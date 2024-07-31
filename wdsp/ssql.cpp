@@ -39,76 +39,76 @@ namespace WDSP {
 *                                                                                                       *
 ********************************************************************************************************/
 
-FTOV* FTOV::create_ftov (int run, int size, int rate, int rsize, double fmax, float* in, float* out)
+FTOV::FTOV(
+    int _run,
+    int _size,
+    int _rate,
+    int _rsize,
+    double _fmax,
+    float* _in,
+    float* _out
+)
 {
-    FTOV *a = new FTOV;
-    a->run = run;
-    a->size = size;
-    a->rate = rate;
-    a->rsize = rsize;
-    a->fmax = fmax;
-    a->in = in;
-    a->out = out;
-    a->eps = 0.01;
-    a->ring = new int[a->rsize]; // (int*) malloc0 (a->rsize * sizeof (int));
-    a->rptr = 0;
-    a->inlast = 0.0;
-    a->rcount = 0;
-    a->div = a->fmax * 2.0 * a->rsize / a->rate;                // fmax * 2 = zero-crossings/sec
+    run = _run;
+    size = _size;
+    rate = _rate;
+    rsize = _rsize;
+    fmax = _fmax;
+    in = _in;
+    out = _out;
+    eps = 0.01;
+    ring.resize(rsize); // (int*) malloc0 (rsize * sizeof (int));
+    rptr = 0;
+    inlast = 0.0;
+    rcount = 0;
+    div = fmax * 2.0 * rsize / rate;                // fmax * 2 = zero-crossings/sec
                                                                 // rsize / rate = sec of data in ring
                                                                 // product is # zero-crossings in ring at fmax
-    return a;
 }
 
-void FTOV::destroy_ftov (FTOV *a)
+void FTOV::flush()
 {
-    delete[] (a->ring);
-    delete (a);
+    std::fill(ring.begin(), ring.end(), 0);
+    rptr = 0;
+    rcount = 0;
+    inlast = 0.0;
 }
 
-void FTOV::flush_ftov (FTOV *a)
-{
-    memset (a->ring, 0, a->rsize * sizeof (int));
-    a->rptr = 0;
-    a->rcount = 0;
-    a->inlast = 0.0;
-}
-
-void FTOV::xftov (FTOV *a)
+void FTOV::execute()
 {
     // 'ftov' does frequency to voltage conversion looking only at zero crossings of an
     //     AC (DC blocked) signal, i.e., ignoring signal amplitude.
-    if (a->run)
+    if (run)
     {
-        if (a->ring[a->rptr] == 1)                              // if current ring location is a '1' ...
+        if (ring[rptr] == 1)                              // if current ring location is a '1' ...
         {
-            a->rcount--;                                        // decrement the count
-            a->ring[a->rptr] = 0;                               // set the location to '0'
+            rcount--;                                        // decrement the count
+            ring[rptr] = 0;                               // set the location to '0'
         }
-        if ((a->inlast * a->in[0] < 0.0) &&                     // different signs mean zero-crossing
-            (fabs (a->inlast - a->in[0]) > a->eps))
+        if ((inlast * in[0] < 0.0) &&                     // different signs mean zero-crossing
+            (fabs (inlast - in[0]) > eps))
         {
-            a->ring[a->rptr] = 1;                               // set the ring location to '1'
-            a->rcount++;                                        // increment the count
+            ring[rptr] = 1;                               // set the ring location to '1'
+            rcount++;                                        // increment the count
         }
-        if (++a->rptr == a->rsize) a->rptr = 0;                 // increment and wrap the pointer as needed
-        a->out[0] = std::min (1.0, (double)a->rcount / a->div);      // calculate the output sample
-        a->inlast = a->in[a->size - 1];                         // save the last input sample for next buffer
-        for (int i = 1; i < a->size; i++)
+        if (++rptr == rsize) rptr = 0;                 // increment and wrap the pointer as needed
+        out[0] = std::min (1.0, (double)rcount / div);      // calculate the output sample
+        inlast = in[size - 1];                         // save the last input sample for next buffer
+        for (int i = 1; i < size; i++)
         {
-            if (a->ring[a->rptr] == 1)                          // if current ring location is '1' ...
+            if (ring[rptr] == 1)                          // if current ring location is '1' ...
             {
-                a->rcount--;                                    // decrement the count
-                a->ring[a->rptr] = 0;                           // set the location to '0'
+                rcount--;                                    // decrement the count
+                ring[rptr] = 0;                           // set the location to '0'
             }
-            if ((a->in[i - 1] * a->in[i] < 0.0) &&              // different signs mean zero-crossing
-                (fabs (a->in[i - 1] - a->in[i]) > a->eps))
+            if ((in[i - 1] * in[i] < 0.0) &&              // different signs mean zero-crossing
+                (fabs (in[i - 1] - in[i]) > eps))
             {
-                a->ring[a->rptr] = 1;                           // set the ring location to '1'
-                a->rcount++;                                    // increment the count
+                ring[rptr] = 1;                           // set the ring location to '1'
+                rcount++;                                    // increment the count
             }
-            if (++a->rptr == a->rsize) a->rptr = 0;             // increment and wrap the pointer as needed
-            a->out[i] = std::min(1.0, (double)a->rcount / a->div);   // calculate the output sample
+            if (++rptr == rsize) rptr = 0;             // increment and wrap the pointer as needed
+            out[i] = std::min(1.0, (double)rcount / div);   // calculate the output sample
         }
     }
 }
@@ -143,9 +143,9 @@ void SSQL::calc_ssql (SSQL *a)
     a->dcbl = new CBL(1, a->size, a->in, a->b1, 0, a->rate, 0.02);
     a->ibuff = new float[a->size]; // (float*) malloc0 (a->size * sizeof (float));
     a->ftovbuff = new float[a->size]; // (float*) malloc0(a->size * sizeof (float));
-    a->cvtr = FTOV::create_ftov (1, a->size, a->rate, a->ftov_rsize, a->ftov_fmax, a->ibuff, a->ftovbuff);
+    a->cvtr = new FTOV(1, a->size, a->rate, a->ftov_rsize, a->ftov_fmax, a->ibuff, a->ftovbuff);
     a->lpbuff = new float[a->size]; // (float*) malloc0 (a->size * sizeof (float));
-    a->filt = DBQLP::create_dbqlp (1, a->size, a->ftovbuff, a->lpbuff, a->rate, 11.3, 1.0, 1.0, 1);
+    a->filt = new DBQLP(1, a->size, a->ftovbuff, a->lpbuff, a->rate, 11.3, 1.0, 1.0, 1);
     a->wdbuff = new int[a->size]; // (int*) malloc0 (a->size * sizeof (int));
     a->tr_signal = new int[a->size]; // (int*) malloc0 (a->size * sizeof (int));
     // window detector
@@ -170,9 +170,9 @@ void SSQL::decalc_ssql (SSQL *a)
 {
     delete[] (a->tr_signal);
     delete[] (a->wdbuff);
-    DBQLP::destroy_dbqlp (a->filt);
+    delete (a->filt);
     delete[] (a->lpbuff);
-    FTOV::destroy_ftov (a->cvtr);
+    delete (a->cvtr);
     delete[] (a->ftovbuff);
     delete[] (a->ibuff);
     delete (a->dcbl);
@@ -233,9 +233,9 @@ void SSQL::flush_ssql (SSQL *a)
     a->dcbl->flush();
     memset (a->ibuff, 0, a->size * sizeof (float));
     memset (a->ftovbuff, 0, a->size * sizeof (float));
-    FTOV::flush_ftov (a->cvtr);
+    a->cvtr->flush();
     memset (a->lpbuff, 0, a->size * sizeof (float));
-    DBQLP::flush_dbqlp (a->filt);
+    a->filt->flush();
     memset (a->wdbuff, 0, a->size * sizeof (int));
     memset (a->tr_signal, 0, a->size * sizeof (int));
 }
@@ -255,9 +255,9 @@ void SSQL::xssql (SSQL *a)
         a->dcbl->execute();                                         // dc block the input signal
         for (int i = 0; i < a->size; i++)                       // extract 'I' component
             a->ibuff[i] = a->b1[2 * i];
-        FTOV::xftov (a->cvtr);                                        // convert frequency to voltage, ignoring amplitude
+        a->cvtr->execute();                                        // convert frequency to voltage, ignoring amplitude
         // WriteAudioWDSP(20.0, a->rate, a->size, a->ftovbuff, 4, 0.99);
-        DBQLP::xdbqlp (a->filt);                                       // low-pass filter
+        a->filt->execute();                                       // low-pass filter
         // WriteAudioWDSP(20.0, a->rate, a->size, a->lpbuff, 4, 0.99);
         // calculate the output of the window detector for each sample
         for (int i = 0; i < a->size; i++)

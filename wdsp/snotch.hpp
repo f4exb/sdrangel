@@ -51,18 +51,29 @@ public:
     double a0, a1, a2, b1, b2;
     double x0, x1, x2, y1, y2;
 
-    static SNOTCH* create_snotch (int run, int size, float* in, float* out, int rate, double f, double bw);
-    static void destroy_snotch (SNOTCH *a);
-    static void flush_snotch (SNOTCH *a);
-    static void xsnotch (SNOTCH *a);
-    static void setBuffers_snotch (SNOTCH *a, float* in, float* out);
-    static void setSamplerate_snotch (SNOTCH *a, int rate);
-    static void setSize_snotch (SNOTCH *a, int size);
-    static void SetSNCTCSSFreq (SNOTCH *a, double freq);
-    static void SetSNCTCSSRun (SNOTCH *a, int run);
+    SNOTCH(
+        int run,
+        int size,
+        float* in,
+        float* out,
+        int rate,
+        double f,
+        double bw
+    );
+    SNOTCH(const SNOTCH&) = delete;
+    SNOTCH& operator=(SNOTCH& other) = delete;
+    ~SNOTCH() {}
+
+    void flush();
+    void execute();
+    void setBuffers(float* in, float* out);
+    void setSamplerate(int rate);
+    void setSize(int size);
+    void setFreq(double freq);
+    void setRun(int run);
 
 private:
-    static void calc_snotch (SNOTCH *a);
+    void calc();
 };
 
 } // namespace WDSP

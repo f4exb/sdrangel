@@ -53,7 +53,15 @@ void FMD::calc()
     // pll audio gain
     again = rate / (deviation * TWOPI);
     // CTCSS Removal
-    sntch = SNOTCH::create_snotch(1, size, out, out, (int)rate, ctcss_freq, 0.0002);
+    sntch = new SNOTCH(
+        1,
+        size,
+        out,
+        out,
+        (int) rate,
+        ctcss_freq,
+        0.0002)
+    ;
     // detector limiter
     plim = new WCPAGC(
         1,                                          // run - always ON
@@ -84,7 +92,7 @@ void FMD::calc()
 void FMD::decalc()
 {
     delete (plim);
-    SNOTCH::destroy_snotch(sntch);
+    delete (sntch);
 }
 
 FMD::FMD(
@@ -162,7 +170,7 @@ void FMD::flush()
     fil_out = 0.0;
     omega = 0.0;
     fmdc = 0.0;
-    SNOTCH::flush_snotch (sntch);
+    sntch->flush();
     plim->flush();
 }
 
@@ -200,7 +208,7 @@ void FMD::execute()
         // audio filter
         FIRCORE::xfircore (paud);
         // CTCSS Removal
-        SNOTCH::xsnotch (sntch);
+        sntch->execute();
         if (lim_run)
         {
             for (i = 0; i < 2 * size; i++)
@@ -275,13 +283,13 @@ void FMD::setDeviation(double _deviation)
 void FMD::setCTCSSFreq(double freq)
 {
     ctcss_freq = freq;
-    SNOTCH::SetSNCTCSSFreq (sntch, ctcss_freq);
+    sntch->setFreq(ctcss_freq);
 }
 
 void FMD::setCTCSSRun(int run)
 {
     sntch_run = run;
-    SNOTCH::SetSNCTCSSRun (sntch, sntch_run);
+    sntch->setRun(sntch_run);
 }
 
 void FMD::setNCde(int nc)

@@ -34,6 +34,8 @@ warren@wpratt.com
 #ifndef wdsp_dbqlp_h
 #define wdsp_dbqlp_h
 
+#include <vector>
+
 #include "export.h"
 
 namespace WDSP {
@@ -51,18 +53,31 @@ public:
     double gain;
     int nstages;
     double a0, a1, a2, b1, b2;
-    double* x0, * x1, * x2, * y0, * y1, * y2;
+    std::vector<double> x0, x1, x2, y0, y1, y2;
 
-    static DBQLP* create_dbqlp(int run, int size, float* in, float* out, double rate, double fc, double Q, double gain, int nstages);
-    static void destroy_dbqlp(DBQLP *a);
-    static void flush_dbqlp(DBQLP *a);
-    static void xdbqlp(DBQLP *a);
-    static void setBuffers_dbqlp(DBQLP *a, float* in, float* out);
-    static void setSamplerate_dbqlp(DBQLP *a, int rate);
-    static void setSize_dbqlp(DBQLP *a, int size);
+    DBQLP(
+        int run,
+        int size,
+        float* in,
+        float* out,
+        double rate,
+        double fc,
+        double Q,
+        double gain,
+        int nstages
+    );
+    DBQLP(const DBQLP&) = delete;
+    DBQLP& operator=(DBQLP& other) = delete;
+    ~DBQLP() = default;
+
+    void flush();
+    void execute();
+    void setBuffers(float* in, float* out);
+    void setSamplerate(int rate);
+    void setSize(int size);
 
 private:
-    static void calc_dbqlp(DBQLP *a);
+    void calc();
 };
 
 } // namespace WDSP

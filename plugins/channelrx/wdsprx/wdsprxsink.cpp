@@ -571,19 +571,19 @@ void WDSPRxSink::applySettings(const WDSPRxSettings& settings, bool force)
     // CW Peaking
 
     if ((m_settings.m_cwPeaking != settings.m_cwPeaking) || force) {
-        WDSP::SPEAK::SetSPCWRun(*m_rxa, settings.m_cwPeaking ? 1 : 0);
+        m_rxa->speak->setRun(settings.m_cwPeaking ? 1 : 0);
     }
 
     if ((m_settings.m_cwPeakFrequency != settings.m_cwPeakFrequency) || force) {
-        WDSP::SPEAK::SetSPCWFreq(*m_rxa, settings.m_cwPeakFrequency);
+        m_rxa->speak->setFreq(settings.m_cwPeakFrequency);
     }
 
     if ((m_settings.m_cwBandwidth != settings.m_cwBandwidth) || force) {
-        WDSP::SPEAK::SetSPCWBandwidth(*m_rxa, settings.m_cwBandwidth);
+        m_rxa->speak->setBandwidth(settings.m_cwBandwidth);
     }
 
     if ((m_settings.m_cwGain != settings.m_cwGain) || force) {
-        WDSP::SPEAK::SetSPCWGain(*m_rxa, settings.m_cwGain);
+        m_rxa->speak->setGain(settings.m_cwGain);
     }
 
     // Noise Blanker

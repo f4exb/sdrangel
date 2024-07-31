@@ -27,8 +27,6 @@ warren@wpratt.com
 
 #include "comm.hpp"
 #include "bqlp.hpp"
-#include "RXA.hpp"
-#include "TXA.hpp"
 
 namespace WDSP {
 
@@ -38,118 +36,114 @@ namespace WDSP {
 *                                                                                                       *
 ********************************************************************************************************/
 
-void BQLP::calc_bqlp(BQLP *a)
+void BQLP::calc()
 {
     double w0, cs, c, den;
-    w0 = TWOPI * a->fc / (double)a->rate;
+
+    w0 = TWOPI * fc / (double)rate;
     cs = cos(w0);
-    c = sin(w0) / (2.0 * a->Q);
+    c = sin(w0) / (2.0 * Q);
     den = 1.0 + c;
-    a->a0 = 0.5 * (1.0 - cs) / den;
-    a->a1 = (1.0 - cs) / den;
-    a->a2 = 0.5 * (1.0 - cs) / den;
-    a->b1 = 2.0 * cs / den;
-    a->b2 = (c - 1.0) / den;
-    flush_bqlp(a);
+    a0 = 0.5 * (1.0 - cs) / den;
+    a1 = (1.0 - cs) / den;
+    a2 = 0.5 * (1.0 - cs) / den;
+    b1 = 2.0 * cs / den;
+    b2 = (c - 1.0) / den;
+    flush();
 }
 
-BQLP* BQLP::create_bqlp(int run, int size, float* in, float* out, double rate, double fc, double Q, double gain, int nstages)
+BQLP::BQLP(
+    int _run,
+    int _size,
+    float* _in,
+    float* _out,
+    double _rate,
+    double _fc,
+    double _Q,
+    double _gain,
+    int _nstages
+) :
+    run(_run),
+    size(_size),
+    in(_in),
+    out(_out),
+    rate(_rate),
+    fc(_fc),
+    Q(_Q),
+    gain(_gain),
+    nstages(_nstages)
 {
-    BQLP *a = new BQLP;
-    a->run = run;
-    a->size = size;
-    a->in = in;
-    a->out = out;
-    a->rate = rate;
-    a->fc = fc;
-    a->Q = Q;
-    a->gain = gain;
-    a->nstages = nstages;
-    a->x0 = new double[a->nstages * 2]; // (float*)malloc0(a->nstages * sizeof(complex));
-    a->x1 = new double[a->nstages * 2]; // (float*)malloc0(a->nstages * sizeof(complex));
-    a->x2 = new double[a->nstages * 2]; // (float*)malloc0(a->nstages * sizeof(complex));
-    a->y0 = new double[a->nstages * 2]; // (float*)malloc0(a->nstages * sizeof(complex));
-    a->y1 = new double[a->nstages * 2]; // (float*)malloc0(a->nstages * sizeof(complex));
-    a->y2 = new double[a->nstages * 2]; // (float*)malloc0(a->nstages * sizeof(complex));
-    calc_bqlp(a);
-    return a;
+    x0.resize(nstages * 2); // (float*)malloc0(nstages * sizeof(complex));
+    x1.resize(nstages * 2); // (float*)malloc0(nstages * sizeof(complex));
+    x2.resize(nstages * 2); // (float*)malloc0(nstages * sizeof(complex));
+    y0.resize(nstages * 2); // (float*)malloc0(nstages * sizeof(complex));
+    y1.resize(nstages * 2); // (float*)malloc0(nstages * sizeof(complex));
+    y2.resize(nstages * 2); // (float*)malloc0(nstages * sizeof(complex));
+    calc();
 }
 
-void BQLP::destroy_bqlp(BQLP *a)
+void BQLP::flush()
 {
-    delete[](a->y2);
-    delete[](a->y1);
-    delete[](a->y0);
-    delete[](a->x2);
-    delete[](a->x1);
-    delete[](a->x0);
-    delete(a);
-}
-
-void BQLP::flush_bqlp(BQLP *a)
-{
-    int i;
-    for (i = 0; i < a->nstages; i++)
+    for (int i = 0; i < nstages; i++)
     {
-        a->x1[2 * i + 0] = a->x2[2 * i + 0] = a->y1[2 * i + 0] = a->y2[2 * i + 0] = 0.0;
-        a->x1[2 * i + 1] = a->x2[2 * i + 1] = a->y1[2 * i + 1] = a->y2[2 * i + 1] = 0.0;
+        x1[2 * i + 0] = x2[2 * i + 0] = y1[2 * i + 0] = y2[2 * i + 0] = 0.0;
+        x1[2 * i + 1] = x2[2 * i + 1] = y1[2 * i + 1] = y2[2 * i + 1] = 0.0;
     }
 }
 
-void BQLP::xbqlp(BQLP *a)
+void BQLP::execute()
 {
-    if (a->run)
+    if (run)
     {
         int i, j, n;
 
-        for (i = 0; i < a->size; i++)
+        for (i = 0; i < size; i++)
         {
             for (j = 0; j < 2; j++)
             {
-                a->x0[j] = a->gain * a->in[2 * i + j];
+                x0[j] = gain * in[2 * i + j];
 
-                for (n = 0; n < a->nstages; n++)
+                for (n = 0; n < nstages; n++)
                 {
                     if (n > 0)
-                        a->x0[2 * n + j] = a->y0[2 * (n - 1) + j];
-                    a->y0[2 * n + j] = a->a0 * a->x0[2 * n + j]
-                        + a->a1 * a->x1[2 * n + j]
-                        + a->a2 * a->x2[2 * n + j]
-                        + a->b1 * a->y1[2 * n + j]
-                        + a->b2 * a->y2[2 * n + j];
-                    a->y2[2 * n + j] = a->y1[2 * n + j];
-                    a->y1[2 * n + j] = a->y0[2 * n + j];
-                    a->x2[2 * n + j] = a->x1[2 * n + j];
-                    a->x1[2 * n + j] = a->x0[2 * n + j];
+                        x0[2 * n + j] = y0[2 * (n - 1) + j];
+                    y0[2 * n + j] = a0 * x0[2 * n + j]
+                        + a1 * x1[2 * n + j]
+                        + a2 * x2[2 * n + j]
+                        + b1 * y1[2 * n + j]
+                        + b2 * y2[2 * n + j];
+                    y2[2 * n + j] = y1[2 * n + j];
+                    y1[2 * n + j] = y0[2 * n + j];
+                    x2[2 * n + j] = x1[2 * n + j];
+                    x1[2 * n + j] = x0[2 * n + j];
                 }
 
-                a->out[2 * i + j] = a->y0[2 * (a->nstages - 1) + j];
+                out[2 * i + j] = y0[2 * (nstages - 1) + j];
             }
         }
     }
-    else if (a->out != a->in)
+    else if (out != in)
     {
-        std::copy(a->in, a->in + a->size * 2, a->out);
+        std::copy(in, in + size * 2, out);
     }
 }
 
-void BQLP::setBuffers_bqlp(BQLP *a, float* in, float* out)
+void BQLP::setBuffers(float* _in, float* _out)
 {
-    a->in = in;
-    a->out = out;
+    in = _in;
+    out = _out;
 }
 
-void BQLP::setSamplerate_bqlp(BQLP *a, int rate)
+void BQLP::setSamplerate(int _rate)
 {
-    a->rate = rate;
-    calc_bqlp(a);
+    rate = _rate;
+    calc();
 }
 
-void BQLP::setSize_bqlp(BQLP *a, int size)
+void BQLP::setSize(int _size)
 {
-    a->size = size;
-    flush_bqlp(a);
+    size = _size;
+    flush();
 }
-
 
 } // namespace WDSP

@@ -34,6 +34,8 @@ warren@wpratt.com
 #ifndef wdsp_dbqbp_h
 #define wdsp_dbqbp_h
 
+#include <vector>
+
 #include "export.h"
 
 namespace WDSP {
@@ -51,19 +53,32 @@ public:
     double gain;
     int nstages;
     double a0, a1, a2, b1, b2;
-    double* x0, * x1, * x2, * y0, * y1, * y2;
+    std::vector<double> x0, x1, x2, y0, y1, y2;
 
     // Double Bi-Quad Band-Pass
-    static DBQBP* create_dbqbp(int run, int size, float* in, float* out, double rate, double f_low, double f_high, double gain, int nstages);
-    static void destroy_dbqbp(DBQBP *a);
-    static void flush_dbqbp(DBQBP *a);
-    static void xdbqbp(DBQBP *a);
-    static void setBuffers_dbqbp(DBQBP *a, float* in, float* out);
-    static void setSamplerate_dbqbp(DBQBP *a, int rate);
-    static void setSize_dbqbp(DBQBP *a, int size);
+    DBQBP(
+        int run,
+        int size,
+        float* in,
+        float* out,
+        double rate,
+        double f_low,
+        double f_high,
+        double gain,
+        int nstages
+    );
+    DBQBP(const DBQBP&) = delete;
+    DBQBP& operator=(DBQBP& other) = delete;
+    ~DBQBP() = default;
+
+    void flush();
+    void execute();
+    void setBuffers(float* in, float* out);
+    void setSamplerate(int rate);
+    void setSize(int size);
 
 private:
-    static void calc_dbqbp(DBQBP *a);
+    void calc();
 };
 
 } // namespace WDSP

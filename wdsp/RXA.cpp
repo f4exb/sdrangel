@@ -482,7 +482,7 @@ RXA* RXA::create_rxa (
         0.02);                                  // tau
 
     // CW peaking filter
-    rxa->speak = SPEAK::create_speak (
+    rxa->speak = new SPEAK(
         0,                                      // run
         rxa->dsp_size,                          // buffer size,
         rxa->midbuff,                           // pointer to input buffer
@@ -500,7 +500,7 @@ RXA* RXA::create_rxa (
         double def_freq[2] = {2125.0, 2295.0};
         double def_bw[2] = {75.0, 75.0};
         double def_gain[2] = {1.0, 1.0};
-        rxa->mpeak = MPEAK::create_mpeak (
+        rxa->mpeak = new MPEAK(
             0,                                  // run
             rxa->dsp_size,                      // size
             rxa->midbuff,                       // pointer to input buffer
@@ -567,8 +567,8 @@ void RXA::destroy_rxa (RXA *rxa)
     delete (rxa->rsmpout);
     PANEL::destroy_panel (rxa->panel);
     SSQL::destroy_ssql (rxa->ssql);
-    MPEAK::destroy_mpeak (rxa->mpeak);
-    SPEAK::destroy_speak (rxa->speak);
+    delete (rxa->mpeak);
+    delete (rxa->speak);
     delete (rxa->cbl);
     delete (rxa->sip1);
     delete (rxa->bp1);
@@ -627,8 +627,8 @@ void RXA::flush_rxa (RXA *rxa)
     rxa->bp1->flush();
     rxa->sip1->flush();
     rxa->cbl->flush();
-    SPEAK::flush_speak (rxa->speak);
-    MPEAK::flush_mpeak (rxa->mpeak);
+    rxa->speak->flush();
+    rxa->mpeak->flush();
     SSQL::flush_ssql (rxa->ssql);
     PANEL::flush_panel (rxa->panel);
     rxa->rsmpout->flush();
@@ -666,8 +666,8 @@ void RXA::xrxa (RXA *rxa)
     rxa->agcmeter->execute();
     rxa->sip1->execute(0);
     rxa->cbl->execute();
-    SPEAK::xspeak (rxa->speak);
-    MPEAK::xmpeak (rxa->mpeak);
+    rxa->speak->execute();
+    rxa->mpeak->execute();
     SSQL::xssql (rxa->ssql);
     PANEL::xpanel (rxa->panel);
     rxa->amsq->execute();
@@ -773,8 +773,8 @@ void RXA::setDSPSamplerate (RXA *rxa, int dsp_rate)
     rxa->agcmeter->setSamplerate(rxa->dsp_rate);
     rxa->sip1->setSamplerate(rxa->dsp_rate);
     rxa->cbl->setSamplerate(rxa->dsp_rate);
-    SPEAK::setSamplerate_speak (rxa->speak, rxa->dsp_rate);
-    MPEAK::setSamplerate_mpeak (rxa->mpeak, rxa->dsp_rate);
+    rxa->speak->setSamplerate(rxa->dsp_rate);
+    rxa->mpeak->setSamplerate(rxa->dsp_rate);
     SSQL::setSamplerate_ssql (rxa->ssql, rxa->dsp_rate);
     PANEL::setSamplerate_panel (rxa->panel, rxa->dsp_rate);
     // output resampler
@@ -854,10 +854,10 @@ void RXA::setDSPBuffsize (RXA *rxa, int dsp_size)
     rxa->sip1->setSize(rxa->dsp_size);
     rxa->cbl->setBuffers(rxa->midbuff, rxa->midbuff);
     rxa->cbl->setSize(rxa->dsp_size);
-    SPEAK::setBuffers_speak (rxa->speak, rxa->midbuff, rxa->midbuff);
-    SPEAK::setSize_speak (rxa->speak, rxa->dsp_size);
-    MPEAK::setBuffers_mpeak (rxa->mpeak, rxa->midbuff, rxa->midbuff);
-    MPEAK::setSize_mpeak (rxa->mpeak, rxa->dsp_size);
+    rxa->speak->setBuffers(rxa->midbuff, rxa->midbuff);
+    rxa->speak->setSize(rxa->dsp_size);
+    rxa->mpeak->setBuffers(rxa->midbuff, rxa->midbuff);
+    rxa->mpeak->setSize(rxa->dsp_size);
     SSQL::setBuffers_ssql (rxa->ssql, rxa->midbuff, rxa->midbuff);
     SSQL::setSize_ssql (rxa->ssql, rxa->dsp_size);
     PANEL::setBuffers_panel (rxa->panel, rxa->midbuff, rxa->midbuff);

@@ -38,82 +38,83 @@ namespace WDSP {
 *                                                                                                       *
 ********************************************************************************************************/
 
-void SNOTCH::calc_snotch (SNOTCH *a)
+void SNOTCH::calc()
 {
     double fn, qk, qr, csn;
-    fn = a->f / (float)a->rate;
+    fn = f / (double) rate;
     csn = cos (TWOPI * fn);
-    qr = 1.0 - 3.0 * a->bw;
+    qr = 1.0 - 3.0 * bw;
     qk = (1.0 - 2.0 * qr * csn + qr * qr) / (2.0 * (1.0 - csn));
-    a->a0 = + qk;
-    a->a1 = - 2.0 * qk * csn;
-    a->a2 = + qk;
-    a->b1 = + 2.0 * qr * csn;
-    a->b2 = - qr * qr;
-    flush_snotch (a);
+    a0 = + qk;
+    a1 = - 2.0 * qk * csn;
+    a2 = + qk;
+    b1 = + 2.0 * qr * csn;
+    b2 = - qr * qr;
+    flush();
 }
 
-SNOTCH* SNOTCH::create_snotch (int run, int size, float* in, float* out, int rate, double f, double bw)
+SNOTCH::SNOTCH(
+    int _run,
+    int _size,
+    float* _in,
+    float* _out,
+    int _rate,
+    double _f,
+    double _bw
+) :
+    run(_run),
+    size(_size),
+    in(_in),
+    out(_out),
+    rate(_rate),
+    f(_f),
+    bw(_bw)
 {
-    SNOTCH *a = new SNOTCH;
-    a->run = run;
-    a->size = size;
-    a->in = in;
-    a->out = out;
-    a->rate = rate;
-    a->f = f;
-    a->bw = bw;
-    calc_snotch (a);
-    return a;
+    calc();
 }
 
-void SNOTCH::destroy_snotch (SNOTCH *a)
+void SNOTCH::flush()
 {
-    delete (a);
+    x1 = x2 = y1 = y2 = 0.0;
 }
 
-void SNOTCH::flush_snotch (SNOTCH *a)
+void SNOTCH::execute()
 {
-    a->x1 = a->x2 = a->y1 = a->y2 = 0.0;
-}
-
-void SNOTCH::xsnotch (SNOTCH *a)
-{
-    if (a->run)
+    if (run)
     {
         int i;
-        for (i = 0; i < a->size; i++)
+        for (i = 0; i < size; i++)
         {
-            a->x0 = a->in[2 * i + 0];
-            a->out[2 * i + 0] = a->a0 * a->x0 + a->a1 * a->x1 + a->a2 * a->x2 + a->b1 * a->y1 + a->b2 * a->y2;
-            a->y2 = a->y1;
-            a->y1 = a->out[2 * i + 0];
-            a->x2 = a->x1;
-            a->x1 = a->x0;
+            x0 = in[2 * i + 0];
+            out[2 * i + 0] = a0 * x0 + a1 * x1 + a2 * x2 + b1 * y1 + b2 * y2;
+            y2 = y1;
+            y1 = out[2 * i + 0];
+            x2 = x1;
+            x1 = x0;
         }
     }
-    else if (a->out != a->in)
+    else if (out != in)
     {
-        std::copy( a->in,  a->in + a->size * 2, a->out);
+        std::copy( in,  in + size * 2, out);
     }
 }
 
-void SNOTCH::setBuffers_snotch (SNOTCH *a, float* in, float* out)
+void SNOTCH::setBuffers(float* _in, float* _out)
 {
-    a->in = in;
-    a->out = out;
+    in = _in;
+    out = _out;
 }
 
-void SNOTCH::setSamplerate_snotch (SNOTCH *a, int rate)
+void SNOTCH::setSamplerate(int _rate)
 {
-    a->rate = rate;
-    calc_snotch (a);
+    rate = _rate;
+    calc();
 }
 
-void SNOTCH::setSize_snotch (SNOTCH *a, int size)
+void SNOTCH::setSize(int _size)
 {
-    a->size = size;
-    flush_snotch (a);
+    size = _size;
+    flush();
 }
 
 /********************************************************************************************************
@@ -122,15 +123,15 @@ void SNOTCH::setSize_snotch (SNOTCH *a, int size)
 *                                                                                                       *
 ********************************************************************************************************/
 
-void SNOTCH::SetSNCTCSSFreq (SNOTCH *a, double freq)
+void SNOTCH::setFreq(double _freq)
 {
-    a->f = freq;
-    calc_snotch (a);
+    f = _freq;
+    calc();
 }
 
-void SNOTCH::SetSNCTCSSRun (SNOTCH *a, int run)
+void SNOTCH::setRun(int _run)
 {
-    a->run = run;
+    run = _run;
 }
 
 } // namespace WDSP

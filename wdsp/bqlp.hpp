@@ -34,6 +34,8 @@ warren@wpratt.com
 #ifndef wdsp_bqlp_h
 #define wdsp_bqlp_h
 
+#include <vector>
+
 #include "export.h"
 
 namespace WDSP {
@@ -51,18 +53,31 @@ public:
     double gain;
     int nstages;
     double a0, a1, a2, b1, b2;
-    double* x0, * x1, * x2, * y0, * y1, * y2;
+    std::vector<double> x0, x1, x2, y0, y1, y2;
 
-    static BQLP* create_bqlp(int run, int size, float* in, float* out, double rate, double fc, double Q, double gain, int nstages);
-    static void destroy_bqlp(BQLP *a);
-    static void flush_bqlp(BQLP *a);
-    static void xbqlp(BQLP *a);
-    static void setBuffers_bqlp(BQLP *a, float* in, float* out);
-    static void setSamplerate_bqlp(BQLP *a, int rate);
-    static void setSize_bqlp(BQLP *a, int size);
+    BQLP(
+        int run,
+        int size,
+        float* in,
+        float* out,
+        double rate,
+        double fc,
+        double Q,
+        double gain,
+        int nstages
+    );
+    BQLP(const BQLP&) = delete;
+    BQLP& operator=(BQLP& other) = delete;
+    ~BQLP() = default;
+
+    void flush();
+    void execute();
+    void setBuffers(float* in, float* out);
+    void setSamplerate(int rate);
+    void setSize(int size);
 
 private:
-    static void calc_bqlp(BQLP *a);
+    void calc();
 };
 
 } // namespace WDSP

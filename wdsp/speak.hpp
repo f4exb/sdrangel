@@ -34,6 +34,8 @@ warren@wpratt.com
 #ifndef wdsp_speak_h
 #define wdsp_speak_h
 
+#include <vector>
+
 #include "export.h"
 
 namespace WDSP {
@@ -56,9 +58,9 @@ public:
     int nstages;
     int design;
     double a0, a1, a2, b1, b2;
-    double *x0, *x1, *x2, *y0, *y1, *y2;
+    std::vector<double> x0, x1, x2, y0, y1, y2;
 
-    static SPEAK* create_speak (
+    SPEAK(
         int run,
         int size,
         float* in,
@@ -70,18 +72,21 @@ public:
         int nstages,
         int design
     );
-    static void destroy_speak (SPEAK *a);
-    static void flush_speak (SPEAK *a);
-    static void xspeak (SPEAK *a);
-    static void setBuffers_speak (SPEAK *a, float* in, float* out);
-    static void setSamplerate_speak (SPEAK *a, int rate);
-    static void setSize_speak (SPEAK *a, int size);
+    SPEAK(const SPEAK&) = delete;
+    SPEAK& operator=(const SPEAK& other) = delete;
+    ~SPEAK() {}
+
+    void flush();
+    void execute();
+    void setBuffers(float* in, float* out);
+    void setSamplerate(int rate);
+    void setSize(int size);
     // RXA
-    static void SetSPCWRun (RXA& rxa, int run);
-    static void SetSPCWFreq (RXA& rxa, double freq);
-    static void SetSPCWBandwidth (RXA& rxa, double bw);
-    static void SetSPCWGain (RXA& rxa, double gain);
-    static void calc_speak (SPEAK *a);
+    void setRun(int run);
+    void setFreq(double freq);
+    void setBandwidth(double bw);
+    void setGain(double gain);
+    void calc();
 };
 
 } // namespace WDSP

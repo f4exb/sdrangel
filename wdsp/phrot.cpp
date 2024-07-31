@@ -38,108 +38,97 @@ namespace WDSP {
 *                                                                                                       *
 ********************************************************************************************************/
 
-void PHROT::calc_phrot (PHROT *a)
+void PHROT::calc()
 {
     double g;
-    a->x0 = new double[a->nstages]; // (float *) malloc0 (a->nstages * sizeof (float));
-    a->x1 = new double[a->nstages]; // (float *) malloc0 (a->nstages * sizeof (float));
-    a->y0 = new double[a->nstages]; // (float *) malloc0 (a->nstages * sizeof (float));
-    a->y1 = new double[a->nstages]; // (float *) malloc0 (a->nstages * sizeof (float));
-    g = tan (PI * a->fc / (float)a->rate);
-    a->b0 = (g - 1.0) / (g + 1.0);
-    a->b1 = 1.0;
-    a->a1 = a->b0;
+    x0.resize(nstages); // (float *) malloc0 (nstages * sizeof (float));
+    x1.resize(nstages); // (float *) malloc0 (nstages * sizeof (float));
+    y0.resize(nstages); // (float *) malloc0 (nstages * sizeof (float));
+    y1.resize(nstages); // (float *) malloc0 (nstages * sizeof (float));
+    g = tan (PI * fc / (float)rate);
+    b0 = (g - 1.0) / (g + 1.0);
+    b1 = 1.0;
+    a1 = b0;
 }
 
-void PHROT::decalc_phrot (PHROT *a)
+PHROT::PHROT(
+    int _run,
+    int _size,
+    float* _in,
+    float* _out,
+    int _rate,
+    double _fc,
+    int _nstages
+) :
+    reverse(0),
+    run(_run),
+    size(_size),
+    in(_in),
+    out(_out),
+    rate(_rate),
+    fc(_fc),
+    nstages(_nstages)
 {
-    delete[] (a->y1);
-    delete[] (a->y0);
-    delete[] (a->x1);
-    delete[] (a->x0);
+    calc();
 }
 
-PHROT* PHROT::create_phrot (int run, int size, float* in, float* out, int rate, double fc, int nstages)
+void PHROT::flush()
 {
-    PHROT *a = new PHROT;
-    a->reverse = 0;
-    a->run = run;
-    a->size = size;
-    a->in = in;
-    a->out = out;
-    a->rate = rate;
-    a->fc = fc;
-    a->nstages = nstages;
-    calc_phrot (a);
-    return a;
+    std::fill (x0.begin(), x0.end(), 0);
+    std::fill (x1.begin(), x1.end(), 0);
+    std::fill (y0.begin(), y0.end(), 0);
+    std::fill (y1.begin(), y1.end(), 0);
 }
 
-void PHROT::destroy_phrot (PHROT *a)
+void PHROT::execute()
 {
-    decalc_phrot (a);
-    delete (a);
-}
-
-void PHROT::flush_phrot (PHROT *a)
-{
-    memset (a->x0, 0, a->nstages * sizeof (double));
-    memset (a->x1, 0, a->nstages * sizeof (double));
-    memset (a->y0, 0, a->nstages * sizeof (double));
-    memset (a->y1, 0, a->nstages * sizeof (double));
-}
-
-void PHROT::xphrot (PHROT *a)
-{
-    if (a->reverse)
+    if (reverse)
     {
-        for (int i = 0; i < a->size; i++)
-            a->in[2 * i + 0] = -a->in[2 * i + 0];
+        for (int i = 0; i < size; i++)
+            in[2 * i + 0] = -in[2 * i + 0];
     }
 
-    if (a->run)
+    if (run)
     {
-        int i, n;
-
-        for (i = 0; i < a->size; i++)
+        for (int i = 0; i < size; i++)
         {
-            a->x0[0] = a->in[2 * i + 0];
+            x0[0] = in[2 * i + 0];
 
-            for (n = 0; n < a->nstages; n++)
+            for (int n = 0; n < nstages; n++)
             {
-                if (n > 0) a->x0[n] = a->y0[n - 1];
-                a->y0[n] = a->b0 * a->x0[n]
-                    + a->b1 * a->x1[n]
-                    - a->a1 * a->y1[n];
-                a->y1[n] = a->y0[n];
-                a->x1[n] = a->x0[n];
+                if (n > 0) x0[n] = y0[n - 1];
+                y0[n] = b0 * x0[n]
+                    + b1 * x1[n]
+                    - a1 * y1[n];
+                y1[n] = y0[n];
+                x1[n] = x0[n];
             }
 
-            a->out[2 * i + 0] = a->y0[a->nstages - 1];
+            out[2 * i + 0] = y0[nstages - 1];
         }
     }
-    else if (a->out != a->in)
+    else if (out != in)
     {
-        std::copy( a->in,  a->in + a->size * 2, a->out);
+        std::copy( in,  in + size * 2, out);
     }
 }
 
-void PHROT::setBuffers_phrot (PHROT *a, float* in, float* out)
+void PHROT::setBuffers(float* _in, float* _out)
 {
-    a->in = in;
-    a->out = out;
+    in = _in;
+    out = _out;
 }
 
-void PHROT::setSamplerate_phrot (PHROT *a, int rate)
+void PHROT::setSamplerate(int _rate)
 {
-    decalc_phrot (a);
-    a->rate = rate;
-    calc_phrot (a);
+    rate = _rate;
+    calc();
 }
 
-void PHROT::setSize_phrot (PHROT *a, int size)
+void PHROT::setSize(int _size)
 {
-    a->size = size;
-    flush_phrot (a);
+    size = _size;
+    flush();
 }
 
 /********************************************************************************************************
@@ -148,35 +137,29 @@ void PHROT::setSize_phrot (PHROT *a, int size)
 *                                                                                                       *
 ********************************************************************************************************/
 
-void PHROT::SetPHROTRun (TXA& txa, int run)
+void PHROT::setRun(int run)
 {
-    PHROT *a = txa.phrot;
-    a->run = run;
+    run = run;
 
-    if (a->run)
-        flush_phrot (a);
+    if (run)
+        flush();
 }
 
-void PHROT::SetPHROTCorner (TXA& txa, double corner)
+void PHROT::setCorner(double corner)
 {
-    PHROT *a = txa.phrot;
-    decalc_phrot (a);
-    a->fc = corner;
-    calc_phrot (a);
+    fc = corner;
+    calc();
 }
 
-void PHROT::SetPHROTNstages (TXA& txa, int nstages)
+void PHROT::setNstages(int _nstages)
 {
-    PHROT *a = txa.phrot;
-    decalc_phrot (a);
-    a->nstages = nstages;
-    calc_phrot (a);
+    nstages = _nstages;
+    calc();
 }
 
-void PHROT::SetPHROTReverse (TXA& txa, int reverse)
+void PHROT::setReverse(int _reverse)
 {
-    PHROT *a = txa.phrot;
-    a->reverse = reverse;
+    reverse = _reverse;
 }
 
 } // namespace WDSP

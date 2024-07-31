@@ -34,6 +34,8 @@ warren@wpratt.com
 #ifndef wdsp_phrot_h
 #define wdsp_phrot_h
 
+#include <vector>
+
 #include "export.h"
 
 namespace WDSP {
@@ -53,24 +55,35 @@ public:
     int nstages;
     // normalized such that a0 = 1
     double a1, b0, b1;
-    double *x0, *x1, *y0, *y1;
+    std::vector<double> x0, x1, y0, y1;
 
-    static PHROT* create_phrot (int run, int size, float* in, float* out, int rate, double fc, int nstages);
-    static void destroy_phrot (PHROT *a);
-    static void flush_phrot (PHROT *a);
-    static void xphrot (PHROT *a);
-    static void setBuffers_phrot (PHROT *a, float* in, float* out);
-    static void setSamplerate_phrot (PHROT *a, int rate);
-    static void setSize_phrot (PHROT *a, int size);
+    PHROT(
+        int run,
+        int size,
+        float* in,
+        float* out,
+        int rate,
+        double fc,
+        int nstages
+    );
+    PHROT(const PHROT&) = delete;
+    PHROT& operator=(const PHROT& other) = delete;
+    ~PHROT() = default;
+
+    void destroy();
+    void flush();
+    void execute();
+    void setBuffers(float* in, float* out);
+    void setSamplerate(int rate);
+    void setSize(int size);
     // TXA Properties
-    static void SetPHROTRun (TXA& txa, int run);
-    static void SetPHROTCorner (TXA& txa, double corner);
-    static void SetPHROTNstages (TXA& txa, int nstages);
-    static void SetPHROTReverse (TXA& txa, int reverse);
+    void setRun(int run);
+    void setCorner(double corner);
+    void setNstages(int nstages);
+    void setReverse(int reverse);
 
 private:
-    static void calc_phrot (PHROT *a);
-    static void decalc_phrot (PHROT *a);
+    void calc();
 };
 
 } // namespace WDSP

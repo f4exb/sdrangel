@@ -38,16 +38,16 @@ namespace WDSP {
 *                                                                                                       *
 ********************************************************************************************************/
 
-void SPEAK::calc_speak (SPEAK *a)
+void SPEAK::calc()
 {
     double ratio;
     double f_corr, g_corr, bw_corr, bw_parm, A, f_min;
 
-    switch (a->design)
+    switch (design)
     {
     case 0:
-        ratio = a->bw / a->f;
-        switch (a->nstages)
+        ratio = bw / f;
+        switch (nstages)
         {
         case 4:
             bw_parm = 2.4;
@@ -62,23 +62,23 @@ void SPEAK::calc_speak (SPEAK *a)
         }
         {
             double fn, qk, qr, csn;
-            a->fgain = a->gain / g_corr;
-            fn = a->f / (double)a->rate / f_corr;
+            fgain = gain / g_corr;
+            fn = f / (double)rate / f_corr;
             csn = cos (TWOPI * fn);
-            qr = 1.0 - 3.0 * a->bw / (double)a->rate * bw_parm;
+            qr = 1.0 - 3.0 * bw / (double)rate * bw_parm;
             qk = (1.0 - 2.0 * qr * csn + qr * qr) / (2.0 * (1.0 - csn));
-            a->a0 = 1.0 - qk;
-            a->a1 = 2.0 * (qk - qr) * csn;
-            a->a2 = qr * qr - qk;
-            a->b1 = 2.0 * qr * csn;
-            a->b2 = - qr * qr;
+            a0 = 1.0 - qk;
+            a1 = 2.0 * (qk - qr) * csn;
+            a2 = qr * qr - qk;
+            b1 = 2.0 * qr * csn;
+            b2 = - qr * qr;
         }
         break;
 
     case 1:
-        if (a->f < 200.0) a->f = 200.0;
-        ratio = a->bw / a->f;
-        switch (a->nstages)
+        if (f < 200.0) f = 200.0;
+        ratio = bw / f;
+        switch (nstages)
         {
         case 4:
             bw_parm = 5.0;
@@ -96,132 +96,116 @@ void SPEAK::calc_speak (SPEAK *a)
         }
         {
             double w0, sn, c, den;
-            if (a->f < f_min) a->f = f_min;
-            w0 = TWOPI * a->f / (double)a->rate;
+            if (f < f_min) f = f_min;
+            w0 = TWOPI * f / (double)rate;
             sn = sin (w0);
-            a->cbw = bw_corr * a->f;
-            c = sn * sinh(0.5 * log((a->f + 0.5 * a->cbw * bw_parm) / (a->f - 0.5 * a->cbw * bw_parm)) * w0 / sn);
+            cbw = bw_corr * f;
+            c = sn * sinh(0.5 * log((f + 0.5 * cbw * bw_parm) / (f - 0.5 * cbw * bw_parm)) * w0 / sn);
             den = 1.0 + c / A;
-            a->a0 = (1.0 + c * A) / den;
-            a->a1 = - 2.0 * cos (w0) / den;
-            a->a2 = (1 - c * A) / den;
-            a->b1 = - a->a1;
-            a->b2 = - (1 - c / A ) / den;
-            a->fgain = a->gain / pow (A * A, (double)a->nstages);
+            a0 = (1.0 + c * A) / den;
+            a1 = - 2.0 * cos (w0) / den;
+            a2 = (1 - c * A) / den;
+            b1 = - a1;
+            b2 = - (1 - c / A ) / den;
+            fgain = gain / pow (A * A, (double)nstages);
         }
         break;
     }
-    flush_speak (a);
+    flush();
 }
 
-SPEAK* SPEAK::create_speak (
-    int run,
-    int size,
-    float* in,
-    float* out,
-    int rate,
-    double f,
-    double bw,
-    double gain,
-    int nstages,
-    int design
-)
+SPEAK::SPEAK(
+    int _run,
+    int _size,
+    float* _in,
+    float* _out,
+    int _rate,
+    double _f,
+    double _bw,
+    double _gain,
+    int _nstages,
+    int _design
+) :
+    run(_run),
+    size(_size),
+    in(_in),
+    out(_out),
+    rate(_rate),
+    f(_f),
+    bw(_bw),
+    gain(_gain),
+    nstages(_nstages),
+    design(_design)
 {
-    SPEAK *a = new SPEAK;
-    a->run = run;
-    a->size = size;
-    a->in = in;
-    a->out = out;
-    a->rate = rate;
-    a->f = f;
-    a->bw = bw;
-    a->gain = gain;
-    a->nstages = nstages;
-    a->design = design;
-    a->x0 = new double[a->nstages * 2]; // (float *) malloc0 (a->nstages * sizeof (complex));
-    a->x1 = new double[a->nstages * 2]; // (float *) malloc0 (a->nstages * sizeof (complex));
-    a->x2 = new double[a->nstages * 2]; //(float *) malloc0 (a->nstages * sizeof (complex));
-    a->y0 = new double[a->nstages * 2]; // (float *) malloc0 (a->nstages * sizeof (complex));
-    a->y1 = new double[a->nstages * 2]; // (float *) malloc0 (a->nstages * sizeof (complex));
-    a->y2 = new double[a->nstages * 2]; // (float *) malloc0 (a->nstages * sizeof (complex));
-    calc_speak (a);
-    return a;
+    x0.resize(nstages * 2); // (float *) malloc0 (nstages * sizeof (complex));
+    x1.resize(nstages * 2); // (float *) malloc0 (nstages * sizeof (complex));
+    x2.resize(nstages * 2); //(float *) malloc0 (nstages * sizeof (complex));
+    y0.resize(nstages * 2); // (float *) malloc0 (nstages * sizeof (complex));
+    y1.resize(nstages * 2); // (float *) malloc0 (nstages * sizeof (complex));
+    y2.resize(nstages * 2); // (float *) malloc0 (nstages * sizeof (complex));
+    calc();
 }
 
-void SPEAK::destroy_speak (SPEAK *a)
+void SPEAK::flush()
 {
-    delete[] (a->y2);
-    delete[] (a->y1);
-    delete[] (a->y0);
-    delete[] (a->x2);
-    delete[] (a->x1);
-    delete[] (a->x0);
-    delete (a);
-}
-
-void SPEAK::flush_speak (SPEAK *a)
-{
-    int i;
-    for (i = 0; i < a->nstages; i++)
+    for (int i = 0; i < nstages; i++)
     {
-        a->x1[2 * i + 0] = a->x2[2 * i + 0] = a->y1[2 * i + 0] = a->y2[2 * i + 0] = 0.0;
-        a->x1[2 * i + 1] = a->x2[2 * i + 1] = a->y1[2 * i + 1] = a->y2[2 * i + 1] = 0.0;
+        x1[2 * i + 0] = x2[2 * i + 0] = y1[2 * i + 0] = y2[2 * i + 0] = 0.0;
+        x1[2 * i + 1] = x2[2 * i + 1] = y1[2 * i + 1] = y2[2 * i + 1] = 0.0;
     }
 }
 
-void SPEAK::xspeak (SPEAK *a)
+void SPEAK::execute()
 {
-    if (a->run)
+    if (run)
     {
-        int i, j, n;
-
-        for (i = 0; i < a->size; i++)
+        for (int i = 0; i < size; i++)
         {
-            for (j = 0; j < 2; j++)
+            for (int j = 0; j < 2; j++)
             {
-                a->x0[j] = a->fgain * a->in[2 * i + j];
+                x0[j] = fgain * in[2 * i + j];
 
-                for (n = 0; n < a->nstages; n++)
+                for (int n = 0; n < nstages; n++)
                 {
                     if (n > 0)
-                        a->x0[2 * n + j] = a->y0[2 * (n - 1) + j];
-                    a->y0[2 * n + j] = a->a0 * a->x0[2 * n + j]
-                        + a->a1 * a->x1[2 * n + j]
-                        + a->a2 * a->x2[2 * n + j]
-                        + a->b1 * a->y1[2 * n + j]
-                        + a->b2 * a->y2[2 * n + j];
-                    a->y2[2 * n + j] = a->y1[2 * n + j];
-                    a->y1[2 * n + j] = a->y0[2 * n + j];
-                    a->x2[2 * n + j] = a->x1[2 * n + j];
-                    a->x1[2 * n + j] = a->x0[2 * n + j];
+                        x0[2 * n + j] = y0[2 * (n - 1) + j];
+                    y0[2 * n + j] = a0 * x0[2 * n + j]
+                        + a1 * x1[2 * n + j]
+                        + a2 * x2[2 * n + j]
+                        + b1 * y1[2 * n + j]
+                        + b2 * y2[2 * n + j];
+                    y2[2 * n + j] = y1[2 * n + j];
+                    y1[2 * n + j] = y0[2 * n + j];
+                    x2[2 * n + j] = x1[2 * n + j];
+                    x1[2 * n + j] = x0[2 * n + j];
                 }
 
-                a->out[2 * i + j] = a->y0[2 * (a->nstages - 1) + j];
+                out[2 * i + j] = y0[2 * (nstages - 1) + j];
             }
         }
     }
-    else if (a->out != a->in)
+    else if (out != in)
     {
-        std::copy( a->in,  a->in + a->size * 2, a->out);
+        std::copy( in,  in + size * 2, out);
     }
 }
 
-void SPEAK::setBuffers_speak (SPEAK *a, float* in, float* out)
+void SPEAK::setBuffers(float* _in, float* _out)
 {
-    a->in = in;
-    a->out = out;
+    in = _in;
+    out = _out;
 }
 
-void SPEAK::setSamplerate_speak (SPEAK *a, int rate)
+void SPEAK::setSamplerate(int _rate)
 {
-    a->rate = rate;
-    calc_speak (a);
+    rate = _rate;
+    calc();
 }
 
-void SPEAK::setSize_speak (SPEAK *a, int size)
+void SPEAK::setSize(int _size)
 {
-    a->size = size;
-    flush_speak (a);
+    size = _size;
+    flush();
 }
 
 /********************************************************************************************************
@@ -230,31 +214,27 @@ void SPEAK::setSize_speak (SPEAK *a, int size)
 *                                                                                                       *
 ********************************************************************************************************/
 
-void SPEAK::SetSPCWRun (RXA& rxa, int run)
+void SPEAK::setRun(int _run)
 {
-    SPEAK *a = rxa.speak;
-    a->run = run;
+    run = _run;
 }
 
-void SPEAK::SetSPCWFreq (RXA& rxa, double freq)
+void SPEAK::setFreq(double _freq)
 {
-    SPEAK *a = rxa.speak;
-    a->f = freq;
-    calc_speak (a);
+    f = _freq;
+    calc();
 }
 
-void SPEAK::SetSPCWBandwidth (RXA& rxa, double bw)
+void SPEAK::setBandwidth(double _bw)
 {
-    SPEAK *a = rxa.speak;
-    a->bw = bw;
-    calc_speak (a);
+    bw = _bw;
+    calc();
 }
 
-void SPEAK::SetSPCWGain (RXA& rxa, double gain)
+void SPEAK::setGain(double _gain)
 {
-    SPEAK *a = rxa.speak;
-    a->gain = gain;
-    calc_speak (a);
+    gain = _gain;
+    calc();
 }
 
 } // namespace WDSP

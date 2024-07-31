@@ -34,11 +34,12 @@ warren@wpratt.com
 #ifndef _mpeak_h
 #define _mpeak_h
 
+#include <vector>
+
 #include "export.h"
 
 namespace WDSP {
 
-class RXA;
 class SPEAK;
 
 class WDSP_API MPEAK
@@ -50,16 +51,16 @@ public:
     float* out;
     int rate;
     int npeaks;
-    int* enable;
-    double* f;
-    double* bw;
-    double* gain;
+    std::vector<int> enable;
+    std::vector<double> f;
+    std::vector<double> bw;
+    std::vector<double> gain;
     int nstages;
-    SPEAK** pfil;
-    float* tmp;
-    float* mix;
+    std::vector<SPEAK*> pfil;
+    std::vector<float> tmp;
+    std::vector<float> mix;
 
-    static MPEAK* create_mpeak (
+    MPEAK(
         int run,
         int size,
         float* in,
@@ -72,23 +73,26 @@ public:
         double* gain,
         int nstages
     );
-    static void destroy_mpeak (MPEAK *a);
-    static void flush_mpeak (MPEAK *a);
-    static void xmpeak (MPEAK *a);
-    static void setBuffers_mpeak (MPEAK *a, float* in, float* out);
-    static void setSamplerate_mpeak (MPEAK *a, int rate);
-    static void setSize_mpeak (MPEAK *a, int size);
+    MPEAK(const MPEAK&) = delete;
+    MPEAK& operator=(const MPEAK& other) = delete;
+    ~MPEAK();
+
+    void flush();
+    void execute();
+    void setBuffers(float* in, float* out);
+    void setSamplerate(int rate);
+    void setSize(int size);
     // RXA
-    static void SetmpeakRun (RXA& rxa, int run);
-    static void SetmpeakNpeaks (RXA& rxa, int npeaks);
-    static void SetmpeakFilEnable (RXA& rxa, int fil, int enable);
-    static void SetmpeakFilFreq (RXA& rxa, int fil, double freq);
-    static void SetmpeakFilBw (RXA& rxa, int fil, double bw);
-    static void SetmpeakFilGain (RXA& rxa, int fil, double gain);
+    void setRun(int run);
+    void setNpeaks(int npeaks);
+    void setFilEnable(int fil, int enable);
+    void setFilFreq(int fil, double freq);
+    void setFilBw(int fil, double bw);
+    void setFilGain(int fil, double gain);
 
 private:
-    static void calc_mpeak (MPEAK *a);
-    static void decalc_mpeak (MPEAK *a);
+    void calc();
+    void decalc();
 };
 
 } // namespace WDSP

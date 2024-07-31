@@ -39,135 +39,121 @@ namespace WDSP {
 *                                                                                                       *
 ********************************************************************************************************/
 
-void MPEAK::calc_mpeak (MPEAK *a)
+void MPEAK::calc()
 {
-    int i;
-    a->tmp = new float[a->size * 2]; // (float *) malloc0 (a->size * sizeof (complex));
-    a->mix = new float[a->size * 2]; // (float *) malloc0 (a->size * sizeof (complex));
-    for (i = 0; i < a->npeaks; i++)
+    tmp.resize(size * 2); // (float *) malloc0 (size * sizeof (complex));
+    mix.resize(size * 2); // (float *) malloc0 (size * sizeof (complex));
+    for (int i = 0; i < npeaks; i++)
     {
-        a->pfil[i] = SPEAK::create_speak (
+        pfil[i] = new SPEAK(
             1,
-            a->size,
-            a->in,
-            a->tmp,
-            a->rate,
-            a->f[i],
-            a->bw[i],
-            a->gain[i],
-            a->nstages,
+            size,
+            in,
+            tmp.data(),
+            rate,
+            f[i],
+            bw[i],
+            gain[i],
+            nstages,
             1
         );
     }
 }
 
-void MPEAK::decalc_mpeak (MPEAK *a)
+void MPEAK::decalc()
 {
-    int i;
-    for (i = 0; i < a->npeaks; i++)
-        SPEAK::destroy_speak (a->pfil[i]);
-    delete[] (a->mix);
-    delete[] (a->tmp);
+    for (int i = 0; i < npeaks; i++)
+        delete (pfil[i]);
 }
 
-MPEAK* MPEAK::create_mpeak (
-    int run,
-    int size,
-    float* in,
-    float* out,
-    int rate,
-    int npeaks,
-    int* enable,
-    double* f,
-    double* bw,
-    double* gain,
-    int nstages
+MPEAK::MPEAK(
+    int _run,
+    int _size,
+    float* _in,
+    float* _out,
+    int _rate,
+    int _npeaks,
+    int* _enable,
+    double* _f,
+    double* _bw,
+    double* _gain,
+    int _nstages
 )
 {
-    MPEAK *a = new MPEAK;
-    a->run = run;
-    a->size = size;
-    a->in = in;
-    a->out = out;
-    a->rate = rate;
-    a->npeaks = npeaks;
-    a->nstages = nstages;
-    a->enable = new int[a->npeaks]; // (int *) malloc0 (a->npeaks * sizeof (int));
-    a->f    = new double[a->npeaks]; // (float *) malloc0 (a->npeaks * sizeof (float));
-    a->bw   = new double[a->npeaks]; // (float *) malloc0 (a->npeaks * sizeof (float));
-    a->gain = new double[a->npeaks]; // (float *) malloc0 (a->npeaks * sizeof (float));
-    memcpy (a->enable, enable, a->npeaks * sizeof (int));
-    memcpy (a->f, f, a->npeaks * sizeof (double));
-    memcpy (a->bw, bw, a->npeaks * sizeof (double));
-    memcpy (a->gain, gain, a->npeaks * sizeof (double));
-    a->pfil = new SPEAK*[a->npeaks]; // (SPEAK *) malloc0 (a->npeaks * sizeof (SPEAK));
-    calc_mpeak (a);
-    return a;
+    run = _run;
+    size = _size;
+    in = _in;
+    out = _out;
+    rate = _rate;
+    npeaks = _npeaks;
+    nstages = _nstages;
+    enable.resize(npeaks); // (int *) malloc0 (npeaks * sizeof (int));
+    f.resize(npeaks); // (float *) malloc0 (npeaks * sizeof (float));
+    bw.resize(npeaks); // (float *) malloc0 (npeaks * sizeof (float));
+    gain.resize(npeaks); // (float *) malloc0 (npeaks * sizeof (float));
+    std::copy(_enable, _enable + npeaks, enable.begin());
+    std::copy(_f, _f + npeaks, f.begin());
+    std::copy(_bw, _bw + npeaks, bw.begin());
+    std::copy(_gain, _gain + npeaks, gain.begin());
+    pfil.resize(npeaks); // (SPEAK *) malloc0 (npeaks * sizeof (SPEAK));
+    calc();
 }
 
-void MPEAK::destroy_mpeak (MPEAK *a)
+MPEAK::~MPEAK()
 {
-    decalc_mpeak (a);
-    delete[] (a->pfil);
-    delete[] (a->gain);
-    delete[] (a->bw);
-    delete[] (a->f);
-    delete[] (a->enable);
-    delete (a);
+    decalc();
 }
 
-void MPEAK::flush_mpeak (MPEAK *a)
+void MPEAK::flush()
 {
-    int i;
-    for (i = 0; i < a->npeaks; i++)
-        SPEAK::flush_speak (a->pfil[i]);
+    for (int i = 0; i < npeaks; i++)
+        pfil[i]->flush();
 }
 
-void MPEAK::xmpeak (MPEAK *a)
+void MPEAK::execute()
 {
-    if (a->run)
+    if (run)
     {
-        int i, j;
-        std::fill(a->mix, a->mix + a->size * 2, 0);
+        std::fill(mix.begin(), mix.end(), 0);
 
-        for (i = 0; i < a->npeaks; i++)
+        for (int i = 0; i < npeaks; i++)
         {
-            if (a->enable[i])
+            if (enable[i])
             {
-                SPEAK::xspeak (a->pfil[i]);
-                for (j = 0; j < 2 * a->size; j++)
-                    a->mix[j] += a->tmp[j];
+                pfil[i]->execute();
+                for (int j = 0; j < 2 * size; j++)
+                    mix[j] += tmp[j];
             }
         }
 
-        std::copy(a->mix, a->mix + a->size * 2, a->out);
+        std::copy(mix.begin(), mix.end(), out);
     }
-    else if (a->in != a->out)
+    else if (in != out)
     {
-        std::copy( a->in,  a->in + a->size * 2, a->out);
+        std::copy( in,  in + size * 2, out);
     }
 }
 
-void MPEAK::setBuffers_mpeak (MPEAK *a, float* in, float* out)
+void MPEAK::setBuffers(float* _in, float* _out)
 {
-    decalc_mpeak (a);
-    a->in = in;
-    a->out = out;
-    calc_mpeak (a);
+    decalc();
+    in = _in;
+    out = _out;
+    calc();
 }
 
-void MPEAK::setSamplerate_mpeak (MPEAK *a, int rate)
+void MPEAK::setSamplerate(int _rate)
 {
-    decalc_mpeak (a);
-    a->rate = rate;
-    calc_mpeak (a);
+    decalc();
+    rate = _rate;
+    calc();
 }
 
-void MPEAK::setSize_mpeak (MPEAK *a, int size)
+void MPEAK::setSize(int _size)
 {
-    decalc_mpeak (a);
-    a->size = size;
-    calc_mpeak (a);
+    decalc();
+    size = _size;
+    calc();
 }
 
 /********************************************************************************************************
@@ -176,46 +162,40 @@ void MPEAK::setSize_mpeak (MPEAK *a, int size)
 *                                                                                                       *
 ********************************************************************************************************/
 
-void MPEAK::SetmpeakRun (RXA& rxa, int run)
+void MPEAK::setRun(int _run)
 {
-    MPEAK *a = rxa.mpeak;
-    a->run = run;
+    run = _run;
 }
 
-void MPEAK::SetmpeakNpeaks (RXA& rxa, int npeaks)
+void MPEAK::setNpeaks(int _npeaks)
 {
-    MPEAK *a = rxa.mpeak;
-    a->npeaks = npeaks;
+    npeaks = _npeaks;
 }
 
-void MPEAK::SetmpeakFilEnable (RXA& rxa, int fil, int enable)
+void MPEAK::setFilEnable(int _fil, int _enable)
 {
-    MPEAK *a = rxa.mpeak;
-    a->enable[fil] = enable;
+    enable[_fil] = _enable;
 }
 
-void MPEAK::SetmpeakFilFreq (RXA& rxa, int fil, double freq)
+void MPEAK::setFilFreq(int _fil, double _freq)
 {
-    MPEAK *a = rxa.mpeak;
-    a->f[fil] = freq;
-    a->pfil[fil]->f = freq;
-    SPEAK::calc_speak(a->pfil[fil]);
+    f[_fil] = _freq;
+    pfil[_fil]->f = _freq;
+    pfil[_fil]->calc();
 }
 
-void MPEAK::SetmpeakFilBw (RXA& rxa, int fil, double bw)
+void MPEAK::setFilBw(int _fil, double _bw)
 {
-    MPEAK *a = rxa.mpeak;
-    a->bw[fil] = bw;
-    a->pfil[fil]->bw = bw;
-    SPEAK::calc_speak(a->pfil[fil]);
+    bw[_fil] = _bw;
+    pfil[_fil]->bw = _bw;
+    pfil[_fil]->calc();
 }
 
-void MPEAK::SetmpeakFilGain (RXA& rxa, int fil, double gain)
+void MPEAK::setFilGain(int _fil, double _gain)
 {
-    MPEAK *a = rxa.mpeak;
-    a->gain[fil] = gain;
-    a->pfil[fil]->gain = gain;
-    SPEAK::calc_speak(a->pfil[fil]);
+    gain[_fil] = _gain;
+    pfil[_fil]->gain = _gain;
+    pfil[_fil]->calc();
 }
 
 } // namespace WDSP

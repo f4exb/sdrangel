@@ -34,6 +34,8 @@ warren@wpratt.com
 #ifndef wdsp_dsphp_h
 #define wdsp_dsphp_h
 
+#include <vector>
+
 #include "export.h"
 
 namespace WDSP {
@@ -49,19 +51,31 @@ public:
     double fc;
     int nstages;
     double a1, b0, b1;
-    double* x0, * x1, * y0, * y1;
+    std::vector<double> x0, x1, y0, y1;
 
-    static DSPHP* create_dsphp(int run, int size, float* in, float* out, double rate, double fc, int nstages);
-    static void destroy_dsphp(DSPHP *a);
-    static void flush_dsphp(DSPHP *a);
-    static void xdsphp(DSPHP *a);
-    static void setBuffers_dsphp(DSPHP *a, float* in, float* out);
-    static void setSamplerate_dsphp(DSPHP *a, int rate);
-    static void setSize_dsphp(DSPHP *a, int size);
+    DSPHP(
+        int run,
+        int size,
+        float* in,
+        float* out,
+        double rate,
+        double fc,
+        int nstages
+    );
+    DSPHP(const DSPHP&) = delete;
+    DSPHP& operator=(DSPHP& other) = delete;
+    ~DSPHP() = default;
+
+    void destroy();
+    void flush();
+    void execute();
+    void setBuffers(float* in, float* out);
+    void setSamplerate(int rate);
+    void setSize(int size);
 
 private:
-    static void calc_dsphp(DSPHP *a);
-    static void decalc_dsphp(DSPHP *a);
+    void calc();
+    void decalc();
 };
 
 } // namespace WDSP

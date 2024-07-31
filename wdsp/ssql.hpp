@@ -28,6 +28,8 @@ warren@pratt.one
 #ifndef wdsp_ssql_h
 #define wdsp_ssql_h
 
+#include <vector>
+
 #include "export.h"
 
 namespace WDSP {
@@ -40,19 +42,30 @@ public:
     int rate;                           // sample-rate
     int rsize;                          // rate * time_to_fill_ring, e.g., 48K/s * 50ms = 2400
     double fmax;                        // frequency (Hz) for full output, e.g., 2000 (Hz)
-    float* in;                         // pointer to the intput buffer for ftov
-    float* out;                        // pointer to the output buffer for ftov
-    int* ring;                          // pointer to the base of the ring
+    float* in;                          // pointer to the intput buffer for ftov
+    float* out;                         // pointer to the output buffer for ftov
+    std::vector<int> ring;              // the ring
     int rptr;                           // index into the ring
     double inlast;                      // holds last sample from previous buffer
     int rcount;                         // count of zero-crossings currently in the ring
     double div;                         // divisor for 'rcount' to produce output of 1.0 at 'fmax'
     double eps;                         // minimum input change to count as a signal edge transition
 
-    static FTOV* create_ftov (int run, int size, int rate, int rsize, double fmax, float* in, float* out);
-    static void destroy_ftov (FTOV *a);
-    static void flush_ftov (FTOV *a);
-    static void xftov (FTOV *a);
+    FTOV(
+        int run,
+        int size,
+        int rate,
+        int rsize,
+        double fmax,
+        float* in,
+        float* out
+    );
+    FTOV(const FTOV&) = delete;
+    FTOV& operator=(FTOV& other) = delete;
+    ~FTOV() = default;
+
+    void flush();
+    void execute();
 };
 
 class CBL;

@@ -37,105 +37,96 @@ namespace WDSP {
 *                                                                                                       *
 ********************************************************************************************************/
 
-void SPHP::calc_sphp(SPHP *a)
+void SPHP::calc()
 {
     double g;
-    a->x0 = new double[a->nstages * 2]; // (float*)malloc0(a->nstages * sizeof(complex));
-    a->x1 = new double[a->nstages * 2]; // (float*)malloc0(a->nstages * sizeof(complex));
-    a->y0 = new double[a->nstages * 2]; // (float*)malloc0(a->nstages * sizeof(complex));
-    a->y1 = new double[a->nstages * 2]; // (float*)malloc0(a->nstages * sizeof(complex));
-    g = exp(-TWOPI * a->fc / a->rate);
-    a->b0 = +0.5 * (1.0 + g);
-    a->b1 = -0.5 * (1.0 + g);
-    a->a1 = -g;
+    x0.resize(nstages * 2); // (float*)malloc0(nstages * sizeof(complex));
+    x1.resize(nstages * 2); // (float*)malloc0(nstages * sizeof(complex));
+    y0.resize(nstages * 2); // (float*)malloc0(nstages * sizeof(complex));
+    y1.resize(nstages * 2); // (float*)malloc0(nstages * sizeof(complex));
+    g = exp(-TWOPI * fc / rate);
+    b0 = +0.5 * (1.0 + g);
+    b1 = -0.5 * (1.0 + g);
+    a1 = -g;
 }
 
-SPHP* SPHP::create_sphp(int run, int size, float* in, float* out, double rate, double fc, int nstages)
+SPHP::SPHP(
+    int _run,
+    int _size,
+    float* _in,
+    float* _out,
+    double _rate,
+    double _fc,
+    int _nstages
+) :
+    run(_run),
+    size(_size),
+    in(_in),
+    out(_out),
+    rate(_rate),
+    fc(_fc),
+    nstages(_nstages)
 {
-    SPHP *a = new SPHP;
-    a->run = run;
-    a->size = size;
-    a->in = in;
-    a->out = out;
-    a->rate = rate;
-    a->fc = fc;
-    a->nstages = nstages;
-    calc_sphp(a);
-    return a;
+    calc();
 }
 
-void SPHP::decalc_sphp(SPHP *a)
+void SPHP::flush()
 {
-    delete[](a->y1);
-    delete[](a->y0);
-    delete[](a->x1);
-    delete[](a->x0);
+    std::fill(x0.begin(), x0.end(), 0);
+    std::fill(x1.begin(), x0.end(), 0);
+    std::fill(y0.begin(), x0.end(), 0);
+    std::fill(y1.begin(), x0.end(), 0);
 }
 
-void SPHP::destroy_sphp(SPHP *a)
+void SPHP::execute()
 {
-    decalc_sphp(a);
-    delete(a);
-}
-
-void SPHP::flush_sphp(SPHP *a)
-{
-    std::fill(a->x0, a->x0 + a->nstages * 2, 0);
-    std::fill(a->x1, a->x0 + a->nstages * 2, 0);
-    std::fill(a->y0, a->x0 + a->nstages * 2, 0);
-    std::fill(a->y1, a->x0 + a->nstages * 2, 0);
-}
-
-void SPHP::xsphp(SPHP *a)
-{
-    if (a->run)
+    if (run)
     {
         int i, j, n;
-        for (i = 0; i < a->size; i++)
+        for (i = 0; i < size; i++)
         {
             for (j = 0; j < 2; j++)
             {
-                a->x0[j] = a->in[2 * i + j];
+                x0[j] = in[2 * i + j];
 
-                for (n = 0; n < a->nstages; n++)
+                for (n = 0; n < nstages; n++)
                 {
                     if (n > 0)
-                        a->x0[2 * n + j] = a->y0[2 * (n - 1) + j];
+                        x0[2 * n + j] = y0[2 * (n - 1) + j];
 
-                    a->y0[2 * n + j] = a->b0 * a->x0[2 * n + j]
-                        + a->b1 * a->x1[2 * n + j]
-                        - a->a1 * a->y1[2 * n + j];
-                    a->y1[2 * n + j] = a->y0[2 * n + j];
-                    a->x1[2 * n + j] = a->x0[2 * n + j];
+                    y0[2 * n + j] = b0 * x0[2 * n + j]
+                        + b1 * x1[2 * n + j]
+                        - a1 * y1[2 * n + j];
+                    y1[2 * n + j] = y0[2 * n + j];
+                    x1[2 * n + j] = x0[2 * n + j];
                 }
 
-                a->out[2 * i + j] = a->y0[2 * (a->nstages - 1) + j];
+                out[2 * i + j] = y0[2 * (nstages - 1) + j];
             }
         }
     }
-    else if (a->out != a->in)
+    else if (out != in)
     {
-        std::copy(a->in, a->in + a->size * 2, a->out);
+        std::copy(in, in + size * 2, out);
     }
 }
 
-void SPHP::setBuffers_sphp(SPHP *a, float* in, float* out)
+void SPHP::setBuffers(float* _in, float* _out)
 {
-    a->in = in;
-    a->out = out;
+    in = _in;
+    out = _out;
 }
 
-void SPHP::setSamplerate_sphp(SPHP *a, int rate)
+void SPHP::setSamplerate(int _rate)
 {
-    decalc_sphp(a);
-    a->rate = rate;
-    calc_sphp(a);
+    rate = _rate;
+    calc();
 }
 
-void SPHP::setSize_sphp(SPHP *a, int size)
+void SPHP::setSize(int _size)
 {
-    a->size = size;
-    flush_sphp(a);
+    size = _size;
+    flush();
 }
 
 } // namespace WDSP

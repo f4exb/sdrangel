@@ -27,8 +27,6 @@ warren@wpratt.com
 
 #include "comm.hpp"
 #include "bqbp.hpp"
-#include "RXA.hpp"
-#include "TXA.hpp"
 
 namespace WDSP {
 
@@ -38,122 +36,119 @@ namespace WDSP {
 *                                                                                                       *
 ********************************************************************************************************/
 
-void BQBP::calc_bqbp(BQBP *a)
+void BQBP::calc()
 {
     double f0, w0, bw, q, sn, cs, c, den;
-    bw = a->f_high - a->f_low;
-    f0 = (a->f_high + a->f_low) / 2.0;
+
+    bw = f_high - f_low;
+    f0 = (f_high + f_low) / 2.0;
     q = f0 / bw;
-    w0 = TWOPI * f0 / a->rate;
+    w0 = TWOPI * f0 / rate;
     sn = sin(w0);
     cs = cos(w0);
     c = sn / (2.0 * q);
     den = 1.0 + c;
-    a->a0 = +c / den;
-    a->a1 = 0.0;
-    a->a2 = -c / den;
-    a->b1 = 2.0 * cs / den;
-    a->b2 = (c - 1.0) / den;
-    flush_bqbp(a);
+    a0 = +c / den;
+    a1 = 0.0;
+    a2 = -c / den;
+    b1 = 2.0 * cs / den;
+    b2 = (c - 1.0) / den;
+    flush();
 }
 
-BQBP* BQBP::create_bqbp(int run, int size, float* in, float* out, double rate, double f_low, double f_high, double gain, int nstages)
+BQBP::BQBP(
+    int _run,
+    int _size,
+    float* _in,
+    float* _out,
+    double _rate,
+    double _f_low,
+    double _f_high,
+    double _gain,
+    int _nstages
+) :
+    run(_run),
+    size(_size),
+    in(_in),
+    out(_out),
+    rate(_rate),
+    f_low(_f_low),
+    f_high(_f_high),
+    gain(_gain),
+    nstages(_nstages)
 {
-    BQBP *a = new BQBP;
-    a->run = run;
-    a->size = size;
-    a->in = in;
-    a->out = out;
-    a->rate = rate;
-    a->f_low = f_low;
-    a->f_high = f_high;
-    a->gain = gain;
-    a->nstages = nstages;
-    a->x0 = new double[a->nstages * 2]; // (float*)malloc0(a->nstages * sizeof(complex));
-    a->x1 = new double[a->nstages * 2]; // (float*)malloc0(a->nstages * sizeof(complex));
-    a->x2 = new double[a->nstages * 2]; // (float*)malloc0(a->nstages * sizeof(complex));
-    a->y0 = new double[a->nstages * 2]; // (float*)malloc0(a->nstages * sizeof(complex));
-    a->y1 = new double[a->nstages * 2]; // (float*)malloc0(a->nstages * sizeof(complex));
-    a->y2 = new double[a->nstages * 2]; // (float*)malloc0(a->nstages * sizeof(complex));
-    calc_bqbp(a);
-    return a;
+    x0.resize(nstages * 2); // (float*)malloc0(nstages * sizeof(complex));
+    x1.resize(nstages * 2); // (float*)malloc0(nstages * sizeof(complex));
+    x2.resize(nstages * 2); // (float*)malloc0(nstages * sizeof(complex));
+    y0.resize(nstages * 2); // (float*)malloc0(nstages * sizeof(complex));
+    y1.resize(nstages * 2); // (float*)malloc0(nstages * sizeof(complex));
+    y2.resize(nstages * 2); // (float*)malloc0(nstages * sizeof(complex));
+    calc();
 }
 
-void BQBP::destroy_bqbp(BQBP *a)
+void BQBP::flush()
 {
-    delete[](a->y2);
-    delete[](a->y1);
-    delete[](a->y0);
-    delete[](a->x2);
-    delete[](a->x1);
-    delete[](a->x0);
-    delete(a);
-}
-
-void BQBP::flush_bqbp(BQBP *a)
-{
-    int i;
-    for (i = 0; i < a->nstages; i++)
+    for (int i = 0; i < nstages; i++)
     {
-        a->x1[2 * i + 0] = a->x2[2 * i + 0] = a->y1[2 * i + 0] = a->y2[2 * i + 0] = 0.0;
-        a->x1[2 * i + 1] = a->x2[2 * i + 1] = a->y1[2 * i + 1] = a->y2[2 * i + 1] = 0.0;
+        x1[2 * i + 0] = x2[2 * i + 0] = y1[2 * i + 0] = y2[2 * i + 0] = 0.0;
+        x1[2 * i + 1] = x2[2 * i + 1] = y1[2 * i + 1] = y2[2 * i + 1] = 0.0;
     }
 }
 
-void BQBP::xbqbp(BQBP *a)
+void BQBP::execute()
 {
-    if (a->run)
+    if (run)
     {
         int i, j, n;
 
-        for (i = 0; i < a->size; i++)
+        for (i = 0; i < size; i++)
         {
             for (j = 0; j < 2; j++)
             {
-                a->x0[j] = a->gain * a->in[2 * i + j];
+                x0[j] = gain * in[2 * i + j];
 
-                for (n = 0; n < a->nstages; n++)
+                for (n = 0; n < nstages; n++)
                 {
                     if (n > 0)
-                        a->x0[2 * n + j] = a->y0[2 * (n - 1) + j];
+                        x0[2 * n + j] = y0[2 * (n - 1) + j];
 
-                    a->y0[2 * n + j] = a->a0 * a->x0[2 * n + j]
-                        + a->a1 * a->x1[2 * n + j]
-                        + a->a2 * a->x2[2 * n + j]
-                        + a->b1 * a->y1[2 * n + j]
-                        + a->b2 * a->y2[2 * n + j];
-                    a->y2[2 * n + j] = a->y1[2 * n + j];
-                    a->y1[2 * n + j] = a->y0[2 * n + j];
-                    a->x2[2 * n + j] = a->x1[2 * n + j];
-                    a->x1[2 * n + j] = a->x0[2 * n + j];
+                    y0[2 * n + j] = a0 * x0[2 * n + j]
+                        + a1 * x1[2 * n + j]
+                        + a2 * x2[2 * n + j]
+                        + b1 * y1[2 * n + j]
+                        + b2 * y2[2 * n + j];
+                    y2[2 * n + j] = y1[2 * n + j];
+                    y1[2 * n + j] = y0[2 * n + j];
+                    x2[2 * n + j] = x1[2 * n + j];
+                    x1[2 * n + j] = x0[2 * n + j];
                 }
 
-                a->out[2 * i + j] = a->y0[2 * (a->nstages - 1) + j];
+                out[2 * i + j] = y0[2 * (nstages - 1) + j];
             }
         }
     }
-    else if (a->out != a->in)
+    else if (out != in)
     {
-        std::copy(a->in, a->in + a->size * 2, a->out);
+        std::copy(in, in + size * 2, out);
     }
 }
 
-void BQBP::setBuffers_bqbp(BQBP *a, float* in, float* out)
+void BQBP::setBuffers(float* _in, float* _out)
 {
-    a->in = in;
-    a->out = out;
+    in = _in;
+    out = _out;
 }
 
-void BQBP::setSamplerate_bqbp(BQBP *a, int rate)
+void BQBP::setSamplerate( int _rate)
 {
-    a->rate = rate;
-    calc_bqbp(a);
+    rate = _rate;
+    calc();
 }
 
-void BQBP::setSize_bqbp(BQBP *a, int size)
+void BQBP::setSize(int _size)
 {
-    a->size = size;
-    flush_bqbp(a);
+    size = _size;
+    flush();
 }
 
 } // namespace WDSP

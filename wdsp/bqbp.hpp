@@ -34,6 +34,8 @@ warren@wpratt.com
 #ifndef wdsp_bqbp_h
 #define wdsp_bqbp_h
 
+#include <vector>
+
 #include "export.h"
 
 namespace WDSP {
@@ -51,18 +53,31 @@ public:
     double gain;
     int nstages;
     double a0, a1, a2, b1, b2;
-    double* x0, * x1, * x2, * y0, * y1, * y2;
+    std::vector<double> x0, x1, x2, y0, y1, y2;
 
-    static BQBP* create_bqbp(int run, int size, float* in, float* out, double rate, double f_low, double f_high, double gain, int nstages);
-    static void destroy_bqbp(BQBP *a);
-    static void flush_bqbp(BQBP *a);
-    static void xbqbp(BQBP *a);
-    static void setBuffers_bqbp(BQBP *a, float* in, float* out);
-    static void setSamplerate_bqbp(BQBP *a, int rate);
-    static void setSize_bqbp(BQBP *a, int size);
+    BQBP(
+        int run,
+        int size,
+        float* in,
+        float* out,
+        double rate,
+        double f_low,
+        double f_high,
+        double gain,
+        int nstages
+    );
+    BQBP(const BQBP&) = delete;
+    BQBP& operator=(BQBP& other) = delete;
+    ~BQBP() = default;
+
+    void flush();
+    void execute();
+    void setBuffers(float* in, float* out);
+    void setSamplerate(int rate);
+    void setSize(int size);
 
 private:
-    static void calc_bqbp(BQBP *a);
+    void calc();
 };
 
 } // namespace WDSP

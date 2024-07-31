@@ -34,6 +34,8 @@ warren@wpratt.com
 #ifndef wdsp_sphp_h
 #define wdsp_sphp_h
 
+#include <vector>
+
 #include "export.h"
 
 namespace WDSP {
@@ -49,20 +51,31 @@ public:
     double fc;
     int nstages;
     double a1, b0, b1;
-    double* x0, * x1, * y0, * y1;
+    std::vector<double> x0, x1, y0, y1;
 
     // Complex Single-Pole High-Pass
-    static SPHP* create_sphp(int run, int size, float* in, float* out, double rate, double fc, int nstages);
-    static void destroy_sphp(SPHP *a);
-    static void flush_sphp(SPHP *a);
-    static void xsphp(SPHP *a);
-    static void setBuffers_sphp(SPHP *a, float* in, float* out);
-    static void setSamplerate_sphp(SPHP *a, int rate);
-    static void setSize_sphp(SPHP *a, int size);
+    SPHP(
+        int run,
+        int size,
+        float* in,
+        float* out,
+        double rate,
+        double fc,
+        int nstages
+    );
+    SPHP(const SPHP&) = delete;
+    SPHP& operator=(const SPHP& other) = delete;
+    ~SPHP() = default;
+
+    void destroy();
+    void flush();
+    void execute();
+    void setBuffers(float* in, float* out);
+    void setSamplerate(int rate);
+    void setSize(int size);
 
 private:
-    static void calc_sphp(SPHP *a);
-    static void decalc_sphp(SPHP *a);
+    void calc();
 };
 
 } // namespace WDSP

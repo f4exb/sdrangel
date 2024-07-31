@@ -38,103 +38,91 @@ namespace WDSP {
 *                                                                                                       *
 ********************************************************************************************************/
 
-void DSPHP::calc_dsphp(DSPHP *a)
+void DSPHP::calc()
 {
     double g;
-    a->x0 = new double[a->nstages]; // (float*)malloc0(a->nstages * sizeof(float));
-    a->x1 = new double[a->nstages]; // (float*)malloc0(a->nstages * sizeof(float));
-    a->y0 = new double[a->nstages]; // (float*)malloc0(a->nstages * sizeof(float));
-    a->y1 = new double[a->nstages]; // (float*)malloc0(a->nstages * sizeof(float));
-    g = exp(-TWOPI * a->fc / a->rate);
-    a->b0 = +0.5 * (1.0 + g);
-    a->b1 = -0.5 * (1.0 + g);
-    a->a1 = -g;
+    x0.resize(nstages); // (float*)malloc0(nstages * sizeof(float));
+    x1.resize(nstages); // (float*)malloc0(nstages * sizeof(float));
+    y0.resize(nstages); // (float*)malloc0(nstages * sizeof(float));
+    y1.resize(nstages); // (float*)malloc0(nstages * sizeof(float));
+    g = exp(-TWOPI * fc / rate);
+    b0 = +0.5 * (1.0 + g);
+    b1 = -0.5 * (1.0 + g);
+    a1 = -g;
 }
 
-DSPHP* DSPHP::create_dsphp(int run, int size, float* in, float* out, double rate, double fc, int nstages)
+DSPHP::DSPHP(
+    int _run,
+    int _size,
+    float* _in,
+    float* _out,
+    double _rate,
+    double _fc,
+    int _nstages
+)
 {
-    DSPHP *a = new DSPHP;
-    a->run = run;
-    a->size = size;
-    a->in = in;
-    a->out = out;
-    a->rate = rate;
-    a->fc = fc;
-    a->nstages = nstages;
-    calc_dsphp(a);
-    return a;
+    run = _run;
+    size = _size;
+    in = _in;
+    out = _out;
+    rate = _rate;
+    fc = _fc;
+    nstages = _nstages;
+    calc();
 }
 
-void DSPHP::decalc_dsphp(DSPHP *a)
+void DSPHP::flush()
 {
-    delete[](a->y1);
-    delete[](a->y0);
-    delete[](a->x1);
-    delete[](a->x0);
+    std::fill(x0.begin(), x0.end(), 0);
+    std::fill(x1.begin(), x1.end(), 0);
+    std::fill(y0.begin(), y0.end(), 0);
+    std::fill(y1.begin(), y1.end(), 0);
 }
 
-void DSPHP::destroy_dsphp(DSPHP *a)
+void DSPHP::execute()
 {
-    decalc_dsphp(a);
-    delete(a);
-}
-
-void DSPHP::flush_dsphp(DSPHP *a)
-{
-    memset(a->x0, 0, a->nstages * sizeof(float));
-    memset(a->x1, 0, a->nstages * sizeof(float));
-    memset(a->y0, 0, a->nstages * sizeof(float));
-    memset(a->y1, 0, a->nstages * sizeof(float));
-}
-
-void DSPHP::xdsphp(DSPHP *a)
-{
-    if (a->run)
+    if (run)
     {
-        int i, n;
-
-        for (i = 0; i < a->size; i++)
+        for (int i = 0; i < size; i++)
         {
-            a->x0[0] = a->in[i];
+            x0[0] = in[i];
 
-            for (n = 0; n < a->nstages; n++)
+            for (int n = 0; n < nstages; n++)
             {
                 if (n > 0)
-                    a->x0[n] = a->y0[n - 1];
+                    x0[n] = y0[n - 1];
 
-                a->y0[n] = a->b0 * a->x0[n]
-                    + a->b1 * a->x1[n]
-                    - a->a1 * a->y1[n];
-                a->y1[n] = a->y0[n];
-                a->x1[n] = a->x0[n];
+                y0[n] = b0 * x0[n]
+                    + b1 * x1[n]
+                    - a1 * y1[n];
+                y1[n] = y0[n];
+                x1[n] = x0[n];
             }
 
-            a->out[i] = a->y0[a->nstages - 1];
+            out[i] = y0[nstages - 1];
         }
     }
-    else if (a->out != a->in)
+    else if (out != in)
     {
-        memcpy(a->out, a->in, a->size * sizeof(float));
+        std::copy(in, in + size, out);
     }
 }
 
-void DSPHP::setBuffers_dsphp(DSPHP *a, float* in, float* out)
+void DSPHP::setBuffers(float* _in, float* _out)
 {
-    a->in = in;
-    a->out = out;
+    in = _in;
+    out = _out;
 }
 
-void DSPHP::setSamplerate_dsphp(DSPHP *a, int rate)
+void DSPHP::setSamplerate(int _rate)
 {
-    decalc_dsphp(a);
-    a->rate = rate;
-    calc_dsphp(a);
+    rate = _rate;
+    calc();
 }
 
-void DSPHP::setSize_dsphp(DSPHP *a, int size)
+void DSPHP::setSize(int _size)
 {
-    a->size = size;
-    flush_dsphp(a);
+    size = _size;
 }
 
 } // namespace WDSP
