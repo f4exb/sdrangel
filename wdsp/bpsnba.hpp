@@ -30,8 +30,6 @@ warren@wpratt.com
 
 namespace WDSP{
 
-class RXA;
-
 class NOTCHDB;
 class NBP;
 

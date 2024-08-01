@@ -27,8 +27,6 @@ warren@wpratt.com
 
 #include "comm.hpp"
 #include "snotch.hpp"
-#include "RXA.hpp"
-#include "TXA.hpp"
 
 namespace WDSP {
 

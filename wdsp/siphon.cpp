@@ -28,8 +28,6 @@ warren@wpratt.com
 #include "comm.hpp"
 #include "meterlog10.hpp"
 #include "siphon.hpp"
-#include "RXA.hpp"
-#include "TXA.hpp"
 
 namespace WDSP {
 

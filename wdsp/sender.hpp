@@ -37,7 +37,6 @@ warren@wpratt.com
 
 namespace WDSP {
 
-class RXA;
 class BufferProbe;
 
 class WDSP_API SENDER

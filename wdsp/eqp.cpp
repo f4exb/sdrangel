@@ -29,8 +29,6 @@ warren@wpratt.com
 #include "eqp.hpp"
 #include "fircore.hpp"
 #include "fir.hpp"
-#include "RXA.hpp"
-#include "TXA.hpp"
 
 namespace WDSP {
 

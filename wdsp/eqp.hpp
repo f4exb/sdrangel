@@ -41,8 +41,6 @@ warren@wpratt.com
 namespace WDSP {
 
 class FIRCORE;
-class RXA;
-class TXA;
 
 class WDSP_API EQP
 {

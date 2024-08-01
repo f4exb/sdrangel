@@ -27,8 +27,6 @@ warren@wpratt.com
 
 #include "comm.hpp"
 #include "dsphp.hpp"
-#include "RXA.hpp"
-#include "TXA.hpp"
 
 namespace WDSP {
 

@@ -40,8 +40,6 @@ warren@wpratt.com
 
 namespace WDSP {
 
-class RXA;
-
 class WDSP_API SPEAK
 {
 public:

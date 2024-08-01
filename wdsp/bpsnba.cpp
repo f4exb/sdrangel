@@ -35,7 +35,6 @@ warren@wpratt.com
 #include "anr.hpp"
 #include "emnr.hpp"
 #include "bpsnba.hpp"
-#include "RXA.hpp"
 
 #define MAXIMP          256
 

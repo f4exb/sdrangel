@@ -34,8 +34,6 @@ Santa Cruz, CA  95060
 #include "comm.hpp"
 #include "nbp.hpp"
 #include "wcpAGC.hpp"
-#include "RXA.hpp"
-#include "TXA.hpp"
 
 namespace WDSP {
 

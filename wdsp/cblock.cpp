@@ -27,7 +27,6 @@ warren@wpratt.com
 
 #include "comm.hpp"
 #include "cblock.hpp"
-#include "RXA.hpp"
 
 namespace WDSP {
 

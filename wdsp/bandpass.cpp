@@ -29,8 +29,6 @@ warren@wpratt.com
 #include "bandpass.hpp"
 #include "fir.hpp"
 #include "fircore.hpp"
-#include "RXA.hpp"
-#include "TXA.hpp"
 
 namespace WDSP {
 

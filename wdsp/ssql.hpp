@@ -71,7 +71,6 @@ public:
 class CBL;
 class FTDV;
 class DBQLP;
-class RXA;
 
 class WDSP_API SSQL                    // Syllabic Squelch
 {

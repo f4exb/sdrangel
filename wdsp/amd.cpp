@@ -33,7 +33,6 @@ warren@wpratt.com
 #include "emnr.hpp"
 #include "anr.hpp"
 #include "snba.hpp"
-#include "RXA.hpp"
 
 namespace WDSP {
 

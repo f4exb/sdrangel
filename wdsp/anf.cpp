@@ -32,7 +32,6 @@ warren@wpratt.com
 #include "anr.hpp"
 #include "anf.hpp"
 #include "bandpass.hpp"
-#include "RXA.hpp"
 
 namespace WDSP {
 

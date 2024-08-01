@@ -27,7 +27,6 @@ warren@wpratt.com
 
 #include "comm.hpp"
 #include "sender.hpp"
-#include "RXA.hpp"
 #include "bufferprobe.hpp"
 
 namespace WDSP {

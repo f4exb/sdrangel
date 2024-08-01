@@ -32,9 +32,6 @@ warren@wpratt.com
 
 namespace WDSP {
 
-class RXA;
-class TXA;
-
 class WDSP_API PANEL
 {
 public:
