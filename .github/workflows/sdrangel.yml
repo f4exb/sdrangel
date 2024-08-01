@@ -6,7 +6,6 @@ on:
   push:
     branches:
       - master
-      - feature-*
       - mac_ci
     tags:
       - 'v*'
