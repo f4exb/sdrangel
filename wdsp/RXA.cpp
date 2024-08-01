@@ -515,7 +515,7 @@ RXA* RXA::create_rxa (
     }
 
     // Syllabic squelch (Voice suelch) - Not in the block diagram
-    rxa->ssql = SSQL::create_ssql(
+    rxa->ssql = new SSQL(
         0,                                      // run
         rxa->dsp_size,                          // size
         rxa->midbuff,                           // pointer to input buffer
@@ -532,7 +532,7 @@ RXA* RXA::create_rxa (
         2000.0);                                // max freq for f_to_v converter
 
     // PatchPanel
-    rxa->panel = PANEL::create_panel (
+    rxa->panel = new PANEL(
         1,                                      // run
         rxa->dsp_size,                          // size
         rxa->midbuff,                           // pointer to input buffer
@@ -565,8 +565,8 @@ RXA* RXA::create_rxa (
 void RXA::destroy_rxa (RXA *rxa)
 {
     delete (rxa->rsmpout);
-    PANEL::destroy_panel (rxa->panel);
-    SSQL::destroy_ssql (rxa->ssql);
+    delete (rxa->panel);
+    delete (rxa->ssql);
     delete (rxa->mpeak);
     delete (rxa->speak);
     delete (rxa->cbl);
@@ -629,8 +629,8 @@ void RXA::flush_rxa (RXA *rxa)
     rxa->cbl->flush();
     rxa->speak->flush();
     rxa->mpeak->flush();
-    SSQL::flush_ssql (rxa->ssql);
-    PANEL::flush_panel (rxa->panel);
+    rxa->ssql->flush();
+    rxa->panel->flush();
     rxa->rsmpout->flush();
 }
 
@@ -668,8 +668,8 @@ void RXA::xrxa (RXA *rxa)
     rxa->cbl->execute();
     rxa->speak->execute();
     rxa->mpeak->execute();
-    SSQL::xssql (rxa->ssql);
-    PANEL::xpanel (rxa->panel);
+    rxa->ssql->execute();
+    rxa->panel->execute();
     rxa->amsq->execute();
     rxa->rsmpout->execute();
 }
@@ -775,8 +775,8 @@ void RXA::setDSPSamplerate (RXA *rxa, int dsp_rate)
     rxa->cbl->setSamplerate(rxa->dsp_rate);
     rxa->speak->setSamplerate(rxa->dsp_rate);
     rxa->mpeak->setSamplerate(rxa->dsp_rate);
-    SSQL::setSamplerate_ssql (rxa->ssql, rxa->dsp_rate);
-    PANEL::setSamplerate_panel (rxa->panel, rxa->dsp_rate);
+    rxa->ssql->setSamplerate(rxa->dsp_rate);
+    rxa->panel->setSamplerate(rxa->dsp_rate);
     // output resampler
     rxa->rsmpout->setBuffers(rxa->midbuff, rxa->outbuff);
     rxa->rsmpout->setInRate(rxa->dsp_rate);
@@ -858,10 +858,10 @@ void RXA::setDSPBuffsize (RXA *rxa, int dsp_size)
     rxa->speak->setSize(rxa->dsp_size);
     rxa->mpeak->setBuffers(rxa->midbuff, rxa->midbuff);
     rxa->mpeak->setSize(rxa->dsp_size);
-    SSQL::setBuffers_ssql (rxa->ssql, rxa->midbuff, rxa->midbuff);
-    SSQL::setSize_ssql (rxa->ssql, rxa->dsp_size);
-    PANEL::setBuffers_panel (rxa->panel, rxa->midbuff, rxa->midbuff);
-    PANEL::setSize_panel (rxa->panel, rxa->dsp_size);
+    rxa->ssql->setBuffers(rxa->midbuff, rxa->midbuff);
+    rxa->ssql->setSize(rxa->dsp_size);
+    rxa->panel->setBuffers(rxa->midbuff, rxa->midbuff);
+    rxa->panel->setSize(rxa->dsp_size);
     // output resampler
     rxa->rsmpout->setBuffers(rxa->midbuff, rxa->outbuff);
     rxa->rsmpout->setSize(rxa->dsp_size);

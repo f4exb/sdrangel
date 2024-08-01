@@ -48,7 +48,7 @@ public:
     int inselect;
     int copy;
 
-    static PANEL* create_panel (
+    PANEL(
         int run,
         int size,
         float* in,
@@ -59,24 +59,25 @@ public:
         int inselect,
         int copy
     );
-    static void destroy_panel (PANEL *a);
-    static void flush_panel (PANEL *a);
-    static void xpanel (PANEL *a);
-    static void setBuffers_panel (PANEL *a, float* in, float* out);
-    static void setSamplerate_panel (PANEL *a, int rate);
-    static void setSize_panel (PANEL *a, int size);
+    PANEL(const PANEL&) = delete;
+    PANEL& operator=(const PANEL& other) = delete;
+    ~PANEL() = default;
+
+    void flush();
+    void execute();
+    void setBuffers(float* in, float* out);
+    void setSamplerate(int rate);
+    void setSize(int size);
     // RXA Properties
-    static void SetPanelRun (RXA& rxa, int run);
-    static void SetPanelSelect (RXA& rxa, int select);
-    static void SetPanelGain1 (RXA& rxa, double gain);
-    static void SetPanelGain2 (RXA& rxa, double gainI, double gainQ);
-    static void SetPanelPan (RXA& rxa, double pan);
-    static void SetPanelCopy (RXA& rxa, int copy);
-    static void SetPanelBinaural (RXA& rxa, int bin);
+    void setRun(int run);
+    void setSelect(int select);
+    void setGain1(double gain);
+    void setGain2(double gainI, double gainQ);
+    void setPan(double pan);
+    void setCopy(int copy);
+    void setBinaural(int bin);
     // TXA Properties
-    static void SetPanelRun (TXA& txa, int run);
-    static void SetPanelGain1 (TXA& txa, double gain);
-    static void SetPanelSelect (TXA& txa, int select);
+    void setSelectTx(int select);
 };
 
 } // namespace WDSP

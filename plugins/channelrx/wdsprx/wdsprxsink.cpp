@@ -680,7 +680,7 @@ void WDSPRxSink::applySettings(const WDSPRxSettings& settings, bool force)
     || (m_settings.m_squelchThreshold != settings.m_squelchThreshold)
     || (m_settings.m_squelchMode != settings.m_squelchMode) || force)
     {
-        WDSP::SSQL::SetSSQLRun(*m_rxa, 0);
+        m_rxa->ssql->setRun(0);
         m_rxa->amsq->setRun(0);
         m_rxa->fmsq->setRun(0);
 
@@ -690,9 +690,9 @@ void WDSPRxSink::applySettings(const WDSPRxSettings& settings, bool force)
             {
             case WDSPRxProfile::SquelchModeVoice:
             {
-                WDSP::SSQL::SetSSQLRun(*m_rxa, 1);
+                m_rxa->ssql->setRun(1);
                 double threshold = 0.0075 * settings.m_squelchThreshold;
-                WDSP::SSQL::SetSSQLThreshold(*m_rxa, threshold);
+                m_rxa->ssql->setThreshold(threshold);
             }
                 break;
             case WDSPRxProfile::SquelchModeAM:
@@ -717,11 +717,11 @@ void WDSPRxSink::applySettings(const WDSPRxSettings& settings, bool force)
     }
 
     if ((m_settings.m_ssqlTauMute != settings.m_ssqlTauMute) || force) {
-        WDSP::SSQL::SetSSQLTauMute(*m_rxa, settings.m_ssqlTauMute);
+        m_rxa->ssql->setTauMute(settings.m_ssqlTauMute);
     }
 
     if ((m_settings.m_ssqlTauUnmute != settings.m_ssqlTauUnmute) || force) {
-        WDSP::SSQL::SetSSQLTauUnMute(*m_rxa, settings.m_ssqlTauUnmute);
+        m_rxa->ssql->setTauUnMute(settings.m_ssqlTauUnmute);
     }
 
     if ((m_settings.m_amsqMaxTail != settings.m_amsqMaxTail) || force) {
@@ -743,7 +743,7 @@ void WDSPRxSink::applySettings(const WDSPRxSettings& settings, bool force)
     // Audio panel
 
     if ((m_settings.m_volume != settings.m_volume) || force) {
-        WDSP::PANEL::SetPanelGain1(*m_rxa, settings.m_volume);
+        m_rxa->panel->setGain1(settings.m_volume);
     }
 
     if ((m_settings.m_audioBinaural != settings.m_audioBinaural)
@@ -752,13 +752,13 @@ void WDSPRxSink::applySettings(const WDSPRxSettings& settings, bool force)
     {
         if (settings.m_audioBinaural)
         {
-            WDSP::PANEL::SetPanelCopy(*m_rxa, settings.m_audioFlipChannels ? 3 : 0);
-            WDSP::PANEL::SetPanelPan(*m_rxa, settings.m_audioPan);
+            m_rxa->panel->setCopy(settings.m_audioFlipChannels ? 3 : 0);
+            m_rxa->panel->setPan(settings.m_audioPan);
         }
         else
         {
-            WDSP::PANEL::SetPanelCopy(*m_rxa, settings.m_audioFlipChannels ? 2 : 1);
-            WDSP::PANEL::SetPanelPan(*m_rxa, 0.5);
+            m_rxa->panel->setCopy(settings.m_audioFlipChannels ? 2 : 1);
+            m_rxa->panel->setPan(0.5);
         }
     }
 

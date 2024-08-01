@@ -117,7 +117,7 @@ public:
     double unmute_mult;                 // multiplier for successive voltage calcs when unmuted
     int* tr_signal;                     // trigger signal, 0 or 1
 
-    static SSQL* create_ssql (
+    SSQL(
         int run,
         int size,
         float* in,
@@ -133,22 +133,25 @@ public:
         int rsize,
         double fmax
     );
-    static void destroy_ssql (SSQL *a);
-    static void flush_ssql (SSQL *a);
-    static void xssql (SSQL *a);
-    static void setBuffers_ssql (SSQL *a, float* in, float* out);
-    static void setSamplerate_ssql (SSQL *a, int rate);
-    static void setSize_ssql (SSQL *a, int size);
+    SSQL(const SSQL&) = delete;
+    SSQL& operator=(const SSQL& other) = delete;
+    ~SSQL();
+
+    void flush();
+    void execute();
+    void setBuffers(float* in, float* out);
+    void setSamplerate(int rate);
+    void setSize(int size);
     // RXA Properties
-    static void SetSSQLRun (RXA& rxa, int run);
-    static void SetSSQLThreshold (RXA& rxa, double threshold);
-    static void SetSSQLTauMute (RXA& rxa, double tau_mute);
-    static void SetSSQLTauUnMute (RXA& rxa, double tau_unmute);
+    void setRun(int run);
+    void setThreshold(double threshold);
+    void setTauMute(double tau_mute);
+    void setTauUnMute(double tau_unmute);
 
 private:
-    static void compute_ssql_slews(SSQL *a);
-    static void calc_ssql (SSQL *a);
-    static void decalc_ssql (SSQL *a);
+    void compute_slews();
+    void calc();
+    void decalc();
 };
 
 } // namespace WDSP

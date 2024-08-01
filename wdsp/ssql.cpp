@@ -117,127 +117,122 @@ void FTOV::execute()
 
 
 
-void SSQL::compute_ssql_slews(SSQL *a)
+void SSQL::compute_slews()
 {
-    int i;
     double delta, theta;
-    delta = PI / (double)a->ntup;
+    delta = PI / (double) ntup;
     theta = 0.0;
-    for (i = 0; i <= a->ntup; i++)
+    for (int i = 0; i <= ntup; i++)
     {
-        a->cup[i] = a->muted_gain + (1.0 - a->muted_gain) * 0.5 * (1.0 - cos(theta));
+        cup[i] = muted_gain + (1.0 - muted_gain) * 0.5 * (1.0 - cos(theta));
         theta += delta;
     }
-    delta = PI / (double)a->ntdown;
+    delta = PI / (double)ntdown;
     theta = 0.0;
-    for (i = 0; i <= a->ntdown; i++)
+    for (int i = 0; i <= ntdown; i++)
     {
-        a->cdown[i] = a->muted_gain + (1.0 - a->muted_gain) * 0.5 * (1.0 + cos(theta));
+        cdown[i] = muted_gain + (1.0 - muted_gain) * 0.5 * (1.0 + cos(theta));
         theta += delta;
     }
 }
 
-void SSQL::calc_ssql (SSQL *a)
+void SSQL::calc()
 {
-    a->b1 = new float[a->size * 2]; // (float*) malloc0 (a->size * sizeof (complex));
-    a->dcbl = new CBL(1, a->size, a->in, a->b1, 0, a->rate, 0.02);
-    a->ibuff = new float[a->size]; // (float*) malloc0 (a->size * sizeof (float));
-    a->ftovbuff = new float[a->size]; // (float*) malloc0(a->size * sizeof (float));
-    a->cvtr = new FTOV(1, a->size, a->rate, a->ftov_rsize, a->ftov_fmax, a->ibuff, a->ftovbuff);
-    a->lpbuff = new float[a->size]; // (float*) malloc0 (a->size * sizeof (float));
-    a->filt = new DBQLP(1, a->size, a->ftovbuff, a->lpbuff, a->rate, 11.3, 1.0, 1.0, 1);
-    a->wdbuff = new int[a->size]; // (int*) malloc0 (a->size * sizeof (int));
-    a->tr_signal = new int[a->size]; // (int*) malloc0 (a->size * sizeof (int));
+    b1 = new float[size * 2]; // (float*) malloc0 (size * sizeof (complex));
+    dcbl = new CBL(1, size, in, b1, 0, rate, 0.02);
+    ibuff = new float[size]; // (float*) malloc0 (size * sizeof (float));
+    ftovbuff = new float[size]; // (float*) malloc0(size * sizeof (float));
+    cvtr = new FTOV(1, size, rate, ftov_rsize, ftov_fmax, ibuff, ftovbuff);
+    lpbuff = new float[size]; // (float*) malloc0 (size * sizeof (float));
+    filt = new DBQLP(1, size, ftovbuff, lpbuff, rate, 11.3, 1.0, 1.0, 1);
+    wdbuff = new int[size]; // (int*) malloc0 (size * sizeof (int));
+    tr_signal = new int[size]; // (int*) malloc0 (size * sizeof (int));
     // window detector
-    a->wdmult = exp (-1.0 / (a->rate * a->wdtau));
-    a->wdaverage = 0.0;
+    wdmult = exp (-1.0 / (rate * wdtau));
+    wdaverage = 0.0;
     // trigger
-    a->tr_voltage = a->tr_thresh;
-    a->mute_mult = 1.0 - exp (-1.0 / (a->rate * a->tr_tau_mute));
-    a->unmute_mult = 1.0 - exp (-1.0 / (a->rate * a->tr_tau_unmute));
+    tr_voltage = tr_thresh;
+    mute_mult = 1.0 - exp (-1.0 / (rate * tr_tau_mute));
+    unmute_mult = 1.0 - exp (-1.0 / (rate * tr_tau_unmute));
     // level change
-    a->ntup = (int)(a->tup * a->rate);
-    a->ntdown = (int)(a->tdown * a->rate);
-    a->cup = new float[a->ntup + 1]; // (float*) malloc0 ((a->ntup + 1) * sizeof (float));
-    a->cdown = new float[a->ntdown + 1]; // (float*) malloc0 ((a->ntdown + 1) * sizeof (float));
-    compute_ssql_slews (a);
+    ntup = (int)(tup * rate);
+    ntdown = (int)(tdown * rate);
+    cup = new float[ntup + 1]; // (float*) malloc0 ((ntup + 1) * sizeof (float));
+    cdown = new float[ntdown + 1]; // (float*) malloc0 ((ntdown + 1) * sizeof (float));
+    compute_slews();
     // control
-    a->state = 0;
-    a->count = 0;
+    state = 0;
+    count = 0;
 }
 
-void SSQL::decalc_ssql (SSQL *a)
+void SSQL::decalc()
 {
-    delete[] (a->tr_signal);
-    delete[] (a->wdbuff);
-    delete (a->filt);
-    delete[] (a->lpbuff);
-    delete (a->cvtr);
-    delete[] (a->ftovbuff);
-    delete[] (a->ibuff);
-    delete (a->dcbl);
-    delete[] (a->b1);
-    delete[] (a->cdown);
-    delete[] (a->cup);
+    delete[] (tr_signal);
+    delete[] (wdbuff);
+    delete (filt);
+    delete[] (lpbuff);
+    delete (cvtr);
+    delete[] (ftovbuff);
+    delete[] (ibuff);
+    delete (dcbl);
+    delete[] (b1);
+    delete[] (cdown);
+    delete[] (cup);
 }
 
-SSQL* SSQL::create_ssql (
-    int run,
-    int size,
-    float* in,
-    float* out,
-    int rate,
-    double tup,
-    double tdown,
-    double muted_gain,
-    double tau_mute,
-    double tau_unmute,
-    double wthresh,
-    double tr_thresh,
-    int rsize,
-    double fmax
+SSQL::SSQL(
+    int _run,
+    int _size,
+    float* _in,
+    float* _out,
+    int _rate,
+    double _tup,
+    double _tdown,
+    double _muted_gain,
+    double _tau_mute,
+    double _tau_unmute,
+    double _wthresh,
+    double _tr_thresh,
+    int _rsize,
+    double _fmax
 )
 {
-    SSQL *a = new SSQL;
-    a->run = run;
-    a->size = size;
-    a->in = in;
-    a->out = out;
-    a->rate = rate;
-    a->tup = tup;
-    a->tdown = tdown;
-    a->muted_gain = muted_gain;
-    a->tr_tau_mute = tau_mute;
-    a->tr_tau_unmute = tau_unmute;
-    a->wthresh = wthresh;           // PRIMARY SQUELCH THRESHOLD CONTROL
-    a->tr_thresh = tr_thresh;       // value between tr_ss_unmute and tr_ss_mute, default = 0.8197
-    a->tr_ss_mute = 1.0;
-    a->tr_ss_unmute = 0.3125;
-    a->wdtau = 0.5;
-    a->ftov_rsize = rsize;
-    a->ftov_fmax = fmax;
-    calc_ssql (a);
-    return a;
+    run = _run;
+    size = _size;
+    in = _in;
+    out = _out;
+    rate = _rate;
+    tup = _tup;
+    tdown = _tdown;
+    muted_gain = _muted_gain;
+    tr_tau_mute = _tau_mute;
+    tr_tau_unmute = _tau_unmute;
+    wthresh = _wthresh;           // PRIMARY SQUELCH THRESHOLD CONTROL
+    tr_thresh = _tr_thresh;       // value between tr_ss_unmute and tr_ss_mute, default = 0.8197
+    tr_ss_mute = 1.0;
+    tr_ss_unmute = 0.3125;
+    wdtau = 0.5;
+    ftov_rsize = _rsize;
+    ftov_fmax = _fmax;
+    calc();
 }
 
-void SSQL::destroy_ssql (SSQL *a)
+SSQL::~SSQL()
 {
-    decalc_ssql (a);
-    delete (a);
+    decalc();
 }
 
-void SSQL::flush_ssql (SSQL *a)
+void SSQL::flush()
 {
-
-    std::fill(a->b1, a->b1 + a->size * 2, 0);
-    a->dcbl->flush();
-    memset (a->ibuff, 0, a->size * sizeof (float));
-    memset (a->ftovbuff, 0, a->size * sizeof (float));
-    a->cvtr->flush();
-    memset (a->lpbuff, 0, a->size * sizeof (float));
-    a->filt->flush();
-    memset (a->wdbuff, 0, a->size * sizeof (int));
-    memset (a->tr_signal, 0, a->size * sizeof (int));
+    std::fill(b1, b1 + size * 2, 0);
+    dcbl->flush();
+    memset (ibuff, 0, size * sizeof (float));
+    memset (ftovbuff, 0, size * sizeof (float));
+    cvtr->flush();
+    memset (lpbuff, 0, size * sizeof (float));
+    filt->flush();
+    memset (wdbuff, 0, size * sizeof (int));
+    memset (tr_signal, 0, size * sizeof (int));
 }
 
 enum _ssqlstate
@@ -248,98 +243,98 @@ enum _ssqlstate
     DECREASE
 };
 
-void SSQL::xssql (SSQL *a)
+void SSQL::execute()
 {
-    if (a->run)
+    if (run)
     {
-        a->dcbl->execute();                                         // dc block the input signal
-        for (int i = 0; i < a->size; i++)                       // extract 'I' component
-            a->ibuff[i] = a->b1[2 * i];
-        a->cvtr->execute();                                        // convert frequency to voltage, ignoring amplitude
-        // WriteAudioWDSP(20.0, a->rate, a->size, a->ftovbuff, 4, 0.99);
-        a->filt->execute();                                       // low-pass filter
-        // WriteAudioWDSP(20.0, a->rate, a->size, a->lpbuff, 4, 0.99);
+        dcbl->execute();                                         // dc block the input signal
+        for (int i = 0; i < size; i++)                       // extract 'I' component
+            ibuff[i] = b1[2 * i];
+        cvtr->execute();                                        // convert frequency to voltage, ignoring amplitude
+        // WriteAudioWDSP(20.0, rate, size, ftovbuff, 4, 0.99);
+        filt->execute();                                       // low-pass filter
+        // WriteAudioWDSP(20.0, rate, size, lpbuff, 4, 0.99);
         // calculate the output of the window detector for each sample
-        for (int i = 0; i < a->size; i++)
+        for (int i = 0; i < size; i++)
         {
-            a->wdaverage = a->wdmult * a->wdaverage + (1.0 - a->wdmult) * a->lpbuff[i];
-            if ((a->lpbuff[i] - a->wdaverage) > a->wthresh || (a->wdaverage - a->lpbuff[i]) > a->wthresh)
-                a->wdbuff[i] = 0;       // signal unmute
+            wdaverage = wdmult * wdaverage + (1.0 - wdmult) * lpbuff[i];
+            if ((lpbuff[i] - wdaverage) > wthresh || (wdaverage - lpbuff[i]) > wthresh)
+                wdbuff[i] = 0;       // signal unmute
             else
-                a->wdbuff[i] = 1;       // signal mute
+                wdbuff[i] = 1;       // signal mute
         }
         // calculate the trigger signal for each sample
-        for (int i = 0; i < a->size; i++)
+        for (int i = 0; i < size; i++)
         {
-            if (a->wdbuff[i] == 0)
-                a->tr_voltage += (a->tr_ss_unmute - a->tr_voltage) * a->unmute_mult;
-            if (a->wdbuff[i] == 1)
-                a->tr_voltage += (a->tr_ss_mute - a->tr_voltage) * a->mute_mult;
-            if (a->tr_voltage > a->tr_thresh) a->tr_signal[i] = 0;  // muted
-            else                              a->tr_signal[i] = 1;  // unmuted
+            if (wdbuff[i] == 0)
+                tr_voltage += (tr_ss_unmute - tr_voltage) * unmute_mult;
+            if (wdbuff[i] == 1)
+                tr_voltage += (tr_ss_mute - tr_voltage) * mute_mult;
+            if (tr_voltage > tr_thresh) tr_signal[i] = 0;  // muted
+            else                              tr_signal[i] = 1;  // unmuted
         }
         // execute state machine; calculate audio output
-        for (int i = 0; i < a->size; i++)
+        for (int i = 0; i < size; i++)
         {
-            switch (a->state)
+            switch (state)
             {
             case MUTED:
-                if (a->tr_signal[i] == 1)
+                if (tr_signal[i] == 1)
                 {
-                    a->state = INCREASE;
-                    a->count = a->ntup;
+                    state = INCREASE;
+                    count = ntup;
                 }
-                a->out[2 * i + 0] = a->muted_gain * a->in[2 * i + 0];
-                a->out[2 * i + 1] = a->muted_gain * a->in[2 * i + 1];
+                out[2 * i + 0] = muted_gain * in[2 * i + 0];
+                out[2 * i + 1] = muted_gain * in[2 * i + 1];
                 break;
             case INCREASE:
-                a->out[2 * i + 0] = a->in[2 * i + 0] * a->cup[a->ntup - a->count];
-                a->out[2 * i + 1] = a->in[2 * i + 1] * a->cup[a->ntup - a->count];
-                if (a->count-- == 0)
-                    a->state = UNMUTED;
+                out[2 * i + 0] = in[2 * i + 0] * cup[ntup - count];
+                out[2 * i + 1] = in[2 * i + 1] * cup[ntup - count];
+                if (count-- == 0)
+                    state = UNMUTED;
                 break;
             case UNMUTED:
-                if (a->tr_signal[i] == 0)
+                if (tr_signal[i] == 0)
                 {
-                    a->state = DECREASE;
-                    a->count = a->ntdown;
+                    state = DECREASE;
+                    count = ntdown;
                 }
-                a->out[2 * i + 0] = a->in[2 * i + 0];
-                a->out[2 * i + 1] = a->in[2 * i + 1];
+                out[2 * i + 0] = in[2 * i + 0];
+                out[2 * i + 1] = in[2 * i + 1];
                 break;
             case DECREASE:
-                a->out[2 * i + 0] = a->in[2 * i + 0] * a->cdown[a->ntdown - a->count];
-                a->out[2 * i + 1] = a->in[2 * i + 1] * a->cdown[a->ntdown - a->count];
-                if (a->count-- == 0)
-                    a->state = MUTED;
+                out[2 * i + 0] = in[2 * i + 0] * cdown[ntdown - count];
+                out[2 * i + 1] = in[2 * i + 1] * cdown[ntdown - count];
+                if (count-- == 0)
+                    state = MUTED;
                 break;
             }
         }
     }
-    else if (a->in != a->out)
-        std::copy(a->in, a->in + a->size * 2, a->out);
+    else if (in != out)
+        std::copy(in, in + size * 2, out);
 }
 
-void SSQL::setBuffers_ssql (SSQL *a, float* in, float* out)
+void SSQL::setBuffers(float* _in, float* _out)
 {
-    decalc_ssql (a);
-    a->in = in;
-    a->out = out;
-    calc_ssql (a);
+    decalc();
+    in = _in;
+    out = _out;
+    calc();
 }
 
-void SSQL::setSamplerate_ssql (SSQL *a, int rate)
+void SSQL::setSamplerate(int _rate)
 {
-    decalc_ssql (a);
-    a->rate = rate;
-    calc_ssql (a);
+    decalc();
+    rate = _rate;
+    calc();
 }
 
-void SSQL::setSize_ssql (SSQL *a, int size)
+void SSQL::setSize(int _size)
 {
-    decalc_ssql (a);
-    a->size = size;
-    calc_ssql (a);
+    decalc();
+    size = _size;
+    calc();
 }
 
 /********************************************************************************************************
@@ -348,34 +343,32 @@ void SSQL::setSize_ssql (SSQL *a, int size)
 *                                                                                                       *
 ********************************************************************************************************/
 
-void SSQL::SetSSQLRun (RXA& rxa, int run)
+void SSQL::setRun(int _run)
 {
-    rxa.ssql->run = run;
+    run = _run;
 }
 
-void SSQL::SetSSQLThreshold (RXA& rxa, double threshold)
+void SSQL::setThreshold(double _threshold)
 {
     // 'threshold' should be between 0.0 and 1.0
     // WU2O testing:  0.16 is a good default for 'threshold'; => 0.08 for 'wthresh'
-    rxa.ssql->wthresh = threshold / 2.0;
+    wthresh = _threshold / 2.0;
 }
 
-void SSQL::SetSSQLTauMute (RXA& rxa, double tau_mute)
+void SSQL::setTauMute(double _tau_mute)
 {
     // reasonable (wide) range is 0.1 to 2.0
     // WU2O testing:  0.1 is good default value
-    SSQL *a = rxa.ssql;
-    a->tr_tau_mute = tau_mute;
-    a->mute_mult = 1.0 - exp (-1.0 / (a->rate * a->tr_tau_mute));
+    tr_tau_mute = _tau_mute;
+    mute_mult = 1.0 - exp (-1.0 / (rate * tr_tau_mute));
 }
 
-void SSQL::SetSSQLTauUnMute (RXA& rxa, double tau_unmute)
+void SSQL::setTauUnMute(double _tau_unmute)
 {
     // reasonable (wide) range is 0.1 to 1.0
     // WU2O testing:  0.1 is good default value
-    SSQL *a = rxa.ssql;
-    a->tr_tau_unmute = tau_unmute;
-    a->unmute_mult = 1.0 - exp (-1.0 / (a->rate * a->tr_tau_unmute));
+    tr_tau_unmute = _tau_unmute;
+    unmute_mult = 1.0 - exp (-1.0 / (rate * tr_tau_unmute));
 }
 
 } // namespace WDSP

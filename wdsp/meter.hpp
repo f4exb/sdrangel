@@ -66,6 +66,8 @@ public:
         int enum_gain,
         double* pgain
     );
+    METER(const METER&) = delete;
+    METER& operator=(const METER& other) = delete;
     ~METER() = default;
 
     void flush();

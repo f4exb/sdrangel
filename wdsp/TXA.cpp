@@ -103,7 +103,7 @@ TXA* TXA::create_txa (
         txa->dsp_rate,                       // sample rate
         2);                                         // mode
 
-    txa->panel = PANEL::create_panel (
+    txa->panel = new PANEL(
         1,                                          // run
         txa->dsp_size,                       // size
         txa->midbuff,                       // pointer to input buffer
@@ -549,7 +549,7 @@ void TXA::destroy_txa (TXA *txa)
     delete (txa->amsq);
     delete (txa->micmeter);
     delete (txa->phrot);
-    PANEL::destroy_panel (txa->panel);
+    delete (txa->panel);
     delete (txa->gen0);
     delete (txa->rsmpin);
     delete[] (txa->midbuff);
@@ -565,7 +565,7 @@ void TXA::flush_txa (TXA* txa)
     std::fill(txa->midbuff, txa->midbuff + 2 * txa->dsp_size    * 2, 0);
     txa->rsmpin->flush();
     txa->gen0->flush();
-    PANEL::flush_panel (txa->panel);
+    txa->panel->flush ();
     txa->phrot->flush();
     txa->micmeter->flush ();
     txa->amsq->flush ();
@@ -599,7 +599,7 @@ void xtxa (TXA* txa)
 {
     txa->rsmpin->execute();              // input resampler
     txa->gen0->execute();                     // input signal generator
-    PANEL::xpanel (txa->panel);                  // includes MIC gain
+    txa->panel->execute();                  // includes MIC gain
     txa->phrot->execute();                  // phase rotator
     txa->micmeter->execute ();               // MIC meter
     txa->amsq->xcap ();                 // downward expander capture
@@ -697,7 +697,7 @@ void TXA::setDSPSamplerate (TXA *txa, int dsp_rate)
     txa->rsmpin->setOutRate(txa->dsp_rate);
     // dsp_rate blocks
     txa->gen0->setSamplerate(txa->dsp_rate);
-    PANEL::setSamplerate_panel (txa->panel, txa->dsp_rate);
+    txa->panel->setSamplerate(txa->dsp_rate);
     txa->phrot->setSamplerate(txa->dsp_rate);
     txa->micmeter->setSamplerate (txa->dsp_rate);
     txa->amsq->setSamplerate (txa->dsp_rate);
@@ -758,8 +758,8 @@ void TXA::setDSPBuffsize (TXA *txa, int dsp_size)
     // dsp_size blocks
     txa->gen0->setBuffers(txa->midbuff, txa->midbuff);
     txa->gen0->setSize(txa->dsp_size);
-    PANEL::setBuffers_panel (txa->panel, txa->midbuff, txa->midbuff);
-    PANEL::setSize_panel (txa->panel, txa->dsp_size);
+    txa->panel->setBuffers(txa->midbuff, txa->midbuff);
+    txa->panel->setSize(txa->dsp_size);
     txa->phrot->setBuffers(txa->midbuff, txa->midbuff);
     txa->phrot->setSize(txa->dsp_size);
     txa->micmeter->setBuffers (txa->midbuff);
