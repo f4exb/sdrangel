@@ -28,15 +28,6 @@ warren@wpratt.com
 #ifndef wdsp_amd_hpp
 #define wdsp_amd_hpp
 
-// ff defines for sbdemod
-#ifndef STAGES
-#define STAGES      7
-#endif
-
-#ifndef OUT_IDX
-#define OUT_IDX     (3 * STAGES)
-#endif
-
 #include <array>
 
 #include "export.h"
@@ -61,13 +52,16 @@ public:
     double phs;                         // pll - phase accumulator
     double omega;                       // pll - locked pll frequency
     double fil_out;                     // pll - filter output
-    double g1, g2;                      // pll - filter gain parameters
+    double g1;                          // pll - filter gain parameters
+    double g2;                          // pll - filter gain parameters
     double tauR;                        // carrier removal time constant
     double tauI;                        // carrier insertion time constant
     double mtauR;                       // carrier removal multiplier
     double onem_mtauR;                  // 1.0 - carrier_removal_multiplier
     double mtauI;                       // carrier insertion multiplier
     double onem_mtauI;                  // 1.0 - carrier_insertion_multiplier
+    static const int STAGES = 7;
+    static const int OUT_IDX = 3 * STAGES;
     std::array<double, 3*STAGES + 3> a; // Filter a variables
     std::array<double, 3*STAGES + 3> b; // Filter b variables
     std::array<double, 3*STAGES + 3> c; // Filter c variables

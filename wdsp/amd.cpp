@@ -26,6 +26,7 @@ warren@wpratt.com
 */
 
 #include <cmath>
+#include <array>
 
 #include "comm.hpp"
 #include "amd.hpp"
@@ -116,15 +117,19 @@ void AMD::flush()
 
 void AMD::execute()
 {
-    int i;
     double audio;
-    double vco[2];
-    double corr[2];
+    std::array<double, 2> vco;
+    std::array<double, 2> corr;
     double det;
     double del_out;
-    double ai, bi, aq, bq;
-    double ai_ps, bi_ps, aq_ps, bq_ps;
-    int j, k;
+    double ai;
+    double bi;
+    double aq;
+    double bq;
+    double ai_ps;
+    double bi_ps;
+    double aq_ps;
+    double bq_ps;
 
     if (run)
     {
@@ -133,7 +138,7 @@ void AMD::execute()
 
             case 0:     //AM Demodulator
                 {
-                    for (i = 0; i < buff_size; i++)
+                    for (int i = 0; i < buff_size; i++)
                     {
                         double xr = in_buff[2 * i + 0];
                         double xi = in_buff[2 * i + 1];
@@ -146,8 +151,8 @@ void AMD::execute()
                             audio += dc_insert - dc;
                         }
 
-                        out_buff[2 * i + 0] = audio;
-                        out_buff[2 * i + 1] = audio;
+                        out_buff[2 * i + 0] = (float) audio;
+                        out_buff[2 * i + 1] = (float) audio;
                     }
 
                     break;
@@ -155,7 +160,7 @@ void AMD::execute()
 
             case 1:     //Synchronous AM Demodulator with Sideband Separation
                 {
-                    for (i = 0; i < buff_size; i++)
+                    for (int i = 0; i < buff_size; i++)
                     {
                         vco[0] = cos(phs);
                         vco[1] = sin(phs);
@@ -174,9 +179,9 @@ void AMD::execute()
                             dsI = ai;
                             dsQ = bq;
 
-                            for (j = 0; j < STAGES; j++)
+                            for (int j = 0; j < STAGES; j++)
                             {
-                                k = 3 * j;
+                                int k = 3 * j;
                                 a[k + 3] = c0[j] * (a[k] - a[k + 5]) + a[k + 2];
                                 b[k + 3] = c1[j] * (b[k] - b[k + 5]) + b[k + 2];
                                 c[k + 3] = c0[j] * (c[k] - c[k + 5]) + c[k + 2];
@@ -188,7 +193,7 @@ void AMD::execute()
                             bq_ps = c[OUT_IDX];
                             aq_ps = d[OUT_IDX];
 
-                            for (j = OUT_IDX + 2; j > 0; j--)
+                            for (int j = OUT_IDX + 2; j > 0; j--)
                             {
                                 a[j] = a[j - 1];
                                 b[j] = b[j - 1];
@@ -217,6 +222,8 @@ void AMD::execute()
                                 audio = (ai_ps + bi_ps) - (aq_ps - bq_ps);
                                 break;
                             }
+                        default:
+                            break;
                         }
 
                         if (levelfade)
@@ -226,8 +233,8 @@ void AMD::execute()
                             audio += dc_insert - dc;
                         }
 
-                        out_buff[2 * i + 0] = audio;
-                        out_buff[2 * i + 1] = audio;
+                        out_buff[2 * i + 0] = (float) audio;
+                        out_buff[2 * i + 1] = (float) audio;
 
                         if ((corr[0] == 0.0) && (corr[1] == 0.0))
                             corr[0] = 1.0;
@@ -254,6 +261,8 @@ void AMD::execute()
 
                     break;
                 }
+            default:
+                break;
         }
     }
     else if (in_buff != out_buff)

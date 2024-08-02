@@ -36,6 +36,15 @@ namespace WDSP {
 class WDSP_API AMSQ
 {
 public:
+    enum class AMSQState
+    {
+        MUTED,
+        INCREASE,
+        UNMUTED,
+        TAIL,
+        DECREASE
+    };
+
     int run;                           // 0 if squelch system is OFF; 1 if it's ON
     int size;                          // size of input/output buffers
     float* in;                         // squelch input signal buffer
@@ -47,7 +56,7 @@ public:
     double avm;
     double onem_avm;
     double avsig;
-    int state;                         // state machine control
+    AMSQState state;                   // state machine control
     int count;
     double tup;
     double tdown;

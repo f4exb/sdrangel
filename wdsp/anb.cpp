@@ -36,7 +36,6 @@ namespace WDSP {
 
 void ANB::initBlanker()
 {
-    int i;
     trans_count = (int)(tau * samplerate);
 
     if (trans_count < 2)
@@ -54,7 +53,7 @@ void ANB::initBlanker()
     backmult = exp(-1.0 / (samplerate * backtau));
     ombackmult = 1.0 - backmult;
 
-    for (i = 0; i <= trans_count; i++)
+    for (int i = 0; i <= trans_count; i++)
         wave[i] = 0.5 * cos(i * coef);
 
     std::fill(dline.begin(), dline.end(), 0);
@@ -76,23 +75,44 @@ ANB::ANB  (
     buffsize(_buffsize),
     in(_in),
     out(_out),
+    dline_size((int)((MAX_TAU + MAX_ADVTIME) * MAX_SAMPLERATE) + 1),
     samplerate(_samplerate),
     tau(_tau),
     hangtime(_hangtime),
     advtime(_advtime),
     backtau(_backtau),
-    threshold(_threshold),
-    dtime(0),
-    htime(0),
-    itime(0),
-    atime(0)
+    threshold(_threshold)
 {
-    tau = tau < 0.0 ? 0.0 : (tau > MAX_TAU ? MAX_TAU : tau);
-    hangtime = hangtime < 0.0 ? 0.0 : (hangtime > MAX_ADVTIME ? MAX_ADVTIME : hangtime);
-    advtime = advtime < 0.0 ? 0.0 : (advtime > MAX_ADVTIME ? MAX_ADVTIME : advtime);
-    samplerate = samplerate < 0.0 ? 0.0 : (samplerate > MAX_SAMPLERATE ? MAX_SAMPLERATE : samplerate);
+    dtime = 0;
+    htime = 0;
+    itime = 0;
+    atime = 0;
+
+    if (tau < 0.0) {
+        tau = 0.0;
+    } else if (tau > MAX_TAU) {
+        tau = MAX_TAU;
+    }
+
+    if (hangtime < 0.0) {
+        hangtime = 0.0;
+    } else if (hangtime > MAX_ADVTIME) {
+        hangtime = MAX_ADVTIME;
+    }
+
+    if (advtime < 0.0) {
+        advtime = 0.0;
+    } else if (advtime > MAX_ADVTIME) {
+        advtime = MAX_ADVTIME;
+    }
+
+    if (samplerate < 0.0) {
+        samplerate = 0.0;
+    } else if (samplerate > MAX_SAMPLERATE) {
+        samplerate = MAX_SAMPLERATE;
+    }
+
     wave.resize((int)(MAX_SAMPLERATE * MAX_TAU) + 1);
-    dline_size = (int)((MAX_TAU + MAX_ADVTIME) * MAX_SAMPLERATE) + 1;
     dline.resize(dline_size * 2);
     initBlanker();
 }
@@ -106,11 +126,10 @@ void ANB::execute()
 {
     double scale;
     double mag;
-    int i;
 
     if (run)
     {
-        for (i = 0; i < buffsize; i++)
+        for (int i = 0; i < buffsize; i++)
         {
             double xr = in[2 * i + 0];
             double xi = in[2 * i + 1];
@@ -139,8 +158,8 @@ void ANB::execute()
 
                 case 1:
                     scale = power * (0.5 + wave[dtime]);
-                    out[2 * i + 0] = dline[2 * out_idx + 0] * scale;
-                    out[2 * i + 1] = dline[2 * out_idx + 1] * scale;
+                    out[2 * i + 0] = (float) (dline[2 * out_idx + 0] * scale);
+                    out[2 * i + 1] = (float) (dline[2 * out_idx + 1] * scale);
 
                     if (++dtime > trans_count)
                     {
@@ -177,8 +196,8 @@ void ANB::execute()
 
                 case 4:
                     scale = 0.5 - wave[itime];
-                    out[2 * i + 0] = dline[2 * out_idx + 0] * scale;
-                    out[2 * i + 1] = dline[2 * out_idx + 1] * scale;
+                    out[2 * i + 0] = (float) (dline[2 * out_idx + 0] * scale);
+                    out[2 * i + 1] = (float) (dline[2 * out_idx + 1] * scale);
 
                     if (count > 0)
                     {

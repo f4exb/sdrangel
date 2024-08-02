@@ -71,22 +71,24 @@ void CBL::execute()
 {
     if (run)
     {
-        int i;
-        double tempI, tempQ;
+        double tempI;
+        double tempQ;
 
-        for (i = 0; i < buff_size; i++)
+        for (int i = 0; i < buff_size; i++)
         {
             tempI  = in_buff[2 * i + 0];
             tempQ  = in_buff[2 * i + 1];
-            out_buff[2 * i + 0] = in_buff[2 * i + 0] - prevIin + mtau * prevIout;
-            out_buff[2 * i + 1] = in_buff[2 * i + 1] - prevQin + mtau * prevQout;
+            out_buff[2 * i + 0] = (float) (in_buff[2 * i + 0] - prevIin + mtau * prevIout);
+            out_buff[2 * i + 1] = (float) (in_buff[2 * i + 1] - prevQin + mtau * prevQout);
             prevIin  = tempI;
             prevQin  = tempQ;
+            prevIout = out_buff[2 * i + 0];
+            prevQout = out_buff[2 * i + 1];
 
-            if (fabs(prevIout = out_buff[2 * i + 0]) < 1.0e-20)
+            if (fabs(prevIout) < 1.0e-20)
                 prevIout = 0.0;
 
-            if (fabs(prevQout = out_buff[2 * i + 1]) < 1.0e-20)
+            if (fabs(prevQout) < 1.0e-20)
                 prevQout = 0.0;
         }
     }

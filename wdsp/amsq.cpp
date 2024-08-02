@@ -32,12 +32,12 @@ namespace WDSP {
 
 void AMSQ::compute_slews()
 {
-    int i;
-    double delta, theta;
+    double delta;
+    double theta;
     delta = PI / (double)ntup;
     theta = 0.0;
 
-    for (i = 0; i <= ntup; i++)
+    for (int i = 0; i <= ntup; i++)
     {
         cup[i] = muted_gain + (1.0 - muted_gain) * 0.5 * (1.0 - cos (theta));
         theta += delta;
@@ -46,7 +46,7 @@ void AMSQ::compute_slews()
     delta = PI / (double)ntdown;
     theta = 0.0;
 
-    for (i = 0; i <= ntdown; i++)
+    for (int i = 0; i <= ntdown; i++)
     {
         cdown[i] = muted_gain + (1.0 - muted_gain) * 0.5 * (1.0 + cos (theta));
         theta += delta;
@@ -63,11 +63,11 @@ void AMSQ::calc()
     // level change
     ntup = (int)(tup * rate);
     ntdown = (int)(tdown * rate);
-    cup.resize((ntup + 1) * 2);     // (float *)malloc0((ntup + 1) * sizeof(float));
-    cdown.resize((ntdown + 1) * 2); // (float *)malloc0((ntdown + 1) * sizeof(float));
+    cup.resize((ntup + 1) * 2);
+    cdown.resize((ntdown + 1) * 2);
     compute_slews();
     // control
-    state = 0;
+    state = AMSQState::MUTED;
 }
 
 AMSQ::AMSQ (
@@ -108,26 +108,17 @@ void AMSQ::flush()
 {
     std::fill(trigsig.begin(), trigsig.end(), 0);
     avsig = 0.0;
-    state = 0;
+    state = AMSQState::MUTED;
 }
-
-enum _amsqstate
-{
-    MUTED,
-    INCREASE,
-    UNMUTED,
-    TAIL,
-    DECREASE
-};
 
 void AMSQ::execute()
 {
     if (run)
     {
-        int i;
-        double sig, siglimit;
+        double sig;
+        double siglimit;
 
-        for (i = 0; i < size; i++)
+        for (int i = 0; i < size; i++)
         {
             double trigr = trigsig[2 * i + 0];
             double trigi = trigsig[2 * i + 1];
@@ -136,31 +127,31 @@ void AMSQ::execute()
 
             switch (state)
             {
-            case MUTED:
+            case AMSQState::MUTED:
                 if (avsig > unmute_thresh)
                 {
-                    state = INCREASE;
+                    state = AMSQState::INCREASE;
                     count = ntup;
                 }
 
-                out[2 * i + 0] = muted_gain * in[2 * i + 0];
-                out[2 * i + 1] = muted_gain * in[2 * i + 1];
+                out[2 * i + 0] = (float) (muted_gain * in[2 * i + 0]);
+                out[2 * i + 1] = (float) (muted_gain * in[2 * i + 1]);
 
                 break;
 
-            case INCREASE:
-                out[2 * i + 0] = in[2 * i + 0] * cup[ntup - count];
-                out[2 * i + 1] = in[2 * i + 1] * cup[ntup - count];
+            case AMSQState::INCREASE:
+                out[2 * i + 0] = (float) (in[2 * i + 0] * cup[ntup - count]);
+                out[2 * i + 1] = (float) (in[2 * i + 1] * cup[ntup - count]);
 
                 if (count-- == 0)
-                    state = UNMUTED;
+                    state = AMSQState::UNMUTED;
 
                 break;
 
-            case UNMUTED:
+            case AMSQState::UNMUTED:
                 if (avsig < tail_thresh)
                 {
-                    state = TAIL;
+                    state = AMSQState::TAIL;
 
                     if ((siglimit = avsig) > 1.0)
                         siglimit = 1.0;
@@ -173,28 +164,28 @@ void AMSQ::execute()
 
                 break;
 
-            case TAIL:
+            case AMSQState::TAIL:
                 out[2 * i + 0] = in[2 * i + 0];
                 out[2 * i + 1] = in[2 * i + 1];
 
                 if (avsig > unmute_thresh)
                 {
-                    state = UNMUTED;
+                    state = AMSQState::UNMUTED;
                 }
                 else if (count-- == 0)
                 {
-                    state = DECREASE;
+                    state = AMSQState::TAIL;
                     count = ntdown;
                 }
 
                 break;
 
-            case DECREASE:
-                out[2 * i + 0] = in[2 * i + 0] * cdown[ntdown - count];
-                out[2 * i + 1] = in[2 * i + 1] * cdown[ntdown - count];
+            case AMSQState::DECREASE:
+                out[2 * i + 0] = (float) (in[2 * i + 0] * cdown[ntdown - count]);
+                out[2 * i + 1] = (float) (in[2 * i + 1] * cdown[ntdown - count]);
 
                 if (count-- == 0)
-                    state = MUTED;
+                    state = AMSQState::MUTED;
 
                 break;
             }

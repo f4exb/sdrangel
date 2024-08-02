@@ -354,7 +354,7 @@ RXA* RXA::create_rxa (
         rxa->dsp_size,                          // buffer size
         rxa->midbuff,                           // pointer to input buffer
         rxa->midbuff,                           // pointer to output buffer
-        ANF_DLINE_SIZE,                         // dline_size
+        ANF::ANF_DLINE_SIZE,                    // dline_size
         64,                                     // taps
         16,                                     // delay
         0.0001,                                 // two_mu
@@ -374,7 +374,7 @@ RXA* RXA::create_rxa (
         rxa->dsp_size,                          // buffer size
         rxa->midbuff,                           // pointer to input buffer
         rxa->midbuff,                           // pointer to output buffer
-        ANR_DLINE_SIZE,                         // dline_size
+        ANR::ANR_DLINE_SIZE,                    // dline_size
         64,                                     // taps
         16,                                     // delay
         0.0001,                                 // two_mu

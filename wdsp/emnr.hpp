@@ -119,7 +119,8 @@ public:
         static double e1xb (double x);
         static double bessI0 (double x);
         static double bessI1 (double x);
-    } *g;
+    };
+    G *g;
 
     struct NP
     {
@@ -186,7 +187,8 @@ public:
             const std::array<double, 18>& xvals,
             const std::array<double, 18>& yvals
         );
-    } *np;
+    };
+    NP *np;
 
     struct NPS
     {
@@ -221,8 +223,8 @@ public:
         ~NPS() = default;
 
         void LambdaDs();
-    } *nps;
-
+    };
+    NPS *nps;
     struct AE
     {
         int msize;
@@ -240,7 +242,8 @@ public:
         AE(const AE&) = delete;
         AE& operator=(const AE& other) = delete;
         ~AE() = default;
-    } *ae;
+    };
+    AE *ae;
 
     EMNR(
         int run,

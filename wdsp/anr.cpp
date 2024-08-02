@@ -80,21 +80,26 @@ ANR::ANR(
 
 void ANR::execute(int _position)
 {
-    int i, j, idx;
-    double c0, c1;
-    double y, error, sigma, inv_sigp;
-    double nel, nev;
+    int idx;
+    double c0;
+    double c1;
+    double y;
+    double error;
+    double sigma;
+    double inv_sigp;
+    double nel;
+    double nev;
 
     if (run && (position == _position))
     {
-        for (i = 0; i < buff_size; i++)
+        for (int i = 0; i < buff_size; i++)
         {
             d[in_idx] = in_buff[2 * i + 0];
 
             y = 0;
             sigma = 0;
 
-            for (j = 0; j < n_taps; j++)
+            for (int j = 0; j < n_taps; j++)
             {
                 idx = (in_idx + j + delay) & mask;
                 y += w[j] * d[idx];
@@ -104,7 +109,7 @@ void ANR::execute(int _position)
             inv_sigp = 1.0 / (sigma + 1e-10);
             error = d[in_idx] - y;
 
-            out_buff[2 * i + 0] = y;
+            out_buff[2 * i + 0] = (float) y;
             out_buff[2 * i + 1] = 0.0;
 
             if ((nel = error * (1.0 - two_mu * sigma * inv_sigp)) < 0.0)
@@ -127,7 +132,7 @@ void ANR::execute(int _position)
             c0 = 1.0 - two_mu * ngamma;
             c1 = two_mu * error * inv_sigp;
 
-            for (j = 0; j < n_taps; j++)
+            for (int j = 0; j < n_taps; j++)
             {
                 idx = (in_idx + j + delay) & mask;
                 w[j] = c0 * w[j] + c1 * d[idx];

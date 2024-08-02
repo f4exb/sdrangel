@@ -28,12 +28,15 @@ warren@wpratt.com
 #ifndef wdsp_bpsnba_h
 #define wdsp_bpsnba_h
 
+#include <vector>
+
+#include "export.h"
 namespace WDSP{
 
 class NOTCHDB;
 class NBP;
 
-class BPSNBA
+class WDSP_API BPSNBA
 {
 public:
     int run;                        // run the filter
@@ -49,7 +52,7 @@ public:
     double abs_high_freq;           // highest positive freq supported by SNG
     double f_low;                   // low cutoff frequency
     double f_high;                  // high cutoff frequency
-    float* buff;                   // internal buffer
+    std::vector<float> buff;        // internal buffer
     int wintype;                    // filter window type
     double gain;                    // filter gain
     int autoincr;                   // use auto increment for notch width

@@ -97,7 +97,7 @@ void DSPHP::execute()
                 x1[n] = x0[n];
             }
 
-            out[i] = y0[nstages - 1];
+            out[i] = (float) y0[nstages - 1];
         }
     }
     else if (out != in)

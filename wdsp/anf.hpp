@@ -32,8 +32,6 @@ warren@wpratt.com
 
 #include "export.h"
 
-#define ANF_DLINE_SIZE 2048
-
 namespace WDSP {
 
 class WDSP_API ANF
@@ -50,6 +48,7 @@ public:
     int delay;
     double two_mu;
     double gamma;
+    static const int ANF_DLINE_SIZE = 2048;
     std::array<double, ANF_DLINE_SIZE> d;
     std::array<double, ANF_DLINE_SIZE> w;
     int in_idx;

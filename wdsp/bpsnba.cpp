@@ -52,7 +52,7 @@ namespace WDSP {
 
 void BPSNBA::calc()
 {
-    buff = new float[size * 2]; // (double *) malloc0 (size * sizeof (complex));
+    buff.resize(size * 2);
     bpsnba = new NBP (
         1,                          // run, always runs (use bpsnba 'run')
         run_notches,             // run the notches
@@ -60,7 +60,7 @@ void BPSNBA::calc()
         size,                    // buffer size
         nc,                      // number of filter coefficients
         mp,                      // minimum phase flag
-        buff,                    // pointer to input buffer
+        buff.data(),             // pointer to input buffer
         out,                     // pointer to output buffer
         f_low,                   // lower filter frequency
         f_high,                  // upper filter frequency
@@ -116,8 +116,7 @@ BPSNBA::BPSNBA(
 
 void BPSNBA::decalc()
 {
-    delete (bpsnba);
-    delete[] (buff);
+    delete bpsnba;
 }
 
 BPSNBA::~BPSNBA()
@@ -127,7 +126,7 @@ BPSNBA::~BPSNBA()
 
 void BPSNBA::flush()
 {
-    std::fill(buff, buff + size * 2, 0);
+    std::fill(buff.begin(), buff.end(), 0);
     bpsnba->flush();
 }
 
@@ -156,7 +155,7 @@ void BPSNBA::setSize(int _size)
 void BPSNBA::exec_in(int _position)
 {
     if (run && position == _position)
-        std::copy(in, in + size * 2, buff);
+        std::copy(in, in + size * 2, buff.begin());
 }
 
 void BPSNBA::exec_out(int _position)
