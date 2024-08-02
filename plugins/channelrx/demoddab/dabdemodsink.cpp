@@ -403,7 +403,12 @@ void DABDemodSink::audio(int16_t *buffer, int size, int samplerate, bool stereo)
             ci.real(0.0f);
             ci.imag(0.0f);
         }
-        if (m_audioInterpolatorDistance < 1.0f) // interpolate
+
+        if (m_audioInterpolatorDistance == 1.0f)
+        {
+            processOneAudioSample(ci);
+        }
+        else if (m_audioInterpolatorDistance < 1.0f) // interpolate
         {
             while (!m_audioInterpolator.interpolate(&m_audioInterpolatorDistanceRemain, ci, &ca))
             {
