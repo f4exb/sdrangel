@@ -366,7 +366,7 @@ void DABDemodSink::tii(int tii)
     }
 }
 
-static int16_t scale(int16_t sample, float factor)
+static int16_t scale(Real sample, float factor)
 {
     int32_t prod = (int32_t)(((int32_t)sample) * factor);
     prod = std::min(prod, 32767);
@@ -403,7 +403,12 @@ void DABDemodSink::audio(int16_t *buffer, int size, int samplerate, bool stereo)
             ci.real(0.0f);
             ci.imag(0.0f);
         }
-        if (m_audioInterpolatorDistance < 1.0f) // interpolate
+
+        if (m_audioInterpolatorDistance == 1.0f)
+        {
+            processOneAudioSample(ci);
+        }
+        else if (m_audioInterpolatorDistance < 1.0f) // interpolate
         {
             while (!m_audioInterpolator.interpolate(&m_audioInterpolatorDistanceRemain, ci, &ca))
             {
