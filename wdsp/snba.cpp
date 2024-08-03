@@ -25,6 +25,8 @@ warren@wpratt.com
 
 */
 
+#include <array>
+
 #include "comm.hpp"
 #include "resample.hpp"
 #include "lmath.hpp"
@@ -36,9 +38,74 @@ warren@wpratt.com
 #include "emnr.hpp"
 #include "snba.hpp"
 
-#define MAXIMP          256
-
 namespace WDSP {
+
+SNBA::Exec::Exec(int xsize, int _asize, int _npasses) :
+    asize(_asize),
+    npasses(_npasses)
+{
+    a.resize(xsize);
+    v.resize(xsize);
+    detout.resize(xsize);
+    savex.resize(xsize);
+    xHout.resize(xsize);
+    unfixed.resize(xsize);
+}
+
+void SNBA::Exec::fluxh()
+{
+    std::fill (a.begin(), a.end(), 0);
+    std::fill (v.begin(), v.end(), 0);
+    std::fill (detout.begin(), detout.end(), 0);
+    std::fill (savex.begin(), savex.end(), 0);
+    std::fill (xHout.begin(), xHout.end(), 0);
+    std::fill (unfixed.begin(), unfixed.end(), 0);
+}
+
+SNBA::Det::Det(
+    int _xsize,
+    double _k1,
+    double _k2,
+    int _b,
+    int _pre,
+    int _post
+) :
+    k1(_k1),
+    k2(_k2),
+    b(_b),
+    pre(_pre),
+    post(_post)
+{
+    vp.resize(_xsize);
+    vpwr.resize(_xsize);
+}
+
+void SNBA::Det::flush()
+{
+    std::fill(vp.begin(), vp.end(), 0);
+    std::fill(vpwr.begin(), vpwr.end(), 0);
+}
+
+SNBA::Wrk::Wrk(
+    int xsize,
+    int asize
+) :
+    xHat_a1rows_max(xsize + asize),
+    xHat_a2cols_max(xsize + 2 * asize)
+{
+    xHat_r.resize(xsize);
+    xHat_ATAI.resize(xsize * xsize);
+    xHat_A1.resize(xHat_a1rows_max * xsize);
+    xHat_A2.resize(xHat_a1rows_max * xHat_a2cols_max);
+    xHat_P1.resize(xsize * xHat_a2cols_max);
+    xHat_P2.resize(xsize);
+    trI_y.resize(xsize - 1);
+    trI_v.resize(xsize - 1);
+    dR_z.resize(xsize - 2);
+    asolve_r.resize(asize + 1);
+    asolve_z.resize(asize + 1);
+
+}
 
 void SNBA::calc()
 {
@@ -47,8 +114,8 @@ void SNBA::calc()
     else
         isize = bsize * (internalrate / inrate);
 
-    inbuff  = new float[isize * 2]; // (double *) malloc0 (isize * sizeof (complex));
-    outbuff = new float[isize * 2]; // (double *) malloc0 (isize * sizeof (complex));
+    inbuff  = new float[isize * 2];
+    outbuff = new float[isize * 2];
 
     if (inrate != internalrate)
         resamprun = 1;
@@ -88,7 +155,7 @@ void SNBA::calc()
 
     iainidx = 0;
     iaoutidx = 0;
-    inaccum = new double[iasize * 2]; // (double *) malloc0 (iasize * sizeof (double));
+    inaccum.resize(iasize * 2);
     nsamps = 0;
 
     if (incr > isize)
@@ -105,7 +172,7 @@ void SNBA::calc()
     }
 
     init_oaoutidx = oaoutidx;
-    outaccum = new double[oasize * 2]; // (double *) malloc0 (oasize * sizeof (double));
+    outaccum.resize(oasize * 2);
 }
 
 SNBA::SNBA(
@@ -140,15 +207,12 @@ SNBA::SNBA(
     iasize(0),
     iainidx(0),
     iaoutidx(0),
-    inaccum(nullptr),
-    xbase(nullptr),
     xaux(nullptr),
     nsamps(0),
     oasize(0),
     oainidx(0),
     oaoutidx(0),
     init_oaoutidx(0),
-    outaccum(nullptr),
     resamprun(0),
     isize(0),
     inresamp(nullptr),
@@ -156,80 +220,29 @@ SNBA::SNBA(
     inbuff(nullptr),
     outbuff(nullptr),
     out_low_cut(_out_low_cut),
-    out_high_cut(_out_high_cut)
+    out_high_cut(_out_high_cut),
+    exec(_xsize, _asize, _npasses),
+    sdet(_xsize, _k1, _k2, _b, _pre, _post),
+    wrk(_xsize, _asize)
 {
-    exec.asize = _asize;
-    exec.npasses = _npasses;
-    sdet.k1 = _k1;
-    sdet.k2 = _k2;
-    sdet.b = _b;
-    sdet.pre = _pre;
-    sdet.post = _post;
     scan.pmultmin = _pmultmin;
 
     calc();
 
-    xbase        = new double[2 * xsize]; // (double *) malloc0 (2 * xsize * sizeof (double));
-    xaux         = xbase + xsize;
-    exec.a       = new double[xsize]; //(double *) malloc0 (xsize * sizeof (double));
-    exec.v       = new double[xsize]; //(double *) malloc0 (xsize * sizeof (double));
-    exec.detout  = new int[xsize]; //(int    *) malloc0 (xsize * sizeof (int));
-    exec.savex   = new double[xsize]; //(double *) malloc0 (xsize * sizeof (double));
-    exec.xHout   = new double[xsize]; //(double *) malloc0 (xsize * sizeof (double));
-    exec.unfixed = new int[xsize]; //(int    *) malloc0 (xsize * sizeof (int));
-    sdet.vp      = new double[xsize]; //(double *) malloc0 (xsize * sizeof (double));
-    sdet.vpwr    = new double[xsize]; //(double *) malloc0 (xsize * sizeof (double));
-
-    wrk.xHat_a1rows_max = xsize + exec.asize;
-    wrk.xHat_a2cols_max = xsize + 2 * exec.asize;
-    wrk.xHat_r          = new double[xsize]; // (double *) malloc0 (xsize * sizeof(double));
-    wrk.xHat_ATAI       = new double[xsize * xsize]; // (double *) malloc0 (xsize * xsize * sizeof(double));
-    wrk.xHat_A1         = new double[wrk.xHat_a1rows_max * xsize]; // (double *) malloc0 (wrk.xHat_a1rows_max * xsize * sizeof(double));
-    wrk.xHat_A2         = new double[wrk.xHat_a1rows_max * wrk.xHat_a2cols_max]; // (double *) malloc0 (wrk.xHat_a1rows_max * wrk.xHat_a2cols_max * sizeof(double));
-    wrk.xHat_P1         = new double[xsize * wrk.xHat_a2cols_max]; // (double *) malloc0 (xsize * wrk.xHat_a2cols_max * sizeof(double));
-    wrk.xHat_P2         = new double[xsize]; // (double *) malloc0 (xsize * sizeof(double));
-    wrk.trI_y           = new double[xsize - 1]; // (double *) malloc0 ((xsize - 1) * sizeof(double));
-    wrk.trI_v           = new double[xsize - 1]; // (double *) malloc0 ((xsize - 1) * sizeof(double));
-    wrk.dR_z            = new double[xsize - 2]; // (double *) malloc0 ((xsize - 2) * sizeof(double));
-    wrk.asolve_r        = new double[exec.asize + 1]; // (double *) malloc0 ((exec.asize + 1) * sizeof(double));
-    wrk.asolve_z        = new double[exec.asize + 1]; // (double *) malloc0 ((exec.asize + 1) * sizeof(double));
+    xbase.resize(2 * xsize);
+    xaux = &xbase[xsize];
 }
 
 void SNBA::decalc()
 {
-    delete (outresamp);
-    delete (inresamp);
-    delete[] (outbuff);
-    delete[] (inbuff);
-    delete[] (outaccum);
-    delete[] (inaccum);
+    delete outresamp;
+    delete inresamp;
+    delete[] outbuff;
+    delete[] inbuff;
 }
 
 SNBA::~SNBA()
 {
-    delete[] (wrk.xHat_r);
-    delete[] (wrk.xHat_ATAI);
-    delete[] (wrk.xHat_A1);
-    delete[] (wrk.xHat_A2);
-    delete[] (wrk.xHat_P1);
-    delete[] (wrk.xHat_P2);
-    delete[] (wrk.trI_y);
-    delete[] (wrk.trI_v);
-    delete[] (wrk.dR_z);
-    delete[] (wrk.asolve_r);
-    delete[] (wrk.asolve_z);
-
-    delete[] (sdet.vpwr);
-    delete[] (sdet.vp);
-    delete[] (exec.unfixed);
-    delete[] (exec.xHout);
-    delete[] (exec.savex);
-    delete[] (exec.detout);
-    delete[] (exec.v);
-    delete[] (exec.a);
-
-    delete[] (xbase);
-
     decalc();
 }
 
@@ -241,20 +254,13 @@ void SNBA::flush()
     oainidx = 0;
     oaoutidx = init_oaoutidx;
 
-    memset (inaccum,      0, iasize * sizeof (double));
-    memset (outaccum,     0, oasize * sizeof (double));
-    memset (xaux,         0, xsize  * sizeof (double));
-    memset (exec.a,       0, xsize  * sizeof (double));
-    memset (exec.v,       0, xsize  * sizeof (double));
-    memset (exec.detout,  0, xsize  * sizeof (int));
-    memset (exec.savex,   0, xsize  * sizeof (double));
-    memset (exec.xHout,   0, xsize  * sizeof (double));
-    memset (exec.unfixed, 0, xsize  * sizeof (int));
-    memset (sdet.vp,      0, xsize  * sizeof (double));
-    memset (sdet.vpwr,    0, xsize  * sizeof (double));
-
-    std::fill(inbuff,  inbuff + isize  * 2,  0);
-    std::fill(outbuff, outbuff + isize  * 2, 0);
+    exec.fluxh();
+    sdet.flush();
+    std::fill(inaccum.begin(), inaccum.end(), 0);
+    std::fill(outaccum.begin(), outaccum.end(), 0);
+    std::fill(xaux, xaux + xsize, 0);
+    std::fill(inbuff,  inbuff + isize * 2, 0);
+    std::fill(outbuff, outbuff + isize * 2, 0);
 
     inresamp->flush();
     outresamp->flush();
@@ -282,27 +288,26 @@ void SNBA::setSize(int size)
     calc();
 }
 
-void SNBA::ATAc0 (int n, int nr, double* A, double* r)
+void SNBA::ATAc0 (int n, int nr, std::vector<double>& A, std::vector<double>& r)
 {
-    int i, j;
-    memset(r, 0, n * sizeof (double));
+    std::fill(r.begin(), r.begin() + n, 0);
 
-    for (i = 0; i < n; i++)
+    for (int i = 0; i < n; i++)
     {
-        for (j = 0; j < nr; j++)
+        for (int j = 0; j < nr; j++)
             r[i] += A[j * n + i] * A[j * n + 0];
     }
 }
 
-void SNBA::multA1TA2(double* a1, double* a2, int m, int n, int q, double* c)
+void SNBA::multA1TA2(std::vector<double>& a1, std::vector<double>& a2, int m, int n, int q, std::vector<double>& c)
 {
-    int i, j, k;
+    int k;
     int p = q - m;
-    memset (c, 0, m * n * sizeof (double));
+    std::fill(c.begin(), c.begin() + m*n, 0);
 
-    for (i = 0; i < m; i++)
+    for (int i = 0; i < m; i++)
     {
-        for (j = 0; j < n; j++)
+        for (int j = 0; j < n; j++)
         {
             if (j < p)
             {
@@ -318,12 +323,12 @@ void SNBA::multA1TA2(double* a1, double* a2, int m, int n, int q, double* c)
     }
 }
 
-void SNBA::multXKE(double* a, double* xk, int m, int q, int p, double* vout)
+void SNBA::multXKE(std::vector<double>& a, const double* xk, int m, int q, int p, std::vector<double>& vout)
 {
-    int i, k;
-    memset (vout, 0, m * sizeof (double));
+    int k;
+    std::fill(vout.begin(), vout.begin() + m, 0);
 
-    for (i = 0; i < m; i++)
+    for (int i = 0; i < m; i++)
     {
         for (k = i; k < p; k++)
             vout[i] += a[i * q + k] * xk[k];
@@ -332,14 +337,13 @@ void SNBA::multXKE(double* a, double* xk, int m, int q, int p, double* vout)
     }
 }
 
-void SNBA::multAv(double* a, double* v, int m, int q, double* vout)
+void SNBA::multAv(std::vector<double>& a, std::vector<double>& v, int m, int q, std::vector<double>& vout)
 {
-    int i, k;
-    memset (vout, 0, m * sizeof (double));
+    std::fill(vout.begin(), vout.begin() + m, 0);
 
-    for (i = 0; i < m; i++)
+    for (int i = 0; i < m; i++)
     {
-        for (k = 0; k < q; k++)
+        for (int k = 0; k < q; k++)
             vout[i] += a[i * q + k] * v[k];
     }
 }
@@ -347,29 +351,31 @@ void SNBA::multAv(double* a, double* v, int m, int q, double* vout)
 void SNBA::xHat(
     int xusize,
     int asize,
-    double* xk,
-    double* a,
-    double* xout,
-    double* r,
-    double* ATAI,
-    double* A1,
-    double* A2,
-    double* P1,
-    double* P2,
-    double* trI_y,
-    double* trI_v,
-    double* dR_z
+    const double* xk,
+    std::vector<double>& a,
+    std::vector<double>& xout,
+    std::vector<double>& r,
+    std::vector<double>& ATAI,
+    std::vector<double>& A1,
+    std::vector<double>& A2,
+    std::vector<double>& P1,
+    std::vector<double>& P2,
+    std::vector<double>& trI_y,
+    std::vector<double>& trI_v,
+    std::vector<double>& dR_z
 )
 {
-    int i, j, k;
+    int i;
+    int j;
+    int k;
     int a1rows = xusize + asize;
     int a2cols = xusize + 2 * asize;
-    memset (r,    0, xusize          * sizeof(double));     // work space
-    memset (ATAI, 0, xusize * xusize * sizeof(double));     // work space
-    memset (A1,   0, a1rows * xusize * sizeof(double));     // work space
-    memset (A2,   0, a1rows * a2cols * sizeof(double));     // work space
-    memset (P1,   0, xusize * a2cols * sizeof(double));     // work space
-    memset (P2,   0, xusize          * sizeof(double));     // work space
+    std::fill (r.begin(), r.begin() + xusize, 0);     // work space
+    std::fill (ATAI.begin(), ATAI.begin() + xusize * xusize, 0);     // work space
+    std::fill (A1.begin(), A1.begin() + a1rows * xusize, 0);     // work space
+    std::fill (A2.begin(), A2.begin() + a1rows * a2cols, 0);     // work space
+    std::fill (P1.begin(), P1.begin() + xusize * a2cols, 0);     // work space
+    std::fill (P2.begin(), P2.begin() + xusize, 0);     // work space
 
     for (i = 0; i < xusize; i++)
     {
@@ -380,28 +386,29 @@ void SNBA::xHat(
     }
 
     for (i = 0; i < asize; i++)
-        {
-            for (k = asize - i - 1, j = 0; k < asize; k++, j++)
-                A2[j * a2cols + i] = a[k];
-        }
+    {
+        for (k = asize - i - 1, j = 0; k < asize; k++, j++)
+            A2[j * a2cols + i] = a[k];
+    }
     for (i = asize + xusize; i < 2 * asize + xusize; i++)
-        {
-            A2[(i - asize) * a2cols + i] = - 1.0;
-            for (j = i - asize + 1, k = 0; j < xusize + asize; j++, k++)
-                A2[j * a2cols + i] = a[k];
-        }
+    {
+        A2[(i - asize) * a2cols + i] = - 1.0;
+        for (j = i - asize + 1, k = 0; j < xusize + asize; j++, k++)
+            A2[j * a2cols + i] = a[k];
+    }
 
     ATAc0(xusize, xusize + asize, A1, r);
-    LMathd::trI(xusize, r, ATAI, trI_y, trI_v, dR_z);
+    LMathd::trI(xusize, r.data(), ATAI.data(), trI_y.data(), trI_v.data(), dR_z.data());
     multA1TA2(A1, A2, xusize, 2 * asize + xusize, xusize + asize, P1);
     multXKE(P1, xk, xusize, xusize + 2 * asize, asize, P2);
     multAv(ATAI, P2, xusize, xusize, xout);
 }
 
-void SNBA::invf(int xsize, int asize, double* a, double* x, double* v)
+void SNBA::invf(int xsize, int asize, std::vector<double>& a, const double* x, std::vector<double>& v)
 {
-    int i, j;
-    memset (v, 0, xsize * sizeof (double));
+    int i;
+    int j;
+    std::fill(v.begin(), v.begin() + xsize, 0);
 
     for (i = asize; i < xsize - asize; i++)
     {
@@ -417,12 +424,16 @@ void SNBA::invf(int xsize, int asize, double* a, double* x, double* v)
     }
 }
 
-void SNBA::det(int asize, double* v, int* detout)
+void SNBA::det(int asize, std::vector<double>& v, std::vector<int>& detout)
 {
-    int i, j;
+    int i;
+    int j;
     double medpwr;
-    double t1, t2;
-    int bstate, bcount, bsamp;
+    double t1;
+    double t2;
+    int bstate;
+    int bcount;
+    int bsamp;
 
     for (i = asize, j = 0; i < xsize; i++, j++)
     {
@@ -430,7 +441,7 @@ void SNBA::det(int asize, double* v, int* detout)
         sdet.vp[j] = sdet.vpwr[i];
     }
 
-    LMathd::median(xsize - asize, sdet.vp, &medpwr);
+    LMathd::median(xsize - asize, sdet.vp.data(), &medpwr);
     t1 = sdet.k1 * medpwr;
     t2 = 0.0;
 
@@ -493,6 +504,8 @@ void SNBA::det(int asize, double* v, int* detout)
                 }
 
                 break;
+            default:
+                break;
         }
     }
 
@@ -525,24 +538,26 @@ int SNBA::scanFrame(
     int xsize,
     int pval,
     double pmultmin,
-    int* det,
-    int* bimp,
-    int* limp,
-    int* befimp,
-    int* aftimp,
-    int* p_opt,
+    std::vector<int>& det,
+    std::array<int, MAXIMP>& bimp,
+    std::array<int, MAXIMP>& limp,
+    std::array<int, MAXIMP>& befimp,
+    std::array<int, MAXIMP>& aftimp,
+    std::array<int, MAXIMP>& p_opt,
     int* next
 )
 {
     int inflag = 0;
-    int i = 0, j = 0, k = 0;
+    int i = 0;
+    int j = 0;
+    int k = 0;
     int nimp = 0;
     double td;
     int ti;
-    double merit[MAXIMP] = { 0 };
-    int nextlist[MAXIMP];
-    memset (befimp, 0, MAXIMP * sizeof (int));
-    memset (aftimp, 0, MAXIMP * sizeof (int));
+    std::array<double, MAXIMP> merit = { 0 };
+    std::array<int, MAXIMP> nextlist;
+    std::fill(befimp.begin(), befimp.end(), 0);
+    std::fill(aftimp.begin(), aftimp.end(), 0);
 
     while (i < xsize && nimp < MAXIMP)
     {
@@ -555,7 +570,8 @@ int SNBA::scanFrame(
         }
         else if (det[i] == 1)
         {
-            limp[nimp - 1]++;
+            if (nimp > 0)
+                limp[nimp - 1]++;
         }
         else
         {
@@ -634,22 +650,20 @@ int SNBA::scanFrame(
 
 void SNBA::execFrame(double* x)
 {
-    int i, k;
-    int pass;
     int nimp;
-    int bimp[MAXIMP];
-    int limp[MAXIMP];
-    int befimp[MAXIMP];
-    int aftimp[MAXIMP];
-    int p_opt[MAXIMP];
+    std::array<int, MAXIMP> bimp;
+    std::array<int, MAXIMP> limp;
+    std::array<int, MAXIMP> befimp;
+    std::array<int, MAXIMP> aftimp;
+    std::array<int, MAXIMP> p_opt;
     int next = 0;
     int p;
-    memcpy (exec.savex, x, xsize * sizeof (double));
-    LMathd::asolve(xsize, exec.asize, x, exec.a, wrk.asolve_r, wrk.asolve_z);
+    std::copy(x, x + xsize, exec.savex.begin());
+    LMathd::asolve(xsize, exec.asize, x, exec.a.data(), wrk.asolve_r.data(), wrk.asolve_z.data());
     invf(xsize, exec.asize, exec.a, x, exec.v);
     det(exec.asize, exec.v, exec.detout);
 
-    for (i = 0; i < xsize; i++)
+    for (int i = 0; i < xsize; i++)
     {
         if (exec.detout[i] != 0)
             x[i] = 0.0;
@@ -657,18 +671,18 @@ void SNBA::execFrame(double* x)
 
     nimp = scanFrame(xsize, exec.asize, scan.pmultmin, exec.detout, bimp, limp, befimp, aftimp, p_opt, &next);
 
-    for (pass = 0; pass < exec.npasses; pass++)
+    for (int pass = 0; pass < exec.npasses; pass++)
     {
-        memcpy (exec.unfixed, exec.detout, xsize * sizeof (int));
+        std::copy(exec.detout.begin(), exec.detout.end(), exec.unfixed.begin());
 
-        for (k = 0; k < nimp; k++)
+        for (int k = 0; k < nimp; k++)
         {
             if (k > 0)
                 scanFrame(xsize, exec.asize, scan.pmultmin, exec.unfixed, bimp, limp, befimp, aftimp, p_opt, &next);
 
             if ((p = p_opt[next]) > 0)
             {
-                LMathd::asolve(xsize, p, x, exec.a, wrk.asolve_r, wrk.asolve_z);
+                LMathd::asolve(xsize, p, x, exec.a.data(), wrk.asolve_r.data(), wrk.asolve_z.data());
                 xHat(
                     limp[next],
                     p,
@@ -685,7 +699,7 @@ void SNBA::execFrame(double* x)
                     wrk.trI_v,
                     wrk.dR_z
                 );
-                memcpy (&x[bimp[next]], exec.xHout, limp[next] * sizeof (double));
+                std::copy(exec.xHout.begin(), exec.xHout.begin() + limp[next], &x[bimp[next]]);
                 memset (&exec.unfixed[bimp[next]], 0, limp[next] * sizeof (int));
             }
             else
@@ -719,12 +733,12 @@ void SNBA::execute()
             nsamps -= incr;
             memcpy (&outaccum[oainidx], xaux, incr * sizeof (double));
             oainidx = (oainidx + incr) % oasize;
-            memmove (xbase, &xbase[incr], (2 * xsize - incr) * sizeof (double));
+            std::copy(&xbase[incr], &xbase[incr] + (2 * xsize - incr), xbase.begin());
         }
 
         for (i = 0; i < isize; i++)
         {
-            outbuff[2 * i + 0] = outaccum[oaoutidx];
+            outbuff[2 * i + 0] = (float) outaccum[oaoutidx];
             outbuff[2 * i + 1] = 0.0;
             oaoutidx = (oaoutidx + 1) % oasize;
         }
@@ -792,7 +806,8 @@ void SNBA::setPmultmin(double pmultmin)
 
 void SNBA::setOutputBandwidth(double flow, double fhigh)
 {
-    double f_low, f_high;
+    double f_low = 0;
+    double f_high = 0;
 
     if (flow >= 0 && fhigh >= 0)
     {
@@ -802,7 +817,7 @@ void SNBA::setOutputBandwidth(double flow, double fhigh)
         if (flow  > out_high_cut)
             flow  = out_high_cut;
 
-        f_low  = std::max ( out_low_cut, flow);
+        f_low  = std::max (out_low_cut,  flow);
         f_high = std::min (out_high_cut, fhigh);
     }
     else if (flow <= 0 && fhigh <= 0)
@@ -813,7 +828,7 @@ void SNBA::setOutputBandwidth(double flow, double fhigh)
         if (fhigh < -out_high_cut)
             fhigh = -out_high_cut;
 
-        f_low  = std::max ( out_low_cut, -fhigh);
+        f_low  = std::max (out_low_cut,  -fhigh);
         f_high = std::min (out_high_cut, -flow);
     }
     else if (flow < 0 && fhigh > 0)

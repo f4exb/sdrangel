@@ -39,10 +39,10 @@ namespace WDSP {
 void PHROT::calc()
 {
     double g;
-    x0.resize(nstages); // (float *) malloc0 (nstages * sizeof (float));
-    x1.resize(nstages); // (float *) malloc0 (nstages * sizeof (float));
-    y0.resize(nstages); // (float *) malloc0 (nstages * sizeof (float));
-    y1.resize(nstages); // (float *) malloc0 (nstages * sizeof (float));
+    x0.resize(nstages);
+    x1.resize(nstages);
+    y0.resize(nstages);
+    y1.resize(nstages);
     g = tan (PI * fc / (float)rate);
     b0 = (g - 1.0) / (g + 1.0);
     b1 = 1.0;
@@ -58,7 +58,6 @@ PHROT::PHROT(
     double _fc,
     int _nstages
 ) :
-    reverse(0),
     run(_run),
     size(_size),
     in(_in),
@@ -67,6 +66,7 @@ PHROT::PHROT(
     fc(_fc),
     nstages(_nstages)
 {
+    reverse = 0;
     calc();
 }
 
@@ -102,7 +102,7 @@ void PHROT::execute()
                 x1[n] = x0[n];
             }
 
-            out[2 * i + 0] = y0[nstages - 1];
+            out[2 * i + 0] = (float) y0[nstages - 1];
         }
     }
     else if (out != in)
@@ -135,9 +135,9 @@ void PHROT::setSize(int _size)
 *                                                                                                       *
 ********************************************************************************************************/
 
-void PHROT::setRun(int run)
+void PHROT::setRun(int _run)
 {
-    run = run;
+    run = _run;
 
     if (run)
         flush();

@@ -81,14 +81,13 @@ void SPHP::execute()
 {
     if (run)
     {
-        int i, j, n;
-        for (i = 0; i < size; i++)
+        for (int i = 0; i < size; i++)
         {
-            for (j = 0; j < 2; j++)
+            for (int j = 0; j < 2; j++)
             {
                 x0[j] = in[2 * i + j];
 
-                for (n = 0; n < nstages; n++)
+                for (int n = 0; n < nstages; n++)
                 {
                     if (n > 0)
                         x0[2 * n + j] = y0[2 * (n - 1) + j];
@@ -100,7 +99,7 @@ void SPHP::execute()
                     x1[2 * n + j] = x0[2 * n + j];
                 }
 
-                out[2 * i + j] = y0[2 * (nstages - 1) + j];
+                out[2 * i + j] = (float) y0[2 * (nstages - 1) + j];
             }
         }
     }

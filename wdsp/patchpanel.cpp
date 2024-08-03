@@ -55,24 +55,26 @@ PANEL::PANEL(
 
 void PANEL::flush()
 {
+    // There is no data to be reset internally
 }
 
 void PANEL::execute()
 {
     int i;
-    double I, Q;
+    double I;
+    double Q;
     double gainI = gain1 * gain2I;
     double gainQ = gain1 * gain2Q;
     // inselect is either 0(neither), 1(Q), 2(I), or 3(both)
     switch (copy)
     {
-    case 0: // no copy
+    default: // 0 (default) no copy
         for (i = 0; i < size; i++)
         {
             I = in[2 * i + 0] * (inselect >> 1);
             Q = in[2 * i + 1] * (inselect &  1);
-            out[2 * i + 0] = gainI * I;
-            out[2 * i + 1] = gainQ * Q;
+            out[2 * i + 0] = (float) (gainI * I);
+            out[2 * i + 1] = (float) (gainQ * Q);
         }
         break;
     case 1: // copy I to Q (then Q == I)
@@ -80,17 +82,17 @@ void PANEL::execute()
         {
             I = in[2 * i + 0] * (inselect >> 1);
             Q = I;
-            out[2 * i + 0] = gainI * I;
-            out[2 * i + 1] = gainQ * Q;
+            out[2 * i + 0] = (float) (gainI * I);
+            out[2 * i + 1] = (float) (gainQ * Q);
         }
         break;
     case 2: // copy Q to I (then I == Q)
         for (i = 0; i < size; i++)
         {
-            Q = in[2 * i + 1] * (inselect &  1);
+            Q = in[2 * i + 1] * (inselect & 1);
             I = Q;
-            out[2 * i + 0] = gainI * I;
-            out[2 * i + 1] = gainQ * Q;
+            out[2 * i + 0] = (float) (gainI * I);
+            out[2 * i + 1] = (float) (gainQ * Q);
         }
         break;
     case 3: // reverse (I=>Q and Q=>I)
@@ -98,8 +100,8 @@ void PANEL::execute()
         {
             Q = in[2 * i + 0] * (inselect >> 1);
             I = in[2 * i + 1] * (inselect &  1);
-            out[2 * i + 0] = gainI * I;
-            out[2 * i + 1] = gainQ * Q;
+            out[2 * i + 0] = (float) (gainI * I);
+            out[2 * i + 1] = (float) (gainQ * Q);
         }
         break;
     }
@@ -113,6 +115,7 @@ void PANEL::setBuffers(float* _in, float* _out)
 
 void PANEL::setSamplerate(int)
 {
+    // There is no sample rate to be set for this component
 }
 
 void PANEL::setSize(int _size)
@@ -149,21 +152,22 @@ void PANEL::setGain2(double _gainI, double _gainQ)
 
 void PANEL::setPan(double _pan)
 {
-    double gain1, gain2;
+    double _gain1;
+    double _gain2;
 
     if (_pan <= 0.5)
     {
-        gain1 = 1.0;
-        gain2 = sin (_pan * PI);
+        _gain1 = 1.0;
+        _gain2 = sin (_pan * PI);
     }
     else
     {
-        gain1 = sin (_pan * PI);
-        gain2 = 1.0;
+        _gain1 = sin (_pan * PI);
+        _gain2 = 1.0;
     }
 
-    gain2I = gain1;
-    gain2Q = gain2;
+    gain2I = _gain1;
+    gain2Q = _gain2;
 }
 
 void PANEL::setCopy(int _copy)

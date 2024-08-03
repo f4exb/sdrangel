@@ -50,9 +50,9 @@ SHIFT::SHIFT (
     in(_in),
     out(_out),
     rate((double) _rate),
-    shift(_fshift)
+    shift(_fshift),
+    phase(0.0)
 {
-    phase = 0.0;
     calc();
 }
 
@@ -65,17 +65,19 @@ void SHIFT::execute()
 {
     if (run)
     {
-        int i;
-        double I1, Q1, t1, t2;
+        double I1;
+        double Q1;
+        double t1;
+        double t2;
         double cos_phase = cos (phase);
         double sin_phase = sin (phase);
 
-        for (i = 0; i < size; i++)
+        for (int i = 0; i < size; i++)
         {
             I1 = in[2 * i + 0];
             Q1 = in[2 * i + 1];
-            out[2 * i + 0] = I1 * cos_phase - Q1 * sin_phase;
-            out[2 * i + 1] = I1 * sin_phase + Q1 * cos_phase;
+            out[2 * i + 0] = (float) (I1 * cos_phase - Q1 * sin_phase);
+            out[2 * i + 1] = (float) (I1 * sin_phase + Q1 * cos_phase);
             t1 = cos_phase;
             t2 = sin_phase;
             cos_phase = t1 * cos_delta - t2 * sin_delta;

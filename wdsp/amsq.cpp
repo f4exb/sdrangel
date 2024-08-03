@@ -25,6 +25,8 @@ warren@wpratt.com
 
 */
 
+#include <cstdio>
+
 #include "comm.hpp"
 #include "amsq.hpp"
 
@@ -174,7 +176,7 @@ void AMSQ::execute()
                 }
                 else if (count-- == 0)
                 {
-                    state = AMSQState::TAIL;
+                    state = AMSQState::DECREASE;
                     count = ntdown;
                 }
 

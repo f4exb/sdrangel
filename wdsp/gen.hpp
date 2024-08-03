@@ -37,88 +37,103 @@ class TXA;
 class WDSP_API GEN
 {
 public:
+    enum class PState
+    {
+        OFF,
+        UP,
+        ON,
+        DOWN
+    };
+
     int run;                    // run
     int size;                   // number of samples per buffer
     float* in;                 // input buffer (retained in case I want to mix in a generated signal)
     float* out;                // output buffer
-    float rate;                // sample rate
+    double rate;                // sample rate
     int mode;
     struct _tone
     {
-        float mag;
-        float freq;
-        float phs;
-        float delta;
-        float cosdelta;
-        float sindelta;
-    } tone;
+        double mag;
+        double freq;
+        double phs;
+        double delta;
+        double cosdelta;
+        double sindelta;
+    };
+    _tone tone;
     struct _tt
     {
-        float mag1;
-        float mag2;
-        float f1;
-        float f2;
-        float phs1;
-        float phs2;
-        float delta1;
-        float delta2;
-        float cosdelta1;
-        float cosdelta2;
-        float sindelta1;
-        float sindelta2;
-    } tt;
+        double mag1;
+        double mag2;
+        double f1;
+        double f2;
+        double phs1;
+        double phs2;
+        double delta1;
+        double delta2;
+        double cosdelta1;
+        double cosdelta2;
+        double sindelta1;
+        double sindelta2;
+    };
+    _tt tt;
     struct _noise
     {
-        float mag;
-    } noise;
+        double mag;
+    };
+    _noise noise;
     struct _sweep
     {
-        float mag;
-        float f1;
-        float f2;
-        float sweeprate;
-        float phs;
-        float dphs;
-        float d2phs;
-        float dphsmax;
-    } sweep;
+        double mag;
+        double f1;
+        double f2;
+        double sweeprate;
+        double phs;
+        double dphs;
+        double d2phs;
+        double dphsmax;
+    };
+    _sweep sweep;
     struct _saw
     {
-        float mag;
-        float f;
-        float period;
-        float delta;
-        float t;
-    } saw;
+        double mag;
+        double f;
+        double period;
+        double delta;
+        double t;
+    };
+    _saw saw;
     struct _tri
     {
-        float mag;
-        float f;
-        float period;
-        float half;
-        float delta;
-        float t;
-        float t1;
-    } tri;
+        double mag;
+        double f;
+        double period;
+        double half;
+        double delta;
+        double t;
+        double t1;
+    };
+    _tri tri;
     struct _pulse
     {
-        float mag;
-        float pf;
-        float pdutycycle;
-        float ptranstime;
-        float* ctrans;
+        double mag;
+        double pf;
+        double pdutycycle;
+        double ptranstime;
+        double* ctrans;
         int pcount;
         int pnon;
         int pntrans;
         int pnoff;
-        float pperiod;
-        float tf;
-        float tphs;
-        float tdelta;
-        float tcosdelta;
-        float tsindelta;
-        int state;
-    } pulse;
+        double pperiod;
+        double tf;
+        double tphs;
+        double tdelta;
+        double tcosdelta;
+        double tsindelta;
+        PState state;
+    };
+    _pulse pulse;
 
     GEN(
         int run,

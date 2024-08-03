@@ -56,7 +56,7 @@ FTOV::FTOV(
     in = _in;
     out = _out;
     eps = 0.01;
-    ring.resize(rsize); // (int*) malloc0 (rsize * sizeof (int));
+    ring.resize(rsize);
     rptr = 0;
     inlast = 0.0;
     rcount = 0;
@@ -91,7 +91,7 @@ void FTOV::execute()
             rcount++;                                        // increment the count
         }
         if (++rptr == rsize) rptr = 0;                 // increment and wrap the pointer as needed
-        out[0] = std::min (1.0, (double)rcount / div);      // calculate the output sample
+        out[0] = (float) std::min (1.0, (double)rcount / div);      // calculate the output sample
         inlast = in[size - 1];                         // save the last input sample for next buffer
         for (int i = 1; i < size; i++)
         {
@@ -107,7 +107,7 @@ void FTOV::execute()
                 rcount++;                                    // increment the count
             }
             if (++rptr == rsize) rptr = 0;             // increment and wrap the pointer as needed
-            out[i] = std::min(1.0, (double)rcount / div);   // calculate the output sample
+            out[i] = (float) std::min(1.0, (double)rcount / div);   // calculate the output sample
         }
     }
 }
@@ -118,7 +118,8 @@ void FTOV::execute()
 
 void SSQL::compute_slews()
 {
-    double delta, theta;
+    double delta;
+    double theta;
     delta = PI / (double) ntup;
     theta = 0.0;
     for (int i = 0; i <= ntup; i++)
@@ -137,15 +138,33 @@ void SSQL::compute_slews()
 
 void SSQL::calc()
 {
-    b1 = new float[size * 2]; // (float*) malloc0 (size * sizeof (complex));
-    dcbl = new CBL(1, size, in, b1, 0, rate, 0.02);
-    ibuff = new float[size]; // (float*) malloc0 (size * sizeof (float));
-    ftovbuff = new float[size]; // (float*) malloc0(size * sizeof (float));
-    cvtr = new FTOV(1, size, rate, ftov_rsize, ftov_fmax, ibuff, ftovbuff);
-    lpbuff = new float[size]; // (float*) malloc0 (size * sizeof (float));
-    filt = new DBQLP(1, size, ftovbuff, lpbuff, rate, 11.3, 1.0, 1.0, 1);
-    wdbuff = new int[size]; // (int*) malloc0 (size * sizeof (int));
-    tr_signal = new int[size]; // (int*) malloc0 (size * sizeof (int));
+    b1.resize(size * 2);
+    dcbl = new CBL(1, size, in, b1.data(), 0, rate, 0.02);
+    ibuff.resize(size);
+    ftovbuff.resize(size);
+    cvtr = new FTOV(
+        1,
+        size,
+        rate,
+        ftov_rsize,
+        ftov_fmax,
+        ibuff.data(),
+        ftovbuff.data()
+    );
+    lpbuff.resize(size);
+    filt = new DBQLP(
+        1,
+        size,
+        ftovbuff.data(),
+        lpbuff.data(),
+        rate,
+        11.3,
+        1.0,
+        1.0,
+        1
+    );
+    wdbuff.resize(size);
+    tr_signal.resize(size);
     // window detector
     wdmult = exp (-1.0 / (rate * wdtau));
     wdaverage = 0.0;
@@ -156,27 +175,19 @@ void SSQL::calc()
     // level change
     ntup = (int)(tup * rate);
     ntdown = (int)(tdown * rate);
-    cup = new float[ntup + 1]; // (float*) malloc0 ((ntup + 1) * sizeof (float));
-    cdown = new float[ntdown + 1]; // (float*) malloc0 ((ntdown + 1) * sizeof (float));
+    cup.resize(ntup + 1);
+    cdown.resize(ntdown + 1);
     compute_slews();
     // control
-    state = 0;
+    state = SSQLState::MUTED;
     count = 0;
 }
 
 void SSQL::decalc()
 {
-    delete[] (tr_signal);
-    delete[] (wdbuff);
-    delete (filt);
-    delete[] (lpbuff);
-    delete (cvtr);
-    delete[] (ftovbuff);
-    delete[] (ibuff);
-    delete (dcbl);
-    delete[] (b1);
-    delete[] (cdown);
-    delete[] (cup);
+    delete filt;
+    delete cvtr;
+    delete dcbl;
 }
 
 SSQL::SSQL(
@@ -223,24 +234,17 @@ SSQL::~SSQL()
 
 void SSQL::flush()
 {
-    std::fill(b1, b1 + size * 2, 0);
+    std::fill(b1.begin(), b1.end(), 0);
     dcbl->flush();
-    memset (ibuff, 0, size * sizeof (float));
-    memset (ftovbuff, 0, size * sizeof (float));
+    std::fill(ibuff.begin(), ibuff.end(), 0);
+    std::fill(ftovbuff.begin(), ftovbuff.end(), 0);
     cvtr->flush();
-    memset (lpbuff, 0, size * sizeof (float));
+    std::fill(lpbuff.begin(), lpbuff.end(), 0);
     filt->flush();
-    memset (wdbuff, 0, size * sizeof (int));
-    memset (tr_signal, 0, size * sizeof (int));
+    std::fill(wdbuff.begin(), wdbuff.end(), 0);
+    std::fill(tr_signal.begin(), tr_signal.end(), 0);
 }
 
-enum _ssqlstate
-{
-    MUTED,
-    INCREASE,
-    UNMUTED,
-    DECREASE
-};
 
 void SSQL::execute()
 {
@@ -277,35 +281,35 @@ void SSQL::execute()
         {
             switch (state)
             {
-            case MUTED:
+            case SSQLState::MUTED:
                 if (tr_signal[i] == 1)
                 {
-                    state = INCREASE;
+                    state = SSQLState::INCREASE;
                     count = ntup;
                 }
-                out[2 * i + 0] = muted_gain * in[2 * i + 0];
-                out[2 * i + 1] = muted_gain * in[2 * i + 1];
+                out[2 * i + 0] = (float) (muted_gain * in[2 * i + 0]);
+                out[2 * i + 1] = (float) (muted_gain * in[2 * i + 1]);
                 break;
-            case INCREASE:
-                out[2 * i + 0] = in[2 * i + 0] * cup[ntup - count];
-                out[2 * i + 1] = in[2 * i + 1] * cup[ntup - count];
+            case SSQLState::INCREASE:
+                out[2 * i + 0] = (float) (in[2 * i + 0] * cup[ntup - count]);
+                out[2 * i + 1] = (float) (in[2 * i + 1] * cup[ntup - count]);
                 if (count-- == 0)
-                    state = UNMUTED;
+                    state = SSQLState::UNMUTED;
                 break;
-            case UNMUTED:
+            case SSQLState::UNMUTED:
                 if (tr_signal[i] == 0)
                 {
-                    state = DECREASE;
+                    state = SSQLState::DECREASE;
                     count = ntdown;
                 }
                 out[2 * i + 0] = in[2 * i + 0];
                 out[2 * i + 1] = in[2 * i + 1];
                 break;
-            case DECREASE:
-                out[2 * i + 0] = in[2 * i + 0] * cdown[ntdown - count];
-                out[2 * i + 1] = in[2 * i + 1] * cdown[ntdown - count];
+            case SSQLState::DECREASE:
+                out[2 * i + 0] = (float) (in[2 * i + 0] * cdown[ntdown - count]);
+                out[2 * i + 1] = (float) (in[2 * i + 1] * cdown[ntdown - count]);
                 if (count-- == 0)
-                    state = MUTED;
+                    state = SSQLState::MUTED;
                 break;
             }
         }

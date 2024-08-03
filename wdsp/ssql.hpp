@@ -75,26 +75,33 @@ class DBQLP;
 class WDSP_API SSQL                    // Syllabic Squelch
 {
 public:
+    enum class SSQLState
+    {
+        MUTED,
+        INCREASE,
+        UNMUTED,
+        DECREASE
+    };
     int run;                            // 0 if squelch system is OFF; 1 if it's ON
     int size;                           // size of input/output buffers
     float* in;                         // squelch input signal buffer
     float* out;                        // squelch output signal buffer
     int rate;                           // sample rate
-    int state;                          // state machine control
+    SSQLState state;                          // state machine control
     int count;                          // count variable for raised cosine transitions
     double tup;                         // time for turn-on transition
     double tdown;                       // time for turn-off transition
     int ntup;                           // number of samples for turn-on transition
     int ntdown;                         // number of samples for turn-off transition
-    float* cup;                        // coefficients for up-slew
-    float* cdown;                      // coefficients for down-slew
+    std::vector<double> cup;                        // coefficients for up-slew
+    std::vector<double> cdown;                      // coefficients for down-slew
     double muted_gain;                  // audio gain while muted; 0.0 for complete silence
 
-    float* b1;                         // buffer to hold output of dc-block function
-    float* ibuff;                      // buffer containing only 'I' component
-    float* ftovbuff;                   // buffer containing output of f to v converter
-    float* lpbuff;                     // buffer containing output of low-pass filter
-    int* wdbuff;                        // buffer containing output of window detector
+    std::vector<float> b1;                         // buffer to hold output of dc-block function
+    std::vector<float> ibuff;                      // buffer containing only 'I' component
+    std::vector<float> ftovbuff;                   // buffer containing output of f to v converter
+    std::vector<float> lpbuff;                     // buffer containing output of low-pass filter
+    std::vector<int> wdbuff;                        // buffer containing output of window detector
     CBL *dcbl;                          // pointer to DC Blocker data structure
     FTOV *cvtr;                         // pointer to F to V Converter data structure
     DBQLP *filt;                         // pointer to Bi-Quad Low-Pass Filter data structure
@@ -114,7 +121,7 @@ public:
     double tr_voltage;                  // trigger voltage
     double mute_mult;                   // multiplier for successive voltage calcs when muted
     double unmute_mult;                 // multiplier for successive voltage calcs when unmuted
-    int* tr_signal;                     // trigger signal, 0 or 1
+    std::vector<int> tr_signal;                     // trigger signal, 0 or 1
 
     SSQL(
         int run,

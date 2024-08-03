@@ -39,11 +39,14 @@ namespace WDSP {
 
 void RESAMPLE::calc()
 {
-    int x, y, z;
-    int i, j, k;
+    int x;
+    int y;
+    int z;
+    int i;
     int min_rate;
     double full_rate;
-    double fc_norm_high, fc_norm_low;
+    double fc_norm_high;
+    double fc_norm_low;
     float* impulse;
     fc = fcin;
     ncoef = ncoefin;
@@ -84,22 +87,22 @@ void RESAMPLE::calc()
 
     ncoef = (ncoef / L + 1) * L;
     cpp = ncoef / L;
-    h.resize(ncoef); // (float *)malloc0(ncoef * sizeof(float));
+    h.resize(ncoef);
     impulse = FIR::fir_bandpass(ncoef, fc_norm_low, fc_norm_high, 1.0, 1, 0, gain * (double)L);
     i = 0;
 
-    for (j = 0; j < L; j++)
+    for (int j = 0; j < L; j++)
     {
-        for (k = 0; k < ncoef; k += L)
+        for (int k = 0; k < ncoef; k += L)
             h[i++] = impulse[j + k];
     }
 
     ringsize = cpp;
-    ring.resize(ringsize); // (float *)malloc0(ringsize * sizeof(complex));
+    ring.resize(ringsize);
     idx_in = ringsize - 1;
     phnum = 0;
 
-    delete[] (impulse);
+    delete[] impulse;
 }
 
 RESAMPLE::RESAMPLE (
@@ -141,11 +144,12 @@ int RESAMPLE::execute()
 
     if (run)
     {
-        int i, j, n;
+        int n;
         int idx_out;
-        double I, Q;
+        double I;
+        double Q;
 
-        for (i = 0; i < size; i++)
+        for (int i = 0; i < size; i++)
         {
             ring[2 * idx_in + 0] = in[2 * i + 0];
             ring[2 * idx_in + 1] = in[2 * i + 1];
@@ -156,7 +160,7 @@ int RESAMPLE::execute()
                 Q = 0.0;
                 n = cpp * phnum;
 
-                for (j = 0; j < cpp; j++)
+                for (int j = 0; j < cpp; j++)
                 {
                     if ((idx_out = idx_in + j) >= ringsize)
                         idx_out -= ringsize;
@@ -165,8 +169,8 @@ int RESAMPLE::execute()
                     Q += h[n + j] * ring[2 * idx_out + 1];
                 }
 
-                out[2 * outsamps + 0] = I;
-                out[2 * outsamps + 1] = Q;
+                out[2 * outsamps + 0] = (float) I;
+                out[2 * outsamps + 1] = (float) Q;
                 outsamps++;
                 phnum += M;
             }
@@ -231,25 +235,24 @@ void RESAMPLE::setBandwidth(double _fc_low, double _fc_high)
 // exported calls
 
 
-void* RESAMPLE::createV (int in_rate, int out_rate)
+RESAMPLE* RESAMPLE::Create(int in_rate, int out_rate)
 {
-    return (void *) new RESAMPLE(1, 0, 0, 0, in_rate, out_rate, 0.0, 0, 1.0);
+    return new RESAMPLE(1, 0, nullptr, nullptr, in_rate, out_rate, 0.0, 0, 1.0);
 }
 
 
-void RESAMPLE::executeV (float* input, float* output, int numsamps, int* outsamps, void* ptr)
+void RESAMPLE::Execute(float* input, float* output, int numsamps, int* outsamps, RESAMPLE* ptr)
 {
-    RESAMPLE *a = (RESAMPLE*) ptr;
-    a->in = input;
-    a->out = output;
-    a->size = numsamps;
-    *outsamps = a->execute();
+    ptr->in = input;
+    ptr->out = output;
+    ptr->size = numsamps;
+    *outsamps = ptr->execute();
 }
 
 
-void RESAMPLE::destroyV (void* ptr)
+void RESAMPLE::Destroy(RESAMPLE* ptr)
 {
-    delete ( (RESAMPLE*) ptr );
+    delete  ptr;
 }
 
 } // namespace WDSP

@@ -145,11 +145,11 @@ public:
     void setAttack(int attack);
     void setDecay(int decay);
     void setHang(int hang);
-    void getHangLevel(double *hangLevel);
+    void getHangLevel(double *hangLevel) const;
     void setHangLevel(double hangLevel);
-    void getHangThreshold(int *hangthreshold);
+    void getHangThreshold(int *hangthreshold) const;
     void setHangThreshold(int hangthreshold);
-    void getTop(double *max_agc);
+    void getTop(double *max_agc) const;
     void setTop(double max_agc);
     void setSlope(int slope);
     void setMaxInputLevel(double level);

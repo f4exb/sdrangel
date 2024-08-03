@@ -25,6 +25,8 @@ warren@wpratt.com
 
 */
 
+#include <array>
+
 #include "comm.hpp"
 #include "fir.hpp"
 #include "fircore.hpp"
@@ -44,16 +46,17 @@ NOTCHDB::NOTCHDB(int _master_run, int _maxnotches)
     master_run = _master_run;
     maxnotches = _maxnotches;
     nn = 0;
-    fcenter.resize(maxnotches); // (float *) malloc0 (maxnotches * sizeof (float));
-    fwidth.resize(maxnotches);  // (float *) malloc0 (maxnotches * sizeof (float));
-    nlow.resize(maxnotches);    // (float *) malloc0 (maxnotches * sizeof (float));
-    nhigh.resize(maxnotches);   // (float *) malloc0 (maxnotches * sizeof (float));
-    active.resize(maxnotches);  // (int    *) malloc0 (maxnotches * sizeof (int   ));
+    fcenter.resize(maxnotches);
+    fwidth.resize(maxnotches);
+    nlow.resize(maxnotches);
+    nhigh.resize(maxnotches);
+    active.resize(maxnotches);
 }
 
 int NOTCHDB::addNotch(int notch, double _fcenter, double _fwidth, int _active)
 {
-    int i, j;
+    int i;
+    int j;
     int rval;
 
     if (notch <= nn && nn < maxnotches)
@@ -104,7 +107,8 @@ int NOTCHDB::getNotch(int _notch, double* _fcenter, double* _fwidth, int* _activ
 
 int NOTCHDB::deleteNotch(int _notch)
 {
-    int i, j;
+    int i;
+    int j;
     int rval;
 
     if (_notch < nn)
@@ -143,7 +147,7 @@ int NOTCHDB::editNotch(int _notch, double _fcenter, double _fwidth, int _active)
     return rval;
 }
 
-void NOTCHDB::getNumNotches(int* _nnotches)
+void NOTCHDB::getNumNotches(int* _nnotches) const
 {
     *_nnotches = nn;
 }
@@ -154,25 +158,24 @@ void NOTCHDB::getNumNotches(int* _nnotches)
 *                                                                                                       *
 ********************************************************************************************************/
 
-float* NBP::fir_mbandpass (int N, int nbp, double* flow, double* fhigh, double rate, double scale, int wintype)
+float* NBP::fir_mbandpass (int N, int nbp, const double* flow, const double* fhigh, double rate, double scale, int wintype)
 {
-    int i, k;
-    float* impulse = new float[N * 2]; // (float *) malloc0 (N * sizeof (complex));
-    float* imp;
-    for (k = 0; k < nbp; k++)
+    auto* impulse = new float[N * 2];
+    std::fill(impulse, impulse + N*2, 0);
+    for (int k = 0; k < nbp; k++)
     {
-        imp = FIR::fir_bandpass (N, flow[k], fhigh[k], rate, wintype, 1, scale);
-        for (i = 0; i < N; i++)
+        float* imp = FIR::fir_bandpass (N, flow[k], fhigh[k], rate, wintype, 1, scale);
+        for (int i = 0; i < N; i++)
         {
             impulse[2 * i + 0] += imp[2 * i + 0];
             impulse[2 * i + 1] += imp[2 * i + 1];
         }
-        delete[] (imp);
+        delete[] imp;
     }
     return impulse;
 }
 
-double NBP::min_notch_width()
+double NBP::min_notch_width() const
 {
     double min_width;
     switch (wintype)
@@ -183,6 +186,8 @@ double NBP::min_notch_width()
     case 1:
         min_width = 2200.0 / (nc / 256) * (rate / 48000);
         break;
+    default:
+        min_width = 0;
     }
     return min_width;
 }
@@ -204,10 +209,12 @@ int NBP::make_nbp (
 )
 {
     int nbp;
-    int nnbp, adds;
-    int i, j, k;
-    double nl, nh;
-    int* del = new int[1024]; // (int *) malloc0 (1024 * sizeof (int));
+    int nnbp;
+    int adds;
+    int i;
+    double nl;
+    double nh;
+    std::array<int, 1024> del;
     if (fhigh > flow)
     {
         bplow[0]  = flow;
@@ -217,11 +224,10 @@ int NBP::make_nbp (
     else
     {
         nbp = 0;
-        delete[] del;
         return nbp;
     }
     *havnotch = 0;
-    for (k = 0; k < nn; k++)
+    for (int k = 0; k < nn; k++)
     {
         if (autoincr && width[k] < minwidth)
         {
@@ -270,7 +276,7 @@ int NBP::make_nbp (
                 if (del[i] == 1)
                 {
                     nnbp--;
-                    for (j = i; j < nnbp; j++)
+                    for (int j = i; j < nnbp; j++)
                     {
                         bplow[j] = bplow[j + 1];
                         bphigh[j] = bphigh[j + 1];
@@ -281,14 +287,13 @@ int NBP::make_nbp (
             nbp = nnbp;
         }
     }
-    delete[] (del);
     return nbp;
 }
 
 void NBP::calc_lightweight()
 {   // calculate and set new impulse response; used when changing tune freq or shift freq
-    int i;
-    double fl, fh;
+    double fl;
+    double fh;
     double offset;
     NOTCHDB *b = notchdb;
     if (fnfrun)
@@ -314,7 +319,7 @@ void NBP::calc_lightweight()
         // when tuning, no need to recalc filter if there were not and are not any notches in passband
         if (hadnotch || havnotch)
         {
-            for (i = 0; i < numpb; i++)
+            for (int i = 0; i < numpb; i++)
             {
                 bplow[i]  -= offset;
                 bphigh[i] -= offset;
@@ -330,7 +335,7 @@ void NBP::calc_lightweight()
             );
             FIRCORE::setImpulse_fircore (fircore, impulse, 1);
             // print_impulse ("nbp.txt", size + 1, impulse, 1, 0);
-            delete[](impulse);
+            delete[] impulse;
         }
         hadnotch = havnotch;
     }
@@ -340,8 +345,8 @@ void NBP::calc_lightweight()
 
 void NBP::calc_impulse ()
 {   // calculates impulse response; for create_fircore() and parameter changes
-    int i;
-    float fl, fh;
+    double fl;
+    double fh;
     double offset;
     NOTCHDB *b = notchdb;
 
@@ -365,7 +370,7 @@ void NBP::calc_impulse ()
             bphigh,
             &havnotch
         );
-        for (i = 0; i < numpb; i++)
+        for (int i = 0; i < numpb; i++)
         {
             bplow[i]  -= offset;
             bphigh[i] -= offset;
@@ -429,12 +434,12 @@ NBP::NBP(
     maxpb(_maxpb),
     notchdb(_notchdb)
 {
-    bplow.resize(maxpb);  // (float *) malloc0 (maxpb * sizeof (float));
-    bphigh.resize(maxpb); // (float *) malloc0 (maxpb * sizeof (float));
+    bplow.resize(maxpb);
+    bphigh.resize(maxpb);
     calc_impulse ();
     fircore = FIRCORE::create_fircore (size, in, out, nc, mp, impulse);
     // print_impulse ("nbp.txt", size + 1, impulse, 1, 0);
-    delete[](impulse);
+    delete[]impulse;
 }
 
 NBP::~NBP()
@@ -467,7 +472,7 @@ void NBP::setSamplerate(int _rate)
     rate = _rate;
     calc_impulse ();
     FIRCORE::setImpulse_fircore (fircore, impulse, 1);
-    delete[] (impulse);
+    delete[] impulse;
 }
 
 void NBP::setSize(int _size)
@@ -477,14 +482,14 @@ void NBP::setSize(int _size)
     FIRCORE::setSize_fircore (fircore, size);
     calc_impulse ();
     FIRCORE::setImpulse_fircore (fircore, impulse, 1);
-    delete[] (impulse);
+    delete[] impulse;
 }
 
 void NBP::setNc()
 {
     calc_impulse();
     FIRCORE::setNc_fircore (fircore, nc, impulse);
-    delete[] (impulse);
+    delete[] impulse;
 }
 
 void NBP::setMp()
@@ -513,7 +518,7 @@ void NBP::SetFreqs(double _flow, double _fhigh)
         fhigh = _fhigh;
         calc_impulse();
         FIRCORE::setImpulse_fircore (fircore, impulse, 1);
-        delete[] (impulse);
+        delete[] impulse;
     }
 }
 
@@ -536,7 +541,7 @@ void NBP::SetMP(int _mp)
     }
 }
 
-void NBP::GetMinNotchWidth(double* minwidth)
+void NBP::GetMinNotchWidth(double* minwidth) const
 {
     *minwidth = min_notch_width();
 }

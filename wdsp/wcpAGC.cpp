@@ -146,7 +146,8 @@ void WCPAGC::flush()
 
 void WCPAGC::execute()
 {
-    int i, j, k;
+    int i;
+    int k;
     double mult;
 
     if (run)
@@ -155,8 +156,8 @@ void WCPAGC::execute()
         {
             for (i = 0; i < io_buffsize; i++)
             {
-                out[2 * i + 0] = fixed_gain * in[2 * i + 0];
-                out[2 * i + 1] = fixed_gain * in[2 * i + 1];
+                out[2 * i + 0] = (float) (fixed_gain * in[2 * i + 0]);
+                out[2 * i + 1] = (float) (fixed_gain * in[2 * i + 1]);
             }
 
             return;
@@ -173,8 +174,10 @@ void WCPAGC::execute()
             out_sample[0] = ring[2 * out_index + 0];
             out_sample[1] = ring[2 * out_index + 1];
             abs_out_sample = abs_ring[out_index];
-            double xr = ring[2 * in_index + 0] = in[2 * i + 0];
-            double xi = ring[2 * in_index + 1] = in[2 * i + 1];
+            ring[2 * in_index + 0] = in[2 * i + 0];
+            ring[2 * in_index + 1] = in[2 * i + 1];
+            double xr = ring[2 * in_index + 0];
+            double xi = ring[2 * in_index + 1];
 
             if (pmode == 0)
                 abs_ring[in_index] = std::max(fabs(xr), fabs(xi));
@@ -189,7 +192,7 @@ void WCPAGC::execute()
                 ring_max = 0.0;
                 k = out_index;
 
-                for (j = 0; j < attack_buffsize; j++)
+                for (int j = 0; j < attack_buffsize; j++)
                 {
                     if (++k == ring_buffsize)
                         k = 0;
@@ -323,6 +326,8 @@ void WCPAGC::execute()
                     }
                     break;
                 }
+            default:
+                break;
             }
 
             if (volts < min_volts)
@@ -330,8 +335,8 @@ void WCPAGC::execute()
 
             gain = volts * inv_out_target;
             mult = (out_target - slope_constant * std::min (0.0, log10(inv_max_input * volts))) / volts;
-            out[2 * i + 0] = out_sample[0] * mult;
-            out[2 * i + 1] = out_sample[1] * mult;
+            out[2 * i + 0] = (float) (out_sample[0] * mult);
+            out[2 * i + 1] = (float) (out_sample[1] * mult);
         }
     }
     else if (out != in)
@@ -406,7 +411,7 @@ void WCPAGC::setMode(int _mode)
 
 void WCPAGC::setFixed(double _fixed_agc)
 {
-    fixed_gain = pow (10.0, (double) _fixed_agc / 20.0);
+    fixed_gain = pow (10.0, _fixed_agc / 20.0);
     loadWcpAGC();
 }
 
@@ -428,7 +433,7 @@ void WCPAGC::setHang(int _hang)
     loadWcpAGC();
 }
 
-void WCPAGC::getHangLevel(double *hangLevel)
+void WCPAGC::getHangLevel(double *hangLevel) const
 //for line on bandscope
 {
     *hangLevel = 20.0 * log10(hang_level / 0.637);
@@ -437,7 +442,8 @@ void WCPAGC::getHangLevel(double *hangLevel)
 void WCPAGC::setHangLevel(double _hangLevel)
 //for line on bandscope
 {
-    double convert, tmp;
+    double convert;
+    double tmp;
 
     if (max_input > min_volts)
     {
@@ -451,7 +457,7 @@ void WCPAGC::setHangLevel(double _hangLevel)
     loadWcpAGC();
 }
 
-void WCPAGC::getHangThreshold(int *hangthreshold)
+void WCPAGC::getHangThreshold(int *hangthreshold) const
 //for slider in setup
 {
     *hangthreshold = (int) (100.0 * hang_thresh);
@@ -464,7 +470,7 @@ void WCPAGC::setHangThreshold(int _hangthreshold)
     loadWcpAGC();
 }
 
-void WCPAGC::getTop(double *max_agc)
+void WCPAGC::getTop(double *max_agc) const
 //for AGC Max Gain in setup
 {
     *max_agc = 20 * log10 (max_gain);
@@ -473,7 +479,7 @@ void WCPAGC::getTop(double *max_agc)
 void WCPAGC::setTop(double _max_agc)
 //for AGC Max Gain in setup
 {
-    max_gain = pow (10.0, (double) _max_agc / 20.0);
+    max_gain = pow (10.0, _max_agc / 20.0);
     loadWcpAGC();
 }
 
@@ -489,9 +495,9 @@ void WCPAGC::setMaxInputLevel(double _level)
     loadWcpAGC();
 }
 
-void WCPAGC::setRun(int state)
+void WCPAGC::setRun(int _state)
 {
-    run = state;
+    run = _state;
 }
 
 } // namespace WDSP

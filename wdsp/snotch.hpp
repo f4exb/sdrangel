@@ -48,8 +48,16 @@ public:
     double rate;
     double f;
     double bw;
-    double a0, a1, a2, b1, b2;
-    double x0, x1, x2, y1, y2;
+    double a0;
+    double a1;
+    double a2;
+    double b1;
+    double b2;
+    double x0;
+    double x1;
+    double x2;
+    double y1;
+    double y2;
 
     SNOTCH(
         int run,
@@ -62,7 +70,7 @@ public:
     );
     SNOTCH(const SNOTCH&) = delete;
     SNOTCH& operator=(SNOTCH& other) = delete;
-    ~SNOTCH() {}
+    ~SNOTCH() = default;
 
     void flush();
     void execute();

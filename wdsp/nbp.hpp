@@ -59,7 +59,7 @@ public:
     int getNotch (int notch, double* fcenter, double* fwidth, int* active);
     int deleteNotch (int notch);
     int editNotch (int notch, double fcenter, double fwidth, int active);
-    void getNumNotches (int* nnotches);
+    void getNumNotches (int* nnotches) const;
 };
 
 
@@ -125,12 +125,12 @@ public:
     void SetFreqs(double flow, double fhigh);
     void SetNC(int nc);
     void SetMP(int mp);
-    void GetMinNotchWidth(double* minwidth);
+    void GetMinNotchWidth(double* minwidth) const;
     void calc_lightweight();
 
 private:
-    static float* fir_mbandpass (int N, int nbp, double* flow, double* fhigh, double rate, double scale, int wintype);
-    double min_notch_width ();
+    static float* fir_mbandpass (int N, int nbp, const double* flow, const double* fhigh, double rate, double scale, int wintype);
+    double min_notch_width () const;
     static int make_nbp (
         int nn,
         std::vector<int>& active,

@@ -87,11 +87,6 @@ public:
     void setSipDisplay(int disp);
     void getSpecF1(float* out);
     void setSipSpecmode(int mode);
-    // Calls for External Use
-    // static void create_siphonEXT (int id, int run, int insize, int sipsize, int fftsize, int specmode);
-    // static void destroy_siphonEXT (int id);
-    // static void xsiphonEXT (int id, float* buff);
-    // static void SetSiphonInsize (int id, int size);
 
 private:
     void build_window();

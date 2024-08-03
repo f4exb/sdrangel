@@ -34,23 +34,25 @@ namespace WDSP {
 void SIPHON::build_window()
 {
     int i;
-    double arg0, cosphi;
-    double sum, scale;
+    double arg0;
+    double cosphi;
+    double sum;
+    float scale;
     arg0 = 2.0 * PI / ((double) fftsize - 1.0);
     sum = 0.0;
     for (i = 0; i < fftsize; i++)
     {
         cosphi = cos (arg0 * (float)i);
-        window[i] =  + 6.3964424114390378e-02
+        window[i] = (float)  (+ 6.3964424114390378e-02
           + cosphi *  ( - 2.3993864599352804e-01
           + cosphi *  ( + 3.5015956323820469e-01
           + cosphi *  ( - 2.4774111897080783e-01
           + cosphi *  ( + 8.5438256055858031e-02
           + cosphi *  ( - 1.2320203369293225e-02
-          + cosphi *  ( + 4.3778825791773474e-04 ))))));
+          + cosphi *  ( + 4.3778825791773474e-04 )))))));
         sum += window[i];
     }
-    scale = 1.0 / sum;
+    scale = 1.0f / (float) sum;
     for (i = 0; i < fftsize; i++)
         window[i] *= scale;
 }
@@ -65,23 +67,23 @@ SIPHON::SIPHON(
     int _sipsize,
     int _fftsize,
     int _specmode
-)
+) :
+    run(_run),
+    position(_position),
+    mode(_mode),
+    disp(_disp),
+    insize(_insize),
+    in(_in),
+    sipsize(_sipsize),   // NOTE:  sipsize MUST BE A POWER OF TWO!!
+    fftsize(_fftsize),
+    specmode(_specmode)
 {
-    run = _run;
-    position = _position;
-    mode = _mode;
-    disp = _disp;
-    insize = _insize;
-    in = _in;
-    sipsize = _sipsize;   // NOTE:  sipsize MUST BE A POWER OF TWO!!
-    fftsize = _fftsize;
-    specmode = _specmode;
-    sipbuff.resize(sipsize * 2); // (float *) malloc0 (sipsize * sizeof (complex));
+    sipbuff.resize(sipsize * 2);
     idx = 0;
-    sipout.resize(sipsize * 2); // (float *) malloc0 (sipsize * sizeof (complex));
-    specout.resize(fftsize * 2); // (float *) malloc0 (fftsize * sizeof (complex));
+    sipout.resize(sipsize * 2);
+    specout.resize(fftsize * 2);
     sipplan = fftwf_plan_dft_1d (fftsize, (fftwf_complex *) sipout.data(), (fftwf_complex *) specout.data(), FFTW_FORWARD, FFTW_PATIENT);
-    window.resize(fftsize * 2); // (float *) malloc0 (fftsize * sizeof (complex));
+    window.resize(fftsize * 2);
     build_window();
 }
 
@@ -100,35 +102,28 @@ void SIPHON::flush()
 
 void SIPHON::execute(int pos)
 {
-    int first, second;
+    int first;
+    int second;
 
-    if (run && position == pos)
+    if (run && (position == pos) && (mode == 0))
     {
-        switch (mode)
+        if (insize >= sipsize)
+            std::copy(&(in[2 * (insize - sipsize)]), &(in[2 * (insize - sipsize)]) + sipsize * 2, sipbuff.begin());
+        else
         {
-        case 0:
-            if (insize >= sipsize)
-                std::copy(&(in[2 * (insize - sipsize)]), &(in[2 * (insize - sipsize)]) + sipsize * 2, sipbuff.begin());
+            if (insize > (sipsize - idx))
+            {
+                first = sipsize - idx;
+                second = insize - first;
+            }
             else
             {
-                if (insize > (sipsize - idx))
-                {
-                    first = sipsize - idx;
-                    second = insize - first;
-                }
-                else
-                {
-                    first = insize;
-                    second = 0;
-                }
-                std::copy(in, in + first * 2, sipbuff.begin() + 2 * idx);
-                std::copy(in + 2 * first, in + 2 * first + second * 2, sipbuff.begin());
-                if ((idx += insize) >= sipsize) idx -= sipsize;
+                first = insize;
+                second = 0;
             }
-            break;
-        case 1:
-            // Spectrum0 (1, disp, 0, 0, in);
-            break;
+            std::copy(in, in + first * 2, sipbuff.begin() + 2 * idx);
+            std::copy(in + 2 * first, in + 2 * first + second * 2, sipbuff.begin());
+            if ((idx += insize) >= sipsize) idx -= sipsize;
         }
     }
 }
@@ -168,8 +163,7 @@ void SIPHON::suck()
 
 void SIPHON::sip_spectrum()
 {
-    int i;
-    for (i = 0; i < fftsize; i++)
+    for (int i = 0; i < fftsize; i++)
     {
         sipout[2 * i + 0] *= window[i];
         sipout[2 * i + 1] *= window[i];
@@ -189,7 +183,7 @@ void SIPHON::getaSipF(float* _out, int _size)
     suck ();
 
     for (int i = 0; i < _size; i++) {
-        _out[i] = (float) sipout[2 * i + 0];
+        _out[i] = sipout[2 * i + 0];
     }
 }
 
@@ -200,8 +194,8 @@ void SIPHON::getaSipF1(float* _out, int _size)
 
     for (int i = 0; i < _size; i++)
     {
-        _out[2 * i + 0] = (float) sipout[2 * i + 0];
-        _out[2 * i + 1] = (float) sipout[2 * i + 1];
+        _out[2 * i + 0] = sipout[2 * i + 0];
+        _out[2 * i + 1] = sipout[2 * i + 1];
     }
 }
 
@@ -236,7 +230,11 @@ void SIPHON::setSipSpecmode(int _mode)
 
 void SIPHON::getSpecF1(float* _out)
 {   // return spectrum magnitudes in dB
-    int i, j, mid, m, n;
+    int i;
+    int j;
+    int mid;
+    int m;
+    int n;
     outsize = fftsize;
     suck();
     sip_spectrum();
@@ -261,69 +259,6 @@ void SIPHON::getSpecF1(float* _out)
         }
     }
 }
-
-/********************************************************************************************************
-*                                                                                                       *
-*                                       CALLS FOR EXTERNAL USE                                          *
-*                                                                                                       *
-********************************************************************************************************/
-
-/*
-#define MAX_EXT_SIPHONS (2)                                 // maximum number of Siphons called from outside wdsp
-__declspec (align (16)) SIPHON psiphon[MAX_EXT_SIPHONS];    // array of pointers for Siphons used EXTERNAL to wdsp
-
-
-PORT
-void create_siphonEXT (int id, int run, int insize, int sipsize, int fftsize, int specmode)
-{
-    psiphon[id] = create_siphon (run, 0, 0, 0, insize, 0, sipsize, fftsize, specmode);
-}
-
-PORT
-void destroy_siphonEXT (int id)
-{
-    destroy_siphon (psiphon[id]);
-}
-
-PORT
-void flush_siphonEXT (int id)
-{
-    flush_siphon (psiphon[id]);
-}
-
-PORT
-void xsiphonEXT (int id, float* buff)
-{
-    SIPHON a = psiphon[id];
-    a->in = buff;
-    xsiphon (a, 0);
-}
-
-PORT
-void GetaSipF1EXT (int id, float* out, int size)
-{   // return raw samples as floats
-    SIPHON a = psiphon[id];
-    int i;
-    a->update.lock();
-    a->outsize = size;
-    suck (a);
-    a->update.unlock();
-    for (i = 0; i < size; i++)
-    {
-        out[2 * i + 0] = (float)a->sipout[2 * i + 0];
-        out[2 * i + 1] = (float)a->sipout[2 * i + 1];
-    }
-}
-
-PORT
-void SetSiphonInsize (int id, int size)
-{
-    SIPHON a = psiphon[id];
-    a->update.lock();
-    a->insize = size;
-    a->update.unlock();
-}
-*/
 
 } // namespace WDSP
 

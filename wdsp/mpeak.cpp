@@ -39,8 +39,8 @@ namespace WDSP {
 
 void MPEAK::calc()
 {
-    tmp.resize(size * 2); // (float *) malloc0 (size * sizeof (complex));
-    mix.resize(size * 2); // (float *) malloc0 (size * sizeof (complex));
+    tmp.resize(size * 2);
+    mix.resize(size * 2);
     for (int i = 0; i < npeaks; i++)
     {
         pfil[i] = new SPEAK(
@@ -85,15 +85,15 @@ MPEAK::MPEAK(
     rate = _rate;
     npeaks = _npeaks;
     nstages = _nstages;
-    enable.resize(npeaks); // (int *) malloc0 (npeaks * sizeof (int));
-    f.resize(npeaks); // (float *) malloc0 (npeaks * sizeof (float));
-    bw.resize(npeaks); // (float *) malloc0 (npeaks * sizeof (float));
-    gain.resize(npeaks); // (float *) malloc0 (npeaks * sizeof (float));
+    enable.resize(npeaks);
+    f.resize(npeaks);
+    bw.resize(npeaks);
+    gain.resize(npeaks);
     std::copy(_enable, _enable + npeaks, enable.begin());
     std::copy(_f, _f + npeaks, f.begin());
     std::copy(_bw, _bw + npeaks, bw.begin());
     std::copy(_gain, _gain + npeaks, gain.begin());
-    pfil.resize(npeaks); // (SPEAK *) malloc0 (npeaks * sizeof (SPEAK));
+    pfil.resize(npeaks);
     calc();
 }
 

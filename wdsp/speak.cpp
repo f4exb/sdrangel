@@ -39,31 +39,38 @@ namespace WDSP {
 void SPEAK::calc()
 {
     double ratio;
-    double f_corr, g_corr, bw_corr, bw_parm, A, f_min;
+    double f_corr;
+    double g_corr;
+    double bw_corr;
+    double bw_parm;
+    double A;
+    double f_min;
 
     switch (design)
     {
     case 0:
         ratio = bw / f;
-        switch (nstages)
+        if (nstages == 4)
         {
-        case 4:
             bw_parm = 2.4;
             f_corr  = 1.0 - 0.160 * ratio + 1.440 * ratio * ratio;
             g_corr = 1.0 - 1.003 * ratio + 3.990 * ratio * ratio;
-            break;
-        default:
+        }
+        else
+        {
             bw_parm = 1.0;
             f_corr  = 1.0;
             g_corr = 1.0;
-            break;
         }
         {
-            double fn, qk, qr, csn;
+            double fn;
+            double qk;
+            double qr;
+            double csn;
             fgain = gain / g_corr;
-            fn = f / (double)rate / f_corr;
+            fn = f / rate / f_corr;
             csn = cos (TWOPI * fn);
-            qr = 1.0 - 3.0 * bw / (double)rate * bw_parm;
+            qr = 1.0 - 3.0 * bw / rate * bw_parm;
             qk = (1.0 - 2.0 * qr * csn + qr * qr) / (2.0 * (1.0 - csn));
             a0 = 1.0 - qk;
             a1 = 2.0 * (qk - qr) * csn;
@@ -76,26 +83,27 @@ void SPEAK::calc()
     case 1:
         if (f < 200.0) f = 200.0;
         ratio = bw / f;
-        switch (nstages)
+        if (nstages == 4)
         {
-        case 4:
             bw_parm = 5.0;
             bw_corr = 1.13 * ratio - 0.956 * ratio * ratio;
             A = 2.5;
             f_min = 50.0;
-            break;
-        default:
+        }
+        else
+        {
             bw_parm = 1.0;
             bw_corr  = 1.0;
-            g_corr = 1.0;
             A = 2.5;
             f_min = 50.0;
-            break;
         }
         {
-            double w0, sn, c, den;
+            double w0;
+            double sn;
+            double c;
+            double den;
             if (f < f_min) f = f_min;
-            w0 = TWOPI * f / (double)rate;
+            w0 = TWOPI * f / rate;
             sn = sin (w0);
             cbw = bw_corr * f;
             c = sn * sinh(0.5 * log((f + 0.5 * cbw * bw_parm) / (f - 0.5 * cbw * bw_parm)) * w0 / sn);
@@ -107,6 +115,8 @@ void SPEAK::calc()
             b2 = - (1 - c / A ) / den;
             fgain = gain / pow (A * A, (double)nstages);
         }
+        break;
+    default:
         break;
     }
     flush();
@@ -135,12 +145,12 @@ SPEAK::SPEAK(
     nstages(_nstages),
     design(_design)
 {
-    x0.resize(nstages * 2); // (float *) malloc0 (nstages * sizeof (complex));
-    x1.resize(nstages * 2); // (float *) malloc0 (nstages * sizeof (complex));
-    x2.resize(nstages * 2); //(float *) malloc0 (nstages * sizeof (complex));
-    y0.resize(nstages * 2); // (float *) malloc0 (nstages * sizeof (complex));
-    y1.resize(nstages * 2); // (float *) malloc0 (nstages * sizeof (complex));
-    y2.resize(nstages * 2); // (float *) malloc0 (nstages * sizeof (complex));
+    x0.resize(nstages * 2);
+    x1.resize(nstages * 2);
+    x2.resize(nstages * 2);
+    y0.resize(nstages * 2);
+    y1.resize(nstages * 2);
+    y2.resize(nstages * 2);
     calc();
 }
 
@@ -178,7 +188,7 @@ void SPEAK::execute()
                     x1[2 * n + j] = x0[2 * n + j];
                 }
 
-                out[2 * i + j] = y0[2 * (nstages - 1) + j];
+                out[2 * i + j] = (float) y0[2 * (nstages - 1) + j];
             }
         }
     }

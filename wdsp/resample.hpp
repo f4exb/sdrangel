@@ -87,10 +87,10 @@ public:
     void setOutRate(int rate);
     void setFCLow(double fc_low);
     void setBandwidth(double fc_low, double fc_high);
-    // Exported calls
-    static void* createV (int in_rate, int out_rate);
-    static void executeV (float* input, float* output, int numsamps, int* outsamps, void* ptr);
-    static void destroyV (void* ptr);
+    // Static methods
+    static RESAMPLE* Create (int in_rate, int out_rate);
+    static void Execute (float* input, float* output, int numsamps, int* outsamps, RESAMPLE* ptr);
+    static void Destroy (RESAMPLE* ptr);
 
 private:
     void calc();

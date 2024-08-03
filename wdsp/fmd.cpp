@@ -25,6 +25,8 @@ warren@wpratt.com
 
 */
 
+#include <array>
+
 #include "comm.hpp"
 #include "fircore.hpp"
 #include "fcurve.hpp"
@@ -91,8 +93,8 @@ void FMD::calc()
 
 void FMD::decalc()
 {
-    delete (plim);
-    delete (sntch);
+    delete plim;
+    delete sntch;
 }
 
 FMD::FMD(
@@ -144,14 +146,24 @@ FMD::FMD(
     float* impulse;
     calc();
     // de-emphasis filter
-    audio.resize(size * 2); // (float *) malloc0 (size * sizeof (complex));
-    impulse = FCurve::fc_impulse (nc_de, f_low, f_high, +20.0 * log10(f_high / f_low), 0.0, 1, rate, 1.0 / (2.0 * size), 0, 0);
+    audio.resize(size * 2);
+    impulse = FCurve::fc_impulse (
+        nc_de,
+        (float) f_low,
+        (float) f_high,
+        (float) (+20.0 * log10(f_high / f_low)),
+        0.0, 1,
+        (float) rate,
+        (float) (1.0 / (2.0 * size)),
+        0,
+        0
+    );
     pde = FIRCORE::create_fircore (size, audio.data(), out, nc_de, mp_de, impulse);
-    delete[] (impulse);
+    delete[] impulse;
     // audio filter
     impulse = FIR::fir_bandpass(nc_aud, 0.8 * f_low, 1.1 * f_high, rate, 0, 1, afgain / (2.0 * size));
     paud = FIRCORE::create_fircore (size, out, out, nc_aud, mp_aud, impulse);
-    delete[] (impulse);
+    delete[] impulse;
 }
 
 FMD::~FMD()
@@ -179,8 +191,11 @@ void FMD::execute()
     if (run)
     {
         int i;
-        double det, del_out;
-        double vco[2], corr[2];
+        double det;
+        double del_out;
+        std::array<double, 2> vco;
+        std::array<double, 2> corr;
+
         for (i = 0; i < size; i++)
         {
             // pll
@@ -200,7 +215,7 @@ void FMD::execute()
             while (phs < 0.0) phs += TWOPI;
             // dc removal, gain, & demod output
             fmdc = mtau * fmdc + onem_mtau * fil_out;
-            audio[2 * i + 0] = again * (fil_out - fmdc);
+            audio[2 * i + 0] = (float) (again * (fil_out - fmdc));
             audio[2 * i + 1] = audio[2 * i + 0];
         }
         // de-emphasis
@@ -212,7 +227,7 @@ void FMD::execute()
         if (lim_run)
         {
             for (i = 0; i < 2 * size; i++)
-                out[i] *= lim_pre_gain;
+                out[i] *= (float) lim_pre_gain;
             plim->execute();
         }
     }
@@ -238,13 +253,24 @@ void FMD::setSamplerate(int _rate)
     rate = _rate;
     calc();
     // de-emphasis filter
-    impulse = FCurve::fc_impulse (nc_de, f_low, f_high, +20.0 * log10(f_high / f_low), 0.0, 1, rate, 1.0 / (2.0 * size), 0, 0);
+    impulse = FCurve::fc_impulse (
+        nc_de,
+        (float) f_low,
+        (float) f_high,
+        (float) (+20.0 * log10(f_high / f_low)),
+        0.0,
+        1,
+        (float) rate,
+        (float) (1.0 / (2.0 * size)),
+        0,
+        0
+    );
     FIRCORE::setImpulse_fircore (pde, impulse, 1);
-    delete[] (impulse);
+    delete[] impulse;
     // audio filter
     impulse = FIR::fir_bandpass(nc_aud, 0.8 * f_low, 1.1 * f_high, rate, 0, 1, afgain / (2.0 * size));
     FIRCORE::setImpulse_fircore (paud, impulse, 1);
-    delete[] (impulse);
+    delete[] impulse;
     plim->setSamplerate((int) rate);
 }
 
@@ -254,17 +280,28 @@ void FMD::setSize(int _size)
     decalc();
     size = _size;
     calc();
-    audio.resize(size * 2); // (float *) malloc0 (size * sizeof (complex));
+    audio.resize(size * 2);
     // de-emphasis filter
     FIRCORE::destroy_fircore (pde);
-    impulse = FCurve::fc_impulse (nc_de, f_low, f_high, +20.0 * log10(f_high / f_low), 0.0, 1, rate, 1.0 / (2.0 * size), 0, 0);
+    impulse = FCurve::fc_impulse (
+        nc_de,
+        (float) f_low,
+        (float) f_high,
+        (float) (+20.0 * log10(f_high / f_low)),
+        0.0,
+        1,
+        (float) rate,
+        (float) (1.0 / (2.0 * size)),
+        0,
+        0
+    );
     pde = FIRCORE::create_fircore (size, audio.data(), out, nc_de, mp_de, impulse);
-    delete[] (impulse);
+    delete[] impulse;
     // audio filter
     FIRCORE::destroy_fircore (paud);
     impulse = FIR::fir_bandpass(nc_aud, 0.8 * f_low, 1.1 * f_high, rate, 0, 1, afgain / (2.0 * size));
     paud = FIRCORE::create_fircore (size, out, out, nc_aud, mp_aud, impulse);
-    delete[] (impulse);
+    delete[] impulse;
     plim->setSize(size);
 }
 
@@ -286,9 +323,9 @@ void FMD::setCTCSSFreq(double freq)
     sntch->setFreq(ctcss_freq);
 }
 
-void FMD::setCTCSSRun(int run)
+void FMD::setCTCSSRun(int _run)
 {
-    sntch_run = run;
+    sntch_run = _run;
     sntch->setRun(sntch_run);
 }
 
@@ -299,9 +336,20 @@ void FMD::setNCde(int nc)
     if (nc_de != nc)
     {
         nc_de = nc;
-        impulse = FCurve::fc_impulse (nc_de, f_low, f_high, +20.0 * log10(f_high / f_low), 0.0, 1, rate, 1.0 / (2.0 * size), 0, 0);
+        impulse = FCurve::fc_impulse (
+            nc_de,
+            (float) f_low,
+            (float) f_high,
+            (float) (+20.0 * log10(f_high / f_low)),
+            0.0,
+            1,
+            (float) rate,
+            (float) (1.0 / (2.0 * size)),
+            0,
+            0
+        );
         FIRCORE::setNc_fircore (pde, nc_de, impulse);
-        delete[] (impulse);
+        delete[] impulse;
     }
 }
 
@@ -323,7 +371,7 @@ void FMD::setNCaud(int nc)
         nc_aud = nc;
         impulse = FIR::fir_bandpass(nc_aud, 0.8 * f_low, 1.1 * f_high, rate, 0, 1, afgain / (2.0 * size));
         FIRCORE::setNc_fircore (paud, nc_aud, impulse);
-        delete[] (impulse);
+        delete[] impulse;
     }
 }
 
@@ -336,10 +384,10 @@ void FMD::setMPaud(int mp)
     }
 }
 
-void FMD::setLimRun(int run)
+void FMD::setLimRun(int _run)
 {
-    if (lim_run != run) {
-        lim_run = run;
+    if (lim_run != _run) {
+        lim_run = _run;
     }
 }
 
@@ -364,13 +412,24 @@ void FMD::setAFFilter(double low, double high)
         f_low = low;
         f_high = high;
         // de-emphasis filter
-        impulse = FCurve::fc_impulse (nc_de, f_low, f_high, +20.0 * log10(f_high / f_low), 0.0, 1, rate, 1.0 / (2.0 * size), 0, 0);
+        impulse = FCurve::fc_impulse (
+            nc_de,
+            (float) f_low,
+            (float) f_high,
+            (float) (+20.0 * log10(f_high / f_low)),
+            0.0,
+            1,
+            (float) rate,
+            (float) (1.0 / (2.0 * size)),
+            0,
+            0
+        );
         FIRCORE::setImpulse_fircore (pde, impulse, 1);
-        delete[] (impulse);
+        delete[] impulse;
         // audio filter
         impulse = FIR::fir_bandpass (nc_aud, 0.8 * f_low, 1.1 * f_high, rate, 0, 1, afgain / (2.0 * size));
         FIRCORE::setImpulse_fircore (paud, impulse, 1);
-        delete[] (impulse);
+        delete[] impulse;
     }
 }
 

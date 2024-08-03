@@ -150,8 +150,10 @@ void NOB::execute()
     double mag;
     int bf_idx;
     int ff_idx;
-    int lidx, tidx;
-    int i, j, k;
+    int lidx;
+    int tidx;
+    int j;
+    int k;
     int bfboutidx;
     int ffboutidx;
     int hcount;
@@ -161,7 +163,7 @@ void NOB::execute()
 
     if (run)
     {
-        for (i = 0; i < buffsize; i++)
+        for (int i = 0; i < buffsize; i++)
         {
             dline[2 * in_idx + 0] = in[2 * i + 0];
             dline[2 * in_idx + 1] = in[2 * i + 1];
@@ -189,8 +191,8 @@ void NOB::execute()
             {
                 case 0:     // normal output & impulse setup
                     {
-                        out[2 * i + 0] = dline[2 * out_idx + 0];
-                        out[2 * i + 1] = dline[2 * out_idx + 1];
+                        out[2 * i + 0] = (float) (dline[2 * out_idx + 0]);
+                        out[2 * i + 1] = (float) (dline[2 * out_idx + 1]);
                         Ilast = dline[2 * out_idx + 0];
                         Qlast = dline[2 * out_idx + 1];
 
@@ -210,7 +212,6 @@ void NOB::execute()
 
                             do
                             {
-                                len = 0;
                                 hcount = 0;
 
                                 while ((imp[tidx] > 0 || hcount > 0) && blank_count < max_imp_seq)
@@ -314,7 +315,7 @@ void NOB::execute()
 
                                 switch (mode)
                                 {
-                                    case 0: // zero
+                                    default: // zero
                                         deltaI = 0.0;
                                         deltaQ = 0.0;
                                         I = 0.0;
@@ -367,8 +368,8 @@ void NOB::execute()
                 case 1:     // slew output in advance of blanking period
                     {
                         scale = 0.5 + awave[time];
-                        out[2 * i + 0] = Ilast * scale + (1.0 - scale) * I;
-                        out[2 * i + 1] = Qlast * scale + (1.0 - scale) * Q;
+                        out[2 * i + 0] = (float) (Ilast * scale + (1.0 - scale) * I);
+                        out[2 * i + 1] = (float) (Qlast * scale + (1.0 - scale) * Q);
 
                         if (++time == adv_slew_count)
                         {
@@ -385,8 +386,8 @@ void NOB::execute()
 
                 case 2:     // initial advance period
                     {
-                        out[2 * i + 0] = I;
-                        out[2 * i + 1] = Q;
+                        out[2 * i + 0] = (float) I;
+                        out[2 * i + 1] = (float) Q;
                         I += deltaI;
                         Q += deltaQ;
 
@@ -401,8 +402,8 @@ void NOB::execute()
 
                 case 3:     // impulse & hang period
                     {
-                        out[2 * i + 0] = I;
-                        out[2 * i + 1] = Q;
+                        out[2 * i + 0] = (float) I;
+                        out[2 * i + 1] = (float) Q;
                         I += deltaI;
                         Q += deltaQ;
 
@@ -425,8 +426,8 @@ void NOB::execute()
                 case 4:     // slew output after blanking period
                     {
                         scale = 0.5 - hwave[time];
-                        out[2 * i + 0] = Inext * scale + (1.0 - scale) * I;
-                        out[2 * i + 1] = Qnext * scale + (1.0 - scale) * Q;
+                        out[2 * i + 0] = (float) (Inext * scale + (1.0 - scale) * I);
+                        out[2 * i + 1] = (float) (Qnext * scale + (1.0 - scale) * Q);
 
                         if (++time == hang_slew_count)
                             state = 0;
@@ -437,8 +438,8 @@ void NOB::execute()
                 case 5:
                     {
                         scale = 0.5 + awave[time];
-                        out[2 * i + 0] = Ilast * scale;
-                        out[2 * i + 1] = Qlast * scale;
+                        out[2 * i + 0] = (float) (Ilast * scale);
+                        out[2 * i + 1] = (float) (Qlast * scale);
 
                         if (++time == adv_slew_count)
                         {
@@ -542,8 +543,8 @@ void NOB::execute()
                 case 9:
                     {
                         scale = 0.5 - hwave[time];
-                        out[2 * i + 0] = Inext * scale;
-                        out[2 * i + 1] = Qnext * scale;
+                        out[2 * i + 0] = (float) (Inext * scale);
+                        out[2 * i + 1] = (float) (Qnext * scale);
 
                         if (++time >= hang_slew_count)
                         {

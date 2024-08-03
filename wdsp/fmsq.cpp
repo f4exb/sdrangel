@@ -34,22 +34,23 @@ namespace WDSP {
 
 void FMSQ::calc()
 {
-    double delta, theta;
+    double delta;
+    double theta;
     float* impulse;
     int i;
     // noise filter
-    noise.resize(2 * size * 2); // (float *)malloc0(2 * size * sizeof(complex));
+    noise.resize(2 * size * 2);
     F[0] = 0.0;
-    F[1] = fc;
-    F[2] = *pllpole;
+    F[1] = (float) fc;
+    F[2] = (float) *pllpole;
     F[3] = 20000.0;
     G[0] = 0.0;
     G[1] = 0.0;
     G[2] = 3.0;
-    G[3] = +20.0 * log10(20000.0 / *pllpole);
+    G[3] = (float) (+20.0 * log10(20000.0 / *pllpole));
     impulse = EQP::eq_impulse (nc, 3, F.data(), G.data(), rate, 1.0 / (2.0 * size), 0, 0);
     p = FIRCORE::create_fircore (size, trigger, noise.data(), nc, mp, impulse);
-    delete[]  (impulse);
+    delete[]  impulse;
     // noise averaging
     avm = exp(-1.0 / (rate * avtau));
     onem_avm = 1.0 - avm;
@@ -60,8 +61,8 @@ void FMSQ::calc()
     // level change
     ntup   = (int)(tup   * rate);
     ntdown = (int)(tdown * rate);
-    cup.resize(ntup + 1); // (float *)malloc0 ((ntup   + 1) * sizeof(float));
-    cdown.resize(ntdown + 1); //(float *)malloc0 ((ntdown + 1) * sizeof(float));
+    cup.resize(ntup + 1);
+    cdown.resize(ntdown + 1);
     delta = PI / (double) ntup;
     theta = 0.0;
 
@@ -80,7 +81,7 @@ void FMSQ::calc()
         theta += delta;
     }
     // control
-    state = 0;
+    state = FMSQState::MUTED;
     ready = 0;
     ramp = 0.0;
     rstep = 1.0 / rate;
@@ -145,29 +146,20 @@ void FMSQ::flush()
     FIRCORE::flush_fircore (p);
     avnoise = 100.0;
     longnoise = 1.0;
-    state = 0;
+    state = FMSQState::MUTED;
     ready = 0;
     ramp = 0.0;
 }
-
-enum _fmsqstate
-{
-    MUTED,
-    INCREASE,
-    UNMUTED,
-    TAIL,
-    DECREASE
-};
 
 void FMSQ::execute()
 {
     if (run)
     {
-        int i;
-        double _noise, lnlimit;
+        double _noise;
+        double lnlimit;
         FIRCORE::xfircore (p);
 
-        for (i = 0; i < size; i++)
+        for (int i = 0; i < size; i++)
         {
             double noise0 = noise[2 * i + 0];
             double noise1 = noise[2 * i + 1];
@@ -183,10 +175,10 @@ void FMSQ::execute()
 
             switch (state)
             {
-            case MUTED:
+            case FMSQState::MUTED:
                 if (avnoise < unmute_thresh && ready)
                 {
-                    state = INCREASE;
+                    state = FMSQState::INCREASE;
                     count = ntup;
                 }
 
@@ -195,19 +187,19 @@ void FMSQ::execute()
 
                 break;
 
-            case INCREASE:
-                outsig[2 * i + 0] = insig[2 * i + 0] * cup[ntup - count];
-                outsig[2 * i + 1] = insig[2 * i + 1] * cup[ntup - count];
+            case FMSQState::INCREASE:
+                outsig[2 * i + 0] = (float) (insig[2 * i + 0] * cup[ntup - count]);
+                outsig[2 * i + 1] = (float) (insig[2 * i + 1] * cup[ntup - count]);
 
                 if (count-- == 0)
-                    state = UNMUTED;
+                    state = FMSQState::UNMUTED;
 
                 break;
 
-            case UNMUTED:
+            case FMSQState::UNMUTED:
                 if (avnoise > tail_thresh)
                 {
-                    state = TAIL;
+                    state = FMSQState::TAIL;
 
                     if ((lnlimit = longnoise) > 1.0)
                         lnlimit = 1.0;
@@ -220,28 +212,28 @@ void FMSQ::execute()
 
                 break;
 
-            case TAIL:
+            case FMSQState::TAIL:
                 outsig[2 * i + 0] = insig[2 * i + 0];
                 outsig[2 * i + 1] = insig[2 * i + 1];
 
                 if (avnoise < unmute_thresh)
                 {
-                    state = UNMUTED;
+                    state = FMSQState::UNMUTED;
                 }
                 else if (count-- == 0)
                 {
-                    state = DECREASE;
+                    state = FMSQState::DECREASE;
                     count = ntdown;
                 }
 
                 break;
 
-            case DECREASE:
-                outsig[2 * i + 0] = insig[2 * i + 0] * cdown[ntdown - count];
-                outsig[2 * i + 1] = insig[2 * i + 1] * cdown[ntdown - count];
+            case FMSQState::DECREASE:
+                outsig[2 * i + 0] = (float) (insig[2 * i + 0] * cdown[ntdown - count]);
+                outsig[2 * i + 1] = (float) (insig[2 * i + 1] * cdown[ntdown - count]);
 
                 if (count-- == 0)
-                    state = MUTED;
+                    state = FMSQState::MUTED;
 
                 break;
             }
@@ -301,7 +293,7 @@ void FMSQ::setNC(int _nc)
         nc = _nc;
         impulse = EQP::eq_impulse (nc, 3, F.data(), G.data(), rate, 1.0 / (2.0 * size), 0, 0);
         FIRCORE::setNc_fircore (p, nc, impulse);
-        delete[]  (impulse);
+        delete[]  impulse;
     }
 }
 

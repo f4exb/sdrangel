@@ -54,8 +54,13 @@ public:
     double fc;
     int nstages;
     // normalized such that a0 = 1
-    double a1, b0, b1;
-    std::vector<double> x0, x1, y0, y1;
+    double a1;
+    double b0;
+    double b1;
+    std::vector<double> x0;
+    std::vector<double> x1;
+    std::vector<double> y0;
+    std::vector<double> y1;
 
     PHROT(
         int run,

@@ -75,7 +75,7 @@ public:
     void setBuffers(float* in);
     void setSamplerate(int rate);
     void setSize(int size);
-    double getMeter(int mt);
+    double getMeter(int mt) const;
 
 private:
     void calc();

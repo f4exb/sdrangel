@@ -38,8 +38,11 @@ namespace WDSP {
 
 void SNOTCH::calc()
 {
-    double fn, qk, qr, csn;
-    fn = f / (double) rate;
+    double fn;
+    double qk;
+    double qr;
+    double csn;
+    fn = f / rate;
     csn = cos (TWOPI * fn);
     qr = 1.0 - 3.0 * bw;
     qk = (1.0 - 2.0 * qr * csn + qr * qr) / (2.0 * (1.0 - csn));
@@ -80,11 +83,10 @@ void SNOTCH::execute()
 {
     if (run)
     {
-        int i;
-        for (i = 0; i < size; i++)
+        for (int i = 0; i < size; i++)
         {
             x0 = in[2 * i + 0];
-            out[2 * i + 0] = a0 * x0 + a1 * x1 + a2 * x2 + b1 * y1 + b2 * y2;
+            out[2 * i + 0] = (float) (a0 * x0 + a1 * x1 + a2 * x2 + b1 * y1 + b2 * y2);
             y2 = y1;
             y1 = out[2 * i + 0];
             x2 = x1;

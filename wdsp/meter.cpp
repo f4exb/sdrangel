@@ -51,20 +51,20 @@ METER::METER(
     int _enum_pk,
     int _enum_gain,
     double* _pgain
-)
+) :
+    run(_run),
+    prun(_prun),
+    size(_size),
+    buff(_buff),
+    rate((double) _rate),
+    tau_average(_tau_av),
+    tau_peak_decay(_tau_decay),
+    result(_result),
+    enum_av(_enum_av),
+    enum_pk(_enum_pk),
+    enum_gain(_enum_gain),
+    pgain(_pgain)
 {
-    run = _run;
-    prun = _prun;
-    size = _size;
-    buff = _buff;
-    rate = (double) _rate;
-    tau_average = _tau_av;
-    tau_peak_decay = _tau_decay;
-    result = _result;
-    enum_av = _enum_av;
-    enum_pk = _enum_pk;
-    enum_gain = _enum_gain;
-    pgain = _pgain;
     calc();
 }
 
@@ -75,7 +75,7 @@ void METER::flush()
     result[enum_av] = -100.0;
     result[enum_pk] = -100.0;
 
-    if ((pgain != 0) && (enum_gain >= 0))
+    if ((pgain != nullptr) && (enum_gain >= 0))
         result[enum_gain] = 0.0;
 }
 
@@ -83,18 +83,17 @@ void METER::execute()
 {
     int srun;
 
-    if (prun != 0)
-        srun = *(prun);
+    if (prun != nullptr)
+        srun = *prun;
     else
         srun = 1;
 
     if (run && srun)
     {
-        int i;
         double smag;
         double np = 0.0;
 
-        for (i = 0; i < size; i++)
+        for (int i = 0; i < size; i++)
         {
             double xr = buff[2 * i + 0];
             double xi = buff[2 * i + 1];
@@ -112,7 +111,7 @@ void METER::execute()
         result[enum_av] = 10.0 * MemLog::mlog10 (avg  <= 0 ? 1.0e-20 : avg);
         result[enum_pk] = 10.0 * MemLog::mlog10 (peak <= 0 ? 1.0e-20 : peak);
 
-        if ((pgain != 0) && (enum_gain >= 0))
+        if ((pgain != nullptr) && (enum_gain >= 0))
             result[enum_gain] = 20.0 * MemLog::mlog10 (*pgain <= 0 ? 1.0e-20 : *pgain);
     }
     else
@@ -150,7 +149,7 @@ void METER::setSize(int _size)
 *                                                                                                       *
 ********************************************************************************************************/
 
-double METER::getMeter(int mt)
+double METER::getMeter(int mt) const
 {
     return result[mt];
 }

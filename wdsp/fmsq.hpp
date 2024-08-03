@@ -40,6 +40,15 @@ class FIRCORE;
 class WDSP_API FMSQ
 {
 public:
+    enum class FMSQState
+    {
+        MUTED,
+        INCREASE,
+        UNMUTED,
+        TAIL,
+        DECREASE
+    };
+
     int run;                            // 0 if squelch system is OFF; 1 if it's ON
     int size;                           // size of input/output buffers
     float* insig;                      // squelch input signal buffer
@@ -59,7 +68,7 @@ public:
     double longavm;
     double onem_longavm;
     double longnoise;
-    int state;                          // state machine control
+    FMSQState state;                          // state machine control
     int count;
     double tup;
     double tdown;

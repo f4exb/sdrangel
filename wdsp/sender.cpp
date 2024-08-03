@@ -36,29 +36,20 @@ SENDER::SENDER(int _run, int _flag, int _mode, int _size, float* _in) :
     flag(_flag),
     mode(_mode),
     size(_size),
-    in(_in)
+    in(_in),
+    spectrumProbe(nullptr)
 {
-    spectrumProbe = nullptr;
 }
 
 void SENDER::flush()
 {
+    // There is no internal data to be reset
 }
 
 void SENDER::execute()
 {
-    if (run && flag)
-    {
-        switch (mode)
-        {
-        case 0:
-            {
-                if (spectrumProbe) {
-                    spectrumProbe->proceed(in, size);
-                }
-                break;
-            }
-        }
+    if (run && flag && (mode == 0) && spectrumProbe) {
+        spectrumProbe->proceed(in, size);
     }
 }
 

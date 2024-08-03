@@ -78,8 +78,8 @@ void GEN::calc_triangle()
 
 void GEN::calc_pulse ()
 {
-    int i;
-    float delta, theta;
+    double delta;
+    double theta;
     pulse.pperiod = 1.0 / pulse.pf;
     pulse.tphs = 0.0;
     pulse.tdelta = TWOPI * pulse.tf / rate;
@@ -93,11 +93,11 @@ void GEN::calc_pulse ()
         pulse.pnoff = 0;
 
     pulse.pcount = pulse.pnoff;
-    pulse.state = 0;
-    pulse.ctrans = new float[pulse.pntrans + 1]; // (float *) malloc0 ((pulse.pntrans + 1) * sizeof (float));
+    pulse.state = PState::OFF;
+    pulse.ctrans = new double[pulse.pntrans + 1];
     delta = PI / (float)pulse.pntrans;
     theta = 0.0;
-    for (i = 0; i <= pulse.pntrans; i++)
+    for (int i = 0; i <= pulse.pntrans; i++)
     {
         pulse.ctrans[i] = 0.5 * (1.0 - cos (theta));
         theta += delta;
@@ -143,7 +143,7 @@ GEN::GEN(
     tt.f1 = +  900.0;
     tt.f2 = + 1700.0;
     // noise
-    srand ((unsigned int) time (0));
+    srand ((unsigned int) time (nullptr));
     noise.mag = 1.0;
     // sweep
     sweep.mag = 1.0;
@@ -172,16 +172,8 @@ GEN::~GEN()
 
 void GEN::flush()
 {
-    pulse.state = 0;
+    pulse.state = PState::OFF;
 }
-
-enum pstate
-{
-    OFF,
-    UP,
-    ON,
-    DOWN
-};
 
 void GEN::execute()
 {
@@ -191,14 +183,14 @@ void GEN::execute()
         {
         case 0: // tone
             {
-                int i;
-                float t1, t2;
-                float cosphase = cos (tone.phs);
-                float sinphase = sin (tone.phs);
-                for (i = 0; i < size; i++)
+                double t1;
+                double t2;
+                double cosphase = cos (tone.phs);
+                double sinphase = sin (tone.phs);
+                for (int i = 0; i < size; i++)
                 {
-                    out[2 * i + 0] = + tone.mag * cosphase;
-                    out[2 * i + 1] = - tone.mag * sinphase;
+                    out[2 * i + 0] = (float) (+ tone.mag * cosphase);
+                    out[2 * i + 1] = (float) (- tone.mag * sinphase);
                     t1 = cosphase;
                     t2 = sinphase;
                     cosphase = t1 * tone.cosdelta - t2 * tone.sindelta;
@@ -211,16 +203,16 @@ void GEN::execute()
             }
         case 1: // two-tone
             {
-                int i;
-                float tcos, tsin;
-                float cosphs1 = cos (tt.phs1);
-                float sinphs1 = sin (tt.phs1);
-                float cosphs2 = cos (tt.phs2);
-                float sinphs2 = sin (tt.phs2);
-                for (i = 0; i < size; i++)
+                double tcos;
+                double tsin;
+                double cosphs1 = cos (tt.phs1);
+                double sinphs1 = sin (tt.phs1);
+                double cosphs2 = cos (tt.phs2);
+                double sinphs2 = sin (tt.phs2);
+                for (int i = 0; i < size; i++)
                 {
-                    out[2 * i + 0] = + tt.mag1 * cosphs1 + tt.mag2 * cosphs2;
-                    out[2 * i + 1] = - tt.mag1 * sinphs1 - tt.mag2 * sinphs2;
+                    out[2 * i + 0] = (float) (+ tt.mag1 * cosphs1 + tt.mag2 * cosphs2);
+                    out[2 * i + 1] = (float) (- tt.mag1 * sinphs1 - tt.mag2 * sinphs2);
                     tcos = cosphs1;
                     tsin = sinphs1;
                     cosphs1 = tcos * tt.cosdelta1 - tsin * tt.sindelta1;
@@ -240,29 +232,30 @@ void GEN::execute()
             }
         case 2: // noise
             {
-                int i;
-                float r1, r2, c, rad;
-                for (i = 0; i < size; i++)
+                double r1;
+                double r2;
+                double c;
+                double rad;
+                for (int i = 0; i < size; i++)
                 {
                     do
                     {
-                        r1 = 2.0 * (float)rand() / (float)RAND_MAX - 1.0;
-                        r2 = 2.0 * (float)rand() / (float)RAND_MAX - 1.0;
+                        r1 = 2.0 * (double)rand() / (double)RAND_MAX - 1.0;
+                        r2 = 2.0 * (double)rand() / (double)RAND_MAX - 1.0;
                         c = r1 * r1 + r2 * r2;
                     } while (c >= 1.0);
                     rad = sqrt (-2.0 * log (c) / c);
-                    out[2 * i + 0] = noise.mag * rad * r1;
-                    out[2 * i + 1] = noise.mag * rad * r2;
+                    out[2 * i + 0] = (float) (noise.mag * rad * r1);
+                    out[2 * i + 1] = (float) (noise.mag * rad * r2);
                 }
                 break;
             }
         case 3:  // sweep
             {
-                int i;
-                for (i = 0; i < size; i++)
+                for (int i = 0; i < size; i++)
                 {
-                    out[2 * i + 0] = + sweep.mag * cos(sweep.phs);
-                    out[2 * i + 1] = - sweep.mag * sin(sweep.phs);
+                    out[2 * i + 0] = (float) (+ sweep.mag * cos(sweep.phs));
+                    out[2 * i + 1] = (float) (- sweep.mag * sin(sweep.phs));
                     sweep.phs += sweep.dphs;
                     sweep.dphs += sweep.d2phs;
                     if (sweep.phs >= TWOPI) sweep.phs -= TWOPI;
@@ -274,11 +267,10 @@ void GEN::execute()
             }
         case 4:  // sawtooth (audio only)
             {
-                int i;
-                for (i = 0; i < size; i++)
+                for (int i = 0; i < size; i++)
                 {
                     if (saw.t > saw.period) saw.t -= saw.period;
-                    out[2 * i + 0] = saw.mag * (saw.t * saw.f - 1.0);
+                    out[2 * i + 0] = (float) (saw.mag * (saw.t * saw.f - 1.0));
                     out[2 * i + 1] = 0.0;
                     saw.t += saw.delta;
                 }
@@ -286,13 +278,12 @@ void GEN::execute()
             break;
         case 5:  // triangle (audio only)
             {
-                int i;
-                for (i = 0; i < size; i++)
+                for (int i = 0; i < size; i++)
                 {
                     if (tri.t > tri.period) tri.t1 = tri.t -= tri.period;
                     if (tri.t > tri.half) tri.t1 -= tri.delta;
                     else                        tri.t1 += tri.delta;
-                    out[2 * i + 0] = tri.mag * (4.0 * tri.t1 * tri.f - 1.0);
+                    out[2 * i + 0] = (float) (tri.mag * (4.0 * tri.t1 * tri.f - 1.0));
                     out[2 * i + 1] = 0.0;
                     tri.t += tri.delta;
                 }
@@ -300,44 +291,44 @@ void GEN::execute()
             break;
         case 6:  // pulse (audio only)
             {
-                int i;
-                float t1, t2;
-                float cosphase = cos (pulse.tphs);
-                float sinphase = sin (pulse.tphs);
-                for (i = 0; i < size; i++)
+                double t1;
+                double t2;
+                double cosphase = cos (pulse.tphs);
+                double sinphase = sin (pulse.tphs);
+                for (int i = 0; i < size; i++)
                 {
                     if (pulse.pnoff != 0)
                         switch (pulse.state)
                         {
-                        case OFF:
+                        case PState::OFF:
                             out[2 * i + 0] = 0.0;
                             if (--pulse.pcount == 0)
                             {
-                                pulse.state = UP;
+                                pulse.state = PState::UP;
                                 pulse.pcount = pulse.pntrans;
                             }
                             break;
-                        case UP:
-                            out[2 * i + 0] = pulse.mag * cosphase * pulse.ctrans[pulse.pntrans - pulse.pcount];
+                        case PState::UP:
+                            out[2 * i + 0] = (float) (pulse.mag * cosphase * pulse.ctrans[pulse.pntrans - pulse.pcount]);
                             if (--pulse.pcount == 0)
                             {
-                                pulse.state = ON;
+                                pulse.state = PState::ON;
                                 pulse.pcount = pulse.pnon;
                             }
                             break;
-                        case ON:
-                            out[2 * i + 0] = pulse.mag * cosphase;
+                        case PState::ON:
+                            out[2 * i + 0] = (float) (pulse.mag * cosphase);
                             if (--pulse.pcount == 0)
                             {
-                                pulse.state = DOWN;
+                                pulse.state = PState::DOWN;
                                 pulse.pcount = pulse.pntrans;
                             }
                             break;
-                        case DOWN:
-                            out[2 * i + 0] = pulse.mag * cosphase * pulse.ctrans[pulse.pcount];
+                        case PState::DOWN:
+                            out[2 * i + 0] = (float) (pulse.mag * cosphase * pulse.ctrans[pulse.pcount]);
                             if (--pulse.pcount == 0)
                             {
-                                pulse.state = OFF;
+                                pulse.state = PState::OFF;
                                 pulse.pcount = pulse.pnoff;
                             }
                             break;
@@ -432,9 +423,9 @@ void GEN::SetPreSweepFreq(float freq1, float freq2)
     calc_sweep();
 }
 
-void GEN::SetPreSweepRate(float rate)
+void GEN::SetPreSweepRate(float _rate)
 {
-    sweep.sweeprate = rate;
+    sweep.sweeprate = _rate;
     calc_sweep();
 }
 

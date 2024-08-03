@@ -89,10 +89,10 @@ public:
     void setProfile(int nfreqs, const float* F, const float* G);
     void setCtfmode(int mode);
     void setWintype(int wintype);
-    void setGrphEQ(int *rxeq);
-    void setGrphEQ10(int *rxeq);
+    void setGrphEQ(const int *rxeq);
+    void setGrphEQ10(const int *rxeq);
 
-    static float* eq_impulse (int N, int nfreqs, float* F, float* G, double samplerate, double scale, int ctfmode, int wintype);
+    static float* eq_impulse (int N, int nfreqs, const float* F, const float* G, double samplerate, double scale, int ctfmode, int wintype);
 
 private:
     static int fEQcompare (const void * a, const void * b);
