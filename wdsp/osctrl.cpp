@@ -149,7 +149,7 @@ void OSCTRL::SetosctrlRun (TXA& txa, int run)
     if (txa.osctrl->run != run)
     {
         txa.osctrl->run = run;
-        TXA::SetupBPFilters (txa);
+        txa.setupBPFilters();
     }
 }
 

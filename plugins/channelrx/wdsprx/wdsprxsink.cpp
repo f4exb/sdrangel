@@ -125,14 +125,14 @@ WDSPRxSink::WDSPRxSink() :
     m_sPeak = 0.0;
     m_sCount = m_wdspBufSize;
 
-    m_rxa = WDSP::RXA::create_rxa(
+    m_rxa = new WDSP::RXA(
         m_wdspSampleRate, // input samplerate
         m_wdspSampleRate, // output samplerate
         m_wdspSampleRate, // sample rate for mainstream dsp processing (dsp)
         m_wdspBufSize     // number complex samples processed per buffer in mainstream dsp processing
     );
     m_rxa->setSpectrumProbe(&m_spectrumProbe);
-    WDSP::RXA::SetPassband(*m_rxa, 0, m_Bandwidth);
+    m_rxa->setPassband(0, m_Bandwidth);
 
     applyChannelSettings(m_channelSampleRate, m_channelFrequencyOffset, true);
 	applySettings(m_settings, true);
@@ -140,7 +140,7 @@ WDSPRxSink::WDSPRxSink() :
 
 WDSPRxSink::~WDSPRxSink()
 {
-    WDSP::RXA::destroy_rxa(m_rxa);
+    delete m_rxa;
 }
 
 void WDSPRxSink::feed(const SampleVector::const_iterator& begin, const SampleVector::const_iterator& end)
@@ -189,7 +189,7 @@ void WDSPRxSink::processOneSample(Complex &ci)
 
     if (++m_inCount == m_rxa->get_insize())
     {
-        WDSP::RXA::xrxa(m_rxa);
+        m_rxa->execute();
 
         m_sCount = m_wdspBufSize;
         m_sAvg = m_rxa->smeter->getMeter(WDSP::RXA::RXA_S_AV);
@@ -306,7 +306,7 @@ void WDSPRxSink::applyAudioSampleRate(int sampleRate)
     m_interpolatorDistanceRemain = 0;
     m_interpolatorDistance = (Real) m_channelSampleRate / (Real) m_wdspSampleRate;
 
-    WDSP::RXA::setOutputSamplerate(m_rxa, sampleRate);
+    m_rxa->setOutputSamplerate(sampleRate);
 
     m_audioFifo.setSize(sampleRate);
     m_audioSampleRate = sampleRate;
@@ -446,24 +446,24 @@ void WDSPRxSink::applySettings(const WDSPRxSettings& settings, bool force)
         m_interpolatorDistanceRemain = 0;
         m_interpolatorDistance = (Real) m_channelSampleRate / (Real) m_audioSampleRate;
 
-        WDSP::RXA::SetPassband(*m_rxa, fLow, fHigh);
-        WDSP::RXA::NBPSetWindow(*m_rxa, m_settings.m_profiles[m_settings.m_profileIndex].m_fftWindow);
+        m_rxa->setPassband(fLow, fHigh);
+        m_rxa->nbpSetWindow(m_settings.m_profiles[m_settings.m_profileIndex].m_fftWindow);
 
         if (settings.m_demod == WDSPRxProfile::DemodSSB)
         {
             if (dsb) {
-                WDSP::RXA::SetMode(*m_rxa, WDSP::RXA::RXA_DSB);
+                m_rxa->setMode(WDSP::RXA::RXA_DSB);
             } else {
-                WDSP::RXA::SetMode(*m_rxa, usb ? WDSP::RXA::RXA_USB : WDSP::RXA::RXA_LSB);
+                m_rxa->setMode(usb ? WDSP::RXA::RXA_USB : WDSP::RXA::RXA_LSB);
             }
         }
         else if (settings.m_demod == WDSPRxProfile::DemodAM)
         {
-            WDSP::RXA::SetMode(*m_rxa, WDSP::RXA::RXA_AM);
+            m_rxa->setMode(WDSP::RXA::RXA_AM);
         }
         else if (settings.m_demod == WDSPRxProfile::DemodSAM)
         {
-            WDSP::RXA::SetMode(*m_rxa, WDSP::RXA::RXA_SAM);
+            m_rxa->setMode(WDSP::RXA::RXA_SAM);
 
             if (dsb) {
                 m_rxa->amd->setSBMode(0);
@@ -473,7 +473,7 @@ void WDSPRxSink::applySettings(const WDSPRxSettings& settings, bool force)
         }
         else if (settings.m_demod == WDSPRxProfile::DemodFMN)
         {
-            WDSP::RXA::SetMode(*m_rxa, WDSP::RXA::RXA_FM);
+            m_rxa->setMode(WDSP::RXA::RXA_FM);
         }
     }
 
@@ -486,18 +486,18 @@ void WDSPRxSink::applySettings(const WDSPRxSettings& settings, bool force)
     if ((m_settings.m_dnr != settings.m_dnr)
     || (m_settings.m_nrScheme != settings.m_nrScheme) || force)
     {
-        WDSP::RXA::SetANRRun(*m_rxa, 0);
-        WDSP::RXA::SetEMNRRun(*m_rxa, 0);
+        m_rxa->setANRRun(0);
+        m_rxa->setEMNRRun(0);
 
         if (settings.m_dnr)
         {
             switch (settings.m_nrScheme)
             {
             case WDSPRxProfile::NRSchemeNR:
-                WDSP::RXA::SetANRRun(*m_rxa, 1);
+                m_rxa->setANRRun(1);
                 break;
             case WDSPRxProfile::NRSchemeNR2:
-                WDSP::RXA::SetEMNRRun(*m_rxa, 1);
+                m_rxa->setEMNRRun(1);
                 break;
             default:
                 break;
@@ -510,12 +510,12 @@ void WDSPRxSink::applySettings(const WDSPRxSettings& settings, bool force)
         switch (settings.m_nrPosition)
         {
         case WDSPRxProfile::NRPositionPreAGC:
-            WDSP::RXA::SetANRPosition(*m_rxa, 0);
-            WDSP::RXA::SetEMNRPosition(*m_rxa, 0);
+            m_rxa->setANRPosition(0);
+            m_rxa->setEMNRPosition(0);
             break;
         case WDSPRxProfile::NRPositionPostAGC:
-            WDSP::RXA::SetANRPosition(*m_rxa, 1);
-            WDSP::RXA::SetEMNRPosition(*m_rxa, 1);
+            m_rxa->setANRPosition(1);
+            m_rxa->setEMNRPosition(1);
             break;
         default:
             break;
@@ -560,12 +560,12 @@ void WDSPRxSink::applySettings(const WDSPRxSettings& settings, bool force)
     }
 
     if ((m_settings.m_anf != settings.m_anf) || force) {
-        WDSP::RXA::SetANFRun(*m_rxa, settings.m_anf ? 1 : 0);
+        m_rxa->setANFRun(settings.m_anf ? 1 : 0);
     }
 
     // Caution: Causes corruption
     if ((m_settings.m_snb != settings.m_snb) || force) {
-        WDSP::RXA::SetSNBARun(*m_rxa, settings.m_snb ? 1 : 0);
+        m_rxa->setSNBARun(settings.m_snb ? 1 : 0);
     }
 
     // CW Peaking

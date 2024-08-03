@@ -103,7 +103,7 @@ void COMPRESSOR::SetCompressorRun (TXA& txa, int run)
     if (txa.compressor->run != run)
     {
         txa.compressor->run = run;
-        TXA::SetupBPFilters (txa);
+        txa.setupBPFilters();
     }
 }
 

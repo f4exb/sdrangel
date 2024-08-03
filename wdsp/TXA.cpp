@@ -53,97 +53,82 @@ warren@wpratt.com
 
 namespace WDSP {
 
-TXA* TXA::create_txa (
-    int in_rate,                // input samplerate
-    int out_rate,               // output samplerate
-    int dsp_rate,               // sample rate for mainstream dsp processing
-    int dsp_size                // number complex samples processed per buffer in mainstream dsp processing
+TXA::TXA(
+    int _in_rate,                // input samplerate
+    int _out_rate,               // output samplerate
+    int _dsp_rate,               // sample rate for mainstream dsp processing
+    int _dsp_size                // number complex samples processed per buffer in mainstream dsp processing
+) : Unit(
+    _in_rate,
+    _out_rate,
+    _dsp_rate,
+    _dsp_size
 )
 {
-    TXA *txa = new TXA;
+    mode   = TXA_LSB;
+    f_low  = -5000.0;
+    f_high = - 100.0;
 
-    txa->in_rate = in_rate;
-    txa->out_rate = out_rate;
-    txa->dsp_rate = dsp_rate;
-    txa->dsp_size = dsp_size;
-
-    if (in_rate  >= dsp_rate)
-        txa->dsp_insize  = dsp_size * (in_rate  / dsp_rate);
-    else
-        txa->dsp_insize  = dsp_size / (dsp_rate /  in_rate);
-
-    if (out_rate >= dsp_rate)
-        txa->dsp_outsize = dsp_size * (out_rate / dsp_rate);
-    else
-        txa->dsp_outsize = dsp_size / (dsp_rate / out_rate);
-
-    txa->mode   = TXA_LSB;
-    txa->f_low  = -5000.0;
-    txa->f_high = - 100.0;
-    txa->inbuff  = new float[1 * txa->dsp_insize  * 2]; // (float *) malloc0 (1 * txa->dsp_insize  * sizeof (complex));
-    txa->outbuff = new float[1 * txa->dsp_outsize  * 2]; // (float *) malloc0 (1 * txa->dsp_outsize * sizeof (complex));
-    txa->midbuff = new float[3 * txa->dsp_size  * 2]; //(float *) malloc0 (2 * txa->dsp_size    * sizeof (complex));
-
-    txa->rsmpin = new RESAMPLE(
+    rsmpin = new RESAMPLE(
         0,                                          // run - will be turned on below if needed
-        txa->dsp_insize,                     // input buffer size
-        txa->inbuff,                        // pointer to input buffer
-        txa->midbuff,                       // pointer to output buffer
-        txa->in_rate,                        // input sample rate
-        txa->dsp_rate,                       // output sample rate
+        dsp_insize,                     // input buffer size
+        inbuff,                        // pointer to input buffer
+        midbuff,                       // pointer to output buffer
+        in_rate,                        // input sample rate
+        dsp_rate,                       // output sample rate
         0.0,                                        // select cutoff automatically
         0,                                          // select ncoef automatically
         1.0);                                       // gain
 
-    txa->gen0 = new GEN(
+    gen0 = new GEN(
         0,                                          // run
-        txa->dsp_size,                       // buffer size
-        txa->midbuff,                       // input buffer
-        txa->midbuff,                       // output buffer
-        txa->dsp_rate,                       // sample rate
+        dsp_size,                       // buffer size
+        midbuff,                       // input buffer
+        midbuff,                       // output buffer
+        dsp_rate,                       // sample rate
         2);                                         // mode
 
-    txa->panel = new PANEL(
+    panel = new PANEL(
         1,                                          // run
-        txa->dsp_size,                       // size
-        txa->midbuff,                       // pointer to input buffer
-        txa->midbuff,                       // pointer to output buffer
+        dsp_size,                       // size
+        midbuff,                       // pointer to input buffer
+        midbuff,                       // pointer to output buffer
         1.0,                                        // gain1
         1.0,                                        // gain2I
         1.0,                                        // gain2Q
         2,                                          // 1 to use Q, 2 to use I for input
         0);                                         // 0, no copy
 
-    txa->phrot = new PHROT(
+    phrot = new PHROT(
         0,                                          // run
-        txa->dsp_size,                       // size
-        txa->midbuff,                       // input buffer
-        txa->midbuff,                       // output buffer
-        txa->dsp_rate,                       // samplerate
+        dsp_size,                       // size
+        midbuff,                       // input buffer
+        midbuff,                       // output buffer
+        dsp_rate,                       // samplerate
         338.0,                                      // 1/2 of phase frequency
         8);                                         // number of stages
 
-    txa->micmeter = new METER(
+    micmeter = new METER(
         1,                                          // run
-        0,                                          // optional pointer to another 'run'
-        txa->dsp_size,                       // size
-        txa->midbuff,                       // pointer to buffer
-        txa->dsp_rate,                       // samplerate
+        nullptr,                                          // optional pointer to another 'run'
+        dsp_size,                       // size
+        midbuff,                       // pointer to buffer
+        dsp_rate,                       // samplerate
         0.100,                                      // averaging time constant
         0.100,                                      // peak decay time constant
-        txa->meter,                         // result vector
+        meter,                         // result vector
         TXA_MIC_AV,                                 // index for average value
         TXA_MIC_PK,                                 // index for peak value
         -1,                                         // index for gain value
-        0);                                         // pointer for gain computation
+        nullptr);                                         // pointer for gain computation
 
-    txa->amsq = new AMSQ(
+    amsq = new AMSQ(
         0,                                          // run
-        txa->dsp_size,                       // size
-        txa->midbuff,                       // input buffer
-        txa->midbuff,                       // output buffer
-        txa->midbuff,                       // trigger buffer
-        txa->dsp_rate,                       // sample rate
+        dsp_size,                       // size
+        midbuff,                       // input buffer
+        midbuff,                       // output buffer
+        midbuff,                       // trigger buffer
+        dsp_rate,                       // sample rate
         0.010,                                      // time constant for averaging signal
         0.004,                                      // up-slew time
         0.004,                                      // down-slew time
@@ -154,59 +139,59 @@ TXA* TXA::create_txa (
         0.200);                                     // muted gain
 
     {
-        float default_F[11] = {0.0,  32.0,  63.0, 125.0, 250.0, 500.0, 1000.0, 2000.0, 4000.0, 8000.0, 16000.0};
-        float default_G[11] = {0.0, -12.0, -12.0, -12.0,  -1.0,  +1.0,   +4.0,   +9.0,  +12.0,  -10.0,   -10.0};
+        std::array<float, 11> default_F = {0.0,  32.0,  63.0, 125.0, 250.0, 500.0, 1000.0, 2000.0, 4000.0, 8000.0, 16000.0};
+        std::array<float, 11> default_G = {0.0, -12.0, -12.0, -12.0,  -1.0,  +1.0,   +4.0,   +9.0,  +12.0,  -10.0,   -10.0};
         //float default_G[11] =   {0.0,   0.0,   0.0,   0.0,   0.0,   0.0,    0.0,    0.0,    0.0,    0.0,     0.0};
-        txa->eqp = new EQP (
+        eqp = new EQP (
             0,                                          // run - OFF by default
-            txa->dsp_size,                       // size
-            std::max(2048, txa->dsp_size),            // number of filter coefficients
+            dsp_size,                       // size
+            std::max(2048, dsp_size),            // number of filter coefficients
             0,                                          // minimum phase flag
-            txa->midbuff,                       // pointer to input buffer
-            txa->midbuff,                       // pointer to output buffer
+            midbuff,                       // pointer to input buffer
+            midbuff,                       // pointer to output buffer
             10,                                         // nfreqs
-            default_F,                                  // vector of frequencies
-            default_G,                                  // vector of gain values
+            default_F.data(),                                  // vector of frequencies
+            default_G.data(),                                  // vector of gain values
             0,                                          // cutoff mode
             0,                                          // wintype
-            txa->dsp_rate);                      // samplerate
+            dsp_rate);                      // samplerate
     }
 
-    txa->eqmeter = new METER(
+    eqmeter = new METER(
         1,                                          // run
-        &(txa->eqp->run),                 // pointer to eqp 'run'
-        txa->dsp_size,                       // size
-        txa->midbuff,                       // pointer to buffer
-        txa->dsp_rate,                       // samplerate
+        &(eqp->run),                 // pointer to eqp 'run'
+        dsp_size,                       // size
+        midbuff,                       // pointer to buffer
+        dsp_rate,                       // samplerate
         0.100,                                      // averaging time constant
         0.100,                                      // peak decay time constant
-        txa->meter,                         // result vector
+        meter,                         // result vector
         TXA_EQ_AV,                                  // index for average value
         TXA_EQ_PK,                                  // index for peak value
         -1,                                         // index for gain value
-        0);                                         // pointer for gain computation
+        nullptr);                                         // pointer for gain computation
 
-    txa->preemph = EMPHP::create_emphp (
+    preemph = EMPHP::create_emphp (
         0,                                          // run
         1,                                          // position
-        txa->dsp_size,                       // size
-        std::max(2048, txa->dsp_size),            // number of filter coefficients
+        dsp_size,                       // size
+        std::max(2048, dsp_size),            // number of filter coefficients
         0,                                          // minimum phase flag
-        txa->midbuff,                       // input buffer
-        txa->midbuff,                       // output buffer,
-        txa->dsp_rate,                       // sample rate
+        midbuff,                       // input buffer
+        midbuff,                       // output buffer,
+        dsp_rate,                       // sample rate
         0,                                          // pre-emphasis type
         300.0,                                      // f_low
         3000.0);                                    // f_high
 
-    txa->leveler = new WCPAGC(
+    leveler = new WCPAGC(
         0,                                          // run - OFF by default
         5,                                          // mode
         0,                                          // 0 for max(I,Q), 1 for envelope
-        txa->midbuff,                       // input buff pointer
-        txa->midbuff,                       // output buff pointer
-        txa->dsp_size,                       // io_buffsize
-        txa->dsp_rate,                       // sample rate
+        midbuff,                       // input buff pointer
+        midbuff,                       // output buff pointer
+        dsp_size,                       // io_buffsize
+        dsp_rate,                       // sample rate
         0.001,                                      // tau_attack
         0.500,                                      // tau_decay
         6,                                          // n_tau
@@ -224,139 +209,139 @@ TXA* TXA::create_txa (
         2.000,                                      // hang_thresh
         0.100);                                     // tau_hang_decay
 
-    txa->lvlrmeter = new METER(
+    lvlrmeter = new METER(
         1,                                          // run
-        &(txa->leveler->run),             // pointer to leveler 'run'
-        txa->dsp_size,                       // size
-        txa->midbuff,                       // pointer to buffer
-        txa->dsp_rate,                       // samplerate
+        &(leveler->run),             // pointer to leveler 'run'
+        dsp_size,                       // size
+        midbuff,                       // pointer to buffer
+        dsp_rate,                       // samplerate
         0.100,                                      // averaging time constant
         0.100,                                      // peak decay time constant
-        txa->meter,                         // result vector
+        meter,                         // result vector
         TXA_LVLR_AV,                                // index for average value
         TXA_LVLR_PK,                                // index for peak value
         TXA_LVLR_GAIN,                              // index for gain value
-        &txa->leveler->gain);             // pointer for gain computation
+        &leveler->gain);             // pointer for gain computation
 
     {
-        float default_F[5] = {200.0, 1000.0, 2000.0, 3000.0, 4000.0};
-        float default_G[5] = {0.0, 5.0, 10.0, 10.0, 5.0};
-        float default_E[5] = {7.0, 7.0, 7.0, 7.0, 7.0};
-        txa->cfcomp = CFCOMP::create_cfcomp(
+        std::array<float, 5> default_F = {200.0, 1000.0, 2000.0, 3000.0, 4000.0};
+        std::array<float, 5> default_G = {  0.0,    5.0,   10.0,   10.0,    5.0};
+        std::array<float, 5> default_E = {  7.0,    7.0,    7.0,    7.0,    7.0};
+        cfcomp = CFCOMP::create_cfcomp(
             0,                                          // run
             0,                                          // position
             0,                                          // post-equalizer run
-            txa->dsp_size,                       // size
-            txa->midbuff,                       // input buffer
-            txa->midbuff,                       // output buffer
+            dsp_size,                       // size
+            midbuff,                       // input buffer
+            midbuff,                       // output buffer
             2048,                                       // fft size
             4,                                          // overlap
-            txa->dsp_rate,                       // samplerate
+            dsp_rate,                       // samplerate
             1,                                          // window type
             0,                                          // compression method
             5,                                          // nfreqs
             0.0,                                        // pre-compression
             0.0,                                        // pre-postequalization
-            default_F,                                  // frequency array
-            default_G,                                  // compression array
-            default_E,                                  // eq array
+            default_F.data(),                                  // frequency array
+            default_G.data(),                                  // compression array
+            default_E.data(),                                  // eq array
             0.25,                                       // metering time constant
             0.50);                                      // display time constant
     }
 
-    txa->cfcmeter = new METER(
+    cfcmeter = new METER(
         1,                                          // run
-        &(txa->cfcomp->run),              // pointer to eqp 'run'
-        txa->dsp_size,                       // size
-        txa->midbuff,                       // pointer to buffer
-        txa->dsp_rate,                       // samplerate
+        &(cfcomp->run),              // pointer to eqp 'run'
+        dsp_size,                       // size
+        midbuff,                       // pointer to buffer
+        dsp_rate,                       // samplerate
         0.100,                                      // averaging time constant
         0.100,                                      // peak decay time constant
-        txa->meter,                         // result vector
+        meter,                         // result vector
         TXA_CFC_AV,                                 // index for average value
         TXA_CFC_PK,                                 // index for peak value
         TXA_CFC_GAIN,                               // index for gain value
-        (double*) &txa->cfcomp->gain);              // pointer for gain computation
+        (double*) &cfcomp->gain);              // pointer for gain computation
 
-    txa->bp0 = new BANDPASS(
+    bp0 = new BANDPASS(
         1,                                          // always runs
         0,                                          // position
-        txa->dsp_size,                       // size
-        std::max(2048, txa->dsp_size),            // number of coefficients
+        dsp_size,                       // size
+        std::max(2048, dsp_size),            // number of coefficients
         0,                                          // flag for minimum phase
-        txa->midbuff,                       // pointer to input buffer
-        txa->midbuff,                       // pointer to output buffer
-        txa->f_low,                         // low freq cutoff
-        txa->f_high,                        // high freq cutoff
-        txa->dsp_rate,                       // samplerate
+        midbuff,                       // pointer to input buffer
+        midbuff,                       // pointer to output buffer
+        f_low,                         // low freq cutoff
+        f_high,                        // high freq cutoff
+        dsp_rate,                       // samplerate
         1,                                          // wintype
         2.0);                                       // gain
 
-    txa->compressor = COMPRESSOR::create_compressor (
+    compressor = COMPRESSOR::create_compressor (
         0,                                          // run - OFF by default
-        txa->dsp_size,                       // size
-        txa->midbuff,                       // pointer to input buffer
-        txa->midbuff,                       // pointer to output buffer
+        dsp_size,                       // size
+        midbuff,                       // pointer to input buffer
+        midbuff,                       // pointer to output buffer
         3.0);                                       // gain
 
-    txa->bp1 = new BANDPASS(
+    bp1 = new BANDPASS(
         0,                                          // ONLY RUNS WHEN COMPRESSOR IS USED
         0,                                          // position
-        txa->dsp_size,                       // size
-        std::max(2048, txa->dsp_size),            // number of coefficients
+        dsp_size,                       // size
+        std::max(2048, dsp_size),            // number of coefficients
         0,                                          // flag for minimum phase
-        txa->midbuff,                       // pointer to input buffer
-        txa->midbuff,                       // pointer to output buffer
-        txa->f_low,                         // low freq cutoff
-        txa->f_high,                        // high freq cutoff
-        txa->dsp_rate,                       // samplerate
+        midbuff,                       // pointer to input buffer
+        midbuff,                       // pointer to output buffer
+        f_low,                         // low freq cutoff
+        f_high,                        // high freq cutoff
+        dsp_rate,                       // samplerate
         1,                                          // wintype
         2.0);                                       // gain
 
-    txa->osctrl = OSCTRL::create_osctrl (
+    osctrl = OSCTRL::create_osctrl (
         0,                                          // run
-        txa->dsp_size,                       // size
-        txa->midbuff,                       // input buffer
-        txa->midbuff,                       // output buffer
-        txa->dsp_rate,                       // sample rate
-        1.95);                                      // gain for clippings
+        dsp_size,                       // size
+        midbuff,                       // input buffer
+        midbuff,                       // output buffer
+        dsp_rate,                       // sample rate
+        1.95f);                                      // gain for clippings
 
-    txa->bp2 = new BANDPASS(
+    bp2 = new BANDPASS(
         0,                                          // ONLY RUNS WHEN COMPRESSOR IS USED
         0,                                          // position
-        txa->dsp_size,                       // size
-        std::max(2048, txa->dsp_size),            // number of coefficients
+        dsp_size,                       // size
+        std::max(2048, dsp_size),            // number of coefficients
         0,                                          // flag for minimum phase
-        txa->midbuff,                       // pointer to input buffer
-        txa->midbuff,                       // pointer to output buffer
-        txa->f_low,                         // low freq cutoff
-        txa->f_high,                        // high freq cutoff
-        txa->dsp_rate,                       // samplerate
+        midbuff,                       // pointer to input buffer
+        midbuff,                       // pointer to output buffer
+        f_low,                         // low freq cutoff
+        f_high,                        // high freq cutoff
+        dsp_rate,                       // samplerate
         1,                                          // wintype
         1.0);                                       // gain
 
-    txa->compmeter = new METER(
+    compmeter = new METER(
         1,                                          // run
-        &(txa->compressor->run),          // pointer to compressor 'run'
-        txa->dsp_size,                       // size
-        txa->midbuff,                       // pointer to buffer
-        txa->dsp_rate,                       // samplerate
+        &(compressor->run),          // pointer to compressor 'run'
+        dsp_size,                       // size
+        midbuff,                       // pointer to buffer
+        dsp_rate,                       // samplerate
         0.100,                                      // averaging time constant
         0.100,                                      // peak decay time constant
-        txa->meter,                         // result vector
+        meter,                         // result vector
         TXA_COMP_AV,                                // index for average value
         TXA_COMP_PK,                                // index for peak value
         -1,                                         // index for gain value
-        0);                                         // pointer for gain computation
+        nullptr);                                         // pointer for gain computation
 
-    txa->alc = new WCPAGC(
+    alc = new WCPAGC(
         1,                                          // run - always ON
         5,                                          // mode
         1,                                          // 0 for max(I,Q), 1 for envelope
-        txa->midbuff,                       // input buff pointer
-        txa->midbuff,                       // output buff pointer
-        txa->dsp_size,                       // io_buffsize
-        txa->dsp_rate,                       // sample rate
+        midbuff,                       // input buff pointer
+        midbuff,                       // output buff pointer
+        dsp_size,                       // io_buffsize
+        dsp_rate,                       // sample rate
         0.001,                                      // tau_attack
         0.010,                                      // tau_decay
         6,                                          // n_tau
@@ -374,70 +359,70 @@ TXA* TXA::create_txa (
         2.000,                                      // hang_thresh
         0.100);                                     // tau_hang_decay
 
-    txa->ammod = AMMOD::create_ammod (
+    ammod = AMMOD::create_ammod (
         0,                                          // run - OFF by default
         0,                                          // mode:  0=>AM, 1=>DSB
-        txa->dsp_size,                       // size
-        txa->midbuff,                       // pointer to input buffer
-        txa->midbuff,                       // pointer to output buffer
+        dsp_size,                       // size
+        midbuff,                       // pointer to input buffer
+        midbuff,                       // pointer to output buffer
         0.5);                                       // carrier level
 
 
-    txa->fmmod = FMMOD::create_fmmod (
+    fmmod = FMMOD::create_fmmod (
         0,                                          // run - OFF by default
-        txa->dsp_size,                       // size
-        txa->midbuff,                       // pointer to input buffer
-        txa->midbuff,                       // pointer to input buffer
-        txa->dsp_rate,                       // samplerate
+        dsp_size,                       // size
+        midbuff,                       // pointer to input buffer
+        midbuff,                       // pointer to input buffer
+        dsp_rate,                       // samplerate
         5000.0,                                     // deviation
         300.0,                                      // low cutoff frequency
         3000.0,                                     // high cutoff frequency
         1,                                          // ctcss run control
-        0.10,                                       // ctcss level
+        0.10f,                                       // ctcss level
         100.0,                                      // ctcss frequency
         1,                                          // run bandpass filter
-        std::max(2048, txa->dsp_size),            // number coefficients for bandpass filter
+        std::max(2048, dsp_size),            // number coefficients for bandpass filter
         0);                                         // minimum phase flag
 
-    txa->gen1 = new GEN(
+    gen1 = new GEN(
         0,                                          // run
-        txa->dsp_size,                       // buffer size
-        txa->midbuff,                       // input buffer
-        txa->midbuff,                       // output buffer
-        txa->dsp_rate,                       // sample rate
+        dsp_size,                       // buffer size
+        midbuff,                       // input buffer
+        midbuff,                       // output buffer
+        dsp_rate,                       // sample rate
         0);                                         // mode
 
-    txa->uslew = USLEW::create_uslew (
-        txa,
-        &(txa->upslew),                        // pointer to channel upslew flag
-        txa->dsp_size,                       // buffer size
-        txa->midbuff,                       // input buffer
-        txa->midbuff,                       // output buffer
-        txa->dsp_rate,                       // sample rate
+    uslew = USLEW::create_uslew (
+        this,
+        &upslew,                        // pointer to channel upslew flag
+        dsp_size,                       // buffer size
+        midbuff,                       // input buffer
+        midbuff,                       // output buffer
+        (float) dsp_rate,                       // sample rate
         0.000,                                      // delay time
-        0.005);                                     // upslew time
+        0.005f);                                     // upslew time
 
-    txa->alcmeter = new METER(
+    alcmeter = new METER(
         1,                                          // run
-        0,                                          // optional pointer to a 'run'
-        txa->dsp_size,                       // size
-        txa->midbuff,                       // pointer to buffer
-        txa->dsp_rate,                       // samplerate
+        nullptr,                                          // optional pointer to a 'run'
+        dsp_size,                       // size
+        midbuff,                       // pointer to buffer
+        dsp_rate,                       // samplerate
         0.100,                                      // averaging time constant
         0.100,                                      // peak decay time constant
-        txa->meter,                         // result vector
+        meter,                         // result vector
         TXA_ALC_AV,                                 // index for average value
         TXA_ALC_PK,                                 // index for peak value
         TXA_ALC_GAIN,                               // index for gain value
-        &txa->alc->gain);                 // pointer for gain computation
+        &alc->gain);                 // pointer for gain computation
 
-    txa->sip1 = new SIPHON(
+    sip1 = new SIPHON(
         1,                                          // run
         0,                                          // position
         0,                                          // mode
         0,                                          // disp
-        txa->dsp_size,                       // input buffer size
-        txa->midbuff,                       // input buffer
+        dsp_size,                       // input buffer size
+        midbuff,                       // input buffer
         16384,                                      // number of samples to buffer
         16384,                                      // fft size for spectrum
         1);                                         // specmode
@@ -446,7 +431,7 @@ TXA* TXA::create_txa (
     //     channel,                                    // channel number
     //     1,                                          // run calibration
     //     1024,                                       // input buffer size
-    //     txa->in_rate,                        // samplerate
+    //     in_rate,                        // samplerate
     //     16,                                         // ints
     //     256,                                        // spi
     //     (1.0 / 0.4072),                             // hw_scale
@@ -461,25 +446,25 @@ TXA* TXA::create_txa (
     //     256,                                        // pin samples
     //     0.9);                                       // alpha
 
-    txa->iqc.p0 = txa->iqc.p1 = IQC::create_iqc (
+    iqc.p0 = iqc.p1 = IQC::create_iqc (
         0,                                          // run
-        txa->dsp_size,                       // size
-        txa->midbuff,                       // input buffer
-        txa->midbuff,                       // output buffer
-        (float)txa->dsp_rate,               // sample rate
+        dsp_size,                       // size
+        midbuff,                       // input buffer
+        midbuff,                       // output buffer
+        (float)dsp_rate,               // sample rate
         16,                                         // ints
-        0.005,                                      // changeover time
+        0.005f,                                      // changeover time
         256);                                       // spi
 
-    txa->cfir = CFIR::create_cfir(
+    cfir = CFIR::create_cfir(
         0,                                          // run
-        txa->dsp_size,                       // size
-        std::max(2048, txa->dsp_size),            // number of filter coefficients
+        dsp_size,                       // size
+        std::max(2048, dsp_size),            // number of filter coefficients
         0,                                          // minimum phase flag
-        txa->midbuff,                       // input buffer
-        txa->midbuff,                       // output buffer
-        txa->dsp_rate,                       // input sample rate
-        txa->out_rate,                       // CIC input sample rate
+        midbuff,                       // input buffer
+        midbuff,                       // output buffer
+        dsp_rate,                       // input sample rate
+        out_rate,                       // CIC input sample rate
         1,                                          // CIC differential delay
         640,                                        // CIC interpolation factor
         5,                                          // CIC integrator-comb pairs
@@ -488,334 +473,277 @@ TXA* TXA::create_txa (
         0.0,                                        // raised-cosine transition width
         0);                                         // window type
 
-    txa->rsmpout = new RESAMPLE(
+    rsmpout = new RESAMPLE(
         0,                                          // run - will be turned ON below if needed
-        txa->dsp_size,                       // input size
-        txa->midbuff,                       // pointer to input buffer
-        txa->outbuff,                       // pointer to output buffer
-        txa->dsp_rate,                       // input sample rate
-        txa->out_rate,                       // output sample rate
+        dsp_size,                       // input size
+        midbuff,                       // pointer to input buffer
+        outbuff,                       // pointer to output buffer
+        dsp_rate,                       // input sample rate
+        out_rate,                       // output sample rate
         0.0,                                        // select cutoff automatically
         0,                                          // select ncoef automatically
         0.980);                                     // gain
 
-    txa->outmeter = new METER(
+    outmeter = new METER(
         1,                                          // run
-        0,                                          // optional pointer to another 'run'
-        txa->dsp_outsize,                    // size
-        txa->outbuff,                       // pointer to buffer
-        txa->out_rate,                       // samplerate
+        nullptr,                                          // optional pointer to another 'run'
+        dsp_outsize,                    // size
+        outbuff,                       // pointer to buffer
+        out_rate,                       // samplerate
         0.100,                                      // averaging time constant
         0.100,                                      // peak decay time constant
-        txa->meter,                         // result vector
+        meter,                         // result vector
         TXA_OUT_AV,                                 // index for average value
         TXA_OUT_PK,                                 // index for peak value
         -1,                                         // index for gain value
-        0);                                         // pointer for gain computation
+        nullptr);                                         // pointer for gain computation
 
     // turn OFF / ON resamplers as needed
-    ResCheck (*txa);
-    return txa;
+    resCheck();
 }
 
-void TXA::destroy_txa (TXA *txa)
+TXA::~TXA()
 {
     // in reverse order, free each item we created
-    delete (txa->outmeter);
-    delete (txa->rsmpout);
-    CFIR::destroy_cfir(txa->cfir);
-    // destroy_calcc (txa->calcc);
-    IQC::destroy_iqc (txa->iqc.p0);
-    delete (txa->sip1);
-    delete (txa->alcmeter);
-    USLEW::destroy_uslew (txa->uslew);
-    delete (txa->gen1);
-    FMMOD::destroy_fmmod (txa->fmmod);
-    AMMOD::destroy_ammod (txa->ammod);
-    delete (txa->alc);
-    delete (txa->compmeter);
-    delete (txa->bp2);
-    OSCTRL::destroy_osctrl (txa->osctrl);
-    delete (txa->bp1);
-    COMPRESSOR::destroy_compressor (txa->compressor);
-    delete (txa->bp0);
-    delete (txa->cfcmeter);
-    CFCOMP::destroy_cfcomp (txa->cfcomp);
-    delete (txa->lvlrmeter);
-    delete (txa->leveler);
-    EMPHP::destroy_emphp (txa->preemph);
-    delete (txa->eqmeter);
-    delete (txa->eqp);
-    delete (txa->amsq);
-    delete (txa->micmeter);
-    delete (txa->phrot);
-    delete (txa->panel);
-    delete (txa->gen0);
-    delete (txa->rsmpin);
-    delete[] (txa->midbuff);
-    delete[] (txa->outbuff);
-    delete[] (txa->inbuff);
-    delete txa;
+    delete outmeter;
+    delete rsmpout;
+    CFIR::destroy_cfir(cfir);
+    IQC::destroy_iqc (iqc.p0);
+    delete sip1;
+    delete alcmeter;
+    USLEW::destroy_uslew (uslew);
+    delete gen1;
+    FMMOD::destroy_fmmod (fmmod);
+    AMMOD::destroy_ammod (ammod);
+    delete alc;
+    delete compmeter;
+    delete bp2;
+    OSCTRL::destroy_osctrl (osctrl);
+    delete bp1;
+    COMPRESSOR::destroy_compressor (compressor);
+    delete bp0;
+    delete cfcmeter;
+    CFCOMP::destroy_cfcomp (cfcomp);
+    delete lvlrmeter;
+    delete leveler;
+    EMPHP::destroy_emphp (preemph);
+    delete eqmeter;
+    delete eqp;
+    delete amsq;
+    delete micmeter;
+    delete phrot;
+    delete panel;
+    delete gen0;
+    delete rsmpin;
 }
 
-void TXA::flush_txa (TXA* txa)
+void TXA::flush()
 {
-    std::fill(txa->inbuff,  txa->inbuff  + 1 * txa->dsp_insize  * 2, 0);
-    std::fill(txa->outbuff, txa->outbuff + 1 * txa->dsp_outsize * 2, 0);
-    std::fill(txa->midbuff, txa->midbuff + 2 * txa->dsp_size    * 2, 0);
-    txa->rsmpin->flush();
-    txa->gen0->flush();
-    txa->panel->flush ();
-    txa->phrot->flush();
-    txa->micmeter->flush ();
-    txa->amsq->flush ();
-    txa->eqp->flush();
-    txa->eqmeter->flush ();
-    EMPHP::flush_emphp (txa->preemph);
-    txa->leveler->flush();
-    txa->lvlrmeter->flush ();
-    CFCOMP::flush_cfcomp (txa->cfcomp);
-    txa->cfcmeter->flush ();
-    txa->bp0->flush ();
-    COMPRESSOR::flush_compressor (txa->compressor);
-    txa->bp1->flush ();
-    OSCTRL::flush_osctrl (txa->osctrl);
-    txa->bp2->flush ();
-    txa->compmeter->flush ();
-    txa->alc->flush ();
-    AMMOD::flush_ammod (txa->ammod);
-    FMMOD::flush_fmmod (txa->fmmod);
-    txa->gen1->flush();
-    USLEW::flush_uslew (txa->uslew);
-    txa->alcmeter->flush ();
-    txa->sip1->flush();
-    IQC::flush_iqc (txa->iqc.p0);
-    CFIR::flush_cfir(txa->cfir);
-    txa->rsmpout->flush();
-    txa->outmeter->flush ();
+    Unit::flushBuffers();
+    rsmpin->flush();
+    gen0->flush();
+    panel->flush ();
+    phrot->flush();
+    micmeter->flush ();
+    amsq->flush ();
+    eqp->flush();
+    eqmeter->flush ();
+    EMPHP::flush_emphp (preemph);
+    leveler->flush();
+    lvlrmeter->flush ();
+    CFCOMP::flush_cfcomp (cfcomp);
+    cfcmeter->flush ();
+    bp0->flush ();
+    COMPRESSOR::flush_compressor (compressor);
+    bp1->flush ();
+    OSCTRL::flush_osctrl (osctrl);
+    bp2->flush ();
+    compmeter->flush ();
+    alc->flush ();
+    AMMOD::flush_ammod (ammod);
+    FMMOD::flush_fmmod (fmmod);
+    gen1->flush();
+    USLEW::flush_uslew (uslew);
+    alcmeter->flush ();
+    sip1->flush();
+    IQC::flush_iqc (iqc.p0);
+    CFIR::flush_cfir(cfir);
+    rsmpout->flush();
+    outmeter->flush ();
 }
 
-void xtxa (TXA* txa)
+void TXA::execute()
 {
-    txa->rsmpin->execute();              // input resampler
-    txa->gen0->execute();                     // input signal generator
-    txa->panel->execute();                  // includes MIC gain
-    txa->phrot->execute();                  // phase rotator
-    txa->micmeter->execute ();               // MIC meter
-    txa->amsq->xcap ();                 // downward expander capture
-    txa->amsq->execute ();                    // downward expander action
-    txa->eqp->execute ();                      // pre-EQ
-    txa->eqmeter->execute ();                // EQ meter
-    EMPHP::xemphp (txa->preemph, 0);             // FM pre-emphasis (first option)
-    txa->leveler->execute ();               // Leveler
-    txa->lvlrmeter->execute ();              // Leveler Meter
-    CFCOMP::xcfcomp (txa->cfcomp, 0);             // Continuous Frequency Compressor with post-EQ
-    txa->cfcmeter->execute ();               // CFC+PostEQ Meter
-    txa->bp0->execute (0);              // primary bandpass filter
-    COMPRESSOR::xcompressor (txa->compressor);        // COMP compressor
-    txa->bp1->execute (0);              // aux bandpass (runs if COMP)
-    OSCTRL::xosctrl (txa->osctrl);                // CESSB Overshoot Control
-    txa->bp2->execute (0);              // aux bandpass (runs if CESSB)
-    txa->compmeter->execute ();              // COMP meter
-    txa->alc->execute ();                   // ALC
-    AMMOD::xammod (txa->ammod);                  // AM Modulator
-    EMPHP::xemphp (txa->preemph, 1);             // FM pre-emphasis (second option)
-    FMMOD::xfmmod (txa->fmmod);                  // FM Modulator
-    txa->gen1->execute();                     // output signal generator (TUN and Two-tone)
-    USLEW::xuslew (txa->uslew);                  // up-slew for AM, FM, and gens
-    txa->alcmeter->execute ();               // ALC Meter
-    txa->sip1->execute(0);               // siphon data for display
-    IQC::xiqc (txa->iqc.p0);                     // PureSignal correction
-    CFIR::xcfir(txa->cfir);                     // compensating FIR filter (used Protocol_2 only)
-    txa->rsmpout->execute();             // output resampler
-    txa->outmeter->execute ();               // output meter
-    // print_peak_env ("env_exception.txt", txa->dsp_outsize, txa->outbuff, 0.7);
+    rsmpin->execute();              // input resampler
+    gen0->execute();                     // input signal generator
+    panel->execute();                  // includes MIC gain
+    phrot->execute();                  // phase rotator
+    micmeter->execute ();               // MIC meter
+    amsq->xcap ();                 // downward expander capture
+    amsq->execute ();                    // downward expander action
+    eqp->execute ();                      // pre-EQ
+    eqmeter->execute ();                // EQ meter
+    EMPHP::xemphp (preemph, 0);             // FM pre-emphasis (first option)
+    leveler->execute ();               // Leveler
+    lvlrmeter->execute ();              // Leveler Meter
+    CFCOMP::xcfcomp (cfcomp, 0);             // Continuous Frequency Compressor with post-EQ
+    cfcmeter->execute ();               // CFC+PostEQ Meter
+    bp0->execute (0);              // primary bandpass filter
+    COMPRESSOR::xcompressor (compressor);        // COMP compressor
+    bp1->execute (0);              // aux bandpass (runs if COMP)
+    OSCTRL::xosctrl (osctrl);                // CESSB Overshoot Control
+    bp2->execute (0);              // aux bandpass (runs if CESSB)
+    compmeter->execute ();              // COMP meter
+    alc->execute ();                   // ALC
+    AMMOD::xammod (ammod);                  // AM Modulator
+    EMPHP::xemphp (preemph, 1);             // FM pre-emphasis (second option)
+    FMMOD::xfmmod (fmmod);                  // FM Modulator
+    gen1->execute();                     // output signal generator (TUN and Two-tone)
+    USLEW::xuslew (uslew);                  // up-slew for AM, FM, and gens
+    alcmeter->execute ();               // ALC Meter
+    sip1->execute(0);               // siphon data for display
+    IQC::xiqc (iqc.p0);                     // PureSignal correction
+    CFIR::xcfir(cfir);                     // compensating FIR filter (used Protocol_2 only)
+    rsmpout->execute();             // output resampler
+    outmeter->execute ();               // output meter
 }
 
-void TXA::setInputSamplerate (TXA *txa, int in_rate)
+void TXA::setInputSamplerate(int in_rate)
 {
-    if (in_rate  >= txa->dsp_rate)
-        txa->dsp_insize  = txa->dsp_size * (in_rate  / txa->dsp_rate);
-    else
-        txa->dsp_insize  = txa->dsp_size / (txa->dsp_rate /  in_rate);
-
-    txa->in_rate = in_rate;
-    // buffers
-    delete[] (txa->inbuff);
-    txa->inbuff = new float[1 * txa->dsp_insize  * 2]; //(float *)malloc0(1 * txa->dsp_insize  * sizeof(complex));
+    Unit::setBuffersInputSamplerate(in_rate);
     // input resampler
-    txa->rsmpin->setBuffers(txa->inbuff, txa->midbuff);
-    txa->rsmpin->setSize(txa->dsp_insize);
-    txa->rsmpin->setInRate(txa->in_rate);
-    ResCheck (*txa);
+    rsmpin->setBuffers(inbuff, midbuff);
+    rsmpin->setSize(dsp_insize);
+    rsmpin->setInRate(in_rate);
+    resCheck();
 }
 
-void TXA::setOutputSamplerate (TXA* txa, int out_rate)
+void TXA::setOutputSamplerate(int out_rate)
 {
-    if (out_rate >= txa->dsp_rate)
-        txa->dsp_outsize = txa->dsp_size * (out_rate / txa->dsp_rate);
-    else
-        txa->dsp_outsize = txa->dsp_size / (txa->dsp_rate / out_rate);
-
-    txa->out_rate = out_rate;
-    // buffers
-    delete[] (txa->outbuff);
-    txa->outbuff = new float[1 * txa->dsp_outsize * 2]; // (float *)malloc0(1 * txa->dsp_outsize * sizeof(complex));
+    Unit::setBuffersOutputSamplerate(out_rate);
     // cfir - needs to know input rate of firmware CIC
-    CFIR::setOutRate_cfir (txa->cfir, txa->out_rate);
+    CFIR::setOutRate_cfir (cfir, out_rate);
     // output resampler
-    txa->rsmpout->setBuffers(txa->midbuff, txa->outbuff);
-    txa->rsmpout->setOutRate(txa->out_rate);
-    ResCheck (*txa);
+    rsmpout->setBuffers(midbuff, outbuff);
+    rsmpout->setOutRate(out_rate);
+    resCheck();
     // output meter
-    txa->outmeter->setBuffers(txa->outbuff);
-    txa->outmeter->setSize(txa->dsp_outsize);
-    txa->outmeter->setSamplerate (txa->out_rate);
+    outmeter->setBuffers(outbuff);
+    outmeter->setSize(dsp_outsize);
+    outmeter->setSamplerate (out_rate);
 }
 
-void TXA::setDSPSamplerate (TXA *txa, int dsp_rate)
+void TXA::setDSPSamplerate(int dsp_rate)
 {
-    if (txa->in_rate  >= dsp_rate)
-        txa->dsp_insize  = txa->dsp_size * (txa->in_rate  / dsp_rate);
-    else
-        txa->dsp_insize  = txa->dsp_size / (dsp_rate /  txa->in_rate);
-
-    if (txa->out_rate >= dsp_rate)
-        txa->dsp_outsize = txa->dsp_size * (txa->out_rate / dsp_rate);
-    else
-        txa->dsp_outsize = txa->dsp_size / (dsp_rate / txa->out_rate);
-
-    txa->dsp_rate = dsp_rate;
-    // buffers
-    delete[] (txa->inbuff);
-    txa->inbuff = new float[1 * txa->dsp_insize  * 2]; // (float *)malloc0(1 * txa->dsp_insize  * sizeof(complex));
-    delete[] (txa->outbuff);
-    txa->outbuff = new float[1 * txa->dsp_outsize  * 2]; // (float *)malloc0(1 * txa->dsp_outsize * sizeof(complex));
+    Unit::setBuffersDSPSamplerate(dsp_rate);
     // input resampler
-    txa->rsmpin->setBuffers(txa->inbuff, txa->midbuff);
-    txa->rsmpin->setSize(txa->dsp_insize);
-    txa->rsmpin->setOutRate(txa->dsp_rate);
+    rsmpin->setBuffers(inbuff, midbuff);
+    rsmpin->setSize(dsp_insize);
+    rsmpin->setOutRate(dsp_rate);
     // dsp_rate blocks
-    txa->gen0->setSamplerate(txa->dsp_rate);
-    txa->panel->setSamplerate(txa->dsp_rate);
-    txa->phrot->setSamplerate(txa->dsp_rate);
-    txa->micmeter->setSamplerate (txa->dsp_rate);
-    txa->amsq->setSamplerate (txa->dsp_rate);
-    txa->eqp->setSamplerate (txa->dsp_rate);
-    txa->eqmeter->setSamplerate (txa->dsp_rate);
-    EMPHP::setSamplerate_emphp (txa->preemph, txa->dsp_rate);
-    txa->leveler->setSamplerate (txa->dsp_rate);
-    txa->lvlrmeter->setSamplerate (txa->dsp_rate);
-    CFCOMP::setSamplerate_cfcomp (txa->cfcomp, txa->dsp_rate);
-    txa->cfcmeter->setSamplerate (txa->dsp_rate);
-    txa->bp0->setSamplerate (txa->dsp_rate);
-    COMPRESSOR::setSamplerate_compressor (txa->compressor, txa->dsp_rate);
-    txa->bp1->setSamplerate (txa->dsp_rate);
-    OSCTRL::setSamplerate_osctrl (txa->osctrl, txa->dsp_rate);
-    txa->bp2->setSamplerate (txa->dsp_rate);
-    txa->compmeter->setSamplerate (txa->dsp_rate);
-    txa->alc->setSamplerate (txa->dsp_rate);
-    AMMOD::setSamplerate_ammod (txa->ammod, txa->dsp_rate);
-    FMMOD::setSamplerate_fmmod (txa->fmmod, txa->dsp_rate);
-    txa->gen1->setSamplerate(txa->dsp_rate);
-    USLEW::setSamplerate_uslew (txa->uslew, txa->dsp_rate);
-    txa->alcmeter->setSamplerate (txa->dsp_rate);
-    txa->sip1->setSamplerate (txa->dsp_rate);
-    IQC::setSamplerate_iqc (txa->iqc.p0, txa->dsp_rate);
-    CFIR::setSamplerate_cfir (txa->cfir, txa->dsp_rate);
+    gen0->setSamplerate(dsp_rate);
+    panel->setSamplerate(dsp_rate);
+    phrot->setSamplerate(dsp_rate);
+    micmeter->setSamplerate (dsp_rate);
+    amsq->setSamplerate (dsp_rate);
+    eqp->setSamplerate (dsp_rate);
+    eqmeter->setSamplerate (dsp_rate);
+    EMPHP::setSamplerate_emphp (preemph, dsp_rate);
+    leveler->setSamplerate (dsp_rate);
+    lvlrmeter->setSamplerate (dsp_rate);
+    CFCOMP::setSamplerate_cfcomp (cfcomp, dsp_rate);
+    cfcmeter->setSamplerate (dsp_rate);
+    bp0->setSamplerate (dsp_rate);
+    COMPRESSOR::setSamplerate_compressor (compressor, dsp_rate);
+    bp1->setSamplerate (dsp_rate);
+    OSCTRL::setSamplerate_osctrl (osctrl, dsp_rate);
+    bp2->setSamplerate (dsp_rate);
+    compmeter->setSamplerate (dsp_rate);
+    alc->setSamplerate (dsp_rate);
+    AMMOD::setSamplerate_ammod (ammod, dsp_rate);
+    FMMOD::setSamplerate_fmmod (fmmod, dsp_rate);
+    gen1->setSamplerate(dsp_rate);
+    USLEW::setSamplerate_uslew (uslew, dsp_rate);
+    alcmeter->setSamplerate (dsp_rate);
+    sip1->setSamplerate (dsp_rate);
+    IQC::setSamplerate_iqc (iqc.p0, dsp_rate);
+    CFIR::setSamplerate_cfir (cfir, dsp_rate);
     // output resampler
-    txa->rsmpout->setBuffers(txa->midbuff, txa->outbuff);
-    txa->rsmpout->setInRate(txa->dsp_rate);
-    ResCheck (*txa);
+    rsmpout->setBuffers(midbuff, outbuff);
+    rsmpout->setInRate(dsp_rate);
+    resCheck();
     // output meter
-    txa->outmeter->setBuffers(txa->outbuff);
-    txa->outmeter->setSize (txa->dsp_outsize);
+    outmeter->setBuffers(outbuff);
+    outmeter->setSize (dsp_outsize);
 }
 
-void TXA::setDSPBuffsize (TXA *txa, int dsp_size)
+void TXA::setDSPBuffsize(int dsp_size)
 {
-    if (txa->in_rate  >= txa->dsp_rate)
-        txa->dsp_insize  = dsp_size * (txa->in_rate  / txa->dsp_rate);
-    else
-        txa->dsp_insize  = dsp_size / (txa->dsp_rate /  txa->in_rate);
-
-    if (txa->out_rate >= txa->dsp_rate)
-        txa->dsp_outsize = dsp_size * (txa->out_rate / txa->dsp_rate);
-    else
-        txa->dsp_outsize = dsp_size / (txa->dsp_rate / txa->out_rate);
-
-    txa->dsp_size = dsp_size;
-    // buffers
-    delete[] (txa->inbuff);
-    txa->inbuff = new float[1 * txa->dsp_insize  * 2]; // (float *)malloc0(1 * txa->dsp_insize  * sizeof(complex));
-    delete[] (txa->midbuff);
-    txa->midbuff = new float[2 * txa->dsp_size  * 2]; // (float *)malloc0(2 * txa->dsp_size * sizeof(complex));
-    delete[] (txa->outbuff);
-    txa->outbuff = new float[1 * txa->dsp_outsize  * 2]; // (float *)malloc0(1 * txa->dsp_outsize * sizeof(complex));
+    Unit::setBuffersDSPBuffsize(dsp_size);
     // input resampler
-    txa->rsmpin->setBuffers(txa->inbuff, txa->midbuff);
-    txa->rsmpin->setSize(txa->dsp_insize);
+    rsmpin->setBuffers(inbuff, midbuff);
+    rsmpin->setSize(dsp_insize);
     // dsp_size blocks
-    txa->gen0->setBuffers(txa->midbuff, txa->midbuff);
-    txa->gen0->setSize(txa->dsp_size);
-    txa->panel->setBuffers(txa->midbuff, txa->midbuff);
-    txa->panel->setSize(txa->dsp_size);
-    txa->phrot->setBuffers(txa->midbuff, txa->midbuff);
-    txa->phrot->setSize(txa->dsp_size);
-    txa->micmeter->setBuffers (txa->midbuff);
-    txa->micmeter->setSize (txa->dsp_size);
-    txa->amsq->setBuffers (txa->midbuff, txa->midbuff, txa->midbuff);
-    txa->amsq->setSize (txa->dsp_size);
-    txa->eqp->setBuffers (txa->midbuff, txa->midbuff);
-    txa->eqp->setSize (txa->dsp_size);
-    txa->eqmeter->setBuffers (txa->midbuff);
-    txa->eqmeter->setSize (txa->dsp_size);
-    EMPHP::setBuffers_emphp (txa->preemph, txa->midbuff, txa->midbuff);
-    EMPHP::setSize_emphp (txa->preemph, txa->dsp_size);
-    txa->leveler->setBuffers(txa->midbuff, txa->midbuff);
-    txa->leveler->setSize(txa->dsp_size);
-    txa->lvlrmeter->setBuffers(txa->midbuff);
-    txa->lvlrmeter->setSize(txa->dsp_size);
-    CFCOMP::setBuffers_cfcomp (txa->cfcomp, txa->midbuff, txa->midbuff);
-    CFCOMP::setSize_cfcomp (txa->cfcomp, txa->dsp_size);
-    txa->cfcmeter->setBuffers(txa->midbuff);
-    txa->cfcmeter->setSize(txa->dsp_size);
-    txa->bp0->setBuffers (txa->midbuff, txa->midbuff);
-    txa->bp0->setSize (txa->dsp_size);
-    COMPRESSOR::setBuffers_compressor (txa->compressor, txa->midbuff, txa->midbuff);
-    COMPRESSOR::setSize_compressor (txa->compressor, txa->dsp_size);
-    txa->bp1->setBuffers (txa->midbuff, txa->midbuff);
-    txa->bp1->setSize (txa->dsp_size);
-    OSCTRL::setBuffers_osctrl (txa->osctrl, txa->midbuff, txa->midbuff);
-    OSCTRL::setSize_osctrl (txa->osctrl, txa->dsp_size);
-    txa->bp2->setBuffers (txa->midbuff, txa->midbuff);
-    txa->bp2->setSize (txa->dsp_size);
-    txa->compmeter->setBuffers(txa->midbuff);
-    txa->compmeter->setSize(txa->dsp_size);
-    txa->alc->setBuffers(txa->midbuff, txa->midbuff);
-    txa->alc->setSize( txa->dsp_size);
-    AMMOD::setBuffers_ammod (txa->ammod, txa->midbuff, txa->midbuff);
-    AMMOD::setSize_ammod (txa->ammod, txa->dsp_size);
-    FMMOD::setBuffers_fmmod (txa->fmmod, txa->midbuff, txa->midbuff);
-    FMMOD::setSize_fmmod (txa->fmmod, txa->dsp_size);
-    txa->gen1->setBuffers(txa->midbuff, txa->midbuff);
-    txa->gen1->setSize(txa->dsp_size);
-    USLEW::setBuffers_uslew (txa->uslew, txa->midbuff, txa->midbuff);
-    USLEW::setSize_uslew (txa->uslew, txa->dsp_size);
-    txa->alcmeter->setBuffers (txa->midbuff);
-    txa->alcmeter->setSize(txa->dsp_size);
-    txa->sip1->setBuffers (txa->midbuff);
-    txa->sip1->setSize (txa->dsp_size);
-    IQC::setBuffers_iqc (txa->iqc.p0, txa->midbuff, txa->midbuff);
-    IQC::setSize_iqc (txa->iqc.p0, txa->dsp_size);
-    CFIR::setBuffers_cfir (txa->cfir, txa->midbuff, txa->midbuff);
-    CFIR::setSize_cfir (txa->cfir, txa->dsp_size);
+    gen0->setBuffers(midbuff, midbuff);
+    gen0->setSize(dsp_size);
+    panel->setBuffers(midbuff, midbuff);
+    panel->setSize(dsp_size);
+    phrot->setBuffers(midbuff, midbuff);
+    phrot->setSize(dsp_size);
+    micmeter->setBuffers (midbuff);
+    micmeter->setSize (dsp_size);
+    amsq->setBuffers (midbuff, midbuff, midbuff);
+    amsq->setSize (dsp_size);
+    eqp->setBuffers (midbuff, midbuff);
+    eqp->setSize (dsp_size);
+    eqmeter->setBuffers (midbuff);
+    eqmeter->setSize (dsp_size);
+    EMPHP::setBuffers_emphp (preemph, midbuff, midbuff);
+    EMPHP::setSize_emphp (preemph, dsp_size);
+    leveler->setBuffers(midbuff, midbuff);
+    leveler->setSize(dsp_size);
+    lvlrmeter->setBuffers(midbuff);
+    lvlrmeter->setSize(dsp_size);
+    CFCOMP::setBuffers_cfcomp (cfcomp, midbuff, midbuff);
+    CFCOMP::setSize_cfcomp (cfcomp, dsp_size);
+    cfcmeter->setBuffers(midbuff);
+    cfcmeter->setSize(dsp_size);
+    bp0->setBuffers (midbuff, midbuff);
+    bp0->setSize (dsp_size);
+    COMPRESSOR::setBuffers_compressor (compressor, midbuff, midbuff);
+    COMPRESSOR::setSize_compressor (compressor, dsp_size);
+    bp1->setBuffers (midbuff, midbuff);
+    bp1->setSize (dsp_size);
+    OSCTRL::setBuffers_osctrl (osctrl, midbuff, midbuff);
+    OSCTRL::setSize_osctrl (osctrl, dsp_size);
+    bp2->setBuffers (midbuff, midbuff);
+    bp2->setSize (dsp_size);
+    compmeter->setBuffers(midbuff);
+    compmeter->setSize(dsp_size);
+    alc->setBuffers(midbuff, midbuff);
+    alc->setSize( dsp_size);
+    AMMOD::setBuffers_ammod (ammod, midbuff, midbuff);
+    AMMOD::setSize_ammod (ammod, dsp_size);
+    FMMOD::setBuffers_fmmod (fmmod, midbuff, midbuff);
+    FMMOD::setSize_fmmod (fmmod, dsp_size);
+    gen1->setBuffers(midbuff, midbuff);
+    gen1->setSize(dsp_size);
+    USLEW::setBuffers_uslew (uslew, midbuff, midbuff);
+    USLEW::setSize_uslew (uslew, dsp_size);
+    alcmeter->setBuffers (midbuff);
+    alcmeter->setSize(dsp_size);
+    sip1->setBuffers (midbuff);
+    sip1->setSize (dsp_size);
+    IQC::setBuffers_iqc (iqc.p0, midbuff, midbuff);
+    IQC::setSize_iqc (iqc.p0, dsp_size);
+    CFIR::setBuffers_cfir (cfir, midbuff, midbuff);
+    CFIR::setSize_cfir (cfir, dsp_size);
     // output resampler
-    txa->rsmpout->setBuffers(txa->midbuff, txa->outbuff);
-    txa->rsmpout->setSize(txa->dsp_size);
+    rsmpout->setBuffers(midbuff, outbuff);
+    rsmpout->setSize(dsp_size);
     // output meter
-    txa->outmeter->setBuffers(txa->outbuff);
-    txa->outmeter->setSize(txa->dsp_outsize);
+    outmeter->setBuffers(outbuff);
+    outmeter->setSize(dsp_outsize);
 }
 
 /********************************************************************************************************
@@ -824,51 +752,51 @@ void TXA::setDSPBuffsize (TXA *txa, int dsp_size)
 *                                                                                                       *
 ********************************************************************************************************/
 
-void TXA::SetMode (TXA& txa, int mode)
+void TXA::setMode(int _mode)
 {
-    if (txa.mode != mode)
+    if (mode != _mode)
     {
-        txa.mode = mode;
-        txa.ammod->run   = 0;
-        txa.fmmod->run   = 0;
-        txa.preemph->run = 0;
+        mode = _mode;
+        ammod->run   = 0;
+        fmmod->run   = 0;
+        preemph->run = 0;
 
-        switch (mode)
+        switch (_mode)
         {
         case TXA_AM:
         case TXA_SAM:
-            txa.ammod->run   = 1;
-            txa.ammod->mode  = 0;
+            ammod->run   = 1;
+            ammod->mode  = 0;
             break;
         case TXA_DSB:
-            txa.ammod->run   = 1;
-            txa.ammod->mode  = 1;
+            ammod->run   = 1;
+            ammod->mode  = 1;
             break;
         case TXA_AM_LSB:
         case TXA_AM_USB:
-            txa.ammod->run   = 1;
-            txa.ammod->mode  = 2;
+            ammod->run   = 1;
+            ammod->mode  = 2;
             break;
         case TXA_FM:
-            txa.fmmod->run   = 1;
-            txa.preemph->run = 1;
+            fmmod->run   = 1;
+            preemph->run = 1;
             break;
         default:
 
             break;
         }
 
-        SetupBPFilters (txa);
+        setupBPFilters();
     }
 }
 
-void TXA::SetBandpassFreqs (TXA& txa, float f_low, float f_high)
+void TXA::setBandpassFreqs(float _f_low, float _f_high)
 {
-    if ((txa.f_low != f_low) || (txa.f_high != f_high))
+    if ((f_low != _f_low) || (f_high != _f_high))
     {
-        txa.f_low = f_low;
-        txa.f_high = f_high;
-        SetupBPFilters (txa);
+        f_low = _f_low;
+        f_high = _f_high;
+        setupBPFilters();
     }
 }
 
@@ -879,34 +807,34 @@ void TXA::SetBandpassFreqs (TXA& txa, float f_low, float f_high)
 *                                                                                                       *
 ********************************************************************************************************/
 
-void TXA::ResCheck (TXA& txa)
+void TXA::resCheck()
 {
-    RESAMPLE *a = txa.rsmpin;
-    if (txa.in_rate  != txa.dsp_rate)
+    RESAMPLE *a = rsmpin;
+    if (in_rate  != dsp_rate)
         a->run = 1;
     else
         a->run = 0;
-    a = txa.rsmpout;
-    if (txa.dsp_rate != txa.out_rate)
+    a = rsmpout;
+    if (dsp_rate != out_rate)
         a->run = 1;
     else
         a->run = 0;
 }
 
-int TXA::UslewCheck (TXA& txa)
+int TXA::uslewCheck()
 {
-    return  (txa.ammod->run == 1) ||
-            (txa.fmmod->run == 1) ||
-            (txa.gen0->run  == 1) ||
-            (txa.gen1->run  == 1);
+    return  (ammod->run == 1) ||
+            (fmmod->run == 1) ||
+            (gen0->run  == 1) ||
+            (gen1->run  == 1);
 }
 
-void TXA::SetupBPFilters (TXA& txa)
+void TXA::setupBPFilters()
 {
-    txa.bp0->run = 1;
-    txa.bp1->run = 0;
-    txa.bp2->run = 0;
-    switch (txa.mode)
+    bp0->run = 1;
+    bp1->run = 0;
+    bp2->run = 0;
+    switch (mode)
     {
     case TXA_LSB:
     case TXA_USB:
@@ -916,15 +844,15 @@ void TXA::SetupBPFilters (TXA& txa)
     case TXA_DIGU:
     case TXA_SPEC:
     case TXA_DRM:
-        txa.bp0->calcBandpassFilter (txa.f_low, txa.f_high, 2.0);
-        if (txa.compressor->run)
+        bp0->calcBandpassFilter (f_low, f_high, 2.0);
+        if (compressor->run)
         {
-            txa.bp1->calcBandpassFilter (txa.f_low, txa.f_high, 2.0);
-            txa.bp1->run = 1;
-            if (txa.osctrl->run)
+            bp1->calcBandpassFilter (f_low, f_high, 2.0);
+            bp1->run = 1;
+            if (osctrl->run)
             {
-                txa.bp2->calcBandpassFilter (txa.f_low, txa.f_high, 1.0);
-                txa.bp2->run = 1;
+                bp2->calcBandpassFilter (f_low, f_high, 1.0);
+                bp2->run = 1;
             }
         }
         break;
@@ -932,60 +860,62 @@ void TXA::SetupBPFilters (TXA& txa)
     case TXA_AM:
     case TXA_SAM:
     case TXA_FM:
-        if (txa.compressor->run)
+        if (compressor->run)
         {
-            txa.bp0->calcBandpassFilter (0.0, txa.f_high, 2.0);
-            txa.bp1->calcBandpassFilter (0.0, txa.f_high, 2.0);
-            txa.bp1->run = 1;
-            if (txa.osctrl->run)
+            bp0->calcBandpassFilter (0.0, f_high, 2.0);
+            bp1->calcBandpassFilter (0.0, f_high, 2.0);
+            bp1->run = 1;
+            if (osctrl->run)
             {
-                txa.bp2->calcBandpassFilter (0.0, txa.f_high, 1.0);
-                txa.bp2->run = 1;
+                bp2->calcBandpassFilter (0.0, f_high, 1.0);
+                bp2->run = 1;
             }
         }
         else
         {
-            txa.bp0->calcBandpassFilter (txa.f_low, txa.f_high, 1.0);
+            bp0->calcBandpassFilter (f_low, f_high, 1.0);
         }
         break;
     case TXA_AM_LSB:
-        txa.bp0->calcBandpassFilter (-txa.f_high, 0.0, 2.0);
-        if (txa.compressor->run)
+        bp0->calcBandpassFilter (-f_high, 0.0, 2.0);
+        if (compressor->run)
         {
-            txa.bp1->calcBandpassFilter (-txa.f_high, 0.0, 2.0);
-            txa.bp1->run = 1;
-            if (txa.osctrl->run)
+            bp1->calcBandpassFilter (-f_high, 0.0, 2.0);
+            bp1->run = 1;
+            if (osctrl->run)
             {
-                txa.bp2->calcBandpassFilter (-txa.f_high, 0.0, 1.0);
-                txa.bp2->run = 1;
+                bp2->calcBandpassFilter (-f_high, 0.0, 1.0);
+                bp2->run = 1;
             }
         }
         break;
     case TXA_AM_USB:
-        txa.bp0->calcBandpassFilter (0.0, txa.f_high, 2.0);
-        if (txa.compressor->run)
+        bp0->calcBandpassFilter (0.0, f_high, 2.0);
+        if (compressor->run)
         {
-            txa.bp1->calcBandpassFilter (0.0, txa.f_high, 2.0);
-            txa.bp1->run = 1;
-            if (txa.osctrl->run)
+            bp1->calcBandpassFilter (0.0, f_high, 2.0);
+            bp1->run = 1;
+            if (osctrl->run)
             {
-                txa.bp2->calcBandpassFilter(0.0, txa.f_high, 1.0);
-                txa.bp2->run = 1;
+                bp2->calcBandpassFilter(0.0, f_high, 1.0);
+                bp2->run = 1;
             }
         }
+        break;
+    default:
         break;
     }
 }
 
-void TXA::SetBandpassNC (TXA& txa, int nc)
+void TXA::setBandpassNC(int _nc)
 {
     // NOTE:  'nc' must be >= 'size'
     BANDPASS *a;
-    a = txa.bp0;
+    a = bp0;
 
-    if (a->nc != nc)
+    if (a->nc != _nc)
     {
-        a->nc = nc;
+        a->nc = _nc;
         float* impulse = FIR::fir_bandpass (
             a->nc,
             a->f_low,
@@ -996,14 +926,14 @@ void TXA::SetBandpassNC (TXA& txa, int nc)
             a->gain / (double)(2 * a->size)
         );
         FIRCORE::setNc_fircore (a->fircore, a->nc, impulse);
-        delete[] (impulse);
+        delete[] impulse;
     }
 
-    a = txa.bp1;
+    a = bp1;
 
-    if (a->nc != nc)
+    if (a->nc != _nc)
     {
-        a->nc = nc;
+        a->nc = _nc;
         float* impulse = FIR::fir_bandpass (
             a->nc,
             a->f_low,
@@ -1014,14 +944,14 @@ void TXA::SetBandpassNC (TXA& txa, int nc)
             a->gain / (double)(2 * a->size)
         );
         FIRCORE::setNc_fircore (a->fircore, a->nc, impulse);
-        delete[] (impulse);
+        delete[] impulse;
     }
 
-    a = txa.bp2;
+    a = bp2;
 
-    if (a->nc != nc)
+    if (a->nc != _nc)
     {
-        a->nc = nc;
+        a->nc = _nc;
         float* impulse = FIR::fir_bandpass (
             a->nc,
             a->f_low,
@@ -1032,34 +962,34 @@ void TXA::SetBandpassNC (TXA& txa, int nc)
             a->gain / (double)(2 * a->size)
         );
         FIRCORE::setNc_fircore (a->fircore, a->nc, impulse);
-        delete[] (impulse);
+        delete[] impulse;
     }
 }
 
-void TXA::SetBandpassMP (TXA& txa, int mp)
+void TXA::setBandpassMP(int _mp)
 {
     BANDPASS *a;
-    a = txa.bp0;
+    a = bp0;
 
-    if (mp != a->mp)
+    if (_mp != a->mp)
     {
-        a->mp = mp;
+        a->mp = _mp;
         FIRCORE::setMp_fircore (a->fircore, a->mp);
     }
 
-    a = txa.bp1;
+    a = bp1;
 
-    if (mp != a->mp)
+    if (_mp != a->mp)
     {
-        a->mp = mp;
+        a->mp = _mp;
         FIRCORE::setMp_fircore (a->fircore, a->mp);
     }
 
-    a = txa.bp2;
+    a = bp2;
 
-    if (mp != a->mp)
+    if (_mp != a->mp)
     {
-        a->mp = mp;
+        a->mp = _mp;
         FIRCORE::setMp_fircore (a->fircore, a->mp);
     }
 }
@@ -1070,30 +1000,30 @@ void TXA::SetBandpassMP (TXA& txa, int mp)
 *                                                                                                       *
 ********************************************************************************************************/
 
-void TXA::SetNC (TXA& txa, int nc)
+void TXA::setNC(int _nc)
 {
-    int oldstate = txa.state;
+    int oldstate = state;
 
-    SetBandpassNC           (txa, nc);
-    EMPHP::SetFMEmphNC      (txa, nc);
-    txa.eqp->setNC               (nc);
-    FMMOD::SetFMNC          (txa, nc);
-    CFIR::SetCFIRNC         (txa, nc);
-    txa.state = oldstate;
+    setBandpassNC                (_nc);
+    EMPHP::SetFMEmphNC    (*this, _nc);
+    eqp->setNC                   (_nc);
+    FMMOD::SetFMNC        (*this, _nc);
+    CFIR::SetCFIRNC       (*this, _nc);
+    state = oldstate;
 }
 
-void TXA::SetMP (TXA& txa, int mp)
+void TXA::setMP(int _mp)
 {
-    SetBandpassMP            (txa, mp);
-    EMPHP::SetFMEmphMP       (txa, mp);
-    txa.eqp->setMP                (mp);
-    FMMOD::SetFMMP           (txa, mp);
+    setBandpassMP                 (_mp);
+    EMPHP::SetFMEmphMP     (*this, _mp);
+    eqp->setMP                    (_mp);
+    FMMOD::SetFMMP         (*this, _mp);
 }
 
-void TXA::SetFMAFFilter (TXA& txa, float low, float high)
+void TXA::setFMAFFilter(float _low, float _high)
 {
-    EMPHP::SetFMPreEmphFreqs (txa, low, high);
-    FMMOD::SetFMAFFreqs      (txa, low, high);
+    EMPHP::SetFMPreEmphFreqs (*this, _low, _high);
+    FMMOD::SetFMAFFreqs      (*this, _low, _high);
 }
 
 } // namespace WDSP

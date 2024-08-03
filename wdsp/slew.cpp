@@ -103,7 +103,7 @@ void USLEW::flush_uslew (USLEW *a)
 
 void USLEW::xuslew (USLEW *a)
 {
-    if (!a->runmode && TXA::UslewCheck (*a->txa))
+    if (!a->runmode && a->txa->uslewCheck())
         a->runmode = 1;
 
     long upslew = *a->ch_upslew;

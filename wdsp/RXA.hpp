@@ -128,70 +128,68 @@ public:
     PANEL *panel;
     RESAMPLE *rsmpout;
 
-    static RXA* create_rxa (
+    RXA(
         int in_rate,                // input samplerate
         int out_rate,               // output samplerate
         int dsp_rate,               // sample rate for mainstream dsp processing
         int dsp_size                // number complex samples processed per buffer in mainstream dsp processing
     );
-    static void destroy_rxa (RXA *rxa);
-    static void flush_rxa (RXA *rxa);
-    static void xrxa (RXA *rxa);
-    int get_insize() const { return dsp_insize; }
-    int get_outsize() const { return dsp_outsize; }
-    float *get_inbuff() { return inbuff; }
-    float *get_outbuff() { return outbuff; }
+    RXA(const RXA&) = delete;
+    RXA& operator=(const RXA& other) = delete;
+    ~RXA();
+
+    void flush();
+    void execute();
+    void setInputSamplerate(int _in_rate);
+    void setOutputSamplerate(int _out_rate);
+    void setDSPSamplerate(int _dsp_rate);
+    void setDSPBuffsize(int _dsp_size);
+    int get_insize() const { return Unit::dsp_insize; }
+    int get_outsize() const { return Unit::dsp_outsize; }
+    float *get_inbuff() { return Unit::inbuff; }
+    float *get_outbuff() { return Unit::outbuff; }
     void setSpectrumProbe(BufferProbe *_spectrumProbe);
-    static void setInputSamplerate (RXA *rxa, int in_rate);
-    static void setOutputSamplerate (RXA *rxa, int out_rate);
-    static void setDSPSamplerate (RXA *rxa, int dsp_rate);
-    static void setDSPBuffsize (RXA *rxa, int dsp_size);
 
     // RXA Properties
-    static void SetMode (RXA& rxa, int mode);
-    static void ResCheck (RXA& rxa);
-    static void bp1Check (RXA& rxa, int amd_run, int snba_run, int emnr_run, int anf_run, int anr_run);
-    static void bp1Set (RXA& rxa);
-    static void bpsnbaCheck (RXA& rxa, int mode, int notch_run);
-    static void bpsnbaSet (RXA& rxa);
+    void setMode (int mode);
+    void resCheck ();
+    void bp1Check (int amd_run, int snba_run, int emnr_run, int anf_run, int anr_run);
+    void bp1Set ();
+    void bpsnbaCheck (int mode, int notch_run);
+    void bpsnbaSet ();
     // NOTCHDB, NBP, SNBA
-    static void UpdateNBPFiltersLightWeight (RXA& rxa);
-    static void UpdateNBPFilters(RXA& rxa);
-    static int NBPAddNotch (RXA& rxa, int notch, double fcenter, double fwidth, int active);
-    static int NBPGetNotch (RXA& rxa, int notch, double* fcenter, double* fwidth, int* active);
-    static int NBPDeleteNotch (RXA& rxa, int notch);
-    static int NBPEditNotch (RXA& rxa, int notch, double fcenter, double fwidth, int active);
-    static void NBPGetNumNotches (RXA& rxa, int* nnotches);
-    static void NBPSetTuneFrequency (RXA& rxa, double tunefreq);
-    static void NBPSetShiftFrequency (RXA& rxa, double shift);
-    static void NBPSetNotchesRun (RXA& rxa, int run);
-    static void NBPSetWindow (RXA& rxa, int wintype);
-    static void NBPSetAutoIncrease (RXA& rxa, int autoincr);
+    void updateNBPFiltersLightWeight();
+    void updateNBPFilters();
+    int nbpAddNotch(int notch, double fcenter, double fwidth, int active);
+    int nbpGetNotch(int notch, double* fcenter, double* fwidth, int* active);
+    int nbpDeleteNotch(int notch);
+    int nbpEditNotch(int notch, double fcenter, double fwidth, int active);
+    void nbpGetNumNotches(int* nnotches);
+    void nbpSetTuneFrequency(double tunefreq);
+    void nbpSetShiftFrequency(double shift);
+    void nbpSetNotchesRun(int run);
+    void nbpSetWindow(int wintype);
+    void nbpSetAutoIncrease(int autoincr);
     // AMD
-    static void SetAMDRun(RXA& rxa, int run);
+    void setAMDRun(int run);
     // SNBA
-    static void SetSNBARun (RXA& rxa, int run);
+    void setSNBARun(int run);
     // ANF
-    static void SetANFRun (RXA& rxa, int run);
-    static void SetANFPosition (RXA& rxa, int position);
+    void setANFRun(int run);
+    void setANFPosition(int position);
     // ANR
-    static void SetANRRun (RXA& rxa, int run);
-    static void SetANRPosition (RXA& rxa, int position);
+    void setANRRun(int run);
+    void setANRPosition(int position);
     // EMNR
-    static void SetEMNRRun (RXA& rxa, int run);
-    static void SetEMNRPosition (RXA& rxa, int position);
+    void setEMNRRun(int run);
+    void setEMNRPosition(int position);
     // WCPAGC
-    static void SetAGCThresh(RXA& rxa, double thresh, double size, double rate);
-    static void GetAGCThresh(RXA& rxa, double *thresh, double size, double rate);
+    void setAGCThresh(double thresh, double size, double rate);
+    void getAGCThresh(double *thresh, double size, double rate);
     // Collectives
-    static void SetPassband (RXA& rxa, float f_low, float f_high);
-    static void SetNC (RXA& rxa, int nc);
-    static void SetMP (RXA& rxa, int mp);
-
-private:
-    float* inbuff;
-    float* midbuff;
-    float* outbuff;
+    void setPassband(float f_low, float f_high);
+    void setNC(int nc);
+    void setMP(int mp);
 };
 
 } // namespace WDSP

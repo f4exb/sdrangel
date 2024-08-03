@@ -157,11 +157,6 @@ public:
     GEN *gen0;
     GEN *gen1;
     USLEW *uslew;
-    // struct
-    // {
-    //     CALCC *p;
-    //     CRITICAL_SECTION cs_update;
-    // } calcc;
     struct
     {
         IQC *p0, *p1;
@@ -169,42 +164,42 @@ public:
     } iqc;
     CFIR *cfir;
 
-    static TXA* create_txa (
+    TXA(
         int in_rate,                // input samplerate
         int out_rate,               // output samplerate
         int dsp_rate,               // sample rate for mainstream dsp processing
         int dsp_size                // number complex samples processed per buffer in mainstream dsp processing
     );
-    static void destroy_txa (TXA *txa);
-    static void flush_txa (TXA *txa);
-    static void xtxa (TXA *txa);
-    int get_insize() const { return dsp_insize; }
-    int get_outsize() const { return dsp_outsize; }
-    float *get_inbuff() { return inbuff; }
-    float *get_outbuff() { return outbuff; }
-    static void setInputSamplerate (TXA *txa, int in_rate);
-    static void setOutputSamplerate (TXA *txa, int out_rate);
-    static void setDSPSamplerate (TXA *txa, int dsp_rate);
-    static void setDSPBuffsize (TXA *txa, int dsp_size);
+    TXA(const TXA&) = delete;
+    TXA& operator=(const TXA& other) = delete;
+    ~TXA();
+
+    void flush();
+    void execute();
+    void setInputSamplerate(int _in_rate);
+    void setOutputSamplerate(int _out_rate);
+    void setDSPSamplerate(int _dsp_rate);
+    void setDSPBuffsize(int _dsp_size);
+    int get_insize() const { return Unit::dsp_insize; }
+    int get_outsize() const { return Unit::dsp_outsize; }
+    float *get_inbuff() { return Unit::inbuff; }
+    float *get_outbuff() { return Unit::outbuff; }
 
     // TXA Properties
-    static void SetMode (TXA& txa, int mode);
-    static void SetBandpassFreqs (TXA& txa, float f_low, float f_high);
-    static void SetBandpassNC (TXA& txa, int nc);
-    static void SetBandpassMP (TXA& txa, int mp);
+    void setMode(int mode);
+    void setBandpassFreqs(float f_low, float f_high);
+    void setBandpassNC(int nc);
+    void setBandpassMP(int mp);
 
     // Collectives
-    static void SetNC (TXA& txa, int nc);
-    static void SetMP (TXA& txa, int mp);
-    static void SetFMAFFilter (TXA& txa, float low, float high);
-    static void SetupBPFilters (TXA& txa);
-    static int UslewCheck (TXA& txa);
+    void setNC(int nc);
+    void setMP(int mp);
+    void setFMAFFilter(float low, float high);
+    void setupBPFilters();
+    int uslewCheck();
 
 private:
-    static void ResCheck (TXA& txa);
-    float* inbuff;
-    float* midbuff;
-    float* outbuff;
+    void resCheck();
 };
 
 } // namespace WDSP

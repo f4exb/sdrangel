@@ -62,6 +62,7 @@ set(wdsp_SOURCES
     sphp.cpp
     ssql.cpp
     TXA.cpp
+    unit.cpp
     varsamp.cpp
     wcpAGC.cpp
 )
@@ -129,6 +130,7 @@ set(wdsp_HEADERS
     sphp.hpp
     ssql.hpp
     TXA.hpp
+    unit.hpp
     varsamp.hpp
     wcpAGC.hpp
 )
