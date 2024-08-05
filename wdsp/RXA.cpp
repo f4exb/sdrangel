@@ -55,6 +55,7 @@ warren@wpratt.com
 #include "nob.hpp"
 #include "speak.hpp"
 #include "mpeak.hpp"
+#include "fir.hpp"
 
 namespace WDSP {
 
@@ -71,7 +72,7 @@ RXA::RXA(
 )
 {
     mode = RXA::RXA_LSB;
-    std::fill(meter, meter + RXA::RXA_METERTYPE_LAST, 0);
+    std::fill(meter.begin(), meter.end(), 0);
 
     // Noise blanker (ANB or "NB")
     anb = new ANB(
@@ -127,17 +128,17 @@ RXA::RXA(
     // Input meter - ADC
     adcmeter = new METER(
         0,                                      // run
-        0,                                      // optional pointer to another 'run'
+        nullptr,                                      // optional pointer to another 'run'
         dsp_size,                          // size
         midbuff,                           // pointer to buffer
         dsp_rate,                          // samplerate
         0.100,                                  // averaging time constant
         0.100,                                  // peak decay time constant
-        meter,                             // result vector
+        meter.data(),                           // result vector
         RXA_ADC_AV,                             // index for average value
         RXA_ADC_PK,                             // index for peak value
         -1,                                     // index for gain value - disabled
-        0);                                     // pointer for gain computation
+        nullptr);                                     // pointer for gain computation
 
     // Notched bandpass section
 
@@ -200,17 +201,17 @@ RXA::RXA(
     // S-meter
     smeter = new METER(
         1,                                      // run
-        0,                                      // optional pointer to another 'run'
+        nullptr,                                      // optional pointer to another 'run'
         dsp_size,                          // size
         midbuff,                           // pointer to buffer
         dsp_rate,                          // samplerate
         0.100,                                  // averaging time constant
         0.100,                                  // peak decay time constant
-        meter,                             // result vector
+        meter.data(),                           // result vector
         RXA_S_AV,                               // index for average value
         RXA_S_PK,                               // index for peak value
         -1,                                     // index for gain value - disabled
-        0);                                     // pointer for gain computation
+        nullptr);                                     // pointer for gain computation
 
     // AM squelch capture (for other modes than FM)
     amsq = new AMSQ(
@@ -416,13 +417,13 @@ RXA::RXA(
     // AGC meter
     agcmeter = new METER(
         0,                                      // run
-        0,                                      // optional pointer to another 'run'
+        nullptr,                                      // optional pointer to another 'run'
         dsp_size,                          // size
         midbuff,                           // pointer to buffer
         dsp_rate,                          // samplerate
         0.100,                                  // averaging time constant
         0.100,                                  // peak decay time constant
-        meter,                             // result vector
+        meter.data(),                             // result vector
         RXA_AGC_AV,                             // index for average value
         RXA_AGC_PK,                             // index for peak value
         RXA_AGC_GAIN,                           // index for gain value
@@ -903,7 +904,7 @@ void RXA::bp1Set ()
         a->run = 0;
     if (!old && a->run)
         a->flush();
-    FIRCORE::setUpdate_fircore (a->fircore);
+    FIRCORE::setUpdate_fircore(a->fircore);
 }
 
 void RXA::bpsnbaCheck(int _mode, int _notch_run)
@@ -988,7 +989,7 @@ void RXA::bpsnbaSet()
         default:
             break;
     }
-    FIRCORE::setUpdate_fircore (a->bpsnba->fircore);
+    FIRCORE::setUpdate_fircore(a->bpsnba->fircore);
 }
 
 void RXA::updateNBPFiltersLightWeight()
@@ -1004,7 +1005,7 @@ void RXA::updateNBPFilters()
     if (a->fnfrun)
     {
         a->calc_impulse();
-        FIRCORE::setImpulse_fircore (a->fircore, a->impulse, 1);
+        FIRCORE::setImpulse_fircore(a->fircore, a->impulse, 1);
         delete[] (a->impulse);
     }
     if (b->bpsnba->fnfrun)
@@ -1025,7 +1026,7 @@ int RXA::nbpAddNotch(int _notch, double _fcenter, double _fwidth, int _active)
     return rval;
 }
 
-int RXA::nbpGetNotch(int _notch, double* _fcenter, double* _fwidth, int* _active)
+int RXA::nbpGetNotch(int _notch, double* _fcenter, double* _fwidth, int* _active) const
 {
     NOTCHDB *a = ndb;
     int rval = a->getNotch(_notch, _fcenter, _fwidth, _active);
@@ -1056,7 +1057,7 @@ int RXA::nbpEditNotch(int _notch, double _fcenter, double _fwidth, int _active)
     return rval;
 }
 
-void RXA::nbpGetNumNotches(int* _nnotches)
+void RXA::nbpGetNumNotches(int* _nnotches) const
 {
     const NOTCHDB *a = ndb;
     a->getNumNotches(_nnotches);
@@ -1096,10 +1097,10 @@ void RXA::nbpSetNotchesRun(int _run)
         b->fnfrun = a->master_run;
         bpsnbaCheck(mode, _run);
         b->calc_impulse();                           // recalc nbp impulse response
-        FIRCORE::setImpulse_fircore (b->fircore, b->impulse, 0);       // calculate new filter masks
+        FIRCORE::setImpulse_fircore(b->fircore, b->impulse, 0);       // calculate new filter masks
         delete[] (b->impulse);
         bpsnbaSet();
-        FIRCORE::setUpdate_fircore (b->fircore);                       // apply new filter masks
+        FIRCORE::setUpdate_fircore(b->fircore);                       // apply new filter masks
     }
 }
 
@@ -1110,15 +1111,15 @@ void RXA::nbpSetWindow(int _wintype)
     a = nbp0;
     b = bpsnba;
 
-    if ((a->wintype != _wintype))
+    if (a->wintype != _wintype)
     {
         a->wintype = _wintype;
         a->calc_impulse();
-        FIRCORE::setImpulse_fircore (a->fircore, a->impulse, 1);
+        FIRCORE::setImpulse_fircore(a->fircore, a->impulse, 1);
         delete[] (a->impulse);
     }
 
-    if ((b->wintype != _wintype))
+    if (b->wintype != _wintype)
     {
         b->wintype = _wintype;
         b->recalc_bpsnba_filter(1);
@@ -1132,15 +1133,15 @@ void RXA::nbpSetAutoIncrease(int _autoincr)
     a = nbp0;
     b = bpsnba;
 
-    if ((a->autoincr != _autoincr))
+    if (a->autoincr != _autoincr)
     {
         a->autoincr = _autoincr;
         a->calc_impulse();
-        FIRCORE::setImpulse_fircore (a->fircore, a->impulse, 1);
+        FIRCORE::setImpulse_fircore(a->fircore, a->impulse, 1);
         delete[] (a->impulse);
     }
 
-    if ((b->autoincr != _autoincr))
+    if (b->autoincr != _autoincr)
     {
         b->autoincr = _autoincr;
         b->recalc_bpsnba_filter(1);
@@ -1260,7 +1261,7 @@ void RXA::setEMNRPosition(int _position)
     bp1->position  = _position;
 }
 
-void RXA::getAGCThresh(double *_thresh, double _size, double _rate)
+void RXA::getAGCThresh(double *_thresh, double _size, double _rate) const
 //for line on bandscope.
 {
     double noise_offset;

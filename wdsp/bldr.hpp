@@ -28,6 +28,8 @@ warren@wpratt.com
 #ifndef wdsp_bldr_h
 #define wdsp_bldr_h
 
+#include <vector>
+
 #include "export.h"
 
 namespace WDSP {
@@ -35,47 +37,50 @@ namespace WDSP {
 class WDSP_API BLDR
 {
 public:
-    float* catxy;
-    float* sx;
-    float* sy;
-    float* h;
-    int* p;
-    int* np;
-    float* taa;
-    float* tab;
-    float* tag;
-    float* tad;
-    float* tbb;
-    float* tbg;
-    float* tbd;
-    float* tgg;
-    float* tgd;
-    float* tdd;
-    float* A;
-    float* B;
-    float* C;
-    float* D;
-    float* E;
-    float* F;
-    float* G;
-    float* MAT;
-    float* RHS;
-    float* SLN;
-    float* z;
-    float* zp;
-    float* wrk;
-    int* ipiv;
+    double* catxy;
+    std::vector<double> sx;
+    std::vector<double> sy;
+    std::vector<double> h;
+    std::vector<int> p;
+    std::vector<int> np;
+    std::vector<double> taa;
+    std::vector<double> tab;
+    std::vector<double> tag;
+    std::vector<double> tad;
+    std::vector<double> tbb;
+    std::vector<double> tbg;
+    std::vector<double> tbd;
+    std::vector<double> tgg;
+    std::vector<double> tgd;
+    std::vector<double> tdd;
+    std::vector<double> A;
+    std::vector<double> B;
+    std::vector<double> C;
+    std::vector<double> D;
+    std::vector<double> E;
+    std::vector<double> F;
+    std::vector<double> G;
+    std::vector<double> MAT;
+    std::vector<double> RHS;
+    std::vector<double> SLN;
+    std::vector<double> z;
+    std::vector<double> zp;
+    std::vector<double> wrk;
+    std::vector<int> ipiv;
 
-    static BLDR* create_builder(int points, int ints);
-    static void destroy_builder(BLDR *a);
-    static void flush_builder(BLDR *a, int points, int ints);
-    static void xbuilder(BLDR *a, int points, float* x, float* y, int ints, float* t, int* info, float* c, float ptol);
+    BLDR(int points, int ints);
+    BLDR(const BLDR&) = delete;
+    BLDR& operator=(const BLDR& other) = delete;
+    ~BLDR();
+
+    void flush(int points);
+    void execute(int points, const double* x, const double* y, int ints, const double* t, int* info, double* c, double ptol);
 
 private:
     static int fcompare(const void* a, const void* b);
-    static void decomp(int n, float* a, int* piv, int* info, float* wrk);
-    static void dsolve(int n, float* a, int* piv, float* b, float* x);
-    static void cull(int* n, int ints, float* x, float* t, float ptol);
+    static void decomp(int n, std::vector<double>& a, std::vector<int>& piv, int* info, std::vector<double>& wrk);
+    static void dsolve(int n, std::vector<double>& a, std::vector<int>& piv, std::vector<double>& b, std::vector<double>& x);
+    static void cull(int* n, int ints, std::vector<double>& x, const double* t, double ptol);
 };
 
 } // namespace WDSP

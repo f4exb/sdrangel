@@ -35,237 +35,115 @@ namespace WDSP {
 
 /********************************************************************************************************
 *                                                                                                       *
-*                               Partitioned Overlap-Save FM Pre-Emphasis                                *
-*                                                                                                       *
-********************************************************************************************************/
-
-EMPHP* EMPHP::create_emphp (int run, int position, int size, int nc, int mp, float* in, float* out, int rate, int ctype, float f_low, float f_high)
-{
-    EMPHP *a = new EMPHP;
-    float* impulse;
-    a->run = run;
-    a->position = position;
-    a->size = size;
-    a->nc = nc;
-    a->mp = mp;
-    a->in = in;
-    a->out = out;
-    a->rate = rate;
-    a->ctype = ctype;
-    a->f_low = f_low;
-    a->f_high = f_high;
-    impulse = FCurve::fc_impulse (a->nc, a->f_low, a->f_high, -20.0 * log10(a->f_high / a->f_low), 0.0, a->ctype, a->rate, 1.0 / (2.0 * a->size), 0, 0);
-    a->p = FIRCORE::create_fircore (a->size, a->in, a->out, a->nc, a->mp, impulse);
-    delete[] (impulse);
-    return a;
-}
-
-void EMPHP::destroy_emphp (EMPHP *a)
-{
-    FIRCORE::destroy_fircore (a->p);
-    delete (a);
-}
-
-void EMPHP::flush_emphp (EMPHP *a)
-{
-    FIRCORE::flush_fircore (a->p);
-}
-
-void EMPHP::xemphp (EMPHP *a, int position)
-{
-    if (a->run && a->position == position)
-        FIRCORE::xfircore (a->p);
-    else if (a->in != a->out)
-        std::copy( a->in,  a->in + a->size * 2, a->out);
-}
-
-void EMPHP::setBuffers_emphp (EMPHP *a, float* in, float* out)
-{
-    a->in = in;
-    a->out = out;
-    FIRCORE::setBuffers_fircore (a->p, a->in, a->out);
-}
-
-void EMPHP::setSamplerate_emphp (EMPHP *a, int rate)
-{
-    float* impulse;
-    a->rate = rate;
-    impulse = FCurve::fc_impulse (a->nc, a->f_low, a->f_high, -20.0 * log10(a->f_high / a->f_low), 0.0, a->ctype, a->rate, 1.0 / (2.0 * a->size), 0, 0);
-    FIRCORE::setImpulse_fircore (a->p, impulse, 1);
-    delete[] (impulse);
-}
-
-void EMPHP::setSize_emphp (EMPHP *a, int size)
-{
-    float* impulse;
-    a->size = size;
-    FIRCORE::setSize_fircore (a->p, a->size);
-    impulse = FCurve::fc_impulse (a->nc, a->f_low, a->f_high, -20.0 * log10(a->f_high / a->f_low), 0.0, a->ctype, a->rate, 1.0 / (2.0 * a->size), 0, 0);
-    FIRCORE::setImpulse_fircore (a->p, impulse, 1);
-    delete[] (impulse);
-}
-
-/********************************************************************************************************
-*                                                                                                       *
-*                       Partitioned Overlap-Save FM Pre-Emphasis:  TXA Properties                       *
-*                                                                                                       *
-********************************************************************************************************/
-
-void EMPHP::SetFMEmphPosition (TXA& txa, int position)
-{
-    txa.preemph->position = position;
-}
-
-void EMPHP::SetFMEmphMP (TXA& txa, int mp)
-{
-    EMPHP *a;
-    a = txa.preemph;
-    if (a->mp != mp)
-    {
-        a->mp = mp;
-        FIRCORE::setMp_fircore (a->p, a->mp);
-    }
-}
-
-void EMPHP::SetFMEmphNC (TXA& txa, int nc)
-{
-    EMPHP *a;
-    float* impulse;
-    a = txa.preemph;
-
-    if (a->nc != nc)
-    {
-        a->nc = nc;
-        impulse = FCurve::fc_impulse (a->nc, a->f_low, a->f_high, -20.0 * log10(a->f_high / a->f_low), 0.0, a->ctype, a->rate, 1.0 / (2.0 * a->size), 0, 0);
-        FIRCORE::setNc_fircore (a->p, a->nc, impulse);
-        delete[] (impulse);
-    }
-}
-
-void EMPHP::SetFMPreEmphFreqs (TXA& txa, float low, float high)
-{
-    EMPHP *a;
-    float* impulse;
-    a = txa.preemph;
-
-    if (a->f_low != low || a->f_high != high)
-    {
-        a->f_low = low;
-        a->f_high = high;
-        impulse = FCurve::fc_impulse (a->nc, a->f_low, a->f_high, -20.0 * log10(a->f_high / a->f_low), 0.0, a->ctype, a->rate, 1.0 / (2.0 * a->size), 0, 0);
-        FIRCORE::setImpulse_fircore (a->p, impulse, 1);
-        delete[] (impulse);
-    }
-}
-
-/********************************************************************************************************
-*                                                                                                       *
 *                                       Overlap-Save FM Pre-Emphasis                                    *
 *                                                                                                       *
 ********************************************************************************************************/
 
-void EMPH::calc_emph (EMPH *a)
+void EMPH::calc()
 {
-    a->infilt = new float[2 * a->size * 2]; // (float *)malloc0(2 * a->size * sizeof(complex));
-    a->product = new float[2 * a->size * 2]; // (float *)malloc0(2 * a->size * sizeof(complex));
-    a->mults = FCurve::fc_mults(a->size, a->f_low, a->f_high, -20.0 * log10(a->f_high / a->f_low), 0.0, a->ctype, a->rate, 1.0 / (2.0 * a->size), 0, 0);
-    a->CFor = fftwf_plan_dft_1d(2 * a->size, (fftwf_complex *)a->infilt, (fftwf_complex *)a->product, FFTW_FORWARD, FFTW_PATIENT);
-    a->CRev = fftwf_plan_dft_1d(2 * a->size, (fftwf_complex *)a->product, (fftwf_complex *)a->out, FFTW_BACKWARD, FFTW_PATIENT);
+    infilt = new float[2 * size * 2];
+    product = new float[2 * size * 2];
+    mults = FCurve::fc_mults(
+        size,
+        f_low,
+        f_high,
+        -20.0 * log10(f_high / f_low),
+        0.0,
+        ctype,
+        rate,
+        1.0 / (2.0 * size),
+        0,
+        0
+    );
+    CFor = fftwf_plan_dft_1d(2 * size, (fftwf_complex *)infilt, (fftwf_complex *)product, FFTW_FORWARD, FFTW_PATIENT);
+    CRev = fftwf_plan_dft_1d(2 * size, (fftwf_complex *)product, (fftwf_complex *)out, FFTW_BACKWARD, FFTW_PATIENT);
 }
 
-void EMPH::decalc_emph (EMPH *a)
+void EMPH::decalc()
 {
-    fftwf_destroy_plan(a->CRev);
-    fftwf_destroy_plan(a->CFor);
-    delete[] (a->mults);
-    delete[] (a->product);
-    delete[] (a->infilt);
+    fftwf_destroy_plan(CRev);
+    fftwf_destroy_plan(CFor);
+    delete[] mults;
+    delete[] product;
+    delete[] infilt;
 }
 
-EMPH* EMPH::create_emph (int run, int position, int size, float* in, float* out, int rate, int ctype, float f_low, float f_high)
+EMPH::EMPH(
+    int _run,
+    int _position,
+    int _size,
+    float* _in,
+    float* _out,
+    int _rate,
+    int _ctype,
+    double _f_low,
+    double _f_high
+) :
+    run(_run),
+    position(_position),
+    size(_size),
+    in(_in),
+    out(_out),
+    ctype(_ctype),
+    f_low(_f_low),
+    f_high(_f_high),
+    rate((double) _rate)
 {
-    EMPH *a = new EMPH;
-    a->run = run;
-    a->position = position;
-    a->size = size;
-    a->in = in;
-    a->out = out;
-    a->rate = (float)rate;
-    a->ctype = ctype;
-    a->f_low = f_low;
-    a->f_high = f_high;
-    calc_emph (a);
-    return a;
+    calc();
 }
 
-void EMPH::destroy_emph (EMPH *a)
+EMPH::~EMPH()
 {
-    decalc_emph (a);
-    delete (a);
+    decalc();
 }
 
-void EMPH::flush_emph (EMPH *a)
+void EMPH::flush()
 {
-    std::fill(a->infilt, a->infilt + 2 * a->size * 2, 0);
+    std::fill(infilt, infilt + 2 * size * 2, 0);
 }
 
-void EMPH::xemph (EMPH *a, int position)
+void EMPH::execute(int _position)
 {
-    int i;
-    float I, Q;
-    if (a->run && a->position == position)
+    double I;
+    double Q;
+    if (run && position == _position)
     {
-        std::copy(a->in, a->in + a->size * 2, &(a->infilt[2 * a->size]));
-        fftwf_execute (a->CFor);
-        for (i = 0; i < 2 * a->size; i++)
+        std::copy(in, in + size * 2, &(infilt[2 * size]));
+        fftwf_execute (CFor);
+        for (int i = 0; i < 2 * size; i++)
         {
-            I = a->product[2 * i + 0];
-            Q = a->product[2 * i + 1];
-            a->product[2 * i + 0] = I * a->mults[2 * i + 0] - Q * a->mults[2 * i + 1];
-            a->product[2 * i + 1] = I * a->mults[2 * i + 1] + Q * a->mults[2 * i + 0];
+            I = product[2 * i + 0];
+            Q = product[2 * i + 1];
+            product[2 * i + 0] = (float) (I * mults[2 * i + 0] - Q * mults[2 * i + 1]);
+            product[2 * i + 1] = (float) (I * mults[2 * i + 1] + Q * mults[2 * i + 0]);
         }
-        fftwf_execute (a->CRev);
-        std::copy(&(a->infilt[2 * a->size]), &(a->infilt[2 * a->size]) + a->size * 2, a->infilt);
+        fftwf_execute (CRev);
+        std::copy(&(infilt[2 * size]), &(infilt[2 * size]) + size * 2, infilt);
     }
-    else if (a->in != a->out)
-        std::copy( a->in,  a->in + a->size * 2, a->out);
+    else if (in != out)
+        std::copy( in,  in + size * 2, out);
 }
 
-void EMPH::setBuffers_emph (EMPH *a, float* in, float* out)
+void EMPH::setBuffers(float* _in, float* _out)
 {
-    decalc_emph (a);
-    a->in = in;
-    a->out = out;
-    calc_emph (a);
+    decalc();
+    in = _in;
+    out = _out;
+    calc();
 }
 
-void EMPH::setSamplerate_emph (EMPH *a, int rate)
+void EMPH::setSamplerate(int _rate)
 {
-    decalc_emph (a);
-    a->rate = rate;
-    calc_emph (a);
+    decalc();
+    rate = _rate;
+    calc();
 }
 
-void EMPH::setSize_emph (EMPH *a, int size)
+void EMPH::setSize(int _size)
 {
-    decalc_emph(a);
-    a->size = size;
-    calc_emph(a);
+    decalc();
+    size = _size;
+    calc();
 }
-
-/********************************************************************************************************
-*                                                                                                       *
-*                               Overlap-Save FM Pre-Emphasis:  TXA Properties                           *
-*                                                                                                       *
-********************************************************************************************************/
-/*  // Uncomment when needed
-PORT
-void SetTXAFMEmphPosition (int channel, int position)
-{
-    ch.csDSP.lock();
-    txa.preemph->position = position;
-    ch.csDSP.unlock();
-}
-*/
 
 } // namespace WDSP

@@ -40,116 +40,116 @@ namespace WDSP {
 *                                                                                                       *
 ********************************************************************************************************/
 
-void BPS::calc_bps (BPS *a)
+void BPS::calc()
 {
     float* impulse;
-    a->infilt = new float[2 * a->size * 2];
-    a->product = new float[2 * a->size * 2];
-    impulse = FIR::fir_bandpass(a->size + 1, a->f_low, a->f_high, a->samplerate, a->wintype, 1, 1.0 / (float)(2 * a->size));
-    a->mults = FIR::fftcv_mults(2 * a->size, impulse);
-    a->CFor = fftwf_plan_dft_1d(2 * a->size, (fftwf_complex *)a->infilt, (fftwf_complex *)a->product, FFTW_FORWARD, FFTW_PATIENT);
-    a->CRev = fftwf_plan_dft_1d(2 * a->size, (fftwf_complex *)a->product, (fftwf_complex *)a->out, FFTW_BACKWARD, FFTW_PATIENT);
-    delete[](impulse);
+    infilt.resize(2 * size * 2);
+    product.resize(2 * size * 2);
+    impulse = FIR::fir_bandpass(size + 1, f_low, f_high, samplerate, wintype, 1, 1.0 / (float)(2 * size));
+    mults = FIR::fftcv_mults(2 * size, impulse);
+    CFor = fftwf_plan_dft_1d(2 * size, (fftwf_complex *) infilt.data(), (fftwf_complex *) product.data(), FFTW_FORWARD, FFTW_PATIENT);
+    CRev = fftwf_plan_dft_1d(2 * size, (fftwf_complex *) product.data(), (fftwf_complex *) out, FFTW_BACKWARD, FFTW_PATIENT);
+    delete[]impulse;
 }
 
-void BPS::decalc_bps (BPS *a)
+void BPS::decalc()
 {
-    fftwf_destroy_plan(a->CRev);
-    fftwf_destroy_plan(a->CFor);
-    delete[] (a->mults);
-    delete[] (a->product);
-    delete[] (a->infilt);
+    fftwf_destroy_plan(CRev);
+    fftwf_destroy_plan(CFor);
+    delete[] mults;
 }
 
-BPS* BPS::create_bps (
-    int run,
-    int position,
-    int size,
-    float* in,
-    float* out,
-    float f_low,
-    float f_high,
-    int samplerate,
-    int wintype,
-    float gain
-)
+BPS::BPS(
+    int _run,
+    int _position,
+    int _size,
+    float* _in,
+    float* _out,
+    double _f_low,
+    double _f_high,
+    int _samplerate,
+    int _wintype,
+    double _gain
+) :
+    run(_run),
+    position(_position),
+    size(_size),
+    in(_in),
+    out(_out),
+    f_low(_f_low),
+    f_high(_f_high),
+    samplerate((double) _samplerate),
+    wintype(_wintype),
+    gain(_gain)
 {
-    BPS *a = new BPS;
-    a->run = run;
-    a->position = position;
-    a->size = size;
-    a->samplerate = (float)samplerate;
-    a->wintype = wintype;
-    a->gain = gain;
-    a->in = in;
-    a->out = out;
-    a->f_low = f_low;
-    a->f_high = f_high;
-    calc_bps (a);
-    return a;
+    calc();
 }
 
-void BPS::destroy_bps (BPS *a)
+BPS::~BPS()
 {
-    decalc_bps (a);
-    delete a;
+    decalc();
 }
 
-void BPS::flush_bps (BPS *a)
+void BPS::flush()
 {
-    std::fill(a->infilt, a->infilt + 2 * a->size * 2, 0);
+    std::fill(infilt.begin(), infilt.end(), 0);
 }
 
-void BPS::xbps (BPS *a, int pos)
+void BPS::execute(int pos)
 {
-    int i;
-    float I, Q;
-    if (a->run && pos == a->position)
+    double I;
+    double Q;
+    if (run && pos == position)
     {
-        std::copy(a->in, a->in + a->size * 2, &(a->infilt[2 * a->size]));
-        fftwf_execute (a->CFor);
-        for (i = 0; i < 2 * a->size; i++)
+        std::copy(in, in + size * 2, &(infilt[2 * size]));
+        fftwf_execute (CFor);
+        for (int i = 0; i < 2 * size; i++)
         {
-            I = a->gain * a->product[2 * i + 0];
-            Q = a->gain * a->product[2 * i + 1];
-            a->product[2 * i + 0] = I * a->mults[2 * i + 0] - Q * a->mults[2 * i + 1];
-            a->product[2 * i + 1] = I * a->mults[2 * i + 1] + Q * a->mults[2 * i + 0];
+            I = gain * product[2 * i + 0];
+            Q = gain * product[2 * i + 1];
+            product[2 * i + 0] = (float) (I * mults[2 * i + 0] - Q * mults[2 * i + 1]);
+            product[2 * i + 1] = (float) (I * mults[2 * i + 1] + Q * mults[2 * i + 0]);
         }
-        fftwf_execute (a->CRev);
-        std::copy(&(a->infilt[2 * a->size]), &(a->infilt[2 * a->size]) + a->size * 2, a->infilt);
+        fftwf_execute (CRev);
+        std::copy(&(infilt[2 * size]), &(infilt[2 * size]) + size * 2, infilt.begin());
     }
-    else if (a->in != a->out)
-        std::copy( a->in,  a->in + a->size * 2, a->out);
+    else if (in != out)
+        std::copy( in,  in + size * 2, out);
 }
 
-void BPS::setBuffers_bps (BPS *a, float* in, float* out)
+void BPS::setBuffers(float* _in, float* _out)
 {
-    decalc_bps (a);
-    a->in = in;
-    a->out = out;
-    calc_bps (a);
+    decalc();
+    in = _in;
+    out = _out;
+    calc();
 }
 
-void BPS::setSamplerate_bps (BPS *a, int rate)
+void BPS::setSamplerate(int rate)
 {
-    decalc_bps (a);
-    a->samplerate = rate;
-    calc_bps (a);
+    decalc();
+    samplerate = rate;
+    calc();
 }
 
-void BPS::setSize_bps (BPS *a, int size)
+void BPS::setSize(int _size)
 {
-    decalc_bps (a);
-    a->size = size;
-    calc_bps (a);
+    decalc();
+    size = _size;
+    calc();
 }
 
-void BPS::setFreqs_bps (BPS *a, float f_low, float f_high)
+void BPS::setFreqs(double _f_low, double _f_high)
 {
-    decalc_bps (a);
-    a->f_low = f_low;
-    a->f_high = f_high;
-    calc_bps (a);
+    decalc();
+    f_low = _f_low;
+    f_high = _f_high;
+    calc();
+}
+
+void BPS::setRun(int _run)
+{
+    run = _run;
 }
 
 /********************************************************************************************************
@@ -157,133 +157,5 @@ void BPS::setFreqs_bps (BPS *a, float f_low, float f_high)
 *                               Overlap-Save Bandpass:  RXA Properties                                  *
 *                                                                                                       *
 ********************************************************************************************************/
-
-void BPS::SetBPSRun (RXA& rxa, int run)
-{
-    rxa.bp1->run = run;
-}
-
-void BPS::SetBPSFreqs (RXA& rxa, float f_low, float f_high)
-{
-    float* impulse;
-    BPS *a1;
-    a1 = rxa.bps1;
-
-    if ((f_low != a1->f_low) || (f_high != a1->f_high))
-    {
-        a1->f_low = f_low;
-        a1->f_high = f_high;
-        delete[] (a1->mults);
-        impulse = FIR::fir_bandpass(a1->size + 1, f_low, f_high, a1->samplerate, a1->wintype, 1, 1.0 / (float)(2 * a1->size));
-        a1->mults = FIR::fftcv_mults (2 * a1->size, impulse);
-        delete[] (impulse);
-    }
-}
-
-void BPS::SetBPSWindow (RXA& rxa, int wintype)
-{
-    float* impulse;
-    BPS *a1;
-    a1 = rxa.bps1;
-
-    if ((a1->wintype != wintype))
-    {
-        a1->wintype = wintype;
-        delete[] (a1->mults);
-        impulse = FIR::fir_bandpass(a1->size + 1, a1->f_low, a1->f_high, a1->samplerate, a1->wintype, 1, 1.0 / (float)(2 * a1->size));
-        a1->mults = FIR::fftcv_mults (2 * a1->size, impulse);
-        delete[] (impulse);
-    }
-}
-
-/********************************************************************************************************
-*                                                                                                       *
-*                                           TXA Properties                                              *
-*                                                                                                       *
-********************************************************************************************************/
-// UNCOMMENT properties when pointers in place in txa
-void BPS::SetBPSRun (TXA& txa, int run)
-{
-    txa.bp1->run = run;
-}
-
-void BPS::SetBPSFreqs (TXA& txa, float f_low, float f_high)
-{
-    float* impulse;
-    BPS *a;
-    a = txa.bps0;
-
-    if ((f_low != a->f_low) || (f_high != a->f_high))
-    {
-        a->f_low = f_low;
-        a->f_high = f_high;
-        delete[] (a->mults);
-        impulse = FIR::fir_bandpass(a->size + 1, f_low, f_high, a->samplerate, a->wintype, 1, 1.0 / (float)(2 * a->size));
-        a->mults = FIR::fftcv_mults (2 * a->size, impulse);
-        delete[] (impulse);
-    }
-
-    a = txa.bps1;
-
-    if ((f_low != a->f_low) || (f_high != a->f_high))
-    {
-        a->f_low = f_low;
-        a->f_high = f_high;
-        delete[] (a->mults);
-        impulse = FIR::fir_bandpass(a->size + 1, f_low, f_high, a->samplerate, a->wintype, 1, 1.0 / (float)(2 * a->size));
-        a->mults = FIR::fftcv_mults (2 * a->size, impulse);
-        delete[] (impulse);
-    }
-
-    a = txa.bps2;
-
-    if ((f_low != a->f_low) || (f_high != a->f_high))
-    {
-        a->f_low = f_low;
-        a->f_high = f_high;
-        delete[] (a->mults);
-        impulse = FIR::fir_bandpass(a->size + 1, f_low, f_high, a->samplerate, a->wintype, 1, 1.0 / (float)(2 * a->size));
-        a->mults = FIR::fftcv_mults (2 * a->size, impulse);
-        delete[] (impulse);
-    }
-}
-
-void BPS::SetBPSWindow (TXA& txa, int wintype)
-{
-    float* impulse;
-    BPS *a;
-    a = txa.bps0;
-
-    if (a->wintype != wintype)
-    {
-        a->wintype = wintype;
-        delete[] (a->mults);
-        impulse = FIR::fir_bandpass(a->size + 1, a->f_low, a->f_high, a->samplerate, a->wintype, 1, 1.0 / (float)(2 * a->size));
-        a->mults = FIR::fftcv_mults (2 * a->size, impulse);
-        delete[] (impulse);
-    }
-
-    a = txa.bps1;
-
-    if (a->wintype != wintype)
-    {
-        a->wintype = wintype;
-        delete[] (a->mults);
-        impulse = FIR::fir_bandpass(a->size + 1, a->f_low, a->f_high, a->samplerate, a->wintype, 1, 1.0 / (float)(2 * a->size));
-        a->mults = FIR::fftcv_mults (2 * a->size, impulse);
-        delete[] (impulse);
-    }
-
-    a = txa.bps2;
-
-    if (a->wintype != wintype)
-    {
-        a->wintype = wintype;
-        delete[] (a->mults);
-        impulse = FIR::fir_bandpass (a->size + 1, a->f_low, a->f_high, a->samplerate, a->wintype, 1, 1.0 / (float)(2 * a->size));
-        a->mults = FIR::fftcv_mults (2 * a->size, impulse);
-        delete[] (impulse);
-    }
-}
 
 } // namespace WDSP

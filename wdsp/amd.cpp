@@ -53,22 +53,22 @@ AMD::AMD
     double _omegaN,
     double _tauR,
     double _tauI
-)
+) :
+    run(_run),
+    buff_size(_buff_size),
+    in_buff(_in_buff),
+    out_buff(_out_buff),
+    mode(_mode),
+    sample_rate((double) _sample_rate),
+    fmin(_fmin),
+    fmax(_fmax),
+    zeta(_zeta),
+    omegaN(_omegaN),
+    tauR(_tauR),
+    tauI(_tauI),
+    sbmode(_sbmode),
+    levelfade(_levelfade)
 {
-    run = _run;
-    buff_size = _buff_size;
-    in_buff = _in_buff;
-    out_buff = _out_buff;
-    mode = _mode;
-    levelfade = _levelfade;
-    sbmode = _sbmode;
-    sample_rate = (double) _sample_rate;
-    fmin = _fmin;
-    fmax = _fmax;
-    zeta = _zeta;
-    omegaN = _omegaN;
-    tauR = _tauR;
-    tauI = _tauI;
     init();
 }
 

@@ -57,15 +57,15 @@ DSPHP::DSPHP(
     double _rate,
     double _fc,
     int _nstages
-)
+) :
+    run(_run),
+    size(_size),
+    in(_in),
+    out(_out),
+    rate(_rate),
+    fc(_fc),
+    nstages(_nstages)
 {
-    run = _run;
-    size = _size;
-    in = _in;
-    out = _out;
-    rate = _rate;
-    fc = _fc;
-    nstages = _nstages;
     calc();
 }
 

@@ -33,72 +33,74 @@ warren@wpratt.com
 
 namespace WDSP {
 
-AMMOD* AMMOD::create_ammod (int run, int mode, int size, float* in, float* out, float c_level)
+AMMOD::AMMOD(
+    int _run,
+    int _mode,
+    int _size,
+    float* _in,
+    float* _out,
+    double _c_level
+)
 {
-    AMMOD *a = new AMMOD;
-    a->run = run;
-    a->mode = mode;
-    a->size = size;
-    a->in = in;
-    a->out = out;
-    a->c_level = c_level;
-    a->a_level = 1.0 - a->c_level;
-    a->mult = 1.0 / sqrt (2.0);
-    return a;
+    run = _run;
+    mode = _mode;
+    size = _size;
+    in = _in;
+    out = _out;
+    c_level = _c_level;
+    a_level = 1.0 - c_level;
+    mult = 1.0 / sqrt (2.0);
 }
 
-void AMMOD::destroy_ammod(AMMOD *a)
+void AMMOD::flush()
 {
-    delete a;
+    // Nothing to flush
 }
 
-void AMMOD::flush_ammod(AMMOD *)
+void AMMOD::execute()
 {
-
-}
-
-void AMMOD::xammod(AMMOD *a)
-{
-    if (a->run)
+    if (run)
     {
         int i;
-        switch (a->mode)
+        switch (mode)
         {
         case 0: // AM
-            for (i = 0; i < a->size; i++)
-                a->out[2 * i + 0] = a->out[2 * i + 1] = a->mult * (a->c_level + a->a_level * a->in[2 * i + 0]);
+            for (i = 0; i < size; i++)
+                out[2 * i + 0] = out[2 * i + 1] = (float) (mult * (c_level + a_level * in[2 * i + 0]));
             break;
         case 1: // DSB
-            for (i = 0; i < a->size; i++)
-                a->out[2 * i + 0] = a->out[2 * i + 1] = a->mult * a->in[2 * i + 0];
+            for (i = 0; i < size; i++)
+                out[2 * i + 0] = out[2 * i + 1] = (float) (mult * in[2 * i + 0]);
             break;
         case 2: // SSB w/Carrier
-            for (i = 0; i < a->size; i++)
+            for (i = 0; i < size; i++)
             {
-                a->out[2 * i + 0] = a->mult * a->c_level + a->a_level * a->in[2 * i + 0];
-                a->out[2 * i + 1] = a->mult * a->c_level + a->a_level * a->in[2 * i + 1];
+                out[2 * i + 0] = (float) (mult * c_level + a_level * in[2 * i + 0]);
+                out[2 * i + 1] = (float) (mult * c_level + a_level * in[2 * i + 1]);
             }
+            break;
+        default:
             break;
         }
     }
-    else if (a->in != a->out)
-        std::copy( a->in,  a->in + a->size * 2, a->out);
+    else if (in != out)
+        std::copy( in,  in + size * 2, out);
 }
 
-void AMMOD::setBuffers_ammod(AMMOD *a, float* in, float* out)
+void AMMOD::setBuffers(float* _in, float* _out)
 {
-    a->in = in;
-    a->out = out;
+    in = _in;
+    out = _out;
 }
 
-void AMMOD::setSamplerate_ammod(AMMOD *, int)
+void AMMOD::setSamplerate(int)
 {
-
+    // Nothing to do
 }
 
-void AMMOD::setSize_ammod(AMMOD *a, int size)
+void AMMOD::setSize(int _size)
 {
-    a->size = size;
+    size = _size;
 }
 
 /********************************************************************************************************
@@ -107,10 +109,10 @@ void AMMOD::setSize_ammod(AMMOD *a, int size)
 *                                                                                                       *
 ********************************************************************************************************/
 
-void AMMOD::SetAMCarrierLevel (TXA& txa, float c_level)
+void AMMOD::setAMCarrierLevel(double _c_level)
 {
-    txa.ammod->c_level = c_level;
-    txa.ammod->a_level = 1.0 - c_level;
+    c_level = _c_level;
+    a_level = 1.0 - _c_level;
 }
 
 } // namespace WDSP

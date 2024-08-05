@@ -81,13 +81,12 @@ ANB::ANB  (
     hangtime(_hangtime),
     advtime(_advtime),
     backtau(_backtau),
-    threshold(_threshold)
+    threshold(_threshold),
+    dtime(0),
+    htime(0),
+    itime(0),
+    atime(0)
 {
-    dtime = 0;
-    htime = 0;
-    itime = 0;
-    atime = 0;
-
     if (tau < 0.0) {
         tau = 0.0;
     } else if (tau > MAX_TAU) {

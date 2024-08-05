@@ -1,8 +1,8 @@
-/*  dbqbp.h
+/*  emph.h
 
 This file is part of a program that implements a Software-Defined Radio.
 
-Copyright (C) 2014, 2022, 2023 Warren Pratt, NR0V
+Copyright (C) 2014, 2016, 2023 Warren Pratt, NR0V
 Copyright (C) 2024 Edouard Griffiths, F4EXB Adapted to SDRangel
 
 This program is free software; you can redistribute it and/or
@@ -27,67 +27,63 @@ warren@wpratt.com
 
 /********************************************************************************************************
 *                                                                                                       *
-*                                   Complex Bi-Quad Band-Pass                                           *
+*                               Partitioned Overlap-Save FM Pre-Emphasis                                *
 *                                                                                                       *
 ********************************************************************************************************/
 
-#ifndef wdsp_dbqbp_h
-#define wdsp_dbqbp_h
-
-#include <vector>
+#ifndef wdsp_emphp_h
+#define wdsp_emphp_h
 
 #include "export.h"
 
 namespace WDSP {
 
-class WDSP_API DBQBP
+class FIRCORE;
+class TXA;
+
+class WDSP_API EMPHP
 {
 public:
     int run;
+    int position;
     int size;
+    int nc;
+    int mp;
     float* in;
     float* out;
-    double rate;
+    int ctype;
     double f_low;
     double f_high;
-    double gain;
-    int nstages;
-    double a0;
-    double a1;
-    double a2;
-    double b1;
-    double b2;
-    std::vector<double> x0;
-    std::vector<double> x1;
-    std::vector<double> x2;
-    std::vector<double> y0;
-    std::vector<double> y1;
-    std::vector<double> y2;
+    double rate;
+    FIRCORE *p;
 
-    // Double Bi-Quad Band-Pass
-    DBQBP(
+    EMPHP(
         int run,
+        int position,
         int size,
+        int nc,
+        int mp,
         float* in,
         float* out,
-        double rate,
+        int rate,
+        int ctype,
         double f_low,
-        double f_high,
-        double gain,
-        int nstages
+        double f_high
     );
-    DBQBP(const DBQBP&) = delete;
-    DBQBP& operator=(DBQBP& other) = delete;
-    ~DBQBP() = default;
+    EMPHP(const EMPHP&) = delete;
+    EMPHP& operator=(const EMPHP& other) = delete;
+    ~EMPHP();
 
     void flush();
-    void execute();
+    void execute(int position);
     void setBuffers(float* in, float* out);
     void setSamplerate(int rate);
     void setSize(int size);
-
-private:
-    void calc();
+    // TXA Properties
+    void setPosition(int position);
+    void setMP(int mp);
+    void setNC(int nc);
+    void setFreqs(double low, double high);
 };
 
 } // namespace WDSP

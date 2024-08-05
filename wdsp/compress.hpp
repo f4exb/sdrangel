@@ -41,14 +41,14 @@ public:
     int buffsize;
     float *inbuff;
     float *outbuff;
-    float gain;
+    double gain;
 
     static COMPRESSOR* create_compressor (
         int run,
         int buffsize,
         float* inbuff,
         float* outbuff,
-        float gain
+        double gain
     );
     static void destroy_compressor (COMPRESSOR *a);
     static void flush_compressor (COMPRESSOR *a);

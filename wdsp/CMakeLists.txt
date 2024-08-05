@@ -25,6 +25,7 @@ set(wdsp_SOURCES
     dsphp.cpp
     emnr.cpp
     emph.cpp
+    emphp.cpp
     eqp.cpp
     fcurve.cpp
     fir.cpp
@@ -93,6 +94,7 @@ set(wdsp_HEADERS
     dsphp.hpp
     emnr.hpp
     emph.hpp
+    emphp.hpp
     eqp.hpp
     fcurve.hpp
     fir.hpp

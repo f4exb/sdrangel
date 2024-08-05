@@ -47,15 +47,15 @@ CBL::CBL(
     int _mode,
     int _sample_rate,
     double _tau
-)
+) :
+    run(_run),
+    buff_size(_buff_size),
+    in_buff(_in_buff),
+    out_buff(_out_buff),
+    mode(_mode),
+    sample_rate((double) _sample_rate),
+    tau(_tau)
 {
-    run = _run;
-    buff_size = _buff_size;
-    in_buff = _in_buff;
-    out_buff = _out_buff;
-    mode = _mode;
-    sample_rate = (double) _sample_rate;
-    tau = _tau;
     calc();
 }
 

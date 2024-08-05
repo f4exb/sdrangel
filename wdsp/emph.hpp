@@ -27,57 +27,6 @@ warren@wpratt.com
 
 /********************************************************************************************************
 *                                                                                                       *
-*                               Partitioned Overlap-Save FM Pre-Emphasis                                *
-*                                                                                                       *
-********************************************************************************************************/
-
-#ifndef wdsp_emphp_h
-#define wdsp_emphp_h
-
-#include "export.h"
-
-namespace WDSP {
-
-class FIRCORE;
-class TXA;
-
-class WDSP_API EMPHP
-{
-public:
-    int run;
-    int position;
-    int size;
-    int nc;
-    int mp;
-    float* in;
-    float* out;
-    int ctype;
-    float f_low;
-    float f_high;
-    float rate;
-    FIRCORE *p;
-
-    static EMPHP* create_emphp (int run, int position, int size, int nc, int mp,
-        float* in, float* out, int rate, int ctype, float f_low, float f_high);
-    static void destroy_emphp (EMPHP *a);
-    static void flush_emphp (EMPHP *a);
-    static void xemphp (EMPHP *a, int position);
-    static void setBuffers_emphp (EMPHP *a, float* in, float* out);
-    static void setSamplerate_emphp (EMPHP *a, int rate);
-    static void setSize_emphp (EMPHP *a, int size);
-    // TXA Properties
-    static void SetFMEmphPosition (TXA& txa, int position);
-    static void SetFMEmphMP (TXA& txa, int mp);
-    static void SetFMEmphNC (TXA& txa, int nc);
-    static void SetFMPreEmphFreqs(TXA& txa, float low, float high);
-};
-
-} // namespace WDSP
-
-#endif
-
-/********************************************************************************************************
-*                                                                                                       *
 *                                       Overlap-Save FM Pre-Emphasis                                    *
 *                                                                                                       *
 ********************************************************************************************************/
@@ -92,32 +41,46 @@ namespace WDSP {
 
 class WDSP_API EMPH
 {
+public:
     int run;
     int position;
     int size;
     float* in;
     float* out;
     int ctype;
-    float f_low;
-    float f_high;
+    double f_low;
+    double f_high;
     float* infilt;
     float* product;
     float* mults;
-    float rate;
+    double rate;
     fftwf_plan CFor;
     fftwf_plan CRev;
 
-    static EMPH* create_emph (int run, int position, int size, float* in, float* out, int rate, int ctype, float f_low, float f_high);
-    static void destroy_emph (EMPH *a);
-    static void flush_emph (EMPH *a);
-    static void xemph (EMPH *a, int position);
-    static void setBuffers_emph (EMPH *a, float* in, float* out);
-    static void setSamplerate_emph (EMPH *a, int rate);
-    static void setSize_emph (EMPH *a, int size);
+    EMPH(
+        int run,
+        int position,
+        int size,
+        float* in,
+        float* out,
+        int rate,
+        int ctype,
+        double f_low,
+        double f_high
+    );
+    EMPH(const EMPH&) = delete;
+    EMPH& operator=(const EMPH& other) = delete;
+    ~EMPH();
+
+    void flush();
+    void execute(int position);
+    void setBuffers(float* in, float* out);
+    void setSamplerate(int rate);
+    void setSize(int size);
 
 private:
-    static void calc_emph (EMPH *a);
-    static void decalc_emph (EMPH *a);
+    void calc();
+    void decalc();
 };
 
 } // namespace WDSP

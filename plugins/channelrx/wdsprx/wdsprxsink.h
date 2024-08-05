@@ -55,13 +55,14 @@ public:
 	bool getAudioActive() const { return m_audioActive; }
     void setChannel(ChannelAPI *channel) { m_channel = channel; }
     void setAudioFifoLabel(const QString& label) { m_audioFifo.setLabel(label); }
-    void getMagSqLevels(double& avg, double& peak, int& nbSamples);
+    void getMagSqLevels(double& avg, double& peak, int& nbSamples) const;
 
 private:
     class SpectrumProbe : public WDSP::BufferProbe
     {
     public:
-        SpectrumProbe(SampleVector& sampleVector);
+        explicit SpectrumProbe(SampleVector& sampleVector);
+        virtual ~SpectrumProbe() = default;
         virtual void proceed(const float *in, int nbSamples);
         void setSpanLog2(int spanLog2);
         void setDSB(bool dsb) { m_dsb = dsb; }
@@ -102,8 +103,6 @@ private:
     Interpolator m_interpolator;
     Real m_interpolatorDistance;
     Real m_interpolatorDistanceRemain;
-	// fftfilt* SSBFilter;
-	// fftfilt* DSBFilter;
 
 	SpectrumVis* m_spectrumSink;
 	SampleVector m_sampleBuffer;
@@ -123,7 +122,7 @@ private:
     static const int m_wdspSampleRate;
     static const int m_wdspBufSize;
 
-    void processOneSample(Complex &ci);
+    void processOneSample(const Complex &ci);
 };
 
 #endif // INCLUDE_SSBDEMODSINK_H

@@ -26,7 +26,6 @@
 #include "util/messagequeue.h"
 #include "maincore.h"
 #include "RXA.hpp"
-#include "nbp.hpp"
 #include "meter.hpp"
 #include "patchpanel.hpp"
 #include "wcpAGC.hpp"
@@ -83,10 +82,10 @@ void WDSPRxSink::SpectrumProbe::proceed(const float *in, int nb_samples)
         {
             if (!(m_undersampleCount++ & decim_mask))
             {
-                float avgr = m_sum.real() / decim;
-                float avgi = m_sum.imag() / decim;
+                float avgr = m_sum.real() / (float) decim;
+                float avgi = m_sum.imag() / (float) decim;
 
-                if (!m_dsb & !m_usb)
+                if (!m_dsb && !m_usb)
                 { // invert spectrum for LSB
                     m_sampleVector.push_back(Sample(avgi*SDR_RX_SCALEF, avgr*SDR_RX_SCALEF));
                 }
@@ -175,14 +174,14 @@ void WDSPRxSink::feed(const SampleVector::const_iterator& begin, const SampleVec
     }
 }
 
-void WDSPRxSink::getMagSqLevels(double& avg, double& peak, int& nbSamples)
+void WDSPRxSink::getMagSqLevels(double& avg, double& peak, int& nbSamples) const
 {
     avg = m_sAvg;
     peak = m_sPeak;
     nbSamples = m_sCount;
 }
 
-void WDSPRxSink::processOneSample(Complex &ci)
+void WDSPRxSink::processOneSample(const Complex &ci)
 {
     m_rxa->get_inbuff()[2*m_inCount] = ci.imag() / SDR_RX_SCALEF;
     m_rxa->get_inbuff()[2*m_inCount+1] = ci.real() / SDR_RX_SCALEF;
@@ -204,10 +203,10 @@ void WDSPRxSink::processOneSample(Complex &ci)
             }
             else
             {
-                const double& cr = m_rxa->get_outbuff()[2*i+1];
-                const double& ci = m_rxa->get_outbuff()[2*i];
-                qint16 zr = cr * 32768.0;
-                qint16 zi = ci * 32768.0;
+                const double& dr = m_rxa->get_outbuff()[2*i+1];
+                const double& di = m_rxa->get_outbuff()[2*i];
+                qint16 zr = dr * 32768.0;
+                qint16 zi = di * 32768.0;
                 m_audioBuffer[m_audioBufferFill].r = zr;
                 m_audioBuffer[m_audioBufferFill].l = zi;
 
@@ -219,7 +218,7 @@ void WDSPRxSink::processOneSample(Complex &ci)
                 else
                 {
                     Real demod = (zr + zi) * 0.7;
-                    qint16 sample = (qint16)(demod);
+                    auto sample = (qint16)(demod);
                     m_demodBuffer[m_demodBufferFill++] = sample;
                 }
 
@@ -228,13 +227,11 @@ void WDSPRxSink::processOneSample(Complex &ci)
                     QList<ObjectPipe*> dataPipes;
                     MainCore::instance()->getDataPipes().getDataPipes(m_channel, "demod", dataPipes);
 
-                    if (dataPipes.size() > 0)
+                    if (!dataPipes.empty())
                     {
-                        QList<ObjectPipe*>::iterator it = dataPipes.begin();
-
-                        for (; it != dataPipes.end(); ++it)
+                        for (auto dataPipe : dataPipes)
                         {
-                            DataFifo *fifo = qobject_cast<DataFifo*>((*it)->m_element);
+                            DataFifo *fifo = qobject_cast<DataFifo*>(dataPipe->m_element);
 
                             if (fifo)
                             {
@@ -245,7 +242,7 @@ void WDSPRxSink::processOneSample(Complex &ci)
                                 );
                             }
                         }
-                    }
+                }
 
                     m_demodBufferFill = 0;
                 }
@@ -316,7 +313,7 @@ void WDSPRxSink::applyAudioSampleRate(int sampleRate)
     QList<ObjectPipe*> pipes;
     MainCore::instance()->getMessagePipes().getMessagePipes(m_channel, "reportdemod", pipes);
 
-    if (pipes.size() > 0)
+    if (!pipes.empty())
     {
         for (const auto& pipe : pipes)
         {
@@ -385,8 +382,13 @@ void WDSPRxSink::applySettings(const WDSPRxSettings& settings, bool force)
         (m_settings.m_demod != settings.m_demod) ||
         (m_settings.m_dsb != settings.m_dsb) || force)
     {
-        float band, low, high, fLow, fHigh;
-        bool usb, dsb;
+        float band;
+        float low;
+        float high;
+        float fLow;
+        float fHigh;
+        bool usb;
+        bool dsb;
 
         band = settings.m_profiles[settings.m_profileIndex].m_highCutoff;
         high = band;
@@ -770,8 +772,8 @@ void WDSPRxSink::applySettings(const WDSPRxSettings& settings, bool force)
     || (m_settings.m_agcHangThreshold != settings.m_agcHangThreshold)
     || (m_settings.m_agcGain != settings.m_agcGain) || force)
     {
-        m_rxa->agc->setSlope(settings.m_agcSlope); // SetRXAAGCSlope(id, rx->agc_slope);
-        m_rxa->agc->setTop((float) settings.m_agcGain); // SetRXAAGCTop(id, rx->agc_gain);
+        m_rxa->agc->setSlope(settings.m_agcSlope);
+        m_rxa->agc->setTop((float) settings.m_agcGain);
 
         if (settings.m_agc)
         {
@@ -779,31 +781,31 @@ void WDSPRxSink::applySettings(const WDSPRxSettings& settings, bool force)
             {
             case WDSPRxProfile::WDSPRxAGCMode::AGCLong:
                 m_rxa->agc->setMode(1);
-                m_rxa->agc->setAttack(2);   // SetRXAAGCAttack(id, 2);
-                m_rxa->agc->setHang(2000);  // SetRXAAGCHang(id, 2000);
-                m_rxa->agc->setDecay(2000); // SetRXAAGCDecay(id, 2000);
-                m_rxa->agc->setHangThreshold(settings.m_agcHangThreshold); // SetRXAAGCHangThreshold(id, (int)rx->agc_hang_threshold);
+                m_rxa->agc->setAttack(2);
+                m_rxa->agc->setHang(2000);
+                m_rxa->agc->setDecay(2000);
+                m_rxa->agc->setHangThreshold(settings.m_agcHangThreshold);
                 break;
             case WDSPRxProfile::WDSPRxAGCMode::AGCSlow:
                 m_rxa->agc->setMode(2);
-                m_rxa->agc->setAttack(2);   // SetRXAAGCAttack(id, 2);
-                m_rxa->agc->setHang(1000);  // SetRXAAGCHang(id, 1000);
-                m_rxa->agc->setDecay(500);  // SetRXAAGCDecay(id, 500);
-                m_rxa->agc->setHangThreshold(settings.m_agcHangThreshold); // SetRXAAGCHangThreshold(id, (int)rx->agc_hang_threshold);
+                m_rxa->agc->setAttack(2);
+                m_rxa->agc->setHang(1000);
+                m_rxa->agc->setDecay(500);
+                m_rxa->agc->setHangThreshold(settings.m_agcHangThreshold);
                 break;
             case WDSPRxProfile::WDSPRxAGCMode::AGCMedium:
                 m_rxa->agc->setMode(3);
-                m_rxa->agc->setAttack(2);   // SetRXAAGCAttack(id, 2);
-                m_rxa->agc->setHang(0);     // SetRXAAGCHang(id, 0);
-                m_rxa->agc->setDecay(250);  // SetRXAAGCDecay(id, 250);
-                m_rxa->agc->setHangThreshold(settings.m_agcHangThreshold); // SetRXAAGCHangThreshold(id, 100);
+                m_rxa->agc->setAttack(2);
+                m_rxa->agc->setHang(0);
+                m_rxa->agc->setDecay(250);
+                m_rxa->agc->setHangThreshold(settings.m_agcHangThreshold);
                 break;
             case WDSPRxProfile::WDSPRxAGCMode::AGCFast:
                 m_rxa->agc->setMode(4);
-                m_rxa->agc->setAttack(2);   // SetRXAAGCAttack(id, 2);
-                m_rxa->agc->setHang(0);     // SetRXAAGCHang(id, 0);
-                m_rxa->agc->setDecay(50);   // SetRXAAGCDecay(id, 50);
-                m_rxa->agc->setHangThreshold(settings.m_agcHangThreshold); // SetRXAAGCHangThreshold(id, 100);
+                m_rxa->agc->setAttack(2);
+                m_rxa->agc->setHang(0);
+                m_rxa->agc->setDecay(50);
+                m_rxa->agc->setHangThreshold(settings.m_agcHangThreshold);
                 break;
             }
         }

@@ -28,6 +28,8 @@ warren@wpratt.com
 #ifndef wdsp_rxa_h
 #define wdsp_rxa_h
 
+#include <array>
+
 #include "comm.hpp"
 #include "unit.hpp"
 #include "export.h"
@@ -95,7 +97,7 @@ public:
     };
 
     int mode;
-    double meter[RXA_METERTYPE_LAST];
+    std::array<double, RXA_METERTYPE_LAST>  meter;
 
     ANB *anb;
     NOB *nob;
@@ -119,7 +121,6 @@ public:
     WCPAGC *agc;
     METER *agcmeter;
     BANDPASS *bp1;
-    BPS *bps1;
     SIPHON *sip1;
     CBL *cbl;
     SPEAK *speak;
@@ -136,7 +137,7 @@ public:
     );
     RXA(const RXA&) = delete;
     RXA& operator=(const RXA& other) = delete;
-    ~RXA();
+    virtual ~RXA();
 
     void flush();
     void execute();
@@ -161,10 +162,10 @@ public:
     void updateNBPFiltersLightWeight();
     void updateNBPFilters();
     int nbpAddNotch(int notch, double fcenter, double fwidth, int active);
-    int nbpGetNotch(int notch, double* fcenter, double* fwidth, int* active);
+    int nbpGetNotch(int notch, double* fcenter, double* fwidth, int* active) const;
     int nbpDeleteNotch(int notch);
     int nbpEditNotch(int notch, double fcenter, double fwidth, int active);
-    void nbpGetNumNotches(int* nnotches);
+    void nbpGetNumNotches(int* nnotches) const;
     void nbpSetTuneFrequency(double tunefreq);
     void nbpSetShiftFrequency(double shift);
     void nbpSetNotchesRun(int run);
@@ -185,7 +186,8 @@ public:
     void setEMNRPosition(int position);
     // WCPAGC
     void setAGCThresh(double thresh, double size, double rate);
-    void getAGCThresh(double *thresh, double size, double rate);
+    void getAGCThresh(double *thresh, double size, double rate) const;
+
     // Collectives
     void setPassband(float f_low, float f_high);
     void setNC(int nc);

@@ -65,6 +65,7 @@ ANF::ANF(
     delay(_delay),
     two_mu(_two_mu),
     gamma(_gamma),
+    in_idx(0),
     lidx(_lidx),
     lidx_min(_lidx_min),
     lidx_max(_lidx_max),
@@ -73,7 +74,6 @@ ANF::ANF(
     lincr(_lincr),
     ldecr(_ldecr)
 {
-    in_idx = 0;
     std::fill(d.begin(), d.end(), 0);
     std::fill(w.begin(), w.end(), 0);
 }

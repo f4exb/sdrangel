@@ -35,13 +35,14 @@ in the January 2010 issue of RadCom magazine.
 namespace WDSP {
 
 COMPRESSOR* COMPRESSOR::create_compressor (
-                int run,
-                int buffsize,
-                float* inbuff,
-                float* outbuff,
-                float gain )
+    int run,
+    int buffsize,
+    float* inbuff,
+    float* outbuff,
+    double gain
+)
 {
-    COMPRESSOR *a = new COMPRESSOR;
+    auto *a = new COMPRESSOR;
     a->run = run;
     a->inbuff = inbuff;
     a->outbuff = outbuff;
@@ -61,10 +62,9 @@ void COMPRESSOR::flush_compressor (COMPRESSOR *)
 
 void COMPRESSOR::xcompressor (COMPRESSOR *a)
 {
-    int i;
     float mag;
     if (a->run)
-        for (i = 0; i < a->buffsize; i++)
+        for (int i = 0; i < a->buffsize; i++)
         {
             mag = sqrt(a->inbuff[2 * i + 0] * a->inbuff[2 * i + 0] + a->inbuff[2 * i + 1] * a->inbuff[2 * i + 1]);
             if (a->gain * mag > 1.0)

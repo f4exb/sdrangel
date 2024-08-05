@@ -52,8 +52,17 @@ public:
     double Q;
     double gain;
     int nstages;
-    double a0, a1, a2, b1, b2;
-    std::vector<double> x0, x1, x2, y0, y1, y2;
+    double a0;
+    double a1;
+    double a2;
+    double b1;
+    double b2;
+    std::vector<double> x0;
+    std::vector<double> x1;
+    std::vector<double> x2;
+    std::vector<double> y0;
+    std::vector<double> y1;
+    std::vector<double> y2;
 
     BQLP(
         int run,

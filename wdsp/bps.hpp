@@ -34,6 +34,8 @@ warren@wpratt.com
 #ifndef wdsp_bps_h
 #define wdsp_bps_h
 
+#include <vector>
+
 #include "fftw3.h"
 #include "export.h"
 
@@ -50,48 +52,44 @@ public:
     int size;
     float* in;
     float* out;
-    float f_low;
-    float f_high;
-    float* infilt;
-    float* product;
+    double f_low;
+    double f_high;
+    std::vector<float> infilt;
+    std::vector<float> product;
     float* mults;
-    float samplerate;
+    double samplerate;
     int wintype;
-    float gain;
+    double gain;
     fftwf_plan CFor;
     fftwf_plan CRev;
 
-    static BPS* create_bps (
+    BPS(
         int run,
         int position,
         int size,
         float* in,
         float* out,
-        float f_low,
-        float f_high,
+        double f_low,
+        double f_high,
         int samplerate,
         int wintype,
-        float gain
+        double gain
     );
-    static void destroy_bps (BPS *a);
-    static void flush_bps (BPS *a);
-    static void xbps (BPS *a, int pos);
-    static void setBuffers_bps (BPS *a, float* in, float* out);
-    static void setSamplerate_bps (BPS *a, int rate);
-    static void setSize_bps (BPS *a, int size);
-    static void setFreqs_bps (BPS *a, float f_low, float f_high);
-    // RXA Prototypes
-    static void SetBPSRun (RXA& rxa, int run);
-    static void SetBPSFreqs (RXA& rxa, float low, float high);
-    static void SetBPSWindow (RXA& rxa, int wintype);
-    // TXA Prototypes
-    static void SetBPSRun (TXA& txa, int run);
-    static void SetBPSFreqs (TXA& txa, float low, float high);
-    static void SetBPSWindow (TXA& txa, int wintype);
+    BPS(const BPS&) = delete;
+    BPS& operator=(const BPS& other) = delete;
+    ~BPS();
+
+    void flush();
+    void execute(int pos);
+    void setBuffers(float* in, float* out);
+    void setSamplerate(int rate);
+    void setSize(int size);
+    void setFreqs(double f_low, double f_high);
+    void setRun(int run);
 
 private:
-    static void calc_bps (BPS *a);
-    static void decalc_bps (BPS *a);
+    void calc();
+    void decalc();
 };
 
 } // namespace WDSP

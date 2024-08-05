@@ -38,7 +38,14 @@ namespace WDSP {
 
 void BQBP::calc()
 {
-    double f0, w0, bw, q, sn, cs, c, den;
+    double f0;
+    double w0;
+    double bw;
+    double q;
+    double sn;
+    double cs;
+    double c;
+    double den;
 
     bw = f_high - f_low;
     f0 = (f_high + f_low) / 2.0;
@@ -99,15 +106,13 @@ void BQBP::execute()
 {
     if (run)
     {
-        int i, j, n;
-
-        for (i = 0; i < size; i++)
+        for (int i = 0; i < size; i++)
         {
-            for (j = 0; j < 2; j++)
+            for (int j = 0; j < 2; j++)
             {
                 x0[j] = gain * in[2 * i + j];
 
-                for (n = 0; n < nstages; n++)
+                for (int n = 0; n < nstages; n++)
                 {
                     if (n > 0)
                         x0[2 * n + j] = y0[2 * (n - 1) + j];
@@ -123,7 +128,7 @@ void BQBP::execute()
                     x1[2 * n + j] = x0[2 * n + j];
                 }
 
-                out[2 * i + j] = y0[2 * (nstages - 1) + j];
+                out[2 * i + j] = (float) y0[2 * (nstages - 1) + j];
             }
         }
     }

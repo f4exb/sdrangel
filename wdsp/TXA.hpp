@@ -172,7 +172,7 @@ public:
     );
     TXA(const TXA&) = delete;
     TXA& operator=(const TXA& other) = delete;
-    ~TXA();
+    virtual ~TXA();
 
     void flush();
     void execute();
@@ -190,6 +190,10 @@ public:
     void setBandpassFreqs(float f_low, float f_high);
     void setBandpassNC(int nc);
     void setBandpassMP(int mp);
+    // BPS
+    static void SetBPSRun (TXA& txa, int run);
+    static void SetBPSFreqs (TXA& txa, double low, double high);
+    static void SetBPSWindow (TXA& txa, int wintype);
 
     // Collectives
     void setNC(int nc);

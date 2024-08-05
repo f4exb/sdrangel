@@ -39,7 +39,7 @@ warren@wpratt.com
 #include "bps.hpp"
 #include "osctrl.hpp"
 #include "wcpAGC.hpp"
-#include "emph.hpp"
+#include "emphp.hpp"
 #include "fmmod.hpp"
 #include "siphon.hpp"
 #include "gen.hpp"
@@ -171,7 +171,7 @@ TXA::TXA(
         -1,                                         // index for gain value
         nullptr);                                         // pointer for gain computation
 
-    preemph = EMPHP::create_emphp (
+    preemph = new EMPHP(
         0,                                          // run
         1,                                          // position
         dsp_size,                       // size
@@ -224,10 +224,10 @@ TXA::TXA(
         &leveler->gain);             // pointer for gain computation
 
     {
-        std::array<float, 5> default_F = {200.0, 1000.0, 2000.0, 3000.0, 4000.0};
-        std::array<float, 5> default_G = {  0.0,    5.0,   10.0,   10.0,    5.0};
-        std::array<float, 5> default_E = {  7.0,    7.0,    7.0,    7.0,    7.0};
-        cfcomp = CFCOMP::create_cfcomp(
+        std::array<double, 5> default_F = {200.0, 1000.0, 2000.0, 3000.0, 4000.0};
+        std::array<double, 5> default_G = {  0.0,    5.0,   10.0,   10.0,    5.0};
+        std::array<double, 5> default_E = {  7.0,    7.0,    7.0,    7.0,    7.0};
+        cfcomp = new CFCOMP(
             0,                                          // run
             0,                                          // position
             0,                                          // post-equalizer run
@@ -359,7 +359,7 @@ TXA::TXA(
         2.000,                                      // hang_thresh
         0.100);                                     // tau_hang_decay
 
-    ammod = AMMOD::create_ammod (
+    ammod = new AMMOD(
         0,                                          // run - OFF by default
         0,                                          // mode:  0=>AM, 1=>DSB
         dsp_size,                       // size
@@ -514,7 +514,7 @@ TXA::~TXA()
     USLEW::destroy_uslew (uslew);
     delete gen1;
     FMMOD::destroy_fmmod (fmmod);
-    AMMOD::destroy_ammod (ammod);
+    delete ammod;
     delete alc;
     delete compmeter;
     delete bp2;
@@ -523,10 +523,10 @@ TXA::~TXA()
     COMPRESSOR::destroy_compressor (compressor);
     delete bp0;
     delete cfcmeter;
-    CFCOMP::destroy_cfcomp (cfcomp);
+    delete cfcomp;
     delete lvlrmeter;
     delete leveler;
-    EMPHP::destroy_emphp (preemph);
+    delete preemph;
     delete eqmeter;
     delete eqp;
     delete amsq;
@@ -548,10 +548,10 @@ void TXA::flush()
     amsq->flush ();
     eqp->flush();
     eqmeter->flush ();
-    EMPHP::flush_emphp (preemph);
+    preemph->flush();
     leveler->flush();
     lvlrmeter->flush ();
-    CFCOMP::flush_cfcomp (cfcomp);
+    cfcomp->flush();
     cfcmeter->flush ();
     bp0->flush ();
     COMPRESSOR::flush_compressor (compressor);
@@ -560,7 +560,7 @@ void TXA::flush()
     bp2->flush ();
     compmeter->flush ();
     alc->flush ();
-    AMMOD::flush_ammod (ammod);
+    ammod->flush();
     FMMOD::flush_fmmod (fmmod);
     gen1->flush();
     USLEW::flush_uslew (uslew);
@@ -583,10 +583,10 @@ void TXA::execute()
     amsq->execute ();                    // downward expander action
     eqp->execute ();                      // pre-EQ
     eqmeter->execute ();                // EQ meter
-    EMPHP::xemphp (preemph, 0);             // FM pre-emphasis (first option)
+    preemph->execute(0);             // FM pre-emphasis (first option)
     leveler->execute ();               // Leveler
     lvlrmeter->execute ();              // Leveler Meter
-    CFCOMP::xcfcomp (cfcomp, 0);             // Continuous Frequency Compressor with post-EQ
+    cfcomp->execute(0);             // Continuous Frequency Compressor with post-EQ
     cfcmeter->execute ();               // CFC+PostEQ Meter
     bp0->execute (0);              // primary bandpass filter
     COMPRESSOR::xcompressor (compressor);        // COMP compressor
@@ -595,8 +595,8 @@ void TXA::execute()
     bp2->execute (0);              // aux bandpass (runs if CESSB)
     compmeter->execute ();              // COMP meter
     alc->execute ();                   // ALC
-    AMMOD::xammod (ammod);                  // AM Modulator
-    EMPHP::xemphp (preemph, 1);             // FM pre-emphasis (second option)
+    ammod->execute();                  // AM Modulator
+    preemph->execute(1);             // FM pre-emphasis (second option)
     FMMOD::xfmmod (fmmod);                  // FM Modulator
     gen1->execute();                     // output signal generator (TUN and Two-tone)
     USLEW::xuslew (uslew);                  // up-slew for AM, FM, and gens
@@ -648,10 +648,10 @@ void TXA::setDSPSamplerate(int dsp_rate)
     amsq->setSamplerate (dsp_rate);
     eqp->setSamplerate (dsp_rate);
     eqmeter->setSamplerate (dsp_rate);
-    EMPHP::setSamplerate_emphp (preemph, dsp_rate);
+    preemph->setSamplerate(dsp_rate);
     leveler->setSamplerate (dsp_rate);
     lvlrmeter->setSamplerate (dsp_rate);
-    CFCOMP::setSamplerate_cfcomp (cfcomp, dsp_rate);
+    cfcomp->setSamplerate(dsp_rate);
     cfcmeter->setSamplerate (dsp_rate);
     bp0->setSamplerate (dsp_rate);
     COMPRESSOR::setSamplerate_compressor (compressor, dsp_rate);
@@ -660,7 +660,7 @@ void TXA::setDSPSamplerate(int dsp_rate)
     bp2->setSamplerate (dsp_rate);
     compmeter->setSamplerate (dsp_rate);
     alc->setSamplerate (dsp_rate);
-    AMMOD::setSamplerate_ammod (ammod, dsp_rate);
+    ammod->setSamplerate(dsp_rate);
     FMMOD::setSamplerate_fmmod (fmmod, dsp_rate);
     gen1->setSamplerate(dsp_rate);
     USLEW::setSamplerate_uslew (uslew, dsp_rate);
@@ -698,14 +698,14 @@ void TXA::setDSPBuffsize(int dsp_size)
     eqp->setSize (dsp_size);
     eqmeter->setBuffers (midbuff);
     eqmeter->setSize (dsp_size);
-    EMPHP::setBuffers_emphp (preemph, midbuff, midbuff);
-    EMPHP::setSize_emphp (preemph, dsp_size);
+    preemph->setBuffers(midbuff, midbuff);
+    preemph->setSize(dsp_size);
     leveler->setBuffers(midbuff, midbuff);
     leveler->setSize(dsp_size);
     lvlrmeter->setBuffers(midbuff);
     lvlrmeter->setSize(dsp_size);
-    CFCOMP::setBuffers_cfcomp (cfcomp, midbuff, midbuff);
-    CFCOMP::setSize_cfcomp (cfcomp, dsp_size);
+    cfcomp->setBuffers(midbuff, midbuff);
+    cfcomp->setSize(dsp_size);
     cfcmeter->setBuffers(midbuff);
     cfcmeter->setSize(dsp_size);
     bp0->setBuffers (midbuff, midbuff);
@@ -722,8 +722,8 @@ void TXA::setDSPBuffsize(int dsp_size)
     compmeter->setSize(dsp_size);
     alc->setBuffers(midbuff, midbuff);
     alc->setSize( dsp_size);
-    AMMOD::setBuffers_ammod (ammod, midbuff, midbuff);
-    AMMOD::setSize_ammod (ammod, dsp_size);
+    ammod->setBuffers(midbuff, midbuff);
+    ammod->setSize(dsp_size);
     FMMOD::setBuffers_fmmod (fmmod, midbuff, midbuff);
     FMMOD::setSize_fmmod (fmmod, dsp_size);
     gen1->setBuffers(midbuff, midbuff);
@@ -925,7 +925,7 @@ void TXA::setBandpassNC(int _nc)
             1,
             a->gain / (double)(2 * a->size)
         );
-        FIRCORE::setNc_fircore (a->fircore, a->nc, impulse);
+        FIRCORE::setNc_fircore(a->fircore, a->nc, impulse);
         delete[] impulse;
     }
 
@@ -943,7 +943,7 @@ void TXA::setBandpassNC(int _nc)
             1,
             a->gain / (double)(2 * a->size)
         );
-        FIRCORE::setNc_fircore (a->fircore, a->nc, impulse);
+        FIRCORE::setNc_fircore(a->fircore, a->nc, impulse);
         delete[] impulse;
     }
 
@@ -961,7 +961,7 @@ void TXA::setBandpassNC(int _nc)
             1,
             a->gain / (double)(2 * a->size)
         );
-        FIRCORE::setNc_fircore (a->fircore, a->nc, impulse);
+        FIRCORE::setNc_fircore(a->fircore, a->nc, impulse);
         delete[] impulse;
     }
 }
@@ -974,7 +974,7 @@ void TXA::setBandpassMP(int _mp)
     if (_mp != a->mp)
     {
         a->mp = _mp;
-        FIRCORE::setMp_fircore (a->fircore, a->mp);
+        FIRCORE::setMp_fircore(a->fircore, a->mp);
     }
 
     a = bp1;
@@ -982,7 +982,7 @@ void TXA::setBandpassMP(int _mp)
     if (_mp != a->mp)
     {
         a->mp = _mp;
-        FIRCORE::setMp_fircore (a->fircore, a->mp);
+        FIRCORE::setMp_fircore(a->fircore, a->mp);
     }
 
     a = bp2;
@@ -990,7 +990,7 @@ void TXA::setBandpassMP(int _mp)
     if (_mp != a->mp)
     {
         a->mp = _mp;
-        FIRCORE::setMp_fircore (a->fircore, a->mp);
+        FIRCORE::setMp_fircore(a->fircore, a->mp);
     }
 }
 
@@ -1005,7 +1005,7 @@ void TXA::setNC(int _nc)
     int oldstate = state;
 
     setBandpassNC                (_nc);
-    EMPHP::SetFMEmphNC    (*this, _nc);
+    preemph->setNC               (_nc);
     eqp->setNC                   (_nc);
     FMMOD::SetFMNC        (*this, _nc);
     CFIR::SetCFIRNC       (*this, _nc);
@@ -1015,15 +1015,100 @@ void TXA::setNC(int _nc)
 void TXA::setMP(int _mp)
 {
     setBandpassMP                 (_mp);
-    EMPHP::SetFMEmphMP     (*this, _mp);
+    preemph->setMP                (_mp);
     eqp->setMP                    (_mp);
     FMMOD::SetFMMP         (*this, _mp);
 }
 
 void TXA::setFMAFFilter(float _low, float _high)
 {
-    EMPHP::SetFMPreEmphFreqs (*this, _low, _high);
-    FMMOD::SetFMAFFreqs      (*this, _low, _high);
+    preemph->setFreqs         (_low, _high);
+    FMMOD::SetFMAFFreqs(*this, _low, _high);
 }
+
+void TXA::SetBPSRun (TXA& txa, int _run)
+{
+    txa.bp1->run = _run;
+}
+
+void TXA::SetBPSFreqs (TXA& txa, double _f_low, double _f_high)
+{
+    float* impulse;
+    BPS *a;
+    a = txa.bps0;
+
+    if ((_f_low != a->f_low) || (_f_high != a->f_high))
+    {
+        a->f_low = _f_low;
+        a->f_high = _f_high;
+        delete[] (a->mults);
+        impulse = FIR::fir_bandpass(a->size + 1, _f_low, _f_high, a->samplerate, a->wintype, 1, 1.0 / (float)(2 * a->size));
+        a->mults = FIR::fftcv_mults (2 * a->size, impulse);
+        delete[] (impulse);
+    }
+
+    a = txa.bps1;
+
+    if ((_f_low != a->f_low) || (_f_high != a->f_high))
+    {
+        a->f_low = _f_low;
+        a->f_high = _f_high;
+        delete[] (a->mults);
+        impulse = FIR::fir_bandpass(a->size + 1, _f_low, _f_high, a->samplerate, a->wintype, 1, 1.0 / (float)(2 * a->size));
+        a->mults = FIR::fftcv_mults (2 * a->size, impulse);
+        delete[] (impulse);
+    }
+
+    a = txa.bps2;
+
+    if ((_f_low != a->f_low) || (_f_high != a->f_high))
+    {
+        a->f_low = _f_low;
+        a->f_high = _f_high;
+        delete[] (a->mults);
+        impulse = FIR::fir_bandpass(a->size + 1, _f_low, _f_high, a->samplerate, a->wintype, 1, 1.0 / (float)(2 * a->size));
+        a->mults = FIR::fftcv_mults (2 * a->size, impulse);
+        delete[] (impulse);
+    }
+}
+
+void TXA::SetBPSWindow (TXA& txa, int _wintype)
+{
+    float* impulse;
+    BPS *a;
+    a = txa.bps0;
+
+    if (a->wintype != _wintype)
+    {
+        a->wintype = _wintype;
+        delete[] (a->mults);
+        impulse = FIR::fir_bandpass(a->size + 1, a->f_low, a->f_high, a->samplerate, a->wintype, 1, 1.0 / (float)(2 * a->size));
+        a->mults = FIR::fftcv_mults (2 * a->size, impulse);
+        delete[] (impulse);
+    }
+
+    a = txa.bps1;
+
+    if (a->wintype != _wintype)
+    {
+        a->wintype = _wintype;
+        delete[] (a->mults);
+        impulse = FIR::fir_bandpass(a->size + 1, a->f_low, a->f_high, a->samplerate, a->wintype, 1, 1.0 / (float)(2 * a->size));
+        a->mults = FIR::fftcv_mults (2 * a->size, impulse);
+        delete[] (impulse);
+    }
+
+    a = txa.bps2;
+
+    if (a->wintype != _wintype)
+    {
+        a->wintype = _wintype;
+        delete[] (a->mults);
+        impulse = FIR::fir_bandpass (a->size + 1, a->f_low, a->f_high, a->samplerate, a->wintype, 1, 1.0 / (float)(2 * a->size));
+        a->mults = FIR::fftcv_mults (2 * a->size, impulse);
+        delete[] (impulse);
+    }
+}
+
 
 } // namespace WDSP

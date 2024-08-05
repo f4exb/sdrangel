@@ -118,7 +118,9 @@ EMNR::NP::NP(
     rate(_rate),
     msize(_msize),
     lambda_y(_lambda_y),
-    lambda_d(_lambda_d)
+    lambda_d(_lambda_d),
+    invQeqMax(0.5),
+    av(2.12)
 {
 
     double tau0 = -128.0 / 8000.0 / log(0.7);
@@ -132,8 +134,6 @@ EMNR::NP::NP(
     snrq = -incr / (0.064 * rate);
     double tau4 = -128.0 / 8000.0 / log(0.8);
     betamax = exp(-incr / rate / tau4);
-    invQeqMax = 0.5;
-    av = 2.12;
     Dtime = 8.0 * 12.0 * 128.0 / 8000.0;
     U = 8;
     V = (int)(0.5 + (Dtime * rate / (U * incr)));
