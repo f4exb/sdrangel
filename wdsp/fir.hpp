@@ -27,6 +27,8 @@ warren@pratt.one
 #ifndef wdsp_fir_h
 #define wdsp_fir_h
 
+#include <vector>
+
 #include "export.h"
 
 namespace WDSP {
@@ -38,7 +40,7 @@ public:
     static float* fir_fsamp_odd (int N, const float* A, int rtype, double scale, int wintype);
     static float* fir_fsamp (int N, const float* A, int rtype, double scale, int wintype);
     static float* fir_bandpass (int N, double f_low, double f_high, double samplerate, int wintype, int rtype, double scale);
-    static void mp_imp (int N, float* fir, float* mpfir, int pfactor, int polarity);
+    static void mp_imp (int N, std::vector<float>& fir, std::vector<float>& mpfir, int pfactor, int polarity);
 
 private:
     static void analytic (int N, float* in, float* out);

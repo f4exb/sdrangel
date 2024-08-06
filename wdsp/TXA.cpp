@@ -925,7 +925,7 @@ void TXA::setBandpassNC(int _nc)
             1,
             a->gain / (double)(2 * a->size)
         );
-        FIRCORE::setNc_fircore(a->fircore, a->nc, impulse);
+        a->fircore->setNc(a->nc, impulse);
         delete[] impulse;
     }
 
@@ -943,7 +943,7 @@ void TXA::setBandpassNC(int _nc)
             1,
             a->gain / (double)(2 * a->size)
         );
-        FIRCORE::setNc_fircore(a->fircore, a->nc, impulse);
+        a->fircore->setNc(a->nc, impulse);
         delete[] impulse;
     }
 
@@ -961,7 +961,7 @@ void TXA::setBandpassNC(int _nc)
             1,
             a->gain / (double)(2 * a->size)
         );
-        FIRCORE::setNc_fircore(a->fircore, a->nc, impulse);
+        a->fircore->setNc(a->nc, impulse);
         delete[] impulse;
     }
 }
@@ -974,7 +974,7 @@ void TXA::setBandpassMP(int _mp)
     if (_mp != a->mp)
     {
         a->mp = _mp;
-        FIRCORE::setMp_fircore(a->fircore, a->mp);
+        a->fircore->setMp(a->mp);
     }
 
     a = bp1;
@@ -982,7 +982,7 @@ void TXA::setBandpassMP(int _mp)
     if (_mp != a->mp)
     {
         a->mp = _mp;
-        FIRCORE::setMp_fircore(a->fircore, a->mp);
+        a->fircore->setMp(a->mp);
     }
 
     a = bp2;
@@ -990,7 +990,7 @@ void TXA::setBandpassMP(int _mp)
     if (_mp != a->mp)
     {
         a->mp = _mp;
-        FIRCORE::setMp_fircore(a->fircore, a->mp);
+        a->fircore->setMp(a->mp);
     }
 }
 

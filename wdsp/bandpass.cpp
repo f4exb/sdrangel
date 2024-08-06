@@ -75,24 +75,24 @@ BANDPASS::BANDPASS(
         1,
         gain / (double)(2 * size)
     );
-    fircore = FIRCORE::create_fircore (size, in, out, nc, mp, impulse);
+    fircore = new FIRCORE(size, in, out, nc, mp, impulse);
     delete[] impulse;
 }
 
 BANDPASS::~BANDPASS()
 {
-    FIRCORE::destroy_fircore (fircore);
+    delete (fircore);
 }
 
 void BANDPASS::flush()
 {
-    FIRCORE::flush_fircore(fircore);
+    fircore->flush();
 }
 
 void BANDPASS::execute(int pos)
 {
     if (run && position == pos)
-        FIRCORE::xfircore(fircore);
+        fircore->execute();
     else if (out != in)
         std::copy(in,  in + size * 2, out);
 }
@@ -101,7 +101,7 @@ void BANDPASS::setBuffers(float* _in, float* _out)
 {
     in = _in;
     out = _out;
-    FIRCORE::setBuffers_fircore(fircore, in, out);
+    fircore->setBuffers(in, out);
 }
 
 void BANDPASS::setSamplerate(int _rate)
@@ -116,7 +116,7 @@ void BANDPASS::setSamplerate(int _rate)
         1,
         gain / (double) (2 * size)
     );
-    FIRCORE::setImpulse_fircore (fircore, impulse, 1);
+    fircore->setImpulse(impulse, 1);
     delete[] impulse;
 }
 
@@ -124,7 +124,7 @@ void BANDPASS::setSize(int _size)
 {
     // NOTE:  'size' must be <= 'nc'
     size = _size;
-    FIRCORE::setSize_fircore (fircore, size);
+    fircore->setSize(size);
     // recalc impulse because scale factor is a function of size
     float* impulse = FIR::fir_bandpass (
         nc,
@@ -135,7 +135,7 @@ void BANDPASS::setSize(int _size)
         1,
         gain / (double) (2 * size)
     );
-    FIRCORE::setImpulse_fircore (fircore, impulse, 1);
+    fircore->setImpulse(impulse, 1);
     delete[] impulse;
 }
 
@@ -151,7 +151,7 @@ void BANDPASS::setGain(double _gain, int _update)
         1,
         gain / (double) (2 * size)
     );
-    FIRCORE::setImpulse_fircore (fircore, impulse, _update);
+    fircore->setImpulse(impulse, _update);
     delete[] impulse;
 }
 
@@ -171,7 +171,7 @@ void BANDPASS::calcBandpassFilter(double _f_low, double _f_high, double _gain)
             1,
             gain / (double)(2 * size)
         );
-        FIRCORE::setImpulse_fircore (fircore, impulse, 1);
+        fircore->setImpulse(impulse, 1);
         delete[] impulse;
     }
 }
@@ -196,11 +196,11 @@ void BANDPASS::setBandpassFreqs(double _f_low, double _f_high)
             gain / (double)(2 * size)
         );
 
-        FIRCORE::setImpulse_fircore (fircore, impulse, 0);
+        fircore->setImpulse(impulse, 0);
         delete[] impulse;
         f_low = _f_low;
         f_high = _f_high;
-        FIRCORE::setUpdate_fircore (fircore);
+        fircore->setUpdate();
     }
 }
 
@@ -219,7 +219,7 @@ void BANDPASS::SetBandpassNC(int _nc)
             1,
             gain / (double)( 2 * size)
         );
-        FIRCORE::setNc_fircore (fircore, nc, impulse);
+        fircore->setNc(nc, impulse);
         delete[] impulse;
     }
 }
@@ -229,7 +229,7 @@ void BANDPASS::SetBandpassMP(int _mp)
     if (_mp != mp)
     {
         mp = _mp;
-        FIRCORE::setMp_fircore (fircore, mp);
+        fircore->setMp(mp);
     }
 }
 

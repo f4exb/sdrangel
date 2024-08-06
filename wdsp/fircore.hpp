@@ -34,6 +34,9 @@ warren@wpratt.com
 #ifndef wdsp_fircore_h
 #define wdsp_fircore_h
 
+#include <array>
+#include <vector>
+
 #include "fftw3.h"
 #include "export.h"
 
@@ -46,39 +49,49 @@ public:
     float* in;             // input buffer
     float* out;            // output buffer, can be same as input
     int nc;                 // number of filter coefficients, power of two, >= size
-    float* impulse;        // impulse response of filter
-    float* imp;
+    std::vector<float> impulse;        // impulse response of filter
+    std::vector<float> imp;
     int nfor;               // number of buffers in delay line
-    float* fftin;          // fft input buffer
-    float*** fmask;        // frequency domain masks
-    float** fftout;        // fftout delay line
-    float* accum;          // frequency domain accumulator
+    std::vector<float> fftin;          // fft input buffer
+    std::array<std::vector<std::vector<float>>, 2> fmask;        // frequency domain masks
+    std::vector<std::vector<float>> fftout;        // fftout delay line
+    std::vector<float> accum;          // frequency domain accumulator
     int buffidx;            // fft out buffer index
     int idxmask;            // mask for index computations
-    float* maskgen;        // input for mask generation FFT
-    fftwf_plan* pcfor;       // array of forward FFT plans
+    std::vector<float> maskgen;        // input for mask generation FFT
+    std::vector<fftwf_plan> pcfor;       // array of forward FFT plans
     fftwf_plan crev;         // reverse fft plan
-    fftwf_plan** maskplan;   // plans for frequency domain masks
+    std::array<std::vector<fftwf_plan>, 2> maskplan;   // plans for frequency domain masks
     int cset;
     int mp;
     int masks_ready;
 
-    static FIRCORE* create_fircore (int size, float* in, float* out,
-        int nc, int mp, float* impulse);
-    static void xfircore (FIRCORE *a);
-    static void destroy_fircore (FIRCORE *a);
-    static void flush_fircore (FIRCORE *a);
-    static void setBuffers_fircore (FIRCORE *a, float* in, float* out);
-    static void setSize_fircore (FIRCORE *a, int size);
-    static void setImpulse_fircore (FIRCORE *a, float* impulse, int update);
-    static void setNc_fircore (FIRCORE *a, int nc, float* impulse);
-    static void setMp_fircore (FIRCORE *a, int mp);
-    static void setUpdate_fircore (FIRCORE *a);
+    FIRCORE(
+        int size,
+        float* in,
+        float* out,
+        int nc,
+        int mp,
+        float*
+        impulse
+    );
+    FIRCORE(const FIRCORE&) = delete;
+    FIRCORE& operator=(const FIRCORE& other) = delete;
+    ~FIRCORE();
+
+    void flush();
+    void execute();
+    void setBuffers(float* in, float* out);
+    void setSize(int size);
+    void setImpulse(float* impulse, int update);
+    void setNc(int nc, float* impulse);
+    void setMp(int mp);
+    void setUpdate();
 
 private:
-    static void plan_fircore (FIRCORE *a);
-    static void calc_fircore (FIRCORE *a, int flip);
-    static void deplan_fircore (FIRCORE *a);
+    void plan();
+    void calc(int flip);
+    void deplan();
 };
 
 } // namespace WDSP

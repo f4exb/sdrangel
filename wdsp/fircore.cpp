@@ -38,223 +38,202 @@ namespace WDSP {
 ********************************************************************************************************/
 
 
-void FIRCORE::plan_fircore (FIRCORE *a)
+void FIRCORE::plan()
 {
     // must call for change in 'nc', 'size', 'out'
-    int i;
-    a->nfor = a->nc / a->size;
-    a->cset = 0;
-    a->buffidx = 0;
-    a->idxmask = a->nfor - 1;
-    a->fftin = new float[2 * a->size * 2]; // (float *) malloc0 (2 * a->size * sizeof (complex));
-    a->fftout   = new float*[a->nfor]; // (float **) malloc0 (a->nfor * sizeof (float *));
-    a->fmask    = new float**[2]; // (float ***) malloc0 (2 * sizeof (float **));
-    a->fmask[0] = new float*[a->nfor]; // (float **) malloc0 (a->nfor * sizeof (float *));
-    a->fmask[1] = new float*[a->nfor]; // (float **) malloc0 (a->nfor * sizeof (float *));
-    a->maskgen = new float[2 * a->size * 2]; // (float *) malloc0 (2 * a->size * sizeof (complex));
-    a->pcfor = new fftwf_plan[a->nfor]; // (fftwf_plan *) malloc0 (a->nfor * sizeof (fftwf_plan));
-    a->maskplan    = new fftwf_plan*[2]; // (fftwf_plan **) malloc0 (2 * sizeof (fftwf_plan *));
-    a->maskplan[0] = new fftwf_plan[a->nfor]; // (fftwf_plan *) malloc0 (a->nfor * sizeof (fftwf_plan));
-    a->maskplan[1] = new fftwf_plan[a->nfor]; // (fftwf_plan *) malloc0 (a->nfor * sizeof (fftwf_plan));
-    for (i = 0; i < a->nfor; i++)
+    nfor = nc / size;
+    cset = 0;
+    buffidx = 0;
+    idxmask = nfor - 1;
+    fftin.resize(2 * size * 2);
+    fftout.resize(nfor);
+    fmask[0].resize(nfor);
+    fmask[1].resize(nfor);
+    maskgen.resize(2 * size * 2);
+    pcfor.resize(nfor);
+    maskplan[0].resize(nfor);
+    maskplan[1].resize(nfor);
+    for (int i = 0; i < nfor; i++)
     {
-        a->fftout[i]   = new float[2 * a->size * 2]; // (float *) malloc0 (2 * a->size * sizeof (complex));
-        a->fmask[0][i] = new float[2 * a->size * 2]; // (float *) malloc0 (2 * a->size * sizeof (complex));
-        a->fmask[1][i] = new float[2 * a->size * 2]; // (float *) malloc0 (2 * a->size * sizeof (complex));
-        a->pcfor[i] = fftwf_plan_dft_1d(
-            2 * a->size,
-            (fftwf_complex *)a->fftin,
-            (fftwf_complex *)a->fftout[i],
+        fftout[i].resize(2 * size * 2);
+        fmask[0][i].resize(2 * size * 2);
+        fmask[1][i].resize(2 * size * 2);
+        pcfor[i] = fftwf_plan_dft_1d(
+            2 * size,
+            (fftwf_complex *)fftin.data(),
+            (fftwf_complex *)fftout[i].data(),
             FFTW_FORWARD,
             FFTW_PATIENT
         );
-        a->maskplan[0][i] = fftwf_plan_dft_1d(
-            2 * a->size,
-            (fftwf_complex *)a->maskgen,
-            (fftwf_complex *)a->fmask[0][i],
+        maskplan[0][i] = fftwf_plan_dft_1d(
+            2 * size,
+            (fftwf_complex *)maskgen.data(),
+            (fftwf_complex *)fmask[0][i].data(),
             FFTW_FORWARD,
             FFTW_PATIENT
         );
-        a->maskplan[1][i] = fftwf_plan_dft_1d(
-            2 * a->size,
-            (fftwf_complex *)a->maskgen,
-            (fftwf_complex *)a->fmask[1][i],
+        maskplan[1][i] = fftwf_plan_dft_1d(
+            2 * size,
+            (fftwf_complex *)maskgen.data(),
+            (fftwf_complex *)fmask[1][i].data(),
             FFTW_FORWARD,
             FFTW_PATIENT
         );
     }
-    a->accum = new float[2 * a->size * 2]; // (float *) malloc0 (2 * a->size * sizeof (complex));
-    a->crev = fftwf_plan_dft_1d(
-        2 * a->size,
-        (fftwf_complex *)a->accum,
-        (fftwf_complex *)a->out,
+    accum.resize(2 * size * 2);
+    crev = fftwf_plan_dft_1d(
+        2 * size,
+        (fftwf_complex *)accum.data(),
+        (fftwf_complex *)out,
         FFTW_BACKWARD,
         FFTW_PATIENT
     );
-    a->masks_ready = 0;
+    masks_ready = 0;
 }
 
-void FIRCORE::calc_fircore (FIRCORE *a, int flip)
+void FIRCORE::calc(int _flip)
 {
     // call for change in frequency, rate, wintype, gain
     // must also call after a call to plan_firopt()
-    int i;
 
-    if (a->mp)
-        FIR::mp_imp (a->nc, a->impulse, a->imp, 16, 0);
+    if (mp)
+        FIR::mp_imp (nc, impulse, imp, 16, 0);
     else
-        std::copy(a->impulse, a->impulse + a->nc * 2, a->imp);
+        std::copy(impulse.begin(), impulse.begin() + nc * 2, imp.begin());
 
-    for (i = 0; i < a->nfor; i++)
+    for (int i = 0; i < nfor; i++)
     {
         // I right-justified the impulse response => take output from left side of output buff, discard right side
         // Be careful about flipping an asymmetrical impulse response.
-        std::copy(&(a->imp[2 * a->size * i]), &(a->imp[2 * a->size * i]) + a->size * 2, &(a->maskgen[2 * a->size]));
-        fftwf_execute (a->maskplan[1 - a->cset][i]);
+        std::copy(&(imp[2 * size * i]), &(imp[2 * size * i]) + size * 2, &(maskgen[2 * size]));
+        fftwf_execute (maskplan[1 - cset][i]);
     }
 
-    a->masks_ready = 1;
+    masks_ready = 1;
 
-    if (flip)
+    if (_flip)
     {
-        a->cset = 1 - a->cset;
-        a->masks_ready = 0;
+        cset = 1 - cset;
+        masks_ready = 0;
     }
 }
 
-FIRCORE* FIRCORE::create_fircore (int size, float* in, float* out, int nc, int mp, float* impulse)
+FIRCORE::FIRCORE(
+    int _size,
+    float* _in,
+    float* _out,
+    int _nc,
+    int _mp,
+    float* _impulse
+)
 {
-    FIRCORE *a = new FIRCORE;
-    a->size = size;
-    a->in = in;
-    a->out = out;
-    a->nc = nc;
-    a->mp = mp;
-    // InitializeCriticalSectionAndSpinCount (&a->update, 2500);
-    plan_fircore (a);
-    a->impulse = new float[a->nc * 2]; // (float *) malloc0 (a->nc * sizeof (complex));
-    a->imp     = new float[a->nc * 2]; // (float *) malloc0 (a->nc * sizeof (complex));
-    std::copy(impulse, impulse + a->nc * 2, a->impulse);
-    calc_fircore (a, 1);
-    return a;
+    size = _size;
+    in = _in;
+    out = _out;
+    nc = _nc;
+    mp = _mp;
+    plan();
+    impulse.resize(nc * 2);
+    imp.resize(nc * 2);
+    std::copy(_impulse, _impulse + nc * 2, impulse.begin());
+    calc(1);
 }
 
-void FIRCORE::deplan_fircore (FIRCORE *a)
+void FIRCORE::deplan()
 {
-    int i;
-    fftwf_destroy_plan (a->crev);
-    delete[] (a->accum);
-    for (i = 0; i < a->nfor; i++)
+    fftwf_destroy_plan (crev);
+    for (int i = 0; i < nfor; i++)
     {
-        delete[] (a->fftout[i]);
-        delete[] (a->fmask[0][i]);
-        delete[] (a->fmask[1][i]);
-        fftwf_destroy_plan (a->pcfor[i]);
-        fftwf_destroy_plan (a->maskplan[0][i]);
-        fftwf_destroy_plan (a->maskplan[1][i]);
+        fftwf_destroy_plan (pcfor[i]);
+        fftwf_destroy_plan (maskplan[0][i]);
+        fftwf_destroy_plan (maskplan[1][i]);
     }
-    delete[] (a->maskplan[0]);
-    delete[] (a->maskplan[1]);
-    delete[] (a->maskplan);
-    delete[] (a->pcfor);
-    delete[] (a->maskgen);
-    delete[] (a->fmask[0]);
-    delete[] (a->fmask[1]);
-    delete[] (a->fmask);
-    delete[] (a->fftout);
-    delete[] (a->fftin);
 }
 
-void FIRCORE::destroy_fircore (FIRCORE *a)
+FIRCORE::~FIRCORE()
 {
-    deplan_fircore (a);
-    delete[] (a->imp);
-    delete[] (a->impulse);
-    delete (a);
+    deplan();
 }
 
-void FIRCORE::flush_fircore (FIRCORE *a)
+void FIRCORE::flush()
 {
-    int i;
-    std::fill(a->fftin, a->fftin + 2 * a->size * 2, 0);
-    for (i = 0; i < a->nfor; i++)
-        std::fill(a->fftout[i], a->fftout[i] + 2 * a->size * 2, 0);
-    a->buffidx = 0;
+    std::fill(fftin.begin(), fftin.end(), 0);
+    for (int i = 0; i < nfor; i++)
+        std::fill(fftout[i].begin(), fftout[i].end(), 0);
+    buffidx = 0;
 }
 
-void FIRCORE::xfircore (FIRCORE *a)
+void FIRCORE::execute()
 {
-    int i, j, k;
-    std::copy(a->in, a->in + a->size * 2, &(a->fftin[2 * a->size]));
-    fftwf_execute (a->pcfor[a->buffidx]);
-    k = a->buffidx;
-    std::fill(a->accum, a->accum + 2 * a->size * 2, 0);
+    int k;
+    std::copy(in, in + size * 2, &(fftin[2 * size]));
+    fftwf_execute (pcfor[buffidx]);
+    k = buffidx;
+    std::fill(accum.begin(), accum.end(), 0);
 
-    for (j = 0; j < a->nfor; j++)
+    for (int j = 0; j < nfor; j++)
     {
-        for (i = 0; i < 2 * a->size; i++)
+        for (int i = 0; i < 2 * size; i++)
         {
-            a->accum[2 * i + 0] += a->fftout[k][2 * i + 0] * a->fmask[a->cset][j][2 * i + 0] - a->fftout[k][2 * i + 1] * a->fmask[a->cset][j][2 * i + 1];
-            a->accum[2 * i + 1] += a->fftout[k][2 * i + 0] * a->fmask[a->cset][j][2 * i + 1] + a->fftout[k][2 * i + 1] * a->fmask[a->cset][j][2 * i + 0];
+            accum[2 * i + 0] += fftout[k][2 * i + 0] * fmask[cset][j][2 * i + 0] - fftout[k][2 * i + 1] * fmask[cset][j][2 * i + 1];
+            accum[2 * i + 1] += fftout[k][2 * i + 0] * fmask[cset][j][2 * i + 1] + fftout[k][2 * i + 1] * fmask[cset][j][2 * i + 0];
         }
 
-        k = (k + a->idxmask) & a->idxmask;
+        k = (k + idxmask) & idxmask;
     }
 
-    a->buffidx = (a->buffidx + 1) & a->idxmask;
-    fftwf_execute (a->crev);
-    std::copy(&(a->fftin[2 * a->size]), &(a->fftin[2 * a->size]) + a->size * 2, a->fftin);
+    buffidx = (buffidx + 1) & idxmask;
+    fftwf_execute (crev);
+    std::copy(&(fftin[2 * size]), &(fftin[2 * size]) + size * 2, fftin.begin());
 }
 
-void FIRCORE::setBuffers_fircore (FIRCORE *a, float* in, float* out)
+void FIRCORE::setBuffers(float* _in, float* _out)
 {
-    a->in = in;
-    a->out = out;
-    deplan_fircore (a);
-    plan_fircore (a);
-    calc_fircore (a, 1);
+    in = _in;
+    out = _out;
+    deplan();
+    plan();
+    calc(1);
 }
 
-void FIRCORE::setSize_fircore (FIRCORE *a, int size)
+void FIRCORE::setSize(int _size)
 {
-    a->size = size;
-    deplan_fircore (a);
-    plan_fircore (a);
-    calc_fircore (a, 1);
+    size = _size;
+    deplan();
+    plan();
+    calc(1);
 }
 
-void FIRCORE::setImpulse_fircore (FIRCORE *a, float* impulse, int update)
+void FIRCORE::setImpulse(float* _impulse, int _update)
 {
-    std::copy(impulse, impulse + a->nc * 2, a->impulse);
-    calc_fircore (a, update);
+    std::copy(_impulse, _impulse + nc * 2, impulse.begin());
+    calc(_update);
 }
 
-void FIRCORE::setNc_fircore (FIRCORE *a, int nc, float* impulse)
+void FIRCORE::setNc(int _nc, float* _impulse)
 {
     // because of FFT planning, this will probably cause a glitch in audio if done during dataflow
-    deplan_fircore (a);
-    delete[] (a->impulse);
-    delete[] (a->imp);
-    a->nc = nc;
-    plan_fircore (a);
-    a->imp     = new float[a->nc * 2]; // (float *) malloc0 (a->nc * sizeof (complex));
-    a->impulse = new float[a->nc * 2]; // (float *) malloc0 (a->nc * sizeof (complex));
-    std::copy(impulse, impulse + a->nc * 2, a->impulse);
-    calc_fircore (a, 1);
+    deplan();
+    nc = _nc;
+    plan();
+    imp.resize(nc * 2);
+    impulse.resize(nc * 2);
+    std::copy(_impulse, _impulse + nc * 2, impulse.begin());
+    calc(1);
 }
 
-void FIRCORE::setMp_fircore (FIRCORE *a, int mp)
+void FIRCORE::setMp(int _mp)
 {
-    a->mp = mp;
-    calc_fircore (a, 1);
+    mp = _mp;
+    calc(1);
 }
 
-void FIRCORE::setUpdate_fircore (FIRCORE *a)
+void FIRCORE::setUpdate()
 {
-    if (a->masks_ready)
+    if (masks_ready)
     {
-        a->cset = 1 - a->cset;
-        a->masks_ready = 0;
+        cset = 1 - cset;
+        masks_ready = 0;
     }
 }
 

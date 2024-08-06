@@ -377,7 +377,7 @@ void FIR::analytic (int N, float* in, float* out)
     fftwf_destroy_plan (pfor);
 }
 
-void FIR::mp_imp (int N, float* fir, float* mpfir, int pfactor, int polarity)
+void FIR::mp_imp (int N, std::vector<float>& fir, std::vector<float>& mpfir, int pfactor, int polarity)
 {
     int i;
     int size = N * pfactor;
@@ -388,7 +388,7 @@ void FIR::mp_imp (int N, float* fir, float* mpfir, int pfactor, int polarity)
     std::vector<float> ana(size * 2);
     std::vector<float> impulse(size * 2);
     std::vector<float> newfreq(size * 2);
-    std::copy(fir, fir + N * 2, firpad.begin());
+    std::copy(fir.begin(), fir.begin() + N * 2, firpad.begin());
     fftwf_plan pfor = fftwf_plan_dft_1d (
         size,
         (fftwf_complex *) firpad.data(),
@@ -425,9 +425,9 @@ void FIR::mp_imp (int N, float* fir, float* mpfir, int pfactor, int polarity)
     }
     fftwf_execute (prev);
     if (polarity)
-        std::copy(&impulse[2 * (pfactor - 1) * N], &impulse[2 * (pfactor - 1) * N] + N * 2, mpfir);
+        std::copy(&impulse[2 * (pfactor - 1) * N], &impulse[2 * (pfactor - 1) * N] + N * 2, mpfir.begin());
     else
-        std::copy(impulse.begin(), impulse.end(), mpfir);
+        std::copy(impulse.begin(), impulse.end(), mpfir.begin());
 
     fftwf_destroy_plan (prev);
     fftwf_destroy_plan (pfor);

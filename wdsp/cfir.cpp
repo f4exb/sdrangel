@@ -37,13 +37,13 @@ void CFIR::calc_cfir (CFIR *a)
     float* impulse;
     a->scale = 1.0 / (float)(2 * a->size);
     impulse = cfir_impulse (a->nc, a->DD, a->R, a->Pairs, a->runrate, a->cicrate, a->cutoff, a->xtype, a->xbw, 1, a->scale, a->wintype);
-    a->p = FIRCORE::create_fircore (a->size, a->in, a->out, a->nc, a->mp, impulse);
+    a->p = new FIRCORE(a->size, a->in, a->out, a->nc, a->mp, impulse);
     delete[] (impulse);
 }
 
 void CFIR::decalc_cfir (CFIR *a)
 {
-    FIRCORE::destroy_fircore (a->p);
+    delete (a->p);
 }
 
 CFIR* CFIR::create_cfir (
@@ -105,13 +105,13 @@ void CFIR::destroy_cfir (CFIR *a)
 
 void CFIR::flush_cfir (CFIR *a)
 {
-    FIRCORE::flush_fircore (a->p);
+    a->p->flush();
 }
 
 void CFIR::xcfir (CFIR *a)
 {
     if (a->run)
-        FIRCORE::xfircore (a->p);
+        a->p->execute();
     else if (a->in != a->out)
         std::copy( a->in,  a->in + a->size * 2, a->out);
 }

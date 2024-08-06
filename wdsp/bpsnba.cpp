@@ -176,7 +176,7 @@ void BPSNBA::recalc_bpsnba_filter(int update)
     b->gain = gain;
     b->autoincr = autoincr;
     b->calc_impulse();
-    FIRCORE::setImpulse_fircore (b->fircore, b->impulse, update);
+    b->fircore->setImpulse(b->impulse, update);
     delete[] (b->impulse);
 }
 

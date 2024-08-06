@@ -333,7 +333,7 @@ void NBP::calc_lightweight()
                 gain / (float)(2 * size),
                 wintype
             );
-            FIRCORE::setImpulse_fircore (fircore, impulse, 1);
+            fircore->setImpulse(impulse, 1);
             // print_impulse ("nbp.txt", size + 1, impulse, 1, 0);
             delete[] impulse;
         }
@@ -437,25 +437,25 @@ NBP::NBP(
     bplow.resize(maxpb);
     bphigh.resize(maxpb);
     calc_impulse ();
-    fircore = FIRCORE::create_fircore (size, in, out, nc, mp, impulse);
+    fircore = new FIRCORE(size, in, out, nc, mp, impulse);
     // print_impulse ("nbp.txt", size + 1, impulse, 1, 0);
     delete[]impulse;
 }
 
 NBP::~NBP()
 {
-    FIRCORE::destroy_fircore (fircore);
+    delete (fircore);
 }
 
 void NBP::flush()
 {
-    FIRCORE::flush_fircore (fircore);
+    fircore->flush();
 }
 
 void NBP::execute (int pos)
 {
     if (run && pos == position)
-        FIRCORE::xfircore (fircore);
+        fircore->execute();
     else if (in != out)
         std::copy( in,  in + size * 2, out);
 }
@@ -464,14 +464,14 @@ void NBP::setBuffers(float* _in, float* _out)
 {
     in = _in;
     out = _out;
-    FIRCORE::setBuffers_fircore (fircore, in, out);
+    fircore->setBuffers(in, out);
 }
 
 void NBP::setSamplerate(int _rate)
 {
     rate = _rate;
     calc_impulse ();
-    FIRCORE::setImpulse_fircore (fircore, impulse, 1);
+    fircore->setImpulse(impulse, 1);
     delete[] impulse;
 }
 
@@ -479,22 +479,22 @@ void NBP::setSize(int _size)
 {
     // NOTE:  'size' must be <= 'nc'
     size = _size;
-    FIRCORE::setSize_fircore (fircore, size);
+    fircore->setSize(size);
     calc_impulse ();
-    FIRCORE::setImpulse_fircore (fircore, impulse, 1);
+    fircore->setImpulse(impulse, 1);
     delete[] impulse;
 }
 
 void NBP::setNc()
 {
     calc_impulse();
-    FIRCORE::setNc_fircore (fircore, nc, impulse);
+    fircore->setNc(nc, impulse);
     delete[] impulse;
 }
 
 void NBP::setMp()
 {
-    FIRCORE::setMp_fircore (fircore, mp);
+    fircore->setMp(mp);
 }
 
 /********************************************************************************************************
@@ -517,7 +517,7 @@ void NBP::SetFreqs(double _flow, double _fhigh)
         flow = _flow;
         fhigh = _fhigh;
         calc_impulse();
-        FIRCORE::setImpulse_fircore (fircore, impulse, 1);
+        fircore->setImpulse(impulse, 1);
         delete[] impulse;
     }
 }

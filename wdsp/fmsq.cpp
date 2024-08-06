@@ -49,7 +49,7 @@ void FMSQ::calc()
     G[2] = 3.0;
     G[3] = (float) (+20.0 * log10(20000.0 / *pllpole));
     impulse = EQP::eq_impulse (nc, 3, F.data(), G.data(), rate, 1.0 / (2.0 * size), 0, 0);
-    p = FIRCORE::create_fircore (size, trigger, noise.data(), nc, mp, impulse);
+    p = new FIRCORE(size, trigger, noise.data(), nc, mp, impulse);
     delete[]  impulse;
     // noise averaging
     avm = exp(-1.0 / (rate * avtau));
@@ -89,7 +89,7 @@ void FMSQ::calc()
 
 void FMSQ::decalc()
 {
-    FIRCORE::destroy_fircore (p);
+    delete (p);
 }
 
 FMSQ::FMSQ(
@@ -143,7 +143,7 @@ FMSQ::~FMSQ()
 
 void FMSQ::flush()
 {
-    FIRCORE::flush_fircore (p);
+    p->flush();
     avnoise = 100.0;
     longnoise = 1.0;
     state = FMSQState::MUTED;
@@ -157,7 +157,7 @@ void FMSQ::execute()
     {
         double _noise;
         double lnlimit;
-        FIRCORE::xfircore (p);
+        p->execute();
 
         for (int i = 0; i < size; i++)
         {
@@ -250,7 +250,7 @@ void FMSQ::setBuffers(float* in, float* out, float* trig)
     insig = in;
     outsig = out;
     trigger = trig;
-    FIRCORE::setBuffers_fircore (p, trigger, noise.data());
+    p->setBuffers(trigger, noise.data());
 }
 
 void FMSQ::setSamplerate(int _rate)
@@ -292,7 +292,7 @@ void FMSQ::setNC(int _nc)
     {
         nc = _nc;
         impulse = EQP::eq_impulse (nc, 3, F.data(), G.data(), rate, 1.0 / (2.0 * size), 0, 0);
-        FIRCORE::setNc_fircore (p, nc, impulse);
+        p->setNc(nc, impulse);
         delete[]  impulse;
     }
 }
@@ -302,7 +302,7 @@ void FMSQ::setMP(int _mp)
     if (mp != _mp)
     {
         mp = _mp;
-        FIRCORE::setMp_fircore (p, mp);
+        p->setMp(mp);
     }
 }
 

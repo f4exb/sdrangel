@@ -76,7 +76,7 @@ EMPHP::EMPHP(
         1.0 / (2.0 * size),
         0, 0
     );
-    p = FIRCORE::create_fircore(size, in, out, nc, mp, impulse);
+    p = new FIRCORE(size, in, out, nc, mp, impulse);
     delete[] (impulse);
 }
 
@@ -87,13 +87,13 @@ EMPHP::~EMPHP()
 
 void EMPHP::flush()
 {
-    FIRCORE::flush_fircore(p);
+    p->flush();
 }
 
 void EMPHP::execute(int _position)
 {
     if (run && position == _position)
-        FIRCORE::xfircore(p);
+        p->execute();
     else if (in != out)
         std::copy( in,  in + size * 2, out);
 }
@@ -102,7 +102,7 @@ void EMPHP::setBuffers(float* _in, float* _out)
 {
     in = _in;
     out = _out;
-    FIRCORE::setBuffers_fircore(p, in, out);
+    p->setBuffers(in, out);
 }
 
 void EMPHP::setSamplerate(int _rate)
@@ -120,7 +120,7 @@ void EMPHP::setSamplerate(int _rate)
         1.0 / (2.0 * size),
         0, 0
     );
-    FIRCORE::setImpulse_fircore(p, impulse, 1);
+    p->setImpulse(impulse, 1);
     delete[] (impulse);
 }
 
@@ -128,7 +128,7 @@ void EMPHP::setSize(int _size)
 {
     float* impulse;
     size = _size;
-    FIRCORE::setSize_fircore(p, size);
+    p->setSize(size);
     impulse = FCurve::fc_impulse (
         nc,
         f_low,
@@ -141,7 +141,7 @@ void EMPHP::setSize(int _size)
         0,
         0
     );
-    FIRCORE::setImpulse_fircore(p, impulse, 1);
+    p->setImpulse(impulse, 1);
     delete[] (impulse);
 }
 
@@ -161,7 +161,7 @@ void EMPHP::setMP(int _mp)
     if (mp != _mp)
     {
         mp = _mp;
-        FIRCORE::setMp_fircore(p, mp);
+        p->setMp(mp);
     }
 }
 
@@ -184,7 +184,7 @@ void EMPHP::setNC(int _nc)
             0,
             0
         );
-        FIRCORE::setNc_fircore(p, nc, impulse);
+        p->setNc(nc, impulse);
         delete[] (impulse);
     }
 }
@@ -209,7 +209,7 @@ void EMPHP::setFreqs(double low, double high)
             0,
             0
         );
-        FIRCORE::setImpulse_fircore(p, impulse, 1);
+        p->setImpulse(impulse, 1);
         delete[] (impulse);
     }
 }

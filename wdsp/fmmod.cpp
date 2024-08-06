@@ -81,14 +81,14 @@ FMMOD* FMMOD::create_fmmod (
     a->mp = mp;
     calc_fmmod (a);
     impulse = FIR::fir_bandpass(a->nc, -a->bp_fc, +a->bp_fc, a->samplerate, 0, 1, 1.0 / (2 * a->size));
-    a->p = FIRCORE::create_fircore (a->size, a->out, a->out, a->nc, a->mp, impulse);
+    a->p = new FIRCORE(a->size, a->out, a->out, a->nc, a->mp, impulse);
     delete[] (impulse);
     return a;
 }
 
 void FMMOD::destroy_fmmod (FMMOD *a)
 {
-    FIRCORE::destroy_fircore (a->p);
+    delete (a->p);
     delete (a);
 }
 
@@ -124,7 +124,7 @@ void FMMOD::xfmmod (FMMOD *a)
         }
         //print_deviation ("peakdev.txt", peak, a->samplerate);
         if (a->bp_run)
-            FIRCORE::xfircore (a->p);
+            a->p->execute();
     }
     else if (a->in != a->out)
         std::copy( a->in,  a->in + a->size * 2, a->out);
@@ -135,7 +135,7 @@ void FMMOD::setBuffers_fmmod (FMMOD *a, float* in, float* out)
     a->in = in;
     a->out = out;
     calc_fmmod (a);
-    FIRCORE::setBuffers_fircore (a->p, a->out, a->out);
+    a->p->setBuffers(a->out, a->out);
 }
 
 void FMMOD::setSamplerate_fmmod (FMMOD *a, int rate)
@@ -144,7 +144,7 @@ void FMMOD::setSamplerate_fmmod (FMMOD *a, int rate)
     a->samplerate = rate;
     calc_fmmod (a);
     impulse = FIR::fir_bandpass(a->nc, -a->bp_fc, +a->bp_fc, a->samplerate, 0, 1, 1.0 / (2 * a->size));
-    FIRCORE::setImpulse_fircore (a->p, impulse, 1);
+    a->p->setImpulse(impulse, 1);
     delete[] (impulse);
 }
 
@@ -153,9 +153,9 @@ void FMMOD::setSize_fmmod (FMMOD *a, int size)
     float* impulse;
     a->size = size;
     calc_fmmod (a);
-    FIRCORE::setSize_fircore (a->p, a->size);
+    a->p->setSize(a->size);
     impulse = FIR::fir_bandpass(a->nc, -a->bp_fc, +a->bp_fc, a->samplerate, 0, 1, 1.0 / (2 * a->size));
-    FIRCORE::setImpulse_fircore (a->p, impulse, 1);
+    a->p->setImpulse(impulse, 1);
     delete[] (impulse);
 }
 
@@ -170,7 +170,7 @@ void FMMOD::SetFMDeviation (TXA& txa, float deviation)
     FMMOD *a = txa.fmmod;
     float bp_fc = a->f_high + deviation;
     float* impulse = FIR::fir_bandpass (a->nc, -bp_fc, +bp_fc, a->samplerate, 0, 1, 1.0 / (2 * a->size));
-    FIRCORE::setImpulse_fircore (a->p, impulse, 0);
+    a->p->setImpulse(impulse, 0);
     delete[] (impulse);
     a->deviation = deviation;
     // mod
@@ -178,7 +178,7 @@ void FMMOD::SetFMDeviation (TXA& txa, float deviation)
     a->sdelta = TWOPI * a->deviation / a->samplerate;
     // bandpass
     a->bp_fc = bp_fc;
-    FIRCORE::setUpdate_fircore (a->p);
+    a->p->setUpdate();
 }
 
 void FMMOD::SetCTCSSFreq (TXA& txa, float freq)
@@ -205,7 +205,7 @@ void FMMOD::SetFMNC (TXA& txa, int nc)
     {
         a->nc = nc;
         impulse = FIR::fir_bandpass (a->nc, -a->bp_fc, +a->bp_fc, a->samplerate, 0, 1, 1.0 / (2 * a->size));
-        FIRCORE::setNc_fircore (a->p, a->nc, impulse);
+        a->p->setNc(a->nc, impulse);
         delete[] (impulse);
     }
 }
@@ -217,7 +217,7 @@ void FMMOD::SetFMMP (TXA& txa, int mp)
     if (a->mp != mp)
     {
         a->mp = mp;
-        FIRCORE::setMp_fircore (a->p, a->mp);
+        a->p->setMp(a->mp);
     }
 }
 
@@ -233,7 +233,7 @@ void FMMOD::SetFMAFFreqs (TXA& txa, float low, float high)
         a->f_high = high;
         a->bp_fc = a->deviation + a->f_high;
         impulse = FIR::fir_bandpass (a->nc, -a->bp_fc, +a->bp_fc, a->samplerate, 0, 1, 1.0 / (2 * a->size));
-        FIRCORE::setImpulse_fircore (a->p, impulse, 1);
+        a->p->setImpulse(impulse, 1);
         delete[] (impulse);
     }
 }

@@ -234,24 +234,24 @@ EQP::EQP(
     wintype = _wintype;
     samplerate = (double) _samplerate;
     impulse = eq_impulse (nc, nfreqs, F.data(), G.data(), samplerate, 1.0 / (2.0 * size), ctfmode, wintype);
-    fircore = FIRCORE::create_fircore (size, in, out, nc, mp, impulse);
+    fircore = new FIRCORE(size, in, out, nc, mp, impulse);
     delete[] impulse;
 }
 
 EQP::~EQP()
 {
-    FIRCORE::destroy_fircore (fircore);
+    delete (fircore);
 }
 
 void EQP::flush()
 {
-    FIRCORE::flush_fircore (fircore);
+    fircore->flush();
 }
 
 void EQP::execute()
 {
     if (run)
-        FIRCORE::xfircore (fircore);
+        fircore->execute();
     else
         std::copy(in,  in + size * 2, out);
 }
@@ -260,7 +260,7 @@ void EQP::setBuffers(float* _in, float* _out)
 {
     in = _in;
     out = _out;
-    FIRCORE::setBuffers_fircore (fircore, in, out);
+    fircore->setBuffers(in, out);
 }
 
 void EQP::setSamplerate(int rate)
@@ -268,7 +268,7 @@ void EQP::setSamplerate(int rate)
     float* impulse;
     samplerate = rate;
     impulse = eq_impulse (nc, nfreqs, F.data(), G.data(), samplerate, 1.0 / (2.0 * size), ctfmode, wintype);
-    FIRCORE::setImpulse_fircore (fircore, impulse, 1);
+    fircore->setImpulse(impulse, 1);
     delete[] impulse;
 }
 
@@ -276,9 +276,9 @@ void EQP::setSize(int _size)
 {
     float* impulse;
     size = _size;
-    FIRCORE::setSize_fircore (fircore, size);
+    fircore->setSize(size);
     impulse = eq_impulse (nc, nfreqs, F.data(), G.data(), samplerate, 1.0 / (2.0 * size), ctfmode, wintype);
-    FIRCORE::setImpulse_fircore (fircore, impulse, 1);
+    fircore->setImpulse(impulse, 1);
     delete[] impulse;
 }
 
@@ -301,7 +301,7 @@ void EQP::setNC(int _nc)
     {
         nc = _nc;
         impulse = eq_impulse (nc, nfreqs, F.data(), G.data(), samplerate, 1.0 / (2.0 * size), ctfmode, wintype);
-        FIRCORE::setNc_fircore (fircore, nc, impulse);
+        fircore->setNc(nc, impulse);
         delete[] impulse;
     }
 }
@@ -311,7 +311,7 @@ void EQP::setMP(int _mp)
     if (mp != _mp)
     {
         mp = _mp;
-        FIRCORE::setMp_fircore (fircore, mp);
+        fircore->setMp(mp);
     }
 }
 
@@ -324,7 +324,7 @@ void EQP::setProfile(int _nfreqs, const float* _F, const float* _G)
     std::copy(_F, _F + (_nfreqs + 1), F.begin());
     std::copy(_G, _G + (_nfreqs + 1), G.begin());
     impulse = eq_impulse (nc, nfreqs, F.data(), G.data(), samplerate, 1.0 / (2.0 * size), ctfmode, wintype);
-    FIRCORE::setImpulse_fircore (fircore, impulse, 1);
+    fircore->setImpulse(impulse, 1);
     delete[] impulse;
 }
 
@@ -333,7 +333,7 @@ void EQP::setCtfmode(int _mode)
     float* impulse;
     ctfmode = _mode;
     impulse = eq_impulse (nc, nfreqs, F.data(), G.data(), samplerate, 1.0 / (2.0 * size), ctfmode, wintype);
-    FIRCORE::setImpulse_fircore (fircore, impulse, 1);
+    fircore->setImpulse(impulse, 1);
     delete[] impulse;
 }
 
@@ -342,7 +342,7 @@ void EQP::setWintype(int _wintype)
     float* impulse;
     wintype = _wintype;
     impulse = eq_impulse (nc, nfreqs, F.data(), G.data(), samplerate, 1.0 / (2.0 * size), ctfmode, wintype);
-    FIRCORE::setImpulse_fircore (fircore, impulse, 1);
+    fircore->setImpulse(impulse, 1);
     delete[] impulse;
 }
 
@@ -363,7 +363,7 @@ void EQP::setGrphEQ(const int *rxeq)
     G[4] = (float)rxeq[3];
     ctfmode = 0;
     impulse = eq_impulse (nc, nfreqs, F.data(), G.data(), samplerate, 1.0 / (2.0 * size), ctfmode, wintype);
-    FIRCORE::setImpulse_fircore (fircore, impulse, 1);
+    fircore->setImpulse(impulse, 1);
     delete[] impulse;
 }
 
@@ -387,7 +387,7 @@ void EQP::setGrphEQ10(const int *rxeq)
         G[i] = (float)rxeq[i];
     ctfmode = 0;
     impulse = eq_impulse (nc, nfreqs, F.data(), G.data(), samplerate, 1.0 / (2.0 * size), ctfmode, wintype);
-    FIRCORE::setImpulse_fircore (fircore, impulse, 1);
+    fircore->setImpulse(impulse, 1);
     delete[] impulse;
 }
 
