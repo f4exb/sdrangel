@@ -277,7 +277,7 @@ TXA::TXA(
         1,                                          // wintype
         2.0);                                       // gain
 
-    compressor = COMPRESSOR::create_compressor (
+    compressor = new COMPRESSOR(
         0,                                          // run - OFF by default
         dsp_size,                       // size
         midbuff,                       // pointer to input buffer
@@ -298,7 +298,7 @@ TXA::TXA(
         1,                                          // wintype
         2.0);                                       // gain
 
-    osctrl = OSCTRL::create_osctrl (
+    osctrl = new OSCTRL(
         0,                                          // run
         dsp_size,                       // size
         midbuff,                       // input buffer
@@ -368,7 +368,7 @@ TXA::TXA(
         0.5);                                       // carrier level
 
 
-    fmmod = FMMOD::create_fmmod (
+    fmmod = new FMMOD(
         0,                                          // run - OFF by default
         dsp_size,                       // size
         midbuff,                       // pointer to input buffer
@@ -392,15 +392,14 @@ TXA::TXA(
         dsp_rate,                       // sample rate
         0);                                         // mode
 
-    uslew = USLEW::create_uslew (
-        this,
+    uslew = new USLEW(
         &upslew,                        // pointer to channel upslew flag
         dsp_size,                       // buffer size
         midbuff,                       // input buffer
         midbuff,                       // output buffer
-        (float) dsp_rate,                       // sample rate
+        (double) dsp_rate,                       // sample rate
         0.000,                                      // delay time
-        0.005f);                                     // upslew time
+        0.005);                                     // upslew time
 
     alcmeter = new METER(
         1,                                          // run
@@ -446,17 +445,17 @@ TXA::TXA(
     //     256,                                        // pin samples
     //     0.9);                                       // alpha
 
-    iqc.p0 = iqc.p1 = IQC::create_iqc (
+    iqc.p0 = iqc.p1 = new IQC(
         0,                                          // run
         dsp_size,                       // size
         midbuff,                       // input buffer
         midbuff,                       // output buffer
-        (float)dsp_rate,               // sample rate
+        (double) dsp_rate,               // sample rate
         16,                                         // ints
-        0.005f,                                      // changeover time
+        0.005,                                      // changeover time
         256);                                       // spi
 
-    cfir = CFIR::create_cfir(
+    cfir = new CFIR(
         0,                                          // run
         dsp_size,                       // size
         std::max(2048, dsp_size),            // number of filter coefficients
@@ -507,20 +506,20 @@ TXA::~TXA()
     // in reverse order, free each item we created
     delete outmeter;
     delete rsmpout;
-    CFIR::destroy_cfir(cfir);
-    IQC::destroy_iqc (iqc.p0);
+    delete cfir;
+    delete iqc.p0;
     delete sip1;
     delete alcmeter;
-    USLEW::destroy_uslew (uslew);
+    delete uslew;
     delete gen1;
-    FMMOD::destroy_fmmod (fmmod);
+    delete fmmod;
     delete ammod;
     delete alc;
     delete compmeter;
     delete bp2;
-    OSCTRL::destroy_osctrl (osctrl);
+    delete osctrl;
     delete bp1;
-    COMPRESSOR::destroy_compressor (compressor);
+    delete compressor;
     delete bp0;
     delete cfcmeter;
     delete cfcomp;
@@ -554,20 +553,20 @@ void TXA::flush()
     cfcomp->flush();
     cfcmeter->flush ();
     bp0->flush ();
-    COMPRESSOR::flush_compressor (compressor);
+    compressor->flush();
     bp1->flush ();
-    OSCTRL::flush_osctrl (osctrl);
+    osctrl->flush();
     bp2->flush ();
     compmeter->flush ();
     alc->flush ();
     ammod->flush();
-    FMMOD::flush_fmmod (fmmod);
+    fmmod->flush();
     gen1->flush();
-    USLEW::flush_uslew (uslew);
+    uslew->flush();
     alcmeter->flush ();
     sip1->flush();
-    IQC::flush_iqc (iqc.p0);
-    CFIR::flush_cfir(cfir);
+    iqc.p0->flush();
+    cfir->flush();
     rsmpout->flush();
     outmeter->flush ();
 }
@@ -589,21 +588,21 @@ void TXA::execute()
     cfcomp->execute(0);             // Continuous Frequency Compressor with post-EQ
     cfcmeter->execute ();               // CFC+PostEQ Meter
     bp0->execute (0);              // primary bandpass filter
-    COMPRESSOR::xcompressor (compressor);        // COMP compressor
+    compressor->execute();        // COMP compressor
     bp1->execute (0);              // aux bandpass (runs if COMP)
-    OSCTRL::xosctrl (osctrl);                // CESSB Overshoot Control
+    osctrl->execute();                // CESSB Overshoot Control
     bp2->execute (0);              // aux bandpass (runs if CESSB)
     compmeter->execute ();              // COMP meter
     alc->execute ();                   // ALC
     ammod->execute();                  // AM Modulator
     preemph->execute(1);             // FM pre-emphasis (second option)
-    FMMOD::xfmmod (fmmod);                  // FM Modulator
+    fmmod->execute();                  // FM Modulator
     gen1->execute();                     // output signal generator (TUN and Two-tone)
-    USLEW::xuslew (uslew);                  // up-slew for AM, FM, and gens
+    uslew->execute(uslewCheck());                  // up-slew for AM, FM, and gens
     alcmeter->execute ();               // ALC Meter
     sip1->execute(0);               // siphon data for display
-    IQC::xiqc (iqc.p0);                     // PureSignal correction
-    CFIR::xcfir(cfir);                     // compensating FIR filter (used Protocol_2 only)
+    iqc.p0->execute();                     // PureSignal correction
+    cfir->execute();                     // compensating FIR filter (used Protocol_2 only)
     rsmpout->execute();             // output resampler
     outmeter->execute ();               // output meter
 }
@@ -622,7 +621,7 @@ void TXA::setOutputSamplerate(int out_rate)
 {
     Unit::setBuffersOutputSamplerate(out_rate);
     // cfir - needs to know input rate of firmware CIC
-    CFIR::setOutRate_cfir (cfir, out_rate);
+    cfir->setOutRate(out_rate);
     // output resampler
     rsmpout->setBuffers(midbuff, outbuff);
     rsmpout->setOutRate(out_rate);
@@ -654,20 +653,20 @@ void TXA::setDSPSamplerate(int dsp_rate)
     cfcomp->setSamplerate(dsp_rate);
     cfcmeter->setSamplerate (dsp_rate);
     bp0->setSamplerate (dsp_rate);
-    COMPRESSOR::setSamplerate_compressor (compressor, dsp_rate);
+    compressor->setSamplerate(dsp_rate);
     bp1->setSamplerate (dsp_rate);
-    OSCTRL::setSamplerate_osctrl (osctrl, dsp_rate);
+    osctrl->setSamplerate(dsp_rate);
     bp2->setSamplerate (dsp_rate);
     compmeter->setSamplerate (dsp_rate);
     alc->setSamplerate (dsp_rate);
     ammod->setSamplerate(dsp_rate);
-    FMMOD::setSamplerate_fmmod (fmmod, dsp_rate);
+    fmmod->setSamplerate(dsp_rate);
     gen1->setSamplerate(dsp_rate);
-    USLEW::setSamplerate_uslew (uslew, dsp_rate);
+    uslew->setSamplerate(dsp_rate);
     alcmeter->setSamplerate (dsp_rate);
     sip1->setSamplerate (dsp_rate);
-    IQC::setSamplerate_iqc (iqc.p0, dsp_rate);
-    CFIR::setSamplerate_cfir (cfir, dsp_rate);
+    iqc.p0->setSamplerate(dsp_rate);
+    cfir->setSamplerate(dsp_rate);
     // output resampler
     rsmpout->setBuffers(midbuff, outbuff);
     rsmpout->setInRate(dsp_rate);
@@ -710,12 +709,12 @@ void TXA::setDSPBuffsize(int dsp_size)
     cfcmeter->setSize(dsp_size);
     bp0->setBuffers (midbuff, midbuff);
     bp0->setSize (dsp_size);
-    COMPRESSOR::setBuffers_compressor (compressor, midbuff, midbuff);
-    COMPRESSOR::setSize_compressor (compressor, dsp_size);
+    compressor->setBuffers(midbuff, midbuff);
+    compressor->setSize(dsp_size);
     bp1->setBuffers (midbuff, midbuff);
     bp1->setSize (dsp_size);
-    OSCTRL::setBuffers_osctrl (osctrl, midbuff, midbuff);
-    OSCTRL::setSize_osctrl (osctrl, dsp_size);
+    osctrl->setBuffers(midbuff, midbuff);
+    osctrl->setSize(dsp_size);
     bp2->setBuffers (midbuff, midbuff);
     bp2->setSize (dsp_size);
     compmeter->setBuffers(midbuff);
@@ -724,20 +723,20 @@ void TXA::setDSPBuffsize(int dsp_size)
     alc->setSize( dsp_size);
     ammod->setBuffers(midbuff, midbuff);
     ammod->setSize(dsp_size);
-    FMMOD::setBuffers_fmmod (fmmod, midbuff, midbuff);
-    FMMOD::setSize_fmmod (fmmod, dsp_size);
+    fmmod->setBuffers(midbuff, midbuff);
+    fmmod->setSize(dsp_size);
     gen1->setBuffers(midbuff, midbuff);
     gen1->setSize(dsp_size);
-    USLEW::setBuffers_uslew (uslew, midbuff, midbuff);
-    USLEW::setSize_uslew (uslew, dsp_size);
+    uslew->setBuffers(midbuff, midbuff);
+    uslew->setSize(dsp_size);
     alcmeter->setBuffers (midbuff);
     alcmeter->setSize(dsp_size);
     sip1->setBuffers (midbuff);
     sip1->setSize (dsp_size);
-    IQC::setBuffers_iqc (iqc.p0, midbuff, midbuff);
-    IQC::setSize_iqc (iqc.p0, dsp_size);
-    CFIR::setBuffers_cfir (cfir, midbuff, midbuff);
-    CFIR::setSize_cfir (cfir, dsp_size);
+    iqc.p0->IQC::setBuffers(midbuff, midbuff);
+    iqc.p0->IQC::setSize(dsp_size);
+    cfir->setBuffers(midbuff, midbuff);
+    cfir->setSize(dsp_size);
     // output resampler
     rsmpout->setBuffers(midbuff, outbuff);
     rsmpout->setSize(dsp_size);
@@ -1007,8 +1006,8 @@ void TXA::setNC(int _nc)
     setBandpassNC                (_nc);
     preemph->setNC               (_nc);
     eqp->setNC                   (_nc);
-    FMMOD::SetFMNC        (*this, _nc);
-    CFIR::SetCFIRNC       (*this, _nc);
+    fmmod->setNC                 (_nc);
+    cfir->setNC                  (_nc);
     state = oldstate;
 }
 
@@ -1017,13 +1016,13 @@ void TXA::setMP(int _mp)
     setBandpassMP                 (_mp);
     preemph->setMP                (_mp);
     eqp->setMP                    (_mp);
-    FMMOD::SetFMMP         (*this, _mp);
+    fmmod->setMP                  (_mp);
 }
 
 void TXA::setFMAFFilter(float _low, float _high)
 {
     preemph->setFreqs         (_low, _high);
-    FMMOD::SetFMAFFreqs(*this, _low, _high);
+    fmmod->setAFFreqs         (_low, _high);
 }
 
 void TXA::SetBPSRun (TXA& txa, int _run)
@@ -1095,7 +1094,7 @@ void TXA::SetBPSWindow (TXA& txa, int _wintype)
         delete[] (a->mults);
         impulse = FIR::fir_bandpass(a->size + 1, a->f_low, a->f_high, a->samplerate, a->wintype, 1, 1.0 / (float)(2 * a->size));
         a->mults = FIR::fftcv_mults (2 * a->size, impulse);
-        delete[] (impulse);
+        delete[] impulse;
     }
 
     a = txa.bps2;
@@ -1106,9 +1105,95 @@ void TXA::SetBPSWindow (TXA& txa, int _wintype)
         delete[] (a->mults);
         impulse = FIR::fir_bandpass (a->size + 1, a->f_low, a->f_high, a->samplerate, a->wintype, 1, 1.0 / (float)(2 * a->size));
         a->mults = FIR::fftcv_mults (2 * a->size, impulse);
-        delete[] (impulse);
+        delete[] impulse;
     }
 }
 
+void TXA::SetCompressorRun (TXA& txa, int _run)
+{
+    if (txa.compressor->run != _run)
+    {
+        txa.compressor->run = _run;
+        txa.setupBPFilters();
+    }
+}
+
+void TXA::SetosctrlRun (TXA& txa, int run)
+{
+    if (txa.osctrl->run != run)
+    {
+        txa.osctrl->run = run;
+        txa.setupBPFilters();
+    }
+}
+
+void TXA::GetiqcValues (TXA& txa, std::vector<double>& cm, std::vector<double>& cc, std::vector<double>& cs)
+{
+    IQC *a;
+    a = txa.iqc.p0;
+    cm.resize(a->ints * 4);
+    cc.resize(a->ints * 4);
+    cs.resize(a->ints * 4);
+    std::copy(a->cm[a->cset].begin(), a->cm[a->cset].begin() + a->ints * 4, cm.begin());
+    std::copy(a->cc[a->cset].begin(), a->cc[a->cset].begin() + a->ints * 4, cc.begin());
+    std::copy(a->cs[a->cset].begin(), a->cs[a->cset].begin() + a->ints * 4, cs.begin());
+}
+
+void TXA::SetiqcValues (TXA& txa, const std::vector<double>& cm, const std::vector<double>& cc, const std::vector<double>& cs)
+{
+    IQC *a;
+    a = txa.iqc.p0;
+    a->cset = 1 - a->cset;
+    std::copy(cm.begin(), cm.begin() + a->ints * 4, a->cm[a->cset].begin());
+    std::copy(cc.begin(), cc.begin() + a->ints * 4, a->cc[a->cset].begin());
+    std::copy(cs.begin(), cs.begin() + a->ints * 4, a->cs[a->cset].begin());
+    a->state = IQC::IQCSTATE::RUN;
+}
+
+void TXA::SetiqcSwap (TXA& txa, const std::vector<double>& cm, const std::vector<double>& cc, const std::vector<double>& cs)
+{
+    IQC *a = txa.iqc.p1;
+    a->cset = 1 - a->cset;
+    std::copy(cm.begin(), cm.begin() + a->ints * 4, a->cm[a->cset].begin());
+    std::copy(cc.begin(), cc.begin() + a->ints * 4, a->cc[a->cset].begin());
+    std::copy(cs.begin(), cs.begin() + a->ints * 4, a->cs[a->cset].begin());
+    a->busy = 1;
+    a->state = IQC::IQCSTATE::SWAP;
+    a->count = 0;
+}
+
+void TXA::SetiqcStart (TXA& txa, const std::vector<double>& cm, const std::vector<double>& cc, const std::vector<double>& cs)
+{
+    IQC *a = txa.iqc.p1;
+    a->cset = 0;
+    std::copy(cm.begin(), cm.begin() + a->ints * 4, a->cm[a->cset].begin());
+    std::copy(cc.begin(), cc.begin() + a->ints * 4, a->cc[a->cset].begin());
+    std::copy(cs.begin(), cs.begin() + a->ints * 4, a->cs[a->cset].begin());
+    a->busy = 1;
+    a->state = IQC::IQCSTATE::BEGIN;
+    a->count = 0;
+    txa.iqc.p1->run = 1;
+}
+
+void TXA::SetiqcEnd (TXA& txa)
+{
+    IQC *a = txa.iqc.p1;
+    a->busy = 1;
+    a->state = IQC::IQCSTATE::END;
+    a->count = 0;
+    txa.iqc.p1->run = 0;
+}
+
+void TXA::GetiqcDogCount (TXA& txa, int* count)
+{
+    IQC *a = txa.iqc.p1;
+    *count = a->dog.count;
+}
+
+void TXA::SetiqcDogCount (TXA& txa, int count)
+{
+    IQC *a = txa.iqc.p1;
+    a->dog.count = count;
+}
 
 } // namespace WDSP

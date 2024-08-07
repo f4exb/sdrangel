@@ -194,6 +194,18 @@ public:
     static void SetBPSRun (TXA& txa, int run);
     static void SetBPSFreqs (TXA& txa, double low, double high);
     static void SetBPSWindow (TXA& txa, int wintype);
+    // COMPRESSOR
+    static void SetCompressorRun (TXA& txa, int run);
+    // OSCTRL
+    static void SetosctrlRun (TXA& txa, int run);
+    // IQC
+    static void GetiqcValues (TXA& txa, std::vector<double>& cm, std::vector<double>& cc, std::vector<double>& cs);
+    static void SetiqcValues (TXA& txa, const std::vector<double>& cm, const std::vector<double>& cc, const std::vector<double>& cs);
+    static void SetiqcSwap (TXA& txa, const std::vector<double>& cm, const std::vector<double>& cc, const std::vector<double>& cs);
+    static void SetiqcStart (TXA& txa, const std::vector<double>& cm, const std::vector<double>& cc, const std::vector<double>& cs);
+    static void SetiqcEnd (TXA& txa);
+    static void GetiqcDogCount (TXA& txa, int* count);
+    static void SetiqcDogCount (TXA& txa, int  count);
 
     // Collectives
     void setNC(int nc);

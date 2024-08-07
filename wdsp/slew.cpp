@@ -31,162 +31,141 @@ warren@wpratt.com
 
 namespace WDSP {
 
-enum _USLEW
+void USLEW::calc()
 {
-    BEGIN,
-    WAIT,
-    UP,
-    ON
-};
-
-void USLEW::calc_uslew (USLEW *a)
-{
-    int i;
-    float delta, theta;
-    a->runmode = 0;
-    a->state = BEGIN;
-    a->count = 0;
-    a->ndelup = (int)(a->tdelay * a->rate);
-    a->ntup = (int)(a->tupslew * a->rate);
-    a->cup = new float[a->ntup + 1]; // (float *) malloc0 ((a->ntup + 1) * sizeof (float));
-    delta = PI / (float)a->ntup;
+    double delta;
+    double theta;
+    runmode = 0;
+    state = _USLEW::BEGIN;
+    count = 0;
+    ndelup = (int)(tdelay * rate);
+    ntup = (int)(tupslew * rate);
+    cup.resize(ntup + 1);
+    delta = PI / (float)ntup;
     theta = 0.0;
-    for (i = 0; i <= a->ntup; i++)
+    for (int i = 0; i <= ntup; i++)
     {
-        a->cup[i] = 0.5 * (1.0 - cos (theta));
+        cup[i] = 0.5 * (1.0 - cos (theta));
         theta += delta;
     }
-    *a->ch_upslew &= ~((long)1); // InterlockedBitTestAndReset (a->ch_upslew, 0);
+    *ch_upslew &= ~((long)1);
 }
 
-void USLEW::decalc_uslew (USLEW *a)
+USLEW::USLEW(
+    long *_ch_upslew,
+    int _size,
+    float* _in,
+    float* _out,
+    double _rate,
+    double _tdelay,
+    double _tupslew
+) :
+    ch_upslew(_ch_upslew),
+    size(_size),
+    in(_in),
+    out(_out),
+    rate(_rate),
+    tdelay(_tdelay),
+    tupslew(_tupslew)
 {
-    delete[] (a->cup);
+    calc();
 }
 
-USLEW* USLEW::create_uslew (
-    TXA *txa,
-    long *ch_upslew,
-    int size,
-    float* in,
-    float* out,
-    float rate,
-    float tdelay,
-    float tupslew
-)
+void USLEW::flush()
 {
-    USLEW *a = new USLEW;
-    a->txa = txa;
-    a->ch_upslew = ch_upslew;
-    a->size = size;
-    a->in = in;
-    a->out = out;
-    a->rate = rate;
-    a->tdelay = tdelay;
-    a->tupslew = tupslew;
-    calc_uslew (a);
-    return a;
+    state = _USLEW::BEGIN;
+    runmode = 0;
+    *ch_upslew &= ~1L;
 }
 
-void USLEW::destroy_uslew (USLEW *a)
+void USLEW::execute (int check)
 {
-    decalc_uslew (a);
-    delete (a);
-}
+    if (!runmode && check)
+        runmode = 1;
 
-void USLEW::flush_uslew (USLEW *a)
-{
-    a->state = BEGIN;
-    a->runmode = 0;
-    *a->ch_upslew &= ~1L; //InterlockedBitTestAndReset (a->ch_upslew, 0);
-}
-
-void USLEW::xuslew (USLEW *a)
-{
-    if (!a->runmode && a->txa->uslewCheck())
-        a->runmode = 1;
-
-    long upslew = *a->ch_upslew;
-    *a->ch_upslew = 1L;
-    if (a->runmode && upslew) //_InterlockedAnd (a->ch_upslew, 1))
+    long upslew = *ch_upslew;
+    *ch_upslew = 1L;
+    if (runmode && upslew) //_InterlockedAnd (ch_upslew, 1))
     {
-        int i;
-        float I, Q;
-        for (i = 0; i < a->size; i++)
+        double I;
+        double Q;
+        for (int i = 0; i < size; i++)
         {
-            I = a->in[2 * i + 0];
-            Q = a->in[2 * i + 1];
-            switch (a->state)
+            I = in[2 * i + 0];
+            Q = in[2 * i + 1];
+            switch (state)
             {
-            case BEGIN:
-                a->out[2 * i + 0] = 0.0;
-                a->out[2 * i + 1] = 0.0;
+            case _USLEW::BEGIN:
+                out[2 * i + 0] = 0.0;
+                out[2 * i + 1] = 0.0;
                 if ((I != 0.0) || (Q != 0.0))
                 {
-                    if (a->ndelup > 0)
+                    if (ndelup > 0)
                     {
-                        a->state = WAIT;
-                        a->count = a->ndelup;
+                        state = _USLEW::WAIT;
+                        count = ndelup;
                     }
-                    else if (a->ntup > 0)
+                    else if (ntup > 0)
                     {
-                        a->state = UP;
-                        a->count = a->ntup;
+                        state = _USLEW::UP;
+                        count = ntup;
                     }
                     else
-                        a->state = ON;
+                        state = _USLEW::ON;
                 }
                 break;
-            case WAIT:
-                a->out[2 * i + 0] = 0.0;
-                a->out[2 * i + 1] = 0.0;
-                if (a->count-- == 0)
+            case _USLEW::WAIT:
+                out[2 * i + 0] = 0.0;
+                out[2 * i + 1] = 0.0;
+                if (count-- == 0)
                 {
-                    if (a->ntup > 0)
+                    if (ntup > 0)
                     {
-                        a->state = UP;
-                        a->count = a->ntup;
+                        state = _USLEW::UP;
+                        count = ntup;
                     }
                     else
-                        a->state = ON;
+                        state = _USLEW::ON;
                 }
                 break;
-            case UP:
-                a->out[2 * i + 0] = I * a->cup[a->ntup - a->count];
-                a->out[2 * i + 1] = Q * a->cup[a->ntup - a->count];
-                if (a->count-- == 0)
-                    a->state = ON;
+            case _USLEW::UP:
+                out[2 * i + 0] = (float) (I * cup[ntup - count]);
+                out[2 * i + 1] = (float) (Q * cup[ntup - count]);
+                if (count-- == 0)
+                    state = _USLEW::ON;
                 break;
-            case ON:
-                a->out[2 * i + 0] = I;
-                a->out[2 * i + 1] = Q;
-                *a->ch_upslew &= ~((long)1); // InterlockedBitTestAndReset (a->ch_upslew, 0);
-                a->runmode = 0;
+            case _USLEW::ON:
+                out[2 * i + 0] = (float) I;
+                out[2 * i + 1] = (float) Q;
+                *ch_upslew &= ~((long)1);
+                runmode = 0;
+                break;
+            default:
                 break;
             }
         }
     }
-    else if (a->out != a->in)
-        std::copy( a->in,  a->in + a->size * 2, a->out);
+    else if (out != in)
+        std::copy( in,  in + size * 2, out);
 }
 
-void USLEW::setBuffers_uslew (USLEW *a, float* in, float* out)
+void USLEW::setBuffers(float* _in, float* _out)
 {
-    a->in = in;
-    a->out = out;
+    in = _in;
+    out = _out;
 }
 
-void USLEW::setSamplerate_uslew (USLEW *a, int rate)
+void USLEW::setSamplerate(int _rate)
 {
-    decalc_uslew (a);
-    a->rate = rate;
-    calc_uslew (a);
+    decalc();
+    rate = _rate;
+    calc();
 }
 
-void USLEW::setSize_uslew (USLEW *a, int size)
+void USLEW::setSize(int _size)
 {
-    a->size = size;
-    flush_uslew (a);
+    size = _size;
+    flush();
 }
 
 /********************************************************************************************************
@@ -195,13 +174,17 @@ void USLEW::setSize_uslew (USLEW *a, int size)
 *                                                                                                       *
 ********************************************************************************************************/
 
-void USLEW::SetuSlewTime (TXA& txa, float time)
+void USLEW::setuSlewTime(double _time)
 {
     // NOTE:  'time' is in seconds
-    USLEW *a = txa.uslew;
-    decalc_uslew (a);
-    a->tupslew = time;
-    calc_uslew (a);
+    decalc();
+    tupslew = _time;
+    calc();
+}
+
+void USLEW::setRun(int run)
+{
+    runmode = run;
 }
 
 } // namespace WDSP

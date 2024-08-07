@@ -75,12 +75,18 @@ public:
     int out_idx;                    // ring buffer position from which delayed samples are pulled
     double backmult;                // multiplier for waveform averaging
     double ombackmult;              // multiplier for waveform averaging
-    double I1, Q1;
-    double I2, Q2;
-    double I, Q;
-    double Ilast, Qlast;
-    double deltaI, deltaQ;
-    double Inext, Qnext;
+    double I1;
+    double Q1;
+    double I2;
+    double Q2;
+    double I;
+    double Q;
+    double Ilast;
+    double Qlast;
+    double deltaI;
+    double deltaQ;
+    double Inext;
+    double Qnext;
     int overflow;
 
     NOB(

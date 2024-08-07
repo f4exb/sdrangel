@@ -43,22 +43,24 @@ public:
     float *outbuff;
     double gain;
 
-    static COMPRESSOR* create_compressor (
+    COMPRESSOR(
         int run,
         int buffsize,
         float* inbuff,
         float* outbuff,
         double gain
     );
-    static void destroy_compressor (COMPRESSOR *a);
-    static void flush_compressor (COMPRESSOR *a);
-    static void xcompressor (COMPRESSOR *a);
-    static void setBuffers_compressor (COMPRESSOR *a, float* in, float* out);
-    static void setSamplerate_compressor (COMPRESSOR *a, int rate);
-    static void setSize_compressor (COMPRESSOR *a, int size);
+    COMPRESSOR(const COMPRESSOR&) = delete;
+    COMPRESSOR& operator=(COMPRESSOR& other) = delete;
+    ~COMPRESSOR() = default;
+
+    void flush();
+    void execute();
+    void setBuffers(float* in, float* out);
+    void setSamplerate(int rate);
+    void setSize(int size);
     // TXA Properties
-    static void SetCompressorRun (TXA& txa, int run);
-    static void SetCompressorGain (TXA& txa, float gain);
+    void setGain(float gain);
 };
 
 } // namespace WDSP

@@ -56,7 +56,7 @@ public:
     int wintype;
     FIRCORE *p;
 
-    static CFIR* create_cfir (
+    CFIR(
         int run,
         int size,
         int nc,
@@ -73,13 +73,16 @@ public:
         double xbw,
         int wintype
     );
-    static void destroy_cfir (CFIR *a);
-    static void flush_cfir (CFIR *a);
-    static void xcfir (CFIR *a);
-    static void setBuffers_cfir (CFIR *a, float* in, float* out);
-    static void setSamplerate_cfir (CFIR *a, int rate);
-    static void setSize_cfir (CFIR *a, int size);
-    static void setOutRate_cfir (CFIR *a, int rate);
+    CFIR(const CFIR&) = delete;
+    CFIR& operator=(CFIR& other) = delete;
+    ~CFIR();
+
+    void flush();
+    void execute();
+    void setBuffers(float* in, float* out);
+    void setSamplerate(int rate);
+    void setSize(int size);
+    void setOutRate(int rate);
     static float* cfir_impulse (
         int N,
         int DD,
@@ -95,12 +98,12 @@ public:
         int wintype
     );
     // TXA Properties
-    static void SetCFIRRun(TXA& txa, int run);
-    static void SetCFIRNC(TXA& txa, int nc);
+    void setRun(int run);
+    void setNC(int nc);
 
 private:
-    static void calc_cfir (CFIR *a);
-    static void decalc_cfir (CFIR *a);
+    void calc();
+    void decalc();
 };
 
 } // namespace WDSP
