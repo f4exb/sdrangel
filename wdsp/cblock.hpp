@@ -32,8 +32,6 @@ warren@wpratt.com
 
 namespace WDSP {
 
-class RXA;
-
 class WDSP_API CBL
 {
 public:
@@ -50,7 +48,7 @@ public:
     double tau;                         //carrier removal time constant
     double mtau;                        //carrier removal multiplier
 
-    static CBL* create_cbl(
+    CBL(
         int run,
         int buff_size,
         float *in_buff,
@@ -59,17 +57,20 @@ public:
         int sample_rate,
         double tau
     );
-    static void destroy_cbl (CBL *a);
-    static void flush_cbl (CBL *a);
-    static void xcbl (CBL *a);
-    static void setBuffers_cbl (CBL *a, float* in, float* out);
-    static void setSamplerate_cbl (CBL *a, int rate);
-    static void setSize_cbl (CBL *a, int size);
-    // RXA Properties
-    static  void SetCBLRun(RXA& rxa, int setit);
+    CBL(const CBL&) = delete;
+    CBL& operator=(CBL& other) = delete;
+    ~CBL() = default;
+
+    void flush();
+    void execute();
+    void setBuffers(float* in, float* out);
+    void setSamplerate(int rate);
+    void setSize(int size);
+    // Public Properties
+    void setRun(int setit);
 
 private:
-    static void calc_cbl (CBL *a);
+    void calc();
 };
 
 } // namespace WDSP

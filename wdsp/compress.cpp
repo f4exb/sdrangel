@@ -34,62 +34,56 @@ in the January 2010 issue of RadCom magazine.
 
 namespace WDSP {
 
-COMPRESSOR* COMPRESSOR::create_compressor (
-                int run,
-                int buffsize,
-                float* inbuff,
-                float* outbuff,
-                float gain )
+COMPRESSOR::COMPRESSOR(
+    int _run,
+    int _buffsize,
+    float* _inbuff,
+    float* _outbuff,
+    double _gain
+) :
+    run(_run),
+    buffsize(_buffsize),
+    inbuff(_inbuff),
+    outbuff(_outbuff),
+    gain(_gain)
+{}
+
+void COMPRESSOR::flush()
 {
-    COMPRESSOR *a = new COMPRESSOR;
-    a->run = run;
-    a->inbuff = inbuff;
-    a->outbuff = outbuff;
-    a->buffsize = buffsize;
-    a->gain = gain;
-    return a;
+    // Nothing to do
 }
 
-void COMPRESSOR::destroy_compressor (COMPRESSOR *a)
+void COMPRESSOR::execute()
 {
-    delete (a);
-}
-
-void COMPRESSOR::flush_compressor (COMPRESSOR *)
-{
-}
-
-void COMPRESSOR::xcompressor (COMPRESSOR *a)
-{
-    int i;
-    float mag;
-    if (a->run)
-        for (i = 0; i < a->buffsize; i++)
+    double mag;
+    if (run)
+        for (int i = 0; i < buffsize; i++)
         {
-            mag = sqrt(a->inbuff[2 * i + 0] * a->inbuff[2 * i + 0] + a->inbuff[2 * i + 1] * a->inbuff[2 * i + 1]);
-            if (a->gain * mag > 1.0)
-                a->outbuff[2 * i + 0] = a->inbuff[2 * i + 0] / mag;
+            mag = sqrt(inbuff[2 * i + 0] * inbuff[2 * i + 0] + inbuff[2 * i + 1] * inbuff[2 * i + 1]);
+            if (gain * mag > 1.0)
+                outbuff[2 * i + 0] = (float) (inbuff[2 * i + 0] / mag);
             else
-                a->outbuff[2 * i + 0] = a->inbuff[2 * i + 0] * a->gain;
-            a->outbuff[2 * i + 1] = 0.0;
+                outbuff[2 * i + 0] = (float) (inbuff[2 * i + 0] * gain);
+            outbuff[2 * i + 1] = 0.0;
         }
-    else if (a->inbuff != a->outbuff)
-        std::copy(a->inbuff, a->inbuff + a->buffsize * 2, a->outbuff);
+    else if (inbuff != outbuff)
+        std::copy(inbuff, inbuff + buffsize * 2, outbuff);
 }
 
-void COMPRESSOR::setBuffers_compressor (COMPRESSOR *a, float* in, float* out)
+void COMPRESSOR::setBuffers(float* _in, float* _out)
 {
-    a->inbuff = in;
-    a->outbuff = out;
+    inbuff = _in;
+    outbuff = _out;
 }
 
-void COMPRESSOR::setSamplerate_compressor (COMPRESSOR *, int)
+void COMPRESSOR::setSamplerate(int)
 {
+    // Nothing to do
 }
 
-void COMPRESSOR::setSize_compressor (COMPRESSOR *a, int size)
+void COMPRESSOR::setSize(int _size)
 {
-    a->buffsize = size;
+    buffsize = _size;
 }
 
 /********************************************************************************************************
@@ -98,18 +92,9 @@ void COMPRESSOR::setSize_compressor (COMPRESSOR *a, int size)
 *                                                                                                       *
 ********************************************************************************************************/
 
-void COMPRESSOR::SetCompressorRun (TXA& txa, int run)
+void COMPRESSOR::setGain(float _gain)
 {
-    if (txa.compressor.p->run != run)
-    {
-        txa.compressor.p->run = run;
-        TXA::SetupBPFilters (txa);
-    }
-}
-
-void COMPRESSOR::SetCompressorGain (TXA& txa, float gain)
-{
-    txa.compressor.p->gain = pow (10.0, gain / 20.0);
+    gain = pow (10.0, _gain / 20.0);
 }
 
 } // namespace WDSP

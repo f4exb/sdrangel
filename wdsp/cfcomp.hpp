@@ -28,6 +28,8 @@ warren@wpratt.com
 #ifndef wdsp_cfcomp_h
 #define wdsp_cfcomp_h
 
+#include <vector>
+
 #include "fftw3.h"
 #include "export.h"
 
@@ -46,25 +48,25 @@ public:
     int fsize;
     int ovrlp;
     int incr;
-    float* window;
+    std::vector<double> window;
     int iasize;
-    float* inaccum;
-    float* forfftin;
-    float* forfftout;
+    std::vector<double> inaccum;
+    std::vector<float> forfftin;
+    std::vector<float> forfftout;
     int msize;
-    float* cmask;
-    float* mask;
+    std::vector<double> cmask;
+    std::vector<double> mask;
     int mask_ready;
-    float* cfc_gain;
-    float* revfftin;
-    float* revfftout;
-    float** save;
+    std::vector<double> cfc_gain;
+    std::vector<float> revfftin;
+    std::vector<float> revfftout;
+    std::vector<std::vector<double>> save;
     int oasize;
-    float* outaccum;
-    float rate;
+    std::vector<double> outaccum;
+    double rate;
     int wintype;
-    float pregain;
-    float postgain;
+    double pregain;
+    double postgain;
     int nsamps;
     int iainidx;
     int iaoutidx;
@@ -77,32 +79,32 @@ public:
 
     int comp_method;
     int nfreqs;
-    float* F;
-    float* G;
-    float* E;
-    float* fp;
-    float* gp;
-    float* ep;
-    float* comp;
-    float precomp;
-    float precomplin;
-    float* peq;
+    std::vector<double> F;
+    std::vector<double> G;
+    std::vector<double> E;
+    std::vector<double> fp;
+    std::vector<double> gp;
+    std::vector<double> ep;
+    std::vector<double> comp;
+    double precomp;
+    double precomplin;
+    std::vector<double> peq;
     int peq_run;
-    float prepeq;
-    float prepeqlin;
-    float winfudge;
+    double prepeq;
+    double prepeqlin;
+    double winfudge;
 
-    float gain;
-    float mtau;
-    float mmult;
+    double gain;
+    double mtau;
+    double mmult;
     // display stuff
-    float dtau;
-    float dmult;
-    float* delta;
-    float* delta_copy;
-    float* cfc_gain_copy;
+    double dtau;
+    double dmult;
+    std::vector<double> delta;
+    std::vector<double> delta_copy;
+    std::vector<double> cfc_gain_copy;
 
-    static CFCOMP* create_cfcomp (
+    CFCOMP(
         int run,
         int position,
         int peq_run,
@@ -115,36 +117,39 @@ public:
         int wintype,
         int comp_method,
         int nfreqs,
-        float precomp,
-        float prepeq,
-        float* F,
-        float* G,
-        float* E,
-        float mtau,
-        float dtau
+        double precomp,
+        double prepeq,
+        const double* F,
+        const double* G,
+        const double* E,
+        double mtau,
+        double dtau
     );
-    static void destroy_cfcomp (CFCOMP *a);
-    static void flush_cfcomp (CFCOMP *a);
-    static void xcfcomp (CFCOMP *a, int pos);
-    static void setBuffers_cfcomp (CFCOMP *a, float* in, float* out);
-    static void setSamplerate_cfcomp (CFCOMP *a, int rate);
-    static void setSize_cfcomp (CFCOMP *a, int size);
+    CFCOMP(const CFCOMP&) = delete;
+    CFCOMP& operator=(CFCOMP& other) = delete;
+    ~CFCOMP();
+
+    void flush();
+    void execute(int pos);
+    void setBuffers(float* in, float* out);
+    void setSamplerate(int rate);
+    void setSize(int size);
     // TXA Properties
-    static void SetCFCOMPRun (TXA& txa, int run);
-    static void SetCFCOMPPosition (TXA& txa, int pos);
-    static void SetCFCOMPprofile (TXA& txa, int nfreqs, float* F, float* G, float *E);
-    static void SetCFCOMPPrecomp (TXA& txa, float precomp);
-    static void SetCFCOMPPeqRun (TXA& txa, int run);
-    static void SetCFCOMPPrePeq (TXA& txa, float prepeq);
-    static void GetCFCOMPDisplayCompression (TXA& txa, float* comp_values, int* ready);
+    void setRun(int run);
+    void setPosition(int pos);
+    void setProfile(int nfreqs, const double* F, const double* G, const double *E);
+    void setPrecomp(double precomp);
+    void setPeqRun(int run);
+    void setPrePeq(double prepeq);
+    void getDisplayCompression(double* comp_values, int* ready);
 
 private:
-    static void calc_cfcwindow (CFCOMP *a);
+    void calc_cfcwindow();
     static int fCOMPcompare (const void *a, const void *b);
-    static void calc_comp (CFCOMP *a);
-    static void calc_cfcomp(CFCOMP *a);
-    static void decalc_cfcomp(CFCOMP *a);
-    static void calc_mask (CFCOMP *a);
+    void calc_comp();
+    void calc_cfcomp();
+    void decalc_cfcomp();
+    void calc_mask();
 };
 
 } // namespace WDSP

@@ -28,6 +28,9 @@ warren@wpratt.com
 #ifndef wdsp_iqc_h
 #define wdsp_iqc_h
 
+#include <array>
+#include <vector>
+
 #include "export.h"
 
 namespace WDSP {
@@ -37,52 +40,63 @@ class TXA;
 class WDSP_API IQC
 {
 public:
+    enum class IQCSTATE
+    {
+        RUN = 0,
+        BEGIN,
+        SWAP,
+        END,
+        DONE
+    };
+
     long run;
     long busy;
     int size;
     float* in;
     float* out;
-    float rate;
+    double rate;
     int ints;
-    float* t;
+    std::vector<double> t;
     int cset;
-    float* cm[2];
-    float* cc[2];
-    float* cs[2];
-    float tup;
-    float* cup;
+    std::array<std::vector<double>, 2> cm;
+    std::array<std::vector<double>, 2> cc;
+    std::array<std::vector<double>, 2> cs;
+    double tup;
+    std::vector<double> cup;
     int count;
     int ntup;
-    int state;
+    IQCSTATE state;
     struct
     {
         int spi;
-        int* cpi;
+        std::vector<int> cpi;
         int full_ints;
         int count;
     } dog;
 
-    static IQC* create_iqc (int run, int size, float* in, float* out, float rate, int ints, float tup, int spi);
-    static void destroy_iqc (IQC *a);
-    static void flush_iqc (IQC *a);
-    static void xiqc (IQC *a);
-    static void setBuffers_iqc (IQC *a, float* in, float* out);
-    static void setSamplerate_iqc (IQC *a, int rate);
-    static void setSize_iqc (IQC *a, int size);
-    // TXA Properties
-    static void GetiqcValues (TXA& txa, float* cm, float* cc, float* cs);
-    static void SetiqcValues (TXA& txa, float* cm, float* cc, float* cs);
-    static void SetiqcSwap (TXA& txa, float* cm, float* cc, float* cs);
-    static void SetiqcStart (TXA& txa, float* cm, float* cc, float* cs);
-    static void SetiqcEnd (TXA& txa);
-    static void GetiqcDogCount (TXA& txa, int* count);
-    static void SetiqcDogCount (TXA& txa, int  count);
+    IQC(
+        int run,
+        int size,
+        float* in,
+        float* out,
+        double rate,
+        int ints,
+        double tup,
+        int spi
+    );
+    IQC(const IQC&) = delete;
+    IQC& operator=(const IQC& other) = delete;
+    ~IQC() = default;
+
+    void flush();
+    void execute();
+    void setBuffers(float* in, float* out);
+    void setSamplerate(int rate);
+    void setSize(int size);
 
 private:
-    static void size_iqc (IQC *a);
-    static void desize_iqc (IQC *a);
-    static void calc_iqc (IQC *a);
-    static void decalc_iqc (IQC *a);
+    void size_iqc();
+    void calc();
 };
 
 } // namespace WDSP

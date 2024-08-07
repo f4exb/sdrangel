@@ -32,6 +32,8 @@ warren@wpratt.com
 #ifndef wdsp_osctrl_h
 #define wdsp_osctrl_h
 
+#include <vector>
+
 #include "export.h"
 
 namespace WDSP {
@@ -46,37 +48,37 @@ public:
     float *inbuff;                 // input buffer
     float *outbuff;                // output buffer
     int rate;                       // sample rate
-    float osgain;                  // gain applied to overshoot "clippings"
-    float bw;                      // bandwidth
+    double osgain;                  // gain applied to overshoot "clippings"
+    double bw;                      // bandwidth
     int pn;                         // "peak stretcher" window, samples
     int dl_len;                     // delay line length, samples
-    float* dl;                     // delay line for complex samples
-    float* dlenv;                  // delay line for envelope values
+    std::vector<double> dl;                     // delay line for complex samples
+    std::vector<double> dlenv;                  // delay line for envelope values
     int in_idx;                     // input index for dl
     int out_idx;                    // output index for dl
-    float max_env;                 // maximum env value in env delay line
-    float env_out;
+    double max_env;                 // maximum env value in env delay line
+    double env_out;
 
-    static void xosctrl (OSCTRL *a);
-    static OSCTRL* create_osctrl (
+    OSCTRL(
         int run,
         int size,
         float* inbuff,
         float* outbuff,
         int rate,
-        float osgain
+        double osgain
     );
-    static void destroy_osctrl (OSCTRL *a);
-    static void flush_osctrl (OSCTRL *a);
-    static void setBuffers_osctrl (OSCTRL *a, float* in, float* out);
-    static void setSamplerate_osctrl (OSCTRL *a, int rate);
-    static void setSize_osctrl (OSCTRL *a, int size);
-    // TXA Properties
-    static void SetosctrlRun (TXA& txa, int run);
+    OSCTRL(const OSCTRL&) = delete;
+    OSCTRL& operator=(const OSCTRL& other) = delete;
+    ~OSCTRL() = default;
+
+    void flush();
+    void execute();
+    void setBuffers(float* in, float* out);
+    void setSamplerate(int rate);
+    void setSize(int size);
 
 private:
-    static void calc_osctrl (OSCTRL *a);
-    static void decalc_osctrl (OSCTRL *a);
+    void calc();
 };
 
 } // namespace WDSP

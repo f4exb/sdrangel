@@ -34,278 +34,174 @@ warren@wpratt.com
 
 namespace WDSP {
 
-void IQC::size_iqc (IQC *a)
+void IQC::size_iqc()
 {
     int i;
-    a->t = new float[a->ints + 1]; // (float *) malloc0 ((a->ints + 1) * sizeof(float));
-    for (i = 0; i <= a->ints; i++)
-        a->t[i] = (float)i / (float)a->ints;
+    t.resize(ints + 1);
+    for (i = 0; i <= ints; i++)
+        t[i] = (double)i / (double)ints;
     for (i = 0; i < 2; i++)
     {
-        a->cm[i] = new float[a->ints * 4]; // (float *) malloc0 (a->ints * 4 * sizeof(float));
-        a->cc[i] = new float[a->ints * 4]; // (float *) malloc0 (a->ints * 4 * sizeof(float));
-        a->cs[i] = new float[a->ints * 4]; // (float *) malloc0 (a->ints * 4 * sizeof(float));
+        cm[i].resize(ints * 4);
+        cc[i].resize(ints * 4);
+        cs[i].resize(ints * 4);
     }
-    a->dog.cpi = new int[a->ints]; // (int *) malloc0 (a->ints * sizeof (int));
-    a->dog.count = 0;
-    a->dog.full_ints = 0;
+    dog.cpi.resize(ints);
+    dog.count = 0;
+    dog.full_ints = 0;
 }
 
-void IQC::desize_iqc (IQC *a)
+void IQC::calc()
 {
-    int i;
-    delete[] (a->dog.cpi);
-    for (i = 0; i < 2; i++)
-    {
-        delete[] (a->cm[i]);
-        delete[] (a->cc[i]);
-        delete[] (a->cs[i]);
-    }
-    delete[] (a->t);
-}
-
-void IQC::calc_iqc (IQC *a)
-{
-    int i;
-    float delta, theta;
-    a->cset = 0;
-    a->count = 0;
-    a->state = 0;
-    a->busy = 0;
-    a->ntup = (int)(a->tup * a->rate);
-    a->cup = new float[a->ntup + 1]; // (float *) malloc0 ((a->ntup + 1) * sizeof (float));
-    delta = PI / (float)a->ntup;
+    double delta;
+    double theta;
+    cset = 0;
+    count = 0;
+    state = IQCSTATE::RUN;
+    busy = 0;
+    ntup = (int)(tup * rate);
+    cup.resize(ntup + 1);
+    delta = PI / (double)ntup;
     theta = 0.0;
-    for (i = 0; i <= a->ntup; i++)
+    for (int i = 0; i <= ntup; i++)
     {
-        a->cup[i] = 0.5 * (1.0 - cos (theta));
+        cup[i] = 0.5 * (1.0 - cos (theta));
         theta += delta;
     }
-    size_iqc (a);
+    size_iqc();
 }
 
-void IQC::decalc_iqc (IQC *a)
+IQC::IQC(
+    int _run,
+    int _size,
+    float* _in,
+    float* _out,
+    double _rate,
+    int _ints,
+    double _tup,
+    int _spi
+) :
+    run(_run),
+    size(_size),
+    in(_in),
+    out(_out),
+    rate(_rate),
+    ints(_ints),
+    tup(_tup)
 {
-    desize_iqc (a);
-    delete[] (a->cup);
+    dog.spi = _spi;
+    calc();
 }
 
-IQC* IQC::create_iqc (int run, int size, float* in, float* out, float rate, int ints, float tup, int spi)
+void IQC::flush()
 {
-    IQC *a = new IQC;
-    a->run = run;
-    a->size = size;
-    a->in = in;
-    a->out = out;
-    a->rate = rate;
-    a->ints = ints;
-    a->tup = tup;
-    a->dog.spi = spi;
-    calc_iqc (a);
-    return a;
+    // Nothing to do
 }
 
-void IQC::destroy_iqc (IQC *a)
+void IQC::execute()
 {
-    decalc_iqc (a);
-    delete (a);
-}
-
-void IQC::flush_iqc (IQC *)
-{
-
-}
-
-enum _iqcstate
-{
-    RUN = 0,
-    BEGIN,
-    SWAP,
-    END,
-    DONE
-};
-
-void IQC::xiqc (IQC *a)
-{
-    if (a->run == 1)
+    if (run == 1)
     {
-        int i, k, cset, mset;
-        float I, Q, env, dx, ym, yc, ys, PRE0, PRE1;
-        for (i = 0; i < a->size; i++)
+        int k;
+        int icset;
+        int mset;
+        double I;
+        double Q;
+        double env;
+        double dx;
+        double ym;
+        double yc;
+        double ys;
+        double PRE0;
+        double PRE1;
+        for (int i = 0; i < size; i++)
         {
-            I = a->in[2 * i + 0];
-            Q = a->in[2 * i + 1];
+            I = in[2 * i + 0];
+            Q = in[2 * i + 1];
             env = sqrt (I * I + Q * Q);
-            if ((k = (int)(env * a->ints)) > a->ints - 1) k = a->ints - 1;
-            dx = env - a->t[k];
-            cset = a->cset;
-            ym = a->cm[cset][4 * k + 0] + dx * (a->cm[cset][4 * k + 1] + dx * (a->cm[cset][4 * k + 2] + dx * a->cm[cset][4 * k + 3]));
-            yc = a->cc[cset][4 * k + 0] + dx * (a->cc[cset][4 * k + 1] + dx * (a->cc[cset][4 * k + 2] + dx * a->cc[cset][4 * k + 3]));
-            ys = a->cs[cset][4 * k + 0] + dx * (a->cs[cset][4 * k + 1] + dx * (a->cs[cset][4 * k + 2] + dx * a->cs[cset][4 * k + 3]));
+            if ((k = (int)(env * ints)) > ints - 1) k = ints - 1;
+            dx = env - t[k];
+            icset = cset;
+            ym = cm[icset][4 * k + 0] + dx * (cm[icset][4 * k + 1] + dx * (cm[icset][4 * k + 2] + dx * cm[icset][4 * k + 3]));
+            yc = cc[icset][4 * k + 0] + dx * (cc[icset][4 * k + 1] + dx * (cc[icset][4 * k + 2] + dx * cc[icset][4 * k + 3]));
+            ys = cs[icset][4 * k + 0] + dx * (cs[icset][4 * k + 1] + dx * (cs[icset][4 * k + 2] + dx * cs[icset][4 * k + 3]));
             PRE0 = ym * (I * yc - Q * ys);
             PRE1 = ym * (I * ys + Q * yc);
 
-            switch (a->state)
+            switch (state)
             {
-            case RUN:
-                if (a->dog.cpi[k] != a->dog.spi)
-                    if (++a->dog.cpi[k] == a->dog.spi)
-                        a->dog.full_ints++;
-                if (a->dog.full_ints == a->ints)
+            case IQCSTATE::RUN:
+                if ((dog.cpi[k] != dog.spi) && (++dog.cpi[k] == dog.spi))
+                    dog.full_ints++;
+                if (dog.full_ints == ints)
                 {
-                    ++a->dog.count;
-                    a->dog.full_ints = 0;
-                    memset (a->dog.cpi, 0, a->ints * sizeof (int));
+                    ++dog.count;
+                    dog.full_ints = 0;
+                    std::fill(dog.cpi.begin(), dog.cpi.end(), 0);
                 }
                 break;
-            case BEGIN:
-                PRE0 = (1.0 - a->cup[a->count]) * I + a->cup[a->count] * PRE0;
-                PRE1 = (1.0 - a->cup[a->count]) * Q + a->cup[a->count] * PRE1;
-                if (a->count++ == a->ntup)
+            case IQCSTATE::BEGIN:
+                PRE0 = (1.0 - cup[count]) * I + cup[count] * PRE0;
+                PRE1 = (1.0 - cup[count]) * Q + cup[count] * PRE1;
+                if (count++ == ntup)
                 {
-                    a->state = RUN;
-                    a->count = 0;
-                    a->busy = 0; // InterlockedBitTestAndReset (&a->busy, 0);
+                    state = IQCSTATE::RUN;
+                    count = 0;
+                    busy = 0;
                 }
                 break;
-            case SWAP:
+            case IQCSTATE::SWAP:
                 mset = 1 - cset;
-                ym = a->cm[mset][4 * k + 0] + dx * (a->cm[mset][4 * k + 1] + dx * (a->cm[mset][4 * k + 2] + dx * a->cm[mset][4 * k + 3]));
-                yc = a->cc[mset][4 * k + 0] + dx * (a->cc[mset][4 * k + 1] + dx * (a->cc[mset][4 * k + 2] + dx * a->cc[mset][4 * k + 3]));
-                ys = a->cs[mset][4 * k + 0] + dx * (a->cs[mset][4 * k + 1] + dx * (a->cs[mset][4 * k + 2] + dx * a->cs[mset][4 * k + 3]));
-                PRE0 = (1.0 - a->cup[a->count]) * ym * (I * yc - Q * ys) + a->cup[a->count] * PRE0;
-                PRE1 = (1.0 - a->cup[a->count]) * ym * (I * ys + Q * yc) + a->cup[a->count] * PRE1;
-                if (a->count++ == a->ntup)
+                ym = cm[mset][4 * k + 0] + dx * (cm[mset][4 * k + 1] + dx * (cm[mset][4 * k + 2] + dx * cm[mset][4 * k + 3]));
+                yc = cc[mset][4 * k + 0] + dx * (cc[mset][4 * k + 1] + dx * (cc[mset][4 * k + 2] + dx * cc[mset][4 * k + 3]));
+                ys = cs[mset][4 * k + 0] + dx * (cs[mset][4 * k + 1] + dx * (cs[mset][4 * k + 2] + dx * cs[mset][4 * k + 3]));
+                PRE0 = (1.0 - cup[count]) * ym * (I * yc - Q * ys) + cup[count] * PRE0;
+                PRE1 = (1.0 - cup[count]) * ym * (I * ys + Q * yc) + cup[count] * PRE1;
+                if (count++ == ntup)
                 {
-                    a->state = RUN;
-                    a->count = 0;
-                    a->busy = 0; // InterlockedBitTestAndReset (&a->busy, 0);
+                    state = IQCSTATE::RUN;
+                    count = 0;
+                    busy = 0;
                 }
                 break;
-            case END:
-                PRE0 = (1.0 - a->cup[a->count]) * PRE0 + a->cup[a->count] * I;
-                PRE1 = (1.0 - a->cup[a->count]) * PRE1 + a->cup[a->count] * Q;
-                if (a->count++ == a->ntup)
+            case IQCSTATE::END:
+                PRE0 = (1.0 - cup[count]) * PRE0 + cup[count] * I;
+                PRE1 = (1.0 - cup[count]) * PRE1 + cup[count] * Q;
+                if (count++ == ntup)
                 {
-                    a->state = DONE;
-                    a->count = 0;
-                    a->busy = 0; // InterlockedBitTestAndReset (&a->busy, 0);
+                    state = IQCSTATE::DONE;
+                    count = 0;
+                    busy = 0;
                 }
                 break;
-            case DONE:
+            case IQCSTATE::DONE:
                 PRE0 = I;
                 PRE1 = Q;
                 break;
             }
-            a->out[2 * i + 0] = PRE0;
-            a->out[2 * i + 1] = PRE1;
-            // print_iqc_values("iqc.txt", a->state, env, PRE0, PRE1, ym, yc, ys, 1.1);
+            out[2 * i + 0] = (float) PRE0;
+            out[2 * i + 1] = (float) PRE1;
         }
     }
-    else if (a->out != a->in)
-        std::copy( a->in,  a->in + a->size * 2, a->out);
+    else if (out != in)
+        std::copy( in,  in + size * 2, out);
 }
 
-void IQC::setBuffers_iqc (IQC *a, float* in, float* out)
+void IQC::setBuffers(float* _in, float* _out)
 {
-    a->in = in;
-    a->out = out;
+    in = _in;
+    out = _out;
 }
 
-void IQC::setSamplerate_iqc (IQC *a, int rate)
+void IQC::setSamplerate(int _rate)
 {
-    decalc_iqc (a);
-    a->rate = rate;
-    calc_iqc (a);
+    rate = _rate;
+    calc();
 }
 
-void IQC::setSize_iqc (IQC *a, int size)
+void IQC::setSize(int _size)
 {
-    a->size = size;
-}
-
-/********************************************************************************************************
-*                                                                                                       *
-*                                           TXA Properties                                              *
-*                                                                                                       *
-********************************************************************************************************/
-
-void IQC::GetiqcValues (TXA& txa, float* cm, float* cc, float* cs)
-{
-    IQC *a;
-    a = txa.iqc.p0;
-    memcpy (cm, a->cm[a->cset], a->ints * 4 * sizeof (float));
-    memcpy (cc, a->cc[a->cset], a->ints * 4 * sizeof (float));
-    memcpy (cs, a->cs[a->cset], a->ints * 4 * sizeof (float));
-}
-
-void IQC::SetiqcValues (TXA& txa, float* cm, float* cc, float* cs)
-{
-    IQC *a;
-    a = txa.iqc.p0;
-    a->cset = 1 - a->cset;
-    memcpy (a->cm[a->cset], cm, a->ints * 4 * sizeof (float));
-    memcpy (a->cc[a->cset], cc, a->ints * 4 * sizeof (float));
-    memcpy (a->cs[a->cset], cs, a->ints * 4 * sizeof (float));
-    a->state = RUN;
-}
-
-void IQC::SetiqcSwap (TXA& txa, float* cm, float* cc, float* cs)
-{
-    IQC *a = txa.iqc.p1;
-    a->cset = 1 - a->cset;
-    memcpy (a->cm[a->cset], cm, a->ints * 4 * sizeof (float));
-    memcpy (a->cc[a->cset], cc, a->ints * 4 * sizeof (float));
-    memcpy (a->cs[a->cset], cs, a->ints * 4 * sizeof (float));
-    a->busy = 1; // InterlockedBitTestAndSet (&a->busy, 0);
-    a->state = SWAP;
-    a->count = 0;
-    // while (_InterlockedAnd (&a->busy, 1)) Sleep(1);
-    while (a->busy == 1) {
-        std::this_thread::sleep_for(std::chrono::seconds(1));
-    }
-}
-
-void IQC::SetiqcStart (TXA& txa, float* cm, float* cc, float* cs)
-{
-    IQC *a = txa.iqc.p1;
-    a->cset = 0;
-    memcpy (a->cm[a->cset], cm, a->ints * 4 * sizeof (float));
-    memcpy (a->cc[a->cset], cc, a->ints * 4 * sizeof (float));
-    memcpy (a->cs[a->cset], cs, a->ints * 4 * sizeof (float));
-    a->busy = 1; // InterlockedBitTestAndSet (&a->busy, 0);
-    a->state = BEGIN;
-    a->count = 0;
-    txa.iqc.p1->run = 1; //InterlockedBitTestAndSet   (&txa.iqc.p1->run, 0);
-    // while (_InterlockedAnd (&a->busy, 1)) Sleep(1);
-    while (a->busy == 1) {
-        std::this_thread::sleep_for(std::chrono::seconds(1));
-    }
-}
-
-void IQC::SetiqcEnd (TXA& txa)
-{
-    IQC *a = txa.iqc.p1;
-    a->busy = 1; // InterlockedBitTestAndSet (&a->busy, 0);
-    a->state = END;
-    a->count = 0;
-    // while (_InterlockedAnd (&a->busy, 1)) Sleep(1);
-    while (a->busy == 1) {
-        std::this_thread::sleep_for(std::chrono::seconds(1));
-    }
-    txa.iqc.p1->run = 0; //InterlockedBitTestAndReset (&txa.iqc.p1->run, 0);
-}
-
-void IQC::GetiqcDogCount (TXA& txa, int* count)
-{
-    IQC *a = txa.iqc.p1;
-    *count = a->dog.count;
-}
-
-void IQC::SetiqcDogCount (TXA& txa, int count)
-{
-    IQC *a = txa.iqc.p1;
-    a->dog.count = count;
+    size = _size;
 }
 
 } // namespace WDSP

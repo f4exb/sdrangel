@@ -35,15 +35,15 @@ namespace WDSP {
 void ICFIR::calc_icfir (ICFIR *a)
 {
     float* impulse;
-    a->scale = 1.0 / (float)(2 * a->size);
-    impulse = icfir_impulse (a->nc, a->DD, a->R, a->Pairs, a->runrate, a->cicrate, a->cutoff, a->xtype, a->xbw, 1, a->scale, a->wintype);
-    a->p = FIRCORE::create_fircore (a->size, a->in, a->out, a->nc, a->mp, impulse);
+    a->scale = 1.0f / (float)(2 * a->size);
+    impulse = icfir_impulse (a->nc, a->DD, a->R, a->Pairs, (float) a->runrate, (float) a->cicrate, a->cutoff, a->xtype, a->xbw, 1, a->scale, a->wintype);
+    a->p = new FIRCORE(a->size, a->in, a->out, a->nc, a->mp, impulse);
     delete[] (impulse);
 }
 
 void ICFIR::decalc_icfir (ICFIR *a)
 {
-    FIRCORE::destroy_fircore (a->p);
+    delete (a->p);
 }
 
 ICFIR* ICFIR::create_icfir (
@@ -105,13 +105,13 @@ void ICFIR::destroy_icfir (ICFIR *a)
 
 void ICFIR::flush_icfir (ICFIR *a)
 {
-    FIRCORE::flush_fircore (a->p);
+    a->p->flush();
 }
 
 void ICFIR::xicfir (ICFIR *a)
 {
     if (a->run)
-        FIRCORE::xfircore (a->p);
+        a->p->execute();
     else if (a->in != a->out)
         std::copy( a->in,  a->in + a->size * 2, a->out);
 }
@@ -171,16 +171,21 @@ float* ICFIR::icfir_impulse (
     // xbw:     transition bandwidth for raised cosine
     // rtype:   0 for real output, 1 for complex output
     // scale:   scale factor to be applied to the output
-    int i, j;
-    float tmp, local_scale, ri, mag, fn;
+    int i;
+    int j;
+    float tmp;
+    float local_scale;
+    float ri;
+    float mag;
+    float fn;
     float* impulse;
-    float* A = new float[N]; // (float *) malloc0 (N * sizeof (float));
+    auto* A = new float[N];
     float ft = cutoff / cicrate;                                       // normalized cutoff frequency
     int u_samps = (N + 1) / 2;                                          // number of unique samples,  OK for odd or even N
     int c_samps = (int)(cutoff / runrate * N) + (N + 1) / 2 - N / 2;    // number of unique samples within bandpass, OK for odd or even N
-    int x_samps = (int)(xbw / runrate * N);                             // number of unique samples in transition region, OK for odd or even N
-    float offset = 0.5 - 0.5 * (float)((N + 1) / 2 - N / 2);          // sample offset from center, OK for odd or even N
-    float* xistion = new float[x_samps + 1]; // (float *) malloc0 ((x_samps + 1) * sizeof (float));
+    auto x_samps = (int)(xbw / runrate * N);                             // number of unique samples in transition region, OK for odd or even N
+    float offset = 0.5f - 0.5f * (float)((N + 1) / 2 - N / 2);          // sample offset from center, OK for odd or even N
+    auto* xistion = new float[x_samps + 1];
     float delta = PI / (float)x_samps;
     float L = cicrate / runrate;
     float phs = 0.0;
@@ -235,24 +240,10 @@ float* ICFIR::icfir_impulse (
         for (i = u_samps, j = 1; i < N; i++, j++)
             A[i] = A[u_samps - j];
     impulse = FIR::fir_fsamp (N, A, rtype, 1.0, wintype);
-    // print_impulse ("icfirImpulse.txt", N, impulse, 1, 0);
     delete[] (A);
     delete[] xistion;
     return impulse;
 }
 
-/********************************************************************************************************
-*                                                                                                       *
-*                                           TXA Properties                                              *
-*                                                                                                       *
-********************************************************************************************************/
-
-//PORT void
-//SetTXAICFIRRun (int channel, int run)
-//{
-//  EnterCriticalSection(&ch[channel].csDSP);
-//  txa[channel].icfir.p->run = run;
-//  LeaveCriticalSection(&ch[channel].csDSP);
-//}
 
 } // namespace WDSP

@@ -42,59 +42,62 @@ public:
     int size;
     float* in;
     float* out;
-    float samplerate;
-    float deviation;
-    float f_low;
-    float f_high;
+    double samplerate;
+    double deviation;
+    double f_low;
+    double f_high;
     int ctcss_run;
-    float ctcss_level;
-    float ctcss_freq;
+    double ctcss_level;
+    double ctcss_freq;
     // for ctcss gen
-    float tscale;
-    float tphase;
-    float tdelta;
+    double tscale;
+    double tphase;
+    double tdelta;
     // mod
-    float sphase;
-    float sdelta;
+    double sphase;
+    double sdelta;
     // bandpass
     int bp_run;
-    float bp_fc;
+    double bp_fc;
     int nc;
     int mp;
     FIRCORE *p;
 
-    static FMMOD* create_fmmod (
+    FMMOD(
         int run,
         int size,
         float* in,
         float* out,
         int rate,
-        float dev,
-        float f_low,
-        float f_high,
+        double dev,
+        double f_low,
+        double f_high,
         int ctcss_run,
-        float ctcss_level,
-        float ctcss_freq,
+        double ctcss_level,
+        double ctcss_freq,
         int bp_run,
         int nc,
         int mp
     );
-    static void destroy_fmmod (FMMOD *a);
-    static void flush_fmmod (FMMOD *a);
-    static void xfmmod (FMMOD *a);
-    static void setBuffers_fmmod (FMMOD *a, float* in, float* out);
-    static void setSamplerate_fmmod (FMMOD *a, int rate);
-    static void setSize_fmmod (FMMOD *a, int size);
+    FMMOD(const FMMOD&) = delete;
+    FMMOD& operator=(const FMMOD& other) = delete;
+    ~FMMOD();
+
+    void flush();
+    void execute();
+    void setBuffers(float* in, float* out);
+    void setSamplerate(int rate);
+    void setSize(int size);
     // TXA Properties
-    static void SetFMDeviation (TXA& txa, float deviation);
-    static void SetCTCSSFreq (TXA& txa, float freq);
-    static void SetCTCSSRun (TXA& txa, int run);
-    static void SetFMMP (TXA& txa, int mp);
-    static void SetFMNC (TXA& txa, int nc);
-    static void SetFMAFFreqs (TXA& txa, float low, float high);
+    void setDeviation(float deviation);
+    void setCTCSSFreq(float freq);
+    void setCTCSSRun(int run);
+    void setMP(int mp);
+    void setNC(int nc);
+    void setAFFreqs(float low, float high);
 
 private:
-    static void calc_fmmod (FMMOD *a);
+    void calc();
 };
 
 } // namespace WDSP

@@ -34,9 +34,515 @@ warren@wpratt.com
 #include "anf.hpp"
 #include "snba.hpp"
 #include "bandpass.hpp"
-#include "RXA.hpp"
 
 namespace WDSP {
+
+EMNR::AE::AE(
+    int _msize,
+    const std::vector<double>& _lambda_y,
+    double _zetaThresh,
+    double _psi
+) :
+    msize(_msize),
+    lambda_y(_lambda_y),
+    zetaThresh(_zetaThresh),
+    psi(_psi)
+{
+    nmask.resize(msize);
+}
+
+EMNR::NPS::NPS(
+    int _incr,
+    double _rate,
+    int _msize,
+    const std::vector<double>& _lambda_y,
+    std::vector<double>& _lambda_d,
+
+    double _alpha_pow,
+    double _alpha_Pbar,
+    double _epsH1
+) :
+    incr(_incr),
+    rate(_rate),
+    msize(_msize),
+    lambda_y(_lambda_y),
+    lambda_d(_lambda_d),
+    alpha_pow(_alpha_pow),
+    alpha_Pbar(_alpha_Pbar),
+    epsH1(_epsH1)
+{
+    epsH1r = epsH1 / (1.0 + epsH1);
+    sigma2N.resize(msize);
+    PH1y.resize(msize);
+    Pbar.resize(msize);
+    EN2y.resize(msize);
+
+    for (int i = 0; i < msize; i++)
+    {
+        sigma2N[i] = 0.5;
+        Pbar[i] = 0.5;
+    }
+}
+
+void EMNR::NPS::LambdaDs()
+{
+
+    for (int k = 0; k < msize; k++)
+    {
+        PH1y[k] = 1.0 / (1.0 + (1.0 + epsH1) * exp (- epsH1r * lambda_y[k] / sigma2N[k]));
+        Pbar[k] = alpha_Pbar * Pbar[k] + (1.0 - alpha_Pbar) * PH1y[k];
+
+        if (Pbar[k] > 0.99)
+            PH1y[k] = std::min (PH1y[k], 0.99);
+
+        EN2y[k] = (1.0 - PH1y[k]) * lambda_y[k] + PH1y[k] * sigma2N[k];
+        sigma2N[k] = alpha_pow * sigma2N[k] + (1.0 - alpha_pow) * EN2y[k];
+    }
+
+    std::copy(sigma2N.begin(), sigma2N.end(), lambda_d.begin());
+}
+
+const std::array<double, 18> EMNR::NP::DVals = { 1.0, 2.0, 5.0, 8.0, 10.0, 15.0, 20.0, 30.0, 40.0,
+    60.0, 80.0, 120.0, 140.0, 160.0, 180.0, 220.0, 260.0, 300.0 };
+const std::array<double, 18> EMNR::NP::MVals = { 0.000, 0.260, 0.480, 0.580, 0.610, 0.668, 0.705, 0.762, 0.800,
+    0.841, 0.865, 0.890, 0.900, 0.910, 0.920, 0.930, 0.935, 0.940 };
+
+EMNR::NP::NP(
+    int _incr,
+    double _rate,
+    int _msize,
+    std::vector<double>& _lambda_y,
+    std::vector<double>& _lambda_d
+) :
+    incr(_incr),
+    rate(_rate),
+    msize(_msize),
+    lambda_y(_lambda_y),
+    lambda_d(_lambda_d),
+    invQeqMax(0.5),
+    av(2.12)
+{
+
+    double tau0 = -128.0 / 8000.0 / log(0.7);
+    alphaCsmooth = exp(-incr / rate / tau0);
+    double tau1 = -128.0 / 8000.0 / log(0.96);
+    alphaMax = exp(-incr / rate / tau1);
+    double tau2 = -128.0 / 8000.0 / log(0.7);
+    alphaCmin = exp(-incr / rate / tau2);
+    double tau3 = -128.0 / 8000.0 / log(0.3);
+    alphaMin_max_value = exp(-incr / rate / tau3);
+    snrq = -incr / (0.064 * rate);
+    double tau4 = -128.0 / 8000.0 / log(0.8);
+    betamax = exp(-incr / rate / tau4);
+    Dtime = 8.0 * 12.0 * 128.0 / 8000.0;
+    U = 8;
+    V = (int)(0.5 + (Dtime * rate / (U * incr)));
+
+    if (V < 4)
+        V = 4;
+
+    if ((U = (int)(0.5 + (Dtime * rate / (V * incr)))) < 1)
+        U = 1;
+
+    D = U * V;
+    interpM(&MofD, D, 18, DVals, MVals);
+    interpM(&MofV, V, 18, DVals, MVals);
+
+    invQbar_points[0] = 0.03;
+    invQbar_points[1] = 0.05;
+    invQbar_points[2] = 0.06;
+    invQbar_points[3] = std::numeric_limits<double>::max();
+
+    double db;
+    db = 10.0 * log10(8.0) / (12.0 * 128 / 8000);
+    nsmax[0] = pow(10.0, db / 10.0 * V * incr / rate);
+    db = 10.0 * log10(4.0) / (12.0 * 128 / 8000);
+    nsmax[1] = pow(10.0, db / 10.0 * V * incr / rate);
+    db = 10.0 * log10(2.0) / (12.0 * 128 / 8000);
+    nsmax[2] = pow(10.0, db / 10.0 * V * incr / rate);
+    db = 10.0 * log10(1.2) / (12.0 * 128 / 8000);
+    nsmax[3] = pow(10.0, db / 10.0 * V * incr / rate);
+
+    p.resize(msize);
+    alphaOptHat.resize(msize);
+    alphaHat.resize(msize);
+    sigma2N.resize(msize);
+    pbar.resize(msize);
+    p2bar.resize(msize);
+    Qeq.resize(msize);
+    bmin.resize(msize);
+    bmin_sub.resize(msize);
+    k_mod.resize(msize);
+    actmin.resize(msize);
+    actmin_sub.resize(msize);
+    lmin_flag.resize(msize);
+    pmin_u.resize(msize);
+    actminbuff.resize(U);
+
+    for (int i = 0; i < U; i++) {
+        actminbuff[i].resize(msize);
+    }
+
+    alphaC = 1.0;
+    subwc = V;
+    amb_idx = 0;
+
+    for (int k = 0; k < msize; k++) {
+        lambda_y[k] = 0.5;
+    }
+
+    std::copy(lambda_y.begin(), lambda_y.end(), p.begin());
+    std::copy(lambda_y.begin(), lambda_y.end(), sigma2N.begin());
+    std::copy(lambda_y.begin(), lambda_y.end(), pbar.begin());
+    std::copy(lambda_y.begin(), lambda_y.end(), pmin_u.begin());
+
+    for (int k = 0; k < msize; k++)
+    {
+        p2bar[k] = lambda_y[k] * lambda_y[k];
+        actmin[k] = std::numeric_limits<double>::max();
+        actmin_sub[k] = std::numeric_limits<double>::max();
+
+        for (int ku = 0; ku < U; ku++) {
+            actminbuff[ku][k] = std::numeric_limits<double>::max();
+        }
+    }
+
+    std::fill(lmin_flag.begin(), lmin_flag.end(), 0);
+}
+
+void EMNR::NP::interpM (
+    double* res,
+    double x,
+    int nvals,
+    const std::array<double, 18>& xvals,
+    const std::array<double, 18>& yvals
+)
+{
+    if (x <= xvals[0])
+    {
+        *res = yvals[0];
+    }
+    else if (x >= xvals[nvals - 1])
+    {
+        *res = yvals[nvals - 1];
+    }
+    else
+    {
+        int idx = 1;
+        double xllow;
+        double xlhigh;
+        double frac;
+
+        while ((x >= xvals[idx]) && (idx < nvals - 1))
+            idx++;
+
+        xllow = log10 (xvals[idx - 1]);
+        xlhigh = log10(xvals[idx]);
+        frac = (log10 (x) - xllow) / (xlhigh - xllow);
+        *res = yvals[idx - 1] + frac * (yvals[idx] - yvals[idx - 1]);
+    }
+}
+
+void EMNR::NP::LambdaD()
+{
+    int k;
+    double f0;
+    double f1;
+    double f2;
+    double f3;
+    double sum_prev_p;
+    double sum_lambda_y;
+    double alphaCtilda;
+    double sum_prev_sigma2N;
+    double alphaMin;
+    double SNR;
+    double beta;
+    double varHat;
+    double invQeq;
+    double invQbar;
+    double bc;
+    double QeqTilda;
+    double QeqTildaSub;
+    double noise_slope_max;
+
+    sum_prev_p = 0.0;
+    sum_lambda_y = 0.0;
+    sum_prev_sigma2N = 0.0;
+
+    for (k = 0; k < msize; k++)
+    {
+        sum_prev_p += p[k];
+        sum_lambda_y += lambda_y[k];
+        sum_prev_sigma2N += sigma2N[k];
+    }
+
+    for (k = 0; k < msize; k++)
+    {
+        f0 = p[k] / sigma2N[k] - 1.0;
+        alphaOptHat[k] = 1.0 / (1.0 + f0 * f0);
+    }
+
+    SNR = sum_prev_p / sum_prev_sigma2N;
+    alphaMin = std::min (alphaMin_max_value, pow (SNR, snrq));
+
+    for (k = 0; k < msize; k++)
+        if (alphaOptHat[k] < alphaMin) alphaOptHat[k] = alphaMin;
+
+    f1 = sum_prev_p / sum_lambda_y - 1.0;
+    alphaCtilda = 1.0 / (1.0 + f1 * f1);
+    alphaC = alphaCsmooth * alphaC + (1.0 - alphaCsmooth) * std::max (alphaCtilda, alphaCmin);
+    f2 = alphaMax * alphaC;
+
+    for (k = 0; k < msize; k++)
+        alphaHat[k] = f2 * alphaOptHat[k];
+
+    for (k = 0; k < msize; k++)
+        p[k] = alphaHat[k] * p[k] + (1.0 - alphaHat[k]) * lambda_y[k];
+
+    invQbar = 0.0;
+
+    for (k = 0; k < msize; k++)
+    {
+        beta = std::min (betamax, alphaHat[k] * alphaHat[k]);
+        pbar[k] = beta * pbar[k] + (1.0 - beta) * p[k];
+        p2bar[k] = beta * p2bar[k] + (1.0 - beta) * p[k] * p[k];
+        varHat = p2bar[k] - pbar[k] * pbar[k];
+        invQeq = varHat / (2.0 * sigma2N[k] * sigma2N[k]);
+        if (invQeq > invQeqMax)
+            invQeq = invQeqMax;
+        Qeq[k] = 1.0 / invQeq;
+        invQbar += invQeq;
+    }
+    invQbar /= (double) msize;
+    bc = 1.0 + av * sqrt (invQbar);
+
+    for (k = 0; k < msize; k++)
+    {
+        QeqTilda    = (Qeq[k] - 2.0 * MofD) / (1.0 - MofD);
+        QeqTildaSub = (Qeq[k] - 2.0 * MofV) / (1.0 - MofV);
+        bmin[k]     = 1.0 + 2.0 * (D - 1.0) / QeqTilda;
+        bmin_sub[k] = 1.0 + 2.0 * (V - 1.0) / QeqTildaSub;
+    }
+
+    std::fill(k_mod.begin(), k_mod.end(), 0);
+
+    for (k = 0; k < msize; k++)
+    {
+        f3 = p[k] * bmin[k] * bc;
+
+        if (f3 < actmin[k])
+        {
+            actmin[k] = f3;
+            actmin_sub[k] = p[k] * bmin_sub[k] * bc;
+            k_mod[k] = 1;
+        }
+    }
+
+    if (subwc == V)
+    {
+        if (invQbar < invQbar_points[0])
+            noise_slope_max = nsmax[0];
+        else if (invQbar < invQbar_points[1])
+            noise_slope_max = nsmax[1];
+        else if (invQbar < invQbar_points[2])
+            noise_slope_max = nsmax[2];
+        else
+            noise_slope_max = nsmax[3];
+
+        for (k = 0; k < msize; k++)
+        {
+            int ku;
+            double min;
+
+            if (k_mod[k])
+                lmin_flag[k] = 0;
+
+            actminbuff[amb_idx][k] = actmin[k];
+            min = std::numeric_limits<double>::max();
+
+            for (ku = 0; ku < U; ku++)
+            {
+                if (actminbuff[ku][k] < min)
+                    min = actminbuff[ku][k];
+            }
+
+            pmin_u[k] = min;
+
+            if ((lmin_flag[k] == 1)
+                && (actmin_sub[k] < noise_slope_max * pmin_u[k])
+                && (actmin_sub[k] >                   pmin_u[k]))
+            {
+                pmin_u[k] = actmin_sub[k];
+                for (ku = 0; ku < U; ku++)
+                    actminbuff[ku][k] = actmin_sub[k];
+            }
+
+            lmin_flag[k] = 0;
+            actmin[k] = std::numeric_limits<double>::max();
+            actmin_sub[k] = std::numeric_limits<double>::max();
+        }
+
+        if (++amb_idx == U)
+            amb_idx = 0;
+
+        subwc = 1;
+    }
+    else
+    {
+        if (subwc > 1)
+        {
+            for (k = 0; k < msize; k++)
+            {
+                if (k_mod[k])
+                {
+                    lmin_flag[k] = 1;
+                    sigma2N[k] = std::min (actmin_sub[k], pmin_u[k]);
+                    pmin_u[k] = sigma2N[k];
+                }
+            }
+        }
+
+        ++subwc;
+    }
+
+    std::copy(sigma2N.begin(), sigma2N.end(), lambda_d.begin());
+}
+
+EMNR::G::G(
+    int _incr,
+    double _rate,
+    int _msize,
+    std::vector<double>& _mask,
+    const std::vector<float>& _y
+) :
+    incr(_incr),
+    rate(_rate),
+    msize(_msize),
+    mask(_mask),
+    y(_y)
+{
+
+    lambda_y.resize(msize);
+    lambda_d.resize(msize);
+    prev_gamma.resize(msize);
+    prev_mask.resize(msize);
+
+    gf1p5 = sqrt(PI) / 2.0;
+
+    double tau = -128.0 / 8000.0 / log(0.98);
+    alpha = exp(-incr / rate / tau);
+
+    eps_floor = std::numeric_limits<double>::min();
+    gamma_max = 1000.0;
+    q = 0.2;
+
+    std::fill(prev_mask.begin(), prev_mask.end(), 1.0);
+    std::fill(prev_gamma.begin(), prev_gamma.end(), 1.0);
+
+    gmax = 10000.0;
+
+    std::copy(Calculus::GG.begin(), Calculus::GG.end(), GG.begin());
+    std::copy(Calculus::GGS.begin(), Calculus::GGS.end(), GGS.begin());
+
+    // We keep this pretty useless part just in case...
+    if ((fileb = fopen("calculus", "rb")))
+    {
+        std::array<double, 241*241> gg;
+        std::size_t lgg = fread(&gg[0], sizeof(double), 241 * 241, fileb);
+        if (lgg != 241 * 241) {
+            fprintf(stderr, "GG file has an invalid size\n");
+        } else {
+            std::copy(gg.begin(), gg.end(), GG.begin());
+        }
+        std::array<double, 241*241> ggs;
+        std::size_t lggs =fread(&ggs[0], sizeof(double), 241 * 241, fileb);
+        if (lggs != 241 * 241) {
+            fprintf(stderr, "GGS file has an invalid size\n");
+        } else {
+            std::copy(ggs.begin(), ggs.end(), GGS.begin());
+        }
+        fclose(fileb);
+    }
+}
+
+void EMNR::G::calc_gamma0()
+{
+    double gamma;
+    double eps_hat;
+    double v;
+
+    for (int k = 0; k < msize; k++)
+    {
+        gamma = std::min (lambda_y[k] / lambda_d[k], gamma_max);
+        eps_hat = alpha * prev_mask[k] * prev_mask[k] * prev_gamma[k]
+            + (1.0 - alpha) * std::max (gamma - 1.0f, eps_floor);
+        v = (eps_hat / (1.0 + eps_hat)) * gamma;
+        mask[k] = gf1p5 * sqrt (v) / gamma * exp (- 0.5 * v)
+            * ((1.0 + v) * bessI0 (0.5 * v) + v * bessI1 (0.5 * v));
+        double v2 = std::min (v, 700.0);
+        double eta = mask[k] * mask[k] * lambda_y[k] / lambda_d[k];
+        double eps = eta / (1.0 - q);
+        double witchHat = (1.0 - q) / q * exp (v2) / (1.0 + eps);
+        mask[k] *= witchHat / (1.0 + witchHat);
+
+        if (mask[k] > gmax)
+            mask[k] = gmax;
+
+        prev_gamma[k] = gamma;
+        prev_mask[k] = mask[k];
+    }
+}
+
+void EMNR::G::calc_gamma1()
+{
+    double gamma;
+    double eps_hat;
+    double v;
+    double ehr;
+
+    for (int k = 0; k < msize; k++)
+    {
+        gamma = std::min (lambda_y[k] / lambda_d[k], gamma_max);
+        eps_hat = alpha * prev_mask[k] * prev_mask[k] * prev_gamma[k]
+            + (1.0 - alpha) * std::max (gamma - 1.0f, eps_floor);
+        ehr = eps_hat / (1.0 + eps_hat);
+        v = ehr * gamma;
+
+        if ((mask[k] = ehr * exp (std::min (700.0, 0.5 * e1xb(v)))) > gmax)
+            mask[k] = gmax;
+
+        prev_gamma[k] = gamma;
+        prev_mask[k] = mask[k];
+    }
+}
+
+void EMNR::G::calc_gamma2()
+{
+    double gamma;
+    double eps_hat;
+    double eps_p;
+
+    for (int k = 0; k < msize; k++)
+    {
+        gamma = std::min(lambda_y[k] / lambda_d[k], gamma_max);
+        eps_hat = alpha * prev_mask[k] * prev_mask[k] * prev_gamma[k]
+            + (1.0 - alpha) * std::max(gamma - 1.0f, eps_floor);
+        eps_p = eps_hat / (1.0 - q);
+        mask[k] = getKey(GG, gamma, eps_hat) * getKey(GGS, gamma, eps_p);
+        prev_gamma[k] = gamma;
+        prev_mask[k] = mask[k];
+    }
+}
+
+void EMNR::G::calc_lambda_y()
+{
+    for (int k = 0; k < msize; k++)
+    {
+        double y0 = y[2 * k + 0];
+        double y1 = y[2 * k + 1];
+        lambda_y[k] = y0 * y0 + y1 * y1;
+    }
+}
 
 /********************************************************************************************************
 *                                                                                                       *
@@ -50,9 +556,10 @@ namespace WDSP {
 // Shanjie Zhang and Jianming Jin, "Computation of Special Functions."  New York, NY, John Wiley and Sons,
 //      Inc., 1996.  [Sample code given in FORTRAN]
 
-double EMNR::bessI0 (double x)
+double EMNR::G::bessI0 (double x)
 {
-    double res, p;
+    double res;
+    double p;
 
     if (x == 0.0)
     {
@@ -93,10 +600,11 @@ double EMNR::bessI0 (double x)
     return res;
 }
 
-double EMNR::bessI1 (double x)
+double EMNR::G::bessI1 (double x)
 {
 
-    double res, p;
+    double res;
+    double p;
 
     if (x == 0.0)
     {
@@ -145,14 +653,19 @@ double EMNR::bessI1 (double x)
 // Shanjie Zhang and Jianming Jin, "Computation of Special Functions."  New York, NY, John Wiley and Sons,
 //      Inc., 1996.  [Sample code given in FORTRAN]
 
-double EMNR::e1xb (double x)
+double EMNR::G::e1xb (double x)
 {
-    double e1, ga, r, t, t0;
-    int k, m;
+    double e1;
+    double ga;
+    double r;
+    double t;
+    double t0;
+    int k;
+    int m;
 
     if (x == 0.0)
     {
-        e1 = std::numeric_limits<double>::max();;
+        e1 = std::numeric_limits<double>::max();
     }
     else if (x <= 1.0)
     {
@@ -192,620 +705,229 @@ double EMNR::e1xb (double x)
 *                                                                                                       *
 ********************************************************************************************************/
 
-void EMNR::calc_window (EMNR *a)
+void EMNR::calc_window()
 {
     int i;
-    double arg, sum, inv_coherent_gain;
+    double arg;
+    double sum;
+    double inv_coherent_gain;
 
-    switch (a->wintype)
+    if (wintype == 0)
     {
-    case 0:
-        arg = 2.0 * PI / (double) a->fsize;
+        arg = 2.0 * PI / (double) fsize;
         sum = 0.0;
 
-        for (i = 0; i < a->fsize; i++)
+        for (i = 0; i < fsize; i++)
         {
-            a->window[i] = sqrt (0.54 - 0.46 * cos((float)i * arg));
-            sum += a->window[i];
+            window[i] = (float) (sqrt (0.54 - 0.46 * cos((float)i * arg)));
+            sum += window[i];
         }
 
-        inv_coherent_gain = (double) a->fsize / sum;
+        inv_coherent_gain = (double) fsize / sum;
 
-        for (i = 0; i < a->fsize; i++)
-            a->window[i] *= inv_coherent_gain;
-
-        break;
+        for (i = 0; i < fsize; i++)
+            window[i] *= (float) inv_coherent_gain;
     }
 }
 
-void EMNR::interpM (double* res, double x, int nvals, double* xvals, double* yvals)
+void EMNR::calc()
 {
-    if (x <= xvals[0])
-    {
-        *res = yvals[0];
-    }
-    else if (x >= xvals[nvals - 1])
-    {
-        *res = yvals[nvals - 1];
-    }
-    else
-    {
-        int idx = 1;
-        double xllow, xlhigh, frac;
-
-        while ((x >= xvals[idx]) && (idx < nvals - 1))
-            idx++;
-
-        xllow = log10 (xvals[idx - 1]);
-        xlhigh = log10(xvals[idx]);
-        frac = (log10 (x) - xllow) / (xlhigh - xllow);
-        *res = yvals[idx - 1] + frac * (yvals[idx] - yvals[idx - 1]);
-    }
-}
-
-void EMNR::calc_emnr(EMNR *a)
-{
-    int i;
-    double Dvals[18] = { 1.0, 2.0, 5.0, 8.0, 10.0, 15.0, 20.0, 30.0, 40.0,
-        60.0, 80.0, 120.0, 140.0, 160.0, 180.0, 220.0, 260.0, 300.0 };
-    double Mvals[18] = { 0.000, 0.260, 0.480, 0.580, 0.610, 0.668, 0.705, 0.762, 0.800,
-        0.841, 0.865, 0.890, 0.900, 0.910, 0.920, 0.930, 0.935, 0.940 };
     // float Hvals[18] = { 0.000, 0.150, 0.480, 0.780, 0.980, 1.550, 2.000, 2.300, 2.520,
     //     3.100, 3.380, 4.150, 4.350, 4.250, 3.900, 4.100, 4.700, 5.000 };
-    a->incr = a->fsize / a->ovrlp;
-    a->gain = a->ogain / a->fsize / (float)a->ovrlp;
+    incr = fsize / ovrlp;
+    gain = ogain / fsize / (float)ovrlp;
 
-    if (a->fsize > a->bsize)
-        a->iasize = a->fsize;
+    if (fsize > bsize)
+        iasize = fsize;
     else
-        a->iasize = a->bsize + a->fsize - a->incr;
+        iasize = bsize + fsize - incr;
 
-    a->iainidx = 0;
-    a->iaoutidx = 0;
+    iainidx = 0;
+    iaoutidx = 0;
 
-    if (a->fsize > a->bsize)
+    if (fsize > bsize)
     {
-        if (a->bsize > a->incr)
-            a->oasize = a->bsize;
+        if (bsize > incr)
+            oasize = bsize;
         else
-            a->oasize = a->incr;
+            oasize = incr;
 
-        a->oainidx = (a->fsize - a->bsize - a->incr) % a->oasize;
+        oainidx = (fsize - bsize - incr) % oasize;
     }
     else
     {
-        a->oasize = a->bsize;
-        a->oainidx = a->fsize - a->incr;
+        oasize = bsize;
+        oainidx = fsize - incr;
     }
 
-    a->init_oainidx = a->oainidx;
-    a->oaoutidx = 0;
-    a->msize = a->fsize / 2 + 1;
-    a->window = new float[a->fsize]; // (float *)malloc0(a->fsize * sizeof(float));
-    a->inaccum = new float[a->iasize]; // (float *)malloc0(a->iasize * sizeof(float));
-    a->forfftin = new float[a->fsize]; // (float *)malloc0(a->fsize * sizeof(float));
-    a->forfftout = new float[a->msize * 2]; // (float *)malloc0(a->msize * sizeof(complex));
-    a->mask = new double[a->msize]; // (float *)malloc0(a->msize * sizeof(float));
-    std::fill(a->mask, a->mask + a->msize, 1.0);
-    a->revfftin = new float[a->msize * 2]; // (float *)malloc0(a->msize * sizeof(complex));
-    a->revfftout = new float[a->fsize]; // (float *)malloc0(a->fsize * sizeof(float));
-    a->save = new float*[a->ovrlp]; // (float **)malloc0(a->ovrlp * sizeof(float *));
+    init_oainidx = oainidx;
+    oaoutidx = 0;
+    msize = fsize / 2 + 1;
+    window.resize(fsize);
+    inaccum.resize(iasize);
+    forfftin.resize(fsize);
+    forfftout.resize(msize * 2);
+    mask.resize(msize);
+    std::fill(mask.begin(), mask.end(), 1.0);
+    revfftin.resize(msize * 2);
+    revfftout.resize(fsize);
+    save.resize(ovrlp);
 
-    for (i = 0; i < a->ovrlp; i++)
-        a->save[i] = new float[a->fsize]; // (float *)malloc0(a->fsize * sizeof(float));
+    for (int i = 0; i < ovrlp; i++)
+        save[i].resize(fsize);
 
-    a->outaccum = new float[a->oasize]; // (float *)malloc0(a->oasize * sizeof(float));
-    a->nsamps = 0;
-    a->saveidx = 0;
-    a->Rfor = fftwf_plan_dft_r2c_1d(
-        a->fsize,
-        a->forfftin,
-        (fftwf_complex *)a->forfftout,
+    outaccum.resize(oasize);
+    nsamps = 0;
+    saveidx = 0;
+    Rfor = fftwf_plan_dft_r2c_1d(
+        fsize,
+        forfftin.data(),
+        (fftwf_complex *)forfftout.data(),
         FFTW_ESTIMATE
     );
-    a->Rrev = fftwf_plan_dft_c2r_1d(
-        a->fsize,
-        (fftwf_complex *)a->revfftin,
-        a->revfftout,
+    Rrev = fftwf_plan_dft_c2r_1d(
+        fsize,
+        (fftwf_complex *)revfftin.data(),
+        revfftout.data(),
         FFTW_ESTIMATE
     );
 
-    calc_window(a);
+    calc_window();
 
-    a->g.msize = a->msize;
-    a->g.mask = a->mask;
-    a->g.y = a->forfftout;
-    a->g.lambda_y = new double[a->msize]; // (float *)malloc0(a->msize * sizeof(float));
-    a->g.lambda_d = new double[a->msize]; // (float *)malloc0(a->msize * sizeof(float));
-    a->g.prev_gamma = new double[a->msize]; // (float *)malloc0(a->msize * sizeof(float));
-    a->g.prev_mask = new double[a->msize]; // (float *)malloc0(a->msize * sizeof(float));
+    // G
 
-    a->g.gf1p5 = sqrt(PI) / 2.0;
-    {
-        double tau = -128.0 / 8000.0 / log(0.98);
-        a->g.alpha = exp(-a->incr / a->rate / tau);
-    }
-    a->g.eps_floor = std::numeric_limits<double>::min();
-    a->g.gamma_max = 1000.0;
-    a->g.q = 0.2;
+    g = new G(
+        incr,
+        rate,
+        msize,
+        mask,
+        forfftout
+    );
 
-    for (i = 0; i < a->g.msize; i++)
-    {
-        a->g.prev_mask[i] = 1.0;
-        a->g.prev_gamma[i] = 1.0;
-    }
+    // NP
 
-    a->g.gmax = 10000.0;
-    //
-    a->g.GG = new double[241 * 241]; // (float *)malloc0(241 * 241 * sizeof(float));
-    a->g.GGS = new double[241 * 241]; // (float *)malloc0(241 * 241 * sizeof(float));
+    np = new NP(
+        incr,
+        rate,
+        msize,
+        g->lambda_y,
+        g->lambda_d
+    );
 
-    if ((a->g.fileb = fopen("calculus", "rb")))
-    {
-        std::size_t lgg = fread(a->g.GG, sizeof(float), 241 * 241, a->g.fileb);
-        if (lgg != 241 * 241) {
-            fprintf(stderr, "GG file has an invalid size\n");
-        }
-        std::size_t lggs =fread(a->g.GGS, sizeof(float), 241 * 241, a->g.fileb);
-        if (lggs != 241 * 241) {
-            fprintf(stderr, "GGS file has an invalid size\n");
-        }
-        fclose(a->g.fileb);
-    }
-    else
-    {
-        std::copy(Calculus::GG, Calculus::GG + (241 * 241), a->g.GG);
-        std::copy(Calculus::GGS, Calculus::GGS + (241 * 241), a->g.GGS);
-    }
-    //
+    // NPS
 
-    a->np.incr = a->incr;
-    a->np.rate = a->rate;
-    a->np.msize = a->msize;
-    a->np.lambda_y = a->g.lambda_y;
-    a->np.lambda_d = a->g.lambda_d;
+    double tauNPS0 = -128.0 / 8000.0 / log(0.8);
+    double alpha_pow = exp(-incr / rate / tauNPS0);
 
-    {
-        double tau = -128.0 / 8000.0 / log(0.7);
-        a->np.alphaCsmooth = exp(-a->np.incr / a->np.rate / tau);
-    }
-    {
-        double tau = -128.0 / 8000.0 / log(0.96);
-        a->np.alphaMax = exp(-a->np.incr / a->np.rate / tau);
-    }
-    {
-        double tau = -128.0 / 8000.0 / log(0.7);
-        a->np.alphaCmin = exp(-a->np.incr / a->np.rate / tau);
-    }
-    {
-        double tau = -128.0 / 8000.0 / log(0.3);
-        a->np.alphaMin_max_value = exp(-a->np.incr / a->np.rate / tau);
-    }
-    a->np.snrq = -a->np.incr / (0.064 * a->np.rate);
-    {
-        double tau = -128.0 / 8000.0 / log(0.8);
-        a->np.betamax = exp(-a->np.incr / a->np.rate / tau);
-    }
-    a->np.invQeqMax = 0.5;
-    a->np.av = 2.12;
-    a->np.Dtime = 8.0 * 12.0 * 128.0 / 8000.0;
-    a->np.U = 8;
-    a->np.V = (int)(0.5 + (a->np.Dtime * a->np.rate / (a->np.U * a->np.incr)));
+    double tauNPS1 = -128.0 / 8000.0 / log(0.9);
+    double alpha_Pbar = exp(-incr / rate / tauNPS1);
 
-    if (a->np.V < 4)
-        a->np.V = 4;
+    nps = new NPS(
+        incr,
+        rate,
+        msize,
+        g->lambda_y,
+        g->lambda_d,
+        alpha_pow,
+        alpha_Pbar,
+        pow(10.0, 15.0 / 10.0) // epsH1
+    );
 
-    if ((a->np.U = (int)(0.5 + (a->np.Dtime * a->np.rate / (a->np.V * a->np.incr)))) < 1)
-        a->np.U = 1;
+    // AE
 
-    a->np.D = a->np.U * a->np.V;
-    interpM(&a->np.MofD, a->np.D, 18, Dvals, Mvals);
-    interpM(&a->np.MofV, a->np.V, 18, Dvals, Mvals);
-    a->np.invQbar_points[0] = 0.03;
-    a->np.invQbar_points[1] = 0.05;
-    a->np.invQbar_points[2] = 0.06;
-    a->np.invQbar_points[3] = std::numeric_limits<double>::max();;
-    {
-        double db;
-        db = 10.0 * log10(8.0) / (12.0 * 128 / 8000);
-        a->np.nsmax[0] = pow(10.0, db / 10.0 * a->np.V * a->np.incr / a->np.rate);
-        db = 10.0 * log10(4.0) / (12.0 * 128 / 8000);
-        a->np.nsmax[1] = pow(10.0, db / 10.0 * a->np.V * a->np.incr / a->np.rate);
-        db = 10.0 * log10(2.0) / (12.0 * 128 / 8000);
-        a->np.nsmax[2] = pow(10.0, db / 10.0 * a->np.V * a->np.incr / a->np.rate);
-        db = 10.0 * log10(1.2) / (12.0 * 128 / 8000);
-        a->np.nsmax[3] = pow(10.0, db / 10.0 * a->np.V * a->np.incr / a->np.rate);
-    }
-
-    a->np.p = new double[a->np.msize]; // (float *)malloc0(a->np.msize * sizeof(float));
-    a->np.alphaOptHat = new double[a->np.msize]; // (float *)malloc0(a->np.msize * sizeof(float));
-    a->np.alphaHat = new double[a->np.msize]; // (float *)malloc0(a->np.msize * sizeof(float));
-    a->np.sigma2N = new double[a->np.msize]; // (float *)malloc0(a->np.msize * sizeof(float));
-    a->np.pbar = new double[a->np.msize]; // (float *)malloc0(a->np.msize * sizeof(float));
-    a->np.p2bar = new double[a->np.msize]; // (float *)malloc0(a->np.msize * sizeof(float));
-    a->np.Qeq = new double[a->np.msize]; // (float *)malloc0(a->np.msize * sizeof(float));
-    a->np.bmin = new double[a->np.msize]; // (float *)malloc0(a->np.msize * sizeof(float));
-    a->np.bmin_sub = new double[a->np.msize]; // (float *)malloc0(a->np.msize * sizeof(float));
-    a->np.k_mod = new int[a->np.msize]; // (int *)malloc0(a->np.msize * sizeof(int));
-    a->np.actmin = new double[a->np.msize]; // (float *)malloc0(a->np.msize * sizeof(float));
-    a->np.actmin_sub =  new double[a->np.msize]; // (float *)malloc0(a->np.msize * sizeof(float));
-    a->np.lmin_flag = new int[a->np.msize]; // (int *)malloc0(a->np.msize * sizeof(int));
-    a->np.pmin_u = new double[a->np.msize]; // (float *)malloc0(a->np.msize * sizeof(float));
-    a->np.actminbuff = new double*[a->np.U]; // (float**)malloc0(a->np.U     * sizeof(float*));
-
-    for (i = 0; i < a->np.U; i++)
-        a->np.actminbuff[i] = new double[a->np.msize]; // (float *)malloc0(a->np.msize * sizeof(float));
-
-    {
-        int k, ku;
-        a->np.alphaC = 1.0;
-        a->np.subwc = a->np.V;
-        a->np.amb_idx = 0;
-
-        for (k = 0; k < a->np.msize; k++)
-            a->np.lambda_y[k] = 0.5;
-
-        std::copy(a->np.lambda_y, a->np.lambda_y + a->np.msize, a->np.p);
-        std::copy(a->np.lambda_y, a->np.lambda_y + a->np.msize, a->np.sigma2N);
-        std::copy(a->np.lambda_y, a->np.lambda_y + a->np.msize, a->np.pbar);
-        std::copy(a->np.lambda_y, a->np.lambda_y + a->np.msize, a->np.pmin_u);
-
-        for (k = 0; k < a->np.msize; k++)
-        {
-            a->np.p2bar[k] = a->np.lambda_y[k] * a->np.lambda_y[k];
-            a->np.actmin[k] = std::numeric_limits<double>::max();
-            a->np.actmin_sub[k] = std::numeric_limits<double>::max();;
-
-            for (ku = 0; ku < a->np.U; ku++)
-                a->np.actminbuff[ku][k] = std::numeric_limits<double>::max();;
-        }
-
-        std::fill(a->np.lmin_flag, a->np.lmin_flag + a->np.msize, 0);
-    }
-
-    a->nps.incr = a->incr;
-    a->nps.rate = a->rate;
-    a->nps.msize = a->msize;
-    a->nps.lambda_y = a->g.lambda_y;
-    a->nps.lambda_d = a->g.lambda_d;
-
-    {
-        double tau = -128.0 / 8000.0 / log(0.8);
-        a->nps.alpha_pow = exp(-a->nps.incr / a->nps.rate / tau);
-    }
-    {
-        double tau = -128.0 / 8000.0 / log(0.9);
-        a->nps.alpha_Pbar = exp(-a->nps.incr / a->nps.rate / tau);
-    }
-
-    a->nps.epsH1 = pow(10.0, 15.0 / 10.0);
-    a->nps.epsH1r = a->nps.epsH1 / (1.0 + a->nps.epsH1);
-
-    a->nps.sigma2N = new double[a->nps.msize]; // (float *)malloc0(a->nps.msize * sizeof(float));
-    a->nps.PH1y = new double[a->nps.msize]; // (float *)malloc0(a->nps.msize * sizeof(float));
-    a->nps.Pbar = new double[a->nps.msize]; // (float *)malloc0(a->nps.msize * sizeof(float));
-    a->nps.EN2y = new double[a->nps.msize]; // (float *)malloc0(a->nps.msize * sizeof(float));
-
-    for (i = 0; i < a->nps.msize; i++)
-    {
-        a->nps.sigma2N[i] = 0.5;
-        a->nps.Pbar[i] = 0.5;
-    }
-
-    a->ae.msize = a->msize;
-    a->ae.lambda_y = a->g.lambda_y;
-
-    a->ae.zetaThresh = 0.75;
-    a->ae.psi = 10.0;
-
-    a->ae.nmask = new double[a->ae.msize]; // (float *)malloc0(a->ae.msize * sizeof(float));
+    ae = new AE(
+        msize,
+        g->lambda_y,
+        0.75, // zetaThresh
+        10.0 // psi
+    );
 }
 
-void EMNR::decalc_emnr(EMNR *a)
+void EMNR::decalc()
 {
-    int i;
-    delete[] (a->ae.nmask);
+    delete ae;
+    delete nps;
+    delete np;
+    delete g;
 
-    delete[] (a->nps.EN2y);
-    delete[] (a->nps.Pbar);
-    delete[] (a->nps.PH1y);
-    delete[] (a->nps.sigma2N);
-
-    for (i = 0; i < a->np.U; i++)
-        delete[] (a->np.actminbuff[i]);
-
-    delete[] (a->np.actminbuff);
-    delete[] (a->np.pmin_u);
-    delete[] (a->np.lmin_flag);
-    delete[] (a->np.actmin_sub);
-    delete[] (a->np.actmin);
-    delete[] (a->np.k_mod);
-    delete[] (a->np.bmin_sub);
-    delete[] (a->np.bmin);
-    delete[] (a->np.Qeq);
-    delete[] (a->np.p2bar);
-    delete[] (a->np.pbar);
-    delete[] (a->np.sigma2N);
-    delete[] (a->np.alphaHat);
-    delete[] (a->np.alphaOptHat);
-    delete[] (a->np.p);
-
-    delete[] (a->g.GGS);
-    delete[] (a->g.GG);
-    delete[] (a->g.prev_mask);
-    delete[] (a->g.prev_gamma);
-    delete[] (a->g.lambda_d);
-    delete[] (a->g.lambda_y);
-
-    fftwf_destroy_plan(a->Rrev);
-    fftwf_destroy_plan(a->Rfor);
-
-    delete[] (a->outaccum);
-
-    for (i = 0; i < a->ovrlp; i++)
-        delete[] (a->save[i]);
-
-    delete[] (a->save);
-    delete[] (a->revfftout);
-    delete[] (a->revfftin);
-    delete[] (a->mask);
-    delete[] (a->forfftout);
-    delete[] (a->forfftin);
-    delete[] (a->inaccum);
-    delete[] (a->window);
+    fftwf_destroy_plan(Rrev);
+    fftwf_destroy_plan(Rfor);
 }
 
-EMNR* EMNR::create_emnr (
-    int run,
-    int position,
-    int size,
-    float* in,
-    float* out,
-    int fsize,
-    int ovrlp,
-    int rate,
-    int wintype,
-    double gain,
-    int gain_method,
-    int npe_method,
-    int ae_run
+EMNR::EMNR(
+    int _run,
+    int _position,
+    int _size,
+    float* _in,
+    float* _out,
+    int _fsize,
+    int _ovrlp,
+    int _rate,
+    int _wintype,
+    double _gain,
+    int _gain_method,
+    int _npe_method,
+    int _ae_run
 )
 {
-    EMNR *a = new EMNR;
-
-    a->run = run;
-    a->position = position;
-    a->bsize = size;
-    a->in = in;
-    a->out = out;
-    a->fsize = fsize;
-    a->ovrlp = ovrlp;
-    a->rate = rate;
-    a->wintype = wintype;
-    a->ogain = gain;
-    a->g.gain_method = gain_method;
-    a->g.npe_method = npe_method;
-    a->g.ae_run = ae_run;
-    calc_emnr (a);
-    return a;
+    run = _run;
+    position = _position;
+    bsize = _size;
+    in = _in;
+    out = _out;
+    fsize = _fsize;
+    ovrlp = _ovrlp;
+    rate = _rate;
+    wintype = _wintype;
+    ogain = _gain;
+    calc();
+    g->gain_method = _gain_method;
+    g->npe_method = _npe_method;
+    g->ae_run = _ae_run;
 }
 
-void EMNR::flush_emnr (EMNR *a)
+void EMNR::flush()
 {
-    int i;
-    std::fill(a->inaccum, a->inaccum + a->iasize, 0);
+    std::fill(inaccum.begin(), inaccum.end(), 0);
 
-    for (i = 0; i < a->ovrlp; i++)
-        std::fill(a->save[i], a->save[i] + a->fsize, 0);
+    for (int i = 0; i < ovrlp; i++)
+        std::fill(save[i].begin(), save[i].end(), 0);
 
-    std::fill(a->outaccum, a->outaccum + a->oasize, 0);
-    a->nsamps   = 0;
-    a->iainidx  = 0;
-    a->iaoutidx = 0;
-    a->oainidx  = a->init_oainidx;
-    a->oaoutidx = 0;
-    a->saveidx  = 0;
+    std::fill(outaccum.begin(), outaccum.end(), 0);
+    nsamps   = 0;
+    iainidx  = 0;
+    iaoutidx = 0;
+    oainidx  = init_oainidx;
+    oaoutidx = 0;
+    saveidx  = 0;
 }
 
-void EMNR::destroy_emnr (EMNR *a)
+EMNR::~EMNR()
 {
-    decalc_emnr (a);
-    delete[]  (a);
+    decalc();
 }
 
-void EMNR::LambdaD(EMNR *a)
+void EMNR::aepf()
 {
     int k;
-    double f0, f1, f2, f3;
-    double sum_prev_p;
-    double sum_lambda_y;
-    double alphaCtilda;
-    double sum_prev_sigma2N;
-    double alphaMin, SNR;
-    double beta, varHat, invQeq;
-    double invQbar;
-    double bc;
-    double QeqTilda, QeqTildaSub;
-    double noise_slope_max;
-
-    sum_prev_p = 0.0;
-    sum_lambda_y = 0.0;
-    sum_prev_sigma2N = 0.0;
-
-    for (k = 0; k < a->np.msize; k++)
-    {
-        sum_prev_p += a->np.p[k];
-        sum_lambda_y += a->np.lambda_y[k];
-        sum_prev_sigma2N += a->np.sigma2N[k];
-    }
-
-    for (k = 0; k < a->np.msize; k++)
-    {
-        f0 = a->np.p[k] / a->np.sigma2N[k] - 1.0;
-        a->np.alphaOptHat[k] = 1.0 / (1.0 + f0 * f0);
-    }
-
-    SNR = sum_prev_p / sum_prev_sigma2N;
-    alphaMin = std::min (a->np.alphaMin_max_value, pow (SNR, a->np.snrq));
-
-    for (k = 0; k < a->np.msize; k++)
-        if (a->np.alphaOptHat[k] < alphaMin) a->np.alphaOptHat[k] = alphaMin;
-
-    f1 = sum_prev_p / sum_lambda_y - 1.0;
-    alphaCtilda = 1.0 / (1.0 + f1 * f1);
-    a->np.alphaC = a->np.alphaCsmooth * a->np.alphaC + (1.0 - a->np.alphaCsmooth) * std::max (alphaCtilda, a->np.alphaCmin);
-    f2 = a->np.alphaMax * a->np.alphaC;
-
-    for (k = 0; k < a->np.msize; k++)
-        a->np.alphaHat[k] = f2 * a->np.alphaOptHat[k];
-
-    for (k = 0; k < a->np.msize; k++)
-        a->np.p[k] = a->np.alphaHat[k] * a->np.p[k] + (1.0 - a->np.alphaHat[k]) * a->np.lambda_y[k];
-
-    invQbar = 0.0;
-
-    for (k = 0; k < a->np.msize; k++)
-    {
-        beta = std::min (a->np.betamax, a->np.alphaHat[k] * a->np.alphaHat[k]);
-        a->np.pbar[k] = beta * a->np.pbar[k] + (1.0 - beta) * a->np.p[k];
-        a->np.p2bar[k] = beta * a->np.p2bar[k] + (1.0 - beta) * a->np.p[k] * a->np.p[k];
-        varHat = a->np.p2bar[k] - a->np.pbar[k] * a->np.pbar[k];
-        invQeq = varHat / (2.0 * a->np.sigma2N[k] * a->np.sigma2N[k]);
-        if (invQeq > a->np.invQeqMax) invQeq = a->np.invQeqMax;
-        a->np.Qeq[k] = 1.0 / invQeq;
-        invQbar += invQeq;
-    }
-    invQbar /= (double) a->np.msize;
-    bc = 1.0 + a->np.av * sqrt (invQbar);
-
-    for (k = 0; k < a->np.msize; k++)
-    {
-        QeqTilda    = (a->np.Qeq[k] - 2.0 * a->np.MofD) / (1.0 - a->np.MofD);
-        QeqTildaSub = (a->np.Qeq[k] - 2.0 * a->np.MofV) / (1.0 - a->np.MofV);
-        a->np.bmin[k]     = 1.0 + 2.0 * (a->np.D - 1.0) / QeqTilda;
-        a->np.bmin_sub[k] = 1.0 + 2.0 * (a->np.V - 1.0) / QeqTildaSub;
-    }
-
-    std::fill(a->np.k_mod, a->np.k_mod + a->np.msize, 0);
-
-    for (k = 0; k < a->np.msize; k++)
-    {
-        f3 = a->np.p[k] * a->np.bmin[k] * bc;
-
-        if (f3 < a->np.actmin[k])
-        {
-            a->np.actmin[k] = f3;
-            a->np.actmin_sub[k] = a->np.p[k] * a->np.bmin_sub[k] * bc;
-            a->np.k_mod[k] = 1;
-        }
-    }
-
-    if (a->np.subwc == a->np.V)
-    {
-        if (invQbar < a->np.invQbar_points[0])
-            noise_slope_max = a->np.nsmax[0];
-        else if (invQbar < a->np.invQbar_points[1])
-            noise_slope_max = a->np.nsmax[1];
-        else if (invQbar < a->np.invQbar_points[2])
-            noise_slope_max = a->np.nsmax[2];
-        else
-            noise_slope_max = a->np.nsmax[3];
-
-        for (k = 0; k < a->np.msize; k++)
-        {
-            int ku;
-            double min;
-
-            if (a->np.k_mod[k])
-                a->np.lmin_flag[k] = 0;
-
-            a->np.actminbuff[a->np.amb_idx][k] = a->np.actmin[k];
-            min = std::numeric_limits<double>::max();;
-
-            for (ku = 0; ku < a->np.U; ku++)
-            {
-                if (a->np.actminbuff[ku][k] < min)
-                    min = a->np.actminbuff[ku][k];
-            }
-
-            a->np.pmin_u[k] = min;
-
-            if ((a->np.lmin_flag[k] == 1)
-                && (a->np.actmin_sub[k] < noise_slope_max * a->np.pmin_u[k])
-                && (a->np.actmin_sub[k] >                   a->np.pmin_u[k]))
-            {
-                a->np.pmin_u[k] = a->np.actmin_sub[k];
-                for (ku = 0; ku < a->np.U; ku++)
-                    a->np.actminbuff[ku][k] = a->np.actmin_sub[k];
-            }
-
-            a->np.lmin_flag[k] = 0;
-            a->np.actmin[k] = std::numeric_limits<double>::max();;
-            a->np.actmin_sub[k] = std::numeric_limits<double>::max();;
-        }
-
-        if (++a->np.amb_idx == a->np.U)
-            a->np.amb_idx = 0;
-
-        a->np.subwc = 1;
-    }
-    else
-    {
-        if (a->np.subwc > 1)
-        {
-            for (k = 0; k < a->np.msize; k++)
-            {
-                if (a->np.k_mod[k])
-                {
-                    a->np.lmin_flag[k] = 1;
-                    a->np.sigma2N[k] = std::min (a->np.actmin_sub[k], a->np.pmin_u[k]);
-                    a->np.pmin_u[k] = a->np.sigma2N[k];
-                }
-            }
-        }
-
-        ++a->np.subwc;
-    }
-
-    std::copy(a->np.sigma2N, a->np.sigma2N + a->np.msize, a->np.lambda_d);
-}
-
-void EMNR::LambdaDs (EMNR *a)
-{
-    int k;
-
-    for (k = 0; k < a->nps.msize; k++)
-    {
-        a->nps.PH1y[k] = 1.0 / (1.0 + (1.0 + a->nps.epsH1) * exp (- a->nps.epsH1r * a->nps.lambda_y[k] / a->nps.sigma2N[k]));
-        a->nps.Pbar[k] = a->nps.alpha_Pbar * a->nps.Pbar[k] + (1.0 - a->nps.alpha_Pbar) * a->nps.PH1y[k];
-
-        if (a->nps.Pbar[k] > 0.99)
-            a->nps.PH1y[k] = std::min (a->nps.PH1y[k], 0.99);
-
-        a->nps.EN2y[k] = (1.0 - a->nps.PH1y[k]) * a->nps.lambda_y[k] + a->nps.PH1y[k] * a->nps.sigma2N[k];
-        a->nps.sigma2N[k] = a->nps.alpha_pow * a->nps.sigma2N[k] + (1.0 - a->nps.alpha_pow) * a->nps.EN2y[k];
-    }
-
-    std::copy(a->nps.sigma2N, a->nps.sigma2N + a->nps.msize, a->nps.lambda_d);
-}
-
-void EMNR::aepf(EMNR *a)
-{
-    int k, m;
-    int N, n;
-    double sumPre, sumPost, zeta, zetaT;
+    int N;
+    int n;
+    double sumPre;
+    double sumPost;
+    double zeta;
+    double zetaT;
     sumPre = 0.0;
     sumPost = 0.0;
 
-    for (k = 0; k < a->ae.msize; k++)
+    for (k = 0; k < ae->msize; k++)
     {
-        sumPre += a->ae.lambda_y[k];
-        sumPost += a->mask[k] * a->mask[k] * a->ae.lambda_y[k];
+        sumPre += ae->lambda_y[k];
+        sumPost += mask[k] * mask[k] * ae->lambda_y[k];
     }
 
     zeta = sumPost / sumPre;
 
-    if (zeta >= a->ae.zetaThresh)
+    if (zeta >= ae->zetaThresh)
         zetaT = 1.0;
     else
         zetaT = zeta;
@@ -813,25 +935,31 @@ void EMNR::aepf(EMNR *a)
     if (zetaT == 1.0)
         N = 1;
     else
-        N = 1 + 2 * (int)(0.5 + a->ae.psi * (1.0 - zetaT / a->ae.zetaThresh));
+        N = 1 + 2 * (int)(0.5 + ae->psi * (1.0 - zetaT / ae->zetaThresh));
 
     n = N / 2;
 
-    for (k = n; k < (a->ae.msize - n); k++)
+    for (k = n; k < (ae->msize - n); k++)
     {
-        a->ae.nmask[k] = 0.0;
-        for (m = k - n; m <= (k + n); m++)
-            a->ae.nmask[k] += a->mask[m];
-        a->ae.nmask[k] /= (float)N;
+        ae->nmask[k] = 0.0;
+        for (int m = k - n; m <= (k + n); m++)
+            ae->nmask[k] += mask[m];
+        ae->nmask[k] /= (float)N;
     }
 
-    std::copy(a->ae.nmask, a->ae.nmask + (a->ae.msize - 2 * n), a->mask + n);
+    std::copy(ae->nmask.begin(), ae->nmask.end() - 2*n, &mask[n]);
 }
 
-double EMNR::getKey(double* type, double gamma, double xi)
+double EMNR::G::getKey(const std::array<double, 241*241>& type, double gamma, double xi)
 {
-    int ngamma1, ngamma2, nxi1 = 0, nxi2 = 0;
-    double tg, tx, dg, dx;
+    int ngamma1;
+    int ngamma2;
+    int nxi1 = 0;
+    int nxi2 = 0;
+    double tg;
+    double tx;
+    double dg;
+    double dx;
     const double dmin = 0.001;
     const double dmax = 1000.0;
 
@@ -871,202 +999,153 @@ double EMNR::getKey(double* type, double gamma, double xi)
 
     dg = (tg - 0.25 * ngamma1) / 0.25;
     dx = (tx - 0.25 * nxi1) / 0.25;
-    return (1.0 - dg)  * (1.0 - dx) * type[241 * nxi1 + ngamma1]
-        +  (1.0 - dg)  *        dx  * type[241 * nxi2 + ngamma1]
-        +         dg   * (1.0 - dx) * type[241 * nxi1 + ngamma2]
-        +         dg   *        dx  * type[241 * nxi2 + ngamma2];
+
+    std::array<int, 4> ix;
+    ix[0] = 241 * nxi1 + ngamma1;
+    ix[1] = 241 * nxi2 + ngamma1;
+    ix[2] = 241 * nxi1 + ngamma2;
+    ix[3] = 241 * nxi2 + ngamma2;
+
+    for (auto& ixi : ix)
+    {
+        if (ixi < 0) {
+            ixi = 0;
+        } else if (ixi >= 241*241) {
+            ixi = 241*241 - 1;
+        }
+    }
+
+    return (1.0 - dg)  * (1.0 - dx) * type[ix[0]]
+        +  (1.0 - dg)  *        dx  * type[ix[1]]
+        +         dg   * (1.0 - dx) * type[ix[2]]
+        +         dg   *        dx  * type[ix[3]];
 }
 
-void EMNR::calc_gain (EMNR *a)
+void EMNR::calc_gain()
 {
-    int k;
+    g->calc_lambda_y();
 
-    for (k = 0; k < a->g.msize; k++)
-    {
-        double y0 = a->g.y[2 * k + 0];
-        double y1 = a->g.y[2 * k + 1];
-        a->g.lambda_y[k] = y0 * y0 + y1 * y1;
-    }
-
-    switch (a->g.npe_method)
+    switch (g->npe_method)
     {
     case 0:
-        LambdaD(a);
+        np->LambdaD();
         break;
     case 1:
-        LambdaDs(a);
+        nps->LambdaDs();
+        break;
+    default:
         break;
     }
 
-    switch (a->g.gain_method)
+    switch (g->gain_method)
     {
     case 0:
-        {
-            double gamma, eps_hat, v;
-
-            for (k = 0; k < a->msize; k++)
-            {
-                gamma = std::min (a->g.lambda_y[k] / a->g.lambda_d[k], a->g.gamma_max);
-                eps_hat = a->g.alpha * a->g.prev_mask[k] * a->g.prev_mask[k] * a->g.prev_gamma[k]
-                    + (1.0 - a->g.alpha) * std::max (gamma - 1.0f, a->g.eps_floor);
-                v = (eps_hat / (1.0 + eps_hat)) * gamma;
-                a->g.mask[k] = a->g.gf1p5 * sqrt (v) / gamma * exp (- 0.5 * v)
-                    * ((1.0 + v) * bessI0 (0.5 * v) + v * bessI1 (0.5 * v));
-                {
-                    double v2 = std::min (v, 700.0);
-                    double eta = a->g.mask[k] * a->g.mask[k] * a->g.lambda_y[k] / a->g.lambda_d[k];
-                    double eps = eta / (1.0 - a->g.q);
-                    double witchHat = (1.0 - a->g.q) / a->g.q * exp (v2) / (1.0 + eps);
-                    a->g.mask[k] *= witchHat / (1.0 + witchHat);
-                }
-
-                if (a->g.mask[k] > a->g.gmax)
-                    a->g.mask[k] = a->g.gmax;
-
-                if (a->g.mask[k] != a->g.mask[k])
-                    a->g.mask[k] = 0.01;
-
-                a->g.prev_gamma[k] = gamma;
-                a->g.prev_mask[k] = a->g.mask[k];
-            }
-
-            break;
-        }
-
+        g->calc_gamma0();
+        break;
     case 1:
-        {
-            double gamma, eps_hat, v, ehr;
-
-            for (k = 0; k < a->g.msize; k++)
-            {
-                gamma = std::min (a->g.lambda_y[k] / a->g.lambda_d[k], a->g.gamma_max);
-                eps_hat = a->g.alpha * a->g.prev_mask[k] * a->g.prev_mask[k] * a->g.prev_gamma[k]
-                    + (1.0 - a->g.alpha) * std::max (gamma - 1.0f, a->g.eps_floor);
-                ehr = eps_hat / (1.0 + eps_hat);
-                v = ehr * gamma;
-
-                if ((a->g.mask[k] = ehr * exp (std::min (700.0, 0.5 * e1xb(v)))) > a->g.gmax)
-                    a->g.mask[k] = a->g.gmax;
-
-                if (a->g.mask[k] != a->g.mask[k])
-                    a->g.mask[k] = 0.01;
-
-                a->g.prev_gamma[k] = gamma;
-                a->g.prev_mask[k] = a->g.mask[k];
-            }
-
-            break;
-        }
-
+        g->calc_gamma1();
+        break;
     case 2:
-        {
-            double gamma, eps_hat, eps_p;
-
-            for (k = 0; k < a->msize; k++)
-            {
-                gamma = std::min(a->g.lambda_y[k] / a->g.lambda_d[k], a->g.gamma_max);
-                eps_hat = a->g.alpha * a->g.prev_mask[k] * a->g.prev_mask[k] * a->g.prev_gamma[k]
-                    + (1.0 - a->g.alpha) * std::max(gamma - 1.0f, a->g.eps_floor);
-                eps_p = eps_hat / (1.0 - a->g.q);
-                a->g.mask[k] = getKey(a->g.GG, gamma, eps_hat) * getKey(a->g.GGS, gamma, eps_p);
-                a->g.prev_gamma[k] = gamma;
-                a->g.prev_mask[k] = a->g.mask[k];
-            }
-
-            break;
-        }
+        g->calc_gamma2();
+        break;
+    default:
+        break;
     }
 
-    if (a->g.ae_run)
-        aepf(a);
+    if (g->ae_run)
+        aepf();
 }
 
-void EMNR::xemnr (EMNR *a, int pos)
+void EMNR::execute(int _pos)
 {
-    if (a->run && pos == a->position)
+    if (run && _pos == position)
     {
-        int i, j, k, sbuff, sbegin;
+        int i;
+        int j;
+        int k;
+        int sbuff;
+        int sbegin;
         double g1;
 
-        for (i = 0; i < 2 * a->bsize; i += 2)
+        for (i = 0; i < 2 * bsize; i += 2)
         {
-            a->inaccum[a->iainidx] = a->in[i];
-            a->iainidx = (a->iainidx + 1) % a->iasize;
+            inaccum[iainidx] = in[i];
+            iainidx = (iainidx + 1) % iasize;
         }
 
-        a->nsamps += a->bsize;
+        nsamps += bsize;
 
-        while (a->nsamps >= a->fsize)
+        while (nsamps >= fsize)
         {
-            for (i = 0, j = a->iaoutidx; i < a->fsize; i++, j = (j + 1) % a->iasize)
-                a->forfftin[i] = a->window[i] * a->inaccum[j];
+            for (i = 0, j = iaoutidx; i < fsize; i++, j = (j + 1) % iasize)
+                forfftin[i] = window[i] * inaccum[j];
 
-            a->iaoutidx = (a->iaoutidx + a->incr) % a->iasize;
-            a->nsamps -= a->incr;
-            fftwf_execute (a->Rfor);
-            calc_gain(a);
+            iaoutidx = (iaoutidx + incr) % iasize;
+            nsamps -= incr;
+            fftwf_execute (Rfor);
+            calc_gain();
 
-            for (i = 0; i < a->msize; i++)
+            for (i = 0; i < msize; i++)
             {
-                g1 = a->gain * a->mask[i];
-                a->revfftin[2 * i + 0] = g1 * a->forfftout[2 * i + 0];
-                a->revfftin[2 * i + 1] = g1 * a->forfftout[2 * i + 1];
+                g1 = gain * mask[i];
+                revfftin[2 * i + 0] = (float) (g1 * forfftout[2 * i + 0]);
+                revfftin[2 * i + 1] = (float) (g1 * forfftout[2 * i + 1]);
             }
 
-            fftwf_execute (a->Rrev);
+            fftwf_execute (Rrev);
 
-            for (i = 0; i < a->fsize; i++)
-                a->save[a->saveidx][i] = a->window[i] * a->revfftout[i];
+            for (i = 0; i < fsize; i++)
+                save[saveidx][i] = window[i] * revfftout[i];
 
-            for (i = a->ovrlp; i > 0; i--)
+            for (i = ovrlp; i > 0; i--)
             {
-                sbuff = (a->saveidx + i) % a->ovrlp;
-                sbegin = a->incr * (a->ovrlp - i);
+                sbuff = (saveidx + i) % ovrlp;
+                sbegin = incr * (ovrlp - i);
 
-                for (j = sbegin, k = a->oainidx; j < a->incr + sbegin; j++, k = (k + 1) % a->oasize)
+                for (j = sbegin, k = oainidx; j < incr + sbegin; j++, k = (k + 1) % oasize)
                 {
-                    if ( i == a->ovrlp)
-                        a->outaccum[k]  = a->save[sbuff][j];
+                    if ( i == ovrlp)
+                        outaccum[k]  = save[sbuff][j];
                     else
-                        a->outaccum[k] += a->save[sbuff][j];
+                        outaccum[k] += save[sbuff][j];
                 }
             }
 
-            a->saveidx = (a->saveidx + 1) % a->ovrlp;
-            a->oainidx = (a->oainidx + a->incr) % a->oasize;
+            saveidx = (saveidx + 1) % ovrlp;
+            oainidx = (oainidx + incr) % oasize;
         }
 
-        for (i = 0; i < a->bsize; i++)
+        for (i = 0; i < bsize; i++)
         {
-            a->out[2 * i + 0] = a->outaccum[a->oaoutidx];
-            a->out[2 * i + 1] = 0.0;
-            a->oaoutidx = (a->oaoutidx + 1) % a->oasize;
+            out[2 * i + 0] = outaccum[oaoutidx];
+            out[2 * i + 1] = 0.0;
+            oaoutidx = (oaoutidx + 1) % oasize;
         }
     }
-    else if (a->out != a->in)
+    else if (out != in)
     {
-        std::copy(a->in, a->in + a->bsize * 2, a->out);
+        std::copy(in, in + bsize * 2, out);
     }
 }
 
-void EMNR::setBuffers_emnr (EMNR *a, float* in, float* out)
+void EMNR::setBuffers(float* _in, float* _out)
 {
-    a->in = in;
-    a->out = out;
+    in = _in;
+    out = _out;
 }
 
-void EMNR::setSamplerate_emnr (EMNR *a, int rate)
+void EMNR::setSamplerate(int _rate)
 {
-    decalc_emnr (a);
-    a->rate = rate;
-    calc_emnr (a);
+    decalc();
+    rate = _rate;
+    calc();
 }
 
-void EMNR::setSize_emnr (EMNR *a, int size)
+void EMNR::setSize(int _size)
 {
-    decalc_emnr (a);
-    a->bsize = size;
-    calc_emnr (a);
+    decalc();
+    bsize = _size;
+    calc();
 }
 
 /********************************************************************************************************
@@ -1075,54 +1154,29 @@ void EMNR::setSize_emnr (EMNR *a, int size)
 *                                                                                                       *
 ********************************************************************************************************/
 
-void EMNR::SetEMNRRun (RXA& rxa, int run)
+void EMNR::setGainMethod(int _method)
 {
-    EMNR *a = rxa.emnr.p;
-
-    if (a->run != run)
-    {
-        RXA::bp1Check (
-            rxa,
-            rxa.amd.p->run,
-            rxa.snba.p->run,
-            run,
-            rxa.anf.p->run,
-            rxa.anr.p->run
-        );
-        a->run = run;
-        RXA::bp1Set (rxa);
-    }
+    g->gain_method = _method;
 }
 
-void EMNR::SetEMNRgainMethod (RXA& rxa, int method)
+void EMNR::setNpeMethod(int _method)
 {
-    rxa.emnr.p->g.gain_method = method;
+    g->npe_method = _method;
 }
 
-void EMNR::SetEMNRnpeMethod (RXA& rxa, int method)
+void EMNR::setAeRun(int _run)
 {
-    rxa.emnr.p->g.npe_method = method;
+    g->ae_run = _run;
 }
 
-void EMNR::SetEMNRaeRun (RXA& rxa, int run)
+void EMNR::setAeZetaThresh(double _zetathresh)
 {
-    rxa.emnr.p->g.ae_run = run;
+    ae->zetaThresh = _zetathresh;
 }
 
-void EMNR::SetEMNRPosition (RXA& rxa, int position)
+void EMNR::setAePsi(double _psi)
 {
-    rxa.emnr.p->position = position;
-    rxa.bp1.p->position  = position;
-}
-
-void EMNR::SetEMNRaeZetaThresh (RXA& rxa, double zetathresh)
-{
-    rxa.emnr.p->ae.zetaThresh = zetathresh;
-}
-
-void EMNR::SetEMNRaePsi (RXA& rxa, double psi)
-{
-    rxa.emnr.p->ae.psi = psi;
+    ae->psi = _psi;
 }
 
 } // namespace WDSP

@@ -28,152 +28,130 @@ warren@wpratt.com
 #include "comm.hpp"
 #include "meterlog10.hpp"
 #include "meter.hpp"
-#include "RXA.hpp"
-#include "TXA.hpp"
 
 namespace WDSP {
 
-void METER::calc_meter (METER *a)
+void METER::calc()
 {
-    a->mult_average = exp(-1.0 / (a->rate * a->tau_average));
-    a->mult_peak = exp(-1.0 / (a->rate * a->tau_peak_decay));
-    flush_meter(a);
+    mult_average = exp(-1.0 / (rate * tau_average));
+    mult_peak = exp(-1.0 / (rate * tau_peak_decay));
+    flush();
 }
 
-METER* METER::create_meter (
-    int run,
-    int* prun,
-    int size,
-    float* buff,
-    int rate,
-    double tau_av,
-    double tau_decay,
-    double* result,
-    int enum_av,
-    int enum_pk,
-    int enum_gain,
-    double* pgain
-)
+METER::METER(
+    int _run,
+    int* _prun,
+    int _size,
+    float* _buff,
+    int _rate,
+    double _tau_av,
+    double _tau_decay,
+    double* _result,
+    int _enum_av,
+    int _enum_pk,
+    int _enum_gain,
+    double* _pgain
+) :
+    run(_run),
+    prun(_prun),
+    size(_size),
+    buff(_buff),
+    rate((double) _rate),
+    tau_average(_tau_av),
+    tau_peak_decay(_tau_decay),
+    result(_result),
+    enum_av(_enum_av),
+    enum_pk(_enum_pk),
+    enum_gain(_enum_gain),
+    pgain(_pgain)
 {
-    METER *a = new METER;
-    a->run = run;
-    a->prun = prun;
-    a->size = size;
-    a->buff = buff;
-    a->rate = (double) rate;
-    a->tau_average = tau_av;
-    a->tau_peak_decay = tau_decay;
-    a->result = result;
-    a->enum_av = enum_av;
-    a->enum_pk = enum_pk;
-    a->enum_gain = enum_gain;
-    a->pgain = pgain;
-    calc_meter(a);
-    return a;
+    calc();
 }
 
-void METER::destroy_meter (METER *a)
+void METER::flush()
 {
-    delete a;
+    avg  = 0.0;
+    peak = 0.0;
+    result[enum_av] = -100.0;
+    result[enum_pk] = -100.0;
+
+    if ((pgain != nullptr) && (enum_gain >= 0))
+        result[enum_gain] = 0.0;
 }
 
-void METER::flush_meter (METER *a)
-{
-    a->avg  = 0.0;
-    a->peak = 0.0;
-    a->result[a->enum_av] = -100.0;
-    a->result[a->enum_pk] = -100.0;
-
-    if ((a->pgain != 0) && (a->enum_gain >= 0))
-        a->result[a->enum_gain] = 0.0;
-}
-
-void METER::xmeter (METER *a)
+void METER::execute()
 {
     int srun;
 
-    if (a->prun != 0)
-        srun = *(a->prun);
+    if (prun != nullptr)
+        srun = *prun;
     else
         srun = 1;
 
-    if (a->run && srun)
+    if (run && srun)
     {
-        int i;
         double smag;
         double np = 0.0;
 
-        for (i = 0; i < a->size; i++)
+        for (int i = 0; i < size; i++)
         {
-            double xr = a->buff[2 * i + 0];
-            double xi = a->buff[2 * i + 1];
+            double xr = buff[2 * i + 0];
+            double xi = buff[2 * i + 1];
             smag = xr*xr + xi*xi;
-            a->avg = a->avg * a->mult_average + (1.0 - a->mult_average) * smag;
-            a->peak *= a->mult_peak;
+            avg = avg * mult_average + (1.0 - mult_average) * smag;
+            peak *= mult_peak;
 
             if (smag > np)
                 np = smag;
         }
 
-        if (np > a->peak)
-            a->peak = np;
+        if (np > peak)
+            peak = np;
 
-        a->result[a->enum_av] = 10.0 * MemLog::mlog10 (a->avg + 1.0e-40);
-        a->result[a->enum_pk] = 10.0 * MemLog::mlog10 (a->peak + 1.0e-40);
+        result[enum_av] = 10.0 * MemLog::mlog10 (avg  <= 0 ? 1.0e-20 : avg);
+        result[enum_pk] = 10.0 * MemLog::mlog10 (peak <= 0 ? 1.0e-20 : peak);
 
-        if ((a->pgain != 0) && (a->enum_gain >= 0))
-            a->result[a->enum_gain] = 20.0 * MemLog::mlog10 (*a->pgain + 1.0e-40);
+        if ((pgain != nullptr) && (enum_gain >= 0))
+            result[enum_gain] = 20.0 * MemLog::mlog10 (*pgain <= 0 ? 1.0e-20 : *pgain);
     }
     else
     {
-        if (a->enum_av   >= 0)
-            a->result[a->enum_av]   = -100.0;
-        if (a->enum_pk   >= 0)
-            a->result[a->enum_pk]   = -100.0;
-        if (a->enum_gain >= 0)
-            a->result[a->enum_gain] = 0.0;
+        if (enum_av   >= 0)
+            result[enum_av]   = -100.0;
+        if (enum_pk   >= 0)
+            result[enum_pk]   = -100.0;
+        if (enum_gain >= 0)
+            result[enum_gain] = 0.0;
     }
 }
 
-void METER::setBuffers_meter (METER *a, float* in)
+void METER::setBuffers(float* in)
 {
-    a->buff = in;
+    buff = in;
+    flush();
 }
 
-void METER::setSamplerate_meter (METER *a, int rate)
+void METER::setSamplerate(int _rate)
 {
-    a->rate = (double) rate;
-    calc_meter(a);
+    rate = (double) _rate;
+    calc();
 }
 
-void METER::setSize_meter (METER *a, int size)
+void METER::setSize(int _size)
 {
-    a->size = size;
-    flush_meter (a);
-}
-
-/********************************************************************************************************
-*                                                                                                       *
-*                                           RXA Properties                                              *
-*                                                                                                       *
-********************************************************************************************************/
-
-double METER::GetMeter (RXA& rxa, int mt)
-{
-    double val = rxa.meter[mt];
-    return val;
+    size = _size;
+    flush();
 }
 
 /********************************************************************************************************
 *                                                                                                       *
-*                                           TXA Properties                                              *
+*                                           Public Properties                                           *
 *                                                                                                       *
 ********************************************************************************************************/
 
-double METER::GetMeter (TXA& txa, int mt)
+double METER::getMeter(int mt) const
 {
-    double val = txa.meter[mt];
-    return val;
+    return result[mt];
 }
 
 } // namespace WDSP

@@ -30,138 +30,102 @@ warren@wpratt.com
 
 namespace WDSP {
 
-BLDR* BLDR::create_builder(int points, int ints)
+BLDR::BLDR(int points, int ints)
 {
     // for the create function, 'points' and 'ints' are the MAXIMUM values that will be encountered
-    BLDR *a = new BLDR;
-    a->catxy = new float[2 * points]; // (float*)malloc0(2 * points * sizeof(float));
-    a->sx    = new float[points];     // (float*)malloc0(    points * sizeof(float));
-    a->sy    = new float[points];     // (float*)malloc0(    points * sizeof(float));
-    a->h     = new float[ints];       // (float*)malloc0(    ints   * sizeof(float));
-    a->p     = new int[ints];          // (int*)   malloc0(    ints   * sizeof(int));
-    a->np    = new int[ints];          // (int*)   malloc0(    ints   * sizeof(int));
-    a->taa   = new float[ints];       // (float*)malloc0(    ints   * sizeof(float));
-    a->tab   = new float[ints];       // (float*)malloc0(    ints   * sizeof(float));
-    a->tag   = new float[ints];       // (float*)malloc0(    ints   * sizeof(float));
-    a->tad   = new float[ints];       // (float*)malloc0(    ints   * sizeof(float));
-    a->tbb   = new float[ints];       // (float*)malloc0(    ints   * sizeof(float));
-    a->tbg   = new float[ints];       // (float*)malloc0(    ints   * sizeof(float));
-    a->tbd   = new float[ints];       // (float*)malloc0(    ints   * sizeof(float));
-    a->tgg   = new float[ints];       // (float*)malloc0(    ints   * sizeof(float));
-    a->tgd   = new float[ints];       // (float*)malloc0(    ints   * sizeof(float));
-    a->tdd   = new float[ints];       // (float*)malloc0(    ints   * sizeof(float));
+    catxy = new double[2 * points];
+    sx.resize(points);
+    sy.resize(points);
+    h .resize(ints);
+    p.resize(ints);
+    np.resize(ints);
+    taa.resize(ints);
+    tab.resize(ints);
+    tag.resize(ints);
+    tad.resize(ints);
+    tbb.resize(ints);
+    tbg.resize(ints);
+    tbd.resize(ints);
+    tgg.resize(ints);
+    tgd.resize(ints);
+    tdd.resize(ints);
     int nsize = 3 * ints + 1;
     int intp1 = ints + 1;
     int intm1 = ints - 1;
-    a->A     = new float[intp1 * intp1]; // (float*)malloc0(intp1 * intp1 * sizeof(float));
-    a->B     = new float[intp1 * intp1]; // (float*)malloc0(intp1 * intp1 * sizeof(float));
-    a->C     = new float[intp1 * intp1]; // (float*)malloc0(intm1 * intp1 * sizeof(float));
-    a->D     = new float[intp1];         // (float*)malloc0(intp1         * sizeof(float));
-    a->E     = new float[intp1 * intp1]; // (float*)malloc0(intp1 * intp1 * sizeof(float));
-    a->F     = new float[intm1 * intp1]; // (float*)malloc0(intm1 * intp1 * sizeof(float));
-    a->G     = new float[intp1];         // (float*)malloc0(intp1         * sizeof(float));
-    a->MAT   = new float[nsize * nsize]; // (float*)malloc0(nsize * nsize * sizeof(float));
-    a->RHS   = new float[nsize];         // (float*)malloc0(nsize         * sizeof(float));
-    a->SLN   = new float[nsize];         // (float*)malloc0(nsize         * sizeof(float));
-    a->z     = new float[intp1];         // (float*)malloc0(intp1         * sizeof(float));
-    a->zp    = new float[intp1];         // (float*)malloc0(intp1         * sizeof(float));
-    a->wrk   = new float[nsize];         // (float*)malloc0(nsize         * sizeof(float));
-    a->ipiv  = new int[nsize];            // (int*)   malloc0(nsize         * sizeof(int));
-    return a;
+    A .resize(intp1 * intp1);
+    B .resize(intp1 * intp1);
+    C .resize(intp1 * intp1);
+    D .resize(intp1);
+    E .resize(intp1 * intp1);
+    F .resize(intm1 * intp1);
+    G .resize(intp1);
+    MAT.resize(nsize * nsize);
+    RHS.resize(nsize);
+    SLN.resize(nsize);
+    z .resize(intp1);
+    zp.resize(intp1);
+    wrk.resize(nsize);
+    ipiv.resize(nsize);
 }
 
-void BLDR::destroy_builder(BLDR *a)
+BLDR::~BLDR()
 {
-    delete[](a->ipiv);
-    delete[](a->wrk);
-    delete[](a->catxy);
-    delete[](a->sx);
-    delete[](a->sy);
-    delete[](a->h);
-    delete[](a->p);
-    delete[](a->np);
-
-    delete[](a->taa);
-    delete[](a->tab);
-    delete[](a->tag);
-    delete[](a->tad);
-    delete[](a->tbb);
-    delete[](a->tbg);
-    delete[](a->tbd);
-    delete[](a->tgg);
-    delete[](a->tgd);
-    delete[](a->tdd);
-
-    delete[](a->A);
-    delete[](a->B);
-    delete[](a->C);
-    delete[](a->D);
-    delete[](a->E);
-    delete[](a->F);
-    delete[](a->G);
-
-    delete[](a->MAT);
-    delete[](a->RHS);
-    delete[](a->SLN);
-
-    delete[](a->z);
-    delete[](a->zp);
-
-    delete(a);
+    delete[]catxy;
 }
 
-void BLDR::flush_builder(BLDR *a, int points, int ints)
+void BLDR::flush(int points)
 {
-    memset(a->catxy, 0, 2 * points * sizeof(float));
-    memset(a->sx,    0, points * sizeof(float));
-    memset(a->sy,    0, points * sizeof(float));
-    memset(a->h,     0, ints * sizeof(float));
-    memset(a->p,     0, ints * sizeof(int));
-    memset(a->np,    0, ints * sizeof(int));
-    memset(a->taa,   0, ints * sizeof(float));
-    memset(a->tab,   0, ints * sizeof(float));
-    memset(a->tag,   0, ints * sizeof(float));
-    memset(a->tad,   0, ints * sizeof(float));
-    memset(a->tbb,   0, ints * sizeof(float));
-    memset(a->tbg,   0, ints * sizeof(float));
-    memset(a->tbd,   0, ints * sizeof(float));
-    memset(a->tgg,   0, ints * sizeof(float));
-    memset(a->tgd,   0, ints * sizeof(float));
-    memset(a->tdd,   0, ints * sizeof(float));
-    int nsize = 3 * ints + 1;
-    int intp1 = ints + 1;
-    int intm1 = ints - 1;
-    memset(a->A,     0, intp1 * intp1 * sizeof(float));
-    memset(a->B,     0, intp1 * intp1 * sizeof(float));
-    memset(a->C,     0, intm1 * intp1 * sizeof(float));
-    memset(a->D,     0, intp1         * sizeof(float));
-    memset(a->E,     0, intp1 * intp1 * sizeof(float));
-    memset(a->F,     0, intm1 * intp1 * sizeof(float));
-    memset(a->G,     0, intp1         * sizeof(float));
-    memset(a->MAT,   0, nsize * nsize * sizeof(float));
-    memset(a->RHS,   0, nsize * sizeof(float));
-    memset(a->SLN,   0, nsize * sizeof(float));
-    memset(a->z,     0, intp1 * sizeof(float));
-    memset(a->zp,    0, intp1 * sizeof(float));
-    memset(a->wrk,   0, nsize * sizeof(float));
-    memset(a->ipiv,  0, nsize * sizeof(int));
+    memset(catxy, 0, 2 * points * sizeof(double));
+    std::fill(sx.begin(),   sx.end(),   0);
+    std::fill(sy.begin(),   sy.end(),   0);
+    std::fill(h.begin(),    h.end(),    0);
+    std::fill(p.begin(),    p.end(),    0);
+    std::fill(np.begin(),   np.end(),   0);
+    std::fill(taa.begin(),  taa.end(),  0);
+    std::fill(tab.begin(),  tab.end(),  0);
+    std::fill(tag.begin(),  tag.end(),  0);
+    std::fill(tad.begin(),  tad.end(),  0);
+    std::fill(tbb.begin(),  tbb.end(),  0);
+    std::fill(tbg.begin(),  tbg.end(),  0);
+    std::fill(tbd.begin(),  tbd.end(),  0);
+    std::fill(tgg.begin(),  tgg.end(),  0);
+    std::fill(tgd.begin(),  tgd.end(),  0);
+    std::fill(tdd.begin(),  tdd.end(),  0);
+    std::fill(A.begin(),    A.end(),    0);
+    std::fill(B.begin(),    B.end(),    0);
+    std::fill(C.begin(),    C.end(),    0);
+    std::fill(D.begin(),    D.end(),    0);
+    std::fill(E.begin(),    E.end(),    0);
+    std::fill(F.begin(),    F.end(),    0);
+    std::fill(G.begin(),    G.end(),    0);
+    std::fill(MAT.begin(),  MAT.end(),  0);
+    std::fill(RHS.begin(),  RHS.end(),  0);
+    std::fill(SLN.begin(),  SLN.end(),  0);
+    std::fill(z.begin(),    z.end(),    0);
+    std::fill(zp.begin(),   zp.end(),   0);
+    std::fill(wrk.begin(),  wrk.end(),  0);
+    std::fill(ipiv.begin(), ipiv.end(), 0);
 }
 
 int BLDR::fcompare(const void* a, const void* b)
 {
-    if (*(float*)a < *(float*)b)
+    if (*(double*)a < *(double*)b)
         return -1;
-    else if (*(float*)a == *(float*)b)
+    else if (*(double*)a == *(double*)b)
         return 0;
     else
         return 1;
 }
 
-void BLDR::decomp(int n, float* a, int* piv, int* info, float* wrk)
+void BLDR::decomp(int n, std::vector<double>& a, std::vector<int>& piv, int* info, std::vector<double>& wrk)
 {
-    int i, j, k;
+    int i;
+    int j;
     int t_piv;
-    float m_row, mt_row, m_col, mt_col;
+    double m_row;
+    double mt_row;
+    double m_col;
+    double mt_col;
     *info = 0;
     for (i = 0; i < n; i++)
     {
@@ -180,7 +144,7 @@ void BLDR::decomp(int n, float* a, int* piv, int* info, float* wrk)
         }
         wrk[i] = m_row;
     }
-    for (k = 0; k < n - 1; k++)
+    for (int k = 0; k < n - 1; k++)
     {
         j = k;
         m_col = a[n * piv[k] + k] / wrk[piv[k]];
@@ -216,10 +180,11 @@ cleanup:
     return;
 }
 
-void BLDR::dsolve(int n, float* a, int* piv, float* b, float* x)
+void BLDR::dsolve(int n, std::vector<double>& a, std::vector<int>& piv, std::vector<double>& b, std::vector<double>& x)
 {
-    int j, k;
-    float sum;
+    int j;
+    int k;
+    double sum;
 
     for (k = 0; k < n; k++)
     {
@@ -238,7 +203,7 @@ void BLDR::dsolve(int n, float* a, int* piv, float* b, float* x)
     }
 }
 
-void BLDR::cull(int* n, int ints, float* x, float* t, float ptol)
+void BLDR::cull(int* n, int ints, std::vector<double>& x, const double* t, double ptol)
 {
     int k = 0;
     int i = *n;
@@ -255,28 +220,36 @@ void BLDR::cull(int* n, int ints, float* x, float* t, float ptol)
     *n -= k;
 }
 
-void BLDR::xbuilder(BLDR *a, int points, float* x, float* y, int ints, float* t, int* info, float* c, float ptol)
+void BLDR::execute(int points, const double* x, const double* y, int ints, const double* t, int* info, double* c, double ptol)
 {
-    float u, v, alpha, beta, gamma, delta;
+    double u;
+    double v;
+    double alpha;
+    double beta;
+    double gamma;
+    double delta;
     int nsize = 3 * ints + 1;
     int intp1 = ints + 1;
     int intm1 = ints - 1;
-    int i, j, k, m;
+    int i;
+    int j;
+    int k;
+    int m;
     int dinfo;
-    flush_builder(a, points, ints);
+    flush(points);
     for (i = 0; i < points; i++)
     {
-        a->catxy[2 * i + 0] = x[i];
-        a->catxy[2 * i + 1] = y[i];
+        catxy[2 * i + 0] = x[i];
+        catxy[2 * i + 1] = y[i];
     }
-    qsort(a->catxy, points, 2 * sizeof(float), fcompare);
+    qsort(catxy, points, 2 * sizeof(double), fcompare);
     for (i = 0; i < points; i++)
     {
-        a->sx[i] = a->catxy[2 * i + 0];
-        a->sy[i] = a->catxy[2 * i + 1];
+        sx[i] = catxy[2 * i + 0];
+        sy[i] = catxy[2 * i + 1];
     }
-    cull(&points, ints, a->sx, t, ptol);
-    if (points <= 0 || a->sx[points - 1] > t[ints])
+    cull(&points, ints, sx, t, ptol);
+    if (points <= 0 || sx[points - 1] > t[ints])
     {
         *info = -1000;
         goto cleanup;
@@ -284,101 +257,101 @@ void BLDR::xbuilder(BLDR *a, int points, float* x, float* y, int ints, float* t,
     else *info = 0;
 
     for (j = 0; j < ints; j++)
-        a->h[j] = t[j + 1] - t[j];
-    a->p[0] = 0;
+        h[j] = t[j + 1] - t[j];
+    p[0] = 0;
     j = 0;
     for (i = 0; i < points; i++)
     {
-        if (a->sx[i] <= t[j + 1])
-            a->np[j]++;
+        if (sx[i] <= t[j + 1])
+            np[j]++;
         else
         {
-            a->p[++j] = i;
-            while (a->sx[i] > t[j + 1])
-                a->p[++j] = i;
-            a->np[j] = 1;
+            p[++j] = i;
+            while (sx[i] > t[j + 1])
+                p[++j] = i;
+            np[j] = 1;
         }
     }
     for (i = 0; i < ints; i++)
-        for (j = a->p[i]; j < a->p[i] + a->np[i]; j++)
+        for (j = p[i]; j < p[i] + np[i]; j++)
         {
-            u = (a->sx[j] - t[i]) / a->h[i];
+            u = (sx[j] - t[i]) / h[i];
             v = u - 1.0;
             alpha = (2.0 * u + 1.0) * v * v;
             beta = u * u * (1.0 - 2.0 * v);
-            gamma = a->h[i] * u * v * v;
-            delta = a->h[i] * u * u * v;
-            a->taa[i] += alpha * alpha;
-            a->tab[i] += alpha * beta;
-            a->tag[i] += alpha * gamma;
-            a->tad[i] += alpha * delta;
-            a->tbb[i] += beta * beta;
-            a->tbg[i] += beta * gamma;
-            a->tbd[i] += beta * delta;
-            a->tgg[i] += gamma * gamma;
-            a->tgd[i] += gamma * delta;
-            a->tdd[i] += delta * delta;
-            a->D[i + 0] += 2.0 * a->sy[j] * alpha;
-            a->D[i + 1] += 2.0 * a->sy[j] * beta;
-            a->G[i + 0] += 2.0 * a->sy[j] * gamma;
-            a->G[i + 1] += 2.0 * a->sy[j] * delta;
+            gamma = h[i] * u * v * v;
+            delta = h[i] * u * u * v;
+            taa[i] += alpha * alpha;
+            tab[i] += alpha * beta;
+            tag[i] += alpha * gamma;
+            tad[i] += alpha * delta;
+            tbb[i] += beta * beta;
+            tbg[i] += beta * gamma;
+            tbd[i] += beta * delta;
+            tgg[i] += gamma * gamma;
+            tgd[i] += gamma * delta;
+            tdd[i] += delta * delta;
+            D[i + 0] += 2.0 * sy[j] * alpha;
+            D[i + 1] += 2.0 * sy[j] * beta;
+            G[i + 0] += 2.0 * sy[j] * gamma;
+            G[i + 1] += 2.0 * sy[j] * delta;
         }
     for (i = 0; i < ints; i++)
     {
-        a->A[(i + 0) * intp1 + (i + 0)] += 2.0 * a->taa[i];
-        a->A[(i + 1) * intp1 + (i + 1)] = 2.0 * a->tbb[i];
-        a->A[(i + 0) * intp1 + (i + 1)] = 2.0 * a->tab[i];
-        a->A[(i + 1) * intp1 + (i + 0)] = 2.0 * a->tab[i];
-        a->B[(i + 0) * intp1 + (i + 0)] += 2.0 * a->tag[i];
-        a->B[(i + 1) * intp1 + (i + 1)] = 2.0 * a->tbd[i];
-        a->B[(i + 0) * intp1 + (i + 1)] = 2.0 * a->tbg[i];
-        a->B[(i + 1) * intp1 + (i + 0)] = 2.0 * a->tad[i];
-        a->E[(i + 0) * intp1 + (i + 0)] += 2.0 * a->tgg[i];
-        a->E[(i + 1) * intp1 + (i + 1)] = 2.0 * a->tdd[i];
-        a->E[(i + 0) * intp1 + (i + 1)] = 2.0 * a->tgd[i];
-        a->E[(i + 1) * intp1 + (i + 0)] = 2.0 * a->tgd[i];
+        A[(i + 0) * intp1 + (i + 0)] += 2.0 * taa[i];
+        A[(i + 1) * intp1 + (i + 1)] = 2.0 * tbb[i];
+        A[(i + 0) * intp1 + (i + 1)] = 2.0 * tab[i];
+        A[(i + 1) * intp1 + (i + 0)] = 2.0 * tab[i];
+        B[(i + 0) * intp1 + (i + 0)] += 2.0 * tag[i];
+        B[(i + 1) * intp1 + (i + 1)] = 2.0 * tbd[i];
+        B[(i + 0) * intp1 + (i + 1)] = 2.0 * tbg[i];
+        B[(i + 1) * intp1 + (i + 0)] = 2.0 * tad[i];
+        E[(i + 0) * intp1 + (i + 0)] += 2.0 * tgg[i];
+        E[(i + 1) * intp1 + (i + 1)] = 2.0 * tdd[i];
+        E[(i + 0) * intp1 + (i + 1)] = 2.0 * tgd[i];
+        E[(i + 1) * intp1 + (i + 0)] = 2.0 * tgd[i];
     }
     for (i = 0; i < intm1; i++)
     {
-        a->C[i * intp1 + (i + 0)] = +3.0 * a->h[i + 1] / a->h[i];
-        a->C[i * intp1 + (i + 2)] = -3.0 * a->h[i] / a->h[i + 1];
-        a->C[i * intp1 + (i + 1)] = -a->C[i * intp1 + (i + 0)] - a->C[i * intp1 + (i + 2)];
-        a->F[i * intp1 + (i + 0)] = a->h[i + 1];
-        a->F[i * intp1 + (i + 1)] = 2.0 * (a->h[i] + a->h[i + 1]);
-        a->F[i * intp1 + (i + 2)] = a->h[i];
+        C[i * intp1 + (i + 0)] = +3.0 * h[i + 1] / h[i];
+        C[i * intp1 + (i + 2)] = -3.0 * h[i] / h[i + 1];
+        C[i * intp1 + (i + 1)] = -C[i * intp1 + (i + 0)] - C[i * intp1 + (i + 2)];
+        F[i * intp1 + (i + 0)] = h[i + 1];
+        F[i * intp1 + (i + 1)] = 2.0 * (h[i] + h[i + 1]);
+        F[i * intp1 + (i + 2)] = h[i];
     }
     for (i = 0, k = 0; i < intp1; i++, k++)
     {
         for (j = 0, m = 0; j < intp1; j++, m++)
-            a->MAT[k * nsize + m] = a->A[i * intp1 + j];
+            MAT[k * nsize + m] = A[i * intp1 + j];
         for (j = 0, m = intp1; j < intp1; j++, m++)
-            a->MAT[k * nsize + m] = a->B[j * intp1 + i];
+            MAT[k * nsize + m] = B[j * intp1 + i];
         for (j = 0, m = 2 * intp1; j < intm1; j++, m++)
-            a->MAT[k * nsize + m] = a->C[j * intp1 + i];
-        a->RHS[k] = a->D[i];
+            MAT[k * nsize + m] = C[j * intp1 + i];
+        RHS[k] = D[i];
     }
     for (i = 0, k = intp1; i < intp1; i++, k++)
     {
         for (j = 0, m = 0; j < intp1; j++, m++)
-            a->MAT[k * nsize + m] = a->B[i * intp1 + j];
+            MAT[k * nsize + m] = B[i * intp1 + j];
         for (j = 0, m = intp1; j < intp1; j++, m++)
-            a->MAT[k * nsize + m] = a->E[i * intp1 + j];
+            MAT[k * nsize + m] = E[i * intp1 + j];
         for (j = 0, m = 2 * intp1; j < intm1; j++, m++)
-            a->MAT[k * nsize + m] = a->F[j * intp1 + i];
-        a->RHS[k] = a->G[i];
+            MAT[k * nsize + m] = F[j * intp1 + i];
+        RHS[k] = G[i];
     }
     for (i = 0, k = 2 * intp1; i < intm1; i++, k++)
     {
         for (j = 0, m = 0; j < intp1; j++, m++)
-            a->MAT[k * nsize + m] = a->C[i * intp1 + j];
+            MAT[k * nsize + m] = C[i * intp1 + j];
         for (j = 0, m = intp1; j < intp1; j++, m++)
-            a->MAT[k * nsize + m] = a->F[i * intp1 + j];
+            MAT[k * nsize + m] = F[i * intp1 + j];
         for (j = 0, m = 2 * intp1; j < intm1; j++, m++)
-            a->MAT[k * nsize + m] = 0.0;
-        a->RHS[k] = 0.0;
+            MAT[k * nsize + m] = 0.0;
+        RHS[k] = 0.0;
     }
-    decomp(nsize, a->MAT, a->ipiv, &dinfo, a->wrk);
-    dsolve(nsize, a->MAT, a->ipiv, a->RHS, a->SLN);
+    decomp(nsize, MAT, ipiv, &dinfo, wrk);
+    dsolve(nsize, MAT, ipiv, RHS, SLN);
     if (dinfo != 0)
     {
         *info = dinfo;
@@ -387,15 +360,15 @@ void BLDR::xbuilder(BLDR *a, int points, float* x, float* y, int ints, float* t,
 
     for (i = 0; i <= ints; i++)
     {
-        a->z[i] = a->SLN[i];
-        a->zp[i] = a->SLN[i + ints + 1];
+        z[i] = SLN[i];
+        zp[i] = SLN[i + ints + 1];
     }
     for (i = 0; i < ints; i++)
     {
-        c[4 * i + 0] = a->z[i];
-        c[4 * i + 1] = a->zp[i];
-        c[4 * i + 2] = -3.0 / (a->h[i] * a->h[i]) * (a->z[i] - a->z[i + 1]) - 1.0 / a->h[i] * (2.0 * a->zp[i] + a->zp[i + 1]);
-        c[4 * i + 3] = 2.0 / (a->h[i] * a->h[i] * a->h[i]) * (a->z[i] - a->z[i + 1]) + 1.0 / (a->h[i] * a->h[i]) * (a->zp[i] + a->zp[i + 1]);
+        c[4 * i + 0] = z[i];
+        c[4 * i + 1] = zp[i];
+        c[4 * i + 2] = -3.0 / (h[i] * h[i]) * (z[i] - z[i + 1]) - 1.0 / h[i] * (2.0 * zp[i] + zp[i + 1]);
+        c[4 * i + 3] = 2.0 / (h[i] * h[i] * h[i]) * (z[i] - z[i + 1]) + 1.0 / (h[i] * h[i]) * (zp[i] + zp[i + 1]);
     }
 cleanup:
     return;

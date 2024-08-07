@@ -27,108 +27,100 @@ warren@wpratt.com
 
 #include "comm.hpp"
 #include "patchpanel.hpp"
-#include "RXA.hpp"
-#include "TXA.hpp"
 
 namespace WDSP {
 
-PANEL* PANEL::create_panel (
-    int run,
-    int size,
-    float* in,
-    float* out,
-    double gain1,
-    double gain2I,
-    double gain2Q,
-    int inselect,
-    int copy
-)
+PANEL::PANEL(
+    int _run,
+    int _size,
+    float* _in,
+    float* _out,
+    double _gain1,
+    double _gain2I,
+    double _gain2Q,
+    int _inselect,
+    int _copy
+) :
+    run(_run),
+    size(_size),
+    in(_in),
+    out(_out),
+    gain1(_gain1),
+    gain2I(_gain2I),
+    gain2Q(_gain2Q),
+    inselect(_inselect),
+    copy(_copy)
 {
-    PANEL* a = new PANEL;
-    a->run = run;
-    a->size = size;
-    a->in = in;
-    a->out = out;
-    a->gain1 = gain1;
-    a->gain2I = gain2I;
-    a->gain2Q = gain2Q;
-    a->inselect = inselect;
-    a->copy = copy;
-    return a;
 }
 
-void PANEL::destroy_panel (PANEL *a)
+void PANEL::flush()
 {
-    delete (a);
+    // There is no data to be reset internally
 }
 
-void PANEL::flush_panel (PANEL *)
-{
-
-}
-
-void PANEL::xpanel (PANEL *a)
+void PANEL::execute()
 {
     int i;
-    double I, Q;
-    double gainI = a->gain1 * a->gain2I;
-    double gainQ = a->gain1 * a->gain2Q;
+    double I;
+    double Q;
+    double gainI = gain1 * gain2I;
+    double gainQ = gain1 * gain2Q;
     // inselect is either 0(neither), 1(Q), 2(I), or 3(both)
-    switch (a->copy)
+    switch (copy)
     {
-    case 0: // no copy
-        for (i = 0; i < a->size; i++)
+    default: // 0 (default) no copy
+        for (i = 0; i < size; i++)
         {
-            I = a->in[2 * i + 0] * (a->inselect >> 1);
-            Q = a->in[2 * i + 1] * (a->inselect &  1);
-            a->out[2 * i + 0] = gainI * I;
-            a->out[2 * i + 1] = gainQ * Q;
+            I = in[2 * i + 0] * (inselect >> 1);
+            Q = in[2 * i + 1] * (inselect &  1);
+            out[2 * i + 0] = (float) (gainI * I);
+            out[2 * i + 1] = (float) (gainQ * Q);
         }
         break;
     case 1: // copy I to Q (then Q == I)
-        for (i = 0; i < a->size; i++)
+        for (i = 0; i < size; i++)
         {
-            I = a->in[2 * i + 0] * (a->inselect >> 1);
+            I = in[2 * i + 0] * (inselect >> 1);
             Q = I;
-            a->out[2 * i + 0] = gainI * I;
-            a->out[2 * i + 1] = gainQ * Q;
+            out[2 * i + 0] = (float) (gainI * I);
+            out[2 * i + 1] = (float) (gainQ * Q);
         }
         break;
     case 2: // copy Q to I (then I == Q)
-        for (i = 0; i < a->size; i++)
+        for (i = 0; i < size; i++)
         {
-            Q = a->in[2 * i + 1] * (a->inselect &  1);
+            Q = in[2 * i + 1] * (inselect & 1);
             I = Q;
-            a->out[2 * i + 0] = gainI * I;
-            a->out[2 * i + 1] = gainQ * Q;
+            out[2 * i + 0] = (float) (gainI * I);
+            out[2 * i + 1] = (float) (gainQ * Q);
         }
         break;
     case 3: // reverse (I=>Q and Q=>I)
-        for (i = 0; i < a->size; i++)
+        for (i = 0; i < size; i++)
         {
-            Q = a->in[2 * i + 0] * (a->inselect >> 1);
-            I = a->in[2 * i + 1] * (a->inselect &  1);
-            a->out[2 * i + 0] = gainI * I;
-            a->out[2 * i + 1] = gainQ * Q;
+            Q = in[2 * i + 0] * (inselect >> 1);
+            I = in[2 * i + 1] * (inselect &  1);
+            out[2 * i + 0] = (float) (gainI * I);
+            out[2 * i + 1] = (float) (gainQ * Q);
         }
         break;
     }
 }
 
-void PANEL::setBuffers_panel (PANEL *a, float* in, float* out)
+void PANEL::setBuffers(float* _in, float* _out)
 {
-    a->in = in;
-    a->out = out;
+    in = _in;
+    out = _out;
 }
 
-void PANEL::setSamplerate_panel (PANEL *, int)
+void PANEL::setSamplerate(int)
 {
-
+    // There is no sample rate to be set for this component
 }
 
-void PANEL::setSize_panel (PANEL *a, int size)
+void PANEL::setSize(int _size)
 {
-    a->size = size;
+    size = _size;
 }
 
 /********************************************************************************************************
@@ -137,54 +129,55 @@ void PANEL::setSize_panel (PANEL *a, int size)
 *                                                                                                       *
 ********************************************************************************************************/
 
-void PANEL::SetPanelRun (RXA& rxa, int run)
+void PANEL::setRun(int _run)
 {
-    rxa.panel.p->run = run;
+    run = _run;
 }
 
-void PANEL::SetPanelSelect (RXA& rxa, int select)
+void PANEL::setSelect(int _select)
 {
-    rxa.panel.p->inselect = select;
+    inselect = _select;
 }
 
-void PANEL::SetPanelGain1 (RXA& rxa, double gain)
+void PANEL::setGain1(double _gain)
 {
-    rxa.panel.p->gain1 = gain;
+    gain1 = _gain;
 }
 
-void PANEL::SetPanelGain2 (RXA& rxa, double gainI, double gainQ)
+void PANEL::setGain2(double _gainI, double _gainQ)
 {
-    rxa.panel.p->gain2I = gainI;
-    rxa.panel.p->gain2Q = gainQ;
+    gain2I = _gainI;
+    gain2Q = _gainQ;
 }
 
-void PANEL::SetPanelPan (RXA& rxa, double pan)
+void PANEL::setPan(double _pan)
 {
-    double gain1, gain2;
+    double _gain1;
+    double _gain2;
 
-    if (pan <= 0.5)
+    if (_pan <= 0.5)
     {
-        gain1 = 1.0;
-        gain2 = sin (pan * PI);
+        _gain1 = 1.0;
+        _gain2 = sin (_pan * PI);
     }
     else
     {
-        gain1 = sin (pan * PI);
-        gain2 = 1.0;
+        _gain1 = sin (_pan * PI);
+        _gain2 = 1.0;
     }
 
-    rxa.panel.p->gain2I = gain1;
-    rxa.panel.p->gain2Q = gain2;
+    gain2I = _gain1;
+    gain2Q = _gain2;
 }
 
-void PANEL::SetPanelCopy (RXA& rxa, int copy)
+void PANEL::setCopy(int _copy)
 {
-    rxa.panel.p->copy = copy;
+    copy = _copy;
 }
 
-void PANEL::SetPanelBinaural (RXA& rxa, int bin)
+void PANEL::setBinaural(int _bin)
 {
-    rxa.panel.p->copy = 1 - bin;
+    copy = 1 - _bin;
 }
 
 /********************************************************************************************************
@@ -193,25 +186,14 @@ void PANEL::SetPanelBinaural (RXA& rxa, int bin)
 *                                                                                                       *
 ********************************************************************************************************/
 
-void PANEL::SetPanelRun (TXA& txa, int run)
+void PANEL::setSelectTx(int _select)
 {
-    txa.panel.p->run = run;
-}
-
-void PANEL::SetPanelGain1 (TXA& txa, double gain)
-{
-    txa.panel.p->gain1 = gain;
-    //print_message ("micgainset.txt", "Set MIC Gain to", (int)(100.0 * gain), 0, 0);
-}
-
-void PANEL::SetPanelSelect (TXA& txa, int select)
-{
-    if (select == 1)
-        txa.panel.p->copy = 3;
+    if (_select == 1)
+        copy = 3;
     else
-        txa.panel.p->copy = 0;
+        copy = 0;
 
-    txa.panel.p->inselect = select;
+    inselect = _select;
 }
 
 } // namespace WDSP

@@ -27,99 +27,93 @@ warren@wpratt.com
 
 #include "comm.hpp"
 #include "cblock.hpp"
-#include "RXA.hpp"
 
 namespace WDSP {
 
-void CBL::calc_cbl (CBL *a)
+void CBL::calc()
 {
-    a->prevIin  = 0.0;
-    a->prevQin  = 0.0;
-    a->prevIout = 0.0;
-    a->prevQout = 0.0;
-    a->mtau = exp(-1.0 / (a->sample_rate * a->tau));
+    prevIin  = 0.0;
+    prevQin  = 0.0;
+    prevIout = 0.0;
+    prevQout = 0.0;
+    mtau = exp(-1.0 / (sample_rate * tau));
 }
 
-CBL* CBL::create_cbl(
-    int run,
-    int buff_size,
-    float *in_buff,
-    float *out_buff,
-    int mode,
-    int sample_rate,
-    double tau
-)
+CBL::CBL(
+    int _run,
+    int _buff_size,
+    float *_in_buff,
+    float *_out_buff,
+    int _mode,
+    int _sample_rate,
+    double _tau
+) :
+    run(_run),
+    buff_size(_buff_size),
+    in_buff(_in_buff),
+    out_buff(_out_buff),
+    mode(_mode),
+    sample_rate((double) _sample_rate),
+    tau(_tau)
 {
-    CBL *a = new CBL;
-    a->run = run;
-    a->buff_size = buff_size;
-    a->in_buff = in_buff;
-    a->out_buff = out_buff;
-    a->mode = mode;
-    a->sample_rate = (double) sample_rate;
-    a->tau = tau;
-    calc_cbl (a);
-    return a;
+    calc();
 }
 
-void CBL::destroy_cbl(CBL *a)
+void CBL::flush()
 {
-    delete a;
+    prevIin  = 0.0;
+    prevQin  = 0.0;
+    prevIout = 0.0;
+    prevQout = 0.0;
 }
 
-void CBL::flush_cbl (CBL *a)
+void CBL::execute()
 {
-    a->prevIin  = 0.0;
-    a->prevQin  = 0.0;
-    a->prevIout = 0.0;
-    a->prevQout = 0.0;
-}
-
-void CBL::xcbl (CBL *a)
-{
-    if (a->run)
+    if (run)
     {
-        int i;
-        double tempI, tempQ;
+        double tempI;
+        double tempQ;
 
-        for (i = 0; i < a->buff_size; i++)
+        for (int i = 0; i < buff_size; i++)
         {
-            tempI  = a->in_buff[2 * i + 0];
-            tempQ  = a->in_buff[2 * i + 1];
-            a->out_buff[2 * i + 0] = a->in_buff[2 * i + 0] - a->prevIin + a->mtau * a->prevIout;
-            a->out_buff[2 * i + 1] = a->in_buff[2 * i + 1] - a->prevQin + a->mtau * a->prevQout;
-            a->prevIin  = tempI;
-            a->prevQin  = tempQ;
+            tempI  = in_buff[2 * i + 0];
+            tempQ  = in_buff[2 * i + 1];
+            out_buff[2 * i + 0] = (float) (in_buff[2 * i + 0] - prevIin + mtau * prevIout);
+            out_buff[2 * i + 1] = (float) (in_buff[2 * i + 1] - prevQin + mtau * prevQout);
+            prevIin  = tempI;
+            prevQin  = tempQ;
+            prevIout = out_buff[2 * i + 0];
+            prevQout = out_buff[2 * i + 1];
 
-            if (fabs(a->prevIout = a->out_buff[2 * i + 0]) < 1.0e-20)
-                a->prevIout = 0.0;
+            if (fabs(prevIout) < 1.0e-20)
+                prevIout = 0.0;
 
-            if (fabs(a->prevQout = a->out_buff[2 * i + 1]) < 1.0e-20)
-                a->prevQout = 0.0;
+            if (fabs(prevQout) < 1.0e-20)
+                prevQout = 0.0;
         }
     }
-    else if (a->in_buff != a->out_buff)
+    else if (in_buff != out_buff)
     {
-        std::copy(a->in_buff, a->in_buff + a->buff_size * 2, a->out_buff);
+        std::copy(in_buff, in_buff + buff_size * 2, out_buff);
     }
 }
 
-void CBL::setBuffers_cbl (CBL *a, float* in, float* out)
+void CBL::setBuffers(float* _in, float* _out)
 {
-    a->in_buff = in;
-    a->out_buff = out;
+    in_buff = _in;
+    out_buff = _out;
 }
 
-void CBL::setSamplerate_cbl (CBL *a, int rate)
+void CBL::setSamplerate(int _rate)
 {
-    a->sample_rate = rate;
-    calc_cbl (a);
+    sample_rate = _rate;
+    calc();
 }
 
-void CBL::setSize_cbl (CBL *a, int size)
+void CBL::setSize(int _size)
 {
-    a->buff_size = size;
-    flush_cbl (a);
+    buff_size = _size;
+    flush();
 }
 
 /********************************************************************************************************
@@ -128,9 +122,9 @@ void CBL::setSize_cbl (CBL *a, int size)
 *                                                                                                       *
 ********************************************************************************************************/
 
-void CBL::SetCBLRun(RXA& rxa, int setit)
+void CBL::setRun(int setit)
 {
-    rxa.cbl.p->run = setit;
+    run = setit;
 }
 
 } // namespace WDSP

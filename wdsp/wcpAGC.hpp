@@ -28,6 +28,8 @@ warren@wpratt.com
 #ifndef wdsp_wcpagc_h
 #define wdsp_wcpagc_h
 
+#include <array>
+
 #include "export.h"
 
 #define MAX_SAMPLE_RATE     (384000.0)
@@ -36,9 +38,6 @@ warren@wpratt.com
 #define RB_SIZE             (int)(MAX_SAMPLE_RATE * MAX_N_TAU * MAX_TAU_ATTACK + 1)
 
 namespace WDSP {
-
-class RXA;
-class TXA;
 
 class WDSP_API WCPAGC
 {
@@ -71,16 +70,16 @@ public:
     int in_index;
     int attack_buffsize;
 
-    double* ring;
-    double* abs_ring;
-    int ring_buffsize;
+    std::array<double, RB_SIZE*2> ring;
+    std::array<double, RB_SIZE> abs_ring;
+    static const int ring_buffsize = RB_SIZE;
     double ring_max;
 
     double attack_mult;
     double decay_mult;
     double volts;
     double save_volts;
-    double out_sample[2];
+    std::array<double, 2> out_sample;
     double abs_out_sample;
     int state;
 
@@ -106,8 +105,7 @@ public:
     double hang_decay_mult;
     int decay_type;
 
-    static void xwcpagc (WCPAGC *a);
-    static WCPAGC* create_wcpagc (
+    WCPAGC(
         int run,
         int mode,
         int pmode,
@@ -132,43 +130,34 @@ public:
         double hang_thresh,
         double tau_hang_decay
     );
-    static void destroy_wcpagc (WCPAGC *a);
-    static void flush_wcpagc (WCPAGC *a);
-    static void setBuffers_wcpagc (WCPAGC *a, float* in, float* out);
-    static void setSamplerate_wcpagc (WCPAGC *a, int rate);
-    static void setSize_wcpagc (WCPAGC *a, int size);
-    // RXA Properties
-    static void SetAGCMode (RXA& rxa, int mode);
-    static void SetAGCFixed (RXA& rxa, double fixed_agc);
-    static void SetAGCAttack (RXA& rxa, int attack);
-    static void SetAGCDecay (RXA& rxa, int decay);
-    static void SetAGCHang (RXA& rxa, int hang);
-    static void GetAGCHangLevel(RXA& rxa, double *hangLevel);
-    static void SetAGCHangLevel(RXA& rxa, double hangLevel);
-    static void GetAGCHangThreshold(RXA& rxa, int *hangthreshold);
-    static void SetAGCHangThreshold (RXA& rxa, int hangthreshold);
-    static void GetAGCTop(RXA& rxa, double *max_agc);
-    static void SetAGCTop (RXA& rxa, double max_agc);
-    static void SetAGCSlope (RXA& rxa, int slope);
-    static void SetAGCThresh(RXA& rxa, double thresh, double size, double rate);
-    static void GetAGCThresh(RXA& rxa, double *thresh, double size, double rate);
-    static void SetAGCMaxInputLevel (RXA& rxa, double level);
-    // TXA Properties
-    static void SetALCSt (TXA& txa, int state);
-    static void SetALCAttack (TXA& txa, int attack);
-    static void SetALCDecay (TXA& txa, int decay);
-    static void SetALCHang (TXA& txa, int hang);
-    static void SetLevelerSt (TXA& txa, int state);
-    static void SetLevelerAttack (TXA& txa, int attack);
-    static void SetLevelerDecay (TXA& txa, int decay);
-    static void SetLevelerHang (TXA& txa, int hang);
-    static void SetLevelerTop (TXA& txa, double maxgain);
-    static void SetALCMaxGain (TXA& txa, double maxgain);
+    WCPAGC(const WCPAGC&) = delete;
+    WCPAGC& operator=(const WCPAGC& other) = delete;
+    ~WCPAGC() = default;
+
+    void flush();
+    void execute();
+    void setBuffers(float* in, float* out);
+    void setSamplerate(int rate);
+    void setSize(int size);
+    // Public Properties
+    void setMode(int mode);
+    void setFixed(double fixed_agc);
+    void setAttack(int attack);
+    void setDecay(int decay);
+    void setHang(int hang);
+    void getHangLevel(double *hangLevel) const;
+    void setHangLevel(double hangLevel);
+    void getHangThreshold(int *hangthreshold) const;
+    void setHangThreshold(int hangthreshold);
+    void getTop(double *max_agc) const;
+    void setTop(double max_agc);
+    void setSlope(int slope);
+    void setMaxInputLevel(double level);
+    void setRun(int state);
+    void loadWcpAGC();
 
 private:
-    static void loadWcpAGC (WCPAGC *a);
-    static void calc_wcpagc (WCPAGC *a);
-    static void decalc_wcpagc (WCPAGC *a);
+    void calc();
 };
 
 } // namespace WDSP

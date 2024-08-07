@@ -12,15 +12,21 @@ set(wdsp_SOURCES
     bldr.cpp
     bps.cpp
     bpsnba.cpp
+    bqbp.cpp
+    bqlp.cpp
     calculus.cpp
     cblock.cpp
     cfcomp.cpp
     cfir.cpp
     compress.cpp
+    dbqbp.cpp
+    dbqlp.cpp
     delay.cpp
+    dsphp.cpp
     emnr.cpp
     emph.cpp
-    eq.cpp
+    emphp.cpp
+    eqp.cpp
     fcurve.cpp
     fir.cpp
     fircore.cpp
@@ -32,15 +38,17 @@ set(wdsp_SOURCES
     gain.cpp
     gen.cpp
     icfir.cpp
-    iir.cpp
+    # iir.cpp
     iqc.cpp
     lmath.cpp
     meter.cpp
     meterlog10.cpp
+    mpeak.cpp
     nbp.cpp
     nob.cpp
     osctrl.cpp
     patchpanel.cpp
+    phrot.cpp
     resample.cpp
     resamplef.cpp
     rmatch.cpp
@@ -50,8 +58,12 @@ set(wdsp_SOURCES
     siphon.cpp
     slew.cpp
     snba.cpp
+    snotch.cpp
+    speak.cpp
+    sphp.cpp
     ssql.cpp
     TXA.cpp
+    unit.cpp
     varsamp.cpp
     wcpAGC.cpp
 )
@@ -67,6 +79,8 @@ set(wdsp_HEADERS
     bldr.hpp
     bps.hpp
     bpsnba.hpp
+    bqbp.hpp
+    bqlp.hpp
     bufferprobe.hpp
     calculus.hpp
     cblock.hpp
@@ -74,10 +88,14 @@ set(wdsp_HEADERS
     cfir.hpp
     comm.hpp
     compress.hpp
+    dbqbp.hpp
+    dbqlp.hpp
     delay.hpp
+    dsphp.hpp
     emnr.hpp
     emph.hpp
-    eq.hpp
+    emphp.hpp
+    eqp.hpp
     fcurve.hpp
     fir.hpp
     fircore.hpp
@@ -89,15 +107,17 @@ set(wdsp_HEADERS
     gain.hpp
     gen.hpp
     icfir.hpp
-    iir.hpp
+    # iir.hpp
     iqc.hpp
     lmath.hpp
     meter.hpp
     meterlog10.hpp
+    mpeak.hpp
     nbp.hpp
     nob.hpp
     osctrl.hpp
     patchpanel.hpp
+    phrot.hpp
     resample.hpp
     resamplef.hpp
     rmatch.hpp
@@ -107,8 +127,12 @@ set(wdsp_HEADERS
     siphon.hpp
     slew.hpp
     snba.hpp
+    snotch.hpp
+    speak.hpp
+    sphp.hpp
     ssql.hpp
     TXA.hpp
+    unit.hpp
     varsamp.hpp
     wcpAGC.hpp
 )

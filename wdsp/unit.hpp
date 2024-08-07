@@ -42,6 +42,25 @@ public:
     int dsp_insize;             // size (complex samples) of the input buffer
     int dsp_outsize;            // size (complex samples) of the output buffer
     int state;                  // 0 for unit OFF; 1 for unit ON
+
+    Unit(
+        int _in_rate,                // input samplerate
+        int _out_rate,               // output samplerate
+        int _dsp_rate,               // sample rate for mainstream dsp processing
+        int _dsp_size                // number complex samples processed per buffer in mainstream dsp processing
+    );
+    ~Unit();
+
+    void flushBuffers();
+    void setBuffersInputSamplerate(int _in_rate);
+    void setBuffersOutputSamplerate(int _out_rate);
+    void setBuffersDSPSamplerate(int _dsp_rate);
+    void setBuffersDSPBuffsize(int _dsp_size);
+
+protected:
+    float* inbuff;
+    float* midbuff;
+    float* outbuff;
 };
 
 } // namespace WDSP

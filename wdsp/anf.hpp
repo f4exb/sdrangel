@@ -28,13 +28,11 @@ warren@wpratt.com
 #ifndef wdsp_anf_h
 #define wdsp_anf_h
 
+#include <array>
+
 #include "export.h"
 
-#define ANF_DLINE_SIZE 2048
-
 namespace WDSP {
-
-class RXA;
 
 class WDSP_API ANF
 {
@@ -50,8 +48,9 @@ public:
     int delay;
     double two_mu;
     double gamma;
-    double d [ANF_DLINE_SIZE];
-    double w [ANF_DLINE_SIZE];
+    static const int ANF_DLINE_SIZE = 2048;
+    std::array<double, ANF_DLINE_SIZE> d;
+    std::array<double, ANF_DLINE_SIZE> w;
     int in_idx;
     double lidx;
     double lidx_min;
@@ -61,7 +60,7 @@ public:
     double lincr;
     double ldecr;
 
-    static ANF* create_anf(
+    ANF(
         int run,
         int position,
         int buff_size,
@@ -80,20 +79,21 @@ public:
         double lincr,
         double ldecr
     );
-    static void destroy_anf (ANF *a);
-    static void flush_anf (ANF *a);
-    static void xanf (ANF *a, int position);
-    static void setBuffers_anf (ANF *a, float* in, float* out);
-    static void setSamplerate_anf (ANF *a, int rate);
-    static void setSize_anf (ANF *a, int size);
-    // RXA Properties
-    static void SetANFRun (RXA& rxa, int setit);
-    static void SetANFVals (RXA& rxa, int taps, int delay, double gain, double leakage);
-    static void SetANFTaps (RXA& rxa, int taps);
-    static void SetANFDelay (RXA& rxa, int delay);
-    static void SetANFGain (RXA& rxa, double gain);
-    static void SetANFLeakage (RXA& rxa, double leakage);
-    static void SetANFPosition (RXA& rxa, int position);
+    ANF(const ANF&) = delete;
+    ANF& operator=(const ANF& other) = delete;
+    ~ANF() = default;
+
+    void flush();
+    void execute(int position);
+    void setBuffers(float* in, float* out);
+    void setSamplerate(int rate);
+    void setSize(int size);
+    // Public Properties
+    void setVals(int taps, int delay, double gain, double leakage);
+    void setTaps(int taps);
+    void setDelay(int delay);
+    void setGain(double gain);
+    void setLeakage(double leakage);
 };
 
 } // namespace WDSP

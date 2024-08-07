@@ -28,6 +28,7 @@ obj-x86_64-linux-gnu/*
 **/venv*/
 *.pyc
 .DS_Store
+.sonarlint
 
 ### Go ###
 # Binaries for programs and plugins

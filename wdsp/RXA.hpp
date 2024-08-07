@@ -28,6 +28,8 @@ warren@wpratt.com
 #ifndef wdsp_rxa_h
 #define wdsp_rxa_h
 
+#include <array>
+
 #include "comm.hpp"
 #include "unit.hpp"
 #include "export.h"
@@ -37,7 +39,6 @@ namespace WDSP {
 class METER;
 class SHIFT;
 class RESAMPLE;
-class GEN;
 class BANDPASS;
 class BPS;
 class NOTCHDB;
@@ -96,157 +97,101 @@ public:
     };
 
     int mode;
-    double meter[RXA_METERTYPE_LAST];
+    std::array<double, RXA_METERTYPE_LAST>  meter;
 
-    struct
-    {
-        METER *p;
-    } smeter, adcmeter, agcmeter;
-    struct
-    {
-        SHIFT *p;
-    } shift;
-    struct
-    {
-        RESAMPLE *p;
-    } rsmpin, rsmpout;
-    struct
-    {
-        GEN *p;
-    } gen0;
-    struct
-    {
-        BANDPASS *p;
-    } bp1;
-    struct
-    {
-        BPS *p;
-    } bps1;
-    struct
-    {
-        NOTCHDB *p;
-    } ndb;
-    struct
-    {
-        NBP *p;
-    } nbp0;
-    struct
-    {
-        BPSNBA *p;
-    } bpsnba;
-    struct
-    {
-        SNBA *p;
-    } snba;
-    struct
-    {
-        SENDER *p;
-    } sender;
-    struct
-    {
-        AMSQ *p;
-    } amsq;
-    struct
-    {
-        AMD *p;
-    } amd;
-    struct
-    {
-        FMD *p;
-    } fmd;
-    struct
-    {
-        FMSQ *p;
-    } fmsq;
-    struct
-    {
-        EQP *p;
-    } eqp;
-    struct
-    {
-        ANF *p;
-    } anf;
-    struct
-    {
-        ANR *p;
-    } anr;
-    struct
-    {
-        EMNR *p;
-    } emnr;
-    struct
-    {
-        WCPAGC *p;
-    } agc;
-    struct
-    {
-        SPEAK *p;
-    } speak;
-    struct
-    {
-        MPEAK *p;
-    } mpeak;
-    struct
-    {
-        PANEL *p;
-    } panel;
-    struct
-    {
-        SIPHON *p;
-    } sip1;
-    struct
-    {
-        CBL *p;
-    } cbl;
-    struct
-    {
-        SSQL *p;
-    } ssql;
-    struct
-    {
-        ANB *p;
-    } anb;
-    struct
-    {
-        NOB *p;
-    } nob;
+    ANB *anb;
+    NOB *nob;
+    SHIFT *shift;
+    RESAMPLE *rsmpin;
+    METER *adcmeter;
+    NOTCHDB *ndb;
+    NBP *nbp0;
+    BPSNBA *bpsnba;
+    SENDER *sender;
+    METER *smeter;
+    AMSQ *amsq;
+    AMD *amd;
+    FMD *fmd;
+    FMSQ *fmsq;
+    SNBA *snba;
+    EQP *eqp;
+    ANF *anf;
+    ANR *anr;
+    EMNR *emnr;
+    WCPAGC *agc;
+    METER *agcmeter;
+    BANDPASS *bp1;
+    SIPHON *sip1;
+    CBL *cbl;
+    SPEAK *speak;
+    MPEAK *mpeak;
+    SSQL *ssql;
+    PANEL *panel;
+    RESAMPLE *rsmpout;
 
-    static RXA* create_rxa (
+    RXA(
         int in_rate,                // input samplerate
         int out_rate,               // output samplerate
         int dsp_rate,               // sample rate for mainstream dsp processing
         int dsp_size                // number complex samples processed per buffer in mainstream dsp processing
     );
-    static void destroy_rxa (RXA *rxa);
-    static void flush_rxa (RXA *rxa);
-    static void xrxa (RXA *rxa);
-    int get_insize() const { return dsp_insize; }
-    int get_outsize() const { return dsp_outsize; }
-    float *get_inbuff() { return inbuff; }
-    float *get_outbuff() { return outbuff; }
+    RXA(const RXA&) = delete;
+    RXA& operator=(const RXA& other) = delete;
+    virtual ~RXA();
+
+    void flush();
+    void execute();
+    void setInputSamplerate(int _in_rate);
+    void setOutputSamplerate(int _out_rate);
+    void setDSPSamplerate(int _dsp_rate);
+    void setDSPBuffsize(int _dsp_size);
+    int get_insize() const { return Unit::dsp_insize; }
+    int get_outsize() const { return Unit::dsp_outsize; }
+    float *get_inbuff() { return Unit::inbuff; }
+    float *get_outbuff() { return Unit::outbuff; }
     void setSpectrumProbe(BufferProbe *_spectrumProbe);
-    static void setInputSamplerate (RXA *rxa, int in_rate);
-    static void setOutputSamplerate (RXA *rxa, int out_rate);
-    static void setDSPSamplerate (RXA *rxa, int dsp_rate);
-    static void setDSPBuffsize (RXA *rxa, int dsp_size);
 
     // RXA Properties
-    static void SetMode (RXA& rxa, int mode);
-    static void ResCheck (RXA& rxa);
-    static void bp1Check (RXA& rxa, int amd_run, int snba_run, int emnr_run, int anf_run, int anr_run);
-    static void bp1Set (RXA& rxa);
-    static void bpsnbaCheck (RXA& rxa, int mode, int notch_run);
-    static void bpsnbaSet (RXA& rxa);
+    void setMode (int mode);
+    void resCheck ();
+    void bp1Check (int amd_run, int snba_run, int emnr_run, int anf_run, int anr_run);
+    void bp1Set ();
+    void bpsnbaCheck (int mode, int notch_run);
+    void bpsnbaSet ();
+    // NOTCHDB, NBP, SNBA
+    void updateNBPFiltersLightWeight();
+    void updateNBPFilters();
+    int nbpAddNotch(int notch, double fcenter, double fwidth, int active);
+    int nbpGetNotch(int notch, double* fcenter, double* fwidth, int* active) const;
+    int nbpDeleteNotch(int notch);
+    int nbpEditNotch(int notch, double fcenter, double fwidth, int active);
+    void nbpGetNumNotches(int* nnotches) const;
+    void nbpSetTuneFrequency(double tunefreq);
+    void nbpSetShiftFrequency(double shift);
+    void nbpSetNotchesRun(int run);
+    void nbpSetWindow(int wintype);
+    void nbpSetAutoIncrease(int autoincr);
+    // AMD
+    void setAMDRun(int run);
+    // SNBA
+    void setSNBARun(int run);
+    // ANF
+    void setANFRun(int run);
+    void setANFPosition(int position);
+    // ANR
+    void setANRRun(int run);
+    void setANRPosition(int position);
+    // EMNR
+    void setEMNRRun(int run);
+    void setEMNRPosition(int position);
+    // WCPAGC
+    void setAGCThresh(double thresh, double size, double rate);
+    void getAGCThresh(double *thresh, double size, double rate) const;
 
     // Collectives
-    static void SetPassband (RXA& rxa, float f_low, float f_high);
-    static void SetNC (RXA& rxa, int nc);
-    static void SetMP (RXA& rxa, int mp);
-
-private:
-    float* inbuff;
-    float* midbuff;
-    float* outbuff;
+    void setPassband(float f_low, float f_high);
+    void setNC(int nc);
+    void setMP(int mp);
 };
 
 } // namespace WDSP

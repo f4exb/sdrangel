@@ -25,226 +25,202 @@ warren@wpratt.com
 
 */
 
+#include <cstdio>
+
 #include "comm.hpp"
 #include "amsq.hpp"
-#include "RXA.hpp"
-#include "TXA.hpp"
 
 namespace WDSP {
 
-void AMSQ::compute_slews(AMSQ *a)
+void AMSQ::compute_slews()
 {
-    int i;
-    double delta, theta;
-    delta = PI / (double)a->ntup;
+    double delta;
+    double theta;
+    delta = PI / (double)ntup;
     theta = 0.0;
 
-    for (i = 0; i <= a->ntup; i++)
+    for (int i = 0; i <= ntup; i++)
     {
-        a->cup[i] = a->muted_gain + (1.0 - a->muted_gain) * 0.5 * (1.0 - cos (theta));
+        cup[i] = muted_gain + (1.0 - muted_gain) * 0.5 * (1.0 - cos (theta));
         theta += delta;
     }
 
-    delta = PI / (double)a->ntdown;
+    delta = PI / (double)ntdown;
     theta = 0.0;
 
-    for (i = 0; i <= a->ntdown; i++)
+    for (int i = 0; i <= ntdown; i++)
     {
-        a->cdown[i] = a->muted_gain + (1.0 - a->muted_gain) * 0.5 * (1.0 + cos (theta));
+        cdown[i] = muted_gain + (1.0 - muted_gain) * 0.5 * (1.0 + cos (theta));
         theta += delta;
     }
 }
 
-void AMSQ::calc_amsq(AMSQ *a)
+void AMSQ::calc()
 {
     // signal averaging
-    a->trigsig = new float[a->size * 2];
-    a->avm = exp(-1.0 / (a->rate * a->avtau));
-    a->onem_avm = 1.0 - a->avm;
-    a->avsig = 0.0;
+    trigsig.resize(size * 2);
+    avm = exp(-1.0 / (rate * avtau));
+    onem_avm = 1.0 - avm;
+    avsig = 0.0;
     // level change
-    a->ntup = (int)(a->tup * a->rate);
-    a->ntdown = (int)(a->tdown * a->rate);
-    a->cup = new double[(a->ntup + 1) * 2]; // (float *)malloc0((a->ntup + 1) * sizeof(float));
-    a->cdown = new double[(a->ntdown + 1) * 2]; // (float *)malloc0((a->ntdown + 1) * sizeof(float));
-    compute_slews(a);
+    ntup = (int)(tup * rate);
+    ntdown = (int)(tdown * rate);
+    cup.resize((ntup + 1) * 2);
+    cdown.resize((ntdown + 1) * 2);
+    compute_slews();
     // control
-    a->state = 0;
+    state = AMSQState::MUTED;
 }
 
-void AMSQ::decalc_amsq (AMSQ *a)
+AMSQ::AMSQ (
+    int _run,
+    int _size,
+    float* _in,
+    float* _out,
+    float* _trigger,
+    int _rate,
+    double _avtau,
+    double _tup,
+    double _tdown,
+    double _tail_thresh,
+    double _unmute_thresh,
+    double _min_tail,
+    double _max_tail,
+    double _muted_gain
+) :
+    run(_run),
+    size(_size),
+    in(_in),
+    out(_out),
+    trigger(_trigger),
+    rate((double) _rate),
+    avtau(_avtau),
+    tup(_tup),
+    tdown(_tdown),
+    tail_thresh(_tail_thresh),
+    unmute_thresh(_unmute_thresh),
+    min_tail(_min_tail),
+    max_tail(_max_tail),
+    muted_gain(_muted_gain)
 {
-    delete[] a->cdown;
-    delete[] a->cup;
-    delete[] a->trigsig;
+    calc();
 }
 
-AMSQ* AMSQ::create_amsq (
-    int run,
-    int size,
-    float* in,
-    float* out,
-    float* trigger,
-    int rate,
-    double avtau,
-    double tup,
-    double tdown,
-    double tail_thresh,
-    double unmute_thresh,
-    double min_tail,
-    double max_tail,
-    double muted_gain
-)
+void AMSQ::flush()
 {
-    AMSQ *a = new AMSQ;
-    a->run = run;
-    a->size = size;
-    a->in = in;
-    a->out = out;
-    a->rate = (float)rate;
-    a->muted_gain = muted_gain;
-    a->trigger = trigger;
-    a->avtau = avtau;
-    a->tup = tup;
-    a->tdown = tdown;
-    a->tail_thresh = tail_thresh;
-    a->unmute_thresh = unmute_thresh;
-    a->min_tail = min_tail;
-    a->max_tail = max_tail;
-    calc_amsq (a);
-    return a;
+    std::fill(trigsig.begin(), trigsig.end(), 0);
+    avsig = 0.0;
+    state = AMSQState::MUTED;
 }
 
-void AMSQ::destroy_amsq (AMSQ *a)
+void AMSQ::execute()
 {
-    decalc_amsq (a);
-    delete a;
-}
-
-void AMSQ::flush_amsq (AMSQ*a)
-{
-    std::fill(a->trigsig, a->trigsig + a->size * 2, 0);
-    a->avsig = 0.0;
-    a->state = 0;
-}
-
-enum _amsqstate
-{
-    MUTED,
-    INCREASE,
-    UNMUTED,
-    TAIL,
-    DECREASE
-};
-
-void AMSQ::xamsq (AMSQ *a)
-{
-    if (a->run)
+    if (run)
     {
-        int i;
-        double sig, siglimit;
+        double sig;
+        double siglimit;
 
-        for (i = 0; i < a->size; i++)
+        for (int i = 0; i < size; i++)
         {
-            sig = sqrt (a->trigsig[2 * i + 0] * a->trigsig[2 * i + 0] + a->trigsig[2 * i + 1] * a->trigsig[2 * i + 1]);
-            a->avsig = a->avm * a->avsig + a->onem_avm * sig;
+            double trigr = trigsig[2 * i + 0];
+            double trigi = trigsig[2 * i + 1];
+            sig = sqrt (trigr*trigr + trigi*trigi);
+            avsig = avm * avsig + onem_avm * sig;
 
-            switch (a->state)
+            switch (state)
             {
-            case MUTED:
-                if (a->avsig > a->unmute_thresh)
+            case AMSQState::MUTED:
+                if (avsig > unmute_thresh)
                 {
-                    a->state = INCREASE;
-                    a->count = a->ntup;
+                    state = AMSQState::INCREASE;
+                    count = ntup;
                 }
 
-                a->out[2 * i + 0] = a->muted_gain * a->in[2 * i + 0];
-                a->out[2 * i + 1] = a->muted_gain * a->in[2 * i + 1];
+                out[2 * i + 0] = (float) (muted_gain * in[2 * i + 0]);
+                out[2 * i + 1] = (float) (muted_gain * in[2 * i + 1]);
 
                 break;
 
-            case INCREASE:
-                a->out[2 * i + 0] = a->in[2 * i + 0] * a->cup[a->ntup - a->count];
-                a->out[2 * i + 1] = a->in[2 * i + 1] * a->cup[a->ntup - a->count];
+            case AMSQState::INCREASE:
+                out[2 * i + 0] = (float) (in[2 * i + 0] * cup[ntup - count]);
+                out[2 * i + 1] = (float) (in[2 * i + 1] * cup[ntup - count]);
 
-                if (a->count-- == 0)
-                    a->state = UNMUTED;
+                if (count-- == 0)
+                    state = AMSQState::UNMUTED;
 
                 break;
 
-            case UNMUTED:
-                if (a->avsig < a->tail_thresh)
+            case AMSQState::UNMUTED:
+                if (avsig < tail_thresh)
                 {
-                    a->state = TAIL;
+                    state = AMSQState::TAIL;
 
-                    if ((siglimit = a->avsig) > 1.0)
+                    if ((siglimit = avsig) > 1.0)
                         siglimit = 1.0;
 
-                    a->count = (int)((a->min_tail + (a->max_tail - a->min_tail) * (1.0 - siglimit)) * a->rate);
+                    count = (int)((min_tail + (max_tail - min_tail) * (1.0 - siglimit)) * rate);
                 }
 
-                a->out[2 * i + 0] = a->in[2 * i + 0];
-                a->out[2 * i + 1] = a->in[2 * i + 1];
+                out[2 * i + 0] = in[2 * i + 0];
+                out[2 * i + 1] = in[2 * i + 1];
 
                 break;
 
-            case TAIL:
-                a->out[2 * i + 0] = a->in[2 * i + 0];
-                a->out[2 * i + 1] = a->in[2 * i + 1];
+            case AMSQState::TAIL:
+                out[2 * i + 0] = in[2 * i + 0];
+                out[2 * i + 1] = in[2 * i + 1];
 
-                if (a->avsig > a->unmute_thresh)
+                if (avsig > unmute_thresh)
                 {
-                    a->state = UNMUTED;
+                    state = AMSQState::UNMUTED;
                 }
-                else if (a->count-- == 0)
+                else if (count-- == 0)
                 {
-                    a->state = DECREASE;
-                    a->count = a->ntdown;
+                    state = AMSQState::DECREASE;
+                    count = ntdown;
                 }
 
                 break;
 
-            case DECREASE:
-                a->out[2 * i + 0] = a->in[2 * i + 0] * a->cdown[a->ntdown - a->count];
-                a->out[2 * i + 1] = a->in[2 * i + 1] * a->cdown[a->ntdown - a->count];
+            case AMSQState::DECREASE:
+                out[2 * i + 0] = (float) (in[2 * i + 0] * cdown[ntdown - count]);
+                out[2 * i + 1] = (float) (in[2 * i + 1] * cdown[ntdown - count]);
 
-                if (a->count-- == 0)
-                    a->state = MUTED;
+                if (count-- == 0)
+                    state = AMSQState::MUTED;
 
                 break;
             }
         }
     }
-    else if (a->in != a->out)
+    else if (in != out)
     {
-        std::copy( a->in,  a->in + a->size * 2, a->out);
+        std::copy( in,  in + size * 2, out);
     }
 }
 
-void AMSQ::xamsqcap (AMSQ *a)
+void AMSQ::xcap()
 {
-    std::copy(a->trigger, a->trigger + a->size * 2, a->trigsig);
+    std::copy(trigger, trigger + size * 2, trigsig.begin());
 }
 
-void AMSQ::setBuffers_amsq (AMSQ *a, float* in, float* out, float* trigger)
+void AMSQ::setBuffers(float* _in, float* _out, float* _trigger)
 {
-    a->in = in;
-    a->out = out;
-    a->trigger = trigger;
+    in = _in;
+    out = _out;
+    trigger = _trigger;
 }
 
-void AMSQ::setSamplerate_amsq (AMSQ *a, int rate)
+void AMSQ::setSamplerate(int _rate)
 {
-    decalc_amsq (a);
-    a->rate = rate;
-    calc_amsq (a);
+    rate = _rate;
+    calc();
 }
 
-void AMSQ::setSize_amsq (AMSQ *a, int size)
+void AMSQ::setSize(int _size)
 {
-    decalc_amsq (a);
-    a->size = size;
-    calc_amsq (a);
+    size = _size;
+    calc();
 }
 
 /********************************************************************************************************
@@ -253,53 +229,30 @@ void AMSQ::setSize_amsq (AMSQ *a, int size)
 *                                                                                                       *
 ********************************************************************************************************/
 
-void AMSQ::SetAMSQRun (RXA& rxa, int run)
+void AMSQ::setRun(int _run)
 {
-    rxa.amsq.p->run = run;
+    run = _run;
 }
 
-void AMSQ::SetAMSQThreshold (RXA& rxa, double threshold)
+void AMSQ::setThreshold(double _threshold)
 {
-    double thresh = pow (10.0, threshold / 20.0);
-    rxa.amsq.p->tail_thresh = 0.9 * thresh;
-    rxa.amsq.p->unmute_thresh =  thresh;
+    double thresh = pow (10.0, _threshold / 20.0);
+    tail_thresh = 0.9 * thresh;
+    unmute_thresh =  thresh;
 }
 
-void AMSQ::SetAMSQMaxTail (RXA& rxa, double tail)
+void AMSQ::setMaxTail(double _tail)
 {
-    AMSQ *a;
-    a = rxa.amsq.p;
+    if (_tail < min_tail)
+        _tail = min_tail;
 
-    if (tail < a->min_tail)
-        tail = a->min_tail;
-
-    a->max_tail = tail;
+    max_tail = _tail;
 }
 
-/********************************************************************************************************
-*                                                                                                       *
-*                                           TXA Properties                                              *
-*                                                                                                       *
-********************************************************************************************************/
-
-void AMSQ::SetAMSQRun (TXA& txa, int run)
-{
-    txa.amsq.p->run = run;
-}
-
-void AMSQ::SetAMSQMutedGain (TXA& txa, double dBlevel)
+void AMSQ::setMutedGain(double dBlevel)
 {   // dBlevel is negative
-    AMSQ *a;
-    a = txa.amsq.p;
-    a->muted_gain = pow (10.0, dBlevel / 20.0);
-    compute_slews(a);
-}
-
-void AMSQ::SetAMSQThreshold (TXA& txa, double threshold)
-{
-    double thresh = pow (10.0, threshold / 20.0);
-    txa.amsq.p->tail_thresh = 0.9 * thresh;
-    txa.amsq.p->unmute_thresh =  thresh;
+    muted_gain = pow (10.0, dBlevel / 20.0);
+    compute_slews();
 }
 
 } // namespace WDSP

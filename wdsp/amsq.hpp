@@ -27,77 +27,84 @@ warren@wpratt.com
 #ifndef _amsq_h
 #define _amsq_h
 
+#include <vector>
+
 #include "export.h"
 
 namespace WDSP {
 
-class RXA;
-class TXA;
-
 class WDSP_API AMSQ
 {
 public:
-    int run;                            // 0 if squelch system is OFF; 1 if it's ON
-    int size;                           // size of input/output buffers
+    enum class AMSQState
+    {
+        MUTED,
+        INCREASE,
+        UNMUTED,
+        TAIL,
+        DECREASE
+    };
+
+    int run;                           // 0 if squelch system is OFF; 1 if it's ON
+    int size;                          // size of input/output buffers
     float* in;                         // squelch input signal buffer
     float* out;                        // squelch output signal buffer
     float* trigger;                    // pointer to trigger data source
-    float* trigsig;                    // buffer containing trigger signal
-    double rate;                        // sample rate
-    double avtau;                       // time constant for averaging noise
+    std::vector<float> trigsig;        // buffer containing trigger signal
+    double rate;                       // sample rate
+    double avtau;                      // time constant for averaging noise
     double avm;
     double onem_avm;
     double avsig;
-    int state;                          // state machine control
+    AMSQState state;                   // state machine control
     int count;
     double tup;
     double tdown;
     int ntup;
     int ntdown;
-    double* cup;
-    double* cdown;
+    std::vector<double> cup;
+    std::vector<double> cdown;
     double tail_thresh;
     double unmute_thresh;
     double min_tail;
     double max_tail;
     double muted_gain;
 
-    static AMSQ* create_amsq (
-        int run,
-        int size,
-        float* in,
-        float* out,
-        float* trigger,
-        int rate,
-        double avtau,
-        double tup,
-        double tdown,
-        double tail_thresh,
-        double unmute_thresh,
-        double min_tail,
-        double max_tail,
-        double muted_gain
+    AMSQ (
+        int _run,
+        int _size,
+        float* _in,
+        float* _out,
+        float* _trigger,
+        int _rate,
+        double _avtau,
+        double _tup,
+        double _tdown,
+        double _tail_thresh,
+        double _unmute_thresh,
+        double _min_tail,
+        double _max_tail,
+        double _muted_gain
     );
-    static void destroy_amsq (AMSQ *a);
-    static void flush_amsq (AMSQ *a);
-    static void xamsq (AMSQ *a);
-    static void xamsqcap (AMSQ *a);
-    static void setBuffers_amsq (AMSQ *a, float* in, float* out, float* trigger);
-    static void setSamplerate_amsq (AMSQ *a, int rate);
-    static void setSize_amsq (AMSQ *a, int size);
+    AMSQ(const AMSQ&) = delete;
+    AMSQ& operator=(const AMSQ& other) = delete;
+    ~AMSQ() = default;
+
+    void flush();
+    void execute();
+    void xcap();
+    void setBuffers(float* in, float* out, float* trigger);
+    void setSamplerate(int rate);
+    void setSize(int size);
     // RXA Properties
-    static void SetAMSQRun (RXA& rxa, int run);
-    static void SetAMSQThreshold (RXA& rxa, double threshold);
-    static void SetAMSQMaxTail (RXA& rxa, double tail);
-    // TXA Properties
-    static void SetAMSQRun (TXA& txa, int run);
-    static void SetAMSQMutedGain (TXA& txa, double dBlevel);
-    static void SetAMSQThreshold (TXA& txa, double threshold);
+    void setRun(int run);
+    void setThreshold(double threshold);
+    void setMaxTail(double tail);
+    void setMutedGain(double dBlevel);
 
 private:
-    static void compute_slews(AMSQ *a);
-    static void calc_amsq(AMSQ *a);
-    static void decalc_amsq (AMSQ *a);
+    void compute_slews();
+    void calc();
 };
 
 } // namespace WDSP
