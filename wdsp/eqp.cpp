@@ -42,25 +42,34 @@ int EQP::fEQcompare (const void * a, const void * b)
         return 1;
 }
 
-float* EQP::eq_impulse (int N, int nfreqs, const float* F, const float* G, double samplerate, double scale, int ctfmode, int wintype)
+void EQP::eq_impulse (
+    std::vector<float>& impulse,
+    int N,
+    int _nfreqs,
+    const float* F,
+    const float* G,
+    double samplerate,
+    double scale,
+    int ctfmode,
+    int wintype
+)
 {
-    std::vector<float> fp(nfreqs + 2);
-    std::vector<float> gp(nfreqs + 2);
+    std::vector<float> fp(_nfreqs + 2);
+    std::vector<float> gp(_nfreqs + 2);
     std::vector<float> A(N / 2 + 1);
-    float* sary = new float[2 * nfreqs];
+    float* sary = new float[2 * _nfreqs];
 
     double gpreamp;
     double f;
     double frac;
-    float* impulse;
     int i;
     int j;
     int mid;
     fp[0] = 0.0;
-    fp[nfreqs + 1] = 1.0;
+    fp[_nfreqs + 1] = 1.0;
     gpreamp = G[0];
 
-    for (i = 1; i <= nfreqs; i++)
+    for (i = 1; i <= _nfreqs; i++)
     {
         fp[i] = (float) (2.0 * F[i] / samplerate);
 
@@ -73,22 +82,22 @@ float* EQP::eq_impulse (int N, int nfreqs, const float* F, const float* G, doubl
         gp[i] = G[i];
     }
 
-    for (i = 1, j = 0; i <= nfreqs; i++, j+=2)
+    for (i = 1, j = 0; i <= _nfreqs; i++, j+=2)
     {
         sary[j + 0] = fp[i];
         sary[j + 1] = gp[i];
     }
 
-    qsort (sary, nfreqs, 2 * sizeof (float), fEQcompare);
+    qsort (sary, _nfreqs, 2 * sizeof (float), fEQcompare);
 
-    for (i = 1, j = 0; i <= nfreqs; i++, j+=2)
+    for (i = 1, j = 0; i <= _nfreqs; i++, j+=2)
     {
         fp[i] = sary[j + 0];
         gp[i] = sary[j + 1];
     }
 
     gp[0] = gp[1];
-    gp[nfreqs + 1] = gp[nfreqs];
+    gp[_nfreqs + 1] = gp[_nfreqs];
     mid = N / 2;
     j = 0;
 
@@ -98,7 +107,7 @@ float* EQP::eq_impulse (int N, int nfreqs, const float* F, const float* G, doubl
         {
             f = (double)i / (double)mid;
 
-            while ((f > fp[j + 1]) && (j < nfreqs))
+            while ((f > fp[j + 1]) && (j < _nfreqs))
                 j++;
 
             frac = (f - fp[j]) / (fp[j + 1] - fp[j]);
@@ -111,7 +120,7 @@ float* EQP::eq_impulse (int N, int nfreqs, const float* F, const float* G, doubl
         {
             f = ((double)i + 0.5) / (double)mid;
 
-            while ((f > fp[j + 1]) && (j < nfreqs))
+            while ((f > fp[j + 1]) && (j < _nfreqs))
                 j++;
 
             frac = (f - fp[j]) / (fp[j + 1] - fp[j]);
@@ -132,7 +141,7 @@ float* EQP::eq_impulse (int N, int nfreqs, const float* F, const float* G, doubl
         if (N & 1)
         {
             low = (int)(fp[1] * mid);
-            high = (int)(fp[nfreqs] * mid + 0.5);
+            high = (int)(fp[_nfreqs] * mid + 0.5);
             lowmag = A[low];
             highmag = A[high];
             flow4 = pow((double)low / (double)mid, 4.0);
@@ -160,7 +169,7 @@ float* EQP::eq_impulse (int N, int nfreqs, const float* F, const float* G, doubl
         else
         {
             low = (int)(fp[1] * mid - 0.5);
-            high = (int)(fp[nfreqs] * mid - 0.5);
+            high = (int)(fp[_nfreqs] * mid - 0.5);
             lowmag = A[low];
             highmag = A[high];
             flow4 = pow((double)low / (double)mid, 4.0);
@@ -187,13 +196,14 @@ float* EQP::eq_impulse (int N, int nfreqs, const float* F, const float* G, doubl
         }
     }
 
+    impulse.resize(2 * N);
+
     if (N & 1)
-        impulse = FIR::fir_fsamp_odd(N, A.data(), 1, 1.0, wintype);
+        FIR::fir_fsamp_odd(impulse, N, A.data(), 1, 1.0, wintype);
     else
-        impulse = FIR::fir_fsamp(N, A.data(), 1, 1.0, wintype);
+        FIR::fir_fsamp(impulse, N, A.data(), 1, 1.0, wintype);
 
     delete[] sary;
-    return impulse;
 }
 
 /********************************************************************************************************
@@ -218,7 +228,7 @@ EQP::EQP(
 )
 {
     // NOTE:  'nc' must be >= 'size'
-    float* impulse;
+    std::vector<float> impulse;
     run = _run;
     size = _size;
     nc = _nc;
@@ -233,9 +243,8 @@ EQP::EQP(
     ctfmode = _ctfmode;
     wintype = _wintype;
     samplerate = (double) _samplerate;
-    impulse = eq_impulse (nc, nfreqs, F.data(), G.data(), samplerate, 1.0 / (2.0 * size), ctfmode, wintype);
-    fircore = new FIRCORE(size, in, out, nc, mp, impulse);
-    delete[] impulse;
+    eq_impulse (impulse, nc, nfreqs, F.data(), G.data(), samplerate, 1.0 / (2.0 * size), ctfmode, wintype);
+    fircore = new FIRCORE(size, in, out, nc, mp, impulse.data());
 }
 
 EQP::~EQP()
@@ -265,21 +274,19 @@ void EQP::setBuffers(float* _in, float* _out)
 
 void EQP::setSamplerate(int rate)
 {
-    float* impulse;
+    std::vector<float> impulse;
     samplerate = rate;
-    impulse = eq_impulse (nc, nfreqs, F.data(), G.data(), samplerate, 1.0 / (2.0 * size), ctfmode, wintype);
-    fircore->setImpulse(impulse, 1);
-    delete[] impulse;
+    eq_impulse (impulse, nc, nfreqs, F.data(), G.data(), samplerate, 1.0 / (2.0 * size), ctfmode, wintype);
+    fircore->setImpulse(impulse.data(), 1);
 }
 
 void EQP::setSize(int _size)
 {
-    float* impulse;
+    std::vector<float> impulse;
     size = _size;
     fircore->setSize(size);
-    impulse = eq_impulse (nc, nfreqs, F.data(), G.data(), samplerate, 1.0 / (2.0 * size), ctfmode, wintype);
-    fircore->setImpulse(impulse, 1);
-    delete[] impulse;
+    eq_impulse (impulse, nc, nfreqs, F.data(), G.data(), samplerate, 1.0 / (2.0 * size), ctfmode, wintype);
+    fircore->setImpulse(impulse.data(), 1);
 }
 
 /********************************************************************************************************
@@ -295,14 +302,13 @@ void EQP::setRun(int _run)
 
 void EQP::setNC(int _nc)
 {
-    float* impulse;
+    std::vector<float> impulse;
 
     if (nc != _nc)
     {
         nc = _nc;
-        impulse = eq_impulse (nc, nfreqs, F.data(), G.data(), samplerate, 1.0 / (2.0 * size), ctfmode, wintype);
-        fircore->setNc(nc, impulse);
-        delete[] impulse;
+        eq_impulse (impulse, nc, nfreqs, F.data(), G.data(), samplerate, 1.0 / (2.0 * size), ctfmode, wintype);
+        fircore->setNc(nc, impulse.data());
     }
 }
 
@@ -317,38 +323,35 @@ void EQP::setMP(int _mp)
 
 void EQP::setProfile(int _nfreqs, const float* _F, const float* _G)
 {
-    float* impulse;
+    std::vector<float> impulse;
     nfreqs = _nfreqs;
     F.resize(nfreqs + 1);
     G.resize(nfreqs + 1);
     std::copy(_F, _F + (_nfreqs + 1), F.begin());
     std::copy(_G, _G + (_nfreqs + 1), G.begin());
-    impulse = eq_impulse (nc, nfreqs, F.data(), G.data(), samplerate, 1.0 / (2.0 * size), ctfmode, wintype);
-    fircore->setImpulse(impulse, 1);
-    delete[] impulse;
+    eq_impulse (impulse, nc, nfreqs, F.data(), G.data(), samplerate, 1.0 / (2.0 * size), ctfmode, wintype);
+    fircore->setImpulse(impulse.data(), 1);
 }
 
 void EQP::setCtfmode(int _mode)
 {
-    float* impulse;
+    std::vector<float> impulse;
     ctfmode = _mode;
-    impulse = eq_impulse (nc, nfreqs, F.data(), G.data(), samplerate, 1.0 / (2.0 * size), ctfmode, wintype);
-    fircore->setImpulse(impulse, 1);
-    delete[] impulse;
+    eq_impulse (impulse, nc, nfreqs, F.data(), G.data(), samplerate, 1.0 / (2.0 * size), ctfmode, wintype);
+    fircore->setImpulse(impulse.data(), 1);
 }
 
 void EQP::setWintype(int _wintype)
 {
-    float* impulse;
+    std::vector<float> impulse;
     wintype = _wintype;
-    impulse = eq_impulse (nc, nfreqs, F.data(), G.data(), samplerate, 1.0 / (2.0 * size), ctfmode, wintype);
-    fircore->setImpulse(impulse, 1);
-    delete[] impulse;
+    eq_impulse (impulse, nc, nfreqs, F.data(), G.data(), samplerate, 1.0 / (2.0 * size), ctfmode, wintype);
+    fircore->setImpulse(impulse.data(), 1);
 }
 
 void EQP::setGrphEQ(const int *rxeq)
 {   // three band equalizer (legacy compatibility)
-    float* impulse;
+    std::vector<float> impulse;
     nfreqs = 4;
     F.resize(nfreqs + 1);
     G.resize(nfreqs + 1);
@@ -362,14 +365,13 @@ void EQP::setGrphEQ(const int *rxeq)
     G[3] = (float)rxeq[2];
     G[4] = (float)rxeq[3];
     ctfmode = 0;
-    impulse = eq_impulse (nc, nfreqs, F.data(), G.data(), samplerate, 1.0 / (2.0 * size), ctfmode, wintype);
-    fircore->setImpulse(impulse, 1);
-    delete[] impulse;
+    eq_impulse (impulse, nc, nfreqs, F.data(), G.data(), samplerate, 1.0 / (2.0 * size), ctfmode, wintype);
+    fircore->setImpulse(impulse.data(), 1);
 }
 
 void EQP::setGrphEQ10(const int *rxeq)
 {   // ten band equalizer (legacy compatibility)
-    float* impulse;
+    std::vector<float> impulse;
     nfreqs = 10;
     F.resize(nfreqs + 1);
     G.resize(nfreqs + 1);
@@ -386,9 +388,8 @@ void EQP::setGrphEQ10(const int *rxeq)
     for (int i = 0; i <= nfreqs; i++)
         G[i] = (float)rxeq[i];
     ctfmode = 0;
-    impulse = eq_impulse (nc, nfreqs, F.data(), G.data(), samplerate, 1.0 / (2.0 * size), ctfmode, wintype);
-    fircore->setImpulse(impulse, 1);
-    delete[] impulse;
+    eq_impulse (impulse, nc, nfreqs, F.data(), G.data(), samplerate, 1.0 / (2.0 * size), ctfmode, wintype);
+    fircore->setImpulse(impulse.data(), 1);
 }
 
 } // namespace WDSP

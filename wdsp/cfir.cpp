@@ -34,11 +34,10 @@ namespace WDSP {
 
 void CFIR::calc()
 {
-    float* impulse;
+    std::vector<float> impulse;
     scale = 1.0 / (float)(2 * size);
-    impulse = cfir_impulse (nc, DD, R, Pairs, runrate, cicrate, cutoff, xtype, xbw, 1, scale, wintype);
-    p = new FIRCORE(size, in, out, nc, mp, impulse);
-    delete[] impulse;
+    cfir_impulse (impulse, nc, DD, R, Pairs, runrate, cicrate, cutoff, xtype, xbw, 1, scale, wintype);
+    p = new FIRCORE(size, in, out, nc, mp, impulse.data());
 }
 
 void CFIR::decalc()
@@ -142,7 +141,8 @@ void CFIR::setOutRate(int rate)
     calc();
 }
 
-float* CFIR::cfir_impulse (
+void CFIR::cfir_impulse (
+    std::vector<float>& impulse,
     int _N,
     int _DD,
     int _R,
@@ -175,7 +175,6 @@ float* CFIR::cfir_impulse (
     double ri;
     double mag = 0;
     double fn;
-    float* impulse;
     std::vector<float> A(_N);
     double ft = _cutoff / _cicrate;                                       // normalized cutoff frequency
     int u_samps = (_N + 1) / 2;                                          // number of unique samples,  OK for odd or even N
@@ -254,8 +253,8 @@ float* CFIR::cfir_impulse (
     else
         for (i = u_samps, j = 1; i < _N; i++, j++)
             A[i] = A[u_samps - j];
-    impulse = FIR::fir_fsamp (_N, A.data(), _rtype, 1.0, _wintype);
-    return impulse;
+    impulse.resize(2 * _N);
+    FIR::fir_fsamp (impulse, _N, A.data(), _rtype, 1.0, _wintype);
 }
 
 /********************************************************************************************************

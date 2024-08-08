@@ -79,7 +79,8 @@ public:
     static void setSamplerate_icfir (ICFIR *a, int rate);
     static void setSize_icfir (ICFIR *a, int size);
     static void setOutRate_icfir (ICFIR *a, int rate);
-    static float* icfir_impulse (
+    static void icfir_impulse (
+        std::vector<float>& impulse,
         int N,
         int DD,
         int R,

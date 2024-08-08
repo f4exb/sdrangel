@@ -34,11 +34,10 @@ namespace WDSP {
 
 void ICFIR::calc_icfir (ICFIR *a)
 {
-    float* impulse;
+    std::vector<float> impulse;
     a->scale = 1.0f / (float)(2 * a->size);
-    impulse = icfir_impulse (a->nc, a->DD, a->R, a->Pairs, (float) a->runrate, (float) a->cicrate, a->cutoff, a->xtype, a->xbw, 1, a->scale, a->wintype);
-    a->p = new FIRCORE(a->size, a->in, a->out, a->nc, a->mp, impulse);
-    delete[] (impulse);
+    icfir_impulse (impulse, a->nc, a->DD, a->R, a->Pairs, (float) a->runrate, (float) a->cicrate, a->cutoff, a->xtype, a->xbw, 1, a->scale, a->wintype);
+    a->p = new FIRCORE(a->size, a->in, a->out, a->nc, a->mp, impulse.data());
 }
 
 void ICFIR::decalc_icfir (ICFIR *a)
@@ -145,7 +144,8 @@ void ICFIR::setOutRate_icfir (ICFIR *a, int rate)
     calc_icfir (a);
 }
 
-float* ICFIR::icfir_impulse (
+void ICFIR::icfir_impulse (
+    std::vector<float>& impulse,
     int N,
     int DD,
     int R,
@@ -178,7 +178,6 @@ float* ICFIR::icfir_impulse (
     float ri;
     float mag;
     float fn;
-    float* impulse;
     auto* A = new float[N];
     float ft = cutoff / cicrate;                                       // normalized cutoff frequency
     int u_samps = (N + 1) / 2;                                          // number of unique samples,  OK for odd or even N
@@ -239,10 +238,10 @@ float* ICFIR::icfir_impulse (
     else
         for (i = u_samps, j = 1; i < N; i++, j++)
             A[i] = A[u_samps - j];
-    impulse = FIR::fir_fsamp (N, A, rtype, 1.0, wintype);
+    impulse.resize(2 * N);
+    FIR::fir_fsamp (impulse, N, A, rtype, 1.0, wintype);
     delete[] (A);
     delete[] xistion;
-    return impulse;
 }
 
 

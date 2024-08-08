@@ -28,6 +28,8 @@ warren@wpratt.com
 #ifndef wdsp_cfir_h
 #define wdsp_cfir_h
 
+#include <vector>
+
 #include "export.h"
 
 namespace WDSP {
@@ -83,7 +85,8 @@ public:
     void setSamplerate(int rate);
     void setSize(int size);
     void setOutRate(int rate);
-    static float* cfir_impulse (
+    static void cfir_impulse (
+        std::vector<float>& impulse,
         int N,
         int DD,
         int R,

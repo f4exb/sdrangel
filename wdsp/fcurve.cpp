@@ -31,12 +31,11 @@ warren@wpratt.com
 
 namespace WDSP {
 
-float* FCurve::fc_impulse (int nc, float f0, float f1, float g0, float, int curve, float samplerate, float scale, int ctfmode, int wintype)
+void FCurve::fc_impulse (std::vector<float>& impulse, int nc, float f0, float f1, float g0, float, int curve, float samplerate, float scale, int ctfmode, int wintype)
 {
     float* A  = new float[nc / 2 + 1]; // (float *) malloc0 ((nc / 2 + 1) * sizeof (float));
     int i;
     float fn, f;
-    float* impulse;
     int mid = nc / 2;
     float g0_lin = pow(10.0, g0 / 20.0);
     if (nc & 1)
@@ -140,21 +139,21 @@ float* FCurve::fc_impulse (int nc, float f0, float f1, float g0, float, int curv
             }
         }
     }
+
     if (nc & 1)
-        impulse = FIR::fir_fsamp_odd(nc, A, 1, 1.0, wintype);
+        FIR::fir_fsamp_odd(impulse, nc, A, 1, 1.0, wintype);
     else
-        impulse = FIR::fir_fsamp(nc, A, 1, 1.0, wintype);
+        FIR::fir_fsamp(impulse, nc, A, 1, 1.0, wintype);
     // print_impulse ("emph.txt", size + 1, impulse, 1, 0);
     delete[] (A);
-    return impulse;
 }
 
 // generate mask for Overlap-Save Filter
 float* FCurve::fc_mults (int size, float f0, float f1, float g0, float g1, int curve, float samplerate, float scale, int ctfmode, int wintype)
 {
-    float* impulse = fc_impulse (size + 1, f0, f1, g0, g1, curve, samplerate, scale, ctfmode, wintype);
-    float* mults = FIR::fftcv_mults(2 * size, impulse);
-    delete[] (impulse);
+    std::vector<float> impulse(2 * (size + 1));
+    fc_impulse (impulse, size + 1, f0, f1, g0, g1, curve, samplerate, scale, ctfmode, wintype);
+    float* mults = FIR::fftcv_mults(2 * size, impulse.data());
     return mults;
 }
 

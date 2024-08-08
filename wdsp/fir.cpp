@@ -95,17 +95,16 @@ float* FIR::get_fsamp_window(int N, int wintype)
     return window;
 }
 
-float* FIR::fir_fsamp_odd (int N, const float* A, int rtype, double scale, int wintype)
+void FIR::fir_fsamp_odd (std::vector<float>& c_impulse, int N, const float* A, int rtype, double scale, int wintype)
 {
     int mid = (N - 1) / 2;
     double mag;
     double phs;
     std::vector<float> fcoef(N * 2);
-    auto *c_impulse = new float[N * 2];
     fftwf_plan ptmp = fftwf_plan_dft_1d(
         N,
         (fftwf_complex *)fcoef.data(),
-        (fftwf_complex *)c_impulse,
+        (fftwf_complex *)c_impulse.data(),
         FFTW_BACKWARD,
         FFTW_PATIENT
     );
@@ -142,13 +141,11 @@ float* FIR::fir_fsamp_odd (int N, const float* A, int rtype, double scale, int w
         break;
     }
     delete[] window;
-    return c_impulse;
 }
 
-float* FIR::fir_fsamp (int N, const float* A, int rtype, double scale, int wintype)
+void FIR::fir_fsamp (std::vector<float>& c_impulse, int N, const float* A, int rtype, double scale, int wintype)
 {
     double sum;
-    auto c_impulse = new float[N * 2];
 
     if (N & 1)
     {
@@ -202,7 +199,6 @@ float* FIR::fir_fsamp (int N, const float* A, int rtype, double scale, int winty
         break;
     }
     delete[] window;
-    return c_impulse;
 }
 
 float* FIR::fir_bandpass (int N, double f_low, double f_high, double samplerate, int wintype, int rtype, double scale)

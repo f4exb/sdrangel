@@ -44,12 +44,12 @@ namespace WDSP {
 
 void EQ::eq_mults (std::vector<float>& mults, int size, int nfreqs, float* F, float* G, float samplerate, float scale, int ctfmode, int wintype)
 {
-    float* impulse = EQP::eq_impulse (size + 1, nfreqs, F, G, samplerate, scale, ctfmode, wintype);
-    float* _mults = FIR::fftcv_mults(2 * size, impulse);
+    std::vector<float> impulse;
+    EQP::eq_impulse (impulse, size + 1, nfreqs, F, G, samplerate, scale, ctfmode, wintype);
+    float* _mults = FIR::fftcv_mults(2 * size, impulse.data());
     mults.resize(2 * size * 2);
     std::copy(_mults, _mults + 2*size*2, mults.begin());
     delete[] _mults;
-    delete[] impulse;
 }
 
 void EQ::calc()

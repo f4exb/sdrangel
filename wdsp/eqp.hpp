@@ -92,7 +92,17 @@ public:
     void setGrphEQ(const int *rxeq);
     void setGrphEQ10(const int *rxeq);
 
-    static float* eq_impulse (int N, int nfreqs, const float* F, const float* G, double samplerate, double scale, int ctfmode, int wintype);
+    static void eq_impulse (
+        std::vector<float>& impulse,
+        int N,
+        int nfreqs,
+        const float* F,
+        const float* G,
+        double samplerate,
+        double scale,
+        int ctfmode,
+        int wintype
+    );
 
 private:
     static int fEQcompare (const void * a, const void * b);

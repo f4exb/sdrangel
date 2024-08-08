@@ -53,7 +53,6 @@ EMPHP::EMPHP(
     double _f_high
 )
 {
-    float* impulse;
     run = _run;
     position = _position;
     size = _size;
@@ -65,7 +64,9 @@ EMPHP::EMPHP(
     ctype = _ctype;
     f_low = _f_low;
     f_high = _f_high;
-    impulse = FCurve::fc_impulse (
+    std::vector<float> impulse(2 * nc);
+    FCurve::fc_impulse (
+        impulse,
         nc,
         f_low,
         f_high,
@@ -76,8 +77,7 @@ EMPHP::EMPHP(
         1.0 / (2.0 * size),
         0, 0
     );
-    p = new FIRCORE(size, in, out, nc, mp, impulse);
-    delete[] (impulse);
+    p = new FIRCORE(size, in, out, nc, mp, impulse.data());
 }
 
 EMPHP::~EMPHP()
@@ -107,9 +107,10 @@ void EMPHP::setBuffers(float* _in, float* _out)
 
 void EMPHP::setSamplerate(int _rate)
 {
-    float* impulse;
     rate = _rate;
-    impulse = FCurve::fc_impulse (
+    std::vector<float> impulse(2 * nc);
+    FCurve::fc_impulse (
+        impulse,
         nc,
         f_low,
         f_high,
@@ -120,16 +121,16 @@ void EMPHP::setSamplerate(int _rate)
         1.0 / (2.0 * size),
         0, 0
     );
-    p->setImpulse(impulse, 1);
-    delete[] (impulse);
+    p->setImpulse(impulse.data(), 1);
 }
 
 void EMPHP::setSize(int _size)
 {
-    float* impulse;
     size = _size;
     p->setSize(size);
-    impulse = FCurve::fc_impulse (
+    std::vector<float> impulse(2 * nc);
+    FCurve::fc_impulse (
+        impulse,
         nc,
         f_low,
         f_high,
@@ -141,8 +142,7 @@ void EMPHP::setSize(int _size)
         0,
         0
     );
-    p->setImpulse(impulse, 1);
-    delete[] (impulse);
+    p->setImpulse(impulse.data(), 1);
 }
 
 /********************************************************************************************************
@@ -167,12 +167,12 @@ void EMPHP::setMP(int _mp)
 
 void EMPHP::setNC(int _nc)
 {
-    float* impulse;
-
     if (nc != _nc)
     {
         nc = _nc;
-        impulse = FCurve::fc_impulse (
+        std::vector<float> impulse(2 * nc);
+        FCurve::fc_impulse (
+            impulse,
             nc,
             f_low,
             f_high,
@@ -184,20 +184,19 @@ void EMPHP::setNC(int _nc)
             0,
             0
         );
-        p->setNc(nc, impulse);
-        delete[] (impulse);
+        p->setNc(nc, impulse.data());
     }
 }
 
 void EMPHP::setFreqs(double low, double high)
 {
-    float* impulse;
-
     if (f_low != low || f_high != high)
     {
         f_low = low;
         f_high = high;
-        impulse = FCurve::fc_impulse (
+        std::vector<float> impulse(2 * nc);
+        FCurve::fc_impulse (
+            impulse,
             nc,
             f_low,
             f_high,
@@ -209,8 +208,7 @@ void EMPHP::setFreqs(double low, double high)
             0,
             0
         );
-        p->setImpulse(impulse, 1);
-        delete[] (impulse);
+        p->setImpulse(impulse.data(), 1);
     }
 }
 
