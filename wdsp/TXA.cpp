@@ -1040,9 +1040,8 @@ void TXA::SetBPSFreqs (TXA& txa, double _f_low, double _f_high)
     {
         a->f_low = _f_low;
         a->f_high = _f_high;
-        delete[] (a->mults);
         impulse = FIR::fir_bandpass(a->size + 1, _f_low, _f_high, a->samplerate, a->wintype, 1, 1.0 / (float)(2 * a->size));
-        a->mults = FIR::fftcv_mults (2 * a->size, impulse);
+        FIR::fftcv_mults (a->mults, 2 * a->size, impulse);
         delete[] (impulse);
     }
 
@@ -1052,9 +1051,8 @@ void TXA::SetBPSFreqs (TXA& txa, double _f_low, double _f_high)
     {
         a->f_low = _f_low;
         a->f_high = _f_high;
-        delete[] (a->mults);
         impulse = FIR::fir_bandpass(a->size + 1, _f_low, _f_high, a->samplerate, a->wintype, 1, 1.0 / (float)(2 * a->size));
-        a->mults = FIR::fftcv_mults (2 * a->size, impulse);
+        FIR::fftcv_mults (a->mults, 2 * a->size, impulse);
         delete[] (impulse);
     }
 
@@ -1064,9 +1062,8 @@ void TXA::SetBPSFreqs (TXA& txa, double _f_low, double _f_high)
     {
         a->f_low = _f_low;
         a->f_high = _f_high;
-        delete[] (a->mults);
         impulse = FIR::fir_bandpass(a->size + 1, _f_low, _f_high, a->samplerate, a->wintype, 1, 1.0 / (float)(2 * a->size));
-        a->mults = FIR::fftcv_mults (2 * a->size, impulse);
+        FIR::fftcv_mults (a->mults, 2 * a->size, impulse);
         delete[] (impulse);
     }
 }
@@ -1080,9 +1077,8 @@ void TXA::SetBPSWindow (TXA& txa, int _wintype)
     if (a->wintype != _wintype)
     {
         a->wintype = _wintype;
-        delete[] (a->mults);
         impulse = FIR::fir_bandpass(a->size + 1, a->f_low, a->f_high, a->samplerate, a->wintype, 1, 1.0 / (float)(2 * a->size));
-        a->mults = FIR::fftcv_mults (2 * a->size, impulse);
+        FIR::fftcv_mults (a->mults, 2 * a->size, impulse);
         delete[] (impulse);
     }
 
@@ -1091,9 +1087,8 @@ void TXA::SetBPSWindow (TXA& txa, int _wintype)
     if (a->wintype != _wintype)
     {
         a->wintype = _wintype;
-        delete[] (a->mults);
         impulse = FIR::fir_bandpass(a->size + 1, a->f_low, a->f_high, a->samplerate, a->wintype, 1, 1.0 / (float)(2 * a->size));
-        a->mults = FIR::fftcv_mults (2 * a->size, impulse);
+        FIR::fftcv_mults (a->mults, 2 * a->size, impulse);
         delete[] impulse;
     }
 
@@ -1102,9 +1097,8 @@ void TXA::SetBPSWindow (TXA& txa, int _wintype)
     if (a->wintype != _wintype)
     {
         a->wintype = _wintype;
-        delete[] (a->mults);
         impulse = FIR::fir_bandpass (a->size + 1, a->f_low, a->f_high, a->samplerate, a->wintype, 1, 1.0 / (float)(2 * a->size));
-        a->mults = FIR::fftcv_mults (2 * a->size, impulse);
+        FIR::fftcv_mults (a->mults, 2 * a->size, impulse);
         delete[] impulse;
     }
 }

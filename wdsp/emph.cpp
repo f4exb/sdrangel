@@ -43,7 +43,8 @@ void EMPH::calc()
 {
     infilt = new float[2 * size * 2];
     product = new float[2 * size * 2];
-    mults = FCurve::fc_mults(
+    FCurve::fc_mults(
+        mults,
         size,
         f_low,
         f_high,
@@ -63,7 +64,6 @@ void EMPH::decalc()
 {
     fftwf_destroy_plan(CRev);
     fftwf_destroy_plan(CFor);
-    delete[] mults;
     delete[] product;
     delete[] infilt;
 }

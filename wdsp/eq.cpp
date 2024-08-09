@@ -46,10 +46,10 @@ void EQ::eq_mults (std::vector<float>& mults, int size, int nfreqs, float* F, fl
 {
     std::vector<float> impulse;
     EQP::eq_impulse (impulse, size + 1, nfreqs, F, G, samplerate, scale, ctfmode, wintype);
-    float* _mults = FIR::fftcv_mults(2 * size, impulse.data());
+    std::vector<float> _mults;
+    FIR::fftcv_mults(_mults, 2 * size, impulse.data());
     mults.resize(2 * size * 2);
-    std::copy(_mults, _mults + 2*size*2, mults.begin());
-    delete[] _mults;
+    std::copy(_mults.begin(), _mults.end(), mults.begin());
 }
 
 void EQ::calc()

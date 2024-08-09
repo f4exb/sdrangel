@@ -34,6 +34,8 @@ warren@wpratt.com
 #ifndef _emph_h
 #define _emph_h
 
+#include <vector>
+
 #include "fftw3.h"
 #include "export.h"
 
@@ -52,7 +54,7 @@ public:
     double f_high;
     float* infilt;
     float* product;
-    float* mults;
+    std::vector<float> mults;
     double rate;
     fftwf_plan CFor;
     fftwf_plan CRev;

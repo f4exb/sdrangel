@@ -35,14 +35,14 @@ warren@pratt.one
 
 namespace WDSP {
 
-float* FIR::fftcv_mults (int NM, float* c_impulse)
+void FIR::fftcv_mults (std::vector<float>& mults, int NM, float* c_impulse)
 {
-    auto mults        = new float[NM * 2];
+    mults.resize(NM * 2);
     std::vector<float> cfft_impulse(NM * 2);
     fftwf_plan ptmp = fftwf_plan_dft_1d(
         NM,
         (fftwf_complex *) cfft_impulse.data(),
-        (fftwf_complex *) mults,
+        (fftwf_complex *) mults.data(),
         FFTW_FORWARD,
         FFTW_PATIENT
     );
@@ -51,7 +51,6 @@ float* FIR::fftcv_mults (int NM, float* c_impulse)
     std::copy(c_impulse, c_impulse + (NM / 2 + 1) * 2, &(cfft_impulse[NM - 2]));
     fftwf_execute (ptmp);
     fftwf_destroy_plan (ptmp);
-    return mults;
 }
 
 float* FIR::get_fsamp_window(int N, int wintype)

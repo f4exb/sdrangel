@@ -56,7 +56,7 @@ public:
     double f_high;
     std::vector<float> infilt;
     std::vector<float> product;
-    float* mults;
+    std::vector<float> mults;
     double samplerate;
     int wintype;
     double gain;
