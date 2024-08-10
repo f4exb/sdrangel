@@ -159,11 +159,11 @@ FMD::FMD(
         0,
         0
     );
-    pde = new FIRCORE(size, audio.data(), out, nc_de, mp_de, impulse.data());
+    pde = new FIRCORE(size, audio.data(), out, mp_de, impulse);
     // audio filter
     std::vector<float> impulseb;
     FIR::fir_bandpass(impulseb, nc_aud, 0.8 * f_low, 1.1 * f_high, rate, 0, 1, afgain / (2.0 * size));
-    paud = new FIRCORE(size, out, out, nc_aud, mp_aud, impulseb.data());
+    paud = new FIRCORE(size, out, out, mp_aud, impulseb);
 }
 
 FMD::~FMD()
@@ -266,11 +266,11 @@ void FMD::setSamplerate(int _rate)
         0,
         0
     );
-    pde->setImpulse(impulse.data(), 1);
+    pde->setImpulse(impulse, 1);
     // audio filter
     std::vector<float> impulseb;
     FIR::fir_bandpass(impulseb, nc_aud, 0.8 * f_low, 1.1 * f_high, rate, 0, 1, afgain / (2.0 * size));
-    paud->setImpulse(impulseb.data(), 1);
+    paud->setImpulse(impulseb, 1);
     plim->setSamplerate((int) rate);
 }
 
@@ -296,12 +296,12 @@ void FMD::setSize(int _size)
         0,
         0
     );
-    pde = new FIRCORE(size, audio.data(), out, nc_de, mp_de, impulse.data());
+    pde = new FIRCORE(size, audio.data(), out, mp_de, impulse);
     // audio filter
     delete paud;
     std::vector<float> impulseb;
     FIR::fir_bandpass(impulseb, nc_aud, 0.8 * f_low, 1.1 * f_high, rate, 0, 1, afgain / (2.0 * size));
-    paud = new FIRCORE(size, out, out, nc_aud, mp_aud, impulseb.data());
+    paud = new FIRCORE(size, out, out, mp_aud, impulseb);
     plim->setSize(size);
 }
 
@@ -348,7 +348,7 @@ void FMD::setNCde(int nc)
             0,
             0
         );
-        pde->setNc(nc_de, impulse.data());
+        pde->setNc(impulse);
     }
 }
 
@@ -368,7 +368,7 @@ void FMD::setNCaud(int nc)
         nc_aud = nc;
         std::vector<float> impulse;
         FIR::fir_bandpass(impulse, nc_aud, 0.8 * f_low, 1.1 * f_high, rate, 0, 1, afgain / (2.0 * size));
-        paud->setNc(nc_aud, impulse.data());
+        paud->setNc(impulse);
     }
 }
 
@@ -421,11 +421,11 @@ void FMD::setAFFilter(double low, double high)
             0,
             0
         );
-        pde->setImpulse(impulse.data(), 1);
+        pde->setImpulse(impulse, 1);
         // audio filter
         std::vector<float> impulseb;
         FIR::fir_bandpass (impulseb, nc_aud, 0.8 * f_low, 1.1 * f_high, rate, 0, 1, afgain / (2.0 * size));
-        paud->setImpulse(impulseb.data(), 1);
+        paud->setImpulse(impulseb, 1);
     }
 }
 

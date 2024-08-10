@@ -333,7 +333,7 @@ void NBP::calc_lightweight()
                 gain / (float)(2 * size),
                 wintype
             );
-            fircore->setImpulse(impulse.data(), 1);
+            fircore->setImpulse(impulse, 1);
             // print_impulse ("nbp.txt", size + 1, impulse, 1, 0);
         }
         hadnotch = havnotch;
@@ -438,7 +438,7 @@ NBP::NBP(
     bplow.resize(maxpb);
     bphigh.resize(maxpb);
     calc_impulse ();
-    fircore = new FIRCORE(size, in, out, nc, mp, impulse.data());
+    fircore = new FIRCORE(size, in, out, mp, impulse);
 }
 
 NBP::~NBP()
@@ -470,7 +470,7 @@ void NBP::setSamplerate(int _rate)
 {
     rate = _rate;
     calc_impulse ();
-    fircore->setImpulse(impulse.data(), 1);
+    fircore->setImpulse(impulse, 1);
 }
 
 void NBP::setSize(int _size)
@@ -479,13 +479,13 @@ void NBP::setSize(int _size)
     size = _size;
     fircore->setSize(size);
     calc_impulse ();
-    fircore->setImpulse(impulse.data(), 1);
+    fircore->setImpulse(impulse, 1);
 }
 
 void NBP::setNc()
 {
     calc_impulse();
-    fircore->setNc(nc, impulse.data());
+    fircore->setNc(impulse);
 }
 
 void NBP::setMp()
@@ -513,7 +513,7 @@ void NBP::SetFreqs(double _flow, double _fhigh)
         flow = _flow;
         fhigh = _fhigh;
         calc_impulse();
-        fircore->setImpulse(impulse.data(), 1);
+        fircore->setImpulse(impulse, 1);
     }
 }
 

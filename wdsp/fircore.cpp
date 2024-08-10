@@ -99,7 +99,7 @@ void FIRCORE::calc(int _flip)
     if (mp)
         FIR::mp_imp (nc, impulse, imp, 16, 0);
     else
-        std::copy(impulse.begin(), impulse.begin() + nc * 2, imp.begin());
+        std::copy(impulse.begin(), impulse.end(), imp.begin());
 
     for (int i = 0; i < nfor; i++)
     {
@@ -122,20 +122,19 @@ FIRCORE::FIRCORE(
     int _size,
     float* _in,
     float* _out,
-    int _nc,
     int _mp,
-    const float* _impulse
+    const std::vector<float>& _impulse
 )
 {
     size = _size;
     in = _in;
     out = _out;
-    nc = _nc;
+    nc = (int) (_impulse.size() / 2);
     mp = _mp;
     plan();
-    impulse.resize(nc * 2);
-    imp.resize(nc * 2);
-    std::copy(_impulse, _impulse + nc * 2, impulse.begin());
+    impulse.resize(_impulse.size());
+    imp.resize(_impulse.size());
+    std::copy(_impulse.begin(), _impulse.end(), impulse.begin());
     calc(1);
 }
 
@@ -204,21 +203,29 @@ void FIRCORE::setSize(int _size)
     calc(1);
 }
 
-void FIRCORE::setImpulse(const float* _impulse, int _update)
+void FIRCORE::setImpulse(const std::vector<float>& _impulse, int _update)
 {
-    std::copy(_impulse, _impulse + nc * 2, impulse.begin());
-    calc(_update);
+    auto imp_nc = (int) (_impulse.size() / 2);
+
+    if (imp_nc == nc) // to be on the safe side but setNc would be called if impulse size changes
+    {
+        std::copy(_impulse.begin(), _impulse.end(), impulse.begin());
+        calc(_update);
+    }
+    else{
+        setNc(_impulse);
+    }
 }
 
-void FIRCORE::setNc(int _nc, const float* _impulse)
+void FIRCORE::setNc(const std::vector<float>& _impulse)
 {
     // because of FFT planning, this will probably cause a glitch in audio if done during dataflow
     deplan();
-    nc = _nc;
+    nc = (int) (_impulse.size() / 2);
     plan();
     imp.resize(nc * 2);
     impulse.resize(nc * 2);
-    std::copy(_impulse, _impulse + nc * 2, impulse.begin());
+    std::copy(_impulse.begin(), _impulse.end(), impulse.begin());
     calc(1);
 }
 

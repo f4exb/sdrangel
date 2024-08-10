@@ -49,7 +49,7 @@ void FMSQ::calc()
     G[2] = 3.0;
     G[3] = (float) (+20.0 * log10(20000.0 / *pllpole));
     EQP::eq_impulse (impulse, nc, 3, F.data(), G.data(), rate, 1.0 / (2.0 * size), 0, 0);
-    p = new FIRCORE(size, trigger, noise.data(), nc, mp, impulse.data());
+    p = new FIRCORE(size, trigger, noise.data(), mp, impulse);
     // noise averaging
     avm = exp(-1.0 / (rate * avtau));
     onem_avm = 1.0 - avm;
@@ -291,7 +291,7 @@ void FMSQ::setNC(int _nc)
     {
         nc = _nc;
         EQP::eq_impulse (impulse, nc, 3, F.data(), G.data(), rate, 1.0 / (2.0 * size), 0, 0);
-        p->setNc(nc, impulse.data());
+        p->setNc(impulse);
     }
 }
 

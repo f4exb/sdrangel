@@ -37,7 +37,7 @@ void ICFIR::calc_icfir (ICFIR *a)
     std::vector<float> impulse;
     a->scale = 1.0f / (float)(2 * a->size);
     icfir_impulse (impulse, a->nc, a->DD, a->R, a->Pairs, (float) a->runrate, (float) a->cicrate, a->cutoff, a->xtype, a->xbw, 1, a->scale, a->wintype);
-    a->p = new FIRCORE(a->size, a->in, a->out, a->nc, a->mp, impulse.data());
+    a->p = new FIRCORE(a->size, a->in, a->out, a->mp, impulse);
 }
 
 void ICFIR::decalc_icfir (ICFIR *a)

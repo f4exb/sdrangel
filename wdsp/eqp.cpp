@@ -244,7 +244,7 @@ EQP::EQP(
     wintype = _wintype;
     samplerate = (double) _samplerate;
     eq_impulse (impulse, nc, nfreqs, F.data(), G.data(), samplerate, 1.0 / (2.0 * size), ctfmode, wintype);
-    fircore = new FIRCORE(size, in, out, nc, mp, impulse.data());
+    fircore = new FIRCORE(size, in, out, mp, impulse);
 }
 
 EQP::~EQP()
@@ -277,7 +277,7 @@ void EQP::setSamplerate(int rate)
     std::vector<float> impulse;
     samplerate = rate;
     eq_impulse (impulse, nc, nfreqs, F.data(), G.data(), samplerate, 1.0 / (2.0 * size), ctfmode, wintype);
-    fircore->setImpulse(impulse.data(), 1);
+    fircore->setImpulse(impulse, 1);
 }
 
 void EQP::setSize(int _size)
@@ -286,7 +286,7 @@ void EQP::setSize(int _size)
     size = _size;
     fircore->setSize(size);
     eq_impulse (impulse, nc, nfreqs, F.data(), G.data(), samplerate, 1.0 / (2.0 * size), ctfmode, wintype);
-    fircore->setImpulse(impulse.data(), 1);
+    fircore->setImpulse(impulse, 1);
 }
 
 /********************************************************************************************************
@@ -308,7 +308,7 @@ void EQP::setNC(int _nc)
     {
         nc = _nc;
         eq_impulse (impulse, nc, nfreqs, F.data(), G.data(), samplerate, 1.0 / (2.0 * size), ctfmode, wintype);
-        fircore->setNc(nc, impulse.data());
+        fircore->setNc(impulse);
     }
 }
 
@@ -330,7 +330,7 @@ void EQP::setProfile(int _nfreqs, const float* _F, const float* _G)
     std::copy(_F, _F + (_nfreqs + 1), F.begin());
     std::copy(_G, _G + (_nfreqs + 1), G.begin());
     eq_impulse (impulse, nc, nfreqs, F.data(), G.data(), samplerate, 1.0 / (2.0 * size), ctfmode, wintype);
-    fircore->setImpulse(impulse.data(), 1);
+    fircore->setImpulse(impulse, 1);
 }
 
 void EQP::setCtfmode(int _mode)
@@ -338,7 +338,7 @@ void EQP::setCtfmode(int _mode)
     std::vector<float> impulse;
     ctfmode = _mode;
     eq_impulse (impulse, nc, nfreqs, F.data(), G.data(), samplerate, 1.0 / (2.0 * size), ctfmode, wintype);
-    fircore->setImpulse(impulse.data(), 1);
+    fircore->setImpulse(impulse, 1);
 }
 
 void EQP::setWintype(int _wintype)
@@ -346,7 +346,7 @@ void EQP::setWintype(int _wintype)
     std::vector<float> impulse;
     wintype = _wintype;
     eq_impulse (impulse, nc, nfreqs, F.data(), G.data(), samplerate, 1.0 / (2.0 * size), ctfmode, wintype);
-    fircore->setImpulse(impulse.data(), 1);
+    fircore->setImpulse(impulse, 1);
 }
 
 void EQP::setGrphEQ(const int *rxeq)
@@ -366,7 +366,7 @@ void EQP::setGrphEQ(const int *rxeq)
     G[4] = (float)rxeq[3];
     ctfmode = 0;
     eq_impulse (impulse, nc, nfreqs, F.data(), G.data(), samplerate, 1.0 / (2.0 * size), ctfmode, wintype);
-    fircore->setImpulse(impulse.data(), 1);
+    fircore->setImpulse(impulse, 1);
 }
 
 void EQP::setGrphEQ10(const int *rxeq)
@@ -389,7 +389,7 @@ void EQP::setGrphEQ10(const int *rxeq)
         G[i] = (float)rxeq[i];
     ctfmode = 0;
     eq_impulse (impulse, nc, nfreqs, F.data(), G.data(), samplerate, 1.0 / (2.0 * size), ctfmode, wintype);
-    fircore->setImpulse(impulse.data(), 1);
+    fircore->setImpulse(impulse, 1);
 }
 
 } // namespace WDSP

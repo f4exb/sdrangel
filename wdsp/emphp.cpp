@@ -68,16 +68,16 @@ EMPHP::EMPHP(
     FCurve::fc_impulse (
         impulse,
         nc,
-        f_low,
-        f_high,
-        -20.0 * log10(f_high / f_low),
+        (float) f_low,
+        (float) f_high,
+        (float) (-20.0 * log10(f_high / f_low)),
         0.0,
         ctype,
-        rate,
-        1.0 / (2.0 * size),
+        (float) rate,
+        (float) (1.0 / (2.0 * size)),
         0, 0
     );
-    p = new FIRCORE(size, in, out, nc, mp, impulse.data());
+    p = new FIRCORE(size, in, out, mp, impulse);
 }
 
 EMPHP::~EMPHP()
@@ -121,7 +121,7 @@ void EMPHP::setSamplerate(int _rate)
         1.0 / (2.0 * size),
         0, 0
     );
-    p->setImpulse(impulse.data(), 1);
+    p->setImpulse(impulse, 1);
 }
 
 void EMPHP::setSize(int _size)
@@ -142,7 +142,7 @@ void EMPHP::setSize(int _size)
         0,
         0
     );
-    p->setImpulse(impulse.data(), 1);
+    p->setImpulse(impulse, 1);
 }
 
 /********************************************************************************************************
@@ -174,17 +174,17 @@ void EMPHP::setNC(int _nc)
         FCurve::fc_impulse (
             impulse,
             nc,
-            f_low,
-            f_high,
-            -20.0 * log10(f_high / f_low),
+            (float) f_low,
+            (float) f_high,
+            (float) (-20.0 * log10(f_high / f_low)),
             0.0,
             ctype,
-            rate,
-            1.0 / (2.0 * size),
+            (float) rate,
+            (float) (1.0 / (2.0 * size)),
             0,
             0
         );
-        p->setNc(nc, impulse.data());
+        p->setNc(impulse);
     }
 }
 
@@ -208,7 +208,7 @@ void EMPHP::setFreqs(double low, double high)
             0,
             0
         );
-        p->setImpulse(impulse.data(), 1);
+        p->setImpulse(impulse, 1);
     }
 }
 

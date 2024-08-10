@@ -926,7 +926,7 @@ void TXA::setBandpassNC(int _nc)
             1,
             a->gain / (double)(2 * a->size)
         );
-        a->fircore->setNc(a->nc, impulse.data());
+        a->fircore->setNc(impulse);
     }
 
     a = bp1;
@@ -945,7 +945,7 @@ void TXA::setBandpassNC(int _nc)
             1,
             a->gain / (double)(2 * a->size)
         );
-        a->fircore->setNc(a->nc, impulse.data());
+        a->fircore->setNc(impulse);
     }
 
     a = bp2;
@@ -964,7 +964,7 @@ void TXA::setBandpassNC(int _nc)
             1,
             a->gain / (double)(2 * a->size)
         );
-        a->fircore->setNc(a->nc, impulse.data());
+        a->fircore->setNc(impulse);
     }
 }
 

@@ -1005,7 +1005,7 @@ void RXA::updateNBPFilters()
     if (a->fnfrun)
     {
         a->calc_impulse();
-        a->fircore->setImpulse(a->impulse.data(), 1);
+        a->fircore->setImpulse(a->impulse, 1);
     }
     if (b->bpsnba->fnfrun)
     {
@@ -1096,7 +1096,7 @@ void RXA::nbpSetNotchesRun(int _run)
         b->fnfrun = a->master_run;
         bpsnbaCheck(mode, _run);
         b->calc_impulse();                           // recalc nbp impulse response
-        b->fircore->setImpulse(b->impulse.data(), 0);       // calculate new filter masks
+        b->fircore->setImpulse(b->impulse, 0);       // calculate new filter masks
         bpsnbaSet();
         b->fircore->setUpdate();                       // apply new filter masks
     }
@@ -1113,7 +1113,7 @@ void RXA::nbpSetWindow(int _wintype)
     {
         a->wintype = _wintype;
         a->calc_impulse();
-        a->fircore->setImpulse(a->impulse.data(), 1);
+        a->fircore->setImpulse(a->impulse, 1);
     }
 
     if (b->wintype != _wintype)
@@ -1134,7 +1134,7 @@ void RXA::nbpSetAutoIncrease(int _autoincr)
     {
         a->autoincr = _autoincr;
         a->calc_impulse();
-        a->fircore->setImpulse(a->impulse.data(), 1);
+        a->fircore->setImpulse(a->impulse, 1);
     }
 
     if (b->autoincr != _autoincr)

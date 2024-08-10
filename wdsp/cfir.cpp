@@ -37,7 +37,7 @@ void CFIR::calc()
     std::vector<float> impulse;
     scale = 1.0 / (float)(2 * size);
     cfir_impulse (impulse, nc, DD, R, Pairs, runrate, cicrate, cutoff, xtype, xbw, 1, scale, wintype);
-    p = new FIRCORE(size, in, out, nc, mp, impulse.data());
+    p = new FIRCORE(size, in, out, mp, impulse);
 }
 
 void CFIR::decalc()
