@@ -82,7 +82,7 @@ EMPHP::EMPHP(
 
 EMPHP::~EMPHP()
 {
-    delete (p);
+    delete p;
 }
 
 void EMPHP::flush()
@@ -112,13 +112,13 @@ void EMPHP::setSamplerate(int _rate)
     FCurve::fc_impulse (
         impulse,
         nc,
-        f_low,
-        f_high,
-        -20.0 * log10(f_high / f_low),
+        (float) f_low,
+        (float) f_high,
+        (float) (-20.0 * log10(f_high / f_low)),
         0.0,
         ctype,
-        rate,
-        1.0 / (2.0 * size),
+        (float) rate,
+        (float) (1.0 / (2.0 * size)),
         0, 0
     );
     p->setImpulse(impulse, 1);
@@ -132,13 +132,13 @@ void EMPHP::setSize(int _size)
     FCurve::fc_impulse (
         impulse,
         nc,
-        f_low,
-        f_high,
-        -20.0 * log10(f_high / f_low),
+        (float) f_low,
+        (float) f_high,
+        (float) (-20.0 * log10(f_high / f_low)),
         0.0,
         ctype,
-        rate,
-        1.0 / (2.0 * size),
+        (float) rate,
+        (float) (1.0 / (2.0 * size)),
         0,
         0
     );
@@ -198,13 +198,13 @@ void EMPHP::setFreqs(double low, double high)
         FCurve::fc_impulse (
             impulse,
             nc,
-            f_low,
-            f_high,
-            -20.0 * log10(f_high / f_low),
+            (float) f_low,
+            (float) f_high,
+            (float) (-20.0 * log10(f_high / f_low)),
             0.0,
             ctype,
-            rate,
-            1.0 / (2.0 * size),
+            (float) rate,
+            (float) (1.0 / (2.0 * size)),
             0,
             0
         );

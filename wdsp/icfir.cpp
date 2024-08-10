@@ -25,6 +25,8 @@ warren@pratt.one
 
 */
 
+#include <vector>
+
 #include "comm.hpp"
 #include "fircore.hpp"
 #include "fir.hpp"
@@ -32,35 +34,35 @@ warren@pratt.one
 
 namespace WDSP {
 
-void ICFIR::calc_icfir (ICFIR *a)
+void ICFIR::calc()
 {
     std::vector<float> impulse;
-    a->scale = 1.0f / (float)(2 * a->size);
-    icfir_impulse (impulse, a->nc, a->DD, a->R, a->Pairs, (float) a->runrate, (float) a->cicrate, a->cutoff, a->xtype, a->xbw, 1, a->scale, a->wintype);
-    a->p = new FIRCORE(a->size, a->in, a->out, a->mp, impulse);
+    scale = 1.0f / (float)(2 * size);
+    icfir_impulse (impulse, nc, DD, R, Pairs, (float) runrate, (float) cicrate, cutoff, xtype, xbw, 1, scale, wintype);
+    p = new FIRCORE(size, in, out, mp, impulse);
 }
 
-void ICFIR::decalc_icfir (ICFIR *a)
+void ICFIR::decalc()
 {
-    delete (a->p);
+    delete p;
 }
 
-ICFIR* ICFIR::create_icfir (
-    int run,
-    int size,
-    int nc,
-    int mp,
-    float* in,
-    float* out,
-    int runrate,
-    int cicrate,
-    int DD,
-    int R,
-    int Pairs,
-    float cutoff,
-    int xtype,
-    float xbw,
-    int wintype
+ICFIR::ICFIR(
+    int _run,
+    int _size,
+    int _nc,
+    int _mp,
+    float* _in,
+    float* _out,
+    int _runrate,
+    int _cicrate,
+    int _DD,
+    int _R,
+    int _Pairs,
+    float _cutoff,
+    int _xtype,
+    float _xbw,
+    int _wintype
 )
 //  run:  0 - no action; 1 - operate
 //  size:  number of complex samples in an input buffer to the CFIR filter
@@ -76,88 +78,85 @@ ICFIR* ICFIR::create_icfir (
 //  xtype:  0 - fourth power transition; 1 - raised cosine transition
 //  xbw:  width of raised cosine transition
 {
-    ICFIR *a = new ICFIR;
-    a->run = run;
-    a->size = size;
-    a->nc = nc;
-    a->mp = mp;
-    a->in = in;
-    a->out = out;
-    a->runrate = runrate;
-    a->cicrate = cicrate;
-    a->DD = DD;
-    a->R = R;
-    a->Pairs = Pairs;
-    a->cutoff = cutoff;
-    a->xtype = xtype;
-    a->xbw = xbw;
-    a->wintype = wintype;
-    calc_icfir (a);
-    return a;
+    run = _run;
+    size = _size;
+    nc = _nc;
+    mp = _mp;
+    in = _in;
+    out = _out;
+    runrate = _runrate;
+    cicrate = _cicrate;
+    DD = _DD;
+    R = _R;
+    Pairs = _Pairs;
+    cutoff = _cutoff;
+    xtype = _xtype;
+    xbw = _xbw;
+    wintype = _wintype;
+    calc();
 }
 
-void ICFIR::destroy_icfir (ICFIR *a)
+ICFIR::~ICFIR()
 {
-    decalc_icfir (a);
-    delete[] (a);
+    decalc();
 }
 
-void ICFIR::flush_icfir (ICFIR *a)
+void ICFIR::flush()
 {
-    a->p->flush();
+    p->flush();
 }
 
-void ICFIR::xicfir (ICFIR *a)
+void ICFIR::execute()
 {
-    if (a->run)
-        a->p->execute();
-    else if (a->in != a->out)
-        std::copy( a->in,  a->in + a->size * 2, a->out);
+    if (run)
+        p->execute();
+    else if (in != out)
+        std::copy( in,  in + size * 2, out);
 }
 
-void ICFIR::setBuffers_icfir (ICFIR *a, float* in, float* out)
+void ICFIR::setBuffers(float* _in, float* _out)
 {
-    decalc_icfir (a);
-    a->in = in;
-    a->out = out;
-    calc_icfir (a);
+    decalc();
+    in = _in;
+    out = _out;
+    calc();
 }
 
-void ICFIR::setSamplerate_icfir (ICFIR *a, int rate)
+void ICFIR::setSamplerate(int _rate)
 {
-    decalc_icfir (a);
-    a->runrate = rate;
-    calc_icfir (a);
+    decalc();
+    runrate = _rate;
+    calc();
 }
 
-void ICFIR::setSize_icfir (ICFIR *a, int size)
+void ICFIR::setSize(int _size)
 {
-    decalc_icfir (a);
-    a->size = size;
-    calc_icfir (a);
+    decalc();
+    size = _size;
+    calc();
 }
 
-void ICFIR::setOutRate_icfir (ICFIR *a, int rate)
+void ICFIR::setOutRate(int _rate)
 {
-    decalc_icfir (a);
-    a->cicrate = rate;
-    calc_icfir (a);
+    decalc();
+    cicrate = _rate;
+    calc();
 }
 
 void ICFIR::icfir_impulse (
-    std::vector<float>& impulse,
-    int N,
-    int DD,
-    int R,
-    int Pairs,
-    float runrate,
-    float cicrate,
-    float cutoff,
-    int xtype,
-    float xbw,
-    int rtype,
-    float scale,
-    int wintype
+    std::vector<float>& _impulse,
+    int _N,
+    int _DD,
+    int _R,
+    int _Pairs,
+    float _runrate,
+    float _cicrate,
+    float _cutoff,
+    int _xtype,
+    float _xbw,
+    int _rtype,
+    float _scale,
+    int _wintype
 )
 {
     // N:       number of impulse response samples
@@ -173,75 +172,73 @@ void ICFIR::icfir_impulse (
     // scale:   scale factor to be applied to the output
     int i;
     int j;
-    float tmp;
-    float local_scale;
-    float ri;
-    float mag;
-    float fn;
-    auto* A = new float[N];
-    float ft = cutoff / cicrate;                                       // normalized cutoff frequency
-    int u_samps = (N + 1) / 2;                                          // number of unique samples,  OK for odd or even N
-    int c_samps = (int)(cutoff / runrate * N) + (N + 1) / 2 - N / 2;    // number of unique samples within bandpass, OK for odd or even N
-    auto x_samps = (int)(xbw / runrate * N);                             // number of unique samples in transition region, OK for odd or even N
-    float offset = 0.5f - 0.5f * (float)((N + 1) / 2 - N / 2);          // sample offset from center, OK for odd or even N
-    auto* xistion = new float[x_samps + 1];
-    float delta = PI / (float)x_samps;
-    float L = cicrate / runrate;
-    float phs = 0.0;
+    double tmp;
+    double local_scale;
+    double ri;
+    double mag = 0;
+    double fn;
+    std::vector<float> A(_N);
+    double ft = _cutoff / _cicrate;                                       // normalized cutoff frequency
+    int u_samps = (_N + 1) / 2;                                          // number of unique samples,  OK for odd or even N
+    int c_samps = (int)(_cutoff / _runrate * _N) + (_N + 1) / 2 - _N / 2;    // number of unique samples within bandpass, OK for odd or even N
+    auto x_samps = (int)(_xbw / _runrate * _N);                             // number of unique samples in transition region, OK for odd or even N
+    double offset = 0.5f - 0.5f * (float)((_N + 1) / 2 - _N / 2);          // sample offset from center, OK for odd or even N
+    std::vector<double> xistion(x_samps + 1);
+    double delta = PI / (float)x_samps;
+    double L = _cicrate / _runrate;
+    double phs = 0.0;
     for (i = 0; i <= x_samps; i++)
     {
         xistion[i] = 0.5 * (cos (phs) + 1.0);
         phs += delta;
     }
-    if ((tmp = DD * R * sin (PI * ft / R) / sin (PI * DD * ft)) < 0.0)  //normalize by peak gain
+    if ((tmp = _DD * _R * sin (PI * ft / _R) / sin (PI * _DD * ft)) < 0.0)  //normalize by peak gain
         tmp = -tmp;
-    local_scale = scale / pow (tmp, Pairs);
-    if (xtype == 0)
+    local_scale = _scale / pow (tmp, _Pairs);
+    if (_xtype == 0)
     {
         for (i = 0, ri = offset; i < u_samps; i++, ri += 1.0)
         {
-            fn = ri / (L * (float)N);
+            fn = ri / (L * (float)_N);
             if (fn <= ft)
             {
                 if (fn == 0.0) tmp = 1.0;
-                else if ((tmp = sin (PI * DD * fn) / (DD * R * sin (PI * fn / R))) < 0.0)
+                else if ((tmp = sin (PI * _DD * fn) / (_DD * _R * sin (PI * fn / _R))) < 0.0)
                     tmp = -tmp;
-                mag = pow (tmp, Pairs) * local_scale;
+                mag = pow (tmp, _Pairs) * local_scale;
             }
             else
                 mag *= (ft * ft * ft * ft) / (fn * fn * fn * fn);
-            A[i] = mag;
+            A[i] = (float) mag;
         }
     }
-    else if (xtype == 1)
+    else if (_xtype == 1)
     {
         for (i = 0, ri = offset; i < u_samps; i++, ri += 1.0)
         {
-            fn = ri / (L *(float)N);
+            fn = ri / (L *(float)_N);
             if (i < c_samps)
             {
                 if (fn == 0.0) tmp = 1.0;
-                else if ((tmp = sin (PI * DD * fn) / (DD * R * sin (PI * fn / R))) < 0.0)
+                else if ((tmp = sin (PI * _DD * fn) / (_DD * _R * sin (PI * fn / _R))) < 0.0)
                     tmp = -tmp;
-                mag = pow (tmp, Pairs) * local_scale;
-                A[i] = mag;
+                mag = pow (tmp, _Pairs) * local_scale;
+                A[i] = (float) mag;
             }
             else if ( i >= c_samps && i <= c_samps + x_samps)
-                A[i] = mag * xistion[i - c_samps];
+                A[i] = (float) (mag * xistion[i - c_samps]);
             else
                 A[i] = 0.0;
         }
     }
-    if (N & 1)
-        for (i = u_samps, j = 2; i < N; i++, j++)
+    if (_N & 1)
+        for (i = u_samps, j = 2; i < _N; i++, j++)
             A[i] = A[u_samps - j];
     else
-        for (i = u_samps, j = 1; i < N; i++, j++)
+        for (i = u_samps, j = 1; i < _N; i++, j++)
             A[i] = A[u_samps - j];
-    impulse.resize(2 * N);
-    FIR::fir_fsamp (impulse, N, A, rtype, 1.0, wintype);
-    delete[] (A);
-    delete[] xistion;
+    _impulse.resize(2 * _N);
+    FIR::fir_fsamp (_impulse, _N, A.data(), _rtype, 1.0, _wintype);
 }
 
 

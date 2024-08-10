@@ -52,8 +52,8 @@ public:
     int ctype;
     double f_low;
     double f_high;
-    float* infilt;
-    float* product;
+    std::vector<float> infilt;
+    std::vector<float> product;
     std::vector<float> mults;
     double rate;
     fftwf_plan CFor;

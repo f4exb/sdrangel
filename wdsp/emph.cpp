@@ -41,31 +41,41 @@ namespace WDSP {
 
 void EMPH::calc()
 {
-    infilt = new float[2 * size * 2];
-    product = new float[2 * size * 2];
+    infilt.resize(2 * size * 2);
+    product.resize(2 * size * 2);
     FCurve::fc_mults(
         mults,
         size,
-        f_low,
-        f_high,
-        -20.0 * log10(f_high / f_low),
+        (float) f_low,
+        (float) f_high,
+        (float) (-20.0 * log10(f_high / f_low)),
         0.0,
         ctype,
-        rate,
-        1.0 / (2.0 * size),
+        (float) rate,
+        (float) (1.0 / (2.0 * size)),
         0,
         0
     );
-    CFor = fftwf_plan_dft_1d(2 * size, (fftwf_complex *)infilt, (fftwf_complex *)product, FFTW_FORWARD, FFTW_PATIENT);
-    CRev = fftwf_plan_dft_1d(2 * size, (fftwf_complex *)product, (fftwf_complex *)out, FFTW_BACKWARD, FFTW_PATIENT);
+    CFor = fftwf_plan_dft_1d(
+        2 * size,
+        (fftwf_complex *)infilt.data(),
+        (fftwf_complex *)product.data(),
+        FFTW_FORWARD,
+        FFTW_PATIENT)
+    ;
+    CRev = fftwf_plan_dft_1d(
+        2 * size,
+        (fftwf_complex *)product.data(),
+        (fftwf_complex *)out,
+        FFTW_BACKWARD,
+        FFTW_PATIENT
+    );
 }
 
 void EMPH::decalc()
 {
     fftwf_destroy_plan(CRev);
     fftwf_destroy_plan(CFor);
-    delete[] product;
-    delete[] infilt;
 }
 
 EMPH::EMPH(
@@ -99,7 +109,7 @@ EMPH::~EMPH()
 
 void EMPH::flush()
 {
-    std::fill(infilt, infilt + 2 * size * 2, 0);
+    std::fill(infilt.begin(), infilt.end(), 0);
 }
 
 void EMPH::execute(int _position)
@@ -118,7 +128,7 @@ void EMPH::execute(int _position)
             product[2 * i + 1] = (float) (I * mults[2 * i + 1] + Q * mults[2 * i + 0]);
         }
         fftwf_execute (CRev);
-        std::copy(&(infilt[2 * size]), &(infilt[2 * size]) + size * 2, infilt);
+        std::copy(&(infilt[2 * size]), &(infilt[2 * size]) + size * 2, infilt.begin());
     }
     else if (in != out)
         std::copy( in,  in + size * 2, out);

@@ -114,8 +114,8 @@ void SNBA::calc()
     else
         isize = bsize * (internalrate / inrate);
 
-    inbuff  = new float[isize * 2];
-    outbuff = new float[isize * 2];
+    inbuff.resize(isize * 2);
+    outbuff.resize(isize * 2);
 
     if (inrate != internalrate)
         resamprun = 1;
@@ -126,7 +126,7 @@ void SNBA::calc()
         resamprun,
         bsize,
         in,
-        inbuff,
+        inbuff.data(),
         inrate,
         internalrate,
         0.0,
@@ -137,7 +137,7 @@ void SNBA::calc()
     outresamp = new RESAMPLE(
         resamprun,
         isize,
-        outbuff,
+        outbuff.data(),
         out,
         internalrate,
         inrate,
@@ -217,8 +217,6 @@ SNBA::SNBA(
     isize(0),
     inresamp(nullptr),
     outresamp(nullptr),
-    inbuff(nullptr),
-    outbuff(nullptr),
     out_low_cut(_out_low_cut),
     out_high_cut(_out_high_cut),
     exec(_xsize, _asize, _npasses),
@@ -237,8 +235,6 @@ void SNBA::decalc()
 {
     delete outresamp;
     delete inresamp;
-    delete[] outbuff;
-    delete[] inbuff;
 }
 
 SNBA::~SNBA()
@@ -259,8 +255,8 @@ void SNBA::flush()
     std::fill(inaccum.begin(), inaccum.end(), 0);
     std::fill(outaccum.begin(), outaccum.end(), 0);
     std::fill(xaux, xaux + xsize, 0);
-    std::fill(inbuff,  inbuff + isize * 2, 0);
-    std::fill(outbuff, outbuff + isize * 2, 0);
+    std::fill(inbuff.begin(),  inbuff.end(), 0);
+    std::fill(outbuff.begin(), outbuff.end(), 0);
 
     inresamp->flush();
     outresamp->flush();

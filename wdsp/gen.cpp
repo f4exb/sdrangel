@@ -94,7 +94,7 @@ void GEN::calc_pulse ()
 
     pulse.pcount = pulse.pnoff;
     pulse.state = PState::OFF;
-    pulse.ctrans = new double[pulse.pntrans + 1];
+    pulse.ctrans.resize(pulse.pntrans + 1);
     delta = PI / (float)pulse.pntrans;
     theta = 0.0;
     for (int i = 0; i <= pulse.pntrans; i++)
@@ -112,11 +112,6 @@ void GEN::calc()
     calc_sawtooth();
     calc_triangle();
     calc_pulse();
-}
-
-void GEN::decalc()
-{
-    delete[] (pulse.ctrans);
 }
 
 GEN::GEN(
@@ -163,11 +158,6 @@ GEN::GEN(
     pulse.ptranstime = 0.002;
     pulse.tf = 1000.0;
     calc();
-}
-
-GEN::~GEN()
-{
-    decalc();
 }
 
 void GEN::flush()
@@ -365,7 +355,6 @@ void GEN::setBuffers(float* _in, float* _out)
 
 void GEN::setSamplerate(int _rate)
 {
-    decalc();
     rate = _rate;
     calc();
 }

@@ -39,7 +39,14 @@ namespace WDSP {
 *                                                                                               *
 ************************************************************************************************/
 
-RESAMPLEF* RESAMPLEF::create_resampleF ( int run, int size, float* in, float* out, int in_rate, int out_rate)
+RESAMPLEF* RESAMPLEF::create_resampleF (
+    int _run,
+    int _size,
+    float* _in,
+    float* _out,
+    int _in_rate,
+    int _out_rate
+)
 {
     auto *a = new RESAMPLEF;
     int x;
@@ -51,12 +58,12 @@ RESAMPLEF* RESAMPLEF::create_resampleF ( int run, int size, float* in, float* ou
     float fc;
     float fc_norm;
     std::vector<float> impulse;
-    a->run = run;
-    a->size = size;
-    a->in = in;
-    a->out = out;
-    x = in_rate;
-    y = out_rate;
+    a->run = _run;
+    a->size = _size;
+    a->in = _in;
+    a->out = _out;
+    x = _in_rate;
+    y = _out_rate;
 
     while (y != 0)
     {
@@ -65,19 +72,19 @@ RESAMPLEF* RESAMPLEF::create_resampleF ( int run, int size, float* in, float* ou
         x = z;
     }
 
-    a->L = out_rate / x;
-    a->M = in_rate / x;
+    a->L = _out_rate / x;
+    a->M = _in_rate / x;
 
     a->L = a->L <= 0 ? 1 : a->L;
     a->M = a->M <= 0 ? 1 : a->M;
 
-    if (in_rate < out_rate)
-        min_rate = in_rate;
+    if (_in_rate < _out_rate)
+        min_rate = _in_rate;
     else
-        min_rate = out_rate;
+        min_rate = _out_rate;
 
     fc = 0.45f * (float)min_rate;
-    full_rate = (float)(in_rate * a->L);
+    full_rate = (float)(_in_rate * a->L);
     fc_norm = fc / full_rate;
     a->ncoef = (int)(60.0 / fc_norm);
     a->ncoef = (a->ncoef / a->L + 1) * a->L;
@@ -164,25 +171,25 @@ int RESAMPLEF::xresampleF (RESAMPLEF *a)
 // Exported calls
 
 
-void* RESAMPLEF::create_resampleFV (int in_rate, int out_rate)
+void* RESAMPLEF::create_resampleFV (int _in_rate, int _out_rate)
 {
-    return (void *) create_resampleF (1, 0, nullptr, nullptr, in_rate, out_rate);
+    return (void *) create_resampleF (1, 0, nullptr, nullptr, _in_rate, _out_rate);
 }
 
 
-void RESAMPLEF::xresampleFV (float* input, float* output, int numsamps, int* outsamps, void* ptr)
+void RESAMPLEF::xresampleFV (float* _input, float* _output, int _numsamps, int* _outsamps, void* _ptr)
 {
-    auto *a = (RESAMPLEF*) ptr;
-    a->in = input;
-    a->out = output;
-    a->size = numsamps;
-    *outsamps = xresampleF(a);
+    auto *a = (RESAMPLEF*) _ptr;
+    a->in = _input;
+    a->out = _output;
+    a->size = _numsamps;
+    *_outsamps = xresampleF(a);
 }
 
 
-void RESAMPLEF::destroy_resampleFV (void* ptr)
+void RESAMPLEF::destroy_resampleFV (void* _ptr)
 {
-    destroy_resampleF ( (RESAMPLEF*) ptr );
+    destroy_resampleF ( (RESAMPLEF*) _ptr );
 }
 
 } // namespace WDSP

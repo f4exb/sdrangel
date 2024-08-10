@@ -28,6 +28,8 @@ warren@wpratt.com
 #ifndef wdsp_gen_h
 #define wdsp_gen_h
 
+#include <vector>
+
 #include "export.h"
 
 namespace WDSP {
@@ -120,7 +122,7 @@ public:
         double pf;
         double pdutycycle;
         double ptranstime;
-        double* ctrans;
+        std::vector<double> ctrans;
         int pcount;
         int pnon;
         int pntrans;
@@ -143,7 +145,9 @@ public:
         int rate,
         int mode
     );
-    ~GEN();
+    GEN(const GEN&) = delete;
+    GEN& operator=(const GEN& other) = delete;
+    ~GEN() = default;
 
     void flush();
     void execute();
@@ -197,7 +201,6 @@ private:
     void calc_triangle();
     void calc_pulse();
     void calc();
-    void decalc();
 };
 
 } // namespace WDSP

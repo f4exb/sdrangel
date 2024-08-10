@@ -64,8 +64,8 @@ public:
     int isize;
     RESAMPLE *inresamp;
     RESAMPLE *outresamp;
-    float* inbuff;
-    float* outbuff;
+    std::vector<float> inbuff;
+    std::vector<float> outbuff;
     double out_low_cut;
     double out_high_cut;
     static const int MAXIMP = 256;
@@ -155,6 +155,8 @@ public:
         double out_low_cut,
         double out_high_cut
     );
+    SNBA(const SNBA&) = delete;
+    SNBA& operator=(const SNBA& other) = delete;
     ~SNBA();
 
     void flush();
