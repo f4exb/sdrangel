@@ -37,172 +37,169 @@ namespace WDSP {
 *                                                                                                       *
 ********************************************************************************************************/
 
-void FIROPT::plan_firopt (FIROPT *a)
+void FIROPT::plan()
 {
     // must call for change in 'nc', 'size', 'out'
-    int i;
-    a->nfor = a->nc / a->size;
-    a->buffidx = 0;
-    a->idxmask = a->nfor - 1;
-    a->fftin = new float[2 * a->size * 2];
-    a->fftout = new float*[a->nfor];
-    a->fmask = new float*[a->nfor];
-    a->maskgen = new float[2 * a->size * 2];
-    a->pcfor = new fftwf_plan[a->nfor];
-    a->maskplan = new fftwf_plan[a->nfor];
-    for (i = 0; i < a->nfor; i++)
+    nfor = nc / size;
+    buffidx = 0;
+    idxmask = nfor - 1;
+    fftin.resize(2 * size * 2);
+    fftout.resize(nfor);
+    fmask.resize(nfor);
+    maskgen.resize(2 * size * 2);
+    pcfor.resize(nfor);
+    maskplan.resize(nfor);
+    for (int i = 0; i < nfor; i++)
     {
-        a->fftout[i] = new float[2 * a->size * 2];
-        a->fmask[i] = new float[2 * a->size * 2];
-        a->pcfor[i] = fftwf_plan_dft_1d(
-            2 * a->size,
-            (fftwf_complex *)a->fftin,
-            (fftwf_complex *)a->fftout[i],
+        fftout[i].resize(2 * size * 2);
+        fmask[i].resize(2 * size * 2);
+        pcfor[i] = fftwf_plan_dft_1d(
+            2 * size,
+            (fftwf_complex *)fftin.data(),
+            (fftwf_complex *)fftout[i].data(),
             FFTW_FORWARD,
             FFTW_PATIENT
         );
-        a->maskplan[i] = fftwf_plan_dft_1d(
-            2 * a->size,
-            (fftwf_complex *)a->maskgen,
-            (fftwf_complex *)a->fmask[i],
+        maskplan[i] = fftwf_plan_dft_1d(
+            2 * size,
+            (fftwf_complex *)maskgen.data(),
+            (fftwf_complex *)fmask[i].data(),
             FFTW_FORWARD,
             FFTW_PATIENT
         );
     }
-    a->accum = new float[2 * a->size * 2];
-    a->crev = fftwf_plan_dft_1d(
-        2 * a->size,
-        (fftwf_complex *)a->accum,
-        (fftwf_complex *)a->out,
+    accum.resize(2 * size * 2);
+    crev = fftwf_plan_dft_1d(
+        2 * size,
+        (fftwf_complex *)accum.data(),
+        (fftwf_complex *)out,
         FFTW_BACKWARD,
         FFTW_PATIENT
     );
 }
 
-void FIROPT::calc_firopt (FIROPT *a)
+void FIROPT::calc()
 {
     // call for change in frequency, rate, wintype, gain
     // must also call after a call to plan_firopt()
     std::vector<float> impulse;
-    FIR::fir_bandpass (impulse, a->nc, a->f_low, a->f_high, a->samplerate, a->wintype, 1, a->gain);
-    a->buffidx = 0;
-    for (int i = 0; i < a->nfor; i++)
+    FIR::fir_bandpass (impulse, nc, f_low, f_high, samplerate, wintype, 1, gain);
+    buffidx = 0;
+    for (int i = 0; i < nfor; i++)
     {
         // I right-justified the impulse response => take output from left side of output buff, discard right side
         // Be careful about flipping an asymmetrical impulse response.
-        std::copy(&(impulse[2 * a->size * i]), &(impulse[2 * a->size * i]) + a->size * 2, &(a->maskgen[2 * a->size]));
-        fftwf_execute (a->maskplan[i]);
+        std::copy(&(impulse[2 * size * i]), &(impulse[2 * size * i]) + size * 2, &(maskgen[2 * size]));
+        fftwf_execute (maskplan[i]);
     }
 }
 
-FIROPT* FIROPT::create_firopt (int run, int position, int size, float* in, float* out,
-    int nc, float f_low, float f_high, int samplerate, int wintype, float gain)
+FIROPT::FIROPT(
+    int _run,
+    int _position,
+    int _size,
+    float* _in,
+    float* _out,
+    int _nc,
+    float _f_low,
+    float _f_high,
+    int _samplerate,
+    int _wintype,
+    float _gain
+)
 {
-    FIROPT *a = new FIROPT;
-    a->run = run;
-    a->position = position;
-    a->size = size;
-    a->in = in;
-    a->out = out;
-    a->nc = nc;
-    a->f_low = f_low;
-    a->f_high = f_high;
-    a->samplerate = (float) samplerate;
-    a->wintype = wintype;
-    a->gain = gain;
-    plan_firopt (a);
-    calc_firopt (a);
-    return a;
+    run = _run;
+    position = _position;
+    size = _size;
+    in = _in;
+    out = _out;
+    nc = _nc;
+    f_low = _f_low;
+    f_high = _f_high;
+    samplerate = (float) _samplerate;
+    wintype = _wintype;
+    gain = _gain;
+    plan();
+    calc();
 }
 
-void FIROPT::deplan_firopt (FIROPT *a)
+void FIROPT::deplan()
 {
-    int i;
-    fftwf_destroy_plan (a->crev);
-    delete[] (a->accum);
-    for (i = 0; i < a->nfor; i++)
+    fftwf_destroy_plan (crev);
+    for (int i = 0; i < nfor; i++)
     {
-        delete[] (a->fftout[i]);
-        delete[] (a->fmask[i]);
-        fftwf_destroy_plan (a->pcfor[i]);
-        fftwf_destroy_plan (a->maskplan[i]);
+        fftwf_destroy_plan (pcfor[i]);
+        fftwf_destroy_plan (maskplan[i]);
     }
-    delete[] (a->maskplan);
-    delete[] (a->pcfor);
-    delete[] (a->maskgen);
-    delete[] (a->fmask);
-    delete[] (a->fftout);
-    delete[] (a->fftin);
 }
 
-void FIROPT::destroy_firopt (FIROPT *a)
+FIROPT::~FIROPT()
 {
-    deplan_firopt (a);
-    delete (a);
+    deplan();
 }
 
-void FIROPT::flush_firopt (FIROPT *a)
+void FIROPT::flush()
 {
-    std::fill(a->fftin, a->fftin + 2 * a->size * 2, 0);
-    for (int i = 0; i < a->nfor; i++)
-        std::fill(a->fftout[i], a->fftout[i] + 2 * a->size * 2, 0);
-    a->buffidx = 0;
+    std::fill(fftin.begin(), fftin.end(), 0);
+    for (int i = 0; i < nfor; i++)
+        std::fill(fftout[i].begin(), fftout[i].end(), 0);
+    buffidx = 0;
 }
 
-void FIROPT::xfiropt (FIROPT *a, int pos)
+void FIROPT::execute(int pos)
 {
-    if (a->run && (a->position == pos))
+    if (run && (position == pos))
     {
         int k;
-        std::copy(a->in, a->in + a->size * 2, &(a->fftin[2 * a->size]));
-        fftwf_execute (a->pcfor[a->buffidx]);
-        k = a->buffidx;
-        std::fill(a->accum, a->accum + 2 * a->size * 2, 0);
-        for (int j = 0; j < a->nfor; j++)
+        std::copy(in, in + size * 2, &(fftin[2 * size]));
+        fftwf_execute (pcfor[buffidx]);
+        k = buffidx;
+        std::fill(accum.begin(), accum.end(), 0);
+        for (int j = 0; j < nfor; j++)
         {
-            for (int i = 0; i < 2 * a->size; i++)
+            for (int i = 0; i < 2 * size; i++)
             {
-                a->accum[2 * i + 0] += a->fftout[k][2 * i + 0] * a->fmask[j][2 * i + 0] - a->fftout[k][2 * i + 1] * a->fmask[j][2 * i + 1];
-                a->accum[2 * i + 1] += a->fftout[k][2 * i + 0] * a->fmask[j][2 * i + 1] + a->fftout[k][2 * i + 1] * a->fmask[j][2 * i + 0];
+                accum[2 * i + 0] += fftout[k][2 * i + 0] * fmask[j][2 * i + 0] - fftout[k][2 * i + 1] * fmask[j][2 * i + 1];
+                accum[2 * i + 1] += fftout[k][2 * i + 0] * fmask[j][2 * i + 1] + fftout[k][2 * i + 1] * fmask[j][2 * i + 0];
             }
-            k = (k + a->idxmask) & a->idxmask;
+            k = (k + idxmask) & idxmask;
         }
-        a->buffidx = (a->buffidx + 1) & a->idxmask;
-        fftwf_execute (a->crev);
-        std::copy(&(a->fftin[2 * a->size]), &(a->fftin[2 * a->size]) + a->size * 2, a->fftin);
+        buffidx = (buffidx + 1) & idxmask;
+        fftwf_execute (crev);
+        std::copy(&(fftin[2 * size]), &(fftin[2 * size]) + size * 2, fftin.begin());
     }
-    else if (a->in != a->out)
-        std::copy( a->in,  a->in + a->size * 2, a->out);
+    else if (in != out)
+        std::copy( in,  in + size * 2, out);
 }
 
-void FIROPT::setBuffers_firopt (FIROPT *a, float* in, float* out)
+void FIROPT::setBuffers(float* _in, float* _out)
 {
-    a->in = in;
-    a->out = out;
-    deplan_firopt (a);
-    plan_firopt (a);
-    calc_firopt (a);
+    in = _in;
+    out = _out;
+    deplan();
+    plan();
+    calc();
 }
 
-void FIROPT::setSamplerate_firopt (FIROPT *a, int rate)
+void FIROPT::setSamplerate(int _rate)
 {
-    a->samplerate = (float) rate;
-    calc_firopt (a);
+    samplerate = (float) _rate;
+    calc();
 }
 
-void FIROPT::setSize_firopt (FIROPT *a, int size)
+void FIROPT::setSize(int _size)
 {
-    a->size = size;
-    deplan_firopt (a);
-    plan_firopt (a);
-    calc_firopt (a);
+    size = _size;
+    deplan();
+    plan();
+    calc();
 }
 
-void FIROPT::setFreqs_firopt (FIROPT *a, float f_low, float f_high)
+void FIROPT::setFreqs(float _f_low, float _f_high)
 {
-    a->f_low = f_low;
-    a->f_high = f_high;
-    calc_firopt (a);
+    f_low = _f_low;
+    f_high = _f_high;
+    calc();
 }
 
 

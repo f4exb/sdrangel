@@ -43,6 +43,7 @@ namespace WDSP {
 
 class WDSP_API FIROPT
 {
+public:
     int run;                // run control
     int position;           // position at which to execute
     int size;               // input/output buffer size, power of two
@@ -55,31 +56,46 @@ class WDSP_API FIROPT
     int wintype;            // filter window type
     float gain;            // filter gain
     int nfor;               // number of buffers in delay line
-    float* fftin;          // fft input buffer
-    float** fmask;         // frequency domain masks
-    float** fftout;        // fftout delay line
-    float* accum;          // frequency domain accumulator
+    std::vector<float> fftin;          // fft input buffer
+    std::vector<std::vector<float>> fmask;         // frequency domain masks
+    std::vector<std::vector<float>> fftout;        // fftout delay line
+    std::vector<float> accum;          // frequency domain accumulator
     int buffidx;            // fft out buffer index
     int idxmask;            // mask for index computations
-    float* maskgen;        // input for mask generation FFT
-    fftwf_plan* pcfor;       // array of forward FFT plans
+    std::vector<float> maskgen;        // input for mask generation FFT
+    std::vector<fftwf_plan> pcfor;       // array of forward FFT plans
     fftwf_plan crev;         // reverse fft plan
-    fftwf_plan* maskplan;    // plans for frequency domain masks
+    std::vector<fftwf_plan> maskplan;    // plans for frequency domain masks
 
-    static FIROPT* create_firopt (int run, int position, int size, float* in, float* out,
-        int nc, float f_low, float f_high, int samplerate, int wintype, float gain);
-    static void xfiropt (FIROPT *a, int pos);
-    static void destroy_firopt (FIROPT *a);
-    static void flush_firopt (FIROPT *a);
-    static void setBuffers_firopt (FIROPT *a, float* in, float* out);
-    static void setSamplerate_firopt (FIROPT *a, int rate);
-    static void setSize_firopt (FIROPT *a, int size);
-    static void setFreqs_firopt (FIROPT *a, float f_low, float f_high);
+    FIROPT(
+        int run,
+        int position,
+        int size,
+        float* in,
+        float* out,
+        int nc,
+        float f_low,
+        float f_high,
+        int samplerate,
+        int wintype,
+        float gain
+    );
+    FIROPT(const FIROPT&) = delete;
+    FIROPT& operator=(const FIROPT& other) = delete;
+    ~FIROPT();
+
+    void destroy();
+    void flush();
+    void execute(int pos);
+    void setBuffers(float* in, float* out);
+    void setSamplerate(int rate);
+    void setSize(int size);
+    void setFreqs(float f_low, float f_high);
 
 private:
-    static void plan_firopt (FIROPT *a);
-    static void calc_firopt (FIROPT *a);
-    static void deplan_firopt (FIROPT *a);
+    void plan();
+    void calc();
+    void deplan();
 };
 
 } // namespace WDSP

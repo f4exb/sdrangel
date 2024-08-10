@@ -168,8 +168,8 @@ FMD::FMD(
 
 FMD::~FMD()
 {
-    delete (paud);
-    delete (pde);
+    delete paud;
+    delete pde;
     decalc();
 }
 
@@ -281,7 +281,7 @@ void FMD::setSize(int _size)
     calc();
     audio.resize(size * 2);
     // de-emphasis filter
-    delete (pde);
+    delete pde;
     std::vector<float> impulse(2 * nc_de);
     FCurve::fc_impulse (
         impulse,
@@ -298,7 +298,7 @@ void FMD::setSize(int _size)
     );
     pde = new FIRCORE(size, audio.data(), out, nc_de, mp_de, impulse.data());
     // audio filter
-    delete (paud);
+    delete paud;
     std::vector<float> impulseb;
     FIR::fir_bandpass(impulseb, nc_aud, 0.8 * f_low, 1.1 * f_high, rate, 0, 1, afgain / (2.0 * size));
     paud = new FIRCORE(size, out, out, nc_aud, mp_aud, impulseb.data());
@@ -363,8 +363,6 @@ void FMD::setMPde(int mp)
 
 void FMD::setNCaud(int nc)
 {
-    float* impulse;
-
     if (nc_aud != nc)
     {
         nc_aud = nc;
