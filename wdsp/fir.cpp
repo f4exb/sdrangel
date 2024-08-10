@@ -53,11 +53,11 @@ void FIR::fftcv_mults (std::vector<float>& mults, int NM, float* c_impulse)
     fftwf_destroy_plan (ptmp);
 }
 
-float* FIR::get_fsamp_window(int N, int wintype)
+void FIR::get_fsamp_window(std::vector<float>& window, int N, int wintype)
 {
     double arg0;
     double arg1;
-    auto window = new float[N];
+    window.resize(N);
     switch (wintype)
     {
     case 0:
@@ -91,7 +91,6 @@ float* FIR::get_fsamp_window(int N, int wintype)
         for (int i = 0; i < N; i++)
             window[i] = 1.0;
     }
-    return window;
 }
 
 void FIR::fir_fsamp_odd (std::vector<float>& c_impulse, int N, const float* A, int rtype, double scale, int wintype)
@@ -122,7 +121,8 @@ void FIR::fir_fsamp_odd (std::vector<float>& c_impulse, int N, const float* A, i
     }
     fftwf_execute (ptmp);
     fftwf_destroy_plan (ptmp);
-    float* window = get_fsamp_window(N, wintype);
+    std::vector<float> window;
+    get_fsamp_window(window, N, wintype);
     switch (rtype)
     {
     case 0:
@@ -139,7 +139,6 @@ void FIR::fir_fsamp_odd (std::vector<float>& c_impulse, int N, const float* A, i
     default:
         break;
     }
-    delete[] window;
 }
 
 void FIR::fir_fsamp (std::vector<float>& c_impulse, int N, const float* A, int rtype, double scale, int wintype)
@@ -180,7 +179,8 @@ void FIR::fir_fsamp (std::vector<float>& c_impulse, int N, const float* A, int r
             c_impulse[2 * n + 1] = 0.0;
         }
     }
-    float* window = get_fsamp_window (N, wintype);
+    std::vector<float> window;
+    get_fsamp_window (window, N, wintype);
     switch (rtype)
     {
     case 0:
@@ -197,7 +197,6 @@ void FIR::fir_fsamp (std::vector<float>& c_impulse, int N, const float* A, int r
     default:
         break;
     }
-    delete[] window;
 }
 
 float* FIR::fir_bandpass (int N, double f_low, double f_high, double samplerate, int wintype, int rtype, double scale)
@@ -277,7 +276,7 @@ float* FIR::fir_bandpass (int N, double f_low, double f_high, double samplerate,
     return c_impulse;
 }
 
-float *FIR::fir_read (int N, const char *filename, int rtype, float scale)
+void FIR::fir_read (std::vector<float>& c_impulse, int N, const char *filename, int rtype, float scale)
     // N = number of real or complex coefficients (see rtype)
     // *filename = filename
     // rtype = 0:  real coefficients
@@ -289,12 +288,12 @@ float *FIR::fir_read (int N, const char *filename, int rtype, float scale)
     FILE *file;
     float I;
     float Q;
-    auto c_impulse = new float[N * 2];
-    std::fill(c_impulse, c_impulse + N*2, 0);
+    c_impulse.resize(N * 2);
+    std::fill(c_impulse.begin(), c_impulse.end(), 0);
     file = fopen (filename, "r");
 
     if (!file) {
-        return c_impulse;
+        return;
     }
 
     for (int i = 0; i < N; i++)
@@ -325,7 +324,6 @@ float *FIR::fir_read (int N, const char *filename, int rtype, float scale)
         }
     }
     fclose (file);
-    return c_impulse;
 }
 
 void FIR::analytic (int N, float* in, float* out)
@@ -430,7 +428,7 @@ void FIR::mp_imp (int N, std::vector<float>& fir, std::vector<float>& mpfir, int
 
 // impulse response of a zero frequency filter comprising a cascade of two resonators,
 //    each followed by a detrending filter
-float* FIR::zff_impulse(int nc, float scale)
+void FIR::zff_impulse(std::vector<float>& c_dresdet, int nc, float scale)
 {
     // nc = number of coefficients (power of two)
     int n_resdet = nc / 2 - 1;          // size of single zero-frequency resonator with detrender
@@ -444,7 +442,7 @@ float* FIR::zff_impulse(int nc, float scale)
     // allocate the float and complex versions and make the values
     std::vector<float> dresdet(n_dresdet);
     auto div = (float) ((nc / 2 + 1) * (nc / 2 + 1));                 // calculate divisor
-    auto c_dresdet = new float[nc * 2];
+    c_dresdet.resize(nc * 2);
     for (int n = 0; n < n_dresdet; n++) // convolve to make the cascade
     {
         for (int k = 0; k < n_resdet; k++)
@@ -454,8 +452,6 @@ float* FIR::zff_impulse(int nc, float scale)
         c_dresdet[2 * n + 0] = dresdet[n] * scale;
         c_dresdet[2 * n + 1] = 0.0;
     }
-
-    return c_dresdet;
 }
 
 } // namespace WDSP

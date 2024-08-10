@@ -149,7 +149,7 @@ void FCurve::fc_impulse (std::vector<float>& impulse, int nc, float f0, float f1
 }
 
 // generate mask for Overlap-Save Filter
-float* FCurve::fc_mults (std::vector<float>& mults, int size, float f0, float f1, float g0, float g1, int curve, float samplerate, float scale, int ctfmode, int wintype)
+void FCurve::fc_mults (std::vector<float>& mults, int size, float f0, float f1, float g0, float g1, int curve, float samplerate, float scale, int ctfmode, int wintype)
 {
     std::vector<float> impulse(2 * (size + 1));
     fc_impulse (impulse, size + 1, f0, f1, g0, g1, curve, samplerate, scale, ctfmode, wintype);

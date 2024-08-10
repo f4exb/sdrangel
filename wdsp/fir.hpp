@@ -44,9 +44,9 @@ public:
 
 private:
     static void analytic (int N, float* in, float* out);
-    static float* get_fsamp_window(int N, int wintype);
-    static float *fir_read (int N, const char *filename, int rtype, float scale);
-    static float* zff_impulse(int nc, float scale);
+    static void get_fsamp_window(std::vector<float>& window, int N, int wintype);
+    static void fir_read (std::vector<float>& impulse, int N, const char *filename, int rtype, float scale);
+    static void zff_impulse(std::vector<float>& impulse, int nc, float scale);
 };
 
 #endif
