@@ -279,6 +279,9 @@ QByteArray WDSPRxSettings::serialize() const
         s.writeDouble(163 + 100*i, m_profiles[i].m_ssqlTauMute);
         s.writeDouble(164 + 100*i, m_profiles[i].m_ssqlTauUnmute);
         s.writeDouble(165 + 100*i, m_profiles[i].m_amsqMaxTail);
+        // RIT
+        s.writeBool(  183 + 100*i, m_profiles[i].m_rit);
+        s.writeDouble(184 + 100*i, m_profiles[i].m_ritFrequency);
         // Equalizer
         s.writeBool(  190 + 100*i, m_profiles[i].m_equalizer);
         s.writeFloat(4100 + 100*i, m_profiles[i].m_eqF[0]);
@@ -403,15 +406,15 @@ bool WDSPRxSettings::deserialize(const QByteArray& data)
         d.readU32(   74, &utmp, 0);
 
         if ((utmp > 1023) && (utmp < 65535)) {
-            m_reverseAPIPort = utmp;
+            m_reverseAPIPort = (uint16_t) utmp;
         } else {
             m_reverseAPIPort = 8888;
         }
 
         d.readU32(   75, &utmp, 0);
-        m_reverseAPIDeviceIndex = utmp > 99 ? 99 : utmp;
+        m_reverseAPIDeviceIndex = utmp > 99 ? 99 : (uint16_t) utmp;
         d.readU32(   76, &utmp, 0);
-        m_reverseAPIChannelIndex = utmp > 99 ? 99 : utmp;
+        m_reverseAPIChannelIndex = utmp > 99 ? 99 : (uint16_t) utmp;
         d.readS32(   77, &m_streamIndex, 0);
 
         if (m_rollupState)
@@ -464,9 +467,9 @@ bool WDSPRxSettings::deserialize(const QByteArray& data)
             // Filter
             d.readS32   (100 + 100*i, &m_profiles[i].m_spanLog2, 3);
             d.readS32   (101 + 100*i, &tmp, 30);
-            m_profiles[i].m_highCutoff = tmp * 100.0;
+            m_profiles[i].m_highCutoff = (float) tmp * 100.0f;
             d.readS32   (102 + 100*i, &tmp, 3);
-            m_profiles[i].m_lowCutoff = tmp * 100.0;
+            m_profiles[i].m_lowCutoff = (float) tmp * 100.0f;
             d.readS32   (103 + 100*i, &m_profiles[i].m_fftWindow, 0);
             // AGC
             d.readBool(  110 + 100*i, &m_profiles[i].m_agc, true);

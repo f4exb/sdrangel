@@ -31,81 +31,84 @@ warren@wpratt.com
 
 namespace WDSP {
 
-DELAY* create_delay (int run, int size, float* in, float* out, int rate, float tdelta, float tdelay)
+DELAY::DELAY(
+    int _run,
+    int _size,
+    float* _in,
+    float* _out,
+    int _rate,
+    float _tdelta,
+    float _tdelay
+)
 {
-    DELAY *a = new DELAY;
-    a->run = run;
-    a->size = size;
-    a->in = in;
-    a->out = out;
-    a->rate = rate;
-    a->tdelta = tdelta;
-    a->tdelay = tdelay;
-    a->L = (int)(0.5 + 1.0 / (a->tdelta * (float)a->rate));
-    a->adelta = 1.0 / (a->rate * a->L);
-    a->ft = 0.45 / (float)a->L;
-    a->ncoef = (int)(60.0 / a->ft);
-    a->ncoef = (a->ncoef / a->L + 1) * a->L;
-    a->cpp = a->ncoef / a->L;
-    a->phnum = (int)(0.5 + a->tdelay / a->adelta);
-    a->snum = a->phnum / a->L;
-    a->phnum %= a->L;
-    a->idx_in = 0;
-    a->adelay = a->adelta * (a->snum * a->L + a->phnum);
-    a->h = FIR::fir_bandpass (a->ncoef,-a->ft, +a->ft, 1.0, 1, 0, (float)a->L);
-    a->rsize = a->cpp + (WSDEL - 1);
-    a->ring = new float[a->rsize * 2]; // (float *) malloc0 (a->rsize * sizeof (complex));
-    return a;
+    run = _run;
+    size = _size;
+    in = _in;
+    out = _out;
+    rate = _rate;
+    tdelta = _tdelta;
+    tdelay = _tdelay;
+    L = (int)(0.5 + 1.0 / (tdelta * (float)rate));
+    adelta = 1.0f / (float) (rate * L);
+    ft = 0.45f / (float)L;
+    ncoef = (int)(60.0 / ft);
+    ncoef = (ncoef / L + 1) * L;
+    cpp = ncoef / L;
+    phnum = (int)(0.5 + tdelay / adelta);
+    snum = phnum / L;
+    phnum %= L;
+    idx_in = 0;
+    adelay = adelta * (float) (snum * L + phnum);
+    FIR::fir_bandpass (h, ncoef,-ft, +ft, 1.0, 1, 0, (float)L);
+    rsize = cpp + (WSDEL - 1);
+    ring.resize(rsize * 2);
 }
 
-void DELAY::destroy_delay (DELAY *a)
+void DELAY::flush()
 {
-    delete[] (a->ring);
-    delete[] (a->h);
-    delete (a);
+    std::fill(ring.begin(), ring.end(), 0);
+    idx_in = 0;
 }
 
-void DELAY::flush_delay (DELAY *a)
+void DELAY::execute()
 {
-    std::fill(a->ring, a->ring + a->cpp * 2, 0);
-    a->idx_in = 0;
-}
-
-void DELAY::xdelay (DELAY *a)
-{
-    if (a->run)
+    if (run)
     {
-        int i, j, k, idx, n;
-        float Itmp, Qtmp;
+        int j;
+        int k;
+        int idx;
+        int n;
+        float Itmp;
+        float Qtmp;
 
-        for (i = 0; i < a->size; i++)
+        for (int i = 0; i < size; i++)
         {
-            a->ring[2 * a->idx_in + 0] = a->in[2 * i + 0];
-            a->ring[2 * a->idx_in + 1] = a->in[2 * i + 1];
+            ring[2 * idx_in + 0] = in[2 * i + 0];
+            ring[2 * idx_in + 1] = in[2 * i + 1];
             Itmp = 0.0;
             Qtmp = 0.0;
 
-            if ((n = a->idx_in + a->snum) >= a->rsize)
-                n -= a->rsize;
+            if ((n = idx_in + snum) >= rsize)
+                n -= rsize;
 
-            for (j = 0, k = a->L - 1 - a->phnum; j < a->cpp; j++, k+= a->L)
+            for (j = 0, k = L - 1 - phnum; j < cpp; j++, k+= L)
             {
-                if ((idx = n + j) >= a->rsize)
-                    idx -= a->rsize;
+                if ((idx = n + j) >= rsize)
+                    idx -= rsize;
 
-                Itmp += a->ring[2 * idx + 0] * a->h[k];
-                Qtmp += a->ring[2 * idx + 1] * a->h[k];
+                Itmp += ring[2 * idx + 0] * h[k];
+                Qtmp += ring[2 * idx + 1] * h[k];
             }
 
-            a->out[2 * i + 0] = Itmp;
-            a->out[2 * i + 1] = Qtmp;
+            out[2 * i + 0] = Itmp;
+            out[2 * i + 1] = Qtmp;
 
-            if (--a->idx_in < 0)
-                a->idx_in = a->rsize - 1;
+            if (--idx_in < 0)
+                idx_in = rsize - 1;
         }
     }
-    else if (a->out != a->in)
-        std::copy( a->in,  a->in + a->size * 2, a->out);
+    else if (out != in)
+        std::copy( in,  in + size * 2, out);
 }
 
 /********************************************************************************************************
@@ -114,28 +117,28 @@ void DELAY::xdelay (DELAY *a)
 *                                                                                                       *
 ********************************************************************************************************/
 
-void DELAY::SetDelayRun (DELAY *a, int run)
+void DELAY::setRun(int _run)
 {
-    a->run = run;
+    run = _run;
 }
 
-float DELAY::SetDelayValue (DELAY *a, float tdelay)
+float DELAY::setValue(float _tdelay)
 {
-    float adelay;
-    a->tdelay = tdelay;
-    a->phnum = (int)(0.5 + a->tdelay / a->adelta);
-    a->snum = a->phnum / a->L;
-    a->phnum %= a->L;
-    a->adelay = a->adelta * (a->snum * a->L + a->phnum);
-    adelay = a->adelay;
+    float _adelay;
+    tdelay = _tdelay;
+    phnum = (int)(0.5 + tdelay / adelta);
+    snum = phnum / L;
+    phnum %= L;
+    _adelay = adelta * (float) (snum * L + phnum);
+    adelay = _adelay;
     return adelay;
 }
 
-void DELAY::SetDelayBuffs (DELAY *a, int size, float* in, float* out)
+void DELAY::setBuffs(int _size, float* _in, float* _out)
 {
-    a->size = size;
-    a->in = in;
-    a->out = out;
+    size = _size;
+    in = _in;
+    out = _out;
 }
 
 } // namespace WDSP

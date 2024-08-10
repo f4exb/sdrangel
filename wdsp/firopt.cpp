@@ -44,16 +44,16 @@ void FIROPT::plan_firopt (FIROPT *a)
     a->nfor = a->nc / a->size;
     a->buffidx = 0;
     a->idxmask = a->nfor - 1;
-    a->fftin = new float[2 * a->size * 2]; // (float *) malloc0 (2 * a->size * sizeof (complex));
-    a->fftout = new float*[a->nfor]; //  (float **) malloc0 (a->nfor * sizeof (float *));
-    a->fmask = new float*[a->nfor]; //  (float **) malloc0 (a->nfor * sizeof (float *));
-    a->maskgen = new float[2 * a->size * 2]; //  (float *) malloc0 (2 * a->size * sizeof (complex));
-    a->pcfor = new fftwf_plan[a->nfor]; // (fftwf_plan *) malloc0 (a->nfor * sizeof (fftwf_plan));
-    a->maskplan = new fftwf_plan[a->nfor]; // (fftwf_plan *) malloc0 (a->nfor * sizeof (fftwf_plan));
+    a->fftin = new float[2 * a->size * 2];
+    a->fftout = new float*[a->nfor];
+    a->fmask = new float*[a->nfor];
+    a->maskgen = new float[2 * a->size * 2];
+    a->pcfor = new fftwf_plan[a->nfor];
+    a->maskplan = new fftwf_plan[a->nfor];
     for (i = 0; i < a->nfor; i++)
     {
-        a->fftout[i] = new float[2 * a->size * 2]; // (float *) malloc0 (2 * a->size * sizeof (complex));
-        a->fmask[i] = new float[2 * a->size * 2]; //  (float *) malloc0 (2 * a->size * sizeof (complex));
+        a->fftout[i] = new float[2 * a->size * 2];
+        a->fmask[i] = new float[2 * a->size * 2];
         a->pcfor[i] = fftwf_plan_dft_1d(
             2 * a->size,
             (fftwf_complex *)a->fftin,
@@ -69,7 +69,7 @@ void FIROPT::plan_firopt (FIROPT *a)
             FFTW_PATIENT
         );
     }
-    a->accum = new float[2 * a->size * 2]; //  (float *) malloc0 (2 * a->size * sizeof (complex));
+    a->accum = new float[2 * a->size * 2];
     a->crev = fftwf_plan_dft_1d(
         2 * a->size,
         (fftwf_complex *)a->accum,
@@ -83,17 +83,16 @@ void FIROPT::calc_firopt (FIROPT *a)
 {
     // call for change in frequency, rate, wintype, gain
     // must also call after a call to plan_firopt()
-    int i;
-    float* impulse = FIR::fir_bandpass (a->nc, a->f_low, a->f_high, a->samplerate, a->wintype, 1, a->gain);
+    std::vector<float> impulse;
+    FIR::fir_bandpass (impulse, a->nc, a->f_low, a->f_high, a->samplerate, a->wintype, 1, a->gain);
     a->buffidx = 0;
-    for (i = 0; i < a->nfor; i++)
+    for (int i = 0; i < a->nfor; i++)
     {
         // I right-justified the impulse response => take output from left side of output buff, discard right side
         // Be careful about flipping an asymmetrical impulse response.
         std::copy(&(impulse[2 * a->size * i]), &(impulse[2 * a->size * i]) + a->size * 2, &(a->maskgen[2 * a->size]));
         fftwf_execute (a->maskplan[i]);
     }
-    delete[] (impulse);
 }
 
 FIROPT* FIROPT::create_firopt (int run, int position, int size, float* in, float* out,
@@ -108,7 +107,7 @@ FIROPT* FIROPT::create_firopt (int run, int position, int size, float* in, float
     a->nc = nc;
     a->f_low = f_low;
     a->f_high = f_high;
-    a->samplerate = samplerate;
+    a->samplerate = (float) samplerate;
     a->wintype = wintype;
     a->gain = gain;
     plan_firopt (a);
@@ -144,9 +143,8 @@ void FIROPT::destroy_firopt (FIROPT *a)
 
 void FIROPT::flush_firopt (FIROPT *a)
 {
-    int i;
     std::fill(a->fftin, a->fftin + 2 * a->size * 2, 0);
-    for (i = 0; i < a->nfor; i++)
+    for (int i = 0; i < a->nfor; i++)
         std::fill(a->fftout[i], a->fftout[i] + 2 * a->size * 2, 0);
     a->buffidx = 0;
 }
@@ -155,14 +153,14 @@ void FIROPT::xfiropt (FIROPT *a, int pos)
 {
     if (a->run && (a->position == pos))
     {
-        int i, j, k;
+        int k;
         std::copy(a->in, a->in + a->size * 2, &(a->fftin[2 * a->size]));
         fftwf_execute (a->pcfor[a->buffidx]);
         k = a->buffidx;
         std::fill(a->accum, a->accum + 2 * a->size * 2, 0);
-        for (j = 0; j < a->nfor; j++)
+        for (int j = 0; j < a->nfor; j++)
         {
-            for (i = 0; i < 2 * a->size; i++)
+            for (int i = 0; i < 2 * a->size; i++)
             {
                 a->accum[2 * i + 0] += a->fftout[k][2 * i + 0] * a->fmask[j][2 * i + 0] - a->fftout[k][2 * i + 1] * a->fmask[j][2 * i + 1];
                 a->accum[2 * i + 1] += a->fftout[k][2 * i + 0] * a->fmask[j][2 * i + 1] + a->fftout[k][2 * i + 1] * a->fmask[j][2 * i + 0];
@@ -188,7 +186,7 @@ void FIROPT::setBuffers_firopt (FIROPT *a, float* in, float* out)
 
 void FIROPT::setSamplerate_firopt (FIROPT *a, int rate)
 {
-    a->samplerate = rate;
+    a->samplerate = (float) rate;
     calc_firopt (a);
 }
 

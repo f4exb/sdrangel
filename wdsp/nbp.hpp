@@ -80,7 +80,7 @@ public:
     int autoincr;           // auto-increment notch width
     double flow;            // low bandpass cutoff freq
     double fhigh;           // high bandpass cutoff freq
-    float* impulse;         // filter impulse response
+    std::vector<float> impulse; // filter impulse response
     int maxpb;              // maximum number of passbands
     NOTCHDB* notchdb;       // ptr to addr of notch-database data structure
     std::vector<double> bplow;  // array of passband lows
@@ -129,7 +129,7 @@ public:
     void calc_lightweight();
 
 private:
-    static float* fir_mbandpass (int N, int nbp, const double* flow, const double* fhigh, double rate, double scale, int wintype);
+    static void fir_mbandpass (std::vector<float>& impulse, int N, int nbp, const double* flow, const double* fhigh, double rate, double scale, int wintype);
     double min_notch_width () const;
     static int make_nbp (
         int nn,

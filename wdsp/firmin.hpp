@@ -34,6 +34,8 @@ warren@wpratt.com
 #ifndef wdsp_firmin_h
 #define wdsp_firmin_h
 
+#include <vector>
+
 #include "fftw3.h"
 #include "export.h"
 
@@ -50,8 +52,8 @@ public:
     int nc;                 // number of filter coefficients, power of two
     float f_low;           // low cutoff frequency
     float f_high;          // high cutoff frequency
-    float* ring;           // internal complex ring buffer
-    float* h;              // complex filter coefficients
+    std::vector<float> ring;           // internal complex ring buffer
+    std::vector<float> h;              // complex filter coefficients
     int rsize;              // ring size, number of complex samples, power of two
     int mask;               // mask to update indexes
     int idx;                // ring input/output index
@@ -59,18 +61,32 @@ public:
     int wintype;            // filter window type
     float gain;            // filter gain
 
-    static FIRMIN* create_firmin (int run, int position, int size, float* in, float* out,
-        int nc, float f_low, float f_high, int samplerate, int wintype, float gain);
-    static void destroy_firmin (FIRMIN *a);
-    static void flush_firmin (FIRMIN *a);
-    static void xfirmin (FIRMIN *a, int pos);
-    static void setBuffers_firmin (FIRMIN *a, float* in, float* out);
-    static void setSamplerate_firmin (FIRMIN *a, int rate);
-    static void setSize_firmin (FIRMIN *a, int size);
-    static void setFreqs_firmin (FIRMIN *a, float f_low, float f_high);
+    FIRMIN(
+        int run,
+        int position,
+        int size,
+        float* in,
+        float* out,
+        int nc,
+        float f_low,
+        float f_high,
+        int samplerate,
+        int wintype,
+        float gain
+    );
+    FIRMIN(const FIRMIN&) = delete;
+    FIRMIN& operator=(const FIRMIN& other) = delete;
+    ~FIRMIN() = default;
+
+    void flush();
+    void execute(int pos);
+    void setBuffers(float* in, float* out);
+    void setSamplerate(int rate);
+    void setSize(int size);
+    void setFreqs(float f_low, float f_high);
 
 private:
-    static void calc_firmin (FIRMIN *a);
+    void calc();
 };
 
 } // namespace WDSP

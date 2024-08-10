@@ -124,7 +124,7 @@ FIRCORE::FIRCORE(
     float* _out,
     int _nc,
     int _mp,
-    float* _impulse
+    const float* _impulse
 )
 {
     size = _size;
@@ -204,13 +204,13 @@ void FIRCORE::setSize(int _size)
     calc(1);
 }
 
-void FIRCORE::setImpulse(float* _impulse, int _update)
+void FIRCORE::setImpulse(const float* _impulse, int _update)
 {
     std::copy(_impulse, _impulse + nc * 2, impulse.begin());
     calc(_update);
 }
 
-void FIRCORE::setNc(int _nc, float* _impulse)
+void FIRCORE::setNc(int _nc, const float* _impulse)
 {
     // because of FFT planning, this will probably cause a glitch in audio if done during dataflow
     deplan();

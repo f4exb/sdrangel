@@ -47,7 +47,7 @@ void RESAMPLE::calc()
     double full_rate;
     double fc_norm_high;
     double fc_norm_low;
-    float* impulse;
+    std::vector<float> impulse;
     fc = fcin;
     ncoef = ncoefin;
     x = in_rate;
@@ -88,7 +88,7 @@ void RESAMPLE::calc()
     ncoef = (ncoef / L + 1) * L;
     cpp = ncoef / L;
     h.resize(ncoef);
-    impulse = FIR::fir_bandpass(ncoef, fc_norm_low, fc_norm_high, 1.0, 1, 0, gain * (double)L);
+    FIR::fir_bandpass(impulse, ncoef, fc_norm_low, fc_norm_high, 1.0, 1, 0, gain * (double)L);
     i = 0;
 
     for (int j = 0; j < L; j++)
@@ -101,8 +101,6 @@ void RESAMPLE::calc()
     ring.resize(ringsize);
     idx_in = ringsize - 1;
     phnum = 0;
-
-    delete[] impulse;
 }
 
 RESAMPLE::RESAMPLE (

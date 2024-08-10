@@ -915,7 +915,9 @@ void TXA::setBandpassNC(int _nc)
     if (a->nc != _nc)
     {
         a->nc = _nc;
-        float* impulse = FIR::fir_bandpass (
+        std::vector<float> impulse;
+        FIR::fir_bandpass (
+            impulse,
             a->nc,
             a->f_low,
             a->f_high,
@@ -924,8 +926,7 @@ void TXA::setBandpassNC(int _nc)
             1,
             a->gain / (double)(2 * a->size)
         );
-        a->fircore->setNc(a->nc, impulse);
-        delete[] impulse;
+        a->fircore->setNc(a->nc, impulse.data());
     }
 
     a = bp1;
@@ -933,7 +934,9 @@ void TXA::setBandpassNC(int _nc)
     if (a->nc != _nc)
     {
         a->nc = _nc;
-        float* impulse = FIR::fir_bandpass (
+        std::vector<float> impulse;
+        FIR::fir_bandpass (
+            impulse,
             a->nc,
             a->f_low,
             a->f_high,
@@ -942,8 +945,7 @@ void TXA::setBandpassNC(int _nc)
             1,
             a->gain / (double)(2 * a->size)
         );
-        a->fircore->setNc(a->nc, impulse);
-        delete[] impulse;
+        a->fircore->setNc(a->nc, impulse.data());
     }
 
     a = bp2;
@@ -951,7 +953,9 @@ void TXA::setBandpassNC(int _nc)
     if (a->nc != _nc)
     {
         a->nc = _nc;
-        float* impulse = FIR::fir_bandpass (
+        std::vector<float> impulse;
+        FIR::fir_bandpass (
+            impulse,
             a->nc,
             a->f_low,
             a->f_high,
@@ -960,8 +964,7 @@ void TXA::setBandpassNC(int _nc)
             1,
             a->gain / (double)(2 * a->size)
         );
-        a->fircore->setNc(a->nc, impulse);
-        delete[] impulse;
+        a->fircore->setNc(a->nc, impulse.data());
     }
 }
 
@@ -1032,7 +1035,7 @@ void TXA::SetBPSRun (TXA& txa, int _run)
 
 void TXA::SetBPSFreqs (TXA& txa, double _f_low, double _f_high)
 {
-    float* impulse;
+    std::vector<float> impulse;
     BPS *a;
     a = txa.bps0;
 
@@ -1040,9 +1043,8 @@ void TXA::SetBPSFreqs (TXA& txa, double _f_low, double _f_high)
     {
         a->f_low = _f_low;
         a->f_high = _f_high;
-        impulse = FIR::fir_bandpass(a->size + 1, _f_low, _f_high, a->samplerate, a->wintype, 1, 1.0 / (float)(2 * a->size));
-        FIR::fftcv_mults (a->mults, 2 * a->size, impulse);
-        delete[] (impulse);
+        FIR::fir_bandpass(impulse, a->size + 1, _f_low, _f_high, a->samplerate, a->wintype, 1, 1.0 / (float)(2 * a->size));
+        FIR::fftcv_mults (a->mults, 2 * a->size, impulse.data());
     }
 
     a = txa.bps1;
@@ -1051,9 +1053,8 @@ void TXA::SetBPSFreqs (TXA& txa, double _f_low, double _f_high)
     {
         a->f_low = _f_low;
         a->f_high = _f_high;
-        impulse = FIR::fir_bandpass(a->size + 1, _f_low, _f_high, a->samplerate, a->wintype, 1, 1.0 / (float)(2 * a->size));
-        FIR::fftcv_mults (a->mults, 2 * a->size, impulse);
-        delete[] (impulse);
+        FIR::fir_bandpass(impulse, a->size + 1, _f_low, _f_high, a->samplerate, a->wintype, 1, 1.0 / (float)(2 * a->size));
+        FIR::fftcv_mults (a->mults, 2 * a->size, impulse.data());
     }
 
     a = txa.bps2;
@@ -1062,24 +1063,22 @@ void TXA::SetBPSFreqs (TXA& txa, double _f_low, double _f_high)
     {
         a->f_low = _f_low;
         a->f_high = _f_high;
-        impulse = FIR::fir_bandpass(a->size + 1, _f_low, _f_high, a->samplerate, a->wintype, 1, 1.0 / (float)(2 * a->size));
-        FIR::fftcv_mults (a->mults, 2 * a->size, impulse);
-        delete[] (impulse);
+        FIR::fir_bandpass(impulse, a->size + 1, _f_low, _f_high, a->samplerate, a->wintype, 1, 1.0 / (float)(2 * a->size));
+        FIR::fftcv_mults (a->mults, 2 * a->size, impulse.data());
     }
 }
 
 void TXA::SetBPSWindow (TXA& txa, int _wintype)
 {
-    float* impulse;
+    std::vector<float> impulse;
     BPS *a;
     a = txa.bps0;
 
     if (a->wintype != _wintype)
     {
         a->wintype = _wintype;
-        impulse = FIR::fir_bandpass(a->size + 1, a->f_low, a->f_high, a->samplerate, a->wintype, 1, 1.0 / (float)(2 * a->size));
-        FIR::fftcv_mults (a->mults, 2 * a->size, impulse);
-        delete[] (impulse);
+        FIR::fir_bandpass(impulse, a->size + 1, a->f_low, a->f_high, a->samplerate, a->wintype, 1, 1.0 / (float)(2 * a->size));
+        FIR::fftcv_mults (a->mults, 2 * a->size, impulse.data());
     }
 
     a = txa.bps1;
@@ -1087,9 +1086,8 @@ void TXA::SetBPSWindow (TXA& txa, int _wintype)
     if (a->wintype != _wintype)
     {
         a->wintype = _wintype;
-        impulse = FIR::fir_bandpass(a->size + 1, a->f_low, a->f_high, a->samplerate, a->wintype, 1, 1.0 / (float)(2 * a->size));
-        FIR::fftcv_mults (a->mults, 2 * a->size, impulse);
-        delete[] impulse;
+        FIR::fir_bandpass(impulse, a->size + 1, a->f_low, a->f_high, a->samplerate, a->wintype, 1, 1.0 / (float)(2 * a->size));
+        FIR::fftcv_mults (a->mults, 2 * a->size, impulse.data());
     }
 
     a = txa.bps2;
@@ -1097,9 +1095,8 @@ void TXA::SetBPSWindow (TXA& txa, int _wintype)
     if (a->wintype != _wintype)
     {
         a->wintype = _wintype;
-        impulse = FIR::fir_bandpass (a->size + 1, a->f_low, a->f_high, a->samplerate, a->wintype, 1, 1.0 / (float)(2 * a->size));
-        FIR::fftcv_mults (a->mults, 2 * a->size, impulse);
-        delete[] impulse;
+        FIR::fir_bandpass (impulse, a->size + 1, a->f_low, a->f_high, a->samplerate, a->wintype, 1, 1.0 / (float)(2 * a->size));
+        FIR::fftcv_mults (a->mults, 2 * a->size, impulse.data());
     }
 }
 

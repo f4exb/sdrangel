@@ -72,8 +72,7 @@ public:
         float* out,
         int nc,
         int mp,
-        float*
-        impulse
+        const float* impulse
     );
     FIRCORE(const FIRCORE&) = delete;
     FIRCORE& operator=(const FIRCORE& other) = delete;
@@ -83,8 +82,8 @@ public:
     void execute();
     void setBuffers(float* in, float* out);
     void setSize(int size);
-    void setImpulse(float* impulse, int update);
-    void setNc(int nc, float* impulse);
+    void setImpulse(const float* impulse, int update);
+    void setNc(int nc, const float* impulse);
     void setMp(int mp);
     void setUpdate();
 

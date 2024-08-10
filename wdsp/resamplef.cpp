@@ -25,6 +25,8 @@ warren@wpratt.com
 
 */
 
+#include <vector>
+
 #include "comm.hpp"
 #include "fir.hpp"
 #include "resamplef.hpp"
@@ -39,14 +41,16 @@ namespace WDSP {
 
 RESAMPLEF* RESAMPLEF::create_resampleF ( int run, int size, float* in, float* out, int in_rate, int out_rate)
 {
-    RESAMPLEF *a = new RESAMPLEF;
-    int x, y, z;
-    int i, j, k;
+    auto *a = new RESAMPLEF;
+    int x;
+    int y;
+    int z;
+    int i;
     int min_rate;
     float full_rate;
     float fc;
     float fc_norm;
-    float* impulse;
+    std::vector<float> impulse;
     a->run = run;
     a->size = size;
     a->in = in;
@@ -72,36 +76,35 @@ RESAMPLEF* RESAMPLEF::create_resampleF ( int run, int size, float* in, float* ou
     else
         min_rate = out_rate;
 
-    fc = 0.45 * (float)min_rate;
+    fc = 0.45f * (float)min_rate;
     full_rate = (float)(in_rate * a->L);
     fc_norm = fc / full_rate;
     a->ncoef = (int)(60.0 / fc_norm);
     a->ncoef = (a->ncoef / a->L + 1) * a->L;
     a->cpp = a->ncoef / a->L;
-    a->h = new float[a->ncoef]; // (float *) malloc0 (a->ncoef * sizeof (float));
-    impulse = FIR::fir_bandpass (a->ncoef, -fc_norm, +fc_norm, 1.0, 1, 0, (float)a->L);
+    a->h = new float[a->ncoef];
+    FIR::fir_bandpass (impulse, a->ncoef, -fc_norm, +fc_norm, 1.0, 1, 0, (float)a->L);
     i = 0;
 
-    for (j = 0; j < a->L; j ++)
+    for (int j = 0; j < a->L; j ++)
     {
-        for (k = 0; k < a->ncoef; k += a->L)
+        for (int k = 0; k < a->ncoef; k += a->L)
             a->h[i++] = impulse[j + k];
     }
 
     a->ringsize = a->cpp;
-    a->ring = new float[a->ringsize]; //(float *) malloc0 (a->ringsize * sizeof (float));
+    a->ring = new float[a->ringsize];
     a->idx_in = a->ringsize - 1;
     a->phnum = 0;
 
-    delete[] (impulse);
     return a;
 }
 
 void RESAMPLEF::destroy_resampleF (RESAMPLEF *a)
 {
-    delete[] (a->ring);
-    delete[] (a->h);
-    delete (a);
+    delete[] a->ring;
+    delete[] a->h;
+    delete a;
 }
 
 void RESAMPLEF::flush_resampleF (RESAMPLEF *a)
@@ -117,20 +120,20 @@ int RESAMPLEF::xresampleF (RESAMPLEF *a)
 
     if (a->run)
     {
-        int i, j, n;
+        int n;
         int idx_out;
         float I;
 
-        for (i = 0; i < a->size; i++)
+        for (int i = 0; i < a->size; i++)
         {
-            a->ring[a->idx_in] = (float)a->in[i];
+            a->ring[a->idx_in] = a->in[i];
 
             while (a->phnum < a->L)
             {
                 I = 0.0;
                 n = a->cpp * a->phnum;
 
-                for (j = 0; j < a->cpp; j++)
+                for (int j = 0; j < a->cpp; j++)
                 {
                     if ((idx_out = a->idx_in + j) >= a->ringsize)
                         idx_out -= a->ringsize;
@@ -138,7 +141,7 @@ int RESAMPLEF::xresampleF (RESAMPLEF *a)
                     I += a->h[n + j] * a->ring[idx_out];
                 }
 
-                a->out[outsamps] = (float)I;
+                a->out[outsamps] = I;
 
                 outsamps++;
                 a->phnum += a->M;
@@ -163,13 +166,13 @@ int RESAMPLEF::xresampleF (RESAMPLEF *a)
 
 void* RESAMPLEF::create_resampleFV (int in_rate, int out_rate)
 {
-    return (void *) create_resampleF (1, 0, 0, 0, in_rate, out_rate);
+    return (void *) create_resampleF (1, 0, nullptr, nullptr, in_rate, out_rate);
 }
 
 
 void RESAMPLEF::xresampleFV (float* input, float* output, int numsamps, int* outsamps, void* ptr)
 {
-    RESAMPLEF *a = (RESAMPLEF*) ptr;
+    auto *a = (RESAMPLEF*) ptr;
     a->in = input;
     a->out = output;
     a->size = numsamps;

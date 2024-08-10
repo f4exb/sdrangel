@@ -25,6 +25,8 @@ warren@wpratt.com
 
 */
 
+#include <vector>
+
 #include "comm.hpp"
 #include "fircore.hpp"
 #include "fir.hpp"
@@ -63,7 +65,7 @@ FMMOD::FMMOD(
     int _mp
 )
 {
-    float* impulse;
+    std::vector<float> impulse;
     run = _run;
     size = _size;
     in = _in;
@@ -79,9 +81,8 @@ FMMOD::FMMOD(
     nc = _nc;
     mp = _mp;
     calc();
-    impulse = FIR::fir_bandpass(nc, -bp_fc, +bp_fc, samplerate, 0, 1, 1.0 / (2 * size));
-    p = new FIRCORE(size, out, out, nc, mp, impulse);
-    delete[] impulse;
+    FIR::fir_bandpass(impulse, nc, -bp_fc, +bp_fc, samplerate, 0, 1, 1.0 / (2 * size));
+    p = new FIRCORE(size, out, out, nc, mp, impulse.data());
 }
 
 FMMOD::~FMMOD()
@@ -138,23 +139,21 @@ void FMMOD::setBuffers(float* _in, float* _out)
 
 void FMMOD::setSamplerate(int _rate)
 {
-    float* impulse;
+    std::vector<float> impulse;
     samplerate = _rate;
     calc();
-    impulse = FIR::fir_bandpass(nc, -bp_fc, +bp_fc, samplerate, 0, 1, 1.0 / (2 * size));
-    p->setImpulse(impulse, 1);
-    delete[] impulse;
+    FIR::fir_bandpass(impulse, nc, -bp_fc, +bp_fc, samplerate, 0, 1, 1.0 / (2 * size));
+    p->setImpulse(impulse.data(), 1);
 }
 
 void FMMOD::setSize(int _size)
 {
-    float* impulse;
+    std::vector<float> impulse;
     size = _size;
     calc();
     p->setSize(size);
-    impulse = FIR::fir_bandpass(nc, -bp_fc, +bp_fc, samplerate, 0, 1, 1.0 / (2 * size));
-    p->setImpulse(impulse, 1);
-    delete[] impulse;
+    FIR::fir_bandpass(impulse, nc, -bp_fc, +bp_fc, samplerate, 0, 1, 1.0 / (2 * size));
+    p->setImpulse(impulse.data(), 1);
 }
 
 /********************************************************************************************************
@@ -166,9 +165,9 @@ void FMMOD::setSize(int _size)
 void FMMOD::setDeviation(float _deviation)
 {
     double _bp_fc = f_high + _deviation;
-    float* impulse = FIR::fir_bandpass (nc, -_bp_fc, +_bp_fc, samplerate, 0, 1, 1.0 / (2 * size));
-    p->setImpulse(impulse, 0);
-    delete[] impulse;
+    std::vector<float> impulse;
+    FIR::fir_bandpass (impulse, nc, -_bp_fc, +_bp_fc, samplerate, 0, 1, 1.0 / (2 * size));
+    p->setImpulse(impulse.data(), 0);
     deviation = _deviation;
     // mod
     sphase = 0.0;
@@ -192,14 +191,13 @@ void FMMOD::setCTCSSRun (int _run)
 
 void FMMOD::setNC(int _nc)
 {
-    float* impulse;
+    std::vector<float> impulse;
 
     if (nc != _nc)
     {
         nc = _nc;
-        impulse = FIR::fir_bandpass (nc, -bp_fc, +bp_fc, samplerate, 0, 1, 1.0 / (2 * size));
-        p->setNc(nc, impulse);
-        delete[] impulse;
+        FIR::fir_bandpass (impulse, nc, -bp_fc, +bp_fc, samplerate, 0, 1, 1.0 / (2 * size));
+        p->setNc(nc, impulse.data());
     }
 }
 
@@ -214,16 +212,15 @@ void FMMOD::setMP(int _mp)
 
 void FMMOD::setAFFreqs(float _low, float _high)
 {
-    float* impulse;
+    std::vector<float> impulse;
 
     if (f_low != _low || f_high != _high)
     {
         f_low = _low;
         f_high = _high;
         bp_fc = deviation + f_high;
-        impulse = FIR::fir_bandpass (nc, -bp_fc, +bp_fc, samplerate, 0, 1, 1.0 / (2 * size));
-        p->setImpulse(impulse, 1);
-        delete[] impulse;
+        FIR::fir_bandpass (impulse, nc, -bp_fc, +bp_fc, samplerate, 0, 1, 1.0 / (2 * size));
+        p->setImpulse(impulse.data(), 1);
     }
 }
 

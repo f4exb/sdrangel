@@ -35,7 +35,7 @@ warren@pratt.one
 
 namespace WDSP {
 
-void FIR::fftcv_mults (std::vector<float>& mults, int NM, float* c_impulse)
+void FIR::fftcv_mults (std::vector<float>& mults, int NM, const float* c_impulse)
 {
     mults.resize(NM * 2);
     std::vector<float> cfft_impulse(NM * 2);
@@ -199,9 +199,9 @@ void FIR::fir_fsamp (std::vector<float>& c_impulse, int N, const float* A, int r
     }
 }
 
-float* FIR::fir_bandpass (int N, double f_low, double f_high, double samplerate, int wintype, int rtype, double scale)
+void FIR::fir_bandpass (std::vector<float>& c_impulse, int N, double f_low, double f_high, double samplerate, int wintype, int rtype, double scale)
 {
-    auto *c_impulse = new float[N * 2];
+    c_impulse.resize(N * 2);
     double ft = (f_high - f_low) / (2.0 * samplerate);
     double ft_rad = TWOPI * ft;
     double w_osc = PI * (f_high + f_low) / samplerate;
@@ -273,7 +273,6 @@ float* FIR::fir_bandpass (int N, double f_low, double f_high, double samplerate,
             break;
         }
     }
-    return c_impulse;
 }
 
 void FIR::fir_read (std::vector<float>& c_impulse, int N, const char *filename, int rtype, float scale)

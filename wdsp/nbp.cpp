@@ -158,21 +158,20 @@ void NOTCHDB::getNumNotches(int* _nnotches) const
 *                                                                                                       *
 ********************************************************************************************************/
 
-float* NBP::fir_mbandpass (int N, int nbp, const double* flow, const double* fhigh, double rate, double scale, int wintype)
+void NBP::fir_mbandpass (std::vector<float>& impulse, int N, int nbp, const double* flow, const double* fhigh, double rate, double scale, int wintype)
 {
-    auto* impulse = new float[N * 2];
-    std::fill(impulse, impulse + N*2, 0);
+    impulse.resize(N * 2);
+    std::fill(impulse.begin(), impulse.end(), 0);
     for (int k = 0; k < nbp; k++)
     {
-        float* imp = FIR::fir_bandpass (N, flow[k], fhigh[k], rate, wintype, 1, scale);
+        std::vector<float> imp;
+        FIR::fir_bandpass (imp, N, flow[k], fhigh[k], rate, wintype, 1, scale);
         for (int i = 0; i < N; i++)
         {
             impulse[2 * i + 0] += imp[2 * i + 0];
             impulse[2 * i + 1] += imp[2 * i + 1];
         }
-        delete[] imp;
     }
-    return impulse;
 }
 
 double NBP::min_notch_width() const
@@ -324,7 +323,8 @@ void NBP::calc_lightweight()
                 bplow[i]  -= offset;
                 bphigh[i] -= offset;
             }
-            impulse = fir_mbandpass (
+            fir_mbandpass (
+                impulse,
                 nc,
                 numpb,
                 bplow.data(),
@@ -333,9 +333,8 @@ void NBP::calc_lightweight()
                 gain / (float)(2 * size),
                 wintype
             );
-            fircore->setImpulse(impulse, 1);
+            fircore->setImpulse(impulse.data(), 1);
             // print_impulse ("nbp.txt", size + 1, impulse, 1, 0);
-            delete[] impulse;
         }
         hadnotch = havnotch;
     }
@@ -375,7 +374,8 @@ void NBP::calc_impulse ()
             bplow[i]  -= offset;
             bphigh[i] -= offset;
         }
-        impulse = fir_mbandpass (
+        fir_mbandpass (
+            impulse,
             nc,
             numpb,
             bplow.data(),
@@ -387,7 +387,8 @@ void NBP::calc_impulse ()
     }
     else
     {
-        impulse = FIR::fir_bandpass(
+        FIR::fir_bandpass(
+            impulse,
             nc,
             flow,
             fhigh,
@@ -437,14 +438,12 @@ NBP::NBP(
     bplow.resize(maxpb);
     bphigh.resize(maxpb);
     calc_impulse ();
-    fircore = new FIRCORE(size, in, out, nc, mp, impulse);
-    // print_impulse ("nbp.txt", size + 1, impulse, 1, 0);
-    delete[]impulse;
+    fircore = new FIRCORE(size, in, out, nc, mp, impulse.data());
 }
 
 NBP::~NBP()
 {
-    delete (fircore);
+    delete fircore;
 }
 
 void NBP::flush()
@@ -471,8 +470,7 @@ void NBP::setSamplerate(int _rate)
 {
     rate = _rate;
     calc_impulse ();
-    fircore->setImpulse(impulse, 1);
-    delete[] impulse;
+    fircore->setImpulse(impulse.data(), 1);
 }
 
 void NBP::setSize(int _size)
@@ -481,15 +479,13 @@ void NBP::setSize(int _size)
     size = _size;
     fircore->setSize(size);
     calc_impulse ();
-    fircore->setImpulse(impulse, 1);
-    delete[] impulse;
+    fircore->setImpulse(impulse.data(), 1);
 }
 
 void NBP::setNc()
 {
     calc_impulse();
-    fircore->setNc(nc, impulse);
-    delete[] impulse;
+    fircore->setNc(nc, impulse.data());
 }
 
 void NBP::setMp()
@@ -517,8 +513,7 @@ void NBP::SetFreqs(double _flow, double _fhigh)
         flow = _flow;
         fhigh = _fhigh;
         calc_impulse();
-        fircore->setImpulse(impulse, 1);
-        delete[] impulse;
+        fircore->setImpulse(impulse.data(), 1);
     }
 }
 

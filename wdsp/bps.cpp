@@ -42,14 +42,22 @@ namespace WDSP {
 
 void BPS::calc()
 {
-    float* impulse;
     infilt.resize(2 * size * 2);
     product.resize(2 * size * 2);
-    impulse = FIR::fir_bandpass(size + 1, f_low, f_high, samplerate, wintype, 1, 1.0 / (float)(2 * size));
-    FIR::fftcv_mults(mults, 2 * size, impulse);
+    std::vector<float> impulse;
+    FIR::fir_bandpass(
+        impulse,
+        size + 1,
+        f_low,
+        f_high,
+        samplerate,
+        wintype,
+        1,
+        1.0 / (float)(2 * size)
+    );
+    FIR::fftcv_mults(mults, 2 * size, impulse.data());
     CFor = fftwf_plan_dft_1d(2 * size, (fftwf_complex *) infilt.data(), (fftwf_complex *) product.data(), FFTW_FORWARD, FFTW_PATIENT);
     CRev = fftwf_plan_dft_1d(2 * size, (fftwf_complex *) product.data(), (fftwf_complex *) out, FFTW_BACKWARD, FFTW_PATIENT);
-    delete[]impulse;
 }
 
 void BPS::decalc()

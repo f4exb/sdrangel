@@ -34,6 +34,8 @@ warren@wpratt.com
 #ifndef wdsp_firopt_h
 #define wdsp_firopt_h
 
+#include <vector>
+
 #include "fftw3.h"
 #include "export.h"
 
