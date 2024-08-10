@@ -157,7 +157,6 @@ void USLEW::setBuffers(float* _in, float* _out)
 
 void USLEW::setSamplerate(int _rate)
 {
-    decalc();
     rate = _rate;
     calc();
 }
@@ -177,7 +176,6 @@ void USLEW::setSize(int _size)
 void USLEW::setuSlewTime(double _time)
 {
     // NOTE:  'time' is in seconds
-    decalc();
     tupslew = _time;
     calc();
 }

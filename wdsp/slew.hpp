@@ -85,7 +85,6 @@ public:
 
 private:
     void calc();
-    void decalc();
 };
 
 } // namespace WDSP
