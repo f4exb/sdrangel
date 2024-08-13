@@ -28,12 +28,13 @@ warren@wpratt.com
 #ifndef wdsp_emnr_h
 #define wdsp_emnr_h
 
+#include <array>
+#include <vector>
+
 #include "fftw3.h"
 #include "export.h"
 
 namespace WDSP {
-
-class RXA;
 
 class WDSP_API EMNR
 {
@@ -46,18 +47,18 @@ public:
     int fsize;
     int ovrlp;
     int incr;
-    float* window;
+    std::vector<float> window;
     int iasize;
-    float* inaccum;
-    float* forfftin;
-    float* forfftout;
+    std::vector<float> inaccum;
+    std::vector<float> forfftin;
+    std::vector<float> forfftout;
     int msize;
-    double* mask;
-    float* revfftin;
-    float* revfftout;
-    float** save;
+    std::vector<double> mask;
+    std::vector<float> revfftin;
+    std::vector<float> revfftout;
+    std::vector<std::vector<float>> save;
     int oasize;
-    float* outaccum;
+    std::vector<float> outaccum;
     double rate;
     int wintype;
     double ogain;
@@ -71,18 +72,21 @@ public:
     int saveidx;
     fftwf_plan Rfor;
     fftwf_plan Rrev;
-    struct _g
+
+    struct G
     {
+        int incr;
+        double rate;
+        int msize;
+        std::vector<double>& mask;
+        const std::vector<float>& y;
         int gain_method;
         int npe_method;
         int ae_run;
-        double msize;
-        double* mask;
-        float* y;
-        double* lambda_y;
-        double* lambda_d;
-        double* prev_mask;
-        double* prev_gamma;
+        std::vector<double> lambda_y;
+        std::vector<double> lambda_d;
+        std::vector<double> prev_mask;
+        std::vector<double> prev_gamma;
         double gf1p5;
         double alpha;
         double eps_floor;
@@ -90,80 +94,158 @@ public:
         double q;
         double gmax;
         //
-        double* GG;
-        double* GGS;
+        std::array<double, 241*241> GG;
+        std::array<double, 241*241> GGS;
         FILE* fileb;
-    } g;
-    struct _npest
+
+        G(
+            int incr,
+            double rate,
+            int msize,
+            std::vector<double>& mask,
+            const std::vector<float>& y
+        );
+        G(const G&) = delete;
+        G& operator=(const G& other) = delete;
+        ~G() = default;
+
+        void calc_gamma0();
+        void calc_gamma1();
+        void calc_gamma2();
+        void calc_lambda_y();
+
+    private:
+        static double getKey(const std::array<double, 241*241>& type, double gamma, double xi);
+        static double e1xb (double x);
+        static double bessI0 (double x);
+        static double bessI1 (double x);
+    };
+    G *g;
+
+    struct NP
     {
         int incr;
         double rate;
         int msize;
-        double* lambda_y;
-        double* lambda_d;
-        double* p;
-        double* alphaOptHat;
-        double alphaC;
+        std::vector<double>& lambda_y;
+        std::vector<double>& lambda_d;
         double alphaCsmooth;
-        double alphaCmin;
-        double* alphaHat;
         double alphaMax;
-        double* sigma2N;
+        double alphaCmin;
         double alphaMin_max_value;
         double snrq;
         double betamax;
-        double* pbar;
-        double* p2bar;
         double invQeqMax;
         double av;
-        double* Qeq;
-        int U;
         double Dtime;
+        int U;
         int V;
         int D;
+        std::vector<double> p;
+        std::vector<double> alphaOptHat;
+        double alphaC;
+        std::vector<double> alphaHat;
+        std::vector<double> sigma2N;
+        std::vector<double> pbar;
+        std::vector<double> p2bar;
+        std::vector<double> Qeq;
         double MofD;
         double MofV;
-        double* bmin;
-        double* bmin_sub;
-        int* k_mod;
-        double* actmin;
-        double* actmin_sub;
+        std::array<double, 4> invQbar_points;
+        std::array<double, 4> nsmax;
+        std::vector<double> bmin;
+        std::vector<double> bmin_sub;
+        std::vector<int> k_mod;
+        std::vector<double> actmin;
+        std::vector<double> actmin_sub;
         int subwc;
-        int* lmin_flag;
-        double* pmin_u;
-        double invQbar_points[4];
-        double nsmax[4];
-        double** actminbuff;
+        std::vector<int> lmin_flag;
+        std::vector<double> pmin_u;
+        std::vector<std::vector<double>> actminbuff;
         int amb_idx;
-    } np;
-    struct _npests
+
+        NP(
+            int incr,
+            double rate,
+            int msize,
+            std::vector<double>& lambda_y,
+            std::vector<double>& lambda_d
+        );
+        NP(const NP&) = delete;
+        NP& operator=(const NP& other) = delete;
+        ~NP() = default;
+
+        void LambdaD();
+
+    private:
+        static const std::array<double, 18> DVals;
+        static const std::array<double, 18> MVals;
+        static void interpM (
+            double* res,
+            double x,
+            int nvals,
+            const std::array<double, 18>& xvals,
+            const std::array<double, 18>& yvals
+        );
+    };
+    NP *np;
+
+    struct NPS
     {
         int incr;
         double rate;
         int msize;
-        double* lambda_y;
-        double* lambda_d;
+        const std::vector<double>& lambda_y;
+        std::vector<double>& lambda_d;
 
         double alpha_pow;
         double alpha_Pbar;
         double epsH1;
         double epsH1r;
 
-        double* sigma2N;
-        double* PH1y;
-        double* Pbar;
-        double* EN2y;
-    } nps;
-    struct _ae
+        std::vector<double> sigma2N;
+        std::vector<double> PH1y;
+        std::vector<double> Pbar;
+        std::vector<double> EN2y;
+
+        NPS(
+            int incr,
+            double rate,
+            int msize,
+            const std::vector<double>& lambda_y,
+            std::vector<double>& lambda_d,
+            double alpha_pow,
+            double alpha_Pbar,
+            double epsH1
+        );
+        NPS(const NPS&) = delete;
+        NPS& operator=(const NPS& other) = delete;
+        ~NPS() = default;
+
+        void LambdaDs();
+    };
+    NPS *nps;
+    struct AE
     {
         int msize;
-        double* lambda_y;
+        const std::vector<double>& lambda_y;
         double zetaThresh;
         double psi;
-        double* nmask;
-    } ae;
+        std::vector<double> nmask;
 
-    static EMNR* create_emnr (
+        AE(
+            int msize,
+            const std::vector<double>& lambda_y,
+            double zetaThresh,
+            double psi
+        );
+        AE(const AE&) = delete;
+        AE& operator=(const AE& other) = delete;
+        ~AE() = default;
+    };
+    AE *ae;
+
+    EMNR(
         int run,
         int position,
         int size,
@@ -178,34 +260,28 @@ public:
         int npe_method,
         int ae_run
     );
-    static void destroy_emnr (EMNR *a);
-    static void flush_emnr (EMNR *a);
-    static void xemnr (EMNR *a, int pos);
-    static void setBuffers_emnr (EMNR *a, float* in, float* out);
-    static void setSamplerate_emnr (EMNR *a, int rate);
-    static void setSize_emnr (EMNR *a, int size);
-    // RXA Properties
-    static void SetEMNRRun (RXA& rxa, int run);
-    static void SetEMNRgainMethod (RXA& rxa, int method);
-    static void SetEMNRnpeMethod (RXA& rxa, int method);
-    static void SetEMNRaeRun (RXA& rxa, int run);
-    static void SetEMNRPosition (RXA& rxa, int position);
-    static void SetEMNRaeZetaThresh (RXA& rxa, double zetathresh);
-    static void SetEMNRaePsi (RXA& rxa, double psi);
+    EMNR(const EMNR&) = delete;
+    EMNR& operator=(const EMNR& other) = delete;
+    ~EMNR();
+
+    void flush();
+    void execute(int pos);
+    void setBuffers(float* in, float* out);
+    void setSamplerate(int rate);
+    void setSize(int size);
+    // Public Properties
+    void setGainMethod(int method);
+    void setNpeMethod(int method);
+    void setAeRun(int run);
+    void setAeZetaThresh(double zetathresh);
+    void setAePsi(double psi);
 
 private:
-    static double bessI0 (double x);
-    static double bessI1 (double x);
-    static double e1xb (double x);
-    static void calc_window (EMNR *a);
-    static void interpM (double* res, double x, int nvals, double* xvals, double* yvals);
-    static void calc_emnr(EMNR *a);
-    static void decalc_emnr(EMNR *a);
-    static void LambdaD(EMNR *a);
-    static void LambdaDs (EMNR *a);
-    static void aepf(EMNR *a);
-    static double getKey(double* type, double gamma, double xi);
-    static void calc_gain (EMNR *a);
+    void calc_window();
+    void calc();
+    void decalc();
+    void aepf();
+    void calc_gain();
 };
 
 } // namespace WDSP

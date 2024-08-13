@@ -28,20 +28,11 @@ warren@wpratt.com
 #ifndef wdsp_amd_hpp
 #define wdsp_amd_hpp
 
-// ff defines for sbdemod
-#ifndef STAGES
-#define STAGES      7
-#endif
-
-#ifndef OUT_IDX
-#define OUT_IDX     (3 * STAGES)
-#endif
+#include <array>
 
 #include "export.h"
 
 namespace WDSP {
-
-class RXA;
 
 class WDSP_API AMD {
 public:
@@ -61,26 +52,29 @@ public:
     double phs;                         // pll - phase accumulator
     double omega;                       // pll - locked pll frequency
     double fil_out;                     // pll - filter output
-    double g1, g2;                      // pll - filter gain parameters
+    double g1;                          // pll - filter gain parameters
+    double g2;                          // pll - filter gain parameters
     double tauR;                        // carrier removal time constant
     double tauI;                        // carrier insertion time constant
     double mtauR;                       // carrier removal multiplier
     double onem_mtauR;                  // 1.0 - carrier_removal_multiplier
     double mtauI;                       // carrier insertion multiplier
     double onem_mtauI;                  // 1.0 - carrier_insertion_multiplier
-    double a[3 * STAGES + 3];           // Filter a variables
-    double b[3 * STAGES + 3];           // Filter b variables
-    double c[3 * STAGES + 3];           // Filter c variables
-    double d[3 * STAGES + 3];           // Filter d variables
-    double c0[STAGES];                  // Filter coefficients - path 0
-    double c1[STAGES];                  // Filter coefficients - path 1
+    static const int STAGES = 7;
+    static const int OUT_IDX = 3 * STAGES;
+    std::array<double, 3*STAGES + 3> a; // Filter a variables
+    std::array<double, 3*STAGES + 3> b; // Filter b variables
+    std::array<double, 3*STAGES + 3> c; // Filter c variables
+    std::array<double, 3*STAGES + 3> d; // Filter d variables
+    std::array<double, STAGES> c0;      // Filter coefficients - path 0
+    std::array<double, STAGES> c1;      // Filter coefficients - path 1
     double dsI;                         // delayed sample, I path
     double dsQ;                         // delayed sample, Q path
     double dc_insert;                   // dc component to insert in output
     int sbmode;                         // sideband mode
     int levelfade;                      // Fade Leveler switch
 
-    static AMD* create_amd
+    AMD
     (
         int run,
         int buff_size,
@@ -97,18 +91,19 @@ public:
         double tauR,
         double tauI
     );
+    AMD(const AMD&) = delete;
+    AMD& operator=(const AMD& other) = delete;
+    ~AMD() = default;
 
-    static void init_amd (AMD *a);
-    static void destroy_amd (AMD *a);
-    static void flush_amd (AMD *a);
-    static void xamd (AMD *a);
-    static void setBuffers_amd (AMD *a, float* in, float* out);
-    static void setSamplerate_amd (AMD *a, int rate);
-    static void setSize_amd (AMD *a, int size);
-    // RXA Properties
-    static void SetAMDRun(RXA& rxa, int run);
-    static void SetAMDSBMode(RXA& rxa, int sbmode);
-    static void SetAMDFadeLevel(RXA& rxa, int levelfade);
+    void init();
+    void flush();
+    void execute();
+    void setBuffers(float* in, float* out);
+    void setSamplerate(int rate);
+    void setSize(int size);
+    // Public Properties
+    void setSBMode(int sbmode);
+    void setFadeLevel(int levelfade);
 };
 
 } // namespace WDSP

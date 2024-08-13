@@ -28,6 +28,8 @@ warren@wpratt.com
 #ifndef wdsp_varsamp_h
 #define wdsp_varsamp_h
 
+#include <vector>
+
 #include "export.h"
 
 namespace WDSP {
@@ -47,9 +49,9 @@ public:
     float gain;
     int idx_in;
     int ncoef;
-    float* h;
+    std::vector<float> h;
     int rsize;
-    float* ring;
+    std::vector<float> ring;
     float var;
     int varmode;
     float cvar;
@@ -57,13 +59,13 @@ public:
     float old_inv_cvar;
     float dicvar;
     float delta;
-    float* hs;
+    std::vector<float> hs;
     int R;
     float h_offset;
     float isamps;
     float nom_ratio;
 
-    static VARSAMP* create_varsamp (
+    VARSAMP(
         int run,
         int size,
         float* in,
@@ -77,24 +79,26 @@ public:
         float var,
         int varmode
     );
-    static void destroy_varsamp (VARSAMP *a);
-    static void flush_varsamp (VARSAMP *a);
-    static int xvarsamp (VARSAMP *a, float var);
-    static void setBuffers_varsamp (VARSAMP *a, float* in, float* out);
-    static void setSize_varsamp (VARSAMP *a, int size);
-    static void setInRate_varsamp (VARSAMP *a, int rate);
-    static void setOutRate_varsamp (VARSAMP *a, int rate);
-    static void setFCLow_varsamp (VARSAMP *a, float fc_low);
-    static void setBandwidth_varsamp (VARSAMP *a, float fc_low, float fc_high);
+    VARSAMP(const VARSAMP&) = delete;
+    VARSAMP& operator=(VARSAMP& other) = delete;
+    ~VARSAMP() = default;
+
+    void flush();
+    int execute(float var);
+    void setBuffers(float* in, float* out);
+    void setSize(int size);
+    void setInRate(int rate);
+    void setOutRate(int rate);
+    void setFCLow(float fc_low);
+    void setBandwidth(float fc_low, float fc_high);
     // Exported calls
     static void* create_varsampV (int in_rate, int out_rate, int R);
     static void xvarsampV (float* input, float* output, int numsamps, float var, int* outsamps, void* ptr);
     static void destroy_varsampV (void* ptr);
 
 private:
-    static void calc_varsamp (VARSAMP *a);
-    static void decalc_varsamp (VARSAMP *a);
-    static void hshift (VARSAMP *a);
+    void calc();
+    void hshift();
 };
 
 } // namespace WDSP

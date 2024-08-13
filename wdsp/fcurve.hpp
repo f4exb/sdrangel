@@ -28,6 +28,8 @@ warren@wpratt.com
 #ifndef wdsp_fcurve_h
 #define wdsp_fcurve_h
 
+#include <vector>
+
 #include "export.h"
 
 namespace WDSP {
@@ -35,8 +37,8 @@ namespace WDSP {
 class WDSP_API FCurve
 {
 public:
-    static float* fc_impulse (int nc, float f0, float f1, float g0, float g1, int curve, float samplerate, float scale, int ctfmode, int wintype);
-    static float* fc_mults (int size, float f0, float f1, float g0, float g1, int curve, float samplerate, float scale, int ctfmode, int wintype);
+    static void fc_impulse (std::vector<float>& impulse, int nc, float f0, float f1, float g0, float g1, int curve, float samplerate, float scale, int ctfmode, int wintype);
+    static void fc_mults   (std::vector<float>& mults, int size, float f0, float f1, float g0, float g1, int curve, float samplerate, float scale, int ctfmode, int wintype);
 };
 
 } // namespace WDSP

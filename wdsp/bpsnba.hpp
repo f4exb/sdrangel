@@ -28,14 +28,15 @@ warren@wpratt.com
 #ifndef wdsp_bpsnba_h
 #define wdsp_bpsnba_h
 
-namespace WDSP{
+#include <vector>
 
-class RXA;
+#include "export.h"
+namespace WDSP{
 
 class NOTCHDB;
 class NBP;
 
-class BPSNBA
+class WDSP_API BPSNBA
 {
 public:
     int run;                        // run the filter
@@ -47,19 +48,19 @@ public:
     float* in;                     // input buffer
     float* out;                    // output buffer
     int rate;                       // sample rate
-    float* buff;                   // internal buffer
-    NBP *bpsnba;                     // pointer to the notched bandpass filter, nbp
-    double f_low;                   // low cutoff frequency
-    double f_high;                  // high cutoff frequency
     double abs_low_freq;            // lowest positive freq supported by SNB
     double abs_high_freq;           // highest positive freq supported by SNG
+    double f_low;                   // low cutoff frequency
+    double f_high;                  // high cutoff frequency
+    std::vector<float> buff;        // internal buffer
     int wintype;                    // filter window type
     double gain;                    // filter gain
     int autoincr;                   // use auto increment for notch width
     int maxpb;                      // maximum passband segments supported
-    NOTCHDB* ptraddr;               // pointer to address of NOTCH DATABASE
+    NOTCHDB* notchdb;               // pointer to address of NOTCH DATABASE
+    NBP *bpsnba;                     // pointer to the notched bandpass filter, nbp
 
-    static BPSNBA* create_bpsnba (
+    BPSNBA(
         int run,
         int run_notches,
         int position,
@@ -77,23 +78,26 @@ public:
         double gain,
         int autoincr,
         int maxpb,
-        NOTCHDB* ptraddr
+        NOTCHDB* notchdb
     );
-    static void destroy_bpsnba (BPSNBA *a);
-    static void flush_bpsnba (BPSNBA *a);
-    static void setBuffers_bpsnba (BPSNBA *a, float* in, float* out);
-    static void setSamplerate_bpsnba (BPSNBA *a, int rate);
-    static void setSize_bpsnba (BPSNBA *a, int size);
-    static void xbpsnbain (BPSNBA *a, int position);
-    static void xbpsnbaout (BPSNBA *a, int position);
-    static void recalc_bpsnba_filter (BPSNBA *a, int update);
-    // RXA Propertoes
-    static void BPSNBASetNC (RXA& rxa, int nc);
-    static void BPSNBASetMP (RXA& rxa, int mp);
+    BPSNBA(const BPSNBA&) = delete;
+    BPSNBA& operator=(BPSNBA& other) = delete;
+    ~BPSNBA();
+
+    void flush();
+    void setBuffers(float* in, float* out);
+    void setSamplerate(int rate);
+    void setSize(int size);
+    void exec_in(int position);
+    void exec_out(int position);
+    void recalc_bpsnba_filter(int update);
+    // Propertoes
+    void SetNC(int nc);
+    void SetMP(int mp);
 
 private:
-    static void calc_bpsnba (BPSNBA *a);
-    static void decalc_bpsnba (BPSNBA *a);
+    void calc();
+    void decalc();
 };
 
 

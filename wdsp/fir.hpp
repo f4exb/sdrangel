@@ -27,6 +27,8 @@ warren@pratt.one
 #ifndef wdsp_fir_h
 #define wdsp_fir_h
 
+#include <vector>
+
 #include "export.h"
 
 namespace WDSP {
@@ -34,17 +36,17 @@ namespace WDSP {
 class WDSP_API FIR
 {
 public:
-    static float* fftcv_mults (int NM, float* c_impulse);
-    static float* fir_fsamp_odd (int N, float* A, int rtype, double scale, int wintype);
-    static float* fir_fsamp (int N, float* A, int rtype, double scale, int wintype);
-    static float* fir_bandpass (int N, double f_low, double f_high, double samplerate, int wintype, int rtype, double scale);
-    static void mp_imp (int N, float* fir, float* mpfir, int pfactor, int polarity);
+    static void fftcv_mults (std::vector<float>& mults, int NM, const float* impulse);
+    static void fir_fsamp_odd (std::vector<float>& c_impulse, int N, const float* A, int rtype, double scale, int wintype);
+    static void fir_fsamp (std::vector<float>& c_impulse, int N, const float* A, int rtype, double scale, int wintype);
+    static void fir_bandpass (std::vector<float>& impulse, int N, double f_low, double f_high, double samplerate, int wintype, int rtype, double scale);
+    static void mp_imp (int N, std::vector<float>& fir, std::vector<float>& mpfir, int pfactor, int polarity);
 
 private:
     static void analytic (int N, float* in, float* out);
-    static float* get_fsamp_window(int N, int wintype);
-    static float *fir_read (int N, const char *filename, int rtype, float scale);
-    static float* zff_impulse(int nc, float scale);
+    static void get_fsamp_window(std::vector<float>& window, int N, int wintype);
+    static void fir_read (std::vector<float>& impulse, int N, const char *filename, int rtype, float scale);
+    static void zff_impulse(std::vector<float>& impulse, int nc, float scale);
 };
 
 #endif

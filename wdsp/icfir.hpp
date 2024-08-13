@@ -55,7 +55,7 @@ public:
     int wintype;
     FIRCORE *p;
 
-    static ICFIR* create_icfir (
+    ICFIR(
         int run,
         int size,
         int nc,
@@ -72,14 +72,18 @@ public:
         float xbw,
         int wintype
     );
-    static void destroy_icfir (ICFIR *a);
-    static void flush_icfir (ICFIR *a);
-    static void xicfir (ICFIR *a);
-    static void setBuffers_icfir (ICFIR *a, float* in, float* out);
-    static void setSamplerate_icfir (ICFIR *a, int rate);
-    static void setSize_icfir (ICFIR *a, int size);
-    static void setOutRate_icfir (ICFIR *a, int rate);
-    static float* icfir_impulse (
+    ICFIR(const ICFIR&) = delete;
+    ICFIR& operator=(const ICFIR& other) = delete;
+    ~ICFIR();
+
+    void flush();
+    void execute();
+    void setBuffers(float* in, float* out);
+    void setSamplerate(int rate);
+    void setSize(int size);
+    void setOutRate(int rate);
+    static void icfir_impulse(
+        std::vector<float>& impulse,
         int N,
         int DD,
         int R,
@@ -95,8 +99,8 @@ public:
     );
 
 private:
-    static void calc_icfir (ICFIR *a);
-    static void decalc_icfir (ICFIR *a);
+    void calc();
+    void decalc();
 };
 
 } // namespace WDSP

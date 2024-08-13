@@ -28,6 +28,8 @@ warren@wpratt.com
 #ifndef wdsp_slew_h
 #define wdsp_slew_h
 
+#include <vector>
+
 #include "export.h"
 
 namespace WDSP {
@@ -37,42 +39,52 @@ class TXA;
 class WDSP_API USLEW
 {
 public:
-    TXA *txa;
+    enum class _USLEW
+    {
+        BEGIN,
+        WAIT,
+        UP,
+        ON
+    };
+
     long *ch_upslew;
     int size;
     float* in;
     float* out;
-    float rate;
-    float tdelay;
-    float tupslew;
+    double rate;
+    double tdelay;
+    double tupslew;
     int runmode;
-    int state;
+    _USLEW state;
     int count;
     int ndelup;
     int ntup;
-    float* cup;
+    std::vector<double> cup;
 
-    static USLEW* create_uslew (
-        TXA *txa,
+    USLEW(
         long *ch_upslew,
-        int size, float* in,
+        int size,
+        float* in,
         float* out,
-        float rate,
-        float tdelay,
-        float tupslew
+        double rate,
+        double tdelay,
+        double tupslew
     );
-    static void destroy_uslew (USLEW *a);
-    static void flush_uslew (USLEW *a);
-    static void xuslew (USLEW *a);
-    static void setBuffers_uslew (USLEW *a, float* in, float* out);
-    static void setSamplerate_uslew (USLEW *a, int rate);
-    static void setSize_uslew (USLEW *a, int size);
+    USLEW(const USLEW&) = delete;
+    USLEW& operator=(const USLEW& other) = delete;
+    ~USLEW() = default;
+
+    void flush();
+    void execute (int check);
+    void setBuffers(float* in, float* out);
+    void setSamplerate(int rate);
+    void setSize(int size);
     // TXA Properties
-    static void SetuSlewTime (TXA& txa, float time);
+    void setuSlewTime(double time);
+    void setRun(int run);
 
 private:
-    static void calc_uslew (USLEW *a);
-    static void decalc_uslew (USLEW *a);
+    void calc();
 };
 
 } // namespace WDSP

@@ -28,8 +28,7 @@ warren@pratt.one
 #include "comm.hpp"
 #include "cblock.hpp"
 #include "ssql.hpp"
-#include "iir.hpp"
-#include "RXA.hpp"
+#include "dbqlp.hpp"
 
 namespace WDSP {
 
@@ -39,76 +38,76 @@ namespace WDSP {
 *                                                                                                       *
 ********************************************************************************************************/
 
-FTOV* FTOV::create_ftov (int run, int size, int rate, int rsize, double fmax, float* in, float* out)
+FTOV::FTOV(
+    int _run,
+    int _size,
+    int _rate,
+    int _rsize,
+    double _fmax,
+    float* _in,
+    float* _out
+)
 {
-    FTOV *a = new FTOV;
-    a->run = run;
-    a->size = size;
-    a->rate = rate;
-    a->rsize = rsize;
-    a->fmax = fmax;
-    a->in = in;
-    a->out = out;
-    a->eps = 0.01;
-    a->ring = new int[a->rsize]; // (int*) malloc0 (a->rsize * sizeof (int));
-    a->rptr = 0;
-    a->inlast = 0.0;
-    a->rcount = 0;
-    a->div = a->fmax * 2.0 * a->rsize / a->rate;                // fmax * 2 = zero-crossings/sec
+    run = _run;
+    size = _size;
+    rate = _rate;
+    rsize = _rsize;
+    fmax = _fmax;
+    in = _in;
+    out = _out;
+    eps = 0.01;
+    ring.resize(rsize);
+    rptr = 0;
+    inlast = 0.0;
+    rcount = 0;
+    div = fmax * 2.0 * rsize / rate;                // fmax * 2 = zero-crossings/sec
                                                                 // rsize / rate = sec of data in ring
                                                                 // product is # zero-crossings in ring at fmax
-    return a;
 }
 
-void FTOV::destroy_ftov (FTOV *a)
+void FTOV::flush()
 {
-    delete[] (a->ring);
-    delete (a);
+    std::fill(ring.begin(), ring.end(), 0);
+    rptr = 0;
+    rcount = 0;
+    inlast = 0.0;
 }
 
-void FTOV::flush_ftov (FTOV *a)
-{
-    memset (a->ring, 0, a->rsize * sizeof (int));
-    a->rptr = 0;
-    a->rcount = 0;
-    a->inlast = 0.0;
-}
-
-void FTOV::xftov (FTOV *a)
+void FTOV::execute()
 {
     // 'ftov' does frequency to voltage conversion looking only at zero crossings of an
     //     AC (DC blocked) signal, i.e., ignoring signal amplitude.
-    if (a->run)
+    if (run)
     {
-        if (a->ring[a->rptr] == 1)                              // if current ring location is a '1' ...
+        if (ring[rptr] == 1)                              // if current ring location is a '1' ...
         {
-            a->rcount--;                                        // decrement the count
-            a->ring[a->rptr] = 0;                               // set the location to '0'
+            rcount--;                                        // decrement the count
+            ring[rptr] = 0;                               // set the location to '0'
         }
-        if ((a->inlast * a->in[0] < 0.0) &&                     // different signs mean zero-crossing
-            (fabs (a->inlast - a->in[0]) > a->eps))
+        if ((inlast * in[0] < 0.0) &&                     // different signs mean zero-crossing
+            (fabs (inlast - in[0]) > eps))
         {
-            a->ring[a->rptr] = 1;                               // set the ring location to '1'
-            a->rcount++;                                        // increment the count
+            ring[rptr] = 1;                               // set the ring location to '1'
+            rcount++;                                        // increment the count
         }
-        if (++a->rptr == a->rsize) a->rptr = 0;                 // increment and wrap the pointer as needed
-        a->out[0] = std::min (1.0, (double)a->rcount / a->div);      // calculate the output sample
-        a->inlast = a->in[a->size - 1];                         // save the last input sample for next buffer
-        for (int i = 1; i < a->size; i++)
+        if (++rptr == rsize) rptr = 0;                 // increment and wrap the pointer as needed
+        out[0] = (float) std::min (1.0, (double)rcount / div);      // calculate the output sample
+        inlast = in[size - 1];                         // save the last input sample for next buffer
+        for (int i = 1; i < size; i++)
         {
-            if (a->ring[a->rptr] == 1)                          // if current ring location is '1' ...
+            if (ring[rptr] == 1)                          // if current ring location is '1' ...
             {
-                a->rcount--;                                    // decrement the count
-                a->ring[a->rptr] = 0;                           // set the location to '0'
+                rcount--;                                    // decrement the count
+                ring[rptr] = 0;                           // set the location to '0'
             }
-            if ((a->in[i - 1] * a->in[i] < 0.0) &&              // different signs mean zero-crossing
-                (fabs (a->in[i - 1] - a->in[i]) > a->eps))
+            if ((in[i - 1] * in[i] < 0.0) &&              // different signs mean zero-crossing
+                (fabs (in[i - 1] - in[i]) > eps))
             {
-                a->ring[a->rptr] = 1;                           // set the ring location to '1'
-                a->rcount++;                                    // increment the count
+                ring[rptr] = 1;                           // set the ring location to '1'
+                rcount++;                                    // increment the count
             }
-            if (++a->rptr == a->rsize) a->rptr = 0;             // increment and wrap the pointer as needed
-            a->out[i] = std::min(1.0, (double)a->rcount / a->div);   // calculate the output sample
+            if (++rptr == rsize) rptr = 0;             // increment and wrap the pointer as needed
+            out[i] = (float) std::min(1.0, (double)rcount / div);   // calculate the output sample
         }
     }
 }
@@ -117,229 +116,228 @@ void FTOV::xftov (FTOV *a)
 
 
 
-void SSQL::compute_ssql_slews(SSQL *a)
+void SSQL::compute_slews()
 {
-    int i;
-    double delta, theta;
-    delta = PI / (double)a->ntup;
+    double delta;
+    double theta;
+    delta = PI / (double) ntup;
     theta = 0.0;
-    for (i = 0; i <= a->ntup; i++)
+    for (int i = 0; i <= ntup; i++)
     {
-        a->cup[i] = a->muted_gain + (1.0 - a->muted_gain) * 0.5 * (1.0 - cos(theta));
+        cup[i] = muted_gain + (1.0 - muted_gain) * 0.5 * (1.0 - cos(theta));
         theta += delta;
     }
-    delta = PI / (double)a->ntdown;
+    delta = PI / (double)ntdown;
     theta = 0.0;
-    for (i = 0; i <= a->ntdown; i++)
+    for (int i = 0; i <= ntdown; i++)
     {
-        a->cdown[i] = a->muted_gain + (1.0 - a->muted_gain) * 0.5 * (1.0 + cos(theta));
+        cdown[i] = muted_gain + (1.0 - muted_gain) * 0.5 * (1.0 + cos(theta));
         theta += delta;
     }
 }
 
-void SSQL::calc_ssql (SSQL *a)
+void SSQL::calc()
 {
-    a->b1 = new float[a->size * 2]; // (float*) malloc0 (a->size * sizeof (complex));
-    a->dcbl = CBL::create_cbl (1, a->size, a->in, a->b1, 0, a->rate, 0.02);
-    a->ibuff = new float[a->size]; // (float*) malloc0 (a->size * sizeof (float));
-    a->ftovbuff = new float[a->size]; // (float*) malloc0(a->size * sizeof (float));
-    a->cvtr = FTOV::create_ftov (1, a->size, a->rate, a->ftov_rsize, a->ftov_fmax, a->ibuff, a->ftovbuff);
-    a->lpbuff = new float[a->size]; // (float*) malloc0 (a->size * sizeof (float));
-    a->filt = DBQLP::create_dbqlp (1, a->size, a->ftovbuff, a->lpbuff, a->rate, 11.3, 1.0, 1.0, 1);
-    a->wdbuff = new int[a->size]; // (int*) malloc0 (a->size * sizeof (int));
-    a->tr_signal = new int[a->size]; // (int*) malloc0 (a->size * sizeof (int));
+    b1.resize(size * 2);
+    dcbl = new CBL(1, size, in, b1.data(), 0, rate, 0.02);
+    ibuff.resize(size);
+    ftovbuff.resize(size);
+    cvtr = new FTOV(
+        1,
+        size,
+        rate,
+        ftov_rsize,
+        ftov_fmax,
+        ibuff.data(),
+        ftovbuff.data()
+    );
+    lpbuff.resize(size);
+    filt = new DBQLP(
+        1,
+        size,
+        ftovbuff.data(),
+        lpbuff.data(),
+        rate,
+        11.3,
+        1.0,
+        1.0,
+        1
+    );
+    wdbuff.resize(size);
+    tr_signal.resize(size);
     // window detector
-    a->wdmult = exp (-1.0 / (a->rate * a->wdtau));
-    a->wdaverage = 0.0;
+    wdmult = exp (-1.0 / (rate * wdtau));
+    wdaverage = 0.0;
     // trigger
-    a->tr_voltage = a->tr_thresh;
-    a->mute_mult = 1.0 - exp (-1.0 / (a->rate * a->tr_tau_mute));
-    a->unmute_mult = 1.0 - exp (-1.0 / (a->rate * a->tr_tau_unmute));
+    tr_voltage = tr_thresh;
+    mute_mult = 1.0 - exp (-1.0 / (rate * tr_tau_mute));
+    unmute_mult = 1.0 - exp (-1.0 / (rate * tr_tau_unmute));
     // level change
-    a->ntup = (int)(a->tup * a->rate);
-    a->ntdown = (int)(a->tdown * a->rate);
-    a->cup = new float[a->ntup + 1]; // (float*) malloc0 ((a->ntup + 1) * sizeof (float));
-    a->cdown = new float[a->ntdown + 1]; // (float*) malloc0 ((a->ntdown + 1) * sizeof (float));
-    compute_ssql_slews (a);
+    ntup = (int)(tup * rate);
+    ntdown = (int)(tdown * rate);
+    cup.resize(ntup + 1);
+    cdown.resize(ntdown + 1);
+    compute_slews();
     // control
-    a->state = 0;
-    a->count = 0;
+    state = SSQLState::MUTED;
+    count = 0;
 }
 
-void SSQL::decalc_ssql (SSQL *a)
+void SSQL::decalc()
 {
-    delete[] (a->tr_signal);
-    delete[] (a->wdbuff);
-    DBQLP::destroy_dbqlp (a->filt);
-    delete[] (a->lpbuff);
-    FTOV::destroy_ftov (a->cvtr);
-    delete[] (a->ftovbuff);
-    delete[] (a->ibuff);
-    CBL::destroy_cbl (a->dcbl);
-    delete[] (a->b1);
-    delete[] (a->cdown);
-    delete[] (a->cup);
+    delete filt;
+    delete cvtr;
+    delete dcbl;
 }
 
-SSQL* SSQL::create_ssql (
-    int run,
-    int size,
-    float* in,
-    float* out,
-    int rate,
-    double tup,
-    double tdown,
-    double muted_gain,
-    double tau_mute,
-    double tau_unmute,
-    double wthresh,
-    double tr_thresh,
-    int rsize,
-    double fmax
+SSQL::SSQL(
+    int _run,
+    int _size,
+    float* _in,
+    float* _out,
+    int _rate,
+    double _tup,
+    double _tdown,
+    double _muted_gain,
+    double _tau_mute,
+    double _tau_unmute,
+    double _wthresh,
+    double _tr_thresh,
+    int _rsize,
+    double _fmax
 )
 {
-    SSQL *a = new SSQL;
-    a->run = run;
-    a->size = size;
-    a->in = in;
-    a->out = out;
-    a->rate = rate;
-    a->tup = tup;
-    a->tdown = tdown;
-    a->muted_gain = muted_gain;
-    a->tr_tau_mute = tau_mute;
-    a->tr_tau_unmute = tau_unmute;
-    a->wthresh = wthresh;           // PRIMARY SQUELCH THRESHOLD CONTROL
-    a->tr_thresh = tr_thresh;       // value between tr_ss_unmute and tr_ss_mute, default = 0.8197
-    a->tr_ss_mute = 1.0;
-    a->tr_ss_unmute = 0.3125;
-    a->wdtau = 0.5;
-    a->ftov_rsize = rsize;
-    a->ftov_fmax = fmax;
-    calc_ssql (a);
-    return a;
+    run = _run;
+    size = _size;
+    in = _in;
+    out = _out;
+    rate = _rate;
+    tup = _tup;
+    tdown = _tdown;
+    muted_gain = _muted_gain;
+    tr_tau_mute = _tau_mute;
+    tr_tau_unmute = _tau_unmute;
+    wthresh = _wthresh;           // PRIMARY SQUELCH THRESHOLD CONTROL
+    tr_thresh = _tr_thresh;       // value between tr_ss_unmute and tr_ss_mute, default = 0.8197
+    tr_ss_mute = 1.0;
+    tr_ss_unmute = 0.3125;
+    wdtau = 0.5;
+    ftov_rsize = _rsize;
+    ftov_fmax = _fmax;
+    calc();
 }
 
-void SSQL::destroy_ssql (SSQL *a)
+SSQL::~SSQL()
 {
-    decalc_ssql (a);
-    delete (a);
+    decalc();
 }
 
-void SSQL::flush_ssql (SSQL *a)
+void SSQL::flush()
 {
-
-    std::fill(a->b1, a->b1 + a->size * 2, 0);
-    CBL::flush_cbl (a->dcbl);
-    memset (a->ibuff, 0, a->size * sizeof (float));
-    memset (a->ftovbuff, 0, a->size * sizeof (float));
-    FTOV::flush_ftov (a->cvtr);
-    memset (a->lpbuff, 0, a->size * sizeof (float));
-    DBQLP::flush_dbqlp (a->filt);
-    memset (a->wdbuff, 0, a->size * sizeof (int));
-    memset (a->tr_signal, 0, a->size * sizeof (int));
+    std::fill(b1.begin(), b1.end(), 0);
+    dcbl->flush();
+    std::fill(ibuff.begin(), ibuff.end(), 0);
+    std::fill(ftovbuff.begin(), ftovbuff.end(), 0);
+    cvtr->flush();
+    std::fill(lpbuff.begin(), lpbuff.end(), 0);
+    filt->flush();
+    std::fill(wdbuff.begin(), wdbuff.end(), 0);
+    std::fill(tr_signal.begin(), tr_signal.end(), 0);
 }
 
-enum _ssqlstate
-{
-    MUTED,
-    INCREASE,
-    UNMUTED,
-    DECREASE
-};
 
-void SSQL::xssql (SSQL *a)
+void SSQL::execute()
 {
-    if (a->run)
+    if (run)
     {
-        CBL::xcbl (a->dcbl);                                         // dc block the input signal
-        for (int i = 0; i < a->size; i++)                       // extract 'I' component
-            a->ibuff[i] = a->b1[2 * i];
-        FTOV::xftov (a->cvtr);                                        // convert frequency to voltage, ignoring amplitude
-        // WriteAudioWDSP(20.0, a->rate, a->size, a->ftovbuff, 4, 0.99);
-        DBQLP::xdbqlp (a->filt);                                       // low-pass filter
-        // WriteAudioWDSP(20.0, a->rate, a->size, a->lpbuff, 4, 0.99);
+        dcbl->execute();                                         // dc block the input signal
+        for (int i = 0; i < size; i++)                       // extract 'I' component
+            ibuff[i] = b1[2 * i];
+        cvtr->execute();                                        // convert frequency to voltage, ignoring amplitude
+        // WriteAudioWDSP(20.0, rate, size, ftovbuff, 4, 0.99);
+        filt->execute();                                       // low-pass filter
+        // WriteAudioWDSP(20.0, rate, size, lpbuff, 4, 0.99);
         // calculate the output of the window detector for each sample
-        for (int i = 0; i < a->size; i++)
+        for (int i = 0; i < size; i++)
         {
-            a->wdaverage = a->wdmult * a->wdaverage + (1.0 - a->wdmult) * a->lpbuff[i];
-            if ((a->lpbuff[i] - a->wdaverage) > a->wthresh || (a->wdaverage - a->lpbuff[i]) > a->wthresh)
-                a->wdbuff[i] = 0;       // signal unmute
+            wdaverage = wdmult * wdaverage + (1.0 - wdmult) * lpbuff[i];
+            if ((lpbuff[i] - wdaverage) > wthresh || (wdaverage - lpbuff[i]) > wthresh)
+                wdbuff[i] = 0;       // signal unmute
             else
-                a->wdbuff[i] = 1;       // signal mute
+                wdbuff[i] = 1;       // signal mute
         }
         // calculate the trigger signal for each sample
-        for (int i = 0; i < a->size; i++)
+        for (int i = 0; i < size; i++)
         {
-            if (a->wdbuff[i] == 0)
-                a->tr_voltage += (a->tr_ss_unmute - a->tr_voltage) * a->unmute_mult;
-            if (a->wdbuff[i] == 1)
-                a->tr_voltage += (a->tr_ss_mute - a->tr_voltage) * a->mute_mult;
-            if (a->tr_voltage > a->tr_thresh) a->tr_signal[i] = 0;  // muted
-            else                              a->tr_signal[i] = 1;  // unmuted
+            if (wdbuff[i] == 0)
+                tr_voltage += (tr_ss_unmute - tr_voltage) * unmute_mult;
+            if (wdbuff[i] == 1)
+                tr_voltage += (tr_ss_mute - tr_voltage) * mute_mult;
+            if (tr_voltage > tr_thresh) tr_signal[i] = 0;  // muted
+            else                              tr_signal[i] = 1;  // unmuted
         }
         // execute state machine; calculate audio output
-        for (int i = 0; i < a->size; i++)
+        for (int i = 0; i < size; i++)
         {
-            switch (a->state)
+            switch (state)
             {
-            case MUTED:
-                if (a->tr_signal[i] == 1)
+            case SSQLState::MUTED:
+                if (tr_signal[i] == 1)
                 {
-                    a->state = INCREASE;
-                    a->count = a->ntup;
+                    state = SSQLState::INCREASE;
+                    count = ntup;
                 }
-                a->out[2 * i + 0] = a->muted_gain * a->in[2 * i + 0];
-                a->out[2 * i + 1] = a->muted_gain * a->in[2 * i + 1];
+                out[2 * i + 0] = (float) (muted_gain * in[2 * i + 0]);
+                out[2 * i + 1] = (float) (muted_gain * in[2 * i + 1]);
                 break;
-            case INCREASE:
-                a->out[2 * i + 0] = a->in[2 * i + 0] * a->cup[a->ntup - a->count];
-                a->out[2 * i + 1] = a->in[2 * i + 1] * a->cup[a->ntup - a->count];
-                if (a->count-- == 0)
-                    a->state = UNMUTED;
+            case SSQLState::INCREASE:
+                out[2 * i + 0] = (float) (in[2 * i + 0] * cup[ntup - count]);
+                out[2 * i + 1] = (float) (in[2 * i + 1] * cup[ntup - count]);
+                if (count-- == 0)
+                    state = SSQLState::UNMUTED;
                 break;
-            case UNMUTED:
-                if (a->tr_signal[i] == 0)
+            case SSQLState::UNMUTED:
+                if (tr_signal[i] == 0)
                 {
-                    a->state = DECREASE;
-                    a->count = a->ntdown;
+                    state = SSQLState::DECREASE;
+                    count = ntdown;
                 }
-                a->out[2 * i + 0] = a->in[2 * i + 0];
-                a->out[2 * i + 1] = a->in[2 * i + 1];
+                out[2 * i + 0] = in[2 * i + 0];
+                out[2 * i + 1] = in[2 * i + 1];
                 break;
-            case DECREASE:
-                a->out[2 * i + 0] = a->in[2 * i + 0] * a->cdown[a->ntdown - a->count];
-                a->out[2 * i + 1] = a->in[2 * i + 1] * a->cdown[a->ntdown - a->count];
-                if (a->count-- == 0)
-                    a->state = MUTED;
+            case SSQLState::DECREASE:
+                out[2 * i + 0] = (float) (in[2 * i + 0] * cdown[ntdown - count]);
+                out[2 * i + 1] = (float) (in[2 * i + 1] * cdown[ntdown - count]);
+                if (count-- == 0)
+                    state = SSQLState::MUTED;
                 break;
             }
         }
     }
-    else if (a->in != a->out)
-        std::copy(a->in, a->in + a->size * 2, a->out);
+    else if (in != out)
+        std::copy(in, in + size * 2, out);
 }
 
-void SSQL::setBuffers_ssql (SSQL *a, float* in, float* out)
+void SSQL::setBuffers(float* _in, float* _out)
 {
-    decalc_ssql (a);
-    a->in = in;
-    a->out = out;
-    calc_ssql (a);
+    decalc();
+    in = _in;
+    out = _out;
+    calc();
 }
 
-void SSQL::setSamplerate_ssql (SSQL *a, int rate)
+void SSQL::setSamplerate(int _rate)
 {
-    decalc_ssql (a);
-    a->rate = rate;
-    calc_ssql (a);
+    decalc();
+    rate = _rate;
+    calc();
 }
 
-void SSQL::setSize_ssql (SSQL *a, int size)
+void SSQL::setSize(int _size)
 {
-    decalc_ssql (a);
-    a->size = size;
-    calc_ssql (a);
+    decalc();
+    size = _size;
+    calc();
 }
 
 /********************************************************************************************************
@@ -348,34 +346,32 @@ void SSQL::setSize_ssql (SSQL *a, int size)
 *                                                                                                       *
 ********************************************************************************************************/
 
-void SSQL::SetSSQLRun (RXA& rxa, int run)
+void SSQL::setRun(int _run)
 {
-    rxa.ssql.p->run = run;
+    run = _run;
 }
 
-void SSQL::SetSSQLThreshold (RXA& rxa, double threshold)
+void SSQL::setThreshold(double _threshold)
 {
     // 'threshold' should be between 0.0 and 1.0
     // WU2O testing:  0.16 is a good default for 'threshold'; => 0.08 for 'wthresh'
-    rxa.ssql.p->wthresh = threshold / 2.0;
+    wthresh = _threshold / 2.0;
 }
 
-void SSQL::SetSSQLTauMute (RXA& rxa, double tau_mute)
+void SSQL::setTauMute(double _tau_mute)
 {
     // reasonable (wide) range is 0.1 to 2.0
     // WU2O testing:  0.1 is good default value
-    SSQL *a = rxa.ssql.p;
-    a->tr_tau_mute = tau_mute;
-    a->mute_mult = 1.0 - exp (-1.0 / (a->rate * a->tr_tau_mute));
+    tr_tau_mute = _tau_mute;
+    mute_mult = 1.0 - exp (-1.0 / (rate * tr_tau_mute));
 }
 
-void SSQL::SetSSQLTauUnMute (RXA& rxa, double tau_unmute)
+void SSQL::setTauUnMute(double _tau_unmute)
 {
     // reasonable (wide) range is 0.1 to 1.0
     // WU2O testing:  0.1 is good default value
-    SSQL *a = rxa.ssql.p;
-    a->tr_tau_unmute = tau_unmute;
-    a->unmute_mult = 1.0 - exp (-1.0 / (a->rate * a->tr_tau_unmute));
+    tr_tau_unmute = _tau_unmute;
+    unmute_mult = 1.0 - exp (-1.0 / (rate * tr_tau_unmute));
 }
 
 } // namespace WDSP

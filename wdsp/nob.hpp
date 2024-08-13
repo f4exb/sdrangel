@@ -28,37 +28,39 @@ warren@wpratt.com
 #ifndef wdsp_nob_h
 #define wdsp_nob_h
 
+#include <vector>
+
+#include "export.h"
+
 namespace WDSP {
 
-class RXA;
-
-class NOB
+class WDSP_API NOB
 {
 public:
     int run;
     int buffsize;                   // size of input/output buffer
-    float* in;                     // input buffer
-    float* out;                    // output buffer
-    int mode;
+    float* in;                      // input buffer
+    float* out;                     // output buffer
     int dline_size;                 // length of delay line which is 'double dline[length][2]'
-    double *dline;                  // pointer to delay line
-    int *imp;
+    std::vector<double> dline;      // delay line
+    std::vector<int> imp;
     double samplerate;              // samplerate, used to convert times into sample counts
+    int mode;
     double advslewtime;                     // transition time, signal<->zero
     double advtime;                 // deadtime (zero output) in advance of detected noise
     double hangslewtime;
     double hangtime;                // time to stay at zero after noise is no longer detected
     double max_imp_seq_time;
     int filterlen;
-    double *fcoefs;
-    double *bfbuff;
+    std::vector<double> fcoefs;
+    std::vector<double> bfbuff;
     int bfb_in_idx;
-    double *ffbuff;
+    std::vector<double> ffbuff;
     int ffb_in_idx;
     double backtau;                 // time constant used in averaging the magnitude of the input signal
     double threshold;               // triggers if (noise > threshold * average_signal_magnitude)
-    double *awave;                   // pointer to array holding transition waveform
-    double *hwave;
+    std::vector<double> awave;      // array holding transition waveform
+    std::vector<double> hwave;
     int state;                      // state of the state machine
     double avg;                     // average value of the signal magnitude
     int time;                       // count when decreasing the signal magnitude
@@ -73,17 +75,21 @@ public:
     int out_idx;                    // ring buffer position from which delayed samples are pulled
     double backmult;                // multiplier for waveform averaging
     double ombackmult;              // multiplier for waveform averaging
-    double I1, Q1;
-    double I2, Q2;
-    double I, Q;
-    double Ilast, Qlast;
-    double deltaI, deltaQ;
-    double Inext, Qnext;
+    double I1;
+    double Q1;
+    double I2;
+    double Q2;
+    double I;
+    double Q;
+    double Ilast;
+    double Qlast;
+    double deltaI;
+    double deltaQ;
+    double Inext;
+    double Qnext;
     int overflow;
-    double *legacy;
 
-                                                                                           ////////////  legacy interface - remove
-    static NOB* create_nob   (
+    NOB(
         int run,
         int buffsize,
         float* in,
@@ -98,26 +104,27 @@ public:
         double backtau,
         double threshold
     );
-
-    static void destroy_nob (NOB* a);
-    static void flush_nob (NOB* a);
-    static void xnob (NOB* a);
-    static void setBuffers_nob (NOB *a, float* in, float* out);
-    static void setSamplerate_nob (NOB *a, int rate);
-    static void setSize_nob (NOB *a, int size);
-    // RXA
-    static void SetNOBRun (RXA& rxa, int run);
-    static void SetNOBMode (RXA& rxa, int mode);
-    static void SetNOBBuffsize (RXA& rxa, int size);
-    static void SetNOBSamplerate (RXA& rxa, int size);
-    static void SetNOBTau (RXA& rxa, double tau);
-    static void SetNOBHangtime (RXA& rxa, double time);
-    static void SetNOBAdvtime (RXA& rxa, double time);
-    static void SetNOBBacktau (RXA& rxa, double tau);
-    static void SetNOBThreshold (RXA& rxa, double thresh);
+    NOB(const NOB&) = delete;
+    NOB& operator=(const NOB& other) = delete;
+    ~NOB() = default;
+                                                                                           ////////////  legacy interface - remove
+    void flush();
+    void execute();
+    void setBuffers(float* in, float* out);
+    void setSize(int size);
+    // Common interface
+    void setRun (int run);
+    void setMode (int mode);
+    void setBuffsize (int size);
+    void setSamplerate (int size);
+    void setTau (double tau);
+    void setHangtime (double time);
+    void setAdvtime (double time);
+    void setBacktau (double tau);
+    void setThreshold (double thresh);
 
 private:
-    static void init_nob (NOB *a);
+    void init();
 };
 
 

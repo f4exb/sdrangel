@@ -28,26 +28,28 @@ warren@wpratt.com
 #ifndef wdsp_anb_h
 #define wdsp_anb_h
 
+#include <vector>
+
+#include "export.h"
+
 namespace WDSP {
 
-class RXA;
-
-class ANB
+class WDSP_API ANB
 {
 public:
     int run;
     int buffsize;                   // size of input/output buffer
-    float* in;                     // input buffer
-    float* out;                    // output buffer
+    float* in;                      // input buffer
+    float* out;                     // output buffer
     int dline_size;                 // length of delay line which is 'double dline[length][2]'
-    float *dline;                  // pointer to delay line
+    std::vector<float> dline;       // delay line
     double samplerate;              // samplerate, used to convert times into sample counts
     double tau;                     // transition time, signal<->zero
     double hangtime;                // time to stay at zero after noise is no longer detected
     double advtime;                 // deadtime (zero output) in advance of detected noise
     double backtau;                 // time constant used in averaging the magnitude of the input signal
     double threshold;               // triggers if (noise > threshold * average_signal_magnitude)
-    double *wave;                   // pointer to array holding transition waveform
+    std::vector<double> wave;       // array holding transition waveform
     int state;                      // state of the state machine
     double avg;                     // average value of the signal magnitude
     int dtime;                      // count when decreasing the signal magnitude
@@ -64,9 +66,8 @@ public:
     int count;                      // set each time a noise sample is detected, counts down
     double backmult;                // multiplier for waveform averaging
     double ombackmult;              // multiplier for waveform averaging
-    float *legacy;
 
-    static ANB* create_anb   (
+    ANB(
         int run,
         int buffsize,
         float* in,
@@ -78,25 +79,26 @@ public:
         double backtau,
         double threshold
     );
+    ANB(const ANB&) = delete;
+    ANB& operator=(const ANB& other) = delete;
+    ~ANB() = default;
 
-    static void destroy_anb (ANB *a);
-    static void flush_anb (ANB *a);
-    static void xanb (ANB *a);
-    static void setBuffers_anb (ANB *a, float* in, float* out);
-    static void setSamplerate_anb (ANB *a, int rate);
-    static void setSize_anb (ANB *a, int size);
-    // RXA
-    static void SetANBRun (RXA& rxa, int run);
-    static void SetANBBuffsize (RXA& rxa, int size);
-    static void SetANBSamplerate (RXA& rxa, int rate);
-    static void SetANBTau (RXA& rxa, double tau);
-    static void SetANBHangtime (RXA& rxa, double time);
-    static void SetANBAdvtime (RXA& rxa, double time);
-    static void SetANBBacktau (RXA& rxa, double tau);
-    static void SetANBThreshold (RXA& rxa, double thresh);
+    void flush();
+    void execute();
+    void setBuffers(float* in, float* out);
+    void setSize(int size);
+    // Common interface
+    void setRun (int run);
+    void setBuffsize (int size);
+    void setSamplerate (int rate);
+    void setTau (double tau);
+    void setHangtime (double time);
+    void setAdvtime (double time);
+    void setBacktau (double tau);
+    void setThreshold (double thresh);
 
 private:
-    static void initBlanker(ANB *a);                                                                                                    ////////////  legacy interface - remove
+    void initBlanker();
 };
 
 

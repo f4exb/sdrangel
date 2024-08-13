@@ -32,9 +32,6 @@ warren@wpratt.com
 
 namespace WDSP {
 
-class RXA;
-class TXA;
-
 class WDSP_API METER
 {
 public:
@@ -55,7 +52,7 @@ public:
     double avg;
     double peak;
 
-    static METER* create_meter (
+    METER(
         int run,
         int* prun,
         int size,
@@ -69,19 +66,19 @@ public:
         int enum_gain,
         double* pgain
     );
-    static void destroy_meter (METER *a);
-    static void flush_meter (METER *a);
-    static void xmeter (METER *a);
-    static void setBuffers_meter (METER *a, float* in);
-    static void setSamplerate_meter (METER *a, int rate);
-    static void setSize_meter (METER *a, int size);
-    // RXA Properties
-    static double GetMeter (RXA& rxa, int mt);
-    // TXA Properties
-    static double GetMeter (TXA& txa, int mt);
+    METER(const METER&) = delete;
+    METER& operator=(const METER& other) = delete;
+    ~METER() = default;
+
+    void flush();
+    void execute();
+    void setBuffers(float* in);
+    void setSamplerate(int rate);
+    void setSize(int size);
+    double getMeter(int mt) const;
 
 private:
-    static void calc_meter (METER *a);
+    void calc();
 };
 
 

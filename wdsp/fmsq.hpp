@@ -28,27 +28,38 @@ warren@wpratt.com
 #ifndef wdsp_fmsq_h
 #define wdsp_fmsq_h
 
+#include <array>
+#include <vector>
+
 #include "export.h"
 
 namespace WDSP {
 
 class FIRCORE;
-class RXA;
 
 class WDSP_API FMSQ
 {
 public:
+    enum class FMSQState
+    {
+        MUTED,
+        INCREASE,
+        UNMUTED,
+        TAIL,
+        DECREASE
+    };
+
     int run;                            // 0 if squelch system is OFF; 1 if it's ON
     int size;                           // size of input/output buffers
     float* insig;                      // squelch input signal buffer
     float* outsig;                     // squelch output signal buffer
     float* trigger;                    // buffer used to trigger mute/unmute (may be same as input; matches timing of input buffer)
     double rate;                        // sample rate
-    float* noise;
+    std::vector<float> noise;
     double fc;                          // corner frequency for sig / noise detection
     double* pllpole;                    // pointer to pole frequency of the fm demodulator pll
-    float F[4];
-    float G[4];
+    std::array<float, 4> F;
+    std::array<float, 4> G;
     double avtau;                       // time constant for averaging noise
     double avm;
     double onem_avm;
@@ -57,14 +68,14 @@ public:
     double longavm;
     double onem_longavm;
     double longnoise;
-    int state;                          // state machine control
+    FMSQState state;                          // state machine control
     int count;
     double tup;
     double tdown;
     int ntup;
     int ntdown;
-    double* cup;
-    double* cdown;
+    std::vector<double> cup;
+    std::vector<double> cdown;
     double tail_thresh;
     double unmute_thresh;
     double min_tail;
@@ -77,42 +88,45 @@ public:
     int mp;
     FIRCORE *p;
 
-    static FMSQ* create_fmsq (
-        int run,
-        int size,
-        float* insig,
-        float* outsig,
-        float* trigger,
-        int rate,
-        double fc,
-        double* pllpole,
-        double tdelay,
-        double avtau,
-        double longtau,
-        double tup,
-        double tdown,
-        double tail_thresh,
-        double unmute_thresh,
-        double min_tail,
-        double max_tail,
-        int nc,
-        int mp
+    FMSQ(
+        int _run,
+        int _size,
+        float* _insig,
+        float* _outsig,
+        float* _trigger,
+        int _rate,
+        double _fc,
+        double* _pllpole,
+        double _tdelay,
+        double _avtau,
+        double _longtau,
+        double _tup,
+        double _tdown,
+        double _tail_thresh,
+        double _unmute_thresh,
+        double _min_tail,
+        double _max_tail,
+        int _nc,
+        int _mp
     );
-    static void destroy_fmsq (FMSQ *a);
-    static void flush_fmsq (FMSQ *a);
-    static void xfmsq (FMSQ *a);
-    static void setBuffers_fmsq (FMSQ *a, float* in, float* out, float* trig);
-    static void setSamplerate_fmsq (FMSQ *a, int rate);
-    static void setSize_fmsq (FMSQ *a, int size);
-    // RXA Properties
-    static void SetFMSQRun (RXA& rxa, int run);
-    static void SetFMSQThreshold (RXA& rxa, double threshold);
-    static void SetFMSQNC (RXA& rxa, int nc);
-    static void SetFMSQMP (RXA& rxa, int mp);
+    FMSQ(const FMSQ&) = delete;
+    FMSQ& operator=(const FMSQ& other) = delete;
+    ~FMSQ();
+
+    void flush();
+    void execute();
+    void setBuffers(float* in, float* out, float* trig);
+    void setSamplerate(int rate);
+    void setSize(int size);
+    // Public Properties
+    void setRun(int run);
+    void setThreshold(double threshold);
+    void setNC(int nc);
+    void setMP(int mp);
 
 private:
-    static void calc_fmsq (FMSQ *a);
-    static void decalc_fmsq (FMSQ *a);
+    void calc();
+    void decalc();
 };
 
 } // namespace WDSP

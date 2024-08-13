@@ -31,13 +31,12 @@ warren@wpratt.com
 #ifndef wdsp_siphon_h
 #define wdsp_siphon_h
 
+#include <vector>
+
 #include "fftw3.h"
 #include "export.h"
 
 namespace WDSP {
-
-class RXA;
-class TXA;
 
 class WDSP_API SIPHON
 {
@@ -49,17 +48,17 @@ public:
     int insize;
     float* in;
     int sipsize;    // NOTE:  sipsize MUST BE A POWER OF TWO!!
-    float* sipbuff;
+    std::vector<float> sipbuff;
     int outsize;
     int idx;
-    float* sipout;
+    std::vector<float> sipout;
     int fftsize;
-    float* specout;
+    std::vector<float> specout;
     long specmode;
     fftwf_plan sipplan;
-    float* window;
+    std::vector<float> window;
 
-    static SIPHON* create_siphon (
+    SIPHON(
         int run,
         int position,
         int mode,
@@ -70,33 +69,29 @@ public:
         int fftsize,
         int specmode
     );
-    static void destroy_siphon (SIPHON *a);
-    static void flush_siphon (SIPHON *a);
-    static void xsiphon (SIPHON *a, int pos);
-    static void setBuffers_siphon (SIPHON *a, float* in);
-    static void setSamplerate_siphon (SIPHON *a, int rate);
-    static void setSize_siphon (SIPHON *a, int size);
+    SIPHON(const SIPHON&) = delete;
+    SIPHON& operator=(const SIPHON& other) = delete;
+    ~SIPHON();
+
+    void flush();
+    void execute(int pos);
+    void setBuffers(float* in);
+    void setSamplerate(int rate);
+    void setSize(int size);
     // RXA Properties
-    static void GetaSipF  (RXA& rxa, float* out, int size);
-    static void GetaSipF1 (RXA& rxa, float* out, int size);
+    void getaSipF  (float* out, int size);
+    void getaSipF1 (float* out, int size);
     // TXA Properties
-    static void SetSipPosition (TXA& txa, int pos);
-    static void SetSipMode (TXA& txa, int mode);
-    static void SetSipDisplay (TXA& txa, int disp);
-    static void GetaSipF  (TXA& txa, float* out, int size);
-    static void GetaSipF1 (TXA& txa, float* out, int size);
-    static void GetSpecF1 (TXA& txa, float* out);
-    static void SetSipSpecmode (TXA& txa, int mode);
-    // Calls for External Use
-    // static void create_siphonEXT (int id, int run, int insize, int sipsize, int fftsize, int specmode);
-    // static void destroy_siphonEXT (int id);
-    // static void xsiphonEXT (int id, float* buff);
-    // static void SetSiphonInsize (int id, int size);
+    void setSipPosition(int pos);
+    void setSipMode(int mode);
+    void setSipDisplay(int disp);
+    void getSpecF1(float* out);
+    void setSipSpecmode(int mode);
 
 private:
-    static void build_window (SIPHON *a);
-    static void suck (SIPHON *a);
-    static void sip_spectrum (SIPHON *a);
+    void build_window();
+    void suck();
+    void sip_spectrum();
 };
 
 } // namespace WDSP

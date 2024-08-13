@@ -28,6 +28,8 @@ warren@wpratt.com
 #ifndef wdsp_delay_h
 #define wdsp_delay_h
 
+#include <vector>
+
 #include "export.h"
 
 #define WSDEL   1025    // number of supported whole sample delays
@@ -49,25 +51,36 @@ public:
     int ncoef;          // number of coefficients
     int cpp;            // coefficients per phase
     float ft;          // normalized cutoff frequency
-    float* h;          // coefficients
+    std::vector<float> h;          // coefficients
     int snum;           // starting sample number (0 for sub-sample delay)
     int phnum;          // phase number
 
     int idx_in;         // index for input into ring
     int rsize;          // ring size in complex samples
-    float* ring;       // ring buffer
+    std::vector<float> ring;       // ring buffer
 
     float adelta;      // actual delay increment
     float adelay;      // actual delay
 
-    static DELAY* create_delay (int run, int size, float* in, float* out, int rate, float tdelta, float tdelay);
-    static void destroy_delay (DELAY *a);
-    static void flush_delay (DELAY *a);
-    static void xdelay (DELAY *a);
+    DELAY(
+        int run,
+        int size,
+        float* in,
+        float* out,
+        int rate,
+        float tdelta,
+        float tdelay
+    );
+    DELAY(const DELAY&) = delete;
+    DELAY& operator=(DELAY& other) = delete;
+    ~DELAY() = default;
+
+    void flush();
+    void execute();
     // Properties
-    static void SetDelayRun (DELAY *a, int run);
-    static float SetDelayValue (DELAY *a, float delay);        // returns actual delay in seconds
-    static void SetDelayBuffs (DELAY *a, int size, float* in, float* out);
+    void setRun(int run);
+    float setValue(float delay);        // returns actual delay in seconds
+    void setBuffs(int size, float* in, float* out);
 };
 
 } // namespace WDSP

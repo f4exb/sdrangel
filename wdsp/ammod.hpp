@@ -42,19 +42,29 @@ public:
     int size;
     float* in;
     float* out;
-    float c_level;
-    float a_level;
-    float mult;
+    double c_level;
+    double a_level;
+    double mult;
 
-    static AMMOD* create_ammod(int run, int mode, int size, float* in, float* out, float c_level);
-    static void destroy_ammod (AMMOD *a);
-    static void flush_ammod (AMMOD *a);
-    static void xammod (AMMOD *a);
-    static void setBuffers_ammod (AMMOD *a, float* in, float* out);
-    static void setSamplerate_ammod (AMMOD *a, int rate);
-    static void setSize_ammod (AMMOD *a, int size);
+    AMMOD(
+        int run,
+        int mode,
+        int size,
+        float* in,
+        float* out,
+        double c_level
+    );
+    AMMOD(const AMMOD&) = delete;
+    AMMOD& operator=(const AMMOD& other) = delete;
+    ~AMMOD() = default;
+
+    void flush();
+    void execute();
+    void setBuffers(float* in, float* out);
+    void setSamplerate(int rate);
+    void setSize(int size);
     // TXA Properties
-    static void SetAMCarrierLevel (TXA& txa, float c_level);
+    void setAMCarrierLevel(double c_level);
 };
 
 } // namespace WDSP

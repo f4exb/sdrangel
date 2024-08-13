@@ -29,6 +29,8 @@ warren@wpratt.com
 #ifndef wdsp_calculus_h
 #define wdsp_calculus_h
 
+#include <array>
+
 #include "export.h"
 
 namespace WDSP {
@@ -36,8 +38,8 @@ namespace WDSP {
 class WDSP_API Calculus
 {
 public:
-    static const double GG[];
-    static const double GGS[];
+    static const std::array<double, 241*241> GG;
+    static const std::array<double, 241*241> GGS;
 };
 
 } // namespace WDSP

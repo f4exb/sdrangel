@@ -36,8 +36,7 @@ warren@wpratt.com
 #include "resample.hpp"
 #include "patchpanel.hpp"
 #include "amsq.hpp"
-#include "eq.hpp"
-#include "iir.hpp"
+#include "eqp.hpp"
 #include "cfcomp.hpp"
 #include "compress.hpp"
 #include "bandpass.hpp"
@@ -127,127 +126,96 @@ public:
     double meter[TXA_METERTYPE_LAST];
     long upslew;
 
-    struct
-    {
-        METER *p;
-    } micmeter, eqmeter, lvlrmeter, cfcmeter, compmeter, alcmeter, outmeter;
-    struct
-    {
-        RESAMPLE *p;
-    } rsmpin, rsmpout;
-    struct
-    {
-        PANEL *p;
-    } panel;
-    struct
-    {
-        AMSQ *p;
-    } amsq;
-    struct
-    {
-        EQP *p;
-    } eqp;
-    struct
-    {
-        PHROT *p;
-    } phrot;
-    struct
-    {
-        CFCOMP *p;
-    } cfcomp;
-    struct
-    {
-        COMPRESSOR *p;
-    } compressor;
-    struct
-    {
-        BANDPASS *p;
-    } bp0, bp1, bp2;
-    struct
-    {
-        BPS *p;
-    } bps0, bps1, bps2;
-    struct
-    {
-        OSCTRL *p;
-    } osctrl;
-    struct
-    {
-        WCPAGC *p;
-    } leveler, alc;
-    struct
-    {
-        AMMOD *p;
-    } ammod;
-    struct
-    {
-        EMPHP *p;
-    } preemph;
-    struct
-    {
-        FMMOD *p;
-    } fmmod;
-    struct
-    {
-        SIPHON *p;
-    } sip1;
-    struct
-    {
-        GEN *p;
-    } gen0, gen1;
-    struct
-    {
-        USLEW *p;
-    } uslew;
-    // struct
-    // {
-    //     CALCC *p;
-    //     CRITICAL_SECTION cs_update;
-    // } calcc;
+    METER *micmeter;
+    METER *eqmeter;
+    METER *lvlrmeter;
+    METER *cfcmeter;
+    METER *compmeter;
+    METER *alcmeter;
+    METER *outmeter;
+    RESAMPLE *rsmpin;
+    RESAMPLE *rsmpout;
+    PANEL *panel;
+    AMSQ *amsq;
+    EQP *eqp;
+    PHROT *phrot;
+    CFCOMP *cfcomp;
+    COMPRESSOR *compressor;
+    BANDPASS *bp0;
+    BANDPASS *bp1;
+    BANDPASS *bp2;
+    BPS *bps0;
+    BPS *bps1;
+    BPS *bps2;
+    OSCTRL *osctrl;
+    WCPAGC *leveler;
+    WCPAGC *alc;
+    AMMOD *ammod;
+    EMPHP *preemph;
+    FMMOD *fmmod;
+    SIPHON *sip1;
+    GEN *gen0;
+    GEN *gen1;
+    USLEW *uslew;
     struct
     {
         IQC *p0, *p1;
         // p0 for dsp-synchronized reference, p1 for other
     } iqc;
-    struct
-    {
-        CFIR *p;
-    } cfir;
+    CFIR *cfir;
 
-    static TXA* create_txa (
+    TXA(
         int in_rate,                // input samplerate
         int out_rate,               // output samplerate
         int dsp_rate,               // sample rate for mainstream dsp processing
         int dsp_size                // number complex samples processed per buffer in mainstream dsp processing
     );
-    static void destroy_txa (TXA *txa);
-    static void flush_txa (TXA *txa);
-    static void xtxa (TXA *txa);
-    int get_insize() const { return dsp_insize; }
-    int get_outsize() const { return dsp_outsize; }
-    float *get_inbuff() { return inbuff; }
-    float *get_outbuff() { return outbuff; }
-    static void setInputSamplerate (TXA *txa, int in_rate);
-    static void setOutputSamplerate (TXA *txa, int out_rate);
-    static void setDSPSamplerate (TXA *txa, int dsp_rate);
-    static void setDSPBuffsize (TXA *txa, int dsp_size);
+    TXA(const TXA&) = delete;
+    TXA& operator=(const TXA& other) = delete;
+    virtual ~TXA();
+
+    void flush();
+    void execute();
+    void setInputSamplerate(int _in_rate);
+    void setOutputSamplerate(int _out_rate);
+    void setDSPSamplerate(int _dsp_rate);
+    void setDSPBuffsize(int _dsp_size);
+    int get_insize() const { return Unit::dsp_insize; }
+    int get_outsize() const { return Unit::dsp_outsize; }
+    float *get_inbuff() { return Unit::inbuff; }
+    float *get_outbuff() { return Unit::outbuff; }
 
     // TXA Properties
-    static void SetMode (TXA& txa, int mode);
-    static void SetBandpassFreqs (TXA& txa, float f_low, float f_high);
+    void setMode(int mode);
+    void setBandpassFreqs(float f_low, float f_high);
+    void setBandpassNC(int nc);
+    void setBandpassMP(int mp);
+    // BPS
+    static void SetBPSRun (TXA& txa, int run);
+    static void SetBPSFreqs (TXA& txa, double low, double high);
+    static void SetBPSWindow (TXA& txa, int wintype);
+    // COMPRESSOR
+    static void SetCompressorRun (TXA& txa, int run);
+    // OSCTRL
+    static void SetosctrlRun (TXA& txa, int run);
+    // IQC
+    static void GetiqcValues (TXA& txa, std::vector<double>& cm, std::vector<double>& cc, std::vector<double>& cs);
+    static void SetiqcValues (TXA& txa, const std::vector<double>& cm, const std::vector<double>& cc, const std::vector<double>& cs);
+    static void SetiqcSwap (TXA& txa, const std::vector<double>& cm, const std::vector<double>& cc, const std::vector<double>& cs);
+    static void SetiqcStart (TXA& txa, const std::vector<double>& cm, const std::vector<double>& cc, const std::vector<double>& cs);
+    static void SetiqcEnd (TXA& txa);
+    static void GetiqcDogCount (TXA& txa, int* count);
+    static void SetiqcDogCount (TXA& txa, int  count);
 
     // Collectives
-    static void SetNC (TXA& txa, int nc);
-    static void SetMP (TXA& txa, int mp);
-    static void SetFMAFFilter (TXA& txa, float low, float high);
-    static void SetupBPFilters (TXA& txa);
-    static int UslewCheck (TXA& txa);
+    void setNC(int nc);
+    void setMP(int mp);
+    void setFMAFFilter(float low, float high);
+    void setupBPFilters();
+    int uslewCheck();
 
 private:
-    static void ResCheck (TXA& txa);
-    float* inbuff;
-    float* midbuff;
-    float* outbuff;
+    void resCheck();
 };
 
 } // namespace WDSP

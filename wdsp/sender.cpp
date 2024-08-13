@@ -27,76 +27,57 @@ warren@wpratt.com
 
 #include "comm.hpp"
 #include "sender.hpp"
-#include "RXA.hpp"
 #include "bufferprobe.hpp"
 
 namespace WDSP {
 
-SENDER* SENDER::create_sender (int run, int flag, int mode, int size, float* in)
-{
-    SENDER *a = new SENDER;
-    a->run = run;
-    a->flag = flag;
-    a->mode = mode;
-    a->size = size;
-    a->in = in;
-    a->spectrumProbe = nullptr;
-    return a;
-}
-
-void SENDER::destroy_sender (SENDER *a)
-{
-    delete (a);
-}
-
-void SENDER::flush_sender (SENDER *)
+SENDER::SENDER(int _run, int _flag, int _mode, int _size, float* _in) :
+    run(_run),
+    flag(_flag),
+    mode(_mode),
+    size(_size),
+    in(_in),
+    spectrumProbe(nullptr)
 {
 }
 
-void SENDER::xsender (SENDER *a)
+void SENDER::flush()
 {
-    if (a->run && a->flag)
-    {
-        switch (a->mode)
-        {
-        case 0:
-            {
-                if (a->spectrumProbe) {
-                    a->spectrumProbe->proceed(a->in, a->size);
-                }
-                break;
-            }
-        }
+    // There is no internal data to be reset
+}
+
+void SENDER::execute()
+{
+    if (run && flag && (mode == 0) && spectrumProbe) {
+        spectrumProbe->proceed(in, size);
     }
 }
 
-void SENDER::setBuffers_sender (SENDER *a, float* in)
+void SENDER::setBuffers(float* _in)
 {
-    a->in = in;
+    in = _in;
 }
 
-void SENDER::setSamplerate_sender (SENDER *a, int)
+void SENDER::setSamplerate(int)
 {
-    flush_sender (a);
+    flush();
 }
 
-void SENDER::setSize_sender (SENDER *a, int size)
+void SENDER::setSize(int _size)
 {
-    a->size = size;
+    size = _size;
 }
 
 /********************************************************************************************************
 *                                                                                                       *
-*                                           RXA Properties                                              *
+*                                           Public Properties                                           *
 *                                                                                                       *
 ********************************************************************************************************/
 
-void SENDER::SetSpectrum (RXA& rxa, int flag, BufferProbe *spectrumProbe)
+void SENDER::SetSpectrum(int _flag, BufferProbe *_spectrumProbe)
 {
-    SENDER *a;
-    a = rxa.sender.p;
-    a->flag = flag;
-    a->spectrumProbe = spectrumProbe;
+    flag = _flag;
+    spectrumProbe = _spectrumProbe;
 }
 
 } // namespace WDSP

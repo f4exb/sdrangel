@@ -37,94 +37,96 @@ namespace WDSP {
 *                                                                                                       *
 ********************************************************************************************************/
 
-void FIRMIN::calc_firmin (FIRMIN *a)
+void FIRMIN::calc()
 {
-    a->h = FIR::fir_bandpass (a->nc, a->f_low, a->f_high, a->samplerate, a->wintype, 1, a->gain);
-    a->rsize = a->nc;
-    a->mask = a->rsize - 1;
-    a->ring = new float[a->rsize * 2]; // (float *) malloc0 (a->rsize * sizeof (complex));
-    a->idx = 0;
+    FIR::fir_bandpass (h, nc, f_low, f_high, samplerate, wintype, 1, gain);
+    rsize = nc;
+    mask = rsize - 1;
+    ring.resize(rsize * 2);
+    idx = 0;
 }
 
-FIRMIN* FIRMIN::create_firmin (int run, int position, int size, float* in, float* out,
-    int nc, float f_low, float f_high, int samplerate, int wintype, float gain)
+FIRMIN::FIRMIN(
+    int _run,
+    int _position,
+    int _size,
+    float* _in,
+    float* _out,
+    int _nc,
+    float _f_low,
+    float _f_high,
+    int _samplerate,
+    int _wintype,
+    float _gain
+)
 {
-    FIRMIN *a = new FIRMIN;
-    a->run = run;
-    a->position = position;
-    a->size = size;
-    a->in = in;
-    a->out = out;
-    a->nc = nc;
-    a->f_low = f_low;
-    a->f_high = f_high;
-    a->samplerate = samplerate;
-    a->wintype = wintype;
-    a->gain = gain;
-    calc_firmin (a);
-    return a;
+    run = _run;
+    position = _position;
+    size = _size;
+    in = _in;
+    out = _out;
+    nc = _nc;
+    f_low = _f_low;
+    f_high = _f_high;
+    samplerate = (float) _samplerate;
+    wintype = _wintype;
+    gain = _gain;
+    calc();
 }
 
-void FIRMIN::destroy_firmin (FIRMIN *a)
+void FIRMIN::flush()
 {
-    delete[] (a->ring);
-    delete[] (a->h);
-    delete (a);
+    std::fill(ring.begin(), ring.end(), 0);
+    idx = 0;
 }
 
-void FIRMIN::flush_firmin (FIRMIN *a)
+void FIRMIN::execute(int _pos)
 {
-    std::fill(a->ring, a->ring + a->rsize * 2, 0);
-    a->idx = 0;
-}
-
-void FIRMIN::xfirmin (FIRMIN *a, int pos)
-{
-    if (a->run && a->position == pos)
+    if (run && position == _pos)
     {
-        int i, j, k;
-        for (i = 0; i < a->size; i++)
+        int k;
+        for (int i = 0; i < size; i++)
         {
-            a->ring[2 * a->idx + 0] = a->in[2 * i + 0];
-            a->ring[2 * a->idx + 1] = a->in[2 * i + 1];
-            a->out[2 * i + 0] = 0.0;
-            a->out[2 * i + 1] = 0.0;
-            k = a->idx;
-            for (j = 0; j < a->nc; j++)
+            ring[2 * idx + 0] = in[2 * i + 0];
+            ring[2 * idx + 1] = in[2 * i + 1];
+            out[2 * i + 0] = 0.0;
+            out[2 * i + 1] = 0.0;
+            k = idx;
+            for (int j = 0; j < nc; j++)
             {
-                a->out[2 * i + 0] += a->h[2 * j + 0] * a->ring[2 * k + 0] - a->h[2 * j + 1] * a->ring[2 * k + 1];
-                a->out[2 * i + 1] += a->h[2 * j + 0] * a->ring[2 * k + 1] + a->h[2 * j + 1] * a->ring[2 * k + 0];
-                k = (k + a->mask) & a->mask;
+                out[2 * i + 0] += h[2 * j + 0] * ring[2 * k + 0] - h[2 * j + 1] * ring[2 * k + 1];
+                out[2 * i + 1] += h[2 * j + 0] * ring[2 * k + 1] + h[2 * j + 1] * ring[2 * k + 0];
+                k = (k + mask) & mask;
             }
-            a->idx = (a->idx + 1) & a->mask;
+            idx = (idx + 1) & mask;
         }
     }
-    else if (a->in != a->out)
-        std::copy( a->in,  a->in + a->size * 2, a->out);
+    else if (in != out)
+        std::copy( in,  in + size * 2, out);
 }
 
-void FIRMIN::setBuffers_firmin (FIRMIN *a, float* in, float* out)
+void FIRMIN::setBuffers(float* _in, float* _out)
 {
-    a->in = in;
-    a->out = out;
+    in = _in;
+    out = _out;
 }
 
-void FIRMIN::setSamplerate_firmin (FIRMIN *a, int rate)
+void FIRMIN::setSamplerate(int _rate)
 {
-    a->samplerate = (float)rate;
-    calc_firmin (a);
+    samplerate = (float) _rate;
+    calc();
 }
 
-void FIRMIN::setSize_firmin (FIRMIN *a, int size)
+void FIRMIN::setSize(int _size)
 {
-    a->size = size;
+    size = _size;
 }
 
-void FIRMIN::setFreqs_firmin (FIRMIN *a, float f_low, float f_high)
+void FIRMIN::setFreqs(float _f_low, float _f_high)
 {
-    a->f_low = f_low;
-    a->f_high = f_high;
-    calc_firmin (a);
+    f_low = _f_low;
+    f_high = _f_high;
+    calc();
 }
 
 } // namespace WDSP

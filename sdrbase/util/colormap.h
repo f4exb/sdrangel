@@ -66,6 +66,9 @@ private:
     static const float m_shrimp[m_size];
     static const float m_cubehelix[m_size];
     static const float m_cubegamma[m_size];
+    static const float m_cubehlx2[m_size];
+    static const float m_icy[m_size];
+    static const float m_mint[m_size];
 };
 
 #endif

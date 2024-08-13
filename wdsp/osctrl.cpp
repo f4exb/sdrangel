@@ -35,122 +35,91 @@ warren@wpratt.com
 
 namespace WDSP {
 
-void OSCTRL::calc_osctrl (OSCTRL *a)
+void OSCTRL::calc()
 {
-    a->pn = (int)((0.3 / a->bw) * a->rate + 0.5);
-    if ((a->pn & 1) == 0) a->pn += 1;
-    if (a->pn < 3) a->pn = 3;
-    a->dl_len = a->pn >> 1;
-    a->dl    = new float[a->pn * 2]; // (float *) malloc0 (a->pn * sizeof (complex));
-    a->dlenv = new float[a->pn]; // (float *) malloc0 (a->pn * sizeof (float));
-    a->in_idx = 0;
-    a->out_idx = a->in_idx + a->dl_len;
-    a->max_env = 0.0;
+    pn = (int)((0.3 / bw) * rate + 0.5);
+    if ((pn & 1) == 0) pn += 1;
+    if (pn < 3) pn = 3;
+    dl_len = pn >> 1;
+    dl.resize(pn * 2);
+    dlenv.resize(pn);
+    in_idx = 0;
+    out_idx = in_idx + dl_len;
+    max_env = 0.0;
 }
 
-void OSCTRL::decalc_osctrl (OSCTRL *a)
+OSCTRL::OSCTRL(
+    int _run,
+    int _size,
+    float* _inbuff,
+    float* _outbuff,
+    int _rate,
+    double _osgain
+) :
+    run(_run),
+    size(_size),
+    inbuff(_inbuff),
+    outbuff(_outbuff),
+    rate(_rate),
+    osgain(_osgain)
 {
-    delete[] (a->dlenv);
-    delete[] (a->dl);
+    bw = 3000.0;
+    calc();
 }
 
-OSCTRL* OSCTRL::create_osctrl (
-    int run,
-    int size,
-    float* inbuff,
-    float* outbuff,
-    int rate,
-    float osgain
-)
+void OSCTRL::flush()
 {
-    OSCTRL *a = new OSCTRL;
-    a->run = run;
-    a->size = size;
-    a->inbuff = inbuff;
-    a->outbuff = outbuff;
-    a->rate = rate;
-    a->osgain = osgain;
-    a->bw = 3000.0;
-    calc_osctrl (a);
-    return a;
+    std::fill(dl.begin(), dl.end(), 0);
+    std::fill(dlenv.begin(), dlenv.end(), 0);
 }
 
-void OSCTRL::destroy_osctrl (OSCTRL *a)
+void OSCTRL::execute()
 {
-    decalc_osctrl (a);
-    delete (a);
-}
-
-void OSCTRL::flush_osctrl (OSCTRL *a)
-{
-    std::fill(a->dl, a->dl + a->dl_len * 2, 0);
-    std::fill(a->dlenv, a->dlenv + a->pn, 0);
-}
-
-void OSCTRL::xosctrl (OSCTRL *a)
-{
-    if (a->run)
+    if (run)
     {
-        int i, j;
-        float divisor;
-        for (i = 0; i < a->size; i++)
+        double divisor;
+        for (int i = 0; i < size; i++)
         {
-            a->dl[2 * a->in_idx + 0] = a->inbuff[2 * i + 0];                            // put sample in delay line
-            a->dl[2 * a->in_idx + 1] = a->inbuff[2 * i + 1];
-            a->env_out = a->dlenv[a->in_idx];                                           // take env out of delay line
-            a->dlenv[a->in_idx] = sqrt (a->inbuff[2 * i + 0] * a->inbuff[2 * i + 0]     // put env in delay line
-                                      + a->inbuff[2 * i + 1] * a->inbuff[2 * i + 1]);
-            if (a->dlenv[a->in_idx]  >  a->max_env) a->max_env = a->dlenv[a->in_idx];
-            if (a->env_out >= a->max_env && a->env_out > 0.0)                           // run the buffer
+            dl[2 * in_idx + 0] = inbuff[2 * i + 0];                            // put sample in delay line
+            dl[2 * in_idx + 1] = inbuff[2 * i + 1];
+            env_out = dlenv[in_idx];                                           // take env out of delay line
+            dlenv[in_idx] = sqrt (inbuff[2 * i + 0] * inbuff[2 * i + 0]     // put env in delay line
+                                      + inbuff[2 * i + 1] * inbuff[2 * i + 1]);
+            if (dlenv[in_idx]  >  max_env) max_env = dlenv[in_idx];
+            if (env_out >= max_env && env_out > 0.0)                           // run the buffer
             {
-                a->max_env = 0.0;
-                for (j = 0; j < a->pn; j++)
-                    if (a->dlenv[j] > a->max_env) a->max_env = a->dlenv[j];
+                max_env = 0.0;
+                for (int j = 0; j < pn; j++)
+                    if (dlenv[j] > max_env) max_env = dlenv[j];
             }
-            if (a->max_env > 1.0) divisor = 1.0 + a->osgain * (a->max_env - 1.0);
+            if (max_env > 1.0) divisor = 1.0 + osgain * (max_env - 1.0);
             else                  divisor = 1.0;
-            a->outbuff[2 * i + 0] = a->dl[2 * a->out_idx + 0] / divisor;                // output sample
-            a->outbuff[2 * i + 1] = a->dl[2 * a->out_idx + 1] / divisor;
-            if (--a->in_idx  < 0) a->in_idx  += a->pn;
-            if (--a->out_idx < 0) a->out_idx += a->pn;
+            outbuff[2 * i + 0] = (float) (dl[2 * out_idx + 0] / divisor);                // output sample
+            outbuff[2 * i + 1] = (float) (dl[2 * out_idx + 1] / divisor);
+            if (--in_idx  < 0) in_idx  += pn;
+            if (--out_idx < 0) out_idx += pn;
         }
     }
-    else if (a->inbuff != a->outbuff)
-        std::copy(a->inbuff, a->inbuff + a->size * 2, a->outbuff);
+    else if (inbuff != outbuff)
+        std::copy(inbuff, inbuff + size * 2, outbuff);
 }
 
-void OSCTRL::setBuffers_osctrl (OSCTRL *a, float* in, float* out)
+void OSCTRL::setBuffers(float* _in, float* _out)
 {
-    a->inbuff = in;
-    a->outbuff = out;
+    inbuff = _in;
+    outbuff = _out;
 }
 
-void OSCTRL::setSamplerate_osctrl (OSCTRL *a, int rate)
+void OSCTRL::setSamplerate(int _rate)
 {
-    decalc_osctrl (a);
-    a->rate = rate;
-    calc_osctrl (a);
+    rate = _rate;
+    calc();
 }
 
-void OSCTRL::setSize_osctrl (OSCTRL *a, int size)
+void OSCTRL::setSize(int _size)
 {
-    a->size = size;
-    flush_osctrl (a);
-}
-
-/********************************************************************************************************
-*                                                                                                       *
-*                                           TXA Properties                                              *
-*                                                                                                       *
-********************************************************************************************************/
-
-void OSCTRL::SetosctrlRun (TXA& txa, int run)
-{
-    if (txa.osctrl.p->run != run)
-    {
-        txa.osctrl.p->run = run;
-        TXA::SetupBPFilters (txa);
-    }
+    size = _size;
+    flush();
 }
 
 } // namespace WDSP

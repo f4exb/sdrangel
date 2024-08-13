@@ -34,6 +34,8 @@ warren@wpratt.com
 #ifndef wdsp_resample_h
 #define wdsp_resample_h
 
+#include <vector>
+
 #include "export.h"
 
 namespace WDSP {
@@ -50,19 +52,19 @@ public:
     double fcin;
     double fc;
     double fc_low;
-    double gain;
     int idx_in;         // index for input into ring
     int ncoefin;
+    double gain;
     int ncoef;          // number of coefficients
     int L;              // interpolation factor
     int M;              // decimation factor
-    double* h;          // coefficients
+    std::vector<double> h;    // coefficients
     int ringsize;       // number of complex pairs the ring buffer holds
-    double* ring;       // ring buffer
+    std::vector<double> ring; // ring buffer
     int cpp;            // coefficients of the phase
     int phnum;          // phase number
 
-    static RESAMPLE* create_resample (
+    RESAMPLE (
         int run,
         int size,
         float* in,
@@ -73,23 +75,25 @@ public:
         int ncoef,
         double gain
     );
-    static void destroy_resample (RESAMPLE *a);
-    static void flush_resample (RESAMPLE *a);
-    static int xresample (RESAMPLE *a);
-    static void setBuffers_resample (RESAMPLE *a, float* in, float* out);
-    static void setSize_resample(RESAMPLE *a, int size);
-    static void setInRate_resample(RESAMPLE *a, int rate);
-    static void setOutRate_resample(RESAMPLE *a, int rate);
-    static void setFCLow_resample (RESAMPLE *a, double fc_low);
-    static void setBandwidth_resample (RESAMPLE *a, double fc_low, double fc_high);
-    // Exported calls
-    static void* create_resampleV (int in_rate, int out_rate);
-    static void xresampleV (float* input, float* output, int numsamps, int* outsamps, void* ptr);
-    static void destroy_resampleV (void* ptr);
+    RESAMPLE(const RESAMPLE&) = delete;
+    RESAMPLE& operator=(const RESAMPLE& other) = delete;
+    ~RESAMPLE() = default;
+
+    void flush();
+    int execute();
+    void setBuffers(float* in, float* out);
+    void setSize(int size);
+    void setInRate(int rate);
+    void setOutRate(int rate);
+    void setFCLow(double fc_low);
+    void setBandwidth(double fc_low, double fc_high);
+    // Static methods
+    static RESAMPLE* Create (int in_rate, int out_rate);
+    static void Execute (float* input, float* output, int numsamps, int* outsamps, RESAMPLE* ptr);
+    static void Destroy (RESAMPLE* ptr);
 
 private:
-    static void calc_resample (RESAMPLE *a);
-    static void decalc_resample (RESAMPLE *a);
+    void calc();
 };
 
 } // namespace WDSP
