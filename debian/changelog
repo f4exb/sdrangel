@@ -1,3 +1,20 @@
+sdrangel (7.22.0-1) unstable; urgency=medium
+
+    * New Rx channel based on WDSP. Issue #2156
+    * Added cubehelix based color maps. Issue #2191
+    * Fix API host address in About dialog and debug message. PR #2218
+    * Some cleanup. PR #2212
+    * Added shift to channel marker to take RIT into account. Part of #2156
+    * Added S-meter units to scale engine. Part of #2156
+    * Some typos fixes. PR #2206
+    * Map enhancements and fixes. PR #2187
+    * APT Demod: Check filename suffix is specified. PR #2190
+    * Don't change filenames on Android, PR #2190
+    * Frequency Scanner: Fix rounding error. PR #2186
+    * Update sdrangel-windows-libraries link to include latest VC redistributable. PR #2185
+
+   -- Edouard Griffiths, F4EXB  <f4exb06@gmail.com>  Tue, 13 Aug 2024 17:01:01 +0200
+
 sdrangel (7.21.4-1) unstable; urgency=medium
 
     * Code fixes. PR #2184
