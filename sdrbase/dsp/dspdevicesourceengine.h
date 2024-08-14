@@ -28,7 +28,6 @@
 #include <QWaitCondition>
 #include "dsp/dsptypes.h"
 #include "util/messagequeue.h"
-#include "util/syncmessenger.h"
 #include "export.h"
 #include "util/movingaverage.h"
 
@@ -47,7 +46,7 @@ public:
 		StError        //!< engine is in error
 	};
 
-	DSPDeviceSourceEngine(uint uid, QObject* parent = NULL);
+	DSPDeviceSourceEngine(uint uid, QObject* parent = nullptr);
 	~DSPDeviceSourceEngine();
 
 	uint getUID() const { return m_uid; }
@@ -72,14 +71,13 @@ public:
 
 	State state() const { return m_state; } //!< Return DSP engine current state
 
-	QString errorMessage(); //!< Return the current error message
-	QString sourceDeviceDescription(); //!< Return the source device description
+	QString errorMessage() const; //!< Return the current error message
+	QString sourceDeviceDescription() const; //!< Return the source device description
 
 private:
 	uint m_uid; //!< unique ID
 
 	MessageQueue m_inputMessageQueue;  //<! Input message queue. Post here.
-	SyncMessenger m_syncMessenger;     //!< Used to process messages synchronously with the thread
 
 	State m_state;
 
@@ -89,7 +87,7 @@ private:
 	DeviceSampleSource* m_deviceSampleSource;
 	int m_sampleSourceSequence;
 
-	typedef std::list<BasebandSampleSink*> BasebandSampleSinks;
+	using BasebandSampleSinks = std::list<BasebandSampleSink *>;
 	BasebandSampleSinks m_basebandSampleSinks; //!< sample sinks within main thread (usually spectrum, file output)
 
 	uint m_sampleRate;
@@ -98,7 +96,8 @@ private:
 
 	bool m_dcOffsetCorrection;
 	bool m_iqImbalanceCorrection;
-	double m_iOffset, m_qOffset;
+	double m_iOffset;
+	double m_qOffset;
 
 	MovingAverageUtil<int32_t, int64_t, 1024> m_iBeta;
     MovingAverageUtil<int32_t, int64_t, 1024> m_qBeta;
@@ -140,11 +139,11 @@ private:
 	void setState(State state);
 
 	void handleSetSource(DeviceSampleSource* source); //!< Manage source setting
+    bool handleMessage(const Message& cmd);
 
 private slots:
 	void handleData(); //!< Handle data when samples from source FIFO are ready to be processed
 	void handleInputMessages(); //!< Handle input message queue
-	void handleSynchronousMessages(); //!< Handle synchronous messages with the thread
 
 signals:
 	void stateChanged();

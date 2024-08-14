@@ -47,7 +47,6 @@ DSPDeviceSourceEngine::DSPDeviceSourceEngine(uint uid, QObject* parent) :
 	m_imbalance(65536)
 {
 	connect(&m_inputMessageQueue, SIGNAL(messageEnqueued()), this, SLOT(handleInputMessages()), Qt::QueuedConnection);
-	connect(&m_syncMessenger, SIGNAL(messageSent()), this, SLOT(handleSynchronousMessages()), Qt::QueuedConnection);
 
 	moveToThread(this);
 }
@@ -69,61 +68,55 @@ void DSPDeviceSourceEngine::setState(State state)
 
 void DSPDeviceSourceEngine::run()
 {
-	qDebug() << "DSPDeviceSourceEngine::run";
+	qDebug("DSPDeviceSourceEngine::run");
 	setState(StIdle);
     exec();
 }
 
 void DSPDeviceSourceEngine::start()
 {
-	qDebug() << "DSPDeviceSourceEngine::start";
+	qDebug("DSPDeviceSourceEngine::start");
 	QThread::start();
 }
 
 void DSPDeviceSourceEngine::stop()
 {
-	qDebug() << "DSPDeviceSourceEngine::stop";
+	qDebug("DSPDeviceSourceEngine::stop");
     gotoIdle();
     setState(StNotStarted);
 	QThread::exit();
-//	DSPExit cmd;
-//	m_syncMessenger.sendWait(cmd);
 }
 
 bool DSPDeviceSourceEngine::initAcquisition()
 {
-	qDebug() << "DSPDeviceSourceEngine::initAcquisition";
-	DSPAcquisitionInit cmd;
-
-	return m_syncMessenger.sendWait(cmd) == StReady;
+	qDebug("DSPDeviceSourceEngine::initAcquisition (dummy)");
+	return true;
 }
 
 bool DSPDeviceSourceEngine::startAcquisition()
 {
-	qDebug() << "DSPDeviceSourceEngine::startAcquisition";
-	DSPAcquisitionStart cmd;
-
-	return m_syncMessenger.sendWait(cmd) == StRunning;
+	qDebug("DSPDeviceSourceEngine::startAcquisition");
+	auto *cmd = new DSPAcquisitionStart();
+    getInputMessageQueue()->push(cmd);
+    return true;
 }
 
 void DSPDeviceSourceEngine::stopAcquistion()
 {
-	qDebug() << "DSPDeviceSourceEngine::stopAcquistion";
-	DSPAcquisitionStop cmd;
-	m_syncMessenger.storeMessage(cmd);
-	handleSynchronousMessages();
+	qDebug("DSPDeviceSourceEngine::stopAcquistion");
+	auto *cmd = new DSPAcquisitionStop();
+    getInputMessageQueue()->push(cmd);
 
-	if(m_dcOffsetCorrection)
-	{
+	if (m_dcOffsetCorrection) {
 		qDebug("DC offset:%f,%f", m_iOffset, m_qOffset);
 	}
 }
 
 void DSPDeviceSourceEngine::setSource(DeviceSampleSource* source)
 {
-	qDebug() << "DSPDeviceSourceEngine::setSource";
-	DSPSetSource cmd(source);
-	m_syncMessenger.sendWait(cmd);
+	qDebug("DSPDeviceSourceEngine::setSource");
+	auto *cmd = new DSPSetSource(source);
+    getInputMessageQueue()->push(cmd);
 }
 
 void DSPDeviceSourceEngine::setSourceSequence(int sequence)
@@ -135,38 +128,34 @@ void DSPDeviceSourceEngine::setSourceSequence(int sequence)
 void DSPDeviceSourceEngine::addSink(BasebandSampleSink* sink)
 {
 	qDebug() << "DSPDeviceSourceEngine::addSink: " << sink->getSinkName().toStdString().c_str();
-	DSPAddBasebandSampleSink cmd(sink);
-	m_syncMessenger.sendWait(cmd);
+	auto *cmd = new DSPAddBasebandSampleSink(sink);
+    getInputMessageQueue()->push(cmd);
 }
 
 void DSPDeviceSourceEngine::removeSink(BasebandSampleSink* sink)
 {
 	qDebug() << "DSPDeviceSourceEngine::removeSink: " << sink->getSinkName().toStdString().c_str();
-	DSPRemoveBasebandSampleSink cmd(sink);
-	m_syncMessenger.sendWait(cmd);
+	auto *cmd = new DSPRemoveBasebandSampleSink(sink);
+    getInputMessageQueue()->push(cmd);
 }
 
 void DSPDeviceSourceEngine::configureCorrections(bool dcOffsetCorrection, bool iqImbalanceCorrection)
 {
-	qDebug() << "DSPDeviceSourceEngine::configureCorrections";
-	DSPConfigureCorrection* cmd = new DSPConfigureCorrection(dcOffsetCorrection, iqImbalanceCorrection);
-	m_inputMessageQueue.push(cmd);
+	qDebug("DSPDeviceSourceEngine::configureCorrections");
+	auto *cmd = new DSPConfigureCorrection(dcOffsetCorrection, iqImbalanceCorrection);
+	getInputMessageQueue()->push(cmd);
 }
 
-QString DSPDeviceSourceEngine::errorMessage()
+QString DSPDeviceSourceEngine::errorMessage() const
 {
-	qDebug() << "DSPDeviceSourceEngine::errorMessage";
-	DSPGetErrorMessage cmd;
-	m_syncMessenger.sendWait(cmd);
-	return cmd.getErrorMessage();
+	qDebug("DSPDeviceSourceEngine::errorMessage");
+    return m_errorMessage;
 }
 
-QString DSPDeviceSourceEngine::sourceDeviceDescription()
+QString DSPDeviceSourceEngine::sourceDeviceDescription() const
 {
-	qDebug() << "DSPDeviceSourceEngine::sourceDeviceDescription";
-	DSPGetSourceDeviceDescription cmd;
-	m_syncMessenger.sendWait(cmd);
-	return cmd.getDeviceDescription();
+	qDebug("DSPDeviceSourceEngine::sourceDeviceDescription");
+    return m_deviceDescription;
 }
 
 void DSPDeviceSourceEngine::iqCorrections(SampleVector::iterator begin, SampleVector::iterator end, bool imbalanceCorrection)
@@ -217,8 +206,8 @@ void DSPDeviceSourceEngine::iqCorrections(SampleVector::iterator begin, SampleVe
 
 #else
             // DC correction and conversion
-            float xi = (it->m_real - (int32_t) m_iBeta) / SDR_RX_SCALEF;
-            float xq = (it->m_imag - (int32_t) m_qBeta) / SDR_RX_SCALEF;
+            float xi = (float) (it->m_real - (int32_t) m_iBeta) / SDR_RX_SCALEF;
+            float xq = (float) (it->m_imag - (int32_t) m_qBeta) / SDR_RX_SCALEF;
 
             // phase imbalance
             m_avgII(xi*xi); // <I", I">
@@ -263,10 +252,10 @@ void DSPDeviceSourceEngine::dcOffset(SampleVector::iterator begin, SampleVector:
 	// sum and correct in one pass
 	for(SampleVector::iterator it = begin; it < end; it++)
 	{
-	    m_iBeta(it->real());
-	    m_qBeta(it->imag());
-	    it->m_real -= (int32_t) m_iBeta;
-	    it->m_imag -= (int32_t) m_qBeta;
+        m_iBeta(it->real());
+        m_qBeta(it->imag());
+        it->m_real -= (int32_t) m_iBeta;
+        it->m_imag -= (int32_t) m_qBeta;
 	}
 }
 
@@ -376,7 +365,7 @@ void DSPDeviceSourceEngine::work()
 
 DSPDeviceSourceEngine::State DSPDeviceSourceEngine::gotoIdle()
 {
-	qDebug() << "DSPDeviceSourceEngine::gotoIdle";
+	qDebug("DSPDeviceSourceEngine::gotoIdle");
 
 	switch(m_state) {
 		case StNotStarted:
@@ -442,14 +431,14 @@ DSPDeviceSourceEngine::State DSPDeviceSourceEngine::gotoInit()
 	m_sampleRate = m_deviceSampleSource->getSampleRate();
 
 	qDebug() << "DSPDeviceSourceEngine::gotoInit: "
-	        << " m_deviceDescription: " << m_deviceDescription.toStdString().c_str()
+            << " m_deviceDescription: " << m_deviceDescription.toStdString().c_str()
 			<< " sampleRate: " << m_sampleRate
 			<< " centerFrequency: " << m_centerFrequency;
 
 
 	for (BasebandSampleSinks::const_iterator it = m_basebandSampleSinks.begin(); it != m_basebandSampleSinks.end(); ++it)
 	{
-		DSPSignalNotification *notif = new DSPSignalNotification(m_sampleRate, m_centerFrequency);
+		auto *notif = new DSPSignalNotification(m_sampleRate, m_centerFrequency);
 		qDebug() << "DSPDeviceSourceEngine::gotoInit: initializing " << (*it)->getSinkName().toStdString().c_str();
 		(*it)->pushMessage(notif);
 	}
@@ -457,7 +446,7 @@ DSPDeviceSourceEngine::State DSPDeviceSourceEngine::gotoInit()
 	// pass data to listeners
 	if (m_deviceSampleSource->getMessageQueueToGUI())
 	{
-        DSPSignalNotification* rep = new DSPSignalNotification(m_sampleRate, m_centerFrequency);
+        auto *rep = new DSPSignalNotification(m_sampleRate, m_centerFrequency);
         m_deviceSampleSource->getMessageQueueToGUI()->push(rep);
 	}
 
@@ -466,7 +455,7 @@ DSPDeviceSourceEngine::State DSPDeviceSourceEngine::gotoInit()
 
 DSPDeviceSourceEngine::State DSPDeviceSourceEngine::gotoRunning()
 {
-	qDebug() << "DSPDeviceSourceEngine::gotoRunning";
+	qDebug("DSPDeviceSourceEngine::gotoRunning");
 
 	switch(m_state)
     {
@@ -521,11 +510,6 @@ void DSPDeviceSourceEngine::handleSetSource(DeviceSampleSource* source)
 {
 	gotoIdle();
 
-//	if(m_sampleSource != 0)
-//	{
-//		disconnect(m_sampleSource->getSampleFifo(), SIGNAL(dataReady()), this, SLOT(handleData()));
-//	}
-
 	m_deviceSampleSource = source;
 
 	if (m_deviceSampleSource)
@@ -547,55 +531,123 @@ void DSPDeviceSourceEngine::handleData()
 	}
 }
 
-void DSPDeviceSourceEngine::handleSynchronousMessages()
+bool DSPDeviceSourceEngine::handleMessage(const Message& message)
 {
-    Message *message = m_syncMessenger.getMessage();
-	qDebug() << "DSPDeviceSourceEngine::handleSynchronousMessages: " << message->getIdentifier();
+    if (DSPConfigureCorrection::match(message))
+    {
+        auto& conf = (const DSPConfigureCorrection&) message;
+        m_iqImbalanceCorrection = conf.getIQImbalanceCorrection();
 
-	if (DSPAcquisitionInit::match(*message))
+        if (m_dcOffsetCorrection != conf.getDCOffsetCorrection())
+        {
+            m_dcOffsetCorrection = conf.getDCOffsetCorrection();
+            m_iOffset = 0;
+            m_qOffset = 0;
+        }
+
+        if (m_iqImbalanceCorrection != conf.getIQImbalanceCorrection())
+        {
+            m_iqImbalanceCorrection = conf.getIQImbalanceCorrection();
+            m_iRange = 1 << 16;
+            m_qRange = 1 << 16;
+            m_imbalance = 65536;
+        }
+
+        m_avgAmp.reset();
+        m_avgII.reset();
+        m_avgII2.reset();
+        m_avgIQ.reset();
+        m_avgPhi.reset();
+        m_avgQQ2.reset();
+        m_iBeta.reset();
+        m_qBeta.reset();
+
+        return true;
+    }
+    else if (DSPSignalNotification::match(message))
+    {
+        auto& notif = (const DSPSignalNotification&) message;
+
+        // update DSP values
+
+        m_sampleRate = notif.getSampleRate();
+        m_centerFrequency = notif.getCenterFrequency();
+        m_realElseComplex = notif.getRealElseComplex();
+
+        qDebug() << "DSPDeviceSourceEngine::handleInputMessages: DSPSignalNotification:"
+            << " m_sampleRate: " << m_sampleRate
+            << " m_centerFrequency: " << m_centerFrequency;
+
+        // forward source changes to channel sinks with immediate execution (no queuing)
+
+        for(BasebandSampleSinks::const_iterator it = m_basebandSampleSinks.begin(); it != m_basebandSampleSinks.end(); it++)
+        {
+            auto* rep = new DSPSignalNotification(notif); // make a copy
+            qDebug() << "DSPDeviceSourceEngine::handleInputMessages: forward message to " << (*it)->getSinkName().toStdString().c_str();
+            (*it)->pushMessage(rep);
+        }
+
+        // forward changes to source GUI input queue
+        if (m_deviceSampleSource)
+        {
+            MessageQueue *guiMessageQueue = m_deviceSampleSource->getMessageQueueToGUI();
+            qDebug("DSPDeviceSourceEngine::handleInputMessages: DSPSignalNotification: guiMessageQueue: %p", guiMessageQueue);
+
+            if (guiMessageQueue)
+            {
+                auto* rep = new DSPSignalNotification(notif); // make a copy for the source GUI
+                guiMessageQueue->push(rep);
+            }
+        }
+
+        return true;
+    }
+    // was in handleSynchronousMessages:
+	else if (DSPAcquisitionInit::match(message))
+	{
+        return true; // discard
+	}
+	else if (DSPAcquisitionStart::match(message))
 	{
 		setState(gotoIdle());
 
 		if(m_state == StIdle) {
 			setState(gotoInit()); // State goes ready if init is performed
 		}
-	}
-	else if (DSPAcquisitionStart::match(*message))
-	{
+
 		if(m_state == StReady) {
 			setState(gotoRunning());
 		}
+
+        return true;
 	}
-	else if (DSPAcquisitionStop::match(*message))
+	else if (DSPAcquisitionStop::match(message))
 	{
 		setState(gotoIdle());
+        return true;
 	}
-	else if (DSPGetSourceDeviceDescription::match(*message))
+	else if (DSPSetSource::match(message))
+    {
+        auto cmd = (const DSPSetSource&) message;
+		handleSetSource(cmd.getSampleSource());
+	}
+	else if (DSPAddBasebandSampleSink::match(message))
 	{
-		((DSPGetSourceDeviceDescription*) message)->setDeviceDescription(m_deviceDescription);
-	}
-	else if (DSPGetErrorMessage::match(*message))
-	{
-		((DSPGetErrorMessage*) message)->setErrorMessage(m_errorMessage);
-	}
-	else if (DSPSetSource::match(*message)) {
-		handleSetSource(((DSPSetSource*) message)->getSampleSource());
-	}
-	else if (DSPAddBasebandSampleSink::match(*message))
-	{
-		BasebandSampleSink* sink = ((DSPAddBasebandSampleSink*) message)->getSampleSink();
+        auto cmd = (const DSPAddBasebandSampleSink&) message;
+		BasebandSampleSink* sink = cmd.getSampleSink();
 		m_basebandSampleSinks.push_back(sink);
         // initialize sample rate and center frequency in the sink:
-        DSPSignalNotification *msg = new DSPSignalNotification(m_sampleRate, m_centerFrequency);
+        auto *msg = new DSPSignalNotification(m_sampleRate, m_centerFrequency);
         sink->pushMessage(msg);
         // start the sink:
         if(m_state == StRunning) {
             sink->start();
         }
 	}
-	else if (DSPRemoveBasebandSampleSink::match(*message))
+	else if (DSPRemoveBasebandSampleSink::match(message))
 	{
-		BasebandSampleSink* sink = ((DSPRemoveBasebandSampleSink*) message)->getSampleSink();
+        auto cmd = (const DSPRemoveBasebandSampleSink&) message;
+		BasebandSampleSink* sink = cmd.getSampleSink();
 
 		if(m_state == StRunning) {
 			sink->stop();
@@ -604,85 +656,19 @@ void DSPDeviceSourceEngine::handleSynchronousMessages()
 		m_basebandSampleSinks.remove(sink);
 	}
 
-	m_syncMessenger.done(m_state);
+    return false;
 }
 
 void DSPDeviceSourceEngine::handleInputMessages()
 {
 	Message* message;
 
-	while ((message = m_inputMessageQueue.pop()) != 0)
+	while ((message = m_inputMessageQueue.pop()) != nullptr)
 	{
 		qDebug("DSPDeviceSourceEngine::handleInputMessages: message: %s", message->getIdentifier());
 
-		if (DSPConfigureCorrection::match(*message))
-		{
-			DSPConfigureCorrection* conf = (DSPConfigureCorrection*) message;
-			m_iqImbalanceCorrection = conf->getIQImbalanceCorrection();
-
-			if(m_dcOffsetCorrection != conf->getDCOffsetCorrection())
-			{
-				m_dcOffsetCorrection = conf->getDCOffsetCorrection();
-				m_iOffset = 0;
-				m_qOffset = 0;
-			}
-
-			if(m_iqImbalanceCorrection != conf->getIQImbalanceCorrection())
-			{
-				m_iqImbalanceCorrection = conf->getIQImbalanceCorrection();
-				m_iRange = 1 << 16;
-				m_qRange = 1 << 16;
-				m_imbalance = 65536;
-			}
-
-			m_avgAmp.reset();
-			m_avgII.reset();
-			m_avgII2.reset();
-			m_avgIQ.reset();
-			m_avgPhi.reset();
-			m_avgQQ2.reset();
-			m_iBeta.reset();
-			m_qBeta.reset();
-
-			delete message;
-		}
-		else if (DSPSignalNotification::match(*message))
-		{
-			DSPSignalNotification *notif = (DSPSignalNotification *) message;
-
-			// update DSP values
-
-			m_sampleRate = notif->getSampleRate();
-			m_centerFrequency = notif->getCenterFrequency();
-            m_realElseComplex = notif->getRealElseComplex();
-
-			qDebug() << "DSPDeviceSourceEngine::handleInputMessages: DSPSignalNotification:"
-				<< " m_sampleRate: " << m_sampleRate
-				<< " m_centerFrequency: " << m_centerFrequency;
-
-			// forward source changes to channel sinks with immediate execution (no queuing)
-
-			for(BasebandSampleSinks::const_iterator it = m_basebandSampleSinks.begin(); it != m_basebandSampleSinks.end(); it++)
-			{
-				DSPSignalNotification* rep = new DSPSignalNotification(*notif); // make a copy
-				qDebug() << "DSPDeviceSourceEngine::handleInputMessages: forward message to " << (*it)->getSinkName().toStdString().c_str();
-				(*it)->pushMessage(rep);
-			}
-
-			// forward changes to source GUI input queue
-            if (m_deviceSampleSource)
-            {
-                MessageQueue *guiMessageQueue = m_deviceSampleSource->getMessageQueueToGUI();
-                qDebug("DSPDeviceSourceEngine::handleInputMessages: DSPSignalNotification: guiMessageQueue: %p", guiMessageQueue);
-
-                if (guiMessageQueue)
-                {
-                    DSPSignalNotification* rep = new DSPSignalNotification(*notif); // make a copy for the source GUI
-                    guiMessageQueue->push(rep);
-                }
-            }
-
-			delete message;
-		}
+        if (handleMessage(*message)) {
+            delete message;
+        }
 	}
 }

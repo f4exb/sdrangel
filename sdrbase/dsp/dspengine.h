@@ -32,6 +32,7 @@ class DSPDeviceSourceEngine;
 class DSPDeviceSinkEngine;
 class DSPDeviceMIMOEngine;
 class FFTFactory;
+class QThread;
 
 class SDRBASE_API DSPEngine : public QObject {
 	Q_OBJECT
@@ -79,6 +80,7 @@ private:
         DSPDeviceSourceEngine *m_deviceSourceEngine;
         DSPDeviceSinkEngine *m_deviceSinkEngine;
         DSPDeviceMIMOEngine *m_deviceMIMOEngine;
+        QThread *m_thread;
     };
 
 	QList<DSPDeviceSourceEngine*> m_deviceSourceEngines;

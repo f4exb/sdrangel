@@ -63,10 +63,12 @@ DSPEngine *DSPEngine::instance()
 
 DSPDeviceSourceEngine *DSPEngine::addDeviceSourceEngine()
 {
-    m_deviceSourceEngines.push_back(new DSPDeviceSourceEngine(m_deviceSourceEnginesUIDSequence));
+    auto *deviceSourceEngine = new DSPDeviceSourceEngine(m_deviceSourceEnginesUIDSequence);
+    // auto *deviceThread = new QThread(); TBD
     m_deviceSourceEnginesUIDSequence++;
-    m_deviceEngineReferences.push_back(DeviceEngineReference{0, m_deviceSourceEngines.back(), nullptr, nullptr});
-    return m_deviceSourceEngines.back();
+    m_deviceSourceEngines.push_back(deviceSourceEngine);
+    m_deviceEngineReferences.push_back(DeviceEngineReference{0, m_deviceSourceEngines.back(), nullptr, nullptr, nullptr});
+    return deviceSourceEngine;
 }
 
 void DSPEngine::removeLastDeviceSourceEngine()
@@ -92,7 +94,7 @@ DSPDeviceSinkEngine *DSPEngine::addDeviceSinkEngine()
 {
     m_deviceSinkEngines.push_back(new DSPDeviceSinkEngine(m_deviceSinkEnginesUIDSequence));
     m_deviceSinkEnginesUIDSequence++;
-    m_deviceEngineReferences.push_back(DeviceEngineReference{1, nullptr, m_deviceSinkEngines.back(), nullptr});
+    m_deviceEngineReferences.push_back(DeviceEngineReference{1, nullptr, m_deviceSinkEngines.back(), nullptr, nullptr});
     return m_deviceSinkEngines.back();
 }
 
@@ -119,7 +121,7 @@ DSPDeviceMIMOEngine *DSPEngine::addDeviceMIMOEngine()
 {
     m_deviceMIMOEngines.push_back(new DSPDeviceMIMOEngine(m_deviceMIMOEnginesUIDSequence));
     m_deviceMIMOEnginesUIDSequence++;
-    m_deviceEngineReferences.push_back(DeviceEngineReference{2, nullptr, nullptr, m_deviceMIMOEngines.back()});
+    m_deviceEngineReferences.push_back(DeviceEngineReference{2, nullptr, nullptr, m_deviceMIMOEngines.back(), nullptr});
     return m_deviceMIMOEngines.back();
 }
 
