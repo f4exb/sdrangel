@@ -22,7 +22,7 @@
 #ifndef INCLUDE_DSPDEVICEENGINE_H
 #define INCLUDE_DSPDEVICEENGINE_H
 
-#include <QThread>
+#include <QObject>
 #include <QTimer>
 #include <QMutex>
 #include <QWaitCondition>
@@ -34,7 +34,7 @@
 class DeviceSampleSource;
 class BasebandSampleSink;
 
-class SDRBASE_API DSPDeviceSourceEngine : public QThread {
+class SDRBASE_API DSPDeviceSourceEngine : public QObject {
 	Q_OBJECT
 
 public:
@@ -52,9 +52,6 @@ public:
 	uint getUID() const { return m_uid; }
 
 	MessageQueue* getInputMessageQueue() { return &m_inputMessageQueue; }
-
-	void start(); //!< This thread start
-	void stop();  //!< This thread stop
 
 	bool initAcquisition(); //!< Initialize acquisition sequence
 	bool startAcquisition(); //!< Start acquisition sequence
@@ -124,8 +121,6 @@ private:
     qint32 m_iRange;
 	qint32 m_qRange;
 	qint32 m_imbalance;
-
-	void run();
 
 	void iqCorrections(SampleVector::iterator begin, SampleVector::iterator end, bool imbalanceCorrection);
 	void dcOffset(SampleVector::iterator begin, SampleVector::iterator end);

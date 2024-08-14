@@ -343,7 +343,6 @@ MainWindow::~MainWindow()
 void MainWindow::sampleSourceAdd(Workspace *deviceWorkspace, Workspace *spectrumWorkspace, int deviceIndex)
 {
     DSPDeviceSourceEngine *dspDeviceSourceEngine = m_dspEngine->addDeviceSourceEngine();
-    dspDeviceSourceEngine->start();
 
     uint dspDeviceSourceEngineUID =  dspDeviceSourceEngine->getUID();
     char uidCStr[16];
@@ -1010,7 +1009,6 @@ void MainWindow::removeDeviceSet(int deviceSetIndex)
 	    DeviceAPI *sourceAPI = deviceUISet->m_deviceAPI;
 	    delete deviceUISet;
 
-	    deviceEngine->stop();
 	    m_dspEngine->removeDeviceEngineAt(deviceSetIndex);
         DeviceEnumerator::instance()->removeRxSelection(deviceSetIndex);
 
@@ -1116,7 +1114,6 @@ void MainWindow::removeLastDeviceSet()
 	    DeviceAPI *sourceAPI = m_deviceUIs.back()->m_deviceAPI;
 	    delete m_deviceUIs.back();
 
-	    lastDeviceEngine->stop();
 	    m_dspEngine->removeLastDeviceSourceEngine();
 
 	    delete sourceAPI;
