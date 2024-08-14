@@ -315,7 +315,6 @@ void MainServer::addSinkDevice()
 void MainServer::addSourceDevice()
 {
     DSPDeviceSourceEngine *dspDeviceSourceEngine = m_dspEngine->addDeviceSourceEngine();
-    dspDeviceSourceEngine->start();
 
     uint dspDeviceSourceEngineUID =  dspDeviceSourceEngine->getUID();
     char uidCStr[16];
@@ -423,7 +422,6 @@ void MainServer::removeLastDevice()
         DeviceAPI *sourceAPI = m_mainCore->m_deviceSets.back()->m_deviceAPI;
         delete m_mainCore->m_deviceSets.back();
 
-        lastDeviceEngine->stop();
         m_dspEngine->removeLastDeviceSourceEngine();
 
         delete sourceAPI;

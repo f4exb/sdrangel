@@ -42,7 +42,7 @@ DSPEngine::DSPEngine() :
 
 DSPEngine::~DSPEngine()
 {
-    QList<DSPDeviceSourceEngine*>::iterator it = m_deviceSourceEngines.begin();
+    auto it = m_deviceSourceEngines.begin();
 
     while (it != m_deviceSourceEngines.end())
     {
@@ -64,25 +64,44 @@ DSPEngine *DSPEngine::instance()
 DSPDeviceSourceEngine *DSPEngine::addDeviceSourceEngine()
 {
     auto *deviceSourceEngine = new DSPDeviceSourceEngine(m_deviceSourceEnginesUIDSequence);
-    // auto *deviceThread = new QThread(); TBD
+    auto *deviceThread = new QThread();
     m_deviceSourceEnginesUIDSequence++;
     m_deviceSourceEngines.push_back(deviceSourceEngine);
-    m_deviceEngineReferences.push_back(DeviceEngineReference{0, m_deviceSourceEngines.back(), nullptr, nullptr, nullptr});
+    m_deviceEngineReferences.push_back(DeviceEngineReference{0, m_deviceSourceEngines.back(), nullptr, nullptr, deviceThread});
+    deviceSourceEngine->moveToThread(deviceThread);
+
+    QObject::connect(
+        deviceThread,
+        &QThread::finished,
+        deviceSourceEngine,
+        &QObject::deleteLater
+    );
+    QObject::connect(
+        deviceThread,
+        &QThread::finished,
+        deviceThread,
+        &QThread::deleteLater
+    );
+
+    deviceThread->start();
+
     return deviceSourceEngine;
 }
 
 void DSPEngine::removeLastDeviceSourceEngine()
 {
-    if (m_deviceSourceEngines.size() > 0)
+    if (!m_deviceSourceEngines.empty())
     {
-        DSPDeviceSourceEngine *lastDeviceEngine = m_deviceSourceEngines.back();
-        delete lastDeviceEngine;
+        const DSPDeviceSourceEngine *lastDeviceEngine = m_deviceSourceEngines.back();
         m_deviceSourceEngines.pop_back();
 
         for (int i = 0; i < m_deviceEngineReferences.size(); i++)
         {
             if (m_deviceEngineReferences[i].m_deviceSourceEngine == lastDeviceEngine)
             {
+                QThread* deviceThread = m_deviceEngineReferences[i].m_thread;
+                deviceThread->exit();
+                deviceThread->wait();
                 m_deviceEngineReferences.removeAt(i);
                 break;
             }
@@ -153,7 +172,9 @@ void DSPEngine::removeDeviceEngineAt(int deviceIndex)
     if (m_deviceEngineReferences[deviceIndex].m_deviceEngineType == 0) // source
     {
         DSPDeviceSourceEngine *deviceEngine = m_deviceEngineReferences[deviceIndex].m_deviceSourceEngine;
-        delete deviceEngine;
+        QThread *deviceThread = m_deviceEngineReferences[deviceIndex].m_thread;
+        deviceThread->exit();
+        deviceThread->wait();
         m_deviceSourceEngines.removeAll(deviceEngine);
     }
     else if (m_deviceEngineReferences[deviceIndex].m_deviceEngineType == 1) // sink

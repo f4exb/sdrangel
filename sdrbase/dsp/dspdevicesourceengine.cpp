@@ -29,7 +29,7 @@
 #include "samplesinkfifo.h"
 
 DSPDeviceSourceEngine::DSPDeviceSourceEngine(uint uid, QObject* parent) :
-	QThread(parent),
+	QObject(parent),
     m_uid(uid),
 	m_state(StNotStarted),
 	m_deviceSampleSource(nullptr),
@@ -46,15 +46,12 @@ DSPDeviceSourceEngine::DSPDeviceSourceEngine(uint uid, QObject* parent) :
 	m_qRange(1 << 16),
 	m_imbalance(65536)
 {
+    setState(StIdle);
 	connect(&m_inputMessageQueue, SIGNAL(messageEnqueued()), this, SLOT(handleInputMessages()), Qt::QueuedConnection);
-
-	moveToThread(this);
 }
 
 DSPDeviceSourceEngine::~DSPDeviceSourceEngine()
 {
-    stop();
-    wait();
 }
 
 void DSPDeviceSourceEngine::setState(State state)
@@ -64,27 +61,6 @@ void DSPDeviceSourceEngine::setState(State state)
         m_state = state;
         emit stateChanged();
     }
-}
-
-void DSPDeviceSourceEngine::run()
-{
-	qDebug("DSPDeviceSourceEngine::run");
-	setState(StIdle);
-    exec();
-}
-
-void DSPDeviceSourceEngine::start()
-{
-	qDebug("DSPDeviceSourceEngine::start");
-	QThread::start();
-}
-
-void DSPDeviceSourceEngine::stop()
-{
-	qDebug("DSPDeviceSourceEngine::stop");
-    gotoIdle();
-    setState(StNotStarted);
-	QThread::exit();
 }
 
 bool DSPDeviceSourceEngine::initAcquisition()
