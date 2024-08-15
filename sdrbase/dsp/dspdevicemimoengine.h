@@ -24,7 +24,6 @@
 #include "dsp/dsptypes.h"
 #include "util/message.h"
 #include "util/messagequeue.h"
-#include "util/syncmessenger.h"
 #include "util/movingaverage.h"
 #include "util/incrementalvector.h"
 #include "export.h"
@@ -252,8 +251,8 @@ public:
         }
     }
 
-	QString errorMessage(int subsystemIndex); //!< Return the current error message
-	QString deviceDescription(); //!< Return the device description
+	QString errorMessage(int subsystemIndex) const; //!< Return the current error message
+	QString deviceDescription() const; //!< Return the device description
 
    	void configureCorrections(bool dcOffsetCorrection, bool iqImbalanceCorrection, int isource); //!< Configure source DSP corrections
 
@@ -320,7 +319,6 @@ private:
 	int m_sampleMIMOSequence;
 
     MessageQueue m_inputMessageQueue;  //<! Input message queue. Post here.
-	SyncMessenger m_syncMessenger;     //!< Used to process messages synchronously with the thread
 
 	typedef std::list<BasebandSampleSink*> BasebandSampleSinks;
 	std::vector<BasebandSampleSinks> m_basebandSampleSinks; //!< ancillary sample sinks on main thread (per input stream)
@@ -357,14 +355,14 @@ private:
 	void setStateTx(State state);
 
     void handleSetMIMO(DeviceSampleMIMO* mimo); //!< Manage MIMO device setting
-   	void iqCorrections(SampleVector::iterator begin, SampleVector::iterator end, int isource, bool imbalanceCorrection);
+    void iqCorrections(SampleVector::iterator begin, SampleVector::iterator end, int isource, bool imbalanceCorrection);
+    bool handleMessage(const Message& cmd);
 
 private slots:
 	void handleDataRxSync();           //!< Handle data when Rx samples have to be processed synchronously
 	void handleDataRxAsync(int streamIndex); //!< Handle data when Rx samples have to be processed asynchronously
 	void handleDataTxSync();           //!< Handle data when Tx samples have to be processed synchronously
 	void handleDataTxAsync(int streamIndex); //!< Handle data when Tx samples have to be processed asynchronously
-	void handleSynchronousMessages();  //!< Handle synchronous messages with the thread
 	void handleInputMessages();        //!< Handle input message queue
 
 signals:
