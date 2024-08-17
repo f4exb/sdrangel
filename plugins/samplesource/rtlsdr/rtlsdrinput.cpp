@@ -78,6 +78,7 @@ RTLSDRInput::RTLSDRInput(DeviceAPI *deviceAPI) :
 
 RTLSDRInput::~RTLSDRInput()
 {
+    qDebug("RTLSDRInput::~RTLSDRInput");
     QObject::disconnect(
         m_networkManager,
         &QNetworkAccessManager::finished,
@@ -91,6 +92,7 @@ RTLSDRInput::~RTLSDRInput()
     }
 
     closeDevice();
+    qDebug("RTLSDRInput::~RTLSDRInput: end");
 }
 
 void RTLSDRInput::destroy()
@@ -231,11 +233,15 @@ bool RTLSDRInput::start()
 {
 	QMutexLocker mutexLocker(&m_mutex);
 
+    if (m_running) {
+        return true;
+    }
+
 	if (!m_dev) {
-	    return false;
+        return false;
 	}
 
-    if (m_running) stop();
+    qDebug("RTLSDRInput::start");
 
 	m_rtlSDRThread = new RTLSDRThread(m_dev, &m_sampleFifo, &m_replayBuffer);
 	m_rtlSDRThread->setSamplerate(m_settings.m_devSampleRate);
@@ -243,11 +249,11 @@ bool RTLSDRInput::start()
 	m_rtlSDRThread->setFcPos((int) m_settings.m_fcPos);
     m_rtlSDRThread->setIQOrder(m_settings.m_iqOrder);
 	m_rtlSDRThread->startWork();
+	m_running = true;
 
 	mutexLocker.unlock();
 
 	applySettings(m_settings, QList<QString>(), true);
-	m_running = true;
 
 	return true;
 }
@@ -266,6 +272,12 @@ void RTLSDRInput::closeDevice()
 void RTLSDRInput::stop()
 {
 	QMutexLocker mutexLocker(&m_mutex);
+
+    if (!m_running) {
+        return;
+    }
+
+    qDebug("RTLSDRInput::stop");
 
 	if (m_rtlSDRThread)
 	{
