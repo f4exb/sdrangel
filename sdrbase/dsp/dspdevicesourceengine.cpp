@@ -52,6 +52,7 @@ DSPDeviceSourceEngine::DSPDeviceSourceEngine(uint uid, QObject* parent) :
 
 DSPDeviceSourceEngine::~DSPDeviceSourceEngine()
 {
+    qDebug("DSPDeviceSourceEngine::~DSPDeviceSourceEngine");
 }
 
 void DSPDeviceSourceEngine::setState(State state)

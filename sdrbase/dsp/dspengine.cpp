@@ -138,24 +138,45 @@ void DSPEngine::removeLastDeviceSinkEngine()
 
 DSPDeviceMIMOEngine *DSPEngine::addDeviceMIMOEngine()
 {
-    m_deviceMIMOEngines.push_back(new DSPDeviceMIMOEngine(m_deviceMIMOEnginesUIDSequence));
+    auto *deviceMIMOEngine = new DSPDeviceMIMOEngine(m_deviceMIMOEnginesUIDSequence);
+    auto *deviceThread = new QThread();
     m_deviceMIMOEnginesUIDSequence++;
-    m_deviceEngineReferences.push_back(DeviceEngineReference{2, nullptr, nullptr, m_deviceMIMOEngines.back(), nullptr});
-    return m_deviceMIMOEngines.back();
+    m_deviceMIMOEngines.push_back(deviceMIMOEngine);
+    m_deviceEngineReferences.push_back(DeviceEngineReference{2, nullptr, nullptr, m_deviceMIMOEngines.back(), deviceThread});
+    deviceMIMOEngine->moveToThread(deviceThread);
+
+    QObject::connect(
+        deviceThread,
+        &QThread::finished,
+        deviceMIMOEngine,
+        &QObject::deleteLater
+    );
+    QObject::connect(
+        deviceThread,
+        &QThread::finished,
+        deviceThread,
+        &QThread::deleteLater
+    );
+
+    deviceThread->start();
+
+    return deviceMIMOEngine;
 }
 
 void DSPEngine::removeLastDeviceMIMOEngine()
 {
-    if (m_deviceMIMOEngines.size() > 0)
+    if (!m_deviceMIMOEngines.empty())
     {
-        DSPDeviceMIMOEngine *lastDeviceEngine = m_deviceMIMOEngines.back();
-        delete lastDeviceEngine;
+        const DSPDeviceMIMOEngine *lastDeviceEngine = m_deviceMIMOEngines.back();
         m_deviceMIMOEngines.pop_back();
 
         for (int i = 0; i < m_deviceEngineReferences.size(); i++)
         {
             if (m_deviceEngineReferences[i].m_deviceMIMOEngine == lastDeviceEngine)
             {
+                QThread* deviceThread = m_deviceEngineReferences[i].m_thread;
+                deviceThread->exit();
+                deviceThread->wait();
                 m_deviceEngineReferences.removeAt(i);
                 break;
             }
@@ -186,7 +207,9 @@ void DSPEngine::removeDeviceEngineAt(int deviceIndex)
     else if (m_deviceEngineReferences[deviceIndex].m_deviceEngineType == 2) // MIMO
     {
         DSPDeviceMIMOEngine *deviceEngine = m_deviceEngineReferences[deviceIndex].m_deviceMIMOEngine;
-        delete deviceEngine;
+        QThread *deviceThread = m_deviceEngineReferences[deviceIndex].m_thread;
+        deviceThread->exit();
+        deviceThread->wait();
         m_deviceMIMOEngines.removeAll(deviceEngine);
     }
 

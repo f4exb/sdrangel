@@ -66,6 +66,7 @@ MetisMISO::MetisMISO(DeviceAPI *deviceAPI) :
 
 MetisMISO::~MetisMISO()
 {
+    qDebug("MetisMISO::~MetisMISO");
     QObject::disconnect(
         m_networkManager,
         &QNetworkAccessManager::finished,
@@ -77,6 +78,7 @@ MetisMISO::~MetisMISO()
     if (m_running) {
         stopRx();
     }
+    qDebug("MetisMISO::~MetisMISO: end");
 }
 
 void MetisMISO::destroy()
@@ -155,6 +157,7 @@ void MetisMISO::startMetis()
 
 void MetisMISO::stopMetis()
 {
+    qDebug("MetisMISO::stopMetis");
     MetisMISOUDPHandler::MsgStartStop *message = MetisMISOUDPHandler::MsgStartStop::create(false);
     m_udpHandler.getInputMessageQueue()->push(message);
 }
