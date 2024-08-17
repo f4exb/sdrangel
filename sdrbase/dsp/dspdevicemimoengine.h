@@ -19,7 +19,7 @@
 #ifndef SDRBASE_DSP_DSPDEVICEMIMOENGINE_H_
 #define SDRBASE_DSP_DSPDEVICEMIMOENGINE_H_
 
-#include <QThread>
+#include <QObject>
 
 #include "dsp/dsptypes.h"
 #include "util/message.h"
@@ -33,7 +33,7 @@ class BasebandSampleSink;
 class BasebandSampleSource;
 class MIMOChannel;
 
-class SDRBASE_API DSPDeviceMIMOEngine : public QThread {
+class SDRBASE_API DSPDeviceMIMOEngine : public QObject {
 	Q_OBJECT
 
 public:
@@ -213,12 +213,9 @@ public:
 	};
 
 	DSPDeviceMIMOEngine(uint32_t uid, QObject* parent = nullptr);
-	~DSPDeviceMIMOEngine();
+	~DSPDeviceMIMOEngine() override;
 
 	MessageQueue* getInputMessageQueue() { return &m_inputMessageQueue; }
-
-	void start(); //!< This thread start
-	void stop();  //!< This thread stop
 
 	bool initProcess(int subsystemIndex);  //!< Initialize process sequence
 	bool startProcess(int subsystemIndex); //!< Start process sequence
@@ -339,7 +336,6 @@ private:
     bool m_spectrumInputSourceElseSink; //!< Source else sink stream to be used as spectrum sink input
     unsigned int m_spectrumInputIndex;  //!< Index of the stream to be used as spectrum sink input
 
-    void run();
     void workSampleSinkFifos(); //!< transfer samples of all sink streams (sync mode)
     void workSampleSinkFifo(unsigned int streamIndex); //!< transfer samples of one sink stream (async mode)
     void workSamplesSink(const SampleVector::const_iterator& vbegin, const SampleVector::const_iterator& vend, unsigned int streamIndex);

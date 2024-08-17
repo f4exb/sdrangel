@@ -27,6 +27,9 @@
 #include "dsp/dspdevicesourceengine.h"
 #include "dsp/dspdevicesinkengine.h"
 #include "dsp/dspdevicemimoengine.h"
+#include "dsp/devicesamplesource.h"
+#include "dsp/devicesamplesink.h"
+#include "dsp/devicesamplemimo.h"
 #include "dsp/spectrumvis.h"
 #include "device/deviceapi.h"
 #include "device/deviceset.h"
@@ -316,19 +319,12 @@ void MainServer::addSourceDevice()
 {
     DSPDeviceSourceEngine *dspDeviceSourceEngine = m_dspEngine->addDeviceSourceEngine();
 
-    uint dspDeviceSourceEngineUID =  dspDeviceSourceEngine->getUID();
-    char uidCStr[16];
-    sprintf(uidCStr, "UID:%d", dspDeviceSourceEngineUID);
-
     int deviceTabIndex = m_mainCore->m_deviceSets.size();
     m_mainCore->m_deviceSets.push_back(new DeviceSet(deviceTabIndex, 0));
     m_mainCore->m_deviceSets.back()->m_deviceSourceEngine = dspDeviceSourceEngine;
     m_mainCore->m_deviceSets.back()->m_deviceSinkEngine = nullptr;
     m_mainCore->m_deviceSets.back()->m_deviceMIMOEngine = nullptr;
     dspDeviceSourceEngine->addSink(m_mainCore->m_deviceSets.back()->m_spectrumVis);
-
-    char tabNameCStr[16];
-    sprintf(tabNameCStr, "R%d", deviceTabIndex);
 
     DeviceAPI *deviceAPI = new DeviceAPI(DeviceAPI::StreamSingleRx, deviceTabIndex, dspDeviceSourceEngine, nullptr, nullptr);
 
@@ -361,11 +357,6 @@ void MainServer::addSourceDevice()
 void MainServer::addMIMODevice()
 {
     DSPDeviceMIMOEngine *dspDeviceMIMOEngine = m_dspEngine->addDeviceMIMOEngine();
-    dspDeviceMIMOEngine->start();
-
-    uint dspDeviceMIMOEngineUID =  dspDeviceMIMOEngine->getUID();
-    char uidCStr[16];
-    sprintf(uidCStr, "UID:%d", dspDeviceMIMOEngineUID);
 
     int deviceTabIndex = m_mainCore->m_deviceSets.size();
     m_mainCore->m_deviceSets.push_back(new DeviceSet(deviceTabIndex, 2));
@@ -373,9 +364,6 @@ void MainServer::addMIMODevice()
     m_mainCore->m_deviceSets.back()->m_deviceSinkEngine = nullptr;
     m_mainCore->m_deviceSets.back()->m_deviceMIMOEngine = dspDeviceMIMOEngine;
     dspDeviceMIMOEngine->addSpectrumSink(m_mainCore->m_deviceSets.back()->m_spectrumVis);
-
-    char tabNameCStr[16];
-    sprintf(tabNameCStr, "M%d", deviceTabIndex);
 
     DeviceAPI *deviceAPI = new DeviceAPI(DeviceAPI::StreamMIMO, deviceTabIndex, nullptr, nullptr, dspDeviceMIMOEngine);
 
@@ -415,15 +403,13 @@ void MainServer::removeLastDevice()
         // deletes old UI and input object
         m_mainCore->m_deviceSets.back()->freeChannels();      // destroys the channel instances
         m_mainCore->m_deviceSets.back()->m_deviceAPI->resetSamplingDeviceId();
-        m_mainCore->m_deviceSets.back()->m_deviceAPI->getPluginInterface()->deleteSampleSourcePluginInstanceInput(
-                m_mainCore->m_deviceSets.back()->m_deviceAPI->getSampleSource());
         m_mainCore->m_deviceSets.back()->m_deviceAPI->clearBuddiesLists(); // clear old API buddies lists
-
-        DeviceAPI *sourceAPI = m_mainCore->m_deviceSets.back()->m_deviceAPI;
-        delete m_mainCore->m_deviceSets.back();
 
         m_dspEngine->removeLastDeviceSourceEngine();
 
+        DeviceAPI *sourceAPI = m_mainCore->m_deviceSets.back()->m_deviceAPI;
+        delete m_mainCore->m_deviceSets.back();
+        delete sourceAPI->getSampleSource();
         delete sourceAPI;
     }
     else if (m_mainCore->m_deviceSets.back()->m_deviceSinkEngine) // sink set
@@ -445,6 +431,22 @@ void MainServer::removeLastDevice()
         m_dspEngine->removeLastDeviceSinkEngine();
 
         delete sinkAPI;
+    }
+    else if (m_mainCore->m_deviceSets.back()->m_deviceMIMOEngine) // MIMO set
+    {
+        DSPDeviceMIMOEngine *lastDeviceEngine = m_mainCore->m_deviceSets.back()->m_deviceMIMOEngine;
+        lastDeviceEngine->stopProcess(1); // Tx side
+        lastDeviceEngine->stopProcess(0); // Rx side
+
+        m_mainCore->m_deviceSets.back()->freeChannels();
+        m_mainCore->m_deviceSets.back()->m_deviceAPI->resetSamplingDeviceId();
+
+        m_dspEngine->removeLastDeviceSourceEngine();
+
+        DeviceAPI *mimoAPI = m_mainCore->m_deviceSets.back()->m_deviceAPI;
+        delete m_mainCore->m_deviceSets.back();
+        delete mimoAPI->getSampleMIMO();
+        delete mimoAPI;
     }
 
     m_mainCore->m_deviceSets.pop_back();

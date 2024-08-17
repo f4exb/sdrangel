@@ -41,7 +41,7 @@ MESSAGE_CLASS_DEFINITION(DSPDeviceMIMOEngine::ConfigureCorrection, Message)
 MESSAGE_CLASS_DEFINITION(DSPDeviceMIMOEngine::SetSpectrumSinkInput, Message)
 
 DSPDeviceMIMOEngine::DSPDeviceMIMOEngine(uint32_t uid, QObject* parent) :
-	QThread(parent),
+	QObject(parent),
     m_uid(uid),
     m_stateRx(StNotStarted),
     m_stateTx(StNotStarted),
@@ -49,15 +49,14 @@ DSPDeviceMIMOEngine::DSPDeviceMIMOEngine(uint32_t uid, QObject* parent) :
     m_spectrumInputSourceElseSink(true),
     m_spectrumInputIndex(0)
 {
+	setStateRx(StIdle);
+	setStateTx(StIdle);
 	connect(&m_inputMessageQueue, SIGNAL(messageEnqueued()), this, SLOT(handleInputMessages()), Qt::QueuedConnection);
-
-	moveToThread(this);
 }
 
 DSPDeviceMIMOEngine::~DSPDeviceMIMOEngine()
 {
-    stop();
-	wait();
+    qDebug("DSPDeviceMIMOEngine::~DSPDeviceMIMOEngine");
 }
 
 void DSPDeviceMIMOEngine::setStateRx(State state)
@@ -76,30 +75,6 @@ void DSPDeviceMIMOEngine::setStateTx(State state)
         m_stateTx = state;
         emit stateChanged();
     }
-}
-
-void DSPDeviceMIMOEngine::run()
-{
-	qDebug() << "DSPDeviceMIMOEngine::run";
-	setStateRx(StIdle);
-	setStateTx(StIdle);
-	exec();
-}
-
-void DSPDeviceMIMOEngine::start()
-{
-	qDebug() << "DSPDeviceMIMOEngine::start";
-	QThread::start();
-}
-
-void DSPDeviceMIMOEngine::stop()
-{
-	qDebug() << "DSPDeviceMIMOEngine::stop";
-    gotoIdle(0); // Rx
-    gotoIdle(1); // Tx
-    setStateRx(StNotStarted);
-    setStateTx(StNotStarted);
-    QThread::exit();
 }
 
 bool DSPDeviceMIMOEngine::initProcess(int subsystemIndex)

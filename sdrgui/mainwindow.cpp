@@ -783,7 +783,6 @@ void MainWindow::sampleSinkCreate(
 void MainWindow::sampleMIMOAdd(Workspace *deviceWorkspace, Workspace *spectrumWorkspace, int deviceIndex)
 {
     DSPDeviceMIMOEngine *dspDeviceMIMOEngine = m_dspEngine->addDeviceMIMOEngine();
-    dspDeviceMIMOEngine->start();
 
     uint dspDeviceMIMOEngineUID =  dspDeviceMIMOEngine->getUID();
     char uidCStr[16];
@@ -1002,65 +1001,62 @@ void MainWindow::removeDeviceSet(int deviceSetIndex)
         deviceUISet->m_deviceAPI->getSampleSource()->setMessageQueueToGUI(nullptr); // have source stop sending messages to the GUI
         deviceUISet->m_deviceGUI->destroy();
         deviceUISet->m_deviceAPI->resetSamplingDeviceId();
-        deviceUISet->m_deviceAPI->getPluginInterface()->deleteSampleSourcePluginInstanceInput(
-            deviceUISet->m_deviceAPI->getSampleSource());
         deviceUISet->m_deviceAPI->clearBuddiesLists(); // clear old API buddies lists
 
-	    DeviceAPI *sourceAPI = deviceUISet->m_deviceAPI;
-	    delete deviceUISet;
 
-	    m_dspEngine->removeDeviceEngineAt(deviceSetIndex);
+        m_dspEngine->removeDeviceEngineAt(deviceSetIndex);
         DeviceEnumerator::instance()->removeRxSelection(deviceSetIndex);
 
-	    delete sourceAPI;
+	    DeviceAPI *sourceAPI = deviceUISet->m_deviceAPI;
+        delete deviceUISet;
+        delete sourceAPI->getSampleSource();
+        delete sourceAPI;
     }
     else if (deviceUISet->m_deviceSinkEngine) // sink device
     {
 	    DSPDeviceSinkEngine *deviceEngine = deviceUISet->m_deviceSinkEngine;
-	    deviceEngine->stopGeneration();
-	    deviceEngine->removeSpectrumSink(deviceUISet->m_spectrumVis);
+        deviceEngine->stopGeneration();
+        deviceEngine->removeSpectrumSink(deviceUISet->m_spectrumVis);
 
         // deletes old UI and output object
         deviceUISet->freeChannels();
         deviceUISet->m_deviceAPI->getSampleSink()->setMessageQueueToGUI(nullptr); // have sink stop sending messages to the GUI
         deviceUISet->m_deviceGUI->destroy();
-	    deviceUISet->m_deviceAPI->resetSamplingDeviceId();
-	    deviceUISet->m_deviceAPI->getPluginInterface()->deleteSampleSinkPluginInstanceOutput(
-	        deviceUISet->m_deviceAPI->getSampleSink());
+        deviceUISet->m_deviceAPI->resetSamplingDeviceId();
+        deviceUISet->m_deviceAPI->getPluginInterface()->deleteSampleSinkPluginInstanceOutput(
+            deviceUISet->m_deviceAPI->getSampleSink());
         deviceUISet->m_deviceAPI->clearBuddiesLists(); // clear old API buddies lists
 
 	    DeviceAPI *sinkAPI = deviceUISet->m_deviceAPI;
-	    delete deviceUISet;
+        delete deviceUISet;
 
-	    deviceEngine->stop();
-	    m_dspEngine->removeDeviceEngineAt(deviceSetIndex);
+        deviceEngine->stop();
+        m_dspEngine->removeDeviceEngineAt(deviceSetIndex);
         DeviceEnumerator::instance()->removeTxSelection(deviceSetIndex);
 
-	    delete sinkAPI;
+        delete sinkAPI;
     }
     else if (deviceUISet->m_deviceMIMOEngine) // MIMO device
     {
 	    DSPDeviceMIMOEngine *deviceEngine = deviceUISet->m_deviceMIMOEngine;
 	    deviceEngine->stopProcess(1); // Tx side
         deviceEngine->stopProcess(0); // Rx side
-	    deviceEngine->removeSpectrumSink(deviceUISet->m_spectrumVis);
+        deviceEngine->removeSpectrumSink(deviceUISet->m_spectrumVis);
 
         // deletes old UI and output object
         deviceUISet->freeChannels();
         deviceUISet->m_deviceAPI->getSampleMIMO()->setMessageQueueToGUI(nullptr); // have sink stop sending messages to the GUI
         deviceUISet->m_deviceGUI->destroy();
-	    deviceUISet->m_deviceAPI->resetSamplingDeviceId();
-	    deviceUISet->m_deviceAPI->getPluginInterface()->deleteSampleMIMOPluginInstanceMIMO(
-	        deviceUISet->m_deviceAPI->getSampleMIMO());
+        deviceUISet->m_deviceAPI->resetSamplingDeviceId();
 
-	    DeviceAPI *mimoAPI = deviceUISet->m_deviceAPI;
-	    delete deviceUISet;
 
-	    deviceEngine->stop();
-	    m_dspEngine->removeDeviceEngineAt(deviceSetIndex);
+        m_dspEngine->removeDeviceEngineAt(deviceSetIndex);
         DeviceEnumerator::instance()->removeMIMOSelection(deviceSetIndex);
 
-	    delete mimoAPI;
+	    DeviceAPI *mimoAPI = deviceUISet->m_deviceAPI;
+        delete deviceUISet;
+        delete mimoAPI->getSampleMIMO();
+        delete mimoAPI;
     }
 
     m_deviceUIs.erase(m_deviceUIs.begin() + deviceSetIndex);
@@ -1094,75 +1090,72 @@ void MainWindow::removeDeviceSet(int deviceSetIndex)
 
 void MainWindow::removeLastDeviceSet()
 {
+    qDebug("MainWindow::removeLastDeviceSet: %s", qPrintable(m_deviceUIs.back()->m_deviceAPI->getHardwareId()));
     int removedDeviceSetIndex = m_deviceUIs.size() - 1;
 
     if (m_deviceUIs.back()->m_deviceSourceEngine) // source tab
 	{
 	    DSPDeviceSourceEngine *lastDeviceEngine = m_deviceUIs.back()->m_deviceSourceEngine;
-	    lastDeviceEngine->stopAcquistion();
-	    lastDeviceEngine->removeSink(m_deviceUIs.back()->m_spectrumVis);
+        lastDeviceEngine->stopAcquistion();
+        lastDeviceEngine->removeSink(m_deviceUIs.back()->m_spectrumVis);
 
         // deletes old UI and input object
         m_deviceUIs.back()->freeChannels();      // destroys the channel instances
         m_deviceUIs.back()->m_deviceAPI->getSampleSource()->setMessageQueueToGUI(nullptr); // have source stop sending messages to the GUI
         m_deviceUIs.back()->m_deviceGUI->destroy();
         m_deviceUIs.back()->m_deviceAPI->resetSamplingDeviceId();
-        m_deviceUIs.back()->m_deviceAPI->getPluginInterface()->deleteSampleSourcePluginInstanceInput(
-        m_deviceUIs.back()->m_deviceAPI->getSampleSource());
         m_deviceUIs.back()->m_deviceAPI->clearBuddiesLists(); // clear old API buddies lists
 
+
+        m_dspEngine->removeLastDeviceSourceEngine();
+
 	    DeviceAPI *sourceAPI = m_deviceUIs.back()->m_deviceAPI;
-	    delete m_deviceUIs.back();
-
-	    m_dspEngine->removeLastDeviceSourceEngine();
-
-	    delete sourceAPI;
+        delete m_deviceUIs.back();
+        delete sourceAPI->getSampleSource();
+        delete sourceAPI;
 	}
 	else if (m_deviceUIs.back()->m_deviceSinkEngine) // sink tab
 	{
 	    DSPDeviceSinkEngine *lastDeviceEngine = m_deviceUIs.back()->m_deviceSinkEngine;
-	    lastDeviceEngine->stopGeneration();
-	    lastDeviceEngine->removeSpectrumSink(m_deviceUIs.back()->m_spectrumVis);
+        lastDeviceEngine->stopGeneration();
+        lastDeviceEngine->removeSpectrumSink(m_deviceUIs.back()->m_spectrumVis);
 
         // deletes old UI and output object
         m_deviceUIs.back()->freeChannels();
         m_deviceUIs.back()->m_deviceAPI->getSampleSink()->setMessageQueueToGUI(nullptr); // have sink stop sending messages to the GUI
         m_deviceUIs.back()->m_deviceGUI->destroy();
-	    m_deviceUIs.back()->m_deviceAPI->resetSamplingDeviceId();
-	    m_deviceUIs.back()->m_deviceAPI->getPluginInterface()->deleteSampleSinkPluginInstanceOutput(
-        m_deviceUIs.back()->m_deviceAPI->getSampleSink());
+        m_deviceUIs.back()->m_deviceAPI->resetSamplingDeviceId();
+        m_deviceUIs.back()->m_deviceAPI->getPluginInterface()->deleteSampleSinkPluginInstanceOutput(
+            m_deviceUIs.back()->m_deviceAPI->getSampleSink());
         m_deviceUIs.back()->m_deviceAPI->clearBuddiesLists(); // clear old API buddies lists
 
 	    DeviceAPI *sinkAPI = m_deviceUIs.back()->m_deviceAPI;
-	    delete m_deviceUIs.back();
+        delete m_deviceUIs.back();
 
-	    lastDeviceEngine->stop();
-	    m_dspEngine->removeLastDeviceSinkEngine();
+        lastDeviceEngine->stop();
+        m_dspEngine->removeLastDeviceSinkEngine();
 
-	    delete sinkAPI;
+        delete sinkAPI;
 	}
 	else if (m_deviceUIs.back()->m_deviceMIMOEngine) // MIMO tab
 	{
 	    DSPDeviceMIMOEngine *lastDeviceEngine = m_deviceUIs.back()->m_deviceMIMOEngine;
 	    lastDeviceEngine->stopProcess(1); // Tx side
         lastDeviceEngine->stopProcess(0); // Rx side
-	    lastDeviceEngine->removeSpectrumSink(m_deviceUIs.back()->m_spectrumVis);
+        lastDeviceEngine->removeSpectrumSink(m_deviceUIs.back()->m_spectrumVis);
 
         // deletes old UI and output object
         m_deviceUIs.back()->freeChannels();
         m_deviceUIs.back()->m_deviceAPI->getSampleMIMO()->setMessageQueueToGUI(nullptr); // have sink stop sending messages to the GUI
         m_deviceUIs.back()->m_deviceGUI->destroy();
-	    m_deviceUIs.back()->m_deviceAPI->resetSamplingDeviceId();
-	    m_deviceUIs.back()->m_deviceAPI->getPluginInterface()->deleteSampleMIMOPluginInstanceMIMO(
-        m_deviceUIs.back()->m_deviceAPI->getSampleMIMO());
+        m_deviceUIs.back()->m_deviceAPI->resetSamplingDeviceId();
+
+        m_dspEngine->removeLastDeviceMIMOEngine();
 
 	    DeviceAPI *mimoAPI = m_deviceUIs.back()->m_deviceAPI;
-	    delete m_deviceUIs.back();
-
-	    lastDeviceEngine->stop();
-	    m_dspEngine->removeLastDeviceMIMOEngine();
-
-	    delete mimoAPI;
+        delete m_deviceUIs.back();
+        delete mimoAPI->getSampleMIMO();
+        delete mimoAPI;
 	}
 
     m_deviceUIs.pop_back();
