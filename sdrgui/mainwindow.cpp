@@ -1106,7 +1106,6 @@ void MainWindow::removeLastDeviceSet()
         m_deviceUIs.back()->m_deviceAPI->resetSamplingDeviceId();
         m_deviceUIs.back()->m_deviceAPI->clearBuddiesLists(); // clear old API buddies lists
 
-
         m_dspEngine->removeLastDeviceSourceEngine();
 
 	    DeviceAPI *sourceAPI = m_deviceUIs.back()->m_deviceAPI;
@@ -1125,16 +1124,13 @@ void MainWindow::removeLastDeviceSet()
         m_deviceUIs.back()->m_deviceAPI->getSampleSink()->setMessageQueueToGUI(nullptr); // have sink stop sending messages to the GUI
         m_deviceUIs.back()->m_deviceGUI->destroy();
         m_deviceUIs.back()->m_deviceAPI->resetSamplingDeviceId();
-        m_deviceUIs.back()->m_deviceAPI->getPluginInterface()->deleteSampleSinkPluginInstanceOutput(
-            m_deviceUIs.back()->m_deviceAPI->getSampleSink());
         m_deviceUIs.back()->m_deviceAPI->clearBuddiesLists(); // clear old API buddies lists
+
+        m_dspEngine->removeLastDeviceSinkEngine();
 
 	    DeviceAPI *sinkAPI = m_deviceUIs.back()->m_deviceAPI;
         delete m_deviceUIs.back();
-
-        lastDeviceEngine->stop();
-        m_dspEngine->removeLastDeviceSinkEngine();
-
+        delete sinkAPI->getSampleSink();
         delete sinkAPI;
 	}
 	else if (m_deviceUIs.back()->m_deviceMIMOEngine) // MIMO tab
