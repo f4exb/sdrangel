@@ -20,6 +20,7 @@
 
 #include "dsp/datafifo.h"
 #include "dsp/misc.h"
+#include "dsp/cwkeyer.h"
 #include "util/messagequeue.h"
 #include "maincore.h"
 
@@ -39,7 +40,8 @@ NFMModSource::NFMModSource() :
 	m_levelCalcCount(0),
 	m_peakLevel(0.0f),
 	m_levelSum(0.0f),
-    m_ifstream(nullptr)
+    m_ifstream(nullptr),
+    m_cwKeyer(nullptr)
 {
     m_audioFifo.setLabel("NFMModSource.m_audioFifo");
     m_feedbackAudioFifo.setLabel("NFMModSource.m_feedbackAudioFifo");
@@ -276,14 +278,18 @@ void NFMModSource::pullAF(Real& sample)
     case NFMModSettings::NFMModInputCWTone:
         Real fadeFactor;
 
-        if (m_cwKeyer.getSample())
+        if (!m_cwKeyer) {
+            break;
+        }
+
+        if (m_cwKeyer->getSample())
         {
-            m_cwKeyer.getCWSmoother().getFadeSample(true, fadeFactor);
+            m_cwKeyer->getCWSmoother().getFadeSample(true, fadeFactor);
             sample = m_toneNco.next() * fadeFactor;
         }
         else
         {
-            if (m_cwKeyer.getCWSmoother().getFadeSample(false, fadeFactor))
+            if (m_cwKeyer->getCWSmoother().getFadeSample(false, fadeFactor))
             {
                 sample = m_toneNco.next() * fadeFactor;
             }
@@ -382,8 +388,13 @@ void NFMModSource::applyAudioSampleRate(int sampleRate)
     m_toneNco.setFreq(m_settings.m_toneFrequency, sampleRate);
     m_ctcssNco.setFreq(NFMModSettings::getCTCSSFreq(m_settings.m_ctcssIndex), sampleRate);
     m_dcsMod.setSampleRate(sampleRate);
-    m_cwKeyer.setSampleRate(sampleRate);
-    m_cwKeyer.reset();
+
+    if (m_cwKeyer)
+    {
+        m_cwKeyer->setSampleRate(sampleRate);
+        m_cwKeyer->reset();
+    }
+
     m_preemphasisFilter.configure(m_preemphasis*sampleRate);
     m_audioCompressor.m_rate = sampleRate;
     m_audioCompressor.initState();

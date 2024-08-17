@@ -28,6 +28,7 @@
 #include <QNetworkRequest>
 
 #include "dsp/basebandsamplesource.h"
+#include "dsp/cwkeyer.h"
 #include "channel/channelapi.h"
 #include "util/message.h"
 
@@ -233,8 +234,8 @@ public:
             SWGSDRangel::SWGChannelSettings& response);
 
     double getMagSq() const;
-    CWKeyer *getCWKeyer();
-    void setLevelMeter(QObject *levelMeter);
+    CWKeyer *getCWKeyer() { return &m_cwKeyer; }
+    void setLevelMeter(QObject *levelMeter) { m_levelMeter = levelMeter; }
     uint32_t getNumberOfDeviceStreams() const;
     int getAudioSampleRate() const;
     int getFeedbackAudioSampleRate() const;
@@ -250,6 +251,7 @@ private:
 
     DeviceAPI* m_deviceAPI;
     QThread *m_thread;
+    bool m_running;
     NFMModBaseband* m_basebandSource;
     NFMModSettings m_settings;
 
@@ -264,6 +266,9 @@ private:
 
     QNetworkAccessManager *m_networkManager;
     QNetworkRequest m_networkRequest;
+
+    CWKeyer m_cwKeyer;
+    QObject *m_levelMeter;
 
     virtual bool handleMessage(const Message& cmd);
     void applySettings(const NFMModSettings& settings, bool force = false);

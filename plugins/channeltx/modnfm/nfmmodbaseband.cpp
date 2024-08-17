@@ -21,6 +21,7 @@
 #include "dsp/upchannelizer.h"
 #include "dsp/dspengine.h"
 #include "dsp/dspcommands.h"
+#include "dsp/cwkeyer.h"
 
 #include "nfmmodbaseband.h"
 
@@ -170,8 +171,8 @@ bool NFMModBaseband::handleMessage(const Message& cmd)
         QMutexLocker mutexLocker(&m_mutex);
         const CWKeyer::MsgConfigureCWKeyer& cfg = (CWKeyer::MsgConfigureCWKeyer&) cmd;
         CWKeyer::MsgConfigureCWKeyer *notif = new CWKeyer::MsgConfigureCWKeyer(cfg);
-        CWKeyer& cwKeyer = m_source.getCWKeyer();
-        cwKeyer.getInputMessageQueue()->push(notif);
+        CWKeyer *cwKeyer = m_source.getCWKeyer();
+        cwKeyer->getInputMessageQueue()->push(notif);
 
         return true;
     }
