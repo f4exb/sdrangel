@@ -57,17 +57,13 @@ const char* const NFMMod::m_channelId = "NFMMod";
 NFMMod::NFMMod(DeviceAPI *deviceAPI) :
     ChannelAPI(m_channelIdURI, ChannelAPI::StreamSingleSource),
 	m_deviceAPI(deviceAPI),
+    m_running(false),
 	m_fileSize(0),
 	m_recordLength(0),
-	m_sampleRate(48000)
+	m_sampleRate(48000),
+    m_levelMeter(nullptr)
 {
 	setObjectName(m_channelId);
-
-    m_thread = new QThread(this);
-    m_basebandSource = new NFMModBaseband();
-    m_basebandSource->setInputFileStream(&m_ifstream);
-    m_basebandSource->setChannel(this);
-    m_basebandSource->moveToThread(m_thread);
 
     applySettings(m_settings, true);
 
@@ -94,8 +90,8 @@ NFMMod::~NFMMod()
     delete m_networkManager;
     m_deviceAPI->removeChannelSourceAPI(this);
     m_deviceAPI->removeChannelSource(this);
-    delete m_basebandSource;
-    delete m_thread;
+
+    stop();
 }
 
 void NFMMod::setDeviceAPI(DeviceAPI *deviceAPI)
@@ -112,21 +108,61 @@ void NFMMod::setDeviceAPI(DeviceAPI *deviceAPI)
 
 void NFMMod::start()
 {
+    if (m_running) {
+        return;
+    }
+
 	qDebug("NFMMod::start");
+    m_thread = new QThread(this);
+    m_basebandSource = new NFMModBaseband();
+    m_basebandSource->setInputFileStream(&m_ifstream);
+    m_basebandSource->setChannel(this);
     m_basebandSource->reset();
+    m_basebandSource->setCWKeyer(&m_cwKeyer);
+    m_basebandSource->moveToThread(m_thread);
+
+    QObject::connect(
+        m_thread,
+        &QThread::finished,
+        m_basebandSource,
+        &QObject::deleteLater
+    );
+    QObject::connect(
+        m_thread,
+        &QThread::finished,
+        m_thread,
+        &QThread::deleteLater
+    );
+
     m_thread->start();
+
+    if (m_levelMeter) {
+        connect(m_basebandSource, SIGNAL(levelChanged(qreal, qreal, int)), m_levelMeter, SLOT(levelChanged(qreal, qreal, int)));
+    }
+
+    NFMModBaseband::MsgConfigureNFMModBaseband *msg = NFMModBaseband::MsgConfigureNFMModBaseband::create(m_settings, true);
+    m_basebandSource->getInputMessageQueue()->push(msg);
+
+    m_running = true;
 }
 
 void NFMMod::stop()
 {
+    if (!m_running) {
+        return;
+    }
+
     qDebug("NFMMod::stop");
-	m_thread->exit();
+    m_running = false;
+	m_thread->quit();
 	m_thread->wait();
 }
 
 void NFMMod::pull(SampleVector::iterator& begin, unsigned int nbSamples)
 {
-    m_basebandSource->pull(begin, nbSamples);
+    if (m_running) {
+        m_basebandSource->pull(begin, nbSamples);
+    }
 }
 
 void NFMMod::setCenterFrequency(qint64 frequency)
@@ -236,13 +272,16 @@ bool NFMMod::handleMessage(const Message& cmd)
     else if (DSPSignalNotification::match(cmd))
     {
         // Forward to the source
-        DSPSignalNotification& notif = (DSPSignalNotification&) cmd;
-        DSPSignalNotification* rep = new DSPSignalNotification(notif); // make a copy
-        qDebug() << "NFMMod::handleMessage: DSPSignalNotification";
-        m_basebandSource->getInputMessageQueue()->push(rep);
-        // Forward to GUI if any
-        if (getMessageQueueToGUI()) {
-            getMessageQueueToGUI()->push(new DSPSignalNotification(notif));
+        if (m_running)
+        {
+            DSPSignalNotification& notif = (DSPSignalNotification&) cmd;
+            DSPSignalNotification* rep = new DSPSignalNotification(notif); // make a copy
+            qDebug() << "NFMMod::handleMessage: DSPSignalNotification";
+            m_basebandSource->getInputMessageQueue()->push(rep);
+            // Forward to GUI if any
+            if (getMessageQueueToGUI()) {
+                getMessageQueueToGUI()->push(new DSPSignalNotification(notif));
+            }
         }
 
         return true;
@@ -386,8 +425,11 @@ void NFMMod::applySettings(const NFMModSettings& settings, bool force)
         reverseAPIKeys.append("streamIndex");
     }
 
-    NFMModBaseband::MsgConfigureNFMModBaseband *msg = NFMModBaseband::MsgConfigureNFMModBaseband::create(settings, force);
-    m_basebandSource->getInputMessageQueue()->push(msg);
+    if (m_running)
+    {
+        NFMModBaseband::MsgConfigureNFMModBaseband *msg = NFMModBaseband::MsgConfigureNFMModBaseband::create(settings, force);
+        m_basebandSource->getInputMessageQueue()->push(msg);
+    }
 
     if (settings.m_useReverseAPI)
     {
@@ -459,7 +501,7 @@ int NFMMod::webapiSettingsGet(
     webapiFormatChannelSettings(response, m_settings);
 
     SWGSDRangel::SWGCWKeyerSettings *apiCwKeyerSettings = response.getNfmModSettings()->getCwKeyer();
-    const CWKeyerSettings& cwKeyerSettings = m_basebandSource->getCWKeyer().getSettings();
+    const CWKeyerSettings& cwKeyerSettings = getCWKeyer()->getSettings();
     CWKeyer::webapiFormatChannelSettings(apiCwKeyerSettings, cwKeyerSettings);
 
     return 200;
@@ -487,11 +529,11 @@ int NFMMod::webapiSettingsPutPatch(
     if (channelSettingsKeys.contains("cwKeyer"))
     {
         SWGSDRangel::SWGCWKeyerSettings *apiCwKeyerSettings = response.getNfmModSettings()->getCwKeyer();
-        CWKeyerSettings cwKeyerSettings = m_basebandSource->getCWKeyer().getSettings();
+        CWKeyerSettings cwKeyerSettings = getCWKeyer()->getSettings();
         CWKeyer::webapiSettingsPutPatch(channelSettingsKeys, cwKeyerSettings, apiCwKeyerSettings);
 
         CWKeyer::MsgConfigureCWKeyer *msgCwKeyer = CWKeyer::MsgConfigureCWKeyer::create(cwKeyerSettings, force);
-        m_basebandSource->getCWKeyer().getInputMessageQueue()->push(msgCwKeyer);
+        getCWKeyer()->getInputMessageQueue()->push(msgCwKeyer);
 
         if (m_guiMessageQueue) // forward to GUI if any
         {
@@ -691,8 +733,12 @@ void NFMMod::webapiFormatChannelSettings(SWGSDRangel::SWGChannelSettings& respon
 void NFMMod::webapiFormatChannelReport(SWGSDRangel::SWGChannelReport& response)
 {
     response.getNfmModReport()->setChannelPowerDb(CalcDb::dbPower(getMagSq()));
-    response.getNfmModReport()->setAudioSampleRate(m_basebandSource->getAudioSampleRate());
-    response.getNfmModReport()->setChannelSampleRate(m_basebandSource->getChannelSampleRate());
+
+    if (m_running)
+    {
+        response.getNfmModReport()->setAudioSampleRate(m_basebandSource->getAudioSampleRate());
+        response.getNfmModReport()->setChannelSampleRate(m_basebandSource->getChannelSampleRate());
+    }
 }
 
 void NFMMod::webapiReverseSendSettings(QList<QString>& channelSettingsKeys, const NFMModSettings& settings, bool force)
@@ -730,7 +776,7 @@ void NFMMod::webapiReverseSendCWSettings(const CWKeyerSettings& cwKeyerSettings)
 
     swgNFModSettings->setCwKeyer(new SWGSDRangel::SWGCWKeyerSettings());
     SWGSDRangel::SWGCWKeyerSettings *apiCwKeyerSettings = swgNFModSettings->getCwKeyer();
-    m_basebandSource->getCWKeyer().webapiFormatChannelSettings(apiCwKeyerSettings, cwKeyerSettings);
+    getCWKeyer()->webapiFormatChannelSettings(apiCwKeyerSettings, cwKeyerSettings);
 
     QString channelSettingsURL = QString("http://%1:%2/sdrangel/deviceset/%3/channel/%4/settings")
             .arg(m_settings.m_reverseAPIAddress)
@@ -870,10 +916,10 @@ void NFMMod::webapiFormatChannelSettings(
 
     if (force)
     {
-        const CWKeyerSettings& cwKeyerSettings = m_basebandSource->getCWKeyer().getSettings();
+        const CWKeyerSettings& cwKeyerSettings = getCWKeyer()->getSettings();
         swgNFMModSettings->setCwKeyer(new SWGSDRangel::SWGCWKeyerSettings());
         SWGSDRangel::SWGCWKeyerSettings *apiCwKeyerSettings = swgNFMModSettings->getCwKeyer();
-        m_basebandSource->getCWKeyer().webapiFormatChannelSettings(apiCwKeyerSettings, cwKeyerSettings);
+        getCWKeyer()->webapiFormatChannelSettings(apiCwKeyerSettings, cwKeyerSettings);
     }
 }
 
@@ -900,17 +946,11 @@ void NFMMod::networkManagerFinished(QNetworkReply *reply)
 
 double NFMMod::getMagSq() const
 {
-    return m_basebandSource->getMagSq();
-}
+    if (m_running) {
+        return m_basebandSource->getMagSq();
+    }
 
-CWKeyer *NFMMod::getCWKeyer()
-{
-    return &m_basebandSource->getCWKeyer();
-}
-
-void NFMMod::setLevelMeter(QObject *levelMeter)
-{
-    connect(m_basebandSource, SIGNAL(levelChanged(qreal, qreal, int)), levelMeter, SLOT(levelChanged(qreal, qreal, int)));
+    return 0;
 }
 
 uint32_t NFMMod::getNumberOfDeviceStreams() const
@@ -920,10 +960,18 @@ uint32_t NFMMod::getNumberOfDeviceStreams() const
 
 int NFMMod::getAudioSampleRate() const
 {
-    return m_basebandSource->getAudioSampleRate();
+    if (m_running) {
+        return m_basebandSource->getAudioSampleRate();
+    }
+
+    return 0;
 }
 
 int NFMMod::getFeedbackAudioSampleRate() const
 {
-    return m_basebandSource->getFeedbackAudioSampleRate();
+    if (m_running) {
+        return m_basebandSource->getFeedbackAudioSampleRate();
+    }
+
+    return 0;
 }
