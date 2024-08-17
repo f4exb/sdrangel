@@ -31,12 +31,12 @@
 #include "dsp/ncof.h"
 #include "dsp/interpolator.h"
 #include "util/movingaverage.h"
-#include "dsp/cwkeyer.h"
 #include "audio/audiofifo.h"
 
 #include "ammodsettings.h"
 
 class ChannelAPI;
+class CWKeyer;
 
 class AMModSource : public QObject,  public ChannelSampleSource
 {
@@ -57,7 +57,8 @@ public:
     void applyFeedbackAudioSampleRate(int sampleRate);
     int getAudioSampleRate() const { return m_audioSampleRate; }
     int getFeedbackAudioSampleRate() const { return m_feedbackAudioSampleRate; }
-    CWKeyer& getCWKeyer() { return m_cwKeyer; }
+    void setCWKeyer(CWKeyer *cwKeyer) { m_cwKeyer = cwKeyer; }
+    CWKeyer* getCWKeyer() { return m_cwKeyer; }
     double getMagSq() const { return m_magsq; }
     void getLevels(qreal& rmsLevel, qreal& peakLevel, int& numSamples) const
     {
@@ -112,7 +113,7 @@ private:
     Real m_levelSum;
 
     std::ifstream *m_ifstream;
-    CWKeyer m_cwKeyer;
+    CWKeyer *m_cwKeyer;
 
     QRecursiveMutex m_mutex;
 
