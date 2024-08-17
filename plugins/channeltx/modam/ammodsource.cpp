@@ -19,6 +19,7 @@
 #include <QDebug>
 
 #include "dsp/datafifo.h"
+#include "dsp/cwkeyer.h"
 #include "util/messagequeue.h"
 #include "maincore.h"
 
@@ -35,7 +36,8 @@ AMModSource::AMModSource() :
 	m_levelCalcCount(0),
 	m_peakLevel(0.0f),
 	m_levelSum(0.0f),
-    m_ifstream(nullptr)
+    m_ifstream(nullptr),
+    m_cwKeyer(nullptr)
 {
     m_audioFifo.setLabel("AMModSource.m_audioFifo");
     m_feedbackAudioFifo.setLabel("AMModSource.m_feedbackAudioFifo");
@@ -218,14 +220,18 @@ void AMModSource::pullAF(Real& sample)
     case AMModSettings::AMModInputCWTone:
         Real fadeFactor;
 
-        if (m_cwKeyer.getSample())
+        if (!m_cwKeyer) {
+            break;
+        }
+
+        if (m_cwKeyer->getSample())
         {
-            m_cwKeyer.getCWSmoother().getFadeSample(true, fadeFactor);
+            m_cwKeyer->getCWSmoother().getFadeSample(true, fadeFactor);
             sample = m_toneNco.next() * fadeFactor;
         }
         else
         {
-            if (m_cwKeyer.getCWSmoother().getFadeSample(false, fadeFactor))
+            if (m_cwKeyer->getCWSmoother().getFadeSample(false, fadeFactor))
             {
                 sample = m_toneNco.next() * fadeFactor;
             }
@@ -320,8 +326,12 @@ void AMModSource::applyAudioSampleRate(int sampleRate)
     m_interpolatorDistance = (Real) sampleRate / (Real) m_channelSampleRate;
     m_interpolator.create(48, sampleRate, m_settings.m_rfBandwidth / 2.2, 3.0);
     m_toneNco.setFreq(m_settings.m_toneFrequency, sampleRate);
-    m_cwKeyer.setSampleRate(sampleRate);
-    m_cwKeyer.reset();
+
+    if (m_cwKeyer)
+    {
+        m_cwKeyer->setSampleRate(sampleRate);
+        m_cwKeyer->reset();
+    }
 
     QList<ObjectPipe*> pipes;
     MainCore::instance()->getMessagePipes().getMessagePipes(m_channel, "reportdemod", pipes);

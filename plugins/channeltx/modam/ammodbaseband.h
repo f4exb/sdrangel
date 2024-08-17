@@ -63,7 +63,7 @@ public:
     void reset();
 	void pull(const SampleVector::iterator& begin, unsigned int nbSamples);
     MessageQueue *getInputMessageQueue() { return &m_inputMessageQueue; } //!< Get the queue for asynchronous inbound communication
-    CWKeyer& getCWKeyer() { return m_source.getCWKeyer(); }
+    void setCWKeyer(CWKeyer *cwKeyer) { m_source.setCWKeyer(cwKeyer); }
     double getMagSq() const { return m_source.getMagSq(); }
     int getAudioSampleRate() const { return m_source.getAudioSampleRate(); }
     int getFeedbackAudioSampleRate() const { return m_source.getFeedbackAudioSampleRate(); }

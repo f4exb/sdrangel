@@ -21,6 +21,7 @@
 #include "dsp/upchannelizer.h"
 #include "dsp/dspengine.h"
 #include "dsp/dspcommands.h"
+#include "dsp/cwkeyer.h"
 
 #include "ammodbaseband.h"
 
@@ -171,8 +172,8 @@ bool AMModBaseband::handleMessage(const Message& cmd)
         qDebug() << "AMModBaseband::handleMessage: MsgConfigureCWKeyer";
         const CWKeyer::MsgConfigureCWKeyer& cfg = (CWKeyer::MsgConfigureCWKeyer&) cmd;
         CWKeyer::MsgConfigureCWKeyer *notif = new CWKeyer::MsgConfigureCWKeyer(cfg);
-        CWKeyer& cwKeyer = m_source.getCWKeyer();
-        cwKeyer.getInputMessageQueue()->push(notif);
+        CWKeyer *cwKeyer = m_source.getCWKeyer();
+        cwKeyer->getInputMessageQueue()->push(notif);
 
         return true;
     }
