@@ -33,7 +33,6 @@
 
 #include "dsp/dsptypes.h"
 #include "util/messagequeue.h"
-#include "util/syncmessenger.h"
 #include "util/incrementalvector.h"
 #include "export.h"
 
@@ -86,7 +85,6 @@ private:
 	uint32_t m_uid; //!< unique ID
 
 	MessageQueue m_inputMessageQueue;  //<! Input message queue. Post here.
-	SyncMessenger m_syncMessenger;     //!< Used to process messages synchronously with the thread
 
 	State m_state;
 
@@ -119,11 +117,11 @@ private:
 	void setState(State state);
 
 	void handleSetSink(DeviceSampleSink* sink); //!< Manage sink setting
+    bool handleMessage(const Message& cmd);
 
 private slots:
 	void handleData(); //!< Handle data when samples have to be written to the sample FIFO
 	void handleInputMessages(); //!< Handle input message queue
-	void handleSynchronousMessages(); //!< Handle synchronous messages with the thread
 
 signals:
 	void stateChanged();
