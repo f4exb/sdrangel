@@ -270,7 +270,6 @@ void MainServer::applySettings()
 void MainServer::addSinkDevice()
 {
     DSPDeviceSinkEngine *dspDeviceSinkEngine = m_dspEngine->addDeviceSinkEngine();
-    dspDeviceSinkEngine->start();
 
     uint dspDeviceSinkEngineUID =  dspDeviceSinkEngine->getUID();
     char uidCStr[16];
@@ -398,7 +397,6 @@ void MainServer::removeLastDevice()
     if (m_mainCore->m_deviceSets.back()->m_deviceSourceEngine) // source set
     {
         DSPDeviceSourceEngine *lastDeviceEngine = m_mainCore->m_deviceSets.back()->m_deviceSourceEngine;
-        lastDeviceEngine->stopAcquistion();
 
         // deletes old UI and input object
         m_mainCore->m_deviceSets.back()->freeChannels();      // destroys the channel instances
@@ -415,28 +413,22 @@ void MainServer::removeLastDevice()
     else if (m_mainCore->m_deviceSets.back()->m_deviceSinkEngine) // sink set
     {
         DSPDeviceSinkEngine *lastDeviceEngine = m_mainCore->m_deviceSets.back()->m_deviceSinkEngine;
-        lastDeviceEngine->stopGeneration();
 
         // deletes old UI and output object
         m_mainCore->m_deviceSets.back()->freeChannels();
         m_mainCore->m_deviceSets.back()->m_deviceAPI->resetSamplingDeviceId();
-        m_mainCore->m_deviceSets.back()->m_deviceAPI->getPluginInterface()->deleteSampleSinkPluginInstanceOutput(
-                m_mainCore->m_deviceSets.back()->m_deviceAPI->getSampleSink());
         m_mainCore->m_deviceSets.back()->m_deviceAPI->clearBuddiesLists(); // clear old API buddies lists
+
+        m_dspEngine->removeLastDeviceSinkEngine();
 
         DeviceAPI *sinkAPI = m_mainCore->m_deviceSets.back()->m_deviceAPI;
         delete m_mainCore->m_deviceSets.back();
-
-        lastDeviceEngine->stop();
-        m_dspEngine->removeLastDeviceSinkEngine();
-
+        delete sinkAPI->getSampleSink();
         delete sinkAPI;
     }
     else if (m_mainCore->m_deviceSets.back()->m_deviceMIMOEngine) // MIMO set
     {
         DSPDeviceMIMOEngine *lastDeviceEngine = m_mainCore->m_deviceSets.back()->m_deviceMIMOEngine;
-        lastDeviceEngine->stopProcess(1); // Tx side
-        lastDeviceEngine->stopProcess(0); // Rx side
 
         m_mainCore->m_deviceSets.back()->freeChannels();
         m_mainCore->m_deviceSets.back()->m_deviceAPI->resetSamplingDeviceId();

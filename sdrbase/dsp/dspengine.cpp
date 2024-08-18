@@ -111,24 +111,45 @@ void DSPEngine::removeLastDeviceSourceEngine()
 
 DSPDeviceSinkEngine *DSPEngine::addDeviceSinkEngine()
 {
-    m_deviceSinkEngines.push_back(new DSPDeviceSinkEngine(m_deviceSinkEnginesUIDSequence));
+    auto *deviceSinkEngine = new DSPDeviceSinkEngine(m_deviceSinkEnginesUIDSequence);
+    auto *deviceThread = new QThread();
     m_deviceSinkEnginesUIDSequence++;
-    m_deviceEngineReferences.push_back(DeviceEngineReference{1, nullptr, m_deviceSinkEngines.back(), nullptr, nullptr});
-    return m_deviceSinkEngines.back();
+    m_deviceSinkEngines.push_back(deviceSinkEngine);
+    m_deviceEngineReferences.push_back(DeviceEngineReference{1, nullptr, m_deviceSinkEngines.back(), nullptr, deviceThread});
+    deviceSinkEngine->moveToThread(deviceThread);
+
+    QObject::connect(
+        deviceThread,
+        &QThread::finished,
+        deviceSinkEngine,
+        &QObject::deleteLater
+    );
+    QObject::connect(
+        deviceThread,
+        &QThread::finished,
+        deviceThread,
+        &QThread::deleteLater
+    );
+
+    deviceThread->start();
+
+    return deviceSinkEngine;
 }
 
 void DSPEngine::removeLastDeviceSinkEngine()
 {
-    if (m_deviceSinkEngines.size() > 0)
+    if (!m_deviceSinkEngines.empty())
     {
-        DSPDeviceSinkEngine *lastDeviceEngine = m_deviceSinkEngines.back();
-        delete lastDeviceEngine;
+        const DSPDeviceSinkEngine *lastDeviceEngine = m_deviceSinkEngines.back();
         m_deviceSinkEngines.pop_back();
 
         for (int i = 0; i < m_deviceEngineReferences.size(); i++)
         {
             if (m_deviceEngineReferences[i].m_deviceSinkEngine == lastDeviceEngine)
             {
+                QThread* deviceThread = m_deviceEngineReferences[i].m_thread;
+                deviceThread->exit();
+                deviceThread->wait();
                 m_deviceEngineReferences.removeAt(i);
                 break;
             }
@@ -201,7 +222,9 @@ void DSPEngine::removeDeviceEngineAt(int deviceIndex)
     else if (m_deviceEngineReferences[deviceIndex].m_deviceEngineType == 1) // sink
     {
         DSPDeviceSinkEngine *deviceEngine = m_deviceEngineReferences[deviceIndex].m_deviceSinkEngine;
-        delete deviceEngine;
+        QThread *deviceThread = m_deviceEngineReferences[deviceIndex].m_thread;
+        deviceThread->exit();
+        deviceThread->wait();
         m_deviceSinkEngines.removeAll(deviceEngine);
     }
     else if (m_deviceEngineReferences[deviceIndex].m_deviceEngineType == 2) // MIMO
