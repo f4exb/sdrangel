@@ -39,6 +39,7 @@
 
 class ChannelAPI;
 class SpectrumVis;
+class CWKeyer;
 
 class SSBModSource : public QObject, public ChannelSampleSource
 {
@@ -59,7 +60,8 @@ public:
     int getAudioSampleRate() const { return m_audioSampleRate; }
     int getFeedbackAudioSampleRate() const { return m_feedbackAudioSampleRate; }
     void setChannel(ChannelAPI *channel) { m_channel = channel; }
-    CWKeyer& getCWKeyer() { return m_cwKeyer; }
+    CWKeyer* getCWKeyer() { return m_cwKeyer; }
+    void setCWKeyer(CWKeyer *cwKeyer) { m_cwKeyer = cwKeyer; }
     double getMagSq() const { return m_magsq; }
     void getLevels(qreal& rmsLevel, qreal& peakLevel, int& numSamples) const
     {
@@ -131,7 +133,7 @@ private:
     Real m_levelSum;
 
     std::ifstream *m_ifstream;
-    CWKeyer m_cwKeyer;
+    CWKeyer *m_cwKeyer;
 
     AudioCompressorSnd m_audioCompressor;
     int m_agcStepLength;

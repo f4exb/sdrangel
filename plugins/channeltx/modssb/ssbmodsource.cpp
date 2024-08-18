@@ -39,7 +39,8 @@ SSBModSource::SSBModSource() :
 	m_levelCalcCount(0),
 	m_peakLevel(0.0f),
 	m_levelSum(0.0f),
-    m_ifstream(nullptr)
+    m_ifstream(nullptr),
+    m_cwKeyer(nullptr)
 {
     m_audioFifo.setLabel("SSBModSource.m_audioFifo");
     m_feedbackAudioFifo.setLabel("SSBModSource.m_feedbackAudioFifo");
@@ -68,9 +69,6 @@ SSBModSource::SSBModSource() :
 
 	m_magsq = 0.0;
 	m_toneNco.setFreq(1000.0, m_audioSampleRate);
-
-	m_cwKeyer.setSampleRate(m_audioSampleRate);
-    m_cwKeyer.reset();
 
     m_audioCompressor.initSimple(
         m_audioSampleRate,
@@ -354,11 +352,15 @@ void SSBModSource::pullAF(Complex& sample)
 
         break;
     case SSBModSettings::SSBModInputCWTone:
+        if (!m_cwKeyer) {
+            break;
+        }
+
     	Real fadeFactor;
 
-        if (m_cwKeyer.getSample())
+        if (m_cwKeyer->getSample())
         {
-            m_cwKeyer.getCWSmoother().getFadeSample(true, fadeFactor);
+            m_cwKeyer->getCWSmoother().getFadeSample(true, fadeFactor);
 
         	if (m_settings.m_dsb)
         	{
@@ -377,7 +379,7 @@ void SSBModSource::pullAF(Complex& sample)
         }
         else
         {
-        	if (m_cwKeyer.getCWSmoother().getFadeSample(false, fadeFactor))
+        	if (m_cwKeyer->getCWSmoother().getFadeSample(false, fadeFactor))
         	{
             	if (m_settings.m_dsb)
             	{
@@ -623,8 +625,12 @@ void SSBModSource::applyAudioSampleRate(int sampleRate)
     m_settings.m_usb = usb;
 
     m_toneNco.setFreq(m_settings.m_toneFrequency, sampleRate);
-    m_cwKeyer.setSampleRate(sampleRate);
-    m_cwKeyer.reset();
+
+    if (m_cwKeyer)
+    {
+        m_cwKeyer->setSampleRate(sampleRate);
+        m_cwKeyer->reset();
+    }
 
     m_audioCompressor.m_rate = sampleRate;
     m_audioCompressor.initState();

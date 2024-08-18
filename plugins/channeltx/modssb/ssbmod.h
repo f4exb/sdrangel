@@ -29,6 +29,7 @@
 
 #include "dsp/basebandsamplesource.h"
 #include "dsp/spectrumvis.h"
+#include "dsp/cwkeyer.h"
 #include "channel/channelapi.h"
 #include "util/message.h"
 
@@ -236,7 +237,7 @@ public:
     SpectrumVis *getSpectrumVis() { return &m_spectrumVis; }
     double getMagSq() const;
     CWKeyer *getCWKeyer();
-    void setLevelMeter(QObject *levelMeter);
+    void setLevelMeter(QObject *levelMeter) { m_levelMeter = levelMeter; }
     int getAudioSampleRate() const;
     int getFeedbackAudioSampleRate() const;
     uint32_t getNumberOfDeviceStreams() const;
@@ -252,6 +253,7 @@ private:
 
     DeviceAPI* m_deviceAPI;
     QThread *m_thread;
+    bool m_running;
     SSBModBaseband* m_basebandSource;
     SSBModSettings m_settings;
     SpectrumVis m_spectrumVis;
@@ -267,6 +269,8 @@ private:
 
     QNetworkAccessManager *m_networkManager;
     QNetworkRequest m_networkRequest;
+    CWKeyer m_cwKeyer;
+    QObject *m_levelMeter;
 
     virtual bool handleMessage(const Message& cmd);
     void applySettings(const SSBModSettings& settings, bool force = false);
