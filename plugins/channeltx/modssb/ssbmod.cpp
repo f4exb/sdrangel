@@ -57,20 +57,13 @@ const char* const SSBMod::m_channelId = "SSBMod";
 SSBMod::SSBMod(DeviceAPI *deviceAPI) :
     ChannelAPI(m_channelIdURI, ChannelAPI::StreamSingleSource),
     m_deviceAPI(deviceAPI),
+    m_running(false),
     m_spectrumVis(SDR_TX_SCALEF),
 	m_fileSize(0),
 	m_recordLength(0),
 	m_sampleRate(48000)
 {
 	setObjectName(m_channelId);
-
-    m_thread = new QThread(this);
-    m_basebandSource = new SSBModBaseband();
-    m_basebandSource->setSpectrumSink(&m_spectrumVis);
-    m_basebandSource->setInputFileStream(&m_ifstream);
-    m_basebandSource->setChannel(this);
-    m_basebandSource->moveToThread(m_thread);
-
     applySettings(m_settings, true);
 
     m_deviceAPI->addChannelSource(this);
@@ -96,8 +89,8 @@ SSBMod::~SSBMod()
     delete m_networkManager;
     m_deviceAPI->removeChannelSourceAPI(this);
     m_deviceAPI->removeChannelSource(this);
-    delete m_basebandSource;
-    delete m_thread;
+
+    stop();
 }
 
 void SSBMod::setDeviceAPI(DeviceAPI *deviceAPI)
@@ -114,21 +107,62 @@ void SSBMod::setDeviceAPI(DeviceAPI *deviceAPI)
 
 void SSBMod::start()
 {
+    if (m_running) {
+        return;
+    }
+
 	qDebug("SSBMod::start");
+    m_thread = new QThread(this);
+    m_basebandSource = new SSBModBaseband();
+    m_basebandSource->setSpectrumSink(&m_spectrumVis);
+    m_basebandSource->setInputFileStream(&m_ifstream);
+    m_basebandSource->setChannel(this);
     m_basebandSource->reset();
+    m_basebandSource->setCWKeyer(&m_cwKeyer);
+    m_basebandSource->moveToThread(m_thread);
+
+    QObject::connect(
+        m_thread,
+        &QThread::finished,
+        m_basebandSource,
+        &QObject::deleteLater
+    );
+    QObject::connect(
+        m_thread,
+        &QThread::finished,
+        m_thread,
+        &QThread::deleteLater
+    );
+
     m_thread->start();
+
+    SSBModBaseband::MsgConfigureSSBModBaseband *msg = SSBModBaseband::MsgConfigureSSBModBaseband::create(m_settings, true);
+    m_basebandSource->getInputMessageQueue()->push(msg);
+
+    if (m_levelMeter) {
+        connect(m_basebandSource, SIGNAL(levelChanged(qreal, qreal, int)), m_levelMeter, SLOT(levelChanged(qreal, qreal, int)));
+    }
+
+    m_running = true;
 }
 
 void SSBMod::stop()
 {
+    if (!m_running) {
+        return;
+    }
+
     qDebug("SSBMod::stop");
+    m_running = false;
 	m_thread->exit();
 	m_thread->wait();
 }
 
 void SSBMod::pull(SampleVector::iterator& begin, unsigned int nbSamples)
 {
-    m_basebandSource->pull(begin, nbSamples);
+    if (m_running) {
+        m_basebandSource->pull(begin, nbSamples);
+    }
 }
 
 void SSBMod::setCenterFrequency(qint64 frequency)
@@ -201,11 +235,14 @@ bool SSBMod::handleMessage(const Message& cmd)
     }
     else if (DSPSignalNotification::match(cmd))
     {
-        // Forward to the source
         DSPSignalNotification& notif = (DSPSignalNotification&) cmd;
-        DSPSignalNotification* rep = new DSPSignalNotification(notif); // make a copy
-        qDebug() << "SSBMod::handleMessage: DSPSignalNotification";
-        m_basebandSource->getInputMessageQueue()->push(rep);
+        // Forward to the source
+        if (m_running)
+        {
+            DSPSignalNotification* rep = new DSPSignalNotification(notif); // make a copy
+            qDebug() << "SSBMod::handleMessage: DSPSignalNotification";
+            m_basebandSource->getInputMessageQueue()->push(rep);
+        }
         // Forward to GUI if any
         if (getMessageQueueToGUI()) {
             getMessageQueueToGUI()->push(new DSPSignalNotification(notif));
@@ -360,8 +397,11 @@ void SSBMod::applySettings(const SSBModSettings& settings, bool force)
         m_spectrumVis.getInputMessageQueue()->push(msg);
     }
 
-    SSBModBaseband::MsgConfigureSSBModBaseband *msg = SSBModBaseband::MsgConfigureSSBModBaseband::create(settings, force);
-    m_basebandSource->getInputMessageQueue()->push(msg);
+    if (m_running)
+    {
+        SSBModBaseband::MsgConfigureSSBModBaseband *msg = SSBModBaseband::MsgConfigureSSBModBaseband::create(settings, force);
+        m_basebandSource->getInputMessageQueue()->push(msg);
+    }
 
     if (settings.m_useReverseAPI)
     {
@@ -437,7 +477,7 @@ int SSBMod::webapiSettingsGet(
     webapiFormatChannelSettings(response, m_settings);
 
     SWGSDRangel::SWGCWKeyerSettings *apiCwKeyerSettings = response.getSsbModSettings()->getCwKeyer();
-    const CWKeyerSettings& cwKeyerSettings = m_basebandSource->getCWKeyer().getSettings();
+    const CWKeyerSettings& cwKeyerSettings = m_cwKeyer.getSettings();
     CWKeyer::webapiFormatChannelSettings(apiCwKeyerSettings, cwKeyerSettings);
 
     return 200;
@@ -465,11 +505,11 @@ int SSBMod::webapiSettingsPutPatch(
     if (channelSettingsKeys.contains("cwKeyer"))
     {
         SWGSDRangel::SWGCWKeyerSettings *apiCwKeyerSettings = response.getSsbModSettings()->getCwKeyer();
-        CWKeyerSettings cwKeyerSettings = m_basebandSource->getCWKeyer().getSettings();
+        CWKeyerSettings cwKeyerSettings = m_cwKeyer.getSettings();
         CWKeyer::webapiSettingsPutPatch(channelSettingsKeys, cwKeyerSettings, apiCwKeyerSettings);
 
         CWKeyer::MsgConfigureCWKeyer *msgCwKeyer = CWKeyer::MsgConfigureCWKeyer::create(cwKeyerSettings, force);
-        m_basebandSource->getCWKeyer().getInputMessageQueue()->push(msgCwKeyer);
+        m_cwKeyer.getInputMessageQueue()->push(msgCwKeyer);
 
         if (m_guiMessageQueue) // forward to GUI if any
         {
@@ -689,8 +729,12 @@ void SSBMod::webapiFormatChannelSettings(SWGSDRangel::SWGChannelSettings& respon
 void SSBMod::webapiFormatChannelReport(SWGSDRangel::SWGChannelReport& response)
 {
     response.getSsbModReport()->setChannelPowerDb(CalcDb::dbPower(getMagSq()));
-    response.getSsbModReport()->setAudioSampleRate(m_basebandSource->getAudioSampleRate());
-    response.getSsbModReport()->setChannelSampleRate(m_basebandSource->getChannelSampleRate());
+
+    if (m_running)
+    {
+        response.getSsbModReport()->setAudioSampleRate(m_basebandSource->getAudioSampleRate());
+        response.getSsbModReport()->setChannelSampleRate(m_basebandSource->getChannelSampleRate());
+    }
 }
 
 void SSBMod::webapiReverseSendSettings(QList<QString>& channelSettingsKeys, const SSBModSettings& settings, bool force)
@@ -728,7 +772,7 @@ void SSBMod::webapiReverseSendCWSettings(const CWKeyerSettings& cwKeyerSettings)
 
     swgSSBModSettings->setCwKeyer(new SWGSDRangel::SWGCWKeyerSettings());
     SWGSDRangel::SWGCWKeyerSettings *apiCwKeyerSettings = swgSSBModSettings->getCwKeyer();
-    m_basebandSource->getCWKeyer().webapiFormatChannelSettings(apiCwKeyerSettings, cwKeyerSettings);
+    m_cwKeyer.webapiFormatChannelSettings(apiCwKeyerSettings, cwKeyerSettings);
 
     QString channelSettingsURL = QString("http://%1:%2/sdrangel/deviceset/%3/channel/%4/settings")
             .arg(m_settings.m_reverseAPIAddress)
@@ -875,10 +919,10 @@ void SSBMod::webapiFormatChannelSettings(
 
     if (force)
     {
-        const CWKeyerSettings& cwKeyerSettings = m_basebandSource->getCWKeyer().getSettings();
+        const CWKeyerSettings& cwKeyerSettings = m_cwKeyer.getSettings();
         swgSSBModSettings->setCwKeyer(new SWGSDRangel::SWGCWKeyerSettings());
         SWGSDRangel::SWGCWKeyerSettings *apiCwKeyerSettings = swgSSBModSettings->getCwKeyer();
-        m_basebandSource->getCWKeyer().webapiFormatChannelSettings(apiCwKeyerSettings, cwKeyerSettings);
+        m_cwKeyer.webapiFormatChannelSettings(apiCwKeyerSettings, cwKeyerSettings);
     }
 }
 
@@ -905,27 +949,34 @@ void SSBMod::networkManagerFinished(QNetworkReply *reply)
 
 double SSBMod::getMagSq() const
 {
-    return m_basebandSource->getMagSq();
+    if (m_running) {
+        return m_basebandSource->getMagSq();
+    }
+
+    return 0;
 }
 
 CWKeyer *SSBMod::getCWKeyer()
 {
-    return &m_basebandSource->getCWKeyer();
-}
-
-void SSBMod::setLevelMeter(QObject *levelMeter)
-{
-    connect(m_basebandSource, SIGNAL(levelChanged(qreal, qreal, int)), levelMeter, SLOT(levelChanged(qreal, qreal, int)));
+    return &m_cwKeyer;
 }
 
 int SSBMod::getAudioSampleRate() const
 {
-    return m_basebandSource->getAudioSampleRate();
+    if (m_running) {
+        return m_basebandSource->getAudioSampleRate();
+    }
+
+    return 0;
 }
 
 int SSBMod::getFeedbackAudioSampleRate() const
 {
-    return m_basebandSource->getFeedbackAudioSampleRate();
+    if (m_running) {
+        return m_basebandSource->getFeedbackAudioSampleRate();
+    }
+
+    return 0;
 }
 
 uint32_t SSBMod::getNumberOfDeviceStreams() const
