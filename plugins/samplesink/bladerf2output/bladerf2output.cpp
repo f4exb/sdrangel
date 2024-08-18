@@ -399,14 +399,14 @@ void BladeRF2Output::stop()
         qDebug("BladeRF2Output::stop: SO mode. Just stop and delete the thread");
         bladeRF2OutputThread->stopWork();
         delete bladeRF2OutputThread;
-        m_thread = 0;
+        m_thread = nullptr;
 
         // remove old thread address from buddies (reset in all buddies)
         const std::vector<DeviceAPI*>& sinkBuddies = m_deviceAPI->getSinkBuddies();
         std::vector<DeviceAPI*>::const_iterator it = sinkBuddies.begin();
 
         for (; it != sinkBuddies.end(); ++it) {
-            ((DeviceBladeRF2Shared*) (*it)->getBuddySharedPtr())->m_sink->setThread(0);
+            ((DeviceBladeRF2Shared*) (*it)->getBuddySharedPtr())->m_sink->setThread(nullptr);
         }
 
         m_deviceShared.m_dev->closeTx(0); // close the unique channel
@@ -422,7 +422,7 @@ void BladeRF2Output::stop()
         for (int i = 0; i < nbOriginalChannels-1; i++) // save original FIFO references
         {
             fifos[i] = bladeRF2OutputThread->getFifo(i);
-            stillActiveFIFO = stillActiveFIFO || (bladeRF2OutputThread->getFifo(i) != 0);
+            stillActiveFIFO = stillActiveFIFO || (bladeRF2OutputThread->getFifo(i) != nullptr);
             log2Interps[i] = bladeRF2OutputThread->getLog2Interpolation(i);
         }
 
@@ -450,7 +450,7 @@ void BladeRF2Output::stop()
         std::vector<DeviceAPI*>::const_iterator it = sinkBuddies.begin();
 
         for (; it != sinkBuddies.end(); ++it) {
-            ((DeviceBladeRF2Shared*) (*it)->getBuddySharedPtr())->m_sink->setThread(0);
+            ((DeviceBladeRF2Shared*) (*it)->getBuddySharedPtr())->m_sink->setThread(nullptr);
         }
 
         // close all channels
@@ -479,10 +479,8 @@ void BladeRF2Output::stop()
     else // remove channel from existing thread
     {
         qDebug("BladeRF2Output::stop: MO mode. Not changing MO configuration. Just remove FIFO reference");
-        bladeRF2OutputThread->setFifo(requestedChannel, 0); // remove FIFO
+        bladeRF2OutputThread->setFifo(requestedChannel, nullptr); // remove FIFO
     }
-
-    applySettings(m_settings, QList<QString>(), true); // re-apply forcibly to set sample rate with the new number of channels
 
     m_running = false;
 }
