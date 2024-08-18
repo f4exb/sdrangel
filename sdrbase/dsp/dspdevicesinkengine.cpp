@@ -28,7 +28,7 @@
 #include "dsp/dspcommands.h"
 
 DSPDeviceSinkEngine::DSPDeviceSinkEngine(uint32_t uid, QObject* parent) :
-	QThread(parent),
+	QObject(parent),
     m_uid(uid),
 	m_state(StNotStarted),
 	m_deviceSampleSink(nullptr),
@@ -41,8 +41,6 @@ DSPDeviceSinkEngine::DSPDeviceSinkEngine(uint32_t uid, QObject* parent) :
 {
     setState(StIdle);
 	connect(&m_inputMessageQueue, SIGNAL(messageEnqueued()), this, SLOT(handleInputMessages()), Qt::QueuedConnection);
-
-	moveToThread(this);
 }
 
 DSPDeviceSinkEngine::~DSPDeviceSinkEngine()
@@ -57,29 +55,6 @@ void DSPDeviceSinkEngine::setState(State state)
         m_state = state;
         emit stateChanged();
     }
-}
-
-void DSPDeviceSinkEngine::run()
-{
-	qDebug() << "DSPDeviceSinkEngine::run";
-	setState(StIdle);
-	exec();
-}
-
-void DSPDeviceSinkEngine::start()
-{
-	qDebug() << "DSPDeviceSinkEngine::start";
-	QThread::start();
-}
-
-void DSPDeviceSinkEngine::stop()
-{
-	qDebug() << "DSPDeviceSinkEngine::stop";
-    gotoIdle();
-    setState(StNotStarted);
-    QThread::exit();
-//	DSPExit cmd;
-//	m_syncMessenger.sendWait(cmd);
 }
 
 bool DSPDeviceSinkEngine::initGeneration()
@@ -101,7 +76,7 @@ bool DSPDeviceSinkEngine::startGeneration()
 void DSPDeviceSinkEngine::stopGeneration()
 {
 	qDebug() << "DSPDeviceSinkEngine::stopGeneration";
-	DSPGenerationStop *cmd = new DSPGenerationStop();
+	auto *cmd = new DSPGenerationStop();
     getInputMessageQueue()->push(cmd);
 }
 
@@ -122,7 +97,7 @@ void DSPDeviceSinkEngine::setSinkSequence(int sequence)
 void DSPDeviceSinkEngine::addChannelSource(BasebandSampleSource* source)
 {
 	qDebug() << "DSPDeviceSinkEngine::addChannelSource: " << source->getSourceName().toStdString().c_str();
-	DSPAddBasebandSampleSource *cmd = new DSPAddBasebandSampleSource(source);
+	auto *cmd = new DSPAddBasebandSampleSource(source);
     getInputMessageQueue()->push(cmd);
 }
 
@@ -167,7 +142,10 @@ void DSPDeviceSinkEngine::workSampleFifo()
     }
 
     SampleVector& data = sourceFifo->getData();
-    unsigned int iPart1Begin, iPart1End, iPart2Begin, iPart2End;
+    unsigned int iPart1Begin;
+    unsigned int iPart1End;
+    unsigned int iPart2Begin;
+    unsigned int iPart2End;
     unsigned int remainder = sourceFifo->remainder();
 
     while ((remainder > 0) && (m_inputMessageQueue.size() == 0))
@@ -208,7 +186,7 @@ void DSPDeviceSinkEngine::workSamples(SampleVector& data, unsigned int iBegin, u
     else
     {
         m_sourceSampleBuffer.allocate(nbSamples);
-        SampleVector::iterator sBegin = m_sourceSampleBuffer.m_vector.begin();
+        auto sBegin = m_sourceSampleBuffer.m_vector.begin();
         BasebandSampleSources::const_iterator srcIt = m_basebandSampleSources.begin();
         BasebandSampleSource *source = *srcIt;
         source->pull(begin, nbSamples);
@@ -309,7 +287,7 @@ DSPDeviceSinkEngine::State DSPDeviceSinkEngine::gotoInit()
 	m_sampleRate = m_deviceSampleSink->getSampleRate();
 
 	qDebug() << "DSPDeviceSinkEngine::gotoInit: "
-	        << " m_deviceDescription: " << m_deviceDescription.toStdString().c_str()
+            << " m_deviceDescription: " << m_deviceDescription.toStdString().c_str()
 			<< " sampleRate: " << m_sampleRate
 			<< " centerFrequency: " << m_centerFrequency;
 
@@ -328,7 +306,7 @@ DSPDeviceSinkEngine::State DSPDeviceSinkEngine::gotoInit()
 	// pass data to listeners
 	if (m_deviceSampleSink->getMessageQueueToGUI())
 	{
-        DSPSignalNotification* rep = new DSPSignalNotification(notif); // make a copy for the output queue
+        auto* rep = new DSPSignalNotification(notif); // make a copy for the output queue
         m_deviceSampleSink->getMessageQueueToGUI()->push(rep);
 	}
 
@@ -413,7 +391,7 @@ void DSPDeviceSinkEngine::handleSetSink(DeviceSampleSink*)
 void DSPDeviceSinkEngine::handleData()
 {
 	if (m_state == StRunning) {
-		 workSampleFifo();
+		workSampleFifo();
 	}
 }
 
@@ -421,7 +399,7 @@ bool DSPDeviceSinkEngine::handleMessage(const Message& message)
 {
     if (DSPSignalNotification::match(message))
     {
-        const DSPSignalNotification& notif = (const DSPSignalNotification&) message;
+        auto& notif = (const DSPSignalNotification&) message;
 
         // update DSP values
 

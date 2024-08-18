@@ -565,7 +565,6 @@ void MainWindow::sampleSourceCreate(
 void MainWindow::sampleSinkAdd(Workspace *deviceWorkspace, Workspace *spectrumWorkspace, int deviceIndex)
 {
     DSPDeviceSinkEngine *dspDeviceSinkEngine = m_dspEngine->addDeviceSinkEngine();
-    dspDeviceSinkEngine->start();
 
     uint dspDeviceSinkEngineUID =  dspDeviceSinkEngine->getUID();
     char uidCStr[16];
@@ -993,7 +992,6 @@ void MainWindow::removeDeviceSet(int deviceSetIndex)
     if (deviceUISet->m_deviceSourceEngine) // source device
     {
         DSPDeviceSourceEngine *deviceEngine = deviceUISet->m_deviceSourceEngine;
-        deviceEngine->stopAcquistion();
         deviceEngine->removeSink(deviceUISet->m_spectrumVis);
 
         // deletes old UI and core object
@@ -1015,7 +1013,6 @@ void MainWindow::removeDeviceSet(int deviceSetIndex)
     else if (deviceUISet->m_deviceSinkEngine) // sink device
     {
 	    DSPDeviceSinkEngine *deviceEngine = deviceUISet->m_deviceSinkEngine;
-        deviceEngine->stopGeneration();
         deviceEngine->removeSpectrumSink(deviceUISet->m_spectrumVis);
 
         // deletes old UI and output object
@@ -1023,24 +1020,19 @@ void MainWindow::removeDeviceSet(int deviceSetIndex)
         deviceUISet->m_deviceAPI->getSampleSink()->setMessageQueueToGUI(nullptr); // have sink stop sending messages to the GUI
         deviceUISet->m_deviceGUI->destroy();
         deviceUISet->m_deviceAPI->resetSamplingDeviceId();
-        deviceUISet->m_deviceAPI->getPluginInterface()->deleteSampleSinkPluginInstanceOutput(
-            deviceUISet->m_deviceAPI->getSampleSink());
         deviceUISet->m_deviceAPI->clearBuddiesLists(); // clear old API buddies lists
 
-	    DeviceAPI *sinkAPI = deviceUISet->m_deviceAPI;
-        delete deviceUISet;
-
-        deviceEngine->stop();
         m_dspEngine->removeDeviceEngineAt(deviceSetIndex);
         DeviceEnumerator::instance()->removeTxSelection(deviceSetIndex);
 
+	    DeviceAPI *sinkAPI = deviceUISet->m_deviceAPI;
+        delete deviceUISet;
+        delete sinkAPI->getSampleSink();
         delete sinkAPI;
     }
     else if (deviceUISet->m_deviceMIMOEngine) // MIMO device
     {
 	    DSPDeviceMIMOEngine *deviceEngine = deviceUISet->m_deviceMIMOEngine;
-	    deviceEngine->stopProcess(1); // Tx side
-        deviceEngine->stopProcess(0); // Rx side
         deviceEngine->removeSpectrumSink(deviceUISet->m_spectrumVis);
 
         // deletes old UI and output object
@@ -1096,7 +1088,6 @@ void MainWindow::removeLastDeviceSet()
     if (m_deviceUIs.back()->m_deviceSourceEngine) // source tab
 	{
 	    DSPDeviceSourceEngine *lastDeviceEngine = m_deviceUIs.back()->m_deviceSourceEngine;
-        lastDeviceEngine->stopAcquistion();
         lastDeviceEngine->removeSink(m_deviceUIs.back()->m_spectrumVis);
 
         // deletes old UI and input object
@@ -1116,7 +1107,6 @@ void MainWindow::removeLastDeviceSet()
 	else if (m_deviceUIs.back()->m_deviceSinkEngine) // sink tab
 	{
 	    DSPDeviceSinkEngine *lastDeviceEngine = m_deviceUIs.back()->m_deviceSinkEngine;
-        lastDeviceEngine->stopGeneration();
         lastDeviceEngine->removeSpectrumSink(m_deviceUIs.back()->m_spectrumVis);
 
         // deletes old UI and output object
@@ -1136,8 +1126,6 @@ void MainWindow::removeLastDeviceSet()
 	else if (m_deviceUIs.back()->m_deviceMIMOEngine) // MIMO tab
 	{
 	    DSPDeviceMIMOEngine *lastDeviceEngine = m_deviceUIs.back()->m_deviceMIMOEngine;
-	    lastDeviceEngine->stopProcess(1); // Tx side
-        lastDeviceEngine->stopProcess(0); // Rx side
         lastDeviceEngine->removeSpectrumSink(m_deviceUIs.back()->m_spectrumVis);
 
         // deletes old UI and output object

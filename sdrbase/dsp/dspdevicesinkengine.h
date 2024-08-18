@@ -22,7 +22,7 @@
 #ifndef SDRBASE_DSP_DSPDEVICESINKENGINE_H_
 #define SDRBASE_DSP_DSPDEVICESINKENGINE_H_
 
-#include <QThread>
+#include <QObject>
 #include <QTimer>
 #include <QMutex>
 #include <QWaitCondition>
@@ -40,7 +40,7 @@ class DeviceSampleSink;
 class BasebandSampleSource;
 class BasebandSampleSink;
 
-class SDRBASE_API DSPDeviceSinkEngine : public QThread {
+class SDRBASE_API DSPDeviceSinkEngine : public QObject {
 	Q_OBJECT
 
 public:
@@ -52,15 +52,12 @@ public:
 		StError        //!< engine is in error
 	};
 
-	DSPDeviceSinkEngine(uint32_t uid, QObject* parent = NULL);
+	DSPDeviceSinkEngine(uint32_t uid, QObject* parent = nullptr);
 	~DSPDeviceSinkEngine();
 
 	uint32_t getUID() const { return m_uid; }
 
 	MessageQueue* getInputMessageQueue() { return &m_inputMessageQueue; }
-
-	void start(); //!< This thread start
-	void stop();  //!< This thread stop
 
 	bool initGeneration(); //!< Initialize generation sequence
 	bool startGeneration(); //!< Start generation sequence
@@ -106,7 +103,6 @@ private:
     bool m_realElseComplex;
     unsigned int m_sumIndex; //!< channel index when summing channels
 
-	void run();
 	void workSampleFifo(); //!< transfer samples from baseband sources to sink if in running state
     void workSamples(SampleVector& data, unsigned int iBegin, unsigned int iEnd);
 
