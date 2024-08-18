@@ -86,9 +86,7 @@ public:
     int webapiSpectrumServerDelete(SWGSDRangel::SWGSuccessResponse& response, QString& errorMessage);
 
 private:
-    typedef QList<ChannelAPI*> ChannelInstanceRegistrations;
-
-    ChannelInstanceRegistrations m_channelInstanceRegistrations;
+    QList<ChannelAPI*> m_channelInstanceRegistrations;
     int m_deviceTabIndex;
 
     void renameChannelInstances();

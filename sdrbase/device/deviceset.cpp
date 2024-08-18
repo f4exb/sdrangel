@@ -59,7 +59,7 @@ void DeviceSet::freeChannels()
     for(int i = 0; i < m_channelInstanceRegistrations.count(); i++)
     {
         qDebug("DeviceSet::freeChannels: destroying channel [%s]", qPrintable(m_channelInstanceRegistrations[i]->getURI()));
-        m_channelInstanceRegistrations[i]->destroy();
+        delete m_channelInstanceRegistrations[i];
     }
 
     MainCore::instance()->clearChannels(this);
@@ -87,7 +87,7 @@ void DeviceSet::deleteChannel(int channelIndex)
 {
     if (channelIndex < m_channelInstanceRegistrations.count())
     {
-        m_channelInstanceRegistrations[channelIndex]->destroy();
+        delete m_channelInstanceRegistrations[channelIndex];
         m_channelInstanceRegistrations.removeAt(channelIndex);
         MainCore::instance()->removeChannelInstanceAt(this, channelIndex);
         renameChannelInstances();
@@ -141,7 +141,7 @@ void DeviceSet::loadRxChannelSettings(const Preset *preset, PluginAPI *pluginAPI
         PluginAPI::ChannelRegistrations *channelRegistrations = pluginAPI->getRxChannelRegistrations();
 
         // copy currently open channels and clear list
-        ChannelInstanceRegistrations openChannels = m_channelInstanceRegistrations;
+        QList<ChannelAPI*> openChannels = m_channelInstanceRegistrations;
         m_channelInstanceRegistrations.clear();
         mainCore->clearChannels(this);
 
@@ -241,7 +241,7 @@ void DeviceSet::loadTxChannelSettings(const Preset *preset, PluginAPI *pluginAPI
         PluginAPI::ChannelRegistrations *channelRegistrations = pluginAPI->getTxChannelRegistrations();
 
         // copy currently open channels and clear list
-        ChannelInstanceRegistrations openChannels = m_channelInstanceRegistrations;
+        QList<ChannelAPI*> openChannels = m_channelInstanceRegistrations;
         m_channelInstanceRegistrations.clear();
         mainCore->clearChannels(this);
 
@@ -339,7 +339,7 @@ void DeviceSet::loadMIMOChannelSettings(const Preset *preset, PluginAPI *pluginA
         PluginAPI::ChannelRegistrations *channelRegistrations = pluginAPI->getMIMOChannelRegistrations();
 
         // copy currently open channels and clear list
-        ChannelInstanceRegistrations openChannels = m_channelInstanceRegistrations;
+        QList<ChannelAPI*> openChannels = m_channelInstanceRegistrations;
         m_channelInstanceRegistrations.clear();
         mainCore->clearChannels(this);
 
