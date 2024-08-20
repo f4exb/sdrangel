@@ -513,7 +513,7 @@ WDSPRxGUI::WDSPRxGUI(PluginAPI* pluginAPI, DeviceUISet *deviceUISet, BasebandSam
     m_squelchDialog(nullptr)
 {
 	setAttribute(Qt::WA_DeleteOnClose, true);
-    m_helpURL = "plugins/channelrx/demodssb/readme.md";
+    m_helpURL = "plugins/channelrx/wdsprx/readme.md";
     RollupContents *rollupContents = getRollupContents();
 	ui->setupUi(rollupContents);
     setSizePolicy(rollupContents->sizePolicy());
