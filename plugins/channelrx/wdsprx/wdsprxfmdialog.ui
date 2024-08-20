@@ -268,7 +268,7 @@
         </size>
        </property>
        <property name="toolTip">
-        <string>AF volume limter gain (dB)</string>
+        <string>AF volume limiter gain (dB)</string>
        </property>
        <property name="minimum">
         <number>-80</number>
