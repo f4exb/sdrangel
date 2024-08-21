@@ -171,12 +171,12 @@ bool AirspyHFInput::start()
 {
 	QMutexLocker mutexLocker(&m_mutex);
 
-    if (!m_dev) {
-        return false;
+    if (m_running) {
+        return true;
     }
 
-    if (m_running) {
-        stop();
+    if (!m_dev) {
+        return false;
     }
 
     m_airspyHFWorkerThread = new QThread();
@@ -198,13 +198,13 @@ bool AirspyHFInput::start()
 
 	m_airspyHFWorker->setLog2Decimation(m_settings.m_log2Decim);
     m_airspyHFWorker->setIQOrder(m_settings.m_iqOrder);
-    mutexLocker.unlock();
-
     m_airspyHFWorkerThread->start();
+    m_running = true;
+
+    mutexLocker.unlock();
 
     qDebug("AirspyHFInput::startInput: started");
     applySettings(m_settings, QList<QString>(), true);
-    m_running = true;
 
 	return m_running;
 }
@@ -223,8 +223,14 @@ void AirspyHFInput::closeDevice()
 
 void AirspyHFInput::stop()
 {
-	qDebug("AirspyHFInput::stop");
 	QMutexLocker mutexLocker(&m_mutex);
+
+    if (!m_running) {
+        return;
+    }
+
+    qDebug("AirspyHFInput::stop");
+	m_running = false;
 
     if (m_airspyHFWorkerThread)
     {
@@ -234,7 +240,6 @@ void AirspyHFInput::stop()
         m_airspyHFWorker = nullptr;
     }
 
-	m_running = false;
 }
 
 QByteArray AirspyHFInput::serialize() const

@@ -129,27 +129,28 @@ void HackRFOutput::init()
 
 bool HackRFOutput::start()
 {
+    QMutexLocker mutexLocker(&m_mutex);
+
     if (!m_dev) {
         return false;
     }
 
     if (m_running) {
-        stop();
+        return true;
     }
 
     m_hackRFThread = new HackRFOutputThread(m_dev, &m_sampleSourceFifo);
 
-//	mutexLocker.unlock();
-
-	applySettings(m_settings, QList<QString>(), true);
 
     m_hackRFThread->setLog2Interpolation(m_settings.m_log2Interp);
     m_hackRFThread->setFcPos((int) m_settings.m_fcPos);
 
 	m_hackRFThread->startWork();
+    m_running = true;
+	mutexLocker.unlock();
 
 	qDebug("HackRFOutput::start: started");
-    m_running = true;
+	applySettings(m_settings, QList<QString>(), true);
 
 	return true;
 }
@@ -173,8 +174,14 @@ void HackRFOutput::closeDevice()
 
 void HackRFOutput::stop()
 {
+	QMutexLocker mutexLocker(&m_mutex);
+
+    if (!m_running) {
+        return;
+    }
+
 	qDebug("HackRFOutput::stop");
-//	QMutexLocker mutexLocker(&m_mutex);
+	m_running = false;
 
 	if(m_hackRFThread != 0)
 	{
@@ -182,8 +189,6 @@ void HackRFOutput::stop()
 		delete m_hackRFThread;
 		m_hackRFThread = 0;
 	}
-
-	m_running = false;
 }
 
 QByteArray HackRFOutput::serialize() const

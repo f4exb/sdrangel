@@ -121,14 +121,14 @@ void FCDProPlusInput::init()
 
 bool FCDProPlusInput::start()
 {
-//	QMutexLocker mutexLocker(&m_mutex);
+	QMutexLocker mutexLocker(&m_mutex);
 
     if (!m_dev) {
         return false;
     }
 
     if (m_running) {
-        stop();
+        return true;
     }
 
     qDebug() << "FCDProPlusInput::start";
@@ -151,12 +151,12 @@ bool FCDProPlusInput::start()
     m_FCDThread->setFcPos(m_settings.m_fcPos);
     m_FCDThread->setIQOrder(m_settings.m_iqOrder);
 	m_FCDThread->startWork();
+	m_running = true;
 
-//	mutexLocker.unlock();
+	mutexLocker.unlock();
 	applySettings(m_settings, QList<QString>(), true);
 
 	qDebug("FCDProPlusInput::started");
-	m_running = true;
 
 	return true;
 }
@@ -170,7 +170,7 @@ void FCDProPlusInput::closeDevice()
     fcdClose(m_dev);
     m_dev = 0;
 
-   	closeFCDAudio();
+    closeFCDAudio();
 }
 
 bool FCDProPlusInput::openFCDAudio(const char* cardname)
@@ -208,6 +208,12 @@ void FCDProPlusInput::stop()
 {
 	QMutexLocker mutexLocker(&m_mutex);
 
+    if (!m_running) {
+        return;
+    }
+
+	m_running = false;
+
 	if (m_FCDThread)
 	{
 		m_FCDThread->stopWork();
@@ -215,8 +221,6 @@ void FCDProPlusInput::stop()
 		delete m_FCDThread;
 		m_FCDThread = nullptr;
 	}
-
-	m_running = false;
 }
 
 QByteArray FCDProPlusInput::serialize() const

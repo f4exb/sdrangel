@@ -153,7 +153,7 @@ public:
 
 private:
 	DeviceAPI *m_deviceAPI;
-	QMutex m_mutex;
+	QRecursiveMutex m_mutex;
 	HackRFInputSettings m_settings;
 	struct hackrf_device* m_dev;
 	HackRFInputThread* m_hackRFThread;

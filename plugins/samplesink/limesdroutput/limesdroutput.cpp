@@ -380,14 +380,17 @@ void LimeSDROutput::init()
 
 bool LimeSDROutput::start()
 {
+    QMutexLocker mutexLocker(&m_mutex);
+
+    if (m_running) {
+        return true;
+    }
+
     if (!m_deviceShared.m_deviceParams->getDevice()) {
         return false;
     }
 
-    if (m_running) { stop(); }
-
-    if (!acquireChannel())
-    {
+    if (!acquireChannel()) {
         return false;
     }
 
@@ -396,20 +399,25 @@ bool LimeSDROutput::start()
     m_limeSDROutputThread = new LimeSDROutputThread(&m_streamId, &m_sampleSourceFifo);
     qDebug("LimeSDROutput::start: thread created");
 
-    applySettings(m_settings, QList<QString>(), true);
-
     m_limeSDROutputThread->setLog2Interpolation(m_settings.m_log2SoftInterp);
     m_limeSDROutputThread->startWork();
-
     m_deviceShared.m_thread = m_limeSDROutputThread;
     m_running = true;
+    mutexLocker.unlock();
+
+    applySettings(m_settings, QList<QString>(), true);
 
     return true;
 }
 
 void LimeSDROutput::stop()
 {
+    if (!m_running) {
+        return;
+    }
+
     qDebug("LimeSDROutput::stop");
+    m_running = false;
 
     if (m_limeSDROutputThread)
     {
@@ -419,7 +427,6 @@ void LimeSDROutput::stop()
     }
 
     m_deviceShared.m_thread = 0;
-    m_running = false;
 
     releaseChannel();
 }

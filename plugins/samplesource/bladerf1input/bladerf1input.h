@@ -135,7 +135,7 @@ public:
 
 private:
 	DeviceAPI *m_deviceAPI;
-	QMutex m_mutex;
+	QRecursiveMutex m_mutex;
 	BladeRF1InputSettings m_settings;
 	struct bladerf* m_dev;
 	Bladerf1InputThread* m_bladerfThread;

@@ -124,7 +124,11 @@ void XTRXMIMO::init()
 
 bool XTRXMIMO::startRx()
 {
-    qDebug("XTRXMIMO::startRx");
+	QMutexLocker mutexLocker(&m_mutex);
+
+    if (m_runningRx) {
+        return true;
+    }
 
     if (!m_open)
     {
@@ -132,11 +136,7 @@ bool XTRXMIMO::startRx()
         return false;
     }
 
-	QMutexLocker mutexLocker(&m_mutex);
-
-    if (m_runningRx) {
-        stopRx();
-    }
+    qDebug("XTRXMIMO::startRx");
 
     m_sourceThread = new XTRXMIThread(m_deviceShared.m_dev->getDevice());
     m_sampleMIFifo.reset();
@@ -152,7 +152,11 @@ bool XTRXMIMO::startRx()
 
 bool XTRXMIMO::startTx()
 {
-    qDebug("XTRXMIMO::startTx");
+	QMutexLocker mutexLocker(&m_mutex);
+
+    if (m_runningTx) {
+        return true;
+    }
 
     if (!m_open)
     {
@@ -160,11 +164,7 @@ bool XTRXMIMO::startTx()
         return false;
     }
 
-	QMutexLocker mutexLocker(&m_mutex);
-
-    if (m_runningRx) {
-        stopRx();
-    }
+    qDebug("XTRXMIMO::startTx");
 
     m_sinkThread = new XTRXMOThread(m_deviceShared.m_dev->getDevice());
     m_sampleMOFifo.reset();
@@ -179,34 +179,42 @@ bool XTRXMIMO::startTx()
 
 void XTRXMIMO::stopRx()
 {
-    qDebug("XTRXMIMO::stopRx");
+	QMutexLocker mutexLocker(&m_mutex);
+
+    if (!m_runningRx){
+        return;
+    }
 
     if (!m_sourceThread) {
         return;
     }
 
-	QMutexLocker mutexLocker(&m_mutex);
+    qDebug("XTRXMIMO::stopRx");
+    m_runningRx = false;
 
     m_sourceThread->stopWork();
     delete m_sourceThread;
     m_sourceThread = nullptr;
-    m_runningRx = false;
 }
 
 void XTRXMIMO::stopTx()
 {
-    qDebug("XTRXMIMO::stopTx");
+	QMutexLocker mutexLocker(&m_mutex);
+
+    if (!m_runningTx) {
+        return;
+    }
 
     if (!m_sinkThread) {
         return;
     }
 
-	QMutexLocker mutexLocker(&m_mutex);
+    qDebug("XTRXMIMO::stopTx");
+    m_runningTx = false;
 
     m_sinkThread->stopWork();
     delete m_sinkThread;
     m_sinkThread = nullptr;
-    m_runningTx = false;
 }
 
 QByteArray XTRXMIMO::serialize() const

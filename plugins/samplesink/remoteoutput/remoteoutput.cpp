@@ -47,6 +47,7 @@ MESSAGE_CLASS_DEFINITION(RemoteOutput::MsgRequestFixedData, Message)
 
 RemoteOutput::RemoteOutput(DeviceAPI *deviceAPI) :
     m_deviceAPI(deviceAPI),
+    m_running(false),
 	m_settings(),
 	m_centerFrequency(435000000),
     m_sampleRate(48000),
@@ -95,6 +96,11 @@ void RemoteOutput::destroy()
 bool RemoteOutput::start()
 {
 	QMutexLocker mutexLocker(&m_mutex);
+
+    if (m_running) {
+        return true;
+    }
+
 	qDebug() << "RemoteOutput::start";
 
 	m_remoteOutputWorker = new RemoteOutputWorker(&m_sampleSourceFifo);
@@ -105,6 +111,7 @@ bool RemoteOutput::start()
 	m_remoteOutputWorker->setNbBlocksFEC(m_settings.m_nbFECBlocks);
 	m_remoteOutputWorker->connectTimer(m_masterTimer);
 	startWorker();
+    m_running = true;
 
 	mutexLocker.unlock();
     applySampleRate();
@@ -121,12 +128,18 @@ void RemoteOutput::init()
 
 void RemoteOutput::stop()
 {
-	qDebug() << "RemoteOutput::stop";
 	QMutexLocker mutexLocker(&m_mutex);
+
+    if (!m_running) {
+        return;
+    }
+
+	qDebug() << "RemoteOutput::stop";
+    m_running = false;
 
 	if (m_remoteOutputWorker)
 	{
-	    stopWorker();
+        stopWorker();
 		delete m_remoteOutputWorker;
 		m_remoteOutputWorker = nullptr;
 	}

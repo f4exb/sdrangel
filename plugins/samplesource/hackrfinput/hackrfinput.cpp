@@ -142,29 +142,29 @@ void HackRFInput::init()
 
 bool HackRFInput::start()
 {
-//	QMutexLocker mutexLocker(&m_mutex);
+	QMutexLocker mutexLocker(&m_mutex);
+
+    if (m_running) {
+        return true;
+    }
+
     if (!m_dev) {
         return false;
     }
 
-    if (m_running) {
-        stop();
-    }
-
     m_hackRFThread = new HackRFInputThread(m_dev, &m_sampleFifo);
-
-//	mutexLocker.unlock();
-
-	applySettings(m_settings, QList<QString>(), true);
 
 	m_hackRFThread->setSamplerate(m_settings.m_devSampleRate);
 	m_hackRFThread->setLog2Decimation(m_settings.m_log2Decim);
 	m_hackRFThread->setFcPos((int) m_settings.m_fcPos);
     m_hackRFThread->setIQOrder(m_settings.m_iqOrder);
 	m_hackRFThread->startWork();
+	m_running = true;
+
+	mutexLocker.unlock();
+	applySettings(m_settings, QList<QString>(), true);
 
 	qDebug("HackRFInput::startInput: started");
-	m_running = true;
 
 	return true;
 }
@@ -188,8 +188,14 @@ void HackRFInput::closeDevice()
 
 void HackRFInput::stop()
 {
+	QMutexLocker mutexLocker(&m_mutex);
+
+    if (!m_running) {
+        return;
+    }
+
 	qDebug("HackRFInput::stop");
-//	QMutexLocker mutexLocker(&m_mutex);
+	m_running = false;
 
 	if (m_hackRFThread)
 	{
@@ -197,8 +203,6 @@ void HackRFInput::stop()
 		delete m_hackRFThread;
 		m_hackRFThread = nullptr;
 	}
-
-	m_running = false;
 }
 
 QByteArray HackRFInput::serialize() const
@@ -349,7 +353,7 @@ void HackRFInput::setDeviceCenterFrequency(quint64 freq_hz, int loPpmTenths)
 
 bool HackRFInput::applySettings(const HackRFInputSettings& settings, const QList<QString>& settingsKeys, bool force)
 {
-//	QMutexLocker mutexLocker(&m_mutex);
+	QMutexLocker mutexLocker(&m_mutex);
     qDebug() << "HackRFInput::applySettings: forcE: " << force << settings.getDebugString(settingsKeys, force);
 	bool forwardChange = false;
 	hackrf_error rc;

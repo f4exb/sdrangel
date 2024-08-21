@@ -275,6 +275,11 @@ bool XTRXInput::start()
     //
     // Eventually it registers the FIFO in the thread. If the thread has to be started it enables the channels up to the number of channels
     // allocated in the thread and starts the thread.
+    QMutexLocker mutexLocker(&m_mutex);
+
+    if (m_running) {
+        return true;
+    }
 
     if (!m_deviceShared.m_dev || !m_deviceShared.m_dev->getDevice())
     {
@@ -353,8 +358,6 @@ bool XTRXInput::start()
     xtrxInputThread->setFifo(requestedChannel, &m_sampleFifo);
     xtrxInputThread->setLog2Decimation(requestedChannel, m_settings.m_log2SoftDecim);
 
-    applySettings(m_settings, QList<QString>(), true);
-
     if (needsStart)
     {
         qDebug("XTRXInput::start: (re)start thread");
@@ -363,6 +366,9 @@ bool XTRXInput::start()
 
     qDebug("XTRXInput::start: started");
     m_running = true;
+
+    m_mutex.unlock();
+    applySettings(m_settings, QList<QString>(), true);
 
     return true;
 }
@@ -377,11 +383,13 @@ void XTRXInput::stop()
     // If the thread is currently managing both channels (MI mode) then we are removing one channel. Thus we must
     // transition from MI to SI. This transition is handled by stopping the thread, deleting it and creating a new one
     // managing a single channel.
+    QMutexLocker mutexLocker(&m_mutex);
 
     if (!m_running) {
         return;
     }
 
+    m_running = false;
     int removedChannel = m_deviceAPI->getDeviceItemIndex(); // channel to remove
     int requestedChannel = removedChannel ^ 1; // channel to keep (opposite channel)
     XTRXInputThread *xtrxInputThread = findThread();
@@ -432,8 +440,6 @@ void XTRXInput::stop()
         applySettings(m_settings, QList<QString>(), true);
         xtrxInputThread->startWork();
     }
-
-    m_running = false;
 }
 
 void XTRXInput::suspendTxThread()

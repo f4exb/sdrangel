@@ -165,7 +165,7 @@ public:
 
 private:
 	DeviceAPI *m_deviceAPI;
-	QMutex m_mutex;
+	QRecursiveMutex m_mutex;
 	AirspyHFSettings m_settings;
 	airspyhf_device_t* m_dev;
 	AirspyHFWorker* m_airspyHFWorker;

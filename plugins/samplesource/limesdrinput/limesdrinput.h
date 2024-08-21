@@ -290,7 +290,7 @@ public:
 
 private:
     DeviceAPI *m_deviceAPI;
-    QMutex m_mutex;
+    QRecursiveMutex m_mutex;
     LimeSDRInputSettings m_settings;
     LimeSDRInputThread* m_limeSDRInputThread;
     QString m_deviceDescription;

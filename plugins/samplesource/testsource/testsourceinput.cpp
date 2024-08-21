@@ -119,11 +119,16 @@ bool TestSourceInput::start()
 void TestSourceInput::stop()
 {
 	QMutexLocker mutexLocker(&m_mutex);
+
+    if (!m_running) {
+        return;
+    }
+
     m_running = false;
 
     if (m_testSourceWorkerThread)
     {
-    	m_testSourceWorker->stopWork();
+        m_testSourceWorker->stopWork();
         m_testSourceWorkerThread->quit();
         m_testSourceWorkerThread->wait();
         m_testSourceWorker = nullptr;

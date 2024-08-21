@@ -158,7 +158,7 @@ public:
 
 private:
     DeviceAPI *m_deviceAPI;
-    QMutex m_mutex;
+    QRecursiveMutex m_mutex;
     SDRPlayV3Settings m_settings;
     sdrplay_api_DeviceT m_devs[SDRPLAY_MAX_DEVICES];
     sdrplay_api_DeviceT* m_dev;

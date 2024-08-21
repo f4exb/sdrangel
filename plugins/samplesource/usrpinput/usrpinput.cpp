@@ -414,14 +414,17 @@ void USRPInput::init()
 
 bool USRPInput::start()
 {
+    QMutexLocker mutexLocker(&m_mutex);
+
+    if (m_running) {
+        return true;
+    }
+
     if (!m_deviceShared.m_deviceParams->getDevice()) {
         return false;
     }
 
-    if (m_running) { stop(); }
-
-    if (!acquireChannel())
-    {
+    if (!acquireChannel()) {
         return false;
     }
 
@@ -441,7 +444,14 @@ bool USRPInput::start()
 
 void USRPInput::stop()
 {
+    QMutexLocker mutexLocker(&m_mutex);
+
+    if (!m_running) {
+        return;
+    }
+
     qDebug("USRPInput::stop");
+    m_running = false;
 
     if (m_usrpInputThread)
     {
@@ -451,7 +461,6 @@ void USRPInput::stop()
     }
 
     m_deviceShared.m_thread = 0;
-    m_running = false;
 
     releaseChannel();
 }

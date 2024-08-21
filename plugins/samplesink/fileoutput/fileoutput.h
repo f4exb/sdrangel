@@ -234,6 +234,7 @@ public:
 private:
     DeviceAPI *m_deviceAPI;
 	QMutex m_mutex;
+    bool m_running;
 	FileOutputSettings m_settings;
 	std::ofstream m_ofstream;
 	FileOutputWorker* m_fileOutputWorker;

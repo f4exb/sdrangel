@@ -453,6 +453,11 @@ bool SoapySDROutput::start()
     //
     // Note: this is quite similar to the BladeRF2 start handling. The main difference is that the channel allocation (enabling) process is
     // done in the thread object.
+    QMutexLocker mutexLocker(&m_mutex);
+
+    if (m_running) {
+        return true;
+    }
 
     if (!m_openSuccess)
     {
@@ -558,11 +563,13 @@ void SoapySDROutput::stop()
     // channel then the FIFO reference is simply removed from the thread so that this FIFO will not be used anymore.
     // In this case the channel is not closed (this is managed in the thread object) so that other channels can continue with the
     // same configuration. The device continues streaming on this channel but the samples are set to all zeros.
+    QMutexLocker mutexLocker(&m_mutex);
 
     if (!m_running) {
         return;
     }
 
+    m_running = false;
     int requestedChannel = m_deviceAPI->getDeviceItemIndex();
     SoapySDROutputThread *soapySDROutputThread = findThread();
 
@@ -648,9 +655,8 @@ void SoapySDROutput::stop()
         soapySDROutputThread->setFifo(requestedChannel, nullptr); // remove FIFO
     }
 
+    mutexLocker.unlock();
     applySettings(m_settings, true); // re-apply forcibly to set sample rate with the new number of channels
-
-    m_running = false;
 }
 
 QByteArray SoapySDROutput::serialize() const

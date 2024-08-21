@@ -481,6 +481,11 @@ bool SoapySDRInput::start()
     //
     // Note: this is quite similar to the BladeRF2 start handling. The main difference is that the channel allocation (enabling) process is
     // done in the thread object.
+    QMutexLocker mutexLocker(&m_mutex);
+
+    if (m_running) {
+        return true;
+    }
 
     if (!m_openSuccess)
     {
@@ -595,11 +600,13 @@ void SoapySDRInput::stop()
     //
     // Note: this is quite similar to the BladeRF2 stop handling. The main difference is that the channel allocation (enabling) process is
     // done in the thread object.
+    QMutexLocker mutexLocker(&m_mutex);
 
     if (!m_running) {
         return;
     }
 
+    m_running = false;
     int requestedChannel = m_deviceAPI->getDeviceItemIndex();
     SoapySDRInputThread *soapySDRInputThread = findThread();
 
@@ -688,8 +695,6 @@ void SoapySDRInput::stop()
         qDebug("SoapySDRInput::stop: MI mode. Not changing MI configuration. Just remove FIFO reference");
         soapySDRInputThread->setFifo(requestedChannel, nullptr); // remove FIFO
     }
-
-    m_running = false;
 }
 
 QByteArray SoapySDRInput::serialize() const

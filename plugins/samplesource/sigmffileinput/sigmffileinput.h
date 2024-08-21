@@ -446,6 +446,7 @@ public:
 private:
 	DeviceAPI *m_deviceAPI;
 	QMutex m_mutex;
+    bool m_running;
 	SigMFFileInputSettings m_settings;
 	std::ifstream m_metaStream;
     std::ifstream m_dataStream;

@@ -168,7 +168,11 @@ void PlutoSDRMIMO::init()
 
 bool PlutoSDRMIMO::startRx()
 {
-    qDebug("PlutoSDRMIMO::startRx");
+	QMutexLocker mutexLocker(&m_mutex);
+
+    if (m_runningRx) {
+        return true;
+    }
 
     if (!m_open)
     {
@@ -176,11 +180,7 @@ bool PlutoSDRMIMO::startRx()
         return false;
     }
 
-	QMutexLocker mutexLocker(&m_mutex);
-
-    if (m_runningRx) {
-        stopRx();
-    }
+    qDebug("PlutoSDRMIMO::startRx");
 
     m_sourceThread = new PlutoSDRMIThread(m_plutoParams->getBox());
     m_sampleMIFifo.reset();
@@ -206,7 +206,11 @@ bool PlutoSDRMIMO::startRx()
 
 bool PlutoSDRMIMO::startTx()
 {
-    qDebug("PlutoSDRMIMO::startTx");
+	QMutexLocker mutexLocker(&m_mutex);
+
+    if (m_runningTx) {
+        return true;
+    }
 
     if (!m_open)
     {
@@ -214,11 +218,7 @@ bool PlutoSDRMIMO::startTx()
         return false;
     }
 
-	QMutexLocker mutexLocker(&m_mutex);
-
-    if (m_runningTx) {
-        stopTx();
-    }
+    qDebug("PlutoSDRMIMO::startTx");
 
     m_sinkThread = new PlutoSDRMOThread(m_plutoParams->getBox());
     m_sampleMOFifo.reset();
@@ -243,18 +243,22 @@ bool PlutoSDRMIMO::startTx()
 
 void PlutoSDRMIMO::stopRx()
 {
-    qDebug("PlutoSDRMIMO::stopRx");
+	QMutexLocker mutexLocker(&m_mutex);
+
+    if (!m_runningRx) {
+        return;
+    }
 
     if (!m_sourceThread) {
         return;
     }
 
-	QMutexLocker mutexLocker(&m_mutex);
+    qDebug("PlutoSDRMIMO::stopRx");
+    m_runningRx = false;
 
     m_sourceThread->stopWork();
     delete m_sourceThread;
     m_sourceThread = nullptr;
-    m_runningRx = false;
 
     if (m_nbRx > 1) {
         m_plutoParams->getBox()->closeSecondRx();
@@ -270,18 +274,22 @@ void PlutoSDRMIMO::stopRx()
 
 void PlutoSDRMIMO::stopTx()
 {
-    qDebug("PlutoSDRMIMO::stopTx");
+	QMutexLocker mutexLocker(&m_mutex);
+
+    if (!m_runningTx) {
+        return;
+    }
 
     if (!m_sinkThread) {
         return;
     }
 
-	QMutexLocker mutexLocker(&m_mutex);
+    qDebug("PlutoSDRMIMO::stopTx");
+    m_runningTx = false;
 
     m_sinkThread->stopWork();
     delete m_sinkThread;
     m_sinkThread = nullptr;
-    m_runningTx = false;
 
     if (m_nbTx > 1) {
         m_plutoParams->getBox()->closeSecondTx();

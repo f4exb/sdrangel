@@ -409,14 +409,17 @@ void LimeSDRInput::init()
 
 bool LimeSDRInput::start()
 {
+    QMutexLocker mutexLocker(&m_mutex);
+
+    if (m_running) {
+        return true;
+    }
+
     if (!m_deviceShared.m_deviceParams->getDevice()) {
         return false;
     }
 
-    if (m_running) { stop(); }
-
-    if (!acquireChannel())
-    {
+    if (!acquireChannel()) {
         return false;
     }
 
@@ -425,21 +428,28 @@ bool LimeSDRInput::start()
     m_limeSDRInputThread = new LimeSDRInputThread(&m_streamId, &m_sampleFifo, &m_replayBuffer);
     qDebug("LimeSDRInput::start: thread created");
 
-    applySettings(m_settings, QList<QString>(), true);
-
     m_limeSDRInputThread->setLog2Decimation(m_settings.m_log2SoftDecim);
     m_limeSDRInputThread->setIQOrder(m_settings.m_iqOrder);
     m_limeSDRInputThread->startWork();
-
     m_deviceShared.m_thread = m_limeSDRInputThread;
     m_running = true;
+
+    mutexLocker.unlock();
+    applySettings(m_settings, QList<QString>(), true);
 
     return true;
 }
 
 void LimeSDRInput::stop()
 {
+    QMutexLocker mutexLocker(&m_mutex);
+
+    if (!m_running) {
+        return;
+    }
+
     qDebug("LimeSDRInput::stop");
+    m_running = false;
 
     if (m_limeSDRInputThread)
     {
@@ -449,7 +459,6 @@ void LimeSDRInput::stop()
     }
 
     m_deviceShared.m_thread = 0;
-    m_running = false;
 
     releaseChannel();
 }
@@ -803,7 +812,7 @@ bool LimeSDRInput::applySettings(const LimeSDRInputSettings& settings, const QLi
     bool doLPCalibration = false;
     double clockGenFreq      = 0.0;
 
-//  QMutexLocker mutexLocker(&m_mutex);
+    QMutexLocker mutexLocker(&m_mutex);
 
     qint64 deviceCenterFrequency = settings.m_centerFrequency;
     deviceCenterFrequency -= settings.m_transverterMode ? settings.m_transverterDeltaFrequency : 0;

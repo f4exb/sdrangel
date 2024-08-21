@@ -144,25 +144,24 @@ void Bladerf1Output::init()
 
 bool Bladerf1Output::start()
 {
-//	QMutexLocker mutexLocker(&m_mutex);
+	QMutexLocker mutexLocker(&m_mutex);
+
+    if (m_running) {
+        return true;
+    }
 
     if (!m_dev) {
         return false;
     }
 
-    if (m_running) stop();
-
     m_bladerfThread = new Bladerf1OutputThread(m_dev, &m_sampleSourceFifo);
-
-//	mutexLocker.unlock();
-	applySettings(m_settings, QList<QString>(), true);
-
 	m_bladerfThread->setLog2Interpolation(m_settings.m_log2Interp);
-
     m_bladerfThread->startWork();
-
 	qDebug("BladerfOutput::start: started");
     m_running = true;
+	mutexLocker.unlock();
+
+	applySettings(m_settings, QList<QString>(), true);
 
     return true;
 }
@@ -171,7 +170,7 @@ void Bladerf1Output::closeDevice()
 {
     int res;
 
-    if (m_dev == 0) { // was never open
+    if (m_dev == nullptr) { // was never open
         return;
     }
 
@@ -180,7 +179,7 @@ void Bladerf1Output::closeDevice()
         qCritical("BladerfOutput::closeDevice: bladerf_enable_module with return code %d", res);
     }
 
-    if (m_deviceAPI->getSourceBuddies().size() == 0)
+    if (m_deviceAPI->getSourceBuddies().empty())
     {
         qDebug("BladerfOutput::closeDevice: closing device since Rx side is not open");
 
@@ -190,21 +189,26 @@ void Bladerf1Output::closeDevice()
         }
     }
 
-    m_sharedParams.m_dev = 0;
+    m_sharedParams.m_dev = nullptr;
     m_dev = 0;
 }
 
 void Bladerf1Output::stop()
 {
-//	QMutexLocker mutexLocker(&m_mutex);
-    if (m_bladerfThread != 0)
+	QMutexLocker mutexLocker(&m_mutex);
+
+    if (!m_running) {
+        return;
+    }
+
+    m_running = false;
+
+    if (m_bladerfThread)
 	{
 		m_bladerfThread->stopWork();
 		delete m_bladerfThread;
-		m_bladerfThread = 0;
+		m_bladerfThread = nullptr;
 	}
-
-    m_running = false;
 }
 
 QByteArray Bladerf1Output::serialize() const
