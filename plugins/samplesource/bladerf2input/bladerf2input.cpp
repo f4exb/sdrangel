@@ -290,6 +290,11 @@ bool BladeRF2Input::start()
     //
     // Eventually it registers the FIFO in the thread. If the thread has to be started it enables the channels up to the number of channels
     // allocated in the thread and starts the thread.
+    QMutexLocker mutexLocker(&m_mutex);
+
+    if (m_running) {
+        return true;
+    }
 
     if (!m_deviceShared.m_dev)
     {
@@ -383,10 +388,11 @@ bool BladeRF2Input::start()
         bladerf2InputThread->startWork();
     }
 
+    m_running = true;
+    mutexLocker.unlock();
     applySettings(m_settings, QList<QString>(), true);
 
     qDebug("BladeRF2Input::start: started");
-    m_running = true;
 
     return true;
 }
@@ -408,6 +414,7 @@ void BladeRF2Input::stop()
     // anymore. In this case the channel is not closed (disabled) so that other channels can continue with the
     // same configuration. The device continues streaming on this channel but the samples are simply dropped (by
     // removing FIFO reference).
+    QMutexLocker mutexLocker(&m_mutex);
 
     if (!m_running) {
         return;
@@ -420,6 +427,7 @@ void BladeRF2Input::stop()
         return;
     }
 
+    m_running = false;
     int nbOriginalChannels = bladerf2InputThread->getNbChannels();
 
     if (nbOriginalChannels == 1) // SI mode => just stop and delete the thread
@@ -500,8 +508,6 @@ void BladeRF2Input::stop()
         qDebug("BladeRF2Input::stop: MI mode. Not changing MI configuration. Just remove FIFO reference");
         bladerf2InputThread->setFifo(requestedChannel, 0); // remove FIFO
     }
-
-    m_running = false;
 }
 
 QByteArray BladeRF2Input::serialize() const

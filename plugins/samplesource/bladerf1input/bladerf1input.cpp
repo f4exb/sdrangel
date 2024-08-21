@@ -151,7 +151,11 @@ void Bladerf1Input::init()
 
 bool Bladerf1Input::start()
 {
-//	QMutexLocker mutexLocker(&m_mutex);
+	QMutexLocker mutexLocker(&m_mutex);
+
+    if (m_running) {
+        return true;
+    }
 
     if (!m_dev)
     {
@@ -159,20 +163,17 @@ bool Bladerf1Input::start()
         return false;
     }
 
-    if (m_running) stop();
-
 	m_bladerfThread = new Bladerf1InputThread(m_dev, &m_sampleFifo);
 	m_bladerfThread->setLog2Decimation(m_settings.m_log2Decim);
 	m_bladerfThread->setFcPos((int) m_settings.m_fcPos);
     m_bladerfThread->setIQOrder(m_settings.m_iqOrder);
-
 	m_bladerfThread->startWork();
+	m_running = true;
 
-//	mutexLocker.unlock();
+	mutexLocker.unlock();
 	applySettings(m_settings, QList<QString>(), true);
 
 	qDebug("BladerfInput::startInput: started");
-	m_running = true;
 
 	return true;
 }
@@ -194,19 +195,25 @@ void Bladerf1Input::closeDevice()
     {
         qDebug("BladerfInput::closeDevice: closing device since Tx side is not open");
 
-        if(m_dev != 0) // close BladeRF
+        if(m_dev != nullptr) // close BladeRF
         {
             bladerf_close(m_dev);
         }
     }
 
-    m_sharedParams.m_dev = 0;
-    m_dev = 0;
+    m_sharedParams.m_dev = nullptr;
+    m_dev = nullptr;
 }
 
 void Bladerf1Input::stop()
 {
-//	QMutexLocker mutexLocker(&m_mutex);
+	QMutexLocker mutexLocker(&m_mutex);
+
+    if (!m_running) {
+        return;
+    }
+
+	m_running = false;
 
 	if(m_bladerfThread)
 	{
@@ -215,7 +222,6 @@ void Bladerf1Input::stop()
 		m_bladerfThread = nullptr;
 	}
 
-	m_running = false;
 }
 
 QByteArray Bladerf1Input::serialize() const

@@ -142,18 +142,18 @@ void BladeRF2MIMO::init()
 
 bool BladeRF2MIMO::startRx()
 {
+	QMutexLocker mutexLocker(&m_mutex);
+
+    if (m_runningRx) {
+        return true;
+    }
+
     qDebug("BladeRF2MIMO::startRx");
 
     if (!m_open)
     {
         qCritical("BladeRF2MIMO::startRx: device was not opened");
         return false;
-    }
-
-	QMutexLocker mutexLocker(&m_mutex);
-
-    if (m_runningRx) {
-        stopRx();
     }
 
     m_sourceThread = new BladeRF2MIThread(m_dev->getDev());
@@ -178,18 +178,18 @@ bool BladeRF2MIMO::startRx()
 
 bool BladeRF2MIMO::startTx()
 {
+	QMutexLocker mutexLocker(&m_mutex);
+
+    if (m_runningTx) {
+        return true;
+    }
+
     qDebug("BladeRF2MIMO::startTx");
 
     if (!m_open)
     {
         qCritical("BladeRF2MIMO::startRx: device was not opened");
         return false;
-    }
-
-	QMutexLocker mutexLocker(&m_mutex);
-
-    if (m_runningTx) {
-        stopTx();
     }
 
     m_sinkThread = new BladeRF2MOThread(m_dev->getDev());
@@ -213,18 +213,22 @@ bool BladeRF2MIMO::startTx()
 
 void BladeRF2MIMO::stopRx()
 {
-    qDebug("BladeRF2MIMO::stopRx");
+	QMutexLocker mutexLocker(&m_mutex);
+
+    if (!m_runningRx) {
+        return;
+    }
 
     if (!m_sourceThread) {
         return;
     }
 
-	QMutexLocker mutexLocker(&m_mutex);
+    qDebug("BladeRF2MIMO::stopRx");
+    m_runningRx = false;
 
     m_sourceThread->stopWork();
     delete m_sourceThread;
     m_sourceThread = nullptr;
-    m_runningRx = false;
 
     for (int i = 0; i < 2; i++) {
         m_dev->closeRx(i);
@@ -233,18 +237,22 @@ void BladeRF2MIMO::stopRx()
 
 void BladeRF2MIMO::stopTx()
 {
-    qDebug("BladeRF2MIMO::stopTx");
+	QMutexLocker mutexLocker(&m_mutex);
+
+    if (!m_runningTx) {
+        return;
+    }
 
     if (!m_sinkThread) {
         return;
     }
 
-	QMutexLocker mutexLocker(&m_mutex);
+    qDebug("BladeRF2MIMO::stopTx");
+    m_runningTx = false;
 
     m_sinkThread->stopWork();
     delete m_sinkThread;
     m_sinkThread = nullptr;
-    m_runningTx = false;
 
     for (int i = 0; i < 2; i++) {
         m_dev->closeTx(i);

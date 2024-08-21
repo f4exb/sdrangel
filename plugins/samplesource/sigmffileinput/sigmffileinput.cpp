@@ -61,6 +61,7 @@ MESSAGE_CLASS_DEFINITION(SigMFFileInput::MsgReportTotalSamplesCheck, Message)
 
 SigMFFileInput::SigMFFileInput(DeviceAPI *deviceAPI) :
     m_deviceAPI(deviceAPI),
+    m_running(false),
 	m_settings(),
     m_trackMode(false),
     m_currentTrackIndex(0),
@@ -446,13 +447,18 @@ void SigMFFileInput::init()
 
 bool SigMFFileInput::start()
 {
+	QMutexLocker mutexLocker(&m_mutex);
+
+    if (m_running) {
+        return true;
+    }
+
     if (!m_dataStream.is_open())
     {
         qWarning("SigMFFileInput::start: file not open. not starting");
         return false;
     }
 
-	QMutexLocker mutexLocker(&m_mutex);
 	qDebug() << "SigMFFileInput::start";
 
 	if (m_dataStream.tellg() != (std::streampos) 0) {
@@ -472,6 +478,7 @@ bool SigMFFileInput::start()
     m_fileInputWorker->setTrackIndex(0);
     m_fileInputWorker->moveToThread(&m_fileInputWorkerThread);
 	m_deviceDescription = "SigMFFileInput";
+    m_running = true;
 
 	mutexLocker.unlock();
 	qDebug("SigMFFileInput::startInput: started");
@@ -486,8 +493,14 @@ bool SigMFFileInput::start()
 
 void SigMFFileInput::stop()
 {
-	qDebug() << "SigMFFileInput::stop";
 	QMutexLocker mutexLocker(&m_mutex);
+
+    if (!m_running) {
+        return;
+    }
+
+	qDebug() << "SigMFFileInput::stop";
+    m_running = false;
 
 	if (m_fileInputWorker)
 	{

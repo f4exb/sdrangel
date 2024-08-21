@@ -265,6 +265,11 @@ bool XTRXOutput::start()
     //
     // Eventually it registers the FIFO in the thread. If the thread has to be started it enables the channels up to the number of channels
     // allocated in the thread and starts the thread.
+    QMutexLocker mutexLocker(&m_mutex);
+
+    if (m_running) {
+        return true;
+    }
 
     if (!m_deviceShared.m_dev || !m_deviceShared.m_dev->getDevice())
     {
@@ -341,6 +346,8 @@ bool XTRXOutput::start()
 
     xtrxOutputThread->setFifo(requestedChannel, &m_sampleSourceFifo);
     xtrxOutputThread->setLog2Interpolation(requestedChannel, m_settings.m_log2SoftInterp);
+    m_running = true;
+    mutexLocker.unlock();
 
     applySettings(m_settings, QList<QString>(), true);
 
@@ -351,7 +358,6 @@ bool XTRXOutput::start()
     }
 
     qDebug("XTRXOutput::start: started");
-    m_running = true;
 
     return true;
 }
@@ -366,16 +372,18 @@ void XTRXOutput::stop()
     // If the thread is currently managing both channels (MO mode) then we are removing one channel. Thus we must
     // transition from MO to SO. This transition is handled by stopping the thread, deleting it and creating a new one
     // managing a single channel.
+    QMutexLocker mutexLocker(&m_mutex);
 
     if (!m_running) {
         return;
     }
 
+    m_running = false;
     int removedChannel = m_deviceAPI->getDeviceItemIndex(); // channel to remove
     int requestedChannel = removedChannel ^ 1; // channel to keep (opposite channel)
     XTRXOutputThread *xtrxOutputThread = findThread();
 
-    if (xtrxOutputThread == 0) { // no thread allocated
+    if (xtrxOutputThread == nullptr) { // no thread allocated
         return;
     }
 
@@ -386,8 +394,8 @@ void XTRXOutput::stop()
         qDebug("XTRXOutput::stop: SO mode. Just stop and delete the thread");
         xtrxOutputThread->stopWork();
         delete xtrxOutputThread;
-        m_XTRXOutputThread = 0;
-        m_deviceShared.m_thread = 0;
+        m_XTRXOutputThread = nullptr;
+        m_deviceShared.m_thread = nullptr;
 
         // remove old thread address from buddies (reset in all buddies)
         const std::vector<DeviceAPI*>& sinkBuddies = m_deviceAPI->getSinkBuddies();
@@ -417,11 +425,10 @@ void XTRXOutput::stop()
             ((DeviceXTRXShared*) (*it)->getBuddySharedPtr())->m_sink->setThread(nullptr);
         }
 
+        mutexLocker.unlock();
         applySettings(m_settings, QList<QString>(), true);
         xtrxOutputThread->startWork();
     }
-
-    m_running = false;
 }
 
 void XTRXOutput::suspendRxThread()

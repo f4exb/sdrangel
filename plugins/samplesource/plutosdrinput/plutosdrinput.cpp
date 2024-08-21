@@ -102,14 +102,16 @@ void PlutoSDRInput::init()
 
 bool PlutoSDRInput::start()
 {
+    QMutexLocker mutexLocker(&m_mutex);
+
+    if (m_running) {
+        return true;
+    }
+
     if (!m_deviceShared.m_deviceParams->getBox())
     {
         qCritical("PlutoSDRInput::start: device not open");
         return false;
-    }
-
-    if (m_running) {
-        stop();
     }
 
     // start / stop streaming is done in the thread.
@@ -117,20 +119,28 @@ bool PlutoSDRInput::start()
     m_plutoSDRInputThread = new PlutoSDRInputThread(PLUTOSDR_BLOCKSIZE_SAMPLES, m_deviceShared.m_deviceParams->getBox(), &m_sampleFifo);
     qDebug("PlutoSDRInput::start: thread created");
 
-    applySettings(m_settings, QList<QString>(), true);
-
     m_plutoSDRInputThread->setLog2Decimation(m_settings.m_log2Decim);
     m_plutoSDRInputThread->setIQOrder(m_settings.m_iqOrder);
     m_plutoSDRInputThread->startWork();
-
     m_deviceShared.m_thread = m_plutoSDRInputThread;
     m_running = true;
+
+    mutexLocker.unlock();
+    applySettings(m_settings, QList<QString>(), true);
 
     return true;
 }
 
 void PlutoSDRInput::stop()
 {
+    QMutexLocker mutexLocker(&m_mutex);
+
+    if (!m_running) {
+        return;
+    }
+
+    m_running = false;
+
     if (m_plutoSDRInputThread)
     {
         m_plutoSDRInputThread->stopWork();
@@ -139,7 +149,6 @@ void PlutoSDRInput::stop()
     }
 
     m_deviceShared.m_thread = nullptr;
-    m_running = false;
 }
 
 QByteArray PlutoSDRInput::serialize() const

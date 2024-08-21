@@ -121,15 +121,18 @@ void FCDProInput::init()
 
 bool FCDProInput::start()
 {
-	qDebug() << "FCDProInput::start";
 
-//	QMutexLocker mutexLocker(&m_mutex);
+	QMutexLocker mutexLocker(&m_mutex);
+
+    if (m_running) {
+        return true;
+    }
 
     if (!m_dev) {
         return false;
     }
 
-    if (m_running) stop();
+	qDebug() << "FCDProInput::start";
 
 	/* Apply settings before streaming to avoid bus contention;
 	 * there is very little spare bandwidth on a full speed USB device.
@@ -149,12 +152,12 @@ bool FCDProInput::start()
     m_FCDThread->setFcPos(m_settings.m_fcPos);
     m_FCDThread->setIQOrder(m_settings.m_iqOrder);
 	m_FCDThread->startWork();
+	m_running = true;
 
-//	mutexLocker.unlock();
+	mutexLocker.unlock();
 	applySettings(m_settings, QList<QString>(), true);
 
 	qDebug("FCDProInput::started");
-	m_running = true;
 
 	return true;
 }
@@ -204,7 +207,13 @@ void FCDProInput::closeFCDAudio()
 
 void FCDProInput::stop()
 {
-//	QMutexLocker mutexLocker(&m_mutex);
+	QMutexLocker mutexLocker(&m_mutex);
+
+    if (!m_running) {
+        return;
+    }
+
+	m_running = false;
 
 	if (m_FCDThread)
 	{
@@ -213,8 +222,6 @@ void FCDProInput::stop()
 		delete m_FCDThread;
 		m_FCDThread = nullptr;
 	}
-
-	m_running = false;
 }
 
 QByteArray FCDProInput::serialize() const

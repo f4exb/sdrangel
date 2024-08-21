@@ -149,15 +149,17 @@ bool SDRPlayInput::openDevice()
 
 bool SDRPlayInput::start()
 {
-//    QMutexLocker mutexLocker(&m_mutex);
-    int res;
+    QMutexLocker mutexLocker(&m_mutex);
+
+    if (m_running) {
+        return true;
+    }
 
     if (!m_dev) {
         return false;
     }
 
-    if (m_running) stop();
-
+    int res;
 	char s12FormatString[] = "336_S16";
 
 	if ((res = mirisdr_set_sample_format(m_dev, s12FormatString))) // sample format S12
@@ -197,11 +199,10 @@ bool SDRPlayInput::start()
     m_sdrPlayThread->setFcPos((int) m_settings.m_fcPos);
     m_sdrPlayThread->setIQOrder(m_settings.m_iqOrder);
     m_sdrPlayThread->startWork();
-
-//	mutexLocker.unlock();
-
-	applySettings(m_settings, QList<QString>(), true, true);
 	m_running = true;
+
+	mutexLocker.unlock();
+	applySettings(m_settings, QList<QString>(), true, true);
 
 	return true;
 }
@@ -224,7 +225,13 @@ void SDRPlayInput::init()
 
 void SDRPlayInput::stop()
 {
-//    QMutexLocker mutexLocker(&m_mutex);
+    QMutexLocker mutexLocker(&m_mutex);
+
+    if (!m_running) {
+        return;
+    }
+
+    m_running = false;
 
     if(m_sdrPlayThread)
     {
@@ -232,8 +239,6 @@ void SDRPlayInput::stop()
         delete m_sdrPlayThread;
         m_sdrPlayThread = nullptr;
     }
-
-    m_running = false;
 }
 
 QByteArray SDRPlayInput::serialize() const

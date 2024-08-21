@@ -256,6 +256,12 @@ void LimeSDRMIMO::init()
 
 bool LimeSDRMIMO::startRx()
 {
+	QMutexLocker mutexLocker(&m_mutex);
+
+    if (m_runningRx) {
+        return true;
+    }
+
     qDebug("LimeSDRMIMO::startRx");
     lms_stream_t *streams[2];
 
@@ -263,12 +269,6 @@ bool LimeSDRMIMO::startRx()
     {
         qCritical("LimeSDRMIMO::startRx: device was not opened");
         return false;
-    }
-
-	QMutexLocker mutexLocker(&m_mutex);
-
-    if (m_runningRx) {
-        stopRx();
     }
 
     for (unsigned int channel = 0; channel < 2; channel++)
@@ -307,18 +307,22 @@ bool LimeSDRMIMO::startRx()
 
 void LimeSDRMIMO::stopRx()
 {
-    qDebug("LimeSDRMIMO::stopRx");
+	QMutexLocker mutexLocker(&m_mutex);
+
+    if (!m_runningRx) {
+        return;
+    }
 
     if (!m_sourceThread) {
         return;
     }
 
-	QMutexLocker mutexLocker(&m_mutex);
+    qDebug("LimeSDRMIMO::stopRx");
+    m_runningRx = false;
 
     m_sourceThread->stopWork();
     delete m_sourceThread;
     m_sourceThread = nullptr;
-    m_runningRx = false;
 
     for (unsigned int channel = 0; channel < 2; channel++)
     {
@@ -330,6 +334,12 @@ void LimeSDRMIMO::stopRx()
 
 bool LimeSDRMIMO::startTx()
 {
+	QMutexLocker mutexLocker(&m_mutex);
+
+    if (m_runningTx) {
+        return true;
+    }
+
     qDebug("LimeSDRMIMO::startTx");
     lms_stream_t *streams[2];
 
@@ -337,12 +347,6 @@ bool LimeSDRMIMO::startTx()
     {
         qCritical("LimeSDRMIMO::startTx: device was not opened");
         return false;
-    }
-
-	QMutexLocker mutexLocker(&m_mutex);
-
-    if (m_runningTx) {
-        stopTx();
     }
 
     for (unsigned int channel = 0; channel < 2; channel++)
@@ -380,18 +384,22 @@ bool LimeSDRMIMO::startTx()
 
 void LimeSDRMIMO::stopTx()
 {
-    qDebug("LimeSDRMIMO::stopTx");
+	QMutexLocker mutexLocker(&m_mutex);
+
+    if (!m_runningTx) {
+        return;
+    }
 
     if (!m_sinkThread) {
         return;
     }
 
-	QMutexLocker mutexLocker(&m_mutex);
+    qDebug("LimeSDRMIMO::stopTx");
+    m_runningTx = false;
 
     m_sinkThread->stopWork();
     delete m_sinkThread;
     m_sinkThread = nullptr;
-    m_runningTx = false;
 
     for (unsigned int channel = 0; channel < 2; channel++)
     {

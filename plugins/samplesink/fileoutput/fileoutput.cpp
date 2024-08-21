@@ -44,6 +44,7 @@ MESSAGE_CLASS_DEFINITION(FileOutput::MsgReportFileOutputStreamTiming, Message)
 
 FileOutput::FileOutput(DeviceAPI *deviceAPI) :
     m_deviceAPI(deviceAPI),
+    m_running(false),
 	m_settings(),
 	m_fileOutputWorker(nullptr),
 	m_deviceDescription("FileOutput"),
@@ -94,6 +95,11 @@ void FileOutput::init()
 bool FileOutput::start()
 {
 	QMutexLocker mutexLocker(&m_mutex);
+
+    if (m_running) {
+        return true;
+    }
+
 	qDebug() << "FileOutput::start";
 
 	openFileStream();
@@ -104,6 +110,7 @@ bool FileOutput::start()
 	m_fileOutputWorker->setLog2Interpolation(m_settings.m_log2Interp);
 	m_fileOutputWorker->connectTimer(m_masterTimer);
 	startWorker();
+    m_running = true;
 
 	mutexLocker.unlock();
 	//applySettings(m_generalSettings, m_settings, true);
@@ -120,8 +127,14 @@ bool FileOutput::start()
 
 void FileOutput::stop()
 {
-	qDebug() << "FileSourceInput::stop";
 	QMutexLocker mutexLocker(&m_mutex);
+
+    if (!m_running) {
+        return;
+    }
+
+	qDebug() << "FileSourceInput::stop";
+    m_running = false;
 
 	if (m_fileOutputWorker)
 	{

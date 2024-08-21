@@ -141,7 +141,7 @@ public:
 
 private:
 	DeviceAPI *m_deviceAPI;
-	QMutex m_mutex;
+	QRecursiveMutex m_mutex;
 	AirspySettings m_settings;
 	struct airspy_device* m_dev;
 	AirspyWorker* m_airspyWorker;

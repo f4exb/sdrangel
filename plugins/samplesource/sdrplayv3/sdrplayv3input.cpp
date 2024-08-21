@@ -147,20 +147,25 @@ bool SDRPlayV3Input::openDevice()
 
 bool SDRPlayV3Input::start()
 {
-    qDebug() << "SDRPlayV3Input::start";
+    QMutexLocker mutexLocker(&m_mutex);
+
+    if (m_running) {
+        return true;
+    }
 
     if (!m_dev) {
         return false;
     }
 
-    if (m_running) stop();
+    qDebug() << "SDRPlayV3Input::start";
 
     m_sdrPlayThread = new SDRPlayV3Thread(m_dev, &m_sampleFifo, &m_replayBuffer);
     m_sdrPlayThread->setLog2Decimation(m_settings.m_log2Decim);
     m_sdrPlayThread->setFcPos((int) m_settings.m_fcPos);
     m_sdrPlayThread->startWork();
-
     m_running = m_sdrPlayThread->isRunning();
+
+    mutexLocker.unlock();
     applySettings(m_settings, QList<QString>(), true, true);
 
     return true;
@@ -184,8 +189,14 @@ void SDRPlayV3Input::init()
 
 void SDRPlayV3Input::stop()
 {
-    qDebug() << "SDRPlayV3Input::stop";
     QMutexLocker mutexLocker(&m_mutex);
+
+    if (!m_running) {
+        return;
+    }
+
+    qDebug() << "SDRPlayV3Input::stop";
+    m_running = false;
 
     if(m_sdrPlayThread)
     {
@@ -193,8 +204,6 @@ void SDRPlayV3Input::stop()
         delete m_sdrPlayThread;
         m_sdrPlayThread = nullptr;
     }
-
-    m_running = false;
 }
 
 QByteArray SDRPlayV3Input::serialize() const

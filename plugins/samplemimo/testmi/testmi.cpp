@@ -127,7 +127,7 @@ void TestMI::stopRx()
     }
 
     qDebug("TestMI::stopRx");
- 	m_running = false;
+    m_running = false;
     stopWorkers();
 
     m_testSourceWorkers.clear();

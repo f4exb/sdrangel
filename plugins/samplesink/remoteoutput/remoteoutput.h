@@ -258,7 +258,8 @@ public:
 
 private:
     DeviceAPI *m_deviceAPI;
-	QMutex m_mutex;
+	QRecursiveMutex m_mutex;
+    bool m_running;
 	RemoteOutputSettings m_settings;
 	uint64_t m_centerFrequency;
     int m_sampleRate;

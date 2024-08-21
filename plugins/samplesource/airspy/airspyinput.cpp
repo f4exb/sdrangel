@@ -197,12 +197,12 @@ bool AirspyInput::start()
 {
 	QMutexLocker mutexLocker(&m_mutex);
 
-    if (!m_dev) {
-        return false;
-    }
-
     if (m_running) {
         return true;
+    }
+
+    if (!m_dev) {
+        return false;
     }
 
     m_airspyWorkerThread = new QThread();
@@ -217,13 +217,13 @@ bool AirspyInput::start()
 	m_airspyWorker->setLog2Decimation(m_settings.m_log2Decim);
     m_airspyWorker->setIQOrder(m_settings.m_iqOrder);
 	m_airspyWorker->setFcPos((int) m_settings.m_fcPos);
-    mutexLocker.unlock();
-
     m_airspyWorkerThread->start();
+    m_running = true;
+
+    mutexLocker.unlock();
 
     qDebug("AirspyInput::startInput: started");
     applySettings(m_settings, QList<QString>(), true);
-    m_running = true;
 
 	return true;
 }
