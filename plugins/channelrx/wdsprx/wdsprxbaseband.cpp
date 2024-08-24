@@ -59,6 +59,7 @@ void WDSPRxBaseband::reset()
 {
     QMutexLocker mutexLocker(&m_mutex);
     m_sink.applyAudioSampleRate(DSPEngine::instance()->getAudioDeviceManager()->getOutputSampleRate());
+    mutexLocker.unlock();
     m_sampleFifo.reset();
     m_channelSampleRate = 0;
 }

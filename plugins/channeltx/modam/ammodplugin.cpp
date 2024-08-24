@@ -41,7 +41,7 @@ const PluginDescriptor AMModPlugin::m_pluginDescriptor = {
 
 AMModPlugin::AMModPlugin(QObject* parent) :
     QObject(parent),
-    m_pluginAPI(0)
+    m_pluginAPI(nullptr)
 {
 }
 
@@ -62,7 +62,7 @@ void AMModPlugin::createTxChannel(DeviceAPI *deviceAPI, BasebandSampleSource **b
 {
 	if (bs || cs)
 	{
-		AMMod *instance = new AMMod(deviceAPI);
+		auto *instance = new AMMod(deviceAPI);
 
 		if (bs) {
 			*bs = instance;

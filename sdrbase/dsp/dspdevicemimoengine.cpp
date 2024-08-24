@@ -43,14 +43,14 @@ MESSAGE_CLASS_DEFINITION(DSPDeviceMIMOEngine::SetSpectrumSinkInput, Message)
 DSPDeviceMIMOEngine::DSPDeviceMIMOEngine(uint32_t uid, QObject* parent) :
 	QObject(parent),
     m_uid(uid),
-    m_stateRx(StNotStarted),
-    m_stateTx(StNotStarted),
+    m_stateRx(State::StNotStarted),
+    m_stateTx(State::StNotStarted),
     m_deviceSampleMIMO(nullptr),
     m_spectrumInputSourceElseSink(true),
     m_spectrumInputIndex(0)
 {
-	setStateRx(StIdle);
-	setStateTx(StIdle);
+	setStateRx(State::StIdle);
+	setStateTx(State::StIdle);
 	connect(&m_inputMessageQueue, SIGNAL(messageEnqueued()), this, SLOT(handleInputMessages()), Qt::QueuedConnection);
 }
 
@@ -127,7 +127,7 @@ void DSPDeviceMIMOEngine::stopProcess(int subsystemIndex)
     }
     else if (subsystemIndex == 1) // Tx side
     {
-        DSPGenerationStop *cmd = new DSPGenerationStop();
+        auto *cmd = new DSPGenerationStop();
         getInputMessageQueue()->push(cmd);
     }
 }
@@ -255,11 +255,9 @@ void DSPDeviceMIMOEngine::workSampleSinkFifos()
     unsigned int iPart2Begin;
     unsigned int iPart2End;
     const std::vector<SampleVector>& data = sampleFifo->getData();
-    //unsigned int samplesDone = 0;
 
     while ((sampleFifo->fillSync() > 0) && (m_inputMessageQueue.size() == 0))
     {
-        //unsigned int count = sampleFifo->readSync(sampleFifo->fillSync(), iPart1Begin, iPart1End, iPart2Begin, iPart2End);
         sampleFifo->readSync(iPart1Begin, iPart1End, iPart2Begin, iPart2End);
 
         if (iPart1Begin != iPart1End)
@@ -288,7 +286,10 @@ void DSPDeviceMIMOEngine::workSampleSourceFifos()
 
     std::vector<SampleVector::iterator> vbegin;
     std::vector<SampleVector>& data = sampleFifo->getData();
-    unsigned int iPart1Begin, iPart1End, iPart2Begin, iPart2End;
+    unsigned int iPart1Begin;
+    unsigned int iPart1End;
+    unsigned int iPart2Begin;
+    unsigned int iPart2End;
     unsigned int remainder = sampleFifo->remainderSync();
 
     while ((remainder > 0) && (m_inputMessageQueue.size() == 0))
@@ -331,7 +332,6 @@ void DSPDeviceMIMOEngine::workSampleSinkFifo(unsigned int streamIndex)
 
     while ((sampleFifo->fillAsync(streamIndex) > 0) && (m_inputMessageQueue.size() == 0))
     {
-        //unsigned int count = sampleFifo->readAsync(sampleFifo->fillAsync(stream), &part1begin, &part1end, &part2begin, &part2end, stream);
         sampleFifo->readAsync(&part1begin, &part1end, &part2begin, &part2end, streamIndex);
 
         if (part1begin != part1end) { // first part of FIFO data
@@ -354,7 +354,10 @@ void DSPDeviceMIMOEngine::workSampleSourceFifo(unsigned int streamIndex)
     }
 
     SampleVector& data = sampleFifo->getData(streamIndex);
-    unsigned int iPart1Begin, iPart1End, iPart2Begin, iPart2End;
+    unsigned int iPart1Begin;
+    unsigned int iPart1End;
+    unsigned int iPart2Begin;
+    unsigned int iPart2End;
     unsigned int amount = sampleFifo->remainderAsync(streamIndex);
 
     while ((amount > 0) && (m_inputMessageQueue.size() == 0))
@@ -382,11 +385,6 @@ void DSPDeviceMIMOEngine::workSamplesSink(const SampleVector::const_iterator& vb
     std::map<int, bool>::const_iterator rcIt = m_rxRealElseComplex.find(streamIndex);
 	bool positiveOnly = (rcIt == m_rxRealElseComplex.end() ? false : rcIt->second);
 
-    // DC and IQ corrections
-    // if (m_sourcesCorrections[streamIndex].m_dcOffsetCorrection) {
-    //     iqCorrections(vbegin, vend, streamIndex, m_sourcesCorrections[streamIndex].m_iqImbalanceCorrection);
-    // }
-
     // feed data to direct sinks
     if (streamIndex < m_basebandSampleSinks.size())
     {
@@ -396,7 +394,7 @@ void DSPDeviceMIMOEngine::workSamplesSink(const SampleVector::const_iterator& vb
     }
 
     // possibly feed data to spectrum sink
-    if ((m_spectrumSink) && (m_spectrumInputSourceElseSink) && (streamIndex == m_spectrumInputIndex)) {
+    if (m_spectrumSink && m_spectrumInputSourceElseSink && (streamIndex == m_spectrumInputIndex)) {
         m_spectrumSink->feed(vbegin, vend, positiveOnly);
     }
 
@@ -445,14 +443,14 @@ void DSPDeviceMIMOEngine::workSamplesSource(SampleVector& data, unsigned int iBe
             for (; srcIt != m_basebandSampleSources[streamIndex].end(); ++srcIt, m_sumIndex++)
             {
                 sampleSource = *srcIt;
-                SampleVector::iterator aBegin = m_sourceSampleBuffers[streamIndex].m_vector.begin();
+                auto aBegin = m_sourceSampleBuffers[streamIndex].m_vector.begin();
                 sampleSource->pull(aBegin, nbSamples);
                 std::transform(
                     aBegin,
                     aBegin + nbSamples,
                     begin,
                     begin,
-                    [this](Sample& a, const Sample& b) -> Sample {
+                    [this](Sample const& a, const Sample& b) -> Sample {
                         FixReal den = m_sumIndex + 1; // at each stage scale sum by n/n+1 and input by 1/n+1
                         FixReal nom = m_sumIndex;     // so that final sum is scaled by N (number of channels)
                         FixReal x = a.real()/den + nom*(b.real()/den);
@@ -468,7 +466,7 @@ void DSPDeviceMIMOEngine::workSamplesSource(SampleVector& data, unsigned int iBe
     std::map<int, bool>::const_iterator rcIt = m_txRealElseComplex.find(streamIndex);
 	bool positiveOnly = (rcIt == m_txRealElseComplex.end() ? false : rcIt->second);
 
-    if ((m_spectrumSink) && (!m_spectrumInputSourceElseSink) && (streamIndex == m_spectrumInputIndex)) {
+    if (m_spectrumSink && (!m_spectrumInputSourceElseSink) && (streamIndex == m_spectrumInputIndex)) {
         m_spectrumSink->feed(begin, begin + nbSamples, positiveOnly);
     }
 }
@@ -482,21 +480,21 @@ DSPDeviceMIMOEngine::State DSPDeviceMIMOEngine::gotoIdle(int subsystemIndex)
 	qDebug() << "DSPDeviceMIMOEngine::gotoIdle: subsystemIndex:" << subsystemIndex;
 
 	if (!m_deviceSampleMIMO) {
-		return StIdle;
+		return State::StIdle;
 	}
 
     if (subsystemIndex == 0) // Rx
     {
         switch (m_stateRx) {
-            case StNotStarted:
-                return StNotStarted;
+            case State::StNotStarted:
+                return State::StNotStarted;
 
-            case StIdle:
-            case StError:
-                return StIdle;
+            case State::StIdle:
+            case State::StError:
+                return State::StIdle;
 
-            case StReady:
-            case StRunning:
+            case State::StReady:
+            case State::StRunning:
                 break;
         }
 
@@ -506,7 +504,7 @@ DSPDeviceMIMOEngine::State DSPDeviceMIMOEngine::gotoIdle(int subsystemIndex)
 
         for (; vbit != m_basebandSampleSinks.end(); ++vbit)
         {
-            for (BasebandSampleSinks::const_iterator it = vbit->begin(); it != vbit->end(); ++it)
+            for (auto it = vbit->begin(); it != vbit->end(); ++it)
             {
                 qDebug() << "DSPDeviceMIMOEngine::gotoIdle: stopping BasebandSampleSink: " << (*it)->getSinkName().toStdString().c_str();
                 (*it)->stop();
@@ -522,15 +520,15 @@ DSPDeviceMIMOEngine::State DSPDeviceMIMOEngine::gotoIdle(int subsystemIndex)
     else if (subsystemIndex == 1) // Tx
     {
         switch (m_stateTx) {
-            case StNotStarted:
-                return StNotStarted;
+            case State::StNotStarted:
+                return State::StNotStarted;
 
-            case StIdle:
-            case StError:
-                return StIdle;
+            case State::StIdle:
+            case State::StError:
+                return State::StIdle;
 
-            case StReady:
-            case StRunning:
+            case State::StReady:
+            case State::StRunning:
                 break;
         }
 
@@ -540,7 +538,7 @@ DSPDeviceMIMOEngine::State DSPDeviceMIMOEngine::gotoIdle(int subsystemIndex)
 
         for (; vSourceIt != m_basebandSampleSources.end(); vSourceIt++)
         {
-            for (BasebandSampleSources::const_iterator it = vSourceIt->begin(); it != vSourceIt->end(); ++it)
+            for (auto it = vSourceIt->begin(); it != vSourceIt->end(); ++it)
             {
                 qDebug() << "DSPDeviceMIMOEngine::gotoIdle: stopping BasebandSampleSource(" << (*it)->getSourceName().toStdString().c_str() << ")";
                 (*it)->stop();
@@ -555,12 +553,12 @@ DSPDeviceMIMOEngine::State DSPDeviceMIMOEngine::gotoIdle(int subsystemIndex)
     }
     else
     {
-        return StIdle;
+        return State::StIdle;
     }
 
 	m_deviceDescription.clear();
 
-	return StIdle;
+	return State::StIdle;
 }
 
 DSPDeviceMIMOEngine::State DSPDeviceMIMOEngine::gotoInit(int subsystemIndex)
@@ -578,17 +576,17 @@ DSPDeviceMIMOEngine::State DSPDeviceMIMOEngine::gotoInit(int subsystemIndex)
     if (subsystemIndex == 0) // Rx
     {
         switch(m_stateRx) {
-            case StNotStarted:
-                return StNotStarted;
+            case State::StNotStarted:
+                return State::StNotStarted;
 
-            case StRunning: // FIXME: assumes it goes first through idle state. Could we get back to init from running directly?
-                return StRunning;
+            case State::StRunning:
+                return State::StRunning;
 
-            case StReady:
-                return StReady;
+            case State::StReady:
+                return State::StReady;
 
-            case StIdle:
-            case StError:
+            case State::StIdle:
+            case State::StError:
                 break;
         }
 
@@ -624,17 +622,17 @@ DSPDeviceMIMOEngine::State DSPDeviceMIMOEngine::gotoInit(int subsystemIndex)
     else if (subsystemIndex == 1) // Tx
     {
         switch(m_stateTx) {
-            case StNotStarted:
-                return StNotStarted;
+            case State::StNotStarted:
+                return State::StNotStarted;
 
-            case StRunning: // FIXME: assumes it goes first through idle state. Could we get back to init from running directly?
-                return StRunning;
+            case State::StRunning:
+                return State::StRunning;
 
-            case StReady:
-                return StReady;
+            case State::StReady:
+                return State::StReady;
 
-            case StIdle:
-            case StError:
+            case State::StIdle:
+            case State::StError:
                 break;
         }
 
@@ -659,7 +657,7 @@ DSPDeviceMIMOEngine::State DSPDeviceMIMOEngine::gotoInit(int subsystemIndex)
         }
     }
 
-	return StReady;
+	return State::StReady;
 }
 
 DSPDeviceMIMOEngine::State DSPDeviceMIMOEngine::gotoRunning(int subsystemIndex)
@@ -676,17 +674,17 @@ DSPDeviceMIMOEngine::State DSPDeviceMIMOEngine::gotoRunning(int subsystemIndex)
     {
         switch (m_stateRx)
         {
-            case StNotStarted:
-                return StNotStarted;
+            case State::StNotStarted:
+                return State::StNotStarted;
 
-            case StIdle:
-                return StIdle;
+            case State::StIdle:
+                return State::StIdle;
 
-            case StRunning:
-                return StRunning;
+            case State::StRunning:
+                return State::StRunning;
 
-            case StReady:
-            case StError:
+            case State::StReady:
+            case State::StError:
                 break;
         }
 
@@ -698,7 +696,7 @@ DSPDeviceMIMOEngine::State DSPDeviceMIMOEngine::gotoRunning(int subsystemIndex)
 
         for (; vbit != m_basebandSampleSinks.end(); ++vbit)
         {
-            for (BasebandSampleSinks::const_iterator it = vbit->begin(); it != vbit->end(); ++it)
+            for (auto it = vbit->begin(); it != vbit->end(); ++it)
             {
                 qDebug() << "DSPDeviceMIMOEngine::gotoRunning: starting BasebandSampleSink: " << (*it)->getSinkName().toStdString().c_str();
                 (*it)->start();
@@ -715,17 +713,17 @@ DSPDeviceMIMOEngine::State DSPDeviceMIMOEngine::gotoRunning(int subsystemIndex)
     {
         switch (m_stateTx)
         {
-            case StNotStarted:
-                return StNotStarted;
+            case State::StNotStarted:
+                return State::StNotStarted;
 
-            case StIdle:
-                return StIdle;
+            case State::StIdle:
+                return State::StIdle;
 
-            case StRunning:
-                return StRunning;
+            case State::StRunning:
+                return State::StRunning;
 
-            case StReady:
-            case StError:
+            case State::StReady:
+            case State::StError:
                 break;
         }
 
@@ -737,7 +735,7 @@ DSPDeviceMIMOEngine::State DSPDeviceMIMOEngine::gotoRunning(int subsystemIndex)
 
         for (; vSourceIt != m_basebandSampleSources.end(); vSourceIt++)
         {
-            for (BasebandSampleSources::const_iterator it = vSourceIt->begin(); it != vSourceIt->end(); ++it)
+            for (auto it = vSourceIt->begin(); it != vSourceIt->end(); ++it)
             {
                 qDebug() << "DSPDeviceMIMOEngine::gotoRunning: starting BasebandSampleSource(" << (*it)->getSourceName().toStdString().c_str() << ")";
                 (*it)->start();
@@ -753,7 +751,7 @@ DSPDeviceMIMOEngine::State DSPDeviceMIMOEngine::gotoRunning(int subsystemIndex)
 
 	qDebug() << "DSPDeviceMIMOEngine::gotoRunning:input message queue pending: " << m_inputMessageQueue.size();
 
-	return StRunning;
+	return State::StRunning;
 }
 
 DSPDeviceMIMOEngine::State DSPDeviceMIMOEngine::gotoError(int subsystemIndex, const QString& errorMessage)
@@ -765,42 +763,42 @@ DSPDeviceMIMOEngine::State DSPDeviceMIMOEngine::gotoError(int subsystemIndex, co
 
     if (subsystemIndex == 0)
     {
-    	m_errorMessageRx = errorMessage;
-	    setStateRx(StError);
+        m_errorMessageRx = errorMessage;
+        setStateRx(State::StError);
     }
     else if (subsystemIndex == 1)
     {
-    	m_errorMessageTx = errorMessage;
-	    setStateTx(StError);
+        m_errorMessageTx = errorMessage;
+        setStateTx(State::StError);
     }
 
-    return StError;
+    return State::StError;
 }
 
 void DSPDeviceMIMOEngine::handleDataRxSync()
 {
-	if (m_stateRx == StRunning) {
+	if (m_stateRx == State::StRunning) {
         workSampleSinkFifos();
 	}
 }
 
 void DSPDeviceMIMOEngine::handleDataRxAsync(int streamIndex)
 {
-	if (m_stateRx == StRunning) {
+	if (m_stateRx == State::StRunning) {
 		workSampleSinkFifo(streamIndex);
 	}
 }
 
 void DSPDeviceMIMOEngine::handleDataTxSync()
 {
-	if (m_stateTx == StRunning) {
+	if (m_stateTx == State::StRunning) {
         workSampleSourceFifos();
 	}
 }
 
 void DSPDeviceMIMOEngine::handleDataTxAsync(int streamIndex)
 {
-	if (m_stateTx == StRunning) {
+	if (m_stateTx == State::StRunning) {
 		workSampleSourceFifo(streamIndex);
 	}
 }
@@ -815,21 +813,20 @@ void DSPDeviceMIMOEngine::handleSetMIMO(DeviceSampleMIMO* mimo)
 
     for (unsigned int i = 0; i < m_deviceSampleMIMO->getNbSinkFifos(); i++)
     {
-        m_basebandSampleSinks.push_back(BasebandSampleSinks());
-        m_sourcesCorrections.push_back(SourceCorrection());
+        m_basebandSampleSinks.emplace_back();
+        m_sourcesCorrections.emplace_back();
     }
 
     for (unsigned int i = 0; i < m_deviceSampleMIMO->getNbSourceFifos(); i++)
     {
-        m_basebandSampleSources.push_back(BasebandSampleSources());
-        m_sourceSampleBuffers.push_back(IncrementalVector<Sample>());
-        m_sourceZeroBuffers.push_back(IncrementalVector<Sample>());
+        m_basebandSampleSources.emplace_back();
+        m_sourceSampleBuffers.emplace_back();
+        m_sourceZeroBuffers.emplace_back();
     }
 
     if (m_deviceSampleMIMO->getMIMOType() == DeviceSampleMIMO::MIMOHalfSynchronous) // synchronous FIFOs on Rx and not with Tx
     {
         qDebug("DSPDeviceMIMOEngine::handleSetMIMO: synchronous sources set %s", qPrintable(mimo->getDeviceDescription()));
-        // connect(m_deviceSampleMIMO->getSampleSinkFifo(m_sampleSinkConnectionIndexes[0]), SIGNAL(dataReady()), this, SLOT(handleData()), Qt::QueuedConnection);
         QObject::connect(
             m_deviceSampleMIMO->getSampleMIFifo(),
             &SampleMIFifo::dataSyncReady,
@@ -865,13 +862,6 @@ void DSPDeviceMIMOEngine::handleSetMIMO(DeviceSampleMIMO* mimo)
                 &DSPDeviceMIMOEngine::handleDataTxAsync,
                 Qt::QueuedConnection
             );
-            // QObject::connect(
-            //     m_deviceSampleMIMO->getSampleSinkFifo(stream),
-            //     &SampleSinkFifo::dataReady,
-            //     this,
-            //     [=](){ this->handleDataRxAsync(stream); },
-            //     Qt::QueuedConnection
-            // );
         }
     }
 }
@@ -950,7 +940,7 @@ bool DSPDeviceMIMOEngine::handleMessage(const Message& message)
         {
             if (sourceElseSink)
             {
-                if ((istream < m_deviceSampleMIMO->getNbSourceStreams()))
+                if (istream < m_deviceSampleMIMO->getNbSourceStreams())
                 {
 
                     // forward source changes to ancillary sinks
@@ -983,7 +973,7 @@ bool DSPDeviceMIMOEngine::handleMessage(const Message& message)
             }
             else
             {
-                if ((istream < m_deviceSampleMIMO->getNbSinkStreams()))
+                if (istream < m_deviceSampleMIMO->getNbSinkStreams())
                 {
 
                     // forward source changes to channel sources with immediate execution (no queuing)
@@ -1023,7 +1013,7 @@ bool DSPDeviceMIMOEngine::handleMessage(const Message& message)
 	{
 		setStateRx(gotoIdle(0));
 
-		if (m_stateRx == StIdle) {
+		if (m_stateRx == State::StIdle) {
 			setStateRx(gotoInit(0)); // State goes ready if init is performed
 		}
 
@@ -1031,7 +1021,7 @@ bool DSPDeviceMIMOEngine::handleMessage(const Message& message)
 	}
 	else if (DSPAcquisitionStart::match(message))
 	{
-		if (m_stateRx == StReady) {
+		if (m_stateRx == State::StReady) {
 			setStateRx(gotoRunning(0));
 		}
 
@@ -1046,7 +1036,7 @@ bool DSPDeviceMIMOEngine::handleMessage(const Message& message)
 	{
 		setStateTx(gotoIdle(1));
 
-		if (m_stateTx == StIdle) {
+		if (m_stateTx == State::StIdle) {
 			setStateTx(gotoInit(1)); // State goes ready if init is performed
 		}
 
@@ -1054,7 +1044,7 @@ bool DSPDeviceMIMOEngine::handleMessage(const Message& message)
 	}
 	else if (DSPGenerationStart::match(message))
 	{
-		if (m_stateTx == StReady) {
+		if (m_stateTx == State::StReady) {
 			setStateTx(gotoRunning(1));
 		}
 
@@ -1085,7 +1075,7 @@ bool DSPDeviceMIMOEngine::handleMessage(const Message& message)
             auto *msgToSink = new DSPSignalNotification(sourceStreamSampleRate, sourceCenterFrequency);
             sink->pushMessage(msgToSink);
             // start the sink:
-            if (m_stateRx == StRunning) {
+            if (m_stateRx == State::StRunning) {
                 sink->start();
             }
         }
@@ -1100,7 +1090,7 @@ bool DSPDeviceMIMOEngine::handleMessage(const Message& message)
 
         if (isource < m_basebandSampleSinks.size())
         {
-            if (m_stateRx == StRunning) {
+            if (m_stateRx == State::StRunning) {
                 sink->stop();
             }
 
@@ -1124,7 +1114,7 @@ bool DSPDeviceMIMOEngine::handleMessage(const Message& message)
             auto *msgToSource = new DSPSignalNotification(sinkStreamSampleRate, sinkCenterFrequency);
             sampleSource->pushMessage(msgToSource);
             // start the sink:
-            if (m_stateTx == StRunning) {
+            if (m_stateTx == State::StRunning) {
                 sampleSource->start();
             }
         }
@@ -1173,11 +1163,11 @@ bool DSPDeviceMIMOEngine::handleMessage(const Message& message)
             channel->pushMessage(notif);
         }
 
-        if (m_stateRx == StRunning) {
+        if (m_stateRx == State::StRunning) {
             channel->startSinks();
         }
 
-        if (m_stateTx == StRunning) {
+        if (m_stateTx == State::StRunning) {
             channel->startSources();
         }
 
@@ -1214,15 +1204,14 @@ bool DSPDeviceMIMOEngine::handleMessage(const Message& message)
 
         if ((spectrumInputSourceElseSink != m_spectrumInputSourceElseSink) || (spectrumInputIndex != m_spectrumInputIndex))
         {
-            if ((!spectrumInputSourceElseSink) && (spectrumInputIndex <  m_deviceSampleMIMO->getNbSinkStreams())) // add the source listener
+            if ((!spectrumInputSourceElseSink)
+            && (spectrumInputIndex <  m_deviceSampleMIMO->getNbSinkStreams())
+            && m_spectrumSink) // add the source listener
             {
-                if (m_spectrumSink)
-                {
-                    auto *notif = new DSPSignalNotification(
-                        m_deviceSampleMIMO->getSinkSampleRate(spectrumInputIndex),
-                        m_deviceSampleMIMO->getSinkCenterFrequency(spectrumInputIndex));
-                    m_spectrumSink->pushMessage(notif);
-                }
+                auto *notif = new DSPSignalNotification(
+                    m_deviceSampleMIMO->getSinkSampleRate(spectrumInputIndex),
+                    m_deviceSampleMIMO->getSinkCenterFrequency(spectrumInputIndex));
+                m_spectrumSink->pushMessage(notif);
             }
 
             if (m_spectrumSink && spectrumInputSourceElseSink && (spectrumInputIndex <  m_deviceSampleMIMO->getNbSinkFifos()))
@@ -1248,7 +1237,7 @@ void DSPDeviceMIMOEngine::handleInputMessages()
 {
 	Message* message;
 
-	while ((message = m_inputMessageQueue.pop()) != 0)
+	while ((message = m_inputMessageQueue.pop()) != nullptr)
 	{
 		qDebug("DSPDeviceMIMOEngine::handleInputMessages: message: %s", message->getIdentifier());
 
@@ -1261,7 +1250,7 @@ void DSPDeviceMIMOEngine::handleInputMessages()
 void DSPDeviceMIMOEngine::configureCorrections(bool dcOffsetCorrection, bool iqImbalanceCorrection, int isource)
 {
 	qDebug() << "DSPDeviceMIMOEngine::configureCorrections";
-	ConfigureCorrection* cmd = new ConfigureCorrection(dcOffsetCorrection, iqImbalanceCorrection, isource);
+	auto* cmd = new ConfigureCorrection(dcOffsetCorrection, iqImbalanceCorrection, isource);
 	m_inputMessageQueue.push(cmd);
 }
 
@@ -1313,8 +1302,8 @@ void DSPDeviceMIMOEngine::iqCorrections(SampleVector::iterator begin, SampleVect
 
 #else
             // DC correction and conversion
-            float xi = (it->m_real - (int32_t) m_sourcesCorrections[isource].m_iBeta) / SDR_RX_SCALEF;
-            float xq = (it->m_imag - (int32_t) m_sourcesCorrections[isource].m_qBeta) / SDR_RX_SCALEF;
+            float xi = (float) (it->m_real - (int32_t) m_sourcesCorrections[isource].m_iBeta) / SDR_RX_SCALEF;
+            float xq = (float) (it->m_imag - (int32_t) m_sourcesCorrections[isource].m_qBeta) / SDR_RX_SCALEF;
 
             // phase imbalance
             m_sourcesCorrections[isource].m_avgII(xi*xi); // <I", I">
@@ -1325,8 +1314,8 @@ void DSPDeviceMIMOEngine::iqCorrections(SampleVector::iterator begin, SampleVect
                 m_sourcesCorrections[isource].m_avgPhi(m_sourcesCorrections[isource].m_avgIQ.asDouble()/m_sourcesCorrections[isource].m_avgII.asDouble());
             }
 
-            float& yi = xi; // the in phase remains the reference
-            float yq = xq - m_sourcesCorrections[isource].m_avgPhi.asDouble()*xi;
+            const float& yi = xi; // the in phase remains the reference
+            float yq = xq - (float) m_sourcesCorrections[isource].m_avgPhi.asDouble()*xi;
 
             // amplitude I/Q imbalance
             m_sourcesCorrections[isource].m_avgII2(yi*yi); // <I, I>
@@ -1337,12 +1326,12 @@ void DSPDeviceMIMOEngine::iqCorrections(SampleVector::iterator begin, SampleVect
             }
 
             // final correction
-            float& zi = yi; // the in phase remains the reference
-            float zq = m_sourcesCorrections[isource].m_avgAmp.asDouble() * yq;
+            const float& zi = yi; // the in phase remains the reference
+            auto zq = (float) (m_sourcesCorrections[isource].m_avgAmp.asDouble() * yq);
 
             // convert and store
-            it->m_real = zi * SDR_RX_SCALEF;
-            it->m_imag = zq * SDR_RX_SCALEF;
+            it->m_real = (FixReal) (zi * SDR_RX_SCALEF);
+            it->m_imag = (FixReal) (zq * SDR_RX_SCALEF);
 #endif
         }
         else

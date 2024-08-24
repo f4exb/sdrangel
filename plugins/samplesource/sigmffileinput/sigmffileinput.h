@@ -86,7 +86,7 @@ public:
 	private:
 		bool m_working;
 
-		MsgConfigureTrackWork(bool working) :
+		explicit MsgConfigureTrackWork(bool working) :
 			Message(),
 			m_working(working)
 		{ }
@@ -109,7 +109,7 @@ public:
 	private:
 		bool m_working;
 
-		MsgConfigureFileWork(bool working) :
+		explicit MsgConfigureFileWork(bool working) :
 			Message(),
 			m_working(working)
 		{ }
@@ -132,7 +132,7 @@ public:
 	private:
         int m_trackIndex;
 
-		MsgConfigureTrackIndex(int trackIndex) :
+		explicit MsgConfigureTrackIndex(int trackIndex) :
 			Message(),
             m_trackIndex(trackIndex)
 		{ }
@@ -152,10 +152,10 @@ public:
 			return new MsgConfigureTrackSeek(seekMillis);
 		}
 
-	protected:
+	private:
 		int m_seekMillis; //!< millis of seek position from the beginning 0..1000
 
-		MsgConfigureTrackSeek(int seekMillis) :
+		explicit MsgConfigureTrackSeek(int seekMillis) :
 			Message(),
 			m_seekMillis(seekMillis)
 		{ }
@@ -175,10 +175,10 @@ public:
 			return new MsgConfigureFileSeek(seekMillis);
 		}
 
-	protected:
+	private:
 		int m_seekMillis; //!< millis of seek position from the beginning 0..1000
 
-		MsgConfigureFileSeek(int seekMillis) :
+		explicit MsgConfigureFileSeek(int seekMillis) :
 			Message(),
 			m_seekMillis(seekMillis)
 		{ }
@@ -217,10 +217,10 @@ public:
             return new MsgStartStop(startStop);
         }
 
-    protected:
+    private:
         bool m_startStop;
 
-        MsgStartStop(bool startStop) :
+        explicit MsgStartStop(bool startStop) :
             Message(),
             m_startStop(startStop)
         { }
@@ -240,10 +240,10 @@ public:
 			return new MsgReportStartStop(startStop);
 		}
 
-	protected:
+	private:
 		bool m_startStop;
 
-		MsgReportStartStop(bool startStop) :
+		explicit MsgReportStartStop(bool startStop) :
 			Message(),
 			m_startStop(startStop)
 		{ }
@@ -257,13 +257,13 @@ public:
 
     public:
         const SigMFFileMetaInfo& getMetaInfo() const { return m_metaInfo; }
-        const QList<SigMFFileCapture>& getCaptures() { return m_captures; }
+        const QList<SigMFFileCapture>& getCaptures() const { return m_captures; }
 
         static MsgReportMetaData* create(const SigMFFileMetaInfo& metaInfo, const QList<SigMFFileCapture>& captures) {
             return new MsgReportMetaData(metaInfo, captures);
         }
 
-    protected:
+    private:
         SigMFFileMetaInfo m_metaInfo;
         QList<SigMFFileCapture> m_captures;
 
@@ -288,7 +288,7 @@ public:
 
     private:
         int m_trackIndex;
-        MsgReportTrackChange(int trackIndex) :
+        explicit MsgReportTrackChange(int trackIndex) :
             Message(),
             m_trackIndex(trackIndex)
         { }
@@ -321,7 +321,7 @@ public:
             );
 		}
 
-	protected:
+	private:
         quint64 m_samplesCount;
         quint64 m_trackSamplesCount;
         quint64 m_trackTimeStart;
@@ -354,10 +354,10 @@ public:
 			return new MsgReportCRC(ok);
 		}
 
-	protected:
+	private:
 		bool m_ok;
 
-		MsgReportCRC(bool ok) :
+		explicit MsgReportCRC(bool ok) :
 			Message(),
 			m_ok(ok)
 		{ }
@@ -376,98 +376,98 @@ public:
 			return new MsgReportTotalSamplesCheck(ok);
 		}
 
-	protected:
+	private:
 		bool m_ok;
 
-		MsgReportTotalSamplesCheck(bool ok) :
+		explicit MsgReportTotalSamplesCheck(bool ok) :
 			Message(),
 			m_ok(ok)
 		{ }
 	};
 
-	SigMFFileInput(DeviceAPI *deviceAPI);
-	virtual ~SigMFFileInput();
-	virtual void destroy();
+	explicit SigMFFileInput(DeviceAPI *deviceAPI);
+	~SigMFFileInput() final;
+	void destroy() final;
 
-    virtual void init();
-	virtual bool start();
-	virtual void stop();
+    void init() final;
+	bool start() final;
+	void stop() final;
 
-    virtual QByteArray serialize() const;
-    virtual bool deserialize(const QByteArray& data);
+    QByteArray serialize() const final;
+    bool deserialize(const QByteArray& data) final;
 
-    virtual void setMessageQueueToGUI(MessageQueue *queue) { m_guiMessageQueue = queue; }
-	virtual const QString& getDeviceDescription() const;
-	virtual int getSampleRate() const;
-    virtual void setSampleRate(int sampleRate) { (void) sampleRate; }
-	virtual quint64 getCenterFrequency() const;
-    virtual void setCenterFrequency(qint64 centerFrequency);
+    void setMessageQueueToGUI(MessageQueue *queue) final { m_guiMessageQueue = queue; }
+	const QString& getDeviceDescription() const final;
+	int getSampleRate() const final;
+    void setSampleRate(int sampleRate) final { (void) sampleRate; }
+	quint64 getCenterFrequency() const final;
+    void setCenterFrequency(qint64 centerFrequency) final;
     quint64 getStartingTimeStamp() const;
 
-	virtual bool handleMessage(const Message& message);
+	bool handleMessage(const Message& message) final;
 
-	virtual int webapiSettingsGet(
-	            SWGSDRangel::SWGDeviceSettings& response,
-	            QString& errorMessage);
+	int webapiSettingsGet(
+        SWGSDRangel::SWGDeviceSettings& response,
+        QString& errorMessage) final;
 
-	virtual int webapiSettingsPutPatch(
-                bool force,
-                const QStringList& deviceSettingsKeys,
-                SWGSDRangel::SWGDeviceSettings& response, // query + response
-                QString& errorMessage);
+	int webapiSettingsPutPatch(
+        bool force,
+        const QStringList& deviceSettingsKeys,
+        SWGSDRangel::SWGDeviceSettings& response, // query + response
+        QString& errorMessage) final;
 
-    virtual int webapiRunGet(
-            SWGSDRangel::SWGDeviceState& response,
-            QString& errorMessage);
+    int webapiRunGet(
+        SWGSDRangel::SWGDeviceState& response,
+        QString& errorMessage) final;
 
-    virtual int webapiActionsPost(
-            const QStringList& deviceActionsKeys,
-            SWGSDRangel::SWGDeviceActions& query,
-            QString& errorMessage);
+    int webapiActionsPost(
+        const QStringList& deviceActionsKeys,
+        SWGSDRangel::SWGDeviceActions& query,
+        QString& errorMessage) final;
 
-    virtual int webapiRun(
-            bool run,
-            SWGSDRangel::SWGDeviceState& response,
-            QString& errorMessage);
+    int webapiRun(
+        bool run,
+        SWGSDRangel::SWGDeviceState& response,
+        QString& errorMessage) final;
 
-    virtual int webapiReportGet(
-            SWGSDRangel::SWGDeviceReport& response,
-            QString& errorMessage);
+    int webapiReportGet(
+        SWGSDRangel::SWGDeviceReport& response,
+        QString& errorMessage) final;
 
     static void webapiFormatDeviceSettings(
-            SWGSDRangel::SWGDeviceSettings& response,
-            const SigMFFileInputSettings& settings);
+        SWGSDRangel::SWGDeviceSettings& response,
+        const SigMFFileInputSettings& settings);
 
     static void webapiUpdateDeviceSettings(
-            SigMFFileInputSettings& settings,
-            const QStringList& deviceSettingsKeys,
-            SWGSDRangel::SWGDeviceSettings& response);
+        SigMFFileInputSettings& settings,
+        const QStringList& deviceSettingsKeys,
+        SWGSDRangel::SWGDeviceSettings& response);
 
 private:
 	DeviceAPI *m_deviceAPI;
 	QMutex m_mutex;
-    bool m_running;
+    bool m_running = false;
 	SigMFFileInputSettings m_settings;
 	std::ifstream m_metaStream;
     std::ifstream m_dataStream;
     SigMFFileMetaInfo m_metaInfo;
     QList<SigMFFileCapture> m_captures;
     std::vector<uint64_t> m_captureStarts;
-    bool m_trackMode;
-    int m_currentTrackIndex;
-    bool m_recordOpen;
-    bool m_crcAvailable;
-    bool m_crcOK;
-    bool m_recordLengthOK;
+    bool m_trackMode = false;
+    int m_currentTrackIndex = 0;
+    bool m_recordOpen = false;
+    bool m_crcAvailable = false;
+    bool m_crcOK = false;
+    bool m_recordLengthOK = false;
     QString m_recordSummary;
-	SigMFFileInputWorker* m_fileInputWorker;
+	SigMFFileInputWorker* m_fileInputWorker = nullptr;
     QThread m_fileInputWorkerThread;
 	QString m_deviceDescription;
-	int m_sampleRate;
-	unsigned int m_sampleBytes;
-	quint64 m_centerFrequency;
-    quint64 m_recordLength; //!< record length in seconds computed from file size
-    quint64 m_startingTimeStamp;
+	int m_sampleRate = 48000;
+	unsigned int m_sampleBytes = 1;
+	quint64 m_centerFrequency = 0;
+    quint64 m_recordLength = 0; //!< record length in seconds computed from file size
+    quint64 m_startingTimeStamp = 0;
 	QTimer m_masterTimer;
     QNetworkAccessManager *m_networkManager;
     QNetworkRequest m_networkRequest;
@@ -498,7 +498,7 @@ private:
     void webapiReverseSendStartStop(bool start);
 
 private slots:
-    void networkManagerFinished(QNetworkReply *reply);
+    void networkManagerFinished(QNetworkReply *reply) const;
 };
 
 #endif // INCLUDE_SIGMFFILEINPUT_H

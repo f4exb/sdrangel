@@ -49,7 +49,7 @@
 
 WDSPRxGUI* WDSPRxGUI::create(PluginAPI* pluginAPI, DeviceUISet *deviceUISet, BasebandSampleSink *rxChannel)
 {
-	WDSPRxGUI* gui = new WDSPRxGUI(pluginAPI, deviceUISet, rxChannel);
+	auto* gui = new WDSPRxGUI(pluginAPI, deviceUISet, rxChannel);
 	return gui;
 }
 
@@ -98,7 +98,7 @@ bool WDSPRxGUI::handleMessage(const Message& message)
     if (WDSPRx::MsgConfigureWDSPRx::match(message))
     {
         qDebug("WDSPRxGUI::handleMessage: WDSPRx::MsgConfigureWDSPRx");
-        const WDSPRx::MsgConfigureWDSPRx& cfg = (WDSPRx::MsgConfigureWDSPRx&) message;
+        auto& cfg = (const WDSPRx::MsgConfigureWDSPRx&) message;
         m_settings = cfg.getSettings();
         blockApplySettings(true);
         ui->spectrumGUI->updateSettings();
@@ -118,7 +118,7 @@ bool WDSPRxGUI::handleMessage(const Message& message)
     }
     else if (DSPSignalNotification::match(message))
     {
-        const DSPSignalNotification& notif = (const DSPSignalNotification&) message;
+        auto& notif = (const DSPSignalNotification&) message;
         m_deviceCenterFrequency = notif.getCenterFrequency();
         m_basebandSampleRate = notif.getSampleRate();
         qDebug("WDSPRxGUI::handleMessage: DSPSignalNotification: centerFrequency: %lld sampleRate: %d",
@@ -138,7 +138,7 @@ void WDSPRxGUI::handleInputMessages()
 {
     Message* message;
 
-    while ((message = getInputMessageQueue()->pop()) != 0)
+    while ((message = getInputMessageQueue()->pop()) != nullptr)
     {
         if (handleMessage(*message))
         {
@@ -183,7 +183,7 @@ void WDSPRxGUI::on_dsb_toggled(bool dsb)
 
 void WDSPRxGUI::on_deltaFrequency_changed(qint64 value)
 {
-    m_channelMarker.setCenterFrequency(value);
+    m_channelMarker.setCenterFrequency((int) value);
     m_settings.m_inputFrequencyOffset = m_channelMarker.getCenterFrequency();
     updateAbsoluteCenterFrequency();
     applySettings();
@@ -205,7 +205,7 @@ void WDSPRxGUI::on_lowCut_valueChanged(int value)
 void WDSPRxGUI::on_volume_valueChanged(int value)
 {
 	ui->volumeText->setText(QString("%1").arg(value));
-	m_settings.m_volume = CalcDb::powerFromdB(value);
+	m_settings.m_volume = (Real) CalcDb::powerFromdB(value);
 	applySettings();
 }
 
@@ -279,7 +279,7 @@ void WDSPRxGUI::on_rit_toggled(bool checked)
 {
     m_settings.m_rit = checked;
     m_settings.m_profiles[m_settings.m_profileIndex].m_rit = m_settings.m_rit;
-    m_channelMarker.setShift(checked ? m_settings.m_ritFrequency: 0);
+    m_channelMarker.setShift(checked ? (int) m_settings.m_ritFrequency: 0);
     applySettings();
 }
 
@@ -406,7 +406,7 @@ void WDSPRxGUI::on_profileIndex_valueChanged(int value)
 
 void WDSPRxGUI::on_demod_currentIndexChanged(int index)
 {
-    WDSPRxProfile::WDSPRxDemod demod = (WDSPRxProfile::WDSPRxDemod) index;
+    auto demod = (WDSPRxProfile::WDSPRxDemod) index;
 
     if ((m_settings.m_demod != WDSPRxProfile::DemodSSB) && (demod == WDSPRxProfile::DemodSSB)) {
         m_settings.m_dsb = false;
@@ -480,7 +480,7 @@ void WDSPRxGUI::onMenuDialogCalled(const QPoint &p)
     resetContextMenuType();
 }
 
-void WDSPRxGUI::onWidgetRolled(QWidget* widget, bool rollDown)
+void WDSPRxGUI::onWidgetRolled(const QWidget* widget, bool rollDown)
 {
     (void) widget;
     (void) rollDown;
@@ -524,7 +524,7 @@ WDSPRxGUI::WDSPRxGUI(PluginAPI* pluginAPI, DeviceUISet *deviceUISet, BasebandSam
 	m_wdspRx = (WDSPRx*) rxChannel;
     m_spectrumVis = m_wdspRx->getSpectrumVis();
 	m_spectrumVis->setGLSpectrum(ui->glSpectrum);
-	m_wdspRx->setMessageQueueToGUI(getInputMessageQueue());
+	m_wdspRx->setMessageQueueToGUI(WDSPRxGUI::getInputMessageQueue());
 
     m_audioMuteRightClickEnabler = new CRightClickEnabler(ui->audioMute);
     connect(m_audioMuteRightClickEnabler, SIGNAL(rightClick(const QPoint &)), this, SLOT(audioSelect(const QPoint &)));
@@ -588,7 +588,7 @@ WDSPRxGUI::WDSPRxGUI(PluginAPI* pluginAPI, DeviceUISet *deviceUISet, BasebandSam
 	m_deviceUISet->addChannelMarker(&m_channelMarker);
 	connect(&m_channelMarker, SIGNAL(changedByCursor()), this, SLOT(channelMarkerChangedByCursor()));
     connect(&m_channelMarker, SIGNAL(highlightedByCursor()), this, SLOT(channelMarkerHighlightedByCursor()));
-    connect(getInputMessageQueue(), SIGNAL(messageEnqueued()), this, SLOT(handleInputMessages()));
+    connect(WDSPRxGUI::getInputMessageQueue(), SIGNAL(messageEnqueued()), this, SLOT(handleInputMessages()));
 
 
 	m_iconDSBUSB.addPixmap(QPixmap("://dsb.png"), QIcon::Normal, QIcon::On);
@@ -654,7 +654,7 @@ uint32_t WDSPRxGUI::getValidAudioSampleRate() const
     return sr;
 }
 
-unsigned int WDSPRxGUI::spanLog2Max()
+unsigned int WDSPRxGUI::spanLog2Max() const
 {
     unsigned int spanLog2 = 0;
     for (; getValidAudioSampleRate() / (1<<spanLog2) >= 1000; spanLog2++);
@@ -668,7 +668,6 @@ void WDSPRxGUI::applyBandwidths(unsigned int spanLog2, bool force)
     unsigned int limit = s2max < 1 ? 0 : s2max - 1;
     ui->spanLog2->setMaximum(limit);
     bool dsb = ui->dsb->isChecked();
-    //int spanLog2 = ui->spanLog2->value();
     m_spectrumRate = getValidAudioSampleRate() / (1<<spanLog2);
     int bw = ui->BW->value();
     int lw = ui->lowCut->value();
@@ -764,8 +763,8 @@ void WDSPRxGUI::applyBandwidths(unsigned int spanLog2, bool force)
     m_settings.m_dsb = dsb;
     m_settings.m_profiles[m_settings.m_profileIndex].m_dsb = dsb;
     m_settings.m_profiles[m_settings.m_profileIndex].m_spanLog2 = spanLog2;
-    m_settings.m_profiles[m_settings.m_profileIndex].m_highCutoff = bw * 100;
-    m_settings.m_profiles[m_settings.m_profileIndex].m_lowCutoff = lw * 100;
+    m_settings.m_profiles[m_settings.m_profileIndex].m_highCutoff = (Real) (bw * 100);
+    m_settings.m_profiles[m_settings.m_profileIndex].m_lowCutoff = (Real) (lw * 100);
 
     applySettings(force);
 
@@ -785,11 +784,11 @@ void WDSPRxGUI::displaySettings()
 {
     m_channelMarker.blockSignals(true);
     m_channelMarker.setCenterFrequency(m_settings.m_inputFrequencyOffset);
-    m_channelMarker.setBandwidth(m_settings.m_profiles[m_settings.m_profileIndex].m_highCutoff * 2);
+    m_channelMarker.setBandwidth((int) (m_settings.m_profiles[m_settings.m_profileIndex].m_highCutoff * 2));
     m_channelMarker.setTitle(m_settings.m_title);
-    m_channelMarker.setLowCutoff(m_settings.m_profiles[m_settings.m_profileIndex].m_lowCutoff);
+    m_channelMarker.setLowCutoff((int) m_settings.m_profiles[m_settings.m_profileIndex].m_lowCutoff);
     int shift = m_settings.m_profiles[m_settings.m_profileIndex].m_rit ?
-        m_settings.m_profiles[m_settings.m_profileIndex].m_ritFrequency :
+        (int) m_settings.m_profiles[m_settings.m_profileIndex].m_ritFrequency :
         0;
     m_channelMarker.setShift(shift);
 
@@ -880,7 +879,7 @@ void WDSPRxGUI::displaySettings()
     ui->dsb->setChecked(m_settings.m_dsb);
     ui->spanLog2->setValue(1 + ui->spanLog2->maximum() - m_settings.m_profiles[m_settings.m_profileIndex].m_spanLog2);
 
-    ui->BW->setValue(m_settings.m_profiles[m_settings.m_profileIndex].m_highCutoff / 100.0);
+    ui->BW->setValue((int) (m_settings.m_profiles[m_settings.m_profileIndex].m_highCutoff / 100.0));
     s = QString::number(m_settings.m_profiles[m_settings.m_profileIndex].m_highCutoff/1000.0, 'f', 1);
 
     if (m_settings.m_dsb) {
@@ -899,10 +898,10 @@ void WDSPRxGUI::displaySettings()
 
     // The only one of the four signals triggering applyBandwidths will trigger it once only with all other values
     // set correctly and therefore validate the settings and apply them to dependent widgets
-    ui->lowCut->setValue(m_settings.m_profiles[m_settings.m_profileIndex].m_lowCutoff / 100.0);
+    ui->lowCut->setValue((int) (m_settings.m_profiles[m_settings.m_profileIndex].m_lowCutoff / 100.0));
     ui->lowCutText->setText(tr("%1k").arg(m_settings.m_profiles[m_settings.m_profileIndex].m_lowCutoff / 1000.0));
 
-    int volume = CalcDb::dbPower(m_settings.m_volume);
+    auto volume = (int) CalcDb::dbPower(m_settings.m_volume);
     ui->volume->setValue(volume);
     ui->volumeText->setText(QString("%1").arg(volume));
 
@@ -1199,15 +1198,11 @@ void WDSPRxGUI::amSetup(int iValueChanged)
 
     auto valueChanged = (WDSPRxAMDialog::ValueChanged) iValueChanged;
 
-    switch (valueChanged)
+    if (valueChanged == WDSPRxAMDialog::ChangedFadeLevel)
     {
-    case WDSPRxAMDialog::ChangedFadeLevel:
         m_settings.m_amFadeLevel = m_amDialog->getFadeLevel();
         m_settings.m_profiles[m_settings.m_profileIndex].m_amFadeLevel = m_settings.m_amFadeLevel;
         applySettings();
-        break;
-    default:
-        break;
     }
 }
 
@@ -1369,21 +1364,18 @@ void WDSPRxGUI::panSetup(int iValueChanged)
 
     auto valueChanged = (WDSPRxPanDialog::ValueChanged) iValueChanged;
 
-    switch (valueChanged)
+    if (valueChanged == WDSPRxPanDialog::ChangedPan)
     {
-    case WDSPRxPanDialog::ChangedPan:
         m_settings.m_audioPan = m_panDialog->getPan();
         m_settings.m_profiles[m_settings.m_profileIndex].m_audioPan = m_settings.m_audioPan;
         applySettings();
-        break;
-    default:
-        break;
     }
 }
 
 void WDSPRxGUI::tick()
 {
-    double powDbAvg, powDbPeak;
+    double powDbAvg;
+    double powDbPeak;
     int nbMagsqSamples;
     m_wdspRx->getMagSqLevels(powDbAvg, powDbPeak, nbMagsqSamples); // powers directly in dB
 
@@ -1416,7 +1408,7 @@ void WDSPRxGUI::tick()
     m_tickCount++;
 }
 
-void WDSPRxGUI::makeUIConnections()
+void WDSPRxGUI::makeUIConnections() const
 {
     QObject::connect(ui->deltaFrequency, &ValueDialZ::changed, this, &WDSPRxGUI::on_deltaFrequency_changed);
     QObject::connect(ui->audioBinaural, &QToolButton::toggled, this, &WDSPRxGUI::on_audioBinaural_toggled);

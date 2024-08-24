@@ -30,7 +30,7 @@
 DSPDeviceSinkEngine::DSPDeviceSinkEngine(uint32_t uid, QObject* parent) :
 	QObject(parent),
     m_uid(uid),
-	m_state(StNotStarted),
+	m_state(State::StNotStarted),
 	m_deviceSampleSink(nullptr),
 	m_sampleSinkSequence(0),
 	m_basebandSampleSources(),
@@ -39,7 +39,7 @@ DSPDeviceSinkEngine::DSPDeviceSinkEngine(uint32_t uid, QObject* parent) :
 	m_centerFrequency(0),
     m_realElseComplex(false)
 {
-    setState(StIdle);
+    setState(State::StIdle);
 	connect(&m_inputMessageQueue, SIGNAL(messageEnqueued()), this, SLOT(handleInputMessages()), Qt::QueuedConnection);
 }
 
@@ -121,13 +121,13 @@ void DSPDeviceSinkEngine::removeSpectrumSink(BasebandSampleSink* spectrumSink)
 	getInputMessageQueue()->push(cmd);
 }
 
-QString DSPDeviceSinkEngine::errorMessage()
+QString DSPDeviceSinkEngine::errorMessage() const
 {
 	qDebug() << "DSPDeviceSinkEngine::errorMessage";
     return m_errorMessage;
 }
 
-QString DSPDeviceSinkEngine::sinkDeviceDescription()
+QString DSPDeviceSinkEngine::sinkDeviceDescription() const
 {
 	qDebug() << "DSPDeviceSinkEngine::sinkDeviceDescription";
     return m_deviceDescription;
@@ -202,7 +202,7 @@ void DSPDeviceSinkEngine::workSamples(SampleVector& data, unsigned int iBegin, u
                 sBegin + nbSamples,
                 data.begin() + iBegin,
                 data.begin() + iBegin,
-                [this](Sample& a, const Sample& b) -> Sample {
+                [this](const Sample& a, const Sample& b) -> Sample {
                     FixReal den = m_sumIndex + 1; // at each stage scale sum by n/n+1 and input by 1/n+1
                     FixReal nom = m_sumIndex;     // so that final sum is scaled by N (number of channels)
 					FixReal x = a.real()/den + nom*(b.real()/den);
@@ -228,20 +228,20 @@ DSPDeviceSinkEngine::State DSPDeviceSinkEngine::gotoIdle()
 	qDebug() << "DSPDeviceSinkEngine::gotoIdle";
 
 	switch(m_state) {
-		case StNotStarted:
-			return StNotStarted;
+		case State::StNotStarted:
+			return State::StNotStarted;
 
-		case StIdle:
-		case StError:
-			return StIdle;
+		case State::StIdle:
+		case State::StError:
+			return State::StIdle;
 
-		case StReady:
-		case StRunning:
+		case State::StReady:
+		case State::StRunning:
 			break;
 	}
 
 	if (!m_deviceSampleSink) {
-		return StIdle;
+		return State::StIdle;
 	}
 
 	// stop everything
@@ -256,23 +256,23 @@ DSPDeviceSinkEngine::State DSPDeviceSinkEngine::gotoIdle()
 	m_deviceDescription.clear();
 	m_sampleRate = 0;
 
-	return StIdle;
+	return State::StIdle;
 }
 
 DSPDeviceSinkEngine::State DSPDeviceSinkEngine::gotoInit()
 {
 	switch(m_state) {
-		case StNotStarted:
-			return StNotStarted;
+		case State::StNotStarted:
+			return State::StNotStarted;
 
-		case StRunning: // FIXME: assumes it goes first through idle state. Could we get back to init from running directly?
-			return StRunning;
+		case State::StRunning:
+			return State::StRunning;
 
-		case StReady:
-			return StReady;
+		case State::StReady:
+			return State::StReady;
 
-		case StIdle:
-		case StError:
+		case State::StIdle:
+		case State::StError:
 			break;
 	}
 
@@ -310,7 +310,7 @@ DSPDeviceSinkEngine::State DSPDeviceSinkEngine::gotoInit()
         m_deviceSampleSink->getMessageQueueToGUI()->push(rep);
 	}
 
-	return StReady;
+	return State::StReady;
 }
 
 DSPDeviceSinkEngine::State DSPDeviceSinkEngine::gotoRunning()
@@ -319,17 +319,17 @@ DSPDeviceSinkEngine::State DSPDeviceSinkEngine::gotoRunning()
 
 	switch(m_state)
     {
-		case StNotStarted:
-			return StNotStarted;
+		case State::StNotStarted:
+			return State::StNotStarted;
 
-		case StIdle:
-			return StIdle;
+		case State::StIdle:
+			return State::StIdle;
 
-		case StRunning:
-			return StRunning;
+		case State::StRunning:
+			return State::StRunning;
 
-		case StReady:
-		case StError:
+		case State::StReady:
+		case State::StError:
 			break;
 	}
 
@@ -358,7 +358,7 @@ DSPDeviceSinkEngine::State DSPDeviceSinkEngine::gotoRunning()
 
 	qDebug() << "DSPDeviceSinkEngine::gotoRunning: input message queue pending: " << m_inputMessageQueue.size();
 
-	return StRunning;
+	return State::StRunning;
 }
 
 DSPDeviceSinkEngine::State DSPDeviceSinkEngine::gotoError(const QString& errorMessage)
@@ -367,11 +367,11 @@ DSPDeviceSinkEngine::State DSPDeviceSinkEngine::gotoError(const QString& errorMe
 
 	m_errorMessage = errorMessage;
 	m_deviceDescription.clear();
-	setState(StError);
-	return StError;
+	setState(State::StError);
+	return State::StError;
 }
 
-void DSPDeviceSinkEngine::handleSetSink(DeviceSampleSink*)
+void DSPDeviceSinkEngine::handleSetSink(const DeviceSampleSink*)
 {
     if (!m_deviceSampleSink) { // Early leave
         return;
@@ -390,7 +390,7 @@ void DSPDeviceSinkEngine::handleSetSink(DeviceSampleSink*)
 
 void DSPDeviceSinkEngine::handleData()
 {
-	if (m_state == StRunning) {
+	if (m_state == State::StRunning) {
 		workSampleFifo();
 	}
 }
@@ -441,7 +441,7 @@ bool DSPDeviceSinkEngine::handleMessage(const Message& message)
 	{
 		setState(gotoIdle());
 
-		if(m_state == StIdle) {
+		if(m_state == State::StIdle) {
 			setState(gotoInit()); // State goes ready if init is performed
 		}
 
@@ -449,7 +449,7 @@ bool DSPDeviceSinkEngine::handleMessage(const Message& message)
 	}
 	else if (DSPGenerationStart::match(message))
 	{
-		if(m_state == StReady) {
+		if(m_state == State::StReady) {
 			setState(gotoRunning());
 		}
 
@@ -462,7 +462,7 @@ bool DSPDeviceSinkEngine::handleMessage(const Message& message)
 	}
 	else if (DSPSetSink::match(message))
     {
-        const DSPSetSink& cmd = (const DSPSetSink&) message;
+        const auto& cmd = (const DSPSetSink&) message;
 		handleSetSink(cmd.getSampleSink());
         return true;
 	}
@@ -471,7 +471,7 @@ bool DSPDeviceSinkEngine::handleMessage(const Message& message)
         auto& cmd = (const DSPRemoveSpectrumSink&) message;
 		BasebandSampleSink* spectrumSink = cmd.getSampleSink();
 
-		if(m_state == StRunning) {
+		if(m_state == State::StRunning) {
 			spectrumSink->stop();
 		}
 
@@ -486,7 +486,7 @@ bool DSPDeviceSinkEngine::handleMessage(const Message& message)
         auto *notif = new DSPSignalNotification(m_sampleRate, m_centerFrequency);
         source->pushMessage(notif);
 
-        if (m_state == StRunning) {
+        if (m_state == State::StRunning) {
             source->start();
         }
 
@@ -497,7 +497,7 @@ bool DSPDeviceSinkEngine::handleMessage(const Message& message)
         auto& cmd = (const DSPRemoveBasebandSampleSource&) message;
 		BasebandSampleSource* source = cmd.getSampleSource();
 
-		if(m_state == StRunning) {
+		if(m_state == State::StRunning) {
 			source->stop();
 		}
 

@@ -38,7 +38,7 @@ class SDRBASE_API DSPDeviceSourceEngine : public QObject {
 	Q_OBJECT
 
 public:
-	enum State {
+	enum class State {
 		StNotStarted,  //!< engine is before initialization
 		StIdle,        //!< engine is idle
 		StReady,       //!< engine is ready to run
@@ -47,13 +47,13 @@ public:
 	};
 
 	DSPDeviceSourceEngine(uint uid, QObject* parent = nullptr);
-	~DSPDeviceSourceEngine();
+	~DSPDeviceSourceEngine() final;
 
 	uint getUID() const { return m_uid; }
 
 	MessageQueue* getInputMessageQueue() { return &m_inputMessageQueue; }
 
-	bool initAcquisition(); //!< Initialize acquisition sequence
+	bool initAcquisition() const; //!< Initialize acquisition sequence
 	bool startAcquisition(); //!< Start acquisition sequence
 	void stopAcquistion();   //!< Stop acquisition sequence
 

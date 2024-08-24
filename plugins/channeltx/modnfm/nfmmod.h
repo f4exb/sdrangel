@@ -82,7 +82,7 @@ public:
     private:
         QString m_fileName;
 
-        MsgConfigureFileSourceName(const QString& fileName) :
+        explicit MsgConfigureFileSourceName(const QString& fileName) :
             Message(),
             m_fileName(fileName)
         { }
@@ -100,10 +100,10 @@ public:
             return new MsgConfigureFileSourceSeek(seekPercentage);
         }
 
-    protected:
+    private:
         int m_seekPercentage; //!< percentage of seek position from the beginning 0..100
 
-        MsgConfigureFileSourceSeek(int seekPercentage) :
+        explicit MsgConfigureFileSourceSeek(int seekPercentage) :
             Message(),
             m_seekPercentage(seekPercentage)
         { }
@@ -138,10 +138,10 @@ public:
             return new MsgReportFileSourceStreamTiming(samplesCount);
         }
 
-    protected:
+    private:
         std::size_t m_samplesCount;
 
-        MsgReportFileSourceStreamTiming(std::size_t samplesCount) :
+        explicit MsgReportFileSourceStreamTiming(std::size_t samplesCount) :
             Message(),
             m_samplesCount(samplesCount)
         { }
@@ -160,7 +160,7 @@ public:
             return new MsgReportFileSourceStreamData(sampleRate, recordLength);
         }
 
-    protected:
+    private:
         int m_sampleRate;
         quint32 m_recordLength;
 
@@ -174,55 +174,55 @@ public:
 
     //=================================================================
 
-    NFMMod(DeviceAPI *deviceAPI);
-    virtual ~NFMMod();
-    virtual void destroy() { delete this; }
-    virtual void setDeviceAPI(DeviceAPI *deviceAPI);
-    virtual DeviceAPI *getDeviceAPI() { return m_deviceAPI; }
+    explicit NFMMod(DeviceAPI *deviceAPI);
+    ~NFMMod() final;
+    void destroy() final { delete this; }
+    void setDeviceAPI(DeviceAPI *deviceAPI) final;
+    DeviceAPI *getDeviceAPI() final { return m_deviceAPI; }
 
-    virtual void start();
-    virtual void stop();
-    virtual void pull(SampleVector::iterator& begin, unsigned int nbSamples);
-    virtual void pushMessage(Message *msg) { m_inputMessageQueue.push(msg); }
-    virtual QString getSourceName() { return objectName(); }
+    void start() final;
+    void stop() final;
+    void pull(SampleVector::iterator& begin, unsigned int nbSamples) final;
+    void pushMessage(Message *msg) final { m_inputMessageQueue.push(msg); }
+    QString getSourceName() final { return objectName(); }
 
-    virtual void getIdentifier(QString& id) { id = objectName(); }
-    virtual QString getIdentifier() const { return objectName(); }
-    virtual void getTitle(QString& title) { title = m_settings.m_title; }
-    virtual qint64 getCenterFrequency() const { return m_settings.m_inputFrequencyOffset; }
-    virtual void setCenterFrequency(qint64 frequency);
+    void getIdentifier(QString& id) final { id = objectName(); }
+    QString getIdentifier() const final { return objectName(); }
+    void getTitle(QString& title) final { title = m_settings.m_title; }
+    qint64 getCenterFrequency() const final { return m_settings.m_inputFrequencyOffset; }
+    void setCenterFrequency(qint64 frequency) final;
 
-    virtual QByteArray serialize() const;
-    virtual bool deserialize(const QByteArray& data);
+    QByteArray serialize() const final;
+    bool deserialize(const QByteArray& data) final;
 
-    virtual int getNbSinkStreams() const { return 1; }
-    virtual int getNbSourceStreams() const { return 0; }
-    virtual int getStreamIndex() const { return m_settings.m_streamIndex; }
+    int getNbSinkStreams() const final { return 1; }
+    int getNbSourceStreams() const final { return 0; }
+    int getStreamIndex() const final { return m_settings.m_streamIndex; }
 
-    virtual qint64 getStreamCenterFrequency(int streamIndex, bool sinkElseSource) const
+    qint64 getStreamCenterFrequency(int streamIndex, bool sinkElseSource) const final
     {
         (void) streamIndex;
         (void) sinkElseSource;
         return m_settings.m_inputFrequencyOffset;
     }
 
-    virtual int webapiSettingsGet(
+    int webapiSettingsGet(
                 SWGSDRangel::SWGChannelSettings& response,
-                QString& errorMessage);
+                QString& errorMessage) final;
 
-    virtual int webapiWorkspaceGet(
+    int webapiWorkspaceGet(
             SWGSDRangel::SWGWorkspaceInfo& response,
-            QString& errorMessage);
+            QString& errorMessage) final;
 
-    virtual int webapiSettingsPutPatch(
+    int webapiSettingsPutPatch(
                 bool force,
                 const QStringList& channelSettingsKeys,
                 SWGSDRangel::SWGChannelSettings& response,
-                QString& errorMessage);
+                QString& errorMessage) final;
 
-    virtual int webapiReportGet(
+    int webapiReportGet(
                 SWGSDRangel::SWGChannelReport& response,
-                QString& errorMessage);
+                QString& errorMessage) final;
 
     static void webapiFormatChannelSettings(
         SWGSDRangel::SWGChannelSettings& response,
@@ -251,7 +251,7 @@ private:
 
     DeviceAPI* m_deviceAPI;
     QThread *m_thread;
-    bool m_running;
+    bool m_running = false;
     NFMModBaseband* m_basebandSource;
     NFMModSettings m_settings;
 
@@ -260,39 +260,39 @@ private:
 
     std::ifstream m_ifstream;
     QString m_fileName;
-    quint64 m_fileSize;     //!< raw file size (bytes)
-    quint32 m_recordLength; //!< record length in seconds computed from file size
-    int m_sampleRate;
+    quint64 m_fileSize = 0;     //!< raw file size (bytes)
+    quint32 m_recordLength = 0; //!< record length in seconds computed from file size
+    int m_sampleRate = 48000;
 
     QNetworkAccessManager *m_networkManager;
     QNetworkRequest m_networkRequest;
 
     CWKeyer m_cwKeyer;
-    QObject *m_levelMeter;
+    QObject *m_levelMeter = nullptr;
 
-    virtual bool handleMessage(const Message& cmd);
+    bool handleMessage(const Message& cmd) final;
     void applySettings(const NFMModSettings& settings, bool force = false);
-    void sendSampleRateToDemodAnalyzer();
+    void sendSampleRateToDemodAnalyzer() const;
     void openFileStream();
     void seekFileStream(int seekPercentage);
-    void webapiFormatChannelReport(SWGSDRangel::SWGChannelReport& response);
-    void webapiReverseSendSettings(QList<QString>& channelSettingsKeys, const NFMModSettings& settings, bool force);
+    void webapiFormatChannelReport(SWGSDRangel::SWGChannelReport& response) const;
+    void webapiReverseSendSettings(const QList<QString>& channelSettingsKeys, const NFMModSettings& settings, bool force);
     void webapiReverseSendCWSettings(const CWKeyerSettings& settings);
     void sendChannelSettings(
         const QList<ObjectPipe*>& pipes,
-        QList<QString>& channelSettingsKeys,
+        const QList<QString>& channelSettingsKeys,
         const NFMModSettings& settings,
         bool force
     );
     void webapiFormatChannelSettings(
-        QList<QString>& channelSettingsKeys,
+        const QList<QString>& channelSettingsKeys,
         SWGSDRangel::SWGChannelSettings *swgChannelSettings,
         const NFMModSettings& settings,
         bool force
     );
 
 private slots:
-    void networkManagerFinished(QNetworkReply *reply);
+    void networkManagerFinished(QNetworkReply *reply) const;
 };
 
 

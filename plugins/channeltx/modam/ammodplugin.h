@@ -27,20 +27,20 @@
 class DeviceUISet;
 class BasebandSampleSource;
 
-class AMModPlugin : public QObject, PluginInterface {
+class AMModPlugin : public QObject, public PluginInterface {
 	Q_OBJECT
 	Q_INTERFACES(PluginInterface)
 	Q_PLUGIN_METADATA(IID "sdrangel.channeltx.ammod")
 
 public:
-	explicit AMModPlugin(QObject* parent = 0);
+	explicit AMModPlugin(QObject* parent = nullptr);
 
-	const PluginDescriptor& getPluginDescriptor() const;
-	void initPlugin(PluginAPI* pluginAPI);
+	const PluginDescriptor& getPluginDescriptor() const final;
+	void initPlugin(PluginAPI* pluginAPI) final;
 
-	virtual void createTxChannel(DeviceAPI *deviceAPI, BasebandSampleSource **bs, ChannelAPI **cs) const;
-	virtual ChannelGUI* createTxChannelGUI(DeviceUISet *deviceUISet, BasebandSampleSource *txChannel) const;
-	virtual ChannelWebAPIAdapter* createChannelWebAPIAdapter() const;
+	void createTxChannel(DeviceAPI *deviceAPI, BasebandSampleSource **bs, ChannelAPI **cs) const final;
+	ChannelGUI* createTxChannelGUI(DeviceUISet *deviceUISet, BasebandSampleSource *txChannel) const final;
+	ChannelWebAPIAdapter* createChannelWebAPIAdapter() const final;
 
 private:
 	static const PluginDescriptor m_pluginDescriptor;

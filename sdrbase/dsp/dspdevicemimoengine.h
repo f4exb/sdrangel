@@ -40,7 +40,7 @@ public:
     class SetSampleMIMO : public Message {
         MESSAGE_CLASS_DECLARATION
     public:
-        SetSampleMIMO(DeviceSampleMIMO* sampleMIMO) : Message(), m_sampleMIMO(sampleMIMO) { }
+        explicit SetSampleMIMO(DeviceSampleMIMO* sampleMIMO) : Message(), m_sampleMIMO(sampleMIMO) { }
         DeviceSampleMIMO* getSampleMIMO() const { return m_sampleMIMO; }
     private:
         DeviceSampleMIMO* m_sampleMIMO;
@@ -80,7 +80,7 @@ public:
     class AddMIMOChannel : public Message {
         MESSAGE_CLASS_DECLARATION
     public:
-        AddMIMOChannel(MIMOChannel* channel) :
+        explicit AddMIMOChannel(MIMOChannel* channel) :
             Message(),
             m_channel(channel)
         { }
@@ -92,7 +92,7 @@ public:
     class RemoveMIMOChannel : public Message {
         MESSAGE_CLASS_DECLARATION
     public:
-        RemoveMIMOChannel(MIMOChannel* channel) :
+        explicit RemoveMIMOChannel(MIMOChannel* channel) :
             Message(),
             m_channel(channel)
         { }
@@ -134,7 +134,7 @@ public:
     class AddSpectrumSink : public Message {
         MESSAGE_CLASS_DECLARATION
     public:
-        AddSpectrumSink(BasebandSampleSink* sampleSink) : Message(), m_sampleSink(sampleSink) { }
+        explicit AddSpectrumSink(BasebandSampleSink* sampleSink) : Message(), m_sampleSink(sampleSink) { }
         BasebandSampleSink* getSampleSink() const { return m_sampleSink; }
     private:
         BasebandSampleSink* m_sampleSink;
@@ -143,7 +143,7 @@ public:
     class RemoveSpectrumSink : public Message {
         MESSAGE_CLASS_DECLARATION
     public:
-        RemoveSpectrumSink(BasebandSampleSink* sampleSink) : Message(), m_sampleSink(sampleSink) { }
+        explicit RemoveSpectrumSink(BasebandSampleSink* sampleSink) : Message(), m_sampleSink(sampleSink) { }
         BasebandSampleSink* getSampleSink() const { return m_sampleSink; }
     private:
         BasebandSampleSink* m_sampleSink;
@@ -152,7 +152,7 @@ public:
     class GetErrorMessage : public Message {
         MESSAGE_CLASS_DECLARATION
     public:
-        GetErrorMessage(unsigned int subsystemIndex) :
+        explicit GetErrorMessage(unsigned int subsystemIndex) :
             m_subsystemIndex(subsystemIndex)
         {}
         void setErrorMessage(const QString& text) { m_errorMessage = text; }
@@ -204,7 +204,7 @@ public:
         int m_index;
     };
 
-	enum State {
+	enum class State {
 		StNotStarted,  //!< engine is before initialization
 		StIdle,        //!< engine is idle
 		StReady,       //!< engine is ready to run
@@ -244,7 +244,7 @@ public:
         } else if (subsystemIndex == 1) {
             return m_stateTx;
         } else {
-            return StNotStarted;
+            return State::StNotStarted;
         }
     }
 
@@ -256,13 +256,13 @@ public:
 private:
     struct SourceCorrection
     {
-        bool m_dcOffsetCorrection;
-        bool m_iqImbalanceCorrection;
-        double m_iOffset;
-        double m_qOffset;
-        int m_iRange;
-        int m_qRange;
-        int m_imbalance;
+        bool m_dcOffsetCorrection = false;
+        bool m_iqImbalanceCorrection = false;
+        double m_iOffset = 0;
+        double m_qOffset = 0;
+        int m_iRange = 1 << 16;
+        int m_qRange = 1 << 16;
+        int m_imbalance = 65536;
         MovingAverageUtil<int32_t, int64_t, 1024> m_iBeta;
         MovingAverageUtil<int32_t, int64_t, 1024> m_qBeta;
 #if IMBALANCE_INT
@@ -284,13 +284,6 @@ private:
 #endif
         SourceCorrection()
         {
-            m_dcOffsetCorrection = false;
-            m_iqImbalanceCorrection = false;
-            m_iOffset = 0;
-            m_qOffset = 0;
-            m_iRange = 1 << 16;
-            m_qRange = 1 << 16;
-            m_imbalance = 65536;
             m_iBeta.reset();
             m_qBeta.reset();
             m_avgAmp.reset();
@@ -317,17 +310,17 @@ private:
 
     MessageQueue m_inputMessageQueue;  //<! Input message queue. Post here.
 
-	typedef std::list<BasebandSampleSink*> BasebandSampleSinks;
+	using BasebandSampleSinks = std::list<BasebandSampleSink *>;
 	std::vector<BasebandSampleSinks> m_basebandSampleSinks; //!< ancillary sample sinks on main thread (per input stream)
     std::map<int, bool> m_rxRealElseComplex; //!< map of real else complex indicators for device sources (by input stream)
-	typedef std::list<BasebandSampleSource*> BasebandSampleSources;
+	using BasebandSampleSources = std::list<BasebandSampleSource *>;
 	std::vector<BasebandSampleSources> m_basebandSampleSources; //!< channel sample sources (per output stream)
     std::map<int, bool> m_txRealElseComplex; //!< map of real else complex indicators for device sinks (by input stream)
     std::vector<IncrementalVector<Sample>> m_sourceSampleBuffers;
     std::vector<IncrementalVector<Sample>> m_sourceZeroBuffers;
     unsigned int m_sumIndex;            //!< channel index when summing channels
 
-    typedef std::list<MIMOChannel*> MIMOChannels;
+    using MIMOChannels = std::list<MIMOChannel *>;
     MIMOChannels m_mimoChannels; //!< MIMO channels
 
     std::vector<SourceCorrection> m_sourcesCorrections;

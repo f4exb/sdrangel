@@ -56,12 +56,7 @@ const char* const NFMMod::m_channelId = "NFMMod";
 
 NFMMod::NFMMod(DeviceAPI *deviceAPI) :
     ChannelAPI(m_channelIdURI, ChannelAPI::StreamSingleSource),
-	m_deviceAPI(deviceAPI),
-    m_running(false),
-	m_fileSize(0),
-	m_recordLength(0),
-	m_sampleRate(48000),
-    m_levelMeter(nullptr)
+	m_deviceAPI(deviceAPI)
 {
 	setObjectName(m_channelId);
 
@@ -91,7 +86,7 @@ NFMMod::~NFMMod()
     m_deviceAPI->removeChannelSourceAPI(this);
     m_deviceAPI->removeChannelSource(this);
 
-    stop();
+    NFMMod::stop();
 }
 
 void NFMMod::setDeviceAPI(DeviceAPI *deviceAPI)
@@ -182,7 +177,7 @@ bool NFMMod::handleMessage(const Message& cmd)
 {
     if (MsgConfigureNFMMod::match(cmd))
     {
-        MsgConfigureNFMMod& cfg = (MsgConfigureNFMMod&) cmd;
+        auto& cfg = (const MsgConfigureNFMMod&) cmd;
         qDebug() << "NFMMod::handleMessage: MsgConfigureNFMMod";
 
         applySettings(cfg.getSettings(), cfg.getForce());
@@ -191,7 +186,7 @@ bool NFMMod::handleMessage(const Message& cmd)
     }
 	else if (MsgConfigureFileSourceName::match(cmd))
     {
-        MsgConfigureFileSourceName& conf = (MsgConfigureFileSourceName&) cmd;
+        auto& conf = (const MsgConfigureFileSourceName&) cmd;
         m_fileName = conf.getFileName();
         openFileStream();
 	    qDebug() << "NFMMod::handleMessage: MsgConfigureFileSourceName:"
@@ -200,7 +195,7 @@ bool NFMMod::handleMessage(const Message& cmd)
     }
     else if (MsgConfigureFileSourceSeek::match(cmd))
     {
-        MsgConfigureFileSourceSeek& conf = (MsgConfigureFileSourceSeek&) cmd;
+        auto& conf = (const MsgConfigureFileSourceSeek&) cmd;
         int seekPercentage = conf.getPercentage();
         seekFileStream(seekPercentage);
         qDebug() << "NFMMod::handleMessage: MsgConfigureFileSourceSeek:"
@@ -226,7 +221,7 @@ bool NFMMod::handleMessage(const Message& cmd)
     }
 	else if (MsgConfigureFileSourceName::match(cmd))
     {
-        MsgConfigureFileSourceName& conf = (MsgConfigureFileSourceName&) cmd;
+        auto& conf = (const MsgConfigureFileSourceName&) cmd;
         m_fileName = conf.getFileName();
         openFileStream();
 	    qDebug() << "NFMMod::handleMessage: MsgConfigureFileSourceName:"
@@ -235,7 +230,7 @@ bool NFMMod::handleMessage(const Message& cmd)
     }
     else if (MsgConfigureFileSourceSeek::match(cmd))
     {
-        MsgConfigureFileSourceSeek& conf = (MsgConfigureFileSourceSeek&) cmd;
+        auto& conf = (const MsgConfigureFileSourceSeek&) cmd;
         int seekPercentage = conf.getPercentage();
         seekFileStream(seekPercentage);
         qDebug() << "NFMMod::handleMessage: MsgConfigureFileSourceSeek:"
@@ -261,7 +256,7 @@ bool NFMMod::handleMessage(const Message& cmd)
     }
     else if (CWKeyer::MsgConfigureCWKeyer::match(cmd))
     {
-        const CWKeyer::MsgConfigureCWKeyer& cfg = (CWKeyer::MsgConfigureCWKeyer&) cmd;
+        auto& cfg = (const CWKeyer::MsgConfigureCWKeyer&) cmd;
 
         if (m_settings.m_useReverseAPI) {
             webapiReverseSendCWSettings(cfg.getSettings());
@@ -274,8 +269,8 @@ bool NFMMod::handleMessage(const Message& cmd)
         // Forward to the source
         if (m_running)
         {
-            DSPSignalNotification& notif = (DSPSignalNotification&) cmd;
-            DSPSignalNotification* rep = new DSPSignalNotification(notif); // make a copy
+            auto& notif = (const DSPSignalNotification&) cmd;
+            auto* rep = new DSPSignalNotification(notif); // make a copy
             qDebug() << "NFMMod::handleMessage: DSPSignalNotification";
             m_basebandSource->getInputMessageQueue()->push(rep);
             // Forward to GUI if any
@@ -310,7 +305,7 @@ void NFMMod::openFileStream()
     m_ifstream.seekg(0,std::ios_base::beg);
 
     m_sampleRate = 48000; // fixed rate
-    m_recordLength = m_fileSize / (sizeof(Real) * m_sampleRate);
+    m_recordLength = (quint32) (m_fileSize / (sizeof(Real) * m_sampleRate));
 
     qDebug() << "NFMMod::openFileStream: " << m_fileName.toStdString().c_str()
             << " fileSize: " << m_fileSize << "bytes"
@@ -444,7 +439,7 @@ void NFMMod::applySettings(const NFMModSettings& settings, bool force)
     QList<ObjectPipe*> pipes;
     MainCore::instance()->getMessagePipes().getMessagePipes(this, "settings", pipes);
 
-    if (pipes.size() > 0) {
+    if (!pipes.empty()) {
         sendChannelSettings(pipes, reverseAPIKeys, settings, force);
     }
 
@@ -472,12 +467,12 @@ bool NFMMod::deserialize(const QByteArray& data)
     return success;
 }
 
-void NFMMod::sendSampleRateToDemodAnalyzer()
+void NFMMod::sendSampleRateToDemodAnalyzer() const
 {
     QList<ObjectPipe*> pipes;
     MainCore::instance()->getMessagePipes().getMessagePipes(this, "reportdemod", pipes);
 
-    if (pipes.size() > 0)
+    if (!pipes.empty())
     {
         for (const auto& pipe : pipes)
         {
@@ -625,13 +620,13 @@ void NFMMod::webapiUpdateChannelSettings(
         settings.m_reverseAPIAddress = *response.getNfmModSettings()->getReverseApiAddress();
     }
     if (channelSettingsKeys.contains("reverseAPIPort")) {
-        settings.m_reverseAPIPort = response.getNfmModSettings()->getReverseApiPort();
+        settings.m_reverseAPIPort = (uint16_t) response.getNfmModSettings()->getReverseApiPort();
     }
     if (channelSettingsKeys.contains("reverseAPIDeviceIndex")) {
-        settings.m_reverseAPIDeviceIndex = response.getNfmModSettings()->getReverseApiDeviceIndex();
+        settings.m_reverseAPIDeviceIndex = (uint16_t) response.getNfmModSettings()->getReverseApiDeviceIndex();
     }
     if (channelSettingsKeys.contains("reverseAPIChannelIndex")) {
-        settings.m_reverseAPIChannelIndex = response.getNfmModSettings()->getReverseApiChannelIndex();
+        settings.m_reverseAPIChannelIndex = (uint16_t) response.getNfmModSettings()->getReverseApiChannelIndex();
     }
     if (settings.m_channelMarker && channelSettingsKeys.contains("channelMarker")) {
         settings.m_channelMarker->updateFrom(channelSettingsKeys, response.getNfmModSettings()->getChannelMarker());
@@ -709,7 +704,7 @@ void NFMMod::webapiFormatChannelSettings(SWGSDRangel::SWGChannelSettings& respon
         }
         else
         {
-            SWGSDRangel::SWGChannelMarker *swgChannelMarker = new SWGSDRangel::SWGChannelMarker();
+            auto *swgChannelMarker = new SWGSDRangel::SWGChannelMarker();
             settings.m_channelMarker->formatTo(swgChannelMarker);
             response.getNfmModSettings()->setChannelMarker(swgChannelMarker);
         }
@@ -723,16 +718,16 @@ void NFMMod::webapiFormatChannelSettings(SWGSDRangel::SWGChannelSettings& respon
         }
         else
         {
-            SWGSDRangel::SWGRollupState *swgRollupState = new SWGSDRangel::SWGRollupState();
+            auto *swgRollupState = new SWGSDRangel::SWGRollupState();
             settings.m_rollupState->formatTo(swgRollupState);
             response.getNfmModSettings()->setRollupState(swgRollupState);
         }
     }
 }
 
-void NFMMod::webapiFormatChannelReport(SWGSDRangel::SWGChannelReport& response)
+void NFMMod::webapiFormatChannelReport(SWGSDRangel::SWGChannelReport& response) const
 {
-    response.getNfmModReport()->setChannelPowerDb(CalcDb::dbPower(getMagSq()));
+    response.getNfmModReport()->setChannelPowerDb((float) CalcDb::dbPower(getMagSq()));
 
     if (m_running)
     {
@@ -741,9 +736,9 @@ void NFMMod::webapiFormatChannelReport(SWGSDRangel::SWGChannelReport& response)
     }
 }
 
-void NFMMod::webapiReverseSendSettings(QList<QString>& channelSettingsKeys, const NFMModSettings& settings, bool force)
+void NFMMod::webapiReverseSendSettings(const QList<QString>& channelSettingsKeys, const NFMModSettings& settings, bool force)
 {
-    SWGSDRangel::SWGChannelSettings *swgChannelSettings = new SWGSDRangel::SWGChannelSettings();
+    auto *swgChannelSettings = new SWGSDRangel::SWGChannelSettings();
     webapiFormatChannelSettings(channelSettingsKeys, swgChannelSettings, settings, force);
 
     QString channelSettingsURL = QString("http://%1:%2/sdrangel/deviceset/%3/channel/%4/settings")
@@ -754,8 +749,8 @@ void NFMMod::webapiReverseSendSettings(QList<QString>& channelSettingsKeys, cons
     m_networkRequest.setUrl(QUrl(channelSettingsURL));
     m_networkRequest.setHeader(QNetworkRequest::ContentTypeHeader, "application/json");
 
-    QBuffer *buffer = new QBuffer();
-    buffer->open((QBuffer::ReadWrite));
+    auto *buffer = new QBuffer();
+    buffer->open(QBuffer::ReadWrite);
     buffer->write(swgChannelSettings->asJson().toUtf8());
     buffer->seek(0);
 
@@ -768,7 +763,7 @@ void NFMMod::webapiReverseSendSettings(QList<QString>& channelSettingsKeys, cons
 
 void NFMMod::webapiReverseSendCWSettings(const CWKeyerSettings& cwKeyerSettings)
 {
-    SWGSDRangel::SWGChannelSettings *swgChannelSettings = new SWGSDRangel::SWGChannelSettings();
+    auto *swgChannelSettings = new SWGSDRangel::SWGChannelSettings();
     swgChannelSettings->setDirection(1); // single source (Tx)
     swgChannelSettings->setChannelType(new QString("NFMMod"));
     swgChannelSettings->setNfmModSettings(new SWGSDRangel::SWGNFMModSettings());
@@ -776,7 +771,7 @@ void NFMMod::webapiReverseSendCWSettings(const CWKeyerSettings& cwKeyerSettings)
 
     swgNFModSettings->setCwKeyer(new SWGSDRangel::SWGCWKeyerSettings());
     SWGSDRangel::SWGCWKeyerSettings *apiCwKeyerSettings = swgNFModSettings->getCwKeyer();
-    getCWKeyer()->webapiFormatChannelSettings(apiCwKeyerSettings, cwKeyerSettings);
+    CWKeyer::webapiFormatChannelSettings(apiCwKeyerSettings, cwKeyerSettings);
 
     QString channelSettingsURL = QString("http://%1:%2/sdrangel/deviceset/%3/channel/%4/settings")
             .arg(m_settings.m_reverseAPIAddress)
@@ -786,8 +781,8 @@ void NFMMod::webapiReverseSendCWSettings(const CWKeyerSettings& cwKeyerSettings)
     m_networkRequest.setUrl(QUrl(channelSettingsURL));
     m_networkRequest.setHeader(QNetworkRequest::ContentTypeHeader, "application/json");
 
-    QBuffer *buffer = new QBuffer();
-    buffer->open((QBuffer::ReadWrite));
+    auto *buffer = new QBuffer();
+    buffer->open(QBuffer::ReadWrite);
     buffer->write(swgChannelSettings->asJson().toUtf8());
     buffer->seek(0);
 
@@ -800,7 +795,7 @@ void NFMMod::webapiReverseSendCWSettings(const CWKeyerSettings& cwKeyerSettings)
 
 void NFMMod::sendChannelSettings(
     const QList<ObjectPipe*>& pipes,
-    QList<QString>& channelSettingsKeys,
+    const QList<QString>& channelSettingsKeys,
     const NFMModSettings& settings,
     bool force)
 {
@@ -810,7 +805,7 @@ void NFMMod::sendChannelSettings(
 
         if (messageQueue)
         {
-            SWGSDRangel::SWGChannelSettings *swgChannelSettings = new SWGSDRangel::SWGChannelSettings();
+            auto *swgChannelSettings = new SWGSDRangel::SWGChannelSettings();
             webapiFormatChannelSettings(channelSettingsKeys, swgChannelSettings, settings, force);
             MainCore::MsgChannelSettings *msg = MainCore::MsgChannelSettings::create(
                 this,
@@ -824,7 +819,7 @@ void NFMMod::sendChannelSettings(
 }
 
 void NFMMod::webapiFormatChannelSettings(
-        QList<QString>& channelSettingsKeys,
+        const QList<QString>& channelSettingsKeys,
         SWGSDRangel::SWGChannelSettings *swgChannelSettings,
         const NFMModSettings& settings,
         bool force
@@ -902,14 +897,14 @@ void NFMMod::webapiFormatChannelSettings(
 
     if (settings.m_channelMarker && (channelSettingsKeys.contains("channelMarker") || force))
     {
-        SWGSDRangel::SWGChannelMarker *swgChannelMarker = new SWGSDRangel::SWGChannelMarker();
+        auto *swgChannelMarker = new SWGSDRangel::SWGChannelMarker();
         settings.m_channelMarker->formatTo(swgChannelMarker);
         swgNFMModSettings->setChannelMarker(swgChannelMarker);
     }
 
     if (settings.m_rollupState && (channelSettingsKeys.contains("rollupState") || force))
     {
-        SWGSDRangel::SWGRollupState *swgRollupState = new SWGSDRangel::SWGRollupState();
+        auto *swgRollupState = new SWGSDRangel::SWGRollupState();
         settings.m_rollupState->formatTo(swgRollupState);
         swgNFMModSettings->setRollupState(swgRollupState);
     }
@@ -919,11 +914,11 @@ void NFMMod::webapiFormatChannelSettings(
         const CWKeyerSettings& cwKeyerSettings = getCWKeyer()->getSettings();
         swgNFMModSettings->setCwKeyer(new SWGSDRangel::SWGCWKeyerSettings());
         SWGSDRangel::SWGCWKeyerSettings *apiCwKeyerSettings = swgNFMModSettings->getCwKeyer();
-        getCWKeyer()->webapiFormatChannelSettings(apiCwKeyerSettings, cwKeyerSettings);
+        CWKeyer::webapiFormatChannelSettings(apiCwKeyerSettings, cwKeyerSettings);
     }
 }
 
-void NFMMod::networkManagerFinished(QNetworkReply *reply)
+void NFMMod::networkManagerFinished(QNetworkReply *reply) const
 {
     QNetworkReply::NetworkError replyError = reply->error();
 

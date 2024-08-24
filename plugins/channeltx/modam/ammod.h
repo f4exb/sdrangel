@@ -251,7 +251,7 @@ private:
 
     DeviceAPI* m_deviceAPI;
     QThread *m_thread;
-    bool m_running;
+    bool m_running = false;
     AMModBaseband* m_basebandSource;
     AMModSettings m_settings;
 
@@ -260,38 +260,38 @@ private:
 
     std::ifstream m_ifstream;
     QString m_fileName;
-    quint64 m_fileSize;     //!< raw file size (bytes)
-    quint32 m_recordLength; //!< record length in seconds computed from file size
-    int m_sampleRate;
+    quint64 m_fileSize = 0;     //!< raw file size (bytes)
+    quint32 m_recordLength = 0; //!< record length in seconds computed from file size
+    int m_sampleRate = 48000;
 
     QNetworkAccessManager *m_networkManager;
     QNetworkRequest m_networkRequest;
     CWKeyer m_cwKeyer;
-    QObject *m_levelMeter;
+    QObject *m_levelMeter = nullptr;
 
     virtual bool handleMessage(const Message& cmd);
     void applySettings(const AMModSettings& settings, bool force = false);
-    void sendSampleRateToDemodAnalyzer();
+    void sendSampleRateToDemodAnalyzer() const;
     void openFileStream();
     void seekFileStream(int seekPercentage);
-    void webapiFormatChannelReport(SWGSDRangel::SWGChannelReport& response);
-    void webapiReverseSendSettings(QList<QString>& channelSettingsKeys, const AMModSettings& settings, bool force);
+    void webapiFormatChannelReport(SWGSDRangel::SWGChannelReport& response) const;
+    void webapiReverseSendSettings(const QList<QString>& channelSettingsKeys, const AMModSettings& settings, bool force);
     void webapiReverseSendCWSettings(const CWKeyerSettings& settings);
     void sendChannelSettings(
         const QList<ObjectPipe*>& pipes,
-        QList<QString>& channelSettingsKeys,
+        const QList<QString>& channelSettingsKeys,
         const AMModSettings& settings,
         bool force
     );
     void webapiFormatChannelSettings(
-        QList<QString>& channelSettingsKeys,
+        const QList<QString>& channelSettingsKeys,
         SWGSDRangel::SWGChannelSettings *swgChannelSettings,
         const AMModSettings& settings,
         bool force
     );
 
 private slots:
-    void networkManagerFinished(QNetworkReply *reply);
+    void networkManagerFinished(QNetworkReply *reply) const;
 };
 
 

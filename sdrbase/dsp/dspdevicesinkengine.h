@@ -44,7 +44,7 @@ class SDRBASE_API DSPDeviceSinkEngine : public QObject {
 	Q_OBJECT
 
 public:
-	enum State {
+	enum class State {
 		StNotStarted,  //!< engine is before initialization
 		StIdle,        //!< engine is idle
 		StReady,       //!< engine is ready to run
@@ -53,7 +53,7 @@ public:
 	};
 
 	DSPDeviceSinkEngine(uint32_t uid, QObject* parent = nullptr);
-	~DSPDeviceSinkEngine();
+	~DSPDeviceSinkEngine() final;
 
 	uint32_t getUID() const { return m_uid; }
 
@@ -75,8 +75,8 @@ public:
 
 	State state() const { return m_state; } //!< Return DSP engine current state
 
-	QString errorMessage(); //!< Return the current error message
-	QString sinkDeviceDescription(); //!< Return the sink device description
+	QString errorMessage() const; //!< Return the current error message
+	QString sinkDeviceDescription() const; //!< Return the sink device description
 
 private:
 	uint32_t m_uid; //!< unique ID
@@ -91,7 +91,7 @@ private:
 	DeviceSampleSink* m_deviceSampleSink;
 	int m_sampleSinkSequence;
 
-	typedef std::list<BasebandSampleSource*> BasebandSampleSources;
+	using BasebandSampleSources = std::list<BasebandSampleSource *>;
 	BasebandSampleSources m_basebandSampleSources; //!< baseband sample sources within main thread (usually file input)
 
 	BasebandSampleSink *m_spectrumSink;
@@ -112,7 +112,7 @@ private:
 	State gotoError(const QString& errorMsg); //!< Go to an error state
 	void setState(State state);
 
-	void handleSetSink(DeviceSampleSink* sink); //!< Manage sink setting
+	void handleSetSink(const DeviceSampleSink* sink); //!< Manage sink setting
     bool handleMessage(const Message& cmd);
 
 private slots:

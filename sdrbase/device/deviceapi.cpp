@@ -65,9 +65,7 @@ DeviceAPI::DeviceAPI(
     }
 }
 
-DeviceAPI::~DeviceAPI()
-{
-}
+DeviceAPI::~DeviceAPI() = default;
 
 void DeviceAPI::setSpectrumSinkInput(bool sourceElseSink, unsigned int index)
 {
@@ -269,7 +267,7 @@ DeviceAPI::EngineState DeviceAPI::state(int subsystemIndex) const
     }
 }
 
-QString DeviceAPI::errorMessage(int subsystemIndex)
+QString DeviceAPI::errorMessage(int subsystemIndex) const
 {
     if (m_deviceSourceEngine) {
         return m_deviceSourceEngine->errorMessage();
@@ -360,28 +358,28 @@ void DeviceAPI::setDeviceItemIndex(uint32_t index)
 
 void DeviceAPI::setSamplingDevicePluginInterface(PluginInterface *iface)
 {
-     m_pluginInterface = iface;
+    m_pluginInterface = iface;
 }
 
-void DeviceAPI::getDeviceEngineStateStr(QString& state, int subsystemIndex)
+void DeviceAPI::getDeviceEngineStateStr(QString& state, int subsystemIndex) const
 {
     if (m_deviceSourceEngine)
     {
         switch(m_deviceSourceEngine->state())
         {
-        case DSPDeviceSourceEngine::StNotStarted:
+        case DSPDeviceSourceEngine::State::StNotStarted:
             state = "notStarted";
             break;
-        case DSPDeviceSourceEngine::StIdle:
+        case DSPDeviceSourceEngine::State::StIdle:
             state = "idle";
             break;
-        case DSPDeviceSourceEngine::StReady:
+        case DSPDeviceSourceEngine::State::StReady:
             state = "ready";
             break;
-        case DSPDeviceSourceEngine::StRunning:
+        case DSPDeviceSourceEngine::State::StRunning:
             state = "running";
             break;
-        case DSPDeviceSourceEngine::StError:
+        case DSPDeviceSourceEngine::State::StError:
             state = "error";
             break;
         default:
@@ -393,19 +391,19 @@ void DeviceAPI::getDeviceEngineStateStr(QString& state, int subsystemIndex)
     {
         switch(m_deviceSinkEngine->state())
         {
-        case DSPDeviceSinkEngine::StNotStarted:
+        case DSPDeviceSinkEngine::State::StNotStarted:
             state = "notStarted";
             break;
-        case DSPDeviceSinkEngine::StIdle:
+        case DSPDeviceSinkEngine::State::StIdle:
             state = "idle";
             break;
-        case DSPDeviceSinkEngine::StReady:
+        case DSPDeviceSinkEngine::State::StReady:
             state = "ready";
             break;
-        case DSPDeviceSinkEngine::StRunning:
+        case DSPDeviceSinkEngine::State::StRunning:
             state = "running";
             break;
-        case DSPDeviceSinkEngine::StError:
+        case DSPDeviceSinkEngine::State::StError:
             state = "error";
             break;
         default:
@@ -417,19 +415,19 @@ void DeviceAPI::getDeviceEngineStateStr(QString& state, int subsystemIndex)
     {
         switch(m_deviceMIMOEngine->state(subsystemIndex))
         {
-        case DSPDeviceMIMOEngine::StNotStarted:
+        case DSPDeviceMIMOEngine::State::StNotStarted:
             state = "notStarted";
             break;
-        case DSPDeviceMIMOEngine::StIdle:
+        case DSPDeviceMIMOEngine::State::StIdle:
             state = "idle";
             break;
-        case DSPDeviceMIMOEngine::StReady:
+        case DSPDeviceMIMOEngine::State::StReady:
             state = "ready";
             break;
-        case DSPDeviceMIMOEngine::StRunning:
+        case DSPDeviceMIMOEngine::State::StRunning:
             state = "running";
             break;
-        case DSPDeviceMIMOEngine::StError:
+        case DSPDeviceMIMOEngine::State::StError:
             state = "error";
             break;
         default:
@@ -546,26 +544,26 @@ bool DeviceAPI::deserialize(const QByteArray& data)
 
     if (d.getVersion() == 1)
     {
-        QByteArray data;
+        QByteArray bdata;
         QList<quint64> centerFrequency;
 
         if (m_deviceSourceEngine && m_deviceSourceEngine->getSource())
         {
-            d.readBlob(1, &data);
+            d.readBlob(1, &bdata);
             if (data.size() > 0) {
                 m_deviceSourceEngine->getSource()->deserialize(data);
             }
         }
         if (m_deviceSinkEngine && m_deviceSinkEngine->getSink())
         {
-            d.readBlob(2, &data);
+            d.readBlob(2, &bdata);
             if (data.size() > 0) {
                 m_deviceSinkEngine->getSink()->deserialize(data);
             }
         }
         if (m_deviceMIMOEngine && m_deviceMIMOEngine->getMIMO())
         {
-            d.readBlob(3, &data);
+            d.readBlob(3, &bdata);
             if (data.size() > 0) {
                 m_deviceMIMOEngine->getMIMO()->deserialize(data);
             }
@@ -596,7 +594,7 @@ void DeviceAPI::loadSamplingDeviceSettings(const Preset* preset)
             qDebug("DeviceAPI::loadSamplingDeviceSettings: deserializing source %s[%d]: %s",
                 qPrintable(m_samplingDeviceId), m_samplingDeviceSequence, qPrintable(m_samplingDeviceSerial));
 
-            if (m_deviceSourceEngine->getSource() != 0) // Server flavor
+            if (m_deviceSourceEngine->getSource() != nullptr) // Server flavor
             {
                 m_deviceSourceEngine->getSource()->deserialize(*sourceConfig);
             }
@@ -791,8 +789,8 @@ void DeviceAPI::removeBuddy(DeviceAPI* buddy)
 
 void DeviceAPI::clearBuddiesLists()
 {
-    std::vector<DeviceAPI*>::iterator itSource = m_sourceBuddies.begin();
-    std::vector<DeviceAPI*>::iterator itSink = m_sinkBuddies.begin();
+    auto itSource = m_sourceBuddies.begin();
+    auto itSink = m_sinkBuddies.begin();
     bool leaderElected = false;
 
     for (;itSource != m_sourceBuddies.end(); ++itSource)

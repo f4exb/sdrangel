@@ -55,12 +55,7 @@ const char* const AMMod::m_channelId ="AMMod";
 
 AMMod::AMMod(DeviceAPI *deviceAPI) :
     ChannelAPI(m_channelIdURI, ChannelAPI::StreamSingleSource),
-    m_deviceAPI(deviceAPI),
-    m_running(false),
-	m_fileSize(0),
-	m_recordLength(0),
-	m_sampleRate(48000),
-    m_levelMeter(nullptr)
+    m_deviceAPI(deviceAPI)
 {
 	setObjectName(m_channelId);
     applySettings(m_settings, true);
@@ -89,7 +84,7 @@ AMMod::~AMMod()
     m_deviceAPI->removeChannelSourceAPI(this);
     m_deviceAPI->removeChannelSource(this);
 
-    stop();
+    AMMod::stop();
 }
 
 void AMMod::setDeviceAPI(DeviceAPI *deviceAPI)
@@ -185,7 +180,7 @@ bool AMMod::handleMessage(const Message& cmd)
 {
     if (MsgConfigureAMMod::match(cmd))
     {
-        MsgConfigureAMMod& cfg = (MsgConfigureAMMod&) cmd;
+        auto& cfg = (const MsgConfigureAMMod&) cmd;
         qDebug() << "AMMod::handleMessage: MsgConfigureAMMod";
 
         applySettings(cfg.getSettings(), cfg.getForce());
@@ -194,7 +189,7 @@ bool AMMod::handleMessage(const Message& cmd)
     }
 	else if (MsgConfigureFileSourceName::match(cmd))
     {
-        MsgConfigureFileSourceName& conf = (MsgConfigureFileSourceName&) cmd;
+        auto& conf = (const MsgConfigureFileSourceName&) cmd;
         m_fileName = conf.getFileName();
         qDebug() << "AMMod::handleMessage: MsgConfigureFileSourceName";
         openFileStream();
@@ -202,7 +197,7 @@ bool AMMod::handleMessage(const Message& cmd)
     }
     else if (MsgConfigureFileSourceSeek::match(cmd))
     {
-        MsgConfigureFileSourceSeek& conf = (MsgConfigureFileSourceSeek&) cmd;
+        auto& conf = (const MsgConfigureFileSourceSeek&) cmd;
         int seekPercentage = conf.getPercentage();
         qDebug() << "AMMod::handleMessage: MsgConfigureFileSourceSeek";
         seekFileStream(seekPercentage);
@@ -211,13 +206,13 @@ bool AMMod::handleMessage(const Message& cmd)
     }
     else if (MsgConfigureFileSourceStreamTiming::match(cmd))
     {
-    	std::size_t samplesCount;
+        std::size_t samplesCount;
 
-    	if (m_ifstream.eof()) {
-    		samplesCount = m_fileSize / sizeof(Real);
-    	} else {
-    		samplesCount = m_ifstream.tellg() / sizeof(Real);
-    	}
+        if (m_ifstream.eof()) {
+            samplesCount = m_fileSize / sizeof(Real);
+        } else {
+            samplesCount = m_ifstream.tellg() / sizeof(Real);
+        }
 
     	MsgReportFileSourceStreamTiming *report;
         report = MsgReportFileSourceStreamTiming::create(samplesCount);
@@ -227,7 +222,7 @@ bool AMMod::handleMessage(const Message& cmd)
     }
     else if (CWKeyer::MsgConfigureCWKeyer::match(cmd))
     {
-        const CWKeyer::MsgConfigureCWKeyer& cfg = (CWKeyer::MsgConfigureCWKeyer&) cmd;
+        auto& cfg = (const CWKeyer::MsgConfigureCWKeyer&) cmd;
         qDebug() << "AMMod::handleMessage: MsgConfigureCWKeyer";
 
         if (m_settings.m_useReverseAPI) {
@@ -240,7 +235,7 @@ bool AMMod::handleMessage(const Message& cmd)
     {
         qDebug() << "AMMod::handleMessage: DSPSignalNotification";
         // Forward to the source
-        DSPSignalNotification& notif = (DSPSignalNotification&) cmd;
+        auto& notif = (const DSPSignalNotification&) cmd;
 
         if (m_running) {
             m_basebandSource->getInputMessageQueue()->push(new DSPSignalNotification(notif));
@@ -276,7 +271,7 @@ void AMMod::openFileStream()
     m_ifstream.seekg(0,std::ios_base::beg);
 
     m_sampleRate = 48000; // fixed rate
-    m_recordLength = m_fileSize / (sizeof(Real) * m_sampleRate);
+    m_recordLength = (quint32) (m_fileSize / (sizeof(Real) * m_sampleRate));
 
     qDebug() << "AMMod::openFileStream: " << m_fileName.toStdString().c_str()
             << " fileSize: " << m_fileSize << "bytes"
@@ -394,7 +389,7 @@ void AMMod::applySettings(const AMModSettings& settings, bool force)
     QList<ObjectPipe*> pipes;
     MainCore::instance()->getMessagePipes().getMessagePipes(this, "settings", pipes);
 
-    if (pipes.size() > 0) {
+    if (!pipes.empty()) {
         sendChannelSettings(pipes, reverseAPIKeys, settings, force);
     }
 
@@ -423,12 +418,12 @@ bool AMMod::deserialize(const QByteArray& data)
     }
 }
 
-void AMMod::sendSampleRateToDemodAnalyzer()
+void AMMod::sendSampleRateToDemodAnalyzer() const
 {
     QList<ObjectPipe*> pipes;
     MainCore::instance()->getMessagePipes().getMessagePipes(this, "reportdemod", pipes);
 
-    if (pipes.size() > 0)
+    if (!pipes.empty())
     {
         for (const auto& pipe : pipes)
         {
@@ -555,13 +550,13 @@ void AMMod::webapiUpdateChannelSettings(
         settings.m_reverseAPIAddress = *response.getAmModSettings()->getReverseApiAddress();
     }
     if (channelSettingsKeys.contains("reverseAPIPort")) {
-        settings.m_reverseAPIPort = response.getAmModSettings()->getReverseApiPort();
+        settings.m_reverseAPIPort = (uint16_t) response.getAmModSettings()->getReverseApiPort();
     }
     if (channelSettingsKeys.contains("reverseAPIDeviceIndex")) {
-        settings.m_reverseAPIDeviceIndex = response.getAmModSettings()->getReverseApiDeviceIndex();
+        settings.m_reverseAPIDeviceIndex = (uint16_t) response.getAmModSettings()->getReverseApiDeviceIndex();
     }
     if (channelSettingsKeys.contains("reverseAPIChannelIndex")) {
-        settings.m_reverseAPIChannelIndex = response.getAmModSettings()->getReverseApiChannelIndex();
+        settings.m_reverseAPIChannelIndex = (uint16_t) response.getAmModSettings()->getReverseApiChannelIndex();
     }
     if (settings.m_channelMarker && channelSettingsKeys.contains("channelMarker")) {
         settings.m_channelMarker->updateFrom(channelSettingsKeys, response.getAmModSettings()->getChannelMarker());
@@ -631,7 +626,7 @@ void AMMod::webapiFormatChannelSettings(SWGSDRangel::SWGChannelSettings& respons
         }
         else
         {
-            SWGSDRangel::SWGChannelMarker *swgChannelMarker = new SWGSDRangel::SWGChannelMarker();
+            auto *swgChannelMarker = new SWGSDRangel::SWGChannelMarker();
             settings.m_channelMarker->formatTo(swgChannelMarker);
             response.getAmModSettings()->setChannelMarker(swgChannelMarker);
         }
@@ -645,16 +640,16 @@ void AMMod::webapiFormatChannelSettings(SWGSDRangel::SWGChannelSettings& respons
         }
         else
         {
-            SWGSDRangel::SWGRollupState *swgRollupState = new SWGSDRangel::SWGRollupState();
+            auto *swgRollupState = new SWGSDRangel::SWGRollupState();
             settings.m_rollupState->formatTo(swgRollupState);
             response.getAmModSettings()->setRollupState(swgRollupState);
         }
     }
 }
 
-void AMMod::webapiFormatChannelReport(SWGSDRangel::SWGChannelReport& response)
+void AMMod::webapiFormatChannelReport(SWGSDRangel::SWGChannelReport& response) const
 {
-    response.getAmModReport()->setChannelPowerDb(CalcDb::dbPower(getMagSq()));
+    response.getAmModReport()->setChannelPowerDb((float) CalcDb::dbPower(getMagSq()));
 
     if (m_running)
     {
@@ -663,9 +658,9 @@ void AMMod::webapiFormatChannelReport(SWGSDRangel::SWGChannelReport& response)
     }
 }
 
-void AMMod::webapiReverseSendSettings(QList<QString>& channelSettingsKeys, const AMModSettings& settings, bool force)
+void AMMod::webapiReverseSendSettings(const QList<QString>& channelSettingsKeys, const AMModSettings& settings, bool force)
 {
-    SWGSDRangel::SWGChannelSettings *swgChannelSettings = new SWGSDRangel::SWGChannelSettings();
+    auto *swgChannelSettings = new SWGSDRangel::SWGChannelSettings();
     webapiFormatChannelSettings(channelSettingsKeys, swgChannelSettings, settings, force);
 
     QString channelSettingsURL = QString("http://%1:%2/sdrangel/deviceset/%3/channel/%4/settings")
@@ -676,8 +671,8 @@ void AMMod::webapiReverseSendSettings(QList<QString>& channelSettingsKeys, const
     m_networkRequest.setUrl(QUrl(channelSettingsURL));
     m_networkRequest.setHeader(QNetworkRequest::ContentTypeHeader, "application/json");
 
-    QBuffer *buffer = new QBuffer();
-    buffer->open((QBuffer::ReadWrite));
+    auto *buffer = new QBuffer();
+    buffer->open(QBuffer::ReadWrite);
     buffer->write(swgChannelSettings->asJson().toUtf8());
     buffer->seek(0);
 
@@ -690,7 +685,7 @@ void AMMod::webapiReverseSendSettings(QList<QString>& channelSettingsKeys, const
 
 void AMMod::webapiReverseSendCWSettings(const CWKeyerSettings& cwKeyerSettings)
 {
-    SWGSDRangel::SWGChannelSettings *swgChannelSettings = new SWGSDRangel::SWGChannelSettings();
+    auto *swgChannelSettings = new SWGSDRangel::SWGChannelSettings();
     swgChannelSettings->setDirection(1); // single source (Tx)
     swgChannelSettings->setChannelType(new QString("AMMod"));
     swgChannelSettings->setAmModSettings(new SWGSDRangel::SWGAMModSettings());
@@ -698,7 +693,7 @@ void AMMod::webapiReverseSendCWSettings(const CWKeyerSettings& cwKeyerSettings)
 
     swgAMModSettings->setCwKeyer(new SWGSDRangel::SWGCWKeyerSettings());
     SWGSDRangel::SWGCWKeyerSettings *apiCwKeyerSettings = swgAMModSettings->getCwKeyer();
-    getCWKeyer()->webapiFormatChannelSettings(apiCwKeyerSettings, cwKeyerSettings);
+    CWKeyer::webapiFormatChannelSettings(apiCwKeyerSettings, cwKeyerSettings);
 
     QString channelSettingsURL = QString("http://%1:%2/sdrangel/deviceset/%3/channel/%4/settings")
             .arg(m_settings.m_reverseAPIAddress)
@@ -708,8 +703,8 @@ void AMMod::webapiReverseSendCWSettings(const CWKeyerSettings& cwKeyerSettings)
     m_networkRequest.setUrl(QUrl(channelSettingsURL));
     m_networkRequest.setHeader(QNetworkRequest::ContentTypeHeader, "application/json");
 
-    QBuffer *buffer = new QBuffer();
-    buffer->open((QBuffer::ReadWrite));
+    auto *buffer = new QBuffer();
+    buffer->open(QBuffer::ReadWrite);
     buffer->write(swgChannelSettings->asJson().toUtf8());
     buffer->seek(0);
 
@@ -722,7 +717,7 @@ void AMMod::webapiReverseSendCWSettings(const CWKeyerSettings& cwKeyerSettings)
 
 void AMMod::sendChannelSettings(
     const QList<ObjectPipe*>& pipes,
-    QList<QString>& channelSettingsKeys,
+    const QList<QString>& channelSettingsKeys,
     const AMModSettings& settings,
     bool force)
 {
@@ -732,7 +727,7 @@ void AMMod::sendChannelSettings(
 
         if (messageQueue)
         {
-            SWGSDRangel::SWGChannelSettings *swgChannelSettings = new SWGSDRangel::SWGChannelSettings();
+            auto *swgChannelSettings = new SWGSDRangel::SWGChannelSettings();
             webapiFormatChannelSettings(channelSettingsKeys, swgChannelSettings, settings, force);
             MainCore::MsgChannelSettings *msg = MainCore::MsgChannelSettings::create(
                 this,
@@ -746,7 +741,7 @@ void AMMod::sendChannelSettings(
 }
 
 void AMMod::webapiFormatChannelSettings(
-        QList<QString>& channelSettingsKeys,
+        const QList<QString>& channelSettingsKeys,
         SWGSDRangel::SWGChannelSettings *swgChannelSettings,
         const AMModSettings& settings,
         bool force
@@ -803,25 +798,25 @@ void AMMod::webapiFormatChannelSettings(
         const CWKeyerSettings& cwKeyerSettings = getCWKeyer()->getSettings();
         swgAMModSettings->setCwKeyer(new SWGSDRangel::SWGCWKeyerSettings());
         SWGSDRangel::SWGCWKeyerSettings *apiCwKeyerSettings = swgAMModSettings->getCwKeyer();
-        getCWKeyer()->webapiFormatChannelSettings(apiCwKeyerSettings, cwKeyerSettings);
+        CWKeyer::webapiFormatChannelSettings(apiCwKeyerSettings, cwKeyerSettings);
     }
 
     if (settings.m_channelMarker && (channelSettingsKeys.contains("channelMarker") || force))
     {
-        SWGSDRangel::SWGChannelMarker *swgChannelMarker = new SWGSDRangel::SWGChannelMarker();
+        auto *swgChannelMarker = new SWGSDRangel::SWGChannelMarker();
         settings.m_channelMarker->formatTo(swgChannelMarker);
         swgAMModSettings->setChannelMarker(swgChannelMarker);
     }
 
     if (settings.m_rollupState && (channelSettingsKeys.contains("rollupState") || force))
     {
-        SWGSDRangel::SWGRollupState *swgRollupState = new SWGSDRangel::SWGRollupState();
+        auto *swgRollupState = new SWGSDRangel::SWGRollupState();
         settings.m_rollupState->formatTo(swgRollupState);
         swgAMModSettings->setRollupState(swgRollupState);
     }
 }
 
-void AMMod::networkManagerFinished(QNetworkReply *reply)
+void AMMod::networkManagerFinished(QNetworkReply *reply) const
 {
     QNetworkReply::NetworkError replyError = reply->error();
 
