@@ -43,11 +43,11 @@ class AMModSource : public QObject,  public ChannelSampleSource
     Q_OBJECT
 public:
     AMModSource();
-    virtual ~AMModSource();
+    ~AMModSource() final;
 
-    virtual void pull(SampleVector::iterator begin, unsigned int nbSamples);
-    virtual void pullOne(Sample& sample);
-    virtual void prefetch(unsigned int nbSamples);
+    void pull(SampleVector::iterator begin, unsigned int nbSamples) final;
+    void pullOne(Sample& sample) final;
+    void prefetch(unsigned int nbSamples) final;
 
     void setInputFileStream(std::ifstream *ifstream) { m_ifstream = ifstream; }
     AudioFifo *getAudioFifo() { return &m_audioFifo; }
@@ -70,8 +70,8 @@ public:
     void applyChannelSettings(int channelSampleRate, int channelFrequencyOffset, bool force = false);
 
 private:
-    int m_channelSampleRate;
-    int m_channelFrequencyOffset;
+    int m_channelSampleRate = 48000;
+    int m_channelFrequencyOffset = 0;
     AMModSettings m_settings;
     ChannelAPI *m_channel;
 
@@ -91,7 +91,7 @@ private:
     double m_magsq;
     MovingAverageUtil<double, double, 16> m_movingAverage;
 
-    int m_audioSampleRate;
+    int m_audioSampleRate = 48000;
     AudioVector m_audioBuffer;
     unsigned int m_audioBufferFill;
     AudioVector m_audioReadBuffer;
@@ -106,24 +106,24 @@ private:
     int m_demodBufferFill;
     bool m_demodBufferEnabled;
 
-    quint32 m_levelCalcCount;
+    quint32 m_levelCalcCount = 0;
     qreal m_rmsLevel;
     qreal m_peakLevelOut;
-    Real m_peakLevel;
-    Real m_levelSum;
+    Real m_peakLevel = 0.0f;
+    Real m_levelSum = 0.0f;
 
-    std::ifstream *m_ifstream;
-    CWKeyer *m_cwKeyer;
+    std::ifstream *m_ifstream = nullptr;
+    CWKeyer *m_cwKeyer = nullptr;
 
     QRecursiveMutex m_mutex;
 
     static const int m_levelNbSamples;
 
-    void processOneSample(Complex& ci);
+    void processOneSample(const Complex& ci);
     void pullAF(Real& sample);
     void pullAudio(unsigned int nbSamples);
     void pushFeedback(Real sample);
-    void calculateLevel(Real& sample);
+    void calculateLevel(const Real& sample);
     void modulateSample();
 
 private slots:

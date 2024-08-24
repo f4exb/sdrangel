@@ -68,11 +68,11 @@ Bladerf1Output::~Bladerf1Output()
     delete m_networkManager;
 
     if (m_running) {
-        stop();
+        Bladerf1Output::stop();
     }
 
     closeDevice();
-    m_deviceAPI->setBuddySharedPtr(0);
+    m_deviceAPI->setBuddySharedPtr(nullptr);
 }
 
 void Bladerf1Output::destroy()
@@ -82,7 +82,7 @@ void Bladerf1Output::destroy()
 
 bool Bladerf1Output::openDevice()
 {
-    if (m_dev != 0) {
+    if (m_dev != nullptr) {
         closeDevice();
     }
 
@@ -90,24 +90,24 @@ bool Bladerf1Output::openDevice()
 
     m_sampleSourceFifo.resize(SampleSourceFifo::getSizePolicy(m_settings.m_devSampleRate));
 
-    if (m_deviceAPI->getSourceBuddies().size() > 0)
+    if (!m_deviceAPI->getSourceBuddies().empty())
     {
-        DeviceAPI *sourceBuddy = m_deviceAPI->getSourceBuddies()[0];
-        DeviceBladeRF1Params *buddySharedParams = (DeviceBladeRF1Params *) sourceBuddy->getBuddySharedPtr();
+        const DeviceAPI *sourceBuddy = m_deviceAPI->getSourceBuddies()[0];
+        const DeviceBladeRF1Params *buddySharedParams = (DeviceBladeRF1Params *) sourceBuddy->getBuddySharedPtr();
 
-        if (buddySharedParams == 0)
+        if (buddySharedParams == nullptr)
         {
             qCritical("BladerfOutput::start: could not get shared parameters from buddy");
             return false;
         }
 
-        if (buddySharedParams->m_dev == 0) // device is not opened by buddy
+        if (buddySharedParams->m_dev == nullptr) // device is not opened by buddy
         {
             qCritical("BladerfOutput::start: could not get BladeRF handle from buddy");
             return false;
         }
 
-        m_sharedParams = *(buddySharedParams); // copy parameters from buddy
+        m_sharedParams = *buddySharedParams; // copy parameters from buddy
         m_dev = m_sharedParams.m_dev;          // get BladeRF handle
     }
     else
@@ -121,7 +121,6 @@ bool Bladerf1Output::openDevice()
         m_sharedParams.m_dev = m_dev;
     }
 
-    // TODO: adjust USB transfer data according to sample rate
     if ((res = bladerf_sync_config(m_dev, BLADERF_TX_X1, BLADERF_FORMAT_SC16_Q11, 64, 8192, 32, 10000)) < 0)
     {
         qCritical("BladerfOutput::start: bladerf_sync_config with return code %d", res);
@@ -183,14 +182,14 @@ void Bladerf1Output::closeDevice()
     {
         qDebug("BladerfOutput::closeDevice: closing device since Rx side is not open");
 
-        if (m_dev != 0) // close BladeRF
+        if (m_dev != nullptr) // close BladeRF
         {
             bladerf_close(m_dev);
         }
     }
 
     m_sharedParams.m_dev = nullptr;
-    m_dev = 0;
+    m_dev = nullptr;
 }
 
 void Bladerf1Output::stop()
@@ -273,7 +272,7 @@ bool Bladerf1Output::handleMessage(const Message& message)
 {
 	if (MsgConfigureBladerf1::match(message))
 	{
-		MsgConfigureBladerf1& conf = (MsgConfigureBladerf1&) message;
+		auto& conf = (const MsgConfigureBladerf1&) message;
 		qDebug() << "BladerfOutput::handleMessage: MsgConfigureBladerf";
 
 		if (!applySettings(conf.getSettings(), conf.getSettingsKeys(), conf.getForce())) {
@@ -284,7 +283,7 @@ bool Bladerf1Output::handleMessage(const Message& message)
 	}
     else if (MsgStartStop::match(message))
     {
-        MsgStartStop& cmd = (MsgStartStop&) message;
+        auto& cmd = (const MsgStartStop&) message;
         qDebug() << "BladerfOutput::handleMessage: MsgStartStop: " << (cmd.getStartStop() ? "start" : "stop");
 
         if (cmd.getStartStop())
@@ -316,7 +315,7 @@ bool Bladerf1Output::applySettings(const BladeRF1OutputSettings& settings, const
 	bool forwardChange    = false;
     bool suspendOwnThread = false;
     bool threadWasRunning = false;
-//	QMutexLocker mutexLocker(&m_mutex);
+	QMutexLocker mutexLocker(&m_mutex);
 
     if (settingsKeys.contains("devSampleRate") ||
         settingsKeys.contains("log2Interp") || force)
@@ -324,16 +323,10 @@ bool Bladerf1Output::applySettings(const BladeRF1OutputSettings& settings, const
         suspendOwnThread = true;
     }
 
-    if (suspendOwnThread)
+    if (suspendOwnThread && m_bladerfThread && m_bladerfThread->isRunning())
     {
-        if (m_bladerfThread)
-        {
-            if (m_bladerfThread->isRunning())
-            {
-                m_bladerfThread->stopWork();
-                threadWasRunning = true;
-            }
-        }
+        m_bladerfThread->stopWork();
+        threadWasRunning = true;
     }
 
 	if (settingsKeys.contains("devSampleRate") ||
@@ -354,7 +347,7 @@ bool Bladerf1Output::applySettings(const BladeRF1OutputSettings& settings, const
     {
         forwardChange = true;
 
-        if (m_dev != 0)
+        if (m_dev != nullptr)
         {
             unsigned int actualSamplerate;
 
@@ -370,129 +363,108 @@ bool Bladerf1Output::applySettings(const BladeRF1OutputSettings& settings, const
     {
         forwardChange = true;
 
-        if (m_bladerfThread != 0)
+        if (m_bladerfThread != nullptr)
         {
             m_bladerfThread->setLog2Interpolation(settings.m_log2Interp);
             qDebug() << "BladerfOutput::applySettings: set interpolation to " << (1<<settings.m_log2Interp);
         }
     }
 
-	if (settingsKeys.contains("vga1") || force)
+	if ((m_dev != nullptr) && (settingsKeys.contains("vga1") || force))
 	{
-		if (m_dev != 0)
-		{
-			if (bladerf_set_txvga1(m_dev, settings.m_vga1) != 0) {
-				qDebug("BladerfOutput::applySettings: bladerf_set_txvga1() failed");
-			} else {
-				qDebug() << "BladerfOutput::applySettings: VGA1 gain set to " << settings.m_vga1;
-			}
-		}
-	}
-
-	if (settingsKeys.contains("vga2") || force)
-	{
-		if(m_dev != 0)
-		{
-			if (bladerf_set_txvga2(m_dev, settings.m_vga2) != 0) {
-				qDebug("BladerfOutput::applySettings:bladerf_set_rxvga2() failed");
-			} else {
-				qDebug() << "BladerfOutput::applySettings: VGA2 gain set to " << settings.m_vga2;
-			}
-		}
-	}
-
-	if (settingsKeys.contains("xb200") || force)
-	{
-		if (m_dev != 0)
-		{
-            bool changeSettings;
-
-            if (m_deviceAPI->getSourceBuddies().size() > 0)
-            {
-                DeviceAPI *buddy = m_deviceAPI->getSourceBuddies()[0];
-
-                if (buddy->getDeviceSourceEngine()->state() == DSPDeviceSourceEngine::StRunning) { // Tx side running
-                    changeSettings = false;
-                } else {
-                    changeSettings = true;
-                }
-            }
-            else // No Rx open
-            {
-                changeSettings = true;
-            }
-
-            if (changeSettings)
-            {
-                if (settings.m_xb200)
-                {
-                    if (bladerf_expansion_attach(m_dev, BLADERF_XB_200) != 0) {
-                        qDebug("BladerfOutput::applySettings: bladerf_expansion_attach(xb200) failed");
-                    } else {
-                        qDebug() << "BladerfOutput::applySettings: Attach XB200";
-                    }
-                }
-                else
-                {
-                    if (bladerf_expansion_attach(m_dev, BLADERF_XB_NONE) != 0) {
-                        qDebug("BladerfOutput::applySettings: bladerf_expansion_attach(none) failed");
-                    } else {
-                        qDebug() << "BladerfOutput::applySettings: Detach XB200";
-                    }
-                }
-
-                m_sharedParams.m_xb200Attached = settings.m_xb200;
-            }
+        if (bladerf_set_txvga1(m_dev, settings.m_vga1) != 0) {
+            qDebug("BladerfOutput::applySettings: bladerf_set_txvga1() failed");
+        } else {
+            qDebug() << "BladerfOutput::applySettings: VGA1 gain set to " << settings.m_vga1;
         }
 	}
 
-	if (settingsKeys.contains("xb200Path") || force)
+	if ((m_dev != nullptr) && (settingsKeys.contains("vga2") || force))
 	{
-		if (m_dev != 0)
-		{
-			if (bladerf_xb200_set_path(m_dev, BLADERF_MODULE_TX, settings.m_xb200Path) != 0) {
-				qDebug("BladerfOutput::applySettings: bladerf_xb200_set_path(BLADERF_MODULE_TX) failed");
-			} else {
-				qDebug() << "BladerfOutput::applySettings: set xb200 path to " << settings.m_xb200Path;
-			}
-		}
+        if (bladerf_set_txvga2(m_dev, settings.m_vga2) != 0) {
+            qDebug("BladerfOutput::applySettings:bladerf_set_rxvga2() failed");
+        } else {
+            qDebug() << "BladerfOutput::applySettings: VGA2 gain set to " << settings.m_vga2;
+        }
 	}
 
-	if (settingsKeys.contains("xb200Filter") || force)
+	if ((m_dev != nullptr) && (settingsKeys.contains("xb200") || force))
 	{
-		if (m_dev != 0)
-		{
-			if (bladerf_xb200_set_filterbank(m_dev, BLADERF_MODULE_TX, settings.m_xb200Filter) != 0) {
-				qDebug("BladerfOutput::applySettings: bladerf_xb200_set_filterbank(BLADERF_MODULE_TX) failed");
-			} else {
-				qDebug() << "BladerfOutput::applySettings: set xb200 filter to " << settings.m_xb200Filter;
-			}
-		}
+        bool changeSettings;
+
+        if (!m_deviceAPI->getSourceBuddies().empty())
+        {
+            DeviceAPI *buddy = m_deviceAPI->getSourceBuddies()[0];
+
+            if (buddy->getDeviceSourceEngine()->state() == DSPDeviceSourceEngine::State::StRunning) { // Tx side running
+                changeSettings = false;
+            } else {
+                changeSettings = true;
+            }
+        }
+        else // No Rx open
+        {
+            changeSettings = true;
+        }
+
+        if (changeSettings)
+        {
+            if (settings.m_xb200)
+            {
+                if (bladerf_expansion_attach(m_dev, BLADERF_XB_200) != 0) {
+                    qDebug("BladerfOutput::applySettings: bladerf_expansion_attach(xb200) failed");
+                } else {
+                    qDebug() << "BladerfOutput::applySettings: Attach XB200";
+                }
+            }
+            else
+            {
+                if (bladerf_expansion_attach(m_dev, BLADERF_XB_NONE) != 0) {
+                    qDebug("BladerfOutput::applySettings: bladerf_expansion_attach(none) failed");
+                } else {
+                    qDebug() << "BladerfOutput::applySettings: Detach XB200";
+                }
+            }
+
+            m_sharedParams.m_xb200Attached = settings.m_xb200;
+        }
 	}
 
-	if (settingsKeys.contains("bandwidth") || force)
+	if ((m_dev != nullptr) && (settingsKeys.contains("xb200Path") || force))
 	{
-		if (m_dev != 0)
-		{
-			unsigned int actualBandwidth;
+        if (bladerf_xb200_set_path(m_dev, BLADERF_MODULE_TX, settings.m_xb200Path) != 0) {
+            qDebug("BladerfOutput::applySettings: bladerf_xb200_set_path(BLADERF_MODULE_TX) failed");
+        } else {
+            qDebug() << "BladerfOutput::applySettings: set xb200 path to " << settings.m_xb200Path;
+        }
+	}
 
-			if (bladerf_set_bandwidth(m_dev, BLADERF_MODULE_TX, settings.m_bandwidth, &actualBandwidth) < 0) {
-				qCritical("BladerfOutput::applySettings: could not set bandwidth: %d", settings.m_bandwidth);
-			} else {
-				qDebug() << "BladerfOutput::applySettings: bladerf_set_bandwidth(BLADERF_MODULE_TX) actual bandwidth is " << actualBandwidth;
-			}
-		}
+	if ((m_dev != nullptr) && (settingsKeys.contains("xb200Filter") || force))
+	{
+        if (bladerf_xb200_set_filterbank(m_dev, BLADERF_MODULE_TX, settings.m_xb200Filter) != 0) {
+            qDebug("BladerfOutput::applySettings: bladerf_xb200_set_filterbank(BLADERF_MODULE_TX) failed");
+        } else {
+            qDebug() << "BladerfOutput::applySettings: set xb200 filter to " << settings.m_xb200Filter;
+        }
+	}
+
+	if ((m_dev != nullptr) && (settingsKeys.contains("bandwidth") || force))
+	{
+        unsigned int actualBandwidth;
+
+        if (bladerf_set_bandwidth(m_dev, BLADERF_MODULE_TX, settings.m_bandwidth, &actualBandwidth) < 0) {
+            qCritical("BladerfOutput::applySettings: could not set bandwidth: %d", settings.m_bandwidth);
+        } else {
+            qDebug() << "BladerfOutput::applySettings: bladerf_set_bandwidth(BLADERF_MODULE_TX) actual bandwidth is " << actualBandwidth;
+        }
 	}
 
 	if (settingsKeys.contains("centerFrequency"))
     {
 		forwardChange = true;
 
-        if (m_dev != 0)
-        {
-            if (bladerf_set_frequency( m_dev, BLADERF_MODULE_TX, settings.m_centerFrequency ) != 0) {
-                qDebug("BladerfOutput::applySettings: bladerf_set_frequency(%lld) failed", settings.m_centerFrequency);
-            }
+        if ((m_dev != nullptr) && (bladerf_set_frequency( m_dev, BLADERF_MODULE_TX, settings.m_centerFrequency ) != 0)) {
+            qDebug("BladerfOutput::applySettings: bladerf_set_frequency(%lld) failed", settings.m_centerFrequency);
         }
 	}
 
@@ -519,7 +491,7 @@ bool Bladerf1Output::applySettings(const BladeRF1OutputSettings& settings, const
 	if (forwardChange)
 	{
 		int sampleRate = m_settings.m_devSampleRate/(1<<m_settings.m_log2Interp);
-		DSPSignalNotification *notif = new DSPSignalNotification(sampleRate, m_settings.m_centerFrequency);
+		auto *notif = new DSPSignalNotification(sampleRate, m_settings.m_centerFrequency);
 		m_deviceAPI->getDeviceEngineInputMessageQueue()->push(notif);
 	}
 
@@ -608,7 +580,7 @@ void Bladerf1Output::webapiUpdateDeviceSettings(
         settings.m_log2Interp = response.getBladeRf1OutputSettings()->getLog2Interp();
     }
     if (deviceSettingsKeys.contains("xb200")) {
-        settings.m_xb200 = response.getBladeRf1OutputSettings()->getXb200() == 0 ? 0 : 1;
+        settings.m_xb200 = response.getBladeRf1OutputSettings()->getXb200() == 0 ? false : true;
     }
     if (deviceSettingsKeys.contains("xb200Path")) {
         settings.m_xb200Path = static_cast<bladerf_xb200_path>(response.getBladeRf1OutputSettings()->getXb200Path());
@@ -623,10 +595,10 @@ void Bladerf1Output::webapiUpdateDeviceSettings(
         settings.m_reverseAPIAddress = *response.getBladeRf1OutputSettings()->getReverseApiAddress();
     }
     if (deviceSettingsKeys.contains("reverseAPIPort")) {
-        settings.m_reverseAPIPort = response.getBladeRf1OutputSettings()->getReverseApiPort();
+        settings.m_reverseAPIPort = (uint16_t) response.getBladeRf1OutputSettings()->getReverseApiPort();
     }
     if (deviceSettingsKeys.contains("reverseAPIDeviceIndex")) {
-        settings.m_reverseAPIDeviceIndex = response.getBladeRf1OutputSettings()->getReverseApiDeviceIndex();
+        settings.m_reverseAPIDeviceIndex = (uint16_t) response.getBladeRf1OutputSettings()->getReverseApiDeviceIndex();
     }
 }
 
@@ -660,7 +632,7 @@ int Bladerf1Output::webapiRun(
 
 void Bladerf1Output::webapiReverseSendSettings(const QList<QString>& deviceSettingsKeys, const BladeRF1OutputSettings& settings, bool force)
 {
-    SWGSDRangel::SWGDeviceSettings *swgDeviceSettings = new SWGSDRangel::SWGDeviceSettings();
+    auto *swgDeviceSettings = new SWGSDRangel::SWGDeviceSettings();
     swgDeviceSettings->setDirection(1); // single Tx
     swgDeviceSettings->setOriginatorIndex(m_deviceAPI->getDeviceSetIndex());
     swgDeviceSettings->setDeviceHwType(new QString("BladeRF1"));
@@ -704,8 +676,8 @@ void Bladerf1Output::webapiReverseSendSettings(const QList<QString>& deviceSetti
     m_networkRequest.setUrl(QUrl(deviceSettingsURL));
     m_networkRequest.setHeader(QNetworkRequest::ContentTypeHeader, "application/json");
 
-    QBuffer *buffer = new QBuffer();
-    buffer->open((QBuffer::ReadWrite));
+    auto *buffer = new QBuffer();
+    buffer->open(QBuffer::ReadWrite);
     buffer->write(swgDeviceSettings->asJson().toUtf8());
     buffer->seek(0);
 
@@ -718,7 +690,7 @@ void Bladerf1Output::webapiReverseSendSettings(const QList<QString>& deviceSetti
 
 void Bladerf1Output::webapiReverseSendStartStop(bool start)
 {
-    SWGSDRangel::SWGDeviceSettings *swgDeviceSettings = new SWGSDRangel::SWGDeviceSettings();
+    auto *swgDeviceSettings = new SWGSDRangel::SWGDeviceSettings();
     swgDeviceSettings->setDirection(1); // single Tx
     swgDeviceSettings->setOriginatorIndex(m_deviceAPI->getDeviceSetIndex());
     swgDeviceSettings->setDeviceHwType(new QString("BladeRF1"));
@@ -730,8 +702,8 @@ void Bladerf1Output::webapiReverseSendStartStop(bool start)
     m_networkRequest.setUrl(QUrl(deviceSettingsURL));
     m_networkRequest.setHeader(QNetworkRequest::ContentTypeHeader, "application/json");
 
-    QBuffer *buffer = new QBuffer();
-    buffer->open((QBuffer::ReadWrite));
+    auto *buffer = new QBuffer();
+    buffer->open(QBuffer::ReadWrite);
     buffer->write(swgDeviceSettings->asJson().toUtf8());
     buffer->seek(0);
     QNetworkReply *reply;
@@ -746,7 +718,7 @@ void Bladerf1Output::webapiReverseSendStartStop(bool start)
     delete swgDeviceSettings;
 }
 
-void Bladerf1Output::networkManagerFinished(QNetworkReply *reply)
+void Bladerf1Output::networkManagerFinished(QNetworkReply *reply) const
 {
     QNetworkReply::NetworkError replyError = reply->error();
 

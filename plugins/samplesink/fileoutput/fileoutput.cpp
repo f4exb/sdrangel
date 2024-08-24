@@ -44,11 +44,8 @@ MESSAGE_CLASS_DEFINITION(FileOutput::MsgReportFileOutputStreamTiming, Message)
 
 FileOutput::FileOutput(DeviceAPI *deviceAPI) :
     m_deviceAPI(deviceAPI),
-    m_running(false),
 	m_settings(),
-	m_fileOutputWorker(nullptr),
 	m_deviceDescription("FileOutput"),
-	m_startingTimeStamp(0),
 	m_masterTimer(deviceAPI->getMasterTimer())
 {
     m_deviceAPI->setNbSinkStreams(1);
@@ -58,7 +55,7 @@ FileOutput::FileOutput(DeviceAPI *deviceAPI) :
 FileOutput::~FileOutput()
 {
 	delete m_networkManager;
-	stop();
+	FileOutput::stop();
 }
 
 void FileOutput::destroy()
@@ -75,7 +72,7 @@ void FileOutput::openFileStream()
 	m_ofstream.open(m_settings.m_fileName.toStdString().c_str(), std::ios::binary);
 
     FileRecord::Header header;
-	int actualSampleRate = m_settings.m_sampleRate * (1<<m_settings.m_log2Interp);
+	auto actualSampleRate = (int) (m_settings.m_sampleRate * (1<<m_settings.m_log2Interp));
     header.sampleRate = actualSampleRate;
     header.centerFrequency = m_settings.m_centerFrequency;
     m_startingTimeStamp = QDateTime::currentMSecsSinceEpoch();
@@ -106,14 +103,13 @@ bool FileOutput::start()
 
 	m_fileOutputWorker = new FileOutputWorker(&m_ofstream, &m_sampleSourceFifo);
     m_fileOutputWorker->moveToThread(&m_fileOutputWorkerThread);
-	m_fileOutputWorker->setSamplerate(m_settings.m_sampleRate);
+	m_fileOutputWorker->setSamplerate((int) m_settings.m_sampleRate);
 	m_fileOutputWorker->setLog2Interpolation(m_settings.m_log2Interp);
 	m_fileOutputWorker->connectTimer(m_masterTimer);
 	startWorker();
     m_running = true;
 
 	mutexLocker.unlock();
-	//applySettings(m_generalSettings, m_settings, true);
 	qDebug("FileOutput::start: started");
 
     if (getMessageQueueToGUI())
@@ -201,7 +197,7 @@ const QString& FileOutput::getDeviceDescription() const
 
 int FileOutput::getSampleRate() const
 {
-	return m_settings.m_sampleRate;
+	return (int) m_settings.m_sampleRate;
 }
 
 quint64 FileOutput::getCenterFrequency() const
@@ -233,14 +229,14 @@ bool FileOutput::handleMessage(const Message& message)
 {
 	if (MsgConfigureFileOutputName::match(message))
 	{
-		MsgConfigureFileOutputName& conf = (MsgConfigureFileOutputName&) message;
+		auto& conf = (const MsgConfigureFileOutputName&) message;
 		m_settings.m_fileName = conf.getFileName();
 		openFileStream();
 		return true;
 	}
 	else if (MsgStartStop::match(message))
 	{
-        MsgStartStop& cmd = (MsgStartStop&) message;
+        auto& cmd = (const MsgStartStop&) message;
         qDebug() << "FileOutput::handleMessage: MsgStartStop: " << (cmd.getStartStop() ? "start" : "stop");
 
         if (cmd.getStartStop())
@@ -262,17 +258,17 @@ bool FileOutput::handleMessage(const Message& message)
 	}
 	else if (MsgConfigureFileOutput::match(message))
     {
-	    qDebug() << "FileOutput::handleMessage: MsgConfigureFileOutput";
-	    MsgConfigureFileOutput& conf = (MsgConfigureFileOutput&) message;
+        qDebug() << "FileOutput::handleMessage: MsgConfigureFileOutput";
+        auto& conf = (const MsgConfigureFileOutput&) message;
         applySettings(conf.getSettings(), conf.getSettingsKeys(), conf.getForce());
         return true;
     }
 	else if (MsgConfigureFileOutputWork::match(message))
 	{
-		MsgConfigureFileOutputWork& conf = (MsgConfigureFileOutputWork&) message;
+		auto& conf = (const MsgConfigureFileOutputWork&) message;
 		bool working = conf.isWorking();
 
-		if (m_fileOutputWorker != 0)
+		if (m_fileOutputWorker != nullptr)
 		{
 			if (working) {
 				startWorker();
@@ -285,11 +281,9 @@ bool FileOutput::handleMessage(const Message& message)
 	}
 	else if (MsgConfigureFileOutputStreamTiming::match(message))
 	{
-        MsgReportFileOutputStreamTiming *report;
-
-		if (m_fileOutputWorker != 0 && getMessageQueueToGUI())
+		if (m_fileOutputWorker != nullptr && getMessageQueueToGUI())
 		{
-			report = MsgReportFileOutputStreamTiming::create(m_fileOutputWorker->getSamplesCount());
+			auto *report = MsgReportFileOutputStreamTiming::create(m_fileOutputWorker->getSamplesCount());
 			getMessageQueueToGUI()->push(report);
 		}
 
@@ -314,8 +308,8 @@ void FileOutput::applySettings(const FileOutputSettings& settings, const QList<Q
 
     if (force || settingsKeys.contains("sampleRate"))
     {
-        if (m_fileOutputWorker != 0) {
-            m_fileOutputWorker->setSamplerate(settings.m_sampleRate);
+        if (m_fileOutputWorker != nullptr) {
+            m_fileOutputWorker->setSamplerate((int) settings.m_sampleRate);
         }
 
         forwardChange = true;
@@ -323,7 +317,7 @@ void FileOutput::applySettings(const FileOutputSettings& settings, const QList<Q
 
     if (force || settingsKeys.contains("log2Interp"))
     {
-        if (m_fileOutputWorker != 0) {
+        if (m_fileOutputWorker != nullptr) {
             m_fileOutputWorker->setLog2Interpolation(settings.m_log2Interp);
         }
 
@@ -351,7 +345,7 @@ void FileOutput::applySettings(const FileOutputSettings& settings, const QList<Q
                 m_settings.m_centerFrequency,
                 m_settings.m_sampleRate,
                 m_settings.m_log2Interp);
-        DSPSignalNotification *notif = new DSPSignalNotification(m_settings.m_sampleRate, m_settings.m_centerFrequency);
+        auto *notif = new DSPSignalNotification((int) m_settings.m_sampleRate, m_settings.m_centerFrequency);
         m_deviceAPI->getDeviceEngineInputMessageQueue()->push(notif);
     }
 }
@@ -461,16 +455,16 @@ void FileOutput::webapiUpdateDeviceSettings(
         settings.m_reverseAPIAddress = *response.getFileOutputSettings()->getReverseApiAddress();
     }
     if (deviceSettingsKeys.contains("reverseAPIPort")) {
-        settings.m_reverseAPIPort = response.getFileOutputSettings()->getReverseApiPort();
+        settings.m_reverseAPIPort = (uint16_t) response.getFileOutputSettings()->getReverseApiPort();
     }
     if (deviceSettingsKeys.contains("reverseAPIDeviceIndex")) {
-        settings.m_reverseAPIDeviceIndex = response.getFileOutputSettings()->getReverseApiDeviceIndex();
+        settings.m_reverseAPIDeviceIndex = (uint16_t) response.getFileOutputSettings()->getReverseApiDeviceIndex();
     }
 }
 
 void FileOutput::webapiReverseSendSettings(const QList<QString>& deviceSettingsKeys, const FileOutputSettings& settings, bool force)
 {
-    SWGSDRangel::SWGDeviceSettings *swgDeviceSettings = new SWGSDRangel::SWGDeviceSettings();
+    auto *swgDeviceSettings = new SWGSDRangel::SWGDeviceSettings();
     swgDeviceSettings->setDirection(1); // single Tx
     swgDeviceSettings->setOriginatorIndex(m_deviceAPI->getDeviceSetIndex());
     swgDeviceSettings->setDeviceHwType(new QString("FileOutput"));
@@ -499,8 +493,8 @@ void FileOutput::webapiReverseSendSettings(const QList<QString>& deviceSettingsK
     m_networkRequest.setUrl(QUrl(deviceSettingsURL));
     m_networkRequest.setHeader(QNetworkRequest::ContentTypeHeader, "application/json");
 
-    QBuffer *buffer = new QBuffer();
-    buffer->open((QBuffer::ReadWrite));
+    auto *buffer = new QBuffer();
+    buffer->open(QBuffer::ReadWrite);
     buffer->write(swgDeviceSettings->asJson().toUtf8());
     buffer->seek(0);
 
@@ -513,7 +507,7 @@ void FileOutput::webapiReverseSendSettings(const QList<QString>& deviceSettingsK
 
 void FileOutput::webapiReverseSendStartStop(bool start)
 {
-    SWGSDRangel::SWGDeviceSettings *swgDeviceSettings = new SWGSDRangel::SWGDeviceSettings();
+    auto *swgDeviceSettings = new SWGSDRangel::SWGDeviceSettings();
     swgDeviceSettings->setDirection(1); // single Tx
     swgDeviceSettings->setOriginatorIndex(m_deviceAPI->getDeviceSetIndex());
     swgDeviceSettings->setDeviceHwType(new QString("FileOutput"));
@@ -525,8 +519,8 @@ void FileOutput::webapiReverseSendStartStop(bool start)
     m_networkRequest.setUrl(QUrl(deviceSettingsURL));
     m_networkRequest.setHeader(QNetworkRequest::ContentTypeHeader, "application/json");
 
-    QBuffer *buffer = new QBuffer();
-    buffer->open((QBuffer::ReadWrite));
+    auto *buffer = new QBuffer();
+    buffer->open(QBuffer::ReadWrite);
     buffer->write(swgDeviceSettings->asJson().toUtf8());
     buffer->seek(0);
     QNetworkReply *reply;
@@ -541,7 +535,7 @@ void FileOutput::webapiReverseSendStartStop(bool start)
     delete swgDeviceSettings;
 }
 
-void FileOutput::networkManagerFinished(QNetworkReply *reply)
+void FileOutput::networkManagerFinished(QNetworkReply *reply) const
 {
     QNetworkReply::NetworkError replyError = reply->error();
 

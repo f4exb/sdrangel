@@ -46,11 +46,11 @@ class SSBModSource : public QObject, public ChannelSampleSource
     Q_OBJECT
 public:
     SSBModSource();
-    virtual ~SSBModSource();
+    ~SSBModSource() final;
 
-    virtual void pull(SampleVector::iterator begin, unsigned int nbSamples);
-    virtual void pullOne(Sample& sample);
-    virtual void prefetch(unsigned int nbSamples);
+    void pull(SampleVector::iterator begin, unsigned int nbSamples) final;
+    void pullOne(Sample& sample) final;
+    void prefetch(unsigned int nbSamples) final;
 
     void setInputFileStream(std::ifstream *ifstream) { m_ifstream = ifstream; }
     AudioFifo *getAudioFifo() { return &m_audioFifo; }
@@ -70,12 +70,12 @@ public:
         numSamples = m_levelNbSamples;
     }
     void applySettings(const SSBModSettings& settings, bool force = false);
-    void applyChannelSettings(int channelSampleRate, int channelFrequencyOffset, bool force = 0);
+    void applyChannelSettings(int channelSampleRate, int channelFrequencyOffset, bool force = false);
     void setSpectrumSink(SpectrumVis *sampleSink) { m_spectrumSink = sampleSink; }
 
 private:
-    int m_channelSampleRate;
-    int m_channelFrequencyOffset;
+    int m_channelSampleRate = 48000;
+    int m_channelFrequencyOffset = 0;
     SSBModSettings m_settings;
     ChannelAPI *m_channel;
 
@@ -104,7 +104,7 @@ private:
 	int m_DSBFilterBufferIndex;
 	static const int m_ssbFftLen;
 
-	SpectrumVis* m_spectrumSink;
+	SpectrumVis* m_spectrumSink = nullptr;
 	SampleVector m_sampleBuffer;
 
     fftfilt::cmplx m_sum;
@@ -114,7 +114,7 @@ private:
     double m_magsq;
     MovingAverageUtil<double, double, 16> m_movingAverage;
 
-    int m_audioSampleRate;
+    int m_audioSampleRate = 48000;
     AudioVector m_audioBuffer;
     unsigned int m_audioBufferFill;
     AudioVector m_audioReadBuffer;
@@ -126,14 +126,14 @@ private:
     uint m_feedbackAudioBufferFill;
     AudioFifo m_feedbackAudioFifo;
 
-    quint32 m_levelCalcCount;
+    quint32 m_levelCalcCount = 0;
     qreal m_rmsLevel;
     qreal m_peakLevelOut;
-    Real m_peakLevel;
-    Real m_levelSum;
+    Real m_peakLevel = 0.0f;
+    Real m_levelSum = 0.0f;
 
-    std::ifstream *m_ifstream;
-    CWKeyer *m_cwKeyer;
+    std::ifstream *m_ifstream = nullptr;
+    CWKeyer *m_cwKeyer = nullptr;
 
     AudioCompressorSnd m_audioCompressor;
     int m_agcStepLength;
@@ -142,11 +142,11 @@ private:
 
     static const int m_levelNbSamples;
 
-    void processOneSample(Complex& ci);
+    void processOneSample(const Complex& ci);
     void pullAF(Complex& sample);
     void pullAudio(unsigned int nbSamples);
     void pushFeedback(Complex sample);
-    void calculateLevel(Complex& sample);
+    void calculateLevel(const Complex& sample);
     void modulateSample();
 
 private slots:

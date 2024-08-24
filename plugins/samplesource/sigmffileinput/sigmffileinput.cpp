@@ -61,21 +61,8 @@ MESSAGE_CLASS_DEFINITION(SigMFFileInput::MsgReportTotalSamplesCheck, Message)
 
 SigMFFileInput::SigMFFileInput(DeviceAPI *deviceAPI) :
     m_deviceAPI(deviceAPI),
-    m_running(false),
 	m_settings(),
-    m_trackMode(false),
-    m_currentTrackIndex(0),
-    m_recordOpen(false),
-    m_crcAvailable(false),
-    m_crcOK(false),
-    m_recordLengthOK(false),
-	m_fileInputWorker(nullptr),
-	m_deviceDescription("SigMFFileInput"),
-	m_sampleRate(48000),
-	m_sampleBytes(1),
-	m_centerFrequency(0),
-	m_recordLength(0),
-    m_startingTimeStamp(0)
+	m_deviceDescription("SigMFFileInput")
 {
     m_sampleFifo.setLabel(m_deviceDescription);
     m_deviceAPI->setNbSourceStreams(1);
@@ -104,7 +91,7 @@ SigMFFileInput::~SigMFFileInput()
     );
     delete m_networkManager;
 
-	stop();
+	SigMFFileInput::stop();
 }
 
 void SigMFFileInput::destroy()
@@ -156,8 +143,8 @@ bool SigMFFileInput::openFileStreams(const QString& fileName)
     extractCaptures(&metaRecord);
     m_metaInfo.m_totalTimeMs = m_captures.back().m_cumulativeTime + ((m_captures.back().m_length * 1000)/m_captures.back().m_sampleRate);
 
-    uint64_t centerFrequency = (m_captures.size() > 0) ? m_captures.at(0).m_centerFrequency : 0;
-    DSPSignalNotification *notif = new DSPSignalNotification(m_metaInfo.m_coreSampleRate, centerFrequency);
+    uint64_t centerFrequency = (!m_captures.empty()) ? m_captures.at(0).m_centerFrequency : 0;
+    auto *notif = new DSPSignalNotification((int) m_metaInfo.m_coreSampleRate, centerFrequency);
     m_deviceAPI->getDeviceEngineInputMessageQueue()->push(notif);
 
     if (getMessageQueueToGUI())
@@ -244,14 +231,13 @@ void SigMFFileInput::extractMeta(
     m_metaInfo.m_arch = QString::fromStdString(metaRecord->global.access<sdrangel::GlobalT>().arch);
     m_metaInfo.m_os = QString::fromStdString(metaRecord->global.access<sdrangel::GlobalT>().os);
     // lists
-    m_metaInfo.m_nbCaptures = metaRecord->captures.size();
-    m_metaInfo.m_nbAnnotations = metaRecord->annotations.size();
+    m_metaInfo.m_nbCaptures = (unsigned int) metaRecord->captures.size();
+    m_metaInfo.m_nbAnnotations = (unsigned int) metaRecord->annotations.size();
     // correct sample bits if sdrangel
-    if (m_metaInfo.m_sdrAngelVersion.size() > 0)
+    if ((m_metaInfo.m_sdrAngelVersion.size() > 0)
+    && (m_metaInfo.m_dataType.m_sampleBits == 32))
     {
-        if (m_metaInfo.m_dataType.m_sampleBits == 32) {
-            m_metaInfo.m_dataType.m_sampleBits = 24;
-        }
+        m_metaInfo.m_dataType.m_sampleBits = 24;
     }
     // negative sample rate means inversion
     m_metaInfo.m_dataType.m_swapIQ = m_metaInfo.m_coreSampleRate < 0;
@@ -270,8 +256,7 @@ void SigMFFileInput::extractCaptures(
     std::regex datetime_reg("(\\d{4})-(\\d\\d)-(\\d\\d)T(\\d\\d):(\\d\\d):(\\d\\d)(\\.\\d+)?(([+-]\\d\\d:\\d\\d)|Z)?");
     std::smatch datetime_match;
 
-    sigmf::SigMFVector<sigmf::Capture<core::DescrT, sdrangel::DescrT>>::iterator it =
-        metaRecord->captures.begin();
+    auto it = metaRecord->captures.begin();
     uint64_t lastSampleStart = 0;
     unsigned int i = 0;
     uint64_t cumulativeTime = 0;
@@ -279,7 +264,7 @@ void SigMFFileInput::extractCaptures(
     for (; it != metaRecord->captures.end(); ++it, i++)
     {
         m_captures.push_back(SigMFFileCapture());
-        m_captures.back().m_centerFrequency = it->get<core::DescrT>().frequency;
+        m_captures.back().m_centerFrequency = (uint64_t) it->get<core::DescrT>().frequency;
         m_captures.back().m_sampleStart = it->get<core::DescrT>().sample_start;
         m_captureStarts.push_back(m_captures.back().m_sampleStart);
         m_captures.back().m_cumulativeTime = cumulativeTime;
@@ -287,7 +272,7 @@ void SigMFFileInput::extractCaptures(
         double globalSampleRate = metaRecord->global.access<core::GlobalT>().sample_rate;
 
         if (sdrangelSampleRate == 0) {
-            m_captures.back().m_sampleRate = globalSampleRate < 0 ? -globalSampleRate : globalSampleRate;
+            m_captures.back().m_sampleRate = (unsigned int) (globalSampleRate < 0 ? -globalSampleRate : globalSampleRate);
         } else {
             m_captures.back().m_sampleRate = sdrangelSampleRate;
         }
@@ -326,7 +311,7 @@ void SigMFFileInput::extractCaptures(
                 dateTime = QDateTime::currentDateTimeUtc();
             }
 
-            double seconds = dateTime.toSecsSinceEpoch();
+            auto seconds = (double) dateTime.toSecsSinceEpoch();
             // the subsecond part can be milli (strict ISO-8601) or micro or nano (RFC-3339). This will take any width
             if (datetime_match.size() > 7)
             {
@@ -335,13 +320,13 @@ void SigMFFileInput::extractCaptures(
                     double fractionalSecs = boost::lexical_cast<double>(datetime_match[7]);
                     seconds += fractionalSecs;
                 }
-                catch (const boost::bad_lexical_cast &e)
+                catch (const boost::bad_lexical_cast&)
                 {
                     qDebug("SigMFFileInput::extractCaptures: invalid fractional seconds");
                 }
             }
 
-            m_captures.back().m_tsms = seconds * 1000.0;
+            m_captures.back().m_tsms = (uint64_t) (seconds * 1000.0);
         }
 
         m_captures.back().m_length = it->get<core::DescrT>().length;
@@ -390,7 +375,7 @@ void SigMFFileInput::analyzeDataType(const std::string& dataTypeString, SigMFFil
         {
             dataType.m_sampleBits = boost::lexical_cast<int>(dataType_match[3]);
         }
-        catch(const boost::bad_lexical_cast &e)
+        catch(const boost::bad_lexical_cast&)
         {
             qDebug("SigMFFileInput::analyzeDataType: invalid sample bits. Assume 32");
             dataType.m_sampleBits = 32;
@@ -414,7 +399,7 @@ uint64_t SigMFFileInput::getTrackSampleStart(unsigned int trackIndex)
 int SigMFFileInput::getTrackIndex(uint64_t sampleIndex)
 {
     auto it = std::upper_bound(m_captureStarts.begin(), m_captureStarts.end(), sampleIndex);
-    return (it - m_captureStarts.begin()) - 1;
+    return (int) ((it - m_captureStarts.begin()) - 1);
 }
 
 void SigMFFileInput::seekFileStream(uint64_t sampleIndex)
@@ -441,7 +426,7 @@ void SigMFFileInput::seekFileMillis(int seekMillis)
 
 void SigMFFileInput::init()
 {
-    DSPSignalNotification *notif = new DSPSignalNotification(m_sampleRate, m_centerFrequency);
+    auto *notif = new DSPSignalNotification(m_sampleRate, m_centerFrequency);
     m_deviceAPI->getDeviceEngineInputMessageQueue()->push(notif);
 }
 
@@ -596,13 +581,13 @@ bool SigMFFileInput::handleMessage(const Message& message)
 {
     if (MsgConfigureSigMFFileInput::match(message))
     {
-        MsgConfigureSigMFFileInput& conf = (MsgConfigureSigMFFileInput&) message;
+        auto& conf = (const MsgConfigureSigMFFileInput&) message;
         applySettings(conf.getSettings(), conf.getSettingsKeys(), conf.getForce());
         return true;
     }
     else if (MsgConfigureTrackIndex::match(message))
     {
-        MsgConfigureTrackIndex& conf = (MsgConfigureTrackIndex&) message;
+        auto& conf = (const MsgConfigureTrackIndex&) message;
         m_currentTrackIndex = conf.getTrackIndex();
         qDebug("SigMFFileInput::handleMessage MsgConfigureTrackIndex: m_currentTrackIndex: %d", m_currentTrackIndex);
         seekTrackMillis(0);
@@ -623,7 +608,7 @@ bool SigMFFileInput::handleMessage(const Message& message)
             );
 
             if (working) {
-        		startWorker();
+                startWorker();
             }
         }
 
@@ -631,7 +616,7 @@ bool SigMFFileInput::handleMessage(const Message& message)
     }
 	else if (MsgConfigureTrackWork::match(message))
 	{
-		MsgConfigureTrackWork& conf = (MsgConfigureTrackWork&) message;
+		auto& conf = (const MsgConfigureTrackWork&) message;
 		bool working = conf.isWorking();
         m_trackMode = true;
 
@@ -653,7 +638,7 @@ bool SigMFFileInput::handleMessage(const Message& message)
 	}
     else if (MsgConfigureTrackSeek::match(message))
     {
-        MsgConfigureTrackSeek& conf = (MsgConfigureTrackSeek&) message;
+        auto& conf = (const MsgConfigureTrackSeek&) message;
         int seekMillis = conf.getMillis();
         seekTrackMillis(seekMillis);
 
@@ -669,7 +654,7 @@ bool SigMFFileInput::handleMessage(const Message& message)
                 m_captures[m_currentTrackIndex].m_sampleStart + ((m_captures[m_currentTrackIndex].m_length*seekMillis)/1000UL));
 
             if (working) {
-        		startWorker();
+                startWorker();
             }
         }
 
@@ -677,7 +662,7 @@ bool SigMFFileInput::handleMessage(const Message& message)
     }
     else if (MsgConfigureFileSeek::match(message))
     {
-        MsgConfigureFileSeek& conf = (MsgConfigureFileSeek&) message;
+        auto& conf = (const MsgConfigureFileSeek&) message;
         int seekMillis = conf.getMillis();
         seekFileStream(seekMillis);
         uint64_t sampleCount = (m_metaInfo.m_totalSamples*seekMillis)/1000UL;
@@ -695,7 +680,7 @@ bool SigMFFileInput::handleMessage(const Message& message)
             m_fileInputWorker->setSamplesCount(sampleCount);
 
             if (working) {
-        		startWorker();
+                startWorker();
             }
         }
 
@@ -703,7 +688,7 @@ bool SigMFFileInput::handleMessage(const Message& message)
     }
 	else if (MsgConfigureFileWork::match(message))
 	{
-		MsgConfigureFileWork& conf = (MsgConfigureFileWork&) message;
+		auto& conf = (const MsgConfigureFileWork&) message;
 		bool working = conf.isWorking();
         m_trackMode = false;
 
@@ -724,27 +709,24 @@ bool SigMFFileInput::handleMessage(const Message& message)
 	}
 	else if (MsgConfigureFileInputStreamTiming::match(message))
 	{
-		if (m_fileInputWorker)
+		if (m_fileInputWorker && getMessageQueueToGUI())
 		{
-			if (getMessageQueueToGUI())
-			{
-                quint64 totalSamplesCount = m_fileInputWorker->getSamplesCount();
-                quint64 trackSamplesCount = totalSamplesCount - m_captures[m_currentTrackIndex].m_sampleStart;
-        		MsgReportFileInputStreamTiming *report = MsgReportFileInputStreamTiming::create(
-                    totalSamplesCount,
-                    trackSamplesCount,
-                    m_captures[m_currentTrackIndex].m_cumulativeTime,
-                    m_currentTrackIndex
-                );
-                getMessageQueueToGUI()->push(report);
-			}
+            quint64 totalSamplesCount = m_fileInputWorker->getSamplesCount();
+            quint64 trackSamplesCount = totalSamplesCount - m_captures[m_currentTrackIndex].m_sampleStart;
+            MsgReportFileInputStreamTiming *report = MsgReportFileInputStreamTiming::create(
+                totalSamplesCount,
+                trackSamplesCount,
+                m_captures[m_currentTrackIndex].m_cumulativeTime,
+                m_currentTrackIndex
+            );
+            getMessageQueueToGUI()->push(report);
 		}
 
 		return true;
 	}
     else if (MsgStartStop::match(message))
     {
-        MsgStartStop& cmd = (MsgStartStop&) message;
+        auto& cmd = (const MsgStartStop&) message;
         qDebug() << "FileInput::handleMessage: MsgStartStop: " << (cmd.getStartStop() ? "start" : "stop");
 
         if (cmd.getStartStop())
@@ -798,7 +780,7 @@ bool SigMFFileInput::handleMessage(const Message& message)
     }
     else if (SigMFFileInputWorker::MsgReportTrackChange::match(message))
     {
-        SigMFFileInputWorker::MsgReportTrackChange& report = (SigMFFileInputWorker::MsgReportTrackChange&) message;
+        auto& report = (const SigMFFileInputWorker::MsgReportTrackChange&) message;
         m_currentTrackIndex = report.getTrackIndex();
         qDebug("SigMFFileInput::handleMessage MsgReportTrackChange: m_currentTrackIndex: %d", m_currentTrackIndex);
         int sampleRate = m_captures.at(m_currentTrackIndex).m_sampleRate;
@@ -806,7 +788,7 @@ bool SigMFFileInput::handleMessage(const Message& message)
 
         if ((m_sampleRate != sampleRate) || (m_centerFrequency != centerFrequency))
         {
-            DSPSignalNotification *notif = new DSPSignalNotification(sampleRate, centerFrequency);
+            auto *notif = new DSPSignalNotification(sampleRate, centerFrequency);
             m_deviceAPI->getDeviceEngineInputMessageQueue()->push(notif);
 
             m_sampleRate = sampleRate;
@@ -831,18 +813,15 @@ bool SigMFFileInput::applySettings(const SigMFFileInputSettings& settings, const
 {
     qDebug() << "SigMFFileInput::applySettings: force: " << force << settings.getDebugString(settingsKeys, force);
 
-    if (settingsKeys.contains("accelerationFactor") || force)
+    if (m_fileInputWorker && (settingsKeys.contains("accelerationFactor") || force))
     {
-        if (m_fileInputWorker)
-        {
-            QMutexLocker mutexLocker(&m_mutex);
-            if (!m_sampleFifo.setSize(m_settings.m_accelerationFactor * m_sampleRate * sizeof(Sample))) {
-                qCritical("SigMFFileInput::applySettings: could not reallocate sample FIFO size to %lu",
-                        m_settings.m_accelerationFactor * m_sampleRate * sizeof(Sample));
-            }
-
-            m_fileInputWorker->setAccelerationFactor(settings.m_accelerationFactor); // Fast Forward: 1 corresponds to live. 1/2 is half speed, 2 is double speed
+        QMutexLocker mutexLocker(&m_mutex);
+        if (!m_sampleFifo.setSize(m_settings.m_accelerationFactor * m_sampleRate * sizeof(Sample))) {
+            qCritical("SigMFFileInput::applySettings: could not reallocate sample FIFO size to %lu",
+                    m_settings.m_accelerationFactor * m_sampleRate * sizeof(Sample));
         }
+
+        m_fileInputWorker->setAccelerationFactor(settings.m_accelerationFactor); // Fast Forward: 1 corresponds to live. 1/2 is half speed, 2 is double speed
     }
 
     if (settingsKeys.contains("fileName")) {
@@ -925,10 +904,10 @@ void SigMFFileInput::webapiUpdateDeviceSettings(
         settings.m_reverseAPIAddress = *response.getSigMfFileInputSettings()->getReverseApiAddress();
     }
     if (deviceSettingsKeys.contains("reverseAPIPort")) {
-        settings.m_reverseAPIPort = response.getSigMfFileInputSettings()->getReverseApiPort();
+        settings.m_reverseAPIPort = (uint16_t) response.getSigMfFileInputSettings()->getReverseApiPort();
     }
     if (deviceSettingsKeys.contains("reverseAPIDeviceIndex")) {
-        settings.m_reverseAPIDeviceIndex = response.getSigMfFileInputSettings()->getReverseApiDeviceIndex();
+        settings.m_reverseAPIDeviceIndex = (uint16_t) response.getSigMfFileInputSettings()->getReverseApiDeviceIndex();
     }
 }
 
@@ -1080,7 +1059,11 @@ void SigMFFileInput::webapiFormatDeviceReport(SWGSDRangel::SWGDeviceReport& resp
     response.getSigMfFileInputReport()->setSampleFormat(m_metaInfo.m_dataType.m_floatingPoint ? 1 : 0);
     response.getSigMfFileInputReport()->setSampleSigned(m_metaInfo.m_dataType.m_signed ? 1 : 0);
     response.getSigMfFileInputReport()->setSampleSwapIq(m_metaInfo.m_dataType.m_swapIQ ? 1 : 0);
-    response.getSigMfFileInputReport()->setCrcStatus(!m_crcAvailable ? 0 : m_crcOK ? 1 : 2);
+    if (!m_crcAvailable) {
+        response.getSigMfFileInputReport()->setCrcStatus(0);
+    } else {
+        response.getSigMfFileInputReport()->setCrcStatus(m_crcOK ? 1 : 2);
+    }
     response.getSigMfFileInputReport()->setTotalBytesStatus(m_recordLengthOK);
     response.getSigMfFileInputReport()->setTrackNumber(m_currentTrackIndex);
     QList<SigMFFileCapture>::const_iterator it = m_captures.begin();
@@ -1124,7 +1107,7 @@ void SigMFFileInput::webapiFormatDeviceReport(SWGSDRangel::SWGDeviceReport& resp
     posRatio = (float) totalSamplesCount / (float) m_metaInfo.m_totalSamples;
     response.getSigMfFileInputReport()->setRecordSamplesRatio(posRatio);
 
-    if (m_captures.size() > 0 )
+    if (!m_captures.empty() )
     {
         uint64_t totalTimeMs = m_captures.back().m_cumulativeTime + ((m_captures.back().m_length * 1000) / m_captures.back().m_sampleRate);
         response.getSigMfFileInputReport()->setRecordDurationMs(totalTimeMs);
@@ -1137,7 +1120,7 @@ void SigMFFileInput::webapiFormatDeviceReport(SWGSDRangel::SWGDeviceReport& resp
 
 void SigMFFileInput::webapiReverseSendSettings(const QList<QString>& deviceSettingsKeys, const SigMFFileInputSettings& settings, bool force)
 {
-    SWGSDRangel::SWGDeviceSettings *swgDeviceSettings = new SWGSDRangel::SWGDeviceSettings();
+    auto *swgDeviceSettings = new SWGSDRangel::SWGDeviceSettings();
     swgDeviceSettings->setDirection(0); // single Rx
     swgDeviceSettings->setOriginatorIndex(m_deviceAPI->getDeviceSetIndex());
     swgDeviceSettings->setDeviceHwType(new QString("SigMFFileInput"));
@@ -1166,8 +1149,8 @@ void SigMFFileInput::webapiReverseSendSettings(const QList<QString>& deviceSetti
     m_networkRequest.setUrl(QUrl(deviceSettingsURL));
     m_networkRequest.setHeader(QNetworkRequest::ContentTypeHeader, "application/json");
 
-    QBuffer *buffer = new QBuffer();
-    buffer->open((QBuffer::ReadWrite));
+    auto *buffer = new QBuffer();
+    buffer->open(QBuffer::ReadWrite);
     buffer->write(swgDeviceSettings->asJson().toUtf8());
     buffer->seek(0);
 
@@ -1180,7 +1163,7 @@ void SigMFFileInput::webapiReverseSendSettings(const QList<QString>& deviceSetti
 
 void SigMFFileInput::webapiReverseSendStartStop(bool start)
 {
-    SWGSDRangel::SWGDeviceSettings *swgDeviceSettings = new SWGSDRangel::SWGDeviceSettings();
+    auto *swgDeviceSettings = new SWGSDRangel::SWGDeviceSettings();
     swgDeviceSettings->setDirection(0); // single Rx
     swgDeviceSettings->setOriginatorIndex(m_deviceAPI->getDeviceSetIndex());
     swgDeviceSettings->setDeviceHwType(new QString("SigMFFileInput"));
@@ -1192,8 +1175,8 @@ void SigMFFileInput::webapiReverseSendStartStop(bool start)
     m_networkRequest.setUrl(QUrl(deviceSettingsURL));
     m_networkRequest.setHeader(QNetworkRequest::ContentTypeHeader, "application/json");
 
-    QBuffer *buffer = new QBuffer();
-    buffer->open((QBuffer::ReadWrite));
+    auto *buffer = new QBuffer();
+    buffer->open(QBuffer::ReadWrite);
     buffer->write(swgDeviceSettings->asJson().toUtf8());
     buffer->seek(0);
     QNetworkReply *reply;
@@ -1208,7 +1191,7 @@ void SigMFFileInput::webapiReverseSendStartStop(bool start)
     delete swgDeviceSettings;
 }
 
-void SigMFFileInput::networkManagerFinished(QNetworkReply *reply)
+void SigMFFileInput::networkManagerFinished(QNetworkReply *reply) const
 {
     QNetworkReply::NetworkError replyError = reply->error();
 

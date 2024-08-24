@@ -31,7 +31,7 @@
 DSPDeviceSourceEngine::DSPDeviceSourceEngine(uint uid, QObject* parent) :
 	QObject(parent),
     m_uid(uid),
-	m_state(StNotStarted),
+	m_state(State::StNotStarted),
 	m_deviceSampleSource(nullptr),
 	m_sampleSourceSequence(0),
 	m_basebandSampleSinks(),
@@ -46,7 +46,7 @@ DSPDeviceSourceEngine::DSPDeviceSourceEngine(uint uid, QObject* parent) :
 	m_qRange(1 << 16),
 	m_imbalance(65536)
 {
-    setState(StIdle);
+    setState(State::StIdle);
 	connect(&m_inputMessageQueue, SIGNAL(messageEnqueued()), this, SLOT(handleInputMessages()), Qt::QueuedConnection);
 }
 
@@ -64,7 +64,7 @@ void DSPDeviceSourceEngine::setState(State state)
     }
 }
 
-bool DSPDeviceSourceEngine::initAcquisition()
+bool DSPDeviceSourceEngine::initAcquisition() const
 {
 	qDebug("DSPDeviceSourceEngine::initAcquisition (dummy)");
 	return true;
@@ -195,8 +195,8 @@ void DSPDeviceSourceEngine::iqCorrections(SampleVector::iterator begin, SampleVe
                 m_avgPhi(m_avgIQ.asDouble()/m_avgII.asDouble());
             }
 
-            float& yi = xi; // the in phase remains the reference
-            float yq = xq - m_avgPhi.asDouble()*xi;
+            const float& yi = xi; // the in phase remains the reference
+            float yq = xq - (float) m_avgPhi.asDouble()*xi;
 
             // amplitude I/Q imbalance
             m_avgII2(yi*yi); // <I, I>
@@ -207,12 +207,12 @@ void DSPDeviceSourceEngine::iqCorrections(SampleVector::iterator begin, SampleVe
             }
 
             // final correction
-            float& zi = yi; // the in phase remains the reference
-            float zq = m_avgAmp.asDouble() * yq;
+            const float& zi = yi; // the in phase remains the reference
+            auto zq = (float) (m_avgAmp.asDouble() * yq);
 
             // convert and store
-            it->m_real = zi * SDR_RX_SCALEF;
-            it->m_imag = zq * SDR_RX_SCALEF;
+            it->m_real = (FixReal) (zi * SDR_RX_SCALEF);
+            it->m_imag = (FixReal) (zq * SDR_RX_SCALEF);
 #endif
         }
         else
@@ -345,20 +345,20 @@ DSPDeviceSourceEngine::State DSPDeviceSourceEngine::gotoIdle()
 	qDebug("DSPDeviceSourceEngine::gotoIdle");
 
 	switch(m_state) {
-		case StNotStarted:
-			return StNotStarted;
+		case State::StNotStarted:
+			return State::StNotStarted;
 
-		case StIdle:
-		case StError:
-			return StIdle;
+		case State::StIdle:
+		case State::StError:
+			return State::StIdle;
 
-		case StReady:
-		case StRunning:
+		case State::StReady:
+		case State::StRunning:
 			break;
 	}
 
 	if (!m_deviceSampleSource) {
-		return StIdle;
+		return State::StIdle;
 	}
 
 	// stop everything
@@ -372,23 +372,23 @@ DSPDeviceSourceEngine::State DSPDeviceSourceEngine::gotoIdle()
 	m_deviceDescription.clear();
 	m_sampleRate = 0;
 
-	return StIdle;
+	return State::StIdle;
 }
 
 DSPDeviceSourceEngine::State DSPDeviceSourceEngine::gotoInit()
 {
 	switch(m_state) {
-		case StNotStarted:
-			return StNotStarted;
+		case State::StNotStarted:
+			return State::StNotStarted;
 
-		case StRunning: // FIXME: assumes it goes first through idle state. Could we get back to init from running directly?
-			return StRunning;
+		case State::StRunning:
+			return State::StRunning;
 
-		case StReady:
-			return StReady;
+		case State::StReady:
+			return State::StReady;
 
-		case StIdle:
-		case StError:
+		case State::StIdle:
+		case State::StError:
 			break;
 	}
 
@@ -427,7 +427,7 @@ DSPDeviceSourceEngine::State DSPDeviceSourceEngine::gotoInit()
         m_deviceSampleSource->getMessageQueueToGUI()->push(rep);
 	}
 
-	return StReady;
+	return State::StReady;
 }
 
 DSPDeviceSourceEngine::State DSPDeviceSourceEngine::gotoRunning()
@@ -436,17 +436,17 @@ DSPDeviceSourceEngine::State DSPDeviceSourceEngine::gotoRunning()
 
 	switch(m_state)
     {
-		case StNotStarted:
-			return StNotStarted;
+		case State::StNotStarted:
+			return State::StNotStarted;
 
-		case StIdle:
-			return StIdle;
+		case State::StIdle:
+			return State::StIdle;
 
-		case StRunning:
-			return StRunning;
+		case State::StRunning:
+			return State::StRunning;
 
-		case StReady:
-		case StError:
+		case State::StReady:
+		case State::StError:
 			break;
 	}
 
@@ -470,7 +470,7 @@ DSPDeviceSourceEngine::State DSPDeviceSourceEngine::gotoRunning()
 
 	qDebug() << "DSPDeviceSourceEngine::gotoRunning:input message queue pending: " << m_inputMessageQueue.size();
 
-	return StRunning;
+	return State::StRunning;
 }
 
 DSPDeviceSourceEngine::State DSPDeviceSourceEngine::gotoError(const QString& errorMessage)
@@ -479,8 +479,8 @@ DSPDeviceSourceEngine::State DSPDeviceSourceEngine::gotoError(const QString& err
 
 	m_errorMessage = errorMessage;
 	m_deviceDescription.clear();
-	setState(StError);
-	return StError;
+	setState(State::StError);
+	return State::StError;
 }
 
 void DSPDeviceSourceEngine::handleSetSource(DeviceSampleSource* source)
@@ -502,7 +502,7 @@ void DSPDeviceSourceEngine::handleSetSource(DeviceSampleSource* source)
 
 void DSPDeviceSourceEngine::handleData()
 {
-	if(m_state == StRunning)
+	if(m_state == State::StRunning)
 	{
 		work();
 	}
@@ -588,11 +588,11 @@ bool DSPDeviceSourceEngine::handleMessage(const Message& message)
 	{
 		setState(gotoIdle());
 
-		if(m_state == StIdle) {
+		if(m_state == State::StIdle) {
 			setState(gotoInit()); // State goes ready if init is performed
 		}
 
-		if(m_state == StReady) {
+		if(m_state == State::StReady) {
 			setState(gotoRunning());
 		}
 
@@ -617,7 +617,7 @@ bool DSPDeviceSourceEngine::handleMessage(const Message& message)
         auto *msg = new DSPSignalNotification(m_sampleRate, m_centerFrequency);
         sink->pushMessage(msg);
         // start the sink:
-        if(m_state == StRunning) {
+        if(m_state == State::StRunning) {
             sink->start();
         }
 	}
@@ -626,7 +626,7 @@ bool DSPDeviceSourceEngine::handleMessage(const Message& message)
         auto cmd = (const DSPRemoveBasebandSampleSink&) message;
 		BasebandSampleSink* sink = cmd.getSampleSink();
 
-		if(m_state == StRunning) {
+		if(m_state == State::StRunning) {
 			sink->stop();
 		}
 

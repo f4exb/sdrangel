@@ -43,7 +43,7 @@
 #include "mainparser.h"
 #include "mainserver.h"
 
-MainServer *MainServer::m_instance = 0;
+MainServer *MainServer::m_instance = nullptr;
 
 MainServer::MainServer(qtwebapp::LoggerWithFile *logger, const MainParser& parser, QObject *parent) :
     QObject(parent),
@@ -74,7 +74,7 @@ MainServer::MainServer(qtwebapp::LoggerWithFile *logger, const MainParser& parse
 	loadSettings();
 
     qDebug() << "MainServer::MainServer: finishing...";
-    QString applicationDirPath = QCoreApplication::instance()->applicationDirPath();
+    QString applicationDirPath = QCoreApplication::applicationDirPath();
 
     m_apiAdapter = new WebAPIAdapter();
     m_requestMapper = new WebAPIRequestMapper(this);
@@ -89,7 +89,7 @@ MainServer::MainServer(qtwebapp::LoggerWithFile *logger, const MainParser& parse
 
 MainServer::~MainServer()
 {
-    while (m_mainCore->m_deviceSets.size() > 0) {
+    while (!m_mainCore->m_deviceSets.empty()) {
         removeLastDevice();
     }
 
@@ -108,7 +108,7 @@ bool MainServer::handleMessage(const Message& cmd)
 {
     if (MainCore::MsgDeleteInstance::match(cmd))
     {
-        while (m_mainCore->m_deviceSets.size() > 0)
+        while (!m_mainCore->m_deviceSets.empty())
         {
             removeLastDevice();
         }
@@ -118,13 +118,13 @@ bool MainServer::handleMessage(const Message& cmd)
     }
     else if (MainCore::MsgLoadPreset::match(cmd))
     {
-        MainCore::MsgLoadPreset& notif = (MainCore::MsgLoadPreset&) cmd;
+        auto& notif = (const MainCore::MsgLoadPreset&) cmd;
         loadPresetSettings(notif.getPreset(), notif.getDeviceSetIndex());
         return true;
     }
     else if (MainCore::MsgSavePreset::match(cmd))
     {
-        MainCore::MsgSavePreset& notif = (MainCore::MsgSavePreset&) cmd;
+        auto& notif = (const MainCore::MsgSavePreset&) cmd;
         savePresetSettings(notif.getPreset(), notif.getDeviceSetIndex());
         m_mainCore->m_settings.sortPresets();
         m_mainCore->m_settings.save();
@@ -132,7 +132,7 @@ bool MainServer::handleMessage(const Message& cmd)
     }
     else if (MainCore::MsgDeletePreset::match(cmd))
     {
-        MainCore::MsgDeletePreset& notif = (MainCore::MsgDeletePreset&) cmd;
+        auto& notif = (const MainCore::MsgDeletePreset&) cmd;
         const Preset *presetToDelete = notif.getPreset();
         // remove preset from settings
         m_mainCore->m_settings.deletePreset(presetToDelete);
@@ -140,7 +140,7 @@ bool MainServer::handleMessage(const Message& cmd)
     }
     else if (MainCore::MsgDeleteConfiguration::match(cmd))
     {
-        MainCore::MsgDeleteConfiguration& notif = (MainCore::MsgDeleteConfiguration&) cmd;
+        auto& notif = (const MainCore::MsgDeleteConfiguration&) cmd;
         const Configuration *configuationToDelete = notif.getConfiguration();
         // remove configuration from settings
         m_mainCore->m_settings.deleteConfiguration(configuationToDelete);
@@ -148,13 +148,13 @@ bool MainServer::handleMessage(const Message& cmd)
     }
     else if (MainCore::MsgLoadFeatureSetPreset::match(cmd))
     {
-        MainCore::MsgLoadFeatureSetPreset& notif = (MainCore::MsgLoadFeatureSetPreset&) cmd;
+        auto& notif = (const MainCore::MsgLoadFeatureSetPreset&) cmd;
         loadFeatureSetPresetSettings(notif.getPreset(), notif.getFeatureSetIndex());
         return true;
     }
     else if (MainCore::MsgSaveFeatureSetPreset::match(cmd))
     {
-        MainCore::MsgSaveFeatureSetPreset& notif = (MainCore::MsgSaveFeatureSetPreset&) cmd;
+        auto& notif = (const MainCore::MsgSaveFeatureSetPreset&) cmd;
         saveFeatureSetPresetSettings(notif.getPreset(), notif.getFeatureSetIndex());
         m_mainCore->m_settings.sortPresets();
         m_mainCore->m_settings.save();
@@ -162,7 +162,7 @@ bool MainServer::handleMessage(const Message& cmd)
     }
     else if (MainCore::MsgDeleteFeatureSetPreset::match(cmd))
     {
-        MainCore::MsgDeleteFeatureSetPreset& notif = (MainCore::MsgDeleteFeatureSetPreset&) cmd;
+        auto& notif = (const MainCore::MsgDeleteFeatureSetPreset&) cmd;
         const FeatureSetPreset *presetToDelete = notif.getPreset();
         // remove preset from settings
         m_mainCore->m_settings.deleteFeatureSetPreset(presetToDelete);
@@ -170,7 +170,7 @@ bool MainServer::handleMessage(const Message& cmd)
     }
     else if (MainCore::MsgAddDeviceSet::match(cmd))
     {
-        MainCore::MsgAddDeviceSet& notif = (MainCore::MsgAddDeviceSet&) cmd;
+        auto& notif = (const MainCore::MsgAddDeviceSet&) cmd;
         int direction = notif.getDirection();
 
         if (direction == 1) { // Single stream Tx
@@ -185,7 +185,7 @@ bool MainServer::handleMessage(const Message& cmd)
     }
     else if (MainCore::MsgRemoveLastDeviceSet::match(cmd))
     {
-        if (m_mainCore->m_deviceSets.size() > 0) {
+        if (!m_mainCore->m_deviceSets.empty()) {
             removeLastDevice();
         }
 
@@ -193,7 +193,7 @@ bool MainServer::handleMessage(const Message& cmd)
     }
     else if (MainCore::MsgSetDevice::match(cmd))
     {
-        MainCore::MsgSetDevice& notif = (MainCore::MsgSetDevice&) cmd;
+        auto& notif = (const MainCore::MsgSetDevice&) cmd;
 
         if (notif.getDeviceType() == 1) {
             changeSampleSink(notif.getDeviceSetIndex(), notif.getDeviceIndex());
@@ -206,26 +206,26 @@ bool MainServer::handleMessage(const Message& cmd)
     }
     else if (MainCore::MsgAddChannel::match(cmd))
     {
-        MainCore::MsgAddChannel& notif = (MainCore::MsgAddChannel&) cmd;
+        auto& notif = (const MainCore::MsgAddChannel&) cmd;
         addChannel(notif.getDeviceSetIndex(), notif.getChannelRegistrationIndex());
         return true;
     }
     else if (MainCore::MsgDeleteChannel::match(cmd))
     {
-        MainCore::MsgDeleteChannel& notif = (MainCore::MsgDeleteChannel&) cmd;
+        auto& notif = (const MainCore::MsgDeleteChannel&) cmd;
         deleteChannel(notif.getDeviceSetIndex(), notif.getChannelIndex());
         return true;
     }
     else if (MainCore::MsgAddFeature::match(cmd))
     {
-        MainCore::MsgAddFeature& notif = (MainCore::MsgAddFeature&) cmd;
+        auto& notif = (const MainCore::MsgAddFeature&) cmd;
         addFeature(0, notif.getFeatureRegistrationIndex());
 
         return true;
     }
     else if (MainCore::MsgDeleteFeature::match(cmd))
     {
-        MainCore::MsgDeleteFeature& notif = (MainCore::MsgDeleteFeature&) cmd;
+        auto& notif = (const MainCore::MsgDeleteFeature&) cmd;
         deleteFeature(0, notif.getFeatureIndex());
         return true;
     }
@@ -244,7 +244,7 @@ void MainServer::handleMessages()
 {
     Message* message;
 
-    while ((message = m_inputMessageQueue.pop()) != 0)
+    while ((message = m_inputMessageQueue.pop()) != nullptr)
     {
         qDebug("MainServer::handleMessages: message: %s", message->getIdentifier());
         handleMessage(*message);
@@ -271,21 +271,14 @@ void MainServer::addSinkDevice()
 {
     DSPDeviceSinkEngine *dspDeviceSinkEngine = m_dspEngine->addDeviceSinkEngine();
 
-    uint dspDeviceSinkEngineUID =  dspDeviceSinkEngine->getUID();
-    char uidCStr[16];
-    sprintf(uidCStr, "UID:%d", dspDeviceSinkEngineUID);
-
-    int deviceTabIndex = m_mainCore->m_deviceSets.size();
+    auto deviceTabIndex = (int) m_mainCore->m_deviceSets.size();
     m_mainCore->m_deviceSets.push_back(new DeviceSet(deviceTabIndex, 1));
     m_mainCore->m_deviceSets.back()->m_deviceSourceEngine = nullptr;
     m_mainCore->m_deviceSets.back()->m_deviceSinkEngine = dspDeviceSinkEngine;
     m_mainCore->m_deviceSets.back()->m_deviceMIMOEngine = nullptr;
     dspDeviceSinkEngine->addSpectrumSink(m_mainCore->m_deviceSets.back()->m_spectrumVis);
 
-    char tabNameCStr[16];
-    sprintf(tabNameCStr, "T%d", deviceTabIndex);
-
-    DeviceAPI *deviceAPI = new DeviceAPI(DeviceAPI::StreamSingleTx, deviceTabIndex, nullptr, dspDeviceSinkEngine, nullptr);
+    auto *deviceAPI = new DeviceAPI(DeviceAPI::StreamSingleTx, deviceTabIndex, nullptr, dspDeviceSinkEngine, nullptr);
 
     m_mainCore->m_deviceSets.back()->m_deviceAPI = deviceAPI;
     QList<QString> channelNames;
@@ -318,14 +311,14 @@ void MainServer::addSourceDevice()
 {
     DSPDeviceSourceEngine *dspDeviceSourceEngine = m_dspEngine->addDeviceSourceEngine();
 
-    int deviceTabIndex = m_mainCore->m_deviceSets.size();
+    auto deviceTabIndex = (int) m_mainCore->m_deviceSets.size();
     m_mainCore->m_deviceSets.push_back(new DeviceSet(deviceTabIndex, 0));
     m_mainCore->m_deviceSets.back()->m_deviceSourceEngine = dspDeviceSourceEngine;
     m_mainCore->m_deviceSets.back()->m_deviceSinkEngine = nullptr;
     m_mainCore->m_deviceSets.back()->m_deviceMIMOEngine = nullptr;
     dspDeviceSourceEngine->addSink(m_mainCore->m_deviceSets.back()->m_spectrumVis);
 
-    DeviceAPI *deviceAPI = new DeviceAPI(DeviceAPI::StreamSingleRx, deviceTabIndex, dspDeviceSourceEngine, nullptr, nullptr);
+    auto *deviceAPI = new DeviceAPI(DeviceAPI::StreamSingleRx, deviceTabIndex, dspDeviceSourceEngine, nullptr, nullptr);
 
     m_mainCore->m_deviceSets.back()->m_deviceAPI = deviceAPI;
 
@@ -357,14 +350,14 @@ void MainServer::addMIMODevice()
 {
     DSPDeviceMIMOEngine *dspDeviceMIMOEngine = m_dspEngine->addDeviceMIMOEngine();
 
-    int deviceTabIndex = m_mainCore->m_deviceSets.size();
+    auto deviceTabIndex = (int) m_mainCore->m_deviceSets.size();
     m_mainCore->m_deviceSets.push_back(new DeviceSet(deviceTabIndex, 2));
     m_mainCore->m_deviceSets.back()->m_deviceSourceEngine = nullptr;
     m_mainCore->m_deviceSets.back()->m_deviceSinkEngine = nullptr;
     m_mainCore->m_deviceSets.back()->m_deviceMIMOEngine = dspDeviceMIMOEngine;
     dspDeviceMIMOEngine->addSpectrumSink(m_mainCore->m_deviceSets.back()->m_spectrumVis);
 
-    DeviceAPI *deviceAPI = new DeviceAPI(DeviceAPI::StreamMIMO, deviceTabIndex, nullptr, nullptr, dspDeviceMIMOEngine);
+    auto *deviceAPI = new DeviceAPI(DeviceAPI::StreamMIMO, deviceTabIndex, nullptr, nullptr, dspDeviceMIMOEngine);
 
     // create a test MIMO by default
     int testMIMODeviceIndex = DeviceEnumerator::instance()->getTestMIMODeviceIndex();
@@ -392,12 +385,10 @@ void MainServer::addMIMODevice()
 
 void MainServer::removeLastDevice()
 {
-    int removedTabIndex = m_mainCore->m_deviceSets.size() - 1;
+    auto removedTabIndex = (int) (m_mainCore->m_deviceSets.size() - 1);
 
     if (m_mainCore->m_deviceSets.back()->m_deviceSourceEngine) // source set
     {
-        DSPDeviceSourceEngine *lastDeviceEngine = m_mainCore->m_deviceSets.back()->m_deviceSourceEngine;
-
         // deletes old UI and input object
         m_mainCore->m_deviceSets.back()->freeChannels();      // destroys the channel instances
         m_mainCore->m_deviceSets.back()->m_deviceAPI->resetSamplingDeviceId();
@@ -412,8 +403,6 @@ void MainServer::removeLastDevice()
     }
     else if (m_mainCore->m_deviceSets.back()->m_deviceSinkEngine) // sink set
     {
-        DSPDeviceSinkEngine *lastDeviceEngine = m_mainCore->m_deviceSets.back()->m_deviceSinkEngine;
-
         // deletes old UI and output object
         m_mainCore->m_deviceSets.back()->freeChannels();
         m_mainCore->m_deviceSets.back()->m_deviceAPI->resetSamplingDeviceId();
@@ -428,8 +417,6 @@ void MainServer::removeLastDevice()
     }
     else if (m_mainCore->m_deviceSets.back()->m_deviceMIMOEngine) // MIMO set
     {
-        DSPDeviceMIMOEngine *lastDeviceEngine = m_mainCore->m_deviceSets.back()->m_deviceMIMOEngine;
-
         m_mainCore->m_deviceSets.back()->freeChannels();
         m_mainCore->m_deviceSets.back()->m_deviceAPI->resetSamplingDeviceId();
 
@@ -486,19 +473,17 @@ void MainServer::changeSampleSource(int deviceSetIndex, int selectedDeviceIndex)
         }
 
         // add to buddies list
-        std::vector<DeviceSet*>::iterator it = m_mainCore->m_deviceSets.begin();
+        auto it = m_mainCore->m_deviceSets.begin();
         int nbOfBuddies = 0;
 
         for (; it != m_mainCore->m_deviceSets.end(); ++it)
         {
-            if (*it != deviceSet) // do not add to itself
+            if ((*it != deviceSet) && // do not add to itself
+                (deviceSet->m_deviceAPI->getHardwareId() == (*it)->m_deviceAPI->getHardwareId()) &&
+                (deviceSet->m_deviceAPI->getSamplingDeviceSerial() == (*it)->m_deviceAPI->getSamplingDeviceSerial()))
             {
-                if ((deviceSet->m_deviceAPI->getHardwareId() == (*it)->m_deviceAPI->getHardwareId()) &&
-                    (deviceSet->m_deviceAPI->getSamplingDeviceSerial() == (*it)->m_deviceAPI->getSamplingDeviceSerial()))
-                {
-                    (*it)->m_deviceAPI->addBuddy(deviceSet->m_deviceAPI);
-                    nbOfBuddies++;
-                }
+                (*it)->m_deviceAPI->addBuddy(deviceSet->m_deviceAPI);
+                nbOfBuddies++;
             }
         }
 
@@ -547,7 +532,7 @@ void MainServer::changeSampleSink(int deviceSetIndex, int selectedDeviceIndex)
         {
             qDebug("MainServer::changeSampleSink: non existent device replaced by File Sink");
             int fileSinkDeviceIndex = DeviceEnumerator::instance()->getFileOutputDeviceIndex();
-            const PluginInterface::SamplingDevice *samplingDevice = DeviceEnumerator::instance()->getTxSamplingDevice(fileSinkDeviceIndex);
+            samplingDevice = DeviceEnumerator::instance()->getTxSamplingDevice(fileSinkDeviceIndex);
             deviceSet->m_deviceAPI->setSamplingDeviceSequence(samplingDevice->sequence);
             deviceSet->m_deviceAPI->setDeviceNbItems(samplingDevice->deviceNbItems);
             deviceSet->m_deviceAPI->setDeviceItemIndex(samplingDevice->deviceItemIndex);
@@ -559,19 +544,17 @@ void MainServer::changeSampleSink(int deviceSetIndex, int selectedDeviceIndex)
         }
 
         // add to buddies list
-        std::vector<DeviceSet*>::iterator it = m_mainCore->m_deviceSets.begin();
+        auto it = m_mainCore->m_deviceSets.begin();
         int nbOfBuddies = 0;
 
         for (; it != m_mainCore->m_deviceSets.end(); ++it)
         {
-            if (*it != deviceSet) // do not add to itself
+            if ((deviceSet->m_deviceAPI->getHardwareId() == (*it)->m_deviceAPI->getHardwareId()) &&
+                (deviceSet->m_deviceAPI->getSamplingDeviceSerial() == (*it)->m_deviceAPI->getSamplingDeviceSerial()) &&
+                (*it != deviceSet)) // do not add to itself
             {
-                if ((deviceSet->m_deviceAPI->getHardwareId() == (*it)->m_deviceAPI->getHardwareId()) &&
-                    (deviceSet->m_deviceAPI->getSamplingDeviceSerial() == (*it)->m_deviceAPI->getSamplingDeviceSerial()))
-                {
-                    (*it)->m_deviceAPI->addBuddy(deviceSet->m_deviceAPI);
-                    nbOfBuddies++;
-                }
+                (*it)->m_deviceAPI->addBuddy(deviceSet->m_deviceAPI);
+                nbOfBuddies++;
             }
         }
 
@@ -616,7 +599,7 @@ void MainServer::changeSampleMIMO(int deviceSetIndex, int selectedDeviceIndex)
         {
             qDebug("MainServer::changeSampleMIMO: non existent device replaced by Test MIMO");
             int testMIMODeviceIndex = DeviceEnumerator::instance()->getTestMIMODeviceIndex();
-            const PluginInterface::SamplingDevice *samplingDevice = DeviceEnumerator::instance()->getMIMOSamplingDevice(testMIMODeviceIndex);
+            samplingDevice = DeviceEnumerator::instance()->getMIMOSamplingDevice(testMIMODeviceIndex);
             deviceSet->m_deviceAPI->setSamplingDeviceSequence(samplingDevice->sequence);
             deviceSet->m_deviceAPI->setDeviceNbItems(samplingDevice->deviceNbItems);
             deviceSet->m_deviceAPI->setDeviceItemIndex(samplingDevice->deviceItemIndex);
@@ -671,7 +654,7 @@ void MainServer::deleteChannel(int deviceSetIndex, int channelIndex)
 void MainServer::addFeatureSet()
 {
     m_mainCore->appendFeatureSet();
-    emit m_mainCore->featureSetAdded(m_mainCore->getFeatureeSets().size() - 1);
+    emit m_mainCore->featureSetAdded((int) (m_mainCore->getFeatureeSets().size() - 1));
 }
 
 void MainServer::removeFeatureSet(unsigned int featureSetIndex)

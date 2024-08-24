@@ -57,11 +57,7 @@ const char* const SSBMod::m_channelId = "SSBMod";
 SSBMod::SSBMod(DeviceAPI *deviceAPI) :
     ChannelAPI(m_channelIdURI, ChannelAPI::StreamSingleSource),
     m_deviceAPI(deviceAPI),
-    m_running(false),
-    m_spectrumVis(SDR_TX_SCALEF),
-	m_fileSize(0),
-	m_recordLength(0),
-	m_sampleRate(48000)
+    m_spectrumVis(SDR_TX_SCALEF)
 {
 	setObjectName(m_channelId);
     applySettings(m_settings, true);
@@ -90,7 +86,7 @@ SSBMod::~SSBMod()
     m_deviceAPI->removeChannelSourceAPI(this);
     m_deviceAPI->removeChannelSource(this);
 
-    stop();
+    SSBMod::stop();
 }
 
 void SSBMod::setDeviceAPI(DeviceAPI *deviceAPI)
@@ -182,7 +178,7 @@ bool SSBMod::handleMessage(const Message& cmd)
 {
     if (MsgConfigureSSBMod::match(cmd))
     {
-        MsgConfigureSSBMod& cfg = (MsgConfigureSSBMod&) cmd;
+        auto& cfg = (const MsgConfigureSSBMod&) cmd;
         qDebug() << "SSBMod::handleMessage: MsgConfigureSSBMod";
 
         applySettings(cfg.getSettings(), cfg.getForce());
@@ -191,14 +187,14 @@ bool SSBMod::handleMessage(const Message& cmd)
     }
 	else if (MsgConfigureFileSourceName::match(cmd))
     {
-        MsgConfigureFileSourceName& conf = (MsgConfigureFileSourceName&) cmd;
+        auto& conf = (const MsgConfigureFileSourceName&) cmd;
         m_fileName = conf.getFileName();
         openFileStream();
         return true;
     }
     else if (MsgConfigureFileSourceSeek::match(cmd))
     {
-        MsgConfigureFileSourceSeek& conf = (MsgConfigureFileSourceSeek&) cmd;
+        auto& conf = (const MsgConfigureFileSourceSeek&) cmd;
         int seekPercentage = conf.getPercentage();
         seekFileStream(seekPercentage);
 
@@ -206,18 +202,17 @@ bool SSBMod::handleMessage(const Message& cmd)
     }
     else if (MsgConfigureFileSourceStreamTiming::match(cmd))
     {
-    	std::size_t samplesCount;
+        std::size_t samplesCount;
 
-    	if (m_ifstream.eof()) {
-    		samplesCount = m_fileSize / sizeof(Real);
-    	} else {
-    		samplesCount = m_ifstream.tellg() / sizeof(Real);
-    	}
+        if (m_ifstream.eof()) {
+            samplesCount = m_fileSize / sizeof(Real);
+        } else {
+            samplesCount = m_ifstream.tellg() / sizeof(Real);
+        }
 
         if (getMessageQueueToGUI())
         {
-            MsgReportFileSourceStreamTiming *report;
-            report = MsgReportFileSourceStreamTiming::create(samplesCount);
+            auto *report = MsgReportFileSourceStreamTiming::create(samplesCount);
             getMessageQueueToGUI()->push(report);
         }
 
@@ -225,7 +220,7 @@ bool SSBMod::handleMessage(const Message& cmd)
     }
     else if (CWKeyer::MsgConfigureCWKeyer::match(cmd))
     {
-        const CWKeyer::MsgConfigureCWKeyer& cfg = (CWKeyer::MsgConfigureCWKeyer&) cmd;
+        auto& cfg = (const CWKeyer::MsgConfigureCWKeyer&) cmd;
 
         if (m_settings.m_useReverseAPI) {
             webapiReverseSendCWSettings(cfg.getSettings());
@@ -235,11 +230,11 @@ bool SSBMod::handleMessage(const Message& cmd)
     }
     else if (DSPSignalNotification::match(cmd))
     {
-        DSPSignalNotification& notif = (DSPSignalNotification&) cmd;
+        auto& notif = (const DSPSignalNotification&) cmd;
         // Forward to the source
         if (m_running)
         {
-            DSPSignalNotification* rep = new DSPSignalNotification(notif); // make a copy
+            auto* rep = new DSPSignalNotification(notif); // make a copy
             qDebug() << "SSBMod::handleMessage: DSPSignalNotification";
             m_basebandSource->getInputMessageQueue()->push(rep);
         }
@@ -274,7 +269,7 @@ void SSBMod::openFileStream()
     m_ifstream.seekg(0,std::ios_base::beg);
 
     m_sampleRate = 48000; // fixed rate
-    m_recordLength = m_fileSize / (sizeof(Real) * m_sampleRate);
+    m_recordLength = (quint32) (m_fileSize / (sizeof(Real) * m_sampleRate));
 
     qDebug() << "SSBMod::openFileStream: " << m_fileName.toStdString().c_str()
             << " fileSize: " << m_fileSize << "bytes"
@@ -416,7 +411,7 @@ void SSBMod::applySettings(const SSBModSettings& settings, bool force)
     QList<ObjectPipe*> pipes;
     MainCore::instance()->getMessagePipes().getMessagePipes(this, "settings", pipes);
 
-    if (pipes.size() > 0) {
+    if (!pipes.empty()) {
         sendChannelSettings(pipes, reverseAPIKeys, settings, force);
     }
 
@@ -448,12 +443,12 @@ bool SSBMod::deserialize(const QByteArray& data)
     }
 }
 
-void SSBMod::sendSampleRateToDemodAnalyzer()
+void SSBMod::sendSampleRateToDemodAnalyzer() const
 {
     QList<ObjectPipe*> pipes;
     MainCore::instance()->getMessagePipes().getMessagePipes(this, "reportdemod", pipes);
 
-    if (pipes.size() > 0)
+    if (!pipes.empty())
     {
         for (const auto& pipe : pipes)
         {
@@ -604,13 +599,13 @@ void SSBMod::webapiUpdateChannelSettings(
         settings.m_reverseAPIAddress = *response.getSsbModSettings()->getReverseApiAddress();
     }
     if (channelSettingsKeys.contains("reverseAPIPort")) {
-        settings.m_reverseAPIPort = response.getSsbModSettings()->getReverseApiPort();
+        settings.m_reverseAPIPort = (uint16_t) response.getSsbModSettings()->getReverseApiPort();
     }
     if (channelSettingsKeys.contains("reverseAPIDeviceIndex")) {
-        settings.m_reverseAPIDeviceIndex = response.getSsbModSettings()->getReverseApiDeviceIndex();
+        settings.m_reverseAPIDeviceIndex = (uint16_t) response.getSsbModSettings()->getReverseApiDeviceIndex();
     }
     if (channelSettingsKeys.contains("reverseAPIChannelIndex")) {
-        settings.m_reverseAPIChannelIndex = response.getSsbModSettings()->getReverseApiChannelIndex();
+        settings.m_reverseAPIChannelIndex = (uint16_t) response.getSsbModSettings()->getReverseApiChannelIndex();
     }
     if (settings.m_spectrumGUI && channelSettingsKeys.contains("spectrumConfig")) {
         settings.m_spectrumGUI->updateFrom(channelSettingsKeys, response.getSsbModSettings()->getSpectrumConfig());
@@ -691,7 +686,7 @@ void SSBMod::webapiFormatChannelSettings(SWGSDRangel::SWGChannelSettings& respon
         }
         else
         {
-            SWGSDRangel::SWGGLSpectrum *swgGLSpectrum = new SWGSDRangel::SWGGLSpectrum();
+            auto *swgGLSpectrum = new SWGSDRangel::SWGGLSpectrum();
             settings.m_spectrumGUI->formatTo(swgGLSpectrum);
             response.getSsbModSettings()->setSpectrumConfig(swgGLSpectrum);
         }
@@ -705,7 +700,7 @@ void SSBMod::webapiFormatChannelSettings(SWGSDRangel::SWGChannelSettings& respon
         }
         else
         {
-            SWGSDRangel::SWGChannelMarker *swgChannelMarker = new SWGSDRangel::SWGChannelMarker();
+            auto *swgChannelMarker = new SWGSDRangel::SWGChannelMarker();
             settings.m_channelMarker->formatTo(swgChannelMarker);
             response.getSsbModSettings()->setChannelMarker(swgChannelMarker);
         }
@@ -719,16 +714,16 @@ void SSBMod::webapiFormatChannelSettings(SWGSDRangel::SWGChannelSettings& respon
         }
         else
         {
-            SWGSDRangel::SWGRollupState *swgRollupState = new SWGSDRangel::SWGRollupState();
+            auto *swgRollupState = new SWGSDRangel::SWGRollupState();
             settings.m_rollupState->formatTo(swgRollupState);
             response.getSsbModSettings()->setRollupState(swgRollupState);
         }
     }
 }
 
-void SSBMod::webapiFormatChannelReport(SWGSDRangel::SWGChannelReport& response)
+void SSBMod::webapiFormatChannelReport(SWGSDRangel::SWGChannelReport& response) const
 {
-    response.getSsbModReport()->setChannelPowerDb(CalcDb::dbPower(getMagSq()));
+    response.getSsbModReport()->setChannelPowerDb((float) CalcDb::dbPower(getMagSq()));
 
     if (m_running)
     {
@@ -737,9 +732,9 @@ void SSBMod::webapiFormatChannelReport(SWGSDRangel::SWGChannelReport& response)
     }
 }
 
-void SSBMod::webapiReverseSendSettings(QList<QString>& channelSettingsKeys, const SSBModSettings& settings, bool force)
+void SSBMod::webapiReverseSendSettings(const QList<QString>& channelSettingsKeys, const SSBModSettings& settings, bool force)
 {
-    SWGSDRangel::SWGChannelSettings *swgChannelSettings = new SWGSDRangel::SWGChannelSettings();
+    auto *swgChannelSettings = new SWGSDRangel::SWGChannelSettings();
     webapiFormatChannelSettings(channelSettingsKeys, swgChannelSettings, settings, force);
 
     QString channelSettingsURL = QString("http://%1:%2/sdrangel/deviceset/%3/channel/%4/settings")
@@ -750,8 +745,8 @@ void SSBMod::webapiReverseSendSettings(QList<QString>& channelSettingsKeys, cons
     m_networkRequest.setUrl(QUrl(channelSettingsURL));
     m_networkRequest.setHeader(QNetworkRequest::ContentTypeHeader, "application/json");
 
-    QBuffer *buffer = new QBuffer();
-    buffer->open((QBuffer::ReadWrite));
+    auto *buffer = new QBuffer();
+    buffer->open(QBuffer::ReadWrite);
     buffer->write(swgChannelSettings->asJson().toUtf8());
     buffer->seek(0);
 
@@ -764,7 +759,7 @@ void SSBMod::webapiReverseSendSettings(QList<QString>& channelSettingsKeys, cons
 
 void SSBMod::webapiReverseSendCWSettings(const CWKeyerSettings& cwKeyerSettings)
 {
-    SWGSDRangel::SWGChannelSettings *swgChannelSettings = new SWGSDRangel::SWGChannelSettings();
+    auto *swgChannelSettings = new SWGSDRangel::SWGChannelSettings();
     swgChannelSettings->setDirection(1); // single source (Tx)
     swgChannelSettings->setChannelType(new QString("SSBMod"));
     swgChannelSettings->setSsbModSettings(new SWGSDRangel::SWGSSBModSettings());
@@ -772,7 +767,7 @@ void SSBMod::webapiReverseSendCWSettings(const CWKeyerSettings& cwKeyerSettings)
 
     swgSSBModSettings->setCwKeyer(new SWGSDRangel::SWGCWKeyerSettings());
     SWGSDRangel::SWGCWKeyerSettings *apiCwKeyerSettings = swgSSBModSettings->getCwKeyer();
-    m_cwKeyer.webapiFormatChannelSettings(apiCwKeyerSettings, cwKeyerSettings);
+    CWKeyer::webapiFormatChannelSettings(apiCwKeyerSettings, cwKeyerSettings);
 
     QString channelSettingsURL = QString("http://%1:%2/sdrangel/deviceset/%3/channel/%4/settings")
             .arg(m_settings.m_reverseAPIAddress)
@@ -782,8 +777,8 @@ void SSBMod::webapiReverseSendCWSettings(const CWKeyerSettings& cwKeyerSettings)
     m_networkRequest.setUrl(QUrl(channelSettingsURL));
     m_networkRequest.setHeader(QNetworkRequest::ContentTypeHeader, "application/json");
 
-    QBuffer *buffer = new QBuffer();
-    buffer->open((QBuffer::ReadWrite));
+    auto *buffer = new QBuffer();
+    buffer->open(QBuffer::ReadWrite);
     buffer->write(swgChannelSettings->asJson().toUtf8());
     buffer->seek(0);
 
@@ -796,9 +791,9 @@ void SSBMod::webapiReverseSendCWSettings(const CWKeyerSettings& cwKeyerSettings)
 
 void SSBMod::sendChannelSettings(
     const QList<ObjectPipe*>& pipes,
-    QList<QString>& channelSettingsKeys,
+    const QList<QString>& channelSettingsKeys,
     const SSBModSettings& settings,
-    bool force)
+    bool force) const
 {
     for (const auto& pipe : pipes)
     {
@@ -806,7 +801,7 @@ void SSBMod::sendChannelSettings(
 
         if (messageQueue)
         {
-            SWGSDRangel::SWGChannelSettings *swgChannelSettings = new SWGSDRangel::SWGChannelSettings();
+            auto *swgChannelSettings = new SWGSDRangel::SWGChannelSettings();
             webapiFormatChannelSettings(channelSettingsKeys, swgChannelSettings, settings, force);
             MainCore::MsgChannelSettings *msg = MainCore::MsgChannelSettings::create(
                 this,
@@ -820,11 +815,11 @@ void SSBMod::sendChannelSettings(
 }
 
 void SSBMod::webapiFormatChannelSettings(
-        QList<QString>& channelSettingsKeys,
+        const QList<QString>& channelSettingsKeys,
         SWGSDRangel::SWGChannelSettings *swgChannelSettings,
         const SSBModSettings& settings,
         bool force
-)
+) const
 {
     swgChannelSettings->setDirection(1); // single source (Tx)
     swgChannelSettings->setOriginatorChannelIndex(getIndexInDeviceSet());
@@ -898,21 +893,21 @@ void SSBMod::webapiFormatChannelSettings(
 
     if (settings.m_spectrumGUI && (channelSettingsKeys.contains("spectrunConfig") || force))
     {
-        SWGSDRangel::SWGGLSpectrum *swgGLSpectrum = new SWGSDRangel::SWGGLSpectrum();
+        auto *swgGLSpectrum = new SWGSDRangel::SWGGLSpectrum();
         settings.m_spectrumGUI->formatTo(swgGLSpectrum);
         swgSSBModSettings->setSpectrumConfig(swgGLSpectrum);
     }
 
     if (settings.m_channelMarker && (channelSettingsKeys.contains("channelMarker") || force))
     {
-        SWGSDRangel::SWGChannelMarker *swgChannelMarker = new SWGSDRangel::SWGChannelMarker();
+        auto *swgChannelMarker = new SWGSDRangel::SWGChannelMarker();
         settings.m_channelMarker->formatTo(swgChannelMarker);
         swgSSBModSettings->setChannelMarker(swgChannelMarker);
     }
 
     if (settings.m_rollupState && (channelSettingsKeys.contains("rollupState") || force))
     {
-        SWGSDRangel::SWGRollupState *swgRollupState = new SWGSDRangel::SWGRollupState();
+        auto *swgRollupState = new SWGSDRangel::SWGRollupState();
         settings.m_rollupState->formatTo(swgRollupState);
         swgSSBModSettings->setRollupState(swgRollupState);
     }
@@ -922,11 +917,11 @@ void SSBMod::webapiFormatChannelSettings(
         const CWKeyerSettings& cwKeyerSettings = m_cwKeyer.getSettings();
         swgSSBModSettings->setCwKeyer(new SWGSDRangel::SWGCWKeyerSettings());
         SWGSDRangel::SWGCWKeyerSettings *apiCwKeyerSettings = swgSSBModSettings->getCwKeyer();
-        m_cwKeyer.webapiFormatChannelSettings(apiCwKeyerSettings, cwKeyerSettings);
+        CWKeyer::webapiFormatChannelSettings(apiCwKeyerSettings, cwKeyerSettings);
     }
 }
 
-void SSBMod::networkManagerFinished(QNetworkReply *reply)
+void SSBMod::networkManagerFinished(QNetworkReply *reply) const
 {
     QNetworkReply::NetworkError replyError = reply->error();
 

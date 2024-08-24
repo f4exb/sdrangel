@@ -33,7 +33,6 @@ class SpectrumVis;
 class GLSpectrum;
 class GLSpectrumGUI;
 class MainSpectrumGUI;
-// class ChannelWindow;
 class DeviceAPI;
 class DeviceSet;
 class DSPDeviceSourceEngine;
@@ -61,7 +60,6 @@ public:
     GLSpectrum *m_spectrum;
     GLSpectrumGUI *m_spectrumGUI;
     MainSpectrumGUI *m_mainSpectrumGUI;
-    // ChannelWindow *m_channelWindow;
     DeviceAPI *m_deviceAPI;
     DeviceGUI *m_deviceGUI;
     DSPDeviceSourceEngine *m_deviceSourceEngine;
@@ -74,7 +72,7 @@ public:
     int m_selectedDeviceItemImdex;
 
     DeviceUISet(int deviceSetIndex, DeviceSet *deviceSet);
-    ~DeviceUISet();
+    ~DeviceUISet() final;
 
     void setIndex(int deviceSetIndex);
     int getIndex() const { return m_deviceSetIndex; }
@@ -146,10 +144,8 @@ private:
         bool operator<(const ChannelInstanceRegistration& other) const;
     };
 
-    typedef QList<ChannelInstanceRegistration> ChannelInstanceRegistrations;
+    using ChannelInstanceRegistrations = QList<ChannelInstanceRegistration>;
 
-    // ChannelInstanceRegistrations m_rxChannelInstanceRegistrations;
-    // ChannelInstanceRegistrations m_txChannelInstanceRegistrations;
     ChannelInstanceRegistrations m_channelInstanceRegistrations;
     int m_deviceSetIndex;
     DeviceSet *m_deviceSet;
@@ -165,8 +161,8 @@ private:
     void saveMIMOChannelSettings(Preset* preset) const;
 
 private slots:
-    void handleChannelGUIClosing(ChannelGUI* channelGUI);
-    void handleDeleteChannel(ChannelAPI *channelAPI);
+    void handleChannelGUIClosing(const ChannelGUI* channelGUI);
+    void handleDeleteChannel(ChannelAPI *channelAPI) const;
     void onTimeSelected(int deviceSetIndex, float time);
 };
 

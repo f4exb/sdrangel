@@ -65,7 +65,7 @@ public:
         DSPDeviceSinkEngine *deviceSinkEngine,
         DSPDeviceMIMOEngine *deviceMIMOEngine
     );
-    ~DeviceAPI();
+    ~DeviceAPI() override;
 
     void setSpectrumSinkInput(bool sourceElseSink = true, unsigned int index = 0); //!< Used in the MIMO case to select which stream is used as input to main spectrum
 
@@ -94,7 +94,7 @@ public:
     bool startDeviceEngine(int subsystemIndex = 0);   //!< Start the device engine corresponding to the stream type
     void stopDeviceEngine(int subsystemIndex = 0);    //!< Stop the device engine corresponding to the stream type
     EngineState state(int subsystemIndex = 0) const;  //!< Return the state of the device engine corresponding to the stream type
-    QString errorMessage(int subsystemIndex = 0);     //!< Last error message from the device engine
+    QString errorMessage(int subsystemIndex = 0) const;     //!< Last error message from the device engine
     uint getDeviceUID() const;  //!< Return the current device engine unique ID
 
     MessageQueue *getDeviceEngineInputMessageQueue();   //!< Device engine message queue
@@ -131,7 +131,7 @@ public:
     void setDeviceSetIndex(int deviceSetIndex);
     PluginInterface *getPluginInterface() { return m_pluginInterface; }
 
-    void getDeviceEngineStateStr(QString& state, int subsystemIndex = 0);
+    void getDeviceEngineStateStr(QString& state, int subsystemIndex = 0) const;
 
     ChannelAPI *getChanelSinkAPIAt(int index);
     ChannelAPI *getChanelSourceAPIAt(int index);
@@ -142,11 +142,7 @@ public:
     int getNbMIMOChannels() const { return m_mimoChannelAPIs.size(); }
 
     void loadSamplingDeviceSettings(const Preset* preset);
-    // void loadSourceSettings(const Preset* preset);
-    // void loadSinkSettings(const Preset* preset);
     void saveSamplingDeviceSettings(Preset* preset);
-    // void saveSourceSettings(Preset* preset);
-    // void saveSinkSettings(Preset* preset);
 
     QByteArray serialize() const override;
     bool deserialize(const QByteArray& data) override;
@@ -176,7 +172,7 @@ public:
 
     const QTimer& getMasterTimer() const { return m_masterTimer; } //!< This is the DSPEngine master timer
 
-protected:
+private:
     // common
 
     StreamType m_streamType;
@@ -217,7 +213,6 @@ protected:
     DSPDeviceMIMOEngine *m_deviceMIMOEngine;
     QList<ChannelAPI*> m_mimoChannelAPIs;
 
-private:
     void renumerateChannels();
 
 private slots:

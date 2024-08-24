@@ -76,10 +76,10 @@ public:
             return new MsgStartStop(startStop);
         }
 
-    protected:
+    private:
         bool m_startStop;
 
-        MsgStartStop(bool startStop) :
+        explicit MsgStartStop(bool startStop) :
             Message(),
             m_startStop(startStop)
         { }
@@ -99,7 +99,7 @@ public:
 	private:
 		QString m_fileName;
 
-		MsgConfigureFileOutputName(const QString& fileName) :
+		explicit MsgConfigureFileOutputName(const QString& fileName) :
 			Message(),
 			m_fileName(fileName)
 		{ }
@@ -119,7 +119,7 @@ public:
 	private:
 		bool m_working;
 
-		MsgConfigureFileOutputWork(bool working) :
+		explicit MsgConfigureFileOutputWork(bool working) :
 			Message(),
 			m_working(working)
 		{ }
@@ -153,10 +153,10 @@ public:
 			return new MsgReportFileOutputGeneration(acquisition);
 		}
 
-	protected:
+	private:
 		bool m_acquisition;
 
-		MsgReportFileOutputGeneration(bool acquisition) :
+		explicit MsgReportFileOutputGeneration(bool acquisition) :
 			Message(),
 			m_acquisition(acquisition)
 		{ }
@@ -173,54 +173,54 @@ public:
 			return new MsgReportFileOutputStreamTiming(samplesCount);
 		}
 
-	protected:
+	private:
 		std::size_t m_samplesCount;
 
-		MsgReportFileOutputStreamTiming(std::size_t samplesCount) :
+		explicit MsgReportFileOutputStreamTiming(std::size_t samplesCount) :
 			Message(),
 			m_samplesCount(samplesCount)
 		{ }
 	};
 
-	FileOutput(DeviceAPI *deviceAPI);
-	virtual ~FileOutput();
-	virtual void destroy();
+	explicit FileOutput(DeviceAPI *deviceAPI);
+	~FileOutput() final;
+	void destroy() final;
 
-    virtual void init();
-	virtual bool start();
-	virtual void stop();
+    void init() final;
+	bool start() final;
+	void stop() final;
 
-    virtual QByteArray serialize() const;
-    virtual bool deserialize(const QByteArray& data);
+    QByteArray serialize() const final;
+    bool deserialize(const QByteArray& data) final;
 
-    virtual void setMessageQueueToGUI(MessageQueue *queue) { m_guiMessageQueue = queue; }
-	virtual const QString& getDeviceDescription() const;
-	virtual int getSampleRate() const;
-    virtual void setSampleRate(int sampleRate) { (void) sampleRate; }
-	virtual quint64 getCenterFrequency() const;
-    virtual void setCenterFrequency(qint64 centerFrequency);
+    void setMessageQueueToGUI(MessageQueue *queue) final { m_guiMessageQueue = queue; }
+	const QString& getDeviceDescription() const final;
+	int getSampleRate() const final;
+    void setSampleRate(int sampleRate) final { (void) sampleRate; }
+	quint64 getCenterFrequency() const final;
+    void setCenterFrequency(qint64 centerFrequency) final;
 	std::time_t getStartingTimeStamp() const;
 
-	virtual bool handleMessage(const Message& message);
+	bool handleMessage(const Message& message) final;
 
-	virtual int webapiSettingsGet(
-	            SWGSDRangel::SWGDeviceSettings& response,
-	            QString& errorMessage);
+	int webapiSettingsGet(
+        SWGSDRangel::SWGDeviceSettings& response,
+        QString& errorMessage) final;
 
-	virtual int webapiSettingsPutPatch(
-                bool force,
-                const QStringList& deviceSettingsKeys,
-                SWGSDRangel::SWGDeviceSettings& response, // query + response
-                QString& errorMessage);
+	int webapiSettingsPutPatch(
+        bool force,
+        const QStringList& deviceSettingsKeys,
+        SWGSDRangel::SWGDeviceSettings& response, // query + response
+        QString& errorMessage) final;
 
-    virtual int webapiRunGet(
-            SWGSDRangel::SWGDeviceState& response,
-            QString& errorMessage);
+    int webapiRunGet(
+        SWGSDRangel::SWGDeviceState& response,
+        QString& errorMessage) final;
 
-    virtual int webapiRun(
-            bool run,
-            SWGSDRangel::SWGDeviceState& response,
-            QString& errorMessage);
+    int webapiRun(
+        bool run,
+        SWGSDRangel::SWGDeviceState& response,
+        QString& errorMessage) final;
 
     static void webapiFormatDeviceSettings(
             SWGSDRangel::SWGDeviceSettings& response,
@@ -234,13 +234,13 @@ public:
 private:
     DeviceAPI *m_deviceAPI;
 	QMutex m_mutex;
-    bool m_running;
+    bool m_running = false;
 	FileOutputSettings m_settings;
 	std::ofstream m_ofstream;
-	FileOutputWorker* m_fileOutputWorker;
+	FileOutputWorker* m_fileOutputWorker = nullptr;
     QThread m_fileOutputWorkerThread;
 	QString m_deviceDescription;
-	qint64 m_startingTimeStamp;
+	qint64 m_startingTimeStamp = 0;
 	const QTimer& m_masterTimer;
     QNetworkAccessManager *m_networkManager;
     QNetworkRequest m_networkRequest;
@@ -253,7 +253,7 @@ private:
     void webapiReverseSendStartStop(bool start);
 
 private slots:
-    void networkManagerFinished(QNetworkReply *reply);
+    void networkManagerFinished(QNetworkReply *reply) const;
 };
 
 #endif // INCLUDE_FILEOUTPUT_H

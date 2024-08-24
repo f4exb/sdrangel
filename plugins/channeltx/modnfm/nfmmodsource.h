@@ -47,11 +47,11 @@ class NFMModSource : public QObject, public ChannelSampleSource
     Q_OBJECT
 public:
     NFMModSource();
-    virtual ~NFMModSource();
+    ~NFMModSource() final;
 
-    virtual void pull(SampleVector::iterator begin, unsigned int nbSamples);
-    virtual void pullOne(Sample& sample);
-    virtual void prefetch(unsigned int nbSamples);
+    void pull(SampleVector::iterator begin, unsigned int nbSamples) final;
+    void pullOne(Sample& sample) final;
+    void prefetch(unsigned int nbSamples) final;
 
     void setInputFileStream(std::ifstream *ifstream) { m_ifstream = ifstream; }
     AudioFifo *getAudioFifo() { return &m_audioFifo; }
@@ -74,8 +74,8 @@ public:
     void applyChannelSettings(int channelSampleRate, int channelFrequencyOffset, bool force = false);
 
 private:
-    int m_channelSampleRate;
-    int m_channelFrequencyOffset;
+    int m_channelSampleRate = 48000;
+    int m_channelFrequencyOffset = 0;
     NFMModSettings m_settings;
     ChannelAPI *m_channel;
 
@@ -83,7 +83,7 @@ private:
     NCOF m_toneNco;
     NCOF m_ctcssNco;
     NFMModDCS m_dcsMod;
-    float m_modPhasor; //!< baseband modulator phasor
+    float m_modPhasor = 0.0f; //!< baseband modulator phasor
     Complex m_modSample;
 
     Interpolator m_interpolator;
@@ -106,7 +106,7 @@ private:
     double m_magsq;
     MovingAverageUtil<double, double, 16> m_movingAverage;
 
-    int m_audioSampleRate;
+    int m_audioSampleRate = 48000;
     AudioVector m_audioBuffer;
     unsigned int m_audioBufferFill;
     AudioVector m_audioReadBuffer;
@@ -118,14 +118,14 @@ private:
     uint m_feedbackAudioBufferFill;
     AudioFifo m_feedbackAudioFifo;
 
-    quint32 m_levelCalcCount;
+    quint32 m_levelCalcCount = 0;
     qreal m_rmsLevel;
     qreal m_peakLevelOut;
-    Real m_peakLevel;
-    Real m_levelSum;
+    Real m_peakLevel = 0.0f;
+    Real m_levelSum = 0.0f;
 
-    std::ifstream *m_ifstream;
-    CWKeyer *m_cwKeyer;
+    std::ifstream *m_ifstream = nullptr;
+    CWKeyer *m_cwKeyer = nullptr;
 
     AudioCompressorSnd m_audioCompressor;
 
@@ -134,11 +134,11 @@ private:
     static const int m_levelNbSamples;
     static const float m_preemphasis;
 
-    void processOneSample(Complex& ci);
+    void processOneSample(const Complex& ci);
     void pullAF(Real& sample);
     void pullAudio(unsigned int nbSamples);
     void pushFeedback(Real sample);
-    void calculateLevel(Real& sample);
+    void calculateLevel(const Real& sample);
     void modulateSample();
 
 private slots:

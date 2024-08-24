@@ -74,10 +74,10 @@ public:
             return new MsgStartStop(startStop);
         }
 
-    protected:
+    private:
         bool m_startStop;
 
-        MsgStartStop(bool startStop) :
+        explicit MsgStartStop(bool startStop) :
             Message(),
             m_startStop(startStop)
         { }
@@ -100,57 +100,57 @@ public:
 		{ }
 	};
 
-	Bladerf1Output(DeviceAPI *deviceAPI);
-	virtual ~Bladerf1Output();
-	virtual void destroy();
+	explicit Bladerf1Output(DeviceAPI *deviceAPI);
+	~Bladerf1Output() final;
+	void destroy() final;
 
-    virtual void init();
-	virtual bool start();
-	virtual void stop();
+    void init() final;
+	bool start() final;
+	void stop() final;
 
-    virtual QByteArray serialize() const;
-    virtual bool deserialize(const QByteArray& data);
+    QByteArray serialize() const final;
+    bool deserialize(const QByteArray& data) final;
 
-    virtual void setMessageQueueToGUI(MessageQueue *queue) { m_guiMessageQueue = queue; }
-	virtual const QString& getDeviceDescription() const;
-	virtual int getSampleRate() const;
-    virtual void setSampleRate(int sampleRate) { (void) sampleRate; }
-	virtual quint64 getCenterFrequency() const;
-    virtual void setCenterFrequency(qint64 centerFrequency);
+    void setMessageQueueToGUI(MessageQueue *queue) final { m_guiMessageQueue = queue; }
+	const QString& getDeviceDescription() const final;
+	int getSampleRate() const final;
+    void setSampleRate(int sampleRate) final { (void) sampleRate; }
+	quint64 getCenterFrequency() const final;
+    void setCenterFrequency(qint64 centerFrequency) final;
 
-	virtual bool handleMessage(const Message& message);
+	bool handleMessage(const Message& message) final;
 
-    virtual int webapiSettingsGet(
-                SWGSDRangel::SWGDeviceSettings& response,
-                QString& errorMessage);
+    int webapiSettingsGet(
+        SWGSDRangel::SWGDeviceSettings& response,
+        QString& errorMessage) final;
 
-    virtual int webapiSettingsPutPatch(
-                bool force,
-                const QStringList& deviceSettingsKeys,
-                SWGSDRangel::SWGDeviceSettings& response, // query + response
-                QString& errorMessage);
+    int webapiSettingsPutPatch(
+        bool force,
+        const QStringList& deviceSettingsKeys,
+        SWGSDRangel::SWGDeviceSettings& response, // query + response
+        QString& errorMessage) final;
 
-    virtual int webapiRunGet(
-            SWGSDRangel::SWGDeviceState& response,
-            QString& errorMessage);
+    int webapiRunGet(
+        SWGSDRangel::SWGDeviceState& response,
+        QString& errorMessage) final;
 
-    virtual int webapiRun(
-            bool run,
-            SWGSDRangel::SWGDeviceState& response,
-            QString& errorMessage);
+    int webapiRun(
+        bool run,
+        SWGSDRangel::SWGDeviceState& response,
+        QString& errorMessage) final;
 
     static void webapiFormatDeviceSettings(
-            SWGSDRangel::SWGDeviceSettings& response,
-            const BladeRF1OutputSettings& settings);
+        SWGSDRangel::SWGDeviceSettings& response,
+        const BladeRF1OutputSettings& settings);
 
     static void webapiUpdateDeviceSettings(
-            BladeRF1OutputSettings& settings,
-            const QStringList& deviceSettingsKeys,
-            SWGSDRangel::SWGDeviceSettings& response);
+        BladeRF1OutputSettings& settings,
+        const QStringList& deviceSettingsKeys,
+        SWGSDRangel::SWGDeviceSettings& response);
 
 private:
 	DeviceAPI *m_deviceAPI;
-	QMutex m_mutex;
+	QRecursiveMutex m_mutex;
 	BladeRF1OutputSettings m_settings;
 	struct bladerf* m_dev;
 	Bladerf1OutputThread* m_bladerfThread;
@@ -167,7 +167,7 @@ private:
     void webapiReverseSendStartStop(bool start);
 
 private slots:
-    void networkManagerFinished(QNetworkReply *reply);
+    void networkManagerFinished(QNetworkReply *reply) const;
 };
 
 #endif // INCLUDE_BLADERFOUTPUT_H

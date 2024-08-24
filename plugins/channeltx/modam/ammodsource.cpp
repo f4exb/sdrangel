@@ -28,16 +28,8 @@
 const int AMModSource::m_levelNbSamples = 480; // every 10ms
 
 AMModSource::AMModSource() :
-    m_channelSampleRate(48000),
-    m_channelFrequencyOffset(0),
-    m_audioSampleRate(48000),
     m_audioFifo(12000),
-    m_feedbackAudioFifo(48000),
-	m_levelCalcCount(0),
-	m_peakLevel(0.0f),
-	m_levelSum(0.0f),
-    m_ifstream(nullptr),
-    m_cwKeyer(nullptr)
+    m_feedbackAudioFifo(48000)
 {
     m_audioFifo.setLabel("AMModSource.m_audioFifo");
     m_feedbackAudioFifo.setLabel("AMModSource.m_feedbackAudioFifo");
@@ -57,9 +49,7 @@ AMModSource::AMModSource() :
     applyChannelSettings(m_channelSampleRate, m_channelFrequencyOffset, true);
 }
 
-AMModSource::~AMModSource()
-{
-}
+AMModSource::~AMModSource() = default;
 
 void AMModSource::pull(SampleVector::iterator begin, unsigned int nbSamples)
 {
@@ -111,7 +101,7 @@ void AMModSource::pullOne(Sample& sample)
 	sample.m_real = (FixReal) ci.real();
 	sample.m_imag = (FixReal) ci.imag();
 
-    m_demodBuffer[m_demodBufferFill] = ci.real() + ci.imag();
+    m_demodBuffer[m_demodBufferFill] = (qint16) (ci.real() + ci.imag());
     ++m_demodBufferFill;
 
     if (m_demodBufferFill >= m_demodBuffer.size())
@@ -119,13 +109,11 @@ void AMModSource::pullOne(Sample& sample)
         QList<ObjectPipe*> dataPipes;
         MainCore::instance()->getDataPipes().getDataPipes(m_channel, "demod", dataPipes);
 
-        if (dataPipes.size() > 0)
+        if (!dataPipes.empty())
         {
-            QList<ObjectPipe*>::iterator it = dataPipes.begin();
-
-            for (; it != dataPipes.end(); ++it)
+            for (auto& dataPipe : dataPipes)
             {
-                DataFifo *fifo = qobject_cast<DataFifo*>((*it)->m_element);
+                DataFifo *fifo = qobject_cast<DataFifo*>(dataPipe->m_element);
 
                 if (fifo) {
                     fifo->write((quint8*) &m_demodBuffer[0], m_demodBuffer.size() * sizeof(qint16), DataFifo::DataTypeI16);
@@ -139,7 +127,7 @@ void AMModSource::pullOne(Sample& sample)
 
 void AMModSource::prefetch(unsigned int nbSamples)
 {
-    unsigned int nbSamplesAudio = nbSamples * ((Real) m_audioSampleRate / (Real) m_channelSampleRate);
+    auto nbSamplesAudio = (nbSamples * (unsigned int) ((Real) m_audioSampleRate / (Real) m_channelSampleRate));
     pullAudio(nbSamplesAudio);
 }
 
@@ -163,7 +151,7 @@ void AMModSource::pullAudio(unsigned int nbSamples)
 
 void AMModSource::modulateSample()
 {
-	Real t;
+	Real t = 0.0f;
 
     pullAF(t);
 
@@ -186,17 +174,12 @@ void AMModSource::pullAF(Real& sample)
         sample = m_toneNco.next();
         break;
     case AMModSettings::AMModInputFile:
-        // sox f4exb_call.wav --encoding float --endian little f4exb_call.raw
-        // ffplay -f f32le -ar 48k -ac 1 f4exb_call.raw
         if (m_ifstream && m_ifstream->is_open())
         {
-            if (m_ifstream->eof())
+            if ((m_ifstream->eof()) && (m_settings.m_playLoop))
             {
-            	if (m_settings.m_playLoop)
-            	{
-                    m_ifstream->clear();
-                    m_ifstream->seekg(0, std::ios::beg);
-            	}
+                m_ifstream->clear();
+                m_ifstream->seekg(0, std::ios::beg);
             }
 
             if (m_ifstream->eof())
@@ -242,7 +225,6 @@ void AMModSource::pullAF(Real& sample)
             }
         }
         break;
-    case AMModSettings::AMModInputNone:
     default:
         sample = 0.0f;
         break;
@@ -272,10 +254,10 @@ void AMModSource::pushFeedback(Real sample)
     }
 }
 
-void AMModSource::processOneSample(Complex& ci)
+void AMModSource::processOneSample(const Complex& ci)
 {
-    m_feedbackAudioBuffer[m_feedbackAudioBufferFill].l = ci.real();
-    m_feedbackAudioBuffer[m_feedbackAudioBufferFill].r = ci.imag();
+    m_feedbackAudioBuffer[m_feedbackAudioBufferFill].l = (qint16) ci.real();
+    m_feedbackAudioBuffer[m_feedbackAudioBufferFill].r = (qint16) ci.imag();
     ++m_feedbackAudioBufferFill;
 
     if (m_feedbackAudioBufferFill >= m_feedbackAudioBuffer.size())
@@ -293,7 +275,7 @@ void AMModSource::processOneSample(Complex& ci)
     }
 }
 
-void AMModSource::calculateLevel(Real& sample)
+void AMModSource::calculateLevel(const Real& sample)
 {
     if (m_levelCalcCount < m_levelNbSamples)
     {
@@ -325,7 +307,7 @@ void AMModSource::applyAudioSampleRate(int sampleRate)
     m_interpolatorConsumed = false;
     m_interpolatorDistance = (Real) sampleRate / (Real) m_channelSampleRate;
     m_interpolator.create(48, sampleRate, m_settings.m_rfBandwidth / 2.2, 3.0);
-    m_toneNco.setFreq(m_settings.m_toneFrequency, sampleRate);
+    m_toneNco.setFreq(m_settings.m_toneFrequency, (float) sampleRate);
 
     if (m_cwKeyer)
     {
@@ -336,7 +318,7 @@ void AMModSource::applyAudioSampleRate(int sampleRate)
     QList<ObjectPipe*> pipes;
     MainCore::instance()->getMessagePipes().getMessagePipes(m_channel, "reportdemod", pipes);
 
-    if (pipes.size() > 0)
+    if (!pipes.empty())
     {
         for (const auto& pipe : pipes)
         {
@@ -362,7 +344,7 @@ void AMModSource::applyFeedbackAudioSampleRate(int sampleRate)
 
     m_feedbackInterpolatorDistanceRemain = 0;
     m_feedbackInterpolatorDistance = (Real) sampleRate / (Real) m_audioSampleRate;
-    Real cutoff = std::min(sampleRate, m_audioSampleRate) / 2.2f;
+    Real cutoff = ((float) std::min(sampleRate, m_audioSampleRate)) / 2.2f;
     m_feedbackInterpolator.create(48, sampleRate, cutoff, 3.0);
     m_feedbackAudioSampleRate = sampleRate;
 }
@@ -375,9 +357,8 @@ void AMModSource::applySettings(const AMModSettings& settings, bool force)
         applyAudioSampleRate(m_audioSampleRate);
     }
 
-    if ((settings.m_toneFrequency != m_settings.m_toneFrequency) || force)
-    {
-        m_toneNco.setFreq(settings.m_toneFrequency, m_audioSampleRate);
+    if ((settings.m_toneFrequency != m_settings.m_toneFrequency) || force) {
+        m_toneNco.setFreq(settings.m_toneFrequency, (float) m_audioSampleRate);
     }
 
     if ((settings.m_modAFInput != m_settings.m_modAFInput) || force)
@@ -401,7 +382,7 @@ void AMModSource::applyChannelSettings(int channelSampleRate, int channelFrequen
     if ((channelFrequencyOffset != m_channelFrequencyOffset)
      || (channelSampleRate != m_channelSampleRate) || force)
     {
-        m_carrierNco.setFreq(channelFrequencyOffset, channelSampleRate);
+        m_carrierNco.setFreq((float) channelFrequencyOffset, (float) channelSampleRate);
     }
 
     if ((channelSampleRate != m_channelSampleRate) || force)
@@ -418,7 +399,6 @@ void AMModSource::applyChannelSettings(int channelSampleRate, int channelFrequen
 
 void AMModSource::handleAudio()
 {
-    QMutexLocker mlock(&m_mutex);
     unsigned int nbRead;
 
     while ((nbRead = m_audioFifo.read(reinterpret_cast<quint8*>(&m_audioReadBuffer[m_audioReadBufferFill]), 4096)) != 0)

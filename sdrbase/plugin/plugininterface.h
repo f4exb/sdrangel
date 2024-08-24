@@ -84,8 +84,8 @@ public:
 		StreamType streamType;    //!< This is the type of stream supported
 		int deviceNbItems;        //!< Number of items (or streams) in the device. >1 for composite devices.
 		int deviceItemIndex;      //!< For composite devices this is the Rx or Tx stream index. -1 if not initialized
-		int claimed;              //!< This is the device set index if claimed else -1
-        bool removed;             //!< Set if device has been removed
+		int claimed = -1;         //!< This is the device set index if claimed else -1
+        bool removed = false;     //!< Set if device has been removed
 
 		SamplingDevice(const QString& _displayedName,
                 const QString& _hardwareId,
@@ -104,9 +104,7 @@ public:
 			type(_type),
 			streamType(_streamType),
 			deviceNbItems(_deviceNbItems),
-			deviceItemIndex(_deviceItemIndex),
-			claimed(-1),
-            removed(false)
+			deviceItemIndex(_deviceItemIndex)
 		{ }
 
         bool operator==(const SamplingDevice& rhs) const
@@ -117,7 +115,7 @@ public:
                 && serial == rhs.serial;
         }
 	};
-	typedef QList<SamplingDevice> SamplingDevices;
+	using SamplingDevices = QList<SamplingDevice>;
 
     /** This is the device from which the sampling devices are derived. For physical devices this represents
      * a single physical unit (a LimeSDR, HackRF, BladeRF, RTL-SDR dongle, ...) that is enumerated once and
@@ -148,9 +146,9 @@ public:
             nbTxStreams(_nbTxStreams)
         {}
     };
-    typedef QList<OriginDevice> OriginDevices;
+    using OriginDevices = QList<OriginDevice>;
 
-    virtual ~PluginInterface() { }
+    virtual ~PluginInterface() = default;
 
 	virtual const PluginDescriptor& getPluginDescriptor() const = 0;
 	virtual void initPlugin(PluginAPI* pluginAPI) = 0;
