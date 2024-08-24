@@ -166,7 +166,7 @@ void DeviceUISet::freeChannels()
     for(int i = 0; i < m_channelInstanceRegistrations.count(); i++)
     {
         qDebug("DeviceUISet::freeChannels: destroying channel [%s]", qPrintable(m_channelInstanceRegistrations[i].m_channelAPI->getURI()));
-        m_channelInstanceRegistrations[i].m_gui->destroy();
+        delete m_channelInstanceRegistrations[i].m_gui;
         delete m_channelInstanceRegistrations[i].m_channelAPI;
     }
 
@@ -181,7 +181,7 @@ void DeviceUISet::deleteChannel(int channelIndex)
         qDebug("DeviceUISet::deleteChannel: delete channel [%s] at %d",
                 qPrintable(m_channelInstanceRegistrations[channelIndex].m_channelAPI->getURI()),
                 channelIndex);
-        m_channelInstanceRegistrations[channelIndex].m_gui->destroy();
+        delete m_channelInstanceRegistrations[channelIndex].m_gui;
         delete m_channelInstanceRegistrations[channelIndex].m_channelAPI;
         m_channelInstanceRegistrations.removeAt(channelIndex);
     }
@@ -320,7 +320,7 @@ void DeviceUISet::loadRxChannelSettings(const Preset *preset, PluginAPI *pluginA
             qDebug("DeviceUISet::loadRxChannelSettings: destroying old channel [%s]",
                 qPrintable(m_channelInstanceRegistrations[i].m_channelAPI->getURI()));
             m_channelInstanceRegistrations[i].m_channelAPI->setMessageQueueToGUI(nullptr); // have channel stop sending messages to its GUI
-            m_channelInstanceRegistrations[i].m_gui->destroy();
+            delete m_channelInstanceRegistrations[i].m_gui;
             delete m_channelInstanceRegistrations[i].m_channelAPI;
         }
 
@@ -449,7 +449,7 @@ void DeviceUISet::loadTxChannelSettings(const Preset *preset, PluginAPI *pluginA
             qDebug("DeviceUISet::loadTxChannelSettings: destroying old channel [%s]",
                 qPrintable(m_channelInstanceRegistrations[i].m_channelAPI->getURI()));
             m_channelInstanceRegistrations[i].m_channelAPI->setMessageQueueToGUI(nullptr); // have channel stop sending messages to its GUI
-            m_channelInstanceRegistrations[i].m_gui->destroy();
+            delete m_channelInstanceRegistrations[i].m_gui;
             delete m_channelInstanceRegistrations[i].m_channelAPI;
         }
 
@@ -575,7 +575,7 @@ void DeviceUISet::loadMIMOChannelSettings(const Preset *preset, PluginAPI *plugi
         {
             qDebug("DeviceUISet::loadMIMOChannelSettings: destroying old channel [%s]",
                 qPrintable(m_channelInstanceRegistrations[i].m_channelAPI->getURI()));
-            m_channelInstanceRegistrations[i].m_gui->destroy(); // stop GUI first (issue #1427)
+            delete m_channelInstanceRegistrations[i].m_gui; // stop GUI first (issue #1427)
             delete m_channelInstanceRegistrations[i].m_channelAPI; // stop channel before (issue #860)
         }
 
