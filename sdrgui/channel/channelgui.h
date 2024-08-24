@@ -56,9 +56,8 @@ public:
         ContextMenuChannelSettings
     };
 
-	ChannelGUI(QWidget *parent = nullptr);
-	virtual ~ChannelGUI();
-	virtual void destroy() = 0;
+	explicit ChannelGUI(QWidget *parent = nullptr);
+	~ChannelGUI() override;
 
 	virtual void resetToDefaults() = 0;
     // Data saved in the derived settings
