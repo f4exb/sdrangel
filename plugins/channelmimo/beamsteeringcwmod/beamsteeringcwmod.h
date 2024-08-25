@@ -86,67 +86,64 @@ public:
         qint64 m_centerFrequency;
     };
 
-    BeamSteeringCWMod(DeviceAPI *deviceAPI);
-	virtual ~BeamSteeringCWMod();
-	virtual void destroy() { delete this; }
-    virtual void setDeviceAPI(DeviceAPI *deviceAPI);
-    virtual DeviceAPI *getDeviceAPI() { return m_deviceAPI; }
+    explicit BeamSteeringCWMod(DeviceAPI *deviceAPI);
+	~BeamSteeringCWMod() final;
+	void destroy() final { delete this; }
+    void setDeviceAPI(DeviceAPI *deviceAPI) final;
+    DeviceAPI *getDeviceAPI() final { return m_deviceAPI; }
 
-    virtual void startSinks() {}
-	virtual void stopSinks() {}
-    virtual void startSources(); //!< thread start()
-    virtual void stopSources(); //!< thread exit() and wait()
-	virtual void feed(const SampleVector::const_iterator& begin, const SampleVector::const_iterator& end, unsigned int sinkIndex);
-    virtual void pull(SampleVector::iterator& begin, unsigned int nbSamples, unsigned int sourceIndex);
-    virtual void pushMessage(Message *msg) { m_inputMessageQueue.push(msg); }
-    virtual QString getMIMOName() { return objectName(); }
+    void startSinks() final { /* Not used for MIMO */ }
+	void stopSinks() final { /* Not used for MIMO */ }
+    void startSources( /* Not used for MIMO */ ) final; //!< thread start()
+    void stopSources( /* Not used for MIMO */ ) final; //!< thread exit() and wait()
+	void feed(const SampleVector::const_iterator& begin, const SampleVector::const_iterator& end, unsigned int sinkIndex) final;
+    void pull(SampleVector::iterator& begin, unsigned int nbSamples, unsigned int sourceIndex) final;
+    void pushMessage(Message *msg) final { m_inputMessageQueue.push(msg); }
+    QString getMIMOName() final { return objectName(); }
 
-    virtual void getIdentifier(QString& id) { id = objectName(); }
-    virtual QString getIdentifier() const { return objectName(); }
-    virtual void getTitle(QString& title) { title = "BeamSteeringCWMod"; }
-    virtual qint64 getCenterFrequency() const { return m_frequencyOffset; }
-    virtual void setCenterFrequency(qint64) {}
+    void getIdentifier(QString& id) final { id = objectName(); }
+    QString getIdentifier() const final { return objectName(); }
+    void getTitle(QString& title) final { title = "BeamSteeringCWMod"; }
+    qint64 getCenterFrequency() const final { return m_frequencyOffset; }
+    void setCenterFrequency(qint64) final { /* Not used for MIMO */ }
     uint32_t getBasebandSampleRate() const { return m_basebandSampleRate; }
 
-    virtual QByteArray serialize() const;
-    virtual bool deserialize(const QByteArray& data);
+    QByteArray serialize() const final;
+    bool deserialize(const QByteArray& data) final;
 
-    virtual int getNbSinkStreams() const { return 0; }
-    virtual int getNbSourceStreams() const { return 2; }
-    virtual int getStreamIndex() const { return -1; }
+    int getNbSinkStreams() const final { return 0; }
+    int getNbSourceStreams() const final { return 2; }
+    int getStreamIndex() const final { return -1; }
 
-    virtual qint64 getStreamCenterFrequency(int streamIndex, bool sinkElseSource) const
+    qint64 getStreamCenterFrequency(int streamIndex, bool sinkElseSource) const final
     {
         (void) streamIndex;
         (void) sinkElseSource;
         return m_frequencyOffset;
     }
 
-    virtual void setMessageQueueToGUI(MessageQueue *queue) { m_guiMessageQueue = queue; }
-    MessageQueue *getMessageQueueToGUI() { return m_guiMessageQueue; }
+    int webapiSettingsGet(
+        SWGSDRangel::SWGChannelSettings& response,
+        QString& errorMessage) final;
 
-    virtual int webapiSettingsGet(
-            SWGSDRangel::SWGChannelSettings& response,
-            QString& errorMessage);
+    int webapiSettingsPutPatch(
+        bool force,
+        const QStringList& channelSettingsKeys,
+        SWGSDRangel::SWGChannelSettings& response,
+        QString& errorMessage) final;
 
-    virtual int webapiSettingsPutPatch(
-            bool force,
-            const QStringList& channelSettingsKeys,
-            SWGSDRangel::SWGChannelSettings& response,
-            QString& errorMessage);
-
-    virtual int webapiWorkspaceGet(
-            SWGSDRangel::SWGWorkspaceInfo& query,
-            QString& errorMessage);
+    int webapiWorkspaceGet(
+        SWGSDRangel::SWGWorkspaceInfo& query,
+        QString& errorMessage) final;
 
     static void webapiFormatChannelSettings(
         SWGSDRangel::SWGChannelSettings& response,
         const BeamSteeringCWModSettings& settings);
 
     static void webapiUpdateChannelSettings(
-            BeamSteeringCWModSettings& settings,
-            const QStringList& channelSettingsKeys,
-            SWGSDRangel::SWGChannelSettings& response);
+        BeamSteeringCWModSettings& settings,
+        const QStringList& channelSettingsKeys,
+        SWGSDRangel::SWGChannelSettings& response);
 
     static const char* const m_channelIdURI;
     static const char* const m_channelId;
@@ -161,36 +158,36 @@ private:
     BasebandSampleSink* m_spectrumSink;
     BasebandSampleSink* m_scopeSink;
     BeamSteeringCWModSettings m_settings;
-    MessageQueue *m_guiMessageQueue;  //!< Input message queue to the GUI
 
     QNetworkAccessManager *m_networkManager;
     QNetworkRequest m_networkRequest;
 
     int64_t m_frequencyOffset;
     uint32_t m_basebandSampleRate;
-    int m_count0, m_count1;
+    int m_count0;
+    int m_count1;
 
-   	virtual bool handleMessage(const Message& cmd); //!< Processing of a message. Returns true if message has actually been processed
+   	bool handleMessage(const Message& cmd) final; //!< Processing of a message. Returns true if message has actually been processed
     void applySettings(const BeamSteeringCWModSettings& settings, bool force = false);
     static void validateFilterChainHash(BeamSteeringCWModSettings& settings);
     void calculateFrequencyOffset();
-    void webapiReverseSendSettings(QList<QString>& channelSettingsKeys, const BeamSteeringCWModSettings& settings, bool force);
+    void webapiReverseSendSettings(const QList<QString>& channelSettingsKeys, const BeamSteeringCWModSettings& settings, bool force);
     void sendChannelSettings(
         const QList<ObjectPipe*>& pipes,
-        QList<QString>& channelSettingsKeys,
+        const QList<QString>& channelSettingsKeys,
         const BeamSteeringCWModSettings& settings,
         bool force
-    );
+    ) const;
     void webapiFormatChannelSettings(
-        QList<QString>& channelSettingsKeys,
+        const QList<QString>& channelSettingsKeys,
         SWGSDRangel::SWGChannelSettings *swgChannelSettings,
         const BeamSteeringCWModSettings& settings,
         bool force
-    );
+    ) const;
 
 private slots:
     void handleInputMessages();
-    void networkManagerFinished(QNetworkReply *reply);
+    void networkManagerFinished(QNetworkReply *reply) const;
 };
 
 #endif // INCLUDE_BEAMSTEERINGCWSOURCE_H

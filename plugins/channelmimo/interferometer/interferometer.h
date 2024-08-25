@@ -108,72 +108,69 @@ public:
         { }
     };
 
-    Interferometer(DeviceAPI *deviceAPI);
-	virtual ~Interferometer();
-	virtual void destroy() { delete this; }
-    virtual void setDeviceAPI(DeviceAPI *deviceAPI);
-    virtual DeviceAPI *getDeviceAPI() { return m_deviceAPI; }
+    explicit Interferometer(DeviceAPI *deviceAPI);
+	~Interferometer() final;
+	void destroy() final { delete this; }
+    void setDeviceAPI(DeviceAPI *deviceAPI) final;
+    DeviceAPI *getDeviceAPI() final { return m_deviceAPI; }
 
-	virtual void startSinks(); //!< thread start()
-	virtual void stopSinks();  //!< thread exit() and wait()
-    virtual void startSources() {}
-    virtual void stopSources() {}
-	virtual void feed(const SampleVector::const_iterator& begin, const SampleVector::const_iterator& end, unsigned int sinkIndex);
-    virtual void pull(SampleVector::iterator& begin, unsigned int nbSamples, unsigned int sourceIndex);
-    virtual void pushMessage(Message *msg) { m_inputMessageQueue.push(msg); }
-    virtual QString getMIMOName() { return objectName(); }
+	void startSinks() final; //!< thread start()
+	void stopSinks() final;  //!< thread exit() and wait()
+    void startSources() final { /* not for MIMMO*/ }
+    void stopSources() final { /* not for MIMMO*/ }
+	void feed(const SampleVector::const_iterator& begin, const SampleVector::const_iterator& end, unsigned int sinkIndex) final;
+    void pull(SampleVector::iterator& begin, unsigned int nbSamples, unsigned int sourceIndex) final;
+    void pushMessage(Message *msg) final { m_inputMessageQueue.push(msg); }
+    QString getMIMOName() final { return objectName(); }
 
-    virtual void getIdentifier(QString& id) { id = objectName(); }
-    virtual QString getIdentifier() const { return objectName(); }
-    virtual void getTitle(QString& title) { title = "Interferometer"; }
-    virtual qint64 getCenterFrequency() const { return m_frequencyOffset; }
-    virtual void setCenterFrequency(qint64) {}
+    void getIdentifier(QString& id) final { id = objectName(); }
+    QString getIdentifier() const final { return objectName(); }
+    void getTitle(QString& title) final { title = "Interferometer"; }
+    qint64 getCenterFrequency() const final { return m_frequencyOffset; }
+    void setCenterFrequency(qint64) final { /* not for MIMMO*/ }
     uint32_t getDeviceSampleRate() const { return m_deviceSampleRate; }
 
-    virtual QByteArray serialize() const;
-    virtual bool deserialize(const QByteArray& data);
+    QByteArray serialize() const final;
+    bool deserialize(const QByteArray& data) final;
 
-    virtual int getNbSinkStreams() const { return 2; }
-    virtual int getNbSourceStreams() const { return 0; }
-    virtual int getStreamIndex() const { return -1; }
+    int getNbSinkStreams() const final { return 2; }
+    int getNbSourceStreams() const final { return 0; }
+    int getStreamIndex() const final { return -1; }
 
-    virtual qint64 getStreamCenterFrequency(int streamIndex, bool sinkElseSource) const
+    qint64 getStreamCenterFrequency(int streamIndex, bool sinkElseSource) const final
     {
         (void) streamIndex;
         (void) sinkElseSource;
         return m_frequencyOffset;
     }
 
-    virtual void setMessageQueueToGUI(MessageQueue *queue) { m_guiMessageQueue = queue; }
-    MessageQueue *getMessageQueueToGUI() { return m_guiMessageQueue; }
-
     SpectrumVis *getSpectrumVis() { return &m_spectrumVis; }
     ScopeVis *getScopeVis() { return &m_scopeSink; }
     void applyChannelSettings(uint32_t log2Decim, uint32_t filterChainHash);
     const QList<int>& getDeviceSetList() { return m_localInputDeviceIndexes; }
 
-    virtual int webapiSettingsGet(
-            SWGSDRangel::SWGChannelSettings& response,
-            QString& errorMessage);
+    int webapiSettingsGet(
+        SWGSDRangel::SWGChannelSettings& response,
+        QString& errorMessage) final;
 
-    virtual int webapiSettingsPutPatch(
-            bool force,
-            const QStringList& channelSettingsKeys,
-            SWGSDRangel::SWGChannelSettings& response,
-            QString& errorMessage);
+    int webapiSettingsPutPatch(
+        bool force,
+        const QStringList& channelSettingsKeys,
+        SWGSDRangel::SWGChannelSettings& response,
+        QString& errorMessage) final;
 
-    virtual int webapiWorkspaceGet(
-            SWGSDRangel::SWGWorkspaceInfo& query,
-            QString& errorMessage);
+    int webapiWorkspaceGet(
+        SWGSDRangel::SWGWorkspaceInfo& query,
+        QString& errorMessage) final;
 
     static void webapiFormatChannelSettings(
         SWGSDRangel::SWGChannelSettings& response,
         const InterferometerSettings& settings);
 
     static void webapiUpdateChannelSettings(
-            InterferometerSettings& settings,
-            const QStringList& channelSettingsKeys,
-            SWGSDRangel::SWGChannelSettings& response);
+        InterferometerSettings& settings,
+        const QStringList& channelSettingsKeys,
+        SWGSDRangel::SWGChannelSettings& response);
 
     static const char* const m_channelIdURI;
     static const char* const m_channelId;
@@ -196,11 +193,12 @@ private:
     uint64_t m_centerFrequency;
     int64_t m_frequencyOffset;
     uint32_t m_deviceSampleRate;
-    int m_count0, m_count1;
+    int m_count0;
+    int m_count1;
 
     QList<int> m_localInputDeviceIndexes;
 
-	virtual bool handleMessage(const Message& cmd); //!< Processing of a message. Returns true if message has actually been processed
+	bool handleMessage(const Message& cmd) final; //!< Processing of a message. Returns true if message has actually been processed
     void applySettings(const InterferometerSettings& settings, const QList<QString>& settingsKeys, bool force = false);
     static void validateFilterChainHash(InterferometerSettings& settings);
     void calculateFrequencyOffset(uint32_t log2Decim, uint32_t filterChainHash);
@@ -213,17 +211,17 @@ private:
         const QList<QString>& channelSettingsKeys,
         const InterferometerSettings& settings,
         bool force
-    );
+    ) const;
     void webapiFormatChannelSettings(
         const QList<QString>& channelSettingsKeys,
         SWGSDRangel::SWGChannelSettings *swgChannelSettings,
         const InterferometerSettings& settings,
         bool force
-    );
+    ) const;
 
 private slots:
     void handleInputMessages();
-    void networkManagerFinished(QNetworkReply *reply);
+    void networkManagerFinished(QNetworkReply *reply) const;
 };
 
 #endif // INCLUDE_INTERFEROMETER_H

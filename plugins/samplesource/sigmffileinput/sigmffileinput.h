@@ -462,7 +462,7 @@ private:
     QString m_recordSummary;
 	SigMFFileInputWorker* m_fileInputWorker = nullptr;
     QThread m_fileInputWorkerThread;
-	QString m_deviceDescription;
+	QString m_deviceDescription = "SigMFFileInput";
 	int m_sampleRate = 48000;
 	unsigned int m_sampleBytes = 1;
 	quint64 m_centerFrequency = 0;

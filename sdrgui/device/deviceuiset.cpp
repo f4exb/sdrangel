@@ -383,7 +383,7 @@ void DeviceUISet::loadRxChannelSettings(const Preset *preset, PluginAPI *pluginA
 
                 MDIUtils::restoreMDIGeometry(rxChannelGUI, rxChannelGUI->getGeometryBytes());
                 rxChannelGUI->getRollupContents()->arrangeRollups();
-                rxChannelGUI->setDeviceType(ChannelGUI::DeviceRx);
+                rxChannelGUI->setDeviceType(ChannelGUI::DeviceType::DeviceRx);
                 rxChannelGUI->setDeviceSetIndex(m_deviceSetIndex);
                 rxChannelGUI->setIndex(channelAPI->getIndexInDeviceSet());
                 rxChannelGUI->setIndexToolTip(m_deviceAPI->getSamplingDeviceDisplayName());
@@ -511,7 +511,7 @@ void DeviceUISet::loadTxChannelSettings(const Preset *preset, PluginAPI *pluginA
 
                 MDIUtils::restoreMDIGeometry(txChannelGUI, txChannelGUI->getGeometryBytes());
                 txChannelGUI->getRollupContents()->arrangeRollups();
-                txChannelGUI->setDeviceType(ChannelGUI::DeviceTx);
+                txChannelGUI->setDeviceType(ChannelGUI::DeviceType::DeviceTx);
                 txChannelGUI->setDeviceSetIndex(m_deviceSetIndex);
                 txChannelGUI->setIndex(channelAPI->getIndexInDeviceSet());
                 txChannelGUI->setIndexToolTip(m_deviceAPI->getSamplingDeviceDisplayName());
@@ -685,7 +685,7 @@ void DeviceUISet::loadMIMOChannelSettings(const Preset *preset, PluginAPI *plugi
 
                 MDIUtils::restoreMDIGeometry(channelGUI, channelGUI->getGeometryBytes());
                 channelGUI->getRollupContents()->arrangeRollups();
-                channelGUI->setDeviceType(ChannelGUI::DeviceMIMO);
+                channelGUI->setDeviceType(ChannelGUI::DeviceType::DeviceMIMO);
                 channelGUI->setDeviceSetIndex(m_deviceSetIndex);
                 channelGUI->setIndex(channelAPI->getIndexInDeviceSet());
                 channelGUI->setIndexToolTip(m_deviceAPI->getSamplingDeviceDisplayName());

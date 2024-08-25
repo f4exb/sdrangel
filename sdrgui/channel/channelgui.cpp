@@ -41,11 +41,11 @@
 
 ChannelGUI::ChannelGUI(QWidget *parent) :
     QMdiSubWindow(parent),
-    m_deviceType(DeviceRx),
+    m_resizer(this),
+    m_contextMenuType(ContextMenuType::ContextMenuNone),
+    m_deviceType(DeviceType::DeviceRx),
     m_deviceSetIndex(0),
     m_channelIndex(0),
-    m_contextMenuType(ContextMenuNone),
-    m_resizer(this),
     m_drag(false),
     m_disableResize(false),
     m_mdi(nullptr)
@@ -125,9 +125,6 @@ ChannelGUI::ChannelGUI(QWidget *parent) :
     m_moveToDeviceButton->setToolTip("Move to another device");
 
     m_statusFrequency = new QLabel();
-    // QFont font = m_statusFrequency->font();
-    // font.setPointSize(8);
-    // m_statusFrequency->setFont(font);
     m_statusFrequency->setAlignment(Qt::AlignRight |Qt::AlignVCenter);
     m_statusFrequency->setFixedHeight(20);
     m_statusFrequency->setFixedWidth(90);
@@ -136,7 +133,6 @@ ChannelGUI::ChannelGUI(QWidget *parent) :
     m_statusFrequency->setToolTip("Channel absolute frequency (Hz)");
 
     m_statusLabel = new QLabel();
-    // m_statusLabel->setText("OK"); // for future use
     m_statusLabel->setFixedHeight(20);
     m_statusLabel->setMinimumWidth(20);
     m_statusLabel->setContentsMargins(10, 0, 0, 0); // Add space between statusFrequency and statusLabel
@@ -152,7 +148,6 @@ ChannelGUI::ChannelGUI(QWidget *parent) :
     m_topLayout->addWidget(m_indexLabel);
     m_topLayout->addWidget(m_settingsButton);
     m_topLayout->addWidget(m_titleLabel);
-    // m_topLayout->addStretch(1);
     m_topLayout->addWidget(m_helpButton);
     m_topLayout->addWidget(m_moveButton);
     m_topLayout->addWidget(m_shrinkButton);
@@ -174,7 +169,6 @@ ChannelGUI::ChannelGUI(QWidget *parent) :
     m_sizeGripBottomRight = new QSizeGrip(this);
     m_sizeGripBottomRight->setSizePolicy(QSizePolicy::Fixed, QSizePolicy::Fixed);
     m_sizeGripBottomRight->setFixedHeight(20);
-    // m_bottomLayout->addStretch(1);
     m_bottomLayout->addWidget(m_sizeGripBottomRight, 0, Qt::AlignBottom | Qt::AlignRight);
 
     m_layouts->addLayout(m_topLayout);
@@ -275,11 +269,11 @@ void ChannelGUI::leaveEvent(QEvent* event)
 void ChannelGUI::activateSettingsDialog()
 {
     QPoint p = QCursor::pos();
-    m_contextMenuType = ContextMenuChannelSettings;
+    m_contextMenuType = ContextMenuType::ContextMenuChannelSettings;
     emit customContextMenuRequested(p);
 }
 
-void ChannelGUI::showHelp()
+void ChannelGUI::showHelp() const
 {
     if (m_helpURL.isEmpty()) {
         return;
@@ -322,13 +316,11 @@ void ChannelGUI::onWidgetRolled(QWidget *widget, bool show)
     {
         if (show)
         {
-            // qDebug("ChannelGUI::onWidgetRolled: show: %d %d", m_rollupContents.height(), widget->height());
             int dh = m_heightsMap.contains(widget) ? m_heightsMap[widget] - widget->height() : widget->minimumHeight();
             resize(width(), 52 + 3 + m_rollupContents->height() + dh);
         }
         else
         {
-            // qDebug("ChannelGUI::onWidgetRolled: hide: %d %d", m_rollupContents.height(), widget->height());
             m_heightsMap[widget] = widget->height();
             resize(width(), 52 + 3 + m_rollupContents->height());
         }
@@ -517,7 +509,7 @@ void ChannelGUI::setStatusText(const QString& text)
 
 void ChannelGUI::updateIndexLabel()
 {
-    if ((m_deviceType == DeviceMIMO) && (getStreamIndex() >= 0)) {
+    if ((m_deviceType == DeviceType::DeviceMIMO) && (getStreamIndex() >= 0)) {
         m_indexLabel->setText(tr("%1%2:%3.%4").arg(getDeviceTypeTag()).arg(m_deviceSetIndex).arg(m_channelIndex).arg(getStreamIndex()));
     }
     else {
@@ -525,7 +517,7 @@ void ChannelGUI::updateIndexLabel()
     }
 }
 
-bool ChannelGUI::isOnMovingPad()
+bool ChannelGUI::isOnMovingPad() const
 {
     return m_indexLabel->underMouse() || m_titleLabel->underMouse() || m_statusFrequency->underMouse() || m_statusLabel->underMouse();
 }
@@ -537,15 +529,15 @@ void ChannelGUI::setHighlighted(bool highlighted)
         .arg(palette().dark().color().darker(115).name())));
 }
 
-QString ChannelGUI::getDeviceTypeTag()
+QString ChannelGUI::getDeviceTypeTag() const
 {
     switch (m_deviceType)
     {
-        case DeviceRx:
+        case DeviceType::DeviceRx:
             return "R";
-        case DeviceTx:
+        case DeviceType::DeviceTx:
             return "T";
-        case DeviceMIMO:
+        case DeviceType::DeviceMIMO:
             return "M";
         default:
             return "X";
@@ -554,6 +546,6 @@ QString ChannelGUI::getDeviceTypeTag()
 
 QColor ChannelGUI::getTitleColor(const QColor& backgroundColor)
 {
-    float l = 0.2126*backgroundColor.redF() + 0.7152*backgroundColor.greenF() + 0.0722*backgroundColor.blueF();
-    return l < 0.5f ? Qt::white : Qt::black;
+    double l = 0.2126*backgroundColor.redF() + 0.7152*backgroundColor.greenF() + 0.0722*backgroundColor.blueF();
+    return l < 0.5 ? Qt::white : Qt::black;
 }

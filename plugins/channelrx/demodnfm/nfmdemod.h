@@ -135,7 +135,6 @@ public:
         }
     }
 
-    void setMessageQueueToGUI(MessageQueue* queue) override { ChannelAPI::setMessageQueueToGUI(queue); }
     int getAudioSampleRate() const { return m_running ? m_basebandSink->getAudioSampleRate() : 0; }
 
     uint32_t getNumberOfDeviceStreams() const;

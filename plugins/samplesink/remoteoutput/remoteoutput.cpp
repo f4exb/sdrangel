@@ -47,21 +47,8 @@ MESSAGE_CLASS_DEFINITION(RemoteOutput::MsgRequestFixedData, Message)
 
 RemoteOutput::RemoteOutput(DeviceAPI *deviceAPI) :
     m_deviceAPI(deviceAPI),
-    m_running(false),
 	m_settings(),
-	m_centerFrequency(435000000),
-    m_sampleRate(48000),
-    m_remoteOutputWorker(nullptr),
-	m_deviceDescription("RemoteOutput"),
-    m_startingTimeStamp(0),
-	m_masterTimer(deviceAPI->getMasterTimer()),
-	m_tickCount(0),
-    m_greaterTickCount(0),
-    m_tickMultiplier(1),
-    m_queueLength(0),
-    m_queueSize(0),
-    m_recoverableCount(0),
-    m_unrecoverableCount(0)
+	m_masterTimer(deviceAPI->getMasterTimer())
 {
     m_deviceAPI->setNbSinkStreams(1);
     m_networkManager = new QNetworkAccessManager();

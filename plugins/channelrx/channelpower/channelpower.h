@@ -138,11 +138,6 @@ public:
         m_basebandSink->resetMagLevels();
     }
 
-/*    void setMessageQueueToGUI(MessageQueue* queue) override {
-        ChannelAPI::setMessageQueueToGUI(queue);
-        m_basebandSink->setMessageQueueToGUI(queue);
-    }*/
-
     uint32_t getNumberOfDeviceStreams() const;
 
     static const char * const m_channelIdURI;

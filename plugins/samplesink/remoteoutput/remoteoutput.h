@@ -259,22 +259,22 @@ public:
 private:
     DeviceAPI *m_deviceAPI;
 	QRecursiveMutex m_mutex;
-    bool m_running;
+    bool m_running = false;
 	RemoteOutputSettings m_settings;
-	uint64_t m_centerFrequency;
-    int m_sampleRate;
-	RemoteOutputWorker* m_remoteOutputWorker;
+	uint64_t m_centerFrequency = 435000000;
+    int m_sampleRate = 48000;
+	RemoteOutputWorker* m_remoteOutputWorker = nullptr;
     QThread m_remoteOutputWorkerThread;
-	QString m_deviceDescription;
-	std::time_t m_startingTimeStamp;
+	QString m_deviceDescription = "RemoteOutput";
+	std::time_t m_startingTimeStamp = 0;
 	const QTimer& m_masterTimer;
-	uint32_t m_tickCount; // for 50 ms timer
-    uint32_t m_greaterTickCount; // for 1 s derived timer
-    uint32_t m_tickMultiplier; // for greater tick count
-    int m_queueLength;
-    int m_queueSize;
-    int m_recoverableCount;
-    int m_unrecoverableCount;
+	uint32_t m_tickCount = 0; // for 50 ms timer
+    uint32_t m_greaterTickCount = 0; // for 1 s derived timer
+    uint32_t m_tickMultiplier = 1; // for greater tick count
+    int m_queueLength = 0;
+    int m_queueSize = 0;
+    int m_recoverableCount = 0;
+    int m_unrecoverableCount = 0;
 
     QNetworkAccessManager *m_networkManager;
     QNetworkRequest m_networkRequest;

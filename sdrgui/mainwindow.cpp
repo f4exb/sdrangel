@@ -2528,12 +2528,12 @@ void MainWindow::channelDuplicateToDeviceSet(const ChannelGUI *sourceChannelGUI,
 
             if (pluginInterface)
             {
-                ChannelAPI *channelAPI = nullptr;
+                ChannelAPI *channelAPI;
                 BasebandSampleSink *rxChannel = nullptr;
                 pluginInterface->createRxChannel(destDeviceUI->m_deviceAPI, &rxChannel, &channelAPI);
                 destChannelGUI = pluginInterface->createRxChannelGUI(destDeviceUI, rxChannel);
                 destDeviceUI->registerRxChannelInstance(channelAPI, destChannelGUI);
-                destChannelGUI->setDeviceType(ChannelGUI::DeviceRx);
+                destChannelGUI->setDeviceType(ChannelGUI::DeviceType::DeviceRx);
                 destChannelGUI->setIndex(channelAPI->getIndexInDeviceSet());
                 QByteArray b = sourceChannelGUI->serialize();
                 destChannelGUI->deserialize(b);
@@ -2560,7 +2560,7 @@ void MainWindow::channelDuplicateToDeviceSet(const ChannelGUI *sourceChannelGUI,
                 pluginInterface->createTxChannel(destDeviceUI->m_deviceAPI, &txChannel, &channelAPI);
                 destChannelGUI = pluginInterface->createTxChannelGUI(destDeviceUI, txChannel);
                 destDeviceUI->registerTxChannelInstance(channelAPI, destChannelGUI);
-                destChannelGUI->setDeviceType(ChannelGUI::DeviceTx);
+                destChannelGUI->setDeviceType(ChannelGUI::DeviceType::DeviceTx);
                 destChannelGUI->setIndex(channelAPI->getIndexInDeviceSet());
                 QByteArray b = sourceChannelGUI->serialize();
                 destChannelGUI->deserialize(b);
@@ -2589,7 +2589,7 @@ void MainWindow::channelDuplicateToDeviceSet(const ChannelGUI *sourceChannelGUI,
                 pluginInterface->createRxChannel(destDeviceUI->m_deviceAPI, &rxChannel, &channelAPI);
                 destChannelGUI = pluginInterface->createRxChannelGUI(destDeviceUI, rxChannel);
                 destDeviceUI->registerRxChannelInstance(channelAPI, destChannelGUI);
-                destChannelGUI->setDeviceType(ChannelGUI::DeviceMIMO);
+                destChannelGUI->setDeviceType(ChannelGUI::DeviceType::DeviceMIMO);
                 destChannelGUI->setIndex(channelAPI->getIndexInDeviceSet());
                 QByteArray b = sourceChannelGUI->serialize();
                 destChannelGUI->deserialize(b);
@@ -2612,7 +2612,7 @@ void MainWindow::channelDuplicateToDeviceSet(const ChannelGUI *sourceChannelGUI,
                     pluginInterface->createTxChannel(destDeviceUI->m_deviceAPI, &txChannel, &channelAPI);
                     destChannelGUI = pluginInterface->createTxChannelGUI(destDeviceUI, txChannel);
                     destDeviceUI->registerTxChannelInstance(channelAPI, destChannelGUI);
-                    destChannelGUI->setDeviceType(ChannelGUI::DeviceMIMO);
+                    destChannelGUI->setDeviceType(ChannelGUI::DeviceType::DeviceMIMO);
                     destChannelGUI->setIndex(channelAPI->getIndexInDeviceSet());
                     QByteArray b = sourceChannelGUI->serialize();
                     destChannelGUI->deserialize(b);
@@ -2635,7 +2635,7 @@ void MainWindow::channelDuplicateToDeviceSet(const ChannelGUI *sourceChannelGUI,
                         pluginInterface->createMIMOChannel(destDeviceUI->m_deviceAPI, &mimoChannel, &channelAPI);
                         destChannelGUI = pluginInterface->createMIMOChannelGUI(destDeviceUI, mimoChannel);
                         destDeviceUI->registerChannelInstance(channelAPI, destChannelGUI);
-                        destChannelGUI->setDeviceType(ChannelGUI::DeviceMIMO);
+                        destChannelGUI->setDeviceType(ChannelGUI::DeviceType::DeviceMIMO);
                         destChannelGUI->setIndex(channelAPI->getIndexInDeviceSet());
                         QByteArray b = sourceChannelGUI->serialize();
                         destChannelGUI->deserialize(b);
@@ -2696,7 +2696,7 @@ void MainWindow::channelAddClicked(Workspace *workspace, int deviceSetIndex, int
             pluginInterface->createRxChannel(deviceUI->m_deviceAPI, &rxChannel, &channelAPI);
             gui = pluginInterface->createRxChannelGUI(deviceUI, rxChannel);
             deviceUI->registerRxChannelInstance(channelAPI, gui);
-            gui->setDeviceType(ChannelGUI::DeviceRx);
+            gui->setDeviceType(ChannelGUI::DeviceType::DeviceRx);
             gui->setIndex(channelAPI->getIndexInDeviceSet());
             gui->setDisplayedame(pluginInterface->getPluginDescriptor().displayedName);
         }
@@ -2708,7 +2708,7 @@ void MainWindow::channelAddClicked(Workspace *workspace, int deviceSetIndex, int
             pluginInterface->createTxChannel(deviceUI->m_deviceAPI, &txChannel, &channelAPI);
             gui = pluginInterface->createTxChannelGUI(deviceUI, txChannel);
             deviceUI->registerTxChannelInstance(channelAPI, gui);
-            gui->setDeviceType(ChannelGUI::DeviceTx);
+            gui->setDeviceType(ChannelGUI::DeviceType::DeviceTx);
             gui->setIndex(channelAPI->getIndexInDeviceSet());
             gui->setDisplayedame(pluginInterface->getPluginDescriptor().displayedName);
         }
@@ -2758,7 +2758,7 @@ void MainWindow::channelAddClicked(Workspace *workspace, int deviceSetIndex, int
                 return;
             }
 
-            gui->setDeviceType(ChannelGUI::DeviceMIMO);
+            gui->setDeviceType(ChannelGUI::DeviceType::DeviceMIMO);
         }
         else
         {

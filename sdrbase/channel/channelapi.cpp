@@ -21,6 +21,7 @@
 ///////////////////////////////////////////////////////////////////////////////////
 
 #include "util/uid.h"
+#include "util/message.h"
 #include "channelapi.h"
 
 ChannelAPI::ChannelAPI(const QString& uri, StreamType streamType) :
@@ -39,7 +40,7 @@ void ChannelAPI::handleInputMessages()
 {
 	Message* message;
 
-	while ((message = m_inputMessageQueue.pop()) != 0)
+	while ((message = m_inputMessageQueue.pop()) != nullptr)
 	{
 		if (handleMessage(*message)) {
 			delete message;

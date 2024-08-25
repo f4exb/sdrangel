@@ -152,7 +152,7 @@ public:
             SWGSDRangel::SWGChannelSettings& response);
 
     void getMagSqLevels(double& avg, double& peak, int& nbSamples) { m_basebandSink->getMagSqLevels(avg, peak, nbSamples); }
-    void setMessageQueueToGUI(MessageQueue* queue) override {
+    void setMessageQueueToGUI(MessageQueue* queue) final {
         ChannelAPI::setMessageQueueToGUI(queue);
         m_basebandSink->setMessageQueueToGUI(queue);
     }

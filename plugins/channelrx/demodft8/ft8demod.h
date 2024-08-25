@@ -102,7 +102,7 @@ public:
     }
 
     void setDeviceCenterFrequency(qint64 centerFrequency, int index);
-    void setMessageQueueToGUI(MessageQueue* queue) override;
+    void setMessageQueueToGUI(MessageQueue* queue) final;
     uint32_t getChannelSampleRate() const { return m_running ? m_basebandSink->getChannelSampleRate() : 0; }
     double getMagSq() const { return m_running ? m_basebandSink->getMagSq() : 0.0; }
 

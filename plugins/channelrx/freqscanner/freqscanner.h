@@ -355,7 +355,7 @@ public:
             const QStringList& channelSettingsKeys,
             SWGSDRangel::SWGChannelSettings& response);
 
-    void setMessageQueueToGUI(MessageQueue* queue) override {
+    void setMessageQueueToGUI(MessageQueue* queue) final {
         ChannelAPI::setMessageQueueToGUI(queue);
         m_basebandSink->setMessageQueueToGUI(queue);
     }
