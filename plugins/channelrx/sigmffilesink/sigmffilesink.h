@@ -148,7 +148,7 @@ public:
             const QStringList& channelSettingsKeys,
             SWGSDRangel::SWGChannelSettings& response);
 
-    void setMessageQueueToGUI(MessageQueue* queue) override;
+    void setMessageQueueToGUI(MessageQueue* queue) final;
     void getLocalDevices(std::vector<uint32_t>& indexes);
     uint32_t getNumberOfDeviceStreams() const;
     SpectrumVis *getSpectrumVis() { return &m_spectrumVis; }

@@ -73,7 +73,7 @@ public:
     private:
         DOA2Settings::CorrelationType m_correlationType;
 
-        MsgConfigureCorrelation(DOA2Settings::CorrelationType correlationType) :
+        explicit MsgConfigureCorrelation(DOA2Settings::CorrelationType correlationType) :
             Message(),
             m_correlationType(correlationType)
         {}
@@ -103,8 +103,8 @@ public:
         { }
     };
 
-    DOA2Baseband(int fftSize);
-    ~DOA2Baseband();
+    explicit DOA2Baseband(int fftSize);
+    ~DOA2Baseband() final;
     void reset();
 
     MessageQueue *getInputMessageQueue() { return &m_inputMessageQueue; } //!< Get the queue for asynchronous inbound communication
@@ -114,7 +114,7 @@ public:
 
 	void feed(const SampleVector::const_iterator& begin, const SampleVector::const_iterator& end, unsigned int streamIndex);
     void setBasebandSampleRate(unsigned int sampleRate);
-    float getPhi() const { return m_phi; }
+    double getPhi() const { return m_phi; }
     void setMagThreshold(float threshold) { m_magThreshold = threshold * SDR_RX_SCALED * SDR_RX_SCALED; }
     void setFFTAveraging(int nbFFT);
 
@@ -128,9 +128,9 @@ private:
     DOA2Settings::CorrelationType m_correlationType;
     int m_fftSize;
     int m_samplesCount;    //!< Number of samples processed by DOA
-    float m_magSum;        //!< Squared magnitudes accumulator
-    float m_wphSum;        //!< Phase difference accumulator (averaging weighted by squared magnitude)
-    float m_phi;           //!< Resulting calculated phase difference
+    double m_magSum;        //!< Squared magnitudes accumulator
+    double m_wphSum;        //!< Phase difference accumulator (averaging weighted by squared magnitude)
+    double m_phi;           //!< Resulting calculated phase difference
     double m_magThreshold; //!< Squared magnitude scaled threshold
     int m_fftAvg;          //!< Average over a certain number of FFTs
     int m_fftAvgCount;     //!< FFT averaging counter

@@ -47,22 +47,21 @@ class BeamSteeringCWModGUI : public ChannelGUI {
 public:
     static BeamSteeringCWModGUI* create(PluginAPI* pluginAPI, DeviceUISet *deviceUISet, MIMOChannel *mimoChannel);
 
-    virtual void destroy();
-    virtual void resetToDefaults();
-    QByteArray serialize() const;
-    bool deserialize(const QByteArray& data);
-    virtual MessageQueue *getInputMessageQueue() { return &m_inputMessageQueue; }
-    virtual void setWorkspaceIndex(int index) { m_settings.m_workspaceIndex = index; };
-    virtual int getWorkspaceIndex() const { return m_settings.m_workspaceIndex; };
-    virtual void setGeometryBytes(const QByteArray& blob) { m_settings.m_geometryBytes = blob; };
-    virtual QByteArray getGeometryBytes() const { return m_settings.m_geometryBytes; };
-    virtual QString getTitle() const { return m_settings.m_title; };
-    virtual QColor getTitleColor() const  { return m_settings.m_rgbColor; };
-    virtual void zetHidden(bool hidden) { m_settings.m_hidden = hidden; }
-    virtual bool getHidden() const { return m_settings.m_hidden; }
-    virtual ChannelMarker& getChannelMarker() { return m_channelMarker; }
-    virtual int getStreamIndex() const { return -1; }
-    virtual void setStreamIndex(int streamIndex) { (void) streamIndex; }
+    void resetToDefaults() final;
+    QByteArray serialize() const final;
+    bool deserialize(const QByteArray& data) final;
+    MessageQueue *getInputMessageQueue() final { return &m_inputMessageQueue; }
+    void setWorkspaceIndex(int index) final { m_settings.m_workspaceIndex = index; };
+    int getWorkspaceIndex() const final { return m_settings.m_workspaceIndex; };
+    void setGeometryBytes(const QByteArray& blob) final { m_settings.m_geometryBytes = blob; };
+    QByteArray getGeometryBytes() const final { return m_settings.m_geometryBytes; };
+    QString getTitle() const final { return m_settings.m_title; };
+    QColor getTitleColor() const final  { return m_settings.m_rgbColor; };
+    void zetHidden(bool hidden) final { m_settings.m_hidden = hidden; }
+    bool getHidden() const final { return m_settings.m_hidden; }
+    ChannelMarker& getChannelMarker() final { return m_channelMarker; }
+    int getStreamIndex() const final { return -1; }
+    void setStreamIndex(int streamIndex) final { (void) streamIndex; }
 
 private:
     Ui::BeamSteeringCWModGUI* ui;
@@ -82,18 +81,18 @@ private:
     uint32_t m_tickCount;
 
     explicit BeamSteeringCWModGUI(PluginAPI* pluginAPI, DeviceUISet *deviceUISet, MIMOChannel *mimoChannel, QWidget* parent = nullptr);
-    virtual ~BeamSteeringCWModGUI();
+    ~BeamSteeringCWModGUI() final;
 
     void blockApplySettings(bool block);
     void applySettings(bool force = false);
     void displaySettings();
     void displayRateAndShift();
     bool handleMessage(const Message& message);
-    void makeUIConnections();
+    void makeUIConnections() const;
     void updateAbsoluteCenterFrequency();
 
-    void leaveEvent(QEvent*);
-    void enterEvent(EnterEventType*);
+    void leaveEvent(QEvent*) final;
+    void enterEvent(EnterEventType*) final;
 
     void applyInterpolation();
     void applyPosition();
@@ -104,7 +103,7 @@ private slots:
     void on_interpolationFactor_currentIndexChanged(int index);
     void on_position_valueChanged(int value);
     void on_steeringDegrees_valueChanged(int value);
-    void onWidgetRolled(QWidget* widget, bool rollDown);
+    void onWidgetRolled(const QWidget* widget, bool rollDown);
     void onMenuDialogCalled(const QPoint& p);
     void tick();
 };

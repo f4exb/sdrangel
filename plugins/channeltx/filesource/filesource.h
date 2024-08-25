@@ -219,7 +219,7 @@ public:
 
     double getMagSq() const;
     void getMagSqLevels(double& avg, double& peak, int& nbSamples) const;
-    void setMessageQueueToGUI(MessageQueue* queue) override;
+    void setMessageQueueToGUI(MessageQueue* queue) final;
     uint32_t getNumberOfDeviceStreams() const;
 
     static const char* const m_channelIdURI;

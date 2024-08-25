@@ -501,7 +501,7 @@ void RadiosondeDemodGUI::onWidgetRolled(QWidget* widget, bool rollDown)
 
 void RadiosondeDemodGUI::onMenuDialogCalled(const QPoint &p)
 {
-    if (m_contextMenuType == ContextMenuChannelSettings)
+    if (m_contextMenuType == ContextMenuType::ContextMenuChannelSettings)
     {
         BasicChannelSettingsDialog dialog(&m_channelMarker, this);
         dialog.setUseReverseAPI(m_settings.m_useReverseAPI);

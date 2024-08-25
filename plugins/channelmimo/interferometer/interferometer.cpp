@@ -83,7 +83,7 @@ Interferometer::Interferometer(DeviceAPI *deviceAPI) :
         &Interferometer::updateDeviceSetList
     );
     updateDeviceSetList();
-    startSinks();
+    Interferometer::startSinks();
 }
 
 Interferometer::~Interferometer()
@@ -98,7 +98,7 @@ Interferometer::~Interferometer()
 
     m_deviceAPI->removeChannelSinkAPI(this);
     m_deviceAPI->removeMIMOChannel(this);
-    stopSinks();
+    Interferometer::stopSinks();
 }
 
 void Interferometer::setDeviceAPI(DeviceAPI *deviceAPI)
@@ -229,7 +229,7 @@ void Interferometer::applySettings(const InterferometerSettings& settings, const
     QList<ObjectPipe*> pipes;
     MainCore::instance()->getMessagePipes().getMessagePipes(this, "settings", pipes);
 
-    if (pipes.size() > 0) {
+    if (!pipes.empty()) {
         sendChannelSettings(pipes, settingsKeys, settings, force);
     }
 
@@ -254,7 +254,7 @@ void Interferometer::handleInputMessages()
 {
     Message* message;
 
-    while ((message = m_inputMessageQueue.pop()) != 0)
+    while ((message = m_inputMessageQueue.pop()) != nullptr)
     {
         if (handleMessage(*message))
         {
@@ -267,14 +267,14 @@ bool Interferometer::handleMessage(const Message& cmd)
 {
     if (MsgConfigureInterferometer::match(cmd))
     {
-        MsgConfigureInterferometer& cfg = (MsgConfigureInterferometer&) cmd;
+        auto& cfg = (const MsgConfigureInterferometer&) cmd;
         qDebug() << "Interferometer::handleMessage: MsgConfigureInterferometer";
         applySettings(cfg.getSettings(), cfg.getSettingsKeys(), cfg.getForce());
         return true;
     }
     else if (DSPMIMOSignalNotification::match(cmd))
     {
-        DSPMIMOSignalNotification& notif = (DSPMIMOSignalNotification&) cmd;
+        auto& notif = (const DSPMIMOSignalNotification&) cmd;
 
         qDebug() << "Interferometer::handleMessage: DSPMIMOSignalNotification:"
                 << " inputSampleRate: " << notif.getSampleRate()
@@ -355,7 +355,7 @@ void Interferometer::validateFilterChainHash(InterferometerSettings& settings)
 void Interferometer::calculateFrequencyOffset(uint32_t log2Decim, uint32_t filterChainHash)
 {
     double shiftFactor = HBFilterChainConverter::getShiftFactor(log2Decim, filterChainHash);
-    m_frequencyOffset = m_deviceSampleRate * shiftFactor;
+    m_frequencyOffset = (int64_t) (m_deviceSampleRate * shiftFactor);
 }
 
 void Interferometer::applyChannelSettings(uint32_t log2Decim, uint32_t filterChainHash)
@@ -383,7 +383,7 @@ void Interferometer::updateDeviceSetList()
 
         if (deviceSourceEngine)
         {
-            DeviceSampleSource *deviceSource = deviceSourceEngine->getSource();
+            const DeviceSampleSource *deviceSource = deviceSourceEngine->getSource();
 
             if (deviceSource->getDeviceDescription() == "LocalInput") {
                 m_localInputDeviceIndexes.append(deviceSetIndex);
@@ -401,7 +401,7 @@ void Interferometer::updateDeviceSetList()
     InterferometerSettings settings = m_settings;
     int newIndexInList;
 
-    if (m_localInputDeviceIndexes.size() != 0) // there are some local input devices
+    if (!m_localInputDeviceIndexes.empty()) // there are some local input devices
     {
         if (m_settings.m_localDeviceIndex < 0) { // not set before
             newIndexInList = 0; // set to first device in list
@@ -574,13 +574,13 @@ void Interferometer::webapiUpdateChannelSettings(
         settings.m_reverseAPIAddress = *response.getInterferometerSettings()->getReverseApiAddress();
     }
     if (channelSettingsKeys.contains("reverseAPIPort")) {
-        settings.m_reverseAPIPort = response.getInterferometerSettings()->getReverseApiPort();
+        settings.m_reverseAPIPort = (uint16_t) response.getInterferometerSettings()->getReverseApiPort();
     }
     if (channelSettingsKeys.contains("reverseAPIDeviceIndex")) {
-        settings.m_reverseAPIDeviceIndex = response.getInterferometerSettings()->getReverseApiDeviceIndex();
+        settings.m_reverseAPIDeviceIndex = (uint16_t) response.getInterferometerSettings()->getReverseApiDeviceIndex();
     }
     if (channelSettingsKeys.contains("reverseAPIChannelIndex")) {
-        settings.m_reverseAPIChannelIndex = response.getInterferometerSettings()->getReverseApiChannelIndex();
+        settings.m_reverseAPIChannelIndex = (uint16_t) response.getInterferometerSettings()->getReverseApiChannelIndex();
     }
     if (settings.m_spectrumGUI && channelSettingsKeys.contains("spectrumConfig")) {
         settings.m_spectrumGUI->updateFrom(channelSettingsKeys, response.getInterferometerSettings()->getSpectrumConfig());
@@ -632,7 +632,7 @@ void Interferometer::webapiFormatChannelSettings(SWGSDRangel::SWGChannelSettings
         }
         else
         {
-            SWGSDRangel::SWGGLSpectrum *swgGLSpectrum = new SWGSDRangel::SWGGLSpectrum();
+            auto *swgGLSpectrum = new SWGSDRangel::SWGGLSpectrum();
             settings.m_spectrumGUI->formatTo(swgGLSpectrum);
             response.getInterferometerSettings()->setSpectrumConfig(swgGLSpectrum);
         }
@@ -646,7 +646,7 @@ void Interferometer::webapiFormatChannelSettings(SWGSDRangel::SWGChannelSettings
         }
         else
         {
-            SWGSDRangel::SWGGLScope *swgGLScope = new SWGSDRangel::SWGGLScope();
+            auto *swgGLScope = new SWGSDRangel::SWGGLScope();
             settings.m_scopeGUI->formatTo(swgGLScope);
             response.getInterferometerSettings()->setScopeConfig(swgGLScope);
         }
@@ -660,7 +660,7 @@ void Interferometer::webapiFormatChannelSettings(SWGSDRangel::SWGChannelSettings
         }
         else
         {
-            SWGSDRangel::SWGChannelMarker *swgChannelMarker = new SWGSDRangel::SWGChannelMarker();
+            auto *swgChannelMarker = new SWGSDRangel::SWGChannelMarker();
             settings.m_channelMarker->formatTo(swgChannelMarker);
             response.getInterferometerSettings()->setChannelMarker(swgChannelMarker);
         }
@@ -674,7 +674,7 @@ void Interferometer::webapiFormatChannelSettings(SWGSDRangel::SWGChannelSettings
         }
         else
         {
-            SWGSDRangel::SWGRollupState *swgRollupState = new SWGSDRangel::SWGRollupState();
+            auto *swgRollupState = new SWGSDRangel::SWGRollupState();
             settings.m_rollupState->formatTo(swgRollupState);
             response.getInterferometerSettings()->setRollupState(swgRollupState);
         }
@@ -683,7 +683,7 @@ void Interferometer::webapiFormatChannelSettings(SWGSDRangel::SWGChannelSettings
 
 void Interferometer::webapiReverseSendSettings(const QList<QString>& channelSettingsKeys, const InterferometerSettings& settings, bool force)
 {
-    SWGSDRangel::SWGChannelSettings *swgChannelSettings = new SWGSDRangel::SWGChannelSettings();
+    auto *swgChannelSettings = new SWGSDRangel::SWGChannelSettings();
     webapiFormatChannelSettings(channelSettingsKeys, swgChannelSettings, settings, force);
 
     QString channelSettingsURL = QString("http://%1:%2/sdrangel/deviceset/%3/channel/%4/settings")
@@ -694,8 +694,8 @@ void Interferometer::webapiReverseSendSettings(const QList<QString>& channelSett
     m_networkRequest.setUrl(QUrl(channelSettingsURL));
     m_networkRequest.setHeader(QNetworkRequest::ContentTypeHeader, "application/json");
 
-    QBuffer *buffer = new QBuffer();
-    buffer->open((QBuffer::ReadWrite));
+    auto *buffer = new QBuffer();
+    buffer->open(QBuffer::ReadWrite);
     buffer->write(swgChannelSettings->asJson().toUtf8());
     buffer->seek(0);
 
@@ -710,7 +710,7 @@ void Interferometer::sendChannelSettings(
     const QList<ObjectPipe*>& pipes,
     const QList<QString>& channelSettingsKeys,
     const InterferometerSettings& settings,
-    bool force)
+    bool force) const
 {
     for (const auto& pipe : pipes)
     {
@@ -718,7 +718,7 @@ void Interferometer::sendChannelSettings(
 
         if (messageQueue)
         {
-            SWGSDRangel::SWGChannelSettings *swgChannelSettings = new SWGSDRangel::SWGChannelSettings();
+            auto *swgChannelSettings = new SWGSDRangel::SWGChannelSettings();
             webapiFormatChannelSettings(channelSettingsKeys, swgChannelSettings, settings, force);
             MainCore::MsgChannelSettings *msg = MainCore::MsgChannelSettings::create(
                 this,
@@ -736,7 +736,7 @@ void Interferometer::webapiFormatChannelSettings(
         SWGSDRangel::SWGChannelSettings *swgChannelSettings,
         const InterferometerSettings& settings,
         bool force
-)
+) const
 {
     swgChannelSettings->setDirection(2); // MIMO sink
     swgChannelSettings->setOriginatorChannelIndex(getIndexInDeviceSet());
@@ -774,34 +774,34 @@ void Interferometer::webapiFormatChannelSettings(
 
     if (settings.m_spectrumGUI && (channelSettingsKeys.contains("spectrumConfig") || force))
     {
-        SWGSDRangel::SWGGLSpectrum *swgGLSpectrum = new SWGSDRangel::SWGGLSpectrum();
+        auto *swgGLSpectrum = new SWGSDRangel::SWGGLSpectrum();
         settings.m_spectrumGUI->formatTo(swgGLSpectrum);
         swgInterferometerSettings->setSpectrumConfig(swgGLSpectrum);
     }
 
     if (settings.m_scopeGUI && (channelSettingsKeys.contains("scopeConfig") || force))
     {
-        SWGSDRangel::SWGGLScope *swgGLScope = new SWGSDRangel::SWGGLScope();
+        auto *swgGLScope = new SWGSDRangel::SWGGLScope();
         settings.m_scopeGUI->formatTo(swgGLScope);
         swgInterferometerSettings->setScopeConfig(swgGLScope);
     }
 
     if (settings.m_channelMarker && (channelSettingsKeys.contains("channelMarker") || force))
     {
-        SWGSDRangel::SWGChannelMarker *swgChannelMarker = new SWGSDRangel::SWGChannelMarker();
+        auto *swgChannelMarker = new SWGSDRangel::SWGChannelMarker();
         settings.m_channelMarker->formatTo(swgChannelMarker);
         swgInterferometerSettings->setChannelMarker(swgChannelMarker);
     }
 
     if (settings.m_rollupState && (channelSettingsKeys.contains("rollupState") || force))
     {
-        SWGSDRangel::SWGRollupState *swgRollupState = new SWGSDRangel::SWGRollupState();
+        auto *swgRollupState = new SWGSDRangel::SWGRollupState();
         settings.m_rollupState->formatTo(swgRollupState);
         swgInterferometerSettings->setRollupState(swgRollupState);
     }
 }
 
-void Interferometer::networkManagerFinished(QNetworkReply *reply)
+void Interferometer::networkManagerFinished(QNetworkReply *reply) const
 {
     QNetworkReply::NetworkError replyError = reply->error();
 

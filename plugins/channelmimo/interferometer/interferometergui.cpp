@@ -32,13 +32,8 @@
 
 InterferometerGUI* InterferometerGUI::create(PluginAPI* pluginAPI, DeviceUISet *deviceUISet, MIMOChannel *channelMIMO)
 {
-    InterferometerGUI* gui = new InterferometerGUI(pluginAPI, deviceUISet, channelMIMO);
+    auto* gui = new InterferometerGUI(pluginAPI, deviceUISet, channelMIMO);
     return gui;
-}
-
-void InterferometerGUI::destroy()
-{
-    delete this;
 }
 
 void InterferometerGUI::resetToDefaults()
@@ -77,7 +72,7 @@ bool InterferometerGUI::handleMessage(const Message& message)
 {
     if (Interferometer::MsgBasebandNotification::match(message))
     {
-        Interferometer::MsgBasebandNotification& notif = (Interferometer::MsgBasebandNotification&) message;
+        auto& notif = (const Interferometer::MsgBasebandNotification&) message;
         m_sampleRate = notif.getSampleRate();
         m_centerFrequency = notif.getCenterFrequency();
         displayRateAndShift();
@@ -86,7 +81,7 @@ bool InterferometerGUI::handleMessage(const Message& message)
     }
     else if (Interferometer::MsgConfigureInterferometer::match(message))
     {
-        const Interferometer::MsgConfigureInterferometer& cfg = (const Interferometer::MsgConfigureInterferometer&) message;
+        auto& cfg = (const Interferometer::MsgConfigureInterferometer&) message;
 
         if (cfg.getForce()) {
             m_settings = cfg.getSettings();
@@ -102,7 +97,8 @@ bool InterferometerGUI::handleMessage(const Message& message)
     }
     else if (Interferometer::MsgReportDevices::match(message))
     {
-        Interferometer::MsgReportDevices& report = (Interferometer::MsgReportDevices&) message;
+        auto& msg = const_cast<Message&>(message);
+        auto& report = (Interferometer::MsgReportDevices&) msg;
         updateDeviceSetList(report.getDeviceSetIndexes());
         return true;
     }
@@ -135,7 +131,7 @@ InterferometerGUI::InterferometerGUI(PluginAPI* pluginAPI, DeviceUISet *deviceUI
     m_spectrumVis->setGLSpectrum(ui->glSpectrum);
     m_scopeVis = m_interferometer->getScopeVis();
     m_scopeVis->setGLScope(ui->glScope);
-    m_interferometer->setMessageQueueToGUI(getInputMessageQueue());
+    m_interferometer->setMessageQueueToGUI(InterferometerGUI::getInputMessageQueue());
     m_sampleRate = m_interferometer->getDeviceSampleRate();
 
 	ui->spectrumGUI->setBuddies(m_spectrumVis, ui->glSpectrum);
@@ -175,7 +171,7 @@ InterferometerGUI::InterferometerGUI(PluginAPI* pluginAPI, DeviceUISet *deviceUI
     m_scopeVis->setTraceChunkSize(Interferometer::m_fftSize); // Set scope trace length unit to FFT size
     ui->scopeGUI->traceLengthChange();
 
-    connect(getInputMessageQueue(), SIGNAL(messageEnqueued()), this, SLOT(handleSourceMessages()));
+    connect(InterferometerGUI::getInputMessageQueue(), SIGNAL(messageEnqueued()), this, SLOT(handleSourceMessages()));
 
     updateDeviceSetList(m_interferometer->getDeviceSetList());
     displaySettings();
@@ -243,15 +239,15 @@ void InterferometerGUI::displaySettings()
 
 void InterferometerGUI::displayRateAndShift()
 {
-    int shift = m_shiftFrequencyFactor * m_sampleRate;
+    auto shift = (int) (m_shiftFrequencyFactor * m_sampleRate);
     double channelSampleRate = ((double) m_sampleRate) / (1<<m_settings.m_log2Decim);
     QLocale loc;
     ui->offsetFrequencyText->setText(tr("%1 Hz").arg(loc.toString(shift)));
     ui->channelRateText->setText(tr("%1k").arg(QString::number(channelSampleRate / 1000.0, 'g', 5)));
     m_channelMarker.setCenterFrequency(shift);
-    m_channelMarker.setBandwidth(channelSampleRate);
-    ui->glSpectrum->setSampleRate(channelSampleRate);
-    m_scopeVis->setLiveRate(channelSampleRate);
+    m_channelMarker.setBandwidth((int) channelSampleRate);
+    ui->glSpectrum->setSampleRate((int) channelSampleRate);
+    m_scopeVis->setLiveRate((int) channelSampleRate);
 }
 
 void InterferometerGUI::leaveEvent(QEvent*)
@@ -268,7 +264,7 @@ void InterferometerGUI::handleSourceMessages()
 {
     Message* message;
 
-    while ((message = getInputMessageQueue()->pop()) != 0)
+    while ((message = getInputMessageQueue()->pop()) != nullptr)
     {
         if (handleMessage(*message))
         {
@@ -277,7 +273,7 @@ void InterferometerGUI::handleSourceMessages()
     }
 }
 
-void InterferometerGUI::onWidgetRolled(QWidget* widget, bool rollDown)
+void InterferometerGUI::onWidgetRolled(const QWidget* widget, bool rollDown)
 {
     (void) widget;
     (void) rollDown;
@@ -288,7 +284,7 @@ void InterferometerGUI::onWidgetRolled(QWidget* widget, bool rollDown)
 
 void InterferometerGUI::onMenuDialogCalled(const QPoint &p)
 {
-    if (m_contextMenuType == ContextMenuChannelSettings)
+    if (m_contextMenuType == ContextMenuType::ContextMenuChannelSettings)
     {
         BasicChannelSettingsDialog dialog(&m_channelMarker, this);
         dialog.setUseReverseAPI(m_settings.m_useReverseAPI);
@@ -330,7 +326,7 @@ void InterferometerGUI::onMenuDialogCalled(const QPoint &p)
 
 void InterferometerGUI::updateDeviceSetList(const QList<int>& deviceSetIndexes)
 {
-    QList<int>::const_iterator it = deviceSetIndexes.begin();
+    auto it = deviceSetIndexes.begin();
 
     ui->localDevice->blockSignals(true);
 
@@ -343,7 +339,7 @@ void InterferometerGUI::updateDeviceSetList(const QList<int>& deviceSetIndexes)
     ui->localDevice->blockSignals(false);
 }
 
-int InterferometerGUI::getLocalDeviceIndexInCombo(int localDeviceIndex)
+int InterferometerGUI::getLocalDeviceIndexInCombo(int localDeviceIndex) const
 {
     int index = 0;
 
@@ -457,7 +453,7 @@ void InterferometerGUI::tick()
     }
 }
 
-void InterferometerGUI::makeUIConnections()
+void InterferometerGUI::makeUIConnections() const
 {
     QObject::connect(ui->decimationFactor, QOverload<int>::of(&QComboBox::currentIndexChanged), this, &InterferometerGUI::on_decimationFactor_currentIndexChanged);
     QObject::connect(ui->position, &QSlider::valueChanged, this, &InterferometerGUI::on_position_valueChanged);
@@ -472,5 +468,5 @@ void InterferometerGUI::makeUIConnections()
 
 void InterferometerGUI::updateAbsoluteCenterFrequency()
 {
-    setStatusFrequency(m_centerFrequency + m_shiftFrequencyFactor * m_sampleRate);
+    setStatusFrequency((qint64) ((double) m_centerFrequency + m_shiftFrequencyFactor * m_sampleRate));
 }

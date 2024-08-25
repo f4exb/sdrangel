@@ -194,7 +194,7 @@ public:
     void setLevelMeter(QObject *levelMeter);
     uint32_t getNumberOfDeviceStreams() const;
     int getSourceChannelSampleRate() const;
-    void setMessageQueueToGUI(MessageQueue* queue) override;
+    void setMessageQueueToGUI(MessageQueue* queue) final;
 
     static const char* const m_channelIdURI;
     static const char* const m_channelId;

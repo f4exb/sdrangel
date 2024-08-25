@@ -55,7 +55,7 @@ public:
     };
 
     ChannelAPI(const QString& name, StreamType streamType);
-    virtual ~ChannelAPI() {}
+    ~ChannelAPI() override = default;
     virtual void destroy() = 0;
     virtual void setDeviceAPI(DeviceAPI*) = 0;
     virtual DeviceAPI *getDeviceAPI() = 0;

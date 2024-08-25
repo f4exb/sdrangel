@@ -46,7 +46,6 @@ BeamSteeringCWMod::BeamSteeringCWMod(DeviceAPI *deviceAPI) :
     m_thread(nullptr),
     m_basebandSource(nullptr),
     m_running(false),
-    m_guiMessageQueue(nullptr),
     m_frequencyOffset(0),
     m_basebandSampleRate(48000)
 {
@@ -62,7 +61,7 @@ BeamSteeringCWMod::BeamSteeringCWMod(DeviceAPI *deviceAPI) :
         this,
         &BeamSteeringCWMod::networkManagerFinished
     );
-    startSources();
+    BeamSteeringCWMod::startSources();
 }
 
 BeamSteeringCWMod::~BeamSteeringCWMod()
@@ -77,7 +76,7 @@ BeamSteeringCWMod::~BeamSteeringCWMod()
 
     m_deviceAPI->removeChannelSinkAPI(this);
     m_deviceAPI->removeMIMOChannel(this);
-    stopSources();
+    BeamSteeringCWMod::stopSources();
 }
 
 void BeamSteeringCWMod::setDeviceAPI(DeviceAPI *deviceAPI)
@@ -194,7 +193,7 @@ void BeamSteeringCWMod::applySettings(const BeamSteeringCWModSettings& settings,
     QList<ObjectPipe*> pipes;
     MainCore::instance()->getMessagePipes().getMessagePipes(this, "settings", pipes);
 
-    if (pipes.size() > 0) {
+    if (!pipes.empty()) {
         sendChannelSettings(pipes, reverseAPIKeys, settings, force);
     }
 
@@ -205,7 +204,7 @@ void BeamSteeringCWMod::handleInputMessages()
 {
     Message* message;
 
-    while ((message = m_inputMessageQueue.pop()) != 0)
+    while ((message = m_inputMessageQueue.pop()) != nullptr)
     {
         if (handleMessage(*message))
         {
@@ -218,14 +217,14 @@ bool BeamSteeringCWMod::handleMessage(const Message& cmd)
 {
     if (MsgConfigureBeamSteeringCWMod::match(cmd))
     {
-        MsgConfigureBeamSteeringCWMod& cfg = (MsgConfigureBeamSteeringCWMod&) cmd;
+        auto& cfg = (const MsgConfigureBeamSteeringCWMod&) cmd;
         qDebug() << "BeamSteeringCWMod::handleMessage: MsgConfigureBeamSteeringCWMod";
         applySettings(cfg.getSettings(), cfg.getForce());
         return true;
     }
     else if (DSPMIMOSignalNotification::match(cmd))
     {
-        DSPMIMOSignalNotification& notif = (DSPMIMOSignalNotification&) cmd;
+        auto& notif = (const DSPMIMOSignalNotification&) cmd;
 
         qDebug() << "BeamSteeringCWMod::handleMessage: DSPMIMOSignalNotification:"
                 << " basebandSampleRate: " << notif.getSampleRate()
@@ -301,7 +300,7 @@ void BeamSteeringCWMod::validateFilterChainHash(BeamSteeringCWModSettings& setti
 void BeamSteeringCWMod::calculateFrequencyOffset()
 {
     double shiftFactor = HBFilterChainConverter::getShiftFactor(m_settings.m_log2Interp, m_settings.m_filterChainHash);
-    m_frequencyOffset = m_basebandSampleRate * shiftFactor;
+    m_frequencyOffset = (int64_t) (m_basebandSampleRate * shiftFactor);
 }
 
 int BeamSteeringCWMod::webapiSettingsGet(
@@ -380,13 +379,13 @@ void BeamSteeringCWMod::webapiUpdateChannelSettings(
         settings.m_reverseAPIAddress = *response.getBeamSteeringCwModSettings()->getReverseApiAddress();
     }
     if (channelSettingsKeys.contains("reverseAPIPort")) {
-        settings.m_reverseAPIPort = response.getBeamSteeringCwModSettings()->getReverseApiPort();
+        settings.m_reverseAPIPort = (uint16_t) response.getBeamSteeringCwModSettings()->getReverseApiPort();
     }
     if (channelSettingsKeys.contains("reverseAPIDeviceIndex")) {
-        settings.m_reverseAPIDeviceIndex = response.getBeamSteeringCwModSettings()->getReverseApiDeviceIndex();
+        settings.m_reverseAPIDeviceIndex = (uint16_t) response.getBeamSteeringCwModSettings()->getReverseApiDeviceIndex();
     }
     if (channelSettingsKeys.contains("reverseAPIChannelIndex")) {
-        settings.m_reverseAPIChannelIndex = response.getBeamSteeringCwModSettings()->getReverseApiChannelIndex();
+        settings.m_reverseAPIChannelIndex = (uint16_t) response.getBeamSteeringCwModSettings()->getReverseApiChannelIndex();
     }
     if (settings.m_channelMarker && channelSettingsKeys.contains("channelMarker")) {
         settings.m_channelMarker->updateFrom(channelSettingsKeys, response.getBeamSteeringCwModSettings()->getChannelMarker());
@@ -429,7 +428,7 @@ void BeamSteeringCWMod::webapiFormatChannelSettings(SWGSDRangel::SWGChannelSetti
         }
         else
         {
-            SWGSDRangel::SWGChannelMarker *swgChannelMarker = new SWGSDRangel::SWGChannelMarker();
+            auto *swgChannelMarker = new SWGSDRangel::SWGChannelMarker();
             settings.m_channelMarker->formatTo(swgChannelMarker);
             response.getBeamSteeringCwModSettings()->setChannelMarker(swgChannelMarker);
         }
@@ -443,16 +442,16 @@ void BeamSteeringCWMod::webapiFormatChannelSettings(SWGSDRangel::SWGChannelSetti
         }
         else
         {
-            SWGSDRangel::SWGRollupState *swgRollupState = new SWGSDRangel::SWGRollupState();
+            auto *swgRollupState = new SWGSDRangel::SWGRollupState();
             settings.m_rollupState->formatTo(swgRollupState);
             response.getBeamSteeringCwModSettings()->setRollupState(swgRollupState);
         }
     }
 }
 
-void BeamSteeringCWMod::webapiReverseSendSettings(QList<QString>& channelSettingsKeys, const BeamSteeringCWModSettings& settings, bool force)
+void BeamSteeringCWMod::webapiReverseSendSettings(const QList<QString>& channelSettingsKeys, const BeamSteeringCWModSettings& settings, bool force)
 {
-    SWGSDRangel::SWGChannelSettings *swgChannelSettings = new SWGSDRangel::SWGChannelSettings();
+    auto *swgChannelSettings = new SWGSDRangel::SWGChannelSettings();
     webapiFormatChannelSettings(channelSettingsKeys, swgChannelSettings, settings, force);
 
     QString channelSettingsURL = QString("http://%1:%2/sdrangel/deviceset/%3/channel/%4/settings")
@@ -463,8 +462,8 @@ void BeamSteeringCWMod::webapiReverseSendSettings(QList<QString>& channelSetting
     m_networkRequest.setUrl(QUrl(channelSettingsURL));
     m_networkRequest.setHeader(QNetworkRequest::ContentTypeHeader, "application/json");
 
-    QBuffer *buffer = new QBuffer();
-    buffer->open((QBuffer::ReadWrite));
+    auto *buffer = new QBuffer();
+    buffer->open(QBuffer::ReadWrite);
     buffer->write(swgChannelSettings->asJson().toUtf8());
     buffer->seek(0);
 
@@ -477,9 +476,9 @@ void BeamSteeringCWMod::webapiReverseSendSettings(QList<QString>& channelSetting
 
 void BeamSteeringCWMod::sendChannelSettings(
         const QList<ObjectPipe*>& pipes,
-        QList<QString>& channelSettingsKeys,
+        const QList<QString>& channelSettingsKeys,
         const BeamSteeringCWModSettings& settings,
-        bool force)
+        bool force) const
 {
     for (const auto& pipe : pipes)
     {
@@ -487,7 +486,7 @@ void BeamSteeringCWMod::sendChannelSettings(
 
         if (messageQueue)
         {
-            SWGSDRangel::SWGChannelSettings *swgChannelSettings = new SWGSDRangel::SWGChannelSettings();
+            auto *swgChannelSettings = new SWGSDRangel::SWGChannelSettings();
             webapiFormatChannelSettings(channelSettingsKeys, swgChannelSettings, settings, force);
             MainCore::MsgChannelSettings *msg = MainCore::MsgChannelSettings::create(
                 this,
@@ -501,11 +500,11 @@ void BeamSteeringCWMod::sendChannelSettings(
 }
 
 void BeamSteeringCWMod::webapiFormatChannelSettings(
-        QList<QString>& channelSettingsKeys,
+        const QList<QString>& channelSettingsKeys,
         SWGSDRangel::SWGChannelSettings *swgChannelSettings,
         const BeamSteeringCWModSettings& settings,
         bool force
-)
+) const
 {
     swgChannelSettings->setDirection(2); // MIMO sink
     swgChannelSettings->setOriginatorChannelIndex(getIndexInDeviceSet());
@@ -534,20 +533,20 @@ void BeamSteeringCWMod::webapiFormatChannelSettings(
 
     if (settings.m_channelMarker && (channelSettingsKeys.contains("channelMarker") || force))
     {
-        SWGSDRangel::SWGChannelMarker *swgChannelMarker = new SWGSDRangel::SWGChannelMarker();
+        auto *swgChannelMarker = new SWGSDRangel::SWGChannelMarker();
         settings.m_channelMarker->formatTo(swgChannelMarker);
         swgBeamSteeringCWSettings->setChannelMarker(swgChannelMarker);
     }
 
     if (settings.m_rollupState && (channelSettingsKeys.contains("rollupState") || force))
     {
-        SWGSDRangel::SWGRollupState *swgRollupState = new SWGSDRangel::SWGRollupState();
+        auto *swgRollupState = new SWGSDRangel::SWGRollupState();
         settings.m_rollupState->formatTo(swgRollupState);
         swgBeamSteeringCWSettings->setRollupState(swgRollupState);
     }
 }
 
-void BeamSteeringCWMod::networkManagerFinished(QNetworkReply *reply)
+void BeamSteeringCWMod::networkManagerFinished(QNetworkReply *reply) const
 {
     QNetworkReply::NetworkError replyError = reply->error();
 

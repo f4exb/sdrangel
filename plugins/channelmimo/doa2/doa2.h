@@ -86,76 +86,73 @@ public:
         qint64 m_centerFrequency;
     };
 
-    DOA2(DeviceAPI *deviceAPI);
-	virtual ~DOA2();
-	virtual void destroy() { delete this; }
-    virtual void setDeviceAPI(DeviceAPI *deviceAPI);
-    virtual DeviceAPI *getDeviceAPI() { return m_deviceAPI; }
+    explicit DOA2(DeviceAPI *deviceAPI);
+	~DOA2() final;
+	void destroy() final { delete this; }
+    void setDeviceAPI(DeviceAPI *deviceAPI) final;
+    DeviceAPI *getDeviceAPI() final { return m_deviceAPI; }
 
-	virtual void startSinks(); //!< thread start()
-	virtual void stopSinks();  //!< thread exit() and wait()
-    virtual void startSources() {}
-    virtual void stopSources() {}
-	virtual void feed(const SampleVector::const_iterator& begin, const SampleVector::const_iterator& end, unsigned int sinkIndex);
-    virtual void pull(SampleVector::iterator& begin, unsigned int nbSamples, unsigned int sourceIndex);
-    virtual void pushMessage(Message *msg) { m_inputMessageQueue.push(msg); }
-    virtual QString getMIMOName() { return objectName(); }
+	void startSinks() final; //!< thread start()
+	void stopSinks() final;  //!< thread exit() and wait()
+    void startSources() final { /* Not for MIMO */ }
+    void stopSources() final { /* Not for MIMO */ }
+	void feed(const SampleVector::const_iterator& begin, const SampleVector::const_iterator& end, unsigned int sinkIndex) final;
+    void pull(SampleVector::iterator& begin, unsigned int nbSamples, unsigned int sourceIndex) final;
+    void pushMessage(Message *msg) final { m_inputMessageQueue.push(msg); }
+    QString getMIMOName() final { return objectName(); }
 
-    virtual void getIdentifier(QString& id) { id = objectName(); }
-    virtual QString getIdentifier() const { return objectName(); }
-    virtual void getTitle(QString& title) { title = "DOA 2 sources"; }
-    virtual qint64 getCenterFrequency() const { return m_frequencyOffset; }
-    virtual void setCenterFrequency(qint64) {}
+    void getIdentifier(QString& id) final { id = objectName(); }
+    QString getIdentifier() const final { return objectName(); }
+    void getTitle(QString& title) final { title = "DOA 2 sources"; }
+    qint64 getCenterFrequency() const final { return m_frequencyOffset; }
+    void setCenterFrequency(qint64) final { /* Not for MIMO */ }
     uint32_t getDeviceSampleRate() const { return m_deviceSampleRate; }
 
-    virtual QByteArray serialize() const;
-    virtual bool deserialize(const QByteArray& data);
+    QByteArray serialize() const final;
+    bool deserialize(const QByteArray& data) final;
 
-    virtual int getNbSinkStreams() const { return 2; }
-    virtual int getNbSourceStreams() const { return 0; }
-    virtual int getStreamIndex() const { return -1; }
+    int getNbSinkStreams() const final { return 2; }
+    int getNbSourceStreams() const final { return 0; }
+    int getStreamIndex() const final { return -1; }
 
-    virtual qint64 getStreamCenterFrequency(int streamIndex, bool sinkElseSource) const
+    qint64 getStreamCenterFrequency(int streamIndex, bool sinkElseSource) const final
     {
         (void) streamIndex;
         (void) sinkElseSource;
         return m_frequencyOffset;
     }
 
-    virtual void setMessageQueueToGUI(MessageQueue *queue) { m_guiMessageQueue = queue; }
-    MessageQueue *getMessageQueueToGUI() { return m_guiMessageQueue; }
-
     ScopeVis *getScopeVis() { return &m_scopeSink; }
     void applyChannelSettings(uint32_t log2Decim, uint32_t filterChainHash);
-    float getPhi() const;
-    float getPositiveDOA() const;
+    double getPhi() const;
+    double getPositiveDOA() const;
 
-    virtual int webapiSettingsGet(
-            SWGSDRangel::SWGChannelSettings& response,
-            QString& errorMessage);
+    int webapiSettingsGet(
+        SWGSDRangel::SWGChannelSettings& response,
+        QString& errorMessage) final;
 
-    virtual int webapiSettingsPutPatch(
-            bool force,
-            const QStringList& channelSettingsKeys,
-            SWGSDRangel::SWGChannelSettings& response,
-            QString& errorMessage);
+    int webapiSettingsPutPatch(
+        bool force,
+        const QStringList& channelSettingsKeys,
+        SWGSDRangel::SWGChannelSettings& response,
+        QString& errorMessage) final;
 
-    virtual int webapiReportGet(
-            SWGSDRangel::SWGChannelReport& response,
-            QString& errorMessage);
+    int webapiReportGet(
+        SWGSDRangel::SWGChannelReport& response,
+        QString& errorMessage) final;
 
-    virtual int webapiWorkspaceGet(
-            SWGSDRangel::SWGWorkspaceInfo& query,
-            QString& errorMessage);
+    int webapiWorkspaceGet(
+        SWGSDRangel::SWGWorkspaceInfo& query,
+        QString& errorMessage) final;
 
     static void webapiFormatChannelSettings(
         SWGSDRangel::SWGChannelSettings& response,
         const DOA2Settings& settings);
 
     static void webapiUpdateChannelSettings(
-            DOA2Settings& settings,
-            const QStringList& channelSettingsKeys,
-            SWGSDRangel::SWGChannelSettings& response);
+        DOA2Settings& settings,
+        const QStringList& channelSettingsKeys,
+        SWGSDRangel::SWGChannelSettings& response);
 
     static const char* const m_channelIdURI;
     static const char* const m_channelId;
@@ -169,7 +166,6 @@ private:
     QMutex m_mutex;
     bool m_running;
     DOA2Settings m_settings;
-    MessageQueue *m_guiMessageQueue;  //!< Input message queue to the GUI
 
     QNetworkAccessManager *m_networkManager;
     QNetworkRequest m_networkRequest;
@@ -177,31 +173,32 @@ private:
     int64_t m_frequencyOffset;
     uint32_t m_deviceSampleRate;
     qint64 m_deviceCenterFrequency;
-    int m_count0, m_count1;
+    int m_count0;
+    int m_count1;
 
-	virtual bool handleMessage(const Message& cmd); //!< Processing of a message. Returns true if message has actually been processed
+	bool handleMessage(const Message& cmd) final; //!< Processing of a message. Returns true if message has actually been processed
     void applySettings(const DOA2Settings& settings, bool force = false);
     static void validateFilterChainHash(DOA2Settings& settings);
     void calculateFrequencyOffset();
-    void webapiFormatChannelReport(SWGSDRangel::SWGChannelReport& response);
-    void webapiReverseSendSettings(QList<QString>& channelSettingsKeys, const DOA2Settings& settings, bool force);
+    void webapiFormatChannelReport(SWGSDRangel::SWGChannelReport& response) const;
+    void webapiReverseSendSettings(const QList<QString>& channelSettingsKeys, const DOA2Settings& settings, bool force);
     void sendChannelSettings(
         const QList<ObjectPipe*>& pipes,
-        QList<QString>& channelSettingsKeys,
+        const QList<QString>& channelSettingsKeys,
         const DOA2Settings& settings,
         bool force
-    );
+    ) const;
     void webapiFormatChannelSettings(
-        QList<QString>& channelSettingsKeys,
+        const QList<QString>& channelSettingsKeys,
         SWGSDRangel::SWGChannelSettings *swgChannelSettings,
         const DOA2Settings& settings,
         bool force
-    );
-    static float normalizeAngle(float angle, float max);
+    ) const;
+    static double normalizeAngle(double angle, double max);
 
 private slots:
     void handleInputMessages();
-    void networkManagerFinished(QNetworkReply *reply);
+    void networkManagerFinished(QNetworkReply *reply) const;
 };
 
 #endif // INCLUDE_DOA2_H

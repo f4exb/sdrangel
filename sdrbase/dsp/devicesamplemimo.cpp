@@ -20,20 +20,18 @@
 #include "devicesamplemimo.h"
 
 DeviceSampleMIMO::DeviceSampleMIMO() :
-    m_guiMessageQueue(0)
+    m_guiMessageQueue(nullptr)
 {
 	connect(&m_inputMessageQueue, SIGNAL(messageEnqueued()), this, SLOT(handleInputMessages()));
 }
 
-DeviceSampleMIMO::~DeviceSampleMIMO()
-{
-}
+DeviceSampleMIMO::~DeviceSampleMIMO() = default;
 
 void DeviceSampleMIMO::handleInputMessages()
 {
 	Message* message;
 
-	while ((message = m_inputMessageQueue.pop()) != 0)
+	while ((message = m_inputMessageQueue.pop()) != nullptr)
 	{
 		if (handleMessage(*message))
 		{

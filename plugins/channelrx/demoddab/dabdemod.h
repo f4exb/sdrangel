@@ -392,10 +392,6 @@ public:
     void getMagSqLevels(double& avg, double& peak, int& nbSamples) {
         m_basebandSink->getMagSqLevels(avg, peak, nbSamples);
     }
-/*    void setMessageQueueToGUI(MessageQueue* queue) override {
-        ChannelAPI::setMessageQueueToGUI(queue);
-        m_basebandSink->setMessageQueueToGUI(queue);
-    }*/
 
     uint32_t getNumberOfDeviceStreams() const;
     int getAudioSampleRate() const { return m_basebandSink->getAudioSampleRate(); }

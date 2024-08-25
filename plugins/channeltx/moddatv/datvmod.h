@@ -262,7 +262,7 @@ public:
     uint32_t getNumberOfDeviceStreams() const;
     double getMagSq() const;
     int getEffectiveSampleRate() const;
-    void setMessageQueueToGUI(MessageQueue* queue) override;
+    void setMessageQueueToGUI(MessageQueue* queue) final;
 
     static const char* const m_channelIdURI;
     static const char* const m_channelId;

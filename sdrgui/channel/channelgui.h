@@ -43,14 +43,14 @@ class SDRGUI_API ChannelGUI : public QMdiSubWindow, public SerializableInterface
 {
     Q_OBJECT
 public:
-    enum DeviceType
+    enum class DeviceType
     {
         DeviceRx,
         DeviceTx,
         DeviceMIMO
     };
 
-    enum ContextMenuType
+    enum class ContextMenuType
     {
         ContextMenuNone,
         ContextMenuChannelSettings
@@ -91,34 +91,35 @@ public:
     void setStatusText(const QString& text);
 
 protected:
+    FramelessWindowResizer m_resizer;
+    ContextMenuType m_contextMenuType;
+    QString m_helpURL;
+    QString m_displayedName;
+
     void closeEvent(QCloseEvent *event) override;
     void leaveEvent(QEvent *event) override;
     void mousePressEvent(QMouseEvent* event) override;
     void mouseReleaseEvent(QMouseEvent* event) override;
     void mouseMoveEvent(QMouseEvent* event) override;
-    void resetContextMenuType() { m_contextMenuType = ContextMenuNone; }
+    void resetContextMenuType() { m_contextMenuType = ContextMenuType::ContextMenuNone; }
     void updateIndexLabel();
     int getAdditionalHeight() const { return 22 + 22; }  // height of top and bottom bars
     void setHighlighted(bool highlighted);
-    int gripSize() { return m_resizer.m_gripSize; } // size in pixels of resize grip around the window
-
-    DeviceType m_deviceType;
-    int m_deviceSetIndex;
-    int m_channelIndex;
-    QString m_helpURL;
-    RollupContents* m_rollupContents;
-    ContextMenuType m_contextMenuType;
-    QString m_displayedName;
-    FramelessWindowResizer m_resizer;
+    int gripSize() const { return m_resizer.m_gripSize; } // size in pixels of resize grip around the window
 
 protected slots:
     void shrinkWindow();
     void maximizeWindow();
 
 private:
-    bool isOnMovingPad();
-    QString getDeviceTypeTag();
+    bool isOnMovingPad() const;
+    QString getDeviceTypeTag() const;
     static QColor getTitleColor(const QColor& backgroundColor);
+
+    DeviceType m_deviceType;
+    int m_deviceSetIndex;
+    int m_channelIndex;
+    RollupContents* m_rollupContents;
 
     QLabel *m_indexLabel;
     QPushButton *m_settingsButton;
@@ -146,7 +147,7 @@ private:
 
 private slots:
     void activateSettingsDialog();
-    void showHelp();
+    void showHelp() const;
     void openMoveToWorkspaceDialog();
     void onWidgetRolled(QWidget *widget, bool show);
     void duplicateChannel();

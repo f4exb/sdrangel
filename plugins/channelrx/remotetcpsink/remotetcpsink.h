@@ -164,7 +164,7 @@ public:
     uint32_t getNumberOfDeviceStreams() const;
     int getBasebandSampleRate() const { return m_basebandSampleRate; }
 
-    void setMessageQueueToGUI(MessageQueue* queue) override {
+    void setMessageQueueToGUI(MessageQueue* queue) final {
         ChannelAPI::setMessageQueueToGUI(queue);
         m_basebandSink->setMessageQueueToGUI(queue);
     }

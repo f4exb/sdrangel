@@ -61,8 +61,7 @@ MESSAGE_CLASS_DEFINITION(SigMFFileInput::MsgReportTotalSamplesCheck, Message)
 
 SigMFFileInput::SigMFFileInput(DeviceAPI *deviceAPI) :
     m_deviceAPI(deviceAPI),
-	m_settings(),
-	m_deviceDescription("SigMFFileInput")
+	m_settings()
 {
     m_sampleFifo.setLabel(m_deviceDescription);
     m_deviceAPI->setNbSourceStreams(1);

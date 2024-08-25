@@ -48,7 +48,6 @@ DOA2::DOA2(DeviceAPI *deviceAPI) :
     m_thread(nullptr),
     m_basebandSink(nullptr),
     m_running(false),
-    m_guiMessageQueue(nullptr),
     m_frequencyOffset(0),
     m_deviceSampleRate(48000),
     m_deviceCenterFrequency(435000000)
@@ -65,7 +64,7 @@ DOA2::DOA2(DeviceAPI *deviceAPI) :
         this,
         &DOA2::networkManagerFinished
     );
-    startSinks();
+    DOA2::startSinks();
 }
 
 DOA2::~DOA2()
@@ -80,7 +79,7 @@ DOA2::~DOA2()
 
     m_deviceAPI->removeChannelSinkAPI(this);
     m_deviceAPI->removeMIMOChannel(this);
-    stopSinks();
+    DOA2::stopSinks();
 }
 
 void DOA2::setDeviceAPI(DeviceAPI *deviceAPI)
@@ -203,7 +202,7 @@ void DOA2::applySettings(const DOA2Settings& settings, bool force)
         reverseAPIKeys.append("squelchdB");
 
         if (m_running) {
-            m_basebandSink->setMagThreshold(CalcDb::powerFromdB(settings.m_squelchdB));
+            m_basebandSink->setMagThreshold((float) CalcDb::powerFromdB(settings.m_squelchdB));
         }
     }
 
@@ -217,7 +216,7 @@ void DOA2::applySettings(const DOA2Settings& settings, bool force)
     }
 
     if (m_running && ((m_settings.m_log2Decim != settings.m_log2Decim)
-     || (m_settings.m_filterChainHash != settings.m_filterChainHash) || force))
+    || (m_settings.m_filterChainHash != settings.m_filterChainHash) || force))
     {
         DOA2Baseband::MsgConfigureChannelizer *msg = DOA2Baseband::MsgConfigureChannelizer::create(
             settings.m_log2Decim, settings.m_filterChainHash);
@@ -238,7 +237,7 @@ void DOA2::applySettings(const DOA2Settings& settings, bool force)
     QList<ObjectPipe*> pipes;
     MainCore::instance()->getMessagePipes().getMessagePipes(this, "settings", pipes);
 
-    if (pipes.size() > 0) {
+    if (!pipes.empty()) {
         sendChannelSettings(pipes, reverseAPIKeys, settings, force);
     }
 
@@ -249,7 +248,7 @@ void DOA2::handleInputMessages()
 {
     Message* message;
 
-    while ((message = m_inputMessageQueue.pop()) != 0)
+    while ((message = m_inputMessageQueue.pop()) != nullptr)
     {
         if (handleMessage(*message))
         {
@@ -262,14 +261,14 @@ bool DOA2::handleMessage(const Message& cmd)
 {
     if (MsgConfigureDOA2::match(cmd))
     {
-        MsgConfigureDOA2& cfg = (MsgConfigureDOA2&) cmd;
+        auto& cfg = (const MsgConfigureDOA2&) cmd;
         qDebug() << "DOA2::handleMessage: MsgConfigureDOA2";
         applySettings(cfg.getSettings(), cfg.getForce());
         return true;
     }
     else if (DSPMIMOSignalNotification::match(cmd))
     {
-        DSPMIMOSignalNotification& notif = (DSPMIMOSignalNotification&) cmd;
+        auto& notif = (const DSPMIMOSignalNotification&) cmd;
 
         qDebug() << "DOA2::handleMessage: DSPMIMOSignalNotification:"
                 << " inputSampleRate: " << notif.getSampleRate()
@@ -347,7 +346,7 @@ void DOA2::validateFilterChainHash(DOA2Settings& settings)
 void DOA2::calculateFrequencyOffset()
 {
     double shiftFactor = HBFilterChainConverter::getShiftFactor(m_settings.m_log2Decim, m_settings.m_filterChainHash);
-    m_frequencyOffset = m_deviceSampleRate * shiftFactor;
+    m_frequencyOffset = (int64_t) (m_deviceSampleRate * shiftFactor);
 }
 
 void DOA2::applyChannelSettings(uint32_t log2Decim, uint32_t filterChainHash)
@@ -360,12 +359,12 @@ void DOA2::applyChannelSettings(uint32_t log2Decim, uint32_t filterChainHash)
     m_basebandSink->getInputMessageQueue()->push(msg);
 }
 
-float DOA2::getPhi() const
+double DOA2::getPhi() const
 {
-    return m_basebandSink ? m_basebandSink->getPhi() : 0.0f;
+    return m_basebandSink ? m_basebandSink->getPhi() : 0.0;
 }
 
-float DOA2::getPositiveDOA() const
+double DOA2::getPositiveDOA() const
 {
     return std::acos(getPhi()/M_PI)*(180/M_PI);
 }
@@ -469,13 +468,13 @@ void DOA2::webapiUpdateChannelSettings(
         settings.m_reverseAPIAddress = *response.getDoa2Settings()->getReverseApiAddress();
     }
     if (channelSettingsKeys.contains("reverseAPIPort")) {
-        settings.m_reverseAPIPort = response.getDoa2Settings()->getReverseApiPort();
+        settings.m_reverseAPIPort = (uint16_t) response.getDoa2Settings()->getReverseApiPort();
     }
     if (channelSettingsKeys.contains("reverseAPIDeviceIndex")) {
-        settings.m_reverseAPIDeviceIndex = response.getDoa2Settings()->getReverseApiDeviceIndex();
+        settings.m_reverseAPIDeviceIndex = (uint16_t) response.getDoa2Settings()->getReverseApiDeviceIndex();
     }
     if (channelSettingsKeys.contains("reverseAPIChannelIndex")) {
-        settings.m_reverseAPIChannelIndex = response.getDoa2Settings()->getReverseApiChannelIndex();
+        settings.m_reverseAPIChannelIndex = (uint16_t) response.getDoa2Settings()->getReverseApiChannelIndex();
     }
     if (settings.m_scopeGUI && channelSettingsKeys.contains("scopeConfig")) {
         settings.m_scopeGUI->updateFrom(channelSettingsKeys, response.getDoa2Settings()->getScopeConfig());
@@ -525,7 +524,7 @@ void DOA2::webapiFormatChannelSettings(SWGSDRangel::SWGChannelSettings& response
         }
         else
         {
-            SWGSDRangel::SWGGLScope *swgGLScope = new SWGSDRangel::SWGGLScope();
+            auto *swgGLScope = new SWGSDRangel::SWGGLScope();
             settings.m_scopeGUI->formatTo(swgGLScope);
             response.getDoa2Settings()->setScopeConfig(swgGLScope);
         }
@@ -539,7 +538,7 @@ void DOA2::webapiFormatChannelSettings(SWGSDRangel::SWGChannelSettings& response
         }
         else
         {
-            SWGSDRangel::SWGChannelMarker *swgChannelMarker = new SWGSDRangel::SWGChannelMarker();
+            auto *swgChannelMarker = new SWGSDRangel::SWGChannelMarker();
             settings.m_channelMarker->formatTo(swgChannelMarker);
             response.getDoa2Settings()->setChannelMarker(swgChannelMarker);
         }
@@ -553,39 +552,39 @@ void DOA2::webapiFormatChannelSettings(SWGSDRangel::SWGChannelSettings& response
         }
         else
         {
-            SWGSDRangel::SWGRollupState *swgRollupState = new SWGSDRangel::SWGRollupState();
+            auto *swgRollupState = new SWGSDRangel::SWGRollupState();
             settings.m_rollupState->formatTo(swgRollupState);
             response.getDoa2Settings()->setRollupState(swgRollupState);
         }
     }
 }
 
-void DOA2::webapiFormatChannelReport(SWGSDRangel::SWGChannelReport& response)
+void DOA2::webapiFormatChannelReport(SWGSDRangel::SWGChannelReport& response) const
 {
-    float phi = normalizeAngle(getPhi() * (180/M_PI), 180.0f);
-    response.getDoa2Report()->setPhi(phi);
+    double phi = normalizeAngle(getPhi() * (180.0/M_PI), 180.0);
+    response.getDoa2Report()->setPhi((qint32) phi);
 
-    float hwl = 1.5e8 / (m_deviceCenterFrequency + m_frequencyOffset);
-    float cosTheta = (getPhi()/M_PI) * ((hwl * 1000.0) / m_settings.m_basebandDistance);
-    float blindAngle = (m_settings.m_basebandDistance > hwl * 1000.0) ?
+    double hwl = 1.5e8 / (double) (m_deviceCenterFrequency + m_frequencyOffset);
+    double cosTheta = (getPhi()/M_PI) * ((hwl * 1000.0) / m_settings.m_basebandDistance);
+    double blindAngle = (m_settings.m_basebandDistance > hwl * 1000.0) ?
         std::acos((hwl * 1000.0) / m_settings.m_basebandDistance) * (180/M_PI) :
         0;
     response.getDoa2Report()->setBlindAngle((int) blindAngle);
-    float doaAngle = std::acos(cosTheta < -1.0 ? -1.0 : cosTheta > 1.0 ? 1.0 : cosTheta) * (180/M_PI);
+    double doaAngle = std::acos(cosTheta < -1.0 ? -1.0 : cosTheta > 1.0 ? 1.0 : cosTheta) * (180.0/M_PI);
     qDebug("DOA2::webapiFormatChannelReport: phi: %f cosT: %f DOAngle: %f", getPhi(), cosTheta, doaAngle);
-    float posAngle = normalizeAngle(m_settings.m_antennaAz - doaAngle, 360.0f); // DOA angles are trigonometric but displayed angles are clockwise
-    float negAngle = normalizeAngle(m_settings.m_antennaAz + doaAngle, 360.0f);
-    response.getDoa2Report()->setPosAz(posAngle);
-    response.getDoa2Report()->setNegAz(negAngle);
+    double posAngle = normalizeAngle(m_settings.m_antennaAz - doaAngle, 360.0); // DOA angles are trigonometric but displayed angles are clockwise
+    double negAngle = normalizeAngle(m_settings.m_antennaAz + doaAngle, 360.0);
+    response.getDoa2Report()->setPosAz((qint32) posAngle);
+    response.getDoa2Report()->setNegAz((qint32) negAngle);
 
     response.getDoa2Report()->setFftSize(m_fftSize);
     int channelSampleRate = m_deviceSampleRate / (1<<m_settings.m_log2Decim);
     response.getDoa2Report()->setChannelSampleRate(channelSampleRate);
 }
 
-void DOA2::webapiReverseSendSettings(QList<QString>& channelSettingsKeys, const DOA2Settings& settings, bool force)
+void DOA2::webapiReverseSendSettings(const QList<QString>& channelSettingsKeys, const DOA2Settings& settings, bool force)
 {
-    SWGSDRangel::SWGChannelSettings *swgChannelSettings = new SWGSDRangel::SWGChannelSettings();
+    auto *swgChannelSettings = new SWGSDRangel::SWGChannelSettings();
     webapiFormatChannelSettings(channelSettingsKeys, swgChannelSettings, settings, force);
 
     QString channelSettingsURL = QString("http://%1:%2/sdrangel/deviceset/%3/channel/%4/settings")
@@ -596,8 +595,8 @@ void DOA2::webapiReverseSendSettings(QList<QString>& channelSettingsKeys, const 
     m_networkRequest.setUrl(QUrl(channelSettingsURL));
     m_networkRequest.setHeader(QNetworkRequest::ContentTypeHeader, "application/json");
 
-    QBuffer *buffer = new QBuffer();
-    buffer->open((QBuffer::ReadWrite));
+    auto *buffer = new QBuffer();
+    buffer->open(QBuffer::ReadWrite);
     buffer->write(swgChannelSettings->asJson().toUtf8());
     buffer->seek(0);
 
@@ -610,9 +609,9 @@ void DOA2::webapiReverseSendSettings(QList<QString>& channelSettingsKeys, const 
 
 void DOA2::sendChannelSettings(
     const QList<ObjectPipe*>& pipes,
-    QList<QString>& channelSettingsKeys,
+    const QList<QString>& channelSettingsKeys,
     const DOA2Settings& settings,
-    bool force)
+    bool force) const
 {
     for (const auto& pipe : pipes)
     {
@@ -620,7 +619,7 @@ void DOA2::sendChannelSettings(
 
         if (messageQueue)
         {
-            SWGSDRangel::SWGChannelSettings *swgChannelSettings = new SWGSDRangel::SWGChannelSettings();
+            auto *swgChannelSettings = new SWGSDRangel::SWGChannelSettings();
             webapiFormatChannelSettings(channelSettingsKeys, swgChannelSettings, settings, force);
             MainCore::MsgChannelSettings *msg = MainCore::MsgChannelSettings::create(
                 this,
@@ -634,11 +633,11 @@ void DOA2::sendChannelSettings(
 }
 
 void DOA2::webapiFormatChannelSettings(
-        QList<QString>& channelSettingsKeys,
+        const QList<QString>& channelSettingsKeys,
         SWGSDRangel::SWGChannelSettings *swgChannelSettings,
         const DOA2Settings& settings,
         bool force
-)
+) const
 {
     swgChannelSettings->setDirection(2); // MIMO sink
     swgChannelSettings->setOriginatorChannelIndex(getIndexInDeviceSet());
@@ -677,29 +676,26 @@ void DOA2::webapiFormatChannelSettings(
         swgDOA2Settings->setFftAveragingValue(DOA2Settings::getAveragingValue(settings.m_fftAveragingIndex));
     }
 
-    if (settings.m_scopeGUI)
-    {
-        if (channelSettingsKeys.contains("scopeConfig") || force) {
-            settings.m_scopeGUI->formatTo(swgDOA2Settings->getScopeConfig());
-        }
+    if ((settings.m_scopeGUI) && (channelSettingsKeys.contains("scopeConfig") || force)) {
+        settings.m_scopeGUI->formatTo(swgDOA2Settings->getScopeConfig());
     }
 
     if (settings.m_channelMarker && (channelSettingsKeys.contains("channelMarker") || force))
     {
-        SWGSDRangel::SWGChannelMarker *swgChannelMarker = new SWGSDRangel::SWGChannelMarker();
+        auto *swgChannelMarker = new SWGSDRangel::SWGChannelMarker();
         settings.m_channelMarker->formatTo(swgChannelMarker);
         swgDOA2Settings->setChannelMarker(swgChannelMarker);
     }
 
     if (settings.m_rollupState && (channelSettingsKeys.contains("rollupState") || force))
     {
-        SWGSDRangel::SWGRollupState *swgRollupState = new SWGSDRangel::SWGRollupState();
+        auto *swgRollupState = new SWGSDRangel::SWGRollupState();
         settings.m_rollupState->formatTo(swgRollupState);
         swgDOA2Settings->setRollupState(swgRollupState);
     }
 }
 
-void DOA2::networkManagerFinished(QNetworkReply *reply)
+void DOA2::networkManagerFinished(QNetworkReply *reply) const
 {
     QNetworkReply::NetworkError replyError = reply->error();
 
@@ -720,7 +716,7 @@ void DOA2::networkManagerFinished(QNetworkReply *reply)
     reply->deleteLater();
 }
 
-float DOA2::normalizeAngle(float angle, float max)
+double DOA2::normalizeAngle(double angle, double max)
 {
     if (angle < 0)   { return max + angle; }
     if (angle > max) { return angle - max; }

@@ -33,13 +33,8 @@
 
 DOA2GUI* DOA2GUI::create(PluginAPI* pluginAPI, DeviceUISet *deviceUISet, MIMOChannel *channelMIMO)
 {
-    DOA2GUI* gui = new DOA2GUI(pluginAPI, deviceUISet, channelMIMO);
+    auto* gui = new DOA2GUI(pluginAPI, deviceUISet, channelMIMO);
     return gui;
-}
-
-void DOA2GUI::destroy()
-{
-    delete this;
 }
 
 void DOA2GUI::resetToDefaults()
@@ -78,7 +73,7 @@ bool DOA2GUI::handleMessage(const Message& message)
 {
     if (DOA2::MsgBasebandNotification::match(message))
     {
-        DOA2::MsgBasebandNotification& notif = (DOA2::MsgBasebandNotification&) message;
+        auto& notif = (const DOA2::MsgBasebandNotification&) message;
         m_sampleRate = notif.getSampleRate();
         m_centerFrequency = notif.getCenterFrequency();
         displayRateAndShift();
@@ -88,7 +83,7 @@ bool DOA2GUI::handleMessage(const Message& message)
     }
     else if (DOA2::MsgConfigureDOA2::match(message))
     {
-        const DOA2::MsgConfigureDOA2& notif = (const DOA2::MsgConfigureDOA2&) message;
+        auto& notif = (const DOA2::MsgConfigureDOA2&) message;
         m_settings = notif.getSettings();
         ui->scopeGUI->updateSettings();
         m_channelMarker.updateSettings(static_cast<const ChannelMarker*>(m_settings.m_channelMarker));
@@ -122,7 +117,7 @@ DOA2GUI::DOA2GUI(PluginAPI* pluginAPI, DeviceUISet *deviceUISet, MIMOChannel *ch
     m_doa2 = (DOA2*) channelMIMO;
     m_scopeVis = m_doa2->getScopeVis();
     m_scopeVis->setGLScope(ui->glScope);
-    m_doa2->setMessageQueueToGUI(getInputMessageQueue());
+    m_doa2->setMessageQueueToGUI(DOA2GUI::getInputMessageQueue());
     m_sampleRate = m_doa2->getDeviceSampleRate();
 
     ui->glScope->setTraceModulo(DOA2::m_fftSize);
@@ -150,7 +145,7 @@ DOA2GUI::DOA2GUI(PluginAPI* pluginAPI, DeviceUISet *deviceUISet, MIMOChannel *ch
     ui->scopeGUI->traceLengthChange();
     ui->compass->setBlindAngleBorder(true);
 
-    connect(getInputMessageQueue(), SIGNAL(messageEnqueued()), this, SLOT(handleSourceMessages()));
+    connect(DOA2GUI::getInputMessageQueue(), SIGNAL(messageEnqueued()), this, SLOT(handleSourceMessages()));
 
     displaySettings();
     makeUIConnections();
@@ -221,20 +216,20 @@ void DOA2GUI::displaySettings()
 
 void DOA2GUI::displayRateAndShift()
 {
-    int shift = m_shiftFrequencyFactor * m_sampleRate;
+    auto shift = (int) (m_shiftFrequencyFactor * m_sampleRate);
     double channelSampleRate = ((double) m_sampleRate) / (1<<m_settings.m_log2Decim);
     QLocale loc;
     ui->offsetFrequencyText->setText(tr("%1 Hz").arg(loc.toString(shift)));
     ui->channelRateText->setText(tr("%1k").arg(QString::number(channelSampleRate / 1000.0, 'g', 5)));
     m_channelMarker.setCenterFrequency(shift);
-    m_channelMarker.setBandwidth(channelSampleRate);
-    m_scopeVis->setLiveRate(channelSampleRate);
+    m_channelMarker.setBandwidth((int) channelSampleRate);
+    m_scopeVis->setLiveRate((int) channelSampleRate);
 }
 
 void DOA2GUI::setFFTAveragingTooltip()
 {
-    float channelSampleRate = ((float) m_sampleRate) / (1<<m_settings.m_log2Decim);
-    float averagingTime = (DOA2::m_fftSize * DOA2Settings::getAveragingValue(m_settings.m_fftAveragingIndex)) /
+    float channelSampleRate = ((float) m_sampleRate) / ((float) (1<<m_settings.m_log2Decim));
+    float averagingTime = ((float) DOA2::m_fftSize * (float) DOA2Settings::getAveragingValue(m_settings.m_fftAveragingIndex)) /
         channelSampleRate;
     QString s;
     setNumberStr(averagingTime, 2, s);
@@ -274,7 +269,7 @@ void DOA2GUI::handleSourceMessages()
 {
     Message* message;
 
-    while ((message = getInputMessageQueue()->pop()) != 0)
+    while ((message = getInputMessageQueue()->pop()) != nullptr)
     {
         if (handleMessage(*message))
         {
@@ -283,7 +278,7 @@ void DOA2GUI::handleSourceMessages()
     }
 }
 
-void DOA2GUI::onWidgetRolled(QWidget* widget, bool rollDown)
+void DOA2GUI::onWidgetRolled(const QWidget* widget, bool rollDown)
 {
     (void) widget;
     (void) rollDown;
@@ -294,7 +289,7 @@ void DOA2GUI::onWidgetRolled(QWidget* widget, bool rollDown)
 
 void DOA2GUI::onMenuDialogCalled(const QPoint &p)
 {
-    if (m_contextMenuType == ContextMenuChannelSettings)
+    if (m_contextMenuType == ContextMenuType::ContextMenuChannelSettings)
     {
         BasicChannelSettingsDialog dialog(&m_channelMarker, this);
         dialog.setUseReverseAPI(m_settings.m_useReverseAPI);
@@ -434,7 +429,7 @@ void DOA2GUI::tick()
     }
 }
 
-void DOA2GUI::makeUIConnections()
+void DOA2GUI::makeUIConnections() const
 {
     QObject::connect(ui->decimationFactor, QOverload<int>::of(&QComboBox::currentIndexChanged), this, &DOA2GUI::on_decimationFactor_currentIndexChanged);
     QObject::connect(ui->position, &QSlider::valueChanged, this, &DOA2GUI::on_position_valueChanged);
@@ -449,9 +444,9 @@ void DOA2GUI::makeUIConnections()
 
 void DOA2GUI::updateAbsoluteCenterFrequency()
 {
-    qint64 cf = m_centerFrequency + m_shiftFrequencyFactor * m_sampleRate;
+    auto cf = (qint64) ((double) m_centerFrequency + m_shiftFrequencyFactor * m_sampleRate);
     setStatusFrequency(cf);
-    m_hwl = 1.5e+8 / cf;
+    m_hwl = 1.5e+8 / (double) cf;
     ui->halfWLText->setText(tr("%1").arg(m_hwl*1000, 5, 'f', 0));
     updateScopeFScale();
 }
@@ -470,14 +465,14 @@ void DOA2GUI::updateScopeFScale()
 
 void DOA2GUI::updateDOA()
 {
-    float cosTheta = (m_doa2->getPhi()/M_PI) * ((m_hwl * 1000.0) / m_settings.m_basebandDistance);
-    float blindAngle = (m_settings.m_basebandDistance > m_hwl * 1000.0) ?
+    double cosTheta = (m_doa2->getPhi()/M_PI) * ((m_hwl * 1000.0) / m_settings.m_basebandDistance);
+    double blindAngle = (m_settings.m_basebandDistance > m_hwl * 1000.0) ?
         std::acos((m_hwl * 1000.0) / m_settings.m_basebandDistance) * (180/M_PI) :
         0;
     ui->compass->setBlindAngle(blindAngle);
-    float doaAngle = std::acos(cosTheta < -1.0 ? -1.0 : cosTheta > 1.0 ? 1.0 : cosTheta) * (180/M_PI);
-    float posAngle = ui->antAz->value() - doaAngle; // DOA angles are trigonometric but displayed angles are clockwise
-    float negAngle = ui->antAz->value() + doaAngle;
+    double doaAngle = std::acos(cosTheta < -1.0 ? -1.0 : cosTheta > 1.0 ? 1.0 : cosTheta) * (180/M_PI);
+    double posAngle = ui->antAz->value() - doaAngle; // DOA angles are trigonometric but displayed angles are clockwise
+    double negAngle = ui->antAz->value() + doaAngle;
     ui->compass->setAzPos(posAngle);
     ui->compass->setAzNeg(negAngle);
     ui->posText->setText(tr("%1").arg(ui->compass->getAzPos(), 3, 'f', 0, QLatin1Char('0')));
