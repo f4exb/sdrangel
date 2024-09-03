@@ -378,7 +378,7 @@ void RadioAstronomyGUI::addToPowerSeries(FFTMeasurement *fft, bool skipCalcs)
         && !((m_settings.m_powerYUnits == RadioAstronomySettings::PY_DBM) && (fft->m_tSys == 0.0f))  // dBm value not valid if temp is 0
        )
     {
-        qreal power;
+        qreal power = 0.0;
         switch (m_settings.m_powerYData)
         {
         case RadioAstronomySettings::PY_POWER:

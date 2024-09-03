@@ -101,9 +101,6 @@ struct ATVDemodSettings
     static float getNominalLineTime(int nbLines, int fps);
     static float getRFBandwidthDivisor(ATVModulation modulation);
     static void getBaseValues(int sampleRate, int linesPerSecond, uint32_t& nbPointsPerLine);
-
-private:
-    int m_rfSliderDivisor;
 };
 
 #endif /* PLUGINS_CHANNELRX_DEMODATV_ATVDEMODSETTINGS_H_ */

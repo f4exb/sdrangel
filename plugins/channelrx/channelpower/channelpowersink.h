@@ -65,7 +65,6 @@ public:
 
 private:
 
-    ChannelPower *m_channelPower;
     ChannelPowerSettings m_settings;
     ChannelAPI *m_channel;
     int m_channelSampleRate;

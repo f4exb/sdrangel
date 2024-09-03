@@ -178,7 +178,6 @@ private:
     RemoteTCPSinkBaseband *m_basebandSink;
     RemoteTCPSinkSettings m_settings;
 
-    uint64_t m_centerFrequency;
     int m_basebandSampleRate;
 
     QNetworkAccessManager *m_networkManager;

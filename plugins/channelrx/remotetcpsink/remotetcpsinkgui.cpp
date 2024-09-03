@@ -88,13 +88,13 @@ QString RemoteTCPSinkGUI::displayScaledF(float value, char type, int precision, 
     }
     else
     {
-        if (posValue < 1000) {
+        if (posValue < 1000.0f) {
             return tr("%1").arg(QString::number(value, type, precision));
-        } else if (posValue < 1000000) {
+        } else if (posValue < 1000000.0f) {
             return tr("%1%2").arg(QString::number(value / 1000.0, type, precision)).arg(showMult ? "k" : "");
-        } else if (posValue < 1000000000) {
+        } else if (posValue < 1000000000.0f) {
             return tr("%1%2").arg(QString::number(value / 1000000.0, type, precision)).arg(showMult ? "M" : "");
-        } else if (posValue < 1000000000000) {
+        } else if (posValue < 1000000000000.0f) {
             return tr("%1%2").arg(QString::number(value / 1000000000.0, type, precision)).arg(showMult ? "G" : "");
         } else {
             return tr("%1").arg(QString::number(value, 'e', precision));

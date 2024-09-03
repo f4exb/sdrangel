@@ -35,6 +35,9 @@
 
 #include "androidsdrdriverinput.h"
 #include "androidsdrdriverinputtcphandler.h"
+#ifdef ANDROID
+#include "util/android.h"
+#endif
 
 MESSAGE_CLASS_DEFINITION(AndroidSDRDriverInput::MsgConfigureAndroidSDRDriverInput, Message)
 MESSAGE_CLASS_DEFINITION(AndroidSDRDriverInput::MsgStartStop, Message)

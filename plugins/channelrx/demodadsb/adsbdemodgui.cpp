@@ -4991,7 +4991,7 @@ ADSBDemodGUI::ADSBDemodGUI(PluginAPI* pluginAPI, DeviceUISet *deviceUISet, Baseb
     m_azEl.setLocation(stationLatitude, stationLongitude, stationAltitude);
 
     // These are the default values in sdrbase/settings/preferences.cpp
-    if ((stationLatitude == 49.012423) && (stationLongitude == 8.418125)) {
+    if ((stationLatitude == (float)49.012423) && (stationLongitude == (float)8.418125)) {
         ui->warning->setText("Please set your antenna location under Preferences > My Position");
     }
 

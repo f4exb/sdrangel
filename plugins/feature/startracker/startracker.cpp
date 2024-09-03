@@ -695,7 +695,6 @@ double StarTracker::applyBeam(const FITS *fits, double beamwidth, double ra, dou
         numberOfCoeffsV++;
     }
     double *beam = new double[numberOfCoeffsH*numberOfCoeffsV];
-    double sum = 0.0;
     int y0 = numberOfCoeffsV/2;
     int x0 =  numberOfCoeffsH/2;
     int nonZeroCount = 0;
@@ -709,7 +708,6 @@ double StarTracker::applyBeam(const FITS *fits, double beamwidth, double ra, dou
             if (r < halfBeamwidth)
             {
                 beam[y*numberOfCoeffsH+x] = pow(cos(Units::degreesToRadians(r)), p);
-                sum += beam[y*numberOfCoeffsH+x];
                 nonZeroCount++;
             }
             else

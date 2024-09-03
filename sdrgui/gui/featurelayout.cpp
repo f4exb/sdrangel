@@ -233,12 +233,6 @@ QSize FeatureLayout::doLayoutVertically(const QRect &rect, bool testOnly) const
     int lineHeight = 0;
     int spaceX = 0;
     int spaceY = 0;
-
-    // Calculate space available for rows of widgets
-    int maxHeightForRows = effectiveRect.height();
-    if (itemList.size() > 0) {
-        maxHeightForRows -= itemList[0]->minimumSize().height();
-    }
     int minWidth = 0;
 
     int i = 0;

@@ -1096,12 +1096,12 @@ void DATVDemodSink::InitDATVS2Framework()
     p_vbitcount= new leansdr::pipebuf<int>(m_objScheduler, "Bits processed", BUF_S2PACKETS);
     p_verrcount = new leansdr::pipebuf<int>(m_objScheduler, "Bits corrected", BUF_S2PACKETS);
 
-    bool commandFileValid = false;
+    // bool commandFileValid = false;
 
     if (QFileInfo::exists(m_settings.m_softLDPCToolPath))
     {
         QFileInfo fileInfo = QFileInfo(m_settings.m_softLDPCToolPath);
-        commandFileValid = fileInfo.isExecutable();
+        // commandFileValid = fileInfo.isExecutable();
     }
 
     if (m_settings.m_softLDPC /*&& commandFileValid*/)
@@ -1195,11 +1195,6 @@ void DATVDemodSink::InitDATVS2Framework()
 
 void DATVDemodSink::feed(const SampleVector::const_iterator& begin, const SampleVector::const_iterator& end)
 {
-    float fltI;
-    float fltQ;
-    fftfilt::cmplx *objRF;
-    int intRFOut;
-    int lngWritable=0;
     leansdr::s2_frame_receiver<leansdr::f32, leansdr::llr_ss> *objDemodulatorDVBS2 =
         (leansdr::s2_frame_receiver<leansdr::f32, leansdr::llr_ss> *) m_objDemodulatorDVBS2;
 

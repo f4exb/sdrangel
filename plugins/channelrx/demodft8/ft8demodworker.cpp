@@ -40,7 +40,6 @@ FT8DemodWorker::FT8Callback::FT8Callback(
 ) :
     m_packing(packing),
     m_periodTS(periodTS),
-    m_baseFrequency(baseFrequency),
     m_name(name),
     m_validCallsigns(nullptr)
 {
@@ -226,7 +225,7 @@ void FT8DemodWorker::processBuffer(int16_t *buffer, QDateTime periodTS)
 
     m_ft8Decoder.wait(m_decoderTimeBudget + 1.0); // add one second to budget to force quit threads
     qDebug("FT8DemodWorker::processBuffer: done: at %6.3f %d messages",
-        m_baseFrequency / 1000000.0, ft8Callback.getReportMessage()->getFT8Messages().size());
+        m_baseFrequency / 1000000.0, (int)ft8Callback.getReportMessage()->getFT8Messages().size());
 
     if (m_reportingMessageQueue) {
         m_reportingMessageQueue->push(new MsgReportFT8Messages(*ft8Callback.getReportMessage()));

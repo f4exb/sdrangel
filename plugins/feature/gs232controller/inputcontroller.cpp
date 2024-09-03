@@ -60,6 +60,7 @@ InputController* InputControllerManager::open(const QString& name)
 #ifdef QT_GAMEPAD_FOUND
     return GamepadInputController::open(name);
 #else
+    (void)name;
     return nullptr;
 #endif
 }

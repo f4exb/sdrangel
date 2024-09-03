@@ -1350,9 +1350,9 @@ void MainWindow::loadConfiguration(const Configuration *configuration, bool from
 	qDebug("MainWindow::loadConfiguration: configuration [%s | %s] %d workspace(s) - %d device set(s) - %d feature(s)",
 		qPrintable(configuration->getGroup()),
 		qPrintable(configuration->getDescription()),
-        configuration->getNumberOfWorkspaceGeometries(),
-        configuration->getDeviceSetPresets().size(),
-        configuration->getFeatureSetPreset().getFeatureCount()
+        (int)configuration->getNumberOfWorkspaceGeometries(),
+        (int)configuration->getDeviceSetPresets().size(),
+        (int)configuration->getFeatureSetPreset().getFeatureCount()
     );
 
     QProgressDialog *waitBox = nullptr;
@@ -1549,7 +1549,7 @@ void MainWindow::saveConfiguration(Configuration *configuration)
 	qDebug("MainWindow::saveConfiguration: configuration [%s | %s] %d workspaces",
 		qPrintable(configuration->getGroup()),
 		qPrintable(configuration->getDescription()),
-        m_workspaces.size()
+        (int)m_workspaces.size()
     );
 
     configuration->clearData();

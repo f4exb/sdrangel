@@ -51,8 +51,9 @@ struct FT8DemodBandPreset
     int m_channelOffset;
 };
 
-struct FT8DemodSettings
+class FT8DemodSettings
 {
+public:
     enum MessageCol {
         MESSAGE_COL_UTC,
         MESSAGE_COL_TYPE,

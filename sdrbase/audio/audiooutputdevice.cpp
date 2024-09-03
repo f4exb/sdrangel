@@ -176,7 +176,7 @@ bool AudioOutputDevice::start(int deviceIndex, int sampleRate)
         if (m_audioOutput->state() != QAudio::ActiveState) {
             qWarning() << "AudioOutputDevice::start: cannot start - " << m_audioOutput->error();
         } else {
-            qDebug("AudioOutputDevice::start: started buffer: %d bytes", m_audioOutput->bufferSize());
+            qDebug("AudioOutputDevice::start: started buffer: %d bytes", (int)m_audioOutput->bufferSize());
         }
 
         if (m_managerMessageQueue) {

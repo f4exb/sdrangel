@@ -555,7 +555,7 @@ bool InterferometerCorrelator::performFFTProd(
             m_fft2[0]->out() + m_fftSize,
             m_dataj,
             m_invFFT2->in(),
-            [this](std::complex<float>& a, const std::complex<float>& b) -> std::complex<float> {
+            [](std::complex<float>& a, const std::complex<float>& b) -> std::complex<float> {
                 return (a*b);
             }
         );

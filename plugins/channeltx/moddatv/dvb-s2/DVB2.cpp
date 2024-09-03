@@ -273,8 +273,6 @@ int DVB2::next_ts_frame_base( u8 *ts )
 }
 DVB2::DVB2(void)
 {
-    // Clear the transport queue
-    m_tp_q.empty();
     init_bb_randomiser();
     bch_poly_build_tables();
     build_crc8_table();

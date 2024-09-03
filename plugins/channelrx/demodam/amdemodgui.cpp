@@ -663,7 +663,7 @@ void AMDemodGUI::snapClicked()
     {
         applySnap();
 
-        qint64 value;
+        qint64 value = 0;
 
         if (m_settings.m_frequencyMode == AMDemodSettings::Offset) {
             value = m_settings.m_inputFrequencyOffset;

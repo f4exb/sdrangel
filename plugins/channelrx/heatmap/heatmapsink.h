@@ -106,12 +106,10 @@ private:
     };
 
     ScopeVis* m_scopeSink;    // Scope GUI to display filtered power
-    HeatMap *m_heatMap;
     HeatMapSettings m_settings;
     ChannelAPI *m_channel;
     int m_channelSampleRate;
     int m_channelFrequencyOffset;
-    int m_sinkSampleRate;
 
     NCO m_nco;
     Interpolator m_interpolator;

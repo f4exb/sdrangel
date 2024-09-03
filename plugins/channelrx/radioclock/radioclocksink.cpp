@@ -28,7 +28,6 @@
 
 RadioClockSink::RadioClockSink(RadioClock *radioClock) :
         m_scopeSink(nullptr),
-        m_radioClock(radioClock),
         m_channelSampleRate(RadioClockSettings::RADIOCLOCK_CHANNEL_SAMPLE_RATE),
         m_channelFrequencyOffset(0),
         m_magsq(0.0),
@@ -49,6 +48,8 @@ RadioClockSink::RadioClockSink(RadioClock *radioClock) :
         m_sampleBufferIndex(0),
         m_gotMarker(false)
 {
+    (void)radioClock;
+   
     m_phaseDiscri.setFMScaling(RadioClockSettings::RADIOCLOCK_CHANNEL_SAMPLE_RATE / (2.0f * 20.0/M_PI));
     applySettings(m_settings, true);
     applyChannelSettings(m_channelSampleRate, m_channelFrequencyOffset, true);

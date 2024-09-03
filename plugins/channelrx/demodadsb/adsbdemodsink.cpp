@@ -79,7 +79,6 @@ void ADSBDemodSink::feed(const SampleVector::const_iterator& begin, const Sample
         for (SampleVector::const_iterator it = begin; it != end; ++it)
         {
             Complex c(it->real(), it->imag());
-            Complex ci;
             c *= m_nco.nextIQ();
             processOneSample(complexMagSq(c));
         }

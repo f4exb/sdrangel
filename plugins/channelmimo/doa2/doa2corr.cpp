@@ -264,7 +264,7 @@ bool DOA2Correlator::performFFTProd(
             m_fft[0]->out() + m_fftSize,
             m_dataj,
             m_invFFT->in(),
-            [this](std::complex<float>& a, const std::complex<float>& b) -> std::complex<float> {
+            [](std::complex<float>& a, const std::complex<float>& b) -> std::complex<float> {
                 return (a*b);
             }
         );

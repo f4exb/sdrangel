@@ -1432,7 +1432,6 @@ void ILSDemodGUI::scanAvailableChannels()
     MessagePipes& messagePipes = mainCore->getMessagePipes();
     std::vector<DeviceSet*>& deviceSets = mainCore->getDeviceSets();
     m_availableChannels.clear();
-    int deviceSetIndex = 0;
 
     for (const auto& deviceSet : deviceSets)
     {
@@ -1465,7 +1464,6 @@ void ILSDemodGUI::scanAvailableChannels()
                 }
             }
         }
-        deviceSetIndex++;
     }
 }
 

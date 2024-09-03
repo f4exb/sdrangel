@@ -87,7 +87,6 @@ private:
         double m_magsqPeak;
     };
 
-    APTDemod *m_aptDemod;
     APTDemodSettings m_settings;
     int m_channelSampleRate;
     int m_channelFrequencyOffset;

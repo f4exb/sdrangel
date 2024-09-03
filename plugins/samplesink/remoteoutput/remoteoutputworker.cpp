@@ -116,8 +116,6 @@ void RemoteOutputWorker::tick()
             m_throttleToggle = !m_throttleToggle;
         }
 
-        SampleVector::iterator readUntil;
-
         SampleVector& data = m_sampleFifo->getData();
         unsigned int iPart1Begin, iPart1End, iPart2Begin, iPart2End;
         m_sampleFifo->read(m_samplesChunkSize, iPart1Begin, iPart1End, iPart2Begin, iPart2End);

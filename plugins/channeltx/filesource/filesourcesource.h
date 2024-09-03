@@ -92,19 +92,15 @@ private:
         double m_magsqPeak;
     };
 
-    int m_channelSampleRate;
-    int m_channelFrequencyOffset;
     FileSourceSettings m_settings;
 
 	std::ifstream m_ifstream;
 	QString m_fileName;
 	quint32 m_sampleSize;
 	quint64 m_centerFrequency;
-    int64_t m_frequencyOffset;
     uint32_t m_fileSampleRate;
     quint64 m_samplesCount;
     uint32_t m_sampleRate;
-    uint32_t m_deviceSampleRate;
     quint64 m_recordLengthMuSec; //!< record length in microseconds computed from file size
     quint64 m_startingTimeStamp;
 	QTimer m_masterTimer;

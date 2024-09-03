@@ -158,8 +158,6 @@ private:
     BeamSteeringCWModBaseband* m_basebandSource;
     QMutex m_mutex;
     bool m_running;
-    BasebandSampleSink* m_spectrumSink;
-    BasebandSampleSink* m_scopeSink;
     BeamSteeringCWModSettings m_settings;
     MessageQueue *m_guiMessageQueue;  //!< Input message queue to the GUI
 
@@ -168,7 +166,6 @@ private:
 
     int64_t m_frequencyOffset;
     uint32_t m_basebandSampleRate;
-    int m_count0, m_count1;
 
    	virtual bool handleMessage(const Message& cmd); //!< Processing of a message. Returns true if message has actually been processed
     void applySettings(const BeamSteeringCWModSettings& settings, bool force = false);

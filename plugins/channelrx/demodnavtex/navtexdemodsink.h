@@ -83,7 +83,6 @@ private:
     };
 
     ScopeVis* m_scopeSink;    // Scope GUI to display baseband waveform
-    NavtexDemod *m_navtexDemod;
     NavtexDemodSettings m_settings;
     ChannelAPI *m_channel;
     int m_channelSampleRate;

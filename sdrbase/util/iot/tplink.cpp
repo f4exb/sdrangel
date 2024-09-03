@@ -519,7 +519,6 @@ void TPLinkDeviceDiscoverer::handleReply(QNetworkReply* reply)
                                     if (sysInfoObj.contains(QStringLiteral("child_num")))
                                     {
                                         QJsonArray children = sysInfoObj.value(QStringLiteral("children")).toArray();
-                                        int child = 1;
                                         for (auto childRef : children)
                                         {
                                             QJsonObject childObj = childRef.toObject();
@@ -530,7 +529,6 @@ void TPLinkDeviceDiscoverer::handleReply(QNetworkReply* reply)
                                             }
                                             controlInfo->m_type = DeviceDiscoverer::BOOL;
                                             info.m_controls.append(controlInfo);
-                                            child++;
                                         }
                                     }
                                     else if (sysInfoObj.contains(QStringLiteral("relay_state")))
