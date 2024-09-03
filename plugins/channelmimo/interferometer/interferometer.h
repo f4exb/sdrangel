@@ -193,8 +193,6 @@ private:
     uint64_t m_centerFrequency;
     int64_t m_frequencyOffset;
     uint32_t m_deviceSampleRate;
-    int m_count0;
-    int m_count1;
 
     QList<int> m_localInputDeviceIndexes;
 

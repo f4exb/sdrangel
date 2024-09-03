@@ -458,6 +458,8 @@ struct s2_frame_transmitter : runnable
         std::complex<T> *pout
     )
     {
+        (void)mcinfo;
+        
         std::complex<T> *pout0 = pout; // For sanity check
         // PLHEADER: SOF AND PLSCODE
         // EN 302 307-1 section 5.5.2 PL signalling
@@ -2584,6 +2586,8 @@ struct s2_deinterleaver : runnable
     static inline void split_symbol(const llr_ss &ps,
                                     hard_sb accs[/*bps*/], int nacc)
     {
+        (void)nacc;
+        
         if (MSB_FIRST)
         {
             for (int b = 0; b < BPS; ++b) {
@@ -3833,10 +3837,6 @@ struct s2_fecdec_helper : runnable
     // Receive a finished job.
     void receive_frame(const helper_job *job)
     {
-        // Read corrected frame from helper
-        const s2_pls *pls = &job->pls;
-        int iosize = (pls->framebits() / 8) * sizeof(ldpc_buf[0]);
-
         // Non blocking read - will do the next time if no adata is available
         if (job->h->m_worker->dataAvailable())
         {
@@ -4267,7 +4267,6 @@ private:
                     // 188     =  waiting for CRC
     uint8_t leftover[188];
     static const int MAX_TS_PER_BBFRAME = fec_info::KBCH_MAX / 8 / 188 + 1;
-    bool locked;
     pipereader<bbframe> in;
     pipewriter<tspacket> out;
     int current_state;

@@ -28,7 +28,6 @@
 #include "navtexdemodsink.h"
 
 NavtexDemodSink::NavtexDemodSink(NavtexDemod *packetDemod) :
-        m_navtexDemod(packetDemod),
         m_channelSampleRate(NavtexDemodSettings::NAVTEXDEMOD_CHANNEL_SAMPLE_RATE),
         m_channelFrequencyOffset(0),
         m_magsqSum(0.0f),
@@ -38,6 +37,7 @@ NavtexDemodSink::NavtexDemodSink(NavtexDemod *packetDemod) :
         m_exp(nullptr),
         m_sampleBufferIndex(0)
 {
+    (void)packetDemod;
     m_magsq = 0.0;
 
     m_sampleBuffer.resize(m_sampleBufferSize);

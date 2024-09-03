@@ -53,6 +53,7 @@ void LocalSinkSettings::resetToDefaults()
     m_reverseAPIChannelIndex = 0;
     m_workspaceIndex = 0;
     m_hidden = false;
+    m_maxFFTBands = 32;
 }
 
 QByteArray LocalSinkSettings::serialize() const
@@ -94,7 +95,7 @@ QByteArray LocalSinkSettings::serialize() const
     s.writeBool(24, m_reverseFilter);
 
     s.writeU32(99, m_fftBands.size());
-    int i = 0;
+    uint32_t i = 0;
 
     for (auto fftBand : m_fftBands)
     {

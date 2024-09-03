@@ -1824,6 +1824,7 @@ void MapGUI::applyMap3DSettings(bool reloadMap)
     m_imageMapModel.allUpdated();
     m_polygonMapModel.allUpdated();
     m_polylineMapModel.allUpdated();
+    (void)reloadMap;
 #endif
 }
 

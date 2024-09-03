@@ -173,8 +173,6 @@ private:
     int64_t m_frequencyOffset;
     uint32_t m_deviceSampleRate;
     qint64 m_deviceCenterFrequency;
-    int m_count0;
-    int m_count1;
 
 	bool handleMessage(const Message& cmd) final; //!< Processing of a message. Returns true if message has actually been processed
     void applySettings(const DOA2Settings& settings, bool force = false);

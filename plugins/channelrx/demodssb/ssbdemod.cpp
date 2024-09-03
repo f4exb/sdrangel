@@ -752,7 +752,7 @@ void SSBDemod::sendChannelSettings(
     const SSBDemodSettings& settings,
     bool force)
 {
-    qDebug("SSBDemod::sendChannelSettings: %d pipes", pipes.size());
+    qDebug("SSBDemod::sendChannelSettings: %d pipes", (int)pipes.size());
 
     for (const auto& pipe : pipes)
     {

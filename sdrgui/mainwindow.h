@@ -229,7 +229,7 @@ private slots:
     void openDeviceSetPresetsDialog(QPoint p, const DeviceGUI *deviceGUI);
 	void commandKeyPressed(Qt::Key key, Qt::KeyboardModifiers keyModifiers, bool release) const;
 	void fftWisdomProcessFinished(int exitCode, QProcess::ExitStatus exitStatus);
-    void orientationChanged(Qt::ScreenOrientation orientation) const;
+    void orientationChanged(Qt::ScreenOrientation orientation);
 };
 
 #endif // INCLUDE_MAINWINDOW_H

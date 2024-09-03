@@ -333,8 +333,8 @@ private:
     Interpolator m_interpolator;
     Real m_interpolatorDistance;
     Real m_interpolatorDistanceRemain;
-    static const int m_interpolatorPhaseSteps = 4;      // Higher than these two values will struggle to run in real-time
-    static const int m_interpolatorTapsPerPhase = 3.5f; // without gaining much improvement in PER
+    static constexpr int m_interpolatorPhaseSteps = 4;      // Higher than these two values will struggle to run in real-time
+    static constexpr float m_interpolatorTapsPerPhase = 3.5f; // without gaining much improvement in PER
 
     bool m_blnInitialized;
     bool m_blnRenderingVideo;

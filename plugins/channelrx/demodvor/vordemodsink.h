@@ -105,7 +105,6 @@ private:
     MagSqLevelsStore m_magSqLevelStore;
 
     MessageQueue *m_messageQueueToChannel;
-    MessageQueue *m_messageQueueToGUI;
 
     MovingAverageUtil<Real, double, 16> m_movingAverage;
     SimpleAGC<4800> m_volumeAGC;

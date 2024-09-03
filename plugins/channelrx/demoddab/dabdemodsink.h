@@ -106,7 +106,6 @@ private:
         double m_magsqPeak;
     };
 
-    DABDemod *m_dabDemod;
     DABDemodSettings m_settings;
     ChannelAPI *m_channel;
 

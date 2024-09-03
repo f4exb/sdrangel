@@ -214,8 +214,6 @@ private:
     SampleVector m_sampleBuffer;
     QRecursiveMutex m_settingsMutex;
 
-    int m_sampleRate;
-
     QNetworkAccessManager *m_networkManager;
     QNetworkRequest m_networkRequest;
     QUdpSocket *m_udpSocket;

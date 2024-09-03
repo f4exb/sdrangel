@@ -27,7 +27,6 @@
 #include "freqscannersink.h"
 
 FreqScannerSink::FreqScannerSink(FreqScanner *ilsDemod) :
-        m_freqScanner(ilsDemod),
         m_channel(nullptr),
         m_channelSampleRate(48000),
         m_channelFrequencyOffset(0),
@@ -41,6 +40,8 @@ FreqScannerSink::FreqScannerSink(FreqScanner *ilsDemod) :
         m_binsPerChannel(16),
         m_averageCount(0)
 {
+    (void)ilsDemod;
+   
     applySettings(m_settings, QStringList(), true);
     applyChannelSettings(m_channelSampleRate, m_channelFrequencyOffset, 16, 4, true);
 }

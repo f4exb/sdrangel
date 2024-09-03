@@ -81,7 +81,6 @@ private:
         double m_magsqPeak;
     };
 
-    NoiseFigure *m_noiseFigure;
     NoiseFigureSettings m_settings;
     ChannelAPI *m_channel;
     int m_channelSampleRate;

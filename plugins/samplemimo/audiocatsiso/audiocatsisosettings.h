@@ -25,7 +25,8 @@
 #include "audio/audiodeviceinfo.h"
 #include "util/message.h"
 
-struct AudioCATSISOSettings {
+class AudioCATSISOSettings{
+public:
 
     class MsgPTT : public Message {
         MESSAGE_CLASS_DECLARATION

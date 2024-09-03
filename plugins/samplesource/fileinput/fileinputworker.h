@@ -27,6 +27,9 @@
 #include <iostream>
 #include <fstream>
 #include <cstdlib>
+#ifdef ANDROID
+#include <QFile>
+#endif
 
 #include "util/message.h"
 

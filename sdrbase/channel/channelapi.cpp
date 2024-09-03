@@ -23,6 +23,7 @@
 #include "util/uid.h"
 #include "util/message.h"
 #include "channelapi.h"
+#include "util/message.h"
 
 ChannelAPI::ChannelAPI(const QString& uri, StreamType streamType) :
     m_guiMessageQueue(nullptr),

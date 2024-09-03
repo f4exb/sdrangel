@@ -423,7 +423,7 @@ void MainCore::positionError(QGeoPositionInfoSource::Error positioningError)
 void MainCore::updateWakeLock()
 {
     bool running = false;
-    for (int i = 0; i < m_deviceSets.size(); i++)
+    for (size_t i = 0; i < m_deviceSets.size(); i++)
     {
         if (m_deviceSets[i]->m_deviceAPI->state() == DeviceAPI::StRunning)
         {

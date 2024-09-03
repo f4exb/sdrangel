@@ -767,7 +767,7 @@ void DSCDemodGUI::customContextMenuRequested(QPoint pos)
                     QAction* sendAreaToMapAction = new QAction(QString("Display %1 on map").arg(address), tableContextMenu);
                     connect(sendAreaToMapAction, &QAction::triggered, this, [this, name, address, info]()->void {
                         sendAreaToMapFeature(name, address, info);
-                        QTimer::singleShot(500, [this, name] {
+                        QTimer::singleShot(500, [ name] {
                             FeatureWebAPIUtils::mapFind(name);
                         });
                     });
@@ -776,7 +776,7 @@ void DSCDemodGUI::customContextMenuRequested(QPoint pos)
                 else
                 {
                     QAction* findAreaOnMapAction = new QAction(QString("Center map on %1").arg(address), tableContextMenu);
-                    connect(findAreaOnMapAction, &QAction::triggered, this, [this, name]()->void {
+                    connect(findAreaOnMapAction, &QAction::triggered, this, [ name]()->void {
                         FeatureWebAPIUtils::mapFind(name);
                     });
                     tableContextMenu->addAction(findAreaOnMapAction);
@@ -814,7 +814,7 @@ void DSCDemodGUI::customContextMenuRequested(QPoint pos)
                             if (sampleSource)
                             {
                                 QAction* tuneRxAction = new QAction(QString("Tune SSB Demod %1:%2 to %3").arg(deviceSetIndex).arg(chi).arg(rxFormatted), tableContextMenu);
-                                connect(tuneRxAction, &QAction::triggered, this, [this, deviceSetIndex, chi, rxFreq, sampleSource]()->void {
+                                connect(tuneRxAction, &QAction::triggered, this, [deviceSetIndex, chi, rxFreq, sampleSource]()->void {
 
                                     int bw = sampleSource->getSampleRate();
                                     quint64 cf = sampleSource->getCenterFrequency();

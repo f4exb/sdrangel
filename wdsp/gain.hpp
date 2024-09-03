@@ -25,7 +25,7 @@ warren@wpratt.com
 
 */
 
-#ifndef wdso_gain_h
+#ifndef wdsp_gain_h
 #define wdsp_gain_h
 
 #include "export.h"

@@ -44,9 +44,6 @@ private:
     int m_dataSize;
     int m_bufferSize;
     int m_dataStart;
-
-    uint32_t m_log2Decim;
-    uint32_t m_filterChainHash;
 };
 
 

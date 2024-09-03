@@ -697,7 +697,7 @@ void FT8Demod::sendChannelSettings(
     const FT8DemodSettings& settings,
     bool force)
 {
-    qDebug("FT8Demod::sendChannelSettings: %d pipes", pipes.size());
+    qDebug("FT8Demod::sendChannelSettings: %d pipes", (int)pipes.size());
 
     for (const auto& pipe : pipes)
     {
