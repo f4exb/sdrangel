@@ -24,9 +24,13 @@
 
 #include <QString>
 #include <QOpenGLFunctions>
+#if defined(ANDROID)
+#include <QOpenGLFunctions_ES2>
+#else
 #include <QOpenGLFunctions_2_0>
 #include <QOpenGLFunctions_2_1>
 #include <QOpenGLFunctions_3_0>
+#endif
 #include <QOpenGLTexture>
 #include <QOpenGLShaderProgram>
 #include <QOpenGLVertexArrayObject>
