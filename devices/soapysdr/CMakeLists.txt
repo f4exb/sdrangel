@@ -27,7 +27,12 @@ set_target_properties(soapysdrdevice
 
 target_link_libraries(soapysdrdevice
     ${SOAPYSDR_LINK_LIBRARIES}
+    ${SOAPYSDR_LIBRARIES}
     sdrbase
+)
+
+target_link_directories(soapysdrdevice PRIVATE
+    ${SOAPYSDR_LIBRARY_DIRS}
 )
 
 if(SOAPYSDR_EXTERNAL AND NOT LINUX)

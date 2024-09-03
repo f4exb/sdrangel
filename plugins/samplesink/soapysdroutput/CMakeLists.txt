@@ -56,7 +56,12 @@ target_link_libraries(${TARGET_NAME}
 	${TARGET_LIB_GUI}
         swagger
         ${SOAPYSDR_LINK_LIBRARIES}
+        ${SOAPYSDR_LIBRARIES}
         soapysdrdevice
+)
+
+target_link_directories(${TARGET_NAME} PRIVATE
+    ${SOAPYSDR_LIBRARY_DIRS}
 )
 
 install(TARGETS ${TARGET_NAME} DESTINATION ${INSTALL_FOLDER})
