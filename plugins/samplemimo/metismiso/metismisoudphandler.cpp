@@ -483,7 +483,7 @@ void MetisMISOUDPHandler::processIQBuffer(unsigned char* buffer)
 {
     int b = 0;
     unsigned int r;
-    int sampleI, sampleQ, sampleMic;
+    int sampleI, sampleQ;
 
 
     if (buffer[b++]==0x7F && buffer[b++]==0x7F && buffer[b++]==0x7F)
@@ -622,8 +622,9 @@ void MetisMISOUDPHandler::processIQBuffer(unsigned char* buffer)
                 }
             }
 
-            sampleMic  = (int)((signed char) buffer[b++]) << 8;
-            sampleMic += (int)((unsigned char)buffer[b++]);
+            // sampleMic
+            b+=2;
+
             m_sampleTxCount++;
 
             if (m_sampleTxCount >= 63) // 63 samples per 512 byte Tx block

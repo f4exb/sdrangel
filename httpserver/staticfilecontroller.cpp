@@ -35,7 +35,7 @@ StaticFileController::StaticFileController(QSettings* settings, QObject* parent)
     maxCachedFileSize=settings->value("maxCachedFileSize","65536").toInt();
     cache.setMaxCost(settings->value("cacheSize","1000000").toInt());
     cacheTimeout=settings->value("cacheTime","60000").toInt();
-    qDebug("StaticFileController: cache timeout=%i, size=%i",cacheTimeout,cache.maxCost());
+    qDebug("StaticFileController: cache timeout=%i, size=%i",cacheTimeout,(int)cache.maxCost());
 }
 
 StaticFileController::StaticFileController(const HttpDocrootSettings& settings, QObject* parent)
@@ -56,7 +56,7 @@ StaticFileController::StaticFileController(const HttpDocrootSettings& settings, 
     maxCachedFileSize=settings.maxCachedFileSize;
     cache.setMaxCost(settings.cacheSize);
     cacheTimeout=settings.cacheTime;
-    qDebug("StaticFileController: cache timeout=%i, size=%i",cacheTimeout,cache.maxCost());
+    qDebug("StaticFileController: cache timeout=%i, size=%i",cacheTimeout,(int)cache.maxCost());
 }
 
 void StaticFileController::service(HttpRequest& request, HttpResponse& response)

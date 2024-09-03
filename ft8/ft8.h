@@ -85,8 +85,9 @@ struct FT8_API cdecode
 // total transmission time is 12.64 seconds
 
 // tunable parameters
-struct FT8_API FT8Params
+class FT8_API FT8Params
 {
+public:
     int nthreads;            // number of parallel threads, for multi-core
     int npasses_one;         // number of spectral subtraction passes
     int npasses_two;         // number of spectral subtraction passes

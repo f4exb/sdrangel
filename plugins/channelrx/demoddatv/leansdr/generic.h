@@ -544,6 +544,7 @@ struct serializer : runnable
         in(_in),
         out(_out, nout)
     {
+        (void)sch;
         if (nin * sizeof(Tin) != nout * sizeof(Tout)) {
             fail("serializer: incompatible sizes");
         }

@@ -235,7 +235,6 @@ private:
     QRecursiveMutex m_settingsMutex;
     uint64_t m_frequencyOffset;
     uint32_t m_basebandSampleRate;
-    double m_linearGain;
 
     QNetworkAccessManager *m_networkManager;
     QNetworkRequest m_networkRequest;

@@ -88,7 +88,6 @@ private:
     };
 
     ScopeVis* m_scopeSink;              // Scope GUI to display debug waveforms
-    PagerDemod *m_pagerDemod;
     PagerDemodSettings m_settings;
     ChannelAPI *m_channel;
     int m_channelSampleRate;

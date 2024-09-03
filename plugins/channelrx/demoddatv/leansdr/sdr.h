@@ -414,7 +414,6 @@ struct simple_agc : runnable
             float gain = estimated ? out_rms / sqrtf(estimated) : 0;
             pin = in.rd();
             std::complex<T> *pout = out.wr();
-            float bwcomp = 1 - bw;
 
             for (; pin < pend; ++pin, ++pout)
             {

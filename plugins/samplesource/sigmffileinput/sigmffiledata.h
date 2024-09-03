@@ -64,8 +64,9 @@ struct SigMFFileDataType
     }
 };
 
-struct SigMFFileMetaInfo
+class SigMFFileMetaInfo
 {
+public:
     // core
     QString m_dataTypeStr;
     SigMFFileDataType m_dataType;
@@ -153,8 +154,9 @@ struct SigMFFileMetaInfo
     }
 };
 
-struct SigMFFileCapture
+class SigMFFileCapture
 {
+public:
     uint64_t m_tsms;            //!< Unix timestamp in milliseconds
     uint64_t m_centerFrequency; //!< Center frequency in Hz
     uint64_t m_sampleStart;     //!< Sample index at which capture start

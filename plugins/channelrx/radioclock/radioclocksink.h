@@ -86,7 +86,6 @@ private:
     };
 
     ScopeVis* m_scopeSink;    // Scope GUI to display debug waveforms
-    RadioClock *m_radioClock;
     RadioClockSettings m_settings;
     ChannelAPI *m_channel;
     int m_channelSampleRate;

@@ -58,7 +58,7 @@ struct bitvect
         for (int i = 0; i < nw; ++i)
             v[i] = a.v[i];
         if (M < N)
-            for (int i = a.NW; i < NW; ++i)
+            for (size_t i = a.NW; i < NW; ++i)
                 v[i] = 0;
         if (M > N)
             truncate_to_N();

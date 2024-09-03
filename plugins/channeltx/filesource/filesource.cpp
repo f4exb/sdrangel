@@ -54,8 +54,7 @@ FileSource::FileSource(DeviceAPI *deviceAPI) :
     ChannelAPI(m_channelIdURI, ChannelAPI::StreamSingleSource),
     m_deviceAPI(deviceAPI),
 	m_frequencyOffset(0),
-	m_basebandSampleRate(0),
-    m_linearGain(0.0)
+	m_basebandSampleRate(0)
 {
     setObjectName(m_channelId);
 

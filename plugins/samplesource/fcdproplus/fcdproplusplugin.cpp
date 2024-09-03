@@ -40,8 +40,6 @@ const PluginDescriptor FCDProPlusPlugin::m_pluginDescriptor = {
 	QStringLiteral("https://github.com/f4exb/sdrangel")
 };
 
-static constexpr const char* const m_deviceTypeID = FCDPROPLUS_DEVICE_TYPE_ID;
-
 FCDProPlusPlugin::FCDProPlusPlugin(QObject* parent) :
 	QObject(parent)
 {

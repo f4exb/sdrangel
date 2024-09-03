@@ -50,7 +50,6 @@ public:
 
 private:
 
-    FreqScanner *m_freqScanner;
     FreqScannerSettings m_settings;
     ChannelAPI *m_channel;
     int m_channelSampleRate;

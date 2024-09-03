@@ -42,7 +42,7 @@ struct LocalSinkSettings
     uint32_t m_log2FFT;
     FFTWindow::Function m_fftWindow;
     bool m_reverseFilter;
-    static const uint32_t m_maxFFTBands = 20;
+    uint32_t m_maxFFTBands;
     std::vector<std::pair<float, float>> m_fftBands;
     int m_streamIndex; //!< MIMO channel. Not relevant when connected to SI (single Rx).
     bool m_useReverseAPI;

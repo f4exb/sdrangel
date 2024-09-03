@@ -73,7 +73,6 @@ private:
     unsigned int m_nbCaptures;
     SampleSimpleFifo m_preRecordBuffer;
     unsigned int m_preRecordFill;
-    float m_squelchLevel;
     SpectrumVis* m_spectrumSink;
     MessageQueue *m_msgQueueToGUI;
     bool m_recordEnabled;

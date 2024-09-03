@@ -26,7 +26,6 @@
 
 HeatMapSink::HeatMapSink(HeatMap *heatMap) :
         m_scopeSink(nullptr),
-        m_heatMap(heatMap),
         m_channelSampleRate(10000),
         m_channelFrequencyOffset(0),
         m_magsq(0.0),
@@ -37,6 +36,8 @@ HeatMapSink::HeatMapSink(HeatMap *heatMap) :
         m_sampleBufferSize(1000),
         m_sampleBufferIndex(0)
 {
+    (void)heatMap;
+
     resetMagLevels();
     m_sampleBuffer.resize(m_sampleBufferSize);
 

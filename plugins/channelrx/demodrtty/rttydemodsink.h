@@ -83,7 +83,6 @@ private:
     };
 
     ScopeVis* m_scopeSink;    // Scope GUI to display baseband waveform
-    RttyDemod *m_rttyDemod;
     RttyDemodSettings m_settings;
     ChannelAPI *m_channel;
     int m_channelSampleRate;

@@ -27,6 +27,7 @@
 #include <QDateTime>
 
 #include "util/messagequeue.h"
+#include "util/message.h"
 #include "androidsdrdriverinputsettings.h"
 #include "../../channelrx/remotetcpsink/remotetcpprotocol.h"
 

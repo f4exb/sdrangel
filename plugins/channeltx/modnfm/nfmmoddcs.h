@@ -33,7 +33,6 @@ public:
     int next(); //!< +1/-1 sample
 
 private:
-    int m_shift; //!< current frequency shift: -1 or 1
     int m_dcsWord[23]; //!< current DCS word in transmit order including parity and filler 11 + 3 + 9
     float m_step;
     bool m_positive;

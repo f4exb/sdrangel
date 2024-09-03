@@ -467,7 +467,6 @@ void RDSParser::decode_type0(unsigned int *group, bool B)
 {
 	unsigned int af_code_1 = 0;
 	unsigned int af_code_2 = 0;
-	unsigned int  no_af    = 0;
 	double af_1            = 0;
 	double af_2            = 0;
 
@@ -534,7 +533,7 @@ void RDSParser::decode_type0(unsigned int *group, bool B)
             // @TODO: Find proper header or STL on OSX
 			auto res = m_g0_alt_freq.insert(af_1/1e3);
 			m_g0_af_updated = m_g0_af_updated || res.second;
-			no_af += 1;
+			// no_af += 1;
 		}
 
 		if (af_2)
@@ -542,7 +541,7 @@ void RDSParser::decode_type0(unsigned int *group, bool B)
             // @TODO: Find proper header or STL on OSX
             auto res = m_g0_alt_freq.insert(af_2/1e3);
             m_g0_af_updated = m_g0_af_updated || res.second;
-			no_af += 2;
+			// no_af += 2;
 		}
 
 		/*

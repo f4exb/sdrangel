@@ -31,7 +31,6 @@
 ILSDemodSink::ILSDemodSink(ILSDemod *ilsDemod) :
         m_spectrumSink(nullptr),
         m_scopeSink(nullptr),
-        m_ilsDemod(ilsDemod),
         m_channel(nullptr),
         m_channelSampleRate(ILSDemodSettings::ILSDEMOD_CHANNEL_SAMPLE_RATE),
         m_channelFrequencyOffset(0),
@@ -51,6 +50,8 @@ ILSDemodSink::ILSDemodSink(ILSDemod *ilsDemod) :
         m_audioFifo(48000),
         m_sampleBufferIndex(0)
 {
+	(void)ilsDemod;
+
 	m_audioBuffer.resize(1<<14);
 	m_audioBufferFill = 0;
 

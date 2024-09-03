@@ -239,7 +239,7 @@ constexpr T to_int(uint8_t v)
 {
     constexpr auto MAX_LOCAL_INPUT = (1 << (n - 1));
     constexpr auto NEGATIVE_OFFSET = std::numeric_limits<typename std::make_unsigned<T>::type>::max() - (MAX_LOCAL_INPUT - 1);
-    T r = v & (1 << (n - 1)) ? NEGATIVE_OFFSET : 0;
+    T r = v & (1 << (n - 1)) ? (T)NEGATIVE_OFFSET : 0;
     return r + (v & (MAX_LOCAL_INPUT - 1));
 }
 

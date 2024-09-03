@@ -488,7 +488,6 @@ void DABDemodSink::processOneAudioSample(Complex &ci)
 }
 
 DABDemodSink::DABDemodSink(DABDemod *packetDemod) :
-        m_dabDemod(packetDemod),
         m_audioSampleRate(48000),
         m_dabAudioSampleRate(10000), // Unused value to begin with
         m_channelSampleRate(DABDEMOD_CHANNEL_SAMPLE_RATE),
@@ -500,6 +499,8 @@ DABDemodSink::DABDemodSink(DABDemod *packetDemod) :
         m_messageQueueToChannel(nullptr),
         m_audioFifo(48000)
 {
+    (void)packetDemod;
+
     m_audioBuffer.resize(1<<14);
     m_audioBufferFill = 0;
 

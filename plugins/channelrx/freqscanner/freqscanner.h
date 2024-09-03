@@ -389,7 +389,6 @@ private:
     qint64 m_activeFrequency;
     QDateTime m_minFFTStartTime;
     int m_scannerSampleRate;
-    bool m_stepping;
     qint64 m_stepStartFrequency;
     qint64 m_stepStopFrequency;
     QList<MsgScanResult::ScanResult> m_scanResults;

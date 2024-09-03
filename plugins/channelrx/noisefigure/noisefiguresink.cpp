@@ -26,7 +26,6 @@
 #include "noisefiguresink.h"
 
 NoiseFigureSink::NoiseFigureSink(NoiseFigure *noiseFigure) :
-        m_noiseFigure(noiseFigure),
         m_channelSampleRate(48000),
         m_fftSequence(-1),
         m_fft(nullptr),
@@ -39,6 +38,8 @@ NoiseFigureSink::NoiseFigureSink(NoiseFigure *noiseFigure) :
         m_count(0),
         m_enabled(false)
 {
+    (void)noiseFigure;
+
     m_magsq = 0.0;
 
     applySettings(m_settings, true);

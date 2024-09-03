@@ -88,8 +88,6 @@ void PacketDemodSink::feed(const SampleVector::const_iterator& begin, const Samp
 
 void PacketDemodSink::processOneSample(Complex &ci)
 {
-    Complex ca;
-
     // FM demodulation
     double magsqRaw;
     Real deviation;
