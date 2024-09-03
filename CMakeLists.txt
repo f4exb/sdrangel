@@ -587,6 +587,7 @@ elseif(ANDROID)
       CACHE INTERNAL ""
     )
   endif()
+  add_compile_definitions(ANDROID)
 endif()
 
 # When building a bundle on MacOS, we want to keep build paths in the library
@@ -667,6 +668,7 @@ if (BUILD_GUI)
         if (ENABLE_QT6)
             find_package(Qt6
                            REQUIRED COMPONENTS
+                            Location
                             OpenGL
                             OpenGLWidgets
                             Quick
