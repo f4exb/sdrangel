@@ -26,7 +26,7 @@ include_directories(
     ${Boost_INCLUDE_DIRS}
 )
 
-set(TARGET_NAME demodatv)
+set(TARGET_NAME ${PLUGINS_PREFIX}demodatv)
 set(INSTALL_FOLDER ${INSTALL_PLUGINS_DIR})
 
 add_library(${TARGET_NAME} SHARED

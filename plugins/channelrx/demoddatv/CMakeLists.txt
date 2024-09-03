@@ -68,7 +68,7 @@ include_directories(
     ${CMAKE_SOURCE_DIR}/swagger/sdrangel/code/qt5/client
 )
 
-set(TARGET_NAME demoddatv)
+set(TARGET_NAME ${PLUGINS_PREFIX}demoddatv)
 set(INSTALL_FOLDER ${INSTALL_PLUGINS_DIR})
 
 add_library(${TARGET_NAME} SHARED

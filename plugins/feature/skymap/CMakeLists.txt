@@ -49,7 +49,7 @@ if(NOT SERVER_MODE)
         webview.h
     )
 
-    set(TARGET_NAME featureskymap)
+    set(TARGET_NAME ${PLUGINS_PREFIX}featureskymap)
     set(TARGET_LIB_GUI "sdrgui")
     set(INSTALL_FOLDER ${INSTALL_PLUGINS_DIR})
 
@@ -61,7 +61,7 @@ if(NOT SERVER_MODE)
         set(TARGET_LIB "Qt::Widgets" Qt::Positioning Qt::Location)
     endif()
 else()
-    set(TARGET_NAME featureskymapsrv)
+    set(TARGET_NAME ${PLUGINSSRV_PREFIX}featureskymapsrv)
     set(TARGET_LIB "")
     set(TARGET_LIB_GUI "")
     set(INSTALL_FOLDER ${INSTALL_PLUGINSSRV_DIR})
