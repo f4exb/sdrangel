@@ -269,6 +269,14 @@ else()
 endif()
 set(INSTALL_PLUGINS_DIR "${INSTALL_LIB_DIR}/plugins")
 set(INSTALL_PLUGINSSRV_DIR "${INSTALL_LIB_DIR}/pluginssrv")
+
+if(ANDROID)
+  set(PLUGINS_PREFIX    "sdrangel_plugins_")
+  set(PLUGINSSRV_PREFIX "sdrangel_pluginssrv_")
+else()
+  set(PLUGINS_PREFIX    "")
+  set(PLUGINSSRV_PREFIX "")
+endif()
 set(EXTERNAL_BUILD_LIBRARIES "${CMAKE_BINARY_DIR}/external")
 
 # custom libraries

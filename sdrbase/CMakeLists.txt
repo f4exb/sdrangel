@@ -709,6 +709,10 @@ if(ANDROID)
     target_link_libraries(sdrbase log)
 endif()
 
+target_compile_definitions(sdrbase PRIVATE
+	-DPLUGIN_PREFIX=\"${PLUGIN_PREFIX}\"
+)
+
 install(TARGETS sdrbase DESTINATION ${INSTALL_LIB_DIR})
 
 if(WIN32 AND Qt6_FOUND)
