@@ -82,7 +82,7 @@ if(NOT SERVER_MODE)
         czml.h
     )
 
-    set(TARGET_NAME map)
+    set(TARGET_NAME ${PLUGINS_PREFIX}map)
     set(TARGET_LIB_GUI "sdrgui")
     set(INSTALL_FOLDER ${INSTALL_PLUGINS_DIR})
 
@@ -94,7 +94,7 @@ if(NOT SERVER_MODE)
         set(TARGET_LIB "Qt::Widgets" Qt::Quick Qt::QuickWidgets Qt::Svg Qt::Positioning Qt::Location)
     endif()
 else()
-    set(TARGET_NAME mapsrv)
+    set(TARGET_NAME ${PLUGINSSRV_PREFIX}mapsrv)
     set(TARGET_LIB "")
     set(TARGET_LIB_GUI "")
     set(INSTALL_FOLDER ${INSTALL_PLUGINSSRV_DIR})

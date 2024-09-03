@@ -75,9 +75,15 @@ void PluginManager::loadPluginsPart(const QString& pluginsSubDir)
 {
     QString applicationDirPath = QCoreApplication::instance()->applicationDirPath();
     QStringList PluginsPath;
+    QStringList filter;
 
     // NOTE: not the best solution but for now this is
     // on make install [PREFIX]/bin and [PREFIX]/lib/sdrangel
+#if defined(ANDROID)
+    PluginsPath = QStringList({applicationDirPath});
+    filter = QStringList({"libsdrangel_" + pluginsSubDir + "_*.so"});
+#else
+    filter = QStringList({"*"});
     PluginsPath << applicationDirPath + "/../" + LIB + "/sdrangel/" + pluginsSubDir;
     // on build
     PluginsPath << applicationDirPath + "/" + LIB + "/" + pluginsSubDir;
@@ -90,8 +96,7 @@ void PluginManager::loadPluginsPart(const QString& pluginsSubDir)
     // By default it searches in `$applicationDir/../lib/SoapySDR/`, which on Windows
     // is incorrect as both `bin` and `lib` dir are set to root application dir.
     qputenv("SOAPY_SDR_ROOT", applicationDirPath.toLocal8Bit());
-#elif defined(ANDROID)
-    PluginsPath = QStringList({applicationDirPath});
+#endif
 #endif
 
     // NOTE: exit on the first folder found
@@ -105,7 +110,7 @@ void PluginManager::loadPluginsPart(const QString& pluginsSubDir)
         }
 
         found = true;
-        loadPluginsDir(d);
+        loadPluginsDir(d, filter);
         break;
     }
 
@@ -211,11 +216,11 @@ void PluginManager::registerFeature(const QString& featureIdURI, const QString& 
 	m_featureRegistrations.append(PluginAPI::FeatureRegistration(featureIdURI, featureId, plugin));
 }
 
-void PluginManager::loadPluginsDir(const QDir& dir)
+void PluginManager::loadPluginsDir(const QDir& dir, const QStringList& filter)
 {
     QDir pluginsDir(dir);
 
-    foreach (QString fileName, pluginsDir.entryList(QDir::Files))
+    foreach (QString fileName, pluginsDir.entryList(filter, QDir::Files))
     {
         if (QLibrary::isLibrary(fileName))
         {

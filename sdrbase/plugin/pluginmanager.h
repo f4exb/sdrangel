@@ -162,7 +162,7 @@ private:
     static const QString m_testMIMOHardwareID;       //!< Test MIMO hardware ID
     static const QString m_testMIMODeviceTypeID;     //!< Test MIMO plugin ID
 
-	void loadPluginsDir(const QDir& dir);
+	void loadPluginsDir(const QDir& dir, const QStringList& filter);
 };
 
 static inline bool operator<(const PluginManager::Plugin& a, const PluginManager::Plugin& b)

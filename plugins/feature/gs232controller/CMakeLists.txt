@@ -48,7 +48,7 @@ if(NOT SERVER_MODE)
         inputcontrollersettings.h
     )
 
-    set(TARGET_NAME featuregs232controller)
+    set(TARGET_NAME ${PLUGINS_PREFIX}featuregs232controller)
     set(TARGET_LIB Qt::Widgets)
     set(TARGET_LIB_GUI "sdrgui")
     set(INSTALL_FOLDER ${INSTALL_PLUGINS_DIR})
@@ -68,7 +68,7 @@ if(NOT SERVER_MODE)
     endif()
 
 else()
-    set(TARGET_NAME featuregs232controllersrv)
+    set(TARGET_NAME ${PLUGINSSRV_PREFIX}featuregs232controllersrv)
     set(TARGET_LIB "")
     set(TARGET_LIB_GUI "")
     set(INSTALL_FOLDER ${INSTALL_PLUGINSSRV_DIR})
