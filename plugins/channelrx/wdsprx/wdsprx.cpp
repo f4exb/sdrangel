@@ -84,6 +84,7 @@ WDSPRx::WDSPRx(DeviceAPI *deviceAPI) :
 
 WDSPRx::~WDSPRx()
 {
+    qDebug("WDSPRx::~WDSPRx");
     QObject::disconnect(
         m_networkManager,
         &QNetworkAccessManager::finished,
@@ -94,7 +95,8 @@ WDSPRx::~WDSPRx()
 	m_deviceAPI->removeChannelSinkAPI(this);
     m_deviceAPI->removeChannelSink(this);
 
-    stop();
+    WDSPRx::stop();
+    qDebug("WDSPRx::~WDSPRx: emd");
 }
 
 void WDSPRx::setDeviceAPI(DeviceAPI *deviceAPI)
@@ -196,7 +198,7 @@ bool WDSPRx::handleMessage(const Message& cmd)
 {
     if (MsgConfigureWDSPRx::match(cmd))
     {
-        MsgConfigureWDSPRx& cfg = (MsgConfigureWDSPRx&) cmd;
+        auto& cfg = (const MsgConfigureWDSPRx&) cmd;
         qDebug("WDSPRx::handleMessage: MsgConfigureWDSPRx");
 
         applySettings(cfg.getSettings(), cfg.getForce());
@@ -206,7 +208,7 @@ bool WDSPRx::handleMessage(const Message& cmd)
     else if (DSPSignalNotification::match(cmd))
     {
         qDebug() << "WDSPRx::handleMessage: DSPSignalNotification";
-        DSPSignalNotification& notif = (DSPSignalNotification&) cmd;
+        auto& notif = (const DSPSignalNotification&) cmd;
         m_basebandSampleRate = notif.getSampleRate();
         // Forward to the sink
         if (m_running) {
@@ -235,7 +237,7 @@ bool WDSPRx::handleMessage(const Message& cmd)
 void WDSPRx::setCenterFrequency(qint64 frequency)
 {
     WDSPRxSettings settings = m_settings;
-    settings.m_inputFrequencyOffset = frequency;
+    settings.m_inputFrequencyOffset = (qint32) frequency;
     applySettings(settings, false);
 
     if (m_guiMessageQueue) // forward to GUI if any
@@ -360,7 +362,7 @@ void WDSPRx::applySettings(const WDSPRxSettings& settings, bool force)
     QList<ObjectPipe*> pipes;
     MainCore::instance()->getMessagePipes().getMessagePipes(this, "settings", pipes);
 
-    if (pipes.size() > 0) {
+    if (!pipes.empty()) {
         sendChannelSettings(pipes, reverseAPIKeys, settings, force);
     }
 
@@ -389,12 +391,12 @@ bool WDSPRx::deserialize(const QByteArray& data)
     }
 }
 
-void WDSPRx::sendSampleRateToDemodAnalyzer()
+void WDSPRx::sendSampleRateToDemodAnalyzer() const
 {
     QList<ObjectPipe*> pipes;
     MainCore::instance()->getMessagePipes().getMessagePipes(this, "reportdemod", pipes);
 
-    if (pipes.size() > 0)
+    if (!pipes.empty())
     {
         for (const auto& pipe: pipes)
         {
@@ -463,7 +465,7 @@ void WDSPRx::webapiUpdateChannelSettings(
         SWGSDRangel::SWGChannelSettings& response)
 {
     if (channelSettingsKeys.contains("inputFrequencyOffset")) {
-        settings.m_inputFrequencyOffset = response.getWdspRxSettings()->getInputFrequencyOffset();
+        settings.m_inputFrequencyOffset = (qint32) response.getWdspRxSettings()->getInputFrequencyOffset();
     }
     if (channelSettingsKeys.contains("profileIndex")) {
         settings.m_profileIndex = response.getWdspRxSettings()->getProfileIndex();
@@ -669,13 +671,13 @@ void WDSPRx::webapiUpdateChannelSettings(
         settings.m_reverseAPIAddress = *response.getWdspRxSettings()->getReverseApiAddress();
     }
     if (channelSettingsKeys.contains("reverseAPIPort")) {
-        settings.m_reverseAPIPort = response.getWdspRxSettings()->getReverseApiPort();
+        settings.m_reverseAPIPort = (uint16_t) response.getWdspRxSettings()->getReverseApiPort();
     }
     if (channelSettingsKeys.contains("reverseAPIDeviceIndex")) {
-        settings.m_reverseAPIDeviceIndex = response.getWdspRxSettings()->getReverseApiDeviceIndex();
+        settings.m_reverseAPIDeviceIndex = (uint16_t) response.getWdspRxSettings()->getReverseApiDeviceIndex();
     }
     if (channelSettingsKeys.contains("reverseAPIChannelIndex")) {
-        settings.m_reverseAPIChannelIndex = response.getWdspRxSettings()->getReverseApiChannelIndex();
+        settings.m_reverseAPIChannelIndex = (uint16_t) response.getWdspRxSettings()->getReverseApiChannelIndex();
     }
     if (settings.m_spectrumGUI && channelSettingsKeys.contains("spectrumConfig")) {
         settings.m_spectrumGUI->updateFrom(channelSettingsKeys, response.getWdspRxSettings()->getSpectrumConfig());
@@ -717,11 +719,11 @@ void WDSPRx::webapiFormatChannelSettings(SWGSDRangel::SWGChannelSettings& respon
     response.getWdspRxSettings()->setDnb(settings.m_dnb ? 1 : 0);
     response.getWdspRxSettings()->setNbScheme((int) settings.m_nbScheme);
     response.getWdspRxSettings()->setNb2Mode((int) settings.m_nb2Mode);
-    response.getWdspRxSettings()->setNbSlewTime(settings.m_nbSlewTime);
-    response.getWdspRxSettings()->setNbLeadTime(settings.m_nbLeadTime);
-    response.getWdspRxSettings()->setNbLagTime(settings.m_nbLagTime);
+    response.getWdspRxSettings()->setNbSlewTime((float) settings.m_nbSlewTime);
+    response.getWdspRxSettings()->setNbLeadTime((float) settings.m_nbLeadTime);
+    response.getWdspRxSettings()->setNbLagTime((float) settings.m_nbLagTime);
     response.getWdspRxSettings()->setNbThreshold(settings.m_nbThreshold);
-    response.getWdspRxSettings()->setNbAvgTime(settings.m_nbAvgTime);
+    response.getWdspRxSettings()->setNbAvgTime((float) settings.m_nbAvgTime);
     response.getWdspRxSettings()->setDnr(settings.m_dnr ? 1 : 0);
     response.getWdspRxSettings()->setAnf(settings.m_anf ? 1 : 0);
     response.getWdspRxSettings()->setNrScheme((int) settings.m_nrScheme);
@@ -731,22 +733,22 @@ void WDSPRx::webapiFormatChannelSettings(SWGSDRangel::SWGChannelSettings& respon
     response.getWdspRxSettings()->setNr2ArtifactReduction(settings.m_nr2ArtifactReduction ? 1 : 0);
     response.getWdspRxSettings()->setAmFadeLevel(settings.m_amFadeLevel ? 1 : 0);
     response.getWdspRxSettings()->setCwPeaking(settings.m_cwPeaking ? 1 : 0);
-    response.getWdspRxSettings()->setCwPeakFrequency(settings.m_cwPeakFrequency);
-    response.getWdspRxSettings()->setCwBandwidth(settings.m_cwBandwidth);
-    response.getWdspRxSettings()->setCwGain(settings.m_cwGain);
-    response.getWdspRxSettings()->setFmDeviation(settings.m_fmDeviation);
-    response.getWdspRxSettings()->setFmAfLow(settings.m_fmAFLow);
-    response.getWdspRxSettings()->setFmAfHigh(settings.m_fmAFHigh);
+    response.getWdspRxSettings()->setCwPeakFrequency((float) settings.m_cwPeakFrequency);
+    response.getWdspRxSettings()->setCwBandwidth((float) settings.m_cwBandwidth);
+    response.getWdspRxSettings()->setCwGain((float) settings.m_cwGain);
+    response.getWdspRxSettings()->setFmDeviation((float) settings.m_fmDeviation);
+    response.getWdspRxSettings()->setFmAfLow((float) settings.m_fmAFLow);
+    response.getWdspRxSettings()->setFmAfHigh((float) settings.m_fmAFHigh);
     response.getWdspRxSettings()->setFmAfLimiter(settings.m_fmAFLimiter ? 1 : 0);
-    response.getWdspRxSettings()->setFmAfLimiterGain(settings.m_fmAFLimiterGain);
+    response.getWdspRxSettings()->setFmAfLimiterGain((float) settings.m_fmAFLimiterGain);
     response.getWdspRxSettings()->setFmCtcssNotch(settings.m_fmCTCSSNotch ? 1 : 0);
-    response.getWdspRxSettings()->setFmCtcssNotchFrequency(settings.m_fmCTCSSNotchFrequency);
+    response.getWdspRxSettings()->setFmCtcssNotchFrequency((float) settings.m_fmCTCSSNotchFrequency);
     response.getWdspRxSettings()->setSquelch(settings.m_squelch ? 1 : 0);
     response.getWdspRxSettings()->setSquelchThreshold(settings.m_squelchThreshold);
     response.getWdspRxSettings()->setSquelchMode((int) settings.m_squelchMode);
-    response.getWdspRxSettings()->setSsqlTauMute(settings.m_ssqlTauMute);
-    response.getWdspRxSettings()->setSsqlTauUnmute(settings.m_ssqlTauUnmute);
-    response.getWdspRxSettings()->setAmsqMaxTail(settings.m_amsqMaxTail);
+    response.getWdspRxSettings()->setSsqlTauMute((float) settings.m_ssqlTauMute);
+    response.getWdspRxSettings()->setSsqlTauUnmute((float) settings.m_ssqlTauUnmute);
+    response.getWdspRxSettings()->setAmsqMaxTail((float) settings.m_amsqMaxTail);
     response.getWdspRxSettings()->setEqualizer(settings.m_equalizer ? 1 : 0);
 
     if (!response.getWdspRxSettings()->getEqF()) {
@@ -770,11 +772,11 @@ void WDSPRx::webapiFormatChannelSettings(SWGSDRangel::SWGChannelSettings& respon
     }
 
     response.getWdspRxSettings()->setRit(settings.m_rit ? 1 : 0);
-    response.getWdspRxSettings()->setRitFrequency(settings.m_ritFrequency);
+    response.getWdspRxSettings()->setRitFrequency((float) settings.m_ritFrequency);
     response.getWdspRxSettings()->setSpanLog2(settings.m_profiles[settings.m_profileIndex].m_spanLog2);
     response.getWdspRxSettings()->setRfBandwidth(settings.m_profiles[settings.m_profileIndex].m_highCutoff);
     response.getWdspRxSettings()->setLowCutoff(settings.m_profiles[settings.m_profileIndex].m_lowCutoff);
-    response.getWdspRxSettings()->setFftWindow((int) settings.m_profiles[settings.m_profileIndex].m_fftWindow);
+    response.getWdspRxSettings()->setFftWindow(settings.m_profiles[settings.m_profileIndex].m_fftWindow);
     response.getWdspRxSettings()->setRgbColor(settings.m_rgbColor);
 
     if (response.getWdspRxSettings()->getTitle()) {
@@ -810,7 +812,7 @@ void WDSPRx::webapiFormatChannelSettings(SWGSDRangel::SWGChannelSettings& respon
         }
         else
         {
-            SWGSDRangel::SWGGLSpectrum *swgGLSpectrum = new SWGSDRangel::SWGGLSpectrum();
+            auto *swgGLSpectrum = new SWGSDRangel::SWGGLSpectrum();
             settings.m_spectrumGUI->formatTo(swgGLSpectrum);
             response.getWdspRxSettings()->setSpectrumConfig(swgGLSpectrum);
         }
@@ -824,7 +826,7 @@ void WDSPRx::webapiFormatChannelSettings(SWGSDRangel::SWGChannelSettings& respon
         }
         else
         {
-            SWGSDRangel::SWGChannelMarker *swgChannelMarker = new SWGSDRangel::SWGChannelMarker();
+            auto *swgChannelMarker = new SWGSDRangel::SWGChannelMarker();
             settings.m_channelMarker->formatTo(swgChannelMarker);
             response.getWdspRxSettings()->setChannelMarker(swgChannelMarker);
         }
@@ -838,7 +840,7 @@ void WDSPRx::webapiFormatChannelSettings(SWGSDRangel::SWGChannelSettings& respon
         }
         else
         {
-            SWGSDRangel::SWGRollupState *swgRollupState = new SWGSDRangel::SWGRollupState();
+            auto *swgRollupState = new SWGSDRangel::SWGRollupState();
             settings.m_rollupState->formatTo(swgRollupState);
             response.getWdspRxSettings()->setRollupState(swgRollupState);
         }
@@ -847,11 +849,12 @@ void WDSPRx::webapiFormatChannelSettings(SWGSDRangel::SWGChannelSettings& respon
 
 void WDSPRx::webapiFormatChannelReport(SWGSDRangel::SWGChannelReport& response)
 {
-    double magsqAvg, magsqPeak;
+    double magsqAvg;
+    double magsqPeak;
     int nbMagsqSamples;
     getMagSqLevels(magsqAvg, magsqPeak, nbMagsqSamples);
 
-    response.getSsbDemodReport()->setChannelPowerDb(CalcDb::dbPower(magsqAvg));
+    response.getSsbDemodReport()->setChannelPowerDb((float) CalcDb::dbPower(magsqAvg));
 
     if (m_running)
     {
@@ -861,9 +864,9 @@ void WDSPRx::webapiFormatChannelReport(SWGSDRangel::SWGChannelReport& response)
     }
 }
 
-void WDSPRx::webapiReverseSendSettings(QList<QString>& channelSettingsKeys, const WDSPRxSettings& settings, bool force)
+void WDSPRx::webapiReverseSendSettings(const QList<QString>& channelSettingsKeys, const WDSPRxSettings& settings, bool force)
 {
-    SWGSDRangel::SWGChannelSettings *swgChannelSettings = new SWGSDRangel::SWGChannelSettings();
+    auto *swgChannelSettings = new SWGSDRangel::SWGChannelSettings();
     webapiFormatChannelSettings(channelSettingsKeys, swgChannelSettings, settings, force);
 
     QString channelSettingsURL = QString("http://%1:%2/sdrangel/deviceset/%3/channel/%4/settings")
@@ -874,8 +877,8 @@ void WDSPRx::webapiReverseSendSettings(QList<QString>& channelSettingsKeys, cons
     m_networkRequest.setUrl(QUrl(channelSettingsURL));
     m_networkRequest.setHeader(QNetworkRequest::ContentTypeHeader, "application/json");
 
-    QBuffer *buffer = new QBuffer();
-    buffer->open((QBuffer::ReadWrite));
+    auto *buffer = new QBuffer();
+    buffer->open(QBuffer::ReadWrite);
     buffer->write(swgChannelSettings->asJson().toUtf8());
     buffer->seek(0);
 
@@ -888,9 +891,9 @@ void WDSPRx::webapiReverseSendSettings(QList<QString>& channelSettingsKeys, cons
 
 void WDSPRx::sendChannelSettings(
     const QList<ObjectPipe*>& pipes,
-    QList<QString>& channelSettingsKeys,
+    const QList<QString>& channelSettingsKeys,
     const WDSPRxSettings& settings,
-    bool force)
+    bool force) const
 {
     qDebug("WDSPRx::sendChannelSettings: %d pipes", pipes.size());
 
@@ -900,7 +903,7 @@ void WDSPRx::sendChannelSettings(
 
         if (messageQueue)
         {
-            SWGSDRangel::SWGChannelSettings *swgChannelSettings = new SWGSDRangel::SWGChannelSettings();
+            auto *swgChannelSettings = new SWGSDRangel::SWGChannelSettings();
             webapiFormatChannelSettings(channelSettingsKeys, swgChannelSettings, settings, force);
             MainCore::MsgChannelSettings *msg = MainCore::MsgChannelSettings::create(
                 this,
@@ -914,11 +917,11 @@ void WDSPRx::sendChannelSettings(
 }
 
 void WDSPRx::webapiFormatChannelSettings(
-        QList<QString>& channelSettingsKeys,
+        const QList<QString>& channelSettingsKeys,
         SWGSDRangel::SWGChannelSettings *swgChannelSettings,
         const WDSPRxSettings& settings,
         bool force
-)
+) const
 {
     swgChannelSettings->setDirection(0); // Single sink (Rx)
     swgChannelSettings->setOriginatorChannelIndex(getIndexInDeviceSet());
@@ -978,19 +981,19 @@ void WDSPRx::webapiFormatChannelSettings(
         swgWDSPRxSettings->setNb2Mode((int) settings.m_nb2Mode);
     }
     if (channelSettingsKeys.contains("nbSlewTime")) {
-        swgWDSPRxSettings->setNbSlewTime(settings.m_nbSlewTime);
+        swgWDSPRxSettings->setNbSlewTime((float) settings.m_nbSlewTime);
     }
     if (channelSettingsKeys.contains("nbLeadTime")) {
-        swgWDSPRxSettings->setNbLeadTime(settings.m_nbSlewTime);
+        swgWDSPRxSettings->setNbLeadTime((float) settings.m_nbSlewTime);
     }
     if (channelSettingsKeys.contains("nbLagTime")) {
-        swgWDSPRxSettings->setNbLagTime(settings.m_nbLagTime);
+        swgWDSPRxSettings->setNbLagTime((float) settings.m_nbLagTime);
     }
     if (channelSettingsKeys.contains("nbThreshold")) {
         swgWDSPRxSettings->setNbThreshold(settings.m_nbThreshold);
     }
     if (channelSettingsKeys.contains("nbAvgTime")) {
-        swgWDSPRxSettings->setNbAvgTime(settings.m_nbAvgTime);
+        swgWDSPRxSettings->setNbAvgTime((float) settings.m_nbAvgTime);
     }
     if (channelSettingsKeys.contains("dnr")) {
         swgWDSPRxSettings->setDnr(settings.m_dnr ? 1 : 0);
@@ -1020,34 +1023,34 @@ void WDSPRx::webapiFormatChannelSettings(
         swgWDSPRxSettings->setCwPeaking(settings.m_cwPeaking ? 1 : 0);
     }
     if (channelSettingsKeys.contains("cwPeakFrequency")) {
-        swgWDSPRxSettings->setCwPeakFrequency(settings.m_cwPeakFrequency);
+        swgWDSPRxSettings->setCwPeakFrequency((float) settings.m_cwPeakFrequency);
     }
     if (channelSettingsKeys.contains("cwBandwidth")) {
-        swgWDSPRxSettings->setCwBandwidth(settings.m_cwBandwidth);
+        swgWDSPRxSettings->setCwBandwidth((float) settings.m_cwBandwidth);
     }
     if (channelSettingsKeys.contains("cwGain")) {
-        swgWDSPRxSettings->setCwGain(settings.m_cwGain);
+        swgWDSPRxSettings->setCwGain((float) settings.m_cwGain);
     }
     if (channelSettingsKeys.contains("fmDeviation")) {
-        swgWDSPRxSettings->setFmDeviation(settings.m_fmDeviation);
+        swgWDSPRxSettings->setFmDeviation((float) settings.m_fmDeviation);
     }
     if (channelSettingsKeys.contains("fmAFLow")) {
-        swgWDSPRxSettings->setFmAfLow(settings.m_fmAFLow);
+        swgWDSPRxSettings->setFmAfLow((float) settings.m_fmAFLow);
     }
     if (channelSettingsKeys.contains("fmAFHigh")) {
-        swgWDSPRxSettings->setFmAfHigh(settings.m_fmAFHigh);
+        swgWDSPRxSettings->setFmAfHigh((float) settings.m_fmAFHigh);
     }
     if (channelSettingsKeys.contains("fmAFLimiter")) {
         swgWDSPRxSettings->setFmAfLimiter(settings.m_fmAFLimiter ? 1 : 0);
     }
     if (channelSettingsKeys.contains("fmAFLimiterGain")) {
-        swgWDSPRxSettings->setFmAfLimiterGain(settings.m_fmAFLimiterGain);
+        swgWDSPRxSettings->setFmAfLimiterGain((float) settings.m_fmAFLimiterGain);
     }
     if (channelSettingsKeys.contains("fmCTCSSNotch")) {
         swgWDSPRxSettings->setFmCtcssNotch(settings.m_fmCTCSSNotch ? 1 : 0);
     }
     if (channelSettingsKeys.contains("fmCTCSSNotchFrequency")) {
-        swgWDSPRxSettings->setFmCtcssNotchFrequency(settings.m_fmCTCSSNotchFrequency);
+        swgWDSPRxSettings->setFmCtcssNotchFrequency((float) settings.m_fmCTCSSNotchFrequency);
     }
     if (channelSettingsKeys.contains("squelch")) {
         swgWDSPRxSettings->setSquelch(settings.m_squelch ? 1 : 0);
@@ -1059,13 +1062,13 @@ void WDSPRx::webapiFormatChannelSettings(
         swgWDSPRxSettings->setSquelchMode((int) settings.m_squelchMode);
     }
     if (channelSettingsKeys.contains("ssqlTauMute")) {
-        swgWDSPRxSettings->setSsqlTauMute(settings.m_ssqlTauMute);
+        swgWDSPRxSettings->setSsqlTauMute((float) settings.m_ssqlTauMute);
     }
     if (channelSettingsKeys.contains("ssqlTauUnmute")) {
-        swgWDSPRxSettings->setSsqlTauUnmute(settings.m_ssqlTauUnmute);
+        swgWDSPRxSettings->setSsqlTauUnmute((float) settings.m_ssqlTauUnmute);
     }
     if (channelSettingsKeys.contains("amsqMaxTail")) {
-        swgWDSPRxSettings->setAmsqMaxTail(settings.m_amsqMaxTail);
+        swgWDSPRxSettings->setAmsqMaxTail((float) settings.m_amsqMaxTail);
     }
     if (channelSettingsKeys.contains("equalizer")) {
         swgWDSPRxSettings->setEqualizer(settings.m_equalizer ? 1 : 0);
@@ -1101,7 +1104,7 @@ void WDSPRx::webapiFormatChannelSettings(
         swgWDSPRxSettings->setRit(settings.m_rit ? 1 : 0);
     }
     if (channelSettingsKeys.contains("ritFrequency")) {
-        swgWDSPRxSettings->setRit(settings.m_ritFrequency);
+        swgWDSPRxSettings->setRit((qint32) settings.m_ritFrequency);
     }
     if (channelSettingsKeys.contains("spanLog2") || force) {
         swgWDSPRxSettings->setSpanLog2(settings.m_profiles[settings.m_profileIndex].m_spanLog2);
@@ -1113,7 +1116,7 @@ void WDSPRx::webapiFormatChannelSettings(
         swgWDSPRxSettings->setLowCutoff(settings.m_profiles[settings.m_profileIndex].m_lowCutoff);
     }
     if (channelSettingsKeys.contains("fftWindow") || force) {
-        swgWDSPRxSettings->setLowCutoff(settings.m_profiles[settings.m_profileIndex].m_fftWindow);
+        swgWDSPRxSettings->setLowCutoff((float) settings.m_profiles[settings.m_profileIndex].m_fftWindow);
     }
     if (channelSettingsKeys.contains("rgbColor") || force) {
         swgWDSPRxSettings->setRgbColor(settings.m_rgbColor);
@@ -1130,27 +1133,27 @@ void WDSPRx::webapiFormatChannelSettings(
 
     if (settings.m_spectrumGUI && (channelSettingsKeys.contains("spectrunConfig") || force))
     {
-        SWGSDRangel::SWGGLSpectrum *swgGLSpectrum = new SWGSDRangel::SWGGLSpectrum();
+        auto *swgGLSpectrum = new SWGSDRangel::SWGGLSpectrum();
         settings.m_spectrumGUI->formatTo(swgGLSpectrum);
         swgWDSPRxSettings->setSpectrumConfig(swgGLSpectrum);
     }
 
     if (settings.m_channelMarker && (channelSettingsKeys.contains("channelMarker") || force))
     {
-        SWGSDRangel::SWGChannelMarker *swgChannelMarker = new SWGSDRangel::SWGChannelMarker();
+        auto *swgChannelMarker = new SWGSDRangel::SWGChannelMarker();
         settings.m_channelMarker->formatTo(swgChannelMarker);
         swgWDSPRxSettings->setChannelMarker(swgChannelMarker);
     }
 
     if (settings.m_rollupState && (channelSettingsKeys.contains("rollupState") || force))
     {
-        SWGSDRangel::SWGRollupState *swgRolllupState = new SWGSDRangel::SWGRollupState();
+        auto *swgRolllupState = new SWGSDRangel::SWGRollupState();
         settings.m_rollupState->formatTo(swgRolllupState);
         swgWDSPRxSettings->setRollupState(swgRolllupState);
     }
 }
 
-void WDSPRx::networkManagerFinished(QNetworkReply *reply)
+void WDSPRx::networkManagerFinished(QNetworkReply *reply) const
 {
     QNetworkReply::NetworkError replyError = reply->error();
 

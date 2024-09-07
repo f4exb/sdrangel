@@ -56,7 +56,6 @@ class WDSPRxGUI : public ChannelGUI {
 
 public:
 	static WDSPRxGUI* create(PluginAPI* pluginAPI, DeviceUISet *deviceUISet, BasebandSampleSink *rxChannel);
-	virtual void destroy();
 
 	void resetToDefaults() final;
 	QByteArray serialize() const final;

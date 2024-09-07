@@ -43,7 +43,7 @@ RTLSDRGui::RTLSDRGui(DeviceUISet *deviceUISet, QWidget* parent) :
 	m_forceSettings(true),
 	m_settings(),
     m_sampleRateMode(true),
-	m_sampleSource(0)
+	m_sampleSource(nullptr)
 {
     m_deviceUISet = deviceUISet;
     setAttribute(Qt::WA_DeleteOnClose, true);
@@ -90,11 +90,6 @@ RTLSDRGui::~RTLSDRGui()
     qDebug("RTLSDRGui::~RTLSDRGui");
 	delete ui;
     qDebug("RTLSDRGui::~RTLSDRGui: end");
-}
-
-void RTLSDRGui::destroy()
-{
-	delete this;
 }
 
 void RTLSDRGui::resetToDefaults()
@@ -145,23 +140,23 @@ bool RTLSDRGui::handleMessage(const Message& message)
 {
 	if (RTLSDRInput::MsgConfigureRTLSDR::match(message))
 	{
-	    const RTLSDRInput::MsgConfigureRTLSDR& cfg = (RTLSDRInput::MsgConfigureRTLSDR&) message;
+        auto& cfg = (const RTLSDRInput::MsgConfigureRTLSDR&) message;
 
         if (cfg.getForce()) {
-    	    m_settings = cfg.getSettings();
+            m_settings = cfg.getSettings();
         } else {
             m_settings.applySettings(cfg.getSettingsKeys(), cfg.getSettings());
         }
 
-	    blockApplySettings(true);
-	    displayGains();
-	    displaySettings();
-	    blockApplySettings(false);
-	    return true;
+        blockApplySettings(true);
+        displayGains();
+        displaySettings();
+        blockApplySettings(false);
+        return true;
 	}
 	else if (RTLSDRInput::MsgStartStop::match(message))
     {
-        RTLSDRInput::MsgStartStop& notif = (RTLSDRInput::MsgStartStop&) message;
+        auto& notif = (const RTLSDRInput::MsgStartStop&) message;
         blockApplySettings(true);
         ui->startStop->setChecked(notif.getStartStop());
         blockApplySettings(false);
@@ -178,13 +173,13 @@ void RTLSDRGui::handleInputMessages()
 {
     Message* message;
 
-    while ((message = m_inputMessageQueue.pop()) != 0)
+    while ((message = m_inputMessageQueue.pop()) != nullptr)
     {
         qDebug("RTLSDRGui::handleInputMessages: message: %s", message->getIdentifier());
 
         if (DSPSignalNotification::match(*message))
         {
-            DSPSignalNotification* notif = (DSPSignalNotification*) message;
+            auto* notif = (const DSPSignalNotification*) message;
             m_sampleRate = notif->getSampleRate();
             m_deviceCenterFrequency = notif->getCenterFrequency();
             qDebug("RTLSDRGui::handleInputMessages: DSPSignalNotification: SampleRate:%d, CenterFrequency:%llu", notif->getSampleRate(), notif->getCenterFrequency());
@@ -213,7 +208,7 @@ void RTLSDRGui::updateFrequencyLimits()
 {
     // values in kHz
     qint64 deltaFrequency = m_settings.m_transverterMode ? m_settings.m_transverterDeltaFrequency/1000 : 0;
-    qint64 minLimit = (m_settings.m_noModMode ? RTLSDRInput::frequencyLowRangeMin : m_sampleSource->m_frequencyHighRangeMin) + deltaFrequency;
+    qint64 minLimit = (m_settings.m_noModMode ? RTLSDRInput::frequencyLowRangeMin : m_sampleSource->getFrequencyHighRangeMin()) + deltaFrequency;
     qint64 maxLimit = (m_settings.m_noModMode ? RTLSDRInput::frequencyLowRangeMax : RTLSDRInput::frequencyHighRangeMax) + deltaFrequency;
 
     if (m_settings.m_transverterMode)
@@ -233,7 +228,7 @@ void RTLSDRGui::updateFrequencyLimits()
 
 void RTLSDRGui::displayGains()
 {
-    if (m_gains.size() > 0)
+    if (!m_gains.empty())
     {
         int dist = abs(m_settings.m_gain - m_gains[0]);
         int pos = 0;
@@ -248,7 +243,7 @@ void RTLSDRGui::displayGains()
         }
 
         ui->gainText->setText(tr("%1.%2").arg(m_gains[pos] / 10).arg(abs(m_gains[pos] % 10)));
-        ui->gain->setMaximum(m_gains.size() - 1);
+        ui->gain->setMaximum((int) (m_gains.size() - 1));
         ui->gain->setEnabled(true);
         ui->gain->setValue(pos);
     }
@@ -280,7 +275,7 @@ void RTLSDRGui::displaySampleRate()
         ui->sampleRate->setToolTip("Device to host sample rate (S/s)");
         ui->deviceRateText->setToolTip("Baseband sample rate (S/s)");
         uint32_t basebandSampleRate = m_settings.m_devSampleRate/(1<<m_settings.m_log2Decim);
-        ui->deviceRateText->setText(tr("%1k").arg(QString::number(basebandSampleRate / 1000.0f, 'g', 5)));
+        ui->deviceRateText->setText(tr("%1k").arg(QString::number((float) basebandSampleRate / 1000.0f, 'g', 5)));
     }
     else
     {
@@ -296,7 +291,7 @@ void RTLSDRGui::displaySampleRate()
         ui->sampleRate->setValue(m_settings.m_devSampleRate/(1<<m_settings.m_log2Decim));
         ui->sampleRate->setToolTip("Baseband sample rate (S/s)");
         ui->deviceRateText->setToolTip("Device to host sample rate (S/s)");
-        ui->deviceRateText->setText(tr("%1k").arg(QString::number(m_settings.m_devSampleRate / 1000.0f, 'g', 5)));
+        ui->deviceRateText->setText(tr("%1k").arg(QString::number((float) m_settings.m_devSampleRate / 1000.0f, 'g', 5)));
     }
 
     ui->sampleRate->blockSignals(false);
@@ -310,7 +305,7 @@ void RTLSDRGui::displayFcTooltip()
         m_settings.m_devSampleRate,
         DeviceSampleSource::FrequencyShiftScheme::FSHIFT_STD
     );
-    ui->fcPos->setToolTip(tr("Relative position of device center frequency: %1 kHz").arg(QString::number(fShift / 1000.0f, 'g', 5)));
+    ui->fcPos->setToolTip(tr("Relative position of device center frequency: %1 kHz").arg(QString::number((float) fShift / 1000.0f, 'g', 5)));
 }
 
 void RTLSDRGui::displaySettings()
@@ -363,9 +358,9 @@ void RTLSDRGui::on_decim_currentIndexChanged(int index)
     displaySampleRate();
 
     if (m_sampleRateMode) {
-        m_settings.m_devSampleRate = ui->sampleRate->getValueNew();
+        m_settings.m_devSampleRate = (int) ui->sampleRate->getValueNew();
     } else {
-        m_settings.m_devSampleRate = ui->sampleRate->getValueNew() * (1 << m_settings.m_log2Decim);
+        m_settings.m_devSampleRate = (int) ui->sampleRate->getValueNew() * (1 << m_settings.m_log2Decim);
     }
 
     m_settingsKeys.append("log2Decim");
@@ -523,9 +518,9 @@ void RTLSDRGui::on_agc_stateChanged(int state)
 void RTLSDRGui::on_sampleRate_changed(quint64 value)
 {
     if (m_sampleRateMode) {
-        m_settings.m_devSampleRate = value;
+        m_settings.m_devSampleRate = (int) value;
     } else {
-        m_settings.m_devSampleRate = value * (1 << m_settings.m_log2Decim);
+        m_settings.m_devSampleRate = (int) (value * (1 << m_settings.m_log2Decim));
     }
 
     displayFcTooltip();
@@ -542,7 +537,7 @@ void RTLSDRGui::on_offsetTuning_toggled(bool checked)
 
 void RTLSDRGui::on_rfBW_changed(quint64 value)
 {
-    m_settings.m_rfBandwidth = value * 1000;
+    m_settings.m_rfBandwidth = (quint32) (value * 1000);
     m_settingsKeys.append("rfBandwidth");
     sendSettings();
 }
@@ -554,9 +549,9 @@ void RTLSDRGui::on_lowSampleRate_toggled(bool checked)
     displaySampleRate();
 
     if (m_sampleRateMode) {
-        m_settings.m_devSampleRate = ui->sampleRate->getValueNew();
+        m_settings.m_devSampleRate = (int) ui->sampleRate->getValueNew();
     } else {
-        m_settings.m_devSampleRate = ui->sampleRate->getValueNew() * (1 << m_settings.m_log2Decim);
+        m_settings.m_devSampleRate = (int) (ui->sampleRate->getValueNew() * (1 << m_settings.m_log2Decim));
     }
 
     qDebug("RTLSDRGui::on_lowSampleRate_toggled: %d S/s", m_settings.m_devSampleRate);
@@ -611,7 +606,7 @@ void RTLSDRGui::displayReplayLength()
     if (!replayEnabled) {
         ui->replayOffset->setMaximum(0);
     } else {
-        ui->replayOffset->setMaximum(m_settings.m_replayLength * 10 - 1);
+        ui->replayOffset->setMaximum((int) (m_settings.m_replayLength * 10 - 1));
     }
     ui->replayLabel->setEnabled(replayEnabled);
     ui->replayOffset->setEnabled(replayEnabled);
@@ -622,10 +617,10 @@ void RTLSDRGui::displayReplayLength()
 void RTLSDRGui::displayReplayOffset()
 {
     bool replayEnabled = m_settings.m_replayLength > 0.0f;
-    ui->replayOffset->setValue(m_settings.m_replayOffset * 10);
+    ui->replayOffset->setValue((int) (m_settings.m_replayOffset * 10));
     ui->replayOffsetText->setText(QString("%1s").arg(m_settings.m_replayOffset, 0, 'f', 1));
     ui->replayNow->setEnabled(replayEnabled && (m_settings.m_replayOffset > 0.0f));
-    ui->replayPlus->setEnabled(replayEnabled && (std::round(m_settings.m_replayOffset * 10) < ui->replayOffset->maximum()));
+    ui->replayPlus->setEnabled(replayEnabled && (std::round(m_settings.m_replayOffset * 10) < (float) ui->replayOffset->maximum()));
     ui->replayMinus->setEnabled(replayEnabled && (m_settings.m_replayOffset > 0.0f));
 }
 
@@ -647,7 +642,7 @@ void RTLSDRGui::displayReplayStep()
 
 void RTLSDRGui::on_replayOffset_valueChanged(int value)
 {
-    m_settings.m_replayOffset = value / 10.0f;
+    m_settings.m_replayOffset = (float) value / 10.0f;
     displayReplayOffset();
     m_settingsKeys.append("replayOffset");
     sendSettings();
@@ -660,12 +655,12 @@ void RTLSDRGui::on_replayNow_clicked()
 
 void RTLSDRGui::on_replayPlus_clicked()
 {
-    ui->replayOffset->setValue(ui->replayOffset->value() + m_settings.m_replayStep * 10);
+    ui->replayOffset->setValue((int) ((float) ui->replayOffset->value() + m_settings.m_replayStep * 10));
 }
 
 void RTLSDRGui::on_replayMinus_clicked()
 {
-    ui->replayOffset->setValue(ui->replayOffset->value() - m_settings.m_replayStep * 10);
+    ui->replayOffset->setValue((int) ((float) ui->replayOffset->value() - m_settings.m_replayStep * 10));
 }
 
 void RTLSDRGui::on_replaySave_clicked()
@@ -675,7 +670,7 @@ void RTLSDRGui::on_replaySave_clicked()
     if (fileDialog.exec())
     {
         QStringList fileNames = fileDialog.selectedFiles();
-        if (fileNames.size() > 0)
+        if (!fileNames.empty())
         {
             RTLSDRInput::MsgSaveReplay *message = RTLSDRInput::MsgSaveReplay::create(fileNames[0]);
             m_sampleSource->getInputMessageQueue()->push(message);
@@ -692,10 +687,10 @@ void RTLSDRGui::on_replayLoop_toggled(bool checked)
 
 void RTLSDRGui::setReplayTime(float time)
 {
-    ui->replayOffset->setValue(std::ceil(time * 10.0f));
+    ui->replayOffset->setValue((int) std::ceil(time * 10.0f));
 }
 
-void RTLSDRGui::makeUIConnections()
+void RTLSDRGui::makeUIConnections() const
 {
     QObject::connect(ui->centerFrequency, &ValueDial::changed, this, &RTLSDRGui::on_centerFrequency_changed);
     QObject::connect(ui->sampleRate, &ValueDial::changed, this, &RTLSDRGui::on_sampleRate_changed);

@@ -42,14 +42,13 @@ class RTLSDRGui : public DeviceGUI {
 	Q_OBJECT
 
 public:
-	explicit RTLSDRGui(DeviceUISet *deviceUISet, QWidget* parent = 0);
-	virtual ~RTLSDRGui();
-	virtual void destroy();
+	explicit RTLSDRGui(DeviceUISet *deviceUISet, QWidget* parent = nullptr);
+	~RTLSDRGui() final;
 
-	void resetToDefaults();
-	QByteArray serialize() const;
-	bool deserialize(const QByteArray& data);
-	virtual MessageQueue *getInputMessageQueue() { return &m_inputMessageQueue; }
+	void resetToDefaults() final;
+	QByteArray serialize() const final;
+	bool deserialize(const QByteArray& data) final;
+	MessageQueue *getInputMessageQueue() final { return &m_inputMessageQueue; }
     void setReplayTime(float time) override;
 
 private:
@@ -79,7 +78,7 @@ private:
 	void updateFrequencyLimits();
     void blockApplySettings(bool block);
 	bool handleMessage(const Message& message);
-    void makeUIConnections();
+    void makeUIConnections() const;
 
 private slots:
     void handleInputMessages();

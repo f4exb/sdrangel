@@ -53,11 +53,6 @@ WDSPRxGUI* WDSPRxGUI::create(PluginAPI* pluginAPI, DeviceUISet *deviceUISet, Bas
 	return gui;
 }
 
-void WDSPRxGUI::destroy()
-{
-	delete this;
-}
-
 void WDSPRxGUI::resetToDefaults()
 {
 	m_settings.resetToDefaults();
@@ -610,6 +605,7 @@ WDSPRxGUI::WDSPRxGUI(PluginAPI* pluginAPI, DeviceUISet *deviceUISet, BasebandSam
 
 WDSPRxGUI::~WDSPRxGUI()
 {
+    qDebug("WDSPRxGUI::~WDSPRxGUI");
 	delete ui;
     delete m_audioMuteRightClickEnabler;
     delete m_agcRightClickEnabler;
@@ -620,6 +616,7 @@ WDSPRxGUI::~WDSPRxGUI()
     delete m_equalizerRightClickEnabler;
     delete m_panRightClickEnabler;
     delete m_demodRightClickEnabler;
+    qDebug("WDSPRxGUI::~WDSPRxGUI: end");
 }
 
 bool WDSPRxGUI::blockApplySettings(bool block)

@@ -59,9 +59,8 @@ public:
         ContextMenuDeviceSettings
     };
 
-	DeviceGUI(QWidget *parent = nullptr);
-	virtual ~DeviceGUI();
-	virtual void destroy() = 0;
+	explicit DeviceGUI(QWidget *parent = nullptr);
+	~DeviceGUI() override;
 
 	virtual void resetToDefaults() = 0;
     void setWorkspaceIndex(int index);

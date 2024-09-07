@@ -67,34 +67,34 @@ public:
         { }
     };
 
-	WDSPRx(DeviceAPI *deviceAPI);
-	virtual ~WDSPRx();
-	virtual void destroy() { delete this; }
-    virtual void setDeviceAPI(DeviceAPI *deviceAPI);
-    virtual DeviceAPI *getDeviceAPI() { return m_deviceAPI; }
+	explicit WDSPRx(DeviceAPI *deviceAPI);
+	~WDSPRx() final;
+	void destroy() final { delete this; }
+    void setDeviceAPI(DeviceAPI *deviceAPI) final;
+    DeviceAPI *getDeviceAPI() final { return m_deviceAPI; }
     SpectrumVis *getSpectrumVis() { return &m_spectrumVis; }
 
     using BasebandSampleSink::feed;
-    virtual void feed(const SampleVector::const_iterator& begin, const SampleVector::const_iterator& end, bool po);
-	virtual void start();
-	virtual void stop();
-    virtual void pushMessage(Message *msg) { m_inputMessageQueue.push(msg); }
-    virtual QString getSinkName() { return objectName(); }
+    void feed(const SampleVector::const_iterator& begin, const SampleVector::const_iterator& end, bool po) final;
+	void start() final;
+	void stop() final;
+    void pushMessage(Message *msg) final { m_inputMessageQueue.push(msg); }
+    QString getSinkName() final { return objectName(); }
 
-    virtual void getIdentifier(QString& id) { id = objectName(); }
-    virtual QString getIdentifier() const { return objectName(); }
-    virtual void getTitle(QString& title) { title = m_settings.m_title; }
-    virtual qint64 getCenterFrequency() const { return m_settings.m_inputFrequencyOffset; }
-    virtual void setCenterFrequency(qint64 frequency);
+    void getIdentifier(QString& id) final { id = objectName(); }
+    QString getIdentifier() const final { return objectName(); }
+    void getTitle(QString& title) final { title = m_settings.m_title; }
+    qint64 getCenterFrequency() const final { return m_settings.m_inputFrequencyOffset; }
+    void setCenterFrequency(qint64 frequency) final;
 
-    virtual QByteArray serialize() const;
-    virtual bool deserialize(const QByteArray& data);
+    QByteArray serialize() const final;
+    bool deserialize(const QByteArray& data) final;
 
-    virtual int getNbSinkStreams() const { return 1; }
-    virtual int getNbSourceStreams() const { return 0; }
-    virtual int getStreamIndex() const { return m_settings.m_streamIndex; }
+    int getNbSinkStreams() const final { return 1; }
+    int getNbSourceStreams() const final { return 0; }
+    int getStreamIndex() const final { return m_settings.m_streamIndex; }
 
-    virtual qint64 getStreamCenterFrequency(int streamIndex, bool sinkElseSource) const
+    qint64 getStreamCenterFrequency(int streamIndex, bool sinkElseSource) const final
     {
         (void) streamIndex;
         (void) sinkElseSource;
@@ -116,32 +116,32 @@ public:
         }
     }
 
-    virtual int webapiSettingsGet(
-            SWGSDRangel::SWGChannelSettings& response,
-            QString& errorMessage);
+    int webapiSettingsGet(
+        SWGSDRangel::SWGChannelSettings& response,
+        QString& errorMessage) final;
 
-    virtual int webapiWorkspaceGet(
-            SWGSDRangel::SWGWorkspaceInfo& response,
-            QString& errorMessage);
+    int webapiWorkspaceGet(
+        SWGSDRangel::SWGWorkspaceInfo& response,
+        QString& errorMessage) final;
 
-    virtual int webapiSettingsPutPatch(
-            bool force,
-            const QStringList& channelSettingsKeys,
-            SWGSDRangel::SWGChannelSettings& response,
-            QString& errorMessage);
+    int webapiSettingsPutPatch(
+        bool force,
+        const QStringList& channelSettingsKeys,
+        SWGSDRangel::SWGChannelSettings& response,
+        QString& errorMessage) final;
 
-    virtual int webapiReportGet(
-            SWGSDRangel::SWGChannelReport& response,
-            QString& errorMessage);
+    int webapiReportGet(
+        SWGSDRangel::SWGChannelReport& response,
+        QString& errorMessage) final;
 
     static void webapiFormatChannelSettings(
         SWGSDRangel::SWGChannelSettings& response,
         const WDSPRxSettings& settings);
 
     static void webapiUpdateChannelSettings(
-            WDSPRxSettings& settings,
-            const QStringList& channelSettingsKeys,
-            SWGSDRangel::SWGChannelSettings& response);
+        WDSPRxSettings& settings,
+        const QStringList& channelSettingsKeys,
+        SWGSDRangel::SWGChannelSettings& response);
 
     uint32_t getNumberOfDeviceStreams() const;
 
@@ -161,26 +161,26 @@ private:
     QNetworkAccessManager *m_networkManager;
     QNetworkRequest m_networkRequest;
 
-	virtual bool handleMessage(const Message& cmd);
+	bool handleMessage(const Message& cmd) final;
 	void applySettings(const WDSPRxSettings& settings, bool force = false);
-    void sendSampleRateToDemodAnalyzer();
+    void sendSampleRateToDemodAnalyzer() const;
     void webapiFormatChannelReport(SWGSDRangel::SWGChannelReport& response);
-    void webapiReverseSendSettings(QList<QString>& channelSettingsKeys, const WDSPRxSettings& settings, bool force);
+    void webapiReverseSendSettings(const QList<QString>& channelSettingsKeys, const WDSPRxSettings& settings, bool force);
     void sendChannelSettings(
         const QList<ObjectPipe*>& pipes,
-        QList<QString>& channelSettingsKeys,
+        const QList<QString>& channelSettingsKeys,
         const WDSPRxSettings& settings,
         bool force
-    );
+    ) const;
     void webapiFormatChannelSettings(
-        QList<QString>& channelSettingsKeys,
+        const QList<QString>& channelSettingsKeys,
         SWGSDRangel::SWGChannelSettings *swgChannelSettings,
         const WDSPRxSettings& settings,
         bool force
-    );
+    ) const;
 
 private slots:
-    void networkManagerFinished(QNetworkReply *reply);
+    void networkManagerFinished(QNetworkReply *reply) const;
     void handleIndexInDeviceSetChanged(int index);
 };
 
