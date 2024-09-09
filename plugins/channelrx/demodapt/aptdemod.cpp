@@ -55,7 +55,7 @@ APTDemod::APTDemod(DeviceAPI *deviceAPI) :
 {
     setObjectName(m_channelId);
 
-    m_basebandSink = new APTDemodBaseband(this);
+    m_basebandSink = new APTDemodBaseband();
     m_basebandSink->moveToThread(&m_thread);
 
     m_imageWorker = new APTDemodImageWorker(this);

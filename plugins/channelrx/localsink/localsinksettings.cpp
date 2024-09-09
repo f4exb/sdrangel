@@ -53,7 +53,7 @@ void LocalSinkSettings::resetToDefaults()
     m_reverseAPIChannelIndex = 0;
     m_workspaceIndex = 0;
     m_hidden = false;
-    m_maxFFTBands = 32;
+    m_maxFFTBands = 20;
 }
 
 QByteArray LocalSinkSettings::serialize() const

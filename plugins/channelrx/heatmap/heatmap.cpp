@@ -46,7 +46,7 @@ HeatMap::HeatMap(DeviceAPI *deviceAPI) :
 {
     setObjectName(m_channelId);
 
-    m_basebandSink = new HeatMapBaseband(this);
+    m_basebandSink = new HeatMapBaseband();
     m_basebandSink->setMessageQueueToChannel(getInputMessageQueue());
     m_basebandSink->setChannel(this);
     m_basebandSink->moveToThread(&m_thread);

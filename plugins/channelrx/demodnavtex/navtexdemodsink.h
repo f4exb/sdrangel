@@ -39,7 +39,7 @@ class ScopeVis;
 
 class NavtexDemodSink : public ChannelSampleSink {
 public:
-    NavtexDemodSink(NavtexDemod *packetDemod);
+    NavtexDemodSink();
     ~NavtexDemodSink();
 
     virtual void feed(const SampleVector::const_iterator& begin, const SampleVector::const_iterator& end);

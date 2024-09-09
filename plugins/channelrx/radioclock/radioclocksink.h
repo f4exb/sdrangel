@@ -42,7 +42,7 @@ class ScopeVis;
 
 class RadioClockSink : public ChannelSampleSink {
 public:
-    RadioClockSink(RadioClock *radioClock);
+    RadioClockSink();
     ~RadioClockSink();
 
     virtual void feed(const SampleVector::const_iterator& begin, const SampleVector::const_iterator& end);

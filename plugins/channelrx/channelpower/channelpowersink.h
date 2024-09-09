@@ -32,7 +32,7 @@ class ChannelPower;
 
 class ChannelPowerSink : public ChannelSampleSink {
 public:
-    ChannelPowerSink(ChannelPower *channelPower);
+    ChannelPowerSink();
     ~ChannelPowerSink();
 
     virtual void feed(const SampleVector::const_iterator& begin, const SampleVector::const_iterator& end);

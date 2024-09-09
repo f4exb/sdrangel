@@ -62,7 +62,7 @@ public:
         { }
     };
 
-    ChannelPowerBaseband(ChannelPower *channelPower);
+    ChannelPowerBaseband();
     ~ChannelPowerBaseband();
     void reset();
     void startWork();

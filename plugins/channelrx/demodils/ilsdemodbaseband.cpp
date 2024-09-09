@@ -27,8 +27,7 @@
 
 MESSAGE_CLASS_DEFINITION(ILSDemodBaseband::MsgConfigureILSDemodBaseband, Message)
 
-ILSDemodBaseband::ILSDemodBaseband(ILSDemod *packetDemod) :
-    m_sink(packetDemod),
+ILSDemodBaseband::ILSDemodBaseband() :
     m_running(false)
 {
     qDebug("ILSDemodBaseband::ILSDemodBaseband");

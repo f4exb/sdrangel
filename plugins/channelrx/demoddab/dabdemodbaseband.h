@@ -60,7 +60,7 @@ public:
         { }
     };
 
-    DABDemodBaseband(DABDemod *packetDemod);
+    DABDemodBaseband();
     ~DABDemodBaseband();
     void reset();
     void startWork();

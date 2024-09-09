@@ -21,9 +21,7 @@
 #if defined(ANDROID)
 #include <QOpenGLFunctions_ES2>
 #else
-#include <QOpenGLFunctions_2_0>
-#include <QOpenGLFunctions_2_1>
-#include <QOpenGLFunctions_3_0>
+#include <QOpenGLFunctions_3_3_Core>
 #endif
 #include <QOpenGLContext>
 #include <QtOpenGL>

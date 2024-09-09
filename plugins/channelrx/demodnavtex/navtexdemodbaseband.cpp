@@ -26,8 +26,7 @@
 
 MESSAGE_CLASS_DEFINITION(NavtexDemodBaseband::MsgConfigureNavtexDemodBaseband, Message)
 
-NavtexDemodBaseband::NavtexDemodBaseband(NavtexDemod *navtexDemod) :
-    m_sink(navtexDemod),
+NavtexDemodBaseband::NavtexDemodBaseband() :
     m_running(false)
 {
     qDebug("NavtexDemodBaseband::NavtexDemodBaseband");

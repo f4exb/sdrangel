@@ -38,7 +38,7 @@ class NoiseFigure;
 
 class NoiseFigureSink : public ChannelSampleSink {
 public:
-    NoiseFigureSink(NoiseFigure *aisDemod);
+    NoiseFigureSink();
     ~NoiseFigureSink();
 
     virtual void feed(const SampleVector::const_iterator& begin, const SampleVector::const_iterator& end);

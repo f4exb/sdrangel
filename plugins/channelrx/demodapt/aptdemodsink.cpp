@@ -23,7 +23,7 @@
 #include "aptdemod.h"
 #include "aptdemodsink.h"
 
-APTDemodSink::APTDemodSink(APTDemod *packetDemod) :
+APTDemodSink::APTDemodSink() :
         m_channelSampleRate(APTDEMOD_AUDIO_SAMPLE_RATE),
         m_channelFrequencyOffset(0),
         m_magsqSum(0.0f),
@@ -32,7 +32,6 @@ APTDemodSink::APTDemodSink(APTDemod *packetDemod) :
         m_imageWorkerMessageQueue(nullptr),
         m_samples(nullptr)
 {
-    (void)packetDemod;
 
     m_magsq = 0.0;
 

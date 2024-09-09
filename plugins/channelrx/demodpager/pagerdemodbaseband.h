@@ -62,7 +62,7 @@ public:
         { }
     };
 
-    PagerDemodBaseband(PagerDemod *pagerDemod);
+    PagerDemodBaseband();
     ~PagerDemodBaseband();
     void reset();
     void startWork();

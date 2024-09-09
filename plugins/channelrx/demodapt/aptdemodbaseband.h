@@ -58,7 +58,7 @@ public:
         { }
     };
 
-    APTDemodBaseband(APTDemod *packetDemod);
+    APTDemodBaseband();
     ~APTDemodBaseband();
     void reset();
     void startWork();
