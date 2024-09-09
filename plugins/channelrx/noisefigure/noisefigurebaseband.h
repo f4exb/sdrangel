@@ -60,7 +60,7 @@ public:
         { }
     };
 
-    NoiseFigureBaseband(NoiseFigure *aisDemod);
+    NoiseFigureBaseband();
     ~NoiseFigureBaseband();
     void reset();
     void startWork();

@@ -26,8 +26,7 @@
 
 MESSAGE_CLASS_DEFINITION(PagerDemodBaseband::MsgConfigurePagerDemodBaseband, Message)
 
-PagerDemodBaseband::PagerDemodBaseband(PagerDemod *pagerDemod) :
-    m_sink(pagerDemod),
+PagerDemodBaseband::PagerDemodBaseband() :
     m_running(false)
 {
     qDebug("PagerDemodBaseband::PagerDemodBaseband");

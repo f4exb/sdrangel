@@ -26,8 +26,7 @@
 
 MESSAGE_CLASS_DEFINITION(NoiseFigureBaseband::MsgConfigureNoiseFigureBaseband, Message)
 
-NoiseFigureBaseband::NoiseFigureBaseband(NoiseFigure *aisDemod) :
-    m_sink(aisDemod),
+NoiseFigureBaseband::NoiseFigureBaseband() :
     m_running(false)
 {
     qDebug("NoiseFigureBaseband::NoiseFigureBaseband");

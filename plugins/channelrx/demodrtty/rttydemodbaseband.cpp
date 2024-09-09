@@ -26,8 +26,7 @@
 
 MESSAGE_CLASS_DEFINITION(RttyDemodBaseband::MsgConfigureRttyDemodBaseband, Message)
 
-RttyDemodBaseband::RttyDemodBaseband(RttyDemod *rttyDemod) :
-    m_sink(rttyDemod),
+RttyDemodBaseband::RttyDemodBaseband() :
     m_running(false)
 {
     qDebug("RttyDemodBaseband::RttyDemodBaseband");

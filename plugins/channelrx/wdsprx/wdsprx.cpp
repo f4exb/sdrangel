@@ -892,7 +892,7 @@ void WDSPRx::sendChannelSettings(
     const WDSPRxSettings& settings,
     bool force)
 {
-    qDebug("WDSPRx::sendChannelSettings: %d pipes", pipes.size());
+    qDebug("WDSPRx::sendChannelSettings: %d pipes", (int)pipes.size());
 
     for (const auto& pipe : pipes)
     {

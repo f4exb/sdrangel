@@ -43,7 +43,7 @@ class DABDemod;
 
 class DABDemodSink : public ChannelSampleSink {
 public:
-    DABDemodSink(DABDemod *packetDemod);
+    DABDemodSink();
     ~DABDemodSink();
 
     virtual void feed(const SampleVector::const_iterator& begin, const SampleVector::const_iterator& end);

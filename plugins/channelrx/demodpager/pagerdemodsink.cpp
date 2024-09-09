@@ -28,7 +28,7 @@
 #include "pagerdemod.h"
 #include "pagerdemodsink.h"
 
-PagerDemodSink::PagerDemodSink(PagerDemod *pagerDemod) :
+PagerDemodSink::PagerDemodSink() :
         m_scopeSink(nullptr),
         m_channelSampleRate(PagerDemodSettings::m_channelSampleRate),
         m_channelFrequencyOffset(0),
@@ -49,8 +49,6 @@ PagerDemodSink::PagerDemodSink(PagerDemod *pagerDemod) :
         m_addressValid(0),
         m_sampleBufferIndex(0)
 {
-    (void)pagerDemod;
-
     m_magsq = 0.0;
 
     m_demodBuffer.resize(1<<12);

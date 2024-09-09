@@ -39,7 +39,7 @@ class ScopeVis;
 
 class RttyDemodSink : public ChannelSampleSink {
 public:
-    RttyDemodSink(RttyDemod *packetDemod);
+    RttyDemodSink();
     ~RttyDemodSink();
 
     virtual void feed(const SampleVector::const_iterator& begin, const SampleVector::const_iterator& end);

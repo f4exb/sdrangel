@@ -26,8 +26,7 @@
 
 MESSAGE_CLASS_DEFINITION(APTDemodBaseband::MsgConfigureAPTDemodBaseband, Message)
 
-APTDemodBaseband::APTDemodBaseband(APTDemod *packetDemod) :
-    m_sink(packetDemod),
+APTDemodBaseband::APTDemodBaseband() :
     m_running(false)
 {
     qDebug("APTDemodBaseband::APTDemodBaseband");

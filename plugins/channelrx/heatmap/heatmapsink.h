@@ -41,7 +41,7 @@ class ScopeVis;
 
 class HeatMapSink : public ChannelSampleSink {
 public:
-    HeatMapSink(HeatMap *heatMap);
+    HeatMapSink();
     ~HeatMapSink();
 
     virtual void feed(const SampleVector::const_iterator& begin, const SampleVector::const_iterator& end);

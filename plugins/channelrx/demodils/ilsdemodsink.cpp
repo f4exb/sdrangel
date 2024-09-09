@@ -28,7 +28,7 @@
 #include "ilsdemod.h"
 #include "ilsdemodsink.h"
 
-ILSDemodSink::ILSDemodSink(ILSDemod *ilsDemod) :
+ILSDemodSink::ILSDemodSink() :
         m_spectrumSink(nullptr),
         m_scopeSink(nullptr),
         m_channel(nullptr),
@@ -50,8 +50,6 @@ ILSDemodSink::ILSDemodSink(ILSDemod *ilsDemod) :
         m_audioFifo(48000),
         m_sampleBufferIndex(0)
 {
-	(void)ilsDemod;
-
 	m_audioBuffer.resize(1<<14);
 	m_audioBufferFill = 0;
 

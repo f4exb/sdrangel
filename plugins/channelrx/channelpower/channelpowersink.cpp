@@ -20,14 +20,12 @@
 
 #include "channelpowersink.h"
 
-ChannelPowerSink::ChannelPowerSink(ChannelPower *channelPower) :
+ChannelPowerSink::ChannelPowerSink() :
         m_channelSampleRate(10000),
         m_channelFrequencyOffset(0),
         m_lowpassFFT(nullptr),
         m_lowpassBufferIdx(0)
 {
-    (void)channelPower;
-
     resetMagLevels();
 
     applySettings(m_settings, QStringList(), true);

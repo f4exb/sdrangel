@@ -45,7 +45,7 @@ class ScopeVis;
 
 class PagerDemodSink : public ChannelSampleSink {
 public:
-    PagerDemodSink(PagerDemod *pagerDemod);
+    PagerDemodSink();
     ~PagerDemodSink();
 
     virtual void feed(const SampleVector::const_iterator& begin, const SampleVector::const_iterator& end);

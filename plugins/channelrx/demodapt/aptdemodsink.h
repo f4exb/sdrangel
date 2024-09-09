@@ -44,7 +44,7 @@ class APTDemod;
 
 class APTDemodSink : public ChannelSampleSink {
 public:
-    APTDemodSink(APTDemod *packetDemod);
+    APTDemodSink();
     ~APTDemodSink();
 
     virtual void feed(const SampleVector::const_iterator& begin, const SampleVector::const_iterator& end);

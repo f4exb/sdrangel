@@ -44,7 +44,7 @@ class SpectrumVis;
 
 class ILSDemodSink : public ChannelSampleSink {
 public:
-    ILSDemodSink(ILSDemod *packetDemod);
+    ILSDemodSink();
     ~ILSDemodSink();
 
     virtual void feed(const SampleVector::const_iterator& begin, const SampleVector::const_iterator& end);

@@ -27,9 +27,7 @@
 
 MESSAGE_CLASS_DEFINITION(FreqScannerBaseband::MsgConfigureFreqScannerBaseband, Message)
 
-FreqScannerBaseband::FreqScannerBaseband(FreqScanner *freqScanner) :
-    m_freqScanner(freqScanner),
-    m_sink(freqScanner),
+FreqScannerBaseband::FreqScannerBaseband() :
     m_messageQueueToGUI(nullptr)
 {
     qDebug("FreqScannerBaseband::FreqScannerBaseband");
