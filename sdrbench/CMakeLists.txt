@@ -31,8 +31,12 @@ include_directories(
     ${CMAKE_SOURCE_DIR}
 )
 
+if(DEFINED FFTW3F_DEPENDS)
+    add_dependencies(sdrbench "${FFTW3F_DEPENDS}")
+endif()
+
 target_link_libraries(sdrbench
-    Boost::disable_autolinking
+     Boost::disable_autolinking
     ${FFTW3F_LIBRARIES}
     Qt::Core
     Qt::Gui

@@ -71,12 +71,18 @@ include_directories(
 set(TARGET_NAME demoddatv)
 set(INSTALL_FOLDER ${INSTALL_PLUGINS_DIR})
 
-add_library(${TARGET_NAME} SHARED
-    ${datv_SOURCES}
-    ${ldpc_SOURCES}
-)
 
-target_link_libraries(${TARGET_NAME}
+if(NOT Qt6_FOUND)
+    add_library(${TARGET_NAME} ${datv_SOURCES} ${ldpc_SOURCES})
+else()
+    qt_add_plugin(${TARGET_NAME} CLASS_NAME DATVDemodPlugin ${datv_SOURCES} ${ldpc_SOURCES})
+endif()
+
+if(NOT BUILD_SHARED_LIBS)
+    set_property(GLOBAL APPEND PROPERTY STATIC_PLUGINS_PROPERTY ${TARGET_NAME})
+endif()
+
+target_link_libraries(${TARGET_NAME} PRIVATE
     Qt::Core
     Qt::Widgets
     Qt::Multimedia

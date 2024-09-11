@@ -8,7 +8,7 @@ file(GLOB swagger_HEADERS
     ${CMAKE_SOURCE_DIR}/swagger/sdrangel/code/qt5/client/*.h
 )
 
-add_library(swagger SHARED
+add_library(swagger
     ${swagger_SOURCES}
 )
 

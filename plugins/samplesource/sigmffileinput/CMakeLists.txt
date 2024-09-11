@@ -46,15 +46,21 @@ else()
     set(INSTALL_FOLDER ${INSTALL_PLUGINSSRV_DIR})
 endif()
 
-add_library(${TARGET_NAME} SHARED
-	${sigmffileinput_SOURCES}
-)
+if(NOT Qt6_FOUND)
+    add_library(${TARGET_NAME} ${sigmffileinput_SOURCES})
+else()
+    qt_add_plugin(${TARGET_NAME} CLASS_NAME SigMFFileInputPlugin ${sigmffileinput_SOURCES})
+endif()
+
+if(NOT BUILD_SHARED_LIBS)
+    set_property(GLOBAL APPEND PROPERTY STATIC_PLUGINS_PROPERTY ${TARGET_NAME})
+endif()
 
 if (NOT WIN32)
     link_directories(${Boost_LIBRARY_DIRS})
 endif()
 
-target_link_libraries(${TARGET_NAME}
+target_link_libraries(${TARGET_NAME} PRIVATE
     Boost::disable_autolinking
     Qt::Core
     ${TARGET_LIB}

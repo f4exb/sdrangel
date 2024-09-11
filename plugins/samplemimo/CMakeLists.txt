@@ -31,6 +31,11 @@ else()
     message(STATUS "Not building audiocatsiso (hamlib_FOUND=${hamlib_FOUND})")
 endif()
 
-add_subdirectory(metismiso)
+if(ENABLE_METIS)
+    add_subdirectory(metismiso)
+else()
+    message(STATUS "Not building metis (ENABLE_METIS=${ENABLE_METIS}")
+endif()
+
 add_subdirectory(testmi)
 add_subdirectory(testmosync)

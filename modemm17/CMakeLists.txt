@@ -47,7 +47,7 @@ include_directories(
     ${CMAKE_SOURCE_DIR}/exports
 )
 
-add_library(modemm17 SHARED
+add_library(modemm17
 	${modemm17_SOURCES}
 )
 

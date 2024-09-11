@@ -35,7 +35,7 @@ include_directories(
     ${CMAKE_SOURCE_DIR}/exports
 )
 
-add_library(httpserver SHARED
+add_library(httpserver
 	${httpserver_SOURCES}
 )
 

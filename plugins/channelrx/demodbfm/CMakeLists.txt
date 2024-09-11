@@ -55,11 +55,18 @@ else()
     set(INSTALL_FOLDER ${INSTALL_PLUGINSSRV_DIR})
 endif()
 
-add_library(${TARGET_NAME} SHARED
-	${bfm_SOURCES}
-)
 
-target_link_libraries(${TARGET_NAME}
+if(NOT Qt6_FOUND)
+    add_library(${TARGET_NAME} ${bfm_SOURCES})
+else()
+    qt_add_plugin(${TARGET_NAME} CLASS_NAME BFMPlugin ${bfm_SOURCES})
+endif()
+
+if(NOT BUILD_SHARED_LIBS)
+    set_property(GLOBAL APPEND PROPERTY STATIC_PLUGINS_PROPERTY ${TARGET_NAME})
+endif()
+
+target_link_libraries(${TARGET_NAME} PRIVATE
     Qt::Core
     ${TARGET_LIB}
 	sdrbase
