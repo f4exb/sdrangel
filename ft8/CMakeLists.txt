@@ -39,9 +39,13 @@ include_directories(
     ${CMAKE_SOURCE_DIR}/sdrbase
 )
 
-add_library(ft8 SHARED
+add_library(ft8
     ${ft8_SOURCES}
 )
+
+if(DEFINED FFTW3F_DEPENDS)
+    add_dependencies(ft8 "${FFTW3F_DEPENDS}")
+endif()
 
 target_link_libraries(ft8
     Boost::disable_autolinking

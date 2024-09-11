@@ -19,6 +19,8 @@ set(remotetcpinput_HEADERS
 
 include_directories(
     ${CMAKE_SOURCE_DIR}/swagger/sdrangel/code/qt5/client
+    ${FLAC_INCLUDE_DIR}
+    ${ZLIB_INCLUDE_DIRS}
 )
 
 if(NOT SERVER_MODE)
@@ -43,16 +45,24 @@ else()
     set(INSTALL_FOLDER ${INSTALL_PLUGINSSRV_DIR})
 endif()
 
-add_library(${TARGET_NAME} SHARED
-	${remotetcpinput_SOURCES}
-)
+if(NOT Qt6_FOUND)
+    add_library(${TARGET_NAME} ${remotetcpinput_SOURCES})
+else()
+    qt_add_plugin(${TARGET_NAME} CLASS_NAME RemoteTCPInputPlugin ${remotetcpinput_SOURCES})
+endif()
 
-target_link_libraries(${TARGET_NAME}
+if(NOT BUILD_SHARED_LIBS)
+    set_property(GLOBAL APPEND PROPERTY STATIC_PLUGINS_PROPERTY ${TARGET_NAME})
+endif()
+
+target_link_libraries(${TARGET_NAME} PRIVATE
     Qt::Core
     ${TARGET_LIB}
 	sdrbase
 	${TARGET_LIB_GUI}
     swagger
+    ${FLAC_LIBRARIES}
+    ${ZLIB_LIBRARIES}
 )
 
 install(TARGETS ${TARGET_NAME} DESTINATION ${INSTALL_FOLDER})

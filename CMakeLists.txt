@@ -30,6 +30,7 @@ option(SANITIZE_MEMORY "Activate detection of leaked memory (LeakSanitizer)" OFF
 option(RX_SAMPLE_24BIT "Internal 24 bit Rx DSP" ON)
 option(BUILD_SERVER "Build Server" ON)
 option(BUILD_GUI "Build GUI" ON)
+option(BUILD_BENCH "Build benchmark" ON)
 option(HIDE_CONSOLE "Hide console when running GUI on Windows" ON)
 option(BUNDLE "Enable distribution bundle" OFF)
 set(ARCH_OPT "native" CACHE STRING "Specify instruction set to use. Will be passed directly as `-march` or `/arch:` argument on supported compilers. \
@@ -37,8 +38,10 @@ set(ARCH_OPT "native" CACHE STRING "Specify instruction set to use. Will be pass
 option(ENABLE_QT6 "Build with Qt6 rather than Qt5" OFF)
 option(ENABLE_PROFILER "Enable runtime profiler" OFF)
 set(VKFFT_BACKEND 1 CACHE STRING "vkFFT Backend: 0 - Vulkan, 1 - CUDA")
+option(BUILD_SHARED_LIBS "Build using shared libraries" ON)
 
 # Sampling devices enablers
+option(ENABLE_AARONIARTSA "Enable AaroniaRTSA support" ON)
 option(ENABLE_AIRSPY "Enable AirSpy support" ON)
 option(ENABLE_AIRSPYHF "Enable AirSpyHF support" ON)
 option(ENABLE_BLADERF "Enable bladeRF support" ON)
@@ -46,6 +49,7 @@ option(ENABLE_FUNCUBE "Enable FUNcube support" ON)
 option(ENABLE_HACKRF "Enable HackRF support" ON)
 option(ENABLE_IIO "Enable liniio support like PlutoSDR" ON)
 option(ENABLE_LIMESUITE "Enable limesuite support" ON)
+option(ENABLE_METIS "Enable Metis support" ON)
 option(ENABLE_MIRISDR "Enable LibMiri for old SDRPlay" ON)
 option(ENABLE_PERSEUS "Enable perseus support" ON)
 option(ENABLE_RTLSDR "Enable rtl-sdr support" ON)
@@ -182,7 +186,7 @@ if(GIT_FOUND AND EXISTS "${CMAKE_SOURCE_DIR}/.git/")
 endif()
 
 find_program(CCACHE "ccache")
-if(CCACHE)
+if(CCACHE AND NOT EMSCRIPTEN)
     message(STATUS "Using ccache ${CCACHE}")
     set(CMAKE_C_COMPILER_LAUNCHER ${CCACHE})
     set(CMAKE_CXX_COMPILER_LAUNCHER ${CCACHE})
@@ -190,7 +194,7 @@ if(CCACHE)
         set(CMAKE_OBJCXX_COMPILER_LAUNCHER ${CCACHE})
     endif()
     set(ENV{CCACHE_SLOPPINESS} pch_defines,time_macros)
-endif(CCACHE)
+endif()
 
 set(sdrangel_VERSION "${sdrangel_VERSION_MAJOR}.${sdrangel_VERSION_MINOR}.${sdrangel_VERSION_PATCH}${sdrangel_VERSION_SUFFIX}" CACHE INTERNAL "")
 message(STATUS "${APPLICATION_NAME} Version: ${sdrangel_VERSION}")
@@ -876,7 +880,9 @@ if (FFTW3F_FOUND)
     set(WDSP_SUPPORT ON CACHE INTERNAL "")
 endif()
 
+if (BUILD_BENCH)
 add_subdirectory(sdrbench)
+endif()
 
 if (BUILD_GUI)
     add_subdirectory(sdrgui)
@@ -947,6 +953,7 @@ else()
 endif()
 
 ############ build sdrangel benchmark ################
+if (BUILD_BENCH)
 set(sdrangelbench_SOURCES
   appbench/main.cpp
 )
@@ -960,6 +967,7 @@ target_link_libraries(sdrangelbench
   sdrbench
   logging
 )
+endif()
 
 ############ build sdrangel gui ################
 if (BUILD_GUI)
@@ -1053,6 +1061,7 @@ if (BUILD_SERVER)
 endif()
 
 ############ install ##################
+if (BUILD_BENCH)
 install(TARGETS sdrangelbench DESTINATION ${INSTALL_BIN_DIR})
 if (BUILD_GUI)
       install(TARGETS ${CMAKE_PROJECT_NAME} DESTINATION ${INSTALL_BIN_DIR})

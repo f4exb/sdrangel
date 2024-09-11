@@ -320,7 +320,7 @@ if(NOT ANDROID)
   include_directories(${OPENGL_INCLUDE_DIR})
 endif()
 
-add_library(sdrgui SHARED
+add_library(sdrgui
   ${sdrgui_SOURCES}
   ${sdrgui_FORMS_HEADERS}
   )

@@ -45,15 +45,20 @@ else()
     set(INSTALL_FOLDER ${INSTALL_PLUGINSSRV_DIR})
 endif()
 
-add_library(${TARGET_NAME} SHARED
-    ${usrpoutput_SOURCES}
-)
-
 if(UHD_EXTERNAL)
     add_dependencies(${TARGET_NAME} uhd)
 endif()
+if(NOT Qt6_FOUND)
+    add_library(${TARGET_NAME} ${usrpoutput_SOURCES})
+else()
+    qt_add_plugin(${TARGET_NAME} CLASS_NAME USRPOutputPlugin ${usrpoutput_SOURCES})
+endif()
 
-target_link_libraries(${TARGET_NAME}
+if(NOT BUILD_SHARED_LIBS)
+    set_property(GLOBAL APPEND PROPERTY STATIC_PLUGINS_PROPERTY ${TARGET_NAME})
+endif()
+
+target_link_libraries(${TARGET_NAME} PRIVATE
     Qt::Core
     ${TARGET_LIB}
     sdrbase
