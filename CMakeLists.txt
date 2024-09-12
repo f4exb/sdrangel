@@ -1053,6 +1053,7 @@ endif()
 ############ install ##################
 if (BUILD_BENCH)
 install(TARGETS sdrangelbench DESTINATION ${INSTALL_BIN_DIR})
+endif()
 if (BUILD_GUI)
       install(TARGETS ${CMAKE_PROJECT_NAME} DESTINATION ${INSTALL_BIN_DIR})
 endif()
