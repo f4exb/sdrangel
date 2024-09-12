@@ -26,8 +26,7 @@
 
 MESSAGE_CLASS_DEFINITION(HeatMapBaseband::MsgConfigureHeatMapBaseband, Message)
 
-HeatMapBaseband::HeatMapBaseband(HeatMap *heatDemod) :
-    m_sink(heatDemod),
+HeatMapBaseband::HeatMapBaseband() :
     m_running(false)
 {
     qDebug("HeatMapBaseband::HeatMapBaseband");

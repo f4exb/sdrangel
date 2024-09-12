@@ -858,7 +858,6 @@ void GLScope::paintGL()
 void GLScope::drawMarkers()
 {
     QVector4D markerColor(1.0f, 1.0f, 1.0f, 0.3f);
-    QVector4D markerTextColor(1.0f, 1.0f, 1.0f, 0.8f);
 
     if ((m_markers1.size() > 0) && ((m_displayMode == DisplayX) || (m_displayMode == DisplayXYH) || (m_displayMode == DisplayXYV))) // Draw markers1
     {
@@ -2397,13 +2396,13 @@ QString GLScope::displayScaled(float value, char type, int precision)
     }
     else
     {
-        if (posValue < 1000) {
+        if (posValue < 1000.0f) {
             return tr("%1").arg(QString::number(value, type, precision));
-        } else if (posValue < 1000000) {
+        } else if (posValue < 1000000.0f) {
             return tr("%1k").arg(QString::number(value / 1000.0, type, precision));
-        } else if (posValue < 1000000000) {
+        } else if (posValue < 1000000000.0f) {
             return tr("%1M").arg(QString::number(value / 1000000.0, type, precision));
-        } else if (posValue < 1000000000000) {
+        } else if (posValue < 1000000000000.0f) {
             return tr("%1G").arg(QString::number(value / 1000000000.0, type, precision));
         } else {
             return tr("%1").arg(QString::number(value, 'e', precision));

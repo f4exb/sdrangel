@@ -279,7 +279,11 @@ bool DATVideoRender::preprocessStream()
     m_metaData.Width = m_videoDecoderCtx->width;
     m_metaData.Height = m_videoDecoderCtx->height;
     m_metaData.BitRate = m_videoDecoderCtx->bit_rate;
+#if LIBAVUTIL_VERSION_MAJOR < 59
     m_metaData.Channels = m_videoDecoderCtx->channels;
+#else
+    m_metaData.Channels = m_videoDecoderCtx->ch_layout.nb_channels;
+#endif
     m_metaData.CodecDescription = QString("%1").arg(videoCodec->long_name);
     m_metaData.OK_VideoStream = true;
 
@@ -305,8 +309,13 @@ bool DATVideoRender::preprocessStream()
         //m_audioDecoderCtx = m_formatCtx->streams[m_audioStreamIndex]->codec; // old style
 
         qDebug() << "DATVideoRender::preprocessStream: audio: "
+#if LIBAVUTIL_VERSION_MAJOR < 59
         << " channels: " << m_audioDecoderCtx->channels
         << " channel_layout: " << m_audioDecoderCtx->channel_layout
+#else
+        << " channels: " << m_audioDecoderCtx->ch_layout.nb_channels
+        << " channel_layout: " << m_audioDecoderCtx->ch_layout.u.mask
+#endif
         << " sample_rate: " << m_audioDecoderCtx->sample_rate
         << " sample_fmt: " << m_audioDecoderCtx->sample_fmt
         << " codec_id: "<< m_audioDecoderCtx->codec_id;
@@ -625,10 +634,16 @@ void DATVideoRender::setResampler()
     }
 
     m_audioSWR = swr_alloc();
+#if LIBAVUTIL_VERSION_MAJOR < 59
     av_opt_set_int(m_audioSWR, "in_channel_count",  m_audioDecoderCtx->channels, 0);
     av_opt_set_int(m_audioSWR, "out_channel_count", 2, 0);
     av_opt_set_int(m_audioSWR, "in_channel_layout",  m_audioDecoderCtx->channel_layout, 0);
     av_opt_set_int(m_audioSWR, "out_channel_layout", AV_CH_LAYOUT_STEREO, 0);
+#else
+    AVChannelLayout out_chlayout = AV_CHANNEL_LAYOUT_STEREO;
+    av_opt_set_chlayout(m_audioSWR, "in_chlayout", &m_audioDecoderCtx->ch_layout, 0);
+    av_opt_set_chlayout(m_audioSWR, "out_chlayout",  &out_chlayout, 0);
+#endif
     av_opt_set_int(m_audioSWR, "in_sample_rate", m_audioDecoderCtx->sample_rate, 0);
     av_opt_set_int(m_audioSWR, "out_sample_rate", m_audioSampleRate, 0);
     av_opt_set_sample_fmt(m_audioSWR, "in_sample_fmt",  m_audioDecoderCtx->sample_fmt, 0);
@@ -637,10 +652,17 @@ void DATVideoRender::setResampler()
     swr_init(m_audioSWR);
 
     qDebug() << "DATVideoRender::setResampler: "
+#if LIBAVUTIL_VERSION_MAJOR < 59
         << " in_channel_count: " <<  m_audioDecoderCtx->channels
         << " out_channel_count: " << 2
         << " in_channel_layout: " <<  m_audioDecoderCtx->channel_layout
         << " out_channel_layout: " <<  AV_CH_LAYOUT_STEREO
+#else
+        << " in_channel_count: " <<  m_audioDecoderCtx->ch_layout.nb_channels
+        << " out_channel_count: " << 2
+        << " in_channel_layout: " <<  m_audioDecoderCtx->ch_layout.u.mask
+        << " out_channel_layout: " <<  out_chlayout.u.mask
+#endif
         << " in_sample_rate: " << m_audioDecoderCtx->sample_rate
         << " out_sample_rate: " << m_audioSampleRate
         << " in_sample_fmt: " << m_audioDecoderCtx->sample_fmt

@@ -27,8 +27,7 @@
 
 MESSAGE_CLASS_DEFINITION(RadioClockBaseband::MsgConfigureRadioClockBaseband, Message)
 
-RadioClockBaseband::RadioClockBaseband(RadioClock *radioClock) :
-    m_sink(radioClock),
+RadioClockBaseband::RadioClockBaseband() :
     m_running(false)
 {
     qDebug("RadioClockBaseband::RadioClockBaseband");

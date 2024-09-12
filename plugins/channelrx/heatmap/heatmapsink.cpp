@@ -24,9 +24,8 @@
 #include "heatmap.h"
 #include "heatmapsink.h"
 
-HeatMapSink::HeatMapSink(HeatMap *heatMap) :
+HeatMapSink::HeatMapSink() :
         m_scopeSink(nullptr),
-        m_heatMap(heatMap),
         m_channelSampleRate(10000),
         m_channelFrequencyOffset(0),
         m_magsq(0.0),

@@ -18,7 +18,11 @@
 
 #include <QOpenGLShaderProgram>
 #include <QOpenGLFunctions>
+#if defined(ANDROID)
+#include <QOpenGLFunctions_ES2>
+#else
 #include <QOpenGLFunctions_3_3_Core>
+#endif
 #include <QOpenGLContext>
 #include <QtOpenGL>
 #include <QImage>

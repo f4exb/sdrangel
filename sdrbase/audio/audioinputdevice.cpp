@@ -143,7 +143,7 @@ bool AudioInputDevice::start(int device, int rate)
         if (m_audioInput->state() != QAudio::ActiveState) {
             qWarning("AudioInputDevice::start: cannot start");
         } else {
-            qDebug("AudioInputDevice::start: started buffer: %d bytes", m_audioInput->bufferSize());
+            qDebug("AudioInputDevice::start: started buffer: %d bytes", (int)m_audioInput->bufferSize());
         }
 	// }
 

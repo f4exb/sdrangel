@@ -20,8 +20,7 @@
 
 #include "channelpowersink.h"
 
-ChannelPowerSink::ChannelPowerSink(ChannelPower *channelPower) :
-        m_channelPower(channelPower),
+ChannelPowerSink::ChannelPowerSink() :
         m_channelSampleRate(10000),
         m_channelFrequencyOffset(0),
         m_lowpassFFT(nullptr),
@@ -41,7 +40,6 @@ ChannelPowerSink::~ChannelPowerSink()
 void ChannelPowerSink::feed(const SampleVector::const_iterator& begin, const SampleVector::const_iterator& end)
 {
     QMutexLocker mutexLocker(&m_mutex);
-    Complex ci;
 
     for (SampleVector::const_iterator it = begin; it != end; ++it)
     {

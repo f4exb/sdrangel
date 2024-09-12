@@ -38,7 +38,7 @@ class NoiseFigure;
 
 class NoiseFigureSink : public ChannelSampleSink {
 public:
-    NoiseFigureSink(NoiseFigure *aisDemod);
+    NoiseFigureSink();
     ~NoiseFigureSink();
 
     virtual void feed(const SampleVector::const_iterator& begin, const SampleVector::const_iterator& end);
@@ -81,7 +81,6 @@ private:
         double m_magsqPeak;
     };
 
-    NoiseFigure *m_noiseFigure;
     NoiseFigureSettings m_settings;
     ChannelAPI *m_channel;
     int m_channelSampleRate;

@@ -163,7 +163,6 @@ private:
     int m_hSyncErrorCount;
 
     float prevSample;
-    int m_avgColIndex;
 
     SampleVector m_sampleBuffer;
 

@@ -27,8 +27,7 @@
 #include "navtexdemod.h"
 #include "navtexdemodsink.h"
 
-NavtexDemodSink::NavtexDemodSink(NavtexDemod *packetDemod) :
-        m_navtexDemod(packetDemod),
+NavtexDemodSink::NavtexDemodSink() :
         m_channelSampleRate(NavtexDemodSettings::NAVTEXDEMOD_CHANNEL_SAMPLE_RATE),
         m_channelFrequencyOffset(0),
         m_magsqSum(0.0f),

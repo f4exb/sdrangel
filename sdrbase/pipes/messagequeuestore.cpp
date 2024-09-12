@@ -34,7 +34,7 @@ QObject *MessageQueueStore::createElement()
 {
     MessageQueue *messageQueue = new MessageQueue();
     m_messageQueues.push_back(messageQueue);
-    qDebug("MessageQueueStore::createElement: %d added", m_messageQueues.size() - 1);
+    qDebug("MessageQueueStore::createElement: %d added", (int)m_messageQueues.size() - 1);
     return messageQueue;
 }
 

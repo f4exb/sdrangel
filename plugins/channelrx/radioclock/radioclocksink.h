@@ -42,7 +42,7 @@ class ScopeVis;
 
 class RadioClockSink : public ChannelSampleSink {
 public:
-    RadioClockSink(RadioClock *radioClock);
+    RadioClockSink();
     ~RadioClockSink();
 
     virtual void feed(const SampleVector::const_iterator& begin, const SampleVector::const_iterator& end);
@@ -86,7 +86,6 @@ private:
     };
 
     ScopeVis* m_scopeSink;    // Scope GUI to display debug waveforms
-    RadioClock *m_radioClock;
     RadioClockSettings m_settings;
     ChannelAPI *m_channel;
     int m_channelSampleRate;

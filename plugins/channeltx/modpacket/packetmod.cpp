@@ -59,7 +59,6 @@ PacketMod::PacketMod(DeviceAPI *deviceAPI) :
     ChannelAPI(m_channelIdURI, ChannelAPI::StreamSingleSource),
     m_deviceAPI(deviceAPI),
     m_spectrumVis(SDR_TX_SCALEF),
-    m_sampleRate(48000),
     m_udpSocket(nullptr)
 {
     setObjectName(m_channelId);

@@ -84,7 +84,6 @@ private:
         FT8::Packing& m_packing;
         MsgReportFT8Messages *m_msgReportFT8Messages;
         const QDateTime& m_periodTS;
-        qint64 m_baseFrequency;
         QString m_name;
         const QSet<QString> *m_validCallsigns;
     };

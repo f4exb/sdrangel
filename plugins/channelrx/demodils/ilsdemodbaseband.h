@@ -63,7 +63,7 @@ public:
         { }
     };
 
-    ILSDemodBaseband(ILSDemod *packetDemod);
+    ILSDemodBaseband();
     ~ILSDemodBaseband();
     void reset();
     void startWork();

@@ -45,7 +45,7 @@ class ScopeVis;
 
 class PagerDemodSink : public ChannelSampleSink {
 public:
-    PagerDemodSink(PagerDemod *pagerDemod);
+    PagerDemodSink();
     ~PagerDemodSink();
 
     virtual void feed(const SampleVector::const_iterator& begin, const SampleVector::const_iterator& end);
@@ -88,7 +88,6 @@ private:
     };
 
     ScopeVis* m_scopeSink;              // Scope GUI to display debug waveforms
-    PagerDemod *m_pagerDemod;
     PagerDemodSettings m_settings;
     ChannelAPI *m_channel;
     int m_channelSampleRate;

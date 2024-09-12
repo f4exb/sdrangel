@@ -39,7 +39,7 @@ class ScopeVis;
 
 class RttyDemodSink : public ChannelSampleSink {
 public:
-    RttyDemodSink(RttyDemod *packetDemod);
+    RttyDemodSink();
     ~RttyDemodSink();
 
     virtual void feed(const SampleVector::const_iterator& begin, const SampleVector::const_iterator& end);
@@ -83,7 +83,6 @@ private:
     };
 
     ScopeVis* m_scopeSink;    // Scope GUI to display baseband waveform
-    RttyDemod *m_rttyDemod;
     RttyDemodSettings m_settings;
     ChannelAPI *m_channel;
     int m_channelSampleRate;

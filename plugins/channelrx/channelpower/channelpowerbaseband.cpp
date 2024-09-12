@@ -25,8 +25,7 @@
 
 MESSAGE_CLASS_DEFINITION(ChannelPowerBaseband::MsgConfigureChannelPowerBaseband, Message)
 
-ChannelPowerBaseband::ChannelPowerBaseband(ChannelPower *channelPower) :
-    m_sink(channelPower),
+ChannelPowerBaseband::ChannelPowerBaseband() :
     m_running(false)
 {
     qDebug("ChannelPowerBaseband::ChannelPowerBaseband");

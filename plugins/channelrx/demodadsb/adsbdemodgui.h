@@ -811,6 +811,8 @@ public:
     {
         m_aircraftRegExp.optimize();
     }
+    
+    virtual ~ModelMatch() = default;
 
     virtual bool match(const QString &aircraft, const QString &manufacturer, QString &model)
     {

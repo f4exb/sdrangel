@@ -34,12 +34,12 @@ if(NOT SERVER_MODE)
         soapysdrinputgui.h
     )
 
-    set(TARGET_NAME inputsoapysdr)
+    set(TARGET_NAME ${PLUGINS_PREFIX}inputsoapysdr)
     set(TARGET_LIB "Qt::Widgets")
     set(TARGET_LIB_GUI "sdrgui")
     set(INSTALL_FOLDER ${INSTALL_PLUGINS_DIR})
 else()
-    set(TARGET_NAME inputsoapysdrsrv)
+    set(TARGET_NAME ${PLUGINSSRV_PREFIX}inputsoapysdrsrv)
     set(TARGET_LIB "")
     set(TARGET_LIB_GUI "")
     set(INSTALL_FOLDER ${INSTALL_PLUGINSSRV_DIR})
@@ -56,7 +56,12 @@ target_link_libraries(${TARGET_NAME}
 	${TARGET_LIB_GUI}
         swagger
         ${SOAPYSDR_LINK_LIBRARIES}
+        ${SOAPYSDR_LIBRARIES}
         soapysdrdevice
+)
+
+target_link_directories(${TARGET_NAME} PRIVATE
+    ${SOAPYSDR_LIBRARY_DIRS}
 )
 
 install(TARGETS ${TARGET_NAME} DESTINATION ${INSTALL_FOLDER})

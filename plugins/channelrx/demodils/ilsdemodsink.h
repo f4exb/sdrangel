@@ -44,7 +44,7 @@ class SpectrumVis;
 
 class ILSDemodSink : public ChannelSampleSink {
 public:
-    ILSDemodSink(ILSDemod *packetDemod);
+    ILSDemodSink();
     ~ILSDemodSink();
 
     virtual void feed(const SampleVector::const_iterator& begin, const SampleVector::const_iterator& end);
@@ -96,7 +96,6 @@ private:
 
 	SpectrumVis* m_spectrumSink;
     ScopeVis* m_scopeSink;    // Scope GUI to display baseband waveform
-    ILSDemod *m_ilsDemod;
     ILSDemodSettings m_settings;
     ChannelAPI *m_channel;
     int m_channelSampleRate;

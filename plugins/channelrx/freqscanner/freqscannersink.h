@@ -37,7 +37,7 @@ class FreqScanner;
 
 class FreqScannerSink : public ChannelSampleSink {
 public:
-    FreqScannerSink(FreqScanner *packetDemod);
+    FreqScannerSink();
     ~FreqScannerSink();
 
     virtual void feed(const SampleVector::const_iterator& begin, const SampleVector::const_iterator& end);
@@ -50,7 +50,6 @@ public:
 
 private:
 
-    FreqScanner *m_freqScanner;
     FreqScannerSettings m_settings;
     ChannelAPI *m_channel;
     int m_channelSampleRate;

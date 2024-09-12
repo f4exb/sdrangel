@@ -28,8 +28,7 @@
 #include "rttydemod.h"
 #include "rttydemodsink.h"
 
-RttyDemodSink::RttyDemodSink(RttyDemod *packetDemod) :
-        m_rttyDemod(packetDemod),
+RttyDemodSink::RttyDemodSink() :
         m_channelSampleRate(RttyDemodSettings::RTTYDEMOD_CHANNEL_SAMPLE_RATE),
         m_channelFrequencyOffset(0),
         m_magsqSum(0.0f),

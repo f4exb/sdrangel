@@ -62,7 +62,7 @@ public:
         { }
     };
 
-    RadioClockBaseband(RadioClock *radioClock);
+    RadioClockBaseband();
     ~RadioClockBaseband();
     void reset();
     void startWork();

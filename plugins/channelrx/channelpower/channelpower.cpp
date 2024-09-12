@@ -49,7 +49,7 @@ ChannelPower::ChannelPower(DeviceAPI *deviceAPI) :
 {
     setObjectName(m_channelId);
 
-    m_basebandSink = new ChannelPowerBaseband(this);
+    m_basebandSink = new ChannelPowerBaseband();
     m_basebandSink->setChannel(this);
     m_basebandSink->moveToThread(&m_thread);
 

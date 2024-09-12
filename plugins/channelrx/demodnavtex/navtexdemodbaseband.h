@@ -62,7 +62,7 @@ public:
         { }
     };
 
-    NavtexDemodBaseband(NavtexDemod *navtexDemod);
+    NavtexDemodBaseband();
     ~NavtexDemodBaseband();
     void reset();
     void startWork();

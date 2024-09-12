@@ -28,10 +28,9 @@
 #include "ilsdemod.h"
 #include "ilsdemodsink.h"
 
-ILSDemodSink::ILSDemodSink(ILSDemod *ilsDemod) :
+ILSDemodSink::ILSDemodSink() :
         m_spectrumSink(nullptr),
         m_scopeSink(nullptr),
-        m_ilsDemod(ilsDemod),
         m_channel(nullptr),
         m_channelSampleRate(ILSDemodSettings::ILSDEMOD_CHANNEL_SAMPLE_RATE),
         m_channelFrequencyOffset(0),

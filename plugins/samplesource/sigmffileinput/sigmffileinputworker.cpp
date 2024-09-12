@@ -625,8 +625,8 @@ void SigMFFileInputWorker::writeToSampleFifoBAK(const quint8* buf, qint32 nbByte
                 nbSamples = nbBytes / (2 * m_samplebytes);
                 for (int is = 0; is < nbSamples; is++)
                 {
-                    convertBuf[2*is]   = fileBuf[2*is] >> (SDR_RX_SAMP_SZ == 24) ? 8 : 16;
-                    convertBuf[2*is+1] = fileBuf[2*is+1] >> (SDR_RX_SAMP_SZ == 24) ? 8 : 16;
+                    convertBuf[2*is]   = fileBuf[2*is] >> ((SDR_RX_SAMP_SZ == 24) ? 8 : 16);
+                    convertBuf[2*is+1] = fileBuf[2*is+1] >> ((SDR_RX_SAMP_SZ == 24) ? 8 : 16);
                 }
             }
             else
@@ -634,7 +634,7 @@ void SigMFFileInputWorker::writeToSampleFifoBAK(const quint8* buf, qint32 nbByte
                 nbSamples = nbBytes / m_samplebytes;
                 for (int is = 0; is < nbSamples; is++)
                 {
-                    convertBuf[2*is]   = fileBuf[is] >> (SDR_RX_SAMP_SZ == 24) ? 8 : 16;
+                    convertBuf[2*is]   = fileBuf[is] >> ((SDR_RX_SAMP_SZ == 24) ? 8 : 16);
                     convertBuf[2*is+1] = 0;
                 }
             }
@@ -715,9 +715,9 @@ void SigMFFileInputWorker::writeToSampleFifoBAK(const quint8* buf, qint32 nbByte
                 nbSamples = nbBytes / (2 * m_samplebytes);
                 for (int is = 0; is < nbSamples; is++)
                 {
-                    convertBuf[2*is] = (fileBuf[2*is] >> (SDR_RX_SAMP_SZ == 24) ? 8 : 16)
+                    convertBuf[2*is] = (fileBuf[2*is] >> ((SDR_RX_SAMP_SZ == 24) ? 8 : 16))
                         - ((SDR_RX_SAMP_SZ == 24) ? (1<<23) : (1<<15));
-                    convertBuf[2*is+1] = (fileBuf[2*is+1] >> (SDR_RX_SAMP_SZ == 24) ? 8 : 16)
+                    convertBuf[2*is+1] = (fileBuf[2*is+1] >> ((SDR_RX_SAMP_SZ == 24) ? 8 : 16))
                         - ((SDR_RX_SAMP_SZ == 24) ? (1<<23) : (1<<15));;
                 }
             }
@@ -726,7 +726,7 @@ void SigMFFileInputWorker::writeToSampleFifoBAK(const quint8* buf, qint32 nbByte
                 nbSamples = nbBytes / m_samplebytes;
                 for (int is = 0; is < nbSamples; is++)
                 {
-                    convertBuf[2*is] = (fileBuf[is] >> (SDR_RX_SAMP_SZ == 24) ? 8 : 16)
+                    convertBuf[2*is] = (fileBuf[is] >> ((SDR_RX_SAMP_SZ == 24) ? 8 : 16))
                         - ((SDR_RX_SAMP_SZ == 24) ? (1<<23) : (1<<15));
                     convertBuf[2*is+1] = 0;
                 }

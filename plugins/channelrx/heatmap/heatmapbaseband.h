@@ -62,7 +62,7 @@ public:
         { }
     };
 
-    HeatMapBaseband(HeatMap *heatDemod);
+    HeatMapBaseband();
     ~HeatMapBaseband();
     void reset();
     void startWork();

@@ -118,8 +118,6 @@ void AISDemodSink::feed(const SampleVector::const_iterator& begin, const SampleV
 
 void AISDemodSink::processOneSample(Complex &ci)
 {
-    Complex ca;
-
     // FM demodulation
     double magsqRaw;
     Real deviation;

@@ -66,7 +66,7 @@ uint32_t RTPRandom::PickSeed()
 #else
     x += (uint32_t)clock();
 #endif
-    x ^= (uint32_t)((uint8_t *)this - (uint8_t *)0);
+    x ^= (uint32_t)(size_t)this;
     return x;
 }
 

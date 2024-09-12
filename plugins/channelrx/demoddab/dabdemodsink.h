@@ -43,7 +43,7 @@ class DABDemod;
 
 class DABDemodSink : public ChannelSampleSink {
 public:
-    DABDemodSink(DABDemod *packetDemod);
+    DABDemodSink();
     ~DABDemodSink();
 
     virtual void feed(const SampleVector::const_iterator& begin, const SampleVector::const_iterator& end);
@@ -106,7 +106,6 @@ private:
         double m_magsqPeak;
     };
 
-    DABDemod *m_dabDemod;
     DABDemodSettings m_settings;
     ChannelAPI *m_channel;
 

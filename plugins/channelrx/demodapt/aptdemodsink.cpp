@@ -23,8 +23,7 @@
 #include "aptdemod.h"
 #include "aptdemodsink.h"
 
-APTDemodSink::APTDemodSink(APTDemod *packetDemod) :
-        m_aptDemod(packetDemod),
+APTDemodSink::APTDemodSink() :
         m_channelSampleRate(APTDEMOD_AUDIO_SAMPLE_RATE),
         m_channelFrequencyOffset(0),
         m_magsqSum(0.0f),
@@ -33,6 +32,7 @@ APTDemodSink::APTDemodSink(APTDemod *packetDemod) :
         m_imageWorkerMessageQueue(nullptr),
         m_samples(nullptr)
 {
+
     m_magsq = 0.0;
 
     applySettings(m_settings, true);
@@ -129,8 +129,6 @@ void APTDemodSink::feed(const SampleVector::const_iterator& begin, const SampleV
 
 void APTDemodSink::processOneSample(Complex &ci)
 {
-    Complex ca;
-
     // FM demodulation
     double magsqRaw;
     Real deviation;

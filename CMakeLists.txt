@@ -269,6 +269,14 @@ else()
 endif()
 set(INSTALL_PLUGINS_DIR "${INSTALL_LIB_DIR}/plugins")
 set(INSTALL_PLUGINSSRV_DIR "${INSTALL_LIB_DIR}/pluginssrv")
+
+if(ANDROID)
+  set(PLUGINS_PREFIX    "sdrangel_plugins_")
+  set(PLUGINSSRV_PREFIX "sdrangel_pluginssrv_")
+else()
+  set(PLUGINS_PREFIX    "")
+  set(PLUGINSSRV_PREFIX "")
+endif()
 set(EXTERNAL_BUILD_LIBRARIES "${CMAKE_BINARY_DIR}/external")
 
 # custom libraries
@@ -579,6 +587,7 @@ elseif(ANDROID)
       CACHE INTERNAL ""
     )
   endif()
+  add_compile_definitions(ANDROID)
 endif()
 
 # When building a bundle on MacOS, we want to keep build paths in the library
@@ -659,6 +668,7 @@ if (BUILD_GUI)
         if (ENABLE_QT6)
             find_package(Qt6
                            REQUIRED COMPONENTS
+                            Location
                             OpenGL
                             OpenGLWidgets
                             Quick

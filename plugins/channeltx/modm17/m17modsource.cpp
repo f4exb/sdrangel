@@ -130,7 +130,7 @@ void M17ModSource::pullOne(Sample& sample)
 
 void M17ModSource::prefetch(unsigned int nbSamples)
 {
-    if ((m_settings.m_m17Mode == M17ModSettings::M17ModeFMAudio))
+    if (m_settings.m_m17Mode == M17ModSettings::M17ModeFMAudio)
     {
         unsigned int nbSamplesAudio = nbSamples * ((Real) m_audioSampleRate / (Real) m_channelSampleRate);
         pullAudio(nbSamplesAudio);

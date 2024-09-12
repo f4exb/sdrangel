@@ -487,8 +487,7 @@ void DABDemodSink::processOneAudioSample(Complex &ci)
     }
 }
 
-DABDemodSink::DABDemodSink(DABDemod *packetDemod) :
-        m_dabDemod(packetDemod),
+DABDemodSink::DABDemodSink() :
         m_audioSampleRate(48000),
         m_dabAudioSampleRate(10000), // Unused value to begin with
         m_channelSampleRate(DABDEMOD_CHANNEL_SAMPLE_RATE),

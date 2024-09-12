@@ -34,7 +34,7 @@ QObject *DataFifoStore::createElement()
 {
     DataFifo *fifo = new DataFifo();
     m_dataFifos.push_back(fifo);
-    qDebug("DataFifoStore::createElement: %d added", m_dataFifos.size() - 1);
+    qDebug("DataFifoStore::createElement: %d added", (int)m_dataFifos.size() - 1);
     return fifo;
 }
 

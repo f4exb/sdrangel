@@ -94,7 +94,7 @@ void HttpConnectionHandlerPool::cleanup()
             if (++idleCounter > maxIdleHandlers)
             {
                 pool.removeOne(handler);
-                qDebug("HttpConnectionHandlerPool: Removed connection handler (%p), pool size is now %i",handler,pool.size());
+                qDebug("HttpConnectionHandlerPool: Removed connection handler (%p), pool size is now %i",handler,(int)pool.size());
                 delete handler;
                 break; // remove only one handler in each interval
             }
