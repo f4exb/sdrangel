@@ -50,7 +50,7 @@ endif()
 
 # CUDA Toolkit: https://developer.nvidia.com/cuda-downloads
 if (${VKFFT_BACKEND} EQUAL 1)
-    find_package(CUDA 9.0)
+    find_package(CUDAToolkit)    
     if(CUDA_FOUND)
         enable_language(CUDA)
         set(sdrbase_SOURCES
