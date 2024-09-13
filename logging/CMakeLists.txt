@@ -21,7 +21,7 @@ include_directories(
     ${CMAKE_SOURCE_DIR}/exports
 )
 
-add_library(logging SHARED
+add_library(logging
     ${logging_SOURCES}
 )
 

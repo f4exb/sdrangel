@@ -4,7 +4,12 @@ add_subdirectory(testsink)
 add_subdirectory(fileoutput)
 add_subdirectory(localoutput)
 add_subdirectory(audiooutput)
-add_subdirectory(aaroniartsaoutput)
+
+if(ENABLE_AARONIARTSA)
+    add_subdirectory(aaroniartsaoutput)
+else()
+    message(STATUS "Not building aaroniartsaoutput (ENABLE_AARONIARTSA=${ENABLE_AARONIARTSA})")
+endif()
 
 if (CM256CC_FOUND AND (HAS_SSE3 OR HAS_NEON))
     add_subdirectory(remoteoutput)

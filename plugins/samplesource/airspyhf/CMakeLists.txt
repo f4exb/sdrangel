@@ -44,15 +44,21 @@ else()
     set(INSTALL_FOLDER ${INSTALL_PLUGINSSRV_DIR})
 endif()
 
-add_library(${TARGET_NAME} SHARED
-	${airspyhf_SOURCES}
-)
+if(NOT Qt6_FOUND)
+    add_library(${TARGET_NAME} ${airspyhf_SOURCES})
+else()
+    qt_add_plugin(${TARGET_NAME} CLASS_NAME AirspyHFPlugin ${airspyhf_SOURCES})
+endif()
+
+if(NOT BUILD_SHARED_LIBS)
+    set_property(GLOBAL APPEND PROPERTY STATIC_PLUGINS_PROPERTY ${TARGET_NAME})
+endif()
 
 if(LIBAIRSPYHF_EXTERNAL)
     add_dependencies(${TARGET_NAME} airspyhf)
 endif()
 
-target_link_libraries(${TARGET_NAME}
+target_link_libraries(${TARGET_NAME} PRIVATE
         Qt::Core
         ${TARGET_LIB}
 	sdrbase

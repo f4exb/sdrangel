@@ -29,11 +29,17 @@ include_directories(
 set(TARGET_NAME ${PLUGINS_PREFIX}demodatv)
 set(INSTALL_FOLDER ${INSTALL_PLUGINS_DIR})
 
-add_library(${TARGET_NAME} SHARED
-	${atv_SOURCES}
-)
+if(NOT Qt6_FOUND)
+    add_library(${TARGET_NAME} ${atv_SOURCES})
+else()
+    qt_add_plugin(${TARGET_NAME} CLASS_NAME ATVDemodPlugin ${atv_SOURCES})
+endif()
 
-target_link_libraries(${TARGET_NAME}
+if(NOT BUILD_SHARED_LIBS)
+    set_property(GLOBAL APPEND PROPERTY STATIC_PLUGINS_PROPERTY ${TARGET_NAME})
+endif()
+
+target_link_libraries(${TARGET_NAME} PRIVATE
     Qt::Core
     Qt::Widgets
 	sdrbase

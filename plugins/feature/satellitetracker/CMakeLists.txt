@@ -49,6 +49,9 @@ if(NOT SERVER_MODE)
 
     set(TARGET_NAME ${PLUGINS_PREFIX}featuresatellitetracker)
     set(TARGET_LIB Qt::Widgets Qt::Positioning Qt::Charts Qt::TextToSpeech)
+    if(Qt${QT_DEFAULT_MAJOR_VERSION}TextToSpeech_FOUND)
+        list(APPEND TARGET_LIB Qt::TextToSpeech)
+    endif()
     set(TARGET_LIB_GUI "sdrgui")
     set(INSTALL_FOLDER ${INSTALL_PLUGINS_DIR})
 else()
@@ -58,15 +61,21 @@ else()
     set(INSTALL_FOLDER ${INSTALL_PLUGINSSRV_DIR})
 endif()
 
-add_library(${TARGET_NAME} SHARED
-    ${satellitetracker_SOURCES}
-)
+if(NOT Qt6_FOUND)
+    add_library(${TARGET_NAME} ${satellitetracker_SOURCES})
+else()
+    qt_add_plugin(${TARGET_NAME} CLASS_NAME SatelliteTrackerPlugin ${satellitetracker_SOURCES})
+endif()
+
+if(NOT BUILD_SHARED_LIBS)
+    set_property(GLOBAL APPEND PROPERTY STATIC_PLUGINS_PROPERTY ${TARGET_NAME})
+endif()
 
 if(SGP4_EXTERNAL)
     add_dependencies(${TARGET_NAME} sgp4)
 endif()
 
-target_link_libraries(${TARGET_NAME}
+target_link_libraries(${TARGET_NAME} PRIVATE
     Qt::Core
     ${TARGET_LIB}
     sdrbase
@@ -74,9 +83,7 @@ target_link_libraries(${TARGET_NAME}
     ${SGP4_LIBRARIES}
 )
 if (Qt6_FOUND)
-    target_link_libraries(${TARGET_NAME}
-        Qt::Core5Compat
-    )
+    target_link_libraries(${TARGET_NAME} PRIVATE Qt::Core5Compat)
 endif()
 
 install(TARGETS ${TARGET_NAME} DESTINATION ${INSTALL_FOLDER})

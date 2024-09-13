@@ -52,11 +52,17 @@ else()
     set(INSTALL_FOLDER ${INSTALL_PLUGINSSRV_DIR})
 endif()
 
-add_library(${TARGET_NAME} SHARED
-	${audiocatsiso_SOURCES}
-)
+if(NOT Qt6_FOUND)
+    add_library(${TARGET_NAME} ${audiocatsiso_SOURCES})
+else()
+    qt_add_plugin(${TARGET_NAME} CLASS_NAME AudioCATSISOPlugin ${audiocatsiso_SOURCES})
+endif()
 
-target_link_libraries(${TARGET_NAME}
+if(NOT BUILD_SHARED_LIBS)
+    set_property(GLOBAL APPEND PROPERTY STATIC_PLUGINS_PROPERTY ${TARGET_NAME})
+endif()
+
+target_link_libraries(${TARGET_NAME} PRIVATE
     Qt::Core
     ${TARGET_LIB}
 	sdrbase

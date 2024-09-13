@@ -143,7 +143,7 @@ include_directories(
     ${FFTW3F_INCLUDE_DIRS}
 )
 
-add_library(wdsp SHARED
+add_library(wdsp
     ${wdsp_SOURCES}
 )
 

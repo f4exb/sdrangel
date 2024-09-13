@@ -572,7 +572,7 @@ include_directories(
     ${Qt${QT_DEFAULT_MAJOR_VERSION}Gui_PRIVATE_INCLUDE_DIRS}
 )
 
-add_library(sdrbase SHARED
+add_library(sdrbase
     ${sdrbase_SOURCES}
 )
 
