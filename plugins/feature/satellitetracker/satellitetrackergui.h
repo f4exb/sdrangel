@@ -92,7 +92,9 @@ private:
     QDateTime m_nextTargetLOS;
     bool m_geostationarySatVisible;
 
+#ifdef QT_TEXTTOSPEECH_FOUND
     QTextToSpeech *m_speech;
+#endif
     QMenu *menu;                        // Column select context menu
 
     enum SatCol {

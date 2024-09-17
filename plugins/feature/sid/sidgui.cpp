@@ -2035,7 +2035,15 @@ void SIDGUI::on_showPaths_clicked()
         {
             // Get position of device, defaulting to My Position
             QGeoCoordinate rxPosition;
-            if (!ChannelWebAPIUtils::getDevicePosition(deviceSetIndex, rxPosition))
+            float latitude, longitude, altitude;
+
+            if (ChannelWebAPIUtils::getDevicePosition(deviceSetIndex, latitude, longitude, altitude))
+            {
+                rxPosition.setLatitude(latitude);
+                rxPosition.setLongitude(longitude);
+                rxPosition.setAltitude(altitude);
+            }
+            else
             {
                 rxPosition.setLatitude(MainCore::instance()->getSettings().getLatitude());
                 rxPosition.setLongitude(MainCore::instance()->getSettings().getLongitude());

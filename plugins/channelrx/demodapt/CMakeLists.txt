@@ -35,7 +35,7 @@ if(NOT SERVER_MODE)
         aptdemodsettingsdialog.ui
         aptdemodselectdialog.cpp
         aptdemodselectdialog.ui
-        icons.qrc
+        aptdemodicons.qrc
     )
     set(demodapt_HEADERS
         ${demodapt_HEADERS}
@@ -55,9 +55,15 @@ else()
     set(INSTALL_FOLDER ${INSTALL_PLUGINSSRV_DIR})
 endif()
 
-add_library(${TARGET_NAME} SHARED
-    ${demodapt_SOURCES}
-)
+if(NOT Qt6_FOUND)
+    add_library(${TARGET_NAME} ${demodapt_SOURCES})
+else()
+    qt_add_plugin(${TARGET_NAME} CLASS_NAME APTDemodPlugin ${demodapt_SOURCES})
+endif()
+
+if(NOT BUILD_SHARED_LIBS)
+    set_property(GLOBAL APPEND PROPERTY STATIC_PLUGINS_PROPERTY ${TARGET_NAME})
+endif()
 
 if(APT_EXTERNAL)
     add_dependencies(${TARGET_NAME} apt)
@@ -67,7 +73,7 @@ if(SGP4_EXTERNAL)
     add_dependencies(${TARGET_NAME} sgp4)
 endif()
 
-target_link_libraries(${TARGET_NAME}
+target_link_libraries(${TARGET_NAME} PRIVATE
     Qt::Core
     ${TARGET_LIB}
     sdrbase

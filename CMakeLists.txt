@@ -728,8 +728,27 @@ if (BUILD_GUI)
     endif()
 endif()
 
+# List of static plugins to link with - This is appended to by each pluging CMakeLists.txt
+set_property(GLOBAL PROPERTY STATIC_PLUGINS_PROPERTY "")
+
+if(Qt${QT_DEFAULT_MAJOR_VERSION}Positioning_FOUND)
+    add_compile_definitions(QT_POSITIONING_FOUND)
+endif()
+if(Qt${QT_DEFAULT_MAJOR_VERSION}Location_FOUND)
+    add_compile_definitions(QT_LOCATION_FOUND)
+endif()
+if(Qt${QT_DEFAULT_MAJOR_VERSION}Charts_FOUND)
+    add_compile_definitions(QT_CHARTS_FOUND)
+endif()
+if(Qt${QT_DEFAULT_MAJOR_VERSION}TextToSpeech_FOUND)
+    add_compile_definitions(QT_TEXTTOSPEECH_FOUND)
+endif()
+if(BUILD_SHARED_LIBS)
+    add_compile_definitions(BUILD_SHARED_LIBS)
+endif()
+
 # other requirements
-if(NOT ANDROID)
+if(NOT ANDROID AND NOT EMSCRIPTEN)
   find_package(PkgConfig REQUIRED)
 endif()
 

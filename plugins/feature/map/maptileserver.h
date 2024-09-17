@@ -181,7 +181,9 @@ public:
         }
 
         QNetworkReply *reply = m_manager.get(request);
+#ifndef QT_NO_OPENSSL
         connect(reply, &QNetworkReply::sslErrors, this, &MapTileServer::sslErrors);
+#endif
         //qDebug() << "MapTileServer: Downloading from " << url;
         return reply;
     }
@@ -407,6 +409,7 @@ private slots:
         m_replies.remove(reply);
     }
 
+#ifndef QT_NO_OPENSSL
     void sslErrors(const QList<QSslError> &sslErrors)
     {
         for (const QSslError &error : sslErrors)
@@ -425,6 +428,7 @@ private slots:
     #endif
         }
     }
+#endif
 
 };
 

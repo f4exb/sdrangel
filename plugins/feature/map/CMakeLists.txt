@@ -41,7 +41,7 @@ if(NOT SERVER_MODE)
     set(map_SOURCES
         ${map_SOURCES}
         mapgui.cpp
-        ${CMAKE_CURRENT_BINARY_DIR}/mapgui.ui
+        #${CMAKE_CURRENT_BINARY_DIR}/mapgui.ui
         maplocationdialog.cpp
         maplocationdialog.ui
         mapmaidenheaddialog.cpp
@@ -61,9 +61,9 @@ if(NOT SERVER_MODE)
         cesiuminterface.cpp
         czml.cpp
         map.qrc
-        icons.qrc
+        mapicons.qrc
         cesium.qrc
-        data.qrc
+        mapdata.qrc
     )
     set(map_HEADERS
         ${map_HEADERS}
@@ -91,7 +91,7 @@ if(NOT SERVER_MODE)
         set(TARGET_LIB ${TARGET_LIB} Qt::WebEngine Qt::WebEngineCore Qt::WebEngineWidgets)
     elseif(Qt${QT_DEFAULT_MAJOR_VERSION}WebEngineCore_FOUND)
         set(TARGET_LIB ${TARGET_LIB} Qt::SvgWidgets Qt::WebEngineCore Qt::WebEngineWidgets)
-    elseif(ANDROID)
+    else()
         set(TARGET_LIB ${TARGET_LIB} Qt::SvgWidgets)
     endif()
 else()
@@ -101,11 +101,17 @@ else()
     set(INSTALL_FOLDER ${INSTALL_PLUGINSSRV_DIR})
 endif()
 
-add_library(${TARGET_NAME} SHARED
-    ${map_SOURCES}
-)
+if(NOT Qt6_FOUND)
+    add_library(${TARGET_NAME} ${map_SOURCES})
+else()
+    qt_add_plugin(${TARGET_NAME} CLASS_NAME MapPlugin ${map_SOURCES})
+endif()
 
-target_link_libraries(${TARGET_NAME}
+if(NOT BUILD_SHARED_LIBS)
+    set_property(GLOBAL APPEND PROPERTY STATIC_PLUGINS_PROPERTY ${TARGET_NAME})
+endif()
+
+target_link_libraries(${TARGET_NAME} PRIVATE
     Qt::Core
     ${TARGET_LIB}
     sdrbase

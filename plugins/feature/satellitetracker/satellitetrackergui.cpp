@@ -20,7 +20,6 @@
 #include <cmath>
 #include <QMessageBox>
 #include <QLineEdit>
-#include <QRegExp>
 
 #include <QtCharts/QChartView>
 #include <QtCharts/QLineSeries>
@@ -334,7 +333,9 @@ SatelliteTrackerGUI::SatelliteTrackerGUI(PluginAPI* pluginAPI, FeatureUISet *fea
     connect(ui->satTable->horizontalHeader(), SIGNAL(sectionMoved(int, int, int)), SLOT(satTable_sectionMoved(int, int, int)));
     connect(ui->satTable->horizontalHeader(), SIGNAL(sectionResized(int, int, int)), SLOT(satTable_sectionResized(int, int, int)));
 
+#ifdef QT_TEXTTOSPEECH_FOUND
     m_speech = new QTextToSpeech(this);
+#endif
 
     displaySettings();
     applySettings(true);
@@ -441,16 +442,26 @@ void SatelliteTrackerGUI::aos(const QString &speech)
     // Call plotChart() to start the periodic updates with sat position in polar chart
     plotChart();
     // Give speech notification of pass
-    if (!speech.isEmpty()) {
+    if (!speech.isEmpty()) 
+    {
+#ifdef QT_TEXTTOSPEECH_FOUND
         m_speech->say(speech);
+#else
+        qWarning() << "SatelliteTrackerGUI::aos: No TextToSpeech: " << speech;
+#endif
     }
 }
 
 void SatelliteTrackerGUI::los(const QString &speech)
 {
     // Give speech notification of end of pass
-    if (!speech.isEmpty()) {
+    if (!speech.isEmpty()) 
+    {
+#ifdef QT_TEXTTOSPEECH_FOUND
         m_speech->say(speech);
+#else
+        qWarning() << "SatelliteTrackerGUI::los: No TextToSpeech: " << speech;
+#endif
     }
 }
 

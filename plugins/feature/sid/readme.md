@@ -211,11 +211,11 @@ When clicked, the X-axis is set 1 day later than the current setting, at the sam
 
 <h3>27: Start Time</h3>
 
-Displays/sets the current start time of the chart (X-axis minimum). It's possible to scroll through hours/days/months by clicking on the relevant segment and using the mouse scroll wheel.
+Displays/sets the current local start time of the chart (X-axis minimum). It's possible to scroll through hours/days/months by clicking on the relevant segment and using the mouse scroll wheel.
 
 <h3>28: End Time</h3>
 
-Displays/sets the current end time of the chart (X-axis maximum). It's possible to scroll through hours/days/months by clicking on the relevant segment and using the mouse scroll wheel.
+Displays/sets the current local end time of the chart (X-axis maximum). It's possible to scroll through hours/days/months by clicking on the relevant segment and using the mouse scroll wheel.
 
 <h3>29: Min</h3>
 
@@ -231,7 +231,7 @@ When checked, the latest SDO imagery is displayed. When unchecked, you can enter
 
 <h3>32: Date Time</h3>
 
-Specifies the date and time for which SDO imagery should be displayed. Images are updated every 15 minutes. The date and time can also be set by clicking on the chart.
+Specifies the local date and time for which SDO imagery should be displayed. Images are updated every 15 minutes. The date and time can also be set by clicking on the chart.
 
 <h3>33: Map</h3>
 
