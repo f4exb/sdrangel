@@ -165,6 +165,10 @@ public:
 protected slots:
 	void handleInputMessages();
 
+signals:
+    void positionChanged(float latitude, float longitude, float altitude);
+    void directionChanged(bool isotropic, float azimuth, float elevation);
+
 protected:
     SampleSinkFifo m_sampleFifo;
 	MessageQueue m_inputMessageQueue; //!< Input queue to the source

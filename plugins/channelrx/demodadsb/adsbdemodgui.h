@@ -941,7 +941,9 @@ private:
     ADSBDemodSettings::AirportType m_currentAirportMinimumSize;
     bool m_currentDisplayHeliports;
 
+#ifdef QT_TEXTTOSPEECH_FOUND
     QTextToSpeech *m_speech;
+#endif
     QMenu *menu;                        // Column select context menu
     FlightInformation *m_flightInformation;
     PlaneSpotters m_planeSpotters;
@@ -1039,6 +1041,7 @@ private:
     void redrawMap();
     void applyImportSettings();
     void sendAircraftReport();
+    void updatePosition(float latitude, float longitude, float altitude);
 
     void leaveEvent(QEvent*);
     void enterEvent(EnterEventType*);
@@ -1092,6 +1095,7 @@ private slots:
     void import();
     void handleImportReply(QNetworkReply* reply);
     void preferenceChanged(int elementType);
+    void devicePositionChanged(float latitude, float longitude, float altitude);
     void requestMetar(const QString& icao);
     void weatherUpdated(const AviationWeather::METAR &metar);
 

@@ -668,6 +668,7 @@ void SatelliteTrackerWorker::executeCommand(const QString &command, const QStrin
 {
     if (!command.isEmpty())
     {
+#if QT_CONFIG(process)
         // Replace variables
         QString cmd = substituteVariables(command, satelliteName);
         QStringList allArgs = QProcess::splitCommand(cmd);
@@ -675,6 +676,9 @@ void SatelliteTrackerWorker::executeCommand(const QString &command, const QStrin
         QString program = allArgs[0];
         allArgs.pop_front();
         QProcess::startDetached(program, allArgs);
+#else
+        qWarning() << "SatelliteTrackerWorker::executeCommand: QProcess not supported. Can't run: " << command;
+#endif
     }
 }
 
