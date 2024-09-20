@@ -16,7 +16,9 @@
 ///////////////////////////////////////////////////////////////////////////////////
 
 #include <QFontDialog>
+#ifdef QT_LOCATION_FOUND
 #include <QGeoServiceProvider>
+#endif
 #include <QDebug>
 
 #include "adsbdemoddisplaydialog.h"
@@ -30,6 +32,7 @@ ADSBDemodDisplayDialog::ADSBDemodDisplayDialog(ADSBDemodSettings *settings, QWid
 {
     ui->setupUi(this);
 
+#ifdef QT_LOCATION_FOUND
     QStringList mapProviders = QGeoServiceProvider::availableServiceProviders();
     if (!mapProviders.contains("osm")) {
         ui->mapProvider->removeItem(ui->mapProvider->findText("osm"));
@@ -37,6 +40,9 @@ ADSBDemodDisplayDialog::ADSBDemodDisplayDialog(ADSBDemodSettings *settings, QWid
     if (!mapProviders.contains("mapboxgl")) {
         ui->mapProvider->removeItem(ui->mapProvider->findText("mapboxgl"));
     }
+#else
+    QStringList mapProviders;
+#endif
 
     ui->timeout->setValue(settings->m_removeTimeout);
     ui->aircraftMinZoom->setValue(settings->m_aircraftMinZoom);

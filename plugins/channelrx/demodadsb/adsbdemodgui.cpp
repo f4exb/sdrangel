@@ -1,6 +1,6 @@
 ///////////////////////////////////////////////////////////////////////////////////
 // Copyright (C) 2020 Edouard Griffiths, F4EXB                                   //
-// Copyright (C) 2020 Jon Beniston, M7RCE                                        //
+// Copyright (C) 2020-2024 Jon Beniston, M7RCE                                   //
 //                                                                               //
 // This program is free software; you can redistribute it and/or modify          //
 // it under the terms of the GNU General Public License as published by          //
@@ -34,10 +34,13 @@
 #include <QQmlProperty>
 #include <QJsonDocument>
 #include <QJsonObject>
+#ifdef QT_LOCATION_FOUND
 #include <QGeoServiceProvider>
+#endif
 
 #include "ui_adsbdemodgui.h"
 #include "device/deviceapi.h"
+#include "dsp/devicesamplesource.h"
 #include "channel/channelwebapiutils.h"
 #include "feature/featurewebapiutils.h"
 #include "plugin/pluginapi.h"
@@ -3323,6 +3326,7 @@ void ADSBDemodGUI::checkDynamicNotification(Aircraft *aircraft)
 // has speech notifications configured
 void ADSBDemodGUI::enableSpeechIfNeeded()
 {
+#ifdef QT_TEXTTOSPEECH_FOUND
     if (m_speech) {
         return;
     }
@@ -3335,19 +3339,25 @@ void ADSBDemodGUI::enableSpeechIfNeeded()
             return;
         }
     }
+#endif
 }
 
 void ADSBDemodGUI::speechNotification(Aircraft *aircraft, const QString &speech)
 {
+#ifdef QT_TEXTTOSPEECH_FOUND
     if (m_speech) {
         m_speech->say(subAircraftString(aircraft, speech));
     } else {
-        qDebug() << "ADSBDemodGUI::speechNotification: Unable to say " << speech;
+        qWarning() << "ADSBDemodGUI::speechNotification: Unable to say " << speech;
     }
+#else
+    qWarning() << "ADSBDemodGUI::speechNotification: TextToSpeech not supported. Unable to say " << speech;
+#endif
 }
 
 void ADSBDemodGUI::commandNotification(Aircraft *aircraft, const QString &command)
 {
+#if QT_CONFIG(process)
     QString commandLine = subAircraftString(aircraft, command);
     QStringList allArgs = QProcess::splitCommand(commandLine);
 
@@ -3357,6 +3367,9 @@ void ADSBDemodGUI::commandNotification(Aircraft *aircraft, const QString &comman
         allArgs.pop_front();
         QProcess::startDetached(program, allArgs);
     }
+#else
+    qWarning() << "ADSBDemodGUI::commandNotification: QProcess not supported. Can't run: " << command;
+#endif
 }
 
 QString ADSBDemodGUI::subAircraftString(Aircraft *aircraft, const QString &string)
@@ -3606,6 +3619,7 @@ void ADSBDemodGUI::on_findOnMapFeature_clicked()
 // Find aircraft on channel map
 void ADSBDemodGUI::findOnChannelMap(Aircraft *aircraft)
 {
+#ifdef QT_LOCATION_FOUND
     if (aircraft->m_positionValid)
     {
         QQuickItem *item = ui->map->rootObject();
@@ -3618,6 +3632,7 @@ void ADSBDemodGUI::findOnChannelMap(Aircraft *aircraft)
             object->setProperty("center", QVariant::fromValue(geocoord));
         }
     }
+#endif
 }
 
 void ADSBDemodGUI::adsbData_customContextMenuRequested(QPoint pos)
@@ -4682,6 +4697,7 @@ void ADSBDemodGUI::on_displaySettings_clicked()
 {
     bool oldSiUnits = m_settings.m_siUnits;
     ADSBDemodDisplayDialog dialog(&m_settings);
+    new DialogPositioner(&dialog, true);
     if (dialog.exec() == QDialog::Accepted)
     {
         bool unitsChanged = m_settings.m_siUnits != oldSiUnits;
@@ -4695,6 +4711,7 @@ void ADSBDemodGUI::on_displaySettings_clicked()
 
 void ADSBDemodGUI::applyMapSettings()
 {
+#ifdef QT_LOCATION_FOUND
     Real stationLatitude = MainCore::instance()->getSettings().getLatitude();
     Real stationLongitude = MainCore::instance()->getSettings().getLongitude();
     Real stationAltitude = MainCore::instance()->getSettings().getAltitude();
@@ -4743,8 +4760,13 @@ void ADSBDemodGUI::applyMapSettings()
 
     if (mapProvider == "osm")
     {
+#ifdef __EMSCRIPTEN__
+        // Default is http://maps-redirect.qt.io/osm/5.8/ and Emscripten needs https
+        parameters["osm.mapping.providersrepository.address"] = QString("https://sdrangel.beniston.com/sdrangel/maps/");
+#else
         // Use our repo, so we can append API key and redefine transmit maps
         parameters["osm.mapping.providersrepository.address"] = QString("http://127.0.0.1:%1/").arg(m_osmPort);
+#endif
         // Use ADS-B specific cache, as we use different transmit maps
         QString cachePath = QStandardPaths::writableLocation(QStandardPaths::GenericCacheLocation) + "/QtLocation/5.8/tiles/osm/sdrangel_adsb";
         parameters["osm.mapping.cache.directory"] = cachePath;
@@ -4831,6 +4853,7 @@ void ADSBDemodGUI::applyMapSettings()
     {
         qDebug() << "ADSBDemodGUI::applyMapSettings - createMap returned a nullptr";
     }
+#endif // QT_LOCATION_FOUND
 }
 
 // Called from QML when empty space clicked
@@ -4875,12 +4898,15 @@ ADSBDemodGUI::ADSBDemodGUI(PluginAPI* pluginAPI, DeviceUISet *deviceUISet, Baseb
     {
         QSurfaceFormat format;
         format.setSamples(multisamples);
+#ifdef QT_LOCATION_FOUND
         ui->map->setFormat(format);
+#endif
     }
 
     m_osmPort = 0; // Pick a free port
     m_templateServer = new ADSBOSMTemplateServer("q2RVNAe3eFKCH4XsrE3r", m_osmPort);
 
+#ifdef QT_LOCATION_FOUND
     ui->map->setAttribute(Qt::WA_AcceptTouchEvents, true);
 
     ui->map->rootContext()->setContextProperty("aircraftModel", &m_aircraftModel);
@@ -4889,9 +4915,17 @@ ADSBDemodGUI::ADSBDemodGUI(PluginAPI* pluginAPI, DeviceUISet *deviceUISet, Baseb
     ui->map->rootContext()->setContextProperty("navAidModel", &m_navAidModel);
 #if (QT_VERSION < QT_VERSION_CHECK(6, 0, 0))
     ui->map->setSource(QUrl(QStringLiteral("qrc:/map/map.qml")));
+#elif defined(__EMSCRIPTEN__)
+    // No Qt5Compat.GraphicalEffects
+    ui->map->setSource(QUrl(QStringLiteral("qrc:/map/map_6_strict.qml")));
 #else
-    ui->map->setSource(QUrl(QStringLiteral("qrc:/map/map_6.qml")));
+    ui->map->setSource(QUrl(QStringLiteral("qrc:/map/map_6_strict.qml")));
 #endif
+    ui->map->installEventFilter(this);
+#else
+    ui->map->hide();
+#endif
+
     connect(this, SIGNAL(customContextMenuRequested(const QPoint &)), this, SLOT(onMenuDialogCalled(const QPoint &)));
 
     m_adsbDemod = reinterpret_cast<ADSBDemod*>(rxChannel); //new ADSBDemod(m_deviceUISet->m_deviceSourceAPI);
@@ -4991,12 +5025,15 @@ ADSBDemodGUI::ADSBDemodGUI(PluginAPI* pluginAPI, DeviceUISet *deviceUISet, Baseb
     m_azEl.setLocation(stationLatitude, stationLongitude, stationAltitude);
 
     // These are the default values in sdrbase/settings/preferences.cpp
-    if ((stationLatitude == (float)49.012423) && (stationLongitude == (float)8.418125)) {
+    if ((stationLatitude == 49.012423f) && (stationLongitude == 8.418125f)) {
         ui->warning->setText("Please set your antenna location under Preferences > My Position");
     }
 
     // Get updated when position changes
     connect(&MainCore::instance()->getSettings(), &MainSettings::preferenceChanged, this, &ADSBDemodGUI::preferenceChanged);
+    if (m_deviceUISet->m_deviceAPI->getSampleSource()) {
+        connect(m_deviceUISet->m_deviceAPI->getSampleSource(), &DeviceSampleSource::positionChanged, this, &ADSBDemodGUI::devicePositionChanged);
+    }
 
     // Get airport weather when requested
     connect(&m_airportModel, &AirportModel::requestMetar, this, &ADSBDemodGUI::requestMetar);
@@ -5034,7 +5071,6 @@ ADSBDemodGUI::ADSBDemodGUI(PluginAPI* pluginAPI, DeviceUISet *deviceUISet, Baseb
 
     connect(&m_redrawMapTimer, &QTimer::timeout, this, &ADSBDemodGUI::redrawMap);
     m_redrawMapTimer.setSingleShot(true);
-    ui->map->installEventFilter(this);
     DialPopup::addPopupsToChildDials(this);
     m_resizer.enableChildMouseTracking();
 }
@@ -5194,12 +5230,19 @@ void ADSBDemodGUI::displaySettings()
     initFlightInformation();
     initAviationWeather();
 
-    applyMapSettings();
     applyImportSettings();
 
     getRollupContents()->restoreState(m_rollupState);
     blockApplySettings(false);
     enableSpeechIfNeeded();
+#ifdef __EMSCRIPTEN__
+    // FIXME: If we don't have this delay, tile server requests get deleted
+    QTimer::singleShot(250, [this] {
+        applyMapSettings();
+    });
+#else
+    applyMapSettings();
+#endif
 }
 
 void ADSBDemodGUI::leaveEvent(QEvent* event)
@@ -5752,6 +5795,7 @@ int ADSBDemodGUI::grayToBinary(int gray, int bits) const
 
 void ADSBDemodGUI::redrawMap()
 {
+#ifdef QT_LOCATION_FOUND
     // An awful workaround for https://bugreports.qt.io/browse/QTBUG-100333
     // Also used in Map feature
     QQuickItem *item = ui->map->rootObject();
@@ -5765,6 +5809,7 @@ void ADSBDemodGUI::redrawMap()
             object->setProperty("zoomLevel", QVariant::fromValue(zoom));
         }
     }
+#endif
 }
 
 void ADSBDemodGUI::showEvent(QShowEvent *event)
@@ -5976,54 +6021,70 @@ void ADSBDemodGUI::handleImportReply(QNetworkReply* reply)
     }
 }
 
+void ADSBDemodGUI::updatePosition(float latitude, float longitude, float altitude)
+{
+    // Use device postion in preference to My Position
+    ChannelWebAPIUtils::getDevicePosition(getDeviceSetIndex(), latitude, longitude, altitude);
+
+    QGeoCoordinate stationPosition(latitude, longitude, altitude);
+    QGeoCoordinate previousPosition(m_azEl.getLocationSpherical().m_latitude, m_azEl.getLocationSpherical().m_longitude, m_azEl.getLocationSpherical().m_altitude);
+
+    if (stationPosition != previousPosition)
+    {
+        m_azEl.setLocation(latitude, longitude, altitude);
+
+        // Update distances and what is visible, but only do it if position has changed significantly
+        if (!m_lastFullUpdatePosition.isValid() || (stationPosition.distanceTo(m_lastFullUpdatePosition) >= 1000))
+        {
+            updateAirports();
+            updateAirspaces();
+            updateNavAids();
+            m_lastFullUpdatePosition = stationPosition;
+        }
+
+#ifdef QT_LOCATION_FOUND
+        // Update icon position on Map
+        QQuickItem *item = ui->map->rootObject();
+#if (QT_VERSION < QT_VERSION_CHECK(6, 0, 0))
+        QObject *map = item->findChild<QObject*>("map");
+#else
+        QObject *map = item->findChild<QObject*>("mapView");
+#endif
+        if (map != nullptr)
+        {
+            QObject *stationObject = map->findChild<QObject*>("station");
+            if(stationObject != NULL)
+            {
+                QGeoCoordinate coords = stationObject->property("coordinate").value<QGeoCoordinate>();
+                coords.setLatitude(latitude);
+                coords.setLongitude(longitude);
+                coords.setAltitude(altitude);
+                stationObject->setProperty("coordinate", QVariant::fromValue(coords));
+            }
+        }
+#endif
+    }
+}
+
+void ADSBDemodGUI::devicePositionChanged(float latitude, float longitude, float altitude)
+{
+    updatePosition(latitude, longitude, altitude);
+}
+
 void ADSBDemodGUI::preferenceChanged(int elementType)
 {
     Preferences::ElementType pref = (Preferences::ElementType)elementType;
     if ((pref == Preferences::Latitude) || (pref == Preferences::Longitude) || (pref == Preferences::Altitude))
     {
-        Real stationLatitude = MainCore::instance()->getSettings().getLatitude();
-        Real stationLongitude = MainCore::instance()->getSettings().getLongitude();
-        Real stationAltitude = MainCore::instance()->getSettings().getAltitude();
+        Real myLatitude = MainCore::instance()->getSettings().getLatitude();
+        Real myLongitude = MainCore::instance()->getSettings().getLongitude();
+        Real myAltitude = MainCore::instance()->getSettings().getAltitude();
 
-        QGeoCoordinate stationPosition(stationLatitude, stationLongitude, stationAltitude);
-        QGeoCoordinate previousPosition(m_azEl.getLocationSpherical().m_latitude, m_azEl.getLocationSpherical().m_longitude, m_azEl.getLocationSpherical().m_altitude);
-
-        if (stationPosition != previousPosition)
-        {
-            m_azEl.setLocation(stationLatitude, stationLongitude, stationAltitude);
-
-            // Update distances and what is visible, but only do it if position has changed significantly
-            if (!m_lastFullUpdatePosition.isValid() || (stationPosition.distanceTo(m_lastFullUpdatePosition) >= 1000))
-            {
-                updateAirports();
-                updateAirspaces();
-                updateNavAids();
-                m_lastFullUpdatePosition = stationPosition;
-            }
-
-            // Update icon position on Map
-            QQuickItem *item = ui->map->rootObject();
-#if (QT_VERSION < QT_VERSION_CHECK(6, 0, 0))
-            QObject *map = item->findChild<QObject*>("map");
-#else
-            QObject *map = item->findChild<QObject*>("mapView");
-#endif
-            if (map != nullptr)
-            {
-                QObject *stationObject = map->findChild<QObject*>("station");
-                if(stationObject != NULL)
-                {
-                    QGeoCoordinate coords = stationObject->property("coordinate").value<QGeoCoordinate>();
-                    coords.setLatitude(stationLatitude);
-                    coords.setLongitude(stationLongitude);
-                    coords.setAltitude(stationAltitude);
-                    stationObject->setProperty("coordinate", QVariant::fromValue(coords));
-                }
-            }
-        }
+        updatePosition(myLatitude, myLongitude, myAltitude);
     }
     else if (pref == Preferences::StationName)
     {
+#ifdef QT_LOCATION_FOUND
         // Update icon label on Map
         QQuickItem *item = ui->map->rootObject();
 #if (QT_VERSION < QT_VERSION_CHECK(6, 0, 0))
@@ -6038,11 +6099,14 @@ void ADSBDemodGUI::preferenceChanged(int elementType)
                 stationObject->setProperty("stationName", QVariant::fromValue(MainCore::instance()->getSettings().getStationName()));
             }
         }
+#endif
     }
     else if (pref == Preferences::MapSmoothing)
     {
+#ifdef QT_LOCATION_FOUND
         QQuickItem *item = ui->map->rootObject();
         QQmlProperty::write(item, "smoothing", MainCore::instance()->getSettings().getMapSmoothing());
+#endif
     }
 }
 

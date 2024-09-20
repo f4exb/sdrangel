@@ -369,6 +369,7 @@ bool ChannelWebAPIUtils::setCenterFrequency(unsigned int deviceIndex, double fre
             deviceSettingsResponse.init();
             deviceSettingsResponse.fromJsonObject(*jsonObj);
             SWGSDRangel::SWGErrorResponse errorResponse2;
+            delete jsonObj;
 
             DeviceSampleSource *source = deviceSet->m_deviceAPI->getSampleSource();
             if (source) {
@@ -910,7 +911,9 @@ bool ChannelWebAPIUtils::getFrequencyOffset(unsigned int deviceIndex, int channe
         }
 
         jsonObj = channelSettingsResponse.asJsonObject();
-        if (WebAPIUtils::getSubObjectDouble(*jsonObj, "inputFrequencyOffset", offsetD))
+        bool result = WebAPIUtils::getSubObjectDouble(*jsonObj, "inputFrequencyOffset", offsetD);
+        delete jsonObj;
+        if (result)
         {
             offset = (int)offsetD;
             return true;
@@ -946,6 +949,7 @@ bool ChannelWebAPIUtils::setFrequencyOffset(unsigned int deviceIndex, int channe
             keys.append("inputFrequencyOffset");
             channelSettingsResponse.init();
             channelSettingsResponse.fromJsonObject(*jsonObj);
+            delete jsonObj;
             httpRC = channel->webapiSettingsPutPatch(false, keys, channelSettingsResponse, errorResponse);
             if (httpRC/100 != 2)
             {
@@ -956,6 +960,7 @@ bool ChannelWebAPIUtils::setFrequencyOffset(unsigned int deviceIndex, int channe
 
             return true;
         }
+        delete jsonObj;
     }
     return false;
 }
@@ -986,6 +991,7 @@ bool ChannelWebAPIUtils::setAudioMute(unsigned int deviceIndex, int channelIndex
             keys.append("audioMute");
             channelSettingsResponse.init();
             channelSettingsResponse.fromJsonObject(*jsonObj);
+            delete jsonObj;
             httpRC = channel->webapiSettingsPutPatch(false, keys, channelSettingsResponse, errorResponse);
             if (httpRC / 100 != 2)
             {
@@ -996,6 +1002,7 @@ bool ChannelWebAPIUtils::setAudioMute(unsigned int deviceIndex, int channelIndex
 
             return true;
         }
+        delete jsonObj;
     }
     return false;
 }
@@ -1120,7 +1127,9 @@ bool ChannelWebAPIUtils::getDeviceSetting(unsigned int deviceIndex, const QStrin
     if (getDeviceSettings(deviceIndex, deviceSettingsResponse, deviceSet))
     {
         QJsonObject *jsonObj = deviceSettingsResponse.asJsonObject();
-        return WebAPIUtils::getSubObjectInt(*jsonObj, setting, value);
+        bool result = WebAPIUtils::getSubObjectInt(*jsonObj, setting, value);
+        delete jsonObj;
+        return result;
     }
     else
     {
@@ -1136,7 +1145,9 @@ bool ChannelWebAPIUtils::getDeviceReportValue(unsigned int deviceIndex, const QS
     {
         // Get value of requested key
         QJsonObject *jsonObj = deviceReport.asJsonObject();
-        if (WebAPIUtils::getSubObjectString(*jsonObj, key, value))
+        bool result = WebAPIUtils::getSubObjectString(*jsonObj, key, value);
+        delete jsonObj;
+        if (result)
         {
             // Done
             return true;
@@ -1158,7 +1169,9 @@ bool ChannelWebAPIUtils::getDeviceReportList(unsigned int deviceIndex, const QSt
     {
         // Get value of requested key
         QJsonObject *jsonObj = deviceReport.asJsonObject();
-        if (WebAPIUtils::getSubObjectIntList(*jsonObj, key, subKey, values))
+        bool result = WebAPIUtils::getSubObjectIntList(*jsonObj, key, subKey, values);
+        delete jsonObj;
+        if (result)
         {
             // Done
             return true;
@@ -1173,29 +1186,27 @@ bool ChannelWebAPIUtils::getDeviceReportList(unsigned int deviceIndex, const QSt
 }
 
 
-bool ChannelWebAPIUtils::getDevicePosition(unsigned int deviceIndex, QGeoCoordinate& position)
+bool ChannelWebAPIUtils::getDevicePosition(unsigned int deviceIndex, float& latitude, float& longitude, float& altitude)
 {
     SWGSDRangel::SWGDeviceReport deviceReport;
 
     if (getDeviceReport(deviceIndex, deviceReport))
     {
         QJsonObject *jsonObj = deviceReport.asJsonObject();
-        double latitude, longitude, altitude;
-
-        if (WebAPIUtils::getSubObjectDouble(*jsonObj, "latitude", latitude)
-            && WebAPIUtils::getSubObjectDouble(*jsonObj, "longitude", longitude)
-            && WebAPIUtils::getSubObjectDouble(*jsonObj, "altitude", altitude))
+        double latitudeDouble, longitudeDouble, altitudeDouble;
+        bool result = WebAPIUtils::getSubObjectDouble(*jsonObj, "latitude", latitudeDouble)
+            && WebAPIUtils::getSubObjectDouble(*jsonObj, "longitude", longitudeDouble)
+            && WebAPIUtils::getSubObjectDouble(*jsonObj, "altitude", altitudeDouble);
+        delete jsonObj;
+        if (result)
         {
-            position.setLatitude(latitude);
-            position.setLongitude(longitude);
-            position.setAltitude(altitude);
-            // Done
-            return true;
-        }
-        else
-        {
-            //qWarning("ChannelWebAPIUtils::getDevicePosition: no latitude/longitude/altitude in device report");
-            return false;
+            if (!std::isnan(latitudeDouble) && !std::isnan(longitudeDouble) && !std::isnan(altitudeDouble))
+            {
+                latitude = (float) latitudeDouble;
+                longitude = (float) longitudeDouble;
+                altitude = (float) altitudeDouble;
+                return true;
+            }
         }
     }
     return false;
@@ -1305,6 +1316,7 @@ bool ChannelWebAPIUtils::patchDeviceSetting(unsigned int deviceIndex, const QStr
             deviceSettingsResponse.init();
             deviceSettingsResponse.fromJsonObject(*jsonObj);
             SWGSDRangel::SWGErrorResponse errorResponse2;
+            delete jsonObj;
 
             DeviceSampleSource *source = deviceSet->m_deviceAPI->getSampleSource();
 
@@ -1324,6 +1336,7 @@ bool ChannelWebAPIUtils::patchDeviceSetting(unsigned int deviceIndex, const QStr
         }
         else
         {
+            delete jsonObj;
             qWarning("ChannelWebAPIUtils::patchDeviceSetting: no key %s in device settings", qPrintable(setting));
             return false;
         }
@@ -1354,6 +1367,7 @@ bool ChannelWebAPIUtils::patchFeatureSetting(unsigned int featureSetIndex, unsig
             featureSettingsResponse.init();
             featureSettingsResponse.fromJsonObject(*jsonObj);
             SWGSDRangel::SWGErrorResponse errorResponse2;
+            delete jsonObj;
 
             httpRC = feature->webapiSettingsPutPatch(false, featureSettingsKeys, featureSettingsResponse, *errorResponse2.getMessage());
 
@@ -1371,6 +1385,7 @@ bool ChannelWebAPIUtils::patchFeatureSetting(unsigned int featureSetIndex, unsig
         }
         else
         {
+            delete jsonObj;
             qWarning("ChannelWebAPIUtils::patchFeatureSetting: no key %s in feature settings", qPrintable(setting));
             return false;
         }
@@ -1401,6 +1416,7 @@ bool ChannelWebAPIUtils::patchFeatureSetting(unsigned int featureSetIndex, unsig
             featureSettingsResponse.init();
             featureSettingsResponse.fromJsonObject(*jsonObj);
             SWGSDRangel::SWGErrorResponse errorResponse2;
+            delete jsonObj;
 
             httpRC = feature->webapiSettingsPutPatch(false, featureSettingsKeys, featureSettingsResponse, *errorResponse2.getMessage());
 
@@ -1418,6 +1434,7 @@ bool ChannelWebAPIUtils::patchFeatureSetting(unsigned int featureSetIndex, unsig
         }
         else
         {
+            delete jsonObj;
             qWarning("ChannelWebAPIUtils::patchFeatureSetting: no key %s in feature settings", qPrintable(setting));
             return false;
         }
@@ -1480,6 +1497,7 @@ bool ChannelWebAPIUtils::patchFeatureSetting(unsigned int featureSetIndex, unsig
         featureSettingsResponse.init();
         featureSettingsResponse.fromJsonObject(*jsonObj);
         SWGSDRangel::SWGErrorResponse errorResponse2;
+        delete jsonObj;
 
         httpRC = feature->webapiSettingsPutPatch(false, featureSettingsKeys, featureSettingsResponse, *errorResponse2.getMessage());
 
@@ -1519,6 +1537,7 @@ bool ChannelWebAPIUtils::patchChannelSetting(ChannelAPI *channel, const QString 
             channelSettingsResponse.init();
             channelSettingsResponse.fromJsonObject(*jsonObj);
             SWGSDRangel::SWGErrorResponse errorResponse2;
+            delete jsonObj;
 
             httpRC = channel->webapiSettingsPutPatch(false, channelSettingsKeys, channelSettingsResponse, *errorResponse2.getMessage());
 
@@ -1536,6 +1555,7 @@ bool ChannelWebAPIUtils::patchChannelSetting(ChannelAPI *channel, const QString 
         }
         else
         {
+            delete jsonObj;
             qWarning("ChannelWebAPIUtils::patchChannelSetting: no key %s in channel settings", qPrintable(setting));
             return false;
         }
@@ -1631,6 +1651,7 @@ bool ChannelWebAPIUtils::patchChannelSetting(unsigned int deviceSetIndex, unsign
         channelSettingsResponse.init();
         channelSettingsResponse.fromJsonObject(*jsonObj);
         SWGSDRangel::SWGErrorResponse errorResponse2;
+        delete jsonObj;
 
         httpRC = channel->webapiSettingsPutPatch(false, channelSettingsKeys, channelSettingsResponse, *errorResponse2.getMessage());
 
@@ -1660,7 +1681,9 @@ bool ChannelWebAPIUtils::getFeatureSetting(unsigned int featureSetIndex,  unsign
     if (getFeatureSettings(featureSetIndex, featureIndex, featureSettingsResponse, feature))
     {
         QJsonObject *jsonObj = featureSettingsResponse.asJsonObject();
-        return WebAPIUtils::getSubObjectInt(*jsonObj, setting, value);
+        bool result = WebAPIUtils::getSubObjectInt(*jsonObj, setting, value);
+        delete jsonObj;
+        return result;
     }
     else
     {
@@ -1676,7 +1699,9 @@ bool ChannelWebAPIUtils::getFeatureSetting(unsigned int featureSetIndex,  unsign
     if (getFeatureSettings(featureSetIndex, featureIndex, featureSettingsResponse, feature))
     {
         QJsonObject *jsonObj = featureSettingsResponse.asJsonObject();
-        return WebAPIUtils::getSubObjectDouble(*jsonObj, setting, value);
+        bool result = WebAPIUtils::getSubObjectDouble(*jsonObj, setting, value);
+        delete jsonObj;
+        return result;
     }
     else
     {
@@ -1692,7 +1717,9 @@ bool ChannelWebAPIUtils::getFeatureSetting(unsigned int featureSetIndex,  unsign
     if (getFeatureSettings(featureSetIndex, featureIndex, featureSettingsResponse, feature))
     {
         QJsonObject *jsonObj = featureSettingsResponse.asJsonObject();
-        return WebAPIUtils::getSubObjectString(*jsonObj, setting, value);
+        bool result = WebAPIUtils::getSubObjectString(*jsonObj, setting, value);
+        delete jsonObj;
+        return result;
     }
     else
     {
@@ -1708,7 +1735,9 @@ bool ChannelWebAPIUtils::getChannelSetting(unsigned int deviceSetIndex,  unsigne
     if (getChannelSettings(deviceSetIndex, channelIndex, channelSettingsResponse, channel))
     {
         QJsonObject *jsonObj = channelSettingsResponse.asJsonObject();
-        return WebAPIUtils::getSubObjectInt(*jsonObj, setting, value);
+        bool result = WebAPIUtils::getSubObjectInt(*jsonObj, setting, value);
+        delete jsonObj;
+        return result;
     }
     else
     {
@@ -1724,7 +1753,9 @@ bool ChannelWebAPIUtils::getChannelSetting(unsigned int deviceSetIndex,  unsigne
     if (getChannelSettings(deviceSetIndex, channelIndex, channelSettingsResponse, channel))
     {
         QJsonObject *jsonObj = channelSettingsResponse.asJsonObject();
-        return WebAPIUtils::getSubObjectDouble(*jsonObj, setting, value);
+        bool result = WebAPIUtils::getSubObjectDouble(*jsonObj, setting, value);
+        delete jsonObj;
+        return result;
     }
     else
     {
@@ -1740,7 +1771,9 @@ bool ChannelWebAPIUtils::getChannelSetting(unsigned int deviceSetIndex,  unsigne
     if (getChannelSettings(deviceSetIndex, channelIndex, channelSettingsResponse, channel))
     {
         QJsonObject *jsonObj = channelSettingsResponse.asJsonObject();
-        return WebAPIUtils::getSubObjectString(*jsonObj, setting, value);
+        bool result = WebAPIUtils::getSubObjectString(*jsonObj, setting, value);
+        delete jsonObj;
+        return result;
     }
     else
     {
@@ -1756,7 +1789,9 @@ bool ChannelWebAPIUtils::getFeatureReportValue(unsigned int featureSetIndex, uns
     {
         // Get value of requested key
         QJsonObject *jsonObj = featureReport.asJsonObject();
-        if (WebAPIUtils::getSubObjectInt(*jsonObj, key, value))
+        bool result = WebAPIUtils::getSubObjectInt(*jsonObj, key, value);
+        delete jsonObj;
+        if (result)
         {
             // Done
             return true;
@@ -1778,7 +1813,9 @@ bool ChannelWebAPIUtils::getFeatureReportValue(unsigned int featureSetIndex, uns
     {
         // Get value of requested key
         QJsonObject *jsonObj = featureReport.asJsonObject();
-        if (WebAPIUtils::getSubObjectDouble(*jsonObj, key, value))
+        bool result = WebAPIUtils::getSubObjectDouble(*jsonObj, key, value);
+        delete jsonObj;
+        if (result)
         {
             // Done
             return true;
@@ -1800,7 +1837,9 @@ bool ChannelWebAPIUtils::getFeatureReportValue(unsigned int featureSetIndex, uns
     {
         // Get value of requested key
         QJsonObject *jsonObj = featureReport.asJsonObject();
-        if (WebAPIUtils::getSubObjectString(*jsonObj, key, value))
+        bool result = WebAPIUtils::getSubObjectString(*jsonObj, key, value);
+        delete jsonObj;
+        if (result)
         {
             // Done
             return true;
@@ -1823,7 +1862,9 @@ bool ChannelWebAPIUtils::getChannelReportValue(unsigned int deviceIndex, unsigne
     {
         // Get value of requested key
         QJsonObject *jsonObj = channelReport.asJsonObject();
-        if (WebAPIUtils::getSubObjectInt(*jsonObj, key, value))
+        bool result = WebAPIUtils::getSubObjectInt(*jsonObj, key, value);
+        delete jsonObj;
+        if (result)
         {
             // Done
             return true;
@@ -1845,7 +1886,9 @@ bool ChannelWebAPIUtils::getChannelReportValue(unsigned int deviceIndex, unsigne
     {
         // Get value of requested key
         QJsonObject *jsonObj = channelReport.asJsonObject();
-        if (WebAPIUtils::getSubObjectDouble(*jsonObj, key, value))
+        bool result = WebAPIUtils::getSubObjectDouble(*jsonObj, key, value);
+        delete jsonObj;
+        if (result)
         {
             // Done
             return true;
@@ -1867,7 +1910,9 @@ bool ChannelWebAPIUtils::getChannelReportValue(unsigned int deviceIndex, unsigne
     {
         // Get value of requested key
         QJsonObject *jsonObj = channelReport.asJsonObject();
-        if (WebAPIUtils::getSubObjectString(*jsonObj, key, value))
+        bool result = WebAPIUtils::getSubObjectString(*jsonObj, key, value);
+        delete jsonObj;
+        if (result)
         {
             // Done
             return true;

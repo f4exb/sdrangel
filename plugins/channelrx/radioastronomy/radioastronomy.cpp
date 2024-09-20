@@ -382,6 +382,7 @@ void RadioAstronomy::startCal(bool hot)
     // Execute command to enable calibration
     if (!m_settings.m_startCalCommand.isEmpty())
     {
+#if QT_CONFIG(process)
 #if QT_VERSION >= QT_VERSION_CHECK(5, 14, 0)
         QStringList allArgs = m_settings.m_startCalCommand.split(" ", Qt::SkipEmptyParts);
 #else
@@ -390,6 +391,9 @@ void RadioAstronomy::startCal(bool hot)
         QString program = allArgs[0];
         allArgs.pop_front();
         QProcess::startDetached(program, allArgs);
+#else
+        qWarning() << "RadioAstronomy::startCal: QProcess not supported. Can't run: " << m_settings.m_startCalCommand;
+#endif
     }
 
     // Start calibration after requested delay
@@ -423,6 +427,7 @@ void RadioAstronomy::calComplete(MsgCalComplete* report)
     // Execute command to disable calibration
     if (!m_settings.m_stopCalCommand.isEmpty())
     {
+#if QT_CONFIG(process)
 #if QT_VERSION >= QT_VERSION_CHECK(5, 14, 0)
         QStringList allArgs = m_settings.m_stopCalCommand.split(" ", Qt::SkipEmptyParts);
 #else
@@ -431,6 +436,9 @@ void RadioAstronomy::calComplete(MsgCalComplete* report)
         QString program = allArgs[0];
         allArgs.pop_front();
         QProcess::startDetached(program, allArgs);
+#else
+        qWarning() << "RadioAstronomy::calComplete: QProcess not supported. Can't run: " << m_settings.m_startCalCommand;
+#endif
     }
 
     // Send calibration result to GUI

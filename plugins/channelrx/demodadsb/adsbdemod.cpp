@@ -157,7 +157,9 @@ void ADSBDemod::stop()
     m_basebandSink->stopWork();
     m_worker->stopWork();
     m_thread->exit();
+#ifndef __EMSCRIPTEN__
     m_thread->wait();
+#endif
 }
 
 bool ADSBDemod::handleMessage(const Message& cmd)

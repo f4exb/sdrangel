@@ -43,10 +43,10 @@ if(NOT SERVER_MODE)
         adsbdemodnotificationdialog.cpp
         adsbdemodnotificationdialog.ui
         adsbosmtemplateserver.cpp
+        adsbdemodmap.qrc
+        adsbdemodicons.qrc
         airlinelogos.qrc
         flags.qrc
-        map.qrc
-        icons.qrc
     )
     set(adsb_HEADERS
         ${adsb_HEADERS}
@@ -60,7 +60,13 @@ if(NOT SERVER_MODE)
     )
 
     set(TARGET_NAME ${PLUGINS_PREFIX}demodadsb)
-    set(TARGET_LIB Qt::Widgets Qt::Quick Qt::QuickWidgets Qt::Positioning Qt::Location Qt::TextToSpeech)
+    set(TARGET_LIB Qt::Widgets Qt::Quick Qt::QuickWidgets Qt::Positioning)
+    if(Qt${QT_DEFAULT_MAJOR_VERSION}Location_FOUND)
+        list(APPEND TARGET_LIB Qt::Location)
+    endif()
+    if(Qt${QT_DEFAULT_MAJOR_VERSION}TextToSpeech_FOUND)
+        list(APPEND TARGET_LIB Qt::TextToSpeech)
+    endif()
     set(TARGET_LIB_GUI "sdrgui")
     set(INSTALL_FOLDER ${INSTALL_PLUGINS_DIR})
 else()
@@ -70,15 +76,21 @@ else()
     set(INSTALL_FOLDER ${INSTALL_PLUGINSSRV_DIR})
 endif()
 
-add_library(${TARGET_NAME} SHARED
-    ${adsb_SOURCES}
-)
+if(NOT Qt6_FOUND)
+    add_library(${TARGET_NAME} ${adsb_SOURCES})
+else()
+    qt_add_plugin(${TARGET_NAME} CLASS_NAME ADSBPlugin ${adsb_SOURCES})
+endif()
+
+if(NOT BUILD_SHARED_LIBS)
+    set_property(GLOBAL APPEND PROPERTY STATIC_PLUGINS_PROPERTY ${TARGET_NAME})
+endif()
 
 if (NOT WIN32)
     link_directories(${Boost_LIBRARY_DIRS})
 endif()
 
-target_link_libraries(${TARGET_NAME}
+target_link_libraries(${TARGET_NAME} PRIVATE
     Boost::disable_autolinking
     Qt::Core
     ${TARGET_LIB}
