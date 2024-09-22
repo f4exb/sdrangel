@@ -38,6 +38,31 @@ void RemoteTCPSinkSettings::resetToDefaults()
     m_dataAddress = "0.0.0.0";
     m_dataPort = 1234;
     m_protocol = SDRA;
+    m_iqOnly = false;
+    m_compression = FLAC;
+    m_compressionLevel = 5;
+    m_blockSize = 16384;
+    m_squelchEnabled = false;
+    m_squelch = -100.0f;
+    m_squelchGate = 0.001f;
+    m_remoteControl = true;
+    m_maxClients = 4;
+    m_timeLimit = 0;
+    m_maxSampleRate = 10000000;
+    m_certificate = "";
+    m_key = "";
+    m_public = false;
+    m_publicAddress = "";
+    m_publicPort = 1234;
+    m_minFrequency = 0;
+    m_maxFrequency = 2000000000;
+    m_antenna = "";
+    m_location = "";
+    m_ipBlacklist = QStringList();
+    m_isotropic = true;
+    m_azimuth = 0.0f;
+    m_elevation = 0.0f;
+    m_rotator = "None";
     m_rgbColor = QColor(140, 4, 4).rgb();
     m_title = "Remote TCP sink";
     m_channelMarker = nullptr;
@@ -62,6 +87,33 @@ QByteArray RemoteTCPSinkSettings::serialize() const
     s.writeString(5, m_dataAddress);
     s.writeU32(6, m_dataPort);
     s.writeS32(7, (int)m_protocol);
+    s.writeBool(42, m_iqOnly);
+    s.writeS32(29, m_compression);
+    s.writeS32(38, m_compressionLevel);
+    s.writeS32(39, m_blockSize);
+    s.writeBool(40, m_squelchEnabled);
+    s.writeFloat(41, m_squelch);
+    s.writeFloat(43, m_squelchGate);
+    s.writeBool(23, m_remoteControl);
+    s.writeS32(24, m_maxClients);
+    s.writeS32(25, m_timeLimit);
+    s.writeS32(28, m_maxSampleRate);
+    s.writeString(26, m_certificate);
+    s.writeString(27, m_key);
+
+    s.writeBool(30, m_public);
+    s.writeString(31, m_publicAddress);
+    s.writeS32(32, m_publicPort);
+    s.writeS64(33, m_minFrequency);
+    s.writeS64(34, m_maxFrequency);
+    s.writeString(35, m_antenna);
+    s.writeString(37, m_location);
+    s.writeList(36, m_ipBlacklist);
+    s.writeBool(44, m_isotropic);
+    s.writeFloat(45, m_azimuth);
+    s.writeFloat(46, m_elevation);
+    s.writeString(47, m_rotator);
+
     s.writeU32(8, m_rgbColor);
     s.writeString(9, m_title);
     s.writeBool(10, m_useReverseAPI);
@@ -115,6 +167,33 @@ bool RemoteTCPSinkSettings::deserialize(const QByteArray& data)
             m_dataPort = 1234;
         }
         d.readS32(7, (int *)&m_protocol, (int)SDRA);
+        d.readBool(42, &m_iqOnly, false);
+        d.readS32(29, (int *)&m_compression, (int)FLAC);
+        d.readS32(38, &m_compressionLevel, 5);
+        d.readS32(39, &m_blockSize, 16384);
+        d.readBool(40, &m_squelchEnabled, false);
+        d.readFloat(41, &m_squelch, -100.0f);
+        d.readFloat(43, &m_squelchGate, 0.001f);
+        d.readBool(23, &m_remoteControl, true);
+        d.readS32(24, &m_maxClients, 4);
+        d.readS32(25, &m_timeLimit, 0);
+        d.readS32(28, &m_maxSampleRate, 10000000);
+
+        d.readString(26, &m_certificate, "");
+        d.readString(27, &m_key, "");
+
+        d.readBool(30, &m_public, false);
+        d.readString(31, &m_publicAddress, "");
+        d.readS32(32, &m_publicPort, 1234);
+        d.readS64(33, &m_minFrequency, 0);
+        d.readS64(34, &m_maxFrequency, 2000000000);
+        d.readString(35, &m_antenna, "");
+        d.readString(37, &m_location, "");
+        d.readList(36, &m_ipBlacklist);
+        d.readBool(44, &m_isotropic, true);
+        d.readFloat(45, &m_azimuth, 0.0f);
+        d.readFloat(46, &m_elevation, 0.0f);
+        d.readString(47, &m_rotator, "None");
 
         d.readU32(8, &m_rgbColor, QColor(0, 255, 255).rgb());
         d.readString(9, &m_title, "Remote TCP sink");
@@ -182,6 +261,78 @@ void RemoteTCPSinkSettings::applySettings(const QStringList& settingsKeys, const
     if (settingsKeys.contains("protocol")) {
         m_protocol = settings.m_protocol;
     }
+    if (settingsKeys.contains("iqOnly")) {
+        m_iqOnly = settings.m_iqOnly;
+    }
+    if (settingsKeys.contains("compression")) {
+        m_compression = settings.m_compression;
+    }
+    if (settingsKeys.contains("compressionLevel")) {
+        m_compressionLevel = settings.m_compressionLevel;
+    }
+    if (settingsKeys.contains("blockSize")) {
+        m_blockSize = settings.m_blockSize;
+    }
+    if (settingsKeys.contains("squelchEnabled")) {
+        m_squelchEnabled = settings.m_squelchEnabled;
+    }
+    if (settingsKeys.contains("squelch")) {
+        m_squelch = settings.m_squelch;
+    }
+    if (settingsKeys.contains("squelchGate")) {
+        m_squelchGate = settings.m_squelchGate;
+    }
+    if (settingsKeys.contains("remoteControl")) {
+        m_remoteControl = settings.m_remoteControl;
+    }
+    if (settingsKeys.contains("maxClients")) {
+        m_maxClients = settings.m_maxClients;
+    }
+    if (settingsKeys.contains("timeLimit")) {
+        m_timeLimit = settings.m_timeLimit;
+    }
+    if (settingsKeys.contains("maxSampleRate")) {
+        m_maxSampleRate = settings.m_maxSampleRate;
+    }
+    if (settingsKeys.contains("certificate")) {
+        m_certificate = settings.m_certificate;
+    }
+    if (settingsKeys.contains("key")) {
+        m_key = settings.m_key;
+    }
+    if (settingsKeys.contains("public")) {
+        m_public = settings.m_public;
+    }
+    if (settingsKeys.contains("publicAddress")) {
+        m_publicAddress = settings.m_publicAddress;
+    }
+    if (settingsKeys.contains("publicPort")) {
+        m_publicPort = settings.m_publicPort;
+    }
+    if (settingsKeys.contains("minFrequency")) {
+        m_minFrequency = settings.m_minFrequency;
+    }
+    if (settingsKeys.contains("maxFrequency")) {
+        m_maxFrequency = settings.m_maxFrequency;
+    }
+    if (settingsKeys.contains("antenna")) {
+        m_antenna = settings.m_antenna;
+    }
+    if (settingsKeys.contains("ipBlacklist")) {
+        m_ipBlacklist = settings.m_ipBlacklist;
+    }
+    if (settingsKeys.contains("isotrophic")) {
+        m_isotropic = settings.m_isotropic;
+    }
+    if (settingsKeys.contains("azimuth")) {
+        m_azimuth = settings.m_azimuth;
+    }
+    if (settingsKeys.contains("elevation")) {
+        m_elevation = settings.m_elevation;
+    }
+    if (settingsKeys.contains("rotator")) {
+        m_rotator = settings.m_rotator;
+    }
     if (settingsKeys.contains("rgbColor")) {
         m_rgbColor = settings.m_rgbColor;
     }
@@ -238,6 +389,78 @@ QString RemoteTCPSinkSettings::getDebugString(const QStringList& settingsKeys, b
     }
     if (settingsKeys.contains("protocol") || force) {
         ostr << " m_protocol: " << m_protocol;
+    }
+    if (settingsKeys.contains("iqOnly") || force) {
+        ostr << " m_iqOnly: " << m_iqOnly;
+    }
+    if (settingsKeys.contains("compression") || force) {
+        ostr << " m_compression: " << m_compression;
+    }
+    if (settingsKeys.contains("compressionLevel") || force) {
+        ostr << " m_compressionLevel: " << m_compressionLevel;
+    }
+    if (settingsKeys.contains("blockSize") || force) {
+        ostr << " m_blockSize: " << m_blockSize;
+    }
+    if (settingsKeys.contains("squelchEnabled") || force) {
+        ostr << " m_squelchEnabled: " << m_squelchEnabled;
+    }
+    if (settingsKeys.contains("squelch") || force) {
+        ostr << " m_squelch: " << m_squelch;
+    }
+    if (settingsKeys.contains("squelchGate") || force) {
+        ostr << " m_squelchGate: " << m_squelchGate;
+    }
+    if (settingsKeys.contains("remoteControl") || force) {
+        ostr << " m_remoteControl: " << m_remoteControl;
+    }
+    if (settingsKeys.contains("maxClients") || force) {
+        ostr << " m_maxClients: " << m_maxClients;
+    }
+    if (settingsKeys.contains("timeLimit") || force) {
+        ostr << " m_timeLimit: " << m_timeLimit;
+    }
+    if (settingsKeys.contains("maxSampleRate") || force) {
+        ostr << " m_maxSampleRate: " << m_maxSampleRate;
+    }
+    if (settingsKeys.contains("certificate") || force) {
+        ostr << " m_certificate: " << m_certificate.toStdString();
+    }
+    if (settingsKeys.contains("key") || force) {
+        ostr << " m_key: " << m_key.toStdString();
+    }
+    if (settingsKeys.contains("public") || force) {
+        ostr << " m_public: " << m_public;
+    }
+    if (settingsKeys.contains("publicAddress") || force) {
+        ostr << " m_publicAddress: " << m_publicAddress.toStdString();
+    }
+    if (settingsKeys.contains("publicPort") || force) {
+        ostr << " m_publicPort: " << m_publicPort;
+    }
+    if (settingsKeys.contains("minFrequency") || force) {
+        ostr << " m_minFrequency: " << m_minFrequency;
+    }
+    if (settingsKeys.contains("maxFrequency") || force) {
+        ostr << " m_maxFrequency: " << m_maxFrequency;
+    }
+    if (settingsKeys.contains("antenna") || force) {
+        ostr << " m_antenna: " << m_antenna.toStdString();
+    }
+    if (settingsKeys.contains("ipBlacklist") || force) {
+        ostr << " m_ipBlacklist: " << m_ipBlacklist.join(" ").toStdString();
+    }
+    if (settingsKeys.contains("isotrophic") || force) {
+        ostr << " m_isotropic: " << m_isotropic;
+    }
+    if (settingsKeys.contains("azimuth") || force) {
+        ostr << " m_azimuth: " << m_azimuth;
+    }
+    if (settingsKeys.contains("elevation") || force) {
+        ostr << " m_elevation: " << m_elevation;
+    }
+    if (settingsKeys.contains("rotator") || force) {
+        ostr << " m_rotator: " << m_rotator.toStdString();
     }
     if (settingsKeys.contains("rgbColor") || force) {
         ostr << " m_rgbColor: " << m_rgbColor;

@@ -84,7 +84,7 @@ for:
             qml-module-qtlocation qml-module-qtpositioning qml-module-qtquick-window2 qml-module-qtquick-dialogs \
             qml-module-qtquick-controls qml-module-qtquick-controls2 qml-module-qtquick-layouts qml-module-qtgraphicaleffects \
             libqt5serialport5-dev qtdeclarative5-dev qtpositioning5-dev qtlocation5-dev \
-            libqt5charts5-dev libqt5texttospeech5-dev libqt5gamepad5-dev libqt5svg5-dev libfaad-dev zlib1g-dev \
+            libqt5charts5-dev libqt5texttospeech5-dev libqt5gamepad5-dev libqt5svg5-dev libfaad-dev libflac-dev zlib1g-dev \
             libusb-1.0-0-dev libhidapi-dev libboost-all-dev libasound2-dev libopencv-dev libopencv-imgcodecs-dev \
             libxml2-dev bison flex ffmpeg  libpostproc-dev libavcodec-dev libavformat-dev \
             libopus-dev libcodec2-dev libairspy-dev libhackrf-dev \

@@ -53,6 +53,13 @@ void RemoteTCPInputSettings::resetToDefaults()
     m_reverseAPIAddress = "127.0.0.1";
     m_reverseAPIPort = 8888;
     m_reverseAPIDeviceIndex = 0;
+    m_replayOffset = 0.0f;
+    m_replayLength = 20.0f;
+    m_replayStep = 5.0f;
+    m_replayLoop = false;
+    m_squelchEnabled = false;
+    m_squelch = -100.0f;
+    m_squelchGate = 0.001f;
 }
 
 QByteArray RemoteTCPInputSettings::serialize() const
@@ -83,10 +90,18 @@ QByteArray RemoteTCPInputSettings::serialize() const
     s.writeU32(23, m_reverseAPIDeviceIndex);
     s.writeList(24, m_addressList);
     s.writeString(25, m_protocol);
+    s.writeFloat(26, m_replayOffset);
+    s.writeFloat(27, m_replayLength);
+    s.writeFloat(28, m_replayStep);
+    s.writeBool(29, m_replayLoop);
 
     for (int i = 0; i < m_maxGains; i++) {
         s.writeS32(30+i, m_gain[i]);
     }
+
+    s.writeBool(40, m_squelchEnabled);
+    s.writeFloat(41, m_squelch);
+    s.writeFloat(42, m_squelchGate);
 
     return s.final();
 }
@@ -140,9 +155,18 @@ bool RemoteTCPInputSettings::deserialize(const QByteArray& data)
         d.readList(24, &m_addressList);
         d.readString(25, &m_protocol, "SDRangel");
 
+        d.readFloat(26, &m_replayOffset, 0.0f);
+        d.readFloat(27, &m_replayLength, 20.0f);
+        d.readFloat(28, &m_replayStep, 5.0f);
+        d.readBool(29, &m_replayLoop, false);
+
         for (int i = 0; i < m_maxGains; i++) {
             d.readS32(30+i, &m_gain[i], 0);
         }
+
+        d.readBool(40, &m_squelchEnabled, false);
+        d.readFloat(41, &m_squelch, -100.0f);
+        d.readFloat(42, &m_squelchGate, 0.001f);
 
         return true;
     }
@@ -212,7 +236,7 @@ void RemoteTCPInputSettings::applySettings(const QStringList& settingsKeys, cons
     if (settingsKeys.contains("preFill")) {
         m_preFill = settings.m_preFill;
     }
-    if (settingsKeys.contains("_useReverseAPI")) {
+    if (settingsKeys.contains("useReverseAPI")) {
         m_useReverseAPI = settings.m_useReverseAPI;
     }
     if (settingsKeys.contains("reverseAPIAddress")) {
@@ -229,6 +253,27 @@ void RemoteTCPInputSettings::applySettings(const QStringList& settingsKeys, cons
     }
     if (settingsKeys.contains("protocol")) {
         m_protocol = settings.m_protocol;
+    }
+    if (settingsKeys.contains("replayOffset")) {
+        m_replayOffset = settings.m_replayOffset;
+    }
+    if (settingsKeys.contains("replayLength")) {
+        m_replayLength = settings.m_replayLength;
+    }
+    if (settingsKeys.contains("replayStep")) {
+        m_replayStep = settings.m_replayStep;
+    }
+    if (settingsKeys.contains("replayLoop")) {
+        m_replayLoop = settings.m_replayLoop;
+    }
+    if (settingsKeys.contains("squelchEnabled")) {
+        m_squelchEnabled = settings.m_squelchEnabled;
+    }
+    if (settingsKeys.contains("squelch")) {
+        m_squelch = settings.m_squelch;
+    }
+    if (settingsKeys.contains("squelchGate")) {
+        m_squelchGate = settings.m_squelchGate;
     }
 
     for (int i = 0; i < m_maxGains; i++)
@@ -317,6 +362,27 @@ QString RemoteTCPInputSettings::getDebugString(const QStringList& settingsKeys, 
     }
     if (settingsKeys.contains("protocol") || force) {
         ostr << " m_protocol: " << m_protocol.toStdString();
+    }
+    if (settingsKeys.contains("replayOffset") || force) {
+        ostr << " m_replayOffset: " << m_replayOffset;
+    }
+    if (settingsKeys.contains("replayLength") || force) {
+        ostr << " m_replayLength: " << m_replayLength;
+    }
+    if (settingsKeys.contains("replayStep") || force) {
+        ostr << " m_replayStep: " << m_replayStep;
+    }
+    if (settingsKeys.contains("replayLoop") || force) {
+        ostr << " m_replayLoop: " << m_replayLoop;
+    }
+    if (settingsKeys.contains("squelchEnabled") || force) {
+        ostr << " m_squelchEnabled: " << m_squelchEnabled;
+    }
+    if (settingsKeys.contains("squelch") || force) {
+        ostr << " m_squelch: " << m_squelch;
+    }
+    if (settingsKeys.contains("squelchGate") || force) {
+        ostr << " m_squelchGate: " << m_squelchGate;
     }
 
     for (int i = 0; i < m_maxGains; i++)

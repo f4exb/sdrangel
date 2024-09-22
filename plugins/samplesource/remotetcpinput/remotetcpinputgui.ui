@@ -7,7 +7,7 @@
     <x>0</x>
     <y>0</y>
     <width>360</width>
-    <height>360</height>
+    <height>586</height>
    </rect>
   </property>
   <property name="sizePolicy">
@@ -19,13 +19,13 @@
   <property name="minimumSize">
    <size>
     <width>360</width>
-    <height>360</height>
+    <height>500</height>
    </size>
   </property>
   <property name="maximumSize">
    <size>
-    <width>491</width>
-    <height>360</height>
+    <width>533</width>
+    <height>610</height>
    </size>
   </property>
   <property name="font">
@@ -864,6 +864,184 @@ Use to ensure full dynamic range of 8-bit data is used.</string>
     </layout>
    </item>
    <item>
+    <widget class="Line" name="line_9">
+     <property name="orientation">
+      <enum>Qt::Horizontal</enum>
+     </property>
+    </widget>
+   </item>
+   <item>
+    <layout class="QHBoxLayout" name="signalLevelLayout">
+     <item>
+      <widget class="QLabel" name="channelPowerMeterUnits">
+       <property name="text">
+        <string>dB</string>
+       </property>
+      </widget>
+     </item>
+     <item>
+      <widget class="LevelMeterSignalDB" name="channelPowerMeter" native="true">
+       <property name="sizePolicy">
+        <sizepolicy hsizetype="Expanding" vsizetype="MinimumExpanding">
+         <horstretch>0</horstretch>
+         <verstretch>0</verstretch>
+        </sizepolicy>
+       </property>
+       <property name="minimumSize">
+        <size>
+         <width>0</width>
+         <height>24</height>
+        </size>
+       </property>
+       <property name="font">
+        <font>
+         <family>Liberation Mono</family>
+         <pointsize>8</pointsize>
+        </font>
+       </property>
+       <property name="toolTip">
+        <string>Level meter (dB) top trace: average, bottom trace: instantaneous peak, tip: peak hold</string>
+       </property>
+      </widget>
+     </item>
+    </layout>
+   </item>
+   <item>
+    <layout class="QHBoxLayout" name="squelchLayout">
+     <item>
+      <widget class="ButtonSwitch" name="squelchEnabled">
+       <property name="toolTip">
+        <string>Check to enable IQ squelch</string>
+       </property>
+       <property name="text">
+        <string>SQ</string>
+       </property>
+      </widget>
+     </item>
+     <item>
+      <widget class="Line" name="line_12">
+       <property name="orientation">
+        <enum>Qt::Vertical</enum>
+       </property>
+      </widget>
+     </item>
+     <item>
+      <widget class="QDial" name="squelch">
+       <property name="maximumSize">
+        <size>
+         <width>24</width>
+         <height>24</height>
+        </size>
+       </property>
+       <property name="toolTip">
+        <string>IQ squelch power level in dB</string>
+       </property>
+       <property name="minimum">
+        <number>-150</number>
+       </property>
+       <property name="maximum">
+        <number>0</number>
+       </property>
+       <property name="pageStep">
+        <number>1</number>
+       </property>
+      </widget>
+     </item>
+     <item>
+      <widget class="QLabel" name="squelchText">
+       <property name="minimumSize">
+        <size>
+         <width>32</width>
+         <height>0</height>
+        </size>
+       </property>
+       <property name="text">
+        <string>-150</string>
+       </property>
+       <property name="alignment">
+        <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
+       </property>
+      </widget>
+     </item>
+     <item>
+      <widget class="QLabel" name="squelchUnits">
+       <property name="text">
+        <string>dB</string>
+       </property>
+      </widget>
+     </item>
+     <item>
+      <widget class="Line" name="line_13">
+       <property name="orientation">
+        <enum>Qt::Vertical</enum>
+       </property>
+      </widget>
+     </item>
+     <item>
+      <widget class="PeriodDial" name="squelchGate" native="true">
+       <property name="minimumSize">
+        <size>
+         <width>40</width>
+         <height>0</height>
+        </size>
+       </property>
+       <property name="toolTip">
+        <string>IQ squelch gate time</string>
+       </property>
+      </widget>
+     </item>
+     <item>
+      <widget class="Line" name="line_14">
+       <property name="orientation">
+        <enum>Qt::Vertical</enum>
+       </property>
+      </widget>
+     </item>
+     <item>
+      <spacer name="horizontalSpacer_8">
+       <property name="orientation">
+        <enum>Qt::Horizontal</enum>
+       </property>
+       <property name="sizeHint" stdset="0">
+        <size>
+         <width>40</width>
+         <height>20</height>
+        </size>
+       </property>
+      </spacer>
+     </item>
+     <item>
+      <widget class="QLabel" name="channelPower">
+       <property name="minimumSize">
+        <size>
+         <width>30</width>
+         <height>0</height>
+        </size>
+       </property>
+       <property name="toolTip">
+        <string>Channel power</string>
+       </property>
+       <property name="layoutDirection">
+        <enum>Qt::RightToLeft</enum>
+       </property>
+       <property name="text">
+        <string>0.0</string>
+       </property>
+       <property name="alignment">
+        <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
+       </property>
+      </widget>
+     </item>
+     <item>
+      <widget class="QLabel" name="channelPowerUnits">
+       <property name="text">
+        <string> dB</string>
+       </property>
+      </widget>
+     </item>
+    </layout>
+   </item>
+   <item>
     <widget class="Line" name="line_6">
      <property name="orientation">
       <enum>Qt::Horizontal</enum>
@@ -914,33 +1092,18 @@ Use to ensure full dynamic range of 8-bit data is used.</string>
       </widget>
      </item>
      <item>
-      <widget class="QLineEdit" name="dataPort">
-       <property name="enabled">
-        <bool>true</bool>
-       </property>
-       <property name="minimumSize">
-        <size>
-         <width>60</width>
-         <height>0</height>
-        </size>
-       </property>
-       <property name="maximumSize">
-        <size>
-         <width>60</width>
-         <height>16777215</height>
-        </size>
-       </property>
+      <widget class="QSpinBox" name="dataPort">
        <property name="toolTip">
         <string>Remote data port (rtl_tcp defaults to 1234)</string>
        </property>
-       <property name="inputMask">
-        <string>00000</string>
+       <property name="minimum">
+        <number>1024</number>
        </property>
-       <property name="text">
-        <string>0</string>
+       <property name="maximum">
+        <number>65535</number>
        </property>
-       <property name="alignment">
-        <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
+       <property name="value">
+        <number>1234</number>
        </property>
       </widget>
      </item>
@@ -961,7 +1124,7 @@ Use to ensure full dynamic range of 8-bit data is used.</string>
       <widget class="QComboBox" name="protocol">
        <property name="minimumSize">
         <size>
-         <width>75</width>
+         <width>92</width>
          <height>0</height>
         </size>
        </property>
@@ -1163,6 +1326,182 @@ This should typically be empty. If full, your CPU cannot keep up and data will b
     </layout>
    </item>
    <item>
+    <widget class="Line" name="line_8">
+     <property name="orientation">
+      <enum>Qt::Horizontal</enum>
+     </property>
+    </widget>
+   </item>
+   <item>
+    <layout class="QHBoxLayout" name="txMessagesLayout">
+     <item>
+      <widget class="QToolButton" name="sendMessage">
+       <property name="enabled">
+        <bool>false</bool>
+       </property>
+       <property name="toolTip">
+        <string>Click to send message</string>
+       </property>
+       <property name="text">
+        <string>TX</string>
+       </property>
+      </widget>
+     </item>
+     <item>
+      <widget class="QComboBox" name="txAddress">
+       <property name="enabled">
+        <bool>false</bool>
+       </property>
+       <property name="toolTip">
+        <string>Who to send message to</string>
+       </property>
+       <item>
+        <property name="text">
+         <string>Host</string>
+        </property>
+       </item>
+       <item>
+        <property name="text">
+         <string>All</string>
+        </property>
+       </item>
+      </widget>
+     </item>
+     <item>
+      <widget class="QLineEdit" name="txMessage">
+       <property name="enabled">
+        <bool>false</bool>
+       </property>
+       <property name="toolTip">
+        <string>Message to transmit</string>
+       </property>
+      </widget>
+     </item>
+    </layout>
+   </item>
+   <item>
+    <layout class="QHBoxLayout" name="messagesLayout">
+     <item>
+      <widget class="QListWidget" name="messages">
+       <property name="enabled">
+        <bool>false</bool>
+       </property>
+       <property name="toolTip">
+        <string>Messages</string>
+       </property>
+       <property name="movement">
+        <enum>QListView::Static</enum>
+       </property>
+      </widget>
+     </item>
+    </layout>
+   </item>
+   <item>
+    <widget class="Line" name="line_7">
+     <property name="orientation">
+      <enum>Qt::Horizontal</enum>
+     </property>
+    </widget>
+   </item>
+   <item>
+    <layout class="QHBoxLayout" name="replayLayout">
+     <item>
+      <widget class="QLabel" name="replayLabel">
+       <property name="minimumSize">
+        <size>
+         <width>65</width>
+         <height>0</height>
+        </size>
+       </property>
+       <property name="text">
+        <string>Time Delay</string>
+       </property>
+      </widget>
+     </item>
+     <item>
+      <widget class="QSlider" name="replayOffset">
+       <property name="toolTip">
+        <string>Replay time delay in seconds</string>
+       </property>
+       <property name="maximum">
+        <number>500</number>
+       </property>
+       <property name="orientation">
+        <enum>Qt::Horizontal</enum>
+       </property>
+      </widget>
+     </item>
+     <item>
+      <widget class="QLabel" name="replayOffsetText">
+       <property name="toolTip">
+        <string>Replay time delay in seconds</string>
+       </property>
+       <property name="text">
+        <string>0.0s</string>
+       </property>
+      </widget>
+     </item>
+     <item>
+      <widget class="QToolButton" name="replayNow">
+       <property name="toolTip">
+        <string>Set time delay to 0 seconds</string>
+       </property>
+       <property name="text">
+        <string>Now</string>
+       </property>
+      </widget>
+     </item>
+     <item>
+      <widget class="QToolButton" name="replayPlus">
+       <property name="toolTip">
+        <string>Add displayed number of seconds to time delay</string>
+       </property>
+       <property name="text">
+        <string>+5s</string>
+       </property>
+      </widget>
+     </item>
+     <item>
+      <widget class="QToolButton" name="replayMinus">
+       <property name="toolTip">
+        <string>Remove displayed number of seconds from time delay</string>
+       </property>
+       <property name="text">
+        <string>-5s</string>
+       </property>
+      </widget>
+     </item>
+     <item>
+      <widget class="ButtonSwitch" name="replayLoop">
+       <property name="toolTip">
+        <string>Repeatedly replay data in replay buffer</string>
+       </property>
+       <property name="text">
+        <string/>
+       </property>
+       <property name="icon">
+        <iconset resource="../../../sdrgui/resources/res.qrc">
+         <normaloff>:/playloop.png</normaloff>:/playloop.png</iconset>
+       </property>
+      </widget>
+     </item>
+     <item>
+      <widget class="QToolButton" name="replaySave">
+       <property name="toolTip">
+        <string>Save replay buffer to a file</string>
+       </property>
+       <property name="text">
+        <string/>
+       </property>
+       <property name="icon">
+        <iconset resource="../../../sdrgui/resources/res.qrc">
+         <normaloff>:/save.png</normaloff>:/save.png</iconset>
+       </property>
+      </widget>
+     </item>
+    </layout>
+   </item>
+   <item>
     <widget class="Line" name="line_5">
      <property name="orientation">
       <enum>Qt::Horizontal</enum>
@@ -1214,6 +1553,18 @@ This should typically be empty. If full, your CPU cannot keep up and data will b
    <header>gui/valuedial.h</header>
    <container>1</container>
   </customwidget>
+  <customwidget>
+   <class>LevelMeterSignalDB</class>
+   <extends>QWidget</extends>
+   <header>gui/levelmeter.h</header>
+   <container>1</container>
+  </customwidget>
+  <customwidget>
+   <class>PeriodDial</class>
+   <extends>QWidget</extends>
+   <header>gui/perioddial.h</header>
+   <container>1</container>
+  </customwidget>
  </customwidgets>
  <tabstops>
   <tabstop>startStop</tabstop>
@@ -1232,7 +1583,8 @@ This should typically be empty. If full, your CPU cannot keep up and data will b
   <tabstop>channelGain</tabstop>
   <tabstop>decimation</tabstop>
   <tabstop>sampleBits</tabstop>
-  <tabstop>dataPort</tabstop>
+  <tabstop>dataAddress</tabstop>
+  <tabstop>protocol</tabstop>
   <tabstop>overrideRemoteSettings</tabstop>
   <tabstop>preFill</tabstop>
  </tabstops>

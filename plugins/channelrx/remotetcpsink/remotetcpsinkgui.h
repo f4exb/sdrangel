@@ -25,6 +25,7 @@
 #include <stdint.h>
 
 #include <QObject>
+#include <QHostAddress>
 
 #include "dsp/channelmarker.h"
 #include "channel/channelgui.h"
@@ -82,9 +83,23 @@ private:
     bool m_doApplySettings;
 
     RemoteTCPSink* m_remoteSink;
+    uint32_t m_tickCount;
+    bool m_squelchOpen;
     MessageQueue m_inputMessageQueue;
 
     MovingAverageUtil<float, float, 10> m_bwAvg;
+    MovingAverageUtil<float, float, 10> m_compressionAvg;
+    MovingAverageUtil<float, float, 10> m_networkBWAvg;
+
+    enum ConnectionsCol {
+        CONNECTIONS_COL_ADDRESS,
+        CONNECTIONS_COL_PORT,
+        CONNECTIONS_COL_CONNECTED,
+        CONNECTIONS_COL_DISCONNECTED,
+        CONNECTIONS_COL_TIME
+    };
+
+    static const QString m_dateTimeFormat;
 
     explicit RemoteTCPSinkGUI(PluginAPI* pluginAPI, DeviceUISet *deviceUISet, BasebandSampleSink *rxChannel, QWidget* parent = 0);
     virtual ~RemoteTCPSinkGUI();
@@ -94,11 +109,16 @@ private:
     void applySettings(const QStringList& settingsKeys, bool force = false);
     void applyAllSettings();
     void displaySettings();
+    void displayIQOnly();
+    void displaySquelch();
     void displayRateAndShift();
     bool handleMessage(const Message& message);
     void makeUIConnections();
     QString displayScaledF(float value, char type, int precision, bool showMult);
     void updateAbsoluteCenterFrequency();
+    void resizeTable();
+    void addConnection(const QHostAddress& address, int port);
+    void removeConnection(const QHostAddress& address, int port);
 
     void leaveEvent(QEvent*);
     void enterEvent(EnterEventType*);
@@ -111,10 +131,18 @@ private slots:
     void on_sampleBits_currentIndexChanged(int index);
     void on_dataAddress_editingFinished();
     void on_dataAddress_currentIndexChanged(int index);
-    void on_dataPort_editingFinished();
+    void on_dataPort_valueChanged(int value);
     void on_protocol_currentIndexChanged(int index);
+    void on_remoteControl_toggled(bool checked);
+    void on_squelchEnabled_toggled(bool checked);
+    void on_squelch_valueChanged(int value);
+    void on_squelchGate_valueChanged(double value);
+    void on_displaySettings_clicked();
+    void on_sendMessage_clicked();
+    void on_txMessage_returnPressed();
     void onWidgetRolled(QWidget* widget, bool rollDown);
     void onMenuDialogCalled(const QPoint& p);
+    void tick();
 };
 
 #endif /* PLUGINS_CHANNELRX_REMOTETCPSINK_REMOTETCPSINKGUI_H_ */
