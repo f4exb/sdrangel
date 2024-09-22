@@ -71,6 +71,8 @@ void PeriodDial::on_spinBox_valueChanged(int boxValue)
 
 void PeriodDial::on_units_currentIndexChanged(int index)
 {
+    (void) index;
+
     emit valueChanged(value());
 }
 

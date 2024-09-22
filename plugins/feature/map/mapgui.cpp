@@ -2779,6 +2779,8 @@ void MapGUI::openKiwiSDR(const QString& url)
 
 void MapGUI::kiwiSDRDeviceSetAdded(int index, DeviceAPI *device)
 {
+    (void) index;
+
     disconnect(MainCore::instance(), &MainCore::deviceSetAdded, this, &MapGUI::kiwiSDRDeviceSetAdded);
 
     // FIXME: Doesn't work if we do it immediately. Settings overwritten?
@@ -2848,7 +2850,8 @@ void MapGUI::openSpyServer(const QString& url)
 
 void MapGUI::spyServerDeviceSetAdded(int index, DeviceAPI *device)
 {
-qDebug() << "**************** MapGUI::spyServerDeviceSetAdded";
+    (void) index;
+
     disconnect(MainCore::instance(), &MainCore::deviceSetAdded, this, &MapGUI::spyServerDeviceSetAdded);
 
     // FIXME: Doesn't work if we do it immediately. Settings overwritten?
@@ -2881,6 +2884,8 @@ void MapGUI::openSDRangelServer(const QString& url)
 
 void MapGUI::sdrangelServerDeviceSetAdded(int index, DeviceAPI *device)
 {
+    (void) index;
+
     disconnect(MainCore::instance(), &MainCore::deviceSetAdded, this, &MapGUI::sdrangelServerDeviceSetAdded);
 
     // FIXME: Doesn't work if we do it immediately. Settings overwritten?
