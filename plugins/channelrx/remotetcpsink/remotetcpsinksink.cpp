@@ -70,8 +70,8 @@ RemoteTCPSinkSink::RemoteTCPSinkSink() :
     m_iqCorrection(false),
     m_devSampleRate(0),
     m_log2Decim(0),
-    m_gain(),
     m_rfBW(0),
+    m_gain(),
     m_timer(this),
     m_azimuth(std::numeric_limits<float>::quiet_NaN()),
     m_elevation(std::numeric_limits<float>::quiet_NaN())
@@ -872,8 +872,10 @@ void RemoteTCPSinkSink::acceptTCPConnection()
 
 FLAC__StreamEncoderWriteStatus RemoteTCPSinkSink::flacWrite(const FLAC__StreamEncoder *encoder, const FLAC__byte buffer[], size_t bytes, uint32_t samples, uint32_t currentFrame)
 {
+    (void) encoder;
+
     char header[1+4];
-//qDebug() << "RemoteTCPSinkSink::flacWrite bytes" << bytes << "samples" << samples;
+
     // Save FLAC header for clients that connect later
     if ((currentFrame == 0) && (samples == 0))
     {
@@ -1140,7 +1142,7 @@ void RemoteTCPSinkSink::processCommand()
                 {
                     char *buf = new char[msgLen];
                     len = client->read((char *)buf, msgLen);
-                    if (len == msgLen)
+                    if (len == (int) msgLen)
                     {
                         bool broadcast = (bool) buf[0];
                         int i;
@@ -1520,7 +1522,7 @@ void RemoteTCPSinkSink::sendDirection(bool isotropic, float azimuth, float eleva
     RemoteTCPProtocol::encodeUInt32((quint8 *) &msg[1], 4+4+4);
     RemoteTCPProtocol::encodeUInt32((quint8 *) &msg[1+4], isotropic);
     RemoteTCPProtocol::encodeFloat((quint8 *) &msg[1+4+4], azimuth);
-    RemoteTCPProtocol::encodeFloat((quint8 *) &msg[1+4+4+5], elevation);
+    RemoteTCPProtocol::encodeFloat((quint8 *) &msg[1+4+4+4], elevation);
 
     int clients = std::min((int) m_clients.size(), m_settings.m_maxClients);
     for (int i = 0; i < clients; i++)
