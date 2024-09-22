@@ -18,6 +18,7 @@
 ///////////////////////////////////////////////////////////////////////////////////
 
 #include <QDebug>
+#include <cstring>
 
 #include "device/deviceapi.h"
 #include "util/message.h"
@@ -615,7 +616,7 @@ void RemoteTCPInputTCPHandler::applySettings(const RemoteTCPInputSettings& setti
     // Don't use force, as disconnect can cause rtl_tcp to quit
     if (settingsKeys.contains("dataAddress")
         || settingsKeys.contains("dataPort")
-        || (m_dataSocket == nullptr) && !m_blacklisted)
+        || ((m_dataSocket == nullptr) && !m_blacklisted))
     {
         //disconnectFromHost();
         cleanup();
@@ -681,6 +682,8 @@ static void flacErrorCallback(const FLAC__StreamDecoder *decoder, FLAC__StreamDe
 
 FLAC__StreamDecoderReadStatus RemoteTCPInputTCPHandler::flacRead(const FLAC__StreamDecoder *decoder, FLAC__byte buffer[], size_t *bytes)
 {
+    (void) decoder;
+
     qsizetype bytesRequested = *bytes;
     qsizetype bytesRead = std::min(bytesRequested, (qsizetype) m_compressedData.size());
 
@@ -755,7 +758,7 @@ qsizetype FIFO::read(quint8 *data, qsizetype elements)
     else
     {
         std::memcpy(&data[0], &m_data.data()[m_readPtr], remaining);
-        std::memcpy(&data[remaining], &m_data[0], len2);
+        std::memcpy(&data[remaining], &m_data.data()[0], len2);
         m_readPtr = len2;
     }
 
@@ -813,6 +816,8 @@ void RemoteTCPInputTCPHandler::calcPower(const Sample *iq, int nbSamples)
 
 FLAC__StreamDecoderWriteStatus RemoteTCPInputTCPHandler::flacWrite(const FLAC__StreamDecoder *decoder, const FLAC__Frame *frame, const FLAC__int32 *const buffer[])
 {
+    (void) decoder;
+
     m_uncompressedFrames++;
 
     int nbSamples = frame->header.blocksize;
@@ -982,6 +987,8 @@ void RemoteTCPInputTCPHandler::processDecompressedZlibData(const char *inBuf, in
 
 void RemoteTCPInputTCPHandler::flacError(const FLAC__StreamDecoder *decoder, FLAC__StreamDecoderErrorStatus status)
 {
+    (void) decoder;
+
     qDebug() << "RemoteTCPInputTCPHandler::flacError: Error:" << status;
 }
 
@@ -1782,7 +1789,7 @@ void RemoteTCPInputTCPHandler::processCommands()
 
                     case RemoteTCPProtocol::dataIQzlib:
                     {
-                        if (m_commandLength > m_compressedData.size()) {
+                        if (m_commandLength > (quint32) m_compressedData.size()) {
                             m_compressedData.resize(m_commandLength);
                         }
                         qint64 bytesRead = m_dataSocket->read(m_compressedData.data(), m_commandLength);
