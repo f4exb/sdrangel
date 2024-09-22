@@ -209,6 +209,11 @@ private:
         return data;
     }
 
+    qint16 conv(FixReal data) const
+    {
+        return data; // FIXME:
+    }
+
     qint16 conv(float data) const
     {
         return (qint16)(data * SDR_RX_SCALEF);
