@@ -273,6 +273,8 @@ void RemoteTCPSinkSettingsDialog::on_iqOnly_toggled(bool checked)
 
 void RemoteTCPSinkSettingsDialog::on_isotropic_toggled(bool checked)
 {
+    (void) checked;
+
     displayEnabled();
 }
 
