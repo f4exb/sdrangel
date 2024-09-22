@@ -104,6 +104,8 @@ set(sdrgui_SOURCES
     gui/workspaceselectiondialog.cpp
     gui/wsspectrumsettingsdialog.cpp
     gui/wrappingdatetimeedit.cpp
+    gui/wrappingdial.cpp
+    gui/wrappingspinbox.cpp
 
     dsp/scopevisxy.cpp
 
@@ -235,6 +237,8 @@ set(sdrgui_HEADERS
     gui/workspaceselectiondialog.h
     gui/wsspectrumsettingsdialog.h
     gui/wrappingdatetimeedit.h
+    gui/wrappingdial.h
+    gui/wrappingspinbox.h
 
     dsp/scopevisxy.h
 
