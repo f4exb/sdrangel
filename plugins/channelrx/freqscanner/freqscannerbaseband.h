@@ -63,7 +63,7 @@ public:
         { }
     };
 
-    FreqScannerBaseband();
+    FreqScannerBaseband(FreqScanner *freqScanner);
     ~FreqScannerBaseband();
     void reset();
     void feed(const SampleVector::const_iterator& begin, const SampleVector::const_iterator& end);
