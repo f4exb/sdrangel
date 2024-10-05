@@ -216,6 +216,7 @@ MorseDecoderGUI::MorseDecoderGUI(PluginAPI* pluginAPI, FeatureUISet *featureUISe
     makeUIConnections();
     DialPopup::addPopupsToChildDials(this);
     m_resizer.enableChildMouseTracking();
+    m_morseDecoder->getAvailableChannelsReport();
 }
 
 MorseDecoderGUI::~MorseDecoderGUI()
