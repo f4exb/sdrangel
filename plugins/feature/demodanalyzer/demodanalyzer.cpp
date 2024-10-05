@@ -323,6 +323,12 @@ void DemodAnalyzer::notifyUpdate(const QStringList& renameFrom, const QStringLis
     }
 }
 
+void DemodAnalyzer::getAvailableChannelsReport()
+{
+    notifyUpdate(QStringList{}, QStringList{});
+}
+
+
 void DemodAnalyzer::setChannel(ChannelAPI *selectedChannel)
 {
     if ((selectedChannel == m_selectedChannel) || (m_availableChannels.indexOfObject(selectedChannel) == -1)) {

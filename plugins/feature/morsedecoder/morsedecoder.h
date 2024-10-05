@@ -216,6 +216,7 @@ public:
             SWGSDRangel::SWGFeatureSettings& response);
 
     ScopeVis *getScopeVis() { return &m_scopeVis; }
+    void getAvailableChannelsReport();
 
     static const char* const m_featureIdURI;
     static const char* const m_featureId;

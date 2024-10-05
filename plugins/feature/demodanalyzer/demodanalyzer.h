@@ -194,6 +194,8 @@ public:
             const QStringList& featureSettingsKeys,
             SWGSDRangel::SWGFeatureSettings& response);
 
+    void getAvailableChannelsReport();
+
     static const char* const m_featureIdURI;
     static const char* const m_featureId;
 
