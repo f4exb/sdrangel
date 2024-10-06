@@ -32,7 +32,7 @@
 const PluginDescriptor BladeRF2MIMOPlugin::m_pluginDescriptor = {
     QStringLiteral("BladeRF2"),
 	QStringLiteral("BladeRF2 MIMO"),
-    QStringLiteral("7.21.4"),
+    QStringLiteral("7.22.1"),
 	QStringLiteral("(c) Edouard Griffiths, F4EXB"),
 	QStringLiteral("https://github.com/f4exb/sdrangel"),
 	true,
