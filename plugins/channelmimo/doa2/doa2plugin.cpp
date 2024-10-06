@@ -34,7 +34,7 @@
 const PluginDescriptor DOA2Plugin::m_pluginDescriptor = {
     DOA2::m_channelId,
     QStringLiteral("DOA 2 sources"),
-    QStringLiteral("7.22.0"),
+    QStringLiteral("7.22.1"),
     QStringLiteral("(c) Edouard Griffiths, F4EXB"),
     QStringLiteral("https://github.com/f4exb/sdrangel"),
     true,

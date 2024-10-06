@@ -33,7 +33,7 @@
 const PluginDescriptor NoiseFigurePlugin::m_pluginDescriptor = {
     NoiseFigure::m_channelId,
     QStringLiteral("Noise Figure"),
-    QStringLiteral("7.21.3"),
+    QStringLiteral("7.22.1"),
     QStringLiteral("(c) Jon Beniston, M7RCE"),
     QStringLiteral("https://github.com/f4exb/sdrangel"),
     true,
