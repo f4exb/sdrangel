@@ -153,7 +153,7 @@ void FreqScanner::start()
 
     qDebug("FreqScanner::start");
     m_thread = new QThread();
-    m_basebandSink = new FreqScannerBaseband();
+    m_basebandSink = new FreqScannerBaseband(this);
     m_basebandSink->setFifoLabel(QString("%1 [%2:%3]")
         .arg(m_channelId)
         .arg(m_deviceAPI->getDeviceSetIndex())

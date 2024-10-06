@@ -192,6 +192,7 @@ DemodAnalyzerGUI::DemodAnalyzerGUI(PluginAPI* pluginAPI, FeatureUISet *featureUI
     makeUIConnections();
     DialPopup::addPopupsToChildDials(this);
     m_resizer.enableChildMouseTracking();
+    m_demodAnalyzer->getAvailableChannelsReport();
 }
 
 DemodAnalyzerGUI::~DemodAnalyzerGUI()

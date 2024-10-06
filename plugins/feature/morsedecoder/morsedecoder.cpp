@@ -372,6 +372,11 @@ void MorseDecoder::notifyUpdate(const QStringList& renameFrom, const QStringList
     }
 }
 
+void MorseDecoder::getAvailableChannelsReport()
+{
+    notifyUpdate(QStringList{}, QStringList{});
+}
+
 void MorseDecoder::setChannel(ChannelAPI *selectedChannel)
 {
     if ((selectedChannel == m_selectedChannel) || (m_availableChannels.indexOfObject(selectedChannel) == -1)) {

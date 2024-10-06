@@ -31,7 +31,7 @@
 const PluginDescriptor RigCtlServerPlugin::m_pluginDescriptor = {
     RigCtlServer::m_featureId,
 	QStringLiteral("RigCtl Server"),
-    QStringLiteral("7.22.0"),
+    QStringLiteral("7.22.1"),
 	QStringLiteral("(c) Jon Beniston, M7RCE and Edouard Griffiths, F4EXB"),
 	QStringLiteral("https://github.com/f4exb/sdrangel"),
 	true,

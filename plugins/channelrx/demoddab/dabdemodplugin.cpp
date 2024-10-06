@@ -33,7 +33,7 @@
 const PluginDescriptor DABDemodPlugin::m_pluginDescriptor = {
     DABDemod::m_channelId,
     QStringLiteral("DAB Demodulator"),
-    QStringLiteral("7.22.0"),
+    QStringLiteral("7.22.1"),
     QStringLiteral("(c) Jon Beniston, M7RCE. DAB library by Jvan Katwijk"),
     QStringLiteral("https://github.com/f4exb/sdrangel"),
     true,

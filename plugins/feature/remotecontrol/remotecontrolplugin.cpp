@@ -33,7 +33,7 @@
 const PluginDescriptor RemoteControlPlugin::m_pluginDescriptor = {
     RemoteControl::m_featureId,
     QStringLiteral("Remote Control"),
-    QStringLiteral("7.20.0"),
+    QStringLiteral("7.22.1"),
     QStringLiteral("(c) Jon Beniston, M7RCE"),
     QStringLiteral("https://github.com/f4exb/sdrangel"),
     true,

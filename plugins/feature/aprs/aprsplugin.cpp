@@ -34,7 +34,7 @@
 const PluginDescriptor APRSPlugin::m_pluginDescriptor = {
     APRS::m_featureId,
     QStringLiteral("APRS"),
-    QStringLiteral("7.22.0"),
+    QStringLiteral("7.22.1"),
     QStringLiteral("(c) Jon Beniston, M7RCE"),
     QStringLiteral("https://github.com/f4exb/sdrangel"),
     true,
