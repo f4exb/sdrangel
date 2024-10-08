@@ -93,6 +93,97 @@ Specifies the protocol used for sending IQ samples and metadata to clients:
 
 Click to open the Settings Dialog.
 
+![Remote TCP sink Settings Dialog](../../../doc/img/RemoteTCPSink_settings.png)
+
+<h4>Max Clients</h4>
+
+Specify the maximum number of clients than can connect simultaneously.
+If additional clients attempt to connect, they will be held in a queue.
+
+<h4>Time Limit</h4>
+
+Specify a time limit in minutes for each client connection. Use 0 for no limit.
+After the time limit expires, a client will be disconnected. 
+They will be allowed to reconnect if the maximum number of clients is not reached.
+
+<h4>Max Channel Sample Rate</h4>
+
+Specify the maximum channel sample rate that can be set. This allows a limit to be set on network bandwidth.
+
+<h4>IQ only</h4>
+
+When checked, only uncompressed IQ samples will be transmitted. This is for compatibilty with client software expecting the RTL0 protcol.
+Checking this option will disable support for compression, messaging, device location and direction.
+
+<h4>Compressor</h4>
+
+Specify the compressor to use. This can be FLAC or zlib.
+
+<h4>Compression Level</h4>
+
+Specifies the compression effort level. Higher settings can improve compression, but require more CPU time.
+
+<h4>Block size</h4>
+
+Specify the block size the compressor uses. Larger block sizes improve compression, but add latency.
+Generally it should be fine to use the largest setting, unless the sample rate is very low.
+
+<h4>SSL Certificate</h4>
+
+Specify an SSL certificate .pem file. This is required to use SDRangel wss protocol.
+
+<h4>SSL Key</h4>
+
+Specify an SSL key .pem file. This is required to use SDRangel wss protocol.
+
+<h4>List Server</h4>
+
+Check to list the server in a public directory on sdrangel.com.
+This will allow other users to find and connect to the server via the Map feature.
+
+<h4>Address</h4>
+
+Public IP address or hostname and port number to access the server.
+The port number specified here may differ from (12) if your router's
+port forwarding maps the port numbers.
+
+<h4>Frequency Range</h4>
+
+Specify minimum and maximum frequencies that users can expect to receive on.
+This will typically depend on the SDR and antenna.
+For information only and will be displayed on the Map.
+
+<h4>Antenna</h4>
+
+Optionally enter details of the antenna. 
+For information only and will be displayed on the Map.
+
+<h4>Location</h4>
+
+Optionaly enter the location (Town and Country) of the antenna.
+For information only and will be displayed on the Map.
+The position the SDRangel icon will be plotted on the Map will be
+taken from the device itself, which for most devices, will default
+to the position in Preferences > My Position.
+
+<h4>Isotropic</h4>
+
+Check to indicate the antenna is isotropic (non-directional).
+When unchecked, the direction the antenna points in can be specified below.
+
+<h4>Rotator</h4>
+
+Specify a Rotator feature that is controlling the direction of the antenna.
+Set to None to manually set the direction the antenna points.
+
+<h4>Direction</h4>
+
+Specify the direction the antenna is pointing, as Azimuth in degrees and Elevation in degrees.
+
+<h4>IP Blacklist</h4>
+
+Specify a list of IP addresses that will be prevented from connecting to the server.
+
 <h3>15: Remote Control</h3>
 
 When checked, remote clients will be able to change device settings. When unchecked, client requests to change settings will be ignored.
