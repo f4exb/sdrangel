@@ -550,22 +550,22 @@ bool DeviceAPI::deserialize(const QByteArray& data)
         if (m_deviceSourceEngine && m_deviceSourceEngine->getSource())
         {
             d.readBlob(1, &bdata);
-            if (data.size() > 0) {
-                m_deviceSourceEngine->getSource()->deserialize(data);
+            if (bdata.size() > 0) {
+                m_deviceSourceEngine->getSource()->deserialize(bdata);
             }
         }
         if (m_deviceSinkEngine && m_deviceSinkEngine->getSink())
         {
             d.readBlob(2, &bdata);
-            if (data.size() > 0) {
-                m_deviceSinkEngine->getSink()->deserialize(data);
+            if (bdata.size() > 0) {
+                m_deviceSinkEngine->getSink()->deserialize(bdata);
             }
         }
         if (m_deviceMIMOEngine && m_deviceMIMOEngine->getMIMO())
         {
             d.readBlob(3, &bdata);
-            if (data.size() > 0) {
-                m_deviceMIMOEngine->getMIMO()->deserialize(data);
+            if (bdata.size() > 0) {
+                m_deviceMIMOEngine->getMIMO()->deserialize(bdata);
             }
         }
         d.readList<quint64>(4, &centerFrequency);
