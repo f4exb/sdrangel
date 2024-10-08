@@ -40,7 +40,7 @@
 #include "remotetcpsinksettings.h"
 #include "remotetcpprotocol.h"
 
-#include "socket.h"
+#include "util/socket.h"
 
 class DeviceSampleSource;
 

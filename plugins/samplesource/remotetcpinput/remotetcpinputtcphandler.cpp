@@ -18,6 +18,7 @@
 ///////////////////////////////////////////////////////////////////////////////////
 
 #include <QDebug>
+#include <QMessageBox>
 #include <cstring>
 
 #include "device/deviceapi.h"
@@ -36,6 +37,8 @@ RemoteTCPInputTCPHandler::RemoteTCPInputTCPHandler(SampleSinkFifo *sampleFifo, D
     m_deviceAPI(deviceAPI),
     m_running(false),
     m_dataSocket(nullptr),
+    m_tcpSocket(nullptr),
+    m_webSocket(nullptr),
     m_tcpBuf(nullptr),
     m_sampleFifo(sampleFifo),
 	m_replayBuffer(replayBuffer),
@@ -82,9 +85,7 @@ RemoteTCPInputTCPHandler::~RemoteTCPInputTCPHandler()
     if (m_converterBuffer) {
         delete[] m_converterBuffer;
     }
-    qDebug() << "RemoteTCPInputTCPHandler::~RemoteTCPInputTCPHandler cleanup";
     cleanup();
-    qDebug() << "RemoteTCPInputTCPHandler::~RemoteTCPInputTCPHandler done";
 }
 
 void RemoteTCPInputTCPHandler::reset()
@@ -114,7 +115,6 @@ void RemoteTCPInputTCPHandler::start()
 
 void RemoteTCPInputTCPHandler::stop()
 {
-    qDebug("RemoteTCPInputTCPHandler::stop locking");
     QMutexLocker mutexLocker(&m_mutex);
 
     qDebug("RemoteTCPInputTCPHandler::stop");
@@ -142,24 +142,40 @@ void RemoteTCPInputTCPHandler::finished()
     cleanup();
     disconnect(thread(), SIGNAL(finished()), this, SLOT(finished()));
     m_running = false;
-    qDebug("RemoteTCPInputTCPHandler::finished done");
 }
 
-void RemoteTCPInputTCPHandler::connectToHost(const QString& address, quint16 port)
+void RemoteTCPInputTCPHandler::connectToHost(const QString& address, quint16 port, const QString& protocol)
 {
-    qDebug("RemoteTCPInputTCPHandler::connectToHost: connect to %s:%d", address.toStdString().c_str(), port);
-    m_dataSocket = new QTcpSocket(this);
+    qDebug("RemoteTCPInputTCPHandler::connectToHost: connect to %s %s:%d", protocol.toStdString().c_str(), address.toStdString().c_str(), port);
     m_fillBuffer = true;
     m_readMetaData = false;
-    connect(m_dataSocket, SIGNAL(readyRead()), this, SLOT(dataReadyRead()));
-    connect(m_dataSocket, SIGNAL(connected()), this, SLOT(connected()));
-    connect(m_dataSocket, SIGNAL(disconnected()), this, SLOT(disconnected()));
-#if QT_VERSION < QT_VERSION_CHECK(5, 15, 0)
-    connect(m_dataSocket, QOverload<QAbstractSocket::SocketError>::of(&QAbstractSocket::error), this, &RemoteTCPInputTCPHandler::errorOccurred);
-#else
-    connect(m_dataSocket, &QAbstractSocket::errorOccurred, this, &RemoteTCPInputTCPHandler::errorOccurred);
+    if (protocol == "SDRangel wss")
+    {
+        m_webSocket = new QWebSocket(QString(), QWebSocketProtocol::VersionLatest, this);
+        connect(m_webSocket, &QWebSocket::binaryFrameReceived, this, &RemoteTCPInputTCPHandler::dataReadyRead);
+        connect(m_webSocket, &QWebSocket::connected, this, &RemoteTCPInputTCPHandler::connected);
+        connect(m_webSocket, &QWebSocket::disconnected, this, &RemoteTCPInputTCPHandler::disconnected);
+#if QT_VERSION >= QT_VERSION_CHECK(6, 5, 0)
+        connect(m_webSocket, &QWebSocket::errorOccurred, this, &RemoteTCPInputTCPHandler::errorOccurred);
 #endif
-    m_dataSocket->connectToHost(address, port);
+        connect(m_webSocket, &QWebSocket::sslErrors, this, &RemoteTCPInputTCPHandler::sslErrors);
+        m_webSocket->open(QUrl(QString("wss://%1:%2").arg(address).arg(port)));
+        m_dataSocket = new WebSocket(m_webSocket);
+    }
+    else
+    {
+        m_tcpSocket = new QTcpSocket(this);
+        connect(m_tcpSocket, SIGNAL(readyRead()), this, SLOT(dataReadyRead()));
+        connect(m_tcpSocket, SIGNAL(connected()), this, SLOT(connected()));
+        connect(m_tcpSocket, SIGNAL(disconnected()), this, SLOT(disconnected()));
+#if QT_VERSION < QT_VERSION_CHECK(5, 15, 0)
+        connect(m_tcpSocket, QOverload<QAbstractSocket::SocketError>::of(&QAbstractSocket::error), this, &RemoteTCPInputTCPHandler::errorOccurred);
+#else
+        connect(m_tcpSocket, &QAbstractSocket::errorOccurred, this, &RemoteTCPInputTCPHandler::errorOccurred);
+#endif
+        m_tcpSocket->connectToHost(address, port);
+        m_dataSocket = new TCPSocket(m_tcpSocket);
+    }
 }
 
 /*void RemoteTCPInputTCPHandler::disconnectFromHost()
@@ -187,21 +203,44 @@ void RemoteTCPInputTCPHandler::cleanup()
         FLAC__stream_decoder_delete(m_decoder);
         m_decoder = nullptr;
     }
+    if (m_webSocket)
+    {
+        qDebug() << "RemoteTCPInputTCPHandler::cleanup: Closing and deleting web socket";
+        disconnect(m_webSocket, &QWebSocket::binaryFrameReceived, this, &RemoteTCPInputTCPHandler::dataReadyRead);
+        disconnect(m_webSocket, &QWebSocket::connected, this, &RemoteTCPInputTCPHandler::connected);
+        disconnect(m_webSocket, &QWebSocket::disconnected, this, &RemoteTCPInputTCPHandler::disconnected);
+#if QT_VERSION >= QT_VERSION_CHECK(6, 5, 0)
+        disconnect(m_webSocket, &QWebSocket::errorOccurred, this, &RemoteTCPInputTCPHandler::errorOccurred);
+#endif
+    }
+    if (m_tcpSocket)
+    {
+        qDebug() << "RemoteTCPInputTCPHandler::cleanup: Closing and deleting TCP socket";
+        // Disconnect disconnected, so don't get called recursively
+        disconnect(m_tcpSocket, SIGNAL(readyRead()), this, SLOT(dataReadyRead()));
+        disconnect(m_tcpSocket, SIGNAL(connected()), this, SLOT(connected()));
+        disconnect(m_tcpSocket, SIGNAL(disconnected()), this, SLOT(disconnected()));
+#if QT_VERSION < QT_VERSION_CHECK(5, 15, 0)
+        disconnect(m_tcpSocket, QOverload<QAbstractSocket::SocketError>::of(&QAbstractSocket::error), this, &RemoteTCPInputTCPHandler::errorOccurred);
+#else
+        disconnect(m_tcpSocket, &QAbstractSocket::errorOccurred, this, &RemoteTCPInputTCPHandler::errorOccurred);
+#endif
+    }
     if (m_dataSocket)
     {
-        qDebug() << "RemoteTCPInputTCPHandler::cleanup: Closing and deleting socket";
-        // Disconnect disconnected, so don't get called recursively
-        disconnect(m_dataSocket, SIGNAL(readyRead()), this, SLOT(dataReadyRead()));
-        disconnect(m_dataSocket, SIGNAL(connected()), this, SLOT(connected()));
-        disconnect(m_dataSocket, SIGNAL(disconnected()), this, SLOT(disconnected()));
-#if QT_VERSION < QT_VERSION_CHECK(5, 15, 0)
-        disconnect(m_dataSocket, QOverload<QAbstractSocket::SocketError>::of(&QAbstractSocket::error), this, &RemoteTCPInputTCPHandler::errorOccurred);
-#else
-        disconnect(m_dataSocket, &QAbstractSocket::errorOccurred, this, &RemoteTCPInputTCPHandler::errorOccurred);
-#endif
         m_dataSocket->close();
         m_dataSocket->deleteLater();
         m_dataSocket = nullptr;
+    }
+    if (m_webSocket)
+    {
+        m_webSocket->deleteLater();
+        m_webSocket = nullptr;
+    }
+    if (m_tcpSocket)
+    {
+        m_tcpSocket->deleteLater();
+        m_tcpSocket = nullptr;
     }
 }
 
@@ -620,7 +659,7 @@ void RemoteTCPInputTCPHandler::applySettings(const RemoteTCPInputSettings& setti
     {
         //disconnectFromHost();
         cleanup();
-        connectToHost(settings.m_dataAddress, settings.m_dataPort);
+        connectToHost(settings.m_dataAddress, settings.m_dataPort, settings.m_protocol);
     }
 
     if (force) {
@@ -651,35 +690,6 @@ static void flacErrorCallback(const FLAC__StreamDecoder *decoder, FLAC__StreamDe
     return handler->flacError(decoder, status);
 }
 
-/*FLAC__StreamDecoderReadStatus RemoteTCPInputTCPHandler::flacRead(const FLAC__StreamDecoder *decoder, FLAC__byte buffer[], size_t *bytes)
-{
-    if (m_dataSocket)
-    {
-        qint64 bytesRequested = *bytes;
-        qint64 bytesRead = std::min(bytesRequested, m_compressedData.size());
-
-        //bytesRead = m_dataSocket->read((char *) buffer, bytesRequested);
-
-        memcpy(buffer, m_compressedData.constData(), bytesRead);
-
-        qDebug() << "flacRead" << bytesRequested << bytesRead;
-
-        if (bytesRead != -1)
-        {
-            *bytes = (size_t) bytesRead;
-            return FLAC__STREAM_DECODER_READ_STATUS_CONTINUE;
-        }
-        else
-        {
-            return FLAC__STREAM_DECODER_READ_STATUS_ABORT;
-        }
-    }
-    else
-    {
-        return FLAC__STREAM_DECODER_READ_STATUS_ABORT;
-    }
-}*/
-
 FLAC__StreamDecoderReadStatus RemoteTCPInputTCPHandler::flacRead(const FLAC__StreamDecoder *decoder, FLAC__byte buffer[], size_t *bytes)
 {
     (void) decoder;
@@ -690,7 +700,6 @@ FLAC__StreamDecoderReadStatus RemoteTCPInputTCPHandler::flacRead(const FLAC__Str
     memcpy(buffer, m_compressedData.constData(), bytesRead);
     m_compressedData.remove(0, bytesRead);
 
-    //qDebug() << "RemoteTCPInputTCPHandler::flacRead bytesRequested" << bytesRequested << "bytesRead" << bytesRead;
     if (bytesRead == 0)
     {
         qDebug() << "RemoteTCPInputTCPHandler::flacRead: Decoder will hang if we can't return data";
@@ -821,7 +830,6 @@ FLAC__StreamDecoderWriteStatus RemoteTCPInputTCPHandler::flacWrite(const FLAC__S
     m_uncompressedFrames++;
 
     int nbSamples = frame->header.blocksize;
-//qDebug() << "RemoteTCPInputTCPHandler::flacWrite m_uncompressedFrames" << m_uncompressedFrames << "nbSamples" << nbSamples;
     if (nbSamples > (int) m_converterBufferNbSamples)
     {
         if (m_converterBuffer) {
@@ -1011,20 +1019,13 @@ void RemoteTCPInputTCPHandler::connected()
     }
     // Start calls to processData
     m_timer.start();
-
-    /*if (m_dataSocket->bytesAvailable()) {
-        qDebug() << "Data is already available";
-        dataReadyRead();
-    } else {
-        qDebug() << "No data available";
-    }*/
 }
 
 void RemoteTCPInputTCPHandler::reconnect()
 {
     QMutexLocker mutexLocker(&m_mutex);
     if (!m_dataSocket) {
-        connectToHost(m_settings.m_dataAddress, m_settings.m_dataPort);
+        connectToHost(m_settings.m_dataAddress, m_settings.m_dataPort, m_settings.m_protocol);
     }
 }
 
@@ -1069,6 +1070,12 @@ void RemoteTCPInputTCPHandler::errorOccurred(QAbstractSocket::SocketError socket
         // Try to reconnect
         m_reconnectTimer.start(500);
     }
+}
+
+void RemoteTCPInputTCPHandler::sslErrors(const QList<QSslError> &errors)
+{
+    qDebug() << "RemoteTCPInputTCPHandler::sslErrors: " << errors;
+    m_webSocket->ignoreSslErrors(); // FIXME: Add a setting whether to do this?
 }
 
 void RemoteTCPInputTCPHandler::dataReadyRead()
@@ -1753,7 +1760,6 @@ void RemoteTCPInputTCPHandler::processCommands()
                         m_compressedData.resize(s + m_commandLength);
                         qint64 bytesRead = m_dataSocket->read(&m_compressedData.data()[s], m_commandLength);
                         m_compressedFrames++;
-                        //qDebug() << "*************************** RemoteTCPProtocol::dataIQFLAC m_compressedData.size()" << m_compressedData.size() << "m_compressedFrames" << m_compressedFrames << "m_uncompressedFrames" << m_uncompressedFrames;
                         if (bytesRead == m_commandLength)
                         {
                             // FLAC encoder writes out 4 (fLaC), 38 (STREAMINFO), 51 (?) byte headers, that are transmitted as one command block,
@@ -1940,7 +1946,7 @@ void RemoteTCPInputTCPHandler::processData()
 {
     QMutexLocker mutexLocker(&m_mutex);
 
-    if (m_dataSocket && (m_dataSocket->state() == QAbstractSocket::ConnectedState))
+    if (m_dataSocket && m_dataSocket->isConnected())
     {
         int sampleRate = m_settings.m_channelSampleRate;
         int bytesPerIQPair = m_iqOnly ?  (2 * m_settings.m_sampleBits / 8) : (2 * sizeof(Sample));

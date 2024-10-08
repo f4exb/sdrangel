@@ -183,6 +183,27 @@ public:
         { }
     };
 
+    class MsgError : public Message {
+        MESSAGE_CLASS_DECLARATION
+
+    public:
+
+        const QString& getError() const { return m_error; }
+
+        static MsgError *create(const QString& error)
+        {
+            return new MsgError(error);
+        }
+
+    private:
+        QString m_error;
+
+        MsgError(const QString& error) :
+            Message(),
+            m_error(error)
+        { }
+    };
+
     RemoteTCPSink(DeviceAPI *deviceAPI);
     virtual ~RemoteTCPSink();
     virtual void destroy() { delete this; }

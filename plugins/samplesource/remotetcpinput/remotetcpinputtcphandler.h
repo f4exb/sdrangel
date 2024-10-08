@@ -22,6 +22,7 @@
 
 #include <QObject>
 #include <QTcpSocket>
+#include <QWebSocket>
 #include <QHostAddress>
 #include <QRecursiveMutex>
 #include <QDateTime>
@@ -31,6 +32,7 @@
 
 #include "util/messagequeue.h"
 #include "util/movingaverage.h"
+#include "util/socket.h"
 #include "dsp/replaybuffer.h"
 #include "remotetcpinputsettings.h"
 #include "../../channelrx/remotetcpsink/remotetcpprotocol.h"
@@ -185,6 +187,7 @@ public slots:
     void connected();
     void disconnected();
     void errorOccurred(QAbstractSocket::SocketError socketError);
+    void sslErrors(const QList<QSslError> &errors);
 
 private:
 
@@ -200,7 +203,9 @@ private:
 
     DeviceAPI *m_deviceAPI;
     bool m_running;
-    QTcpSocket *m_dataSocket;
+    Socket *m_dataSocket;
+    QTcpSocket *m_tcpSocket;
+    QWebSocket *m_webSocket;
     char *m_tcpBuf;
     SampleSinkFifo *m_sampleFifo;
     ReplayBuffer<FixReal> *m_replayBuffer;
@@ -253,7 +258,7 @@ private:
     MovingAverageUtil<Real, double, 16> m_movingAverage;
 
     bool handleMessage(const Message& message);
-    void connectToHost(const QString& address, quint16 port);
+    void connectToHost(const QString& address, quint16 port, const QString& protocol);
     //void disconnectFromHost();
     void cleanup();
     void clearBuffer();

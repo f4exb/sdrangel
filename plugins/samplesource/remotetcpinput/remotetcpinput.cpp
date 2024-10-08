@@ -96,7 +96,7 @@ void RemoteTCPInput::destroy()
 
 void RemoteTCPInput::init()
 {
-    qDebug() << "*************** RemoteTCPInput::init";
+    qDebug() << "RemoteTCPInput::init";
     applySettings(m_settings, QList<QString>(), true);
 }
 
@@ -109,7 +109,6 @@ bool RemoteTCPInput::start()
     }
     m_remoteInputTCPPHandler->reset();
     m_remoteInputTCPPHandler->start();
-    qDebug() << "************ RemoteTCPInput::start" << m_settings.m_dataAddress;
     m_remoteInputTCPPHandler->getInputMessageQueue()->push(RemoteTCPInputTCPHandler::MsgConfigureTcpHandler::create(m_settings, QList<QString>(), true));
     m_thread.start();
     m_running = true;
@@ -122,19 +121,14 @@ void RemoteTCPInput::stop()
     if (!m_running) {
         // For wasm, important not to call m_remoteInputTCPPHandler->stop() twice
         // as mutex can deadlock when this object is being deleted
-        qDebug() << "RemoteTCPInput::stop - Not running";
         return;
     }
     m_remoteInputTCPPHandler->stop();
-    qDebug() << "RemoteTCPInput::stop1";
     m_thread.quit();
-    qDebug() << "RemoteTCPInput::stop2";
 #ifndef __EMSCRIPTEN__
-    qDebug() << "RemoteTCPInput::stop3";
     m_thread.wait();
 #endif
     m_running = false;
-    qDebug() << "RemoteTCPInput::stopped";
 }
 
 QByteArray RemoteTCPInput::serialize() const
@@ -151,9 +145,6 @@ bool RemoteTCPInput::deserialize(const QByteArray& data)
         m_settings.resetToDefaults();
         success = false;
     }
-
-    qDebug() << "************** RemoteTCPInput::deserialize" << m_settings.m_dataAddress;
-
     MsgConfigureRemoteTCPInput* message = MsgConfigureRemoteTCPInput::create(m_settings, QList<QString>(), true);
     m_inputMessageQueue.push(message);
 
@@ -230,7 +221,6 @@ bool RemoteTCPInput::handleMessage(const Message& message)
     {
         qDebug() << "RemoteTCPInput::handleMessage:" << message.getIdentifier();
         MsgConfigureRemoteTCPInput& conf = (MsgConfigureRemoteTCPInput&) message;
-        qDebug() << "*********** RemoteTCPInput::handleMessage MsgConfigureRemoteTCPInput" << m_settings.m_dataAddress;
         applySettings(conf.getSettings(), conf.getSettingsKeys(), conf.getForce());
         return true;
     }

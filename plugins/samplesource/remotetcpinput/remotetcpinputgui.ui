@@ -89,7 +89,7 @@
             <string>00000k</string>
            </property>
            <property name="alignment">
-            <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
+            <set>Qt::AlignmentFlag::AlignRight|Qt::AlignmentFlag::AlignTrailing|Qt::AlignmentFlag::AlignVCenter</set>
            </property>
           </widget>
          </item>
@@ -100,7 +100,7 @@
      <item>
       <spacer name="freqLeftSpacer">
        <property name="orientation">
-        <enum>Qt::Horizontal</enum>
+        <enum>Qt::Orientation::Horizontal</enum>
        </property>
        <property name="sizeHint" stdset="0">
         <size>
@@ -134,7 +134,7 @@
         <cursorShape>PointingHandCursor</cursorShape>
        </property>
        <property name="focusPolicy">
-        <enum>Qt::StrongFocus</enum>
+        <enum>Qt::FocusPolicy::StrongFocus</enum>
        </property>
        <property name="toolTip">
         <string>Center frequency in kHz</string>
@@ -153,14 +153,14 @@
         <string> kHz</string>
        </property>
        <property name="alignment">
-        <set>Qt::AlignCenter</set>
+        <set>Qt::AlignmentFlag::AlignCenter</set>
        </property>
       </widget>
      </item>
      <item>
       <spacer name="horizontalSpacer_3">
        <property name="orientation">
-        <enum>Qt::Horizontal</enum>
+        <enum>Qt::Orientation::Horizontal</enum>
        </property>
        <property name="sizeHint" stdset="0">
         <size>
@@ -199,7 +199,7 @@
         <number>1</number>
        </property>
        <property name="orientation">
-        <enum>Qt::Horizontal</enum>
+        <enum>Qt::Orientation::Horizontal</enum>
        </property>
       </widget>
      </item>
@@ -215,7 +215,7 @@
         <string>0</string>
        </property>
        <property name="alignment">
-        <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
+        <set>Qt::AlignmentFlag::AlignRight|Qt::AlignmentFlag::AlignTrailing|Qt::AlignmentFlag::AlignVCenter</set>
        </property>
       </widget>
      </item>
@@ -224,7 +224,7 @@
    <item>
     <widget class="Line" name="line_rateTime">
      <property name="orientation">
-      <enum>Qt::Horizontal</enum>
+      <enum>Qt::Orientation::Horizontal</enum>
      </property>
     </widget>
    </item>
@@ -253,7 +253,7 @@
      <item>
       <spacer name="horizontalSpacer_2">
        <property name="orientation">
-        <enum>Qt::Horizontal</enum>
+        <enum>Qt::Orientation::Horizontal</enum>
        </property>
        <property name="sizeHint" stdset="0">
         <size>
@@ -288,7 +288,7 @@
    <item>
     <widget class="Line" name="line_address">
      <property name="orientation">
-      <enum>Qt::Horizontal</enum>
+      <enum>Qt::Orientation::Horizontal</enum>
      </property>
     </widget>
    </item>
@@ -342,7 +342,7 @@
      <item>
       <spacer name="horizontalSpacer_9">
        <property name="orientation">
-        <enum>Qt::Horizontal</enum>
+        <enum>Qt::Orientation::Horizontal</enum>
        </property>
        <property name="sizeHint" stdset="0">
         <size>
@@ -415,7 +415,7 @@
    <item>
     <widget class="Line" name="line">
      <property name="orientation">
-      <enum>Qt::Horizontal</enum>
+      <enum>Qt::Orientation::Horizontal</enum>
      </property>
     </widget>
    </item>
@@ -459,14 +459,14 @@
         <string>40.0dB</string>
        </property>
        <property name="alignment">
-        <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
+        <set>Qt::AlignmentFlag::AlignRight|Qt::AlignmentFlag::AlignTrailing|Qt::AlignmentFlag::AlignVCenter</set>
        </property>
       </widget>
      </item>
      <item>
       <widget class="Line" name="gainLine1">
        <property name="orientation">
-        <enum>Qt::Vertical</enum>
+        <enum>Qt::Orientation::Vertical</enum>
        </property>
       </widget>
      </item>
@@ -500,7 +500,7 @@
      <item>
       <widget class="Line" name="gainLine2">
        <property name="orientation">
-        <enum>Qt::Vertical</enum>
+        <enum>Qt::Orientation::Vertical</enum>
        </property>
       </widget>
      </item>
@@ -534,7 +534,7 @@
      <item>
       <spacer name="horizontalSpacer_7">
        <property name="orientation">
-        <enum>Qt::Horizontal</enum>
+        <enum>Qt::Orientation::Horizontal</enum>
        </property>
        <property name="sizeHint" stdset="0">
         <size>
@@ -559,7 +559,7 @@
    <item>
     <widget class="Line" name="line_rfBW">
      <property name="orientation">
-      <enum>Qt::Horizontal</enum>
+      <enum>Qt::Orientation::Horizontal</enum>
      </property>
     </widget>
    </item>
@@ -609,7 +609,7 @@
      <item>
       <spacer name="rfBWSpacer">
        <property name="orientation">
-        <enum>Qt::Horizontal</enum>
+        <enum>Qt::Orientation::Horizontal</enum>
        </property>
        <property name="sizeHint" stdset="0">
         <size>
@@ -624,7 +624,7 @@
    <item>
     <widget class="Line" name="line_3">
      <property name="orientation">
-      <enum>Qt::Horizontal</enum>
+      <enum>Qt::Orientation::Horizontal</enum>
      </property>
     </widget>
    </item>
@@ -669,7 +669,7 @@
         <cursorShape>PointingHandCursor</cursorShape>
        </property>
        <property name="focusPolicy">
-        <enum>Qt::StrongFocus</enum>
+        <enum>Qt::FocusPolicy::StrongFocus</enum>
        </property>
        <property name="toolTip">
         <string>Channel shift frequency from center in Hz</string>
@@ -686,7 +686,7 @@
      <item>
       <spacer name="horizontalSpacer_6">
        <property name="orientation">
-        <enum>Qt::Horizontal</enum>
+        <enum>Qt::Orientation::Horizontal</enum>
        </property>
        <property name="sizeHint" stdset="0">
         <size>
@@ -804,7 +804,7 @@ Use to ensure full dynamic range of 8-bit data is used.</string>
      <item>
       <spacer name="horizontalSpacer">
        <property name="orientation">
-        <enum>Qt::Horizontal</enum>
+        <enum>Qt::Orientation::Horizontal</enum>
        </property>
        <property name="sizeHint" stdset="0">
         <size>
@@ -866,7 +866,7 @@ Use to ensure full dynamic range of 8-bit data is used.</string>
    <item>
     <widget class="Line" name="line_9">
      <property name="orientation">
-      <enum>Qt::Horizontal</enum>
+      <enum>Qt::Orientation::Horizontal</enum>
      </property>
     </widget>
    </item>
@@ -921,7 +921,7 @@ Use to ensure full dynamic range of 8-bit data is used.</string>
      <item>
       <widget class="Line" name="line_12">
        <property name="orientation">
-        <enum>Qt::Vertical</enum>
+        <enum>Qt::Orientation::Vertical</enum>
        </property>
       </widget>
      </item>
@@ -959,7 +959,7 @@ Use to ensure full dynamic range of 8-bit data is used.</string>
         <string>-150</string>
        </property>
        <property name="alignment">
-        <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
+        <set>Qt::AlignmentFlag::AlignRight|Qt::AlignmentFlag::AlignTrailing|Qt::AlignmentFlag::AlignVCenter</set>
        </property>
       </widget>
      </item>
@@ -973,7 +973,7 @@ Use to ensure full dynamic range of 8-bit data is used.</string>
      <item>
       <widget class="Line" name="line_13">
        <property name="orientation">
-        <enum>Qt::Vertical</enum>
+        <enum>Qt::Orientation::Vertical</enum>
        </property>
       </widget>
      </item>
@@ -993,14 +993,14 @@ Use to ensure full dynamic range of 8-bit data is used.</string>
      <item>
       <widget class="Line" name="line_14">
        <property name="orientation">
-        <enum>Qt::Vertical</enum>
+        <enum>Qt::Orientation::Vertical</enum>
        </property>
       </widget>
      </item>
      <item>
       <spacer name="horizontalSpacer_8">
        <property name="orientation">
-        <enum>Qt::Horizontal</enum>
+        <enum>Qt::Orientation::Horizontal</enum>
        </property>
        <property name="sizeHint" stdset="0">
         <size>
@@ -1022,13 +1022,13 @@ Use to ensure full dynamic range of 8-bit data is used.</string>
         <string>Channel power</string>
        </property>
        <property name="layoutDirection">
-        <enum>Qt::RightToLeft</enum>
+        <enum>Qt::LayoutDirection::RightToLeft</enum>
        </property>
        <property name="text">
         <string>0.0</string>
        </property>
        <property name="alignment">
-        <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
+        <set>Qt::AlignmentFlag::AlignRight|Qt::AlignmentFlag::AlignTrailing|Qt::AlignmentFlag::AlignVCenter</set>
        </property>
       </widget>
      </item>
@@ -1044,7 +1044,7 @@ Use to ensure full dynamic range of 8-bit data is used.</string>
    <item>
     <widget class="Line" name="line_6">
      <property name="orientation">
-      <enum>Qt::Horizontal</enum>
+      <enum>Qt::Orientation::Horizontal</enum>
      </property>
     </widget>
    </item>
@@ -1065,6 +1065,12 @@ Use to ensure full dynamic range of 8-bit data is used.</string>
      </item>
      <item>
       <widget class="QComboBox" name="dataAddress">
+       <property name="sizePolicy">
+        <sizepolicy hsizetype="Expanding" vsizetype="Fixed">
+         <horstretch>0</horstretch>
+         <verstretch>0</verstretch>
+        </sizepolicy>
+       </property>
        <property name="minimumSize">
         <size>
          <width>120</width>
@@ -1110,7 +1116,7 @@ Use to ensure full dynamic range of 8-bit data is used.</string>
      <item>
       <spacer name="horizontalSpacer_4">
        <property name="orientation">
-        <enum>Qt::Horizontal</enum>
+        <enum>Qt::Orientation::Horizontal</enum>
        </property>
        <property name="sizeHint" stdset="0">
         <size>
@@ -1124,7 +1130,7 @@ Use to ensure full dynamic range of 8-bit data is used.</string>
       <widget class="QComboBox" name="protocol">
        <property name="minimumSize">
         <size>
-         <width>92</width>
+         <width>110</width>
          <height>0</height>
         </size>
        </property>
@@ -1134,6 +1140,11 @@ Use to ensure full dynamic range of 8-bit data is used.</string>
        <item>
         <property name="text">
          <string>SDRangel</string>
+        </property>
+       </item>
+       <item>
+        <property name="text">
+         <string>SDRangel wss</string>
         </property>
        </item>
        <item>
@@ -1200,7 +1211,7 @@ When unchecked, if remote device is using SDRA protocol, local settings are upda
      <item>
       <widget class="Line" name="line_4">
        <property name="orientation">
-        <enum>Qt::Vertical</enum>
+        <enum>Qt::Orientation::Vertical</enum>
        </property>
       </widget>
      </item>
@@ -1263,14 +1274,14 @@ When unchecked, if remote device is using SDRA protocol, local settings are upda
         <string>10.00s</string>
        </property>
        <property name="alignment">
-        <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
+        <set>Qt::AlignmentFlag::AlignRight|Qt::AlignmentFlag::AlignTrailing|Qt::AlignmentFlag::AlignVCenter</set>
        </property>
       </widget>
      </item>
      <item>
       <widget class="Line" name="buferLine">
        <property name="orientation">
-        <enum>Qt::Vertical</enum>
+        <enum>Qt::Orientation::Vertical</enum>
        </property>
       </widget>
      </item>
@@ -1328,7 +1339,7 @@ This should typically be empty. If full, your CPU cannot keep up and data will b
    <item>
     <widget class="Line" name="line_8">
      <property name="orientation">
-      <enum>Qt::Horizontal</enum>
+      <enum>Qt::Orientation::Horizontal</enum>
      </property>
     </widget>
    </item>
@@ -1390,7 +1401,7 @@ This should typically be empty. If full, your CPU cannot keep up and data will b
         <string>Messages</string>
        </property>
        <property name="movement">
-        <enum>QListView::Static</enum>
+        <enum>QListView::Movement::Static</enum>
        </property>
       </widget>
      </item>
@@ -1399,7 +1410,7 @@ This should typically be empty. If full, your CPU cannot keep up and data will b
    <item>
     <widget class="Line" name="line_7">
      <property name="orientation">
-      <enum>Qt::Horizontal</enum>
+      <enum>Qt::Orientation::Horizontal</enum>
      </property>
     </widget>
    </item>
@@ -1427,7 +1438,7 @@ This should typically be empty. If full, your CPU cannot keep up and data will b
         <number>500</number>
        </property>
        <property name="orientation">
-        <enum>Qt::Horizontal</enum>
+        <enum>Qt::Orientation::Horizontal</enum>
        </property>
       </widget>
      </item>
@@ -1504,7 +1515,7 @@ This should typically be empty. If full, your CPU cannot keep up and data will b
    <item>
     <widget class="Line" name="line_5">
      <property name="orientation">
-      <enum>Qt::Horizontal</enum>
+      <enum>Qt::Orientation::Horizontal</enum>
      </property>
     </widget>
    </item>
@@ -1520,7 +1531,7 @@ This should typically be empty. If full, your CPU cannot keep up and data will b
      <item>
       <widget class="Line" name="line_2">
        <property name="orientation">
-        <enum>Qt::Vertical</enum>
+        <enum>Qt::Orientation::Vertical</enum>
        </property>
       </widget>
      </item>
@@ -1548,15 +1559,15 @@ This should typically be empty. If full, your CPU cannot keep up and data will b
    <container>1</container>
   </customwidget>
   <customwidget>
-   <class>ValueDial</class>
-   <extends>QWidget</extends>
-   <header>gui/valuedial.h</header>
-   <container>1</container>
-  </customwidget>
-  <customwidget>
    <class>LevelMeterSignalDB</class>
    <extends>QWidget</extends>
    <header>gui/levelmeter.h</header>
+   <container>1</container>
+  </customwidget>
+  <customwidget>
+   <class>ValueDial</class>
+   <extends>QWidget</extends>
+   <header>gui/valuedial.h</header>
    <container>1</container>
   </customwidget>
   <customwidget>
@@ -1583,10 +1594,23 @@ This should typically be empty. If full, your CPU cannot keep up and data will b
   <tabstop>channelGain</tabstop>
   <tabstop>decimation</tabstop>
   <tabstop>sampleBits</tabstop>
+  <tabstop>squelchEnabled</tabstop>
+  <tabstop>squelch</tabstop>
   <tabstop>dataAddress</tabstop>
+  <tabstop>dataPort</tabstop>
   <tabstop>protocol</tabstop>
   <tabstop>overrideRemoteSettings</tabstop>
   <tabstop>preFill</tabstop>
+  <tabstop>sendMessage</tabstop>
+  <tabstop>txAddress</tabstop>
+  <tabstop>txMessage</tabstop>
+  <tabstop>messages</tabstop>
+  <tabstop>replayOffset</tabstop>
+  <tabstop>replayNow</tabstop>
+  <tabstop>replayPlus</tabstop>
+  <tabstop>replayMinus</tabstop>
+  <tabstop>replayLoop</tabstop>
+  <tabstop>replaySave</tabstop>
  </tabstops>
  <resources>
   <include location="../../../sdrgui/resources/res.qrc"/>

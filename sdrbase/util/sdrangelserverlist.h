@@ -37,6 +37,7 @@ public:
     struct SDRangelServer {
         QString m_address;
         quint16 m_port;
+        QString m_protocol;
         qint64 m_minFrequency;
         qint64 m_maxFrequency;
         int m_maxSampleRate;

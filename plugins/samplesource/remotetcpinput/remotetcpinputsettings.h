@@ -53,7 +53,7 @@ struct RemoteTCPInputSettings
     uint16_t m_reverseAPIPort;
     uint16_t m_reverseAPIDeviceIndex;
     QStringList m_addressList;          // List of dataAddresses that have been used in the past
-    QString  m_protocol;                // "SDRangel" or "Spy Server"
+    QString  m_protocol;                // "SDRangel", "SDRangel wss" or "Spy Server"
     float    m_replayOffset;            //!< Replay offset in seconds
     float    m_replayLength;            //!< Replay buffer size in seconds
     float    m_replayStep;              //!< Replay forward/back step size in seconds

@@ -114,6 +114,9 @@ void SDRangelServerList::handleJSON(const QString& url, const QByteArray& bytes)
                 if (serverObj.contains(QStringLiteral("port"))) {
                     sdr.m_port = serverObj.value(QStringLiteral("port")).toInt();
                 }
+                if (serverObj.contains(QStringLiteral("protocol"))) {
+                    sdr.m_protocol = serverObj.value(QStringLiteral("protocol")).toString();
+                }
                 if (serverObj.contains(QStringLiteral("minFrequency"))) {
                     sdr.m_minFrequency = serverObj.value(QStringLiteral("minFrequency")).toInt();
                 }

@@ -380,10 +380,10 @@ void RemoteTCPSinkSink::processOneSample(Complex &ci)
                     if (ret == Z_STREAM_END) {
                         deflateReset(&m_zStream);
                     } else if (ret != Z_OK) {
-                        qDebug() << "Failed to deflate" << ret;
+                        qDebug() << "RemoteTCPSinkSink::processOneSample: Failed to deflate" << ret;
                     }
                     if (m_zStream.avail_in != 0) {
-                        qDebug() << "Warning: Data still in input buffer";
+                        qDebug() << "RemoteTCPSinkSink::processOneSample: Data still in input buffer";
                     }
                     int compressedBytes = m_zOutBuf.size() - m_zStream.avail_out;
 
@@ -497,6 +497,7 @@ void RemoteTCPSinkSink::applySettings(const RemoteTCPSinkSettings& settings, con
     }
 
     if ((settingsKeys.contains("compressionLevel") && (settings.m_compressionLevel != m_settings.m_compressionLevel))
+        || (settingsKeys.contains("compression") && (settings.m_compression != m_settings.m_compression))
         || (settingsKeys.contains("sampleBits")  && (settings.m_sampleBits != m_settings.m_sampleBits))
         || (settingsKeys.contains("blockSize")  && (settings.m_blockSize != m_settings.m_blockSize))
         || (settingsKeys.contains("channelSampleRate")  && (settings.m_channelSampleRate != m_settings.m_channelSampleRate))
@@ -506,6 +507,7 @@ void RemoteTCPSinkSink::applySettings(const RemoteTCPSinkSettings& settings, con
     }
 
     if ((settingsKeys.contains("compressionLevel") && (settings.m_compressionLevel != m_settings.m_compressionLevel))
+        || (settingsKeys.contains("compression") && (settings.m_compression != m_settings.m_compression))
         || force)
     {
         initZLib = true;
@@ -670,15 +672,46 @@ void RemoteTCPSinkSink::startServer()
     if (m_settings.m_protocol == RemoteTCPSinkSettings::SDRA_WSS)
     {
 #ifndef QT_NO_OPENSSL
-        m_webSocketServer = new QWebSocketServer(QStringLiteral("Remote TCP Sink"),
-                                                 QWebSocketServer::SecureMode,
-                                                 this);
         QSslConfiguration sslConfiguration;
         qDebug() << "RemoteTCPSinkSink::startServer: SSL config: " << m_settings.m_certificate << m_settings.m_key;
+        if (m_settings.m_certificate.isEmpty())
+        {
+            QString msg = "RemoteTCPSink requires an SSL certificate in order to use wss protocol";
+            qWarning() << msg;
+            if (m_messageQueueToGUI) {
+                m_messageQueueToGUI->push(RemoteTCPSink::MsgError::create(msg));
+            }
+            return;
+        }
+        if (m_settings.m_certificate.isEmpty())
+        {
+            QString msg = "RemoteTCPSink requires an SSL key in order to use wss protocol";
+            qWarning() << msg;
+            if (m_messageQueueToGUI) {
+                m_messageQueueToGUI->push(RemoteTCPSink::MsgError::create(msg));
+            }
+            return;
+        }
         QFile certFile(m_settings.m_certificate);
+        if (!certFile.open(QIODevice::ReadOnly))
+        {
+            QString msg = QString("RemoteTCPSink failed to open certificate %1: %2").arg(m_settings.m_certificate).arg(certFile.errorString());
+            qWarning() << msg;
+            if (m_messageQueueToGUI) {
+                m_messageQueueToGUI->push(RemoteTCPSink::MsgError::create(msg));
+            }
+            return;
+        }
         QFile keyFile(m_settings.m_key);
-        certFile.open(QIODevice::ReadOnly);
-        keyFile.open(QIODevice::ReadOnly);
+        if (!keyFile.open(QIODevice::ReadOnly))
+        {
+            QString msg = QString("RemoteTCPSink failed to open key %1: %2").arg(m_settings.m_key).arg(keyFile.errorString());
+            qWarning() << msg;
+            if (m_messageQueueToGUI) {
+                m_messageQueueToGUI->push(RemoteTCPSink::MsgError::create(msg));
+            }
+            return;
+        }
         QSslCertificate certificate(&certFile, QSsl::Pem);
         QSslKey sslKey(&keyFile, QSsl::Rsa, QSsl::Pem);
         certFile.close();
@@ -686,6 +719,10 @@ void RemoteTCPSinkSink::startServer()
         sslConfiguration.setPeerVerifyMode(QSslSocket::VerifyNone);
         sslConfiguration.setLocalCertificate(certificate);
         sslConfiguration.setPrivateKey(sslKey);
+
+        m_webSocketServer = new QWebSocketServer(QStringLiteral("Remote TCP Sink"),
+                                                 QWebSocketServer::SecureMode,
+                                                 this);
         m_webSocketServer->setSslConfiguration(sslConfiguration);
 
         QHostAddress address(m_settings.m_dataAddress);
@@ -695,8 +732,11 @@ void RemoteTCPSinkSink::startServer()
 #endif
         if (!m_webSocketServer->listen(address, m_settings.m_dataPort))
         {
-            qCritical() << "RemoteTCPSink failed to listen on" << m_settings.m_dataAddress << "port" << m_settings.m_dataPort;
-            // FIXME: Report to GUI?
+            QString msg = QString("RemoteTCPSink failed to listen on %1 port %2: %3").arg(m_settings.m_dataAddress).arg(m_settings.m_dataPort).arg(m_webSocketServer->errorString());
+            qWarning() << msg;
+            if (m_messageQueueToGUI) {
+                m_messageQueueToGUI->push(RemoteTCPSink::MsgError::create(msg));
+            }
         }
         else
         {
@@ -705,7 +745,11 @@ void RemoteTCPSinkSink::startServer()
             connect(m_webSocketServer, &QWebSocketServer::sslErrors, this, &RemoteTCPSinkSink::onSslErrors);
         }
 #else
-        qWarning("RemoteTCPSinkSink::startServer: SSL is not supported");
+        QString msg = "RemoteTCPSink unable to use wss protocol as SSL is not supported";
+        qWarning() << msg;
+        if (m_messageQueueToGUI) {
+            m_messageQueueToGUI->push(RemoteTCPSink::MsgError::create(msg));
+        }
 #endif
     }
     else
@@ -713,8 +757,11 @@ void RemoteTCPSinkSink::startServer()
         m_server = new QTcpServer(this);
         if (!m_server->listen(QHostAddress(m_settings.m_dataAddress), m_settings.m_dataPort))
         {
-            qCritical() << "RemoteTCPSink failed to listen on" << m_settings.m_dataAddress << "port" << m_settings.m_dataPort;
-            // FIXME: Report to GUI?
+            QString msg = QString("RemoteTCPSink failed to listen on %1 port %2: %3").arg(m_settings.m_dataAddress).arg(m_settings.m_dataPort).arg(m_webSocketServer->errorString());
+            qWarning() << msg;
+            if (m_messageQueueToGUI) {
+                m_messageQueueToGUI->push(RemoteTCPSink::MsgError::create(msg));
+            }
         }
         else
         {

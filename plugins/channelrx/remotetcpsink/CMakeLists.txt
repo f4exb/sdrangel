@@ -7,7 +7,6 @@ set(remotetcpsink_SOURCES
     remotetcpsinksettings.cpp
     remotetcpsinkwebapiadapter.cpp
     remotetcpsinkplugin.cpp
-    socket.cpp
 )
 
 set(remotetcpsink_HEADERS
@@ -18,7 +17,6 @@ set(remotetcpsink_HEADERS
     remotetcpsinkwebapiadapter.h
     remotetcpsinkplugin.h
     remotetcpprotocol.h
-    socket.h
 )
 
 include_directories(

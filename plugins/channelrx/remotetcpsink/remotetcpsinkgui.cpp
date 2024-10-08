@@ -18,6 +18,7 @@
 #include <QHostAddress>
 #include <QNetworkInterface>
 #include <QTableWidgetItem>
+#include <QMessageBox>
 
 #include "device/deviceuiset.h"
 #include "gui/basicchannelsettingsdialog.h"
@@ -274,6 +275,13 @@ bool RemoteTCPSinkGUI::handleMessage(const Message& message)
             m_remoteSink->getInputMessageQueue()->push(RemoteTCPSink::MsgSendMessage::create(msg.getAddress(), msg.getPort(), callsign, text, broadcast));
         }
 
+        return true;
+    }
+    else if (RemoteTCPSink::MsgError::match(message))
+    {
+        RemoteTCPSink::MsgError& msg = (RemoteTCPSink::MsgError&) message;
+        QString error = msg.getError();
+        QMessageBox::warning(this, "RemoteTCPSink", error, QMessageBox::Ok);
         return true;
     }
     else

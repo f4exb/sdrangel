@@ -21,8 +21,10 @@
 #include <QTcpSocket>
 #include <QWebSocket>
 
+#include "export.h"
+
 // Class to allow easy use of either QTCPSocket or QWebSocket
-class Socket : public QObject {
+class SDRBASE_API Socket : public QObject {
     Q_OBJECT
 protected:
     Socket(QObject *socket, QObject *parent=nullptr);
@@ -33,9 +35,11 @@ public:
     virtual void flush() = 0;
     virtual qint64 read(char *data, qint64 length) = 0;
     virtual qint64 bytesAvailable() = 0;
+    virtual QByteArray readAll() = 0;
     virtual void close() = 0;
     virtual QHostAddress peerAddress() = 0;
     virtual quint16 peerPort() = 0;
+    virtual bool isConnected() = 0;
 
     QObject *socket() { return m_socket; }
 
@@ -45,7 +49,7 @@ protected:
 
 };
 
-class TCPSocket : public Socket {
+class SDRBASE_API TCPSocket : public Socket {
     Q_OBJECT
 
 public:
@@ -55,13 +59,15 @@ public:
     void flush() override;
     qint64 read(char *data, qint64 length) override;
     qint64 bytesAvailable() override;
+    QByteArray readAll() override;
     void close() override;
     QHostAddress peerAddress() override;
     quint16 peerPort() override;
+    bool isConnected() override;
 
 };
 
-class WebSocket : public Socket {
+class SDRBASE_API WebSocket : public Socket {
     Q_OBJECT
 
 public:
@@ -71,9 +77,11 @@ public:
     void flush() override;
     qint64 read(char *data, qint64 length) override;
     qint64 bytesAvailable() override;
+    QByteArray readAll() override;
     void close() override;
     QHostAddress peerAddress() override;
     quint16 peerPort() override;
+    bool isConnected() override;
 
 private slots:
 

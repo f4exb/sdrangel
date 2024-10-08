@@ -117,7 +117,7 @@ void RemoteTCPInputGui::destroy()
 
 void RemoteTCPInputGui::resetToDefaults()
 {
-    qDebug() << "*************** RemoteTCPInputGui::resetToDefaults";
+    qDebug() << "RemoteTCPInputGui::resetToDefaults";
     m_settings.resetToDefaults();
     displaySettings();
     m_forceSettings = true;
@@ -158,7 +158,6 @@ bool RemoteTCPInputGui::handleMessage(const Message& message)
         } else {
             m_settings.applySettings(cfg.getSettingsKeys(), cfg.getSettings());
         }
-        qDebug() << "********* RemoteTCPInputGui::handleMessage MsgConfigureRemoteTCPInput" << m_settings.m_dataAddress;
 
         blockApplySettings(true);
         displaySettings();
@@ -304,16 +303,7 @@ bool RemoteTCPInputGui::handleMessage(const Message& message)
     {
         const RemoteTCPInputTCPHandler::MsgReportConnection& report = (RemoteTCPInputTCPHandler::MsgReportConnection&) message;
         qDebug() << "RemoteTCPInputGui::handleMessage: MsgReportConnection connected: " << report.getConnected();
-        if (report.getConnected())
-        {
-             m_connectionError = false;
-             //ui->startStop->setStyleSheet("QToolButton { background-color : green; }");
-        }
-        else
-        {
-             m_connectionError = true;
-             //ui->startStop->setStyleSheet("QToolButton { background-color : red; }");
-        }
+        m_connectionError = !report.getConnected();
         updateStatus();
         return true;
     }
@@ -921,14 +911,18 @@ void RemoteTCPInputGui::on_squelchGate_valueChanged(double value)
 
 void RemoteTCPInputGui::on_dataAddress_editingFinished()
 {
-    m_settings.m_dataAddress = ui->dataAddress->currentText();
-    m_settingsKeys.append("dataAddress");
-    m_settings.m_addressList.clear();
-    for (int i = 0; i < ui->dataAddress->count(); i++) {
-        m_settings.m_addressList.append(ui->dataAddress->itemText(i));
+    QString text = ui->dataAddress->currentText();
+    if (text != m_settings.m_dataAddress)
+    {
+        m_settings.m_dataAddress = text;
+        m_settingsKeys.append("dataAddress");
+        m_settings.m_addressList.clear();
+        for (int i = 0; i < ui->dataAddress->count(); i++) {
+            m_settings.m_addressList.append(ui->dataAddress->itemText(i));
+        }
+        m_settingsKeys.append("addressList");
+        sendSettings();
     }
-    m_settingsKeys.append("addressList");
-    sendSettings();
 }
 
 void RemoteTCPInputGui::on_dataAddress_currentIndexChanged(int index)

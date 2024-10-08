@@ -45,6 +45,7 @@ MESSAGE_CLASS_DEFINITION(RemoteTCPSink::MsgReportConnection, Message)
 MESSAGE_CLASS_DEFINITION(RemoteTCPSink::MsgReportDisconnect, Message)
 MESSAGE_CLASS_DEFINITION(RemoteTCPSink::MsgReportBW, Message)
 MESSAGE_CLASS_DEFINITION(RemoteTCPSink::MsgSendMessage, Message)
+MESSAGE_CLASS_DEFINITION(RemoteTCPSink::MsgError, Message)
 
 const char* const RemoteTCPSink::m_channelIdURI = "sdrangel.channel.remotetcpsink";
 const char* const RemoteTCPSink::m_channelId = "RemoteTCPSink";
@@ -713,9 +714,17 @@ void RemoteTCPSink::updatePublicListing()
 
     QString device = MainCore::instance()->getDevice(getDeviceSetIndex())->getHardwareId();
 
+    QString protocol;
+    if (m_settings.m_protocol == RemoteTCPSinkSettings::SDRA_WSS) {
+        protocol = "SDRangel wss";
+    } else {
+        protocol = "SDRangel";
+    }
+
     QJsonObject json;
     json.insert("address", m_settings.m_publicAddress);
     json.insert("port", m_settings.m_publicPort);
+    json.insert("protocol", protocol);
     json.insert("minFrequency", m_settings.m_minFrequency);
     json.insert("maxFrequency", m_settings.m_maxFrequency);
     json.insert("maxSampleRate", m_settings.m_maxSampleRate);

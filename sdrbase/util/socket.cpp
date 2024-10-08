@@ -49,6 +49,13 @@ qint64 TCPSocket::read(char *data, qint64 length)
     return socket->read(data, length);
 }
 
+QByteArray TCPSocket::readAll()
+{
+    QTcpSocket *socket = qobject_cast<QTcpSocket *>(m_socket);
+
+    return socket->readAll();
+}
+
 void TCPSocket::close()
 {
     QTcpSocket *socket = qobject_cast<QTcpSocket *>(m_socket);
@@ -82,6 +89,13 @@ quint16 TCPSocket::peerPort()
     QTcpSocket *socket = qobject_cast<QTcpSocket *>(m_socket);
 
     return socket->peerPort();
+}
+
+bool TCPSocket::isConnected()
+{
+    QTcpSocket *socket = qobject_cast<QTcpSocket *>(m_socket);
+
+    return socket->state() == QAbstractSocket::ConnectedState;
 }
 
 WebSocket::WebSocket(QWebSocket *socket) :
@@ -126,11 +140,23 @@ qint64 WebSocket::read(char *data, qint64 length)
     return length;
 }
 
+QByteArray WebSocket::readAll()
+{
+    QByteArray b = m_rxBuffer;
+
+    m_rxBuffer.clear();
+
+    return b;
+}
+
 void WebSocket::close()
 {
     QWebSocket *socket = qobject_cast<QWebSocket *>(m_socket);
 
-    socket->close();
+    // Will crash if we call close on unopened socket
+    if (socket->state() != QAbstractSocket::UnconnectedState) {
+        socket->close();
+    }
 }
 
 qint64 WebSocket::bytesAvailable()
@@ -157,4 +183,11 @@ quint16 WebSocket::peerPort()
     QWebSocket *socket = qobject_cast<QWebSocket *>(m_socket);
 
     return socket->peerPort();
+}
+
+bool WebSocket::isConnected()
+{
+    QWebSocket *socket = qobject_cast<QWebSocket *>(m_socket);
+
+    return socket->state() == QAbstractSocket::ConnectedState;
 }

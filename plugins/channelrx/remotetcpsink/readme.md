@@ -6,7 +6,7 @@ The Remote TCP Sink Channel plugin sends I/Q samples from the baseband via TCP/I
 The client application could be SDRangel using the [Remote TCP Input](../../samplesource/remotetcpinput/readme.md) plugin or an rtl_tcp compatible application.
 This means that applications using rtl_tcp protocol can connect to the wide variety of SDRs supported by SDRangel.
 
-While the plugin supports the RTL0 protocol for compatibility with older applications, the newer SDRA protocol supports the following additional features:
+While the plugin supports rtl_tcp's RTL0 protocol for compatibility with older applications, the newer SDRA protocol supports the following additional features:
 
 - Different bit depths (8, 16, 24 or 32),
 - Additional settings, such as decimation, frequency offset and channel gain,
@@ -14,7 +14,8 @@ While the plugin supports the RTL0 protocol for compatibility with older applica
 - IQ compression, using FLAC or zlib, to reduce network bandwidth,
 - IQ squelch, to reduce network bandwidth when no signal is being received,
 - Real-time forwarding of device/antenna position and direction to client,
-- Text messaging between clients and server.
+- Text messaging between clients and server,
+- Use of either TCP or WSS (WebSocket Secure Protocol).
 
 The Remote TCP Sink can support multiple clients connected simultaneously, with a user-defined maximum client limit. Clients can also have a time limit applied.
 
