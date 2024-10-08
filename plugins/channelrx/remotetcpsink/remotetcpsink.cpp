@@ -167,7 +167,7 @@ bool RemoteTCPSink::handleMessage(const Message& cmd)
 {
     if (MsgConfigureRemoteTCPSink::match(cmd))
     {
-        MsgConfigureRemoteTCPSink& cfg = (MsgConfigureRemoteTCPSink&) cmd;
+        const MsgConfigureRemoteTCPSink& cfg = (const MsgConfigureRemoteTCPSink&) cmd;
         qDebug() << "RemoteTCPSink::handleMessage: MsgConfigureRemoteTCPSink";
         applySettings(cfg.getSettings(), cfg.getSettingsKeys(), cfg.getForce(), cfg.getRestartRequired());
 
@@ -175,7 +175,7 @@ bool RemoteTCPSink::handleMessage(const Message& cmd)
     }
     else if (DSPSignalNotification::match(cmd))
     {
-        DSPSignalNotification& notif = (DSPSignalNotification&) cmd;
+        const DSPSignalNotification& notif = (const DSPSignalNotification&) cmd;
         m_basebandSampleRate = notif.getSampleRate();
         qDebug() << "RemoteTCPSink::handleMessage: DSPSignalNotification: m_basebandSampleRate:" << m_basebandSampleRate;
 
@@ -191,7 +191,7 @@ bool RemoteTCPSink::handleMessage(const Message& cmd)
     }
     else if (MsgSendMessage::match(cmd))
     {
-        MsgSendMessage& msg = (MsgSendMessage&) cmd;
+        const MsgSendMessage& msg = (const MsgSendMessage&) cmd;
 
         // Forward to the sink
         m_basebandSink->getInputMessageQueue()->push(MsgSendMessage::create(msg.getAddress(), msg.getPort(), msg.getCallsign(), msg.getText(), msg.getBroadcast()));
@@ -199,14 +199,14 @@ bool RemoteTCPSink::handleMessage(const Message& cmd)
     }
     else if (MsgReportConnection::match(cmd))
     {
-        MsgReportConnection& msg = (MsgReportConnection&) cmd;
+        const MsgReportConnection& msg = (const MsgReportConnection&) cmd;
         m_clients = msg.getClients();
         updatePublicListing();
         return true;
     }
     else if (MsgReportDisconnect::match(cmd))
     {
-        MsgReportDisconnect& msg = (MsgReportDisconnect&) cmd;
+        const MsgReportDisconnect& msg = (const MsgReportDisconnect&) cmd;
         m_clients = msg.getClients();
         updatePublicListing();
         return true;

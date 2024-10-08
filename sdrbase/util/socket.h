@@ -54,7 +54,7 @@ class SDRBASE_API TCPSocket : public Socket {
 
 public:
 
-    TCPSocket(QTcpSocket *socket) ;
+    explicit TCPSocket(QTcpSocket *socket) ;
     qint64 write(const char *data, qint64 length) override;
     void flush() override;
     qint64 read(char *data, qint64 length) override;
@@ -72,7 +72,7 @@ class SDRBASE_API WebSocket : public Socket {
 
 public:
 
-    WebSocket(QWebSocket *socket);
+    explicit WebSocket(QWebSocket *socket);
     qint64 write(const char *data, qint64 length) override;
     void flush() override;
     qint64 read(char *data, qint64 length) override;

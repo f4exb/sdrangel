@@ -198,7 +198,7 @@ public:
     private:
         QString m_error;
 
-        MsgError(const QString& error) :
+        explicit MsgError(const QString& error) :
             Message(),
             m_error(error)
         { }

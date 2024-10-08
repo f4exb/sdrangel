@@ -45,7 +45,7 @@ class DeviceAPI;
 class FIFO {
 public:
 
-    FIFO(qsizetype elements = 10);
+    explicit FIFO(qsizetype elements = 10);
 
     qsizetype write(quint8 *data, qsizetype elements);
     qsizetype read(quint8 *data, qsizetype elements);

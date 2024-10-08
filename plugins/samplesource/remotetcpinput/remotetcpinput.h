@@ -79,10 +79,10 @@ public:
             return new MsgStartStop(startStop);
         }
 
-    protected:
+    private:
         bool m_startStop;
 
-        MsgStartStop(bool startStop) :
+        explicit MsgStartStop(bool startStop) :
             Message(),
             m_startStop(startStop)
         { }
@@ -105,7 +105,7 @@ public:
                                           outBytesAvailable, outSize, outSeconds);
         }
 
-    protected:
+    private:
         qint64 m_inBytesAvailable;
         qint64 m_inSize;
         float m_inSeconds;
@@ -135,7 +135,7 @@ public:
             return new MsgSaveReplay(filename);
         }
 
-    protected:
+    private:
         QString m_filename;
 
         MsgSaveReplay(const QString& filename) :
@@ -156,7 +156,7 @@ public:
             return new MsgSendMessage(callsign, text, broadcast);
         }
 
-    protected:
+    private:
         QString m_callsign;
         QString m_text;
         bool m_broadcast;

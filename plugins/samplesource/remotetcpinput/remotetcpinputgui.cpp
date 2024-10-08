@@ -151,7 +151,7 @@ bool RemoteTCPInputGui::handleMessage(const Message& message)
 {
     if (RemoteTCPInput::MsgConfigureRemoteTCPInput::match(message))
     {
-        const RemoteTCPInput::MsgConfigureRemoteTCPInput& cfg = (RemoteTCPInput::MsgConfigureRemoteTCPInput&) message;
+        const RemoteTCPInput::MsgConfigureRemoteTCPInput& cfg = (const RemoteTCPInput::MsgConfigureRemoteTCPInput&) message;
 
         if (cfg.getForce()) {
             m_settings = cfg.getSettings();
@@ -166,7 +166,7 @@ bool RemoteTCPInputGui::handleMessage(const Message& message)
     }
     else if (RemoteTCPInput::MsgStartStop::match(message))
     {
-        RemoteTCPInput::MsgStartStop& notif = (RemoteTCPInput::MsgStartStop&) message;
+        const RemoteTCPInput::MsgStartStop& notif = (const RemoteTCPInput::MsgStartStop&) message;
         m_connectionError = false;
         blockApplySettings(true);
         ui->startStop->setChecked(notif.getStartStop());
@@ -175,7 +175,7 @@ bool RemoteTCPInputGui::handleMessage(const Message& message)
     }
     else if (RemoteTCPInput::MsgReportTCPBuffer::match(message))
     {
-        const RemoteTCPInput::MsgReportTCPBuffer& report = (RemoteTCPInput::MsgReportTCPBuffer&) message;
+        const RemoteTCPInput::MsgReportTCPBuffer& report = (const RemoteTCPInput::MsgReportTCPBuffer&) message;
         ui->inGauge->setMaximum((int)report.getInSize());
         ui->inGauge->setValue((int)report.getInBytesAvailable());
         ui->inBufferLenSecsText->setText(QString("%1s").arg(report.getInSeconds(), 0, 'f', 2));
@@ -186,7 +186,7 @@ bool RemoteTCPInputGui::handleMessage(const Message& message)
     }
     else if (RemoteTCPInputTCPHandler::MsgReportRemoteDevice::match(message))
     {
-        const RemoteTCPInputTCPHandler::MsgReportRemoteDevice& report = (RemoteTCPInputTCPHandler::MsgReportRemoteDevice&) message;
+        const RemoteTCPInputTCPHandler::MsgReportRemoteDevice& report = (const RemoteTCPInputTCPHandler::MsgReportRemoteDevice&) message;
         QHash<RemoteTCPProtocol::Device, QString> devices = {
              {RemoteTCPProtocol::RTLSDR_E4000, "RTLSDR E4000"},
              {RemoteTCPProtocol::RTLSDR_FC0012, "RTLSDR FC0012"},
@@ -301,7 +301,7 @@ bool RemoteTCPInputGui::handleMessage(const Message& message)
     }
     else if (RemoteTCPInputTCPHandler::MsgReportConnection::match(message))
     {
-        const RemoteTCPInputTCPHandler::MsgReportConnection& report = (RemoteTCPInputTCPHandler::MsgReportConnection&) message;
+        const RemoteTCPInputTCPHandler::MsgReportConnection& report = (const RemoteTCPInputTCPHandler::MsgReportConnection&) message;
         qDebug() << "RemoteTCPInputGui::handleMessage: MsgReportConnection connected: " << report.getConnected();
         m_connectionError = !report.getConnected();
         updateStatus();

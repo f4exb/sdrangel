@@ -220,14 +220,14 @@ bool RemoteTCPInput::handleMessage(const Message& message)
     else if (MsgConfigureRemoteTCPInput::match(message))
     {
         qDebug() << "RemoteTCPInput::handleMessage:" << message.getIdentifier();
-        MsgConfigureRemoteTCPInput& conf = (MsgConfigureRemoteTCPInput&) message;
+        const MsgConfigureRemoteTCPInput& conf = (const MsgConfigureRemoteTCPInput&) message;
         applySettings(conf.getSettings(), conf.getSettingsKeys(), conf.getForce());
         return true;
     }
     else if (RemoteTCPInputTCPHandler::MsgReportConnection::match(message))
     {
         qDebug() << "RemoteTCPInput::handleMessage:" << message.getIdentifier();
-        RemoteTCPInputTCPHandler::MsgReportConnection& report = (RemoteTCPInputTCPHandler::MsgReportConnection&) message;
+        const RemoteTCPInputTCPHandler::MsgReportConnection& report = (const RemoteTCPInputTCPHandler::MsgReportConnection&) message;
         if (report.getConnected())
         {
             qDebug() << "Disconnected - stopping DSP";
@@ -237,19 +237,19 @@ bool RemoteTCPInput::handleMessage(const Message& message)
     }
     else if (MsgSaveReplay::match(message))
     {
-        MsgSaveReplay& cmd = (MsgSaveReplay&) message;
+        const MsgSaveReplay& cmd = (const MsgSaveReplay&) message;
         m_replayBuffer.save(cmd.getFilename(), m_settings.m_devSampleRate, getCenterFrequency());
         return true;
     }
     else if (MsgSendMessage::match(message))
     {
-        MsgSendMessage& msg = (MsgSendMessage&) message;
+        const MsgSendMessage& msg = (const MsgSendMessage&) message;
         m_remoteInputTCPPHandler->getInputMessageQueue()->push(MsgSendMessage::create(msg.getCallsign(), msg.getText(), msg.getBroadcast()));
         return true;
     }
     else if (MsgReportPosition::match(message))
     {
-        MsgReportPosition& report = (MsgReportPosition&) message;
+        const MsgReportPosition& report = (const MsgReportPosition&) message;
 
         m_latitude = report.getLatitude();
         m_longitude = report.getLongitude();
@@ -261,7 +261,7 @@ bool RemoteTCPInput::handleMessage(const Message& message)
     }
     else if (MsgReportDirection::match(message))
     {
-        MsgReportDirection& report = (MsgReportDirection&) message;
+        const MsgReportDirection& report = (const MsgReportDirection&) message;
 
         m_isotropic = report.getIsotropic();
         m_azimuth = report.getAzimuth();

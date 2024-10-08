@@ -175,7 +175,7 @@ bool RemoteTCPSinkGUI::handleMessage(const Message& message)
 {
     if (RemoteTCPSink::MsgConfigureRemoteTCPSink::match(message))
     {
-        const RemoteTCPSink::MsgConfigureRemoteTCPSink& cfg = (RemoteTCPSink::MsgConfigureRemoteTCPSink&) message;
+        const RemoteTCPSink::MsgConfigureRemoteTCPSink& cfg = (const RemoteTCPSink::MsgConfigureRemoteTCPSink&) message;
 
         if ((cfg.getSettings().m_channelSampleRate != m_settings.m_channelSampleRate)
             || (cfg.getSettings().m_sampleBits != m_settings.m_sampleBits)) {
@@ -195,7 +195,7 @@ bool RemoteTCPSinkGUI::handleMessage(const Message& message)
     }
     else if (RemoteTCPSink::MsgReportConnection::match(message))
     {
-        const RemoteTCPSink::MsgReportConnection& report = (RemoteTCPSink::MsgReportConnection&) message;
+        const RemoteTCPSink::MsgReportConnection& report = (const RemoteTCPSink::MsgReportConnection&) message;
 
         ui->clients->setText(QString("%1/%2").arg(report.getClients()).arg(m_settings.m_maxClients));
         QString ip = QString("%1:%2").arg(report.getAddress().toString()).arg(report.getPort());
@@ -208,7 +208,7 @@ bool RemoteTCPSinkGUI::handleMessage(const Message& message)
     }
     else if (RemoteTCPSink::MsgReportDisconnect::match(message))
     {
-        const RemoteTCPSink::MsgReportDisconnect& report = (RemoteTCPSink::MsgReportDisconnect&) message;
+        const RemoteTCPSink::MsgReportDisconnect& report = (const RemoteTCPSink::MsgReportDisconnect&) message;
 
         ui->clients->setText(QString("%1/%2").arg(report.getClients()).arg(m_settings.m_maxClients));
         QString ip = QString("%1:%2").arg(report.getAddress().toString()).arg(report.getPort());
@@ -222,7 +222,7 @@ bool RemoteTCPSinkGUI::handleMessage(const Message& message)
     }
     else if (RemoteTCPSink::MsgReportBW::match(message))
     {
-        const RemoteTCPSink::MsgReportBW& report = (RemoteTCPSink::MsgReportBW&) message;
+        const RemoteTCPSink::MsgReportBW& report = (const RemoteTCPSink::MsgReportBW&) message;
 
         m_bwAvg(report.getBW());
         m_networkBWAvg(report.getNetworkBW());

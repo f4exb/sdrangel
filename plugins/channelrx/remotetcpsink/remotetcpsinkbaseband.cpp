@@ -125,7 +125,7 @@ bool RemoteTCPSinkBaseband::handleMessage(const Message& cmd)
     if (RemoteTCPSink::MsgConfigureRemoteTCPSink::match(cmd))
     {
         QMutexLocker mutexLocker(&m_mutex);
-        RemoteTCPSink::MsgConfigureRemoteTCPSink& cfg = (RemoteTCPSink::MsgConfigureRemoteTCPSink&) cmd;
+        const RemoteTCPSink::MsgConfigureRemoteTCPSink& cfg = (const RemoteTCPSink::MsgConfigureRemoteTCPSink&) cmd;
         qDebug() << "RemoteTCPSinkBaseband::handleMessage: MsgConfigureRemoteTCPSink";
 
         applySettings(cfg.getSettings(), cfg.getSettingsKeys(), cfg.getForce(), cfg.getRestartRequired());
@@ -134,7 +134,7 @@ bool RemoteTCPSinkBaseband::handleMessage(const Message& cmd)
     }
     else if (DSPSignalNotification::match(cmd))
     {
-        DSPSignalNotification& notif = (DSPSignalNotification&) cmd;
+        const DSPSignalNotification& notif = (const DSPSignalNotification&) cmd;
         qDebug() << "RemoteTCPSinkBaseband::handleMessage: DSPSignalNotification: basebandSampleRate:" << notif.getSampleRate();
         setBasebandSampleRate(notif.getSampleRate());
         m_sampleFifo.setSize(SampleSinkFifo::getSizePolicy(notif.getSampleRate()));
@@ -143,7 +143,7 @@ bool RemoteTCPSinkBaseband::handleMessage(const Message& cmd)
     }
     else if (RemoteTCPSink::MsgSendMessage::match(cmd))
     {
-        RemoteTCPSink::MsgSendMessage& msg = (RemoteTCPSink::MsgSendMessage&) cmd;
+        const RemoteTCPSink::MsgSendMessage& msg = (const RemoteTCPSink::MsgSendMessage&) cmd;
 
         m_sink.sendMessage(msg.getAddress(), msg.getPort(), msg.getCallsign(), msg.getText(), msg.getBroadcast());
 
