@@ -97,6 +97,11 @@ void KiwiSDRList::handleHTML(const QString& url, const QByteArray& bytes)
 
     QList<KiwiSDR> sdrs;
     QString html(bytes);
+
+    // Strip nested divs, as the following div regexp can't handle them
+    QRegularExpression divName("<div class='cl-name'>(.*?)<\\/div>", QRegularExpression::DotMatchesEverythingOption);
+    html.replace(divName, "\\1");
+
     QRegularExpression div("<div class='cl-info'>(.*?)<\\/div>", QRegularExpression::DotMatchesEverythingOption);
     QRegularExpressionMatchIterator divItr = div.globalMatch(html);
 

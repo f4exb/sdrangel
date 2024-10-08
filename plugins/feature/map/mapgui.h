@@ -52,6 +52,7 @@
 #include "availablechannelorfeaturehandler.h"
 
 #include "SWGMapItem.h"
+#include "SWGDeviceSettings.h"
 
 #include "mapsettings.h"
 #include "mapbeacondialog.h"
@@ -290,11 +291,9 @@ private:
     void applyNASAGlobalImagerySettings();
     void createNASAGlobalImageryView();
     void displayNASAMetaData();
-    bool openKiwiSDRInput();
-    bool openRemoteTCPInput();
     void openKiwiSDR(const QString& url);
     void openSpyServer(const QString& url);
-    void openSDRangelServer(const QString& url);
+    void openSDRangelServer(const QString& url, bool wss);
     QString formatFrequency(qint64 frequency) const;
     void updateGIRO(const QDateTime& mapDateTime);
 
@@ -371,11 +370,8 @@ private slots:
     void airportsUpdated();
     void waypointsUpdated();
     void kiwiSDRUpdated(const QList<KiwiSDRList::KiwiSDR>& sdrs);
-    void kiwiSDRDeviceSetAdded(int index, DeviceAPI *device);
     void spyServerUpdated(const QList<SpyServerList::SpyServer>& sdrs);
-    void spyServerDeviceSetAdded(int index, DeviceAPI *device);
     void sdrangelServerUpdated(const QList<SDRangelServerList::SDRangelServer>& sdrs);
-    void sdrangelServerDeviceSetAdded(int index, DeviceAPI *device);
     void linkClicked(const QString& url);
 };
 
