@@ -86,8 +86,8 @@ TCP port on which the server will listen for connections.
 Specifies the protocol used for sending IQ samples and metadata to clients:
 
 - RTL0: Compatible with rtl_tcp - limited to 8-bit IQ data.
-- SDRA: Enhanced version of protocol via TCP Socket.
-- SDRA wss: SDRA protocol via a Secure Web Socket instead of a TCP Socket. You should use this with the WebAssembly version of SDRangel.
+- SDRangel: Enhanced version of protocol via TCP Socket.
+- SDRangel wss: SDRangel protocol via a WebSocket Secure instead of a TCP Socket. You should use this if you wish to allow connections from the WebAssembly version of SDRangel.
 
 <h3>14: Display Settings</h3>
 
@@ -131,15 +131,17 @@ Generally it should be fine to use the largest setting, unless the sample rate i
 <h4>SSL Certificate</h4>
 
 Specify an SSL certificate .pem file. This is required to use SDRangel wss protocol.
+This file can be generated in the same way as for a web server.
 
 <h4>SSL Key</h4>
 
 Specify an SSL key .pem file. This is required to use SDRangel wss protocol.
+This file can be generated in the same way as for a web server.
 
 <h4>List Server</h4>
 
-Check to list the server in a public directory on sdrangel.com.
-This will allow other users to find and connect to the server via the Map feature.
+Check to list the server in a public directory on https://sdrangel.com.
+This will allow other users to find and connect to the server via the [Map Feature](../../feature/map/readme.md).
 
 <h4>Address</h4>
 
@@ -151,17 +153,17 @@ port forwarding maps the port numbers.
 
 Specify minimum and maximum frequencies that users can expect to receive on.
 This will typically depend on the SDR and antenna.
-For information only and will be displayed on the Map.
+For information only and will be displayed on the [Map](../../feature/map/readme.md).
 
 <h4>Antenna</h4>
 
 Optionally enter details of the antenna. 
-For information only and will be displayed on the Map.
+For information only and will be displayed on the [Map](../../feature/map/readme.md).
 
 <h4>Location</h4>
 
 Optionaly enter the location (Town and Country) of the antenna.
-For information only and will be displayed on the Map.
+For information only and will be displayed on the [Map](../../feature/map/readme.md).
 The position the SDRangel icon will be plotted on the Map will be
 taken from the device itself, which for most devices, will default
 to the position in Preferences > My Position.
@@ -206,5 +208,5 @@ Displays text messages received from clients.
 
 <h3>20: Connection Log</h3>
 
-Displays a the IP addresses and TCP port numbers of clients that have connected, along with when they connected and disconnected
+Displays the IP addresses and TCP port numbers of clients that have connected, along with when they connected and disconnected
 and how long they were connected for.
