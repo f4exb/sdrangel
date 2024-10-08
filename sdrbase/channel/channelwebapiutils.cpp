@@ -2016,7 +2016,6 @@ bool DeviceOpener::open(const QString hwType, int direction, const QStringList& 
     }
 
     int nbSamplingDevices = DeviceEnumerator::instance()->getNbRxSamplingDevices();
-    bool found = false;
 
     for (int i = 0; i < nbSamplingDevices; i++)
     {
@@ -2032,9 +2031,7 @@ bool DeviceOpener::open(const QString hwType, int direction, const QStringList& 
 
         return true;
     }
-    if (!found)
-    {
-        qCritical() << "DeviceOpener::open: Failed to find device with hwType " << hwType;
-        return false;
-    }
+
+    qWarning() << "DeviceOpener::open: Failed to find device with hwType " << hwType;
+    return false;
 }

@@ -37,7 +37,7 @@ public:
     const QStringList& getSettingsKeys() const { return m_settingsKeys; };
 
 private slots:
-    void accept();
+    void accept() override;
     void on_browseCertificate_clicked();
     void on_browseKey_clicked();
     void on_addIP_clicked();

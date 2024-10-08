@@ -246,7 +246,7 @@ bool RemoteTCPSinkGUI::handleMessage(const Message& message)
     }
     else if (DSPSignalNotification::match(message))
     {
-        DSPSignalNotification& cfg = (DSPSignalNotification&) message;
+        const DSPSignalNotification& cfg = (const DSPSignalNotification&) message;
         if (cfg.getSampleRate() != m_basebandSampleRate) {
             m_bwAvg.reset();
         }
@@ -260,7 +260,7 @@ bool RemoteTCPSinkGUI::handleMessage(const Message& message)
     }
     else if (RemoteTCPSink::MsgSendMessage::match(message))
     {
-        RemoteTCPSink::MsgSendMessage& msg = (RemoteTCPSink::MsgSendMessage&) message;
+        const RemoteTCPSink::MsgSendMessage& msg = (const RemoteTCPSink::MsgSendMessage&) message;
         QString address = QString("%1:%2").arg(msg.getAddress().toString()).arg(msg.getPort());
         QString callsign = msg.getCallsign();
         QString text = msg.getText();
@@ -279,7 +279,7 @@ bool RemoteTCPSinkGUI::handleMessage(const Message& message)
     }
     else if (RemoteTCPSink::MsgError::match(message))
     {
-        RemoteTCPSink::MsgError& msg = (RemoteTCPSink::MsgError&) message;
+        const RemoteTCPSink::MsgError& msg = (const RemoteTCPSink::MsgError&) message;
         QString error = msg.getError();
         QMessageBox::warning(this, "RemoteTCPSink", error, QMessageBox::Ok);
         return true;
