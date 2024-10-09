@@ -48,7 +48,7 @@
 name: sdrangel
 base: core22
 type: app
-version: "7.22.1"
+adopt-info: sdrangel
 summary: SDRangel
 description: SDRangel is an Open Source Qt5 / OpenGL 3.0+ SDR and signal analyzer frontend to various hardware. SSE 4.2 required.
 confinement: strict
@@ -147,7 +147,9 @@ parts:
         plugin: cmake
         source: https://github.com/f4exb/sdrangel
         source-type: git
-        source-tag: v7.22.1
+        override-pull: |
+            snapcraftctl pull
+            snapcraftctl set-version "$(git describe --tags --abbrev=0 | sed 's/v//')"
         after: [apt, libdab, mbelib, serialdv, dsdcc, codec2, sgp4, cm265cc, libsigmf, airspy, rtlsdr, pluto, bladerf, hackrf, limesuite, airspyhf, uhd, uhdfpga, soapysdr, soapyremote]
         cmake-parameters:
             - -DDEBUG_OUTPUT=OFF
