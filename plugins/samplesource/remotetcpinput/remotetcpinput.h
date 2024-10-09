@@ -138,7 +138,7 @@ public:
     private:
         QString m_filename;
 
-        MsgSaveReplay(const QString& filename) :
+        explicit MsgSaveReplay(const QString& filename) :
             Message(),
             m_filename(filename)
         { }

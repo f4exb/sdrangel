@@ -67,11 +67,11 @@ RemoteTCPInputTCPHandler::RemoteTCPInputTCPHandler(SampleSinkFifo *sampleFifo, D
     m_reconnectTimer.setSingleShot(true);
 
     // Initialise zlib decompressor
-    m_zStream.zalloc = Z_NULL;
-    m_zStream.zfree = Z_NULL;
-    m_zStream.opaque = Z_NULL;
+    m_zStream.zalloc = nullptr;
+    m_zStream.zfree = nullptr;
+    m_zStream.opaque = nullptr;
     m_zStream.avail_in = 0;
-    m_zStream.next_in = Z_NULL;
+    m_zStream.next_in = nullptr;
     if (Z_OK != inflateInit(&m_zStream)) {
         qDebug() << "RemoteTCPInputTCPHandler::RemoteTCPInputTCPHandler: inflateInit failed.";
     }
@@ -2059,7 +2059,7 @@ void RemoteTCPInputTCPHandler::processDecompressedData(int requiredSamples)
 
             calcPower(reinterpret_cast<const Sample*>(buf), len / 2);
 
-            m_sampleFifo->write((quint8 *) buf, len * sizeof(FixReal));
+            m_sampleFifo->write(reinterpret_cast<const quint8 *>(buf), len * sizeof(FixReal));
         }
 
         m_uncompressedData.read(uncompressedBytes);
@@ -2216,13 +2216,13 @@ bool RemoteTCPInputTCPHandler::handleMessage(const Message& cmd)
     if (MsgConfigureTcpHandler::match(cmd))
     {
         qDebug() << "RemoteTCPInputTCPHandler::handleMessage: MsgConfigureTcpHandler";
-        MsgConfigureTcpHandler& notif = (MsgConfigureTcpHandler&) cmd;
+        const MsgConfigureTcpHandler& notif = (const MsgConfigureTcpHandler&) cmd;
         applySettings(notif.getSettings(), notif.getSettingsKeys(), notif.getForce());
         return true;
     }
     else if (RemoteTCPInput::MsgSendMessage::match(cmd))
     {
-        RemoteTCPInput::MsgSendMessage& msg = (RemoteTCPInput::MsgSendMessage&) cmd;
+        const RemoteTCPInput::MsgSendMessage& msg = (const RemoteTCPInput::MsgSendMessage&) cmd;
 
         sendMessage(MainCore::instance()->getSettings().getStationName(), msg.getText(), msg.getBroadcast());
 

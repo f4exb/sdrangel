@@ -643,9 +643,9 @@ void RemoteTCPSinkSink::applySettings(const RemoteTCPSinkSettings& settings, con
     if (initZLib && (m_settings.m_compression == RemoteTCPSinkSettings::ZLIB))
     {
         // Intialise zlib compression
-        m_zStream.zalloc = Z_NULL;
-        m_zStream.zfree = Z_NULL;
-        m_zStream.opaque = Z_NULL;
+        m_zStream.zalloc = nullptr;
+        m_zStream.zfree = nullptr;
+        m_zStream.opaque = nullptr;
         m_zStream.data_type = Z_BINARY;
         int windowBits = log2(m_settings.m_blockSize);
 
