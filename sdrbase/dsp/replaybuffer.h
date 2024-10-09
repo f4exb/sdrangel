@@ -209,9 +209,9 @@ private:
         return data;
     }
 
-    qint16 conv(FixReal data) const
+    qint16 conv(qint32 data) const
     {
-        return data; // FIXME:
+        return data >> 16;
     }
 
     qint16 conv(float data) const
