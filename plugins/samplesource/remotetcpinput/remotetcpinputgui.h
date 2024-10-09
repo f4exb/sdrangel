@@ -108,12 +108,11 @@ private:
     QList<QString> m_settingsKeys;
     RemoteTCPInput* m_sampleSource;
     QTimer m_updateTimer;
-    QTimer m_statusTimer;
-    int m_lastEngineState;
     MessageQueue m_inputMessageQueue;
 
     int m_sampleRate;
     quint64 m_centerFrequency;
+    uint32_t m_tickCount;
 
     bool m_doApplySettings;
     bool m_forceSettings;
@@ -124,6 +123,11 @@ private:
 
     DeviceGains::GainRange m_spyServerGainRange;
     DeviceGains m_spyServerGains;
+
+    bool m_sdra;
+    bool m_spyServer;
+    bool m_remoteControl;
+    bool m_iqOnly;
 
     static const DeviceGains::GainRange m_rtlSDR34kGainRange;
     static const DeviceGains m_rtlSDRe4kGains;
@@ -175,9 +179,13 @@ private:
     void blockApplySettings(bool block);
     void displaySettings();
     QString gainText(int stage);
+    void displayEnabled();
     void displayGains();
     void displayRemoteSettings();
     void displayRemoteShift();
+	void displayReplayLength();
+	void displayReplayOffset();
+	void displayReplayStep();
     void sendSettings();
     void updateSampleRateAndFrequency();
     void applyDecimation();
@@ -206,15 +214,27 @@ private slots:
     void on_channelSampleRate_changed(quint64 value);
     void on_decimation_toggled(bool checked);
     void on_sampleBits_currentIndexChanged(int index);
+    void on_squelchEnabled_toggled(bool checked);
+    void on_squelch_valueChanged(int value);
+    void on_squelchGate_valueChanged(double value);
     void on_dataAddress_editingFinished();
     void on_dataAddress_currentIndexChanged(int index);
-    void on_dataPort_editingFinished();
+    void on_dataPort_valueChanged(int value);
     void on_overrideRemoteSettings_toggled(bool checked);
     void on_preFill_valueChanged(int value);
     void on_protocol_currentIndexChanged(int index);
+    void on_replayOffset_valueChanged(int value);
+    void on_replayNow_clicked();
+    void on_replayPlus_clicked();
+    void on_replayMinus_clicked();
+    void on_replaySave_clicked();
+    void on_replayLoop_toggled(bool checked);
+    void on_sendMessage_clicked();
+    void on_txMessage_returnPressed();
     void updateHardware();
     void updateStatus();
     void openDeviceSettingsDialog(const QPoint& p);
+    void tick();
 };
 
 #endif // INCLUDE_REMOTETCPINPUTGUI_H

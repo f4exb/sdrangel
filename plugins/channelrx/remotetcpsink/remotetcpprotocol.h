@@ -105,13 +105,23 @@ public:
         setChannelFreqOffset = 0xc4,
         setChannelGain = 0xc5,
         setSampleBitDepth = 0xc6,           // Bit depth for samples sent over network
+        setIQSquelchEnabled = 0xc7,
+        setIQSquelch = 0xc8,
+        setIQSquelchGate = 0xc9,
         //setAntenna?
         //setLOOffset?
+        sendMessage = 0xd0,
+        sendBlacklistedMessage = 0xd1,
+        dataIQ = 0xf0,                      // Uncompressed IQ data
+        dataIQFLAC = 0xf1,                  // IQ data compressed with FLAC
+        dataIQzlib = 0xf2,                  // IQ data compressed with zlib
+        dataPosition = 0xf3,                // Lat, Long, Alt of anntenna
+        dataDirection = 0xf4                // Az/El of antenna
     };
 
     static const int m_rtl0MetaDataSize = 12;
     static const int m_rsp0MetaDataSize = 45;
-    static const int m_sdraMetaDataSize = 64;
+    static const int m_sdraMetaDataSize = 128;
 
     static void encodeInt16(quint8 *p, qint16 data)
     {
@@ -132,7 +142,7 @@ public:
         encodeUInt32(p, (quint32)data);
     }
 
-    static qint16 extractInt16(quint8 *p)
+    static qint16 extractInt16(const quint8 *p)
     {
         qint16 data;
         data = (p[1] & 0xff)
@@ -140,7 +150,7 @@ public:
         return data;
     }
 
-    static quint32 extractUInt32(quint8 *p)
+    static quint32 extractUInt32(const quint8 *p)
     {
         quint32 data;
         data = (p[3] & 0xff)
@@ -150,7 +160,7 @@ public:
         return data;
     }
 
-    static qint32 extractInt32(quint8 *p)
+    static qint32 extractInt32(const quint8 *p)
     {
         return (qint32)extractUInt32(p);
     }
@@ -167,7 +177,7 @@ public:
         p[7] = data & 0xff;
     }
 
-    static quint64 extractUInt64(quint8 *p)
+    static quint64 extractUInt64(const quint8 *p)
     {
         quint64 data;
         data = (p[7] & 0xff)
@@ -179,6 +189,27 @@ public:
             | (((quint64)(p[1] & 0xff)) << 48)
             | (((quint64)(p[0] & 0xff)) << 56);
         return data;
+    }
+
+    static void encodeFloat(quint8 *p, float data)
+    {
+        quint32 t;
+
+        memcpy(&t, &data, 4);
+
+        encodeUInt32(p, t);
+    }
+
+    static float extractFloat(const quint8 *p)
+    {
+        quint32 t;
+        float f;
+
+        t = extractUInt32(p);
+
+        memcpy(&f, &t, 4);
+
+        return f;
     }
 
 };

@@ -40,6 +40,7 @@
 #include "gui/dialogpositioner.h"
 #include "device/deviceset.h"
 #include "device/deviceapi.h"
+#include "channel/channelwebapiutils.h"
 #include "dsp/devicesamplesource.h"
 #include "device/deviceenumerator.h"
 #include "util/units.h"
@@ -55,8 +56,6 @@
 #include "ui_mapgui.h"
 #include "map.h"
 #include "mapgui.h"
-#include "SWGMapItem.h"
-#include "SWGDeviceSettings.h"
 #include "SWGKiwiSDRSettings.h"
 #include "SWGRemoteTCPInputSettings.h"
 
@@ -295,6 +294,7 @@ MapGUI::MapGUI(PluginAPI* pluginAPI, FeatureUISet *featureUISet, Feature *featur
 
     connect(&m_kiwiSDRList, &KiwiSDRList::dataUpdated, this, &MapGUI::kiwiSDRUpdated);
     connect(&m_spyServerList, &SpyServerList::dataUpdated, this, &MapGUI::spyServerUpdated);
+    connect(&m_sdrangelServerList, &SDRangelServerList::dataUpdated, this, &MapGUI::sdrangelServerUpdated);
 
 #ifdef QT_WEBENGINE_FOUND
     QWebEngineSettings *settings = ui->web->settings();
@@ -358,7 +358,7 @@ MapGUI::MapGUI(PluginAPI* pluginAPI, FeatureUISet *featureUISet, Feature *featur
         setBeacons(beacons);
     }
     addIBPBeacons();
-
+    addNAT();
     addRadioTimeTransmitters();
     addRadar();
     addIonosonde();
@@ -371,6 +371,7 @@ MapGUI::MapGUI(PluginAPI* pluginAPI, FeatureUISet *featureUISet, Feature *featur
     addVLF();
     addKiwiSDR();
     addSpyServer();
+    addSDRangelServer();
 
     displaySettings();
     applySettings(true);
@@ -487,6 +488,44 @@ void MapGUI::addIBPBeacons()
         beaconMapItem.setLabelAltitudeOffset(4.5);
         beaconMapItem.setAltitudeReference(1);
         update(m_map, &beaconMapItem, "Beacons");
+    }
+}
+
+// https://www.icao.int/EURNAT/EUR%20and%20NAT%20Documents/NAT%20Documents/NAT%20Documents/NAT%20Doc%20003/NAT%20Doc003%20-%20HF%20Guidance%20v3.0.0_2015.pdf
+// Coords aren't precise
+const QList<RadioTimeTransmitter> MapGUI::m_natTransmitters = {
+    {"Bodo", 0, 67.26742f, 14.34990, 0},
+    {"Gander", 0, 48.993056f, -54.674444f, 0},
+    {"Iceland", 0, 64.08516f, -21.84531f, 0},
+    {"New York", 0, 40.881111f, -72.647778f, 0},
+    {"Santa Maria", 0, 36.995556f, -25.170556, 0},
+    {"Shanwick", 0, 52.75f, -8.933333f, 0},
+};
+
+// North Atlantic HF ATC ground stations
+void MapGUI::addNAT()
+{
+    for (int i = 0; i < m_natTransmitters.size(); i++)
+    {
+        SWGSDRangel::SWGMapItem natMapItem;
+        // Need to suffix frequency, as there are multiple becaons with same callsign at different locations
+        QString name = QString("%1").arg(m_natTransmitters[i].m_callsign);
+        natMapItem.setName(new QString(name));
+        natMapItem.setLatitude(m_natTransmitters[i].m_latitude);
+        natMapItem.setLongitude(m_natTransmitters[i].m_longitude);
+        natMapItem.setAltitude(0.0);
+        natMapItem.setImage(new QString("antenna.png"));
+        natMapItem.setImageRotation(0);
+        QString text = QString("NAT ATC Transmitter\nCallsign: %1")
+                                .arg(m_natTransmitters[i].m_callsign);
+        natMapItem.setText(new QString(text));
+        natMapItem.setModel(new QString("antenna.glb"));
+        natMapItem.setFixedPosition(true);
+        natMapItem.setOrientation(0);
+        natMapItem.setLabel(new QString(name));
+        natMapItem.setLabelAltitudeOffset(4.5);
+        natMapItem.setAltitudeReference(1);
+        update(m_map, &natMapItem, "NAT ATC Transmitters");
     }
 }
 
@@ -696,6 +735,81 @@ void MapGUI::spyServerUpdated(const QList<SpyServerList::SpyServer>& sdrs)
         spyServerMapItem.setLabelAltitudeOffset(4.5);
         spyServerMapItem.setAltitudeReference(1);
         update(m_map, &spyServerMapItem, "SpyServer");
+    }
+}
+
+void MapGUI::addSDRangelServer()
+{
+    m_sdrangelServerList.getDataPeriodically();
+}
+
+void MapGUI::sdrangelServerUpdated(const QList<SDRangelServerList::SDRangelServer>& sdrs)
+{
+    for (const auto& sdr : sdrs)
+    {
+        SWGSDRangel::SWGMapItem sdrangelServerMapItem;
+
+        QString address = QString("%1:%2").arg(sdr.m_address).arg(sdr.m_port);
+        sdrangelServerMapItem.setName(new QString(address));
+        sdrangelServerMapItem.setLatitude(sdr.m_latitude);
+        sdrangelServerMapItem.setLongitude(sdr.m_longitude);
+        sdrangelServerMapItem.setAltitude(sdr.m_altitude);
+        sdrangelServerMapItem.setImage(new QString("antennaangel.png"));
+        sdrangelServerMapItem.setImageRotation(0);
+        QStringList antenna;
+        if (!sdr.m_antenna.isEmpty()) {
+            antenna.append(sdr.m_antenna);
+        }
+        if (sdr.m_isotropic) {
+            antenna.append("Isotropic");
+        } else {
+            antenna.append(QString("Az: %1%3 El: %2%3").arg(sdr.m_azimuth).arg(sdr.m_elevation).arg(QChar(0x00b0)));
+        }
+
+        QString text = QString("%9\n\nStation: %1\nDevice: %2\nAntenna: %3\nFrequency: %4 - %5\nRemote control: %6\nUsers: %7/%8")
+                                .arg(sdr.m_stationName)
+                                .arg(sdr.m_device)
+                                .arg(antenna.join(" - "))
+                                .arg(formatFrequency(sdr.m_minFrequency))
+                                .arg(formatFrequency(sdr.m_maxFrequency))
+                                .arg(sdr.m_remoteControl ? "Yes" : "No")
+                                .arg(sdr.m_clients)
+                                .arg(sdr.m_maxClients)
+                                .arg(sdr.m_protocol)
+                                ;
+        if (sdr.m_timeLimit > 0) {
+            text.append(QString("\nTime limit: %1 mins").arg(sdr.m_timeLimit));
+        }
+        QString url;
+        if (sdr.m_protocol == "SDRangel wss") {
+            url = QString("sdrangel-wss-server://%1").arg(address);
+        } else {
+            url = QString("sdrangel-server://%1").arg(address);
+        }
+        QString link = QString("<a href=%1 onclick=\"return parent.infoboxLink('%1')\">%2</a>").arg(url).arg(address);
+        text.append(QString("\nURL: %1").arg(link));
+        sdrangelServerMapItem.setText(new QString(text));
+        sdrangelServerMapItem.setModel(new QString("antenna.glb"));
+        sdrangelServerMapItem.setFixedPosition(true);
+        sdrangelServerMapItem.setOrientation(0);
+        QStringList bands;
+        if (sdr.m_minFrequency < 30000000) {
+            bands.append("HF");
+        }
+        if ((sdr.m_minFrequency < 300000000) && (sdr.m_maxFrequency > 30000000)) {
+            bands.append("VHF");
+        }
+        if ((sdr.m_minFrequency < 3000000000) && (sdr.m_maxFrequency > 300000000)) {
+            bands.append("UHF");
+        }
+        if (sdr.m_maxFrequency > 3000000000) {
+            bands.append("SHF");
+        }
+        QString label = QString("%1 %2").arg(sdr.m_protocol).arg(bands.join(" "));
+        sdrangelServerMapItem.setLabel(new QString(label));
+        sdrangelServerMapItem.setLabelAltitudeOffset(4.5);
+        sdrangelServerMapItem.setAltitudeReference(1);
+        update(m_map, &sdrangelServerMapItem, "SDRangel");
     }
 }
 
@@ -1582,8 +1696,13 @@ void MapGUI::applyMap2DSettings(bool reloadMap)
             if (!m_settings.m_osmURL.isEmpty()) {
                 parameters["osm.mapping.custom.host"] = m_settings.m_osmURL;  // E.g: "http://a.tile.openstreetmap.fr/hot/"
             }
+#ifdef __EMSCRIPTEN__
+            // Default is http://maps-redirect.qt.io/osm/5.8/ and Emscripten needs https
+            parameters["osm.mapping.providersrepository.address"] = QString("https://sdrangel.beniston.com/sdrangel/maps/");
+#else
             // Use our repo, so we can append API key
             parameters["osm.mapping.providersrepository.address"] = QString("http://127.0.0.1:%1/").arg(m_osmPort);
+#endif
             // Use application specific cache, as other apps may not use API key so will have different images
             QString cachePath = osmCachePath();
             parameters["osm.mapping.cache.directory"] = cachePath;
@@ -1685,6 +1804,9 @@ void MapGUI::displayToolbar()
     bool narrow = this->screen()->availableGeometry().width() < 400;
     ui->layersMenu->setVisible(narrow);
     bool overlayButtons = !narrow && ((m_settings.m_mapProvider == "osm") || m_settings.m_map3DEnabled);
+#ifdef __EMSCRIPTEN__
+    overlayButtons = false;
+#endif
     ui->displayRain->setVisible(overlayButtons);
     ui->displayClouds->setVisible(overlayButtons);
     ui->displaySeaMarks->setVisible(overlayButtons);
@@ -2600,135 +2722,67 @@ void MapGUI::linkClicked(const QString& url)
         QString spyServerURL = url.mid(21);
         openSpyServer(spyServerURL);
     }
+    else if (url.startsWith("sdrangel-wss-server://"))
+    {
+        QString sdrangelServerURL = url.mid(22);
+        openSDRangelServer(sdrangelServerURL, true);
+    }
+    else if (url.startsWith("sdrangel-server://"))
+    {
+        QString sdrangelServerURL = url.mid(18);
+        openSDRangelServer(sdrangelServerURL, false);
+    }
 }
 
 // Open a KiwiSDR RX device
 void MapGUI::openKiwiSDR(const QString& url)
 {
-    // Create DeviceSet
-    MainCore *mainCore = MainCore::instance();
-    unsigned int deviceSetIndex = mainCore->getDeviceSets().size();
-    MainCore::MsgAddDeviceSet *msg = MainCore::MsgAddDeviceSet::create(0);
-    mainCore->getMainMessageQueue()->push(msg);
-
-    // Switch to KiwiSDR
-    int nbSamplingDevices = DeviceEnumerator::instance()->getNbRxSamplingDevices();
-    bool found = false;
-    QString hwType = "KiwiSDR";
-    for (int i = 0; i < nbSamplingDevices; i++)
-    {
-        const PluginInterface::SamplingDevice *samplingDevice;
-
-        samplingDevice = DeviceEnumerator::instance()->getRxSamplingDevice(i);
-
-        if (!hwType.isEmpty() && (hwType != samplingDevice->hardwareId)) {
-            continue;
-        }
-
-        int direction = 0;
-        MainCore::MsgSetDevice *msg = MainCore::MsgSetDevice::create(deviceSetIndex, i, direction);
-        mainCore->getMainMessageQueue()->push(msg);
-        found = true;
-        break;
-    }
-    if (!found)
-    {
-        qCritical() << "MapGUI::openKiwiSDR: Failed to find KiwiSDR";
-        return;
-    }
-
-    // Wait until device is created - is there a better way?
-    DeviceSet *deviceSet = nullptr;
-    do
-    {
-        QTime dieTime = QTime::currentTime().addMSecs(100);
-        while (QTime::currentTime() < dieTime) {
-            QCoreApplication::processEvents(QEventLoop::AllEvents, 100);
-        }
-        if (mainCore->getDeviceSets().size() > deviceSetIndex)
-        {
-            deviceSet = mainCore->getDeviceSets()[deviceSetIndex];
-        }
-    }
-    while (!deviceSet);
-
-    // Move to same workspace
-    //getWorkspaceIndex();
-
-    // Set address setting
+    m_remoteDeviceAddress = url;
     QStringList deviceSettingsKeys = {"serverAddress"};
-    SWGSDRangel::SWGDeviceSettings response;
-    response.init();
-    SWGSDRangel::SWGKiwiSDRSettings *deviceSettings = response.getKiwiSdrSettings();
-    deviceSettings->setServerAddress(new QString(url));
-    QString errorMessage;
-    deviceSet->m_deviceAPI->getSampleSource()->webapiSettingsPutPatch(false, deviceSettingsKeys, response, errorMessage);
+    SWGSDRangel::SWGDeviceSettings *response = new SWGSDRangel::SWGDeviceSettings();
+    response->init();
+    SWGSDRangel::SWGKiwiSDRSettings *deviceSettings = response->getKiwiSdrSettings();
+    deviceSettings->setServerAddress(new QString(m_remoteDeviceAddress));
+
+    ChannelWebAPIUtils::addDevice("KiwiSDR", 0, deviceSettingsKeys, response);
 }
 
 // Open a RemoteTCPInput device to use for SpyServer
 void MapGUI::openSpyServer(const QString& url)
 {
-    // Create DeviceSet
-    MainCore *mainCore = MainCore::instance();
-    unsigned int deviceSetIndex = mainCore->getDeviceSets().size();
-    MainCore::MsgAddDeviceSet *msg = MainCore::MsgAddDeviceSet::create(0);
-    mainCore->getMainMessageQueue()->push(msg);
-
-    // Switch to RemoteTCPInput
-    int nbSamplingDevices = DeviceEnumerator::instance()->getNbRxSamplingDevices();
-    bool found = false;
-    QString hwType = "RemoteTCPInput";
-    for (int i = 0; i < nbSamplingDevices; i++)
-    {
-        const PluginInterface::SamplingDevice *samplingDevice;
-
-        samplingDevice = DeviceEnumerator::instance()->getRxSamplingDevice(i);
-
-        if (!hwType.isEmpty() && (hwType != samplingDevice->hardwareId)) {
-            continue;
-        }
-
-        int direction = 0;
-        MainCore::MsgSetDevice *msg = MainCore::MsgSetDevice::create(deviceSetIndex, i, direction);
-        mainCore->getMainMessageQueue()->push(msg);
-        found = true;
-        break;
-    }
-    if (!found)
-    {
-        qCritical() << "MapGUI::openSpyServer: Failed to find RemoteTCPInput";
-        return;
-    }
-
-    // Wait until device is created - is there a better way?
-    DeviceSet *deviceSet = nullptr;
-    do
-    {
-        QTime dieTime = QTime::currentTime().addMSecs(100);
-        while (QTime::currentTime() < dieTime) {
-            QCoreApplication::processEvents(QEventLoop::AllEvents, 100);
-        }
-        if (mainCore->getDeviceSets().size() > deviceSetIndex)
-        {
-            deviceSet = mainCore->getDeviceSets()[deviceSetIndex];
-        }
-    }
-    while (!deviceSet);
-
-    // Move to same workspace
-    //getWorkspaceIndex();
-
-    // Set address/port setting
     QStringList address = url.split(":");
-    QStringList deviceSettingsKeys = {"dataAddress", "dataPort", "protocol"};
-    SWGSDRangel::SWGDeviceSettings response;
-    response.init();
-    SWGSDRangel::SWGRemoteTCPInputSettings *deviceSettings = response.getRemoteTcpInputSettings();
-    deviceSettings->setDataAddress(new QString(address[0]));
-    deviceSettings->setDataPort(address[1].toInt());
+    m_remoteDeviceAddress = address[0];
+    m_remoteDevicePort = address[1].toInt();
+
+    QStringList deviceSettingsKeys = {"dataAddress", "dataPort", "protocol", "overrideRemoteSettings"};
+    SWGSDRangel::SWGDeviceSettings *response = new SWGSDRangel::SWGDeviceSettings();
+    response->init();
+    SWGSDRangel::SWGRemoteTCPInputSettings *deviceSettings = response->getRemoteTcpInputSettings();
+    deviceSettings->setDataAddress(new QString(m_remoteDeviceAddress));
+    deviceSettings->setDataPort(m_remoteDevicePort);
     deviceSettings->setProtocol(new QString("Spy Server"));
-    QString errorMessage;
-    deviceSet->m_deviceAPI->getSampleSource()->webapiSettingsPutPatch(false, deviceSettingsKeys, response, errorMessage);
+    deviceSettings->setOverrideRemoteSettings(false);
+
+    ChannelWebAPIUtils::addDevice("RemoteTCPInput", 0, deviceSettingsKeys, response);
+}
+
+// Open a RemoteTCPInput device to use for SDRangel
+void MapGUI::openSDRangelServer(const QString& url, bool wss)
+{
+    QStringList address = url.split(":");
+    m_remoteDeviceAddress = address[0];
+    m_remoteDevicePort = address[1].toInt();
+
+    QStringList deviceSettingsKeys = {"dataAddress", "dataPort", "protocol", "overrideRemoteSettings"};
+    SWGSDRangel::SWGDeviceSettings *response = new SWGSDRangel::SWGDeviceSettings();
+    response->init();
+    SWGSDRangel::SWGRemoteTCPInputSettings *deviceSettings = response->getRemoteTcpInputSettings();
+    deviceSettings->setDataAddress(new QString(m_remoteDeviceAddress));
+    deviceSettings->setDataPort(m_remoteDevicePort);
+    deviceSettings->setProtocol(new QString(wss ? "SDRangel wss" : "SDRangel"));
+    deviceSettings->setOverrideRemoteSettings(false);
+
+    ChannelWebAPIUtils::addDevice("RemoteTCPInput", 0, deviceSettingsKeys, response);
 }
 
 #ifdef QT_WEBENGINE_FOUND
@@ -2836,4 +2890,3 @@ void MapGUI::makeUIConnections()
     QObject::connect(ui->ibpBeacons, &QToolButton::clicked, this, &MapGUI::on_ibpBeacons_clicked);
     QObject::connect(ui->radiotime, &QToolButton::clicked, this, &MapGUI::on_radiotime_clicked);
 }
-

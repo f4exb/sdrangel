@@ -24,6 +24,7 @@
 
 #include <QByteArray>
 #include <QString>
+#include <QList>
 
 class Serializable;
 
@@ -31,7 +32,13 @@ struct RemoteTCPSinkSettings
 {
     enum Protocol {
         RTL0,                           // Compatible with rtl_tcp
-        SDRA                            // SDRangel remote TCP protocol which extends rtl_tcp
+        SDRA,                           // SDRangel remote TCP protocol which extends rtl_tcp
+        SDRA_WSS                        // SDRA using WebSocket Secure
+    };
+
+    enum Compressor {
+        FLAC,
+        ZLIB
     };
 
     qint32 m_channelSampleRate;
@@ -41,6 +48,34 @@ struct RemoteTCPSinkSettings
     QString m_dataAddress;
     uint16_t m_dataPort;
     enum Protocol m_protocol;
+    bool m_iqOnly;                      // Send uncompressed IQ only (No position or messages)
+    Compressor m_compression;           // How IQ stream is compressed
+    int m_compressionLevel;
+    int m_blockSize;
+    bool m_squelchEnabled;
+    float m_squelch;
+    float m_squelchGate;                // In seconds
+    bool m_remoteControl;               // Whether remote control is enabled
+    int m_maxClients;
+    int m_timeLimit;                    // Time limit per connection in minutes, if server busy. 0 = no limit.
+    int m_maxSampleRate;
+
+    QString m_certificate;              // SSL certificate
+    QString m_key;                      // SSL key
+
+    bool m_public;                      // Whether to list publically
+    QString m_publicAddress;            // IP address / host for public listing
+    int m_publicPort;                   // What port number for public listing
+    qint64 m_minFrequency;              // Minimum frequency for public listing
+    qint64 m_maxFrequency;              // Maximum frequency for public listing
+    QString m_antenna;                  // Anntenna description for public listing
+    QString m_location;                 // Anntenna location for public listing
+    QStringList m_ipBlacklist;          // List of IP addresses to refuse connections from
+    bool m_isotropic;                   // Antenna is isotropic
+    float m_azimuth;                    // Antenna azimuth angle
+    float m_elevation;                  // Antenna elevation angle
+    QString m_rotator;                  // Id of Rotator Controller feature to get az/el from
+
     quint32 m_rgbColor;
     QString m_title;
     int m_streamIndex; //!< MIMO channel. Not relevant when connected to SI (single Rx).

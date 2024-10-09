@@ -125,19 +125,27 @@ bool RemoteTCPSinkBaseband::handleMessage(const Message& cmd)
     if (RemoteTCPSink::MsgConfigureRemoteTCPSink::match(cmd))
     {
         QMutexLocker mutexLocker(&m_mutex);
-        RemoteTCPSink::MsgConfigureRemoteTCPSink& cfg = (RemoteTCPSink::MsgConfigureRemoteTCPSink&) cmd;
+        const RemoteTCPSink::MsgConfigureRemoteTCPSink& cfg = (const RemoteTCPSink::MsgConfigureRemoteTCPSink&) cmd;
         qDebug() << "RemoteTCPSinkBaseband::handleMessage: MsgConfigureRemoteTCPSink";
 
-        applySettings(cfg.getSettings(), cfg.getSettingsKeys(), cfg.getForce(), cfg.getRemoteChange());
+        applySettings(cfg.getSettings(), cfg.getSettingsKeys(), cfg.getForce(), cfg.getRestartRequired());
 
         return true;
     }
     else if (DSPSignalNotification::match(cmd))
     {
-        DSPSignalNotification& notif = (DSPSignalNotification&) cmd;
+        const DSPSignalNotification& notif = (const DSPSignalNotification&) cmd;
         qDebug() << "RemoteTCPSinkBaseband::handleMessage: DSPSignalNotification: basebandSampleRate:" << notif.getSampleRate();
         setBasebandSampleRate(notif.getSampleRate());
         m_sampleFifo.setSize(SampleSinkFifo::getSizePolicy(notif.getSampleRate()));
+
+        return true;
+    }
+    else if (RemoteTCPSink::MsgSendMessage::match(cmd))
+    {
+        const RemoteTCPSink::MsgSendMessage& msg = (const RemoteTCPSink::MsgSendMessage&) cmd;
+
+        m_sink.sendMessage(msg.getAddress(), msg.getPort(), msg.getCallsign(), msg.getText(), msg.getBroadcast());
 
         return true;
     }
@@ -147,7 +155,7 @@ bool RemoteTCPSinkBaseband::handleMessage(const Message& cmd)
     }
 }
 
-void RemoteTCPSinkBaseband::applySettings(const RemoteTCPSinkSettings& settings, const QStringList& settingsKeys, bool force, bool remoteChange)
+void RemoteTCPSinkBaseband::applySettings(const RemoteTCPSinkSettings& settings, const QStringList& settingsKeys, bool force, bool restartRequired)
 {
     qDebug() << "RemoteTCPSinkBaseband::applySettings:"
         << "m_channelSampleRate:" << settings.m_channelSampleRate
@@ -160,7 +168,7 @@ void RemoteTCPSinkBaseband::applySettings(const RemoteTCPSinkSettings& settings,
         m_sink.applyChannelSettings(m_channelizer->getChannelSampleRate(), m_channelizer->getChannelFrequencyOffset());
     }
 
-    m_sink.applySettings(settings, settingsKeys, force, remoteChange);
+    m_sink.applySettings(settings, settingsKeys, force, restartRequired);
     if (force) {
         m_settings = settings;
     } else {

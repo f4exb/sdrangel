@@ -40,16 +40,27 @@
 MESSAGE_CLASS_DEFINITION(RemoteTCPInput::MsgConfigureRemoteTCPInput, Message)
 MESSAGE_CLASS_DEFINITION(RemoteTCPInput::MsgStartStop, Message)
 MESSAGE_CLASS_DEFINITION(RemoteTCPInput::MsgReportTCPBuffer, Message)
+MESSAGE_CLASS_DEFINITION(RemoteTCPInput::MsgSaveReplay, Message)
+MESSAGE_CLASS_DEFINITION(RemoteTCPInput::MsgSendMessage, Message)
+MESSAGE_CLASS_DEFINITION(RemoteTCPInput::MsgReportPosition, Message)
+MESSAGE_CLASS_DEFINITION(RemoteTCPInput::MsgReportDirection, Message)
 
 RemoteTCPInput::RemoteTCPInput(DeviceAPI *deviceAPI) :
     m_deviceAPI(deviceAPI),
     m_settings(),
     m_remoteInputTCPPHandler(nullptr),
-    m_deviceDescription("RemoteTCPInput")
+    m_deviceDescription("RemoteTCPInput"),
+    m_running(false),
+    m_latitude(std::numeric_limits<float>::quiet_NaN()),
+    m_longitude(std::numeric_limits<float>::quiet_NaN()),
+    m_altitude(std::numeric_limits<float>::quiet_NaN()),
+    m_isotropic(false),
+    m_azimuth(std::numeric_limits<float>::quiet_NaN()),
+    m_elevation(std::numeric_limits<float>::quiet_NaN())
 {
     m_sampleFifo.setLabel(m_deviceDescription);
     m_sampleFifo.setSize(48000 * 8);
-    m_remoteInputTCPPHandler = new RemoteTCPInputTCPHandler(&m_sampleFifo, m_deviceAPI);
+    m_remoteInputTCPPHandler = new RemoteTCPInputTCPHandler(&m_sampleFifo, m_deviceAPI, &m_replayBuffer);
     m_remoteInputTCPPHandler->moveToThread(&m_thread);
     m_remoteInputTCPPHandler->setMessageQueueToInput(&m_inputMessageQueue);
 
@@ -66,6 +77,7 @@ RemoteTCPInput::RemoteTCPInput(DeviceAPI *deviceAPI) :
 
 RemoteTCPInput::~RemoteTCPInput()
 {
+    qDebug() << "RemoteTCPInput::~RemoteTCPInput";
     QObject::disconnect(
         m_networkManager,
         &QNetworkAccessManager::finished,
@@ -84,25 +96,39 @@ void RemoteTCPInput::destroy()
 
 void RemoteTCPInput::init()
 {
+    qDebug() << "RemoteTCPInput::init";
     applySettings(m_settings, QList<QString>(), true);
 }
 
 bool RemoteTCPInput::start()
 {
     qDebug() << "RemoteTCPInput::start";
+    if (m_running) {
+        qDebug() << "RemoteTCPInput::stop - Already running";
+        return true;
+    }
     m_remoteInputTCPPHandler->reset();
     m_remoteInputTCPPHandler->start();
     m_remoteInputTCPPHandler->getInputMessageQueue()->push(RemoteTCPInputTCPHandler::MsgConfigureTcpHandler::create(m_settings, QList<QString>(), true));
     m_thread.start();
+    m_running = true;
     return true;
 }
 
 void RemoteTCPInput::stop()
 {
     qDebug() << "RemoteTCPInput::stop";
+    if (!m_running) {
+        // For wasm, important not to call m_remoteInputTCPPHandler->stop() twice
+        // as mutex can deadlock when this object is being deleted
+        return;
+    }
     m_remoteInputTCPPHandler->stop();
     m_thread.quit();
+#ifndef __EMSCRIPTEN__
     m_thread.wait();
+#endif
+    m_running = false;
 }
 
 QByteArray RemoteTCPInput::serialize() const
@@ -119,7 +145,6 @@ bool RemoteTCPInput::deserialize(const QByteArray& data)
         m_settings.resetToDefaults();
         success = false;
     }
-
     MsgConfigureRemoteTCPInput* message = MsgConfigureRemoteTCPInput::create(m_settings, QList<QString>(), true);
     m_inputMessageQueue.push(message);
 
@@ -195,19 +220,55 @@ bool RemoteTCPInput::handleMessage(const Message& message)
     else if (MsgConfigureRemoteTCPInput::match(message))
     {
         qDebug() << "RemoteTCPInput::handleMessage:" << message.getIdentifier();
-        MsgConfigureRemoteTCPInput& conf = (MsgConfigureRemoteTCPInput&) message;
+        const MsgConfigureRemoteTCPInput& conf = (const MsgConfigureRemoteTCPInput&) message;
         applySettings(conf.getSettings(), conf.getSettingsKeys(), conf.getForce());
         return true;
     }
     else if (RemoteTCPInputTCPHandler::MsgReportConnection::match(message))
     {
         qDebug() << "RemoteTCPInput::handleMessage:" << message.getIdentifier();
-        RemoteTCPInputTCPHandler::MsgReportConnection& report = (RemoteTCPInputTCPHandler::MsgReportConnection&) message;
+        const RemoteTCPInputTCPHandler::MsgReportConnection& report = (const RemoteTCPInputTCPHandler::MsgReportConnection&) message;
         if (report.getConnected())
         {
             qDebug() << "Disconnected - stopping DSP";
             m_deviceAPI->stopDeviceEngine();
         }
+        return true;
+    }
+    else if (MsgSaveReplay::match(message))
+    {
+        const MsgSaveReplay& cmd = (const MsgSaveReplay&) message;
+        m_replayBuffer.save(cmd.getFilename(), m_settings.m_devSampleRate, getCenterFrequency());
+        return true;
+    }
+    else if (MsgSendMessage::match(message))
+    {
+        const MsgSendMessage& msg = (const MsgSendMessage&) message;
+        m_remoteInputTCPPHandler->getInputMessageQueue()->push(MsgSendMessage::create(msg.getCallsign(), msg.getText(), msg.getBroadcast()));
+        return true;
+    }
+    else if (MsgReportPosition::match(message))
+    {
+        const MsgReportPosition& report = (const MsgReportPosition&) message;
+
+        m_latitude = report.getLatitude();
+        m_longitude = report.getLongitude();
+        m_altitude = report.getAltitude();
+
+        emit positionChanged(m_latitude, m_longitude, m_altitude);
+
+        return true;
+    }
+    else if (MsgReportDirection::match(message))
+    {
+        const MsgReportDirection& report = (const MsgReportDirection&) message;
+
+        m_isotropic = report.getIsotropic();
+        m_azimuth = report.getAzimuth();
+        m_elevation = report.getElevation();
+
+        emit directionChanged(m_isotropic, m_azimuth, m_elevation);
+
         return true;
     }
     else
@@ -242,6 +303,12 @@ void RemoteTCPInput::applySettings(const RemoteTCPInputSettings& settings, const
         forwardChange = true;
     }
 
+    if ((settingsKeys.contains("channelSampleRate") || force)
+        && (settings.m_devSampleRate != m_settings.m_devSampleRate))
+    {
+        m_replayBuffer.clear();
+    }
+
     mutexLocker.unlock();
 
     if (settings.m_useReverseAPI)
@@ -263,6 +330,18 @@ void RemoteTCPInput::applySettings(const RemoteTCPInputSettings& settings, const
         m_settings = settings;
     } else {
         m_settings.applySettings(settingsKeys, settings);
+    }
+
+    if (settingsKeys.contains("replayLength") || settingsKeys.contains("devSampleRate") || force) {
+        m_replayBuffer.setSize(m_settings.m_replayLength, m_settings.m_devSampleRate);
+    }
+
+    if (settingsKeys.contains("replayOffset") || settingsKeys.contains("devSampleRate")  || force) {
+        m_replayBuffer.setReadOffset(((unsigned)(m_settings.m_replayOffset * m_settings.m_devSampleRate)) * 2);
+    }
+
+    if (settingsKeys.contains("replayLoop") || force) {
+        m_replayBuffer.setLoop(m_settings.m_replayLoop);
     }
 
     m_remoteInputTCPPHandler->getInputMessageQueue()->push(RemoteTCPInputTCPHandler::MsgConfigureTcpHandler::create(m_settings, settingsKeys, force));
@@ -459,6 +538,9 @@ int RemoteTCPInput::webapiReportGet(
 void RemoteTCPInput::webapiFormatDeviceReport(SWGSDRangel::SWGDeviceReport& response)
 {
     response.getRemoteTcpInputReport()->setSampleRate(m_settings.m_channelSampleRate);
+    response.getRemoteTcpInputReport()->setLatitude(m_latitude);
+    response.getRemoteTcpInputReport()->setLongitude(m_longitude);
+    response.getRemoteTcpInputReport()->setAltitude(m_altitude);
 }
 
 void RemoteTCPInput::webapiReverseSendSettings(const QList<QString>& deviceSettingsKeys, const RemoteTCPInputSettings& settings, bool force)

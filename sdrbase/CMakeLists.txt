@@ -266,8 +266,10 @@ set(sdrbase_SOURCES
     util/rtpsink.cpp
     util/syncmessenger.cpp
     util/samplesourceserializer.cpp
+    util/sdrangelserverlist.cpp
     util/simpleserializer.cpp
     util/serialutil.cpp
+    util/socket.cpp
     util/solardynamicsobservatory.cpp
     util/sondehub.cpp
     #util/spinlock.cpp
@@ -526,8 +528,10 @@ set(sdrbase_HEADERS
     util/rtty.h
     util/syncmessenger.h
     util/samplesourceserializer.h
+    util/sdrangelserverlist.h
     util/simpleserializer.h
     util/serialutil.h
+    util/socket.h
     util/solardynamicsobservatory.h
     util/sondehub.h
     #util/spinlock.h

@@ -57,6 +57,7 @@ endif()
 
 target_link_libraries(${TARGET_NAME} PRIVATE
     Qt::Core
+    Qt::WebSockets
     ${TARGET_LIB}
 	sdrbase
 	${TARGET_LIB_GUI}

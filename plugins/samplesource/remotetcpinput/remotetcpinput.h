@@ -31,13 +31,14 @@
 #include <QNetworkRequest>
 
 #include "dsp/devicesamplesource.h"
+#include "dsp/replaybuffer.h"
 
 #include "remotetcpinputsettings.h"
+#include "remotetcpinputtcphandler.h"
 
 class QNetworkAccessManager;
 class QNetworkReply;
 class DeviceAPI;
-class RemoteTCPInputTCPHandler;
 
 class RemoteTCPInput : public DeviceSampleSource {
     Q_OBJECT
@@ -78,10 +79,10 @@ public:
             return new MsgStartStop(startStop);
         }
 
-    protected:
+    private:
         bool m_startStop;
 
-        MsgStartStop(bool startStop) :
+        explicit MsgStartStop(bool startStop) :
             Message(),
             m_startStop(startStop)
         { }
@@ -104,7 +105,7 @@ public:
                                           outBytesAvailable, outSize, outSeconds);
         }
 
-    protected:
+    private:
         qint64 m_inBytesAvailable;
         qint64 m_inSize;
         float m_inSeconds;
@@ -123,6 +124,100 @@ public:
             m_outSeconds(outSeconds)
         { }
     };
+
+    class MsgSaveReplay : public Message {
+        MESSAGE_CLASS_DECLARATION
+
+    public:
+        QString getFilename() const { return m_filename; }
+
+        static MsgSaveReplay* create(const QString& filename) {
+            return new MsgSaveReplay(filename);
+        }
+
+    private:
+        QString m_filename;
+
+        explicit MsgSaveReplay(const QString& filename) :
+            Message(),
+            m_filename(filename)
+        { }
+    };
+
+    class MsgSendMessage : public Message {
+        MESSAGE_CLASS_DECLARATION
+
+    public:
+        const QString& getCallsign() const { return m_callsign; }
+        const QString& getText() const { return m_text; }
+        bool getBroadcast() const { return m_broadcast; }
+
+        static MsgSendMessage* create(const QString& callsign, const QString& text, bool broadcast) {
+            return new MsgSendMessage(callsign, text, broadcast);
+        }
+
+    private:
+        QString m_callsign;
+        QString m_text;
+        bool m_broadcast;
+
+        MsgSendMessage(const QString& callsign, const QString& text, bool broadcast) :
+            Message(),
+            m_callsign(callsign),
+            m_text(text),
+            m_broadcast(broadcast)
+        { }
+    };
+
+    class MsgReportPosition : public Message {
+		MESSAGE_CLASS_DECLARATION
+
+	public:
+		float getLatitude() const { return m_latitude; }
+		float getLongitude() const { return m_longitude; }
+		float getAltitude() const { return m_altitude; }
+
+		static MsgReportPosition* create(float latitude, float longitude, float altitude) {
+			return new MsgReportPosition(latitude, longitude, altitude);
+		}
+
+	private:
+		float m_latitude;
+		float m_longitude;
+		float m_altitude;
+
+		MsgReportPosition(float latitude, float longitude, float altitude) :
+			Message(),
+			m_latitude(latitude),
+			m_longitude(longitude),
+			m_altitude(altitude)
+		{ }
+	};
+
+    class MsgReportDirection : public Message {
+		MESSAGE_CLASS_DECLARATION
+
+	public:
+        bool getIsotropic() const { return m_isotropic; }
+		float getAzimuth() const { return m_azimuth; }
+		float getElevation() const { return m_elevation; }
+
+		static MsgReportDirection* create(bool isotropic, float azimuth, float elevation) {
+			return new MsgReportDirection(isotropic, azimuth, elevation);
+		}
+
+	private:
+        bool m_isotropic;
+		float m_azimuth;
+		float m_elevation;
+
+		MsgReportDirection(bool isotropic, float azimuth, float elevation) :
+			Message(),
+            m_isotropic(isotropic),
+			m_azimuth(azimuth),
+			m_elevation(elevation)
+		{ }
+	};
 
     RemoteTCPInput(DeviceAPI *deviceAPI);
     virtual ~RemoteTCPInput();
@@ -177,6 +272,15 @@ public:
             const QStringList& deviceSettingsKeys,
             SWGSDRangel::SWGDeviceSettings& response);
 
+    void getMagSqLevels(double& avg, double& peak, int& nbSamples)
+    {
+        if (m_remoteInputTCPPHandler) {
+            m_remoteInputTCPPHandler->getMagSqLevels(avg, peak, nbSamples);
+        } else {
+            avg = 0.0; peak = 0.0; nbSamples = 1;
+        }
+    }
+
 private:
     DeviceAPI *m_deviceAPI;
     QRecursiveMutex m_mutex;
@@ -185,7 +289,15 @@ private:
     QString m_deviceDescription;
     QNetworkAccessManager *m_networkManager;
     QNetworkRequest m_networkRequest;
+    ReplayBuffer<FixReal> m_replayBuffer;
     QThread m_thread;
+    bool m_running;
+    float m_latitude;   // Position of remote device (antenna)
+    float m_longitude;
+    float m_altitude;
+    bool m_isotropic;   // Direction of remote anntenna
+    float m_azimuth;
+    float m_elevation;
 
     void applySettings(const RemoteTCPInputSettings& settings, const QList<QString>& settingsKeys, bool force = false);
     void webapiFormatDeviceReport(SWGSDRangel::SWGDeviceReport& response);

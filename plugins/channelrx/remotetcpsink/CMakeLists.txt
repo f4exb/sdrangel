@@ -21,6 +21,8 @@ set(remotetcpsink_HEADERS
 
 include_directories(
     ${CMAKE_SOURCE_DIR}/swagger/sdrangel/code/qt5/client
+    ${FLAC_INCLUDE_DIR}
+    ${ZLIB_INCLUDE_DIRS}
 )
 
 if(NOT SERVER_MODE)
@@ -28,10 +30,13 @@ if(NOT SERVER_MODE)
         ${remotetcpsink_SOURCES}
         remotetcpsinkgui.cpp
         remotetcpsinkgui.ui
+        remotetcpsinksettingsdialog.cpp
+        remotetcpsinksettingsdialog.ui
     )
     set(remotetcpsink_HEADERS
         ${remotetcpsink_HEADERS}
         remotetcpsinkgui.h
+        remotetcpsinksettingsdialog.h
     )
     set(TARGET_NAME ${PLUGINS_PREFIX}remotetcpsink)
     set(TARGET_LIB "Qt::Widgets")
@@ -44,16 +49,25 @@ else()
     set(INSTALL_FOLDER ${INSTALL_PLUGINSSRV_DIR})
 endif()
 
-add_library(${TARGET_NAME} SHARED
-    ${remotetcpsink_SOURCES}
-)
+if(NOT Qt6_FOUND)
+    add_library(${TARGET_NAME} ${remotetcpsink_SOURCES})
+else()
+    qt_add_plugin(${TARGET_NAME} CLASS_NAME RemoteTCPSinkPlugin ${remotetcpsink_SOURCES})
+endif()
 
-target_link_libraries(${TARGET_NAME}
+if(NOT BUILD_SHARED_LIBS)
+    set_property(GLOBAL APPEND PROPERTY STATIC_PLUGINS_PROPERTY ${TARGET_NAME})
+endif()
+
+target_link_libraries(${TARGET_NAME} PRIVATE
     Qt::Core
+    Qt::WebSockets
     ${TARGET_LIB}
     sdrbase
     ${TARGET_LIB_GUI}
     swagger
+    ${FLAC_LIBRARIES}
+    ${ZLIB_LIBRARIES}
 )
 
 install(TARGETS ${TARGET_NAME} DESTINATION ${INSTALL_FOLDER})

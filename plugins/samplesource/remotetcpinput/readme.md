@@ -93,7 +93,7 @@ When unchecked, the channel sample rate can be set to any value.
 
 Specifies number of bits per I/Q sample transmitted via TCP/IP.
 
-When the protocol is RTL0, only 8-bits are supported. SDRA and Spy Server protocol supports 8, 16, 24 and 32-bit samples.
+When the protocol is RTL0, only 8-bits are supported. SDRangel and Spy Server protocol supports 8, 16, 24 and 32-bit samples.
 
 <h3>19: Server IP address</h3>
 
@@ -105,14 +105,16 @@ TCP port on the server to connect to.
 
 <h3>21: Protocol</h3>
 
-Selects protocol to use. Set to SDRangel for rtl_tcp, rsp_tcp or SDRangel's own protocol. Alternative, Spy Server can be selected to connect to Spy Servers.
+Selects protocol to use. Set to SDRangel for rtl_tcp, rsp_tcp or SDRangel's own protocol. 
+Set to SDRangel wss to use SDRangel's protocol over WebSocket Secure.
+Alternatively, Spy Server can be selected to connect to Spy Servers.
 
 <h3>23: Connection settings</h3>
 
 Determines which settings are used when connecting.
 
 When checked, settings in the RemoteTCPInput GUI are written to the remote device upon connection.
-When unchecked, if the remote server is using the SDRA protocol, the RemoteTCPInput GUI will be updated with the current settings from the remote device.
+When unchecked, if the remote server is using the SDRangel protocol, the RemoteTCPInput GUI will be updated with the current settings from the remote device.
 If the remote server is using the RTL0 protocol, the GUI will not be updated, which may mean the two are inconsistent.
 
 <h3>24: Pre-fill</h3>

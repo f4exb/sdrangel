@@ -851,6 +851,38 @@ if(ENABLE_FEATURE_SATELLITETRACKER OR ENABLE_CHANNELRX_DEMODAPT)
     endif ()
 endif ()
 
+if(ENABLE_CHANNELRX_REMOTETCPSINK)
+    if (WIN32)
+        set(FLAC_LIBRARIES "${SDRANGEL_BINARY_LIB_DIR}/FLAC.lib" CACHE INTERNAL "")
+    elseif (LINUX)
+        set(FLAC_LIBRARIES "${EXTERNAL_BUILD_LIBRARIES}/flac/src/flac-build/src/libFLAC/libFLAC${CMAKE_SHARED_LIBRARY_SUFFIX}" CACHE INTERNAL "")
+    elseif (APPLE)
+        set(FLAC_LIBRARIES "${EXTERNAL_BUILD_LIBRARIES}/flac/src/flac-build/src/libFLAC/libFLAC${CMAKE_SHARED_LIBRARY_SUFFIX}" CACHE INTERNAL "")
+    elseif (EMSCRIPTEN)
+        set(FLAC_LIBRARIES "${EXTERNAL_BUILD_LIBRARIES}/flac/src/flac-build/src/libFLAC/libFLAC.a" CACHE INTERNAL "")
+    endif()
+    ExternalProject_Add(flac
+            GIT_REPOSITORY https://github.com/xiph/flac.git
+            PREFIX "${EXTERNAL_BUILD_LIBRARIES}/flac"
+            CMAKE_ARGS ${COMMON_CMAKE_ARGS} -DINSTALL_MANPAGES=OFF -D=BUILD_SHARED_LIBS=ON -DWITH_FORTIFY_SOURCE=OFF -DWITH_STACK_PROTECTOR=PFF -DBUILD_PROGRAMS=OFF -DBUILD_TESTING=OFF -DBUILD_EXAMPLES=OFF -DWITH_OGG=OFF -DBUILD_DOCS=OFF
+            BUILD_BYPRODUCTS "${FLAC_LIBRARIES}"
+            INSTALL_COMMAND ""
+            TEST_COMMAND ""
+            )
+    ExternalProject_Get_Property(flac source_dir binary_dir)
+    set_global(FLAC_DEPENDS flac)
+    set_global_cache(FLAC_FOUND ON)
+    set(FLAC_EXTERNAL ON CACHE INTERNAL "")
+    set(FLAC_INCLUDE_DIR "${EXTERNAL_BUILD_LIBRARIES}/flac/src/flac/include" CACHE INTERNAL "")
+    if (WIN32)
+        install(FILES "${SDRANGEL_BINARY_BIN_DIR}/FLAC${CMAKE_SHARED_LIBRARY_SUFFIX}" DESTINATION "${INSTALL_LIB_DIR}")
+    elseif (APPLE)
+        install(DIRECTORY "${EXTERNAL_BUILD_LIBRARIES}/flac/src/flac-build/src/libFLAC" DESTINATION "${INSTALL_LIB_DIR}"
+                FILES_MATCHING PATTERN "libFLAC*${CMAKE_SHARED_LIBRARY_SUFFIX}")
+        set(MACOS_EXTERNAL_LIBS_FIXUP "${MACOS_EXTERNAL_LIBS_FIXUP};${EXTERNAL_BUILD_LIBRARIES}/flac/src/flac-build/src/libFLAC")
+    endif ()
+endif ()
+
 # For Morse Decoder feature
 if(ENABLE_FEATURE_MORSEDECODER)
     if (WIN32)

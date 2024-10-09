@@ -209,6 +209,11 @@ private:
         return data;
     }
 
+    qint16 conv(qint32 data) const
+    {
+        return data >> 16;
+    }
+
     qint16 conv(float data) const
     {
         return (qint16)(data * SDR_RX_SCALEF);

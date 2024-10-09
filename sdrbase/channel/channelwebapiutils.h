@@ -23,6 +23,7 @@
 
 #include <QString>
 #include <QJsonArray>
+#include <QTimer>
 
 #include "SWGDeviceSettings.h"
 #include "SWGDeviceReport.h"
@@ -36,6 +37,28 @@
 class DeviceSet;
 class Feature;
 class ChannelAPI;
+class DeviceAPI;
+
+// Use ChannelWebAPIUtils::addDevice rather than this directly
+class DeviceOpener : public QObject {
+    Q_OBJECT
+protected:
+    DeviceOpener(int deviceIndex, int direction, const QStringList& settingsKeys, SWGSDRangel::SWGDeviceSettings *response);
+private:
+    int m_deviceIndex;
+    int m_direction;
+    int m_deviceSetIndex;
+    QStringList m_settingsKeys;
+    SWGSDRangel::SWGDeviceSettings *m_response;
+    DeviceAPI *m_device;
+    QTimer m_timer;
+
+private slots:
+    void deviceSetAdded(int index, DeviceAPI *device);
+    void checkInitialised();
+public:
+    static bool open(const QString hwType, int direction, const QStringList& settingsKeys, SWGSDRangel::SWGDeviceSettings *response);
+};
 
 class SDRBASE_API ChannelWebAPIUtils
 {
@@ -103,6 +126,7 @@ public:
     static bool getChannelSettings(ChannelAPI *channel, SWGSDRangel::SWGChannelSettings &channelSettingsResponse);
     static bool getChannelReport(unsigned int deviceIndex, unsigned int channelIndex, SWGSDRangel::SWGChannelReport &channelReport);
     static bool addChannel(unsigned int deviceSetIndex, const QString& uri, int direction);
+    static bool addDevice(const QString hwType, int direction, const QStringList& settingsKeys, SWGSDRangel::SWGDeviceSettings *response);
 protected:
     static QString getDeviceHardwareId(unsigned int deviceIndex);
 };

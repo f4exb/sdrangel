@@ -10,7 +10,7 @@
 #
 # To install sdrangel local snap:
 #
-#     sudo snap install sdrangel_7.19.0_amd64.snap --dangerous
+#     sudo snap install sdrangel_7.22.1_amd64.snap --dangerous
 #
 # Users appear to need to grant h/w access manually from command line with:
 #
@@ -36,11 +36,19 @@
 #     snapcraft clean uhd
 #     snapcraft stage uhd --shell-after
 #
+#
+# To publish to snap store:
+#
+#     snapcraft login
+#     snapcraft push sdrangel_7.22.1_amd64.snap --release=stable,edge,candidate,beta
+#
+# Can also manage/promote releases at: https://snapcraft.io/sdrangel/releases
+
 
 name: sdrangel
 base: core22
 type: app
-version: "7.19.0"
+adopt-info: sdrangel
 summary: SDRangel
 description: SDRangel is an Open Source Qt5 / OpenGL 3.0+ SDR and signal analyzer frontend to various hardware. SSE 4.2 required.
 confinement: strict
@@ -139,7 +147,9 @@ parts:
         plugin: cmake
         source: https://github.com/f4exb/sdrangel
         source-type: git
-        source-tag: v7.19.0
+        override-pull: |
+            snapcraftctl pull
+            snapcraftctl set-version "$(git describe --tags --abbrev=0 | sed 's/v//')"
         after: [apt, libdab, mbelib, serialdv, dsdcc, codec2, sgp4, cm265cc, libsigmf, airspy, rtlsdr, pluto, bladerf, hackrf, limesuite, airspyhf, uhd, uhdfpga, soapysdr, soapyremote]
         cmake-parameters:
             - -DDEBUG_OUTPUT=OFF
@@ -167,6 +177,7 @@ parts:
             - -DSGP4_DIR=$SNAPCRAFT_STAGE/opt/install/sdrangel
             - -DLIBSIGMF_DIR=$SNAPCRAFT_STAGE/opt/install/sdrangel
             - -DDAB_DIR=$SNAPCRAFT_STAGE/opt/install/sdrangel
+            - -DARCH_OPT=nehalem
             #- -DQt5_DIR=/usr/lib/x86_64-linux-gnu/cmake/Qt5
         build-packages:
             - libfftw3-dev
@@ -192,6 +203,7 @@ parts:
             - libqt5texttospeech5-dev
             - libqt5gamepad5-dev
             - libfaad-dev
+            - libflac-dev
             - zlib1g-dev
             - libboost-all-dev
             - libasound2-dev

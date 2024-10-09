@@ -33,6 +33,7 @@
 #include "maincore.h"
 #include "device/deviceset.h"
 #include "device/deviceapi.h"
+#include "device/deviceenumerator.h"
 #include "channel/channelapi.h"
 #include "channel/channelutils.h"
 #include "dsp/devicesamplesource.h"
@@ -1952,4 +1953,85 @@ bool ChannelWebAPIUtils::addChannel(unsigned int deviceSetIndex, const QString& 
         qWarning() << "ChannelWebAPIUtils::addChannel:" << uri << "plugin not available";
         return false;
     }
+}
+
+// response will be deleted after device is opened.
+bool ChannelWebAPIUtils::addDevice(const QString hwType, int direction, const QStringList& settingsKeys, SWGSDRangel::SWGDeviceSettings *response)
+{
+    return DeviceOpener::open(hwType, direction, settingsKeys, response);
+}
+
+DeviceOpener::DeviceOpener(int deviceIndex, int direction, const QStringList& settingsKeys, SWGSDRangel::SWGDeviceSettings *response) :
+    m_deviceIndex(deviceIndex),
+    m_direction(direction),
+    m_settingsKeys(settingsKeys),
+    m_response(response),
+    m_device(nullptr)
+{
+    connect(MainCore::instance(), &MainCore::deviceSetAdded, this, &DeviceOpener::deviceSetAdded);
+    // Create DeviceSet
+    MainCore *mainCore = MainCore::instance();
+    m_deviceSetIndex = mainCore->getDeviceSets().size();
+    MainCore::MsgAddDeviceSet *msg = MainCore::MsgAddDeviceSet::create(m_direction);
+    mainCore->getMainMessageQueue()->push(msg);
+}
+
+void DeviceOpener::deviceSetAdded(int index, DeviceAPI *device)
+{
+    if (index == m_deviceSetIndex)
+    {
+        disconnect(MainCore::instance(), &MainCore::deviceSetAdded, this, &DeviceOpener::deviceSetAdded);
+
+        m_device = device;
+        // Set the correct device type
+        MainCore::MsgSetDevice *msg = MainCore::MsgSetDevice::create(m_deviceSetIndex, m_deviceIndex, m_direction);
+        MainCore::instance()->getMainMessageQueue()->push(msg);
+        // Wait until device has initialised - FIXME: Better way to do this other than polling?
+        m_timer.setInterval(250);
+        connect(&m_timer, &QTimer::timeout, this, &DeviceOpener::checkInitialised);
+        m_timer.start();
+    }
+}
+
+void DeviceOpener::checkInitialised()
+{
+    if (m_device && m_device->getSampleSource() && (m_device->state() >= DeviceAPI::EngineState::StIdle))
+    {
+        m_timer.stop();
+
+        QString errorMessage;
+        if (200 != m_device->getSampleSource()->webapiSettingsPutPatch(false, m_settingsKeys, *m_response, errorMessage)) {
+            qDebug() << "DeviceOpener::checkInitialised: webapiSettingsPutPatch failed: " << errorMessage;
+        }
+
+        delete m_response;
+        delete this;
+    }
+}
+
+bool DeviceOpener::open(const QString hwType, int direction, const QStringList& settingsKeys, SWGSDRangel::SWGDeviceSettings *response)
+{
+    if (direction) {
+        return false; // FIXME: Only RX support for now
+    }
+
+    int nbSamplingDevices = DeviceEnumerator::instance()->getNbRxSamplingDevices();
+
+    for (int i = 0; i < nbSamplingDevices; i++)
+    {
+        const PluginInterface::SamplingDevice *samplingDevice;
+
+        samplingDevice = DeviceEnumerator::instance()->getRxSamplingDevice(i);
+
+        if (!hwType.isEmpty() && (hwType != samplingDevice->hardwareId)) {
+            continue;
+        }
+
+        new DeviceOpener(i, direction, settingsKeys, response);
+
+        return true;
+    }
+
+    qWarning() << "DeviceOpener::open: Failed to find device with hwType " << hwType;
+    return false;
 }

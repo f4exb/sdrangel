@@ -20,6 +20,7 @@
 #include <QMessageBox>
 #include <QDateTime>
 #include <QString>
+#include <QFileDialog>
 
 #include "ui_remotetcpinputgui.h"
 #include "gui/colormapper.h"
@@ -30,17 +31,19 @@
 #include "dsp/dspcommands.h"
 #include "device/deviceapi.h"
 #include "device/deviceuiset.h"
+#include "util/db.h"
 #include "remotetcpinputgui.h"
 #include "remotetcpinputtcphandler.h"
+#include "maincore.h"
 
 RemoteTCPInputGui::RemoteTCPInputGui(DeviceUISet *deviceUISet, QWidget* parent) :
     DeviceGUI(parent),
     ui(new Ui::RemoteTCPInputGui),
     m_settings(),
-    m_sampleSource(0),
-    m_lastEngineState(DeviceAPI::StNotStarted),
+    m_sampleSource(nullptr),
     m_sampleRate(0),
     m_centerFrequency(0),
+    m_tickCount(0),
     m_doApplySettings(true),
     m_forceSettings(true),
     m_deviceGains(nullptr),
@@ -71,12 +74,15 @@ RemoteTCPInputGui::RemoteTCPInputGui(DeviceUISet *deviceUISet, QWidget* parent) 
     ui->deltaFrequency->setColorMapper(ColorMapper(ColorMapper::GrayGold));
     ui->deltaFrequency->setValueRange(false, 7, -9999999, 9999999);
 
+    ui->channelPowerMeter->setColorTheme(LevelMeterSignalDB::ColorGreenAndBlue);
+
     connect(this, SIGNAL(customContextMenuRequested(const QPoint &)), this, SLOT(openDeviceSettingsDialog(const QPoint &)));
 
     displaySettings();
 
-    connect(&m_statusTimer, SIGNAL(timeout()), this, SLOT(updateStatus()));
-    m_statusTimer.start(500);
+    connect(deviceUISet->m_deviceAPI, &DeviceAPI::stateChanged, this, &RemoteTCPInputGui::updateStatus);
+    updateStatus();
+
     connect(&m_updateTimer, SIGNAL(timeout()), this, SLOT(updateHardware()));
 
     m_sampleSource = (RemoteTCPInput*) m_deviceUISet->m_deviceAPI->getSampleSource();
@@ -89,11 +95,12 @@ RemoteTCPInputGui::RemoteTCPInputGui(DeviceUISet *deviceUISet, QWidget* parent) 
     makeUIConnections();
     DialPopup::addPopupsToChildDials(this);
     m_resizer.enableChildMouseTracking();
+
+    connect(&MainCore::instance()->getMasterTimer(), SIGNAL(timeout()), this, SLOT(tick()));
 }
 
 RemoteTCPInputGui::~RemoteTCPInputGui()
 {
-    m_statusTimer.stop();
     m_updateTimer.stop();
     delete ui;
 }
@@ -110,6 +117,7 @@ void RemoteTCPInputGui::destroy()
 
 void RemoteTCPInputGui::resetToDefaults()
 {
+    qDebug() << "RemoteTCPInputGui::resetToDefaults";
     m_settings.resetToDefaults();
     displaySettings();
     m_forceSettings = true;
@@ -143,7 +151,7 @@ bool RemoteTCPInputGui::handleMessage(const Message& message)
 {
     if (RemoteTCPInput::MsgConfigureRemoteTCPInput::match(message))
     {
-        const RemoteTCPInput::MsgConfigureRemoteTCPInput& cfg = (RemoteTCPInput::MsgConfigureRemoteTCPInput&) message;
+        const RemoteTCPInput::MsgConfigureRemoteTCPInput& cfg = (const RemoteTCPInput::MsgConfigureRemoteTCPInput&) message;
 
         if (cfg.getForce()) {
             m_settings = cfg.getSettings();
@@ -158,7 +166,7 @@ bool RemoteTCPInputGui::handleMessage(const Message& message)
     }
     else if (RemoteTCPInput::MsgStartStop::match(message))
     {
-        RemoteTCPInput::MsgStartStop& notif = (RemoteTCPInput::MsgStartStop&) message;
+        const RemoteTCPInput::MsgStartStop& notif = (const RemoteTCPInput::MsgStartStop&) message;
         m_connectionError = false;
         blockApplySettings(true);
         ui->startStop->setChecked(notif.getStartStop());
@@ -167,7 +175,7 @@ bool RemoteTCPInputGui::handleMessage(const Message& message)
     }
     else if (RemoteTCPInput::MsgReportTCPBuffer::match(message))
     {
-        const RemoteTCPInput::MsgReportTCPBuffer& report = (RemoteTCPInput::MsgReportTCPBuffer&) message;
+        const RemoteTCPInput::MsgReportTCPBuffer& report = (const RemoteTCPInput::MsgReportTCPBuffer&) message;
         ui->inGauge->setMaximum((int)report.getInSize());
         ui->inGauge->setValue((int)report.getInBytesAvailable());
         ui->inBufferLenSecsText->setText(QString("%1s").arg(report.getInSeconds(), 0, 'f', 2));
@@ -178,7 +186,7 @@ bool RemoteTCPInputGui::handleMessage(const Message& message)
     }
     else if (RemoteTCPInputTCPHandler::MsgReportRemoteDevice::match(message))
     {
-        const RemoteTCPInputTCPHandler::MsgReportRemoteDevice& report = (RemoteTCPInputTCPHandler::MsgReportRemoteDevice&) message;
+        const RemoteTCPInputTCPHandler::MsgReportRemoteDevice& report = (const RemoteTCPInputTCPHandler::MsgReportRemoteDevice&) message;
         QHash<RemoteTCPProtocol::Device, QString> devices = {
              {RemoteTCPProtocol::RTLSDR_E4000, "RTLSDR E4000"},
              {RemoteTCPProtocol::RTLSDR_FC0012, "RTLSDR FC0012"},
@@ -224,24 +232,27 @@ bool RemoteTCPInputGui::handleMessage(const Message& message)
         ui->detectedProtocol->setText(QString("Protocol: %1").arg(report.getProtocol()));
 
         // Update GUI so we only show widgets available for the protocol in use
-        bool sdra = report.getProtocol() == "SDRA";
-        bool spyServer = report.getProtocol() == "Spy Server";
-        if (spyServer) {
+        m_sdra = report.getProtocol() == "SDRA";
+        m_spyServer = report.getProtocol() == "Spy Server";
+        m_remoteControl = report.getRemoteControl();
+        m_iqOnly = report.getIQOnly();
+
+        if (m_spyServer) {
             m_spyServerGains.m_gains[0].m_max = report.getMaxGain();
         }
-        if ((sdra || spyServer) && (ui->sampleBits->count() < 4))
+        if ((m_sdra || m_spyServer) && (ui->sampleBits->count() < 4))
         {
             ui->sampleBits->addItem("16");
             ui->sampleBits->addItem("24");
             ui->sampleBits->addItem("32");
         }
-        else if (!(sdra || spyServer) && (ui->sampleBits->count() != 1))
+        else if (!(m_sdra || m_spyServer) && (ui->sampleBits->count() != 1))
         {
             while (ui->sampleBits->count() > 1) {
                 ui->sampleBits->removeItem(ui->sampleBits->count() - 1);
             }
         }
-        if ((sdra || spyServer) && (ui->decim->count() != 7))
+        if ((m_sdra || m_spyServer) && (ui->decim->count() != 7))
         {
             ui->decim->addItem("2");
             ui->decim->addItem("4");
@@ -250,26 +261,19 @@ bool RemoteTCPInputGui::handleMessage(const Message& message)
             ui->decim->addItem("32");
             ui->decim->addItem("64");
         }
-        else if (!(sdra || spyServer) && (ui->decim->count() != 1))
+        else if (!(m_sdra || m_spyServer) && (ui->decim->count() != 1))
         {
             while (ui->decim->count() > 1) {
                 ui->decim->removeItem(ui->decim->count() - 1);
             }
         }
-        if (!sdra)
+        if (!m_sdra)
         {
             ui->deltaFrequency->setValue(0);
             ui->channelGain->setValue(0);
             ui->decimation->setChecked(true);
         }
-        ui->deltaFrequencyLabel->setEnabled(sdra);
-        ui->deltaFrequency->setEnabled(sdra);
-        ui->deltaUnits->setEnabled(sdra);
-        ui->channelGainLabel->setEnabled(sdra);
-        ui->channelGain->setEnabled(sdra);
-        ui->channelGainText->setEnabled(sdra);
-        ui->decimation->setEnabled(sdra);
-        if (sdra) {
+        if (m_sdra) {
             ui->centerFrequency->setValueRange(9, 0, 999999999); // Should add transverter control to protocol in the future
         } else {
             ui->centerFrequency->setValueRange(7, 0, 9999999);
@@ -291,42 +295,122 @@ bool RemoteTCPInputGui::handleMessage(const Message& message)
         {
             ui->devSampleRate->setValueRange(8, 0, 99999999);
         }
-        ui->devSampleRateLabel->setEnabled(!spyServer);
-        ui->devSampleRate->setEnabled(!spyServer);
-        ui->devSampleRateUnits->setEnabled(!spyServer);
-        ui->agc->setEnabled(!spyServer);
-        ui->rfBWLabel->setEnabled(!spyServer);
-        ui->rfBW->setEnabled(!spyServer);
-        ui->rfBWUnits->setEnabled(!spyServer);
-        ui->dcOffset->setEnabled(!spyServer);
-        ui->iqImbalance->setEnabled(!spyServer);
-        ui->ppm->setEnabled(!spyServer);
-        ui->ppmLabel->setEnabled(!spyServer);
-        ui->ppmText->setEnabled(!spyServer);
-
+        displayEnabled();
         displayGains();
         return true;
     }
     else if (RemoteTCPInputTCPHandler::MsgReportConnection::match(message))
     {
-        const RemoteTCPInputTCPHandler::MsgReportConnection& report = (RemoteTCPInputTCPHandler::MsgReportConnection&) message;
+        const RemoteTCPInputTCPHandler::MsgReportConnection& report = (const RemoteTCPInputTCPHandler::MsgReportConnection&) message;
         qDebug() << "RemoteTCPInputGui::handleMessage: MsgReportConnection connected: " << report.getConnected();
-        if (report.getConnected())
-        {
-             m_connectionError = false;
-             ui->startStop->setStyleSheet("QToolButton { background-color : green; }");
-        }
-        else
-        {
-             m_connectionError = true;
-             ui->startStop->setStyleSheet("QToolButton { background-color : red; }");
-        }
+        m_connectionError = !report.getConnected();
+        updateStatus();
+        return true;
+    }
+    else if (RemoteTCPInput::MsgSendMessage::match(message))
+    {
+        const RemoteTCPInput::MsgSendMessage& msg = (const RemoteTCPInput::MsgSendMessage&) message;
+
+        ui->messages->addItem(QString("%1> %2").arg(msg.getCallsign()).arg(msg.getText()));
+        ui->messages->scrollToBottom();
+
+        return true;
+    }
+    else if (RemoteTCPInput::MsgReportPosition::match(message))
+    {
+        // Could display in future
+        return true;
+    }
+    else if (RemoteTCPInput::MsgReportDirection::match(message))
+    {
+        // Could display in future
         return true;
     }
     else
     {
         return false;
     }
+}
+
+void RemoteTCPInputGui::displayEnabled()
+{
+    int state = m_deviceUISet->m_deviceAPI->state();
+    bool remoteControl;
+    bool enableMessages;
+    bool enableSquelchEnable;
+    bool enableSquelch;
+    bool sdra;
+
+    if (state == DeviceAPI::StRunning)
+    {
+        sdra = m_sdra;
+        remoteControl = m_remoteControl;
+        enableMessages = !m_iqOnly;
+        enableSquelchEnable = !m_iqOnly;
+        enableSquelch = !m_iqOnly && m_settings.m_squelchEnabled;
+    }
+    else
+    {
+        sdra = m_settings.m_protocol == "SDRangel";
+        remoteControl = m_settings.m_overrideRemoteSettings;
+        enableMessages = false;
+        enableSquelchEnable = m_settings.m_overrideRemoteSettings;
+        enableSquelch = m_settings.m_overrideRemoteSettings && m_settings.m_squelchEnabled;
+    }
+
+    ui->deltaFrequencyLabel->setEnabled(sdra && remoteControl);
+    ui->deltaFrequency->setEnabled(sdra && remoteControl);
+    ui->deltaUnits->setEnabled(sdra && remoteControl);
+    ui->channelGainLabel->setEnabled(sdra && remoteControl);
+    ui->channelGain->setEnabled(sdra && remoteControl);
+    ui->channelGainText->setEnabled(sdra && remoteControl);
+    ui->decimation->setEnabled(sdra && remoteControl);
+
+    ui->channelSampleRate->setEnabled(m_settings.m_channelDecimation && sdra && remoteControl);
+    ui->channelSampleRateLabel->setEnabled(m_settings.m_channelDecimation && sdra && remoteControl);
+    ui->channelSampleRateUnit->setEnabled(m_settings.m_channelDecimation && sdra && remoteControl);
+
+    ui->devSampleRateLabel->setEnabled(!m_spyServer && remoteControl);
+    ui->devSampleRate->setEnabled(!m_spyServer && remoteControl);
+    ui->devSampleRateUnits->setEnabled(!m_spyServer && remoteControl);
+    ui->agc->setEnabled(!m_spyServer && remoteControl);
+    ui->rfBWLabel->setEnabled(!m_spyServer && remoteControl);
+    ui->rfBW->setEnabled(!m_spyServer && remoteControl);
+    ui->rfBWUnits->setEnabled(!m_spyServer && remoteControl);
+    ui->dcOffset->setEnabled(!m_spyServer && remoteControl);
+    ui->iqImbalance->setEnabled(!m_spyServer && remoteControl);
+    ui->ppm->setEnabled(!m_spyServer && remoteControl);
+    ui->ppmLabel->setEnabled(!m_spyServer && remoteControl);
+    ui->ppmText->setEnabled(!m_spyServer && remoteControl);
+
+    ui->centerFrequency->setEnabled(remoteControl);
+    ui->biasTee->setEnabled(remoteControl);
+    ui->directSampling->setEnabled(remoteControl);
+    ui->decimLabel->setEnabled(remoteControl);
+    ui->decim->setEnabled(remoteControl);
+    ui->gain1Label->setEnabled(remoteControl);
+    ui->gain1->setEnabled(remoteControl);
+    ui->gain1Text->setEnabled(remoteControl);
+    ui->gain2Label->setEnabled(remoteControl);
+    ui->gain2->setEnabled(remoteControl);
+    ui->gain2Text->setEnabled(remoteControl);
+    ui->gain3Label->setEnabled(remoteControl);
+    ui->gain3->setEnabled(remoteControl);
+    ui->gain3Text->setEnabled(remoteControl);
+    ui->sampleBitsLabel->setEnabled(remoteControl);
+    ui->sampleBits->setEnabled(remoteControl);
+    ui->sampleBitsUnits->setEnabled(remoteControl);
+
+    ui->squelchEnabled->setEnabled(enableSquelchEnable);
+    ui->squelch->setEnabled(enableSquelch);
+    ui->squelchText->setEnabled(enableSquelch);
+    ui->squelchUnits->setEnabled(enableSquelch);
+    ui->squelchGate->setEnabled(enableSquelch);
+
+    ui->sendMessage->setEnabled(enableMessages);
+    ui->txAddress->setEnabled(enableMessages);
+    ui->txMessage->setEnabled(enableMessages);
+    ui->messages->setEnabled(enableMessages);
 }
 
 void RemoteTCPInputGui::handleInputMessages()
@@ -386,12 +470,14 @@ void RemoteTCPInputGui::displaySettings()
     ui->channelSampleRate->setValue(m_settings.m_channelSampleRate);
     ui->deviceRateText->setText(tr("%1k").arg(m_settings.m_channelSampleRate / 1000.0));
     ui->decimation->setChecked(!m_settings.m_channelDecimation);
-    ui->channelSampleRate->setEnabled(m_settings.m_channelDecimation);
-    ui->channelSampleRateLabel->setEnabled(m_settings.m_channelDecimation);
-    ui->channelSampleRateUnit->setEnabled(m_settings.m_channelDecimation);
     ui->sampleBits->setCurrentText(QString::number(m_settings.m_sampleBits));
 
-    ui->dataPort->setText(tr("%1").arg(m_settings.m_dataPort));
+    ui->squelchEnabled->setChecked(m_settings.m_squelchEnabled);
+    ui->squelch->setValue(m_settings.m_squelch);
+    ui->squelchText->setText(QString::number(m_settings.m_squelch));
+    ui->squelchGate->setValue(m_settings.m_squelchGate);
+
+    ui->dataPort->setValue(m_settings.m_dataPort);
     ui->dataAddress->blockSignals(true);
     ui->dataAddress->clear();
     for (const auto& address : m_settings.m_addressList) {
@@ -412,6 +498,11 @@ void RemoteTCPInputGui::displaySettings()
     }
 
     displayGains();
+    displayReplayLength();
+    displayReplayOffset();
+    displayReplayStep();
+    ui->replayLoop->setChecked(m_settings.m_replayLoop);
+    displayEnabled();
     blockApplySettings(false);
 }
 
@@ -517,6 +608,7 @@ const QHash<RemoteTCPProtocol::Device, const RemoteTCPInputGui::DeviceGains *> R
 {
     {RemoteTCPProtocol::RTLSDR_E4000, &m_rtlSDRe4kGains},
     {RemoteTCPProtocol::RTLSDR_R820T, &m_rtlSDRR820Gains},
+    {RemoteTCPProtocol::RTLSDR_R828D, &m_rtlSDRR820Gains},
     {RemoteTCPProtocol::AIRSPY, &m_airspyGains},
     {RemoteTCPProtocol::AIRSPY_HF, &m_airspyHFGains},
     {RemoteTCPProtocol::BLADE_RF1, &m_baldeRF1Gains},
@@ -609,7 +701,12 @@ void RemoteTCPInputGui::on_startStop_toggled(bool checked)
 {
     if (m_doApplySettings)
     {
-        m_connectionError = false;
+        if (m_connectionError)
+        {
+            // Clear previous error
+            m_connectionError = false;
+            updateStatus();
+        }
         RemoteTCPInput::MsgStartStop *message = RemoteTCPInput::MsgStartStop::create(checked);
         m_sampleSource->getInputMessageQueue()->push(message);
     }
@@ -789,16 +886,43 @@ void RemoteTCPInputGui::on_sampleBits_currentIndexChanged(int index)
     sendSettings();
 }
 
+void RemoteTCPInputGui::on_squelchEnabled_toggled(bool checked)
+{
+    m_settings.m_squelchEnabled = checked;
+    m_settingsKeys.append("squelchEnabled");
+    displayEnabled();
+    sendSettings();
+}
+
+void RemoteTCPInputGui::on_squelch_valueChanged(int value)
+{
+    m_settings.m_squelch = value;
+    ui->squelchText->setText(QString::number(m_settings.m_squelch));
+    m_settingsKeys.append("squelch");
+    sendSettings();
+}
+
+void RemoteTCPInputGui::on_squelchGate_valueChanged(double value)
+{
+    m_settings.m_squelchGate = value;
+    m_settingsKeys.append("squelchGate");
+    sendSettings();
+}
+
 void RemoteTCPInputGui::on_dataAddress_editingFinished()
 {
-    m_settings.m_dataAddress = ui->dataAddress->currentText();
-    m_settingsKeys.append("dataAddress");
-    m_settings.m_addressList.clear();
-    for (int i = 0; i < ui->dataAddress->count(); i++) {
-        m_settings.m_addressList.append(ui->dataAddress->itemText(i));
+    QString text = ui->dataAddress->currentText();
+    if (text != m_settings.m_dataAddress)
+    {
+        m_settings.m_dataAddress = text;
+        m_settingsKeys.append("dataAddress");
+        m_settings.m_addressList.clear();
+        for (int i = 0; i < ui->dataAddress->count(); i++) {
+            m_settings.m_addressList.append(ui->dataAddress->itemText(i));
+        }
+        m_settingsKeys.append("addressList");
+        sendSettings();
     }
-    m_settingsKeys.append("addressList");
-    sendSettings();
 }
 
 void RemoteTCPInputGui::on_dataAddress_currentIndexChanged(int index)
@@ -810,17 +934,9 @@ void RemoteTCPInputGui::on_dataAddress_currentIndexChanged(int index)
     sendSettings();
 }
 
-void RemoteTCPInputGui::on_dataPort_editingFinished()
+void RemoteTCPInputGui::on_dataPort_valueChanged(int value)
 {
-    bool ok;
-    quint16 udpPort = ui->dataPort->text().toInt(&ok);
-
-    if ((!ok) || (udpPort < 1024)) {
-        udpPort = 9998;
-    }
-
-    m_settings.m_dataPort = udpPort;
-    ui->dataPort->setText(tr("%1").arg(m_settings.m_dataPort));
+    m_settings.m_dataPort = value;
     m_settingsKeys.append("dataPort");
 
     sendSettings();
@@ -831,6 +947,7 @@ void RemoteTCPInputGui::on_overrideRemoteSettings_toggled(bool checked)
     m_settings.m_overrideRemoteSettings = checked;
     m_settingsKeys.append("overrideRemoteSettings");
     sendSettings();
+    displayEnabled();
 }
 
 void RemoteTCPInputGui::on_preFill_valueChanged(int value)
@@ -867,10 +984,14 @@ void RemoteTCPInputGui::updateHardware()
 
 void RemoteTCPInputGui::updateStatus()
 {
-    int state = m_deviceUISet->m_deviceAPI->state();
-
-    if (!m_connectionError && (m_lastEngineState != state))
+    if (m_connectionError)
     {
+        ui->startStop->setStyleSheet("QToolButton { background-color : red; }");
+    }
+    else
+    {
+        int state = m_deviceUISet->m_deviceAPI->state();
+
         switch(state)
         {
             case DeviceAPI::StNotStarted:
@@ -889,9 +1010,28 @@ void RemoteTCPInputGui::updateStatus()
             default:
                 break;
         }
-
-        m_lastEngineState = state;
     }
+    displayEnabled();
+}
+
+void RemoteTCPInputGui::tick()
+{
+    double magsqAvg, magsqPeak;
+    int nbMagsqSamples;
+    m_sampleSource->getMagSqLevels(magsqAvg, magsqPeak, nbMagsqSamples);
+    double powDbAvg = CalcDb::dbPower(magsqAvg);
+    double powDbPeak = CalcDb::dbPower(magsqPeak);
+
+    ui->channelPowerMeter->levelChanged(
+            (100.0f + powDbAvg) / 100.0f,
+            (100.0f + powDbPeak) / 100.0f,
+            nbMagsqSamples);
+
+    if (m_tickCount % 4 == 0) {
+        ui->channelPower->setText(tr("%1").arg(powDbAvg, 0, 'f', 1));
+    }
+
+	m_tickCount++;
 }
 
 void RemoteTCPInputGui::openDeviceSettingsDialog(const QPoint& p)
@@ -899,6 +1039,9 @@ void RemoteTCPInputGui::openDeviceSettingsDialog(const QPoint& p)
     if (m_contextMenuType == ContextMenuDeviceSettings)
     {
         BasicDeviceSettingsDialog dialog(this);
+        dialog.setReplayBytesPerSecond(m_settings.m_devSampleRate * 2 * sizeof(FixReal));
+        dialog.setReplayLength(m_settings.m_replayLength);
+        dialog.setReplayStep(m_settings.m_replayStep);
         dialog.setUseReverseAPI(m_settings.m_useReverseAPI);
         dialog.setReverseAPIAddress(m_settings.m_reverseAPIAddress);
         dialog.setReverseAPIPort(m_settings.m_reverseAPIPort);
@@ -908,6 +1051,11 @@ void RemoteTCPInputGui::openDeviceSettingsDialog(const QPoint& p)
         new DialogPositioner(&dialog, false);
         dialog.exec();
 
+        m_settings.m_replayLength = dialog.getReplayLength();
+        m_settings.m_replayStep = dialog.getReplayStep();
+        displayReplayLength();
+        displayReplayOffset();
+        displayReplayStep();
         m_settings.m_useReverseAPI = dialog.useReverseAPI();
         m_settings.m_reverseAPIAddress = dialog.getReverseAPIAddress();
         m_settings.m_reverseAPIPort = dialog.getReverseAPIPort();
@@ -917,6 +1065,110 @@ void RemoteTCPInputGui::openDeviceSettingsDialog(const QPoint& p)
     }
 
     resetContextMenuType();
+}
+
+void RemoteTCPInputGui::displayReplayLength()
+{
+    bool replayEnabled = m_settings.m_replayLength > 0.0f;
+    if (!replayEnabled) {
+        ui->replayOffset->setMaximum(0);
+    } else {
+        ui->replayOffset->setMaximum(m_settings.m_replayLength * 10 - 1);
+    }
+    ui->replayLabel->setEnabled(replayEnabled);
+    ui->replayOffset->setEnabled(replayEnabled);
+    ui->replayOffsetText->setEnabled(replayEnabled);
+    ui->replaySave->setEnabled(replayEnabled);
+}
+
+void RemoteTCPInputGui::displayReplayOffset()
+{
+    bool replayEnabled = m_settings.m_replayLength > 0.0f;
+    ui->replayOffset->setValue(m_settings.m_replayOffset * 10);
+    ui->replayOffsetText->setText(QString("%1s").arg(m_settings.m_replayOffset, 0, 'f', 1));
+    ui->replayNow->setEnabled(replayEnabled && (m_settings.m_replayOffset > 0.0f));
+    ui->replayPlus->setEnabled(replayEnabled && (std::round(m_settings.m_replayOffset * 10) < ui->replayOffset->maximum()));
+    ui->replayMinus->setEnabled(replayEnabled && (m_settings.m_replayOffset > 0.0f));
+}
+
+void RemoteTCPInputGui::displayReplayStep()
+{
+    QString step;
+    float intpart;
+    float frac = modf(m_settings.m_replayStep, &intpart);
+    if (frac == 0.0f) {
+        step = QString::number((int)intpart);
+    } else {
+        step = QString::number(m_settings.m_replayStep, 'f', 1);
+    }
+    ui->replayPlus->setText(QString("+%1s").arg(step));
+    ui->replayPlus->setToolTip(QString("Add %1 seconds to time delay").arg(step));
+    ui->replayMinus->setText(QString("-%1s").arg(step));
+    ui->replayMinus->setToolTip(QString("Remove %1 seconds from time delay").arg(step));
+}
+
+void RemoteTCPInputGui::on_replayOffset_valueChanged(int value)
+{
+    m_settings.m_replayOffset = value / 10.0f;
+    displayReplayOffset();
+    m_settingsKeys.append("replayOffset");
+    sendSettings();
+}
+
+void RemoteTCPInputGui::on_replayNow_clicked()
+{
+    ui->replayOffset->setValue(0);
+}
+
+void RemoteTCPInputGui::on_replayPlus_clicked()
+{
+    ui->replayOffset->setValue(ui->replayOffset->value() + m_settings.m_replayStep * 10);
+}
+
+void RemoteTCPInputGui::on_replayMinus_clicked()
+{
+    ui->replayOffset->setValue(ui->replayOffset->value() - m_settings.m_replayStep * 10);
+}
+
+void RemoteTCPInputGui::on_replaySave_clicked()
+{
+    QFileDialog fileDialog(nullptr, "Select file to save IQ data to", "", "*.wav");
+    fileDialog.setAcceptMode(QFileDialog::AcceptSave);
+    if (fileDialog.exec())
+    {
+        QStringList fileNames = fileDialog.selectedFiles();
+        if (fileNames.size() > 0)
+        {
+            RemoteTCPInput::MsgSaveReplay *message = RemoteTCPInput ::MsgSaveReplay::create(fileNames[0]);
+            m_sampleSource->getInputMessageQueue()->push(message);
+        }
+    }
+}
+
+void RemoteTCPInputGui::on_replayLoop_toggled(bool checked)
+{
+    m_settings.m_replayLoop = checked;
+    m_settingsKeys.append("replayLoop");
+    sendSettings();
+}
+
+void RemoteTCPInputGui::on_sendMessage_clicked()
+{
+    QString message = ui->txMessage->text().trimmed();
+    if (!message.isEmpty())
+    {
+        ui->messages->addItem(QString("< %1").arg(message));
+        ui->messages->scrollToBottom();
+        bool broadcast = ui->txAddress->currentText() == "All";
+        QString callsign = MainCore::instance()->getSettings().getStationName();
+        m_sampleSource->getInputMessageQueue()->push(RemoteTCPInput::MsgSendMessage::create(callsign, message, broadcast));
+    }
+}
+
+void RemoteTCPInputGui::on_txMessage_returnPressed()
+{
+    on_sendMessage_clicked();
+    ui->txMessage->selectAll();
 }
 
 void RemoteTCPInputGui::makeUIConnections()
@@ -940,10 +1192,21 @@ void RemoteTCPInputGui::makeUIConnections()
     QObject::connect(ui->channelSampleRate, &ValueDial::changed, this, &RemoteTCPInputGui::on_channelSampleRate_changed);
     QObject::connect(ui->decimation, &ButtonSwitch::toggled, this, &RemoteTCPInputGui::on_decimation_toggled);
     QObject::connect(ui->sampleBits, QOverload<int>::of(&QComboBox::currentIndexChanged), this, &RemoteTCPInputGui::on_sampleBits_currentIndexChanged);
+    QObject::connect(ui->squelchEnabled, &ButtonSwitch::toggled, this, &RemoteTCPInputGui::on_squelchEnabled_toggled);
+    QObject::connect(ui->squelch, &QDial::valueChanged, this, &RemoteTCPInputGui::on_squelch_valueChanged);
+    QObject::connect(ui->squelchGate, &PeriodDial::valueChanged, this, &RemoteTCPInputGui::on_squelchGate_valueChanged);
     QObject::connect(ui->dataAddress->lineEdit(), &QLineEdit::editingFinished, this, &RemoteTCPInputGui::on_dataAddress_editingFinished);
     QObject::connect(ui->dataAddress, QOverload<int>::of(&QComboBox::currentIndexChanged), this, &RemoteTCPInputGui::on_dataAddress_currentIndexChanged);
-    QObject::connect(ui->dataPort, &QLineEdit::editingFinished, this, &RemoteTCPInputGui::on_dataPort_editingFinished);
+    QObject::connect(ui->dataPort, QOverload<int>::of(&QSpinBox::valueChanged), this, &RemoteTCPInputGui::on_dataPort_valueChanged);
     QObject::connect(ui->overrideRemoteSettings, &ButtonSwitch::toggled, this, &RemoteTCPInputGui::on_overrideRemoteSettings_toggled);
     QObject::connect(ui->preFill, &QDial::valueChanged, this, &RemoteTCPInputGui::on_preFill_valueChanged);
     QObject::connect(ui->protocol, QOverload<int>::of(&QComboBox::currentIndexChanged), this, &RemoteTCPInputGui::on_protocol_currentIndexChanged);
+    QObject::connect(ui->replayOffset, &QSlider::valueChanged, this, &RemoteTCPInputGui::on_replayOffset_valueChanged);
+    QObject::connect(ui->replayNow, &QToolButton::clicked, this, &RemoteTCPInputGui::on_replayNow_clicked);
+    QObject::connect(ui->replayPlus, &QToolButton::clicked, this, &RemoteTCPInputGui::on_replayPlus_clicked);
+    QObject::connect(ui->replayMinus, &QToolButton::clicked, this, &RemoteTCPInputGui::on_replayMinus_clicked);
+    QObject::connect(ui->replaySave, &QToolButton::clicked, this, &RemoteTCPInputGui::on_replaySave_clicked);
+    QObject::connect(ui->replayLoop, &ButtonSwitch::toggled, this, &RemoteTCPInputGui::on_replayLoop_toggled);
+    QObject::connect(ui->sendMessage, &QToolButton::clicked, this, &RemoteTCPInputGui::on_sendMessage_clicked);
+    QObject::connect(ui->txMessage, &QLineEdit::returnPressed, this, &RemoteTCPInputGui::on_txMessage_returnPressed);
 }

@@ -47,10 +47,12 @@
 #include "util/nasaglobalimagery.h"
 #include "util/kiwisdrlist.h"
 #include "util/spyserverlist.h"
+#include "util/sdrangelserverlist.h"
 #include "settings/rollupstate.h"
 #include "availablechannelorfeaturehandler.h"
 
 #include "SWGMapItem.h"
+#include "SWGDeviceSettings.h"
 
 #include "mapsettings.h"
 #include "mapbeacondialog.h"
@@ -169,6 +171,7 @@ public:
     void addIBPBeacons();
     QList<RadioTimeTransmitter> getRadioTimeTransmitters() { return m_radioTimeTransmitters; }
     void addRadioTimeTransmitters();
+    void addNAT();
     void addRadar();
     void addIonosonde();
     void addBroadcast();
@@ -182,6 +185,7 @@ public:
     void addVLF();
     void addKiwiSDR();
     void addSpyServer();
+    void addSDRangelServer();
     void find(const QString& target);
     void track3D(const QString& target);
     Q_INVOKABLE void supportedMapsChanged();
@@ -231,6 +235,7 @@ private:
     QGeoCoordinate m_lastFullUpdatePosition;
     KiwiSDRList m_kiwiSDRList;
     SpyServerList m_spyServerList;
+    SDRangelServerList m_sdrangelServerList;
 
     CesiumInterface *m_cesium;
     WebServer *m_webServer;
@@ -256,6 +261,10 @@ private:
     QSvgWidget *m_legendWidget;
     QTableWidget *m_overviewWidget;
     QTextEdit *m_descriptionWidget;
+
+    // Settings for opening a device
+    QString m_remoteDeviceAddress;
+    quint16 m_remoteDevicePort;
 
     explicit MapGUI(PluginAPI* pluginAPI, FeatureUISet *featureUISet, Feature *feature, QWidget* parent = nullptr);
     virtual ~MapGUI();
@@ -284,11 +293,13 @@ private:
     void displayNASAMetaData();
     void openKiwiSDR(const QString& url);
     void openSpyServer(const QString& url);
+    void openSDRangelServer(const QString& url, bool wss);
     QString formatFrequency(qint64 frequency) const;
     void updateGIRO(const QDateTime& mapDateTime);
 
     static QString getDataDir();
     static const QList<RadioTimeTransmitter> m_radioTimeTransmitters;
+    static const QList<RadioTimeTransmitter> m_natTransmitters;
     static const QList<RadioTimeTransmitter> m_vlfTransmitters;
 
     enum NASARow {
@@ -360,8 +371,8 @@ private slots:
     void waypointsUpdated();
     void kiwiSDRUpdated(const QList<KiwiSDRList::KiwiSDR>& sdrs);
     void spyServerUpdated(const QList<SpyServerList::SpyServer>& sdrs);
+    void sdrangelServerUpdated(const QList<SDRangelServerList::SDRangelServer>& sdrs);
     void linkClicked(const QString& url);
-
 };
 
 #endif // INCLUDE_FEATURE_MAPGUI_H_
