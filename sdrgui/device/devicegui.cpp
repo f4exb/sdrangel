@@ -283,7 +283,7 @@ void DeviceGUI::closeEvent(QCloseEvent *event)
 {
     qDebug("DeviceGUI::closeEvent");
     emit closing();
-    event->accept();
+    event->ignore(); // Don't automatically delete this object -  MainWindow::RemoveDeviceSetFSM::removeUI will do it
 }
 
 void DeviceGUI::mousePressEvent(QMouseEvent* event)
