@@ -343,6 +343,9 @@ target_link_libraries(sdrgui
   logging
   )
 if (Qt6_FOUND)
+  target_link_libraries(sdrgui
+    Qt6::StateMachine
+  )
   target_link_libraries(sdrbase
     Qt::OpenGLWidgets
   )

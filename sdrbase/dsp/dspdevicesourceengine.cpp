@@ -52,7 +52,7 @@ DSPDeviceSourceEngine::DSPDeviceSourceEngine(uint uid, QObject* parent) :
 
 DSPDeviceSourceEngine::~DSPDeviceSourceEngine()
 {
-    qDebug("DSPDeviceSourceEngine::~DSPDeviceSourceEngine");
+	qDebug("DSPDeviceSourceEngine::~DSPDeviceSourceEngine");
 }
 
 void DSPDeviceSourceEngine::setState(State state)
@@ -601,12 +601,15 @@ bool DSPDeviceSourceEngine::handleMessage(const Message& message)
 	else if (DSPAcquisitionStop::match(message))
 	{
 		setState(gotoIdle());
+		emit acquistionStopped();
         return true;
 	}
 	else if (DSPSetSource::match(message))
     {
         auto cmd = (const DSPSetSource&) message;
 		handleSetSource(cmd.getSampleSource());
+		emit sampleSet();
+		return true;
 	}
 	else if (DSPAddBasebandSampleSink::match(message))
 	{
@@ -620,6 +623,7 @@ bool DSPDeviceSourceEngine::handleMessage(const Message& message)
         if(m_state == State::StRunning) {
             sink->start();
         }
+		return true;
 	}
 	else if (DSPRemoveBasebandSampleSink::match(message))
 	{
@@ -631,6 +635,8 @@ bool DSPDeviceSourceEngine::handleMessage(const Message& message)
 		}
 
 		m_basebandSampleSinks.remove(sink);
+		emit sinkRemoved();
+		return true;
 	}
 
     return false;

@@ -142,6 +142,10 @@ private slots:
 
 signals:
 	void stateChanged();
+
+	void acquistionStopped();
+	void sampleSet();
+	void sinkRemoved();
 };
 
 #endif // INCLUDE_DSPDEVICEENGINE_H
