@@ -119,12 +119,13 @@ private slots:
     void stackSubWindows();
     void autoStackSubWindows(const QPoint&);
     void tabSubWindows();
-    void layoutSubWindows();
     void startStopClicked(bool checked = false);
     void addFeatureEmitted(int featureIndex);
     void toggleFloating();
     void deviceStateChanged(int, DeviceAPI *deviceAPI);
     void subWindowActivated(QMdiSubWindow *window);
+public slots:
+    void layoutSubWindows();
 
 signals:
     void addRxDevice(Workspace *inWorkspace, int deviceIndex);

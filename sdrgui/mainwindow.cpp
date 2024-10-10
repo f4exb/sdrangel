@@ -137,12 +137,6 @@ MainWindow::MainWindow(qtwebapp::LoggerWithFile *logger, const MainParser& parse
 #endif
     m_settingsSaved(false)
 {
-#if defined(ANDROID) || defined(__EMSCRIPTEN__)
-    bool showWelcome = true;
-#else
-    bool showWelcome = false;
-#endif
-
     QAccessible::installFactory(AccessibleValueDial::factory);
     QAccessible::installFactory(AccessibleValueDialZ::factory);
 
@@ -898,7 +892,7 @@ void RemoveAllWorkspacesFSM::removeWorkspaces()
 }
 
 LoadConfigurationFSM::LoadConfigurationFSM(MainWindow *mainWindow, const Configuration *configuration, QProgressDialog *waitBox, QObject *parent) :
-    MainWindowFSM(mainWindow),
+    MainWindowFSM(mainWindow, parent),
     m_configuration(configuration),
     m_waitBox(waitBox)
 {
@@ -1091,7 +1085,7 @@ void LoadConfigurationFSM::loadDeviceSetSettings()
     int deviceSetIndex = 0;
     for (const auto& deviceSetPreset : deviceSetPresets)
     {
-        if (m_mainWindow->m_deviceUIs.size() > deviceSetIndex)
+        if (((int) m_mainWindow->m_deviceUIs.size()) > deviceSetIndex)
         {
             MDIUtils::restoreMDIGeometry(m_mainWindow->m_deviceUIs[deviceSetIndex]->m_deviceGUI, deviceSetPreset.getDeviceGeometry());
             MDIUtils::restoreMDIGeometry(m_mainWindow->m_deviceUIs[deviceSetIndex]->m_mainSpectrumGUI, deviceSetPreset.getSpectrumGeometry());
@@ -1170,11 +1164,18 @@ InitFSM::InitFSM(MainWindow *mainWindow, SDRangelSplash *splash, bool loadDefaul
     // Create FSM
     createStates(2);
 
+    if (loadDefault)
+    {
     m_loadConfigurationFSM = new LoadConfigurationFSM(m_mainWindow, m_mainWindow->m_mainCore->getMutableSettings().getWorkingConfiguration(), nullptr, this);
 
     m_states[0]->addTransition(m_loadConfigurationFSM, &LoadConfigurationFSM::finished, m_finalState);
 
     connect(m_states[0], &QState::entered, this, &InitFSM::loadDefaultConfiguration);
+    }
+    else
+    {
+        m_states[0]->addTransition(m_finalState);
+    }
     connect(m_finalState, &QState::entered, this, &InitFSM::showDefaultConfigurations);
 }
 
@@ -2792,6 +2793,7 @@ void MainWindow::fftWisdomProcessFinished(int exitCode, QProcess::ExitStatus exi
     delete m_fftWisdomProcess;
     m_fftWisdomProcess = nullptr;
 }
+#endif
 
 void MainWindow::samplingDeviceChangeHandler(const DeviceGUI *deviceGUI, int newDeviceIndex)
 {
