@@ -429,7 +429,9 @@ void AddSampleSourceFSM::addDeviceUI()
 
     m_deviceWorkspace->addToMdiArea(m_deviceUISet->m_deviceGUI);
     m_spectrumWorkspace->addToMdiArea(m_deviceUISet->m_mainSpectrumGUI);
+    if (m_loadDefaults) {
     m_mainWindow->loadDefaultPreset(m_deviceAPI->getSamplingDeviceId(), m_deviceUISet);
+    }
     emit m_mainWindow->m_mainCore->deviceSetAdded(m_deviceSetIndex, m_deviceAPI);
 
 #ifdef ANDROID
@@ -542,7 +544,9 @@ void AddSampleSinkFSM::addDeviceUI()
 
     m_deviceWorkspace->addToMdiArea(m_deviceUISet->m_deviceGUI);
     m_spectrumWorkspace->addToMdiArea(m_deviceUISet->m_mainSpectrumGUI);
+    if (m_loadDefaults) {
     m_mainWindow->loadDefaultPreset(m_deviceAPI->getSamplingDeviceId(), m_deviceUISet);
+    }
     emit m_mainWindow->m_mainCore->deviceSetAdded(m_deviceSetIndex, m_deviceAPI);
 
 #ifdef ANDROID
@@ -655,7 +659,9 @@ void AddSampleMIMOFSM::addDeviceUI()
 
     m_deviceWorkspace->addToMdiArea(m_deviceUISet->m_deviceGUI);
     m_spectrumWorkspace->addToMdiArea(m_deviceUISet->m_mainSpectrumGUI);
+    if (m_loadDefaults) {
     m_mainWindow->loadDefaultPreset(m_deviceAPI->getSamplingDeviceId(), m_deviceUISet);
+    }
     emit m_mainWindow->m_mainCore->deviceSetAdded(m_deviceSetIndex, m_deviceAPI);
 
 #ifdef ANDROID
@@ -1234,12 +1240,11 @@ void MainWindow::sampleSourceAdd(Workspace *deviceWorkspace, Workspace *spectrum
 
 void MainWindow::sampleSourceCreate(
     int deviceSetIndex,
-    int deviceIndex,
+    int& deviceIndex,
     DeviceUISet *deviceUISet
 )
 {
     DeviceAPI *deviceAPI = deviceUISet->m_deviceAPI;
-    int selectedDeviceIndex = deviceIndex;
     DeviceEnumerator::instance()->changeRxSelection(deviceSetIndex, deviceIndex);
     const PluginInterface::SamplingDevice *samplingDevice = DeviceEnumerator::instance()->getRxSamplingDevice(deviceIndex);
     deviceAPI->setSamplingDeviceSequence(samplingDevice->sequence);
@@ -1264,7 +1269,7 @@ void MainWindow::sampleSourceCreate(
     {
         qDebug("MainWindow::sampleSourceCreate: non existent device replaced by File Input");
         int fileInputDeviceIndex = DeviceEnumerator::instance()->getFileInputDeviceIndex();
-        selectedDeviceIndex = fileInputDeviceIndex;
+        deviceIndex = fileInputDeviceIndex;
         samplingDevice = DeviceEnumerator::instance()->getRxSamplingDevice(fileInputDeviceIndex);
         deviceAPI->setSamplingDeviceSequence(samplingDevice->sequence);
         deviceAPI->setDeviceNbItems(samplingDevice->deviceNbItems);
@@ -1314,8 +1319,6 @@ void MainWindow::sampleSourceCreateUI(
 )
 {
     DeviceAPI *deviceAPI = deviceUISet->m_deviceAPI;
-    int selectedDeviceIndex = deviceIndex;
-    const PluginInterface::SamplingDevice *samplingDevice = DeviceEnumerator::instance()->getRxSamplingDevice(deviceIndex);
     QWidget *gui;
     DeviceGUI *deviceGUI = deviceAPI->getPluginInterface()->createSampleSourcePluginInstanceGUI(
             deviceAPI->getSamplingDeviceId(),
@@ -1361,7 +1364,8 @@ void MainWindow::sampleSourceCreateUI(
 
     deviceAPI->getSampleSource()->setMessageQueueToGUI(deviceGUI->getInputMessageQueue());
     deviceUISet->m_deviceGUI = deviceGUI;
-    const PluginInterface::SamplingDevice *selectedDevice = DeviceEnumerator::instance()->getRxSamplingDevice(selectedDeviceIndex);
+    const PluginInterface::SamplingDevice *samplingDevice = DeviceEnumerator::instance()->getRxSamplingDevice(deviceIndex);
+    const PluginInterface::SamplingDevice *selectedDevice = DeviceEnumerator::instance()->getRxSamplingDevice(deviceIndex); // FIXME: Why not use samplingDevice?
     deviceUISet->m_selectedDeviceId = selectedDevice->id;
     deviceUISet->m_selectedDeviceSerial = selectedDevice->serial;
     deviceUISet->m_selectedDeviceSequence = selectedDevice->sequence;
@@ -1372,7 +1376,7 @@ void MainWindow::sampleSourceCreateUI(
     deviceGUI->setIndex(deviceSetIndex);
     deviceGUI->setToolTip(samplingDevice->displayedName);
     deviceGUI->setTitle(samplingDevice->displayedName.split(" ")[0]);
-    deviceGUI->setCurrentDeviceIndex(selectedDeviceIndex);
+    deviceGUI->setCurrentDeviceIndex(deviceIndex);
     QStringList channelNames;
     m_pluginManager->listRxChannels(channelNames);
     deviceGUI->setChannelNames(channelNames);
@@ -1392,7 +1396,7 @@ void MainWindow::sampleSinkAdd(Workspace *deviceWorkspace, Workspace *spectrumWo
 
 void MainWindow::sampleSinkCreate(
         int deviceSetIndex,
-        int deviceIndex,
+        int& deviceIndex,
         DeviceUISet *deviceUISet
 )
 {
@@ -1422,7 +1426,7 @@ void MainWindow::sampleSinkCreate(
     {
         qDebug("MainWindow::sampleSinkCreate: non existent device replaced by File Sink");
         int fileSinkDeviceIndex = DeviceEnumerator::instance()->getFileOutputDeviceIndex();
-        selectedDeviceIndex = fileSinkDeviceIndex;
+        deviceIndex = fileSinkDeviceIndex;
         samplingDevice = DeviceEnumerator::instance()->getTxSamplingDevice(fileSinkDeviceIndex);
         deviceAPI->setSamplingDeviceSequence(samplingDevice->sequence);
         deviceAPI->setDeviceNbItems(samplingDevice->deviceNbItems);
@@ -1472,8 +1476,6 @@ void MainWindow::sampleSinkCreateUI(
 )
 {
     DeviceAPI *deviceAPI = deviceUISet->m_deviceAPI;
-    int selectedDeviceIndex = deviceIndex;
-    const PluginInterface::SamplingDevice *samplingDevice = DeviceEnumerator::instance()->getTxSamplingDevice(deviceIndex);
     QWidget *gui;
     DeviceGUI *deviceGUI = deviceAPI->getPluginInterface()->createSampleSinkPluginInstanceGUI(
             deviceAPI->getSamplingDeviceId(),
@@ -1519,7 +1521,8 @@ void MainWindow::sampleSinkCreateUI(
 
     deviceAPI->getSampleSink()->setMessageQueueToGUI(deviceGUI->getInputMessageQueue());
     deviceUISet->m_deviceGUI = deviceGUI;
-    const PluginInterface::SamplingDevice *selectedDevice = DeviceEnumerator::instance()->getRxSamplingDevice(selectedDeviceIndex);
+    const PluginInterface::SamplingDevice *samplingDevice = DeviceEnumerator::instance()->getTxSamplingDevice(deviceIndex);
+    const PluginInterface::SamplingDevice *selectedDevice = DeviceEnumerator::instance()->getRxSamplingDevice(deviceIndex); // FIXME: Why getRxSamplingDevice?
     deviceUISet->m_selectedDeviceId = selectedDevice->id;
     deviceUISet->m_selectedDeviceSerial = selectedDevice->serial;
     deviceUISet->m_selectedDeviceSequence = selectedDevice->sequence;
@@ -1530,7 +1533,7 @@ void MainWindow::sampleSinkCreateUI(
     deviceGUI->setIndex(deviceSetIndex);
     deviceGUI->setToolTip(samplingDevice->displayedName);
     deviceGUI->setTitle(samplingDevice->displayedName.split(" ")[0]);
-    deviceGUI->setCurrentDeviceIndex(selectedDeviceIndex);
+    deviceGUI->setCurrentDeviceIndex(deviceIndex);
     QStringList channelNames;
     m_pluginManager->listTxChannels(channelNames);
     deviceGUI->setChannelNames(channelNames);
@@ -1550,7 +1553,7 @@ void MainWindow::sampleMIMOAdd(Workspace *deviceWorkspace, Workspace *spectrumWo
 
 void MainWindow::sampleMIMOCreate(
     int deviceSetIndex,
-    int deviceIndex,
+    int& deviceIndex,
     DeviceUISet *deviceUISet
 )
 {
@@ -1580,7 +1583,7 @@ void MainWindow::sampleMIMOCreate(
     {
         qDebug("MainWindow::sampleMIMOCreate: non existent device replaced by Test MIMO");
         int testMIMODeviceIndex = DeviceEnumerator::instance()->getTestMIMODeviceIndex();
-        selectedDeviceIndex = testMIMODeviceIndex;
+        deviceIndex = testMIMODeviceIndex;
         samplingDevice = DeviceEnumerator::instance()->getMIMOSamplingDevice(testMIMODeviceIndex);
         deviceAPI->setSamplingDeviceSequence(samplingDevice->sequence);
         deviceAPI->setDeviceNbItems(samplingDevice->deviceNbItems);
@@ -1611,8 +1614,6 @@ void MainWindow::sampleMIMOCreateUI(
 )
 {
     DeviceAPI *deviceAPI = deviceUISet->m_deviceAPI;
-    int selectedDeviceIndex = deviceIndex;
-    const PluginInterface::SamplingDevice *samplingDevice = DeviceEnumerator::instance()->getMIMOSamplingDevice(deviceIndex);
     QWidget *gui;
     DeviceGUI *deviceGUI = deviceAPI->getPluginInterface()->createSampleMIMOPluginInstanceGUI(
             deviceAPI->getSamplingDeviceId(),
@@ -1658,7 +1659,8 @@ void MainWindow::sampleMIMOCreateUI(
 
     deviceAPI->getSampleMIMO()->setMessageQueueToGUI(deviceGUI->getInputMessageQueue());
     deviceUISet->m_deviceGUI = deviceGUI;
-    const PluginInterface::SamplingDevice *selectedDevice = DeviceEnumerator::instance()->getRxSamplingDevice(selectedDeviceIndex);
+    const PluginInterface::SamplingDevice *samplingDevice = DeviceEnumerator::instance()->getMIMOSamplingDevice(deviceIndex);
+    const PluginInterface::SamplingDevice *selectedDevice = DeviceEnumerator::instance()->getRxSamplingDevice(deviceIndex); // FIXME: Why getRxSamplingDevice?
     deviceUISet->m_selectedDeviceId = selectedDevice->id;
     deviceUISet->m_selectedDeviceSerial = selectedDevice->serial;
     deviceUISet->m_selectedDeviceSequence = selectedDevice->sequence;
@@ -1669,7 +1671,7 @@ void MainWindow::sampleMIMOCreateUI(
     deviceGUI->setIndex(deviceSetIndex);
     deviceGUI->setToolTip(samplingDevice->displayedName);
     deviceGUI->setTitle(samplingDevice->displayedName.split(" ")[0]);
-    deviceGUI->setCurrentDeviceIndex(selectedDeviceIndex);
+    deviceGUI->setCurrentDeviceIndex(deviceIndex);
     QStringList channelNames;
     QStringList tmpChannelNames;
     m_pluginManager->listMIMOChannels(channelNames);

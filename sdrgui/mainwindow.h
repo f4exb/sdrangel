@@ -372,7 +372,7 @@ private:
 	void sampleMIMOChange(int deviceSetIndex, int newDeviceIndex, Workspace *workspace);
     void sampleSourceCreate(
         int deviceSetIndex,
-        int deviceIndex,
+        int& deviceIndex,
         DeviceUISet *deviceUISet
     );
     void sampleSourceCreateUI(
@@ -382,7 +382,7 @@ private:
     );
     void sampleSinkCreate(
         int deviceSetIndex,
-        int deviceIndex,
+        int& deviceIndex,
         DeviceUISet *deviceUISet
     );
     void sampleSinkCreateUI(
@@ -392,7 +392,7 @@ private:
     );
     void sampleMIMOCreate(
         int deviceSetIndex,
-        int deviceIndex,
+        int& deviceIndex,
         DeviceUISet *deviceUISet
     );
      void sampleMIMOCreateUI(
