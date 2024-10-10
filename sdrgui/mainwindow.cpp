@@ -1401,7 +1401,6 @@ void MainWindow::sampleSinkCreate(
 )
 {
     DeviceAPI *deviceAPI = deviceUISet->m_deviceAPI;
-    int selectedDeviceIndex = deviceIndex;
     DeviceEnumerator::instance()->changeTxSelection(deviceSetIndex, deviceIndex);
     const PluginInterface::SamplingDevice *samplingDevice = DeviceEnumerator::instance()->getTxSamplingDevice(deviceIndex);
     deviceAPI->setSamplingDeviceSequence(samplingDevice->sequence);
@@ -1558,7 +1557,6 @@ void MainWindow::sampleMIMOCreate(
 )
 {
     DeviceAPI *deviceAPI = deviceUISet->m_deviceAPI;
-    int selectedDeviceIndex = deviceIndex;
     DeviceEnumerator::instance()->changeMIMOSelection(deviceSetIndex, deviceIndex);
     const PluginInterface::SamplingDevice *samplingDevice = DeviceEnumerator::instance()->getMIMOSamplingDevice(deviceIndex);
     deviceAPI->setSamplingDeviceSequence(samplingDevice->sequence);
