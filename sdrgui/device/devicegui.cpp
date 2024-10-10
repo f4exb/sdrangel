@@ -44,7 +44,8 @@ DeviceGUI::DeviceGUI(QWidget *parent) :
     m_contextMenuType(ContextMenuNone),
     m_resizer(this),
     m_drag(false),
-    m_currentDeviceIndex(-1)
+    m_currentDeviceIndex(-1),
+    m_channelAddDialog(this)
 {
     qDebug("DeviceGUI::DeviceGUI: %p", parent);
     setWindowFlags(windowFlags() | Qt::FramelessWindowHint);
@@ -283,7 +284,7 @@ void DeviceGUI::closeEvent(QCloseEvent *event)
 {
     qDebug("DeviceGUI::closeEvent");
     emit closing();
-    event->accept();
+    event->ignore(); // Don't automatically delete the GUI -  MainWindow::RemoveDeviceSetFSM::removeUI will do it
 }
 
 void DeviceGUI::mousePressEvent(QMouseEvent* event)
@@ -380,7 +381,8 @@ void DeviceGUI::openMoveToWorkspaceDialog()
 
 void DeviceGUI::openAddChannelsDialog()
 {
-    m_channelAddDialog.exec();
+    //m_channelAddDialog.exec();
+    m_channelAddDialog.open();
 }
 
 void DeviceGUI::showSpectrumHandler()

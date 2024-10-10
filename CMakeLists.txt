@@ -704,6 +704,7 @@ if (BUILD_GUI)
                             QuickWidgets
                             Svg
                             SvgWidgets
+                            StateMachine
                            OPTIONAL_COMPONENTS
                             WebEngineQuick
                             WebEngineCore

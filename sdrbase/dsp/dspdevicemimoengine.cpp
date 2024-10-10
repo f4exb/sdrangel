@@ -1030,6 +1030,7 @@ bool DSPDeviceMIMOEngine::handleMessage(const Message& message)
     else if (DSPAcquisitionStop::match(message))
 	{
 		setStateRx(gotoIdle(0));
+        emit acquisitionStopped();
         return true;
 	}
     else if (DSPGenerationInit::match(message))
@@ -1053,11 +1054,13 @@ bool DSPDeviceMIMOEngine::handleMessage(const Message& message)
 	else if (DSPGenerationStop::match(message))
 	{
 		setStateTx(gotoIdle(1));
+        emit generationStopped();
         return true;
 	}
 	else if (SetSampleMIMO::match(message)) {
         const auto& cmd = (const SetSampleMIMO&) message;
         handleSetMIMO(cmd.getSampleMIMO());
+        emit sampleSet();
 		return true;
 	}
 	else if (AddBasebandSampleSink::match(message))
@@ -1194,6 +1197,7 @@ bool DSPDeviceMIMOEngine::handleMessage(const Message& message)
         BasebandSampleSink* spectrumSink = msg.getSampleSink();
         spectrumSink->stop();
         m_spectrumSink = nullptr;
+        emit spectrumSinkRemoved();
         return true;
     }
     else if (SetSpectrumSinkInput::match(message))

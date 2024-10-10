@@ -53,7 +53,7 @@ public:
 	DSPDeviceMIMOEngine *addDeviceMIMOEngine();
 	void removeLastDeviceMIMOEngine();
 
-    void removeDeviceEngineAt(int deviceIndex);
+    QThread *removeDeviceEngineAt(int deviceIndex);
 
 	AudioDeviceManager *getAudioDeviceManager() { return &m_audioDeviceManager; }
 

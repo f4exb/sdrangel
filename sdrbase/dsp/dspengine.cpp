@@ -73,12 +73,6 @@ DSPDeviceSourceEngine *DSPEngine::addDeviceSourceEngine()
     QObject::connect(
         deviceThread,
         &QThread::finished,
-        deviceSourceEngine,
-        &QObject::deleteLater
-    );
-    QObject::connect(
-        deviceThread,
-        &QThread::finished,
         deviceThread,
         &QThread::deleteLater
     );
@@ -118,12 +112,6 @@ DSPDeviceSinkEngine *DSPEngine::addDeviceSinkEngine()
     m_deviceEngineReferences.push_back(DeviceEngineReference{1, nullptr, m_deviceSinkEngines.back(), nullptr, deviceThread});
     deviceSinkEngine->moveToThread(deviceThread);
 
-    QObject::connect(
-        deviceThread,
-        &QThread::finished,
-        deviceSinkEngine,
-        &QObject::deleteLater
-    );
     QObject::connect(
         deviceThread,
         &QThread::finished,
@@ -169,12 +157,6 @@ DSPDeviceMIMOEngine *DSPEngine::addDeviceMIMOEngine()
     QObject::connect(
         deviceThread,
         &QThread::finished,
-        deviceMIMOEngine,
-        &QObject::deleteLater
-    );
-    QObject::connect(
-        deviceThread,
-        &QThread::finished,
         deviceThread,
         &QThread::deleteLater
     );
@@ -205,38 +187,39 @@ void DSPEngine::removeLastDeviceMIMOEngine()
     }
 }
 
-void DSPEngine::removeDeviceEngineAt(int deviceIndex)
+QThread * DSPEngine::removeDeviceEngineAt(int deviceIndex)
 {
     if (deviceIndex >= m_deviceEngineReferences.size()) {
-        return;
+        return nullptr;
     }
+
+    QThread *deviceThread = nullptr;
 
     if (m_deviceEngineReferences[deviceIndex].m_deviceEngineType == 0) // source
     {
         DSPDeviceSourceEngine *deviceEngine = m_deviceEngineReferences[deviceIndex].m_deviceSourceEngine;
-        QThread *deviceThread = m_deviceEngineReferences[deviceIndex].m_thread;
+        deviceThread = m_deviceEngineReferences[deviceIndex].m_thread;
         deviceThread->exit();
-        deviceThread->wait();
         m_deviceSourceEngines.removeAll(deviceEngine);
     }
     else if (m_deviceEngineReferences[deviceIndex].m_deviceEngineType == 1) // sink
     {
         DSPDeviceSinkEngine *deviceEngine = m_deviceEngineReferences[deviceIndex].m_deviceSinkEngine;
-        QThread *deviceThread = m_deviceEngineReferences[deviceIndex].m_thread;
+        deviceThread = m_deviceEngineReferences[deviceIndex].m_thread;
         deviceThread->exit();
-        deviceThread->wait();
         m_deviceSinkEngines.removeAll(deviceEngine);
     }
     else if (m_deviceEngineReferences[deviceIndex].m_deviceEngineType == 2) // MIMO
     {
         DSPDeviceMIMOEngine *deviceEngine = m_deviceEngineReferences[deviceIndex].m_deviceMIMOEngine;
-        QThread *deviceThread = m_deviceEngineReferences[deviceIndex].m_thread;
+        deviceThread = m_deviceEngineReferences[deviceIndex].m_thread;
         deviceThread->exit();
-        deviceThread->wait();
         m_deviceMIMOEngines.removeAll(deviceEngine);
     }
 
     m_deviceEngineReferences.removeAt(deviceIndex);
+
+    return deviceThread;
 }
 
 void DSPEngine::createFFTFactory(const QString& fftWisdomFileName)

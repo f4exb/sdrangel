@@ -356,6 +356,11 @@ private slots:
 
 signals:
 	void stateChanged();
+
+    void acquisitionStopped();
+    void sampleSet();
+    void generationStopped();
+    void spectrumSinkRemoved();
 };
 
 #endif // SDRBASE_DSP_DSPDEVICEMIMOENGINE_H_

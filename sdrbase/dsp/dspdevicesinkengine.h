@@ -121,6 +121,10 @@ private slots:
 
 signals:
 	void stateChanged();
+
+	void generationStopped();
+	void sampleSet();
+	void spectrumSinkRemoved();
 };
 
 
