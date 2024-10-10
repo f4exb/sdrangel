@@ -795,8 +795,6 @@ void RemoveDeviceSetFSM::removeDeviceSet()
 
     DeviceAPI *deviceAPI = m_deviceUISet->m_deviceAPI;
     delete m_deviceUISet;
-    // FIXME: DSPEngine::addDeviceSourceEngine() used to setup deleteLater for these objects
-    // But that would cause crash on exit
     if (m_deviceSourceEngine) {
         delete deviceAPI->getSampleSource();
     } else if (m_deviceSinkEngine) {
@@ -946,11 +944,7 @@ void LoadConfigurationFSM::createWorkspaces()
         m_mainWindow->m_workspaces[i]->setAutoStackOption(m_configuration->getWorkspaceAutoStackOptions()[i]);
         m_mainWindow->m_workspaces[i]->setTabSubWindowsOption(m_configuration->getWorkspaceTabSubWindowsOptions()[i]);
     }
-
-    if (m_mainWindow->m_workspaces.size() <= 0) { // cannot go further if there are no workspaces
-        // FIXME: How to terminate FSM?? Need extra transition to final
     }
-}
 
 void LoadConfigurationFSM::loadDeviceSets()
 {
