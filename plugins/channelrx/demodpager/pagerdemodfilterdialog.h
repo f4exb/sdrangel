@@ -27,7 +27,7 @@ class PagerDemodFilterDialog : public QDialog {
     Q_OBJECT
 
 public:
-    explicit PagerDemodFilterDialog(PagerDemodSettings* settings, QWidget* parent = 0);
+    explicit PagerDemodFilterDialog(PagerDemodSettings* settings, QWidget* parent = nullptr);
     ~PagerDemodFilterDialog();
 
 private slots:
