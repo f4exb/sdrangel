@@ -55,15 +55,15 @@ void PagerDemodGUI::resizeTable()
     // Trailing spaces are for sort arrow
     int row = ui->messages->rowCount();
     ui->messages->setRowCount(row + 1);
-    ui->messages->setItem(row, MESSAGE_COL_DATE, new QTableWidgetItem("Fri Apr 15 2016--"));
-    ui->messages->setItem(row, MESSAGE_COL_TIME, new QTableWidgetItem("10:17:00"));
-    ui->messages->setItem(row, MESSAGE_COL_ADDRESS, new QTableWidgetItem("1000000"));
-    ui->messages->setItem(row, MESSAGE_COL_MESSAGE, new QTableWidgetItem("ABCEDGHIJKLMNOPQRSTUVWXYZABCEDGHIJKLMNOPQRSTUVWXYZ"));
-    ui->messages->setItem(row, MESSAGE_COL_FUNCTION, new QTableWidgetItem("0"));
-    ui->messages->setItem(row, MESSAGE_COL_ALPHA, new QTableWidgetItem("ABCEDGHIJKLMNOPQRSTUVWXYZABCEDGHIJKLMNOPQRSTUVWXYZ"));
-    ui->messages->setItem(row, MESSAGE_COL_NUMERIC, new QTableWidgetItem("123456789123456789123456789123456789123456789123456789"));
-    ui->messages->setItem(row, MESSAGE_COL_EVEN_PE, new QTableWidgetItem("0"));
-    ui->messages->setItem(row, MESSAGE_COL_BCH_PE, new QTableWidgetItem("0"));
+    ui->messages->setItem(row, PagerDemodSettings::MESSAGE_COL_DATE, new QTableWidgetItem("Fri Apr 15 2016--"));
+    ui->messages->setItem(row, PagerDemodSettings::MESSAGE_COL_TIME, new QTableWidgetItem("10:17:00"));
+    ui->messages->setItem(row, PagerDemodSettings::MESSAGE_COL_ADDRESS, new QTableWidgetItem("1000000"));
+    ui->messages->setItem(row, PagerDemodSettings::MESSAGE_COL_MESSAGE, new QTableWidgetItem("ABCEDGHIJKLMNOPQRSTUVWXYZABCEDGHIJKLMNOPQRSTUVWXYZ"));
+    ui->messages->setItem(row, PagerDemodSettings::MESSAGE_COL_FUNCTION, new QTableWidgetItem("0"));
+    ui->messages->setItem(row, PagerDemodSettings::MESSAGE_COL_ALPHA, new QTableWidgetItem("ABCEDGHIJKLMNOPQRSTUVWXYZABCEDGHIJKLMNOPQRSTUVWXYZ"));
+    ui->messages->setItem(row, PagerDemodSettings::MESSAGE_COL_NUMERIC, new QTableWidgetItem("123456789123456789123456789123456789123456789123456789"));
+    ui->messages->setItem(row, PagerDemodSettings::MESSAGE_COL_EVEN_PE, new QTableWidgetItem("0"));
+    ui->messages->setItem(row, PagerDemodSettings::MESSAGE_COL_BCH_PE, new QTableWidgetItem("0"));
     ui->messages->resizeColumnsToContents();
     ui->messages->removeRow(row);
 }
@@ -233,8 +233,8 @@ void PagerDemodGUI::messageReceived(const QDateTime dateTime, int address, int f
         int startRow = m_settings.m_duplicateMatchLastOnly ? ui->messages->rowCount() - 1 : 0;
         for (int row = startRow; row < ui->messages->rowCount(); row++)
         {
-            QString prevAddress = ui->messages->item(row, MESSAGE_COL_ADDRESS)->text();
-            QString prevMessage = ui->messages->item(row, MESSAGE_COL_MESSAGE)->text();
+            QString prevAddress = ui->messages->item(row, PagerDemodSettings::MESSAGE_COL_ADDRESS)->text();
+            QString prevMessage = ui->messages->item(row, PagerDemodSettings::MESSAGE_COL_MESSAGE)->text();
 
             if ((message == prevMessage) && (m_settings.m_duplicateMatchMessageOnly || (addressString == prevAddress)))
             {
@@ -262,15 +262,15 @@ void PagerDemodGUI::messageReceived(const QDateTime dateTime, int address, int f
     QTableWidgetItem *numericItem = new QTableWidgetItem();
     QTableWidgetItem *evenPEItem = new QTableWidgetItem();
     QTableWidgetItem *bchPEItem = new QTableWidgetItem();
-    ui->messages->setItem(row, MESSAGE_COL_DATE, dateItem);
-    ui->messages->setItem(row, MESSAGE_COL_TIME, timeItem);
-    ui->messages->setItem(row, MESSAGE_COL_ADDRESS, addressItem);
-    ui->messages->setItem(row, MESSAGE_COL_MESSAGE, messageItem);
-    ui->messages->setItem(row, MESSAGE_COL_FUNCTION, functionItem);
-    ui->messages->setItem(row, MESSAGE_COL_ALPHA, alphaItem);
-    ui->messages->setItem(row, MESSAGE_COL_NUMERIC, numericItem);
-    ui->messages->setItem(row, MESSAGE_COL_EVEN_PE, evenPEItem);
-    ui->messages->setItem(row, MESSAGE_COL_BCH_PE, bchPEItem);
+    ui->messages->setItem(row, PagerDemodSettings::MESSAGE_COL_DATE, dateItem);
+    ui->messages->setItem(row, PagerDemodSettings::MESSAGE_COL_TIME, timeItem);
+    ui->messages->setItem(row, PagerDemodSettings::MESSAGE_COL_ADDRESS, addressItem);
+    ui->messages->setItem(row, PagerDemodSettings::MESSAGE_COL_MESSAGE, messageItem);
+    ui->messages->setItem(row, PagerDemodSettings::MESSAGE_COL_FUNCTION, functionItem);
+    ui->messages->setItem(row, PagerDemodSettings::MESSAGE_COL_ALPHA, alphaItem);
+    ui->messages->setItem(row, PagerDemodSettings::MESSAGE_COL_NUMERIC, numericItem);
+    ui->messages->setItem(row, PagerDemodSettings::MESSAGE_COL_EVEN_PE, evenPEItem);
+    ui->messages->setItem(row, PagerDemodSettings::MESSAGE_COL_BCH_PE, bchPEItem);
     dateItem->setText(dateTime.date().toString());
     timeItem->setText(dateTime.time().toString());
     addressItem->setText(addressString);
@@ -434,7 +434,7 @@ void PagerDemodGUI::filterRow(int row)
     if (m_settings.m_filterAddress != "")
     {
         QRegExp re(m_settings.m_filterAddress);
-        QTableWidgetItem *fromItem = ui->messages->item(row, MESSAGE_COL_ADDRESS);
+        QTableWidgetItem *fromItem = ui->messages->item(row, PagerDemodSettings::MESSAGE_COL_ADDRESS);
         if (!re.exactMatch(fromItem->text())) {
             hidden = true;
         }
@@ -921,18 +921,18 @@ void PagerDemodGUI::enableSpeechIfNeeded()
 
 void PagerDemodGUI::checkNotification(int row)
 {
-    QString address = ui->messages->item(row, MESSAGE_COL_ADDRESS)->text();
-    QString message = ui->messages->item(row, MESSAGE_COL_MESSAGE)->text();
+    QString address = ui->messages->item(row, PagerDemodSettings::MESSAGE_COL_ADDRESS)->text();
+    QString message = ui->messages->item(row, PagerDemodSettings::MESSAGE_COL_MESSAGE)->text();
 
     for (int i = 0; i < m_settings.m_notificationSettings.size(); i++)
     {
         QString match;
         switch (m_settings.m_notificationSettings[i]->m_matchColumn)
         {
-        case MESSAGE_COL_ADDRESS:
+        case PagerDemodSettings::MESSAGE_COL_ADDRESS:
             match = address;
             break;
-        case MESSAGE_COL_MESSAGE:
+        case PagerDemodSettings::MESSAGE_COL_MESSAGE:
             match = message;
             break;
         }
@@ -944,7 +944,7 @@ void PagerDemodGUI::checkNotification(int row)
                 if (matchResult.hasMatch())
                 {
                     if (m_settings.m_notificationSettings[i]->m_highlight) {
-                        ui->messages->item(row, MESSAGE_COL_MESSAGE)->setTextColor(m_settings.m_notificationSettings[i]->m_highlightColor);
+                        ui->messages->item(row, PagerDemodSettings::MESSAGE_COL_MESSAGE)->setTextColor(m_settings.m_notificationSettings[i]->m_highlightColor);
                     }
 
                     if (!m_settings.m_notificationSettings[i]->m_speech.isEmpty())
@@ -968,8 +968,8 @@ void PagerDemodGUI::checkNotification(int row)
                         {
                             QDateTime dateTime;
 
-                            dateTime.setDate(QDate::fromString(ui->messages->item(row, MESSAGE_COL_DATE)->text()));
-                            dateTime.setTime(QTime::fromString(ui->messages->item(row, MESSAGE_COL_TIME)->text()));
+                            dateTime.setDate(QDate::fromString(ui->messages->item(row, PagerDemodSettings::MESSAGE_COL_DATE)->text()));
+                            dateTime.setTime(QTime::fromString(ui->messages->item(row, PagerDemodSettings::MESSAGE_COL_TIME)->text()));
 
                             sendToMap(address, message, latitude, longitude, dateTime);
                         }

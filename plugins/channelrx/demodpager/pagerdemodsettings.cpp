@@ -25,7 +25,6 @@
 #include "util/simpleserializer.h"
 #include "settings/serializable.h"
 #include "pagerdemodsettings.h"
-#include "pagerdemodgui.h"
 
 PagerDemodSettings::PagerDemodSettings() :
     m_channelMarker(nullptr),
@@ -255,7 +254,7 @@ void PagerDemodSettings::deserializeIntList(const QByteArray& data, QList<qint32
 }
 
 PagerDemodSettings::NotificationSettings::NotificationSettings() :
-    m_matchColumn(PagerDemodGUI::MESSAGE_COL_ADDRESS),
+    m_matchColumn(PagerDemodSettings::MESSAGE_COL_ADDRESS),
     m_highlight(false),
     m_highlightColor(Qt::red),
     m_plotOnMap(false)

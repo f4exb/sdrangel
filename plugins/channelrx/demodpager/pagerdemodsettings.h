@@ -34,6 +34,18 @@ class Serializable;
 
 struct PagerDemodSettings
 {
+    enum MessageCol {
+        MESSAGE_COL_DATE,
+        MESSAGE_COL_TIME,
+        MESSAGE_COL_ADDRESS,
+        MESSAGE_COL_MESSAGE,
+        MESSAGE_COL_FUNCTION,
+        MESSAGE_COL_ALPHA,
+        MESSAGE_COL_NUMERIC,
+        MESSAGE_COL_EVEN_PE,
+        MESSAGE_COL_BCH_PE
+    };
+
     struct NotificationSettings {
         int m_matchColumn;
         QString m_regExp;

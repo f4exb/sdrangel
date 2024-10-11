@@ -28,7 +28,7 @@
 
 // Map main table column numbers to combo box indices
 std::vector<int> PagerDemodNotificationDialog::m_columnMap = {
-    PagerDemodGUI::MESSAGE_COL_ADDRESS, PagerDemodGUI::MESSAGE_COL_MESSAGE
+    PagerDemodSettings::MESSAGE_COL_ADDRESS, PagerDemodSettings::MESSAGE_COL_MESSAGE
 };
 
 PagerDemodNotificationDialog::PagerDemodNotificationDialog(PagerDemodSettings *settings,
@@ -76,7 +76,7 @@ void PagerDemodNotificationDialog::accept()
 void PagerDemodNotificationDialog::resizeTable()
 {
     PagerDemodSettings::NotificationSettings dummy;
-    dummy.m_matchColumn = PagerDemodGUI::MESSAGE_COL_ADDRESS;
+    dummy.m_matchColumn = PagerDemodSettings::MESSAGE_COL_ADDRESS;
     dummy.m_regExp = "1234567";
     dummy.m_speech = "${message}";
     dummy.m_command = "cmail.exe -to:user@host.com \"-subject: Paging ${address}\" \"-body: ${message}\"";

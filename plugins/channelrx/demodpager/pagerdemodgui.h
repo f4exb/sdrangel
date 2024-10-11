@@ -46,17 +46,6 @@ class PagerDemodGUI : public ChannelGUI {
     Q_OBJECT
 
 public:
-    enum MessageCol {
-        MESSAGE_COL_DATE,
-        MESSAGE_COL_TIME,
-        MESSAGE_COL_ADDRESS,
-        MESSAGE_COL_MESSAGE,
-        MESSAGE_COL_FUNCTION,
-        MESSAGE_COL_ALPHA,
-        MESSAGE_COL_NUMERIC,
-        MESSAGE_COL_EVEN_PE,
-        MESSAGE_COL_BCH_PE
-    };
 
     static PagerDemodGUI* create(PluginAPI* pluginAPI, DeviceUISet *deviceUISet, BasebandSampleSink *rxChannel);
     virtual void destroy();
