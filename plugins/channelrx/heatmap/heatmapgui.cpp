@@ -1506,21 +1506,29 @@ void HeatMapGUI::addToPowerSeries(QDateTime dateTime, double average, double pul
 {
     if (m_powerAverageSeries)
     {
-        qint64 msecs = dateTime.toMSecsSinceEpoch();
-        if (!std::isnan(average)) {
-            m_powerAverageSeries->append(msecs, average);
+        try
+        {
+            qint64 msecs = dateTime.toMSecsSinceEpoch();
+            if (!std::isnan(average)) {
+                m_powerAverageSeries->append(msecs, average);
+            }
+            if (!std::isnan(pulseAverage)) {
+                m_powerPulseAverageSeries->append(msecs, pulseAverage);
+            }
+            if (!std::isnan(max)) {
+                m_powerMaxPeakSeries->append(msecs, max);
+            }
+            if (!std::isnan(min)) {
+                m_powerMinPeakSeries->append(msecs, min);
+            }
+            if (!std::isnan(pathLoss)) {
+                m_powerPathLossSeries->append(msecs, pathLoss);
+            }
         }
-        if (!std::isnan(pulseAverage)) {
-            m_powerPulseAverageSeries->append(msecs, pulseAverage);
-        }
-        if (!std::isnan(max)) {
-            m_powerMaxPeakSeries->append(msecs, max);
-        }
-        if (!std::isnan(min)) {
-            m_powerMinPeakSeries->append(msecs, min);
-        }
-        if (!std::isnan(pathLoss)) {
-            m_powerPathLossSeries->append(msecs, pathLoss);
+        catch (std::bad_alloc&)
+        {
+           QMessageBox::critical(this, "Heat Map", QString("Failed to allocate memory for chart series"));
+           ui->displayChart->setChecked(false);
         }
     }
 }
