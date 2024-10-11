@@ -944,7 +944,7 @@ void PagerDemodGUI::checkNotification(int row)
                 if (matchResult.hasMatch())
                 {
                     if (m_settings.m_notificationSettings[i]->m_highlight) {
-                        ui->messages->item(row, PagerDemodSettings::MESSAGE_COL_MESSAGE)->setTextColor(m_settings.m_notificationSettings[i]->m_highlightColor);
+                        ui->messages->item(row, PagerDemodSettings::MESSAGE_COL_MESSAGE)->setForeground(QBrush(m_settings.m_notificationSettings[i]->m_highlightColor));
                     }
 
                     if (!m_settings.m_notificationSettings[i]->m_speech.isEmpty())
