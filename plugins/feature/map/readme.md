@@ -16,7 +16,8 @@ On top of this, it can plot data from other plugins, such as:
 * Radials and estimated position from the VOR localizer feature,
 * ILS course line and glide path from the ILS Demodulator,
 * DSC geographic call areas,
-* SID paths.
+* SID paths,
+* Pager messages that contain coordinates.
 
 As well as internet and built-in data sources:
 
@@ -313,6 +314,7 @@ Mapbox: https://www.mapbox.com/ Cesium: https://www.cesium.com Bing: https://www
 
 Ionosonde data and MUF/coF2 contours from [KC2G](https://prop.kc2g.com/) with source data from [GIRO](https://giro.uml.edu/) and [NOAA NCEI](https://www.ngdc.noaa.gov/stp/iono/ionohome.html).
 
+
 Sea Marks are from OpenSeaMap: https://www.openseamap.org/
 
 Railways are from OpenRailwayMap: https://www.openrailwaymap.org/
@@ -324,6 +326,7 @@ World icons created by turkkub from Flaticon: https://www.flaticon.com
 Layers and Boat icons created by Freepik from Flaticon: https://www.flaticon.com
 Railway icons created by Prosymbols Premium from Flaticon: https://www.flaticon.com
 Satellite icons created by SyafriStudio from Flaticon: https://www.flaticon.com
+Pager icons created by xnimrodx from Flaticon: https://www.flaticon.com
 
 3D models are by various artists under a variety of licenses. See: https://github.com/srcejon/sdrangel-3d-models
 

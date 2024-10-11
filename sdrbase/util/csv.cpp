@@ -167,3 +167,11 @@ QHash<QString, int> CSV::readHeader(QTextStream &in, QStringList requiredColumns
 
     return colNumbers;
 }
+
+QString CSV::escape(const QString& string)
+{
+    QString s = string;
+    s.replace('"', "\"\"");
+    s = QString("\"%1\"").arg(s);
+    return s;
+}

@@ -31,6 +31,7 @@
 #include "dsp/dspcommands.h"
 #include "device/deviceapi.h"
 #include "util/db.h"
+#include "util/csv.h"
 #include "maincore.h"
 
 MESSAGE_CLASS_DEFINITION(PagerDemod::MsgConfigurePagerDemod, Message)
@@ -141,7 +142,7 @@ bool PagerDemod::handleMessage(const Message& cmd)
 {
     if (MsgConfigurePagerDemod::match(cmd))
     {
-        MsgConfigurePagerDemod& cfg = (MsgConfigurePagerDemod&) cmd;
+        const MsgConfigurePagerDemod& cfg = (const MsgConfigurePagerDemod&) cmd;
         qDebug() << "PagerDemod::handleMessage: MsgConfigurePagerDemod";
         applySettings(cfg.getSettings(), cfg.getForce());
 
@@ -149,7 +150,7 @@ bool PagerDemod::handleMessage(const Message& cmd)
     }
     else if (DSPSignalNotification::match(cmd))
     {
-        DSPSignalNotification& notif = (DSPSignalNotification&) cmd;
+        const DSPSignalNotification& notif = (const DSPSignalNotification&) cmd;
         m_basebandSampleRate = notif.getSampleRate();
         m_centerFrequency = notif.getCenterFrequency();
         // Forward to the sink
@@ -166,7 +167,7 @@ bool PagerDemod::handleMessage(const Message& cmd)
     else if (MsgPagerMessage::match(cmd))
     {
         // Forward to GUI
-        MsgPagerMessage& report = (MsgPagerMessage&)cmd;
+        const MsgPagerMessage& report = (const MsgPagerMessage&)cmd;
         if (getMessageQueueToGUI())
         {
             MsgPagerMessage *msg = new MsgPagerMessage(report);
@@ -200,7 +201,7 @@ bool PagerDemod::handleMessage(const Message& cmd)
                 << report.getDateTime().time().toString() << ","
                 << QString("%1").arg(report.getAddress(), 7, 10, QChar('0')) << ","
                 << QString::number(report.getFunctionBits()) << ","
-                << "\"" << report.getAlphaMessage() << "\","
+                << CSV::escape(report.getAlphaMessage()) << ","
                 << report.getNumericMessage() << ","
                 << QString::number(report.getEvenParityErrors()) << ","
                 << QString::number(report.getBCHParityErrors()) << "\n";

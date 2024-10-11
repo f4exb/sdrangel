@@ -1,8 +1,5 @@
 ///////////////////////////////////////////////////////////////////////////////////
-// Copyright (C) 2012 maintech GmbH, Otto-Hahn-Str. 15, 97204 Hoechberg, Germany //
-// written by Christian Daniel                                                   //
-// Copyright (C) 2015-2020 Edouard Griffiths, F4EXB <f4exb06@gmail.com>          //
-// Copyright (C) 2020-2021, 2023 Jon Beniston, M7RCE <jon@beniston.com>          //
+// Copyright (C) 2021 Jon Beniston, M7RCE                                        //
 //                                                                               //
 // This program is free software; you can redistribute it and/or modify          //
 // it under the terms of the GNU General Public License as published by          //
@@ -18,42 +15,27 @@
 // along with this program. If not, see <http://www.gnu.org/licenses/>.          //
 ///////////////////////////////////////////////////////////////////////////////////
 
-#ifndef INCLUDE_CSV_H
-#define INCLUDE_CSV_H
+#ifndef INCLUDE_PAGERDEMODFILTERDIALOG_H
+#define INCLUDE_PAGERDEMODFILTERDIALOG_H
 
-#include <QString>
-#include <QHash>
-#include <QTextStream>
 
-#include "export.h"
+#include "ui_pagerdemodfilterdialog.h"
+#include "pagerdemodsettings.h"
 
-// Extract string from CSV line, updating pp to next column (This doesn't handle , inside quotes)
-static inline char *csvNext(char **pp, char delimiter=',')
-{
-    char *p = *pp;
 
-    if (p[0] == '\0')
-        return nullptr;
+class PagerDemodFilterDialog : public QDialog {
+    Q_OBJECT
 
-    char *start = p;
+public:
+    explicit PagerDemodFilterDialog(PagerDemodSettings* settings, QWidget* parent = 0);
+    ~PagerDemodFilterDialog();
 
-    while ((*p != delimiter) && (*p != '\n'))
-        p++;
-    *p++ = '\0';
-    *pp = p;
+private slots:
+    void accept() override;
 
-    return start;
-}
-
-struct SDRBASE_API CSV {
-
-    static QHash<QString, QString> *hash(const QString& filename, int reserve=0);
-
-    static bool readRow(QTextStream &in, QStringList *row, char seperator=',');
-    static QHash<QString, int> readHeader(QTextStream &in, QStringList requiredColumns, QString &error, char seperator=',');
-
-    static QString escape(const QString& string);
-
+private:
+    Ui::PagerDemodFilterDialog* ui;
+    PagerDemodSettings *m_settings;
 };
 
-#endif /* INCLUDE_CSV_H */
+#endif // INCLUDE_PAGERDEMODFILTERDIALOG_H

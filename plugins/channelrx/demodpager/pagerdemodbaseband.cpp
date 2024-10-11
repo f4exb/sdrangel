@@ -131,7 +131,7 @@ bool PagerDemodBaseband::handleMessage(const Message& cmd)
     if (MsgConfigurePagerDemodBaseband::match(cmd))
     {
         QMutexLocker mutexLocker(&m_mutex);
-        MsgConfigurePagerDemodBaseband& cfg = (MsgConfigurePagerDemodBaseband&) cmd;
+        const MsgConfigurePagerDemodBaseband& cfg = (const MsgConfigurePagerDemodBaseband&) cmd;
         qDebug() << "PagerDemodBaseband::handleMessage: MsgConfigurePagerDemodBaseband";
 
         applySettings(cfg.getSettings(), cfg.getForce());
@@ -141,7 +141,7 @@ bool PagerDemodBaseband::handleMessage(const Message& cmd)
     else if (DSPSignalNotification::match(cmd))
     {
         QMutexLocker mutexLocker(&m_mutex);
-        DSPSignalNotification& notif = (DSPSignalNotification&) cmd;
+        const DSPSignalNotification& notif = (const DSPSignalNotification&) cmd;
         qDebug() << "PagerDemodBaseband::handleMessage: DSPSignalNotification: basebandSampleRate: " << notif.getSampleRate();
         setBasebandSampleRate(notif.getSampleRate());
         m_sampleFifo.setSize(SampleSinkFifo::getSizePolicy(notif.getSampleRate()));

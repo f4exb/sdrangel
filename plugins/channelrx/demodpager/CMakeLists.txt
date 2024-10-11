@@ -29,16 +29,25 @@ if(NOT SERVER_MODE)
         pagerdemodgui.ui
         pagerdemodcharsetdialog.cpp
         pagerdemodcharsetdialog.ui
+        pagerdemodnotificationdialog.cpp
+        pagerdemodnotificationdialog.ui
+        pagerdemodfilterdialog.cpp
+        pagerdemodfilterdialog.ui
+        pagerdemodicons.qrc
     )
     set(demodpager_HEADERS
         ${demodpager_HEADERS}
         pagerdemodgui.h
         pagerdemodcharsetdialog.h
+        pagerdemodnotificationdialog.h
     )
 
     set(TARGET_NAME ${PLUGINS_PREFIX}demodpager)
     set(TARGET_LIB "Qt::Widgets")
     set(TARGET_LIB_GUI "sdrgui")
+    if(Qt${QT_DEFAULT_MAJOR_VERSION}TextToSpeech_FOUND)
+        list(APPEND TARGET_LIB_GUI Qt::TextToSpeech)
+    endif()
     set(INSTALL_FOLDER ${INSTALL_PLUGINS_DIR})
 else()
     set(TARGET_NAME ${PLUGINSSRV_PREFIX}demodpagersrv)

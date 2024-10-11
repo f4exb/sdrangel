@@ -269,11 +269,15 @@ public:
     // Try to convert a string to latitude and longitude. Returns false if not recognised format.
     // https://en.wikipedia.org/wiki/ISO_6709 specifies a standard syntax
     // We support both decimal and DMS formats
-    static bool stringToLatitudeAndLongitude(const QString& string, float& latitude, float& longitude)
+    static bool stringToLatitudeAndLongitude(const QString& string, float& latitude, float& longitude, bool exact=true)
     {
         QRegularExpressionMatch match;
 
-        QRegularExpression decimal(QRegularExpression::anchoredPattern("(-?[0-9]+(\\.[0-9]+)?) *,? *(-?[0-9]+(\\.[0-9]+)?)"));
+        QString decimalPattern = "(-?[0-9]+(\\.[0-9]+)?) *,? *(-?[0-9]+(\\.[0-9]+)?)";
+        if (exact) {
+            decimalPattern = QRegularExpression::anchoredPattern(decimalPattern);
+        }
+        QRegularExpression decimal(decimalPattern);
         match = decimal.match(string);
         if (match.hasMatch())
         {
@@ -282,7 +286,11 @@ public:
              return true;
         }
 
-        QRegularExpression dms(QRegularExpression::anchoredPattern(QString("([0-9]+)[%1d]([0-9]+)['m]([0-9]+(\\.[0-9]+)?)[\"s]([NS]) *,? *([0-9]+)[%1d]([0-9]+)['m]([0-9]+(\\.[0-9]+)?)[\"s]([EW])").arg(QChar(0xb0))));
+        QString dmsPattern = QString("([0-9]+)[%1d]([0-9]+)['m]([0-9]+(\\.[0-9]+)?)[\"s]([NS]) *,? *([0-9]+)[%1d]([0-9]+)['m]([0-9]+(\\.[0-9]+)?)[\"s]([EW])").arg(QChar(0xb0));
+        if (exact) {
+            dmsPattern = QRegularExpression::anchoredPattern(dmsPattern);
+        }
+        QRegularExpression dms(dmsPattern);
         match = dms.match(string);
         if (match.hasMatch())
         {
@@ -303,7 +311,11 @@ public:
              return true;
         }
 
-        QRegularExpression dms2(QRegularExpression::anchoredPattern(QString("([0-9]+)([NS])([0-9]{2})([0-9]{2}) *,?([0-9]+)([EW])([0-9]{2})([0-9]{2})")));
+        QString dms2Pattern = "([0-9]+)([NS])([0-9]{2})([0-9]{2}) *,?([0-9]+)([EW])([0-9]{2})([0-9]{2})";
+        if (exact) {
+            dms2Pattern = QRegularExpression::anchoredPattern(dms2Pattern);
+        }
+        QRegularExpression dms2(dms2Pattern);
         match = dms2.match(string);
         if (match.hasMatch())
         {
@@ -325,7 +337,11 @@ public:
         }
 
         // 512255.5900N 0024400.6105W as used on aviation charts
-        QRegularExpression dms3(QRegularExpression::anchoredPattern(QString("(\\d{2})(\\d{2})((\\d{2})(\\.\\d+)?)([NS]) *,?(\\d{3})(\\d{2})((\\d{2})(\\.\\d+)?)([EW])")));
+        QString dms3Pattern = "(\\d{2})(\\d{2})((\\d{2})(\\.\\d+)?)([NS]) *,?(\\d{3})(\\d{2})((\\d{2})(\\.\\d+)?)([EW])";
+        if (exact) {
+            dms3Pattern = QRegularExpression::anchoredPattern(dms3Pattern);
+        }
+        QRegularExpression dms3(dms3Pattern);
         match = dms3.match(string);
         if (match.hasMatch())
         {

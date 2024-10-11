@@ -1,4 +1,4 @@
-<h1>Pager demodulator plugin</h1>
+﻿<h1>Pager demodulator plugin</h1>
 
 <h2>Introduction</h2>
 
@@ -85,6 +85,36 @@ IP address of the host to forward received messages to via UDP.
 <h3>14: UDP port</h3>
 
 UDP port number to forward received messages to.
+
+<h3>Filter Duplicates</h3>
+
+Check to filter (discard) duplicate messages. Right click to show the Duplicate Filter options dialog:
+
+- Match message only: When unchecked, compare address and message. When checked, compare only message, ignoring the address.
+- Match last message only: When unchecked the message is compared against all messages in the table. When checked, the message is compared against the last received message only.
+
+<h3>Open Notifications Dialog</h3>
+
+When clicked, opens the Notifications Dialog, which allows speech notifications or programs/scripts to be run when messages matching user-defined rules are received.
+
+By running a program such as [cmail](https://www.inveigle.net/cmail/download) on Windows or sendmail on Linux, e-mail notifications can be sent.
+
+Messages can be highlighted in a user-defined colour. 
+
+By checking plot on map, if a message contains a position specified as latitude and longitude, the message can be displayed on the [Map](../../feature/map/readme.md) feature.
+The format of the coordinates should follow https://en.wikipedia.org/wiki/ISO_6709, E.g: 50°40′46″N 95°48′26″W or -23.342,5.234
+
+Here are a few examples:
+
+![Notifications Dialog](../../../doc/img/PagerDemod_plugin_notifications.png)
+
+In the Speech and Command strings, variables can be used to substitute data from the received message:
+
+* ${address},
+* ${message},
+* ${1}, ${2}... are replaced with the string from the corresponding capture group in the regular expression.
+
+To experiment with regular expressions, try [https://regexr.com/](https://regexr.com/).
 
 <h3>15: Start/stop Logging Messages to .csv File</h3>
 
