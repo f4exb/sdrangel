@@ -27,6 +27,11 @@
 #include <QTimer>
 #include <QList>
 #include <QProcess>
+#include <QStateMachine>
+#include <QState>
+#include <QFinalState>
+#include <QSignalTransition>
+#include <QProgressDialog>
 
 #include "settings/mainsettings.h"
 #include "util/message.h"
@@ -43,6 +48,7 @@ class QToolButton;
 class DSPEngine;
 class DSPDeviceSourceEngine;
 class DSPDeviceSinkEngine;
+class DSPDeviceMIMOEngine;
 class Indicator;
 class GLSpectrumGUI;
 class MainSpectrumGUI;
@@ -65,12 +71,216 @@ class CommandKeyReceiver;
 class ConfigurationsDialog;
 class ProfileDialog;
 class SerializableInterface;
+class SDRangelSplash;
 
 class QMenuBar;
 class Workspace;
+class MainWindow;
+
+// Would preferablly have these FSM classes as nested classes of MainWindow
+// However, as they inherit from QObject, they should have Q_OBJECT macro which isn't supported for nested classes
+// Instead we have to declare them as friend classes to MainWindow
+
+class MainWindowFSM : public QStateMachine {
+    Q_OBJECT
+
+public:
+
+    MainWindowFSM(MainWindow *mainWindow, QObject *parent=nullptr);
+
+protected:
+
+    void createStates(int states); // number of states to create, including final state
+
+    MainWindow *m_mainWindow;
+    QList<QState *> m_states;
+    QFinalState *m_finalState;
+
+};
+
+class AddSampleSourceFSM : public MainWindowFSM {
+    Q_OBJECT
+
+public:
+
+    AddSampleSourceFSM(MainWindow *mainWindow, Workspace *deviceWorkspace, Workspace *spectrumWorkspace, int deviceIndex, bool loadDefaults, QObject *parent=nullptr);
+
+private:
+
+    Workspace *m_deviceWorkspace;
+    Workspace *m_spectrumWorkspace;
+    int m_deviceIndex;
+    bool m_loadDefaults;
+
+    int m_deviceSetIndex;
+    DeviceAPI *m_deviceAPI;
+    DeviceUISet *m_deviceUISet;
+
+    DSPDeviceSourceEngine *m_dspDeviceSourceEngine;
+
+    void addEngine();
+    void addDevice();
+    void addDeviceUI();
+};
+
+class AddSampleSinkFSM : public MainWindowFSM {
+    Q_OBJECT
+
+public:
+
+    AddSampleSinkFSM(MainWindow *mainWindow, Workspace *deviceWorkspace, Workspace *spectrumWorkspace, int deviceIndex, bool loadDefaults, QObject *parent=nullptr);
+
+private:
+
+    Workspace *m_deviceWorkspace;
+    Workspace *m_spectrumWorkspace;
+    int m_deviceIndex;
+    bool m_loadDefaults;
+
+    int m_deviceSetIndex;
+    DeviceAPI *m_deviceAPI;
+    DeviceUISet *m_deviceUISet;
+
+    DSPDeviceSinkEngine *m_dspDeviceSinkEngine;
+
+    void addEngine();
+    void addDevice();
+    void addDeviceUI();
+};
+
+class AddSampleMIMOFSM : public MainWindowFSM {
+    Q_OBJECT
+
+public:
+
+    AddSampleMIMOFSM(MainWindow *mainWindow, Workspace *deviceWorkspace, Workspace *spectrumWorkspace, int deviceIndex, bool loadDefaults, QObject *parent=nullptr);
+
+private:
+
+    Workspace *m_deviceWorkspace;
+    Workspace *m_spectrumWorkspace;
+    int m_deviceIndex;
+    bool m_loadDefaults;
+
+    int m_deviceSetIndex;
+    DeviceAPI *m_deviceAPI;
+    DeviceUISet *m_deviceUISet;
+
+    DSPDeviceMIMOEngine *m_dspDeviceMIMOEngine;
+
+    void addEngine();
+    void addDevice();
+    void addDeviceUI();
+};
+
+class RemoveDeviceSetFSM : public MainWindowFSM {
+    Q_OBJECT
+
+public:
+    RemoveDeviceSetFSM(MainWindow *mainWindow, int deviceSetIndex, QObject *parent=nullptr);
+
+private:
+    int m_deviceSetIndex;
+    DeviceUISet *m_deviceUISet;
+    DSPDeviceSourceEngine *m_deviceSourceEngine;
+    DSPDeviceSinkEngine *m_deviceSinkEngine;
+    DSPDeviceMIMOEngine *m_deviceMIMOEngine;
+    QSignalTransition *m_t1;
+    QSignalTransition *m_t2;
+
+    void stopAcquisition();
+    void removeSink();
+    void removeUI();
+    void stopEngine();
+    void removeDeviceSet();
+};
+
+class RemoveAllDeviceSetsFSM : public MainWindowFSM {
+    Q_OBJECT
+
+public:
+    RemoveAllDeviceSetsFSM(MainWindow *mainWindow, QObject *parent=nullptr);
+
+private:
+
+    void removeNext();
+
+};
+
+class RemoveAllWorkspacesFSM : public MainWindowFSM {
+    Q_OBJECT
+
+public:
+    RemoveAllWorkspacesFSM(MainWindow *mainWindow, QObject *parent=nullptr);
+
+private:
+
+    RemoveAllDeviceSetsFSM *m_removeAllDeviceSetsFSM;
+
+    void removeDeviceSets();
+    void removeWorkspaces();
+
+};
+
+class LoadConfigurationFSM : public MainWindowFSM {
+    Q_OBJECT
+
+public:
+    LoadConfigurationFSM(MainWindow *mainWindow, const Configuration *configuration, QProgressDialog *waitBox, QObject *parent=nullptr);
+
+private:
+
+    const Configuration *m_configuration;
+    QProgressDialog *m_waitBox;
+
+    RemoveAllWorkspacesFSM *m_removeAllWorkspacesFSM;
+
+    void clearWorkspace();
+    void createWorkspaces();
+    void loadDeviceSets();
+    void loadDeviceSetSettings();
+    void loadFeatureSets();
+    void restoreGeometry();
+};
+
+class CloseFSM : public MainWindowFSM {
+    Q_OBJECT
+
+public:
+    CloseFSM(MainWindow *mainWindow, QObject *parent=nullptr);
+
+private:
+    void on_started();
+    void on_finished();
+};
+
+class InitFSM : public MainWindowFSM {
+    Q_OBJECT
+
+public:
+    InitFSM(MainWindow *mainWindow, SDRangelSplash *splash, bool loadDefault, QObject *parent=nullptr);
+
+private:
+    SDRangelSplash *m_splash;
+    LoadConfigurationFSM *m_loadConfigurationFSM;
+
+    void loadDefaultConfiguration();
+    void showDefaultConfigurations();
+};
+
 
 class SDRGUI_API MainWindow : public QMainWindow {
 	Q_OBJECT
+
+    friend InitFSM;
+    friend AddSampleSourceFSM;
+    friend AddSampleSinkFSM;
+    friend AddSampleMIMOFSM;
+    friend LoadConfigurationFSM;
+    friend RemoveDeviceSetFSM;
+    friend RemoveAllDeviceSetsFSM;
+    friend RemoveAllWorkspacesFSM;
+    friend CloseFSM;
 
 public:
 	explicit MainWindow(qtwebapp::LoggerWithFile *logger, const MainParser& parser, QWidget* parent = nullptr);
@@ -130,7 +340,11 @@ private:
 	CommandKeyReceiver *m_commandKeyReceiver;
     ProfileDialog *m_profileDialog;
 
+#if QT_CONFIG(process)
 	QProcess *m_fftWisdomProcess;
+#endif
+
+    bool m_settingsSaved;               // Records if settings have already been saved in response to a QCloseEvent
 
 	void loadSettings();
 	void loadDeviceSetPresetSettings(const Preset* preset, int deviceSetIndex);
@@ -146,6 +360,7 @@ private:
 
     void removeDeviceSet(int deviceSetIndex);
     void removeLastDeviceSet();
+    void removeAllDeviceSets();
     void addFeatureSet();
     void removeFeatureSet(unsigned int featureSetIndex);
     void removeAllFeatureSets();
@@ -157,15 +372,30 @@ private:
 	void sampleMIMOChange(int deviceSetIndex, int newDeviceIndex, Workspace *workspace);
     void sampleSourceCreate(
         int deviceSetIndex,
+        int& deviceIndex,
+        DeviceUISet *deviceUISet
+    );
+    void sampleSourceCreateUI(
+        int deviceSetIndex,
         int deviceIndex,
         DeviceUISet *deviceUISet
     );
     void sampleSinkCreate(
         int deviceSetIndex,
+        int& deviceIndex,
+        DeviceUISet *deviceUISet
+    );
+    void sampleSinkCreateUI(
+        int deviceSetIndex,
         int deviceIndex,
         DeviceUISet *deviceUISet
     );
     void sampleMIMOCreate(
+        int deviceSetIndex,
+        int& deviceIndex,
+        DeviceUISet *deviceUISet
+    );
+     void sampleMIMOCreateUI(
         int deviceSetIndex,
         int deviceIndex,
         DeviceUISet *deviceUISet
@@ -177,6 +407,12 @@ private:
 
 protected:
     void keyPressEvent(QKeyEvent* event) override;
+
+signals:
+    // For internal FSM usage
+    void allDeviceSetsRemoved();
+    void allDeviceSetsAdded();
+    void engineStopped();
 
 private slots:
 	void handleMessages();
@@ -193,10 +429,13 @@ private slots:
 	void on_action_Graphics_triggered();
     void on_action_Logging_triggered();
 	void on_action_FFT_triggered();
+#if QT_CONFIG(process)
 	void on_action_FFTWisdom_triggered();
+    void on_action_commands_triggered();
+#endif
 	void on_action_My_Position_triggered();
     void on_action_DeviceUserArguments_triggered();
-    void on_action_commands_triggered();
+    void on_action_Welcome_triggered();
     void on_action_Quick_Start_triggered() const;
     void on_action_Main_Window_triggered() const;
 	void on_action_Loaded_Plugins_triggered();
@@ -228,7 +467,9 @@ private slots:
     void showAllChannels(int deviceSetIndex);
     void openDeviceSetPresetsDialog(QPoint p, const DeviceGUI *deviceGUI);
 	void commandKeyPressed(Qt::Key key, Qt::KeyboardModifiers keyModifiers, bool release) const;
+#if QT_CONFIG(process)
 	void fftWisdomProcessFinished(int exitCode, QProcess::ExitStatus exitStatus);
+#endif
     void orientationChanged(Qt::ScreenOrientation orientation);
 };
 

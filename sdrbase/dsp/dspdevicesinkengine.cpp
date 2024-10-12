@@ -458,12 +458,14 @@ bool DSPDeviceSinkEngine::handleMessage(const Message& message)
 	else if (DSPGenerationStop::match(message))
 	{
 		setState(gotoIdle());
+		emit generationStopped();
         return true;
 	}
 	else if (DSPSetSink::match(message))
     {
         const auto& cmd = (const DSPSetSink&) message;
 		handleSetSink(cmd.getSampleSink());
+		emit sampleSet();
         return true;
 	}
 	else if (DSPRemoveSpectrumSink::match(message))
@@ -476,6 +478,7 @@ bool DSPDeviceSinkEngine::handleMessage(const Message& message)
 		}
 
 		m_spectrumSink = nullptr;
+		emit spectrumSinkRemoved();
         return true;
 	}
 	else if (DSPAddBasebandSampleSource::match(message))
