@@ -107,6 +107,7 @@ private:
     bool handleMessage(const Message& message);
     void makeUIConnections();
     void updateAbsoluteCenterFrequency();
+    uint32_t getValidAudioSampleRate() const;
 
     void leaveEvent(QEvent*);
     void enterEvent(EnterEventType*);

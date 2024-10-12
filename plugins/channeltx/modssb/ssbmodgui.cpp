@@ -547,13 +547,29 @@ void SSBModGUI::applySettings(bool force)
 	}
 }
 
+uint32_t SSBModGUI::getValidAudioSampleRate() const
+{
+    // When not running, m_ssbDemod->getAudioSampleRate() will return 0, but we
+    // want a valid value to initialise the GUI, to allow a user to preselect settings
+    int sr = m_ssbMod->getAudioSampleRate();
+    if (sr == 0)
+    {
+        if (m_audioSampleRate > 0) {
+            sr = m_audioSampleRate;
+        } else {
+            sr = 48000;
+        }
+    }
+    return sr;
+}
+
 void SSBModGUI::applyBandwidths(int spanLog2, bool force)
 {
     bool dsb = ui->dsb->isChecked();
-    m_spectrumRate = m_ssbMod->getAudioSampleRate() / (1<<spanLog2);
+    m_spectrumRate = getValidAudioSampleRate() / (1<<spanLog2);
     int bw = ui->BW->value();
     int lw = ui->lowCut->value();
-    int bwMax = m_ssbMod->getAudioSampleRate() / (100*(1<<spanLog2));
+    int bwMax = getValidAudioSampleRate() / (100*(1<<spanLog2));
     int tickInterval = m_spectrumRate / 1200;
     tickInterval = tickInterval == 0 ? 1 : tickInterval;
 
@@ -897,6 +913,7 @@ void SSBModGUI::makeUIConnections()
     QObject::connect(ui->showFileDialog, &QPushButton::clicked, this, &SSBModGUI::on_showFileDialog_clicked);
     QObject::connect(ui->feedbackEnable, &QToolButton::toggled, this, &SSBModGUI::on_feedbackEnable_toggled);
     QObject::connect(ui->feedbackVolume, &QDial::valueChanged, this, &SSBModGUI::on_feedbackVolume_valueChanged);
+    QObject::connect(ui->spanLog2, &QSlider::valueChanged, this, &SSBModGUI::on_spanLog2_valueChanged);
 }
 
 void SSBModGUI::updateAbsoluteCenterFrequency()

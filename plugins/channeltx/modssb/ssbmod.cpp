@@ -60,6 +60,14 @@ SSBMod::SSBMod(DeviceAPI *deviceAPI) :
     m_spectrumVis(SDR_TX_SCALEF)
 {
 	setObjectName(m_channelId);
+
+    m_thread = new QThread(this);
+    m_basebandSource = new SSBModBaseband();
+    m_basebandSource->setSpectrumSink(&m_spectrumVis);
+    m_basebandSource->setInputFileStream(&m_ifstream);
+    m_basebandSource->setChannel(this);
+    m_basebandSource->moveToThread(m_thread);
+
     applySettings(m_settings, true);
 
     m_deviceAPI->addChannelSource(this);
@@ -85,8 +93,8 @@ SSBMod::~SSBMod()
     delete m_networkManager;
     m_deviceAPI->removeChannelSourceAPI(this);
     m_deviceAPI->removeChannelSource(this);
-
-    SSBMod::stop();
+    delete m_basebandSource;
+    delete m_thread;
 }
 
 void SSBMod::setDeviceAPI(DeviceAPI *deviceAPI)
@@ -108,37 +116,8 @@ void SSBMod::start()
     }
 
 	qDebug("SSBMod::start");
-    m_thread = new QThread(this);
-    m_basebandSource = new SSBModBaseband();
-    m_basebandSource->setSpectrumSink(&m_spectrumVis);
-    m_basebandSource->setInputFileStream(&m_ifstream);
-    m_basebandSource->setChannel(this);
     m_basebandSource->reset();
-    m_basebandSource->setCWKeyer(&m_cwKeyer);
-    m_basebandSource->moveToThread(m_thread);
-
-    QObject::connect(
-        m_thread,
-        &QThread::finished,
-        m_basebandSource,
-        &QObject::deleteLater
-    );
-    QObject::connect(
-        m_thread,
-        &QThread::finished,
-        m_thread,
-        &QThread::deleteLater
-    );
-
     m_thread->start();
-
-    SSBModBaseband::MsgConfigureSSBModBaseband *msg = SSBModBaseband::MsgConfigureSSBModBaseband::create(m_settings, true);
-    m_basebandSource->getInputMessageQueue()->push(msg);
-
-    if (m_levelMeter) {
-        connect(m_basebandSource, SIGNAL(levelChanged(qreal, qreal, int)), m_levelMeter, SLOT(levelChanged(qreal, qreal, int)));
-    }
-
     m_running = true;
 }
 
