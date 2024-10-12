@@ -1,8 +1,5 @@
 ///////////////////////////////////////////////////////////////////////////////////
-// Copyright (C) 2012 maintech GmbH, Otto-Hahn-Str. 15, 97204 Hoechberg, Germany //
-// written by Christian Daniel                                                   //
-// Copyright (C) 2015-2020 Edouard Griffiths, F4EXB <f4exb06@gmail.com>          //
-// Copyright (C) 2020-2021, 2023 Jon Beniston, M7RCE <jon@beniston.com>          //
+// Copyright (C) 2021 Jon Beniston, M7RCE                                        //
 //                                                                               //
 // This program is free software; you can redistribute it and/or modify          //
 // it under the terms of the GNU General Public License as published by          //
@@ -18,42 +15,32 @@
 // along with this program. If not, see <http://www.gnu.org/licenses/>.          //
 ///////////////////////////////////////////////////////////////////////////////////
 
-#ifndef INCLUDE_CSV_H
-#define INCLUDE_CSV_H
+#include <QDebug>
+#include <QCheckBox>
 
-#include <QString>
-#include <QHash>
-#include <QTextStream>
+#include "pagerdemodfilterdialog.h"
 
-#include "export.h"
-
-// Extract string from CSV line, updating pp to next column (This doesn't handle , inside quotes)
-static inline char *csvNext(char **pp, char delimiter=',')
+PagerDemodFilterDialog::PagerDemodFilterDialog(PagerDemodSettings *settings,
+        QWidget* parent) :
+    QDialog(parent),
+    ui(new Ui::PagerDemodFilterDialog),
+    m_settings(settings)
 {
-    char *p = *pp;
+    ui->setupUi(this);
 
-    if (p[0] == '\0')
-        return nullptr;
-
-    char *start = p;
-
-    while ((*p != delimiter) && (*p != '\n'))
-        p++;
-    *p++ = '\0';
-    *pp = p;
-
-    return start;
+    ui->matchLastOnly->setChecked(m_settings->m_duplicateMatchLastOnly);
+    ui->matchMessageOnly->setChecked(m_settings->m_duplicateMatchMessageOnly);
 }
 
-struct SDRBASE_API CSV {
+PagerDemodFilterDialog::~PagerDemodFilterDialog()
+{
+    delete ui;
+}
 
-    static QHash<QString, QString> *hash(const QString& filename, int reserve=0);
+void PagerDemodFilterDialog::accept()
+{
+    m_settings->m_duplicateMatchLastOnly = ui->matchLastOnly->isChecked();
+    m_settings->m_duplicateMatchMessageOnly = ui->matchMessageOnly->isChecked();
 
-    static bool readRow(QTextStream &in, QStringList *row, char seperator=',');
-    static QHash<QString, int> readHeader(QTextStream &in, QStringList requiredColumns, QString &error, char seperator=',');
-
-    static QString escape(const QString& string);
-
-};
-
-#endif /* INCLUDE_CSV_H */
+    QDialog::accept();
+}

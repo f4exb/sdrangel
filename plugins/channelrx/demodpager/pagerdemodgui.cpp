@@ -16,8 +16,6 @@
 // along with this program. If not, see <http://www.gnu.org/licenses/>.          //
 ///////////////////////////////////////////////////////////////////////////////////
 
-#include <limits>
-#include <ctype.h>
 #include <QDockWidget>
 #include <QDebug>
 #include <QAction>
@@ -26,6 +24,7 @@
 #include <QFileDialog>
 #include <QMessageBox>
 #include <QScrollBar>
+#include <QProcess>
 
 #include "pagerdemodgui.h"
 
@@ -36,6 +35,8 @@
 #include "plugin/pluginapi.h"
 #include "util/db.h"
 #include "util/csv.h"
+#include "util/units.h"
+#include "gui/crightclickenabler.h"
 #include "gui/basicchannelsettingsdialog.h"
 #include "dsp/dspengine.h"
 #include "gui/dialogpositioner.h"
@@ -43,6 +44,10 @@
 
 #include "pagerdemod.h"
 #include "pagerdemodcharsetdialog.h"
+#include "pagerdemodnotificationdialog.h"
+#include "pagerdemodfilterdialog.h"
+
+#include "SWGMapItem.h"
 
 void PagerDemodGUI::resizeTable()
 {
@@ -50,15 +55,15 @@ void PagerDemodGUI::resizeTable()
     // Trailing spaces are for sort arrow
     int row = ui->messages->rowCount();
     ui->messages->setRowCount(row + 1);
-    ui->messages->setItem(row, MESSAGE_COL_DATE, new QTableWidgetItem("Fri Apr 15 2016-"));
-    ui->messages->setItem(row, MESSAGE_COL_TIME, new QTableWidgetItem("10:17:00"));
-    ui->messages->setItem(row, MESSAGE_COL_ADDRESS, new QTableWidgetItem("1000000"));
-    ui->messages->setItem(row, MESSAGE_COL_MESSAGE, new QTableWidgetItem("ABCEDGHIJKLMNOPQRSTUVWXYZABCEDGHIJKLMNOPQRSTUVWXYZ"));
-    ui->messages->setItem(row, MESSAGE_COL_FUNCTION, new QTableWidgetItem("0"));
-    ui->messages->setItem(row, MESSAGE_COL_ALPHA, new QTableWidgetItem("ABCEDGHIJKLMNOPQRSTUVWXYZABCEDGHIJKLMNOPQRSTUVWXYZ"));
-    ui->messages->setItem(row, MESSAGE_COL_NUMERIC, new QTableWidgetItem("123456789123456789123456789123456789123456789123456789"));
-    ui->messages->setItem(row, MESSAGE_COL_EVEN_PE, new QTableWidgetItem("0"));
-    ui->messages->setItem(row, MESSAGE_COL_BCH_PE, new QTableWidgetItem("0"));
+    ui->messages->setItem(row, PagerDemodSettings::MESSAGE_COL_DATE, new QTableWidgetItem("Fri Apr 15 2016--"));
+    ui->messages->setItem(row, PagerDemodSettings::MESSAGE_COL_TIME, new QTableWidgetItem("10:17:00"));
+    ui->messages->setItem(row, PagerDemodSettings::MESSAGE_COL_ADDRESS, new QTableWidgetItem("1000000"));
+    ui->messages->setItem(row, PagerDemodSettings::MESSAGE_COL_MESSAGE, new QTableWidgetItem("ABCEDGHIJKLMNOPQRSTUVWXYZABCEDGHIJKLMNOPQRSTUVWXYZ"));
+    ui->messages->setItem(row, PagerDemodSettings::MESSAGE_COL_FUNCTION, new QTableWidgetItem("0"));
+    ui->messages->setItem(row, PagerDemodSettings::MESSAGE_COL_ALPHA, new QTableWidgetItem("ABCEDGHIJKLMNOPQRSTUVWXYZABCEDGHIJKLMNOPQRSTUVWXYZ"));
+    ui->messages->setItem(row, PagerDemodSettings::MESSAGE_COL_NUMERIC, new QTableWidgetItem("123456789123456789123456789123456789123456789123456789"));
+    ui->messages->setItem(row, PagerDemodSettings::MESSAGE_COL_EVEN_PE, new QTableWidgetItem("0"));
+    ui->messages->setItem(row, PagerDemodSettings::MESSAGE_COL_BCH_PE, new QTableWidgetItem("0"));
     ui->messages->resizeColumnsToContents();
     ui->messages->removeRow(row);
 }
@@ -144,11 +149,101 @@ bool PagerDemodGUI::deserialize(const QByteArray& data)
     }
 }
 
+QString PagerDemodGUI::selectMessage(int functionBits, const QString &numericMessage, const QString &alphaMessage) const
+{
+    QString message;
+
+    // Standard way of choosing numeric or alpha decode isn't followed widely
+    if (m_settings.m_decode == PagerDemodSettings::Standard)
+    {
+        // Encoding is based on function bits
+        if (functionBits == 0) {
+            message = numericMessage;
+        } else {
+            message = alphaMessage;
+        }
+    }
+    else if (m_settings.m_decode == PagerDemodSettings::Inverted)
+    {
+        // Encoding is based on function bits, but inverted from standard
+        if (functionBits == 3) {
+            message = numericMessage;
+        } else {
+            message = alphaMessage;
+        }
+    }
+    else if (m_settings.m_decode == PagerDemodSettings::Numeric)
+    {
+        // Always display as numeric
+        message = numericMessage;
+    }
+    else if (m_settings.m_decode == PagerDemodSettings::Alphanumeric)
+    {
+        // Always display as alphanumeric
+        message = alphaMessage;
+    }
+    else
+    {
+        // Guess at what the encoding is
+        QString numeric = numericMessage;
+        QString alpha = alphaMessage;
+        bool done = false;
+        if (!done)
+        {
+            // If alpha contains control characters, possibly numeric
+            for (int i = 0; i < alpha.size(); i++)
+            {
+                if (iscntrl(alpha[i].toLatin1()) && !isspace(alpha[i].toLatin1()))
+                {
+                    message = numeric;
+                    done = true;
+                    break;
+                }
+            }
+        }
+        if (!done) {
+            // Possibly not likely to get only longer than 15 digits
+            if (numeric.size() > 15)
+            {
+                done = true;
+                message = alpha;
+            }
+        }
+        if (!done) {
+            // Default to alpha
+            message = alpha;
+        }
+    }
+
+    return message;
+
+}
+
 // Add row to table
 void PagerDemodGUI::messageReceived(const QDateTime dateTime, int address, int functionBits,
         const QString &numericMessage, const QString &alphaMessage,
         int evenParityErrors, int bchParityErrors)
 {
+    QString message = selectMessage(functionBits, numericMessage, alphaMessage);
+    QString addressString = QString("%1").arg(address, 7, 10, QChar('0'));
+
+    // Should we ignore the message if it is a duplicate?
+    if (m_settings.m_filterDuplicates  && (ui->messages->rowCount() > 0))
+    {
+        int startRow = m_settings.m_duplicateMatchLastOnly ? ui->messages->rowCount() - 1 : 0;
+        for (int row = startRow; row < ui->messages->rowCount(); row++)
+        {
+            QString prevAddress = ui->messages->item(row, PagerDemodSettings::MESSAGE_COL_ADDRESS)->text();
+            QString prevMessage = ui->messages->item(row, PagerDemodSettings::MESSAGE_COL_MESSAGE)->text();
+
+            if ((message == prevMessage) && (m_settings.m_duplicateMatchMessageOnly || (addressString == prevAddress)))
+            {
+                // Ignore this message
+                return;
+            }
+        }
+    }
+
     // Is scroll bar at bottom
     QScrollBar *sb = ui->messages->verticalScrollBar();
     bool scrollToBottom = sb->value() == sb->maximum();
@@ -167,79 +262,19 @@ void PagerDemodGUI::messageReceived(const QDateTime dateTime, int address, int f
     QTableWidgetItem *numericItem = new QTableWidgetItem();
     QTableWidgetItem *evenPEItem = new QTableWidgetItem();
     QTableWidgetItem *bchPEItem = new QTableWidgetItem();
-    ui->messages->setItem(row, MESSAGE_COL_DATE, dateItem);
-    ui->messages->setItem(row, MESSAGE_COL_TIME, timeItem);
-    ui->messages->setItem(row, MESSAGE_COL_ADDRESS, addressItem);
-    ui->messages->setItem(row, MESSAGE_COL_MESSAGE, messageItem);
-    ui->messages->setItem(row, MESSAGE_COL_FUNCTION, functionItem);
-    ui->messages->setItem(row, MESSAGE_COL_ALPHA, alphaItem);
-    ui->messages->setItem(row, MESSAGE_COL_NUMERIC, numericItem);
-    ui->messages->setItem(row, MESSAGE_COL_EVEN_PE, evenPEItem);
-    ui->messages->setItem(row, MESSAGE_COL_BCH_PE, bchPEItem);
+    ui->messages->setItem(row, PagerDemodSettings::MESSAGE_COL_DATE, dateItem);
+    ui->messages->setItem(row, PagerDemodSettings::MESSAGE_COL_TIME, timeItem);
+    ui->messages->setItem(row, PagerDemodSettings::MESSAGE_COL_ADDRESS, addressItem);
+    ui->messages->setItem(row, PagerDemodSettings::MESSAGE_COL_MESSAGE, messageItem);
+    ui->messages->setItem(row, PagerDemodSettings::MESSAGE_COL_FUNCTION, functionItem);
+    ui->messages->setItem(row, PagerDemodSettings::MESSAGE_COL_ALPHA, alphaItem);
+    ui->messages->setItem(row, PagerDemodSettings::MESSAGE_COL_NUMERIC, numericItem);
+    ui->messages->setItem(row, PagerDemodSettings::MESSAGE_COL_EVEN_PE, evenPEItem);
+    ui->messages->setItem(row, PagerDemodSettings::MESSAGE_COL_BCH_PE, bchPEItem);
     dateItem->setText(dateTime.date().toString());
     timeItem->setText(dateTime.time().toString());
-    addressItem->setText(QString("%1").arg(address, 7, 10, QChar('0')));
-    // Standard way of choosing numeric or alpha decode isn't followed widely
-    if (m_settings.m_decode == PagerDemodSettings::Standard)
-    {
-        // Encoding is based on function bits
-        if (functionBits == 0) {
-            messageItem->setText(numericMessage);
-        } else {
-            messageItem->setText(alphaMessage);
-        }
-    }
-    else if (m_settings.m_decode == PagerDemodSettings::Inverted)
-    {
-        // Encoding is based on function bits, but inverted from standard
-        if (functionBits == 3) {
-            messageItem->setText(numericMessage);
-        } else {
-            messageItem->setText(alphaMessage);
-        }
-    }
-    else if (m_settings.m_decode == PagerDemodSettings::Numeric)
-    {
-        // Always display as numeric
-        messageItem->setText(numericMessage);
-    }
-    else if (m_settings.m_decode == PagerDemodSettings::Alphanumeric)
-    {
-        // Always display as alphanumeric
-        messageItem->setText(alphaMessage);
-    }
-    else
-    {
-        // Guess at what the encoding is
-        QString numeric = numericMessage;
-        QString alpha = alphaMessage;
-        bool done = false;
-        if (!done)
-        {
-            // If alpha contains control characters, possibly numeric
-            for (int i = 0; i < alpha.size(); i++)
-            {
-                if (iscntrl(alpha[i].toLatin1()) && !isspace(alpha[i].toLatin1()))
-                {
-                    messageItem->setText(numeric);
-                    done = true;
-                    break;
-                }
-            }
-        }
-        if (!done) {
-            // Possibly not likely to get only longer than 15 digits
-            if (numeric.size() > 15)
-            {
-                done = true;
-                messageItem->setText(alpha);
-            }
-        }
-        if (!done) {
-            // Default to alpha
-            messageItem->setText(alpha);
-        }
-    }
+    addressItem->setText(addressString);
+    messageItem->setText(message);
     functionItem->setText(QString("%1").arg(functionBits));
     alphaItem->setText(alphaMessage);
     numericItem->setText(numericMessage);
@@ -250,6 +285,7 @@ void PagerDemodGUI::messageReceived(const QDateTime dateTime, int address, int f
     if (scrollToBottom) {
         ui->messages->scrollToBottom();
     }
+    checkNotification(row);
 }
 
 bool PagerDemodGUI::handleMessage(const Message& message)
@@ -257,7 +293,7 @@ bool PagerDemodGUI::handleMessage(const Message& message)
     if (PagerDemod::MsgConfigurePagerDemod::match(message))
     {
         qDebug("PagerDemodGUI::handleMessage: PagerDemod::MsgConfigurePagerDemod");
-        const PagerDemod::MsgConfigurePagerDemod& cfg = (PagerDemod::MsgConfigurePagerDemod&) message;
+        const PagerDemod::MsgConfigurePagerDemod& cfg = (const PagerDemod::MsgConfigurePagerDemod&) message;
         m_settings = cfg.getSettings();
         blockApplySettings(true);
         ui->scopeGUI->updateSettings();
@@ -268,7 +304,7 @@ bool PagerDemodGUI::handleMessage(const Message& message)
     }
     else if (PagerDemod::MsgPagerMessage::match(message))
     {
-        PagerDemod::MsgPagerMessage& report = (PagerDemod::MsgPagerMessage&) message;
+        const PagerDemod::MsgPagerMessage& report = (const PagerDemod::MsgPagerMessage&) message;
         messageReceived(report.getDateTime(), report.getAddress(), report.getFunctionBits(),
             report.getNumericMessage(), report.getAlphaMessage(),
             report.getEvenParityErrors(), report.getBCHParityErrors());
@@ -276,7 +312,7 @@ bool PagerDemodGUI::handleMessage(const Message& message)
     }
     else if (DSPSignalNotification::match(message))
     {
-        DSPSignalNotification& notif = (DSPSignalNotification&) message;
+        const DSPSignalNotification& notif = (const DSPSignalNotification&) message;
         m_deviceCenterFrequency = notif.getCenterFrequency();
         m_basebandSampleRate = notif.getSampleRate();
         ui->deltaFrequency->setValueRange(false, 7, -m_basebandSampleRate/2, m_basebandSampleRate/2);
@@ -398,7 +434,7 @@ void PagerDemodGUI::filterRow(int row)
     if (m_settings.m_filterAddress != "")
     {
         QRegExp re(m_settings.m_filterAddress);
-        QTableWidgetItem *fromItem = ui->messages->item(row, MESSAGE_COL_ADDRESS);
+        QTableWidgetItem *fromItem = ui->messages->item(row, PagerDemodSettings::MESSAGE_COL_ADDRESS);
         if (!re.exactMatch(fromItem->text())) {
             hidden = true;
         }
@@ -479,7 +515,8 @@ PagerDemodGUI::PagerDemodGUI(PluginAPI* pluginAPI, DeviceUISet *deviceUISet, Bas
     m_deviceCenterFrequency(0),
     m_basebandSampleRate(1),
     m_doApplySettings(true),
-    m_tickCount(0)
+    m_tickCount(0),
+    m_speech(nullptr)
 {
     setAttribute(Qt::WA_DeleteOnClose, true);
     m_helpURL = "plugins/channelrx/demodpager/readme.md";
@@ -525,6 +562,9 @@ PagerDemodGUI::PagerDemodGUI(PluginAPI* pluginAPI, DeviceUISet *deviceUISet, Bas
     connect(&m_channelMarker, SIGNAL(changedByCursor()), this, SLOT(channelMarkerChangedByCursor()));
     connect(&m_channelMarker, SIGNAL(highlightedByCursor()), this, SLOT(channelMarkerHighlightedByCursor()));
     connect(getInputMessageQueue(), SIGNAL(messageEnqueued()), this, SLOT(handleInputMessages()));
+
+    CRightClickEnabler *filterDuplicatesRightClickEnabler = new CRightClickEnabler(ui->filterDuplicates);
+    connect(filterDuplicatesRightClickEnabler, SIGNAL(rightClick(const QPoint &)), this, SLOT(on_filterDuplicates_rightClicked(const QPoint &)));
 
     // Resize the table using dummy data
     resizeTable();
@@ -575,6 +615,7 @@ void PagerDemodGUI::customContextMenuRequested(QPoint pos)
 
 PagerDemodGUI::~PagerDemodGUI()
 {
+    clearFromMap();
     delete ui;
 }
 
@@ -638,6 +679,8 @@ void PagerDemodGUI::displaySettings()
     ui->logFilename->setToolTip(QString(".csv log filename: %1").arg(m_settings.m_logFilename));
     ui->logEnable->setChecked(m_settings.m_logEnabled);
 
+    ui->filterDuplicates->setChecked(m_settings.m_filterDuplicates);
+
     // Order and size columns
     QHeaderView *header = ui->messages->horizontalHeader();
 
@@ -656,6 +699,7 @@ void PagerDemodGUI::displaySettings()
     getRollupContents()->restoreState(m_rollupState);
     updateAbsoluteCenterFrequency();
     blockApplySettings(false);
+    enableSpeechIfNeeded();
 }
 
 void PagerDemodGUI::leaveEvent(QEvent* event)
@@ -693,12 +737,39 @@ void PagerDemodGUI::tick()
 void PagerDemodGUI::on_charset_clicked()
 {
     PagerDemodCharsetDialog dialog(&m_settings);
-    if (dialog.exec() == QDialog::Accepted)
-    {
+    new DialogPositioner(&dialog, true);
+    if (dialog.exec() == QDialog::Accepted) {
         applySettings();
     }
 }
 
+void PagerDemodGUI::on_notifications_clicked()
+{
+    PagerDemodNotificationDialog dialog(&m_settings);
+    new DialogPositioner(&dialog, true);
+    if (dialog.exec() == QDialog::Accepted)
+    {
+        enableSpeechIfNeeded();
+        applySettings();
+    }
+}
+
+void PagerDemodGUI::on_filterDuplicates_clicked(bool checked)
+{
+    m_settings.m_filterDuplicates = checked;
+    applySettings();
+}
+
+void PagerDemodGUI::on_filterDuplicates_rightClicked(const QPoint &p)
+{
+    (void) p;
+
+    PagerDemodFilterDialog dialog(&m_settings);
+    new DialogPositioner(&dialog, true);
+    if (dialog.exec() == QDialog::Accepted) {
+        applySettings();
+    }
+}
 
 void PagerDemodGUI::on_logEnable_clicked(bool checked)
 {
@@ -813,6 +884,8 @@ void PagerDemodGUI::makeUIConnections()
     QObject::connect(ui->udpEnabled, &QCheckBox::clicked, this, &PagerDemodGUI::on_udpEnabled_clicked);
     QObject::connect(ui->udpAddress, &QLineEdit::editingFinished, this, &PagerDemodGUI::on_udpAddress_editingFinished);
     QObject::connect(ui->udpPort, &QLineEdit::editingFinished, this, &PagerDemodGUI::on_udpPort_editingFinished);
+    QObject::connect(ui->notifications, &QToolButton::clicked, this, &PagerDemodGUI::on_notifications_clicked);
+    QObject::connect(ui->filterDuplicates, &ButtonSwitch::clicked, this, &PagerDemodGUI::on_filterDuplicates_clicked);
     QObject::connect(ui->logEnable, &ButtonSwitch::clicked, this, &PagerDemodGUI::on_logEnable_clicked);
     QObject::connect(ui->logFilename, &QToolButton::clicked, this, &PagerDemodGUI::on_logFilename_clicked);
     QObject::connect(ui->logOpen, &QToolButton::clicked, this, &PagerDemodGUI::on_logOpen_clicked);
@@ -823,4 +896,179 @@ void PagerDemodGUI::makeUIConnections()
 void PagerDemodGUI::updateAbsoluteCenterFrequency()
 {
     setStatusFrequency(m_deviceCenterFrequency + m_settings.m_inputFrequencyOffset);
+}
+
+// Initialise text to speech engine
+// This takes 10 seconds on some versions of Linux, so only do it, if user actually
+// has speech notifications configured
+void PagerDemodGUI::enableSpeechIfNeeded()
+{
+#ifdef QT_TEXTTOSPEECH_FOUND
+    if (m_speech) {
+        return;
+    }
+    for (const auto& notification : m_settings.m_notificationSettings)
+    {
+        if (!notification->m_speech.isEmpty())
+        {
+            qDebug() << "PagerDemodGUI: Enabling text to speech";
+            m_speech = new QTextToSpeech(this);
+            return;
+        }
+    }
+#endif
+}
+
+void PagerDemodGUI::checkNotification(int row)
+{
+    QString address = ui->messages->item(row, PagerDemodSettings::MESSAGE_COL_ADDRESS)->text();
+    QString message = ui->messages->item(row, PagerDemodSettings::MESSAGE_COL_MESSAGE)->text();
+
+    for (int i = 0; i < m_settings.m_notificationSettings.size(); i++)
+    {
+        QString match;
+        switch (m_settings.m_notificationSettings[i]->m_matchColumn)
+        {
+        case PagerDemodSettings::MESSAGE_COL_ADDRESS:
+            match = address;
+            break;
+        case PagerDemodSettings::MESSAGE_COL_MESSAGE:
+            match = message;
+            break;
+        }
+        if (!match.isEmpty())
+        {
+            if (m_settings.m_notificationSettings[i]->m_regularExpression.isValid())
+            {
+                QRegularExpressionMatch matchResult = m_settings.m_notificationSettings[i]->m_regularExpression.match(match);
+                if (matchResult.hasMatch())
+                {
+                    if (m_settings.m_notificationSettings[i]->m_highlight) {
+                        ui->messages->item(row, PagerDemodSettings::MESSAGE_COL_MESSAGE)->setForeground(QBrush(m_settings.m_notificationSettings[i]->m_highlightColor));
+                    }
+
+                    if (!m_settings.m_notificationSettings[i]->m_speech.isEmpty())
+                    {
+                        QString speech = subStrings(address, message, matchResult, m_settings.m_notificationSettings[i]->m_speech);
+
+                        speechNotification(speech);
+                    }
+                    if (!m_settings.m_notificationSettings[i]->m_command.isEmpty())
+                    {
+                        QString command = subStrings(address, message, matchResult, m_settings.m_notificationSettings[i]->m_command);
+
+                        commandNotification(command);
+                    }
+                    if (m_settings.m_notificationSettings[i]->m_plotOnMap)
+                    {
+                        float latitude;
+                        float longitude;
+
+                        if (Units::stringToLatitudeAndLongitude(message, latitude, longitude, false))
+                        {
+                            QDateTime dateTime;
+
+                            dateTime.setDate(QDate::fromString(ui->messages->item(row, PagerDemodSettings::MESSAGE_COL_DATE)->text()));
+                            dateTime.setTime(QTime::fromString(ui->messages->item(row, PagerDemodSettings::MESSAGE_COL_TIME)->text()));
+
+                            sendToMap(address, message, latitude, longitude, dateTime);
+                        }
+                    }
+                }
+            }
+        }
+    }
+}
+
+QString PagerDemodGUI::subStrings(const QString& address, const QString& message, const QRegularExpressionMatch& match, const QString &string) const
+{
+    QString s = string;
+    s = s.replace("${address}", address);
+    s = s.replace("${message}", message);
+    for (int i = 0; i < match.capturedTexts().size(); i++)
+    {
+        QString escape = QString("${%1}").arg(i);
+        s = s.replace(escape, match.capturedTexts()[i]);
+    }
+    return s;
+}
+
+void PagerDemodGUI::speechNotification(const QString &speech)
+{
+#ifdef QT_TEXTTOSPEECH_FOUND
+    if (m_speech) {
+        m_speech->say(speech);
+    } else {
+        qWarning() << "PagerDemodGUI::speechNotification: Unable to say " << speech;
+    }
+#else
+    qWarning() << "PagerDemodGUI::speechNotification: TextToSpeech not supported. Unable to say " << speech;
+#endif
+}
+
+void PagerDemodGUI::commandNotification(const QString &command)
+{
+#if QT_CONFIG(process)
+    QStringList allArgs = QProcess::splitCommand(command);
+
+    if (allArgs.size() > 0)
+    {
+        QString program = allArgs[0];
+        allArgs.pop_front();
+        QProcess::startDetached(program, allArgs);
+    }
+#else
+    qWarning() << "PagerDemodGUI::commandNotification: QProcess not supported. Can't run: " << command;
+#endif
+}
+
+void PagerDemodGUI::sendToMap(const QString& address, const QString& message, float latitude, float longitude, QDateTime dateTime)
+{
+    QList<ObjectPipe*> mapPipes;
+    MainCore::instance()->getMessagePipes().getMessagePipes(m_pagerDemod, "mapitems", mapPipes);
+
+    for (const auto& pipe : mapPipes)
+    {
+        MessageQueue *messageQueue = qobject_cast<MessageQueue*>(pipe->m_element);
+        SWGSDRangel::SWGMapItem *swgMapItem = new SWGSDRangel::SWGMapItem();
+        swgMapItem->setName(new QString(address));
+        swgMapItem->setLatitude(latitude);
+        swgMapItem->setLongitude(longitude);
+        swgMapItem->setAltitude(0);
+        swgMapItem->setAltitudeReference(1); // CLAMP_TO_GROUND
+        swgMapItem->setFixedPosition(false);
+        swgMapItem->setPositionDateTime(new QString(dateTime.toString(Qt::ISODateWithMs)));
+
+        swgMapItem->setImageRotation(0);
+        swgMapItem->setText(new QString(message));
+        swgMapItem->setImage(new QString(QString("pager.png")));
+
+        MainCore::MsgMapItem *msg = MainCore::MsgMapItem::create(m_pagerDemod, swgMapItem);
+        messageQueue->push(msg);
+    }
+
+    m_mapItems.insert(address);
+}
+
+// Clear all items from map
+void PagerDemodGUI::clearFromMap()
+{
+    for (const auto& address : m_mapItems)
+    {
+        QList<ObjectPipe*> mapPipes;
+        MainCore::instance()->getMessagePipes().getMessagePipes(m_pagerDemod, "mapitems", mapPipes);
+
+        for (const auto& pipe : mapPipes)
+        {
+            MessageQueue *messageQueue = qobject_cast<MessageQueue*>(pipe->m_element);
+            SWGSDRangel::SWGMapItem *swgMapItem = new SWGSDRangel::SWGMapItem();
+            swgMapItem->setName(new QString(address));
+            swgMapItem->setImage(new QString(QString("")));
+
+            MainCore::MsgMapItem *msg = MainCore::MsgMapItem::create(m_pagerDemod, swgMapItem);
+            messageQueue->push(msg);
+        }
+    }
+
+    m_mapItems.clear();
 }

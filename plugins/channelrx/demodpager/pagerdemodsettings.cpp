@@ -20,6 +20,7 @@
 
 #include <QColor>
 #include <QDataStream>
+#include <QDebug>
 
 #include "util/simpleserializer.h"
 #include "settings/serializable.h"
@@ -59,6 +60,9 @@ void PagerDemodSettings::resetToDefaults()
     m_reverse = false;
     m_workspaceIndex = 0;
     m_hidden = false;
+    m_filterDuplicates = false;
+    m_duplicateMatchMessageOnly = false;
+    m_duplicateMatchLastOnly = false;
 
     for (int i = 0; i < PAGERDEMOD_MESSAGE_COLUMNS; i++)
     {
@@ -109,6 +113,11 @@ QByteArray PagerDemodSettings::serialize() const
     s.writeS32(28, m_workspaceIndex);
     s.writeBlob(29, m_geometryBytes);
     s.writeBool(30, m_hidden);
+
+    s.writeList(31, m_notificationSettings);
+    s.writeBool(32, m_filterDuplicates);
+    s.writeBool(33, m_duplicateMatchMessageOnly);
+    s.writeBool(34, m_duplicateMatchLastOnly);
 
     for (int i = 0; i < PAGERDEMOD_MESSAGE_COLUMNS; i++) {
         s.writeS32(100 + i, m_messageColumnIndexes[i]);
@@ -205,6 +214,12 @@ bool PagerDemodSettings::deserialize(const QByteArray& data)
         d.readBlob(29, &m_geometryBytes);
         d.readBool(30, &m_hidden, false);
 
+        d.readList(31, &m_notificationSettings);
+
+        d.readBool(32, &m_filterDuplicates);
+        d.readBool(33, &m_duplicateMatchMessageOnly);
+        d.readBool(34, &m_duplicateMatchLastOnly);
+
         for (int i = 0; i < PAGERDEMOD_MESSAGE_COLUMNS; i++) {
             d.readS32(100 + i, &m_messageColumnIndexes[i], i);
         }
@@ -236,4 +251,81 @@ void PagerDemodSettings::deserializeIntList(const QByteArray& data, QList<qint32
     QDataStream *stream = new QDataStream(data);
     (*stream) >> ints;
     delete stream;
+}
+
+PagerDemodSettings::NotificationSettings::NotificationSettings() :
+    m_matchColumn(PagerDemodSettings::MESSAGE_COL_ADDRESS),
+    m_highlight(false),
+    m_highlightColor(Qt::red),
+    m_plotOnMap(false)
+{
+}
+
+void PagerDemodSettings::NotificationSettings::updateRegularExpression()
+{
+    m_regularExpression.setPattern(m_regExp);
+    m_regularExpression.optimize();
+    if (!m_regularExpression.isValid()) {
+        qDebug() << "PagerDemodSettings::NotificationSettings: Regular expression is not valid: " << m_regExp;
+    }
+}
+
+QByteArray PagerDemodSettings::NotificationSettings::serialize() const
+{
+    SimpleSerializer s(1);
+
+    s.writeS32(1, m_matchColumn);
+    s.writeString(2, m_regExp);
+    s.writeString(3, m_speech);
+    s.writeString(4, m_command);
+    s.writeBool(5, m_highlight);
+    s.writeS32(6, m_highlightColor);
+    s.writeBool(7, m_plotOnMap);
+
+    return s.final();
+}
+
+bool PagerDemodSettings::NotificationSettings::deserialize(const QByteArray& data)
+{
+    SimpleDeserializer d(data);
+
+    if (!d.isValid()) {
+        return false;
+    }
+
+    if (d.getVersion() == 1)
+    {
+        QByteArray blob;
+
+        d.readS32(1, &m_matchColumn);
+        d.readString(2, &m_regExp);
+        d.readString(3, &m_speech);
+        d.readString(4, &m_command);
+        d.readBool(5, &m_highlight, false);
+        d.readS32(6, &m_highlightColor, QColor(Qt::red).rgba());
+        d.readBool(7, &m_plotOnMap, false);
+
+        updateRegularExpression();
+
+        return true;
+    }
+    else
+    {
+        return false;
+    }
+}
+
+QDataStream& operator<<(QDataStream& out, const PagerDemodSettings::NotificationSettings *settings)
+{
+    out << settings->serialize();
+    return out;
+}
+
+QDataStream& operator>>(QDataStream& in, PagerDemodSettings::NotificationSettings*& settings)
+{
+    settings = new PagerDemodSettings::NotificationSettings();
+    QByteArray data;
+    in >> data;
+    settings->deserialize(data);
+    return in;
 }

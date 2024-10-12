@@ -38,6 +38,7 @@ const QStringList MapSettings::m_pipeTypes = {
     QStringLiteral("FT8Demod"),
     QStringLiteral("HeatMap"),
     QStringLiteral("ILSDemod"),
+    QStringLiteral("PagerDemod"),
     QStringLiteral("Radiosonde"),
     QStringLiteral("StarTracker"),
     QStringLiteral("SatelliteTracker"),
@@ -55,6 +56,7 @@ const QStringList MapSettings::m_pipeURIs = {
     QStringLiteral("sdrangel.channel.ft8demod"),
     QStringLiteral("sdrangel.channel.heatmap"),
     QStringLiteral("sdrangel.channel.ilsdemod"),
+    QStringLiteral("sdrangel.channel.pagerdemod"),
     QStringLiteral("sdrangel.feature.radiosonde"),
     QStringLiteral("sdrangel.feature.startracker"),
     QStringLiteral("sdrangel.feature.satellitetracker"),
@@ -96,6 +98,7 @@ MapSettings::MapSettings() :
     m_itemSettings.insert("StarTracker", new MapItemSettings("StarTracker", true,  QColor(230, 230, 230), true, true, 3));
     m_itemSettings.insert("SatelliteTracker", new MapItemSettings("SatelliteTracker", true, QColor(0, 0, 255), true, false, 0, modelMinPixelSize));
     m_itemSettings.insert("Beacons", new MapItemSettings("Beacons", true, QColor(255, 0, 0), false, true, 8));
+    m_itemSettings.insert("PagerDemod", new MapItemSettings("PagerDemod", true, QColor(200, 191, 231), true, false, 11));
     m_itemSettings.insert("Radiosonde", new MapItemSettings("Radiosonde", true, QColor(102, 0, 102), true, false, 11, modelMinPixelSize));
     m_itemSettings.insert("Radio Time Transmitters", new MapItemSettings("Radio Time Transmitters", true, QColor(255, 0, 0), false, true, 8));
     m_itemSettings.insert("Radar", new MapItemSettings("Radar", true, QColor(255, 0, 0), false, true, 8));

@@ -20,6 +20,7 @@
 #define INCLUDE_PAGERDEMODGUI_H
 
 #include <QMenu>
+#include <QTextToSpeech>
 
 #include "channel/channelgui.h"
 #include "dsp/channelmarker.h"
@@ -45,6 +46,7 @@ class PagerDemodGUI : public ChannelGUI {
     Q_OBJECT
 
 public:
+
     static PagerDemodGUI* create(PluginAPI* pluginAPI, DeviceUISet *deviceUISet, BasebandSampleSink *rxChannel);
     virtual void destroy();
 
@@ -86,12 +88,18 @@ private:
 
     QMenu *messagesMenu;                        // Column select context menu
 
+#ifdef QT_TEXTTOSPEECH_FOUND
+    QTextToSpeech *m_speech;
+#endif
+    QSet<QString> m_mapItems;
+
     explicit PagerDemodGUI(PluginAPI* pluginAPI, DeviceUISet *deviceUISet, BasebandSampleSink *rxChannel, QWidget* parent = 0);
     virtual ~PagerDemodGUI();
 
     void blockApplySettings(bool block);
     void applySettings(bool force = false);
     void displaySettings();
+    QString selectMessage(int functionBits, const QString &numericMessage, const QString &alphaMessage) const;
     void messageReceived(const QDateTime dateTime, int address, int functionBits,
         const QString &numericMessage, const QString &alphaMessage,
         int evenParityErrors, int bchParityErrors);
@@ -105,17 +113,13 @@ private:
     void resizeTable();
     QAction *createCheckableItem(QString& text, int idx, bool checked, const char *slot);
 
-    enum MessageCol {
-        MESSAGE_COL_DATE,
-        MESSAGE_COL_TIME,
-        MESSAGE_COL_ADDRESS,
-        MESSAGE_COL_MESSAGE,
-        MESSAGE_COL_FUNCTION,
-        MESSAGE_COL_ALPHA,
-        MESSAGE_COL_NUMERIC,
-        MESSAGE_COL_EVEN_PE,
-        MESSAGE_COL_BCH_PE
-    };
+    void enableSpeechIfNeeded();
+    void checkNotification(int row);
+    void speechNotification(const QString &speech);
+    void commandNotification(const QString &command);
+    QString subStrings(const QString& address, const QString& message, const QRegularExpressionMatch& match, const QString &string) const;
+    void sendToMap(const QString& address, const QString& message, float latitide, float longitude, QDateTime dateTime);
+    void clearFromMap();
 
 private slots:
     void on_deltaFrequency_changed(qint64 value);
@@ -131,6 +135,9 @@ private slots:
     void on_udpPort_editingFinished();
     void on_channel1_currentIndexChanged(int index);
     void on_channel2_currentIndexChanged(int index);
+    void on_notifications_clicked();
+    void on_filterDuplicates_clicked(bool checked=false);
+    void on_filterDuplicates_rightClicked(const QPoint &);
     void on_logEnable_clicked(bool checked=false);
     void on_logFilename_clicked();
     void on_logOpen_clicked();

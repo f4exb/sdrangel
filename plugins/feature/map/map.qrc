@@ -25,6 +25,7 @@
     <file>map/airport_small.png</file>
     <file>map/heliport.png</file>
     <file>map/waypoint.png</file>
+    <file>map/pager.png</file>
     <file>map/map3d.html</file>
     <file>data/transmitters.csv</file>
   </qresource>

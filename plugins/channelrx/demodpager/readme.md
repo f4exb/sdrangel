@@ -1,4 +1,4 @@
-<h1>Pager demodulator plugin</h1>
+﻿<h1>Pager demodulator plugin</h1>
 
 <h2>Introduction</h2>
 
@@ -38,7 +38,7 @@ Specifies the pager modulation. Currently only POCSAG is supported.
 
 POCSAG uses FSK with 4.5kHz frequency shift, at 512, 1200 or 2400 baud.
 High frequency is typically 0, with low 1, but occasionally this appears to be reversed, so the demodulator supports either.
-Data is framed as specified in ITU-R M.584-2: https://www.itu.int/dms_pubrec/itu-r/rec/m/R-REC-M.584-2-199711-I!!PDF-E.pdf
+Data is framed as specified in [ITU-R M.584-2](https://www.itu.int/dms_pubrec/itu-r/rec/m/R-REC-M.584-2-199711-I!!PDF-E.pdf)
 
 <h3>7: Baud</h3>
 
@@ -86,15 +86,45 @@ IP address of the host to forward received messages to via UDP.
 
 UDP port number to forward received messages to.
 
-<h3>15: Start/stop Logging Messages to .csv File</h3>
+<h3>15: Filter Duplicates</h3>
+
+Check to filter (discard) duplicate messages. Right click to show the Duplicate Filter options dialog:
+
+- Match message only: When unchecked, compare address and message. When checked, compare only message, ignoring the address.
+- Match last message only: When unchecked the message is compared against all messages in the table. When checked, the message is compared against the last received message only.
+
+<h3>16: Open Notifications Dialog</h3>
+
+When clicked, opens the Notifications Dialog, which allows speech notifications or programs/scripts to be run when messages matching user-defined rules are received.
+
+By running a program such as [cmail](https://www.inveigle.net/cmail/download) on Windows or sendmail on Linux, e-mail notifications can be sent containing the received message.
+
+Messages can be highlighted in a user-defined colour, selected in the Highlight column.
+
+By checking Plot on Map, if a message contains a position specified as latitude and longitude, the message can be displayed on the [Map](../../feature/map/readme.md) feature.
+The format of the coordinates should follow [ISO 6709](https://en.wikipedia.org/wiki/ISO_6709), E.g: 50°40′46″N 95°48′26″W or -23.342,5.234
+
+Here are a few examples:
+
+![Notifications Dialog](../../../doc/img/PagerDemod_plugin_notifications.png)
+
+In the Speech and Command strings, variables can be used to substitute data from the received message:
+
+* ${address},
+* ${message},
+* ${1}, ${2}... are replaced with the string from the corresponding capture group in the regular expression.
+
+To experiment with regular expressions, try [https://regexr.com/](https://regexr.com/).
+
+<h3>17: Start/stop Logging Messages to .csv File</h3>
 
 When checked, writes all received messages to a .csv file.
 
-<h3>16: .csv Log Filename</h3>
+<h3>18: .csv Log Filename</h3>
 
 Click to specify the name of the .csv file which received messages are logged to.
 
-<h3>17: Read Data from .csv File</h3>
+<h3>19: Read Data from .csv File</h3>
 
 Click to specify a previously written .csv log file, which is read and used to update the table.
 

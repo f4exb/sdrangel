@@ -80,6 +80,15 @@
       "cacheVariables": {
         "ENABLE_QT6": "ON"
       }
+    },
+    {
+      "name": "default-qt6-windows",
+      "inherits": "default-windows",
+      "binaryDir": "${sourceDir}/build-qt6",
+      "cacheVariables": {
+        "ENABLE_QT6": "ON",
+        "CMAKE_PREFIX_PATH": "C:/Qt/6.7.3/msvc2022_64;C:/Applications/boost_1_81_0"
+      }
     }
   ],
   "buildPresets": [
@@ -94,6 +103,10 @@
     {
       "name": "default-qt6",
       "configurePreset": "default-qt6"
+    },
+    {
+      "name": "default-qt6-windows",
+      "configurePreset": "default-qt6-windows"
     }
   ]
 }

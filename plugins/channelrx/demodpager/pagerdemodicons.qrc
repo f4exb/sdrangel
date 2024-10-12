@@ -1,0 +1,5 @@
+<RCC>
+  <qresource prefix="/">
+    <file>icons/filterduplicate.png</file>
+  </qresource>
+</RCC>
