@@ -36,7 +36,7 @@ class RTLSDRThread : public QThread {
 	Q_OBJECT
 
 public:
-	RTLSDRThread(rtlsdr_dev_t* dev, SampleSinkFifo* sampleFifo, ReplayBuffer<quint8> *replayBuffer, const RTLSDRSettings& settings, QObject* parent = NULL);
+	RTLSDRThread(rtlsdr_dev_t* dev, SampleSinkFifo* sampleFifo, ReplayBuffer<quint8> *replayBuffer, const RTLSDRSettings& settings, QObject* parent = nullptr);
 	~RTLSDRThread();
 
 	void startWork();

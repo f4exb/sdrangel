@@ -374,7 +374,7 @@ void RTLSDRThread::handleInputMessages()
 {
     Message* message;
 
-    while ((message = m_inputMessageQueue.pop()) != 0)
+    while ((message = m_inputMessageQueue.pop()) != nullptr)
     {
         if (handleMessage(*message)) {
             delete message;
@@ -386,7 +386,7 @@ bool RTLSDRThread::handleMessage(const Message& cmd)
 {
     if (RTLSDRInput::MsgConfigureRTLSDR::match(cmd))
     {
-        RTLSDRInput::MsgConfigureRTLSDR& conf = (RTLSDRInput::MsgConfigureRTLSDR&) cmd;
+        auto& conf = (const RTLSDRInput::MsgConfigureRTLSDR&) cmd;
 
         applySettings(conf.getSettings(), conf.getSettingsKeys(), conf.getForce());
 
