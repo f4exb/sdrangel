@@ -52,7 +52,6 @@ RTLSDRThread::~RTLSDRThread()
 
 void RTLSDRThread::startWork()
 {
-    qDebug() << "RTLSDRThread::startWork";
     connect(&m_inputMessageQueue, &MessageQueue::messageEnqueued, this, &RTLSDRThread::handleInputMessages);
 	m_startWaitMutex.lock();
 	start();
@@ -63,7 +62,6 @@ void RTLSDRThread::startWork()
 
 void RTLSDRThread::stopWork()
 {
-    qDebug() << "RTLSDRThread::stopWork";
     if (m_running)
     {
         disconnect(&m_inputMessageQueue, &MessageQueue::messageEnqueued, this, &RTLSDRThread::handleInputMessages);

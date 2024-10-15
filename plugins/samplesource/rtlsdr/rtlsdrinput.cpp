@@ -343,7 +343,6 @@ void RTLSDRInput::setCenterFrequency(qint64 centerFrequency)
 
 bool RTLSDRInput::handleMessage(const Message& message)
 {
-    qDebug() << "RTLSDRInput::handleMessage";
     if (MsgConfigureRTLSDR::match(message))
     {
         auto& conf = (const MsgConfigureRTLSDR&) message;
