@@ -241,7 +241,7 @@ bool RTLSDRInput::start()
 
     qDebug("RTLSDRInput::start");
 
-	m_rtlSDRThread = new RTLSDRThread(m_dev, &m_sampleFifo, &m_replayBuffer, m_settings);
+    m_rtlSDRThread = new RTLSDRThread(m_dev, &m_sampleFifo, &m_replayBuffer, m_settings);
     connect(m_rtlSDRThread, &QThread::finished, m_rtlSDRThread, &QObject::deleteLater);
 	m_rtlSDRThread->startWork();
 	m_running = true;
