@@ -46,17 +46,18 @@ RTLSDRThread::~RTLSDRThread()
 {
     qDebug() << "RTLSDRThread::~RTLSDRThread";
     if (m_running) {
-	    stopWork();
+        stopWork();
     }
 }
 
 void RTLSDRThread::startWork()
 {
     connect(&m_inputMessageQueue, &MessageQueue::messageEnqueued, this, &RTLSDRThread::handleInputMessages);
-	m_startWaitMutex.lock();
-	start();
-	while(!m_running)
-		m_startWaiter.wait(&m_startWaitMutex, 100);
+    m_startWaitMutex.lock();
+    start();
+    while (!m_running) {
+        m_startWaiter.wait(&m_startWaitMutex, 100);
+    }
 	m_startWaitMutex.unlock();
 }
 
@@ -65,9 +66,9 @@ void RTLSDRThread::stopWork()
     if (m_running)
     {
         disconnect(&m_inputMessageQueue, &MessageQueue::messageEnqueued, this, &RTLSDRThread::handleInputMessages);
-	    m_running = false; // Cause run() to finish
+        m_running = false; // Cause run() to finish
 #ifndef __EMSCRIPTEN__
-    	wait();
+        wait();
 #endif
     }
 }
@@ -79,25 +80,25 @@ void RTLSDRThread::run()
 	m_running = true;
 	m_startWaiter.wakeAll();
 
-	while (m_running)
+    while (m_running)
     {
 #ifndef __EMSCRIPTEN__
-		if ((res = rtlsdr_read_async(m_dev, &RTLSDRThread::callbackHelper, this, 32, FCD_BLOCKSIZE)) < 0)
+        if ((res = rtlsdr_read_async(m_dev, &RTLSDRThread::callbackHelper, this, 32, FCD_BLOCKSIZE)) < 0)
         {
             if (m_running) {
-			    qCritical("RTLSDRThread: async read error: %s", strerror(errno));
+                qCritical("RTLSDRThread: async read error: %s", strerror(errno));
             }
-			break;
-		}
+            break;
+        }
 #else
         int len = 0;
         unsigned char buf[FCD_BLOCKSIZE];
 
-		if ((res = rtlsdr_read_sync(m_dev, buf, sizeof(buf), &len)) < 0)
+        if ((res = rtlsdr_read_sync(m_dev, buf, sizeof(buf), &len)) < 0)
         {
-			qCritical("RTLSDRThread: read error: %s", strerror(errno));
-			break;
-		}
+            qCritical("RTLSDRThread: read error: %s", strerror(errno));
+            break;
+        }
         else
         {
             if (m_settings.m_iqOrder) {
@@ -109,7 +110,7 @@ void RTLSDRThread::run()
 #endif
     }
 
-	m_running = false;
+    m_running = false;
 }
 
 //  Decimate according to specified log2 (ex: log2=4 => decim=16)
