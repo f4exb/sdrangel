@@ -26,6 +26,8 @@
 #include <QWaitCondition>
 #include <rtl-sdr.h>
 
+#include "rtlsdrsettings.h"
+
 #include "dsp/replaybuffer.h"
 #include "dsp/samplesinkfifo.h"
 #include "dsp/decimatorsu.h"
@@ -34,15 +36,12 @@ class RTLSDRThread : public QThread {
 	Q_OBJECT
 
 public:
-	RTLSDRThread(rtlsdr_dev_t* dev, SampleSinkFifo* sampleFifo, ReplayBuffer<quint8> *replayBuffer, QObject* parent = NULL);
+	RTLSDRThread(rtlsdr_dev_t* dev, SampleSinkFifo* sampleFifo, ReplayBuffer<quint8> *replayBuffer, const RTLSDRSettings& settings, QObject* parent = nullptr);
 	~RTLSDRThread();
 
 	void startWork();
 	void stopWork();
-	void setSamplerate(int samplerate);
-	void setLog2Decimation(unsigned int log2_decim);
-	void setFcPos(int fcPos);
-    void setIQOrder(bool iqOrder) { m_iqOrder = iqOrder; }
+	MessageQueue *getInputMessageQueue() { return &m_inputMessageQueue; }
 
 private:
 	QMutex m_startWaitMutex;
@@ -54,10 +53,8 @@ private:
 	SampleSinkFifo* m_sampleFifo;
 	ReplayBuffer<quint8> *m_replayBuffer;
 
-	int m_samplerate;
-	unsigned int m_log2Decim;
-	int m_fcPos;
-    bool m_iqOrder;
+	RTLSDRSettings m_settings;
+	MessageQueue m_inputMessageQueue;  //!< Queue for asynchronous inbound communication
 
 	DecimatorsU<qint32, quint8, SDR_RX_SAMP_SZ, 8, 127, true> m_decimatorsIQ;
 	DecimatorsU<qint32, quint8, SDR_RX_SAMP_SZ, 8, 127, false> m_decimatorsQI;
@@ -66,7 +63,15 @@ private:
 	void callbackIQ(const quint8* buf, qint32 len);
 	void callbackQI(const quint8* buf, qint32 len);
 
+	bool handleMessage(const Message& cmd);
+	bool applySettings(const RTLSDRSettings& settings, const QStringList& settingsKeys, bool force);
+
+#ifndef __EMSCRIPTEN__
 	static void callbackHelper(unsigned char* buf, uint32_t len, void* ctx);
+#endif
+
+private slots:
+	void handleInputMessages();
 };
 
 #endif // INCLUDE_RTLSDRTHREAD_H
