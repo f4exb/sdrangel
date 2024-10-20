@@ -7,7 +7,6 @@ on:
     branches:
       - master
       - mac_ci
-      - win_qt6
     tags:
       - 'v*'
   pull_request:
