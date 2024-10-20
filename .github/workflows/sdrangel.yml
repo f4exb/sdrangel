@@ -76,14 +76,14 @@ jobs:
           dir: ${{matrix.config.QT_INST_DIR}}
           arch: ${{matrix.config.QT_ARCH}}
           setup-python: false
-          modules: 'qtcharts qtscxml'
+          modules: 'qtcharts qtscxml qt5compat qtlocation qtmultimedia qtpositioning qtserialport qtspeech'
       - name: build sdrangel on Windows
         if: startsWith(matrix.config.os, 'windows')
         run: |
           cmd "C:\Program Files\Microsoft Visual Studio\2022\Enterprise\VC\Auxiliary\Build\vcvars64.bat"
           choco install patch
           mkdir build && cd build
-          cmake .. -G "${{ matrix.config.generators }}" -DCMAKE_BUILD_TYPE=Release -DARCH_OPT=SSE4_2 -DDEBUG_OUTPUT=ON -DENABLE_MIRISDR=OFF -DBUILD_SERVER=OFF -DCMAKE_PREFIX_PATH="C:\Qt\6.8.0\msvc2022_64;C:\Libraries\boost_1_73_0"
+          cmake .. -G "${{ matrix.config.generators }}" -DCMAKE_BUILD_TYPE=Release -DENABLE_QT6=ON -DARCH_OPT=SSE4_2 -DDEBUG_OUTPUT=ON -DENABLE_MIRISDR=OFF -DBUILD_SERVER=OFF -DCMAKE_PREFIX_PATH="C:\Qt\6.8.0\msvc2022_64;C:\Libraries\boost_1_73_0"
           cmake --build . --config Release --target package
       - name: Check disk space
         run: Get-PSDrive
