@@ -1,3 +1,26 @@
+sdrangel (7.22.2-1) unstable; urgency=medium
+
+    * ChirpChat: increased preamble symbols limit from 20 to 32. Fixes #2284
+    * RTLSDR: Apply driver settings in RTLSDRThread Add sync read for WebAssembly. PR #2281
+    * SSB demod: fixed GUI and returned to previous threading model. Fixes #2273
+    * HeatMap: Catch memory allocation failures... For #2083 PR #2277
+    * Add default-qt6-windows cmake config. PR #2276
+    * Add pager notifications. Add option to ignore duplicates. Support plotting pager messages on the map. PR #2276
+    * Don't load defaults if loading a preset. PR #2274
+    * DeviceGUI::closeEvent - Don't automatically delete the GUI,.. PR #2274
+    * MainWindow: Add FSMs to avoid blocking on the GUI thread... PR #2274
+    * Fix replay buffer when FixReal is qint16. PR #2270
+    * snap: Try to get version number from latest tag. PR #2270
+    * Add libflac to snap. Set ARCH_OPT to nehalem. PR #2270
+    * Fix flac on Mac. PR #2270
+    * RemoteTCP: Update docs. PR #2270
+    * Map: Fix Kiwi list. Add SDRangel wss support. PR #2270
+    * RemoteTCPSink: Report server init errors via GUI. Send protocol to public list. PR #2270
+    * RemoteTCPInput: Add wss protocol support. PR #2270
+    * Fix DeviceAPI::deserialize. Fixes #2266. PR #2267
+
+-- Edouard Griffiths, F4EXB  <f4exb06@gmail.com>  Sun, 20 Oct 2024 08:26:38 +0200
+
 sdrangel (7.22.1-1) unstable; urgency=medium
 
     * wdsprx: Fix path to help file.
