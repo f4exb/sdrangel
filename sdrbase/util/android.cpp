@@ -95,6 +95,38 @@ void Android::moveTaskToBack()
     }
 }
 
+void Android::acquireWakeLock()
+{
+    QJniObject activity = QJniObject::callStaticObjectMethod("org/qtproject/qt5/android/QtNative", "activity", "()Landroid/app/Activity;");
+    if (activity.isValid()) {
+        activity.callMethod<void>("acquireWakeLock");
+    }
+}
+
+void Android::releaseWakeLock()
+{
+    QJniObject activity = QJniObject::callStaticObjectMethod("org/qtproject/qt5/android/QtNative", "activity", "()Landroid/app/Activity;");
+    if (activity.isValid()) {
+        activity.callMethod<void>("releaseWakeLock");
+    }
+}
+
+void Android::acquireScreenLock()
+{
+    QJniObject activity = QJniObject::callStaticObjectMethod("org/qtproject/qt5/android/QtNative", "activity", "()Landroid/app/Activity;");
+    if (activity.isValid()) {
+        activity.callMethod<void>("acquireScreenLock");
+    }
+}
+
+void Android::releaseScreenLock()
+{
+    QJniObject activity = QJniObject::callStaticObjectMethod("org/qtproject/qt5/android/QtNative", "activity", "()Landroid/app/Activity;");
+    if (activity.isValid()) {
+        activity.callMethod<void>("releaseScreenLock");
+    }
+}
+
 #else // QT_VERSION
 
 #include <QtAndroid>
