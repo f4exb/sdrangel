@@ -24,7 +24,7 @@ jobs:
             WIN_ARCH: "x64",
             os: windows-latest,
             QT_INST_DIR: "C:/",
-            QTDIR: "C:/Qt/5.15.2/msvc2019_64",
+            QTDIR: "C:/Qt/6.7.3/msvc2019_64",
             QT_ARCH: win64_msvc2019_64,
             boost_dl: "${{ github.workspace }}\\downloads\\boost",
             lib_dir: "C:\\Libraries",
@@ -69,19 +69,20 @@ jobs:
           rm -rf boost_*/* download.tar.bz2 download.tar
         shell: bash
       - name: Install Qt
-        uses: jurplel/install-qt-action@v3
+        uses: jurplel/install-qt-action@v4
         with:
+          version: '6.7.3'
           dir: ${{matrix.config.QT_INST_DIR}}
           arch: ${{matrix.config.QT_ARCH}}
           setup-python: false
-          modules: 'qtcharts qtwebengine'
+          modules: 'qtcharts qtscxml qt5compat qtlocation qtmultimedia qtpositioning qtserialport qtspeech qtwebsockets qtwebengine qtshadertools'
       - name: build sdrangel on Windows
         if: startsWith(matrix.config.os, 'windows')
         run: |
-          cmd "C:\Program Files (x86)\Microsoft Visual Studio\2019\Enterprise\VC\Auxiliary\Build\vcvars64.bat"
+          cmd "C:\Program Files\Microsoft Visual Studio\2022\Enterprise\VC\Auxiliary\Build\vcvars64.bat"
           choco install patch
           mkdir build && cd build
-          cmake .. -G "${{ matrix.config.generators }}" -DCMAKE_BUILD_TYPE=Release -DARCH_OPT=SSE4_2 -DDEBUG_OUTPUT=ON -DENABLE_MIRISDR=OFF -DBUILD_SERVER=OFF -DCMAKE_PREFIX_PATH="C:\Qt\5.15.2\msvc2019_64;C:\Libraries\boost_1_73_0"
+          cmake .. -G "${{ matrix.config.generators }}" -DCMAKE_BUILD_TYPE=Release -DENABLE_QT6=ON -DARCH_OPT=SSE4_2 -DDEBUG_OUTPUT=ON -DENABLE_MIRISDR=OFF -DBUILD_SERVER=OFF -DCMAKE_PREFIX_PATH="C:\Qt\6.7.3\msvc2019_64;C:\Libraries\boost_1_73_0"
           cmake --build . --config Release --target package
       - name: Check disk space
         run: Get-PSDrive
