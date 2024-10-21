@@ -22,7 +22,6 @@
 ///////////////////////////////////////////////////////////////////////////////////
 
 #include <QApplication>
-#include <QTextCodec>
 #include <QProxyStyle>
 #include <QStyleFactory>
 #include <QFontDatabase>
@@ -48,10 +47,6 @@
 
 static int runQtApplication(int argc, char* argv[], qtwebapp::LoggerWithFile *logger)
 {
-/*
-	QTextCodec::setCodecForTr(QTextCodec::codecForName("UTF-8"));
-	QTextCodec::setCodecForCStrings(QTextCodec::codecForName("UTF-8"));
-*/
 	QCoreApplication::setOrganizationName(COMPANY);
 	QCoreApplication::setApplicationName(APPLICATION_NAME);
     QCoreApplication::setApplicationVersion(SDRANGEL_VERSION);
