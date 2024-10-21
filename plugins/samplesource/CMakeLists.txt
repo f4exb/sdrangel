@@ -106,7 +106,7 @@ add_subdirectory(audioinput)
 add_subdirectory(kiwisdr)
 add_subdirectory(remotetcpinput)
 
-if(ENABLE_AARONIARTSA)
+if(ENABLE_AARONIARTSA AND NOT ANDROID)
     add_subdirectory(aaroniartsainput)
 else()
     message(STATUS "Not building aaroniartsainput (ENABLE_AARONIARTSA=${ENABLE_AARONIARTSA})")
