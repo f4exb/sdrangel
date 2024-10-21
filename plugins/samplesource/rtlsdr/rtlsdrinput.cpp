@@ -128,7 +128,7 @@ bool RTLSDRInput::openDevice()
         qCritical("RTLSDRInput::openDevice: could not open USB device %s", qPrintable(m_deviceAPI->getSamplingDeviceSerial()));
         return false;
     }
-    if ((res = rtlsdr_open_fd(&m_dev, fd)) < 0)
+    if ((rtlsdr_open_fd(&m_dev, fd)) < 0)
     {
         qCritical("RTLSDRInput::openDevice: could not open RTLSDR: %s", strerror(errno));
         return false;
