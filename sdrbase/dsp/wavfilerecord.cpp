@@ -22,7 +22,7 @@
 
 #include <QDebug>
 #include <QDateTime>
-#include <QRegExp>
+#include <QRegularExpression>
 
 #include "dsp/dspcommands.h"
 #include "util/message.h"
@@ -472,16 +472,19 @@ void WavFileRecord::writeHeader(QFile& sampleFile, Header& header)
 bool WavFileRecord::getCenterFrequency(QString fileName, quint64& centerFrequency)
 {
     // Attempt to extract center frequency from filename
-    QRegExp freqkRE("(([0-9]+)kHz)");
-    QRegExp freqRE("(([0-9]+)Hz)");
-    if (freqkRE.indexIn(fileName))
+    QRegularExpression freqkRE("(([0-9]+)kHz)");
+    QRegularExpression freqRE("(([0-9]+)Hz)");
+    QRegularExpressionMatch freqkREMatch = freqkRE.match(fileName);
+    QRegularExpressionMatch freqREMatch = freqRE.match(fileName);
+
+    if (freqkREMatch.hasMatch())
     {
-        centerFrequency = freqkRE.capturedTexts()[2].toLongLong() * 1000LL;
+        centerFrequency = freqkREMatch.capturedTexts()[2].toLongLong() * 1000LL;
         return true;
     }
-    else if (freqRE.indexIn(fileName))
+    else if (freqREMatch.hasMatch())
     {
-        centerFrequency = freqRE.capturedTexts()[2].toLongLong();
+        centerFrequency = freqREMatch.capturedTexts()[2].toLongLong();
         return true;
     }
     return false;
@@ -490,17 +493,18 @@ bool WavFileRecord::getCenterFrequency(QString fileName, quint64& centerFrequenc
 bool WavFileRecord::getStartTime(QString fileName, QDateTime& startTime)
 {
     // Attempt to extract start time from filename
-    QRegExp dateTimeRE("([12][0-9][0-9][0-9]).?([01][0-9]).?([0-3][0-9]).?([0-2][0-9]).?([0-5][0-9]).?([0-5][0-9])");
-    if (dateTimeRE.indexIn(fileName) != -1)
+    QRegularExpression dateTimeRE("([12][0-9][0-9][0-9]).?([01][0-9]).?([0-3][0-9]).?([0-2][0-9]).?([0-5][0-9]).?([0-5][0-9])");
+    QRegularExpressionMatch match = dateTimeRE.match(fileName);
+    if (match.hasMatch())
     {
         startTime = QDateTime(QDate(
-                                  dateTimeRE.capturedTexts()[1].toInt(),
-                                  dateTimeRE.capturedTexts()[2].toInt(),
-                                  dateTimeRE.capturedTexts()[3].toInt()),
+                                  match.capturedTexts()[1].toInt(),
+                                  match.capturedTexts()[2].toInt(),
+                                  match.capturedTexts()[3].toInt()),
                               QTime(
-                                  dateTimeRE.capturedTexts()[4].toInt(),
-                                  dateTimeRE.capturedTexts()[5].toInt(),
-                                  dateTimeRE.capturedTexts()[6].toInt()));
+                                  match.capturedTexts()[4].toInt(),
+                                  match.capturedTexts()[5].toInt(),
+                                  match.capturedTexts()[6].toInt()));
         return true;
     }
     return false;

@@ -211,6 +211,7 @@ void MapSettings::resetToDefaults()
     m_displayfoF2 = false;
     m_displayRain = false;
     m_displayClouds = false;
+    m_displayRailways = false;
     m_displaySeaMarks = false;
     m_displayNASAGlobalImagery = false;
     m_nasaGlobalImageryIdentifier = "";

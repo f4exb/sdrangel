@@ -29,6 +29,7 @@
 #include "SWGDeviceReport.h"
 #include "SWGAndroidSDRDriverInputReport.h"
 
+#include "util/android.h"
 #include "util/simpleserializer.h"
 #include "dsp/dspcommands.h"
 #include "device/deviceapi.h"

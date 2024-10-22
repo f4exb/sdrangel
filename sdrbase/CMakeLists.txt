@@ -702,7 +702,6 @@ if (LIBSIGMF_FOUND)
 endif()
 if (Qt6_FOUND)
     target_link_libraries(sdrbase
-        Qt::Core5Compat
         Qt::CorePrivate
     )
 endif()

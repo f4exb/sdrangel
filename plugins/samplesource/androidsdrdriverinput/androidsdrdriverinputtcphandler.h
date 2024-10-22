@@ -26,6 +26,7 @@
 #include <QRecursiveMutex>
 #include <QDateTime>
 
+#include "util/message.h"
 #include "util/messagequeue.h"
 #include "util/message.h"
 #include "androidsdrdriverinputsettings.h"
