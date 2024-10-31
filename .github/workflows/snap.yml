@@ -1,0 +1,31 @@
+name: SDRangel snap release build
+
+on:
+  push:
+    branches:
+      - snap
+    tags:
+      - 'v*'
+  pull_request:
+
+jobs:
+  build_snap:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          submodules: true
+          fetch-depth: 0
+      - name: Install Snapcraft
+        uses: samuelmeuli/action-snapcraft@v2
+      - name: Build snap
+        run: |
+          snapcraft
+      - name: Get version
+        id: get_version
+        run: echo "version=$(echo ${{github.ref_name}} | cut -c2-)" >> $env:GITHUB_OUTPUT
+      - name: Upload artifact
+        uses: actions/upload-artifact@v3
+        with:
+          name: sdrangel-${{ steps.get_version.outputs.version }}-amd64.snap
+          path: ${{ github.workspace }}/sdrangel_${{ steps.get_version.outputs.version }}_amd64.snap
