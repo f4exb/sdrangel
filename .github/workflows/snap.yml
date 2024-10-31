@@ -1,3 +1,4 @@
+# See: https://github.com/snapcore/action-build
 name: SDRangel snap release build
 
 on:
@@ -16,11 +17,7 @@ jobs:
         with:
           submodules: true
           fetch-depth: 0
-      - name: Install Snapcraft
-        uses: samuelmeuli/action-snapcraft@v2
-      - name: Build snap
-        run: |
-          snapcraft
+      - uses: snapcore/action-build@v1
       - name: Get version
         id: get_version
         run: echo "version=$(echo ${{github.ref_name}} | cut -c2-)" >> $env:GITHUB_OUTPUT
@@ -28,4 +25,4 @@ jobs:
         uses: actions/upload-artifact@v3
         with:
           name: sdrangel-${{ steps.get_version.outputs.version }}-amd64.snap
-          path: ${{ github.workspace }}/sdrangel_${{ steps.get_version.outputs.version }}_amd64.snap
+          path: ${{ steps.snapcraft.outputs.snap }}
