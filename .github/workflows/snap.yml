@@ -17,11 +17,16 @@ jobs:
         with:
           submodules: true
           fetch-depth: 0
-      - uses: snapcore/action-build@v1
-        id: snapcraft
       - name: Get version
         id: get_version
-        run: echo "version=$(echo ${{github.ref_name}} | cut -c2-)" >> $env:GITHUB_OUTPUT
+        run: |
+            if [[ "${{github.ref_name}" == "snap" ]]; then
+                echo "version=${{github.sha}}" >> $GITHUB_OUTPUT
+            else
+                echo "version=$(echo ${{github.ref_name}} | cut -c2-)" >> $GITHUB_OUTPUT
+            fi
+      - uses: snapcore/action-build@v1
+        id: snapcraft
       - name: Upload artifact
         uses: actions/upload-artifact@v3
         with:
