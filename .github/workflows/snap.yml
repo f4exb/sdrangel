@@ -20,7 +20,7 @@ jobs:
       - name: Get version
         id: get_version
         run: |
-            if [[ "${{github.ref_name}" == "snap" ]]; then
+            if [[ "${{github.ref_name}}" == "snap" ]]; then
                 echo "version=${{github.sha}}" >> $GITHUB_OUTPUT
             else
                 echo "version=$(echo ${{github.ref_name}} | cut -c2-)" >> $GITHUB_OUTPUT
