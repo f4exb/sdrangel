@@ -40,11 +40,7 @@ jobs:
         run: |
           source .venv/bin/activate
           cd build
-          make -j3 all
-      - name: Build dmg
-        run: |
-          cd build
-          make package
+          make -j3 package
       - name: Get version
         id: get_version
         run: echo "version=$(echo ${{github.ref_name}} | cut -c2-)" >> $env:GITHUB_OUTPUT
