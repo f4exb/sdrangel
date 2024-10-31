@@ -18,6 +18,7 @@ jobs:
           submodules: true
           fetch-depth: 0
       - uses: snapcore/action-build@v1
+        id: snapcraft
       - name: Get version
         id: get_version
         run: echo "version=$(echo ${{github.ref_name}} | cut -c2-)" >> $env:GITHUB_OUTPUT
