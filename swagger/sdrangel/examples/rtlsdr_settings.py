@@ -1,4 +1,4 @@
-#!/usr/bin/env python
+#!/usr/bin/env python3
 import requests, json
 
 base_url = "http://127.0.0.1:8091/sdrangel"
@@ -14,7 +14,7 @@ requests_methods = {
 
 def getHwType():
     r = requests.get(url=base_url + "/deviceset/0")
-    if r.status_code / 100 == 2:
+    if r.status_code // 100 == 2:
         rj = r.json()
         devj = rj.get('samplingDevice', None)
         if devj is not None:
@@ -27,8 +27,8 @@ def getHwType():
 
 def selectRtlSdr():
     r = requests.put(url=base_url + "/deviceset/0/device", json={"hwType": "RTLSDR"})
-    if r.status_code / 100 == 2:
-        print json.dumps(r.json(), indent=4, sort_keys=True)
+    if r.status_code // 100 == 2:
+        print(json.dumps(r.json(), indent=4, sort_keys=True))
         return True
     else:
         return False
@@ -36,7 +36,7 @@ def selectRtlSdr():
 
 def getRtlSdrSettings():
     r = requests.get(url=base_url + "/deviceset/0/device/settings")
-    if r.status_code / 100 == 2:
+    if r.status_code // 100 == 2:
         rj = r.json()
         hwType = rj.get('deviceHwType', None)
         if hwType is not None and hwType == "RTLSDR":
@@ -51,10 +51,10 @@ def getRtlSdrSettings():
 def patchRtlSdrSettings(settings):
     new_settings = {"deviceHwType": "RTLSDR", "direction": 0, "rtlSdrSettings": settings}
     r = requests.patch(url=base_url + "/deviceset/0/device/settings", json=new_settings)
-    if r.status_code / 100 == 2:
-        print json.dumps(r.json(), indent=4, sort_keys=True)
+    if r.status_code // 100 == 2:
+        print(json.dumps(r.json(), indent=4, sort_keys=True))
     else:
-        print "Error HTTP:", r.status_code
+        print("Error HTTP:", r.status_code)
 
 
 def deviceRun(run):
@@ -62,10 +62,10 @@ def deviceRun(run):
         r = requests.post(url=base_url + "/deviceset/0/device/run")
     else:
         r = requests.delete(url=base_url + "/deviceset/0/device/run")
-    if r.status_code / 100 == 2:
-        print json.dumps(r.json(), indent=4, sort_keys=True)
+    if r.status_code // 100 == 2:
+        print(json.dumps(r.json(), indent=4, sort_keys=True))
     else:
-        print "Error HTTP:", r.status_code
+        print("Error HTTP:", r.status_code)
 
 
 def main():
@@ -73,8 +73,10 @@ def main():
     if hwType is not None:
         if hwType != "RTLSDR":
             if not selectRtlSdr():
+                print("Device set 0 is not an RTLSDR device")
                 return
     else:
+        print("Device set 0 does not exist")
         return
     settings = getRtlSdrSettings()
     if settings is not None:
