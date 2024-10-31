@@ -2423,7 +2423,8 @@ void GLSpectrumView::peakWidth(const Real *spectrum, int center, int &left, int 
     float prevRight = spectrum[center];
     left = center - 1;
     right = center + 1;
-    while ((left > maxLeft) && (spectrum[left] < prevLeft) && (right < maxRight) && (spectrum[right] < prevRight))
+    // Use <= as SSB spectrums have duplicated values
+    while ((left > maxLeft) && (spectrum[left] <= prevLeft) && (right < maxRight) && (spectrum[right] <= prevRight))
     {
         prevLeft = spectrum[left];
         left--;
