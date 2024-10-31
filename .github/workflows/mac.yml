@@ -18,9 +18,9 @@ jobs:
       - name: Update brew
         run: brew update
       - name: Install brew packages
-        run: brew install nasm subversion
+        run: brew install nasm subversion pipx
       - name: Install python packages for UHD
-        run: pip3 install numpy mako requests Cheetah3 setuptools
+        run: pipx install numpy mako requests Cheetah3 setuptools
       - name: Install Qt
         uses: jurplel/install-qt-action@v4
         with:
