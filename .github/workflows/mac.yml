@@ -43,7 +43,12 @@ jobs:
           make -j3 package
       - name: Get version
         id: get_version
-        run: echo "version=$(echo ${{github.ref_name}} | cut -c2-)" >> $env:GITHUB_OUTPUT
+        run: |
+            if [[ "${{github.ref_name}}" == "mac_ci" ]]; then
+                echo "version=${{github.sha}}" >> $GITHUB_OUTPUT
+            else
+                echo "version=$(echo ${{github.ref_name}} | cut -c2-)" >> $GITHUB_OUTPUT
+            fi
       - name: Get filename
         id: get_filename
         run: echo "filename=$(grep CPACK_PACKAGE_FILE_NAME build/CMakeCache.txt | cut -d "=" -f2)" >> $GITHUB_OUTPUT
