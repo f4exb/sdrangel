@@ -21,7 +21,6 @@ jobs:
           version: '6.7.3'
           host: 'mac'
           arch: 'clang_64'
-          setup-python: false
           modules: 'qtcharts qtscxml qt5compat qtlocation qtmultimedia qtpositioning qtserialport qtspeech qtwebsockets qtwebengine qtshadertools'
       - name: Configure SDRangel
         run: |
