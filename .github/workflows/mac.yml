@@ -18,9 +18,12 @@ jobs:
       - name: Update brew
         run: brew update
       - name: Install brew packages
-        run: brew install nasm subversion pipx
+        run: brew install nasm subversion
       - name: Install python packages for UHD
-        run: pipx install numpy mako requests Cheetah3 setuptools
+        run: |
+          python3 -m venv .venv
+          source .venv/bin/activate
+          python3 -m pip install numpy mako requests Cheetah3 setuptools
       - name: Install Qt
         uses: jurplel/install-qt-action@v4
         with:
@@ -30,10 +33,12 @@ jobs:
           modules: 'qtcharts qtscxml qt5compat qtlocation qtmultimedia qtpositioning qtserialport qtspeech qtwebsockets qtwebengine qtshadertools qtwebchannel'
       - name: Configure SDRangel
         run: |
+          source .venv/bin/activate
           mkdir build && cd build
           cmake .. -DCMAKE_VERBOSE_MAKEFILE=ON -DENABLE_QT6=ON -DCMAKE_BUILD_TYPE=Release -DDEBUG_OUTPUT=ON -DENABLE_CHANNELRX_DEMODDATV=OFF -DENABLE_CHANNELTX_MODDATV=OFF -DENABLE_MIRISDR=OFF -DBUILD_SERVER=OFF -DENABLE_EXTERNAL_LIBRARIES=ON -DBUNDLE=ON -DPKG_CONFIG_USE_CMAKE_PREFIX_PATH=TRUE
       - name: Build SDRangel on Mac
         run: |
+          source .venv/bin/activate
           cd build
           make -j3 all
       - name: Build dmg
