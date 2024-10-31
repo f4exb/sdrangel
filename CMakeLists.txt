@@ -11,7 +11,7 @@ endif()
 list(APPEND CMAKE_MODULE_PATH ${CMAKE_SOURCE_DIR}/cmake/Modules)
 
 # disable only when needed
-set(CMAKE_CXX_STANDARD 14)
+set(CMAKE_CXX_STANDARD 17)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
 set(CMAKE_CXX_EXTENSIONS OFF)
 
@@ -277,6 +277,7 @@ set(INSTALL_PLUGINSSRV_DIR "${INSTALL_LIB_DIR}/pluginssrv")
 if(ANDROID)
   set(PLUGINS_PREFIX    "sdrangel_plugins_")
   set(PLUGINSSRV_PREFIX "sdrangel_pluginssrv_")
+  set(ANDROID_PACKAGE_SOURCE_DIR ${PROJECT_SOURCE_DIR}/android/qt6 CACHE INTERNAL "")
 else()
   set(PLUGINS_PREFIX    "")
   set(PLUGINSSRV_PREFIX "")
@@ -428,7 +429,7 @@ elseif (WIN32)
 elseif(ANDROID)
   set(EXTERNAL_LIBRARY_FOLDER "${CMAKE_SOURCE_DIR}/external/android")
 
-  set(Boost_INCLUDE_DIR "${EXTERNAL_LIBRARY_FOLDER}/ndk_21_boost_1.72.0/include" CACHE INTERNAL "")
+  set(Boost_INCLUDE_DIR "${EXTERNAL_LIBRARY_FOLDER}/ndk_26b_boost_1.83.0/include" CACHE INTERNAL "")
 
   set(FFTW3F_FOUND ON CACHE INTERNAL "")
   set(FFTW3F_INCLUDE_DIRS "${EXTERNAL_LIBRARY_FOLDER}/${ANDROID_ABI}/fftw-3/include" CACHE INTERNAL "")
@@ -485,6 +486,14 @@ elseif(ANDROID)
   set(SWSCALE_INCLUDE_DIRS "${EXTERNAL_LIBRARY_FOLDER}/${ANDROID_ABI}/ffmpeg/include" CACHE INTERNAL "")
   set(SWSCALE_LIBRARIES "${EXTERNAL_LIBRARY_FOLDER}/${ANDROID_ABI}/ffmpeg/lib/libswscale.so" CACHE INTERNAL "")
 
+  set(GGMORSE_FOUND ON CACHE INTERNAL "")
+  set(GGMORSE_INCLUDE_DIR "${EXTERNAL_LIBRARY_FOLDER}/${ANDROID_ABI}/ggmorse/include/" CACHE INTERNAL "")
+  set(GGMORSE_LIBRARIES "${EXTERNAL_LIBRARY_FOLDER}/${ANDROID_ABI}/ggmorse/lib/static/libggmorse.a" CACHE INTERNAL "")
+
+  set(FLAC_FOUND ON CACHE INTERNAL "")
+  set(FLAC_INCLUDE_DIR "${EXTERNAL_LIBRARY_FOLDER}/${ANDROID_ABI}/flac/include/" CACHE INTERNAL "")
+  set(FLAC_LIBRARIES "${EXTERNAL_LIBRARY_FOLDER}/${ANDROID_ABI}/flac/lib/libFLAC.so" CACHE INTERNAL "")
+
   set(LIBUSB_FOUND ON CACHE INTERNAL "")
   set(LIBUSB_INCLUDE_DIR "${EXTERNAL_LIBRARY_FOLDER}/${ANDROID_ABI}/libusb/include/" CACHE INTERNAL "")
   set(LIBUSB_LIBRARIES "${EXTERNAL_LIBRARY_FOLDER}/${ANDROID_ABI}/libusb/lib/libusb1.0.so" CACHE INTERNAL "")
@@ -507,11 +516,6 @@ elseif(ANDROID)
 
   if (ENABLE_QT6)
     set(ANDROID_EXTRA_LIBS
-      ${Qt6_DIR}/../../../android_arm64_v8a/lib/libQt6Charts_arm64-v8a.so
-      ${Qt6_DIR}/../../../android_arm64_v8a/lib/libQt6Concurrent_arm64-v8a.so
-      ${Qt6_DIR}/../../../android_arm64_v8a/lib/libQt6MultimediaWidgets_arm64-v8a.so
-      ${Qt6_DIR}/../../../android_arm64_v8a/lib/libQt6SerialPort_arm64-v8a.so
-      ${Qt6_DIR}/../../../android_arm64_v8a/lib/libQt6TextToSpeech_arm64-v8a.so
       ${EXTERNAL_LIBRARY_FOLDER}/android_openssl/latest/arm64/libssl_1_1.so
       ${EXTERNAL_LIBRARY_FOLDER}/android_openssl/latest/arm64/libcrypto_1_1.so
       ${EXTERNAL_LIBRARY_FOLDER}/${ANDROID_ABI}/ffmpeg/lib/libavcodec.so
@@ -526,6 +530,7 @@ elseif(ANDROID)
       ${EXTERNAL_LIBRARY_FOLDER}/${ANDROID_ABI}/dsdcc/lib/libdsdcc.so
       ${EXTERNAL_LIBRARY_FOLDER}/${ANDROID_ABI}/libusb/lib/libunrooted_android.so
       ${EXTERNAL_LIBRARY_FOLDER}/${ANDROID_ABI}/libusb/lib/libusb1.0.so
+      ${EXTERNAL_LIBRARY_FOLDER}/${ANDROID_ABI}/flac/lib/libFLAC.so
       CACHE INTERNAL ""
     )
   else()
@@ -576,6 +581,7 @@ elseif(ANDROID)
         ${EXTERNAL_LIBRARY_FOLDER}/arm64-v8a/dsdcc/lib/libdsdcc.so
         ${EXTERNAL_LIBRARY_FOLDER}/arm64-v8a/libusb/lib/libunrooted_android.so
         ${EXTERNAL_LIBRARY_FOLDER}/arm64-v8a/libusb/lib/libusb1.0.so
+        ${EXTERNAL_LIBRARY_FOLDER}/arm64-v8a/flac/lib/libFLAC.so
         ${EXTERNAL_LIBRARY_FOLDER}/armeabi-v7a/ffmpeg/lib/libavcodec.so
         ${EXTERNAL_LIBRARY_FOLDER}/armeabi-v7a/ffmpeg/lib/libavdevice.so
         ${EXTERNAL_LIBRARY_FOLDER}/armeabi-v7a/ffmpeg/lib/libavfilter.so
@@ -588,6 +594,7 @@ elseif(ANDROID)
         ${EXTERNAL_LIBRARY_FOLDER}/armeabi-v7a/dsdcc/lib/libdsdcc.so
         ${EXTERNAL_LIBRARY_FOLDER}/armeabi-v7a/libusb/lib/libunrooted_android.so
         ${EXTERNAL_LIBRARY_FOLDER}/armeabi-v7a/libusb/lib/libusb1.0.so
+        ${EXTERNAL_LIBRARY_FOLDER}/armeabi-v7a/flac/lib/libFLAC.so
       CACHE INTERNAL ""
     )
   endif()
@@ -650,8 +657,7 @@ if(ENABLE_QT6)
                      MultimediaWidgets
                      Positioning
                      Charts
-                     SerialPort
-                     Core5Compat)
+                     SerialPort)
 else()
     find_package(Qt5 5.15
                    REQUIRED COMPONENTS
@@ -679,7 +685,8 @@ if (BUILD_GUI)
                             QuickWidgets
                             TextToSpeech
                             Svg
-                            SvgWidgets)
+                            SvgWidgets
+                            StateMachine)
         else()
             find_package(Qt5
                            REQUIRED COMPONENTS

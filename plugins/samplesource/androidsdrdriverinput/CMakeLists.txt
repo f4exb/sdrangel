@@ -60,7 +60,7 @@ target_link_libraries(${TARGET_NAME} PRIVATE
     swagger
 )
 if(NOT ENABLE_QT6 AND ANDROID)
-    target_link_libraries(${TARGET_NAME} Qt::AndroidExtras)
+    target_link_libraries(${TARGET_NAME} PRIVATE Qt::AndroidExtras)
 endif()
 
 install(TARGETS ${TARGET_NAME} DESTINATION ${INSTALL_FOLDER})

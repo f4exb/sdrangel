@@ -26,7 +26,7 @@
 #include <QNetworkDatagram>
 #include <QEventLoop>
 #include <QTimer>
-#include <QRegExp>
+#include <QRegularExpression>
 
 #include "util/ax25.h"
 
@@ -205,11 +205,12 @@ void PERTesterWorker::rx()
 
 void PERTesterWorker::tx()
 {
-    QRegExp ax25Dst("^%\\{ax25\\.dst=([A-Za-z0-9-]+)\\}");
-    QRegExp ax25Src("^%\\{ax25\\.src=([A-Za-z0-9-]+)\\}");
-    QRegExp num("^%\\{num\\}");
-    QRegExp data("^%\\{data=([0-9]+),([0-9]+)\\}");
-    QRegExp hex("^(0x)?([0-9a-fA-F]?[0-9a-fA-F])");
+    QRegularExpression ax25Dst("^%\\{ax25\\.dst=([A-Za-z0-9-]+)\\}");
+    QRegularExpression ax25Src("^%\\{ax25\\.src=([A-Za-z0-9-]+)\\}");
+    QRegularExpression num("^%\\{num\\}");
+    QRegularExpression data("^%\\{data=([0-9]+),([0-9]+)\\}");
+    QRegularExpression hex("^(0x)?([0-9a-fA-F]?[0-9a-fA-F])");
+    QRegularExpressionMatch match;
     QByteArray bytes;
     int pos = 0;
 
@@ -217,34 +218,34 @@ void PERTesterWorker::tx()
     {
         if (m_settings.m_packet[pos] == '%')
         {
-            if (ax25Dst.indexIn(m_settings.m_packet, pos, QRegExp::CaretAtOffset) != -1)
+            if ((match = ax25Dst.match(m_settings.m_packet, pos, QRegularExpression::NormalMatch, QRegularExpression::AnchoredMatchOption)).hasMatch())
             {
                 // AX.25 destination callsign & SSID
-                QString address = ax25Dst.capturedTexts()[1];
+                QString address = match.captured(1);
                 bytes.append(AX25Packet::encodeAddress(address));
-                pos += ax25Dst.matchedLength();
+                pos += match.capturedLength();
             }
-            else if (ax25Src.indexIn(m_settings.m_packet, pos, QRegExp::CaretAtOffset) != -1)
+            else if ((match = ax25Src.match(m_settings.m_packet, pos, QRegularExpression::NormalMatch, QRegularExpression::AnchoredMatchOption)).hasMatch())
             {
                 // AX.25 source callsign & SSID
-                QString address = ax25Src.capturedTexts()[1];
+                QString address = match.captured(1);
                 bytes.append(AX25Packet::encodeAddress(address, 1));
-                pos += ax25Src.matchedLength();
+                pos += match.capturedLength();
             }
-            else if (num.indexIn(m_settings.m_packet, pos, QRegExp::CaretAtOffset) != -1)
+            else if ((match = num.match(m_settings.m_packet, pos, QRegularExpression::NormalMatch, QRegularExpression::AnchoredMatchOption)).hasMatch())
             {
                 // Big endian packet number
                 bytes.append((m_tx >> 24) & 0xff);
                 bytes.append((m_tx >> 16) & 0xff);
                 bytes.append((m_tx >> 8) & 0xff);
                 bytes.append(m_tx & 0xff);
-                pos += num.matchedLength();
+                pos += match.capturedLength();
             }
-            else if (data.indexIn(m_settings.m_packet, pos, QRegExp::CaretAtOffset) != -1)
+            else if ((match = data.match(m_settings.m_packet, pos, QRegularExpression::NormalMatch, QRegularExpression::AnchoredMatchOption)).hasMatch())
             {
                 // Constrained random number of random bytes
-                int minBytes = data.capturedTexts()[1].toInt();
-                int maxBytes = data.capturedTexts()[2].toInt();
+                int minBytes = match.captured(1).toInt();
+                int maxBytes = match.captured(2).toInt();
                 std::random_device rd;
                 std::mt19937 gen(rd());
                 std::uniform_int_distribution<> distr0(minBytes, maxBytes);
@@ -252,7 +253,7 @@ void PERTesterWorker::tx()
                 int count = distr0(gen);
                 for (int i = 0; i < count; i++)
                     bytes.append(distr1(gen));
-                pos += data.matchedLength();
+                pos += match.capturedLength();
             }
             else
             {
@@ -278,12 +279,12 @@ void PERTesterWorker::tx()
                 break;
             }
         }
-        else if (hex.indexIn(m_settings.m_packet, pos, QRegExp::CaretAtOffset) != -1)
+        else if ((match = hex.match(m_settings.m_packet, pos, QRegularExpression::NormalMatch, QRegularExpression::AnchoredMatchOption)).hasMatch())
         {
             // Hex byte
-            int value = hex.capturedTexts()[2].toInt(nullptr, 16);
+            int value = match.captured(2).toInt(nullptr, 16);
             bytes.append(value);
-            pos += hex.matchedLength();
+            pos += match.capturedLength();
         }
         else if ((m_settings.m_packet[pos] == ' ') || (m_settings.m_packet[pos] == ',') || (m_settings.m_packet[pos] == ':'))
         {

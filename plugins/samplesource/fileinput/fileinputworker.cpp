@@ -19,6 +19,9 @@
 #include <stdio.h>
 #include <errno.h>
 #include <QDebug>
+#ifdef ANDROID
+#include <QFile>
+#endif
 
 #include "fileinputworker.h"
 #include "dsp/samplesinkfifo.h"

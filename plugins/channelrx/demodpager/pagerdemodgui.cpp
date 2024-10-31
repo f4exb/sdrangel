@@ -19,7 +19,7 @@
 #include <QDockWidget>
 #include <QDebug>
 #include <QAction>
-#include <QRegExp>
+#include <QRegularExpression>
 #include <QClipboard>
 #include <QFileDialog>
 #include <QMessageBox>
@@ -433,15 +433,15 @@ void PagerDemodGUI::filterRow(int row)
     bool hidden = false;
     if (m_settings.m_filterAddress != "")
     {
-        QRegExp re(m_settings.m_filterAddress);
+        QRegularExpression re(QRegularExpression::anchoredPattern(m_settings.m_filterAddress));
         QTableWidgetItem *fromItem = ui->messages->item(row, PagerDemodSettings::MESSAGE_COL_ADDRESS);
-        if (!re.exactMatch(fromItem->text())) {
+        QRegularExpressionMatch match = re.match(fromItem->text());
+        if (!match.hasMatch()) {
             hidden = true;
         }
     }
     ui->messages->setRowHidden(row, hidden);
 }
-
 void PagerDemodGUI::filter()
 {
     for (int i = 0; i < ui->messages->rowCount(); i++) {

@@ -81,7 +81,10 @@ void PluginManager::loadPluginsPart(const QString& pluginsSubDir)
     // on make install [PREFIX]/bin and [PREFIX]/lib/sdrangel
 #if defined(ANDROID)
     PluginsPath = QStringList({applicationDirPath});
-    filter = QStringList({"libsdrangel_" + pluginsSubDir + "_*.so"});
+    // Qt5 add_library gives libsdrangel_plugins_antennatools.so
+    // Qt6 qt_add_plugin gives libplugins__sdrangel_plugins_antennatools.so
+    // Assuming PLUGINS_PREFIX=sdrangel_plugins_
+    filter = QStringList({"lib*sdrangel_" + pluginsSubDir + "_*.so"});
 #else
     filter = QStringList({"*"});
     PluginsPath << applicationDirPath + "/../" + LIB + "/sdrangel/" + pluginsSubDir;

@@ -82,9 +82,6 @@ target_link_libraries(${TARGET_NAME} PRIVATE
     ${TARGET_LIB_GUI}
     ${SGP4_LIBRARIES}
 )
-if (Qt6_FOUND)
-    target_link_libraries(${TARGET_NAME} PRIVATE Qt::Core5Compat)
-endif()
 
 install(TARGETS ${TARGET_NAME} DESTINATION ${INSTALL_FOLDER})
 

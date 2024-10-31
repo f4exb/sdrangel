@@ -1143,7 +1143,7 @@ void LoadConfigurationFSM::restoreGeometry()
         m_mainWindow->m_workspaces[i]->adjustSubWindowsAfterRestore();
 #ifdef ANDROID
         // On Android, workspaces seem to be restored to 0,20, rather than 0,0
-        m_mainWindow->m_workspaces[i]->move(m_workspaces[i]->pos().x(), 0);
+        m_mainWindow->m_workspaces[i]->move(m_mainWindow->m_workspaces[i]->pos().x(), 0);
         // Need to call updateGeometry, otherwise sometimes the layout is corrupted
         m_mainWindow->m_workspaces[i]->updateGeometry();
 #endif

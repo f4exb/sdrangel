@@ -60,6 +60,9 @@ target_link_libraries(${TARGET_NAME} PRIVATE
 	${TARGET_LIB_GUI}
     ${LIMESUITE_LIBRARY}
 )
+if(ANDROID)
+    target_link_libraries(${TARGET_NAME} PRIVATE ${LIBUSB_LIBRARIES} log)
+endif()
 
 install(TARGETS ${TARGET_NAME} DESTINATION ${INSTALL_FOLDER})
 
