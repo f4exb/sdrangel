@@ -8,6 +8,56 @@ on:
       - 'v*'
 
 jobs:
+  build_mac_x64:
+    runs-on: macos-13
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          submodules: true
+          fetch-depth: 0
+      - name: Update brew
+        run: brew update
+      - name: Install brew packages
+        run: brew install nasm subversion
+      - name: Install python packages for UHD
+        run: |
+          python3 -m venv .venv
+          source .venv/bin/activate
+          python3 -m pip install numpy mako requests Cheetah3 setuptools
+      - name: Install Qt
+        uses: jurplel/install-qt-action@v4
+        with:
+          version: '6.7.3'
+          host: 'mac'
+          arch: 'clang_64'
+          modules: 'qtcharts qtscxml qt5compat qtlocation qtmultimedia qtpositioning qtserialport qtspeech qtwebsockets qtwebengine qtshadertools qtwebchannel'
+      - name: Configure SDRangel
+        run: |
+          source .venv/bin/activate
+          mkdir build && cd build
+          cmake .. -DCMAKE_VERBOSE_MAKEFILE=ON -DENABLE_QT6=ON -DCMAKE_BUILD_TYPE=Release -DARCH_OPT=nehalem -DDEBUG_OUTPUT=ON -DENABLE_USRP=OFF -DENABLE_MIRISDR=OFF -DBUILD_SERVER=OFF -DENABLE_EXTERNAL_LIBRARIES=ON -DBUNDLE=ON -DPKG_CONFIG_USE_CMAKE_PREFIX_PATH=TRUE
+      - name: Build SDRangel on Mac
+        run: |
+          source .venv/bin/activate
+          cd build
+          make -j4 package
+      - name: Get version
+        id: get_version
+        run: |
+            if [[ "${{github.ref_name}}" == "mac_ci" ]]; then
+                echo "version=${{github.sha}}" >> $GITHUB_OUTPUT
+            else
+                echo "version=$(echo ${{github.ref_name}} | cut -c2-)" >> $GITHUB_OUTPUT
+            fi
+      - name: Get filename
+        id: get_filename
+        run: echo "filename=$(grep CPACK_PACKAGE_FILE_NAME build/CMakeCache.txt | cut -d "=" -f2)" >> $GITHUB_OUTPUT
+      - name: Upload artifact
+        uses: actions/upload-artifact@v3
+        with:
+          name: sdrangel-${{ steps.get_version.outputs.version }}-macx64.dmg
+          path: ${{ github.workspace }}/build/${{ steps.get_filename.outputs.filename }}.dmg
+
   build_mac_arm:
     runs-on: macos-14
     steps:
@@ -35,7 +85,7 @@ jobs:
         run: |
           source .venv/bin/activate
           mkdir build && cd build
-          cmake .. -DCMAKE_VERBOSE_MAKEFILE=ON -DENABLE_QT6=ON -DCMAKE_BUILD_TYPE=Release -DDEBUG_OUTPUT=ON -DENABLE_USRP=OFF -DENABLE_CHANNELRX_DEMODDATV=OFF -DENABLE_CHANNELTX_MODDATV=OFF -DENABLE_MIRISDR=OFF -DBUILD_SERVER=OFF -DENABLE_EXTERNAL_LIBRARIES=ON -DBUNDLE=ON -DPKG_CONFIG_USE_CMAKE_PREFIX_PATH=TRUE
+          cmake .. -DCMAKE_VERBOSE_MAKEFILE=ON -DENABLE_QT6=ON -DCMAKE_BUILD_TYPE=Release -DDEBUG_OUTPUT=ON -DENABLE_USRP=OFF -DENABLE_MIRISDR=OFF -DBUILD_SERVER=OFF -DENABLE_EXTERNAL_LIBRARIES=ON -DBUNDLE=ON -DPKG_CONFIG_USE_CMAKE_PREFIX_PATH=TRUE
       - name: Build SDRangel on Mac
         run: |
           source .venv/bin/activate
@@ -55,5 +105,5 @@ jobs:
       - name: Upload artifact
         uses: actions/upload-artifact@v3
         with:
-          name: sdrangel-${{ steps.get_version.outputs.version }}-macarm.dmg
+          name: sdrangel-${{ steps.get_version.outputs.version }}-macarm64.dmg
           path: ${{ github.workspace }}/build/${{ steps.get_filename.outputs.filename }}.dmg
