@@ -1,0 +1,45 @@
+# See: https://github.com/snapcore/action-build
+name: SDRangel snap release build
+
+on:
+  push:
+    branches:
+      - snap
+    tags:
+      - 'v*'
+  pull_request:
+
+jobs:
+  build_snap:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          submodules: true
+          fetch-depth: 0
+      - name: Get version
+        id: get_version
+        run: |
+            if [[ "${{github.ref_name}}" == "snap" ]]; then
+                echo "version=${{github.sha}}" >> $GITHUB_OUTPUT
+            else
+                echo "version=$(echo ${{github.ref_name}} | cut -c2-)" >> $GITHUB_OUTPUT
+            fi
+      - uses: snapcore/action-build@v1
+        id: build
+      - name: Upload artifact
+        uses: actions/upload-artifact@v3
+        with:
+          name: sdrangel-${{ steps.get_version.outputs.version }}-amd64.snap
+          path: ${{ steps.build.outputs.snap }}
+      - name: Upload release
+        if: startsWith(github.ref, 'refs/tags/')
+        uses: softprops/action-gh-release@v2
+        with:
+          files: ${{ steps.build.outputs.snap }}
+      - uses: snapcore/action-publish@v1
+        env:
+          SNAPCRAFT_STORE_CREDENTIALS: ${{ secrets.SNAP_STORE_LOGIN }}
+        with:
+          snap: ${{ steps.build.outputs.snap }}
+          release: stable
