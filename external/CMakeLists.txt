@@ -31,15 +31,9 @@ set(SOAPYSDR_REMOTE_TAG "soapy-remote-0.5.1")
 set(AIRSPY_TAG "37c768ce9997b32e7328eb48972a7fda0a1f8554")
 set(HACKRF_TAG "v2022.09.1")
 set(LIBXML2_TAG "v2.10.4")
-set(UHD_TAG "v4.6.0.0")
-if (APPLE AND (CMAKE_HOST_SYSTEM_PROCESSOR STREQUAL x86_64))
-    # UHD fails to load with 1.80+
-    set(BOOST_TAG "1.78.0")
-    set(BOOST_TAG2 "1_78_0")
-else()
-    set(BOOST_TAG "1.83.0")
-    set(BOOST_TAG2 "1_83_0")
-endif()
+set(UHD_TAG "v4.7.0.0")
+set(BOOST_TAG "1.86.0")
+set(BOOST_TAG2 "1_86_0")
 
 # For some external project macros
 include(ExternalProject)
@@ -1578,6 +1572,7 @@ if (WIN32 OR APPLE)
                     -DLIBUSB_LIBRARIES=${LIBUSB_LIBRARIES}
                     -DLIBUSB_INCLUDE_DIR=${LIBUSB_INCLUDE_DIR}
                     ${UHD_PYTHON_ARGS}
+                    -DENABLE_PYTHON_API=OFF
                     -DCMAKE_INSTALL_NAME_DIR=<INSTALL_DIR>/lib
                 TEST_COMMAND ""
                 )
