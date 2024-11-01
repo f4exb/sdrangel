@@ -578,8 +578,8 @@ void MainServer::changeSampleSink(int deviceSetIndex, int selectedDeviceIndex)
         // wait for sample source to be set, before loading settings
         auto connection = new QMetaObject::Connection();
         *connection = connect(
-            deviceSet->m_deviceSourceEngine,
-            &DSPDeviceSourceEngine::sampleSet,
+            deviceSet->m_deviceSinkEngine,
+            &DSPDeviceSinkEngine::sampleSet,
             this,
             [=]() {
                 deviceSet->m_deviceAPI->loadSamplingDeviceSettings(m_mainCore->m_settings.getWorkingPreset()); // load new API settings
@@ -644,8 +644,8 @@ void MainServer::changeSampleMIMO(int deviceSetIndex, int selectedDeviceIndex)
         // wait for sample source to be set, before loading settings
         auto connection = new QMetaObject::Connection();
         *connection = connect(
-            deviceSet->m_deviceSourceEngine,
-            &DSPDeviceSourceEngine::sampleSet,
+            deviceSet->m_deviceMIMOEngine,
+            &DSPDeviceMIMOEngine::sampleSet,
             this,
             [=]() {
                 deviceSet->m_deviceAPI->loadSamplingDeviceSettings(m_mainCore->m_settings.getWorkingPreset()); // load new API settings
