@@ -9,7 +9,7 @@ on:
 
 jobs:
   build_deb:
-    runs-on: ubuntu-24.04
+    runs-on: ubuntu-22.04
     steps:
       - uses: actions/checkout@v4
         with:
