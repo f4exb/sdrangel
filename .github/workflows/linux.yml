@@ -10,8 +10,9 @@ on:
 jobs:
   build_deb:
     strategy:
+      fail-fast: false
       matrix:
-       os: [ubuntu-22.04, ubuntu-24.04]
+       os: [ubuntu-20.04, ubuntu-22.04, ubuntu-24.04]
     runs-on: ${{ matrix.os }}
     steps:
       - uses: actions/checkout@v4
@@ -43,7 +44,7 @@ jobs:
         id: get_version
         run: |
             if [[ "${{github.ref_name}}" == "linux_github_release" ]]; then
-                echo "version=${{github.sha}}" >> $GITHUB_OUTPUT
+                echo "version=$(echo ${{github.sha}} | cut -c1-7)" >> $GITHUB_OUTPUT
             else
                 echo "version=$(echo ${{github.ref_name}} | cut -c2-)" >> $GITHUB_OUTPUT
             fi
