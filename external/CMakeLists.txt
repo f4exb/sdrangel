@@ -1577,6 +1577,7 @@ if (WIN32 OR APPLE)
                     -DLIBUSB_LIBRARIES=${LIBUSB_LIBRARIES}
                     -DLIBUSB_INCLUDE_DIR=${LIBUSB_INCLUDE_DIR}
                     ${UHD_PYTHON_ARGS}
+                    -DPython3_FIND_FRAMEWORK=NEVER
                     -DENABLE_PYTHON_API=OFF
                     -DCMAKE_INSTALL_NAME_DIR=<INSTALL_DIR>/lib
                 TEST_COMMAND ""
