@@ -32,7 +32,7 @@ jobs:
             libopus-dev libcodec2-dev libairspy-dev libhackrf-dev \
             libbladerf-dev libsoapysdr-dev libiio-dev libuhd-dev libhamlib-dev \
             python3-mako python3-cheetah python3-numpy \
-            autoconf automake libtool ninja-build libclang1-11
+            autoconf automake libtool ninja-build
           bash cmake/ci/build_sdrplay.sh
       - name: Build SDRangel
         run: |
