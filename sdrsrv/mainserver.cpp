@@ -495,11 +495,20 @@ void MainServer::changeSampleSource(int deviceSetIndex, int selectedDeviceIndex)
         DeviceSampleSource *source = deviceSet->m_deviceAPI->getPluginInterface()->createSampleSourcePluginInstance(
                 deviceSet->m_deviceAPI->getSamplingDeviceId(), deviceSet->m_deviceAPI);
         deviceSet->m_deviceAPI->setSampleSource(source);
-
-        deviceSet->m_deviceAPI->loadSamplingDeviceSettings(m_mainCore->m_settings.getWorkingPreset()); // load new API settings
-
-        // Notify
-        emit m_mainCore->deviceChanged(deviceSetIndex);
+        // wait for sample source to be set, before loading settings
+        auto connection = new QMetaObject::Connection();
+        *connection = connect(
+            deviceSet->m_deviceSourceEngine,
+            &DSPDeviceSourceEngine::sampleSet,
+            this,
+            [=]() {
+                deviceSet->m_deviceAPI->loadSamplingDeviceSettings(m_mainCore->m_settings.getWorkingPreset()); // load new API settings
+                // Notify
+                emit m_mainCore->deviceChanged(deviceSetIndex);
+                QObject::disconnect(*connection);
+                delete connection;
+            }
+        );
     }
 }
 
@@ -566,8 +575,20 @@ void MainServer::changeSampleSink(int deviceSetIndex, int selectedDeviceIndex)
         DeviceSampleSink *sink = deviceSet->m_deviceAPI->getPluginInterface()->createSampleSinkPluginInstance(
                 deviceSet->m_deviceAPI->getSamplingDeviceId(), deviceSet->m_deviceAPI);
         deviceSet->m_deviceAPI->setSampleSink(sink);
-
-        deviceSet->m_deviceAPI->loadSamplingDeviceSettings(m_mainCore->m_settings.getWorkingPreset()); // load new API settings
+        // wait for sample source to be set, before loading settings
+        auto connection = new QMetaObject::Connection();
+        *connection = connect(
+            deviceSet->m_deviceSourceEngine,
+            &DSPDeviceSourceEngine::sampleSet,
+            this,
+            [=]() {
+                deviceSet->m_deviceAPI->loadSamplingDeviceSettings(m_mainCore->m_settings.getWorkingPreset()); // load new API settings
+                // Notify
+                emit m_mainCore->deviceChanged(deviceSetIndex);
+                QObject::disconnect(*connection);
+                delete connection;
+            }
+        );
     }
 }
 
@@ -620,8 +641,20 @@ void MainServer::changeSampleMIMO(int deviceSetIndex, int selectedDeviceIndex)
         DeviceSampleMIMO *mimo = deviceSet->m_deviceAPI->getPluginInterface()->createSampleMIMOPluginInstance(
                 deviceSet->m_deviceAPI->getSamplingDeviceId(), deviceSet->m_deviceAPI);
         deviceSet->m_deviceAPI->setSampleMIMO(mimo);
-
-        deviceSet->m_deviceAPI->loadSamplingDeviceSettings(m_mainCore->m_settings.getWorkingPreset()); // load new API settings
+        // wait for sample source to be set, before loading settings
+        auto connection = new QMetaObject::Connection();
+        *connection = connect(
+            deviceSet->m_deviceSourceEngine,
+            &DSPDeviceSourceEngine::sampleSet,
+            this,
+            [=]() {
+                deviceSet->m_deviceAPI->loadSamplingDeviceSettings(m_mainCore->m_settings.getWorkingPreset()); // load new API settings
+                // Notify
+                emit m_mainCore->deviceChanged(deviceSetIndex);
+                QObject::disconnect(*connection);
+                delete connection;
+            }
+        );
     }
 }
 
