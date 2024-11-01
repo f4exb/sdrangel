@@ -9,13 +9,15 @@ on:
 
 jobs:
   build_deb:
-    runs-on: ubuntu-22.04
+    strategy:
+      matrix:
+       os: [ubuntu-22.04, ubuntu-24.04]
+    runs-on: ${{ matrix.os }}
     steps:
       - uses: actions/checkout@v4
         with:
           submodules: true
           fetch-depth: 0
-
       - name: Install dependencies
         run: |
           sudo apt-get update
@@ -37,8 +39,6 @@ jobs:
       - name: Build SDRangel
         run: |
           debuild -i -us -uc -b
-          find . | grep .deb
-          find .. | grep .deb
       - name: Get version
         id: get_version
         run: |
@@ -47,16 +47,15 @@ jobs:
             else
                 echo "version=$(echo ${{github.ref_name}} | cut -c2-)" >> $GITHUB_OUTPUT
             fi
-      - name: Get filename
-        id: get_filename
-        run: echo "filename=$(grep CPACK_PACKAGE_FILE_NAME build/CMakeCache.txt | cut -d "=" -f2)" >> $GITHUB_OUTPUT
+      - name: Rename
+        run: mv ../sdrangel_*_amd64.deb ../sdrangel_${{ steps.get_version.outputs.version }}_${{ matrix.os }}_amd64.deb
       - name: Upload artifact
         uses: actions/upload-artifact@v3
         with:
-          name: sdrangel-${{ steps.get_version.outputs.version }}-deb
-          path: ${{ github.workspace }}/build/${{ steps.get_filename.outputs.filename }}.deb
+          name: sdrangel_${{ steps.get_version.outputs.version }}_${{ matrix.os }}_amd64.deb
+          path: ../sdrangel_${{ steps.get_version.outputs.version }}_${{ matrix.os }}_amd64.deb
       - name: Upload release
         if: startsWith(github.ref, 'refs/tags/')
         uses: softprops/action-gh-release@v2
         with:
-          files: ${{ github.workspace }}/build/${{ steps.get_filename.outputs.filename }}.deb
+          files: ../sdrangel_${{ steps.get_version.outputs.version }}_${{ matrix.os }}_amd64.deb
