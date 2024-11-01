@@ -61,8 +61,13 @@ jobs:
         with:
           name: sdrangel-${{ steps.get_version.outputs.version }}-macx64.dmg
           path: ${{ github.workspace }}/build/${{ steps.get_filename.outputs.filename }}.dmg
+      - name: Upload release
+        if: startsWith(github.ref, 'refs/tags/')
+        uses: softprops/action-gh-release@v2
+        with:
+          files: ${{ github.workspace }}/build/${{ steps.get_filename.outputs.filename }}.dmg
 
-  build_mac_arm:
+  build_mac_arm64:
     runs-on: macos-14
     steps:
       - uses: actions/checkout@v4
@@ -117,3 +122,8 @@ jobs:
         with:
           name: sdrangel-${{ steps.get_version.outputs.version }}-macarm64.dmg
           path: ${{ github.workspace }}/build/${{ steps.get_filename.outputs.filename }}.dmg
+      - name: Upload release
+        if: startsWith(github.ref, 'refs/tags/')
+        uses: softprops/action-gh-release@v2
+        with:
+          files: ${{ github.workspace }}/build/${{ steps.get_filename.outputs.filename }}.dmg
