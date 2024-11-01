@@ -32,7 +32,16 @@ RemoteTCPSinkSettingsDialog::RemoteTCPSinkSettingsDialog(RemoteTCPSinkSettings *
     ui->maxClients->setValue(m_settings->m_maxClients);
     ui->timeLimit->setValue(m_settings->m_timeLimit);
     ui->maxSampleRate->setValue(m_settings->m_maxSampleRate);
-    ui->iqOnly->setChecked(m_settings->m_iqOnly);
+    if (m_settings->m_protocol == RemoteTCPSinkSettings::RTL0)
+    {
+        ui->iqOnly->setChecked(true);
+        ui->iqOnlyLabel->setEnabled(false);
+        ui->iqOnly->setEnabled(false);
+    }
+    else
+    {
+        ui->iqOnly->setChecked(m_settings->m_iqOnly);
+    }
 
     ui->compressor->setCurrentIndex((int) m_settings->m_compression);
     ui->compressionLevel->setValue(m_settings->m_compressionLevel);
@@ -40,6 +49,9 @@ RemoteTCPSinkSettingsDialog::RemoteTCPSinkSettingsDialog(RemoteTCPSinkSettings *
 
     ui->certificate->setText(m_settings->m_certificate);
     ui->key->setText(m_settings->m_key);
+    if (m_settings->m_protocol != RemoteTCPSinkSettings::SDRA_WSS) {
+        ui->sslSettingsGroup->setEnabled(false);
+    }
 
     ui->publicListing->setChecked(m_settings->m_public);
     ui->publicAddress->setText(m_settings->m_publicAddress);
@@ -94,10 +106,13 @@ void RemoteTCPSinkSettingsDialog::accept()
         m_settings->m_maxSampleRate = ui->maxSampleRate->value();
         m_settingsKeys.append("maxSampleRate");
     }
-    if (ui->iqOnly->isChecked() != m_settings->m_iqOnly)
+    if (m_settings->m_protocol != RemoteTCPSinkSettings::RTL0)
     {
-        m_settings->m_iqOnly = ui->iqOnly->isChecked();
-        m_settingsKeys.append("iqOnly");
+        if (ui->iqOnly->isChecked() != m_settings->m_iqOnly)
+        {
+            m_settings->m_iqOnly = ui->iqOnly->isChecked();
+            m_settingsKeys.append("iqOnly");
+        }
     }
     RemoteTCPSinkSettings::Compressor compressor = (RemoteTCPSinkSettings::Compressor) ui->compressor->currentIndex();
     if (compressor != m_settings->m_compression)
