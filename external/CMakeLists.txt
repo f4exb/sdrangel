@@ -1560,6 +1560,11 @@ if (WIN32 OR APPLE)
         else ()
             set(UHD_PYTHON_ARGS "")
         endif ()
+        if (DEFINED Python3_ROOT_DIR)
+            set(UHD_PYTHON_ARGS "-DPython3_ROOT_DIR=${Python3_ROOT_DIR}")
+        else ()
+            set(UHD_PYTHON_ARGS "")
+        endif ()
         ExternalProject_Add(uhd
                 GIT_REPOSITORY https://github.com/EttusResearch/uhd.git
                 GIT_TAG ${UHD_TAG}
