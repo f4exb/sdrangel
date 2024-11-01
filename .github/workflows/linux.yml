@@ -48,14 +48,14 @@ jobs:
                 echo "version=$(echo ${{github.ref_name}} | cut -c2-)" >> $GITHUB_OUTPUT
             fi
       - name: Rename
-        run: mv ../sdrangel_*_amd64.deb ../sdrangel_${{ steps.get_version.outputs.version }}_${{ matrix.os }}_amd64.deb
+        run: mv ../sdrangel_*_amd64.deb sdrangel_${{ steps.get_version.outputs.version }}_${{ matrix.os }}_amd64.deb
       - name: Upload artifact
         uses: actions/upload-artifact@v3
         with:
           name: sdrangel_${{ steps.get_version.outputs.version }}_${{ matrix.os }}_amd64.deb
-          path: ../sdrangel_${{ steps.get_version.outputs.version }}_${{ matrix.os }}_amd64.deb
+          path: sdrangel_${{ steps.get_version.outputs.version }}_${{ matrix.os }}_amd64.deb
       - name: Upload release
         if: startsWith(github.ref, 'refs/tags/')
         uses: softprops/action-gh-release@v2
         with:
-          files: ../sdrangel_${{ steps.get_version.outputs.version }}_${{ matrix.os }}_amd64.deb
+          files: sdrangel_${{ steps.get_version.outputs.version }}_${{ matrix.os }}_amd64.deb
