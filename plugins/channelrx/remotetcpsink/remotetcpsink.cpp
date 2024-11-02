@@ -149,6 +149,9 @@ void RemoteTCPSink::start()
         m_basebandSink->setBasebandSampleRate(m_basebandSampleRate);
     }
 
+    MsgConfigureRemoteTCPSink* msg = MsgConfigureRemoteTCPSink::create(m_settings, QStringList(), true, true);
+    m_basebandSink->getInputMessageQueue()->push(msg);
+
     updatePublicListing();
 }
 

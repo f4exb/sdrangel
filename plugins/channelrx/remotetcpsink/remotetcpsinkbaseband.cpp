@@ -43,6 +43,7 @@ RemoteTCPSinkBaseband::~RemoteTCPSinkBaseband()
 void RemoteTCPSinkBaseband::reset()
 {
     QMutexLocker mutexLocker(&m_mutex);
+    m_inputMessageQueue.clear();
     m_sampleFifo.reset();
     m_sink.init();
 }

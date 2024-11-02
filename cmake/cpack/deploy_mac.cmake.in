@@ -1,14 +1,15 @@
 # This CPACK_PRE_BUILD_SCRIPTS script is used to copy all required Qt and other 3rd party libraries (SDR drivers and codecs) in to the .app bundle
 # It is run in a staging area (${CPACK_TEMPORARY_INSTALL_DIRECTORY}/SDRangel.app) after all targets have been installed (E.g. sdrangel exe and plugins)
 # The copying of frameworks and libraries is mostly done by 'macdeployqt', however, in order for 'macdeployqt' to copy libraries built by external/CMakeLists.txt,
-# we first need to add RPATHs into the libraries giving the locations of any libraries they might depend on. 
+# we first need to add RPATHs into the libraries giving the locations of any libraries they might depend on.
 # These paths are in the variable MACOS_EXTERNAL_LIBS_FIXUP set in externals/CMakeLists.txt
 # Is there an easier way to this?
 
 # Copy executable that will be run when icon in /Applications is clicked
 message ("Copying default executable to SDRangel.app/Contents/MacOS/SDRangel")
 execute_process (COMMAND mkdir ${CPACK_TEMPORARY_INSTALL_DIRECTORY}/SDRangel.app/Contents/MacOS/)
-execute_process (COMMAND cp /opt/build/sdrangel/build/sdrangel ${CPACK_TEMPORARY_INSTALL_DIRECTORY}/SDRangel.app/Contents/MacOS/SDRangel)
+execute_process (COMMAND pwd)
+execute_process (COMMAND cp sdrangel ${CPACK_TEMPORARY_INSTALL_DIRECTORY}/SDRangel.app/Contents/MacOS/SDRangel)
 
 
 # Add RPATHS to libraries so macdeployqt can find out and copy all dependencies

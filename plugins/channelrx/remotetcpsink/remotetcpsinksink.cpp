@@ -269,7 +269,7 @@ void RemoteTCPSinkSink::processOneSample(Complex &ci)
         }
     }
 
-    if (!m_settings.m_iqOnly && (m_settings.m_compression == RemoteTCPSinkSettings::FLAC))
+    if (!m_settings.m_iqOnly && (m_settings.m_compression == RemoteTCPSinkSettings::FLAC) && (m_settings.m_protocol != RemoteTCPSinkSettings::RTL0))
     {
         // Compress using FLAC
         FLAC__int32 iqBuf[2];
@@ -360,7 +360,7 @@ void RemoteTCPSinkSink::processOneSample(Complex &ci)
         int bytes = 2 * m_settings.m_sampleBits / 8;
         m_bytesUncompressed += bytes;
 
-        if (!m_settings.m_iqOnly && (m_settings.m_compression == RemoteTCPSinkSettings::ZLIB))
+        if (!m_settings.m_iqOnly && (m_settings.m_compression == RemoteTCPSinkSettings::ZLIB) && (m_settings.m_protocol != RemoteTCPSinkSettings::RTL0))
         {
             if (m_zStreamInitialised)
             {
@@ -1027,12 +1027,12 @@ void RemoteTCPSinkSink::acceptConnection(Socket *client)
         client->flush();
 
         // Inform client if they are in a queue
-        if (!m_settings.m_iqOnly && (m_clients.size() > m_settings.m_maxClients)) {
+        if (!m_settings.m_iqOnly && (m_clients.size() > m_settings.m_maxClients) && (m_settings.m_protocol != RemoteTCPSinkSettings::RTL0)) {
             sendQueuePosition(client, m_clients.size() - m_settings.m_maxClients);
         }
 
         // Send existing FLAC header to new client
-        if (!m_settings.m_iqOnly && (m_settings.m_compression == RemoteTCPSinkSettings::FLAC) && (m_flacHeader.size() == m_flacHeaderSize))
+        if (!m_settings.m_iqOnly && (m_settings.m_compression == RemoteTCPSinkSettings::FLAC) && (m_flacHeader.size() == m_flacHeaderSize) && (m_settings.m_protocol != RemoteTCPSinkSettings::RTL0))
         {
             char header[1+4];
 
