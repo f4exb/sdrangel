@@ -1,0 +1,62 @@
+name: SDRangel Linux release build
+
+on:
+  push:
+    branches:
+      - linux_github_release
+    tags:
+      - 'v*'
+
+jobs:
+  build_deb:
+    strategy:
+      fail-fast: false
+      matrix:
+       os: [ubuntu-22.04, ubuntu-24.04]
+    runs-on: ${{ matrix.os }}
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          submodules: true
+          fetch-depth: 0
+      - name: Install dependencies
+        run: |
+          sudo apt-get update
+          sudo apt-get -y install build-essential cmake git xxd \
+            devscripts fakeroot debhelper libfftw3-dev qtbase5-dev libopengl-dev libqt5opengl5-dev \
+            qttools5-dev qttools5-dev-tools qtmultimedia5-dev libqt5multimedia5-plugins libqt5websockets5-dev \
+            libqt5quick5 qtwebengine5-dev qtbase5-private-dev \
+            qml-module-qtlocation qml-module-qtpositioning qml-module-qtquick-window2 qml-module-qtquick-dialogs \
+            qml-module-qtquick-controls qml-module-qtquick-controls2 qml-module-qtquick-layouts qml-module-qtgraphicaleffects \
+            libqt5serialport5-dev qtdeclarative5-dev qtpositioning5-dev qtlocation5-dev \
+            libqt5charts5-dev libqt5texttospeech5-dev libqt5gamepad5-dev libqt5svg5-dev libfaad-dev libflac-dev zlib1g-dev \
+            libusb-1.0-0-dev libhidapi-dev libboost-all-dev libasound2-dev libopencv-dev libopencv-imgcodecs-dev \
+            libxml2-dev bison flex ffmpeg  libpostproc-dev libavcodec-dev libavformat-dev \
+            libopus-dev libcodec2-dev libairspy-dev libhackrf-dev \
+            libbladerf-dev libsoapysdr-dev libiio-dev libuhd-dev libhamlib-dev \
+            python3-mako python3-cheetah python3-numpy \
+            autoconf automake libtool ninja-build
+          bash cmake/ci/build_sdrplay.sh
+      - name: Build SDRangel
+        run: |
+          debuild -i -us -uc -b
+      - name: Get version
+        id: get_version
+        run: |
+            if [[ "${{github.ref_name}}" == "linux_github_release" ]]; then
+                echo "version=$(echo ${{github.sha}} | cut -c1-7)" >> $GITHUB_OUTPUT
+            else
+                echo "version=$(echo ${{github.ref_name}} | cut -c2-)" >> $GITHUB_OUTPUT
+            fi
+      - name: Rename
+        run: mv ../sdrangel_*_amd64.deb sdrangel_${{ steps.get_version.outputs.version }}_${{ matrix.os }}_amd64.deb
+      - name: Upload artifact
+        uses: actions/upload-artifact@v3
+        with:
+          name: sdrangel_${{ steps.get_version.outputs.version }}_${{ matrix.os }}_amd64.deb
+          path: sdrangel_${{ steps.get_version.outputs.version }}_${{ matrix.os }}_amd64.deb
+      - name: Upload release
+        if: startsWith(github.ref, 'refs/tags/')
+        uses: softprops/action-gh-release@v2
+        with:
+          files: sdrangel_${{ steps.get_version.outputs.version }}_${{ matrix.os }}_amd64.deb
