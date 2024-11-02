@@ -7,7 +7,6 @@ on:
       - snap
     tags:
       - 'v*'
-  pull_request:
 
 jobs:
   build_snap:
