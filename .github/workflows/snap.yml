@@ -27,7 +27,7 @@ jobs:
       - uses: snapcore/action-build@v1
         id: build
       - name: Upload artifact
-        uses: actions/upload-artifact@v3
+        uses: actions/upload-artifact@v4
         with:
           name: sdrangel-${{ steps.get_version.outputs.version }}-amd64.snap
           path: ${{ steps.build.outputs.snap }}

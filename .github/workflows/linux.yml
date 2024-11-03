@@ -51,7 +51,7 @@ jobs:
       - name: Rename
         run: mv ../sdrangel_*_amd64.deb sdrangel_${{ steps.get_version.outputs.version }}_${{ matrix.os }}_amd64.deb
       - name: Upload artifact
-        uses: actions/upload-artifact@v3
+        uses: actions/upload-artifact@v4
         with:
           name: sdrangel_${{ steps.get_version.outputs.version }}_${{ matrix.os }}_amd64.deb
           path: sdrangel_${{ steps.get_version.outputs.version }}_${{ matrix.os }}_amd64.deb

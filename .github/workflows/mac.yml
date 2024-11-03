@@ -57,7 +57,7 @@ jobs:
         id: get_filename
         run: echo "filename=$(grep CPACK_PACKAGE_FILE_NAME build/CMakeCache.txt | cut -d "=" -f2)" >> $GITHUB_OUTPUT
       - name: Upload artifact
-        uses: actions/upload-artifact@v3
+        uses: actions/upload-artifact@v4
         with:
           name: sdrangel-${{ steps.get_version.outputs.version }}-macx64.dmg
           path: ${{ github.workspace }}/build/${{ steps.get_filename.outputs.filename }}.dmg
@@ -116,7 +116,7 @@ jobs:
         id: get_filename
         run: echo "filename=$(grep CPACK_PACKAGE_FILE_NAME build/CMakeCache.txt | cut -d "=" -f2)" >> $GITHUB_OUTPUT
       - name: Upload artifact
-        uses: actions/upload-artifact@v3
+        uses: actions/upload-artifact@v4
         with:
           name: sdrangel-${{ steps.get_version.outputs.version }}-macarm64.dmg
           path: ${{ github.workspace }}/build/${{ steps.get_filename.outputs.filename }}.dmg
