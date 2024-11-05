@@ -99,7 +99,7 @@ jobs:
           api-token: '${{ secrets.SIGNPATH_API_TOKEN }}'
           organization-id: '553b8f53-adf0-4fe5-be3d-283504a21a51'
           project-slug: 'sdrangel'
-          signing-policy-slug: 'release-signing'
+          signing-policy-slug: 'test-signing'
           github-artifact-id: '${{ steps.upload-unsigned-artifact.outputs.artifact-id }}'
           wait-for-completion: true
           output-artifact-directory: '${{ github.workspace }}/build/sdrangel-${{ steps.get_version.outputs.version }}-win64-signed.exe'
