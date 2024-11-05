@@ -40,20 +40,23 @@ public:
 
     public:
         const ADSBDemodSettings& getSettings() const { return m_settings; }
+        const QStringList& getSettingsKeys() const { return m_settingsKeys; }
         bool getForce() const { return m_force; }
 
-        static MsgConfigureADSBDemodSinkWorker* create(const ADSBDemodSettings& settings, bool force)
+        static MsgConfigureADSBDemodSinkWorker* create(const ADSBDemodSettings& settings, const QStringList& settingsKeys, bool force)
         {
-            return new MsgConfigureADSBDemodSinkWorker(settings, force);
+            return new MsgConfigureADSBDemodSinkWorker(settings, settingsKeys, force);
         }
 
     private:
         ADSBDemodSettings m_settings;
+        QStringList m_settingsKeys;
         bool m_force;
 
-        MsgConfigureADSBDemodSinkWorker(const ADSBDemodSettings& settings, bool force) :
+        MsgConfigureADSBDemodSinkWorker(const ADSBDemodSettings& settings, const QStringList& settingsKeys, bool force) :
             Message(),
             m_settings(settings),
+            m_settingsKeys(settingsKeys),
             m_force(force)
         { }
     };

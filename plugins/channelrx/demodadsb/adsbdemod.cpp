@@ -71,7 +71,7 @@ ADSBDemod::ADSBDemod(DeviceAPI *devieAPI) :
     m_worker = new ADSBDemodWorker();
     m_basebandSink->setMessageQueueToWorker(m_worker->getInputMessageQueue());
 
-    applySettings(m_settings, true);
+    applySettings(m_settings, QStringList(), true);
 
     m_deviceAPI->addChannelSink(this);
     m_deviceAPI->addChannelSinkAPI(this);
@@ -147,7 +147,7 @@ void ADSBDemod::start()
     m_basebandSink->startWork();
     m_thread->start();
 
-    ADSBDemodWorker::MsgConfigureADSBDemodWorker *msg = ADSBDemodWorker::MsgConfigureADSBDemodWorker::create(m_settings, true);
+    ADSBDemodWorker::MsgConfigureADSBDemodWorker *msg = ADSBDemodWorker::MsgConfigureADSBDemodWorker::create(m_settings, QStringList(), true);
     m_worker->getInputMessageQueue()->push(msg);
 }
 
@@ -169,7 +169,7 @@ bool ADSBDemod::handleMessage(const Message& cmd)
         MsgConfigureADSBDemod& cfg = (MsgConfigureADSBDemod&) cmd;
         qDebug() << "ADSBDemod::handleMessage: MsgConfigureADSBDemod";
 
-        applySettings(cfg.getSettings(), cfg.getForce());
+        applySettings(cfg.getSettings(), cfg.getSettingsKeys(), cfg.getForce());
 
         return true;
     }
@@ -200,111 +200,11 @@ bool ADSBDemod::handleMessage(const Message& cmd)
     }
 }
 
-void ADSBDemod::applySettings(const ADSBDemodSettings& settings, bool force)
+void ADSBDemod::applySettings(const ADSBDemodSettings& settings, const QStringList& settingsKeys, bool force)
 {
     qDebug() << "ADSBDemod::applySettings:"
-            << " m_inputFrequencyOffset: " << settings.m_inputFrequencyOffset
-            << " m_rfBandwidth: " << settings.m_rfBandwidth
-            << " m_streamIndex: " << settings.m_streamIndex
-            << " m_useReverseAPI: " << settings.m_useReverseAPI
-            << " m_reverseAPIAddress: " << settings.m_reverseAPIAddress
-            << " m_reverseAPIPort: " << settings.m_reverseAPIPort
-            << " m_reverseAPIDeviceIndex: " << settings.m_reverseAPIDeviceIndex
-            << " m_reverseAPIChannelIndex: " << settings.m_reverseAPIChannelIndex
+            << settings.getDebugString(settingsKeys, force)
             << " force: " << force;
-
-    QList<QString> reverseAPIKeys;
-
-    if ((settings.m_inputFrequencyOffset != m_settings.m_inputFrequencyOffset) || force) {
-        reverseAPIKeys.append("inputFrequencyOffset");
-    }
-    if ((settings.m_rfBandwidth != m_settings.m_rfBandwidth) || force) {
-        reverseAPIKeys.append("rfBandwidth");
-    }
-    if ((settings.m_correlationThreshold != m_settings.m_correlationThreshold) || force) {
-        reverseAPIKeys.append("correlationThreshold");
-    }
-    if ((settings.m_samplesPerBit != m_settings.m_samplesPerBit) || force) {
-        reverseAPIKeys.append("samplesPerBit");
-    }
-    if ((settings.m_correlateFullPreamble != m_settings.m_correlateFullPreamble) || force) {
-        reverseAPIKeys.append("correlateFullPreamble");
-    }
-    if ((settings.m_demodModeS != m_settings.m_demodModeS) || force) {
-        reverseAPIKeys.append("demodModeS");
-    }
-    if ((settings.m_interpolatorPhaseSteps != m_settings.m_interpolatorPhaseSteps) || force) {
-        reverseAPIKeys.append("interpolatorPhaseSteps");
-    }
-    if ((settings.m_interpolatorTapsPerPhase != m_settings.m_interpolatorTapsPerPhase) || force) {
-        reverseAPIKeys.append("interpolatorTapsPerPhase");
-    }
-    if ((settings.m_removeTimeout != m_settings.m_removeTimeout) || force) {
-        reverseAPIKeys.append("removeTimeout");
-    }
-    if ((settings.m_feedEnabled != m_settings.m_feedEnabled) || force) {
-        reverseAPIKeys.append("feedEnabled");
-    }
-    if ((settings.m_exportClientEnabled != m_settings.m_exportClientEnabled) || force) {
-        reverseAPIKeys.append("exportClientEnabled");
-    }
-    if ((settings.m_exportClientHost != m_settings.m_exportClientHost) || force) {
-        reverseAPIKeys.append("exportClientHost");
-    }
-    if ((settings.m_exportClientPort != m_settings.m_exportClientPort) || force) {
-        reverseAPIKeys.append("exportClientPort");
-    }
-    if ((settings.m_exportClientFormat != m_settings.m_exportClientFormat) || force) {
-        reverseAPIKeys.append("exportClientFormat");
-    }
-     if ((settings.m_exportServerEnabled != m_settings.m_exportServerEnabled) || force) {
-        reverseAPIKeys.append("exportServerEnabled");
-    }
-    if ((settings.m_exportServerPort != m_settings.m_exportServerPort) || force) {
-        reverseAPIKeys.append("exportServerPort");
-    }
-   if ((settings.m_importEnabled != m_settings.m_importEnabled) || force) {
-        reverseAPIKeys.append("importEnabled");
-    }
-    if ((settings.m_importHost != m_settings.m_importHost) || force) {
-        reverseAPIKeys.append("importHost");
-    }
-    if ((settings.m_importUsername != m_settings.m_importUsername) || force) {
-        reverseAPIKeys.append("importUsername");
-    }
-    if ((settings.m_importPassword != m_settings.m_importPassword) || force) {
-        reverseAPIKeys.append("importPassword");
-    }
-    if ((settings.m_importParameters != m_settings.m_importParameters) || force) {
-        reverseAPIKeys.append("importParameters");
-    }
-    if ((settings.m_importPeriod != m_settings.m_importPeriod) || force) {
-        reverseAPIKeys.append("importPeriod");
-    }
-    if ((settings.m_importMinLatitude != m_settings.m_importMinLatitude) || force) {
-        reverseAPIKeys.append("importMinLatitude");
-    }
-    if ((settings.m_importMaxLatitude != m_settings.m_importMaxLatitude) || force) {
-        reverseAPIKeys.append("importMaxLatitude");
-    }
-    if ((settings.m_importMinLongitude != m_settings.m_importMinLongitude) || force) {
-        reverseAPIKeys.append("importMinLongitude");
-    }
-    if ((settings.m_importMaxLongitude != m_settings.m_importMaxLongitude) || force) {
-        reverseAPIKeys.append("importMaxLongitude");
-    }
-    if ((settings.m_logFilename != m_settings.m_logFilename) || force) {
-        reverseAPIKeys.append("logFilename");
-    }
-    if ((settings.m_logEnabled != m_settings.m_logEnabled) || force) {
-        reverseAPIKeys.append("logEnabled");
-    }
-    if ((settings.m_title != m_settings.m_title) || force) {
-        reverseAPIKeys.append("title");
-    }
-    if ((settings.m_rfBandwidth != m_settings.m_rfBandwidth) || force) {
-        reverseAPIKeys.append("rfBandwidth");
-    }
 
     if (m_settings.m_streamIndex != settings.m_streamIndex)
     {
@@ -317,38 +217,40 @@ void ADSBDemod::applySettings(const ADSBDemodSettings& settings, bool force)
             m_settings.m_streamIndex = settings.m_streamIndex; // make sure ChannelAPI::getStreamIndex() is consistent
             emit streamIndexChanged(settings.m_streamIndex);
         }
-
-        reverseAPIKeys.append("streamIndex");
     }
 
-    ADSBDemodBaseband::MsgConfigureADSBDemodBaseband *msg = ADSBDemodBaseband::MsgConfigureADSBDemodBaseband::create(settings, force);
+    ADSBDemodBaseband::MsgConfigureADSBDemodBaseband *msg = ADSBDemodBaseband::MsgConfigureADSBDemodBaseband::create(settings, settingsKeys, force);
     m_basebandSink->getInputMessageQueue()->push(msg);
 
-    ADSBDemodWorker::MsgConfigureADSBDemodWorker *workerMsg = ADSBDemodWorker::MsgConfigureADSBDemodWorker::create(settings, force);
+    ADSBDemodWorker::MsgConfigureADSBDemodWorker *workerMsg = ADSBDemodWorker::MsgConfigureADSBDemodWorker::create(settings, settingsKeys, force);
     m_worker->getInputMessageQueue()->push(workerMsg);
 
     if (settings.m_useReverseAPI)
     {
-        bool fullUpdate = ((m_settings.m_useReverseAPI != settings.m_useReverseAPI) && settings.m_useReverseAPI) ||
-                (m_settings.m_reverseAPIAddress != settings.m_reverseAPIAddress) ||
-                (m_settings.m_reverseAPIPort != settings.m_reverseAPIPort) ||
-                (m_settings.m_reverseAPIDeviceIndex != settings.m_reverseAPIDeviceIndex) ||
-                (m_settings.m_reverseAPIChannelIndex != settings.m_reverseAPIChannelIndex);
-        webapiReverseSendSettings(reverseAPIKeys, settings, fullUpdate || force);
+        bool fullUpdate = (settingsKeys.contains("useReverseAPI") && settings.m_useReverseAPI) ||
+            settingsKeys.contains("reverseAPIAddress") ||
+            settingsKeys.contains("reverseAPIPort") ||
+            settingsKeys.contains("reverseAPIDeviceIndex") ||
+            settingsKeys.contains("reverseAPIChannelIndex");
+        webapiReverseSendSettings(settingsKeys, settings, fullUpdate || force);
     }
 
-    m_settings = settings;
+    if (force) {
+        m_settings = settings;
+    } else {
+        m_settings.applySettings(settingsKeys, settings);
+    }
 }
 
 void ADSBDemod::setCenterFrequency(qint64 frequency)
 {
     ADSBDemodSettings settings = m_settings;
     settings.m_inputFrequencyOffset = frequency;
-    applySettings(settings);
+    applySettings(settings, {"inputFrequencyOffset"}, false);
 
     if (m_guiMessageQueue) // forward to GUI if any
     {
-        MsgConfigureADSBDemod *msgToGUI = MsgConfigureADSBDemod::create(settings, false);
+        MsgConfigureADSBDemod *msgToGUI = MsgConfigureADSBDemod::create(settings, {"inputFrequencyOffset"}, false);
         m_guiMessageQueue->push(msgToGUI);
     }
 }
@@ -368,7 +270,7 @@ bool ADSBDemod::deserialize(const QByteArray& data)
         success = false;
     }
 
-    MsgConfigureADSBDemod *msg = MsgConfigureADSBDemod::create(m_settings, true);
+    MsgConfigureADSBDemod *msg = MsgConfigureADSBDemod::create(m_settings, QStringList(), true);
     m_inputMessageQueue.push(msg);
 
     return success;
@@ -404,12 +306,12 @@ int ADSBDemod::webapiSettingsPutPatch(
     ADSBDemodSettings settings = m_settings;
     webapiUpdateChannelSettings(settings, channelSettingsKeys, response);
 
-    MsgConfigureADSBDemod *msg = MsgConfigureADSBDemod::create(settings, force);
+    MsgConfigureADSBDemod *msg = MsgConfigureADSBDemod::create(settings, channelSettingsKeys, force);
     m_inputMessageQueue.push(msg);
 
     if (m_guiMessageQueue) // forward to GUI if any
     {
-        MsgConfigureADSBDemod *msgToGUI = MsgConfigureADSBDemod::create(settings, force);
+        MsgConfigureADSBDemod *msgToGUI = MsgConfigureADSBDemod::create(settings, channelSettingsKeys, force);
         m_guiMessageQueue->push(msgToGUI);
     }
 
@@ -661,7 +563,7 @@ void ADSBDemod::webapiFormatChannelReport(SWGSDRangel::SWGChannelReport& respons
     }
 }
 
-void ADSBDemod::webapiReverseSendSettings(QList<QString>& channelSettingsKeys, const ADSBDemodSettings& settings, bool force)
+void ADSBDemod::webapiReverseSendSettings(const QList<QString>& channelSettingsKeys, const ADSBDemodSettings& settings, bool force)
 {
     SWGSDRangel::SWGChannelSettings *swgChannelSettings = new SWGSDRangel::SWGChannelSettings();
     swgChannelSettings->setDirection(0); // single sink (Rx)

@@ -28,6 +28,8 @@ public:
     explicit ADSBDemodDisplayDialog(ADSBDemodSettings *settings, QWidget* parent = 0);
     ~ADSBDemodDisplayDialog();
 
+    const QStringList& getSettingsKeys() const { return m_settingsKeys; };
+
 private slots:
     void accept();
     void on_font_clicked();
@@ -35,6 +37,7 @@ private slots:
 private:
     Ui::ADSBDemodDisplayDialog* ui;
     ADSBDemodSettings *m_settings;
+    QStringList m_settingsKeys;
     QString m_fontName;
     int m_fontSize;
 };

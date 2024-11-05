@@ -357,22 +357,30 @@ void ADSBDemodSinkWorker::handleInputMessages()
             MsgConfigureADSBDemodSinkWorker* cfg = (MsgConfigureADSBDemodSinkWorker*)message;
 
             ADSBDemodSettings settings = cfg->getSettings();
+            QStringList settingsKeys = cfg->getSettingsKeys();
             bool force = cfg->getForce();
 
-            if (settings.m_correlateFullPreamble) {
-                m_correlationScale = 3.0;
-            } else {
-                m_correlationScale = 2.0;
+            if (settingsKeys.contains("correlateFullPreamble") || force)
+            {
+                if (settings.m_correlateFullPreamble) {
+                    m_correlationScale = 3.0;
+                } else {
+                    m_correlationScale = 2.0;
+                }
             }
 
-            if ((m_settings.m_correlationThreshold != settings.m_correlationThreshold) || force)
+            if ((settingsKeys.contains("correlationThreshold") && (m_settings.m_correlationThreshold != settings.m_correlationThreshold)) || force)
             {
                 m_correlationThresholdLinear = CalcDb::powerFromdB(settings.m_correlationThreshold);
                 m_correlationThresholdLinear /= m_correlationScale;
                 qDebug() << "m_correlationThresholdLinear: " << m_correlationThresholdLinear;
             }
 
-            m_settings = settings;
+            if (force) {
+                m_settings = settings;
+            } else {
+                m_settings.applySettings(settingsKeys, settings);
+            }
             delete message;
         }
     }

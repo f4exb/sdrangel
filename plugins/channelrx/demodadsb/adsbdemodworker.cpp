@@ -150,7 +150,7 @@ bool ADSBDemodWorker::handleMessage(const Message& message)
         QMutexLocker mutexLocker(&m_mutex);
         MsgConfigureADSBDemodWorker& cfg = (MsgConfigureADSBDemodWorker&) message;
 
-        applySettings(cfg.getSettings(), cfg.getForce());
+        applySettings(cfg.getSettings(), cfg.getSettingsKeys(), cfg.getForce());
         return true;
     }
     else if (ADSBDemodReport::MsgReportADSB::match(message))
@@ -165,7 +165,7 @@ bool ADSBDemodWorker::handleMessage(const Message& message)
     }
 }
 
-void ADSBDemodWorker::applySettings(const ADSBDemodSettings& settings, bool force)
+void ADSBDemodWorker::applySettings(const ADSBDemodSettings& settings, const QStringList& settingsKeys, bool force)
 {
     qDebug() << "ADSBDemodWorker::applySettings:"
             << " m_feedEnabled: " << settings.m_feedEnabled
@@ -179,10 +179,10 @@ void ADSBDemodWorker::applySettings(const ADSBDemodSettings& settings, bool forc
             << " m_logFilename: " << settings.m_logFilename
             << " force: " << force;
 
-    if ((settings.m_feedEnabled != m_settings.m_feedEnabled)
-        || (settings.m_exportClientEnabled != m_settings.m_exportClientEnabled)
-        || (settings.m_exportClientHost != m_settings.m_exportClientHost)
-        || (settings.m_exportClientPort != m_settings.m_exportClientPort)
+    if ((settingsKeys.contains("feedEnabled") && (settings.m_feedEnabled != m_settings.m_feedEnabled))
+        || (settingsKeys.contains("exportClientEnabled") && (settings.m_exportClientEnabled != m_settings.m_exportClientEnabled))
+        || (settingsKeys.contains("exportClientHost") && (settings.m_exportClientHost != m_settings.m_exportClientHost))
+        || (settingsKeys.contains("exportClientPort") && (settings.m_exportClientPort != m_settings.m_exportClientPort))
         || force)
     {
         // Close any existing connection
@@ -195,9 +195,9 @@ void ADSBDemodWorker::applySettings(const ADSBDemodSettings& settings, bool forc
         }
     }
 
-    if ((settings.m_feedEnabled != m_settings.m_feedEnabled)
-        || (settings.m_exportServerEnabled != m_settings.m_exportServerEnabled)
-        || (settings.m_exportServerPort != m_settings.m_exportServerPort)
+    if ((settingsKeys.contains("feedEnabled") && (settings.m_feedEnabled != m_settings.m_feedEnabled))
+        || (settingsKeys.contains("exportServerEnabled") && (settings.m_exportServerEnabled != m_settings.m_exportServerEnabled))
+        || (settingsKeys.contains("exportServerPort") && (settings.m_exportServerPort != m_settings.m_exportServerPort))
         || force)
     {
         if (m_beastServer.isListening()) {
@@ -208,8 +208,8 @@ void ADSBDemodWorker::applySettings(const ADSBDemodSettings& settings, bool forc
         }
     }
 
-    if ((settings.m_logEnabled != m_settings.m_logEnabled)
-        || (settings.m_logFilename != m_settings.m_logFilename)
+    if ((settingsKeys.contains("logEnabled") && (settings.m_logEnabled != m_settings.m_logEnabled))
+        || (settingsKeys.contains("logFilename") && (settings.m_logFilename != m_settings.m_logFilename))
         || force)
     {
         if (m_logFile.isOpen())
@@ -238,7 +238,11 @@ void ADSBDemodWorker::applySettings(const ADSBDemodSettings& settings, bool forc
         }
     }
 
-    m_settings = settings;
+    if (force) {
+        m_settings = settings;
+    } else {
+        m_settings.applySettings(settingsKeys, settings);
+    }
 }
 
 void ADSBDemodWorker::connected()

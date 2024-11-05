@@ -146,8 +146,8 @@ void ADSBDemodGUI::destroy()
 void ADSBDemodGUI::resetToDefaults()
 {
     m_settings.resetToDefaults();
-    displaySettings();
-    applySettings();
+    displaySettings(QStringList(), true);
+    applyAllSettings();
 }
 
 QByteArray ADSBDemodGUI::serialize() const
@@ -160,8 +160,8 @@ bool ADSBDemodGUI::deserialize(const QByteArray& data)
     if(m_settings.deserialize(data))
     {
         updateChannelList();
-        displaySettings();
-        applySettings(true);
+        displaySettings(QStringList(), true);
+        applyAllSettings();
         return true;
     }
     else
@@ -3471,10 +3471,19 @@ bool ADSBDemodGUI::handleMessage(const Message& message)
     {
         qDebug("ADSBDemodGUI::handleMessage: ADSBDemod::MsgConfigureADSBDemod");
         const ADSBDemod::MsgConfigureADSBDemod& cfg = (ADSBDemod::MsgConfigureADSBDemod&) message;
-        m_settings = cfg.getSettings();
+        const ADSBDemodSettings settings = cfg.getSettings();
+        const QStringList settingsKeys = cfg.getSettingsKeys();
+        bool force = cfg.getForce();
+
+        if (force) {
+            m_settings = cfg.getSettings();
+        } else {
+            m_settings.applySettings(settingsKeys, settings);
+        }
+
         blockApplySettings(true);
         m_channelMarker.updateSettings(static_cast<const ChannelMarker*>(m_settings.m_channelMarker));
-        displaySettings();
+        displaySettings(settingsKeys, force);
         blockApplySettings(false);
         return true;
     }
@@ -3499,7 +3508,7 @@ void ADSBDemodGUI::channelMarkerChangedByCursor()
 {
     ui->deltaFrequency->setValue(m_channelMarker.getCenterFrequency());
     m_settings.m_inputFrequencyOffset = m_channelMarker.getCenterFrequency();
-    applySettings();
+    applySetting("inputFrequencyOffset");
 }
 
 void ADSBDemodGUI::channelMarkerHighlightedByCursor()
@@ -3512,7 +3521,7 @@ void ADSBDemodGUI::on_deltaFrequency_changed(qint64 value)
     m_channelMarker.setCenterFrequency(value);
     m_settings.m_inputFrequencyOffset = m_channelMarker.getCenterFrequency();
     updateAbsoluteCenterFrequency();
-    applySettings();
+    applySetting("inputFrequencyOffset");
 }
 
 void ADSBDemodGUI::on_rfBW_valueChanged(int value)
@@ -3521,7 +3530,7 @@ void ADSBDemodGUI::on_rfBW_valueChanged(int value)
     ui->rfBWText->setText(QString("%1M").arg(bw / 1000000.0, 0, 'f', 1));
     m_channelMarker.setBandwidth(bw);
     m_settings.m_rfBandwidth = bw;
-    applySettings();
+    applySetting("rfBandwidth");
 }
 
 void ADSBDemodGUI::on_threshold_valueChanged(int value)
@@ -3529,14 +3538,14 @@ void ADSBDemodGUI::on_threshold_valueChanged(int value)
     Real thresholddB = ((Real)value)/10.0f;
     ui->thresholdText->setText(QString("%1").arg(thresholddB, 0, 'f', 1));
     m_settings.m_correlationThreshold = thresholddB;
-    applySettings();
+    applySetting("correlationThreshold");
 }
 
 void ADSBDemodGUI::on_phaseSteps_valueChanged(int value)
 {
     ui->phaseStepsText->setText(QString("%1").arg(value));
     m_settings.m_interpolatorPhaseSteps = value;
-    applySettings();
+    applySetting("interpolatorPhaseSteps");
 }
 
 void ADSBDemodGUI::on_tapsPerPhase_valueChanged(int value)
@@ -3544,14 +3553,14 @@ void ADSBDemodGUI::on_tapsPerPhase_valueChanged(int value)
     Real tapsPerPhase = ((Real)value)/10.0f;
     ui->tapsPerPhaseText->setText(QString("%1").arg(tapsPerPhase, 0, 'f', 1));
     m_settings.m_interpolatorTapsPerPhase = tapsPerPhase;
-    applySettings();
+    applySetting("interpolatorTapsPerPhase");
 }
 
 void ADSBDemodGUI::on_feed_clicked(bool checked)
 {
     m_settings.m_feedEnabled = checked;
     // Don't disable host/port - so they can be entered before connecting
-    applySettings();
+    applySetting("feedEnabled");
     applyImportSettings();
 }
 
@@ -3561,7 +3570,7 @@ void ADSBDemodGUI::on_notifications_clicked()
     if (dialog.exec() == QDialog::Accepted)
     {
         enableSpeechIfNeeded();
-        applySettings();
+        applySetting("notificationSettings");
     }
 }
 
@@ -3829,19 +3838,19 @@ QAction *ADSBDemodGUI::createCheckableItem(QString &text, int idx, bool checked)
 void ADSBDemodGUI::on_spb_currentIndexChanged(int value)
 {
     m_settings.m_samplesPerBit = (value + 1) * 2;
-    applySettings();
+    applySetting("samplesPerBi");
 }
 
 void ADSBDemodGUI::on_correlateFullPreamble_clicked(bool checked)
 {
     m_settings.m_correlateFullPreamble = checked;
-    applySettings();
+    applySetting("correlateFullPreamble");
 }
 
 void ADSBDemodGUI::on_demodModeS_clicked(bool checked)
 {
     m_settings.m_demodModeS = checked;
-    applySettings();
+    applySetting("demodModeS");
 }
 
 void ADSBDemodGUI::on_getOSNDB_clicked()
@@ -3897,7 +3906,7 @@ void ADSBDemodGUI::on_atcLabels_clicked(bool checked)
 {
     m_settings.m_atcLabels = checked;
     m_aircraftModel.setSettings(&m_settings);
-    applySettings();
+    applySetting("atcLabels");
 }
 
 QString ADSBDemodGUI::getDataDir()
@@ -3914,7 +3923,7 @@ void ADSBDemodGUI::onWidgetRolled(QWidget* widget, bool rollDown)
     (void) rollDown;
 
     getRollupContents()->saveState(m_rollupState);
-    applySettings();
+    applySetting("rollupState");
 }
 
 void ADSBDemodGUI::onMenuDialogCalled(const QPoint &p)
@@ -3951,6 +3960,16 @@ void ADSBDemodGUI::onMenuDialogCalled(const QPoint &p)
         setTitle(m_channelMarker.getTitle());
         setTitleColor(m_settings.m_rgbColor);
 
+        QStringList settingsKeys({
+           "rgbColor",
+           "title",
+           "useReverseAPI",
+           "reverseAPIAddress",
+           "reverseAPIPort",
+           "reverseAPIDeviceIndex",
+           "reverseAPIChannelIndex"
+            });
+
         if (m_deviceUISet->m_deviceMIMOEngine)
         {
             m_settings.m_streamIndex = dialog.getSelectedStreamIndex();
@@ -3959,7 +3978,7 @@ void ADSBDemodGUI::onMenuDialogCalled(const QPoint &p)
             updateIndexLabel();
         }
 
-        applySettings();
+        applySettings(settingsKeys);
     }
 
     resetContextMenuType();
@@ -4000,7 +4019,7 @@ void ADSBDemodGUI::on_amDemod_currentIndexChanged(int index)
     if (index >= 0)
     {
         m_settings.m_amDemod = ui->amDemod->currentText();
-        applySettings();
+        applySetting("amDemod");
     }
 }
 
@@ -4687,7 +4706,24 @@ void ADSBDemodGUI::feedSelect(const QPoint& p)
 
     if (dialog.exec() == QDialog::Accepted)
     {
-        applySettings();
+        applySettings({
+            "exportClientEnabled",
+            "exportClientHost",
+            "exportClientPort",
+            "exportClientFormat",
+            "exportServerEnabled",
+            "exportServerPort",
+            "importEnabled",
+            "importHost",
+            "importUsername",
+            "importPassword",
+            "importParameters",
+            "importPeriod",
+            "importMinLatitude",
+            "importMaxLatitude",
+            "importMinLongitude",
+            "importMaxLongitude"
+            });
         applyImportSettings();
     }
 }
@@ -4704,8 +4740,8 @@ void ADSBDemodGUI::on_displaySettings_clicked()
         if (unitsChanged) {
             m_aircraftModel.allAircraftUpdated();
         }
-        displaySettings();
-        applySettings();
+        displaySettings(dialog.getSettingsKeys(), false);
+        applySettings(dialog.getSettingsKeys());
     }
 }
 
@@ -5055,9 +5091,9 @@ ADSBDemodGUI::ADSBDemodGUI(PluginAPI* pluginAPI, DeviceUISet *deviceUISet, Baseb
     connect(MainCore::instance(), &MainCore::channelRemoved, this, &ADSBDemodGUI::updateChannelList);
 
     updateChannelList();
-    displaySettings();
+    displaySettings(QStringList(), true);
     makeUIConnections();
-    applySettings(true);
+    applyAllSettings();
 
     connect(&m_importTimer, &QTimer::timeout, this, &ADSBDemodGUI::import);
     m_networkManager = new QNetworkAccessManager();
@@ -5111,18 +5147,30 @@ ADSBDemodGUI::~ADSBDemodGUI()
     delete m_networkManager;
 }
 
-void ADSBDemodGUI::applySettings(bool force)
+void ADSBDemodGUI::applySetting(const QString& settingsKey)
 {
+    applySettings({settingsKey});
+}
+
+void ADSBDemodGUI::applySettings(const QStringList& settingsKeys, bool force)
+{
+    m_settingsKeys.append(settingsKeys);
     if (m_doApplySettings)
     {
         qDebug() << "ADSBDemodGUI::applySettings";
 
-        ADSBDemod::MsgConfigureADSBDemod* message = ADSBDemod::MsgConfigureADSBDemod::create(m_settings, force);
+        ADSBDemod::MsgConfigureADSBDemod* message = ADSBDemod::MsgConfigureADSBDemod::create(m_settings, m_settingsKeys, force);
         m_adsbDemod->getInputMessageQueue()->push(message);
     }
 }
 
-void ADSBDemodGUI::displaySettings()
+void ADSBDemodGUI::applyAllSettings()
+{
+    applySettings(QStringList(), true);
+}
+
+// All settings are valid - we just use settingsKeys here to avoid updating things that are slow to update
+void ADSBDemodGUI::displaySettings(const QStringList& settingsKeys, bool force)
 {
     m_channelMarker.blockSignals(true);
     m_channelMarker.setCenterFrequency(m_settings.m_inputFrequencyOffset);
@@ -5175,74 +5223,104 @@ void ADSBDemodGUI::displaySettings()
 
     updateIndexLabel();
 
-    QFont font(m_settings.m_tableFontName, m_settings.m_tableFontSize);
-    ui->adsbData->setFont(font);
+    if (settingsKeys.contains("tableFontName") || settingsKeys.contains("tableFontSize") || force)
+    {
+        QFont font(m_settings.m_tableFontName, m_settings.m_tableFontSize);
+        ui->adsbData->setFont(font);
+    }
 
     // Set units in column headers
-    if (m_settings.m_siUnits)
+    if (settingsKeys.contains("siUnits") || force)
     {
-        ui->adsbData->horizontalHeaderItem(ADSB_COL_ALTITUDE)->setText("Alt (m)");
-        ui->adsbData->horizontalHeaderItem(ADSB_COL_VERTICALRATE)->setText("VR (m/s)");
-        ui->adsbData->horizontalHeaderItem(ADSB_COL_SEL_ALTITUDE)->setText("Sel Alt (m)");
-        ui->adsbData->horizontalHeaderItem(ADSB_COL_GROUND_SPEED)->setText("GS (kph)");
-        ui->adsbData->horizontalHeaderItem(ADSB_COL_TRUE_AIRSPEED)->setText("TAS (kph)");
-        ui->adsbData->horizontalHeaderItem(ADSB_COL_INDICATED_AIRSPEED)->setText("IAS (kph)");
-        ui->adsbData->horizontalHeaderItem(ADSB_COL_HEADWIND)->setText("H Wnd (kph)");
-        ui->adsbData->horizontalHeaderItem(ADSB_COL_WIND_SPEED)->setText("Wnd (kph)");
-    }
-    else
-    {
-        ui->adsbData->horizontalHeaderItem(ADSB_COL_ALTITUDE)->setText("Alt (ft)");
-        ui->adsbData->horizontalHeaderItem(ADSB_COL_VERTICALRATE)->setText("VR (ft/m)");
-        ui->adsbData->horizontalHeaderItem(ADSB_COL_SEL_ALTITUDE)->setText("Sel Alt (ft)");
-        ui->adsbData->horizontalHeaderItem(ADSB_COL_GROUND_SPEED)->setText("GS (kn)");
-        ui->adsbData->horizontalHeaderItem(ADSB_COL_TRUE_AIRSPEED)->setText("TAS (kn)");
-        ui->adsbData->horizontalHeaderItem(ADSB_COL_INDICATED_AIRSPEED)->setText("IAS (kn)");
-        ui->adsbData->horizontalHeaderItem(ADSB_COL_HEADWIND)->setText("H Wnd (kn)");
-        ui->adsbData->horizontalHeaderItem(ADSB_COL_WIND_SPEED)->setText("Wnd (kn)");
+        if (m_settings.m_siUnits)
+        {
+            ui->adsbData->horizontalHeaderItem(ADSB_COL_ALTITUDE)->setText("Alt (m)");
+            ui->adsbData->horizontalHeaderItem(ADSB_COL_VERTICALRATE)->setText("VR (m/s)");
+            ui->adsbData->horizontalHeaderItem(ADSB_COL_SEL_ALTITUDE)->setText("Sel Alt (m)");
+            ui->adsbData->horizontalHeaderItem(ADSB_COL_GROUND_SPEED)->setText("GS (kph)");
+            ui->adsbData->horizontalHeaderItem(ADSB_COL_TRUE_AIRSPEED)->setText("TAS (kph)");
+            ui->adsbData->horizontalHeaderItem(ADSB_COL_INDICATED_AIRSPEED)->setText("IAS (kph)");
+            ui->adsbData->horizontalHeaderItem(ADSB_COL_HEADWIND)->setText("H Wnd (kph)");
+            ui->adsbData->horizontalHeaderItem(ADSB_COL_WIND_SPEED)->setText("Wnd (kph)");
+        }
+        else
+        {
+            ui->adsbData->horizontalHeaderItem(ADSB_COL_ALTITUDE)->setText("Alt (ft)");
+            ui->adsbData->horizontalHeaderItem(ADSB_COL_VERTICALRATE)->setText("VR (ft/m)");
+            ui->adsbData->horizontalHeaderItem(ADSB_COL_SEL_ALTITUDE)->setText("Sel Alt (ft)");
+            ui->adsbData->horizontalHeaderItem(ADSB_COL_GROUND_SPEED)->setText("GS (kn)");
+            ui->adsbData->horizontalHeaderItem(ADSB_COL_TRUE_AIRSPEED)->setText("TAS (kn)");
+            ui->adsbData->horizontalHeaderItem(ADSB_COL_INDICATED_AIRSPEED)->setText("IAS (kn)");
+            ui->adsbData->horizontalHeaderItem(ADSB_COL_HEADWIND)->setText("H Wnd (kn)");
+            ui->adsbData->horizontalHeaderItem(ADSB_COL_WIND_SPEED)->setText("Wnd (kn)");
+        }
     }
 
     // Order and size columns
-    QHeaderView *header = ui->adsbData->horizontalHeader();
-    for (int i = 0; i < ADSBDEMOD_COLUMNS; i++)
+    if (settingsKeys.contains("columnSizes") || settingsKeys.contains("columnIndexes") || force)
     {
-        bool hidden = m_settings.m_columnSizes[i] == 0;
-        header->setSectionHidden(i, hidden);
-        menu->actions().at(i)->setChecked(!hidden);
-        if (m_settings.m_columnSizes[i] > 0)
-            ui->adsbData->setColumnWidth(i, m_settings.m_columnSizes[i]);
-        header->moveSection(header->visualIndex(i), m_settings.m_columnIndexes[i]);
+        QHeaderView* header = ui->adsbData->horizontalHeader();
+        for (int i = 0; i < ADSBDEMOD_COLUMNS; i++)
+        {
+            bool hidden = m_settings.m_columnSizes[i] == 0;
+            header->setSectionHidden(i, hidden);
+            menu->actions().at(i)->setChecked(!hidden);
+            if (m_settings.m_columnSizes[i] > 0)
+                ui->adsbData->setColumnWidth(i, m_settings.m_columnSizes[i]);
+            header->moveSection(header->visualIndex(i), m_settings.m_columnIndexes[i]);
+        }
     }
 
     // Only update airports on map if settings have changed
     if ((m_airportInfo != nullptr)
-        && ((m_settings.m_airportRange != m_currentAirportRange)
-            || (m_settings.m_airportMinimumSize != m_currentAirportMinimumSize)
-            || (m_settings.m_displayHeliports != m_currentDisplayHeliports)))
+        && (((settingsKeys.contains("airportRange") || force) && (m_settings.m_airportRange != m_currentAirportRange))
+            || ((settingsKeys.contains("airportMinimumSize") || force) && (m_settings.m_airportMinimumSize != m_currentAirportMinimumSize))
+            || ((settingsKeys.contains("displayHeliports") || force) && (m_settings.m_displayHeliports != m_currentDisplayHeliports)))) {
         updateAirports();
+    }
 
-    updateAirspaces();
-    updateNavAids();
+    if (settingsKeys.contains("airspaces") || force) {
+        updateAirspaces();
+    }
+    if (settingsKeys.contains("displayNavAids") || settingsKeys.contains("airspaceRange") || force) {
+        updateNavAids();
+    }
 
     if (!m_settings.m_displayDemodStats)
         ui->stats->setText("");
 
-    initFlightInformation();
-    initAviationWeather();
+    if (settingsKeys.contains("aviationstackAPIKey") || force) {
+        initFlightInformation();
+    }
+    if (settingsKeys.contains("checkWXAPIKey") || force) {
+        initAviationWeather();
+    }
 
-    applyImportSettings();
+    if (settingsKeys.contains("importPeriod")
+        || settingsKeys.contains("feedEnabled")
+        || settingsKeys.contains("importEnabled")
+        || force) {
+        applyImportSettings();
+    }
 
     getRollupContents()->restoreState(m_rollupState);
     blockApplySettings(false);
     enableSpeechIfNeeded();
+
+    if (settingsKeys.contains("mapProvider")
+        || settingsKeys.contains("aircraftMinZoom")
+        || settingsKeys.contains("mapType")
+        || force)
+    {
 #ifdef __EMSCRIPTEN__
-    // FIXME: If we don't have this delay, tile server requests get deleted
-    QTimer::singleShot(250, [this] {
-        applyMapSettings();
-    });
+        // FIXME: If we don't have this delay, tile server requests get deleted
+        QTimer::singleShot(250, [this] {
+            applyMapSettings();
+            });
 #else
-    applyMapSettings();
+        applyMapSettings();
 #endif
+    }
 }
 
 void ADSBDemodGUI::leaveEvent(QEvent* event)
@@ -5536,7 +5614,7 @@ void ADSBDemodGUI::photoClicked()
 void ADSBDemodGUI::on_logEnable_clicked(bool checked)
 {
     m_settings.m_logEnabled = checked;
-    applySettings();
+    applySetting("logEnabled");
 }
 
 void ADSBDemodGUI::on_logFilename_clicked()
@@ -5551,7 +5629,7 @@ void ADSBDemodGUI::on_logFilename_clicked()
         {
             m_settings.m_logFilename = fileNames[0];
             ui->logFilename->setToolTip(QString(".csv log filename: %1").arg(m_settings.m_logFilename));
-            applySettings();
+            applySetting("logFilename");
         }
     }
 }

@@ -37,7 +37,7 @@ ADSBDemodSink::ADSBDemodSink() :
     m_magsqCount(0),
     m_messageQueueToGUI(nullptr)
 {
-    applySettings(m_settings, true);
+    applySettings(m_settings, QStringList(), true);
     applyChannelSettings(m_channelSampleRate, m_channelFrequencyOffset, true);
     for (int i = 0; i < m_buffers; i++)
         m_bufferWrite[i].release(1);
@@ -247,7 +247,7 @@ void ADSBDemodSink::applyChannelSettings(int channelSampleRate, int channelFrequ
     m_channelFrequencyOffset = channelFrequencyOffset;
 }
 
-void ADSBDemodSink::applySettings(const ADSBDemodSettings& settings, bool force)
+void ADSBDemodSink::applySettings(const ADSBDemodSettings& settings, const QStringList& settingsKeys, bool force)
 {
     qDebug() << "ADSBDemodSink::applySettings:"
             << " m_inputFrequencyOffset: " << settings.m_inputFrequencyOffset
@@ -258,26 +258,30 @@ void ADSBDemodSink::applySettings(const ADSBDemodSettings& settings, bool force)
             << " m_samplesPerBit: " << settings.m_samplesPerBit
             << " force: " << force;
 
-    if ((settings.m_rfBandwidth != m_settings.m_rfBandwidth)
-        || (settings.m_samplesPerBit != m_settings.m_samplesPerBit)
-        || (settings.m_interpolatorPhaseSteps != m_settings.m_interpolatorPhaseSteps)
-        || (settings.m_interpolatorTapsPerPhase != m_settings.m_interpolatorTapsPerPhase)
+    if ((settingsKeys.contains("rfBandwidth") && (settings.m_rfBandwidth != m_settings.m_rfBandwidth))
+        || (settingsKeys.contains("samplesPerBit") && (settings.m_samplesPerBit != m_settings.m_samplesPerBit))
+        || (settingsKeys.contains("interpolatorPhaseSteps") && (settings.m_interpolatorPhaseSteps != m_settings.m_interpolatorPhaseSteps))
+        || (settingsKeys.contains("interpolatorTapsPerPhase") && (settings.m_interpolatorTapsPerPhase != m_settings.m_interpolatorTapsPerPhase))
         || force)
     {
         m_interpolator.create(m_settings.m_interpolatorPhaseSteps, m_channelSampleRate, settings.m_rfBandwidth / 2.2,  m_settings.m_interpolatorTapsPerPhase);
         m_interpolatorDistanceRemain = 0;
-        m_interpolatorDistance =  (Real) m_channelSampleRate / (Real) (ADS_B_BITS_PER_SECOND * settings.m_samplesPerBit);
+        m_interpolatorDistance = (Real) m_channelSampleRate / (Real) (ADS_B_BITS_PER_SECOND * settings.m_samplesPerBit);
     }
 
-    if ((settings.m_samplesPerBit != m_settings.m_samplesPerBit) || force)
+    if ((settingsKeys.contains("samplesPerBit") && (settings.m_samplesPerBit != m_settings.m_samplesPerBit)) || force)
     {
         init(settings.m_samplesPerBit);
     }
 
     // Forward to worker
     ADSBDemodSinkWorker::MsgConfigureADSBDemodSinkWorker *msg = ADSBDemodSinkWorker::MsgConfigureADSBDemodSinkWorker::create(
-            settings, force);
+            settings, settingsKeys, force);
     m_worker.getInputMessageQueue()->push(msg);
 
-    m_settings = settings;
+    if (force) {
+        m_settings = settings;
+    } else {
+        m_settings.applySettings(settingsKeys, settings);
+    }
 }
