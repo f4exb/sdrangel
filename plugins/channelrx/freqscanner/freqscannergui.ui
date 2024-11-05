@@ -602,7 +602,7 @@
          <string/>
         </property>
         <property name="icon">
-         <iconset resource="../../../../srcejon_sdrangel/sdrgui/resources/res.qrc">
+         <iconset resource="../../../sdrgui/resources/res.qrc">
           <normaloff>:/play.png</normaloff>
           <normalon>:/stop.png</normalon>:/play.png</iconset>
         </property>
@@ -772,7 +772,7 @@ Leave blank for no adjustment</string>
            <string>Up</string>
           </property>
           <property name="icon">
-           <iconset resource="../../../../srcejon_sdrangel/sdrgui/resources/res.qrc">
+           <iconset resource="../../../sdrgui/resources/res.qrc">
             <normaloff>:/arrow_up.png</normaloff>:/arrow_up.png</iconset>
           </property>
          </widget>
@@ -786,7 +786,7 @@ Leave blank for no adjustment</string>
            <string/>
           </property>
           <property name="icon">
-           <iconset resource="../../../../srcejon_sdrangel/sdrgui/resources/res.qrc">
+           <iconset resource="../../../sdrgui/resources/res.qrc">
             <normaloff>:/arrow_down.png</normaloff>:/arrow_down.png</iconset>
           </property>
          </widget>
@@ -813,7 +813,7 @@ Leave blank for no adjustment</string>
            <string/>
           </property>
           <property name="icon">
-           <iconset resource="../../../../srcejon_sdrangel/sdrgui/resources/res.qrc">
+           <iconset resource="../../../sdrgui/resources/res.qrc">
             <normaloff>:/bin.png</normaloff>:/bin.png</iconset>
           </property>
          </widget>
@@ -848,7 +848,7 @@ Leave blank for no adjustment</string>
   <tabstop>deltaFrequency</tabstop>
  </tabstops>
  <resources>
-  <include location="../../../../srcejon_sdrangel/sdrgui/resources/res.qrc"/>
+  <include location="../../../sdrgui/resources/res.qrc"/>
  </resources>
  <connections/>
 </ui>
