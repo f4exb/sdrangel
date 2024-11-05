@@ -29,7 +29,7 @@
    </font>
   </property>
   <property name="focusPolicy">
-   <enum>Qt::StrongFocus</enum>
+   <enum>Qt::FocusPolicy::StrongFocus</enum>
   </property>
   <property name="windowTitle">
    <string>Frequency Scanner</string>
@@ -102,7 +102,7 @@
       <item>
        <widget class="Line" name="line_6">
         <property name="orientation">
-         <enum>Qt::Vertical</enum>
+         <enum>Qt::Orientation::Vertical</enum>
         </property>
        </widget>
       </item>
@@ -143,7 +143,7 @@
          <cursorShape>PointingHandCursor</cursorShape>
         </property>
         <property name="focusPolicy">
-         <enum>Qt::StrongFocus</enum>
+         <enum>Qt::FocusPolicy::StrongFocus</enum>
         </property>
         <property name="toolTip">
          <string>Minimum demod shift frequency from center in Hz</string>
@@ -160,14 +160,14 @@
       <item>
        <widget class="Line" name="line">
         <property name="orientation">
-         <enum>Qt::Vertical</enum>
+         <enum>Qt::Orientation::Vertical</enum>
         </property>
        </widget>
       </item>
       <item>
        <spacer name="horizontalSpacer">
         <property name="orientation">
-         <enum>Qt::Horizontal</enum>
+         <enum>Qt::Orientation::Horizontal</enum>
         </property>
         <property name="sizeHint" stdset="0">
          <size>
@@ -191,13 +191,13 @@
            <string>Active frequency power </string>
           </property>
           <property name="layoutDirection">
-           <enum>Qt::RightToLeft</enum>
+           <enum>Qt::LayoutDirection::RightToLeft</enum>
           </property>
           <property name="text">
            <string>-120.0</string>
           </property>
           <property name="alignment">
-           <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
+           <set>Qt::AlignmentFlag::AlignRight|Qt::AlignmentFlag::AlignTrailing|Qt::AlignmentFlag::AlignVCenter</set>
           </property>
          </widget>
         </item>
@@ -215,7 +215,7 @@
     <item>
      <widget class="Line" name="line_7">
       <property name="orientation">
-       <enum>Qt::Horizontal</enum>
+       <enum>Qt::Orientation::Horizontal</enum>
       </property>
      </widget>
     </item>
@@ -266,7 +266,7 @@
       <item>
        <spacer name="horizontalSpacer_3">
         <property name="orientation">
-         <enum>Qt::Horizontal</enum>
+         <enum>Qt::Orientation::Horizontal</enum>
         </property>
         <property name="sizeHint" stdset="0">
          <size>
@@ -279,7 +279,7 @@
       <item>
        <widget class="Line" name="line_4">
         <property name="orientation">
-         <enum>Qt::Vertical</enum>
+         <enum>Qt::Orientation::Vertical</enum>
         </property>
        </widget>
       </item>
@@ -328,7 +328,7 @@
       <item>
        <widget class="Line" name="line_3">
         <property name="orientation">
-         <enum>Qt::Vertical</enum>
+         <enum>Qt::Orientation::Vertical</enum>
         </property>
        </widget>
       </item>
@@ -377,7 +377,7 @@
       <item>
        <widget class="Line" name="line_2">
         <property name="orientation">
-         <enum>Qt::Vertical</enum>
+         <enum>Qt::Orientation::Vertical</enum>
         </property>
        </widget>
       </item>
@@ -428,7 +428,7 @@
     <item>
      <widget class="Line" name="line_5">
       <property name="orientation">
-       <enum>Qt::Horizontal</enum>
+       <enum>Qt::Orientation::Horizontal</enum>
       </property>
      </widget>
     </item>
@@ -465,7 +465,7 @@
          <cursorShape>PointingHandCursor</cursorShape>
         </property>
         <property name="focusPolicy">
-         <enum>Qt::StrongFocus</enum>
+         <enum>Qt::FocusPolicy::StrongFocus</enum>
         </property>
         <property name="toolTip">
          <string>Channel bandwidth</string>
@@ -482,7 +482,7 @@
       <item>
        <spacer name="horizontalSpacer_4">
         <property name="orientation">
-         <enum>Qt::Horizontal</enum>
+         <enum>Qt::Orientation::Horizontal</enum>
         </property>
         <property name="sizeHint" stdset="0">
          <size>
@@ -551,7 +551,7 @@
     <item>
      <widget class="Line" name="filterLine">
       <property name="orientation">
-       <enum>Qt::Horizontal</enum>
+       <enum>Qt::Orientation::Horizontal</enum>
       </property>
      </widget>
     </item>
@@ -569,7 +569,7 @@
          <string>Run mode</string>
         </property>
         <property name="currentIndex">
-         <number>1</number>
+         <number>0</number>
         </property>
         <item>
          <property name="text">
@@ -586,6 +586,11 @@
           <string>Scan-only</string>
          </property>
         </item>
+        <item>
+         <property name="text">
+          <string>Multiplex</string>
+         </property>
+        </item>
        </widget>
       </item>
       <item>
@@ -597,7 +602,7 @@
          <string/>
         </property>
         <property name="icon">
-         <iconset resource="../../../sdrgui/resources/res.qrc">
+         <iconset resource="../../../../srcejon_sdrangel/sdrgui/resources/res.qrc">
           <normaloff>:/play.png</normaloff>
           <normalon>:/stop.png</normalon>:/play.png</iconset>
         </property>
@@ -621,7 +626,7 @@
     <item>
      <widget class="Line" name="line_8">
       <property name="orientation">
-       <enum>Qt::Horizontal</enum>
+       <enum>Qt::Orientation::Horizontal</enum>
       </property>
      </widget>
     </item>
@@ -767,7 +772,7 @@ Leave blank for no adjustment</string>
            <string>Up</string>
           </property>
           <property name="icon">
-           <iconset resource="../../../sdrgui/resources/res.qrc">
+           <iconset resource="../../../../srcejon_sdrangel/sdrgui/resources/res.qrc">
             <normaloff>:/arrow_up.png</normaloff>:/arrow_up.png</iconset>
           </property>
          </widget>
@@ -781,7 +786,7 @@ Leave blank for no adjustment</string>
            <string/>
           </property>
           <property name="icon">
-           <iconset resource="../../../sdrgui/resources/res.qrc">
+           <iconset resource="../../../../srcejon_sdrangel/sdrgui/resources/res.qrc">
             <normaloff>:/arrow_down.png</normaloff>:/arrow_down.png</iconset>
           </property>
          </widget>
@@ -789,7 +794,7 @@ Leave blank for no adjustment</string>
         <item>
          <spacer name="horizontalSpacer_2">
           <property name="orientation">
-           <enum>Qt::Horizontal</enum>
+           <enum>Qt::Orientation::Horizontal</enum>
           </property>
           <property name="sizeHint" stdset="0">
            <size>
@@ -808,7 +813,7 @@ Leave blank for no adjustment</string>
            <string/>
           </property>
           <property name="icon">
-           <iconset resource="../../../sdrgui/resources/res.qrc">
+           <iconset resource="../../../../srcejon_sdrangel/sdrgui/resources/res.qrc">
             <normaloff>:/bin.png</normaloff>:/bin.png</iconset>
           </property>
          </widget>
@@ -843,7 +848,7 @@ Leave blank for no adjustment</string>
   <tabstop>deltaFrequency</tabstop>
  </tabstops>
  <resources>
-  <include location="../../../sdrgui/resources/res.qrc"/>
+  <include location="../../../../srcejon_sdrangel/sdrgui/resources/res.qrc"/>
  </resources>
  <connections/>
 </ui>

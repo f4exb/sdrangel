@@ -64,7 +64,8 @@ struct FreqScannerSettings
     enum Mode {
         SINGLE,
         CONTINUOUS,
-        SCAN_ONLY
+        SCAN_ONLY,
+        MULTIPLEX
     } m_mode;                       //!< Whether to run a single or many scans
 
     QList<int> m_columnIndexes;//!< How the columns are ordered in the table
