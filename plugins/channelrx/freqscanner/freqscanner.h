@@ -399,7 +399,8 @@ private:
         START_SCAN,
         SCAN_FOR_MAX_POWER,
         WAIT_FOR_END_TX,
-        WAIT_FOR_RETRANSMISSION
+        WAIT_FOR_RETRANSMISSION,
+        WAIT_FOR_RX_TIME
     } m_state;
 
     QTimer m_timeoutTimer;

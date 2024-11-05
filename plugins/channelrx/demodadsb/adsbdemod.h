@@ -20,8 +20,6 @@
 #ifndef INCLUDE_ADSBDEMOD_H
 #define INCLUDE_ADSBDEMOD_H
 
-#include <vector>
-
 #include <QNetworkRequest>
 
 #include "dsp/basebandsamplesink.h"
@@ -44,20 +42,23 @@ public:
 
     public:
         const ADSBDemodSettings& getSettings() const { return m_settings; }
+        const QStringList& getSettingsKeys() const { return m_settingsKeys; }
         bool getForce() const { return m_force; }
 
-        static MsgConfigureADSBDemod* create(const ADSBDemodSettings& settings, bool force)
+        static MsgConfigureADSBDemod* create(const ADSBDemodSettings& settings, const QStringList& settingsKeys, bool force)
         {
-            return new MsgConfigureADSBDemod(settings, force);
+            return new MsgConfigureADSBDemod(settings, settingsKeys, force);
         }
 
     private:
         ADSBDemodSettings m_settings;
+        QStringList m_settingsKeys;
         bool m_force;
 
-        MsgConfigureADSBDemod(const ADSBDemodSettings& settings, bool force) :
+        MsgConfigureADSBDemod(const ADSBDemodSettings& settings, const QStringList& settingsKeys, bool force) :
             Message(),
             m_settings(settings),
+            m_settingsKeys(settingsKeys),
             m_force(force)
         { }
     };
@@ -184,9 +185,9 @@ private:
     QNetworkRequest m_networkRequest;
 
 	virtual bool handleMessage(const Message& cmd); //!< Processing of a message. Returns true if message has actually been processed
-    void applySettings(const ADSBDemodSettings& settings, bool force = false);
+    void applySettings(const ADSBDemodSettings& settings, const QStringList& settingsKeys, bool force = false);
     void webapiFormatChannelReport(SWGSDRangel::SWGChannelReport& response);
-    void webapiReverseSendSettings(QList<QString>& channelSettingsKeys, const ADSBDemodSettings& settings, bool force);
+    void webapiReverseSendSettings(const QList<QString>& channelSettingsKeys, const ADSBDemodSettings& settings, bool force);
 
 private slots:
     void networkManagerFinished(QNetworkReply *reply);

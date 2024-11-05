@@ -811,7 +811,7 @@ public:
     {
         m_aircraftRegExp.optimize();
     }
-    
+
     virtual ~ModelMatch() = default;
 
     virtual bool match(const QString &aircraft, const QString &manufacturer, QString &model)
@@ -911,6 +911,7 @@ private:
     ChannelMarker m_channelMarker;
     RollupState m_rollupState;
     ADSBDemodSettings m_settings;
+    QStringList m_settingsKeys;
     qint64 m_deviceCenterFrequency;
     int m_basebandSampleRate;
     bool m_basicSettingsShown;
@@ -981,8 +982,10 @@ private:
     virtual ~ADSBDemodGUI();
 
     void blockApplySettings(bool block);
-    void applySettings(bool force = false);
-    void displaySettings();
+    void applySetting(const QString& settingsKey);
+    void applySettings(const QStringList& settingsKeys, bool force = false);
+    void applyAllSettings();
+    void displaySettings(const QStringList& settingsKeys, bool force);
     bool handleMessage(const Message& message);
     void makeUIConnections();
     void updateAbsoluteCenterFrequency();

@@ -377,6 +377,7 @@ void FreqScanner::processScanResults(const QDateTime& fftStartTime, const QList<
             bool freqInRange = false;
             qint64 nextCenterFrequency = m_centerFrequency;
             int usableBW = (m_scannerSampleRate * 3 / 4) & ~1;
+            int nextFrequencyIndex = 0;
             do
             {
                 if (nextCenterFrequency + usableBW / 2 > m_stepStopFrequency)
@@ -398,13 +399,30 @@ void FreqScanner::processScanResults(const QDateTime& fftStartTime, const QList<
                         && (m_settings.m_frequencySettings[i].m_frequency < nextCenterFrequency + usableBW / 2))
                     {
                         freqInRange = true;
+                        nextFrequencyIndex = i;
+
+                        // Do we need to realign for frequencies with wider bandwidths than default
+                        if (!m_settings.m_frequencySettings[i].m_channelBandwidth.isEmpty())
+                        {
+                            bool ok;
+                            int channelBW = m_settings.m_frequencySettings[i].m_channelBandwidth.toInt(&ok);
+                            if (ok)
+                            {
+                                if (channelBW >= usableBW) {
+                                    nextCenterFrequency = m_settings.m_frequencySettings[i].m_frequency;
+                                } else if (m_settings.m_frequencySettings[i].m_frequency - channelBW / 2 < nextCenterFrequency - usableBW / 2) {
+                                    nextCenterFrequency = m_settings.m_frequencySettings[i].m_frequency - channelBW / 2;
+                                }
+                            }
+                        }
+
                         break;
                     }
                 }
             }
             while (!complete && !freqInRange);
 
-            if (complete)
+            if (complete || (m_settings.m_mode == FreqScannerSettings::MULTIPLEX))
             {
                 if (m_scanResults.size() > 0)
                 {
@@ -421,7 +439,12 @@ void FreqScanner::processScanResults(const QDateTime& fftStartTime, const QList<
                     FreqScannerSettings::FrequencySettings *frequencySettings = nullptr;
                     FreqScannerSettings::FrequencySettings *activeFrequencySettings = nullptr;
 
-                    if (m_settings.m_priority == FreqScannerSettings::MAX_POWER)
+                    if (m_settings.m_mode == FreqScannerSettings::MULTIPLEX)
+                    {
+                        activeFrequencySettings = &m_settings.m_frequencySettings[nextFrequencyIndex];
+                        frequency = activeFrequencySettings->m_frequency;
+                    }
+                    else if (m_settings.m_priority == FreqScannerSettings::MAX_POWER)
                     {
                         Real maxPower = -200.0f;
 
@@ -528,6 +551,13 @@ void FreqScanner::processScanResults(const QDateTime& fftStartTime, const QList<
                                 }
                                 m_state = IDLE;
                             }
+                            else if (m_settings.m_mode == FreqScannerSettings::MULTIPLEX)
+                            {
+                                // Wait for user-specified receive time before moving to next frequency
+                                m_timeoutTimer.setSingleShot(true);
+                                m_timeoutTimer.start((int)(m_settings.m_retransmitTime * 1000.0));
+                                m_state = WAIT_FOR_RX_TIME;
+                            }
                             else
                             {
                                 // Wait for transmission to finish
@@ -605,13 +635,33 @@ void FreqScanner::processScanResults(const QDateTime& fftStartTime, const QList<
         }
         break;
 
+    case WAIT_FOR_RX_TIME:
+        for (int i = 0; i < results.size(); i++)
+        {
+            if (results[i].m_frequency == m_activeFrequency)
+            {
+                if (m_guiMessageQueue) {
+                    m_guiMessageQueue->push(MsgReportActivePower::create(results[i].m_power));
+                }
+            }
+        }
+        break;
+
     }
 }
 
 void FreqScanner::timeout()
 {
-    // Power hasn't returned above threshold - Restart scan
-    initScan();
+    if (m_settings.m_mode == FreqScannerSettings::MULTIPLEX)
+    {
+        // Move to next frequency
+        m_state = SCAN_FOR_MAX_POWER;
+    }
+    else
+    {
+        // Power hasn't returned above threshold - Restart scan
+        initScan();
+    }
 }
 
 void FreqScanner::calcScannerSampleRate(int channelBW, int basebandSampleRate, int& scannerSampleRate, int& fftSize, int& binsPerChannel)

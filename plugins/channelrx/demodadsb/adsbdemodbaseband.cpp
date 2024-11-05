@@ -117,7 +117,7 @@ bool ADSBDemodBaseband::handleMessage(const Message& cmd)
         MsgConfigureADSBDemodBaseband& cfg = (MsgConfigureADSBDemodBaseband&) cmd;
         qDebug() << "ADSBDemodBaseband::handleMessage: MsgConfigureADSBDemodBaseband";
 
-        applySettings(cfg.getSettings(), cfg.getForce());
+        applySettings(cfg.getSettings(), cfg.getSettingsKeys(), cfg.getForce());
 
         return true;
     }
@@ -138,19 +138,24 @@ bool ADSBDemodBaseband::handleMessage(const Message& cmd)
     }
 }
 
-void ADSBDemodBaseband::applySettings(const ADSBDemodSettings& settings, bool force)
+void ADSBDemodBaseband::applySettings(const ADSBDemodSettings& settings, const QStringList& settingsKeys, bool force)
 {
-    if ((settings.m_inputFrequencyOffset != m_settings.m_inputFrequencyOffset)
-        || (settings.m_samplesPerBit != m_settings.m_samplesPerBit) || force)
+    if (   (settingsKeys.contains("inputFrequencyOffset") && (settings.m_inputFrequencyOffset != m_settings.m_inputFrequencyOffset))
+        || (settingsKeys.contains("samplesPerBit") && (settings.m_samplesPerBit != m_settings.m_samplesPerBit))
+        || force)
     {
         int requestedRate = ADS_B_BITS_PER_SECOND * settings.m_samplesPerBit;
         m_channelizer->setChannelization(requestedRate, settings.m_inputFrequencyOffset);
         m_sink.applyChannelSettings(m_channelizer->getChannelSampleRate(), m_channelizer->getChannelFrequencyOffset());
     }
 
-    m_sink.applySettings(settings, force);
+    m_sink.applySettings(settings, settingsKeys, force);
 
-    m_settings = settings;
+    if (force) {
+        m_settings = settings;
+    } else {
+        m_settings.applySettings(settingsKeys, settings);
+    }
 }
 
 int ADSBDemodBaseband::getChannelSampleRate() const

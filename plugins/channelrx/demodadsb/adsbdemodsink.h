@@ -55,7 +55,7 @@ public:
     }
 
     void applyChannelSettings(int channelSampleRate, int channelFrequencyOffset, bool force = false);
-    void applySettings(const ADSBDemodSettings& settings, bool force = false);
+    void applySettings(const ADSBDemodSettings& settings, const QStringList& settingsKeys, bool force = false);
     void setMessageQueueToGUI(MessageQueue *messageQueue) { m_messageQueueToGUI = messageQueue; }
     void setMessageQueueToWorker(MessageQueue *messageQueue) { m_messageQueueToWorker = messageQueue; }
     void startWorker();

@@ -201,6 +201,8 @@ struct ADSBDemodSettings
     bool deserialize(const QByteArray& data);
     QByteArray serializeNotificationSettings(QList<NotificationSettings *> notificationSettings) const;
     void deserializeNotificationSettings(const QByteArray& data, QList<NotificationSettings *>& notificationSettings);
+    void applySettings(const QStringList& settingsKeys, const ADSBDemodSettings& settings);
+    QString getDebugString(const QStringList& settingsKeys, bool force = false) const;
 };
 
 #endif /* PLUGINS_CHANNELRX_DEMODADSB_ADSBDEMODSETTINGS_H_ */

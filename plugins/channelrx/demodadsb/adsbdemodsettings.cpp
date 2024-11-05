@@ -401,3 +401,375 @@ void ADSBDemodSettings::NotificationSettings::updateRegularExpression()
         qDebug() << "ADSBDemod: Regular expression is not valid: " << m_regExp;
     }
 }
+
+void ADSBDemodSettings::applySettings(const QStringList& settingsKeys, const ADSBDemodSettings& settings)
+{
+    if (settingsKeys.contains("inputFrequencyOffset")) {
+        m_inputFrequencyOffset = settings.m_inputFrequencyOffset;
+    }
+    if (settingsKeys.contains("rfBandwidth")) {
+        m_rfBandwidth = settings.m_rfBandwidth;
+    }
+    if (settingsKeys.contains("correlationThreshold")) {
+        m_correlationThreshold = settings.m_correlationThreshold;
+    }
+    if (settingsKeys.contains("samplesPerBit")) {
+        m_samplesPerBit = settings.m_samplesPerBit;
+    }
+    if (settingsKeys.contains("removeTimeout")) {
+        m_removeTimeout = settings.m_removeTimeout;
+    }
+    if (settingsKeys.contains("feedEnabled")) {
+        m_feedEnabled = settings.m_feedEnabled;
+    }
+    if (settingsKeys.contains("exportClientEnabled")) {
+        m_exportClientEnabled = settings.m_exportClientEnabled;
+    }
+    if (settingsKeys.contains("exportClientHost")) {
+        m_exportClientHost = settings.m_exportClientHost;
+    }
+    if (settingsKeys.contains("exportClientPort")) {
+        m_exportClientPort = settings.m_exportClientPort;
+    }
+    if (settingsKeys.contains("exportClientFormat")) {
+        m_exportClientFormat = settings.m_exportClientFormat;
+    }
+    if (settingsKeys.contains("exportServerEnabled")) {
+        m_exportServerEnabled = settings.m_exportServerEnabled;
+    }
+    if (settingsKeys.contains("exportServerPort")) {
+        m_exportServerPort = settings.m_exportServerPort;
+    }
+    if (settingsKeys.contains("importEnabled")) {
+        m_importEnabled = settings.m_importEnabled;
+    }
+    if (settingsKeys.contains("importHost")) {
+        m_importHost = settings.m_importHost;
+    }
+    if (settingsKeys.contains("importUsername")) {
+        m_importUsername = settings.m_importUsername;
+    }
+    if (settingsKeys.contains("importPassword")) {
+        m_importPassword = settings.m_importPassword;
+    }
+    if (settingsKeys.contains("importParameters")) {
+        m_importParameters = settings.m_importParameters;
+    }
+    if (settingsKeys.contains("importPeriod")) {
+        m_importPeriod = settings.m_importPeriod;
+    }
+    if (settingsKeys.contains("importMinLatitude")) {
+        m_importMinLatitude = settings.m_importMinLatitude;
+    }
+    if (settingsKeys.contains("importMaxLatitude")) {
+        m_importMaxLatitude = settings.m_importMaxLatitude;
+    }
+    if (settingsKeys.contains("importMinLongitude")) {
+        m_importMinLongitude = settings.m_importMinLongitude;
+    }
+    if (settingsKeys.contains("importMaxLongitude")) {
+        m_importMaxLongitude = settings.m_importMaxLongitude;
+    }
+    if (settingsKeys.contains("rgbColor")) {
+        m_rgbColor = settings.m_rgbColor;
+    }
+    if (settingsKeys.contains("title")) {
+        m_title = settings.m_title;
+    }
+    if (settingsKeys.contains("useReverseAPI")) {
+        m_useReverseAPI = settings.m_useReverseAPI;
+    }
+    if (settingsKeys.contains("reverseAPIAddress")) {
+        m_reverseAPIAddress = settings.m_reverseAPIAddress;
+    }
+    if (settingsKeys.contains("reverseAPIPort")) {
+        m_reverseAPIPort = settings.m_reverseAPIPort;
+    }
+    if (settingsKeys.contains("reverseAPIDeviceIndex")) {
+        m_reverseAPIDeviceIndex = settings.m_reverseAPIDeviceIndex;
+    }
+    if (settingsKeys.contains("columnIndexes")) {
+        std::copy(std::begin(settings.m_columnIndexes), std::end(settings.m_columnIndexes), std::begin(m_columnIndexes));
+    }
+    if (settingsKeys.contains("columnSizes")) {
+        std::copy(std::begin(settings.m_columnSizes), std::end(settings.m_columnIndexes), std::begin(m_columnSizes));
+    }
+    if (settingsKeys.contains("airportRange")) {
+        m_airportRange = settings.m_airportRange;
+    }
+    if (settingsKeys.contains("airportMinimumSize")) {
+        m_airportMinimumSize = settings.m_airportMinimumSize;
+    }
+    if (settingsKeys.contains("displayHeliports")) {
+        m_displayHeliports = settings.m_displayHeliports;
+    }
+    if (settingsKeys.contains("flightPaths")) {
+        m_flightPaths = settings.m_flightPaths;
+    }
+    if (settingsKeys.contains("allFlightPaths")) {
+        m_allFlightPaths = settings.m_allFlightPaths;
+    }
+    if (settingsKeys.contains("siUnits")) {
+        m_siUnits = settings.m_siUnits;
+    }
+    if (settingsKeys.contains("tableFontName")) {
+        m_tableFontName = settings.m_tableFontName;
+    }
+    if (settingsKeys.contains("tableFontSize")) {
+        m_tableFontSize = settings.m_tableFontSize;
+    }
+    if (settingsKeys.contains("displayDemodStats")) {
+        m_displayDemodStats = settings.m_displayDemodStats;
+    }
+    if (settingsKeys.contains("correlateFullPreamble")) {
+        m_correlateFullPreamble = settings.m_correlateFullPreamble;
+    }
+    if (settingsKeys.contains("demodModeS")) {
+        m_demodModeS = settings.m_demodModeS;
+    }
+    if (settingsKeys.contains("amDemod")) {
+        m_amDemod = settings.m_amDemod;
+    }
+    if (settingsKeys.contains("autoResizeTableColumns")) {
+        m_autoResizeTableColumns = settings.m_autoResizeTableColumns;
+    }
+    if (settingsKeys.contains("interpolatorPhaseSteps")) {
+        m_interpolatorPhaseSteps = settings.m_interpolatorPhaseSteps;
+    }
+    if (settingsKeys.contains("interpolatorTapsPerPhase")) {
+        m_interpolatorTapsPerPhase = settings.m_interpolatorTapsPerPhase;
+    }
+    if (settingsKeys.contains("notificationSettings")) {
+        m_notificationSettings = settings.m_notificationSettings;
+    }
+    if (settingsKeys.contains("aviationstackAPIKey")) {
+        m_aviationstackAPIKey = settings.m_aviationstackAPIKey;
+    }
+    if (settingsKeys.contains("checkWXAPIKey")) {
+        m_checkWXAPIKey = settings.m_checkWXAPIKey;
+    }
+    if (settingsKeys.contains("logFilename")) {
+        m_logFilename = settings.m_logFilename;
+    }
+    if (settingsKeys.contains("logEnabled")) {
+        m_logEnabled = settings.m_logEnabled;
+    }
+    if (settingsKeys.contains("airspaces")) {
+        m_airspaces = settings.m_airspaces;
+    }
+    if (settingsKeys.contains("airspaceRange")) {
+        m_airspaceRange = settings.m_airspaceRange;
+    }
+    if (settingsKeys.contains("mapProvider")) {
+        m_mapProvider = settings.m_mapProvider;
+    }
+    if (settingsKeys.contains("mapType")) {
+        m_mapType = settings.m_mapType;
+    }
+    if (settingsKeys.contains("displayNavAids")) {
+        m_displayNavAids = settings.m_displayNavAids;
+    }
+    if (settingsKeys.contains("displayPhotos")) {
+        m_displayPhotos = settings.m_displayPhotos;
+    }
+    if (settingsKeys.contains("verboseModelMatching")) {
+        m_verboseModelMatching = settings.m_verboseModelMatching;
+    }
+    if (settingsKeys.contains("airfieldElevation")) {
+        m_airfieldElevation = settings.m_airfieldElevation;
+    }
+    if (settingsKeys.contains("aircraftMinZoom")) {
+        m_aircraftMinZoom = settings.m_aircraftMinZoom;
+    }
+    if (settingsKeys.contains("atcLabels")) {
+        m_atcLabels = settings.m_atcLabels;
+    }
+    if (settingsKeys.contains("atcCallsigns")) {
+        m_atcCallsigns = settings.m_atcCallsigns;
+    }
+    if (settingsKeys.contains("transitionAlt")) {
+        m_transitionAlt = settings.m_transitionAlt;
+    }
+}
+
+QString ADSBDemodSettings::getDebugString(const QStringList& settingsKeys, bool force) const
+{
+    std::ostringstream ostr;
+
+    if (settingsKeys.contains("inputFrequencyOffset") || force) {
+        ostr << " m_inputFrequencyOffset: " << m_inputFrequencyOffset;
+    }
+    if (settingsKeys.contains("rfBandwidth") || force) {
+        ostr << " m_rfBandwidth: " << m_rfBandwidth;
+    }
+    if (settingsKeys.contains("correlationThreshold") || force) {
+        ostr << " m_correlationThreshold: " << m_correlationThreshold;
+    }
+    if (settingsKeys.contains("samplesPerBit") || force) {
+        ostr << " m_samplesPerBit: " << m_samplesPerBit;
+    }
+    if (settingsKeys.contains("removeTimeout") || force) {
+        ostr << " m_removeTimeout: " << m_removeTimeout;
+    }
+    if (settingsKeys.contains("feedEnabled") || force) {
+        ostr << " m_feedEnabled: " << m_feedEnabled;
+    }
+    if (settingsKeys.contains("exportClientEnabled") || force) {
+        ostr << " m_exportClientEnabled: " << m_exportClientEnabled;
+    }
+    if (settingsKeys.contains("exportClientHost") || force) {
+        ostr << " m_exportClientHost: " << m_exportClientHost.toStdString();
+    }
+    if (settingsKeys.contains("exportClientPort") || force) {
+        ostr << " m_exportClientPort: " << m_exportClientPort;
+    }
+    if (settingsKeys.contains("exportClientFormat") || force) {
+        ostr << " m_exportClientFormat: " << m_exportClientFormat;
+    }
+    if (settingsKeys.contains("exportServerEnabled") || force) {
+        ostr << " m_exportServerEnabled: " << m_exportServerEnabled;
+    }
+    if (settingsKeys.contains("exportServerPort") || force) {
+        ostr << " m_exportServerPort: " << m_exportServerPort;
+    }
+    if (settingsKeys.contains("importEnabled") || force) {
+        ostr << " m_importEnabled: " << m_importEnabled;
+    }
+    if (settingsKeys.contains("importHost") || force) {
+        ostr << " m_importHost: " << m_importHost.toStdString();
+    }
+    if (settingsKeys.contains("importUsername") || force) {
+        ostr << " m_importUsername: " << m_importUsername.toStdString();
+    }
+    if (settingsKeys.contains("importPassword") || force) {
+        ostr << " m_importPassword: " << m_importPassword.toStdString();
+    }
+    if (settingsKeys.contains("importParameters") || force) {
+        ostr << " m_importParameters: " << m_importParameters.toStdString();
+    }
+    if (settingsKeys.contains("importPeriod") || force) {
+        ostr << " m_importPeriod: " << m_importPeriod;
+    }
+    if (settingsKeys.contains("importMinLatitude") || force) {
+        ostr << " m_importMinLatitude: " << m_importMinLatitude.toStdString();
+    }
+    if (settingsKeys.contains("importMaxLatitude") || force) {
+        ostr << " m_importMaxLatitude: " << m_importMaxLatitude.toStdString();
+    }
+    if (settingsKeys.contains("importMinLongitude") || force) {
+        ostr << " m_importMinLongitude: " << m_importMinLongitude.toStdString();
+    }
+    if (settingsKeys.contains("importMaxLongitude") || force) {
+        ostr << " m_importMaxLongitude: " << m_importMaxLongitude.toStdString();
+    }
+    if (settingsKeys.contains("title") || force) {
+        ostr << " m_title: " << m_title.toStdString();
+    }
+    if (settingsKeys.contains("useReverseAPI") || force) {
+        ostr << " m_useReverseAPI: " << m_useReverseAPI;
+    }
+    if (settingsKeys.contains("reverseAPIAddress") || force) {
+        ostr << " m_reverseAPIAddress: " << m_reverseAPIAddress.toStdString();
+    }
+    if (settingsKeys.contains("reverseAPIPort") || force) {
+        ostr << " m_reverseAPIPort: " << m_reverseAPIPort;
+    }
+    if (settingsKeys.contains("reverseAPIDeviceIndex") || force) {
+        ostr << " m_reverseAPIDeviceIndex: " << m_reverseAPIDeviceIndex;
+    }
+    if (settingsKeys.contains("airportRange") || force) {
+        ostr << " m_airportRange: " << m_airportRange;
+    }
+    if (settingsKeys.contains("airportMinimumSize") || force) {
+        ostr << " m_airportMinimumSize: " << m_airportMinimumSize;
+    }
+    if (settingsKeys.contains("displayHeliports") || force) {
+        ostr << " m_displayHeliports: " << m_displayHeliports;
+    }
+    if (settingsKeys.contains("flightPaths") || force) {
+        ostr << " m_flightPaths: " << m_flightPaths;
+    }
+    if (settingsKeys.contains("allFlightPaths") || force) {
+        ostr << " m_allFlightPaths: " << m_allFlightPaths;
+    }
+    if (settingsKeys.contains("siUnits") || force) {
+        ostr << " m_siUnits: " << m_siUnits;
+    }
+    if (settingsKeys.contains("tableFontName") || force) {
+        ostr << " m_tableFontName: " << m_tableFontName.toStdString();
+    }
+    if (settingsKeys.contains("tableFontSize") || force) {
+        ostr << " m_tableFontSize: " << m_tableFontSize;
+    }
+    if (settingsKeys.contains("displayDemodStats") || force) {
+        ostr << " m_displayDemodStats: " << m_displayDemodStats;
+    }
+    if (settingsKeys.contains("correlateFullPreamble") || force) {
+        ostr << " m_correlateFullPreamble: " << m_correlateFullPreamble;
+    }
+    if (settingsKeys.contains("demodModeS") || force) {
+        ostr << " m_demodModeS: " << m_demodModeS;
+    }
+    if (settingsKeys.contains("amDemod") || force) {
+        ostr << " m_amDemod: " << m_amDemod.toStdString();
+    }
+    if (settingsKeys.contains("autoResizeTableColumns") || force) {
+        ostr << " m_autoResizeTableColumns: " << m_autoResizeTableColumns;
+    }
+    if (settingsKeys.contains("interpolatorPhaseSteps") || force) {
+        ostr << " m_interpolatorPhaseSteps: " << m_interpolatorPhaseSteps;
+    }
+    if (settingsKeys.contains("notificationSettings") || force) {
+        //ostr << " m_notificationSettings: " << m_notificationSettings.join(",").toStdString();
+    }
+    if (settingsKeys.contains("aviationstackAPIKey") || force) {
+        ostr << " m_aviationstackAPIKey: " << m_aviationstackAPIKey.toStdString();
+    }
+    if (settingsKeys.contains("checkWXAPIKey") || force) {
+        ostr << " m_checkWXAPIKey: " << m_checkWXAPIKey.toStdString();
+    }
+    if (settingsKeys.contains("logFilename") || force) {
+        ostr << " m_logFilename: " << m_logFilename.toStdString();
+    }
+    if (settingsKeys.contains("logEnabled") || force) {
+        ostr << " m_logEnabled: " << m_logEnabled;
+    }
+    if (settingsKeys.contains("airspaces") || force) {
+        ostr << " m_airspaces: " << m_airspaces.join(",").toStdString();
+    }
+    if (settingsKeys.contains("airspaceRange") || force) {
+        ostr << " m_airspaceRange: " << m_airspaceRange;
+    }
+    if (settingsKeys.contains("mapProvider") || force) {
+        ostr << " m_mapProvider: " << m_mapProvider.toStdString();
+    }
+    if (settingsKeys.contains("mapType") || force) {
+        ostr << " m_mapType: " << m_mapType;
+    }
+    if (settingsKeys.contains("displayNavAids") || force) {
+        ostr << " m_displayNavAids: " << m_displayNavAids;
+    }
+    if (settingsKeys.contains("displayPhotos") || force) {
+        ostr << " m_displayPhotos: " << m_displayPhotos;
+    }
+    if (settingsKeys.contains("verboseModelMatching") || force) {
+        ostr << " m_verboseModelMatching: " << m_verboseModelMatching;
+    }
+    if (settingsKeys.contains("airfieldElevation") || force) {
+        ostr << " m_airfieldElevation: " << m_airfieldElevation;
+    }
+    if (settingsKeys.contains("aircraftMinZoom") || force) {
+        ostr << " m_aircraftMinZoom: " << m_aircraftMinZoom;
+    }
+    if (settingsKeys.contains("atcLabels") || force) {
+        ostr << " m_atcLabels: " << m_atcLabels;
+    }
+    if (settingsKeys.contains("atcCallsigns") || force) {
+        ostr << " m_atcCallsigns: " << m_atcCallsigns;
+    }
+    if (settingsKeys.contains("transitionAlt") || force) {
+        ostr << " m_transitionAlt: " << m_transitionAlt;
+    }
+
+    return QString(ostr.str().c_str());
+}

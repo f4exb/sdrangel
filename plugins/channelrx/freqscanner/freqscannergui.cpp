@@ -364,6 +364,22 @@ void FreqScannerGUI::on_mode_currentIndexChanged(int index)
 {
     m_settings.m_mode = (FreqScannerSettings::Mode)index;
     applySetting("mode");
+    bool multiplex = m_settings.m_mode == FreqScannerSettings::MULTIPLEX;
+    ui->threshLabel->setEnabled(!multiplex);
+    ui->thresh->setEnabled(!multiplex);
+    ui->threshText->setEnabled(!multiplex);
+    ui->priorityLabel->setEnabled(!multiplex);
+    ui->priority->setEnabled(!multiplex);
+    if (multiplex)
+    {
+        ui->retransmitTimeLabel->setText("t<sub>TX</sub>");
+        ui->retransmitTime->setToolTip("Time in seconds to listen on each frequency");
+    }
+    else
+    {
+        ui->retransmitTimeLabel->setText("t<sub>RTX</sub>");
+        ui->retransmitTime->setToolTip("Time in seconds to wait for frequency to become active again, before restarting scan");
+    }
 }
 
 void FreqScannerGUI::onWidgetRolled(QWidget* widget, bool rollDown)

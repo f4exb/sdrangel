@@ -61,20 +61,23 @@ public:
 
     public:
         const ADSBDemodSettings& getSettings() const { return m_settings; }
+        const QStringList& getSettingsKeys() const { return m_settingsKeys; }
         bool getForce() const { return m_force; }
 
-        static MsgConfigureADSBDemodWorker* create(const ADSBDemodSettings& settings, bool force)
+        static MsgConfigureADSBDemodWorker* create(const ADSBDemodSettings& settings, const QStringList& settingsKeys, bool force)
         {
-            return new MsgConfigureADSBDemodWorker(settings, force);
+            return new MsgConfigureADSBDemodWorker(settings, settingsKeys, force);
         }
 
     private:
         ADSBDemodSettings m_settings;
+        QStringList m_settingsKeys;
         bool m_force;
 
-        MsgConfigureADSBDemodWorker(const ADSBDemodSettings& settings, bool force) :
+        MsgConfigureADSBDemodWorker(const ADSBDemodSettings& settings, const QStringList& settingsKeys, bool force) :
             Message(),
             m_settings(settings),
+            m_settingsKeys(settingsKeys),
             m_force(force)
         { }
     };
@@ -101,7 +104,7 @@ private:
     ADSBBeastServer m_beastServer;
 
     bool handleMessage(const Message& cmd);
-    void applySettings(const ADSBDemodSettings& settings, bool force = false);
+    void applySettings(const ADSBDemodSettings& settings, const QStringList& settingsKeys, bool force = false);
     void send(const char *data, int length);
     char *escape(char *p, char c);
     void handleADSB(QByteArray data, const QDateTime dateTime, float correlation);

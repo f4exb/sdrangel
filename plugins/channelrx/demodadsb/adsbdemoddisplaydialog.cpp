@@ -82,35 +82,124 @@ ADSBDemodDisplayDialog::~ADSBDemodDisplayDialog()
 
 void ADSBDemodDisplayDialog::accept()
 {
-    m_settings->m_removeTimeout = ui->timeout->value();
-    m_settings->m_aircraftMinZoom = ui->aircraftMinZoom->value();
-    m_settings->m_airportRange = ui->airportRange->value();
-    m_settings->m_airportMinimumSize = (ADSBDemodSettings::AirportType)ui->airportSize->currentIndex();
-    m_settings->m_displayHeliports = ui->heliports->isChecked();
-    m_settings->m_siUnits = ui->units->currentIndex() == 0 ? false : true;
-    m_settings->m_displayDemodStats = ui->displayStats->isChecked();
-    m_settings->m_autoResizeTableColumns = ui->autoResizeTableColumns->isChecked();
-    m_settings->m_aviationstackAPIKey = ui->aviationstackAPIKey->text();
-    m_settings->m_checkWXAPIKey = ui->checkWXAPIKey->text();
-    m_settings->m_airspaces = QStringList();
+    if (m_settings->m_removeTimeout != ui->timeout->value())
+    {
+        m_settings->m_removeTimeout = ui->timeout->value();
+        m_settingsKeys.append("removeTimeout");
+    }
+    if (m_settings->m_aircraftMinZoom != ui->aircraftMinZoom->value())
+    {
+        m_settings->m_aircraftMinZoom = ui->aircraftMinZoom->value();
+        m_settingsKeys.append("aircraftMinZoom");
+    }
+    if (m_settings->m_airportRange != ui->airportRange->value())
+    {
+        m_settings->m_airportRange = ui->airportRange->value();
+        m_settingsKeys.append("airportRange");
+    }
+    if (m_settings->m_airportMinimumSize != (ADSBDemodSettings::AirportType)ui->airportSize->currentIndex())
+    {
+        m_settings->m_airportMinimumSize = (ADSBDemodSettings::AirportType)ui->airportSize->currentIndex();
+        m_settingsKeys.append("airportMinimumSize");
+    }
+    if (m_settings->m_displayHeliports != ui->heliports->isChecked())
+    {
+        m_settings->m_displayHeliports = ui->heliports->isChecked();
+        m_settingsKeys.append("displayHeliports");
+    }
+    if (m_settings->m_siUnits != ui->units->currentIndex() == 0 ? false : true)
+    {
+        m_settings->m_siUnits = ui->units->currentIndex() == 0 ? false : true;
+        m_settingsKeys.append("siUnits");
+    }
+    if (m_settings->m_displayDemodStats != ui->displayStats->isChecked())
+    {
+        m_settings->m_displayDemodStats = ui->displayStats->isChecked();
+        m_settingsKeys.append("displayDemodStats");
+    }
+    if (m_settings->m_autoResizeTableColumns != ui->autoResizeTableColumns->isChecked())
+    {
+        m_settings->m_autoResizeTableColumns = ui->autoResizeTableColumns->isChecked();
+        m_settingsKeys.append("autoResizeTableColumns");
+    }
+    if (m_settings->m_aviationstackAPIKey != ui->aviationstackAPIKey->text())
+    {
+        m_settings->m_aviationstackAPIKey = ui->aviationstackAPIKey->text();
+        m_settingsKeys.append("aviationstackAPIKey");
+    }
+    if (m_settings->m_checkWXAPIKey != ui->checkWXAPIKey->text())
+    {
+        m_settings->m_checkWXAPIKey = ui->checkWXAPIKey->text();
+        m_settingsKeys.append("checkWXAPIKey");
+    }
+    QStringList airspaces;
     for (int i = 0; i < ui->airspaces->count(); i++)
     {
         QListWidgetItem *item = ui->airspaces->item(i);
         if (item->checkState() == Qt::Checked) {
-            m_settings->m_airspaces.append(item->text());
+            airspaces.append(item->text());
         }
     }
-    m_settings->m_airspaceRange = ui->airspaceRange->value();
-    m_settings->m_mapProvider = ui->mapProvider->currentText();
-    m_settings->m_mapType = (ADSBDemodSettings::MapType)ui->mapType->currentIndex();
-    m_settings->m_displayNavAids = ui->navAids->isChecked();
-    m_settings->m_atcCallsigns = ui->atcCallsigns->isChecked();
-    m_settings->m_displayPhotos = ui->photos->isChecked();
-    m_settings->m_verboseModelMatching = ui->verboseModelMatching->isChecked();
-    m_settings->m_airfieldElevation = ui->airfieldElevation->value();
-    m_settings->m_transitionAlt = ui->transitionAltitude->value();
-    m_settings->m_tableFontName = m_fontName;
-    m_settings->m_tableFontSize = m_fontSize;
+    if (m_settings->m_airspaces != airspaces)
+    {
+        m_settings->m_airspaces = airspaces;
+        m_settingsKeys.append("airspaces");
+    }
+    if (m_settings->m_airspaceRange != ui->airspaceRange->value())
+    {
+        m_settings->m_airspaceRange = ui->airspaceRange->value();
+        m_settingsKeys.append("airspaceRange");
+    }
+    if (m_settings->m_mapProvider != ui->mapProvider->currentText())
+    {
+        m_settings->m_mapProvider = ui->mapProvider->currentText();
+        m_settingsKeys.append("mapProvider");
+    }
+    if (m_settings->m_mapType != (ADSBDemodSettings::MapType)ui->mapType->currentIndex())
+    {
+        m_settings->m_mapType = (ADSBDemodSettings::MapType)ui->mapType->currentIndex();
+        m_settingsKeys.append("mapType");
+    }
+    if (m_settings->m_displayNavAids != ui->navAids->isChecked())
+    {
+        m_settings->m_displayNavAids = ui->navAids->isChecked();
+        m_settingsKeys.append("displayNavAids");
+    }
+    if (m_settings->m_atcCallsigns != ui->atcCallsigns->isChecked())
+    {
+        m_settings->m_atcCallsigns = ui->atcCallsigns->isChecked();
+        m_settingsKeys.append("atcCallsigns");
+    }
+    if (m_settings->m_displayPhotos != ui->photos->isChecked())
+    {
+        m_settings->m_displayPhotos = ui->photos->isChecked();
+        m_settingsKeys.append("displayPhotos");
+    }
+    if (m_settings->m_verboseModelMatching != ui->verboseModelMatching->isChecked())
+    {
+        m_settings->m_verboseModelMatching = ui->verboseModelMatching->isChecked();
+        m_settingsKeys.append("verboseModelMatching");
+    }
+    if (m_settings->m_airfieldElevation != ui->airfieldElevation->value())
+    {
+        m_settings->m_airfieldElevation = ui->airfieldElevation->value();
+        m_settingsKeys.append("airfieldElevation");
+    }
+    if (m_settings->m_transitionAlt != ui->transitionAltitude->value())
+    {
+        m_settings->m_transitionAlt = ui->transitionAltitude->value();
+        m_settingsKeys.append("transitionAlt");
+    }
+    if (m_settings->m_tableFontName != m_fontName)
+    {
+        m_settings->m_tableFontName = m_fontName;
+        m_settingsKeys.append("tableFontName");
+    }
+    if (m_settings->m_tableFontSize != m_fontSize)
+    {
+        m_settings->m_tableFontSize = m_fontSize;
+        m_settingsKeys.append("tableFontSize");
+    }
     QDialog::accept();
 }
 

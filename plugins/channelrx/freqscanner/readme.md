@@ -6,6 +6,14 @@ This plugin can be used to scan a range of frequencies looking for a transmissio
 
 [Tutorial Video](https://www.youtube.com/watch?v=IpKP3t4Bmmg)
 
+With the Run Mode (11) set to Multiplex, it can also repeatedly cycle through frequencies listening for a fixed period of time. This can be used, for example, to
+receive both AIS and ADS-B data via a single SDR.
+
+Note that when scanning, the device centre frequency will often not be set exactly to the frequencies you enter. 
+The Frequency Scanner will typically try to set the device centre frequency in order to
+scan as many frequencies simultanously as possible, and also avoid having a DC offset within the bandwidth of a scanned frequency. 
+The demodulator channel's frequency offset option will be used so that it receives at the specified frequency.
+
 <h2>Interface</h2>
 
 The top and bottom bars of the channel window are described [here](../../../sdrgui/channel/readme.md)
@@ -40,10 +48,12 @@ that corresponds to the set frequency is being received.
 
 Specifies the time in seconds that the Frequency Scanner will average its power measurement over.
 
-<h3>7: t_rtx - Retransmission Time</h3>
+<h3>7: t_rtx - Retransmission Time / t_rx Receive Time</h3>
 
-Specifies the time in seconds that the Frequency Scanner will wait after the power on the active frequency falls below the threshold, before restarting
+t_rtx: When Run Mode (11) is not Multiplex, specifies the time in seconds that the Frequency Scanner will wait after the power on the active frequency falls below the threshold, before restarting
 scanning. This enables the channel to remain tuned to a single frequency while there is a temporary break in transmission.
+
+t_rx: When Run Mode (11) is Multiplex, specifies the time in seconds the channel will be tuned to each frequency.
 
 <h3>8: Ch BW - Channel Bandwidth</h3>
 
@@ -75,6 +85,7 @@ Specifies the run mode:
 - Single: All frequencies are scanned once. Channel (1) is tuned to the active frequency at the end of the scan. The scan does not repeat.
 - Continuous: All frequencies scanned, with channel (1) being tuned to active frequency at the end of the scan. Scan repeats once the power on the active frequency falls below the threshold (4) for longer than the retransmission time (7).
 - Scan only: All frequencies are scanned repeatedly. The channel will not be tuned. This mode is just for counting how often frequencies are active, which can be seen in the Active Count column in the frequency table (14).
+- Multiplex: Frequencies will be stepped through sequentially and repeatedly, with the channel (1) being tuned for the time specified by t_rx (7).
 
 <h3>12: Start/Stop Scanning</h3>
 
