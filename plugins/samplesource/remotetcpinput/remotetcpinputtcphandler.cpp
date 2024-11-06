@@ -150,6 +150,7 @@ void RemoteTCPInputTCPHandler::connectToHost(const QString& address, quint16 por
     m_readMetaData = false;
     if (protocol == "SDRangel wss")
     {
+#ifndef QT_NO_OPENSSL
         m_webSocket = new QWebSocket(QString(), QWebSocketProtocol::VersionLatest, this);
         connect(m_webSocket, &QWebSocket::binaryFrameReceived, this, &RemoteTCPInputTCPHandler::dataReadyRead);
         connect(m_webSocket, &QWebSocket::connected, this, &RemoteTCPInputTCPHandler::connected);
@@ -160,6 +161,9 @@ void RemoteTCPInputTCPHandler::connectToHost(const QString& address, quint16 por
         connect(m_webSocket, &QWebSocket::sslErrors, this, &RemoteTCPInputTCPHandler::sslErrors);
         m_webSocket->open(QUrl(QString("wss://%1:%2").arg(address).arg(port)));
         m_dataSocket = new WebSocket(m_webSocket);
+#else
+        qWarning() << "RemoteTCPInput unable to use wss protocol as SSL is not supported";
+#endif
     }
     else
     {
@@ -202,6 +206,7 @@ void RemoteTCPInputTCPHandler::cleanup()
         FLAC__stream_decoder_delete(m_decoder);
         m_decoder = nullptr;
     }
+#ifndef QT_NO_OPENSSL
     if (m_webSocket)
     {
         qDebug() << "RemoteTCPInputTCPHandler::cleanup: Closing and deleting web socket";
@@ -212,6 +217,7 @@ void RemoteTCPInputTCPHandler::cleanup()
         disconnect(m_webSocket, &QWebSocket::errorOccurred, this, &RemoteTCPInputTCPHandler::errorOccurred);
 #endif
     }
+#endif
     if (m_tcpSocket)
     {
         qDebug() << "RemoteTCPInputTCPHandler::cleanup: Closing and deleting TCP socket";
@@ -1071,11 +1077,13 @@ void RemoteTCPInputTCPHandler::errorOccurred(QAbstractSocket::SocketError socket
     }
 }
 
+#ifndef QT_NO_OPENSSL
 void RemoteTCPInputTCPHandler::sslErrors(const QList<QSslError> &errors)
 {
     qDebug() << "RemoteTCPInputTCPHandler::sslErrors: " << errors;
     m_webSocket->ignoreSslErrors(); // FIXME: Add a setting whether to do this?
 }
+#endif
 
 void RemoteTCPInputTCPHandler::dataReadyRead()
 {
