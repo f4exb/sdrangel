@@ -22,6 +22,8 @@
 
 #include <QDateTime>
 
+#if QT_CONFIG(process)
+
 CommandOutputDialog::CommandOutputDialog(Command& command, QWidget* parent) :
     QDialog(parent),
     ui(new Ui::CommandOutputDialog),
@@ -167,3 +169,4 @@ void CommandOutputDialog::on_processKill_toggled(bool checked)
     }
 }
 
+#endif // QT_CONFIG(process)

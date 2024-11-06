@@ -28,6 +28,7 @@
 #include "util/timeutil.h"
 
 Command::Command() :
+#if QT_CONFIG(process)
     m_currentProcess(nullptr),
     m_currentProcessState(QProcess::NotRunning),
     m_isInError(false),
@@ -35,6 +36,7 @@ Command::Command() :
     m_hasExited(false),
     m_currentProcessExitCode(0),
     m_currentProcessExitStatus(QProcess::NormalExit),
+#endif
     m_currentProcessPid(0)
 {
     m_currentProcessStartTimeStampms = 0;
@@ -53,6 +55,7 @@ Command::Command(const Command& command) :
         m_keyModifiers(command.m_keyModifiers),
         m_associateKey(command.m_associateKey),
         m_release(command.m_release),
+#if QT_CONFIG(process)
         m_currentProcess(nullptr),
         m_currentProcessState(QProcess::NotRunning),
         m_isInError(false),
@@ -60,6 +63,7 @@ Command::Command(const Command& command) :
         m_hasExited(false),
         m_currentProcessExitCode(0),
         m_currentProcessExitStatus(QProcess::NormalExit),
+#endif
         m_currentProcessPid(0)
 {
     m_currentProcessStartTimeStampms = 0;
@@ -68,6 +72,7 @@ Command::Command(const Command& command) :
 
 Command::~Command()
 {
+#if QT_CONFIG(process)
     if (m_currentProcess)
     {
 #if QT_VERSION < QT_VERSION_CHECK(5, 10, 0)
@@ -79,6 +84,7 @@ Command::~Command()
         disconnect(m_currentProcess, SIGNAL(stateChanged(QProcess::ProcessState)), this, SLOT(processStateChanged(QProcess::ProcessState)));
         m_currentProcess->deleteLater();
     }
+#endif
 }
 
 void Command::resetToDefaults()
@@ -164,6 +170,7 @@ QString Command::getKeyLabel() const
 
 void Command::run(const QString& apiAddress, int apiPort, int deviceSetIndex)
 {
+#if QT_CONFIG(process)
     if (m_currentProcess)
     {
         qWarning("Command::run: process already running");
@@ -212,17 +219,22 @@ void Command::run(const QString& apiAddress, int apiPort, int deviceSetIndex)
     QStringList allArgs = args.split(" ", QString::SkipEmptyParts);
 #endif
     m_currentProcess->start(m_command, allArgs);
+
+#endif
 }
 
 void Command::kill()
 {
+#if QT_CONFIG(process)
     if (m_currentProcess)
     {
         qDebug("Command::kill: %lld", m_currentProcessPid);
         m_currentProcess->kill();
     }
+#endif
 }
 
+#if QT_CONFIG(process)
 QProcess::ProcessState Command::getLastProcessState() const
 {
     return m_currentProcessState;
@@ -307,3 +319,4 @@ void Command::processFinished(int exitCode, QProcess::ExitStatus exitStatus)
     m_currentProcess->deleteLater(); // make sure other threads can still access it until all events have been processed
     m_currentProcess = nullptr; // for this thread it can assume it was deleted
 }
+#endif /* QT_CONFIG(process) */

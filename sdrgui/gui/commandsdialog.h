@@ -25,6 +25,8 @@
 
 #include "export.h"
 
+#if QT_CONFIG(process)
+
 class CommandKeyReceiver;
 
 namespace Ui {
@@ -65,5 +67,7 @@ private slots:
     void on_commandDelete_clicked();
     void on_commandKeyboardConnect_toggled(bool checked);
 };
+
+#endif // QT_CONFIG(process)
 
 #endif // SDRGUI_GUI_COMMANDSDIALOG_H_
