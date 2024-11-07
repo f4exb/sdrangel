@@ -187,7 +187,9 @@ public slots:
     void connected();
     void disconnected();
     void errorOccurred(QAbstractSocket::SocketError socketError);
+#ifndef QT_NO_OPENSSL
     void sslErrors(const QList<QSslError> &errors);
+#endif
 
 private:
 

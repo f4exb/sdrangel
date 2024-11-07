@@ -40,4 +40,6 @@ if(ENABLE_USRP AND UHD_FOUND)
     add_subdirectory(usrp)
 endif()
 
-add_subdirectory(metis)
+if(ENABLE_METIS)
+    add_subdirectory(metis)
+endif()

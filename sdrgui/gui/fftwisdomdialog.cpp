@@ -24,6 +24,8 @@
 #include "fftwisdomdialog.h"
 #include "ui_fftwisdomdialog.h"
 
+#if QT_CONFIG(process)
+
 FFTWisdomDialog::FFTWisdomDialog(QProcess *process, QWidget* parent) :
     QDialog(parent),
     ui(new Ui::FFTWisdomDialog),
@@ -132,3 +134,5 @@ void FFTWisdomDialog::updateArguments(int fftMaxLog2, bool includeReverse)
     qDebug("FFTWisdomDialog::updateArguments: %s %s", qPrintable(m_fftwExecPath), qPrintable(argStr));
     ui->fftwCommand->setText(m_fftwExecPath + " " + argStr);
 }
+
+#endif // QT_CONFIG(process)

@@ -62,10 +62,12 @@ public:
 
     void run(const QString& apiAddress, int apiPort, int deviceSetIndex = 0);
     void kill();
+#if QT_CONFIG(process)
     QProcess::ProcessState getLastProcessState() const;
     bool getLastProcessError(QProcess::ProcessError& error) const;
     bool getLastProcessExit(int& exitCode, QProcess::ExitStatus& exitStatus) const;
     const QString& getLastProcessLog() const;
+#endif
     uint64_t  getLastProcessStartTimestampms() const { return m_currentProcessStartTimeStampms; }
     uint64_t  getLastProcessFinishTimestampms() const { return m_currentProcessFinishTimeStampms; }
     const QString& getLastProcessCommandLine() const { return m_currentProcessCommandLine; }
@@ -102,6 +104,7 @@ private:
     Qt::KeyboardModifiers m_keyModifiers;
     bool m_associateKey;
     bool m_release;
+#if QT_CONFIG(process)
     QProcess *m_currentProcess;
     QProcess::ProcessState m_currentProcessState;
     bool m_isInError;
@@ -109,6 +112,7 @@ private:
     bool m_hasExited;
     int m_currentProcessExitCode;
     QProcess::ExitStatus m_currentProcessExitStatus;
+#endif
     QString m_log;
     uint64_t  m_currentProcessStartTimeStampms;
     uint64_t  m_currentProcessFinishTimeStampms;
@@ -116,9 +120,11 @@ private:
     qint64 m_currentProcessPid;
 
 private slots:
+#if QT_CONFIG(process)
     void processStateChanged(QProcess::ProcessState newState);
     void processError(QProcess::ProcessError error);
     void processFinished(int exitCode, QProcess::ExitStatus exitStatus);
+#endif
 };
 
 Q_DECLARE_METATYPE(const Command*);

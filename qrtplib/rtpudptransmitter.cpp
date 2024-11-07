@@ -157,8 +157,10 @@ int RTPUDPTransmitter::Create(std::size_t maximumpacketsize, const RTPTransmissi
     }
 
     m_maxpacksize = maximumpacketsize;
-    m_multicastInterface = params->GetMulticastInterface();
-    m_receivemode = RTPTransmitter::AcceptAll;
+#ifndef QT_NO_NETWORKINTERFACE
+     m_multicastInterface = params->GetMulticastInterface();
+#endif
+     m_receivemode = RTPTransmitter::AcceptAll;
 
     m_waitingfordata = false;
     m_created = true;
@@ -306,7 +308,8 @@ void RTPUDPTransmitter::ClearDestinations()
 
 bool RTPUDPTransmitter::SupportsMulticasting()
 {
-    QNetworkInterface::InterfaceFlags flags = m_multicastInterface.flags();
+#ifndef QT_NO_NETWORKINTERFACE
+     QNetworkInterface::InterfaceFlags flags = m_multicastInterface.flags();
     QAbstractSocket::SocketState rtpSocketState = m_rtpsock->state();
     QAbstractSocket::SocketState rtcpSocketState = m_rtcpsock->state();
     return m_multicastInterface.isValid()
@@ -315,11 +318,16 @@ bool RTPUDPTransmitter::SupportsMulticasting()
             && (flags & QNetworkInterface::CanMulticast)
             && (flags & QNetworkInterface::IsRunning)
             && !(flags & QNetworkInterface::IsLoopBack);
+
+#else
+    return false;
+#endif
 }
 
 int RTPUDPTransmitter::JoinMulticastGroup(const RTPAddress &addr)
 {
-    if (!m_init) {
+#ifndef QT_NO_NETWORKINTERFACE
+     if (!m_init) {
         return ERR_RTP_UDPV4TRANS_NOTINIT;
     }
 
@@ -346,10 +354,14 @@ int RTPUDPTransmitter::JoinMulticastGroup(const RTPAddress &addr)
     }
 
     return 0;
+#else
+    return ERR_RTP_UDPV6TRANS_NOMULTICASTSUPPORT;
+#endif
 }
 
 int RTPUDPTransmitter::LeaveMulticastGroup(const RTPAddress &addr)
 {
+#ifndef QT_NO_NETWORKINTERFACE
     if (!m_init) {
         return ERR_RTP_UDPV4TRANS_NOTINIT;
     }
@@ -370,6 +382,9 @@ int RTPUDPTransmitter::LeaveMulticastGroup(const RTPAddress &addr)
     }
 
     return 0;
+#else
+    return ERR_RTP_UDPV6TRANS_NOMULTICASTSUPPORT;
+#endif
 }
 
 int RTPUDPTransmitter::SetReceiveMode(RTPTransmitter::ReceiveMode m)

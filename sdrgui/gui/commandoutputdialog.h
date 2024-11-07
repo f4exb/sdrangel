@@ -24,6 +24,8 @@
 #include <QDialog>
 #include <QProcess>
 
+#if QT_CONFIG(process)
+
 #include "export.h"
 
 namespace Ui {
@@ -54,5 +56,6 @@ private slots:
     void on_processKill_toggled(bool checked);
 };
 
+#endif
 
 #endif /* SDRGUI_GUI_COMMANDOUTPUTDIALOG_H_ */

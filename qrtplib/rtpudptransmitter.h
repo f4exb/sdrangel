@@ -68,10 +68,12 @@ public:
         m_bindAddress = bindAddress;
     }
 
-    /** Sets the multicast interface IP address. */
+#ifndef QT_NO_NETWORKINTERFACE
+     /** Sets the multicast interface IP address. */
     void SetMulticastInterface(const QNetworkInterface& mcastInterface) {
         m_mcastInterface = mcastInterface;
     }
+#endif
 
     /** Sets the RTP portbase to \c pbase, which has to be an even number
      *  unless RTPUDPv4TransmissionParams::SetAllowOddPortbase was called;
@@ -87,11 +89,13 @@ public:
         return m_bindAddress;
     }
 
+#ifndef QT_NO_NETWORKINTERFACE
     /** Returns the multicast interface IP address. */
     QNetworkInterface GetMulticastInterface() const
     {
         return m_mcastInterface;
     }
+#endif
 
     /** Returns the RTP portbase which will be used (default is 5000). */
     uint16_t GetPortbase() const
@@ -210,7 +214,9 @@ public:
 
 private:
     QHostAddress m_bindAddress;
+#ifndef QT_NO_NETWORKINTERFACE
     QNetworkInterface m_mcastInterface;
+#endif
     uint16_t m_portbase;
     int m_rtpsendbufsz, m_rtprecvbufsz;
     int m_rtcpsendbufsz, m_rtcprecvbufsz;
@@ -349,8 +355,10 @@ private:
     QUdpSocket *m_rtpsock, *m_rtcpsock;
     bool m_deletesocketswhendone;
     QHostAddress m_localIP; //!< from parameters bind IP
-    QNetworkInterface m_multicastInterface; //!< from parameters multicast interface
-    uint16_t m_rtpPort, m_rtcpPort;
+#ifndef QT_NO_NETWORKINTERFACE
+     QNetworkInterface m_multicastInterface; //!< from parameters multicast interface
+#endif
+     uint16_t m_rtpPort, m_rtcpPort;
     RTPTransmitter::ReceiveMode m_receivemode;
 
     std::size_t m_maxpacksize;

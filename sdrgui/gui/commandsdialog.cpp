@@ -29,6 +29,8 @@
 #include "commandsdialog.h"
 #include "ui_commandsdialog.h"
 
+#if QT_CONFIG(process)
+
 CommandsDialog::CommandsDialog(QWidget* parent) :
     QDialog(parent),
     ui(new Ui::CommandsDialog),
@@ -309,3 +311,5 @@ QTreeWidgetItem* CommandsDialog::addCommandToTree(const Command* command)
     //updatePresetControls();
     return item;
 }
+
+#endif // QT_CONFIG(process)

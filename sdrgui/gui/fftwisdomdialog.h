@@ -25,6 +25,8 @@
 
 #include "export.h"
 
+#if QT_CONFIG(process)
+
 namespace Ui {
     class FFTWisdomDialog;
 }
@@ -54,6 +56,8 @@ private:
     QStringList m_fftwArguments;
     QProcess *m_process;
 };
+
+#endif
 
 
 #endif // SDRGUI_GUI_FFTWISDOMDIALOG_H_
