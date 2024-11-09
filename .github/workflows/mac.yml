@@ -37,6 +37,10 @@ jobs:
           host: 'mac'
           arch: 'clang_64'
           modules: 'qtcharts qtscxml qt5compat qtlocation qtmultimedia qtpositioning qtserialport qtspeech qtwebsockets qtwebengine qtshadertools qtwebchannel'
+      - name: "Workaround for hdiutil: create failed - Resource busy - https://github.com/actions/runner-images/issues/7522"
+        run: |
+          echo killing...; sudo pkill -9 XProtect >/dev/null || true;
+          echo waiting...; while pgrep XProtect; do sleep 3; done;
       - name: Configure SDRangel
         run: |
           mkdir build && cd build
