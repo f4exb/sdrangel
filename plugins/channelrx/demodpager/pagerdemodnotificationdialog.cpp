@@ -28,7 +28,7 @@
 
 // Map main table column numbers to combo box indices
 std::vector<int> PagerDemodNotificationDialog::m_columnMap = {
-    PagerDemodSettings::MESSAGE_COL_ADDRESS, PagerDemodSettings::MESSAGE_COL_MESSAGE
+    PagerDemodSettings::MESSAGE_COL_ADDRESS, PagerDemodSettings::MESSAGE_COL_MESSAGE, PagerDemodSettings::MESSAGE_COL_ALPHA, PagerDemodSettings::MESSAGE_COL_NUMERIC
 };
 
 PagerDemodNotificationDialog::PagerDemodNotificationDialog(PagerDemodSettings *settings,
@@ -132,6 +132,8 @@ void PagerDemodNotificationDialog::addRow(PagerDemodSettings::NotificationSettin
 
     match->addItem("Address");
     match->addItem("Message");
+    match->addItem("Alpha");
+    match->addItem("Numeric");
 
     QTableWidgetItem *regExpItem = new QTableWidgetItem();
     QTableWidgetItem *speechItem = new QTableWidgetItem();
