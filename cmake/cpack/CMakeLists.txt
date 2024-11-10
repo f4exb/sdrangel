@@ -36,7 +36,7 @@ if(APPLE AND BUNDLE AND BUILD_GUI)
   set(CPACK_BUNDLE_ICON "${CMAKE_SOURCE_DIR}/cmake/cpack/sdrangel_icon.icns")
   set(CPACK_BUNDLE_PLIST "${CMAKE_BINARY_DIR}/Info.plist")
   set(CPACK_PACKAGE_ICON "${CMAKE_SOURCE_DIR}/cmake/cpack/sdrangel_icon.icns")
-  set(CPACK_PACKAGE_FILE_NAME "${CMAKE_PROJECT_NAME}-${CPACK_PACKAGE_VERSION}_${CPACK_MACOS_PACKAGE_ARCHITECTURE}_${CMAKE_SYSTEM_PROCESSOR}" CACHE INTERNAL "")
+  set(CPACK_PACKAGE_FILE_NAME "${CMAKE_PROJECT_NAME}-${CPACK_PACKAGE_VERSION}_mac-${CPACK_MACOS_PACKAGE_ARCHITECTURE}_${CMAKE_SYSTEM_PROCESSOR}" CACHE INTERNAL "")
   set(CPACK_PRE_BUILD_SCRIPTS "${PROJECT_BINARY_DIR}/deploy_mac.cmake")
 
   # copy SoapySDR Modules
@@ -175,7 +175,7 @@ elseif(WIN32 OR MINGW)
       COMMAND ${CMAKE_COMMAND} -E copy_if_different "${fftw3f_dll}" "${SDRANGEL_BINARY_BIN_DIR}/"
     )
   endforeach(fftw3f_dll)
-  
+
   file(GLOB LIBUSB_DLLS "${LIBUSB_DLL_DIR}/*${CMAKE_SHARED_LIBRARY_SUFFIX}")
   foreach(libusb_dll ${LIBUSB_DLLS})
     get_filename_component(libusb_dll_name "${libusb_dll}"  NAME)
