@@ -72,7 +72,7 @@ jobs:
           dir: ${{matrix.config.QT_INST_DIR}}
           arch: ${{matrix.config.QT_ARCH}}
           setup-python: false
-          modules: 'qtcharts qtscxml qt5compat qtlocation qtmultimedia qtpositioning qtserialport qtspeech qtwebsockets qtwebengine qtshadertools'
+          modules: 'qtcharts qtscxml qt5compat qtlocation qtmultimedia qtpositioning qtserialport qtspeech qtwebsockets qtwebengine qtshadertools qtwebchannel'
       - name: build sdrangel on Windows
         if: startsWith(matrix.config.os, 'windows')
         run: |
