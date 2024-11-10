@@ -9,16 +9,12 @@ on:
 
 jobs:
   build_mac_x64:
-    runs-on: macos-13
+    runs-on: macos-12
     steps:
       - uses: actions/checkout@v4
         with:
           submodules: true
           fetch-depth: 0
-      - name: Update brew
-        run: brew update
-      - name: Install brew packages
-        run: brew install nasm subversion
       - name: Install SDRplay API
         run: |
             wget https://www.sdrplay.com/software/SDRplayAPI-macos-installer-universal-3.15.0.pkg
