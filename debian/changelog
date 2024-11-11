@@ -1,3 +1,13 @@
+sdrangel (7.22.4-1) unstable; urgency=medium
+
+    * Use macos-12 for Mac x86 build. PR #2321
+    * Workaround for "hdiutil: create failed - Resource busy"
+    * Pager: Add alpha and numeric columns. Implements #2319. PR #2320
+    * Added qtwebchannel dependecy to fix missing 3d Map and Sky Map from Windows release. PR #2316
+    * Removed .deb package build from Appveyor
+
+   -- Edouard Griffiths, F4EXB  <f4exb06@gmail.com>  Mom, 11 Nov 2024 08:42:03 +0100
+
 sdrangel (7.22.3-1) unstable; urgency=medium
 
     * Add deb dependencies for pipewire. PR #2314
@@ -18,7 +28,7 @@ sdrangel (7.22.3-1) unstable; urgency=medium
     * Update Qt optional packages for 6.8 , PR #2287
     * Use Qt 6.8 for Windows build. PR #2287
 
--- Edouard Griffiths, F4EXB  <f4exb06@gmail.com>  Sat, 09 Nov 2024 17:30:44 +0100
+   -- Edouard Griffiths, F4EXB  <f4exb06@gmail.com>  Sat, 09 Nov 2024 17:30:44 +0100
 
 sdrangel (7.22.2-1) unstable; urgency=medium
 
@@ -41,7 +51,7 @@ sdrangel (7.22.2-1) unstable; urgency=medium
     * RemoteTCPInput: Add wss protocol support. PR #2270
     * Fix DeviceAPI::deserialize. Fixes #2266. PR #2267
 
--- Edouard Griffiths, F4EXB  <f4exb06@gmail.com>  Sun, 20 Oct 2024 08:26:38 +0200
+   -- Edouard Griffiths, F4EXB  <f4exb06@gmail.com>  Sun, 20 Oct 2024 08:26:38 +0200
 
 sdrangel (7.22.1-1) unstable; urgency=medium
 
