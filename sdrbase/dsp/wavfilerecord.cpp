@@ -204,6 +204,126 @@ bool WavFileRecord::startRecording()
     return true;
 }
 
+void addString(QByteArray& buffer, const QString& type, const QString text)
+{
+    buffer.append(type.toUtf8(), 4);
+
+    QByteArray s = text.toUtf8();
+    s.append('\0'); // Strings should be null terminated
+    if (s.size() & 1) {
+        s.append('\0');
+    }
+
+    quint16 textSize = s.size();
+    buffer.append(textSize & 0xff);
+    buffer.append((textSize >> 8) & 0xff);
+    buffer.append((textSize >> 16) & 0xff);
+    buffer.append((textSize >> 24) & 0xff);
+
+    buffer.append(s, textSize);
+}
+
+void addTag(QByteArray& buffer, const QString& id, const QString text)
+{
+    buffer.append(id.toUtf8(), 4);
+    QByteArray s = text.toUtf8();
+    int size = s.size() + 1;
+    buffer.append((size >> 24) & 0xff); // MSB first
+    buffer.append((size >> 16) & 0xff);
+    buffer.append((size >> 8) & 0xff);
+    buffer.append(size & 0xff);
+
+    buffer.append((char)0); // flags
+    buffer.append((char)0); // flags
+
+    buffer.append((char)0); // text encoding (0 ISO-8859-1, 1 Unicode)
+    buffer.append(s);
+}
+
+void WavFileRecord::setMetaData(const QString& trackTitle, const QString& album, const QString& artist)
+{
+    m_trackTitle = trackTitle;
+    m_album = album;
+    m_artist = artist;
+}
+
+bool WavFileRecord::hasMetaData() const
+{
+    return !m_trackTitle.isEmpty() || !m_album.isEmpty() || !m_artist.isEmpty();
+}
+
+void WavFileRecord::writeInfoList()
+{
+    QByteArray meta;
+
+    meta.append("INFO", 4);
+
+    if (!m_trackTitle.isEmpty()) {
+        addString(meta, "INAM", m_trackTitle);
+    }
+    if (!m_album.isEmpty()) {
+        addString(meta, "IPRD", m_album);
+    }
+    if (!m_artist.isEmpty()) {
+        addString(meta, "IART", m_artist);
+    }
+
+    struct Chunk list;
+    list.m_id[0] = 'L';
+    list.m_id[1] = 'I';
+    list.m_id[2] = 'S';
+    list.m_id[3] = 'T';
+    list.m_size = meta.size();
+
+    m_sampleFile.write((char*)&list, sizeof(Chunk));
+    m_sampleFile.write((char*)meta.data(), meta.size());
+}
+
+// ID3 v2.3
+// https://mutagen-specs.readthedocs.io/en/latest/id3/id3v2.3.0.html
+void WavFileRecord::writeID3()
+{
+    QByteArray meta;
+
+    QByteArray textInfo;
+    if (!m_artist.isEmpty()) {
+        addTag(textInfo, "TPE1", m_artist);
+    }
+    if (!m_trackTitle.isEmpty()) {
+        addTag(textInfo, "TIT2", m_trackTitle);
+    }
+    if (!m_album.isEmpty()) {
+        addTag(textInfo, "TALB", m_album);
+    }
+
+    meta.append("ID3", 3);
+    meta.append((char)3); // .3 version
+    meta.append((char)0); // revision
+    meta.append((char)0); // flags
+
+    int textInfoSize = textInfo.size();
+    meta.append((textInfoSize >> 24) & 0xff); // MSB first
+    meta.append((textInfoSize >> 16) & 0xff);
+    meta.append((textInfoSize >> 8) & 0xff);
+    meta.append(textInfoSize & 0xff);
+
+    meta.append(textInfo);
+
+    if (meta.size() & 1) {
+        meta.append((char)0);
+    }
+
+    struct Chunk id3;
+    id3.m_id[0] = 'i';
+    id3.m_id[1] = 'd';
+    id3.m_id[2] = '3';
+    id3.m_id[3] = ' ';
+    id3.m_size = meta.size();
+
+    m_sampleFile.write((char*)&id3, sizeof(Chunk));
+    m_sampleFile.write((char*)meta.data(), meta.size());
+}
+
 bool WavFileRecord::stopRecording()
 {
 #ifdef ANDROID
@@ -213,6 +333,20 @@ bool WavFileRecord::stopRecording()
 #endif
     {
         qDebug() << "WavFileRecord::stopRecording";
+
+#ifdef ANDROID
+        long dataSize = (long)m_sampleFile.size();
+#else
+        long dataSize = m_sampleFile.tellp();
+#endif
+
+        // Write meta data
+        if (hasMetaData())
+        {
+            writeInfoList();
+            writeID3();
+        }
+
         // Fix up chunk sizes
 #ifdef ANDROID
         long fileSize = (long)m_sampleFile.size();
@@ -228,7 +362,7 @@ bool WavFileRecord::stopRecording()
 #else
         m_sampleFile.seekp(offsetof(Header, m_dataHeader.m_size));
 #endif
-        size = fileSize - sizeof(Header);
+        size = dataSize - sizeof(Header);
         m_sampleFile.write((char *)&size, 4);
         m_sampleFile.close();
         m_recordOn = false;

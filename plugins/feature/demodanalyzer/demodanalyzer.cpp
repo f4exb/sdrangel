@@ -131,6 +131,7 @@ void DemodAnalyzer::start()
     DemodAnalyzerWorker::MsgConfigureDemodAnalyzerWorker *msg
         = DemodAnalyzerWorker::MsgConfigureDemodAnalyzerWorker::create(m_settings, QList<QString>(), true);
     m_worker->getInputMessageQueue()->push(msg);
+    m_worker->applySampleRate(m_sampleRate);
 
     if (m_dataPipe)
     {

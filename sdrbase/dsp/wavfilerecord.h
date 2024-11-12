@@ -114,6 +114,9 @@ public:
     virtual bool stopRecording() override;
     virtual bool isRecording() const override { return m_recordOn; }
 
+    void setMetaData(const QString& trackTitle="", const QString& album="", const QString& artist="");
+    bool hasMetaData() const;
+
     static bool readHeader(std::ifstream& samplefile, Header& header, bool check=true);
     static bool readHeader(QFile& samplefile, Header& header);
     static void writeHeader(std::ofstream& samplefile, Header& header);
@@ -140,7 +143,13 @@ private:
     qint64 m_msShift;
     int m_nbChannels;
 
+    QString m_trackTitle;
+    QString m_album;
+    QString m_artist;
+
     void writeHeader();
+    void writeInfoList();
+    void writeID3();
 
     static bool checkHeader(Header& header);
 };
