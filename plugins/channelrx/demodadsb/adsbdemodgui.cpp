@@ -5113,6 +5113,7 @@ ADSBDemodGUI::ADSBDemodGUI(PluginAPI* pluginAPI, DeviceUISet *deviceUISet, Baseb
 
 ADSBDemodGUI::~ADSBDemodGUI()
 {
+    m_adsbDemod->setMessageQueueToGUI(nullptr);
     disconnect(&MainCore::instance()->getSettings(), &MainSettings::preferenceChanged, this, &ADSBDemodGUI::preferenceChanged);
     if (m_templateServer)
     {

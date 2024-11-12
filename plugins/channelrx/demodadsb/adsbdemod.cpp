@@ -105,8 +105,8 @@ ADSBDemod::~ADSBDemod()
     delete m_networkManager;
     m_deviceAPI->removeChannelSinkAPI(this);
     m_deviceAPI->removeChannelSink(this);
+    delete m_basebandSink; // This results in a call to ADSBDemod::stop(), so need to delete before worker and thread
     delete m_worker;
-    delete m_basebandSink;
     delete m_thread;
 }
 
