@@ -102,10 +102,15 @@ jobs:
           signing-policy-slug: 'test-signing'
           github-artifact-id: '${{ steps.upload-unsigned-artifact.outputs.artifact-id }}'
           wait-for-completion: true
-          output-artifact-directory: '${{ github.workspace }}/build/sdrangel-${{ steps.get_version.outputs.version }}-win64-signed.exe'
+          output-artifact-directory: '${{ github.workspace }}\build\signed'
+      - name: Unzip signed artifact
+        run: |
+          dir ${{ github.workspace }}\build\signed
+          cd ${{ github.workspace }}\build\signed
+          7z x sdrangel-${{ steps.get_version.outputs.version }}-win64.exe.zip
       - name: Upload signed artifact
         id: upload-signed-artifact
         uses: actions/upload-artifact@v4
         with:
           name: sdrangel-${{ steps.get_version.outputs.version }}-win64-signed.exe
-          path: ${{ github.workspace }}/build/sdrangel-${{ steps.get_version.outputs.version }}-win64-signed.exe
+          path: ${{ github.workspace }}/build/signed/sdrangel-${{ steps.get_version.outputs.version }}-win64.exe
