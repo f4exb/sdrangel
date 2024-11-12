@@ -35,7 +35,7 @@ environment:
       APPVEYOR_BUILD_WORKER_IMAGE: Linux
       APPVEYOR_CONSOLE_DISABLE_PTY: true
 
-# for:
+for:
 #   # - matrix:
 #   #     only:
 #   #       - TARGET: 'vs2019gui'
