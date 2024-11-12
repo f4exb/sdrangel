@@ -29,6 +29,7 @@ MESSAGE_CLASS_DEFINITION(DemodAnalyzerWorker::MsgConnectFifo, Message)
 
 DemodAnalyzerWorker::DemodAnalyzerWorker() :
     m_dataFifo(nullptr),
+    m_sinkSampleRate(0),
     m_msgQueueToFeature(nullptr),
     m_sampleBufferSize(0),
     m_wavFileRecord(nullptr),
