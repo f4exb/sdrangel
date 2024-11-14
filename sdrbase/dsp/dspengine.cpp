@@ -187,39 +187,41 @@ void DSPEngine::removeLastDeviceMIMOEngine()
     }
 }
 
-QThread * DSPEngine::removeDeviceEngineAt(int deviceIndex)
+QThread *DSPEngine::getDeviceEngineThread(int deviceIndex)
 {
     if (deviceIndex >= m_deviceEngineReferences.size()) {
         return nullptr;
+    } else {
+        return m_deviceEngineReferences[deviceIndex].m_thread;
     }
+}
 
-    QThread *deviceThread = nullptr;
+void DSPEngine::removeDeviceEngineAt(int deviceIndex)
+{
+    if (deviceIndex >= m_deviceEngineReferences.size()) {
+        return;
+    }
 
     if (m_deviceEngineReferences[deviceIndex].m_deviceEngineType == 0) // source
     {
         DSPDeviceSourceEngine *deviceEngine = m_deviceEngineReferences[deviceIndex].m_deviceSourceEngine;
-        deviceThread = m_deviceEngineReferences[deviceIndex].m_thread;
-        deviceThread->exit();
+        m_deviceEngineReferences[deviceIndex].m_thread->exit();
         m_deviceSourceEngines.removeAll(deviceEngine);
     }
     else if (m_deviceEngineReferences[deviceIndex].m_deviceEngineType == 1) // sink
     {
         DSPDeviceSinkEngine *deviceEngine = m_deviceEngineReferences[deviceIndex].m_deviceSinkEngine;
-        deviceThread = m_deviceEngineReferences[deviceIndex].m_thread;
-        deviceThread->exit();
+        m_deviceEngineReferences[deviceIndex].m_thread->exit();
         m_deviceSinkEngines.removeAll(deviceEngine);
     }
     else if (m_deviceEngineReferences[deviceIndex].m_deviceEngineType == 2) // MIMO
     {
         DSPDeviceMIMOEngine *deviceEngine = m_deviceEngineReferences[deviceIndex].m_deviceMIMOEngine;
-        deviceThread = m_deviceEngineReferences[deviceIndex].m_thread;
-        deviceThread->exit();
+        m_deviceEngineReferences[deviceIndex].m_thread->exit();
         m_deviceMIMOEngines.removeAll(deviceEngine);
     }
 
     m_deviceEngineReferences.removeAt(deviceIndex);
-
-    return deviceThread;
 }
 
 void DSPEngine::createFFTFactory(const QString& fftWisdomFileName)
