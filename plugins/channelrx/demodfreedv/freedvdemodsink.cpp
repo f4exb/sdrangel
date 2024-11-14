@@ -176,6 +176,8 @@ FreeDVDemodSink::~FreeDVDemodSink()
 {
     delete SSBFilter;
     delete[] m_SSBFilterBuffer;
+    delete[] m_speechOut;
+    delete[] m_modIn;
 }
 
 void FreeDVDemodSink::feed(const SampleVector::const_iterator& begin, const SampleVector::const_iterator& end)
@@ -449,7 +451,7 @@ void FreeDVDemodSink::applyFreeDVMode(FreeDVDemodSettings::FreeDVMode mode)
         freedv_set_ext_vco(m_freeDV, 0);
         freedv_set_sync(m_freeDV, FREEDV_SYNC_MANUAL);
 
-        int nSpeechSamples = freedv_get_n_speech_samples(m_freeDV);
+        int nSpeechSamples = freedv_get_n_max_speech_samples(m_freeDV);
         int nMaxModemSamples = freedv_get_n_max_modem_samples(m_freeDV);
         int Fs = freedv_get_modem_sample_rate(m_freeDV);
         int Rs = freedv_get_modem_symbol_rate(m_freeDV);

@@ -79,6 +79,7 @@ FreeDVDemod::FreeDVDemod(DeviceAPI *deviceAPI) :
 
 FreeDVDemod::~FreeDVDemod()
 {
+    stop();
     QObject::disconnect(
         m_networkManager,
         &QNetworkAccessManager::finished,
