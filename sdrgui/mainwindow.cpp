@@ -778,10 +778,19 @@ void RemoveDeviceSetFSM::removeUI()
 void RemoveDeviceSetFSM::stopEngine()
 {
     qDebug() << "RemoveDeviceSetFSM::stopEngine";
-    QThread *thread = m_mainWindow->m_dspEngine->removeDeviceEngineAt(m_deviceSetIndex);
-    if (thread && !thread->isFinished())    // FIXME: Is there a race condition here? We might need to connect before calling thread->exit
+    QThread *thread = m_mainWindow->m_dspEngine->getDeviceEngineThread(m_deviceSetIndex);
+
+    if (thread)
     {
-        connect(thread, &QThread::finished, m_mainWindow, &MainWindow::engineStopped);
+        bool finished = thread->isFinished();
+
+        if (!finished) {
+            connect(thread, &QThread::finished, m_mainWindow, &MainWindow::engineStopped);
+        }
+        m_mainWindow->m_dspEngine->removeDeviceEngineAt(m_deviceSetIndex);
+        if (finished) {
+            emit m_mainWindow->engineStopped();
+        }
     }
     else
     {
@@ -801,12 +810,20 @@ void RemoveDeviceSetFSM::removeDeviceSet()
 
     DeviceAPI *deviceAPI = m_deviceUISet->m_deviceAPI;
     delete m_deviceUISet;
-    if (m_deviceSourceEngine) {
+    if (m_deviceSourceEngine)
+    {
         delete deviceAPI->getSampleSource();
-    } else if (m_deviceSinkEngine) {
+        delete m_deviceSourceEngine;
+    }
+    else if (m_deviceSinkEngine)
+    {
         delete deviceAPI->getSampleSink();
-    } else {
+        delete m_deviceSinkEngine;
+    }
+    else
+    {
         delete deviceAPI->getSampleMIMO();
+        delete m_deviceMIMOEngine;
     }
     delete deviceAPI;
 
