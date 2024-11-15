@@ -25,7 +25,6 @@
 #include "adsbdemodreport.h"
 #include "adsbdemodsink.h"
 #include "adsbdemodsinkworker.h"
-#include "adsbdemodsettings.h"
 #include "adsb.h"
 
 MESSAGE_CLASS_DEFINITION(ADSBDemodSinkWorker::MsgConfigureADSBDemodSinkWorker, Message)
