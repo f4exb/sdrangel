@@ -26,10 +26,9 @@
 #include "util/message.h"
 #include "util/messagequeue.h"
 #include "adsbdemodstats.h"
+#include "adsbdemodsettings.h"
 
 class ADSBDemodSink;
-struct ADSBDemodSettings;
-struct ADSBDemodStats;
 
 class ADSBDemodSinkWorker : public QThread {
     Q_OBJECT
