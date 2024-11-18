@@ -58,7 +58,9 @@ void SondeHub::upload(
     }
 
     QJsonArray uploaderPos {
-        uploaderLat, uploaderLon, uploaderAlt
+        QString::number(uploaderLat, 'f', 5).toDouble(),
+        QString::number(uploaderLon, 'f', 5).toDouble(),
+        QString::number(uploaderAlt, 'f', 1).toDouble()
     };
 
     QJsonObject obj {
@@ -75,27 +77,27 @@ void SondeHub::upload(
     {
         obj.insert("frame", frame->m_frameNumber);
         obj.insert("serial", frame->m_serial);
-        obj.insert("batt", frame->m_batteryVoltage);
+        obj.insert("batt", QString::number(frame->m_batteryVoltage, 'f', 2).toDouble());
     }
 
     if (frame->m_measValid)
     {
         // Don't upload uncalibrated measurements, as there can be a significant error
         if (frame->isTemperatureCalibrated()) {
-            obj.insert("temp", frame->getTemperatureFloat(subframe));
+            obj.insert("temp", QString::number(frame->getTemperatureFloat(subframe), 'f', 1).toDouble());
         }
         if (frame->isHumidityCalibrated())
         {
             float humidity = frame->getHumidityFloat(subframe);
             if (humidity != 0.0f) {
-                obj.insert("humidity", humidity);
+                obj.insert("humidity", QString::number(humidity, 'f', 1).toDouble());
             }
         }
         if (frame->isPressureCalibrated())
         {
             float pressure = frame->getPressureFloat(subframe);
             if (pressure != 0.0f) {
-                obj.insert("pressure", pressure);
+                obj.insert("pressure", QString::number(pressure, 'f', 2).toDouble());
             }
         }
     }
@@ -107,12 +109,12 @@ void SondeHub::upload(
 
     if (frame->m_posValid)
     {
-        obj.insert("lat", frame->m_latitude);
-        obj.insert("lon", frame->m_longitude);
-        obj.insert("alt", frame->m_height);
-        obj.insert("vel_h", frame->m_speed);
-        obj.insert("vel_v", frame->m_verticalRate);
-        obj.insert("heading", frame->m_heading);
+        obj.insert("lat", QString::number(frame->m_latitude, 'f', 5).toDouble());
+        obj.insert("lon", QString::number(frame->m_longitude, 'f', 5).toDouble());
+        obj.insert("alt", QString::number(frame->m_height, 'f', 1).toDouble());
+        obj.insert("vel_h", QString::number(frame->m_speed, 'f', 2).toDouble());
+        obj.insert("vel_v", QString::number(frame->m_verticalRate, 'f', 2).toDouble());
+        obj.insert("heading", QString::number(frame->m_heading, 'f', 1).toDouble());
         obj.insert("sats", frame->m_satellitesUsed);
     }
 
