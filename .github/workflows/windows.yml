@@ -102,7 +102,8 @@ jobs:
           signing-policy-slug: 'release-signing'
           github-artifact-id: '${{ steps.upload-unsigned-artifact.outputs.artifact-id }}'
           wait-for-completion: true
-          output-artifact-directory: '${{ github.workspace }}\build\signed'
+          output-artifact-directory: 'build\signed'
+          wait-for-completion-timeout-in-seconds: 1800
       - name: Unzip signed artifact
         run: |
           dir ${{ github.workspace }}\build\signed
