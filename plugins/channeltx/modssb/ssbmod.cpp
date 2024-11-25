@@ -57,6 +57,8 @@ const char* const SSBMod::m_channelId = "SSBMod";
 SSBMod::SSBMod(DeviceAPI *deviceAPI) :
     ChannelAPI(m_channelIdURI, ChannelAPI::StreamSingleSource),
     m_deviceAPI(deviceAPI),
+    m_basebandSampleRate(0),
+    m_centerFrequency(0),
     m_spectrumVis(SDR_TX_SCALEF)
 {
 	setObjectName(m_channelId);
@@ -92,7 +94,8 @@ SSBMod::~SSBMod()
     );
     delete m_networkManager;
     m_deviceAPI->removeChannelSourceAPI(this);
-    m_deviceAPI->removeChannelSource(this);
+    m_deviceAPI->removeChannelSource(this, true);
+    stop();
     delete m_basebandSource;
     delete m_thread;
 }
@@ -102,7 +105,7 @@ void SSBMod::setDeviceAPI(DeviceAPI *deviceAPI)
     if (deviceAPI != m_deviceAPI)
     {
         m_deviceAPI->removeChannelSourceAPI(this);
-        m_deviceAPI->removeChannelSource(this);
+        m_deviceAPI->removeChannelSource(this, false);
         m_deviceAPI = deviceAPI;
         m_deviceAPI->addChannelSource(this);
         m_deviceAPI->addChannelSinkAPI(this);
@@ -118,6 +121,10 @@ void SSBMod::start()
 	qDebug("SSBMod::start");
     m_basebandSource->reset();
     m_thread->start();
+
+    DSPSignalNotification *dspMsg = new DSPSignalNotification(m_basebandSampleRate, m_centerFrequency);
+    m_basebandSource->getInputMessageQueue()->push(dspMsg);
+
     m_running = true;
 }
 
@@ -210,6 +217,10 @@ bool SSBMod::handleMessage(const Message& cmd)
     else if (DSPSignalNotification::match(cmd))
     {
         auto& notif = (const DSPSignalNotification&) cmd;
+
+        m_centerFrequency = notif.getCenterFrequency();
+        m_basebandSampleRate = notif.getSampleRate();
+
         // Forward to the source
         if (m_running)
         {
@@ -351,7 +362,7 @@ void SSBMod::applySettings(const SSBModSettings& settings, bool force)
         if (m_deviceAPI->getSampleMIMO()) // change of stream is possible for MIMO devices only
         {
             m_deviceAPI->removeChannelSourceAPI(this);
-            m_deviceAPI->removeChannelSource(this, m_settings.m_streamIndex);
+            m_deviceAPI->removeChannelSource(this, false, m_settings.m_streamIndex);
             m_deviceAPI->addChannelSource(this, settings.m_streamIndex);
             m_deviceAPI->addChannelSourceAPI(this);
             m_settings.m_streamIndex = settings.m_streamIndex; // make sure ChannelAPI::getStreamIndex() is consistent

@@ -254,6 +254,8 @@ private:
     bool m_running = false;
     NFMModBaseband* m_basebandSource;
     NFMModSettings m_settings;
+    int m_basebandSampleRate;
+    qint64 m_centerFrequency;
 
     SampleVector m_sampleBuffer;
     QRecursiveMutex m_settingsMutex;

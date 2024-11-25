@@ -256,6 +256,8 @@ private:
     bool m_running = false;
     SSBModBaseband* m_basebandSource;
     SSBModSettings m_settings;
+    int m_basebandSampleRate;
+    qint64 m_centerFrequency;
     SpectrumVis m_spectrumVis;
 
 	SampleVector m_sampleBuffer;

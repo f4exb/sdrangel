@@ -62,7 +62,7 @@ public:
 	DeviceSampleSource *getSource() { return m_deviceSampleSource; }
 
 	void addSink(BasebandSampleSink* sink); //!< Add a sample sink
-	void removeSink(BasebandSampleSink* sink); //!< Remove a sample sink
+	void removeSink(BasebandSampleSink* sink, bool deleting); //!< Remove a sample sink
 
 	void configureCorrections(bool dcOffsetCorrection, bool iqImbalanceCorrection); //!< Configure DSP corrections
 

@@ -70,9 +70,9 @@ public:
     void setSpectrumSinkInput(bool sourceElseSink = true, unsigned int index = 0); //!< Used in the MIMO case to select which stream is used as input to main spectrum
 
     void addChannelSink(BasebandSampleSink* sink, int streamIndex = 0);                //!< Add a channel sink (Rx)
-    void removeChannelSink(BasebandSampleSink* sink, int streamIndex = 0);             //!< Remove a channel sink (Rx)
+    void removeChannelSink(BasebandSampleSink* sink, bool deleting, int streamIndex = 0);             //!< Remove a channel sink (Rx)
     void addChannelSource(BasebandSampleSource* sink, int streamIndex = 0);            //!< Add a channel source (Tx)
-    void removeChannelSource(BasebandSampleSource* sink, int streamIndex = 0);         //!< Remove a channel source (Tx)
+    void removeChannelSource(BasebandSampleSource* sink, bool deleting, int streamIndex = 0);         //!< Remove a channel source (Tx)
     void addMIMOChannel(MIMOChannel* channel);   //!< Add a MIMO channel (n Rx and m Tx combination)
     void removeMIMOChannel(MIMOChannel* channel); //!< Remove a MIMO channel (n Rx and m Tx combination)
 

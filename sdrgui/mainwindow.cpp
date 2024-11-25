@@ -740,7 +740,7 @@ void RemoveDeviceSetFSM::removeSink()
 {
     qDebug() << "RemoveDeviceSetFSM::removeSink";
     if (m_deviceSourceEngine) {
-        m_deviceSourceEngine->removeSink(m_deviceUISet->m_spectrumVis);
+        m_deviceSourceEngine->removeSink(m_deviceUISet->m_spectrumVis, false);
     } else if (m_deviceSinkEngine) {
         m_deviceSinkEngine->removeSpectrumSink(m_deviceUISet->m_spectrumVis);
     } else {

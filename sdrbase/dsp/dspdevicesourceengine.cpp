@@ -109,10 +109,10 @@ void DSPDeviceSourceEngine::addSink(BasebandSampleSink* sink)
     getInputMessageQueue()->push(cmd);
 }
 
-void DSPDeviceSourceEngine::removeSink(BasebandSampleSink* sink)
+void DSPDeviceSourceEngine::removeSink(BasebandSampleSink* sink, bool deleting)
 {
 	qDebug() << "DSPDeviceSourceEngine::removeSink: " << sink->getSinkName().toStdString().c_str();
-	auto *cmd = new DSPRemoveBasebandSampleSink(sink);
+	auto *cmd = new DSPRemoveBasebandSampleSink(sink, deleting);
     getInputMessageQueue()->push(cmd);
 }
 
@@ -629,8 +629,10 @@ bool DSPDeviceSourceEngine::handleMessage(const Message& message)
 	{
         auto cmd = (const DSPRemoveBasebandSampleSink&) message;
 		BasebandSampleSink* sink = cmd.getSampleSink();
+		bool deleting = cmd.getDeleting();
 
-		if(m_state == State::StRunning) {
+		// Don't dereference sink if deleting, as it may have already been deleted
+		if (!deleting && (m_state == State::StRunning)) {
 			sink->stop();
 		}
 

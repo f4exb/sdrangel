@@ -29,6 +29,7 @@ const int AMModSource::m_levelNbSamples = 480; // every 10ms
 
 AMModSource::AMModSource() :
     m_audioFifo(12000),
+    m_feedbackAudioSampleRate(48000),
     m_feedbackAudioFifo(48000)
 {
     m_audioFifo.setLabel("AMModSource.m_audioFifo");

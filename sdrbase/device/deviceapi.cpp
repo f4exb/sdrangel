@@ -83,10 +83,10 @@ void DeviceAPI::addChannelSink(BasebandSampleSink* sink, int streamIndex)
     }
 }
 
-void DeviceAPI::removeChannelSink(BasebandSampleSink* sink, int streamIndex)
+void DeviceAPI::removeChannelSink(BasebandSampleSink* sink, bool deleting, int streamIndex)
 {
     if (m_deviceSourceEngine) {
-        m_deviceSourceEngine->removeSink(sink);
+        m_deviceSourceEngine->removeSink(sink, deleting);
     } else if (m_deviceMIMOEngine) {
         m_deviceMIMOEngine->removeChannelSink(sink, streamIndex);
     }
@@ -101,12 +101,12 @@ void DeviceAPI::addChannelSource(BasebandSampleSource* source, int streamIndex)
     }
 }
 
-void DeviceAPI::removeChannelSource(BasebandSampleSource* source, int streamIndex)
+void DeviceAPI::removeChannelSource(BasebandSampleSource* source, bool deleting, int streamIndex)
 {
     if (m_deviceSinkEngine) {
-        m_deviceSinkEngine->removeChannelSource(source);
+        m_deviceSinkEngine->removeChannelSource(source, deleting);
     } else if (m_deviceMIMOEngine) {
-        m_deviceMIMOEngine->removeChannelSource(source, streamIndex);
+        m_deviceMIMOEngine->removeChannelSource(source, deleting, streamIndex);
     }
 }
 

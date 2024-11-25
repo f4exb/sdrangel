@@ -68,7 +68,7 @@ public:
 	void setSinkSequence(int sequence); //!< Set the sample sink sequence in type
 
 	void addChannelSource(BasebandSampleSource* source);       //!< Add a baseband sample source
-	void removeChannelSource(BasebandSampleSource* source);    //!< Remove a baseband sample source
+	void removeChannelSource(BasebandSampleSource* source, bool deleting);    //!< Remove a baseband sample source
 
 	void addSpectrumSink(BasebandSampleSink* spectrumSink);    //!< Add a spectrum vis baseband sample sink
 	void removeSpectrumSink(BasebandSampleSink* spectrumSink); //!< Add a spectrum vis baseband sample sink

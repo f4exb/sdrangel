@@ -65,16 +65,19 @@ public:
 	    MESSAGE_CLASS_DECLARATION
 
     public:
-        RemoveBasebandSampleSource(BasebandSampleSource* sampleSource, unsigned int index) :
+        RemoveBasebandSampleSource(BasebandSampleSource* sampleSource, unsigned int index, bool deleting) :
             Message(),
             m_sampleSource(sampleSource),
-            m_index(index)
+            m_index(index),
+            m_deleting(deleting)
         { }
         BasebandSampleSource* getSampleSource() const { return m_sampleSource; }
         unsigned int getIndex() const { return m_index; }
+        bool getDeleting() const { return m_deleting; }
     private:
         BasebandSampleSource* m_sampleSource;
         unsigned int m_index;
+        bool m_deleting;
     };
 
     class AddMIMOChannel : public Message {
@@ -227,7 +230,7 @@ public:
     uint getUID() const { return m_uid; }
 
 	void addChannelSource(BasebandSampleSource* source, int index = 0);            //!< Add a channel source
-	void removeChannelSource(BasebandSampleSource* source, int index = 0);         //!< Remove a channel source
+	void removeChannelSource(BasebandSampleSource* source, bool deleting, int index = 0); //!< Remove a channel source
 	void addChannelSink(BasebandSampleSink* sink, int index = 0);                  //!< Add a channel sink
 	void removeChannelSink(BasebandSampleSink* sink, int index = 0);               //!< Remove a channel sink
     void addMIMOChannel(MIMOChannel *channel);                                     //!< Add a MIMO channel
