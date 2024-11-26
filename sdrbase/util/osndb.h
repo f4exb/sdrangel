@@ -34,7 +34,7 @@
 #include "util/httpdownloadmanager.h"
 #include "export.h"
 
-#define OSNDB_URL "https://opensky-network.org/datasets/metadata/aircraftDatabase.zip"
+#define OSNDB_URL "https://s3.opensky-network.org/data-samples/metadata/aircraftDatabase.zip"
 
 struct SDRBASE_API AircraftInformation {
 
