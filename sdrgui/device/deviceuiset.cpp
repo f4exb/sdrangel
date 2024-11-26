@@ -39,6 +39,7 @@
 #include "channel/channelutils.h"
 #include "channel/channelapi.h"
 #include "channel/channelgui.h"
+#include "channel/channelwebapiutils.h"
 #include "mainspectrum/mainspectrumgui.h"
 #include "settings/preset.h"
 #include "util/simpleserializer.h"
@@ -258,12 +259,47 @@ void DeviceUISet::loadDeviceSetSettings(
         m_mainSpectrumGUI->hide();
     }
 
-    if (m_deviceSourceEngine) { // source device
-        loadRxChannelSettings(preset, pluginAPI, workspaces, currentWorkspace);
-    } else if (m_deviceSinkEngine) { // sink device
-        loadTxChannelSettings(preset, pluginAPI, workspaces, currentWorkspace);
-    } else if (m_deviceMIMOEngine) { // MIMO device
-        loadMIMOChannelSettings(preset, pluginAPI, workspaces, currentWorkspace);
+    // Stop device while changing channels
+    if (m_deviceAPI->state() == DeviceAPI::EngineState::StRunning)
+    {
+        int deviceIndex = m_deviceAPI->getDeviceSetIndex();
+
+        // Load settings after stopping device
+        auto connection = new QMetaObject::Connection();
+        *connection = connect(m_deviceAPI, &DeviceAPI::stateChanged, this, [=]() {
+            if (m_deviceAPI->state() != DeviceAPI::EngineState::StRunning)
+            {
+                // Load channel settings
+                if (m_deviceSourceEngine) {
+                    loadRxChannelSettings(preset, pluginAPI, workspaces, currentWorkspace);
+                } else if (m_deviceSinkEngine) {
+                    loadTxChannelSettings(preset, pluginAPI, workspaces, currentWorkspace);
+                } else if (m_deviceMIMOEngine) {
+                    loadMIMOChannelSettings(preset, pluginAPI, workspaces, currentWorkspace);
+                }
+
+                // Restart device
+                ChannelWebAPIUtils::run(deviceIndex);
+
+                QObject::disconnect(*connection);
+                delete connection;
+            }
+        });
+
+        // We use WebAPI rather than m_deviceAPI->stopDeviceEngine();
+        // so that the start/stop button in the Device GUI is correctly updated
+        ChannelWebAPIUtils::stop(deviceIndex);
+    }
+    else
+    {
+        // Load channel settings
+        if (m_deviceSourceEngine) {
+            loadRxChannelSettings(preset, pluginAPI, workspaces, currentWorkspace);
+        } else if (m_deviceSinkEngine) {
+            loadTxChannelSettings(preset, pluginAPI, workspaces, currentWorkspace);
+        } else if (m_deviceMIMOEngine) {
+            loadMIMOChannelSettings(preset, pluginAPI, workspaces, currentWorkspace);
+        }
     }
 }
 
