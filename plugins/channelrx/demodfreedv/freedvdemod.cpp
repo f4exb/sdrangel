@@ -88,7 +88,7 @@ FreeDVDemod::~FreeDVDemod()
     );
     delete m_networkManager;
 	m_deviceAPI->removeChannelSinkAPI(this);
-    m_deviceAPI->removeChannelSink(this);
+    m_deviceAPI->removeChannelSink(this, true);
     delete m_basebandSink;
     delete m_thread;
 }
@@ -98,7 +98,7 @@ void FreeDVDemod::setDeviceAPI(DeviceAPI *deviceAPI)
     if (deviceAPI != m_deviceAPI)
     {
         m_deviceAPI->removeChannelSinkAPI(this);
-        m_deviceAPI->removeChannelSink(this);
+        m_deviceAPI->removeChannelSink(this, false);
         m_deviceAPI = deviceAPI;
         m_deviceAPI->addChannelSink(this);
         m_deviceAPI->addChannelSinkAPI(this);

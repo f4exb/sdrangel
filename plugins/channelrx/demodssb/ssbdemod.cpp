@@ -92,7 +92,7 @@ SSBDemod::~SSBDemod()
     );
     delete m_networkManager;
 	m_deviceAPI->removeChannelSinkAPI(this);
-    m_deviceAPI->removeChannelSink(this);
+    m_deviceAPI->removeChannelSink(this, true);
 
     stop();
 }
@@ -102,7 +102,7 @@ void SSBDemod::setDeviceAPI(DeviceAPI *deviceAPI)
     if (deviceAPI != m_deviceAPI)
     {
         m_deviceAPI->removeChannelSinkAPI(this);
-        m_deviceAPI->removeChannelSink(this);
+        m_deviceAPI->removeChannelSink(this, false);
         m_deviceAPI = deviceAPI;
         m_deviceAPI->addChannelSink(this);
         m_deviceAPI->addChannelSinkAPI(this);

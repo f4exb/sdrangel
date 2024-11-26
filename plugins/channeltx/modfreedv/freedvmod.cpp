@@ -92,7 +92,8 @@ FreeDVMod::~FreeDVMod()
     );
     delete m_networkManager;
     m_deviceAPI->removeChannelSourceAPI(this);
-    m_deviceAPI->removeChannelSource(this);
+    m_deviceAPI->removeChannelSource(this, true);
+    stop();
     delete m_basebandSource;
     delete m_thread;
 }
@@ -102,7 +103,7 @@ void FreeDVMod::setDeviceAPI(DeviceAPI *deviceAPI)
     if (deviceAPI != m_deviceAPI)
     {
         m_deviceAPI->removeChannelSourceAPI(this);
-        m_deviceAPI->removeChannelSource(this);
+        m_deviceAPI->removeChannelSource(this, false);
         m_deviceAPI = deviceAPI;
         m_deviceAPI->addChannelSource(this);
         m_deviceAPI->addChannelSinkAPI(this);
@@ -313,7 +314,7 @@ void FreeDVMod::applySettings(const FreeDVModSettings& settings, bool force)
         if (m_deviceAPI->getSampleMIMO()) // change of stream is possible for MIMO devices only
         {
             m_deviceAPI->removeChannelSourceAPI(this);
-            m_deviceAPI->removeChannelSource(this, m_settings.m_streamIndex);
+            m_deviceAPI->removeChannelSource(this, false, m_settings.m_streamIndex);
             m_deviceAPI->addChannelSource(this, settings.m_streamIndex);
             m_deviceAPI->addChannelSourceAPI(this);
             m_settings.m_streamIndex = settings.m_streamIndex; // make sure ChannelAPI::getStreamIndex() is consistent

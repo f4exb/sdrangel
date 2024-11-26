@@ -152,12 +152,14 @@ class SDRBASE_API DSPRemoveBasebandSampleSink : public Message {
 	MESSAGE_CLASS_DECLARATION
 
 public:
-	DSPRemoveBasebandSampleSink(BasebandSampleSink* sampleSink) : Message(), m_sampleSink(sampleSink) { }
+	DSPRemoveBasebandSampleSink(BasebandSampleSink* sampleSink, bool deleting) : Message(), m_sampleSink(sampleSink), m_deleting(deleting) { }
 
 	BasebandSampleSink* getSampleSink() const { return m_sampleSink; }
+	bool getDeleting() const { return m_deleting; }
 
 private:
 	BasebandSampleSink* m_sampleSink;
+	bool m_deleting;
 };
 
 class SDRBASE_API DSPRemoveSpectrumSink : public Message {
@@ -176,12 +178,14 @@ class SDRBASE_API DSPRemoveBasebandSampleSource : public Message {
 	MESSAGE_CLASS_DECLARATION
 
 public:
-	DSPRemoveBasebandSampleSource(BasebandSampleSource* sampleSource) : Message(), m_sampleSource(sampleSource) { }
+	DSPRemoveBasebandSampleSource(BasebandSampleSource* sampleSource, bool deleting) : Message(), m_sampleSource(sampleSource), m_deleting(deleting) { }
 
 	BasebandSampleSource* getSampleSource() const { return m_sampleSource; }
+	bool getDeleting() const { return m_deleting; }
 
 private:
 	BasebandSampleSource* m_sampleSource;
+	bool m_deleting;
 };
 
 class SDRBASE_API DSPAddAudioSink : public Message {

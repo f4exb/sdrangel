@@ -101,10 +101,10 @@ void DSPDeviceSinkEngine::addChannelSource(BasebandSampleSource* source)
     getInputMessageQueue()->push(cmd);
 }
 
-void DSPDeviceSinkEngine::removeChannelSource(BasebandSampleSource* source)
+void DSPDeviceSinkEngine::removeChannelSource(BasebandSampleSource* source, bool deleting)
 {
 	qDebug() << "DSPDeviceSinkEngine::removeChannelSource: " << source->getSourceName().toStdString().c_str();
-	auto *cmd = new DSPRemoveBasebandSampleSource(source);
+	auto *cmd = new DSPRemoveBasebandSampleSource(source, deleting);
     getInputMessageQueue()->push(cmd);
 }
 
@@ -499,8 +499,9 @@ bool DSPDeviceSinkEngine::handleMessage(const Message& message)
 	{
         auto& cmd = (const DSPRemoveBasebandSampleSource&) message;
 		BasebandSampleSource* source = cmd.getSampleSource();
+		bool deleting = cmd.getDeleting();
 
-		if(m_state == State::StRunning) {
+		if (!deleting && (m_state == State::StRunning)) {
 			source->stop();
 		}
 

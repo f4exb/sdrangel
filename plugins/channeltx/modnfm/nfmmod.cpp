@@ -56,7 +56,9 @@ const char* const NFMMod::m_channelId = "NFMMod";
 
 NFMMod::NFMMod(DeviceAPI *deviceAPI) :
     ChannelAPI(m_channelIdURI, ChannelAPI::StreamSingleSource),
-	m_deviceAPI(deviceAPI)
+	m_deviceAPI(deviceAPI),
+    m_basebandSampleRate(0),
+    m_centerFrequency(0)
 {
 	setObjectName(m_channelId);
 
@@ -84,9 +86,8 @@ NFMMod::~NFMMod()
     );
     delete m_networkManager;
     m_deviceAPI->removeChannelSourceAPI(this);
-    m_deviceAPI->removeChannelSource(this);
-
-    NFMMod::stop();
+    m_deviceAPI->removeChannelSource(this, true);
+    stop();
 }
 
 void NFMMod::setDeviceAPI(DeviceAPI *deviceAPI)
@@ -94,7 +95,7 @@ void NFMMod::setDeviceAPI(DeviceAPI *deviceAPI)
     if (deviceAPI != m_deviceAPI)
     {
         m_deviceAPI->removeChannelSourceAPI(this);
-        m_deviceAPI->removeChannelSource(this);
+        m_deviceAPI->removeChannelSource(this, false);
         m_deviceAPI = deviceAPI;
         m_deviceAPI->addChannelSource(this);
         m_deviceAPI->addChannelSinkAPI(this);
@@ -134,6 +135,9 @@ void NFMMod::start()
     if (m_levelMeter) {
         connect(m_basebandSource, SIGNAL(levelChanged(qreal, qreal, int)), m_levelMeter, SLOT(levelChanged(qreal, qreal, int)));
     }
+
+    DSPSignalNotification *dspMsg = new DSPSignalNotification(m_basebandSampleRate, m_centerFrequency);
+    m_basebandSource->getInputMessageQueue()->push(dspMsg);
 
     NFMModBaseband::MsgConfigureNFMModBaseband *msg = NFMModBaseband::MsgConfigureNFMModBaseband::create(m_settings, true);
     m_basebandSource->getInputMessageQueue()->push(msg);
@@ -266,10 +270,14 @@ bool NFMMod::handleMessage(const Message& cmd)
     }
     else if (DSPSignalNotification::match(cmd))
     {
+        auto& notif = (const DSPSignalNotification&) cmd;
+    
+        m_centerFrequency = notif.getCenterFrequency();
+        m_basebandSampleRate = notif.getSampleRate();
+
         // Forward to the source
         if (m_running)
         {
-            auto& notif = (const DSPSignalNotification&) cmd;
             auto* rep = new DSPSignalNotification(notif); // make a copy
             qDebug() << "NFMMod::handleMessage: DSPSignalNotification";
             m_basebandSource->getInputMessageQueue()->push(rep);
@@ -410,7 +418,7 @@ void NFMMod::applySettings(const NFMModSettings& settings, bool force)
         if (m_deviceAPI->getSampleMIMO()) // change of stream is possible for MIMO devices only
         {
             m_deviceAPI->removeChannelSourceAPI(this);
-            m_deviceAPI->removeChannelSource(this, m_settings.m_streamIndex);
+            m_deviceAPI->removeChannelSource(this, false, m_settings.m_streamIndex);
             m_deviceAPI->addChannelSource(this, settings.m_streamIndex);
             m_deviceAPI->addChannelSourceAPI(this);
             m_settings.m_streamIndex = settings.m_streamIndex; // make sure ChannelAPI::getStreamIndex() is consistent

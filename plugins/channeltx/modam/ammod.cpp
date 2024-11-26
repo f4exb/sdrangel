@@ -55,7 +55,9 @@ const char* const AMMod::m_channelId ="AMMod";
 
 AMMod::AMMod(DeviceAPI *deviceAPI) :
     ChannelAPI(m_channelIdURI, ChannelAPI::StreamSingleSource),
-    m_deviceAPI(deviceAPI)
+    m_deviceAPI(deviceAPI),
+    m_basebandSampleRate(0),
+    m_centerFrequency(0)
 {
 	setObjectName(m_channelId);
     applySettings(m_settings, true);
@@ -82,9 +84,8 @@ AMMod::~AMMod()
     );
     delete m_networkManager;
     m_deviceAPI->removeChannelSourceAPI(this);
-    m_deviceAPI->removeChannelSource(this);
-
-    AMMod::stop();
+    m_deviceAPI->removeChannelSource(this, true);
+    stop();
 }
 
 void AMMod::setDeviceAPI(DeviceAPI *deviceAPI)
@@ -92,7 +93,7 @@ void AMMod::setDeviceAPI(DeviceAPI *deviceAPI)
     if (deviceAPI != m_deviceAPI)
     {
         m_deviceAPI->removeChannelSourceAPI(this);
-        m_deviceAPI->removeChannelSource(this);
+        m_deviceAPI->removeChannelSource(this, false);
         m_deviceAPI = deviceAPI;
         m_deviceAPI->addChannelSource(this);
         m_deviceAPI->addChannelSinkAPI(this);
@@ -133,6 +134,9 @@ void AMMod::start()
     );
 
     m_thread->start();
+
+    DSPSignalNotification *dspMsg = new DSPSignalNotification(m_basebandSampleRate, m_centerFrequency);
+    m_basebandSource->getInputMessageQueue()->push(dspMsg);
 
     AMModBaseband::MsgConfigureAMModBaseband *msg = AMModBaseband::MsgConfigureAMModBaseband::create(m_settings, true);
     m_basebandSource->getInputMessageQueue()->push(msg);
@@ -236,6 +240,9 @@ bool AMMod::handleMessage(const Message& cmd)
         qDebug() << "AMMod::handleMessage: DSPSignalNotification";
         // Forward to the source
         auto& notif = (const DSPSignalNotification&) cmd;
+
+        m_centerFrequency = notif.getCenterFrequency();
+        m_basebandSampleRate = notif.getSampleRate();
 
         if (m_running) {
             m_basebandSource->getInputMessageQueue()->push(new DSPSignalNotification(notif));

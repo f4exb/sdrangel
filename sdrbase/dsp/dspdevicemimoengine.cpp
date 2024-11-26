@@ -155,13 +155,13 @@ void DSPDeviceMIMOEngine::addChannelSource(BasebandSampleSource* source, int ind
 	getInputMessageQueue()->push(cmd);
 }
 
-void DSPDeviceMIMOEngine::removeChannelSource(BasebandSampleSource* source, int index)
+void DSPDeviceMIMOEngine::removeChannelSource(BasebandSampleSource* source, bool deleting, int index)
 {
 	qDebug() << "DSPDeviceMIMOEngine::removeChannelSource: "
         << source->getSourceName().toStdString().c_str()
         << " at: "
         << index;
-	auto *cmd = new RemoveBasebandSampleSource(source, index);
+	auto *cmd = new RemoveBasebandSampleSource(source, index, deleting);
 	getInputMessageQueue()->push(cmd);
 }
 
@@ -1129,10 +1129,13 @@ bool DSPDeviceMIMOEngine::handleMessage(const Message& message)
         const auto& msg = (const RemoveBasebandSampleSource&) message;
 		BasebandSampleSource* sampleSource = msg.getSampleSource();
         unsigned int isink = msg.getIndex();
+        bool deleting = msg.getDeleting();
 
         if (isink < m_basebandSampleSources.size())
         {
-            sampleSource->stop();
+            if (!deleting) {
+                sampleSource->stop();
+            }
             m_basebandSampleSources[isink].remove(sampleSource);
         }
 
