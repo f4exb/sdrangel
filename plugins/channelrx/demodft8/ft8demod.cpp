@@ -484,8 +484,10 @@ void FT8Demod::webapiUpdateChannelSettings(
     if (channelSettingsKeys.contains("spanLog2")) {
         settings.m_filterBank[settings.m_filterIndex].m_spanLog2 = response.getFt8DemodSettings()->getSpanLog2();
     }
-    if (channelSettingsKeys.contains("rfBandwidth")) {
-        settings.m_filterBank[settings.m_filterIndex].m_rfBandwidth = response.getFt8DemodSettings()->getRfBandwidth();
+    if (channelSettingsKeys.contains("rfBandwidth"))
+    {
+        float bw = response.getFt8DemodSettings()->getRfBandwidth();
+        settings.m_filterBank[settings.m_filterIndex].m_rfBandwidth = bw > 5800.0f ? 5800.0f : bw; // Hard limit upper bandwidth to 5800 Hx fixes #2339
     }
     if (channelSettingsKeys.contains("lowCutoff")) {
         settings.m_filterBank[settings.m_filterIndex].m_lowCutoff = response.getFt8DemodSettings()->getLowCutoff();

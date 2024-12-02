@@ -667,7 +667,7 @@ FT8DemodGUI::FT8DemodGUI(PluginAPI* pluginAPI, DeviceUISet *deviceUISet, Baseban
 
     m_ft8Demod->setLevelMeter(ui->volumeMeter);
 
-    ui->BW->setMaximum(60);
+    ui->BW->setMaximum(58);
     ui->BW->setMinimum(10);
     ui->lowCut->setMaximum(50);
     ui->lowCut->setMinimum(0);
@@ -759,7 +759,7 @@ void FT8DemodGUI::applyBandwidths(unsigned int spanLog2, bool force)
     ui->BW->blockSignals(true);
     ui->lowCut->blockSignals(true);
 
-    ui->BW->setMaximum(bwMax);
+    ui->BW->setMaximum(bwMax > 58 ? 58 : bwMax); // Cap to 5.8k fixes #2339
     ui->BW->setMinimum(0);
     ui->BW->setValue(bw);
 

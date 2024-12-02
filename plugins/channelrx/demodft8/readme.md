@@ -85,7 +85,7 @@ Values are expressed in kHz and step is 100 Hz.
 
 <h3>A.9: RF filter high cutoff</h3>
 
-Values are expressed in kHz and step is 100 Hz.
+Values are expressed in kHz and step is 100 Hz. This is limited to 5800 Hz,
 
 <h3>A.10: Volume</h3>
 

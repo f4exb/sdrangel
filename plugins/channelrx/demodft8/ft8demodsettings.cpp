@@ -219,6 +219,7 @@ bool FT8DemodSettings::deserialize(const QByteArray& data)
         {
             d.readS32(100 + 10*i, &m_filterBank[i].m_spanLog2, 3);
             d.readS32(101 + 10*i, &tmp, 30);
+            tmp = tmp > 58 ? 58 : tmp; // Hard limit upper bandwidth fixes #2339
             m_filterBank[i].m_rfBandwidth = tmp * 100.0;
             d.readS32(102+ 10*i, &tmp, 3);
             m_filterBank[i].m_lowCutoff = tmp * 100.0;
