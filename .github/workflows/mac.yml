@@ -9,7 +9,7 @@ on:
 
 jobs:
   build_mac_x64:
-    runs-on: macos-14
+    runs-on: macos-13
     steps:
       - uses: actions/checkout@v4
         with:
