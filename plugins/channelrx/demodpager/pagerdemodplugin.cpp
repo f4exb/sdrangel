@@ -33,7 +33,7 @@
 const PluginDescriptor PagerDemodPlugin::m_pluginDescriptor = {
     PagerDemod::m_channelId,
     QStringLiteral("Pager Demodulator"),
-    QStringLiteral("7.22.4"),
+    QStringLiteral("7.22.5"),
     QStringLiteral("(c) Jon Beniston, M7RCE"),
     QStringLiteral("https://github.com/f4exb/sdrangel"),
     true,

@@ -1,3 +1,27 @@
+sdrangel (7.22.5-1) unstable; urgency=medium
+
+    * Windows: upload signed releases rather than unsigned releases to Github releases page. PR #2347
+    * Windows: fixed signed releases. PR #2344
+    * FT8 Demod: limit upper bandwidth to 5.8 kHz. Fixes #2339
+    * Stop device while changing channel set. Fixes #2332. PR #2342
+    * ADSB: Update URL of OpenSkyNetwork Aircraft database. PR #2341
+    * Don't stop source if being deleted. For #2315. PR #2340
+    * Send DSPSignalNotification in audio mods for #2336. PR #2340
+    * Radiosonde: limit precision of floating point numbers sent to SondeHub. PR #2338
+    * Windows signed releases: use relative path. Increase timeout to 30 minutes. PR #2335
+    * ADSB: Include adsbdemodsettings.h PR #2334
+    * Use release signing certificate for Windows installer. PR #2331
+    * Fix memory leak and race condition relating to DSP*Engines. Part of #2159 PR #2330
+    * FreeDV: Fix memory allocation/free issues. Part of #2315. PR #2330
+    * Wav Files: Add support for meta-data. PR #2328
+    * DemodAnalyzer: Ensure sample rate is set in worker. Fixes #2309. PR #2328
+    ^ SDRplayv3: Mac: link with libsdrplay_api.so.3 rather than libsdrplay_api.so.3.15. PR #2327
+    * ADS-B: Fix memory use after delete. For #1734 and part of #2315 PR #2326
+    * Fixed Appveyor Docker image build
+    * Fix output-artifact-directory and unzip file. PR #2323
+
+   -- Edouard Griffiths, F4EXB  <f4exb06@gmail.com>  Thu, 05 Dec 2024 01:07:27 +0100
+
 sdrangel (7.22.4-1) unstable; urgency=medium
 
     * Use macos-12 for Mac x86 build. PR #2321
