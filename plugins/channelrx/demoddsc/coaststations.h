@@ -20,6 +20,6 @@
 
 #include <QMap>
 
-extern QMap<QString, QString> CoastStations;
+extern const QMap<QString, QString> CoastStations;
 
 #endif /* INCLUDE_COASTSTATIONS_H */

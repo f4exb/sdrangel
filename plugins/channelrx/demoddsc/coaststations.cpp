@@ -19,7 +19,7 @@
 
 // Map from MMSI to Coast Station Name
 // From https://www.itu.int/mmsapp/coaststation/list
-QMap<QString, QString> CoastStations {
+const QMap<QString, QString> CoastStations {
     {"003311000", "AASIAAT RADIO"},
     {"004224102", "ABADAN RADIO"},
     {"004224300", "ABBAS RADIO"},
