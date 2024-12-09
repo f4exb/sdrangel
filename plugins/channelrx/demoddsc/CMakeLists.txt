@@ -27,10 +27,12 @@ if(NOT SERVER_MODE)
         ${demoddsc_SOURCES}
         dscdemodgui.cpp
         dscdemodgui.ui
+        coaststations.cpp
     )
     set(demoddsc_HEADERS
         ${demoddsc_HEADERS}
         dscdemodgui.h
+        coaststations.h
     )
 
     set(TARGET_NAME ${PLUGINS_PREFIX}demoddsc)
