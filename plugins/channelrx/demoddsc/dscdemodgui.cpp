@@ -329,6 +329,9 @@ void DSCDemodGUI::messageReceived(const DSCMessage& message, int errors, float r
     if (CoastStations.contains(message.m_address)) {
         addressNameItem->setText(CoastStations.value(message.m_address));
     }
+    if (CoastStations.contains(message.m_selfId)) {
+        selfIdNameItem->setText(CoastStations.value(message.m_selfId));
+    }
 
     // Get latest APRS.fi data to calculate distance
     if (m_aprsFi && message.m_valid)

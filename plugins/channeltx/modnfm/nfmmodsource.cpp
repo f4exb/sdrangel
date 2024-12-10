@@ -119,7 +119,7 @@ void NFMModSource::pullOne(Sample& sample)
 
 void NFMModSource::prefetch(unsigned int nbSamples)
 {
-    unsigned int nbSamplesAudio = (nbSamples * (unsigned int) ((Real) m_audioSampleRate / (Real) m_channelSampleRate));
+    unsigned int nbSamplesAudio = (unsigned int) (nbSamples * ((Real) m_audioSampleRate / (Real) m_channelSampleRate));
     pullAudio(nbSamplesAudio);
 }
 
