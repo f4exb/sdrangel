@@ -191,7 +191,7 @@ void WFMModSource::modulateAudio()
 
 void WFMModSource::prefetch(unsigned int nbSamples)
 {
-    unsigned int nbSamplesAudio = nbSamples * ((Real) m_audioSampleRate / (Real) m_channelSampleRate);
+    unsigned int nbSamplesAudio = (unsigned int) (nbSamples * ((Real) m_audioSampleRate / (Real) m_channelSampleRate));
     pullAudio(nbSamplesAudio);
 }
 
