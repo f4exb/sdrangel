@@ -5935,9 +5935,6 @@ void ADSBDemodGUI::applyImportSettings()
 void ADSBDemodGUI::import()
 {
     QString urlString = "https://";
-    if (!m_settings.m_importUsername.isEmpty() && !m_settings.m_importPassword.isEmpty()) {
-        urlString = urlString + m_settings.m_importUsername + ":" + m_settings.m_importPassword + "@";
-    }
     urlString = urlString + m_settings.m_importHost + "/api/states/all";
     QChar join = '?';
     if (!m_settings.m_importParameters.isEmpty())
@@ -5965,7 +5962,13 @@ void ADSBDemodGUI::import()
         urlString = urlString + join + "lomax=" + m_settings.m_importMaxLongitude;
         join = '&';
     }
-    m_networkManager->get(QNetworkRequest(QUrl(urlString)));
+    QNetworkRequest request = QNetworkRequest(QUrl(urlString));
+    if (!m_settings.m_importUsername.isEmpty() && !m_settings.m_importPassword.isEmpty())
+    {
+        QByteArray encoded = (m_settings.m_importUsername + ":" + m_settings.m_importPassword).toLocal8Bit().toBase64();
+        request.setRawHeader("Authorization", "Basic " + encoded);
+    }
+    m_networkManager->get(request);
 }
 
 // Handle opensky-network API call reply
