@@ -1319,9 +1319,15 @@ bool ChannelWebAPIUtils::patchDeviceSetting(unsigned int deviceIndex, const QStr
             SWGSDRangel::SWGErrorResponse errorResponse2;
             delete jsonObj;
 
-            DeviceSampleSource *source = deviceSet->m_deviceAPI->getSampleSource();
-
-            httpRC = source->webapiSettingsPutPatch(false, deviceSettingsKeys, deviceSettingsResponse, *errorResponse2.getMessage());
+            if (DeviceSampleSource *source = deviceSet->m_deviceAPI->getSampleSource()) {
+                httpRC = source->webapiSettingsPutPatch(false, deviceSettingsKeys, deviceSettingsResponse, *errorResponse2.getMessage());
+            } else if (DeviceSampleSink *sink = deviceSet->m_deviceAPI->getSampleSink()) {
+                httpRC = sink->webapiSettingsPutPatch(false, deviceSettingsKeys, deviceSettingsResponse, *errorResponse2.getMessage());
+            } else if (DeviceSampleMIMO *mimo = deviceSet->m_deviceAPI->getSampleMIMO()) {
+                httpRC = mimo->webapiSettingsPutPatch(false, deviceSettingsKeys, deviceSettingsResponse, *errorResponse2.getMessage());
+            } else {
+                httpRC = 404;
+            }
 
             if (httpRC/100 == 2)
             {
