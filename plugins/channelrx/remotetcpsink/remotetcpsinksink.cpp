@@ -881,8 +881,8 @@ RemoteTCPProtocol::Device RemoteTCPSinkSink::getDevice()
 
 void RemoteTCPSinkSink::acceptWebConnection()
 {
-     QMutexLocker mutexLocker(&m_mutex);
-     QWebSocket *client = m_webSocketServer->nextPendingConnection();
+    QMutexLocker mutexLocker(&m_mutex);
+    QWebSocket *client = m_webSocketServer->nextPendingConnection();
 
     connect(client, &QWebSocket::binaryMessageReceived, this, &RemoteTCPSinkSink::processCommand);
     connect(client, &QWebSocket::disconnected, this, &RemoteTCPSinkSink::disconnected);
@@ -891,8 +891,11 @@ void RemoteTCPSinkSink::acceptWebConnection()
     // https://bugreports.qt.io/browse/QTBUG-125874
     QTimer::singleShot(200, this, [this, client] () {
         QMutexLocker mutexLocker(&m_mutex);
-        m_clients.append(new WebSocket(client));
-        acceptConnection(m_clients.last());
+        if (client->isValid())
+        {
+            m_clients.append(new WebSocket(client));
+            acceptConnection(m_clients.last());
+        }
     });
 }
 
@@ -912,8 +915,11 @@ void RemoteTCPSinkSink::acceptTCPConnection()
 
     QTimer::singleShot(200, this, [this, client] () {
         QMutexLocker mutexLocker(&m_mutex);
-        m_clients.append(new TCPSocket(client));
-        acceptConnection(m_clients.last());
+        if (client->isValid())
+        {
+            m_clients.append(new TCPSocket(client));
+            acceptConnection(m_clients.last());
+        }
     });
 }
 
