@@ -52,10 +52,12 @@ struct USRPInputSettings
     QString  m_clockSource;
     bool     m_transverterMode;
     qint64   m_transverterDeltaFrequency;
-	float    m_replayOffset; //!< Replay offset in seconds
+    float    m_replayOffset; //!< Replay offset in seconds
 	float    m_replayLength; //!< Replay buffer size in seconds
 	float    m_replayStep;   //!< Replay forward/back step size in seconds
 	bool     m_replayLoop;   //!< Replay buffer repeatedly without recording new data
+    uint8_t  m_gpioDir;      //!< GPIO pin direction; 0 ATR (automatic transmit/receive), 1 output
+    uint8_t  m_gpioPins;     //!< GPIO pins levels for outputs
     bool     m_useReverseAPI;
     QString  m_reverseAPIAddress;
     uint16_t m_reverseAPIPort;
