@@ -30,6 +30,12 @@ USRPInputSettings:
     transverterDeltaFrequency:
       type: integer
       format: int64
+    gpioDir:
+      type: integer
+      format: int8
+    gpioPins:
+      type: integer
+      format: int8
     useReverseAPI:
       description: Synchronize with reverse API (1 for yes, 0 for no)
       type: integer
@@ -65,6 +71,12 @@ USRPOutputSettings:
     transverterDeltaFrequency:
       type: integer
       format: int64
+    gpioDir:
+      type: integer
+      format: int8
+    gpioPins:
+      type: integer
+      format: int8
     useReverseAPI:
       description: Synchronize with reverse API (1 for yes, 0 for no)
       type: integer

@@ -13451,6 +13451,18 @@ margin-bottom: 20px;
   "properties" : {
     "sampleRate" : {
       "type" : "integer"
+    },
+    "latitude" : {
+      "type" : "number",
+      "format" : "float"
+    },
+    "longitude" : {
+      "type" : "number",
+      "format" : "float"
+    },
+    "altitude" : {
+      "type" : "number",
+      "format" : "float"
     }
   },
   "description" : "RemoteTCPInput"
@@ -16824,6 +16836,14 @@ margin-bottom: 20px;
       "type" : "integer",
       "format" : "int64"
     },
+    "gpioDir" : {
+      "type" : "integer",
+      "format" : "int8"
+    },
+    "gpioPins" : {
+      "type" : "integer",
+      "format" : "int8"
+    },
     "useReverseAPI" : {
       "type" : "integer",
       "description" : "Synchronize with reverse API (1 for yes, 0 for no)"
@@ -16892,6 +16912,14 @@ margin-bottom: 20px;
     "transverterDeltaFrequency" : {
       "type" : "integer",
       "format" : "int64"
+    },
+    "gpioDir" : {
+      "type" : "integer",
+      "format" : "int8"
+    },
+    "gpioPins" : {
+      "type" : "integer",
+      "format" : "int8"
     },
     "useReverseAPI" : {
       "type" : "integer",
@@ -59441,7 +59469,7 @@ except ApiException as e:
           </div>
           <div id="generator">
             <div class="content">
-              Generated 2024-07-16T23:20:27.082+02:00
+              Generated 2024-12-24T11:56:24.260+01:00
             </div>
           </div>
       </div>

@@ -54,6 +54,10 @@ SWGUSRPInputSettings::SWGUSRPInputSettings() {
     m_transverter_mode_isSet = false;
     transverter_delta_frequency = 0L;
     m_transverter_delta_frequency_isSet = false;
+    gpio_dir = 0;
+    m_gpio_dir_isSet = false;
+    gpio_pins = 0;
+    m_gpio_pins_isSet = false;
     use_reverse_api = 0;
     m_use_reverse_api_isSet = false;
     reverse_api_address = nullptr;
@@ -96,6 +100,10 @@ SWGUSRPInputSettings::init() {
     m_transverter_mode_isSet = false;
     transverter_delta_frequency = 0L;
     m_transverter_delta_frequency_isSet = false;
+    gpio_dir = 0;
+    m_gpio_dir_isSet = false;
+    gpio_pins = 0;
+    m_gpio_pins_isSet = false;
     use_reverse_api = 0;
     m_use_reverse_api_isSet = false;
     reverse_api_address = new QString("");
@@ -123,6 +131,8 @@ SWGUSRPInputSettings::cleanup() {
     if(clock_source != nullptr) { 
         delete clock_source;
     }
+
+
 
 
 
@@ -169,6 +179,10 @@ SWGUSRPInputSettings::fromJsonObject(QJsonObject &pJson) {
     ::SWGSDRangel::setValue(&transverter_mode, pJson["transverterMode"], "qint32", "");
     
     ::SWGSDRangel::setValue(&transverter_delta_frequency, pJson["transverterDeltaFrequency"], "qint64", "");
+    
+    ::SWGSDRangel::setValue(&gpio_dir, pJson["gpioDir"], "qint32", "");
+    
+    ::SWGSDRangel::setValue(&gpio_pins, pJson["gpioPins"], "qint32", "");
     
     ::SWGSDRangel::setValue(&use_reverse_api, pJson["useReverseAPI"], "qint32", "");
     
@@ -232,6 +246,12 @@ SWGUSRPInputSettings::asJsonObject() {
     }
     if(m_transverter_delta_frequency_isSet){
         obj->insert("transverterDeltaFrequency", QJsonValue(transverter_delta_frequency));
+    }
+    if(m_gpio_dir_isSet){
+        obj->insert("gpioDir", QJsonValue(gpio_dir));
+    }
+    if(m_gpio_pins_isSet){
+        obj->insert("gpioPins", QJsonValue(gpio_pins));
     }
     if(m_use_reverse_api_isSet){
         obj->insert("useReverseAPI", QJsonValue(use_reverse_api));
@@ -380,6 +400,26 @@ SWGUSRPInputSettings::setTransverterDeltaFrequency(qint64 transverter_delta_freq
 }
 
 qint32
+SWGUSRPInputSettings::getGpioDir() {
+    return gpio_dir;
+}
+void
+SWGUSRPInputSettings::setGpioDir(qint32 gpio_dir) {
+    this->gpio_dir = gpio_dir;
+    this->m_gpio_dir_isSet = true;
+}
+
+qint32
+SWGUSRPInputSettings::getGpioPins() {
+    return gpio_pins;
+}
+void
+SWGUSRPInputSettings::setGpioPins(qint32 gpio_pins) {
+    this->gpio_pins = gpio_pins;
+    this->m_gpio_pins_isSet = true;
+}
+
+qint32
 SWGUSRPInputSettings::getUseReverseApi() {
     return use_reverse_api;
 }
@@ -461,6 +501,12 @@ SWGUSRPInputSettings::isSet(){
             isObjectUpdated = true; break;
         }
         if(m_transverter_delta_frequency_isSet){
+            isObjectUpdated = true; break;
+        }
+        if(m_gpio_dir_isSet){
+            isObjectUpdated = true; break;
+        }
+        if(m_gpio_pins_isSet){
             isObjectUpdated = true; break;
         }
         if(m_use_reverse_api_isSet){
