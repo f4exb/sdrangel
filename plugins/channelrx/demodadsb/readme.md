@@ -133,7 +133,7 @@ As a server:
 The Beast binary and Hex formats are as detailed here: https://wiki.jetvision.de/wiki/Mode-S_Beast:Data_Output_Formats
 
 When Enable import is checked, aircraft data for aircraft anywhere in the world can be imported from OpenSky Network.
-A username and password are not required, but when specified, this allows the update period to be reduced to 5 seconds instead of 10 seconds.
+A username and password are not required, but when specified, this allows the update period to be reduced to 5 seconds instead of 10 seconds, and 4000 API calls per day instead of 400.
 To limit network traffic and processing power requirements, a geographical region can be set via the minimum and maximum latitude and longitude fields.
 
 <h3>17: Open Notifications Dialog</h3>
