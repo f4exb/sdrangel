@@ -46,6 +46,8 @@ void USRPInputSettings::resetToDefaults()
     m_replayLength = 20.0f;
     m_replayStep = 5.0f;
     m_replayLoop = false;
+    m_gpioDir = 0;
+    m_gpioPins = 0;
     m_useReverseAPI = false;
     m_reverseAPIAddress = "127.0.0.1";
     m_reverseAPIPort = 8888;
@@ -76,6 +78,8 @@ QByteArray USRPInputSettings::serialize() const
     s.writeFloat(18, m_replayLength);
     s.writeFloat(19, m_replayStep);
     s.writeBool(20, m_replayLoop);
+    s.writeU32(21, m_gpioDir);
+    s.writeU32(22, m_gpioPins);
 
     return s.final();
 }
@@ -124,6 +128,10 @@ bool USRPInputSettings::deserialize(const QByteArray& data)
         d.readFloat(18, &m_replayLength, 20.0f);
         d.readFloat(19, &m_replayStep, 5.0f);
         d.readBool(20, &m_replayLoop, false);
+        d.readU32(21, &uintval, 0);
+        m_gpioDir = uintval & 0xFF;
+        d.readU32(22, &uintval, 0);
+        m_gpioPins = uintval & 0xFF;
 
         return true;
     }
@@ -190,6 +198,12 @@ void USRPInputSettings::applySettings(const QStringList& settingsKeys, const USR
     }
     if (settingsKeys.contains("replayLoop")) {
         m_replayLoop = settings.m_replayLoop;
+    }
+    if (settingsKeys.contains("gpioDir")) {
+        m_gpioDir = settings.m_gpioDir;
+    }
+    if (settingsKeys.contains("gpioPins")) {
+        m_gpioPins = settings.m_gpioPins;
     }
     if (settingsKeys.contains("useReverseAPI")) {
         m_useReverseAPI = settings.m_useReverseAPI;
@@ -262,6 +276,12 @@ QString USRPInputSettings::getDebugString(const QStringList& settingsKeys, bool 
     }
     if (settingsKeys.contains("replayLoop") || force) {
         ostr << " m_replayLoop: " << m_replayLoop;
+    }
+    if (settingsKeys.contains("gpioDir") || force) {
+        ostr << " m_gpioDir: " << (int) m_gpioDir;
+    }
+    if (settingsKeys.contains("gpioPins") || force) {
+        ostr << " m_gpioPins: " << (int) m_gpioPins;
     }
     if (settingsKeys.contains("useReverseAPI") || force) {
         ostr << " m_useReverseAPI: " << m_useReverseAPI;

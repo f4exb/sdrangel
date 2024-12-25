@@ -895,6 +895,25 @@ bool USRPInput::applySettings(const USRPInputSettings& settings, const QList<QSt
             }
         }
 
+        if (settingsKeys.contains("gpioDir") || force)
+        {
+            if (m_deviceShared.m_deviceParams->getDevice())
+            {
+                m_deviceShared.m_deviceParams->getDevice()->set_gpio_attr("FP0", "CTRL", ~settings.m_gpioDir, 0xff); // 0 for GPIO, 1 for ATR
+                m_deviceShared.m_deviceParams->getDevice()->set_gpio_attr("FP0", "DDR", settings.m_gpioDir, 0xff); // 0 for input, 1 for output
+                qDebug() << "USRPInput::applySettings: set GPIO dir to " << settings.m_gpioDir;
+            }
+        }
+
+        if (settingsKeys.contains("gpioPins") || force)
+        {
+            if (m_deviceShared.m_deviceParams->getDevice())
+            {
+                m_deviceShared.m_deviceParams->getDevice()->set_gpio_attr("FP0", "OUT", settings.m_gpioPins, 0xff);
+                qDebug() << "USRPInput::applySettings: set GPIO pins to " << settings.m_gpioPins;
+            }
+        }
+
         if (settingsKeys.contains("useReverseAPI"))
         {
             bool fullUpdate = (settingsKeys.contains("useReverseAPI") && settings.m_useReverseAPI) ||
@@ -1162,6 +1181,12 @@ void USRPInput::webapiUpdateDeviceSettings(
     if (deviceSettingsKeys.contains("transverterMode")) {
         settings.m_transverterMode = response.getUsrpInputSettings()->getTransverterMode() != 0;
     }
+    if (deviceSettingsKeys.contains("gpioDir")) {
+        settings.m_gpioDir = response.getUsrpInputSettings()->getGpioDir();
+    }
+    if (deviceSettingsKeys.contains("gpioPins")) {
+        settings.m_gpioPins = response.getUsrpInputSettings()->getGpioPins();
+    }
     if (deviceSettingsKeys.contains("useReverseAPI")) {
         settings.m_useReverseAPI = response.getUsrpInputSettings()->getUseReverseApi() != 0;
     }
@@ -1191,6 +1216,8 @@ void USRPInput::webapiFormatDeviceSettings(SWGSDRangel::SWGDeviceSettings& respo
     response.getUsrpInputSettings()->setLpfBw(settings.m_lpfBW);
     response.getUsrpInputSettings()->setTransverterDeltaFrequency(settings.m_transverterDeltaFrequency);
     response.getUsrpInputSettings()->setTransverterMode(settings.m_transverterMode ? 1 : 0);
+    response.getUsrpInputSettings()->setGpioDir(settings.m_gpioDir);
+    response.getUsrpInputSettings()->setGpioPins(settings.m_gpioPins);
     response.getUsrpInputSettings()->setUseReverseApi(settings.m_useReverseAPI ? 1 : 0);
 
     if (response.getUsrpInputSettings()->getReverseApiAddress()) {
@@ -1310,6 +1337,12 @@ void USRPInput::webapiReverseSendSettings(const QList<QString>& deviceSettingsKe
     }
     if (deviceSettingsKeys.contains("transverterMode") || force) {
         swgUsrpInputSettings->setTransverterMode(settings.m_transverterMode ? 1 : 0);
+    }
+    if (deviceSettingsKeys.contains("gpioDir") || force) {
+        swgUsrpInputSettings->setGpioDir(settings.m_gpioDir);
+    }
+    if (deviceSettingsKeys.contains("gpioPins") || force) {
+        swgUsrpInputSettings->setGpioPins(settings.m_gpioPins);
     }
 
     QString deviceSettingsURL = QString("http://%1:%2/sdrangel/deviceset/%3/device/settings")

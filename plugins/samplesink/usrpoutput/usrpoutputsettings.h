@@ -45,6 +45,8 @@ struct USRPOutputSettings
     QString  m_clockSource;
     bool     m_transverterMode;
     qint64   m_transverterDeltaFrequency;
+    uint8_t  m_gpioDir;      //!< GPIO pin direction; 0 ATR (automatic transmit/receive), 1 output
+    uint8_t  m_gpioPins;     //!< GPIO pins levels for outputs
     bool     m_useReverseAPI;
     QString  m_reverseAPIAddress;
     uint16_t m_reverseAPIPort;

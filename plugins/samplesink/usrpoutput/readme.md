@@ -123,3 +123,10 @@ This label turns green when data has been transmitted to the device.
   - **D**: turns red if stream experiences packet drop outs
 
 The stream warning indicators are reset when the acquisition is started.
+
+<h2>GPIOs</h2>
+
+The USRP device settings supports 8-bit `gpioDir` and `gpioPins` settings. These can be set via the Web API or Simple PTT feature.
+`gpioDir` can be set to 0 for default ATR (automatic transmit/receive) functionality or 1 for GPIO output.
+On the b210, the GPIOs are on J504 header. Bit 0 corresponds to pin 1.
+On other USRP devices, that may have multiple GPIO banks, these settings correspond to bank `FP0` (Front panel).

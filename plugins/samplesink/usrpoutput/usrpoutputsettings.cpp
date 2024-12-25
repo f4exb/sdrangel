@@ -40,6 +40,8 @@ void USRPOutputSettings::resetToDefaults()
     m_clockSource = "internal";
     m_transverterMode = false;
     m_transverterDeltaFrequency = 0;
+    m_gpioDir = 0;
+    m_gpioPins = 0;
     m_useReverseAPI = false;
     m_reverseAPIAddress = "127.0.0.1";
     m_reverseAPIPort = 8888;
@@ -63,6 +65,8 @@ QByteArray USRPOutputSettings::serialize() const
     s.writeU32(11, m_reverseAPIPort);
     s.writeU32(12, m_reverseAPIDeviceIndex);
     s.writeS32(13, m_loOffset);
+    s.writeU32(14, m_gpioDir);
+    s.writeU32(15, m_gpioPins);
 
     return s.final();
 }
@@ -102,6 +106,10 @@ bool USRPOutputSettings::deserialize(const QByteArray& data)
         d.readU32(12, &uintval, 0);
         m_reverseAPIDeviceIndex = uintval > 99 ? 99 : uintval;
         d.readS32(13, &m_loOffset, 0);
+        d.readU32(14, &uintval, 0);
+        m_gpioDir = uintval & 0xFF;
+        d.readU32(15, &uintval, 0);
+        m_gpioPins = uintval & 0xFF;
 
         return true;
     }
@@ -147,6 +155,12 @@ void USRPOutputSettings::applySettings(const QStringList& settingsKeys, const US
     }
     if (settingsKeys.contains("transverterDeltaFrequency")) {
         m_transverterDeltaFrequency = settings.m_transverterDeltaFrequency;
+    }
+    if (settingsKeys.contains("gpioDir")) {
+        m_gpioDir = settings.m_gpioDir;
+    }
+    if (settingsKeys.contains("gpioPins")) {
+        m_gpioPins = settings.m_gpioPins;
     }
     if (settingsKeys.contains("useReverseAPI")) {
         m_useReverseAPI = settings.m_useReverseAPI;
@@ -198,6 +212,12 @@ QString USRPOutputSettings::getDebugString(const QStringList& settingsKeys, bool
     }
     if (settingsKeys.contains("transverterDeltaFrequency") || force) {
         ostr << " m_transverterDeltaFrequency: " << m_transverterDeltaFrequency;
+    }
+    if (settingsKeys.contains("gpioDir") || force) {
+        ostr << " m_gpioDir: " << (int) m_gpioDir;
+    }
+    if (settingsKeys.contains("gpioPins") || force) {
+        ostr << " m_gpioPins: " << (int) m_gpioPins;
     }
     if (settingsKeys.contains("useReverseAPI") || force) {
         ostr << " m_useReverseAPI: " << m_useReverseAPI;
