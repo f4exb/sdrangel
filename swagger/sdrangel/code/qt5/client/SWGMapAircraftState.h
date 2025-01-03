@@ -83,8 +83,8 @@ public:
     qint32 getVerticalMode();
     void setVerticalMode(qint32 vertical_mode);
 
-    qint32 getLateralModel();
-    void setLateralModel(qint32 lateral_model);
+    qint32 getLateralMode();
+    void setLateralMode(qint32 lateral_mode);
 
     qint32 getTcasMode();
     void setTcasMode(qint32 tcas_mode);
@@ -144,8 +144,8 @@ private:
     qint32 vertical_mode;
     bool m_vertical_mode_isSet;
 
-    qint32 lateral_model;
-    bool m_lateral_model_isSet;
+    qint32 lateral_mode;
+    bool m_lateral_mode_isSet;
 
     qint32 tcas_mode;
     bool m_tcas_mode_isSet;

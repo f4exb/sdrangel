@@ -56,8 +56,8 @@ SWGMapAircraftState::SWGMapAircraftState() {
     m_autopilot_isSet = false;
     vertical_mode = 0;
     m_vertical_mode_isSet = false;
-    lateral_model = 0;
-    m_lateral_model_isSet = false;
+    lateral_mode = 0;
+    m_lateral_mode_isSet = false;
     tcas_mode = 0;
     m_tcas_mode_isSet = false;
     wind_speed = 0.0f;
@@ -102,8 +102,8 @@ SWGMapAircraftState::init() {
     m_autopilot_isSet = false;
     vertical_mode = 0;
     m_vertical_mode_isSet = false;
-    lateral_model = 0;
-    m_lateral_model_isSet = false;
+    lateral_mode = 0;
+    m_lateral_mode_isSet = false;
     tcas_mode = 0;
     m_tcas_mode_isSet = false;
     wind_speed = 0.0f;
@@ -176,7 +176,7 @@ SWGMapAircraftState::fromJsonObject(QJsonObject &pJson) {
     
     ::SWGSDRangel::setValue(&vertical_mode, pJson["verticalMode"], "qint32", "");
     
-    ::SWGSDRangel::setValue(&lateral_model, pJson["lateralModel"], "qint32", "");
+    ::SWGSDRangel::setValue(&lateral_mode, pJson["lateralMode"], "qint32", "");
     
     ::SWGSDRangel::setValue(&tcas_mode, pJson["tcasMode"], "qint32", "");
     
@@ -244,8 +244,8 @@ SWGMapAircraftState::asJsonObject() {
     if(m_vertical_mode_isSet){
         obj->insert("verticalMode", QJsonValue(vertical_mode));
     }
-    if(m_lateral_model_isSet){
-        obj->insert("lateralModel", QJsonValue(lateral_model));
+    if(m_lateral_mode_isSet){
+        obj->insert("lateralMode", QJsonValue(lateral_mode));
     }
     if(m_tcas_mode_isSet){
         obj->insert("tcasMode", QJsonValue(tcas_mode));
@@ -404,13 +404,13 @@ SWGMapAircraftState::setVerticalMode(qint32 vertical_mode) {
 }
 
 qint32
-SWGMapAircraftState::getLateralModel() {
-    return lateral_model;
+SWGMapAircraftState::getLateralMode() {
+    return lateral_mode;
 }
 void
-SWGMapAircraftState::setLateralModel(qint32 lateral_model) {
-    this->lateral_model = lateral_model;
-    this->m_lateral_model_isSet = true;
+SWGMapAircraftState::setLateralMode(qint32 lateral_mode) {
+    this->lateral_mode = lateral_mode;
+    this->m_lateral_mode_isSet = true;
 }
 
 qint32
@@ -500,7 +500,7 @@ SWGMapAircraftState::isSet(){
         if(m_vertical_mode_isSet){
             isObjectUpdated = true; break;
         }
-        if(m_lateral_model_isSet){
+        if(m_lateral_mode_isSet){
             isObjectUpdated = true; break;
         }
         if(m_tcas_mode_isSet){

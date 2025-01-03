@@ -275,7 +275,7 @@ MapAircraftState:
       type: integer
     verticalMode:
       type: integer
-    lateralModel:
+    lateralMode:
       type: integer
     tcasMode:
       description: "0 Off, 1 TA, 2 TA/RA"
