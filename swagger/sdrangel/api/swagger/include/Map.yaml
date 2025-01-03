@@ -168,6 +168,8 @@ MapItem:
     color:
       description: "RGBA for polygon and polyline"
       type: integer
+    aircraftState:
+      $ref: "http://swgserver:8081/api/swagger/include/Map.yaml#/MapAircraftState"
 
 MapAnimation:
   description: "Animation to play in the model on the 3D map"
@@ -221,3 +223,70 @@ MapCoordinate:
     dateTime:
       description: "Date and time at this coordinate (ISO 8601 extended format)"
       type: string
+
+MapAircraftState:
+  description: "Aircraft state for PFD/ND"
+  properties:
+    airspeed:
+      description: "Indicated airspeed in knots"
+      type: number
+      format: float
+    trueAirspeed:
+      description: "True airspeed in knots"
+      type: number
+      format: float
+    groundspeed:
+      description: "Groundspeed in knots"
+      type: number
+      format: float
+    mach:
+      type: number
+      format: float
+    altitude:
+      description: "Barometric altitude in feet"
+      type: number
+      format: float
+    qnh:
+      description: "QNH in hPA"
+      type: number
+      format: float
+    verticalSpeed:
+      description: "feet/s"
+      type: number
+      format: float      
+    heading:
+      description: "Degrees magnetic"
+      type: number
+      format: float
+    track:
+      description: "Degrees true"
+      type: number
+      format: float
+    selectedAirspeed:
+      type: number
+      format: float
+    selectedAltitude:
+      type: number
+      format: float
+    selectedHeading:
+      type: number
+      format: float
+    autopilot:
+      type: integer
+    verticalMode:
+      type: integer
+    lateralModel:
+      type: integer
+    tcasMode:
+      description: "0 Off, 1 TA, 2 TA/RA"
+      type: integer  
+    windSpeed:
+      type: number
+      format: float
+    windDirection:
+      type: number
+      format: float
+    staticAirTemperature:
+      type: number
+      format: float
+      

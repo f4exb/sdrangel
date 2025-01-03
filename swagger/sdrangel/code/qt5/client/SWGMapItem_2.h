@@ -22,6 +22,7 @@
 #include <QJsonObject>
 
 
+#include "SWGMapAircraftState.h"
 #include "SWGMapAnimation.h"
 #include "SWGMapCoordinate.h"
 #include <QList>
@@ -147,6 +148,9 @@ public:
     qint32 getColor();
     void setColor(qint32 color);
 
+    SWGMapAircraftState* getAircraftState();
+    void setAircraftState(SWGMapAircraftState* aircraft_state);
+
 
     virtual bool isSet() override;
 
@@ -252,6 +256,9 @@ private:
 
     qint32 color;
     bool m_color_isSet;
+
+    SWGMapAircraftState* aircraft_state;
+    bool m_aircraft_state_isSet;
 
 };
 

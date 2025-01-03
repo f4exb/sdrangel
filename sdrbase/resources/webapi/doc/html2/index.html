@@ -9965,6 +9965,92 @@ margin-bottom: 20px;
   },
   "description" : "Map"
 };
+            defs.MapAircraftState = {
+  "properties" : {
+    "airspeed" : {
+      "type" : "number",
+      "format" : "float",
+      "description" : "Indicated airspeed in knots"
+    },
+    "trueAirspeed" : {
+      "type" : "number",
+      "format" : "float",
+      "description" : "True airspeed in knots"
+    },
+    "groundspeed" : {
+      "type" : "number",
+      "format" : "float",
+      "description" : "Groundspeed in knots"
+    },
+    "mach" : {
+      "type" : "number",
+      "format" : "float"
+    },
+    "altitude" : {
+      "type" : "number",
+      "format" : "float",
+      "description" : "Barometric altitude in feet"
+    },
+    "qnh" : {
+      "type" : "number",
+      "format" : "float",
+      "description" : "QNH in hPA"
+    },
+    "verticalSpeed" : {
+      "type" : "number",
+      "format" : "float",
+      "description" : "feet/s"
+    },
+    "heading" : {
+      "type" : "number",
+      "format" : "float",
+      "description" : "Degrees magnetic"
+    },
+    "track" : {
+      "type" : "number",
+      "format" : "float",
+      "description" : "Degrees true"
+    },
+    "selectedAirspeed" : {
+      "type" : "number",
+      "format" : "float"
+    },
+    "selectedAltitude" : {
+      "type" : "number",
+      "format" : "float"
+    },
+    "selectedHeading" : {
+      "type" : "number",
+      "format" : "float"
+    },
+    "autopilot" : {
+      "type" : "integer"
+    },
+    "verticalMode" : {
+      "type" : "integer"
+    },
+    "lateralModel" : {
+      "type" : "integer"
+    },
+    "tcasMode" : {
+      "type" : "integer",
+      "description" : "0 Off, 1 TA, 2 TA/RA"
+    },
+    "windSpeed" : {
+      "type" : "number",
+      "format" : "float"
+    },
+    "windDirection" : {
+      "type" : "number",
+      "format" : "float"
+    },
+    "staticAirTemperature" : {
+      "type" : "number",
+      "format" : "float"
+    }
+  },
+  "description" : "Aircraft state for PFD/ND"
+};
             defs.MapAnimation = {
   "properties" : {
     "name" : {
@@ -10192,6 +10278,9 @@ margin-bottom: 20px;
     "color" : {
       "type" : "integer",
       "description" : "RGBA for polygon and polyline"
+    },
+    "aircraftState" : {
+      "$ref" : "#/definitions/MapAircraftState"
     }
   },
   "description" : "An item to draw on the map. Set image to an empty string to remove item from the map."
@@ -10356,6 +10445,9 @@ margin-bottom: 20px;
     "color" : {
       "type" : "integer",
       "description" : "RGBA for polygon and polyline"
+    },
+    "aircraftState" : {
+      "$ref" : "#/definitions/MapAircraftState"
     }
   },
   "description" : "An item to draw on the map. Set image to an empty string to remove item from the map."
@@ -59469,7 +59561,7 @@ except ApiException as e:
           </div>
           <div id="generator">
             <div class="content">
-              Generated 2024-12-24T11:56:24.260+01:00
+              Generated 2025-01-03T12:29:40.000+01:00
             </div>
           </div>
       </div>

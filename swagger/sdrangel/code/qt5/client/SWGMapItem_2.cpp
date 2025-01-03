@@ -96,6 +96,8 @@ SWGMapItem_2::SWGMapItem_2() {
     m_color_valid_isSet = false;
     color = 0;
     m_color_isSet = false;
+    aircraft_state = nullptr;
+    m_aircraft_state_isSet = false;
 }
 
 SWGMapItem_2::~SWGMapItem_2() {
@@ -172,6 +174,8 @@ SWGMapItem_2::init() {
     m_color_valid_isSet = false;
     color = 0;
     m_color_isSet = false;
+    aircraft_state = new SWGMapAircraftState();
+    m_aircraft_state_isSet = false;
 }
 
 void
@@ -252,6 +256,9 @@ SWGMapItem_2::cleanup() {
     }
 
 
+    if(aircraft_state != nullptr) { 
+        delete aircraft_state;
+    }
 }
 
 SWGMapItem_2*
@@ -332,6 +339,8 @@ SWGMapItem_2::fromJsonObject(QJsonObject &pJson) {
     ::SWGSDRangel::setValue(&color_valid, pJson["colorValid"], "qint32", "");
     
     ::SWGSDRangel::setValue(&color, pJson["color"], "qint32", "");
+    
+    ::SWGSDRangel::setValue(&aircraft_state, pJson["aircraftState"], "SWGMapAircraftState", "SWGMapAircraftState");
     
 }
 
@@ -450,6 +459,9 @@ SWGMapItem_2::asJsonObject() {
     }
     if(m_color_isSet){
         obj->insert("color", QJsonValue(color));
+    }
+    if((aircraft_state != nullptr) && (aircraft_state->isSet())){
+        toJsonValue(QString("aircraftState"), aircraft_state, obj, QString("SWGMapAircraftState"));
     }
 
     return obj;
@@ -795,6 +807,16 @@ SWGMapItem_2::setColor(qint32 color) {
     this->m_color_isSet = true;
 }
 
+SWGMapAircraftState*
+SWGMapItem_2::getAircraftState() {
+    return aircraft_state;
+}
+void
+SWGMapItem_2::setAircraftState(SWGMapAircraftState* aircraft_state) {
+    this->aircraft_state = aircraft_state;
+    this->m_aircraft_state_isSet = true;
+}
+
 
 bool
 SWGMapItem_2::isSet(){
@@ -900,6 +922,9 @@ SWGMapItem_2::isSet(){
             isObjectUpdated = true; break;
         }
         if(m_color_isSet){
+            isObjectUpdated = true; break;
+        }
+        if(aircraft_state && aircraft_state->isSet()){
             isObjectUpdated = true; break;
         }
     }while(false);
