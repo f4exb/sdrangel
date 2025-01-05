@@ -22,6 +22,7 @@
 #include <QJsonObject>
 
 
+#include <QString>
 
 #include "SWGObject.h"
 #include "export.h"
@@ -40,6 +41,12 @@ public:
     virtual QJsonObject* asJsonObject() override;
     virtual void fromJsonObject(QJsonObject &json) override;
     virtual SWGMapAircraftState* fromJson(QString &jsonString) override;
+
+    QString* getAircraftType();
+    void setAircraftType(QString* aircraft_type);
+
+    qint32 getOnSurface();
+    void setOnSurface(qint32 on_surface);
 
     float getAirspeed();
     void setAirspeed(float airspeed);
@@ -102,6 +109,12 @@ public:
     virtual bool isSet() override;
 
 private:
+    QString* aircraft_type;
+    bool m_aircraft_type_isSet;
+
+    qint32 on_surface;
+    bool m_on_surface_isSet;
+
     float airspeed;
     bool m_airspeed_isSet;
 

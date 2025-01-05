@@ -227,6 +227,10 @@ MapCoordinate:
 MapAircraftState:
   description: "Aircraft state for PFD/ND"
   properties:
+    aircraftType:
+      type: string
+    onSurface:
+      type: integer
     airspeed:
       description: "Indicated airspeed in knots"
       type: number
@@ -236,7 +240,7 @@ MapAircraftState:
       type: number
       format: float
     groundspeed:
-      description: "Groundspeed in knots"
+      description: "Ground speed in knots"
       type: number
       format: float
     mach:
@@ -251,7 +255,7 @@ MapAircraftState:
       type: number
       format: float
     verticalSpeed:
-      description: "feet/s"
+      description: "feet/m"
       type: number
       format: float      
     heading:
@@ -272,13 +276,16 @@ MapAircraftState:
       type: number
       format: float
     autopilot:
+      description: "-1 unknown, 0 off, 1 on"
       type: integer
     verticalMode:
+      description: "0 unknown, 1 VNAV, ALT HOLD, APP (G/S)"
       type: integer
     lateralMode:
+      description: "0 unknown, 1 LNAV, APP (LOC)"
       type: integer
     tcasMode:
-      description: "0 Off, 1 TA, 2 TA/RA"
+      description: "-1 unknown, 0 Off, 1 TA, 2 TA/RA"
       type: integer  
     windSpeed:
       type: number

@@ -28,6 +28,10 @@ SWGMapAircraftState::SWGMapAircraftState(QString* json) {
 }
 
 SWGMapAircraftState::SWGMapAircraftState() {
+    aircraft_type = nullptr;
+    m_aircraft_type_isSet = false;
+    on_surface = 0;
+    m_on_surface_isSet = false;
     airspeed = 0.0f;
     m_airspeed_isSet = false;
     true_airspeed = 0.0f;
@@ -74,6 +78,10 @@ SWGMapAircraftState::~SWGMapAircraftState() {
 
 void
 SWGMapAircraftState::init() {
+    aircraft_type = new QString("");
+    m_aircraft_type_isSet = false;
+    on_surface = 0;
+    m_on_surface_isSet = false;
     airspeed = 0.0f;
     m_airspeed_isSet = false;
     true_airspeed = 0.0f;
@@ -116,6 +124,10 @@ SWGMapAircraftState::init() {
 
 void
 SWGMapAircraftState::cleanup() {
+    if(aircraft_type != nullptr) { 
+        delete aircraft_type;
+    }
+
 
 
 
@@ -148,6 +160,10 @@ SWGMapAircraftState::fromJson(QString &json) {
 
 void
 SWGMapAircraftState::fromJsonObject(QJsonObject &pJson) {
+    ::SWGSDRangel::setValue(&aircraft_type, pJson["aircraftType"], "QString", "QString");
+    
+    ::SWGSDRangel::setValue(&on_surface, pJson["onSurface"], "qint32", "");
+    
     ::SWGSDRangel::setValue(&airspeed, pJson["airspeed"], "float", "");
     
     ::SWGSDRangel::setValue(&true_airspeed, pJson["trueAirspeed"], "float", "");
@@ -202,6 +218,12 @@ SWGMapAircraftState::asJson ()
 QJsonObject*
 SWGMapAircraftState::asJsonObject() {
     QJsonObject* obj = new QJsonObject();
+    if(aircraft_type != nullptr && *aircraft_type != QString("")){
+        toJsonValue(QString("aircraftType"), aircraft_type, obj, QString("QString"));
+    }
+    if(m_on_surface_isSet){
+        obj->insert("onSurface", QJsonValue(on_surface));
+    }
     if(m_airspeed_isSet){
         obj->insert("airspeed", QJsonValue(airspeed));
     }
@@ -261,6 +283,26 @@ SWGMapAircraftState::asJsonObject() {
     }
 
     return obj;
+}
+
+QString*
+SWGMapAircraftState::getAircraftType() {
+    return aircraft_type;
+}
+void
+SWGMapAircraftState::setAircraftType(QString* aircraft_type) {
+    this->aircraft_type = aircraft_type;
+    this->m_aircraft_type_isSet = true;
+}
+
+qint32
+SWGMapAircraftState::getOnSurface() {
+    return on_surface;
+}
+void
+SWGMapAircraftState::setOnSurface(qint32 on_surface) {
+    this->on_surface = on_surface;
+    this->m_on_surface_isSet = true;
 }
 
 float
@@ -458,6 +500,12 @@ bool
 SWGMapAircraftState::isSet(){
     bool isObjectUpdated = false;
     do{
+        if(aircraft_type && *aircraft_type != QString("")){
+            isObjectUpdated = true; break;
+        }
+        if(m_on_surface_isSet){
+            isObjectUpdated = true; break;
+        }
         if(m_airspeed_isSet){
             isObjectUpdated = true; break;
         }

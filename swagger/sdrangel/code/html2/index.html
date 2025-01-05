@@ -9967,6 +9967,12 @@ margin-bottom: 20px;
 };
             defs.MapAircraftState = {
   "properties" : {
+    "aircraftType" : {
+      "type" : "string"
+    },
+    "onSurface" : {
+      "type" : "integer"
+    },
     "airspeed" : {
       "type" : "number",
       "format" : "float",
@@ -9980,7 +9986,7 @@ margin-bottom: 20px;
     "groundspeed" : {
       "type" : "number",
       "format" : "float",
-      "description" : "Groundspeed in knots"
+      "description" : "Ground speed in knots"
     },
     "mach" : {
       "type" : "number",
@@ -9999,7 +10005,7 @@ margin-bottom: 20px;
     "verticalSpeed" : {
       "type" : "number",
       "format" : "float",
-      "description" : "feet/s"
+      "description" : "feet/m"
     },
     "heading" : {
       "type" : "number",
@@ -10024,17 +10030,20 @@ margin-bottom: 20px;
       "format" : "float"
     },
     "autopilot" : {
-      "type" : "integer"
+      "type" : "integer",
+      "description" : "-1 unknown, 0 off, 1 on"
     },
     "verticalMode" : {
-      "type" : "integer"
+      "type" : "integer",
+      "description" : "0 unknown, 1 VNAV, ALT HOLD, APP (G/S)"
     },
     "lateralMode" : {
-      "type" : "integer"
+      "type" : "integer",
+      "description" : "0 unknown, 1 LNAV, APP (LOC)"
     },
     "tcasMode" : {
       "type" : "integer",
-      "description" : "0 Off, 1 TA, 2 TA/RA"
+      "description" : "-1 unknown, 0 Off, 1 TA, 2 TA/RA"
     },
     "windSpeed" : {
       "type" : "number",
@@ -59561,7 +59570,7 @@ except ApiException as e:
           </div>
           <div id="generator">
             <div class="content">
-              Generated 2025-01-03T12:42:45.813+01:00
+              Generated 2025-01-05T11:23:33.367+01:00
             </div>
           </div>
       </div>
