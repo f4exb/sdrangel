@@ -34,6 +34,8 @@ SWGMapAircraftState::SWGMapAircraftState() {
     m_on_surface_isSet = false;
     airspeed = 0.0f;
     m_airspeed_isSet = false;
+    airspeed_date_time = nullptr;
+    m_airspeed_date_time_isSet = false;
     true_airspeed = 0.0f;
     m_true_airspeed_isSet = false;
     groundspeed = 0.0f;
@@ -42,10 +44,14 @@ SWGMapAircraftState::SWGMapAircraftState() {
     m_mach_isSet = false;
     altitude = 0.0f;
     m_altitude_isSet = false;
+    altitude_date_time = nullptr;
+    m_altitude_date_time_isSet = false;
     qnh = 0.0f;
     m_qnh_isSet = false;
     vertical_speed = 0.0f;
     m_vertical_speed_isSet = false;
+    vertical_speed_date_time = nullptr;
+    m_vertical_speed_date_time_isSet = false;
     heading = 0.0f;
     m_heading_isSet = false;
     track = 0.0f;
@@ -84,6 +90,8 @@ SWGMapAircraftState::init() {
     m_on_surface_isSet = false;
     airspeed = 0.0f;
     m_airspeed_isSet = false;
+    airspeed_date_time = new QString("");
+    m_airspeed_date_time_isSet = false;
     true_airspeed = 0.0f;
     m_true_airspeed_isSet = false;
     groundspeed = 0.0f;
@@ -92,10 +100,14 @@ SWGMapAircraftState::init() {
     m_mach_isSet = false;
     altitude = 0.0f;
     m_altitude_isSet = false;
+    altitude_date_time = new QString("");
+    m_altitude_date_time_isSet = false;
     qnh = 0.0f;
     m_qnh_isSet = false;
     vertical_speed = 0.0f;
     m_vertical_speed_isSet = false;
+    vertical_speed_date_time = new QString("");
+    m_vertical_speed_date_time_isSet = false;
     heading = 0.0f;
     m_heading_isSet = false;
     track = 0.0f;
@@ -129,12 +141,21 @@ SWGMapAircraftState::cleanup() {
     }
 
 
+    if(airspeed_date_time != nullptr) { 
+        delete airspeed_date_time;
+    }
 
 
 
 
+    if(altitude_date_time != nullptr) { 
+        delete altitude_date_time;
+    }
 
 
+    if(vertical_speed_date_time != nullptr) { 
+        delete vertical_speed_date_time;
+    }
 
 
 
@@ -166,6 +187,8 @@ SWGMapAircraftState::fromJsonObject(QJsonObject &pJson) {
     
     ::SWGSDRangel::setValue(&airspeed, pJson["airspeed"], "float", "");
     
+    ::SWGSDRangel::setValue(&airspeed_date_time, pJson["airspeedDateTime"], "QString", "QString");
+    
     ::SWGSDRangel::setValue(&true_airspeed, pJson["trueAirspeed"], "float", "");
     
     ::SWGSDRangel::setValue(&groundspeed, pJson["groundspeed"], "float", "");
@@ -174,9 +197,13 @@ SWGMapAircraftState::fromJsonObject(QJsonObject &pJson) {
     
     ::SWGSDRangel::setValue(&altitude, pJson["altitude"], "float", "");
     
+    ::SWGSDRangel::setValue(&altitude_date_time, pJson["altitudeDateTime"], "QString", "QString");
+    
     ::SWGSDRangel::setValue(&qnh, pJson["qnh"], "float", "");
     
     ::SWGSDRangel::setValue(&vertical_speed, pJson["verticalSpeed"], "float", "");
+    
+    ::SWGSDRangel::setValue(&vertical_speed_date_time, pJson["verticalSpeedDateTime"], "QString", "QString");
     
     ::SWGSDRangel::setValue(&heading, pJson["heading"], "float", "");
     
@@ -227,6 +254,9 @@ SWGMapAircraftState::asJsonObject() {
     if(m_airspeed_isSet){
         obj->insert("airspeed", QJsonValue(airspeed));
     }
+    if(airspeed_date_time != nullptr && *airspeed_date_time != QString("")){
+        toJsonValue(QString("airspeedDateTime"), airspeed_date_time, obj, QString("QString"));
+    }
     if(m_true_airspeed_isSet){
         obj->insert("trueAirspeed", QJsonValue(true_airspeed));
     }
@@ -239,11 +269,17 @@ SWGMapAircraftState::asJsonObject() {
     if(m_altitude_isSet){
         obj->insert("altitude", QJsonValue(altitude));
     }
+    if(altitude_date_time != nullptr && *altitude_date_time != QString("")){
+        toJsonValue(QString("altitudeDateTime"), altitude_date_time, obj, QString("QString"));
+    }
     if(m_qnh_isSet){
         obj->insert("qnh", QJsonValue(qnh));
     }
     if(m_vertical_speed_isSet){
         obj->insert("verticalSpeed", QJsonValue(vertical_speed));
+    }
+    if(vertical_speed_date_time != nullptr && *vertical_speed_date_time != QString("")){
+        toJsonValue(QString("verticalSpeedDateTime"), vertical_speed_date_time, obj, QString("QString"));
     }
     if(m_heading_isSet){
         obj->insert("heading", QJsonValue(heading));
@@ -315,6 +351,16 @@ SWGMapAircraftState::setAirspeed(float airspeed) {
     this->m_airspeed_isSet = true;
 }
 
+QString*
+SWGMapAircraftState::getAirspeedDateTime() {
+    return airspeed_date_time;
+}
+void
+SWGMapAircraftState::setAirspeedDateTime(QString* airspeed_date_time) {
+    this->airspeed_date_time = airspeed_date_time;
+    this->m_airspeed_date_time_isSet = true;
+}
+
 float
 SWGMapAircraftState::getTrueAirspeed() {
     return true_airspeed;
@@ -355,6 +401,16 @@ SWGMapAircraftState::setAltitude(float altitude) {
     this->m_altitude_isSet = true;
 }
 
+QString*
+SWGMapAircraftState::getAltitudeDateTime() {
+    return altitude_date_time;
+}
+void
+SWGMapAircraftState::setAltitudeDateTime(QString* altitude_date_time) {
+    this->altitude_date_time = altitude_date_time;
+    this->m_altitude_date_time_isSet = true;
+}
+
 float
 SWGMapAircraftState::getQnh() {
     return qnh;
@@ -373,6 +429,16 @@ void
 SWGMapAircraftState::setVerticalSpeed(float vertical_speed) {
     this->vertical_speed = vertical_speed;
     this->m_vertical_speed_isSet = true;
+}
+
+QString*
+SWGMapAircraftState::getVerticalSpeedDateTime() {
+    return vertical_speed_date_time;
+}
+void
+SWGMapAircraftState::setVerticalSpeedDateTime(QString* vertical_speed_date_time) {
+    this->vertical_speed_date_time = vertical_speed_date_time;
+    this->m_vertical_speed_date_time_isSet = true;
 }
 
 float
@@ -509,6 +575,9 @@ SWGMapAircraftState::isSet(){
         if(m_airspeed_isSet){
             isObjectUpdated = true; break;
         }
+        if(airspeed_date_time && *airspeed_date_time != QString("")){
+            isObjectUpdated = true; break;
+        }
         if(m_true_airspeed_isSet){
             isObjectUpdated = true; break;
         }
@@ -521,10 +590,16 @@ SWGMapAircraftState::isSet(){
         if(m_altitude_isSet){
             isObjectUpdated = true; break;
         }
+        if(altitude_date_time && *altitude_date_time != QString("")){
+            isObjectUpdated = true; break;
+        }
         if(m_qnh_isSet){
             isObjectUpdated = true; break;
         }
         if(m_vertical_speed_isSet){
+            isObjectUpdated = true; break;
+        }
+        if(vertical_speed_date_time && *vertical_speed_date_time != QString("")){
             isObjectUpdated = true; break;
         }
         if(m_heading_isSet){

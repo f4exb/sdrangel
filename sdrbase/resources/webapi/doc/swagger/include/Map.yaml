@@ -235,6 +235,9 @@ MapAircraftState:
       description: "Indicated airspeed in knots"
       type: number
       format: float
+    airspeedDateTime:
+      description: "Date and time at this indicated airspeed (ISO 8601 extended format)"
+      type: string
     trueAirspeed:
       description: "True airspeed in knots"
       type: number
@@ -250,6 +253,9 @@ MapAircraftState:
       description: "Barometric altitude in feet"
       type: number
       format: float
+    altitudeDateTime:
+      description: "Date and time at this altitude (ISO 8601 extended format)"
+      type: string
     qnh:
       description: "QNH in hPA"
       type: number
@@ -258,6 +264,9 @@ MapAircraftState:
       description: "feet/m"
       type: number
       format: float      
+    verticalSpeedDateTime:
+      description: "Date and time at this vertical speed (ISO 8601 extended format)"
+      type: string
     heading:
       description: "Degrees magnetic"
       type: number

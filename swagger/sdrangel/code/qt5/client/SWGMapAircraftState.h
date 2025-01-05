@@ -51,6 +51,9 @@ public:
     float getAirspeed();
     void setAirspeed(float airspeed);
 
+    QString* getAirspeedDateTime();
+    void setAirspeedDateTime(QString* airspeed_date_time);
+
     float getTrueAirspeed();
     void setTrueAirspeed(float true_airspeed);
 
@@ -63,11 +66,17 @@ public:
     float getAltitude();
     void setAltitude(float altitude);
 
+    QString* getAltitudeDateTime();
+    void setAltitudeDateTime(QString* altitude_date_time);
+
     float getQnh();
     void setQnh(float qnh);
 
     float getVerticalSpeed();
     void setVerticalSpeed(float vertical_speed);
+
+    QString* getVerticalSpeedDateTime();
+    void setVerticalSpeedDateTime(QString* vertical_speed_date_time);
 
     float getHeading();
     void setHeading(float heading);
@@ -118,6 +127,9 @@ private:
     float airspeed;
     bool m_airspeed_isSet;
 
+    QString* airspeed_date_time;
+    bool m_airspeed_date_time_isSet;
+
     float true_airspeed;
     bool m_true_airspeed_isSet;
 
@@ -130,11 +142,17 @@ private:
     float altitude;
     bool m_altitude_isSet;
 
+    QString* altitude_date_time;
+    bool m_altitude_date_time_isSet;
+
     float qnh;
     bool m_qnh_isSet;
 
     float vertical_speed;
     bool m_vertical_speed_isSet;
+
+    QString* vertical_speed_date_time;
+    bool m_vertical_speed_date_time_isSet;
 
     float heading;
     bool m_heading_isSet;
