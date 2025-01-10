@@ -69,6 +69,7 @@ private:
     static const float m_cubehlx2[m_size];
     static const float m_icy[m_size];
     static const float m_mint[m_size];
+    static const float m_acab[m_size];
 };
 
 #endif
