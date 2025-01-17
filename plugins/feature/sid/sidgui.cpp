@@ -167,9 +167,9 @@ SIDGUI::SIDGUI(PluginAPI* pluginAPI, FeatureUISet *featureUISet, Feature *featur
     setAttribute(Qt::WA_DeleteOnClose, true);
     m_helpURL = "plugins/feature/sid/readme.md";
     RollupContents *rollupContents = getRollupContents();
-    ui->setupUi(rollupContents);
+	ui->setupUi(rollupContents);
     rollupContents->arrangeRollups();
-    connect(rollupContents, SIGNAL(widgetRolled(QWidget*,bool)), this, SLOT(onWidgetRolled(QWidget*,bool)));
+	connect(rollupContents, SIGNAL(widgetRolled(QWidget*,bool)), this, SLOT(onWidgetRolled(QWidget*,bool)));
 
     m_sid = reinterpret_cast<SIDMain*>(feature);
     m_sid->setMessageQueueToGUI(&m_inputMessageQueue);
@@ -257,8 +257,8 @@ SIDGUI::SIDGUI(PluginAPI* pluginAPI, FeatureUISet *featureUISet, Feature *featur
     m_stix = STIX::create();
     if (m_stix)
     {
-        connect(m_stix, &STIX::dataUpdated, this, &SIDGUI::stixDataUpdated);
-        m_stix->getDataPeriodically();
+         connect(m_stix, &STIX::dataUpdated, this, &SIDGUI::stixDataUpdated);
+         m_stix->getDataPeriodically();
     }
 
     plotChart();
@@ -448,7 +448,7 @@ void SIDGUI::onMenuDialogCalled(const QPoint &p)
             "reverseAPIPort",
             "reverseAPIDeviceIndex",
             "reverseAPIChannelIndex"
-            });
+        });
 
         applySettings(m_settingsKeys);
     }
@@ -689,7 +689,7 @@ void SIDGUI::createProtonSeries(QChart *chart, QDateTimeAxis *xAxis, QLogValueAx
     yAxis->setVisible(!secondaryAxis || m_settings.m_displaySecondaryAxis);
 
     for (int i = 0; i < 4; i += 2) // Only plot 10 and 100 MeV so graph isn't too cluttered
-        //for (int i = 0; i < 4; i++)
+    //for (int i = 0; i < 4; i++)
     {
         m_protonMeasurements[i].m_series = new QLineSeries();
         m_protonMeasurements[i].m_series->setName(QString("%1 Proton").arg(SIDGUI::m_protonEnergies[i]));
@@ -1041,21 +1041,21 @@ void SIDGUI::showGRBContextMenu(QContextMenuEvent *contextEvent, QChartView *cha
         QAction* fermiDataAction = new QAction("View Fermi data directory...", contextMenu);
         connect(fermiDataAction, &QAction::triggered, this, [url]()->void {
             QDesktopServices::openUrl(QUrl(url));
-            });
+        });
         contextMenu->addAction(fermiDataAction);
 
         QString plotURL = m_grbData[closestPoint].getFermiPlotURL();
         QAction* fermiPlotAction = new QAction("View Fermi data plot...", contextMenu);
         connect(fermiPlotAction, &QAction::triggered, this, [plotURL]()->void {
             QDesktopServices::openUrl(QUrl(plotURL));
-            });
+        });
         contextMenu->addAction(fermiPlotAction);
 
         QString mapURL = m_grbData[closestPoint].getFermiSkyMapURL();
         QAction* fermiMapDataAction = new QAction("View Fermi sky map...", contextMenu);
         connect(fermiMapDataAction, &QAction::triggered, this, [mapURL]()->void {
             QDesktopServices::openUrl(QUrl(mapURL));
-            });
+        });
         contextMenu->addAction(fermiMapDataAction);
     }
 
@@ -1066,7 +1066,7 @@ void SIDGUI::showGRBContextMenu(QContextMenuEvent *contextEvent, QChartView *cha
         QString switftURL = m_grbData[closestPoint].getSwiftURL();
         connect(swiftDataAction, &QAction::triggered, this, [switftURL]()->void {
             QDesktopServices::openUrl(QUrl(switftURL));
-            });
+        });
         contextMenu->addAction(swiftDataAction);
     }
 
@@ -1083,7 +1083,7 @@ void SIDGUI::showGRBContextMenu(QContextMenuEvent *contextEvent, QChartView *cha
             float dec = m_grbData[closestPoint].m_dec;
             connect(skyMapAction, &QAction::triggered, this, [this, skymap, ra, dec]()->void {
                 sendToSkyMap(skymap, ra, dec);
-                });
+            });
             contextMenu->addAction(skyMapAction);
         }
     }
@@ -1095,7 +1095,7 @@ void SIDGUI::showGRBContextMenu(QContextMenuEvent *contextEvent, QChartView *cha
         QString target = QString("%1 %2").arg(ra).arg(dec);
         connect(skyMapAction, &QAction::triggered, this, [target]()->void {
             FeatureWebAPIUtils::openSkyMapAndFind(target);
-            });
+        });
         contextMenu->addAction(skyMapAction);
     }
 
@@ -1114,14 +1114,14 @@ void SIDGUI::showStixContextMenu(QContextMenuEvent *contextEvent, QChartView *ch
     QAction* lcAction = new QAction("View light curves...", contextMenu);
     connect(lcAction, &QAction::triggered, this, [lcURL]()->void {
         QDesktopServices::openUrl(QUrl(lcURL));
-        });
+    });
     contextMenu->addAction(lcAction);
 
     QString dataURL = m_stixData[closestPoint].getDataURL();
     QAction* stixDataAction = new QAction("View STIX data...", contextMenu);
     connect(stixDataAction, &QAction::triggered, this, [dataURL]()->void {
         QDesktopServices::openUrl(QUrl(dataURL));
-        });
+    });
     contextMenu->addAction(stixDataAction);
 
     contextMenu->popup(chartView->viewport()->mapToGlobal(contextEvent->pos()));
@@ -1525,27 +1525,27 @@ void SIDGUI::updateStatus()
         bool oldState;
         switch (state)
         {
-        case Feature::StNotStarted:
-            ui->startStop->setStyleSheet("QToolButton { background:rgb(79,79,79); }");
-            break;
-        case Feature::StIdle:
-            oldState = ui->startStop->blockSignals(true);
-            ui->startStop->setChecked(false);
-            ui->startStop->blockSignals(oldState);
-            ui->startStop->setStyleSheet("QToolButton { background-color : blue; }");
-            break;
-        case Feature::StRunning:
-            oldState = ui->startStop->blockSignals(true);
-            ui->startStop->setChecked(true);
-            ui->startStop->blockSignals(oldState);
-            ui->startStop->setStyleSheet("QToolButton { background-color : green; }");
-            break;
-        case Feature::StError:
-            ui->startStop->setStyleSheet("QToolButton { background-color : red; }");
-            QMessageBox::critical(this, m_settings.m_title, m_sid->getErrorMessage());
-            break;
-        default:
-            break;
+            case Feature::StNotStarted:
+                ui->startStop->setStyleSheet("QToolButton { background:rgb(79,79,79); }");
+                break;
+            case Feature::StIdle:
+                oldState = ui->startStop->blockSignals(true);
+                ui->startStop->setChecked(false);
+                ui->startStop->blockSignals(oldState);
+                ui->startStop->setStyleSheet("QToolButton { background-color : blue; }");
+                break;
+            case Feature::StRunning:
+                oldState = ui->startStop->blockSignals(true);
+                ui->startStop->setChecked(true);
+                ui->startStop->blockSignals(oldState);
+                ui->startStop->setStyleSheet("QToolButton { background-color : green; }");
+                break;
+            case Feature::StError:
+                ui->startStop->setStyleSheet("QToolButton { background-color : red; }");
+                QMessageBox::critical(this, m_settings.m_title, m_sid->getErrorMessage());
+                break;
+            default:
+                break;
         }
 
         m_lastFeatureState = state;
