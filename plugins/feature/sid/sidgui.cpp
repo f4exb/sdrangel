@@ -2396,8 +2396,11 @@ void SIDGUI::readCSV(const QString& filename, bool autoload)
     if (CSV::readRow(in, &colNames))
     {
         QList<ChannelMeasurement *> measurements;
-        for (int i = 0; i < colNames.size() - 1; i++) {
+        QList<int> measurementIdx;
+        for (int i = 0; i < colNames.size() - 1; i++)
+        {
             measurements.append(nullptr);
+            measurementIdx.append(-1);
         }
         for (int i = 1; i < colNames.size(); i++)
         {
@@ -2439,7 +2442,8 @@ void SIDGUI::readCSV(const QString& filename, bool autoload)
                 } else {
                     id = name;
                 }
-                measurements[i-1] = &addMeasurements(id);
+                addMeasurements(id);
+                measurementIdx[i-1] = m_channelMeasurements.size() - 1;
 
                 // Create settings, if we don't have them
                 SIDSettings::ChannelSettings *channelSettings = m_settings.getChannelSettings(id);
@@ -2482,7 +2486,11 @@ void SIDGUI::readCSV(const QString& filename, bool autoload)
                     if (!valueStr.isEmpty())
                     {
                         double value = valueStr.toDouble();
-                        measurements[i]->append(dateTime, value, false);
+                        if (measurements[i]) {
+                            measurements[i]->append(dateTime, value, false);
+                        } else {
+                            m_channelMeasurements[measurementIdx[i]].append(dateTime, value, false);
+                        }
                     }
                 }
             }
