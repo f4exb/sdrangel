@@ -103,6 +103,10 @@ private:
     QMenu *radiosondesMenu;                         // Column select context menu
 
     SondeHub *m_sondeHub;
+    QDateTime m_lastPositionUpdate;
+    QTimer m_positionUpdateTimer;
+    static const int m_minMobilePositionUpdateTime = 30; // In seconds
+    static const int m_minFixedPositionUpdateTime = 5 * 60;
 
     explicit RadiosondeGUI(PluginAPI* pluginAPI, FeatureUISet *featureUISet, Feature *feature, QWidget* parent = nullptr);
     virtual ~RadiosondeGUI();
