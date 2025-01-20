@@ -61,6 +61,7 @@
 #include "feature/featureset.h"
 #include "feature/feature.h"
 #include "feature/featuregui.h"
+#include "feature/featurewebapiutils.h"
 #include "mainspectrum/mainspectrumgui.h"
 #include "commands/commandkeyreceiver.h"
 #include "gui/presetitem.h"
@@ -275,6 +276,9 @@ MainWindow::MainWindow(qtwebapp::LoggerWithFile *logger, const MainParser& parse
     InitFSM *fsm = new InitFSM(this, splash, !parser.getScratch());
     connect(fsm, &InitFSM::finished, fsm, &InitFSM::deleteLater);
     connect(fsm, &InitFSM::finished, splash, &SDRangelSplash::deleteLater);
+    if (parser.getStart()) {
+        connect(fsm, &InitFSM::finished, this, &MainWindow::startAllAfterDelay);
+    }
     fsm->start();
 
     qDebug() << "MainWindow::MainWindow: end";
@@ -3379,6 +3383,30 @@ void MainWindow::showAllChannels(int deviceSetIndex)
     {
         deviceUISet->getChannelGUIAt(i)->show();
         deviceUISet->getChannelGUIAt(i)->raise();
+    }
+}
+
+void MainWindow::startAllAfterDelay()
+{
+    // Wait a little bit before starting all devices and features,
+    // as some devices, such as FileSinks, can fail to start if run before initialised
+    // Is there a better way than this arbitrary time?
+    QTimer::singleShot(1000, this, &MainWindow::startAll);
+}
+
+// Start all devices and features in all workspaces
+void MainWindow::startAll()
+{
+    // Start all devices
+    for (const auto& workspace : m_workspaces) {
+        startAllDevices(workspace);
+    }
+    // Start all features
+    for (int featureSetIndex = 0; featureSetIndex < m_featureUIs.size(); featureSetIndex++)
+    {
+        for (int featureIndex = 0; featureIndex < m_featureUIs[featureSetIndex]->getNumberOfFeatures(); featureIndex++) {
+            FeatureWebAPIUtils::run(featureSetIndex, featureIndex);
+        }
     }
 }
 

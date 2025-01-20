@@ -20,11 +20,41 @@
 #include "SWGFeatureActions.h"
 #include "SWGMapActions.h"
 #include "SWGPERTesterActions.h"
+#include "SWGDeviceState.h"
 
 #include "maincore.h"
 #include "feature/featureset.h"
 #include "feature/feature.h"
 #include "featurewebapiutils.h"
+
+// Start feature
+bool FeatureWebAPIUtils::run(int featureSetIndex, int featureIndex)
+{
+    Feature *feature = FeatureWebAPIUtils::getFeature(featureSetIndex, featureIndex, "");
+    if (feature != nullptr)
+    {
+        SWGSDRangel::SWGDeviceState runResponse;
+        QString errorResponse;
+        int httpRC;
+
+        runResponse.setState(new QString());
+        httpRC = feature->webapiRun(true, runResponse, errorResponse);
+
+        if (httpRC/100 != 2)
+        {
+            qWarning("FeatureWebAPIUtils::run: run error %d: %s",
+                httpRC, qPrintable(errorResponse));
+            return false;
+        }
+
+        return true;
+    }
+    else
+    {
+        qWarning("FeatureWebAPIUtils::run: no feature F%d:%d", featureSetIndex, featureIndex);
+        return false;
+    }
+}
 
 // Find the specified target on the map
 bool FeatureWebAPIUtils::mapFind(const QString& target, int featureSetIndex, int featureIndex)
