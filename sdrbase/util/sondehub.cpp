@@ -126,6 +126,7 @@ void SondeHub::upload(
         obj.insert("subtype", subframe->getType());
     }
 
+    //obj.insert("dev", true);
     //qDebug() << obj;
     QJsonArray payloads {
         obj
@@ -189,7 +190,43 @@ void SondeHub::handleReply(QNetworkReply* reply)
         if (!reply->error())
         {
             QByteArray bytes = reply->readAll();
-            //qDebug() << bytes;
+            QJsonDocument document = QJsonDocument::fromJson(bytes);
+            if (document.isObject())
+            {
+                QJsonObject obj = document.object();
+                if (obj.contains(QStringLiteral("message")))
+                {
+                    QString message = obj.value(QStringLiteral("message")).toString();
+                    qWarning() << "SondeHub message:" << message;
+                }
+                if (obj.contains(QStringLiteral("errors")))
+                {
+                    QJsonArray errors = obj.value(QStringLiteral("errors")).toArray();
+                    for (auto errorObjRef : errors)
+                    {
+                        QJsonObject errorObj = errorObjRef.toObject();
+                        if (errorObj.contains(QStringLiteral("error_message")))
+                        {
+                            QString errorMessage = errorObj.value(QStringLiteral("error_message")).toString();
+                            qWarning() << "SondeHub error:" << errorMessage;
+                            if (errorObj.contains(QStringLiteral("payload")))
+                            {
+                                QJsonObject payload = errorObj.value(QStringLiteral("payload")).toObject();
+                                qWarning() << "SondeHub error:" << QJsonDocument(payload);
+                            }
+                        }
+                        else
+                        {
+                            qWarning() << "SondeHub error:" << QJsonDocument(errorObj);
+                        }
+                    }
+                }
+                //qDebug() << "SondeHub::handleReply: obj" << QJsonDocument(obj);
+            }
+            else
+            {
+                qDebug() << "SondeHub::handleReply:" << bytes;
+            }
         }
         else
         {
