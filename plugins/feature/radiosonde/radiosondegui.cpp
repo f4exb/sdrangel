@@ -157,6 +157,13 @@ RadiosondeGUI::RadiosondeGUI(PluginAPI* pluginAPI, FeatureUISet *featureUISet, F
     connect(getInputMessageQueue(), SIGNAL(messageEnqueued()), this, SLOT(handleInputMessages()));
 
     m_sondeHub = SondeHub::create();
+    if (m_sondeHub)
+    {
+        connect(m_sondeHub, &SondeHub::prediction, this, &RadiosondeGUI::handlePrediction);
+        connect(&m_predicitionTimer, &QTimer::timeout, this, &RadiosondeGUI::requestPredictions);
+        m_predicitionTimer.setInterval(60 * 1000);
+        m_predicitionTimer.setSingleShot(false);
+    }
 
     // Initialise chart
     ui->chart->setRenderHint(QPainter::Antialiasing);
@@ -257,12 +264,14 @@ void RadiosondeGUI::displaySettings()
     ui->y2->setCurrentIndex((int)m_settings.m_y2);
 
     ui->feed->setChecked(m_settings.m_feedEnabled);
+    ui->showPredictedPaths->setChecked(m_settings.m_showPredictedPaths);
 
     getRollupContents()->restoreState(m_rollupState);
     blockApplySettings(false);
     getRollupContents()->arrangeRollups();
 
     updatePosition();
+    applyShowPredictedPaths();
 }
 
 void RadiosondeGUI::onMenuDialogCalled(const QPoint &p)
@@ -673,6 +682,10 @@ void RadiosondeGUI::updateRadiosondes(RS41Frame *message, QDateTime dateTime)
             MainCore::instance()->getSettings().getAltitude()
             );
     }
+
+    if (!found) {
+        requestPredictions();
+    }
 }
 
 void RadiosondeGUI::on_radiosondes_itemSelectionChanged()
@@ -908,15 +921,37 @@ void RadiosondeGUI::on_deleteAll_clicked()
     {
         QString serial = ui->radiosondes->item(row, RADIOSONDE_COL_SERIAL)->text();
         // Remove from map
-        sendToMap(serial, "",
-            "", "",
-            "", 0.0f,
-            0.0f, 0.0f, 0.0f, QDateTime(),
-            0.0f);
+        clearFromMapFeature(serial, 0);
         // Remove from table
         ui->radiosondes->removeRow(row);
         // Remove from hash and free memory
         delete m_radiosondes.take(serial);
+    }
+    deletePredictedPaths();
+}
+
+void RadiosondeGUI::deletePredictedPaths()
+{
+    for (const auto& prediction : m_predictions) {
+        clearFromMapFeature(prediction, 3);
+    }
+    m_predictions.clear();
+}
+
+void RadiosondeGUI::clearFromMapFeature(const QString& name, int type)
+{
+    QList<ObjectPipe*> mapPipes;
+    MainCore::instance()->getMessagePipes().getMessagePipes(m_radiosonde, "mapitems", mapPipes);
+
+    for (const auto& pipe : mapPipes)
+    {
+        MessageQueue *messageQueue = qobject_cast<MessageQueue*>(pipe->m_element);
+        SWGSDRangel::SWGMapItem *swgMapItem = new SWGSDRangel::SWGMapItem();
+        swgMapItem->setName(new QString(name));
+        swgMapItem->setImage(new QString(""));
+        swgMapItem->setType(type);
+        MainCore::MsgMapItem *msg = MainCore::MsgMapItem::create(m_radiosonde, swgMapItem);
+        messageQueue->push(msg);
     }
 }
 
@@ -928,6 +963,7 @@ void RadiosondeGUI::makeUIConnections()
     QObject::connect(ui->y2, qOverload<int>(&QComboBox::currentIndexChanged), this, &RadiosondeGUI::on_y2_currentIndexChanged);
     QObject::connect(ui->deleteAll, &QPushButton::clicked, this, &RadiosondeGUI::on_deleteAll_clicked);
     QObject::connect(ui->feed, &ButtonSwitch::clicked, this, &RadiosondeGUI::on_feed_clicked);
+    QObject::connect(ui->showPredictedPaths, &ButtonSwitch::clicked, this, &RadiosondeGUI::on_showPredictedPaths_clicked);
 }
 
 void RadiosondeGUI::on_feed_clicked(bool checked)
@@ -953,6 +989,28 @@ void RadiosondeGUI::feedSelect(const QPoint& p)
         m_settingsKeys.append("email");
         applySettings();
         updatePosition();
+    }
+}
+
+void RadiosondeGUI::on_showPredictedPaths_clicked(bool checked)
+{
+    m_settings.m_showPredictedPaths = checked;
+    m_settingsKeys.append("showPredictedPaths");
+    applySettings();
+    applyShowPredictedPaths();
+}
+
+void RadiosondeGUI::applyShowPredictedPaths()
+{
+    if (m_settings.m_showPredictedPaths)
+    {
+        requestPredictions();
+        m_predicitionTimer.start();
+    }
+    else
+    {
+        m_predicitionTimer.stop();
+        deletePredictedPaths();
     }
 }
 
@@ -1015,6 +1073,71 @@ void RadiosondeGUI::updatePosition()
             }
             m_positionUpdateTimer.setInterval(msecs);
             m_positionUpdateTimer.start();
+        }
+    }
+}
+
+void RadiosondeGUI::requestPredictions()
+{
+    if (m_sondeHub && m_settings.m_showPredictedPaths)
+    {
+        for (int row = 0; row < ui->radiosondes->rowCount(); row++)
+        {
+            QString serial = ui->radiosondes->item(row, RADIOSONDE_COL_SERIAL)->text();
+            m_sondeHub->getPrediction(serial);
+        }
+    }
+}
+
+void RadiosondeGUI::handlePrediction(const QString& serial, const QList<SondeHub::Position>& positions)
+{
+    if (positions.size() < 2) {
+        return;
+    }
+
+    // Send to Map feature
+    QList<ObjectPipe*> mapPipes;
+    MainCore::instance()->getMessagePipes().getMessagePipes(m_radiosonde, "mapitems", mapPipes);
+
+    if (mapPipes.size() > 0)
+    {
+        QString name = QString("%1_prediction").arg(serial);
+
+        for (const auto& pipe : mapPipes)
+        {
+            MessageQueue *messageQueue = qobject_cast<MessageQueue*>(pipe->m_element);
+            SWGSDRangel::SWGMapItem *swgMapItem = new SWGSDRangel::SWGMapItem();
+
+            swgMapItem->setName(new QString(name));
+            swgMapItem->setLatitude(positions[0].m_latitude);
+            swgMapItem->setLongitude(positions[0].m_longitude);
+            swgMapItem->setAltitude(positions[0].m_altitude);
+            QString image = QString("none");
+            swgMapItem->setImage(new QString(image));
+            swgMapItem->setImageRotation(0);
+            swgMapItem->setFixedPosition(true);
+            swgMapItem->setLabel(new QString(serial));
+            swgMapItem->setAltitudeReference(0);
+            QList<SWGSDRangel::SWGMapCoordinate *> *coords = new QList<SWGSDRangel::SWGMapCoordinate *>();
+
+            for (const auto& position : positions)
+            {
+                SWGSDRangel::SWGMapCoordinate* c = new SWGSDRangel::SWGMapCoordinate();
+                c->setLatitude(position.m_latitude);
+                c->setLongitude(position.m_longitude);
+                c->setAltitude(position.m_altitude);
+                coords->append(c);
+            }
+
+            swgMapItem->setCoordinates(coords);
+            swgMapItem->setType(3);
+
+            MainCore::MsgMapItem *msg = MainCore::MsgMapItem::create(m_radiosonde, swgMapItem);
+            messageQueue->push(msg);
+
+            if (!m_predictions.contains(name)) {
+                m_predictions.append(name);
+            }
         }
     }
 }

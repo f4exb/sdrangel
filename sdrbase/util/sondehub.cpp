@@ -183,6 +183,17 @@ void SondeHub::updatePosition(
     m_networkManager->put(request, data);
 }
 
+void SondeHub::getPrediction(const QString& serial)
+{
+    QUrl url(QString("https://api.v2.sondehub.org/predictions?vehicles=%1").arg(serial));
+
+    QNetworkRequest request(url);
+    request.setHeader(QNetworkRequest::ContentTypeHeader, "application/json");
+    request.setHeader(QNetworkRequest::UserAgentHeader, "sdrangel");
+
+    m_networkManager->get(request);
+}
+
 void SondeHub::handleReply(QNetworkReply* reply)
 {
     if (reply)
@@ -221,7 +232,53 @@ void SondeHub::handleReply(QNetworkReply* reply)
                         }
                     }
                 }
-                //qDebug() << "SondeHub::handleReply: obj" << QJsonDocument(obj);
+                 //qDebug() << "SondeHub::handleReply: obj" << QJsonDocument(obj);
+            }
+            else if (document.isArray())
+            {
+                QJsonArray array = document.array();
+
+                for (auto arrayRef : array)
+                {
+                    if (arrayRef.isObject())
+                    {
+                        QJsonObject obj = arrayRef.toObject();
+
+                        if (obj.contains(QStringLiteral("vehicle")) && obj.contains(QStringLiteral("data")))
+                        {
+                            QJsonArray data;
+                            // Perhaps a bug that data is a string rather than an array?
+                            if (obj.value(QStringLiteral("data")).isString())
+                            {
+                                QJsonDocument dataDocument = QJsonDocument::fromJson(obj.value(QStringLiteral("data")).toString().toUtf8());
+                                data = dataDocument.array();
+                            }
+                            else
+                            {
+                                data = obj.value(QStringLiteral("data")).toArray();
+                            }
+
+                            QList<Position> positions;
+                            for (auto dataObjRef : data)
+                            {
+                                QJsonObject positionObj = dataObjRef.toObject();
+                                Position position;
+
+                                position.m_dateTime = QDateTime::fromSecsSinceEpoch(positionObj.value(QStringLiteral("time")).toInt());
+                                position.m_latitude = positionObj.value(QStringLiteral("lat")).toDouble();
+                                position.m_longitude = positionObj.value(QStringLiteral("lon")).toDouble();
+                                position.m_altitude = positionObj.value(QStringLiteral("alt")).toDouble();
+                                positions.append(position);
+                            }
+
+                            emit prediction(obj.value("vehicle").toString(), positions);
+                        }
+                    }
+                    else
+                    {
+                        qDebug() << "SondeHub::handleReply:" << bytes;
+                    }
+                }
             }
             else
             {
