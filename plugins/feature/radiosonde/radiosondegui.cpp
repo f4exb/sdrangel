@@ -965,7 +965,7 @@ QStringList RadiosondeGUI::getRadios()
 
     for (const auto& channel : channels)
     {
-        DeviceAPI *device = mainCore->getDevice(channel.m_index);
+        DeviceAPI *device = mainCore->getDevice(channel.m_superIndex);
         if (device)
         {
             QString name = device->getHardwareId();
