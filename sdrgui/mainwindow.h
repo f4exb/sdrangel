@@ -458,6 +458,8 @@ private slots:
     void featureMove(FeatureGUI *gui, int wsIndexDestnation);
     void deviceStateChanged(DeviceAPI *deviceAPI);
     void openFeaturePresetsDialog(QPoint p, Workspace *workspace);
+    void startAllAfterDelay();
+    void startAll();
     void startAllDevices(const Workspace *workspace) const;
     void stopAllDevices(const Workspace *workspace) const;
     void deviceMove(DeviceGUI *gui, int wsIndexDestnation);

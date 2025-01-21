@@ -47,6 +47,7 @@ private slots:
 class SDRBASE_API FeatureWebAPIUtils
 {
 public:
+    static bool run(int featureSetIndex, int featureIndex);
     static bool mapFind(const QString& target, int featureSetIndex=-1, int featureIndex=-1);
     static bool mapSetDateTime(const QDateTime& dateTime, int featureSetIndex=-1, int featureIndex=-1);
     static bool skyMapFind(const QString& target, int featureSetIndex=-1, int featureIndex=-1);
