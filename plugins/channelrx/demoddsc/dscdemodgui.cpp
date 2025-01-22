@@ -27,6 +27,7 @@
 #include <QDesktopServices>
 
 #include "dscdemodgui.h"
+#include "coaststations.h"
 
 #include "device/deviceuiset.h"
 #include "device/deviceset.h"
@@ -323,6 +324,13 @@ void DSCDemodGUI::messageReceived(const DSCMessage& message, int errors, float r
     ui->messages->resizeRowToContents(row);
     if (scrollToBottom) {
         ui->messages->scrollToBottom();
+    }
+
+    if (CoastStations.contains(message.m_address)) {
+        addressNameItem->setText(CoastStations.value(message.m_address));
+    }
+    if (CoastStations.contains(message.m_selfId)) {
+        selfIdNameItem->setText(CoastStations.value(message.m_selfId));
     }
 
     // Get latest APRS.fi data to calculate distance

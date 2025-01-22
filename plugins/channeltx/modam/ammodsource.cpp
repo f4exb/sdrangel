@@ -128,7 +128,7 @@ void AMModSource::pullOne(Sample& sample)
 
 void AMModSource::prefetch(unsigned int nbSamples)
 {
-    auto nbSamplesAudio = (nbSamples * (unsigned int) ((Real) m_audioSampleRate / (Real) m_channelSampleRate));
+    unsigned int nbSamplesAudio = (unsigned int) (nbSamples * ((Real) m_audioSampleRate / (Real) m_channelSampleRate));
     pullAudio(nbSamplesAudio);
 }
 

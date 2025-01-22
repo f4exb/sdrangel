@@ -190,6 +190,8 @@ RadiosondeGUI::RadiosondeGUI(PluginAPI* pluginAPI, FeatureUISet *featureUISet, F
 
      // Get updated when position changes
     connect(&MainCore::instance()->getSettings(), &MainSettings::preferenceChanged, this, &RadiosondeGUI::preferenceChanged);
+    connect(&m_positionUpdateTimer, &QTimer::timeout, this, &RadiosondeGUI::updatePosition);
+    m_positionUpdateTimer.setSingleShot(true);
 
     ui->radiosondes->setItemDelegateForColumn(RADIOSONDE_COL_LATITUDE, new DecimalDelegate(5, ui->radiosondes));
     ui->radiosondes->setItemDelegateForColumn(RADIOSONDE_COL_LONGITUDE, new DecimalDelegate(5, ui->radiosondes));
@@ -979,22 +981,41 @@ QStringList RadiosondeGUI::getRadios()
 
 void RadiosondeGUI::updatePosition()
 {
+    // Limit number of position updates sent to SondeHub
+    const int updateTime = m_settings.m_mobile ? m_minMobilePositionUpdateTime : m_minFixedPositionUpdateTime;
+
     if (m_sondeHub && m_settings.m_displayPosition)
     {
-        float stationLatitude = MainCore::instance()->getSettings().getLatitude();
-        float stationLongitude = MainCore::instance()->getSettings().getLongitude();
-        float stationAltitude = MainCore::instance()->getSettings().getAltitude();
+        if (!m_lastPositionUpdate.isValid() || (m_lastPositionUpdate.secsTo(QDateTime::currentDateTime()) >= updateTime))
+        {
+            float stationLatitude = MainCore::instance()->getSettings().getLatitude();
+            float stationLongitude = MainCore::instance()->getSettings().getLongitude();
+            float stationAltitude = MainCore::instance()->getSettings().getAltitude();
 
-        m_sondeHub->updatePosition(
-            m_settings.m_callsign,
-            stationLatitude,
-            stationLongitude,
-            stationAltitude,
-            getRadios().join(" "),
-            m_settings.m_antenna,
-            m_settings.m_email,
-            m_settings.m_mobile
-        );
+            m_sondeHub->updatePosition(
+                m_settings.m_callsign,
+                stationLatitude,
+                stationLongitude,
+                stationAltitude,
+                getRadios().join(" "),
+                m_settings.m_antenna,
+                m_settings.m_email,
+                m_settings.m_mobile
+            );
+
+            m_positionUpdateTimer.stop();
+            m_lastPositionUpdate = QDateTime::currentDateTime();
+        }
+        else
+        {
+            qint64 msecs = (updateTime * 1000) - m_lastPositionUpdate.msecsTo(QDateTime::currentDateTime());
+
+            if (msecs < 0) {
+                msecs = 0;
+            }
+            m_positionUpdateTimer.setInterval(msecs);
+            m_positionUpdateTimer.start();
+        }
     }
 }
 

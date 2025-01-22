@@ -61,3 +61,12 @@ RemoteTCPInputReport:
   properties:
     sampleRate:
       type: integer
+    latitude:
+      type: number
+      format: float
+    longitude:
+      type: number
+      format: float
+    altitude:
+      type: number
+      format: float

@@ -68,6 +68,7 @@ SSBMod::SSBMod(DeviceAPI *deviceAPI) :
     m_basebandSource->setSpectrumSink(&m_spectrumVis);
     m_basebandSource->setInputFileStream(&m_ifstream);
     m_basebandSource->setChannel(this);
+    m_basebandSource->setCWKeyer(&m_cwKeyer);
     m_basebandSource->moveToThread(m_thread);
 
     applySettings(m_settings, true);

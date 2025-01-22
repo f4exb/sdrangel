@@ -81,6 +81,17 @@ bool CRightClickEnabler::eventFilter(QObject *obj, QEvent *event)
             }
         }
     }
+    else if (event->type() == QEvent::KeyPress)
+    {
+        auto keyEvent = (QKeyEvent*) event;
+
+        if ((keyEvent->key() == Qt::Key_Menu && keyEvent->modifiers() == 0) || (keyEvent->modifiers() & Qt::ShiftModifier && keyEvent->key() == Qt::Key_F10))
+        {
+            emit rightClick(QCursor::pos());
+            keyEvent->setAccepted(true);
+            return true;
+        }
+    }
     else if (event->type() == QEvent::ContextMenu)
     {
         // Filter ContextMenu events, so we don't get popup menus as well
