@@ -55,6 +55,7 @@ jobs:
             let COUNT=$COUNT+1
           done
         shell: bash
+        continue-on-error: true
       - name: Get version
         id: get_version
         run: |
