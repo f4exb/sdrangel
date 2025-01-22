@@ -44,7 +44,17 @@ jobs:
       - name: Build SDRangel on Mac
         run: |
           cd build
-          make -j4 package
+          RETRIES=3
+          COUNT=1
+          while [ $COUNT -lt $RETRIES ]; do
+            make -j4 package
+            if [ $? -eq 0 ]; then
+              RETRIES=0
+              break
+            fi
+            let COUNT=$COUNT+1
+          done
+        shell: bash
       - name: Get version
         id: get_version
         run: |
