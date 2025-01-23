@@ -46,6 +46,7 @@ jobs:
           cd build
           RETRIES=3
           COUNT=1
+          set +e
           while [ $COUNT -lt $RETRIES ]; do
             make -j4 package
             if [ $? -eq 0 ]; then
