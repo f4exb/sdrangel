@@ -44,11 +44,15 @@ jobs:
       - name: Build SDRangel on Mac
         run: |
           cd build
-          RETRIES=3
+          make -j4
+      - name: Create dmg
+        run: |
+          cd build
+          RETRIES=5
           COUNT=1
           set +e
           while [ $COUNT -lt $RETRIES ]; do
-            make -j4 package
+            make package
             if [ $? -eq 0 ]; then
               RETRIES=0
               break
@@ -115,7 +119,23 @@ jobs:
       - name: Build SDRangel on Mac
         run: |
           cd build
-          make -j3 package
+          make -j3
+      - name: Create dmg
+        run: |
+          cd build
+          RETRIES=5
+          COUNT=1
+          set +e
+          while [ $COUNT -lt $RETRIES ]; do
+            make package
+            if [ $? -eq 0 ]; then
+              RETRIES=0
+              break
+            fi
+            let COUNT=$COUNT+1
+          done
+        shell: bash
+        continue-on-error: true
       - name: Get version
         id: get_version
         run: |
