@@ -108,6 +108,9 @@ private:
     static const int m_minMobilePositionUpdateTime = 30; // In seconds
     static const int m_minFixedPositionUpdateTime = 5 * 60;
 
+    QTimer m_predicitionTimer;
+    QStringList m_predictions;
+
     explicit RadiosondeGUI(PluginAPI* pluginAPI, FeatureUISet *featureUISet, Feature *feature, QWidget* parent = nullptr);
     virtual ~RadiosondeGUI();
 
@@ -130,6 +133,9 @@ private:
     float getData(RadiosondeSettings::ChartData dataType, RadiosondeData *radiosonde, RS41Frame *message);
     void updatePosition();
     QStringList getRadios();
+    void applyShowPredictedPaths();
+    void deletePredictedPaths();
+    void clearFromMapFeature(const QString& name, int type);
 
     enum RadiosondeCol {
         RADIOSONDE_COL_SERIAL,
@@ -168,6 +174,9 @@ private slots:
     void on_deleteAll_clicked();
     void on_feed_clicked(bool checked);
     void feedSelect(const QPoint& p);
+    void on_showPredictedPaths_clicked(bool checked);
+    void requestPredictions();
+    void handlePrediction(const QString& serial, const QList<SondeHub::Position>& positions);
     void preferenceChanged(int elementType);
 
 };

@@ -36,6 +36,13 @@ protected:
 
 public:
 
+    struct Position {
+        float m_latitude;
+        float m_longitude;
+        float m_altitude;
+        QDateTime m_dateTime;
+    };
+
     static SondeHub* create();
 
     ~SondeHub();
@@ -61,9 +68,13 @@ public:
         bool mobile
     );
 
+    void getPrediction(const QString& serial);
 
 private slots:
     void handleReply(QNetworkReply* reply);
+
+signals:
+    void prediction(const QString& serial, const QList<Position>& path);
 
 private:
 
