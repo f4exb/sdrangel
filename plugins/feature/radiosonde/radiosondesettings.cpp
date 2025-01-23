@@ -60,6 +60,7 @@ void RadiosondeSettings::resetToDefaults()
     m_displayPosition = false;
     m_mobile = false;
     m_email = "";
+    m_showPredictedPaths = false;
 
     for (int i = 0; i < RADIOSONDES_COLUMNS; i++)
     {
@@ -95,6 +96,7 @@ QByteArray RadiosondeSettings::serialize() const
     s.writeBool(17, m_displayPosition);
     s.writeBool(18, m_mobile);
     s.writeString(19, m_email);
+    s.writeBool(20, m_showPredictedPaths);
 
 
     for (int i = 0; i < RADIOSONDES_COLUMNS; i++) {
@@ -159,6 +161,7 @@ bool RadiosondeSettings::deserialize(const QByteArray& data)
         d.readBool(17, &m_displayPosition, false);
         d.readBool(18, &m_mobile, false);
         d.readString(19, &m_email, "");
+        d.readBool(20, &m_showPredictedPaths, false);
 
         for (int i = 0; i < RADIOSONDES_COLUMNS; i++) {
             d.readS32(300 + i, &m_radiosondesColumnIndexes[i], i);
@@ -223,6 +226,9 @@ void RadiosondeSettings::applySettings(const QStringList& settingsKeys, const Ra
     }
     if (settingsKeys.contains("email")) {
         m_email = settings.m_email;
+    }
+    if (settingsKeys.contains("showPredictedPaths")) {
+        m_showPredictedPaths = settings.m_showPredictedPaths;
     }
     if (settingsKeys.contains("workspaceIndex")) {
         m_workspaceIndex = settings.m_workspaceIndex;
@@ -291,6 +297,9 @@ QString RadiosondeSettings::getDebugString(const QStringList& settingsKeys, bool
     }
     if (settingsKeys.contains("email") || force) {
         ostr << " m_email: " << m_email.toStdString();
+    }
+    if (settingsKeys.contains("showPredictedPaths") || force) {
+        ostr << " m_showPredictedPaths: " << m_showPredictedPaths;
     }
     if (settingsKeys.contains("workspaceIndex") || force) {
         ostr << " m_workspaceIndex: " << m_workspaceIndex;

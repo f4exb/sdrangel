@@ -62,6 +62,7 @@ struct RadiosondeSettings
     bool m_displayPosition;
     bool m_mobile;
     QString m_email;
+    bool m_showPredictedPaths;
 
     int m_radiosondesColumnIndexes[RADIOSONDES_COLUMNS];
     int m_radiosondesColumnSizes[RADIOSONDES_COLUMNS];
