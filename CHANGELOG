@@ -1,3 +1,9 @@
+sdrangel (7.22.6-1) unstable; urgency=medium
+
+    * See Github release
+
+   -- Edouard Griffiths, F4EXB  <f4exb06@gmail.com>  Sun, 02 Feb 2025 18:08:11 +0100
+
 sdrangel (7.22.5-1) unstable; urgency=medium
 
     * Windows: upload signed releases rather than unsigned releases to Github releases page. PR #2347
