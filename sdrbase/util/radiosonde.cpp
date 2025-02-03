@@ -225,7 +225,7 @@ static float calcT(int f, int f1, int f2, float r1, float r2, const float *poly,
     return tCal;
 }
 
-static float calcU(int cInt, int cMin, int cMax, float c1, float c2, float T, float HT, float *capCal, float *matrixCal, float height, const float *vectorPCal, const float *matrixPCal)
+static float calcU(int cInt, int cMin, int cMax, float c1, float c2, float T, float HT, const float *capCal, const float *matrixCal, float height, const float *vectorPCal, const float *matrixPCal)
 {
     //qDebug() << "cInt " << cInt << " cMin " << cMin << " cMax " << cMax << " c1 " << c1 << " c2 " << c2 << " T " << T << " HT " << HT << " capCal[0] " << capCal[0] << " capCal[1] " << capCal[1] << "height" << height;
 
