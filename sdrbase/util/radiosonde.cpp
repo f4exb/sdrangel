@@ -76,6 +76,12 @@ QString RS41Frame::toHex()
     return m_bytes.toHex();
 }
 
+int16_t RS41Frame::getInt16(const QByteArray ba, int offset) const
+{
+    return (ba[offset] & 0xff)
+        | ((ba[offset+1] & 0xff) << 8);
+}
+
 uint16_t RS41Frame::getUInt16(const QByteArray ba, int offset) const
 {
     return (ba[offset] & 0xff)
@@ -130,7 +136,7 @@ void RS41Frame::decodeMeas(const QByteArray ba)
     m_pressureMain = getUInt24(ba, 0x1b);
     m_pressureRef1 = getUInt24(ba, 0x1e);
     m_pressureRef2 = getUInt24(ba, 0x21);
-    m_pressureTemp = getUInt16(ba, 0x26) / 100.0f;
+    m_pressureTemp = getInt16(ba, 0x26) / 100.0f;
 }
 
 void RS41Frame::decodeGPSInfo(const QByteArray ba)
@@ -187,7 +193,7 @@ static float waterVapourSaturationPressure(float tCelsius)
     return p / 100.0f;
 }
 
-static float calcT(int f, int f1, int f2, float r1, float r2, float *poly, float *cal)
+static float calcT(int f, int f1, int f2, float r1, float r2, const float *poly, const float *cal)
 {
     /*float g = (float)(f2-f1) / (r2-r1);       // gain
     float Rb = (f1*r2-f2*r1) / (float)(f2-f1); // offset
@@ -219,7 +225,7 @@ static float calcT(int f, int f1, int f2, float r1, float r2, float *poly, float
     return tCal;
 }
 
-static float calcU(int cInt, int cMin, int cMax, float c1, float c2, float T, float HT, float *capCal, float *matrixCal, float height, float *vectorPCal, float *matrixPCal)
+static float calcU(int cInt, int cMin, int cMax, float c1, float c2, float T, float HT, const float *capCal, const float *matrixCal, float height, const float *vectorPCal, const float *matrixPCal)
 {
     //qDebug() << "cInt " << cInt << " cMin " << cMin << " cMax " << cMax << " c1 " << c1 << " c2 " << c2 << " T " << T << " HT " << HT << " capCal[0] " << capCal[0] << " capCal[1] " << capCal[1] << "height" << height;
 
@@ -302,7 +308,7 @@ static float calcU(int cInt, int cMin, int cMax, float c1, float c2, float T, fl
     return uCal;
 }
 
-static float calcP(int f, int f1, int f2, float pressureTemp, float *cal)
+static float calcP(int f, int f1, int f2, float pressureTemp, const float *cal)
 {
     // Convert integer measurement to scale factor
     float s = (f-f1) / (float)(f2-f1);
