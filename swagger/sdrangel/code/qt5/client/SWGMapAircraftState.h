@@ -42,6 +42,9 @@ public:
     virtual void fromJsonObject(QJsonObject &json) override;
     virtual SWGMapAircraftState* fromJson(QString &jsonString) override;
 
+    QString* getCallsign();
+    void setCallsign(QString* callsign);
+
     QString* getAircraftType();
     void setAircraftType(QString* aircraft_type);
 
@@ -118,6 +121,9 @@ public:
     virtual bool isSet() override;
 
 private:
+    QString* callsign;
+    bool m_callsign_isSet;
+
     QString* aircraft_type;
     bool m_aircraft_type_isSet;
 

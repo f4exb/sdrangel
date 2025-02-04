@@ -28,6 +28,8 @@ SWGMapAircraftState::SWGMapAircraftState(QString* json) {
 }
 
 SWGMapAircraftState::SWGMapAircraftState() {
+    callsign = nullptr;
+    m_callsign_isSet = false;
     aircraft_type = nullptr;
     m_aircraft_type_isSet = false;
     on_surface = 0;
@@ -84,6 +86,8 @@ SWGMapAircraftState::~SWGMapAircraftState() {
 
 void
 SWGMapAircraftState::init() {
+    callsign = new QString("");
+    m_callsign_isSet = false;
     aircraft_type = new QString("");
     m_aircraft_type_isSet = false;
     on_surface = 0;
@@ -136,6 +140,9 @@ SWGMapAircraftState::init() {
 
 void
 SWGMapAircraftState::cleanup() {
+    if(callsign != nullptr) { 
+        delete callsign;
+    }
     if(aircraft_type != nullptr) { 
         delete aircraft_type;
     }
@@ -181,6 +188,8 @@ SWGMapAircraftState::fromJson(QString &json) {
 
 void
 SWGMapAircraftState::fromJsonObject(QJsonObject &pJson) {
+    ::SWGSDRangel::setValue(&callsign, pJson["callsign"], "QString", "QString");
+    
     ::SWGSDRangel::setValue(&aircraft_type, pJson["aircraftType"], "QString", "QString");
     
     ::SWGSDRangel::setValue(&on_surface, pJson["onSurface"], "qint32", "");
@@ -245,6 +254,9 @@ SWGMapAircraftState::asJson ()
 QJsonObject*
 SWGMapAircraftState::asJsonObject() {
     QJsonObject* obj = new QJsonObject();
+    if(callsign != nullptr && *callsign != QString("")){
+        toJsonValue(QString("callsign"), callsign, obj, QString("QString"));
+    }
     if(aircraft_type != nullptr && *aircraft_type != QString("")){
         toJsonValue(QString("aircraftType"), aircraft_type, obj, QString("QString"));
     }
@@ -319,6 +331,16 @@ SWGMapAircraftState::asJsonObject() {
     }
 
     return obj;
+}
+
+QString*
+SWGMapAircraftState::getCallsign() {
+    return callsign;
+}
+void
+SWGMapAircraftState::setCallsign(QString* callsign) {
+    this->callsign = callsign;
+    this->m_callsign_isSet = true;
 }
 
 QString*
@@ -566,6 +588,9 @@ bool
 SWGMapAircraftState::isSet(){
     bool isObjectUpdated = false;
     do{
+        if(callsign && *callsign != QString("")){
+            isObjectUpdated = true; break;
+        }
         if(aircraft_type && *aircraft_type != QString("")){
             isObjectUpdated = true; break;
         }

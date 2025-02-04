@@ -230,6 +230,8 @@ MapCoordinate:
 MapAircraftState:
   description: "Aircraft state for PFD/ND"
   properties:
+    callsign:
+      type: string
     aircraftType:
       type: string
     onSurface:
