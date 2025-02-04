@@ -19,7 +19,11 @@ if(WIN32)
 endif()
 
 if(NOT MSVC)
-  add_compile_options(-Wall -Wextra -Wvla -Woverloaded-virtual -Wno-inconsistent-missing-override -ffast-math -fno-finite-math-only -ftree-vectorize)
+  add_compile_options(-Wall -Wextra -Wvla -ffast-math -fno-finite-math-only -ftree-vectorize)
+  add_compile_options($<$<COMPILE_LANGUAGE:CXX>:-Woverloaded-virtual>)
+  if (CMAKE_CXX_COMPILER_ID STREQUAL "Clang")
+    add_compile_options(-Wno-inconsistent-missing-override)
+  endif()
 else()
   # Disable some warnings, so more useful warnings aren't hidden in the noise
   # 4996 'fopen': This function or variable may be unsafe. Consider using fopen_s instead.

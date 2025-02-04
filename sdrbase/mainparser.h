@@ -45,6 +45,7 @@ public:
     const QString& getRemoteTCPSinkHWType() const { return m_remoteTCPSinkHWType; }
     const QString& getRemoteTCPSinkSerial() const { return m_remoteTCPSinkSerial; }
     bool getListDevices() const { return m_listDevices; }
+    bool getStart() const { return m_start; }
 
 private:
     QString  m_serverAddress;
@@ -58,6 +59,7 @@ private:
     QString m_remoteTCPSinkHWType;
     QString m_remoteTCPSinkSerial;
     bool m_listDevices;
+    bool m_start;
 
     QCommandLineParser m_parser;
     QCommandLineOption m_serverAddressOption;
@@ -71,6 +73,7 @@ private:
     QCommandLineOption m_remoteTCPSinkHWTypeOption;
     QCommandLineOption m_remoteTCPSinkSerialOption;
     QCommandLineOption m_listDevicesOption;
+    QCommandLineOption m_startOption;
 };
 
 

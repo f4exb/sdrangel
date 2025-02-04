@@ -420,6 +420,7 @@ if (NOT FFMPEG_FOUND AND NOT USE_PRECOMPILED_LIBS)
     if (NOT X265_FOUND OR X265_EXTERNAL)
         ExternalProject_Add(x265
             GIT_REPOSITORY https://bitbucket.org/multicoreware/x265_git.git
+            GIT_TAG 4.1
             PREFIX "${EXTERNAL_BUILD_LIBRARIES}/x265"
             SOURCE_SUBDIR "source"
             CMAKE_ARGS ${COMMON_CMAKE_ARGS} -DCMAKE_INSTALL_PREFIX=<INSTALL_DIR>

@@ -7,7 +7,7 @@ based on data received via [Radiosonde Demodulators](../../channelrx/demodradios
 
 The chart can plot two data series vs time for the radiosonde selected in the table.
 
-The Radiosonde feature can draw balloons objects on the [Map](../../feature/map/readme.md) feature in 2D and 3D.
+The Radiosonde feature can draw balloons objects and predicted paths on the [Map](../../feature/map/readme.md) feature in 2D and 3D.
 
 Received data can be forwarded to [SondeHub](https://sondehub.org/). Your location can be displayed on the SondeHub map, as either a stationary receiver or chase car.
 
@@ -48,6 +48,7 @@ The Radiosonde feature can plot balloons (during ascent) and parachutes (during 
 To use, simply open a Map feature and the Radiosonde plugin will display objects based upon the data it receives from that point.
 Selecting a radiosonde item on the map will display a text bubble containing information from the above table.
 To centre the map on an item in the table, double click in the Lat or Lon columns.
+Predicted paths can be displayed by checking the Show Predicted Paths button. The path is predicted by SondeHub.
 
 ![Radiosonde on map](../../../doc/img/Radiosonde_plugin_map.png)
 
