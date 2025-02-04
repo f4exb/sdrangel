@@ -66,6 +66,8 @@ SWGMapItem_2::SWGMapItem_2() {
     m_label_isSet = false;
     label_altitude_offset = 0.0f;
     m_label_altitude_offset_isSet = false;
+    label_date_time = nullptr;
+    m_label_date_time_isSet = false;
     model_altitude_offset = 0.0f;
     m_model_altitude_offset_isSet = false;
     altitude_reference = 0;
@@ -144,6 +146,8 @@ SWGMapItem_2::init() {
     m_label_isSet = false;
     label_altitude_offset = 0.0f;
     m_label_altitude_offset_isSet = false;
+    label_date_time = new QString("");
+    m_label_date_time_isSet = false;
     model_altitude_offset = 0.0f;
     m_model_altitude_offset_isSet = false;
     altitude_reference = 0;
@@ -225,6 +229,9 @@ SWGMapItem_2::cleanup() {
         delete label;
     }
 
+    if(label_date_time != nullptr) { 
+        delete label_date_time;
+    }
 
 
     if(animations != nullptr) { 
@@ -309,6 +316,8 @@ SWGMapItem_2::fromJsonObject(QJsonObject &pJson) {
     ::SWGSDRangel::setValue(&label, pJson["label"], "QString", "QString");
     
     ::SWGSDRangel::setValue(&label_altitude_offset, pJson["labelAltitudeOffset"], "float", "");
+    
+    ::SWGSDRangel::setValue(&label_date_time, pJson["labelDateTime"], "QString", "QString");
     
     ::SWGSDRangel::setValue(&model_altitude_offset, pJson["modelAltitudeOffset"], "float", "");
     
@@ -414,6 +423,9 @@ SWGMapItem_2::asJsonObject() {
     }
     if(m_label_altitude_offset_isSet){
         obj->insert("labelAltitudeOffset", QJsonValue(label_altitude_offset));
+    }
+    if(label_date_time != nullptr && *label_date_time != QString("")){
+        toJsonValue(QString("labelDateTime"), label_date_time, obj, QString("QString"));
     }
     if(m_model_altitude_offset_isSet){
         obj->insert("modelAltitudeOffset", QJsonValue(model_altitude_offset));
@@ -657,6 +669,16 @@ SWGMapItem_2::setLabelAltitudeOffset(float label_altitude_offset) {
     this->m_label_altitude_offset_isSet = true;
 }
 
+QString*
+SWGMapItem_2::getLabelDateTime() {
+    return label_date_time;
+}
+void
+SWGMapItem_2::setLabelDateTime(QString* label_date_time) {
+    this->label_date_time = label_date_time;
+    this->m_label_date_time_isSet = true;
+}
+
 float
 SWGMapItem_2::getModelAltitudeOffset() {
     return model_altitude_offset;
@@ -877,6 +899,9 @@ SWGMapItem_2::isSet(){
             isObjectUpdated = true; break;
         }
         if(m_label_altitude_offset_isSet){
+            isObjectUpdated = true; break;
+        }
+        if(label_date_time && *label_date_time != QString("")){
             isObjectUpdated = true; break;
         }
         if(m_model_altitude_offset_isSet){

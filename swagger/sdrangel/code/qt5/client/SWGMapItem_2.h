@@ -103,6 +103,9 @@ public:
     float getLabelAltitudeOffset();
     void setLabelAltitudeOffset(float label_altitude_offset);
 
+    QString* getLabelDateTime();
+    void setLabelDateTime(QString* label_date_time);
+
     float getModelAltitudeOffset();
     void setModelAltitudeOffset(float model_altitude_offset);
 
@@ -211,6 +214,9 @@ private:
 
     float label_altitude_offset;
     bool m_label_altitude_offset_isSet;
+
+    QString* label_date_time;
+    bool m_label_date_time_isSet;
 
     float model_altitude_offset;
     bool m_model_altitude_offset_isSet;

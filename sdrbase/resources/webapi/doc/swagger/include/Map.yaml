@@ -116,6 +116,9 @@ MapItem:
       description: "Vertical offset to position label at"
       type: number
       format: float
+    labelDateTime:
+      description: "Date and time from when this label applies (ISO 8601 extended format). Leave empty if label should apply for all time."
+      type: string
     modelAltitudeOffset:
       description: "Vertical offset to adjust model by to prevent it from going underground when altitude is 0"
       type: number
