@@ -124,6 +124,7 @@ public:
     static int getFrameLength(int frameType);
 
 protected:
+    int16_t getInt16(const QByteArray ba, int offset) const;
     uint16_t getUInt16(const QByteArray ba, int offset) const;
     uint32_t getUInt24(const QByteArray ba, int offset) const;
     uint32_t getUInt32(const QByteArray ba, int offset) const;
