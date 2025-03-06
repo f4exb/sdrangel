@@ -42,7 +42,8 @@ MainParser::MainParser() :
     m_remoteTCPSinkPortOption("remote-tcp-port", "Remote TCP Sink port (Default 1234).", "port", "1234"),
     m_remoteTCPSinkHWTypeOption("remote-tcp-hwtype", "Remote TCP Sink device hardware type (Optional. E.g. RTLSDR/SDRplayV3/AirspyHF).", "hwtype"),
     m_remoteTCPSinkSerialOption("remote-tcp-serial", "Remote TCP Sink device serial (Optional).", "serial"),
-    m_listDevicesOption("list-devices", "List available physical devices.")
+    m_listDevicesOption("list-devices", "List available physical devices."),
+    m_startOption("start", "Start all devices and features")
 {
 
     m_serverAddress = "";   // Bind to any address
@@ -56,6 +57,7 @@ MainParser::MainParser() :
     m_remoteTCPSinkHWType = "";
     m_remoteTCPSinkSerial = "";
     m_listDevices = false;
+    m_start = false;
 
     m_parser.setApplicationDescription("Software Defined Radio application");
     m_parser.addHelpOption();
@@ -72,6 +74,7 @@ MainParser::MainParser() :
     m_parser.addOption(m_remoteTCPSinkHWTypeOption);
     m_parser.addOption(m_remoteTCPSinkSerialOption);
     m_parser.addOption(m_listDevicesOption);
+    m_parser.addOption(m_startOption);
 }
 
 MainParser::~MainParser()
@@ -154,4 +157,8 @@ void MainParser::parse(const QCoreApplication& app)
         qCritical() << "You must specify a device with either --remote-tcp-hwtype or --remote-tcp-serial";
         exit (EXIT_FAILURE);
     }
+
+    // Start devices and features
+    m_start = m_parser.isSet(m_startOption);
+
 }
