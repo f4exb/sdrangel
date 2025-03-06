@@ -444,6 +444,7 @@ EMNR::G::G(
     std::copy(Calculus::GG.begin(), Calculus::GG.end(), GG.begin());
     std::copy(Calculus::GGS.begin(), Calculus::GGS.end(), GGS.begin());
 
+    /* Removed as redundant and causes a stack overflow on Mac - see #2324
     // We keep this pretty useless part just in case...
     if ((fileb = fopen("calculus", "rb")))
     {
@@ -462,7 +463,7 @@ EMNR::G::G(
             std::copy(ggs.begin(), ggs.end(), GGS.begin());
         }
         fclose(fileb);
-    }
+    }*/
 }
 
 void EMNR::G::calc_gamma0()
