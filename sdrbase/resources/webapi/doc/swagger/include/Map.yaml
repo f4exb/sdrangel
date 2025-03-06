@@ -78,6 +78,9 @@ MapItem:
     positionDateTime:
       description: "Date and time at this position (ISO 8601 extended format)"
       type: string
+    altitudeDateTime:
+      description: "Date and time at this altitude, if different from positionDateTime (ISO 8601 extended format)"
+      type: string
     track:
       description: "Track/path the item has taken"
       type: array

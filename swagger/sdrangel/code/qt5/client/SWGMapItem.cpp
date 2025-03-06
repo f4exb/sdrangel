@@ -46,6 +46,8 @@ SWGMapItem::SWGMapItem() {
     m_fixed_position_isSet = false;
     position_date_time = nullptr;
     m_position_date_time_isSet = false;
+    altitude_date_time = nullptr;
+    m_altitude_date_time_isSet = false;
     track = nullptr;
     m_track_isSet = false;
     predicted_track = nullptr;
@@ -126,6 +128,8 @@ SWGMapItem::init() {
     m_fixed_position_isSet = false;
     position_date_time = new QString("");
     m_position_date_time_isSet = false;
+    altitude_date_time = new QString("");
+    m_altitude_date_time_isSet = false;
     track = new QList<SWGMapCoordinate*>();
     m_track_isSet = false;
     predicted_track = new QList<SWGMapCoordinate*>();
@@ -200,6 +204,9 @@ SWGMapItem::cleanup() {
 
     if(position_date_time != nullptr) { 
         delete position_date_time;
+    }
+    if(altitude_date_time != nullptr) { 
+        delete altitude_date_time;
     }
     if(track != nullptr) { 
         auto arr = track;
@@ -297,6 +304,8 @@ SWGMapItem::fromJsonObject(QJsonObject &pJson) {
     
     ::SWGSDRangel::setValue(&position_date_time, pJson["positionDateTime"], "QString", "QString");
     
+    ::SWGSDRangel::setValue(&altitude_date_time, pJson["altitudeDateTime"], "QString", "QString");
+    
     
     ::SWGSDRangel::setValue(&track, pJson["track"], "QList", "SWGMapCoordinate");
     
@@ -393,6 +402,9 @@ SWGMapItem::asJsonObject() {
     }
     if(position_date_time != nullptr && *position_date_time != QString("")){
         toJsonValue(QString("positionDateTime"), position_date_time, obj, QString("QString"));
+    }
+    if(altitude_date_time != nullptr && *altitude_date_time != QString("")){
+        toJsonValue(QString("altitudeDateTime"), altitude_date_time, obj, QString("QString"));
     }
     if(track && track->size() > 0){
         toJsonArray((QList<void*>*)track, obj, "track", "SWGMapCoordinate");
@@ -567,6 +579,16 @@ void
 SWGMapItem::setPositionDateTime(QString* position_date_time) {
     this->position_date_time = position_date_time;
     this->m_position_date_time_isSet = true;
+}
+
+QString*
+SWGMapItem::getAltitudeDateTime() {
+    return altitude_date_time;
+}
+void
+SWGMapItem::setAltitudeDateTime(QString* altitude_date_time) {
+    this->altitude_date_time = altitude_date_time;
+    this->m_altitude_date_time_isSet = true;
 }
 
 QList<SWGMapCoordinate*>*
@@ -869,6 +891,9 @@ SWGMapItem::isSet(){
             isObjectUpdated = true; break;
         }
         if(position_date_time && *position_date_time != QString("")){
+            isObjectUpdated = true; break;
+        }
+        if(altitude_date_time && *altitude_date_time != QString("")){
             isObjectUpdated = true; break;
         }
         if(track && (track->size() > 0)){

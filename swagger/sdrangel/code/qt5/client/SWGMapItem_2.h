@@ -73,6 +73,9 @@ public:
     QString* getPositionDateTime();
     void setPositionDateTime(QString* position_date_time);
 
+    QString* getAltitudeDateTime();
+    void setAltitudeDateTime(QString* altitude_date_time);
+
     QList<SWGMapCoordinate*>* getTrack();
     void setTrack(QList<SWGMapCoordinate*>* track);
 
@@ -184,6 +187,9 @@ private:
 
     QString* position_date_time;
     bool m_position_date_time_isSet;
+
+    QString* altitude_date_time;
+    bool m_altitude_date_time_isSet;
 
     QList<SWGMapCoordinate*>* track;
     bool m_track_isSet;
