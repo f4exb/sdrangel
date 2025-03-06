@@ -987,7 +987,12 @@ void LoadConfigurationFSM::loadDeviceSets()
     QState *sPrev = nullptr;
     QFinalState *sFinal = new QFinalState();
 
-    connect(m_addDevicesFSM, &QStateMachine::finished, this, [=](){emit m_mainWindow->allDeviceSetsAdded();});
+    connect(m_addDevicesFSM, &QStateMachine::finished, this, [=](){
+        // Wait slighter longer than the 100ms timer used in Device GUI sendSettings, so we know devices should be initialised
+        QTimer::singleShot(250, [this] {
+            emit m_mainWindow->allDeviceSetsAdded();
+        });
+    });
     connect(m_addDevicesFSM, &QStateMachine::finished, m_addDevicesFSM, &QStateMachine::deleteLater);
 
     for (const auto& deviceSetPreset : deviceSetPresets)
