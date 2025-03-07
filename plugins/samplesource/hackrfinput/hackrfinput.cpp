@@ -152,6 +152,10 @@ bool HackRFInput::start()
         return false;
     }
 
+    // applySettings needs to called before thread is started,
+    // otherwise HackRF will not start correctly
+    applySettings(m_settings, QList<QString>(), true);
+
     m_hackRFThread = new HackRFInputThread(m_dev, &m_sampleFifo);
 
 	m_hackRFThread->setSamplerate(m_settings.m_devSampleRate);
@@ -162,7 +166,6 @@ bool HackRFInput::start()
 	m_running = true;
 
 	mutexLocker.unlock();
-	applySettings(m_settings, QList<QString>(), true);
 
 	qDebug("HackRFInput::startInput: started");
 
@@ -267,7 +270,6 @@ bool HackRFInput::handleMessage(const Message& message)
 	if (MsgConfigureHackRF::match(message))
 	{
 		MsgConfigureHackRF& conf = (MsgConfigureHackRF&) message;
-		qDebug() << "HackRFInput::handleMessage: MsgConfigureHackRF";
 
 		bool success = applySettings(conf.getSettings(), conf.getSettingsKeys(), conf.getForce());
 
@@ -356,13 +358,8 @@ bool HackRFInput::applySettings(const HackRFInputSettings& settings, const QList
 	QMutexLocker mutexLocker(&m_mutex);
     qDebug() << "HackRFInput::applySettings: forcE: " << force << settings.getDebugString(settingsKeys, force);
 	bool forwardChange = false;
+    bool setFrequency = false;
 	hackrf_error rc;
-
-	if (settingsKeys.contains("dcBlock") ||
-	    settingsKeys.contains("iqCorrection") || force)
-	{
-		m_deviceAPI->configureCorrections(settings.m_dcBlock, settings.m_iqCorrection);
-	}
 
 	if (settingsKeys.contains("devSampleRate") || force)
 	{
@@ -419,23 +416,7 @@ bool HackRFInput::applySettings(const HackRFInputSettings& settings, const QList
         settingsKeys.contains("transverterDeltaFrequency") ||
         settingsKeys.contains("LOppmTenths") || force)
 	{
-        qint64 deviceCenterFrequency = DeviceSampleSource::calculateDeviceCenterFrequency(
-                settings.m_centerFrequency,
-                settings.m_transverterDeltaFrequency,
-                settings.m_log2Decim,
-                (DeviceSampleSource::fcPos_t) settings.m_fcPos,
-                settings.m_devSampleRate,
-                DeviceSampleSource::FrequencyShiftScheme::FSHIFT_TXSYNC,
-                settings.m_transverterMode);
-		setDeviceCenterFrequency(deviceCenterFrequency, settings.m_LOppmTenths);
-
-        if (m_deviceAPI->getSinkBuddies().size() > 0) // forward to buddy if necessary
-	    {
-	        DeviceAPI *buddy = m_deviceAPI->getSinkBuddies()[0];
-            DeviceHackRFShared::MsgSynchronizeFrequency *freqMsg = DeviceHackRFShared::MsgSynchronizeFrequency::create(deviceCenterFrequency);
-	        buddy->getSamplingDeviceInputMessageQueue()->push(freqMsg);
-	    }
-
+        setFrequency = true;
 		forwardChange = true;
 	}
 
@@ -519,12 +500,6 @@ bool HackRFInput::applySettings(const HackRFInputSettings& settings, const QList
 		}
 	}
 
-	if (forwardChange)
-	{
-		int sampleRate = settings.m_devSampleRate/(1<<settings.m_log2Decim);
-		DSPSignalNotification *notif = new DSPSignalNotification(sampleRate, settings.m_centerFrequency);
-        m_deviceAPI->getDeviceEngineInputMessageQueue()->push(notif);
-	}
 
     if (settings.m_useReverseAPI)
     {
@@ -539,6 +514,42 @@ bool HackRFInput::applySettings(const HackRFInputSettings& settings, const QList
         m_settings = settings;
     } else {
         m_settings.applySettings(settingsKeys, settings);
+    }
+
+    if (settingsKeys.contains("dcBlock") ||
+        settingsKeys.contains("iqCorrection") || force)
+    {
+        m_deviceAPI->configureCorrections(m_settings.m_dcBlock, m_settings.m_iqCorrection);
+    }
+
+    if (setFrequency)
+    {
+        qint64 deviceCenterFrequency = DeviceSampleSource::calculateDeviceCenterFrequency(
+            m_settings.m_centerFrequency,
+            m_settings.m_transverterDeltaFrequency,
+            m_settings.m_log2Decim,
+            (DeviceSampleSource::fcPos_t) m_settings.m_fcPos,
+            m_settings.m_devSampleRate,
+            DeviceSampleSource::FrequencyShiftScheme::FSHIFT_TXSYNC,
+            m_settings.m_transverterMode);
+        qDebug() << "HackRFInput::applySettings deviceCenterFrequency:" << deviceCenterFrequency;
+        setDeviceCenterFrequency(deviceCenterFrequency, m_settings.m_LOppmTenths);
+
+        if (m_deviceAPI->getSinkBuddies().size() > 0) // forward to buddy if necessary
+        {
+            DeviceAPI *buddy = m_deviceAPI->getSinkBuddies()[0];
+            DeviceHackRFShared::MsgSynchronizeFrequency *freqMsg = DeviceHackRFShared::MsgSynchronizeFrequency::create(deviceCenterFrequency);
+            buddy->getSamplingDeviceInputMessageQueue()->push(freqMsg);
+        }
+
+        forwardChange = true;
+    }
+
+    if (forwardChange)
+    {
+        int sampleRate = m_settings.m_devSampleRate/(1<<m_settings.m_log2Decim);
+        DSPSignalNotification *notif = new DSPSignalNotification(sampleRate, m_settings.m_centerFrequency);
+        m_deviceAPI->getDeviceEngineInputMessageQueue()->push(notif);
     }
 
 	return true;
