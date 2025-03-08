@@ -532,7 +532,7 @@ parts:
         plugin: cmake
         source: https://github.com/greatscottgadgets/hackrf.git
         source-type: git
-        source-tag: v2022.09.1
+        source-tag: v2024.02.1
         source-subdir: host/libhackrf
         build-packages:
             - libusb-1.0-0-dev
