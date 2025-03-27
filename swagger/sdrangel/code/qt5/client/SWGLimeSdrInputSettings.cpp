@@ -35,7 +35,9 @@ SWGLimeSdrInputSettings::SWGLimeSdrInputSettings() {
     log2_hard_decim = 0;
     m_log2_hard_decim_isSet = false;
     dc_block = 0;
+    splitFreq = 0;
     m_dc_block_isSet = false;
+    m_splitFreq_isSet = false;
     iq_correction = 0;
     m_iq_correction_isSet = false;
     log2_soft_decim = 0;
@@ -100,6 +102,8 @@ SWGLimeSdrInputSettings::init() {
     m_log2_hard_decim_isSet = false;
     dc_block = 0;
     m_dc_block_isSet = false;
+    splitFreq = 0;
+    m_splitFreq_isSet = false;
     iq_correction = 0;
     m_iq_correction_isSet = false;
     log2_soft_decim = 0;
@@ -202,6 +206,8 @@ SWGLimeSdrInputSettings::fromJsonObject(QJsonObject &pJson) {
     ::SWGSDRangel::setValue(&log2_hard_decim, pJson["log2HardDecim"], "qint32", "");
     
     ::SWGSDRangel::setValue(&dc_block, pJson["dcBlock"], "qint32", "");
+
+    ::SWGSDRangel::setValue(&splitFreq, pJson["splitFreq"], "qint32", "");
     
     ::SWGSDRangel::setValue(&iq_correction, pJson["iqCorrection"], "qint32", "");
     
@@ -278,6 +284,9 @@ SWGLimeSdrInputSettings::asJsonObject() {
     }
     if(m_dc_block_isSet){
         obj->insert("dcBlock", QJsonValue(dc_block));
+    }
+    if(m_splitFreq_isSet){
+        obj->insert("splitFreq", QJsonValue(splitFreq));
     }
     if(m_iq_correction_isSet){
         obj->insert("iqCorrection", QJsonValue(iq_correction));
@@ -393,6 +402,16 @@ void
 SWGLimeSdrInputSettings::setDcBlock(qint32 dc_block) {
     this->dc_block = dc_block;
     this->m_dc_block_isSet = true;
+}
+
+qint32
+SWGLimeSdrInputSettings::getSplitFreq() {
+    return splitFreq;
+}
+void
+SWGLimeSdrInputSettings::setSplitFreq(qint32 splitFreq) {
+    this->splitFreq = splitFreq;
+    this->m_splitFreq_isSet = true;
 }
 
 qint32
@@ -650,6 +669,9 @@ SWGLimeSdrInputSettings::isSet(){
             isObjectUpdated = true; break;
         }
         if(m_dc_block_isSet){
+            isObjectUpdated = true; break;
+        }
+        if(m_splitFreq_isSet){
             isObjectUpdated = true; break;
         }
         if(m_iq_correction_isSet){

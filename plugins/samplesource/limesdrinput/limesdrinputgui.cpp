@@ -428,6 +428,7 @@ void LimeSDRInputGUI::displaySettings()
     displaySampleRate();
 
     ui->dcOffset->setChecked(m_settings.m_dcBlock);
+    ui->splitFreq->setChecked(m_settings.m_splitFreq);
     ui->iqImbalance->setChecked(m_settings.m_iqCorrection);
 
     ui->hwDecim->setCurrentIndex(m_settings.m_log2HardDecim);
@@ -632,6 +633,13 @@ void LimeSDRInputGUI::on_dcOffset_toggled(bool checked)
 {
     m_settings.m_dcBlock = checked;
     m_settingsKeys.append("dcBlock");
+    sendSettings();
+}
+
+void LimeSDRInputGUI::on_splitFreq_toggled(bool checked)
+{
+    m_settings.m_splitFreq = checked;
+    m_settingsKeys.append("splitFreq");
     sendSettings();
 }
 
@@ -939,6 +947,7 @@ void LimeSDRInputGUI::makeUIConnections()
     QObject::connect(ui->ncoFrequency, &ValueDialZ::changed, this, &LimeSDRInputGUI::on_ncoFrequency_changed);
     QObject::connect(ui->ncoEnable, &ButtonSwitch::toggled, this, &LimeSDRInputGUI::on_ncoEnable_toggled);
     QObject::connect(ui->dcOffset, &ButtonSwitch::toggled, this, &LimeSDRInputGUI::on_dcOffset_toggled);
+    QObject::connect(ui->splitFreq, &ButtonSwitch::toggled, this, &LimeSDRInputGUI::on_splitFreq_toggled);
     QObject::connect(ui->iqImbalance, &ButtonSwitch::toggled, this, &LimeSDRInputGUI::on_iqImbalance_toggled);
     QObject::connect(ui->sampleRate, &ValueDial::changed, this, &LimeSDRInputGUI::on_sampleRate_changed);
     QObject::connect(ui->hwDecim, QOverload<int>::of(&QComboBox::currentIndexChanged), this, &LimeSDRInputGUI::on_hwDecim_currentIndexChanged);

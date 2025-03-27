@@ -52,7 +52,10 @@ public:
     void setLog2HardDecim(qint32 log2_hard_decim);
 
     qint32 getDcBlock();
-    void setDcBlock(qint32 dc_block);
+    void setDcBlock(qint32 splitFreq);
+
+    qint32 getSplitFreq();
+    void setSplitFreq(qint32 splitFreq);
 
     qint32 getIqCorrection();
     void setIqCorrection(qint32 iq_correction);
@@ -141,6 +144,9 @@ private:
 
     qint32 dc_block;
     bool m_dc_block_isSet;
+
+    qint32 splitFreq;
+    bool m_splitFreq_isSet;
 
     qint32 iq_correction;
     bool m_iq_correction_isSet;
