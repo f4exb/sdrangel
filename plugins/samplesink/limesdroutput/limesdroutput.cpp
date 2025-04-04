@@ -807,7 +807,9 @@ bool LimeSDROutput::applySettings(const LimeSDROutputSettings& settings, const Q
     if (settingsKeys.contains("devSampleRate")
        || settingsKeys.contains("log2HardInterp") || force)
     {
-        forwardChangeAllDSP = true; //m_settings.m_devSampleRate != settings.m_devSampleRate;
+        //forwardChangeAllDSP = true; //m_settings.m_devSampleRate != settings.m_devSampleRate;
+        forwardChangeTxDSP  = m_settings.m_log2HardInterp != settings.m_log2HardInterp;
+        forwardChangeAllDSP = m_settings.m_devSampleRate != settings.m_devSampleRate;
 
         if (m_deviceShared.m_deviceParams->getDevice())
         {
