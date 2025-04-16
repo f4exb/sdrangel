@@ -826,9 +826,7 @@ void SatelliteTrackerWorker::enableDoppler(SatWorkerState *satWorkerState)
             if (devSettings->m_doppler.size() > 0)
             {
                 requiresDoppler = true;
-                for (int j = 0; j < devSettings->m_doppler.size(); j++) {
-                    satWorkerState->m_doppler.append(0);
-                }
+                satWorkerState->m_doppler.append(0);
             }
         }
         if (requiresDoppler)
@@ -836,7 +834,8 @@ void SatelliteTrackerWorker::enableDoppler(SatWorkerState *satWorkerState)
             qDebug() << "SatelliteTrackerWorker::applyDeviceAOSSettings: Enabling doppler for " << satWorkerState->m_name;
             satWorkerState->m_dopplerTimer.setInterval(m_settings.m_dopplerPeriod * 1000);
             satWorkerState->m_dopplerTimer.start();
-            connect(&satWorkerState->m_dopplerTimer, &QTimer::timeout, [this, satWorkerState]() {
+            disconnect(satWorkerState->m_connection);
+            satWorkerState->m_connection = connect(&satWorkerState->m_dopplerTimer, &QTimer::timeout, [this, satWorkerState]() {
                 doppler(satWorkerState);
             });
         }
@@ -848,13 +847,16 @@ void SatelliteTrackerWorker::disableDoppler(SatWorkerState *satWorkerState)
     // Stop Doppler timer, and set interval to 0, so we don't restart it in start()
     satWorkerState->m_dopplerTimer.stop();
     satWorkerState->m_dopplerTimer.setInterval(0);
+    disconnect(satWorkerState->m_connection);
     // Remove doppler correction from any channel
-    QList<SatelliteTrackerSettings::SatelliteDeviceSettings *> *m_deviceSettingsList = m_settings.m_deviceSettings.value(satWorkerState->m_name);
-    if (m_deviceSettingsList)
+    if (satWorkerState->m_doppler.size() > 0)
     {
-        for (int i = 0; i < m_deviceSettingsList->size(); i++)
+        QList<SatelliteTrackerSettings::SatelliteDeviceSettings *> *m_deviceSettingsList = m_settings.m_deviceSettings.value(satWorkerState->m_name);
+        if (m_deviceSettingsList)
         {
-            if (i < satWorkerState->m_doppler.size())
+            int idx = 0;
+
+            for (int i = 0; i < m_deviceSettingsList->size(); i++)
             {
                 SatelliteTrackerSettings::SatelliteDeviceSettings *devSettings = m_deviceSettingsList->at(i);
                 if (devSettings->m_doppler.size() > 0)
@@ -865,14 +867,25 @@ void SatelliteTrackerWorker::disableDoppler(SatWorkerState *satWorkerState)
                         if (ChannelWebAPIUtils::getFrequencyOffset(devSettings->m_deviceSetIndex, devSettings->m_doppler[j], offset))
                         {
                             // Remove old doppler
-                           offset += satWorkerState->m_doppler[i];
-                           if (!ChannelWebAPIUtils::setFrequencyOffset(devSettings->m_deviceSetIndex, devSettings->m_doppler[j], offset))
+                            std::vector<DeviceSet*>& deviceSets = MainCore::instance()->getDeviceSets();
+                            ChannelAPI *channel = deviceSets[devSettings->m_deviceSetIndex]->getChannelAt(j);
+                            int tx = false;
+                            if (channel) {
+                                tx = channel->getStreamType() == ChannelAPI::StreamSingleSource; // What if MIMO?
+                            }
+                            if (tx) {
+                                offset -= satWorkerState->m_doppler[idx];
+                            } else {
+                                offset += satWorkerState->m_doppler[idx];
+                            }
+                            if (!ChannelWebAPIUtils::setFrequencyOffset(devSettings->m_deviceSetIndex, devSettings->m_doppler[j], offset))
                                 qDebug() << "SatelliteTrackerWorker::disableDoppler: Failed to set frequency offset";
                         }
                         else
                             qDebug() << "SatelliteTrackerWorker::disableDoppler: Failed to get frequency offset";
                     }
-                    satWorkerState->m_doppler[i] = 0;
+                    satWorkerState->m_doppler[idx] = 0;
+                    idx++;
                 }
             }
         }
@@ -886,6 +899,8 @@ void SatelliteTrackerWorker::doppler(SatWorkerState *satWorkerState)
     QList<SatelliteTrackerSettings::SatelliteDeviceSettings *> *m_deviceSettingsList = m_settings.m_deviceSettings.value(satWorkerState->m_name);
     if (m_deviceSettingsList)
     {
+        int idx = 0;
+
         for (int i = 0; i < m_deviceSettingsList->size(); i++)
         {
             SatelliteTrackerSettings::SatelliteDeviceSettings *devSettings = m_deviceSettingsList->at(i);
@@ -918,15 +933,14 @@ void SatelliteTrackerWorker::doppler(SatWorkerState *satWorkerState)
                             int initOffset;
                             if (tx)
                             {
-                                initOffset = offset - satWorkerState->m_doppler[i];
+                                initOffset = offset - satWorkerState->m_doppler[idx];
                                 offset = initOffset + doppler;
                             }
                             else
                             {
-                                initOffset = offset + satWorkerState->m_doppler[i];
+                                initOffset = offset + satWorkerState->m_doppler[idx];
                                 offset = initOffset - doppler;
                             }
-
                             if (!ChannelWebAPIUtils::setFrequencyOffset(devSettings->m_deviceSetIndex, devSettings->m_doppler[j], offset))
                                 qDebug() << "SatelliteTrackerWorker::doppler: Failed to set frequency offset";
                         }
@@ -934,10 +948,12 @@ void SatelliteTrackerWorker::doppler(SatWorkerState *satWorkerState)
                             qDebug() << "SatelliteTrackerWorker::doppler: Failed to get frequency offset";
                     }
 
-                    satWorkerState->m_doppler[i] = doppler;
+                    satWorkerState->m_doppler[idx] = doppler;
                 }
                 else
                     qDebug() << "SatelliteTrackerWorker::doppler: couldn't get centre frequency for device at " << devSettings->m_deviceSetIndex;
+
+                idx++;
             }
         }
     }
