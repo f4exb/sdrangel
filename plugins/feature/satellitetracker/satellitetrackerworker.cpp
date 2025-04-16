@@ -854,23 +854,26 @@ void SatelliteTrackerWorker::disableDoppler(SatWorkerState *satWorkerState)
     {
         for (int i = 0; i < m_deviceSettingsList->size(); i++)
         {
-            SatelliteTrackerSettings::SatelliteDeviceSettings *devSettings = m_deviceSettingsList->at(i);
-            if (devSettings->m_doppler.size() > 0)
+            if (i < satWorkerState->m_doppler.size())
             {
-                for (int j = 0; j < devSettings->m_doppler.size(); j++)
+                SatelliteTrackerSettings::SatelliteDeviceSettings *devSettings = m_deviceSettingsList->at(i);
+                if (devSettings->m_doppler.size() > 0)
                 {
-                    int offset;
-                    if (ChannelWebAPIUtils::getFrequencyOffset(devSettings->m_deviceSetIndex, devSettings->m_doppler[j], offset))
+                    for (int j = 0; j < devSettings->m_doppler.size(); j++)
                     {
-                        // Remove old doppler
-                       offset += satWorkerState->m_doppler[i];
-                       if (!ChannelWebAPIUtils::setFrequencyOffset(devSettings->m_deviceSetIndex, devSettings->m_doppler[j], offset))
-                            qDebug() << "SatelliteTrackerWorker::doppler: Failed to set frequency offset";
+                        int offset;
+                        if (ChannelWebAPIUtils::getFrequencyOffset(devSettings->m_deviceSetIndex, devSettings->m_doppler[j], offset))
+                        {
+                            // Remove old doppler
+                           offset += satWorkerState->m_doppler[i];
+                           if (!ChannelWebAPIUtils::setFrequencyOffset(devSettings->m_deviceSetIndex, devSettings->m_doppler[j], offset))
+                                qDebug() << "SatelliteTrackerWorker::disableDoppler: Failed to set frequency offset";
+                        }
+                        else
+                            qDebug() << "SatelliteTrackerWorker::disableDoppler: Failed to get frequency offset";
                     }
-                    else
-                        qDebug() << "SatelliteTrackerWorker::doppler: Failed to get frequency offset";
+                    satWorkerState->m_doppler[i] = 0;
                 }
-                satWorkerState->m_doppler[i] = 0;
             }
         }
     }
