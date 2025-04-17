@@ -65,6 +65,7 @@ protected:
     QList<int> m_doppler;       // How much doppler we've applied to a channel
     SatelliteState m_satState;
     bool m_hasSignalledAOS;    // For pass specified by m_aos and m_los
+    QMetaObject::Connection m_connection;
 
     friend SatelliteTrackerWorker;
 };
