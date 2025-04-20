@@ -54,15 +54,29 @@ void GS232Protocol::readData()
         if (len != -1)
         {
             QString response = QString::fromUtf8(buf, len);
-            // MD-02 can return AZ=-00 EL=-00 and other negative angles
-            QRegularExpression re("AZ=([-\\d]\\d\\d) *EL=([-\\d]\\d\\d)");
-            QRegularExpressionMatch match = re.match(response);
-            if (match.hasMatch())
+            // Handle both formats:
+            // 1. AZ=XXX EL=XXX (MD-02 can return negative angles like AZ=-00 EL=-00)
+            // 2. +XXXX+YYYY (direct angle format)
+            QRegularExpression reAzEl("AZ=([-\\d]\\d\\d) *EL=([-\\d]\\d\\d)");
+            QRegularExpression reAngles("([+-]\\d{4})([+-]\\d{4})");
+
+            QRegularExpressionMatch matchAzEl = reAzEl.match(response);
+            QRegularExpressionMatch matchAngles = reAngles.match(response);
+            if (matchAzEl.hasMatch())
             {
-                QString az = match.captured(1);
-                QString el = match.captured(2);
-                //qDebug() << "SPIDProtocol::readData read Az " << az << " El " << el;
+                QString az = matchAzEl.captured(1);
+                QString el = matchAzEl.captured(2);
+                qDebug() << "GS232Protocol::readData read Az " << az << " El " << el;
                 reportAzEl(az.toFloat(), el.toFloat());
+            }
+            else if (matchAngles.hasMatch())
+            {
+                // Convert from +XXXX format to float
+                QString az = matchAngles.captured(1);
+                QString el = matchAngles.captured(2);
+                qDebug() << "GS232Protocol::readData read direct angles Az " << az << " El " << el;
+                // The format gives angles in tenths of a degree, so divide by 10
+                reportAzEl(az.toFloat()/10.0f, el.toFloat()/10.0f);
             }
             else if (response == "\r\n")
             {
@@ -70,7 +84,7 @@ void GS232Protocol::readData()
             }
             else
             {
-                qWarning() << "SPIDProtocol::readData - unexpected GS-232 response \"" << response << "\"";
+                qWarning() << "GS232Protocol::readData - unexpected GS-232 response \"" << response << "\"";
                 reportError(QString("Unexpected GS-232 response: %1").arg(response));
             }
         }
