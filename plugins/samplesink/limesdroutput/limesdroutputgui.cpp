@@ -90,7 +90,7 @@ LimeSDROutputGUI::LimeSDROutputGUI(DeviceUISet *deviceUISet, QWidget* parent) :
     displaySettings();
 
     char recFileNameCStr[30];
-    sprintf(recFileNameCStr, "test_%d.sdriq", m_deviceUISet->m_deviceAPI->getDeviceUID());
+    snprintf(recFileNameCStr, sizeof(recFileNameCStr), "test_%d.sdriq", m_deviceUISet->m_deviceAPI->getDeviceUID());
 
     connect(&m_inputMessageQueue, SIGNAL(messageEnqueued()), this, SLOT(handleInputMessages()), Qt::QueuedConnection);
     connect(this, SIGNAL(customContextMenuRequested(const QPoint &)), this, SLOT(openDeviceSettingsDialog(const QPoint &)));

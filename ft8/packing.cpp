@@ -82,7 +82,7 @@ std::string Packing::unpackcall(int x)
 
     if (x <= 1002)
     {
-        sprintf(tmp, "CQ %d", x - 3);
+        snprintf(tmp, sizeof(tmp), "CQ %d", x - 3);
         return std::string(tmp);
     }
 
@@ -96,7 +96,7 @@ std::string Packing::unpackcall(int x)
         int ci3 = x / 27;
         x %= 27;
         int ci4 = x;
-        sprintf(tmp, "CQ %c%c%c%c", c4[ci1], c4[ci2], c4[ci3], c4[ci4]);
+        snprintf(tmp, sizeof(tmp), "CQ %c%c%c%c", c4[ci1], c4[ci2], c4[ci3], c4[ci4]);
         return std::string(tmp);
     }
 
@@ -193,9 +193,9 @@ std::string Packing::unpackgrid15(int ng, int ir)
     char tmp[16];
 
     if (db >= 0) {
-        sprintf(tmp, "%s+%02d", ir ? "R" : "", db);
+        snprintf(tmp, sizeof(tmp), "%s+%02d", ir ? "R" : "", db);
     } else {
-        sprintf(tmp, "%s-%02d", ir ? "R" : "", 0 - db);
+        snprintf(tmp, sizeof(tmp), "%s-%02d", ir ? "R" : "", 0 - db);
     }
 
     return std::string(tmp);
@@ -396,7 +396,7 @@ std::string Packing::unpack_5(int a77[], std::string& call1str, std::string& cal
     i += 3;
     int qsonb = un64(a77, i, 11);
     char report[16];
-    sprintf(report, "%d%04d", rst, qsonb);
+    snprintf(report, sizeof(report), "%d%04d", rst, qsonb);
     i += 11;
     // g25
     int ng = un64(a77, i, 25);
@@ -467,9 +467,9 @@ std::string Packing::unpack_0_1(int a77[], std::string& call1str, std::string& c
     char tmp[32];
 
     if (r >= 0) {
-        sprintf(tmp, "+%02d", r);
+        snprintf(tmp, sizeof(tmp), "+%02d", r);
     } else {
-        sprintf(tmp, "-%02d", -r);
+        snprintf(tmp, sizeof(tmp), "-%02d", -r);
     }
 
     locstr = std::string(tmp);
@@ -553,7 +553,7 @@ std::string Packing::unpack_3(int a77[], std::string& call1str, std::string& cal
     else
     {
         char tmp[32];
-        sprintf(tmp, "%04d", serial);
+        snprintf(tmp, sizeof(tmp), "%04d", serial);
         serialstr = std::string(tmp);
     }
 
@@ -571,7 +571,7 @@ std::string Packing::unpack_3(int a77[], std::string& call1str, std::string& cal
     }
     {
         char tmp[16];
-        sprintf(tmp, "%d ", rst);
+        snprintf(tmp, sizeof(tmp), "%d ", rst);
         msg += std::string(tmp);
     }
 
@@ -634,7 +634,7 @@ std::string Packing::unpack_0_3(int a77[], int n3, std::string& call1str, std::s
 
     {
         char tmp[16];
-        sprintf(tmp, "%d%c ", n_transmitters + 1, clss + 'A');
+        snprintf(tmp, sizeof(tmp), "%d%c ", n_transmitters + 1, clss + 'A');
         msg += std::string(tmp);
     }
 
@@ -658,9 +658,9 @@ std::string Packing::unpack(int a77[], std::string& call1, std::string& call2, s
     char tmp[64];
 
     if (i3 == 0) {
-        sprintf(tmp, "%d.%d", i3, n3);
+        snprintf(tmp, sizeof(tmp), "%d.%d", i3, n3);
     } else {
-        sprintf(tmp, "%d", i3);
+        snprintf(tmp, sizeof(tmp), "%d", i3);
     }
 
     type = std::string(tmp);
@@ -714,7 +714,7 @@ std::string Packing::unpack(int a77[], std::string& call1, std::string& call2, s
     }
 
     call1 = "UNK";
-    sprintf(tmp, "UNK i3=%d n3=%d", i3, n3);
+    snprintf(tmp, sizeof(tmp), "UNK i3=%d n3=%d", i3, n3);
     return std::string(tmp);
 }
 

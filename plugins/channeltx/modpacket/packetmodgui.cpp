@@ -258,8 +258,8 @@ void PacketModGUI::on_insertPosition_clicked()
     longFrac = round(longitude);
 
     // Insert position with house symbol (-) in to data field
-    sprintf(latBuf, "%02d%02d.%02d%c", latDeg, latMin, latFrac, latNorth ? 'N' : 'S');
-    sprintf(longBuf, "%03d%02d.%02d%c", longDeg, longMin, longFrac, longEast ? 'E' : 'W');
+    snprintf(latBuf, sizeof(latBuf), "%02d%02d.%02d%c", latDeg, latMin, latFrac, latNorth ? 'N' : 'S');
+    snprintf(longBuf, sizeof(longBuf), "%03d%02d.%02d%c", longDeg, longMin, longFrac, longEast ? 'E' : 'W');
     QString packet = QString("%1/%2-").arg(latBuf).arg(longBuf);
     ui->packet->insert(packet);
 }
