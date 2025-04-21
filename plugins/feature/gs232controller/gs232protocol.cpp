@@ -66,7 +66,7 @@ void GS232Protocol::readData()
             {
                 QString az = matchAzEl.captured(1);
                 QString el = matchAzEl.captured(2);
-                qDebug() << "GS232Protocol::readData read Az " << az << " El " << el;
+                //qDebug() << "GS232Protocol::readData read Az " << az << " El " << el;
                 reportAzEl(az.toFloat(), el.toFloat());
             }
             else if (matchAngles.hasMatch())
@@ -74,7 +74,7 @@ void GS232Protocol::readData()
                 // Convert from +XXXX format to float
                 QString az = matchAngles.captured(1);
                 QString el = matchAngles.captured(2);
-                qDebug() << "GS232Protocol::readData read direct angles Az " << az << " El " << el;
+                //qDebug() << "GS232Protocol::readData read direct angles Az " << az << " El " << el;
                 // The format gives angles in tenths of a degree, so divide by 10
                 reportAzEl(az.toFloat()/10.0f, el.toFloat()/10.0f);
             }
