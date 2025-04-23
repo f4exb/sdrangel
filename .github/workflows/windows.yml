@@ -37,6 +37,9 @@ jobs:
           echo github.event_name: ${{ github.event_name }}
           echo github.ref: ${{ github.ref }}
           echo github.workspace: ${{ github.workspace }}
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12' 
       - name: Install basic dependencies on Windows
         if: startsWith(matrix.config.os, 'windows')
         run: |
@@ -70,9 +73,7 @@ jobs:
           version: '6.7.3'
           dir: ${{matrix.config.QT_INST_DIR}}
           arch: ${{matrix.config.QT_ARCH}}
-          setup-python: true
-          aqtversion: '==3.1.*'
-          py7zrversion: '==0.20.*'
+          setup-python: 'false'
           modules: 'qtcharts qtscxml qt5compat qtlocation qtmultimedia qtpositioning qtserialport qtspeech qtwebsockets qtwebengine qtshadertools qtwebchannel'
       - name: build sdrangel on Windows
         if: startsWith(matrix.config.os, 'windows')
