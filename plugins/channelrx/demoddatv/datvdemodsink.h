@@ -36,7 +36,6 @@
 #include "datvvideoplayer.h"
 #include "datvideostream.h"
 #include "datvudpstream.h"
-#include "datvideorender.h"
 #include "datvdemodsettings.h"
 
 #include "dsp/channelsamplesink.h"
@@ -50,6 +49,7 @@
 
 class TVScreen;
 class DATVideoRender;
+class DATVideoRenderThread;
 class QLabel;
 
 class DATVDemodSink : public ChannelSampleSink {

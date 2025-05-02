@@ -17,6 +17,7 @@
 // along with this program. If not, see <http://www.gnu.org/licenses/>.          //
 ///////////////////////////////////////////////////////////////////////////////////
 
+#include "datvideorender.h"
 #include "datvdemodsink.h"
 
 #include "leansdr/dvbs2.h"

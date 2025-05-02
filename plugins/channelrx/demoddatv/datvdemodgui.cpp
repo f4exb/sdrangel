@@ -37,6 +37,7 @@
 #include "maincore.h"
 
 #include "ui_datvdemodgui.h"
+#include "datvideorender.h"
 #include "datvdemodreport.h"
 #include "datvdvbs2ldpcdialog.h"
 #include "datvdemodgui.h"
