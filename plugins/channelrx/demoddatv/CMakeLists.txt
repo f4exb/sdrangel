@@ -3,17 +3,14 @@ project(datv)
 
 set(datv_SOURCES
     datvdemod.cpp
-    datvdemodgui.cpp
     datvdemodplugin.cpp
     datvdemodsettings.cpp
     datvdemodwebapiadapter.cpp
     datvideostream.cpp
     datvudpstream.cpp
-    datvideorender.cpp
     datvdemodreport.cpp
     datvdemodsink.cpp
     datvdemodbaseband.cpp
-    datvdvbs2ldpcdialog.cpp
     leansdr/dvb.cpp
     leansdr/filtergen.cpp
     leansdr/framework.cpp
@@ -30,19 +27,14 @@ set(ldpc_SOURCES
 
 set(datv_HEADERS
     datvdemod.h
-    datvdemodgui.h
     datvdemodplugin.h
     datvdemodsettings.h
     datvdemodwebapiadapter.h
     datvideostream.h
     datvudpstream.h
-    datvideorender.h
-    datvconstellation.h
-    datvdvbs2constellation.h
     datvdemodreport.h
     datvdemodsink.h
     datvdemodbaseband.h
-    datvdvbs2ldpcdialog.h
     leansdr/dvb.h
     leansdr/dvbs2.h
     leansdr/filtergen.h
@@ -59,6 +51,31 @@ set(ldpc_HEADERS
     ldpctool/ldpcworker.h
 )
 
+if(NOT SERVER_MODE)
+    set(datv_SOURCES 
+        ${datv_SOURCES}
+        datvdemodgui.ui
+        datvdvbs2ldpcdialog.ui
+        datvideorender.cpp
+    )
+    set(datv_HEADERS ${datv_HEADERS} 
+        datvdemodgui.h
+        datvdvbs2ldpcdialog.h
+        datvideorender.h
+        datvconstellation.h
+        datvdvbs2constellation.h    
+    )
+    set(TARGET_NAME ${PLUGINS_PREFIX}demoddatv)
+    set(TARGET_LIB Qt::Widgets Qt::Multimedia Qt::MultimediaWidgets)
+    set(TARGET_LIB_GUI "sdrgui")
+    set(INSTALL_FOLDER ${INSTALL_PLUGINS_DIR})
+else()
+    set(TARGET_NAME ${PLUGINSSRV_PREFIX}demoddatvsrv)
+    set(TARGET_LIB "")
+    set(TARGET_LIB_GUI "")
+    set(INSTALL_FOLDER ${INSTALL_PLUGINSSRV_DIR})
+endif()
+
 include_directories(
     ${AVCODEC_INCLUDE_DIRS}
     ${AVFORMAT_INCLUDE_DIRS}
@@ -67,10 +84,6 @@ include_directories(
     ${SWRESAMPLE_INCLUDE_DIRS}
     ${CMAKE_SOURCE_DIR}/swagger/sdrangel/code/qt5/client
 )
-
-set(TARGET_NAME ${PLUGINS_PREFIX}demoddatv)
-set(INSTALL_FOLDER ${INSTALL_PLUGINS_DIR})
-
 
 if(NOT Qt6_FOUND)
     add_library(${TARGET_NAME} ${datv_SOURCES} ${ldpc_SOURCES})
@@ -84,11 +97,9 @@ endif()
 
 target_link_libraries(${TARGET_NAME} PRIVATE
     Qt::Core
-    Qt::Widgets
-    Qt::Multimedia
-    Qt::MultimediaWidgets
+    ${TARGET_LIB}    
     sdrbase
-    sdrgui
+    ${TARGET_LIB_GUI}
     ${AVCODEC_LIBRARIES}
     ${AVFORMAT_LIBRARIES}
     ${AVUTIL_LIBRARIES}

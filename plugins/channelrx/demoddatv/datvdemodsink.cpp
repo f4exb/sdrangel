@@ -342,10 +342,11 @@ void DATVDemodSink::CleanUpDATVFramework()
     }
 
     //CONSTELLATION
+#ifndef SERVER_MODE
     if (r_scope_symbols != nullptr) {
         delete r_scope_symbols;
     }
-
+#endif
     // INPUT
     if (p_rawiq != nullptr) {
         delete p_rawiq;
@@ -406,11 +407,11 @@ void DATVDemodSink::CleanUpDATVFramework()
     if (p_deframer != nullptr) {
         delete (leansdr::s2_deframer*) p_deframer;
     }
-
+#ifndef SERVER_MODE
     if (r_scope_symbols_dvbs2 != nullptr) {
         delete r_scope_symbols_dvbs2;
     }
-
+#endif
     ResetDATVFrameworkPointers();
 }
 
@@ -499,7 +500,9 @@ void DATVDemodSink::ResetDATVFrameworkPointers()
     r_videoplayer = nullptr;
 
     //CONSTELLATION
+#ifndef SERVER_MODE    
     r_scope_symbols = nullptr;
+#endif
 
     //DVB-S2
     p_slots_dvbs2 = nullptr;
@@ -514,7 +517,9 @@ void DATVDemodSink::ResetDATVFrameworkPointers()
     r_fecdecsoft = nullptr;
     r_fecdechelper = nullptr;
     p_deframer = nullptr;
+#ifndef SERVER_MODE    
     r_scope_symbols_dvbs2 = nullptr;
+#endif
 }
 
 void DATVDemodSink::InitDATVFramework()
@@ -762,7 +767,7 @@ void DATVDemodSink::InitDATVFramework()
     }
 
     //constellation
-
+#ifndef SERVER_MODE
     if (m_tvScreen)
     {
         qDebug("DATVDemodSink::InitDATVFramework: Register DVB constellation TV screen");
@@ -772,7 +777,7 @@ void DATVDemodSink::InitDATVFramework()
         r_scope_symbols->cstln = &m_objDemodulator->cstln;
         r_scope_symbols->calculate_cstln_points();
     }
-
+#endif
     r_merMeter = new leansdr::datvmeter(m_objScheduler, *p_mer);
     r_cnrMeter = new leansdr::datvmeter(m_objScheduler, *p_cnr);
 
@@ -1068,7 +1073,7 @@ void DATVDemodSink::InitDATVS2Framework()
     m_cstlnSetByModcod = false;
 
     //constellation
-
+#ifndef SERVER_MODE
     if (m_tvScreen)
     {
         qDebug("DATVDemodSink::InitDATVS2Framework: Register DVBS 2 TVSCREEN");
@@ -1077,7 +1082,7 @@ void DATVDemodSink::InitDATVS2Framework()
         r_scope_symbols_dvbs2->cstln = (leansdr::cstln_base**) &objDemodulatorDVBS2->cstln;
         r_scope_symbols_dvbs2->calculate_cstln_points();
     }
-
+#endif
     r_merMeter = new leansdr::datvmeter(m_objScheduler, *p_mer);
     r_cnrMeter = new leansdr::datvmeter(m_objScheduler, *p_cnr);
 
@@ -1206,10 +1211,12 @@ void DATVDemodSink::feed(const SampleVector::const_iterator& begin, const Sample
         {
             qDebug("DATVDemodSink::feed: change by MODCOD detected");
 
+            // Update constellation
+#ifndef SERVER_MODE                        
             if (r_scope_symbols_dvbs2) {
                 r_scope_symbols_dvbs2->calculate_cstln_points();
             }
-
+#endif
             if (getMessageQueueToGUI())
             {
                 DATVDemodReport::MsgReportModcodCstlnChange *msg = DATVDemodReport::MsgReportModcodCstlnChange::create(
