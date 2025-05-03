@@ -56,15 +56,17 @@ if(NOT SERVER_MODE)
         ${datv_SOURCES}
         datvdemodgui.ui
         datvdvbs2ldpcdialog.ui
+        datvdemodgui.cpp
+        datvdvbs2ldpcdialog.cpp
         datvideorender.cpp
     )
     set(datv_HEADERS ${datv_HEADERS} 
         datvdemodgui.h
         datvdvbs2ldpcdialog.h
-        datvideorender.h
         datvconstellation.h
         datvdvbs2constellation.h    
-    )
+        datvideorender.h
+        )
     set(TARGET_NAME ${PLUGINS_PREFIX}demoddatv)
     set(TARGET_LIB Qt::Widgets Qt::Multimedia Qt::MultimediaWidgets)
     set(TARGET_LIB_GUI "sdrgui")
@@ -106,12 +108,6 @@ target_link_libraries(${TARGET_NAME} PRIVATE
     ${SWSCALE_LIBRARIES}
     ${SWRESAMPLE_LIBRARIES}
 )
-
-add_executable(ldpctool
-    ldpctool/ldpc_tool.cpp
-    ldpctool/tables_handler.cpp
-)
-install(TARGETS ldpctool DESTINATION ${INSTALL_BIN_DIR})
 
 if(DEFINED FFMPEG_DEPENDS)
     add_dependencies(${TARGET_NAME} ${FFMPEG_DEPENDS})

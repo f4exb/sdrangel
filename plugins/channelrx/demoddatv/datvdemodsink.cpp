@@ -879,8 +879,7 @@ void DATVDemodSink::InitDATVS2Framework()
         <<  " Excursion: " << m_settings.m_excursion
         <<  " Channel sample rate: " << m_channelSampleRate
         <<  " Input sample rate: " << 2 * m_settings.m_symbolRate
-        <<  " m_softLDPCMaxTrials: " << m_settings.m_softLDPCMaxTrials
-        <<  " m_softLDPCToolPath: " << m_settings.m_softLDPCToolPath;
+        <<  " m_softLDPCMaxTrials: " << m_settings.m_softLDPCMaxTrials;
 
     m_objCfg.standard = m_settings.m_standard;
 
@@ -1104,12 +1103,6 @@ void DATVDemodSink::InitDATVS2Framework()
 
     // bool commandFileValid = false;
 
-    if (QFileInfo::exists(m_settings.m_softLDPCToolPath))
-    {
-        QFileInfo fileInfo = QFileInfo(m_settings.m_softLDPCToolPath);
-        // commandFileValid = fileInfo.isExecutable();
-    }
-
     if (m_settings.m_softLDPC /*&& commandFileValid*/)
     {
 #if 0
@@ -1134,8 +1127,6 @@ void DATVDemodSink::InitDATVS2Framework()
         // External LDPC decoder mode.
         // Deinterleave into soft bits.
         // TBD Latency
-        QByteArray ba = m_settings.m_softLDPCToolPath.toLocal8Bit();
-        const char *c_str2 = ba.data();
         p_fecframes = new leansdr::pipebuf<leansdr::fecframe<leansdr::llr_sb> >(m_objScheduler, "FEC frames", BUF_FRAMES);
         p_s2_deinterleaver = new leansdr::s2_deinterleaver<leansdr::llr_ss, leansdr::llr_sb>(
             m_objScheduler,
@@ -1147,7 +1138,6 @@ void DATVDemodSink::InitDATVS2Framework()
             m_objScheduler,
             *(leansdr::pipebuf< leansdr::fecframe<leansdr::llr_sb> > *) p_fecframes,
             *(leansdr::pipebuf<leansdr::bbframe> *) p_bbframes,
-            c_str2,
             p_vbitcount,
             p_verrcount)
         ;

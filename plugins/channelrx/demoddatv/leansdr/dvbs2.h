@@ -3644,7 +3644,6 @@ struct s2_fecdec_helper : runnable
         scheduler *sch,
         pipebuf<fecframe<SOFTBYTE>> &_in,
         pipebuf<bbframe> &_out,
-        const char *_command,
         pipebuf<int> *_bitcount = nullptr,
         pipebuf<int> *_errcount = nullptr
     ) :
@@ -3658,7 +3657,6 @@ struct s2_fecdec_helper : runnable
         bitcount(opt_writer(_bitcount, 1)),
         errcount(opt_writer(_errcount, 1))
     {
-        command = strdup(_command);
 
         for (int mc = 0; mc < 32; ++mc) {
             for (int sf = 0; sf < 2; ++sf) {
@@ -3669,7 +3667,6 @@ struct s2_fecdec_helper : runnable
 
     ~s2_fecdec_helper()
     {
-        free(command);
         killall(); // also deletes pools[mc][sf].procs if necessary
     }
 

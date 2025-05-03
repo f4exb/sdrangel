@@ -532,14 +532,12 @@ void DATVDemodGUI::ldpcToolSelect(const QPoint& p)
 {
     qDebug("DATVDemodGUI::ldpcToolSelect");
     DatvDvbS2LdpcDialog ldpcDialog;
-    ldpcDialog.setFileName(m_settings.m_softLDPCToolPath);
     ldpcDialog.setMaxTrials(m_settings.m_softLDPCMaxTrials);
     ldpcDialog.move(p);
 
     if (ldpcDialog.exec() == QDialog::Accepted)
     {
         m_settings.m_softLDPCMaxTrials = ldpcDialog.getMaxTrials();
-        m_settings.m_softLDPCToolPath = ldpcDialog.getFileName();
         applySettings();
     }
 }
