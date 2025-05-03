@@ -576,6 +576,7 @@ void DATVDemod::webapiFormatChannelReport(SWGSDRangel::SWGChannelReport& respons
     response.getDatvDemodReport()->setChannelPowerDb(CalcDb::dbPower(magsq));
     response.getDatvDemodReport()->setAudioActive(audioActive() ? 1 : 0);
     response.getDatvDemodReport()->setAudioDecodeOk(audioDecodeOK() ? 1 : 0);
+    response.getDatvDemodReport()->setSymbolRate(m_settings.m_symbolRate); // This is repeated from settings for convenience
     response.getDatvDemodReport()->setModcodCodeRate(getModcodCodeRate());
     response.getDatvDemodReport()->setModcodModulation(getModcodModulation());
     response.getDatvDemodReport()->setSetByModcod(isCstlnSetByModcod() ? 1 : 0);

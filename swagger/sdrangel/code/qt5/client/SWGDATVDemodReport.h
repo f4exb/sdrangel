@@ -59,6 +59,9 @@ public:
     qint32 getUdpRunning();
     void setUdpRunning(qint32 udp_running);
 
+    qint32 getSymbolRate();
+    void setSymbolRate(qint32 symbol_rate);
+
     qint32 getModcodModulation();
     void setModcodModulation(qint32 modcod_modulation);
 
@@ -95,6 +98,9 @@ private:
 
     qint32 udp_running;
     bool m_udp_running_isSet;
+
+    qint32 symbol_rate;
+    bool m_symbol_rate_isSet;
 
     qint32 modcod_modulation;
     bool m_modcod_modulation_isSet;

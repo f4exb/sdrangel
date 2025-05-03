@@ -145,6 +145,10 @@ DATVDemodReport:
     udpRunning:
       description: UDP thread (1 running, 0 idle)
       type: integer
+    symbolRate:
+      type: integer
+      description: >
+        Symbol rate in symbols per second - repeated from settings for convenience
     modcodModulation:
       type: integer
       description: >
