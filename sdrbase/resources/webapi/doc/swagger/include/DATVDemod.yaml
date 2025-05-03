@@ -48,9 +48,6 @@ DATVDemodSettings:
     softLDPC:
       description: (boolean) engage sodt LDPC with LDPC tool sub processes (Linux only)
       type: integer
-    softLDPCToolPath:
-      description: O/S path to the LDPC tool binary
-      type: string
     softLDPCMaxTrials:
       description: maximum number of trials in the soft LDPC algorithm (LDPC tool parameter)
       type: integer

@@ -35,9 +35,9 @@ SWGLimeSdrInputSettings::SWGLimeSdrInputSettings() {
     log2_hard_decim = 0;
     m_log2_hard_decim_isSet = false;
     dc_block = 0;
-    splitFreq = 0;
     m_dc_block_isSet = false;
-    m_splitFreq_isSet = false;
+    split_freq = 0;
+    m_split_freq_isSet = false;
     iq_correction = 0;
     m_iq_correction_isSet = false;
     log2_soft_decim = 0;
@@ -102,8 +102,8 @@ SWGLimeSdrInputSettings::init() {
     m_log2_hard_decim_isSet = false;
     dc_block = 0;
     m_dc_block_isSet = false;
-    splitFreq = 0;
-    m_splitFreq_isSet = false;
+    split_freq = 0;
+    m_split_freq_isSet = false;
     iq_correction = 0;
     m_iq_correction_isSet = false;
     log2_soft_decim = 0;
@@ -181,6 +181,7 @@ SWGLimeSdrInputSettings::cleanup() {
 
 
 
+
     if(reverse_api_address != nullptr) { 
         delete reverse_api_address;
     }
@@ -206,8 +207,8 @@ SWGLimeSdrInputSettings::fromJsonObject(QJsonObject &pJson) {
     ::SWGSDRangel::setValue(&log2_hard_decim, pJson["log2HardDecim"], "qint32", "");
     
     ::SWGSDRangel::setValue(&dc_block, pJson["dcBlock"], "qint32", "");
-
-    ::SWGSDRangel::setValue(&splitFreq, pJson["splitFreq"], "qint32", "");
+    
+    ::SWGSDRangel::setValue(&split_freq, pJson["splitFreq"], "qint32", "");
     
     ::SWGSDRangel::setValue(&iq_correction, pJson["iqCorrection"], "qint32", "");
     
@@ -285,8 +286,8 @@ SWGLimeSdrInputSettings::asJsonObject() {
     if(m_dc_block_isSet){
         obj->insert("dcBlock", QJsonValue(dc_block));
     }
-    if(m_splitFreq_isSet){
-        obj->insert("splitFreq", QJsonValue(splitFreq));
+    if(m_split_freq_isSet){
+        obj->insert("splitFreq", QJsonValue(split_freq));
     }
     if(m_iq_correction_isSet){
         obj->insert("iqCorrection", QJsonValue(iq_correction));
@@ -406,12 +407,12 @@ SWGLimeSdrInputSettings::setDcBlock(qint32 dc_block) {
 
 qint32
 SWGLimeSdrInputSettings::getSplitFreq() {
-    return splitFreq;
+    return split_freq;
 }
 void
-SWGLimeSdrInputSettings::setSplitFreq(qint32 splitFreq) {
-    this->splitFreq = splitFreq;
-    this->m_splitFreq_isSet = true;
+SWGLimeSdrInputSettings::setSplitFreq(qint32 split_freq) {
+    this->split_freq = split_freq;
+    this->m_split_freq_isSet = true;
 }
 
 qint32
@@ -671,7 +672,7 @@ SWGLimeSdrInputSettings::isSet(){
         if(m_dc_block_isSet){
             isObjectUpdated = true; break;
         }
-        if(m_splitFreq_isSet){
+        if(m_split_freq_isSet){
             isObjectUpdated = true; break;
         }
         if(m_iq_correction_isSet){

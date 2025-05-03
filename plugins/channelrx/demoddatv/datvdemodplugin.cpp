@@ -20,10 +20,12 @@
 
 
 #include <QtPlugin>
-#include <QAction>
 #include "plugin/pluginapi.h"
 
+#ifndef SERVER_MODE
 #include "datvdemodgui.h"
+#endif
+#include "datvdemod.h"
 #include "datvdemodplugin.h"
 #include "datvdemodwebapiadapter.h"
 
@@ -75,10 +77,21 @@ void DATVDemodPlugin::createRxChannel(DeviceAPI *deviceAPI, BasebandSampleSink *
 	}
 }
 
+#ifdef SERVER_MODE
+ChannelGUI* DATVDemodPlugin::createRxChannelGUI(
+	DeviceUISet *deviceUISet,
+	BasebandSampleSink *rxChannel) const
+{
+	(void) deviceUISet;
+	(void) rxChannel;
+	return 0;
+}
+#else
 ChannelGUI* DATVDemodPlugin::createRxChannelGUI(DeviceUISet *deviceUISet, BasebandSampleSink *rxChannel) const
 {
     return DATVDemodGUI::create(m_ptrPluginAPI, deviceUISet, rxChannel);
 }
+#endif
 
 ChannelWebAPIAdapter* DATVDemodPlugin::createChannelWebAPIAdapter() const
 {
