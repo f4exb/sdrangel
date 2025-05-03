@@ -42,7 +42,9 @@ template<typename T> struct datvvideoplayer: runnable
         in(_in),
         m_videoStream(videoStream),
         m_udpStream(udpStream),
-        m_atomicUDPRunning(0)
+        m_atomicUDPRunning(0),
+        m_count(0),
+        m_sr(1500000)
     {
     }
 
@@ -50,7 +52,18 @@ template<typename T> struct datvvideoplayer: runnable
     {
         int size = in.readable() * sizeof(T);
 
-        if (!size) {
+        if (!size)
+        {
+            if (m_count == 0)
+            {
+    #if QT_VERSION >= QT_VERSION_CHECK(5, 14, 0)
+                m_atomicUDPRunning.storeRelaxed(0);
+    #else
+                m_atomicUDPRunning.store(0);
+                #endif
+            } else {
+                m_count--;
+            }
             return;
         }
 
@@ -62,6 +75,8 @@ template<typename T> struct datvvideoplayer: runnable
 #else
         m_atomicUDPRunning.store(m_udpStream->isActive() && (size > 0) ? 1 : 0);
 #endif
+        m_count = m_sr / 10000;
+
         if (m_videoStream)
         {
             nw = m_videoStream->pushData((const char *) in.rd(), size);
@@ -114,11 +129,18 @@ template<typename T> struct datvvideoplayer: runnable
 #endif
     }
 
+    void setSymbolRate(unsigned int sr)
+    {
+        m_sr = sr;
+    }
+
 private:
     pipereader<T> in;
     DATVideostream *m_videoStream;
     DATVUDPStream *m_udpStream;
     QAtomicInt m_atomicUDPRunning;
+    unsigned int m_count;
+    unsigned int m_sr; // Symbol rate in S/s used for UDP running detection
 };
 
 }

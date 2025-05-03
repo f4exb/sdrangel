@@ -37,7 +37,7 @@ const unsigned int DATVDemodSink::m_rfFilterFftLength = 512;
 DATVDemodSink::DATVDemodSink() :
     m_blnNeedConfigUpdate(false),
     m_tvScreen(nullptr),
-#ifndef SERVER_MODE    
+#ifndef SERVER_MODE
     m_videoRender(nullptr),
 #endif
     m_videoStream(new DATVideostream()),
@@ -95,7 +95,7 @@ void DATVDemodSink::setTVScreen(TVScreen *tvScreen)
 
 void DATVDemodSink::SetVideoRender(DATVideoRender *screen)
 {
-#ifndef SERVER_MODE    
+#ifndef SERVER_MODE
     m_videoRender = screen;
     m_videoRender->setAudioFIFO(&m_audioFifo);
     m_videoThread = new DATVideoRenderThread(m_videoRender, m_videoStream);
@@ -162,7 +162,6 @@ bool DATVDemodSink::udpRunning()
     }
 
     bool udpRunning = r_videoplayer->isUDPRunning();
-    r_videoplayer->resetUDPRunning();
 
     return udpRunning;
 }
@@ -526,7 +525,7 @@ void DATVDemodSink::ResetDATVFrameworkPointers()
     r_videoplayer = nullptr;
 
     //CONSTELLATION
-#ifndef SERVER_MODE    
+#ifndef SERVER_MODE
     r_scope_symbols = nullptr;
 #endif
 
@@ -543,7 +542,7 @@ void DATVDemodSink::ResetDATVFrameworkPointers()
     r_fecdecsoft = nullptr;
     r_fecdechelper = nullptr;
     p_deframer = nullptr;
-#ifndef SERVER_MODE    
+#ifndef SERVER_MODE
     r_scope_symbols_dvbs2 = nullptr;
 #endif
 }
@@ -879,6 +878,7 @@ void DATVDemodSink::InitDATVFramework()
         r_videoplayer = new leansdr::datvvideoplayer<leansdr::tspacket>(m_objScheduler, *p_tspackets, nullptr, &m_udpStream);
     }
 
+    r_videoplayer->setSymbolRate(m_settings.m_symbolRate);
     m_blnDVBInitialized = true;
 }
 
@@ -1212,6 +1212,7 @@ void DATVDemodSink::InitDATVS2Framework()
         r_videoplayer = new leansdr::datvvideoplayer<leansdr::tspacket>(m_objScheduler, *p_tspackets, nullptr, &m_udpStream);
     }
 
+    r_videoplayer->setSymbolRate(m_settings.m_symbolRate);
     m_blnDVBInitialized = true;
 }
 
@@ -1228,7 +1229,7 @@ void DATVDemodSink::feed(const SampleVector::const_iterator& begin, const Sample
             qDebug("DATVDemodSink::feed: change by MODCOD detected");
 
             // Update constellation
-#ifndef SERVER_MODE                        
+#ifndef SERVER_MODE
             if (r_scope_symbols_dvbs2) {
                 r_scope_symbols_dvbs2->calculate_cstln_points();
             }
@@ -1419,8 +1420,19 @@ void DATVDemodSink::applySettings(const DATVDemodSettings& settings, bool force)
         m_nco.setFreq(-(float) settings.m_centerFrequency, (float) m_channelSampleRate);
     }
 
-    if ((m_settings.m_udpTS != settings.m_udpTS) || force) {
+    if ((m_settings.m_udpTS != settings.m_udpTS) || force)
+    {
         m_udpStream.setActive(settings.m_udpTS);
+
+        if (r_videoplayer && !settings.m_udpTS) {
+            r_videoplayer->resetUDPRunning();
+        }
+    }
+
+    if ((m_settings.m_symbolRate != settings.m_symbolRate) || force) {
+        if (r_videoplayer) {
+            r_videoplayer->setSymbolRate(settings.m_symbolRate);
+        }
     }
 
     if ((m_settings.m_udpTSAddress != settings.m_udpTSAddress) || force) {
