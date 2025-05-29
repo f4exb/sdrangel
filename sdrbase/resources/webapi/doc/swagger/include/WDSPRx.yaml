@@ -76,7 +76,7 @@ WDSPRxSettings:
     nbLeadTime:
       type: number
       format: float
-      descriuption: Advance time (s)
+      description: Advance time (s)
     nbLagTime:
       type: number
       format: float
