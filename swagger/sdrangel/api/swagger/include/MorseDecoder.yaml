@@ -59,12 +59,13 @@ MorseDecoderSettings:
 
 MorseDecoderActions:
   description: "Morse Decoder actions"
+  required:
+  - deviceId
+  - channelId
   properties:
     deviceId:
       type: integer
-      required: true
       description: "Device Id/Number that channel belongs to"
     channelId:
       type: integer
-      required: true
       description: "Channel Id/Number of the channel within the device"

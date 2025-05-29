@@ -19,10 +19,10 @@ RemoteOutputSettings:
     dataPort:
       type: integer
     deviceIndex:
-      device: remote SDRangel instance deviceset index
+      description: remote SDRangel instance deviceset index
       type: integer
     channelIndex:
-      device: remote SDRangel instance channel index
+      description: remote SDRangel instance channel index
       type: integer
     useReverseAPI:
       description: Synchronize with reverse API (1 for yes, 0 for no)

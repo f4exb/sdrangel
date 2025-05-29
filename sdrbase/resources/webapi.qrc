@@ -135,10 +135,12 @@
         <file>webapi/doc/swagger/include/VORLocalizer.yaml</file>
         <file>webapi/doc/swagger/include/WFMDemod.yaml</file>
         <file>webapi/doc/swagger/include/WFMMod.yaml</file>
+        <file>webapi/doc/swagger/include/WDSPRx.yaml</file>
         <file>webapi/doc/swagger/include/Xtrx.yaml</file>
         <file>webapi/doc/swagger-ui/favicon-16x16.png</file>
         <file>webapi/doc/swagger-ui/favicon-32x32.png</file>
         <file>webapi/doc/swagger-ui/index.html</file>
+        <file>webapi/doc/swagger-ui/index.css</file>
         <file>webapi/doc/swagger-ui/oauth2-redirect.html</file>
         <file>webapi/doc/swagger-ui/swagger-ui-bundle.js</file>
         <file>webapi/doc/swagger-ui/swagger-ui-bundle.js.map</file>
@@ -148,6 +150,7 @@
         <file>webapi/doc/swagger-ui/swagger-ui-es-bundle.js.map</file>
         <file>webapi/doc/swagger-ui/swagger-ui-standalone-preset.js.map</file>
         <file>webapi/doc/swagger-ui/swagger-ui-standalone-preset.js</file>
+        <file>webapi/doc/swagger-ui/swagger-initializer.js</file>
         <file>webapi/doc/swagger-ui/swagger-ui.css</file>
         <file>webapi/doc/swagger-ui/swagger-ui.css.map</file>
         <file>webapi/doc/swagger-ui/swagger-ui.js</file>

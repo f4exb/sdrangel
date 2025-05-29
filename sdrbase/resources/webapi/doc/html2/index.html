@@ -5530,6 +5530,7 @@ margin-bottom: 20px;
   "description" : "List of DV serial devices available in the system"
 };
             defs.DemodAnalyzerActions = {
+  "required" : [ "channelId", "deviceId" ],
   "properties" : {
     "deviceId" : {
       "type" : "integer",
@@ -10587,6 +10588,7 @@ margin-bottom: 20px;
   "description" : "MetisMISOSettings"
 };
             defs.MorseDecoderActions = {
+  "required" : [ "channelId", "deviceId" ],
   "properties" : {
     "deviceId" : {
       "type" : "integer",
@@ -13257,10 +13259,12 @@ margin-bottom: 20px;
       "type" : "integer"
     },
     "deviceIndex" : {
-      "type" : "integer"
+      "type" : "integer",
+      "description" : "remote SDRangel instance deviceset index"
     },
     "channelIndex" : {
-      "type" : "integer"
+      "type" : "integer",
+      "description" : "remote SDRangel instance channel index"
     },
     "useReverseAPI" : {
       "type" : "integer",
@@ -17230,7 +17234,8 @@ margin-bottom: 20px;
     },
     "nbLeadTime" : {
       "type" : "number",
-      "format" : "float"
+      "format" : "float",
+      "description" : "Advance time (s)"
     },
     "nbLagTime" : {
       "type" : "number",
@@ -59472,7 +59477,7 @@ except ApiException as e:
           </div>
           <div id="generator">
             <div class="content">
-              Generated 2025-05-03T17:59:40.379+02:00
+              Generated 2025-05-29T12:27:25.321+02:00
             </div>
           </div>
       </div>
