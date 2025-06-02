@@ -31,6 +31,7 @@ void LimeSDRInputSettings::resetToDefaults()
     m_devSampleRate = 5000000;
     m_log2HardDecim = 3;
     m_dcBlock = false;
+    m_splitFreq = false;
     m_iqCorrection = false;
     m_log2SoftDecim = 0;
     m_lpfBW = 4.5e6f;
@@ -96,6 +97,7 @@ QByteArray LimeSDRInputSettings::serialize() const
     s.writeFloat(30, m_replayLength);
     s.writeFloat(31, m_replayStep);
     s.writeBool(32, m_replayLoop);
+    s.writeBool(33, m_splitFreq);
 
     return s.final();
 }
@@ -158,6 +160,7 @@ bool LimeSDRInputSettings::deserialize(const QByteArray& data)
         d.readFloat(30, &m_replayLength, 20.0f);
         d.readFloat(31, &m_replayStep, 5.0f);
         d.readBool(32, &m_replayLoop, false);
+        d.readBool(33, &m_splitFreq, false);
 
         return true;
     }
@@ -182,6 +185,9 @@ void LimeSDRInputSettings::applySettings(const QStringList& settingsKeys, const 
     }
     if (settingsKeys.contains("dcBlock")) {
         m_dcBlock = settings.m_dcBlock;
+    }
+    if (settingsKeys.contains("splitFreq")) {
+        m_splitFreq = settings.m_splitFreq;
     }
     if (settingsKeys.contains("iqCorrection")) {
         m_iqCorrection = settings.m_iqCorrection;
@@ -284,6 +290,9 @@ QString LimeSDRInputSettings::getDebugString(const QStringList& settingsKeys, bo
     }
     if (settingsKeys.contains("dcBlock") || force) {
         ostr << " m_dcBlock: " << m_dcBlock;
+    }
+    if (settingsKeys.contains("splitFreq") || force) {
+        ostr << " m_splitFreq: " << m_splitFreq;
     }
     if (settingsKeys.contains("iqCorrection") || force) {
         ostr << " m_iqCorrection: " << m_iqCorrection;

@@ -203,7 +203,7 @@ void RigCtlServerWorker::getCommand()
             // Set frequency
             double targetFrequency = atof(cmd[0] == 'F' ? &cmd[2] : &cmd[9]);
             setFrequency(targetFrequency, rigCtlRC);
-            sprintf(response, "RPRT %d\n", rigCtlRC);
+            snprintf(response, sizeof(response), "RPRT %d\n", rigCtlRC);
         }
         else if (!strncmp(cmd, "f", 1) || !strncmp(cmd, "get_freq", 8))
         {
@@ -211,9 +211,9 @@ void RigCtlServerWorker::getCommand()
             double frequency;
 
             if (getFrequency(frequency, rigCtlRC)) {
-                sprintf(response, "%u\n", (unsigned int) frequency);
+                snprintf(response, sizeof(response), "%u\n", (unsigned int) frequency);
             } else {
-                sprintf(response, "RPRT %d\n", rigCtlRC);
+                snprintf(response, sizeof(response), "RPRT %d\n", rigCtlRC);
             }
         }
         else if (!strncmp(cmd, "M ?", 3) || !(strncmp(cmd, "set_mode ?", 10)))
@@ -263,11 +263,11 @@ void RigCtlServerWorker::getCommand()
             if (m_modeMap[i].modem != nullptr)
             {
                 changeModem(targetMode, targetModem, targetBW, rigCtlRC);
-                sprintf(response, "RPRT %d\n", rigCtlRC);
+                snprintf(response, sizeof(response), "RPRT %d\n", rigCtlRC);
             }
             else
             {
-                sprintf(response, "RPRT %d\n", RIG_EINVAL);
+                snprintf(response, sizeof(response), "RPRT %d\n", RIG_EINVAL);
                 m_clientConnection->write(response, strlen(response));
             }
         }
@@ -280,27 +280,27 @@ void RigCtlServerWorker::getCommand()
             if (getMode(&mode, passband, rigCtlRC))
             {
                 if (passband < 0) {
-                    sprintf(response, "%s\n", mode);
+                    snprintf(response, sizeof(response), "%s\n", mode);
                 } else {
-                    sprintf(response, "%s %u\n", mode, (unsigned int) passband);
+                    snprintf(response, sizeof(response), "%s %u\n", mode, (unsigned int) passband);
                 }
             }
             else
             {
-                sprintf(response, "RPRT %d\n", rigCtlRC);
+                snprintf(response, sizeof(response), "RPRT %d\n", rigCtlRC);
             }
         }
         else if (!strncmp(cmd, "set_powerstat 0", 15))
         {
             // Power off radio
             setPowerOff(rigCtlRC);
-            sprintf(response, "RPRT %d\n", rigCtlRC);
+            snprintf(response, sizeof(response), "RPRT %d\n", rigCtlRC);
         }
         else if (!strncmp(cmd, "set_powerstat 1", 15))
         {
             // Power on radio
             setPowerOn(rigCtlRC);
-            sprintf(response, "RPRT %d\n", rigCtlRC);
+            snprintf(response, sizeof(response), "RPRT %d\n", rigCtlRC);
         }
         else if (!strncmp(cmd, "get_powerstat", 13))
         {
@@ -309,20 +309,20 @@ void RigCtlServerWorker::getCommand()
             if (getPower(power, rigCtlRC))
             {
                 if (power) {
-                    sprintf(response, "1\n");
+                    snprintf(response, sizeof(response), "1\n");
                 } else {
-                    sprintf(response, "0\n");
+                    snprintf(response, sizeof(response), "0\n");
                 }
             }
             else
             {
-                sprintf(response, "RPRT %d\n", rigCtlRC);
+                snprintf(response, sizeof(response), "RPRT %d\n", rigCtlRC);
             }
         }
         else
         {
             // Unimplemented command
-            sprintf(response, "RPRT %d\n", RIG_ENIMPL);
+            snprintf(response, sizeof(response), "RPRT %d\n", RIG_ENIMPL);
             m_clientConnection->write(response, strlen(response));
         }
     }

@@ -44,7 +44,7 @@ void SerialUtil::getComPorts(std::vector<std::string>& comPorts, const std::stri
 
 	for (int i = 0; i<255; i++) // checking ports from COM0 to COM255
 	{
-		sprintf(portName, "COM%d", i);
+		snprintf(portName, sizeof(portName), "COM%d", i);
 
 		test = QueryDosDeviceA((LPCSTR)portName, (LPSTR)lpTargetPath, 5000);
 

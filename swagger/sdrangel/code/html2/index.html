@@ -4877,6 +4877,10 @@ margin-bottom: 20px;
       "type" : "integer",
       "description" : "UDP thread (1 running, 0 idle)"
     },
+    "symbolRate" : {
+      "type" : "integer",
+      "description" : "Symbol rate in symbols per second - repeated from settings for convenience\n"
+    },
     "modcodModulation" : {
       "type" : "integer",
       "description" : "Modulation set by DVB-S2 MODCOD\n  * -1: Unset\n  *  0: BPSK\n  *  1: QPSK\n  *  2: PSK8\n  *  3: APSK16\n  *  4: APSK32\n  *  5: APSK64E\n  *  6: QAM16\n  *  7: QAM64\n  *  8: QAM256\n"
@@ -4929,10 +4933,6 @@ margin-bottom: 20px;
     "softLDPC" : {
       "type" : "integer",
       "description" : "(boolean) engage sodt LDPC with LDPC tool sub processes (Linux only)"
-    },
-    "softLDPCToolPath" : {
-      "type" : "string",
-      "description" : "O/S path to the LDPC tool binary"
     },
     "softLDPCMaxTrials" : {
       "type" : "integer",
@@ -5530,6 +5530,7 @@ margin-bottom: 20px;
   "description" : "List of DV serial devices available in the system"
 };
             defs.DemodAnalyzerActions = {
+  "required" : [ "channelId", "deviceId" ],
   "properties" : {
     "deviceId" : {
       "type" : "integer",
@@ -8962,6 +8963,9 @@ margin-bottom: 20px;
     "dcBlock" : {
       "type" : "integer"
     },
+    "splitFreq" : {
+      "type" : "integer"
+    },
     "iqCorrection" : {
       "type" : "integer"
     },
@@ -10716,6 +10720,7 @@ margin-bottom: 20px;
   "description" : "MetisMISOSettings"
 };
             defs.MorseDecoderActions = {
+  "required" : [ "channelId", "deviceId" ],
   "properties" : {
     "deviceId" : {
       "type" : "integer",
@@ -13386,10 +13391,12 @@ margin-bottom: 20px;
       "type" : "integer"
     },
     "deviceIndex" : {
-      "type" : "integer"
+      "type" : "integer",
+      "description" : "remote SDRangel instance deviceset index"
     },
     "channelIndex" : {
-      "type" : "integer"
+      "type" : "integer",
+      "description" : "remote SDRangel instance channel index"
     },
     "useReverseAPI" : {
       "type" : "integer",
@@ -17359,7 +17366,8 @@ margin-bottom: 20px;
     },
     "nbLeadTime" : {
       "type" : "number",
-      "format" : "float"
+      "format" : "float",
+      "description" : "Advance time (s)"
     },
     "nbLagTime" : {
       "type" : "number",
@@ -59601,7 +59609,7 @@ except ApiException as e:
           </div>
           <div id="generator">
             <div class="content">
-              Generated 2025-03-06T14:54:56.926+01:00
+              Generated 2025-06-02T13:08:26.366+02:00
             </div>
           </div>
       </div>

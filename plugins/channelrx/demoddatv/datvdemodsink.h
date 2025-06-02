@@ -30,13 +30,14 @@
 #include "leansdr/hdlc.h"
 #include "leansdr/iess.h"
 
+#ifndef SERVER_MODE
 #include "datvconstellation.h"
-#include "datvmeter.h"
 #include "datvdvbs2constellation.h"
+#endif
+#include "datvmeter.h"
 #include "datvvideoplayer.h"
 #include "datvideostream.h"
 #include "datvudpstream.h"
-#include "datvideorender.h"
 #include "datvdemodsettings.h"
 
 #include "dsp/channelsamplesink.h"
@@ -50,6 +51,7 @@
 
 class TVScreen;
 class DATVideoRender;
+class DATVideoRenderThread;
 class QLabel;
 
 class DATVDemodSink : public ChannelSampleSink {
@@ -314,8 +316,10 @@ private:
     leansdr::datvvideoplayer<leansdr::tspacket> *r_videoplayer;
 
     //CONSTELLATION
+#ifndef SERVER_MODE    
     leansdr::datvconstellation<leansdr::f32> *r_scope_symbols;
     leansdr::datvdvbs2constellation<leansdr::f32> *r_scope_symbols_dvbs2;
+#endif
     leansdr::datvmeter *r_merMeter;
     leansdr::datvmeter *r_cnrMeter;
 

@@ -2973,7 +2973,6 @@ definitions:
   FeatureSet:
     description: "Grouping of features"
     required:
-      - index
       - featurecount
     properties:
       featurecount:
@@ -3018,7 +3017,6 @@ definitions:
     required:
       - index
       - hwType
-      - streamIndex
       - sequence
       - serial
       - centerFrequency
@@ -3422,7 +3420,6 @@ definitions:
     description: "Group of configuration"
     required:
       - groupName
-      - nbPresets
     properties:
       groupName:
         description: "Name of the configuration group"
@@ -3530,4 +3527,3 @@ responses:
     description: Function not implemented
     schema:
       $ref: "#/definitions/ErrorResponse"
-

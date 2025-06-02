@@ -627,7 +627,7 @@ void AudioCATSISO::listComPorts()
 {
     m_comPorts.clear();
     std::vector<std::string> comPorts;
-    SerialUtil::getComPorts(comPorts, "tty(USB|ACM)[0-9]+"); // regex is for Linux only
+    SerialUtil::getComPorts(comPorts, "tty(S|USB|ACM)[0-9]+"); // regex is for Linux only
 
     for (std::vector<std::string>::const_iterator it = comPorts.begin(); it != comPorts.end(); ++it) {
         m_comPorts.push_back(QString(it->c_str()));

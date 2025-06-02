@@ -68,9 +68,6 @@ public:
     qint32 getSoftLdpc();
     void setSoftLdpc(qint32 soft_ldpc);
 
-    QString* getSoftLdpcToolPath();
-    void setSoftLdpcToolPath(QString* soft_ldpc_tool_path);
-
     qint32 getSoftLdpcMaxTrials();
     void setSoftLdpcMaxTrials(qint32 soft_ldpc_max_trials);
 
@@ -179,9 +176,6 @@ private:
 
     qint32 soft_ldpc;
     bool m_soft_ldpc_isSet;
-
-    QString* soft_ldpc_tool_path;
-    bool m_soft_ldpc_tool_path_isSet;
 
     qint32 soft_ldpc_max_trials;
     bool m_soft_ldpc_max_trials_isSet;
