@@ -77,11 +77,29 @@ private:
     ADSBDemodSink *m_sink;
     ADSBDemodStats m_demodStats;
     Real m_correlationThresholdLinear;
-    Real m_correlationScale;
+    static const Real m_correlationScale;
     crcadsb m_crc;                      //!< Have as member to avoid recomputing LUT
-    QHash<int, bool> m_icaos;           //!< ICAO addresses that have been received
+    QHash<unsigned, qint64> m_icaos;         //!< ICAO addresses that have been received and msecsSinceEpoch last heard
+    QDateTime m_lastClear;
+
+    struct RXRecord {
+        QByteArray m_data;
+        int m_firstIndex;
+        unsigned short m_preamble;
+        Real m_preambleCorrelation;
+        Real m_correlationOnes;
+        QDateTime m_dateTime;
+        unsigned m_crc;
+    };
+
+    QHash<int, QList<RXRecord>> m_modeSOnlyIcaos;
 
     QDateTime rxDateTime(int firstIdx, int readBuffer) const;
+    void handleModeS(unsigned char *data, int bytes, unsigned icao, int df, int firstIndex, unsigned short preamble, Real preambleCorrelation, Real correlationOnes, const QDateTime& dateTime, unsigned crc);
+    void forwardFrame(const unsigned char *data, int size, float preambleCorrelation, float correlationOnes, const QDateTime& dateTime, unsigned crc);
+    bool icaoHeardRecently(unsigned icao, const QDateTime &dateTime);
+    static bool icaoValid(unsigned icao);
+    static bool modeSValid(unsigned char *data, unsigned df);
 
 };
 

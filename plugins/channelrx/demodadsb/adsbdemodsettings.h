@@ -29,63 +29,89 @@
 class Serializable;
 
 // Number of columns in the table
-#define ADSBDEMOD_COLUMNS           54
+#define ADSBDEMOD_COLUMNS           78
 
 // ADS-B table columns
 #define ADSB_COL_ICAO               0
 #define ADSB_COL_CALLSIGN           1
 #define ADSB_COL_ATC_CALLSIGN       2
 #define ADSB_COL_MODEL              3
-#define ADSB_COL_AIRLINE            4
-#define ADSB_COL_COUNTRY            5
-#define ADSB_COL_GROUND_SPEED       6
-#define ADSB_COL_TRUE_AIRSPEED      7
-#define ADSB_COL_INDICATED_AIRSPEED 8
-#define ADSB_COL_MACH               9
-#define ADSB_COL_SEL_ALTITUDE       10
-#define ADSB_COL_ALTITUDE           11
-#define ADSB_COL_VERTICALRATE       12
-#define ADSB_COL_SEL_HEADING        13
-#define ADSB_COL_HEADING            14
-#define ADSB_COL_TURNRATE           15
-#define ADSB_COL_ROLL               16
-#define ADSB_COL_RANGE              17
-#define ADSB_COL_AZEL               18
-#define ADSB_COL_CATEGORY           19
-#define ADSB_COL_STATUS             20
-#define ADSB_COL_SQUAWK             21
-#define ADSB_COL_REGISTRATION       22
-#define ADSB_COL_REGISTERED         23
-#define ADSB_COL_MANUFACTURER       24
-#define ADSB_COL_OWNER              25
-#define ADSB_COL_OPERATOR_ICAO      26
-#define ADSB_COL_AP                 27
-#define ADSB_COL_V_MODE             28
-#define ADSB_COL_L_MODE             29
-#define ADSB_COL_BARO               30
-#define ADSB_COL_HEADWIND           31
-#define ADSB_COL_EST_AIR_TEMP       32
-#define ADSB_COL_WIND_SPEED         33
-#define ADSB_COL_WIND_DIR           34
-#define ADSB_COL_STATIC_PRESSURE    35
-#define ADSB_COL_STATIC_AIR_TEMP    36
-#define ADSB_COL_HUMIDITY           37
-#define ADSB_COL_LATITUDE           38
-#define ADSB_COL_LONGITUDE          39
-#define ADSB_COL_TIME               40
-#define ADSB_COL_FRAMECOUNT         41
-#define ADSB_COL_TIS_B              42
-#define ADSB_COL_CORRELATION        43
-#define ADSB_COL_RSSI               44
-#define ADSB_COL_FLIGHT_STATUS      45
-#define ADSB_COL_DEP                46
-#define ADSB_COL_ARR                47
-#define ADSB_COL_STD                48
-#define ADSB_COL_ETD                49
-#define ADSB_COL_ATD                50
-#define ADSB_COL_STA                51
-#define ADSB_COL_ETA                52
-#define ADSB_COL_ATA                53
+#define ADSB_COL_TYPE               4
+#define ADSB_COL_SIDEVIEW           5
+#define ADSB_COL_AIRLINE            6
+#define ADSB_COL_COUNTRY            7
+#define ADSB_COL_GROUND_SPEED       8
+#define ADSB_COL_TRUE_AIRSPEED      9
+#define ADSB_COL_INDICATED_AIRSPEED 10
+#define ADSB_COL_MACH               11
+#define ADSB_COL_SEL_ALTITUDE       12
+#define ADSB_COL_ALTITUDE           13
+#define ADSB_COL_VERTICALRATE       14
+#define ADSB_COL_SEL_HEADING        15
+#define ADSB_COL_HEADING            16
+#define ADSB_COL_TRACK              17
+#define ADSB_COL_TURNRATE           18
+#define ADSB_COL_ROLL               19
+#define ADSB_COL_RANGE              20
+#define ADSB_COL_AZEL               21
+#define ADSB_COL_CATEGORY           22
+#define ADSB_COL_STATUS             23
+#define ADSB_COL_SQUAWK             24
+#define ADSB_COL_IDENT              25
+#define ADSB_COL_REGISTRATION       26
+#define ADSB_COL_REGISTERED         27
+#define ADSB_COL_MANUFACTURER       28
+#define ADSB_COL_OWNER              29
+#define ADSB_COL_OPERATOR_ICAO      30
+#define ADSB_COL_AP                 31
+#define ADSB_COL_V_MODE             32
+#define ADSB_COL_L_MODE             33
+#define ADSB_COL_TCAS               34
+#define ADSB_COL_ACAS               35
+#define ADSB_COL_RA                 36
+#define ADSB_COL_MAX_SPEED          37
+#define ADSB_COL_VERSION            38
+#define ADSB_COL_LENGTH             39
+#define ADSB_COL_WIDTH              40
+#define ADSB_COL_BARO               41
+#define ADSB_COL_HEADWIND           42
+#define ADSB_COL_EST_AIR_TEMP       43
+#define ADSB_COL_WIND_SPEED         44
+#define ADSB_COL_WIND_DIR           45
+#define ADSB_COL_STATIC_PRESSURE    46
+#define ADSB_COL_STATIC_AIR_TEMP    47
+#define ADSB_COL_HUMIDITY           48
+#define ADSB_COL_LATITUDE           49
+#define ADSB_COL_LONGITUDE          50
+#define ADSB_COL_IC                 51
+#define ADSB_COL_TIME               52
+#define ADSB_COL_FRAMECOUNT         53
+#define ADSB_COL_ADSB_FRAMECOUNT    54
+#define ADSB_COL_MODES_FRAMECOUNT   55
+#define ADSB_COL_NON_TRANSPONDER    56
+#define ADSB_COL_TIS_B_FRAMECOUNT   57
+#define ADSB_COL_ADSR_FRAMECOUNT    58
+#define ADSB_COL_RADIUS             59
+#define ADSB_COL_NACP               60
+#define ADSB_COL_NACV               61
+#define ADSB_COL_GVA                62
+#define ADSB_COL_NIC                63
+#define ADSB_COL_NIC_BARO           64
+#define ADSB_COL_SIL                65
+#define ADSB_COL_CORRELATION        66
+#define ADSB_COL_RSSI               67
+#define ADSB_COL_FLIGHT_STATUS      68
+#define ADSB_COL_DEP                69
+#define ADSB_COL_ARR                70
+#define ADSB_COL_STOPS              71
+#define ADSB_COL_STD                72
+#define ADSB_COL_ETD                73
+#define ADSB_COL_ATD                74
+#define ADSB_COL_STA                75
+#define ADSB_COL_ETA                76
+#define ADSB_COL_ATA                77
+
+#define ADSB_IC_MAX                 63
 
 struct ADSBDemodSettings
 {
@@ -104,6 +130,7 @@ struct ADSBDemodSettings
     int32_t m_inputFrequencyOffset;
     Real m_rfBandwidth;
     Real m_correlationThreshold; //!< Correlation power threshold in dB
+    int m_chipsThreshold; //!< How many chips in preamble can be incorrect for Mode S
     int m_samplesPerBit;
     int m_removeTimeout;                //!< Time in seconds before removing an aircraft, unless a new frame is received
 
@@ -159,7 +186,6 @@ struct ADSBDemodSettings
     QString m_tableFontName;            //!< Font to use for table
     int m_tableFontSize;
     bool m_displayDemodStats;
-    bool m_correlateFullPreamble;
     bool m_demodModeS;                  //!< Demodulate all Mode-S frames, not just ADS-B
     QString m_amDemod;                  //!< AM Demod to tune to selected ATC frequency
     bool m_autoResizeTableColumns;
@@ -186,12 +212,23 @@ struct ADSBDemodSettings
     bool m_displayPhotos;
     Serializable *m_rollupState;
     bool m_verboseModelMatching;
-    int m_airfieldElevation;            //!< QFE in ft so aircraft takeoff/land from correct position
     int m_aircraftMinZoom;
 
     bool m_atcLabels;
     bool m_atcCallsigns;
     int m_transitionAlt;
+
+    float m_qnh;
+    bool m_manualQNH;
+    bool m_displayCoverage;
+    bool m_displayChart;
+    bool m_displayOrientation;
+    bool m_displayRadius;
+    bool m_displayIC[ADSB_IC_MAX];
+    QString m_flightPathPaletteName;
+    bool m_favourLivery;            //!< Favour airline livery over aircraft type when exact 3D model isn't available
+
+    const QVariant *m_flightPathPalette;
 
     ADSBDemodSettings();
     void resetToDefaults();
@@ -203,6 +240,16 @@ struct ADSBDemodSettings
     void deserializeNotificationSettings(const QByteArray& data, QList<NotificationSettings *>& notificationSettings);
     void applySettings(const QStringList& settingsKeys, const ADSBDemodSettings& settings);
     QString getDebugString(const QStringList& settingsKeys, bool force = false) const;
+    void applyPalette();
+
+    static const QVariant m_rainbowPalette[8];
+    static const QVariant m_pastelPalette[8];
+    static const QVariant m_spectralPalette[8];
+    static const QVariant m_bluePalette[8];
+    static const QVariant m_purplePalette[8];
+    static const QVariant m_greyPalette[8];
+
+    static const QHash<QString, const QVariant *> m_palettes;
 };
 
 #endif /* PLUGINS_CHANNELRX_DEMODADSB_ADSBDEMODSETTINGS_H_ */

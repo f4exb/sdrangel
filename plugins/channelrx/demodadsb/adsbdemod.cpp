@@ -17,10 +17,6 @@
 // along with this program. If not, see <http://www.gnu.org/licenses/>.          //
 ///////////////////////////////////////////////////////////////////////////////////
 
-#define BOOST_CHRONO_HEADER_ONLY
-#include <boost/chrono/chrono.hpp>
-
-#include <stdio.h>
 #include <complex.h>
 
 #include <QTime>
@@ -49,6 +45,7 @@
 
 MESSAGE_CLASS_DEFINITION(ADSBDemod::MsgConfigureADSBDemod, Message)
 MESSAGE_CLASS_DEFINITION(ADSBDemod::MsgAircraftReport, Message)
+MESSAGE_CLASS_DEFINITION(ADSBDemod::MsgResetStats, Message)
 
 const char* const ADSBDemod::m_channelIdURI = "sdrangel.channel.adsbdemod";
 const char* const ADSBDemod::m_channelId = "ADSBDemod";
@@ -194,6 +191,13 @@ bool ADSBDemod::handleMessage(const Message& cmd)
         m_aircraftReport = msg.getReport();
         return true;
     }
+    else if (MsgResetStats::match(cmd))
+    {
+        MsgResetStats& msg = (MsgResetStats&) cmd;
+        MsgResetStats* rep = new MsgResetStats(msg);
+        m_basebandSink->getInputMessageQueue()->push(rep);
+        return true;
+    }
     else
     {
         return false;
@@ -337,9 +341,6 @@ void ADSBDemod::webapiUpdateChannelSettings(
     if (channelSettingsKeys.contains("samplesPerBit")) {
         settings.m_samplesPerBit = response.getAdsbDemodSettings()->getSamplesPerBit();
     }
-    if (channelSettingsKeys.contains("correlateFullPreamble")) {
-        settings.m_correlateFullPreamble = response.getAdsbDemodSettings()->getCorrelateFullPreamble() != 0;
-    }
     if (channelSettingsKeys.contains("demodModeS")) {
         settings.m_demodModeS = response.getAdsbDemodSettings()->getDemodModeS() != 0;
     }
@@ -458,7 +459,6 @@ void ADSBDemod::webapiFormatChannelSettings(SWGSDRangel::SWGChannelSettings& res
     response.getAdsbDemodSettings()->setRfBandwidth(settings.m_rfBandwidth);
     response.getAdsbDemodSettings()->setCorrelationThreshold(settings.m_correlationThreshold);
     response.getAdsbDemodSettings()->setSamplesPerBit(settings.m_samplesPerBit);
-    response.getAdsbDemodSettings()->setCorrelateFullPreamble(settings.m_correlateFullPreamble ? 1 : 0);
     response.getAdsbDemodSettings()->setDemodModeS(settings.m_demodModeS ? 1 : 0);
     response.getAdsbDemodSettings()->setInterpolatorPhaseSteps(settings.m_interpolatorPhaseSteps);
     response.getAdsbDemodSettings()->setInterpolatorTapsPerPhase(settings.m_interpolatorTapsPerPhase);
@@ -586,9 +586,6 @@ void ADSBDemod::webapiReverseSendSettings(const QList<QString>& channelSettingsK
     }
     if (channelSettingsKeys.contains("samplesPerBit") || force) {
         swgADSBDemodSettings->setSamplesPerBit(settings.m_samplesPerBit);
-    }
-    if (channelSettingsKeys.contains("correlateFullPreamble") || force) {
-        swgADSBDemodSettings->setCorrelateFullPreamble(settings.m_correlateFullPreamble ? 1 : 0);
     }
     if (channelSettingsKeys.contains("demodModeS") || force) {
         swgADSBDemodSettings->setDemodModeS(settings.m_demodModeS ? 1 : 0);

@@ -6,7 +6,7 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>506</width>
+    <width>770</width>
     <height>1046</height>
    </rect>
   </property>
@@ -36,7 +36,7 @@
      <x>0</x>
      <y>0</y>
      <width>500</width>
-     <height>141</height>
+     <height>161</height>
     </rect>
    </property>
    <property name="minimumSize">
@@ -107,7 +107,7 @@
            <cursorShape>PointingHandCursor</cursorShape>
           </property>
           <property name="focusPolicy">
-           <enum>Qt::StrongFocus</enum>
+           <enum>Qt::FocusPolicy::StrongFocus</enum>
           </property>
           <property name="toolTip">
            <string>Demod shift frequency from center in Hz</string>
@@ -120,7 +120,7 @@
            <string>Hz </string>
           </property>
           <property name="alignment">
-           <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
+           <set>Qt::AlignmentFlag::AlignRight|Qt::AlignmentFlag::AlignTrailing|Qt::AlignmentFlag::AlignVCenter</set>
           </property>
          </widget>
         </item>
@@ -129,7 +129,7 @@
       <item>
        <spacer name="horizontalSpacer">
         <property name="orientation">
-         <enum>Qt::Horizontal</enum>
+         <enum>Qt::Orientation::Horizontal</enum>
         </property>
         <property name="sizeHint" stdset="0">
          <size>
@@ -151,13 +151,13 @@
          <string>Channel power</string>
         </property>
         <property name="layoutDirection">
-         <enum>Qt::RightToLeft</enum>
+         <enum>Qt::LayoutDirection::RightToLeft</enum>
         </property>
         <property name="text">
          <string>-100.0 dB</string>
         </property>
         <property name="alignment">
-         <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
+         <set>Qt::AlignmentFlag::AlignRight|Qt::AlignmentFlag::AlignTrailing|Qt::AlignmentFlag::AlignVCenter</set>
         </property>
        </widget>
       </item>
@@ -228,7 +228,7 @@
          <number>2300000</number>
         </property>
         <property name="orientation">
-         <enum>Qt::Horizontal</enum>
+         <enum>Qt::Orientation::Horizontal</enum>
         </property>
        </widget>
       </item>
@@ -242,7 +242,7 @@
       <item>
        <spacer name="horizontalSpacer_3">
         <property name="orientation">
-         <enum>Qt::Horizontal</enum>
+         <enum>Qt::Orientation::Horizontal</enum>
         </property>
         <property name="sizeHint" stdset="0">
          <size>
@@ -253,9 +253,35 @@
        </spacer>
       </item>
       <item>
+       <widget class="ButtonSwitch" name="manualQNH">
+        <property name="toolTip">
+         <string>Check to set QNH manually</string>
+        </property>
+        <property name="text">
+         <string>QNH</string>
+        </property>
+        <property name="checkable">
+         <bool>true</bool>
+        </property>
+       </widget>
+      </item>
+      <item>
+       <widget class="QSpinBox" name="qnh">
+        <property name="toolTip">
+         <string>Air pressure in hPa</string>
+        </property>
+        <property name="minimum">
+         <number>500</number>
+        </property>
+        <property name="maximum">
+         <number>1500</number>
+        </property>
+       </widget>
+      </item>
+      <item>
        <widget class="Line" name="line_2">
         <property name="orientation">
-         <enum>Qt::Vertical</enum>
+         <enum>Qt::Orientation::Vertical</enum>
         </property>
        </widget>
       </item>
@@ -296,7 +322,7 @@
          <string>4</string>
         </property>
         <property name="alignment">
-         <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
+         <set>Qt::AlignmentFlag::AlignRight|Qt::AlignmentFlag::AlignTrailing|Qt::AlignmentFlag::AlignVCenter</set>
         </property>
        </widget>
       </item>
@@ -401,7 +427,7 @@
       <item>
        <widget class="Line" name="line">
         <property name="orientation">
-         <enum>Qt::Vertical</enum>
+         <enum>Qt::Orientation::Vertical</enum>
         </property>
        </widget>
       </item>
@@ -421,20 +447,7 @@
       <item>
        <widget class="Line" name="line_3">
         <property name="orientation">
-         <enum>Qt::Vertical</enum>
-        </property>
-       </widget>
-      </item>
-      <item>
-       <widget class="ButtonSwitch" name="correlateFullPreamble">
-        <property name="toolTip">
-         <string>Correlate against full preamble.</string>
-        </property>
-        <property name="text">
-         <string>FP</string>
-        </property>
-        <property name="checkable">
-         <bool>true</bool>
+         <enum>Qt::Orientation::Vertical</enum>
         </property>
        </widget>
       </item>
@@ -483,20 +496,65 @@
         </property>
        </widget>
       </item>
+      <item>
+       <widget class="QLabel" name="chipsThresholdLabel">
+        <property name="text">
+         <string>PCE</string>
+        </property>
+       </widget>
+      </item>
+      <item>
+       <widget class="QDial" name="chipsThreshold">
+        <property name="maximumSize">
+         <size>
+          <width>24</width>
+          <height>24</height>
+         </size>
+        </property>
+        <property name="toolTip">
+         <string>Number of allowed premable chip errors for Mode S frames</string>
+        </property>
+        <property name="minimum">
+         <number>0</number>
+        </property>
+        <property name="maximum">
+         <number>8</number>
+        </property>
+        <property name="pageStep">
+         <number>1</number>
+        </property>
+        <property name="value">
+         <number>8</number>
+        </property>
+       </widget>
+      </item>
+      <item>
+       <widget class="QLabel" name="chipsThresholdText">
+        <property name="minimumSize">
+         <size>
+          <width>30</width>
+          <height>0</height>
+         </size>
+        </property>
+        <property name="text">
+         <string>16</string>
+        </property>
+       </widget>
+      </item>
      </layout>
     </item>
     <item>
      <layout class="QHBoxLayout" name="horizontalLayout">
       <item>
-       <widget class="QToolButton" name="getOSNDB">
+       <widget class="QToolButton" name="getAircraftDB">
         <property name="toolTip">
-         <string>Download the latest Opensky-Network aircraft database (80MB)</string>
+         <string>Download the latest aircraft and route database (45MB)</string>
         </property>
         <property name="text">
          <string>...</string>
         </property>
         <property name="icon">
-         <iconset resource="icons.qrc">
+         <iconset resource="adsbdemodicons.qrc">
           <normaloff>:/icons/aircraft.png</normaloff>:/icons/aircraft.png</iconset>
         </property>
        </widget>
@@ -510,7 +568,7 @@
          <string>...</string>
         </property>
         <property name="icon">
-         <iconset resource="icons.qrc">
+         <iconset resource="adsbdemodicons.qrc">
           <normaloff>:/icons/airport.png</normaloff>:/icons/airport.png</iconset>
         </property>
        </widget>
@@ -524,7 +582,7 @@
          <string>...</string>
         </property>
         <property name="icon">
-         <iconset resource="icons.qrc">
+         <iconset resource="adsbdemodicons.qrc">
           <normaloff>:/icons/vor.png</normaloff>:/icons/vor.png</iconset>
         </property>
        </widget>
@@ -572,7 +630,7 @@
          <string>^</string>
         </property>
         <property name="icon">
-         <iconset resource="icons.qrc">
+         <iconset resource="adsbdemodicons.qrc">
           <normaloff>:/icons/allflightpaths.png</normaloff>:/icons/allflightpaths.png</iconset>
         </property>
         <property name="checkable">
@@ -592,8 +650,109 @@
          <string>^</string>
         </property>
         <property name="icon">
-         <iconset resource="icons.qrc">
+         <iconset resource="adsbdemodicons.qrc">
           <normaloff>:/icons/controltower.png</normaloff>:/icons/controltower.png</iconset>
+        </property>
+        <property name="checkable">
+         <bool>true</bool>
+        </property>
+        <property name="checked">
+         <bool>true</bool>
+        </property>
+       </widget>
+      </item>
+      <item>
+       <widget class="ButtonSwitch" name="coverage">
+        <property name="toolTip">
+         <string>Display receiver coverage on map. Right click to reset coverage data.</string>
+        </property>
+        <property name="text">
+         <string>^</string>
+        </property>
+        <property name="icon">
+         <iconset resource="adsbdemodicons.qrc">
+          <normaloff>:/icons/coverage.png</normaloff>:/icons/coverage.png</iconset>
+        </property>
+        <property name="checkable">
+         <bool>true</bool>
+        </property>
+        <property name="checked">
+         <bool>true</bool>
+        </property>
+       </widget>
+      </item>
+      <item>
+       <widget class="ButtonSwitch" name="stats">
+        <property name="toolTip">
+         <string>Display statistics. Right click to reset data.</string>
+        </property>
+        <property name="text">
+         <string/>
+        </property>
+        <property name="icon">
+         <iconset resource="adsbdemodicons.qrc">
+          <normaloff>:/icons/stats.png</normaloff>:/icons/stats.png</iconset>
+        </property>
+        <property name="checkable">
+         <bool>true</bool>
+        </property>
+        <property name="checked">
+         <bool>true</bool>
+        </property>
+       </widget>
+      </item>
+      <item>
+       <widget class="ButtonSwitch" name="displayChart">
+        <property name="toolTip">
+         <string>Display chart. Right click to reset data</string>
+        </property>
+        <property name="text">
+         <string/>
+        </property>
+        <property name="icon">
+         <iconset resource="adsbdemodicons.qrc">
+          <normaloff>:/icons/chart.png</normaloff>:/icons/chart.png</iconset>
+        </property>
+        <property name="checkable">
+         <bool>true</bool>
+        </property>
+        <property name="checked">
+         <bool>true</bool>
+        </property>
+       </widget>
+      </item>
+      <item>
+       <widget class="ButtonSwitch" name="displayOrientation">
+        <property name="toolTip">
+         <string>Check to display table and map side by side. Uncheck for table on top of map</string>
+        </property>
+        <property name="text">
+         <string/>
+        </property>
+        <property name="icon">
+         <iconset resource="adsbdemodicons.qrc">
+          <normaloff>:/icons/vertical.png</normaloff>
+          <normalon>:/icons/horizontal.png</normalon>:/icons/vertical.png</iconset>
+        </property>
+        <property name="checkable">
+         <bool>true</bool>
+        </property>
+        <property name="checked">
+         <bool>true</bool>
+        </property>
+       </widget>
+      </item>
+      <item>
+       <widget class="ButtonSwitch" name="displayRadius">
+        <property name="toolTip">
+         <string>Check to display aircraft containment radius on map</string>
+        </property>
+        <property name="text">
+         <string/>
+        </property>
+        <property name="icon">
+         <iconset resource="adsbdemodicons.qrc">
+          <normaloff>:/icons/radius.png</normaloff>:/icons/radius.png</iconset>
         </property>
         <property name="checkable">
          <bool>true</bool>
@@ -726,19 +885,33 @@
        </widget>
       </item>
       <item>
-       <widget class="QLabel" name="stats">
+       <widget class="QToolButton" name="deleteAircraft">
         <property name="toolTip">
-         <string>Demodulator statistics</string>
+         <string>Delete all aircraft</string>
         </property>
         <property name="text">
-         <string>-</string>
+         <string>...</string>
+        </property>
+        <property name="icon">
+         <iconset resource="../../../sdrgui/resources/res.qrc">
+          <normaloff>:/bin.png</normaloff>:/bin.png</iconset>
+        </property>
+        <property name="checkable">
+         <bool>false</bool>
+        </property>
+       </widget>
+      </item>
+      <item>
+       <widget class="CheckList" name="ic">
+        <property name="toolTip">
+         <string>Check to display radar coverage by Interogator Code</string>
         </property>
        </widget>
       </item>
       <item>
        <spacer name="horizontalSpacer_2">
         <property name="orientation">
-         <enum>Qt::Horizontal</enum>
+         <enum>Qt::Orientation::Horizontal</enum>
         </property>
         <property name="sizeHint" stdset="0">
          <size>
@@ -777,9 +950,9 @@
    <property name="geometry">
     <rect>
      <x>0</x>
-     <y>140</y>
-     <width>500</width>
-     <height>600</height>
+     <y>190</y>
+     <width>756</width>
+     <height>627</height>
     </rect>
    </property>
    <property name="sizePolicy">
@@ -797,7 +970,7 @@
    <property name="windowTitle">
     <string>ADS-B Data</string>
    </property>
-   <layout class="QVBoxLayout" name="verticalLayout">
+   <layout class="QHBoxLayout" name="horizontalLayout_5">
     <property name="leftMargin">
      <number>0</number>
     </property>
@@ -819,7 +992,7 @@
        </sizepolicy>
       </property>
       <property name="orientation">
-       <enum>Qt::Vertical</enum>
+       <enum>Qt::Orientation::Vertical</enum>
       </property>
       <widget class="QWidget" name="dataContainer" native="true">
        <property name="sizePolicy">
@@ -851,571 +1024,1294 @@
          <number>3</number>
         </property>
         <item>
-         <widget class="QTableWidget" name="adsbData">
-          <property name="minimumSize">
-           <size>
-            <width>0</width>
-            <height>0</height>
-           </size>
+         <widget class="QWidget" name="widget" native="true">
+          <property name="sizePolicy">
+           <sizepolicy hsizetype="Expanding" vsizetype="Expanding">
+            <horstretch>0</horstretch>
+            <verstretch>0</verstretch>
+           </sizepolicy>
           </property>
-          <property name="editTriggers">
-           <set>QAbstractItemView::NoEditTriggers</set>
-          </property>
-          <property name="selectionMode">
-           <enum>QAbstractItemView::SingleSelection</enum>
-          </property>
-          <property name="selectionBehavior">
-           <enum>QAbstractItemView::SelectRows</enum>
-          </property>
-          <column>
-           <property name="text">
-            <string>ICAO ID</string>
-           </property>
-           <property name="toolTip">
-            <string extracomment="Double click to search for the aircraft on www.planespotters.net">Aircraft International Civil Aviation Organization identifier. Links to www.planespotters.net</string>
-           </property>
-          </column>
-          <column>
-           <property name="text">
-            <string>Callsign</string>
-           </property>
-           <property name="toolTip">
-            <string>Callsign. Links to www.flightradar24.com</string>
-           </property>
-          </column>
-          <column>
-           <property name="text">
-            <string>ATC Callsign</string>
-           </property>
-           <property name="toolTip">
-            <string>Airline callsign used by ATC</string>
-           </property>
-          </column>
-          <column>
-           <property name="text">
-            <string>Aircraft</string>
-           </property>
-           <property name="toolTip">
-            <string>Aircraft model</string>
-           </property>
-          </column>
-          <column>
-           <property name="text">
-            <string>Airline</string>
-           </property>
-           <property name="toolTip">
-            <string>Airline logo</string>
-           </property>
-          </column>
-          <column>
-           <property name="text">
-            <string>Country</string>
-           </property>
-           <property name="toolTip">
-            <string>Country of registration</string>
-           </property>
-          </column>
-          <column>
-           <property name="text">
-            <string>GS (kn)</string>
-           </property>
-           <property name="toolTip">
-            <string>Groundspeed in knots or kilometers per hour</string>
-           </property>
-          </column>
-          <column>
-           <property name="text">
-            <string>TAS (kn)</string>
-           </property>
-           <property name="toolTip">
-            <string>True airpeed in knots or kilometers per hour</string>
-           </property>
-          </column>
-          <column>
-           <property name="text">
-            <string>IAS (kn)</string>
-           </property>
-           <property name="toolTip">
-            <string>Indicated airspeed in knots or kilometers per hour</string>
-           </property>
-          </column>
-          <column>
-           <property name="text">
-            <string>Mach</string>
-           </property>
-           <property name="toolTip">
-            <string>Mach number</string>
-           </property>
-          </column>
-          <column>
-           <property name="text">
-            <string>Sel Alt (ft)</string>
-           </property>
-           <property name="toolTip">
-            <string>Selected altitude in feet or metres (As set on MCP/FCU or by FMS)</string>
-           </property>
-          </column>
-          <column>
-           <property name="text">
-            <string>Alt (ft)</string>
-           </property>
-           <property name="toolTip">
-            <string>Altitude in feet or metres</string>
-           </property>
-          </column>
-          <column>
-           <property name="text">
-            <string>VR (ft/m)</string>
-           </property>
-           <property name="toolTip">
-            <string>Vertical climb rate in feet per minute or metres per second</string>
-           </property>
-          </column>
-          <column>
-           <property name="text">
-            <string>Sel Hd (°)</string>
-           </property>
-           <property name="toolTip">
-            <string>Selected heading in degrees (As set on MCP/FCU or by FMS)</string>
-           </property>
-          </column>
-          <column>
-           <property name="text">
-            <string>Hd (°)</string>
-           </property>
-           <property name="toolTip">
-            <string>Aircraft heading / track in degrees</string>
-           </property>
-          </column>
-          <column>
-           <property name="text">
-            <string>TR (°/s)</string>
-           </property>
-           <property name="toolTip">
-            <string>Turn rate in degrees per second</string>
-           </property>
-          </column>
-          <column>
-           <property name="text">
-            <string>Roll (°)</string>
-           </property>
-           <property name="toolTip">
-            <string>Roll angle in degrees</string>
-           </property>
-          </column>
-          <column>
-           <property name="text">
-            <string>D (km)</string>
-           </property>
-           <property name="toolTip">
-            <string>Range or distance of aircraft from home location</string>
-           </property>
-          </column>
-          <column>
-           <property name="text">
-            <string>Az/El (°)</string>
-           </property>
-           <property name="toolTip">
-            <string>Azimuth and elevation to aircraft from My Position. Double click to set as target.</string>
-           </property>
-          </column>
-          <column>
-           <property name="text">
-            <string>Cat</string>
-           </property>
-           <property name="toolTip">
-            <string>Aircraft standard category</string>
-           </property>
-          </column>
-          <column>
-           <property name="text">
-            <string>Status</string>
-           </property>
-           <property name="toolTip">
-            <string>Aircraft emergency status</string>
-           </property>
-          </column>
-          <column>
-           <property name="text">
-            <string>Squawk</string>
-           </property>
-           <property name="toolTip">
-            <string>Mode-A transponder code</string>
-           </property>
-          </column>
-          <column>
-           <property name="text">
-            <string>Reg</string>
-           </property>
-           <property name="toolTip">
-            <string>Aircraft registration</string>
-           </property>
-          </column>
-          <column>
-           <property name="text">
-            <string>Registered</string>
-           </property>
-           <property name="toolTip">
-            <string>Date aircraft was registered</string>
-           </property>
-          </column>
-          <column>
-           <property name="text">
-            <string>Manufacturer</string>
-           </property>
-           <property name="toolTip">
-            <string>Aircraft manufacturer</string>
-           </property>
-          </column>
-          <column>
-           <property name="text">
-            <string>Owner</string>
-           </property>
-           <property name="toolTip">
-            <string>Owner of the aircraft</string>
-           </property>
-          </column>
-          <column>
-           <property name="text">
-            <string>Operator</string>
-           </property>
-           <property name="toolTip">
-            <string>Aircraft operator ICAO code</string>
-           </property>
-          </column>
-          <column>
-           <property name="text">
-            <string>AP</string>
-           </property>
-           <property name="toolTip">
-            <string>Autopilot enabled</string>
-           </property>
-          </column>
-          <column>
-           <property name="text">
-            <string>V Mode</string>
-           </property>
-           <property name="toolTip">
-            <string>MCP/FCU vertical mode</string>
-           </property>
-          </column>
-          <column>
-           <property name="text">
-            <string>L Mode</string>
-           </property>
-           <property name="toolTip">
-            <string>MCP/FCU lateral mode</string>
-           </property>
-          </column>
-          <column>
-           <property name="text">
-            <string>Baro (mb)</string>
-           </property>
-           <property name="toolTip">
-            <string>Barometer setting in millibars</string>
-           </property>
-          </column>
-          <column>
-           <property name="text">
-            <string>H Wnd (kn)</string>
-           </property>
-           <property name="toolTip">
-            <string>Headwind in knots or kilometers per hour</string>
-           </property>
-          </column>
-          <column>
-           <property name="text">
-            <string>OAT (C)</string>
-           </property>
-           <property name="toolTip">
-            <string>Outside air temperature in degrees Celsius estimated from Mach and TAS</string>
-           </property>
-          </column>
-          <column>
-           <property name="text">
-            <string>Wnd (kn)</string>
-           </property>
-           <property name="toolTip">
-            <string>Wind speed in knots</string>
-           </property>
-          </column>
-          <column>
-           <property name="text">
-            <string>Wnd (°)</string>
-           </property>
-           <property name="toolTip">
-            <string>Wind direction in degrees</string>
-           </property>
-          </column>
-          <column>
-           <property name="text">
-            <string>P (hPa)</string>
-           </property>
-           <property name="toolTip">
-            <string>Static air pressure in hectopascals</string>
-           </property>
-          </column>
-          <column>
-           <property name="text">
-            <string>T (C)</string>
-           </property>
-           <property name="toolTip">
-            <string>Static air temperature in degrees Celsius</string>
-           </property>
-          </column>
-          <column>
-           <property name="text">
-            <string>U (%)</string>
-           </property>
-           <property name="toolTip">
-            <string>Humidity in percent</string>
-           </property>
-          </column>
-          <column>
-           <property name="text">
-            <string>Lat (°)</string>
-           </property>
-           <property name="toolTip">
-            <string extracomment="Double click to centre the map on this aircraft">Latitude in degrees positive towards the North</string>
-           </property>
-          </column>
-          <column>
-           <property name="text">
-            <string>Lon (°)</string>
-           </property>
-           <property name="toolTip">
-            <string extracomment="Double click to centre the map on this aircraft">Longitude in degrees. Positive towards the East</string>
-           </property>
-          </column>
-          <column>
-           <property name="text">
-            <string>Updated</string>
-           </property>
-           <property name="toolTip">
-            <string>Time when the last ADS-B message from this aircraft was received.</string>
-           </property>
-          </column>
-          <column>
-           <property name="text">
-            <string>Frames</string>
-           </property>
-           <property name="toolTip">
-            <string>Number of ADS-B frames received from this aircraft</string>
-           </property>
-          </column>
-          <column>
-           <property name="text">
-            <string>TIS-B</string>
-           </property>
-           <property name="toolTip">
-            <string>Number of TIS-B frames received with this aircraft's ICAO</string>
-           </property>
-          </column>
-          <column>
-           <property name="text">
-            <string>Correlation</string>
-           </property>
-           <property name="toolTip">
-            <string>Correlation values for received frames. min/avg/max</string>
-           </property>
-          </column>
-          <column>
-           <property name="text">
-            <string>RSSI</string>
-           </property>
-          </column>
-          <column>
-           <property name="text">
-            <string>Flight Status</string>
-           </property>
-           <property name="toolTip">
-            <string>Status of flight</string>
-           </property>
-          </column>
-          <column>
-           <property name="text">
-            <string>Dep</string>
-           </property>
-           <property name="toolTip">
-            <string>Departure airport</string>
-           </property>
-          </column>
-          <column>
-           <property name="text">
-            <string>Arr</string>
-           </property>
-           <property name="toolTip">
-            <string>Arrival airport</string>
-           </property>
-          </column>
-          <column>
-           <property name="text">
-            <string>STD</string>
-           </property>
-           <property name="toolTip">
-            <string>Scheduled time of departure</string>
-           </property>
-          </column>
-          <column>
-           <property name="text">
-            <string>ETD</string>
-           </property>
-           <property name="toolTip">
-            <string>Estimated time of departure</string>
-           </property>
-          </column>
-          <column>
-           <property name="text">
-            <string>ATD</string>
-           </property>
-           <property name="toolTip">
-            <string>Actual time of departure</string>
-           </property>
-          </column>
-          <column>
-           <property name="text">
-            <string>STA</string>
-           </property>
-           <property name="toolTip">
-            <string>Scheduled time of arrival</string>
-           </property>
-          </column>
-          <column>
-           <property name="text">
-            <string>ETA</string>
-           </property>
-           <property name="toolTip">
-            <string>Estimated time of arrival</string>
-           </property>
-          </column>
-          <column>
-           <property name="text">
-            <string>ATA</string>
-           </property>
-           <property name="toolTip">
-            <string>Actual time of arrival</string>
-           </property>
-          </column>
+          <layout class="QHBoxLayout" name="horizontalLayout_4">
+           <property name="leftMargin">
+            <number>0</number>
+           </property>
+           <property name="topMargin">
+            <number>0</number>
+           </property>
+           <property name="rightMargin">
+            <number>0</number>
+           </property>
+           <property name="bottomMargin">
+            <number>0</number>
+           </property>
+           <item>
+            <widget class="QSplitter" name="dataSplitter">
+             <property name="sizePolicy">
+              <sizepolicy hsizetype="Expanding" vsizetype="Expanding">
+               <horstretch>0</horstretch>
+               <verstretch>0</verstretch>
+              </sizepolicy>
+             </property>
+             <property name="frameShape">
+              <enum>QFrame::Shape::NoFrame</enum>
+             </property>
+             <property name="lineWidth">
+              <number>1</number>
+             </property>
+             <property name="orientation">
+              <enum>Qt::Orientation::Horizontal</enum>
+             </property>
+             <widget class="QWidget" name="adsbDataWidget" native="true">
+              <property name="sizePolicy">
+               <sizepolicy hsizetype="Expanding" vsizetype="Expanding">
+                <horstretch>1</horstretch>
+                <verstretch>0</verstretch>
+               </sizepolicy>
+              </property>
+              <layout class="QHBoxLayout" name="horizontalLayout_3">
+               <property name="leftMargin">
+                <number>0</number>
+               </property>
+               <property name="topMargin">
+                <number>0</number>
+               </property>
+               <property name="rightMargin">
+                <number>0</number>
+               </property>
+               <property name="bottomMargin">
+                <number>0</number>
+               </property>
+               <item>
+                <widget class="QTableWidget" name="adsbData">
+                 <property name="minimumSize">
+                  <size>
+                   <width>0</width>
+                   <height>0</height>
+                  </size>
+                 </property>
+                 <property name="editTriggers">
+                  <set>QAbstractItemView::EditTrigger::NoEditTriggers</set>
+                 </property>
+                 <property name="selectionMode">
+                  <enum>QAbstractItemView::SelectionMode::SingleSelection</enum>
+                 </property>
+                 <property name="selectionBehavior">
+                  <enum>QAbstractItemView::SelectionBehavior::SelectRows</enum>
+                 </property>
+                 <column>
+                  <property name="text">
+                   <string>ICAO ID</string>
+                  </property>
+                  <property name="toolTip">
+                   <string extracomment="Double click to search for the aircraft on www.planespotters.net">Aircraft International Civil Aviation Organization identifier. Links to www.planespotters.net</string>
+                  </property>
+                 </column>
+                 <column>
+                  <property name="text">
+                   <string>Callsign</string>
+                  </property>
+                  <property name="toolTip">
+                   <string>Callsign. Links to www.flightradar24.com</string>
+                  </property>
+                 </column>
+                 <column>
+                  <property name="text">
+                   <string>ATC Callsign</string>
+                  </property>
+                  <property name="toolTip">
+                   <string>Airline callsign used by ATC</string>
+                  </property>
+                 </column>
+                 <column>
+                  <property name="text">
+                   <string>Aircraft</string>
+                  </property>
+                  <property name="toolTip">
+                   <string>Aircraft model</string>
+                  </property>
+                 </column>
+                 <column>
+                  <property name="text">
+                   <string>Type</string>
+                  </property>
+                  <property name="toolTip">
+                   <string>ICAO aircraft type designator</string>
+                  </property>
+                 </column>
+                 <column>
+                  <property name="text">
+                   <string>Sideview</string>
+                  </property>
+                 </column>
+                 <column>
+                  <property name="text">
+                   <string>Airline</string>
+                  </property>
+                  <property name="toolTip">
+                   <string>Airline logo</string>
+                  </property>
+                 </column>
+                 <column>
+                  <property name="text">
+                   <string>Country</string>
+                  </property>
+                  <property name="toolTip">
+                   <string>Country of registration</string>
+                  </property>
+                 </column>
+                 <column>
+                  <property name="text">
+                   <string>GS (kn)</string>
+                  </property>
+                  <property name="toolTip">
+                   <string>Groundspeed in knots or kilometers per hour</string>
+                  </property>
+                 </column>
+                 <column>
+                  <property name="text">
+                   <string>TAS (kn)</string>
+                  </property>
+                  <property name="toolTip">
+                   <string>True airpeed in knots or kilometers per hour</string>
+                  </property>
+                 </column>
+                 <column>
+                  <property name="text">
+                   <string>IAS (kn)</string>
+                  </property>
+                  <property name="toolTip">
+                   <string>Indicated airspeed in knots or kilometers per hour</string>
+                  </property>
+                 </column>
+                 <column>
+                  <property name="text">
+                   <string>Mach</string>
+                  </property>
+                  <property name="toolTip">
+                   <string>Mach number</string>
+                  </property>
+                 </column>
+                 <column>
+                  <property name="text">
+                   <string>Sel Alt (ft)</string>
+                  </property>
+                  <property name="toolTip">
+                   <string>Selected altitude in feet or metres (As set on MCP/FCU or by FMS)</string>
+                  </property>
+                 </column>
+                 <column>
+                  <property name="text">
+                   <string>Alt (ft)</string>
+                  </property>
+                  <property name="toolTip">
+                   <string>Altitude in feet or metres</string>
+                  </property>
+                 </column>
+                 <column>
+                  <property name="text">
+                   <string>VR (ft/m)</string>
+                  </property>
+                  <property name="toolTip">
+                   <string>Vertical climb rate in feet per minute or metres per second</string>
+                  </property>
+                 </column>
+                 <column>
+                  <property name="text">
+                   <string>Sel Hd (°)</string>
+                  </property>
+                  <property name="toolTip">
+                   <string>Selected heading in degrees (As set on MCP/FCU or by FMS)</string>
+                  </property>
+                 </column>
+                 <column>
+                  <property name="text">
+                   <string>Hd (°)</string>
+                  </property>
+                  <property name="toolTip">
+                   <string>Aircraft heading in degrees</string>
+                  </property>
+                 </column>
+                 <column>
+                  <property name="text">
+                   <string>Trk (°)</string>
+                  </property>
+                  <property name="toolTip">
+                   <string>Aircraft track in degrees</string>
+                  </property>
+                 </column>
+                 <column>
+                  <property name="text">
+                   <string>TR (°/s)</string>
+                  </property>
+                  <property name="toolTip">
+                   <string>Turn rate in degrees per second</string>
+                  </property>
+                 </column>
+                 <column>
+                  <property name="text">
+                   <string>Roll (°)</string>
+                  </property>
+                  <property name="toolTip">
+                   <string>Roll angle in degrees</string>
+                  </property>
+                 </column>
+                 <column>
+                  <property name="text">
+                   <string>D (km)</string>
+                  </property>
+                  <property name="toolTip">
+                   <string>Range or distance of aircraft from home location</string>
+                  </property>
+                 </column>
+                 <column>
+                  <property name="text">
+                   <string>Az/El (°)</string>
+                  </property>
+                  <property name="toolTip">
+                   <string>Azimuth and elevation to aircraft from My Position. Double click to set as target.</string>
+                  </property>
+                 </column>
+                 <column>
+                  <property name="text">
+                   <string>Cat</string>
+                  </property>
+                  <property name="toolTip">
+                   <string>Aircraft standard category</string>
+                  </property>
+                 </column>
+                 <column>
+                  <property name="text">
+                   <string>Status</string>
+                  </property>
+                  <property name="toolTip">
+                   <string>Aircraft emergency status</string>
+                  </property>
+                 </column>
+                 <column>
+                  <property name="text">
+                   <string>Squawk</string>
+                  </property>
+                  <property name="toolTip">
+                   <string>Mode-A transponder code</string>
+                  </property>
+                 </column>
+                 <column>
+                  <property name="text">
+                   <string>Ident</string>
+                  </property>
+                  <property name="toolTip">
+                   <string>Ident switch active</string>
+                  </property>
+                 </column>
+                 <column>
+                  <property name="text">
+                   <string>Reg</string>
+                  </property>
+                  <property name="toolTip">
+                   <string>Aircraft registration</string>
+                  </property>
+                 </column>
+                 <column>
+                  <property name="text">
+                   <string>Registered</string>
+                  </property>
+                  <property name="toolTip">
+                   <string>Date aircraft was registered</string>
+                  </property>
+                 </column>
+                 <column>
+                  <property name="text">
+                   <string>Manufacturer</string>
+                  </property>
+                  <property name="toolTip">
+                   <string>Aircraft manufacturer</string>
+                  </property>
+                 </column>
+                 <column>
+                  <property name="text">
+                   <string>Owner</string>
+                  </property>
+                  <property name="toolTip">
+                   <string>Owner of the aircraft</string>
+                  </property>
+                 </column>
+                 <column>
+                  <property name="text">
+                   <string>Operator</string>
+                  </property>
+                  <property name="toolTip">
+                   <string>Aircraft operator ICAO code</string>
+                  </property>
+                 </column>
+                 <column>
+                  <property name="text">
+                   <string>AP</string>
+                  </property>
+                  <property name="toolTip">
+                   <string>Autopilot enabled</string>
+                  </property>
+                 </column>
+                 <column>
+                  <property name="text">
+                   <string>V Mode</string>
+                  </property>
+                  <property name="toolTip">
+                   <string>MCP/FCU vertical mode</string>
+                  </property>
+                 </column>
+                 <column>
+                  <property name="text">
+                   <string>L Mode</string>
+                  </property>
+                  <property name="toolTip">
+                   <string>MCP/FCU lateral mode</string>
+                  </property>
+                 </column>
+                 <column>
+                  <property name="text">
+                   <string>TCAS</string>
+                  </property>
+                  <property name="toolTip">
+                   <string>TCAS operational. RA in red if active</string>
+                  </property>
+                 </column>
+                 <column>
+                  <property name="text">
+                   <string>ACAS</string>
+                  </property>
+                  <property name="toolTip">
+                   <string>Airborne collision avoidance system capability</string>
+                  </property>
+                 </column>
+                 <column>
+                  <property name="text">
+                   <string>RA</string>
+                  </property>
+                  <property name="toolTip">
+                   <string>ACAS active resolition advisory</string>
+                  </property>
+                 </column>
+                 <column>
+                  <property name="text">
+                   <string>Max AS (kn)</string>
+                  </property>
+                  <property name="toolTip">
+                   <string>Maximum speed in knots</string>
+                  </property>
+                 </column>
+                 <column>
+                  <property name="text">
+                   <string>Version</string>
+                  </property>
+                  <property name="toolTip">
+                   <string>ADS-B version</string>
+                  </property>
+                 </column>
+                 <column>
+                  <property name="text">
+                   <string>L (m)</string>
+                  </property>
+                  <property name="toolTip">
+                   <string>Aircraft length in metres</string>
+                  </property>
+                 </column>
+                 <column>
+                  <property name="text">
+                   <string>W (m)</string>
+                  </property>
+                  <property name="toolTip">
+                   <string>Aircraft width in metres</string>
+                  </property>
+                 </column>
+                 <column>
+                  <property name="text">
+                   <string>QNH (mb)</string>
+                  </property>
+                  <property name="toolTip">
+                   <string>Barometer setting in millibars</string>
+                  </property>
+                 </column>
+                 <column>
+                  <property name="text">
+                   <string>H Wnd (kn)</string>
+                  </property>
+                  <property name="toolTip">
+                   <string>Headwind in knots or kilometers per hour</string>
+                  </property>
+                 </column>
+                 <column>
+                  <property name="text">
+                   <string>OAT (C)</string>
+                  </property>
+                  <property name="toolTip">
+                   <string>Outside air temperature in degrees Celsius estimated from Mach and TAS</string>
+                  </property>
+                 </column>
+                 <column>
+                  <property name="text">
+                   <string>Wnd (kn)</string>
+                  </property>
+                  <property name="toolTip">
+                   <string>Wind speed in knots</string>
+                  </property>
+                 </column>
+                 <column>
+                  <property name="text">
+                   <string>Wnd (°)</string>
+                  </property>
+                  <property name="toolTip">
+                   <string>Wind direction in degrees</string>
+                  </property>
+                 </column>
+                 <column>
+                  <property name="text">
+                   <string>P (hPa)</string>
+                  </property>
+                  <property name="toolTip">
+                   <string>Static air pressure in hectopascals</string>
+                  </property>
+                 </column>
+                 <column>
+                  <property name="text">
+                   <string>T (C)</string>
+                  </property>
+                  <property name="toolTip">
+                   <string>Static air temperature in degrees Celsius</string>
+                  </property>
+                 </column>
+                 <column>
+                  <property name="text">
+                   <string>U (%)</string>
+                  </property>
+                  <property name="toolTip">
+                   <string>Humidity in percent</string>
+                  </property>
+                 </column>
+                 <column>
+                  <property name="text">
+                   <string>Lat (°)</string>
+                  </property>
+                  <property name="toolTip">
+                   <string extracomment="Double click to centre the map on this aircraft">Latitude in degrees positive towards the North</string>
+                  </property>
+                 </column>
+                 <column>
+                  <property name="text">
+                   <string>Lon (°)</string>
+                  </property>
+                  <property name="toolTip">
+                   <string extracomment="Double click to centre the map on this aircraft">Longitude in degrees. Positive towards the East</string>
+                  </property>
+                 </column>
+                 <column>
+                  <property name="text">
+                   <string>IC</string>
+                  </property>
+                  <property name="toolTip">
+                   <string>Interrogator code (II/SI)</string>
+                  </property>
+                 </column>
+                 <column>
+                  <property name="text">
+                   <string>Updated</string>
+                  </property>
+                  <property name="toolTip">
+                   <string>Time when the last ADS-B message from this aircraft was received.</string>
+                  </property>
+                 </column>
+                 <column>
+                  <property name="text">
+                   <string>Frames</string>
+                  </property>
+                  <property name="toolTip">
+                   <string>Number of ADS-B and Mode S frames received from this aircraft</string>
+                  </property>
+                 </column>
+                 <column>
+                  <property name="text">
+                   <string>ADS-B FC</string>
+                  </property>
+                  <property name="toolTip">
+                   <string>Number of ADS-B frames received from this aircraft</string>
+                  </property>
+                 </column>
+                 <column>
+                  <property name="text">
+                   <string>Mode S FC</string>
+                  </property>
+                  <property name="toolTip">
+                   <string>Number of Mode S frames received from this aircraft</string>
+                  </property>
+                 </column>
+                 <column>
+                  <property name="text">
+                   <string>Non-transponder</string>
+                  </property>
+                  <property name="toolTip">
+                   <string>Non transponder device frame count</string>
+                  </property>
+                 </column>
+                 <column>
+                  <property name="text">
+                   <string>TIS-B FC</string>
+                  </property>
+                  <property name="toolTip">
+                   <string>Number of TIS-B frames received with this aircraft's ICAO</string>
+                  </property>
+                 </column>
+                 <column>
+                  <property name="text">
+                   <string>ADS-R FC</string>
+                  </property>
+                  <property name="toolTip">
+                   <string>Number of ADS-R frames received with this aircraft's ICAO</string>
+                  </property>
+                 </column>
+                 <column>
+                  <property name="text">
+                   <string>Rc</string>
+                  </property>
+                  <property name="toolTip">
+                   <string>Horizontal containment radius limit</string>
+                  </property>
+                 </column>
+                 <column>
+                  <property name="text">
+                   <string>NACp</string>
+                  </property>
+                  <property name="toolTip">
+                   <string>Navigation accuracy category - 95% horizontal position</string>
+                  </property>
+                 </column>
+                 <column>
+                  <property name="text">
+                   <string>NACv</string>
+                  </property>
+                  <property name="toolTip">
+                   <string>Navigation accuracy category - velocity</string>
+                  </property>
+                 </column>
+                 <column>
+                  <property name="text">
+                   <string>GVA</string>
+                  </property>
+                  <property name="toolTip">
+                   <string>Geometric vertical accuracy</string>
+                  </property>
+                 </column>
+                 <column>
+                  <property name="text">
+                   <string>NIC</string>
+                  </property>
+                  <property name="toolTip">
+                   <string>Navigation integrity category</string>
+                  </property>
+                 </column>
+                 <column>
+                  <property name="text">
+                   <string>NICbaro</string>
+                  </property>
+                  <property name="toolTip">
+                   <string>Barometric altitude integrity code</string>
+                  </property>
+                 </column>
+                 <column>
+                  <property name="text">
+                   <string>SIL</string>
+                  </property>
+                  <property name="toolTip">
+                   <string>Surveillance integrity level</string>
+                  </property>
+                 </column>
+                 <column>
+                  <property name="text">
+                   <string>Correlation</string>
+                  </property>
+                  <property name="toolTip">
+                   <string>Correlation values for received frames. min/avg/max</string>
+                  </property>
+                 </column>
+                 <column>
+                  <property name="text">
+                   <string>RSSI</string>
+                  </property>
+                  <property name="toolTip">
+                   <string>Received Signal Strength Indicator (dBFS)</string>
+                  </property>
+                 </column>
+                 <column>
+                  <property name="text">
+                   <string>Flight Status</string>
+                  </property>
+                  <property name="toolTip">
+                   <string>Status of flight</string>
+                  </property>
+                 </column>
+                 <column>
+                  <property name="text">
+                   <string>Dep</string>
+                  </property>
+                  <property name="toolTip">
+                   <string>Departure airport</string>
+                  </property>
+                 </column>
+                 <column>
+                  <property name="text">
+                   <string>Arr</string>
+                  </property>
+                  <property name="toolTip">
+                   <string>Arrival airport</string>
+                  </property>
+                 </column>
+                 <column>
+                  <property name="text">
+                   <string>Stops</string>
+                  </property>
+                 </column>
+                 <column>
+                  <property name="text">
+                   <string>STD</string>
+                  </property>
+                  <property name="toolTip">
+                   <string>Scheduled time of departure</string>
+                  </property>
+                 </column>
+                 <column>
+                  <property name="text">
+                   <string>ETD</string>
+                  </property>
+                  <property name="toolTip">
+                   <string>Estimated time of departure</string>
+                  </property>
+                 </column>
+                 <column>
+                  <property name="text">
+                   <string>ATD</string>
+                  </property>
+                  <property name="toolTip">
+                   <string>Actual time of departure</string>
+                  </property>
+                 </column>
+                 <column>
+                  <property name="text">
+                   <string>STA</string>
+                  </property>
+                  <property name="toolTip">
+                   <string>Scheduled time of arrival</string>
+                  </property>
+                 </column>
+                 <column>
+                  <property name="text">
+                   <string>ETA</string>
+                  </property>
+                  <property name="toolTip">
+                   <string>Estimated time of arrival</string>
+                  </property>
+                 </column>
+                 <column>
+                  <property name="text">
+                   <string>ATA</string>
+                  </property>
+                  <property name="toolTip">
+                   <string>Actual time of arrival</string>
+                  </property>
+                 </column>
+                </widget>
+               </item>
+               <item>
+                <layout class="QVBoxLayout" name="photoLayout">
+                 <property name="spacing">
+                  <number>4</number>
+                 </property>
+                 <item>
+                  <layout class="QHBoxLayout" name="photoHeaderLayout">
+                   <property name="spacing">
+                    <number>4</number>
+                   </property>
+                   <item>
+                    <widget class="QLabel" name="photoHeader">
+                     <property name="sizePolicy">
+                      <sizepolicy hsizetype="Preferred" vsizetype="Preferred">
+                       <horstretch>0</horstretch>
+                       <verstretch>0</verstretch>
+                      </sizepolicy>
+                     </property>
+                     <property name="text">
+                      <string/>
+                     </property>
+                     <property name="alignment">
+                      <set>Qt::AlignmentFlag::AlignLeading|Qt::AlignmentFlag::AlignLeft|Qt::AlignmentFlag::AlignVCenter</set>
+                     </property>
+                    </widget>
+                   </item>
+                   <item>
+                    <widget class="QLabel" name="photoFlag">
+                     <property name="sizePolicy">
+                      <sizepolicy hsizetype="Minimum" vsizetype="Preferred">
+                       <horstretch>0</horstretch>
+                       <verstretch>0</verstretch>
+                      </sizepolicy>
+                     </property>
+                     <property name="text">
+                      <string/>
+                     </property>
+                     <property name="alignment">
+                      <set>Qt::AlignmentFlag::AlignRight|Qt::AlignmentFlag::AlignTrailing|Qt::AlignmentFlag::AlignVCenter</set>
+                     </property>
+                    </widget>
+                   </item>
+                  </layout>
+                 </item>
+                 <item>
+                  <widget class="ClickableLabel" name="photo">
+                   <property name="text">
+                    <string/>
+                   </property>
+                  </widget>
+                 </item>
+                 <item>
+                  <widget class="QLabel" name="flightDetails">
+                   <property name="minimumSize">
+                    <size>
+                     <width>200</width>
+                     <height>0</height>
+                    </size>
+                   </property>
+                   <property name="maximumSize">
+                    <size>
+                     <width>200</width>
+                     <height>16777215</height>
+                    </size>
+                   </property>
+                   <property name="text">
+                    <string/>
+                   </property>
+                   <property name="textFormat">
+                    <enum>Qt::TextFormat::RichText</enum>
+                   </property>
+                  </widget>
+                 </item>
+                 <item>
+                  <widget class="QLabel" name="aircraftDetails">
+                   <property name="sizePolicy">
+                    <sizepolicy hsizetype="Fixed" vsizetype="Preferred">
+                     <horstretch>0</horstretch>
+                     <verstretch>0</verstretch>
+                    </sizepolicy>
+                   </property>
+                   <property name="minimumSize">
+                    <size>
+                     <width>200</width>
+                     <height>0</height>
+                    </size>
+                   </property>
+                   <property name="maximumSize">
+                    <size>
+                     <width>200</width>
+                     <height>16777215</height>
+                    </size>
+                   </property>
+                   <property name="text">
+                    <string/>
+                   </property>
+                   <property name="textFormat">
+                    <enum>Qt::TextFormat::RichText</enum>
+                   </property>
+                   <property name="alignment">
+                    <set>Qt::AlignmentFlag::AlignLeading|Qt::AlignmentFlag::AlignLeft|Qt::AlignmentFlag::AlignVCenter</set>
+                   </property>
+                  </widget>
+                 </item>
+                 <item>
+                  <spacer name="photoVerticalSpacer">
+                   <property name="orientation">
+                    <enum>Qt::Orientation::Vertical</enum>
+                   </property>
+                   <property name="sizeHint" stdset="0">
+                    <size>
+                     <width>0</width>
+                     <height>40</height>
+                    </size>
+                   </property>
+                  </spacer>
+                 </item>
+                </layout>
+               </item>
+              </layout>
+             </widget>
+             <widget class="QTableWidget" name="statsTable">
+              <property name="sizePolicy">
+               <sizepolicy hsizetype="Preferred" vsizetype="Expanding">
+                <horstretch>0</horstretch>
+                <verstretch>0</verstretch>
+               </sizepolicy>
+              </property>
+              <property name="minimumSize">
+               <size>
+                <width>320</width>
+                <height>0</height>
+               </size>
+              </property>
+              <row>
+               <property name="text">
+                <string>ADS-B Frames</string>
+               </property>
+               <property name="toolTip">
+                <string>Number of ABS-B frames received</string>
+               </property>
+              </row>
+              <row>
+               <property name="text">
+                <string>Mode-S Frames</string>
+               </property>
+               <property name="toolTip">
+                <string>Number of Mode S frames received (Excluding ADS-B)</string>
+               </property>
+              </row>
+              <row>
+               <property name="text">
+                <string>Total Frames</string>
+               </property>
+               <property name="toolTip">
+                <string>Total number of ADS-B and Mode S frames received</string>
+               </property>
+              </row>
+              <row>
+               <property name="text">
+                <string>ASD-B rate (fps)</string>
+               </property>
+               <property name="toolTip">
+                <string>ADS-B received frame rate in frames per second</string>
+               </property>
+              </row>
+              <row>
+               <property name="text">
+                <string>Mode-S rate (fps)</string>
+               </property>
+               <property name="toolTip">
+                <string>Mode S received frame rate in frames per second</string>
+               </property>
+              </row>
+              <row>
+               <property name="text">
+                <string>Total rate (fps)</string>
+               </property>
+               <property name="toolTip">
+                <string>Total received frame rate in frames per second</string>
+               </property>
+              </row>
+              <row>
+               <property name="text">
+                <string>Data Rate (kbps)</string>
+               </property>
+              </row>
+              <row>
+               <property name="text">
+                <string>Correlator Matches</string>
+               </property>
+              </row>
+              <row>
+               <property name="text">
+                <string>Valid (%)</string>
+               </property>
+              </row>
+              <row>
+               <property name="text">
+                <string>Preamble Fails</string>
+               </property>
+              </row>
+              <row>
+               <property name="text">
+                <string>CRC Fails</string>
+               </property>
+               <property name="toolTip">
+                <string>Number of frames where CRC is invalid</string>
+               </property>
+              </row>
+              <row>
+               <property name="text">
+                <string>Type Fails</string>
+               </property>
+               <property name="toolTip">
+                <string>Frames where DF is invalid</string>
+               </property>
+              </row>
+              <row>
+               <property name="text">
+                <string>Invalid Fails</string>
+               </property>
+              </row>
+              <row>
+               <property name="text">
+                <string>ICAO Fails</string>
+               </property>
+              </row>
+              <row>
+               <property name="text">
+                <string>Range Fails</string>
+               </property>
+               <property name="toolTip">
+                <string>Positions rejected due to range from station being too great</string>
+               </property>
+              </row>
+              <row>
+               <property name="text">
+                <string>Alt Fails</string>
+               </property>
+              </row>
+              <row>
+               <property name="text">
+                <string>Avg Corr</string>
+               </property>
+              </row>
+              <row>
+               <property name="text">
+                <string>TC 0: No position</string>
+               </property>
+              </row>
+              <row>
+               <property name="text">
+                <string>TC 1-4: Aircraft indentification</string>
+               </property>
+              </row>
+              <row>
+               <property name="text">
+                <string>TC 5-8: Surface position</string>
+               </property>
+              </row>
+              <row>
+               <property name="text">
+                <string>TC 9-18: Airborne position (Baro)</string>
+               </property>
+              </row>
+              <row>
+               <property name="text">
+                <string>TC 19: Airborne velocity</string>
+               </property>
+              </row>
+              <row>
+               <property name="text">
+                <string>TC 20-22: Airborne position (GNSS)</string>
+               </property>
+              </row>
+              <row>
+               <property name="text">
+                <string>TC 24: Surface system status</string>
+               </property>
+              </row>
+              <row>
+               <property name="text">
+                <string>TC 28: Aircraft status</string>
+               </property>
+              </row>
+              <row>
+               <property name="text">
+                <string>TC 29: Target state and status</string>
+               </property>
+              </row>
+              <row>
+               <property name="text">
+                <string>TC 31: Aircraft operation status</string>
+               </property>
+              </row>
+              <row>
+               <property name="text">
+                <string>TC 23,25-27,30: Reserved</string>
+               </property>
+              </row>
+              <row>
+               <property name="text">
+                <string>DF0: Short air-to-air ACAS</string>
+               </property>
+              </row>
+              <row>
+               <property name="text">
+                <string>DF4: Surveillance Altitude</string>
+               </property>
+              </row>
+              <row>
+               <property name="text">
+                <string>DF5: Surveillance Ident reply</string>
+               </property>
+              </row>
+              <row>
+               <property name="text">
+                <string>DF11: All call reply</string>
+               </property>
+              </row>
+              <row>
+               <property name="text">
+                <string>DF16: Long air-to-air ACAS</string>
+               </property>
+              </row>
+              <row>
+               <property name="text">
+                <string>DF17: ADS-B</string>
+               </property>
+              </row>
+              <row>
+               <property name="text">
+                <string>DF18: ADS-B NT / TIS-B / ADS-R</string>
+               </property>
+               <property name="toolTip">
+                <string>No transponder</string>
+               </property>
+              </row>
+              <row>
+               <property name="text">
+                <string>DF19: Military</string>
+               </property>
+              </row>
+              <row>
+               <property name="text">
+                <string>DF20-21: Comm B</string>
+               </property>
+              </row>
+              <row>
+               <property name="text">
+                <string>DF22: Military</string>
+               </property>
+              </row>
+              <row>
+               <property name="text">
+                <string>DF24: Comm D ELM</string>
+               </property>
+              </row>
+              <row>
+               <property name="text">
+                <string>Max Range (km)</string>
+               </property>
+              </row>
+              <row>
+               <property name="text">
+                <string>Max Altitude (ft)</string>
+               </property>
+              </row>
+              <row>
+               <property name="text">
+                <string>Max Rate (fps)</string>
+               </property>
+              </row>
+              <column>
+               <property name="text">
+                <string>Data</string>
+               </property>
+              </column>
+              <item row="0" column="0">
+               <property name="text">
+                <string>0</string>
+               </property>
+              </item>
+              <item row="1" column="0">
+               <property name="text">
+                <string>0</string>
+               </property>
+              </item>
+              <item row="2" column="0">
+               <property name="text">
+                <string>0</string>
+               </property>
+              </item>
+              <item row="3" column="0">
+               <property name="text">
+                <string>0</string>
+               </property>
+              </item>
+              <item row="4" column="0">
+               <property name="text">
+                <string>0</string>
+               </property>
+              </item>
+              <item row="5" column="0">
+               <property name="text">
+                <string>0</string>
+               </property>
+              </item>
+              <item row="6" column="0">
+               <property name="text">
+                <string>0</string>
+               </property>
+              </item>
+              <item row="7" column="0">
+               <property name="text">
+                <string>0</string>
+               </property>
+              </item>
+              <item row="8" column="0">
+               <property name="text">
+                <string>0</string>
+               </property>
+              </item>
+              <item row="9" column="0">
+               <property name="text">
+                <string>0</string>
+               </property>
+              </item>
+              <item row="10" column="0">
+               <property name="text">
+                <string>0</string>
+               </property>
+              </item>
+              <item row="11" column="0">
+               <property name="text">
+                <string>0</string>
+               </property>
+              </item>
+              <item row="12" column="0">
+               <property name="text">
+                <string>0</string>
+               </property>
+              </item>
+              <item row="13" column="0">
+               <property name="text">
+                <string>0</string>
+               </property>
+              </item>
+              <item row="14" column="0">
+               <property name="text">
+                <string>0</string>
+               </property>
+              </item>
+              <item row="15" column="0">
+               <property name="text">
+                <string>0</string>
+               </property>
+              </item>
+              <item row="16" column="0">
+               <property name="text">
+                <string>0</string>
+               </property>
+              </item>
+              <item row="17" column="0">
+               <property name="text">
+                <string>0</string>
+               </property>
+              </item>
+              <item row="18" column="0">
+               <property name="text">
+                <string>0</string>
+               </property>
+              </item>
+              <item row="19" column="0">
+               <property name="text">
+                <string>0</string>
+               </property>
+              </item>
+              <item row="20" column="0">
+               <property name="text">
+                <string>0</string>
+               </property>
+              </item>
+              <item row="21" column="0">
+               <property name="text">
+                <string>0</string>
+               </property>
+              </item>
+              <item row="22" column="0">
+               <property name="text">
+                <string>0</string>
+               </property>
+              </item>
+              <item row="23" column="0">
+               <property name="text">
+                <string>0</string>
+               </property>
+              </item>
+              <item row="24" column="0">
+               <property name="text">
+                <string>0</string>
+               </property>
+              </item>
+              <item row="25" column="0">
+               <property name="text">
+                <string>0</string>
+               </property>
+              </item>
+              <item row="26" column="0">
+               <property name="text">
+                <string>0</string>
+               </property>
+              </item>
+              <item row="27" column="0">
+               <property name="text">
+                <string>0</string>
+               </property>
+              </item>
+              <item row="28" column="0">
+               <property name="text">
+                <string>0</string>
+               </property>
+              </item>
+              <item row="29" column="0">
+               <property name="text">
+                <string>0</string>
+               </property>
+              </item>
+              <item row="30" column="0">
+               <property name="text">
+                <string>0</string>
+               </property>
+              </item>
+              <item row="31" column="0">
+               <property name="text">
+                <string>0</string>
+               </property>
+              </item>
+              <item row="32" column="0">
+               <property name="text">
+                <string>0</string>
+               </property>
+              </item>
+              <item row="33" column="0">
+               <property name="text">
+                <string>0</string>
+               </property>
+              </item>
+              <item row="34" column="0">
+               <property name="text">
+                <string>0</string>
+               </property>
+              </item>
+              <item row="35" column="0">
+               <property name="text">
+                <string>0</string>
+               </property>
+              </item>
+              <item row="36" column="0">
+               <property name="text">
+                <string>0</string>
+               </property>
+              </item>
+              <item row="37" column="0">
+               <property name="text">
+                <string>0</string>
+               </property>
+              </item>
+              <item row="38" column="0">
+               <property name="text">
+                <string>0</string>
+               </property>
+              </item>
+              <item row="39" column="0">
+               <property name="text">
+                <string>0</string>
+               </property>
+              </item>
+              <item row="40" column="0">
+               <property name="text">
+                <string>0</string>
+               </property>
+              </item>
+              <item row="41" column="0">
+               <property name="text">
+                <string>0</string>
+               </property>
+              </item>
+             </widget>
+            </widget>
+           </item>
+          </layout>
          </widget>
-        </item>
-        <item>
-         <layout class="QVBoxLayout" name="photoLayout">
-          <property name="spacing">
-           <number>4</number>
-          </property>
-          <item>
-           <layout class="QHBoxLayout" name="photoHeaderLayout">
-            <property name="spacing">
-             <number>4</number>
-            </property>
-            <item>
-             <widget class="QLabel" name="photoHeader">
-              <property name="sizePolicy">
-               <sizepolicy hsizetype="Preferred" vsizetype="Preferred">
-                <horstretch>0</horstretch>
-                <verstretch>0</verstretch>
-               </sizepolicy>
-              </property>
-              <property name="text">
-               <string/>
-              </property>
-              <property name="alignment">
-               <set>Qt::AlignLeading|Qt::AlignLeft|Qt::AlignVCenter</set>
-              </property>
-             </widget>
-            </item>
-            <item>
-             <widget class="QLabel" name="photoFlag">
-              <property name="sizePolicy">
-               <sizepolicy hsizetype="Minimum" vsizetype="Preferred">
-                <horstretch>0</horstretch>
-                <verstretch>0</verstretch>
-               </sizepolicy>
-              </property>
-              <property name="text">
-               <string/>
-              </property>
-              <property name="alignment">
-               <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
-              </property>
-             </widget>
-            </item>
-           </layout>
-          </item>
-          <item>
-           <widget class="ClickableLabel" name="photo">
-            <property name="text">
-             <string/>
-            </property>
-           </widget>
-          </item>
-          <item>
-           <widget class="QLabel" name="flightDetails">
-            <property name="minimumSize">
-             <size>
-              <width>200</width>
-              <height>0</height>
-             </size>
-            </property>
-            <property name="maximumSize">
-             <size>
-              <width>200</width>
-              <height>16777215</height>
-             </size>
-            </property>
-            <property name="text">
-             <string/>
-            </property>
-            <property name="textFormat">
-             <enum>Qt::RichText</enum>
-            </property>
-           </widget>
-          </item>
-          <item>
-           <widget class="QLabel" name="aircraftDetails">
-            <property name="sizePolicy">
-             <sizepolicy hsizetype="Fixed" vsizetype="Preferred">
-              <horstretch>0</horstretch>
-              <verstretch>0</verstretch>
-             </sizepolicy>
-            </property>
-            <property name="minimumSize">
-             <size>
-              <width>200</width>
-              <height>0</height>
-             </size>
-            </property>
-            <property name="maximumSize">
-             <size>
-              <width>200</width>
-              <height>16777215</height>
-             </size>
-            </property>
-            <property name="text">
-             <string/>
-            </property>
-            <property name="textFormat">
-             <enum>Qt::RichText</enum>
-            </property>
-            <property name="alignment">
-             <set>Qt::AlignLeading|Qt::AlignLeft|Qt::AlignVCenter</set>
-            </property>
-           </widget>
-          </item>
-          <item>
-           <spacer name="photoVerticalSpacer">
-            <property name="orientation">
-             <enum>Qt::Vertical</enum>
-            </property>
-            <property name="sizeHint" stdset="0">
-             <size>
-              <width>0</width>
-              <height>40</height>
-             </size>
-            </property>
-           </spacer>
-          </item>
-         </layout>
         </item>
        </layout>
       </widget>
@@ -1436,12 +2332,23 @@
         <string>Aircraft map</string>
        </property>
        <property name="resizeMode">
-        <enum>QQuickWidget::SizeRootObjectToView</enum>
+        <enum>QQuickWidget::ResizeMode::SizeRootObjectToView</enum>
        </property>
        <property name="source">
         <url>
          <string/>
         </url>
+       </property>
+      </widget>
+      <widget class="QChartView" name="chart">
+       <property name="minimumSize">
+        <size>
+         <width>300</width>
+         <height>250</height>
+        </size>
+       </property>
+       <property name="toolTip">
+        <string>Chart. Use wheel to scale x-axis and shift+wheel to scale y-axis</string>
        </property>
       </widget>
      </widget>
@@ -1483,6 +2390,16 @@
    <extends>QLabel</extends>
    <header>gui/clickablelabel.h</header>
   </customwidget>
+  <customwidget>
+   <class>CheckList</class>
+   <extends>QComboBox</extends>
+   <header>gui/checklist.h</header>
+  </customwidget>
+  <customwidget>
+   <class>QChartView</class>
+   <extends>QGraphicsView</extends>
+   <header>QtCharts</header>
+  </customwidget>
  </customwidgets>
  <tabstops>
   <tabstop>deltaFrequency</tabstop>
@@ -1491,9 +2408,8 @@
   <tabstop>tapsPerPhase</tabstop>
   <tabstop>spb</tabstop>
   <tabstop>demodModeS</tabstop>
-  <tabstop>correlateFullPreamble</tabstop>
   <tabstop>threshold</tabstop>
-  <tabstop>getOSNDB</tabstop>
+  <tabstop>getAircraftDB</tabstop>
   <tabstop>getAirportDB</tabstop>
   <tabstop>getAirspacesDB</tabstop>
   <tabstop>displaySettings</tabstop>
@@ -1507,12 +2423,11 @@
   <tabstop>logOpen</tabstop>
   <tabstop>findOnMapFeature</tabstop>
   <tabstop>amDemod</tabstop>
-  <tabstop>adsbData</tabstop>
   <tabstop>map</tabstop>
  </tabstops>
  <resources>
   <include location="../../../sdrgui/resources/res.qrc"/>
-  <include location="icons.qrc"/>
+  <include location="adsbdemodicons.qrc"/>
  </resources>
  <connections/>
 </ui>
