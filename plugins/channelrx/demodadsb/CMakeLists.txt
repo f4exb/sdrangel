@@ -28,7 +28,6 @@ set(adsb_HEADERS
 
 include_directories(
     ${CMAKE_SOURCE_DIR}/swagger/sdrangel/code/qt5/client
-    ${Boost_INCLUDE_DIRS}
 )
 
 if(NOT SERVER_MODE)
@@ -47,6 +46,7 @@ if(NOT SERVER_MODE)
         adsbdemodicons.qrc
         airlinelogos.qrc
         flags.qrc
+        sideviews.qrc
     )
     set(adsb_HEADERS
         ${adsb_HEADERS}
@@ -60,7 +60,7 @@ if(NOT SERVER_MODE)
     )
 
     set(TARGET_NAME ${PLUGINS_PREFIX}demodadsb)
-    set(TARGET_LIB Qt::Widgets Qt::Quick Qt::QuickWidgets Qt::Positioning)
+    set(TARGET_LIB Qt::Widgets Qt::Quick Qt::QuickWidgets Qt::Positioning Qt::Charts)
     if(Qt${QT_DEFAULT_MAJOR_VERSION}Location_FOUND)
         list(APPEND TARGET_LIB Qt::Location)
     endif()
@@ -86,12 +86,7 @@ if(NOT BUILD_SHARED_LIBS)
     set_property(GLOBAL APPEND PROPERTY STATIC_PLUGINS_PROPERTY ${TARGET_NAME})
 endif()
 
-if (NOT WIN32)
-    link_directories(${Boost_LIBRARY_DIRS})
-endif()
-
 target_link_libraries(${TARGET_NAME} PRIVATE
-    Boost::disable_autolinking
     Qt::Core
     ${TARGET_LIB}
     sdrbase
