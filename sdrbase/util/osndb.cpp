@@ -28,9 +28,11 @@
 #endif
 
 #include "util/osndb.h"
+#include "util/corsproxy.h"
 
 QHash<QString, QIcon *> AircraftInformation::m_airlineIcons;
 QHash<QString, bool> AircraftInformation::m_airlineMissingIcons;
+QHash<QString, QIcon *> AircraftInformation::m_sideviewIcons;
 QHash<QString, QIcon *> AircraftInformation::m_flagIcons;
 QHash<QString, QString> *AircraftInformation::m_prefixMap;
 QHash<QString, QString> *AircraftInformation::m_militaryMap;
@@ -38,6 +40,7 @@ QMutex AircraftInformation::m_mutex;
 
 QSharedPointer<const QHash<int, AircraftInformation *>> OsnDB::m_aircraftInformation;
 QSharedPointer<const QHash<QString, AircraftInformation *>> OsnDB::m_aircraftInformationByReg;
+QSharedPointer<const QHash<QString, AircraftRouteInformation *>> OsnDB::m_aircraftRouteInformation;
 QDateTime OsnDB::m_modifiedDateTime;
 
 
@@ -54,9 +57,9 @@ OsnDB::~OsnDB()
 
 void OsnDB::downloadAircraftInformation()
 {
-    QString filename = OsnDB::getOSNDBZipFilename();
+    QString filename = OsnDB::getZipFilename();
     QString urlString = OSNDB_URL;
-    QUrl dbURL(urlString);
+    QUrl dbURL(CORSProxy::adjustHost(urlString));
     qDebug() << "OsnDB::downloadAircraftInformation: Downloading " << urlString;
     emit downloadingURL(urlString);
     QNetworkReply *reply = m_dlm.download(dbURL, filename);
@@ -72,38 +75,18 @@ void OsnDB::downloadFinished(const QString& filename, bool success)
         qWarning() << "OsnDB::downloadFinished: Failed to download: " << filename;
         emit downloadError(QString("Failed to download: %1").arg(filename));
     }
-    else if (filename == OsnDB::getOSNDBZipFilename())
+    else if (filename == OsnDB::getZipFilename())
     {
         // Extract .csv file from .zip file
         QZipReader reader(filename);
-        QByteArray database = reader.fileData("media/data/samples/metadata/aircraftDatabase.csv");
-        if (database.size() > 0)
+        if (reader.extractAll(getDataDir()))
         {
-            QFile file(OsnDB::getOSNDBFilename());
-            if (file.open(QIODevice::WriteOnly))
-            {
-                file.write(database);
-                file.close();
-                emit downloadAircraftInformationFinished();
-            }
-            else
-            {
-                qWarning() << "OsnDB::downloadFinished - Failed to open " << file.fileName() << " for writing";
-                emit downloadError(QString("Failed to open %1 for writing").arg(file.fileName()));
-            }
+            emit downloadAircraftInformationFinished();
         }
         else
         {
-            qWarning() << "OsnDB::downloadFinished - aircraftDatabase.csv not in expected dir. Extracting all.";
-            if (reader.extractAll(getDataDir()))
-            {
-                emit downloadAircraftInformationFinished();
-            }
-            else
-            {
-                qWarning() << "OsnDB::downloadFinished - Failed to extract files from " << filename;
-                emit downloadError(QString("Failed to extract files from ").arg(filename));
-            }
+            qWarning() << "OsnDB::downloadFinished - Failed to extract files from " << filename;
+            emit downloadError(QString("Failed to extract files from ").arg(filename));
         }
     }
     else
@@ -153,6 +136,14 @@ QSharedPointer<const QHash<QString, AircraftInformation *>> OsnDB::getAircraftIn
     return m_aircraftInformationByReg;
 }
 
+QSharedPointer<const QHash<QString, AircraftRouteInformation *>>  OsnDB::getAircraftRouteInformation()
+{
+    if (!m_aircraftRouteInformation) {
+        m_aircraftRouteInformation = QSharedPointer<const QHash<QString, AircraftRouteInformation *>>(OsnDB::readRouteDB(getRouteDBFilename()));
+    }
+    return m_aircraftRouteInformation;
+}
+
 QHash<int, AircraftInformation *> *OsnDB::readOSNDB(const QString &filename)
 {
     int cnt = 0;
@@ -163,6 +154,7 @@ QHash<int, AircraftInformation *> *OsnDB::readOSNDB(const QString &filename)
     int registrationCol = 1;
     int manufacturerNameCol = 3;
     int modelCol = 4;
+    int typeCodeCol = 5;
     int ownerCol = 13;
     int operatorCol = 9;
     int operatorICAOCol = 11;
@@ -193,6 +185,8 @@ QHash<int, AircraftInformation *> *OsnDB::readOSNDB(const QString &filename)
                     manufacturerNameCol = idx;
                 else if (!strcmp(p, "model"))
                     modelCol = idx;
+                else if (!strcmp(p, "typecode"))
+                    typeCodeCol = idx;
                 else if (!strcmp(p, "owner"))
                     ownerCol = idx;
                 else if (!strcmp(p, "operator"))
@@ -215,6 +209,8 @@ QHash<int, AircraftInformation *> *OsnDB::readOSNDB(const QString &filename)
                 size_t manufacturerNameLen = 0;
                 char *model = NULL;
                 size_t modelLen = 0;
+                char *typeCode = NULL;
+                size_t typeCodeLen = 0;
                 char *owner = NULL;
                 size_t ownerLen = 0;
                 char *operatorName = NULL;
@@ -263,6 +259,12 @@ QHash<int, AircraftInformation *> *OsnDB::readOSNDB(const QString &filename)
                         model = p+1;
                         modelLen = strlen(model)-1;
                         model[modelLen] = '\0';
+                    }
+                    else if (idx == typeCodeCol)
+                    {
+                        typeCode = p+1;
+                        typeCodeLen = strlen(typeCode)-1;
+                        typeCode[typeCodeLen] = '\0';
                     }
                     else if (idx == ownerCol)
                     {
@@ -315,6 +317,7 @@ QHash<int, AircraftInformation *> *OsnDB::readOSNDB(const QString &filename)
                     aircraft->m_registration = QString(registration);
                     aircraft->m_manufacturerName = QString(manufacturerName);
                     aircraft->m_model = modelQ;
+                    aircraft->m_type = QString(typeCode);
                     aircraft->m_owner = QString(owner);
                     aircraft->m_operator = QString(operatorName);
                     aircraft->m_operatorICAO = QString(operatorICAO);
@@ -353,7 +356,7 @@ bool OsnDB::writeFastDB(const QString &filename, const QHash<int, AircraftInform
     QFile file(filename);
     if (file.open(QIODevice::WriteOnly))
     {
-        file.write("icao24,registration,manufacturername,model,owner,operator,operatoricao,registered\n");
+        file.write("icao24,registration,manufacturername,model,typecode,owner,operator,operatoricao,registered\n");
         QHash<int, AircraftInformation *>::const_iterator i = aircraftInfo->begin();
         while (i != aircraftInfo->end())
         {
@@ -365,6 +368,8 @@ bool OsnDB::writeFastDB(const QString &filename, const QHash<int, AircraftInform
             file.write(info->m_manufacturerName.toUtf8());
             file.write(",");
             file.write(info->m_model.toUtf8());
+            file.write(",");
+            file.write(info->m_type.toUtf8());
             file.write(",");
             file.write(info->m_owner.toUtf8());
             file.write(",");
@@ -402,7 +407,7 @@ QHash<int, AircraftInformation *> *OsnDB::readFastDB(const QString &filename)
         if (fgets(row, sizeof(row), file))
         {
             // Check header
-            if (!strcmp(row, "icao24,registration,manufacturername,model,owner,operator,operatoricao,registered\n"))
+            if (!strcmp(row, "icao24,registration,manufacturername,model,typecode,owner,operator,operatoricao,registered\n"))
             {
                 aircraftInfo = new QHash<int, AircraftInformation *>();
                 aircraftInfo->reserve(500000);
@@ -417,6 +422,7 @@ QHash<int, AircraftInformation *> *OsnDB::readFastDB(const QString &filename)
                     aircraft->m_registration = QString(csvNext(&p));
                     aircraft->m_manufacturerName = QString(csvNext(&p));
                     aircraft->m_model = QString(csvNext(&p));
+                    aircraft->m_type = QString(csvNext(&p));
                     aircraft->m_owner = QString(csvNext(&p));
                     aircraft->m_operator = QString(csvNext(&p));
                     aircraft->m_operatorICAO = QString(csvNext(&p));
@@ -426,7 +432,7 @@ QHash<int, AircraftInformation *> *OsnDB::readFastDB(const QString &filename)
                 }
             }
             else
-                qDebug() << "AircraftInformation::readFastDB: Unexpected header";
+                qDebug() << "AircraftInformation::readFastDB: Unexpected header" << row;
         }
         else
             qDebug() << "AircraftInformation::readFastDB: Empty file";
@@ -438,6 +444,60 @@ QHash<int, AircraftInformation *> *OsnDB::readFastDB(const QString &filename)
     qDebug() << "AircraftInformation::readFastDB - read " << cnt << " aircraft";
 
     return aircraftInfo;
+}
+
+QHash<QString, AircraftRouteInformation *> *OsnDB::readRouteDB(const QString &filename)
+{
+    int cnt = 0;
+    QHash<QString, AircraftRouteInformation *> *routeInfo = nullptr;
+
+    qDebug() << "AircraftInformation::readRouteDB: " << filename;
+
+    FILE *file;
+    QByteArray utfFilename = filename.toUtf8();
+    if ((file = fopen(utfFilename.constData(), "r")) != NULL)
+    {
+        char row[2048];
+
+        if (fgets(row, sizeof(row), file))
+        {
+            // Check header
+            if (!strcmp(row, "callsign,dep,arr,stops\n"))
+            {
+                routeInfo = new QHash<QString, AircraftRouteInformation *>();
+                routeInfo->reserve(600000);
+                // Read data
+                while (fgets(row, sizeof(row), file))
+                {
+                    char *p = row;
+                    AircraftRouteInformation *route = new AircraftRouteInformation();
+                    route->m_callsign = QString(csvNext(&p));
+                    route->m_dep = QString(csvNext(&p));
+                    route->m_arr = QString(csvNext(&p));
+                    route->m_stops = QString(csvNext(&p));
+                    routeInfo->insert(route->m_callsign, route);
+                    cnt++;
+                }
+            }
+            else
+            {
+                qDebug() << "AircraftInformation::readRouteDB: Unexpected header" << row;
+            }
+        }
+        else
+        {
+            qDebug() << "AircraftInformation::readRouteDB: Empty file";
+        }
+        fclose(file);
+    }
+    else
+    {
+        qDebug() << "AircraftInformation::readRouteDB: Failed to open " << filename;
+    }
+
+    qDebug() << "AircraftInformation::readRouteDB - read " << cnt << " routes";
+
+    return routeInfo;
 }
 
 QString AircraftInformation::getFlag() const
@@ -499,7 +559,7 @@ QString AircraftInformation::getFlag() const
 
 QString AircraftInformation::getAirlineIconPath(const QString &operatorICAO)
 {
-    QString endPath = QString("/airlinelogos/%1.bmp").arg(operatorICAO);
+    QString endPath = QString("/airlinelogos/%1.png").arg(operatorICAO);
     // Try in user directory first, so they can customise
     QString userIconPath = OsnDB::getDataDir() + endPath;
     QFile file(userIconPath);
@@ -539,12 +599,81 @@ QIcon *AircraftInformation::getAirlineIcon(const QString &operatorICAO)
         {
             if (!m_airlineMissingIcons.contains(operatorICAO))
             {
-                qDebug() << "ADSBDemodGUI: No airline logo for " << operatorICAO;
+                qDebug() << "AircraftInformation: No airline logo for " << operatorICAO;
                 m_airlineMissingIcons.insert(operatorICAO, true);
             }
         }
         return icon;
     }
+}
+
+QString AircraftInformation::getSideviewIconPath(const QString &registration, const QString &operatorICAO, const QString &modelICAO)
+{
+    QString p1 = QString(":/sideviews/%1.png").arg(registration);
+    QResource r1(p1);
+    if (r1.isValid()) {
+        return p1;
+    }
+
+    QString opModel = operatorICAO + modelICAO;
+    QString p2 = QString(":/sideviews/%1.png").arg(opModel);
+    QResource r2(p2);
+    if (r2.isValid()) {
+        return p2;
+    }
+
+    QString p3 = QString(":/sideviews/%1.png").arg(modelICAO);
+    QResource r3(p3);
+    if (r3.isValid()) {
+       return p3;
+    }
+
+    return QString();
+}
+
+QIcon *AircraftInformation::getSideviewIcon(const QString &registration, const QString &operatorICAO, const QString &modelICAO)
+{
+    QIcon *icon = nullptr;
+
+    if (m_sideviewIcons.contains(registration)) {
+        return m_sideviewIcons.value(registration);
+    }
+    QString p1 = QString(":/sideviews/%1.png").arg(registration);
+    QResource r1(p1);
+    if (r1.isValid())
+    {
+        icon = new QIcon(p1);
+        m_sideviewIcons.insert(registration, icon);
+        return icon;
+    }
+
+    QString opModel = operatorICAO + modelICAO;
+    if (m_sideviewIcons.contains(opModel)) {
+        return m_sideviewIcons.value(opModel);
+    }
+    QString p2 = QString(":/sideviews/%1.png").arg(opModel);
+    QResource r2(p2);
+    if (r2.isValid())
+    {
+        icon = new QIcon(p2);
+        m_sideviewIcons.insert(opModel, icon);
+        return icon;
+    }
+
+    if (m_sideviewIcons.contains(modelICAO)) {
+        return m_sideviewIcons.value(modelICAO);
+    }
+    QString p3 = QString(":/sideviews/%1.png").arg(modelICAO);
+    QResource r3(p3);
+    if (r3.isValid())
+    {
+        icon = new QIcon(p3);
+        m_sideviewIcons.insert(modelICAO, icon);
+        return icon;
+    }
+
+    qDebug() << "AircraftInformation: No sideview for " << opModel;
+    return nullptr;
 }
 
 QString AircraftInformation::getFlagIconPath(const QString &country)
@@ -572,9 +701,13 @@ QString AircraftInformation::getFlagIconPath(const QString &country)
 
 QString AircraftInformation::getFlagIconURL(const QString &country)
 {
-    QString path = getFlagIconPath(country);
+    return resourcePathToURL(getFlagIconPath(country));
+}
+
+QString AircraftInformation::resourcePathToURL(const QString &path)
+{
     if (path.startsWith(':')) {
-        path = "qrc://" + path.mid(1);
+        return "qrc://" + path.mid(1);
     }
     return path;
 }

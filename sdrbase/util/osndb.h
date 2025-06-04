@@ -34,7 +34,15 @@
 #include "util/httpdownloadmanager.h"
 #include "export.h"
 
-#define OSNDB_URL "https://s3.opensky-network.org/data-samples/metadata/aircraftDatabase.zip"
+//#define OSNDB_URL "https://s3.opensky-network.org/data-samples/metadata/aircraftDatabase.zip"
+#define OSNDB_URL "https://sdrangel.org/downloads/aircraftDatabase.zip"
+
+struct SDRBASE_API AircraftRouteInformation {
+    QString m_callsign; // Aircraft callsign
+    QString m_dep;      // Departure airport ICAO
+    QString m_arr;      // Arrival airport ICAO
+    QString m_stops;    // Airport ICAO of stops on route '-' separated list
+};
 
 struct SDRBASE_API AircraftInformation {
 
@@ -42,6 +50,7 @@ struct SDRBASE_API AircraftInformation {
     QString m_registration;
     QString m_manufacturerName;
     QString m_model;
+    QString m_type;
     QString m_owner;
     QString m_operator;
     QString m_operatorICAO;
@@ -68,16 +77,22 @@ struct SDRBASE_API AircraftInformation {
     // Try to find an airline logo based on ICAO
     static QIcon *getAirlineIcon(const QString &operatorICAO);
 
+    static QIcon *getSideviewIcon(const QString &registration, const QString &operatorICAO, const QString &modelICAO);
+    static QString getSideviewIconPath(const QString &registration, const QString &operatorICAO, const QString &modelICAO);
+
     static QString getFlagIconPath(const QString &country);
     static QString getFlagIconURL(const QString &country);
 
     // Try to find an flag logo based on a country
     static QIcon *getFlagIcon(const QString &country);
 
+    static QString resourcePathToURL(const QString &path);
+
 private:
 
     static QHash<QString, QIcon *> m_airlineIcons; // Hashed on airline ICAO
     static QHash<QString, bool> m_airlineMissingIcons; // Hash containing which ICAOs we don't have icons for
+    static QHash<QString, QIcon *> m_sideviewIcons;
     static QHash<QString, QIcon *> m_flagIcons;    // Hashed on country
     static QHash<QString, QString> *m_prefixMap;   // Registration to country (flag name)
     static QHash<QString, QString> *m_militaryMap;   // Operator airforce to military (flag name)
@@ -97,8 +112,9 @@ public:
 
     static QSharedPointer<const QHash<int, AircraftInformation *>> getAircraftInformation();
     static QSharedPointer<const QHash<QString, AircraftInformation *>> getAircraftInformationByReg();
+    static QSharedPointer<const QHash<QString, AircraftRouteInformation *>> getAircraftRouteInformation();
 
-    static QString getOSNDBZipFilename()
+    static QString getZipFilename()
     {
         return getDataDir() + "/aircraftDatabase.zip";
     }
@@ -121,6 +137,7 @@ private:
 
     static QSharedPointer<const QHash<int, AircraftInformation *>> m_aircraftInformation;
     static QSharedPointer<const QHash<QString, AircraftInformation *>> m_aircraftInformationByReg;
+    static QSharedPointer<const QHash<QString, AircraftRouteInformation *>> m_aircraftRouteInformation;
     static QDateTime m_modifiedDateTime;
 
     // Write a reduced size and validated version of the DB, so it loads quicker
@@ -128,6 +145,8 @@ private:
 
     // Read smaller CSV file with no validation. Takes about 0.5s instead of 2s.
     static QHash<int, AircraftInformation *> *readFastDB(const QString &filename);
+
+    static QHash<QString, AircraftRouteInformation *> *readRouteDB(const QString &filename);
 
     // Read OpenSky Network CSV file
     // This is large and contains lots of data we don't want, so we convert to
@@ -139,6 +158,11 @@ private:
     static QString getFastDBFilename()
     {
         return getDataDir() + "/aircraftDatabaseFast.csv";
+    }
+
+    static QString getRouteDBFilename()
+    {
+        return getDataDir() + "/aircraftRouteDatabase.csv";
     }
 
     // Create hash table using registration as key
