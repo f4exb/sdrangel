@@ -22,7 +22,7 @@
 #include <cmath>
 
 // Calculate cartesian distance between two points
-double AzEl::cartDistance(const AzElPoint& a, const AzElPoint& b)
+double AzEl::cartDistance(const AzElPoint& a, const AzElPoint& b) const
 {
     double dx = b.m_cart.m_x - a.m_cart.m_x;
     double dy = b.m_cart.m_y - a.m_cart.m_y;
@@ -31,7 +31,7 @@ double AzEl::cartDistance(const AzElPoint& a, const AzElPoint& b)
 }
 
 // Calculate vector difference then normalise the result
-bool AzEl::normVectorDiff(const AzElCartesian& a, const AzElCartesian& b, AzElCartesian& n)
+bool AzEl::normVectorDiff(const AzElCartesian& a, const AzElCartesian& b, AzElCartesian& n) const
 {
     n.m_x = b.m_x - a.m_x;
     n.m_y = b.m_y - a.m_y;
