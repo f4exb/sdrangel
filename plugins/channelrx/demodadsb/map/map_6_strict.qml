@@ -16,6 +16,7 @@ Item {
     property bool lightIcons
     property variant guiPtr
     property bool smoothing
+    property bool showContainmentRadius
 
     function createMap(pluginParameters, requestedMap, gui) {
         requestedMapType = requestedMap
@@ -98,13 +99,6 @@ Item {
             MapItemView {
                 model: airportModel
                 delegate: airportComponent
-                parent: mapView.map
-            }
-
-            // This needs to be before aircraftComponent MapItemView, so it's drawn underneath
-            MapItemView {
-                model: aircraftModel
-                delegate: aircraftPathComponent
                 parent: mapView.map
             }
 
@@ -238,99 +232,113 @@ Item {
         id: aircraftPathComponent
         MapPolyline {
             line.width: 2
-            line.color: 'gray'
-            path: aircraftPath
+            line.color: color
+            path: coordinates
         }
     }
 
     Component {
         id: aircraftComponent
-        MapQuickItem {
-            id: aircraft
-            anchorPoint.x: image.width/2
-            anchorPoint.y: image.height/2
-            coordinate: position
-            zoomLevel: aircraftZoomLevel
+        MapItemGroup {
+            MapItemView {
+                model: aircraftPathModel
+                delegate: aircraftPathComponent
+            }
+            MapCircle {
+                id: containmentRadiusCircle
+                border.width: 1
+                border.color: "red"
+                radius: containmentRadius
+                center: position
+                visible: showContainmentRadius && (containmentRadius > 0)
+            }
+            MapQuickItem {
+                id: aircraft
+                anchorPoint.x: image.width/2
+                anchorPoint.y: image.height/2
+                coordinate: position
+                zoomLevel: aircraftZoomLevel
 
-            sourceItem: Grid {
-                columns: 1
-                Grid {
-                    layer.enabled: smoothing
-                    layer.smooth: smoothing
-                    horizontalItemAlignment: Grid.AlignHCenter
-                    Image {
-                        id: image
-                        rotation: heading
-                        source: aircraftImage
-                        visible: !lightIcons
-                        MouseArea {
-                            anchors.fill: parent
-                            acceptedButtons: Qt.LeftButton | Qt.RightButton
-                            onClicked: {
-                                if (mouse.button === Qt.LeftButton) {
+                sourceItem: Grid {
+                    columns: 1
+                    Grid {
+                        layer.enabled: smoothing
+                        layer.smooth: smoothing
+                        horizontalItemAlignment: Grid.AlignHCenter
+                        Image {
+                            id: image
+                            rotation: heading
+                            source: aircraftImage
+                            visible: !lightIcons
+                            MouseArea {
+                                anchors.fill: parent
+                                acceptedButtons: Qt.LeftButton | Qt.RightButton
+                                onClicked: {
+                                    if (mouse.button === Qt.LeftButton) {
+                                        highlighted = true
+                                        console.log("z=" + aircraft.sourceItem.z)
+                                        aircraft.sourceItem.z = aircraft.sourceItem.z + 1
+                                    } else if (mouse.button === Qt.RightButton) {
+                                        contextMenu.popup()
+                                    }
+                                }
+                                onDoubleClicked: {
+                                    target = true
+                                }
+                            }
+                        }
+                        MultiEffect {
+                            width: image.width
+                            height: image.height
+                            rotation: heading
+                            source: image
+                            brightness: 1.0
+                            colorization: 1.0
+                            colorizationColor:  "#c0ffffff"
+                            visible: lightIcons
+                            MouseArea {
+                                anchors.fill: parent
+                                onClicked: {
                                     highlighted = true
-                                    console.log("z=" + aircraft.sourceItem.z)
-                                    aircraft.sourceItem.z = aircraft.sourceItem.z + 1
-                                } else if (mouse.button === Qt.RightButton) {
-                                    contextMenu.popup()
+                                }
+                                onDoubleClicked: {
+                                    target = true
                                 }
                             }
-                            onDoubleClicked: {
-                                target = true
-                            }
                         }
-                    }
-                    MultiEffect {
-                        width: image.width
-                        height: image.height
-                        rotation: heading
-                        source: image
-                        brightness: 1.0
-                        colorization: 1.0
-                        colorizationColor:  "#c0ffffff"
-                        visible: lightIcons
-                        MouseArea {
-                            anchors.fill: parent
-                            onClicked: {
-                                highlighted = true
+                        Rectangle {
+                            id: bubble
+                            color: bubbleColour
+                            border.width: 1
+                            width: text.width * 1.1
+                            height: text.height * 1.1
+                            radius: 5
+                            Text {
+                                id: text
+                                anchors.centerIn: parent
+                                text: adsbData
+                                textFormat: TextEdit.RichText
                             }
-                            onDoubleClicked: {
-                                target = true
-                            }
-                        }
-                    }
-                    Rectangle {
-                        id: bubble
-                        color: bubbleColour
-                        border.width: 1
-                        width: text.width * 1.1
-                        height: text.height * 1.1
-                        radius: 5
-                        Text {
-                            id: text
-                            anchors.centerIn: parent
-                            text: adsbData
-                            textFormat: TextEdit.RichText
-                        }
-                        MouseArea {
-                            anchors.fill: parent
-                            acceptedButtons: Qt.LeftButton | Qt.RightButton
-                            onClicked: {
-                                if (mouse.button === Qt.LeftButton) {
-                                    showAll = !showAll
-                                } else if (mouse.button === Qt.RightButton) {
-                                    contextMenu.popup()
+                            MouseArea {
+                                anchors.fill: parent
+                                acceptedButtons: Qt.LeftButton | Qt.RightButton
+                                onClicked: {
+                                    if (mouse.button === Qt.LeftButton) {
+                                        showAll = !showAll
+                                    } else if (mouse.button === Qt.RightButton) {
+                                        contextMenu.popup()
+                                    }
                                 }
-                            }
-                            Menu {
-                                id: contextMenu
-                                MenuItem {
-                                    text: "Set as target"
-                                    onTriggered: target = true
-                                }
-                                MenuItem {
-                                    text: "Find on feature map"
-                                    onTriggered: aircraftModel.findOnMap(index)
+                                Menu {
+                                    id: contextMenu
+                                    MenuItem {
+                                        text: "Set as target"
+                                        onTriggered: target = true
+                                    }
+                                    MenuItem {
+                                        text: "Find on feature map"
+                                        onTriggered: aircraftModel.findOnMap(index)
+                                    }
                                 }
                             }
                         }
