@@ -227,6 +227,7 @@ set(sdrbase_SOURCES
     util/callsign.cpp
     util/colormap.cpp
     util/coordinates.cpp
+    util/corsproxy.cpp
     util/countrydat.cpp
     util/crc.cpp
     util/CRC64.cpp
@@ -482,6 +483,7 @@ set(sdrbase_HEADERS
     util/callsign.h
     util/colormap.h
     util/coordinates.h
+    util/corsproxy.h
     util/countrydat.h
     util/CRC64.h
     util/csv.h
