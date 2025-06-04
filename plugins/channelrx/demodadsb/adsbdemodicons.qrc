@@ -3,7 +3,13 @@
     <file>icons/aircraft.png</file>
     <file>icons/airport.png</file>
     <file>icons/controltower.png</file>
+    <file>icons/coverage.png</file>
     <file>icons/allflightpaths.png</file>
     <file>icons/vor.png</file>
+    <file>icons/stats.png</file>
+    <file>icons/chart.png</file>
+    <file>icons/horizontal.png</file>
+    <file>icons/vertical.png</file>
+    <file>icons/radius.png</file>
   </qresource>
 </RCC>
