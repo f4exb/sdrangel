@@ -143,10 +143,6 @@ void ADSBDemodSinkWorker::handleModeS(unsigned char *data, int bytes, unsigned i
             for (int i = 0; i < l.size(); i++)
             {
                 int df2 = ((l[i].m_data[0] >> 3) & ADS_B_DF_MASK);
-                Real corr = CalcDb::dbPower(m_correlationScale * l[i].m_preambleCorrelation);
-
-                int curAltitude = -1;
-                int curId = -1;
 
                 if ((df2 == 0) || (df2 == 4) || (df2 == 16) || (df2 == 20))
                 {
