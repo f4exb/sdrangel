@@ -16,6 +16,7 @@ set(sdrgui_SOURCES
     gui/basicfeaturesettingsdialog.cpp
     gui/buttonswitch.cpp
     gui/channeladddialog.cpp
+    gui/checklist.cpp
     gui/clickablelabel.cpp
     gui/colordialog.cpp
     gui/colormapper.cpp
@@ -146,6 +147,7 @@ set(sdrgui_HEADERS
     gui/basicfeaturesettingsdialog.h
     gui/buttonswitch.h
     gui/channeladddialog.h
+    gui/checklist.h
     gui/colordialog.h
     gui/colormapper.h
     gui/commanditem.h
