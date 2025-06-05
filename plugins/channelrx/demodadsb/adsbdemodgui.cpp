@@ -686,8 +686,16 @@ void Aircraft::addCoordinate(const QDateTime& dateTime, AircraftModel *model)
 
         if (keepCount <= 0)
         {
+#if (QT_VERSION >= QT_VERSION_CHECK(6, 0, 0))
             m_recentCoordinates.remove(0, i + 1);
             m_recentCoordinateColors.remove(0, i + 1);
+#else
+            for (int j = 0; j < i + 1; j++)
+            {
+                m_recentCoordinates.removeAt(0);
+                m_recentCoordinateColors.removeAt(0);
+            }
+#endif
             removed = true;
             break;
         }
@@ -696,7 +704,13 @@ void Aircraft::addCoordinate(const QDateTime& dateTime, AircraftModel *model)
             if (size > keepCount)
             {
                 int remove = size - keepCount + 1;
+#if (QT_VERSION >= QT_VERSION_CHECK(6, 0, 0))
                 m_recentCoordinates[i].remove(0, remove);
+#else
+                for (int j = 0; j < remove; j++) {
+                    m_recentCoordinates[i].removeAt(0);
+                }
+#endif
                 removed = true;
                 keepCount -= remove;
             }
@@ -1114,7 +1128,7 @@ QVariant AirspaceModel::data(const QModelIndex &index, int role) const
     else if (role == AirspaceModel::airspaceFillColorRole)
     {
         if (m_airspaces[row]->m_name.startsWith("IC")) {
-            int ic = m_airspaces[row]->m_name.sliced(3).toInt();
+            int ic = m_airspaces[row]->m_name.mid(3).toInt();
             int i = (ic & 0x3f) * 3;
 
             return QVariant::fromValue(QColor(colors[i], colors[i+1], colors[i+2], 0x40));
@@ -1545,7 +1559,8 @@ Aircraft *ADSBDemodGUI::getAircraft(int icao, bool &newAircraft)
         newAircraft = true;
         aircraft = new Aircraft(this);
         aircraft->m_icao = icao;
-        aircraft->m_icaoHex = QString::number(aircraft->m_icao, 16);
+        //aircraft->m_icaoHex = QString::number(aircraft->m_icao, 16);
+        aircraft->m_icaoHex = QString("%1").arg(aircraft->m_icao, 6, 16, QChar('0'));
         m_aircraft.insert(icao, aircraft);
         aircraft->m_icaoItem->setText(aircraft->m_icaoHex);
         ui->adsbData->setSortingEnabled(false);
@@ -2061,12 +2076,12 @@ void ADSBDemodGUI::handleADSB(
         } else if (updateTCStats(tc, TC_9_18, 9, 18)) {
         } else if (updateTCStats(tc, TC_19, 19, 19)) {
         } else if (updateTCStats(tc, TC_20_22, 20, 22)) {
-        } else if (updateTCStats(tc, TC_RESERVED, 23, 23)) {
+        } else if (updateTCStats(tc, TC_UNUSED, 23, 23)) {
         } else if (updateTCStats(tc, TC_24, 24, 24)) {
-        } else if (updateTCStats(tc, TC_RESERVED, 25, 27)) {
+        } else if (updateTCStats(tc, TC_UNUSED, 25, 27)) {
         } else if (updateTCStats(tc, TC_28, 28, 28)) {
         } else if (updateTCStats(tc, TC_29, 29, 29)) {
-        } else if (updateTCStats(tc, TC_RESERVED, 30, 30)) {
+        } else if (updateTCStats(tc, TC_UNUSED, 30, 30)) {
         } else if (updateTCStats(tc, TC_31, 31, 31)) {
         }
 
@@ -5514,7 +5529,7 @@ void ADSBDemodGUI::adsbData_customContextMenuRequested(QPoint pos)
         } else {
             return;
         }
-        QString icaoHex = QString("%1").arg(icao, 6, 16, '0');
+        QString icaoHex = QString("%1").arg(icao, 6, 16, QChar('0'));
 
         QMenu* tableContextMenu = new QMenu(ui->adsbData);
         connect(tableContextMenu, &QMenu::aboutToHide, tableContextMenu, &QMenu::deleteLater);
@@ -8631,7 +8646,13 @@ void ADSBDemodGUI::initCoverageMap()
     float lon = m_azEl.getLocationSpherical().m_longitude;
     for (int i = 0; i < 2; i++)
     {
+#if (QT_VERSION >= QT_VERSION_CHECK(6, 0, 0))
         m_maxRange[i].resize(360/ADSBDemodGUI::m_maxRangeDeg, 0.0f);
+#else
+        for (int j = 0; j < 360/ADSBDemodGUI::m_maxRangeDeg; j++) {
+            m_maxRange[i].append(0.0f);
+        }
+#endif
         m_coverageAirspace[i].m_polygon.resize(2 * 360/ADSBDemodGUI::m_maxRangeDeg);
         m_coverageAirspace[i].m_center.setX(lon);
         m_coverageAirspace[i].m_center.setY(lat);

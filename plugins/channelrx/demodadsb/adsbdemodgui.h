@@ -971,7 +971,7 @@ public:
     }
 
 private:
-    QList<Airspace *> m_airspaces;
+    QList<const Airspace *> m_airspaces;
     QList<QVariantList> m_polygons;
 
     void updatePolygon(const Airspace *airspace, int row)
@@ -1266,7 +1266,7 @@ private:
         TC_28,
         TC_29,
         TC_31,
-        TC_RESERVED,
+        TC_UNUSED,
         DF0,
         DF4,
         DF5,
