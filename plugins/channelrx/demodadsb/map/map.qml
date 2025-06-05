@@ -222,8 +222,8 @@ Item {
         id: aircraftPathComponent
         MapPolyline {
             line.width: 2
-            line.color: 'gray'
-            path: aircraftPath
+            line.color: color
+            path: coordinates
         }
     }
 
