@@ -1929,7 +1929,6 @@ void MapGUI::applyMap3DSettings(bool reloadMap)
         ui->web->load(QUrl(QString("http://127.0.0.1:%1/map/map/map3d.html").arg(m_webPort)));
         //ui->web->load(QUrl(QString("http://webglreport.com/")));
         //ui->web->load(QUrl(QString("https://sandcastle.cesium.com/")));
-        //ui->web->load(QUrl("chrome://gpu/"));
         ui->web->show();
     }
     else if (!m_settings.m_map3DEnabled && (m_cesium != nullptr))
@@ -1948,9 +1947,11 @@ void MapGUI::applyMap3DSettings(bool reloadMap)
         m_cesium->setCameraReferenceFrame(m_settings.m_eciCamera);
         m_cesium->setAntiAliasing(m_settings.m_fxaa, m_settings.m_msaa);
         m_cesium->getDateTime();
+        m_cesium->setViewFirstPerson(m_settings.m_viewFirstPerson);
         m_cesium->setHDR(m_settings.m_hdr);
         m_cesium->setFog(m_settings.m_fog);
         m_cesium->showFPS(m_settings.m_fps);
+        m_cesium->showPFD(m_settings.m_displayPFD);
         m_cesium->showMUF(m_settings.m_displayMUF);
         m_cesium->showfoF2(m_settings.m_displayfoF2);
         m_cesium->showMagDec(m_settings.m_displayMagDec);
@@ -1968,9 +1969,12 @@ void MapGUI::applyMap3DSettings(bool reloadMap)
         m_polylineMapModel.allUpdated();
     }
     MapSettings::MapItemSettings *ionosondeItemSettings = getItemSettings("Ionosonde Stations");
-    m_giro->getIndexPeriodically((m_settings.m_displayMUF || m_settings.m_displayfoF2) ? 15 : 0);
-    if (ionosondeItemSettings) {
-        m_giro->getDataPeriodically(ionosondeItemSettings->m_enabled ? 2 : 0);
+    if (m_giro)
+    {
+        m_giro->getIndexPeriodically((m_settings.m_displayMUF || m_settings.m_displayfoF2) ? 15 : 0);
+        if (ionosondeItemSettings) {
+            m_giro->getDataPeriodically(ionosondeItemSettings->m_enabled ? 2 : 0);
+        }
     }
     if (m_aurora) {
         m_aurora->getDataPeriodically(m_settings.m_displayAurora ? 30 : 0);
@@ -2084,6 +2088,8 @@ void MapGUI::displaySettings()
     setTitle(m_settings.m_title);
     blockApplySettings(true);
     ui->displayNames->setChecked(m_settings.m_displayNames);
+    ui->viewFirstPerson->setChecked(m_settings.m_viewFirstPerson);
+    ui->displayPFD->setChecked(m_settings.m_displayPFD);
     ui->displaySelectedGroundTracks->setChecked(m_settings.m_displaySelectedGroundTracks);
     ui->displayAllGroundTracks->setChecked(m_settings.m_displayAllGroundTracks);
     ui->displayRain->setChecked(m_settings.m_displayRain);
@@ -2200,6 +2206,24 @@ void MapGUI::on_maidenhead_clicked()
     MapMaidenheadDialog dialog;
     new DialogPositioner(&dialog, true);
     dialog.exec();
+}
+
+void MapGUI::on_viewFirstPerson_clicked(bool checked)
+{
+    m_settings.m_viewFirstPerson = checked;
+    if (m_cesium) {
+        m_cesium->setViewFirstPerson(checked);
+    }
+    applySetting("viewFirstPerson");
+}
+
+void MapGUI::on_displayPFD_clicked(bool checked)
+{
+    m_settings.m_displayPFD = checked;
+    if (m_cesium) {
+        m_cesium->showPFD(checked);
+    }
+    applySetting("viewFirstPerson");
 }
 
 void MapGUI::on_displayNames_clicked(bool checked)
@@ -2415,10 +2439,10 @@ void MapGUI::on_displayMUF_clicked(bool checked)
         m_displayMUF->setChecked(checked);
     }
     m_settings.m_displayMUF = checked;
-    // Only call show if disabling, so we don't get two updates
-    // (as getMUFPeriodically results in a call to showMUF when the data is available)
-    m_giro->getIndexPeriodically((m_settings.m_displayMUF || m_settings.m_displayfoF2) ? 15 : 0);
-    if (m_cesium && !m_settings.m_displayMUF) {
+    if (m_giro) {
+        m_giro->getIndexPeriodically((m_settings.m_displayMUF || m_settings.m_displayfoF2) ? 15 : 0);
+    }
+    if (m_cesium) {
         m_cesium->showMUF(m_settings.m_displayMUF);
     }
     applySetting("displayMUF");
@@ -2433,8 +2457,10 @@ void MapGUI::on_displayfoF2_clicked(bool checked)
         m_displayfoF2->setChecked(checked);
     }
     m_settings.m_displayfoF2 = checked;
-    m_giro->getIndexPeriodically((m_settings.m_displayMUF || m_settings.m_displayfoF2) ? 15 : 0);
-    if (m_cesium && !m_settings.m_displayfoF2) {
+    if (m_giro) {
+        m_giro->getIndexPeriodically((m_settings.m_displayMUF || m_settings.m_displayfoF2) ? 15 : 0);
+    }
+    if (m_cesium) {
         m_cesium->showfoF2(m_settings.m_displayfoF2);
     }
     applySetting("displayfoF2");
@@ -3009,6 +3035,8 @@ void MapGUI::preferenceChanged(int elementType)
 void MapGUI::makeUIConnections()
 {
     QObject::connect(ui->displayNames, &ButtonSwitch::clicked, this, &MapGUI::on_displayNames_clicked);
+    QObject::connect(ui->viewFirstPerson, &ButtonSwitch::clicked, this, &MapGUI::on_viewFirstPerson_clicked);
+    QObject::connect(ui->displayPFD, &ButtonSwitch::clicked, this, &MapGUI::on_displayPFD_clicked);
     QObject::connect(ui->displayAllGroundTracks, &ButtonSwitch::clicked, this, &MapGUI::on_displayAllGroundTracks_clicked);
     QObject::connect(ui->displaySelectedGroundTracks, &ButtonSwitch::clicked, this, &MapGUI::on_displaySelectedGroundTracks_clicked);
     QObject::connect(ui->displayRain, &ButtonSwitch::clicked, this, &MapGUI::on_displayRain_clicked);

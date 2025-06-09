@@ -48,6 +48,8 @@ public:
     QSpinBox *m_minPixels;
     QDoubleSpinBox *m_labelScale;
     QSpinBox *m_filterDistance;
+    QSpinBox *m_smoothingWindow;
+    QDoubleSpinBox *m_smoothingLambda;
 };
 
 class MapSettingsDialog : public QDialog {
@@ -70,7 +72,9 @@ public:
         COL_3D_TRACK,
         COL_3D_LABEL_SCALE,
         COL_FILTER_NAME,
-        COL_FILTER_DISTANCE
+        COL_FILTER_DISTANCE,
+        COL_SMOOTHING_WINDOW,
+        COL_SMOOTHING_LAMBDA
     };
 
 public:

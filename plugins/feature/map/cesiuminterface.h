@@ -56,6 +56,7 @@ public:
     CesiumInterface(const MapSettings *settings, QObject *parent = nullptr);
     void setHomeView(float latitude, float longitude, float angle=1.0f);
     void setView(float latitude, float longitude, float altitude=60000);
+    void setViewFirstPerson(bool firstPerson);
     void playAnimation(const QString &name, Animation *animation);
     void setDateTime(QDateTime dateTime);
     void getDateTime();
@@ -69,6 +70,7 @@ public:
     void setHDR(bool enabled);
     void setFog(bool enabled);
     void showFPS(bool show);
+    void showPFD(bool show);
     void showMUF(bool show);
     void showfoF2(bool show);
     void showMagDec(bool show);

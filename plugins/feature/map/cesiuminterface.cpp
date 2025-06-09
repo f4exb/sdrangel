@@ -50,6 +50,15 @@ void CesiumInterface::setView(float latitude, float longitude, float altitude)
     send(obj);
 }
 
+void CesiumInterface::setViewFirstPerson(bool firstPerson)
+{
+    QJsonObject obj {
+        {"command", "setViewFirstPerson"},
+        {"firstPerson", firstPerson}
+    };
+    send(obj);
+}
+
 // Play glTF model animation for the map item with the specified name
 void CesiumInterface::playAnimation(const QString &name, Animation *animation)
 {

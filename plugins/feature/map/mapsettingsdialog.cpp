@@ -53,10 +53,20 @@ MapItemSettingsGUI::MapItemSettingsGUI(QTableWidget *table, int row, MapSettings
     m_filterDistance->setAlignment(Qt::AlignRight | Qt::AlignVCenter);
     m_filterDistance->setSpecialValueText(" ");
     m_filterDistance->setCorrectionMode(QAbstractSpinBox::CorrectToNearestValue);
+    m_smoothingWindow = new QSpinBox(table);
+    m_smoothingWindow->setRange(0, 1000);
+    m_smoothingWindow->setValue(settings->m_smoothingWindow);
+    m_smoothingWindow->setAlignment(Qt::AlignRight | Qt::AlignVCenter);
+    m_smoothingLambda = new QDoubleSpinBox(table);
+    m_smoothingLambda->setRange(0, 1e9);
+    m_smoothingLambda->setValue(settings->m_smoothingLambda);
+    m_smoothingLambda->setAlignment(Qt::AlignRight | Qt::AlignVCenter);
     table->setCellWidget(row, MapSettingsDialog::COL_2D_MIN_ZOOM, m_minZoom);
     table->setCellWidget(row, MapSettingsDialog::COL_3D_MIN_PIXELS, m_minPixels);
     table->setCellWidget(row, MapSettingsDialog::COL_3D_LABEL_SCALE, m_labelScale);
     table->setCellWidget(row, MapSettingsDialog::COL_FILTER_DISTANCE, m_filterDistance);
+    table->setCellWidget(row, MapSettingsDialog::COL_SMOOTHING_WINDOW, m_smoothingWindow);
+    table->setCellWidget(row, MapSettingsDialog::COL_SMOOTHING_LAMBDA, m_smoothingLambda);
 }
 
 MapSettingsDialog::MapSettingsDialog(MapSettings *settings, QWidget* parent) :
@@ -142,6 +152,12 @@ MapSettingsDialog::MapSettingsDialog(MapSettings *settings, QWidget* parent) :
         item = new QTableWidgetItem(itemSettings->m_filterName);
         ui->mapItemSettings->setItem(row, COL_FILTER_NAME, item);
 
+        item = new QTableWidgetItem();
+        ui->mapItemSettings->setItem(row, COL_SMOOTHING_WINDOW, item);
+
+        item = new QTableWidgetItem();
+        ui->mapItemSettings->setItem(row, COL_SMOOTHING_LAMBDA, item);
+
         MapItemSettingsGUI *gui = new MapItemSettingsGUI(ui->mapItemSettings, row, itemSettings);
         m_mapItemSettingsGUIs.append(gui);
     }
@@ -170,6 +186,8 @@ MapSettingsDialog::MapSettingsDialog(MapSettings *settings, QWidget* parent) :
     ui->mapItemSettings->hideColumn(COL_3D_POINT);
     ui->mapItemSettings->hideColumn(COL_3D_TRACK);
     ui->mapItemSettings->hideColumn(COL_3D_LABEL_SCALE);
+    ui->mapItemSettings->hideColumn(COL_SMOOTHING_WINDOW);
+    ui->mapItemSettings->hideColumn(COL_SMOOTHING_LAMBDA);
 #endif
 }
 
@@ -203,7 +221,6 @@ void MapSettingsDialog::accept()
         m_settings->m_mapBoxAPIKey = mapBoxAPIKey;
         m_settings->m_osmURL = osmURL;
         m_settings->m_mapBoxStyles = mapBoxStyles;
-        m_settings->m_cesiumIonAPIKey = cesiumIonAPIKey;
         m_map2DSettingsChanged = true;
     }
     else
@@ -223,7 +240,6 @@ void MapSettingsDialog::accept()
     {
         m_map3DSettingsChanged = false;
     }
-
     if (m_settings->m_map2DEnabled != ui->map2DEnabled->isChecked())
     {
         m_settings->m_map2DEnabled = ui->map2DEnabled->isChecked();
@@ -323,6 +339,8 @@ void MapSettingsDialog::accept()
         itemSettings->m_filterNameRE.setPattern(itemSettings->m_filterName);
         itemSettings->m_filterNameRE.optimize();
         itemSettings->m_filterDistance = gui->m_filterDistance->value() * 1000;
+        itemSettings->m_smoothingWindow = gui->m_smoothingWindow->value();
+        itemSettings->m_smoothingLambda = gui->m_smoothingLambda->value();
     }
 
     QDialog::accept();
@@ -359,6 +377,8 @@ void MapSettingsDialog::on_map3DEnabled_clicked(bool checked)
         ui->mapItemSettings->showColumn(COL_3D_POINT);
         ui->mapItemSettings->showColumn(COL_3D_TRACK);
         ui->mapItemSettings->showColumn(COL_3D_LABEL_SCALE);
+        ui->mapItemSettings->showColumn(COL_SMOOTHING_WINDOW);
+        ui->mapItemSettings->showColumn(COL_SMOOTHING_LAMBDA);
     }
     else
     {
@@ -368,6 +388,8 @@ void MapSettingsDialog::on_map3DEnabled_clicked(bool checked)
         ui->mapItemSettings->hideColumn(COL_3D_POINT);
         ui->mapItemSettings->hideColumn(COL_3D_TRACK);
         ui->mapItemSettings->hideColumn(COL_3D_LABEL_SCALE);
+        ui->mapItemSettings->hideColumn(COL_SMOOTHING_WINDOW);
+        ui->mapItemSettings->hideColumn(COL_SMOOTHING_LAMBDA);
     }
     ui->terrain->setEnabled(checked);
     ui->buildings->setEnabled(checked);

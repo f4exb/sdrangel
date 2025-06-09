@@ -269,7 +269,6 @@ QByteArray MapSettings::serialize() const
     s.writeBool(29, m_sunLightEnabled);
     s.writeBool(30, m_eciCamera);
     s.writeString(31, m_cesiumIonAPIKey);
-    s.writeString(32, m_antiAliasing);
     s.writeS32(33, m_workspaceIndex);
     s.writeBlob(34, m_geometryBytes);
 
@@ -292,6 +291,9 @@ QByteArray MapSettings::serialize() const
     s.writeBool(48, m_displayMaidenheadGrid);
     s.writeString(49, m_defaultImagery);
     s.writeString(50, m_arcGISAPIKey);
+    s.writeBool(51, m_displayPFD);
+    s.writeBool(52, m_viewFirstPerson);
+
     s.writeBool(53, m_terrainLighting);
     s.writeBool(54, m_water);
     s.writeBool(55, m_hdr);
@@ -299,6 +301,7 @@ QByteArray MapSettings::serialize() const
     s.writeBool(57, m_fps);
     s.writeBool(58, m_fxaa);
     s.writeS32(59, m_msaa);
+
     return s.final();
 }
 
@@ -369,7 +372,6 @@ bool MapSettings::deserialize(const QByteArray& data)
         d.readBool(29, &m_sunLightEnabled, true);
         d.readBool(30, &m_eciCamera, false);
         d.readString(31, &m_cesiumIonAPIKey, "");
-        d.readString(32, &m_antiAliasing, "None");
         d.readS32(33, &m_workspaceIndex, 0);
         d.readBlob(34, &m_geometryBytes);
 
@@ -391,6 +393,9 @@ bool MapSettings::deserialize(const QByteArray& data)
         d.readBool(48, &m_displayMaidenheadGrid, false);
         d.readString(49, &m_defaultImagery, "Sentinel-2");
         d.readString(50, &m_arcGISAPIKey, "");
+        d.readBool(51, &m_displayPFD, false);
+        d.readBool(52, &m_viewFirstPerson, false);
+
         d.readBool(53, &m_terrainLighting, true);
         d.readBool(54, &m_water, false);
         d.readBool(55, &m_hdr, true);
@@ -398,6 +403,7 @@ bool MapSettings::deserialize(const QByteArray& data)
         d.readBool(57, &m_fps, false);
         d.readBool(58, &m_fxaa, false);
         d.readS32(59, &m_msaa, 1);
+
         return true;
     }
     else
@@ -451,6 +457,8 @@ void MapSettings::MapItemSettings::resetToDefaults()
     m_filterName = "";
     m_filterDistance = 0;
     m_extrapolate = 60;
+    m_smoothingWindow = 0;
+    m_smoothingLambda = 100;
 }
 
 QByteArray MapSettings::MapItemSettings::serialize() const
@@ -475,6 +483,8 @@ QByteArray MapSettings::MapItemSettings::serialize() const
     s.writeString(16, m_filterName);
     s.writeS32(17, m_filterDistance);
     s.writeS32(18, m_extrapolate);
+    s.writeS32(19, m_smoothingWindow);
+    s.writeFloat(20, m_smoothingLambda);
 
     return s.final();
 }
@@ -511,6 +521,16 @@ bool MapSettings::MapItemSettings::deserialize(const QByteArray& data)
         d.readS32(18, &m_extrapolate, 60);
         m_filterNameRE.setPattern(m_filterName);
         m_filterNameRE.optimize();
+        if (m_group == "ADSBDemod")
+        {
+            d.readS32(19, &m_smoothingWindow, 10);
+            d.readFloat(20, &m_smoothingLambda, 100);
+        }
+        else
+        {
+            d.readS32(19, &m_smoothingWindow, 0);
+            d.readFloat(20, &m_smoothingLambda, 100);
+        }
         return true;
     }
     else
@@ -703,6 +723,12 @@ void MapSettings::applySettings(const QStringList& settingsKeys, const MapSettin
     if (settingsKeys.contains("arcGISAPIKey")) {
         m_arcGISAPIKey = settings.m_arcGISAPIKey;
     }
+    if (settingsKeys.contains("displayPFD")) {
+        m_displayPFD = settings.m_displayPFD;
+    }
+    if (settingsKeys.contains("viewFirstPerson")) {
+        m_viewFirstPerson = settings.m_viewFirstPerson;
+    }
     if (settingsKeys.contains("workspaceIndex")) {
         m_workspaceIndex = settings.m_workspaceIndex;
     }
@@ -846,6 +872,12 @@ QString MapSettings::getDebugString(const QStringList& settingsKeys, bool force)
     }
     if (settingsKeys.contains("arcGISAPIKey") || force) {
         ostr << " m_arcGISAPIKey: " << m_arcGISAPIKey.toStdString();
+    }
+    if (settingsKeys.contains("displayPFD") || force) {
+        ostr << " m_displayPFD: " << m_displayPFD;
+    }
+    if (settingsKeys.contains("viewFirstPerson") || force) {
+        ostr << " m_viewFirstPerson: " << m_viewFirstPerson;
     }
     if (settingsKeys.contains("workspaceIndex") || force) {
         ostr << " m_workspaceIndex: " << m_workspaceIndex;

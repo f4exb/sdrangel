@@ -326,6 +326,8 @@ private slots:
     void onMenuDialogCalled(const QPoint &p);
     void onWidgetRolled(QWidget* widget, bool rollDown);
     void handleInputMessages();
+    void on_viewFirstPerson_clicked(bool checked=false);
+    void on_displayPFD_clicked(bool checked=false);
     void on_displayNames_clicked(bool checked=false);
     void on_displayAllGroundTracks_clicked(bool checked=false);
     void on_displaySelectedGroundTracks_clicked(bool checked=false);

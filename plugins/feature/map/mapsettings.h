@@ -52,6 +52,8 @@ struct MapSettings
         QRegularExpression m_filterNameRE;
         int m_filterDistance;     // Filter items > this distance in metres away from My Position. <= 0 don't filter
         int m_extrapolate;        // Extrapolate duration in seconds on 3D map
+        int m_smoothingWindow;    // Window size (numer of points) to smooth over. 0 for no smoothing
+        float m_smoothingLambda;  // Lambda parameter for WhittakerEilers, controls how much smoothing to apply
 
         MapItemSettings(const QString& group, bool enabled, const QColor color, bool display2DTrack=true, bool display3DPoint=true, int minZoom=11, int modelMinPixelSize=0);
         MapItemSettings(const QByteArray& data);
@@ -120,6 +122,8 @@ struct MapSettings
     bool m_displayAurora;
     bool m_displayMagDec;
     bool m_displayMaidenheadGrid;
+    bool m_displayPFD;
+    bool m_viewFirstPerson;
     QString m_defaultImagery;
 
     QString m_checkWXAPIKey;    //!< checkwxapi.com API key
