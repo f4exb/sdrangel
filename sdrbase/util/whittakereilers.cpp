@@ -186,8 +186,7 @@ void WhittakerEilers::filter(const double *xi, double *yi, const double *w, cons
         zb[i-1] = (b[i - 1] - sum) / ca[(i - 1) * 3];
     }
 
-    if (isnan(zb[0])) {
-        qDebug() << "naan";
+    if (std::isnan(zb[0])) {
         qDebug() << "lambda" << lambda;
         for (int i = 0; i < m; i++) {
             qDebug() << "xi[" << i << "]" << qSetRealNumberPrecision(12) << xi[i];
@@ -219,7 +218,6 @@ void WhittakerEilers::filter(const double *xi, double *yi, const double *w, cons
         for (int i = 0; i < m; i++) {
             qDebug() << "zb[" << i << "]" << qSetRealNumberPrecision(12) << zb[i];
         }
-        qDebug() << "bread";
         // Don't put NaNs in output
         return;
     }
@@ -229,8 +227,7 @@ void WhittakerEilers::filter(const double *xi, double *yi, const double *w, cons
         yi[i] = zb[i];
     }
 
-    for (i = 0; i < m; i++) {
-   //     qDebug() << "zb[" << i << "]=" << zb[i];
-    }
-
+    /*for (i = 0; i < m; i++) {
+        qDebug() << "zb[" << i << "]=" << zb[i];
+    }*/
 }
