@@ -3355,6 +3355,7 @@ bool ADSBDemodGUI::validateGlobalPosition(double latitude, double longitude, boo
         m_rangeFails++;
         ui->statsTable->item(RANGE_FAILS, 0)->setData(Qt::DisplayRole, m_rangeFails);
     }
+    return false;
 }
 
 // Called when we have lat & long from local decode and we need to check if it is in a valid range (<180nm/333km airborne or 45nm/83km for surface)
@@ -3374,6 +3375,7 @@ bool ADSBDemodGUI::validateLocalPosition(double latitude, double longitude, bool
         m_rangeFails++;
         ui->statsTable->item(RANGE_FAILS, 0)->setData(Qt::DisplayRole, m_rangeFails);
     }
+    return false;
 }
 
 bool ADSBDemodGUI::decodeGlobalPosition(int f, const double cprLat[2], const double cprLong[2], const QDateTime cprTime[2], double& latitude, double& longitude, bool countFailure)
