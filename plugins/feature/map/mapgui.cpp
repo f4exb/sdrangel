@@ -74,7 +74,7 @@ void MapGUI::resetToDefaults()
 {
     m_settings.resetToDefaults();
     displaySettings();
-    applySettings(true);
+    applyAllSettings();
 }
 
 QByteArray MapGUI::serialize() const
@@ -88,7 +88,7 @@ bool MapGUI::deserialize(const QByteArray& data)
     {
         m_feature->setWorkspaceIndex(m_settings.m_workspaceIndex);
         displaySettings();
-        applySettings(true);
+        applyAllSettings();
         return true;
     }
     else
@@ -375,7 +375,7 @@ MapGUI::MapGUI(PluginAPI* pluginAPI, FeatureUISet *featureUISet, Feature *featur
     addSDRangelServer();
 
     displaySettings();
-    applySettings(true);
+    applyAllSettings();
 
     connect(&m_objectMapModel, &ObjectMapModel::linkClicked, this, &MapGUI::linkClicked);
 
@@ -1906,8 +1906,7 @@ void MapGUI::on_mapTypes_currentIndexChanged(int index)
         if (!currentMap.isEmpty())
         {
             m_settings.m_mapType = currentMap;
-            m_settingsKeys.append("mapType");
-            applySettings();
+            applySetting("mapType");
         }
     }
 }
@@ -2158,29 +2157,42 @@ void MapGUI::onMenuDialogCalled(const QPoint &p)
         setTitle(m_settings.m_title);
         setTitleColor(m_settings.m_rgbColor);
 
-        m_settingsKeys.append("title");
-        m_settingsKeys.append("rgbColor");
-        m_settingsKeys.append("useReverseAPI");
-        m_settingsKeys.append("reverseAPIAddress");
-        m_settingsKeys.append("reverseAPIPort");
-        m_settingsKeys.append("reverseAPIFeatureSetIndex");
-        m_settingsKeys.append("reverseAPIFeatureIndex");
+        QStringList settingsKeys({
+            "rgbColor",
+            "title",
+            "useReverseAPI",
+            "reverseAPIAddress",
+            "reverseAPIPort",
+            "reverseAPIDeviceIndex",
+            "reverseAPIChannelIndex"
+            });
 
-        applySettings();
+        applySettings(settingsKeys);
     }
 
     resetContextMenuType();
 }
 
-void MapGUI::applySettings(bool force)
+void MapGUI::applySetting(const QString& settingsKey)
 {
+    applySettings({settingsKey});
+}
+
+void MapGUI::applySettings(const QStringList& settingsKeys, bool force)
+{
+    m_settingsKeys.append(settingsKeys);
     if (m_doApplySettings)
     {
         Map::MsgConfigureMap* message = Map::MsgConfigureMap::create(m_settings, m_settingsKeys, force);
         m_map->getInputMessageQueue()->push(message);
-    }
 
-    m_settingsKeys.clear();
+        m_settingsKeys.clear();
+    }
+}
+
+void MapGUI::applyAllSettings()
+{
+    applySettings(QStringList(), true);
 }
 
 void MapGUI::on_maidenhead_clicked()
@@ -2194,18 +2206,21 @@ void MapGUI::on_displayNames_clicked(bool checked)
 {
     m_settings.m_displayNames = checked;
     m_objectMapModel.setDisplayNames(checked);
+    applySetting("displayNames");
 }
 
 void MapGUI::on_displaySelectedGroundTracks_clicked(bool checked)
 {
     m_settings.m_displaySelectedGroundTracks = checked;
     m_objectMapModel.setDisplaySelectedGroundTracks(checked);
+    applySetting("displaySelectedGroundTracks");
 }
 
 void MapGUI::on_displayAllGroundTracks_clicked(bool checked)
 {
     m_settings.m_displayAllGroundTracks = checked;
     m_objectMapModel.setDisplayAllGroundTracks(checked);
+    applySetting("displayAllGroundTracks");
 }
 
 void MapGUI::on_displayRain_clicked(bool checked)
@@ -2224,6 +2239,7 @@ void MapGUI::on_displayRain_clicked(bool checked)
     if (m_cesium) {
         m_cesium->showLayer("rain", m_settings.m_displayRain);
     }
+    applySetting("displayRain");
 }
 
 void MapGUI::on_displayClouds_clicked(bool checked)
@@ -2242,6 +2258,7 @@ void MapGUI::on_displayClouds_clicked(bool checked)
     if (m_cesium) {
         m_cesium->showLayer("clouds", m_settings.m_displayClouds);
     }
+    applySetting("displayClouds");
 }
 
 void MapGUI::on_displaySeaMarks_clicked(bool checked)
@@ -2260,6 +2277,7 @@ void MapGUI::on_displaySeaMarks_clicked(bool checked)
     if (m_cesium) {
         m_cesium->showLayer("seaMarks", m_settings.m_displaySeaMarks);
     }
+    applySetting("displaySeaMarks");
 }
 
 void MapGUI::on_displayRailways_clicked(bool checked)
@@ -2278,6 +2296,7 @@ void MapGUI::on_displayRailways_clicked(bool checked)
     if (m_cesium) {
         m_cesium->showLayer("railways", m_settings.m_displayRailways);
     }
+    applySetting("displayRailways");
 }
 
 void MapGUI::on_displayNASAGlobalImagery_clicked(bool checked)
@@ -2302,6 +2321,7 @@ void MapGUI::on_displayNASAGlobalImagery_clicked(bool checked)
     if (m_cesium) {
         m_cesium->showLayer("NASAGlobalImagery", m_settings.m_displayNASAGlobalImagery);
     }
+    applySetting("displayNASAGlobalImagery");
 }
 
 void MapGUI::on_nasaGlobalImageryIdentifier_currentIndexChanged(int index)
@@ -2383,6 +2403,7 @@ void MapGUI::on_nasaGlobalImageryOpacity_valueChanged(int value)
                 {m_settings.m_nasaGlobalImageryOpacity}
         );
     }
+    applySetting("nasaGlobalImageryOpacity");
 }
 
 void MapGUI::on_displayMUF_clicked(bool checked)
@@ -2400,6 +2421,7 @@ void MapGUI::on_displayMUF_clicked(bool checked)
     if (m_cesium && !m_settings.m_displayMUF) {
         m_cesium->showMUF(m_settings.m_displayMUF);
     }
+    applySetting("displayMUF");
 }
 
 void MapGUI::on_displayfoF2_clicked(bool checked)
@@ -2415,6 +2437,9 @@ void MapGUI::on_displayfoF2_clicked(bool checked)
     if (m_cesium && !m_settings.m_displayfoF2) {
         m_cesium->showfoF2(m_settings.m_displayfoF2);
     }
+    applySetting("displayfoF2");
+}
+
 void MapGUI::on_displayAurora_clicked(bool checked)
 {
     if (this->sender() != ui->displayAurora) {
@@ -2734,8 +2759,7 @@ void MapGUI::on_displaySettings_clicked()
         displayToolbar();
         applyMap2DSettings(dialog.m_map2DSettingsChanged);
         applyMap3DSettings(dialog.m_map3DSettingsChanged);
-        m_settingsKeys.append(dialog.m_settingsKeysChanged);
-        applySettings();
+        applySettings(dialog.m_settingsKeysChanged);
         m_objectMapModel.allUpdated();
         m_imageMapModel.allUpdated();
         m_polygonMapModel.allUpdated();

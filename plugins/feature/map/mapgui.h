@@ -277,7 +277,9 @@ private:
 
     void update(const QObject *source, SWGSDRangel::SWGMapItem *swgMapItem, const QString &group);
     void blockApplySettings(bool block);
-    void applySettings(bool force = false);
+    void applySetting(const QString& settingsKey);
+    void applySettings(const QStringList& settingsKeys, bool force = false);
+    void applyAllSettings();
     void applyMap2DSettings(bool reloadMap);
     void applyMap3DSettings(bool reloadMap);
     QString osmCachePath();
