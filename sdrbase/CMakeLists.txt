@@ -222,6 +222,7 @@ set(sdrbase_SOURCES
     util/ax25.cpp
     util/aprs.cpp
     util/astronomy.cpp
+    util/aurora.cpp
     util/azel.cpp
     util/baudot.cpp
     util/callsign.cpp
@@ -474,6 +475,7 @@ set(sdrbase_HEADERS
     util/ais.h
     util/android.h
     util/aprsfi.h
+    util/aurora.h
     util/aviationweather.h
     util/ax25.h
     util/aprs.h

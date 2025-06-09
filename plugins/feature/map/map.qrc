@@ -27,6 +27,8 @@
     <file>map/waypoint.png</file>
     <file>map/pager.png</file>
     <file>map/map3d.html</file>
+    <file>map/cockpit.js</file>
+    <file>map/grid.js</file>
     <file>data/transmitters.csv</file>
   </qresource>
   <qresource prefix="/">

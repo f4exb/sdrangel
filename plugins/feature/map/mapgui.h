@@ -40,6 +40,7 @@
 #include "util/messagequeue.h"
 #include "util/giro.h"
 #include "util/azel.h"
+#include "util/aurora.h"
 #include "util/openaip.h"
 #include "util/ourairportsdb.h"
 #include "util/waypoints.h"
@@ -173,6 +174,7 @@ public:
     void addRadioTimeTransmitters();
     void addNAT();
     void addRadar();
+    void addAurora();
     void addIonosonde();
     void addBroadcast();
     void addDAB();
@@ -228,6 +230,7 @@ private:
     QDateTime m_giroDateTime;
     QString m_giroRunId;
     QHash<QString, IonosondeStation *> m_ionosondeStations;
+    Aurora *m_aurora;
     QSharedPointer<const QList<NavAid *>> m_navAids;
     QSharedPointer<const QList<Airspace *>> m_airspaces;
     QSharedPointer<const QHash<int, AirportInformation *>> m_airportInfo;
@@ -252,7 +255,9 @@ private:
     QAction *m_displayNASAGlobalImagery;
     QAction *m_displayMUF;
     QAction *m_displayfoF2;
+    QAction *m_displayAurora;
     QAction *m_displayMagDec;
+    QAction *m_displayMaidenheadGrid;
 
     QString m_radarPath;
     QString m_satellitePath;
@@ -331,7 +336,9 @@ private slots:
     void on_displayNASAGlobalImagery_clicked(bool checked=false);
     void on_nasaGlobalImageryIdentifier_currentIndexChanged(int index);
     void on_nasaGlobalImageryOpacity_valueChanged(int index);
+    void on_displayAurora_clicked(bool checked=false);
     void on_displayMagDec_clicked(bool checked=false);
+    void on_displayMaidenheadGrid_clicked(bool checked=false);
     void on_layersMenu_clicked();
     void on_find_returnPressed();
     void on_maidenhead_clicked();
@@ -367,6 +374,7 @@ private slots:
     void nasaGlobalImageryMetaDataUpdated(const NASAGlobalImagery::MetaData& metaData);
     void nasaGlobalImageryLegendAvailable(const QString& url, const QByteArray& data);
     void nasaGlobalImageryHTMLAvailable(const QString& url, const QByteArray& data);
+    void auroraUpdated(const QImage& image);
     void navAidsUpdated();
     void airspacesUpdated();
     void airportsUpdated();

@@ -177,6 +177,24 @@ void CesiumInterface::showfoF2(bool show)
     send(obj);
 }
 
+void CesiumInterface::showMagDec(bool show)
+{
+    QJsonObject obj {
+        {"command", "showMagneticDeclination"},
+        {"show", show}
+    };
+    send(obj);
+}
+
+void CesiumInterface::showMaidenheadGrid(bool show)
+{
+    QJsonObject obj {
+        {"command", "showMaidenheadGrid"},
+        {"show", show}
+    };
+    send(obj);
+}
+
 void CesiumInterface::showLayer(const QString& layer, bool show)
 {
     QJsonObject obj {

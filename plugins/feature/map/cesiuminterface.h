@@ -67,6 +67,8 @@ public:
     void setAntiAliasing(const QString &antiAliasing);
     void showMUF(bool show);
     void showfoF2(bool show);
+    void showMagDec(bool show);
+    void showMaidenheadGrid(bool show);
     void showLayer(const QString& layer, bool show);
     void setLayerSettings(const QString& layer, const QStringList& settings, const QList<QVariant>& values);
     void updateImage(const QString &name, float east, float west, float north, float south, float altitude, const QString &data);
