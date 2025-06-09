@@ -2579,13 +2579,13 @@ QString MapGUI::thunderforestAPIKey() const
 
 QString MapGUI::maptilerAPIKey() const
 {
-    return m_settings.m_maptilerAPIKey.isEmpty() ? "q2RVNAe3eFKCH4XsrE3r" : m_settings.m_maptilerAPIKey;
+    return m_settings.m_maptilerAPIKey.isEmpty() ? "Nzl2cSyOnewxUc9VWg4n" : m_settings.m_maptilerAPIKey;
 }
 
 QString MapGUI::cesiumIonAPIKey() const
 {
     return m_settings.m_cesiumIonAPIKey.isEmpty()
-        ? "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJqdGkiOiIyNTcxMDA2OC0yNTIzLTQxMGYtYTNiMS1iM2I3MDFhNWVlMDYiLCJpZCI6ODEyMDUsImlhdCI6MTY0MzY2OTIzOX0.A7NchU4LzaNsuAUpsrA9ZwekOJfMoNcja-8XeRdRoIg"
+        ? "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJqdGkiOiJjN2FlYzcxMy1iNDJjLTRmYjgtOWQ1MC04M2Y4N2JlOGRiN2QiLCJpZCI6ODEyMDUsImlhdCI6MTc0ODg3Mzc2NH0.-zNQm-tDoPzvobxbVfd0G7Ju1oQkojCT5BCKAc1X4HU"
         : m_settings.m_cesiumIonAPIKey;
 }
 
