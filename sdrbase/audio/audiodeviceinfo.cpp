@@ -44,13 +44,16 @@ QList<int> AudioDeviceInfo::supportedSampleRates() const
     // QAudioDevice is a bit more flexible than QAudioDeviceInfo, in that it supports
     // min and max rate, rather than a specific list
     // For now, we just list some common rates.
-    QList<int> sampleRates = {8000, 11025, 22050, 44100, 48000, 96000, 192000};
+    QList<int> sampleRates = {8000, 11025, 22050, 44100, 48000, 96000, 192000, 384000};
     QList<int> supportedRates;
     for (auto sampleRate : sampleRates)
     {
         if ((sampleRate <= m_deviceInfo.maximumSampleRate()) && (sampleRate >= m_deviceInfo.minimumSampleRate())) {
             supportedRates.append(sampleRate);
         }
+    }
+    if (!supportedRates.contains(m_deviceInfo.maximumSampleRate())) {
+        supportedRates.append(m_deviceInfo.maximumSampleRate());
     }
     return supportedRates;
 }
@@ -126,7 +129,7 @@ const QList<AudioDeviceInfo> &AudioDeviceInfo::availableOutputDevices()
 
 const AudioDeviceInfo &AudioDeviceInfo::defaultOutputDevice()
 {
-    if (defaultOutputDevice_.m_deviceInfo.isNull()) 
+    if (defaultOutputDevice_.m_deviceInfo.isNull())
     {
 #if QT_VERSION >= QT_VERSION_CHECK(6, 0, 0)
         defaultOutputDevice_ = AudioDeviceInfo(QMediaDevices::defaultAudioOutput());
@@ -139,7 +142,7 @@ const AudioDeviceInfo &AudioDeviceInfo::defaultOutputDevice()
 
 const AudioDeviceInfo &AudioDeviceInfo::defaultInputDevice()
 {
-    if (defaultInputDevice_.m_deviceInfo.isNull()) 
+    if (defaultInputDevice_.m_deviceInfo.isNull())
     {
 #if QT_VERSION >= QT_VERSION_CHECK(6, 0, 0)
         defaultInputDevice_ = AudioDeviceInfo(QMediaDevices::defaultAudioInput());
