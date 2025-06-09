@@ -201,7 +201,7 @@ void MapSettings::resetToDefaults()
     m_reverseAPIFeatureIndex = 0;
     m_map2DEnabled = true;
     m_map3DEnabled = true;
-    m_terrain = "Cesium World Terrain";
+    m_terrain = "Ellipsoid";
     m_buildings = "None";
     m_sunLightEnabled = true;
     m_lightIntensity = 3.0f;
@@ -364,7 +364,7 @@ bool MapSettings::deserialize(const QByteArray& data)
 
         d.readBool(22, &m_map2DEnabled, true);
         d.readBool(23, &m_map3DEnabled, true);
-        d.readString(24, &m_terrain, "Cesium World Terrain");
+        d.readString(24, &m_terrain, "Ellipsoid");
         d.readString(25, &m_buildings, "None");
         d.readBlob(27, &blob);
         deserializeItemSettings(blob, m_itemSettings);
