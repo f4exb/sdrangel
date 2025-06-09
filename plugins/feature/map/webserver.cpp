@@ -40,6 +40,7 @@ WebServer::WebServer(quint16 &port, QObject* parent) :
     m_mimeTypes.insert(".css", new MimeType("text/css"));
     m_mimeTypes.insert(".json", new MimeType("application/json"));
     m_mimeTypes.insert(".geojson", new MimeType("application/geo+json"));
+    m_mimeTypes.insert(".wasm", new MimeType("application/wasm"));
 }
 
 WebServer::~WebServer()
@@ -180,7 +181,7 @@ void WebServer::readClient()
             else if (m_files.contains(path))
             {
                 // Path is a file held in memory
-                sendFile(socket, m_files.value(path).data(), mimeType, path);
+                sendFile(socket, m_files.value(path), mimeType, path);
             }
             else
             {
