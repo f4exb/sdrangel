@@ -6,7 +6,7 @@ The Map Feature plugin displays a world map in 2D and 3D. It can display street 
 On top of this, it can plot data from other plugins, such as:
 
 * APRS symbols from the APRS Feature,
-* Aircraft from the ADS-B Demodulator,
+* Aircraft from the ADS-B Demodulator including a PFD (Primary Flight Display),
 * Ships from the AIS Demodulator,
 * Satellites from the Satellite Tracker,
 * Satellite imagery from APT Demodulator,
@@ -34,7 +34,8 @@ As well as internet and built-in data sources:
 * Weather radar,
 * Satellite infra-red data (clouds),
 * Sea marks,
-* Satellite imagery from NASA GIBS (Global Imagery Browse Services).
+* Satellite imagery from NASA GIBS (Global Imagery Browse Services),
+* Aurora probabilty from NOAA.
 
 It can also create tracks showing the path aircraft, ships, radiosondes and APRS objects have taken, as well as predicted paths for satellites.
 
@@ -47,6 +48,8 @@ It can also create tracks showing the path aircraft, ships, radiosondes and APRS
 <h2>Interface</h2>
 
 ![Map feature plugin GUI](../../../doc/img/Map_plugin.png)
+
+WASD keys can be used to move the camera up, left, down and right. QE for forward and back.
 
 <h3>1: Find</h3>
 
@@ -246,8 +249,9 @@ Free API keys are available by signing up for an accounts with:
 * [Maptiler](https://www.maptiler.com/)
 * [Mapbox](https://www.mapbox.com/)
 * [Cesium ion](https://cesium.com/ion/signup)
+* [ArcGIS Location Account](https://location.arcgis.com/)
 
-If API keys are not specified, a default key will be used, but this may not work if too many users use it.
+If API keys are not specified, a default key will be used, but this may not work if too many users use it, so please create and use your own.
 
 <h3>Map</h3>
 
@@ -255,6 +259,7 @@ The map feature displays a 2D and a 3D map overlaid with objects reported by oth
 
 * The "Home Station" antenna location is placed according to My Position set under the Preferences > My Position menu.
 * To pan around the map, click the left mouse button and drag. To zoom in or out, use the mouse scroll wheel.
+* The 2D map can be rotated by holding shift while using the mouse wheel, or tilted by holding control and using the mouse wheel. (Qt 6 only).
 * Single clicking on an object in the map will display a text bubble with additional information about the object.
 * Right clicking on a object on the 2D map will open a context menu, which allows:
   * To set an object as the target. The target object will have its azimuth and elevation displayed in the text bubble and sent to the Rotator Controller feature.
@@ -327,6 +332,10 @@ Layers and Boat icons created by Freepik from Flaticon: https://www.flaticon.com
 Railway icons created by Prosymbols Premium from Flaticon: https://www.flaticon.com
 Satellite icons created by SyafriStudio from Flaticon: https://www.flaticon.com
 Pager icons created by xnimrodx from Flaticon: https://www.flaticon.com
+Northern lights icons created by Abdul-Aziz from Flaticon: https://www.flaticon.com
+Globe icons created by Creative Stall Premium from Flaticon: https://www.flaticon.com
+Person icon created by Yudhi Restu Pebriyanto from Noun Project: https://thenounproject.com/
+Eyes icon created by Astatine Lab from Noun Project: https://thenounproject.com/
 
 3D models are by various artists under a variety of licenses. See: https://github.com/srcejon/sdrangel-3d-models
 
