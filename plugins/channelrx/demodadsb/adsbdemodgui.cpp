@@ -1372,7 +1372,11 @@ void ADSBDemodGUI::sendToMap(Aircraft *aircraft, QList<SWGSDRangel::SWGMapAnimat
                 swgMapItem->setOrientation(1);
                 swgMapItem->setHeading(aircraft->m_track);
                 swgMapItem->setPitch(aircraft->m_pitchEst);
-                swgMapItem->setRoll(aircraft->m_rollEst);
+                if (aircraft->m_rollValid) {
+                    swgMapItem->setRoll(aircraft->m_roll);
+                } else {
+                    swgMapItem->setRoll(aircraft->m_rollEst);
+                }
                 swgMapItem->setOrientationDateTime(new QString(aircraft->m_positionDateTime.toString(Qt::ISODateWithMs)));
             }
             else
