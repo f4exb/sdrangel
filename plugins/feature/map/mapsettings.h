@@ -97,9 +97,16 @@ struct MapSettings
     QString m_modelURL;         // Base URL for 3D models (Not user settable, as depends on web server port)
     QString m_modelDir;         // Directory to store 3D models (not customizable for now, as ADS-B plugin needs to know)
     bool m_sunLightEnabled;     // Light globe from direction of Sun
+    float m_lightIntensity;     // Intensity of camera light
     bool m_eciCamera;           // Use ECI instead of ECEF for camera
     QString m_cesiumIonAPIKey;
-    QString m_antiAliasing;
+    bool m_fxaa;
+    int m_msaa;
+    bool m_terrainLighting;
+    bool m_water;
+    bool m_hdr;
+    bool m_fog;
+    bool m_fps;
 
     bool m_displayMUF;          // Plot MUF contours
     bool m_displayfoF2;         // Plot foF2 contours
@@ -110,9 +117,13 @@ struct MapSettings
     bool m_displayNASAGlobalImagery;
     QString m_nasaGlobalImageryIdentifier;
     int m_nasaGlobalImageryOpacity;
+    bool m_displayAurora;
     bool m_displayMagDec;
+    bool m_displayMaidenheadGrid;
+    QString m_defaultImagery;
 
     QString m_checkWXAPIKey;    //!< checkwxapi.com API key
+    QString m_arcGISAPIKey;
 
     // Per source settings
     QHash<QString, MapItemSettings *> m_itemSettings;

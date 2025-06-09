@@ -1925,6 +1925,7 @@ void MapGUI::applyMap3DSettings(bool reloadMap)
         }
         m_webServer->addSubstitution("/map/map/map3d.html", "$WS_PORT$", QString::number(m_cesium->serverPort()));
         m_webServer->addSubstitution("/map/map/map3d.html", "$CESIUM_ION_API_KEY$", cesiumIonAPIKey());
+        m_webServer->addSubstitution("/map/map/map3d.html", "$ARCGIS_API_KEY$", m_settings.m_arcGISAPIKey);
         //ui->web->page()->profile()->clearHttpCache();
         ui->web->load(QUrl(QString("http://127.0.0.1:%1/map/map/map3d.html").arg(m_webPort)));
         //ui->web->load(QUrl(QString("http://webglreport.com/")));
@@ -1941,12 +1942,16 @@ void MapGUI::applyMap3DSettings(bool reloadMap)
     ui->web->setVisible(m_settings.m_map3DEnabled);
     if (m_cesium && m_cesium->isConnected())
     {
-        m_cesium->setTerrain(m_settings.m_terrain, maptilerAPIKey());
+        m_cesium->setDefaultImagery(m_settings.m_defaultImagery);
+        m_cesium->setTerrain(m_settings.m_terrain, maptilerAPIKey(), m_settings.m_terrainLighting, m_settings.m_water);
         m_cesium->setBuildings(m_settings.m_buildings);
-        m_cesium->setSunLight(m_settings.m_sunLightEnabled);
+        m_cesium->setLighting(m_settings.m_sunLightEnabled, m_settings.m_lightIntensity);
         m_cesium->setCameraReferenceFrame(m_settings.m_eciCamera);
-        m_cesium->setAntiAliasing(m_settings.m_antiAliasing);
+        m_cesium->setAntiAliasing(m_settings.m_fxaa, m_settings.m_msaa);
         m_cesium->getDateTime();
+        m_cesium->setHDR(m_settings.m_hdr);
+        m_cesium->setFog(m_settings.m_fog);
+        m_cesium->showFPS(m_settings.m_fps);
         m_cesium->showMUF(m_settings.m_displayMUF);
         m_cesium->showfoF2(m_settings.m_displayfoF2);
         m_cesium->showMagDec(m_settings.m_displayMagDec);
@@ -2030,12 +2035,16 @@ void MapGUI::init3DMap()
     float stationAltitude = MainCore::instance()->getSettings().getLongitude();
 
     m_cesium->setPosition(QGeoCoordinate(stationLatitude, stationLongitude, stationAltitude));
-    m_cesium->setTerrain(m_settings.m_terrain, maptilerAPIKey());
+    m_cesium->setDefaultImagery(m_settings.m_defaultImagery);
+    m_cesium->setTerrain(m_settings.m_terrain, maptilerAPIKey(), m_settings.m_terrainLighting, m_settings.m_water);
     m_cesium->setBuildings(m_settings.m_buildings);
-    m_cesium->setSunLight(m_settings.m_sunLightEnabled);
+    m_cesium->setLighting(m_settings.m_sunLightEnabled, m_settings.m_lightIntensity);
     m_cesium->setCameraReferenceFrame(m_settings.m_eciCamera);
-    m_cesium->setAntiAliasing(m_settings.m_antiAliasing);
+    m_cesium->setAntiAliasing(m_settings.m_fxaa, m_settings.m_msaa);
     m_cesium->getDateTime();
+    m_cesium->setHDR(m_settings.m_hdr);
+    m_cesium->setFog(m_settings.m_fog);
+    m_cesium->showFPS(m_settings.m_fps);
 
     m_objectMapModel.allUpdated();
     m_imageMapModel.allUpdated();

@@ -91,15 +91,19 @@ private:
     Waypoints m_waypoints;
 
     void unzip(const QString &filename);
-
+    QString msaaToString(int msaa) const;
+    int stringToMSAA(const QString& string) const;
+    
 private slots:
     void accept();
     void on_map2DEnabled_clicked(bool checked=false);
     void on_map3DEnabled_clicked(bool checked=false);
+    void on_terrain_currentIndexChanged(int index);
     void on_downloadModels_clicked();
     void on_getAirportDB_clicked();
     void on_getAirspacesDB_clicked();
     void on_getWaypoints_clicked();
+    void on_sunLightEnabled_currentIndexChanged(int index);
     void downloadComplete(const QString &filename, bool success, const QString &url, const QString &errorMessage);
     void downloadingURL(const QString& url);
     void downloadProgress(qint64 bytesRead, qint64 totalBytes);

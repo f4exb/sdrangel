@@ -124,6 +124,26 @@
        </widget>
       </item>
       <item>
+       <widget class="ButtonSwitch" name="displayMaidenheadGrid">
+        <property name="toolTip">
+         <string>Display Maidenhead grid (3D map only)</string>
+        </property>
+        <property name="text">
+         <string/>
+        </property>
+        <property name="icon">
+         <iconset resource="mapicons.qrc">
+          <normaloff>:/map/icons/grid.png</normaloff>:/map/icons/grid.png</iconset>
+        </property>
+        <property name="checkable">
+         <bool>true</bool>
+        </property>
+        <property name="checked">
+         <bool>true</bool>
+        </property>
+       </widget>
+      </item>
+      <item>
        <widget class="QToolButton" name="beacons">
         <property name="toolTip">
          <string>Display Beacon dialog</string>
@@ -290,6 +310,46 @@
         <property name="icon">
          <iconset resource="icons.qrc">
           <normaloff>:/map/icons/fof2.png</normaloff>:/map/icons/fof2.png</iconset>
+        </property>
+        <property name="checkable">
+         <bool>true</bool>
+        </property>
+        <property name="checked">
+         <bool>true</bool>
+        </property>
+       </widget>
+      </item>
+      <item>
+       <widget class="ButtonSwitch" name="displayMagDec">
+        <property name="toolTip">
+         <string>Display magnetic declination contours (3D map only)</string>
+        </property>
+        <property name="text">
+         <string/>
+        </property>
+        <property name="icon">
+         <iconset resource="mapicons.qrc">
+          <normaloff>:/map/icons/compass.png</normaloff>:/map/icons/compass.png</iconset>
+        </property>
+        <property name="checkable">
+         <bool>true</bool>
+        </property>
+        <property name="checked">
+         <bool>true</bool>
+        </property>
+       </widget>
+      </item>
+      <item>
+       <widget class="ButtonSwitch" name="displayAurora">
+        <property name="toolTip">
+         <string>Display aurora probabilty (3D only)</string>
+        </property>
+        <property name="text">
+         <string/>
+        </property>
+        <property name="icon">
+         <iconset resource="mapicons.qrc">
+          <normaloff>:/map/icons/aurora.png</normaloff>:/map/icons/aurora.png</iconset>
         </property>
         <property name="checkable">
          <bool>true</bool>

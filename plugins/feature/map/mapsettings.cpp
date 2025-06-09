@@ -204,9 +204,16 @@ void MapSettings::resetToDefaults()
     m_terrain = "Cesium World Terrain";
     m_buildings = "None";
     m_sunLightEnabled = true;
+    m_lightIntensity = 3.0f;
     m_eciCamera = false;
     m_modelDir = HttpDownloadManager::downloadDir() + "/3d";
-    m_antiAliasing = "None";
+    m_fxaa = true;
+    m_msaa = 1;
+    m_terrainLighting = true;
+    m_water = false;
+    m_hdr = true;
+    m_fog = true;
+    m_fps = false;
     m_displayMUF = false;
     m_displayfoF2 = false;
     m_displayRain = false;
@@ -275,9 +282,23 @@ QByteArray MapSettings::serialize() const
     s.writeBool(41, m_displayNASAGlobalImagery);
     s.writeString(42, m_nasaGlobalImageryIdentifier);
     s.writeS32(43, m_nasaGlobalImageryOpacity);
+    s.writeBool(44, m_displayAurora);
+    s.writeBool(45, m_displayMagDec);
 
     s.writeString(46, m_checkWXAPIKey);
 
+    s.writeFloat(47, m_lightIntensity);
+
+    s.writeBool(48, m_displayMaidenheadGrid);
+    s.writeString(49, m_defaultImagery);
+    s.writeString(50, m_arcGISAPIKey);
+    s.writeBool(53, m_terrainLighting);
+    s.writeBool(54, m_water);
+    s.writeBool(55, m_hdr);
+    s.writeBool(56, m_fog);
+    s.writeBool(57, m_fps);
+    s.writeBool(58, m_fxaa);
+    s.writeS32(59, m_msaa);
     return s.final();
 }
 
@@ -361,10 +382,22 @@ bool MapSettings::deserialize(const QByteArray& data)
         d.readBool(41, &m_displayNASAGlobalImagery, false);
         d.readString(42, &m_nasaGlobalImageryIdentifier, "");
         d.readS32(43, &m_nasaGlobalImageryOpacity, 50);
+        d.readBool(44, &m_displayAurora, false);
         d.readBool(45, &m_displayMagDec, false);
 
         d.readString(46, &m_checkWXAPIKey, "");
 
+        d.readFloat(47, &m_lightIntensity, 3.0f);
+        d.readBool(48, &m_displayMaidenheadGrid, false);
+        d.readString(49, &m_defaultImagery, "Sentinel-2");
+        d.readString(50, &m_arcGISAPIKey, "");
+        d.readBool(53, &m_terrainLighting, true);
+        d.readBool(54, &m_water, false);
+        d.readBool(55, &m_hdr, true);
+        d.readBool(56, &m_fog, true);
+        d.readBool(57, &m_fps, false);
+        d.readBool(58, &m_fxaa, false);
+        d.readS32(59, &m_msaa, 1);
         return true;
     }
     else
@@ -598,14 +631,35 @@ void MapSettings::applySettings(const QStringList& settingsKeys, const MapSettin
     if (settingsKeys.contains("sunLightEnabled")) {
         m_sunLightEnabled = settings.m_sunLightEnabled;
     }
+    if (settingsKeys.contains("lightIntensity")) {
+        m_lightIntensity = settings.m_lightIntensity;
+    }
     if (settingsKeys.contains("eciCamera")) {
         m_eciCamera = settings.m_eciCamera;
     }
     if (settingsKeys.contains("modelDir")) {
         m_modelDir = settings.m_modelDir;
     }
-    if (settingsKeys.contains("antiAliasing")) {
-        m_antiAliasing = settings.m_antiAliasing;
+    if (settingsKeys.contains("fxaa")) {
+        m_fxaa = settings.m_fxaa;
+    }
+    if (settingsKeys.contains("msaa")) {
+        m_msaa = settings.m_msaa;
+    }
+    if (settingsKeys.contains("terrainLighting")) {
+        m_terrainLighting = settings.m_terrainLighting;
+    }
+    if (settingsKeys.contains("water")) {
+        m_water = settings.m_water;
+    }
+    if (settingsKeys.contains("hdr")) {
+        m_hdr = settings.m_hdr;
+    }
+    if (settingsKeys.contains("fog")) {
+        m_fog = settings.m_fog;
+    }
+    if (settingsKeys.contains("fps")) {
+        m_fps = settings.m_fps;
     }
     if (settingsKeys.contains("displayMUF")) {
         m_displayMUF = settings.m_displayMUF;
@@ -634,8 +688,20 @@ void MapSettings::applySettings(const QStringList& settingsKeys, const MapSettin
     if (settingsKeys.contains("nasaGlobalImageryOpacity")) {
         m_nasaGlobalImageryOpacity = settings.m_nasaGlobalImageryOpacity;
     }
+    if (settingsKeys.contains("displayAurora")) {
+        m_displayAurora = settings.m_displayAurora;
+    }
     if (settingsKeys.contains("displayMagDec")) {
         m_displayMagDec = settings.m_displayMagDec;
+    }
+    if (settingsKeys.contains("displayMaidenheadGrid")) {
+        m_displayMaidenheadGrid = settings.m_displayMaidenheadGrid;
+    }
+    if (settingsKeys.contains("defaultImagery")) {
+        m_defaultImagery = settings.m_defaultImagery;
+    }
+    if (settingsKeys.contains("arcGISAPIKey")) {
+        m_arcGISAPIKey = settings.m_arcGISAPIKey;
     }
     if (settingsKeys.contains("workspaceIndex")) {
         m_workspaceIndex = settings.m_workspaceIndex;
@@ -709,14 +775,35 @@ QString MapSettings::getDebugString(const QStringList& settingsKeys, bool force)
     if (settingsKeys.contains("sunLightEnabled") || force) {
         ostr << " m_sunLightEnabled: " << m_sunLightEnabled;
     }
+    if (settingsKeys.contains("lightIntensity") || force) {
+        ostr << " m_lightIntensity: " << m_lightIntensity;
+    }
     if (settingsKeys.contains("eciCamera") || force) {
         ostr << " m_eciCamera: " << m_eciCamera;
     }
     if (settingsKeys.contains("modelDir") || force) {
         ostr << " m_modelDir: " << m_modelDir.toStdString();
     }
-    if (settingsKeys.contains("antiAliasing") || force) {
-        ostr << " m_antiAliasing: " << m_antiAliasing.toStdString();
+    if (settingsKeys.contains("fxaa") || force) {
+        ostr << " m_fxaa: " << m_fxaa;
+    }
+    if (settingsKeys.contains("msaa") || force) {
+        ostr << " m_msaa: " << m_msaa;
+    }
+    if (settingsKeys.contains("terrainLighting") || force) {
+        ostr << " m_terrainLighting: " << m_terrainLighting;
+    }
+    if (settingsKeys.contains("water") || force) {
+        ostr << " m_water: " << m_water;
+    }
+    if (settingsKeys.contains("hdr") || force) {
+        ostr << " m_hdr: " << m_hdr;
+    }
+    if (settingsKeys.contains("fog") || force) {
+        ostr << " m_fog: " << m_fog;
+    }
+    if (settingsKeys.contains("fps") || force) {
+        ostr << " m_fps: " << m_fps;
     }
     if (settingsKeys.contains("displayMUF") || force) {
         ostr << " m_displayMUF: " << m_displayMUF;
@@ -745,8 +832,20 @@ QString MapSettings::getDebugString(const QStringList& settingsKeys, bool force)
     if (settingsKeys.contains("nasaGlobalImageryOpacity") || force) {
         ostr << " m_nasaGlobalImageryOpacity: " << m_nasaGlobalImageryOpacity;
     }
+    if (settingsKeys.contains("displayAurora") || force) {
+        ostr << " m_displayAurora: " << m_displayAurora;
+    }
     if (settingsKeys.contains("displayMagDec") || force) {
         ostr << " m_displayMagDec: " << m_displayMagDec;
+    }
+    if (settingsKeys.contains("displayMaidenheadGrid") || force) {
+        ostr << " m_displayMaidenheadGrid: " << m_displayMaidenheadGrid;
+    }
+    if (settingsKeys.contains("defaultImagery") || force) {
+        ostr << " m_defaultImagery: " << m_defaultImagery.toStdString();
+    }
+    if (settingsKeys.contains("arcGISAPIKey") || force) {
+        ostr << " m_arcGISAPIKey: " << m_arcGISAPIKey.toStdString();
     }
     if (settingsKeys.contains("workspaceIndex") || force) {
         ostr << " m_workspaceIndex: " << m_workspaceIndex;

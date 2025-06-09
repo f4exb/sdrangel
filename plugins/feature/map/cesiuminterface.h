@@ -60,11 +60,15 @@ public:
     void setDateTime(QDateTime dateTime);
     void getDateTime();
     void track(const QString &name);
-    void setTerrain(const QString &terrain, const QString &maptilerAPIKey);
+    void setDefaultImagery(const QString &imagery);
+    void setTerrain(const QString &terrain, const QString &maptilerAPIKey, bool lighting, bool water);
     void setBuildings(const QString &buildings);
     void setCameraReferenceFrame(bool eci);
-    void setSunLight(bool useSunLight);
-    void setAntiAliasing(const QString &antiAliasing);
+    void setLighting(bool useSunLight, float cameraLightIntensity);
+    void setAntiAliasing(bool fxaa, int msaa);
+    void setHDR(bool enabled);
+    void setFog(bool enabled);
+    void showFPS(bool show);
     void showMUF(bool show);
     void showfoF2(bool show);
     void showMagDec(bool show);
