@@ -216,6 +216,13 @@ void MapSettings::resetToDefaults()
     m_displayNASAGlobalImagery = false;
     m_nasaGlobalImageryIdentifier = "";
     m_nasaGlobalImageryOpacity = 50;
+    m_displayAurora = false;
+    m_displayMagDec = false;
+    m_displayMaidenheadGrid = false;
+    m_displayPFD = false;
+    m_viewFirstPerson = false;
+    m_defaultImagery = "Sentinel-2";
+    m_arcGISAPIKey = "";
     m_workspaceIndex = 0;
     m_checkWXAPIKey = "";
 }
@@ -354,6 +361,7 @@ bool MapSettings::deserialize(const QByteArray& data)
         d.readBool(41, &m_displayNASAGlobalImagery, false);
         d.readString(42, &m_nasaGlobalImageryIdentifier, "");
         d.readS32(43, &m_nasaGlobalImageryOpacity, 50);
+        d.readBool(45, &m_displayMagDec, false);
 
         d.readString(46, &m_checkWXAPIKey, "");
 
@@ -626,6 +634,9 @@ void MapSettings::applySettings(const QStringList& settingsKeys, const MapSettin
     if (settingsKeys.contains("nasaGlobalImageryOpacity")) {
         m_nasaGlobalImageryOpacity = settings.m_nasaGlobalImageryOpacity;
     }
+    if (settingsKeys.contains("displayMagDec")) {
+        m_displayMagDec = settings.m_displayMagDec;
+    }
     if (settingsKeys.contains("workspaceIndex")) {
         m_workspaceIndex = settings.m_workspaceIndex;
     }
@@ -733,6 +744,9 @@ QString MapSettings::getDebugString(const QStringList& settingsKeys, bool force)
     }
     if (settingsKeys.contains("nasaGlobalImageryOpacity") || force) {
         ostr << " m_nasaGlobalImageryOpacity: " << m_nasaGlobalImageryOpacity;
+    }
+    if (settingsKeys.contains("displayMagDec") || force) {
+        ostr << " m_displayMagDec: " << m_displayMagDec;
     }
     if (settingsKeys.contains("workspaceIndex") || force) {
         ostr << " m_workspaceIndex: " << m_workspaceIndex;

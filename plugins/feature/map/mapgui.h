@@ -252,6 +252,7 @@ private:
     QAction *m_displayNASAGlobalImagery;
     QAction *m_displayMUF;
     QAction *m_displayfoF2;
+    QAction *m_displayMagDec;
 
     QString m_radarPath;
     QString m_satellitePath;
@@ -330,6 +331,7 @@ private slots:
     void on_displayNASAGlobalImagery_clicked(bool checked=false);
     void on_nasaGlobalImageryIdentifier_currentIndexChanged(int index);
     void on_nasaGlobalImageryOpacity_valueChanged(int index);
+    void on_displayMagDec_clicked(bool checked=false);
     void on_layersMenu_clicked();
     void on_find_returnPressed();
     void on_maidenhead_clicked();

@@ -110,6 +110,7 @@ struct MapSettings
     bool m_displayNASAGlobalImagery;
     QString m_nasaGlobalImageryIdentifier;
     int m_nasaGlobalImageryOpacity;
+    bool m_displayMagDec;
 
     QString m_checkWXAPIKey;    //!< checkwxapi.com API key
 

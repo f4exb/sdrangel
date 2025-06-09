@@ -1814,6 +1814,7 @@ void MapGUI::displayToolbar()
     ui->displayNASAGlobalImagery->setVisible(overlayButtons);
     ui->displayMUF->setVisible(!narrow && m_settings.m_map3DEnabled);
     ui->displayfoF2->setVisible(!narrow && m_settings.m_map3DEnabled);
+    ui->displayMagDec->setVisible(!narrow && m_settings.m_map3DEnabled);
     ui->save->setVisible(m_settings.m_map3DEnabled);
 }
 
@@ -1923,6 +1924,7 @@ void MapGUI::applyMap3DSettings(bool reloadMap)
         m_cesium->getDateTime();
         m_cesium->showMUF(m_settings.m_displayMUF);
         m_cesium->showfoF2(m_settings.m_displayfoF2);
+        m_cesium->showMagDec(m_settings.m_displayMagDec);
         m_cesium->showLayer("rain", m_settings.m_displayRain);
         m_cesium->showLayer("clouds", m_settings.m_displayClouds);
         m_cesium->showLayer("seaMarks", m_settings.m_displaySeaMarks);
@@ -2012,6 +2014,7 @@ void MapGUI::init3DMap()
 
     m_cesium->showMUF(m_settings.m_displayMUF);
     m_cesium->showfoF2(m_settings.m_displayfoF2);
+    m_cesium->showMagDec(m_settings.m_displayMagDec);
 
     m_cesium->showLayer("rain", m_settings.m_displayRain);
     m_cesium->showLayer("clouds", m_settings.m_displayClouds);
@@ -2063,6 +2066,7 @@ void MapGUI::displaySettings()
     m_displayMUF->setChecked(m_settings.m_displayMUF);
     ui->displayfoF2->setChecked(m_settings.m_displayfoF2);
     m_displayfoF2->setChecked(m_settings.m_displayfoF2);
+    ui->displayMagDec->setChecked(m_settings.m_displayMagDec);
     m_objectMapModel.setDisplayNames(m_settings.m_displayNames);
     m_objectMapModel.setDisplaySelectedGroundTracks(m_settings.m_displaySelectedGroundTracks);
     m_objectMapModel.setDisplayAllGroundTracks(m_settings.m_displayAllGroundTracks);
@@ -2362,6 +2366,34 @@ void MapGUI::on_displayfoF2_clicked(bool checked)
     if (m_cesium && !m_settings.m_displayfoF2) {
         m_cesium->showfoF2(m_settings.m_displayfoF2);
     }
+void MapGUI::on_displayMagDec_clicked(bool checked)
+{
+    if (this->sender() != ui->displayMagDec) {
+        ui->displayMagDec->setChecked(checked);
+    }
+    if (this->sender() != m_displayMagDec) {
+        m_displayMagDec->setChecked(checked);
+    }
+    m_settings.m_displayMagDec = checked;
+    if (m_cesium) {
+        m_cesium->showMagDec(m_settings.m_displayMagDec);
+    }
+    applySetting("displayMagDec");
+}
+
+void MapGUI::on_displayMaidenheadGrid_clicked(bool checked)
+{
+    if (this->sender() != ui->displayMaidenheadGrid) {
+        ui->displayMaidenheadGrid->setChecked(checked);
+    }
+    if (this->sender() != m_displayMaidenheadGrid) {
+        m_displayMaidenheadGrid->setChecked(checked);
+    }
+    m_settings.m_displayMaidenheadGrid = checked;
+    if (m_cesium) {
+        m_cesium->showMaidenheadGrid(m_settings.m_displayMaidenheadGrid);
+    }
+    applySetting("displayMaidenheadGrid");
 }
 
 void MapGUI::createLayersMenu()
@@ -2406,6 +2438,10 @@ void MapGUI::createLayersMenu()
     m_displayfoF2->setToolTip("Display F2 layer critical frequency contours");
     connect(m_displayfoF2, &QAction::triggered, this, &MapGUI::on_displayfoF2_clicked);
 
+    m_displayMagDec = menu->addAction("Mag Dec");
+    m_displayMagDec->setCheckable(true);
+    m_displayMagDec->setToolTip("Display magnetic declination");
+    connect(m_displayMagDec, &QAction::triggered, this, &MapGUI::on_displayMagDec_clicked);
     ui->layersMenu->setMenu(menu);
 }
 
@@ -2880,6 +2916,7 @@ void MapGUI::makeUIConnections()
     QObject::connect(ui->nasaGlobalImageryOpacity, qOverload<int>(&QDial::valueChanged), this, &MapGUI::on_nasaGlobalImageryOpacity_valueChanged);
     QObject::connect(ui->displayMUF, &ButtonSwitch::clicked, this, &MapGUI::on_displayMUF_clicked);
     QObject::connect(ui->displayfoF2, &ButtonSwitch::clicked, this, &MapGUI::on_displayfoF2_clicked);
+    QObject::connect(ui->displayMagDec, &ButtonSwitch::clicked, this, &MapGUI::on_displayMagDec_clicked);
     QObject::connect(ui->find, &QLineEdit::returnPressed, this, &MapGUI::on_find_returnPressed);
     QObject::connect(ui->maidenhead, &QToolButton::clicked, this, &MapGUI::on_maidenhead_clicked);
     QObject::connect(ui->save, &QToolButton::clicked, this, &MapGUI::on_save_clicked);

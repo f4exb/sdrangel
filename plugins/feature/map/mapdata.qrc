@@ -1,5 +1,6 @@
 <RCC>
   <qresource prefix="/map/">
     <file>data/transmitters.csv</file>
+    <file>data/wmm.geojson</file>
   </qresource>
 </RCC>

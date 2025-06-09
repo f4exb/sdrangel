@@ -14,5 +14,6 @@
         <file>icons/railway.png</file>
         <file>icons/waypoints.png</file>
         <file>icons/earthsat.png</file>
+        <file>icons/compass.png</file>
     </qresource>
 </RCC>
