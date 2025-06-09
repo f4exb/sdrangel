@@ -67,14 +67,14 @@ private slots:
                 {
                     xml = QString("\
                     {\
-                        \"UrlTemplate\" : \"https://maps.wikimedia.org/osm-intl/%z/%x/%y%1.png\",\
+                        \"UrlTemplate\" : \"https://tile.openstreetmap.org/%z/%x/%y.png\",\
                         \"ImageFormat\" : \"png\",\
                         \"QImageFormat\" : \"Indexed8\",\
-                        \"ID\" : \"wmf-intl-%2x\",\
+                        \"ID\" : \"osm-%1x\",\
                         \"MaximumZoomLevel\" : 18,\
                         \"MapCopyRight\" : \"<a href='https://wikimediafoundation.org/wiki/Terms_of_Use'>WikiMedia Foundation</a>\",\
                         \"DataCopyRight\" : \"<a href='http://www.openstreetmap.org/copyright'>OpenStreetMap</a> contributors\"\
-                    }").arg(hiresURL).arg(hires ? 1 : 2);
+                    }").arg(hires ? 1 : 2);
                 }
                 else if (tokens[1] == "/satellite")
                 {

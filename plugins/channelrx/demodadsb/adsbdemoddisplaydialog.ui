@@ -277,14 +277,14 @@
            </item>
           </widget>
          </item>
-         <item row="2" column="0">
+         <item row="3" column="0">
           <widget class="QLabel" name="aircraftMinZoomLabel">
            <property name="text">
             <string>Zoom level for aircraft scaling</string>
            </property>
           </widget>
          </item>
-         <item row="2" column="1">
+         <item row="3" column="1">
           <widget class="QSpinBox" name="aircraftMinZoom">
            <property name="toolTip">
             <string>When map zoom (0 min zoom - 15 max zoom) is higher than this value, aircraft icon size will be scaled</string>
@@ -294,14 +294,14 @@
            </property>
           </widget>
          </item>
-         <item row="3" column="0">
+         <item row="4" column="0">
           <widget class="QLabel" name="airportSizeLabel">
            <property name="text">
             <string>Display airports with size</string>
            </property>
           </widget>
          </item>
-         <item row="3" column="1">
+         <item row="4" column="1">
           <widget class="QComboBox" name="airportSize">
            <property name="toolTip">
             <string>Sets the minimum airport size that will be displayed on the map</string>
@@ -323,14 +323,14 @@
            </item>
           </widget>
          </item>
-         <item row="4" column="0">
+         <item row="5" column="0">
           <widget class="QLabel" name="heliportsLabel">
            <property name="text">
             <string>Display heliports</string>
            </property>
           </widget>
          </item>
-         <item row="4" column="1">
+         <item row="5" column="1">
           <widget class="QCheckBox" name="heliports">
            <property name="toolTip">
             <string>When checked, heliports are displayed on the map</string>
@@ -340,14 +340,14 @@
            </property>
           </widget>
          </item>
-         <item row="5" column="0">
+         <item row="6" column="0">
           <widget class="QLabel" name="airportRangeLabel">
            <property name="text">
             <string>Airport display distance (km)</string>
            </property>
           </widget>
          </item>
-         <item row="5" column="1">
+         <item row="6" column="1">
           <widget class="QSpinBox" name="airportRange">
            <property name="toolTip">
             <string>Displays airports within the specified distance in kilometres from My Position</string>
@@ -357,14 +357,14 @@
            </property>
           </widget>
          </item>
-         <item row="6" column="0">
+         <item row="7" column="0">
           <widget class="QLabel" name="airspacesLabel">
            <property name="text">
             <string>Airspaces to display</string>
            </property>
           </widget>
          </item>
-         <item row="6" column="1">
+         <item row="7" column="1">
           <widget class="QListWidget" name="airspaces">
            <property name="toolTip">
             <string>Airspace categories to display</string>
@@ -521,14 +521,14 @@
            </item>
           </widget>
          </item>
-         <item row="7" column="0">
+         <item row="8" column="0">
           <widget class="QLabel" name="airspaceRangeLabel">
            <property name="text">
             <string>Airspace display distance (km)</string>
            </property>
           </widget>
          </item>
-         <item row="7" column="1">
+         <item row="8" column="1">
           <widget class="QSpinBox" name="airspaceRange">
            <property name="toolTip">
             <string>Displays airspace within the specified distance in kilometres from My Position</string>
@@ -538,14 +538,14 @@
            </property>
           </widget>
          </item>
-         <item row="8" column="0">
+         <item row="9" column="0">
           <widget class="QLabel" name="displayNavAids">
            <property name="text">
             <string>Display NAVAIDs</string>
            </property>
           </widget>
          </item>
-         <item row="8" column="1">
+         <item row="9" column="1">
           <widget class="QCheckBox" name="navAids">
            <property name="toolTip">
             <string>Display NAVAIDs such as VORs and NDBs</string>
@@ -555,7 +555,7 @@
            </property>
           </widget>
          </item>
-         <item row="9" column="1">
+         <item row="10" column="1">
           <widget class="QCheckBox" name="atcCallsigns">
            <property name="toolTip">
             <string>Use ATC callsigns (SPEEDBIRD) rather than ICAO (BAW) for aircraft labels on map</string>
@@ -565,24 +565,41 @@
            </property>
           </widget>
          </item>
-         <item row="9" column="0">
+         <item row="10" column="0">
           <widget class="QLabel" name="atcCallsignsLabel">
            <property name="text">
             <string>Use ATC callsigns on map</string>
            </property>
           </widget>
          </item>
-         <item row="10" column="1">
+         <item row="11" column="1">
           <widget class="QComboBox" name="flightPathPalette">
            <property name="toolTip">
             <string>Colour palette to use for aircraft flight paths</string>
            </property>
           </widget>
          </item>
-         <item row="10" column="0">
+         <item row="11" column="0">
           <widget class="QLabel" name="flightPathPaletteLabel">
            <property name="text">
             <string>Flight path palette</string>
+           </property>
+          </widget>
+         </item>
+         <item row="2" column="0">
+          <widget class="QLabel" name="label">
+           <property name="toolTip">
+            <string/>
+           </property>
+           <property name="text">
+            <string>Maptiler API key</string>
+           </property>
+          </widget>
+         </item>
+         <item row="2" column="1">
+          <widget class="QLineEdit" name="maptilerAPIKey">
+           <property name="toolTip">
+            <string>API key for Maptiler (https://maptiler.com) for satellite map</string>
            </property>
           </widget>
          </item>

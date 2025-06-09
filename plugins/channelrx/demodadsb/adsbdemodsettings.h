@@ -195,6 +195,7 @@ struct ADSBDemodSettings
     QList<NotificationSettings *> m_notificationSettings;
     QString m_aviationstackAPIKey;      //!< aviationstack.com API key
     QString m_checkWXAPIKey;            //!< checkwxapi.com API key
+    QString m_maptilerAPIKey;           //!< maptiler.com API key (for osm/satellite map)
 
     QString m_logFilename;
     bool m_logEnabled;

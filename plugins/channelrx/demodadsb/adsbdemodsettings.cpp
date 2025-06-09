@@ -80,6 +80,7 @@ void ADSBDemodSettings::resetToDefaults()
     m_interpolatorTapsPerPhase = 3.5f; // without gaining much improvement in PER
     m_aviationstackAPIKey = "";
     m_checkWXAPIKey = "";
+    m_maptilerAPIKey = "";
     for (int i = 0; i < ADSBDEMOD_COLUMNS; i++)
     {
         m_columnIndexes[i] = i;
@@ -211,6 +212,8 @@ QByteArray ADSBDemodSettings::serialize() const
     s.writeString(75, m_flightPathPaletteName);
     s.writeS32(76, m_chipsThreshold);
     s.writeBool(77, m_favourLivery);
+
+    s.writeString(78, m_maptilerAPIKey);
 
     for (int i = 0; i < ADSBDEMOD_COLUMNS; i++) {
         s.writeS32(100 + i, m_columnIndexes[i]);
@@ -356,6 +359,8 @@ bool ADSBDemodSettings::deserialize(const QByteArray& data)
         d.readString(75, &m_flightPathPaletteName, "Spectral");
         d.readS32(76, &m_chipsThreshold, 0);
         d.readBool(77, &m_favourLivery, true);
+
+        d.readString(78, &m_maptilerAPIKey, "");
 
         applyPalette();
 
@@ -579,6 +584,9 @@ void ADSBDemodSettings::applySettings(const QStringList& settingsKeys, const ADS
     if (settingsKeys.contains("checkWXAPIKey")) {
         m_checkWXAPIKey = settings.m_checkWXAPIKey;
     }
+    if (settingsKeys.contains("maptilerAPIKey")) {
+        m_maptilerAPIKey = settings.m_maptilerAPIKey;
+    }
     if (settingsKeys.contains("logFilename")) {
         m_logFilename = settings.m_logFilename;
     }
@@ -781,6 +789,9 @@ QString ADSBDemodSettings::getDebugString(const QStringList& settingsKeys, bool 
     }
     if (settingsKeys.contains("checkWXAPIKey") || force) {
         ostr << " m_checkWXAPIKey: " << m_checkWXAPIKey.toStdString();
+    }
+    if (settingsKeys.contains("maptilerAPIKey") || force) {
+        ostr << " m_maptilerAPIKey: " << m_maptilerAPIKey.toStdString();
     }
     if (settingsKeys.contains("logFilename") || force) {
         ostr << " m_logFilename: " << m_logFilename.toStdString();

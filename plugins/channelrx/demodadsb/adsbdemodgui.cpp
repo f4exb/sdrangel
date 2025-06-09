@@ -2063,15 +2063,11 @@ void ADSBDemodGUI::handleADSB(
         aircraft = getAircraft(icao, newAircraft);
     }
 
-    /*if (aircraft->m_icaoHex != "43ea47") {
-        return;
-    }*/
-
     // ADS-B, non-transponder ADS-B, TIS-B, or rebroadcast of ADS-B (ADS-R)
     if ((df == 17) || ((df == 18) && (ca != 3) && (ca != 4)))
     {
         const int tc = (data[4] >> 3) & 0x1f; // Type code
-        unsigned surveillanceStatus = 0;
+        //unsigned surveillanceStatus = 0;
 
         m_tcStats[tc]++;
         if (updateTCStats(tc, TC_0, 0, 0)) {
@@ -2095,8 +2091,6 @@ void ADSBDemodGUI::handleADSB(
             QString emitterCategory, callsign;
 
             decodeID(data, emitterCategory, callsign);
-
-            int ec = data[4] & 0x7;   // Emitter category
 
             QString prevEmitterCategory = aircraft->m_emitterCategory;
             aircraft->m_emitterCategory = emitterCategory;
@@ -2210,7 +2204,7 @@ void ADSBDemodGUI::handleADSB(
             {
                 // Airborne position (9-18 baro, 20-22 GNSS)
 
-                surveillanceStatus = (data[4] >> 1) & 0x3;
+                //surveillanceStatus = (data[4] >> 1) & 0x3;
 
                 // ADS-B: Version 0 is single antenna flag, version 2 is NIC supplement-B
                 // TSI-B: ICAO/Mode A flag
@@ -2239,7 +2233,7 @@ void ADSBDemodGUI::handleADSB(
             {
                 int f;
                 double latCpr, lonCpr;
-                unsigned t = (data[2] >> 3) & 1; // Not valid for TIS-B
+                //unsigned t = (data[2] >> 3) & 1; // Not valid for TIS-B
                 bool globalValid = false;
                 double globalLatitude, globalLongitude;
                 bool localValid = false;
@@ -2289,7 +2283,7 @@ void ADSBDemodGUI::handleADSB(
                 }
 
                 // Local decode using a single aircraft position + location of receiver or previous global position
-                localValid = decodeLocalPosition(f, aircraft->m_cprLat[f], aircraft->m_cprLong[f], aircraft->m_onSurface, dateTime, aircraft, localLatitude, localLongitude, true);
+                localValid = decodeLocalPosition(f, aircraft->m_cprLat[f], aircraft->m_cprLong[f], aircraft->m_onSurface, aircraft, localLatitude, localLongitude, true);
 
                 if (aircraft->m_globalPosition && !localValid)
                 {
@@ -2511,7 +2505,7 @@ void ADSBDemodGUI::handleADSB(
                 bool nicSupplementA = (data[9] >> 4) & 0x1;
                 int nacp = data[9] & 0xf;
                 int sil = (data[10] >> 4) & 0x3;
-                bool hrd = (data[10] >> 2) & 0x1;       // Whether headings are magnetic (false) or true North (true)
+                //bool hrd = (data[10] >> 2) & 0x1;       // Whether headings are magnetic (false) or true North (true)
                 bool silSuppliment = (data[10] >> 1) & 0x1; // 0 per hour / 1 per sample
 
                 aircraft->m_nicSupplementA = nicSupplementA;
@@ -2537,7 +2531,7 @@ void ADSBDemodGUI::handleADSB(
                     // Airborne
                     unsigned capacityClassCode = ((data[5] & 0xff) << 8) | (data[6] & 0xff);
                     bool tcasOperational = (capacityClassCode >> 13) & 1;
-                    bool adsbIn = (capacityClassCode >> 12) & 1;
+                    //bool adsbIn = (capacityClassCode >> 12) & 1;
 
                     aircraft->m_tcasOperational = tcasOperational;
                     aircraft->m_tcasOperationalValid = true;
@@ -2882,10 +2876,10 @@ void ADSBDemodGUI::handleADSB(
     else if (df == 0)
     {
         // Short air-to-air ACAS (Airborne Collision Avoidance System)
-        bool onSurface = (data[0] >> 2) & 1;
-        unsigned crosslinkCapability = (data[0] >> 1) & 1;
+        //bool onSurface = (data[0] >> 2) & 1;
+        //unsigned crosslinkCapability = (data[0] >> 1) & 1;
         unsigned spare1 = data[0] & 1;
-        unsigned sensitivityLevel = (data[1] >> 5) & 0x7;
+        //unsigned sensitivityLevel = (data[1] >> 5) & 0x7;
         unsigned spare2 = (data[1] >> 3) & 0x3;
         unsigned replyInfo = ((data[1] & 0x7) << 1) | ((data[2] >> 7) & 1);
         unsigned spare3 = (data[2] >> 5) & 0x3;
@@ -3439,7 +3433,7 @@ bool ADSBDemodGUI::decodeGlobalPosition(int f, const double cprLat[2], const dou
 }
 
 // Only valid if airborne within 180nm/333km (C.2.6.4) or 45nm for surface
-bool ADSBDemodGUI::decodeLocalPosition(int f, double cprLat, double cprLong, bool onSurface, const QDateTime& dateTime, const Aircraft *aircraft, double& latitude, double& longitude, bool countFailure)
+bool ADSBDemodGUI::decodeLocalPosition(int f, double cprLat, double cprLong, bool onSurface, const Aircraft *aircraft, double& latitude, double& longitude, bool countFailure)
 {
     double refLatitude;
     double refLongitude;
@@ -3708,7 +3702,7 @@ void ADSBDemodGUI::decodeCommB(const QByteArray data, const QDateTime dateTime, 
         }
         else
         {
-            if (decodeLocalPosition(f, cprLat[f], cprLon[f], aircraft->m_onSurface, dateTime, aircraft, latitude_0_5, longitude_0_5, false)) {
+            if (decodeLocalPosition(f, cprLat[f], cprLon[f], aircraft->m_onSurface, aircraft, latitude_0_5, longitude_0_5, false)) {
                 positionValid_0_5 = true;
             }
         }
@@ -5511,7 +5505,6 @@ void ADSBDemodGUI::statsTable_customContextMenuRequested(QPoint pos)
         QMenu* tableContextMenu = new QMenu(ui->statsTable);
         connect(tableContextMenu, &QMenu::aboutToHide, tableContextMenu, &QMenu::deleteLater);
 
-        int row = item->row();
         QAction* copyAction = new QAction("Copy", tableContextMenu);
         const QString text = item->text();
         connect(copyAction, &QAction::triggered, this, [text]()->void {
@@ -5793,6 +5786,8 @@ void ADSBDemodGUI::on_stats_clicked(bool checked)
 
 void ADSBDemodGUI::on_ic_globalCheckStateChanged(int state)
 {
+    (void) state;
+
     for (int i = 0; i < ui->ic->count(); i++)
     {
         int ic = ui->ic->itemText(i).toInt();
@@ -6972,7 +6967,7 @@ ADSBDemodGUI::ADSBDemodGUI(PluginAPI* pluginAPI, DeviceUISet *deviceUISet, Baseb
     }
 
     m_osmPort = 0; // Pick a free port
-    m_templateServer = new ADSBOSMTemplateServer("q2RVNAe3eFKCH4XsrE3r", m_osmPort);
+    m_templateServer = new ADSBOSMTemplateServer(maptilerAPIKey(), m_osmPort);
 
 #ifdef QT_LOCATION_FOUND
     ui->map->setAttribute(Qt::WA_AcceptTouchEvents, true);
@@ -7204,6 +7199,13 @@ ADSBDemodGUI::~ADSBDemodGUI()
     delete m_networkManager;
 }
 
+// Free keys, so no point in stealing them :)
+
+QString ADSBDemodGUI::maptilerAPIKey() const
+{
+    return m_settings.m_maptilerAPIKey.isEmpty() ? "Nzl2cSyOnewxUc9VWg4n" : m_settings.m_maptilerAPIKey;
+}
+
 void ADSBDemodGUI::applySetting(const QString& settingsKey)
 {
     applySettings({settingsKey});
@@ -7231,6 +7233,13 @@ void ADSBDemodGUI::applyAllSettings()
 // All settings are valid - we just use settingsKeys here to avoid updating things that are slow to update
 void ADSBDemodGUI::displaySettings(const QStringList& settingsKeys, bool force)
 {
+    if (settingsKeys.contains("maptilerAPIKey"))
+    {
+        m_templateServer->close();
+        delete m_templateServer;
+        m_templateServer = new ADSBOSMTemplateServer(maptilerAPIKey(), m_osmPort);
+    }
+
     m_channelMarker.blockSignals(true);
     m_channelMarker.setCenterFrequency(m_settings.m_inputFrequencyOffset);
     m_channelMarker.setBandwidth(m_settings.m_rfBandwidth);
@@ -8718,6 +8727,8 @@ static void calcRadialEndPoint(float startLatitude, float startLongitude, float 
 
 void ADSBDemodGUI::updateCoverageMap(float azimuth, float elevation, float distance, float altitude)
 {
+    (void) elevation;
+
     int i = (int) (azimuth / ADSBDemodGUI::m_maxRangeDeg);
     int k = altitude >= 10000 ? 1 : 0;
     if (distance > m_maxRange[k][i])

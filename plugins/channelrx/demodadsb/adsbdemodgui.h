@@ -1343,6 +1343,8 @@ private:
     explicit ADSBDemodGUI(PluginAPI* pluginAPI, DeviceUISet *deviceUISet, BasebandSampleSink *rxChannel, QWidget* parent = 0);
     virtual ~ADSBDemodGUI();
 
+    QString maptilerAPIKey() const;
+
     void blockApplySettings(bool block);
     void applySetting(const QString& settingsKey);
     void applySettings(const QStringList& settingsKeys, bool force = false);
@@ -1375,7 +1377,7 @@ private:
     bool validateGlobalPosition(double latitude, double longitude, bool countFailure);
     bool validateLocalPosition(double latitude, double longitude, bool surfacePosition, bool countFailure);
     bool decodeGlobalPosition(int f, const double cprLat[2], const double cprLong[2], const QDateTime cprTime[2], double& latitude, double& longitude, bool countFailure);
-    bool decodeLocalPosition(int f, double cprLat, double cprLong, bool onSurface, const QDateTime& dateTime, const Aircraft *aircraft, double& latitude, double& longitude, bool countFailure);
+    bool decodeLocalPosition(int f, double cprLat, double cprLong, bool onSurface, const Aircraft *aircraft, double& latitude, double& longitude, bool countFailure);
     void decodeCpr(const QByteArray& data, int& f, double& latCpr, double& lonCpr) const;
     bool decodeAltitude(const QByteArray& data, int& altFt) const;
     void decodeModeSAltitude(const QByteArray& data, const QDateTime dateTime, Aircraft *aircraft);
