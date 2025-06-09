@@ -285,6 +285,7 @@ set(sdrbase_SOURCES
     util/vlftransmitters.cpp
     util/waypoints.cpp
     util/weather.cpp
+    util/whittakereilers.cpp
     util/iot/device.cpp
     util/iot/homeassistant.cpp
     util/iot/tplink.cpp
@@ -548,6 +549,7 @@ set(sdrbase_HEADERS
     util/vlftransmitters.h
     util/waypoints.h
     util/weather.h
+    util/whittakereilers.h
     util/iot/device.h
     util/iot/homeassistant.h
     util/iot/tplink.h
