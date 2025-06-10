@@ -218,6 +218,8 @@ When checked, tracking an object in the 3D view have the camera in a first perso
 
 When checked, the aircraft PFD (Primary Flight Display) will be displayed. This is used for displaying ADS-B and Mode S data for an aircraft, such as speed, attitude and altitude.
 
+The PFD can be moved by left clicking on it and dragging it. It can be resized by left clicking and dragging in the bottom right corner.
+
 ![PFD](../../../doc/img/Map_plugin_pfd.png)
 
 <h3>22: Display tracks for selected object</h3>
@@ -249,7 +251,7 @@ When clicked, opens the Map Display Settings dialog:
 For the 2D map, the settings include:
 
 * Whether the 2D map is displayed.
-* Which Map provider will be used to source the map images.
+* Which Map provider will be used to source the map images. OpenStreetMap provides raster maps. MapboxGL provides vector maps. Providers will vary according to Qt version and O/S.
 * When OpenStreetMap is used as the provider, a custom map URL can be entered. For example, http://a.tile.openstreetmap.fr/hot/ or http://1.basemaps.cartocdn.com/light_nolabels/
   or file:///opt/install/custom-map if using a map stored locally, such a map created with [QGIS](https://qgis.org/) using the "Generate XYZ tiles (Directory)" tool
   or [gdal2tiles](https://gdal.org/programs/gdal2tiles.html)
@@ -259,11 +261,20 @@ For the 2D map, the settings include:
 For the 3D map, the settings include:
 
 * Whether the 3D map is displayed.
+* The default imagery to use. Bing Maps Aerial and ArcGIS are higher resolution than Sentinel-2. To use these, you should enter your own API key on the API Keys tab.
 * The terrain provider, which provides elevation data. For a "flat" globe, terrain can be set to Ellipsoid for the WGS-84 ellipsoid.
-* The buildings provider, which provides 3D building models. This can be set to None if no buildings are desired.
+* Whether lighting is applied to the terrain. Not applicable if terrain is set to Ellipsoid.
+* Whether animated water effects (such as waves) are used. Not applicable if terrain is set to Ellipsoid.
+* The buildings provider, which provides 3D building models. This can be set to None if no buildings are desired. The buildings may float in the air if terrain is set to Ellipsoid.
 * Whether the globe and models are lit from the direction of the Sun or the camera.
+* The camera light intensity if Lighting is set to Camera.
+* Whether HDT (High Dynamic Range) rendering should be used.
+* Whether a fog effect should be applied.
 * The camera reference frame. For ECEF (Earth Centered Earth Fixed), the camera rotates with the globe.
 For ECI (Earth Centred Inertial) the camera is fixed in space and the globe will rotate under it.
+* Whether FXAA anti-aliasing is applied.
+* Whether MSAA anti-aliasing is applied and how many samples to use.
+* Whether the FPS (Frames Per Second) are displayed.
 
 The "Download 3D Models" button will download the 3D models of aircraft, ships and satellites that are required for the 3D map.
 These are not included with the SDRangel distribution, so must be downloaded. It is recommended to restart SDRangel after downloading the models.
@@ -313,7 +324,7 @@ To the right of the timeline is the fullscreen toggle button, which allows the 3
 
 <h4>SDRs</h4>
 
-The map can display KiwiSDRs and Spy Servers that are publicly accessible via the internet. A URL is displayed in the info box.
+The map can display SDRangel Remote TCP Servers, KiwiSDRs and Spy Servers that are publicly accessible via the internet. A URL is displayed in the info box.
 Clicking on the URL will open a new KiwiSDR or RemoteTCPInput device which will connect to the corresponding SDR.
 Before connecting, you should check the whether the number of users is below the maximum. Server data is updated every 2 minutes.
 
