@@ -1823,6 +1823,7 @@ void MapGUI::orientationChanged(Qt::ScreenOrientation orientation)
 
 void MapGUI::displayToolbar()
 {
+    ui->mapTypes->setVisible(m_settings.m_map2DEnabled);
     // Replace buttons with menu when window gets narrow
     bool narrow = this->screen()->availableGeometry().width() < 400;
     ui->layersMenu->setVisible(narrow);

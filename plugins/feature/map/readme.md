@@ -35,7 +35,7 @@ As well as internet and built-in data sources:
 * Satellite infra-red data (clouds),
 * Sea marks,
 * Satellite imagery from NASA GIBS (Global Imagery Browse Services),
-* Aurora probabilty from NOAA.
+* Aurora probabilty.
 
 It can also create tracks showing the path aircraft, ships, radiosondes and APRS objects have taken, as well as predicted paths for satellites.
 
@@ -43,13 +43,11 @@ It can also create tracks showing the path aircraft, ships, radiosondes and APRS
 
 ![3D Map feature](../../../doc/img/Map_plugin_apt.png)
 
-3D Models are not included with SDRangel. They must be downloaded by pressing the Download 3D Models button in the Display Settings dialog (21).
+3D Models are not included with SDRangel. They must be downloaded by pressing the Download 3D Models button in the Display Settings dialog (26).
 
 <h2>Interface</h2>
 
 ![Map feature plugin GUI](../../../doc/img/Map_plugin.png)
-
-WASD keys can be used to move the camera up, left, down and right. QE for forward and back.
 
 <h3>1: Find</h3>
 
@@ -60,16 +58,26 @@ To centre the map on an object or location, enter:
 * A Maidenhead locator (E.g: IO86av).
 * An address (E.g: St Katharine's & Wapping, London EC3N 4AB)
 
-<h3>2: Map Type</h3>
+<h3>2: 2D Map Type</h3>
 
 Allows you to select a 2D map type. The available types will depend upon the Map provider
-selected under Display Settings (7).
+selected under Display Settings (26).
 
 <h3>3: Maidenhead locator conversion</h3>
 
-When checked, opens the Maidenhead locator converter dialog, which allows conversion between addresses, latitude and longitude and Maidenhead locators.
+When checked, opens the Maidenhead locator converter dialog, which allows conversion between addresses, latitude and longitude and Maidenhead locators. Enter a location in one field and press enter to convert.
 
-<h3>4: Display Beacon dialog</h3>
+![Maidenhead locator converter](../../../doc/img/Map_plugin_maidenhead_converter.png)
+
+<h3>4: Maidenhead grid</h3>
+
+When checked, displays a Maidenhead locatator grid on the 3D map. The grid size depends on the zoom level.
+
+![3D Map Maidenhead Grid](../../../doc/img/Map_plugin_maidenhead_grid1.png)
+
+![3D Map Maidenhead Grid](../../../doc/img/Map_plugin_maidenhead_grid2.png)
+
+<h3>5: Display Beacon dialog</h3>
 
 When clicked, opens the Beacon dialog. Initially, no beacons will be listed. To download the IARU Region 1 beacon list, click the download button in the top right.
 The beacons will then be displayed in the table and on the map.
@@ -79,7 +87,7 @@ The beacons will then be displayed in the table and on the map.
 
 ![Beacon dialog](../../../doc/img/Map_plugin_beacon_dialog.png)
 
-<h3>5: Display IBP Beacon Project Dialog</h3>
+<h3>6: Display IBP Beacon Project Dialog</h3>
 
 When clicked, opens the International Beacon Project dialog. The IBP consists of 18 HF beacons around the world,
 that each transmit once on each of the frequencies 14.100, 18.110, 21.150, 24.930 and 28.200MHz every 3 minutes, for 10 seconds.
@@ -92,7 +100,7 @@ The IBP dialog shows which of the beacons should currently be transmitting.
 
 More details of the IBP can be found at: https://www.ncdxf.org/beacon/beaconfaq.html
 
-<h3>6: Display Radio Time Transmitters dialog</h3>
+<h3>7: Display Radio Time Transmitters dialog</h3>
 
 When clicked, opens the Radio Time Transmitters dialog.
 
@@ -101,7 +109,7 @@ When clicked, opens the Radio Time Transmitters dialog.
 
 ![Radio Time transmitters dialog](../../../doc/img/Map_plugin_radiotime_dialog.png)
 
-<h3>7: Display Satellite Infrared</h3>
+<h3>8: Display Satellite Infrared</h3>
 
 When checked, satellite infrared measurements (10.3um) are downloaded from the internet and are overlaid on the maps. 
 This essentially shows cloud cover. The images are updated every 10 minutes.
@@ -112,7 +120,7 @@ The data is similar to that which can be received using the [APT Demodulator](..
 
 This is only supported on 2D raster maps and the 3D map.
 
-<h3>8: Display Weather Radar</h3>
+<h3>9: Display Weather Radar</h3>
 
 When checked, weather radar measurements are downloaded from the internet and are overlaid on the maps. 
 This shows rain and other forms of precipitation.
@@ -125,7 +133,7 @@ Light blue through dark blue is snow, with dark blue being the most intense.
 
 This is only supported on 2D raster maps and the 3D map.
 
-<h3>9: Display Sea Marks</h3>
+<h3>10: Display Sea Marks</h3>
 
 When checked, sea marks are overlaid on the maps.
 
@@ -135,7 +143,7 @@ When checked, sea marks are overlaid on the maps.
 
 This is only supported on 2D raster maps and the 3D map.
 
-<h3>10: Display Railways</h3>
+<h3>11: Display Railways</h3>
 
 When checked, railway routes are overlaid on the maps.
 
@@ -145,19 +153,39 @@ When checked, railway routes are overlaid on the maps.
 
 This is only supported on 2D raster maps and the 3D map.
 
-<h3>11: Display MUF Contours</h3>
+<h3>12: Display MUF Contours</h3>
 
 When checked, contours will be downloaded and displayed on the 3D map, showing the MUF (Maximum Usable Frequency) for a 3000km path that reflects off the ionosphere.
 The contours will be updated every 15 minutes. MUF contour data is available for the preceding 5 days.
 
 ![MUF contours](../../../doc/img/Map_plugin_muf.png)
 
-<h3>12: Display coF2 Contours</h3>
+<h3>13: Display coF2 Contours</h3>
 
 When checked, contours will be downloaded and displayed on the 3D map, showing coF2 (F2 layer critical frequency), the maximum frequency at which radio waves will be reflected vertically from the F2 region of the ionosphere.
 The contours will be updated every 15 minutes. coF2 contour data is available for the preceding 5 days.
 
-<h3>13: Display NASA GIBS Data</h3>
+<h3>14: Display Magnetic Declination</h3>
+
+When checked, contours will be displayed on the 3D map showing magnetic declination. 
+
+Green contours represent 0 degrees. Red is positive, blue negative. Contours are in 2 degree steps. Clicking on a countour will display its value in the info box.
+
+![Railway Legend](../../../doc/img/Map_plugin_magdec.png)
+
+<h3>15: Display Aurora Predicition</h3>
+
+When checked, aurora prediction data will be downloaded and displayed on the 3D map.
+
+Probabilties:
+
+* Green 10%
+* Yellow 50% 
+* Red 90%
+
+![Aurora probability](../../../doc/img/Map_plugin_aurora.png)
+
+<h3>16: Display NASA GIBS Data</h3>
 
 When checked, enables overlay of data from NASA GIBS (Global Imagery Browse Services). This includes a vast array of Earth observation satellite data,
 such as land and sea temperatures, atmospheric conditions, flux measurements and the like.
@@ -170,27 +198,37 @@ The 2D map will only show data from the default date (which is displayed in the 
 
 This is only supported on 2D raster maps and the 3D map.
 
-<h3>14: NASA GIBS Data</h3>
+<h3>17: NASA GIBS Data</h3>
 
 Selects which data from NASA GIBS to overlay on the maps.
 
-<h3>15: NASA GIBS Opacity</h3>
+<h3>18: NASA GIBS Opacity</h3>
 
 Sets the opacity used for the NASA GIBS overlay image overlay on the 3D map. Lower values make the image more transparent.
 
-<h3>16: Display Names</h3>
+<h3>19: Display Names</h3>
 
 When checked, names of objects are displayed in a bubble next to each object.
 
-<h3>17: Display tracks for selected object</h3>
+<h3>20: First Person View</h3>
+
+When checked, tracking an object in the 3D view have the camera in a first person view. When unchecked, the camera will track the object from a third person view.
+
+<h3>21: PFD (Primary Flight Display)</h3>
+
+When checked, the aircraft PFD (Primary Flight Display) will be displayed. This is used for displaying ADS-B and Mode S data for an aircraft, such as speed, attitude and altitude.
+
+![PFD](../../../doc/img/Map_plugin_pfd.png)
+
+<h3>22: Display tracks for selected object</h3>
 
 When checked, displays the track (taken or predicted) for the selected object.
 
-<h3>18: Display tracks for all objects</h3>
+<h3>23: Display tracks for all objects</h3>
 
 When checked, displays the track (taken or predicted) for the all objects.
 
-<h3>19: Save to .kml</h3>
+<h3>24: Save to .kml</h3>
 
 When clicked, items and tracks on the map will be saved to a [KML](https://en.wikipedia.org/wiki/Keyhole_Markup_Language) (.kml or .kmz) file, for use in other applications.
 
@@ -198,11 +236,11 @@ Note that the KML format requires 3D models in the Collada (.dae) format. Howeve
 If you wish to view the models in a KML viewer, you will need to manually convert them. Note that you should still be able to view tracks without the models.
 Note that the .glbe files cannot be converted to .dae.
 
-<h3>20: Delete</h3>
+<h3>25: Delete</h3>
 
 When clicked, all items will be deleted from the map.
 
-<h3>21: Display settings</h3>
+<h3>26: Display settings</h3>
 
 When clicked, opens the Map Display Settings dialog:
 
@@ -267,6 +305,7 @@ The map feature displays a 2D and a 3D map overlaid with objects reported by oth
   * Changing the order in which the objects are drawn, which can help to cycle through multiple objects that are at the same location on the map.
   * Setting the object as the tracking target on the 3D map.
 * Left double clicking while holding shift on the 3D map will place a marker showing the position. Right clicking will clear it.
+* On the 3D map, WASD keys can be used to move the camera up, left, down and right. QE for forward and back.
 
 The 2D map will only display the last reported positions for objects.
 The 3D map, however, has a timeline that allows replaying how objects have moved over time.
@@ -319,6 +358,7 @@ Mapbox: https://www.mapbox.com/ Cesium: https://www.cesium.com Bing: https://www
 
 Ionosonde data and MUF/coF2 contours from [KC2G](https://prop.kc2g.com/) with source data from [GIRO](https://giro.uml.edu/) and [NOAA NCEI](https://www.ngdc.noaa.gov/stp/iono/ionohome.html).
 
+Aurora probility data from [NOAA](https://www.swpc.noaa.gov/products/aurora-30-minute-forecast)
 
 Sea Marks are from OpenSeaMap: https://www.openseamap.org/
 
