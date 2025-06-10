@@ -64,7 +64,7 @@ Item {
             MouseArea {
                 anchors.fill: parent
                 propagateComposedEvents: true
-                onClicked: {
+                onClicked: (mouse) => {
                     // Unhighlight current aircraft
                     guiPtr.clearHighlighted()
                     mouse.accepted = false
@@ -273,7 +273,7 @@ Item {
                             MouseArea {
                                 anchors.fill: parent
                                 acceptedButtons: Qt.LeftButton | Qt.RightButton
-                                onClicked: {
+                                onClicked: (mouse) => {
                                     if (mouse.button === Qt.LeftButton) {
                                         highlighted = true
                                         console.log("z=" + aircraft.sourceItem.z)
@@ -322,7 +322,7 @@ Item {
                             MouseArea {
                                 anchors.fill: parent
                                 acceptedButtons: Qt.LeftButton | Qt.RightButton
-                                onClicked: {
+                                onClicked: (mouse) => {
                                     if (mouse.button === Qt.LeftButton) {
                                         showAll = !showAll
                                     } else if (mouse.button === Qt.RightButton) {
