@@ -127,7 +127,7 @@ When unchecked, only callsign (or ICAO, until callsign is received) will be disp
 
 <h3>15: Receiver Coverage Map</h3>
 
-When checked, a receiver coverage map will be displayed. This will show the maximum distance a frmae has been received from in each direction.
+When checked, a receiver coverage map will be displayed. This will show the maximum distance a frame has been received from in each direction.
 The yellow region is for frames freceived from aircraft above 10,000 ft, with the green region for below 10,000 ft.
 
 Right clicking on the button will clear the coverage map data.
@@ -154,7 +154,7 @@ The statistics can be reset by right clicking the button.
 <h3>17: Display Chart</h3>
 
 When checked, a chart will be displayed that shows ADS-B and Mode S frame rates in fps (frames per second) as well as the total number of aircraft frames have been received from in the last 10 seconds.
-The chart is update every second. Data older than 10 minutes is averaged over a minute, in order to keep the number of data points managable.
+The chart is updated every second. Data older than 10 minutes is averaged over a minute, in order to keep the number of data points managable.
 
 You can zoom in/out the chart's horizontal axis using the mouse wheel. Hold shift to zoom in/out the chart's vertical axis.
 Series can be hidden/shown by clicking on the corresponding label in the legend.
@@ -167,7 +167,7 @@ Check to display the ADS-B table and map side by side. Uncheck for table on top 
 
 <h3>19: Display Containment Radius</h3>
 
-When checked, an aircrafts horizontal containment radius (Rc) will be drawn as a red circle around an aircraft on the map. This circle represents the aircrafts uncertainty in its reported position.
+When checked, an aircraft's horizontal containment radius (Rc) will be drawn as a red circle around an aircraft on the map. This circle represents the aircraft's uncertainty in its reported position.
 
 ![ADS-B Demodulator coverage map](../../../doc/img/ADSBDemod_plugin_radius.png)
 
@@ -324,7 +324,7 @@ Click to delete all aircraft from the table and map.
 
 <h3>28: IC - Interrogator Code</h3>
 
-The IC dropdown contains a checkable list of Mode S IC (Interrogator Codes) that have been received. When checked, an ellipse in the corresponding colour is drawn on the map showing the location of all the aircraft that have responded with that IC.
+The IC dropdown contains a checkable list of Mode S IC (Interrogator Codes) that have been received. When checked, an ellipse in the corresponding colour is drawn on the map showing the location of all the aircraft that have responded to that IC.
 
 ![ADS-B IC Coverage](../../../doc/img/ADSBDemod_plugin_ic.png)
 
