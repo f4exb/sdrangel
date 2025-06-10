@@ -8,7 +8,7 @@ As well as displaying information received via ADS-B and Mode S, the plugin can 
 
 ![ADS-B Demodulator plugin GUI](../../../doc/img/ADSBDemod_plugin.png)
 
-The ADS-B plugin can send aircraft for display on the [Map Feature](../../feature/map/readme.md) alongside objects from other plugins and in 3D.
+The ADS-B plugin can send aircraft for display on the [Map Feature](../../feature/map/readme.md) alongside objects from other plugins and in 3D, with aircraft data displayed on a PFD (Primary Flight Display).
 
 ![ADS-B on 3D Map](../../../doc/img/ADSBDemod_plugin_map_3d.png)
 
@@ -36,29 +36,33 @@ Average total power in dB relative to a +/- 1.0 amplitude signal received in the
 
 This is the bandwidth in MHz of the channel signal before demodulation.
 
-<h3>QNH</h3>
+<h3>5: QNH</h3>
 
 The QNH setting should be set to the local air pressure in Hectopascals / millibars. It is used to adjust aircraft reported pressure altitudes to heights for display on the 3D map.
 
 When unchecked, the QHN setting is automatically adjusted according to values received from aircraft below the transition altitude. When checked, a value can be entered manually.
 
-<h3>5: SR - Channel Sample Rate</h3>
+<h3>6: SR - Channel Sample Rate</h3>
 
-This specifies the channel sample rate the demodulator uses. Values of 2M-12MSa/s are supported, 2MSa/s steps. Ideally, this should be set to the same value as the baseband sample rate (the sample rate received from the radio). If it is different from the baseband sample rate, interpolation or decimation will be performed as needed to match the rates. However, interpolation currently requires a significant amount of processing power.
+This specifies the channel sample rate the demodulator uses. Values of 2M-12MSa/s are supported, 2MSa/s steps. Ideally, this should be set to the same value as the baseband sample rate (the sample rate received from the radio). If it is different from the baseband sample rate, interpolation or decimation will be performed as needed to match the rates.
 
-2 MSa/s should give decent decodes. Higher rates may be experimented with if your hardware allows it (radio device and processing power). However the higher the rate the more processing power required.
+2 or 4 MSa/s should give decent decodes. Higher rates may be experimented with if your hardware allows it (radio device and processing power). However the higher the rate the more processing power required.
 
-<h3>6: S - Demodulate Mode S frames</h3>
+<h3>7: S - Demodulate Mode S frames</h3>
 
 Checking the S button will enable demodulation of Mode S ELS (Elementary Surveillance), EHS (Enhanced Surveillance) and MRAR (Meteorological Routine Air Report) frames.
 
-<h3>8: Threshold</h3>
+<h3>8: Correlation Threshold</h3>
 
-This sets the correlation threshold in dB between the received signal and expected 1090ES preamble, that is required to be exceeded before the demodulator will try to decode a frame. Lower values should decode more frames and will require more processing power, but will more often decode invalid frames. You may also look at correlation values obtained with reliable signals in the "Correlation" column of the data table.
+This sets the correlation threshold in dB between the received signal and expected 1090ES preamble, that is required to be exceeded before the demodulator will try to decode a frame. Values of 5 to 7 should give good results. Lower values should decode more frames and will require more processing power, but will more often decode invalid frames. You may also look at correlation values obtained with reliable signals in the "Correlation" column of the data table.
+
+<h3>9: PCE - Mode S Preamble Chip Errors</h3>
+
+Specifies the allowed number of errors in Mode S preambles. Higher values may allow more frames to be received, but increases the chance of decoding invalid frames.
 
 <h3>9: Download Aircraft Database</h3>
 
-Clicking this will download the aircraft database. This database contains information about aircraft, such as registration, aircraft model and owner details, that is not broadcast via ADS-B. Once downloaded, this additional information will be displayed in the table alongside the ADS-B data. The database should only need to be downloaded once, as it is saved to disk, and it should be downloaded before starting the demodulator.
+Clicking this will download the aircraft database. This database contains information about aircraft, such as registration, aircraft model, owner details and also airline routes, that is not broadcast via ADS-B. Once downloaded, this additional information will be displayed in the table alongside the ADS-B data. The database should only need to be downloaded once, as it is saved to disk, and it should be downloaded before starting the demodulator.
 
 <h3>10: Download OurAirports Airport Databases</h3>
 
@@ -74,6 +78,8 @@ Clicking the Display Settings button will open the Display Settings dialog, whic
 
 General:
 
+![ADS-B Demodulator general display settings](../../../doc/img/ADSBDemod_plugin_displaysettings.png)
+
 * The units for altitude, speed and vertical climb rate. These can be either ft (feet), kn (knots) and ft/min (feet per minute), or m (metres), kph (kilometers per hour) and m/s (metres per second).
 * Whether aircraft photos are displayed for the highlighted aircraft.
 * The timeout, in seconds, after which an aircraft will be removed from the table and map, if an ADS-B frame has not been received from it.
@@ -86,6 +92,8 @@ General:
 * The transition altitude in feet for use in ATC mode. Below the TA, altitude will be displayed. Above the TA flight levels will be displayed.
 
 Map:
+
+![ADS-B Demodulator map display settings](../../../doc/img/ADSBDemod_plugin_displaysettings_map.png)
 
 * The map provider. This can be osm for OpenStreetMaps or mapboxgl for Mapbox. mapboxgl is not supported on Windows. mapboxgl should be used on Linux with Qt 5.15.3, as osm maps will cause SDRangel to hang, due to a bug in Qt.
 * The type of map that will be displayed. This can either be a light or dark aviation map (with no place names to reduce clutter), a street map or satellite imagery.
@@ -100,31 +108,33 @@ Map:
 * Whether callsigns as said by ATC (E.g. Speedbird) are used on the map instead of the airline ICAO designator (E.g. BAW).
 * The colour palette to use for aircraft flight paths.
 
-![ADS-B Demodulator display settings](../../../doc/img/ADSBDemod_plugin_displaysettings.png)
-
 <h3>13: Display Flight Path</h3>
 
-Checking this button draws a line on the map showing the highlighted aircraft's flight paths, as determined from received ADS-B frames.
+Checking this button draws a line on the map showing the highlighted aircraft's flight paths, as determined from received ADS-B frames. The path can be coloured according to altitude. The colour palette for this can be set in Display Settings.
 
-<h3>14: Display Flight All Paths</h3>
+Each palette has 8 colours, one for each 5,000 ft. For the Spectral palette, 0-5000 ft is red and above 35,000 ft is blue.
+
+<h3>14: Display All Flight Paths</h3>
 
 Checking this button draws flight paths for all aircraft.
 
-<h3>ATC Mode</h3>
+![ADS-B Demodulator All Flight Paths](../../../doc/img/ADSBDemod_plugin_map2.png)
 
-When in ATC mode, the map will display callsign, altitude, ground speed and type, as well as the last 25 seconds of it flight path for all aircraft.
+<h3>14: ATC Mode</h3>
+
+When in ATC mode, the map will display callsign, route, altitude, ground speed and type, as well as the last 25 seconds of it flight path for all aircraft.
 When unchecked, only callsign (or ICAO, until callsign is received) will be displayed.
 
-<h3>Receiver Coverage Map</h3>
+<h3>15: Receiver Coverage Map</h3>
 
-When checked, a receive coverage map will be displayed. This will show the maximum distance a packet has been received from in each direction.
-The yellow region is for packets freceived from aircraft above 10000ft, with the green region for below 10000ft.
+When checked, a receiver coverage map will be displayed. This will show the maximum distance a frmae has been received from in each direction.
+The yellow region is for frames freceived from aircraft above 10,000 ft, with the green region for below 10,000 ft.
 
 Right clicking on the button will clear the coverage map data.
 
 ![ADS-B Demodulator coverage map](../../../doc/img/ADSBDemod_plugin_coverage.png)
 
-<h3>Display Statistics</h3>
+<h3>16: Display Statistics</h3>
 
 When checked, a statistics table will be displayed. This table contains statistics such as:
 
@@ -139,7 +149,9 @@ When checked, a statistics table will be displayed. This table contains statisti
 
 The statistics can be reset by right clicking the button.
 
-<h3>Display Chart</h3>
+![ADS-B Demodulator coverage map](../../../doc/img/ADSBDemod_plugin_stats.png)
+
+<h3>17: Display Chart</h3>
 
 When checked, a chart will be displayed that shows ADS-B and Mode S frame rates in fps (frames per second) as well as the total number of aircraft frames have been received from in the last 10 seconds.
 The chart is update every second. Data older than 10 minutes is averaged over a minute, in order to keep the number of data points managable.
@@ -147,23 +159,27 @@ The chart is update every second. Data older than 10 minutes is averaged over a 
 You can zoom in/out the chart's horizontal axis using the mouse wheel. Hold shift to zoom in/out the chart's vertical axis.
 Series can be hidden/shown by clicking on the corresponding label in the legend.
 
-<h3>Display Orientation</h3>
+![ADS-B Demodulator coverage map](../../../doc/img/ADSBDemod_plugin_chart.png)
+
+<h3>18: Display Orientation</h3>
 
 Check to display the ADS-B table and map side by side. Uncheck for table on top of the map.
 
-<h3>Display Containment Radius</h3>
+<h3>19: Display Containment Radius</h3>
 
-When checked, an aircrafts horizontal containment radius will be drawn as a red circle around an aircraft on the map. This circle represents the aircrafts uncertainty in its reported position.
+When checked, an aircrafts horizontal containment radius (Rc) will be drawn as a red circle around an aircraft on the map. This circle represents the aircrafts uncertainty in its reported position.
 
-<h3>15: Download flight information for selected flight</h3>
+![ADS-B Demodulator coverage map](../../../doc/img/ADSBDemod_plugin_radius.png)
+
+<h3>20: Download flight information for selected flight</h3>
 
 When clicked, flight information (departure and arrival airport and times) is downloaded for the aircraft highlighted in the ADS-B data table using the aviationstack.com API.
 To be able to use this, a callsign for the highlighted aircraft must have been received. Also, the callsign must be mappable to a flight number, which is not always possible (this is typically
-the case for callsigns that end in two characters, as for these, some digits from the flight number will have been omitted).
+the case for callsigns that have a letter in the last 3 digits, as for these, some digits from the flight number will have been omitted).
 
 To use this feature, an [aviationstack](https://aviationstack.com) API Key must be entered in the Display Settings dialog (12). A free key giving 500 API calls per month is [available](https://aviationstack.com/product).
 
-<h3>16: Feed</h3>
+<h3>21: Feed</h3>
 
 Checking Feed enables feeding received ADS-B frames to aggregators such as [Airplanes.Live](https://www.airplanes.live/), [ADS-B Exchange](https://www.adsbexchange.com), [ADSBHub](https://www.adsbhub.org) or [OpenSky Network](https://opensky-network.org/)
 and receiving aircraft state from anywhere in the world from [OpenSky Network](https://opensky-network.org/). Right clicking on the Feed button opens the Feed Settings dialog.
@@ -185,7 +201,7 @@ When Enable import is checked, aircraft data for aircraft anywhere in the world 
 A username and password are not required, but when specified, this allows the update period to be reduced to 5 seconds instead of 10 seconds, and 4000 API calls per day instead of 400.
 To limit network traffic and processing power requirements, a geographical region can be set via the minimum and maximum latitude and longitude fields.
 
-<h3>17: Open Notifications Dialog</h3>
+<h3>22: Open Notifications Dialog</h3>
 
 When clicked, opens the Notifications Dialog, which allows speech notifications or programs/scripts to be run when aircraft matching user-defined rules are seen.
 
@@ -286,19 +302,33 @@ In the Speech and Command strings, variables can be used to substitute in data f
 * ${eta}
 * ${ata}
 
-<h3>18: Start/stop Logging ADS-B frames to .csv File</h3>
+<h3>23: Start/stop Logging ADS-B frames to .csv File</h3>
 
 When checked, writes all received ADS-B frames to a .csv file.
 
-<h3>19: .csv Log Filename</h3>
+<h3>24: .csv Log Filename</h3>
 
 Click to specify the name of the .csv file which received ADS-B frames are logged to.
 
-<h3>20: Read Data from .csv File</h3>
+<h3>25: Read Data from .csv File</h3>
 
 Click to specify a previously written ADS-B .csv log file, which is read and used to update the ADS-B data table and map.
 
-<h3>21: AM Demod</h3>
+<h3>26: Find on Feature Map</h3>
+
+Click to find the currently selected aircraft on a [Map Feature](../../feature/map/readme.md).
+
+<h3>27: Delete All Aircraft</h3>
+
+Click to delete all aircraft from the table and map.
+
+<h3>28: IC - Interrogator Code</h3>
+
+The IC dropdown contains a checkable list of Mode S IC (Interrogator Codes) that have been received. When checked, an ellipse in the corresponding colour is drawn on the map showing the location of all the aircraft that have responded with that IC.
+
+![ADS-B IC Coverage](../../../doc/img/ADSBDemod_plugin_ic.png)
+
+<h3>29: AM Demod</h3>
 
 Specify the AM Demodulator that will be have its centre frequency set when an airport ATC frequency is clicked on the map.
 
@@ -389,21 +419,20 @@ The table displays the decoded ADS-B and Mode S data for each aircraft along sid
 If an ADS-B frame has not been received from an aircraft for 60 seconds, the aircraft is removed from the table and map. This timeout can be adjusted in the Display Settings dialog.
 
 * Single clicking in a cell will highlight the row and the corresponding aircraft information box on the map will be coloured orange, rather than blue.
-* Right clicking on the header will open a menu allowing you to select which columns are visible.
+* Right clicking on the table header will open a menu allowing you to select which columns are visible.
 * To reorder the columns, left click and drag left or right a column header.
 * Left click on a header to sort the table by the data in that column.
 * Double clicking in an ICAO ID cell will open a Web browser and search for the corresponding aircraft on https://www.planespotters.net/
 * Double clicking in an Callsign cell will open a Web browser and search for the corresponding flight on https://www.flightradar24.com/
-* Double clicking in an Az/El cell will set the aircraft as the active target. The azimuth and elevation to the aircraft will be sent to a rotator controller plugin. The aircraft information box will be coloured green, rather than blue, on the map.
+* Double clicking in an Az/El cell will set the aircraft as the active target. The azimuth and elevation to the aircraft will be sent to a [rotator controller](../../feature/gs232controller/readme.md) plugin. The aircraft information box will be coloured green, rather than blue, on the map.
 * Double clicking on any other cell in the table will centre the map on the corresponding aircraft.
+* Right click on a cell opens a context menu that will allow you to view the aircraft on various web sites, copy the data in that cell, or find the aircraft on either the ADS-B map or Map feature.
 
 <h2>Map</h2>
 
 The map displays aircraft locations and data geographically. Four types of map can be chosen from in the Display Settings dialog: Aviation, Aviation (Dark), Street and Satellite.
 
 ![ADS-B Demodulator Map](../../../doc/img/ADSBDemod_plugin_map.png)
-
-![ADS-B Demodulator Map](../../../doc/img/ADSBDemod_plugin_map2.png)
 
 The antenna location is placed according to My Position set under the Preferences > My Position menu.
 If My Position is not set correctly, the position of aircraft may not be computed correctly.
@@ -417,7 +446,7 @@ Aircraft are only placed upon the map when a position can be calculated, which c
 * Left clicking the information box next to an airport will reveal ATC frequencies for the airport (if the OurAirports database has been downloaded) and METAR weather information (if the CheckWX API key has been entered).
 The METAR for the airport is downloaded each time the information box is opened.
 This information box can be closed by left clicking on the airport identifier.
-Double clicking on one of the listed frequencies, will tune the AM Demod  (21) to that frequency.
+Double clicking on one of the listed frequencies, will tune the AM Demod (29) to that frequency.
 The Az/El row gives the azimuth and elevation of the airport from the location set under Preferences > My Position. Double clicking on this row will set the airport as the active target.
 * Right clicking on an airport will display a popup menu, allowing range rings to be shown or hidden, and for the ATC frequencies for the airport to be send to a Frequency Scanner.
 
