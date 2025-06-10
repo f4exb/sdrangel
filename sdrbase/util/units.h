@@ -273,7 +273,7 @@ public:
     {
         QRegularExpressionMatch match;
 
-        QString decimalPattern = "(-?[0-9]+(\\.[0-9]+)?) *,? *(-?[0-9]+(\\.[0-9]+)?)";
+        QString decimalPattern = "(-?[0-9]+(\\.[0-9]+)?) *[ ,] *(-?[0-9]+(\\.[0-9]+)?)";
         if (exact) {
             decimalPattern = QRegularExpression::anchoredPattern(decimalPattern);
         }
