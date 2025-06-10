@@ -1745,22 +1745,36 @@ void MapGUI::applyMap2DSettings(bool reloadMap)
         {
             qCritical() << "MapGUI::applyMap2DSettings - Failed to invoke createMap";
         }
+
+        supportedMapsChanged();
+
         QObject *newMap = retVal.value<QObject *>();
-        // Restore position of map
         if (newMap != nullptr)
         {
             if (coords.isValid())
             {
-                newMap->setProperty("zoomLevel", QVariant::fromValue(zoom));
-                newMap->setProperty("center", QVariant::fromValue(coords));
+                // Restore position of map
+                // With Qt5, we could set the properties immediately, but with Qt6, it seems we need a delay
+                // otherwise they are overwritten. Is there a signal we should use instead?
+                //newMap->setProperty("zoomLevel", QVariant::fromValue(zoom));
+                //newMap->setProperty("center", QVariant::fromValue(coords));
+                QTimer::singleShot(200, [this, zoom, coords]() {
+                    QQuickItem *root = ui->map->rootObject();
+                    if (root)
+                    {
+                        QObject *mapObject = root->findChild<QObject*>("map");
+                        if (mapObject) {
+                            mapObject->setProperty("zoomLevel", QVariant::fromValue(zoom));
+                            mapObject->setProperty("center", QVariant::fromValue(coords));
+                        }
+                    }
+                });
             }
         }
         else
         {
             qCritical() << "MapGUI::applyMap2DSettings - createMap returned a nullptr";
         }
-
-        supportedMapsChanged();
     }
 }
 
@@ -1824,6 +1838,7 @@ void MapGUI::orientationChanged(Qt::ScreenOrientation orientation)
 void MapGUI::displayToolbar()
 {
     ui->mapTypes->setVisible(m_settings.m_map2DEnabled);
+
     // Replace buttons with menu when window gets narrow
     bool narrow = this->screen()->availableGeometry().width() < 400;
     ui->layersMenu->setVisible(narrow);
