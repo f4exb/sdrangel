@@ -401,6 +401,8 @@ void MapSettingsDialog::on_map3DEnabled_clicked(bool checked)
 
 void MapSettingsDialog::on_terrain_currentIndexChanged(int index)
 {
+    (void) index;
+
     bool ellipsoid = ui->terrain->currentText() == "Ellipsoid";
 
     ui->terrainLighting->setEnabled(!ellipsoid);
