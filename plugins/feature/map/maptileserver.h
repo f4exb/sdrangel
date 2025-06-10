@@ -256,7 +256,7 @@ private slots:
         if (socket->canReadLine())
         {
             QString line = socket->readLine();
-            qDebug() << "HTTP Request: " << line;
+            //qDebug() << "HTTP Request: " << line;
             QStringList tokens = QString(line).split(QRegularExpression("[ \r\n][ \r\n]*"));
             if (tokens[0] == "GET")
             {
