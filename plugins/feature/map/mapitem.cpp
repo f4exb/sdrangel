@@ -565,17 +565,15 @@ void ObjectMapItem::updateTrack(QList<SWGSDRangel::SWGMapCoordinate *> *track, M
                 m_takenTrackDateTimes.push_back(new QDateTime(QDateTime::currentDateTime()));
                 m_takenTrackPositionExtrapolated.push_back(false);
                 m_takenTrackAltitudeExtrapolated.push_back(false);
-                //m_takenTrackCoords.push_back(c);
                 m_takenTrackCoords.push_back(new QGeoCoordinate(c));
             }
-            //m_takenTrack.push_back(QVariant::fromValue(*c));
             m_takenTrack.push_back(QVariant::fromValue(c));
 
-            if (m_takenTrackDateTimes.size() >= 2) {
+            /*if (m_takenTrackDateTimes.size() >= 2) {
                 if (*m_takenTrackDateTimes[m_takenTrackDateTimes.size() - 1] < *m_takenTrackDateTimes[m_takenTrackDateTimes.size() - 2]) {
-                    qDebug() << "Out of order";
+                    qDebug() << "ObjectMapItem::updateTrack: Out of order";
                 }
-            }
+            }*/
 
             if ((m_takenTrackPositionExtrapolated.size() > 0) && (prevSize != m_takenTrackPositionExtrapolated.size()))
             {
@@ -590,7 +588,7 @@ void ObjectMapItem::updateTrack(QList<SWGSDRangel::SWGMapCoordinate *> *track, M
                     QVector<double> w1(filterLen);
                     QVector<double> w3(filterLen);
 
-                    //qDebug() << "Filter from" << (m_takenTrackCoords.size() - (filterLen - 0)) << "to" << (m_takenTrackCoords.size() - (filterLen - (filterLen - 1)));
+                    //qDebug() << "Filter from" << (m_takenTrackCoords.size() - (filterLen - 0)) << "to" << (m_takenTrackCoords.size() - 1);
                     for (int i = 0; i < filterLen; i++)
                     {
                         int idx = m_takenTrackCoords.size() - (filterLen - i);
@@ -634,9 +632,9 @@ void ObjectMapItem::updateTrack(QList<SWGSDRangel::SWGMapCoordinate *> *track, M
                     }
 
                     // Update current position
-                    m_latitude = m_takenTrackCoords[filterLen-1]->latitude();
-                    m_longitude = m_takenTrackCoords[filterLen-1]->longitude();
-                    m_altitude = m_takenTrackCoords[filterLen-1]->altitude();
+                    m_latitude = m_takenTrackCoords.back()->latitude();
+                    m_longitude = m_takenTrackCoords.back()->longitude();
+                    m_altitude = m_takenTrackCoords.back()->altitude();
                 }
             }
         }
