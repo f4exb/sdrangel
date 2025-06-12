@@ -475,6 +475,7 @@ void ObjectMapItem::updateTrack(QList<SWGSDRangel::SWGMapCoordinate *> *track, M
             // We store two, rather than one, so that we have the times this position was arrived at and left
 
             const bool interpolate = false;
+            const bool onlyActual2D = true; // Extrapolation / smoothing doesn't look good on 2D map, so only use actual data from aircraft, not extrapolated/interpolated points
 
             QGeoCoordinate *prev1 = m_takenTrackCoords.last();
             bool samePos1 = (prev1->latitude() == m_latitude) && (prev1->longitude() == m_longitude) && (prev1->altitude() == m_altitude);
@@ -484,6 +485,7 @@ void ObjectMapItem::updateTrack(QList<SWGSDRangel::SWGMapCoordinate *> *track, M
             QDateTime *prevDateTime = m_takenTrackDateTimes.last();
 
             QGeoCoordinate c(m_latitude, m_longitude, m_altitude);
+            QGeoCoordinate cActual = c;
             int prevSize = m_takenTrackPositionExtrapolated.size();
 
             if (m_altitudeDateTime.isValid() && m_positionDateTime.isValid() && (m_altitudeDateTime > m_positionDateTime))
@@ -508,6 +510,7 @@ void ObjectMapItem::updateTrack(QList<SWGSDRangel::SWGMapCoordinate *> *track, M
                     {
                         m_takenTrackPositionExtrapolated[m_takenTrackPositionExtrapolated.size() - 1] = true;
                         *m_takenTrackCoords.last() = c;
+                        m_takenTrack.last() = QVariant::fromValue(onlyActual2D ? cActual : c);
                     }
                     else
                     {
@@ -515,6 +518,7 @@ void ObjectMapItem::updateTrack(QList<SWGSDRangel::SWGMapCoordinate *> *track, M
                         m_takenTrackPositionExtrapolated.push_back(true);
                         m_takenTrackAltitudeExtrapolated.push_back(false);
                         m_takenTrackCoords.push_back(new QGeoCoordinate(c));
+                        m_takenTrack.push_back(QVariant::fromValue(onlyActual2D ? cActual : c));
                     }
                 }
             }
@@ -545,6 +549,7 @@ void ObjectMapItem::updateTrack(QList<SWGSDRangel::SWGMapCoordinate *> *track, M
                         {
                             m_takenTrackAltitudeExtrapolated[m_takenTrackPositionExtrapolated.size() - 1] = extrapolateAlt;
                             *m_takenTrackCoords.last() = c;
+                            m_takenTrack.last() = QVariant::fromValue(onlyActual2D ? cActual : c);
                         }
                         else
                         {
@@ -552,6 +557,7 @@ void ObjectMapItem::updateTrack(QList<SWGSDRangel::SWGMapCoordinate *> *track, M
                             m_takenTrackPositionExtrapolated.push_back(false);
                             m_takenTrackAltitudeExtrapolated.push_back(extrapolateAlt);
                             m_takenTrackCoords.push_back(new QGeoCoordinate(c));
+                            m_takenTrack.push_back(QVariant::fromValue(onlyActual2D ? cActual : c));
                         }
                     }
                 }
@@ -566,8 +572,8 @@ void ObjectMapItem::updateTrack(QList<SWGSDRangel::SWGMapCoordinate *> *track, M
                 m_takenTrackPositionExtrapolated.push_back(false);
                 m_takenTrackAltitudeExtrapolated.push_back(false);
                 m_takenTrackCoords.push_back(new QGeoCoordinate(c));
+                m_takenTrack.push_back(QVariant::fromValue(onlyActual2D ? cActual : c));
             }
-            m_takenTrack.push_back(QVariant::fromValue(c));
 
             /*if (m_takenTrackDateTimes.size() >= 2) {
                 if (*m_takenTrackDateTimes[m_takenTrackDateTimes.size() - 1] < *m_takenTrackDateTimes[m_takenTrackDateTimes.size() - 2]) {
@@ -626,15 +632,21 @@ void ObjectMapItem::updateTrack(QList<SWGSDRangel::SWGMapCoordinate *> *track, M
                         m_takenTrackCoords[idx]->setAltitude(y3[i]);
                         m_takenTrackPositionExtrapolated[idx] = false;
                         m_takenTrackAltitudeExtrapolated[idx] = false;
+                        if (!onlyActual2D) {
+                            m_takenTrack[idx] = QVariant::fromValue(QGeoCoordinate(y1[i], y2[i], y3[i]));
+                        }
 
                         m_interpolatedCoords.append(m_takenTrackCoords[idx]);
                         m_interpolatedDateTimes.append(m_takenTrackDateTimes[idx]);
                     }
 
-                    // Update current position
-                    m_latitude = m_takenTrackCoords.back()->latitude();
-                    m_longitude = m_takenTrackCoords.back()->longitude();
-                    m_altitude = m_takenTrackCoords.back()->altitude();
+                    // Update current position - Don't do this, as it can make aircraft move backwards on 2D map
+                    if (!onlyActual2D)
+                    {
+                        m_latitude = m_takenTrackCoords.back()->latitude();
+                        m_longitude = m_takenTrackCoords.back()->longitude();
+                        m_altitude = m_takenTrackCoords.back()->altitude();
+                    }
                 }
             }
         }
