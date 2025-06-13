@@ -9969,6 +9969,116 @@ margin-bottom: 20px;
   },
   "description" : "Map"
 };
+            defs.MapAircraftState = {
+  "properties" : {
+    "callsign" : {
+      "type" : "string"
+    },
+    "aircraftType" : {
+      "type" : "string"
+    },
+    "onSurface" : {
+      "type" : "integer"
+    },
+    "airspeed" : {
+      "type" : "number",
+      "format" : "float",
+      "description" : "Indicated airspeed in knots"
+    },
+    "airspeedDateTime" : {
+      "type" : "string",
+      "description" : "Date and time at this indicated airspeed (ISO 8601 extended format)"
+    },
+    "trueAirspeed" : {
+      "type" : "number",
+      "format" : "float",
+      "description" : "True airspeed in knots"
+    },
+    "groundspeed" : {
+      "type" : "number",
+      "format" : "float",
+      "description" : "Ground speed in knots"
+    },
+    "mach" : {
+      "type" : "number",
+      "format" : "float"
+    },
+    "altitude" : {
+      "type" : "number",
+      "format" : "float",
+      "description" : "Barometric altitude in feet"
+    },
+    "altitudeDateTime" : {
+      "type" : "string",
+      "description" : "Date and time at this altitude (ISO 8601 extended format)"
+    },
+    "qnh" : {
+      "type" : "number",
+      "format" : "float",
+      "description" : "QNH in hPA"
+    },
+    "verticalSpeed" : {
+      "type" : "number",
+      "format" : "float",
+      "description" : "feet/m"
+    },
+    "verticalSpeedDateTime" : {
+      "type" : "string",
+      "description" : "Date and time at this vertical speed (ISO 8601 extended format)"
+    },
+    "heading" : {
+      "type" : "number",
+      "format" : "float",
+      "description" : "Degrees magnetic"
+    },
+    "track" : {
+      "type" : "number",
+      "format" : "float",
+      "description" : "Degrees true"
+    },
+    "selectedAirspeed" : {
+      "type" : "number",
+      "format" : "float"
+    },
+    "selectedAltitude" : {
+      "type" : "number",
+      "format" : "float"
+    },
+    "selectedHeading" : {
+      "type" : "number",
+      "format" : "float"
+    },
+    "autopilot" : {
+      "type" : "integer",
+      "description" : "-1 unknown, 0 off, 1 on"
+    },
+    "verticalMode" : {
+      "type" : "integer",
+      "description" : "0 unknown, 1 VNAV, ALT HOLD, APP (G/S)"
+    },
+    "lateralMode" : {
+      "type" : "integer",
+      "description" : "0 unknown, 1 LNAV, APP (LOC)"
+    },
+    "tcasMode" : {
+      "type" : "integer",
+      "description" : "-1 unknown, 0 Off, 1 TA, 2 TA/RA"
+    },
+    "windSpeed" : {
+      "type" : "number",
+      "format" : "float"
+    },
+    "windDirection" : {
+      "type" : "number",
+      "format" : "float"
+    },
+    "staticAirTemperature" : {
+      "type" : "number",
+      "format" : "float"
+    }
+  },
+  "description" : "Aircraft state for PFD/ND"
+};
             defs.MapAnimation = {
   "properties" : {
     "name" : {
@@ -10078,6 +10188,10 @@ margin-bottom: 20px;
       "type" : "string",
       "description" : "Date and time at this position (ISO 8601 extended format)"
     },
+    "altitudeDateTime" : {
+      "type" : "string",
+      "description" : "Date and time at this altitude, if different from positionDateTime (ISO 8601 extended format)"
+    },
     "track" : {
       "type" : "array",
       "description" : "Track/path the item has taken",
@@ -10127,6 +10241,10 @@ margin-bottom: 20px;
       "type" : "number",
       "format" : "float",
       "description" : "Vertical offset to position label at"
+    },
+    "labelDateTime" : {
+      "type" : "string",
+      "description" : "Date and time from when this label applies (ISO 8601 extended format). Leave empty if label should apply for all time."
     },
     "modelAltitudeOffset" : {
       "type" : "number",
@@ -10196,6 +10314,9 @@ margin-bottom: 20px;
     "color" : {
       "type" : "integer",
       "description" : "RGBA for polygon and polyline"
+    },
+    "aircraftState" : {
+      "$ref" : "#/definitions/MapAircraftState"
     }
   },
   "description" : "An item to draw on the map. Set image to an empty string to remove item from the map."
@@ -10242,6 +10363,10 @@ margin-bottom: 20px;
       "type" : "string",
       "description" : "Date and time at this position (ISO 8601 extended format)"
     },
+    "altitudeDateTime" : {
+      "type" : "string",
+      "description" : "Date and time at this altitude, if different from positionDateTime (ISO 8601 extended format)"
+    },
     "track" : {
       "type" : "array",
       "description" : "Track/path the item has taken",
@@ -10291,6 +10416,10 @@ margin-bottom: 20px;
       "type" : "number",
       "format" : "float",
       "description" : "Vertical offset to position label at"
+    },
+    "labelDateTime" : {
+      "type" : "string",
+      "description" : "Date and time from when this label applies (ISO 8601 extended format). Leave empty if label should apply for all time."
     },
     "modelAltitudeOffset" : {
       "type" : "number",
@@ -10360,6 +10489,9 @@ margin-bottom: 20px;
     "color" : {
       "type" : "integer",
       "description" : "RGBA for polygon and polyline"
+    },
+    "aircraftState" : {
+      "$ref" : "#/definitions/MapAircraftState"
     }
   },
   "description" : "An item to draw on the map. Set image to an empty string to remove item from the map."
@@ -59477,7 +59609,7 @@ except ApiException as e:
           </div>
           <div id="generator">
             <div class="content">
-              Generated 2025-05-29T12:27:25.321+02:00
+              Generated 2025-06-02T13:08:26.366+02:00
             </div>
           </div>
       </div>

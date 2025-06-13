@@ -36,7 +36,7 @@ LZ,bulgaria
 XT,burkina_faso
 9U,burundi
 XU,cambodia
-TJ,cameroun
+TJ,cameroon
 C,canada
 D4,cape_verde
 VP-C,cayman_isles
@@ -48,7 +48,9 @@ B-M,china_macau
 HJ,colombia
 HK,colombia
 D6,comoros
-9Q,congoroc
+TN,congoroc
+9S,congo-drc
+9T,congo-drc_mil
 E5,cook_islands
 TI,costa_rica
 TU,cote_d'ivoire
@@ -222,3 +224,6 @@ VN,vietnam
 7O,yemen
 9J,zambia
 Z,zimbabwe
+VP-L,british_virgin_islands
+XU,kampuchea
+F-O,martinique

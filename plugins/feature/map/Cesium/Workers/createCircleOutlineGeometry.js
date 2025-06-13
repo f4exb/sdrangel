@@ -1,1 +1,26 @@
-define(["./Matrix2-46444433","./RuntimeError-608565a6","./when-229515d6","./EllipseOutlineGeometry-000dc678","./ComponentDatatype-692a36d3","./WebGLConstants-f63312fc","./GeometryOffsetAttribute-4f901209","./Transforms-ab7258fe","./combine-35b6d9cb","./EllipseGeometryLibrary-c06dcaf7","./GeometryAttribute-d3bef603","./GeometryAttributes-b253752a","./IndexDatatype-7c683b18"],(function(e,i,t,r,n,l,s,o,a,u,c,d,m){"use strict";function p(e){const i=(e=t.defaultValue(e,t.defaultValue.EMPTY_OBJECT)).radius,n={center:e.center,semiMajorAxis:i,semiMinorAxis:i,ellipsoid:e.ellipsoid,height:e.height,extrudedHeight:e.extrudedHeight,granularity:e.granularity,numberOfVerticalLines:e.numberOfVerticalLines};this._ellipseGeometry=new r.EllipseOutlineGeometry(n),this._workerName="createCircleOutlineGeometry"}p.packedLength=r.EllipseOutlineGeometry.packedLength,p.pack=function(e,i,t){return r.EllipseOutlineGeometry.pack(e._ellipseGeometry,i,t)};const y=new r.EllipseOutlineGeometry({center:new e.Cartesian3,semiMajorAxis:1,semiMinorAxis:1}),f={center:new e.Cartesian3,radius:void 0,ellipsoid:e.Ellipsoid.clone(e.Ellipsoid.UNIT_SPHERE),height:void 0,extrudedHeight:void 0,granularity:void 0,numberOfVerticalLines:void 0,semiMajorAxis:void 0,semiMinorAxis:void 0};return p.unpack=function(i,n,l){const s=r.EllipseOutlineGeometry.unpack(i,n,y);return f.center=e.Cartesian3.clone(s._center,f.center),f.ellipsoid=e.Ellipsoid.clone(s._ellipsoid,f.ellipsoid),f.height=s._height,f.extrudedHeight=s._extrudedHeight,f.granularity=s._granularity,f.numberOfVerticalLines=s._numberOfVerticalLines,t.defined(l)?(f.semiMajorAxis=s._semiMajorAxis,f.semiMinorAxis=s._semiMinorAxis,l._ellipseGeometry=new r.EllipseOutlineGeometry(f),l):(f.radius=s._semiMajorAxis,new p(f))},p.createGeometry=function(e){return r.EllipseOutlineGeometry.createGeometry(e._ellipseGeometry)},function(i,r){return t.defined(r)&&(i=p.unpack(i,r)),i._ellipseGeometry._center=e.Cartesian3.clone(i._ellipseGeometry._center),i._ellipseGeometry._ellipsoid=e.Ellipsoid.clone(i._ellipseGeometry._ellipsoid),p.createGeometry(i)}}));
+/**
+ * @license
+ * Cesium - https://github.com/CesiumGS/cesium
+ * Version 1.129
+ *
+ * Copyright 2011-2022 Cesium Contributors
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ * http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ *
+ * Columbus View (Pat. Pend.)
+ *
+ * Portions licensed separately.
+ * See https://github.com/CesiumGS/cesium/blob/main/LICENSE.md for full licensing details.
+ */
+
+import{a as n}from"./chunk-OAGMF473.js";import"./chunk-HRZKIJQA.js";import"./chunk-4W2MZV6I.js";import"./chunk-JQLYZQ6V.js";import"./chunk-J3L5WX3X.js";import"./chunk-AVPLM4UI.js";import"./chunk-ZYYZDBKK.js";import"./chunk-3PT5NNSP.js";import"./chunk-WER4LUMF.js";import{a as o,d as s,f as c}from"./chunk-FGKVHLJ4.js";import"./chunk-YRCAQUFT.js";import"./chunk-OVIPITBL.js";import"./chunk-SP23RJSN.js";import{b as d}from"./chunk-ELJAHN3H.js";import{e as a}from"./chunk-3BGP4HCL.js";function m(e){e=e??c.EMPTY_OBJECT;let r=e.radius;d.typeOf.number("radius",r);let l={center:e.center,semiMajorAxis:r,semiMinorAxis:r,ellipsoid:e.ellipsoid,height:e.height,extrudedHeight:e.extrudedHeight,granularity:e.granularity,numberOfVerticalLines:e.numberOfVerticalLines};this._ellipseGeometry=new n(l),this._workerName="createCircleOutlineGeometry"}m.packedLength=n.packedLength;m.pack=function(e,r,l){return d.typeOf.object("value",e),n.pack(e._ellipseGeometry,r,l)};var p=new n({center:new o,semiMajorAxis:1,semiMinorAxis:1}),i={center:new o,radius:void 0,ellipsoid:s.clone(s.UNIT_SPHERE),height:void 0,extrudedHeight:void 0,granularity:void 0,numberOfVerticalLines:void 0,semiMajorAxis:void 0,semiMinorAxis:void 0};m.unpack=function(e,r,l){let t=n.unpack(e,r,p);return i.center=o.clone(t._center,i.center),i.ellipsoid=s.clone(t._ellipsoid,i.ellipsoid),i.height=t._height,i.extrudedHeight=t._extrudedHeight,i.granularity=t._granularity,i.numberOfVerticalLines=t._numberOfVerticalLines,a(l)?(i.semiMajorAxis=t._semiMajorAxis,i.semiMinorAxis=t._semiMinorAxis,l._ellipseGeometry=new n(i),l):(i.radius=t._semiMajorAxis,new m(i))};m.createGeometry=function(e){return n.createGeometry(e._ellipseGeometry)};var u=m;function f(e,r){return a(r)&&(e=u.unpack(e,r)),e._ellipseGeometry._center=o.clone(e._ellipseGeometry._center),e._ellipseGeometry._ellipsoid=s.clone(e._ellipseGeometry._ellipsoid),u.createGeometry(e)}var E=f;export{E as default};

@@ -25,6 +25,8 @@
 #include <QNetworkDiskCache>
 #include <QRegularExpression>
 
+#include "util/corsproxy.h"
+
 KiwiSDRList::KiwiSDRList()
 {
     m_networkManager = new QNetworkAccessManager();
@@ -52,7 +54,12 @@ KiwiSDRList::~KiwiSDRList()
 
 void KiwiSDRList::getData()
 {
-    QUrl url(QString("http://kiwisdr.com/public/"));
+#ifdef __EMSCRIPTEN__
+    // kiwisdr.com doesn't support https, but it's needed for Emscripten - our CORS proxy handles it
+    QUrl url = CORSProxy::adjustHost(QUrl("https://kiwisdr.com/.public/"));
+#else
+    QUrl url = CORSProxy::adjustHost(QUrl("http://kiwisdr.com/.public/"));
+#endif
     m_networkManager->get(QNetworkRequest(url));
 }
 

@@ -53,10 +53,20 @@ MapItemSettingsGUI::MapItemSettingsGUI(QTableWidget *table, int row, MapSettings
     m_filterDistance->setAlignment(Qt::AlignRight | Qt::AlignVCenter);
     m_filterDistance->setSpecialValueText(" ");
     m_filterDistance->setCorrectionMode(QAbstractSpinBox::CorrectToNearestValue);
+    m_smoothingWindow = new QSpinBox(table);
+    m_smoothingWindow->setRange(0, 1000);
+    m_smoothingWindow->setValue(settings->m_smoothingWindow);
+    m_smoothingWindow->setAlignment(Qt::AlignRight | Qt::AlignVCenter);
+    m_smoothingLambda = new QDoubleSpinBox(table);
+    m_smoothingLambda->setRange(0, 1e9);
+    m_smoothingLambda->setValue(settings->m_smoothingLambda);
+    m_smoothingLambda->setAlignment(Qt::AlignRight | Qt::AlignVCenter);
     table->setCellWidget(row, MapSettingsDialog::COL_2D_MIN_ZOOM, m_minZoom);
     table->setCellWidget(row, MapSettingsDialog::COL_3D_MIN_PIXELS, m_minPixels);
     table->setCellWidget(row, MapSettingsDialog::COL_3D_LABEL_SCALE, m_labelScale);
     table->setCellWidget(row, MapSettingsDialog::COL_FILTER_DISTANCE, m_filterDistance);
+    table->setCellWidget(row, MapSettingsDialog::COL_SMOOTHING_WINDOW, m_smoothingWindow);
+    table->setCellWidget(row, MapSettingsDialog::COL_SMOOTHING_LAMBDA, m_smoothingLambda);
 }
 
 MapSettingsDialog::MapSettingsDialog(MapSettings *settings, QWidget* parent) :
@@ -83,15 +93,25 @@ MapSettingsDialog::MapSettingsDialog(MapSettings *settings, QWidget* parent) :
     ui->mapBoxAPIKey->setText(settings->m_mapBoxAPIKey);
     ui->cesiumIonAPIKey->setText(settings->m_cesiumIonAPIKey);
     ui->checkWXAPIKey->setText(settings->m_checkWXAPIKey);
+    ui->arcGISAPIKey->setText(settings->m_arcGISAPIKey);
     ui->osmURL->setText(settings->m_osmURL);
     ui->mapBoxStyles->setText(settings->m_mapBoxStyles);
     ui->map2DEnabled->setChecked(m_settings->m_map2DEnabled);
     ui->map3DEnabled->setChecked(m_settings->m_map3DEnabled);
+    ui->defaultImagery->setCurrentIndex(ui->defaultImagery->findText(m_settings->m_defaultImagery));
     ui->terrain->setCurrentIndex(ui->terrain->findText(m_settings->m_terrain));
     ui->buildings->setCurrentIndex(ui->buildings->findText(m_settings->m_buildings));
     ui->sunLightEnabled->setCurrentIndex((int)m_settings->m_sunLightEnabled);
+    ui->lightIntensity->setValue(m_settings->m_lightIntensity);
+    ui->lightIntensity->setEnabled(!m_settings->m_sunLightEnabled);
     ui->eciCamera->setCurrentIndex((int)m_settings->m_eciCamera);
-    ui->antiAliasing->setCurrentIndex(ui->antiAliasing->findText(m_settings->m_antiAliasing));
+    ui->fxaa->setChecked(m_settings->m_fxaa);
+    ui->msaa->setCurrentText(msaaToString(m_settings->m_msaa));
+    ui->terrainLighting->setChecked(m_settings->m_terrainLighting);
+    ui->water->setChecked(m_settings->m_water);
+    ui->hdr->setChecked(m_settings->m_hdr);
+    ui->fog->setChecked(m_settings->m_fog);
+    ui->fps->setChecked(m_settings->m_fps);
 
     // Sort groups in table alphabetically
     QList<MapSettings::MapItemSettings *> itemSettings = m_settings->m_itemSettings.values();
@@ -132,6 +152,12 @@ MapSettingsDialog::MapSettingsDialog(MapSettings *settings, QWidget* parent) :
         item = new QTableWidgetItem(itemSettings->m_filterName);
         ui->mapItemSettings->setItem(row, COL_FILTER_NAME, item);
 
+        item = new QTableWidgetItem();
+        ui->mapItemSettings->setItem(row, COL_SMOOTHING_WINDOW, item);
+
+        item = new QTableWidgetItem();
+        ui->mapItemSettings->setItem(row, COL_SMOOTHING_LAMBDA, item);
+
         MapItemSettingsGUI *gui = new MapItemSettingsGUI(ui->mapItemSettings, row, itemSettings);
         m_mapItemSettingsGUIs.append(gui);
     }
@@ -160,6 +186,8 @@ MapSettingsDialog::MapSettingsDialog(MapSettings *settings, QWidget* parent) :
     ui->mapItemSettings->hideColumn(COL_3D_POINT);
     ui->mapItemSettings->hideColumn(COL_3D_TRACK);
     ui->mapItemSettings->hideColumn(COL_3D_LABEL_SCALE);
+    ui->mapItemSettings->hideColumn(COL_SMOOTHING_WINDOW);
+    ui->mapItemSettings->hideColumn(COL_SMOOTHING_LAMBDA);
 #endif
 }
 
@@ -178,6 +206,7 @@ void MapSettingsDialog::accept()
     QString thunderforestAPIKey = ui->thunderforestAPIKey->text();
     QString maptilerAPIKey = ui->maptilerAPIKey->text();
     QString cesiumIonAPIKey = ui->cesiumIonAPIKey->text();
+    QString arcGISAPIKey = ui->arcGISAPIKey->text();
     m_osmURLChanged = osmURL != m_settings->m_osmURL;
     if ((mapProvider != m_settings->m_mapProvider)
         || (thunderforestAPIKey != m_settings->m_thunderforestAPIKey)
@@ -192,23 +221,25 @@ void MapSettingsDialog::accept()
         m_settings->m_mapBoxAPIKey = mapBoxAPIKey;
         m_settings->m_osmURL = osmURL;
         m_settings->m_mapBoxStyles = mapBoxStyles;
-        m_settings->m_cesiumIonAPIKey = cesiumIonAPIKey;
         m_map2DSettingsChanged = true;
     }
     else
     {
         m_map2DSettingsChanged = false;
     }
-    if (cesiumIonAPIKey != m_settings->m_cesiumIonAPIKey)
+    if (   (cesiumIonAPIKey != m_settings->m_cesiumIonAPIKey)
+        || (arcGISAPIKey != m_settings->m_arcGISAPIKey))
     {
         m_settings->m_cesiumIonAPIKey = cesiumIonAPIKey;
+        m_settings->m_arcGISAPIKey = arcGISAPIKey;
         m_map3DSettingsChanged = true;
+        m_settingsKeysChanged.append("cesiumIonAPIKey");
+        m_settingsKeysChanged.append("arcGISAPIKey");
     }
     else
     {
         m_map3DSettingsChanged = false;
     }
-
     if (m_settings->m_map2DEnabled != ui->map2DEnabled->isChecked())
     {
         m_settings->m_map2DEnabled = ui->map2DEnabled->isChecked();
@@ -218,6 +249,11 @@ void MapSettingsDialog::accept()
     {
         m_settings->m_map3DEnabled = ui->map3DEnabled->isChecked();
         m_settingsKeysChanged.append("map3DEnabled");
+    }
+    if (m_settings->m_defaultImagery != ui->defaultImagery->currentText())
+    {
+        m_settings->m_defaultImagery = ui->defaultImagery->currentText();
+        m_settingsKeysChanged.append("defaultImagery");
     }
     if (m_settings->m_terrain != ui->terrain->currentText())
     {
@@ -234,15 +270,50 @@ void MapSettingsDialog::accept()
         m_settings->m_sunLightEnabled = ui->sunLightEnabled->currentIndex() == 1;
         m_settingsKeysChanged.append("sunLightEnabled");
     }
+    if (m_settings->m_lightIntensity != ui->lightIntensity->value())
+    {
+        m_settings->m_lightIntensity = ui->lightIntensity->value();
+        m_settingsKeysChanged.append("lightIntensity");
+    }
     if (m_settings->m_eciCamera != (ui->eciCamera->currentIndex() == 1))
     {
         m_settings->m_eciCamera = ui->eciCamera->currentIndex() == 1;
         m_settingsKeysChanged.append("eciCamera");
     }
-    if (m_settings->m_antiAliasing != ui->antiAliasing->currentText())
+    if (m_settings->m_fxaa != ui->fxaa->isChecked())
     {
-        m_settings->m_antiAliasing = ui->antiAliasing->currentText();
-        m_settingsKeysChanged.append("antiAliasing");
+        m_settings->m_fxaa = ui->fxaa->isChecked();
+        m_settingsKeysChanged.append("fxaa");
+    }
+    if (m_settings->m_msaa != stringToMSAA(ui->msaa->currentText()))
+    {
+        m_settings->m_msaa = stringToMSAA(ui->msaa->currentText());
+        m_settingsKeysChanged.append("msaa");
+    }
+    if (m_settings->m_terrainLighting != ui->terrainLighting->isChecked())
+    {
+        m_settings->m_terrainLighting = ui->terrainLighting->isChecked();
+        m_settingsKeysChanged.append("terrainLighting");
+    }
+    if (m_settings->m_water != ui->water->isChecked())
+    {
+        m_settings->m_water = ui->water->isChecked();
+        m_settingsKeysChanged.append("water");
+    }
+    if (m_settings->m_hdr != ui->hdr->isChecked())
+    {
+        m_settings->m_hdr = ui->hdr->isChecked();
+        m_settingsKeysChanged.append("hdr");
+    }
+    if (m_settings->m_fog != ui->fog->isChecked())
+    {
+        m_settings->m_fog = ui->fog->isChecked();
+        m_settingsKeysChanged.append("fog");
+    }
+    if (m_settings->m_fps != ui->fps->isChecked())
+    {
+        m_settings->m_fps = ui->fps->isChecked();
+        m_settingsKeysChanged.append("fps");
     }
 
     for (int row = 0; row < ui->mapItemSettings->rowCount(); row++)
@@ -268,6 +339,8 @@ void MapSettingsDialog::accept()
         itemSettings->m_filterNameRE.setPattern(itemSettings->m_filterName);
         itemSettings->m_filterNameRE.optimize();
         itemSettings->m_filterDistance = gui->m_filterDistance->value() * 1000;
+        itemSettings->m_smoothingWindow = gui->m_smoothingWindow->value();
+        itemSettings->m_smoothingLambda = gui->m_smoothingLambda->value();
     }
 
     QDialog::accept();
@@ -304,6 +377,8 @@ void MapSettingsDialog::on_map3DEnabled_clicked(bool checked)
         ui->mapItemSettings->showColumn(COL_3D_POINT);
         ui->mapItemSettings->showColumn(COL_3D_TRACK);
         ui->mapItemSettings->showColumn(COL_3D_LABEL_SCALE);
+        ui->mapItemSettings->showColumn(COL_SMOOTHING_WINDOW);
+        ui->mapItemSettings->showColumn(COL_SMOOTHING_LAMBDA);
     }
     else
     {
@@ -313,12 +388,25 @@ void MapSettingsDialog::on_map3DEnabled_clicked(bool checked)
         ui->mapItemSettings->hideColumn(COL_3D_POINT);
         ui->mapItemSettings->hideColumn(COL_3D_TRACK);
         ui->mapItemSettings->hideColumn(COL_3D_LABEL_SCALE);
+        ui->mapItemSettings->hideColumn(COL_SMOOTHING_WINDOW);
+        ui->mapItemSettings->hideColumn(COL_SMOOTHING_LAMBDA);
     }
     ui->terrain->setEnabled(checked);
     ui->buildings->setEnabled(checked);
     ui->sunLightEnabled->setEnabled(checked);
     ui->eciCamera->setEnabled(checked);
-    ui->antiAliasing->setEnabled(checked);
+    ui->fxaa->setEnabled(checked);
+    ui->msaa->setEnabled(checked);
+}
+
+void MapSettingsDialog::on_terrain_currentIndexChanged(int index)
+{
+    (void) index;
+
+    bool ellipsoid = ui->terrain->currentText() == "Ellipsoid";
+
+    ui->terrainLighting->setEnabled(!ellipsoid);
+    ui->water->setEnabled(!ellipsoid);
 }
 
 // Models have individual licensing. See LICENSE on github
@@ -554,3 +642,25 @@ void MapSettingsDialog::downloadWaypointsFinished()
     }
 }
 
+void MapSettingsDialog::on_sunLightEnabled_currentIndexChanged(int index)
+{
+    ui->lightIntensity->setEnabled(index == 0);
+}
+
+QString MapSettingsDialog::msaaToString(int msaa) const
+{
+    if (msaa <= 1) {
+        return "Off";
+    } else {
+        return QString::number(msaa);
+    }
+}
+
+int MapSettingsDialog::stringToMSAA(const QString& string) const
+{
+    if (string == "Off") {
+        return 1;
+    } else {
+        return string.toInt();
+    }
+}

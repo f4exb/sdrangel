@@ -39,8 +39,13 @@ FramelessWindowResizer::FramelessWindowResizer(QWidget *widget) :
 void FramelessWindowResizer::enableChildMouseTracking()
 {
     QList<QWidget *> widgets = m_widget->findChildren<QWidget *>();
-    for (auto widget : widgets) {
+    for (auto widget : widgets)
+    {
         widget->setMouseTracking(true);
+        // For QWebEngineView
+        if (widget->focusProxy()) {
+            widget->focusProxy()->installEventFilter(this);
+        }
     }
     // QTableWidgets don't send us mouseMoveEvents for some unknown reason
     // so install an event filter on their viewport

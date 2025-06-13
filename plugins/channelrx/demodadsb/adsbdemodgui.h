@@ -28,6 +28,7 @@
 #include <QTextToSpeech>
 #include <QRandomGenerator>
 #include <QNetworkAccessManager>
+#include <QtCharts>
 
 #include "channel/channelgui.h"
 #include "dsp/dsptypes.h"
@@ -56,10 +57,16 @@ class WebAPIAdapterInterface;
 class HttpDownloadManager;
 class ADSBDemodGUI;
 class ADSBOSMTemplateServer;
+class CheckList;
+class AircraftModel;
 
 namespace Ui {
     class ADSBDemodGUI;
 }
+
+#if QT_VERSION < QT_VERSION_CHECK(6, 0, 0)
+using namespace QtCharts;
+#endif
 
 // Custom widget to allow formatted decimal numbers to be sorted numerically
 class CustomDoubleTableWidgetItem : public QTableWidgetItem
@@ -89,12 +96,16 @@ struct Aircraft {
     QString m_icaoHex;
     QString m_callsign;         // Flight callsign
     QString m_flight;           // Guess at flight number
+    bool m_globalPosition;      // Position has been determined from global decode
     Real m_latitude;            // Latitude in decimal degrees
     Real m_longitude;           // Longitude in decimal degrees
-    int m_altitude;             // Altitude in feet
+    float m_radius;             // Horizontal containment radius limit (Rc) in metres
+    int m_altitude;             // Altitude in feet (will be 0 if on surface)
+    int m_pressureAltitude;     // Pressure altitude in feet for Map PFD altimeter (can be negative on surface)
     bool m_onSurface;           // Indicates if on surface or airborne
     bool m_altitudeGNSS;        // Altitude is GNSS HAE (Height above WGS-84 ellipsoid) rather than barometric alitute (relative to 29.92 Hg)
-    float m_heading;            // Heading or track in degrees
+    float m_heading;            // Heading in degrees magnetic
+    float m_track;              // Track in degrees true?
     int m_verticalRate;         // Vertical climb rate in ft/min
     QString m_emitterCategory;  // Aircraft type
     QString m_status;           // Aircraft status
@@ -102,23 +113,37 @@ struct Aircraft {
     Real m_range;               // Distance from station to aircraft
     Real m_azimuth;             // Azimuth from station to aircraft
     Real m_elevation;           // Elevation from station to aircraft
-    QDateTime m_time;           // When last updated
+    QDateTime m_rxTime;         // When last frame received (can be long ago if reading from log file)
+    QDateTime m_updateTime;     // Last time we updated data for this aircraft (used for determining when to remove an aircraft)
 
     int m_selAltitude;          // Selected altitude in MCP/FCU or FMS in feet
     int m_selHeading;           // Selected heading in MCP/FCU in degrees
-    int m_baro;                 // Aircraft baro setting in mb (Mode-S)
+    float m_baro;               // Aircraft baro setting in mb (Mode-S)
     float m_roll;               // In degrees
     int m_groundspeed;          // In knots
     float m_turnRate;           // In degrees per second
     int m_trueAirspeed;         // In knots
     int m_indicatedAirspeed;    // In knots
     float m_mach;               // Mach number
+    bool m_autopilot;
+    bool m_vnavMode;
+    bool m_altHoldMode;
+    bool m_approachMode;
+    bool m_lnavMode;
+    bool m_tcasOperational;     // Appears only to be true if TA/RA, false if TA ONLY
 
     bool m_bdsCapabilities[16][16]; // BDS capabilities are indicaited by BDS 1.7
+    int m_adsbVersion;
+    bool m_nicSupplementA;
+    bool m_nicSupplementB;
+    bool m_nicSupplementC;
 
     bool m_positionValid;       // Indicates if we have valid data for the above fields
     bool m_altitudeValid;
+    bool m_pressureAltitudeValid;
+    bool m_onSurfaceValid;
     bool m_headingValid;
+    bool m_trackValid;
     bool m_verticalRateValid;
     bool m_selAltitudeValid;
     bool m_selHeadingValid;
@@ -129,16 +154,30 @@ struct Aircraft {
     bool m_trueAirspeedValid;
     bool m_indicatedAirspeedValid;
     bool m_machValid;
+    bool m_autopilotValid;
+    bool m_vnavModeValid;
+    bool m_altHoldModeValid;
+    bool m_approachModeValid;
+    bool m_lnavModeValid;
+    bool m_tcasOperationalValid;
+
     bool m_bdsCapabilitiesValid;
+    bool m_adsbVersionValid;
+    bool m_nicSupplementAValid;
+    bool m_nicSupplementBValid;
+    bool m_nicSupplementCValid;
 
     // State for calculating position using two CPR frames
     bool m_cprValid[2];
-    Real m_cprLat[2];
-    Real m_cprLong[2];
+    double m_cprLat[2];
+    double m_cprLong[2];
     QDateTime m_cprTime[2];
 
     int m_adsbFrameCount;       // Number of ADS-B frames for this aircraft
+    int m_modesFrameCount;      // Number of Mode-S frames for this aircraft
+    int m_nonTransponderFrameCount;
     int m_tisBFrameCount;
+    int m_adsrFrameCount;
     float m_minCorrelation;
     float m_maxCorrelation;
     float m_correlation;
@@ -148,8 +187,12 @@ struct Aircraft {
     bool m_isHighlighted;       // Are we highlighting this aircraft in the table and map
     bool m_showAll;
 
-    QVariantList m_coordinates; // Coordinates we've recorded the aircraft at
+    QList<QVariantList> m_coordinates; // Coordinates we've recorded the aircraft at, split up in to altitude ranges
+    QList<QVariantList> m_recentCoordinates; // Last 20 seconds of coordinates for ATC mode
     QList<QDateTime> m_coordinateDateTimes;
+    QList<int> m_coordinateColors; // 0-7 index to 8 color palette according to altitude
+    QList<int> m_recentCoordinateColors;
+    int m_lastColor;
 
     AircraftInformation *m_aircraftInfo; // Info about the aircraft from the database
     QString m_aircraft3DModel;    // 3D model for map based on aircraft type
@@ -159,6 +202,7 @@ struct Aircraft {
     ADSBDemodGUI *m_gui;
     QString m_flagIconURL;
     QString m_airlineIconURL;
+    QString m_sideviewIconURL;
 
     // For animation on 3D map
     float m_runwayAltitude;
@@ -168,10 +212,14 @@ struct Aircraft {
     bool m_rotorStarted;        // Rotors started on 'Rotorcraft'
     bool m_engineStarted;       // Engines started (typically propellors)
     QDateTime m_positionDateTime;
-    QDateTime m_orientationDateTime;
+    QDateTime m_orientationDateTime; // FIXME
     QDateTime m_headingDateTime;
-    QDateTime m_prevHeadingDateTime;
-    int m_prevHeading;
+    QDateTime m_trackDateTime;
+    QDateTime m_altitudeDateTime;
+    QDateTime m_indicatedAirspeedDateTime;
+    QDateTime m_prevTrackDateTime;
+    int m_prevTrack;
+    float m_trackWhenHeadingSet;
     float m_pitchEst;           // Estimated pitch based on vertical rate
     float m_rollEst;            // Estimated roll based on rate of change in heading
 
@@ -182,30 +230,48 @@ struct Aircraft {
     QTableWidgetItem *m_callsignItem;
     QTableWidgetItem* m_atcCallsignItem;
     QTableWidgetItem *m_modelItem;
+    QTableWidgetItem *m_typeItem;
+    QTableWidgetItem *m_sideviewItem;
     QTableWidgetItem *m_airlineItem;
     QTableWidgetItem *m_latitudeItem;
     QTableWidgetItem *m_longitudeItem;
     QTableWidgetItem *m_altitudeItem;
     QTableWidgetItem *m_headingItem;
+    QTableWidgetItem *m_trackItem;
     QTableWidgetItem *m_verticalRateItem;
     CustomDoubleTableWidgetItem *m_rangeItem;
     QTableWidgetItem *m_azElItem;
     QTableWidgetItem *m_emitterCategoryItem;
     QTableWidgetItem *m_statusItem;
     QTableWidgetItem *m_squawkItem;
+    QTableWidgetItem *m_identItem;
     QTableWidgetItem *m_registrationItem;
     QTableWidgetItem *m_countryItem;
     QTableWidgetItem *m_registeredItem;
     QTableWidgetItem *m_manufacturerNameItem;
     QTableWidgetItem *m_ownerItem;
     QTableWidgetItem *m_operatorICAOItem;
+    QTableWidgetItem *m_interogatorCodeItem;
     QTableWidgetItem *m_timeItem;
+    QTableWidgetItem *m_totalFrameCountItem;
     QTableWidgetItem *m_adsbFrameCountItem;
+    QTableWidgetItem *m_modesFrameCountItem;
+    QTableWidgetItem *m_nonTransponderItem;
+    QTableWidgetItem *m_tisBFrameCountItem;
+    QTableWidgetItem *m_adsrFrameCountItem;
+    QTableWidgetItem *m_radiusItem;
+    QTableWidgetItem *m_nacpItem;
+    QTableWidgetItem *m_nacvItem;
+    QTableWidgetItem *m_gvaItem;
+    QTableWidgetItem *m_nicItem;
+    QTableWidgetItem *m_nicBaroItem;
+    QTableWidgetItem *m_silItem;
     QTableWidgetItem *m_correlationItem;
     QTableWidgetItem *m_rssiItem;
     QTableWidgetItem *m_flightStatusItem;
     QTableWidgetItem *m_depItem;
     QTableWidgetItem *m_arrItem;
+    QTableWidgetItem *m_stopsItem;
     QTableWidgetItem *m_stdItem;
     QTableWidgetItem *m_etdItem;
     QTableWidgetItem *m_atdItem;
@@ -218,6 +284,13 @@ struct Aircraft {
     QTableWidgetItem *m_apItem;
     QTableWidgetItem *m_vModeItem;
     QTableWidgetItem *m_lModeItem;
+    QTableWidgetItem *m_tcasItem;
+    QTableWidgetItem *m_acasItem;
+    QTableWidgetItem *m_raItem;
+    QTableWidgetItem *m_maxSpeedItem;
+    QTableWidgetItem *m_versionItem;
+    QTableWidgetItem *m_lengthItem;
+    QTableWidgetItem *m_widthItem;
     QTableWidgetItem *m_rollItem;
     QTableWidgetItem *m_groundspeedItem;
     QTableWidgetItem *m_turnRateItem;
@@ -231,16 +304,18 @@ struct Aircraft {
     QTableWidgetItem *m_staticPressureItem;
     QTableWidgetItem *m_staticAirTempItem;
     QTableWidgetItem *m_humidityItem;
-    QTableWidgetItem *m_tisBItem;
 
     Aircraft(ADSBDemodGUI *gui) :
         m_icao(0),
+        m_globalPosition(false),
         m_latitude(0),
         m_longitude(0),
+        m_radius(0.0f),
         m_altitude(0),
         m_onSurface(false),
         m_altitudeGNSS(false),
         m_heading(0),
+        m_track(0),
         m_verticalRate(0),
         m_azimuth(0),
         m_elevation(0),
@@ -253,9 +328,22 @@ struct Aircraft {
         m_trueAirspeed(0),
         m_indicatedAirspeed(0),
         m_mach(0.0f),
+        m_autopilot(false),
+        m_vnavMode(false),
+        m_altHoldMode(false),
+        m_approachMode(false),
+        m_lnavMode(false),
+        m_tcasOperational(false),
+        m_adsbVersion(0),
+        m_nicSupplementA(false),
+        m_nicSupplementB(false),
+        m_nicSupplementC(false),
         m_positionValid(false),
         m_altitudeValid(false),
+        m_pressureAltitudeValid(false),
+        m_onSurfaceValid(false),
         m_headingValid(false),
+        m_trackValid(false),
         m_verticalRateValid(false),
         m_selAltitudeValid(false),
         m_selHeadingValid(false),
@@ -266,9 +354,22 @@ struct Aircraft {
         m_trueAirspeedValid(false),
         m_indicatedAirspeedValid(false),
         m_machValid(false),
+        m_autopilotValid(false),
+        m_vnavModeValid(false),
+        m_altHoldModeValid(false),
+        m_approachModeValid(false),
+        m_lnavModeValid(false),
+        m_tcasOperationalValid(false),
         m_bdsCapabilitiesValid(false),
+        m_adsbVersionValid(false),
+        m_nicSupplementAValid(false),
+        m_nicSupplementBValid(false),
+        m_nicSupplementCValid(false),
         m_adsbFrameCount(0),
+        m_modesFrameCount(0),
+        m_nonTransponderFrameCount(0),
         m_tisBFrameCount(0),
+        m_adsrFrameCount(0),
         m_minCorrelation(INFINITY),
         m_maxCorrelation(-INFINITY),
         m_correlation(0.0f),
@@ -302,9 +403,12 @@ struct Aircraft {
         m_callsignItem = new QTableWidgetItem();
         m_atcCallsignItem = new QTableWidgetItem();
         m_modelItem = new QTableWidgetItem();
+        m_typeItem = new QTableWidgetItem();
+        m_sideviewItem = new QTableWidgetItem();
         m_airlineItem = new QTableWidgetItem();
         m_altitudeItem = new QTableWidgetItem();
         m_headingItem = new QTableWidgetItem();
+        m_trackItem = new QTableWidgetItem();
         m_verticalRateItem = new QTableWidgetItem();
         m_rangeItem = new CustomDoubleTableWidgetItem();
         m_azElItem = new QTableWidgetItem();
@@ -313,19 +417,34 @@ struct Aircraft {
         m_emitterCategoryItem = new QTableWidgetItem();
         m_statusItem = new QTableWidgetItem();
         m_squawkItem = new QTableWidgetItem();
+        m_identItem = new QTableWidgetItem();
         m_registrationItem = new QTableWidgetItem();
         m_countryItem = new QTableWidgetItem();
         m_registeredItem = new QTableWidgetItem();
         m_manufacturerNameItem = new QTableWidgetItem();
         m_ownerItem = new QTableWidgetItem();
         m_operatorICAOItem = new QTableWidgetItem();
+        m_interogatorCodeItem = new QTableWidgetItem();
         m_timeItem = new QTableWidgetItem();
+        m_totalFrameCountItem = new QTableWidgetItem();
         m_adsbFrameCountItem = new QTableWidgetItem();
+        m_modesFrameCountItem = new QTableWidgetItem();
+        m_nonTransponderItem = new QTableWidgetItem();
+        m_tisBFrameCountItem = new QTableWidgetItem();
+        m_adsrFrameCountItem = new QTableWidgetItem();
+        m_radiusItem = new QTableWidgetItem();
+        m_nacpItem = new QTableWidgetItem();
+        m_nacvItem = new QTableWidgetItem();
+        m_gvaItem = new QTableWidgetItem();
+        m_nicItem = new QTableWidgetItem();
+        m_nicBaroItem = new QTableWidgetItem();
+        m_silItem = new QTableWidgetItem();
         m_correlationItem = new QTableWidgetItem();
         m_rssiItem = new QTableWidgetItem();
         m_flightStatusItem = new QTableWidgetItem();
         m_depItem = new QTableWidgetItem();
         m_arrItem = new QTableWidgetItem();
+        m_stopsItem = new QTableWidgetItem();
         m_stdItem = new QTableWidgetItem();
         m_etdItem = new QTableWidgetItem();
         m_atdItem = new QTableWidgetItem();
@@ -338,6 +457,13 @@ struct Aircraft {
         m_apItem = new QTableWidgetItem();
         m_vModeItem = new QTableWidgetItem();
         m_lModeItem = new QTableWidgetItem();
+        m_tcasItem = new QTableWidgetItem();
+        m_acasItem = new QTableWidgetItem();
+        m_raItem = new QTableWidgetItem();
+        m_maxSpeedItem = new QTableWidgetItem();
+        m_versionItem = new QTableWidgetItem();
+        m_lengthItem = new QTableWidgetItem();
+        m_widthItem = new QTableWidgetItem();
         m_rollItem = new QTableWidgetItem();
         m_groundspeedItem = new QTableWidgetItem();
         m_turnRateItem = new QTableWidgetItem();
@@ -351,16 +477,15 @@ struct Aircraft {
         m_staticPressureItem = new QTableWidgetItem();
         m_staticAirTempItem = new QTableWidgetItem();
         m_humidityItem = new QTableWidgetItem();
-        m_tisBItem = new QTableWidgetItem();
     }
 
     QString getImage() const;
     QString getText(const ADSBDemodSettings *settings, bool all=false) const;
     // Label to use for aircraft on map
-    QString getLabel(const ADSBDemodSettings *settings) const;
+    QString getLabel(const ADSBDemodSettings *settings, QDateTime& dateTime) const;
 
     // Name to use when selected as a target (E.g. for use as target name in Rotator Controller)
-    QString targetName()
+    QString targetName() const
     {
         if (!m_callsign.isEmpty())
             return QString("Callsign: %1").arg(m_callsign);
@@ -368,6 +493,71 @@ struct Aircraft {
             return QString("ICAO: %1").arg(m_icao, 0, 16);
     }
 
+    void setOnSurface(const QDateTime& dateTime);
+    void setAltitude(int altitudeFt, bool gnss, const QDateTime& dateTime, const ADSBDemodSettings& settings);
+    void setVerticalRate(int verticalRate, const ADSBDemodSettings& settings);
+    void setGroundspeed(float groundspeed, const ADSBDemodSettings& settings);
+    void setTrueAirspeed(int airspeed, const ADSBDemodSettings& settings);
+    void setIndicatedAirspeed(int airspeed, const QDateTime& dateTime, const ADSBDemodSettings& settings);
+    void setTrack(float track, const QDateTime& dateTime);
+    void setHeading(float heading, const QDateTime& dateTime);
+    void addCoordinate(const QDateTime& dateTime, AircraftModel *model);
+    void clearCoordinates(AircraftModel *model);
+};
+
+class AircraftPathModel : public QAbstractListModel {
+    Q_OBJECT
+
+public:
+    using QAbstractListModel::QAbstractListModel;
+    enum MarkerRoles{
+        coordinatesRole = Qt::UserRole + 1,
+        colorRole = Qt::UserRole + 2,
+    };
+
+    AircraftPathModel(AircraftModel *aircraftModel, Aircraft *aircraft) :
+        m_aircraftModel(aircraftModel),
+        m_aircraft(aircraft),
+        m_paths(0),
+        m_showFullPath(false),
+        m_showATCPath(false)
+    {
+        settingsUpdated();
+    }
+
+    int rowCount(const QModelIndex &parent = QModelIndex()) const override {
+        (void) parent;
+        return m_paths;
+    }
+
+    QVariant data(const QModelIndex &index, int role = Qt::DisplayRole) const override;
+
+    void add();
+    void updateLast();
+    void removed();
+    void clear();
+    void settingsUpdated();
+
+    Qt::ItemFlags flags(const QModelIndex &index) const override
+    {
+        (void) index;
+        return Qt::ItemIsEnabled;
+    }
+
+    QHash<int, QByteArray> roleNames() const {
+        QHash<int, QByteArray> roles;
+        roles[coordinatesRole] = "coordinates";
+        roles[colorRole] = "color";
+        return roles;
+    }
+
+private:
+
+    AircraftModel *m_aircraftModel;
+    Aircraft *m_aircraft;
+    int m_paths; // Should match m_aircraft->m_coordinates.count()
+    bool m_showFullPath;
+    bool m_showATCPath;
 };
 
 // Aircraft data model used by QML map item
@@ -385,12 +575,16 @@ public:
         aircraftPathRole = Qt::UserRole + 6,
         showAllRole = Qt::UserRole + 7,
         highlightedRole = Qt::UserRole + 8,
-        targetRole = Qt::UserRole + 9
+        targetRole = Qt::UserRole + 9,
+        radiusRole = Qt::UserRole + 10,
+        showRadiusRole = Qt::UserRole + 11,
+        aircraftPathModelRole = Qt::UserRole + 12,
     };
 
     Q_INVOKABLE void addAircraft(Aircraft *aircraft) {
         beginInsertRows(QModelIndex(), rowCount(), rowCount());
         m_aircrafts.append(aircraft);
+        m_pathModels.append(new AircraftPathModel(this, aircraft));
         endInsertRows();
     }
 
@@ -409,7 +603,8 @@ public:
         return Qt::ItemIsEnabled | Qt::ItemIsSelectable | Qt::ItemIsEditable;
     }
 
-    void aircraftUpdated(Aircraft *aircraft) {
+    void aircraftUpdated(Aircraft *aircraft)
+    {
         int row = m_aircrafts.indexOf(aircraft);
         if (row >= 0)
         {
@@ -418,30 +613,72 @@ public:
         }
     }
 
-    void allAircraftUpdated() {
-        /*
-        // Not sure why this doesn't work - it should be more efficient
-        // than the following code
-        emit dataChanged(index(0), index(rowCount()));
-        */
-        for (int i = 0; i < m_aircrafts.count(); i++)
+    void highlightChanged(Aircraft *aircraft)
+    {
+        int row = m_aircrafts.indexOf(aircraft);
+        if (row >= 0)
         {
-            QModelIndex idx = index(i);
+            m_pathModels[row]->settingsUpdated();
+            QModelIndex idx = index(row);
             emit dataChanged(idx, idx);
         }
     }
 
-    void removeAircraft(Aircraft *aircraft) {
+    void clearCoords(Aircraft *aircraft)
+    {
+        int row = m_aircrafts.indexOf(aircraft);
+        if (row >= 0) {
+            m_pathModels[row]->clear();
+        }
+    }
+
+    void aircraftCoordsUpdated(Aircraft *aircraft)
+    {
+        int row = m_aircrafts.indexOf(aircraft);
+        if (row >= 0) {
+            m_pathModels[row]->updateLast();
+        }
+    }
+
+    void aircraftCoordsAdded(Aircraft *aircraft)
+    {
+        int row = m_aircrafts.indexOf(aircraft);
+        if (row >= 0) {
+            m_pathModels[row]->add();
+        }
+    }
+
+    void aircraftCoordsRemoved(Aircraft *aircraft)
+    {
+        int row = m_aircrafts.indexOf(aircraft);
+        if (row >= 0) {
+            m_pathModels[row]->removed();
+        }
+    }
+
+    void allAircraftUpdated()
+    {
+        emit dataChanged(index(0), index(rowCount()-1));
+
+        for (int i = 0; i < m_aircrafts.count(); i++) {
+            m_pathModels[i]->settingsUpdated();
+        }
+    }
+
+    void removeAircraft(Aircraft *aircraft)
+    {
         int row = m_aircrafts.indexOf(aircraft);
         if (row >= 0)
         {
             beginRemoveRows(QModelIndex(), row, row);
             m_aircrafts.removeAt(row);
+            delete m_pathModels.takeAt(row);
             endRemoveRows();
         }
     }
 
-    QHash<int, QByteArray> roleNames() const {
+    QHash<int, QByteArray> roleNames() const
+    {
         QHash<int, QByteArray> roles;
         roles[positionRole] = "position";
         roles[headingRole] = "heading";
@@ -452,22 +689,12 @@ public:
         roles[showAllRole] = "showAll";
         roles[highlightedRole] = "highlighted";
         roles[targetRole] = "target";
+        roles[radiusRole] = "containmentRadius";
+        roles[aircraftPathModelRole] = "aircraftPathModel";
         return roles;
     }
 
-    void setFlightPaths(bool flightPaths)
-    {
-        m_flightPaths = flightPaths;
-        allAircraftUpdated();
-    }
-
-    void setAllFlightPaths(bool allFlightPaths)
-    {
-        m_allFlightPaths = allFlightPaths;
-        allAircraftUpdated();
-    }
-
-     void setSettings(const ADSBDemodSettings *settings)
+    void setSettings(const ADSBDemodSettings *settings)
     {
         m_settings = settings;
         allAircraftUpdated();
@@ -487,11 +714,11 @@ public:
         }
     }
 
+    const ADSBDemodSettings *m_settings;
+
 private:
     QList<Aircraft *> m_aircrafts;
-    bool m_flightPaths;
-    bool m_allFlightPaths;
-    const ADSBDemodSettings *m_settings;
+    QList<AircraftPathModel *> m_pathModels;
 };
 
 // Airport data model used by QML map item
@@ -667,26 +894,34 @@ public:
         airspacePolygonRole = Qt::UserRole + 6
     };
 
-    Q_INVOKABLE void addAirspace(Airspace *airspace) {
+    Q_INVOKABLE void addAirspace(Airspace *airspace)
+    {
         beginInsertRows(QModelIndex(), rowCount(), rowCount());
         m_airspaces.append(airspace);
-        // Convert QPointF to QVariantList of QGeoCoordinates
-        QVariantList polygon;
-        for (const auto p : airspace->m_polygon)
-        {
-            QGeoCoordinate coord(p.y(), p.x(), airspace->topHeightInMetres());
-            polygon.push_back(QVariant::fromValue(coord));
-        }
-        m_polygons.append(polygon);
+        updatePolygon(airspace, -1);
         endInsertRows();
     }
 
-    int rowCount(const QModelIndex &parent = QModelIndex()) const override {
+    int rowCount(const QModelIndex &parent = QModelIndex()) const override
+    {
         Q_UNUSED(parent)
         return m_airspaces.count();
     }
 
-    void removeAllAirspaces() {
+    void removeAirspace(Airspace *airspace)
+    {
+        int idx = m_airspaces.indexOf(airspace);
+        if (idx >= 0)
+        {
+            beginRemoveRows(QModelIndex(), idx, idx);
+            m_airspaces.removeAt(idx);
+            m_polygons.removeAt(idx);
+            endRemoveRows();
+        }
+    }
+
+    void removeAllAirspaces()
+    {
         if (m_airspaces.count() > 0)
         {
             beginRemoveRows(QModelIndex(), 0, m_airspaces.count() - 1);
@@ -694,6 +929,23 @@ public:
             m_polygons.clear();
             endRemoveRows();
         }
+    }
+
+    void airspaceUpdated(const Airspace *airspace)
+    {
+        int row = m_airspaces.indexOf(airspace);
+        if (row >= 0)
+        {
+            updatePolygon(airspace, row);
+
+            QModelIndex idx = index(row);
+            emit dataChanged(idx, idx);
+        }
+    }
+
+    bool contains(const Airspace *airspace)
+    {
+        return m_airspaces.contains(airspace);
     }
 
     QVariant data(const QModelIndex &index, int role = Qt::DisplayRole) const override;
@@ -706,7 +958,8 @@ public:
         return Qt::ItemIsEnabled | Qt::ItemIsSelectable | Qt::ItemIsEditable;
     }
 
-    QHash<int, QByteArray> roleNames() const {
+    QHash<int, QByteArray> roleNames() const
+    {
         QHash<int, QByteArray> roles;
         roles[nameRole] = "name";
         roles[detailsRole] = "details";
@@ -718,8 +971,25 @@ public:
     }
 
 private:
-    QList<Airspace *> m_airspaces;
+    QList<const Airspace *> m_airspaces;
     QList<QVariantList> m_polygons;
+
+    void updatePolygon(const Airspace *airspace, int row)
+    {
+        // Convert QPointF to QVariantList of QGeoCoordinates
+        QVariantList polygon;
+        for (const auto p : airspace->m_polygon)
+        {
+            QGeoCoordinate coord(p.y(), p.x(), airspace->topHeightInMetres());
+            polygon.push_back(QVariant::fromValue(coord));
+        }
+        if (row == -1) {
+            m_polygons.append(polygon);
+        } else {
+            m_polygons.replace(row, polygon);
+        }
+    }
+
 };
 
 // NavAid model used for each NavAid on the map
@@ -867,6 +1137,23 @@ protected:
 class ADSBDemodGUI : public ChannelGUI {
     Q_OBJECT
 
+    struct Interogator {
+        Real m_minLatitude;
+        Real m_maxLatitude;
+        Real m_minLongitude;
+        Real m_maxLongitude;
+        bool m_valid;
+        Airspace m_airspace;
+
+        Interogator() :
+            m_valid(false)
+        {
+        }
+
+        void update(int ic, Aircraft *aircraft, AirspaceModel *airspaceModel, CheckList *checkList, bool display);
+        void calcPoly();
+    };
+
 public:
     static ADSBDemodGUI* create(PluginAPI* pluginAPI, DeviceUISet *deviceUISet, BasebandSampleSink *rxChannel);
     virtual void destroy();
@@ -923,6 +1210,7 @@ private:
 
     QHash<int, Aircraft *> m_aircraft;  // Hashed on ICAO
     QSharedPointer<const QHash<int, AircraftInformation *>> m_aircraftInfo;
+    QSharedPointer<const QHash<QString, AircraftRouteInformation *>> m_routeInfo; // Hashed on callsign
     QSharedPointer<const QHash<int, AirportInformation *>> m_airportInfo; // Hashed on id
     AircraftModel m_aircraftModel;
     AirportModel m_airportModel;
@@ -936,11 +1224,84 @@ private:
     Aircraft *m_trackAircraft;          // Aircraft we want to track in Channel Report
     MovingAverageUtil<float, double, 10> m_correlationAvg;
     MovingAverageUtil<float, double, 10> m_correlationOnesAvg;
+    MovingAverageUtil<float, double, 100> m_qnhAvg;
+
     Aircraft *m_highlightAircraft;      // Aircraft we want to highlight, when selected in table
 
     float m_currentAirportRange;        // Current settings, so we only update if changed
     ADSBDemodSettings::AirportType m_currentAirportMinimumSize;
     bool m_currentDisplayHeliports;
+
+    static const int m_maxRangeDeg = 5;
+    QList<float> m_maxRange[2];
+    Airspace m_coverageAirspace[2];
+
+    Interogator m_interogators[ADSB_IC_MAX];
+
+    enum StatsRow {
+        ADSB_FRAMES,
+        MODE_S_FRAMES,
+        TOTAL_FRAMES,
+        ADSB_RATE,
+        MODE_S_RATE,
+        TOTAL_RATE,
+        DATA_RATE,
+        CORRELATOR_MATCHES,
+        PERCENT_VALID,
+        PREAMBLE_FAILS,
+        CRC_FAILS,
+        TYPE_FAILS,
+        INVALID_FAILS,
+        ICAO_FAILS,
+        RANGE_FAILS,
+        ALT_FAILS,
+        AVERAGE_CORRELATION,
+        TC_0,
+        TC_1_4,
+        TC_5_8,
+        TC_9_18,
+        TC_19,
+        TC_20_22,
+        TC_24,
+        TC_28,
+        TC_29,
+        TC_31,
+        TC_UNUSED,
+        DF0,
+        DF4,
+        DF5,
+        DF11,
+        DF16,
+        DF17,
+        DF18,
+        DF19,
+        DF20_21,
+        DF22,
+        DF24,
+        MAX_RANGE,
+        MAX_ALTITUDE,
+        MAX_RATE
+    };
+
+    qint64 m_rangeFails;
+    qint64 m_altFails;
+    QDateTime m_frameRateTime;
+    qint64 m_adsbFrameRateCount;
+    qint64 m_modesFrameRateCount;
+    qint64 m_totalBytes;
+    float m_maxRangeStat;
+    float m_maxAltitudeStat;
+    float m_maxRateState;
+    qint64 m_dfStats[32];
+    qint64 m_tcStats[32];
+    QChart *m_chart;
+    QLineSeries *m_adsbFrameRateSeries;
+    QLineSeries *m_modesFrameRateSeries;
+    QLineSeries *m_aircraftSeries;
+    QDateTimeAxis *m_xAxis;
+    QValueAxis *m_fpsYAxis;
+    QValueAxis *m_aircraftYAxis;
+    QDateTime m_averageTime;
 
 #ifdef QT_TEXTTOSPEECH_FOUND
     QTextToSpeech *m_speech;
@@ -977,9 +1338,12 @@ private:
     static const QString m_flightStatuses[];
     static const QString m_hazardSeverity[];
     static const QString m_fomSources[];
+    static const QString m_nacvStrings[];
 
     explicit ADSBDemodGUI(PluginAPI* pluginAPI, DeviceUISet *deviceUISet, BasebandSampleSink *rxChannel, QWidget* parent = 0);
     virtual ~ADSBDemodGUI();
+
+    QString maptilerAPIKey() const;
 
     void blockApplySettings(bool block);
     void applySetting(const QString& settingsKey);
@@ -990,8 +1354,6 @@ private:
     void makeUIConnections();
     void updateAbsoluteCenterFrequency();
 
-    void updatePosition(Aircraft *aircraft);
-    bool updateLocalPosition(Aircraft *aircraft, double latitude, double longitude, bool surfacePosition);
     void clearFromMap(const QString& name);
     void sendToMap(Aircraft *aircraft, QList<SWGSDRangel::SWGMapAnimation *> *animations);
     Aircraft *getAircraft(int icao, bool &newAircraft);
@@ -1006,10 +1368,24 @@ private:
         float correlationOnes,
         unsigned crc,
         bool updateModel);
-    void decodeModeS(const QByteArray data, int df, Aircraft *aircraft);
+
+    void decodeID(const QByteArray& data, QString& emitterCategory, QString& callsign);
+    void decodeGroundspeed(const QByteArray& data, float& v, float& h);
+    void decodeAirspeed(const QByteArray& data, bool& tas, int& as, bool& hdgValid, float& hdg);
+    void decodeVerticalRate(const QByteArray& data, int& verticalRate);
+    void updateAircraftPosition(Aircraft *aircraft, double latitude, double longitude, const QDateTime& dateTime);
+    bool validateGlobalPosition(double latitude, double longitude, bool countFailure);
+    bool validateLocalPosition(double latitude, double longitude, bool surfacePosition, bool countFailure);
+    bool decodeGlobalPosition(int f, const double cprLat[2], const double cprLong[2], const QDateTime cprTime[2], double& latitude, double& longitude, bool countFailure);
+    bool decodeLocalPosition(int f, double cprLat, double cprLong, bool onSurface, const Aircraft *aircraft, double& latitude, double& longitude, bool countFailure);
+    void decodeCpr(const QByteArray& data, int& f, double& latCpr, double& lonCpr) const;
+    bool decodeAltitude(const QByteArray& data, int& altFt) const;
+    void decodeModeSAltitude(const QByteArray& data, const QDateTime dateTime, Aircraft *aircraft);
+    void decodeModeS(const QByteArray data, const QDateTime dateTime, int df, Aircraft *aircraft);
     void decodeCommB(const QByteArray data, const QDateTime dateTime, int df, Aircraft *aircraft, bool &updatedCallsign);
     QList<SWGSDRangel::SWGMapAnimation *> *animate(QDateTime dateTime, Aircraft *aircraft);
     SWGSDRangel::SWGMapAnimation *gearAnimation(QDateTime startDateTime, bool up);
+    SWGSDRangel::SWGMapAnimation *gearAngle(QDateTime startDateTime, bool flat);
     SWGSDRangel::SWGMapAnimation *flapsAnimation(QDateTime startDateTime, float currentFlaps, float flaps);
     SWGSDRangel::SWGMapAnimation *slatsAnimation(QDateTime startDateTime, bool retract);
     SWGSDRangel::SWGMapAnimation *rotorAnimation(QDateTime startDateTime, bool stop);
@@ -1022,18 +1398,18 @@ private:
     QString subAircraftString(Aircraft *aircraft, const QString &string);
     void resizeTable();
     QString getDataDir();
-    void readAirportDB(const QString& filename);
-    void readAirportFrequenciesDB(const QString& filename);
     void update3DModels();
     void updateAirports();
     void updateAirspaces();
     void updateNavAids();
     void updateChannelList();
+    void removeAircraft(QHash<int, Aircraft *>::iterator& i, Aircraft *aircraft);
     QAction *createCheckableItem(QString& text, int idx, bool checked);
     Aircraft* findAircraftByFlight(const QString& flight);
     QString dataTimeToShortString(QDateTime dt);
     void initFlightInformation();
     void initAviationWeather();
+    void setShowContainmentRadius(bool show);
     void applyMapSettings();
     void updatePhotoText(Aircraft *aircraft);
     void updatePhotoFlightInformation(Aircraft *aircraft);
@@ -1045,16 +1421,33 @@ private:
     void applyImportSettings();
     void sendAircraftReport();
     void updatePosition(float latitude, float longitude, float altitude);
+    void clearOldHeading(Aircraft *aircraft, const QDateTime& dateTime, float newTrack);
+    void updateQNH(const Aircraft *aircraft, float qnh);
+    void setCallsign(Aircraft *aircraft, const QString& callsign);
+
+    void initCoverageMap();
+    void clearCoverageMap();
+    void updateCoverageMap(float azimuth, float elevation, float distance, float altitude);
 
     void leaveEvent(QEvent*);
     void enterEvent(EnterEventType*);
+
+    void updateDFStats(int df);
+    bool updateTCStats(int tc, int row, int low, int high);
+    void resetStats();
+    void plotChart();
+    int countActiveAircraft();
+    void averageSeries(QLineSeries *series, const QDateTime& startTime, const QDateTime& endTime);
+    void legendMarkerClicked();
 
 private slots:
     void on_deltaFrequency_changed(qint64 value);
     void on_rfBW_valueChanged(int value);
     void on_threshold_valueChanged(int value);
+    void on_chipsThreshold_valueChanged(int value);
     void on_phaseSteps_valueChanged(int value);
     void on_tapsPerPhase_valueChanged(int value);
+    void statsTable_customContextMenuRequested(QPoint pos);
     void adsbData_customContextMenuRequested(QPoint point);
     void on_adsbData_cellClicked(int row, int column);
     void on_adsbData_cellDoubleClicked(int row, int column);
@@ -1063,18 +1456,24 @@ private slots:
     void columnSelectMenu(QPoint pos);
     void columnSelectMenuChecked(bool checked = false);
     void on_spb_currentIndexChanged(int value);
-    void on_correlateFullPreamble_clicked(bool checked);
     void on_demodModeS_clicked(bool checked);
     void on_feed_clicked(bool checked);
     void on_notifications_clicked();
     void on_flightInfo_clicked();
     void on_findOnMapFeature_clicked();
-    void on_getOSNDB_clicked();
+    void on_deleteAircraft_clicked();
+    void on_getAircraftDB_clicked();
     void on_getAirportDB_clicked();
     void on_getAirspacesDB_clicked();
+    void on_coverage_clicked(bool checked);
+    void on_displayChart_clicked(bool checked);
+    void on_stats_clicked(bool checked);
     void on_flightPaths_clicked(bool checked);
     void on_allFlightPaths_clicked(bool checked);
     void on_atcLabels_clicked(bool checked);
+    void on_displayOrientation_clicked(bool checked);
+    void on_displayRadius_clicked(bool checked);
+    void on_ic_globalCheckStateChanged(int state);
     void onWidgetRolled(QWidget* widget, bool rollDown);
     void onMenuDialogCalled(const QPoint& p);
     void handleInputMessages();
@@ -1101,6 +1500,12 @@ private slots:
     void devicePositionChanged(float latitude, float longitude, float altitude);
     void requestMetar(const QString& icao);
     void weatherUpdated(const AviationWeather::METAR &metar);
+    void on_manualQNH_clicked(bool checked);
+    void on_qnh_valueChanged(int value);
+    void clearCoverage(const QPoint& p);
+    void clearStats(const QPoint& p);
+    void clearChart(const QPoint& p);
+    void resetChartAxes();
 
 signals:
     void homePositionChanged();

@@ -74,7 +74,7 @@ void MapGUI::resetToDefaults()
 {
     m_settings.resetToDefaults();
     displaySettings();
-    applySettings(true);
+    applyAllSettings();
 }
 
 QByteArray MapGUI::serialize() const
@@ -88,7 +88,7 @@ bool MapGUI::deserialize(const QByteArray& data)
     {
         m_feature->setWorkspaceIndex(m_settings.m_workspaceIndex);
         displaySettings();
-        applySettings(true);
+        applyAllSettings();
         return true;
     }
     else
@@ -361,6 +361,7 @@ MapGUI::MapGUI(PluginAPI* pluginAPI, FeatureUISet *featureUISet, Feature *featur
     addNAT();
     addRadioTimeTransmitters();
     addRadar();
+    addAurora();
     addIonosonde();
     addBroadcast();
     addNavAids();
@@ -374,7 +375,7 @@ MapGUI::MapGUI(PluginAPI* pluginAPI, FeatureUISet *featureUISet, Feature *featur
     addSDRangelServer();
 
     displaySettings();
-    applySettings(true);
+    applyAllSettings();
 
     connect(&m_objectMapModel, &ObjectMapModel::linkClicked, this, &MapGUI::linkClicked);
 
@@ -813,6 +814,14 @@ void MapGUI::sdrangelServerUpdated(const QList<SDRangelServerList::SDRangelServe
     }
 }
 
+void MapGUI::addAurora()
+{
+    m_aurora = Aurora::create();
+    if (m_aurora) {
+        connect(m_aurora, &Aurora::dataUpdated, this, &MapGUI::auroraUpdated);
+    }
+}
+
 // Ionosonde stations
 void MapGUI::addIonosonde()
 {
@@ -901,11 +910,25 @@ void MapGUI::updateGIRO(const QDateTime& mapDateTime)
             if (m_giroRunId.isEmpty() || (!giroRunId.isEmpty() && (giroRunId != m_giroRunId)))
             {
                 m_giro->getMUF(giroRunId);
-                m_giro->getMUF(giroRunId);
+                m_giro->getfoF2(giroRunId);
                 m_giroRunId = giroRunId;
                 m_giroDateTime = mapDateTime;
             }
         }
+    }
+}
+
+void MapGUI::auroraUpdated(const QImage& image)
+{
+    //QString filename = QStandardPaths::standardLocations(QStandardPaths::AppDataLocation)[0] + "/aurora.png";
+    //image.save(filename);
+    QByteArray ba;
+    QBuffer buffer(&ba);
+    buffer.open(QIODevice::WriteOnly);
+    image.save(&buffer, "PNG");
+    m_webServer->addFile("/map/map/aurora.png", ba);
+    if (m_cesium) {
+        m_cesium->setLayerSettings("aurora", {"show"}, {m_settings.m_displayAurora});
     }
 }
 
@@ -1722,22 +1745,36 @@ void MapGUI::applyMap2DSettings(bool reloadMap)
         {
             qCritical() << "MapGUI::applyMap2DSettings - Failed to invoke createMap";
         }
+
+        supportedMapsChanged();
+
         QObject *newMap = retVal.value<QObject *>();
-        // Restore position of map
         if (newMap != nullptr)
         {
             if (coords.isValid())
             {
-                newMap->setProperty("zoomLevel", QVariant::fromValue(zoom));
-                newMap->setProperty("center", QVariant::fromValue(coords));
+                // Restore position of map
+                // With Qt5, we could set the properties immediately, but with Qt6, it seems we need a delay
+                // otherwise they are overwritten. Is there a signal we should use instead?
+                //newMap->setProperty("zoomLevel", QVariant::fromValue(zoom));
+                //newMap->setProperty("center", QVariant::fromValue(coords));
+                QTimer::singleShot(200, [this, zoom, coords]() {
+                    QQuickItem *root = ui->map->rootObject();
+                    if (root)
+                    {
+                        QObject *mapObject = root->findChild<QObject*>("map");
+                        if (mapObject) {
+                            mapObject->setProperty("zoomLevel", QVariant::fromValue(zoom));
+                            mapObject->setProperty("center", QVariant::fromValue(coords));
+                        }
+                    }
+                });
             }
         }
         else
         {
             qCritical() << "MapGUI::applyMap2DSettings - createMap returned a nullptr";
         }
-
-        supportedMapsChanged();
     }
 }
 
@@ -1800,6 +1837,8 @@ void MapGUI::orientationChanged(Qt::ScreenOrientation orientation)
 
 void MapGUI::displayToolbar()
 {
+    ui->mapTypes->setVisible(m_settings.m_map2DEnabled);
+
     // Replace buttons with menu when window gets narrow
     bool narrow = this->screen()->availableGeometry().width() < 400;
     ui->layersMenu->setVisible(narrow);
@@ -1814,6 +1853,9 @@ void MapGUI::displayToolbar()
     ui->displayNASAGlobalImagery->setVisible(overlayButtons);
     ui->displayMUF->setVisible(!narrow && m_settings.m_map3DEnabled);
     ui->displayfoF2->setVisible(!narrow && m_settings.m_map3DEnabled);
+    ui->displayAurora->setVisible(!narrow && m_settings.m_map3DEnabled);
+    ui->displayMagDec->setVisible(!narrow && m_settings.m_map3DEnabled);
+    ui->displayMaidenheadGrid->setVisible(!narrow && m_settings.m_map3DEnabled);
     ui->save->setVisible(m_settings.m_map3DEnabled);
 }
 
@@ -1880,8 +1922,7 @@ void MapGUI::on_mapTypes_currentIndexChanged(int index)
         if (!currentMap.isEmpty())
         {
             m_settings.m_mapType = currentMap;
-            m_settingsKeys.append("mapType");
-            applySettings();
+            applySetting("mapType");
         }
     }
 }
@@ -1899,11 +1940,11 @@ void MapGUI::applyMap3DSettings(bool reloadMap)
         }
         m_webServer->addSubstitution("/map/map/map3d.html", "$WS_PORT$", QString::number(m_cesium->serverPort()));
         m_webServer->addSubstitution("/map/map/map3d.html", "$CESIUM_ION_API_KEY$", cesiumIonAPIKey());
+        m_webServer->addSubstitution("/map/map/map3d.html", "$ARCGIS_API_KEY$", m_settings.m_arcGISAPIKey);
         //ui->web->page()->profile()->clearHttpCache();
         ui->web->load(QUrl(QString("http://127.0.0.1:%1/map/map/map3d.html").arg(m_webPort)));
         //ui->web->load(QUrl(QString("http://webglreport.com/")));
         //ui->web->load(QUrl(QString("https://sandcastle.cesium.com/")));
-        //ui->web->load(QUrl("chrome://gpu/"));
         ui->web->show();
     }
     else if (!m_settings.m_map3DEnabled && (m_cesium != nullptr))
@@ -1915,19 +1956,28 @@ void MapGUI::applyMap3DSettings(bool reloadMap)
     ui->web->setVisible(m_settings.m_map3DEnabled);
     if (m_cesium && m_cesium->isConnected())
     {
-        m_cesium->setTerrain(m_settings.m_terrain, maptilerAPIKey());
+        m_cesium->setDefaultImagery(m_settings.m_defaultImagery);
+        m_cesium->setTerrain(m_settings.m_terrain, maptilerAPIKey(), m_settings.m_terrainLighting, m_settings.m_water);
         m_cesium->setBuildings(m_settings.m_buildings);
-        m_cesium->setSunLight(m_settings.m_sunLightEnabled);
+        m_cesium->setLighting(m_settings.m_sunLightEnabled, m_settings.m_lightIntensity);
         m_cesium->setCameraReferenceFrame(m_settings.m_eciCamera);
-        m_cesium->setAntiAliasing(m_settings.m_antiAliasing);
+        m_cesium->setAntiAliasing(m_settings.m_fxaa, m_settings.m_msaa);
         m_cesium->getDateTime();
+        m_cesium->setViewFirstPerson(m_settings.m_viewFirstPerson);
+        m_cesium->setHDR(m_settings.m_hdr);
+        m_cesium->setFog(m_settings.m_fog);
+        m_cesium->showFPS(m_settings.m_fps);
+        m_cesium->showPFD(m_settings.m_displayPFD);
         m_cesium->showMUF(m_settings.m_displayMUF);
         m_cesium->showfoF2(m_settings.m_displayfoF2);
+        m_cesium->showMagDec(m_settings.m_displayMagDec);
+        m_cesium->showMaidenheadGrid(m_settings.m_displayMaidenheadGrid);
         m_cesium->showLayer("rain", m_settings.m_displayRain);
         m_cesium->showLayer("clouds", m_settings.m_displayClouds);
         m_cesium->showLayer("seaMarks", m_settings.m_displaySeaMarks);
         m_cesium->showLayer("railways", m_settings.m_displayRailways);
         m_cesium->showLayer("nasaGlobalImagery", m_settings.m_displayNASAGlobalImagery);
+        m_cesium->showLayer("aurora", m_settings.m_displayAurora);
         applyNASAGlobalImagerySettings();
         m_objectMapModel.allUpdated();
         m_imageMapModel.allUpdated();
@@ -1935,13 +1985,22 @@ void MapGUI::applyMap3DSettings(bool reloadMap)
         m_polylineMapModel.allUpdated();
     }
     MapSettings::MapItemSettings *ionosondeItemSettings = getItemSettings("Ionosonde Stations");
-    m_giro->getIndexPeriodically((m_settings.m_displayMUF || m_settings.m_displayfoF2) ? 15 : 0);
-    if (ionosondeItemSettings) {
-        m_giro->getDataPeriodically(ionosondeItemSettings->m_enabled ? 2 : 0);
+    if (m_giro)
+    {
+        m_giro->getIndexPeriodically((m_settings.m_displayMUF || m_settings.m_displayfoF2) ? 15 : 0);
+        if (ionosondeItemSettings) {
+            m_giro->getDataPeriodically(ionosondeItemSettings->m_enabled ? 2 : 0);
+        }
+    }
+    if (m_aurora) {
+        m_aurora->getDataPeriodically(m_settings.m_displayAurora ? 30 : 0);
     }
 #else
     ui->displayMUF->setVisible(false);
     ui->displayfoF2->setVisible(false);
+    ui->displayAurora->setVisible(false);
+    ui->displayMagDec->setVisible(false);
+    ui->displayMaidenheadGrid->setVisible(false);
     m_objectMapModel.allUpdated();
     m_imageMapModel.allUpdated();
     m_polygonMapModel.allUpdated();
@@ -1995,12 +2054,16 @@ void MapGUI::init3DMap()
     float stationAltitude = MainCore::instance()->getSettings().getLongitude();
 
     m_cesium->setPosition(QGeoCoordinate(stationLatitude, stationLongitude, stationAltitude));
-    m_cesium->setTerrain(m_settings.m_terrain, maptilerAPIKey());
+    m_cesium->setDefaultImagery(m_settings.m_defaultImagery);
+    m_cesium->setTerrain(m_settings.m_terrain, maptilerAPIKey(), m_settings.m_terrainLighting, m_settings.m_water);
     m_cesium->setBuildings(m_settings.m_buildings);
-    m_cesium->setSunLight(m_settings.m_sunLightEnabled);
+    m_cesium->setLighting(m_settings.m_sunLightEnabled, m_settings.m_lightIntensity);
     m_cesium->setCameraReferenceFrame(m_settings.m_eciCamera);
-    m_cesium->setAntiAliasing(m_settings.m_antiAliasing);
+    m_cesium->setAntiAliasing(m_settings.m_fxaa, m_settings.m_msaa);
     m_cesium->getDateTime();
+    m_cesium->setHDR(m_settings.m_hdr);
+    m_cesium->setFog(m_settings.m_fog);
+    m_cesium->showFPS(m_settings.m_fps);
 
     m_objectMapModel.allUpdated();
     m_imageMapModel.allUpdated();
@@ -2012,11 +2075,17 @@ void MapGUI::init3DMap()
 
     m_cesium->showMUF(m_settings.m_displayMUF);
     m_cesium->showfoF2(m_settings.m_displayfoF2);
+    m_cesium->showMagDec(m_settings.m_displayMagDec);
+    m_cesium->showMaidenheadGrid(m_settings.m_displayMaidenheadGrid);
+
+    m_cesium->setViewFirstPerson(m_settings.m_viewFirstPerson);
+    m_cesium->showPFD(m_settings.m_displayPFD);
 
     m_cesium->showLayer("rain", m_settings.m_displayRain);
     m_cesium->showLayer("clouds", m_settings.m_displayClouds);
     m_cesium->showLayer("seaMarks", m_settings.m_displaySeaMarks);
     m_cesium->showLayer("railways", m_settings.m_displayRailways);
+    m_cesium->showLayer("aurora", m_settings.m_displayAurora);
     applyNASAGlobalImagerySettings();
 
     if (!m_radarPath.isEmpty()) {
@@ -2035,6 +2104,8 @@ void MapGUI::displaySettings()
     setTitle(m_settings.m_title);
     blockApplySettings(true);
     ui->displayNames->setChecked(m_settings.m_displayNames);
+    ui->viewFirstPerson->setChecked(m_settings.m_viewFirstPerson);
+    ui->displayPFD->setChecked(m_settings.m_displayPFD);
     ui->displaySelectedGroundTracks->setChecked(m_settings.m_displaySelectedGroundTracks);
     ui->displayAllGroundTracks->setChecked(m_settings.m_displayAllGroundTracks);
     ui->displayRain->setChecked(m_settings.m_displayRain);
@@ -2063,6 +2134,9 @@ void MapGUI::displaySettings()
     m_displayMUF->setChecked(m_settings.m_displayMUF);
     ui->displayfoF2->setChecked(m_settings.m_displayfoF2);
     m_displayfoF2->setChecked(m_settings.m_displayfoF2);
+    ui->displayAurora->setChecked(m_settings.m_displayAurora);
+    ui->displayMagDec->setChecked(m_settings.m_displayMagDec);
+    ui->displayMaidenheadGrid->setChecked(m_settings.m_displayMaidenheadGrid);
     m_objectMapModel.setDisplayNames(m_settings.m_displayNames);
     m_objectMapModel.setDisplaySelectedGroundTracks(m_settings.m_displaySelectedGroundTracks);
     m_objectMapModel.setDisplayAllGroundTracks(m_settings.m_displayAllGroundTracks);
@@ -2105,29 +2179,42 @@ void MapGUI::onMenuDialogCalled(const QPoint &p)
         setTitle(m_settings.m_title);
         setTitleColor(m_settings.m_rgbColor);
 
-        m_settingsKeys.append("title");
-        m_settingsKeys.append("rgbColor");
-        m_settingsKeys.append("useReverseAPI");
-        m_settingsKeys.append("reverseAPIAddress");
-        m_settingsKeys.append("reverseAPIPort");
-        m_settingsKeys.append("reverseAPIFeatureSetIndex");
-        m_settingsKeys.append("reverseAPIFeatureIndex");
+        QStringList settingsKeys({
+            "rgbColor",
+            "title",
+            "useReverseAPI",
+            "reverseAPIAddress",
+            "reverseAPIPort",
+            "reverseAPIDeviceIndex",
+            "reverseAPIChannelIndex"
+            });
 
-        applySettings();
+        applySettings(settingsKeys);
     }
 
     resetContextMenuType();
 }
 
-void MapGUI::applySettings(bool force)
+void MapGUI::applySetting(const QString& settingsKey)
 {
+    applySettings({settingsKey});
+}
+
+void MapGUI::applySettings(const QStringList& settingsKeys, bool force)
+{
+    m_settingsKeys.append(settingsKeys);
     if (m_doApplySettings)
     {
         Map::MsgConfigureMap* message = Map::MsgConfigureMap::create(m_settings, m_settingsKeys, force);
         m_map->getInputMessageQueue()->push(message);
-    }
 
-    m_settingsKeys.clear();
+        m_settingsKeys.clear();
+    }
+}
+
+void MapGUI::applyAllSettings()
+{
+    applySettings(QStringList(), true);
 }
 
 void MapGUI::on_maidenhead_clicked()
@@ -2137,22 +2224,43 @@ void MapGUI::on_maidenhead_clicked()
     dialog.exec();
 }
 
+void MapGUI::on_viewFirstPerson_clicked(bool checked)
+{
+    m_settings.m_viewFirstPerson = checked;
+    if (m_cesium) {
+        m_cesium->setViewFirstPerson(checked);
+    }
+    applySetting("viewFirstPerson");
+}
+
+void MapGUI::on_displayPFD_clicked(bool checked)
+{
+    m_settings.m_displayPFD = checked;
+    if (m_cesium) {
+        m_cesium->showPFD(checked);
+    }
+    applySetting("viewFirstPerson");
+}
+
 void MapGUI::on_displayNames_clicked(bool checked)
 {
     m_settings.m_displayNames = checked;
     m_objectMapModel.setDisplayNames(checked);
+    applySetting("displayNames");
 }
 
 void MapGUI::on_displaySelectedGroundTracks_clicked(bool checked)
 {
     m_settings.m_displaySelectedGroundTracks = checked;
     m_objectMapModel.setDisplaySelectedGroundTracks(checked);
+    applySetting("displaySelectedGroundTracks");
 }
 
 void MapGUI::on_displayAllGroundTracks_clicked(bool checked)
 {
     m_settings.m_displayAllGroundTracks = checked;
     m_objectMapModel.setDisplayAllGroundTracks(checked);
+    applySetting("displayAllGroundTracks");
 }
 
 void MapGUI::on_displayRain_clicked(bool checked)
@@ -2171,6 +2279,7 @@ void MapGUI::on_displayRain_clicked(bool checked)
     if (m_cesium) {
         m_cesium->showLayer("rain", m_settings.m_displayRain);
     }
+    applySetting("displayRain");
 }
 
 void MapGUI::on_displayClouds_clicked(bool checked)
@@ -2189,6 +2298,7 @@ void MapGUI::on_displayClouds_clicked(bool checked)
     if (m_cesium) {
         m_cesium->showLayer("clouds", m_settings.m_displayClouds);
     }
+    applySetting("displayClouds");
 }
 
 void MapGUI::on_displaySeaMarks_clicked(bool checked)
@@ -2207,6 +2317,7 @@ void MapGUI::on_displaySeaMarks_clicked(bool checked)
     if (m_cesium) {
         m_cesium->showLayer("seaMarks", m_settings.m_displaySeaMarks);
     }
+    applySetting("displaySeaMarks");
 }
 
 void MapGUI::on_displayRailways_clicked(bool checked)
@@ -2225,6 +2336,7 @@ void MapGUI::on_displayRailways_clicked(bool checked)
     if (m_cesium) {
         m_cesium->showLayer("railways", m_settings.m_displayRailways);
     }
+    applySetting("displayRailways");
 }
 
 void MapGUI::on_displayNASAGlobalImagery_clicked(bool checked)
@@ -2249,6 +2361,7 @@ void MapGUI::on_displayNASAGlobalImagery_clicked(bool checked)
     if (m_cesium) {
         m_cesium->showLayer("NASAGlobalImagery", m_settings.m_displayNASAGlobalImagery);
     }
+    applySetting("displayNASAGlobalImagery");
 }
 
 void MapGUI::on_nasaGlobalImageryIdentifier_currentIndexChanged(int index)
@@ -2330,6 +2443,7 @@ void MapGUI::on_nasaGlobalImageryOpacity_valueChanged(int value)
                 {m_settings.m_nasaGlobalImageryOpacity}
         );
     }
+    applySetting("nasaGlobalImageryOpacity");
 }
 
 void MapGUI::on_displayMUF_clicked(bool checked)
@@ -2341,12 +2455,13 @@ void MapGUI::on_displayMUF_clicked(bool checked)
         m_displayMUF->setChecked(checked);
     }
     m_settings.m_displayMUF = checked;
-    // Only call show if disabling, so we don't get two updates
-    // (as getMUFPeriodically results in a call to showMUF when the data is available)
-    m_giro->getIndexPeriodically((m_settings.m_displayMUF || m_settings.m_displayfoF2) ? 15 : 0);
-    if (m_cesium && !m_settings.m_displayMUF) {
+    if (m_giro) {
+        m_giro->getIndexPeriodically((m_settings.m_displayMUF || m_settings.m_displayfoF2) ? 15 : 0);
+    }
+    if (m_cesium) {
         m_cesium->showMUF(m_settings.m_displayMUF);
     }
+    applySetting("displayMUF");
 }
 
 void MapGUI::on_displayfoF2_clicked(bool checked)
@@ -2358,10 +2473,63 @@ void MapGUI::on_displayfoF2_clicked(bool checked)
         m_displayfoF2->setChecked(checked);
     }
     m_settings.m_displayfoF2 = checked;
-    m_giro->getIndexPeriodically((m_settings.m_displayMUF || m_settings.m_displayfoF2) ? 15 : 0);
-    if (m_cesium && !m_settings.m_displayfoF2) {
+    if (m_giro) {
+        m_giro->getIndexPeriodically((m_settings.m_displayMUF || m_settings.m_displayfoF2) ? 15 : 0);
+    }
+    if (m_cesium) {
         m_cesium->showfoF2(m_settings.m_displayfoF2);
     }
+    applySetting("displayfoF2");
+}
+
+void MapGUI::on_displayAurora_clicked(bool checked)
+{
+    if (this->sender() != ui->displayAurora) {
+        ui->displayAurora->setChecked(checked);
+    }
+    if (this->sender() != m_displayAurora) {
+        m_displayAurora->setChecked(checked);
+    }
+    m_settings.m_displayAurora = checked;
+    // Only call show if disabling, so we don't get two updates
+    // (as getDataPeriodically results in a call to showLayer when the data is available)
+    if (m_aurora) {
+        m_aurora->getDataPeriodically(m_settings.m_displayAurora ? 30 : 0);
+    }
+    if (m_cesium && !m_settings.m_displayAurora) {
+        m_cesium->showLayer("aurora", m_settings.m_displayAurora);
+    }
+    applySetting("displayAurora");
+}
+
+void MapGUI::on_displayMagDec_clicked(bool checked)
+{
+    if (this->sender() != ui->displayMagDec) {
+        ui->displayMagDec->setChecked(checked);
+    }
+    if (this->sender() != m_displayMagDec) {
+        m_displayMagDec->setChecked(checked);
+    }
+    m_settings.m_displayMagDec = checked;
+    if (m_cesium) {
+        m_cesium->showMagDec(m_settings.m_displayMagDec);
+    }
+    applySetting("displayMagDec");
+}
+
+void MapGUI::on_displayMaidenheadGrid_clicked(bool checked)
+{
+    if (this->sender() != ui->displayMaidenheadGrid) {
+        ui->displayMaidenheadGrid->setChecked(checked);
+    }
+    if (this->sender() != m_displayMaidenheadGrid) {
+        m_displayMaidenheadGrid->setChecked(checked);
+    }
+    m_settings.m_displayMaidenheadGrid = checked;
+    if (m_cesium) {
+        m_cesium->showMaidenheadGrid(m_settings.m_displayMaidenheadGrid);
+    }
+    applySetting("displayMaidenheadGrid");
 }
 
 void MapGUI::createLayersMenu()
@@ -2405,6 +2573,21 @@ void MapGUI::createLayersMenu()
     m_displayfoF2->setCheckable(true);
     m_displayfoF2->setToolTip("Display F2 layer critical frequency contours");
     connect(m_displayfoF2, &QAction::triggered, this, &MapGUI::on_displayfoF2_clicked);
+
+    m_displayAurora = menu->addAction("Aurora");
+    m_displayAurora->setCheckable(true);
+    m_displayAurora->setToolTip("Display aurora prediction");
+    connect(m_displayAurora, &QAction::triggered, this, &MapGUI::on_displayAurora_clicked);
+
+    m_displayMagDec = menu->addAction("Mag Dec");
+    m_displayMagDec->setCheckable(true);
+    m_displayMagDec->setToolTip("Display magnetic declination");
+    connect(m_displayMagDec, &QAction::triggered, this, &MapGUI::on_displayMagDec_clicked);
+
+    m_displayMaidenheadGrid = menu->addAction("Maidenhead grid");
+    m_displayMaidenheadGrid->setCheckable(true);
+    m_displayMaidenheadGrid->setToolTip("Display magnetic declination");
+    connect(m_displayMaidenheadGrid, &QAction::triggered, this, &MapGUI::on_displayMaidenheadGrid_clicked);
 
     ui->layersMenu->setMenu(menu);
 }
@@ -2472,13 +2655,13 @@ QString MapGUI::thunderforestAPIKey() const
 
 QString MapGUI::maptilerAPIKey() const
 {
-    return m_settings.m_maptilerAPIKey.isEmpty() ? "q2RVNAe3eFKCH4XsrE3r" : m_settings.m_maptilerAPIKey;
+    return m_settings.m_maptilerAPIKey.isEmpty() ? "Nzl2cSyOnewxUc9VWg4n" : m_settings.m_maptilerAPIKey;
 }
 
 QString MapGUI::cesiumIonAPIKey() const
 {
     return m_settings.m_cesiumIonAPIKey.isEmpty()
-        ? "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJqdGkiOiIyNTcxMDA2OC0yNTIzLTQxMGYtYTNiMS1iM2I3MDFhNWVlMDYiLCJpZCI6ODEyMDUsImlhdCI6MTY0MzY2OTIzOX0.A7NchU4LzaNsuAUpsrA9ZwekOJfMoNcja-8XeRdRoIg"
+        ? "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJqdGkiOiJjN2FlYzcxMy1iNDJjLTRmYjgtOWQ1MC04M2Y4N2JlOGRiN2QiLCJpZCI6ODEyMDUsImlhdCI6MTc0ODg3Mzc2NH0.-zNQm-tDoPzvobxbVfd0G7Ju1oQkojCT5BCKAc1X4HU"
         : m_settings.m_cesiumIonAPIKey;
 }
 
@@ -2618,8 +2801,7 @@ void MapGUI::on_displaySettings_clicked()
         displayToolbar();
         applyMap2DSettings(dialog.m_map2DSettingsChanged);
         applyMap3DSettings(dialog.m_map3DSettingsChanged);
-        m_settingsKeys.append(dialog.m_settingsKeysChanged);
-        applySettings();
+        applySettings(dialog.m_settingsKeysChanged);
         m_objectMapModel.allUpdated();
         m_imageMapModel.allUpdated();
         m_polygonMapModel.allUpdated();
@@ -2869,6 +3051,8 @@ void MapGUI::preferenceChanged(int elementType)
 void MapGUI::makeUIConnections()
 {
     QObject::connect(ui->displayNames, &ButtonSwitch::clicked, this, &MapGUI::on_displayNames_clicked);
+    QObject::connect(ui->viewFirstPerson, &ButtonSwitch::clicked, this, &MapGUI::on_viewFirstPerson_clicked);
+    QObject::connect(ui->displayPFD, &ButtonSwitch::clicked, this, &MapGUI::on_displayPFD_clicked);
     QObject::connect(ui->displayAllGroundTracks, &ButtonSwitch::clicked, this, &MapGUI::on_displayAllGroundTracks_clicked);
     QObject::connect(ui->displaySelectedGroundTracks, &ButtonSwitch::clicked, this, &MapGUI::on_displaySelectedGroundTracks_clicked);
     QObject::connect(ui->displayRain, &ButtonSwitch::clicked, this, &MapGUI::on_displayRain_clicked);
@@ -2880,6 +3064,9 @@ void MapGUI::makeUIConnections()
     QObject::connect(ui->nasaGlobalImageryOpacity, qOverload<int>(&QDial::valueChanged), this, &MapGUI::on_nasaGlobalImageryOpacity_valueChanged);
     QObject::connect(ui->displayMUF, &ButtonSwitch::clicked, this, &MapGUI::on_displayMUF_clicked);
     QObject::connect(ui->displayfoF2, &ButtonSwitch::clicked, this, &MapGUI::on_displayfoF2_clicked);
+    QObject::connect(ui->displayAurora, &ButtonSwitch::clicked, this, &MapGUI::on_displayAurora_clicked);
+    QObject::connect(ui->displayMagDec, &ButtonSwitch::clicked, this, &MapGUI::on_displayMagDec_clicked);
+    QObject::connect(ui->displayMaidenheadGrid, &ButtonSwitch::clicked, this, &MapGUI::on_displayMaidenheadGrid_clicked);
     QObject::connect(ui->find, &QLineEdit::returnPressed, this, &MapGUI::on_find_returnPressed);
     QObject::connect(ui->maidenhead, &QToolButton::clicked, this, &MapGUI::on_maidenhead_clicked);
     QObject::connect(ui->save, &QToolButton::clicked, this, &MapGUI::on_save_clicked);

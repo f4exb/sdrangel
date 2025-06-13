@@ -23,6 +23,7 @@
 #include "dsp/downchannelizer.h"
 
 #include "adsbdemodbaseband.h"
+#include "adsbdemod.h"
 #include "adsb.h"
 
 MESSAGE_CLASS_DEFINITION(ADSBDemodBaseband::MsgConfigureADSBDemodBaseband, Message)
@@ -130,6 +131,11 @@ bool ADSBDemodBaseband::handleMessage(const Message& cmd)
         m_channelizer->setBasebandSampleRate(notif.getSampleRate());
         m_sink.applyChannelSettings(m_channelizer->getChannelSampleRate(), m_channelizer->getChannelFrequencyOffset());
 
+        return true;
+    }
+    else if (ADSBDemod::MsgResetStats::match(cmd))
+    {
+        m_sink.resetStats();
         return true;
     }
     else

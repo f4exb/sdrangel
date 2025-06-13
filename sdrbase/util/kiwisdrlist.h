@@ -27,7 +27,7 @@ class QNetworkAccessManager;
 class QNetworkReply;
 class QNetworkDiskCache;
 
-// Gets a list of public Kiwi SDRs from http://kiwisdr.com/public/
+// Gets a list of public Kiwi SDRs from http://kiwisdr.com/.public/
 class SDRBASE_API KiwiSDRList : public QObject
 {
     Q_OBJECT

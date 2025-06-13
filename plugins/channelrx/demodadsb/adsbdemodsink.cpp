@@ -19,14 +19,16 @@
 #include <QTime>
 #include <QDebug>
 
+#include "util/profiler.h"
+
 #include "adsbdemodsink.h"
 #include "adsbdemodsinkworker.h"
+#include "adsbdemod.h"
 #include "adsb.h"
 
 ADSBDemodSink::ADSBDemodSink() :
     m_channelSampleRate(6000000),
     m_channelFrequencyOffset(0),
-    m_feedTime(0.0),
     m_sampleBuffer{nullptr, nullptr, nullptr},
     m_worker(this),
     m_writeBuffer(0),
@@ -53,7 +55,7 @@ ADSBDemodSink::~ADSBDemodSink()
 void ADSBDemodSink::feed(const SampleVector::const_iterator& begin, const SampleVector::const_iterator& end)
 {
     // Start timing how long we are in this function
-    m_startPoint = boost::chrono::steady_clock::now();
+    PROFILER_START();
 
     // Optimise for common case, where no resampling or frequency offset
     if ((m_interpolatorDistance == 1.0f) && (m_channelFrequencyOffset == 0))
@@ -113,8 +115,7 @@ void ADSBDemodSink::feed(const SampleVector::const_iterator& begin, const Sample
     }
 
     // Calculate number of seconds in this function
-    boost::chrono::duration<double> sec = boost::chrono::steady_clock::now() - m_startPoint;
-    m_feedTime += sec.count();
+    PROFILER_STOP("ADSB feed");
 }
 
 void ADSBDemodSink::processOneSample(Real magsq)
@@ -127,8 +128,17 @@ void ADSBDemodSink::processOneSample(Real magsq)
     m_writeIdx++;
     if (!m_bufferDateTimeValid[m_writeBuffer])
     {
-        m_bufferFirstSampleDateTime[m_writeBuffer] = QDateTime::currentDateTime();
+        QDateTime dateTime = QDateTime::currentDateTime();
+        if (m_minFirstSampleDateTime.isValid() && (dateTime < m_minFirstSampleDateTime)) {
+            dateTime = m_minFirstSampleDateTime;
+        }
+        m_bufferFirstSampleDateTime[m_writeBuffer] = dateTime;
         m_bufferDateTimeValid[m_writeBuffer] = true;
+
+        // Make sure timestamps from different buffers are in order, even if we receive samples faster than real time
+        const qint64 samplesPerSecondMSec = ADS_B_BITS_PER_SECOND * m_settings.m_samplesPerBit / 1000;
+        const qint64 offsetMSec = m_bufferSize / samplesPerSecondMSec;
+        m_minFirstSampleDateTime = dateTime.addMSecs(offsetMSec);
     }
     if (m_writeIdx >= m_bufferSize)
     {
@@ -138,14 +148,8 @@ void ADSBDemodSink::processOneSample(Real magsq)
         if (m_writeBuffer >= m_buffers)
             m_writeBuffer = 0;
 
-        // Don't include time spent waiting for a buffer
-        boost::chrono::duration<double> sec = boost::chrono::steady_clock::now() - m_startPoint;
-        m_feedTime += sec.count();
-
         if (m_worker.isRunning())
             m_bufferWrite[m_writeBuffer].acquire();
-
-        m_startPoint = boost::chrono::steady_clock::now();
 
         m_writeIdx = m_samplesPerFrame - 1; // Leave space for copying samples from previous buffer
 
@@ -253,7 +257,6 @@ void ADSBDemodSink::applySettings(const ADSBDemodSettings& settings, const QStri
             << " m_inputFrequencyOffset: " << settings.m_inputFrequencyOffset
             << " m_rfBandwidth: " << settings.m_rfBandwidth
             << " m_correlationThreshold: " << settings.m_correlationThreshold
-            << " m_correlateFullPreamble: " << settings.m_correlateFullPreamble
             << " m_demodModeS: " << settings.m_demodModeS
             << " m_samplesPerBit: " << settings.m_samplesPerBit
             << " force: " << force;
@@ -284,4 +287,10 @@ void ADSBDemodSink::applySettings(const ADSBDemodSettings& settings, const QStri
     } else {
         m_settings.applySettings(settingsKeys, settings);
     }
+}
+
+void ADSBDemodSink::resetStats()
+{
+    ADSBDemod::MsgResetStats* msg = ADSBDemod::MsgResetStats::create();
+    m_worker.getInputMessageQueue()->push(msg);
 }

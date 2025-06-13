@@ -36,7 +36,8 @@ void ADSBDemodSettings::resetToDefaults()
 {
     m_inputFrequencyOffset = 0;
     m_rfBandwidth = 2*1300000;
-    m_correlationThreshold = 10.0f; //<! ones/zero powers correlation threshold in dB
+    m_correlationThreshold = 7.0f; //<! ones/zero powers correlation threshold in dB
+    m_chipsThreshold = 0;
     m_samplesPerBit = 4;
     m_removeTimeout = 60;
     m_feedEnabled = false;
@@ -73,13 +74,13 @@ void ADSBDemodSettings::resetToDefaults()
     m_tableFontName = "Liberation Sans";
     m_tableFontSize = 9;
     m_displayDemodStats = false;
-    m_correlateFullPreamble = true;
     m_demodModeS = true;
     m_autoResizeTableColumns = false;
     m_interpolatorPhaseSteps = 4;      // Higher than these two values will struggle to run in real-time
     m_interpolatorTapsPerPhase = 3.5f; // without gaining much improvement in PER
     m_aviationstackAPIKey = "";
     m_checkWXAPIKey = "";
+    m_maptilerAPIKey = "";
     for (int i = 0; i < ADSBDEMOD_COLUMNS; i++)
     {
         m_columnIndexes[i] = i;
@@ -98,13 +99,24 @@ void ADSBDemodSettings::resetToDefaults()
     m_displayNavAids = true;
     m_displayPhotos = true;
     m_verboseModelMatching = false;
-    m_airfieldElevation = 0;
     m_aircraftMinZoom = 11;
     m_workspaceIndex = 0;
     m_hidden = false;
     m_atcLabels = true;
     m_atcCallsigns = true;
     m_transitionAlt = 6000; // Depends on airport. 18,000 in USA
+    m_qnh = 1013.25;
+    m_manualQNH = false;
+    m_displayCoverage = false;
+    m_displayChart = false;
+    m_displayOrientation = false;
+    m_displayRadius = false;
+    for (int i = 0; i < ADSB_IC_MAX; i++) {
+        m_displayIC[i] = false;
+    }
+    m_flightPathPaletteName = "Spectral";
+    applyPalette();
+    m_favourLivery = true;
 }
 
 QByteArray ADSBDemodSettings::serialize() const
@@ -141,7 +153,6 @@ QByteArray ADSBDemodSettings::serialize() const
     s.writeString(25, m_tableFontName);
     s.writeS32(26, m_tableFontSize);
     s.writeBool(27, m_displayDemodStats);
-    s.writeBool(28, m_correlateFullPreamble);
     s.writeBool(29, m_demodModeS);
     s.writeBool(30, m_autoResizeTableColumns);
     s.writeS32(31, m_interpolatorPhaseSteps);
@@ -165,7 +176,6 @@ QByteArray ADSBDemodSettings::serialize() const
     }
 
     s.writeBool(44, m_verboseModelMatching);
-    s.writeS32(45, m_airfieldElevation);
 
     s.writeBool(46, m_exportClientEnabled);
     s.writeBool(47, m_exportServerEnabled);
@@ -191,6 +201,19 @@ QByteArray ADSBDemodSettings::serialize() const
     s.writeBool(66, m_atcCallsigns);
     s.writeS32(67, m_transitionAlt);
     s.writeString(68, m_amDemod);
+
+    s.writeFloat(69, m_qnh);
+    s.writeBool(70, m_manualQNH);
+
+    s.writeBool(71, m_displayCoverage);
+    s.writeBool(72, m_displayChart);
+    s.writeBool(73, m_displayOrientation);
+    s.writeBool(74, m_displayRadius);
+    s.writeString(75, m_flightPathPaletteName);
+    s.writeS32(76, m_chipsThreshold);
+    s.writeBool(77, m_favourLivery);
+
+    s.writeString(78, m_maptilerAPIKey);
 
     for (int i = 0; i < ADSBDEMOD_COLUMNS; i++) {
         s.writeS32(100 + i, m_columnIndexes[i]);
@@ -229,7 +252,7 @@ bool ADSBDemodSettings::deserialize(const QByteArray& data)
         d.readS32(1, &tmp, 0);
         m_inputFrequencyOffset = tmp;
         d.readReal(2, &m_rfBandwidth, 2*1300000);
-        d.readReal(3, &m_correlationThreshold, 0.0f);
+        d.readReal(3, &m_correlationThreshold, 7.0f);
         d.readS32(4, &m_samplesPerBit, 4);
         d.readS32(5, &m_removeTimeout, 60);
         d.readBool(6, &m_feedEnabled, false);
@@ -268,7 +291,6 @@ bool ADSBDemodSettings::deserialize(const QByteArray& data)
         d.readString(25, &m_tableFontName, "Liberation Sans");
         d.readS32(26, &m_tableFontSize, 9);
         d.readBool(27, &m_displayDemodStats, false);
-        d.readBool(28, &m_correlateFullPreamble, true);
         d.readBool(29, &m_demodModeS, true);
         d.readBool(30, &m_autoResizeTableColumns, false);
         d.readS32(31, &m_interpolatorPhaseSteps, 4);
@@ -296,7 +318,6 @@ bool ADSBDemodSettings::deserialize(const QByteArray& data)
         }
 
         d.readBool(44, &m_verboseModelMatching, false);
-        d.readS32(45, &m_airfieldElevation, 0);
 
         d.readBool(46, &m_exportClientEnabled, true);
         d.readBool(47, &m_exportServerEnabled, true);
@@ -327,6 +348,21 @@ bool ADSBDemodSettings::deserialize(const QByteArray& data)
         d.readBool(66, &m_atcCallsigns, true);
         d.readS32(67, &m_transitionAlt, 6000);
         d.readString(68, &m_amDemod);
+
+        d.readFloat(69, &m_qnh, 1013.25);
+        d.readBool(70, &m_manualQNH, false);
+
+        d.readBool(71, &m_displayCoverage, false);
+        d.readBool(72, &m_displayChart, false);
+        d.readBool(73, &m_displayOrientation, false);
+        d.readBool(74, &m_displayRadius, false);
+        d.readString(75, &m_flightPathPaletteName, "Spectral");
+        d.readS32(76, &m_chipsThreshold, 0);
+        d.readBool(77, &m_favourLivery, true);
+
+        d.readString(78, &m_maptilerAPIKey, "");
+
+        applyPalette();
 
 #ifdef LINUX
         if (m_mapProvider == "osm") {
@@ -412,6 +448,9 @@ void ADSBDemodSettings::applySettings(const QStringList& settingsKeys, const ADS
     }
     if (settingsKeys.contains("correlationThreshold")) {
         m_correlationThreshold = settings.m_correlationThreshold;
+    }
+    if (settingsKeys.contains("chipsThreshold")) {
+        m_chipsThreshold = settings.m_chipsThreshold;
     }
     if (settingsKeys.contains("samplesPerBit")) {
         m_samplesPerBit = settings.m_samplesPerBit;
@@ -521,9 +560,6 @@ void ADSBDemodSettings::applySettings(const QStringList& settingsKeys, const ADS
     if (settingsKeys.contains("displayDemodStats")) {
         m_displayDemodStats = settings.m_displayDemodStats;
     }
-    if (settingsKeys.contains("correlateFullPreamble")) {
-        m_correlateFullPreamble = settings.m_correlateFullPreamble;
-    }
     if (settingsKeys.contains("demodModeS")) {
         m_demodModeS = settings.m_demodModeS;
     }
@@ -547,6 +583,9 @@ void ADSBDemodSettings::applySettings(const QStringList& settingsKeys, const ADS
     }
     if (settingsKeys.contains("checkWXAPIKey")) {
         m_checkWXAPIKey = settings.m_checkWXAPIKey;
+    }
+    if (settingsKeys.contains("maptilerAPIKey")) {
+        m_maptilerAPIKey = settings.m_maptilerAPIKey;
     }
     if (settingsKeys.contains("logFilename")) {
         m_logFilename = settings.m_logFilename;
@@ -575,9 +614,6 @@ void ADSBDemodSettings::applySettings(const QStringList& settingsKeys, const ADS
     if (settingsKeys.contains("verboseModelMatching")) {
         m_verboseModelMatching = settings.m_verboseModelMatching;
     }
-    if (settingsKeys.contains("airfieldElevation")) {
-        m_airfieldElevation = settings.m_airfieldElevation;
-    }
     if (settingsKeys.contains("aircraftMinZoom")) {
         m_aircraftMinZoom = settings.m_aircraftMinZoom;
     }
@@ -589,6 +625,32 @@ void ADSBDemodSettings::applySettings(const QStringList& settingsKeys, const ADS
     }
     if (settingsKeys.contains("transitionAlt")) {
         m_transitionAlt = settings.m_transitionAlt;
+    }
+    if (settingsKeys.contains("qnh")) {
+        m_qnh = settings.m_qnh;
+    }
+    if (settingsKeys.contains("manualQNH")) {
+        m_manualQNH = settings.m_manualQNH;
+    }
+    if (settingsKeys.contains("displayCoverage")) {
+        m_displayCoverage = settings.m_displayCoverage;
+    }
+    if (settingsKeys.contains("displayChart")) {
+        m_displayChart = settings.m_displayChart;
+    }
+    if (settingsKeys.contains("displayOrientation")) {
+        m_displayOrientation = settings.m_displayOrientation;
+    }
+    if (settingsKeys.contains("displayRadius")) {
+        m_displayRadius = settings.m_displayRadius;
+    }
+    if (settingsKeys.contains("flightPathPaletteName"))
+    {
+        m_flightPathPaletteName = settings.m_flightPathPaletteName;
+        applyPalette();
+    }
+    if (settingsKeys.contains("favourLivery")) {
+        m_favourLivery = settings.m_favourLivery;
     }
 }
 
@@ -604,6 +666,9 @@ QString ADSBDemodSettings::getDebugString(const QStringList& settingsKeys, bool 
     }
     if (settingsKeys.contains("correlationThreshold") || force) {
         ostr << " m_correlationThreshold: " << m_correlationThreshold;
+    }
+    if (settingsKeys.contains("chipsThreshold") || force) {
+        ostr << " m_chipsThreshold: " << m_chipsThreshold;
     }
     if (settingsKeys.contains("samplesPerBit") || force) {
         ostr << " m_samplesPerBit: " << m_samplesPerBit;
@@ -704,9 +769,6 @@ QString ADSBDemodSettings::getDebugString(const QStringList& settingsKeys, bool 
     if (settingsKeys.contains("displayDemodStats") || force) {
         ostr << " m_displayDemodStats: " << m_displayDemodStats;
     }
-    if (settingsKeys.contains("correlateFullPreamble") || force) {
-        ostr << " m_correlateFullPreamble: " << m_correlateFullPreamble;
-    }
     if (settingsKeys.contains("demodModeS") || force) {
         ostr << " m_demodModeS: " << m_demodModeS;
     }
@@ -727,6 +789,9 @@ QString ADSBDemodSettings::getDebugString(const QStringList& settingsKeys, bool 
     }
     if (settingsKeys.contains("checkWXAPIKey") || force) {
         ostr << " m_checkWXAPIKey: " << m_checkWXAPIKey.toStdString();
+    }
+    if (settingsKeys.contains("maptilerAPIKey") || force) {
+        ostr << " m_maptilerAPIKey: " << m_maptilerAPIKey.toStdString();
     }
     if (settingsKeys.contains("logFilename") || force) {
         ostr << " m_logFilename: " << m_logFilename.toStdString();
@@ -755,9 +820,6 @@ QString ADSBDemodSettings::getDebugString(const QStringList& settingsKeys, bool 
     if (settingsKeys.contains("verboseModelMatching") || force) {
         ostr << " m_verboseModelMatching: " << m_verboseModelMatching;
     }
-    if (settingsKeys.contains("airfieldElevation") || force) {
-        ostr << " m_airfieldElevation: " << m_airfieldElevation;
-    }
     if (settingsKeys.contains("aircraftMinZoom") || force) {
         ostr << " m_aircraftMinZoom: " << m_aircraftMinZoom;
     }
@@ -770,6 +832,114 @@ QString ADSBDemodSettings::getDebugString(const QStringList& settingsKeys, bool 
     if (settingsKeys.contains("transitionAlt") || force) {
         ostr << " m_transitionAlt: " << m_transitionAlt;
     }
+    if (settingsKeys.contains("qnh") || force) {
+        ostr << " m_qnh: " << m_qnh;
+    }
+    if (settingsKeys.contains("manualQNH") || force) {
+        ostr << " m_manualQNH: " << m_manualQNH;
+    }
+    if (settingsKeys.contains("displayCoverage") || force) {
+        ostr << " m_displayCoverage: " << m_displayCoverage;
+    }
+    if (settingsKeys.contains("displayChart") || force) {
+        ostr << " m_displayChart: " << m_displayChart;
+    }
+    if (settingsKeys.contains("displayOrientation") || force) {
+        ostr << " m_displayOrientation: " << m_displayOrientation;
+    }
+    if (settingsKeys.contains("displayRadius") || force) {
+        ostr << " m_displayRadius: " << m_displayRadius;
+    }
+    if (settingsKeys.contains("flightPathPaletteName") || force) {
+        ostr << " m_flightPathPaletteName: " << m_flightPathPaletteName.toStdString();
+    }
+    if (settingsKeys.contains("favourLivery") || force) {
+        ostr << " m_favourLivery: " << m_favourLivery;
+    }
 
     return QString(ostr.str().c_str());
 }
+
+void ADSBDemodSettings::applyPalette()
+{
+    if (m_palettes.contains(m_flightPathPaletteName)) {
+        m_flightPathPalette = m_palettes.value(m_flightPathPaletteName);
+    } else {
+        m_flightPathPalette = m_rainbowPalette;
+    }
+}
+
+const QVariant ADSBDemodSettings::m_rainbowPalette[8] = {
+    QVariant(QColor(0xff, 0x00, 0x00)),
+    QVariant(QColor(0xff, 0x7f, 0x00)),
+    QVariant(QColor(0xff, 0xff, 0x00)),
+    QVariant(QColor(0xf7, 0xff, 0x00)),
+    QVariant(QColor(0x00, 0xff, 0x00)),
+    QVariant(QColor(0x00, 0xff, 0x7f)),
+    QVariant(QColor(0x00, 0xff, 0xff)),
+    QVariant(QColor(0x00, 0x7f, 0xff)),
+};
+
+const QVariant ADSBDemodSettings::m_pastelPalette[8] = {
+    QVariant(QColor(0xff, 0xad, 0xad)),
+    QVariant(QColor(0xff, 0xd6, 0xa5)),
+    QVariant(QColor(0xfd, 0xff, 0xb6)),
+    QVariant(QColor(0xca, 0xff, 0xbf)),
+    QVariant(QColor(0x9b, 0xf6, 0xff)),
+    QVariant(QColor(0xa0, 0xc4, 0xff)),
+    QVariant(QColor(0xbd, 0xb2, 0xff)),
+    QVariant(QColor(0xff, 0xc6, 0xff)),
+};
+
+const QVariant ADSBDemodSettings::m_spectralPalette[8] = {
+    QVariant(QColor(0xd5, 0x3e, 0x4f)),
+    QVariant(QColor(0xf4, 0x6d, 0x43)),
+    QVariant(QColor(0xfd, 0xae, 0x61)),
+    QVariant(QColor(0xfe, 0xe0, 0x8b)),
+    QVariant(QColor(0xe6, 0xf5, 0x98)),
+    QVariant(QColor(0xab, 0xdd, 0xa4)),
+    QVariant(QColor(0x66, 0xc2, 0xa5)),
+    QVariant(QColor(0x32, 0x88, 0xbd)),
+};
+
+const QVariant ADSBDemodSettings::m_bluePalette[8] = {
+    QVariant(QColor(0xde, 0xeb, 0xf7)),
+    QVariant(QColor(0xc6, 0xdb, 0xef)),
+    QVariant(QColor(0x9e, 0xca, 0xe1)),
+    QVariant(QColor(0x6b, 0xae, 0xd6)),
+    QVariant(QColor(0x42, 0x92, 0xc6)),
+    QVariant(QColor(0x21, 0x71, 0xb5)),
+    QVariant(QColor(0x08, 0x51, 0x9c)),
+    QVariant(QColor(0x08, 0x30, 0x6b)),
+};
+
+const QVariant ADSBDemodSettings::m_purplePalette[8] = {
+    QVariant(QColor(0xcc, 0xaf, 0xf2)),
+    QVariant(QColor(0xb6, 0x99, 0xe0)),
+    QVariant(QColor(0xa0, 0x84, 0xcf)),
+    QVariant(QColor(0x8a, 0x6f, 0xbd)),
+    QVariant(QColor(0x76, 0x5a, 0xac)),
+    QVariant(QColor(0x62, 0x45, 0x9a)),
+    QVariant(QColor(0x4f, 0x30, 0x89)),
+    QVariant(QColor(0x3e, 0x18, 0x78)),
+};
+
+const QVariant ADSBDemodSettings::m_greyPalette[8] = {
+    QVariant(QColor(0x80, 0x80, 0x80)),
+    QVariant(QColor(0x80, 0x80, 0x80)),
+    QVariant(QColor(0x80, 0x80, 0x80)),
+    QVariant(QColor(0x80, 0x80, 0x80)),
+    QVariant(QColor(0x80, 0x80, 0x80)),
+    QVariant(QColor(0x80, 0x80, 0x80)),
+    QVariant(QColor(0x80, 0x80, 0x80)),
+    QVariant(QColor(0x80, 0x80, 0x80)),
+};
+
+const QHash<QString, const QVariant *> ADSBDemodSettings::m_palettes = {
+    {"Rainbow", &ADSBDemodSettings::m_rainbowPalette[0]},
+    {"Pastel", &ADSBDemodSettings::m_pastelPalette[0]},
+    {"Spectral", &ADSBDemodSettings::m_spectralPalette[0]},
+    {"Blues", &ADSBDemodSettings::m_bluePalette[0]},
+    {"Purples", &ADSBDemodSettings::m_purplePalette[0]},
+    {"Grey", &ADSBDemodSettings::m_greyPalette[0]},
+};

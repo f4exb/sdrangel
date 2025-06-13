@@ -275,7 +275,7 @@ Item {
                             anchors.fill: parent
                             hoverEnabled: true
                             acceptedButtons: Qt.LeftButton | Qt.RightButton
-                            onClicked: {
+                            onClicked: (mouse) => {
                                 if (mouse.button === Qt.LeftButton) {
                                     selected = !selected
                                     if (selected) {
@@ -320,7 +320,7 @@ Item {
                             anchors.fill: parent
                             hoverEnabled: true
                             acceptedButtons: Qt.LeftButton | Qt.RightButton
-                            onClicked: {
+                            onClicked: (mouse) => {
                                 if (mouse.button === Qt.LeftButton) {
                                     selected = !selected
                                     if (selected) {

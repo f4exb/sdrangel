@@ -19,9 +19,6 @@
 #ifndef INCLUDE_ADSBDEMODSINK_H
 #define INCLUDE_ADSBDEMODSINK_H
 
-#define BOOST_CHRONO_HEADER_ONLY
-#include <boost/chrono/chrono.hpp>
-
 #include "dsp/channelsamplesink.h"
 #include "dsp/nco.h"
 #include "dsp/interpolator.h"
@@ -60,6 +57,7 @@ public:
     void setMessageQueueToWorker(MessageQueue *messageQueue) { m_messageQueueToWorker = messageQueue; }
     void startWorker();
     void stopWorker();
+    void resetStats();
 
 private:
     friend ADSBDemodSinkWorker;
@@ -83,9 +81,6 @@ private:
     Real m_interpolatorDistance;
     Real m_interpolatorDistanceRemain;
 
-    boost::chrono::steady_clock::time_point m_startPoint;
-    double m_feedTime;                  //!< Time spent in feed()
-
     // Triple buffering for sharing sample data between two threads
     // Top area of each buffer is not used by writer, as it's used by the reader
     // for copying the last few samples of the previous buffer, so it can
@@ -96,6 +91,7 @@ private:
     QSemaphore m_bufferWrite[3];        //!< Semaphore to control write access to the buffers
     QSemaphore m_bufferRead[3];         //!< Semaphore to control read access from the buffers
     QDateTime m_bufferFirstSampleDateTime[3];  //!< Time for first sample in the buffer
+    QDateTime m_minFirstSampleDateTime;
     bool m_bufferDateTimeValid[3];
     ADSBDemodSinkWorker m_worker;       //!< Worker thread that does the actual demodulation
     int m_writeBuffer;                  //!< Which of the 3 buffers we're writing in to
