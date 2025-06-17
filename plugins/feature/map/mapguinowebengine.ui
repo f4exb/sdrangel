@@ -29,7 +29,7 @@
    </font>
   </property>
   <property name="focusPolicy">
-   <enum>Qt::StrongFocus</enum>
+   <enum>Qt::FocusPolicy::StrongFocus</enum>
   </property>
   <property name="windowTitle">
    <string>Map</string>
@@ -39,7 +39,7 @@
     <rect>
      <x>0</x>
      <y>0</y>
-     <width>751</width>
+     <width>891</width>
      <height>41</height>
     </rect>
    </property>
@@ -130,6 +130,26 @@
        </widget>
       </item>
       <item>
+       <widget class="ButtonSwitch" name="displayMaidenheadGrid">
+        <property name="toolTip">
+         <string>Display Maidenhead grid (3D map only)</string>
+        </property>
+        <property name="text">
+         <string/>
+        </property>
+        <property name="icon">
+         <iconset resource="mapicons.qrc">
+          <normaloff>:/map/icons/grid.png</normaloff>:/map/icons/grid.png</iconset>
+        </property>
+        <property name="checkable">
+         <bool>true</bool>
+        </property>
+        <property name="checked">
+         <bool>true</bool>
+        </property>
+       </widget>
+      </item>
+      <item>
        <widget class="QToolButton" name="beacons">
         <property name="toolTip">
          <string>Display Beacon dialog</string>
@@ -152,7 +172,7 @@
          <string>IBP</string>
         </property>
         <property name="icon">
-         <iconset resource="icons.qrc">
+         <iconset resource="mapicons.qrc">
           <normaloff>:/map/icons/ibp.png</normaloff>:/map/icons/ibp.png</iconset>
         </property>
        </widget>
@@ -166,7 +186,7 @@
          <string/>
         </property>
         <property name="icon">
-         <iconset resource="icons.qrc">
+         <iconset resource="mapicons.qrc">
           <normaloff>:/map/icons/clock.png</normaloff>:/map/icons/clock.png</iconset>
         </property>
        </widget>
@@ -177,11 +197,11 @@
          <string/>
         </property>
         <property name="icon">
-         <iconset resource="icons.qrc">
+         <iconset resource="mapicons.qrc">
           <normaloff>:/map/icons/layers.png</normaloff>:/map/icons/layers.png</iconset>
         </property>
         <property name="popupMode">
-         <enum>QToolButton::InstantPopup</enum>
+         <enum>QToolButton::ToolButtonPopupMode::InstantPopup</enum>
         </property>
        </widget>
       </item>
@@ -194,7 +214,7 @@
          <string>^</string>
         </property>
         <property name="icon">
-         <iconset resource="icons.qrc">
+         <iconset resource="mapicons.qrc">
           <normaloff>:/map/icons/precipitation.png</normaloff>:/map/icons/precipitation.png</iconset>
         </property>
         <property name="checkable">
@@ -214,7 +234,7 @@
          <string>^</string>
         </property>
         <property name="icon">
-         <iconset resource="icons.qrc">
+         <iconset resource="mapicons.qrc">
           <normaloff>:/map/icons/anchor.png</normaloff>:/map/icons/anchor.png</iconset>
         </property>
         <property name="checkable">
@@ -234,7 +254,7 @@
          <string>^</string>
         </property>
         <property name="icon">
-         <iconset resource="icons.qrc">
+         <iconset resource="mapicons.qrc">
           <normaloff>:/map/icons/cloud.png</normaloff>:/map/icons/cloud.png</iconset>
         </property>
         <property name="checkable">
@@ -254,7 +274,7 @@
          <string>^</string>
         </property>
         <property name="icon">
-         <iconset resource="icons.qrc">
+         <iconset resource="mapicons.qrc">
           <normaloff>:/map/icons/railway.png</normaloff>:/map/icons/railway.png</iconset>
         </property>
         <property name="checkable">
@@ -274,7 +294,7 @@
          <string>^</string>
         </property>
         <property name="icon">
-         <iconset resource="icons.qrc">
+         <iconset resource="mapicons.qrc">
           <normaloff>:/map/icons/muf.png</normaloff>:/map/icons/muf.png</iconset>
         </property>
         <property name="checkable">
@@ -294,8 +314,48 @@
          <string>^</string>
         </property>
         <property name="icon">
-         <iconset resource="icons.qrc">
+         <iconset resource="mapicons.qrc">
           <normaloff>:/map/icons/fof2.png</normaloff>:/map/icons/fof2.png</iconset>
+        </property>
+        <property name="checkable">
+         <bool>true</bool>
+        </property>
+        <property name="checked">
+         <bool>true</bool>
+        </property>
+       </widget>
+      </item>
+      <item>
+       <widget class="ButtonSwitch" name="displayMagDec">
+        <property name="toolTip">
+         <string>Display magnetic declination contours (3D map only)</string>
+        </property>
+        <property name="text">
+         <string/>
+        </property>
+        <property name="icon">
+         <iconset resource="mapicons.qrc">
+          <normaloff>:/map/icons/compass.png</normaloff>:/map/icons/compass.png</iconset>
+        </property>
+        <property name="checkable">
+         <bool>true</bool>
+        </property>
+        <property name="checked">
+         <bool>true</bool>
+        </property>
+       </widget>
+      </item>
+      <item>
+       <widget class="ButtonSwitch" name="displayAurora">
+        <property name="toolTip">
+         <string>Display aurora probabilty (3D only)</string>
+        </property>
+        <property name="text">
+         <string/>
+        </property>
+        <property name="icon">
+         <iconset resource="mapicons.qrc">
+          <normaloff>:/map/icons/aurora.png</normaloff>:/map/icons/aurora.png</iconset>
         </property>
         <property name="checkable">
          <bool>true</bool>
@@ -322,6 +382,47 @@
         </property>
         <property name="checked">
          <bool>true</bool>
+        </property>
+       </widget>
+      </item>
+      <item>
+       <widget class="ButtonSwitch" name="viewFirstPerson">
+        <property name="toolTip">
+         <string>First person / third person view on 3D map</string>
+        </property>
+        <property name="text">
+         <string/>
+        </property>
+        <property name="icon">
+         <iconset resource="mapicons.qrc">
+          <normaloff>:/map/icons/thirdperson.png</normaloff>
+          <normalon>:/map/icons/firstperson.png</normalon>:/map/icons/thirdperson.png</iconset>
+        </property>
+        <property name="checkable">
+         <bool>true</bool>
+        </property>
+        <property name="checked">
+         <bool>true</bool>
+        </property>
+       </widget>
+      </item>
+      <item>
+       <widget class="ButtonSwitch" name="displayPFD">
+        <property name="toolTip">
+         <string>Display aircraft PFD (Primary Flight Display) on 3D map</string>
+        </property>
+        <property name="text">
+         <string/>
+        </property>
+        <property name="icon">
+         <iconset resource="mapicons.qrc">
+          <normaloff>:/map/icons/pfd.png</normaloff>:/map/icons/pfd.png</iconset>
+        </property>
+        <property name="checkable">
+         <bool>true</bool>
+        </property>
+        <property name="checked">
+         <bool>false</bool>
         </property>
        </widget>
       </item>
@@ -354,7 +455,7 @@
          <string>^</string>
         </property>
         <property name="icon">
-         <iconset resource="icons.qrc">
+         <iconset resource="mapicons.qrc">
           <normaloff>:/map/icons/groundtracks.png</normaloff>:/map/icons/groundtracks.png</iconset>
         </property>
         <property name="checkable">
@@ -429,7 +530,7 @@
          <string>^</string>
         </property>
         <property name="icon">
-         <iconset resource="icons.qrc">
+         <iconset resource="mapicons.qrc">
           <normaloff>:/map/icons/earthsat.png</normaloff>:/map/icons/earthsat.png</iconset>
         </property>
         <property name="checkable">
@@ -519,7 +620,7 @@
        </sizepolicy>
       </property>
       <property name="orientation">
-       <enum>Qt::Vertical</enum>
+       <enum>Qt::Orientation::Vertical</enum>
       </property>
       <widget class="QQuickWidget" name="map">
        <property name="sizePolicy">
@@ -538,7 +639,7 @@
         <string>Map</string>
        </property>
        <property name="resizeMode">
-        <enum>QQuickWidget::SizeRootObjectToView</enum>
+        <enum>QQuickWidget::ResizeMode::SizeRootObjectToView</enum>
        </property>
        <property name="source">
         <url>
@@ -581,7 +682,7 @@
  </tabstops>
  <resources>
   <include location="../../../sdrgui/resources/res.qrc"/>
-  <include location="icons.qrc"/>
+  <include location="mapicons.qrc"/>
  </resources>
  <connections/>
 </ui>
