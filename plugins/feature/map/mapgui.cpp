@@ -1856,6 +1856,8 @@ void MapGUI::displayToolbar()
     ui->displayAurora->setVisible(!narrow && m_settings.m_map3DEnabled);
     ui->displayMagDec->setVisible(!narrow && m_settings.m_map3DEnabled);
     ui->displayMaidenheadGrid->setVisible(!narrow && m_settings.m_map3DEnabled);
+    ui->displayPFD->setVisible(!narrow && m_settings.m_map3DEnabled);
+    ui->viewFirstPerson->setVisible(!narrow && m_settings.m_map3DEnabled);
     ui->save->setVisible(m_settings.m_map3DEnabled);
 }
 
