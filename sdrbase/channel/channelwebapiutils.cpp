@@ -2019,18 +2019,21 @@ bool ChannelWebAPIUtils::addChannel(unsigned int deviceSetIndex, const QString& 
 }
 
 // response will be deleted after device is opened.
-bool ChannelWebAPIUtils::addDevice(const QString hwType, int direction, const QStringList& settingsKeys, SWGSDRangel::SWGDeviceSettings *response)
+bool ChannelWebAPIUtils::addDevice(const QString hwType, int direction, const QStringList& settingsKeys, SWGSDRangel::SWGDeviceSettings *response, QObject *receiver, const char *slot)
 {
-    return DeviceOpener::open(hwType, direction, settingsKeys, response);
+    return DeviceOpener::open(hwType, direction, settingsKeys, response, receiver, slot);
 }
 
-DeviceOpener::DeviceOpener(int deviceIndex, int direction, const QStringList& settingsKeys, SWGSDRangel::SWGDeviceSettings *response) :
+DeviceOpener::DeviceOpener(int deviceIndex, int direction, const QStringList& settingsKeys, SWGSDRangel::SWGDeviceSettings *response, QObject *receiver, const char *slot) :
     m_deviceIndex(deviceIndex),
     m_direction(direction),
     m_settingsKeys(settingsKeys),
     m_response(response),
     m_device(nullptr)
 {
+    if (receiver) {
+        connect(this, SIGNAL(deviceOpened(int)), receiver, slot);
+    }
     connect(MainCore::instance(), &MainCore::deviceSetAdded, this, &DeviceOpener::deviceSetAdded);
     // Create DeviceSet
     MainCore *mainCore = MainCore::instance();
@@ -2046,33 +2049,30 @@ void DeviceOpener::deviceSetAdded(int index, DeviceAPI *device)
         disconnect(MainCore::instance(), &MainCore::deviceSetAdded, this, &DeviceOpener::deviceSetAdded);
 
         m_device = device;
+
+        connect(MainCore::instance(), &MainCore::deviceChanged, this, &DeviceOpener::deviceChanged);
         // Set the correct device type
         MainCore::MsgSetDevice *msg = MainCore::MsgSetDevice::create(m_deviceSetIndex, m_deviceIndex, m_direction);
         MainCore::instance()->getMainMessageQueue()->push(msg);
-        // Wait until device has initialised - FIXME: Better way to do this other than polling?
-        m_timer.setInterval(250);
-        connect(&m_timer, &QTimer::timeout, this, &DeviceOpener::checkInitialised);
-        m_timer.start();
     }
 }
 
-void DeviceOpener::checkInitialised()
+void DeviceOpener::deviceChanged(int index)
 {
-    if (m_device && m_device->getSampleSource() && (m_device->state() >= DeviceAPI::EngineState::StIdle))
-    {
-        m_timer.stop();
-
-        QString errorMessage;
-        if (200 != m_device->getSampleSource()->webapiSettingsPutPatch(false, m_settingsKeys, *m_response, errorMessage)) {
-            qDebug() << "DeviceOpener::checkInitialised: webapiSettingsPutPatch failed: " << errorMessage;
-        }
-
-        delete m_response;
-        delete this;
+    // Apply device settings
+    QString errorMessage;
+    if (200 != m_device->getSampleSource()->webapiSettingsPutPatch(false, m_settingsKeys, *m_response, errorMessage)) {
+        qDebug() << "DeviceOpener::checkInitialised: webapiSettingsPutPatch failed: " << errorMessage;
     }
+
+    // Signal device has been opened
+    emit deviceOpened(m_deviceSetIndex);
+
+    delete m_response;
+    delete this;
 }
 
-bool DeviceOpener::open(const QString hwType, int direction, const QStringList& settingsKeys, SWGSDRangel::SWGDeviceSettings *response)
+bool DeviceOpener::open(const QString hwType, int direction, const QStringList& settingsKeys, SWGSDRangel::SWGDeviceSettings *response, QObject *receiver, const char *slot)
 {
     if (direction) {
         return false; // FIXME: Only RX support for now
@@ -2090,7 +2090,7 @@ bool DeviceOpener::open(const QString hwType, int direction, const QStringList& 
             continue;
         }
 
-        new DeviceOpener(i, direction, settingsKeys, response);
+        new DeviceOpener(i, direction, settingsKeys, response, receiver, slot);
 
         return true;
     }

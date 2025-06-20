@@ -105,6 +105,7 @@
 #include "util/android.h"
 #endif
 
+#include "remotetcpsinkstarter.h"
 #include "mainwindow.h"
 
 #include <audio/audiodevicemanager.h>
@@ -136,7 +137,8 @@ MainWindow::MainWindow(qtwebapp::LoggerWithFile *logger, const MainParser& parse
 #if QT_CONFIG(process)
     m_fftWisdomProcess(nullptr),
 #endif
-    m_settingsSaved(false)
+    m_settingsSaved(false),
+    m_parser(parser)
 {
     QAccessible::installFactory(AccessibleValueDial::factory);
     QAccessible::installFactory(AccessibleValueDialZ::factory);
@@ -273,10 +275,12 @@ MainWindow::MainWindow(qtwebapp::LoggerWithFile *logger, const MainParser& parse
     restoreState(qUncompress(QByteArray::fromBase64(s.value("mainWindowState").toByteArray())));
 
     // Load initial configuration
-    InitFSM *fsm = new InitFSM(this, splash, !parser.getScratch());
+    InitFSM *fsm = new InitFSM(this, splash, !parser.getScratch() && !parser.getRemoteTCPSink(), !parser.getRemoteTCPSink());
     connect(fsm, &InitFSM::finished, fsm, &InitFSM::deleteLater);
     connect(fsm, &InitFSM::finished, splash, &SDRangelSplash::deleteLater);
-    if (parser.getStart()) {
+    if (parser.getRemoteTCPSink()) {
+        connect(fsm, &InitFSM::finished, this, &MainWindow::startRemoteTCPSink);
+    } else if (parser.getStart()) {
         connect(fsm, &InitFSM::finished, this, &MainWindow::startAllAfterDelay);
     }
     fsm->start();
@@ -1183,20 +1187,21 @@ void LoadConfigurationFSM::restoreGeometry()
     }
 }
 
-InitFSM::InitFSM(MainWindow *mainWindow, SDRangelSplash *splash, bool loadDefault, QObject *parent) :
+InitFSM::InitFSM(MainWindow *mainWindow, SDRangelSplash *splash, bool loadDefault, bool showConfigs, QObject *parent) :
     MainWindowFSM(mainWindow, parent),
-    m_splash(splash)
+    m_splash(splash),
+    m_showConfigs(showConfigs)
 {
     // Create FSM
     createStates(2);
 
     if (loadDefault)
     {
-    m_loadConfigurationFSM = new LoadConfigurationFSM(m_mainWindow, m_mainWindow->m_mainCore->getMutableSettings().getWorkingConfiguration(), nullptr, this);
+        m_loadConfigurationFSM = new LoadConfigurationFSM(m_mainWindow, m_mainWindow->m_mainCore->getMutableSettings().getWorkingConfiguration(), nullptr, this);
 
-    m_states[0]->addTransition(m_loadConfigurationFSM, &LoadConfigurationFSM::finished, m_finalState);
+        m_states[0]->addTransition(m_loadConfigurationFSM, &LoadConfigurationFSM::finished, m_finalState);
 
-    connect(m_states[0], &QState::entered, this, &InitFSM::loadDefaultConfiguration);
+        connect(m_states[0], &QState::entered, this, &InitFSM::loadDefaultConfiguration);
     }
     else
     {
@@ -1222,17 +1227,20 @@ void InitFSM::showDefaultConfigurations()
         qDebug() << "MainWindow::MainWindow: no or empty current configuration, creating empty workspace...";
         m_mainWindow->addWorkspace();
 
-        // If no configurations, load some basic examples
-        if (m_mainWindow->m_mainCore->getMutableSettings().getConfigurations()->size() == 0) {
-            m_mainWindow->loadDefaultConfigurations();
-        }
+        if (m_showConfigs)
+        {
+            // If no configurations, load some basic examples
+            if (m_mainWindow->m_mainCore->getMutableSettings().getConfigurations()->size() == 0) {
+                m_mainWindow->loadDefaultConfigurations();
+            }
 #if defined(ANDROID) || defined(__EMSCRIPTEN__)
-        // Show welcome dialog
-        m_mainWindow->on_action_Welcome_triggered();
+            // Show welcome dialog
+            m_mainWindow->on_action_Welcome_triggered();
 #endif
-        // Show configurations
-        m_mainWindow->openConfigurationDialog(true);
-}
+            // Show configurations
+            m_mainWindow->openConfigurationDialog(true);
+        }
+    }
 }
 
 CloseFSM::CloseFSM(MainWindow *mainWindow, QObject *parent) :
@@ -3389,6 +3397,11 @@ void MainWindow::showAllChannels(int deviceSetIndex)
         deviceUISet->getChannelGUIAt(i)->show();
         deviceUISet->getChannelGUIAt(i)->raise();
     }
+}
+
+void MainWindow::startRemoteTCPSink()
+{
+    RemoteTCPSinkStarter::start(m_parser);
 }
 
 void MainWindow::startAllAfterDelay()
