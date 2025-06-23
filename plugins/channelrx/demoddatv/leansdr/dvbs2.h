@@ -72,6 +72,8 @@ typedef SSIZE_T ssize_t;
 #include "ldpctool/algorithms.h"
 #include "ldpctool/ldpcworker.h"
 
+#include <QDebug>
+
 namespace leansdr
 {
 
@@ -459,7 +461,7 @@ struct s2_frame_transmitter : runnable
     )
     {
         (void)mcinfo;
-        
+
         std::complex<T> *pout0 = pout; // For sanity check
         // PLHEADER: SOF AND PLSCODE
         // EN 302 307-1 section 5.5.2 PL signalling
@@ -2588,7 +2590,7 @@ struct s2_deinterleaver : runnable
                                     hard_sb accs[/*bps*/], int nacc)
     {
         (void)nacc;
-        
+
         if (MSB_FIRST)
         {
             for (int b = 0; b < BPS; ++b) {

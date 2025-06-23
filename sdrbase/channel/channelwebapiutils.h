@@ -43,7 +43,7 @@ class DeviceAPI;
 class DeviceOpener : public QObject {
     Q_OBJECT
 protected:
-    DeviceOpener(int deviceIndex, int direction, const QStringList& settingsKeys, SWGSDRangel::SWGDeviceSettings *response);
+    DeviceOpener(int deviceIndex, int direction, const QStringList& settingsKeys, SWGSDRangel::SWGDeviceSettings *response, QObject *receiver, const char *slot);
 private:
     int m_deviceIndex;
     int m_direction;
@@ -51,13 +51,17 @@ private:
     QStringList m_settingsKeys;
     SWGSDRangel::SWGDeviceSettings *m_response;
     DeviceAPI *m_device;
-    QTimer m_timer;
 
+    void createDeviceSet();
 private slots:
     void deviceSetAdded(int index, DeviceAPI *device);
-    void checkInitialised();
+    void deviceChanged(int index);
 public:
-    static bool open(const QString hwType, int direction, const QStringList& settingsKeys, SWGSDRangel::SWGDeviceSettings *response);
+    bool open(const QString hwType, int direction, const QStringList& settingsKeys, SWGSDRangel::SWGDeviceSettings *response);
+
+    static bool open(const QString hwType, int direction, const QStringList& settingsKeys, SWGSDRangel::SWGDeviceSettings *response, QObject *receiver, const char *slot);
+signals:
+    void deviceOpened(int deviceSetIndex);
 };
 
 class SDRBASE_API ChannelWebAPIUtils
@@ -127,7 +131,7 @@ public:
     static bool getChannelSettings(ChannelAPI *channel, SWGSDRangel::SWGChannelSettings &channelSettingsResponse);
     static bool getChannelReport(unsigned int deviceIndex, unsigned int channelIndex, SWGSDRangel::SWGChannelReport &channelReport);
     static bool addChannel(unsigned int deviceSetIndex, const QString& uri, int direction);
-    static bool addDevice(const QString hwType, int direction, const QStringList& settingsKeys, SWGSDRangel::SWGDeviceSettings *response);
+    static bool addDevice(const QString hwType, int direction, const QStringList& settingsKeys, SWGSDRangel::SWGDeviceSettings *response, QObject *receiver = nullptr, const char *slot = nullptr);
 protected:
     static QString getDeviceHardwareId(unsigned int deviceIndex);
 };

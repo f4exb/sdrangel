@@ -188,7 +188,9 @@ static int runQtApplication(int argc, char* argv[], qtwebapp::LoggerWithFile *lo
         logger = nullptr;
     }
 
-	MainWindow w(logger, parser);
+    MainWindow w(logger, parser);
+
+    w.show();
 
     if (parser.getListDevices())
     {
@@ -196,12 +198,6 @@ static int runQtApplication(int argc, char* argv[], qtwebapp::LoggerWithFile *lo
         RemoteTCPSinkStarter::listAvailableDevices();
         return EXIT_SUCCESS;
     }
-
-    if (parser.getRemoteTCPSink()) {
-        RemoteTCPSinkStarter::start(parser);
-    }
-
-	w.show();
 
 	return a.exec();
 }

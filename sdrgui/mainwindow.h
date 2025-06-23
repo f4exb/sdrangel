@@ -258,10 +258,11 @@ class InitFSM : public MainWindowFSM {
     Q_OBJECT
 
 public:
-    InitFSM(MainWindow *mainWindow, SDRangelSplash *splash, bool loadDefault, QObject *parent=nullptr);
+    InitFSM(MainWindow *mainWindow, SDRangelSplash *splash, bool loadDefault, bool showConfigs, QObject *parent=nullptr);
 
 private:
     SDRangelSplash *m_splash;
+    bool m_showConfigs;
     LoadConfigurationFSM *m_loadConfigurationFSM;
 
     void loadDefaultConfiguration();
@@ -345,6 +346,7 @@ private:
 #endif
 
     bool m_settingsSaved;               // Records if settings have already been saved in response to a QCloseEvent
+    const MainParser& m_parser;
 
 	void loadSettings();
 	void loadDeviceSetPresetSettings(const Preset* preset, int deviceSetIndex);
@@ -458,6 +460,7 @@ private slots:
     void featureMove(FeatureGUI *gui, int wsIndexDestnation);
     void deviceStateChanged(DeviceAPI *deviceAPI);
     void openFeaturePresetsDialog(QPoint p, Workspace *workspace);
+    void startRemoteTCPSink();
     void startAllAfterDelay();
     void startAll();
     void startAllDevices(const Workspace *workspace) const;
