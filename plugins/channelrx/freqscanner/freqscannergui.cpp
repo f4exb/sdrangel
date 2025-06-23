@@ -737,8 +737,11 @@ void FreqScannerGUI::on_remove_clicked()
     for (auto item : items)
     {
         int row = ui->table->row(item);
-        ui->table->removeRow(row);
-        m_settings.m_frequencySettings.removeAt(row);
+        if (row >= 0)
+        {
+            ui->table->removeRow(row);
+            m_settings.m_frequencySettings.removeAt(row);
+        }
     }
     applySetting("frequencySettings");
 }
