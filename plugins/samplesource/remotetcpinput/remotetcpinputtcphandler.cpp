@@ -896,6 +896,58 @@ FLAC__StreamDecoderWriteStatus RemoteTCPInputTCPHandler::flacWrite(const FLAC__S
         }
         m_uncompressedData.write(reinterpret_cast<quint8*>(m_converterBuffer), nbSamples*sizeof(Sample));
     }
+    else if ((frame->header.bits_per_sample == 8) && (SDR_RX_SAMP_SZ == 16) && (frame->header.channels == 2))
+    {
+        qint16 *out = (qint16 *)m_converterBuffer;
+        const qint32 *inI = buffer[0];
+        const qint32 *inQ = buffer[1];
+
+        for (int i = 0; i < nbSamples; i++)
+        {
+            *out++ = *inI++ << 8;
+            *out++ = *inQ++ << 8;
+        }
+        m_uncompressedData.write(reinterpret_cast<quint8*>(m_converterBuffer), nbSamples*sizeof(Sample));
+    }
+    else if ((frame->header.bits_per_sample == 16) && (SDR_RX_SAMP_SZ == 16) && (frame->header.channels == 2))
+    {
+        qint16 *out = (qint16 *)m_converterBuffer;
+        const qint32 *inI = buffer[0];
+        const qint32 *inQ = buffer[1];
+
+        for (int i = 0; i < nbSamples; i++)
+        {
+            *out++ = *inI++;
+            *out++ = *inQ++;
+        }
+        m_uncompressedData.write(reinterpret_cast<quint8*>(m_converterBuffer), nbSamples*sizeof(Sample));
+    }
+    else if ((frame->header.bits_per_sample == 24) && (SDR_RX_SAMP_SZ == 16) && (frame->header.channels == 2))
+    {
+        qint16 *out = (qint16 *)m_converterBuffer;
+        const qint32 *inI = buffer[0];
+        const qint32 *inQ = buffer[1];
+
+        for (int i = 0; i < nbSamples; i++)
+        {
+            *out++ = *inI++ >> 8;
+            *out++ = *inQ++ >> 8;
+        }
+        m_uncompressedData.write(reinterpret_cast<quint8*>(m_converterBuffer), nbSamples*sizeof(Sample));
+    }
+    else if ((frame->header.bits_per_sample == 32) && (SDR_RX_SAMP_SZ == 16) && (frame->header.channels == 2))
+    {
+        qint16 *out = (qint16 *)m_converterBuffer;
+        const qint32 *inI = buffer[0];
+        const qint32 *inQ = buffer[1];
+
+        for (int i = 0; i < nbSamples; i++)
+        {
+            *out++ = *inI++ >> 8;
+            *out++ = *inQ++ >> 8;
+        }
+        m_uncompressedData.write(reinterpret_cast<quint8*>(m_converterBuffer), nbSamples*sizeof(Sample));
+    }
     else
     {
         qDebug() << "RemoteTCPInputTCPHandler::flacWrite: Unsupported format";
@@ -1848,7 +1900,7 @@ void RemoteTCPInputTCPHandler::processCommands()
                             float latitude = RemoteTCPProtocol::extractFloat((const quint8 *) &pos[0]);
                             float longitude = RemoteTCPProtocol::extractFloat((const quint8 *) &pos[4]);
                             float altitude = RemoteTCPProtocol::extractFloat((const quint8 *) &pos[8]);
-                            qDebug() << "RemoteTCPInputTCPHandler::processCommands: Position " << latitude << longitude << altitude;
+                            //qDebug() << "RemoteTCPInputTCPHandler::processCommands: Position " << latitude << longitude << altitude;
                             if (m_messageQueueToInput) {
                                 m_messageQueueToInput->push(RemoteTCPInput::MsgReportPosition::create(latitude, longitude, altitude));
                             }
@@ -1869,7 +1921,7 @@ void RemoteTCPInputTCPHandler::processCommands()
                             float isotropic = RemoteTCPProtocol::extractUInt32((const quint8 *) &dir[0]);
                             float azimuth = RemoteTCPProtocol::extractFloat((const quint8 *) &dir[4]);
                             float elevation = RemoteTCPProtocol::extractFloat((const quint8 *) &dir[8]);
-                            qDebug() << "RemoteTCPInputTCPHandler::processCommands: Direction " << isotropic << azimuth << elevation;
+                            //qDebug() << "RemoteTCPInputTCPHandler::processCommands: Direction " << isotropic << azimuth << elevation;
                             if (m_messageQueueToInput) {
                                 m_messageQueueToInput->push(RemoteTCPInput::MsgReportDirection::create(isotropic, azimuth, elevation));
                             }
