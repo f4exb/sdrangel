@@ -276,29 +276,49 @@ void RemoteTCPSinkSink::processOneSample(Complex &ci)
 
         if (m_settings.m_sampleBits == 8)
         {
+#ifdef SDR_RX_SAMPLE_24BIT
             iqBuf[0] = (qint32) (ci.real() / 65536.0f);
             iqBuf[1] = (qint32) (ci.imag() / 65536.0f);
+#else
+            iqBuf[0] = (qint32) (ci.real() / 256.0f);
+            iqBuf[1] = (qint32) (ci.imag() / 256.0f);
+#endif
             iqBuf[0] = clamp8(iqBuf[0]);
             iqBuf[1] = clamp8(iqBuf[1]);
         }
         else if (m_settings.m_sampleBits == 16)
         {
+#ifdef SDR_RX_SAMPLE_24BIT
             iqBuf[0] = (qint32) (ci.real() / 256.0f);
             iqBuf[1] = (qint32) (ci.imag() / 256.0f);
+#else
+            iqBuf[0] = (qint32) ci.real();
+            iqBuf[1] = (qint32) ci.imag();
+#endif
             iqBuf[0] = clamp16(iqBuf[0]);
             iqBuf[1] = clamp16(iqBuf[1]);
         }
         else if (m_settings.m_sampleBits == 24)
         {
+#ifdef SDR_RX_SAMPLE_24BIT
             iqBuf[0] = (qint32) ci.real();
             iqBuf[1] = (qint32) ci.imag();
+#else
+            iqBuf[0] = (qint32) (ci.real() * 256.0f);
+            iqBuf[1] = (qint32) (ci.imag() * 256.0f);
+#endif
             iqBuf[0] = clamp24(iqBuf[0]);
             iqBuf[1] = clamp24(iqBuf[1]);
         }
         else
         {
+#ifdef SDR_RX_SAMPLE_24BIT
             iqBuf[0] = (qint32) ci.real();
             iqBuf[1] = (qint32) ci.imag();
+#else
+            iqBuf[0] = (qint32) (ci.real() * 256.0f);
+            iqBuf[1] = (qint32) (ci.imag() * 256.0f);
+#endif
         }
         int bytes = 2 * m_settings.m_sampleBits / 8;
         m_bytesUncompressed += bytes;
