@@ -1735,7 +1735,7 @@ void ADSBDemodGUI::setCallsign(Aircraft *aircraft, const QString& callsign)
 {
     aircraft->m_callsign = callsign;
     aircraft->m_callsignItem->setText(aircraft->m_callsign);
-    if (m_routeInfo->contains(aircraft->m_callsign))
+    if (m_routeInfo && m_routeInfo->contains(aircraft->m_callsign))
     {
         AircraftRouteInformation *route = m_routeInfo->value(aircraft->m_callsign);
         aircraft->m_depItem->setText(route->m_dep);
