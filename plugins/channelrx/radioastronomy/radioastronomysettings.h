@@ -205,6 +205,9 @@ struct RadioAstronomySettings
     QString m_stopCalCommand;
     float m_calCommandDelay;            //!< Delay in seconds after command before starting cal
 
+    QString m_spectrumAutoSaveCSVFilename;
+    QString m_powerAutoSaveCSVFilename;
+
     quint32 m_rgbColor;
     QString m_title;
     Serializable *m_channelMarker;
