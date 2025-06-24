@@ -150,6 +150,9 @@ void RadioAstronomySettings::resetToDefaults()
     m_stopCalCommand = "";
     m_calCommandDelay = 1.0f;
 
+    m_spectrumAutoSaveCSVFilename = "";
+    m_powerAutoSaveCSVFilename = "";
+
     m_rgbColor = QColor(102, 0, 0).rgb();
     m_title = "Radio Astronomy";
     m_streamIndex = 0;
@@ -294,6 +297,9 @@ QByteArray RadioAstronomySettings::serialize() const
     s.writeString(167, m_startCalCommand);
     s.writeString(168, m_stopCalCommand);
     s.writeFloat(169, m_calCommandDelay);
+
+    s.writeString(170, m_spectrumAutoSaveCSVFilename);
+    s.writeString(171, m_powerAutoSaveCSVFilename);
 
     s.writeU32(180, m_rgbColor);
     s.writeString(181, m_title);
@@ -460,6 +466,9 @@ bool RadioAstronomySettings::deserialize(const QByteArray& data)
         d.readString(167, &m_startCalCommand, "");
         d.readString(168, &m_stopCalCommand, "");
         d.readFloat(169, &m_calCommandDelay, 1.0f);
+
+        d.readString(170, &m_spectrumAutoSaveCSVFilename, "");
+        d.readString(171, &m_powerAutoSaveCSVFilename, "");
 
         d.readU32(180, &m_rgbColor, QColor(102, 0, 0).rgb());
         d.readString(181, &m_title, "Radio Astronomy");

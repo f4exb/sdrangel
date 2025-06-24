@@ -49,6 +49,7 @@
 #include "gui/timedelegate.h"
 #include "gui/decimaldelegate.h"
 #include "gui/dialogpositioner.h"
+#include "gui/crightclickenabler.h"
 #include "channel/channelwebapiutils.h"
 #include "maincore.h"
 #include "feature/feature.h"
@@ -1476,40 +1477,77 @@ void RadioAstronomyGUI::on_clearCal_clicked()
     clearCalData();
 }
 
-// Save power data in table to a CSV file
-void RadioAstronomyGUI::on_savePowerData_clicked()
+void RadioAstronomyGUI::savePowerData(const QString& filename)
 {
+    QFile file(filename);
+    if (!file.open(QIODevice::WriteOnly | QIODevice::Text)) {
+        QMessageBox::critical(this, "Radio Astronomy", QString("Failed to open file %1").arg(filename));
+        return;
+    }
+    QTextStream out(&file);
+
+    // Create a CSV file from the values in the table
+    for (int i = 0; i < ui->powerTable->horizontalHeader()->count(); i++)
+    {
+        QString text = ui->powerTable->horizontalHeaderItem(i)->text();
+        out << text << ",";
+    }
+    out << "\n";
+    for (int i = 0; i < ui->powerTable->rowCount(); i++)
+    {
+        for (int j = 0; j < ui->powerTable->horizontalHeader()->count(); j++)
+        {
+            out << ui->powerTable->item(i,j)->data(Qt::DisplayRole).toString() << ",";
+        }
+        out << "\n";
+    }
+}
+
+// Save power data in table to a CSV file
+void RadioAstronomyGUI::on_savePowerData_clicked(bool checked)
+{
+    ui->savePowerData->setChecked(!m_settings.m_powerAutoSaveCSVFilename.isEmpty());
+
     // Get filename to save to
     QFileDialog fileDialog(nullptr, "Select file to save data to", "", "*.csv");
     fileDialog.setAcceptMode(QFileDialog::AcceptSave);
     if (fileDialog.exec())
     {
         QStringList fileNames = fileDialog.selectedFiles();
-        if (fileNames.size() > 0)
-        {
-            QFile file(fileNames[0]);
-            if (!file.open(QIODevice::WriteOnly | QIODevice::Text)) {
-                QMessageBox::critical(this, "Radio Astronomy", QString("Failed to open file %1").arg(fileNames[0]));
-                return;
-            }
-            QTextStream out(&file);
+        if (fileNames.size() > 0) {
+            savePowerData(fileNames[0]);
+        }
+    }
+}
 
-            // Create a CSV file from the values in the table
-            for (int i = 0; i < ui->powerTable->horizontalHeader()->count(); i++)
+void RadioAstronomyGUI::on_savePowerData_rightClicked(const QPoint& point)
+{
+    (void) point;
+
+    if (!ui->savePowerData->isChecked())
+    {
+        // Get filename to save to
+        QFileDialog fileDialog(nullptr, "Select file to auto save data to", "", "*.csv");
+        fileDialog.setAcceptMode(QFileDialog::AcceptSave);
+        if (fileDialog.exec())
+        {
+            QStringList fileNames = fileDialog.selectedFiles();
+            if (fileNames.size() > 0)
             {
-                QString text = ui->powerTable->horizontalHeaderItem(i)->text();
-                out << text << ",";
-            }
-            out << "\n";
-            for (int i = 0; i < ui->powerTable->rowCount(); i++)
-            {
-                for (int j = 0; j < ui->powerTable->horizontalHeader()->count(); j++)
-                {
-                    out << ui->powerTable->item(i,j)->data(Qt::DisplayRole).toString() << ",";
-                }
-                out << "\n";
+                m_settings.m_powerAutoSaveCSVFilename = fileNames[0];
+                ui->savePowerData->setChecked(true);
+                ui->savePowerData->setToolTip(QString("Left click to save data to a .csv file.\nRight click to disable auto save.\nAuto saving to %1").arg(m_settings.m_powerAutoSaveCSVFilename));
+                applySettings();
+                savePowerData(m_settings.m_powerAutoSaveCSVFilename);
             }
         }
+    }
+    else
+    {
+        ui->savePowerData->setChecked(false);
+        ui->savePowerData->setToolTip("Left click to save data to a .csv file.\nRight click to auto-save data to a .csv file");
+        m_settings.m_powerAutoSaveCSVFilename = "";
+        applySettings();
     }
 }
 
@@ -1719,51 +1757,88 @@ RadioAstronomyGUI::FFTMeasurement* RadioAstronomyGUI::loadFFT(QHash<QString,int>
     }
 }
 
-void RadioAstronomyGUI::on_saveSpectrumData_clicked()
+void RadioAstronomyGUI::saveSpectrumData(const QString& filename)
 {
+    QFile file(filename);
+    if (!file.open(QIODevice::WriteOnly | QIODevice::Text)) {
+        QMessageBox::critical(this, "Radio Astronomy", QString("Failed to open file %1").arg(filename));
+        return;
+    }
+    QTextStream out(&file);
+
+    if (ui->spectrumChartSelect->currentIndex() == 0)
+    {
+        // Create a CSV file for all the spectrum data
+        out << "Date Time,Centre Freq,Sample Rate,Integration,Bandwidth,OmegaA,OmegaS,Power (FFT),Power (dBFS),Power (dBm),Power (Watts),Tsys,Tsys0,Tsource,Sv,SigmaTsys,SigmaSsys,Min Temp,Baseline,RA,Dec,Azimuth,Elevation,l,b,vBCRS,vLSR,Solar Flux,Air Temp,Sky Temp,Sensor 1,Sensor 2,FFT Size,Data\n";
+        for (int i = 0; i < m_fftMeasurements.size(); i++) {
+            saveFFT(out, m_fftMeasurements[i]);
+        }
+    }
+    else
+    {
+        // Create a CSV file for calibration data
+        out << "Cal,Cal Temp,Date Time,Centre Freq,Sample Rate,Integration,Bandwidth,OmegaA,OmegaS,Power (FFT),Power (dBFS),Power (dBm),Power (Watts),Tsys,Tsys0,Tsource,Sv,SigmaTsys,SigmaSsys,Min Temp,Baseline,RA,Dec,Azimuth,Elevation,l,b,vBCRS,vLSR,Solar Flux,Air Temp,Sky Temp,Sensor 1,Sensor 2,FFT Size,Data\n";
+        if (m_calHot)
+        {
+            out << "Hot,";
+            out << m_settings.m_tCalHot;
+            out << ",";
+            saveFFT(out, m_calHot);
+        }
+        if (m_calCold)
+        {
+            out << "Cold,";
+            out << m_settings.m_tCalCold;
+            out << ",";
+            saveFFT(out, m_calCold);
+        }
+    }
+}
+
+void RadioAstronomyGUI::on_saveSpectrumData_clicked(bool checked)
+{
+    ui->saveSpectrumData->setChecked(!m_settings.m_spectrumAutoSaveCSVFilename.isEmpty());
+
     // Get filename to save to
     QFileDialog fileDialog(nullptr, "Select file to save data to", "", "*.csv");
     fileDialog.setAcceptMode(QFileDialog::AcceptSave);
     if (fileDialog.exec())
     {
         QStringList fileNames = fileDialog.selectedFiles();
-        if (fileNames.size() > 0)
-        {
-            QFile file(fileNames[0]);
-            if (!file.open(QIODevice::WriteOnly | QIODevice::Text)) {
-                QMessageBox::critical(this, "Radio Astronomy", QString("Failed to open file %1").arg(fileNames[0]));
-                return;
-            }
-            QTextStream out(&file);
+        if (fileNames.size() > 0) {
+            saveSpectrumData(fileNames[0]);
+        }
+    }
+}
 
-            if (ui->spectrumChartSelect->currentIndex() == 0)
+void RadioAstronomyGUI::on_saveSpectrumData_rightClicked(const QPoint &point)
+{
+    (void) point;
+
+    if (!ui->saveSpectrumData->isChecked())
+    {
+        // Get filename to save to
+        QFileDialog fileDialog(nullptr, "Select file to auto save data to", "", "*.csv");
+        fileDialog.setAcceptMode(QFileDialog::AcceptSave);
+        if (fileDialog.exec())
+        {
+            QStringList fileNames = fileDialog.selectedFiles();
+            if (fileNames.size() > 0)
             {
-                // Create a CSV file for all the spectrum data
-                out << "Date Time,Centre Freq,Sample Rate,Integration,Bandwidth,OmegaA,OmegaS,Power (FFT),Power (dBFS),Power (dBm),Power (Watts),Tsys,Tsys0,Tsource,Sv,SigmaTsys,SigmaSsys,Min Temp,Baseline,RA,Dec,Azimuth,Elevation,l,b,vBCRS,vLSR,Solar Flux,Air Temp,Sky Temp,Sensor 1,Sensor 2,FFT Size,Data\n";
-                for (int i = 0; i < m_fftMeasurements.size(); i++) {
-                    saveFFT(out, m_fftMeasurements[i]);
-                }
-            }
-            else
-            {
-                // Create a CSV file for calibration data
-                out << "Cal,Cal Temp,Date Time,Centre Freq,Sample Rate,Integration,Bandwidth,OmegaA,OmegaS,Power (FFT),Power (dBFS),Power (dBm),Power (Watts),Tsys,Tsys0,Tsource,Sv,SigmaTsys,SigmaSsys,Min Temp,Baseline,RA,Dec,Azimuth,Elevation,l,b,vBCRS,vLSR,Solar Flux,Air Temp,Sky Temp,Sensor 1,Sensor 2,FFT Size,Data\n";
-                if (m_calHot)
-                {
-                    out << "Hot,";
-                    out << m_settings.m_tCalHot;
-                    out << ",";
-                    saveFFT(out, m_calHot);
-                }
-                if (m_calCold)
-                {
-                    out << "Cold,";
-                    out << m_settings.m_tCalCold;
-                    out << ",";
-                    saveFFT(out, m_calCold);
-                }
+                m_settings.m_spectrumAutoSaveCSVFilename = fileNames[0];
+                ui->saveSpectrumData->setChecked(true);
+                ui->saveSpectrumData->setToolTip(QString("Left click to save data to a .csv file.\nRight click to disable auto save.\nAuto saving to %1").arg(m_settings.m_spectrumAutoSaveCSVFilename));
+                applySettings();
+                saveSpectrumData(m_settings.m_spectrumAutoSaveCSVFilename);
             }
         }
+    }
+    else
+    {
+        ui->saveSpectrumData->setChecked(false);
+        ui->saveSpectrumData->setToolTip("Left click to save data to a .csv file.\nRight click to auto-save data to a .csv file");
+        m_settings.m_spectrumAutoSaveCSVFilename = "";
+        applySettings();
     }
 }
 
@@ -2067,6 +2142,17 @@ RadioAstronomyGUI::RadioAstronomyGUI(PluginAPI* pluginAPI, DeviceUISet *deviceUI
 
     connect(&MainCore::instance()->getMasterTimer(), SIGNAL(timeout()), this, SLOT(tick())); // 50 ms
 
+    CRightClickEnabler *saveSpectrumDataClickEnabler = new CRightClickEnabler(ui->saveSpectrumData);
+    connect(saveSpectrumDataClickEnabler, SIGNAL(rightClick(const QPoint &)), this, SLOT(on_saveSpectrumData_rightClicked(const QPoint &)));
+
+    CRightClickEnabler *savePowerDataClickEnabler = new CRightClickEnabler(ui->savePowerData);
+    connect(savePowerDataClickEnabler, SIGNAL(rightClick(const QPoint &)), this, SLOT(on_savePowerData_rightClicked(const QPoint &)));
+
+    connect(&m_autoSaveTimer, &QTimer::timeout, this, &RadioAstronomyGUI::autosave);
+    m_autoSaveTimer.setInterval(5 * 60 * 1000);
+    m_autoSaveTimer.setSingleShot(false);
+    m_autoSaveTimer.start();
+
     m_networkManager = new QNetworkAccessManager();
     QObject::connect(
         m_networkManager,
@@ -2306,6 +2392,7 @@ void RadioAstronomyGUI::customContextMenuRequested(QPoint pos)
 
 RadioAstronomyGUI::~RadioAstronomyGUI()
 {
+    m_autoSaveTimer.stop();
     delete m_networkManager;
     delete ui;
     delete m_calHot;
@@ -2530,6 +2617,8 @@ void RadioAstronomyGUI::displaySettings()
         m_calChart->legend()->setVisible(m_settings.m_spectrumLegend);
     }
 
+    ui->savePowerData->setChecked(!m_settings.m_powerAutoSaveCSVFilename.isEmpty());
+    ui->saveSpectrumData->setChecked(!m_settings.m_spectrumAutoSaveCSVFilename.isEmpty());
 
     ui->refFrame->setCurrentIndex((int)m_settings.m_refFrame);
     ui->spectrumLine->setCurrentIndex((int)m_settings.m_line);
@@ -6265,6 +6354,20 @@ void RadioAstronomyGUI::calcSpectrumChartTickCount(QValueAxis *axis, int width)
     }
 }
 
+void RadioAstronomyGUI::autosave()
+{
+    if (!m_settings.m_powerAutoSaveCSVFilename.isEmpty())
+    {
+        qDebug() << "RadioAstronomyGUI: Autosaving power data to" << m_settings.m_powerAutoSaveCSVFilename;
+        savePowerData(m_settings.m_powerAutoSaveCSVFilename);
+    }
+    if (!m_settings.m_spectrumAutoSaveCSVFilename.isEmpty())
+    {
+        qDebug() << "RadioAstronomyGUI: Autosaving spectrum data to" << m_settings.m_spectrumAutoSaveCSVFilename;
+        saveSpectrumData(m_settings.m_spectrumAutoSaveCSVFilename);
+    }
+}
+
 void RadioAstronomyGUI::resizeEvent(QResizeEvent* size)
 {
     int width = size->size().width();
@@ -6316,9 +6419,9 @@ void RadioAstronomyGUI::makeUIConnections()
     QObject::connect(ui->spectrumMarker, &ButtonSwitch::toggled, this, &RadioAstronomyGUI::on_spectrumMarker_toggled);
     QObject::connect(ui->spectrumPeak, &ButtonSwitch::toggled, this, &RadioAstronomyGUI::on_spectrumPeak_toggled);
     QObject::connect(ui->spectrumReverseXAxis, &ButtonSwitch::toggled, this, &RadioAstronomyGUI::on_spectrumReverseXAxis_toggled);
-    QObject::connect(ui->savePowerData, &QToolButton::clicked, this, &RadioAstronomyGUI::on_savePowerData_clicked);
+    QObject::connect(ui->savePowerData, &ButtonSwitch::clicked, this, &RadioAstronomyGUI::on_savePowerData_clicked);
     QObject::connect(ui->savePowerChartImage, &QToolButton::clicked, this, &RadioAstronomyGUI::on_savePowerChartImage_clicked);
-    QObject::connect(ui->saveSpectrumData, &QToolButton::clicked, this, &RadioAstronomyGUI::on_saveSpectrumData_clicked);
+    QObject::connect(ui->saveSpectrumData, &ButtonSwitch::clicked, this, &RadioAstronomyGUI::on_saveSpectrumData_clicked);
     QObject::connect(ui->loadSpectrumData, &QToolButton::clicked, this, &RadioAstronomyGUI::on_loadSpectrumData_clicked);
     QObject::connect(ui->saveSpectrumChartImage, &QToolButton::clicked, this, &RadioAstronomyGUI::on_saveSpectrumChartImage_clicked);
     QObject::connect(ui->saveSpectrumChartImages, &QToolButton::clicked, this, &RadioAstronomyGUI::on_saveSpectrumChartImages_clicked);

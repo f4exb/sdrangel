@@ -458,9 +458,9 @@ Click to save the current chart to an image file.
 
 Click to restore data that had been saved to a .csv file. All existing data will be cleared.
 
-<h3>3.14: Save Data from a .csv File</h3>
+<h3>3.14: Save Data to a .csv File</h3>
 
-Click to save all data to a .csv file.
+Left click to save all data to a .csv file. Right click to select a .csv file to auto save data to every 5 minutes.
 
 <h3>3.15: Autoscale</h3>
 
@@ -635,7 +635,7 @@ Click to save the current chart to an image file.
 
 <h3>4.15: Save Data to a .csv File</h3>
 
-Click to save data from the Radiometer Data table to a .csv file.
+Left click to save data from the Radiometer Data table to a .csv file. Right click to select a .csv file to auto save data to every 5 minutes.
 
 <h3>4.16: Autoscale</h3>
 

@@ -338,6 +338,8 @@ private:
     int m_windowIdx;
     int m_windowCount;
 
+    QTimer m_autoSaveTimer;
+
     QNetworkAccessManager *m_networkManager;
     QNetworkRequest m_networkRequest;
     HttpDownloadManager m_dlm;
@@ -461,6 +463,9 @@ private:
     int powerYUnitsToIndex(RadioAstronomySettings::PowerYUnits units);
     void setColumnPrecisionFromRotator();
     void getRotatorData(FFTMeasurement *fft);
+
+    void saveSpectrumData(const QString& filename);
+    void savePowerData(const QString& filename);
 
     void leaveEvent(QEvent*);
     void enterEvent(EnterEventType*);
@@ -593,9 +598,11 @@ private slots:
     void on_spectrumMarker_toggled(bool checked);
     void on_spectrumPeak_toggled(bool checked);
     void on_spectrumReverseXAxis_toggled(bool checked);
-    void on_savePowerData_clicked();
+    void on_savePowerData_clicked(bool checked);
+    void on_savePowerData_rightClicked(const QPoint& point);
     void on_savePowerChartImage_clicked();
-    void on_saveSpectrumData_clicked();
+    void on_saveSpectrumData_clicked(bool checked);
+    void on_saveSpectrumData_rightClicked(const QPoint &point);
     void on_loadSpectrumData_clicked();
     void on_saveSpectrumChartImage_clicked();
     void on_saveSpectrumChartImages_clicked();
@@ -704,6 +711,7 @@ private slots:
     void powerTableColumnSelectMenuChecked(bool checked = false);
     void on_powerTable_cellDoubleClicked(int row, int column);
 
+    void autosave();
     void plotPowerChart();
     void plotPowerVsTimeChart();
     void plot2DChart();
