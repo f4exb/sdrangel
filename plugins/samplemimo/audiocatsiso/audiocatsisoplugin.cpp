@@ -89,12 +89,12 @@ PluginInterface::SamplingDevices AudioCATSISOPlugin::enumSampleMIMO(const Origin
                     m_deviceTypeID,
                     it->serial,
                     it->sequence,
-                    PluginInterface::SamplingDevice::PhysicalDevice,
+                    PluginInterface::SamplingDevice::BuiltInDevice,
                     PluginInterface::SamplingDevice::StreamMIMO,
                     1,    // MIMO is always considered as a single device
                     0)
             );
-            qDebug("MetisMISOPlugin::enumSampleMIMO: enumerated Metis device #%d", it->sequence);
+            qDebug("AudioCATSISOPlugin::enumSampleMIMO: enumerated AudioCATSISO device #%d", it->sequence);
         }
     }
 

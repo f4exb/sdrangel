@@ -173,3 +173,11 @@ Use this toggle button to connect or disconnect the radio.
  * **grey**: idle (not connected)
  * **green**: connected
  * **red**: error
+
+<h3>26. Audio input (Rx) sample rate</h3>
+
+Select sample rate among presumed supported audio device rates. Check the actual sample rate of your device before starting.
+
+<h3>27. Audio output (Tx) sample rate</h3>
+
+Select sample rate among presumed supported audio device rates. Check the actual sample rate of your device before starting.

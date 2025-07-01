@@ -32,6 +32,7 @@
    <font>
     <family>Liberation Sans</family>
     <pointsize>9</pointsize>
+    <weight>50</weight>
     <italic>false</italic>
     <bold>false</bold>
    </font>
@@ -333,6 +334,7 @@
         <font>
          <family>Liberation Mono</family>
          <pointsize>16</pointsize>
+         <weight>50</weight>
          <italic>false</italic>
          <bold>false</bold>
         </font>
@@ -419,6 +421,45 @@
        </property>
        <property name="text">
         <string>...</string>
+       </property>
+      </widget>
+     </item>
+     <item>
+      <spacer name="horizontalSpacer_6">
+       <property name="orientation">
+        <enum>Qt::Horizontal</enum>
+       </property>
+       <property name="sizeHint" stdset="0">
+        <size>
+         <width>0</width>
+         <height>0</height>
+        </size>
+       </property>
+      </spacer>
+     </item>
+     <item>
+      <widget class="QLabel" name="rxSampleRateLabel">
+       <property name="text">
+        <string>SR</string>
+       </property>
+      </widget>
+     </item>
+     <item>
+      <widget class="QComboBox" name="rxSampleRate">
+       <property name="minimumSize">
+        <size>
+         <width>70</width>
+         <height>0</height>
+        </size>
+       </property>
+       <property name="maximumSize">
+        <size>
+         <width>70</width>
+         <height>16777215</height>
+        </size>
+       </property>
+       <property name="toolTip">
+        <string>Audio sample rate in Hz</string>
        </property>
       </widget>
      </item>
@@ -700,6 +741,45 @@
        </property>
        <property name="text">
         <string>...</string>
+       </property>
+      </widget>
+     </item>
+     <item>
+      <spacer name="horizontalSpacer_8">
+       <property name="orientation">
+        <enum>Qt::Horizontal</enum>
+       </property>
+       <property name="sizeHint" stdset="0">
+        <size>
+         <width>0</width>
+         <height>0</height>
+        </size>
+       </property>
+      </spacer>
+     </item>
+     <item>
+      <widget class="QLabel" name="txSampleRateLabel">
+       <property name="text">
+        <string>SR</string>
+       </property>
+      </widget>
+     </item>
+     <item>
+      <widget class="QComboBox" name="txSampleRate">
+       <property name="minimumSize">
+        <size>
+         <width>70</width>
+         <height>0</height>
+        </size>
+       </property>
+       <property name="maximumSize">
+        <size>
+         <width>70</width>
+         <height>16777215</height>
+        </size>
+       </property>
+       <property name="toolTip">
+        <string>Audio sample rate in Hz</string>
        </property>
       </widget>
      </item>

@@ -151,6 +151,76 @@ bool AudioCATSISOGUI::deserialize(const QByteArray& data)
     }
 }
 
+void AudioCATSISOGUI::refreshRxSampleRates(QString deviceName)
+{
+    ui->rxSampleRate->blockSignals(true);
+    ui->rxSampleRate->clear();
+    const auto deviceInfos = AudioDeviceInfo::availableInputDevices();
+
+    for (const AudioDeviceInfo &deviceInfo : deviceInfos)
+    {
+        if (deviceName == AudioCATSISOSettings::getFullDeviceName(deviceInfo))
+        {
+            QList<int> sampleRates = deviceInfo.supportedSampleRates();
+
+            for (int i = 0; i < sampleRates.size(); ++i)
+            {
+                qDebug("AudioCATSISOGUI::refreshRxSampleRates: device %s: sample rate %d", qPrintable(deviceName), sampleRates[i]);
+                ui->rxSampleRate->addItem(QString("%1").arg(sampleRates[i]));
+            }
+        }
+    }
+
+    ui->rxSampleRate->blockSignals(false);
+
+    int index = ui->rxSampleRate->findText(QString("%1").arg(m_settings.m_rxSampleRate));
+
+    if (index >= 0) {
+        ui->rxSampleRate->setCurrentIndex(index);
+    } else {
+        ui->rxSampleRate->setCurrentIndex(0);
+    }
+
+    if (ui->rxSampleRate->currentText().toInt() != m_settings.m_rxSampleRate) {
+        on_rxSampleRate_currentIndexChanged(ui->rxSampleRate->currentIndex());
+    }
+}
+
+void AudioCATSISOGUI::refreshTxSampleRates(QString deviceName)
+{
+    ui->txSampleRate->blockSignals(true);
+    ui->txSampleRate->clear();
+    const auto deviceInfos = AudioDeviceInfo::availableOutputDevices();
+
+    for (const AudioDeviceInfo &deviceInfo : deviceInfos)
+    {
+        if (deviceName == AudioCATSISOSettings::getFullDeviceName(deviceInfo))
+        {
+            QList<int> sampleRates = deviceInfo.supportedSampleRates();
+
+            for (int i = 0; i < sampleRates.size(); ++i)
+            {
+                qDebug("AudioCATSISOGUI::refreshTxSampleRates: device %s: sample rate %d", qPrintable(deviceName), sampleRates[i]);
+                ui->txSampleRate->addItem(QString("%1").arg(sampleRates[i]));
+            }
+        }
+    }
+
+    ui->txSampleRate->blockSignals(false);
+
+    int index = ui->txSampleRate->findText(QString("%1").arg(m_settings.m_txSampleRate));
+
+    if (index >= 0) {
+        ui->txSampleRate->setCurrentIndex(index);
+    } else {
+        ui->txSampleRate->setCurrentIndex(0);
+    }
+
+    if (ui->txSampleRate->currentText().toInt() != m_settings.m_txSampleRate) {
+        on_txSampleRate_currentIndexChanged(ui->txSampleRate->currentIndex());
+    }
+}
+
 void AudioCATSISOGUI::on_startStop_toggled(bool checked)
 {
     ui->txEnable->setEnabled(!checked);
@@ -335,10 +405,20 @@ void AudioCATSISOGUI::on_rxDeviceSelect_clicked()
     if (audioSelect.m_selected)
     {
         m_settings.m_rxDeviceName = audioSelect.m_audioDeviceName;
+        refreshRxSampleRates(m_settings.m_rxDeviceName);
         m_settingsKeys.append("rxDeviceName");
         ui->rxDeviceLabel->setText(m_settings.m_rxDeviceName);
         sendSettings();
     }
+}
+
+void AudioCATSISOGUI::on_rxSampleRate_currentIndexChanged(int index)
+{
+    (void) index;
+    m_settings.m_rxSampleRate = ui->rxSampleRate->currentText().toInt();
+    displayFcRxTooltip();
+    m_settingsKeys.append("rxSampleRate");
+    sendSettings();
 }
 
 void AudioCATSISOGUI::on_txDeviceSelect_clicked()
@@ -350,10 +430,19 @@ void AudioCATSISOGUI::on_txDeviceSelect_clicked()
     if (audioSelect.m_selected)
     {
         m_settings.m_txDeviceName = audioSelect.m_audioDeviceName;
+        refreshTxSampleRates(m_settings.m_txDeviceName);
         m_settingsKeys.append("txDeviceName");
         ui->txDeviceLabel->setText(m_settings.m_txDeviceName);
         sendSettings();
     }
+}
+
+void AudioCATSISOGUI::on_txSampleRate_currentIndexChanged(int index)
+{
+    (void) index;
+    m_settings.m_txSampleRate = ui->txSampleRate->currentText().toInt();
+    m_settingsKeys.append("txSampleRate");
+    sendSettings();
 }
 
 void AudioCATSISOGUI::on_rxChannels_currentIndexChanged(int index)
@@ -450,6 +539,8 @@ void AudioCATSISOGUI::displaySettings()
     displayFcRxTooltip();
     displayCatDevice();
     displayCatType();
+    refreshRxSampleRates(m_settings.m_rxDeviceName);
+    refreshTxSampleRates(m_settings.m_txDeviceName);
 }
 
 void AudioCATSISOGUI::displayFcRxTooltip()
@@ -457,7 +548,7 @@ void AudioCATSISOGUI::displayFcRxTooltip()
     int32_t fShift = DeviceSampleSource::calculateFrequencyShift(
         m_settings.m_log2Decim,
         (DeviceSampleSource::fcPos_t) m_settings.m_fcPosRx,
-        m_rxSampleRate,
+        m_settings.m_rxSampleRate,
         DeviceSampleSource::FrequencyShiftScheme::FSHIFT_STD
     );
     ui->fcPosRx->setToolTip(tr("Relative position of device center frequency: %1 kHz").arg(QString::number(fShift / 1000.0f, 'g', 5)));
@@ -576,7 +667,7 @@ bool AudioCATSISOGUI::handleMessage(const Message& message)
 
         if (sourceOrSink)
         {
-            m_rxSampleRate = notif.getSampleRate() * (1<<m_settings.m_log2Decim);
+            m_rxSampleRate = notif.getSampleRate();
             m_settings.m_rxCenterFrequency = frequency;
         }
         else
@@ -727,7 +818,7 @@ void AudioCATSISOGUI::updateSpectrum(bool rxElseTx)
     {
         realElseComplex = (m_settings.m_rxIQMapping == AudioCATSISOSettings::L)
             || (m_settings.m_rxIQMapping == AudioCATSISOSettings::R);
-        sampleRate = m_rxSampleRate/(1<<m_settings.m_log2Decim);
+        sampleRate = m_rxSampleRate;
         centerFrequency = m_settings.m_rxCenterFrequency;
     }
     else
@@ -789,7 +880,9 @@ void AudioCATSISOGUI::makeUIConnections()
     QObject::connect(ui->pttSpectrumLink, &ButtonSwitch::toggled, this, &AudioCATSISOGUI::on_pttSpectrumLinkToggled);
     QObject::connect(ui->transverter, &TransverterButton::clicked, this, &AudioCATSISOGUI::on_transverter_clicked);
     QObject::connect(ui->rxDeviceSelect, &QPushButton::clicked, this, &AudioCATSISOGUI::on_rxDeviceSelect_clicked);
+    QObject::connect(ui->rxSampleRate, QOverload<int>::of(&QComboBox::currentIndexChanged), this, &AudioCATSISOGUI::on_rxSampleRate_currentIndexChanged);
     QObject::connect(ui->txDeviceSelect, &QPushButton::clicked, this, &AudioCATSISOGUI::on_txDeviceSelect_clicked);
+    QObject::connect(ui->txSampleRate, QOverload<int>::of(&QComboBox::currentIndexChanged), this, &AudioCATSISOGUI::on_txSampleRate_currentIndexChanged);
     QObject::connect(ui->rxChannels, QOverload<int>::of(&QComboBox::currentIndexChanged), this, &AudioCATSISOGUI::on_rxChannels_currentIndexChanged);
     QObject::connect(ui->rxVolume, &QDial::valueChanged, this, &AudioCATSISOGUI::on_rxVolume_valueChanged);
     QObject::connect(ui->txChannels, QOverload<int>::of(&QComboBox::currentIndexChanged), this, &AudioCATSISOGUI::on_txChannels_currentIndexChanged);
