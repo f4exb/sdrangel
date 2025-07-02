@@ -4,9 +4,13 @@ AudioCATSISOSettings:
     rxCenterFrequency:
       type: integer
       format: int64
+    rxSampleRate:
+      type: integer
     txCenterFrequency:
       type: integer
       format: int64
+    txSampleRate:
+      type: integer
     transverterMode:
       type: integer
     transverterDeltaFrequency:

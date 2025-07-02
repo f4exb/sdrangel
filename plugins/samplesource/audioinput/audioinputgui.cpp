@@ -219,6 +219,10 @@ void AudioInputGui::refreshSampleRates(QString deviceName)
     } else {
         ui->sampleRate->setCurrentIndex(0);
     }
+
+    if (ui->sampleRate->currentText().toInt() != m_settings.m_sampleRate) {
+        on_sampleRate_currentIndexChanged(ui->sampleRate->currentIndex());
+    }
 }
 
 void AudioInputGui::displaySettings()

@@ -69,6 +69,8 @@ private:
     AudioCATSISOSettings::MsgCATReportStatus::Status m_lastCATStatus;
 
 	void blockApplySettings(bool block) { m_doApplySettings = !block; }
+    void refreshRxSampleRates(QString deviceName);
+    void refreshTxSampleRates(QString deviceName);
 	void displaySettings();
     void displayFrequency();
     void displaySampleRate();
@@ -101,7 +103,9 @@ private slots:
     void on_txEnable_toggled(bool checked);
     void on_transverter_clicked();
     void on_rxDeviceSelect_clicked();
+    void on_rxSampleRate_currentIndexChanged(int index);
     void on_txDeviceSelect_clicked();
+    void on_txSampleRate_currentIndexChanged(int index);
     void on_rxChannels_currentIndexChanged(int index);
     void on_rxVolume_valueChanged(int value);
     void on_txChannels_currentIndexChanged(int index);

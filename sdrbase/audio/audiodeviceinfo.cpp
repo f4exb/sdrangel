@@ -60,7 +60,21 @@ QList<int> AudioDeviceInfo::supportedSampleRates() const
 #else
 QList<int> AudioDeviceInfo::supportedSampleRates() const
 {
-    return m_deviceInfo.supportedSampleRates();
+    QList<int> reportedSampleRates = m_deviceInfo.supportedSampleRates();
+    reportedSampleRates.append({96000, 192000, 384000}); // Add some common rates that may not be in the list
+    QList<int> sampleRates;
+
+    for (auto sampleRate : reportedSampleRates) // Retain the sample rates that are supported by the device
+    {
+        QAudioFormat format = m_deviceInfo.preferredFormat();
+        format.setSampleRate(sampleRate);
+
+        if (m_deviceInfo.isFormatSupported(format)) {
+            sampleRates.append(sampleRate);
+        }
+    }
+
+    return sampleRates;
 }
 #endif
 
