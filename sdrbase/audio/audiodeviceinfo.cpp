@@ -44,7 +44,7 @@ QList<int> AudioDeviceInfo::supportedSampleRates() const
     // QAudioDevice is a bit more flexible than QAudioDeviceInfo, in that it supports
     // min and max rate, rather than a specific list
     // For now, we just list some common rates.
-    QList<int> sampleRates = {8000, 11025, 22050, 44100, 48000, 96000, 192000, 384000};
+    QList<int> sampleRates = {8000, 11025, 22050, 44100, 48000, 96000, 160000, 192000, 384000};
     QList<int> supportedRates;
     for (auto sampleRate : sampleRates)
     {
@@ -61,7 +61,7 @@ QList<int> AudioDeviceInfo::supportedSampleRates() const
 QList<int> AudioDeviceInfo::supportedSampleRates() const
 {
     QList<int> reportedSampleRates = m_deviceInfo.supportedSampleRates();
-    reportedSampleRates.append({96000, 192000, 384000}); // Add some common rates that may not be in the list
+    reportedSampleRates.append({96000, 160000, 192000, 384000}); // Add some common rates that may not be in the list
     QList<int> sampleRates;
 
     for (auto sampleRate : reportedSampleRates) // Retain the sample rates that are supported by the device
