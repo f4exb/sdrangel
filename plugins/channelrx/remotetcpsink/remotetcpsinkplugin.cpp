@@ -35,7 +35,7 @@
 const PluginDescriptor RemoteTCPSinkPlugin::m_pluginDescriptor = {
     RemoteTCPSink::m_channelId,
     QStringLiteral("Remote TCP channel sink"),
-    QStringLiteral("7.22.6"),
+    QStringLiteral("7.22.7"),
     QStringLiteral("(c) Jon Beniston, M7RCE"),
     QStringLiteral("https://github.com/f4exb/sdrangel"),
     true,
