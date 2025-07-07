@@ -32,7 +32,7 @@
 #include <QTimer>
 
 
-class DataTSMetaData2;
+struct DataTSMetaData2;
 class PluginAPI;
 class DeviceUISet;
 class BasebandSampleSink;
