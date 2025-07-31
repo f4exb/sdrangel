@@ -34,7 +34,7 @@ else()
   if(CMAKE_BUILD_TYPE MATCHES "Release")
     # Include stripped debug info in release builds so crash handler can generate stack trace with function names
     add_compile_options(/Zi)
-    add_link_options(/Zi /PDBSTRIPPED:$<TARGET_PROPERTY:RUNTIME_OUTPUT_DIRECTORY>/$<TARGET_PROPERTY:NAME>stripped.pdb)
+    add_link_options(/DEBUG /OPT:REF /OPT:ICF /PDBSTRIPPED:$<TARGET_PROPERTY:RUNTIME_OUTPUT_DIRECTORY>/$<TARGET_PROPERTY:NAME>stripped.pdb)
   endif()
 endif()
 
