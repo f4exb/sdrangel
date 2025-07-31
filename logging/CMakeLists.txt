@@ -1,6 +1,7 @@
 project(logging)
 
 set(logging_SOURCES
+   bufferlogger.cpp
    dualfilelogger.cpp
    loggerwithfile.cpp
    filelogger.cpp
@@ -9,6 +10,7 @@ set(logging_SOURCES
 )
 
 set(logging_HEADERS
+   bufferlogger.h
    dualfilelogger.h
    loggerwithfile.h
    filelogger.h

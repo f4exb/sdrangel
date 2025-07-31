@@ -1003,6 +1003,9 @@ if (BUILD_GUI)
         sdrgui/resources/sdrangel.rc
         settings/settings.qrc
     )
+    if (WIN32)
+        set(sdrangel_SOURCES ${sdrangel_SOURCES} app/crashhandlerwin.cpp)
+    endif()
     if(APPLE)
         set(sdrangel_SOURCES ${sdrangel_SOURCES} mac/auth.mm)
     endif()
@@ -1109,6 +1112,7 @@ endif()
 
 # Install debug symbols
 if (WIN32)
+  install(FILES $<TARGET_PROPERTY:${CMAKE_PROJECT_NAME},RUNTIME_OUTPUT_DIRECTORY>/${CMAKE_PROJECT_NAME}stripped.pdb CONFIGURATIONS Release DESTINATION ${INSTALL_LIB_DIR} RENAME ${CMAKE_PROJECT_NAME}.pdb)
   install(FILES $<TARGET_PDB_FILE:${CMAKE_PROJECT_NAME}> CONFIGURATIONS Debug RelWithDebInfo DESTINATION ${INSTALL_BIN_DIR} )
 endif()
 
