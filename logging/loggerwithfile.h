@@ -11,6 +11,7 @@
 #include <QtGlobal>
 #include "logger.h"
 #include "filelogger.h"
+#include "bufferlogger.h"
 
 #include "export.h"
 
@@ -79,12 +80,17 @@ public:
     /** This will log to file only */
     void logToFile(const QtMsgType type, const QString& message, const QString &file="", const QString &function="", const int line=0);
 
+    /** Gets last messages saved in buffer. */
+    QString getBufferLog() const;
+
 private:
     /** First console logger */
     Logger* consoleLogger;
 
     /** Second file logger */
     FileLogger* fileLogger;
+
+    BufferLogger* bufferLogger;
 
     /** Use file logger indicator */
     bool useFileFlogger;

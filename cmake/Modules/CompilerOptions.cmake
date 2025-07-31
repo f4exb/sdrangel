@@ -30,6 +30,12 @@ else()
   # C4267: 'return': conversion from 'size_t' to 'int', possible loss of data
   # C4305: 'initializing': truncation from 'double' to 'Real'
   add_compile_options(/wd4996 /wd4267 /wd4305)
+
+  if(CMAKE_BUILD_TYPE MATCHES "Release")
+    # Include stripped debug info in release builds so crash handler can generate stack trace with function names
+    add_compile_options(/Zi)
+    add_link_options(/DEBUG /OPT:REF /OPT:ICF /PDBSTRIPPED:$<TARGET_PROPERTY:RUNTIME_OUTPUT_DIRECTORY>/$<TARGET_PROPERTY:NAME>stripped.pdb)
+  endif()
 endif()
 
 if (SANITIZE_ADDRESS)

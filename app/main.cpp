@@ -44,6 +44,7 @@
 #include "mainwindow.h"
 #include "remotetcpsinkstarter.h"
 #include "dsp/dsptypes.h"
+#include "crashhandler.h"
 
 static int runQtApplication(int argc, char* argv[], qtwebapp::LoggerWithFile *logger)
 {
@@ -234,6 +235,10 @@ int main(int argc, char* argv[])
 #else
     qtwebapp::LoggerWithFile *logger = new qtwebapp::LoggerWithFile(qApp);
     logger->installMsgHandler();
+#endif
+
+#ifdef _WIN32
+    installCrashHandler(logger);
 #endif
 
 	int res = runQtApplication(argc, argv, logger);

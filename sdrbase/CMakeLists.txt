@@ -50,7 +50,7 @@ endif()
 
 # CUDA Toolkit: https://developer.nvidia.com/cuda-downloads
 if (${VKFFT_BACKEND} EQUAL 1)
-    find_package(CUDAToolkit)    
+    find_package(CUDAToolkit)
     if(CUDA_FOUND)
         enable_language(CUDA)
         set(sdrbase_SOURCES
@@ -732,5 +732,6 @@ endif()
 
 # Install debug symbols
 if (WIN32)
+    install(FILES $<TARGET_PROPERTY:sdrbase,RUNTIME_OUTPUT_DIRECTORY>/sdrbasestripped.pdb CONFIGURATIONS Release DESTINATION ${INSTALL_LIB_DIR} RENAME sdrbase.pdb)
     install(FILES $<TARGET_PDB_FILE:sdrbase> CONFIGURATIONS Debug RelWithDebInfo DESTINATION ${INSTALL_LIB_DIR} )
 endif()
