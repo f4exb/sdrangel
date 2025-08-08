@@ -491,6 +491,7 @@ void GS232ControllerGUI::displaySettings()
     ui->highSensitivity->setChecked(m_settings.m_highSensitivity);
     ui->enableTargetControl->setChecked(m_settings.m_targetControlEnabled);
     ui->enableOffsetControl->setChecked(m_settings.m_offsetControlEnabled);
+    ui->lineEnding->setCurrentIndex((int) m_settings.m_lineEnding);
     ui->dfmTrack->setChecked(m_settings.m_dfmTrackOn);
     ui->dfmLubePumps->setChecked(m_settings.m_dfmLubePumpsOn);
     ui->dfmBrakes->setChecked(m_settings.m_dfmBrakesOn);
@@ -643,17 +644,20 @@ void GS232ControllerGUI::setProtocol(GS232ControllerSettings::Protocol protocol)
         ui->precision->setValue(0);
         ui->precision->setEnabled(false);
         ui->precisionLabel->setEnabled(false);
+        ui->lineEnding->setEnabled(true);
     }
     else if (protocol == GS232ControllerSettings::SPID)
     {
         ui->precision->setValue(1);
         ui->precision->setEnabled(false);
         ui->precisionLabel->setEnabled(false);
+        ui->lineEnding->setEnabled(false);
     }
     else
     {
         ui->precision->setEnabled(true);
         ui->precisionLabel->setEnabled(true);
+        ui->lineEnding->setEnabled(false);
     }
     bool dfm = protocol == GS232ControllerSettings::DFM;
     ui->dfmLine->setVisible(dfm);
@@ -869,6 +873,12 @@ void GS232ControllerGUI::on_sources_currentTextChanged(const QString& text)
     applySetting("source");
 }
 
+void GS232ControllerGUI::on_lineEnding_currentIndexChanged(int index)
+{
+    m_settings.m_lineEnding = (GS232ControllerSettings::LineEnding)index;
+    applySetting("lineEnding");
+}
+
 void GS232ControllerGUI::on_dfmTrack_clicked(bool checked)
 {
     m_settings.m_dfmTrackOn = checked;
@@ -1004,6 +1014,7 @@ void GS232ControllerGUI::makeUIConnections()
     QObject::connect(ui->highSensitivity, &QToolButton::clicked, this, &GS232ControllerGUI::on_highSensitivity_clicked);
     QObject::connect(ui->enableTargetControl, &QToolButton::clicked, this, &GS232ControllerGUI::on_enableTargetControl_clicked);
     QObject::connect(ui->enableOffsetControl, &QToolButton::clicked, this, &GS232ControllerGUI::on_enableOffsetControl_clicked);
+    QObject::connect(ui->lineEnding, qOverload<int>(&QComboBox::currentIndexChanged), this, &GS232ControllerGUI::on_lineEnding_currentIndexChanged);
     QObject::connect(ui->dfmTrack, &QToolButton::toggled, this, &GS232ControllerGUI::on_dfmTrack_clicked);
     QObject::connect(ui->dfmLubePumps, &QToolButton::toggled, this, &GS232ControllerGUI::on_dfmLubePumps_clicked);
     QObject::connect(ui->dfmBrakes, &QToolButton::toggled, this, &GS232ControllerGUI::on_dfmBrakes_clicked);

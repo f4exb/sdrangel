@@ -125,6 +125,7 @@ private slots:
     void on_tolerance_valueChanged(double value);
     void on_precision_valueChanged(int value);
     void on_coordinates_currentIndexChanged(int index);
+    void on_lineEnding_currentIndexChanged(int index);
     void on_dfmTrack_clicked(bool checked=false);
     void on_dfmLubePumps_clicked(bool checked=false);
     void on_dfmBrakes_clicked(bool checked=false);

@@ -107,7 +107,15 @@ Specifies the coordinate system used by the GUI for entry and display of the pos
 
 Equations for translating between these coordinate systems can be found [here](https://ntrs.nasa.gov/citations/19670030005).
 
-<h3>22: Input Control</h3>
+<h3>22: Line Ending</h3>
+
+For the GS-232 protocol only, sets the control characters that are transmitted after each command:
+
+* CRLF - "\r\n"
+* CR - "\r"
+* LF - "\n"
+
+<h3>23: Input Control</h3>
 
 Specifies a controller/gamepad that can be used to specify target coordinates or azimuth and elevation offset.
 
@@ -130,21 +138,21 @@ On Linux, using Qt Gamepad with the evdev backend, all joysticks & gamepads appe
 If using a joystick which only has 2 axes, whether it corresponds to the left or right stick can be configured by pressing the 'Config...' button.
 On Linux, the [xone driver](https://github.com/medusalix/xone) has support for the Xbox Wireless Controller, that isn't supported by the older xpad driver that is included with Ubuntu.
 
-<h3>23: High or Low Sensitivity</h3>
+<h3>24: High or Low Sensitivity</h3>
 
 Specifies High (H) or Low (L) Sensitivity mode. This is how fast coordinates will change for a given control stick movement.
 High Sensitivity is used for coarse target/offset adjustment, whereas Low sensitivity is used for fine target/offset adjustment.
-The sensitivity in each mode can be set in the Input Configuration Dialog (22).
+The sensitivity in each mode can be set in the Input Configuration Dialog (23).
 
-<h3>24: (T) Enable Target Control</h3>
+<h3>25: (T) Enable Target Control</h3>
 
 When checked, the target coordinates can be set with the input controller. When unchecked, the axes controlling the target will be ignored.
 
-<h3>25: (O) Enable Offset Control</h3>
+<h3>26: (O) Enable Offset Control</h3>
 
 When checked, the offset coordinates can be set with the input controller. When unchecked, the axes controlling the offset will be ignored.
 
-<h3>26: Input Control Configuration</h3>
+<h3>27: Input Control Configuration</h3>
 
 Pressing the Config... button will display the Input Configuration Dialog:
 
@@ -160,7 +168,7 @@ when a stick is centered, but is reporting a non-zero position on the axis.
 
 <h4>3: Sensitivity</h4>
 
-Specifies the sensitivity of the input in Low and High Sensitivity mode (23). The higher the value, the faster coordinates will change for a given control stick movement.
+Specifies the sensitivity of the input in Low and High Sensitivity mode (24). The higher the value, the faster coordinates will change for a given control stick movement.
 
 <h2>Protocol Implementations</h2>
 
