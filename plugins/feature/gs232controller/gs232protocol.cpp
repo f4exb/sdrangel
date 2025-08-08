@@ -28,7 +28,7 @@ GS232Protocol::GS232Protocol()
 
 void GS232Protocol::setAzimuth(float azimuth)
 {
-    QString cmd = QString("M%1\r\n").arg((int)std::round(azimuth), 3, 10, QLatin1Char('0'));
+    QString cmd = QString("M%1%2").arg((int)std::round(azimuth), 3, 10, QLatin1Char('0')).arg(lineEnding());
     QByteArray data = cmd.toLatin1();
     m_device->write(data);
     m_lastAzimuth = azimuth;
@@ -36,7 +36,7 @@ void GS232Protocol::setAzimuth(float azimuth)
 
 void GS232Protocol::setAzimuthElevation(float azimuth, float elevation)
 {
-    QString cmd = QString("W%1 %2\r\n").arg((int)std::round(azimuth), 3, 10, QLatin1Char('0')).arg((int)std::round(elevation), 3, 10, QLatin1Char('0'));
+    QString cmd = QString("W%1 %2%3").arg((int)std::round(azimuth), 3, 10, QLatin1Char('0')).arg((int)std::round(elevation), 3, 10, QLatin1Char('0')).arg(lineEnding());
     QByteArray data = cmd.toLatin1();
     m_device->write(data);
     ControllerProtocol::setAzimuthElevation(azimuth, elevation);
@@ -94,7 +94,18 @@ void GS232Protocol::readData()
 // Request current Az/El from controller
 void GS232Protocol::update()
 {
-    QByteArray cmd("C2\r\n");
-    m_device->write(cmd);
+    QString cmd = QString("C2%1").arg(lineEnding());
+    QByteArray data = cmd.toLatin1();
+    m_device->write(data);
 }
 
+QString GS232Protocol::lineEnding() const
+{
+    if (m_settings.m_lineEnding == GS232ControllerSettings::CRLF) {
+        return "\r\n";
+    } else if (m_settings.m_lineEnding == GS232ControllerSettings::CR) {
+        return "\r";
+    } else {
+        return "\n";
+    }
+}
