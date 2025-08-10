@@ -241,7 +241,7 @@ void GLScope::paintGL()
     //    m_traceCounter = 0;
 
     QOpenGLFunctions *glFunctions = QOpenGLContext::currentContext()->functions();
-    glFunctions->glClearColor(0.0f, 0.0f, 0.0f, 0.0f);
+    glFunctions->glClearColor(0.0f, 0.0f, 0.0f, 1.0f);
     glFunctions->glClear(GL_COLOR_BUFFER_BIT);
 
     if ((m_displayMode == DisplayX) || (m_displayMode == DisplayXYV) || (m_displayMode == DisplayXYH)) // display trace #0
