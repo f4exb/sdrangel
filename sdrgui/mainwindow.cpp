@@ -1149,7 +1149,7 @@ void LoadConfigurationFSM::loadFeatureSets()
         QObject::connect(
             gui,
             &FeatureGUI::moveToWorkspace,
-            this,
+            m_mainWindow,
             [m_mainWindow=m_mainWindow, gui](int wsIndexDest){ m_mainWindow->featureMove(gui, wsIndexDest); }
         );
     }
