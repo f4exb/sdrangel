@@ -463,8 +463,8 @@ void HeatMapGUI::on_txPositionSet_clicked(bool checked)
 {
     (void) checked;
 
-    ui->txLatitude->setText(QString::number(m_latitude));
-    ui->txLongitude->setText(QString::number(m_longitude));
+    ui->txLatitude->setText(formatCoord(m_latitude));
+    ui->txLongitude->setText(formatCoord(m_longitude));
     m_settings.m_txLatitude = m_latitude;
     m_settings.m_txLongitude = m_longitude;
     updateRange();
@@ -617,8 +617,8 @@ HeatMapGUI::HeatMapGUI(PluginAPI* pluginAPI, DeviceUISet *deviceUISet, BasebandS
     m_latitude = MainCore::instance()->getSettings().getLatitude();
     m_longitude = MainCore::instance()->getSettings().getLongitude();
     m_altitude = MainCore::instance()->getSettings().getAltitude();
-    ui->latitude->setText(QString::number(m_latitude));
-    ui->longitude->setText(QString::number(m_longitude));
+    ui->latitude->setText(formatCoord(m_latitude));
+    ui->longitude->setText(formatCoord(m_longitude));
 
     QStringList colorMapNames = ColorMap::getColorMapNames();
     for (const auto& color : colorMapNames) {
@@ -709,8 +709,8 @@ void HeatMapGUI::displaySettings()
 
     ui->txPosition->setChecked(m_settings.m_txPosValid);
     displayTXPosition(m_settings.m_txPosValid);
-    ui->txLatitude->setText(QString::number(m_settings.m_txLatitude));
-    ui->txLongitude->setText(QString::number(m_settings.m_txLongitude));
+    ui->txLatitude->setText(formatCoord(m_settings.m_txLatitude));
+    ui->txLongitude->setText(formatCoord(m_settings.m_txLongitude));
     ui->txPower->setValue(m_settings.m_txPower);
 
     ui->displayChart->setChecked(m_settings.m_displayChart);
@@ -1215,8 +1215,8 @@ void HeatMapGUI::preferenceChanged(int elementType)
         m_altitude = MainCore::instance()->getSettings().getAltitude();
 
         // Display new position in GUI
-        ui->latitude->setText(QString::number(m_latitude));
-        ui->longitude->setText(QString::number(m_longitude));
+        ui->latitude->setText(formatCoord(m_latitude));
+        ui->longitude->setText(formatCoord(m_longitude));
         updateRange();
 
         // Map position to pixel
@@ -1651,4 +1651,9 @@ void HeatMapGUI::on_recordPathLoss_clicked(bool checked)
     m_settings.m_recordPathLoss = checked;
     resizeMap(0, 0);
     applySettings();
+}
+
+QString HeatMapGUI::formatCoord(float coord) const
+{
+    return QString::number(coord, 'f', 6);
 }
