@@ -450,6 +450,12 @@ Double clicking on one of the listed frequencies, will tune the AM Demod (29) to
 The Az/El row gives the azimuth and elevation of the airport from the location set under Preferences > My Position. Double clicking on this row will set the airport as the active target.
 * Right clicking on an airport will display a popup menu, allowing range rings to be shown or hidden, and for the ATC frequencies for the airport to be send to a Frequency Scanner.
 
+<h2>Recommended Device Settings</h2>
+
+<h3>RTL SDR</h3>
+
+![RTL SDR Device Settings for ADS-B](../../../doc/img/ADSBDemod_plugin_rtlsdr.png)
+
 <h2>Attribution</h2>
 
 Airline logos, sideviews and flags are by Steve Hibberd from [RadarSpotting](https://radarspotting.com)
