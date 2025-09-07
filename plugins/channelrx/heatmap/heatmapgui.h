@@ -167,6 +167,7 @@ private:
     void updateRange();
     void displayTXPosition(bool enabled);
     double calcFreeSpacePathLoss(double range, double frequency);
+    QString formatCoord(float coord) const;
 
     void displayPowerChart();
     void plotPowerVsTimeChart();
