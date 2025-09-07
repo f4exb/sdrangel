@@ -1510,6 +1510,7 @@ void RadioAstronomyGUI::on_savePowerData_clicked(bool checked)
 
     // Get filename to save to
     QFileDialog fileDialog(nullptr, "Select file to save data to", "", "*.csv");
+    fileDialog.setDefaultSuffix("csv");
     fileDialog.setAcceptMode(QFileDialog::AcceptSave);
     if (fileDialog.exec())
     {
@@ -1528,6 +1529,7 @@ void RadioAstronomyGUI::on_savePowerData_rightClicked(const QPoint& point)
     {
         // Get filename to save to
         QFileDialog fileDialog(nullptr, "Select file to auto save data to", "", "*.csv");
+        fileDialog.setDefaultSuffix("csv");
         fileDialog.setAcceptMode(QFileDialog::AcceptSave);
         if (fileDialog.exec())
         {
@@ -1801,6 +1803,7 @@ void RadioAstronomyGUI::on_saveSpectrumData_clicked(bool checked)
 
     // Get filename to save to
     QFileDialog fileDialog(nullptr, "Select file to save data to", "", "*.csv");
+    fileDialog.setDefaultSuffix("csv");
     fileDialog.setAcceptMode(QFileDialog::AcceptSave);
     if (fileDialog.exec())
     {
@@ -1819,6 +1822,7 @@ void RadioAstronomyGUI::on_saveSpectrumData_rightClicked(const QPoint &point)
     {
         // Get filename to save to
         QFileDialog fileDialog(nullptr, "Select file to auto save data to", "", "*.csv");
+        fileDialog.setDefaultSuffix("csv");
         fileDialog.setAcceptMode(QFileDialog::AcceptSave);
         if (fileDialog.exec())
         {
@@ -1846,6 +1850,7 @@ void RadioAstronomyGUI::on_loadSpectrumData_clicked()
 {
     // Get filename to load from
     QFileDialog fileDialog(nullptr, "Select file to load data from", "", "*.csv");
+    fileDialog.setDefaultSuffix("csv");
     fileDialog.setAcceptMode(QFileDialog::AcceptOpen);
     if (fileDialog.exec())
     {

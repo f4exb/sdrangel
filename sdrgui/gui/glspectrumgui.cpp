@@ -549,6 +549,7 @@ void GLSpectrumGUI::on_save_clicked(bool checked)
 
     // Get filename to write
     QFileDialog fileDialog(nullptr, "Select file to save data to", "", "*.csv");
+    fileDialog.setDefaultSuffix("csv");
     fileDialog.setAcceptMode(QFileDialog::AcceptSave);
     if (fileDialog.exec())
     {

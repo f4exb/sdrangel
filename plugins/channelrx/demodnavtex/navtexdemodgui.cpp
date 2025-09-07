@@ -761,6 +761,7 @@ void NavtexDemodGUI::on_logFilename_clicked()
 {
     // Get filename to save to
     QFileDialog fileDialog(nullptr, "Select file to log received messages to", "", "*.csv");
+    fileDialog.setDefaultSuffix("csv");
     fileDialog.setAcceptMode(QFileDialog::AcceptSave);
     if (fileDialog.exec())
     {

@@ -155,6 +155,7 @@ void SIDSettingsDialog::accept()
 
 void SIDSettingsDialog::on_browse_clicked()
 {
+    m_fileDialog.setDefaultSuffix("csv");
     m_fileDialog.setAcceptMode(QFileDialog::AcceptSave);
     if (m_fileDialog.exec())
     {

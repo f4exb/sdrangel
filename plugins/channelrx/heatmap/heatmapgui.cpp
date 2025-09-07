@@ -305,6 +305,7 @@ void HeatMapGUI::on_writeCSV_clicked()
 {
     m_csvFileDialog.setAcceptMode(QFileDialog::AcceptSave);
     m_csvFileDialog.setNameFilter("*.csv");
+    m_csvFileDialog.setDefaultSuffix("csv");
     if (m_csvFileDialog.exec())
     {
         QStringList fileNames = m_csvFileDialog.selectedFiles();

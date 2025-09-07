@@ -425,6 +425,7 @@ void NoiseFigureGUI::on_saveResults_clicked()
 {
     // Get filename to save to
     QFileDialog fileDialog(nullptr, "Select file to save results to", "", "*.csv");
+    fileDialog.setDefaultSuffix("csv");
     fileDialog.setAcceptMode(QFileDialog::AcceptSave);
     if (fileDialog.exec())
     {
