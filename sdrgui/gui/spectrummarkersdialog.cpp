@@ -738,6 +738,7 @@ void SpectrumMarkersDialog::on_aMarkersImport_clicked()
         QStandardPaths::writableLocation(QStandardPaths::AppDataLocation),
         "*.csv"
     );
+    fileDialog.setDefaultSuffix("csv");
 
     if (fileDialog.exec())
     {

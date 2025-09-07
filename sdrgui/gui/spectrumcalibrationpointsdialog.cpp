@@ -281,6 +281,7 @@ void SpectrumCalibrationPointsDialog::on_calibPointsExport_clicked()
         QStandardPaths::writableLocation(QStandardPaths::AppDataLocation),
         "*.csv"
     );
+    fileDialog.setDefaultSuffix("csv");
     fileDialog.setAcceptMode(QFileDialog::AcceptSave);
 
     if (fileDialog.exec())

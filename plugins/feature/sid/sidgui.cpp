@@ -2237,6 +2237,7 @@ void SIDGUI::autosave()
 
 void SIDGUI::on_saveData_clicked()
 {
+    m_fileDialog.setDefaultSuffix("csv");
     m_fileDialog.setAcceptMode(QFileDialog::AcceptSave);
     if (m_fileDialog.exec())
     {
