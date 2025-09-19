@@ -126,7 +126,7 @@ Workspace::Workspace(int index, QWidget *parent, Qt::WindowFlags flags) :
     m_addFeatureButton->setIcon(addFeatureIcon);
     m_addFeatureButton->setToolTip("Add features");
     m_addFeatureButton->setFixedSize(20, 20);
-    m_addFeatureButton->setShortcut(QKeySequence(Qt::CTRL | Qt::Key_A));
+    m_addFeatureButton->setShortcut(QKeySequence(Qt::CTRL | Qt::Key_E));
 
     m_featurePresetsButton = new QPushButton();
     QIcon presetsIcon(":/tool_star.png");
