@@ -8,7 +8,7 @@
 # but make the configuration dirty
 
 # which version/tag/checkout to use
-set(CODEC2_TAG "v1.0.3")
+set(CODEC2_TAG "v1.1.1")
 set(CM256CC_TAG c0e92b92aca3d1d36c990b642b937c64d363c559)
 set(MBELIB_TAG fe83b32c6a60cdd7bce8cecf3c7a0b9ec87a7667)
 set(SERIALDV_TAG "v1.1.5")
@@ -595,8 +595,6 @@ if ((NOT CODEC2_FOUND OR CODEC2_EXTERNAL) AND NOT USE_PRECOMPILED_LIBS)
     elseif (LINUX)
         set(CODEC2_LIBRARIES "${EXTERNAL_BUILD_LIBRARIES}/lib${LIB_SUFFIX}/libcodec2${CMAKE_SHARED_LIBRARY_SUFFIX}" CACHE INTERNAL "")
     endif ()
-    # Repo temp set to codec2-dev to use v1.0.3 tag
-    # Should revert to codec2 when we eventually update to latest (v1.2.0+) release
     ExternalProject_Add(codec2
             GIT_REPOSITORY https://github.com/drowe67/codec2-dev.git
             GIT_TAG ${CODEC2_TAG}
