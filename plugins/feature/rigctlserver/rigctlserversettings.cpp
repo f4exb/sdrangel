@@ -139,6 +139,9 @@ bool RigCtlServerSettings::deserialize(const QByteArray& data)
 
 void RigCtlServerSettings::applySettings(const QStringList& settingsKeys, const RigCtlServerSettings& settings)
 {
+    if (settingsKeys.contains("enabled")) {
+        m_enabled = settings.m_enabled;
+    }
     if (settingsKeys.contains("rigCtlPort")) {
         m_rigCtlPort = settings.m_rigCtlPort;
     }
@@ -181,6 +184,9 @@ QString RigCtlServerSettings::getDebugString(const QStringList& settingsKeys, bo
 {
     std::ostringstream ostr;
 
+    if (settingsKeys.contains("enabled") || force) {
+        ostr << " m_enabled: " << m_enabled;
+    }
     if (settingsKeys.contains("rigCtlPort") || force) {
         ostr << " m_rigCtlPort: " << m_rigCtlPort;
     }
