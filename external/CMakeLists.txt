@@ -251,7 +251,7 @@ endif ()
 if (NOT OPUS_FOUND AND NOT USE_PRECOMPILED_LIBS)
     ExternalProject_Add(opus
             GIT_REPOSITORY https://github.com/xiph/opus
-            GIT_TAG v1.3.1
+            GIT_TAG v1.5.2
             PREFIX "${EXTERNAL_BUILD_LIBRARIES}/opus"
             CMAKE_ARGS ${COMMON_CMAKE_ARGS} -DOPUS_BUILD_SHARED_LIBRARY=ON -DBUILD_SHARED_LIBS=ON -DCMAKE_INSTALL_PREFIX=<INSTALL_DIR>
             TEST_COMMAND ""
