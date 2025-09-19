@@ -84,11 +84,13 @@ Workspace::Workspace(int index, QWidget *parent, Qt::WindowFlags flags) :
     m_configurationPresetsButton->setIcon(configurationPresetsIcon);
     m_configurationPresetsButton->setToolTip("Configuration presets");
     m_configurationPresetsButton->setFixedSize(20, 20);
+    m_configurationPresetsButton->setShortcut(QKeySequence(Qt::CTRL | Qt::Key_P));
 
     m_startStopButton = new ButtonSwitch();
     m_startStopButton->setCheckable(true);
     updateStartStopButton(false);
     m_startStopButton->setFixedSize(20, 20);
+    m_startStopButton->setShortcut(QKeySequence(Qt::CTRL | Qt::Key_S));
 
     m_vline1 = new QFrame();
     m_vline1->setFrameShape(QFrame::VLine);
@@ -99,18 +101,21 @@ Workspace::Workspace(int index, QWidget *parent, Qt::WindowFlags flags) :
     m_addRxDeviceButton->setIcon(addRxIcon);
     m_addRxDeviceButton->setToolTip("Add Rx device");
     m_addRxDeviceButton->setFixedSize(20, 20);
+    m_addRxDeviceButton->setShortcut(QKeySequence(Qt::CTRL | Qt::Key_R));
 
     m_addTxDeviceButton = new QPushButton();
     QIcon addTxIcon(":/tx.png");
     m_addTxDeviceButton->setIcon(addTxIcon);
     m_addTxDeviceButton->setToolTip("Add Tx device");
     m_addTxDeviceButton->setFixedSize(20, 20);
+    m_addTxDeviceButton->setShortcut(QKeySequence(Qt::CTRL | Qt::Key_T));
 
     m_addMIMODeviceButton = new QPushButton();
     QIcon addMIMOIcon(":/mimo.png");
     m_addMIMODeviceButton->setIcon(addMIMOIcon);
     m_addMIMODeviceButton->setToolTip("Add MIMO device");
     m_addMIMODeviceButton->setFixedSize(20, 20);
+    m_addMIMODeviceButton->setShortcut(QKeySequence(Qt::CTRL | Qt::Key_M));
 
     m_vline2 = new QFrame();
     m_vline2->setFrameShape(QFrame::VLine);
@@ -121,12 +126,14 @@ Workspace::Workspace(int index, QWidget *parent, Qt::WindowFlags flags) :
     m_addFeatureButton->setIcon(addFeatureIcon);
     m_addFeatureButton->setToolTip("Add features");
     m_addFeatureButton->setFixedSize(20, 20);
+    m_addFeatureButton->setShortcut(QKeySequence(Qt::CTRL | Qt::Key_A));
 
     m_featurePresetsButton = new QPushButton();
     QIcon presetsIcon(":/tool_star.png");
     m_featurePresetsButton->setIcon(presetsIcon);
     m_featurePresetsButton->setToolTip("Feature presets");
     m_featurePresetsButton->setFixedSize(20, 20);
+    m_featurePresetsButton->setShortcut(QKeySequence(Qt::CTRL | Qt::SHIFT | Qt::Key_P));
 
     m_vline3 = new QFrame();
     m_vline3->setFrameShape(QFrame::VLine);
@@ -137,24 +144,28 @@ Workspace::Workspace(int index, QWidget *parent, Qt::WindowFlags flags) :
     m_cascadeSubWindows->setIcon(cascadeSubWindowsIcon);
     m_cascadeSubWindows->setToolTip("Cascade sub windows");
     m_cascadeSubWindows->setFixedSize(20, 20);
+    m_cascadeSubWindows->setShortcut(QKeySequence(Qt::CTRL | Qt::SHIFT | Qt::Key_C));
 
     m_tileSubWindows = new QPushButton();
     QIcon tileSubWindowsIcon(":/tiles.png");
     m_tileSubWindows->setIcon(tileSubWindowsIcon);
     m_tileSubWindows->setToolTip("Tile sub windows");
     m_tileSubWindows->setFixedSize(20, 20);
+    m_tileSubWindows->setShortcut(QKeySequence(Qt::CTRL | Qt::SHIFT | Qt::Key_T));
 
     m_stackVerticalSubWindows = new QPushButton();
     QIcon stackVerticalSubWindowsIcon(":/stackvertical.png");
     m_stackVerticalSubWindows->setIcon(stackVerticalSubWindowsIcon);
     m_stackVerticalSubWindows->setToolTip("Stack sub windows vertically");
     m_stackVerticalSubWindows->setFixedSize(20, 20);
+    m_stackVerticalSubWindows->setShortcut(QKeySequence(Qt::CTRL | Qt::SHIFT | Qt::Key_V));
 
     m_stackSubWindows = new QPushButton();
     QIcon stackSubWindowsIcon(":/stackcolumns.png");
     m_stackSubWindows->setIcon(stackSubWindowsIcon);
     m_stackSubWindows->setToolTip("Stack sub windows in columns. Right click to stack automatically.");
     m_stackSubWindows->setFixedSize(20, 20);
+    m_stackSubWindows->setShortcut(QKeySequence(Qt::CTRL | Qt::SHIFT | Qt::Key_S));
     CRightClickEnabler *stackSubWindowsRightClickEnabler = new CRightClickEnabler(m_stackSubWindows);
     connect(stackSubWindowsRightClickEnabler, &CRightClickEnabler::rightClick, this, &Workspace::autoStackSubWindows);
 
@@ -164,6 +175,7 @@ Workspace::Workspace(int index, QWidget *parent, Qt::WindowFlags flags) :
     m_tabSubWindows->setCheckable(true);
     m_tabSubWindows->setToolTip("Display sub windows in tabs");
     m_tabSubWindows->setFixedSize(20, 20);
+    m_tabSubWindows->setShortcut(QKeySequence(Qt::CTRL | Qt::SHIFT | Qt::Key_B));
 
     m_normalButton = new QPushButton();
     QIcon normalIcon(":/dock.png");
