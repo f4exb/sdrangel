@@ -28,7 +28,7 @@ set(SOAPYSDR_TAG "1667b4e6301d7ad47b340dcdcd6e9969bf57d843")
 set(SOAPYSDR_SDRPLAY_TAG "soapy-sdrplay-0.2.0")
 set(SOAPYSDR_AUDIO_TAG "soapy-audio-0.1.1")
 set(SOAPYSDR_REMOTE_TAG "soapy-remote-0.5.1")
-set(AIRSPY_TAG "a379373639ea0a33e5f1f96956c0909da60faeee")
+set(AIRSPY_TAG "cmake4")
 set(HACKRF_TAG "v2024.02.1")
 set(LIBXML2_TAG "v2.10.4")
 set(UHD_TAG "v4.7.0.0")
@@ -1292,7 +1292,7 @@ if (WIN32 OR APPLE)
         # We need to set CMAKE_INSTALL_NAME_DIR, otherwise path to libs is set to install path of /usr/local/
         # but as we don't install, macdeployqt will fail to find them
         ExternalProject_Add(airspy
-                GIT_REPOSITORY https://github.com/airspy/airspyone_host
+                GIT_REPOSITORY https://github.com/srcejon/airspyone_host.git
                 GIT_TAG ${AIRSPY_TAG}
                 DEPENDS ${PTHREADS4W_DEPENDS} ${LIBUSB_DEPENDS}
                 PREFIX "${EXTERNAL_BUILD_LIBRARIES}/airspy"
