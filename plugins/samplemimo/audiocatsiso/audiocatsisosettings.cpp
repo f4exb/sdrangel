@@ -73,6 +73,8 @@ void AudioCATSISOSettings::resetToDefaults()
     m_pttSpectrumLink = true;
     m_rxCenterFrequency = 14200000;
     m_txCenterFrequency = 14200000;
+    m_rxSampleRate = 48000; // Default sample rate
+    m_txSampleRate = 48000; // Default sample rate
     m_transverterMode = false;
     m_transverterDeltaFrequency = 0;
     m_rxDeviceName = "";
@@ -108,6 +110,8 @@ AudioCATSISOSettings::AudioCATSISOSettings(const AudioCATSISOSettings& other)
     m_pttSpectrumLink = other.m_pttSpectrumLink;
     m_rxCenterFrequency = other.m_rxCenterFrequency;
     m_txCenterFrequency = other.m_txCenterFrequency;
+    m_rxSampleRate = other.m_rxSampleRate;
+    m_txSampleRate = other.m_txSampleRate;
     m_transverterMode = other.m_transverterMode;
     m_transverterDeltaFrequency = other.m_transverterDeltaFrequency;
     m_rxDeviceName = other.m_rxDeviceName;
@@ -150,11 +154,13 @@ QByteArray AudioCATSISOSettings::serialize() const
     s.writeS32(8, (int) m_fcPosRx);
     s.writeBool(9, m_transverterMode);
     s.writeS64(10, m_transverterDeltaFrequency);
+    s.writeS32(11, m_rxSampleRate); // Serialize RX sample rate
 
     s.writeString(21, m_txDeviceName);
     s.writeU64(22, m_txCenterFrequency);
     s.writeS32(23, m_txVolume);
     s.writeS32(24, (int)m_txIQMapping);
+    s.writeS32(25, m_txSampleRate); // Serialize TX sample rate
 
     s.writeString(31, m_catDevicePath);
     s.writeU32(32, m_hamlibModel);
@@ -203,11 +209,13 @@ bool AudioCATSISOSettings::deserialize(const QByteArray& data)
         m_fcPosRx = (fcPos_t) intval;
         d.readBool(9, &m_transverterMode, false);
         d.readS64(10, &m_transverterDeltaFrequency, 0);
+        d.readS32(11, &m_rxSampleRate, 48000); // Deserialize RX sample rate
 
         d.readString(21, &m_txDeviceName, "");
         d.readU64(22, &m_txCenterFrequency, 14200000);
         d.readS32(23, &m_txVolume, -10);
         d.readS32(24,(int *)&m_txIQMapping, IQMapping::LR);
+        d.readS32(25, &m_txSampleRate, 48000); // Deserialize TX sample rate
 
         d.readString(31, &m_catDevicePath, "");
         d.readU32(32, &m_hamlibModel, 1);
@@ -257,6 +265,9 @@ void AudioCATSISOSettings::applySettings(const QStringList& settingsKeys, const 
     if (settingsKeys.contains("rxDeviceName")) {
         m_rxDeviceName = settings.m_rxDeviceName;
     }
+    if (settingsKeys.contains("rxSampleRate")) {
+        m_rxSampleRate = settings.m_rxSampleRate;
+    }
     if (settingsKeys.contains("rxCenterFrequency")) {
         m_rxCenterFrequency = settings.m_rxCenterFrequency;
     }
@@ -281,6 +292,9 @@ void AudioCATSISOSettings::applySettings(const QStringList& settingsKeys, const 
 
     if (settingsKeys.contains("txDeviceName")) {
         m_txDeviceName = settings.m_txDeviceName;
+    }
+    if (settingsKeys.contains("txSampleRate")) {
+        m_txSampleRate = settings.m_txSampleRate;
     }
     if (settingsKeys.contains("txCenterFrequency")) {
         m_txCenterFrequency = settings.m_txCenterFrequency;
@@ -357,6 +371,9 @@ QString AudioCATSISOSettings::getDebugString(const QStringList& settingsKeys, bo
     if (settingsKeys.contains("rxDeviceName") || force) {
         ostr << " m_rxDeviceName: " << m_rxDeviceName.toStdString();
     }
+    if (settingsKeys.contains("rxSampleRate") || force) {
+        ostr << " m_rxSampleRate: " << m_rxSampleRate;
+    }
     if (settingsKeys.contains("rxCenterFrequency") || force) {
         ostr << " m_rxCenterFrequency: " << m_rxCenterFrequency;
     }
@@ -381,6 +398,9 @@ QString AudioCATSISOSettings::getDebugString(const QStringList& settingsKeys, bo
 
     if (settingsKeys.contains("txDeviceName") || force) {
         ostr << " m_txDeviceName: " << m_txDeviceName.toStdString();
+    }
+    if (settingsKeys.contains("txSampleRate") || force) {
+        ostr << " m_txSampleRate: " << m_txSampleRate;
     }
     if (settingsKeys.contains("txCenterFrequency") || force) {
         ostr << " m_txCenterFrequency: " << m_txCenterFrequency;

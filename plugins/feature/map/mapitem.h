@@ -25,6 +25,8 @@
 
 #include "mapsettings.h"
 #include "cesiuminterface.h"
+#include "util/whittakereilers.h"
+#include "mapaircraftstate.h"
 
 #include "SWGMapItem.h"
 
@@ -58,6 +60,7 @@ protected:
 
     QString m_name;                     // Unique id
     QString m_label;
+    QDateTime m_labelDateTime;          // Date & time from which this label is valid from (for 3D map). Invalid date/time is forever
     float m_latitude;                   // Position for label
     float m_longitude;
     float m_altitude;                   // In metres
@@ -65,13 +68,13 @@ protected:
     QDateTime m_availableUntil;         // Date & time this item is visible until (for 3D map). Invalid date/time is forever
 };
 
-
 // Information required about each item displayed on the map
 class ObjectMapItem : public MapItem {
 
 public:
     ObjectMapItem(const QObject *sourcePipe, const QString &group, MapSettings::MapItemSettings *itemSettings, SWGSDRangel::SWGMapItem *mapItem) :
-        MapItem(sourcePipe, group, itemSettings, mapItem)
+        MapItem(sourcePipe, group, itemSettings, mapItem),
+        m_aircraftState(nullptr)
     {
         update(mapItem);
     }
@@ -79,12 +82,17 @@ public:
 
 protected:
     void findFrequencies();
-    void updateTrack(QList<SWGSDRangel::SWGMapCoordinate *> *track);
+    void updateTrack(QList<SWGSDRangel::SWGMapCoordinate *> *track, MapSettings::MapItemSettings *itemSettings);
     void updatePredictedTrack(QList<SWGSDRangel::SWGMapCoordinate *> *track);
+    void extrapolatePosition(QGeoCoordinate *c, const QDateTime& dateTime);
+    void extrapolateAltitude(QGeoCoordinate *c, const QDateTime& dateTime);
+    void interpolatePosition(int i, const float latitude, const float longitude, const QDateTime &dateTime);
+    void interpolateAltitude(int i, const float altitude, const QDateTime &dateTime);
 
     friend ObjectMapModel;
     friend CZML;
     QDateTime m_positionDateTime;
+    QDateTime m_altitudeDateTime;
     bool m_useHeadingPitchRoll;
     float m_heading;
     float m_pitch;
@@ -107,6 +115,8 @@ protected:
     QGeoCoordinate m_predictedEnd2;
     QList<QGeoCoordinate *> m_takenTrackCoords;
     QList<QDateTime *> m_takenTrackDateTimes;
+    QList<bool> m_takenTrackPositionExtrapolated;
+    QList<bool> m_takenTrackAltitudeExtrapolated;
     QVariantList m_takenTrack;          // Line showing where the object has been
     QVariantList m_takenTrack1;
     QVariantList m_takenTrack2;
@@ -114,6 +124,8 @@ protected:
     QGeoCoordinate m_takenStart2;
     QGeoCoordinate m_takenEnd1;
     QGeoCoordinate m_takenEnd2;
+    QList<QGeoCoordinate *> m_interpolatedCoords;
+    QList<QDateTime *> m_interpolatedDateTimes;
 
     // For 3D map
     QString m_model;
@@ -121,6 +133,9 @@ protected:
     float m_labelAltitudeOffset;
     float m_modelAltitudeOffset;
     QList<CesiumInterface::Animation *> m_animations;
+    MapAircraftState *m_aircraftState;
+
+    static WhittakerEilers m_filter; // For smoothing/interpolating position
 };
 
 class PolygonMapItem  : public MapItem {

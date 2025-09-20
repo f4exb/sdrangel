@@ -16,6 +16,7 @@ set(sdrgui_SOURCES
     gui/basicfeaturesettingsdialog.cpp
     gui/buttonswitch.cpp
     gui/channeladddialog.cpp
+    gui/checklist.cpp
     gui/clickablelabel.cpp
     gui/colordialog.cpp
     gui/colormapper.cpp
@@ -146,6 +147,7 @@ set(sdrgui_HEADERS
     gui/basicfeaturesettingsdialog.h
     gui/buttonswitch.h
     gui/channeladddialog.h
+    gui/checklist.h
     gui/colordialog.h
     gui/colormapper.h
     gui/commanditem.h
@@ -365,5 +367,6 @@ endif()
 
 # Install debug symbols
 if (WIN32)
+    install(FILES $<TARGET_PROPERTY:sdrgui,RUNTIME_OUTPUT_DIRECTORY>/sdrguistripped.pdb CONFIGURATIONS Release DESTINATION ${INSTALL_LIB_DIR} RENAME sdrgui.pdb)
     install(FILES $<TARGET_PDB_FILE:sdrgui> CONFIGURATIONS Debug RelWithDebInfo DESTINATION ${INSTALL_LIB_DIR} )
 endif()

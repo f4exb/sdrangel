@@ -10,6 +10,8 @@ LimeSdrInputSettings:
       type: integer
     dcBlock:
       type: integer
+    splitFreq:
+      type: integer
     iqCorrection:
       type: integer
     log2SoftDecim:

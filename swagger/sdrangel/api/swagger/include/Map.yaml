@@ -78,6 +78,9 @@ MapItem:
     positionDateTime:
       description: "Date and time at this position (ISO 8601 extended format)"
       type: string
+    altitudeDateTime:
+      description: "Date and time at this altitude, if different from positionDateTime (ISO 8601 extended format)"
+      type: string
     track:
       description: "Track/path the item has taken"
       type: array
@@ -116,6 +119,9 @@ MapItem:
       description: "Vertical offset to position label at"
       type: number
       format: float
+    labelDateTime:
+      description: "Date and time from when this label applies (ISO 8601 extended format). Leave empty if label should apply for all time."
+      type: string
     modelAltitudeOffset:
       description: "Vertical offset to adjust model by to prevent it from going underground when altitude is 0"
       type: number
@@ -168,6 +174,8 @@ MapItem:
     color:
       description: "RGBA for polygon and polyline"
       type: integer
+    aircraftState:
+      $ref: "http://swgserver:8081/api/swagger/include/Map.yaml#/MapAircraftState"
 
 MapAnimation:
   description: "Animation to play in the model on the 3D map"
@@ -221,3 +229,88 @@ MapCoordinate:
     dateTime:
       description: "Date and time at this coordinate (ISO 8601 extended format)"
       type: string
+
+MapAircraftState:
+  description: "Aircraft state for PFD/ND"
+  properties:
+    callsign:
+      type: string
+    aircraftType:
+      type: string
+    onSurface:
+      type: integer
+    airspeed:
+      description: "Indicated airspeed in knots"
+      type: number
+      format: float
+    airspeedDateTime:
+      description: "Date and time at this indicated airspeed (ISO 8601 extended format)"
+      type: string
+    trueAirspeed:
+      description: "True airspeed in knots"
+      type: number
+      format: float
+    groundspeed:
+      description: "Ground speed in knots"
+      type: number
+      format: float
+    mach:
+      type: number
+      format: float
+    altitude:
+      description: "Barometric altitude in feet"
+      type: number
+      format: float
+    altitudeDateTime:
+      description: "Date and time at this altitude (ISO 8601 extended format)"
+      type: string
+    qnh:
+      description: "QNH in hPA"
+      type: number
+      format: float
+    verticalSpeed:
+      description: "feet/m"
+      type: number
+      format: float      
+    verticalSpeedDateTime:
+      description: "Date and time at this vertical speed (ISO 8601 extended format)"
+      type: string
+    heading:
+      description: "Degrees magnetic"
+      type: number
+      format: float
+    track:
+      description: "Degrees true"
+      type: number
+      format: float
+    selectedAirspeed:
+      type: number
+      format: float
+    selectedAltitude:
+      type: number
+      format: float
+    selectedHeading:
+      type: number
+      format: float
+    autopilot:
+      description: "-1 unknown, 0 off, 1 on"
+      type: integer
+    verticalMode:
+      description: "0 unknown, 1 VNAV, ALT HOLD, APP (G/S)"
+      type: integer
+    lateralMode:
+      description: "0 unknown, 1 LNAV, APP (LOC)"
+      type: integer
+    tcasMode:
+      description: "-1 unknown, 0 Off, 1 TA, 2 TA/RA"
+      type: integer  
+    windSpeed:
+      type: number
+      format: float
+    windDirection:
+      type: number
+      format: float
+    staticAirTemperature:
+      type: number
+      format: float
+      

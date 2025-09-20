@@ -661,6 +661,7 @@ void EndOfTrainDemodGUI::on_logFilename_clicked()
 {
     // Get filename to save to
     QFileDialog fileDialog(nullptr, "Select file to log received frames to", "", "*.csv");
+    fileDialog.setDefaultSuffix("csv");
     fileDialog.setAcceptMode(QFileDialog::AcceptSave);
     if (fileDialog.exec())
     {

@@ -44,7 +44,7 @@ QList<int> AudioDeviceInfo::supportedSampleRates() const
     // QAudioDevice is a bit more flexible than QAudioDeviceInfo, in that it supports
     // min and max rate, rather than a specific list
     // For now, we just list some common rates.
-    QList<int> sampleRates = {8000, 11025, 22050, 44100, 48000, 96000, 192000};
+    QList<int> sampleRates = {8000, 11025, 22050, 44100, 48000, 96000, 160000, 192000, 384000};
     QList<int> supportedRates;
     for (auto sampleRate : sampleRates)
     {
@@ -52,12 +52,29 @@ QList<int> AudioDeviceInfo::supportedSampleRates() const
             supportedRates.append(sampleRate);
         }
     }
+    if (!supportedRates.contains(m_deviceInfo.maximumSampleRate())) {
+        supportedRates.append(m_deviceInfo.maximumSampleRate());
+    }
     return supportedRates;
 }
 #else
 QList<int> AudioDeviceInfo::supportedSampleRates() const
 {
-    return m_deviceInfo.supportedSampleRates();
+    QList<int> reportedSampleRates = m_deviceInfo.supportedSampleRates();
+    reportedSampleRates.append({96000, 160000, 192000, 384000}); // Add some common rates that may not be in the list
+    QList<int> sampleRates;
+
+    for (auto sampleRate : reportedSampleRates) // Retain the sample rates that are supported by the device
+    {
+        QAudioFormat format = m_deviceInfo.preferredFormat();
+        format.setSampleRate(sampleRate);
+
+        if (m_deviceInfo.isFormatSupported(format)) {
+            sampleRates.append(sampleRate);
+        }
+    }
+
+    return sampleRates;
 }
 #endif
 
@@ -126,7 +143,7 @@ const QList<AudioDeviceInfo> &AudioDeviceInfo::availableOutputDevices()
 
 const AudioDeviceInfo &AudioDeviceInfo::defaultOutputDevice()
 {
-    if (defaultOutputDevice_.m_deviceInfo.isNull()) 
+    if (defaultOutputDevice_.m_deviceInfo.isNull())
     {
 #if QT_VERSION >= QT_VERSION_CHECK(6, 0, 0)
         defaultOutputDevice_ = AudioDeviceInfo(QMediaDevices::defaultAudioOutput());
@@ -139,7 +156,7 @@ const AudioDeviceInfo &AudioDeviceInfo::defaultOutputDevice()
 
 const AudioDeviceInfo &AudioDeviceInfo::defaultInputDevice()
 {
-    if (defaultInputDevice_.m_deviceInfo.isNull()) 
+    if (defaultInputDevice_.m_deviceInfo.isNull())
     {
 #if QT_VERSION >= QT_VERSION_CHECK(6, 0, 0)
         defaultInputDevice_ = AudioDeviceInfo(QMediaDevices::defaultAudioInput());

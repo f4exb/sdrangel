@@ -195,16 +195,12 @@ void SSBDemodSink::processOneSample(Complex &ci)
 
             if (m_audioBinaual)
             {
-                if (m_audioFlipChannels)
-                {
-                    m_audioBuffer[m_audioBufferFill].r = (qint16)(z.imag() * m_volume);
-                    m_audioBuffer[m_audioBufferFill].l = (qint16)(z.real() * m_volume);
-                }
-                else
-                {
-                    m_audioBuffer[m_audioBufferFill].r = (qint16)(z.real() * m_volume);
-                    m_audioBuffer[m_audioBufferFill].l = (qint16)(z.imag() * m_volume);
-                }
+                Real left  = m_audioFlipChannels ? z.imag() : z.real();
+                Real right = m_audioFlipChannels ? z.real() : z.imag();
+                left  = std::clamp(left  * m_volume, -32767.0f, 32767.0f);
+                right = std::clamp(right * m_volume, -32767.0f, 32767.0f);
+                m_audioBuffer[m_audioBufferFill].l = (qint16)left;
+                m_audioBuffer[m_audioBufferFill].r = (qint16)right;
 
                 m_demodBuffer[m_demodBufferFill++] = z.real();
                 m_demodBuffer[m_demodBufferFill++] = z.imag();
@@ -212,7 +208,7 @@ void SSBDemodSink::processOneSample(Complex &ci)
             else
             {
                 Real demod = (z.real() + z.imag()) * 0.7;
-                qint16 sample = (qint16)(demod * m_volume);
+                qint16 sample = (qint16)(std::clamp(demod * m_volume, -32767.0f, 32767.0f));
                 m_audioBuffer[m_audioBufferFill].l = sample;
                 m_audioBuffer[m_audioBufferFill].r = sample;
                 m_demodBuffer[m_demodBufferFill++] = (z.real() + z.imag()) * 0.7;

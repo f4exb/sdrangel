@@ -17,6 +17,7 @@
 
 #include <QMutexLocker>
 #include <QThread>
+#include <QDebug>
 
 #include <boost/crc.hpp>
 #include <boost/cstdint.hpp>

@@ -2582,9 +2582,15 @@ margin-bottom: 20px;
       "type" : "integer",
       "format" : "int64"
     },
+    "rxSampleRate" : {
+      "type" : "integer"
+    },
     "txCenterFrequency" : {
       "type" : "integer",
       "format" : "int64"
+    },
+    "txSampleRate" : {
+      "type" : "integer"
     },
     "transverterMode" : {
       "type" : "integer"
@@ -4877,6 +4883,10 @@ margin-bottom: 20px;
       "type" : "integer",
       "description" : "UDP thread (1 running, 0 idle)"
     },
+    "symbolRate" : {
+      "type" : "integer",
+      "description" : "Symbol rate in symbols per second - repeated from settings for convenience\n"
+    },
     "modcodModulation" : {
       "type" : "integer",
       "description" : "Modulation set by DVB-S2 MODCOD\n  * -1: Unset\n  *  0: BPSK\n  *  1: QPSK\n  *  2: PSK8\n  *  3: APSK16\n  *  4: APSK32\n  *  5: APSK64E\n  *  6: QAM16\n  *  7: QAM64\n  *  8: QAM256\n"
@@ -4929,10 +4939,6 @@ margin-bottom: 20px;
     "softLDPC" : {
       "type" : "integer",
       "description" : "(boolean) engage sodt LDPC with LDPC tool sub processes (Linux only)"
-    },
-    "softLDPCToolPath" : {
-      "type" : "string",
-      "description" : "O/S path to the LDPC tool binary"
     },
     "softLDPCMaxTrials" : {
       "type" : "integer",
@@ -5530,6 +5536,7 @@ margin-bottom: 20px;
   "description" : "List of DV serial devices available in the system"
 };
             defs.DemodAnalyzerActions = {
+  "required" : [ "channelId", "deviceId" ],
   "properties" : {
     "deviceId" : {
       "type" : "integer",
@@ -8962,6 +8969,9 @@ margin-bottom: 20px;
     "dcBlock" : {
       "type" : "integer"
     },
+    "splitFreq" : {
+      "type" : "integer"
+    },
     "iqCorrection" : {
       "type" : "integer"
     },
@@ -9965,6 +9975,116 @@ margin-bottom: 20px;
   },
   "description" : "Map"
 };
+            defs.MapAircraftState = {
+  "properties" : {
+    "callsign" : {
+      "type" : "string"
+    },
+    "aircraftType" : {
+      "type" : "string"
+    },
+    "onSurface" : {
+      "type" : "integer"
+    },
+    "airspeed" : {
+      "type" : "number",
+      "format" : "float",
+      "description" : "Indicated airspeed in knots"
+    },
+    "airspeedDateTime" : {
+      "type" : "string",
+      "description" : "Date and time at this indicated airspeed (ISO 8601 extended format)"
+    },
+    "trueAirspeed" : {
+      "type" : "number",
+      "format" : "float",
+      "description" : "True airspeed in knots"
+    },
+    "groundspeed" : {
+      "type" : "number",
+      "format" : "float",
+      "description" : "Ground speed in knots"
+    },
+    "mach" : {
+      "type" : "number",
+      "format" : "float"
+    },
+    "altitude" : {
+      "type" : "number",
+      "format" : "float",
+      "description" : "Barometric altitude in feet"
+    },
+    "altitudeDateTime" : {
+      "type" : "string",
+      "description" : "Date and time at this altitude (ISO 8601 extended format)"
+    },
+    "qnh" : {
+      "type" : "number",
+      "format" : "float",
+      "description" : "QNH in hPA"
+    },
+    "verticalSpeed" : {
+      "type" : "number",
+      "format" : "float",
+      "description" : "feet/m"
+    },
+    "verticalSpeedDateTime" : {
+      "type" : "string",
+      "description" : "Date and time at this vertical speed (ISO 8601 extended format)"
+    },
+    "heading" : {
+      "type" : "number",
+      "format" : "float",
+      "description" : "Degrees magnetic"
+    },
+    "track" : {
+      "type" : "number",
+      "format" : "float",
+      "description" : "Degrees true"
+    },
+    "selectedAirspeed" : {
+      "type" : "number",
+      "format" : "float"
+    },
+    "selectedAltitude" : {
+      "type" : "number",
+      "format" : "float"
+    },
+    "selectedHeading" : {
+      "type" : "number",
+      "format" : "float"
+    },
+    "autopilot" : {
+      "type" : "integer",
+      "description" : "-1 unknown, 0 off, 1 on"
+    },
+    "verticalMode" : {
+      "type" : "integer",
+      "description" : "0 unknown, 1 VNAV, ALT HOLD, APP (G/S)"
+    },
+    "lateralMode" : {
+      "type" : "integer",
+      "description" : "0 unknown, 1 LNAV, APP (LOC)"
+    },
+    "tcasMode" : {
+      "type" : "integer",
+      "description" : "-1 unknown, 0 Off, 1 TA, 2 TA/RA"
+    },
+    "windSpeed" : {
+      "type" : "number",
+      "format" : "float"
+    },
+    "windDirection" : {
+      "type" : "number",
+      "format" : "float"
+    },
+    "staticAirTemperature" : {
+      "type" : "number",
+      "format" : "float"
+    }
+  },
+  "description" : "Aircraft state for PFD/ND"
+};
             defs.MapAnimation = {
   "properties" : {
     "name" : {
@@ -10074,6 +10194,10 @@ margin-bottom: 20px;
       "type" : "string",
       "description" : "Date and time at this position (ISO 8601 extended format)"
     },
+    "altitudeDateTime" : {
+      "type" : "string",
+      "description" : "Date and time at this altitude, if different from positionDateTime (ISO 8601 extended format)"
+    },
     "track" : {
       "type" : "array",
       "description" : "Track/path the item has taken",
@@ -10123,6 +10247,10 @@ margin-bottom: 20px;
       "type" : "number",
       "format" : "float",
       "description" : "Vertical offset to position label at"
+    },
+    "labelDateTime" : {
+      "type" : "string",
+      "description" : "Date and time from when this label applies (ISO 8601 extended format). Leave empty if label should apply for all time."
     },
     "modelAltitudeOffset" : {
       "type" : "number",
@@ -10192,6 +10320,9 @@ margin-bottom: 20px;
     "color" : {
       "type" : "integer",
       "description" : "RGBA for polygon and polyline"
+    },
+    "aircraftState" : {
+      "$ref" : "#/definitions/MapAircraftState"
     }
   },
   "description" : "An item to draw on the map. Set image to an empty string to remove item from the map."
@@ -10238,6 +10369,10 @@ margin-bottom: 20px;
       "type" : "string",
       "description" : "Date and time at this position (ISO 8601 extended format)"
     },
+    "altitudeDateTime" : {
+      "type" : "string",
+      "description" : "Date and time at this altitude, if different from positionDateTime (ISO 8601 extended format)"
+    },
     "track" : {
       "type" : "array",
       "description" : "Track/path the item has taken",
@@ -10287,6 +10422,10 @@ margin-bottom: 20px;
       "type" : "number",
       "format" : "float",
       "description" : "Vertical offset to position label at"
+    },
+    "labelDateTime" : {
+      "type" : "string",
+      "description" : "Date and time from when this label applies (ISO 8601 extended format). Leave empty if label should apply for all time."
     },
     "modelAltitudeOffset" : {
       "type" : "number",
@@ -10356,6 +10495,9 @@ margin-bottom: 20px;
     "color" : {
       "type" : "integer",
       "description" : "RGBA for polygon and polyline"
+    },
+    "aircraftState" : {
+      "$ref" : "#/definitions/MapAircraftState"
     }
   },
   "description" : "An item to draw on the map. Set image to an empty string to remove item from the map."
@@ -10584,6 +10726,7 @@ margin-bottom: 20px;
   "description" : "MetisMISOSettings"
 };
             defs.MorseDecoderActions = {
+  "required" : [ "channelId", "deviceId" ],
   "properties" : {
     "deviceId" : {
       "type" : "integer",
@@ -13254,10 +13397,12 @@ margin-bottom: 20px;
       "type" : "integer"
     },
     "deviceIndex" : {
-      "type" : "integer"
+      "type" : "integer",
+      "description" : "remote SDRangel instance deviceset index"
     },
     "channelIndex" : {
-      "type" : "integer"
+      "type" : "integer",
+      "description" : "remote SDRangel instance channel index"
     },
     "useReverseAPI" : {
       "type" : "integer",
@@ -17227,7 +17372,8 @@ margin-bottom: 20px;
     },
     "nbLeadTime" : {
       "type" : "number",
-      "format" : "float"
+      "format" : "float",
+      "description" : "Advance time (s)"
     },
     "nbLagTime" : {
       "type" : "number",
@@ -59469,7 +59615,7 @@ except ApiException as e:
           </div>
           <div id="generator">
             <div class="content">
-              Generated 2024-12-24T11:56:24.260+01:00
+              Generated 2025-07-01T22:00:12.093+02:00
             </div>
           </div>
       </div>

@@ -75,7 +75,7 @@ void AMBEEngine::getComList()
     // Arbitrarily set the list to the 20 first COM ports
     for (int i = 1; i <= 20; i++)
     {
-        sprintf(comCStr, "COM%d", i);
+        snprintf(comCStr, sizeof(comCStr), "COM%d", i);
         m_comList.push_back(std::string(comCStr));
     }
 }

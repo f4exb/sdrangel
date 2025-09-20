@@ -1336,6 +1336,7 @@ void ILSDemodGUI::on_logFilename_clicked()
 {
     // Get filename to save to
     QFileDialog fileDialog(nullptr, "Select CSV file to log data to", "", "*.csv");
+    fileDialog.setDefaultSuffix("csv");
     fileDialog.setAcceptMode(QFileDialog::AcceptSave);
     if (fileDialog.exec())
     {

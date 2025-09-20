@@ -42,42 +42,11 @@ void DatvDvbS2LdpcDialog::accept()
     QDialog::accept();
 }
 
-void DatvDvbS2LdpcDialog::setFileName(const QString& fileName)
-{
-    m_fileName = fileName;
-    ui->ldpcToolText->setText(m_fileName);
-}
-
 void DatvDvbS2LdpcDialog::setMaxTrials(int maxTrials)
 {
     m_maxTrials = maxTrials < 1 ? 1 :
         maxTrials > DATVDemodSettings::m_softLDPCMaxMaxTrials ? DATVDemodSettings::m_softLDPCMaxMaxTrials : maxTrials;
     ui->maxTrials->setValue(m_maxTrials);
-}
-
-void DatvDvbS2LdpcDialog::on_showFileDialog_clicked(bool checked)
-{
-    (void) checked;
-
-    QFileDialog fileDialog(this, "Select LDPC tool");
-    fileDialog.setOption(QFileDialog::DontUseNativeDialog, true);
-#ifdef _MSC_VER
-    fileDialog.setNameFilter("*.exe");
-#else
-    fileDialog.setFilter(QDir::Executable | QDir::Files);
-#endif
-    fileDialog.selectFile(m_fileName);
-
-    if (fileDialog.exec() == QDialog::Accepted)
-    {
-        QStringList fileNames = fileDialog.selectedFiles();
-
-        if (fileNames.size() > 0)
-        {
-            m_fileName = fileNames[0];
-            ui->ldpcToolText->setText(m_fileName);
-        }
-    }
 }
 
 void DatvDvbS2LdpcDialog::on_maxTrials_valueChanged(int value)

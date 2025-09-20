@@ -53,6 +53,7 @@
     <file>flags/botswana_mil.bmp</file>
     <file>flags/brazil.bmp</file>
     <file>flags/brazil_mil.bmp</file>
+    <file>flags/british_virgin_islands.bmp</file>
     <file>flags/brunei.bmp</file>
     <file>flags/brunei_mil.bmp</file>
     <file>flags/bulgaria.bmp</file>
@@ -64,7 +65,7 @@
     <file>flags/cambodia.bmp</file>
     <file>flags/cambodia_mil.bmp</file>
     <file>flags/cameroon_mil.bmp</file>
-    <file>flags/cameroun.bmp</file>
+    <file>flags/cameroon.bmp</file>
     <file>flags/canada.bmp</file>
     <file>flags/canada_mil.bmp</file>
     <file>flags/cape_verde.bmp</file>
@@ -86,8 +87,7 @@
     <file>flags/comoros.bmp</file>
     <file>flags/comoros_mil.bmp</file>
     <file>flags/congo_brazzaville.bmp</file>
-    <file>flags/congodrc.bmp</file>
-    <file>flags/congodrc_mil.bmp</file>
+    <file>flags/congo-drc.bmp</file>
     <file>flags/congo-drc_mil.bmp</file>
     <file>flags/congoroc.bmp</file>
     <file>flags/congo-roc.bmp</file>
@@ -98,11 +98,11 @@
     <file>flags/costa_rica_mil.bmp</file>
     <file>flags/cote_d'ivoire.bmp</file>
     <file>flags/cote_d'ivoire_mil.bmp</file>
-    <file>flags/cote_d'ivorie.bmp</file>
     <file>flags/croatia.bmp</file>
     <file>flags/croatia_mil.bmp</file>
     <file>flags/cuba.bmp</file>
     <file>flags/cuba_mil.bmp</file>
+    <file>flags/curacao.bmp</file>
     <file>flags/cyprus.bmp</file>
     <file>flags/cyprus_mil.bmp</file>
     <file>flags/czech_republic.bmp</file>
@@ -203,6 +203,7 @@
     <file>flags/jordan.bmp</file>
     <file>flags/jordan_mil.bmp</file>
     <file>flags/kazakhstan_mil.bmp</file>
+    <file>flags/kampuchea.bmp</file>
     <file>flags/kenya.bmp</file>
     <file>flags/kenya_mil.bmp</file>
     <file>flags/kazakhstan.bmp</file>
@@ -213,7 +214,6 @@
     <file>flags/korea-north.bmp</file>
     <file>flags/korea-north-mil.bmp</file>
     <file>flags/korea-south.bmp</file>
-    <file>flags/koreasouthmil.bmp</file>
     <file>flags/korea-south-mil.bmp</file>
     <file>flags/kuwait.bmp</file>
     <file>flags/kuwait_mil.bmp</file>
@@ -252,6 +252,7 @@
     <file>flags/malta_mil.bmp</file>
     <file>flags/marshall islands.bmp</file>
     <file>flags/marshall_islands.bmp</file>
+    <file>flags/martinique.bmp</file>
     <file>flags/mauritania.bmp</file>
     <file>flags/mauritania_mil.bmp</file>
     <file>flags/mauritius.bmp</file>
@@ -318,6 +319,7 @@
     <file>flags/poland_mil.bmp</file>
     <file>flags/portugal.bmp</file>
     <file>flags/portugal_mil.bmp</file>
+    <file>flags/puertorico.bmp</file>
     <file>flags/qatar.bmp</file>
     <file>flags/qatar_mil.bmp</file>
     <file>flags/rep. congo.bmp</file>

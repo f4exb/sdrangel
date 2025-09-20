@@ -307,7 +307,7 @@ const QString& AudioCATSISO::getDeviceDescription() const
 
 int AudioCATSISO::getSourceSampleRate(int) const
 {
-    return m_rxSampleRate / (1<<m_settings.m_log2Decim);
+    return m_settings.m_rxSampleRate / (1<<m_settings.m_log2Decim);
 }
 
 quint64 AudioCATSISO::getSourceCenterFrequency(int) const
@@ -332,7 +332,7 @@ void AudioCATSISO::setSourceCenterFrequency(qint64 centerFrequency, int)
 
 int AudioCATSISO::getSinkSampleRate(int) const
 {
-    return m_txSampleRate;
+    return m_settings.m_txSampleRate;
 }
 
 quint64 AudioCATSISO::getSinkCenterFrequency(int) const
@@ -460,10 +460,18 @@ void AudioCATSISO::applySettings(const AudioCATSISOSettings& settings, const QLi
         << " force:" << force
         << settings.getDebugString(settingsKeys, force);
 
-    if (settingsKeys.contains("rxDeviceName") || force)
+    if (settingsKeys.contains("rxDeviceName") || settingsKeys.contains("rxSampleRate") || force)
     {
         AudioDeviceManager *audioDeviceManager = DSPEngine::instance()->getAudioDeviceManager();
         m_rxAudioDeviceIndex = audioDeviceManager->getInputDeviceIndex(settings.m_rxDeviceName);
+        AudioDeviceManager::InputDeviceInfo deviceInfo;
+
+        if (audioDeviceManager->getInputDeviceInfo(settings.m_rxDeviceName, deviceInfo))
+        {
+            deviceInfo.sampleRate = settings.m_rxSampleRate;
+            audioDeviceManager->setInputDeviceInfo(m_rxAudioDeviceIndex, deviceInfo);
+        }
+
         m_rxSampleRate = audioDeviceManager->getInputSampleRate(m_rxAudioDeviceIndex);
         forwardRxChange = true;
 
@@ -476,10 +484,18 @@ void AudioCATSISO::applySettings(const AudioCATSISOSettings& settings, const QLi
         }
     }
 
-    if (settingsKeys.contains("txDeviceName") || force)
+    if (settingsKeys.contains("txDeviceName") || settingsKeys.contains("txSampleRate") || force)
     {
         AudioDeviceManager *audioDeviceManager = DSPEngine::instance()->getAudioDeviceManager();
         m_txAudioDeviceIndex = audioDeviceManager->getOutputDeviceIndex(settings.m_txDeviceName);
+        AudioDeviceManager::InputDeviceInfo deviceInfo;
+
+        if (audioDeviceManager->getInputDeviceInfo(settings.m_txDeviceName, deviceInfo))
+        {
+            deviceInfo.sampleRate = settings.m_txSampleRate;
+            audioDeviceManager->setInputDeviceInfo(m_txAudioDeviceIndex, deviceInfo);
+        }
+
         m_txSampleRate = audioDeviceManager->getOutputSampleRate(m_txAudioDeviceIndex);
         forwardTxChange = true;
 
@@ -595,12 +611,13 @@ void AudioCATSISO::applySettings(const AudioCATSISOSettings& settings, const QLi
         bool realElseComplex = (m_settings.m_rxIQMapping == AudioCATSISOSettings::L)
             || (m_settings.m_rxIQMapping == AudioCATSISOSettings::R);
         DSPMIMOSignalNotification *notif = new DSPMIMOSignalNotification(
-            m_rxSampleRate / (1<<m_settings.m_log2Decim),
-            settings.m_rxCenterFrequency,
+            m_settings.m_rxSampleRate / (1<<m_settings.m_log2Decim),
+            m_settings.m_rxCenterFrequency,
             true,
             0,
             realElseComplex
         );
+        m_rxSampleRate = notif->getSampleRate();
         m_deviceAPI->getDeviceEngineInputMessageQueue()->push(notif);
     }
 
@@ -613,12 +630,13 @@ void AudioCATSISO::applySettings(const AudioCATSISOSettings& settings, const QLi
         bool realElseComplex = (m_settings.m_txIQMapping == AudioCATSISOSettings::L)
             || (m_settings.m_txIQMapping == AudioCATSISOSettings::R);
         DSPMIMOSignalNotification *notif = new DSPMIMOSignalNotification(
-            m_txSampleRate,
-            settings.m_txCenterFrequency,
+            m_settings.m_txSampleRate,
+            m_settings.m_txCenterFrequency,
             false,
             0,
             realElseComplex
         );
+        m_txSampleRate = notif->getSampleRate();
         m_deviceAPI->getDeviceEngineInputMessageQueue()->push(notif);
     }
 }
@@ -627,7 +645,7 @@ void AudioCATSISO::listComPorts()
 {
     m_comPorts.clear();
     std::vector<std::string> comPorts;
-    SerialUtil::getComPorts(comPorts, "tty(USB|ACM)[0-9]+"); // regex is for Linux only
+    SerialUtil::getComPorts(comPorts, "tty(S|USB|ACM)[0-9]+"); // regex is for Linux only
 
     for (std::vector<std::string>::const_iterator it = comPorts.begin(); it != comPorts.end(); ++it) {
         m_comPorts.push_back(QString(it->c_str()));
@@ -713,8 +731,14 @@ void AudioCATSISO::webapiUpdateDeviceSettings(
     if (deviceSettingsKeys.contains("rxCenterFrequency")) {
         settings.m_rxCenterFrequency = response.getAudioCatsisoSettings()->getRxCenterFrequency();
     }
+    if (deviceSettingsKeys.contains("rxSampleRate")) {
+        settings.m_rxSampleRate = response.getAudioCatsisoSettings()->getRxSampleRate();
+    }
     if (deviceSettingsKeys.contains("txCenterFrequency")) {
         settings.m_txCenterFrequency = response.getAudioCatsisoSettings()->getTxCenterFrequency();
+    }
+    if (deviceSettingsKeys.contains("txSampleRate")) {
+        settings.m_txSampleRate = response.getAudioCatsisoSettings()->getTxSampleRate();
     }
     if (deviceSettingsKeys.contains("transverterMode")) {
         settings.m_transverterMode = response.getAudioCatsisoSettings()->getTransverterMode() != 0;
@@ -805,7 +829,9 @@ void AudioCATSISO::webapiUpdateDeviceSettings(
 void AudioCATSISO::webapiFormatDeviceSettings(SWGSDRangel::SWGDeviceSettings& response, const AudioCATSISOSettings& settings)
 {
     response.getAudioCatsisoSettings()->setRxCenterFrequency(settings.m_rxCenterFrequency);
+    response.getAudioCatsisoSettings()->setRxSampleRate(settings.m_rxSampleRate);
     response.getAudioCatsisoSettings()->setTxCenterFrequency(settings.m_txCenterFrequency);
+    response.getAudioCatsisoSettings()->setTxSampleRate(settings.m_txSampleRate);
     response.getAudioCatsisoSettings()->setIqCorrection(settings.m_iqCorrection ? 1 : 0);
     response.getAudioCatsisoSettings()->setTransverterDeltaFrequency(settings.m_transverterDeltaFrequency);
     response.getAudioCatsisoSettings()->setTransverterMode(settings.m_transverterMode ? 1 : 0);
@@ -859,8 +885,14 @@ void AudioCATSISO::webapiReverseSendSettings(const QList<QString>& deviceSetting
     if (deviceSettingsKeys.contains("rxCenterFrequency")) {
         swgAudioCATSISOSettings->setRxCenterFrequency(settings.m_rxCenterFrequency);
     }
+    if (deviceSettingsKeys.contains("rxSampleRate") || force) {
+        swgAudioCATSISOSettings->setRxSampleRate(settings.m_rxSampleRate);
+    }
     if (deviceSettingsKeys.contains("txCenterFrequency")) {
         swgAudioCATSISOSettings->setTxCenterFrequency(settings.m_txCenterFrequency);
+    }
+    if (deviceSettingsKeys.contains("txSampleRate") || force) {
+        swgAudioCATSISOSettings->setTxSampleRate(settings.m_txSampleRate);
     }
     if (deviceSettingsKeys.contains("transverterMode")) {
         swgAudioCATSISOSettings->setTransverterMode(settings.m_transverterMode ? 1 : 0);

@@ -191,7 +191,7 @@ It can be used to decode signals lower that ~10 db MER which is the limit of LDP
 
 Right clicking on this control opens a dialog where you can choose:
 
-  - The `ldpctool` executable. Obsolete.
+  - ~~The `ldpctool` executable.~~ Obsolete removed.
   - The maximum of retries in LDPC decoding from 1 to 8.
 
 <h5>B.2b.7: DVB-S2 specific - LDPC maximum number of bit flips allowed</h5>

@@ -368,7 +368,7 @@ struct slowmultiscope : runnable
             channel *c = &chans[i];
             g.setfg(c->spec.rgb[0], c->spec.rgb[1], c->spec.rgb[2]);
             char text[256];
-            sprintf(text, c->spec.format, c->print_val);
+            snprintf(text, sizeof(text), c->spec.format, c->print_val);
             g.transient_text(5, 20 + 16 * i, text);
         }
         run_gui();
@@ -445,7 +445,7 @@ struct slowmultiscope : runnable
         float ct = g.mx * samples_per_pixel / sample_freq;
         float tt = total_samples / sample_freq;
         char text[256];
-        sprintf(text, "%.3f / %.3f s", ct, tt);
+        snprintf(text, sizeof(text), "%.3f / %.3f s", ct, tt);
         g.setfg(255, 255, 255);
         g.transient_text(g.w * 3 / 4, 20, text);
     }
@@ -529,7 +529,7 @@ struct spectrumscope : runnable
         {
             char s[256];
             float f = 2.4e6 * (g.mx - g.w / 2) / g.w;
-            sprintf(s, "%f", f);
+            snprintf(s, sizeof(s), "%f", f);
             g.text(16, 16, s);
         }
         g.show();
@@ -637,7 +637,7 @@ struct rfscope : runnable
             char s[256];
             float freq = Fc + Fs * (g.mx - g.w / 2) / g.w / hzoom;
             float val = db0 + (float)((g.h - 1) - g.my) * dbrange / g.h;
-            sprintf(s, "%f.3 Hz   %f.2 dB", freq, val);
+            snprintf(s, sizeof(s), "%f.3 Hz   %f.2 dB", freq, val);
             g.setfg(255, 255, 255);
             g.text(16, 16, s);
         }
@@ -726,7 +726,7 @@ struct genscope : runnable
             g.line(pc->spec.r.x - dx, pc->spec.r.y - dy,
                    pc->spec.r.x + dx, pc->spec.r.y + dy);
             char txt[16];
-            sprintf(txt, "%d", (int)last);
+            snprintf(txt, sizeof(txt), "%d", (int)last);
             g.text(pc->spec.r.x + 5, pc->spec.r.y - 2, txt);
         }
         struct timeval newtv;

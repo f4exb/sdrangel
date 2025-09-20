@@ -40,6 +40,8 @@ SWGDATVDemodReport::SWGDATVDemodReport() {
     m_video_decode_ok_isSet = false;
     udp_running = 0;
     m_udp_running_isSet = false;
+    symbol_rate = 0;
+    m_symbol_rate_isSet = false;
     modcod_modulation = 0;
     m_modcod_modulation_isSet = false;
     modcod_code_rate = 0;
@@ -70,6 +72,8 @@ SWGDATVDemodReport::init() {
     m_video_decode_ok_isSet = false;
     udp_running = 0;
     m_udp_running_isSet = false;
+    symbol_rate = 0;
+    m_symbol_rate_isSet = false;
     modcod_modulation = 0;
     m_modcod_modulation_isSet = false;
     modcod_code_rate = 0;
@@ -84,6 +88,7 @@ SWGDATVDemodReport::init() {
 
 void
 SWGDATVDemodReport::cleanup() {
+
 
 
 
@@ -119,6 +124,8 @@ SWGDATVDemodReport::fromJsonObject(QJsonObject &pJson) {
     ::SWGSDRangel::setValue(&video_decode_ok, pJson["videoDecodeOK"], "qint32", "");
     
     ::SWGSDRangel::setValue(&udp_running, pJson["udpRunning"], "qint32", "");
+    
+    ::SWGSDRangel::setValue(&symbol_rate, pJson["symbolRate"], "qint32", "");
     
     ::SWGSDRangel::setValue(&modcod_modulation, pJson["modcodModulation"], "qint32", "");
     
@@ -163,6 +170,9 @@ SWGDATVDemodReport::asJsonObject() {
     }
     if(m_udp_running_isSet){
         obj->insert("udpRunning", QJsonValue(udp_running));
+    }
+    if(m_symbol_rate_isSet){
+        obj->insert("symbolRate", QJsonValue(symbol_rate));
     }
     if(m_modcod_modulation_isSet){
         obj->insert("modcodModulation", QJsonValue(modcod_modulation));
@@ -244,6 +254,16 @@ SWGDATVDemodReport::setUdpRunning(qint32 udp_running) {
 }
 
 qint32
+SWGDATVDemodReport::getSymbolRate() {
+    return symbol_rate;
+}
+void
+SWGDATVDemodReport::setSymbolRate(qint32 symbol_rate) {
+    this->symbol_rate = symbol_rate;
+    this->m_symbol_rate_isSet = true;
+}
+
+qint32
 SWGDATVDemodReport::getModcodModulation() {
     return modcod_modulation;
 }
@@ -314,6 +334,9 @@ SWGDATVDemodReport::isSet(){
             isObjectUpdated = true; break;
         }
         if(m_udp_running_isSet){
+            isObjectUpdated = true; break;
+        }
+        if(m_symbol_rate_isSet){
             isObjectUpdated = true; break;
         }
         if(m_modcod_modulation_isSet){

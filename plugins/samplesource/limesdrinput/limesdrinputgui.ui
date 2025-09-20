@@ -6,7 +6,7 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>360</width>
+    <width>386</width>
     <height>255</height>
    </rect>
   </property>
@@ -309,6 +309,16 @@
        <property name="icon">
         <iconset resource="../../../sdrgui/resources/res.qrc">
          <normaloff>:/clocksource.png</normaloff>:/clocksource.png</iconset>
+       </property>
+      </widget>
+     </item>
+     <item>
+      <widget class="ButtonSwitch" name="splitFreq">
+       <property name="toolTip">
+        <string>Disable RX/TX frequency being locked</string>
+       </property>
+       <property name="text">
+        <string>Split</string>
        </property>
       </widget>
      </item>

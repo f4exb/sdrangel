@@ -41,8 +41,14 @@ Use `run.sh` to create or delete the Docker compose stack. It takes the followin
   - `-b`: SDRangel source code root path (default `/opt/build/sdrangel`)
   - `-c`: Compose stack name (default `sdrangelswg`)
 
-The stack is composed of two containers sharing the `172.20.0.0/16` network internally.
+The stack is composed of three containers sharing the `172.20.0.0/16` network internally.
   - `sdrangel_swgserver`: The http server that listens on port `8081` serving files in `/opt/build/sdrangel/swagger/sdrangel`
-  - `sdrangel_swgcodegen`: The container with the Swagger code generator. The working directory is `/opt/build/sdrangel/swagger/sdrangel`.
+  - `sdrangel_swgcodegen`: The container with the Swagger code generator. The working directory is `/opt/build/sdrangel/swagger/sdrangel`
+  - `sdrangel_swaggerclient`: based on the `jeanberu/swagger-cli` image it can be used to validate the swagger schema (see next).
 
 Use `login.sh` to start a shell in the `sdrangel_swgcodegen` container. At the prompt run `generate.sh` to generate the code from the Swagger definition files.
+
+To validate the swagger schema:
+  - Enter the `sdrangel_swaggerclient` container with: `docker exec -it sdrangel_swaggerclient /bin/sh`
+  - Validate the schema with the command: `swagger-cli validate /opt/build/sdrangel/swagger/sdrangel/api/swagger/swagger.yaml`
+  - Correct errors from the most inner ones (maximum tabs). Top level errors usually result from low level errors and are therefore quite cryptic.

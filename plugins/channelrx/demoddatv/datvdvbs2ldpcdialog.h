@@ -33,19 +33,15 @@ public:
     explicit DatvDvbS2LdpcDialog(QWidget* parent = nullptr);
     ~DatvDvbS2LdpcDialog();
 
-    void setFileName(const QString& fileName);
     void setMaxTrials(int maxTrials);
-    QString& getFileName() { return m_fileName; }
     int getMaxTrials() { return m_maxTrials; }
 
 private:
     Ui::DatvDvbS2LdpcDialog* ui;
-    QString m_fileName;
     int m_maxTrials;
 
 private slots:
     void accept();
-    void on_showFileDialog_clicked(bool checked);
     void on_maxTrials_valueChanged(int value);
 };
 

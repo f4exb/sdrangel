@@ -31,6 +31,7 @@ public:
     void setAzimuthElevation(float azimuth, float elevation) override;
     void readData() override;
     void update() override;
+    QString lineEnding() const;
 };
 
 #endif // INCLUDE_FEATURE_GS232PROTOCOL_H_

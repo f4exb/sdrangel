@@ -45,8 +45,14 @@ public:
     qint64 getRxCenterFrequency();
     void setRxCenterFrequency(qint64 rx_center_frequency);
 
+    qint32 getRxSampleRate();
+    void setRxSampleRate(qint32 rx_sample_rate);
+
     qint64 getTxCenterFrequency();
     void setTxCenterFrequency(qint64 tx_center_frequency);
+
+    qint32 getTxSampleRate();
+    void setTxSampleRate(qint32 tx_sample_rate);
 
     qint32 getTransverterMode();
     void setTransverterMode(qint32 transverter_mode);
@@ -136,8 +142,14 @@ private:
     qint64 rx_center_frequency;
     bool m_rx_center_frequency_isSet;
 
+    qint32 rx_sample_rate;
+    bool m_rx_sample_rate_isSet;
+
     qint64 tx_center_frequency;
     bool m_tx_center_frequency_isSet;
+
+    qint32 tx_sample_rate;
+    bool m_tx_sample_rate_isSet;
 
     qint32 transverter_mode;
     bool m_transverter_mode_isSet;

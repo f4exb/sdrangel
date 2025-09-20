@@ -7,7 +7,7 @@
     <x>0</x>
     <y>0</y>
     <width>1267</width>
-    <height>648</height>
+    <height>775</height>
    </rect>
   </property>
   <property name="font">
@@ -153,13 +153,52 @@
               </widget>
              </item>
              <item row="1" column="0">
+              <widget class="QLabel" name="defaultImageryLabel">
+               <property name="text">
+                <string>Default imagery</string>
+               </property>
+              </widget>
+             </item>
+             <item row="1" column="1">
+              <widget class="QComboBox" name="defaultImagery">
+               <property name="toolTip">
+                <string>Default imagery (Note there is a quota on Bing Maps Ariel usage)</string>
+               </property>
+               <item>
+                <property name="text">
+                 <string>ArcGIS world imagery</string>
+                </property>
+               </item>
+               <item>
+                <property name="text">
+                 <string>Bing Maps Aerial</string>
+                </property>
+               </item>
+               <item>
+                <property name="text">
+                 <string>Sentinel-2</string>
+                </property>
+               </item>
+               <item>
+                <property name="text">
+                 <string>Earth at night</string>
+                </property>
+               </item>
+               <item>
+                <property name="text">
+                 <string>Ersi world ocean</string>
+                </property>
+               </item>
+              </widget>
+             </item>
+             <item row="2" column="0">
               <widget class="QLabel" name="terrainLabel">
                <property name="text">
                 <string>Terrain</string>
                </property>
               </widget>
              </item>
-             <item row="1" column="1">
+             <item row="2" column="1">
               <widget class="QComboBox" name="terrain">
                <item>
                 <property name="text">
@@ -183,14 +222,48 @@
                </item>
               </widget>
              </item>
-             <item row="2" column="0">
+             <item row="3" column="0">
+              <widget class="QLabel" name="terrainLightingLabel">
+               <property name="text">
+                <string>Terrain lighting</string>
+               </property>
+              </widget>
+             </item>
+             <item row="3" column="1">
+              <widget class="QCheckBox" name="terrainLighting">
+               <property name="toolTip">
+                <string>Enable terrain lighting</string>
+               </property>
+               <property name="text">
+                <string/>
+               </property>
+              </widget>
+             </item>
+             <item row="4" column="0">
+              <widget class="QLabel" name="waterLabel">
+               <property name="text">
+                <string>Water effects</string>
+               </property>
+              </widget>
+             </item>
+             <item row="4" column="1">
+              <widget class="QCheckBox" name="water">
+               <property name="toolTip">
+                <string>Enable water effects such as waves</string>
+               </property>
+               <property name="text">
+                <string/>
+               </property>
+              </widget>
+             </item>
+             <item row="5" column="0">
               <widget class="QLabel" name="buildingsLabel">
                <property name="text">
                 <string>Buildings</string>
                </property>
               </widget>
              </item>
-             <item row="2" column="1">
+             <item row="5" column="1">
               <widget class="QComboBox" name="buildings">
                <item>
                 <property name="text">
@@ -204,14 +277,14 @@
                </item>
               </widget>
              </item>
-             <item row="3" column="0">
+             <item row="6" column="0">
               <widget class="QLabel" name="sunLightEnabledLabel">
                <property name="text">
                 <string>Lighting</string>
                </property>
               </widget>
              </item>
-             <item row="3" column="1">
+             <item row="6" column="1">
               <widget class="QComboBox" name="sunLightEnabled">
                <property name="toolTip">
                 <string>Whether lighting is from the Sun or Camera</string>
@@ -228,14 +301,71 @@
                </item>
               </widget>
              </item>
-             <item row="4" column="0">
+             <item row="7" column="0">
+              <widget class="QLabel" name="lightIntensityLabel">
+               <property name="text">
+                <string>Camera light Intensity</string>
+               </property>
+              </widget>
+             </item>
+             <item row="7" column="1">
+              <widget class="QDoubleSpinBox" name="lightIntensity">
+               <property name="toolTip">
+                <string>Intensity of camera light</string>
+               </property>
+               <property name="decimals">
+                <number>1</number>
+               </property>
+               <property name="maximum">
+                <double>100.000000000000000</double>
+               </property>
+               <property name="value">
+                <double>3.000000000000000</double>
+               </property>
+              </widget>
+             </item>
+             <item row="8" column="0">
+              <widget class="QLabel" name="hdrLabel">
+               <property name="text">
+                <string>HDR</string>
+               </property>
+              </widget>
+             </item>
+             <item row="8" column="1">
+              <widget class="QCheckBox" name="hdr">
+               <property name="toolTip">
+                <string>High dynamic range</string>
+               </property>
+               <property name="text">
+                <string/>
+               </property>
+              </widget>
+             </item>
+             <item row="9" column="0">
+              <widget class="QLabel" name="fogLabel">
+               <property name="text">
+                <string>Fog</string>
+               </property>
+              </widget>
+             </item>
+             <item row="9" column="1">
+              <widget class="QCheckBox" name="fog">
+               <property name="toolTip">
+                <string>Enable fog effect</string>
+               </property>
+               <property name="text">
+                <string/>
+               </property>
+              </widget>
+             </item>
+             <item row="11" column="0">
               <widget class="QLabel" name="eciCameraLabel">
                <property name="text">
                 <string>Camera reference frame</string>
                </property>
               </widget>
              </item>
-             <item row="4" column="1">
+             <item row="11" column="1">
               <widget class="QComboBox" name="eciCamera">
                <property name="toolTip">
                 <string>Selects camera reference frame. For ECEF the camera rotates with the Earth. For ECI, the camera position is fixed relative to the stars and the Earth's rotation will be visible.</string>
@@ -252,28 +382,77 @@
                </item>
               </widget>
              </item>
-             <item row="5" column="0">
-              <widget class="QLabel" name="antiAliasingLabel">
+             <item row="14" column="0">
+              <widget class="QLabel" name="fpsLabel">
                <property name="text">
-                <string>Anti-aliasing</string>
+                <string>Display FPS</string>
                </property>
               </widget>
              </item>
-             <item row="5" column="1">
-              <widget class="QComboBox" name="antiAliasing">
+             <item row="14" column="1">
+              <widget class="QCheckBox" name="fps">
                <property name="toolTip">
-                <string>Set anti-aliasing to use. This can remove jagged pixels on the edge of 3D models.</string>
+                <string>Display frames per second (FPS)</string>
+               </property>
+               <property name="text">
+                <string/>
+               </property>
+              </widget>
+             </item>
+             <item row="13" column="0">
+              <widget class="QLabel" name="msaaLabel">
+               <property name="text">
+                <string>MSAA</string>
+               </property>
+              </widget>
+             </item>
+             <item row="13" column="1">
+              <widget class="QComboBox" name="msaa">
+               <property name="toolTip">
+                <string>Multisample Anti-Aliasing</string>
                </property>
                <item>
                 <property name="text">
-                 <string>None</string>
+                 <string>Off</string>
                 </property>
                </item>
                <item>
                 <property name="text">
-                 <string>FXAA</string>
+                 <string>2</string>
                 </property>
                </item>
+               <item>
+                <property name="text">
+                 <string>4</string>
+                </property>
+               </item>
+               <item>
+                <property name="text">
+                 <string>8</string>
+                </property>
+               </item>
+               <item>
+                <property name="text">
+                 <string>16</string>
+                </property>
+               </item>
+              </widget>
+             </item>
+             <item row="12" column="0">
+              <widget class="QLabel" name="fxaaLabel">
+               <property name="text">
+                <string>FXAA</string>
+               </property>
+              </widget>
+             </item>
+             <item row="12" column="1">
+              <widget class="QCheckBox" name="fxaa">
+               <property name="toolTip">
+                <string>Fast Approximate Anti-aliasing</string>
+               </property>
+               <property name="text">
+                <string/>
+               </property>
               </widget>
              </item>
             </layout>
@@ -282,7 +461,7 @@
           <item>
            <spacer name="verticalSpacer">
             <property name="orientation">
-             <enum>Qt::Vertical</enum>
+             <enum>Qt::Orientation::Vertical</enum>
             </property>
             <property name="sizeHint" stdset="0">
              <size>
@@ -313,7 +492,7 @@
                <string/>
               </property>
               <property name="icon">
-               <iconset resource="icons.qrc">
+               <iconset resource="mapicons.qrc">
                 <normaloff>:/map/icons/controltower.png</normaloff>:/map/icons/controltower.png</iconset>
               </property>
              </widget>
@@ -327,7 +506,7 @@
                <string/>
               </property>
               <property name="icon">
-               <iconset resource="icons.qrc">
+               <iconset resource="mapicons.qrc">
                 <normaloff>:/map/icons/vor.png</normaloff>:/map/icons/vor.png</iconset>
               </property>
              </widget>
@@ -341,7 +520,7 @@
                <string/>
               </property>
               <property name="icon">
-               <iconset resource="icons.qrc">
+               <iconset resource="mapicons.qrc">
                 <normaloff>:/map/icons/waypoints.png</normaloff>:/map/icons/waypoints.png</iconset>
               </property>
              </widget>
@@ -349,7 +528,7 @@
             <item>
              <spacer name="horizontalSpacer">
               <property name="orientation">
-               <enum>Qt::Horizontal</enum>
+               <enum>Qt::Orientation::Horizontal</enum>
               </property>
               <property name="sizeHint" stdset="0">
                <size>
@@ -371,7 +550,7 @@
           <item>
            <widget class="QTableWidget" name="mapItemSettings">
             <property name="selectionMode">
-             <enum>QAbstractItemView::NoSelection</enum>
+             <enum>QAbstractItemView::SelectionMode::NoSelection</enum>
             </property>
             <column>
              <property name="text">
@@ -466,6 +645,22 @@
              </property>
              <property name="toolTip">
               <string>Filter objects further than this distance in km away from My Position</string>
+             </property>
+            </column>
+            <column>
+             <property name="text">
+              <string>Smoothing Window</string>
+             </property>
+             <property name="toolTip">
+              <string>How many coordinates to apply smoothing filter to. Set to 0 for no smoothing.</string>
+             </property>
+            </column>
+            <column>
+             <property name="text">
+              <string>Smoothing Lambda</string>
+             </property>
+             <property name="toolTip">
+              <string>Smoothing parameter. Higher values result in more smoothing.</string>
              </property>
             </column>
            </widget>
@@ -563,17 +758,31 @@
                </property>
               </widget>
              </item>
-             <item row="4" column="0">
+             <item row="5" column="0">
               <widget class="QLabel" name="checkWXAPIKeyLabel">
                <property name="text">
                 <string>CheckWX API key</string>
                </property>
               </widget>
              </item>
-             <item row="4" column="1">
+             <item row="5" column="1">
               <widget class="QLineEdit" name="checkWXAPIKey">
                <property name="toolTip">
                 <string>checkwxapi.com API key for accessing airport weather (METARs)</string>
+               </property>
+              </widget>
+             </item>
+             <item row="4" column="0">
+              <widget class="QLabel" name="arcGISAPIKeyLabel">
+               <property name="text">
+                <string>ArcGIS API Key</string>
+               </property>
+              </widget>
+             </item>
+             <item row="4" column="1">
+              <widget class="QLineEdit" name="arcGISAPIKey">
+               <property name="toolTip">
+                <string>Enter an ArcGIS API Key</string>
                </property>
               </widget>
              </item>
@@ -590,10 +799,10 @@
    <item>
     <widget class="QDialogButtonBox" name="buttonBox">
      <property name="orientation">
-      <enum>Qt::Horizontal</enum>
+      <enum>Qt::Orientation::Horizontal</enum>
      </property>
      <property name="standardButtons">
-      <set>QDialogButtonBox::Cancel|QDialogButtonBox::Ok</set>
+      <set>QDialogButtonBox::StandardButton::Cancel|QDialogButtonBox::StandardButton::Ok</set>
      </property>
     </widget>
    </item>
@@ -609,7 +818,7 @@
   <tabstop>buildings</tabstop>
   <tabstop>sunLightEnabled</tabstop>
   <tabstop>eciCamera</tabstop>
-  <tabstop>antiAliasing</tabstop>
+  <tabstop>msaa</tabstop>
   <tabstop>downloadModels</tabstop>
   <tabstop>thunderforestAPIKey</tabstop>
   <tabstop>maptilerAPIKey</tabstop>
@@ -617,7 +826,7 @@
   <tabstop>cesiumIonAPIKey</tabstop>
  </tabstops>
  <resources>
-  <include location="icons.qrc"/>
+  <include location="mapicons.qrc"/>
  </resources>
  <connections>
   <connection>

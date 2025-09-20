@@ -44,8 +44,6 @@ SWGDATVDemodSettings::SWGDATVDemodSettings() {
     m_fec_isSet = false;
     soft_ldpc = 0;
     m_soft_ldpc_isSet = false;
-    soft_ldpc_tool_path = nullptr;
-    m_soft_ldpc_tool_path_isSet = false;
     soft_ldpc_max_trials = 0;
     m_soft_ldpc_max_trials_isSet = false;
     max_bitflips = 0;
@@ -124,8 +122,6 @@ SWGDATVDemodSettings::init() {
     m_fec_isSet = false;
     soft_ldpc = 0;
     m_soft_ldpc_isSet = false;
-    soft_ldpc_tool_path = new QString("");
-    m_soft_ldpc_tool_path_isSet = false;
     soft_ldpc_max_trials = 0;
     m_soft_ldpc_max_trials_isSet = false;
     max_bitflips = 0;
@@ -194,9 +190,6 @@ SWGDATVDemodSettings::cleanup() {
 
 
 
-    if(soft_ldpc_tool_path != nullptr) { 
-        delete soft_ldpc_tool_path;
-    }
 
 
 
@@ -262,8 +255,6 @@ SWGDATVDemodSettings::fromJsonObject(QJsonObject &pJson) {
     ::SWGSDRangel::setValue(&fec, pJson["fec"], "qint32", "");
     
     ::SWGSDRangel::setValue(&soft_ldpc, pJson["softLDPC"], "qint32", "");
-    
-    ::SWGSDRangel::setValue(&soft_ldpc_tool_path, pJson["softLDPCToolPath"], "QString", "QString");
     
     ::SWGSDRangel::setValue(&soft_ldpc_max_trials, pJson["softLDPCMaxTrials"], "qint32", "");
     
@@ -358,9 +349,6 @@ SWGDATVDemodSettings::asJsonObject() {
     }
     if(m_soft_ldpc_isSet){
         obj->insert("softLDPC", QJsonValue(soft_ldpc));
-    }
-    if(soft_ldpc_tool_path != nullptr && *soft_ldpc_tool_path != QString("")){
-        toJsonValue(QString("softLDPCToolPath"), soft_ldpc_tool_path, obj, QString("QString"));
     }
     if(m_soft_ldpc_max_trials_isSet){
         obj->insert("softLDPCMaxTrials", QJsonValue(soft_ldpc_max_trials));
@@ -525,16 +513,6 @@ void
 SWGDATVDemodSettings::setSoftLdpc(qint32 soft_ldpc) {
     this->soft_ldpc = soft_ldpc;
     this->m_soft_ldpc_isSet = true;
-}
-
-QString*
-SWGDATVDemodSettings::getSoftLdpcToolPath() {
-    return soft_ldpc_tool_path;
-}
-void
-SWGDATVDemodSettings::setSoftLdpcToolPath(QString* soft_ldpc_tool_path) {
-    this->soft_ldpc_tool_path = soft_ldpc_tool_path;
-    this->m_soft_ldpc_tool_path_isSet = true;
 }
 
 qint32
@@ -834,9 +812,6 @@ SWGDATVDemodSettings::isSet(){
             isObjectUpdated = true; break;
         }
         if(m_soft_ldpc_isSet){
-            isObjectUpdated = true; break;
-        }
-        if(soft_ldpc_tool_path && *soft_ldpc_tool_path != QString("")){
             isObjectUpdated = true; break;
         }
         if(m_soft_ldpc_max_trials_isSet){

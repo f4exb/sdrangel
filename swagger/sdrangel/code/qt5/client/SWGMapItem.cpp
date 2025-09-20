@@ -46,6 +46,8 @@ SWGMapItem::SWGMapItem() {
     m_fixed_position_isSet = false;
     position_date_time = nullptr;
     m_position_date_time_isSet = false;
+    altitude_date_time = nullptr;
+    m_altitude_date_time_isSet = false;
     track = nullptr;
     m_track_isSet = false;
     predicted_track = nullptr;
@@ -66,6 +68,8 @@ SWGMapItem::SWGMapItem() {
     m_label_isSet = false;
     label_altitude_offset = 0.0f;
     m_label_altitude_offset_isSet = false;
+    label_date_time = nullptr;
+    m_label_date_time_isSet = false;
     model_altitude_offset = 0.0f;
     m_model_altitude_offset_isSet = false;
     altitude_reference = 0;
@@ -96,6 +100,8 @@ SWGMapItem::SWGMapItem() {
     m_color_valid_isSet = false;
     color = 0;
     m_color_isSet = false;
+    aircraft_state = nullptr;
+    m_aircraft_state_isSet = false;
 }
 
 SWGMapItem::~SWGMapItem() {
@@ -122,6 +128,8 @@ SWGMapItem::init() {
     m_fixed_position_isSet = false;
     position_date_time = new QString("");
     m_position_date_time_isSet = false;
+    altitude_date_time = new QString("");
+    m_altitude_date_time_isSet = false;
     track = new QList<SWGMapCoordinate*>();
     m_track_isSet = false;
     predicted_track = new QList<SWGMapCoordinate*>();
@@ -142,6 +150,8 @@ SWGMapItem::init() {
     m_label_isSet = false;
     label_altitude_offset = 0.0f;
     m_label_altitude_offset_isSet = false;
+    label_date_time = new QString("");
+    m_label_date_time_isSet = false;
     model_altitude_offset = 0.0f;
     m_model_altitude_offset_isSet = false;
     altitude_reference = 0;
@@ -172,6 +182,8 @@ SWGMapItem::init() {
     m_color_valid_isSet = false;
     color = 0;
     m_color_isSet = false;
+    aircraft_state = new SWGMapAircraftState();
+    m_aircraft_state_isSet = false;
 }
 
 void
@@ -192,6 +204,9 @@ SWGMapItem::cleanup() {
 
     if(position_date_time != nullptr) { 
         delete position_date_time;
+    }
+    if(altitude_date_time != nullptr) { 
+        delete altitude_date_time;
     }
     if(track != nullptr) { 
         auto arr = track;
@@ -221,6 +236,9 @@ SWGMapItem::cleanup() {
         delete label;
     }
 
+    if(label_date_time != nullptr) { 
+        delete label_date_time;
+    }
 
 
     if(animations != nullptr) { 
@@ -252,6 +270,9 @@ SWGMapItem::cleanup() {
     }
 
 
+    if(aircraft_state != nullptr) { 
+        delete aircraft_state;
+    }
 }
 
 SWGMapItem*
@@ -283,6 +304,8 @@ SWGMapItem::fromJsonObject(QJsonObject &pJson) {
     
     ::SWGSDRangel::setValue(&position_date_time, pJson["positionDateTime"], "QString", "QString");
     
+    ::SWGSDRangel::setValue(&altitude_date_time, pJson["altitudeDateTime"], "QString", "QString");
+    
     
     ::SWGSDRangel::setValue(&track, pJson["track"], "QList", "SWGMapCoordinate");
     
@@ -302,6 +325,8 @@ SWGMapItem::fromJsonObject(QJsonObject &pJson) {
     ::SWGSDRangel::setValue(&label, pJson["label"], "QString", "QString");
     
     ::SWGSDRangel::setValue(&label_altitude_offset, pJson["labelAltitudeOffset"], "float", "");
+    
+    ::SWGSDRangel::setValue(&label_date_time, pJson["labelDateTime"], "QString", "QString");
     
     ::SWGSDRangel::setValue(&model_altitude_offset, pJson["modelAltitudeOffset"], "float", "");
     
@@ -332,6 +357,8 @@ SWGMapItem::fromJsonObject(QJsonObject &pJson) {
     ::SWGSDRangel::setValue(&color_valid, pJson["colorValid"], "qint32", "");
     
     ::SWGSDRangel::setValue(&color, pJson["color"], "qint32", "");
+    
+    ::SWGSDRangel::setValue(&aircraft_state, pJson["aircraftState"], "SWGMapAircraftState", "SWGMapAircraftState");
     
 }
 
@@ -376,6 +403,9 @@ SWGMapItem::asJsonObject() {
     if(position_date_time != nullptr && *position_date_time != QString("")){
         toJsonValue(QString("positionDateTime"), position_date_time, obj, QString("QString"));
     }
+    if(altitude_date_time != nullptr && *altitude_date_time != QString("")){
+        toJsonValue(QString("altitudeDateTime"), altitude_date_time, obj, QString("QString"));
+    }
     if(track && track->size() > 0){
         toJsonArray((QList<void*>*)track, obj, "track", "SWGMapCoordinate");
     }
@@ -405,6 +435,9 @@ SWGMapItem::asJsonObject() {
     }
     if(m_label_altitude_offset_isSet){
         obj->insert("labelAltitudeOffset", QJsonValue(label_altitude_offset));
+    }
+    if(label_date_time != nullptr && *label_date_time != QString("")){
+        toJsonValue(QString("labelDateTime"), label_date_time, obj, QString("QString"));
     }
     if(m_model_altitude_offset_isSet){
         obj->insert("modelAltitudeOffset", QJsonValue(model_altitude_offset));
@@ -450,6 +483,9 @@ SWGMapItem::asJsonObject() {
     }
     if(m_color_isSet){
         obj->insert("color", QJsonValue(color));
+    }
+    if((aircraft_state != nullptr) && (aircraft_state->isSet())){
+        toJsonValue(QString("aircraftState"), aircraft_state, obj, QString("SWGMapAircraftState"));
     }
 
     return obj;
@@ -543,6 +579,16 @@ void
 SWGMapItem::setPositionDateTime(QString* position_date_time) {
     this->position_date_time = position_date_time;
     this->m_position_date_time_isSet = true;
+}
+
+QString*
+SWGMapItem::getAltitudeDateTime() {
+    return altitude_date_time;
+}
+void
+SWGMapItem::setAltitudeDateTime(QString* altitude_date_time) {
+    this->altitude_date_time = altitude_date_time;
+    this->m_altitude_date_time_isSet = true;
 }
 
 QList<SWGMapCoordinate*>*
@@ -643,6 +689,16 @@ void
 SWGMapItem::setLabelAltitudeOffset(float label_altitude_offset) {
     this->label_altitude_offset = label_altitude_offset;
     this->m_label_altitude_offset_isSet = true;
+}
+
+QString*
+SWGMapItem::getLabelDateTime() {
+    return label_date_time;
+}
+void
+SWGMapItem::setLabelDateTime(QString* label_date_time) {
+    this->label_date_time = label_date_time;
+    this->m_label_date_time_isSet = true;
 }
 
 float
@@ -795,6 +851,16 @@ SWGMapItem::setColor(qint32 color) {
     this->m_color_isSet = true;
 }
 
+SWGMapAircraftState*
+SWGMapItem::getAircraftState() {
+    return aircraft_state;
+}
+void
+SWGMapItem::setAircraftState(SWGMapAircraftState* aircraft_state) {
+    this->aircraft_state = aircraft_state;
+    this->m_aircraft_state_isSet = true;
+}
+
 
 bool
 SWGMapItem::isSet(){
@@ -827,6 +893,9 @@ SWGMapItem::isSet(){
         if(position_date_time && *position_date_time != QString("")){
             isObjectUpdated = true; break;
         }
+        if(altitude_date_time && *altitude_date_time != QString("")){
+            isObjectUpdated = true; break;
+        }
         if(track && (track->size() > 0)){
             isObjectUpdated = true; break;
         }
@@ -855,6 +924,9 @@ SWGMapItem::isSet(){
             isObjectUpdated = true; break;
         }
         if(m_label_altitude_offset_isSet){
+            isObjectUpdated = true; break;
+        }
+        if(label_date_time && *label_date_time != QString("")){
             isObjectUpdated = true; break;
         }
         if(m_model_altitude_offset_isSet){
@@ -900,6 +972,9 @@ SWGMapItem::isSet(){
             isObjectUpdated = true; break;
         }
         if(m_color_isSet){
+            isObjectUpdated = true; break;
+        }
+        if(aircraft_state && aircraft_state->isSet()){
             isObjectUpdated = true; break;
         }
     }while(false);

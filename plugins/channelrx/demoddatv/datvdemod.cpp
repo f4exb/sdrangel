@@ -212,9 +212,6 @@ void DATVDemod::applySettings(const DATVDemodSettings& settings, bool force)
     if (settings.m_softLDPC != m_settings.m_softLDPC) {
         reverseAPIKeys.append("softLDPC");
     }
-    if (settings.m_softLDPCToolPath != m_settings.m_softLDPCToolPath) {
-        reverseAPIKeys.append("softLDPCToolPath");
-    }
     if (settings.m_softLDPCMaxTrials != m_settings.m_softLDPCMaxTrials) {
         reverseAPIKeys.append("softLDPCMaxTrials");
     }
@@ -401,9 +398,6 @@ void DATVDemod::webapiUpdateChannelSettings(
     if (channelSettingsKeys.contains("softLDPC")) {
         settings.m_softLDPC = response.getDatvDemodSettings()->getSoftLdpc() == 1;
     }
-    if (channelSettingsKeys.contains("softLDPCToolPath")) {
-        settings.m_softLDPCToolPath = *response.getDatvDemodSettings()->getSoftLdpcToolPath();
-    }
     if (channelSettingsKeys.contains("softLDPCMaxTrials")) {
         settings.m_softLDPCMaxTrials = response.getDatvDemodSettings()->getSoftLdpcMaxTrials();
     }
@@ -503,13 +497,6 @@ void DATVDemod::webapiFormatChannelSettings(SWGSDRangel::SWGChannelSettings& res
     response.getDatvDemodSettings()->setModulation((int) settings.m_modulation);
     response.getDatvDemodSettings()->setFec((int) settings.m_fec);
     response.getDatvDemodSettings()->setSoftLdpc((int) settings.m_softLDPC ? 1 : 0);
-
-    if (response.getDatvDemodSettings()->getSoftLdpcToolPath()) {
-        *response.getDatvDemodSettings()->getSoftLdpcToolPath() = settings.m_softLDPCToolPath;
-    } else {
-        response.getDatvDemodSettings()->setSoftLdpcToolPath(new QString(settings.m_softLDPCToolPath));
-    }
-
     response.getDatvDemodSettings()->setSoftLdpcMaxTrials(settings.m_softLDPCMaxTrials);
     response.getDatvDemodSettings()->setMaxBitflips(settings.m_maxBitflips);
     response.getDatvDemodSettings()->setAudioMute(settings.m_audioMute ? 1 : 0);
@@ -589,6 +576,7 @@ void DATVDemod::webapiFormatChannelReport(SWGSDRangel::SWGChannelReport& respons
     response.getDatvDemodReport()->setChannelPowerDb(CalcDb::dbPower(magsq));
     response.getDatvDemodReport()->setAudioActive(audioActive() ? 1 : 0);
     response.getDatvDemodReport()->setAudioDecodeOk(audioDecodeOK() ? 1 : 0);
+    response.getDatvDemodReport()->setSymbolRate(m_settings.m_symbolRate); // This is repeated from settings for convenience
     response.getDatvDemodReport()->setModcodCodeRate(getModcodCodeRate());
     response.getDatvDemodReport()->setModcodModulation(getModcodModulation());
     response.getDatvDemodReport()->setSetByModcod(isCstlnSetByModcod() ? 1 : 0);
@@ -663,9 +651,6 @@ void DATVDemod::webapiFormatChannelSettings(
     }
     if (channelSettingsKeys.contains("softLDPC") || force) {
         swgDATVDemodSettings->setSoftLdpc(settings.m_softLDPC ? 1 : 0);
-    }
-    if (channelSettingsKeys.contains("softLDPCToolPath") || force) {
-        swgDATVDemodSettings->setSoftLdpcToolPath(new QString(settings.m_softLDPCToolPath));
     }
     if (channelSettingsKeys.contains("softLDPCMaxTrials") || force) {
         swgDATVDemodSettings->setSoftLdpcMaxTrials(settings.m_softLDPCMaxTrials);

@@ -428,7 +428,7 @@ MapItem *ObjectMapModel::newMapItem(const QObject *sourcePipe, const QString &gr
 void ObjectMapModel::update3D(MapItem *item)
 {
     CesiumInterface *cesium = m_gui->cesium();
-    if (cesium)
+    if (cesium && cesium->isConnected()) // Wait until connected, otherwise initial czml will be lost
     {
         ObjectMapItem *objectMapItem = (ObjectMapItem *)item;
         cesium->update(objectMapItem, isTarget(objectMapItem), isSelected3D(objectMapItem));

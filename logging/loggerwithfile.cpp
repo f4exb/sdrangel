@@ -13,12 +13,14 @@ LoggerWithFile::LoggerWithFile(QObject* parent)
     :Logger(parent), fileLogger(0), useFileFlogger(false)
 {
      consoleLogger = new Logger(this);
+     bufferLogger = new BufferLogger(500, this);
 }
 
 LoggerWithFile::~LoggerWithFile()
 {
     destroyFileLogger();
     delete consoleLogger;
+    delete bufferLogger;
 }
 
 void LoggerWithFile::createOrSetFileLogger(const FileLoggerSettings& settings, const int refreshInterval)
@@ -42,6 +44,7 @@ void LoggerWithFile::destroyFileLogger()
 void LoggerWithFile::log(const QtMsgType type, const QString& message, const QString &file, const QString &function, const int line)
 {
     consoleLogger->log(type,message,file,function,line);
+    bufferLogger->log(type,message,file,function,line);
 
     if (fileLogger && useFileFlogger) {
         fileLogger->log(type,message,file,function,line);
@@ -58,6 +61,7 @@ void LoggerWithFile::logToFile(const QtMsgType type, const QString& message, con
 void LoggerWithFile::clear(const bool buffer, const bool variables)
 {
     consoleLogger->clear(buffer,variables);
+    bufferLogger->clear(buffer,variables);
 
     if (fileLogger && useFileFlogger) {
         fileLogger->clear(buffer,variables);
@@ -125,4 +129,9 @@ void LoggerWithFile::getFileMinMessageLevelStr(QString& levelStr)
 void LoggerWithFile::getLogFileName(QString& fileName)
 {
     fileName = fileLogger->getFileLoggerSettings().fileName;
+}
+
+QString LoggerWithFile::getBufferLog() const
+{
+    return bufferLogger->getLog();
 }

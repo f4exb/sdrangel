@@ -51,6 +51,7 @@ struct LimeSDRInputSettings
     uint32_t m_log2HardDecim;
     // channel settings
     bool     m_dcBlock;
+    bool     m_splitFreq;
     bool     m_iqCorrection;
     uint32_t m_log2SoftDecim;
     float    m_lpfBW;        //!< LMS amalog lowpass filter bandwidth (Hz)

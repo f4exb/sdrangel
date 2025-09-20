@@ -22,6 +22,18 @@ services:
     networks:
       default:
         ipv4_address: 172.20.0.3
+  swaggerclient:
+    image: "jeanberu/swagger-cli"
+    user: "1000:1000"
+    entrypoint: "/bin/sh"
+    container_name: "sdrangel_swaggerclient"
+    volumes:
+      - "${SDRANGEL_BASE}:/opt/build/sdrangel:rw"
+    stdin_open: true
+    tty: true
+    networks:
+      default:
+        ipv4_address: 172.20.0.4
 networks:
   default:
     driver: bridge

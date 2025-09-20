@@ -28,12 +28,6 @@
 
 #include "datvdemodsettings.h"
 
-#ifdef _MSC_VER
-#define DEFAULT_LDPCTOOLPATH "C:/Program Files/SDRangel/ldpctool.exe"
-#else
-#define DEFAULT_LDPCTOOLPATH "/opt/install/sdrangel/bin/ldpctool"
-#endif
-
 DATVDemodSettings::DATVDemodSettings() :
     m_channelMarker(nullptr),
     m_rollupState(nullptr)
@@ -51,7 +45,6 @@ void DATVDemodSettings::resetToDefaults()
     m_modulation = BPSK;
     m_fec = FEC12;
     m_softLDPC = false;
-    m_softLDPCToolPath = DEFAULT_LDPCTOOLPATH;
     m_softLDPCMaxTrials = 8;
     m_maxBitflips = 0;
     m_symbolRate = 250000;
@@ -120,7 +113,6 @@ QByteArray DATVDemodSettings::serialize() const
     s.writeU32(31, m_reverseAPIChannelIndex);
     s.writeBool(32, m_softLDPC);
     s.writeS32(33, m_maxBitflips);
-    s.writeString(34, m_softLDPCToolPath);
     s.writeS32(35, m_softLDPCMaxTrials);
     s.writeBool(36, m_playerEnable);
 
@@ -215,7 +207,6 @@ bool DATVDemodSettings::deserialize(const QByteArray& data)
 
         d.readBool(32, &m_softLDPC, false);
         d.readS32(33, &m_maxBitflips, 0);
-        d.readString(34, &m_softLDPCToolPath, DEFAULT_LDPCTOOLPATH);
         d.readS32(35, &tmp, 8);
         m_softLDPCMaxTrials = tmp < 1 ? 1 : tmp > m_softLDPCMaxMaxTrials ? m_softLDPCMaxMaxTrials : tmp;
         d.readBool(36, &m_playerEnable, true);
@@ -256,7 +247,6 @@ void DATVDemodSettings::debug(const QString& msg) const
         << " m_fec: " << m_fec
         << " m_softLDPC: " << m_softLDPC
         << " m_softLDPCMaxTrials: " << m_softLDPCMaxTrials
-        << " m_softLDPCToolPath: " << m_softLDPCToolPath
         << " m_maxBitflips: " << m_maxBitflips
         << " m_modulation: " << m_modulation
         << " m_standard: " << m_standard
@@ -284,7 +274,6 @@ bool DATVDemodSettings::isDifferent(const DATVDemodSettings& other)
         || (m_fec != other.m_fec)
         || (m_softLDPC != other.m_softLDPC)
         || (m_softLDPCMaxTrials != other.m_softLDPCMaxTrials)
-        || (m_softLDPCToolPath != other.m_softLDPCToolPath)
         || (m_maxBitflips != other.m_maxBitflips)
         || (m_modulation != other.m_modulation)
         || (m_notchFilters != other.m_notchFilters)

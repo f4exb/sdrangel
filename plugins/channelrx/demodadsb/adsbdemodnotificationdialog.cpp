@@ -25,7 +25,7 @@
 
 // Map main ADS-B table column numbers to combo box indices
 std::vector<int> ADSBDemodNotificationDialog::m_columnMap = {
-    ADSB_COL_ICAO, ADSB_COL_CALLSIGN, ADSB_COL_MODEL,
+    ADSB_COL_ICAO, ADSB_COL_CALLSIGN, ADSB_COL_MODEL, ADSB_COL_TYPE,
     ADSB_COL_ALTITUDE, ADSB_COL_GROUND_SPEED, ADSB_COL_RANGE,
     ADSB_COL_CATEGORY, ADSB_COL_STATUS, ADSB_COL_SQUAWK,
     ADSB_COL_REGISTRATION, ADSB_COL_MANUFACTURER, ADSB_COL_OWNER, ADSB_COL_OPERATOR_ICAO
@@ -117,6 +117,7 @@ void ADSBDemodNotificationDialog::addRow(ADSBDemodSettings::NotificationSettings
     match->addItem("ICAO ID");
     match->addItem("Callsign");
     match->addItem("Aircraft");
+    match->addItem("Type");
     match->addItem("Alt (ft)");
     match->addItem("GS (kn)");
     match->addItem("D (km)");

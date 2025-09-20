@@ -24,11 +24,33 @@
 #include "mainparser.h"
 #include "export.h"
 
-class SDRBASE_API RemoteTCPSinkStarter {
+#include <QObject>
+
+class DeviceSet;
+class DeviceAPI;
+class ChannelAPI;
+
+class SDRBASE_API RemoteTCPSinkStarter : public QObject {
+
+    Q_OBJECT
+
+    QString m_dataAddress;
+    int m_dataPort;
+
+    DeviceSet *m_deviceSet;
 
 public:
     static void listAvailableDevices();
     static void start(const MainParser& parser);
+
+
+private:
+    RemoteTCPSinkStarter(const QString& address, int port, const QString& hwType, const QString& serial);
+    void startDevice();
+
+private slots:
+    void deviceOpened(int deviceSetIndex);
+    void channelAdded(int deviceSetIndex, ChannelAPI *channel);
 
 };
 

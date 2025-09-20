@@ -40,6 +40,7 @@
 #include "util/messagequeue.h"
 #include "util/giro.h"
 #include "util/azel.h"
+#include "util/aurora.h"
 #include "util/openaip.h"
 #include "util/ourairportsdb.h"
 #include "util/waypoints.h"
@@ -173,6 +174,7 @@ public:
     void addRadioTimeTransmitters();
     void addNAT();
     void addRadar();
+    void addAurora();
     void addIonosonde();
     void addBroadcast();
     void addDAB();
@@ -228,6 +230,7 @@ private:
     QDateTime m_giroDateTime;
     QString m_giroRunId;
     QHash<QString, IonosondeStation *> m_ionosondeStations;
+    Aurora *m_aurora;
     QSharedPointer<const QList<NavAid *>> m_navAids;
     QSharedPointer<const QList<Airspace *>> m_airspaces;
     QSharedPointer<const QHash<int, AirportInformation *>> m_airportInfo;
@@ -252,6 +255,9 @@ private:
     QAction *m_displayNASAGlobalImagery;
     QAction *m_displayMUF;
     QAction *m_displayfoF2;
+    QAction *m_displayAurora;
+    QAction *m_displayMagDec;
+    QAction *m_displayMaidenheadGrid;
 
     QString m_radarPath;
     QString m_satellitePath;
@@ -271,7 +277,9 @@ private:
 
     void update(const QObject *source, SWGSDRangel::SWGMapItem *swgMapItem, const QString &group);
     void blockApplySettings(bool block);
-    void applySettings(bool force = false);
+    void applySetting(const QString& settingsKey);
+    void applySettings(const QStringList& settingsKeys, bool force = false);
+    void applyAllSettings();
     void applyMap2DSettings(bool reloadMap);
     void applyMap3DSettings(bool reloadMap);
     QString osmCachePath();
@@ -318,6 +326,8 @@ private slots:
     void onMenuDialogCalled(const QPoint &p);
     void onWidgetRolled(QWidget* widget, bool rollDown);
     void handleInputMessages();
+    void on_viewFirstPerson_clicked(bool checked=false);
+    void on_displayPFD_clicked(bool checked=false);
     void on_displayNames_clicked(bool checked=false);
     void on_displayAllGroundTracks_clicked(bool checked=false);
     void on_displaySelectedGroundTracks_clicked(bool checked=false);
@@ -330,6 +340,9 @@ private slots:
     void on_displayNASAGlobalImagery_clicked(bool checked=false);
     void on_nasaGlobalImageryIdentifier_currentIndexChanged(int index);
     void on_nasaGlobalImageryOpacity_valueChanged(int index);
+    void on_displayAurora_clicked(bool checked=false);
+    void on_displayMagDec_clicked(bool checked=false);
+    void on_displayMaidenheadGrid_clicked(bool checked=false);
     void on_layersMenu_clicked();
     void on_find_returnPressed();
     void on_maidenhead_clicked();
@@ -365,6 +378,7 @@ private slots:
     void nasaGlobalImageryMetaDataUpdated(const NASAGlobalImagery::MetaData& metaData);
     void nasaGlobalImageryLegendAvailable(const QString& url, const QByteArray& data);
     void nasaGlobalImageryHTMLAvailable(const QString& url, const QByteArray& data);
+    void auroraUpdated(const QImage& image);
     void navAidsUpdated();
     void airspacesUpdated();
     void airportsUpdated();

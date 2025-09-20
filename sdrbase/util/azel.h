@@ -69,22 +69,22 @@ public:
         sphericalToCartesian(m_target);
     }
 
-    AzElSpherical getLocationSpherical()
+    AzElSpherical getLocationSpherical() const
     {
         return m_location.m_spherical;
     }
 
-    AzElCartesian getLocationCartesian()
+    AzElCartesian getLocationCartesian() const
     {
         return m_location.m_cart;
     }
 
-    AzElSpherical getTargetSpherical()
+    AzElSpherical getTargetSpherical() const
     {
         return m_target.m_spherical;
     }
 
-    AzElCartesian getTargetCartesian()
+    AzElCartesian getTargetCartesian() const
     {
         return m_target.m_cart;
     }
@@ -113,8 +113,8 @@ public:
 
 private:
 
-    double cartDistance(const AzElPoint& a, const AzElPoint& b);
-    bool normVectorDiff(const AzElCartesian& a, const AzElCartesian& b, AzElCartesian& n);
+    double cartDistance(const AzElPoint& a, const AzElPoint& b) const;
+    bool normVectorDiff(const AzElCartesian& a, const AzElCartesian& b, AzElCartesian& n) const;
     double geocentricLatitude(double latRad) const;
     double earthRadiusInMetres(double geodeticLatRad) const;
     void sphericalToCartesian(AzElPoint& point);

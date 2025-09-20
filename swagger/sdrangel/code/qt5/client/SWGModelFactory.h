@@ -215,6 +215,7 @@
 #include "SWGM17ModReport.h"
 #include "SWGM17ModSettings.h"
 #include "SWGMapActions.h"
+#include "SWGMapAircraftState.h"
 #include "SWGMapAnimation.h"
 #include "SWGMapCoordinate.h"
 #include "SWGMapItem.h"
@@ -1393,6 +1394,11 @@ namespace SWGSDRangel {
     }
     if(QString("SWGMapActions").compare(type) == 0) {
       SWGMapActions *obj = new SWGMapActions();
+      obj->init();
+      return obj;
+    }
+    if(QString("SWGMapAircraftState").compare(type) == 0) {
+      SWGMapAircraftState *obj = new SWGMapAircraftState();
       obj->init();
       return obj;
     }

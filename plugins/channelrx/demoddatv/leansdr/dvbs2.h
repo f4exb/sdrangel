@@ -72,6 +72,8 @@ typedef SSIZE_T ssize_t;
 #include "ldpctool/algorithms.h"
 #include "ldpctool/ldpcworker.h"
 
+#include <QDebug>
+
 namespace leansdr
 {
 
@@ -459,7 +461,7 @@ struct s2_frame_transmitter : runnable
     )
     {
         (void)mcinfo;
-        
+
         std::complex<T> *pout0 = pout; // For sanity check
         // PLHEADER: SOF AND PLSCODE
         // EN 302 307-1 section 5.5.2 PL signalling
@@ -700,8 +702,9 @@ struct s2_frame_receiver : runnable
 
         char *format() {
             static char buf[256];
-            sprintf(
+            snprintf(
                 buf,
+                sizeof(buf),
                 "%9.2lf %+6.0f ppm  %+3.0f °  %f",
                 (double)((p-(std::complex<T>*)NULL)&262143)+mu,  // Arbitrary wrap
                 fw16*1e6/65536,
@@ -2587,7 +2590,7 @@ struct s2_deinterleaver : runnable
                                     hard_sb accs[/*bps*/], int nacc)
     {
         (void)nacc;
-        
+
         if (MSB_FIRST)
         {
             for (int b = 0; b < BPS; ++b) {
@@ -3516,11 +3519,11 @@ struct s2_fecdec_helper : runnable
             close(rx[0]);
             dup2(rx[1], 1);
             char max_trials_arg[16];
-            sprintf(max_trials_arg, "%d", max_trials);
+            snprintf(max_trials_arg, sizeof(max_trial_args), "%d", max_trials);
             char batch_size_arg[16];
-            sprintf(batch_size_arg, "%d", batch_size);
+            snprintf(batch_size_arg, sizeof(batch_size_args), "%d", batch_size);
             char mc_arg[16];
-            sprintf(mc_arg, "%d", pls->modcod);
+            snprintf(mc_arg, sizeof(mc_arg), "%d", pls->modcod);
             const char *sf_arg = pls->sf ? "--shortframes" : nullptr;
             const char *argv[] = {
                 command,
@@ -3643,7 +3646,6 @@ struct s2_fecdec_helper : runnable
         scheduler *sch,
         pipebuf<fecframe<SOFTBYTE>> &_in,
         pipebuf<bbframe> &_out,
-        const char *_command,
         pipebuf<int> *_bitcount = nullptr,
         pipebuf<int> *_errcount = nullptr
     ) :
@@ -3657,7 +3659,6 @@ struct s2_fecdec_helper : runnable
         bitcount(opt_writer(_bitcount, 1)),
         errcount(opt_writer(_errcount, 1))
     {
-        command = strdup(_command);
 
         for (int mc = 0; mc < 32; ++mc) {
             for (int sf = 0; sf < 2; ++sf) {
@@ -3668,7 +3669,6 @@ struct s2_fecdec_helper : runnable
 
     ~s2_fecdec_helper()
     {
-        free(command);
         killall(); // also deletes pools[mc][sf].procs if necessary
     }
 

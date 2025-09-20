@@ -50,7 +50,7 @@ endif()
 
 # CUDA Toolkit: https://developer.nvidia.com/cuda-downloads
 if (${VKFFT_BACKEND} EQUAL 1)
-    find_package(CUDAToolkit)    
+    find_package(CUDAToolkit)
     if(CUDA_FOUND)
         enable_language(CUDA)
         set(sdrbase_SOURCES
@@ -222,11 +222,13 @@ set(sdrbase_SOURCES
     util/ax25.cpp
     util/aprs.cpp
     util/astronomy.cpp
+    util/aurora.cpp
     util/azel.cpp
     util/baudot.cpp
     util/callsign.cpp
     util/colormap.cpp
     util/coordinates.cpp
+    util/corsproxy.cpp
     util/countrydat.cpp
     util/crc.cpp
     util/CRC64.cpp
@@ -283,6 +285,7 @@ set(sdrbase_SOURCES
     util/vlftransmitters.cpp
     util/waypoints.cpp
     util/weather.cpp
+    util/whittakereilers.cpp
     util/iot/device.cpp
     util/iot/homeassistant.cpp
     util/iot/tplink.cpp
@@ -473,6 +476,7 @@ set(sdrbase_HEADERS
     util/ais.h
     util/android.h
     util/aprsfi.h
+    util/aurora.h
     util/aviationweather.h
     util/ax25.h
     util/aprs.h
@@ -482,6 +486,7 @@ set(sdrbase_HEADERS
     util/callsign.h
     util/colormap.h
     util/coordinates.h
+    util/corsproxy.h
     util/countrydat.h
     util/CRC64.h
     util/csv.h
@@ -544,6 +549,7 @@ set(sdrbase_HEADERS
     util/vlftransmitters.h
     util/waypoints.h
     util/weather.h
+    util/whittakereilers.h
     util/iot/device.h
     util/iot/homeassistant.h
     util/iot/tplink.h
@@ -726,5 +732,6 @@ endif()
 
 # Install debug symbols
 if (WIN32)
+    install(FILES $<TARGET_PROPERTY:sdrbase,RUNTIME_OUTPUT_DIRECTORY>/sdrbasestripped.pdb CONFIGURATIONS Release DESTINATION ${INSTALL_LIB_DIR} RENAME sdrbase.pdb)
     install(FILES $<TARGET_PDB_FILE:sdrbase> CONFIGURATIONS Debug RelWithDebInfo DESTINATION ${INSTALL_LIB_DIR} )
 endif()

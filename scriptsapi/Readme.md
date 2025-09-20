@@ -32,6 +32,23 @@ Normal sequence of operations:
   - In SDRangel connect the Frequency Tracker plugin by clicking on the grey square at the left of the top bar of the Frequency Tracker GUI. It opens the channel settings dialog. Check the 'Reverse API' box. Next to this box is the address and port at which the channel will be connected. If you use the defaults for `freqtracking.py` you may leave it as it is else you have to adjust it to the address and port of `freqtracking.py` (options `-A` and `-P`).
   - In the same manner connect the channel you want to be controlled by `freqtracking.py`. You may connect any number of channels like this. When a channel is removed `freqtracking.py` will automatically remove it from its list at the first attempt to synchronize that will fail.
 
+<h2>plutodvbrpt.py</h2>
+
+Control PlutoDVB2 Tx firmware from SDRangel DATV demod as Rx. This is to effectively implement a DATV repeater based on SDRangel (supposedly sdrangelsrv running on a RPi5 or mini PC) as the receiver and a Pluto equipped with F5OEO PlutoDVB2 firmware as the transmitter. PlutoDVB2 has not such a thing as a "vox" on its UDP TS input so it needs an external command (via MQTT) to switch on/off Tx when the UDP flux starts or stops.
+
+This script  polls the DATV Demod channel report every second via the REST API interface and sends appropriate command to the Pluto to switch Tx on or off according to the UDP status. In addition it can clone the DVBS2 essential parameters to the Tx to match exactly the input parameters on the Rx. These are symbol rate, modulation and FEC.
+
+  - `-h` or `--help` show help message and exit
+  - `-a` or `--sdr_address` SDRangel address and port. Default: `127.0.0.1:8091`
+  - `-d` or `--device` index of device set. Default `0`
+  - `-c` or `--channel` Index of DATV demod channel. Default `0`
+  - `-A` or `--pluto_address` Pluto MQTT address. Mandatory
+  - `-P` or `--pluto_port` Pluto MQTT port. Default `1883`
+  - `-C` or `--callsign` Amateur Radio callsign. Mandatory
+  - `-l` or `--clone` Clone symbol rate, constellation and fec to Pluto
+
+The Pluto address and amateur radio callsign have to be specified. The rest have default values as mentioned.
+
 <h2>ptt_feature.py</h2>
 
 Control a PTT feature and optionally a LimeRFE feature in coordination.

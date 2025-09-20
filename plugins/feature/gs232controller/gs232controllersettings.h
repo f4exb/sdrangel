@@ -54,6 +54,7 @@ struct GS232ControllerSettings
     bool m_targetControlEnabled;
     bool m_offsetControlEnabled;
     bool m_highSensitivity;
+    enum LineEnding { CRLF, CR, LF } m_lineEnding; // GS232 only
 
     bool m_dfmTrackOn;
     bool m_dfmLubePumpsOn;

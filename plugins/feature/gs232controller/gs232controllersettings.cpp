@@ -70,6 +70,7 @@ void GS232ControllerSettings::resetToDefaults()
     for (int i = 0; i < INPUTCONTROLLER_MAX_AXES; i++) {
         m_inputControllerSettings.m_deadzone[i] = 10.0f;
     }
+    m_lineEnding = CRLF;
     m_dfmTrackOn = false;
     m_dfmLubePumpsOn = false;
     m_dfmBrakesOn = false;
@@ -129,6 +130,7 @@ QByteArray GS232ControllerSettings::serialize() const
     s.writeBool(37, m_targetControlEnabled);
     s.writeBool(38, m_offsetControlEnabled);
     s.writeBool(39, m_highSensitivity);
+    s.writeS32(40, m_lineEnding);
 
     s.writeFloat(50, m_inputControllerSettings.m_lowSensitivity);
     s.writeFloat(51, m_inputControllerSettings.m_highSensitivity);
@@ -207,6 +209,7 @@ bool GS232ControllerSettings::deserialize(const QByteArray& data)
         d.readBool(37, &m_targetControlEnabled, true);
         d.readBool(38, &m_offsetControlEnabled, true);
         d.readBool(39, &m_highSensitivity, true);
+        d.readS32(40, (int *) &m_lineEnding, (int) CRLF);
 
         d.readFloat(50, &m_inputControllerSettings.m_lowSensitivity, 5.0f);
         d.readFloat(51, &m_inputControllerSettings.m_highSensitivity, 50.0f);
@@ -311,6 +314,9 @@ void GS232ControllerSettings::applySettings(const QStringList& settingsKeys, con
     }
     if (settingsKeys.contains("highSensitivity")) {
         m_highSensitivity = settings.m_highSensitivity;
+    }
+    if (settingsKeys.contains("lineEnding")) {
+        m_lineEnding = settings.m_lineEnding;
     }
     if (settingsKeys.contains("dfmTrackOn")) {
         m_dfmTrackOn = settings.m_dfmTrackOn;
@@ -429,6 +435,9 @@ QString GS232ControllerSettings::getDebugString(const QStringList& settingsKeys,
     }
     if (settingsKeys.contains("highSensitivity") || force) {
         ostr << " m_highSensitivity: " << m_highSensitivity;
+    }
+    if (settingsKeys.contains("lineEnding") || force) {
+        ostr << " m_lineEnding: " << m_lineEnding;
     }
     if (settingsKeys.contains("title") || force) {
         ostr << " m_title: " << m_title.toStdString();

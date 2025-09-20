@@ -113,6 +113,7 @@ public:
     bool    m_pttSpectrumLink;
 
     QString      m_rxDeviceName;       // Including realm, as from getFullDeviceName below
+    int          m_rxSampleRate;       //!< Sample rate in Hz
     IQMapping    m_rxIQMapping;
     unsigned int m_log2Decim;
     fcPos_t      m_fcPosRx;
@@ -121,6 +122,7 @@ public:
     float        m_rxVolume;
 
     QString      m_txDeviceName;       // Including realm, as from getFullDeviceName below
+    int          m_txSampleRate;       //!< Sample rate in Hz
     IQMapping    m_txIQMapping;
     int          m_txVolume; //!< dB
 

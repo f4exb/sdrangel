@@ -22,6 +22,7 @@
 #include <QJsonObject>
 
 
+#include "SWGMapAircraftState.h"
 #include "SWGMapAnimation.h"
 #include "SWGMapCoordinate.h"
 #include <QList>
@@ -72,6 +73,9 @@ public:
     QString* getPositionDateTime();
     void setPositionDateTime(QString* position_date_time);
 
+    QString* getAltitudeDateTime();
+    void setAltitudeDateTime(QString* altitude_date_time);
+
     QList<SWGMapCoordinate*>* getTrack();
     void setTrack(QList<SWGMapCoordinate*>* track);
 
@@ -101,6 +105,9 @@ public:
 
     float getLabelAltitudeOffset();
     void setLabelAltitudeOffset(float label_altitude_offset);
+
+    QString* getLabelDateTime();
+    void setLabelDateTime(QString* label_date_time);
 
     float getModelAltitudeOffset();
     void setModelAltitudeOffset(float model_altitude_offset);
@@ -147,6 +154,9 @@ public:
     qint32 getColor();
     void setColor(qint32 color);
 
+    SWGMapAircraftState* getAircraftState();
+    void setAircraftState(SWGMapAircraftState* aircraft_state);
+
 
     virtual bool isSet() override;
 
@@ -178,6 +188,9 @@ private:
     QString* position_date_time;
     bool m_position_date_time_isSet;
 
+    QString* altitude_date_time;
+    bool m_altitude_date_time_isSet;
+
     QList<SWGMapCoordinate*>* track;
     bool m_track_isSet;
 
@@ -207,6 +220,9 @@ private:
 
     float label_altitude_offset;
     bool m_label_altitude_offset_isSet;
+
+    QString* label_date_time;
+    bool m_label_date_time_isSet;
 
     float model_altitude_offset;
     bool m_model_altitude_offset_isSet;
@@ -252,6 +268,9 @@ private:
 
     qint32 color;
     bool m_color_isSet;
+
+    SWGMapAircraftState* aircraft_state;
+    bool m_aircraft_state_isSet;
 
 };
 

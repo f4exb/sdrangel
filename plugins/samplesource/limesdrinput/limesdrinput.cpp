@@ -969,8 +969,14 @@ bool LimeSDRInput::applySettings(const LimeSDRInputSettings& settings, const QLi
     if (settingsKeys.contains("devSampleRate")
        || settingsKeys.contains("log2HardDecim") || force)
     {
-        forwardChangeAllDSP = true; //m_settings.m_devSampleRate != settings.m_devSampleRate;
-
+        
+        if(!settings.m_splitFreq) {
+            forwardChangeAllDSP = true; //m_settings.m_devSampleRate != settings.m_devSampleRate;
+            qDebug() << "LimeSDRInput::applySettings: Split is false, val:" << settings.m_splitFreq;
+        }else{
+            forwardChangeRxDSP  = m_settings.m_log2HardDecim != settings.m_log2HardDecim;
+            forwardChangeAllDSP = m_settings.m_devSampleRate != settings.m_devSampleRate;
+        }
         if (m_deviceShared.m_deviceParams->getDevice() && m_channelAcquired)
         {
             if (LMS_SetSampleRateDir(m_deviceShared.m_deviceParams->getDevice(),
@@ -1439,6 +1445,9 @@ void LimeSDRInput::webapiUpdateDeviceSettings(
     if (deviceSettingsKeys.contains("dcBlock")) {
         settings.m_dcBlock = response.getLimeSdrInputSettings()->getDcBlock() != 0;
     }
+    if (deviceSettingsKeys.contains("splitFreq")) {
+        settings.m_splitFreq = response.getLimeSdrInputSettings()->getSplitFreq() != 0;
+    }
     if (deviceSettingsKeys.contains("devSampleRate")) {
         settings.m_devSampleRate = response.getLimeSdrInputSettings()->getDevSampleRate();
     }
@@ -1521,6 +1530,7 @@ void LimeSDRInput::webapiFormatDeviceSettings(SWGSDRangel::SWGDeviceSettings& re
     response.getLimeSdrInputSettings()->setAntennaPath((int) settings.m_antennaPath);
     response.getLimeSdrInputSettings()->setCenterFrequency(settings.m_centerFrequency);
     response.getLimeSdrInputSettings()->setDcBlock(settings.m_dcBlock ? 1 : 0);
+    response.getLimeSdrInputSettings()->setSplitFreq(settings.m_splitFreq ? 1 : 0);
     response.getLimeSdrInputSettings()->setDevSampleRate(settings.m_devSampleRate);
     response.getLimeSdrInputSettings()->setExtClock(settings.m_extClock ? 1 : 0);
     response.getLimeSdrInputSettings()->setExtClockFreq(settings.m_extClockFreq);
@@ -1652,6 +1662,9 @@ void LimeSDRInput::webapiReverseSendSettings(const QList<QString>& deviceSetting
     }
     if (deviceSettingsKeys.contains("dcBlock") || force) {
         swgLimeSdrInputSettings->setDcBlock(settings.m_dcBlock ? 1 : 0);
+    }
+    if (deviceSettingsKeys.contains("splitFreq") || force) {
+        swgLimeSdrInputSettings->setSplitFreq(settings.m_splitFreq ? 1 : 0);
     }
     if (deviceSettingsKeys.contains("devSampleRate") || force) {
         swgLimeSdrInputSettings->setDevSampleRate(settings.m_devSampleRate);

@@ -50,7 +50,6 @@ ADSBDemodDisplayDialog::ADSBDemodDisplayDialog(ADSBDemodSettings *settings, QWid
     ui->airportSize->setCurrentIndex((int)settings->m_airportMinimumSize);
     ui->heliports->setChecked(settings->m_displayHeliports);
     ui->units->setCurrentIndex((int)settings->m_siUnits);
-    ui->displayStats->setChecked(settings->m_displayDemodStats);
     ui->autoResizeTableColumns->setChecked(settings->m_autoResizeTableColumns);
     ui->aviationstackAPIKey->setText(settings->m_aviationstackAPIKey);
     ui->checkWXAPIKey->setText(settings->m_checkWXAPIKey);
@@ -67,12 +66,17 @@ ADSBDemodDisplayDialog::ADSBDemodDisplayDialog(ADSBDemodSettings *settings, QWid
         ui->mapProvider->setCurrentText(settings->m_mapProvider);
     }
     ui->mapType->setCurrentIndex((int)settings->m_mapType);
+    ui->maptilerAPIKey->setText(m_settings->m_maptilerAPIKey);
     ui->navAids->setChecked(settings->m_displayNavAids);
     ui->atcCallsigns->setChecked(settings->m_atcCallsigns);
     ui->photos->setChecked(settings->m_displayPhotos);
     ui->verboseModelMatching->setChecked(settings->m_verboseModelMatching);
-    ui->airfieldElevation->setValue(settings->m_airfieldElevation);
+    ui->favourLivery->setChecked(settings->m_favourLivery);
     ui->transitionAltitude->setValue(settings->m_transitionAlt);
+    for (auto i = ADSBDemodSettings::m_palettes.cbegin(), end = ADSBDemodSettings::m_palettes.cend(); i != end; ++i) {
+        ui->flightPathPalette->addItem(i.key());
+    }
+    ui->flightPathPalette->setCurrentText(settings->m_flightPathPaletteName);
 }
 
 ADSBDemodDisplayDialog::~ADSBDemodDisplayDialog()
@@ -107,15 +111,10 @@ void ADSBDemodDisplayDialog::accept()
         m_settings->m_displayHeliports = ui->heliports->isChecked();
         m_settingsKeys.append("displayHeliports");
     }
-    if (m_settings->m_siUnits != ui->units->currentIndex() == 0 ? false : true)
+    if (m_settings->m_siUnits != (ui->units->currentIndex() == 0 ? false : true))
     {
         m_settings->m_siUnits = ui->units->currentIndex() == 0 ? false : true;
         m_settingsKeys.append("siUnits");
-    }
-    if (m_settings->m_displayDemodStats != ui->displayStats->isChecked())
-    {
-        m_settings->m_displayDemodStats = ui->displayStats->isChecked();
-        m_settingsKeys.append("displayDemodStats");
     }
     if (m_settings->m_autoResizeTableColumns != ui->autoResizeTableColumns->isChecked())
     {
@@ -160,6 +159,11 @@ void ADSBDemodDisplayDialog::accept()
         m_settings->m_mapType = (ADSBDemodSettings::MapType)ui->mapType->currentIndex();
         m_settingsKeys.append("mapType");
     }
+    if (m_settings->m_maptilerAPIKey != ui->maptilerAPIKey->text())
+    {
+        m_settings->m_maptilerAPIKey = ui->maptilerAPIKey->text();
+        m_settingsKeys.append("maptilerAPIKey");
+    }
     if (m_settings->m_displayNavAids != ui->navAids->isChecked())
     {
         m_settings->m_displayNavAids = ui->navAids->isChecked();
@@ -180,10 +184,10 @@ void ADSBDemodDisplayDialog::accept()
         m_settings->m_verboseModelMatching = ui->verboseModelMatching->isChecked();
         m_settingsKeys.append("verboseModelMatching");
     }
-    if (m_settings->m_airfieldElevation != ui->airfieldElevation->value())
+    if (m_settings->m_favourLivery != ui->favourLivery->isChecked())
     {
-        m_settings->m_airfieldElevation = ui->airfieldElevation->value();
-        m_settingsKeys.append("airfieldElevation");
+        m_settings->m_favourLivery = ui->favourLivery->isChecked();
+        m_settingsKeys.append("favourLivery");
     }
     if (m_settings->m_transitionAlt != ui->transitionAltitude->value())
     {
@@ -199,6 +203,12 @@ void ADSBDemodDisplayDialog::accept()
     {
         m_settings->m_tableFontSize = m_fontSize;
         m_settingsKeys.append("tableFontSize");
+    }
+    if (m_settings->m_flightPathPaletteName != ui->flightPathPalette->currentText())
+    {
+        m_settings->m_flightPathPaletteName = ui->flightPathPalette->currentText();
+        m_settingsKeys.append("flightPathPaletteName");
+        m_settings->applyPalette();
     }
     QDialog::accept();
 }

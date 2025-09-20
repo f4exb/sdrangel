@@ -32,7 +32,7 @@
 const PluginDescriptor AudioCATSISOPlugin::m_pluginDescriptor = {
     QStringLiteral("AudioCATSISO"),
 	QStringLiteral("Audio CAT SISO"),
-    QStringLiteral("7.22.1"),
+    QStringLiteral("7.22.7"),
 	QStringLiteral("(c) Edouard Griffiths, F4EXB"),
 	QStringLiteral("https://github.com/f4exb/sdrangel"),
 	true,
@@ -89,12 +89,12 @@ PluginInterface::SamplingDevices AudioCATSISOPlugin::enumSampleMIMO(const Origin
                     m_deviceTypeID,
                     it->serial,
                     it->sequence,
-                    PluginInterface::SamplingDevice::PhysicalDevice,
+                    PluginInterface::SamplingDevice::BuiltInDevice,
                     PluginInterface::SamplingDevice::StreamMIMO,
                     1,    // MIMO is always considered as a single device
                     0)
             );
-            qDebug("MetisMISOPlugin::enumSampleMIMO: enumerated Metis device #%d", it->sequence);
+            qDebug("AudioCATSISOPlugin::enumSampleMIMO: enumerated AudioCATSISO device #%d", it->sequence);
         }
     }
 

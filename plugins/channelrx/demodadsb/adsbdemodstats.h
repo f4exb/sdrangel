@@ -25,20 +25,27 @@ struct ADSBDemodStats {
     qint64 m_correlatorMatches; //!< Total number of correlator matches
     qint64 m_adsbFrames;        //!< How many ADS-B frames with correct CRCs
     qint64 m_modesFrames;       //!< How many non-ADS-B Mode-S frames with correct CRCs
+    qint64 m_preambleFails;     //!< How many non-ADS-B Mode S frames with errors in preamble
     qint64 m_crcFails;          //!< How many frames we've demoded with incorrect CRCs
     qint64 m_typeFails;         //!< How many frames we've demoded with unknown type (DF) so we can't check CRC
-    double m_demodTime;         //!< How long we've spent in run()
-    double m_feedTime;          //!< How long we've spent in feed()
+    qint64 m_invalidFails;      //!< How many frames we've demoded with reserved bits set
+    qint64 m_icaoFails;         //!< How many frames we've demoded with reserved ICAO
 
-    ADSBDemodStats() :
-    m_correlatorMatches(0),
-    m_adsbFrames(0),
-    m_modesFrames(0),
-    m_crcFails(0),
-    m_typeFails(0),
-    m_demodTime(0.0),
-    m_feedTime(0.0)
+    ADSBDemodStats()
     {
+        reset();
+    }
+
+    void reset()
+    {
+        m_correlatorMatches = 0;
+        m_adsbFrames = 0;
+        m_modesFrames = 0;
+        m_preambleFails = 0;
+        m_crcFails = 0;
+        m_typeFails = 0;
+        m_invalidFails = 0;
+        m_icaoFails = 0;
     }
 
 };

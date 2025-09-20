@@ -92,6 +92,21 @@ public:
         { }
     };
 
+    class MsgResetStats : public Message {
+        MESSAGE_CLASS_DECLARATION
+
+    public:
+        static MsgResetStats* create()
+        {
+            return new MsgResetStats();
+        }
+
+    private:
+        MsgResetStats() :
+            Message()
+        { }
+    };
+
     ADSBDemod(DeviceAPI *deviceAPI);
     virtual ~ADSBDemod();
     virtual void destroy() { delete this; }

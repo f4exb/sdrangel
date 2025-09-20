@@ -28,7 +28,7 @@ GS232Protocol::GS232Protocol()
 
 void GS232Protocol::setAzimuth(float azimuth)
 {
-    QString cmd = QString("M%1\r\n").arg((int)std::round(azimuth), 3, 10, QLatin1Char('0'));
+    QString cmd = QString("M%1%2").arg((int)std::round(azimuth), 3, 10, QLatin1Char('0')).arg(lineEnding());
     QByteArray data = cmd.toLatin1();
     m_device->write(data);
     m_lastAzimuth = azimuth;
@@ -36,7 +36,7 @@ void GS232Protocol::setAzimuth(float azimuth)
 
 void GS232Protocol::setAzimuthElevation(float azimuth, float elevation)
 {
-    QString cmd = QString("W%1 %2\r\n").arg((int)std::round(azimuth), 3, 10, QLatin1Char('0')).arg((int)std::round(elevation), 3, 10, QLatin1Char('0'));
+    QString cmd = QString("W%1 %2%3").arg((int)std::round(azimuth), 3, 10, QLatin1Char('0')).arg((int)std::round(elevation), 3, 10, QLatin1Char('0')).arg(lineEnding());
     QByteArray data = cmd.toLatin1();
     m_device->write(data);
     ControllerProtocol::setAzimuthElevation(azimuth, elevation);
@@ -54,15 +54,29 @@ void GS232Protocol::readData()
         if (len != -1)
         {
             QString response = QString::fromUtf8(buf, len);
-            // MD-02 can return AZ=-00 EL=-00 and other negative angles
-            QRegularExpression re("AZ=([-\\d]\\d\\d) *EL=([-\\d]\\d\\d)");
-            QRegularExpressionMatch match = re.match(response);
-            if (match.hasMatch())
+            // Handle both formats:
+            // 1. AZ=XXX EL=XXX (MD-02 can return negative angles like AZ=-00 EL=-00)
+            // 2. +XXXX+YYYY (direct angle format)
+            QRegularExpression reAzEl("AZ=([-\\d]\\d\\d) *EL=([-\\d]\\d\\d)");
+            QRegularExpression reAngles("([+-]\\d{4})([+-]\\d{4})");
+
+            QRegularExpressionMatch matchAzEl = reAzEl.match(response);
+            QRegularExpressionMatch matchAngles = reAngles.match(response);
+            if (matchAzEl.hasMatch())
             {
-                QString az = match.captured(1);
-                QString el = match.captured(2);
-                //qDebug() << "SPIDProtocol::readData read Az " << az << " El " << el;
+                QString az = matchAzEl.captured(1);
+                QString el = matchAzEl.captured(2);
+                //qDebug() << "GS232Protocol::readData read Az " << az << " El " << el;
                 reportAzEl(az.toFloat(), el.toFloat());
+            }
+            else if (matchAngles.hasMatch())
+            {
+                // Convert from +XXXX format to float
+                QString az = matchAngles.captured(1);
+                QString el = matchAngles.captured(2);
+                //qDebug() << "GS232Protocol::readData read direct angles Az " << az << " El " << el;
+                // The format gives angles in tenths of a degree, so divide by 10
+                reportAzEl(az.toFloat()/10.0f, el.toFloat()/10.0f);
             }
             else if (response == "\r\n")
             {
@@ -70,7 +84,7 @@ void GS232Protocol::readData()
             }
             else
             {
-                qWarning() << "SPIDProtocol::readData - unexpected GS-232 response \"" << response << "\"";
+                qWarning() << "GS232Protocol::readData - unexpected GS-232 response \"" << response << "\"";
                 reportError(QString("Unexpected GS-232 response: %1").arg(response));
             }
         }
@@ -80,7 +94,18 @@ void GS232Protocol::readData()
 // Request current Az/El from controller
 void GS232Protocol::update()
 {
-    QByteArray cmd("C2\r\n");
-    m_device->write(cmd);
+    QString cmd = QString("C2%1").arg(lineEnding());
+    QByteArray data = cmd.toLatin1();
+    m_device->write(data);
 }
 
+QString GS232Protocol::lineEnding() const
+{
+    if (m_settings.m_lineEnding == GS232ControllerSettings::CRLF) {
+        return "\r\n";
+    } else if (m_settings.m_lineEnding == GS232ControllerSettings::CR) {
+        return "\r";
+    } else {
+        return "\n";
+    }
+}

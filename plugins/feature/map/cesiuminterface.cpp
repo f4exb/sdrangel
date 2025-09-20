@@ -50,6 +50,15 @@ void CesiumInterface::setView(float latitude, float longitude, float altitude)
     send(obj);
 }
 
+void CesiumInterface::setViewFirstPerson(bool firstPerson)
+{
+    QJsonObject obj {
+        {"command", "setViewFirstPerson"},
+        {"firstPerson", firstPerson}
+    };
+    send(obj);
+}
+
 // Play glTF model animation for the map item with the specified name
 void CesiumInterface::playAnimation(const QString &name, Animation *animation)
 {
@@ -97,7 +106,16 @@ void CesiumInterface::track(const QString& name)
     send(obj);
 }
 
-void CesiumInterface::setTerrain(const QString &terrain, const QString &maptilerAPIKey)
+void CesiumInterface::setDefaultImagery(const QString &imagery)
+{
+    QJsonObject obj {
+        {"command", "setDefaultImagery"},
+        {"imagery", imagery}
+    };
+    send(obj);
+}
+
+void CesiumInterface::setTerrain(const QString &terrain, const QString &maptilerAPIKey, bool lighting, bool water)
 {
     QString provider;
     QString url;
@@ -118,7 +136,9 @@ void CesiumInterface::setTerrain(const QString &terrain, const QString &maptiler
     QJsonObject obj {
         {"command", "setTerrain"},
         {"provider", provider},
-        {"url", url}
+        {"url", url},
+        {"lighting", lighting},
+        {"water", water}
     };
     send(obj);
 }
@@ -132,11 +152,12 @@ void CesiumInterface::setBuildings(const QString &buildings)
     send(obj);
 }
 
-void CesiumInterface::setSunLight(bool useSunLight)
+void CesiumInterface::setLighting(bool useSunLight, float cameraLightIntensity)
 {
     QJsonObject obj {
-        {"command", "setSunLight"},
-        {"useSunLight", useSunLight}
+        {"command", "setLighting"},
+        {"useSunLight", useSunLight},
+        {"cameraLightIntensity", cameraLightIntensity}
     };
     send(obj);
 }
@@ -150,11 +171,48 @@ void CesiumInterface::setCameraReferenceFrame(bool eci)
     send(obj);
 }
 
-void CesiumInterface::setAntiAliasing(const QString &antiAliasing)
+void CesiumInterface::setAntiAliasing(bool fxaa, int msaa)
 {
     QJsonObject obj {
         {"command", "setAntiAliasing"},
-        {"antiAliasing", antiAliasing}
+        {"fxaa", fxaa},
+        {"msaa", msaa}
+    };
+    send(obj);
+}
+
+void CesiumInterface::setHDR(bool enabled)
+{
+    QJsonObject obj {
+        {"command", "setHDR"},
+        {"hdr", enabled}
+    };
+    send(obj);
+}
+
+void CesiumInterface::setFog(bool enabled)
+{
+    QJsonObject obj {
+        {"command", "setFog"},
+        {"fog", enabled}
+    };
+    send(obj);
+}
+
+void CesiumInterface::showFPS(bool show)
+{
+    QJsonObject obj {
+        {"command", "showFPS"},
+        {"show", show}
+    };
+    send(obj);
+}
+
+void CesiumInterface::showPFD(bool show)
+{
+    QJsonObject obj {
+        {"command", "showPFD"},
+        {"show", show}
     };
     send(obj);
 }
@@ -172,6 +230,24 @@ void CesiumInterface::showfoF2(bool show)
 {
     QJsonObject obj {
         {"command", "showfoF2"},
+        {"show", show}
+    };
+    send(obj);
+}
+
+void CesiumInterface::showMagDec(bool show)
+{
+    QJsonObject obj {
+        {"command", "showMagneticDeclination"},
+        {"show", show}
+    };
+    send(obj);
+}
+
+void CesiumInterface::showMaidenheadGrid(bool show)
+{
+    QJsonObject obj {
+        {"command", "showMaidenheadGrid"},
         {"show", show}
     };
     send(obj);

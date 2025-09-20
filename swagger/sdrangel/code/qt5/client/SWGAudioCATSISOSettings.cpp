@@ -30,8 +30,12 @@ SWGAudioCATSISOSettings::SWGAudioCATSISOSettings(QString* json) {
 SWGAudioCATSISOSettings::SWGAudioCATSISOSettings() {
     rx_center_frequency = 0L;
     m_rx_center_frequency_isSet = false;
+    rx_sample_rate = 0;
+    m_rx_sample_rate_isSet = false;
     tx_center_frequency = 0L;
     m_tx_center_frequency_isSet = false;
+    tx_sample_rate = 0;
+    m_tx_sample_rate_isSet = false;
     transverter_mode = 0;
     m_transverter_mode_isSet = false;
     transverter_delta_frequency = 0L;
@@ -96,8 +100,12 @@ void
 SWGAudioCATSISOSettings::init() {
     rx_center_frequency = 0L;
     m_rx_center_frequency_isSet = false;
+    rx_sample_rate = 0;
+    m_rx_sample_rate_isSet = false;
     tx_center_frequency = 0L;
     m_tx_center_frequency_isSet = false;
+    tx_sample_rate = 0;
+    m_tx_sample_rate_isSet = false;
     transverter_mode = 0;
     m_transverter_mode_isSet = false;
     transverter_delta_frequency = 0L;
@@ -163,6 +171,8 @@ SWGAudioCATSISOSettings::cleanup() {
 
 
 
+
+
     if(rx_device_name != nullptr) { 
         delete rx_device_name;
     }
@@ -206,7 +216,11 @@ void
 SWGAudioCATSISOSettings::fromJsonObject(QJsonObject &pJson) {
     ::SWGSDRangel::setValue(&rx_center_frequency, pJson["rxCenterFrequency"], "qint64", "");
     
+    ::SWGSDRangel::setValue(&rx_sample_rate, pJson["rxSampleRate"], "qint32", "");
+    
     ::SWGSDRangel::setValue(&tx_center_frequency, pJson["txCenterFrequency"], "qint64", "");
+    
+    ::SWGSDRangel::setValue(&tx_sample_rate, pJson["txSampleRate"], "qint32", "");
     
     ::SWGSDRangel::setValue(&transverter_mode, pJson["transverterMode"], "qint32", "");
     
@@ -281,8 +295,14 @@ SWGAudioCATSISOSettings::asJsonObject() {
     if(m_rx_center_frequency_isSet){
         obj->insert("rxCenterFrequency", QJsonValue(rx_center_frequency));
     }
+    if(m_rx_sample_rate_isSet){
+        obj->insert("rxSampleRate", QJsonValue(rx_sample_rate));
+    }
     if(m_tx_center_frequency_isSet){
         obj->insert("txCenterFrequency", QJsonValue(tx_center_frequency));
+    }
+    if(m_tx_sample_rate_isSet){
+        obj->insert("txSampleRate", QJsonValue(tx_sample_rate));
     }
     if(m_transverter_mode_isSet){
         obj->insert("transverterMode", QJsonValue(transverter_mode));
@@ -379,6 +399,16 @@ SWGAudioCATSISOSettings::setRxCenterFrequency(qint64 rx_center_frequency) {
     this->m_rx_center_frequency_isSet = true;
 }
 
+qint32
+SWGAudioCATSISOSettings::getRxSampleRate() {
+    return rx_sample_rate;
+}
+void
+SWGAudioCATSISOSettings::setRxSampleRate(qint32 rx_sample_rate) {
+    this->rx_sample_rate = rx_sample_rate;
+    this->m_rx_sample_rate_isSet = true;
+}
+
 qint64
 SWGAudioCATSISOSettings::getTxCenterFrequency() {
     return tx_center_frequency;
@@ -387,6 +417,16 @@ void
 SWGAudioCATSISOSettings::setTxCenterFrequency(qint64 tx_center_frequency) {
     this->tx_center_frequency = tx_center_frequency;
     this->m_tx_center_frequency_isSet = true;
+}
+
+qint32
+SWGAudioCATSISOSettings::getTxSampleRate() {
+    return tx_sample_rate;
+}
+void
+SWGAudioCATSISOSettings::setTxSampleRate(qint32 tx_sample_rate) {
+    this->tx_sample_rate = tx_sample_rate;
+    this->m_tx_sample_rate_isSet = true;
 }
 
 qint32
@@ -667,7 +707,13 @@ SWGAudioCATSISOSettings::isSet(){
         if(m_rx_center_frequency_isSet){
             isObjectUpdated = true; break;
         }
+        if(m_rx_sample_rate_isSet){
+            isObjectUpdated = true; break;
+        }
         if(m_tx_center_frequency_isSet){
+            isObjectUpdated = true; break;
+        }
+        if(m_tx_sample_rate_isSet){
             isObjectUpdated = true; break;
         }
         if(m_transverter_mode_isSet){

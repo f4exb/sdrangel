@@ -93,8 +93,12 @@ void MapWebSocketServer::send(const QJsonObject &obj)
         qint64 bytesSent = m_client->sendTextMessage(bytes);
         m_client->flush(); // Try to reduce latency
         if (bytesSent != bytes.size()) {
-            qDebug() << "MapWebSocketServer::update - Sent only " << bytesSent << " bytes out of " << bytes.size();
+            qDebug() << "MapWebSocketServer::send - Sent only " << bytesSent << " bytes out of " << bytes.size();
         }
+    }
+    else
+    {
+        qDebug() << "MapWebSocketServer::send - No client to send " << obj;
     }
 }
 
