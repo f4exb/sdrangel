@@ -9,10 +9,10 @@
 
 # which version/tag/checkout to use
 set(CODEC2_TAG "v1.0.3")
-set(CM256CC_TAG "v1.1.2")
-set(MBELIB_TAG fac842804e31369696051c0ee80f4eafbfdb4ee2)
+set(CM256CC_TAG c0e92b92aca3d1d36c990b642b937c64d363c559)
+set(MBELIB_TAG fe83b32c6a60cdd7bce8cecf3c7a0b9ec87a7667)
 set(SERIALDV_TAG "v1.1.4")
-set(DSDCC_TAG "v1.9.6")
+set(DSDCC_TAG "v1.9.5")
 set(LIMESUITE_TAG "v23.11.0")
 set(BLADERF_TAG "2021.02")
 set(LIBIIO_TAG 826563e41b5ce9890b75506f672017de8d76d52d)
@@ -670,7 +670,7 @@ if ((NOT LIBDSDCC_FOUND OR LIBDSDCC_EXTERNAL) AND (NOT LIBMBE_FOUND OR LIBMBE_EX
         set(LIBMBE_LIBRARIES "${EXTERNAL_BUILD_LIBRARIES}/lib${LIB_SUFFIX}/libmbe${CMAKE_SHARED_LIBRARY_SUFFIX}" CACHE INTERNAL "")
     endif ()
     ExternalProject_Add(mbelib
-            GIT_REPOSITORY https://github.com/srcejon/mbelib
+            GIT_REPOSITORY https://github.com/kasper93/mbelib.git
             GIT_TAG ${MBELIB_TAG}
             PREFIX "${EXTERNAL_BUILD_LIBRARIES}/mbelib"
             CMAKE_ARGS -DDISABLE_TEST=ON ${COMMON_CMAKE_ARGS}
