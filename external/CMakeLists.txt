@@ -8,12 +8,12 @@
 # but make the configuration dirty
 
 # which version/tag/checkout to use
-set(CODEC2_TAG "v1.0.3")
+set(CODEC2_TAG "v1.1.1")
 set(CM256CC_TAG c0e92b92aca3d1d36c990b642b937c64d363c559)
 set(MBELIB_TAG fe83b32c6a60cdd7bce8cecf3c7a0b9ec87a7667)
 set(SERIALDV_TAG "v1.1.5")
 set(DSDCC_TAG "v1.9.5")
-set(LIMESUITE_TAG b39cb61ed03d74c35a2de757d495e901acbb6404)
+set(LIMESUITE_TAG 524cd2e548b11084e6f739b2dfe0f958c2e30354)
 set(BLADERF_TAG "2021.02")
 set(LIBIIO_TAG 826563e41b5ce9890b75506f672017de8d76d52d)
 set(AIRSPYHF_TAG "1af81c0ca18944b8c9897c3c98dc0a991815b686")
@@ -251,7 +251,7 @@ endif ()
 if (NOT OPUS_FOUND AND NOT USE_PRECOMPILED_LIBS)
     ExternalProject_Add(opus
             GIT_REPOSITORY https://github.com/xiph/opus
-            GIT_TAG v1.3.1
+            GIT_TAG v1.5.2
             PREFIX "${EXTERNAL_BUILD_LIBRARIES}/opus"
             CMAKE_ARGS ${COMMON_CMAKE_ARGS} -DOPUS_BUILD_SHARED_LIBRARY=ON -DBUILD_SHARED_LIBS=ON -DCMAKE_INSTALL_PREFIX=<INSTALL_DIR>
             TEST_COMMAND ""
@@ -595,8 +595,6 @@ if ((NOT CODEC2_FOUND OR CODEC2_EXTERNAL) AND NOT USE_PRECOMPILED_LIBS)
     elseif (LINUX)
         set(CODEC2_LIBRARIES "${EXTERNAL_BUILD_LIBRARIES}/lib${LIB_SUFFIX}/libcodec2${CMAKE_SHARED_LIBRARY_SUFFIX}" CACHE INTERNAL "")
     endif ()
-    # Repo temp set to codec2-dev to use v1.0.3 tag
-    # Should revert to codec2 when we eventually update to latest (v1.2.0+) release
     ExternalProject_Add(codec2
             GIT_REPOSITORY https://github.com/drowe67/codec2-dev.git
             GIT_TAG ${CODEC2_TAG}
