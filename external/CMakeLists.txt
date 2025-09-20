@@ -885,7 +885,8 @@ if(ENABLE_FEATURE_MORSEDECODER)
         set(GGMORSE_LIBRARIES "${EXTERNAL_BUILD_LIBRARIES}/lib${LIB_SUFFIX}/libggmorse${CMAKE_SHARED_LIBRARY_SUFFIX}" CACHE INTERNAL "")
     endif()
     ExternalProject_Add(ggmorse
-        GIT_REPOSITORY https://github.com/ggerganov/ggmorse.git
+        GIT_REPOSITORY https://github.com/srcejon/ggmorse.git
+        GIT_TAG "cmake4"
         PREFIX "${EXTERNAL_BUILD_LIBRARIES}/ggmorse"
         CMAKE_ARGS ${COMMON_CMAKE_ARGS}
         -DGGMORSE_BUILD_TESTS=OFF
