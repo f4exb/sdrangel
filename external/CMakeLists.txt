@@ -669,7 +669,7 @@ if ((NOT LIBDSDCC_FOUND OR LIBDSDCC_EXTERNAL) AND (NOT LIBMBE_FOUND OR LIBMBE_EX
         set(LIBMBE_LIBRARIES "${EXTERNAL_BUILD_LIBRARIES}/lib${LIB_SUFFIX}/libmbe${CMAKE_SHARED_LIBRARY_SUFFIX}" CACHE INTERNAL "")
     endif ()
     ExternalProject_Add(mbelib
-            GIT_REPOSITORY https://github.com/srcejon/mbelib
+            GIT_REPOSITORY https://github.com/srcejon/mbelib.git
             GIT_TAG ${MBELIB_TAG}
             PREFIX "${EXTERNAL_BUILD_LIBRARIES}/mbelib"
             CMAKE_ARGS -DDISABLE_TEST=ON ${COMMON_CMAKE_ARGS}
