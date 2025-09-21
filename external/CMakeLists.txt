@@ -31,7 +31,7 @@ set(SOAPYSDR_REMOTE_TAG "soapy-remote-0.5.1")
 set(AIRSPY_TAG "cmake4")
 set(HACKRF_TAG "adc537331c5bc3165f47648043c570063518ef79")
 set(LIBXML2_TAG "v2.10.4")
-set(UHD_TAG "v4.7.0.0")
+set(UHD_TAG "v4.9.0.0")
 set(BOOST_TAG "1.86.0")
 set(BOOST_TAG2 "1_86_0")
 
