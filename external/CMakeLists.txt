@@ -1534,6 +1534,7 @@ if (WIN32 OR APPLE)
                 -DENABLE_HOST_BUILD=ON
                 -DENABLE_BACKEND_CYAPI=OFF
                 -DTREAT_WARNINGS_AS_ERRORS=OFF
+                -DENABLE_LIBTECLA=OFF
                 BUILD_BYPRODUCTS "${LIBBLADERF_LIBRARIES}"
                 INSTALL_COMMAND ""
                 TEST_COMMAND ""
