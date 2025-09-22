@@ -46,6 +46,11 @@ jobs:
           choco install ninja cmake nsis.install
           ninja --version
           cmake --version
+      - name: Set PATH
+        shell: cmd
+        run: |
+          call refreshenv
+          echo ::set-env name=PATH::%PATH%
           makensis /VERSION
       - name: Install MSVC on Windows
         if: startsWith(matrix.config.os, 'windows')
