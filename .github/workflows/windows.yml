@@ -40,17 +40,16 @@ jobs:
       - uses: actions/setup-python@v5
         with:
           python-version: '3.12'
+      - name: Set PATH
+        shell: bash
+        run: |
+          echo "C:\Program Files (x86)\NSIS" >> "$GITHUB_PATH"
       - name: Install basic dependencies on Windows
         if: startsWith(matrix.config.os, 'windows')
         run: |
           choco install ninja cmake nsis.install
           ninja --version
           cmake --version
-      - name: Set PATH
-        shell: cmd
-        run: |
-          call refreshenv
-          echo ::set-env name=PATH::%PATH%
           makensis /VERSION
       - name: Install MSVC on Windows
         if: startsWith(matrix.config.os, 'windows')
