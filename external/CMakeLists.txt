@@ -10,13 +10,18 @@
 # which version/tag/checkout to use
 set(CODEC2_TAG "v1.1.1")
 set(CM256CC_TAG "v1.1.2")
-set(MBELIB_TAG fe83b32c6a60cdd7bce8cecf3c7a0b9ec87a7667)
+set(MBELIB_TAG "lib")
 set(SERIALDV_TAG "v1.1.5")
 set(DSDCC_TAG "v1.9.6")
 set(LIMESUITE_TAG 524cd2e548b11084e6f739b2dfe0f958c2e30354)
-set(BLADERF_TAG "2021.02")
-set(LIBIIO_TAG 826563e41b5ce9890b75506f672017de8d76d52d)
-set(AIRSPYHF_TAG "1af81c0ca18944b8c9897c3c98dc0a991815b686")
+set(BLADERF_TAG "2024.05")
+if (WIN32)
+    # Using old version of libiio on windows, as we get unresolved symbols in dll: serial_create_context_from_uri
+    set(LIBIIO_TAG 826563e41b5ce9890b75506f672017de8d76d52d)
+else()
+    set(LIBIIO_TAG "v0.26")
+endif()
+set(AIRSPYHF_TAG "87cf12a30f3a0f10f313aab8e54999ca69b753af")
 set(PERSEUS_TAG afefa23e3140ac79d845acb68cf0beeb86d09028)
 set(MIRISDR_TAG "v2.0.0")
 set(LIBSIGMF_TAG "new-namespaces")
@@ -24,14 +29,14 @@ set(LIBSIGMF_TAG "new-namespaces")
 set(PTHREADS4W_TAG "Version-2-11-0-release")
 set(RTLSDR_TAG "v2.0.1")
 set(RTLSDR_UDEV OFF)
-set(SOAPYSDR_TAG "soapy-sdr-0.7.1")
+set(SOAPYSDR_TAG "1667b4e6301d7ad47b340dcdcd6e9969bf57d843")
 set(SOAPYSDR_SDRPLAY_TAG "soapy-sdrplay-0.2.0")
 set(SOAPYSDR_AUDIO_TAG "soapy-audio-0.1.1")
 set(SOAPYSDR_REMOTE_TAG "soapy-remote-0.5.1")
-set(AIRSPY_TAG "37c768ce9997b32e7328eb48972a7fda0a1f8554")
-set(HACKRF_TAG "v2024.02.1")
+set(AIRSPY_TAG "cmake4")
+set(HACKRF_TAG "adc537331c5bc3165f47648043c570063518ef79")
 set(LIBXML2_TAG "v2.10.4")
-set(UHD_TAG "v4.7.0.0")
+set(UHD_TAG "v4.9.0.0")
 set(BOOST_TAG "1.86.0")
 set(BOOST_TAG2 "1_86_0")
 
@@ -421,7 +426,7 @@ if (NOT FFMPEG_FOUND AND NOT USE_PRECOMPILED_LIBS)
     if (NOT X265_FOUND OR X265_EXTERNAL)
         ExternalProject_Add(x265
             GIT_REPOSITORY https://bitbucket.org/multicoreware/x265_git.git
-            GIT_TAG 4.1
+            GIT_TAG 8f11c33acc267ba3f1d2bde60a6aa906e494cbde
             PREFIX "${EXTERNAL_BUILD_LIBRARIES}/x265"
             SOURCE_SUBDIR "source"
             CMAKE_ARGS ${COMMON_CMAKE_ARGS} -DCMAKE_INSTALL_PREFIX=<INSTALL_DIR>
@@ -669,7 +674,7 @@ if ((NOT LIBDSDCC_FOUND OR LIBDSDCC_EXTERNAL) AND (NOT LIBMBE_FOUND OR LIBMBE_EX
         set(LIBMBE_LIBRARIES "${EXTERNAL_BUILD_LIBRARIES}/lib${LIB_SUFFIX}/libmbe${CMAKE_SHARED_LIBRARY_SUFFIX}" CACHE INTERNAL "")
     endif ()
     ExternalProject_Add(mbelib
-            GIT_REPOSITORY https://github.com/kasper93/mbelib.git
+            GIT_REPOSITORY https://github.com/srcejon/mbelib.git
             GIT_TAG ${MBELIB_TAG}
             PREFIX "${EXTERNAL_BUILD_LIBRARIES}/mbelib"
             CMAKE_ARGS -DDISABLE_TEST=ON ${COMMON_CMAKE_ARGS}
@@ -885,7 +890,8 @@ if(ENABLE_FEATURE_MORSEDECODER)
         set(GGMORSE_LIBRARIES "${EXTERNAL_BUILD_LIBRARIES}/lib${LIB_SUFFIX}/libggmorse${CMAKE_SHARED_LIBRARY_SUFFIX}" CACHE INTERNAL "")
     endif()
     ExternalProject_Add(ggmorse
-        GIT_REPOSITORY https://github.com/ggerganov/ggmorse.git
+        GIT_REPOSITORY https://github.com/srcejon/ggmorse.git
+        GIT_TAG "cmake4"
         PREFIX "${EXTERNAL_BUILD_LIBRARIES}/ggmorse"
         CMAKE_ARGS ${COMMON_CMAKE_ARGS}
         -DGGMORSE_BUILD_TESTS=OFF
@@ -1291,7 +1297,7 @@ if (WIN32 OR APPLE)
         # We need to set CMAKE_INSTALL_NAME_DIR, otherwise path to libs is set to install path of /usr/local/
         # but as we don't install, macdeployqt will fail to find them
         ExternalProject_Add(airspy
-                GIT_REPOSITORY https://github.com/airspy/airspyone_host
+                GIT_REPOSITORY https://github.com/srcejon/airspyone_host.git
                 GIT_TAG ${AIRSPY_TAG}
                 DEPENDS ${PTHREADS4W_DEPENDS} ${LIBUSB_DEPENDS}
                 PREFIX "${EXTERNAL_BUILD_LIBRARIES}/airspy"
@@ -1459,7 +1465,7 @@ if (WIN32 OR APPLE)
             set(LIBXML2_LIBRARIES "${EXTERNAL_BUILD_LIBRARIES}/libxml2/lib/libxml2.a" CACHE INTERNAL "")
         endif ()
         if (WIN32)
-            set(IIO_LIBUSB_INCLUDE_DIR ${LIBUSB_INCLUDE_DIR})
+            set(IIO_LIBUSB_INCLUDE_DIR ${LIBUSB_INCLUDE_DIR}/)
         else ()
             set(IIO_LIBUSB_INCLUDE_DIR ${LIBUSB_INCLUDE_DIR}/..)
         endif ()
@@ -1533,6 +1539,7 @@ if (WIN32 OR APPLE)
                 -DENABLE_HOST_BUILD=ON
                 -DENABLE_BACKEND_CYAPI=OFF
                 -DTREAT_WARNINGS_AS_ERRORS=OFF
+                -DENABLE_LIBTECLA=OFF
                 BUILD_BYPRODUCTS "${LIBBLADERF_LIBRARIES}"
                 INSTALL_COMMAND ""
                 TEST_COMMAND ""

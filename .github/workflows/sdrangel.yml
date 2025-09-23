@@ -44,12 +44,17 @@ jobs:
       - uses: actions/setup-python@v5
         with:
           python-version: '3.12'
+      - name: Set PATH
+        shell: bash
+        run: |
+          echo "C:\Program Files (x86)\NSIS" >> "$GITHUB_PATH"
       - name: Install basic dependencies on Windows
         if: startsWith(matrix.config.os, 'windows')
         run: |
-          choco install ninja cmake
+          choco install ninja cmake nsis.install
           ninja --version
           cmake --version
+          makensis /VERSION
       - name: Install MSVC on Windows
         if: startsWith(matrix.config.os, 'windows')
         uses: ilammy/msvc-dev-cmd@v1
@@ -120,7 +125,7 @@ jobs:
           rm -f /usr/local/bin/2to3
           brew install opencv
       - name: Install brew packages
-        run: brew install nasm boost hidapi libusb fftw ffmpeg@5 faad2 zlib airspy airspyhf hackrf rtl-sdr libbladerf soapysdr qt subversion
+        run: brew install nasm boost hidapi libusb fftw ffmpeg@5 faad2 zlib airspy airspyhf hackrf rtl-sdr libbladerf soapysdr qt subversion ncurses
       - name: Configure SDRangel
         run: |
           mkdir build && cd build
