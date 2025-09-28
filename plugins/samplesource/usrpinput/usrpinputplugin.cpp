@@ -36,7 +36,7 @@
 const PluginDescriptor USRPInputPlugin::m_pluginDescriptor = {
     QStringLiteral("USRP"),
     QStringLiteral("USRP Input"),
-    QStringLiteral("7.22.6"),
+    QStringLiteral("7.22.7"),
     QStringLiteral("(c) Jon Beniston, M7RCE and Edouard Griffiths, F4EXB"),
     QStringLiteral("https://github.com/f4exb/sdrangel"),
     true,

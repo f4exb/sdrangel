@@ -32,7 +32,7 @@
 const PluginDescriptor TestMIPlugin::m_pluginDescriptor = {
     QStringLiteral("TestMI"),
 	QStringLiteral("Test Multiple Input"),
-    QStringLiteral("7.22.1"),
+    QStringLiteral("7.22.7"),
 	QStringLiteral("(c) Edouard Griffiths, F4EXB"),
 	QStringLiteral("https://github.com/f4exb/sdrangel"),
 	true,

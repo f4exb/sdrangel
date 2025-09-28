@@ -33,7 +33,7 @@
 const PluginDescriptor AndroidSDRDriverInputPlugin::m_pluginDescriptor = {
     QStringLiteral("AndroidSDRDriverInput"),
     QStringLiteral("Android SDR Driver input"),
-    QStringLiteral("7.22.3"),
+    QStringLiteral("7.22.7"),
     QStringLiteral("(c) Jon Beniston, M7RCE"),
     QStringLiteral("https://github.com/f4exb/sdrangel"),
     true,

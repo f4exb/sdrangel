@@ -29,7 +29,7 @@
 const PluginDescriptor APTDemodPlugin::m_pluginDescriptor = {
     APTDemod::m_channelId,
     QStringLiteral("APT Demodulator"),
-    QStringLiteral("7.22.5"),
+    QStringLiteral("7.22.7"),
     QStringLiteral("(c) Jon Beniston, M7RCE and Aptdec authors"),
     QStringLiteral("https://github.com/f4exb/sdrangel"),
     true,
