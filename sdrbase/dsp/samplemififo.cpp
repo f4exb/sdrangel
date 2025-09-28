@@ -37,6 +37,18 @@ void SampleMIFifo::init(unsigned int nbStreams, unsigned int size)
     }
 }
 
+void SampleMIFifo::resize(unsigned int size)
+{
+    QMutexLocker mutexLocker(&m_mutex);
+    m_size = size;
+
+    for (unsigned int stream = 0; stream < m_nbStreams; stream++) {
+        m_data[stream].resize(size);
+    }
+
+    reset();
+}
+
 void SampleMIFifo::reset()
 {
     QMutexLocker mutexLocker(&m_mutex);

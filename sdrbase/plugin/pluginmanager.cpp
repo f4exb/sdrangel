@@ -62,7 +62,15 @@ PluginManager::PluginManager(QObject* parent) :
 
 PluginManager::~PluginManager()
 {
-  //  freeAll();
+    qDebug("PluginManager::~PluginManager: Unloading plugins");
+    // TODO (maybe)
+    // for (auto plugin : m_plugins)
+    // {
+    //     qDebug("PluginManager::~PluginManager: Unloading plugin %s", qPrintable(plugin.filename));
+    //     delete plugin.pluginInterface;
+    // }
+
+    // m_plugins.clear();
 }
 
 void PluginManager::loadPlugins(const QString& pluginsSubDir)

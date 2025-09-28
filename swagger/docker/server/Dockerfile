@@ -1,4 +1,4 @@
-FROM node:alpine as base
+FROM node:alpine AS base
 
 # Install base packages
 RUN apk update && apk add sudo
@@ -14,7 +14,7 @@ RUN sudo mkdir /opt/build \
     && sudo chown node:node /opt/build
 WORKDIR /opt/build
 
-FROM base as codegen_server
+FROM base AS codegen_server
 RUN mkdir -p /opt/build/sdrangel/swagger/sdrangel
 
 WORKDIR /opt/build/sdrangel/swagger/sdrangel

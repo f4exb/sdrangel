@@ -5961,6 +5961,9 @@ margin-bottom: 20px;
     "soapySDROutputSettings" : {
       "$ref" : "#/definitions/SoapySDROutputSettings"
     },
+    "spectranMISOSettings" : {
+      "$ref" : "#/definitions/SpectranMISOSettings"
+    },
     "testMISettings" : {
       "$ref" : "#/definitions/TestMISettings"
     },
@@ -15780,6 +15783,58 @@ margin-bottom: 20px;
     }
   },
   "description" : "SoapySDR"
+};
+            defs.SpectranMISOSettings = {
+  "type" : "object",
+  "properties" : {
+    "mode" : {
+      "type" : "integer",
+      "description" : "Mode of the Spectran MISO device (Rx, Tx or Rx/Tx) * 0 - Off * 1 - RX1 * 2 - RX2 * 3 - RX1+RX2 * 4 - TX * 5 - RX+TX\n"
+    },
+    "rxCenterFrequency" : {
+      "type" : "integer",
+      "format" : "int64",
+      "description" : "Rx center frequency in Hz"
+    },
+    "txCenterFrequency" : {
+      "type" : "integer",
+      "format" : "int64",
+      "description" : "Tx center frequency in Hz"
+    },
+    "sampleRate" : {
+      "type" : "integer",
+      "format" : "int32",
+      "description" : "Sample rate in Hz"
+    },
+    "streamIndex" : {
+      "type" : "integer",
+      "format" : "int32",
+      "description" : "Stream index of the target Spectran MISO device"
+    },
+    "spectrumStreamIndex" : {
+      "type" : "integer",
+      "format" : "int32",
+      "description" : "Spectrum stream index of the target Spectran MISO device (GUI only)"
+    },
+    "streamLock" : {
+      "type" : "integer",
+      "description" : "Ties together the stream selection and spectrum source stream selections * 0 - stream unlocked * 1 - stream locked\n"
+    },
+    "useReverseAPI" : {
+      "type" : "integer",
+      "description" : "Synchronize with reverse API * 0 - disabled * 1 - enabled\n"
+    },
+    "reverseAPIAddress" : {
+      "type" : "string"
+    },
+    "reverseAPIPort" : {
+      "type" : "integer"
+    },
+    "reverseAPIDeviceIndex" : {
+      "type" : "integer"
+    }
+  },
+  "description" : "Spectran MISO settings"
 };
             defs.SpectrumAnnotationMarker = {
   "properties" : {
@@ -59615,7 +59670,7 @@ except ApiException as e:
           </div>
           <div id="generator">
             <div class="content">
-              Generated 2025-07-01T22:00:12.093+02:00
+              Generated 2025-07-05T05:02:36.413+02:00
             </div>
           </div>
       </div>

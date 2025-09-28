@@ -61,6 +61,7 @@
 #include "SWGSigMFFileInputSettings.h"
 #include "SWGSoapySDRInputSettings.h"
 #include "SWGSoapySDROutputSettings.h"
+#include "SWGSpectranMISOSettings.h"
 #include "SWGTestMISettings.h"
 #include "SWGTestMOSyncSettings.h"
 #include "SWGTestSourceSettings.h"
@@ -208,6 +209,9 @@ public:
 
     SWGSoapySDROutputSettings* getSoapySdrOutputSettings();
     void setSoapySdrOutputSettings(SWGSoapySDROutputSettings* soapy_sdr_output_settings);
+
+    SWGSpectranMISOSettings* getSpectranMisoSettings();
+    void setSpectranMisoSettings(SWGSpectranMISOSettings* spectran_miso_settings);
 
     SWGTestMISettings* getTestMiSettings();
     void setTestMiSettings(SWGTestMISettings* test_mi_settings);
@@ -362,6 +366,9 @@ private:
 
     SWGSoapySDROutputSettings* soapy_sdr_output_settings;
     bool m_soapy_sdr_output_settings_isSet;
+
+    SWGSpectranMISOSettings* spectran_miso_settings;
+    bool m_spectran_miso_settings_isSet;
 
     SWGTestMISettings* test_mi_settings;
     bool m_test_mi_settings_isSet;

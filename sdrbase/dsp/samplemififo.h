@@ -33,6 +33,7 @@ public:
     SampleMIFifo(unsigned int nbStreams, unsigned int size, QObject *parent = nullptr);
     ~SampleMIFifo();
     void init(unsigned int nbStreams, unsigned int size);
+    void resize(unsigned int size);
     void reset();
 
     void writeSync(const quint8* data, unsigned int count); //!< de-interleaved data in input with count bytes for each stream

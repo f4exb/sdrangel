@@ -108,6 +108,8 @@ SWGDeviceSettings::SWGDeviceSettings() {
     m_soapy_sdr_input_settings_isSet = false;
     soapy_sdr_output_settings = nullptr;
     m_soapy_sdr_output_settings_isSet = false;
+    spectran_miso_settings = nullptr;
+    m_spectran_miso_settings_isSet = false;
     test_mi_settings = nullptr;
     m_test_mi_settings_isSet = false;
     test_mo_sync_settings = nullptr;
@@ -216,6 +218,8 @@ SWGDeviceSettings::init() {
     m_soapy_sdr_input_settings_isSet = false;
     soapy_sdr_output_settings = new SWGSoapySDROutputSettings();
     m_soapy_sdr_output_settings_isSet = false;
+    spectran_miso_settings = new SWGSpectranMISOSettings();
+    m_spectran_miso_settings_isSet = false;
     test_mi_settings = new SWGTestMISettings();
     m_test_mi_settings_isSet = false;
     test_mo_sync_settings = new SWGTestMOSyncSettings();
@@ -356,6 +360,9 @@ SWGDeviceSettings::cleanup() {
     if(soapy_sdr_output_settings != nullptr) { 
         delete soapy_sdr_output_settings;
     }
+    if(spectran_miso_settings != nullptr) { 
+        delete spectran_miso_settings;
+    }
     if(test_mi_settings != nullptr) { 
         delete test_mi_settings;
     }
@@ -478,6 +485,8 @@ SWGDeviceSettings::fromJsonObject(QJsonObject &pJson) {
     ::SWGSDRangel::setValue(&soapy_sdr_input_settings, pJson["soapySDRInputSettings"], "SWGSoapySDRInputSettings", "SWGSoapySDRInputSettings");
     
     ::SWGSDRangel::setValue(&soapy_sdr_output_settings, pJson["soapySDROutputSettings"], "SWGSoapySDROutputSettings", "SWGSoapySDROutputSettings");
+    
+    ::SWGSDRangel::setValue(&spectran_miso_settings, pJson["spectranMISOSettings"], "SWGSpectranMISOSettings", "SWGSpectranMISOSettings");
     
     ::SWGSDRangel::setValue(&test_mi_settings, pJson["testMISettings"], "SWGTestMISettings", "SWGTestMISettings");
     
@@ -634,6 +643,9 @@ SWGDeviceSettings::asJsonObject() {
     }
     if((soapy_sdr_output_settings != nullptr) && (soapy_sdr_output_settings->isSet())){
         toJsonValue(QString("soapySDROutputSettings"), soapy_sdr_output_settings, obj, QString("SWGSoapySDROutputSettings"));
+    }
+    if((spectran_miso_settings != nullptr) && (spectran_miso_settings->isSet())){
+        toJsonValue(QString("spectranMISOSettings"), spectran_miso_settings, obj, QString("SWGSpectranMISOSettings"));
     }
     if((test_mi_settings != nullptr) && (test_mi_settings->isSet())){
         toJsonValue(QString("testMISettings"), test_mi_settings, obj, QString("SWGTestMISettings"));
@@ -1069,6 +1081,16 @@ SWGDeviceSettings::setSoapySdrOutputSettings(SWGSoapySDROutputSettings* soapy_sd
     this->m_soapy_sdr_output_settings_isSet = true;
 }
 
+SWGSpectranMISOSettings*
+SWGDeviceSettings::getSpectranMisoSettings() {
+    return spectran_miso_settings;
+}
+void
+SWGDeviceSettings::setSpectranMisoSettings(SWGSpectranMISOSettings* spectran_miso_settings) {
+    this->spectran_miso_settings = spectran_miso_settings;
+    this->m_spectran_miso_settings_isSet = true;
+}
+
 SWGTestMISettings*
 SWGDeviceSettings::getTestMiSettings() {
     return test_mi_settings;
@@ -1292,6 +1314,9 @@ SWGDeviceSettings::isSet(){
             isObjectUpdated = true; break;
         }
         if(soapy_sdr_output_settings && soapy_sdr_output_settings->isSet()){
+            isObjectUpdated = true; break;
+        }
+        if(spectran_miso_settings && spectran_miso_settings->isSet()){
             isObjectUpdated = true; break;
         }
         if(test_mi_settings && test_mi_settings->isSet()){

@@ -37,5 +37,12 @@ else()
     message(STATUS "Not building metis (ENABLE_METIS=${ENABLE_METIS}")
 endif()
 
+find_package(RTSAAPI)
+if (ENABLE_SPECTRAN AND RTSAAPI_FOUND)
+    add_subdirectory(spectranmiso)
+else()
+    message(STATUS "Not building spectranmiso (ENABLE_SPECTRAN=${ENABLE_SPECTRAN} RTSAAPI_FOUND=${RTSAAPI_FOUND})")
+endif()
+
 add_subdirectory(testmi)
 add_subdirectory(testmosync)

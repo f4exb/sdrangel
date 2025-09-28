@@ -43,3 +43,8 @@ endif()
 if(ENABLE_METIS)
     add_subdirectory(metis)
 endif()
+
+find_package(RTSAAPI)
+if (ENABLE_SPECTRAN AND RTSAAPI_FOUND)
+    add_subdirectory(spectran)
+endif()

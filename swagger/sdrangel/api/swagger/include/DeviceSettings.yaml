@@ -88,6 +88,8 @@ DeviceSettings:
       $ref: "http://swgserver:8081/api/swagger/include/SoapySDR.yaml#/SoapySDRInputSettings"
     soapySDROutputSettings:
       $ref: "http://swgserver:8081/api/swagger/include/SoapySDR.yaml#/SoapySDROutputSettings"
+    spectranMISOSettings:
+      $ref: "http://swgserver:8081/api/swagger/include/SpectranMISO.yaml#/SpectranMISOSettings"
     testMISettings:
       $ref: "http://swgserver:8081/api/swagger/include/TestMI.yaml#/TestMISettings"
     testMOSyncSettings:

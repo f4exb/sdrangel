@@ -339,6 +339,7 @@
 #include "SWGSoapySDRInputSettings.h"
 #include "SWGSoapySDROutputSettings.h"
 #include "SWGSoapySDRReport.h"
+#include "SWGSpectranMISOSettings.h"
 #include "SWGSpectrumAnnotationMarker.h"
 #include "SWGSpectrumCalibrationPoint.h"
 #include "SWGSpectrumHistogramMarker.h"
@@ -2014,6 +2015,11 @@ namespace SWGSDRangel {
     }
     if(QString("SWGSoapySDRReport").compare(type) == 0) {
       SWGSoapySDRReport *obj = new SWGSoapySDRReport();
+      obj->init();
+      return obj;
+    }
+    if(QString("SWGSpectranMISOSettings").compare(type) == 0) {
+      SWGSpectranMISOSettings *obj = new SWGSpectranMISOSettings();
       obj->init();
       return obj;
     }
