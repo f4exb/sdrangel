@@ -28,7 +28,8 @@ std::vector<int> ADSBDemodNotificationDialog::m_columnMap = {
     ADSB_COL_ICAO, ADSB_COL_CALLSIGN, ADSB_COL_MODEL, ADSB_COL_TYPE,
     ADSB_COL_ALTITUDE, ADSB_COL_GROUND_SPEED, ADSB_COL_RANGE,
     ADSB_COL_CATEGORY, ADSB_COL_STATUS, ADSB_COL_SQUAWK,
-    ADSB_COL_REGISTRATION, ADSB_COL_MANUFACTURER, ADSB_COL_OWNER, ADSB_COL_OPERATOR_ICAO
+    ADSB_COL_REGISTRATION, ADSB_COL_MANUFACTURER, ADSB_COL_OWNER, ADSB_COL_OPERATOR_ICAO,
+    ADSB_COL_ARR, ADSB_COL_DEP, ADSB_COL_STOPS
 };
 
 ADSBDemodNotificationDialog::ADSBDemodNotificationDialog(ADSBDemodSettings *settings,
@@ -75,8 +76,8 @@ void ADSBDemodNotificationDialog::resizeTable()
     ADSBDemodSettings::NotificationSettings dummy;
     dummy.m_matchColumn = ADSB_COL_MANUFACTURER;
     dummy.m_regExp = "No emergency and some";
-    dummy.m_speech = "${aircraft} ${reg} has entered your airspace";
-    dummy.m_command = "/usr/home/sdrangel/myscript ${aircraft} ${reg}";
+    dummy.m_speech = "${type} ${reg} has entered your airspace";
+    dummy.m_command = "/usr/home/sdrangel/myscript ${type} ${reg}";
     dummy.m_autoTarget = false;
     addRow(&dummy);
     ui->table->resizeColumnsToContents();
@@ -128,6 +129,9 @@ void ADSBDemodNotificationDialog::addRow(ADSBDemodSettings::NotificationSettings
     match->addItem("Manufacturer");
     match->addItem("Owner");
     match->addItem("Operator");
+    match->addItem("Arr");
+    match->addItem("Dep");
+    match->addItem("Stops");
 
     QTableWidgetItem *regExpItem = new QTableWidgetItem();
     QTableWidgetItem *speechItem = new QTableWidgetItem();
@@ -146,12 +150,13 @@ void ADSBDemodNotificationDialog::addRow(ADSBDemodSettings::NotificationSettings
         regExpItem->setData(Qt::DisplayRole, settings->m_regExp);
         speechItem->setData(Qt::DisplayRole, settings->m_speech);
         commandItem->setData(Qt::DisplayRole, settings->m_command);
+        autoTarget->setChecked(settings->m_autoTarget);
     }
     else
     {
-         match->setCurrentIndex(2);
+        match->setCurrentIndex(2);
         regExpItem->setData(Qt::DisplayRole, ".*");
-        speechItem->setData(Qt::DisplayRole, "${aircraft} detected");
+        speechItem->setData(Qt::DisplayRole, "${type} detected");
     }
 
     ui->table->setSortingEnabled(false);

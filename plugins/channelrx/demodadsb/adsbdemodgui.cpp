@@ -5080,7 +5080,10 @@ void ADSBDemodGUI::checkDynamicNotification(Aircraft *aircraft)
                 || (m_settings.m_notificationSettings[i]->m_matchColumn == ADSB_COL_CATEGORY)
                 || (m_settings.m_notificationSettings[i]->m_matchColumn == ADSB_COL_STATUS)
                 || (m_settings.m_notificationSettings[i]->m_matchColumn == ADSB_COL_SQUAWK)
-               )
+                || (m_settings.m_notificationSettings[i]->m_matchColumn == ADSB_COL_DEP)
+                || (m_settings.m_notificationSettings[i]->m_matchColumn == ADSB_COL_ARR)
+                || (m_settings.m_notificationSettings[i]->m_matchColumn == ADSB_COL_STOPS)
+                )
             {
                 QString match;
                 switch (m_settings.m_notificationSettings[i]->m_matchColumn)
@@ -5105,6 +5108,15 @@ void ADSBDemodGUI::checkDynamicNotification(Aircraft *aircraft)
                     break;
                 case ADSB_COL_SQUAWK:
                     match = aircraft->m_squawkItem->data(Qt::DisplayRole).toString();
+                    break;
+                case ADSB_COL_DEP:
+                    match = aircraft->m_depItem->data(Qt::DisplayRole).toString();
+                    break;
+                case ADSB_COL_ARR:
+                    match = aircraft->m_arrItem->data(Qt::DisplayRole).toString();
+                    break;
+                case ADSB_COL_STOPS:
+                    match = aircraft->m_stopsItem->data(Qt::DisplayRole).toString();
                     break;
                 default:
                     break;
