@@ -67,6 +67,12 @@ else()
     message(STATUS "Not building filesink (ENABLE_CHANNELRX_FILESINK=${ENABLE_CHANNELRX_FILESINK})")
 endif()
 
+if (ENABLE_CHANNELRX_FILESINKTXT)
+    add_subdirectory(filesinktxt)
+else()
+    message(STATUS "Not building filesinktxt (ENABLE_CHANNELRX_FILESINKTXT=${ENABLE_CHANNELRX_FILESINKTXT})")
+endif()
+
 if (ENABLE_CHANNELRX_FREQTRACKER)
     add_subdirectory(freqtracker)
 else()

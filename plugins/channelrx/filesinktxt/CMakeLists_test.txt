@@ -1,0 +1,27 @@
+cmake_minimum_required(VERSION 3.16)
+project(test_detection)
+
+# Find Qt5
+find_package(Qt5 REQUIRED COMPONENTS
+    Core
+    Test
+)
+
+# Include directories
+include_directories(
+    ${CMAKE_CURRENT_SOURCE_DIR}
+    ${CMAKE_SOURCE_DIR}/sdrbase
+    ${CMAKE_SOURCE_DIR}/exports
+)
+
+# Test executable
+add_executable(test_detection test_detection.cpp detection.cpp)
+
+# Qt Test
+set_target_properties(test_detection PROPERTIES AUTOMOC ON)
+
+# Link libraries
+target_link_libraries(test_detection PRIVATE
+    Qt5::Core
+    Qt5::Test
+)
