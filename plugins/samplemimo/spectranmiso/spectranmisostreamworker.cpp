@@ -51,7 +51,13 @@ void SpectranMISOStreamWorker::startWork()
 
     qDebug("SpectranMISOStreamWorker::startWork");
     m_running = true;
-    streamIQ();
+
+    if (m_currentMode == SPECTRANMISO_MODE_2RX_RAW) {
+        streamRaw2Rx();
+    } else {
+        streamIQ();
+    }
+
     qDebug("SpectranMISOStreamWorker::startWork: exiting");
 }
 
@@ -107,14 +113,13 @@ void SpectranMISOStreamWorker::streamIQ()
             //     << packet.spanFrequency/1e3 << " kHz Span";
 
             // Convert to Sample format
-            // assume single receive channel for now
             convIt[0] = m_convertBuffer[0].begin();
             convIt[1] = m_convertBuffer[1].begin();
 
             if (SpectranMISOSettings::isDualRx(m_currentMode)) {
-                m_decimatorsFloatIQ.decimate1_2(&convIt[0], &convIt[1], packet.fp32, 2 * packet.size * packet.num);
+                m_decimatorsFloatIQ[0].decimate1_2(&convIt[0], &convIt[1], packet.fp32, 2 * packet.size * packet.num);
             } else {
-                m_decimatorsFloatIQ.decimate1(&convIt[0], packet.fp32, packet.size * packet.num);
+                m_decimatorsFloatIQ[0].decimate1(&convIt[0], packet.fp32, packet.size * packet.num);
             }
 
             // Write samples to FIFO
@@ -147,6 +152,116 @@ void SpectranMISOStreamWorker::streamIQ()
     else
     {
         qDebug("SpectranMISOStreamWorker::streamIQ: normal exit");
+        emit stopped();
+    }
+}
+
+void SpectranMISOStreamWorker::streamRaw2Rx()
+{
+    qDebug("SpectranMISOStreamWorker::streamRaw2Rx: starting");
+    AARTSAAPI_Result res;
+    SampleVector::iterator convIt[2];
+	// Prepare data packet
+	AARTSAAPI_Packet	packets[2] = { { sizeof(AARTSAAPI_Packet) }, { sizeof(AARTSAAPI_Packet) } };
+	int					pi[2] = { 0, 0 };
+
+	// Get the first data packets for both streams, sleep for some milliseconds, if none
+	// available yet.
+
+	for (int j = 0; j < 2; j++)
+	{
+        while (((res = AARTSAAPI_GetPacket(m_device, j, 0, packets + j)) == AARTSAAPI_EMPTY) && m_running)
+            QThread::msleep(5);
+
+		if (res != AARTSAAPI_OK)
+        {
+            qWarning("SpectranMISOStreamWorker::streamRaw2Rx: AARTSAAPI_GetPacket() stream %d [1] failed with error %d", j, res);
+            m_running = false;
+        }
+	}
+
+    while (m_running)
+    {
+		// Synchronize streams by time stamp
+
+		if (packets[0].endTime < packets[1].startTime)
+			pi[0] = packets[0].num;
+		else if (packets[1].endTime < packets[0].startTime)
+			pi[1] = packets[1].num;
+		else if (packets[0].startTime < packets[1].startTime)
+		{
+			pi[1] = 0;
+			pi[0] = (packets[1].startTime - packets[0].startTime) * packets[0].stepFrequency;
+		}
+		else
+		{
+			pi[0] = 0;
+			pi[1] = (packets[0].startTime - packets[1].startTime) * packets[0].stepFrequency;
+		}
+
+        // Convert to Sample format
+        convIt[0] = m_convertBuffer[0].begin();
+        convIt[1] = m_convertBuffer[1].begin();
+
+        m_decimatorsFloatIQ[0].decimate1(&convIt[0], packets[0].fp32, packets[0].size * packets[0].num);
+        m_decimatorsFloatIQ[1].decimate1(&convIt[1], packets[1].fp32, packets[1].size * packets[1].num);
+
+        // Write samples to FIFO
+        std::vector<SampleVector::const_iterator> vbegin;
+        vbegin.push_back(m_convertBuffer[0].begin());
+        vbegin.push_back(m_convertBuffer[1].begin());
+        m_sampleMIFifo->writeSync(vbegin, std::min(packets[0].num, packets[1].num));
+
+		// Get fresh packets
+        pi[0] += std::min(packets[0].num, packets[1].num);
+        pi[1] += std::min(packets[0].num, packets[1].num);
+
+		if (pi[0] >= packets[0].num)
+		{
+			// Remove the first packet from the packet queue
+			AARTSAAPI_ConsumePackets(m_device, 0, 1);
+
+			// Get next packet
+            while (((res = AARTSAAPI_GetPacket(m_device, 0, 0, packets + 0)) == AARTSAAPI_EMPTY) && m_running)
+                QThread::msleep(5);
+
+			pi[0] = 0;
+
+			if (res != AARTSAAPI_OK)
+            {
+                qWarning("SpectranMISOStreamWorker::streamRaw2Rx: AARTSAAPI_GetPacket() stream %d [2] failed with error %d", 0, res);
+                m_running = false;
+            }
+		}
+
+		if (pi[1] >= packets[1].num)
+		{
+			// Remove the first packet from the packet queue
+			AARTSAAPI_ConsumePackets(m_device, 1, 1);
+
+			// Get next packet
+            while (((res = AARTSAAPI_GetPacket(m_device, 1, 0, packets + 1)) == AARTSAAPI_EMPTY) && m_running)
+                QThread::msleep(5);
+
+			pi[1] = 0;
+
+			if (res != AARTSAAPI_OK)
+            {
+                qWarning("SpectranMISOStreamWorker::streamRaw2Rx: AARTSAAPI_GetPacket() stream %d [2] failed with error %d", 1, res);
+                m_running = false;
+            }
+		}
+    }
+
+    if (m_restart)
+    {
+        qDebug("SpectranMISOStreamWorker::streamRaw2Rx: exit and restart");
+        m_restart = false;
+        emit restart();
+    }
+    else
+    {
+        qDebug("SpectranMISOStreamWorker::streamRaw2Rx: normal exit");
         emit stopped();
     }
 }

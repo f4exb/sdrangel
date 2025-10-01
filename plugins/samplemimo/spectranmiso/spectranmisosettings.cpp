@@ -26,7 +26,8 @@ const QMap<SpectranMISOMode, QString> SpectranMISOSettings::m_modeDisplayNames =
     { SPECTRANMISO_MODE_TX_IQ, "TX IQ" },
     { SPECTRANMISO_MODE_RXTX_IQ, "RX/TX IQ" },
     { SPECTRANMISO_MODE_RX_RAW, "RX RAW" },
-    { SPECTRANMISO_MODE_2RX_RAW_INTL, "2x RX RAW Intl" }
+    { SPECTRANMISO_MODE_2RX_RAW_INTL, "2x RX RAW Intl" },
+    { SPECTRANMISO_MODE_2RX_RAW, "2x RX RAW" },
 };
 
 SpectranMISOSettings::SpectranMISOSettings() :
@@ -293,7 +294,9 @@ QDataStream &operator>>(QDataStream &stream, SpectranMISOSettings &settings)
 
 bool SpectranMISOSettings::isRawMode(const SpectranMISOMode& mode)
 {
-    return (mode == SpectranMISOMode::SPECTRANMISO_MODE_RX_RAW) || (mode == SpectranMISOMode::SPECTRANMISO_MODE_2RX_RAW_INTL);
+    return (mode == SpectranMISOMode::SPECTRANMISO_MODE_RX_RAW)
+    || (mode == SpectranMISOMode::SPECTRANMISO_MODE_2RX_RAW_INTL)
+    || (mode == SpectranMISOMode::SPECTRANMISO_MODE_2RX_RAW);
 }
 
 bool SpectranMISOSettings::isDualRx(const SpectranMISOMode &mode)
@@ -308,5 +311,5 @@ bool SpectranMISOSettings::isRxModeSingle(const SpectranMISOMode &mode)
 
 bool SpectranMISOSettings::isDecimationEnabled(const SpectranMISOMode &mode)
 {
-    return (mode == SpectranMISOMode::SPECTRANMISO_MODE_RX_RAW);
+    return (mode == SpectranMISOMode::SPECTRANMISO_MODE_RX_RAW) || (mode == SpectranMISOMode::SPECTRANMISO_MODE_2RX_RAW);
 }

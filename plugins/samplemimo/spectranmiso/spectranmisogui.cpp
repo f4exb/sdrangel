@@ -321,7 +321,7 @@ void SpectranMISOGui::on_mode_currentIndexChanged(int index)
     }
 
     m_settings.m_mode = (SpectranMISOMode) index;
-    SpectranMISO::MsgChangeMode* message = SpectranMISO::MsgChangeMode::create(m_settings.m_mode, m_settings.m_rxChannel);
+    SpectranMISO::MsgChangeMode* message = SpectranMISO::MsgChangeMode::create(m_settings);
     m_sampleMIMO->getInputMessageQueue()->push(message);
 }
 
@@ -344,8 +344,12 @@ void SpectranMISOGui::on_rxChannel_currentIndexChanged(int index)
         return;
     }
 
+    if (!SpectranMISOSettings::isRxModeSingle(m_settings.m_mode)) {
+        return;
+    }
+
     m_settings.m_rxChannel = (SpectranRxChannel) index;
-    SpectranMISO::MsgChangeMode* message = SpectranMISO::MsgChangeMode::create(m_settings.m_mode, m_settings.m_rxChannel);
+    SpectranMISO::MsgChangeMode* message = SpectranMISO::MsgChangeMode::create(m_settings);
     m_sampleMIMO->getInputMessageQueue()->push(message);
 }
 

@@ -59,6 +59,7 @@ public slots:
 
 private:
     void streamIQ();
+    void streamRaw2Rx();
     std::atomic<bool> m_running;
     bool m_restart;
     SpectranMISOMode m_currentMode;
@@ -68,7 +69,7 @@ private:
     MessageQueue *m_inputMessageQueueToGUI;
     MessageQueue *m_inputMessageQueueToSISO;
     AARTSAAPI_Device *m_device;
-    DecimatorsFI<true> m_decimatorsFloatIQ;
+    DecimatorsFI<true> m_decimatorsFloatIQ[2]; // one per channel in non interleaved mode
     SampleVector m_convertBuffer[2]; // one per channel
     bool handleMessage(const Message& message);
 

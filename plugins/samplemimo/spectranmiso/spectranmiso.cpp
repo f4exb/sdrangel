@@ -41,7 +41,8 @@ const QMap<SpectranMISOMode, QString> SpectranMISO::m_modeNames = {
     { SpectranMISOMode::SPECTRANMISO_MODE_TX_IQ, "iqtransmitter" },
     { SpectranMISOMode::SPECTRANMISO_MODE_RXTX_IQ, "iqtransceiver" },
     { SpectranMISOMode::SPECTRANMISO_MODE_RX_RAW, "raw" },
-    { SpectranMISOMode::SPECTRANMISO_MODE_2RX_RAW_INTL, "raw" }
+    { SpectranMISOMode::SPECTRANMISO_MODE_2RX_RAW_INTL, "raw" },
+    { SpectranMISOMode::SPECTRANMISO_MODE_2RX_RAW, "raw" }
 };
 
 const QMap<SpectranModel, QString> SpectranMISO::m_spectranModelNames = {
@@ -438,21 +439,19 @@ bool SpectranMISO::handleMessage(const Message& message)
     else if (MsgChangeMode::match(message))
     {
         const MsgChangeMode& cmd = static_cast<const MsgChangeMode&>(message);
-        SpectranMISOMode mode = cmd.getMode();
-        SpectranRxChannel rxChannel = cmd.getRxChannel();
+        SpectranMISOSettings settings = cmd.getSettings();
         qDebug() << "SpectranMISO::handleMessage: MsgChangeMode: "
-            << SpectranMISOSettings::m_modeDisplayNames.value(mode, "Unknown")
-            << ", RxChannel: " << SpectranMISO::m_rxChannelNames.value(rxChannel, "Unknown");
+            << SpectranMISOSettings::m_modeDisplayNames.value(settings.m_mode, "Unknown")
+            << ", RxChannel: " << SpectranMISO::m_rxChannelNames.value(settings.m_rxChannel, "Unknown");
 
-        if ((mode == m_settings.m_mode) && (rxChannel == m_settings.m_rxChannel)) {
+        if (settings.m_mode == m_settings.m_mode && settings.m_rxChannel == m_settings.m_rxChannel) {
             return true; // No change
         }
 
-        m_settings.m_mode = mode;
-        m_settings.m_rxChannel = rxChannel;
+        m_settings = settings;
 
         if (m_running) {
-            restart(mode);
+            restart(settings.m_mode);
         }
 
         return true;
@@ -504,7 +503,7 @@ bool SpectranMISO::applySettings(
                 if (AARTSAAPI_ConfigFind(&m_device, &root, &config, L"main/centerfreq") == AARTSAAPI_OK)
                     AARTSAAPI_ConfigSetFloat(&m_device, &config, settings.m_rxCenterFrequency);
                 else
-                    qWarning("SpectranMISOStreamWorker::applySettings: cannot find main/centerfreq");
+                    qWarning("SpectranMISO::applySettings: cannot find main/centerfreq");
             }
 
             if (!SpectranMISOSettings::isRawMode(settings.m_mode) && (settingsKeys.contains("sampleRate") || force))
@@ -515,7 +514,7 @@ bool SpectranMISO::applySettings(
                 if (AARTSAAPI_ConfigFind(&m_device, &root, &config, L"main/spanfreq") == AARTSAAPI_OK)
                     AARTSAAPI_ConfigSetFloat(&m_device, &config, (double) settings.m_sampleRate / 1.5);
                 else
-                    qWarning("SpectranMISOStreamWorker::applySettings: cannot find main/spanfreq");
+                    qWarning("SpectranMISO::applySettings: cannot find main/spanfreq");
             }
 
             // V6Eco only supports 61 MHz clock rate (61.44 actually) and therefore does not need to set it
@@ -525,7 +524,7 @@ bool SpectranMISO::applySettings(
                 if (AARTSAAPI_ConfigFind(&m_device, &root, &config, L"device/receiverclock") == AARTSAAPI_OK)
                     AARTSAAPI_ConfigSetString(&m_device, &config, m_clockRateNames[settings.m_clockRate].toStdWString().c_str());
                 else
-                    qWarning("SpectranMISOStreamWorker::applySettings: cannot find device/receiverclock");
+                    qWarning("SpectranMISO::applySettings: cannot find device/receiverclock");
             }
 
             if (SpectranMISOSettings::isRawMode(settings.m_mode))
@@ -533,14 +532,14 @@ bool SpectranMISO::applySettings(
                 m_sampleMIFifo.resize(SampleSourceFifo::getSizePolicy(getSampleRate(settings)));
                 m_sampleMOFifo.resize(SampleSourceFifo::getSizePolicy(getSampleRate(settings)));
 
-                if ((settingsKeys.contains("logDecimation") || force) && (settings.m_mode != SPECTRANMISO_MODE_2RX_RAW_INTL))
+                if ((settingsKeys.contains("logDecimation") || force) && SpectranMISOSettings::isDecimationEnabled(settings.m_mode))
                 {
                     // Decimation factor changed
                     // Set the decimation factor
                     if (AARTSAAPI_ConfigFind(&m_device, &root, &config, L"main/decimation") == AARTSAAPI_OK)
                         AARTSAAPI_ConfigSetString(&m_device, &config, m_log2DecimationNames[settings.m_logDecimation].toStdWString().c_str());
                     else
-                        qWarning("SpectranMISOStreamWorker::applySettings: cannot find main/decimation");
+                        qWarning("SpectranMISO::applySettings: cannot find main/decimation");
                 }
             }
         }
@@ -845,19 +844,22 @@ void SpectranMISO::applyCommonSettings(const SpectranMISOMode& mode)
                 AARTSAAPI_ConfigSetString(&m_device, &config, L"iq");
             else
                 qWarning("SpectranMISO::applyCommonSettings: cannot find device/outputformat");
-
-            if (AARTSAAPI_ConfigFind(&m_device, &root, &config, L"main/decimation") == AARTSAAPI_OK)
-                AARTSAAPI_ConfigSetString(&m_device, &config, L"Full");
-            else
-                qWarning("SpectranMISOStreamWorker::applySettings: cannot find main/decimation");
         }
 
         if (mode != SpectranMISOMode::SPECTRANMISO_MODE_TX_IQ)
         {
-            if (SpectranMISOSettings::isDualRx(mode))
+            if (mode == SpectranMISOMode::SPECTRANMISO_MODE_2RX_RAW_INTL)
             {
                 if (AARTSAAPI_ConfigFind(&m_device, &root, &config, L"device/receiverchannel") == AARTSAAPI_OK) {
                     AARTSAAPI_ConfigSetString(&m_device, &config, L"Rx12"); // Always set in I/Q interleave mode
+                } else {
+                    qWarning("SpectranMISO::applyCommonSettings: cannot find device/receiverchannel");
+                }
+            }
+            else if (mode == SpectranMISOMode::SPECTRANMISO_MODE_2RX_RAW)
+            {
+                if (AARTSAAPI_ConfigFind(&m_device, &root, &config, L"device/receiverchannel") == AARTSAAPI_OK) {
+                    AARTSAAPI_ConfigSetString(&m_device, &config, L"Rx1+Rx2"); // Always set in dual channel mode
                 } else {
                     qWarning("SpectranMISO::applyCommonSettings: cannot find device/receiverchannel");
                 }

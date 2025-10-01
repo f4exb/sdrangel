@@ -274,6 +274,11 @@
          <string>Rx1+2 Raw I</string>
         </property>
        </item>
+       <item>
+        <property name="text">
+         <string>Rx1+2 Raw</string>
+        </property>
+       </item>
       </widget>
      </item>
      <item>

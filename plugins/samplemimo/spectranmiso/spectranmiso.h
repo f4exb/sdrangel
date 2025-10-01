@@ -60,21 +60,18 @@ public:
         MESSAGE_CLASS_DECLARATION
 
     public:
-        SpectranMISOMode getMode() const { return m_mode; }
-        SpectranRxChannel getRxChannel() const { return m_rxChannel; }
+        SpectranMISOSettings getSettings() const { return m_settings; }
 
-        static MsgChangeMode* create(SpectranMISOMode mode, SpectranRxChannel rxChannel) {
-            return new MsgChangeMode(mode, rxChannel);
+        static MsgChangeMode* create(const SpectranMISOSettings& settings) {
+            return new MsgChangeMode(settings);
         }
 
     protected:
-        SpectranMISOMode m_mode;
-        SpectranRxChannel m_rxChannel;
+        SpectranMISOSettings m_settings;
 
-        MsgChangeMode(SpectranMISOMode mode, SpectranRxChannel rxChannel) :
+        MsgChangeMode(const SpectranMISOSettings& settings) :
             Message(),
-            m_mode(mode),
-            m_rxChannel(rxChannel)
+            m_settings(settings)
         { }
     };
 
