@@ -213,7 +213,7 @@ endmacro()
 if (NOT LIBUSB_FOUND AND NOT USE_PRECOMPILED_LIBS)
     # Cloning git repo doesn't include configure, so we download the bz2 which does
     ExternalProject_Add(libusb
-            URL https://github.com/libusb/libusb/releases/download/v1.0.26/libusb-1.0.26.tar.bz2
+            URL https://github.com/libusb/libusb/releases/download/v1.0.29/libusb-1.0.29.tar.bz2
             PREFIX "${EXTERNAL_BUILD_LIBRARIES}/libusb"
             CONFIGURE_COMMAND <SOURCE_DIR>/configure --prefix=<INSTALL_DIR>
             BUILD_COMMAND ${MAKE}
