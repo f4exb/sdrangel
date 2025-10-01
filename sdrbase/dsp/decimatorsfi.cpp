@@ -33,6 +33,30 @@ SDRBASE_API void DecimatorsFI<true>::decimate1(SampleVector::iterator* it, const
     }
 }
 
+// Specialization for 2 channels interleaved I/Q input
+template<>
+SDRBASE_API void DecimatorsFI<true>::decimate1_2(SampleVector::iterator* it1, SampleVector::iterator* it2, const float* buf, qint32 nbIAndQ)
+{
+    float xreal1, yimag1, xreal2, yimag2;
+
+    for (int pos = 0; pos < nbIAndQ - 3; pos += 4)
+    {
+        // First channel
+        xreal1 = buf[pos+0];
+        yimag1 = buf[pos+1];
+        (**it1).setReal(xreal1 * SDR_RX_SCALEF);
+        (**it1).setImag(yimag1 * SDR_RX_SCALEF);
+        ++(*it1); // Valgrind optim (comment not repeated)
+
+        // Second channel
+        xreal2 = buf[pos+2];
+        yimag2 = buf[pos+3];
+        (**it2).setReal(xreal2 * SDR_RX_SCALEF);
+        (**it2).setImag(yimag2 * SDR_RX_SCALEF);
+        ++(*it2); // Valgrind optim (comment not repeated)
+    }
+}
+
 template<>
 SDRBASE_API void DecimatorsFI<false>::decimate1(SampleVector::iterator* it, const float* buf, qint32 nbIAndQ)
 {
@@ -45,6 +69,30 @@ SDRBASE_API void DecimatorsFI<false>::decimate1(SampleVector::iterator* it, cons
         (**it).setReal(xreal * SDR_RX_SCALEF);
         (**it).setImag(yimag * SDR_RX_SCALEF);
         ++(*it); // Valgrind optim (comment not repeated)
+    }
+}
+
+// Specialization for 2 channels interleaved I/Q input
+template<>
+SDRBASE_API void DecimatorsFI<false>::decimate1_2(SampleVector::iterator* it1, SampleVector::iterator* it2, const float* buf, qint32 nbIAndQ)
+{
+    float xreal1, yimag1, xreal2, yimag2;
+
+    for (int pos = 0; pos < nbIAndQ - 3; pos += 4)
+    {
+        // First channel
+        xreal1 = buf[pos+1];
+        yimag1 = buf[pos+0];
+        (**it1).setReal(xreal1 * SDR_RX_SCALEF);
+        (**it1).setImag(yimag1 * SDR_RX_SCALEF);
+        ++(*it1); // Valgrind optim (comment not repeated)
+
+        // Second channel
+        xreal2 = buf[pos+3];
+        yimag2 = buf[pos+2];
+        (**it2).setReal(xreal2 * SDR_RX_SCALEF);
+        (**it2).setImag(yimag2 * SDR_RX_SCALEF);
+        ++(*it2); // Valgrind optim (comment not repeated)
     }
 }
 
@@ -211,4 +259,3 @@ SDRBASE_API void DecimatorsFI<false>::decimate4_sup(SampleVector::iterator* it, 
         ++(*it);
     }
 }
-

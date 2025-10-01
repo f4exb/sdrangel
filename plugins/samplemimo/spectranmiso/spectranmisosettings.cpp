@@ -23,11 +23,10 @@ MESSAGE_CLASS_DEFINITION(MsgConfigureSpectranMISO, Message)
 
 const QMap<SpectranMISOMode, QString> SpectranMISOSettings::m_modeDisplayNames = {
     { SPECTRANMISO_MODE_RX_IQ, "RX IQ" },
-    { SPECTRANMISO_MODE_2RX_IQ, "2x RX IQ" },
     { SPECTRANMISO_MODE_TX_IQ, "TX IQ" },
     { SPECTRANMISO_MODE_RXTX_IQ, "RX/TX IQ" },
     { SPECTRANMISO_MODE_RX_RAW, "RX RAW" },
-    { SPECTRANMISO_MODE_2RX_RAW, "2x RX RAW" }
+    { SPECTRANMISO_MODE_2RX_RAW_INTL, "2x RX RAW Intl" }
 };
 
 SpectranMISOSettings::SpectranMISOSettings() :
@@ -290,4 +289,24 @@ QDataStream &operator>>(QDataStream &stream, SpectranMISOSettings &settings)
            >> settings.m_reverseAPIPort
            >> settings.m_reverseAPIDeviceIndex;
     return stream;
+}
+
+bool SpectranMISOSettings::isRawMode(const SpectranMISOMode& mode)
+{
+    return (mode == SpectranMISOMode::SPECTRANMISO_MODE_RX_RAW) || (mode == SpectranMISOMode::SPECTRANMISO_MODE_2RX_RAW_INTL);
+}
+
+bool SpectranMISOSettings::isDualRx(const SpectranMISOMode &mode)
+{
+    return (mode == SpectranMISOMode::SPECTRANMISO_MODE_2RX_RAW_INTL);
+}
+
+bool SpectranMISOSettings::isRxModeSingle(const SpectranMISOMode &mode)
+{
+    return (mode == SpectranMISOMode::SPECTRANMISO_MODE_RX_IQ) || (mode == SpectranMISOMode::SPECTRANMISO_MODE_RX_RAW);
+}
+
+bool SpectranMISOSettings::isDecimationEnabled(const SpectranMISOMode &mode)
+{
+    return (mode == SpectranMISOMode::SPECTRANMISO_MODE_RX_RAW);
 }

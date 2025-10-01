@@ -110,7 +110,13 @@ void SpectranMISOStreamWorker::streamIQ()
             // assume single receive channel for now
             convIt[0] = m_convertBuffer[0].begin();
             convIt[1] = m_convertBuffer[1].begin();
-            m_decimatorsFloatIQ[0].decimate1(&convIt[0], packet.fp32, packet.size * packet.num);
+
+            if (SpectranMISOSettings::isDualRx(m_currentMode)) {
+                m_decimatorsFloatIQ.decimate1_2(&convIt[0], &convIt[1], packet.fp32, 2 * packet.size * packet.num);
+            } else {
+                m_decimatorsFloatIQ.decimate1(&convIt[0], packet.fp32, packet.size * packet.num);
+            }
+
             // Write samples to FIFO
             std::vector<SampleVector::const_iterator> vbegin;
             vbegin.push_back(m_convertBuffer[0].begin());

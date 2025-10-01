@@ -36,11 +36,10 @@ enum SpectranRxChannel {
 
 enum SpectranMISOMode {
     SPECTRANMISO_MODE_RX_IQ = 0,
-    SPECTRANMISO_MODE_2RX_IQ,
     SPECTRANMISO_MODE_TX_IQ,
     SPECTRANMISO_MODE_RXTX_IQ,
     SPECTRANMISO_MODE_RX_RAW,
-    SPECTRANMISO_MODE_2RX_RAW,
+    SPECTRANMISO_MODE_2RX_RAW_INTL,
     SPECTRANMISO_MODE_END
 };
 
@@ -77,6 +76,10 @@ struct SpectranMISOSettings {
     SpectranMISOSettings& operator=(const SpectranMISOSettings&) = default;
     void applySettings(const QStringList& settingsKeys, const SpectranMISOSettings& settings);
     QString getDebugString(const QStringList& settingsKeys, bool force=false) const;
+    static bool isRawMode(const SpectranMISOMode& mode);
+    static bool isDualRx(const SpectranMISOMode& mode);
+    static bool isRxModeSingle(const SpectranMISOMode& mode);
+    static bool isDecimationEnabled(const SpectranMISOMode& mode);
 
     static const QMap<SpectranMISOMode, QString> m_modeDisplayNames;
 };

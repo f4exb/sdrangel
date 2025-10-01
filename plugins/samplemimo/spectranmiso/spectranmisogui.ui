@@ -256,11 +256,6 @@
        </item>
        <item>
         <property name="text">
-         <string>Rx1+Rx2 IQ</string>
-        </property>
-       </item>
-       <item>
-        <property name="text">
          <string>Tx IQ</string>
         </property>
        </item>
@@ -276,7 +271,7 @@
        </item>
        <item>
         <property name="text">
-         <string>Rx1 + Rx2 Raw</string>
+         <string>Rx1+2 Raw I</string>
         </property>
        </item>
       </widget>

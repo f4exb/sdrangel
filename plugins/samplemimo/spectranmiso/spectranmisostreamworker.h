@@ -43,6 +43,7 @@ public:
 
     bool isRunning() const { return m_running; }
     void setDevice(AARTSAAPI_Device* device) { m_device = device; }
+    void setMode(SpectranMISOMode mode) { m_currentMode = mode; }
     MessageQueue *getInputMessageQueue() { return &m_inputMessageQueue; }
     void setMessageQueueToGUI(MessageQueue *queue) { m_inputMessageQueueToGUI = queue; }
     void setMessageQueueToSISO(MessageQueue *queue) { m_inputMessageQueueToSISO = queue; }
@@ -60,14 +61,14 @@ private:
     void streamIQ();
     std::atomic<bool> m_running;
     bool m_restart;
-    SpectranMISOMode m_restartMode;
+    SpectranMISOMode m_currentMode;
     SampleMIFifo *m_sampleMIFifo;
     SampleMOFifo *m_sampleMOFifo;
     MessageQueue m_inputMessageQueue;
     MessageQueue *m_inputMessageQueueToGUI;
     MessageQueue *m_inputMessageQueueToSISO;
     AARTSAAPI_Device *m_device;
-    DecimatorsFI<true> m_decimatorsFloatIQ[2]; // one per channel
+    DecimatorsFI<true> m_decimatorsFloatIQ;
     SampleVector m_convertBuffer[2]; // one per channel
     bool handleMessage(const Message& message);
 

@@ -68,10 +68,14 @@ SpectranMISOGui::SpectranMISOGui(DeviceUISet *deviceUISet, QWidget* parent) :
     }
 
     // Disable certain modes for the moment
-    ui->mode->model()->setData(ui->mode->model()->index(1, 0), 0, Qt::UserRole - 1); // disables the item
-    ui->mode->model()->setData(ui->mode->model()->index(2, 0), 0, Qt::UserRole - 1); // disables the item
-    ui->mode->model()->setData(ui->mode->model()->index(3, 0), 0, Qt::UserRole - 1); // disables the item
-    ui->mode->model()->setData(ui->mode->model()->index(5, 0), 0, Qt::UserRole - 1); // disables the item
+    ui->mode->model()->setData(ui->mode->model()->index(1, 0), 0, Qt::UserRole - 1); // Tx IQ disables the item
+    ui->mode->model()->setData(ui->mode->model()->index(2, 0), 0, Qt::UserRole - 1); // Rx+Tx IQ disables the item
+
+    // Disable Tx spectrum source for the moment
+    ui->spectrumSource->model()->setData(ui->spectrumSource->model()->index(2, 0), 0, Qt::UserRole - 1); // Tx disabled
+    ui->spectrumSource->setCurrentIndex(0); // Rx1 by default
+
+    ui->log2Decim->setEnabled(false); // enabled when in raw mode
 
     connect(&m_updateTimer, SIGNAL(timeout()), this, SLOT(updateHardware()));
     connect(&m_statusTimer, SIGNAL(timeout()), this, SLOT(updateStatus()));
@@ -138,7 +142,7 @@ void SpectranMISOGui::displaySettings()
     ui->txCenterFrequency->setValue(m_settings.m_txCenterFrequency / 1000); // Display in kHz
     ui->sampleRate->setEnabled(true);
     ui->sampleRate->setValue(m_settings.m_sampleRate);
-    ui->sampleRate->setEnabled(!SpectranMISO::isRawMode(m_settings.m_mode));
+    ui->sampleRate->setEnabled(!SpectranMISOSettings::isRawMode(m_settings.m_mode));
     ui->deviceRateText->setText(tr("%1k").arg(QString::number(SpectranMISO::getSampleRate(m_settings) / 1000.0f, 'g', 5)));
     ui->streamIndex->setCurrentIndex(m_settings.m_streamIndex);
     ui->spectrumSource->setCurrentIndex(m_settings.m_spectrumStreamIndex);
@@ -297,21 +301,41 @@ void SpectranMISOGui::on_mode_currentIndexChanged(int index)
         return;
     }
 
-    if (SpectranMISO::isRawMode((SpectranMISOMode) index)) {
+    if (SpectranMISOSettings::isRawMode((SpectranMISOMode) index)) {
         ui->sampleRate->setEnabled(false);
     } else {
         ui->sampleRate->setEnabled(true);
     }
 
-    if (SpectranMISO::isRxModeSingle((SpectranMISOMode) index)) {
+    if (SpectranMISOSettings::isRxModeSingle((SpectranMISOMode) index)) {
         ui->rxChannel->setEnabled(true);
     } else {
         ui->rxChannel->setEnabled(false);
     }
 
+
+    if (SpectranMISOSettings::isDecimationEnabled((SpectranMISOMode) index)) {
+        ui->log2Decim->setEnabled(true);
+    } else {
+        ui->log2Decim->setEnabled(false);
+    }
+
     m_settings.m_mode = (SpectranMISOMode) index;
     SpectranMISO::MsgChangeMode* message = SpectranMISO::MsgChangeMode::create(m_settings.m_mode, m_settings.m_rxChannel);
     m_sampleMIMO->getInputMessageQueue()->push(message);
+}
+
+void SpectranMISOGui::on_spectrumSource_currentIndexChanged(int index)
+{
+    if (!m_doApplySettings || index < 0 || index > 2) {
+        return;
+    }
+
+    bool spectrumRxElseTx = (index < 2); // 0 or 1 = Rx, 2 = Tx
+    int spectrumStreamIndex = (index == 2) ? 0 : index;
+
+    m_deviceUISet->m_spectrum->setDisplayedStream(spectrumRxElseTx, spectrumStreamIndex);
+    m_deviceUISet->m_deviceAPI->setSpectrumSinkInput(spectrumRxElseTx, spectrumStreamIndex);
 }
 
 void SpectranMISOGui::on_rxChannel_currentIndexChanged(int index)
@@ -378,6 +402,7 @@ void SpectranMISOGui::on_txCenterFrequency_valueChanged(qint64 value)
 void SpectranMISOGui::makeUIConnections()
 {
     connect(ui->startStop, &ButtonSwitch::toggled, this, &SpectranMISOGui::on_startStop_toggled);
+    QObject::connect(ui->spectrumSource, QOverload<int>::of(&QComboBox::currentIndexChanged), this, &SpectranMISOGui::on_spectrumSource_currentIndexChanged);
     QObject::connect(ui->mode, QOverload<int>::of(&QComboBox::currentIndexChanged), this, &SpectranMISOGui::on_mode_currentIndexChanged);
     QObject::connect(ui->rxChannel, QOverload<int>::of(&QComboBox::currentIndexChanged), this, &SpectranMISOGui::on_rxChannel_currentIndexChanged);
     connect(ui->rxCenterFrequency, &ValueDial::changed, this, &SpectranMISOGui::on_rxCenterFrequency_valueChanged);

@@ -59,6 +59,7 @@ private:
     bool handleMessage(const Message& message);
     bool isSpectrumRx() const;
     void on_startStop_toggled(bool checked);
+    void on_spectrumSource_currentIndexChanged(int index);
     void on_mode_currentIndexChanged(int index);
     void on_rxChannel_currentIndexChanged(int index);
     void on_sampleRate_valueChanged(qint64 value);

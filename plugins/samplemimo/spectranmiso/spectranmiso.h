@@ -141,9 +141,6 @@ public:
 
     static int getSampleRate(const SpectranMISOSettings& settings);
     const SpectranModel& getSpectranModel() const { return m_spectranModel; }
-    static bool isRawMode(const SpectranMISOMode& mode);
-    static bool isDualRx(const SpectranMISOMode& mode);
-    static bool isRxModeSingle(const SpectranMISOMode& mode);
 
 private:
     struct DeviceSettingsKeys

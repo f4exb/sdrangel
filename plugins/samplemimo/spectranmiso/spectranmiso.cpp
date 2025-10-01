@@ -38,11 +38,10 @@ MESSAGE_CLASS_DEFINITION(SpectranMISO::MsgChangeMode, Message)
 
 const QMap<SpectranMISOMode, QString> SpectranMISO::m_modeNames = {
     { SpectranMISOMode::SPECTRANMISO_MODE_RX_IQ, "iqreceiver" },
-    { SpectranMISOMode::SPECTRANMISO_MODE_2RX_IQ, "iq2receiver" },
     { SpectranMISOMode::SPECTRANMISO_MODE_TX_IQ, "iqtransmitter" },
     { SpectranMISOMode::SPECTRANMISO_MODE_RXTX_IQ, "iqtransceiver" },
     { SpectranMISOMode::SPECTRANMISO_MODE_RX_RAW, "raw" },
-    { SpectranMISOMode::SPECTRANMISO_MODE_2RX_RAW, "raw2receiver" }
+    { SpectranMISOMode::SPECTRANMISO_MODE_2RX_RAW_INTL, "raw" }
 };
 
 const QMap<SpectranModel, QString> SpectranMISO::m_spectranModelNames = {
@@ -168,6 +167,7 @@ bool SpectranMISO::start(const SpectranMISOMode& mode)
     m_streamWorker = new SpectranMISOStreamWorker(&m_sampleMIFifo, &m_sampleMOFifo);
     m_streamWorker->moveToThread(m_streamWorkerThread);
     m_streamWorker->setDevice(&m_device);
+    m_streamWorker->setMode(mode);
     m_streamWorker->setMessageQueueToGUI(getMessageQueueToGUI());
     m_streamWorker->setMessageQueueToSISO(getInputMessageQueue());
 
@@ -288,10 +288,15 @@ int SpectranMISO::getSinkSampleRate(int index) const
 
 int SpectranMISO::getSampleRate(const SpectranMISOSettings& settings)
 {
-    if (settings.m_mode == SPECTRANMISO_MODE_RX_IQ || settings.m_mode == SPECTRANMISO_MODE_2RX_IQ
+    if (settings.m_mode == SPECTRANMISO_MODE_RX_IQ
         || settings.m_mode == SPECTRANMISO_MODE_RXTX_IQ || settings.m_mode == SPECTRANMISO_MODE_TX_IQ)
     {
         return settings.m_sampleRate; // For IQ modes, the sample rate is directly specified
+    }
+    else if (settings.m_mode == SPECTRANMISO_MODE_2RX_RAW_INTL)
+    {
+        // For 2x RAW mode, the sample rate is determined by the clock rate only (no decimation)
+        return getActualRawRate(settings.m_clockRate);
     }
     else
     {
@@ -502,7 +507,7 @@ bool SpectranMISO::applySettings(
                     qWarning("SpectranMISOStreamWorker::applySettings: cannot find main/centerfreq");
             }
 
-            if (!isRawMode(settings.m_mode) && (settingsKeys.contains("sampleRate") || force))
+            if (!SpectranMISOSettings::isRawMode(settings.m_mode) && (settingsKeys.contains("sampleRate") || force))
             {
                 m_sampleMIFifo.resize(SampleSourceFifo::getSizePolicy(settings.m_sampleRate));
                 m_sampleMOFifo.resize(SampleSourceFifo::getSizePolicy(settings.m_sampleRate));
@@ -516,8 +521,6 @@ bool SpectranMISO::applySettings(
             // V6Eco only supports 61 MHz clock rate (61.44 actually) and therefore does not need to set it
             if ((m_spectranModel == SpectranModel::SPECTRAN_V6) && (settingsKeys.contains("clockRate") || force))
             {
-                m_sampleMIFifo.resize(SampleSourceFifo::getSizePolicy(getSampleRate(settings)));
-                m_sampleMOFifo.resize(SampleSourceFifo::getSizePolicy(getSampleRate(settings)));
                 // Set the clock rate
                 if (AARTSAAPI_ConfigFind(&m_device, &root, &config, L"device/receiverclock") == AARTSAAPI_OK)
                     AARTSAAPI_ConfigSetString(&m_device, &config, m_clockRateNames[settings.m_clockRate].toStdWString().c_str());
@@ -525,12 +528,13 @@ bool SpectranMISO::applySettings(
                     qWarning("SpectranMISOStreamWorker::applySettings: cannot find device/receiverclock");
             }
 
-            if (isRawMode(settings.m_mode))
+            if (SpectranMISOSettings::isRawMode(settings.m_mode))
             {
-                if (settingsKeys.contains("logDecimation") || force)
+                m_sampleMIFifo.resize(SampleSourceFifo::getSizePolicy(getSampleRate(settings)));
+                m_sampleMOFifo.resize(SampleSourceFifo::getSizePolicy(getSampleRate(settings)));
+
+                if ((settingsKeys.contains("logDecimation") || force) && (settings.m_mode != SPECTRANMISO_MODE_2RX_RAW_INTL))
                 {
-                    m_sampleMIFifo.resize(SampleSourceFifo::getSizePolicy(getSampleRate(settings)));
-                    m_sampleMOFifo.resize(SampleSourceFifo::getSizePolicy(getSampleRate(settings)));
                     // Decimation factor changed
                     // Set the decimation factor
                     if (AARTSAAPI_ConfigFind(&m_device, &root, &config, L"main/decimation") == AARTSAAPI_OK)
@@ -826,7 +830,7 @@ void SpectranMISO::applyCommonSettings(const SpectranMISOMode& mode)
     if (AARTSAAPI_ConfigRoot(&m_device, &root) == AARTSAAPI_OK)
     {
         // In I/Q mode and for SpectranV6 clock is set to slow
-        if (!isRawMode(mode) && (m_spectranModel == SpectranModel::SPECTRAN_V6))
+        if (!SpectranMISOSettings::isRawMode(mode) && (m_spectranModel == SpectranModel::SPECTRAN_V6))
         {
             if (AARTSAAPI_ConfigFind(&m_device, &root, &config, L"device/receiverclock") == AARTSAAPI_OK) {
                 AARTSAAPI_ConfigSetString(&m_device, &config, L"92MHz");
@@ -835,7 +839,7 @@ void SpectranMISO::applyCommonSettings(const SpectranMISOMode& mode)
             }
         }
 
-        if (isRawMode(mode))
+        if (SpectranMISOSettings::isRawMode(mode))
         {
             if (AARTSAAPI_ConfigFind(&m_device, &root, &config, L"device/outputformat") == AARTSAAPI_OK)
                 AARTSAAPI_ConfigSetString(&m_device, &config, L"iq");
@@ -850,7 +854,7 @@ void SpectranMISO::applyCommonSettings(const SpectranMISOMode& mode)
 
         if (mode != SpectranMISOMode::SPECTRANMISO_MODE_TX_IQ)
         {
-            if (isDualRx(mode))
+            if (SpectranMISOSettings::isDualRx(mode))
             {
                 if (AARTSAAPI_ConfigFind(&m_device, &root, &config, L"device/receiverchannel") == AARTSAAPI_OK) {
                     AARTSAAPI_ConfigSetString(&m_device, &config, L"Rx12"); // Always set in I/Q interleave mode
@@ -873,19 +877,4 @@ void SpectranMISO::applyCommonSettings(const SpectranMISOMode& mode)
             AARTSAAPI_ConfigSetFloat(&m_device, &config, -20.0);
         }
     }
-}
-
-bool SpectranMISO::isRawMode(const SpectranMISOMode& mode)
-{
-    return (mode == SpectranMISOMode::SPECTRANMISO_MODE_RX_RAW) || (mode == SpectranMISOMode::SPECTRANMISO_MODE_2RX_RAW);
-}
-
-bool SpectranMISO::isDualRx(const SpectranMISOMode &mode)
-{
-    return (mode == SpectranMISOMode::SPECTRANMISO_MODE_2RX_IQ) || (mode == SpectranMISOMode::SPECTRANMISO_MODE_2RX_RAW);
-}
-
-bool SpectranMISO::isRxModeSingle(const SpectranMISOMode &mode)
-{
-    return (mode == SpectranMISOMode::SPECTRANMISO_MODE_RX_IQ) || (mode == SpectranMISOMode::SPECTRANMISO_MODE_RX_RAW);
 }

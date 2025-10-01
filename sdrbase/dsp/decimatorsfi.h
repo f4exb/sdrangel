@@ -30,6 +30,7 @@ class DecimatorsFI
 {
 public:
     SDRBASE_API void decimate1(SampleVector::iterator* it, const float* buf, qint32 nbIAndQ);
+    SDRBASE_API void decimate1_2(SampleVector::iterator* it1, SampleVector::iterator* it2, const float* buf, qint32 nbIAndQ);
     SDRBASE_API void decimate2_inf(SampleVector::iterator* it, const float* buf, qint32 nbIAndQ);
     SDRBASE_API void decimate2_sup(SampleVector::iterator* it, const float* buf, qint32 nbIAndQ);
     void decimate2_cen(SampleVector::iterator* it, const float* buf, qint32 nbIAndQ);
