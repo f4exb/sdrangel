@@ -31,6 +31,7 @@ if(APPLE AND BUNDLE AND BUILD_GUI)
   configure_file("${CMAKE_SOURCE_DIR}/cmake/cpack/deploy_mac.cmake.in" "${PROJECT_BINARY_DIR}/deploy_mac.cmake" @ONLY)
 
   set(CPACK_GENERATOR "Bundle")
+  set(CPACK_STRIP_FILES OFF}
   set(CPACK_BINARY_DRAGNDROP ON)
   set(CPACK_BUNDLE_NAME "${APPLICATION_NAME}")
   set(CPACK_BUNDLE_ICON "${CMAKE_SOURCE_DIR}/cmake/cpack/sdrangel_icon.icns")
