@@ -92,9 +92,6 @@ jobs:
         with:
           submodules: true
           fetch-depth: 0
-      - uses: maxim-lobanov/setup-xcode@v1
-        with:
-          xcode-version: '16.2'
       - name: Update brew
         run: brew update
       - name: Install brew packages
