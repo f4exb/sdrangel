@@ -92,6 +92,9 @@ jobs:
         with:
           submodules: true
           fetch-depth: 0
+      - uses: maxim-lobanov/setup-xcode@v1
+        with:
+          xcode-version: '16.2'
       - name: Update brew
         run: brew update
       - name: Install brew packages
@@ -110,7 +113,7 @@ jobs:
       - name: Install Qt
         uses: jurplel/install-qt-action@v4
         with:
-          version: '6.7.3'
+          version: '6.9.1'
           host: 'mac'
           arch: 'clang_64'
           modules: 'qtcharts qtscxml qt5compat qtlocation qtmultimedia qtpositioning qtserialport qtspeech qtwebsockets qtwebengine qtshadertools qtwebchannel'
