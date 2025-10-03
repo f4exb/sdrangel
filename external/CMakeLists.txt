@@ -231,6 +231,9 @@ if (NOT LIBUSB_FOUND AND NOT USE_PRECOMPILED_LIBS)
     elseif (APPLE)
         set(LIBUSB_LIBRARIES "${install_dir}/lib/libusb-1.0${CMAKE_SHARED_LIBRARY_SUFFIX}" CACHE INTERNAL "")
         set(MACOS_EXTERNAL_LIBS_FIXUP "${MACOS_EXTERNAL_LIBS_FIXUP};${install_dir}/lib")
+        add_custom_command(TARGET libusb POST_BUILD
+                    COMMAND codesign --remove-signature "${install_dir}/lib/libusb-1.0${CMAKE_SHARED_LIBRARY_SUFFIX}"
+                    COMMENT "removing signature on libusb")
     endif ()
 endif (NOT LIBUSB_FOUND AND NOT USE_PRECOMPILED_LIBS)
 
