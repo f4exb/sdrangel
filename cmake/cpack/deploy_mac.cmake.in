@@ -37,7 +37,14 @@ foreach(RPATH_DIR_1 ${EXTERNAL_LIB_DIRS})
    endforeach()
 endforeach()
 
+echo "Testing pre macdeployqt"
+codesign -verify ${CPACK_TEMPORARY_INSTALL_DIRECTORY}/SDRangel.app/Contents/Frameworks/libusb-1.0.0.dylib
+codesign -dvv ${CPACK_TEMPORARY_INSTALL_DIRECTORY}/SDRangel.app/Contents/Frameworks/libusb-1.0.0.dylib
+
 # Run macdeployqt which should copy all libraries and frameworks and Qt plugins and qml
 message ("Running macdeployqt in ${CPACK_TEMPORARY_INSTALL_DIRECTORY}")
-execute_process ( COMMAND macdeployqt ${CPACK_TEMPORARY_INSTALL_DIRECTORY}/SDRangel.app -always-overwrite -verbose=1 -qmldir=@CMAKE_CURRENT_SOURCE_DIR@/../../plugins/ )
+execute_process ( COMMAND macdeployqt ${CPACK_TEMPORARY_INSTALL_DIRECTORY}/SDRangel.app -always-overwrite -verbose=3 -qmldir=@CMAKE_CURRENT_SOURCE_DIR@/../../plugins/ )
 
+echo "Testing post macdeployqt"
+codesign -verify ${CPACK_TEMPORARY_INSTALL_DIRECTORY}/SDRangel.app/Contents/Frameworks/libusb-1.0.0.dylib
+codesign -dvv ${CPACK_TEMPORARY_INSTALL_DIRECTORY}/SDRangel.app/Contents/Frameworks/libusb-1.0.0.dylib
