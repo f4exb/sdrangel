@@ -26,9 +26,9 @@ foreach(RPATH_DIR ${EXTERNAL_LIB_DIRS})
 endforeach()
 
 
-execute_process ( COMMAND "checking signature" )
+execute_process ( COMMAND "checking signature pre" )
 execute_process ( COMMAND codesign -vv ${EXTERNAL_LIB_DIRS}/libusb-1.0.0.dylib )
-execute_process ( COMMAND md5sum -vv ${EXTERNAL_LIB_DIRS}/libusb-1.0.0.dylib )
+execute_process ( COMMAND md5sum ${EXTERNAL_LIB_DIRS}/libusb-1.0.0.dylib )
 execute_process ( COMMAND "signature checked" )
 
 # Add RPATH to libraries in build directory
@@ -47,7 +47,13 @@ endforeach()
 message ("Running macdeployqt in ${CPACK_TEMPORARY_INSTALL_DIRECTORY}")
 execute_process ( COMMAND macdeployqt ${CPACK_TEMPORARY_INSTALL_DIRECTORY}/SDRangel.app -no-strip -always-overwrite -verbose=1 -qmldir=@CMAKE_CURRENT_SOURCE_DIR@/../../plugins/ )
 
-execute_process ( COMMAND "checking signature" )
+execute_process ( COMMAND "checking signature post" )
 execute_process ( COMMAND codesign -vv ${CPACK_TEMPORARY_INSTALL_DIRECTORY}/SDRangel.app/Contents/Frameworks/libusb-1.0.0.dylib )
-execute_process ( COMMAND md5sum -vv ${CPACK_TEMPORARY_INSTALL_DIRECTORY}/SDRangel.app/Contents/Frameworks/libusb-1.0.0.dylib )
+execute_process ( COMMAND md5sum  ${CPACK_TEMPORARY_INSTALL_DIRECTORY}/SDRangel.app/Contents/Frameworks/libusb-1.0.0.dylib )
 execute_process ( COMMAND "signature checked" )
+
+execute_process ( COMMAND "resigning" )
+execute_process ( COMMAND codesign --force --sign - ${CPACK_TEMPORARY_INSTALL_DIRECTORY}/SDRangel.app/Contents/Frameworks/libusb-1.0.0.dylib )
+execute_process ( COMMAND codesign -vv ${CPACK_TEMPORARY_INSTALL_DIRECTORY}/SDRangel.app/Contents/Frameworks/libusb-1.0.0.dylib )
+execute_process ( COMMAND md5sum  ${CPACK_TEMPORARY_INSTALL_DIRECTORY}/SDRangel.app/Contents/Frameworks/libusb-1.0.0.dylib )
+execute_process ( COMMAND "resigned" )
