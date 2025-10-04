@@ -20,7 +20,7 @@ jobs:
       - name: Update brew
         run: brew update
       - name: Install brew packages
-        run: brew install nasm subversion ncurses
+        run: brew install nasm subversion ncurses md5sha1sum
       - name: Install SDRplay API
         run: |
             wget https://www.sdrplay.com/software/SDRplayAPI-macos-installer-universal-3.15.0.pkg
@@ -95,7 +95,7 @@ jobs:
       - name: Update brew
         run: brew update
       - name: Install brew packages
-        run: brew install nasm subversion ncurses
+        run: brew install nasm subversion ncurses md5sha1sum
       - name: Install SDRplay API
         run: |
             wget https://www.sdrplay.com/software/SDRplayAPI-macos-installer-universal-3.15.0.pkg
