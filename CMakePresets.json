@@ -44,8 +44,11 @@
       "name": "default-windows",
       "binaryDir": "${sourceDir}/build",
       "cacheVariables": {
+        //"CMAKE_BUILD_TYPE": "Release",
         "CMAKE_BUILD_TYPE": "RelWithDebInfo",
+        //"CMAKE_BUILD_TYPE": "Debug",
         "DEBUG_OUTPUT": "ON",
+        "SANITIZE_ADDRESS": "OFF",
         "RX_SAMPLE_24BIT": "ON",
         "ARCH_OPT": "SSE4_2",
         "HIDE_CONSOLE": "OFF",
@@ -55,11 +58,11 @@
         "ENABLE_HACKRF": "ON",
         "ENABLE_IIO": "ON",
         "ENABLE_MIRISDR": "OFF",
-        "ENABLE_PERSEUS": "ON",
+        "ENABLE_PERSEUS": "OFF",
         "ENABLE_RTLSDR": "ON",
         "ENABLE_SDRPLAY": "ON",
         "ENABLE_SOAPYSDR": "ON",
-        "ENABLE_XTRX": "ON",
+        "ENABLE_XTRX": "OFF",
         "ENABLE_USRP": "ON",
         "BUILD_SERVER": "OFF",
         "CMAKE_PREFIX_PATH": "C:/Qt/5.15.2/msvc2019_64;C:/Applications/boost_1_81_0"
@@ -87,7 +90,14 @@
       "binaryDir": "${sourceDir}/build-qt6",
       "cacheVariables": {
         "ENABLE_QT6": "ON",
-        "CMAKE_PREFIX_PATH": "C:/Qt/6.7.3/msvc2022_64;C:/Applications/boost_1_81_0"
+        "CMAKE_PREFIX_PATH": "C:/Qt/6.7.3/msvc2022_64;C:/Applications/boost_1_81_0",
+        "CMAKE_BUILD_TYPE": "Release"
+        //"CMAKE_BUILD_TYPE": "RelWithDebInfo",
+        //"CMAKE_BUILD_TYPE": "Debug"
+        //"BUILD_SERVER": "ON",
+        //"RX_SAMPLE_24BIT": "OFF",
+        //"ENABLE_CHANNELMIMO_DOA2": "OFF",
+        //"ENABLE_CHANNELMIMO_INTERFEROMETER":  "OFF"
       }
     }
   ],
