@@ -26,10 +26,11 @@ foreach(RPATH_DIR ${EXTERNAL_LIB_DIRS})
 endforeach()
 
 
-execute_process ( COMMAND "checking signature pre" )
-execute_process ( COMMAND codesign -vv ${EXTERNAL_LIB_DIRS}/libusb-1.0.0.dylib )
-execute_process ( COMMAND md5sum ${EXTERNAL_LIB_DIRS}/libusb-1.0.0.dylib )
-execute_process ( COMMAND "signature checked" )
+execute_process ( COMMAND echo "EXTERNAL_LIB_DIRS ${EXTERNAL_LIB_DIRS}" )
+execute_process ( COMMAND echo "checking signature pre rpath" )
+execute_process ( COMMAND codesign -vv /Users/runner/work/sdrangel/sdrangel/build/external/libusb/lib/libusb-1.0.dylib )
+execute_process ( COMMAND md5sum /Users/runner/work/sdrangel/sdrangel/build/external/libusb/lib/libusb-1.0.dylib )
+execute_process ( COMMAND echo "signature checked" )
 
 # Add RPATH to libraries in build directory
 foreach(RPATH_DIR_1 ${EXTERNAL_LIB_DIRS})
@@ -43,17 +44,23 @@ foreach(RPATH_DIR_1 ${EXTERNAL_LIB_DIRS})
    endforeach()
 endforeach()
 
+execute_process ( COMMAND echo "checking signature pre deploy" )
+execute_process ( COMMAND codesign -vv /Users/runner/work/sdrangel/sdrangel/build/external/libusb/lib/libusb-1.0.dylib )
+execute_process ( COMMAND md5sum /Users/runner/work/sdrangel/sdrangel/build/external/libusb/lib/libusb-1.0.dylib )
+execute_process ( COMMAND echo "signature checked" )
+
+
 # Run macdeployqt which should copy all libraries and frameworks and Qt plugins and qml
 message ("Running macdeployqt in ${CPACK_TEMPORARY_INSTALL_DIRECTORY}")
 execute_process ( COMMAND macdeployqt ${CPACK_TEMPORARY_INSTALL_DIRECTORY}/SDRangel.app -no-strip -always-overwrite -verbose=1 -qmldir=@CMAKE_CURRENT_SOURCE_DIR@/../../plugins/ )
 
-execute_process ( COMMAND "checking signature post" )
+execute_process ( COMMAND echo "checking signature post" )
 execute_process ( COMMAND codesign -vv ${CPACK_TEMPORARY_INSTALL_DIRECTORY}/SDRangel.app/Contents/Frameworks/libusb-1.0.0.dylib )
 execute_process ( COMMAND md5sum  ${CPACK_TEMPORARY_INSTALL_DIRECTORY}/SDRangel.app/Contents/Frameworks/libusb-1.0.0.dylib )
-execute_process ( COMMAND "signature checked" )
+execute_process ( COMMAND echo "signature checked" )
 
-execute_process ( COMMAND "resigning" )
+execute_process ( COMMAND echo "resigning" )
 execute_process ( COMMAND codesign --force --sign - ${CPACK_TEMPORARY_INSTALL_DIRECTORY}/SDRangel.app/Contents/Frameworks/libusb-1.0.0.dylib )
 execute_process ( COMMAND codesign -vv ${CPACK_TEMPORARY_INSTALL_DIRECTORY}/SDRangel.app/Contents/Frameworks/libusb-1.0.0.dylib )
 execute_process ( COMMAND md5sum  ${CPACK_TEMPORARY_INSTALL_DIRECTORY}/SDRangel.app/Contents/Frameworks/libusb-1.0.0.dylib )
-execute_process ( COMMAND "resigned" )
+execute_process ( COMMAND echo "resigned" )
