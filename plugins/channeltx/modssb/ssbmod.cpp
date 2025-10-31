@@ -126,6 +126,9 @@ void SSBMod::start()
     DSPSignalNotification *dspMsg = new DSPSignalNotification(m_basebandSampleRate, m_centerFrequency);
     m_basebandSource->getInputMessageQueue()->push(dspMsg);
 
+    SSBModBaseband::MsgConfigureSSBModBaseband *msg = SSBModBaseband::MsgConfigureSSBModBaseband::create(m_settings, true);
+    m_basebandSource->getInputMessageQueue()->push(msg);
+
     m_running = true;
 }
 
