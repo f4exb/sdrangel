@@ -41,3 +41,6 @@ endforeach()
 message ("Running macdeployqt in ${CPACK_TEMPORARY_INSTALL_DIRECTORY}")
 execute_process ( COMMAND macdeployqt ${CPACK_TEMPORARY_INSTALL_DIRECTORY}/SDRangel.app -always-overwrite -verbose=1 -qmldir=@CMAKE_CURRENT_SOURCE_DIR@/../../plugins/ )
 
+# macdeployqt corrupts libusb signature, so resign it. See: https://github.com/f4exb/sdrangel/issues/2524
+execute_process ( COMMAND echo "resigning" )
+execute_process ( COMMAND codesign --force --sign - ${CPACK_TEMPORARY_INSTALL_DIRECTORY}/SDRangel.app/Contents/Frameworks/libusb-1.0.0.dylib )

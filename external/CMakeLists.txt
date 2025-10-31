@@ -213,7 +213,7 @@ endmacro()
 if (NOT LIBUSB_FOUND AND NOT USE_PRECOMPILED_LIBS)
     # Cloning git repo doesn't include configure, so we download the bz2 which does
     ExternalProject_Add(libusb
-            URL https://github.com/libusb/libusb/releases/download/v1.0.26/libusb-1.0.26.tar.bz2
+            URL https://github.com/libusb/libusb/releases/download/v1.0.29/libusb-1.0.29.tar.bz2
             PREFIX "${EXTERNAL_BUILD_LIBRARIES}/libusb"
             CONFIGURE_COMMAND <SOURCE_DIR>/configure --prefix=<INSTALL_DIR>
             BUILD_COMMAND ${MAKE}
@@ -1414,7 +1414,7 @@ if (WIN32 OR APPLE)
             set(LIBHACKRF_LIBRARIES "${binary_dir}/src/libhackrf${CMAKE_SHARED_LIBRARY_SUFFIX}" CACHE INTERNAL "")
             # include "libhackrf/hackrf.h"
             makeLink("${source_dir}/host/libhackrf/src" "${source_dir}/host/libhackrf/libhackrf" hackrf)
-            set(MACOS_EXTERNAL_LIBS_FIXUP "${MACOS_EXTERNAL_LIBS_FIXUP};${binary_dir}/")
+            set(MACOS_EXTERNAL_LIBS_FIXUP "${MACOS_EXTERNAL_LIBS_FIXUP};${binary_dir}/src")
             install(DIRECTORY "${binary_dir}/src/" DESTINATION "${INSTALL_LIB_DIR}"
                     FILES_MATCHING PATTERN "libhackrf*${CMAKE_SHARED_LIBRARY_SUFFIX}")
         endif ()
