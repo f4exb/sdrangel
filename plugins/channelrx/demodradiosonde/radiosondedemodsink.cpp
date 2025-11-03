@@ -207,7 +207,7 @@ void RadiosondeDemodSink::processOneSample(Complex &ci)
                 int sampleOffset = -1;
                 Real sampleSum = 0.0f;
                 for (int i = 0; i < sampleCnt; i++) {
-                    sampleSum += m_rxBuf[(x + sampleOffset + i) % m_rxBufLength] - dcOffset;
+                    sampleSum += m_rxBuf[(x + sampleOffset + i + m_rxBufLength) % m_rxBufLength] - dcOffset;
                     sampleIdxs.append((x + sampleOffset + i) % m_rxBufLength);
                 }
                 int symbol = sampleSum >= 0.0f ? 1 : 0;
