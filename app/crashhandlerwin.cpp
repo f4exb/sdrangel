@@ -127,7 +127,7 @@ static LRESULT CALLBACK WindowProc(HWND hWnd, UINT message, WPARAM wParam, LPARA
 
         case IDC_GITHUB_BUTTON:
             // Open SDRangel GitHub issues page in web browser
-            ShellExecute(NULL, L"open", L"https://github.com/f4exb/sdrangel/issues", NULL, NULL, SW_SHOWNORMAL);
+            ShellExecute(NULL, TEXT("open"), TEXT("https://github.com/f4exb/sdrangel/issues"), NULL, NULL, SW_SHOWNORMAL);
             break;
 
         case IDC_COPY_BUTTON:
@@ -141,7 +141,7 @@ static LRESULT CALLBACK WindowProc(HWND hWnd, UINT message, WPARAM wParam, LPARA
                 void *text = GlobalLock(hMem);
                 if (text)
                 {
-                    GetWindowText(hEdit, (LPWSTR) text, len);
+                    GetWindowText(hEdit, (LPTSTR) text, len);
                     GlobalUnlock(hMem);
                     OpenClipboard(0);
                     EmptyClipboard();
@@ -163,8 +163,8 @@ static LRESULT CALLBACK WindowProc(HWND hWnd, UINT message, WPARAM wParam, LPARA
         HINSTANCE hInst = (HINSTANCE) GetWindowLongPtr(hWnd, GWLP_HINSTANCE);
         LPCREATESTRUCT cs = (LPCREATESTRUCT) lParam;
 
-        hLabel = CreateWindow(L"Static",
-            L"SDRangel has crashed.\r\n\r\nPlease consider opening a bug report on GitHub, copying the text below and a screenshot.",
+        hLabel = CreateWindow(TEXT("Static"),
+            TEXT("SDRangel has crashed.\r\n\r\nPlease consider opening a bug report on GitHub, copying the text below and a screenshot."),
             WS_CHILD | WS_VISIBLE,
             0, 0, 0, 0,
             hWnd,
@@ -172,8 +172,8 @@ static LRESULT CALLBACK WindowProc(HWND hWnd, UINT message, WPARAM wParam, LPARA
             hInst,
             NULL);
 
-        hEdit = CreateWindowA("EDIT",
-            (LPCSTR) cs->lpCreateParams,
+        hEdit = CreateWindow(TEXT("EDIT"),
+            (LPTSTR) cs->lpCreateParams,
             WS_BORDER | WS_CHILD | WS_VISIBLE | WS_VSCROLL | ES_LEFT | ES_MULTILINE | ES_AUTOVSCROLL,
             0, 0, 0, 0,
             hWnd,
@@ -182,8 +182,8 @@ static LRESULT CALLBACK WindowProc(HWND hWnd, UINT message, WPARAM wParam, LPARA
             NULL);
 
         hGithubButton = CreateWindow(
-            L"BUTTON",
-            L"Open Github...",
+            TEXT("BUTTON"),
+            TEXT("Open Github..."),
             WS_TABSTOP | WS_VISIBLE | WS_CHILD | BS_DEFPUSHBUTTON,
             0, 0, 0, 0,
             hWnd,
@@ -192,8 +192,8 @@ static LRESULT CALLBACK WindowProc(HWND hWnd, UINT message, WPARAM wParam, LPARA
             NULL);
 
         hCopyButton = CreateWindow(
-            L"BUTTON",
-            L"Copy text",
+            TEXT("BUTTON"),
+            TEXT("Copy text"),
             WS_TABSTOP | WS_VISIBLE | WS_CHILD | BS_DEFPUSHBUTTON,
             0, 0, 0, 0,
             hWnd,
@@ -202,8 +202,8 @@ static LRESULT CALLBACK WindowProc(HWND hWnd, UINT message, WPARAM wParam, LPARA
             NULL);
 
         hExitButton = CreateWindow(
-            L"BUTTON",
-            L"Exit SDRangel",
+            TEXT("BUTTON"),
+            TEXT("Exit SDRangel"),
             WS_TABSTOP | WS_VISIBLE | WS_CHILD | BS_DEFPUSHBUTTON,
             0, 0, 0, 0,
             hWnd,
@@ -373,7 +373,7 @@ static LONG crashHandler(struct _EXCEPTION_POINTERS *ExceptionInfo)
 
     SetThreadDpiAwarenessContext(DPI_AWARENESS_CONTEXT_SYSTEM_AWARE); // Needed, otherwise GetDpiForWindow always returns 96, rather than the actual value
 
-    wchar_t windowClass[] = L"SDRangel Crash Window Class";
+    TCHAR windowClass[] = TEXT("SDRangel Crash Window Class");
     HMODULE hInstance = GetModuleHandle(NULL);
     WNDCLASSEX wc = { };
 
@@ -386,7 +386,7 @@ static LONG crashHandler(struct _EXCEPTION_POINTERS *ExceptionInfo)
 
     RegisterClassEx(&wc);
 
-    hWindow = CreateWindow(windowClass, L"SDRangel Crash", WS_OVERLAPPEDWINDOW,
+    hWindow = CreateWindow(windowClass, TEXT("SDRangel Crash"), WS_OVERLAPPEDWINDOW,
         CW_USEDEFAULT, 0, 640, 500,
         NULL, NULL, hInstance, (LPVOID) reportBuffer
     );
