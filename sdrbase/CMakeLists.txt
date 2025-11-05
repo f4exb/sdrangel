@@ -38,7 +38,7 @@ add_definitions(-DUSE_KISSFFT)
 # See bug: https://vulkan.lunarg.com/issue/view/63d158a85df11200d569b2ab
 # Copy it from Linux SDK
 if (${VKFFT_BACKEND} EQUAL 0)
-    find_package(Vulkan)
+    find_package(Vulkan COMPONENTS glslang SPIRV-Tools)
     if(Vulkan_FOUND)
         set(sdrbase_SOURCES
             ${sdrbase_SOURCES}
@@ -608,59 +608,24 @@ endif()
 
 if(Vulkan_FOUND AND (${VKFFT_BACKEND} EQUAL 0))
     target_compile_definitions(sdrbase PUBLIC -DVK_API_VERSION=11)
-    target_include_directories(sdrbase PUBLIC ${Vulkan_INCLUDE_DIR} ${Vulkan_INCLUDE_DIR}/glslang/Include)
+    target_include_directories(sdrbase PUBLIC ${Vulkan_INCLUDE_DIRS} ${Vulkan_INCLUDE_DIR}/glslang/Include)
     add_compile_definitions(sdrbase VKFFT_BACKEND=0)
 
-    find_library(VULKAN_SPIRV_LIB SPIRV HINTS "$ENV{VULKAN_SDK}/lib" REQUIRED)
-    find_library(VULKAN_SPVREMAPPER_LIB SPVRemapper HINTS "$ENV{VULKAN_SDK}/lib" REQUIRED)
-    find_library(VULKAN_SPIRV_TOOLS_LIB SPIRV-Tools HINTS "$ENV{VULKAN_SDK}/lib" REQUIRED)
+    # This library doesn't appear to be defined by cmake's Vulkan module
     find_library(VULKAN_SPIRV_TOOLS_OPT_LIB SPIRV-Tools-opt HINTS "$ENV{VULKAN_SDK}/lib" REQUIRED)
-    find_library(VULKAN_SPIRV_TOOLS_SHARED_LIB SPIRV-Tools-shared HINTS "$ENV{VULKAN_SDK}/lib" REQUIRED)
-    find_library(VULKAN_OSDEPENDENT_LIB OSDependent HINTS "$ENV{VULKAN_SDK}/lib" REQUIRED)
-    find_library(VULKAN_GLSLANG_LIB glslang HINTS "$ENV{VULKAN_SDK}/lib" REQUIRED)
-    find_library(VULKAN_GLSLANG_RES_LIB glslang-default-resource-limits HINTS "$ENV{VULKAN_SDK}/lib" REQUIRED)
-    find_library(VULKAN_MACHINEINDEPENDENT_LIB MachineIndependent HINTS "$ENV{VULKAN_SDK}/lib" REQUIRED)
-    find_library(VULKAN_GENERICCODEGEN_LIB GenericCodeGen HINTS "$ENV{VULKAN_SDK}/lib" REQUIRED)
-
     if(MSVC)
         set(VULKAN_DEBUG_POSTFIX "d")
     else()
         set(VULKAN_DEBUG_POSTFIX "")
     endif()
-    find_library(VULKAN_SPIRVD_LIB SPIRV${VULKAN_DEBUG_POSTFIX} HINTS "$ENV{VULKAN_SDK}/lib" REQUIRED)
-    find_library(VULKAN_SPVREMAPPERD_LIB SPVRemapper${VULKAN_DEBUG_POSTFIX} HINTS "$ENV{VULKAN_SDK}/lib" REQUIRED)
-    find_library(VULKAN_SPIRV_TOOLSD_LIB SPIRV-Tools${VULKAN_DEBUG_POSTFIX} HINTS "$ENV{VULKAN_SDK}/lib" REQUIRED)
     find_library(VULKAN_SPIRV_TOOLS_OPTD_LIB SPIRV-Tools-opt${VULKAN_DEBUG_POSTFIX} HINTS "$ENV{VULKAN_SDK}/lib" REQUIRED)
-    find_library(VULKAN_SPIRV_TOOLS_SHAREDD_LIB SPIRV-Tools-shared${VULKAN_DEBUG_POSTFIX} HINTS "$ENV{VULKAN_SDK}/lib" REQUIRED)
-    find_library(VULKAN_OSDEPENDENTD_LIB OSDependent${VULKAN_DEBUG_POSTFIX} HINTS "$ENV{VULKAN_SDK}/lib" REQUIRED)
-    find_library(VULKAN_GLSLANGD_LIB glslang${VULKAN_DEBUG_POSTFIX} HINTS "$ENV{VULKAN_SDK}/lib" REQUIRED)
-    find_library(VULKAN_GLSLANG_RESD_LIB glslang-default-resource-limits${VULKAN_DEBUG_POSTFIX} HINTS "$ENV{VULKAN_SDK}/lib" REQUIRED)
-    find_library(VULKAN_MACHINEINDEPENDENTD_LIB MachineIndependent${VULKAN_DEBUG_POSTFIX} HINTS "$ENV{VULKAN_SDK}/lib" REQUIRED)
-    find_library(VULKAN_GENERICCODEGEND_LIB GenericCodeGen${VULKAN_DEBUG_POSTFIX} HINTS "$ENV{VULKAN_SDK}/lib" REQUIRED)
 
     target_link_libraries(sdrbase
-        optimized ${VULKAN_SPIRV_LIB}
-        optimized ${VULKAN_SPVREMAPPER_LIB}
-        optimized ${VULKAN_SPIRV_TOOLS_LIB}
         optimized ${VULKAN_SPIRV_TOOLS_OPT_LIB}
-        optimized ${VULKAN_SPIRV_TOOLS_SHARED_LIB}
-        optimized ${VULKAN_OSDEPENDENT_LIB}
-        optimized ${VULKAN_GLSLANG_LIB}
-        optimized ${VULKAN_GLSLANG_RES_LIB}
-        optimized ${VULKAN_MACHINEINDEPENDENT_LIB}
-        optimized ${VULKAN_GENERICCODEGEN_LIB}
-        optimized Vulkan::Vulkan
-        debug ${VULKAN_SPIRVD_LIB}
-        debug ${VULKAN_SPVREMAPPERD_LIB}
-        debug ${VULKAN_SPIRV_TOOLSD_LIB}
         debug ${VULKAN_SPIRV_TOOLS_OPTD_LIB}
-        debug ${VULKAN_SPIRV_TOOLS_SHAREDD_LIB}
-        debug ${VULKAN_OSDEPENDENTD_LIB}
-        debug ${VULKAN_GLSLANGD_LIB}
-        debug ${VULKAN_GLSLANG_RESD_LIB}
-        debug ${VULKAN_MACHINEINDEPENDENTD_LIB}
-        debug ${VULKAN_GENERICCODEGEND_LIB}
-        debug Vulkan::Vulkan
+        Vulkan::Vulkan
+        Vulkan::glslang
+        Vulkan::SPIRV-Tools
     )
 endif()
 
