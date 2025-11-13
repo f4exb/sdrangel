@@ -777,7 +777,7 @@ void RemoteTCPSinkSink::startServer()
         m_server = new QTcpServer(this);
         if (!m_server->listen(QHostAddress(m_settings.m_dataAddress), m_settings.m_dataPort))
         {
-            QString msg = QString("RemoteTCPSink failed to listen on %1 port %2: %3").arg(m_settings.m_dataAddress).arg(m_settings.m_dataPort).arg(m_webSocketServer->errorString());
+            QString msg = QString("RemoteTCPSink failed to listen on %1 port %2: %3").arg(m_settings.m_dataAddress).arg(m_settings.m_dataPort).arg(m_server->errorString());
             qWarning() << msg;
             if (m_messageQueueToGUI) {
                 m_messageQueueToGUI->push(RemoteTCPSink::MsgError::create(msg));
