@@ -1,0 +1,33 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<component type="desktop-application">
+  <id>org.sdrangel.SDRangel</id>
+  <launchable type="desktop-id">sdrangel.desktop</launchable>
+  <metadata_license>CC0-1.0</metadata_license>
+  <project_license>MIT</project_license>
+  <name>SDRangel</name>
+  <developer id="org.sdrangel">
+    <name>Edouard Griffiths</name>
+  </developer>
+  <summary>TX &amp; RX Software Defined Radio</summary>
+  <description>
+    <p>
+      SDRangel is an Open Source SDR and signal analyzer frontend to various hardware. It is able to receive and transmit various analog and digital modes,
+      TX/RX from multiple SDRs simultaneously, do noise figure measurement, satellite and star tracking, rotator control, 2D and 3D mapping and much more.
+    </p>
+    <p>
+      It has native support for Airspy, Airspy HF, Airspy Discovery, bladeRF, FUNcube, HackRF, KiwiSDR, LimeSDR, LimeSDR Mini, LimeRFE, Perseus, PlutoSDR,
+      RTL-SDR, SDRplay RSP1, RSP2, RSPduo, RSPdx, USRP B210, XTRX, and more devices via Soapy and audio interfaces.
+    </p>
+  </description>
+  <screenshots>
+    <screenshot type="default">
+      <image>https://raw.githubusercontent.com/f4exb/sdrangel/master/doc/img/sdrangel_sc02.png</image>
+    </screenshot>
+  </screenshots>
+  <url type="homepage">https://www.sdrangel.org</url>
+  <url type="bugtracker">https://github.com/f4exb/sdrangel/issues</url>
+  <provides>
+    <binary>sdrangel</binary>
+  </provides>
+  <content_rating type="oars-1.1"/>
+</component>
