@@ -510,14 +510,7 @@
         {
           "type": "shell",
           "commands": ["sed -e 's|/usr/|/app/|g' -i cmake/Modules/FindSerialDV.cmake"]
-        },
-        {
-          "type": "file",
-          "path": "org.sdrangel.SDRangel.appdata.xml"
         }
-      ],
-      "post-install": [
-        "install -Dm644 org.sdrangel.SDRangel.appdata.xml /app/share/appdata/org.sdrangel.SDRangel.appdata.xml"
       ]
     }
   ]
