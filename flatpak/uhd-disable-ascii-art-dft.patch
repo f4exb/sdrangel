@@ -1,12 +1,14 @@
 diff --git a/host/examples/CMakeLists.txt b/host/examples/CMakeLists.txt
-index 5894bb0a2..637a48082 100644
+index 69e84f95d..26b2306b4 100644
 --- a/host/examples/CMakeLists.txt
 +++ b/host/examples/CMakeLists.txt
-@@ -55,18 +55,18 @@ endforeach(example_source)
+@@ -51,19 +51,19 @@ endforeach(example_source)
  ########################################################################
  # ASCII Art DFT - requires curses, so this part is optional
  ########################################################################
+-set(CURSES_NEED_NCURSES 1)
 -find_package(Curses)
++#set(CURSES_NEED_NCURSES 1)
 +#find_package(Curses)
  
 -if(CURSES_FOUND)

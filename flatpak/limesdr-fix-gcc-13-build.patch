@@ -1,0 +1,39 @@
+From 48289eff726ba9ab23e495e068ded1ef514219d9 Mon Sep 17 00:00:00 2001
+From: Sergei Trofimovich <slyich@gmail.com>
+Date: Sun, 20 Aug 2023 10:05:53 +0100
+Subject: [PATCH] lms7002m_mcu: fix `gcc-13` build (missing <stdint.h>)
+
+Without the change build on `gcc-13` fails as:
+
+    /build/source/src/lms7002m_mcu/MCU_File.cpp:340:21: error: 'uint8_t' was not declared in this scope
+      340 |                     uint8_t i = 0;
+          |                     ^~~~~~~
+    /build/source/src/lms7002m_mcu/MCU_File.cpp:4:1: note: 'uint8_t' is defined in header '<cstdint>'; did you forget to '#include <cstdint>'?
+        3 | #include <iostream>
+      +++ |+#include <cstdint>
+---
+ src/lms7002m_mcu/MCU_File.cpp | 3 ++-
+ 1 file changed, 2 insertions(+), 1 deletion(-)
+
+diff --git a/src/lms7002m_mcu/MCU_File.cpp b/src/lms7002m_mcu/MCU_File.cpp
+index f1b6f667..65516fe3 100644
+--- a/src/lms7002m_mcu/MCU_File.cpp
++++ b/src/lms7002m_mcu/MCU_File.cpp
+@@ -1,6 +1,7 @@
+ #include "MCU_File.h"
+ #include <algorithm>
+ #include <iostream>
++#include <stdint.h>
+ 
+ using namespace std;
+ 
+@@ -506,4 +507,4 @@ bool MCU_File::BitString(const unsigned long address, const unsigned char bits,
+         mask <<= 1;
+     }
+     return true;
+-}
+\ No newline at end of file
++}
+-- 
+2.41.0
+

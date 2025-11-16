@@ -1129,6 +1129,7 @@ endif()
 if (LINUX)
   install(FILES ${CMAKE_BINARY_DIR}/${CMAKE_PROJECT_NAME}.desktop DESTINATION share/applications)
   install(FILES ${CMAKE_SOURCE_DIR}/cmake/cpack/${CMAKE_PROJECT_NAME}_icon.svg DESTINATION share/icons/hicolor/scalable/apps)
+  install(FILES ${CMAKE_SOURCE_DIR}/cmake/cpack/org.sdrangel.SDRangel.metainfo.xml DESTINATION share/metainfo)
 endif()
 
 ############ uninstall target ################
