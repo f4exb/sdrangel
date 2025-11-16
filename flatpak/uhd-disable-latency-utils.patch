@@ -1,12 +1,14 @@
 diff --git a/host/utils/latency/CMakeLists.txt b/host/utils/latency/CMakeLists.txt
-index 48a3635a7..4e9f725f1 100644
+index e4cd4d171..e806d8da0 100644
 --- a/host/utils/latency/CMakeLists.txt
 +++ b/host/utils/latency/CMakeLists.txt
-@@ -5,32 +5,32 @@
+@@ -5,33 +5,33 @@
  # SPDX-License-Identifier: GPL-3.0-or-later
  #
  
+-set(CURSES_NEED_NCURSES 1)
 -find_package(Curses)
++#set(CURSES_NEED_NCURSES 1)
 +#find_package(Curses)
  
 -if(CURSES_FOUND)
