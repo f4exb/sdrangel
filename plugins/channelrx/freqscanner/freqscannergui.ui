@@ -792,6 +792,34 @@ Leave blank for no adjustment</string>
          </widget>
         </item>
         <item>
+         <widget class="QToolButton" name="importFreqs">
+          <property name="toolTip">
+           <string>Import frequencies from .csv file</string>
+          </property>
+          <property name="text">
+           <string/>
+          </property>
+          <property name="icon">
+           <iconset resource="../../../sdrgui/resources/res.qrc">
+            <normaloff>:/import.png</normaloff>:/import.png</iconset>
+          </property>
+         </widget>
+        </item>
+        <item>
+         <widget class="QToolButton" name="exportFreqs">
+          <property name="toolTip">
+           <string>Export frequencies from .csv file</string>
+          </property>
+          <property name="text">
+           <string/>
+          </property>
+          <property name="icon">
+           <iconset resource="../../../sdrgui/resources/res.qrc">
+            <normaloff>:/export.png</normaloff>:/export.png</iconset>
+          </property>
+         </widget>
+        </item>
+        <item>
          <spacer name="horizontalSpacer_2">
           <property name="orientation">
            <enum>Qt::Orientation::Horizontal</enum>

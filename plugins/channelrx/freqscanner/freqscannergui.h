@@ -148,6 +148,8 @@ private slots:
     void on_up_clicked();
     void on_down_clicked();
     void on_clearActiveCount_clicked();
+    void on_importFreqs_clicked();
+    void on_exportFreqs_clicked();
     void onWidgetRolled(QWidget* widget, bool rollDown);
     void onMenuDialogCalled(const QPoint& p);
     void handleInputMessages();

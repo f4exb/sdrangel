@@ -148,7 +148,19 @@ Moves the selected rows up the frequency table (14).
 
 Moves the selected rows the the frequency table (14).
 
-<h3>21: Clear Active Count</h3>
+<h3>21: Import Frequencies from .csv</h3>
+
+Imports frequencies from a .csv file.
+
+The expected column names are "Freq (Hz)", "Enable", "Notes", "Channel", "Ch BW (Hz)", "TH (dB)", "Sq (dB)". Other columns will be ignored.
+
+Annotations are not included. These should be imported via the Spectrum Markers dialog.
+
+<h3>22: Export Frequencies to .csv</h3>
+
+Exports frequencies to a .csv file. Note that annotations are not included. These should be exported via the Spectrum Markers dialog.
+
+<h3>23: Clear Active Count</h3>
 
 Press to reset the value in the Active Count column to 0 for all rows.
 
