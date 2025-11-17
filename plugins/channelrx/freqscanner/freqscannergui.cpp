@@ -22,6 +22,8 @@
 #include <QTableWidget>
 #include <QTableWidgetItem>
 #include <QComboBox>
+#include <QFileDialog>
+#include <QMessageBox>
 
 #include "device/deviceset.h"
 #include "device/deviceuiset.h"
@@ -37,6 +39,7 @@
 #include "gui/int64delegate.h"
 #include "gui/glspectrum.h"
 #include "channel/channelwebapiutils.h"
+#include "util/csv.h"
 #include "maincore.h"
 
 #include "freqscannergui.h"
@@ -817,6 +820,114 @@ void FreqScannerGUI::on_clearActiveCount_clicked()
     }
 }
 
+void FreqScannerGUI::on_importFreqs_clicked()
+{
+    QString filename = QFileDialog::getOpenFileName(this, "Select file to read frequencies from", "", "*.csv");
+
+    if (!filename.isEmpty())
+    {
+        QFile file(filename);
+
+        if (file.open(QIODevice::ReadOnly | QIODevice::Text))
+        {
+            QTextStream in(&file);
+
+            QString error;
+            QStringList colNames = {"Freq (Hz)", "Enable", "Notes", "Channel", "Ch BW (Hz)", "TH (dB)", "Sq (dB)"};
+            QHash<QString, int> colIndexes = CSV::readHeader(in, colNames, error);
+            if (error.isEmpty())
+            {
+                // Clear existing entries
+                blockApplySettings(true);
+                ui->table->setRowCount(0);
+
+                int freqCol = colIndexes.value("Freq (Hz)");
+                int enableCol = colIndexes.value("Enable");
+                int notesCol = colIndexes.value("Notes");
+                int channelCol = colIndexes.value("Channel");
+                int chBWCol = colIndexes.value("Ch BW (Hz)");
+                int thCol = colIndexes.value("TH (dB)");
+                int sqCol = colIndexes.value("Sq (dB)");
+                QStringList cols;
+
+                while (CSV::readRow(in, &cols))
+                {
+                    if (cols.size() >= 7)
+                    {
+                        FreqScannerSettings::FrequencySettings setting;
+
+                        setting.m_frequency = cols[freqCol].toLongLong();
+                        setting.m_enabled = cols[enableCol].toLower() == "true";
+                        setting.m_notes = cols[notesCol];
+                        setting.m_threshold = cols[thCol];
+                        setting.m_channel = cols[channelCol];
+                        setting.m_channelBandwidth = cols[chBWCol];
+                        setting.m_squelch = cols[sqCol];
+
+                        addRow(setting);
+                    }
+                }
+
+                updateAnnotations();
+                blockApplySettings(false);
+                applySetting("frequencySettings");
+            }
+            else
+            {
+                QString actualColNames = colIndexes.keys().join(" ");
+                QString expectedColNames = colNames.join(" ");
+                QMessageBox::critical(this, "Frequency Scanner", QString("Failed to read expected header in CSV file. %1 != %2").arg(actualColNames).arg(expectedColNames));
+                return;
+            }
+        }
+        else
+        {
+            QMessageBox::warning(this, "Frequency Scanner", QString("Failed to open file %1").arg(filename));
+        }
+    }
+}
+
+void FreqScannerGUI::on_exportFreqs_clicked()
+{
+    QString filename = QFileDialog::getSaveFileName(this, "Select file to save frequencies to", "", "*.csv");
+
+    if (!filename.isEmpty())
+    {
+        QFile file(filename);
+
+        if (file.open(QIODevice::WriteOnly | QIODevice::Text))
+        {
+            QTextStream out(&file);
+
+            out << "Freq (Hz),Enable,Notes,Channel,Ch BW (Hz),TH (dB),Sq (dB)\n";
+
+            for (int i = 0; i < ui->table->rowCount(); i++)
+            {
+                QTableWidgetItem *frequencyItem = ui->table->item(i, COL_FREQUENCY);
+                QTableWidgetItem *enabledItem = ui->table->item(i, COL_ENABLE);
+                QTableWidgetItem *notesItem = ui->table->item(i, COL_NOTES);
+                QComboBox *channelItem = qobject_cast<QComboBox *>(ui->table->cellWidget(i, COL_CHANNEL));
+                QTableWidgetItem *chBWItem = ui->table->item(i, COL_CHANNEL_BW);
+                QTableWidgetItem *thItem = ui->table->item(i, COL_TH);
+                QTableWidgetItem *sqItem = ui->table->item(i, COL_SQ);
+
+                out << frequencyItem->text()
+                    << "," << ((enabledItem->checkState() == Qt::Checked) ? "true" : "false")
+                    << "," << notesItem->text()
+                    << "," << channelItem->currentText()
+                    << "," << chBWItem->text()
+                    << "," << thItem->text()
+                    << "," << sqItem->text()
+                    << "\n";
+            }
+        }
+        else
+        {
+            QMessageBox::warning(this, "Frequency Scanner", QString("Failed to open file %1").arg(filename));
+        }
+    }
+}
+
 void FreqScannerGUI::on_table_cellChanged(int row, int column)
 {
     QTableWidgetItem* item = ui->table->item(row, column);
@@ -1118,6 +1229,8 @@ void FreqScannerGUI::makeUIConnections()
     QObject::connect(ui->up, &QToolButton::clicked, this, &FreqScannerGUI::on_up_clicked);
     QObject::connect(ui->down, &QToolButton::clicked, this, &FreqScannerGUI::on_down_clicked);
     QObject::connect(ui->clearActiveCount, &QToolButton::clicked, this, &FreqScannerGUI::on_clearActiveCount_clicked);
+    QObject::connect(ui->importFreqs, &QToolButton::clicked, this, &FreqScannerGUI::on_importFreqs_clicked);
+    QObject::connect(ui->exportFreqs, &QToolButton::clicked, this, &FreqScannerGUI::on_exportFreqs_clicked);
 }
 
 void FreqScannerGUI::updateAbsoluteCenterFrequency()
