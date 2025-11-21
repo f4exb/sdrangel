@@ -406,6 +406,7 @@ parts:
             - libboost-program-options1.74.0
             - libboost-test1.74.0
             - libnotify-bin
+            - libspeechd2
 
     apt:
         plugin: cmake
