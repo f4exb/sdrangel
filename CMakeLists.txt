@@ -657,7 +657,8 @@ if(ENABLE_QT6)
                      MultimediaWidgets
                      Positioning
                      Charts
-                     SerialPort)
+                     SerialPort
+                     CorePrivate)
 else()
     find_package(Qt5 5.15
                    REQUIRED COMPONENTS

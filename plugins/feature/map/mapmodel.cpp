@@ -575,8 +575,10 @@ bool ObjectMapModel::isTarget(const ObjectMapItem *mapItem) const
 
 // FIXME: This should use Z order - rather than adding/removing
 // but I couldn't quite get it to work
+// Causes a crash with Qt 6.10+
 Q_INVOKABLE void ObjectMapModel::moveToFront(int oldRow)
 {
+#if (QT_VERSION < QT_VERSION_CHECK(6, 10, 0))
     // Last item in list is drawn on top, so remove than add to end of list
     if (oldRow < m_items.size() - 1)
     {
@@ -593,10 +595,12 @@ Q_INVOKABLE void ObjectMapModel::moveToFront(int oldRow)
         QModelIndex idx = index(newRow);
         emit dataChanged(idx, idx);
     }
+#endif
 }
 
 Q_INVOKABLE void ObjectMapModel::moveToBack(int oldRow)
 {
+#if (QT_VERSION < QT_VERSION_CHECK(6, 10, 0))
     // First item in list is drawn first, so remove item then add to front of list
     if ((oldRow < m_items.size()) && (oldRow > 0))
     {
@@ -617,6 +621,7 @@ Q_INVOKABLE void ObjectMapModel::moveToBack(int oldRow)
         endResetModel();
         //emit dataChanged(index(oldRow), index(newRow));
     }
+#endif
 }
 
 Q_INVOKABLE void ObjectMapModel::link(const QString& url)
