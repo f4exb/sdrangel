@@ -5573,7 +5573,7 @@ void ADSBDemodGUI::adsbData_customContextMenuRequested(QPoint pos)
 
         QAction* viewOpenSkyAction = new QAction("View aircraft on opensky-network.org...", tableContextMenu);
         connect(viewOpenSkyAction, &QAction::triggered, this, [icaoHex]()->void {
-            QDesktopServices::openUrl(QUrl(QString("https://old.opensky-network.org/aircraft-profile?icao24=%1").arg(icaoHex)));
+            QDesktopServices::openUrl(QUrl(QString("https://map.opensky-network.org/?icao=%1").arg(icaoHex)));
         });
         tableContextMenu->addAction(viewOpenSkyAction);
 
