@@ -104,6 +104,8 @@ void USRPInput::destroy()
 
 bool USRPInput::openDevice()
 {
+    bool ret = true;
+
     // B210 supports up to 50MSa/s, so a fairly large FIFO is probably a good idea
     // Should it be bigger still?
     if (!m_sampleFifo.setSize(2000000))
@@ -228,14 +230,15 @@ bool USRPInput::openDevice()
         if (!m_deviceShared.m_deviceParams->open(deviceStr, false))
         {
             qCritical("USRPInput::openDevice: failed to open device");
-            return false;
+            // We need to set setBuddySharedPtr below even if open fails
+            ret = false;
         }
         m_deviceShared.m_channel = requestedChannel; // acknowledge the requested channel
     }
 
     m_deviceAPI->setBuddySharedPtr(&m_deviceShared); // propagate common parameters to API
 
-    return true;
+    return ret;
 }
 
 void USRPInput::suspendRxBuddies()
