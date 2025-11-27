@@ -100,6 +100,8 @@ void USRPOutput::destroy()
 
 bool USRPOutput::openDevice()
 {
+    bool ret = true;
+
     int requestedChannel = m_deviceAPI->getDeviceItemIndex();
 
     // look for Tx buddies and get reference to common parameters
@@ -198,14 +200,15 @@ bool USRPOutput::openDevice()
         if (!m_deviceShared.m_deviceParams->open(deviceStr, false))
         {
             qCritical("USRPOutput::openDevice: failed to open device");
-            return false;
+            // We need to set setBuddySharedPtr below even if open fails
+            ret = false;
         }
         m_deviceShared.m_channel = requestedChannel; // acknowledge the requested channel
     }
 
     m_deviceAPI->setBuddySharedPtr(&m_deviceShared); // propagate common parameters to API
 
-    return true;
+    return ret;
 }
 
 void USRPOutput::suspendRxBuddies()
