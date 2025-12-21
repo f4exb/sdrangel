@@ -77,6 +77,8 @@ ChannelSettings:
       $ref: "http://swgserver:8081/api/swagger/include/HeatMap.yaml#/HeatMapSettings"
     ILSDemodSettings:
       $ref: "http://swgserver:8081/api/swagger/include/ILSDemod.yaml#/ILSDemodSettings"
+    InmarsatDemodSettings:
+      $ref: "http://swgserver:8081/api/swagger/include/InmarsatDemod.yaml#/InmarsatDemodSettings"
     InterferometerSettings:
       $ref: "http://swgserver:8081/api/swagger/include/Interferometer.yaml#/InterferometerSettings"
     IEEE_802_15_4_ModSettings:

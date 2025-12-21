@@ -182,6 +182,8 @@
 #include "SWGIEEE_802_15_4_ModSettings.h"
 #include "SWGILSDemodReport.h"
 #include "SWGILSDemodSettings.h"
+#include "SWGInmarsatDemodReport.h"
+#include "SWGInmarsatDemodSettings.h"
 #include "SWGInstanceChannelsResponse.h"
 #include "SWGInstanceConfigResponse.h"
 #include "SWGInstanceDevicesResponse.h"
@@ -1229,6 +1231,16 @@ namespace SWGSDRangel {
     }
     if(QString("SWGILSDemodSettings").compare(type) == 0) {
       SWGILSDemodSettings *obj = new SWGILSDemodSettings();
+      obj->init();
+      return obj;
+    }
+    if(QString("SWGInmarsatDemodReport").compare(type) == 0) {
+      SWGInmarsatDemodReport *obj = new SWGInmarsatDemodReport();
+      obj->init();
+      return obj;
+    }
+    if(QString("SWGInmarsatDemodSettings").compare(type) == 0) {
+      SWGInmarsatDemodSettings *obj = new SWGInmarsatDemodSettings();
       obj->init();
       return obj;
     }

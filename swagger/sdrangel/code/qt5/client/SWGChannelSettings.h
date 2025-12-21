@@ -53,6 +53,7 @@
 #include "SWGHeatMapSettings.h"
 #include "SWGIEEE_802_15_4_ModSettings.h"
 #include "SWGILSDemodSettings.h"
+#include "SWGInmarsatDemodSettings.h"
 #include "SWGInterferometerSettings.h"
 #include "SWGLocalSinkSettings.h"
 #include "SWGLocalSourceSettings.h"
@@ -204,6 +205,9 @@ public:
 
     SWGILSDemodSettings* getIlsDemodSettings();
     void setIlsDemodSettings(SWGILSDemodSettings* ils_demod_settings);
+
+    SWGInmarsatDemodSettings* getInmarsatDemodSettings();
+    void setInmarsatDemodSettings(SWGInmarsatDemodSettings* inmarsat_demod_settings);
 
     SWGInterferometerSettings* getInterferometerSettings();
     void setInterferometerSettings(SWGInterferometerSettings* interferometer_settings);
@@ -403,6 +407,9 @@ private:
 
     SWGILSDemodSettings* ils_demod_settings;
     bool m_ils_demod_settings_isSet;
+
+    SWGInmarsatDemodSettings* inmarsat_demod_settings;
+    bool m_inmarsat_demod_settings_isSet;
 
     SWGInterferometerSettings* interferometer_settings;
     bool m_interferometer_settings_isSet;
