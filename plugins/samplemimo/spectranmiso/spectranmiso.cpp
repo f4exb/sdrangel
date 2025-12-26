@@ -197,6 +197,7 @@ void SpectranMISO::stop()
 
     qDebug("SpectranMISO::stop");
     m_streamWorker->stopWork();
+    QThread::msleep(500);
 }
 
 void SpectranMISO::streamStopped()
@@ -550,6 +551,8 @@ bool SpectranMISO::applySettings(
                         AARTSAAPI_ConfigSetFloat(&m_device, &config, (double) settings.m_sampleRate / 1.5);
                     else
                         qWarning("SpectranMISO::applySettings: cannot find main/demodspanfreq");
+                    // Propagate to the worker
+                    m_streamWorker->setSampleRate(settings.m_sampleRate);
                 }
             }
             else // Rx only modes
@@ -943,6 +946,31 @@ void SpectranMISO::applyCommonSettings(const SpectranMISOMode& mode)
             // Set the frequency range of the transmitter - this is the full range not the IQ mod range
             if (AARTSAAPI_ConfigFind(&m_device, &root, &config, L"main/spanfreq") == AARTSAAPI_OK) {
                 AARTSAAPI_ConfigSetFloat(&m_device, &config, 50.0e6); // Choose 50 MHz as per example
+            }
+            // Set the transmitter gain
+            if (AARTSAAPI_ConfigFind(&m_device, &root, &config, L"main/transgain") == AARTSAAPI_OK) {
+                AARTSAAPI_ConfigSetFloat(&m_device, &config, 0.0);
+            }
+        }
+
+        if (mode == SpectranMISOMode::SPECTRANMISO_MODE_RXTX_IQ)
+        {
+            qDebug("SpectranMISO::applyCommonSettings: applying TX+RX IQ settings");
+            if (AARTSAAPI_ConfigFind(&m_device, &root, &config, L"device/receiverchannel") == AARTSAAPI_OK) {
+                AARTSAAPI_ConfigSetString(&m_device, &config, m_rxChannelNames[m_settings.m_rxChannel].toStdWString().c_str());
+            }
+            if (AARTSAAPI_ConfigFind(&m_device, &root, &config, L"main/centerfreq") == AARTSAAPI_OK) {
+                AARTSAAPI_ConfigSetFloat(&m_device, &config, 2350.0e6);
+            }
+            // Set the frequency range of the transmitter - this is the full range not the IQ mod range
+            if (AARTSAAPI_ConfigFind(&m_device, &root, &config, L"main/spanfreq") == AARTSAAPI_OK) {
+                AARTSAAPI_ConfigSetFloat(&m_device, &config, 50.0e6); // Choose 50 MHz as per example
+            }
+            if (AARTSAAPI_ConfigFind(&m_device, &root, &config, L"main/demodcenterfreq") == AARTSAAPI_OK) {
+                AARTSAAPI_ConfigSetFloat(&m_device, &config, 2350.0e6);
+            }
+            if (AARTSAAPI_ConfigFind(&m_device, &root, &config, L"main/demodspanfreq") == AARTSAAPI_OK) {
+                AARTSAAPI_ConfigSetFloat(&m_device, &config, 2.0e6);
             }
             // Set the transmitter gain
             if (AARTSAAPI_ConfigFind(&m_device, &root, &config, L"main/transgain") == AARTSAAPI_OK) {

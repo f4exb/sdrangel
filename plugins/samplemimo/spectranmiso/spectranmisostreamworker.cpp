@@ -65,19 +65,20 @@ void SpectranMISOStreamWorker::startWork()
 
     if (m_currentMode == SPECTRANMISO_MODE_TX_IQ) {
         streamTx();
-        // qDebug("SpectranMISOStreamWorker::startWork: TX IQ mode not implemented, stopping");
-        // m_running = false;
-        // emit stopped();
-        // return;
     }
-    else if (m_currentMode == SPECTRANMISO_MODE_RXTX_IQ) {
+    else if (m_currentMode == SPECTRANMISO_MODE_RXTX_IQ)
+    {
         qDebug("SpectranMISOStreamWorker::startWork: RX TX IQ mode not implemented, stopping");
         m_running = false;
         emit stopped();
         return;
-    } else if (m_currentMode == SPECTRANMISO_MODE_2RX_RAW) {
+    }
+    else if (m_currentMode == SPECTRANMISO_MODE_2RX_RAW)
+    {
         streamRaw2Rx();
-    } else {
+    }
+    else
+    {
         streamRxIQ();
     }
 
@@ -370,9 +371,10 @@ void SpectranMISOStreamWorker::streamTx()
 
 		// Wait for a max queue fill level of maxQueueTime seconds
 		AARTSAAPI_GetMasterStreamTime(m_device, startTime);
-		while (startTime + maxQueueTime < packet.startTime)
+		while ((startTime + maxQueueTime < packet.startTime) && m_running)
 		{
-			std::this_thread::sleep_for( std::chrono::milliseconds(int(1000 * (packet.startTime - startTime - maxQueueTime - (maxQueueTime/10.0)))));
+            std::this_thread::sleep_for( std::chrono::milliseconds(int(100 * maxQueueTime)));
+			// std::this_thread::sleep_for( std::chrono::milliseconds(int(1000 * (packet.startTime - startTime - maxQueueTime - (maxQueueTime/10.0)))));
 			AARTSAAPI_GetMasterStreamTime(m_device, startTime);
 		}
 
