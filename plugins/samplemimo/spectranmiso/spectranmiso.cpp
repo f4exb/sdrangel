@@ -387,11 +387,11 @@ void SpectranMISO::setSinkCenterFrequency(qint64 centerFrequency, int index)
     SpectranMISOSettings settings = m_settings;
     settings.m_txCenterFrequency = centerFrequency;
 
-    MsgConfigureSpectranMISO* message = MsgConfigureSpectranMISO::create(settings, QList<QString>{"sampleRate"}, false);
+    MsgConfigureSpectranMISO* message = MsgConfigureSpectranMISO::create(settings, QList<QString>{"txCenterFrequency"}, false);
     m_inputMessageQueue.push(message);
 
     if (m_guiMessageQueue) {
-        m_guiMessageQueue->push(MsgConfigureSpectranMISO::create(settings, QList<QString>{"sampleRate"}, false));
+        m_guiMessageQueue->push(MsgConfigureSpectranMISO::create(settings, QList<QString>{"txCenterFrequency"}, false));
     }
 }
 
@@ -609,7 +609,7 @@ bool SpectranMISO::applySettings(
 
     if (forwardChangeTxDSP)
     {
-        int sampleRate = getSampleRate(settings);
+        int sampleRate = getSampleRate(m_settings);
         DSPMIMOSignalNotification *notif = new DSPMIMOSignalNotification(sampleRate, settings.m_txCenterFrequency, false, 0);
         m_deviceAPI->getDeviceEngineInputMessageQueue()->push(notif);
     }

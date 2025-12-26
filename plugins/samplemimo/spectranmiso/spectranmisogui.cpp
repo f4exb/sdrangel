@@ -352,6 +352,12 @@ void SpectranMISOGui::on_spectrumSource_currentIndexChanged(int index)
 
     m_deviceUISet->m_spectrum->setDisplayedStream(spectrumRxElseTx, spectrumStreamIndex);
     m_deviceUISet->m_deviceAPI->setSpectrumSinkInput(spectrumRxElseTx, spectrumStreamIndex);
+
+    if (spectrumRxElseTx) {
+        m_deviceUISet->getSpectrum()->setCenterFrequency(m_settings.m_rxCenterFrequency);
+    } else {
+        m_deviceUISet->getSpectrum()->setCenterFrequency(m_settings.m_txCenterFrequency);
+    }
 }
 
 void SpectranMISOGui::on_rxChannel_currentIndexChanged(int index)

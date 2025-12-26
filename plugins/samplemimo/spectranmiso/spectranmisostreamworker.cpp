@@ -60,7 +60,7 @@ void SpectranMISOStreamWorker::startWork()
         return;
     }
 
-    qDebug("SpectranMISOStreamWorker::startWork");
+    qDebug("SpectranMISOStreamWorker::startWork: %s", SpectranMISOSettings::m_modeDisplayNames.value(m_currentMode, "Unknown").toStdString().c_str());
     m_running = true;
 
     if (m_currentMode == SPECTRANMISO_MODE_TX_IQ) {
@@ -98,6 +98,7 @@ void SpectranMISOStreamWorker::restartWork()
 {
     qDebug("SpectranMISOStreamWorker::restartWork");
     m_restart = true;
+    m_localRestart = false;
     stopWork();
 }
 
@@ -300,7 +301,7 @@ void SpectranMISOStreamWorker::streamTx()
     unsigned int iPart1Begin, iPart1End, iPart2Begin, iPart2End;
 
 	static const double	zeroDBm = sqrt(1.0 / 20.0);
-	float iqbuffer[3*m_maxSamplesPerPacket]; // provision of 50% more than max size
+	float *iqbuffer = new float[3*m_maxSamplesPerPacket]; // provision of 50% more than max size
 
 	// Prepare output packet
 	AARTSAAPI_Packet	packet = { sizeof(AARTSAAPI_Packet) };
@@ -322,7 +323,7 @@ void SpectranMISOStreamWorker::streamTx()
 
     int i = 0;
     // Initialize with current sample rate
-    m_nbSamplesPerPacket = static_cast<int>(0.1 * m_sampleRateHz); // 100 ms of samples basically capped to max size
+    m_nbSamplesPerPacket = static_cast<int>(0.2 * m_sampleRateHz); // 200 ms of samples basically capped to max size
     m_nbSamplesPerPacket = m_nbSamplesPerPacket > m_maxSamplesPerPacket ? m_maxSamplesPerPacket : m_nbSamplesPerPacket;
 
 	// Stream packets
@@ -354,7 +355,7 @@ void SpectranMISOStreamWorker::streamTx()
         packet.startFrequency -= 0.5 * packet.stepFrequency;
         packet.num = m_nbSamplesPerPacket; // nb samples / step frequency s per packet
         packetTime = packet.num / packet.stepFrequency; // time for a packet to complete (actaual)
-	    maxQueueTime = 0.1f * packetTime; // Max seconds of queued data
+	    maxQueueTime = packetTime; // Max seconds of queued data
 
 		// Calculate end time of packet base on number of samples
 		// and sample rate
@@ -371,7 +372,7 @@ void SpectranMISOStreamWorker::streamTx()
 		AARTSAAPI_GetMasterStreamTime(m_device, startTime);
 		while (startTime + maxQueueTime < packet.startTime)
 		{
-			std::this_thread::sleep_for( std::chrono::milliseconds(int(1000 * (packet.startTime - startTime - maxQueueTime))));
+			std::this_thread::sleep_for( std::chrono::milliseconds(int(1000 * (packet.startTime - startTime - maxQueueTime - (maxQueueTime/10.0)))));
 			AARTSAAPI_GetMasterStreamTime(m_device, startTime);
 		}
 
@@ -379,6 +380,7 @@ void SpectranMISOStreamWorker::streamTx()
 		AARTSAAPI_SendPacket(m_device, 0, &packet); // asynchronous send
 
         // Advance packet time and loop counter
+        // qDebug("SpectranMISOStreamWorker::streamTx: loop: %d time: %f %f", i, packetTime, packet.endTime - packet.startTime);
 		packet.startTime = packet.endTime;
         i++;
 	}
@@ -396,6 +398,8 @@ void SpectranMISOStreamWorker::streamTx()
 		std::this_thread::sleep_for( std::chrono::milliseconds(int(1000 * (packet.startTime - startTime))));
 		AARTSAAPI_GetMasterStreamTime(m_device, startTime);
 	}
+
+    delete[] iqbuffer;
 
     if (m_localRestart)
     {
@@ -443,7 +447,7 @@ void SpectranMISOStreamWorker::handleInputMessages()
 void SpectranMISOStreamWorker::setSampleRate(double sampleRateHz)
 {
     m_sampleRateHz = sampleRateHz;
-    m_nbSamplesPerPacket = static_cast<int>(0.3 * m_sampleRateHz); // 300 ms of samples basically capped to max size
+    m_nbSamplesPerPacket = static_cast<int>(0.2 * m_sampleRateHz); // 200 ms of samples basically capped to max size
     m_nbSamplesPerPacket = m_nbSamplesPerPacket > m_maxSamplesPerPacket ? m_maxSamplesPerPacket : m_nbSamplesPerPacket;
     qDebug("SpectranMISOStreamWorker::setSampleRate: sample rate set to %f Hz, nbSamplesPerPacket=%d", m_sampleRateHz, m_nbSamplesPerPacket);
     m_running = false;

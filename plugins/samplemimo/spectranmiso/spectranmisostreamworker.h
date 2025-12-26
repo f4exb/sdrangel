@@ -82,7 +82,7 @@ private:
     InterpolatorsIFNormalized m_interpolatorsFloatIQ;
     bool handleMessage(const Message& message);
     int m_nbSamplesPerPacket;
-    static const int m_maxSamplesPerPacket = 1<<19; // 512k samples
+    static const int m_maxSamplesPerPacket = 4000000; // 0.2 * 20000000
 
 private slots:
     void handleInputMessages();
