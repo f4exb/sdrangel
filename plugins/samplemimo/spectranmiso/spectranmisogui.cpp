@@ -144,9 +144,7 @@ void SpectranMISOGui::displaySettings()
     ui->sampleRate->setValue(m_settings.m_sampleRate);
     ui->sampleRate->setEnabled(!SpectranMISOSettings::isRawMode(m_settings.m_mode));
     ui->deviceRateText->setText(tr("%1k").arg(QString::number(SpectranMISO::getSampleRate(m_settings) / 1000.0f, 'g', 5)));
-    ui->streamIndex->setCurrentIndex(m_settings.m_streamIndex);
     ui->spectrumSource->setCurrentIndex(m_settings.m_spectrumStreamIndex);
-    ui->streamLock->setChecked(m_settings.m_streamLock);
     ui->mode->setCurrentIndex(m_settings.m_mode);
     ui->clockrateIndex->setCurrentIndex(m_settings.m_clockRate);
     ui->log2Decim->setCurrentIndex(m_settings.m_logDecimation);
