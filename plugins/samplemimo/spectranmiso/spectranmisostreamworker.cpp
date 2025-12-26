@@ -15,7 +15,13 @@
 // along with this program. If not, see <http://www.gnu.org/licenses/>.          //
 ///////////////////////////////////////////////////////////////////////////////////
 
+#include <thread>
+#include <chrono>
+
+#include <QMutexLocker>
+
 #include "dsp/samplemififo.h"
+#include "dsp/samplemofifo.h"
 #include "spectran/devicespectran.h"
 #include "spectranmisostreamworker.h"
 
@@ -23,6 +29,8 @@ SpectranMISOStreamWorker::SpectranMISOStreamWorker(SampleMIFifo* sampleMIFifo, S
     QObject(parent),
     m_running(false),
     m_restart(false),
+    m_sampleRateHz(100.0e3),
+    m_centerFrequencyHz(2350.0e6),
     m_sampleMIFifo(sampleMIFifo),
     m_sampleMOFifo(sampleMOFifo),
     m_device(nullptr)
@@ -52,10 +60,22 @@ void SpectranMISOStreamWorker::startWork()
     qDebug("SpectranMISOStreamWorker::startWork");
     m_running = true;
 
-    if (m_currentMode == SPECTRANMISO_MODE_2RX_RAW) {
+    if (m_currentMode == SPECTRANMISO_MODE_TX_IQ) {
+        streamTx();
+        // qDebug("SpectranMISOStreamWorker::startWork: TX IQ mode not implemented, stopping");
+        // m_running = false;
+        // emit stopped();
+        // return;
+    }
+    else if (m_currentMode == SPECTRANMISO_MODE_RXTX_IQ) {
+        qDebug("SpectranMISOStreamWorker::startWork: RX TX IQ mode not implemented, stopping");
+        m_running = false;
+        emit stopped();
+        return;
+    } else if (m_currentMode == SPECTRANMISO_MODE_2RX_RAW) {
         streamRaw2Rx();
     } else {
-        streamIQ();
+        streamRxIQ();
     }
 
     qDebug("SpectranMISOStreamWorker::startWork: exiting");
@@ -78,9 +98,9 @@ void SpectranMISOStreamWorker::restartWork()
     stopWork();
 }
 
-void SpectranMISOStreamWorker::streamIQ()
+void SpectranMISOStreamWorker::streamRxIQ()
 {
-    qDebug("SpectranMISOStreamWorker::streamIQ: starting");
+    qDebug("SpectranMISOStreamWorker::streamRxIQ: starting");
     SampleVector::iterator convIt[2];
     AARTSAAPI_Result res;
 
@@ -132,26 +152,26 @@ void SpectranMISOStreamWorker::streamIQ()
 
             if (res != AARTSAAPI_OK)
             {
-                qWarning("SpectranMISOStreamWorker::streamIQ: AARTSAAPI_ConsumePackets() failed with error %d", res);
+                qWarning("SpectranMISOStreamWorker::streamRxIQ: AARTSAAPI_ConsumePackets() failed with error %d", res);
                 m_running = false;
             }
         }
         else if (res != AARTSAAPI_EMPTY)
         {
-            qWarning("SpectranMISOStreamWorker::streamIQ: AARTSAAPI_GetPacket() failed with error %d", res);
+            qWarning("SpectranMISOStreamWorker::streamRxIQ: AARTSAAPI_GetPacket() failed with error %d", res);
             m_running = false;
         }
     }
 
     if (m_restart)
     {
-        qDebug("SpectranMISOStreamWorker::streamIQ: exit and restart");
+        qDebug("SpectranMISOStreamWorker::streamRxIQ: exit and restart");
         m_restart = false;
         emit restart();
     }
     else
     {
-        qDebug("SpectranMISOStreamWorker::streamIQ: normal exit");
+        qDebug("SpectranMISOStreamWorker::streamRxIQ: normal exit");
         emit stopped();
     }
 }
@@ -266,6 +286,127 @@ void SpectranMISOStreamWorker::streamRaw2Rx()
     }
 }
 
+void SpectranMISOStreamWorker::streamTx()
+{
+    qDebug("SpectranMISOStreamWorker::streamTx: starting - waiting for device to be ready...");
+    while (AARTSAAPI_GetDeviceState(m_device) != AARTSAAPI_RUNNING) {
+        std::this_thread::sleep_for( std::chrono::milliseconds(100));
+    }
+    qDebug("SpectranMISOStreamWorker::streamTx: device is ready");
+
+    unsigned int iPart1Begin, iPart1End, iPart2Begin, iPart2End;
+
+	static const double	zeroDBm = sqrt(1.0 / 20.0);
+	float iqbuffer[3*m_maxSamplesPerPacket]; // provision of 50% more than max size
+
+	// Prepare output packet
+	AARTSAAPI_Packet	packet = { sizeof(AARTSAAPI_Packet) };
+
+
+	// Get the current stream time
+	double	startTime;
+	AARTSAAPI_GetMasterStreamTime(m_device, startTime);
+
+	// Prepare the first packet to be played in 200ms
+
+	packet.startTime = startTime + 0.2;
+	packet.size = 2;
+	packet.stride = 2;
+	packet.fp32 = iqbuffer;
+
+	double packetTime; // time for a packet to complete
+	double maxQueueTime; // Max seconds of queued data
+
+    int i = 0;
+    // Initialize with current sample rate
+    m_nbSamplesPerPacket = static_cast<int>(0.1 * m_sampleRateHz); // 100 ms of samples basically capped to max size
+    m_nbSamplesPerPacket = m_nbSamplesPerPacket > m_maxSamplesPerPacket ? m_maxSamplesPerPacket : m_nbSamplesPerPacket;
+
+	// Stream packets
+	while (m_running)
+	{
+        // now = std::chrono::high_resolution_clock::now().time_since_epoch().count() / 1e9;
+        // qDebug("SpectranMISOStreamWorker::streamTx: nbSamplesFIFO: %d stepFrequency: %f", nbSamplesFIFO, stepFrequency);
+
+        // Read samples from FIFO
+        m_sampleMOFifo->readSync(m_nbSamplesPerPacket, iPart1Begin, iPart1End, iPart2Begin, iPart2End);
+        int iqbufPos = 0;
+
+        if (iPart1Begin != iPart1End)
+        {
+            SampleVector::iterator begin = m_sampleMOFifo->getData(0).begin() + iPart1Begin;
+            m_interpolatorsFloatIQ.interpolate1(&begin, iqbuffer, (iPart1End - iPart1Begin)*2, zeroDBm, false);
+            iqbufPos += (iPart1End - iPart1Begin)*2;
+        }
+        if (iPart2Begin != iPart2End)
+        {
+            SampleVector::iterator begin = m_sampleMOFifo->getData(0).begin() + iPart2Begin;
+            m_interpolatorsFloatIQ.interpolate1(&begin, iqbuffer + iqbufPos, (iPart2End - iPart2Begin)*2, zeroDBm, false);
+            iqbufPos += (iPart2End - iPart2Begin)*2;
+        }
+
+        // Parameters based on frequency and sample rate
+        packet.startFrequency = m_centerFrequencyHz; // Center frequency
+        packet.stepFrequency = m_sampleRateHz; // Sample rate
+        packet.startFrequency -= 0.5 * packet.stepFrequency;
+        packet.num = m_nbSamplesPerPacket; // nb samples / step frequency s per packet
+        packetTime = packet.num / packet.stepFrequency; // time for a packet to complete (actaual)
+	    maxQueueTime = 0.1f * packetTime; // Max seconds of queued data
+
+		// Calculate end time of packet base on number of samples
+		// and sample rate
+		packet.endTime = packet.startTime + packetTime;
+        packet.fp32 = iqbuffer;
+
+		// Set start flags
+		if (i == 0)
+			packet.flags = AARTSAAPI_PACKET_SEGMENT_START | AARTSAAPI_PACKET_STREAM_START;
+		else
+			packet.flags = 0;
+
+		// Wait for a max queue fill level of maxQueueTime seconds
+		AARTSAAPI_GetMasterStreamTime(m_device, startTime);
+		while (startTime + maxQueueTime < packet.startTime)
+		{
+			std::this_thread::sleep_for( std::chrono::milliseconds(int(1000 * (packet.startTime - startTime - maxQueueTime))));
+			AARTSAAPI_GetMasterStreamTime(m_device, startTime);
+		}
+
+		// Send the packet
+		AARTSAAPI_SendPacket(m_device, 0, &packet); // asynchronous send
+
+        // Advance packet time and loop counter
+		packet.startTime = packet.endTime;
+        i++;
+	}
+
+    // Repeat last packet to terminate the stream with end flags
+    packet.flags = AARTSAAPI_PACKET_SEGMENT_END | AARTSAAPI_PACKET_STREAM_END;
+    AARTSAAPI_SendPacket(m_device, 0, &packet);
+    // Advance packet time
+    packet.startTime = packet.endTime;
+
+	// Wait for the last packet to finish
+	AARTSAAPI_GetMasterStreamTime(m_device, startTime);
+	while (startTime < packet.startTime)
+	{
+		std::this_thread::sleep_for( std::chrono::milliseconds(int(1000 * (packet.startTime - startTime))));
+		AARTSAAPI_GetMasterStreamTime(m_device, startTime);
+	}
+
+    if (m_restart)
+    {
+        qDebug("SpectranMISOStreamWorker::streamTx: exit and restart");
+        m_restart = false;
+        emit restart();
+    }
+    else
+    {
+        qDebug("SpectranMISOStreamWorker::streamTx: normal exit");
+        emit stopped();
+    }
+}
+
 bool SpectranMISOStreamWorker::handleMessage(const Message& message)
 {
     return false;
@@ -286,4 +427,12 @@ void SpectranMISOStreamWorker::handleInputMessages()
             delete message.release();
         }
     }
+}
+
+void SpectranMISOStreamWorker::setSampleRate(double sampleRateHz)
+{
+    m_sampleRateHz = sampleRateHz;
+    m_nbSamplesPerPacket = static_cast<int>(0.3 * m_sampleRateHz); // 300 ms of samples basically capped to max size
+    m_nbSamplesPerPacket = m_nbSamplesPerPacket > m_maxSamplesPerPacket ? m_maxSamplesPerPacket : m_nbSamplesPerPacket;
+    qDebug("SpectranMISOStreamWorker::setSampleRate: sample rate set to %f Hz, nbSamplesPerPacket=%d", m_sampleRateHz, m_nbSamplesPerPacket);
 }

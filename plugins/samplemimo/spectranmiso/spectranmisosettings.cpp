@@ -309,6 +309,11 @@ bool SpectranMISOSettings::isRxModeSingle(const SpectranMISOMode &mode)
     return (mode == SpectranMISOMode::SPECTRANMISO_MODE_RX_IQ) || (mode == SpectranMISOMode::SPECTRANMISO_MODE_RX_RAW);
 }
 
+bool SpectranMISOSettings::isTxMode(const SpectranMISOMode &mode)
+{
+    return (mode == SpectranMISOMode::SPECTRANMISO_MODE_TX_IQ) || (mode == SpectranMISOMode::SPECTRANMISO_MODE_RXTX_IQ);
+}
+
 bool SpectranMISOSettings::isDecimationEnabled(const SpectranMISOMode &mode)
 {
     return (mode == SpectranMISOMode::SPECTRANMISO_MODE_RX_RAW) || (mode == SpectranMISOMode::SPECTRANMISO_MODE_2RX_RAW);

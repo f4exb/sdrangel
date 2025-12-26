@@ -135,3 +135,17 @@ unsigned int SampleSourceFifo::getSizePolicy(unsigned int sampleRate)
 {
     return (sampleRate/100)*64; // .64s
 }
+
+unsigned int SampleSourceFifo::getSizePolicy2(unsigned int sampleRate)
+{
+    unsigned int size = (sampleRate/100)*64; // .64s nominal size
+    // now take the next power of two
+
+    int exponent = static_cast<int>(std::ceil(std::log2(size)));
+
+    if (exponent < 0) { // exclude corner case
+        return 1;
+    }
+
+    return 1u << exponent;
+}

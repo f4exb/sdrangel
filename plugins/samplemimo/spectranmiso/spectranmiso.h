@@ -148,6 +148,8 @@ private:
 
 	DeviceAPI *m_deviceAPI;
 	QMutex m_mutex;
+    QTimer m_txSRTimer;
+    qint64 m_freqWiggle;
 	SpectranMISOSettings m_settings;
     SpectranMISOMode m_restartMode;
 	QString m_deviceDescription;
@@ -182,6 +184,7 @@ private slots:
     void streamStopped();
     void streamStoppedForRestart();
     void networkManagerFinished(QNetworkReply *reply);
+    void handleTxSampleRateChange();
 };
 
 #endif // _SPECTRANMISO_SPECTRANMISO_H_

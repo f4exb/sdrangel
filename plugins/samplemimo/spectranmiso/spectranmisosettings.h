@@ -69,6 +69,7 @@ struct SpectranMISOSettings {
     QString m_reverseAPIAddress;
     uint16_t m_reverseAPIPort;
     uint16_t m_reverseAPIDeviceIndex;
+    static const int m_maxTxSampleRate = 20000000; // 20 MHz
 
     SpectranMISOSettings();
     void resetToDefaults();
@@ -80,6 +81,7 @@ struct SpectranMISOSettings {
     static bool isRawMode(const SpectranMISOMode& mode);
     static bool isDualRx(const SpectranMISOMode& mode);
     static bool isRxModeSingle(const SpectranMISOMode& mode);
+    static bool isTxMode(const SpectranMISOMode& mode);
     static bool isDecimationEnabled(const SpectranMISOMode& mode);
 
     static const QMap<SpectranMISOMode, QString> m_modeDisplayNames;

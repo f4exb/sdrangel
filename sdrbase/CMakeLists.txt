@@ -155,6 +155,7 @@ set(sdrbase_SOURCES
     dsp/fmpreemphasis.cpp
     dsp/freqlockcomplex.cpp
     dsp/interpolator.cpp
+    dsp/interpolatorsifnorm.cpp
     dsp/glscopesettings.cpp
     dsp/spectrumsettings.cpp
     dsp/goertzel.cpp
@@ -393,6 +394,7 @@ set(sdrbase_HEADERS
     dsp/hbfilterchainconverter.h
     dsp/iirfilter.h
     dsp/interpolator.h
+    dsp/interpolatorsifnorm.h
     dsp/hbfiltertraits.h
     dsp/inthalfbandfilter.h
     dsp/inthalfbandfilterdb.h

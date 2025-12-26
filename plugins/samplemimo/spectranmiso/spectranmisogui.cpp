@@ -68,11 +68,11 @@ SpectranMISOGui::SpectranMISOGui(DeviceUISet *deviceUISet, QWidget* parent) :
     }
 
     // Disable certain modes for the moment
-    ui->mode->model()->setData(ui->mode->model()->index(1, 0), 0, Qt::UserRole - 1); // Tx IQ disables the item
+    // ui->mode->model()->setData(ui->mode->model()->index(1, 0), 0, Qt::UserRole - 1); // Tx IQ disables the item
     ui->mode->model()->setData(ui->mode->model()->index(2, 0), 0, Qt::UserRole - 1); // Rx+Tx IQ disables the item
 
     // Disable Tx spectrum source for the moment
-    ui->spectrumSource->model()->setData(ui->spectrumSource->model()->index(2, 0), 0, Qt::UserRole - 1); // Tx disabled
+    // ui->spectrumSource->model()->setData(ui->spectrumSource->model()->index(2, 0), 0, Qt::UserRole - 1); // Tx disabled
     ui->spectrumSource->setCurrentIndex(0); // Rx1 by default
 
     ui->log2Decim->setEnabled(false); // enabled when in raw mode
@@ -318,6 +318,22 @@ void SpectranMISOGui::on_mode_currentIndexChanged(int index)
         ui->log2Decim->setEnabled(true);
     } else {
         ui->log2Decim->setEnabled(false);
+    }
+
+    if (SpectranMISOSettings::isTxMode((SpectranMISOMode) index))
+    {
+        quint64 oldValue = ui->sampleRate->getValue();
+        qDebug("SpectranMISOGui::on_mode_currentIndexChanged: old value=%llu", oldValue);
+        ui->sampleRate->setValueRange(9, 48000, 20000000); // 48 kHz to 20 MHz
+
+        if (ui->sampleRate->getValueNew() != oldValue)  {
+            qDebug("SpectranMISOGui::on_mode_currentIndexChanged: new value=%llu", ui->sampleRate->getValueNew());
+            m_settings.m_sampleRate = ui->sampleRate->getValueNew();
+        }
+    }
+    else
+    {
+        ui->sampleRate->setValueRange(9, 12000, 100000000); // 12 kHz to 100 MHz
     }
 
     m_settings.m_mode = (SpectranMISOMode) index;

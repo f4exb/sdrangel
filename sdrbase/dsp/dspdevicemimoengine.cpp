@@ -16,6 +16,12 @@
 // along with this program. If not, see <http://www.gnu.org/licenses/>.          //
 ///////////////////////////////////////////////////////////////////////////////////
 
+// DSPDeviceMIMOEngine.cpp
+// Implementation of DSP engine for MIMO capable devices
+// Handles message passing between BasebandSampleSource/Sink and DeviceSampleMIMO
+// Handles MIMO synchronization and correction configuration
+// Handles spectrum sink management
+
 #include <QDebug>
 
 #include "dspcommands.h"

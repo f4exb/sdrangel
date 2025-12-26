@@ -65,6 +65,7 @@ public:
     unsigned int size() const { return m_size; }
 
     static unsigned int getSizePolicy(unsigned int sampleRate);
+    static unsigned int getSizePolicy2(unsigned int sampleRate);
     static const unsigned int m_rwDivisor;
     static const unsigned int m_guardDivisor;
 

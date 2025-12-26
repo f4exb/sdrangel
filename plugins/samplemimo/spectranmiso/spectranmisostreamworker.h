@@ -28,6 +28,7 @@
 #include "util/message.h"
 #include "util/messagequeue.h"
 #include "dsp/decimatorsfi.h"
+#include "dsp/interpolatorsifnorm.h"
 
 #include "spectranmisosettings.h"
 
@@ -44,6 +45,8 @@ public:
     bool isRunning() const { return m_running; }
     void setDevice(AARTSAAPI_Device* device) { m_device = device; }
     void setMode(SpectranMISOMode mode) { m_currentMode = mode; }
+    void setCenterFrequency(double centerFrequencyHz) { m_centerFrequencyHz = centerFrequencyHz; };
+    void setSampleRate(double sampleRateHz);
     MessageQueue *getInputMessageQueue() { return &m_inputMessageQueue; }
     void setMessageQueueToGUI(MessageQueue *queue) { m_inputMessageQueueToGUI = queue; }
     void setMessageQueueToSISO(MessageQueue *queue) { m_inputMessageQueueToSISO = queue; }
@@ -58,11 +61,14 @@ public slots:
     void startWork();
 
 private:
-    void streamIQ();
+    void streamRxIQ();
     void streamRaw2Rx();
+    void streamTx();
     std::atomic<bool> m_running;
     bool m_restart;
     SpectranMISOMode m_currentMode;
+    double m_sampleRateHz;
+    double m_centerFrequencyHz;
     SampleMIFifo *m_sampleMIFifo;
     SampleMOFifo *m_sampleMOFifo;
     MessageQueue m_inputMessageQueue;
@@ -71,7 +77,10 @@ private:
     AARTSAAPI_Device *m_device;
     DecimatorsFI<true> m_decimatorsFloatIQ[2]; // one per channel in non interleaved mode
     SampleVector m_convertBuffer[2]; // one per channel
+    InterpolatorsIFNormalized m_interpolatorsFloatIQ;
     bool handleMessage(const Message& message);
+    int m_nbSamplesPerPacket;
+    static const int m_maxSamplesPerPacket = 1<<19; // 512k samples
 
 private slots:
     void handleInputMessages();

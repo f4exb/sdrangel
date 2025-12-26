@@ -34,6 +34,7 @@ public:
 
     void init(unsigned int nbStreams, unsigned int size);
     void resize(unsigned int size);
+    unsigned int getSize() const { return m_size; }
     void reset();
 
     void readSync(

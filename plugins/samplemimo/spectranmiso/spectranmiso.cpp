@@ -15,6 +15,9 @@
 // along with this program. If not, see <http://www.gnu.org/licenses/>.          //
 ///////////////////////////////////////////////////////////////////////////////////
 
+#include <thread>
+#include <chrono>
+
 #include <QNetworkAccessManager>
 #include <QNetworkReply>
 #include <QThread>
@@ -98,6 +101,13 @@ SpectranMISO::SpectranMISO(DeviceAPI* deviceAPI) :
         &QNetworkAccessManager::finished,
         this,
         &SpectranMISO::networkManagerFinished
+    );
+    m_freqWiggle = 1000;
+    QObject::connect(
+        &m_txSRTimer,
+        &QTimer::timeout,
+        this,
+        &SpectranMISO::handleTxSampleRateChange
     );
     setSpectranModel(m_deviceAPI->getSamplingDeviceDisplayName());
 }
@@ -227,7 +237,8 @@ void SpectranMISO::restart(const SpectranMISOMode& mode)
 
 void SpectranMISO::streamStoppedForRestart()
 {
-    qDebug("SpectranMISO::streamStoppedForRestart");
+    qDebug("SpectranMISO::streamStoppedForRestart in mode %s",
+        SpectranMISOSettings::m_modeDisplayNames.value(m_restartMode, "Unknown").toStdString().c_str());
 
     if (m_streamWorkerThread)
     {
@@ -420,14 +431,14 @@ bool SpectranMISO::handleMessage(const Message& message)
             }
 
             // Start Tx engine
-            // if (m_deviceAPI->initDeviceEngine(1)) {
-            //     m_deviceAPI->startDeviceEngine(1);
-            // }
+            if (m_deviceAPI->initDeviceEngine(1)) {
+                m_deviceAPI->startDeviceEngine(1);
+            }
         }
         else
         {
             m_deviceAPI->stopDeviceEngine(0); // Stop Rx engine
-            // m_deviceAPI->stopDeviceEngine(1); // Stop Tx engine
+            m_deviceAPI->stopDeviceEngine(1); // Stop Tx engine
         }
 
         if (m_settings.m_useReverseAPI) {
@@ -497,49 +508,101 @@ bool SpectranMISO::applySettings(
 
         if (AARTSAAPI_ConfigRoot(&m_device, &root) == AARTSAAPI_OK)
         {
-            if (settingsKeys.contains("rxCenterFrequency") || force)
+            if (settings.m_mode == SPECTRANMISO_MODE_TX_IQ) // Tx only
             {
-                // Set the center frequency
-                if (AARTSAAPI_ConfigFind(&m_device, &root, &config, L"main/centerfreq") == AARTSAAPI_OK)
-                    AARTSAAPI_ConfigSetFloat(&m_device, &config, settings.m_rxCenterFrequency);
-                else
-                    qWarning("SpectranMISO::applySettings: cannot find main/centerfreq");
-            }
-
-            if (!SpectranMISOSettings::isRawMode(settings.m_mode) && (settingsKeys.contains("sampleRate") || force))
-            {
-                m_sampleMIFifo.resize(SampleSourceFifo::getSizePolicy(settings.m_sampleRate));
-                m_sampleMOFifo.resize(SampleSourceFifo::getSizePolicy(settings.m_sampleRate));
-                // Set the sample rate
-                if (AARTSAAPI_ConfigFind(&m_device, &root, &config, L"main/spanfreq") == AARTSAAPI_OK)
-                    AARTSAAPI_ConfigSetFloat(&m_device, &config, (double) settings.m_sampleRate / 1.5);
-                else
-                    qWarning("SpectranMISO::applySettings: cannot find main/spanfreq");
-            }
-
-            // V6Eco only supports 61 MHz clock rate (61.44 actually) and therefore does not need to set it
-            if ((m_spectranModel == SpectranModel::SPECTRAN_V6) && (settingsKeys.contains("clockRate") || force))
-            {
-                // Set the clock rate
-                if (AARTSAAPI_ConfigFind(&m_device, &root, &config, L"device/receiverclock") == AARTSAAPI_OK)
-                    AARTSAAPI_ConfigSetString(&m_device, &config, m_clockRateNames[settings.m_clockRate].toStdWString().c_str());
-                else
-                    qWarning("SpectranMISO::applySettings: cannot find device/receiverclock");
-            }
-
-            if (SpectranMISOSettings::isRawMode(settings.m_mode))
-            {
-                m_sampleMIFifo.resize(SampleSourceFifo::getSizePolicy(getSampleRate(settings)));
-                m_sampleMOFifo.resize(SampleSourceFifo::getSizePolicy(getSampleRate(settings)));
-
-                if ((settingsKeys.contains("logDecimation") || force) && SpectranMISOSettings::isDecimationEnabled(settings.m_mode))
+                if (settingsKeys.contains("txCenterFrequency") || force)
                 {
-                    // Decimation factor changed
-                    // Set the decimation factor
-                    if (AARTSAAPI_ConfigFind(&m_device, &root, &config, L"main/decimation") == AARTSAAPI_OK)
-                        AARTSAAPI_ConfigSetString(&m_device, &config, m_log2DecimationNames[settings.m_logDecimation].toStdWString().c_str());
+                    // Set the center frequency
+                    if (AARTSAAPI_ConfigFind(&m_device, &root, &config, L"main/centerfreq") == AARTSAAPI_OK)
+                        AARTSAAPI_ConfigSetFloat(&m_device, &config, settings.m_txCenterFrequency);
                     else
-                        qWarning("SpectranMISO::applySettings: cannot find main/decimation");
+                        qWarning("SpectranMISO::applySettings: cannot find main/centerfreq");
+                    // Propagate to the worker
+                    m_streamWorker->setCenterFrequency(settings.m_txCenterFrequency);
+                }
+                if (settingsKeys.contains("sampleRate") || force)
+                {
+                    m_sampleMIFifo.resize(SampleSourceFifo::getSizePolicy(settings.m_sampleRate));
+                    m_sampleMOFifo.resize(SampleSourceFifo::getSizePolicy(settings.m_sampleRate));
+                    // Propagate to the worker
+                    m_streamWorker->setSampleRate(settings.m_sampleRate);
+                    m_txSRTimer.start(250); // trigger frequency wiggle to fix sample rate change issue
+                }
+            }
+            else if (settings.m_mode == SPECTRANMISO_MODE_RXTX_IQ) // Rx + Tx
+            {
+                if (settingsKeys.contains("rxCenterFrequency") || force)
+                {
+                    // Set the Rx center frequency
+                    if (AARTSAAPI_ConfigFind(&m_device, &root, &config, L"main/demodcenterfreq") == AARTSAAPI_OK)
+                        AARTSAAPI_ConfigSetFloat(&m_device, &config, settings.m_rxCenterFrequency);
+                    else
+                        qWarning("SpectranMISO::applySettings: cannot find main/demodcenterfreq");
+                }
+
+                if (settingsKeys.contains("txCenterFrequency") || force)
+                {
+                    // Set the Tx center frequency
+                    if (AARTSAAPI_ConfigFind(&m_device, &root, &config, L"main/centerfreq") == AARTSAAPI_OK)
+                        AARTSAAPI_ConfigSetFloat(&m_device, &config, settings.m_txCenterFrequency);
+                    else
+                        qWarning("SpectranMISO::applySettings: cannot find main/centerfreq");
+                }
+
+                if (settingsKeys.contains("sampleRate") || force)
+                {
+                    m_sampleMIFifo.resize(SampleSourceFifo::getSizePolicy(settings.m_sampleRate));
+                    m_sampleMOFifo.resize(SampleSourceFifo::getSizePolicy(settings.m_sampleRate));
+                    // Set the sample rate of the receiver equal to the transmitter sample rate
+                    if (AARTSAAPI_ConfigFind(&m_device, &root, &config, L"main/demodspanfreq") == AARTSAAPI_OK)
+                        AARTSAAPI_ConfigSetFloat(&m_device, &config, (double) settings.m_sampleRate / 1.5);
+                    else
+                        qWarning("SpectranMISO::applySettings: cannot find main/demodspanfreq");
+                }
+            }
+            else // Rx only modes
+            {
+                if (settingsKeys.contains("rxCenterFrequency") || force)
+                {
+                    // Set the center frequency
+                    if (AARTSAAPI_ConfigFind(&m_device, &root, &config, L"main/centerfreq") == AARTSAAPI_OK)
+                        AARTSAAPI_ConfigSetFloat(&m_device, &config, settings.m_rxCenterFrequency);
+                    else
+                        qWarning("SpectranMISO::applySettings: cannot find main/centerfreq");
+                }
+                if (!SpectranMISOSettings::isRawMode(settings.m_mode) && (settingsKeys.contains("sampleRate") || force))
+                {
+                    m_sampleMIFifo.resize(SampleSourceFifo::getSizePolicy(settings.m_sampleRate));
+                    m_sampleMOFifo.resize(SampleSourceFifo::getSizePolicy(settings.m_sampleRate));
+                    // Set the sample rate
+                    if (AARTSAAPI_ConfigFind(&m_device, &root, &config, L"main/spanfreq") == AARTSAAPI_OK)
+                        AARTSAAPI_ConfigSetFloat(&m_device, &config, (double) settings.m_sampleRate / 1.5);
+                    else
+                        qWarning("SpectranMISO::applySettings: cannot find main/spanfreq");
+                }
+                // V6Eco only supports 61 MHz clock rate (61.44 actually) and therefore does not need to set it
+                if ((m_spectranModel == SpectranModel::SPECTRAN_V6) && (settingsKeys.contains("clockRate") || force))
+                {
+                    // Set the clock rate
+                    if (AARTSAAPI_ConfigFind(&m_device, &root, &config, L"device/receiverclock") == AARTSAAPI_OK)
+                        AARTSAAPI_ConfigSetString(&m_device, &config, m_clockRateNames[settings.m_clockRate].toStdWString().c_str());
+                    else
+                        qWarning("SpectranMISO::applySettings: cannot find device/receiverclock");
+                }
+                if (SpectranMISOSettings::isRawMode(settings.m_mode))
+                {
+                    m_sampleMIFifo.resize(SampleSourceFifo::getSizePolicy(getSampleRate(settings)));
+                    m_sampleMOFifo.resize(SampleSourceFifo::getSizePolicy(getSampleRate(settings)));
+
+                    if ((settingsKeys.contains("logDecimation") || force) && SpectranMISOSettings::isDecimationEnabled(settings.m_mode))
+                    {
+                        // Decimation factor changed
+                        // Set the decimation factor
+                        if (AARTSAAPI_ConfigFind(&m_device, &root, &config, L"main/decimation") == AARTSAAPI_OK)
+                            AARTSAAPI_ConfigSetString(&m_device, &config, m_log2DecimationNames[settings.m_logDecimation].toStdWString().c_str());
+                        else
+                            qWarning("SpectranMISO::applySettings: cannot find main/decimation");
+                    }
                 }
             }
         }
@@ -872,11 +935,42 @@ void SpectranMISO::applyCommonSettings(const SpectranMISOMode& mode)
                     qWarning("SpectranMISO::applyCommonSettings: cannot find device/receiverchannel");
                 }
             }
+
+            // Set Rx reference level to -20 dB
+            if (AARTSAAPI_ConfigFind(&m_device, &root, &config, L"main/reflevel") == AARTSAAPI_OK) {
+                AARTSAAPI_ConfigSetFloat(&m_device, &config, -20.0);
+            }
         }
 
-        // Set Rx reference level to -20 dB
-        if (AARTSAAPI_ConfigFind(&m_device, &root, &config, L"main/reflevel") == AARTSAAPI_OK) {
-            AARTSAAPI_ConfigSetFloat(&m_device, &config, -20.0);
+        if (mode == SpectranMISOMode::SPECTRANMISO_MODE_TX_IQ)
+        {
+            qDebug("SpectranMISO::applyCommonSettings: applying TX IQ settings");
+            if (AARTSAAPI_ConfigFind(&m_device, &root, &config, L"main/centerfreq") == AARTSAAPI_OK)
+                AARTSAAPI_ConfigSetFloat(&m_device, &config, 2350.0e6);
+
+            // Set the frequency range of the transmitter - this is the full range not the IQ mod range
+            if (AARTSAAPI_ConfigFind(&m_device, &root, &config, L"main/spanfreq") == AARTSAAPI_OK) {
+                AARTSAAPI_ConfigSetFloat(&m_device, &config, 50.0e6); // Choose 50 MHz as per example
+            }
+            // Set the transmitter gain
+            if (AARTSAAPI_ConfigFind(&m_device, &root, &config, L"main/transgain") == AARTSAAPI_OK) {
+                AARTSAAPI_ConfigSetFloat(&m_device, &config, 0.0);
+            }
         }
     }
+}
+
+void SpectranMISO::handleTxSampleRateChange()
+{
+    // Fix sample rate change by moving frequency out and back in
+    SpectranMISOSettings settings = m_settings;
+    settings.m_txCenterFrequency += m_freqWiggle;
+    MsgConfigureSpectranMISO* message1 = MsgConfigureSpectranMISO::create(settings, QList<QString>{"txCenterFrequency"}, false);
+    m_inputMessageQueue.push(message1);
+
+    if (m_freqWiggle < 0) {
+        m_txSRTimer.stop();
+    }
+
+    m_freqWiggle = -m_freqWiggle; // Toggle between + and - wiggle
 }
