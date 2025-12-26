@@ -28,6 +28,7 @@
 SpectranMISOStreamWorker::SpectranMISOStreamWorker(SampleMIFifo* sampleMIFifo, SampleMOFifo* sampleMOFifo, QObject* parent) :
     QObject(parent),
     m_running(false),
+    m_localRestart(false),
     m_restart(false),
     m_sampleRateHz(100.0e3),
     m_centerFrequencyHz(2350.0e6),
@@ -42,6 +43,8 @@ SpectranMISOStreamWorker::SpectranMISOStreamWorker(SampleMIFifo* sampleMIFifo, S
     for (int i = 0; i < 2; i++) {
         m_convertBuffer[i].resize(262144, Sample{0, 0}); // should be enough for highest clock rate and no decimation
     }
+
+    connect(this, &SpectranMISOStreamWorker::localRestart, this, &SpectranMISOStreamWorker::startWork, Qt::QueuedConnection);
 }
 
 SpectranMISOStreamWorker::~SpectranMISOStreamWorker()
@@ -394,6 +397,14 @@ void SpectranMISOStreamWorker::streamTx()
 		AARTSAAPI_GetMasterStreamTime(m_device, startTime);
 	}
 
+    if (m_localRestart)
+    {
+        m_localRestart = false;
+        qDebug("SpectranMISOStreamWorker::streamTx: local restart requested");
+        emit localRestart();
+        return;
+    }
+
     if (m_restart)
     {
         qDebug("SpectranMISOStreamWorker::streamTx: exit and restart");
@@ -435,4 +446,6 @@ void SpectranMISOStreamWorker::setSampleRate(double sampleRateHz)
     m_nbSamplesPerPacket = static_cast<int>(0.3 * m_sampleRateHz); // 300 ms of samples basically capped to max size
     m_nbSamplesPerPacket = m_nbSamplesPerPacket > m_maxSamplesPerPacket ? m_maxSamplesPerPacket : m_nbSamplesPerPacket;
     qDebug("SpectranMISOStreamWorker::setSampleRate: sample rate set to %f Hz, nbSamplesPerPacket=%d", m_sampleRateHz, m_nbSamplesPerPacket);
+    m_running = false;
+    m_localRestart = true;
 }

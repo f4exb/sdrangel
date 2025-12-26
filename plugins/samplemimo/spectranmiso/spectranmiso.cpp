@@ -102,13 +102,6 @@ SpectranMISO::SpectranMISO(DeviceAPI* deviceAPI) :
         this,
         &SpectranMISO::networkManagerFinished
     );
-    m_freqWiggle = 1000;
-    QObject::connect(
-        &m_txSRTimer,
-        &QTimer::timeout,
-        this,
-        &SpectranMISO::handleTxSampleRateChange
-    );
     setSpectranModel(m_deviceAPI->getSamplingDeviceDisplayName());
 }
 
@@ -526,7 +519,6 @@ bool SpectranMISO::applySettings(
                     m_sampleMOFifo.resize(SampleSourceFifo::getSizePolicy(settings.m_sampleRate));
                     // Propagate to the worker
                     m_streamWorker->setSampleRate(settings.m_sampleRate);
-                    m_txSRTimer.start(250); // trigger frequency wiggle to fix sample rate change issue
                 }
             }
             else if (settings.m_mode == SPECTRANMISO_MODE_RXTX_IQ) // Rx + Tx
@@ -958,19 +950,4 @@ void SpectranMISO::applyCommonSettings(const SpectranMISOMode& mode)
             }
         }
     }
-}
-
-void SpectranMISO::handleTxSampleRateChange()
-{
-    // Fix sample rate change by moving frequency out and back in
-    SpectranMISOSettings settings = m_settings;
-    settings.m_txCenterFrequency += m_freqWiggle;
-    MsgConfigureSpectranMISO* message1 = MsgConfigureSpectranMISO::create(settings, QList<QString>{"txCenterFrequency"}, false);
-    m_inputMessageQueue.push(message1);
-
-    if (m_freqWiggle < 0) {
-        m_txSRTimer.stop();
-    }
-
-    m_freqWiggle = -m_freqWiggle; // Toggle between + and - wiggle
 }

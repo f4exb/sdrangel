@@ -56,6 +56,7 @@ public:
 signals:
     void stopped();
     void restart(); // restart in new mode
+    void localRestart(); // restart in same mode
 
 public slots:
     void startWork();
@@ -65,6 +66,7 @@ private:
     void streamRaw2Rx();
     void streamTx();
     std::atomic<bool> m_running;
+    std::atomic<bool> m_localRestart;
     bool m_restart;
     SpectranMISOMode m_currentMode;
     double m_sampleRateHz;
