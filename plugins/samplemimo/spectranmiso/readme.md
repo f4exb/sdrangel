@@ -8,6 +8,8 @@ This plugin is marked as a "MISO" meaning it supports multiple inputs i.e. recei
 
 <h2>Compilation</h2>
 
+Linux environment is assumed and in this case the SDK installs in `/opt/aaronia-rtsa-suite/Aaronia-RTSA-Suite-PRO` The Cmake files and the `devices/spectran/aaroniartsasdkhelper.h` expect this installation directory and when present the plugin is automatically compiled with the default build options.
+
 <h2>Interface</h2>
 
 ![Spectran MISO plugin](../../../doc/img/SpectranMISOPlugin.png)
@@ -38,6 +40,7 @@ Below are the options in the combo box:
   - **Rx IQ**: Single receiver in IQ mode
   - **Tx IQ**: Transmitter only
   - **Rx+Tx IQ**: Transceiver
+  - **Rx > Tx IQ**: Transponder (Tx spectrum is not active)
   - **Rx Raw**: Single receiver in Raw mode
   - **Rx 1+2 I**: Dual receivers in Raw mode with interleaved samples
   - **Rx 1+2 Raw**: Dual receivers in Raw mode with non-interleaved samples

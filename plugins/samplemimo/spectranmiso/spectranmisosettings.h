@@ -38,9 +38,10 @@ enum SpectranMISOMode {
     SPECTRANMISO_MODE_RX_IQ = 0,
     SPECTRANMISO_MODE_TX_IQ,
     SPECTRANMISO_MODE_RXTX_IQ,
+    SPECTRANMISO_MODE_TRANSPONDER_IQ, // Rx to Tx loopback
     SPECTRANMISO_MODE_RX_RAW,
-    SPECTRANMISO_MODE_2RX_RAW_INTL, // 2 Rx interleaved
-    SPECTRANMISO_MODE_2RX_RAW,      // 2 Rx non interleaved
+    SPECTRANMISO_MODE_2RX_RAW_INTL,   // 2 Rx interleaved
+    SPECTRANMISO_MODE_2RX_RAW,        // 2 Rx non interleaved
     SPECTRANMISO_MODE_END
 };
 
@@ -83,6 +84,8 @@ struct SpectranMISOSettings {
     static bool isDualRx(const SpectranMISOMode& mode);
     static bool isRxModeSingle(const SpectranMISOMode& mode);
     static bool isTxMode(const SpectranMISOMode& mode);
+    static bool hasTx(const SpectranMISOMode& mode);
+    static bool hasRx(const SpectranMISOMode& mode);
     static bool isDecimationEnabled(const SpectranMISOMode& mode);
 
     static const QMap<SpectranMISOMode, QString> m_modeDisplayNames;

@@ -322,14 +322,7 @@ void SpectranMISOGui::on_mode_currentIndexChanged(int index)
 
     if (SpectranMISOSettings::isTxMode((SpectranMISOMode) index))
     {
-        quint64 oldValue = ui->sampleRate->getValue();
-        qDebug("SpectranMISOGui::on_mode_currentIndexChanged: old value=%llu", oldValue);
         ui->sampleRate->setValueRange(9, 48000, 20000000); // 48 kHz to 20 MHz
-
-        if (ui->sampleRate->getValueNew() != oldValue)  {
-            qDebug("SpectranMISOGui::on_mode_currentIndexChanged: new value=%llu", ui->sampleRate->getValueNew());
-            m_settings.m_sampleRate = ui->sampleRate->getValueNew();
-        }
     }
     else
     {

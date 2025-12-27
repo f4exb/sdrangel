@@ -145,6 +145,11 @@
        </item>
        <item>
         <property name="text">
+         <string>Rx &gt; Tx IQ</string>
+        </property>
+       </item>
+       <item>
+        <property name="text">
          <string>Rx Raw</string>
         </property>
        </item>

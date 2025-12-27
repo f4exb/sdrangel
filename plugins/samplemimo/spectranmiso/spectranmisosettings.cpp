@@ -325,12 +325,34 @@ bool SpectranMISOSettings::isDualRx(const SpectranMISOMode &mode)
 
 bool SpectranMISOSettings::isRxModeSingle(const SpectranMISOMode &mode)
 {
-    return (mode == SpectranMISOMode::SPECTRANMISO_MODE_RX_IQ) || (mode == SpectranMISOMode::SPECTRANMISO_MODE_RX_RAW);
+    return (mode == SpectranMISOMode::SPECTRANMISO_MODE_RX_IQ)
+    || (mode == SpectranMISOMode::SPECTRANMISO_MODE_RX_RAW)
+    || (mode == SpectranMISOMode::SPECTRANMISO_MODE_RXTX_IQ)
+    || (mode == SpectranMISOMode::SPECTRANMISO_MODE_TRANSPONDER_IQ);
 }
 
 bool SpectranMISOSettings::isTxMode(const SpectranMISOMode &mode)
 {
-    return (mode == SpectranMISOMode::SPECTRANMISO_MODE_TX_IQ) || (mode == SpectranMISOMode::SPECTRANMISO_MODE_RXTX_IQ);
+    return (mode == SpectranMISOMode::SPECTRANMISO_MODE_TX_IQ)
+    || (mode == SpectranMISOMode::SPECTRANMISO_MODE_RXTX_IQ)
+    || (mode == SpectranMISOMode::SPECTRANMISO_MODE_TRANSPONDER_IQ);
+}
+
+bool SpectranMISOSettings::hasTx(const SpectranMISOMode &mode)
+{
+    return (mode == SpectranMISOMode::SPECTRANMISO_MODE_TX_IQ)
+    || (mode == SpectranMISOMode::SPECTRANMISO_MODE_RXTX_IQ)
+    || (mode == SpectranMISOMode::SPECTRANMISO_MODE_TRANSPONDER_IQ);
+}
+
+bool SpectranMISOSettings::hasRx(const SpectranMISOMode &mode)
+{
+    return (mode == SpectranMISOMode::SPECTRANMISO_MODE_RX_IQ)
+    || (mode == SpectranMISOMode::SPECTRANMISO_MODE_RX_RAW)
+    || (mode == SpectranMISOMode::SPECTRANMISO_MODE_2RX_RAW_INTL)
+    || (mode == SpectranMISOMode::SPECTRANMISO_MODE_2RX_RAW)
+    || (mode == SpectranMISOMode::SPECTRANMISO_MODE_RXTX_IQ)
+    || (mode == SpectranMISOMode::SPECTRANMISO_MODE_TRANSPONDER_IQ);
 }
 
 bool SpectranMISOSettings::isDecimationEnabled(const SpectranMISOMode &mode)

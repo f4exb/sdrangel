@@ -69,14 +69,14 @@ void SpectranMISOStreamWorker::startWork()
     else if (m_currentMode == SPECTRANMISO_MODE_RXTX_IQ)
     {
         streamRxTx();
-        // qDebug("SpectranMISOStreamWorker::startWork: RX TX IQ mode not implemented, stopping");
-        // m_running = false;
-        // emit stopped();
-        // return;
     }
     else if (m_currentMode == SPECTRANMISO_MODE_2RX_RAW)
     {
         streamRaw2Rx();
+    }
+    else if (m_currentMode == SPECTRANMISO_MODE_TRANSPONDER_IQ)
+    {
+        streamTransponderIQ();
     }
     else
     {
@@ -431,7 +431,7 @@ void SpectranMISOStreamWorker::streamRxTx()
     while (AARTSAAPI_GetDeviceState(m_device) != AARTSAAPI_RUNNING) {
         std::this_thread::sleep_for( std::chrono::milliseconds(100));
     }
-    qDebug("SpectranMISOStreamWorker::streamTx: device is ready %s", m_running ? "true" : "false");
+    qDebug("SpectranMISOStreamWorker::streamRxTx: device is ready");
 
     SampleVector::iterator convIt[2];
     AARTSAAPI_Result res;
@@ -489,7 +489,7 @@ void SpectranMISOStreamWorker::streamRxTx()
 
             if (res != AARTSAAPI_OK)
             {
-                qWarning("SpectranMISOStreamWorker::streamRxIQ: AARTSAAPI_ConsumePackets() failed with error %d", res);
+                qWarning("SpectranMISOStreamWorker::streamRxTx: AARTSAAPI_ConsumePackets() failed with error %d", res);
                 m_running = false;
             }
 
@@ -513,7 +513,7 @@ void SpectranMISOStreamWorker::streamRxTx()
         }
         else if (res != AARTSAAPI_EMPTY)
         {
-            qWarning("SpectranMISOStreamWorker::streamRxIQ: AARTSAAPI_GetPacket() failed with error %d", res);
+            qWarning("SpectranMISOStreamWorker::streamRxTx: AARTSAAPI_GetPacket() failed with error %d", res);
             m_running = false;
         }
     }
@@ -529,6 +529,89 @@ void SpectranMISOStreamWorker::streamRxTx()
     else
     {
         qDebug("SpectranMISOStreamWorker::streamRxTx: normal exit");
+        emit stopped();
+    }
+}
+
+void SpectranMISOStreamWorker::streamTransponderIQ()
+{
+    qDebug("SpectranMISOStreamWorker::streamTransponderIQ: starting - waiting for device to be ready...");
+    while (AARTSAAPI_GetDeviceState(m_device) != AARTSAAPI_RUNNING) {
+        std::this_thread::sleep_for( std::chrono::milliseconds(100));
+    }
+    qDebug("SpectranMISOStreamWorker::streamTransponderIQ: device is ready");
+
+    AARTSAAPI_Result res;
+    SampleVector::iterator convIt[2];
+
+    while (m_running)
+    {
+        // Prepare data packet
+        AARTSAAPI_Packet packet = { sizeof(AARTSAAPI_Packet) };
+        // Get the next data packet, sleep for some milliseconds, if none available yet.
+        while (
+            ((res = AARTSAAPI_GetPacket(m_device, 0, 0, &packet)) == AARTSAAPI_EMPTY)
+            && m_running
+        )
+        {
+            QThread::msleep(5);
+        }
+
+        if (res == AARTSAAPI_OK)
+        {
+            // Convert to Sample format
+            convIt[0] = m_convertBuffer[0].begin();
+            convIt[1] = m_convertBuffer[1].begin();
+
+            m_decimatorsFloatIQ[0].decimate1(&convIt[0], packet.fp32, packet.size * packet.num);
+
+            // Write samples to FIFO
+            std::vector<SampleVector::const_iterator> vbegin;
+            vbegin.push_back(m_convertBuffer[0].begin());
+            vbegin.push_back(m_convertBuffer[1].begin());
+            m_sampleMIFifo->writeSync(vbegin, packet.num);
+            // Remove the first packet from the packet queue
+            res = AARTSAAPI_ConsumePackets(m_device, 0, 1);
+
+            if (res != AARTSAAPI_OK)
+            {
+                qWarning("SpectranMISOStreamWorker::streamRxTx: AARTSAAPI_ConsumePackets() failed with error %d", res);
+                m_running = false;
+            }
+
+            // Get the current system time
+			double	streamTime;
+			AARTSAAPI_GetMasterStreamTime(m_device, streamTime);
+
+			// Check if we are still close to the capture stream
+			if (packet.startTime > streamTime - 0.1)
+			{
+				// Push packet into future for buffering
+
+				packet.startTime += 0.2;
+				packet.endTime += 0.2;
+				packet.startFrequency = m_centerFrequencyHz - 0.5 * packet.stepFrequency;
+
+				// Send packet to transmitter queue
+				AARTSAAPI_SendPacket(m_device, 0, &packet);
+			}
+        }
+        else if (res != AARTSAAPI_EMPTY)
+        {
+            qWarning("SpectranMISOStreamWorker::streamTransponderIQ: AARTSAAPI_GetPacket() failed with error %d", res);
+            m_running = false;
+        }
+    }
+
+    if (m_restart)
+    {
+        qDebug("SpectranMISOStreamWorker::streamTransponderIQ: exit and restart");
+        m_restart = false;
+        emit restart();
+    }
+    else
+    {
+        qDebug("SpectranMISOStreamWorker::streamTransponderIQ: normal exit");
         emit stopped();
     }
 }

@@ -43,6 +43,7 @@ const QMap<SpectranMISOMode, QString> SpectranMISO::m_modeNames = {
     { SpectranMISOMode::SPECTRANMISO_MODE_RX_IQ, "iqreceiver" },
     { SpectranMISOMode::SPECTRANMISO_MODE_TX_IQ, "iqtransmitter" },
     { SpectranMISOMode::SPECTRANMISO_MODE_RXTX_IQ, "iqtransceiver" },
+    { SpectranMISOMode::SPECTRANMISO_MODE_TRANSPONDER_IQ, "iqtransceiver" },
     { SpectranMISOMode::SPECTRANMISO_MODE_RX_RAW, "raw" },
     { SpectranMISOMode::SPECTRANMISO_MODE_2RX_RAW_INTL, "raw" },
     { SpectranMISOMode::SPECTRANMISO_MODE_2RX_RAW, "raw" }
@@ -484,16 +485,16 @@ bool SpectranMISO::applySettings(
     || settingsKeys.contains("clockRate")
     || settingsKeys.contains("logDecimation") || force)
     {
-        forwardChangeRxDSP = true;
-        forwardChangeTxDSP = true;
+        forwardChangeRxDSP = SpectranMISOSettings::hasRx(settings.m_mode);
+        forwardChangeTxDSP = SpectranMISOSettings::hasTx(settings.m_mode);
     }
     if (settingsKeys.contains("rxCenterFrequency") || force)
     {
-        forwardChangeRxDSP = true;
+        forwardChangeRxDSP = SpectranMISOSettings::hasRx(settings.m_mode);
     }
     if (settingsKeys.contains("txCenterFrequency") || force)
     {
-        forwardChangeTxDSP = true;
+        forwardChangeTxDSP = SpectranMISOSettings::hasTx(settings.m_mode);
     }
 
     if (m_running)
@@ -529,7 +530,7 @@ bool SpectranMISO::applySettings(
                     }
                 }
             }
-            else if (settings.m_mode == SPECTRANMISO_MODE_RXTX_IQ) // Rx + Tx
+            else if ((settings.m_mode == SPECTRANMISO_MODE_RXTX_IQ) || (settings.m_mode == SPECTRANMISO_MODE_TRANSPONDER_IQ)) // Rx + Tx
             {
                 if (settingsKeys.contains("rxCenterFrequency") || force)
                 {
@@ -626,7 +627,7 @@ bool SpectranMISO::applySettings(
 
     if (forwardChangeTxDSP)
     {
-        int sampleRate = getSampleRate(m_settings);
+        int sampleRate = getSampleRate(settings);
         DSPMIMOSignalNotification *notif = new DSPMIMOSignalNotification(sampleRate, settings.m_txCenterFrequency, false, 0);
         m_deviceAPI->getDeviceEngineInputMessageQueue()->push(notif);
     }
@@ -967,7 +968,7 @@ void SpectranMISO::applyCommonSettings(const SpectranMISOMode& mode)
             }
         }
 
-        if (mode == SpectranMISOMode::SPECTRANMISO_MODE_RXTX_IQ)
+        if ((mode == SpectranMISOMode::SPECTRANMISO_MODE_RXTX_IQ) || (mode == SpectranMISOMode::SPECTRANMISO_MODE_TRANSPONDER_IQ))
         {
             qDebug("SpectranMISO::applyCommonSettings: applying TX+RX IQ settings");
             if (AARTSAAPI_ConfigFind(&m_device, &root, &config, L"device/receiverchannel") == AARTSAAPI_OK) {
