@@ -4,7 +4,7 @@
 
 This plugin makes it possible to use an Aaronia Spectran V6 or V6 Eco connecting directly to the PC via the USB cables. It uses the SDK developed by Aaronia and you will need to install the Aaronia RTSA suite in your system to be able to compile and use this plugin. As there is not distribution of this plugin you will have to compile it from source (see next).
 
-This plugin is marked as a "MISO" meaning it supports multiple inputs i.e. receivers (Spectran V6) and single output i.e. transmitter (both models) in the same plugin. When connecting a V6 Eco the second receiver is simply disabled. There are also a few other restrictions with the V6 Eco vs the V6 that will be covered in the relevant sections of the interface description next.
+This plugin is marked as a "MISO" plugin meaning it supports multiple inputs i.e. receivers (Spectran V6) and single output i.e. transmitter (both models) in the same plugin. When connecting a V6 Eco the second receiver is simply disabled. There are also a few other restrictions with the V6 Eco vs the V6 that will be covered in the relevant sections of the interface description next.
 
 <h2>Compilation</h2>
 
@@ -18,7 +18,7 @@ The RTSA suite installation directory is hardcoded in the cmake module `cmake/Mo
 
 Please note that this has been experimented only in Linux.
 
-The SDK makes use of the `libAaroniaRTSAAPI.so` shared library (Linux) and the rest resides in the `sdk/` subdirectory with sample code in `sdk/Samples` that comes from the `https://github.com/Aaronia-Open-source/RTSA-API-Samples` Github repository. You may want to either clone this repository or copy the `sdk/Samples` directory in a writable location of your choice and compile the samples to validate your installation.
+The SDK makes use of the `libAaroniaRTSAAPI.so` shared library (Linux) and the rest resides in the `sdk/` subdirectory with sample code in `sdk/Samples` that comes from the `https://github.com/Aaronia-Open-source/RTSA-API-Samples` Github repository. You may want to either clone this repository or copy the `sdk/Samples` directory in a writable location of your choice and compile and run the samples to validate your installation.
 
 A forum to discuss SDK related questions is located at `https://v6-forum.aaronia.de/forum/forum/dll-dynamic-link-library/`
 
@@ -43,9 +43,9 @@ This is the sample rate and thus bandwidth available in the baseband after any p
 
 Selects the processing mode. With the Aaronia SDK there are two essential processing modes IQ and raw.
 
-The IQ mode is downsampling or upsampling a chunk of the bandwidth allowed by the main clock setting (8) at the sample rate provided in (10). It acts similarly to the local sink or local source channel plugins in SDRangel but via the SDK. It supports the single receiver and transmitter modes.
+The IQ mode is downsampling or upsampling a chunk of the bandwidth allowed by the main clock setting (8) at the sample rate provided in (10). It acts similarly to the local sink or local source channel plugins in SDRangel but via the SDK. It supports the single receiver and all transmitter modes.
 
-The Raw mode directly dumps the full bandwidth provided by the main clock and works in receive mode only and can also support dual receivers.
+The Raw mode directly dumps the full bandwidth provided by the main clock possibly with decimation and works in receive mode only. It supports dual synchronous receivers.
 
 Below are the options in the combo box:
 
@@ -71,7 +71,7 @@ This control allows to select the source of the spectrum display:
 
 <h3>6. Receiver frequency</h3>
 
-Sets the frequency of the receiver or receivers. When in dual receive modes the frequency of both receivers is the same as they are coherent.
+Sets the frequency of the receiver or receivers. When in dual receive modes this is the frequency of both receivers as receivers are synchronous.
 
 <h3>7. Transmitter frequency</h3>
 
@@ -83,7 +83,7 @@ Another limitation is that upon restart the transmitter frequency is reset to th
 
 This is the device main clock rate that is in effect in raw mode. For the Eco mode the clock is fixed at 61.44 MHz therefore this control is disabled. In IQ mode it limits the actual sample rate (10)
 
-For the V6 available clock rates are 92, 122 and 245 MHz. Other frequencies may be model dependant and are not supported.
+For the V6 available clock rates are 92, 122 and 245 MHz.
 
 <h3>9. Decimation in raw mode</h3>
 
