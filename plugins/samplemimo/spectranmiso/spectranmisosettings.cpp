@@ -44,7 +44,8 @@ SpectranMISOSettings::SpectranMISOSettings() :
     m_useReverseAPI(false),
     m_reverseAPIAddress(""),
     m_reverseAPIPort(0),
-    m_reverseAPIDeviceIndex(0)
+    m_reverseAPIDeviceIndex(0),
+    m_txDrive(0)
 {
 }
 
@@ -64,6 +65,7 @@ void SpectranMISOSettings::resetToDefaults()
     m_reverseAPIAddress.clear();
     m_reverseAPIPort = 0;
     m_reverseAPIDeviceIndex = 0;
+    m_txDrive = 0;
 }
 QByteArray SpectranMISOSettings::serialize() const
 {
@@ -83,6 +85,7 @@ QByteArray SpectranMISOSettings::serialize() const
     s.writeString(11, m_reverseAPIAddress);
     s.writeU32(12, m_reverseAPIPort);
     s.writeU32(13, m_reverseAPIDeviceIndex);
+    s.writeS32(14, m_txDrive);
 
     return s.final();
 }
@@ -150,6 +153,14 @@ bool SpectranMISOSettings::deserialize(const QByteArray& data)
         } else {
             m_reverseAPIDeviceIndex = static_cast<uint16_t>(uintval);
         }
+        d.readS32(14, &intval, 0);
+        if (intval > 0) {
+            m_txDrive = 0;
+        } else if (intval < -50) {
+            m_txDrive = 50;
+        } else {
+            m_txDrive = intval;
+        }
         return true;
     }
 
@@ -200,6 +211,9 @@ void SpectranMISOSettings::applySettings(const QStringList& settingsKeys, const 
     if (settingsKeys.contains("reverseAPIDeviceIndex")) {
         m_reverseAPIDeviceIndex = settings.m_reverseAPIDeviceIndex;
     }
+    if (settingsKeys.contains("txDrive")) {
+        m_txDrive = settings.m_txDrive;
+    }
 }
 
 QString SpectranMISOSettings::getDebugString(const QStringList& settingsKeys, bool force) const
@@ -229,6 +243,9 @@ QString SpectranMISOSettings::getDebugString(const QStringList& settingsKeys, bo
     }
     if (force || settingsKeys.contains("logDecimation")) {
         debugString += QString("Log Decimation: %1\n").arg(m_logDecimation);
+    }
+    if (force || settingsKeys.contains("txDrive")) {
+        debugString += QString("Tx Drive: %1\n").arg(m_txDrive);
     }
     if (force || settingsKeys.contains("streamIndex")) {
         debugString += QString("Stream Index: %1\n").arg(m_streamIndex);
@@ -269,7 +286,8 @@ QDataStream &operator<<(QDataStream &stream, const SpectranMISOSettings &setting
            << settings.m_useReverseAPI
            << settings.m_reverseAPIAddress
            << settings.m_reverseAPIPort
-           << settings.m_reverseAPIDeviceIndex;
+           << settings.m_reverseAPIDeviceIndex
+           << settings.m_txDrive;
     return stream;
 }
 
@@ -288,7 +306,8 @@ QDataStream &operator>>(QDataStream &stream, SpectranMISOSettings &settings)
            >> settings.m_useReverseAPI
            >> settings.m_reverseAPIAddress
            >> settings.m_reverseAPIPort
-           >> settings.m_reverseAPIDeviceIndex;
+           >> settings.m_reverseAPIDeviceIndex
+           >> settings.m_txDrive;
     return stream;
 }
 

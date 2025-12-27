@@ -521,6 +521,13 @@ bool SpectranMISO::applySettings(
                     // Propagate to the worker
                     m_streamWorker->setSampleRate(settings.m_sampleRate);
                 }
+                if (settingsKeys.contains("txDrive") || force)
+                {
+                    // Set the transmitter gain
+                    if (AARTSAAPI_ConfigFind(&m_device, &root, &config, L"main/transgain") == AARTSAAPI_OK) {
+                        AARTSAAPI_ConfigSetFloat(&m_device, &config, static_cast<float>(settings.m_txDrive));
+                    }
+                }
             }
             else if (settings.m_mode == SPECTRANMISO_MODE_RXTX_IQ) // Rx + Tx
             {
@@ -553,6 +560,13 @@ bool SpectranMISO::applySettings(
                         qWarning("SpectranMISO::applySettings: cannot find main/demodspanfreq");
                     // Propagate to the worker
                     m_streamWorker->setSampleRate(settings.m_sampleRate);
+                }
+                if (settingsKeys.contains("txDrive") || force)
+                {
+                    // Set the transmitter gain
+                    if (AARTSAAPI_ConfigFind(&m_device, &root, &config, L"main/transgain") == AARTSAAPI_OK) {
+                        AARTSAAPI_ConfigSetFloat(&m_device, &config, static_cast<float>(settings.m_txDrive));
+                    }
                 }
             }
             else // Rx only modes

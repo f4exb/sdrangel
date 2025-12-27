@@ -67,6 +67,7 @@ private:
     void on_log2Decimation_currentIndexChanged(int index);
     void on_rxCenterFrequency_valueChanged(qint64 value);
     void on_txCenterFrequency_valueChanged(qint64 value);
+    void on_txDrive_valueChanged(int value);
     void makeUIConnections();
 
 private slots:

@@ -69,6 +69,7 @@ struct SpectranMISOSettings {
     QString m_reverseAPIAddress;
     uint16_t m_reverseAPIPort;
     uint16_t m_reverseAPIDeviceIndex;
+    int m_txDrive;
     static const int m_maxTxSampleRate = 20000000; // 20 MHz
 
     SpectranMISOSettings();

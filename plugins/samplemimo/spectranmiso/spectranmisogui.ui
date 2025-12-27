@@ -234,7 +234,7 @@
         </size>
        </property>
        <property name="toolTip">
-        <string>Select stream for main spectrum source</string>
+        <string>Select stream for spectrum display</string>
        </property>
        <item>
         <property name="text">
@@ -314,7 +314,7 @@
         <enum>Qt::StrongFocus</enum>
        </property>
        <property name="toolTip">
-        <string>Tuner center frequency in kHz</string>
+        <string>Rx center frequency in kHz</string>
        </property>
       </widget>
      </item>
@@ -392,7 +392,7 @@
         <enum>Qt::StrongFocus</enum>
        </property>
        <property name="toolTip">
-        <string>Tuner center frequency in kHz</string>
+        <string>Tx center frequency in kHz</string>
        </property>
       </widget>
      </item>
@@ -630,23 +630,35 @@
         </size>
        </property>
        <property name="toolTip">
-        <string>Tx drive level (0: off)</string>
+        <string>Tx drive level (dB)</string>
+       </property>
+       <property name="minimum">
+        <number>-50</number>
        </property>
        <property name="maximum">
-        <number>15</number>
+        <number>0</number>
        </property>
        <property name="pageStep">
         <number>1</number>
        </property>
        <property name="value">
-        <number>15</number>
+        <number>-20</number>
        </property>
       </widget>
      </item>
      <item>
       <widget class="QLabel" name="txDriveText">
+       <property name="minimumSize">
+        <size>
+         <width>25</width>
+         <height>0</height>
+        </size>
+       </property>
+       <property name="toolTip">
+        <string>Tx drive level (dB)</string>
+       </property>
        <property name="text">
-        <string>00</string>
+        <string>-00</string>
        </property>
        <property name="alignment">
         <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>

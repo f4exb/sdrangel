@@ -149,6 +149,8 @@ void SpectranMISOGui::displaySettings()
     ui->clockrateIndex->setCurrentIndex(m_settings.m_clockRate);
     ui->log2Decim->setCurrentIndex(m_settings.m_logDecimation);
     ui->rxChannel->setCurrentIndex(m_settings.m_rxChannel);
+    ui->txDrive->setValue(m_settings.m_txDrive);
+    ui->txDriveText->setText(tr("%1").arg(m_settings.m_txDrive));
 
     blockApplySettings(false);
 }
@@ -423,6 +425,15 @@ void SpectranMISOGui::on_txCenterFrequency_valueChanged(qint64 value)
     sendSettings();
 }
 
+void SpectranMISOGui::on_txDrive_valueChanged(int value)
+{
+    ui->txDriveText->setText(tr("%1").arg(value));
+    m_settings.m_txDrive = value;
+    m_settingsKeys.append("txDrive");
+    m_doApplySettings = true;
+    sendSettings();
+}
+
 void SpectranMISOGui::makeUIConnections()
 {
     connect(ui->startStop, &ButtonSwitch::toggled, this, &SpectranMISOGui::on_startStop_toggled);
@@ -434,4 +445,5 @@ void SpectranMISOGui::makeUIConnections()
     QObject::connect(ui->clockrateIndex, QOverload<int>::of(&QComboBox::currentIndexChanged), this, &SpectranMISOGui::on_clockRate_currentIndexChanged);
     QObject::connect(ui->log2Decim, QOverload<int>::of(&QComboBox::currentIndexChanged), this, &SpectranMISOGui::on_log2Decimation_currentIndexChanged);
     QObject::connect(ui->sampleRate, &ValueDial::changed, this, &SpectranMISOGui::on_sampleRate_valueChanged);
+    QObject::connect(ui->txDrive, &QDial::valueChanged, this, &SpectranMISOGui::on_txDrive_valueChanged);
 }
