@@ -547,6 +547,8 @@ bool SpectranMISO::applySettings(
                         AARTSAAPI_ConfigSetFloat(&m_device, &config, settings.m_txCenterFrequency);
                     else
                         qWarning("SpectranMISO::applySettings: cannot find main/centerfreq");
+                    // Propagate to the worker
+                    m_streamWorker->setCenterFrequency(settings.m_txCenterFrequency);
                 }
 
                 if (settingsKeys.contains("sampleRate") || force)
@@ -558,8 +560,6 @@ bool SpectranMISO::applySettings(
                         AARTSAAPI_ConfigSetFloat(&m_device, &config, (double) settings.m_sampleRate / 1.5);
                     else
                         qWarning("SpectranMISO::applySettings: cannot find main/demodspanfreq");
-                    // Propagate to the worker
-                    m_streamWorker->setSampleRate(settings.m_sampleRate);
                 }
                 if (settingsKeys.contains("txDrive") || force)
                 {

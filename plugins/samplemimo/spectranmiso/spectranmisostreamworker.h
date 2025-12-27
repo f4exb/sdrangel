@@ -65,6 +65,7 @@ private:
     void streamRxIQ();
     void streamRaw2Rx();
     void streamTx();
+    void streamRxTx();
     std::atomic<bool> m_running;
     std::atomic<bool> m_localRestart;
     bool m_restart;

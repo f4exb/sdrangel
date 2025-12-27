@@ -68,10 +68,11 @@ void SpectranMISOStreamWorker::startWork()
     }
     else if (m_currentMode == SPECTRANMISO_MODE_RXTX_IQ)
     {
-        qDebug("SpectranMISOStreamWorker::startWork: RX TX IQ mode not implemented, stopping");
-        m_running = false;
-        emit stopped();
-        return;
+        streamRxTx();
+        // qDebug("SpectranMISOStreamWorker::startWork: RX TX IQ mode not implemented, stopping");
+        // m_running = false;
+        // emit stopped();
+        // return;
     }
     else if (m_currentMode == SPECTRANMISO_MODE_2RX_RAW)
     {
@@ -420,6 +421,114 @@ void SpectranMISOStreamWorker::streamTx()
     else
     {
         qDebug("SpectranMISOStreamWorker::streamTx: normal exit");
+        emit stopped();
+    }
+}
+
+void SpectranMISOStreamWorker::streamRxTx()
+{
+    qDebug("SpectranMISOStreamWorker::streamTx: starting - waiting for device to be ready...");
+    while (AARTSAAPI_GetDeviceState(m_device) != AARTSAAPI_RUNNING) {
+        std::this_thread::sleep_for( std::chrono::milliseconds(100));
+    }
+    qDebug("SpectranMISOStreamWorker::streamTx: device is ready %s", m_running ? "true" : "false");
+
+    SampleVector::iterator convIt[2];
+    AARTSAAPI_Result res;
+
+    unsigned int iPart1Begin, iPart1End, iPart2Begin, iPart2End;
+
+	static const double	zeroDBm = sqrt(1.0 / 20.0);
+	float *iqbuffer = new float[3*m_convertBuffer[0].size()]; // provision of 50% more than max size
+
+    while (m_running)
+    {
+        // Prepare data packet
+        AARTSAAPI_Packet packet = { sizeof(AARTSAAPI_Packet) };
+        // Get the next data packet, sleep for some milliseconds, if none available yet.
+        while (
+            ((res = AARTSAAPI_GetPacket(m_device, 0, 0, &packet)) == AARTSAAPI_EMPTY)
+            && m_running
+        )
+        {
+            QThread::msleep(5);
+        }
+
+        if (res == AARTSAAPI_OK)
+        {
+            // Read samples from FIFO
+            m_sampleMOFifo->readSync(packet.num, iPart1Begin, iPart1End, iPart2Begin, iPart2End);
+            int iqbufPos = 0;
+
+            if (iPart1Begin != iPart1End)
+            {
+                SampleVector::iterator begin = m_sampleMOFifo->getData(0).begin() + iPart1Begin;
+                m_interpolatorsFloatIQ.interpolate1(&begin, iqbuffer, (iPart1End - iPart1Begin)*2, zeroDBm, false);
+                iqbufPos += (iPart1End - iPart1Begin)*2;
+            }
+            if (iPart2Begin != iPart2End)
+            {
+                SampleVector::iterator begin = m_sampleMOFifo->getData(0).begin() + iPart2Begin;
+                m_interpolatorsFloatIQ.interpolate1(&begin, iqbuffer + iqbufPos, (iPart2End - iPart2Begin)*2, zeroDBm, false);
+                iqbufPos += (iPart2End - iPart2Begin)*2;
+            }
+
+            // Convert to Sample format
+            convIt[0] = m_convertBuffer[0].begin();
+            convIt[1] = m_convertBuffer[1].begin();
+
+            m_decimatorsFloatIQ[0].decimate1(&convIt[0], packet.fp32, packet.size * packet.num);
+
+            // Write samples to FIFO
+            std::vector<SampleVector::const_iterator> vbegin;
+            vbegin.push_back(m_convertBuffer[0].begin());
+            vbegin.push_back(m_convertBuffer[1].begin());
+            m_sampleMIFifo->writeSync(vbegin, packet.num);
+            // Remove the first packet from the packet queue
+            res = AARTSAAPI_ConsumePackets(m_device, 0, 1);
+
+            if (res != AARTSAAPI_OK)
+            {
+                qWarning("SpectranMISOStreamWorker::streamRxIQ: AARTSAAPI_ConsumePackets() failed with error %d", res);
+                m_running = false;
+            }
+
+            // Get the current system time
+			double	streamTime;
+			AARTSAAPI_GetMasterStreamTime(m_device, streamTime);
+
+			// Check if we are still close to the capture stream
+			if (packet.startTime > streamTime - 0.1)
+			{
+				// Push packet into future for buffering
+
+				packet.startTime += 0.2;
+				packet.endTime += 0.2;
+				packet.startFrequency = m_centerFrequencyHz - 0.5 * packet.stepFrequency;
+                packet.fp32 = iqbuffer;
+
+				// Send packet to transmitter queue
+				AARTSAAPI_SendPacket(m_device, 0, &packet);
+			}
+        }
+        else if (res != AARTSAAPI_EMPTY)
+        {
+            qWarning("SpectranMISOStreamWorker::streamRxIQ: AARTSAAPI_GetPacket() failed with error %d", res);
+            m_running = false;
+        }
+    }
+
+    delete[] iqbuffer;
+
+    if (m_restart)
+    {
+        qDebug("SpectranMISOStreamWorker::streamRxTx: exit and restart");
+        m_restart = false;
+        emit restart();
+    }
+    else
+    {
+        qDebug("SpectranMISOStreamWorker::streamRxTx: normal exit");
         emit stopped();
     }
 }

@@ -37,7 +37,7 @@ Below are the options in the combo box:
 
   - **Rx IQ**: Single receiver in IQ mode
   - **Tx IQ**: Transmitter only
-  - **Rx+Tx IQ**: Transceiver is not supported yet
+  - **Rx+Tx IQ**: Transceiver
   - **Rx Raw**: Single receiver in Raw mode
   - **Rx 1+2 I**: Dual receivers in Raw mode with interleaved samples
   - **Rx 1+2 Raw**: Dual receivers in Raw mode with non-interleaved samples

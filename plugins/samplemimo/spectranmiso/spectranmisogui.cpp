@@ -69,7 +69,7 @@ SpectranMISOGui::SpectranMISOGui(DeviceUISet *deviceUISet, QWidget* parent) :
 
     // Disable certain modes for the moment
     // ui->mode->model()->setData(ui->mode->model()->index(1, 0), 0, Qt::UserRole - 1); // Tx IQ disables the item
-    ui->mode->model()->setData(ui->mode->model()->index(2, 0), 0, Qt::UserRole - 1); // Rx+Tx IQ disables the item
+    // ui->mode->model()->setData(ui->mode->model()->index(2, 0), 0, Qt::UserRole - 1); // Rx+Tx IQ disables the item
 
     // Disable Tx spectrum source for the moment
     // ui->spectrumSource->model()->setData(ui->spectrumSource->model()->index(2, 0), 0, Qt::UserRole - 1); // Tx disabled
