@@ -2,13 +2,25 @@
 
 <h2>Introduction</h2>
 
-This plugin makes it possible to use an Aaronia Spectran V6 or V6 Eco connecting directly to the PC via the USB cables. It uses the SDK developed by Aaronia that you will need to download and install in your system to be able to compile and use this plugin. As there is not distribution of this plugin you will have to compile it from source.
+This plugin makes it possible to use an Aaronia Spectran V6 or V6 Eco connecting directly to the PC via the USB cables. It uses the SDK developed by Aaronia and you will need to install the Aaronia RTSA suite in your system to be able to compile and use this plugin. As there is not distribution of this plugin you will have to compile it from source (see next).
 
 This plugin is marked as a "MISO" meaning it supports multiple inputs i.e. receivers (Spectran V6) and single output i.e. transmitter (both models) in the same plugin. When connecting a V6 Eco the second receiver is simply disabled. There are also a few other restrictions with the V6 Eco vs the V6 that will be covered in the relevant sections of the interface description next.
 
 <h2>Compilation</h2>
 
-Linux environment is assumed and in this case the SDK installs in `/opt/aaronia-rtsa-suite/Aaronia-RTSA-Suite-PRO` The Cmake files and the `devices/spectran/aaroniartsasdkhelper.h` expect this installation directory and when present the plugin is automatically compiled with the default build options.
+You have to install the Aaronia RTSA suite first from https://aaronia.com/en/support/downloads.
+
+The SDK is part of the RTSA suite installation which default location depends on the O/S:
+  - Linux: `/opt/aaronia-rtsa-suite/Aaronia-RTSA-Suite-PRO`
+  - Windows: `C:\Program Files\Aaronia AG\Aaronia RTSA-Suite PRO`
+
+The RTSA suite installation directory is hardcoded in the cmake module `cmake/Modules/FindRTSAAPI.cmake` and the `devices/spectran/aaroniartsasdkhelper.h` then when the RTSA suite is installed in the default location the plugin will be built automatically with the rest of the software.
+
+Please note that this has been experimented only in Linux.
+
+The SDK makes use of the `libAaroniaRTSAAPI.so` shared library (Linux) and the rest resides in the `sdk/` subdirectory with sample code in `sdk/Samples` that comes from the `https://github.com/Aaronia-Open-source/RTSA-API-Samples` Github repository. You may want to either clone this repository or copy the `sdk/Samples` directory in a writable location of your choice and compile the samples to validate your installation.
+
+A forum to discuss SDK related questions is located at `https://v6-forum.aaronia.de/forum/forum/dll-dynamic-link-library/`
 
 <h2>Interface</h2>
 
@@ -40,7 +52,7 @@ Below are the options in the combo box:
   - **Rx IQ**: Single receiver in IQ mode
   - **Tx IQ**: Transmitter only
   - **Rx+Tx IQ**: Transceiver
-  - **Rx > Tx IQ**: Transponder (Tx spectrum is not active)
+  - **Rx > Tx IQ**: Transponder (Transmitter spectrum is not active)
   - **Rx Raw**: Single receiver in Raw mode
   - **Rx 1+2 I**: Dual receivers in Raw mode with interleaved samples
   - **Rx 1+2 Raw**: Dual receivers in Raw mode with non-interleaved samples
@@ -53,25 +65,25 @@ For dual receiver devices and single receiver mode this control allows selection
 
 This control allows to select the source of the spectrum display:
 
-  - **Rx1**: Shows spectrum from the first receiver
-  - **Rx2**: Shows spectrum from the second receiver
-  - **Tx**: Shows spectrum from the transmitter
+  - **Rx1**: Shows spectrum coming from the first receiver
+  - **Rx2**: Shows spectrum coming from the second receiver
+  - **Tx**: Shows spectrum of data sent to the transmitter (not available in transponder or receive only modes)
 
-<h3>6. Rx frequency</h3>
+<h3>6. Receiver frequency</h3>
 
 Sets the frequency of the receiver or receivers. When in dual receive modes the frequency of both receivers is the same as they are coherent.
 
-<h3>7. Tx frequency</h3>
+<h3>7. Transmitter frequency</h3>
 
-Sets the frequency of the transmitter. It is independent of the Rx frequency within the limit of the common frequency span between receiver and transmitter sides which is fixed at 50 MHz. Practically it means that the Tx frequency cannot be further away than 25 MHz from the receiver frequency on any side also limited by the transmitter bandwidth so that it is actually the far side of the bandwidth that can be further away than 25 MHz from the receiver center frequency.
+Sets the frequency of the transmitter. It is independent of the receiver frequency within the limit of the common frequency span between receiver and transmitter sides which is fixed at 50 MHz. Practically it means that the transmitter frequency cannot be further away than 25 MHz from the receiver frequency on any side also limited by the transmitter bandwidth so that it is actually the far side of the bandwidth that cannot be further away than 25 MHz from the receiver center frequency.
 
-Another limitation is that upon restart the Tx frequency is reset to the Rx frequency.
+Another limitation is that upon restart the transmitter frequency is reset to the receiver frequency.
 
 <h3>8. Clock rate</h3>
 
 This is the device main clock rate that is in effect in raw mode. For the Eco mode the clock is fixed at 61.44 MHz therefore this control is disabled. In IQ mode it limits the actual sample rate (10)
 
-For the V6 available clock rates are 92, 122 and 245 MHz. Other frequencies may be model dependant and are not supported. Yes it means you can see up to 245 MHz of spectrum.
+For the V6 available clock rates are 92, 122 and 245 MHz. Other frequencies may be model dependant and are not supported.
 
 <h3>9. Decimation in raw mode</h3>
 
@@ -81,6 +93,6 @@ This is available only in raw mode. The full bandwidth conditioned by the main c
 
 This is the sample rate in IQ mode for the receivers or the transmitter. For the transmitter it is limited from 48 kS/s to 20 MS/s.
 
-<h3>11. Tx drive factor</h3>
+<h3>11. Transmitter drive factor</h3>
 
-This is the Tx drive factor in dB referenced to the full power (0 dB) and goes down to -50dB in 1dB steps.
+This is the transmitter drive factor in dB referenced to the full power (0 dB) and goes down to -50dB in 1dB steps.
