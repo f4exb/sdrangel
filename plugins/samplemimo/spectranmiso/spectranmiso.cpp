@@ -296,7 +296,9 @@ int SpectranMISO::getSinkSampleRate(int index) const
 int SpectranMISO::getSampleRate(const SpectranMISOSettings& settings)
 {
     if (settings.m_mode == SPECTRANMISO_MODE_RX_IQ
-        || settings.m_mode == SPECTRANMISO_MODE_RXTX_IQ || settings.m_mode == SPECTRANMISO_MODE_TX_IQ)
+        || settings.m_mode == SPECTRANMISO_MODE_RXTX_IQ
+        || settings.m_mode == SPECTRANMISO_MODE_TX_IQ
+        || settings.m_mode == SPECTRANMISO_MODE_TRANSPONDER_IQ)
     {
         return settings.m_sampleRate; // For IQ modes, the sample rate is directly specified
     }
