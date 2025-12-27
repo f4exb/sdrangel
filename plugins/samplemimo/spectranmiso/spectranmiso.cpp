@@ -955,9 +955,12 @@ void SpectranMISO::applyCommonSettings(const SpectranMISOMode& mode)
         if (mode == SpectranMISOMode::SPECTRANMISO_MODE_TX_IQ)
         {
             qDebug("SpectranMISO::applyCommonSettings: applying TX IQ settings");
-            if (AARTSAAPI_ConfigFind(&m_device, &root, &config, L"main/centerfreq") == AARTSAAPI_OK)
+            if (AARTSAAPI_ConfigFind(&m_device, &root, &config, L"device/transmitterclockvar") == AARTSAAPI_OK) {
+                AARTSAAPI_ConfigSetFloat(&m_device, &config, 0.025); // increase from default 0.0002 to reduce glitches
+            }
+            if (AARTSAAPI_ConfigFind(&m_device, &root, &config, L"main/centerfreq") == AARTSAAPI_OK) {
                 AARTSAAPI_ConfigSetFloat(&m_device, &config, 2350.0e6);
-
+            }
             // Set the frequency range of the transmitter - this is the full range not the IQ mod range
             if (AARTSAAPI_ConfigFind(&m_device, &root, &config, L"main/spanfreq") == AARTSAAPI_OK) {
                 AARTSAAPI_ConfigSetFloat(&m_device, &config, 50.0e6); // Choose 50 MHz as per example
@@ -971,6 +974,9 @@ void SpectranMISO::applyCommonSettings(const SpectranMISOMode& mode)
         if ((mode == SpectranMISOMode::SPECTRANMISO_MODE_RXTX_IQ) || (mode == SpectranMISOMode::SPECTRANMISO_MODE_TRANSPONDER_IQ))
         {
             qDebug("SpectranMISO::applyCommonSettings: applying TX+RX IQ settings");
+            if (AARTSAAPI_ConfigFind(&m_device, &root, &config, L"device/transmitterclockvar") == AARTSAAPI_OK) {
+                AARTSAAPI_ConfigSetFloat(&m_device, &config, 0.025); // increase from default 0.0002 to reduce glitches
+            }
             if (AARTSAAPI_ConfigFind(&m_device, &root, &config, L"device/receiverchannel") == AARTSAAPI_OK) {
                 AARTSAAPI_ConfigSetString(&m_device, &config, m_rxChannelNames[m_settings.m_rxChannel].toStdWString().c_str());
             }
