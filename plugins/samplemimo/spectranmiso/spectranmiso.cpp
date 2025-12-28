@@ -547,6 +547,13 @@ bool SpectranMISO::applySettings(
                         AARTSAAPI_ConfigSetFloat(&m_device, &config, settings.m_rxCenterFrequency);
                     else
                         qWarning("SpectranMISO::applySettings: cannot find main/demodcenterfreq");
+                    if (getSpectranModel() == SpectranModel::SPECTRAN_V6Eco)
+                    {
+                        if (AARTSAAPI_ConfigFind(&m_device, &root, &config, L"main/centerfreqrx") == AARTSAAPI_OK)
+                            AARTSAAPI_ConfigSetFloat(&m_device, &config, settings.m_rxCenterFrequency);
+                        else
+                            qWarning("SpectranMISO::applySettings: cannot find main/centerfreqrx for V6Eco");
+                    }
                 }
 
                 if (settingsKeys.contains("txCenterFrequency") || force)
@@ -556,6 +563,13 @@ bool SpectranMISO::applySettings(
                         AARTSAAPI_ConfigSetFloat(&m_device, &config, settings.m_txCenterFrequency);
                     else
                         qWarning("SpectranMISO::applySettings: cannot find main/centerfreq");
+                    if (getSpectranModel() == SpectranModel::SPECTRAN_V6Eco)
+                    {
+                        if (AARTSAAPI_ConfigFind(&m_device, &root, &config, L"main/centerfreqtx") == AARTSAAPI_OK)
+                            AARTSAAPI_ConfigSetFloat(&m_device, &config, settings.m_txCenterFrequency);
+                        else
+                            qWarning("SpectranMISO::applySettings: cannot find main/centerfreqtx for V6Eco");
+                    }
                     // Propagate to the worker
                     m_streamWorker->setCenterFrequency(settings.m_txCenterFrequency);
                 }
