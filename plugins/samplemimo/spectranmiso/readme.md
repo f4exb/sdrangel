@@ -81,9 +81,7 @@ Another limitation is that upon restart the transmitter frequency is reset to th
 
 <h3>8. Clock rate</h3>
 
-This is the device main clock rate that is in effect in raw mode. For the Eco mode the clock is fixed at 61.44 MHz therefore this control is disabled. In IQ mode it limits the actual sample rate (10)
-
-For the V6 available clock rates are 92, 122 and 245 MHz.
+This is the device main clock rate that is in effect in raw mode. For the Eco mode the clock is fixed at 61.44 MHz therefore this control is disabled. In IQ mode it limits the actual sample rate (10). On the V6 all values may not be available depending on the enabled options. 92 and 122 MHz should always be present. Selectring an invalid value will fallback to a valid one but the assumed sample rate will be wrong.
 
 <h3>9. Decimation in raw mode</h3>
 

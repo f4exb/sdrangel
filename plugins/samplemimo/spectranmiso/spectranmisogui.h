@@ -56,6 +56,7 @@ private:
     bool m_forceSettings;
     SpectranMISO* m_sampleMIMO;
     int m_lastEngineState;
+    void displaySampleRateText(int sampleRate);
     bool handleMessage(const Message& message);
     bool isSpectrumRx() const;
     void on_startStop_toggled(bool checked);

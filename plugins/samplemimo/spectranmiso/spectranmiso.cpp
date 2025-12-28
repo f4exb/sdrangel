@@ -60,12 +60,14 @@ const QMap<SpectranRxChannel, QString> SpectranMISO::m_rxChannelNames = {
 };
 
 const QMap<SpectranMISOClockRate, QString> SpectranMISO::m_clockRateNames = {
-    { SpectranMISOClockRate::SPECTRANMISO_CLOCK_46M, "46MHz" },
-    { SpectranMISOClockRate::SPECTRANMISO_CLOCK_61M, "61MHz" },
-    { SpectranMISOClockRate::SPECTRANMISO_CLOCK_76M, "77MHz" },
     { SpectranMISOClockRate::SPECTRANMISO_CLOCK_92M, "92MHz" },
     { SpectranMISOClockRate::SPECTRANMISO_CLOCK_122M, "122MHz" },
-    { SpectranMISOClockRate::SPECTRANMISO_CLOCK_245M, "245MHz" }
+    { SpectranMISOClockRate::SPECTRANMISO_CLOCK_245M, "245MHz" },
+    { SpectranMISOClockRate::SPECTRANMISO_CLOCK_184M, "184MHz" },
+    { SpectranMISOClockRate::SPECTRANMISO_CLOCK_492M, "492MHz" },
+    { SpectranMISOClockRate::SPECTRANMISO_CLOCK_77M, "77MHz" },
+    { SpectranMISOClockRate::SPECTRANMISO_CLOCK_61M, "61MHz" },
+    { SpectranMISOClockRate::SPECTRANMISO_CLOCK_46M, "46MHz" },
 };
 
 const QMap<unsigned int, QString> SpectranMISO::m_log2DecimationNames = {
@@ -321,14 +323,18 @@ int SpectranMISO::getActualRawRate(const SpectranMISOClockRate& clockRate)
             return 46080000;
         case SPECTRANMISO_CLOCK_61M:
             return 61440000;
-        case SPECTRANMISO_CLOCK_76M:
+        case SPECTRANMISO_CLOCK_77M:
             return 76800000;
         case SPECTRANMISO_CLOCK_92M:
             return 92160000;
         case SPECTRANMISO_CLOCK_122M:
             return 122880000;
+        case SPECTRANMISO_CLOCK_184M:
+            return 184320000;
         case SPECTRANMISO_CLOCK_245M:
             return 245760000;
+        case SPECTRANMISO_CLOCK_492M:
+            return 491520000;
         default:
             return 0; // Invalid clock rate
     }
@@ -888,12 +894,28 @@ bool SpectranMISO::startMode(const SpectranMISOMode& mode)
 void SpectranMISO::stopMode()
 {
     qDebug("SpectranMISO::stopMode");
+    AARTSAAPI_Result res;
     // Stop the streaming process
-    AARTSAAPI_StopDevice(&m_device);
+    if ((res = AARTSAAPI_StopDevice(&m_device)) != AARTSAAPI_OK)
+    {
+        qCritical("SpectranMISO::stopMode: Cannot stop Spectran device. Return code: %x", res);
+    } else {
+        qDebug("SpectranMISO::stopMode: device stopped successfully");
+    }
     // Release the hardware
-    AARTSAAPI_DisconnectDevice(&m_device); // g_main_loop is stopped in the stream worker
+    if ((res = AARTSAAPI_DisconnectDevice(&m_device)) != AARTSAAPI_OK) // g_main_loop is stopped in the stream worker
+    {
+        qCritical("SpectranMISO::stopMode: Cannot disconnect Spectran device. Return code: %x", res);
+    } else {
+        qDebug("SpectranMISO::stopMode: device disconnected");
+    }
     // Close the device handle
-    AARTSAAPI_CloseDevice(DeviceSpectran::instance().getLibraryHandle(), &m_device);
+    if ((res = AARTSAAPI_CloseDevice(DeviceSpectran::instance().getLibraryHandle(), &m_device)) != AARTSAAPI_OK)
+    {
+        qCritical("SpectranMISO::stopMode: Cannot close Spectran device. Return code: %x", res);
+    } else {
+        qDebug("SpectranMISO::stopMode: device closed");
+    }
     qDebug("SpectranMISO::stopMode: ended");
 }
 

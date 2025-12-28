@@ -50,12 +50,6 @@ SpectranMISOGui::SpectranMISOGui(DeviceUISet *deviceUISet, QWidget* parent) :
     ui->sampleRate->setColorMapper(ColorMapper(ColorMapper::GrayGreenYellow));
     ui->sampleRate->setValueRange(9, 12000, 100000000); // 12 kHz to 100 MHz
 
-    // Disable unsupported clock rates for the moment
-    ui->clockrateIndex->model()->setData(ui->clockrateIndex->model()->index(3, 0), 0, Qt::UserRole - 1); // disables 46 MHz
-    ui->clockrateIndex->model()->setData(ui->clockrateIndex->model()->index(4, 0), 0, Qt::UserRole - 1); // disables 46 MHz
-    ui->clockrateIndex->model()->setData(ui->clockrateIndex->model()->index(5, 0), 0, Qt::UserRole - 1); // disables 61 MHz
-    ui->clockrateIndex->model()->setData(ui->clockrateIndex->model()->index(6, 0), 0, Qt::UserRole - 1); // disables 76 MHz
-
     if (m_sampleMIMO->getSpectranModel() == SpectranModel::SPECTRAN_V6Eco)
     {
         // V6 Eco only supports 61 MHz clock rate (61.44 actually)
@@ -143,7 +137,7 @@ void SpectranMISOGui::displaySettings()
     ui->sampleRate->setEnabled(true);
     ui->sampleRate->setValue(m_settings.m_sampleRate);
     ui->sampleRate->setEnabled(!SpectranMISOSettings::isRawMode(m_settings.m_mode));
-    ui->deviceRateText->setText(tr("%1k").arg(QString::number(SpectranMISO::getSampleRate(m_settings) / 1000.0f, 'g', 5)));
+    displaySampleRateText(m_settings.m_sampleRate);
     ui->spectrumSource->setCurrentIndex(m_settings.m_spectrumStreamIndex);
     ui->mode->setCurrentIndex(m_settings.m_mode);
     ui->clockrateIndex->setCurrentIndex(m_settings.m_clockRate);
@@ -256,7 +250,7 @@ bool SpectranMISOGui::handleMessage(const Message& message)
 
         m_settings.m_sampleRate = sampleRate;
         ui->sampleRate->setValue(sampleRate);
-        ui->deviceRateText->setText(tr("%1k").arg(QString::number(sampleRate / 1000.0f, 'g', 5)));
+        displaySampleRateText(sampleRate);
         m_deviceUISet->getSpectrum()->setSampleRate(sampleRate);
 
         blockApplySettings(false);
@@ -264,6 +258,15 @@ bool SpectranMISOGui::handleMessage(const Message& message)
     }
 
     return false; // Message not handled in this GUI
+}
+
+void SpectranMISOGui::displaySampleRateText(int sampleRate)
+{
+    if (sampleRate > 100000000) {
+        ui->deviceRateText->setText(tr("%1M").arg(QString::number(sampleRate / 1000000.0f, 'g', 5)));
+    } else {
+        ui->deviceRateText->setText(tr("%1k").arg(QString::number(sampleRate / 1000.0f, 'g', 5)));
+    }
 }
 
 void SpectranMISOGui::handleInputMessages()

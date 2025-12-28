@@ -467,12 +467,22 @@
        </item>
        <item>
         <property name="text">
+         <string>184M</string>
+        </property>
+       </item>
+       <item>
+        <property name="text">
          <string>245M</string>
         </property>
        </item>
        <item>
         <property name="text">
-         <string>46M</string>
+         <string>492M</string>
+        </property>
+       </item>
+       <item>
+        <property name="text">
+         <string>77M</string>
         </property>
        </item>
        <item>
@@ -482,7 +492,7 @@
        </item>
        <item>
         <property name="text">
-         <string>76M</string>
+         <string>46M</string>
         </property>
        </item>
       </widget>
