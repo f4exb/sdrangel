@@ -325,7 +325,7 @@ void SpectranMISOStreamWorker::streamTx()
 
     int i = 0;
     // Initialize with current sample rate
-    m_nbSamplesPerPacket = static_cast<int>(0.2 * m_sampleRateHz); // 200 ms of samples basically capped to max size
+    m_nbSamplesPerPacket = static_cast<int>(m_packetIntervalMs * (m_sampleRateHz / 1000.0)); // number of samples per packet
     m_nbSamplesPerPacket = m_nbSamplesPerPacket > m_maxSamplesPerPacket ? m_maxSamplesPerPacket : m_nbSamplesPerPacket;
 
 	// Stream packets
@@ -638,10 +638,11 @@ void SpectranMISOStreamWorker::handleInputMessages()
     }
 }
 
+
 void SpectranMISOStreamWorker::setSampleRate(double sampleRateHz)
 {
     m_sampleRateHz = sampleRateHz;
-    m_nbSamplesPerPacket = static_cast<int>(0.2 * m_sampleRateHz); // 200 ms of samples basically capped to max size
+    m_nbSamplesPerPacket = static_cast<int>(m_packetIntervalMs * (m_sampleRateHz / 1000.0)); // number of samples per packet
     m_nbSamplesPerPacket = m_nbSamplesPerPacket > m_maxSamplesPerPacket ? m_maxSamplesPerPacket : m_nbSamplesPerPacket;
     qDebug("SpectranMISOStreamWorker::setSampleRate: sample rate set to %f Hz, nbSamplesPerPacket=%d", m_sampleRateHz, m_nbSamplesPerPacket);
     m_running = false;

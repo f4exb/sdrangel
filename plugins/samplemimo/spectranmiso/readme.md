@@ -2,7 +2,7 @@
 
 <h2>Introduction</h2>
 
-This plugin makes it possible to use an Aaronia Spectran V6 or V6 Eco connecting directly to the PC via the USB cables. It uses the SDK developed by Aaronia and you will need to install the Aaronia RTSA suite in your system to be able to compile and use this plugin. As there is not distribution of this plugin you will have to compile it from source (see next).
+This plugin makes it possible to use an Aaronia Spectran V6 or V6 Eco connecting directly to the PC via the USB cable(s). It uses the SDK developed by Aaronia and you will need to install the Aaronia RTSA suite in your system to be able to compile and use this plugin. As there is not distribution of this plugin you will have to compile it from source (see next).
 
 This plugin is marked as a "MISO" plugin meaning it supports multiple inputs i.e. receivers (Spectran V6) and single output i.e. transmitter (both models) in the same plugin. When connecting a V6 Eco the second receiver is simply disabled. There are also a few other restrictions with the V6 Eco vs the V6 that will be covered in the relevant sections of the interface description next.
 
@@ -43,9 +43,9 @@ This is the sample rate and thus bandwidth available in the baseband after any p
 
 Selects the processing mode. With the Aaronia SDK there are two essential processing modes IQ and raw.
 
-The IQ mode is downsampling or upsampling a chunk of the bandwidth allowed by the main clock setting (8) at the sample rate provided in (10). It acts similarly to the local sink or local source channel plugins in SDRangel but via the SDK. It supports the single receiver and all transmitter modes.
+The IQ mode is downsampling or upsampling a chunk of the bandwidth allowed by the main clock setting (8) at the sample rate provided in (10). It allows to finely tune the sample rate and thus bandwidth. It acts similarly to the local sink or local source channel plugins in SDRangel but via the SDK. This is what is called modulators (upstream for transmission) or demodulators (downstrean for reception). It supports the single receiver and all transmitter modes.
 
-The Raw mode directly dumps the full bandwidth provided by the main clock possibly with decimation and works in receive mode only. It supports dual synchronous receivers.
+The Raw mode provides direct access to the raw IQ data from the device. The data packets arrive at the base clock speed, which can be configured for V6 devices (or is fixed for V6 ECO). The choice of sample rates is thus limited but you can then apply decimation within the SDK (9) to reduce the sample rate. It works in receive mode only and supports dual synchronous receivers.
 
 Below are the options in the combo box:
 
@@ -59,7 +59,9 @@ Below are the options in the combo box:
 
 <h3>4. Select receiver</h3>
 
-For dual receiver devices and single receiver mode this control allows selection between receivers
+For dual receiver devices and single receiver mode this control allows selection between receivers. For single receiver models like the V6 Eco switching to the second receiver just reverts to the first and the spectrum remains visible with the "Rx1" selection (5).
+
+Note that in any case when switching receivers the streaming is briefly suspended.
 
 <h3>5. Select spectrum to display</h3>
 

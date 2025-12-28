@@ -84,7 +84,8 @@ private:
     InterpolatorsIFNormalized m_interpolatorsFloatIQ;
     bool handleMessage(const Message& message);
     int m_nbSamplesPerPacket;
-    static const int m_maxSamplesPerPacket = 4000000; // 0.2 * 20000000
+    static const int m_packetIntervalMs = 50; // 50 ms
+    static const int m_maxSamplesPerPacket = static_cast<int>(m_packetIntervalMs * (20000000 / 1000)); // max clock rate 20 MHz
 
 private slots:
     void handleInputMessages();
