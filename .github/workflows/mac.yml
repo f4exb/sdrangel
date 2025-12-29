@@ -9,7 +9,7 @@ on:
 
 jobs:
   build_mac_x64:
-    runs-on: macos-13
+    runs-on: macos-15-intel
     env:
       MACOSX_DEPLOYMENT_TARGET: 12.0
     steps:
