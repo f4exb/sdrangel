@@ -8,6 +8,7 @@ set(moddatv_SOURCES
     datvmodplugin.cpp
     datvmodsettings.cpp
     datvmodwebapiadapter.cpp
+    tsgenerator.cpp
     dvb-s/dvb-s.cpp
     dvb-s2/DVB2.cpp
     dvb-s2/DVBS2.cpp
@@ -31,6 +32,7 @@ set(moddatv_HEADERS
     datvmodplugin.h
     datvmodsettings.h
     datvmodwebapiadapter.h
+    tsgenerator.h
     dvb-s/dvb-s.h
     dvb-s/dvb-s.h
     dvb-s2/DVB2.h
@@ -45,6 +47,7 @@ include_directories(
     ${AVUTIL_INCLUDE_DIRS}
     ${SWSCALE_INCLUDE_DIRS}
     ${SWRESAMPLE_INCLUDE_DIRS}
+    ${OpenCV_INCLUDE_DIRS}
 )
 
 if(NOT SERVER_MODE)
@@ -91,6 +94,7 @@ target_link_libraries(${TARGET_NAME} PRIVATE
     ${AVUTIL_LIBRARIES}
     ${SWSCALE_LIBRARIES}
     ${SWRESAMPLE_LIBRARIES}
+    ${OpenCV_LIBS}
 )
 
 if(DEFINED FFMPEG_DEPENDS)

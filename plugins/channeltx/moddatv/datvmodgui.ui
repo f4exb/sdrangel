@@ -6,8 +6,8 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>543</width>
-    <height>235</height>
+    <width>542</width>
+    <height>371</height>
    </rect>
   </property>
   <property name="sizePolicy">
@@ -46,7 +46,7 @@
      <x>0</x>
      <y>10</y>
      <width>541</width>
-     <height>221</height>
+     <height>361</height>
     </rect>
    </property>
    <property name="windowTitle">
@@ -359,6 +359,11 @@
         </property>
         <item>
          <property name="text">
+          <string>Image</string>
+         </property>
+        </item>
+        <item>
+         <property name="text">
           <string>File</string>
          </property>
         </item>
@@ -598,6 +603,138 @@
     </item>
     <item>
      <widget class="Line" name="line_5">
+      <property name="orientation">
+       <enum>Qt::Horizontal</enum>
+      </property>
+     </widget>
+    </item>
+    <item>
+     <layout class="QHBoxLayout" name="tsImageLayout">
+      <item>
+       <widget class="QPushButton" name="tsImageDialog">
+        <property name="minimumSize">
+         <size>
+          <width>24</width>
+          <height>24</height>
+         </size>
+        </property>
+        <property name="maximumSize">
+         <size>
+          <width>24</width>
+          <height>24</height>
+         </size>
+        </property>
+        <property name="toolTip">
+         <string>Open still image</string>
+        </property>
+        <property name="text">
+         <string/>
+        </property>
+        <property name="icon">
+         <iconset resource="../../../sdrgui/resources/res.qrc">
+          <normaloff>:/picture.png</normaloff>:/picture.png</iconset>
+        </property>
+       </widget>
+      </item>
+      <item>
+       <widget class="QLabel" name="tsImageFileText">
+        <property name="sizePolicy">
+         <sizepolicy hsizetype="Expanding" vsizetype="Preferred">
+          <horstretch>0</horstretch>
+          <verstretch>0</verstretch>
+         </sizepolicy>
+        </property>
+        <property name="text">
+         <string>...</string>
+        </property>
+       </widget>
+      </item>
+      <item>
+       <widget class="QCheckBox" name="tsImageTimestamp">
+        <property name="toolTip">
+         <string>Show current time on the image</string>
+        </property>
+        <property name="text">
+         <string>time</string>
+        </property>
+       </widget>
+      </item>
+      <item>
+       <widget class="Line" name="line_11">
+        <property name="orientation">
+         <enum>Qt::Vertical</enum>
+        </property>
+       </widget>
+      </item>
+      <item>
+       <widget class="QLabel" name="tsImageFileBitrate">
+        <property name="sizePolicy">
+         <sizepolicy hsizetype="Minimum" vsizetype="Preferred">
+          <horstretch>0</horstretch>
+          <verstretch>0</verstretch>
+         </sizepolicy>
+        </property>
+        <property name="toolTip">
+         <string>Image TS bitrate</string>
+        </property>
+        <property name="text">
+         <string>0kb/s</string>
+        </property>
+       </widget>
+      </item>
+     </layout>
+    </item>
+    <item>
+     <layout class="QHBoxLayout" name="horizontalLayout">
+      <item>
+       <widget class="QLabel" name="imageServiceProviderLabel">
+        <property name="text">
+         <string>Prov</string>
+        </property>
+       </widget>
+      </item>
+      <item>
+       <widget class="QLineEdit" name="imageServiceProvider">
+        <property name="toolTip">
+         <string>Service provider for the still image transmission</string>
+        </property>
+       </widget>
+      </item>
+      <item>
+       <widget class="QLabel" name="imageServiceNameLabel">
+        <property name="text">
+         <string>Name</string>
+        </property>
+       </widget>
+      </item>
+      <item>
+       <widget class="QLineEdit" name="imageServiceName">
+        <property name="toolTip">
+         <string>Service name for the still image transmission</string>
+        </property>
+       </widget>
+      </item>
+      <item>
+       <widget class="QComboBox" name="imageCodec">
+        <property name="toolTip">
+         <string>Codec for image encoding</string>
+        </property>
+        <item>
+         <property name="text">
+          <string>HEVC</string>
+         </property>
+        </item>
+        <item>
+         <property name="text">
+          <string>H264</string>
+         </property>
+        </item>
+       </widget>
+      </item>
+     </layout>
+    </item>
+    <item>
+     <widget class="Line" name="line_6">
       <property name="orientation">
        <enum>Qt::Horizontal</enum>
       </property>

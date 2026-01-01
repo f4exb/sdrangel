@@ -26,6 +26,20 @@ DATVModSettings:
     tsSource:
       description: "Transport stream source (File=0 UDP=1)"
       type: integer
+    imageFileName:
+      type: string
+    imageOverlayTimestamp:
+      description: "Overlay timestamp on still image (1 for yes, 0 for no)"
+      type: integer
+    imageServiceProvider:
+      description: "Service provider name for image overlay"
+      type: string
+    imageServiceName:
+      description: "Service name for image overlay"
+      type: string
+    imageCodec:
+      description: "Image codec (HEVC=0 H264=1)"
+      type: integer
     tsFileName:
       type: string
     tsFilePlayLoop:
