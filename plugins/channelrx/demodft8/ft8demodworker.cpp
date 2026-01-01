@@ -162,6 +162,16 @@ FT8DemodWorker::FT8DemodWorker() :
     relPath = "ft8/logs";
     m_logsPath = dir.absolutePath() + "/" + relPath;
     qDebug("FT8DemodWorker::FT8DemodWorker: logs path: %s", qPrintable(m_logsPath));
+
+    QDir samplesDir(m_samplesPath);
+    if (!samplesDir.exists()) {
+        samplesDir.mkpath(".");
+    }
+
+    QDir logsDir(m_logsPath);
+    if (!logsDir.exists()) {
+        logsDir.mkpath(".");
+    }
 }
 
 FT8DemodWorker::~FT8DemodWorker()
@@ -269,6 +279,12 @@ void FT8DemodWorker::processBuffer(int16_t *buffer, QDateTime periodTS)
                 .arg(ft8Message.loc);
             logMessage.remove(0, 2);
             logFile << logMessage.toStdString() << std::endl;
+        }
+        else
+        {
+            if (logFile.is_open()) {
+                logFile.close();
+            }
         }
 
         if (mapPipes.size() > 0)
