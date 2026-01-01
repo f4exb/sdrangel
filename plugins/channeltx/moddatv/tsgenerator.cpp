@@ -42,12 +42,7 @@ const double  TSGenerator::rate_32apsk[5][4] = {{3.0, 4.0, 12.0, 2}, {4.0, 5.0, 
 
 uint8_t TSGenerator::continuity_counters[8192] = {0};
 
-TSGenerator::TSGenerator() :
-    buffer_size(0)
-{
-}
-
-TSGenerator::~TSGenerator()
+TSGenerator::TSGenerator()
 {
 }
 
@@ -56,8 +51,8 @@ void TSGenerator::generate_still_image_ts(const char* image_path, int bitrate, b
     printf("TSGenerator::generate_still_image_ts: Generating TS from image %s at bitrate %d bps for %d seconds\n",
            image_path, bitrate, duration_sec);
     ts_buffer.clear();
+
     // 1. Setup (one-time)
-    // avformat_network_init();
     AVFrame* frame = load_image_to_yuv_with_opencv(image_path, 1280, 720, overlay_timestamp);
 
     // 1. SELECT CODEC
@@ -209,12 +204,6 @@ AVFrame* TSGenerator::load_image_to_yuv_with_opencv(const char* filename, int wi
         return nullptr;
     }
 
-    // Copy pixels (handle padding)
-    // for (int y = 0; y < rgb24.rows; y++) {
-    //     memcpy(rgb_frame->data[0] + y * rgb_frame->linesize[0],
-    //            rgb24.data + y * rgb24.step, rgb24.cols * 3);
-    // }
-
     // FIXED pixel copy with proper alignment
     int linesize = rgb_frame->linesize[0];  // FFmpeg padded linesize
     int src_width_bytes = rgb24.cols * 3;   // OpenCV tight-packed
@@ -350,7 +339,7 @@ int TSGenerator::setup_ts_context(AVFormatContext** oc, AVCodecContext* codec_ct
 
 void TSGenerator::encode_frame_to_ts(AVFormatContext* oc, AVCodecContext* codec_ctx, AVFrame* frame, int stream_idx)
 {
-    AVPacket pkt = {0};
+    AVPacket pkt = {nullptr};
     int ret;
 
     // 1. Send frame to HEVC encoder
@@ -383,10 +372,6 @@ void TSGenerator::encode_frame_to_ts(AVFormatContext* oc, AVCodecContext* codec_
         av_packet_unref(&pkt);
     }
 }
-
-// Your global ts_buffer (std::vector<uint8_t>)
-extern std::vector<uint8_t> ts_buffer;
-size_t write_pos = 0;
 
 // Write callback - stores TS packets in memory
 int TSGenerator::write_packet_cb(void* opaque, uint8_t* buf, int buf_size)
@@ -503,7 +488,7 @@ double TSGenerator::get_dvbs2_rate(double symbol_rate, DATVModSettings::DATVModu
         }
     }
 
-    return symbol_rate * (fec_num / fec_den); // others;
+    return symbol_rate * (fec_num / fec_den); // others
 }
 
 double TSGenerator::calc_dvbs2_rate(double symbol_rate, double bits, double fec_num, double fec_den, double bch, double pilots)
@@ -511,7 +496,7 @@ double TSGenerator::calc_dvbs2_rate(double symbol_rate, double bits, double fec_
     double    fec_frame = 64800.0;
     double    tsrate;
 
-    tsrate = symbol_rate / (fec_frame / bits + 90 + ceil((fec_frame/ bits / 90 / 16 - 1)) * pilots) * (fec_frame * (fec_num / fec_den) - (16 * bch) - 80);
+    tsrate = symbol_rate / (fec_frame / bits + 90 + ceil(fec_frame/ bits / 90 / 16 - 1) * pilots) * (fec_frame * (fec_num / fec_den) - (16 * bch) - 80);
     return (tsrate);
 }
 
@@ -551,14 +536,11 @@ std::pair<const AVCodec*, AVCodecContext*> TSGenerator::create_codec_context(int
 
     switch (m_codecType)
     {
-        case DATVModSettings::CodecHEVC:
-            codec = avcodec_find_encoder_by_name("libx265");
-            ctx = configure_hevc_context(codec, fps, bitrate, width, height, duration_sec);
-            break;
         case DATVModSettings::CodecH264:
             codec = avcodec_find_encoder_by_name("libx264");
             ctx = configure_h264_context(codec, fps, bitrate, width, height, duration_sec);
             break;
+        case DATVModSettings::CodecHEVC:
         default:
             codec = avcodec_find_encoder_by_name("libx265");
             ctx = configure_hevc_context(codec, fps, bitrate, width, height, duration_sec);

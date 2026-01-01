@@ -1,6 +1,5 @@
 ///////////////////////////////////////////////////////////////////////////////////
-// Copyright (C) 2019 Edouard Griffiths, F4EXB.                                  //
-// Copyright (C) 2021 Jon Beniston, M7RCE                                        //
+// Copyright (C) 2026 Edouard Griffiths, F4EXB.                                  //
 //                                                                               //
 // This program is free software; you can redistribute it and/or modify          //
 // it under the terms of the GNU General Public License as published by          //
@@ -39,7 +38,7 @@ public:
     };
 
     TSGenerator();
-    ~TSGenerator();
+    ~TSGenerator() = default;
     void generate_still_image_ts(const char* image_path, int bitrate, bool overlay_timestamp, int duration_sec = 1);
     void set_service_provider(const std::string& provider) { service_provider = provider; }
     void set_service_name(const std::string& name) { service_name = name; }
@@ -50,6 +49,7 @@ public:
 private:
     std::vector<uint8_t> ts_buffer;  // Complete TS packets (e.g., 10s worth)
     size_t buffer_size = 0;
+    size_t write_pos = 0;
     std::string service_provider = "SDRangel";
     std::string service_name = "SDRangel_TV";
     bool m_generateImage = false;
