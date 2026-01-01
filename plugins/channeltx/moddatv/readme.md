@@ -46,80 +46,114 @@ Average total power in dB relative to a &#177;1.0 amplitude signal generated in 
 
 Use this button to toggle mute for this channel. The radio waves on the icon are toggled on (active) and off (muted) accordingly. Default is channel active.
 
-<h3>6: Standard</h3>
+<h3>A. DATV transmission details</h3>
+
+![DATV Modulator plugin GUI A](../../../doc/img/DATVMod_plugin_A.png)
+
+<h3>A.1: Standard</h3>
 
 Select the DVB standard to use for channel coding and modulation. This can be either DVB-S or DVB-S2.
 
-<h3>7: Symbol rate</h3>
+<h3>A.2: Symbol rate</h3>
 
 Specifies the symbol rate in symbols per second. Higher symbol rates allow for higher bitrate transport streams to be transmitted, but require a greater bandwidth.
 
-<h3>8: Bandwidth</h3>
+<h3>A.3: Bandwidth</h3>
 
 Specifies the bandwidth of a filter applied to the modulated output signal when interpolation takes place (i.e. when the sample rate (2) is not equal to the baseband sample rate). Otherwise the full baseband bandwidth is used.
 
-<h3>9: Transport Stream Source</h3>
+<h3>A.4: Transport Stream Source</h3>
 
 This combo box lets you choose the source of the MPEG transport stream:
 
+  - Image: still image
   - File: transport stream file read from the file selected with button (16).
   - UDP:  transport stream received via UDP port (14).
 
 When using UDP, the packet size should be an integer multiple of the MPEG transport stream packet size, which is 188 bytes. 1316 bytes is a common value.
 
-<h3>10: FEC</h3>
+<h3>A.5: FEC</h3>
 
 Forward error correction code rate. This controls the number of bits sent to help the receiver to correct errors.
 A code rate of 1/2 has the highest overhead (corresponding to a lower data rate), but allows the most amount of errors to be correct.
 7/8 (DVB-S) or 9/10 (DVB-S2) has the least overhead (corresponding to higher data rates), but will allow the fewest amount of errors to be corrected.
 
-<h3>11: Modulation</h3>
+<h3>A.6: Modulation</h3>
 
 Select the modulation to be used. For DVB-S, this can either be BPSK or QPSK. For DVB-S2, this can be QPSK, 8PSK, 16APSK or 32PSK.
 
 BPSK transmits a single bit per symbol, whereas QPSK transmits two bits per symbol, so has twice the bitrate. Similar, 8PSK is 3 bits per symbol, 16APSK 4 and 32PSK 5. BPSK, QPSK and 8PSK only modulate phase. 16APSK and 32APKS modulate both phase and amplitude.
 
-<h3>12: Roll off</h3>
+<h3>A.7: Roll off</h3>
 
 Roll-off for the root raised cosine filter. For DVB-S, this should be 0.35. For DVB-S2 this can be 0.2, 0.25 or 0.35.
 
-<h3>13: UDP IP address</h3>
+<h3>6: UDP IP address</h3>
 
 Set the IP address of the network interface/adaptor to bind the UDP socket to.
 
-<h3>14: UDP port</h3>
+<h3>7: UDP port</h3>
 
 Set the UDP port number the UDP socket will be opened on. This is the port the transport stream will need to be sent to.
 
-<h3>15: UDP bitrate</h3>
+<h3>8: UDP bitrate</h3>
 
 This displays the bitrate at which data is being received via the UDP port.
 
-<h3>16: Transport stream file select</h3>
+<h3>B. Still image details</h3>
+
+![DATV Modulator plugin GUI B](../../../doc/img/DATVMod_plugin_B.png)
+
+<h3>B.1: Select image</h3>
+
+This button opens a file dialog that lets you select an image file
+
+<h3>B.2: Path to the image file</h3>
+
+<h3>B.3: Time display overlay</h3>
+
+When checked show the time in the top left corner updating approximately every second
+
+<h3>B.4: Transport Stream bitrate</h3>
+
+<h3>B.5: Service provider</h3>
+
+<h3>B.6: Service name</h3>
+
+<h3>B.7: Codec</h3>
+
+You have the choice between two codecs to encode the image:
+
+  - **HEVC**: a.k.a. H265
+  - **H264**
+
+<h3>9: Transport stream file select</h3>
 
 Clicking on this button will open a file dialog to let you choose an MPEG transport stream file to transmit. When the dialog is closed and the choice is validated the name of the file will appear on the space at the right of the button.
 
-<h3>17: Play loop</h3>
+<h3>10: Path to the transport stream file</h3>
 
-Use this button to toggle on/off transmitting of the transport stream file in a loop.
-
-<h3>18: Play/Pause</h3>
-
-Use this button to play or pause the transport stream file.
-
-<h3>19: Current transport stream file position</h3>
-
-This is the current transport stream file position in time units relative to the start.
-
-<h3>20: Transport stream file bitrate</h3>
+<h3>11: Transport stream bitrate</h3>
 
 This is the bitrate in kb/s of the transport stream file. This should be less or equal to the DVB data rate (3).
 
-<h3>21: Transport stream file length</h3>
+<h3>12: Play loop</h3>
+
+Use this button to toggle on/off transmitting of the transport stream file in a loop.
+
+<h3>13: Play/Pause</h3>
+
+Use this button to play or pause the transport stream file.
+
+<h3>14: Current transport stream file position</h3>
+
+This is the current transport stream file position in time units relative to the start.
+
+<h3>15: Transport stream file length</h3>
 
 This is the length of the transport stream file in time units
 
-<h3>22: Transport stream file position slider</h3>
+<h3>16: Transport stream file position slider</h3>
 
 This slider can be used to randomly set the current position in the file when file play is in pause state (button 18). When the transport stream is transmitted, the slider moves according to the current position.
 

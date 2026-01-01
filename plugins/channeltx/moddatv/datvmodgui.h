@@ -119,7 +119,12 @@ private slots:
     void on_rollOff_currentIndexChanged(int index);
 
     void on_inputSelect_currentIndexChanged(int index);
+    void on_imageFileDialog_clicked(bool checked);
     void on_tsFileDialog_clicked(bool checked);
+    void on_tsImageTimestamp_toggled(bool checked);
+    void on_imageServiceProvider_editingFinished();
+    void on_imageServiceName_editingFinished();
+    void on_imageCodec_currentIndexChanged(int index);
 
     void on_playFile_toggled(bool checked);
     void on_playLoop_toggled(bool checked);
@@ -132,6 +137,7 @@ private slots:
     void onMenuDialogCalled(const QPoint& p);
 
     void configureTsFileName();
+    void setImageBitrate();
     void tick();
 };
 

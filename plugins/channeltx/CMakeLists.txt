@@ -67,7 +67,7 @@ endif()
 # Copied from channelrx/CMakeLists.txt - why not in top-level?
 find_package(FFmpeg COMPONENTS AVCODEC AVFORMAT AVUTIL SWSCALE)
 
-if (ENABLE_CHANNELTX_MODDATV AND FFMPEG_FOUND)
+if (ENABLE_CHANNELTX_MODDATV AND FFMPEG_FOUND AND OpenCV_FOUND)
     add_subdirectory(moddatv)
 else()
     message(STATUS "Not building moddatv (ENABLE_CHANNELTX_MODDATV=${ENABLE_CHANNELTX_MODDATV} FFMPEG_FOUND=${FFMPEG_FOUND})")

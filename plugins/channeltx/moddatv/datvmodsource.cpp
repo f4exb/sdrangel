@@ -374,7 +374,36 @@ void DATVModSource::modulateSample()
                 m_udpByteCount += ba.size();
                 m_udpAbsByteCount += ba.size();
             }
-            else
+            else if (m_settings.m_source == DATVModSettings::SourceImage)
+            {
+                if (m_frameCount == static_cast<int>(m_tsGenerator.get_buffer_size()/sizeof(m_mpegTS)))
+                {
+                    int bitrate = static_cast<int>(getDVBSDataBitrate(m_settings) * 1.1f); // Add 10% margin
+                    m_tsGenerator.generate_still_image_ts(m_settings.m_imageFileName.toStdString().c_str(), bitrate, m_settings.m_imageOverlayTimestamp, 1);
+                    m_tsFileOK = true;
+                    m_frameIdx = 0;
+                    m_frameCount = 0;
+                }
+
+                // Read transport stream packet from generated image TS
+                uint8_t *tsPacket = m_tsGenerator.next_ts_packet();
+                if (tsPacket != nullptr)
+                {
+                    memcpy(m_mpegTS, tsPacket, sizeof(m_mpegTS));
+                    m_frameIdx++;
+                    m_frameCount++;
+                }
+                else
+                {
+                    // No more data
+                    memset(m_mpegTS, 0xFF, sizeof(m_mpegTS));
+                    m_mpegTS[0] = 0x47; // Sync byte
+                    m_mpegTS[1] = 0x1F;
+                    m_mpegTS[2] = 0xFF;
+                    m_mpegTS[3] = 0x10;
+                }
+            }
+            else // Unsupported source or no more data
             {
                 // Insert null packet. PID=0x1fff
                 memset(m_mpegTS, 0xFF, sizeof(m_mpegTS));
@@ -670,6 +699,11 @@ void DATVModSource::applySettings(const DATVModSettings& settings, bool force)
             << " m_fec: " << (int) settings.m_fec
             << " m_symbolRate: " << (int) settings.m_symbolRate
             << " m_rollOff: " << (int) settings.m_rollOff
+            << " m_imageFileName: " << settings.m_imageFileName
+            << " m_imageOverlayTimestamp: " << settings.m_imageOverlayTimestamp
+            << " m_imageServiceProvider: " << settings.m_imageServiceProvider
+            << " m_imageServiceName: " << settings.m_imageServiceName
+            << " m_tsFileName: " << settings.m_tsFileName
             << " m_tsFilePlayLoop: " << settings.m_tsFilePlayLoop
             << " m_tsFilePlay: " << settings.m_tsFilePlay
             << " m_udpAddress: " << settings.m_udpAddress
@@ -848,6 +882,18 @@ void DATVModSource::applySettings(const DATVModSettings& settings, bool force)
                                                 m_channelSampleRate, m_sampleRate,
                                                 getDVBSDataBitrate(settings)));
         }
+    }
+
+    if (settings.m_imageServiceProvider != m_settings.m_imageServiceProvider || force) {
+        m_tsGenerator.set_service_provider(settings.m_imageServiceProvider.toStdString());
+    }
+
+    if (settings.m_imageServiceName != m_settings.m_imageServiceName || force) {
+        m_tsGenerator.set_service_name(settings.m_imageServiceName.toStdString());
+    }
+
+    if (settings.m_imageCodec != m_settings.m_imageCodec || force) {
+        m_tsGenerator.set_codec(settings.m_imageCodec);
     }
 
     m_settings = settings;

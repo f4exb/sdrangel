@@ -5101,6 +5101,25 @@ margin-bottom: 20px;
       "type" : "integer",
       "description" : "Transport stream source (File=0 UDP=1)"
     },
+    "imageFileName" : {
+      "type" : "string"
+    },
+    "imageOverlayTimestamp" : {
+      "type" : "integer",
+      "description" : "Overlay timestamp on still image (1 for yes, 0 for no)"
+    },
+    "imageServiceProvider" : {
+      "type" : "string",
+      "description" : "Service provider name for image overlay"
+    },
+    "imageServiceName" : {
+      "type" : "string",
+      "description" : "Service name for image overlay"
+    },
+    "imageCodec" : {
+      "type" : "integer",
+      "description" : "Image codec (HEVC=0 H264=1)"
+    },
     "tsFileName" : {
       "type" : "string"
     },
@@ -59615,7 +59634,7 @@ except ApiException as e:
           </div>
           <div id="generator">
             <div class="content">
-              Generated 2025-07-01T22:00:12.093+02:00
+              Generated 2025-12-31T21:12:50.336+01:00
             </div>
           </div>
       </div>

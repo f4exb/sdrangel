@@ -245,7 +245,13 @@ void DATVMod::applySettings(const DATVModSettings& settings, bool force)
             << " m_modulation: " << (int) settings.m_modulation
             << " m_fec: " << (int) settings.m_fec
             << " m_symbolRate: " << settings.m_symbolRate
+            << " m_rollOff: " << settings.m_rollOff
             << " m_source: " << settings.m_source
+            << " m_imageFileName: " << settings.m_imageFileName
+            << " m_imageOverlayTimestamp: " << settings.m_imageOverlayTimestamp
+            << " m_imageServiceProvider: " << settings.m_imageServiceProvider
+            << " m_imageServiceName: " << settings.m_imageServiceName
+            << " m_imageCodec: " << (int) settings.m_imageCodec
             << " m_tsFileName: " << settings.m_tsFileName
             << " m_tsFilePlayLoop: " << settings.m_tsFilePlayLoop
             << " m_tsFilePlay: " << settings.m_tsFilePlay
@@ -282,6 +288,21 @@ void DATVMod::applySettings(const DATVModSettings& settings, bool force)
     }
     if ((settings.m_tsFilePlayLoop != m_settings.m_tsFilePlayLoop) || force) {
         reverseAPIKeys.append("tsSource");
+    }
+    if ((settings.m_imageFileName != m_settings.m_imageFileName) || force) {
+        reverseAPIKeys.append("imageFileName");
+    }
+    if ((settings.m_imageOverlayTimestamp != m_settings.m_imageOverlayTimestamp) || force) {
+        reverseAPIKeys.append("imageOverlayTimestamp");
+    }
+    if ((settings.m_imageServiceProvider != m_settings.m_imageServiceProvider) || force) {
+        reverseAPIKeys.append("imageServiceProvider");
+    }
+    if ((settings.m_imageServiceName != m_settings.m_imageServiceName) || force) {
+        reverseAPIKeys.append("imageServiceName");
+    }
+    if ((settings.m_imageCodec != m_settings.m_imageCodec) || force) {
+        reverseAPIKeys.append("imageCodec");
     }
     if ((settings.m_tsFileName != m_settings.m_tsFileName) || force) {
         reverseAPIKeys.append("tsFileName");
@@ -452,6 +473,21 @@ void DATVMod::webapiUpdateChannelSettings(
     if (channelSettingsKeys.contains("tsSource")) {
         settings.m_source = (DATVModSettings::DATVSource) response.getDatvModSettings()->getTsSource();
     }
+    if (channelSettingsKeys.contains("imageFileName")) {
+        settings.m_imageFileName = *response.getDatvModSettings()->getImageFileName();
+    }
+    if (channelSettingsKeys.contains("imageOverlayTimestamp")) {
+        settings.m_imageOverlayTimestamp = response.getDatvModSettings()->getImageOverlayTimestamp() != 0;
+    }
+    if (channelSettingsKeys.contains("imageServiceProvider")) {
+        settings.m_imageServiceProvider = *response.getDatvModSettings()->getImageServiceProvider();
+    }
+    if (channelSettingsKeys.contains("imageServiceName")) {
+        settings.m_imageServiceName = *response.getDatvModSettings()->getImageServiceName();
+    }
+    if (channelSettingsKeys.contains("imageCodec")) {
+        settings.m_imageCodec = (DATVModSettings::DATVCodec) response.getDatvModSettings()->getImageCodec();
+    }
     if (channelSettingsKeys.contains("tsFileName")) {
         settings.m_tsFileName = *response.getDatvModSettings()->getTsFileName();
     }
@@ -523,6 +559,11 @@ void DATVMod::webapiFormatChannelSettings(SWGSDRangel::SWGChannelSettings& respo
     response.getDatvModSettings()->setSymbolRate(settings.m_symbolRate);
     response.getDatvModSettings()->setRollOff(settings.m_rollOff);
     response.getDatvModSettings()->setTsSource(settings.m_source);
+    response.getDatvModSettings()->setImageFileName(new QString(settings.m_imageFileName));
+    response.getDatvModSettings()->setImageOverlayTimestamp(settings.m_imageOverlayTimestamp ? 1 : 0);
+    response.getDatvModSettings()->setImageServiceProvider(new QString(settings.m_imageServiceProvider));
+    response.getDatvModSettings()->setImageServiceName(new QString(settings.m_imageServiceName));
+    response.getDatvModSettings()->setImageCodec((int)settings.m_imageCodec);
     response.getDatvModSettings()->setTsFileName(new QString(settings.m_tsFileName));
     response.getDatvModSettings()->setTsFilePlayLoop(settings.m_tsFilePlayLoop ? 1 : 0);
     response.getDatvModSettings()->setTsFilePlay(settings.m_tsFilePlay ? 1 : 0);
@@ -686,6 +727,24 @@ void DATVMod::webapiFormatChannelSettings(
     }
     if (channelSettingsKeys.contains("tsSource") || force) {
         swgDATVModSettings->setTsSource((int) settings.m_source);
+    }
+    if (channelSettingsKeys.contains("rollOff") || force) {
+        swgDATVModSettings->setRollOff(settings.m_rollOff);
+    }
+    if (channelSettingsKeys.contains("imageFileName") || force) {
+        swgDATVModSettings->setImageFileName(new QString(settings.m_imageFileName));
+    }
+    if (channelSettingsKeys.contains("imageOverlayTimestamp") || force) {
+        swgDATVModSettings->setImageOverlayTimestamp(settings.m_imageOverlayTimestamp ? 1 : 0);
+    }
+    if (channelSettingsKeys.contains("imageServiceProvider") || force) {
+        swgDATVModSettings->setImageServiceProvider(new QString(settings.m_imageServiceProvider));
+    }
+    if (channelSettingsKeys.contains("imageServiceName") || force) {
+        swgDATVModSettings->setImageServiceName(new QString(settings.m_imageServiceName));
+    }
+    if (channelSettingsKeys.contains("imageCodec") || force) {
+        swgDATVModSettings->setImageCodec((int) settings.m_imageCodec);
     }
     if (channelSettingsKeys.contains("tsFileName") || force) {
         swgDATVModSettings->setTsFileName(new QString(settings.m_tsFileName));

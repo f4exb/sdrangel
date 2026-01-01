@@ -44,6 +44,16 @@ SWGDATVModSettings::SWGDATVModSettings() {
     m_roll_off_isSet = false;
     ts_source = 0;
     m_ts_source_isSet = false;
+    image_file_name = nullptr;
+    m_image_file_name_isSet = false;
+    image_overlay_timestamp = 0;
+    m_image_overlay_timestamp_isSet = false;
+    image_service_provider = nullptr;
+    m_image_service_provider_isSet = false;
+    image_service_name = nullptr;
+    m_image_service_name_isSet = false;
+    image_codec = 0;
+    m_image_codec_isSet = false;
     ts_file_name = nullptr;
     m_ts_file_name_isSet = false;
     ts_file_play_loop = 0;
@@ -100,6 +110,16 @@ SWGDATVModSettings::init() {
     m_roll_off_isSet = false;
     ts_source = 0;
     m_ts_source_isSet = false;
+    image_file_name = new QString("");
+    m_image_file_name_isSet = false;
+    image_overlay_timestamp = 0;
+    m_image_overlay_timestamp_isSet = false;
+    image_service_provider = new QString("");
+    m_image_service_provider_isSet = false;
+    image_service_name = new QString("");
+    m_image_service_name_isSet = false;
+    image_codec = 0;
+    m_image_codec_isSet = false;
     ts_file_name = new QString("");
     m_ts_file_name_isSet = false;
     ts_file_play_loop = 0;
@@ -143,6 +163,17 @@ SWGDATVModSettings::cleanup() {
 
 
 
+
+    if(image_file_name != nullptr) { 
+        delete image_file_name;
+    }
+
+    if(image_service_provider != nullptr) { 
+        delete image_service_provider;
+    }
+    if(image_service_name != nullptr) { 
+        delete image_service_name;
+    }
 
     if(ts_file_name != nullptr) { 
         delete ts_file_name;
@@ -200,6 +231,16 @@ SWGDATVModSettings::fromJsonObject(QJsonObject &pJson) {
     ::SWGSDRangel::setValue(&roll_off, pJson["rollOff"], "float", "");
     
     ::SWGSDRangel::setValue(&ts_source, pJson["tsSource"], "qint32", "");
+    
+    ::SWGSDRangel::setValue(&image_file_name, pJson["imageFileName"], "QString", "QString");
+    
+    ::SWGSDRangel::setValue(&image_overlay_timestamp, pJson["imageOverlayTimestamp"], "qint32", "");
+    
+    ::SWGSDRangel::setValue(&image_service_provider, pJson["imageServiceProvider"], "QString", "QString");
+    
+    ::SWGSDRangel::setValue(&image_service_name, pJson["imageServiceName"], "QString", "QString");
+    
+    ::SWGSDRangel::setValue(&image_codec, pJson["imageCodec"], "qint32", "");
     
     ::SWGSDRangel::setValue(&ts_file_name, pJson["tsFileName"], "QString", "QString");
     
@@ -272,6 +313,21 @@ SWGDATVModSettings::asJsonObject() {
     }
     if(m_ts_source_isSet){
         obj->insert("tsSource", QJsonValue(ts_source));
+    }
+    if(image_file_name != nullptr && *image_file_name != QString("")){
+        toJsonValue(QString("imageFileName"), image_file_name, obj, QString("QString"));
+    }
+    if(m_image_overlay_timestamp_isSet){
+        obj->insert("imageOverlayTimestamp", QJsonValue(image_overlay_timestamp));
+    }
+    if(image_service_provider != nullptr && *image_service_provider != QString("")){
+        toJsonValue(QString("imageServiceProvider"), image_service_provider, obj, QString("QString"));
+    }
+    if(image_service_name != nullptr && *image_service_name != QString("")){
+        toJsonValue(QString("imageServiceName"), image_service_name, obj, QString("QString"));
+    }
+    if(m_image_codec_isSet){
+        obj->insert("imageCodec", QJsonValue(image_codec));
     }
     if(ts_file_name != nullptr && *ts_file_name != QString("")){
         toJsonValue(QString("tsFileName"), ts_file_name, obj, QString("QString"));
@@ -403,6 +459,56 @@ void
 SWGDATVModSettings::setTsSource(qint32 ts_source) {
     this->ts_source = ts_source;
     this->m_ts_source_isSet = true;
+}
+
+QString*
+SWGDATVModSettings::getImageFileName() {
+    return image_file_name;
+}
+void
+SWGDATVModSettings::setImageFileName(QString* image_file_name) {
+    this->image_file_name = image_file_name;
+    this->m_image_file_name_isSet = true;
+}
+
+qint32
+SWGDATVModSettings::getImageOverlayTimestamp() {
+    return image_overlay_timestamp;
+}
+void
+SWGDATVModSettings::setImageOverlayTimestamp(qint32 image_overlay_timestamp) {
+    this->image_overlay_timestamp = image_overlay_timestamp;
+    this->m_image_overlay_timestamp_isSet = true;
+}
+
+QString*
+SWGDATVModSettings::getImageServiceProvider() {
+    return image_service_provider;
+}
+void
+SWGDATVModSettings::setImageServiceProvider(QString* image_service_provider) {
+    this->image_service_provider = image_service_provider;
+    this->m_image_service_provider_isSet = true;
+}
+
+QString*
+SWGDATVModSettings::getImageServiceName() {
+    return image_service_name;
+}
+void
+SWGDATVModSettings::setImageServiceName(QString* image_service_name) {
+    this->image_service_name = image_service_name;
+    this->m_image_service_name_isSet = true;
+}
+
+qint32
+SWGDATVModSettings::getImageCodec() {
+    return image_codec;
+}
+void
+SWGDATVModSettings::setImageCodec(qint32 image_codec) {
+    this->image_codec = image_codec;
+    this->m_image_codec_isSet = true;
 }
 
 QString*
@@ -592,6 +698,21 @@ SWGDATVModSettings::isSet(){
             isObjectUpdated = true; break;
         }
         if(m_ts_source_isSet){
+            isObjectUpdated = true; break;
+        }
+        if(image_file_name && *image_file_name != QString("")){
+            isObjectUpdated = true; break;
+        }
+        if(m_image_overlay_timestamp_isSet){
+            isObjectUpdated = true; break;
+        }
+        if(image_service_provider && *image_service_provider != QString("")){
+            isObjectUpdated = true; break;
+        }
+        if(image_service_name && *image_service_name != QString("")){
+            isObjectUpdated = true; break;
+        }
+        if(m_image_codec_isSet){
             isObjectUpdated = true; break;
         }
         if(ts_file_name && *ts_file_name != QString("")){
