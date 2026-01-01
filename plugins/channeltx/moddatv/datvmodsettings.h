@@ -29,6 +29,7 @@ struct DATVModSettings
 {
     enum DATVSource
     {
+        SourceImage,
         SourceFile,
         SourceUDP
     };
@@ -66,8 +67,15 @@ struct DATVModSettings
     };
     static const QStringList m_codeRateStrings;
 
+    enum DATVCodec
+    {
+        CodecHEVC,
+        CodecH264
+    };
+    static const QStringList m_codecStrings;
+
     qint64 m_inputFrequencyOffset;              //!< Offset from baseband center frequency
-    Real m_rfBandwidth;                         //!< Bandwidth of modulated signal
+    float m_rfBandwidth;                        //!< Bandwidth of modulated signal
 
     DVBStandard m_standard;
     DATVModulation m_modulation;                //!< RF modulation type
@@ -77,6 +85,11 @@ struct DATVModSettings
 
     DATVSource m_source;                        //!< Source of transport stream
 
+    QString m_imageFileName;                    //!< Still image file name
+    bool m_imageOverlayTimestamp;               //!< Overlay timestamp on still image
+    QString m_imageServiceProvider;             //!< Service provider name for still image
+    QString m_imageServiceName;                 //!< Service name for still image
+    DATVCodec m_imageCodec;                     //!< Codec for transport stream encoding of still image
     QString m_tsFileName;
     bool m_tsFilePlayLoop;                      //!< Play TS file in a loop
     bool m_tsFilePlay;                          //!< True to play TS file and false to pause
@@ -107,6 +120,7 @@ struct DATVModSettings
     void setRollupState(Serializable *rollupState) { m_rollupState = rollupState; }
     QByteArray serialize() const;
     bool deserialize(const QByteArray& data);
+    int getDVBSDataBitrate() const;
 
     static DATVCodeRate mapCodeRate(const QString& string);
     static QString mapCodeRate(DATVCodeRate codeRate);

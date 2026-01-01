@@ -21,9 +21,11 @@
 #include "util/simpleserializer.h"
 #include "settings/serializable.h"
 #include "datvmodsettings.h"
+#include "dvb-s/dvb-s.h"
 
 const QStringList DATVModSettings::m_codeRateStrings = {"1/2", "2/3", "3/4", "5/6", "7/8", "4/5", "8/9", "9/10", "1/4", "1/3", "2/5", "3/5"};
 const QStringList DATVModSettings::m_modulationStrings = {"BPSK", "QPSK", "8PSK", "16APSK", "32APSK"};
+const QStringList DATVModSettings::m_codecStrings = {"HEVC", "H264"};
 
 DATVModSettings::DATVModSettings() :
     m_channelMarker(nullptr),
@@ -42,6 +44,11 @@ void DATVModSettings::resetToDefaults()
     m_symbolRate = 250000;
     m_rollOff = 0.35f;
     m_source = SourceFile;
+    m_imageFileName = "";
+    m_imageOverlayTimestamp = false;
+    m_imageServiceProvider = "SDRangel";
+    m_imageServiceName = "SDRangel_TV";
+    m_imageCodec = CodecHEVC;
     m_tsFileName = "";
     m_tsFilePlayLoop = false;
     m_tsFilePlay = false;
@@ -97,6 +104,11 @@ QByteArray DATVModSettings::serialize() const
     s.writeS32(30, m_workspaceIndex);
     s.writeBlob(31, m_geometryBytes);
     s.writeBool(32, m_hidden);
+    s.writeString(33, m_imageFileName);
+    s.writeBool(34, m_imageOverlayTimestamp);
+    s.writeString(35, m_imageServiceProvider);
+    s.writeString(36, m_imageServiceName);
+    s.writeS32(37, (int) m_imageCodec);
 
     return s.final();
 }
@@ -171,6 +183,11 @@ bool DATVModSettings::deserialize(const QByteArray& data)
         d.readS32(30, &m_workspaceIndex, 0);
         d.readBlob(31, &m_geometryBytes);
         d.readBool(32, &m_hidden, false);
+        d.readString(33, &m_imageFileName, "");
+        d.readBool(34, &m_imageOverlayTimestamp, false);
+        d.readString(35, &m_imageServiceProvider, "SDRangel");
+        d.readString(36, &m_imageServiceName, "SDRangel_TV");
+        d.readS32(37, (int *)&m_imageCodec, (int)DATVModSettings::CodecHEVC);
 
         return true;
     }
@@ -209,4 +226,132 @@ DATVModSettings::DATVModulation DATVModSettings::mapModulation(const QString& st
 QString DATVModSettings::mapModulation(DATVModulation modulation)
 {
     return m_modulationStrings[modulation];
+}
+
+int DATVModSettings::getDVBSDataBitrate() const
+{
+    float fecFactor;
+    float plFactor;
+    float bitsPerSymbol;
+
+    switch (m_modulation)
+    {
+    case DATVModSettings::BPSK:
+        bitsPerSymbol = 1.0f;
+        break;
+    case DATVModSettings::QPSK:
+        bitsPerSymbol = 2.0f;
+        break;
+    case DATVModSettings::PSK8:
+        bitsPerSymbol = 3.0f;
+        break;
+    case DATVModSettings::APSK16:
+        bitsPerSymbol = 4.0f;
+        break;
+    case DATVModSettings::APSK32:
+        bitsPerSymbol = 5.0f;
+        break;
+    }
+
+    if (m_standard == DATVModSettings::DVB_S)
+    {
+        float rsFactor;
+        float convFactor;
+
+        rsFactor = DVBS::tsPacketLen/(float)DVBS::rsPacketLen;
+        switch (m_fec)
+        {
+        case DATVModSettings::FEC12:
+            convFactor = 1.0f/2.0f;
+            break;
+        case DATVModSettings::FEC23:
+            convFactor = 2.0f/3.0f;
+            break;
+        case DATVModSettings::FEC34:
+            convFactor = 3.0f/4.0f;
+            break;
+        case DATVModSettings::FEC56:
+            convFactor = 5.0f/6.0f;
+            break;
+        case DATVModSettings::FEC78:
+            convFactor = 7.0f/8.0f;
+            break;
+        case DATVModSettings::FEC45:
+            convFactor = 4.0f/5.0f;
+            break;
+        case DATVModSettings::FEC89:
+            convFactor = 8.0f/9.0f;
+            break;
+        case DATVModSettings::FEC910:
+            convFactor = 9.0f/10.0f;
+            break;
+        case DATVModSettings::FEC14:
+            convFactor = 1.0f/4.0f;
+            break;
+        case DATVModSettings::FEC13:
+            convFactor = 1.0f/3.0f;
+            break;
+        case DATVModSettings::FEC25:
+            convFactor = 2.0f/5.0f;
+            break;
+        case DATVModSettings::FEC35:
+            convFactor = 3.0f/5.0f;
+            break;
+        }
+        fecFactor = rsFactor * convFactor;
+        plFactor = 1.0f;
+    }
+    else
+    {
+        // For normal frames
+        int codedBlockSize = 64800;
+        int uncodedBlockSize;
+        int bbHeaderBits = 80;
+        // See table 5a in DVBS2 spec
+        switch (m_fec)
+        {
+        case DATVModSettings::FEC12:
+            uncodedBlockSize = 32208;
+            break;
+        case DATVModSettings::FEC23:
+            uncodedBlockSize = 43040;
+            break;
+        case DATVModSettings::FEC34:
+            uncodedBlockSize = 48408;
+            break;
+        case DATVModSettings::FEC56:
+            uncodedBlockSize = 53840;
+            break;
+        case DATVModSettings::FEC45:
+            uncodedBlockSize = 51648;
+            break;
+        case DATVModSettings::FEC89:
+            uncodedBlockSize = 57472;
+            break;
+        case DATVModSettings::FEC910:
+            uncodedBlockSize = 58192;
+            break;
+        case DATVModSettings::FEC14:
+            uncodedBlockSize = 16008;
+            break;
+        case DATVModSettings::FEC13:
+            uncodedBlockSize = 21408;
+            break;
+        case DATVModSettings::FEC25:
+            uncodedBlockSize = 25728;
+            break;
+        case DATVModSettings::FEC35:
+            uncodedBlockSize = 38688;
+            break;
+        default:
+            qDebug("DATVModSettings::getDVBSDataBitrate: Unsupported DVB-S2 code rate");
+            break;
+        }
+        fecFactor = (uncodedBlockSize-bbHeaderBits)/(float)codedBlockSize;
+        float symbolsPerFrame = codedBlockSize/bitsPerSymbol;
+        // 90 symbols for PL header
+        plFactor = symbolsPerFrame / (symbolsPerFrame + 90.0f);
+    }
+
+    return std::round(m_symbolRate * bitsPerSymbol * fecFactor * plFactor);
 }

@@ -301,6 +301,7 @@ void DATVModGUI::on_dvbStandard_currentIndexChanged(int index)
     on_modulation_currentIndexChanged(idx);
 
     updateFEC();
+    setImageBitrate();
 
     m_doApplySettings = true;
 
@@ -377,6 +378,7 @@ void DATVModGUI::on_modulation_currentIndexChanged(int index)
         m_settings.m_modulation = (DATVModSettings::DATVModulation) (index + 1);
     m_doApplySettings = false;
     updateFEC();
+    setImageBitrate();
     m_doApplySettings = true;
     applySettings();
 }
@@ -392,12 +394,14 @@ void DATVModGUI::on_fec_currentIndexChanged(int index)
 {
     (void) index;
     m_settings.m_fec = DATVModSettings::mapCodeRate(ui->fec->currentText());
+    setImageBitrate();
     applySettings();
 }
 
 void DATVModGUI::on_symbolRate_valueChanged(int value)
 {
     m_settings.m_symbolRate = value;
+    setImageBitrate();
     applySettings();
 }
 
@@ -421,12 +425,53 @@ void DATVModGUI::setChannelMarkerBandwidth()
 void DATVModGUI::on_inputSelect_currentIndexChanged(int index)
 {
     m_settings.m_source = (DATVModSettings::DATVSource) index;
+    setImageBitrate();
     applySettings();
 }
 
 void DATVModGUI::on_channelMute_toggled(bool checked)
 {
     m_settings.m_channelMute = checked;
+    applySettings();
+}
+
+void DATVModGUI::on_imageFileDialog_clicked(bool checked)
+{
+    (void) checked;
+    QString fileName = QFileDialog::getOpenFileName(this,
+        tr("Open image file"), m_settings.m_imageFileName, tr("Image Files (*.bmp *.png *.jpg *.jpeg)"),
+        nullptr, QFileDialog::DontUseNativeDialog);
+
+    if (fileName != "")
+    {
+        m_settings.m_imageFileName = fileName;
+        ui->tsImageFileText->setText(m_settings.m_imageFileName);
+        m_settings.m_imageFileName = fileName;
+        applySettings();
+    }
+}
+
+void DATVModGUI::on_tsImageTimestamp_toggled(bool checked)
+{
+    m_settings.m_imageOverlayTimestamp = checked;
+    applySettings();
+}
+
+void DATVModGUI::on_imageServiceProvider_editingFinished()
+{
+    m_settings.m_imageServiceProvider = ui->imageServiceProvider->text();
+    applySettings();
+}
+
+void DATVModGUI::on_imageServiceName_editingFinished()
+{
+    m_settings.m_imageServiceName = ui->imageServiceName->text();
+    applySettings();
+}
+
+void DATVModGUI::on_imageCodec_currentIndexChanged(int index)
+{
+    m_settings.m_imageCodec = (DATVModSettings::DATVCodec) index;
     applySettings();
 }
 
@@ -592,10 +637,20 @@ void DATVModGUI::displaySettings()
 
     ui->inputSelect->setCurrentIndex((int) m_settings.m_source);
 
+    if (m_settings.m_imageFileName.isEmpty())
+        ui->tsImageFileText->setText("...");
+    else
+        ui->tsImageFileText->setText(m_settings.m_imageFileName);
+
     if (m_settings.m_tsFileName.isEmpty())
         ui->tsFileText->setText("...");
     else
         ui->tsFileText->setText(m_settings.m_tsFileName);
+
+    ui->tsImageTimestamp->setChecked(m_settings.m_imageOverlayTimestamp);
+    ui->imageServiceProvider->setText(m_settings.m_imageServiceProvider);
+    ui->imageServiceName->setText(m_settings.m_imageServiceName);
+    ui->imageCodec->setCurrentIndex((int) m_settings.m_imageCodec);
     ui->playFile->setChecked(m_settings.m_tsFilePlay);
     ui->playLoop->setChecked(m_settings.m_tsFilePlayLoop);
 
@@ -617,6 +672,19 @@ void DATVModGUI::enterEvent(EnterEventType* event)
 {
     m_channelMarker.setHighlighted(true);
     ChannelGUI::enterEvent(event);
+}
+
+void DATVModGUI::setImageBitrate()
+{
+    if (m_settings.m_source == DATVModSettings::SourceImage)
+    {
+        int bitrate = static_cast<int>(m_settings.getDVBSDataBitrate() * 1.1f);
+        ui->tsImageFileBitrate->setText(QString("%1 kb/s").arg(bitrate/1000.0f, 0, 'f', 2));
+    }
+    else
+    {
+        ui->tsImageFileBitrate->setText("0kb/s");
+    }
 }
 
 void DATVModGUI::tick()
@@ -688,6 +756,11 @@ void DATVModGUI::makeUIConnections()
     QObject::connect(ui->modulation, QOverload<int>::of(&QComboBox::currentIndexChanged), this, &DATVModGUI::on_modulation_currentIndexChanged);
     QObject::connect(ui->rollOff, QOverload<int>::of(&QComboBox::currentIndexChanged), this, &DATVModGUI::on_rollOff_currentIndexChanged);
     QObject::connect(ui->inputSelect, QOverload<int>::of(&QComboBox::currentIndexChanged), this, &DATVModGUI::on_inputSelect_currentIndexChanged);
+    QObject::connect(ui->tsImageDialog, &QPushButton::clicked, this, &DATVModGUI::on_imageFileDialog_clicked);
+    QObject::connect(ui->tsImageTimestamp, &QCheckBox::toggled, this, &DATVModGUI::on_tsImageTimestamp_toggled);
+    QObject::connect(ui->imageServiceProvider, &QLineEdit::editingFinished, this, &DATVModGUI::on_imageServiceProvider_editingFinished);
+    QObject::connect(ui->imageServiceName, &QLineEdit::editingFinished, this, &DATVModGUI::on_imageServiceName_editingFinished);
+    QObject::connect(ui->imageCodec, QOverload<int>::of(&QComboBox::currentIndexChanged), this, &DATVModGUI::on_imageCodec_currentIndexChanged);
     QObject::connect(ui->tsFileDialog, &QPushButton::clicked, this, &DATVModGUI::on_tsFileDialog_clicked);
     QObject::connect(ui->playFile, &ButtonSwitch::toggled, this, &DATVModGUI::on_playFile_toggled);
     QObject::connect(ui->playLoop, &ButtonSwitch::toggled, this, &DATVModGUI::on_playLoop_toggled);

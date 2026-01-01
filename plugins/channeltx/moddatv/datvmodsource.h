@@ -24,9 +24,6 @@
 #include <iostream>
 #include <cstdint>
 
-#include <QObject>
-#include <QMutex>
-
 #include "dsp/channelsamplesource.h"
 #include "dsp/nco.h"
 #include "dsp/interpolator.h"
@@ -37,6 +34,7 @@
 
 #include "dvb-s/dvb-s.h"
 #include "dvb-s2/DVBS2.h"
+#include "tsgenerator.h"
 
 class MessageQueue;
 class QUdpSocket;
@@ -126,6 +124,7 @@ private:
     Real m_levelSum;
 
     bool m_tsFileOK;
+    TSGenerator m_tsGenerator;
 
     MessageQueue *m_messageQueueToGUI;
 
@@ -141,7 +140,6 @@ private:
     void updateUDPBufferUtilization();
 
     MessageQueue *getMessageQueueToGUI() { return m_messageQueueToGUI; }
-
 };
 
 

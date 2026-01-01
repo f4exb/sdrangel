@@ -68,6 +68,21 @@ public:
     qint32 getTsSource();
     void setTsSource(qint32 ts_source);
 
+    QString* getImageFileName();
+    void setImageFileName(QString* image_file_name);
+
+    qint32 getImageOverlayTimestamp();
+    void setImageOverlayTimestamp(qint32 image_overlay_timestamp);
+
+    QString* getImageServiceProvider();
+    void setImageServiceProvider(QString* image_service_provider);
+
+    QString* getImageServiceName();
+    void setImageServiceName(QString* image_service_name);
+
+    qint32 getImageCodec();
+    void setImageCodec(qint32 image_codec);
+
     QString* getTsFileName();
     void setTsFileName(QString* ts_file_name);
 
@@ -143,6 +158,21 @@ private:
 
     qint32 ts_source;
     bool m_ts_source_isSet;
+
+    QString* image_file_name;
+    bool m_image_file_name_isSet;
+
+    qint32 image_overlay_timestamp;
+    bool m_image_overlay_timestamp_isSet;
+
+    QString* image_service_provider;
+    bool m_image_service_provider_isSet;
+
+    QString* image_service_name;
+    bool m_image_service_name_isSet;
+
+    qint32 image_codec;
+    bool m_image_codec_isSet;
 
     QString* ts_file_name;
     bool m_ts_file_name_isSet;
