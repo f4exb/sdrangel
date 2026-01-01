@@ -1,3 +1,20 @@
+///////////////////////////////////////////////////////////////////////////////////
+// Copyright (C) 2026 Edouard Griffiths, F4EXB.                                  //
+//                                                                               //
+// This program is free software; you can redistribute it and/or modify          //
+// it under the terms of the GNU General Public License as published by          //
+// the Free Software Foundation as version 3 of the License, or                  //
+// (at your option) any later version.                                           //
+//                                                                               //
+// This program is distributed in the hope that it will be useful,               //
+// but WITHOUT ANY WARRANTY; without even the implied warranty of                //
+// MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the                  //
+// GNU General Public License V3 for more details.                               //
+//                                                                               //
+// You should have received a copy of the GNU General Public License             //
+// along with this program. If not, see <http://www.gnu.org/licenses/>.          //
+///////////////////////////////////////////////////////////////////////////////////
+
 extern "C"
 {
 #include "libavcodec/avcodec.h"
@@ -166,7 +183,8 @@ AVFrame* TSGenerator::load_image_to_yuv_with_opencv(const char* filename, int wi
         auto now = std::chrono::system_clock::now();
         auto time_t = std::chrono::system_clock::to_time_t(now);
         char time_str[32];
-        std::strftime(time_str, sizeof(time_str), "%H:%M:%S", std::localtime(&time_t));
+        struct tm time_buffer;  // Your own buffer
+        std::strftime(time_str, sizeof(time_str), "%H:%M:%S", localtime_r(&time_t, &time_buffer));
 
         // Draw black background box first
         cv::rectangle(rgb_image, cv::Point(15, 28), cv::Point(170, 65),
