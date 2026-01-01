@@ -377,12 +377,11 @@ void DATVModSource::modulateSample()
             else
             {
                 // Insert null packet. PID=0x1fff
-                memset(m_mpegTS, 0, sizeof(m_mpegTS));
+                memset(m_mpegTS, 0xFF, sizeof(m_mpegTS));
                 m_mpegTS[0] = 0x47; // Sync byte
-                m_mpegTS[1] = 0x01;
-                m_mpegTS[2] = 0xff;
-                m_mpegTS[3] = 0xff;
-                m_mpegTS[4] = 0x10;
+                m_mpegTS[1] = 0x1F;
+                m_mpegTS[2] = 0xFF;
+                m_mpegTS[3] = 0x10;
 
                 if (tsFileReady) {
                     m_frameCount++;

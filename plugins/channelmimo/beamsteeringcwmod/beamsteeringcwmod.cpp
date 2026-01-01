@@ -74,8 +74,9 @@ BeamSteeringCWMod::~BeamSteeringCWMod()
     );
     delete m_networkManager;
 
-    m_deviceAPI->removeChannelSinkAPI(this);
+    m_deviceAPI->removeMIMOChannelAPI(this);
     m_deviceAPI->removeMIMOChannel(this);
+    QThread::msleep(100); // let some time for message queues to be processed
     BeamSteeringCWMod::stopSources();
 }
 
@@ -83,11 +84,11 @@ void BeamSteeringCWMod::setDeviceAPI(DeviceAPI *deviceAPI)
 {
     if (deviceAPI != m_deviceAPI)
     {
-        m_deviceAPI->removeChannelSinkAPI(this);
+        m_deviceAPI->removeMIMOChannelAPI(this);
         m_deviceAPI->removeMIMOChannel(this);
         m_deviceAPI = deviceAPI;
         m_deviceAPI->addMIMOChannel(this);
-        m_deviceAPI->addChannelSinkAPI(this);
+        m_deviceAPI->addMIMOChannelAPI(this);
     }
 }
 
