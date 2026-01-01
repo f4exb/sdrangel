@@ -305,8 +305,8 @@ int DATVModSettings::getDVBSDataBitrate() const
     {
         // For normal frames
         int codedBlockSize = 64800;
-        int uncodedBlockSize;
         int bbHeaderBits = 80;
+        int uncodedBlockSize = codedBlockSize + bbHeaderBits; // Yields a fec factor of 1.0 if no FEC applied
         // See table 5a in DVBS2 spec
         switch (m_fec)
         {
@@ -344,7 +344,7 @@ int DATVModSettings::getDVBSDataBitrate() const
             uncodedBlockSize = 38688;
             break;
         default:
-            qDebug("DATVModSettings::getDVBSDataBitrate: Unsupported DVB-S2 code rate");
+            qWarning("DATVModSettings::getDVBSDataBitrate: Unsupported DVB-S2 code rate");
             break;
         }
         fecFactor = (uncodedBlockSize-bbHeaderBits)/(float)codedBlockSize;
