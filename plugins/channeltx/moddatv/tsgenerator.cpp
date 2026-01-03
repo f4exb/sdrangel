@@ -33,6 +33,8 @@ extern "C"
 
 #include <opencv2/opencv.hpp>  // Add OpenCV for text overlay
 
+#include <QDateTime>
+
 #include "tsgenerator.h"
 
 const double  TSGenerator::rate_qpsk[11][4] = {{1.0, 4.0, 12.0, 2}, {1.0, 3.0, 12.0, 2}, {2.0, 5.0, 12.0, 2}, {1.0, 2.0, 12.0, 2}, {3.0, 5.0, 12.0, 2}, {2.0, 3.0, 10.0, 2}, {3.0, 4.0, 12.0, 2}, {4.0, 5.0, 12.0, 2}, {5.0, 6.0, 10.0, 2}, {8.0, 9.0, 8.0, 2}, {9.0, 10.0, 8.0, 1}};
@@ -174,19 +176,19 @@ AVFrame* TSGenerator::load_image_to_yuv_with_opencv(const char* filename, int wi
     }
 
     // 2. OPTIONAL: Overlay timestamp
-    if (overlay_timestamp) {
-        auto now = std::chrono::system_clock::now();
-        auto time_t = std::chrono::system_clock::to_time_t(now);
-        char time_str[32];
-        struct tm time_buffer;  // Your own buffer
-        std::strftime(time_str, sizeof(time_str), "%H:%M:%S", localtime_r(&time_t, &time_buffer));
+    if (overlay_timestamp)
+    {
+        QString time_str = QDateTime::currentDateTime().toString("HH:mm:ss");
+        char time_cstr[32];
+        strncpy(time_cstr, time_str.toStdString().c_str(), sizeof(time_cstr) - 1);
+        time_cstr[sizeof(time_cstr) - 1] = '\0';
 
         // Draw black background box first
         cv::rectangle(rgb_image, cv::Point(15, 28), cv::Point(170, 65),
                       cv::Scalar(0, 0, 0), -1);
 
         // Draw white timestamp text
-        cv::putText(rgb_image, time_str, cv::Point(20, 55),
+        cv::putText(rgb_image, time_cstr, cv::Point(20, 55),
                     cv::FONT_HERSHEY_SIMPLEX, 1.0, cv::Scalar(255, 255, 255), 2);
     }
 
