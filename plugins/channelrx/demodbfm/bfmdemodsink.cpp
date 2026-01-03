@@ -344,8 +344,10 @@ void BFMDemodSink::applySettings(const BFMDemodSettings& settings, bool force)
             << " m_useReverseAPI: " << settings.m_useReverseAPI
             << " force: " << force;
 
-    if ((settings.m_audioStereo && (settings.m_audioStereo != m_settings.m_audioStereo)) || force) {
+    if ((settings.m_audioStereo && (settings.m_audioStereo != m_settings.m_audioStereo)) || force)
+    {
         m_pilotPLL.configure(19000.0/m_channelSampleRate, 50.0/m_channelSampleRate, 0.01);
+        applyAudioSampleRate(m_audioSampleRate); // re-apply audio sample rate to reconfigure interpolators
     }
 
     if ((settings.m_afBandwidth != m_settings.m_afBandwidth) || force)
