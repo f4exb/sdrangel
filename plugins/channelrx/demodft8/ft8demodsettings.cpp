@@ -19,9 +19,12 @@
 ///////////////////////////////////////////////////////////////////////////////////
 
 #include <QColor>
+#include <QCoreApplication>
 
 #include "util/simpleserializer.h"
 #include "settings/serializable.h"
+#include "maincore.h"
+#include "util/maidenhead.h"
 #include "ft8demodsettings.h"
 
 const int FT8DemodSettings::m_ft8SampleRate = 12000;
@@ -66,6 +69,10 @@ void FT8DemodSettings::resetToDefaults()
     m_workspaceIndex = 0;
     m_hidden = false;
     m_filterIndex = 0;
+    m_enablePSKReporter = false;
+    m_pskReporterCallsign = getDefaultReporterCallsign();
+    m_pskReporterLocator = getDefaultReporterLocator();
+    m_pskReporterSoftware = "SDRangel FT8 Demod";
     resetBandPresets();
 }
 
@@ -133,6 +140,10 @@ QByteArray FT8DemodSettings::serialize() const
     s.writeBlob(26, m_geometryBytes);
     s.writeBool(27, m_hidden);
     s.writeU32(29, m_filterIndex);
+    s.writeBool(30, m_enablePSKReporter);
+    s.writeString(31, m_pskReporterCallsign);
+    s.writeString(32, m_pskReporterLocator);
+    s.writeString(33, m_pskReporterSoftware);
 
     for (unsigned int i = 0; i <  10; i++)
     {
@@ -214,6 +225,10 @@ bool FT8DemodSettings::deserialize(const QByteArray& data)
         d.readBool(27, &m_hidden, false);
         d.readU32(29, &utmp, 0);
         m_filterIndex = utmp < 10 ? utmp : 0;
+        d.readBool(30, &m_enablePSKReporter, false);
+        d.readString(31, &m_pskReporterCallsign, getDefaultReporterCallsign());
+        d.readString(32, &m_pskReporterLocator, getDefaultReporterLocator());
+        d.readString(33, &m_pskReporterSoftware, getDefaultReporterSoftware());
 
         for (unsigned int i = 0; (i < 10); i++)
         {
@@ -251,4 +266,21 @@ QDataStream& operator>>(QDataStream& in, FT8DemodBandPreset& bandPreset)
     in >> bandPreset.m_baseFrequency;
     in >> bandPreset.m_channelOffset;
     return in;
+}
+
+QString FT8DemodSettings::getDefaultReporterCallsign() const
+{
+    return MainCore::instance()->getSettings().getStationName();
+}
+
+QString FT8DemodSettings::getDefaultReporterLocator() const
+{
+    float lat = MainCore::instance()->getSettings().getLatitude();
+    float lon = MainCore::instance()->getSettings().getLongitude();
+    return Maidenhead::toMaidenhead(lat, lon);
+}
+
+QString FT8DemodSettings::getDefaultReporterSoftware() const
+{
+    return QCoreApplication::applicationName() + " " + QCoreApplication::applicationVersion();
 }

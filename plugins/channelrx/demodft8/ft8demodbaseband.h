@@ -36,6 +36,7 @@ class ChannelAPI;
 class SpectrumVis;
 class QThread;
 class FT8DemodWorker;
+class PskReporterWorker;
 
 class FT8DemodBaseband : public QObject
 {
@@ -102,6 +103,8 @@ private:
     int m_tickCount;
     QThread *m_workerThread;
     FT8DemodWorker *m_ft8DemodWorker;
+    QThread *m_pskReporterThread;
+    PskReporterWorker *m_pskReporterWorker;
     int16_t *m_ft8WorkerBuffer;
     qint64 m_deviceCenterFrequency;
     QRecursiveMutex m_mutex;

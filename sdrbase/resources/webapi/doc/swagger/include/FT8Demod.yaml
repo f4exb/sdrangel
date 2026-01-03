@@ -70,6 +70,18 @@ FT8DemodSettings:
         Verify OSD decoded message against a list of validated callsigns
           * 0 - Disable
           * 1 - Enable
+    enablePSKReporter:
+      type: integer
+      description: >
+        Enable reporting of decoded messages to PSK Reporter server
+          * 0 - Disable
+          * 1 - Enable
+    pskReporterCallsign:
+      type: string
+    pskReporterLocator:
+      type: string
+    pskReporterSoftware:
+      type: string
     rgbColor:
       type: integer
     title:
