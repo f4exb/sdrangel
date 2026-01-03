@@ -17,8 +17,8 @@
 
 extern "C"
 {
-#include "libavcodec/avcodec.h"
-#include "libavformat/avformat.h"
+#include <libavcodec/avcodec.h>
+#include <libavformat/avformat.h>
 
 #include <libavutil/channel_layout.h>
 #include <libavutil/common.h>
@@ -376,7 +376,7 @@ void TSGenerator::encode_frame_to_ts(AVFormatContext* oc, AVCodecContext* codec_
 }
 
 // Write callback - stores TS packets in memory
-#if FF_API_AVIO_WRITE_NONCONST
+#if LIBAVFORMAT_VERSION_INT < ((61 << 16) | (0 << 8) | 0)
 int TSGenerator::write_packet_cb(void* opaque, uint8_t* buf, int buf_size)
 #else
 int TSGenerator::write_packet_cb(void* opaque, const uint8_t* buf, int buf_size)
