@@ -41,6 +41,7 @@ public:
     void processBuffer(int16_t *buffer, QDateTime periodTS);
     void setRecordSamples(bool recordSamples) { m_recordSamples = recordSamples; }
     void setLogMessages(bool logMessages) { m_logMessages = logMessages; }
+    void setEnablePskReporter(bool enablePskReporter) { m_enablePskReporter = enablePskReporter; }
     void setNbDecoderThreads(int nbDecoderThreads) { m_nbDecoderThreads = nbDecoderThreads; }
     void setDecoderTimeBudget(float decoderTimeBudget) { m_decoderTimeBudget = decoderTimeBudget; }
     void setUseOSD(bool useOSD) { m_useOSD = useOSD; }
@@ -49,7 +50,8 @@ public:
     void setVerifyOSD(bool verifyOSD) { m_verifyOSD = verifyOSD; }
     void setLowFrequency(int lowFreq) { m_lowFreq = lowFreq; }
     void setHighFrequency(int highFreq) { m_highFreq = highFreq; }
-    void setReportingMessageQueue(MessageQueue *messageQueue) { m_reportingMessageQueue = messageQueue; }
+    void setGUIReportingMessageQueue(MessageQueue *messageQueue) { m_guiReportingMessageQueue = messageQueue; }
+    void setPSKReportingMessageQueue(MessageQueue *messageQueue) { m_pskReportingMessageQueue = messageQueue; }
     void invalidateSequence() { m_invalidSequence = true; }
     void setBaseFrequency(qint64 baseFrequency) { m_baseFrequency = baseFrequency; }
     void setChannel(ChannelAPI *channel) { m_channel = channel; }
@@ -92,6 +94,7 @@ private:
     QString m_logsPath;
     bool m_recordSamples;
     bool m_logMessages;
+    bool m_enablePskReporter;
     int m_nbDecoderThreads;
     float m_decoderTimeBudget;
     bool m_useOSD;
@@ -104,7 +107,8 @@ private:
     qint64 m_baseFrequency;
     FT8::FT8Decoder m_ft8Decoder;
     FT8::Packing m_packing;
-    MessageQueue *m_reportingMessageQueue;
+    MessageQueue *m_guiReportingMessageQueue;
+    MessageQueue *m_pskReportingMessageQueue;
     ChannelAPI *m_channel;
     QSet<QString> m_validCallsigns;
 };

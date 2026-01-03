@@ -6380,6 +6380,19 @@ margin-bottom: 20px;
       "type" : "integer",
       "description" : "Verify OSD decoded message against a list of validated callsigns\n  * 0 - Disable\n  * 1 - Enable\n"
     },
+    "enablePSKReporter" : {
+      "type" : "integer",
+      "description" : "Enable reporting of decoded messages to PSK Reporter server\n  * 0 - Disable\n  * 1 - Enable\n"
+    },
+    "pskReporterCallsign" : {
+      "type" : "string"
+    },
+    "pskReporterLocator" : {
+      "type" : "string"
+    },
+    "pskReporterSoftware" : {
+      "type" : "string"
+    },
     "rgbColor" : {
       "type" : "integer"
     },
@@ -59634,7 +59647,7 @@ except ApiException as e:
           </div>
           <div id="generator">
             <div class="content">
-              Generated 2025-12-31T21:12:50.336+01:00
+              Generated 2026-01-03T10:36:00.091+01:00
             </div>
           </div>
       </div>

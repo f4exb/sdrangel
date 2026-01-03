@@ -24,6 +24,7 @@
 #include "maincore.h"
 
 #include "ft8demodworker.h"
+#include "pskreporterworker.h"
 #include "ft8demodbaseband.h"
 
 MESSAGE_CLASS_DEFINITION(FT8DemodBaseband::MsgConfigureFT8DemodBaseband, Message)
@@ -48,12 +49,7 @@ FT8DemodBaseband::FT8DemodBaseband() :
         m_ft8DemodWorker,
         &QObject::deleteLater
     );
-    QObject::connect(
-        m_workerThread,
-        &QThread::finished,
-        m_ft8DemodWorker,
-        &QThread::deleteLater
-    );
+
     QObject::connect(
         this,
         &FT8DemodBaseband::bufferReady,
@@ -63,6 +59,20 @@ FT8DemodBaseband::FT8DemodBaseband() :
     );
 
     m_workerThread->start();
+
+    m_pskReporterThread = new QThread();
+    m_pskReporterWorker = new PskReporterWorker();
+    m_ft8DemodWorker->setPSKReportingMessageQueue(m_pskReporterWorker->getInputMessageQueue());
+    m_pskReporterWorker->moveToThread(m_pskReporterThread);
+
+    QObject::connect(
+        m_pskReporterThread,
+        &QThread::finished,
+        m_pskReporterWorker,
+        &QObject::deleteLater
+    );
+
+    m_pskReporterThread->start();
 
     QObject::connect(
         &m_sampleFifo,
@@ -84,6 +94,8 @@ FT8DemodBaseband::~FT8DemodBaseband()
     m_workerThread->exit();
 	m_workerThread->wait();
     delete[] m_ft8WorkerBuffer;
+    m_pskReporterThread->exit();
+    m_pskReporterThread->wait();
 }
 
 void FT8DemodBaseband::reset()
@@ -96,7 +108,7 @@ void FT8DemodBaseband::reset()
 void FT8DemodBaseband::setMessageQueueToGUI(MessageQueue *messageQueue)
 {
     m_messageQueueToGUI = messageQueue;
-    m_ft8DemodWorker->setReportingMessageQueue(m_messageQueueToGUI);
+    m_ft8DemodWorker->setGUIReportingMessageQueue(m_messageQueueToGUI);
 }
 
 void FT8DemodBaseband::setChannel(ChannelAPI *channel)
@@ -235,6 +247,22 @@ void FT8DemodBaseband::applySettings(const FT8DemodSettings& settings, bool forc
 
     if ((settings.m_logMessages != m_settings.m_logMessages) || force) {
         m_ft8DemodWorker->setLogMessages(settings.m_logMessages);
+    }
+
+    if ((settings.m_enablePSKReporter != m_settings.m_enablePSKReporter) || force) {
+        m_ft8DemodWorker->setEnablePskReporter(settings.m_enablePSKReporter);
+    }
+
+    if ((settings.m_pskReporterCallsign != m_settings.m_pskReporterCallsign) || force) {
+        m_pskReporterWorker->setMyCallsign(settings.m_pskReporterCallsign);
+    }
+
+    if ((settings.m_pskReporterLocator != m_settings.m_pskReporterLocator) || force) {
+        m_pskReporterWorker->setMyLocator(settings.m_pskReporterLocator);
+    }
+
+    if ((settings.m_pskReporterSoftware != m_settings.m_pskReporterSoftware) || force) {
+        m_pskReporterWorker->setDecoderInfo(settings.m_pskReporterSoftware);
     }
 
     if ((settings.m_nbDecoderThreads != m_settings.m_nbDecoderThreads) || force) {

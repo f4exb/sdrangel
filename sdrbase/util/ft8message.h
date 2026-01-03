@@ -44,7 +44,9 @@ struct SDRBASE_API FT8Message
 class SDRBASE_API MsgReportFT8Messages : public Message {
     MESSAGE_CLASS_DECLARATION
 public:
+    const QList<FT8Message>& getFT8Messages() const { return m_ft8Messages; }
     QList<FT8Message>& getFT8Messages() { return m_ft8Messages; }
+    qint64 getBaseFrequency() const { return m_baseFrequency; }
     void setBaseFrequency(qint64 baseFrequency) { m_baseFrequency = baseFrequency; }
 
     static MsgReportFT8Messages* create() {

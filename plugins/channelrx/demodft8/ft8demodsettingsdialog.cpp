@@ -35,6 +35,10 @@ FT8DemodSettingsDialog::FT8DemodSettingsDialog(FT8DemodSettings& settings, QStri
     ui->osdLDPCThreshold->setValue(m_settings.m_osdLDPCThreshold);
     ui->osdLDPCThresholdText->setText(tr("%1").arg(m_settings.m_osdLDPCThreshold));
     ui->verifyOSD->setChecked(m_settings.m_verifyOSD);
+    ui->enablePSKReporter->setChecked(m_settings.m_enablePSKReporter);
+    ui->reportingStation->setText(m_settings.m_pskReporterCallsign);
+    ui->reportingLocator->setText(m_settings.m_pskReporterLocator);
+    ui->reportingSoftware->setText(m_settings.m_pskReporterSoftware);
     resizeBandsTable();
     populateBandsTable();
     connect(ui->bands, &QTableWidget::cellChanged, this, &FT8DemodSettingsDialog::textCellChanged);
@@ -159,6 +163,65 @@ void FT8DemodSettingsDialog::on_verifyOSD_stateChanged(int state)
 
     if (!m_settingsKeys.contains("verifyOSD")) {
         m_settingsKeys.append("verifyOSD");
+    }
+}
+
+void FT8DemodSettingsDialog::on_enablePSKReporter_toggled(bool checked)
+{
+    m_settings.m_enablePSKReporter = checked;
+
+    if (!m_settingsKeys.contains("enablePSKReporter")) {
+        m_settingsKeys.append("enablePSKReporter");
+    }
+}
+
+void FT8DemodSettingsDialog::on_pskReporterCallsign_editingFinished()
+{
+    m_settings.m_pskReporterCallsign = ui->reportingStation->text();
+
+    if (!m_settingsKeys.contains("pskReporterCallsign")) {
+        m_settingsKeys.append("pskReporterCallsign");
+    }
+}
+
+void FT8DemodSettingsDialog::on_pskReporterLocator_editingFinished()
+{
+    m_settings.m_pskReporterLocator = ui->reportingLocator->text();
+
+    if (!m_settingsKeys.contains("pskReporterLocator")) {
+        m_settingsKeys.append("pskReporterLocator");
+    }
+}
+
+void FT8DemodSettingsDialog::on_pskReporterSoftware_editingFinished()
+{
+    m_settings.m_pskReporterSoftware =  ui->reportingSoftware->text();
+
+    if (!m_settingsKeys.contains("pskReporterSoftware")) {
+        m_settingsKeys.append("pskReporterSoftware");
+    }
+}
+
+void FT8DemodSettingsDialog::on_reportingDefaults_clicked()
+{
+    ui->reportingStation->setText(m_settings.getDefaultReporterCallsign());
+    ui->reportingLocator->setText(m_settings.getDefaultReporterLocator());
+    ui->reportingSoftware->setText(m_settings.getDefaultReporterSoftware());
+
+    m_settings.m_pskReporterCallsign = ui->reportingStation->text();
+    m_settings.m_pskReporterLocator = ui->reportingLocator->text();
+    m_settings.m_pskReporterSoftware = ui->reportingSoftware->text();
+
+    if (!m_settingsKeys.contains("pskReporterCallsign")) {
+        m_settingsKeys.append("pskReporterCallsign");
+    }
+
+    if (!m_settingsKeys.contains("pskReporterLocator")) {
+        m_settingsKeys.append("pskReporterLocator");
+    }
+
+    if (!m_settingsKeys.contains("pskReporterSoftware")) {
+        m_settingsKeys.append("pskReporterSoftware");
     }
 }
 

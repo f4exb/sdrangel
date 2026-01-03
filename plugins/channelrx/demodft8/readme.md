@@ -235,7 +235,27 @@ Sets the minimum number of correct LDPC bits (out of 83) necessary to trigger OS
 
 OSD search may find invalid solutions as mentioned above. When checking this option the callsigns in messages not passed through OSD (thus very certainly valid) are stored for the life of the plugin. When OSD is engaged the second callsign field which is always a callsign is checked against this list and if the callsign is not found the message is rejected. This is quite efficient in removing false messages when OSD is engaged although some valid messages may be removed.
 
-<h4>C.1.7: Band presets table</h4>
+<h4>C.1.7: Report to PSK reporter</h4>
+
+Sends received calls details to the PSK reporter (report.pskreporter.info port 4739) via UDP packets. Reports are sent every 5 minutes.
+
+<h4>C.1.8: Reporting station callsign</h4>
+
+This is the callsign of your station as it will be reported (may be an Amateur Radio callsign or something else). By default it takes the value for "Sation name" in the "Preferences > My Position..." in the main window.
+
+<h4>C.1.9: Reporting station Maindenhead locator</h4>
+
+This is the Maidenhead locator as it will be reported. By default it is calculated from the "Latitude" and "Longitude" values in the "Preferences > My Position..." in the main window.
+
+<h4>C.1.10: Reporting station software</h4>
+
+This is the decoding Software name and version as it will be reported in the "Using" field. By default it takes the value shown at the bottom right of the main SDRangel window.
+
+<h4>C.1.11: Revert to default values</h4>
+
+Use this push button to revert to default values for the reporting station details.
+
+<h4>C.1.12: Band presets table</h4>
 
 This table shows the band presets values that will appear in (C.5)
 
@@ -245,23 +265,23 @@ This table shows the band presets values that will appear in (C.5)
 
 You can edit these values by clicking on the cell in the table.
 
-<h4>C.1.8: Add preset</h4>
+<h4>C.1.13: Add preset</h4>
 
 Use this button to create a new preset. It will take the values from the row of the selected cell in the table (if selected) and put the new preset at the bottom of the table
 
-<h4>C.1.9: Delete preset</h4>
+<h4>C.1.14: Delete preset</h4>
 
 Delete the preset designated by the selected cell in the table.
 
-<h4>C.1.10: Move up preset</h4>
+<h4>C.1.15: Move up preset</h4>
 
 Move up the preset designated by the selected cell in the table.
 
-<h4>C.1.11: Move down preset</h4>
+<h4>C.1.16: Move down preset</h4>
 
 Move down the preset designated by the selected cell in the table.
 
-<h4>C.1.12: Restore defaults</h4>
+<h4>C.1.17: Restore defaults</h4>
 
 This restores the default band preset values:
 
@@ -283,10 +303,10 @@ This restores the default band preset values:
 
 Channel offsets are all set to 0 kHz.
 
-<h4>C.1.13 Commit changes</h4>
+<h4>C.1.18 Commit changes</h4>
 
 Click on the "OK" button to commit changes and close dialog.
 
-<h4>C.1.14 Cancel changes</h4>
+<h4>C.1.19 Cancel changes</h4>
 
 Click on the "Cancel" button to close dialog without making changes.

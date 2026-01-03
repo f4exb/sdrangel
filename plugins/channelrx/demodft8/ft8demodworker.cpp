@@ -141,6 +141,8 @@ QString FT8DemodWorker::FT8Callback::get_name()
 
 FT8DemodWorker::FT8DemodWorker() :
     m_recordSamples(false),
+    m_logMessages(false),
+    m_enablePskReporter(false),
     m_nbDecoderThreads(6),
     m_decoderTimeBudget(0.5),
     m_useOSD(false),
@@ -151,7 +153,8 @@ FT8DemodWorker::FT8DemodWorker() :
     m_highFreq(3000),
     m_invalidSequence(true),
     m_baseFrequency(0),
-    m_reportingMessageQueue(nullptr),
+    m_guiReportingMessageQueue(nullptr),
+    m_pskReportingMessageQueue(nullptr),
     m_channel(nullptr)
 {
     QString relPath = "ft8/save";
@@ -237,8 +240,12 @@ void FT8DemodWorker::processBuffer(int16_t *buffer, QDateTime periodTS)
     qDebug("FT8DemodWorker::processBuffer: done: at %6.3f %d messages",
         m_baseFrequency / 1000000.0, (int)ft8Callback.getReportMessage()->getFT8Messages().size());
 
-    if (m_reportingMessageQueue) {
-        m_reportingMessageQueue->push(new MsgReportFT8Messages(*ft8Callback.getReportMessage()));
+    if (m_guiReportingMessageQueue) {
+        m_guiReportingMessageQueue->push(new MsgReportFT8Messages(*ft8Callback.getReportMessage()));
+    }
+
+    if (m_enablePskReporter && m_pskReportingMessageQueue) {
+        m_pskReportingMessageQueue->push(new MsgReportFT8Messages(*ft8Callback.getReportMessage()));
     }
 
     QList<ObjectPipe*> mapPipes;

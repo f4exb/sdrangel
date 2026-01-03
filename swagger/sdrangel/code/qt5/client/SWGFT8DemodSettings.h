@@ -93,6 +93,18 @@ public:
     qint32 getVerifyOsd();
     void setVerifyOsd(qint32 verify_osd);
 
+    qint32 getEnablePskReporter();
+    void setEnablePskReporter(qint32 enable_psk_reporter);
+
+    QString* getPskReporterCallsign();
+    void setPskReporterCallsign(QString* psk_reporter_callsign);
+
+    QString* getPskReporterLocator();
+    void setPskReporterLocator(QString* psk_reporter_locator);
+
+    QString* getPskReporterSoftware();
+    void setPskReporterSoftware(QString* psk_reporter_software);
+
     qint32 getRgbColor();
     void setRgbColor(qint32 rgb_color);
 
@@ -177,6 +189,18 @@ private:
 
     qint32 verify_osd;
     bool m_verify_osd_isSet;
+
+    qint32 enable_psk_reporter;
+    bool m_enable_psk_reporter_isSet;
+
+    QString* psk_reporter_callsign;
+    bool m_psk_reporter_callsign_isSet;
+
+    QString* psk_reporter_locator;
+    bool m_psk_reporter_locator_isSet;
+
+    QString* psk_reporter_software;
+    bool m_psk_reporter_software_isSet;
 
     qint32 rgb_color;
     bool m_rgb_color_isSet;
