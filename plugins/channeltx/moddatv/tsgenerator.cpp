@@ -376,7 +376,11 @@ void TSGenerator::encode_frame_to_ts(AVFormatContext* oc, AVCodecContext* codec_
 }
 
 // Write callback - stores TS packets in memory
+#if FF_API_AVIO_WRITE_NONCONST
 int TSGenerator::write_packet_cb(void* opaque, uint8_t* buf, int buf_size)
+#else
+int TSGenerator::write_packet_cb(void* opaque, const uint8_t* buf, int buf_size)
+#endif
 {
     std::vector<uint8_t>* buffer = static_cast<std::vector<uint8_t>*>(opaque);
     buffer->insert(buffer->end(), buf, buf + buf_size);
