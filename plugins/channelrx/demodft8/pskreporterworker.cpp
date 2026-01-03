@@ -126,10 +126,11 @@ void PskReporterWorker::processFT8Messages(const QList<FT8Message>& ft8Messages,
         txPtr +=1;
 
         // Station Mode
-        *(uint8_t  *)&txInfoData[txPtr] = (uint8_t)strlen(txMode);
+        const size_t modeLen = strlen(txMode);
+        *(uint8_t  *)&txInfoData[txPtr] = (uint8_t)modeLen;
         txPtr += 1;
-        strncpy((char *)&txInfoData[txPtr], txMode, strlen(txMode));
-        txPtr += strlen(txMode);
+        memcpy(&txInfoData[txPtr], txMode, modeLen);
+        txPtr += modeLen;
 
         // Station locator
         *(uint8_t  *)&txInfoData[txPtr] = (uint8_t) msg.loc.size();
