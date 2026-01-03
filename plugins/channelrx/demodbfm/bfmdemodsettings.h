@@ -32,6 +32,7 @@ struct BFMDemodSettings
     Real m_afBandwidth;
     Real m_volume;
     Real m_squelch;
+    bool m_audioMute;
     bool m_audioStereo;
     bool m_lsbStereo;
     bool m_showPilot;

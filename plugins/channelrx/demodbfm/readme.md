@@ -48,6 +48,10 @@ This is the power of the reconstructed stereo pilot signal.
 
 Use this button to activate or de-activate RDS decoding
 
+<h3>Audio mute</h3>
+
+Use this button to mute or unmute audio
+
 <h3>A.8: Level meter in dB</h3>
 
   - top bar (green): average value

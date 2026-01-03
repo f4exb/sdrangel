@@ -96,6 +96,10 @@ void BFMDemodSink::feed(const SampleVector::const_iterator& begin, const SampleV
 
 	m_sampleBuffer.clear();
 
+    if (m_settings.m_audioMute) {
+        return;
+    }
+
 	for (SampleVector::const_iterator it = begin; it != end; ++it)
 	{
 		Complex c(it->real() / SDR_RX_SCALEF, it->imag() / SDR_RX_SCALEF);

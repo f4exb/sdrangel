@@ -38,6 +38,8 @@ SWGBFMDemodSettings::SWGBFMDemodSettings() {
     m_volume_isSet = false;
     squelch = 0.0f;
     m_squelch_isSet = false;
+    audio_mute = 0;
+    m_audio_mute_isSet = false;
     audio_stereo = 0;
     m_audio_stereo_isSet = false;
     lsb_stereo = 0;
@@ -88,6 +90,8 @@ SWGBFMDemodSettings::init() {
     m_volume_isSet = false;
     squelch = 0.0f;
     m_squelch_isSet = false;
+    audio_mute = 0;
+    m_audio_mute_isSet = false;
     audio_stereo = 0;
     m_audio_stereo_isSet = false;
     lsb_stereo = 0;
@@ -124,6 +128,7 @@ SWGBFMDemodSettings::init() {
 
 void
 SWGBFMDemodSettings::cleanup() {
+
 
 
 
@@ -179,6 +184,8 @@ SWGBFMDemodSettings::fromJsonObject(QJsonObject &pJson) {
     ::SWGSDRangel::setValue(&volume, pJson["volume"], "float", "");
     
     ::SWGSDRangel::setValue(&squelch, pJson["squelch"], "float", "");
+    
+    ::SWGSDRangel::setValue(&audio_mute, pJson["audioMute"], "qint32", "");
     
     ::SWGSDRangel::setValue(&audio_stereo, pJson["audioStereo"], "qint32", "");
     
@@ -242,6 +249,9 @@ SWGBFMDemodSettings::asJsonObject() {
     }
     if(m_squelch_isSet){
         obj->insert("squelch", QJsonValue(squelch));
+    }
+    if(m_audio_mute_isSet){
+        obj->insert("audioMute", QJsonValue(audio_mute));
     }
     if(m_audio_stereo_isSet){
         obj->insert("audioStereo", QJsonValue(audio_stereo));
@@ -343,6 +353,16 @@ void
 SWGBFMDemodSettings::setSquelch(float squelch) {
     this->squelch = squelch;
     this->m_squelch_isSet = true;
+}
+
+qint32
+SWGBFMDemodSettings::getAudioMute() {
+    return audio_mute;
+}
+void
+SWGBFMDemodSettings::setAudioMute(qint32 audio_mute) {
+    this->audio_mute = audio_mute;
+    this->m_audio_mute_isSet = true;
 }
 
 qint32
@@ -523,6 +543,9 @@ SWGBFMDemodSettings::isSet(){
             isObjectUpdated = true; break;
         }
         if(m_squelch_isSet){
+            isObjectUpdated = true; break;
+        }
+        if(m_audio_mute_isSet){
             isObjectUpdated = true; break;
         }
         if(m_audio_stereo_isSet){

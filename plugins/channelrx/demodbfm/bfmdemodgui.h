@@ -110,6 +110,7 @@ private slots:
 	void on_afBW_valueChanged(int value);
 	void on_volume_valueChanged(int value);
 	void on_squelch_valueChanged(int value);
+	void on_audioMute_toggled(bool mute);
 	void on_audioStereo_toggled(bool stereo);
 	void on_lsbStereo_toggled(bool lsb);
 	void on_showPilot_clicked();

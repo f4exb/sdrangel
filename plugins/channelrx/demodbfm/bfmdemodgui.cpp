@@ -193,6 +193,12 @@ void BFMDemodGUI::on_squelch_valueChanged(int value)
 	applySettings();
 }
 
+void BFMDemodGUI::on_audioMute_toggled(bool mute)
+{
+	m_settings.m_audioMute = mute;
+	applySettings();
+}
+
 void BFMDemodGUI::on_audioStereo_toggled(bool stereo)
 {
 	if (!stereo)
@@ -512,6 +518,7 @@ void BFMDemodGUI::displaySettings()
     ui->squelch->setValue(m_settings.m_squelch);
     ui->squelchText->setText(QString("%1 dB").arg(m_settings.m_squelch));
 
+	ui->audioMute->setChecked(m_settings.m_audioMute);
     ui->audioStereo->setChecked(m_settings.m_audioStereo);
     ui->lsbStereo->setChecked(m_settings.m_lsbStereo);
     ui->showPilot->setChecked(m_settings.m_showPilot);
@@ -881,6 +888,7 @@ void BFMDemodGUI::makeUIConnections()
     QObject::connect(ui->afBW, &QSlider::valueChanged, this, &BFMDemodGUI::on_afBW_valueChanged);
     QObject::connect(ui->volume, &QSlider::valueChanged, this, &BFMDemodGUI::on_volume_valueChanged);
     QObject::connect(ui->squelch, &QSlider::valueChanged, this, &BFMDemodGUI::on_squelch_valueChanged);
+	QObject::connect(ui->audioMute, &QToolButton::toggled, this, &BFMDemodGUI::on_audioMute_toggled);
     QObject::connect(ui->audioStereo, &QToolButton::toggled, this, &BFMDemodGUI::on_audioStereo_toggled);
     QObject::connect(ui->lsbStereo, &ButtonSwitch::toggled, this, &BFMDemodGUI::on_lsbStereo_toggled);
     QObject::connect(ui->showPilot, &ButtonSwitch::clicked, this, &BFMDemodGUI::on_showPilot_clicked);

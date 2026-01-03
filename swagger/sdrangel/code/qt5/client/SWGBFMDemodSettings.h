@@ -60,6 +60,9 @@ public:
     float getSquelch();
     void setSquelch(float squelch);
 
+    qint32 getAudioMute();
+    void setAudioMute(qint32 audio_mute);
+
     qint32 getAudioStereo();
     void setAudioStereo(qint32 audio_stereo);
 
@@ -126,6 +129,9 @@ private:
 
     float squelch;
     bool m_squelch_isSet;
+
+    qint32 audio_mute;
+    bool m_audio_mute_isSet;
 
     qint32 audio_stereo;
     bool m_audio_stereo_isSet;
