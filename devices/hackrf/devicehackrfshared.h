@@ -28,24 +28,24 @@
 class DEVICES_API DeviceHackRFShared
 {
 public:
-    class DEVICES_API MsgSynchronizeFrequency : public Message
+    class DEVICES_API MsgSynchronizeSampleRate : public Message
     {
         MESSAGE_CLASS_DECLARATION
 
     public:
-        uint64_t getFrequency() const { return m_frequency; }
+        uint64_t getDeviceSampleRate() const { return m_deviceSampleRate; }
 
-        static MsgSynchronizeFrequency *create(uint64_t frequency)
+        static MsgSynchronizeSampleRate *create(uint64_t deviceSampleRate)
         {
-            return new MsgSynchronizeFrequency(frequency);
+            return new MsgSynchronizeSampleRate(deviceSampleRate);
         }
 
     private:
-        uint64_t m_frequency;
+        uint64_t m_deviceSampleRate;
 
-        MsgSynchronizeFrequency(uint64_t frequency) :
+        MsgSynchronizeSampleRate(uint64_t deviceSampleRate) :
             Message(),
-            m_frequency(frequency)
+            m_deviceSampleRate(deviceSampleRate)
         { }
     };
 

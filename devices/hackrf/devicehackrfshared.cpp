@@ -19,6 +19,6 @@
 
 #include "devicehackrfshared.h"
 
-MESSAGE_CLASS_DEFINITION(DeviceHackRFShared::MsgSynchronizeFrequency, Message)
+MESSAGE_CLASS_DEFINITION(DeviceHackRFShared::MsgSynchronizeSampleRate, Message)
 
 const unsigned int DeviceHackRFShared::m_sampleFifoMinRate = 48000; // 48kS/s knee
