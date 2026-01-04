@@ -2,7 +2,7 @@
 // Copyright (C) 2012 maintech GmbH, Otto-Hahn-Str. 15, 97204 Hoechberg, Germany //
 // written by Christian Daniel                                                   //
 // Copyright (C) 2014 John Greb <hexameron@spam.no>                              //
-// Copyright (C) 2015-2017, 2019-2022 Edouard Griffiths, F4EXB <f4exb06@gmail.com> //
+// Copyright (C) 2015-2017, 2019-2026 Edouard Griffiths, F4EXB                   //
 // Copyright (C) 2021 Andreas Baulig <free.geronimo@hotmail.de>                  //
 //                                                                               //
 // This program is free software; you can redistribute it and/or modify          //
@@ -32,6 +32,7 @@
 #include <fstream>
 
 #include "dsp/devicesamplesink.h"
+#include "dsp/spectrumvis.h"
 #include "fileoutputsettings.h"
 
 class QNetworkAccessManager;
@@ -231,11 +232,14 @@ public:
             const QStringList& deviceSettingsKeys,
             SWGSDRangel::SWGDeviceSettings& response);
 
+	SpectrumVis *getSpectrumVis() { return &m_spectrumVis; }
+    void setSpectrumGUI(Serializable *spectrumGUI) { m_settings.setSpectrumGUI(spectrumGUI); }
+
 private:
     DeviceAPI *m_deviceAPI;
-	QMutex m_mutex;
     bool m_running = false;
 	FileOutputSettings m_settings;
+	SpectrumVis m_spectrumVis;
 	std::ofstream m_ofstream;
 	FileOutputWorker* m_fileOutputWorker = nullptr;
     QThread m_fileOutputWorkerThread;

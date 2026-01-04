@@ -1,5 +1,5 @@
 ///////////////////////////////////////////////////////////////////////////////////
-// Copyright (C) 2015-2017, 2019-2022 Edouard Griffiths, F4EXB <f4exb06@gmail.com> //
+// Copyright (C) 2015-2017, 2019-2026 Edouard Griffiths, F4EXB                   //
 // Copyright (C) 2022 Jon Beniston, M7RCE <jon@beniston.com>                     //
 //                                                                               //
 // This program is free software; you can redistribute it and/or modify          //
@@ -31,6 +31,7 @@
 
 class DeviceSampleSink;
 class DeviceUISet;
+class SpectrumVis;
 
 namespace Ui {
 	class FileOutputGui;
@@ -58,7 +59,7 @@ private:
     QList<QString> m_settingsKeys;
 	QTimer m_updateTimer;
     QTimer m_statusTimer;
-	DeviceSampleSink* m_deviceSampleSink;
+	FileOutput* m_deviceSampleSink;
     int m_sampleRate;
     quint64 m_deviceCenterFrequency; //!< Center frequency in device
     bool m_generation;
@@ -67,6 +68,9 @@ private:
 	std::size_t m_tickCount;
 	int m_lastEngineState;
 	MessageQueue m_inputMessageQueue;
+	SpectrumVis* m_spectrumVis;
+    static const int m_MinimumWidth = 370;
+    static const int m_MinimumHeight = 470;
 
 	void blockApplySettings(bool block) { m_doApplySettings = !block; }
 	void displaySettings();

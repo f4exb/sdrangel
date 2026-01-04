@@ -1,5 +1,5 @@
 ///////////////////////////////////////////////////////////////////////////////////
-// Copyright (C) 2016-2017, 2019-2020 Edouard Griffiths, F4EXB <f4exb06@gmail.com> //
+// Copyright (C) 2016-2017, 2019-2026 Edouard Griffiths, F4EXB                   //
 //                                                                               //
 // This program is free software; you can redistribute it and/or modify          //
 // it under the terms of the GNU General Public License as published by          //
@@ -21,6 +21,7 @@
 #include <QDebug>
 
 #include "dsp/samplesourcefifo.h"
+#include "dsp/basebandsamplesink.h"
 #include "fileoutputworker.h"
 
 FileOutputWorker::FileOutputWorker(std::ofstream *samplesStream, SampleSourceFifo* sampleFifo, QObject* parent) :
@@ -180,7 +181,9 @@ void FileOutputWorker::callbackPart(SampleVector& data, unsigned int iBegin, uns
 
     if (m_log2Interpolation == 0)
     {
-        m_ofstream->write(reinterpret_cast<char*>(&(*beginRead)), chunkSize*sizeof(Sample));
+        m_interpolators.interpolate1(&beginRead, m_buf, 2*chunkSize);
+        m_ofstream->write(reinterpret_cast<char*>(m_buf), chunkSize*2*sizeof(int16_t));
+        feedSpectrum(m_buf, 2*chunkSize);
     }
     else
     {
@@ -209,5 +212,27 @@ void FileOutputWorker::callbackPart(SampleVector& data, unsigned int iBegin, uns
         }
 
         m_ofstream->write(reinterpret_cast<char*>(m_buf), chunkSize*(1<<m_log2Interpolation)*2*sizeof(int16_t));
+        feedSpectrum(m_buf, 2*chunkSize*(1<<m_log2Interpolation));
     }
+}
+
+void FileOutputWorker::feedSpectrum(int16_t *buf, unsigned int bufSize)
+{
+    if (!m_spectrumSink) {
+        return;
+    }
+
+    m_samplesVector.allocate(bufSize/2);
+    Sample16 *s16Buf = (Sample16*) buf;
+
+    std::transform(
+        s16Buf,
+        s16Buf + (bufSize/2),
+        m_samplesVector.m_vector.begin(),
+        [](Sample16 s) -> Sample {
+            return Sample{s.m_real, s.m_imag};
+        }
+    );
+
+    m_spectrumSink->feed(m_samplesVector.m_vector.begin(), m_samplesVector.m_vector.begin() + (bufSize/2), false);
 }

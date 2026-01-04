@@ -1,7 +1,7 @@
 ///////////////////////////////////////////////////////////////////////////////////
 // Copyright (C) 2012 maintech GmbH, Otto-Hahn-Str. 15, 97204 Hoechberg, Germany //
 // written by Christian Daniel                                                   //
-// Copyright (C) 2015-2017, 2019-2022 Edouard Griffiths, F4EXB <f4exb06@gmail.com> //
+// Copyright (C) 2015-2017, 2019-2026 Edouard Griffiths, F4EXB                   //
 //                                                                               //
 // This program is free software; you can redistribute it and/or modify          //
 // it under the terms of the GNU General Public License as published by          //
@@ -20,11 +20,14 @@
 #ifndef PLUGINS_SAMPLESINK_FILEOUTPUT_FILEOUTPUTSETTINGS_H_
 #define PLUGINS_SAMPLESINK_FILEOUTPUT_FILEOUTPUTSETTINGS_H_
 
+class Serializable;
+
 struct FileOutputSettings {
     quint64 m_centerFrequency;
     quint64 m_sampleRate;
     quint32 m_log2Interp;
     QString m_fileName;
+    Serializable *m_spectrumGUI;
     bool     m_useReverseAPI;
     QString  m_reverseAPIAddress;
     uint16_t m_reverseAPIPort;
@@ -36,6 +39,7 @@ struct FileOutputSettings {
     bool deserialize(const QByteArray& data);
     void applySettings(const QStringList& settingsKeys, const FileOutputSettings& settings);
     QString getDebugString(const QStringList& settingsKeys, bool force=false) const;
+    void setSpectrumGUI(Serializable *spectrumGUI) { m_spectrumGUI = spectrumGUI; }
 };
 
 #endif /* PLUGINS_SAMPLESINK_FILEOUTPUT_FILEOUTPUTSETTINGS_H_ */
