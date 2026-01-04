@@ -48,29 +48,36 @@ This is the power of the reconstructed stereo pilot signal.
 
 Use this button to activate or de-activate RDS decoding
 
-<h3>Audio mute</h3>
+<h3>A.8: Audio mute</h3>
 
 Use this button to mute or unmute audio
 
-<h3>A.8: Level meter in dB</h3>
+<h3>A.9: Level meter in dB</h3>
 
   - top bar (green): average value
   - bottom bar (blue green): instantaneous peak value
   - tip vertical bar (bright green): peak hold value
 
-<h3>A.9: RF Bandwidth</h3>
+<h3>A.10: RF Bandwidth</h3>
 
 This is the bandwidth in kHz of the channel signal before demodulation. It can be set in steps: 80, 100, 120, 140, 160, 180, 200, 220 and 250 kHz. Inspect the baseband spectrum (B) to adjust for best quality.
 
-<h3>A.10: AF bandwidth</h3>
+<h3>A.11: AF bandwidth</h3>
 
 This is the AF bandwidth in kHz. It can be varied continuously between 1 and 20 kHz in steps of 1 kHz.
 
-<h3>A.11: AF volume</h3>
+<h3>A.12: De-emphasis</h3>
+
+Select the de-emphasis time constant:
+
+  - **50us**: for Europe, Australia...
+  - **75us**: for North America, Japan...
+
+<h3>A.13: AF volume</h3>
 
 This is the relative AF volume from 0 to 10.
 
-<h3>A.12: Squelch</h3>
+<h3>A.14: Squelch</h3>
 
 Adjust squelch in dB.
 

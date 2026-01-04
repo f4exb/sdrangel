@@ -34,6 +34,8 @@ SWGBFMDemodSettings::SWGBFMDemodSettings() {
     m_rf_bandwidth_isSet = false;
     af_bandwidth = 0.0f;
     m_af_bandwidth_isSet = false;
+    de_emphasis = 0;
+    m_de_emphasis_isSet = false;
     volume = 0.0f;
     m_volume_isSet = false;
     squelch = 0.0f;
@@ -86,6 +88,8 @@ SWGBFMDemodSettings::init() {
     m_rf_bandwidth_isSet = false;
     af_bandwidth = 0.0f;
     m_af_bandwidth_isSet = false;
+    de_emphasis = 0;
+    m_de_emphasis_isSet = false;
     volume = 0.0f;
     m_volume_isSet = false;
     squelch = 0.0f;
@@ -139,6 +143,7 @@ SWGBFMDemodSettings::cleanup() {
 
 
 
+
     if(title != nullptr) { 
         delete title;
     }
@@ -180,6 +185,8 @@ SWGBFMDemodSettings::fromJsonObject(QJsonObject &pJson) {
     ::SWGSDRangel::setValue(&rf_bandwidth, pJson["rfBandwidth"], "float", "");
     
     ::SWGSDRangel::setValue(&af_bandwidth, pJson["afBandwidth"], "float", "");
+    
+    ::SWGSDRangel::setValue(&de_emphasis, pJson["deEmphasis"], "qint32", "");
     
     ::SWGSDRangel::setValue(&volume, pJson["volume"], "float", "");
     
@@ -243,6 +250,9 @@ SWGBFMDemodSettings::asJsonObject() {
     }
     if(m_af_bandwidth_isSet){
         obj->insert("afBandwidth", QJsonValue(af_bandwidth));
+    }
+    if(m_de_emphasis_isSet){
+        obj->insert("deEmphasis", QJsonValue(de_emphasis));
     }
     if(m_volume_isSet){
         obj->insert("volume", QJsonValue(volume));
@@ -333,6 +343,16 @@ void
 SWGBFMDemodSettings::setAfBandwidth(float af_bandwidth) {
     this->af_bandwidth = af_bandwidth;
     this->m_af_bandwidth_isSet = true;
+}
+
+qint32
+SWGBFMDemodSettings::getDeEmphasis() {
+    return de_emphasis;
+}
+void
+SWGBFMDemodSettings::setDeEmphasis(qint32 de_emphasis) {
+    this->de_emphasis = de_emphasis;
+    this->m_de_emphasis_isSet = true;
 }
 
 float
@@ -537,6 +557,9 @@ SWGBFMDemodSettings::isSet(){
             isObjectUpdated = true; break;
         }
         if(m_af_bandwidth_isSet){
+            isObjectUpdated = true; break;
+        }
+        if(m_de_emphasis_isSet){
             isObjectUpdated = true; break;
         }
         if(m_volume_isSet){

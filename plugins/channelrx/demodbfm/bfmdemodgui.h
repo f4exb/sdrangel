@@ -108,6 +108,7 @@ private slots:
 	void on_deltaFrequency_changed(qint64 value);
 	void on_rfBW_valueChanged(int value);
 	void on_afBW_valueChanged(int value);
+	void on_deEmphasis_currentIndexChanged(int index);
 	void on_volume_valueChanged(int value);
 	void on_squelch_valueChanged(int value);
 	void on_audioMute_toggled(bool mute);

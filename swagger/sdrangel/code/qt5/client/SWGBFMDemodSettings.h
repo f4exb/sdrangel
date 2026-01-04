@@ -54,6 +54,9 @@ public:
     float getAfBandwidth();
     void setAfBandwidth(float af_bandwidth);
 
+    qint32 getDeEmphasis();
+    void setDeEmphasis(qint32 de_emphasis);
+
     float getVolume();
     void setVolume(float volume);
 
@@ -123,6 +126,9 @@ private:
 
     float af_bandwidth;
     bool m_af_bandwidth_isSet;
+
+    qint32 de_emphasis;
+    bool m_de_emphasis_isSet;
 
     float volume;
     bool m_volume_isSet;

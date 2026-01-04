@@ -10,6 +10,12 @@ BFMDemodSettings:
     afBandwidth:
       type: number
       format: float
+    deEmphasis:
+      type: integer
+      description: >
+        De-emphasis time constant (us)
+          * 0 - 50us (Europe, Australia)
+          * 1 - 75us (US, Japan)
     volume:
       type: number
       format: float

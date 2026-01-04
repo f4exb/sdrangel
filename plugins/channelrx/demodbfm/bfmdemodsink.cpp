@@ -30,7 +30,6 @@
 #include "rdsparser.h"
 #include "bfmdemodsink.h"
 
-const Real BFMDemodSink::default_deemphasis = 50.0; // 50 us
 const int  BFMDemodSink::default_excursion = 750000; // +/- 75 kHz
 
 BFMDemodSink::BFMDemodSink() :
@@ -41,8 +40,8 @@ BFMDemodSink::BFMDemodSink() :
     m_audioBufferFill(0),
     m_audioFifo(48000),
     m_pilotPLL(19000/384000, 50/384000, 0.01),
-    m_deemphasisFilterX(default_deemphasis * 48000 * 1.0e-6),
-    m_deemphasisFilterY(default_deemphasis * 48000 * 1.0e-6),
+    m_deemphasisFilterX(m_settings.getDeEmphasisTimeConstant() * 48000),
+    m_deemphasisFilterY(m_settings.getDeEmphasisTimeConstant() * 48000),
 	m_fmExcursion(default_excursion)
 {
     m_magsq = 0.0f;
@@ -67,8 +66,8 @@ BFMDemodSink::BFMDemodSink() :
 
     m_rfFilter = new fftfilt(-50000.0 / 384000.0, 50000.0 / 384000.0, filtFftLen);
 
-	m_deemphasisFilterX.configure(default_deemphasis * m_audioSampleRate * 1.0e-6);
-	m_deemphasisFilterY.configure(default_deemphasis * m_audioSampleRate * 1.0e-6);
+	m_deemphasisFilterX.configure(m_settings.getDeEmphasisTimeConstant() * m_audioSampleRate);
+	m_deemphasisFilterY.configure(m_settings.getDeEmphasisTimeConstant() * m_audioSampleRate);
  	m_phaseDiscri.setFMScaling(384000/m_fmExcursion);
 
 	m_audioBuffer.resize(1<<14);
@@ -287,8 +286,8 @@ void BFMDemodSink::applyAudioSampleRate(int sampleRate)
     m_interpolatorStereoDistanceRemain = (Real) m_channelSampleRate / sampleRate;
     m_interpolatorStereoDistance =  (Real) m_channelSampleRate / (Real) sampleRate;
 
-    m_deemphasisFilterX.configure(default_deemphasis * sampleRate * 1.0e-6);
-    m_deemphasisFilterY.configure(default_deemphasis * sampleRate * 1.0e-6);
+    m_deemphasisFilterX.configure(m_settings.getDeEmphasisTimeConstant() * sampleRate);
+    m_deemphasisFilterY.configure(m_settings.getDeEmphasisTimeConstant() * sampleRate);
 
     m_audioSampleRate = sampleRate;
 }
@@ -337,6 +336,7 @@ void BFMDemodSink::applySettings(const BFMDemodSettings& settings, bool force)
             << " m_inputFrequencyOffset: " << settings.m_inputFrequencyOffset
             << " m_rfBandwidth: " << settings.m_rfBandwidth
             << " m_afBandwidth: " << settings.m_afBandwidth
+            << " m_deEmphasis: " << settings.getDeEmphasisTimeConstant()
             << " m_volume: " << settings.m_volume
             << " m_squelch: " << settings.m_squelch
             << " m_audioStereo: " << settings.m_audioStereo
@@ -352,6 +352,12 @@ void BFMDemodSink::applySettings(const BFMDemodSettings& settings, bool force)
     {
         m_pilotPLL.configure(19000.0/m_channelSampleRate, 50.0/m_channelSampleRate, 0.01);
         applyAudioSampleRate(m_audioSampleRate); // re-apply audio sample rate to reconfigure interpolators
+    }
+
+    if ((settings.getDeEmphasisTimeConstant() != m_settings.getDeEmphasisTimeConstant()) || force)
+    {
+        m_deemphasisFilterX.configure(settings.getDeEmphasisTimeConstant() * m_audioSampleRate);
+        m_deemphasisFilterY.configure(settings.getDeEmphasisTimeConstant() * m_audioSampleRate);
     }
 
     if ((settings.m_afBandwidth != m_settings.m_afBandwidth) || force)
