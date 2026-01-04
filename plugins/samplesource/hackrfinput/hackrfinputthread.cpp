@@ -83,22 +83,30 @@ void HackRFInputThread::run()
     if (hackrf_is_streaming(m_dev) == HACKRF_TRUE)
     {
         qDebug("HackRFInputThread::run: HackRF is streaming already");
-    }
-    else
-    {
-        qDebug("HackRFInputThread::run: HackRF is not streaming");
-
-        rc = (hackrf_error) hackrf_start_rx(m_dev, rx_callback, this);
+        rc = (hackrf_error) hackrf_stop_rx(m_dev);
 
         if (rc == HACKRF_SUCCESS)
         {
-            qDebug("HackRFInputThread::run: started HackRF Rx");
+            qDebug("HackRFInputThread::run: stopped HackRF Rx");
         }
         else
         {
-            qDebug("HackRFInputThread::run: failed to start HackRF Rx: %s", hackrf_error_name(rc));
+            qDebug("HackRFInputThread::run: failed to stop HackRF Rx: %s", hackrf_error_name(rc));
         }
     }
+
+	usleep(200000);
+
+	rc = (hackrf_error) hackrf_start_rx(m_dev, rx_callback, this);
+
+	if (rc == HACKRF_SUCCESS)
+	{
+		qDebug("HackRFInputThread::run: started HackRF Rx");
+	}
+	else
+	{
+		qDebug("HackRFInputThread::run: failed to start HackRF Rx: %s", hackrf_error_name(rc));
+	}
 
     while ((m_running) && (hackrf_is_streaming(m_dev) == HACKRF_TRUE))
     {

@@ -38,7 +38,7 @@ This is the center frequency of transmission in kHz.
 
 <h3>4: Local Oscillator correction</h3>
 
-Use this slider to adjust LO correction in ppm. It can be varied from -10.0 to 10.0 in 0.1 steps and is applied in software.
+Use this slider to adjust LO correction in ppm. It can be varied from -100.0 to 100.0 in 0.1 steps and is applied in software.
 
 <h3>5: Rx filter bandwidth</h3>
 
