@@ -27,15 +27,23 @@ class Serializable;
 
 struct BFMDemodSettings
 {
+    enum DeEmphasis
+    {
+        DeEmphasis50us,
+        DeEmphasis75us,
+    };
+
     qint64 m_inputFrequencyOffset;
     Real m_rfBandwidth;
     Real m_afBandwidth;
     Real m_volume;
     Real m_squelch;
+    bool m_audioMute;
     bool m_audioStereo;
     bool m_lsbStereo;
     bool m_showPilot;
     bool m_rdsActive;
+    DeEmphasis m_deEmphasis;
     quint32 m_rgbColor;
     QString m_title;
     QString m_audioDeviceName;
@@ -73,6 +81,19 @@ struct BFMDemodSettings
             return 48000;
         } else {
             return (3*rfBW)/2;
+        }
+    }
+
+    double getDeEmphasisTimeConstant() const
+    {
+        switch (m_deEmphasis)
+        {
+        case DeEmphasis50us:
+            return 50e-6;
+        case DeEmphasis75us:
+            return 75e-6;
+        default:
+            return 50e-6;
         }
     }
 };

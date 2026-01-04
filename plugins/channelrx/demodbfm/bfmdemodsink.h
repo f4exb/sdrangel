@@ -155,7 +155,6 @@ private:
 
 	LowPassFilterRC m_deemphasisFilterX;
 	LowPassFilterRC m_deemphasisFilterY;
-    static const Real default_deemphasis;
 
 	Real m_fmExcursion;
 	static const int default_excursion;
