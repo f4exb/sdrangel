@@ -31,8 +31,10 @@ RUN sudo mkdir /opt/build /opt/install \
 # swagger-codegen
 FROM base as codegen_clone
 ARG clone_label
+ARG branch
+ARG repository
 WORKDIR /opt/build
-RUN git clone --depth 1 https://github.com/f4exb/swagger-codegen.git -b sdrangel \
+RUN git clone --depth 1 ${repository} -b ${branch} \
     && cd swagger-codegen \
     && mkdir build \
     && echo "${clone_label}" > build/clone_label.txt
