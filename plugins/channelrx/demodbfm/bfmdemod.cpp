@@ -217,6 +217,7 @@ void BFMDemod::applySettings(const BFMDemodSettings& settings, bool force)
             << " m_inputFrequencyOffset: " << settings.m_inputFrequencyOffset
             << " m_rfBandwidth: " << settings.m_rfBandwidth
             << " m_afBandwidth: " << settings.m_afBandwidth
+            << " m_deEmphasis: " << settings.getDeEmphasisTimeConstant()
             << " m_volume: " << settings.m_volume
             << " m_squelch: " << settings.m_squelch
             << " m_audioStereo: " << settings.m_audioStereo
@@ -236,6 +237,9 @@ void BFMDemod::applySettings(const BFMDemodSettings& settings, bool force)
     if ((settings.m_volume != m_settings.m_volume) || force) {
         reverseAPIKeys.append("volume");
     }
+    if ((settings.m_audioMute != m_settings.m_audioMute) || force) {
+        reverseAPIKeys.append("audioMute");
+    }
     if ((settings.m_audioStereo != m_settings.m_audioStereo) || force) {
         reverseAPIKeys.append("audioStereo");
     }
@@ -253,6 +257,9 @@ void BFMDemod::applySettings(const BFMDemodSettings& settings, bool force)
     }
     if ((settings.m_rfBandwidth != m_settings.m_rfBandwidth) || force) {
         reverseAPIKeys.append("rfBandwidth");
+    }
+    if ((settings.m_deEmphasis != m_settings.m_deEmphasis) || force) {
+        reverseAPIKeys.append("deEmphasis");
     }
     if ((settings.m_squelch != m_settings.m_squelch) || force) {
         reverseAPIKeys.append("squelch");
@@ -383,11 +390,21 @@ void BFMDemod::webapiUpdateChannelSettings(
     if (channelSettingsKeys.contains("afBandwidth")) {
         settings.m_afBandwidth = response.getBfmDemodSettings()->getAfBandwidth();
     }
+    if (channelSettingsKeys.contains("deEmphasis"))
+    {
+        int deEmphasis = response.getBfmDemodSettings()->getDeEmphasis();
+        if (deEmphasis >= 0 && deEmphasis < 2) {
+            settings.m_deEmphasis = static_cast<BFMDemodSettings::DeEmphasis>(deEmphasis);
+        }
+    }
     if (channelSettingsKeys.contains("volume")) {
         settings.m_volume = response.getBfmDemodSettings()->getVolume();
     }
     if (channelSettingsKeys.contains("squelch")) {
         settings.m_squelch = response.getBfmDemodSettings()->getSquelch();
+    }
+    if (channelSettingsKeys.contains("audioMute")) {
+        settings.m_audioMute = response.getBfmDemodSettings()->getAudioMute() != 0;
     }
     if (channelSettingsKeys.contains("audioStereo")) {
         settings.m_audioStereo = response.getBfmDemodSettings()->getAudioStereo() != 0;
@@ -455,8 +472,10 @@ void BFMDemod::webapiFormatChannelSettings(SWGSDRangel::SWGChannelSettings& resp
     response.getBfmDemodSettings()->setInputFrequencyOffset(settings.m_inputFrequencyOffset);
     response.getBfmDemodSettings()->setRfBandwidth(settings.m_rfBandwidth);
     response.getBfmDemodSettings()->setAfBandwidth(settings.m_afBandwidth);
+    response.getBfmDemodSettings()->setDeEmphasis(static_cast<int>(settings.m_deEmphasis));
     response.getBfmDemodSettings()->setVolume(settings.m_volume);
     response.getBfmDemodSettings()->setSquelch(settings.m_squelch);
+    response.getBfmDemodSettings()->setAudioMute(settings.m_audioMute ? 1 : 0);
     response.getBfmDemodSettings()->setAudioStereo(settings.m_audioStereo ? 1 : 0);
     response.getBfmDemodSettings()->setLsbStereo(settings.m_lsbStereo ? 1 : 0);
     response.getBfmDemodSettings()->setShowPilot(settings.m_showPilot ? 1 : 0);
@@ -665,11 +684,17 @@ void BFMDemod::webapiFormatChannelSettings(
     if (channelSettingsKeys.contains("afBandwidth") || force) {
         swgBFMDemodSettings->setAfBandwidth(settings.m_afBandwidth);
     }
+    if (channelSettingsKeys.contains("deEmphasis") || force) {
+        swgBFMDemodSettings->setDeEmphasis(static_cast<int>(settings.m_deEmphasis));
+    }
     if (channelSettingsKeys.contains("volume") || force) {
         swgBFMDemodSettings->setVolume(settings.m_volume);
     }
     if (channelSettingsKeys.contains("squelch") || force) {
         swgBFMDemodSettings->setSquelch(settings.m_squelch);
+    }
+    if (channelSettingsKeys.contains("audioMute") || force) {
+        swgBFMDemodSettings->setAudioMute(settings.m_audioMute ? 1 : 0);
     }
     if (channelSettingsKeys.contains("audioStereo") || force) {
         swgBFMDemodSettings->setAudioStereo(settings.m_audioStereo ? 1 : 0);

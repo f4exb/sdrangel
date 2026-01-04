@@ -34,10 +34,14 @@ SWGBFMDemodSettings::SWGBFMDemodSettings() {
     m_rf_bandwidth_isSet = false;
     af_bandwidth = 0.0f;
     m_af_bandwidth_isSet = false;
+    de_emphasis = 0;
+    m_de_emphasis_isSet = false;
     volume = 0.0f;
     m_volume_isSet = false;
     squelch = 0.0f;
     m_squelch_isSet = false;
+    audio_mute = 0;
+    m_audio_mute_isSet = false;
     audio_stereo = 0;
     m_audio_stereo_isSet = false;
     lsb_stereo = 0;
@@ -84,10 +88,14 @@ SWGBFMDemodSettings::init() {
     m_rf_bandwidth_isSet = false;
     af_bandwidth = 0.0f;
     m_af_bandwidth_isSet = false;
+    de_emphasis = 0;
+    m_de_emphasis_isSet = false;
     volume = 0.0f;
     m_volume_isSet = false;
     squelch = 0.0f;
     m_squelch_isSet = false;
+    audio_mute = 0;
+    m_audio_mute_isSet = false;
     audio_stereo = 0;
     m_audio_stereo_isSet = false;
     lsb_stereo = 0;
@@ -124,6 +132,8 @@ SWGBFMDemodSettings::init() {
 
 void
 SWGBFMDemodSettings::cleanup() {
+
+
 
 
 
@@ -176,9 +186,13 @@ SWGBFMDemodSettings::fromJsonObject(QJsonObject &pJson) {
     
     ::SWGSDRangel::setValue(&af_bandwidth, pJson["afBandwidth"], "float", "");
     
+    ::SWGSDRangel::setValue(&de_emphasis, pJson["deEmphasis"], "qint32", "");
+    
     ::SWGSDRangel::setValue(&volume, pJson["volume"], "float", "");
     
     ::SWGSDRangel::setValue(&squelch, pJson["squelch"], "float", "");
+    
+    ::SWGSDRangel::setValue(&audio_mute, pJson["audioMute"], "qint32", "");
     
     ::SWGSDRangel::setValue(&audio_stereo, pJson["audioStereo"], "qint32", "");
     
@@ -237,11 +251,17 @@ SWGBFMDemodSettings::asJsonObject() {
     if(m_af_bandwidth_isSet){
         obj->insert("afBandwidth", QJsonValue(af_bandwidth));
     }
+    if(m_de_emphasis_isSet){
+        obj->insert("deEmphasis", QJsonValue(de_emphasis));
+    }
     if(m_volume_isSet){
         obj->insert("volume", QJsonValue(volume));
     }
     if(m_squelch_isSet){
         obj->insert("squelch", QJsonValue(squelch));
+    }
+    if(m_audio_mute_isSet){
+        obj->insert("audioMute", QJsonValue(audio_mute));
     }
     if(m_audio_stereo_isSet){
         obj->insert("audioStereo", QJsonValue(audio_stereo));
@@ -325,6 +345,16 @@ SWGBFMDemodSettings::setAfBandwidth(float af_bandwidth) {
     this->m_af_bandwidth_isSet = true;
 }
 
+qint32
+SWGBFMDemodSettings::getDeEmphasis() {
+    return de_emphasis;
+}
+void
+SWGBFMDemodSettings::setDeEmphasis(qint32 de_emphasis) {
+    this->de_emphasis = de_emphasis;
+    this->m_de_emphasis_isSet = true;
+}
+
 float
 SWGBFMDemodSettings::getVolume() {
     return volume;
@@ -343,6 +373,16 @@ void
 SWGBFMDemodSettings::setSquelch(float squelch) {
     this->squelch = squelch;
     this->m_squelch_isSet = true;
+}
+
+qint32
+SWGBFMDemodSettings::getAudioMute() {
+    return audio_mute;
+}
+void
+SWGBFMDemodSettings::setAudioMute(qint32 audio_mute) {
+    this->audio_mute = audio_mute;
+    this->m_audio_mute_isSet = true;
 }
 
 qint32
@@ -519,10 +559,16 @@ SWGBFMDemodSettings::isSet(){
         if(m_af_bandwidth_isSet){
             isObjectUpdated = true; break;
         }
+        if(m_de_emphasis_isSet){
+            isObjectUpdated = true; break;
+        }
         if(m_volume_isSet){
             isObjectUpdated = true; break;
         }
         if(m_squelch_isSet){
+            isObjectUpdated = true; break;
+        }
+        if(m_audio_mute_isSet){
             isObjectUpdated = true; break;
         }
         if(m_audio_stereo_isSet){

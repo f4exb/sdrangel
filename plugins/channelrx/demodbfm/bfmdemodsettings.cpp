@@ -46,10 +46,12 @@ void BFMDemodSettings::resetToDefaults()
     m_afBandwidth = 15000;
     m_volume = 2.0;
     m_squelch = -60.0;
+    m_audioMute = false;
     m_audioStereo = false;
     m_lsbStereo = false;
     m_showPilot = false;
     m_rdsActive = false;
+    m_deEmphasis = DeEmphasis50us;
     m_rgbColor = QColor(80, 120, 228).rgb();
     m_title = "Broadcast FM Demod";
     m_audioDeviceName = AudioDeviceManager::m_defaultDeviceName;
@@ -101,6 +103,8 @@ QByteArray BFMDemodSettings::serialize() const
     s.writeS32(22, m_workspaceIndex);
     s.writeBlob(23, m_geometryBytes);
     s.writeBool(24, m_hidden);
+    s.writeBool(25, m_audioMute);
+    s.writeS32(26, m_deEmphasis);
 
     return s.final();
 }
@@ -178,6 +182,9 @@ bool BFMDemodSettings::deserialize(const QByteArray& data)
         d.readS32(22, &m_workspaceIndex, 0);
         d.readBlob(23, &m_geometryBytes);
         d.readBool(24, &m_hidden, false);
+        d.readBool(25, &m_audioMute, false);
+        d.readS32(26, &tmp, DeEmphasis50us);
+        m_deEmphasis = static_cast<DeEmphasis>(tmp);
 
         return true;
     }
