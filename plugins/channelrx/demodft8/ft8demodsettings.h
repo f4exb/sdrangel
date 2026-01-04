@@ -97,6 +97,10 @@ public:
     std::vector<FT8DemodFilterSettings> m_filterBank;
     unsigned int m_filterIndex;
     QList<FT8DemodBandPreset> m_bandPresets;
+    bool m_enablePSKReporter;
+    QString m_pskReporterCallsign;
+    QString m_pskReporterLocator;
+    QString m_pskReporterSoftware;
 
     Serializable *m_channelMarker;
     Serializable *m_spectrumGUI;
@@ -110,6 +114,9 @@ public:
     QByteArray serialize() const;
     bool deserialize(const QByteArray& data);
     void resetBandPresets();
+    QString getDefaultReporterCallsign() const;
+    QString getDefaultReporterLocator() const;
+    QString getDefaultReporterSoftware() const;
 
     static const int m_ft8SampleRate;
     static const int m_minPowerThresholdDB;

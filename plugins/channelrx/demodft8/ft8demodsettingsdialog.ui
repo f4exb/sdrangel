@@ -6,8 +6,8 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>349</width>
-    <height>333</height>
+    <width>343</width>
+    <height>423</height>
    </rect>
   </property>
   <property name="font">
@@ -223,6 +223,104 @@
            </size>
           </property>
          </spacer>
+        </item>
+       </layout>
+      </item>
+     </layout>
+    </widget>
+   </item>
+   <item>
+    <widget class="QGroupBox" name="reporterGroup">
+     <property name="minimumSize">
+      <size>
+       <width>0</width>
+       <height>0</height>
+      </size>
+     </property>
+     <property name="title">
+      <string>PSK reporter</string>
+     </property>
+     <layout class="QVBoxLayout" name="verticalLayout_4">
+      <property name="bottomMargin">
+       <number>1</number>
+      </property>
+      <item>
+       <layout class="QHBoxLayout" name="horizontalLayout">
+        <item>
+         <widget class="QCheckBox" name="enablePSKReporter">
+          <property name="toolTip">
+           <string>Enable sending reception reports to PSK reporter</string>
+          </property>
+          <property name="text">
+           <string>Enable</string>
+          </property>
+         </widget>
+        </item>
+        <item>
+         <widget class="QLabel" name="reportingStationLabel">
+          <property name="text">
+           <string>Sta</string>
+          </property>
+         </widget>
+        </item>
+        <item>
+         <widget class="QLineEdit" name="reportingStation">
+          <property name="toolTip">
+           <string>Reporting (your) station</string>
+          </property>
+         </widget>
+        </item>
+        <item>
+         <widget class="QLabel" name="reportingLocatorLabel">
+          <property name="text">
+           <string>Loc</string>
+          </property>
+         </widget>
+        </item>
+        <item>
+         <widget class="QLineEdit" name="reportingLocator">
+          <property name="toolTip">
+           <string>Reporting (your) locator</string>
+          </property>
+         </widget>
+        </item>
+       </layout>
+      </item>
+      <item>
+       <layout class="QHBoxLayout" name="horizontalLayout_2">
+        <item>
+         <widget class="QLabel" name="reportingSoftwareLabel">
+          <property name="text">
+           <string>Soft</string>
+          </property>
+         </widget>
+        </item>
+        <item>
+         <widget class="QLineEdit" name="reportingSoftware">
+          <property name="toolTip">
+           <string>Reporting (your) software</string>
+          </property>
+         </widget>
+        </item>
+        <item>
+         <widget class="QPushButton" name="reportingDefaults">
+          <property name="maximumSize">
+           <size>
+            <width>24</width>
+            <height>24</height>
+           </size>
+          </property>
+          <property name="toolTip">
+           <string>Reset reporter values to defaults</string>
+          </property>
+          <property name="text">
+           <string/>
+          </property>
+          <property name="icon">
+           <iconset resource="../../../sdrgui/resources/res.qrc">
+            <normaloff>:/recycle.png</normaloff>:/recycle.png</iconset>
+          </property>
+         </widget>
         </item>
        </layout>
       </item>

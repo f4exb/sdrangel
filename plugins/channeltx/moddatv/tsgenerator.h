@@ -21,6 +21,7 @@
 #include <vector>
 #include <cstdint>
 #include <string>
+#include <libavformat/version.h>
 
 #include "datvmodsettings.h"
 
@@ -67,7 +68,11 @@ private:
     int setup_ts_context(AVFormatContext** oc, AVCodecContext* codec_ctx);
     void encode_frame_to_ts(AVFormatContext* oc, AVCodecContext* codec_ctx, AVFrame* frame, int stream_idx = 0);
     std::pair<const AVCodec*, AVCodecContext*> create_codec_context(int fps, int bitrate, int width, int height, int duration_sec);
+#if LIBAVFORMAT_VERSION_INT < ((61 << 16) | (0 << 8) | 0)
     static int write_packet_cb(void* opaque, uint8_t* buf, int buf_size);
+#else
+    static int write_packet_cb(void* opaque, const uint8_t* buf, int buf_size);
+#endif
     static int read_packet_cb(void* opaque, uint8_t* buf, int buf_size);
     static int64_t seek_cb(void* opaque, int64_t offset, int whence);
     static double get_dvbs2_rate(double symbol_rate, DATVModSettings::DATVModulation modulation, DATVModSettings::DATVCodeRate code_rate);

@@ -60,6 +60,14 @@ SWGFT8DemodSettings::SWGFT8DemodSettings() {
     m_osd_ldpc_threshold_isSet = false;
     verify_osd = 0;
     m_verify_osd_isSet = false;
+    enable_psk_reporter = 0;
+    m_enable_psk_reporter_isSet = false;
+    psk_reporter_callsign = nullptr;
+    m_psk_reporter_callsign_isSet = false;
+    psk_reporter_locator = nullptr;
+    m_psk_reporter_locator_isSet = false;
+    psk_reporter_software = nullptr;
+    m_psk_reporter_software_isSet = false;
     rgb_color = 0;
     m_rgb_color_isSet = false;
     title = nullptr;
@@ -122,6 +130,14 @@ SWGFT8DemodSettings::init() {
     m_osd_ldpc_threshold_isSet = false;
     verify_osd = 0;
     m_verify_osd_isSet = false;
+    enable_psk_reporter = 0;
+    m_enable_psk_reporter_isSet = false;
+    psk_reporter_callsign = new QString("");
+    m_psk_reporter_callsign_isSet = false;
+    psk_reporter_locator = new QString("");
+    m_psk_reporter_locator_isSet = false;
+    psk_reporter_software = new QString("");
+    m_psk_reporter_software_isSet = false;
     rgb_color = 0;
     m_rgb_color_isSet = false;
     title = new QString("");
@@ -164,6 +180,16 @@ SWGFT8DemodSettings::cleanup() {
 
 
 
+
+    if(psk_reporter_callsign != nullptr) { 
+        delete psk_reporter_callsign;
+    }
+    if(psk_reporter_locator != nullptr) { 
+        delete psk_reporter_locator;
+    }
+    if(psk_reporter_software != nullptr) { 
+        delete psk_reporter_software;
+    }
 
     if(title != nullptr) { 
         delete title;
@@ -229,6 +255,14 @@ SWGFT8DemodSettings::fromJsonObject(QJsonObject &pJson) {
     ::SWGSDRangel::setValue(&osd_ldpc_threshold, pJson["osdLDPCThreshold"], "qint32", "");
     
     ::SWGSDRangel::setValue(&verify_osd, pJson["verifyOSD"], "qint32", "");
+    
+    ::SWGSDRangel::setValue(&enable_psk_reporter, pJson["enablePSKReporter"], "qint32", "");
+    
+    ::SWGSDRangel::setValue(&psk_reporter_callsign, pJson["pskReporterCallsign"], "QString", "QString");
+    
+    ::SWGSDRangel::setValue(&psk_reporter_locator, pJson["pskReporterLocator"], "QString", "QString");
+    
+    ::SWGSDRangel::setValue(&psk_reporter_software, pJson["pskReporterSoftware"], "QString", "QString");
     
     ::SWGSDRangel::setValue(&rgb_color, pJson["rgbColor"], "qint32", "");
     
@@ -315,6 +349,18 @@ SWGFT8DemodSettings::asJsonObject() {
     }
     if(m_verify_osd_isSet){
         obj->insert("verifyOSD", QJsonValue(verify_osd));
+    }
+    if(m_enable_psk_reporter_isSet){
+        obj->insert("enablePSKReporter", QJsonValue(enable_psk_reporter));
+    }
+    if(psk_reporter_callsign != nullptr && *psk_reporter_callsign != QString("")){
+        toJsonValue(QString("pskReporterCallsign"), psk_reporter_callsign, obj, QString("QString"));
+    }
+    if(psk_reporter_locator != nullptr && *psk_reporter_locator != QString("")){
+        toJsonValue(QString("pskReporterLocator"), psk_reporter_locator, obj, QString("QString"));
+    }
+    if(psk_reporter_software != nullptr && *psk_reporter_software != QString("")){
+        toJsonValue(QString("pskReporterSoftware"), psk_reporter_software, obj, QString("QString"));
     }
     if(m_rgb_color_isSet){
         obj->insert("rgbColor", QJsonValue(rgb_color));
@@ -514,6 +560,46 @@ SWGFT8DemodSettings::setVerifyOsd(qint32 verify_osd) {
 }
 
 qint32
+SWGFT8DemodSettings::getEnablePskReporter() {
+    return enable_psk_reporter;
+}
+void
+SWGFT8DemodSettings::setEnablePskReporter(qint32 enable_psk_reporter) {
+    this->enable_psk_reporter = enable_psk_reporter;
+    this->m_enable_psk_reporter_isSet = true;
+}
+
+QString*
+SWGFT8DemodSettings::getPskReporterCallsign() {
+    return psk_reporter_callsign;
+}
+void
+SWGFT8DemodSettings::setPskReporterCallsign(QString* psk_reporter_callsign) {
+    this->psk_reporter_callsign = psk_reporter_callsign;
+    this->m_psk_reporter_callsign_isSet = true;
+}
+
+QString*
+SWGFT8DemodSettings::getPskReporterLocator() {
+    return psk_reporter_locator;
+}
+void
+SWGFT8DemodSettings::setPskReporterLocator(QString* psk_reporter_locator) {
+    this->psk_reporter_locator = psk_reporter_locator;
+    this->m_psk_reporter_locator_isSet = true;
+}
+
+QString*
+SWGFT8DemodSettings::getPskReporterSoftware() {
+    return psk_reporter_software;
+}
+void
+SWGFT8DemodSettings::setPskReporterSoftware(QString* psk_reporter_software) {
+    this->psk_reporter_software = psk_reporter_software;
+    this->m_psk_reporter_software_isSet = true;
+}
+
+qint32
 SWGFT8DemodSettings::getRgbColor() {
     return rgb_color;
 }
@@ -674,6 +760,18 @@ SWGFT8DemodSettings::isSet(){
             isObjectUpdated = true; break;
         }
         if(m_verify_osd_isSet){
+            isObjectUpdated = true; break;
+        }
+        if(m_enable_psk_reporter_isSet){
+            isObjectUpdated = true; break;
+        }
+        if(psk_reporter_callsign && *psk_reporter_callsign != QString("")){
+            isObjectUpdated = true; break;
+        }
+        if(psk_reporter_locator && *psk_reporter_locator != QString("")){
+            isObjectUpdated = true; break;
+        }
+        if(psk_reporter_software && *psk_reporter_software != QString("")){
             isObjectUpdated = true; break;
         }
         if(m_rgb_color_isSet){

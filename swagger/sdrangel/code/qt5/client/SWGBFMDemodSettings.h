@@ -54,11 +54,17 @@ public:
     float getAfBandwidth();
     void setAfBandwidth(float af_bandwidth);
 
+    qint32 getDeEmphasis();
+    void setDeEmphasis(qint32 de_emphasis);
+
     float getVolume();
     void setVolume(float volume);
 
     float getSquelch();
     void setSquelch(float squelch);
+
+    qint32 getAudioMute();
+    void setAudioMute(qint32 audio_mute);
 
     qint32 getAudioStereo();
     void setAudioStereo(qint32 audio_stereo);
@@ -121,11 +127,17 @@ private:
     float af_bandwidth;
     bool m_af_bandwidth_isSet;
 
+    qint32 de_emphasis;
+    bool m_de_emphasis_isSet;
+
     float volume;
     bool m_volume_isSet;
 
     float squelch;
     bool m_squelch_isSet;
+
+    qint32 audio_mute;
+    bool m_audio_mute_isSet;
 
     qint32 audio_stereo;
     bool m_audio_stereo_isSet;

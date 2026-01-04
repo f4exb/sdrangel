@@ -329,6 +329,18 @@ void FT8Demod::applySettings(const FT8DemodSettings& settings, bool force)
     if ((m_settings.m_verifyOSD != settings.m_verifyOSD) || force) {
         reverseAPIKeys.append("verifyOSD");
     }
+    if ((m_settings.m_enablePSKReporter != settings.m_enablePSKReporter) || force) {
+        reverseAPIKeys.append("enablePSKReporter");
+    }
+    if ((m_settings.m_pskReporterCallsign != settings.m_pskReporterCallsign) || force) {
+        reverseAPIKeys.append("pskReporterCallsign");
+    }
+    if ((m_settings.m_pskReporterLocator != settings.m_pskReporterLocator) || force) {
+        reverseAPIKeys.append("pskReporterLocator");
+    }
+    if ((m_settings.m_pskReporterSoftware != settings.m_pskReporterSoftware) || force) {
+        reverseAPIKeys.append("pskReporterSoftware");
+    }
 
     if (m_settings.m_streamIndex != settings.m_streamIndex)
     {
@@ -525,6 +537,18 @@ void FT8Demod::webapiUpdateChannelSettings(
     if (channelSettingsKeys.contains("verifyOSD")) {
         settings.m_verifyOSD = response.getFt8DemodSettings()->getVerifyOsd() != 0;
     }
+    if (channelSettingsKeys.contains("enablePSKReporter")) {
+        settings.m_enablePSKReporter = response.getFt8DemodSettings()->getEnablePskReporter() != 0;
+    }
+    if (channelSettingsKeys.contains("pskReporterCallsign")) {
+        settings.m_pskReporterCallsign = *response.getFt8DemodSettings()->getPskReporterCallsign();
+    }
+    if (channelSettingsKeys.contains("pskReporterLocator")) {
+        settings.m_pskReporterLocator = *response.getFt8DemodSettings()->getPskReporterLocator();
+    }
+    if (channelSettingsKeys.contains("pskReporterSoftware")) {
+        settings.m_pskReporterSoftware = *response.getFt8DemodSettings()->getPskReporterSoftware();
+    }
     if (channelSettingsKeys.contains("rgbColor")) {
         settings.m_rgbColor = response.getFt8DemodSettings()->getRgbColor();
     }
@@ -589,6 +613,10 @@ void FT8Demod::webapiFormatChannelSettings(SWGSDRangel::SWGChannelSettings& resp
     response.getFt8DemodSettings()->setOsdDepth(settings.m_osdDepth);
     response.getFt8DemodSettings()->setOsdLdpcThreshold(settings.m_osdLDPCThreshold);
     response.getFt8DemodSettings()->setUseOsd(settings.m_verifyOSD ? 1 : 0);
+    response.getFt8DemodSettings()->setEnablePskReporter(settings.m_enablePSKReporter ? 1 : 0);
+    response.getFt8DemodSettings()->setPskReporterCallsign(new QString(settings.m_pskReporterCallsign));
+    response.getFt8DemodSettings()->setPskReporterLocator(new QString(settings.m_pskReporterLocator));
+    response.getFt8DemodSettings()->setPskReporterSoftware(new QString(settings.m_pskReporterSoftware));
     response.getFt8DemodSettings()->setRgbColor(settings.m_rgbColor);
 
     if (response.getFt8DemodSettings()->getTitle()) {
@@ -783,6 +811,18 @@ void FT8Demod::webapiFormatChannelSettings(
     }
     if (channelSettingsKeys.contains("verifyOSD") || force) {
         swgFT8DemodSettings->setVerifyOsd(settings.m_verifyOSD ? 1 : 0);
+    }
+    if (channelSettingsKeys.contains("enablePSKReporter") || force) {
+        swgFT8DemodSettings->setEnablePskReporter(settings.m_enablePSKReporter ? 1 : 0);
+    }
+    if (channelSettingsKeys.contains("pskReporterCallsign") || force) {
+        swgFT8DemodSettings->setPskReporterCallsign(new QString(settings.m_pskReporterCallsign));
+    }
+    if (channelSettingsKeys.contains("pskReporterLocator") || force) {
+        swgFT8DemodSettings->setPskReporterLocator(new QString(settings.m_pskReporterLocator));
+    }
+    if (channelSettingsKeys.contains("pskReporterSoftware") || force) {
+        swgFT8DemodSettings->setPskReporterSoftware(new QString(settings.m_pskReporterSoftware));
     }
     if (channelSettingsKeys.contains("rgbColor") || force) {
         swgFT8DemodSettings->setRgbColor(settings.m_rgbColor);

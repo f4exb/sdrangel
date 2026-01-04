@@ -2948,6 +2948,10 @@ margin-bottom: 20px;
       "type" : "number",
       "format" : "float"
     },
+    "deEmphasis" : {
+      "type" : "integer",
+      "description" : "De-emphasis time constant (us)\n  * 0 - 50us (Europe, Australia)\n  * 1 - 75us (US, Japan)\n"
+    },
     "volume" : {
       "type" : "number",
       "format" : "float"
@@ -2955,6 +2959,9 @@ margin-bottom: 20px;
     "squelch" : {
       "type" : "number",
       "format" : "float"
+    },
+    "audioMute" : {
+      "type" : "integer"
     },
     "audioStereo" : {
       "type" : "integer"
@@ -6385,6 +6392,19 @@ margin-bottom: 20px;
     "verifyOSD" : {
       "type" : "integer",
       "description" : "Verify OSD decoded message against a list of validated callsigns\n  * 0 - Disable\n  * 1 - Enable\n"
+    },
+    "enablePSKReporter" : {
+      "type" : "integer",
+      "description" : "Enable reporting of decoded messages to PSK Reporter server\n  * 0 - Disable\n  * 1 - Enable\n"
+    },
+    "pskReporterCallsign" : {
+      "type" : "string"
+    },
+    "pskReporterLocator" : {
+      "type" : "string"
+    },
+    "pskReporterSoftware" : {
+      "type" : "string"
     },
     "rgbColor" : {
       "type" : "integer"
@@ -59734,7 +59754,7 @@ except ApiException as e:
           </div>
           <div id="generator">
             <div class="content">
-              Generated 2025-12-31T21:12:50.336+01:00
+              Generated 2026-01-04T00:29:36.688+01:00
             </div>
           </div>
       </div>

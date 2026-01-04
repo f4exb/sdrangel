@@ -38,7 +38,7 @@ In baseband sample rate input mode (6A) this is the device to host sample rate i
 
 <h3>2: Local Oscillator correction</h3>
 
-Use this slider to adjust LO correction in ppm. It can be varied from -10.0 to 10.0 in 0.1 steps and is applied in software.
+Use this slider to adjust LO correction in ppm. It can be varied from -100.0 to 100.0 in 0.1 steps and is applied in software.
 
 <h3>3: Auto correction options</h3>
 

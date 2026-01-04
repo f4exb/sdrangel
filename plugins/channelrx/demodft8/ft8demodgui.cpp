@@ -528,6 +528,30 @@ void FT8DemodGUI::on_settings_clicked()
             changed = true;
         }
 
+        if (settingsKeys.contains("enablePSKReporter"))
+        {
+            m_settings.m_enablePSKReporter = settings.m_enablePSKReporter;
+            changed = true;
+        }
+
+        if (settingsKeys.contains("pskReporterCallsign"))
+        {
+            m_settings.m_pskReporterCallsign = settings.m_pskReporterCallsign;
+            changed = true;
+        }
+
+        if (settingsKeys.contains("pskReporterLocator"))
+        {
+            m_settings.m_pskReporterLocator = settings.m_pskReporterLocator;
+            changed = true;
+        }
+
+        if (settingsKeys.contains("pskReporterSoftware"))
+        {
+            m_settings.m_pskReporterSoftware = settings.m_pskReporterSoftware;
+            changed = true;
+        }
+
         if (settingsKeys.contains("bandPresets"))
         {
             m_settings.m_bandPresets = settings.m_bandPresets;
