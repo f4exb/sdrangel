@@ -1,5 +1,5 @@
 ///////////////////////////////////////////////////////////////////////////////////
-// Copyright (C) 2016-2023 Edouard Griffiths, F4EXB <f4exb06@gmail.com>          //
+// Copyright (C) 2016-2026 Edouard Griffiths, F4EXB <f4exb06@gmail.com>          //
 // Copyright (C) 2021 Andreas Baulig <free.geronimo@hotmail.de>                  //
 //                                                                               //
 // This program is free software; you can redistribute it and/or modify          //
@@ -45,6 +45,7 @@ MESSAGE_CLASS_DEFINITION(FileOutput::MsgReportFileOutputStreamTiming, Message)
 FileOutput::FileOutput(DeviceAPI *deviceAPI) :
     m_deviceAPI(deviceAPI),
 	m_settings(),
+    m_spectrumVis(SDR_TX_SCALEF),
 	m_deviceDescription("FileOutput"),
 	m_masterTimer(deviceAPI->getMasterTimer())
 {
@@ -77,7 +78,7 @@ void FileOutput::openFileStream()
     header.centerFrequency = m_settings.m_centerFrequency;
     m_startingTimeStamp = QDateTime::currentMSecsSinceEpoch();
     header.startTimeStamp = (quint64)m_startingTimeStamp;
-    header.sampleSize = SDR_RX_SAMP_SZ;
+    header.sampleSize = SDR_TX_SAMP_SZ;
 
     FileRecord::writeHeader(m_ofstream, header);
 
@@ -91,8 +92,6 @@ void FileOutput::init()
 
 bool FileOutput::start()
 {
-	QMutexLocker mutexLocker(&m_mutex);
-
     if (m_running) {
         return true;
     }
@@ -103,13 +102,13 @@ bool FileOutput::start()
 
 	m_fileOutputWorker = new FileOutputWorker(&m_ofstream, &m_sampleSourceFifo);
     m_fileOutputWorker->moveToThread(&m_fileOutputWorkerThread);
+    m_fileOutputWorker->setSpectrumSink(&m_spectrumVis);
 	m_fileOutputWorker->setSamplerate((int) m_settings.m_sampleRate);
 	m_fileOutputWorker->setLog2Interpolation(m_settings.m_log2Interp);
 	m_fileOutputWorker->connectTimer(m_masterTimer);
 	startWorker();
     m_running = true;
 
-	mutexLocker.unlock();
 	qDebug("FileOutput::start: started");
 
     if (getMessageQueueToGUI())
@@ -123,8 +122,6 @@ bool FileOutput::start()
 
 void FileOutput::stop()
 {
-	QMutexLocker mutexLocker(&m_mutex);
-
     if (!m_running) {
         return;
     }
@@ -298,8 +295,8 @@ bool FileOutput::handleMessage(const Message& message)
 void FileOutput::applySettings(const FileOutputSettings& settings, const QList<QString>& settingsKeys, bool force)
 {
     qDebug() << "FileOutput::applySettings: force:" << force << settings.getDebugString(settingsKeys, force);
-    QMutexLocker mutexLocker(&m_mutex);
     bool forwardChange = false;
+    bool needRestart = false;
 
     if (force || settingsKeys.contains("centerFrequency"))
     {
@@ -308,19 +305,13 @@ void FileOutput::applySettings(const FileOutputSettings& settings, const QList<Q
 
     if (force || settingsKeys.contains("sampleRate"))
     {
-        if (m_fileOutputWorker != nullptr) {
-            m_fileOutputWorker->setSamplerate((int) settings.m_sampleRate);
-        }
-
+        needRestart = true;
         forwardChange = true;
     }
 
     if (force || settingsKeys.contains("log2Interp"))
     {
-        if (m_fileOutputWorker != nullptr) {
-            m_fileOutputWorker->setLog2Interpolation(settings.m_log2Interp);
-        }
-
+        needRestart = true;
         forwardChange = true;
     }
 
@@ -337,6 +328,12 @@ void FileOutput::applySettings(const FileOutputSettings& settings, const QList<Q
         m_settings = settings;
     } else {
         m_settings.applySettings(settingsKeys, settings);
+    }
+
+    if (needRestart && m_running)
+    {
+        stop();
+        start();
     }
 
     if (forwardChange)

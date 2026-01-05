@@ -1,7 +1,7 @@
 ///////////////////////////////////////////////////////////////////////////////////
 // Copyright (C) 2012 maintech GmbH, Otto-Hahn-Str. 15, 97204 Hoechberg, Germany //
 // written by Christian Daniel                                                   //
-// Copyright (C) 2015-2017, 2019-2022 Edouard Griffiths, F4EXB <f4exb06@gmail.com> //
+// Copyright (C) 2015-2017, 2019-2026 Edouard Griffiths, F4EXB                   //
 //                                                                               //
 // This program is free software; you can redistribute it and/or modify          //
 // it under the terms of the GNU General Public License as published by          //
@@ -18,6 +18,7 @@
 ///////////////////////////////////////////////////////////////////////////////////
 
 #include "util/simpleserializer.h"
+#include "settings/serializable.h"
 #include "fileoutputsettings.h"
 
 FileOutputSettings::FileOutputSettings()
@@ -31,6 +32,7 @@ void FileOutputSettings::resetToDefaults()
     m_sampleRate = 48000;
     m_log2Interp = 0;
     m_fileName = "./test.sdriq";
+    m_spectrumGUI = nullptr;
     m_useReverseAPI = false;
     m_reverseAPIAddress = "127.0.0.1";
     m_reverseAPIPort = 8888;
@@ -48,6 +50,10 @@ QByteArray FileOutputSettings::serialize() const
     s.writeString(5, m_reverseAPIAddress);
     s.writeU32(6, m_reverseAPIPort);
     s.writeU32(7, m_reverseAPIDeviceIndex);
+
+    if (m_spectrumGUI) {
+        s.writeBlob(8, m_spectrumGUI->serialize());
+    }
 
     return s.final();
 }
@@ -81,6 +87,13 @@ bool FileOutputSettings::deserialize(const QByteArray& data)
 
         d.readU32(7, &uintval, 0);
         m_reverseAPIDeviceIndex = uintval > 99 ? 99 : uintval;
+
+        if (m_spectrumGUI)
+        {
+            QByteArray bytetmp;
+            d.readBlob(8, &bytetmp);
+            m_spectrumGUI->deserialize(bytetmp);
+        }
 
         return true;
     }

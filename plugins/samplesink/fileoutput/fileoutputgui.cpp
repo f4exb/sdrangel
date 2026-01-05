@@ -1,5 +1,5 @@
 ///////////////////////////////////////////////////////////////////////////////////
-// Copyright (C) 2015-2022 Edouard Griffiths, F4EXB <f4exb06@gmail.com>          //
+// Copyright (C) 2015-2026 Edouard Griffiths, F4EXB <f4exb06@gmail.com>          //
 // Copyright (C) 2018 beta-tester <alpha-beta-release@gmx.net>                   //
 // Copyright (C) 2020, 2022-2023 Jon Beniston, M7RCE <jon@beniston.com>          //
 //                                                                               //
@@ -31,6 +31,7 @@
 #include "gui/basicdevicesettingsdialog.h"
 #include "gui/dialogpositioner.h"
 #include "dsp/dspcommands.h"
+#include "dsp/spectrumvis.h"
 
 #include "device/deviceapi.h"
 #include "device/deviceuiset.h"
@@ -54,6 +55,7 @@ FileOutputGui::FileOutputGui(DeviceUISet *deviceUISet, QWidget* parent) :
     setAttribute(Qt::WA_DeleteOnClose, true);
     ui->setupUi(getContents());
     sizeToContents();
+    setMinimumSize(m_MinimumWidth, m_MinimumHeight);
     getContents()->setStyleSheet("#FileOutputGui { background-color: rgb(64, 64, 64); }");
     m_helpURL = "plugins/samplesink/fileoutput/readme.md";
     ui->centerFrequency->setColorMapper(ColorMapper(ColorMapper::GrayGold));
@@ -66,6 +68,15 @@ FileOutputGui::FileOutputGui(DeviceUISet *deviceUISet, QWidget* parent) :
 
 	ui->fileNameText->setText(m_settings.m_fileName);
 
+    m_deviceSampleSink = (FileOutput*) m_deviceUISet->m_deviceAPI->getSampleSink();
+
+    m_spectrumVis = m_deviceSampleSink->getSpectrumVis();
+    m_spectrumVis->setGLSpectrum(ui->glSpectrum);
+    ui->glSpectrum->setCenterFrequency(m_settings.m_centerFrequency);
+    ui->glSpectrum->setSampleRate(m_settings.m_sampleRate*(1<<m_settings.m_log2Interp));
+    ui->spectrumGUI->setBuddies(m_spectrumVis, ui->glSpectrum);
+    m_deviceSampleSink->setSpectrumGUI(ui->spectrumGUI);
+
 	connect(&(m_deviceUISet->m_deviceAPI->getMasterTimer()), SIGNAL(timeout()), this, SLOT(tick()));
 	connect(&m_updateTimer, SIGNAL(timeout()), this, SLOT(updateHardware()));
 	connect(&m_statusTimer, SIGNAL(timeout()), this, SLOT(updateStatus()));
@@ -75,7 +86,6 @@ FileOutputGui::FileOutputGui(DeviceUISet *deviceUISet, QWidget* parent) :
     makeUIConnections();
     m_resizer.enableChildMouseTracking();
 
-    m_deviceSampleSink = (FileOutput*) m_deviceUISet->m_deviceAPI->getSampleSink();
     connect(&m_inputMessageQueue, SIGNAL(messageEnqueued()), this, SLOT(handleInputMessages()), Qt::QueuedConnection);
     connect(this, SIGNAL(customContextMenuRequested(const QPoint &)), this, SLOT(openDeviceSettingsDialog(const QPoint &)));
 }
@@ -256,6 +266,7 @@ void FileOutputGui::updateStatus()
 void FileOutputGui::on_centerFrequency_changed(quint64 value)
 {
     m_settings.m_centerFrequency = value * 1000;
+    ui->glSpectrum->setCenterFrequency(m_settings.m_centerFrequency);
     m_settingsKeys.append("centerFrequency");
     sendSettings();
 }
@@ -263,6 +274,7 @@ void FileOutputGui::on_centerFrequency_changed(quint64 value)
 void FileOutputGui::on_sampleRate_changed(quint64 value)
 {
     m_settings.m_sampleRate = value;
+    ui->glSpectrum->setSampleRate(m_settings.m_sampleRate*(1<<m_settings.m_log2Interp));
     m_settingsKeys.append("sampleRate");
     sendSettings();
 }
@@ -274,6 +286,7 @@ void FileOutputGui::on_interp_currentIndexChanged(int index)
     }
 
     m_settings.m_log2Interp = index;
+    ui->glSpectrum->setSampleRate(m_settings.m_sampleRate*(1<<m_settings.m_log2Interp));
     m_settingsKeys.append("log2Interp");
     updateSampleRateAndFrequency();
     sendSettings();

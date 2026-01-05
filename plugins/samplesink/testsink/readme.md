@@ -14,6 +14,8 @@ The top and bottom bars of the device window are described [here](../../../sdrgu
 
 ![Test sink plugin GUI](../../../doc/img/TestSink.png)
 
+Note: the associated spectrum in the independent spectrum window shows the baseband. The interpolated output appears in the attached spectrum view below the settings.
+
 <h3>1: Start/Stop</h3>
 
 Device start / stop button.
