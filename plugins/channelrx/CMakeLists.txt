@@ -1,5 +1,11 @@
 project(demod)
 
+if (ENABLE_CHANNELRX_DEMODINMARSAT AND INMARSATC_FOUND)
+    add_subdirectory(demodinmarsat)
+else()
+    message(STATUS "Not building demodinmarsat (ENABLE_CHANNELRX_DEMODINMARSAT=${ENABLE_CHANNELRX_DEMODINMARSAT} INMARSATC_FOUND=${INMARSATC_FOUND})")
+endif()
+
 if (ENABLE_CHANNELRX_CHANNELPOWER)
     add_subdirectory(channelpower)
 endif()

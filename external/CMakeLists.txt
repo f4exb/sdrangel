@@ -915,6 +915,49 @@ if(ENABLE_FEATURE_MORSEDECODER)
     endif ()
 endif()
 
+# For Std-C decoder
+if(ENABLE_CHANNELRX_DEMODSTDC)
+    if (WIN32)
+        set(INMARSATC_LIBRARIES
+            "${SDRANGEL_BINARY_LIB_DIR}/inmarsatc_demodulator.lib"
+            "${SDRANGEL_BINARY_LIB_DIR}/inmarsatc_parser.lib"
+            "${SDRANGEL_BINARY_LIB_DIR}/inmarsatc_decoder.lib"
+            CACHE INTERNAL ""
+            )
+    elseif (LINUX)
+        set(INMARSATC_LIBRARIES
+            "${EXTERNAL_BUILD_LIBRARIES}/lib${LIB_SUFFIX}/libinmarsatc_demodulator${CMAKE_SHARED_LIBRARY_SUFFIX}"
+            "${EXTERNAL_BUILD_LIBRARIES}/lib${LIB_SUFFIX}/libinmarsatc_decoder${CMAKE_SHARED_LIBRARY_SUFFIX}"
+            "${EXTERNAL_BUILD_LIBRARIES}/lib${LIB_SUFFIX}/libinmarsatc_parser${CMAKE_SHARED_LIBRARY_SUFFIX}"
+            CACHE INTERNAL ""
+            )
+    endif()
+    ExternalProject_Add(inmarsatc
+        GIT_REPOSITORY https://github.com/srcejon/inmarsatc.git
+        GIT_TAG "msvc"
+        PREFIX "${EXTERNAL_BUILD_LIBRARIES}/inmarsatc"
+        CMAKE_ARGS ${COMMON_CMAKE_ARGS}
+        BUILD_BYPRODUCTS "${INMARSATC_LIBRARIES}"
+        INSTALL_COMMAND ""
+        TEST_COMMAND ""
+        )
+    ExternalProject_Get_Property(inmarsatc source_dir binary_dir)
+    set(INMARSATC_DEPENDS inmarsatc CACHE INTERNAL "")
+    set_global_cache(INMARSATC_FOUND ON)
+    set(INMARSATC_EXTERNAL ON CACHE INTERNAL "")
+    set(INMARSATC_INCLUDE_DIR "${EXTERNAL_BUILD_LIBRARIES}/inmarsatc/src/inmarsatc" CACHE INTERNAL "")
+    if (WIN32)
+        install(FILES "${SDRANGEL_BINARY_BIN_DIR}/inmarsatc_demodulator${CMAKE_SHARED_LIBRARY_SUFFIX}" DESTINATION "${INSTALL_LIB_DIR}")
+        install(FILES "${SDRANGEL_BINARY_BIN_DIR}/inmarsatc_parser${CMAKE_SHARED_LIBRARY_SUFFIX}" DESTINATION "${INSTALL_LIB_DIR}")
+        install(FILES "${SDRANGEL_BINARY_BIN_DIR}/inmarsatc_decoder${CMAKE_SHARED_LIBRARY_SUFFIX}" DESTINATION "${INSTALL_LIB_DIR}")
+    elseif (APPLE)
+        set(INMARSATC_LIBRARIES "${binary_dir}/src/libinmarsatc_*${CMAKE_SHARED_LIBRARY_SUFFIX}" CACHE INTERNAL "")
+        install(DIRECTORY "${binary_dir}/src" DESTINATION "${INSTALL_LIB_DIR}"
+                FILES_MATCHING PATTERN "libinmarsatc*${CMAKE_SHARED_LIBRARY_SUFFIX}")
+        set(MACOS_EXTERNAL_LIBS_FIXUP "${MACOS_EXTERNAL_LIBS_FIXUP};${binary_dir}/src")
+    endif ()
+endif()
+
 # VkFFT (header only library)
 ExternalProject_Add(vkfft
         GIT_REPOSITORY https://github.com/DTolm/VkFFT.git
