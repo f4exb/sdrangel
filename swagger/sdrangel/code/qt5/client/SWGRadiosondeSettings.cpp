@@ -170,10 +170,10 @@ SWGRadiosondeSettings::asJsonObject() {
         toJsonValue(QString("rollupState"), rollup_state, obj, QString("SWGRollupState"));
     }
     if(radiosondes_column_indexes && radiosondes_column_indexes->size() > 0){
-        toJsonArray((QList<void*>*)radiosondes_column_indexes, obj, "radiosondesColumnIndexes", "");
+        toJsonArray((QList<void*>*)radiosondes_column_indexes, obj, "radiosondesColumnIndexes", "qint32");
     }
     if(radiosondes_column_sizes && radiosondes_column_sizes->size() > 0){
-        toJsonArray((QList<void*>*)radiosondes_column_sizes, obj, "radiosondesColumnSizes", "");
+        toJsonArray((QList<void*>*)radiosondes_column_sizes, obj, "radiosondesColumnSizes", "qint32");
     }
 
     return obj;

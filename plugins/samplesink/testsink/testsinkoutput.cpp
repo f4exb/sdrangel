@@ -1,5 +1,5 @@
 ///////////////////////////////////////////////////////////////////////////////////
-// Copyright (C) 2019-2020, 2022 Edouard Griffiths, F4EXB <f4exb06@gmail.com>    //
+// Copyright (C) 2019-2026 Edouard Griffiths, F4EXB <f4exb06@gmail.com>          //
 //                                                                               //
 // This program is free software; you can redistribute it and/or modify          //
 // it under the terms of the GNU General Public License as published by          //
@@ -65,8 +65,6 @@ void TestSinkOutput::init()
 
 bool TestSinkOutput::start()
 {
-	QMutexLocker mutexLocker(&m_mutex);
-
     if (m_running) {
         return true;
     }
@@ -94,8 +92,6 @@ bool TestSinkOutput::start()
 
 void TestSinkOutput::stop()
 {
-	QMutexLocker mutexLocker(&m_mutex);
-
     if (!m_running) {
         return;
     }
@@ -206,8 +202,8 @@ bool TestSinkOutput::handleMessage(const Message& message)
 void TestSinkOutput::applySettings(const TestSinkSettings& settings, const QList<QString>& settingsKeys, bool force)
 {
     qDebug() << "TestSinkOutput::applySettings: force:" << force << settings.getDebugString(settingsKeys, force);
-    QMutexLocker mutexLocker(&m_mutex);
     bool forwardChange = false;
+    bool needRestart = false;
 
     if (force || settingsKeys.contains("centerFrequency"))
     {
@@ -218,25 +214,21 @@ void TestSinkOutput::applySettings(const TestSinkSettings& settings, const QList
     if (force || settingsKeys.contains("sampleRate"))
     {
         m_settings.m_sampleRate = settings.m_sampleRate;
-
-        if (m_running) {
-            m_testSinkWorker->setSamplerate(m_settings.m_sampleRate);
-        }
-
+        needRestart = true;
         forwardChange = true;
     }
 
     if (force || settingsKeys.contains("log2Interp"))
     {
         m_settings.m_log2Interp = settings.m_log2Interp;
-
-        if (m_running) {
-            m_testSinkWorker->setLog2Interpolation(m_settings.m_log2Interp);
-        }
-
+        needRestart = true;
         forwardChange = true;
     }
-
+    if (needRestart && m_running)
+    {
+        stop();
+        start();
+    }
     if (forwardChange)
     {
         qDebug("TestSinkOutput::applySettings: forward: m_centerFrequency: %llu m_sampleRate: %llu m_log2Interp: %d",
@@ -275,5 +267,3 @@ int TestSinkOutput::webapiRun(
 
     return 200;
 }
-
-

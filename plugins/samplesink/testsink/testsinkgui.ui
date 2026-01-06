@@ -280,13 +280,6 @@
        </property>
       </spacer>
      </item>
-     <item>
-      <widget class="Line" name="linePlay2">
-       <property name="orientation">
-        <enum>Qt::Vertical</enum>
-       </property>
-      </widget>
-     </item>
     </layout>
    </item>
    <item>
@@ -348,12 +341,6 @@
    <header>gui/buttonswitch.h</header>
   </customwidget>
   <customwidget>
-   <class>ValueDial</class>
-   <extends>QWidget</extends>
-   <header>gui/valuedial.h</header>
-   <container>1</container>
-  </customwidget>
-  <customwidget>
    <class>GLSpectrum</class>
    <extends>QWidget</extends>
    <header>gui/glspectrum.h</header>
@@ -363,6 +350,12 @@
    <class>GLSpectrumGUI</class>
    <extends>QWidget</extends>
    <header>gui/glspectrumgui.h</header>
+   <container>1</container>
+  </customwidget>
+  <customwidget>
+   <class>ValueDial</class>
+   <extends>QWidget</extends>
+   <header>gui/valuedial.h</header>
    <container>1</container>
   </customwidget>
  </customwidgets>

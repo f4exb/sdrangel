@@ -2,7 +2,7 @@
 // Copyright (C) 2012 maintech GmbH, Otto-Hahn-Str. 15, 97204 Hoechberg, Germany //
 // written by Christian Daniel                                                   //
 // Copyright (C) 2014 John Greb <hexameron@spam.no>                              //
-// Copyright (C) 2015-2020 Edouard Griffiths, F4EXB <f4exb06@gmail.com>          //
+// Copyright (C) 2015-2026 Edouard Griffiths, F4EXB <f4exb06@gmail.com>          //
 //                                                                               //
 // This program is free software; you can redistribute it and/or modify          //
 // it under the terms of the GNU General Public License as published by          //
@@ -30,10 +30,12 @@
 #include <stdint.h>
 
 #include "dsp/interpolators.h"
+#include "util/incrementalvector.h"
 
 #define FILEOUTPUT_THROTTLE_MS 50
 
 class SampleSourceFifo;
+class BasebandSampleSink;
 
 class FileOutputWorker : public QObject {
 	Q_OBJECT
@@ -50,10 +52,18 @@ public:
 	bool isRunning() const { return m_running; }
     std::size_t getSamplesCount() const { return m_samplesCount; }
     void setSamplesCount(int samplesCount) { m_samplesCount = samplesCount; }
+	void setSpectrumSink(BasebandSampleSink *spectrumSink) { m_spectrumSink = spectrumSink; }
 
 	void connectTimer(const QTimer& timer);
 
 private:
+#pragma pack(push, 1)
+    struct Sample16
+    {
+        int16_t m_real;
+        int16_t m_imag;
+    };
+#pragma pack(pop)
 	volatile bool m_running;
 
 	std::ofstream* m_ofstream;
@@ -68,11 +78,14 @@ private:
     int m_maxThrottlems;
     QElapsedTimer m_elapsedTimer;
     bool m_throttleToggle;
+	BasebandSampleSink* m_spectrumSink;
+	IncrementalVector<Sample> m_samplesVector;
 
     Interpolators<qint16, SDR_TX_SAMP_SZ, 16> m_interpolators;
     int16_t *m_buf;
 
 	void callbackPart(SampleVector& data, unsigned int iBegin, unsigned int iEnd);
+	void feedSpectrum(int16_t *buf, unsigned int bufSize);
 
 private slots:
 	void tick();

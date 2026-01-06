@@ -22,6 +22,8 @@ The top and bottom bars of the device window are described [here](../../../sdrgu
 
 ![File output plugin GUI](../../../doc/img/FileOutput_plugin.png)
 
+Note: the associated spectrum in the independent spectrum window shows the baseband. The interpolated output that will go to the file appears in the attached spectrum view below the settings.
+
 <h3>1: Start/Stop</h3>
 
 Device start / stop button.

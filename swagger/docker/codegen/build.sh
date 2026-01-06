@@ -11,6 +11,7 @@ show_help() {
   -c label   Arbitrary clone label. Clone again if different from the last label (default current timestamp)
   -t tag     Docker image tag. Use git tag or commit hash (default latest)
   -f file    Specify a Dockerfile (default is Dockerfile in current directory i.e. '.')
+  -r repo    Git repository URL (default https://github.com/f4exb/swagger-codegen.git)
   -h         Print this help.
 EOF
 }
@@ -20,8 +21,9 @@ clone_label=$(date)
 image_tag="latest"
 uid=1000
 docker_file="."
+repository="https://github.com/f4exb/swagger-codegen.git"
 
-while getopts "h?b:c:t:j:f:" opt; do
+while getopts "h?b:c:t:j:f:r:" opt; do
     case "$opt" in
     h|\?)
         show_help
@@ -34,6 +36,8 @@ while getopts "h?b:c:t:j:f:" opt; do
     t)  image_tag=${OPTARG}
         ;;
     f)  docker_file="-f ${OPTARG} ."
+        ;;
+    r)  repository=${OPTARG}
         ;;
     esac
 done
@@ -48,5 +52,6 @@ DOCKER_BUILDKIT=1 docker build \
     --build-arg branch=${branch_name} \
     --build-arg clone_label="${clone_label}" \
     --build-arg uid=${uid} \
+    --build-arg repository=${repository} \
     --target codegen \
     -t ${IMAGE_NAME} ${docker_file}

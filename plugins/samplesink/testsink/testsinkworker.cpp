@@ -1,5 +1,5 @@
 ///////////////////////////////////////////////////////////////////////////////////
-// Copyright (C) 2016-2017, 2019-2020 Edouard Griffiths, F4EXB <f4exb06@gmail.com> //
+// Copyright (C) 2016-2017, 2019-2026 Edouard Griffiths, F4EXB                   //
 //                                                                               //
 // This program is free software; you can redistribute it and/or modify          //
 // it under the terms of the GNU General Public License as published by          //
@@ -71,14 +71,6 @@ void TestSinkWorker::setSamplerate(int samplerate)
 	            << " new:" << samplerate
 	            << " old:" << m_samplerate;
 
-	    bool wasRunning = false;
-
-		if (m_running)
-		{
-			stopWork();
-			wasRunning = true;
-		}
-
 		// resize sample FIFO
 		if (m_sampleFifo) {
 		    m_sampleFifo->resize(SampleSourceFifo::getSizePolicy(samplerate));
@@ -87,13 +79,8 @@ void TestSinkWorker::setSamplerate(int samplerate)
         // resize output buffer
         if (m_buf) delete[] m_buf;
         m_buf = new int16_t[samplerate*(1<<m_log2Interpolation)*2];
-
         m_samplerate = samplerate;
         m_samplesChunkSize = (m_samplerate * m_throttlems) / 1000;
-
-        if (wasRunning) {
-            startWork();
-        }
 	}
 }
 
@@ -109,23 +96,10 @@ void TestSinkWorker::setLog2Interpolation(int log2Interpolation)
                 << " new:" << log2Interpolation
                 << " old:" << m_log2Interpolation;
 
-        bool wasRunning = false;
-
-        if (m_running)
-        {
-            stopWork();
-            wasRunning = true;
-        }
-
         // resize output buffer
         if (m_buf) delete[] m_buf;
         m_buf = new int16_t[m_samplerate*(1<<log2Interpolation)*2];
-
         m_log2Interpolation = log2Interpolation;
-
-        if (wasRunning) {
-            startWork();
-        }
     }
 }
 
