@@ -16,6 +16,7 @@ On top of this, it can plot data from other plugins, such as:
 * Radials and estimated position from the VOR localizer feature,
 * ILS course line and glide path from the ILS Demodulator,
 * DSC geographic call areas,
+* Inmarsat C message geographic areas,
 * SID paths,
 * Pager messages that contain coordinates.
 
