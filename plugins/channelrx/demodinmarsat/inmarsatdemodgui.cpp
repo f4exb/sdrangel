@@ -981,7 +981,7 @@ void InmarsatDemodGUI::packetReceived(const QByteArray& bytes, QDateTime dateTim
                 decode = decode.append("<tr><th align=left>LCN<td> " + QString::fromStdString(frame.decoding_result.packetVars["logicalChannelNo"]));
                 decode = decode.append("<tr><th align=left>Packet No<td> " + QString::fromStdString(frame.decoding_result.packetVars["packetNo"]));
 
-                bool isBinary = frame.decoding_result.payload.presentation == PACKETDECODER_PRESENTATION_BINARY;
+                //bool isBinary = frame.decoding_result.payload.presentation == PACKETDECODER_PRESENTATION_BINARY;
                 if (frame.decoding_result.payload.presentation == PACKETDECODER_PRESENTATION_IA5)
                 {
                     for (int i = 0; i < (int)frame.decoding_result.payload.data8Bit.size(); i++)

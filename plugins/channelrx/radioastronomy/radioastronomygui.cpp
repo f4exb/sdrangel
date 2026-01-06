@@ -1506,6 +1506,8 @@ void RadioAstronomyGUI::savePowerData(const QString& filename)
 // Save power data in table to a CSV file
 void RadioAstronomyGUI::on_savePowerData_clicked(bool checked)
 {
+    (void) checked;
+
     ui->savePowerData->setChecked(!m_settings.m_powerAutoSaveCSVFilename.isEmpty());
 
     // Get filename to save to
@@ -1799,6 +1801,8 @@ void RadioAstronomyGUI::saveSpectrumData(const QString& filename)
 
 void RadioAstronomyGUI::on_saveSpectrumData_clicked(bool checked)
 {
+    (void) checked;
+
     ui->saveSpectrumData->setChecked(!m_settings.m_spectrumAutoSaveCSVFilename.isEmpty());
 
     // Get filename to save to
