@@ -8,11 +8,12 @@ The packets are BPSK modulated with a symbol rate of 1,200 symbols/s and a data 
 
 Satellites / frequencies are:
 
-|---------------------|-------|---------------------------|------|--------------|
-| Atlantic Ocean West | AOR-W | Inmarsat-4 F3             | 98W  | 1,537.70 MHz |
-| Atlantic Ocean East | AOR-E | Inmarsat-3 F5             | 54W  | 1,541.45 MHz |
-| Pacific Ocean       | POR   | Inmarsat-4 F1             | 178E | 1,541.45 MHz |
-| Indian Ocean        | IOR   | Inmarsat-4A F4 / Alphasat | 25E  | 1,537.10 MHz |
+| Region              | Id    | Satellite				  | Longitude | Frequency    |
+|---------------------|-------|---------------------------|-----------|--------------|
+| Atlantic Ocean West | AOR-W | Inmarsat-4 F3             | 98W       | 1,537.70 MHz |
+| Atlantic Ocean East | AOR-E | Inmarsat-3 F5             | 54W       | 1,541.45 MHz |
+| Pacific Ocean       | POR   | Inmarsat-4 F1             | 178E      | 1,541.45 MHz |
+| Indian Ocean        | IOR   | Inmarsat-4A F4 / Alphasat | 25E       | 1,537.10 MHz |
 
 Messages containing coordinates in the address or message fields can be displayed on the [Map Feature](../../feature/map/readme.md):
 
