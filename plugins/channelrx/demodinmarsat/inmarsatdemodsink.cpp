@@ -42,12 +42,12 @@ Complex AGC::processOneSample(const Complex& iq, bool locked)
     m_agcMovingAverage(abs(z));
     //qDebug() << "abs" << abs(z) << "m_agcGain" << m_agcGain << "m_agcMovingAverage.instantAverage()" << m_agcMovingAverage.instantAverage();
 
-    Real agcRef = 0.6f; // Target amplitude
+    Real agcRef = 0.75f; // Target amplitude
     Real agcMu = locked ? 0.01 : 0.1; // How fast we want to respond to changes in average
     Real agcEr = agcRef - m_agcMovingAverage.instantAverage(); // Error between target and average
 
     m_gain += agcMu * agcEr;
-    m_gain = std::clamp(m_gain, 0.01f, 100.0f); // 20dB max enough?
+    m_gain = std::clamp(m_gain, 0.01f, 10000.0f);
 
     return z;
 }
@@ -366,7 +366,7 @@ void InmarsatDemodSink::processOneSample(Complex &ci)
                 Real iNorm = abs(m_derot.real()) / derotMag;
                 Real qNorm = abs(m_derot.imag()) / derotMag;
                 m_lockAverage(iNorm - qNorm);
-                float lockThresh = 0.2;
+                float lockThresh = 0.45;
                 m_locked = m_lockAverage.instantAverage() > lockThresh;
                 //qDebug() << "m_lockAverage.instantAverage()" << m_lockAverage.instantAverage();
 
