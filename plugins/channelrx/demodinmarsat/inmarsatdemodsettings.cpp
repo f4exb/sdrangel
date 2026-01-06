@@ -58,7 +58,7 @@ void InmarsatDemodSettings::appendDefaultColumnSizes(QList<int>& list, int size)
 void InmarsatDemodSettings::resetToDefaults()
 {
     m_inputFrequencyOffset = 0;
-    m_rfBandwidth = 5000.0f;
+    m_rfBandwidth = 4000.0f;
     m_rrcRolloff = 1.0f;
     m_pllBW = 2*M_PI/100.0;
     m_ssBW = 2*M_PI/100.0;
@@ -163,7 +163,7 @@ bool InmarsatDemodSettings::deserialize(const QByteArray& data)
         d.readString(3, &m_filterType, "");
         d.readString(4, &m_filterMessage, "");
 
-        d.readFloat(5, &m_rfBandwidth, 5000.0f);
+        d.readFloat(5, &m_rfBandwidth, 4000.0f);
         d.readFloat(6, &m_rrcRolloff, 1.0f);
         d.readFloat(7, &m_pllBW, 2*M_PI/100.0);
         d.readFloat(8, &m_ssBW, 2*M_PI/100.0);
