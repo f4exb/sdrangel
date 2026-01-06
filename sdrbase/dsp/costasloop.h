@@ -38,6 +38,8 @@ public:
     void setPskOrder(unsigned int pskOrder) { m_pskOrder = pskOrder; }
     void reset();
     void setSampleRate(unsigned int sampleRate);
+    void setMaxFreq(float freq) { m_maxFreq = freq; }
+    void setMinFreq(float freq) { m_minFreq = freq; }
     void feed(float re, float im);
     const std::complex<float>& getComplex() const { return m_y; }
     float getReal() const { return m_y.real(); }
@@ -79,16 +81,6 @@ private:
             m_freq = m_maxFreq;
         else if (m_freq < m_minFreq)
             m_freq = m_minFreq;
-    }
-
-    void setMaxFreq(float freq)
-    {
-        m_maxFreq = freq;
-    }
-
-    void setMinFreq(float freq)
-    {
-        m_minFreq = freq;
     }
 
     float phaseDetector2(std::complex<float> sample) const // for BPSK
