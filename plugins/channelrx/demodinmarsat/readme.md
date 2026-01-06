@@ -4,7 +4,8 @@
 
 This plugin can be used to demodulate Inmarsat C data packets. They are transmitted by four geostationary satellites.
 
-The packets are BPSK modulated with a symbol rate of 1,200 symbols/s and a data rate of 600 bit/s.
+The packets are BPSK modulated with a symbol rate of 1,200 symbols/s and a data rate of 600 bit/s. 
+The packets are decoded from within frames of 639 bytes that take 8.64 seconds to receive.
 
 Satellites and corresponding frequencies are:
 
