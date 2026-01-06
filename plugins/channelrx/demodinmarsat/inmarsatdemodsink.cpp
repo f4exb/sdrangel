@@ -403,7 +403,7 @@ void InmarsatDemodSink::decodeBits()
 
     if (decoderResults.size() > 0)
     {
-        for (int j = 0; j < decoderResults.size(); j++)
+        for (int j = 0; j < (int) decoderResults.size(); j++)
         {
             QByteArray rxPacket;
             rxPacket.resize(sizeof(inmarsatc::decoder::Decoder::decoder_result));
