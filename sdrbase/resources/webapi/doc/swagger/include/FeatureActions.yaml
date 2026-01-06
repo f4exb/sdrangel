@@ -41,3 +41,5 @@ FeatureActions:
       $ref: "/doc/swagger/include/VORLocalizer.yaml#/VORLocalizerActions"
     DemodAnalyzerActions:
       $ref: "/doc/swagger/include/DemodAnalyzer.yaml#/DemodAnalyzerActions"
+    DenoiserActions:
+      $ref: "/doc/swagger/include/Denoiser.yaml#/DenoiserActions"

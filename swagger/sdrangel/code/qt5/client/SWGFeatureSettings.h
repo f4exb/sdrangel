@@ -28,6 +28,7 @@
 #include "SWGAPRSSettings.h"
 #include "SWGAntennaToolsSettings.h"
 #include "SWGDemodAnalyzerSettings.h"
+#include "SWGDenoiserSettings.h"
 #include "SWGGS232ControllerSettings.h"
 #include "SWGJogdialControllerSettings.h"
 #include "SWGLimeRFESettings.h"
@@ -88,6 +89,9 @@ public:
 
     SWGDemodAnalyzerSettings* getDemodAnalyzerSettings();
     void setDemodAnalyzerSettings(SWGDemodAnalyzerSettings* demod_analyzer_settings);
+
+    SWGDenoiserSettings* getDenoiserSettings();
+    void setDenoiserSettings(SWGDenoiserSettings* denoiser_settings);
 
     SWGJogdialControllerSettings* getJogdialControllerSettings();
     void setJogdialControllerSettings(SWGJogdialControllerSettings* jogdial_controller_settings);
@@ -161,6 +165,9 @@ private:
 
     SWGDemodAnalyzerSettings* demod_analyzer_settings;
     bool m_demod_analyzer_settings_isSet;
+
+    SWGDenoiserSettings* denoiser_settings;
+    bool m_denoiser_settings_isSet;
 
     SWGJogdialControllerSettings* jogdial_controller_settings;
     bool m_jogdial_controller_settings_isSet;

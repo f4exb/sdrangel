@@ -40,6 +40,7 @@
         <file>webapi/doc/swagger/include/DATVDemod.yaml</file>
         <file>webapi/doc/swagger/include/DATVMod.yaml</file>
         <file>webapi/doc/swagger/include/DemodAnalyzer.yaml</file>
+        <file>webapi/doc/swagger/include/Denoiser.yaml</file>
         <file>webapi/doc/swagger/include/DeviceActions.yaml</file>
         <file>webapi/doc/swagger/include/DeviceReports.yaml</file>
         <file>webapi/doc/swagger/include/DeviceSettings.yaml</file>

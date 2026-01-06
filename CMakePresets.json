@@ -3,7 +3,7 @@
   "configurePresets": [
     {
       "name": "default",
-      "binaryDir": "build-default",
+      "binaryDir": "build",
       "cacheVariables": {
         "DEBUG_OUTPUT": "ON",
         "AIRSPYHF_DIR": "/opt/install/libairspyhf",
@@ -29,6 +29,7 @@
         "UHD_DIR": "/opt/install/uhd",
         "XTRX_DIR": "/opt/install/xtrx-images",
         "GGMORSE_DIR": "/opt/install/ggmorse",
+        "RNNOISE_DIR": "/opt/install/rnnoise",
         "CMAKE_INSTALL_PREFIX": "/opt/install/sdrangel"
       },
       "warnings": {

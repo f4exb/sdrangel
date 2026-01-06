@@ -1,0 +1,57 @@
+DenoiserSettings:
+  description: Denoiser
+  properties:
+    denoiserType:
+      type: integer
+      description: >
+        Denoiser type
+          * 0 - none
+          * 1 - RNnoise
+    audioMute:
+      type: integer
+      description: >
+        Audio mute
+          * 1 - mute
+          * 0 - unmute
+    title:
+      type: string
+    rgbColor:
+      type: integer
+    fileRecordName:
+      type: string
+      description: Output wave file name
+    recordToFile:
+      type: integer
+      description: >
+        Recording status
+          * 1 - recording
+          * 0 - not recording
+    useReverseAPI:
+      type: integer
+      description: >
+        Synchronize with reverse API
+          * 1 - yes
+          * 0 - no
+    reverseAPIAddress:
+      type: string
+    reverseAPIPort:
+      type: integer
+    reverseAPIFeatureSetIndex:
+      type: integer
+    reverseAPIFeatureIndex:
+      type: integer
+    rollupState:
+      $ref: "http://swgserver:8081/api/swagger/include/RollupState.yaml#/RollupState"
+
+DenoiserActions:
+  description: "Denoiser actions"
+  required:
+  - deviceId
+  - channelId
+  properties:
+    deviceId:
+      type: integer
+      description: "Set source device Id/Number that channel belongs to"
+    channelId:
+      type: integer
+      description: "Set source channel Id/Number of the channel within the device"

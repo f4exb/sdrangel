@@ -25,6 +25,8 @@ FeatureSettings:
       $ref: "/doc/swagger/include/APRS.yaml#/APRSSettings"
     DemodAnalyzerSettings:
       $ref: "/doc/swagger/include/DemodAnalyzer.yaml#/DemodAnalyzerSettings"
+    DenoiserSettings:
+      $ref: "/doc/swagger/include/Denoiser.yaml#/DenoiserSettings"
     JogdialControllerSettings:
       $ref: "/doc/swagger/include/JogdialController.yaml#/JogdialControllerSettings"
     GS232ControllerSettings:
