@@ -52,8 +52,6 @@ namespace Ui {
 }
 class InmarsatDemodGUI;
 
-QString decodeAddress(QString messageType, QString addressHex, float *latitude = nullptr, float *longitude = nullptr, QList<QGeoCoordinate> *coordinates = nullptr, QIcon **icon = nullptr);
-
 struct MessagePart {
     int m_part;
     int m_packet;
@@ -79,6 +77,8 @@ public:
     float getLongitude() const { return m_addressCoordinates.size() > 0 ? m_longitude : m_messageCoordinates[0].longitude(); }
     QList<QGeoCoordinate>& getCoordinates() { return m_addressCoordinates.size() > 0 ? m_addressCoordinates : m_messageCoordinates; }
 
+    static QString decodeAddress(QString messageType, QString addressHex, float *latitude = nullptr, float *longitude = nullptr, QList<QGeoCoordinate> *coordinates = nullptr, QIcon **icon = nullptr);
+
 private:
 
     QDateTime m_dateTime;
@@ -94,6 +94,8 @@ private:
     QList<QGeoCoordinate> m_messageCoordinates;
 
     static QRegularExpression m_re;
+    static const QStringList m_navAreas;
+    static const QStringList m_navAreaFlags;
 
     void parseMessage();
 };

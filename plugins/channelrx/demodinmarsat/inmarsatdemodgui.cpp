@@ -393,7 +393,8 @@ static QString formatFreqMHz(std::string string)
     return formatFreqMHz(QString::fromStdString(string));
 }
 
-static const QStringList navAreas = {
+// https://en.wikipedia.org/wiki/NAVAREA
+const QStringList MultipartMessage::m_navAreas = {
     "0",
     "I United Kingdom",
     "II France",
@@ -419,7 +420,7 @@ static const QStringList navAreas = {
 };
 
 // We use flags from ADS-B demod
-static const QStringList navAreaFlags = {
+const QStringList MultipartMessage::m_navAreaFlags = {
     "",
     "united_kingdom",
     "france",
@@ -444,7 +445,7 @@ static const QStringList navAreaFlags = {
     "russia"
 };
 
-static QString decodeAddress(QString messageType, QString addressHex, float *latitude, float *longitude, QList<QGeoCoordinate> *coordinates, QIcon **icon)
+QString MultipartMessage::decodeAddress(QString messageType, QString addressHex, float *latitude, float *longitude, QList<QGeoCoordinate> *coordinates, QIcon **icon)
 {
     bool ok;
     int messageTypeNum = messageType.toInt(&ok);
@@ -457,12 +458,12 @@ static QString decodeAddress(QString messageType, QString addressHex, float *lat
         {
             // Navarea
             int navArea = addressHex.left(2).toInt(&ok, 16);
-            if (ok && (navArea > 0) && (navArea < navAreas.size()))
+            if (ok && (navArea > 0) && (navArea < m_navAreas.size()))
             {
                 if (icon) {
-                    *icon = AircraftInformation::getFlagIcon(navAreaFlags[navArea]);
+                    *icon = AircraftInformation::getFlagIcon(m_navAreaFlags[navArea]);
                 }
-                return QString("NAVAREA %1").arg(navAreas[navArea]);
+                return QString("NAVAREA %1").arg(m_navAreas[navArea]);
             }
             else
             {
@@ -476,12 +477,12 @@ static QString decodeAddress(QString messageType, QString addressHex, float *lat
             QByteArray addressBytes = QByteArray::fromHex(addressHex.toLatin1());
             // Navarea - TBD B1/B2
             int navArea = addressBytes[0];
-            if ((navArea > 0) && (navArea < navAreas.size()))
+            if ((navArea > 0) && (navArea < m_navAreas.size()))
             {
                 if (icon) {
-                    *icon = AircraftInformation::getFlagIcon(navAreaFlags[navArea]);
+                    *icon = AircraftInformation::getFlagIcon(m_navAreaFlags[navArea]);
                 }
-                return QString("NAVAREA %1").arg(navAreas[navArea]);
+                return QString("NAVAREA %1").arg(m_navAreas[navArea]);
             }
             else
             {
@@ -789,7 +790,7 @@ void InmarsatDemodGUI::packetReceived(const QByteArray& bytes, QDateTime dateTim
             priorityItem->setText(QString::fromStdString(frame.decoding_result.packetVars["priorityText"]));
 
             QIcon *icon = nullptr;
-            addressItem->setText(decodeAddress(
+            addressItem->setText(MultipartMessage::decodeAddress(
                 QString::fromStdString(frame.decoding_result.packetVars["messageType"]),
                 QString::fromStdString(frame.decoding_result.packetVars["addressHex"]),
                 nullptr,
