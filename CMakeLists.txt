@@ -825,7 +825,7 @@ if (NOT ENABLE_EXTERNAL_LIBRARIES OR (ENABLE_EXTERNAL_LIBRARIES STREQUAL "AUTO")
     find_package(HIDAPI)
     find_package(FFmpeg COMPONENTS AVCODEC AVFORMAT AVUTIL SWSCALE)
     find_package(GGMorse)
-    find_package(InmarsatC)
+    find_package(LibInmarsatC)
 
     # Devices
     if(ENABLE_AIRSPY)
