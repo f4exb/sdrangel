@@ -17,6 +17,7 @@
 
 #include "util/simpleserializer.h"
 #include "settings/serializable.h"
+#include "audio/audiodevicemanager.h"
 
 #include "denoisersettings.h"
 
@@ -43,6 +44,7 @@ void DenoiserSettings::resetToDefaults()
     m_denoiserType = DenoiserType::DenoiserType_RNnoise;
     m_title = "Denoiser";
     m_audioMute = false;
+    m_audioDeviceName = AudioDeviceManager::m_defaultDeviceName;
     m_rgbColor = 0xffd700; // gold
     m_useReverseAPI = false;
     m_reverseAPIAddress = "localhost";
@@ -61,6 +63,7 @@ QByteArray DenoiserSettings::serialize() const
 
     s.writeS32(1, static_cast<qint32>(m_denoiserType));
     s.writeBool(14, m_audioMute);
+    s.writeString(15, m_audioDeviceName);
     s.writeString(2, m_title);
     s.writeU32(3, m_rgbColor);
     s.writeBool(4, m_useReverseAPI);
@@ -99,6 +102,7 @@ bool DenoiserSettings::deserialize(const QByteArray& data)
         d.readS32(1, &itmp, 1);
         m_denoiserType = static_cast<DenoiserType>(itmp);
         d.readBool(14, &m_audioMute, false);
+        d.readString(15, &m_audioDeviceName, AudioDeviceManager::m_defaultDeviceName);
         d.readString(2, &m_title, "Denoiser");
         d.readU32(3, &m_rgbColor, 0xffd700); // gold
         d.readBool(4, &m_useReverseAPI, false);
@@ -143,6 +147,9 @@ void DenoiserSettings::applySettings(const QStringList& settingsKeys, const Deno
     if (settingsKeys.contains("audioMute")) {
         m_audioMute = settings.m_audioMute;
     }
+    if (settingsKeys.contains("audioDeviceName")) {
+        m_audioDeviceName = settings.m_audioDeviceName;
+    }
     if (settingsKeys.contains("title")) {
         m_title = settings.m_title;
     }
@@ -184,6 +191,9 @@ QString DenoiserSettings::getDebugString(const QStringList& settingsKeys, bool f
     }
     if (settingsKeys.contains("audioMute") || force) {
         debugString += QString("Audio Mute: %1 ").arg(m_audioMute ? "true" : "false");
+    }
+    if (settingsKeys.contains("audioDeviceName") || force) {
+        debugString += QString("Audio Device Name: %1 ").arg(m_audioDeviceName);
     }
     if (settingsKeys.contains("title") || force) {
         debugString += QString("Title: %1 ").arg(m_title);

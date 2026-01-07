@@ -22,6 +22,9 @@
 #include "gui/basicfeaturesettingsdialog.h"
 #include "gui/dialpopup.h"
 #include "gui/dialogpositioner.h"
+#include "gui/crightclickenabler.h"
+#include "gui/audioselectdialog.h"
+#include "dsp/dspengine.h"
 #include "util/db.h"
 #include "maincore.h"
 
@@ -156,6 +159,9 @@ DenoiserGUI::DenoiserGUI(PluginAPI* pluginAPI, FeatureUISet *featureUISet, Featu
 
     connect(this, SIGNAL(customContextMenuRequested(const QPoint &)), this, SLOT(onMenuDialogCalled(const QPoint &)));
     connect(getInputMessageQueue(), SIGNAL(messageEnqueued()), this, SLOT(handleInputMessages()));
+
+	CRightClickEnabler *audioMuteRightClickEnabler = new CRightClickEnabler(ui->audioMute);
+	connect(audioMuteRightClickEnabler, SIGNAL(rightClick(const QPoint &)), this, SLOT(audioSelect(const QPoint &)));
 
 	connect(&m_statusTimer, SIGNAL(timeout()), this, SLOT(updateStatus()));
 	m_statusTimer.start(1000);
@@ -340,6 +346,23 @@ void DenoiserGUI::on_showFileDialog_clicked(bool checked)
         }
     }
 }
+
+void DenoiserGUI::audioSelect(const QPoint& p)
+{
+    qDebug("DenoiserGUI::audioSelect");
+    AudioSelectDialog audioSelect(DSPEngine::instance()->getAudioDeviceManager(), m_settings.m_audioDeviceName);
+    audioSelect.move(p);
+    new DialogPositioner(&audioSelect, false);
+    audioSelect.exec();
+
+    if (audioSelect.m_selected)
+    {
+        m_settings.m_audioDeviceName = audioSelect.m_audioDeviceName;
+        m_settingsKeys.append("audioDeviceName");
+        applySettings();
+    }
+}
+
 
 void DenoiserGUI::tick()
 {

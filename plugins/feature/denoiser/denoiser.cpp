@@ -86,7 +86,11 @@ Denoiser::~Denoiser()
         &Denoiser::networkManagerFinished
     );
     delete m_networkManager;
-    stop();
+
+    if (m_running)
+    {
+        stop();
+    }
 }
 
 void Denoiser::start()
@@ -283,7 +287,6 @@ void Denoiser::applySettings(const DenoiserSettings& settings, const QList<QStri
         );
         m_worker->getInputMessageQueue()->push(msg);
     }
-
 
     if (settings.m_useReverseAPI)
     {

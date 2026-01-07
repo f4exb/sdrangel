@@ -16,6 +16,8 @@
 ///////////////////////////////////////////////////////////////////////////////////
 
 #include "dsp/wavfilerecord.h"
+#include "audio/audiodevicemanager.h"
+#include "dsp/dspengine.h"
 
 #include "denoiserworker.h"
 
@@ -31,13 +33,20 @@ DenoiserWorker::DenoiserWorker(QObject *parent) :
     m_sampleBufferSize(0),
     m_channelPowerAvg(),
     m_wavFileRecord(nullptr),
+    m_recordSilenceNbSamples(0),
+    m_recordSilenceCount(0),
     m_nbBytes(0)
 {
+	m_audioBuffer.resize(4800);
+	m_audioBufferFill = 0;
+    m_audioFifo.setSize(4800 * 4);
+    DSPEngine::instance()->getAudioDeviceManager()->addAudioSink(getAudioFifo(), getInputMessageQueue());
 }
 
 DenoiserWorker::~DenoiserWorker()
 {
     m_inputMessageQueue.clear();
+    DSPEngine::instance()->getAudioDeviceManager()->removeAudioSink(getAudioFifo());
 }
 
 void DenoiserWorker::reset()
@@ -106,20 +115,7 @@ void DenoiserWorker::feedPart(
         for (int is = 0; is < countSamples; is++)
         {
             const Sample& sample = m_sampleBuffer[is];
-
-            if ((sample.m_real == 0) && (sample.m_imag == 0))
-            {
-                if (m_wavFileRecord->isRecording()) {
-                    m_wavFileRecord->stopRecording();
-                }
-            }
-            else
-            {
-                if (!m_wavFileRecord->isRecording()) {
-                    m_wavFileRecord->startRecording();
-                }
-                writeSampleToFile(sample);
-            }
+            writeSampleToFile(sample);
         }
     }
 }
@@ -204,16 +200,87 @@ bool DenoiserWorker::handleMessage(const Message& cmd)
 void DenoiserWorker::applySettings(const DenoiserSettings& settings, const QStringList& settingsKeys, bool force)
 {
     QMutexLocker mutexLocker(&m_mutex);
-    Q_UNUSED(settingsKeys)
-    Q_UNUSED(force)
 
-    m_settings = settings;
+    if (settingsKeys.contains("fileRecordName")  || force)
+    {
+        if (m_wavFileRecord)
+        {
+            QStringList dotBreakout = settings.m_fileRecordName.split(QLatin1Char('.'));
+
+            if (dotBreakout.size() > 1)
+            {
+                QString extension = dotBreakout.last();
+
+                if (extension != "wav") {
+                    dotBreakout.last() = "wav";
+                }
+            }
+            else
+            {
+                dotBreakout.append("wav");
+            }
+
+            QString newFileRecordName = dotBreakout.join(QLatin1Char('.'));
+            QString fileBase;
+            FileRecordInterface::guessTypeFromFileName(newFileRecordName, fileBase);
+            qDebug("DemodAnalyzerWorker::applySettings: newFileRecordName: %s fileBase: %s", qPrintable(newFileRecordName), qPrintable(fileBase));
+            m_wavFileRecord->setFileName(fileBase);
+        }
+    }
+
+    if (settingsKeys.contains("recordToFile")  || force)
+    {
+        if (m_wavFileRecord)
+        {
+            if (settings.m_recordToFile)
+            {
+                if (!m_wavFileRecord->isRecording()) {
+                    m_wavFileRecord->startRecording();
+                }
+            }
+            else
+            {
+                if (m_wavFileRecord->isRecording()) {
+                    m_wavFileRecord->stopRecording();
+                }
+            }
+
+            m_recordSilenceCount = 0;
+        }
+    }
+
+    if ((settingsKeys.contains("audioDeviceName") && (settings.m_audioDeviceName != m_settings.m_audioDeviceName)) || force)
+    {
+        AudioDeviceManager *audioDeviceManager = DSPEngine::instance()->getAudioDeviceManager();
+        int audioDeviceIndex = audioDeviceManager->getOutputDeviceIndex(settings.m_audioDeviceName);
+        audioDeviceManager->removeAudioSink(getAudioFifo());
+        audioDeviceManager->addAudioSink(getAudioFifo(), getInputMessageQueue(), audioDeviceIndex);
+        unsigned int audioSampleRate = audioDeviceManager->getOutputSampleRate(audioDeviceIndex);
+        qDebug() << "DenoiserWorker::applySettings: audio device name:" << settings.m_audioDeviceName
+                    << " index:" << audioDeviceIndex << " sample rate:" << audioSampleRate;
+        // TODO: handle sample rate change
+    }
+
+    if (force) {
+        m_settings = settings;
+    } else {
+        m_settings.applySettings(settingsKeys, settings);
+    }
 }
 
 void DenoiserWorker::applySampleRate(int sampleRate)
 {
     QMutexLocker mutexLocker(&m_mutex);
     m_sinkSampleRate = sampleRate;
+
+    if (m_wavFileRecord)
+    {
+        if (m_wavFileRecord->isRecording()) {
+            m_wavFileRecord->stopRecording();
+        }
+
+        m_wavFileRecord->setSampleRate(m_sinkSampleRate);
+    }
 }
 
 void DenoiserWorker::handleData()
@@ -241,5 +308,71 @@ void DenoiserWorker::handleData()
         }
 
 		m_dataFifo->readCommit((unsigned int) count);
+    }
+}
+
+void DenoiserWorker::processSample(
+    DataFifo::DataType dataType,
+    const QByteArray::const_iterator& begin,
+    int i
+)
+{
+    switch(dataType)
+    {
+        case DataFifo::DataTypeI16: {
+            int16_t *s = (int16_t*) begin;
+            double re = s[i] / (double) std::numeric_limits<int16_t>::max();
+            m_magsq = re*re;
+            m_channelPowerAvg(m_magsq);
+
+            m_sampleBuffer[i].setReal(re * SDR_RX_SCALEF);
+            m_sampleBuffer[i].setImag(0);
+
+            m_audioBuffer[m_audioBufferFill].l = s[i];
+            m_audioBuffer[m_audioBufferFill].r = s[i];
+            ++m_audioBufferFill;
+
+            if (m_audioBufferFill >= m_audioBuffer.size())
+            {
+                std::size_t res = m_audioFifo.write((const quint8*)&m_audioBuffer[0], m_audioBufferFill);
+
+                if (res != m_audioBufferFill)
+                {
+                    qDebug("DenoiserWorker::processSample: %lu/%lu audio samples written", res, m_audioBufferFill);
+                    m_audioFifo.clear();
+                }
+
+                m_audioBufferFill = 0;
+            }
+        }
+        break;
+        case DataFifo::DataTypeCI16: {
+            int16_t *s = (int16_t*) begin;
+            double re = s[2*i]   / (double) std::numeric_limits<int16_t>::max();
+            double im = s[2*i+1] / (double) std::numeric_limits<int16_t>::max();
+            m_magsq = re*re + im*im;
+            m_channelPowerAvg(m_magsq);
+
+            m_sampleBuffer[i].setReal(re * SDR_RX_SCALEF);
+            m_sampleBuffer[i].setImag(im * SDR_RX_SCALEF);
+
+            m_audioBuffer[m_audioBufferFill].l = s[2*i];
+            m_audioBuffer[m_audioBufferFill].r = s[2*i+1];
+            ++m_audioBufferFill;
+
+            if (m_audioBufferFill >= m_audioBuffer.size())
+            {
+                std::size_t res = m_audioFifo.write((const quint8*)&m_audioBuffer[0], m_audioBufferFill);
+
+                if (res != m_audioBufferFill)
+                {
+                    qDebug("DenoiserWorker::processSample: %lu/%lu audio samples written", res, m_audioBufferFill);
+                    m_audioFifo.clear();
+                }
+
+                m_audioBufferFill = 0;
+            }
+        }
+        break;
     }
 }

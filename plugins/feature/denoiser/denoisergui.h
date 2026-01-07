@@ -91,6 +91,7 @@ private slots:
 	void on_channelApply_clicked();
 	void on_record_toggled(bool checked);
     void on_showFileDialog_clicked(bool checked);
+	void audioSelect(const QPoint& p);
 	void updateStatus();
 	void tick();
 };

@@ -18,14 +18,16 @@
 #define INCLUDE_FEATURE_DENOISER_DENOISERWORKER_H_
 
 #include <QObject>
-#include <QMutex>
+#include <QRecursiveMutex>
 #include <QByteArray>
+#include <QDebug>
 
 #include "util/movingaverage.h"
 #include "util/message.h"
 #include "util/messagequeue.h"
 #include "dsp/dsptypes.h"
 #include "dsp/datafifo.h"
+#include "audio/audiofifo.h"
 
 #include "denoisersettings.h"
 
@@ -86,7 +88,7 @@ public:
 	double getMagSq() const { return m_magsq; }
 	double getMagSqAvg() const { return (double) m_channelPowerAvg; }
 
-private:
+    private:
     DataFifo *m_dataFifo;
     int m_sinkSampleRate;
 	MessageQueue m_inputMessageQueue;  //!< Queue for asynchronous inbound communication
@@ -97,9 +99,15 @@ private:
     int m_sampleBufferSize;
     MovingAverageUtil<double, double, 480> m_channelPowerAvg;
     WavFileRecord* m_wavFileRecord;
+    int m_recordSilenceNbSamples;
+    int m_recordSilenceCount;
     int m_nbBytes;
+	AudioVector m_audioBuffer;
+	AudioFifo m_audioFifo;
+	std::size_t m_audioBufferFill;
     QRecursiveMutex m_mutex;
 
+    AudioFifo *getAudioFifo() { return &m_audioFifo; }
     void feedPart(
         const QByteArray::const_iterator& begin,
         const QByteArray::const_iterator& end,
@@ -109,37 +117,11 @@ private:
     bool handleMessage(const Message& cmd);
     void writeSampleToFile(const Sample& sample);
 
-    inline void processSample(
+    void processSample(
         DataFifo::DataType dataType,
         const QByteArray::const_iterator& begin,
         int i
-    )
-    {
-        switch(dataType)
-        {
-            case DataFifo::DataTypeI16: {
-                int16_t *s = (int16_t*) begin;
-                double re = s[i] / (double) std::numeric_limits<int16_t>::max();
-                m_magsq = re*re;
-                m_channelPowerAvg(m_magsq);
-
-                m_sampleBuffer[i].setReal(re * SDR_RX_SCALEF);
-                m_sampleBuffer[i].setImag(0);
-            }
-            break;
-            case DataFifo::DataTypeCI16: {
-                int16_t *s = (int16_t*) begin;
-                double re = s[2*i]   / (double) std::numeric_limits<int16_t>::max();
-                double im = s[2*i+1] / (double) std::numeric_limits<int16_t>::max();
-                m_magsq = re*re + im*im;
-                m_channelPowerAvg(m_magsq);
-
-                m_sampleBuffer[i].setReal(re * SDR_RX_SCALEF);
-                m_sampleBuffer[i].setImag(im * SDR_RX_SCALEF);
-            }
-            break;
-        }
-    }
+    );
 
 
 private slots:

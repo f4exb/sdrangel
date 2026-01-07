@@ -33,6 +33,7 @@ struct DenoiserSettings
 
     DenoiserType m_denoiserType;
     bool m_audioMute;
+    QString m_audioDeviceName;
     QString m_title;
     quint32 m_rgbColor;
     bool m_useReverseAPI;
