@@ -1039,7 +1039,7 @@ if (ZLIB_FOUND AND FAAD_FOUND AND ENABLE_CHANNELRX_DEMODDAB)
         ExternalProject_Add(dab
                 GIT_REPOSITORY https://github.com/srcejon/dab-cmdline.git
                 GIT_TAG msvc
-                DEPENDS ${ZLIB_DEPENDS} ${FAAD_DEPENDS}
+                DEPENDS ${ZLIB_DEPENDS} ${FAAD_DEPENDS} ${FFTW3F_DEPENDS}
                 PREFIX "${EXTERNAL_BUILD_LIBRARIES}/dab"
                 SOURCE_SUBDIR "library"
                 CMAKE_ARGS ${COMMON_CMAKE_ARGS}
