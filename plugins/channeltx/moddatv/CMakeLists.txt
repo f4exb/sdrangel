@@ -100,6 +100,9 @@ target_link_libraries(${TARGET_NAME} PRIVATE
 if(DEFINED FFMPEG_DEPENDS)
     add_dependencies(${TARGET_NAME} ${FFMPEG_DEPENDS})
 endif()
+if(DEFINED OpenCV_DEPENDS)
+    add_dependencies(${TARGET_NAME} ${OpenCV_DEPENDS})
+endif()
 
 install(TARGETS ${TARGET_NAME} DESTINATION ${INSTALL_FOLDER})
 
