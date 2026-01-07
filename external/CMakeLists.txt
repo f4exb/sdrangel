@@ -44,8 +44,6 @@ set(BOOST_TAG2 "1_86_0")
 include(ExternalProject)
 
 # default build destination in windows to avoid Release/Debug folder
-# Currently, we don't set this for APPLE, so binaries are built ${binary_dir} (which results in build_dir/external/project_name/src/project_name-build)
-# we should change this to be similar to LINUX, so we don't use ${binary_dir} and can set BUILD_BYPRODUCTS
 if (WIN32)
     # the build will be output on the same folder of sdrangel
     set(COMMON_CMAKE_ARGS
@@ -601,6 +599,8 @@ if ((NOT CODEC2_FOUND OR CODEC2_EXTERNAL) AND NOT USE_PRECOMPILED_LIBS)
         set(CODEC2_LIBRARIES "${SDRANGEL_BINARY_LIB_DIR}/codec2.lib" CACHE INTERNAL "")
     elseif (LINUX)
         set(CODEC2_LIBRARIES "${EXTERNAL_BUILD_LIBRARIES}/lib${LIB_SUFFIX}/libcodec2${CMAKE_SHARED_LIBRARY_SUFFIX}" CACHE INTERNAL "")
+    elseif (APPLE)
+        set(CODEC2_LIBRARIES "${EXTERNAL_BUILD_LIBRARIES}/codec2/src/codec2-build/src/libcodec2${CMAKE_SHARED_LIBRARY_SUFFIX}" CACHE INTERNAL "")
     endif ()
     ExternalProject_Add(codec2
             GIT_REPOSITORY https://github.com/drowe67/codec2-dev.git
@@ -623,7 +623,6 @@ if ((NOT CODEC2_FOUND OR CODEC2_EXTERNAL) AND NOT USE_PRECOMPILED_LIBS)
         set(CODEC2_LIBRARIES "${EXTERNAL_BUILD_LIBRARIES}/lib${LIB_SUFFIX}/libcodec2${CMAKE_SHARED_LIBRARY_SUFFIX}" CACHE INTERNAL "")
         makeLink("${source_dir}/src" "${source_dir}/src/codec2" codec2)
     elseif (APPLE)
-        set(CODEC2_LIBRARIES "${binary_dir}/src/libcodec2${CMAKE_SHARED_LIBRARY_SUFFIX}" CACHE INTERNAL "")
         # some source include "codec2/comp.h" and some without codec2
         makeLink("${source_dir}/src" "${source_dir}/src/codec2" codec2)
         set(MACOS_EXTERNAL_LIBS_FIXUP "${MACOS_EXTERNAL_LIBS_FIXUP};${binary_dir}/src")
@@ -636,6 +635,8 @@ if (NOT CM256CC_FOUND OR CM256CC_EXTERNAL)
         set(CM256CC_LIBRARIES "${SDRANGEL_BINARY_LIB_DIR}/cm256cc.lib" CACHE INTERNAL "")
     elseif (LINUX)
         set(CM256CC_LIBRARIES "${EXTERNAL_BUILD_LIBRARIES}/lib${LIB_SUFFIX}/libcm256cc${CMAKE_SHARED_LIBRARY_SUFFIX}" CACHE INTERNAL "")
+    elseif (APPLE)
+        set(CM256CC_LIBRARIES "${EXTERNAL_BUILD_LIBRARIES}/cm256cc/src/cm256cc-build/libcm256cc${CMAKE_SHARED_LIBRARY_SUFFIX}" CACHE INTERNAL "")
     endif ()
     string(REPLACE ";" "|" CMAKE_PREFIX_PATH_SEP "${CMAKE_PREFIX_PATH}")
     ExternalProject_Add(cm256cc
@@ -661,7 +662,6 @@ if (NOT CM256CC_FOUND OR CM256CC_EXTERNAL)
     if (WIN32)
         install(FILES "${SDRANGEL_BINARY_BIN_DIR}/cm256cc${CMAKE_SHARED_LIBRARY_SUFFIX}" DESTINATION "${INSTALL_LIB_DIR}")
     elseif (APPLE) # kept in case of relaxation of APPLE exclusion
-        set(CM256CC_LIBRARIES "${binary_dir}/libcm256cc${CMAKE_SHARED_LIBRARY_SUFFIX}" CACHE INTERNAL "")
         install(DIRECTORY "${binary_dir}/" DESTINATION "${INSTALL_LIB_DIR}"
                 FILES_MATCHING PATTERN "libcm256cc*${CMAKE_SHARED_LIBRARY_SUFFIX}")
         set(MACOS_EXTERNAL_LIBS_FIXUP "${MACOS_EXTERNAL_LIBS_FIXUP};${binary_dir}")
@@ -674,6 +674,8 @@ if ((NOT LIBDSDCC_FOUND OR LIBDSDCC_EXTERNAL) AND (NOT LIBMBE_FOUND OR LIBMBE_EX
         set(LIBMBE_LIBRARIES "${SDRANGEL_BINARY_LIB_DIR}/libmbe.lib" CACHE INTERNAL "")
     elseif (LINUX)
         set(LIBMBE_LIBRARIES "${EXTERNAL_BUILD_LIBRARIES}/lib${LIB_SUFFIX}/libmbe${CMAKE_SHARED_LIBRARY_SUFFIX}" CACHE INTERNAL "")
+    elseif (APPLE)
+        set(LIBMBE_LIBRARIES "${EXTERNAL_BUILD_LIBRARIES}/mbelib/src/mbelib-build/libmbe${CMAKE_SHARED_LIBRARY_SUFFIX}" CACHE INTERNAL "")
     endif ()
     ExternalProject_Add(mbelib
             GIT_REPOSITORY https://github.com/srcejon/mbelib.git
@@ -693,7 +695,6 @@ if ((NOT LIBDSDCC_FOUND OR LIBDSDCC_EXTERNAL) AND (NOT LIBMBE_FOUND OR LIBMBE_EX
     if (WIN32)
         install(FILES "${SDRANGEL_BINARY_BIN_DIR}/libmbe${CMAKE_SHARED_LIBRARY_SUFFIX}" DESTINATION "${INSTALL_LIB_DIR}")
     elseif (APPLE)
-        set(LIBMBE_LIBRARIES "${binary_dir}/libmbe${CMAKE_SHARED_LIBRARY_SUFFIX}" CACHE INTERNAL "")
         install(DIRECTORY "${binary_dir}/" DESTINATION "${INSTALL_LIB_DIR}"
                 FILES_MATCHING PATTERN "libmbe*${CMAKE_SHARED_LIBRARY_SUFFIX}")
         set(MACOS_EXTERNAL_LIBS_FIXUP "${MACOS_EXTERNAL_LIBS_FIXUP};${binary_dir}")
@@ -706,6 +707,8 @@ if (NOT LIBSERIALDV_FOUND OR LIBSERIALDV_EXTERNAL)
         set(LIBSERIALDV_LIBRARY "${SDRANGEL_BINARY_LIB_DIR}/serialdv.lib" CACHE INTERNAL "")
     elseif (LINUX)
         set(LIBSERIALDV_LIBRARY "${EXTERNAL_BUILD_LIBRARIES}/lib${LIB_SUFFIX}/libserialdv${CMAKE_SHARED_LIBRARY_SUFFIX}" CACHE INTERNAL "")
+    elseif (APPLE)
+        set(LIBSERIALDV_LIBRARY "${EXTERNAL_BUILD_LIBRARIES}/serialdv/src/serialdv-build/libserialdv${CMAKE_SHARED_LIBRARY_SUFFIX}" CACHE INTERNAL "")
     endif ()
     ExternalProject_Add(serialdv
             GIT_REPOSITORY https://github.com/f4exb/serialDV.git
@@ -728,7 +731,6 @@ if (NOT LIBSERIALDV_FOUND OR LIBSERIALDV_EXTERNAL)
         # so we need a link
         makeLink("${source_dir}" "${source_dir}/dsp" serialdv)
     elseif (APPLE)
-        set(LIBSERIALDV_LIBRARY "${binary_dir}/libserialdv${CMAKE_SHARED_LIBRARY_SUFFIX}" CACHE INTERNAL "")
         # because sdrbase/dsp/dvserialworker.h use dsp/dvcontroller.h
         # so we need a link
         makeLink("${source_dir}" "${source_dir}/dsp" serialdv)
@@ -743,6 +745,8 @@ if ((NOT LIBDSDCC_FOUND OR LIBDSDCC_EXTERNAL) AND LIBMBE_FOUND)
         set(LIBDSDCC_LIBRARIES "${SDRANGEL_BINARY_LIB_DIR}/dsdcc.lib" CACHE INTERNAL "")
     elseif (LINUX)
         set(LIBDSDCC_LIBRARIES "${EXTERNAL_BUILD_LIBRARIES}/lib${LIB_SUFFIX}/libdsdcc${CMAKE_SHARED_LIBRARY_SUFFIX}" CACHE INTERNAL "")
+    elseif (APPLE)
+        set(LIBDSDCC_LIBRARIES "${EXTERNAL_BUILD_LIBRARIES}/dsdcc/src/dsdcc-build/libdsdcc${CMAKE_SHARED_LIBRARY_SUFFIX}" CACHE INTERNAL "")
     endif ()
     ExternalProject_Add(dsdcc
             GIT_REPOSITORY https://github.com/f4exb/dsdcc.git
@@ -764,7 +768,6 @@ if ((NOT LIBDSDCC_FOUND OR LIBDSDCC_EXTERNAL) AND LIBMBE_FOUND)
     if (WIN32)
         install(FILES "${SDRANGEL_BINARY_BIN_DIR}/dsdcc${CMAKE_SHARED_LIBRARY_SUFFIX}" DESTINATION "${INSTALL_LIB_DIR}")
     elseif (APPLE)
-        set(LIBDSDCC_LIBRARIES "${binary_dir}/libdsdcc${CMAKE_SHARED_LIBRARY_SUFFIX}" CACHE INTERNAL "")
         install(DIRECTORY "${binary_dir}/" DESTINATION "${INSTALL_LIB_DIR}"
                 FILES_MATCHING PATTERN "libdsdcc*${CMAKE_SHARED_LIBRARY_SUFFIX}")
         set(MACOS_EXTERNAL_LIBS_FIXUP "${MACOS_EXTERNAL_LIBS_FIXUP};${binary_dir}/")
@@ -794,6 +797,8 @@ if(ENABLE_CHANNELRX_DEMODAPT)
         set(APT_LIBRARIES "${SDRANGEL_BINARY_LIB_DIR}/apt.lib" CACHE INTERNAL "")
     elseif (LINUX)
         set(APT_LIBRARIES "${EXTERNAL_BUILD_LIBRARIES}/lib${LIB_SUFFIX}/libapt${CMAKE_SHARED_LIBRARY_SUFFIX}" CACHE INTERNAL "")
+    elseif (APPLE)
+        set(APT_LIBRARIES "${EXTERNAL_BUILD_LIBRARIES}/apt/src/apt-build/libapt${CMAKE_SHARED_LIBRARY_SUFFIX}" CACHE INTERNAL "")
     endif()
     ExternalProject_Add(apt
             GIT_REPOSITORY https://github.com/srcejon/aptdec.git
@@ -812,7 +817,6 @@ if(ENABLE_CHANNELRX_DEMODAPT)
     if (WIN32)
         install(FILES "${SDRANGEL_BINARY_BIN_DIR}/apt${CMAKE_SHARED_LIBRARY_SUFFIX}" DESTINATION "${INSTALL_LIB_DIR}")
     elseif (APPLE)
-        set(APT_LIBRARIES "${binary_dir}/libapt${CMAKE_SHARED_LIBRARY_SUFFIX}" CACHE INTERNAL "")
         install(DIRECTORY "${binary_dir}/" DESTINATION "${INSTALL_LIB_DIR}"
                 FILES_MATCHING PATTERN "libapt*${CMAKE_SHARED_LIBRARY_SUFFIX}")
         set(MACOS_EXTERNAL_LIBS_FIXUP "${MACOS_EXTERNAL_LIBS_FIXUP};${binary_dir}/")
@@ -827,6 +831,8 @@ if(ENABLE_FEATURE_SATELLITETRACKER OR ENABLE_CHANNELRX_DEMODAPT)
         set(SGP4_LIBRARIES "${SDRANGEL_BINARY_LIB_DIR}/sgp4s.lib" CACHE INTERNAL "")
     elseif (LINUX)
         set(SGP4_LIBRARIES "${EXTERNAL_BUILD_LIBRARIES}/lib${LIB_SUFFIX}/libsgp4s${CMAKE_SHARED_LIBRARY_SUFFIX}" CACHE INTERNAL "")
+    elseif (APPLE)
+        set(SGP4_LIBRARIES "${EXTERNAL_BUILD_LIBRARIES}/sgp4/src/sgp4-build/libsgp4/libsgp4s${CMAKE_SHARED_LIBRARY_SUFFIX}" CACHE INTERNAL "")
     endif()
     ExternalProject_Add(sgp4
             GIT_REPOSITORY https://github.com/dnwrnr/sgp4.git
@@ -845,7 +851,6 @@ if(ENABLE_FEATURE_SATELLITETRACKER OR ENABLE_CHANNELRX_DEMODAPT)
     if (WIN32)
         install(FILES "${SDRANGEL_BINARY_BIN_DIR}/sgp4s${CMAKE_SHARED_LIBRARY_SUFFIX}" DESTINATION "${INSTALL_LIB_DIR}")
     elseif (APPLE)
-        set(SGP4_LIBRARIES "${binary_dir}/libsgp4/libsgp4s${CMAKE_SHARED_LIBRARY_SUFFIX}" CACHE INTERNAL "")
         install(DIRECTORY "${binary_dir}/libsgp4" DESTINATION "${INSTALL_LIB_DIR}"
                 FILES_MATCHING PATTERN "libsgp4s*${CMAKE_SHARED_LIBRARY_SUFFIX}")
         set(MACOS_EXTERNAL_LIBS_FIXUP "${MACOS_EXTERNAL_LIBS_FIXUP};${binary_dir}/libsgp4")
@@ -890,6 +895,8 @@ if(ENABLE_FEATURE_MORSEDECODER)
         set(GGMORSE_LIBRARIES "${SDRANGEL_BINARY_LIB_DIR}/ggmorse.lib" CACHE INTERNAL "")
     elseif (LINUX)
         set(GGMORSE_LIBRARIES "${EXTERNAL_BUILD_LIBRARIES}/lib${LIB_SUFFIX}/libggmorse${CMAKE_SHARED_LIBRARY_SUFFIX}" CACHE INTERNAL "")
+    elseif (APPLE)
+        set(GGMORSE_LIBRARIES "${EXTERNAL_BUILD_LIBRARIES}/ggmorse/src/ggmorse-build/src/libggmorse${CMAKE_SHARED_LIBRARY_SUFFIX}" CACHE INTERNAL "")
     endif()
     ExternalProject_Add(ggmorse
         GIT_REPOSITORY https://github.com/srcejon/ggmorse.git
@@ -910,7 +917,6 @@ if(ENABLE_FEATURE_MORSEDECODER)
     if (WIN32)
         install(FILES "${SDRANGEL_BINARY_BIN_DIR}/ggmorse${CMAKE_SHARED_LIBRARY_SUFFIX}" DESTINATION "${INSTALL_LIB_DIR}")
     elseif (APPLE)
-        set(GGMORSE_LIBRARIES "${binary_dir}/src/libggmorse${CMAKE_SHARED_LIBRARY_SUFFIX}" CACHE INTERNAL "")
         install(DIRECTORY "${binary_dir}/src" DESTINATION "${INSTALL_LIB_DIR}"
                 FILES_MATCHING PATTERN "libggmorse*${CMAKE_SHARED_LIBRARY_SUFFIX}")
         set(MACOS_EXTERNAL_LIBS_FIXUP "${MACOS_EXTERNAL_LIBS_FIXUP};${binary_dir}/src")
@@ -929,6 +935,12 @@ if(ENABLE_CHANNELRX_DEMODINMARSAT)
         set(INMARSATC_LIBRARIES
             "${EXTERNAL_BUILD_LIBRARIES}/lib${LIB_SUFFIX}/libinmarsatc_decoder${CMAKE_SHARED_LIBRARY_SUFFIX}"
             "${EXTERNAL_BUILD_LIBRARIES}/lib${LIB_SUFFIX}/libinmarsatc_parser${CMAKE_SHARED_LIBRARY_SUFFIX}"
+            CACHE INTERNAL ""
+            )
+    elseif (APPLE)
+        set(INMARSATC_LIBRARIES
+            "${EXTERNAL_BUILD_LIBRARIES}/inmarsatc/src/inmarsatc-build/libinmarsatc_decoder${CMAKE_SHARED_LIBRARY_SUFFIX}"
+            "${EXTERNAL_BUILD_LIBRARIES}/inmarsatc/src/inmarsatc-build/libinmarsatc_parser${CMAKE_SHARED_LIBRARY_SUFFIX}"
             CACHE INTERNAL ""
             )
     endif()
@@ -950,11 +962,6 @@ if(ENABLE_CHANNELRX_DEMODINMARSAT)
         install(FILES "${SDRANGEL_BINARY_BIN_DIR}/inmarsatc_parser${CMAKE_SHARED_LIBRARY_SUFFIX}" DESTINATION "${INSTALL_LIB_DIR}")
         install(FILES "${SDRANGEL_BINARY_BIN_DIR}/inmarsatc_decoder${CMAKE_SHARED_LIBRARY_SUFFIX}" DESTINATION "${INSTALL_LIB_DIR}")
     elseif (APPLE)
-        set(INMARSATC_LIBRARIES
-            "${binary_dir}/libinmarsatc_decoder${CMAKE_SHARED_LIBRARY_SUFFIX}"
-            "${binary_dir}/libinmarsatc_parser${CMAKE_SHARED_LIBRARY_SUFFIX}"
-            CACHE INTERNAL ""
-            )
         install(DIRECTORY "${binary_dir}" DESTINATION "${INSTALL_LIB_DIR}"
                 FILES_MATCHING PATTERN "libinmarsatc*${CMAKE_SHARED_LIBRARY_SUFFIX}")
         set(MACOS_EXTERNAL_LIBS_FIXUP "${MACOS_EXTERNAL_LIBS_FIXUP};${binary_dir}/src")
@@ -1006,6 +1013,8 @@ if (ZLIB_FOUND AND FAAD_FOUND AND ENABLE_CHANNELRX_DEMODDAB)
         set(DAB_LIBRARIES "${SDRANGEL_BINARY_LIB_DIR}/dab_lib.lib" CACHE INTERNAL "")
     elseif (LINUX)
         set(DAB_LIBRARIES "${EXTERNAL_BUILD_LIBRARIES}/lib${LIB_SUFFIX}/libdab_lib${CMAKE_SHARED_LIBRARY_SUFFIX}" CACHE INTERNAL "")
+    elseif (APPLE)
+        set(DAB_LIBRARIES "${EXTERNAL_BUILD_LIBRARIES}/dab/src/dab-build/libdab_lib${CMAKE_SHARED_LIBRARY_SUFFIX}" CACHE INTERNAL "")
     endif()
     if (WIN32)
         ExternalProject_Add(dab
@@ -1053,13 +1062,12 @@ if (ZLIB_FOUND AND FAAD_FOUND AND ENABLE_CHANNELRX_DEMODDAB)
     if (WIN32)
         install(FILES "${SDRANGEL_BINARY_BIN_DIR}/dab_lib${CMAKE_SHARED_LIBRARY_SUFFIX}" DESTINATION "${INSTALL_LIB_DIR}")
     elseif (APPLE)
-        set(DAB_LIBRARIES "${binary_dir}/libdab_lib${CMAKE_SHARED_LIBRARY_SUFFIX}" CACHE INTERNAL "")
         install(DIRECTORY "${binary_dir}/" DESTINATION "${INSTALL_LIB_DIR}"
                 FILES_MATCHING PATTERN "libdab_lib*${CMAKE_SHARED_LIBRARY_SUFFIX}")
         set(MACOS_EXTERNAL_LIBS_FIXUP "${MACOS_EXTERNAL_LIBS_FIXUP};${binary_dir}/")
     endif ()
 else()
-    message(STATUS "Can't build DAB library as missing zlib or faad")
+    message(STATUS "Can't build DAB library as missing zlib (${ZLIB_FOUND}) or faad (${FAAD_FOUND})")
 endif()
 
 # Device interface libraries.
