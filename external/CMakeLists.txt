@@ -44,6 +44,8 @@ set(BOOST_TAG2 "1_86_0")
 include(ExternalProject)
 
 # default build destination in windows to avoid Release/Debug folder
+# Currently, we don't set this for APPLE, so binaries are built ${binary_dir}/src (which results in build_dir/external/project_name/src/project_name-build/src)
+# we should change this to be similar to LINUX, so we don't use ${binary_dir} and can set BUILD_BYPRODUCTS
 if (WIN32)
     # the build will be output on the same folder of sdrangel
     set(COMMON_CMAKE_ARGS
@@ -948,7 +950,11 @@ if(ENABLE_CHANNELRX_DEMODINMARSAT)
         install(FILES "${SDRANGEL_BINARY_BIN_DIR}/inmarsatc_parser${CMAKE_SHARED_LIBRARY_SUFFIX}" DESTINATION "${INSTALL_LIB_DIR}")
         install(FILES "${SDRANGEL_BINARY_BIN_DIR}/inmarsatc_decoder${CMAKE_SHARED_LIBRARY_SUFFIX}" DESTINATION "${INSTALL_LIB_DIR}")
     elseif (APPLE)
-        set(INMARSATC_LIBRARIES "${binary_dir}/src/libinmarsatc_*${CMAKE_SHARED_LIBRARY_SUFFIX}" CACHE INTERNAL "")
+        set(INMARSATC_LIBRARIES
+            "${binary_dir}/src/libinmarsatc_decoder${CMAKE_SHARED_LIBRARY_SUFFIX}"
+            "${binary_dir}/src/libinmarsatc_parser${CMAKE_SHARED_LIBRARY_SUFFIX}"
+            CACHE INTERNAL ""
+            )
         install(DIRECTORY "${binary_dir}/src" DESTINATION "${INSTALL_LIB_DIR}"
                 FILES_MATCHING PATTERN "libinmarsatc*${CMAKE_SHARED_LIBRARY_SUFFIX}")
         set(MACOS_EXTERNAL_LIBS_FIXUP "${MACOS_EXTERNAL_LIBS_FIXUP};${binary_dir}/src")
