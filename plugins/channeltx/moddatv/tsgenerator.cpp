@@ -31,7 +31,8 @@ extern "C"
 }
 
 
-#include <opencv2/opencv.hpp>  // Add OpenCV for text overlay
+#include <opencv2/imgproc.hpp>  // Add OpenCV for text overlay
+#include <opencv2/imgcodecs.hpp>
 
 #include <QDateTime>
 
