@@ -915,18 +915,16 @@ if(ENABLE_FEATURE_MORSEDECODER)
     endif ()
 endif()
 
-# For Std-C decoder
-if(ENABLE_CHANNELRX_DEMODSTDC)
+# For Inmarsat C decoder
+if(ENABLE_CHANNELRX_DEMODINMARSAT)
     if (WIN32)
         set(INMARSATC_LIBRARIES
-            "${SDRANGEL_BINARY_LIB_DIR}/inmarsatc_demodulator.lib"
             "${SDRANGEL_BINARY_LIB_DIR}/inmarsatc_parser.lib"
             "${SDRANGEL_BINARY_LIB_DIR}/inmarsatc_decoder.lib"
             CACHE INTERNAL ""
             )
     elseif (LINUX)
         set(INMARSATC_LIBRARIES
-            "${EXTERNAL_BUILD_LIBRARIES}/lib${LIB_SUFFIX}/libinmarsatc_demodulator${CMAKE_SHARED_LIBRARY_SUFFIX}"
             "${EXTERNAL_BUILD_LIBRARIES}/lib${LIB_SUFFIX}/libinmarsatc_decoder${CMAKE_SHARED_LIBRARY_SUFFIX}"
             "${EXTERNAL_BUILD_LIBRARIES}/lib${LIB_SUFFIX}/libinmarsatc_parser${CMAKE_SHARED_LIBRARY_SUFFIX}"
             CACHE INTERNAL ""
@@ -947,7 +945,6 @@ if(ENABLE_CHANNELRX_DEMODSTDC)
     set(INMARSATC_EXTERNAL ON CACHE INTERNAL "")
     set(INMARSATC_INCLUDE_DIR "${EXTERNAL_BUILD_LIBRARIES}/inmarsatc/src/inmarsatc" CACHE INTERNAL "")
     if (WIN32)
-        install(FILES "${SDRANGEL_BINARY_BIN_DIR}/inmarsatc_demodulator${CMAKE_SHARED_LIBRARY_SUFFIX}" DESTINATION "${INSTALL_LIB_DIR}")
         install(FILES "${SDRANGEL_BINARY_BIN_DIR}/inmarsatc_parser${CMAKE_SHARED_LIBRARY_SUFFIX}" DESTINATION "${INSTALL_LIB_DIR}")
         install(FILES "${SDRANGEL_BINARY_BIN_DIR}/inmarsatc_decoder${CMAKE_SHARED_LIBRARY_SUFFIX}" DESTINATION "${INSTALL_LIB_DIR}")
     elseif (APPLE)
