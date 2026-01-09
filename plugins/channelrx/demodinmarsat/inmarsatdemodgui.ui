@@ -854,7 +854,15 @@
              <string>Sat</string>
             </property>
             <property name="toolTip">
-             <string>Satellite</string>
+             <string>Satellite region</string>
+            </property>
+           </column>
+           <column>
+            <property name="text">
+             <string>MES</string>
+            </property>
+            <property name="toolTip">
+             <string>Mobile Earth Station</string>
             </property>
            </column>
            <column>
@@ -863,14 +871,6 @@
             </property>
             <property name="toolTip">
              <string>Land Earth Station</string>
-            </property>
-           </column>
-           <column>
-            <property name="text">
-             <string>MsgId</string>
-            </property>
-            <property name="toolTip">
-             <string>Message ID</string>
             </property>
            </column>
            <column>
@@ -911,6 +911,14 @@
             </property>
             <property name="toolTip">
              <string>Downlink frequency</string>
+            </property>
+           </column>
+           <column>
+            <property name="text">
+             <string>MsgId</string>
+            </property>
+            <property name="toolTip">
+             <string>Message ID</string>
             </property>
            </column>
            <column>
@@ -989,24 +997,39 @@
             <property name="text">
              <string>Date</string>
             </property>
+            <property name="toolTip">
+             <string>Date last part of message was received</string>
+            </property>
            </column>
            <column>
             <property name="text">
              <string>Time</string>
+            </property>
+            <property name="toolTip">
+             <string>Time last part of message was received</string>
             </property>
            </column>
            <column>
             <property name="text">
              <string>ID</string>
             </property>
+            <property name="toolTip">
+             <string>Message ID</string>
+            </property>
            </column>
            <column>
             <property name="text">
              <string>Service</string>
             </property>
+            <property name="toolTip">
+             <string>Service Code</string>
+            </property>
            </column>
            <column>
             <property name="text">
+             <string>Priority</string>
+            </property>
+            <property name="toolTip">
              <string>Priority</string>
             </property>
            </column>
@@ -1014,15 +1037,24 @@
             <property name="text">
              <string>Address</string>
             </property>
+            <property name="toolTip">
+             <string>Address</string>
+            </property>
            </column>
            <column>
             <property name="text">
              <string>Parts</string>
             </property>
+            <property name="toolTip">
+             <string>How many parts have been received / Total expected parts</string>
+            </property>
            </column>
            <column>
             <property name="text">
              <string>Message</string>
+            </property>
+            <property name="toolTip">
+             <string>Message text</string>
             </property>
            </column>
           </widget>

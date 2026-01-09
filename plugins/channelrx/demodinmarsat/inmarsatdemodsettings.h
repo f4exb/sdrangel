@@ -29,7 +29,7 @@ class Serializable;
 
 // Number of columns in the table
 #define INMARSATDEMOD_MESSAGES_COLUMNS  8
-#define INMARSATDEMOD_PACKETS_COLUMNS   15
+#define INMARSATDEMOD_PACKETS_COLUMNS   16
 
 struct InmarsatDemodSettings
 {

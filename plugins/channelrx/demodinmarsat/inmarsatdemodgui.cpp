@@ -115,7 +115,7 @@ QRegularExpression MultipartMessage::m_re(QStringLiteral("(\\d+)-(\\d+)(.(\\d+))
 
 void MultipartMessage::parseMessage()
 {
-    if (getParts() == getTotalParts())
+    if (getComplete())
     {
         QString message = getMessage();
         m_messageCoordinates.clear();
@@ -209,13 +209,14 @@ void InmarsatDemodGUI::resizeTable()
     ui->packets->setItem(row, PACKET_COL_DATE, new QTableWidgetItem("Frid Apr 15 2016-"));
     ui->packets->setItem(row, PACKET_COL_TIME, new QTableWidgetItem("10:17:00"));
     ui->packets->setItem(row, PACKET_COL_SAT, new QTableWidgetItem("Atlantic Ocean"));
+    ui->packets->setItem(row, PACKET_COL_MES, new QTableWidgetItem("123456789-"));
     ui->packets->setItem(row, PACKET_COL_LES, new QTableWidgetItem("123456-15-"));
-    ui->packets->setItem(row, PACKET_COL_MSG_ID, new QTableWidgetItem("80555301-"));
     ui->packets->setItem(row, PACKET_COL_TYPE, new QTableWidgetItem("Multiframe Packet Start-"));
     ui->packets->setItem(row, PACKET_COL_FRAME_NO, new QTableWidgetItem("123456"));
     ui->packets->setItem(row, PACKET_COL_LCN, new QTableWidgetItem("888"));
     ui->packets->setItem(row, PACKET_COL_ULF, new QTableWidgetItem("15,888.888"));
     ui->packets->setItem(row, PACKET_COL_DLF, new QTableWidgetItem("15,888.888"));
+    ui->packets->setItem(row, PACKET_COL_MSG_ID, new QTableWidgetItem("80555301-"));
     ui->packets->setItem(row, PACKET_COL_PRIORITY, new QTableWidgetItem("Urgency"));
     ui->packets->setItem(row, PACKET_COL_ADDRESS, new QTableWidgetItem("90S 180W 1000 nm"));
     ui->packets->setItem(row, PACKET_COL_MESSAGE, new QTableWidgetItem("ABCEDGHIJKLMNOPQRSTUVWXYZ"));
@@ -233,7 +234,7 @@ void InmarsatDemodGUI::resizeTable()
     ui->messages->setItem(row, MESSAGE_COL_PRIORITY, new QTableWidgetItem("Urgency-"));
     ui->messages->setItem(row, MESSAGE_COL_ADDRESS, new QTableWidgetItem("90S 180W 1000 nm"));
     ui->messages->setItem(row, MESSAGE_COL_MESSAGE, new QTableWidgetItem("ABCEDGHIJKLMNOPQRSTUVWXYZ"));
-    ui->messages->setItem(row, MESSAGE_COL_PARTS, new QTableWidgetItem("8/88"));
+    ui->messages->setItem(row, MESSAGE_COL_PARTS, new QTableWidgetItem("88/88+"));
     ui->messages->resizeColumnsToContents();
     ui->messages->removeRow(row);
 }
@@ -445,10 +446,10 @@ const QStringList MultipartMessage::m_navAreaFlags = {
     "russia"
 };
 
-QString MultipartMessage::decodeAddress(QString messageType, QString addressHex, float *latitude, float *longitude, QList<QGeoCoordinate> *coordinates, QIcon **icon)
+QString MultipartMessage::decodeAddress(QString serviceCode, QString addressHex, float *latitude, float *longitude, QList<QGeoCoordinate> *coordinates, QIcon **icon)
 {
     bool ok;
-    int messageTypeNum = messageType.toInt(&ok);
+    int messageTypeNum = serviceCode.toInt(&ok);
 
     if (ok)
     {
@@ -697,7 +698,10 @@ void InmarsatDemodGUI::updateMessageTable(MultipartMessage *message)
         addressItem->setIcon(*icon);
     }
     messageItem->setText(message->getMessage());
-    QString parts = QString("%1 / %2").arg(message->getParts()).arg(message->getTotalParts());
+    QString parts = QString("%1 / %2%3")
+        .arg(message->getParts())
+        .arg(message->getTotalParts())
+        .arg(message->getComplete() ? "" : "+");
     partsItem->setData(Qt::DisplayRole, parts);
 
     filterRow(ui->messages, row, -1, MESSAGE_COL_MESSAGE);
@@ -709,6 +713,21 @@ void InmarsatDemodGUI::updateMessageTable(MultipartMessage *message)
             ui->messages->scrollToBottom();
         }
     }
+}
+
+void InmarsatDemodGUI::decodeAppend(QString& decode, const QString& title, const std::string& variable, inmarsatc::frameParser::FrameParser::frameParser_result& frame)
+{
+    decode = decode.append("<tr><th align=left>" + title + "<td> " + QString::fromStdString(frame.decoding_result.packetVars[variable]));
+}
+
+void InmarsatDemodGUI::decodeAppendFreqMHz(QString& decode, const QString& title, const std::string& variable, inmarsatc::frameParser::FrameParser::frameParser_result& frame)
+{
+    decode = decode.append("<tr><th align=left>" + title + "<td> " + formatFreqMHz(frame.decoding_result.packetVars[variable]));
+}
+
+void InmarsatDemodGUI::decodeAppendHTML(QString& decode, const QString& title, const std::string& variable, inmarsatc::frameParser::FrameParser::frameParser_result& frame)
+{
+    decode = decode.append("<tr><th align=left>" + title + "<td> " + toHTML(frame.decoding_result.packetVars[variable]));
 }
 
 // Add row to table
@@ -735,6 +754,7 @@ void InmarsatDemodGUI::packetReceived(const QByteArray& bytes, QDateTime dateTim
             QTableWidgetItem *dateItem = new QTableWidgetItem();
             QTableWidgetItem *timeItem = new QTableWidgetItem();
             QTableWidgetItem *satItem = new QTableWidgetItem();
+            QTableWidgetItem *mesItem = new QTableWidgetItem();
             QTableWidgetItem *lesItem = new QTableWidgetItem();
             QTableWidgetItem *msgIdItem = new QTableWidgetItem();
             QTableWidgetItem *typeItem = new QTableWidgetItem();
@@ -751,6 +771,7 @@ void InmarsatDemodGUI::packetReceived(const QByteArray& bytes, QDateTime dateTim
             ui->packets->setItem(row, PACKET_COL_DATE, dateItem);
             ui->packets->setItem(row, PACKET_COL_TIME, timeItem);
             ui->packets->setItem(row, PACKET_COL_SAT, satItem);
+            ui->packets->setItem(row, PACKET_COL_MES, mesItem);
             ui->packets->setItem(row, PACKET_COL_LES, lesItem);
             ui->packets->setItem(row, PACKET_COL_MSG_ID, msgIdItem);
             ui->packets->setItem(row, PACKET_COL_TYPE, typeItem);
@@ -772,32 +793,29 @@ void InmarsatDemodGUI::packetReceived(const QByteArray& bytes, QDateTime dateTim
             frameNoItem->setText(QString::number(frame.decoding_result.frameNumber));
 
             satItem->setText(QString::fromStdString(frame.decoding_result.packetVars["satName"]));
+            mesItem->setText(QString::fromStdString(frame.decoding_result.packetVars["mesId"]));
             QString lesName = QString::fromStdString(frame.decoding_result.packetVars["lesName"]);
             if (!lesName.isEmpty()) {
                 lesItem->setText(lesName);
-            } else{
-                lesItem->setText(QString::fromStdString(frame.decoding_result.packetVars["les"]));
-            }
-            QString msgId = QString::fromStdString(frame.decoding_result.packetVars["mesId"]);
-            if (!msgId.isEmpty()) {
-                msgIdItem->setText(msgId);
             } else {
-                msgIdItem->setText(QString::fromStdString(frame.decoding_result.packetVars["messageId"]));
+                lesItem->setText(QString::fromStdString(frame.decoding_result.packetVars["les"]));
             }
             lcnItem->setText(QString::fromStdString(frame.decoding_result.packetVars["logicalChannelNo"]));
             ulfItem->setText(formatFreqMHz(frame.decoding_result.packetVars["uplinkChannelMhz"]));
             dlfItem->setText(formatFreqMHz(frame.decoding_result.packetVars["downlinkChannelMhz"]));
+            msgIdItem->setText(QString::fromStdString(frame.decoding_result.packetVars["messageId"]));
             priorityItem->setText(QString::fromStdString(frame.decoding_result.packetVars["priorityText"]));
 
             QIcon *icon = nullptr;
-            addressItem->setText(MultipartMessage::decodeAddress(
+            QString address = MultipartMessage::decodeAddress(
                 QString::fromStdString(frame.decoding_result.packetVars["messageType"]),
                 QString::fromStdString(frame.decoding_result.packetVars["addressHex"]),
                 nullptr,
                 nullptr,
                 nullptr,
                 &icon
-            ));
+            );
+            addressItem->setText(address);
             if (icon) {
                 addressItem->setIcon(*icon);
             }
@@ -805,182 +823,212 @@ void InmarsatDemodGUI::packetReceived(const QByteArray& bytes, QDateTime dateTim
             QString message;
             QString decode;
 
-            switch(frame.decoding_result.packetDescriptor)
-            {
-            case 0x27:
-                decode = decode.append("<tr><th align=left>Msg Id<td> " + QString::fromStdString(frame.decoding_result.packetVars["mesId"]));
-                decode = decode.append("<tr><th align=left>Sat<td> " + QString::fromStdString(frame.decoding_result.packetVars["satName"]));
-                decode = decode.append("<tr><th align=left>LES<td> " + QString::fromStdString(frame.decoding_result.packetVars["lesName"]));
-                decode = decode.append("<tr><th align=left>LCN<td> " + QString::fromStdString(frame.decoding_result.packetVars["logicalChannelNo"]));
-                break;
-
-            case 0x2A:
-                decode = decode.append("<tr><th align=left>Msg Id<td> " + QString::fromStdString(frame.decoding_result.packetVars["mesId"]));
-                decode = decode.append("<tr><th align=left>Sat<td> " + QString::fromStdString(frame.decoding_result.packetVars["satName"]));
-                decode = decode.append("<tr><th align=left>LES<td> " + QString::fromStdString(frame.decoding_result.packetVars["lesName"]));
-                decode = decode.append("<tr><th align=left>LCN<td> " + QString::fromStdString(frame.decoding_result.packetVars["logicalChannelNo"]));
-                break;
-
-            case 0x08:
-                decode = decode.append("<tr><th align=left>Msg Id<td> " + QString::fromStdString(frame.decoding_result.packetVars["mesId"]));
-                decode = decode.append("<tr><th align=left>Sat<td> " + QString::fromStdString(frame.decoding_result.packetVars["satName"]));
-                decode = decode.append("<tr><th align=left>LCN<td> " + QString::fromStdString(frame.decoding_result.packetVars["logicalChannelNo"]));
-                decode = decode.append("<tr><th align=left>ULF<td> " + formatFreqMHz(frame.decoding_result.packetVars["uplinkChannelMhz"]));
-                break;
-
-            case 0x6C:
-            {
-                decode = decode.append("<tr><th align=left>ULF<td>" + formatFreqMHz(frame.decoding_result.packetVars["uplinkChannelMhz"]));
-                decode = decode.append("<tr><th align=left>Services<td>");
-
-                std::string services = frame.decoding_result.packetVars["services"];
-                for (int k = 0; k < (int)services.length(); k++)
-                {
-                    if (services[k] != '\n') {
-                        decode = decode.append(services[k]);
-                    } else {
-                        decode = decode.append("<br>");
-                    }
-                }
-                decode = decode.append("<tr><th align=left>Tdm slots<td>");
-                std::string tdmSlots = frame.decoding_result.packetVars["tdmSlots"];
-                for (int k = 0; k < (int)tdmSlots.length(); k++)
-                {
-                    if (tdmSlots[k] != '\n') {
-                        decode = decode.append(tdmSlots[k]);
-                    } else {
-                        decode = decode.append("<br>");
-                    }
-                }
+            quint8 type;
+            if (((frame.decoding_result.packetDescriptor >> 7) & 1) == 0) {
+                type = frame.decoding_result.packetDescriptor >> 4;
+            } else {
+                type = frame.decoding_result.packetDescriptor & 0x3f;
             }
-            break;
 
-            case 0x7D:
+            switch(type)
             {
-                decode = decode.append("<tr><th align=left>Network Version<td> " + QString::fromStdString(frame.decoding_result.packetVars["networkVersion"]));
-                decode = decode.append("<tr><th align=left>Sat<td> " + QString::fromStdString(frame.decoding_result.packetVars["satName"]));
-                decode = decode.append("<tr><th align=left>LES<td> " + QString::fromStdString(frame.decoding_result.packetVars["lesName"]));
-                decode = decode.append("<tr><th align=left>Signalling Channel<td> " + QString::fromStdString(frame.decoding_result.packetVars["signallingChannel"]));
-                decode = decode.append("<tr><th align=left>Count<td> " + QString::fromStdString(frame.decoding_result.packetVars["count"]));
-                decode = decode.append("<tr><th align=left>Channel Type Name<td> " + QString::fromStdString(frame.decoding_result.packetVars["channelTypeName"]));
-                decode = decode.append("<tr><th align=left>Local<td> " + QString::fromStdString(frame.decoding_result.packetVars["local"]));
-                decode = decode.append("<tr><th align=left>Random Interval<td> " + QString::fromStdString(frame.decoding_result.packetVars["randomInterval"]));
-
-                decode = decode.append("<tr><th align=left>Status<td>");
-                std::string status = frame.decoding_result.packetVars["status"];
-                for (int k = 0; k < (int)status.length(); k++)
-                {
-                    if (status[k] != '\n') {
-                        decode = decode.append(status[k]);
-                    } else {
-                        decode = decode.append("<br>");
-                    }
-                }
-                decode = decode.append("<tr><th align=left>Services<td>");
-                std::string services = frame.decoding_result.packetVars["services"];
-                for (int k = 0; k < (int)services.length(); k++)
-                {
-                    if (services[k] != '\n') {
-                        decode = decode.append(services[k]);
-                    } else {
-                        decode = decode.append("<br>");
-                    }
-                }
-            }
-            break;
-
-            case 0x81:
-                decode = decode.append("<tr><th align=left>Msg Id<td> " + QString::fromStdString(frame.decoding_result.packetVars["mesId"]));
-                decode = decode.append("<tr><th align=left>Sat<td> " + QString::fromStdString(frame.decoding_result.packetVars["satName"]));
-                decode = decode.append("<tr><th align=left>LES<td> " + QString::fromStdString(frame.decoding_result.packetVars["lesName"]));
-                decode = decode.append("<tr><th align=left>LCN<td> " + QString::fromStdString(frame.decoding_result.packetVars["logicalChannelNo"]));
-                decode = decode.append("<tr><th align=left>DLF<td> " + formatFreqMHz(frame.decoding_result.packetVars["downlinkChannelMhz"]));
-                decode = decode.append("<tr><th align=left>Presentation<td> " + QString::fromStdString(frame.decoding_result.packetVars["presentation"]));
+            case 0x00: // Acknowledgement Request
+                decodeAppend(decode, "Packet", "packetDescriptorText", frame);
+                decodeAppend(decode, "Sat", "satName", frame);
+                decodeAppend(decode, "LES", "lesName", frame);
+                decodeAppend(decode, "LCN", "logicalChannelNo", frame);
+                decodeAppendFreqMHz(decode, "ULF", "uplinkChannelMhz", frame);
                 break;
 
-            case 0x83:
-                decode = decode.append("<tr><th align=left>Msg Id<td> " + QString::fromStdString(frame.decoding_result.packetVars["mesId"]));
-                decode = decode.append("<tr><th align=left>Sat<td> " + QString::fromStdString(frame.decoding_result.packetVars["satName"]));
-                decode = decode.append("<tr><th align=left>LES<td> " + QString::fromStdString(frame.decoding_result.packetVars["lesName"]));
-                decode = decode.append("<tr><th align=left>Status Bits<td> " + QString::fromStdString(frame.decoding_result.packetVars["status_bits"]));
-                decode = decode.append("<tr><th align=left>LCN<td> " + QString::fromStdString(frame.decoding_result.packetVars["logicalChannelNo"]));
-                decode = decode.append("<tr><th align=left>Frame Length<td> " + QString::fromStdString(frame.decoding_result.packetVars["frameLength"]));
-                decode = decode.append("<tr><th align=left>Duration<td> " + QString::fromStdString(frame.decoding_result.packetVars["duration"]));
-                decode = decode.append("<tr><th align=left>DLF<td> " + formatFreqMHz(frame.decoding_result.packetVars["downlinkChannelMhz"]));
-                decode = decode.append("<tr><th align=left>ULF<td> " + formatFreqMHz(frame.decoding_result.packetVars["uplinkChannelMhz"]));
-                decode = decode.append("<tr><th align=left>Frame Offset<td> " + QString::fromStdString(frame.decoding_result.packetVars["frameOffset"]));
-                decode = decode.append("<tr><th align=left>Packet Descriptor 1<td> " + QString::fromStdString(frame.decoding_result.packetVars["packetDescriptor1"]));
+            case 0x01: // Announcement
+                decodeAppend(decode, "Packet", "packetDescriptorText", frame);
+                decodeAppend(decode, "Sat", "satName", frame);
+                decodeAppend(decode, "MES", "mesId", frame);
+                decodeAppend(decode, "LES", "lesName", frame);
+                decodeAppendFreqMHz(decode, "DLF", "downlinkChannelMhz", frame);
+                decodeAppend(decode, "Service", "serviceText", frame);
+                decodeAppend(decode, "Direction", "directionText", frame);
+                decodeAppend(decode, "Priority", "priorityText", frame);
+                decodeAppend(decode, "LCN", "logicalChannelNo", frame);
+                decodeAppend(decode, "Message Reference Number", "messageReferenceNumber", frame);
+                decodeAppend(decode, "Sub-address", "subAddress", frame);
+                decodeAppend(decode, "Presentation", "presentationText", frame);
+                decodeAppend(decode, "Packets", "packets", frame);
+                decodeAppend(decode, "Last Count", "lastCount", frame);
                 break;
 
-            case 0x92:
-                decode = decode.append("<tr><th align=left>Login Ack Length<td>" + QString::fromStdString(frame.decoding_result.packetVars["loginAckLength"]));
-                decode = decode.append("<tr><th align=left>DLF<td>" + formatFreqMHz(frame.decoding_result.packetVars["downlinkChannelMhz"]));
-                decode = decode.append("<tr><th align=left>LES<td>" + QString::fromStdString(frame.decoding_result.packetVars["les"]));
-                decode = decode.append("<tr><th align=left>Station Start Hex<td>" + QString::fromStdString(frame.decoding_result.packetVars["stationStartHex"]));
+            case 0x02: // Clear
+                decodeAppend(decode, "Packet", "packetDescriptorText", frame);
+                decodeAppend(decode, "Sat", "satName", frame);
+                decodeAppend(decode, "MES", "mesId", frame);
+                decodeAppend(decode, "LES", "lesName", frame);
+                decodeAppend(decode, "LCN", "logicalChannelNo", frame);
+                break;
+
+            case 0x03: // Logical Channel Assignment
+                decodeAppend(decode, "Packet", "packetDescriptorText", frame);
+                decodeAppend(decode, "Sat", "satName", frame);
+                decodeAppend(decode, "MES", "mesId", frame);
+                decodeAppend(decode, "LES", "lesName", frame);
+                decodeAppend(decode, "Status Bits", "status_bits", frame);
+                decodeAppend(decode, "LCN", "logicalChannelNo", frame);
+                decodeAppend(decode, "Frame Length", "frameLength", frame);
+                decodeAppend(decode, "Duration", "duration", frame);
+                decodeAppendFreqMHz(decode, "DLF", "downlinkChannelMhz", frame);
+                decodeAppendFreqMHz(decode, "ULF", "uplinkChannelMhz", frame);
+                decodeAppend(decode, "Frame Offset", "frameOffset", frame);
+                decodeAppend(decode, "Packet Descriptor 1", "packetDescriptor1", frame);
+                break;
+
+            case 0x06: // Signalling Channel Descriptor
+                decodeAppend(decode, "Packet", "packetDescriptorText", frame);
+                decodeAppendFreqMHz(decode, "ULF", "uplinkChannelMhz", frame);
+                decodeAppendHTML(decode, "Services", "services", frame);
+                decodeAppendHTML(decode, "TDM slots", "tdmSlots", frame);
+                break;
+
+            case 0x07: // Bulletin Board
+                decodeAppend(decode, "Packet", "packetDescriptorText", frame);
+                decodeAppend(decode, "Network Version", "networkVersion", frame);
+                decodeAppend(decode, "Sat", "satName", frame);
+                decodeAppend(decode, "LES", "lesName", frame);
+                decodeAppend(decode, "Signalling Channel", "signallingChannel", frame);
+                decodeAppend(decode, "Count", "count", frame);
+                decodeAppend(decode, "Channel Type Name", "channelTypeName", frame);
+                decodeAppend(decode, "Local", "local", frame);
+                decodeAppend(decode, "Random Interval", "randomInterval", frame);
+                decodeAppendHTML(decode, "Status", "status", frame);
+                decodeAppendHTML(decode, "Services", "services", frame);
+                break;
+
+            case 0x12: // Login Ack
+                decodeAppend(decode, "Packet", "packetDescriptorText", frame);
+                decodeAppend(decode, "MES", "mesId", frame);
+                decodeAppendFreqMHz(decode, "DLF", "downlinkChannelMhz", frame);
+                if (frame.decoding_result.packetVars.find("networkVesrion") != frame.decoding_result.packetVars.end()) {
+                    decodeAppend(decode, "Network Version", "networkVersion", frame);
+                }
                 if (frame.decoding_result.packetVars.find("stationCount") != frame.decoding_result.packetVars.end())
                 {
-                    decode = decode.append("<tr><th align=left>Station Count<td>" + QString::fromStdString(frame.decoding_result.packetVars["stationCnt"]));
-                    decode = decode.append("<tr><th align=left>Stations<td>");
-                    std::string stations = frame.decoding_result.packetVars["stations"];
-                    for (int k = 0; k < (int)stations.length(); k++)
-                    {
-                        if (stations[k] != '\n') {
-                            decode = decode.append(stations[k]);
-                        } else {
-                            decode = decode.append("<br>");
-                        }
-                    }
+                    decodeAppend(decode, "Station Count", "stationCount", frame);
+                    decodeAppendHTML(decode, "Stations", "stations", frame);
                 }
                 break;
 
-            case 0xA3:
-                decode = decode.append("<tr><th align=left>Msg Id<td> " + QString::fromStdString(frame.decoding_result.packetVars["mesId"]));
-                decode = decode.append("<tr><th align=left>Sat<td> " + QString::fromStdString(frame.decoding_result.packetVars["satName"]));
-                decode = decode.append("<tr><th align=left>LES<td> " + QString::fromStdString(frame.decoding_result.packetVars["lesName"]));
-
-                if (frame.decoding_result.packetVars.find("shortMessage") != frame.decoding_result.packetVars.end())
-                {
-                    std::string shortMessage = frame.decoding_result.packetVars["shortMessage"];
-                    for (int k = 0; k < (int)shortMessage.length(); k++)
-                    {
-                        char chr = shortMessage[k] & 0x7F;
-                        if ((chr < 0x20 && chr != '\n' && chr != '\r')) {
-                            message = message.append("(" + QString::number(chr) + ")");
-                        } else if(chr != '\n'  && chr != '\r') {
-                            message = message.append(chr);
-                        }
-                    }
-                    decode = decode.append("<tr><th align=left>Payload<td>" + message);
-                }
+            case 0x13: // Logout Ack
+                decodeAppend(decode, "Packet", "packetDescriptorText", frame);
+                decodeAppend(decode, "MES", "mesId", frame);
                 break;
 
-            case 0xA8:
-                decode = decode.append("<tr><th align=left>Msg Id<td> " + QString::fromStdString(frame.decoding_result.packetVars["mesId"]));
-                decode = decode.append("<tr><th align=left>Sat<td> " + QString::fromStdString(frame.decoding_result.packetVars["satName"]));
-                decode = decode.append("<tr><th align=left>LES<td> " + QString::fromStdString(frame.decoding_result.packetVars["lesName"]));
-                if (frame.decoding_result.packetVars.find("shortMessage") != frame.decoding_result.packetVars.end())
-                {
-                    std::string shortMessage = frame.decoding_result.packetVars["shortMessage"];
-                    for (int k = 0; k < (int)shortMessage.length(); k++)
-                    {
-                        char chr = shortMessage[k] & 0x7F;
-                        if ((chr < 0x20 && chr != '\n' && chr != '\r')) {
-                            message = message.append("(" + QString::number(chr) + ")");
-                        } else if(chr != '\n'  && chr != '\r') {
-                            message = message.append(chr);
-                        }
-                    }
-                    decode = decode.append("<tr><th align=left>Payload<td>" + message);
-                }
-                break;
-
-            case 0xAA:
+            case 0x22: // Group Poll
             {
-                decode = decode.append("<tr><th align=left>Sat<td> " + QString::fromStdString(frame.decoding_result.packetVars["satName"]));
-                decode = decode.append("<tr><th align=left>LES<td> " + QString::fromStdString(frame.decoding_result.packetVars["lesName"]));
-                decode = decode.append("<tr><th align=left>LCN<td> " + QString::fromStdString(frame.decoding_result.packetVars["logicalChannelNo"]));
-                decode = decode.append("<tr><th align=left>Packet No<td> " + QString::fromStdString(frame.decoding_result.packetVars["packetNo"]));
+                decodeAppend(decode, "Packet", "packetDescriptorText", frame);
+                decodeAppend(decode, "Sat", "satName", frame);
+                decodeAppend(decode, "Data Network ID", "dataNetworkId", frame);
+                decodeAppend(decode, "LES", "lesName", frame);
+                decodeAppend(decode, "LES TDM", "lesTDM", frame);
+                decodeAppend(decode, "Randomizing Inverval", "randomizingInterval", frame);
+                decodeAppend(decode, "Sub-address", "subAddress", frame);
+                decodeAppend(decode, "Response", "responseText", frame);
+                decodeAppend(decode, "Command", "commandText", frame);
+                decodeAppend(decode, "Sequence No", "sequenceNo", frame);
+                qint8 command = QString::fromStdString(frame.decoding_result.packetVars["command"]).toInt();
+                if (command == 0x4)
+                {
+                    decodeAppend(decode, "Start Frame", "startFrame", frame);
+                    decodeAppend(decode, "Interval", "interval", frame);
+                }
+                else if (command == 0x8)
+                {
+                    decodeAppend(decode, "MEM Id", "memId", frame);
+                }
+                else if (command == 0xa)
+                {
+                    decodeAppend(decode, "Member Number", "memberNumber", frame);
+                }
+                if (frame.decoding_result.packetVars.find("shortMessage") != frame.decoding_result.packetVars.end())
+                {
+                    std::string shortMessage = frame.decoding_result.packetVars["shortMessage"];
+                    for (int k = 0; k < (int)shortMessage.length(); k++)
+                    {
+                        char chr = shortMessage[k] & 0x7F;
+                        if ((chr < 0x20 && chr != '\n' && chr != '\r')) {
+                            message = message.append("(" + QString::number(chr) + ")");
+                        } else {
+                            message = message.append(chr);
+                        }
+                    }
+                    decode = decode.append("<tr><th align=left>Text<td>" + message);
+                }
+                QString textHex = QString::fromStdString(frame.decoding_result.packetVars["text"]);
+                if (!textHex.isEmpty()) {
+                    decode = decode.append("<tr><th align=left>Text (hex)<td>" + textHex);
+                }
+                break;
+            }
 
+            case 0x23: // Individual Poll
+            {
+                decodeAppend(decode, "Packet", "packetDescriptorText", frame);
+                decodeAppend(decode, "Sat", "satName", frame);
+                decodeAppend(decode, "MES", "mesId", frame);
+                decodeAppend(decode, "LES", "lesName", frame);
+                decodeAppend(decode, "Sub-address", "subAddress", frame);
+                decodeAppend(decode, "Data Network ID", "dataNetworkId", frame);
+                decodeAppend(decode, "Response", "responseText", frame);
+                decodeAppend(decode, "Command", "commandText", frame);
+                decodeAppend(decode, "Sequence No", "sequenceNo", frame);
+                qint8 command = QString::fromStdString(frame.decoding_result.packetVars["command"]).toInt();
+                if (command == 0x4)
+                {
+                    decodeAppend(decode, "Start Frame", "startFrame", frame);
+                    decodeAppend(decode, "Interval", "interval", frame);
+                }
+                else if (command == 0x8)
+                {
+                    decodeAppend(decode, "MEM Id", "memId", frame);
+                }
+                else if (command == 0xa)
+                {
+                    decodeAppend(decode, "Member Number", "memberNumber", frame);
+                }
+                if (frame.decoding_result.packetVars.find("shortMessage") != frame.decoding_result.packetVars.end())
+                {
+                    std::string shortMessage = frame.decoding_result.packetVars["shortMessage"];
+                    for (int k = 0; k < (int)shortMessage.length(); k++)
+                    {
+                        char chr = shortMessage[k] & 0x7F;
+                        if ((chr < 0x20 && chr != '\n' && chr != '\r')) {
+                            message = message.append("(" + QString::number(chr) + ")");
+                        } else {
+                            message = message.append(chr);
+                        }
+                    }
+                    decode = decode.append("<tr><th align=left>Text<td>" + message);
+                }
+                QString textHex = QString::fromStdString(frame.decoding_result.packetVars["text"]);
+                if (!textHex.isEmpty()) {
+                    decode = decode.append("<tr><th align=left>Text (hex)<td>" + textHex);
+                }
+                break;
+            }
+
+            case 0x28: // Confirmation
+                decodeAppend(decode, "Packet", "packetDescriptorText", frame);
+                decodeAppend(decode, "Sat", "satName", frame);
+                decodeAppend(decode, "MES", "mesId", frame);
+                decodeAppend(decode, "LES", "lesName", frame);
+                decodeAppend(decode, "Message Reference Number", "messageReferenceNumber", frame);
+                decodeAppendHTML(decode, "Message Status", "messageStatusDescriptors", frame);
+                break;
+
+            case 0x2A: // Message
+            {
+                decodeAppend(decode, "Packet", "packetDescriptorText", frame);
+                decodeAppend(decode, "Sat", "satName", frame);
+                decodeAppend(decode, "LES", "lesName", frame);
+                decodeAppend(decode, "LCN", "logicalChannelNo", frame);
+                decodeAppend(decode, "Packet No", "packetNo", frame);
                 //bool isBinary = frame.decoding_result.payload.presentation == PACKETDECODER_PRESENTATION_BINARY;
                 if (frame.decoding_result.payload.presentation == PACKETDECODER_PRESENTATION_IA5)
                 {
@@ -989,7 +1037,7 @@ void InmarsatDemodGUI::packetReceived(const QByteArray& bytes, QDateTime dateTim
                         char chr = frame.decoding_result.payload.data8Bit[i] & 0x7F;
                         if ((chr < 0x20 && chr != '\n' && chr != '\r')) {
                             message = message.append("(" + QString::number((uint16_t)chr, 16) + ")");
-                        } else if(chr != '\n' && chr != '\r') {
+                        } else {
                             message = message.append(chr);
                         }
                     }
@@ -1010,36 +1058,30 @@ void InmarsatDemodGUI::packetReceived(const QByteArray& bytes, QDateTime dateTim
             decode = decode.append("<tr><th align=left>Payload<td>" + message);
             break;
 
-            case 0xAB:
-            {
-                decode = decode.append("<tr><th align=left>LES List Length<td>" + QString::fromStdString(frame.decoding_result.packetVars["lesListLength"]));
-                decode = decode.append("<tr><th align=left>Station Start Hex<td>" + QString::fromStdString(frame.decoding_result.packetVars["stationStartHex"]));
-                decode = decode.append("<tr><th align=left>Station Count<td>" + QString::fromStdString(frame.decoding_result.packetVars["stationCount"]));
+            case 0x2B: // Network Update
+                decodeAppend(decode, "Packet", "packetDescriptorText", frame);
+                decodeAppend(decode, "LES List Length", "lesListLength", frame);
+                decodeAppend(decode, "Station Start Hex", "stationStartHex", frame);
+                decodeAppend(decode, "Station Count", "stationCount", frame);
+                decodeAppendHTML(decode, "Stations", "stations", frame);
+                break;
 
-                decode = decode.append("<tr><th align=left>Stations<td>");
-                std::string stations = frame.decoding_result.packetVars["stations"];
-                for (int k = 0; k < (int)stations.length(); k++)
-                {
-                    if (stations[k] != '\n') {
-                        decode = decode.append(stations[k]);
-                    } else {
-                        decode = decode.append("<br>");
-                    }
-                }
-            }
-            break;
-
-            case 0xB1:
+            case 0x30: // EGC (Single Header)
+            case 0x31: // EGC (First of Double Header)
+            case 0x32: // EGC (Second of Double Header)
             {
-                decode = decode.append("<tr><th align=left>Msg Type<td>" + QString::fromStdString(frame.decoding_result.packetVars["messageType"]));
-                decode = decode.append("<tr><th align=left>Service Code & Address Name<td>" + QString::fromStdString(frame.decoding_result.packetVars["serviceCodeAndAddressName"]));
-                decode = decode.append("<tr><th align=left>Continuation<td>" + QString::fromStdString(frame.decoding_result.packetVars["continuation"]));
-                decode = decode.append("<tr><th align=left>Priority<td>" + QString::fromStdString(frame.decoding_result.packetVars["priorityText"]));
-                decode = decode.append("<tr><th align=left>Repetition<td>" + QString::fromStdString(frame.decoding_result.packetVars["rep"]));
-                decode = decode.append("<tr><th align=left>Msg Id<td>" + QString::fromStdString(frame.decoding_result.packetVars["messageId"]));
-                decode = decode.append("<tr><th align=left>Packet No<td>" + QString::fromStdString(frame.decoding_result.packetVars["packetNo"]));
-                decode = decode.append("<tr><th align=left>isNewPayload<td>" + QString::fromStdString(frame.decoding_result.packetVars["isNewPayl"]));
-                decode = decode.append("<tr><th align=left>Address<td>" + QString::fromStdString(frame.decoding_result.packetVars["addrHex"]));
+                decodeAppend(decode, "Packet", "packetDescriptorText", frame);
+                decodeAppend(decode, "Service Code", "serviceCodeAndAddressName", frame);
+                decodeAppend(decode, "Continuation", "continuation", frame);
+                decodeAppend(decode, "Priority", "priorityText", frame);
+                decodeAppend(decode, "Repetition Number", "repetition", frame);
+                decodeAppend(decode, "Message Sequence Number", "messageId", frame);
+                decodeAppend(decode, "Packet Sequence Number", "packetNo", frame);
+                decodeAppend(decode, "Presentation", "presentationText", frame);
+                decodeAppend(decode, "Sat", "satName", frame);
+                decodeAppend(decode, "LES", "lesName", frame);
+                decode = decode.append("<tr><th align=left>Address<td>" + address);
+                decodeAppend(decode, "Checksum", "egcChecksum", frame);
 
                 bool isBinary = frame.decoding_result.payload.presentation == PACKETDECODER_PRESENTATION_BINARY;
                 if (!isBinary)
@@ -1048,7 +1090,7 @@ void InmarsatDemodGUI::packetReceived(const QByteArray& bytes, QDateTime dateTim
                         char chr = frame.decoding_result.payload.data8Bit[k] & 0x7F;
                         if ((chr < 0x20 && chr != '\n' && chr != '\r')) {
                             message = message.append("(" + QString::number((uint16_t)chr, 16) + ")");
-                        } else /*if (chr != '\n'  && chr != '\r')*/ {
+                        } else {
                             message = message.append(chr);
                         }
                     }
@@ -1061,46 +1103,21 @@ void InmarsatDemodGUI::packetReceived(const QByteArray& bytes, QDateTime dateTim
                         message = message.append(QString::number(data, 16) + " ");
                     }
                 }
-                decode = decode.append("<tr><th align=left>Payload<td>" + message);
+                decode = decode.append("<tr><th align=left>Message<td>" + message);
             }
             break;
 
-            case 0xB2:
+            case 0x2c: // Request Status
             {
-                decode = decode.append("<tr><th align=left>Msg Type<td>" + QString::fromStdString(frame.decoding_result.packetVars["messageType"]));
-                decode = decode.append("<tr><th align=left>Service Code & Address Name<td>" + QString::fromStdString(frame.decoding_result.packetVars["serviceCodeAndAddressName"]));
-                decode = decode.append("<tr><th align=left>Continuation<td>" + QString::fromStdString(frame.decoding_result.packetVars["continuation"]));
-                decode = decode.append("<tr><th align=left>Priority<td>" + QString::fromStdString(frame.decoding_result.packetVars["priorityText"]));
-                decode = decode.append("<tr><th align=left>Repetition<td>" + QString::fromStdString(frame.decoding_result.packetVars["rep"]));
-                decode = decode.append("<tr><th align=left>Msg Id<td>" + QString::fromStdString(frame.decoding_result.packetVars["messageId"]));
-                decode = decode.append("<tr><th align=left>Packet No<td>" + QString::fromStdString(frame.decoding_result.packetVars["packetNo"]));
-                decode = decode.append("<tr><th align=left>isNewPayload<td>" + QString::fromStdString(frame.decoding_result.packetVars["isNewPayl"]));
-                decode = decode.append("<tr><th align=left>Address<td>" + QString::fromStdString(frame.decoding_result.packetVars["addrHex"]));
-
-                bool isBinary = frame.decoding_result.payload.presentation == PACKETDECODER_PRESENTATION_BINARY;
-                if (!isBinary)
-                {
-                    for (int k = 0; k < (int)frame.decoding_result.payload.data8Bit.size(); k++)
-                    {
-                        char chr = frame.decoding_result.payload.data8Bit[k] & 0x7F;
-                        if ((chr < 0x20 && chr != '\n' && chr != '\r')) {
-                            message = message.append("(" + QString::number((uint16_t)chr, 16) + ")");
-                        } else /*if (chr != '\n'  && chr != '\r')*/ {
-                            message = message.append(chr);
-                        }
-                    }
-                }
-                else
-                {
-                    for (int i = 0; i < (int)frame.decoding_result.payload.data8Bit.size(); i++)
-                    {
-                        uint8_t data = frame.decoding_result.payload.data8Bit[i];
-                        message = message.append(QString::number(data, 16) + " ");
-                    }
-                }
-                decode = decode.append("<tr><th align=left>Payload<td>" + message);
+                decodeAppend(decode, "Packet", "packetDescriptorText", frame);
+                decodeAppend(decode, "Sat", "satName", frame);
+                decodeAppend(decode, "MES", "mesId", frame);
+                decodeAppend(decode, "LES", "lesName", frame);
+                QString flag = QString::fromStdString(frame.decoding_result.packetVars["rejected"]) == "0" ? "Pending" : "Rejected";
+                decode = decode.append("<tr><th align=left>Pending / Reject Flag<td> " + flag);
+                decodeAppend(decode, "Status Code", "statusCodeText", frame);
+                break;
             }
-            break;
 
             }
 
@@ -1137,6 +1154,7 @@ void InmarsatDemodGUI::packetReceived(const QByteArray& bytes, QDateTime dateTim
                 MessagePart part;
                 part.m_part = frame.decoding_result.packetDescriptor == 0xb1 ? 1 : 2;
                 part.m_packet = QString::fromStdString(frame.decoding_result.packetVars["packetNo"]).toInt();
+                part.m_continuation = QString::fromStdString(frame.decoding_result.packetVars["continuation"]) == "1";
                 part.m_text = message;
                 multipartMessage->addPart(part);
                 updateMessageTable(multipartMessage);
@@ -1150,6 +1168,17 @@ void InmarsatDemodGUI::packetReceived(const QByteArray& bytes, QDateTime dateTim
             }
         }
     }
+}
+
+QString InmarsatDemodGUI::toHTML(const std::string& string) const
+{
+    return toHTML(QString::fromStdString(string));
+}
+
+QString InmarsatDemodGUI::toHTML(const QString& string) const
+{
+    QString s = string;
+    return s.replace("\n", "<br>");
 }
 
 void InmarsatDemodGUI::sendAreaToMapFeature(const QString& name, const QString& text, float latitude, float longitude, const QList<QGeoCoordinate>& coordinates)

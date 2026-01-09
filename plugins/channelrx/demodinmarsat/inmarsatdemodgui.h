@@ -55,6 +55,7 @@ class InmarsatDemodGUI;
 struct MessagePart {
     int m_part;
     int m_packet;
+    bool m_continuation;
     QString m_text;
 };
 
@@ -68,6 +69,7 @@ public:
     int getParts() const { return m_parts.size(); }
     int getTotalParts() const { return m_parts[m_parts.size()-1].m_packet * 2; }
     QDateTime getDateTime() const { return m_dateTime; }
+    bool getComplete() const { return getParts() == getTotalParts() && !m_parts[m_parts.size()-1].m_continuation; }
     int getId() const { return m_id; }
     QString getService() const { return m_service; }
     QString getPriority() const { return m_priority; }
@@ -183,6 +185,12 @@ private:
     void filterRow(QTableWidget *table, int row, int typeCol, int messageCol);
     void filter();
 
+    void decodeAppend(QString& decode, const QString& title, const std::string& variable, inmarsatc::frameParser::FrameParser::frameParser_result& frame);
+    void decodeAppendFreqMHz(QString& decode, const QString& title, const std::string& variable, inmarsatc::frameParser::FrameParser::frameParser_result& frame);
+    void decodeAppendHTML(QString& decode, const QString& title, const std::string& variable, inmarsatc::frameParser::FrameParser::frameParser_result& frame);
+    QString toHTML(const std::string& string) const;
+    QString toHTML(const QString& string) const;
+
     enum MessageCol {
         MESSAGE_COL_DATE,
         MESSAGE_COL_TIME,
@@ -198,13 +206,14 @@ private:
         PACKET_COL_DATE,
         PACKET_COL_TIME,
         PACKET_COL_SAT,
+        PACKET_COL_MES,
         PACKET_COL_LES,
-        PACKET_COL_MSG_ID,
         PACKET_COL_TYPE,
         PACKET_COL_FRAME_NO,
         PACKET_COL_LCN,
         PACKET_COL_ULF,
         PACKET_COL_DLF,
+        PACKET_COL_MSG_ID,
         PACKET_COL_PRIORITY,
         PACKET_COL_ADDRESS,
         PACKET_COL_MESSAGE,
