@@ -350,7 +350,7 @@ void DenoiserWorker::processSample(
             m_magsq = re*re;
             m_channelPowerAvg(m_magsq);
 
-            if (!m_settings.m_enableDenoiser || m_settings.m_denoiserType == DenoiserSettings::DenoiserType::DenoiserType_None)
+            if ((!m_settings.m_enableDenoiser || m_settings.m_denoiserType == DenoiserSettings::DenoiserType::DenoiserType_None) && !m_settings.m_audioMute)
             {
                 // if ((s_dbgCount % 48000) == 1) {
                 //     qDebug() << "DenoiserWorker::processSample[I16]: passthrough branch";
@@ -371,7 +371,7 @@ void DenoiserWorker::processSample(
                     m_audioBufferFill = 0;
                 }
             }
-            else if (m_settings.m_denoiserType == DenoiserSettings::DenoiserType::DenoiserType_RNnoise)
+            else if ((m_settings.m_denoiserType == DenoiserSettings::DenoiserType::DenoiserType_RNnoise) && !m_settings.m_audioMute)
             {
                 // if ((s_dbgCount % 48000) == 1) {
                 //     qDebug() << "DenoiserWorker::processSample[I16]: RNNoise branch";
@@ -389,7 +389,7 @@ void DenoiserWorker::processSample(
                     for (int j = 0; j < 480; j++)
                     {
                         float outSample = m_rnnoiseOut[j];
-                        m_sampleBuffer.push_back(Sample(outSample, 0));
+                        m_sampleBuffer.push_back(Sample(outSample * 181, 0)); // 181 = sqrt(32768)
                         int16_t audioSample = static_cast<int16_t>(outSample);
                         m_audioBuffer[m_audioBufferFill].l = audioSample;
                         m_audioBuffer[m_audioBufferFill].r = audioSample;
@@ -420,7 +420,7 @@ void DenoiserWorker::processSample(
             m_magsq = re*re + im*im;
             m_channelPowerAvg(m_magsq);
 
-            if (!m_settings.m_enableDenoiser || m_settings.m_denoiserType == DenoiserSettings::DenoiserType::DenoiserType_None)
+            if ((!m_settings.m_enableDenoiser || m_settings.m_denoiserType == DenoiserSettings::DenoiserType::DenoiserType_None) && !m_settings.m_audioMute)
             {
                 // if ((s_dbgCount % 48000) == 1) {
                 //     qDebug() << "DenoiserWorker::processSample[CI16]: passthrough branch";
@@ -441,7 +441,7 @@ void DenoiserWorker::processSample(
                     m_audioBufferFill = 0;
                 }
             }
-            else if (m_settings.m_denoiserType == DenoiserSettings::DenoiserType::DenoiserType_RNnoise)
+            else if ((m_settings.m_denoiserType == DenoiserSettings::DenoiserType::DenoiserType_RNnoise) && !m_settings.m_audioMute)
             {
                 // if ((s_dbgCount % 48000) == 1) {
                 //     qDebug() << "DenoiserWorker::processSample[CI16]: RNNoise branch";
@@ -459,7 +459,7 @@ void DenoiserWorker::processSample(
                     for (int j = 0; j < 480; j++)
                     {
                         float outSample = m_rnnoiseOut[j];
-                        m_sampleBuffer.push_back(Sample(outSample, outSample));
+                        m_sampleBuffer.push_back(Sample(outSample * 181, outSample * 181)); // 181 = sqrt(32768)
                         int16_t audioSample = static_cast<int16_t>(outSample);
                         m_audioBuffer[m_audioBufferFill].l = audioSample;
                         m_audioBuffer[m_audioBufferFill].r = audioSample;

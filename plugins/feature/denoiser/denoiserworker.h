@@ -32,7 +32,7 @@
 #include "denoisersettings.h"
 
 class WavFileRecord;
-class DenoiseState;
+struct DenoiseState;
 
 class DenoiserWorker : public QObject {
     Q_OBJECT

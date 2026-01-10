@@ -13,6 +13,8 @@ It connects to the "demod" stream of Rx channels similarly to the Demod analyzer
   - WFM demodulator
   - WDSP plugin (multimode)
 
+Note that this plugin is not available on Mac O/S
+
 The following noise reduction schemes are covered. It can be selected via the (6) combo box:
 
 <h3>RNNoise</h3>

@@ -916,15 +916,13 @@ if(ENABLE_FEATURE_MORSEDECODER)
 endif()
 
 # For denoiser feature
-if(ENABLE_FEATURE_DENOISER)
+if(NOT APPLE AND ENABLE_FEATURE_DENOISER)
     if (WIN32)
         set(RNNOISE_LIBRARIES "${SDRANGEL_BINARY_LIB_DIR}/rnnoise.lib" CACHE INTERNAL "")
-        set(RNNOISE_ARGS "-DRNN_ENABLE_X86_RTCD=ON")
+        set(RNNOISE_ARGS "-DRNN_ENABLE_X86_RTCD=OFF")
     elseif (LINUX)
         set(RNNOISE_LIBRARIES "${EXTERNAL_BUILD_LIBRARIES}/lib${LIB_SUFFIX}/librnnoise${CMAKE_SHARED_LIBRARY_SUFFIX}" CACHE INTERNAL "")
         set(RNNOISE_ARGS "-DRNN_ENABLE_X86_RTCD=ON")
-    elseif (APPLE)
-        set(RNNOISE_ARGS "")
     endif()
     ExternalProject_Add(rnnoise
         GIT_REPOSITORY https://github.com/f4exb/rnnoise.git
@@ -944,11 +942,6 @@ if(ENABLE_FEATURE_DENOISER)
     set(RNNOISE_INCLUDE_DIR "${EXTERNAL_BUILD_LIBRARIES}/rnnoise/src/rnnoise/include" CACHE INTERNAL "")
     if (WIN32)
         install(FILES "${SDRANGEL_BINARY_BIN_DIR}/rnnoise${CMAKE_SHARED_LIBRARY_SUFFIX}" DESTINATION "${INSTALL_LIB_DIR}")
-    elseif (APPLE)
-        set(RNNOISE_LIBRARIES "${binary_dir}/src/librnnoise${CMAKE_SHARED_LIBRARY_SUFFIX}" CACHE INTERNAL "")
-        install(DIRECTORY "${binary_dir}/src" DESTINATION "${INSTALL_LIB_DIR}"
-                FILES_MATCHING PATTERN "librnnoise*${CMAKE_SHARED_LIBRARY_SUFFIX}")
-        set(MACOS_EXTERNAL_LIBS_FIXUP "${MACOS_EXTERNAL_LIBS_FIXUP};${binary_dir}/src")
     endif ()
 endif()
 
