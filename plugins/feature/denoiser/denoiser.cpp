@@ -146,6 +146,11 @@ void Denoiser::start()
         }
     }
 
+    if (m_levelMeter) {
+        connect(m_worker, SIGNAL(levelChanged(qreal, qreal, int)), m_levelMeter, SLOT(levelChanged(qreal, qreal, int)));
+    }
+
+
     m_running = true;
 }
 
@@ -445,6 +450,15 @@ void Denoiser::webapiFormatFeatureSettings(
     SWGSDRangel::SWGFeatureSettings& response,
     const DenoiserSettings& settings)
 {
+    response.getDenoiserSettings()->setDenoiserType(static_cast<int>(settings.m_denoiserType));
+    response.getDenoiserSettings()->setEnableDenoiser(settings.m_enableDenoiser ? 1 : 0);
+    response.getDenoiserSettings()->setAudioMute(settings.m_audioMute ? 1 : 0);
+    response.getDenoiserSettings()->setVolumeTenths(settings.m_volumeTenths);
+    if (response.getDenoiserSettings()->getAudioDeviceName()) {
+        *response.getDenoiserSettings()->getAudioDeviceName() = settings.m_audioDeviceName;
+    } else {
+        response.getDenoiserSettings()->setAudioDeviceName(new QString(settings.m_audioDeviceName));
+    }
     if (response.getDenoiserSettings()->getTitle()) {
         *response.getDenoiserSettings()->getTitle() = settings.m_title;
     } else {
@@ -492,6 +506,21 @@ void Denoiser::webapiUpdateFeatureSettings(
     const QStringList& featureSettingsKeys,
     SWGSDRangel::SWGFeatureSettings& response)
 {
+    if (featureSettingsKeys.contains("DenoiserType")) {
+        settings.m_denoiserType = static_cast<DenoiserSettings::DenoiserType>(response.getDenoiserSettings()->getDenoiserType());
+    }
+    if (featureSettingsKeys.contains("enableDenoiser")) {
+        settings.m_enableDenoiser = response.getDenoiserSettings()->getEnableDenoiser() != 0;
+    }
+    if (featureSettingsKeys.contains("audioMute")) {
+        settings.m_audioMute = response.getDenoiserSettings()->getAudioMute() != 0;
+    }
+    if (featureSettingsKeys.contains("volumeTenths")) {
+        settings.m_volumeTenths = response.getDenoiserSettings()->getVolumeTenths();
+    }
+    if (featureSettingsKeys.contains("audioDeviceName")) {
+        settings.m_audioDeviceName = *response.getDenoiserSettings()->getAudioDeviceName();
+    }
     if (featureSettingsKeys.contains("title")) {
         settings.m_title = *response.getDenoiserSettings()->getTitle();
     }
@@ -535,6 +564,36 @@ void Denoiser::webapiReverseSendSettings(const QList<QString>& featureSettingsKe
 
     // transfer data that has been modified. When force is on transfer all data except reverse API data
 
+    if (featureSettingsKeys.contains("useReverseAPI") || force) {
+        swgDenoiserSettings->setUseReverseApi(settings.m_useReverseAPI ? 1 : 0);
+    }
+    if (featureSettingsKeys.contains("reverseAPIAddress") || force) {
+        swgDenoiserSettings->setReverseApiAddress(new QString(settings.m_reverseAPIAddress));
+    }
+    if (featureSettingsKeys.contains("reverseAPIPort") || force) {
+        swgDenoiserSettings->setReverseApiPort(settings.m_reverseAPIPort);
+    }
+    if (featureSettingsKeys.contains("reverseAPIFeatureSetIndex") || force) {
+        swgDenoiserSettings->setReverseApiFeatureSetIndex(settings.m_reverseAPIFeatureSetIndex);
+    }
+    if (featureSettingsKeys.contains("reverseAPIFeatureIndex") || force) {
+        swgDenoiserSettings->setReverseApiFeatureIndex(settings.m_reverseAPIFeatureIndex);
+    }
+    if (featureSettingsKeys.contains("DenoiserType") || force) {
+        swgDenoiserSettings->setDenoiserType(static_cast<int>(settings.m_denoiserType));
+    }
+    if (featureSettingsKeys.contains("enableDenoiser") || force) {
+        swgDenoiserSettings->setEnableDenoiser(settings.m_enableDenoiser ? 1 : 0);
+    }
+    if (featureSettingsKeys.contains("audioMute") || force) {
+        swgDenoiserSettings->setAudioMute(settings.m_audioMute ? 1 : 0);
+    }
+    if (featureSettingsKeys.contains("volumeTenths") || force) {
+        swgDenoiserSettings->setVolumeTenths(settings.m_volumeTenths);
+    }
+    if (featureSettingsKeys.contains("audioDeviceName") || force) {
+        swgDenoiserSettings->setAudioDeviceName(new QString(settings.m_audioDeviceName));
+    }
     if (featureSettingsKeys.contains("title") || force) {
         swgDenoiserSettings->setTitle(new QString(settings.m_title));
     }

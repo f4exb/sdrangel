@@ -7,6 +7,19 @@ DenoiserSettings:
         Denoiser type
           * 0 - none
           * 1 - RNnoise
+    enableDenoiser:
+      type: integer
+      description: >
+        Enable denoiser
+          * 1 - enable
+          * 0 - disable
+    volumeTenths:
+      type: integer
+      description: >
+        Output volume in tenths (e.g., 10 = 1.0)
+    audioDeviceName:
+      type: string
+      description: Audio output device name
     audioMute:
       type: integer
       description: >

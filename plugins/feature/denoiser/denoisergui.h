@@ -78,6 +78,7 @@ private:
 	void applySettings(bool force = false);
 	void displaySettings();
 	void displaySampleRate(int sampleRate);
+	void displayNRenabled();
 	void updateChannelList();
 	bool handleMessage(const Message& message);
     void makeUIConnections();
@@ -91,6 +92,10 @@ private slots:
 	void on_channelApply_clicked();
 	void on_record_toggled(bool checked);
     void on_showFileDialog_clicked(bool checked);
+	void on_denoiserType_currentIndexChanged(int index);
+	void on_enable_toggled(bool checked);
+	void on_audioMute_toggled(bool checked);
+	void on_volume_valueChanged(int value);
 	void audioSelect(const QPoint& p);
 	void updateStatus();
 	void tick();

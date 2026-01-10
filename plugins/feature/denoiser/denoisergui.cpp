@@ -178,6 +178,7 @@ DenoiserGUI::DenoiserGUI(PluginAPI* pluginAPI, FeatureUISet *featureUISet, Featu
     DialPopup::addPopupsToChildDials(this);
     m_resizer.enableChildMouseTracking();
     m_denoiser->getAvailableChannelsReport();
+    m_denoiser->setLevelMeter(ui->volumeMeter);
 }
 
 DenoiserGUI::~DenoiserGUI()
@@ -205,6 +206,12 @@ void DenoiserGUI::displaySettings()
     ui->record->setChecked(m_settings.m_recordToFile);
     ui->fileNameText->setText(m_settings.m_fileRecordName);
     ui->showFileDialog->setEnabled(!m_settings.m_recordToFile);
+    ui->denoiserType->setCurrentIndex(static_cast<int>(m_settings.m_denoiserType));
+    ui->enable->setChecked(m_settings.m_enableDenoiser);
+    ui->audioMute->setChecked(m_settings.m_audioMute);
+    ui->volume->setValue(m_settings.m_volumeTenths);
+    ui->volumeText->setText(QString::number(m_settings.m_volumeTenths / 10.0, 'f', 1));
+    displayNRenabled();
     getRollupContents()->restoreState(m_rollupState);
     blockApplySettings(false);
 }
@@ -291,6 +298,10 @@ void DenoiserGUI::on_startStop_toggled(bool checked)
     {
         Denoiser::MsgStartStop *message = Denoiser::MsgStartStop::create(checked);
         m_denoiser->getInputMessageQueue()->push(message);
+
+        if (checked && (ui->channels->count() > 0)) {
+            on_channels_currentIndexChanged(ui->channels->currentIndex());
+        }
     }
 }
 
@@ -347,6 +358,36 @@ void DenoiserGUI::on_showFileDialog_clicked(bool checked)
     }
 }
 
+void DenoiserGUI::on_denoiserType_currentIndexChanged(int index)
+{
+    m_settings.m_denoiserType = static_cast<DenoiserSettings::DenoiserType>(index);
+    m_settingsKeys.append("denoiserType");
+    applySettings();
+}
+
+void DenoiserGUI::on_enable_toggled(bool checked)
+{
+    m_settings.m_enableDenoiser = checked;
+    displayNRenabled();
+    m_settingsKeys.append("enableDenoiser");
+    applySettings();
+}
+
+void DenoiserGUI::on_audioMute_toggled(bool checked)
+{
+    m_settings.m_audioMute = checked;
+    m_settingsKeys.append("audioMute");
+    applySettings();
+}
+
+void DenoiserGUI::on_volume_valueChanged(int value)
+{
+    m_settings.m_volumeTenths = value;
+    ui->volumeText->setText(QString::number(value / 10.0, 'f', 1));
+    m_settingsKeys.append("volumeTenths");
+    applySettings();
+}
+
 void DenoiserGUI::audioSelect(const QPoint& p)
 {
     qDebug("DenoiserGUI::audioSelect");
@@ -400,6 +441,15 @@ void DenoiserGUI::updateStatus()
     }
 }
 
+void DenoiserGUI::displayNRenabled()
+{
+    if (m_settings.m_enableDenoiser) {
+        ui->enable->setStyleSheet("QToolButton { background-color : green; }");
+    } else {
+        ui->enable->setStyleSheet("QToolButton { background-color : blue; }");
+    }
+}
+
 void DenoiserGUI::applySettings(bool force)
 {
 	if (m_doApplySettings)
@@ -418,4 +468,8 @@ void DenoiserGUI::makeUIConnections()
 	QObject::connect(ui->channelApply, &QPushButton::clicked, this, &DenoiserGUI::on_channelApply_clicked);
     QObject::connect(ui->record, &ButtonSwitch::toggled, this, &DenoiserGUI::on_record_toggled);
     QObject::connect(ui->showFileDialog, &QPushButton::clicked, this, &DenoiserGUI::on_showFileDialog_clicked);
+    QObject::connect(ui->denoiserType, qOverload<int>(&QComboBox::currentIndexChanged), this, &DenoiserGUI::on_denoiserType_currentIndexChanged);
+    QObject::connect(ui->enable, &ButtonSwitch::toggled, this, &DenoiserGUI::on_enable_toggled);
+    QObject::connect(ui->audioMute, &ButtonSwitch::toggled, this, &DenoiserGUI::on_audioMute_toggled);
+    QObject::connect(ui->volume, &QDial::valueChanged, this, &DenoiserGUI::on_volume_valueChanged);
 }

@@ -5646,6 +5646,18 @@ margin-bottom: 20px;
       "type" : "integer",
       "description" : "Denoiser type\n  * 0 - none\n  * 1 - RNnoise\n"
     },
+    "enableDenoiser" : {
+      "type" : "integer",
+      "description" : "Enable denoiser\n  * 1 - enable\n  * 0 - disable\n"
+    },
+    "volumeTenths" : {
+      "type" : "integer",
+      "description" : "Output volume in tenths (e.g., 10 = 1.0)\n"
+    },
+    "audioDeviceName" : {
+      "type" : "string",
+      "description" : "Audio output device name"
+    },
     "audioMute" : {
       "type" : "integer",
       "description" : "Audio mute\n  * 1 - mute\n  * 0 - unmute\n"
@@ -59720,7 +59732,7 @@ except ApiException as e:
           </div>
           <div id="generator">
             <div class="content">
-              Generated 2026-01-06T07:31:33.605+01:00
+              Generated 2026-01-10T11:16:10.140+01:00
             </div>
           </div>
       </div>

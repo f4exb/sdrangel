@@ -32,6 +32,7 @@
 #include "denoisersettings.h"
 
 class WavFileRecord;
+class DenoiseState;
 
 class DenoiserWorker : public QObject {
     Q_OBJECT
@@ -87,8 +88,23 @@ public:
     void applySettings(const DenoiserSettings& settings, const QStringList& settingsKeys, bool force = false);
 	double getMagSq() const { return m_magsq; }
 	double getMagSqAvg() const { return (double) m_channelPowerAvg; }
+    void getLevels(qreal& rmsLevel, qreal& peakLevel, int& numSamples) const
+    {
+        rmsLevel = m_rmsLevel;
+        peakLevel = m_peakLevelOut;
+        numSamples = m_levelNbSamples;
+    }
 
-    private:
+signals:
+	/**
+	 * Level changed
+	 * \param rmsLevel RMS level in range 0.0 - 1.0
+	 * \param peakLevel Peak level in range 0.0 - 1.0
+	 * \param numSamples Number of audio samples analyzed
+	 */
+	void levelChanged(qreal rmsLevel, qreal peakLevel, int numSamples);
+
+private:
     DataFifo *m_dataFifo;
     int m_sinkSampleRate;
 	MessageQueue m_inputMessageQueue;  //!< Queue for asynchronous inbound communication
@@ -105,7 +121,20 @@ public:
 	AudioVector m_audioBuffer;
 	AudioFifo m_audioFifo;
 	std::size_t m_audioBufferFill;
+    DenoiseState *m_rnnoiseState;
+    float m_rnnoiseIn[480];
+    float m_rnnoiseOut[480];
+    int m_rnnoiseFill;
+
+    quint32 m_levelCalcCount = 0;
+    qreal m_rmsLevel;
+    qreal m_peakLevelOut;
+    Real m_peakLevel = 0.0f;
+    Real m_levelSum = 0.0f;
+
     QRecursiveMutex m_mutex;
+
+    static const int m_levelNbSamples;
 
     AudioFifo *getAudioFifo() { return &m_audioFifo; }
     void feedPart(
@@ -116,13 +145,12 @@ public:
 
     bool handleMessage(const Message& cmd);
     void writeSampleToFile(const Sample& sample);
-
     void processSample(
         DataFifo::DataType dataType,
         const QByteArray::const_iterator& begin,
         int i
     );
-
+    void calculateLevel(const Real& sample);
 
 private slots:
     void handleInputMessages();

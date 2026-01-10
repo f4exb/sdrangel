@@ -120,14 +120,11 @@
          </size>
         </property>
         <property name="toolTip">
-         <string>(Re) apply channel selection</string>
-        </property>
-        <property name="text">
-         <string/>
+         <string>(Re) associate with channel</string>
         </property>
         <property name="icon">
          <iconset resource="../../../sdrgui/resources/res.qrc">
-          <normaloff>:/checkmark.png</normaloff>:/checkmark.png</iconset>
+          <normaloff>:/link.png</normaloff>:/link.png</iconset>
         </property>
        </widget>
       </item>
@@ -190,7 +187,7 @@
        <number>0</number>
       </property>
       <item>
-       <widget class="QComboBox" name="comboBox">
+       <widget class="QComboBox" name="denoiserType">
         <property name="toolTip">
          <string>Noise reduction scheme</string>
         </property>
@@ -204,6 +201,27 @@
           <string>RNnoise</string>
          </property>
         </item>
+       </widget>
+      </item>
+      <item>
+       <widget class="ButtonSwitch" name="enable">
+        <property name="minimumSize">
+         <size>
+          <width>0</width>
+          <height>22</height>
+         </size>
+        </property>
+        <property name="toolTip">
+         <string>Denoiser on/off</string>
+        </property>
+        <property name="text">
+         <string/>
+        </property>
+        <property name="icon">
+         <iconset resource="../../../sdrgui/resources/res.qrc">
+          <normaloff>:/play.png</normaloff>
+          <normalon>:/stop.png</normalon>:/play.png</iconset>
+        </property>
        </widget>
       </item>
       <item>
@@ -311,7 +329,7 @@
          </font>
         </property>
         <property name="toolTip">
-         <string>Level (% full range) top trace: average, bottom trace: instantaneous peak, tip: peak hold</string>
+         <string>Input level (% full range) top trace: average, bottom trace: instantaneous peak, tip: peak hold</string>
         </property>
        </widget>
       </item>

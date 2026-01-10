@@ -46,6 +46,15 @@ public:
     qint32 getDenoiserType();
     void setDenoiserType(qint32 denoiser_type);
 
+    qint32 getEnableDenoiser();
+    void setEnableDenoiser(qint32 enable_denoiser);
+
+    qint32 getVolumeTenths();
+    void setVolumeTenths(qint32 volume_tenths);
+
+    QString* getAudioDeviceName();
+    void setAudioDeviceName(QString* audio_device_name);
+
     qint32 getAudioMute();
     void setAudioMute(qint32 audio_mute);
 
@@ -85,6 +94,15 @@ public:
 private:
     qint32 denoiser_type;
     bool m_denoiser_type_isSet;
+
+    qint32 enable_denoiser;
+    bool m_enable_denoiser_isSet;
+
+    qint32 volume_tenths;
+    bool m_volume_tenths_isSet;
+
+    QString* audio_device_name;
+    bool m_audio_device_name_isSet;
 
     qint32 audio_mute;
     bool m_audio_mute_isSet;

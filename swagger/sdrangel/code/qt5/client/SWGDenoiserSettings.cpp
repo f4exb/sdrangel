@@ -30,6 +30,12 @@ SWGDenoiserSettings::SWGDenoiserSettings(QString* json) {
 SWGDenoiserSettings::SWGDenoiserSettings() {
     denoiser_type = 0;
     m_denoiser_type_isSet = false;
+    enable_denoiser = 0;
+    m_enable_denoiser_isSet = false;
+    volume_tenths = 0;
+    m_volume_tenths_isSet = false;
+    audio_device_name = nullptr;
+    m_audio_device_name_isSet = false;
     audio_mute = 0;
     m_audio_mute_isSet = false;
     title = nullptr;
@@ -62,6 +68,12 @@ void
 SWGDenoiserSettings::init() {
     denoiser_type = 0;
     m_denoiser_type_isSet = false;
+    enable_denoiser = 0;
+    m_enable_denoiser_isSet = false;
+    volume_tenths = 0;
+    m_volume_tenths_isSet = false;
+    audio_device_name = new QString("");
+    m_audio_device_name_isSet = false;
     audio_mute = 0;
     m_audio_mute_isSet = false;
     title = new QString("");
@@ -89,6 +101,11 @@ SWGDenoiserSettings::init() {
 void
 SWGDenoiserSettings::cleanup() {
 
+
+
+    if(audio_device_name != nullptr) { 
+        delete audio_device_name;
+    }
 
     if(title != nullptr) { 
         delete title;
@@ -122,6 +139,12 @@ SWGDenoiserSettings::fromJson(QString &json) {
 void
 SWGDenoiserSettings::fromJsonObject(QJsonObject &pJson) {
     ::SWGSDRangel::setValue(&denoiser_type, pJson["denoiserType"], "qint32", "");
+    
+    ::SWGSDRangel::setValue(&enable_denoiser, pJson["enableDenoiser"], "qint32", "");
+    
+    ::SWGSDRangel::setValue(&volume_tenths, pJson["volumeTenths"], "qint32", "");
+    
+    ::SWGSDRangel::setValue(&audio_device_name, pJson["audioDeviceName"], "QString", "QString");
     
     ::SWGSDRangel::setValue(&audio_mute, pJson["audioMute"], "qint32", "");
     
@@ -163,6 +186,15 @@ SWGDenoiserSettings::asJsonObject() {
     QJsonObject* obj = new QJsonObject();
     if(m_denoiser_type_isSet){
         obj->insert("denoiserType", QJsonValue(denoiser_type));
+    }
+    if(m_enable_denoiser_isSet){
+        obj->insert("enableDenoiser", QJsonValue(enable_denoiser));
+    }
+    if(m_volume_tenths_isSet){
+        obj->insert("volumeTenths", QJsonValue(volume_tenths));
+    }
+    if(audio_device_name != nullptr && *audio_device_name != QString("")){
+        toJsonValue(QString("audioDeviceName"), audio_device_name, obj, QString("QString"));
     }
     if(m_audio_mute_isSet){
         obj->insert("audioMute", QJsonValue(audio_mute));
@@ -209,6 +241,36 @@ void
 SWGDenoiserSettings::setDenoiserType(qint32 denoiser_type) {
     this->denoiser_type = denoiser_type;
     this->m_denoiser_type_isSet = true;
+}
+
+qint32
+SWGDenoiserSettings::getEnableDenoiser() {
+    return enable_denoiser;
+}
+void
+SWGDenoiserSettings::setEnableDenoiser(qint32 enable_denoiser) {
+    this->enable_denoiser = enable_denoiser;
+    this->m_enable_denoiser_isSet = true;
+}
+
+qint32
+SWGDenoiserSettings::getVolumeTenths() {
+    return volume_tenths;
+}
+void
+SWGDenoiserSettings::setVolumeTenths(qint32 volume_tenths) {
+    this->volume_tenths = volume_tenths;
+    this->m_volume_tenths_isSet = true;
+}
+
+QString*
+SWGDenoiserSettings::getAudioDeviceName() {
+    return audio_device_name;
+}
+void
+SWGDenoiserSettings::setAudioDeviceName(QString* audio_device_name) {
+    this->audio_device_name = audio_device_name;
+    this->m_audio_device_name_isSet = true;
 }
 
 qint32
@@ -327,6 +389,15 @@ SWGDenoiserSettings::isSet(){
     bool isObjectUpdated = false;
     do{
         if(m_denoiser_type_isSet){
+            isObjectUpdated = true; break;
+        }
+        if(m_enable_denoiser_isSet){
+            isObjectUpdated = true; break;
+        }
+        if(m_volume_tenths_isSet){
+            isObjectUpdated = true; break;
+        }
+        if(audio_device_name && *audio_device_name != QString("")){
             isObjectUpdated = true; break;
         }
         if(m_audio_mute_isSet){

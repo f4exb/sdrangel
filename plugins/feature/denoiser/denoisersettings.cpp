@@ -43,7 +43,9 @@ void DenoiserSettings::resetToDefaults()
 {
     m_denoiserType = DenoiserType::DenoiserType_RNnoise;
     m_title = "Denoiser";
+    m_enableDenoiser = true;
     m_audioMute = false;
+    m_volumeTenths = 10;
     m_audioDeviceName = AudioDeviceManager::m_defaultDeviceName;
     m_rgbColor = 0xffd700; // gold
     m_useReverseAPI = false;
@@ -62,8 +64,6 @@ QByteArray DenoiserSettings::serialize() const
     SimpleSerializer s(1);
 
     s.writeS32(1, static_cast<qint32>(m_denoiserType));
-    s.writeBool(14, m_audioMute);
-    s.writeString(15, m_audioDeviceName);
     s.writeString(2, m_title);
     s.writeU32(3, m_rgbColor);
     s.writeBool(4, m_useReverseAPI);
@@ -79,6 +79,11 @@ QByteArray DenoiserSettings::serialize() const
     if (m_rollupState) {
         s.writeBlob(13, m_rollupState->serialize());
     }
+
+    s.writeBool(14, m_audioMute);
+    s.writeString(15, m_audioDeviceName);
+    s.writeBool(16, m_enableDenoiser);
+    s.writeS32(17, m_volumeTenths);
 
     return s.final();
 }
@@ -101,8 +106,6 @@ bool DenoiserSettings::deserialize(const QByteArray& data)
 
         d.readS32(1, &itmp, 1);
         m_denoiserType = static_cast<DenoiserType>(itmp);
-        d.readBool(14, &m_audioMute, false);
-        d.readString(15, &m_audioDeviceName, AudioDeviceManager::m_defaultDeviceName);
         d.readString(2, &m_title, "Denoiser");
         d.readU32(3, &m_rgbColor, 0xffd700); // gold
         d.readBool(4, &m_useReverseAPI, false);
@@ -130,6 +133,11 @@ bool DenoiserSettings::deserialize(const QByteArray& data)
             m_rollupState->deserialize(bytetmp);
         }
 
+        d.readBool(14, &m_audioMute, false);
+        d.readString(15, &m_audioDeviceName, AudioDeviceManager::m_defaultDeviceName);
+        d.readBool(16, &m_enableDenoiser, true);
+        d.readS32(17, &m_volumeTenths, 10);
+
         return true;
     }
     else
@@ -144,8 +152,14 @@ void DenoiserSettings::applySettings(const QStringList& settingsKeys, const Deno
     if (settingsKeys.contains("denoiserType")) {
         m_denoiserType = settings.m_denoiserType;
     }
+    if (settingsKeys.contains("enableDenoiser")) {
+        m_enableDenoiser = settings.m_enableDenoiser;
+    }
     if (settingsKeys.contains("audioMute")) {
         m_audioMute = settings.m_audioMute;
+    }
+    if (settingsKeys.contains("volumeTenths")) {
+        m_volumeTenths = settings.m_volumeTenths;
     }
     if (settingsKeys.contains("audioDeviceName")) {
         m_audioDeviceName = settings.m_audioDeviceName;
@@ -189,8 +203,14 @@ QString DenoiserSettings::getDebugString(const QStringList& settingsKeys, bool f
     if (settingsKeys.contains("denoiserType") || force) {
         debugString += QString("DenoiserType: %1 ").arg(static_cast<qint32>(m_denoiserType));
     }
+    if (settingsKeys.contains("enableDenoiser") || force) {
+        debugString += QString("Denoiser Enable: %1 ").arg(m_enableDenoiser ? "true" : "false");
+    }
     if (settingsKeys.contains("audioMute") || force) {
         debugString += QString("Audio Mute: %1 ").arg(m_audioMute ? "true" : "false");
+    }
+    if (settingsKeys.contains("volumeTenths") || force) {
+        debugString += QString("Volume : %1 ").arg(m_volumeTenths/10.0);
     }
     if (settingsKeys.contains("audioDeviceName") || force) {
         debugString += QString("Audio Device Name: %1 ").arg(m_audioDeviceName);

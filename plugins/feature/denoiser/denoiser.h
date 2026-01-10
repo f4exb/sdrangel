@@ -190,6 +190,7 @@ public:
             SWGSDRangel::SWGFeatureSettings& response);
 
     void getAvailableChannelsReport();
+    void setLevelMeter(QObject *levelMeter) { m_levelMeter = levelMeter; }
 
     static const char* const m_featureIdURI;
     static const char* const m_featureId;
@@ -205,6 +206,7 @@ private:
     ChannelAPI *m_selectedChannel;
     ObjectPipe *m_dataPipe;
     int m_sampleRate;
+    QObject *m_levelMeter = nullptr;
 
     QNetworkAccessManager *m_networkManager;
     QNetworkRequest m_networkRequest;
