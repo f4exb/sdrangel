@@ -19,7 +19,7 @@ The following noise reduction schemes are covered. It can be selected via the (6
 
 Noise reduction based on the RNnoise library originally from J.M. Valin. It uses a fork for easier integration in the build system (Cmake support with download of the model file): https://github.com/f4exb/rnnoise
 
-The noise reduction is based on a mix of DSP functions and a recursive neural network (RNN). Basically the RNN helps the DSP functions to adjust the gain in various spectral bands thus very efficiently cancelling the background noise in many situations. Although the model was not particularly trained on radio transmissions it makes a pretty good job at AM and SSB noise reduction however you will need a reasonable SNR to get something out of it else it will consider the audio is just noise. Do not expect it to dig signals out of the noise the goal is to reduce ear fatigue by removing background white noise and other noises e.g birdies. It is not good at FM transmissions.
+The noise reduction is based on a mix of DSP functions and a recursive neural network (RNN). Basically the RNN helps the DSP functions to adjust the gain in various spectral bands thus very efficiently cancelling the background noise in many situations. Although the model was not particularly trained on radio transmissions it can do a pretty good job at AM, SSB, FM noise reduction however you will need a reasonable SNR to get something out of it else it will consider the audio is just noise. Do not expect it to dig signals out of the noise the goal is to reduce ear fatigue by removing background white noise and other noises e.g birdies.
 
 You will find all the details about RNnoise here: https://jmvalin.ca/demo/rnnoise/
 

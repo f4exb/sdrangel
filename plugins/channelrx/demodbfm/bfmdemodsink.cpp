@@ -95,10 +95,6 @@ void BFMDemodSink::feed(const SampleVector::const_iterator& begin, const SampleV
 
 	m_sampleBuffer.clear();
 
-    if (m_settings.m_audioMute) {
-        return;
-    }
-
 	for (SampleVector::const_iterator it = begin; it != end; ++it)
 	{
 		Complex c(it->real() / SDR_RX_SCALEF, it->imag() / SDR_RX_SCALEF);
@@ -199,25 +195,30 @@ void BFMDemodSink::feed(const SampleVector::const_iterator& begin, const SampleV
 
 			if (m_interpolator.decimate(&m_interpolatorDistanceRemain, e, &ci))
 			{
+                qint16 sample_l;
+                qint16 sample_r;
+
 				if (m_settings.m_audioStereo)
 				{
 					Real deemph_l, deemph_r; // Pre-emphasis is applied on each channel before multiplexing
 					m_deemphasisFilterX.process(ci.real() + sampleStereo, deemph_l);
 					m_deemphasisFilterY.process(ci.real() - sampleStereo, deemph_r);
-                    m_audioBuffer[m_audioBufferFill].l = (qint16)(deemph_l * (1<<12) * m_settings.m_volume);
-                    m_audioBuffer[m_audioBufferFill].r = (qint16)(deemph_r * (1<<12) * m_settings.m_volume);
+                    sample_l = (qint16)(deemph_l * (1<<12) * m_settings.m_volume);
+                    sample_r = (qint16)(deemph_r * (1<<12) * m_settings.m_volume);
 				}
 				else
 				{
 					Real deemph;
 					m_deemphasisFilterX.process(ci.real(), deemph);
 					quint16 sample = (qint16)(deemph * (1<<12) * m_settings.m_volume);
-					m_audioBuffer[m_audioBufferFill].l = sample;
-					m_audioBuffer[m_audioBufferFill].r = sample;
+                    sample_l = sample;
+                    sample_r = sample;
 				}
 
-                m_demodBuffer[m_demodBufferFill++] = m_audioBuffer[m_audioBufferFill].l;
-                m_demodBuffer[m_demodBufferFill++] = m_audioBuffer[m_audioBufferFill].r;
+                m_audioBuffer[m_audioBufferFill].l = m_settings.m_audioMute ? 0 : sample_l;
+                m_audioBuffer[m_audioBufferFill].r = m_settings.m_audioMute ? 0 : sample_r;
+                m_demodBuffer[m_demodBufferFill++] = sample_l;
+                m_demodBuffer[m_demodBufferFill++] = sample_r;
 
 				++m_audioBufferFill;
 

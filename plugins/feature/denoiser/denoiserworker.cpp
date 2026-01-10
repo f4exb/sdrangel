@@ -356,8 +356,8 @@ void DenoiserWorker::processSample(
                 //     qDebug() << "DenoiserWorker::processSample[I16]: passthrough branch";
                 // }
                 m_sampleBuffer.push_back(Sample(re * SDR_RX_SCALEF, 0));
-                m_audioBuffer[m_audioBufferFill].l = s[i];
-                m_audioBuffer[m_audioBufferFill].r = s[i];
+                m_audioBuffer[m_audioBufferFill].l = static_cast<int16_t>(s[i]*(m_settings.m_volumeTenths / 10.0f));
+                m_audioBuffer[m_audioBufferFill].r = static_cast<int16_t>(s[i]*(m_settings.m_volumeTenths / 10.0f));
                 ++m_audioBufferFill;
 
                 if (m_audioBufferFill >= m_audioBuffer.size())
@@ -426,8 +426,8 @@ void DenoiserWorker::processSample(
                 //     qDebug() << "DenoiserWorker::processSample[CI16]: passthrough branch";
                 // }
                 m_sampleBuffer.push_back(Sample(re * SDR_RX_SCALEF, im * SDR_RX_SCALEF));
-                m_audioBuffer[m_audioBufferFill].l = s[2*i];
-                m_audioBuffer[m_audioBufferFill].r = s[2*i+1];
+                m_audioBuffer[m_audioBufferFill].l = static_cast<int16_t>(s[2*i]*(m_settings.m_volumeTenths / 10.0f));
+                m_audioBuffer[m_audioBufferFill].r = static_cast<int16_t>(s[2*i+1]*(m_settings.m_volumeTenths / 10.0f));
                 ++m_audioBufferFill;
 
                 if (m_audioBufferFill >= m_audioBuffer.size())
