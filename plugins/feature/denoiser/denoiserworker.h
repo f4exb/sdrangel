@@ -150,6 +150,10 @@ private:
         const QByteArray::const_iterator& begin,
         int i
     );
+    void processI16DenoiserNone(const double& samplefp);
+    void processI16DenoiserRNNoise(const double& samplefp);
+    void processCI16DenoiserNone(const double& samplefpRe, const double& samplefpIm);
+    void processCI16DenoiserRNNoise(const double& samplefpRe, const double& samplefpIm);
     void calculateLevel(const Real& sample);
 
 private slots:

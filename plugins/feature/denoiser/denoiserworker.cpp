@@ -333,155 +333,180 @@ void DenoiserWorker::processSample(
     int i
 )
 {
-    // Periodic debug to verify runtime settings and branch selection
-    // static uint32_t s_dbgCount = 0;
-    // if ((s_dbgCount++ % 48000) == 0) { // approx. once per second at 48 kS/s
-    //     qDebug() << "DenoiserWorker::processSample: dataType=" << (int)dataType
-    //              << " enable=" << m_settings.m_enableDenoiser
-    //              << " type=" << static_cast<int>(m_settings.m_denoiserType);
-    // }
-
     switch(dataType)
     {
-        case DataFifo::DataTypeI16: {
+        case DataFifo::DataTypeI16:
+        {
             int16_t *s = (int16_t*) begin;
-            double re = s[i] / (double) std::numeric_limits<int16_t>::max();
-            calculateLevel(re * (m_settings.m_volumeTenths / 10.0));
+            double samplefp = s[i] * (m_settings.m_volumeTenths / 10.0);
+            double re = samplefp / (double) std::numeric_limits<int16_t>::max();
+            calculateLevel(re);
             m_magsq = re*re;
             m_channelPowerAvg(m_magsq);
 
-            if ((!m_settings.m_enableDenoiser || m_settings.m_denoiserType == DenoiserSettings::DenoiserType::DenoiserType_None) && !m_settings.m_audioMute)
-            {
-                // if ((s_dbgCount % 48000) == 1) {
-                //     qDebug() << "DenoiserWorker::processSample[I16]: passthrough branch";
-                // }
-                m_sampleBuffer.push_back(Sample(re * SDR_RX_SCALEF, 0));
-                m_audioBuffer[m_audioBufferFill].l = static_cast<int16_t>(s[i]*(m_settings.m_volumeTenths / 10.0f));
-                m_audioBuffer[m_audioBufferFill].r = static_cast<int16_t>(s[i]*(m_settings.m_volumeTenths / 10.0f));
-                ++m_audioBufferFill;
-
-                if (m_audioBufferFill >= m_audioBuffer.size())
-                {
-                    std::size_t res = m_audioFifo.write((const quint8*)&m_audioBuffer[0], m_audioBufferFill);
-                    if (res != m_audioBufferFill)
-                    {
-                        qDebug("DenoiserWorker::processSample: %lu/%lu audio samples written", res, m_audioBufferFill);
-                        m_audioFifo.clear();
-                    }
-                    m_audioBufferFill = 0;
-                }
+            if ((!m_settings.m_enableDenoiser || m_settings.m_denoiserType == DenoiserSettings::DenoiserType::DenoiserType_None) && !m_settings.m_audioMute) {
+                processI16DenoiserNone(samplefp);
             }
-            else if ((m_settings.m_denoiserType == DenoiserSettings::DenoiserType::DenoiserType_RNnoise) && !m_settings.m_audioMute)
-            {
-                // if ((s_dbgCount % 48000) == 1) {
-                //     qDebug() << "DenoiserWorker::processSample[I16]: RNNoise branch";
-                // }
-                // feed RNNoise input buffer
-                m_rnnoiseIn[m_rnnoiseFill] = static_cast<float>(s[i])*(m_settings.m_volumeTenths / 10.0f); // already in [-32768..32767] range
-                m_rnnoiseFill++;
-
-                if (m_rnnoiseFill >= 480)
-                {
-                    // process RNNoise frame
-                    rnnoise_process_frame(m_rnnoiseState, m_rnnoiseOut, m_rnnoiseIn);
-
-                    // output RNNoise processed samples
-                    for (int j = 0; j < 480; j++)
-                    {
-                        float outSample = m_rnnoiseOut[j];
-                        m_sampleBuffer.push_back(Sample(outSample * 181, 0)); // 181 = sqrt(32768)
-                        int16_t audioSample = static_cast<int16_t>(outSample);
-                        m_audioBuffer[m_audioBufferFill].l = audioSample;
-                        m_audioBuffer[m_audioBufferFill].r = audioSample;
-                        ++m_audioBufferFill;
-
-                        if (m_audioBufferFill >= m_audioBuffer.size())
-                        {
-                            std::size_t res = m_audioFifo.write((const quint8*)&m_audioBuffer[0], m_audioBufferFill);
-                            if (res != m_audioBufferFill)
-                            {
-                                qDebug("DenoiserWorker::processSample: %lu/%lu audio samples written", res, m_audioBufferFill);
-                                m_audioFifo.clear();
-                            }
-                            m_audioBufferFill = 0;
-                        }
-                    }
-
-                    m_rnnoiseFill = 0;
-                }
+            else if ((m_settings.m_denoiserType == DenoiserSettings::DenoiserType::DenoiserType_RNnoise) && !m_settings.m_audioMute) {
+                processI16DenoiserRNNoise(samplefp);
             }
         }
         break;
-        case DataFifo::DataTypeCI16: {
+        case DataFifo::DataTypeCI16:
+        {
             int16_t *s = (int16_t*) begin;
-            double re = s[2*i]   / (double) std::numeric_limits<int16_t>::max();
-            double im = s[2*i+1] / (double) std::numeric_limits<int16_t>::max();
-            calculateLevel((re + im) * (m_settings.m_volumeTenths / 20.0));
+            double samplefpRe = s[2*i]   * (m_settings.m_volumeTenths / 10.0);
+            double samplefpIm = s[2*i+1] * (m_settings.m_volumeTenths / 10.0);
+            double re = samplefpRe / (double) std::numeric_limits<int16_t>::max();
+            double im = samplefpIm / (double) std::numeric_limits<int16_t>::max();
+            calculateLevel((re + im) / 2.0);
             m_magsq = re*re + im*im;
             m_channelPowerAvg(m_magsq);
 
-            if ((!m_settings.m_enableDenoiser || m_settings.m_denoiserType == DenoiserSettings::DenoiserType::DenoiserType_None) && !m_settings.m_audioMute)
-            {
-                // if ((s_dbgCount % 48000) == 1) {
-                //     qDebug() << "DenoiserWorker::processSample[CI16]: passthrough branch";
-                // }
-                m_sampleBuffer.push_back(Sample(re * SDR_RX_SCALEF, im * SDR_RX_SCALEF));
-                m_audioBuffer[m_audioBufferFill].l = static_cast<int16_t>(s[2*i]*(m_settings.m_volumeTenths / 10.0f));
-                m_audioBuffer[m_audioBufferFill].r = static_cast<int16_t>(s[2*i+1]*(m_settings.m_volumeTenths / 10.0f));
-                ++m_audioBufferFill;
-
-                if (m_audioBufferFill >= m_audioBuffer.size())
-                {
-                    std::size_t res = m_audioFifo.write((const quint8*)&m_audioBuffer[0], m_audioBufferFill);
-                    if (res != m_audioBufferFill)
-                    {
-                        qDebug("DenoiserWorker::processSample: %lu/%lu audio samples written", res, m_audioBufferFill);
-                        m_audioFifo.clear();
-                    }
-                    m_audioBufferFill = 0;
-                }
+            if ((!m_settings.m_enableDenoiser || m_settings.m_denoiserType == DenoiserSettings::DenoiserType::DenoiserType_None) && !m_settings.m_audioMute) {
+                processCI16DenoiserNone(samplefpRe, samplefpIm);
             }
-            else if ((m_settings.m_denoiserType == DenoiserSettings::DenoiserType::DenoiserType_RNnoise) && !m_settings.m_audioMute)
-            {
-                // if ((s_dbgCount % 48000) == 1) {
-                //     qDebug() << "DenoiserWorker::processSample[CI16]: RNNoise branch";
-                // }
-                // feed RNNoise input buffer
-                m_rnnoiseIn[m_rnnoiseFill] = static_cast<float>(s[2*i] + s[2*i+1]) * (m_settings.m_volumeTenths / 20.0f); // average I/Q in [-32768..32767] range
-                m_rnnoiseFill++;
-
-                if (m_rnnoiseFill >= 480)
-                {
-                    // process RNNoise frame
-                    rnnoise_process_frame(m_rnnoiseState, m_rnnoiseOut, m_rnnoiseIn);
-
-                    // output RNNoise processed samples
-                    for (int j = 0; j < 480; j++)
-                    {
-                        float outSample = m_rnnoiseOut[j];
-                        m_sampleBuffer.push_back(Sample(outSample * 181, outSample * 181)); // 181 = sqrt(32768)
-                        int16_t audioSample = static_cast<int16_t>(outSample);
-                        m_audioBuffer[m_audioBufferFill].l = audioSample;
-                        m_audioBuffer[m_audioBufferFill].r = audioSample;
-                        ++m_audioBufferFill;
-
-                        if (m_audioBufferFill >= m_audioBuffer.size())
-                        {
-                            std::size_t res = m_audioFifo.write((const quint8*)&m_audioBuffer[0], m_audioBufferFill);
-                            if (res != m_audioBufferFill)
-                            {
-                                qDebug("DenoiserWorker::processSample: %lu/%lu audio samples written", res, m_audioBufferFill);
-                                m_audioFifo.clear();
-                            }
-                            m_audioBufferFill = 0;
-                        }
-                    }
-
-                    m_rnnoiseFill = 0;
-                }
+            else if ((m_settings.m_denoiserType == DenoiserSettings::DenoiserType::DenoiserType_RNnoise) && !m_settings.m_audioMute) {
+                processCI16DenoiserRNNoise(samplefpRe, samplefpIm);
             }
         }
         break;
+    }
+}
+
+void DenoiserWorker::processI16DenoiserNone(const double& samplefp)
+{
+    if (m_channelPowerAvg.asDouble() > 1e-4) { // -40 dB threshold
+        m_sampleBuffer.push_back(Sample(samplefp, 0));
+    }
+
+    m_audioBuffer[m_audioBufferFill].l = static_cast<int16_t>(samplefp);
+    m_audioBuffer[m_audioBufferFill].r = static_cast<int16_t>(samplefp);
+    ++m_audioBufferFill;
+
+    if (m_audioBufferFill >= m_audioBuffer.size())
+    {
+        std::size_t res = m_audioFifo.write((const quint8*)&m_audioBuffer[0], m_audioBufferFill);
+
+        if (res != m_audioBufferFill)
+        {
+            qDebug("DenoiserWorker::processSample: %lu/%lu audio samples written", res, m_audioBufferFill);
+            m_audioFifo.clear();
+        }
+
+        m_audioBufferFill = 0;
+    }
+}
+
+void DenoiserWorker::processI16DenoiserRNNoise(const double& samplefp)
+{
+    // feed RNNoise input buffer
+    m_rnnoiseIn[m_rnnoiseFill] = static_cast<float>(samplefp); // already in [-32768..32767] range
+    m_rnnoiseFill++;
+
+    if (m_rnnoiseFill >= 480)
+    {
+        // process RNNoise frame
+        rnnoise_process_frame(m_rnnoiseState, m_rnnoiseOut, m_rnnoiseIn);
+
+        // output RNNoise processed samples
+        for (int j = 0; j < 480; j++)
+        {
+            float outSample = m_rnnoiseOut[j];
+
+            if (m_channelPowerAvg.asDouble() > 1e-4) { // -40 dB threshold
+                m_sampleBuffer.push_back(Sample(outSample * 181, 0)); // 181 = sqrt(32768)
+            }
+
+            int16_t audioSample = static_cast<int16_t>(outSample);
+            m_audioBuffer[m_audioBufferFill].l = audioSample;
+            m_audioBuffer[m_audioBufferFill].r = audioSample;
+            ++m_audioBufferFill;
+
+            if (m_audioBufferFill >= m_audioBuffer.size())
+            {
+                std::size_t res = m_audioFifo.write((const quint8*)&m_audioBuffer[0], m_audioBufferFill);
+
+                if (res != m_audioBufferFill)
+                {
+                    qDebug("DenoiserWorker::processSample: %lu/%lu audio samples written", res, m_audioBufferFill);
+                    m_audioFifo.clear();
+                }
+
+                m_audioBufferFill = 0;
+            }
+        }
+
+        m_rnnoiseFill = 0;
+    }
+}
+
+void DenoiserWorker::processCI16DenoiserNone(const double& samplefpRe, const double& samplefpIm)
+{
+    if (m_channelPowerAvg.asDouble() > 1e-4) { // -40 dB threshold
+        m_sampleBuffer.push_back(Sample(samplefpRe, samplefpIm));
+    }
+
+    m_audioBuffer[m_audioBufferFill].l = static_cast<int16_t>(samplefpRe);
+    m_audioBuffer[m_audioBufferFill].r = static_cast<int16_t>(samplefpIm);
+    ++m_audioBufferFill;
+
+    if (m_audioBufferFill >= m_audioBuffer.size())
+    {
+        std::size_t res = m_audioFifo.write((const quint8*)&m_audioBuffer[0], m_audioBufferFill);
+
+        if (res != m_audioBufferFill)
+        {
+            qDebug("DenoiserWorker::processSample: %lu/%lu audio samples written", res, m_audioBufferFill);
+            m_audioFifo.clear();
+        }
+
+        m_audioBufferFill = 0;
+    }
+}
+
+void DenoiserWorker::processCI16DenoiserRNNoise(const double& samplefpRe, const double& samplefpIm)
+{
+    Q_UNUSED(samplefpRe);
+    Q_UNUSED(samplefpIm);
+    // feed RNNoise input buffer
+    m_rnnoiseIn[m_rnnoiseFill] = static_cast<float>((samplefpRe + samplefpIm) / 2.0f); // average I/Q in [-32768..32767] range
+    m_rnnoiseFill++;
+
+    if (m_rnnoiseFill >= 480)
+    {
+        // process RNNoise frame
+        rnnoise_process_frame(m_rnnoiseState, m_rnnoiseOut, m_rnnoiseIn);
+
+        // output RNNoise processed samples
+        for (int j = 0; j < 480; j++)
+        {
+            float outSample = m_rnnoiseOut[j];
+
+            if (m_channelPowerAvg.asDouble() > 1e-4) { // -40 dB threshold
+                m_sampleBuffer.push_back(Sample(outSample * 181, outSample * 181)); // 181 = sqrt(32768)
+            }
+
+            int16_t audioSample = static_cast<int16_t>(outSample);
+            m_audioBuffer[m_audioBufferFill].l = audioSample;
+            m_audioBuffer[m_audioBufferFill].r = audioSample;
+            ++m_audioBufferFill;
+
+            if (m_audioBufferFill >= m_audioBuffer.size())
+            {
+                std::size_t res = m_audioFifo.write((const quint8*)&m_audioBuffer[0], m_audioBufferFill);
+
+                if (res != m_audioBufferFill)
+                {
+                    qDebug("DenoiserWorker::processSample: %lu/%lu audio samples written", res, m_audioBufferFill);
+                    m_audioFifo.clear();
+                }
+
+                m_audioBufferFill = 0;
+            }
+        }
+
+        m_rnnoiseFill = 0;
     }
 }
 
