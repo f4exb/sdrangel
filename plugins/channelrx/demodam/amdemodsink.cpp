@@ -106,6 +106,8 @@ void AMDemodSink::processOneSample(Complex &ci)
     m_movingAverage(magsq);
     m_magsq = m_movingAverage.asDouble();
     m_magsqSum += magsq;
+    QList<ObjectPipe*> dataPipes;
+    MainCore::instance()->getDataPipes().getDataPipes(m_channel, "demod", dataPipes);
 
     if (magsq > m_magsqPeak)
     {
@@ -133,7 +135,7 @@ void AMDemodSink::processOneSample(Complex &ci)
 
     m_squelchOpen = (m_squelchCount >= m_audioSampleRate / 20);
 
-    if (m_squelchOpen && !m_settings.m_audioMute)
+    if (m_squelchOpen && (!m_settings.m_audioMute || dataPipes.size() > 0))
     {
         Real demod;
 
@@ -198,8 +200,8 @@ void AMDemodSink::processOneSample(Complex &ci)
         sample = 0;
     }
 
-    m_audioBuffer[m_audioBufferFill].l = sample;
-    m_audioBuffer[m_audioBufferFill].r = sample;
+    m_audioBuffer[m_audioBufferFill].l = m_settings.m_audioMute ? 0 : sample;
+    m_audioBuffer[m_audioBufferFill].r = m_settings.m_audioMute ? 0 : sample;
     ++m_audioBufferFill;
 
     if (m_audioBufferFill >= m_audioBuffer.size())
@@ -220,9 +222,6 @@ void AMDemodSink::processOneSample(Complex &ci)
 
     if (m_demodBufferFill >= m_demodBuffer.size())
     {
-        QList<ObjectPipe*> dataPipes;
-        MainCore::instance()->getDataPipes().getDataPipes(m_channel, "demod", dataPipes);
-
         if (dataPipes.size() > 0)
         {
             QList<ObjectPipe*>::iterator it = dataPipes.begin();

@@ -62,6 +62,8 @@ SWGFeatureActions::SWGFeatureActions() {
     m_vor_localizer_actions_isSet = false;
     demod_analyzer_actions = nullptr;
     m_demod_analyzer_actions_isSet = false;
+    denoiser_actions = nullptr;
+    m_denoiser_actions_isSet = false;
 }
 
 SWGFeatureActions::~SWGFeatureActions() {
@@ -104,6 +106,8 @@ SWGFeatureActions::init() {
     m_vor_localizer_actions_isSet = false;
     demod_analyzer_actions = new SWGDemodAnalyzerActions();
     m_demod_analyzer_actions_isSet = false;
+    denoiser_actions = new SWGDenoiserActions();
+    m_denoiser_actions_isSet = false;
 }
 
 void
@@ -155,6 +159,9 @@ SWGFeatureActions::cleanup() {
     if(demod_analyzer_actions != nullptr) { 
         delete demod_analyzer_actions;
     }
+    if(denoiser_actions != nullptr) { 
+        delete denoiser_actions;
+    }
 }
 
 SWGFeatureActions*
@@ -201,6 +208,8 @@ SWGFeatureActions::fromJsonObject(QJsonObject &pJson) {
     ::SWGSDRangel::setValue(&vor_localizer_actions, pJson["VORLocalizerActions"], "SWGVORLocalizerActions", "SWGVORLocalizerActions");
     
     ::SWGSDRangel::setValue(&demod_analyzer_actions, pJson["DemodAnalyzerActions"], "SWGDemodAnalyzerActions", "SWGDemodAnalyzerActions");
+    
+    ::SWGSDRangel::setValue(&denoiser_actions, pJson["DenoiserActions"], "SWGDenoiserActions", "SWGDenoiserActions");
     
 }
 
@@ -268,6 +277,9 @@ SWGFeatureActions::asJsonObject() {
     }
     if((demod_analyzer_actions != nullptr) && (demod_analyzer_actions->isSet())){
         toJsonValue(QString("DemodAnalyzerActions"), demod_analyzer_actions, obj, QString("SWGDemodAnalyzerActions"));
+    }
+    if((denoiser_actions != nullptr) && (denoiser_actions->isSet())){
+        toJsonValue(QString("DenoiserActions"), denoiser_actions, obj, QString("SWGDenoiserActions"));
     }
 
     return obj;
@@ -443,6 +455,16 @@ SWGFeatureActions::setDemodAnalyzerActions(SWGDemodAnalyzerActions* demod_analyz
     this->m_demod_analyzer_actions_isSet = true;
 }
 
+SWGDenoiserActions*
+SWGFeatureActions::getDenoiserActions() {
+    return denoiser_actions;
+}
+void
+SWGFeatureActions::setDenoiserActions(SWGDenoiserActions* denoiser_actions) {
+    this->denoiser_actions = denoiser_actions;
+    this->m_denoiser_actions_isSet = true;
+}
+
 
 bool
 SWGFeatureActions::isSet(){
@@ -497,6 +519,9 @@ SWGFeatureActions::isSet(){
             isObjectUpdated = true; break;
         }
         if(demod_analyzer_actions && demod_analyzer_actions->isSet()){
+            isObjectUpdated = true; break;
+        }
+        if(denoiser_actions && denoiser_actions->isSet()){
             isObjectUpdated = true; break;
         }
     }while(false);

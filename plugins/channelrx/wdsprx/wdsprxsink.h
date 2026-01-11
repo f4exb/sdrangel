@@ -28,6 +28,7 @@
 #include "audio/audiofifo.h"
 #include "util/doublebufferfifo.h"
 #include "bufferprobe.hpp"
+#include "pipes/datapipes.h"
 
 #include "wdsprxsettings.h"
 
@@ -122,7 +123,7 @@ private:
     static const int m_wdspSampleRate;
     static const int m_wdspBufSize;
 
-    void processOneSample(const Complex &ci);
+    void processOneSample(const Complex &ci, QList<ObjectPipe*>& dataPipes);
 };
 
 #endif // INCLUDE_SSBDEMODSINK_H

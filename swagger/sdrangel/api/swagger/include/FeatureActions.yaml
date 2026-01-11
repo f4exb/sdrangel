@@ -41,3 +41,5 @@ FeatureActions:
       $ref: "http://swgserver:8081/api/swagger/include/VORLocalizer.yaml#/VORLocalizerActions"
     DemodAnalyzerActions:
       $ref: "http://swgserver:8081/api/swagger/include/DemodAnalyzer.yaml#/DemodAnalyzerActions"
+    DenoiserActions:
+      $ref: "http://swgserver:8081/api/swagger/include/Denoiser.yaml#/DenoiserActions"

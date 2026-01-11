@@ -163,6 +163,8 @@ void NFMDemodSink::processOneSample(Complex &ci)
     m_squelchOpen = m_squelchCount > m_squelchGate;
     int ctcssIndex = m_squelchOpen && m_settings.m_ctcssOn ? m_ctcssIndex : 0;
     unsigned int dcsCode = m_squelchOpen && m_settings.m_dcsOn ? m_dcsCode : 0;
+    QList<ObjectPipe*> dataPipes;
+    MainCore::instance()->getDataPipes().getDataPipes(m_channel, "demod", dataPipes);
 
     if (m_squelchOpen)
     {
@@ -196,7 +198,7 @@ void NFMDemodSink::processOneSample(Complex &ci)
             }
         }
 
-        if (!m_settings.m_audioMute &&
+        if ((!m_settings.m_audioMute || dataPipes.size() > 0) &&
             (!m_settings.m_ctcssOn || m_ctcssIndexSelected == ctcssIndex || m_ctcssIndexSelected == 0) &&
             (!m_settings.m_dcsOn || m_dcsCodeSeleted == dcsCode || m_dcsCodeSeleted == 0))
         {
@@ -232,8 +234,8 @@ void NFMDemodSink::processOneSample(Complex &ci)
         m_dcsCode = dcsCode;
     }
 
-    m_audioBuffer[m_audioBufferFill].l = sample;
-    m_audioBuffer[m_audioBufferFill].r = sample;
+    m_audioBuffer[m_audioBufferFill].l = m_settings.m_audioMute ? 0 : sample;
+    m_audioBuffer[m_audioBufferFill].r = m_settings.m_audioMute ? 0 : sample;
     ++m_audioBufferFill;
 
     if (m_audioBufferFill >= m_audioBuffer.size())
@@ -254,9 +256,6 @@ void NFMDemodSink::processOneSample(Complex &ci)
 
     if (m_demodBufferFill >= m_demodBuffer.size())
     {
-        QList<ObjectPipe*> dataPipes;
-        MainCore::instance()->getDataPipes().getDataPipes(m_channel, "demod", dataPipes);
-
         if (dataPipes.size() > 0)
         {
             QList<ObjectPipe*>::iterator it = dataPipes.begin();

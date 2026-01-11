@@ -5626,6 +5626,78 @@ margin-bottom: 20px;
   },
   "description" : "DemodAnalyzer"
 };
+            defs.DenoiserActions = {
+  "required" : [ "channelId", "deviceId" ],
+  "properties" : {
+    "deviceId" : {
+      "type" : "integer",
+      "description" : "Set source device Id/Number that channel belongs to"
+    },
+    "channelId" : {
+      "type" : "integer",
+      "description" : "Set source channel Id/Number of the channel within the device"
+    }
+  },
+  "description" : "Denoiser actions"
+};
+            defs.DenoiserSettings = {
+  "properties" : {
+    "denoiserType" : {
+      "type" : "integer",
+      "description" : "Denoiser type\n  * 0 - none\n  * 1 - RNnoise\n"
+    },
+    "enableDenoiser" : {
+      "type" : "integer",
+      "description" : "Enable denoiser\n  * 1 - enable\n  * 0 - disable\n"
+    },
+    "volumeTenths" : {
+      "type" : "integer",
+      "description" : "Output volume in tenths (e.g., 10 = 1.0)\n"
+    },
+    "audioDeviceName" : {
+      "type" : "string",
+      "description" : "Audio output device name"
+    },
+    "audioMute" : {
+      "type" : "integer",
+      "description" : "Audio mute\n  * 1 - mute\n  * 0 - unmute\n"
+    },
+    "title" : {
+      "type" : "string"
+    },
+    "rgbColor" : {
+      "type" : "integer"
+    },
+    "fileRecordName" : {
+      "type" : "string",
+      "description" : "Output wave file name"
+    },
+    "recordToFile" : {
+      "type" : "integer",
+      "description" : "Recording status\n  * 1 - recording\n  * 0 - not recording\n"
+    },
+    "useReverseAPI" : {
+      "type" : "integer",
+      "description" : "Synchronize with reverse API\n  * 1 - yes\n  * 0 - no\n"
+    },
+    "reverseAPIAddress" : {
+      "type" : "string"
+    },
+    "reverseAPIPort" : {
+      "type" : "integer"
+    },
+    "reverseAPIFeatureSetIndex" : {
+      "type" : "integer"
+    },
+    "reverseAPIFeatureIndex" : {
+      "type" : "integer"
+    },
+    "rollupState" : {
+      "$ref" : "#/definitions/RollupState"
+    }
+  },
+  "description" : "Denoiser"
+};
             defs.DeviceActions = {
   "required" : [ "deviceHwType", "direction" ],
   "discriminator" : "deviceHwType",
@@ -6518,6 +6590,9 @@ margin-bottom: 20px;
     },
     "DemodAnalyzerActions" : {
       "$ref" : "#/definitions/DemodAnalyzerActions"
+    },
+    "DenoiserActions" : {
+      "$ref" : "#/definitions/DenoiserActions"
     }
   },
   "description" : "Base feature actions. Only the feature actions corresponding to the feature specified in the featureType field is or should be present."
@@ -6734,6 +6809,9 @@ margin-bottom: 20px;
     },
     "DemodAnalyzerSettings" : {
       "$ref" : "#/definitions/DemodAnalyzerSettings"
+    },
+    "DenoiserSettings" : {
+      "$ref" : "#/definitions/DenoiserSettings"
     },
     "JogdialControllerSettings" : {
       "$ref" : "#/definitions/JogdialControllerSettings"
@@ -59654,7 +59732,7 @@ except ApiException as e:
           </div>
           <div id="generator">
             <div class="content">
-              Generated 2026-01-04T12:41:15.650+01:00
+              Generated 2026-01-10T11:16:10.140+01:00
             </div>
           </div>
       </div>
