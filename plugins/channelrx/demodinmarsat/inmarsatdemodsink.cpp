@@ -191,8 +191,8 @@ bool SymbolBuffer::checkUW() const
         bits1 |= (qulonglong)m_bits[idx1] << (63-i);
         bits2 |= (qulonglong)m_bits[idx2] << (63-i);
     }
-    return   (   (bits1 == 0x07eacdda4e2f28c2)
-              || (bits1 == ~0x07eacdda4e2f28c2)
+    return   (   (bits1 == 0x07eacdda4e2f28c2ULL)
+              || (bits1 == ~0x07eacdda4e2f28c2ULL)
              )
           && (bits1 == bits2);
 }

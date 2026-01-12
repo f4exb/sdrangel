@@ -99,6 +99,7 @@ private:
 class Equalizer {
 public:
     Equalizer(int samplesPerSymbol);
+    virtual ~Equalizer() {}
     virtual Complex processOneSample(Complex x, bool update, bool training=false) = 0;
     Complex getError() const { return m_error; }
     void printTaps() const;
