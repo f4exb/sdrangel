@@ -38,6 +38,7 @@ const QStringList MapSettings::m_pipeTypes = {
     QStringLiteral("FT8Demod"),
     QStringLiteral("HeatMap"),
     QStringLiteral("ILSDemod"),
+    QStringLiteral("InmarsatDemod"),
     QStringLiteral("PagerDemod"),
     QStringLiteral("Radiosonde"),
     QStringLiteral("StarTracker"),
@@ -56,6 +57,7 @@ const QStringList MapSettings::m_pipeURIs = {
     QStringLiteral("sdrangel.channel.ft8demod"),
     QStringLiteral("sdrangel.channel.heatmap"),
     QStringLiteral("sdrangel.channel.ilsdemod"),
+    QStringLiteral("sdrangel.channel.inmarsatdemod"),
     QStringLiteral("sdrangel.channel.pagerdemod"),
     QStringLiteral("sdrangel.feature.radiosonde"),
     QStringLiteral("sdrangel.feature.startracker"),
@@ -117,6 +119,7 @@ MapSettings::MapSettings() :
 
     m_itemSettings.insert("Navtex", new MapItemSettings("Navtex", false, QColor(255, 0, 255), false, true, 8));
     m_itemSettings.insert("ILSDemod", new MapItemSettings("ILSDemod", true, QColor(0, 205, 200), true, true, 10));
+    m_itemSettings.insert("InmarsatDemod", new MapItemSettings("InmarsatDemod", true, QColor(40, 180, 75), false, true, 5));
 
     MapItemSettings *navAidSettings = new MapItemSettings("NavAid", false, QColor(255, 0, 255), false, true, 11);
     navAidSettings->m_filterDistance = 500000;

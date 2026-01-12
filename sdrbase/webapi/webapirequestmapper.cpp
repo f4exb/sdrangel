@@ -4595,6 +4595,12 @@ bool WebAPIRequestMapper::getChannelSettings(
             channelSettings->getIlsDemodSettings()->init();
             channelSettings->getIlsDemodSettings()->fromJsonObject(settingsJsonObject);
         }
+        else if (channelSettingsKey == "InmarsatDemodSettings")
+        {
+            channelSettings->setInmarsatDemodSettings(new SWGSDRangel::SWGInmarsatDemodSettings());
+            channelSettings->getInmarsatDemodSettings()->init();
+            channelSettings->getInmarsatDemodSettings()->fromJsonObject(settingsJsonObject);
+        }
         else if (channelSettingsKey == "InterferometerSettings")
         {
             channelSettings->setInterferometerSettings(new SWGSDRangel::SWGInterferometerSettings());
@@ -5565,6 +5571,7 @@ void WebAPIRequestMapper::resetChannelSettings(SWGSDRangel::SWGChannelSettings& 
     channelSettings.setHeatMapSettings(nullptr);
     channelSettings.setIeee802154ModSettings(nullptr);
     channelSettings.setIlsDemodSettings(nullptr);
+    channelSettings.setInmarsatDemodSettings(nullptr);
     channelSettings.setNavtexDemodSettings(nullptr);
     channelSettings.setNfmDemodSettings(nullptr);
     channelSettings.setNfmModSettings(nullptr);
@@ -5610,6 +5617,7 @@ void WebAPIRequestMapper::resetChannelReport(SWGSDRangel::SWGChannelReport& chan
     channelReport.setFreqTrackerReport(nullptr);
     channelReport.setHeatMapReport(nullptr);
     channelReport.setIlsDemodReport(nullptr);
+    channelReport.setInmarsatDemodReport(nullptr);
     channelReport.setNavtexDemodReport(nullptr);
     channelReport.setNfmDemodReport(nullptr);
     channelReport.setNfmModReport(nullptr);

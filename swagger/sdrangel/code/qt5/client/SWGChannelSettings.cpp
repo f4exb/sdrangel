@@ -96,6 +96,8 @@ SWGChannelSettings::SWGChannelSettings() {
     m_heat_map_settings_isSet = false;
     ils_demod_settings = nullptr;
     m_ils_demod_settings_isSet = false;
+    inmarsat_demod_settings = nullptr;
+    m_inmarsat_demod_settings_isSet = false;
     interferometer_settings = nullptr;
     m_interferometer_settings_isSet = false;
     ieee_802_15_4_mod_settings = nullptr;
@@ -234,6 +236,8 @@ SWGChannelSettings::init() {
     m_heat_map_settings_isSet = false;
     ils_demod_settings = new SWGILSDemodSettings();
     m_ils_demod_settings_isSet = false;
+    inmarsat_demod_settings = new SWGInmarsatDemodSettings();
+    m_inmarsat_demod_settings_isSet = false;
     interferometer_settings = new SWGInterferometerSettings();
     m_interferometer_settings_isSet = false;
     ieee_802_15_4_mod_settings = new SWGIEEE_802_15_4_ModSettings();
@@ -395,6 +399,9 @@ SWGChannelSettings::cleanup() {
     }
     if(ils_demod_settings != nullptr) { 
         delete ils_demod_settings;
+    }
+    if(inmarsat_demod_settings != nullptr) { 
+        delete inmarsat_demod_settings;
     }
     if(interferometer_settings != nullptr) { 
         delete interferometer_settings;
@@ -569,6 +576,8 @@ SWGChannelSettings::fromJsonObject(QJsonObject &pJson) {
     ::SWGSDRangel::setValue(&heat_map_settings, pJson["HeatMapSettings"], "SWGHeatMapSettings", "SWGHeatMapSettings");
     
     ::SWGSDRangel::setValue(&ils_demod_settings, pJson["ILSDemodSettings"], "SWGILSDemodSettings", "SWGILSDemodSettings");
+    
+    ::SWGSDRangel::setValue(&inmarsat_demod_settings, pJson["InmarsatDemodSettings"], "SWGInmarsatDemodSettings", "SWGInmarsatDemodSettings");
     
     ::SWGSDRangel::setValue(&interferometer_settings, pJson["InterferometerSettings"], "SWGInterferometerSettings", "SWGInterferometerSettings");
     
@@ -749,6 +758,9 @@ SWGChannelSettings::asJsonObject() {
     }
     if((ils_demod_settings != nullptr) && (ils_demod_settings->isSet())){
         toJsonValue(QString("ILSDemodSettings"), ils_demod_settings, obj, QString("SWGILSDemodSettings"));
+    }
+    if((inmarsat_demod_settings != nullptr) && (inmarsat_demod_settings->isSet())){
+        toJsonValue(QString("InmarsatDemodSettings"), inmarsat_demod_settings, obj, QString("SWGInmarsatDemodSettings"));
     }
     if((interferometer_settings != nullptr) && (interferometer_settings->isSet())){
         toJsonValue(QString("InterferometerSettings"), interferometer_settings, obj, QString("SWGInterferometerSettings"));
@@ -1187,6 +1199,16 @@ SWGChannelSettings::setIlsDemodSettings(SWGILSDemodSettings* ils_demod_settings)
     this->m_ils_demod_settings_isSet = true;
 }
 
+SWGInmarsatDemodSettings*
+SWGChannelSettings::getInmarsatDemodSettings() {
+    return inmarsat_demod_settings;
+}
+void
+SWGChannelSettings::setInmarsatDemodSettings(SWGInmarsatDemodSettings* inmarsat_demod_settings) {
+    this->inmarsat_demod_settings = inmarsat_demod_settings;
+    this->m_inmarsat_demod_settings_isSet = true;
+}
+
 SWGInterferometerSettings*
 SWGChannelSettings::getInterferometerSettings() {
     return interferometer_settings;
@@ -1602,6 +1624,9 @@ SWGChannelSettings::isSet(){
             isObjectUpdated = true; break;
         }
         if(ils_demod_settings && ils_demod_settings->isSet()){
+            isObjectUpdated = true; break;
+        }
+        if(inmarsat_demod_settings && inmarsat_demod_settings->isSet()){
             isObjectUpdated = true; break;
         }
         if(interferometer_settings && interferometer_settings->isSet()){

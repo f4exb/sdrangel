@@ -84,6 +84,8 @@ SWGChannelReport::SWGChannelReport() {
     m_heat_map_report_isSet = false;
     ils_demod_report = nullptr;
     m_ils_demod_report_isSet = false;
+    inmarsat_demod_report = nullptr;
+    m_inmarsat_demod_report_isSet = false;
     m17_demod_report = nullptr;
     m_m17_demod_report_isSet = false;
     m17_mod_report = nullptr;
@@ -198,6 +200,8 @@ SWGChannelReport::init() {
     m_heat_map_report_isSet = false;
     ils_demod_report = new SWGILSDemodReport();
     m_ils_demod_report_isSet = false;
+    inmarsat_demod_report = new SWGInmarsatDemodReport();
+    m_inmarsat_demod_report_isSet = false;
     m17_demod_report = new SWGM17DemodReport();
     m_m17_demod_report_isSet = false;
     m17_mod_report = new SWGM17ModReport();
@@ -333,6 +337,9 @@ SWGChannelReport::cleanup() {
     }
     if(ils_demod_report != nullptr) { 
         delete ils_demod_report;
+    }
+    if(inmarsat_demod_report != nullptr) { 
+        delete inmarsat_demod_report;
     }
     if(m17_demod_report != nullptr) { 
         delete m17_demod_report;
@@ -477,6 +484,8 @@ SWGChannelReport::fromJsonObject(QJsonObject &pJson) {
     ::SWGSDRangel::setValue(&heat_map_report, pJson["HeatMapReport"], "SWGHeatMapReport", "SWGHeatMapReport");
     
     ::SWGSDRangel::setValue(&ils_demod_report, pJson["ILSDemodReport"], "SWGILSDemodReport", "SWGILSDemodReport");
+    
+    ::SWGSDRangel::setValue(&inmarsat_demod_report, pJson["InmarsatDemodReport"], "SWGInmarsatDemodReport", "SWGInmarsatDemodReport");
     
     ::SWGSDRangel::setValue(&m17_demod_report, pJson["M17DemodReport"], "SWGM17DemodReport", "SWGM17DemodReport");
     
@@ -627,6 +636,9 @@ SWGChannelReport::asJsonObject() {
     }
     if((ils_demod_report != nullptr) && (ils_demod_report->isSet())){
         toJsonValue(QString("ILSDemodReport"), ils_demod_report, obj, QString("SWGILSDemodReport"));
+    }
+    if((inmarsat_demod_report != nullptr) && (inmarsat_demod_report->isSet())){
+        toJsonValue(QString("InmarsatDemodReport"), inmarsat_demod_report, obj, QString("SWGInmarsatDemodReport"));
     }
     if((m17_demod_report != nullptr) && (m17_demod_report->isSet())){
         toJsonValue(QString("M17DemodReport"), m17_demod_report, obj, QString("SWGM17DemodReport"));
@@ -987,6 +999,16 @@ SWGChannelReport::setIlsDemodReport(SWGILSDemodReport* ils_demod_report) {
     this->m_ils_demod_report_isSet = true;
 }
 
+SWGInmarsatDemodReport*
+SWGChannelReport::getInmarsatDemodReport() {
+    return inmarsat_demod_report;
+}
+void
+SWGChannelReport::setInmarsatDemodReport(SWGInmarsatDemodReport* inmarsat_demod_report) {
+    this->inmarsat_demod_report = inmarsat_demod_report;
+    this->m_inmarsat_demod_report_isSet = true;
+}
+
 SWGM17DemodReport*
 SWGChannelReport::getM17DemodReport() {
     return m17_demod_report;
@@ -1324,6 +1346,9 @@ SWGChannelReport::isSet(){
             isObjectUpdated = true; break;
         }
         if(ils_demod_report && ils_demod_report->isSet()){
+            isObjectUpdated = true; break;
+        }
+        if(inmarsat_demod_report && inmarsat_demod_report->isSet()){
             isObjectUpdated = true; break;
         }
         if(m17_demod_report && m17_demod_report->isSet()){

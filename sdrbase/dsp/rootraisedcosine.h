@@ -26,25 +26,29 @@
 
 // Root-raised-cosine low-pass filter for pulse shaping, without intersymbol interference (ISI)
 // https://en.wikipedia.org/wiki/Root-raised-cosine_filter
-// This could be optimised in to a polyphase filter, as samplesPerSymbol-1 inputs
+// This could be optimised in to a polyphase filter for TX, as samplesPerSymbol-1 inputs
 // to filter() should be zero, as the data is upsampled to the sample rate
 template <class Type> class RootRaisedCosine {
 public:
     RootRaisedCosine() : m_ptr(0) { }
 
+    enum Normalise {
+        Energy,     // impulse response convolved with itself will be a raised cosine with value of 1 at the peak
+        Amplitude,  // bipolar sequence (E.g. [1 0 0 -1 0 0..]) has maximum output values close to (1,-1) for TX
+        Gain        // 0dB gain - coefficients sum to 1
+    };
+
     // beta - roll-off factor
     // symbolSpan - number of symbols over which the filter is spread
     // samplesPerSymbol - number of samples per symbol
-    // normaliseUpsampledAmplitude - when true, scale the filter such that an upsampled
-    // (by samplesPerSymbol) bipolar sequence (E.g. [1 0 0 -1 0 0..]) has maximum
-    // output values close to (1,-1)
-    void create(double beta, int symbolSpan, int samplesPerSymbol, bool normaliseUpsampledAmplitude = false)
+    // normalise - how to normalise the filter
+    void create(double beta, int symbolSpan, int samplesPerSymbol, Normalise normalise)
     {
         int nTaps = symbolSpan * samplesPerSymbol + 1;
         int i, j;
 
         // check constraints
-        if(!(nTaps & 1)) {
+        if (!(nTaps & 1)) {
             qDebug("Root raised cosine filter has to have an odd number of taps");
             nTaps++;
         }
@@ -57,7 +61,7 @@ public:
         m_taps.resize(nTaps / 2 + 1);
 
         // calculate filter taps
-        for(i = 0; i < nTaps / 2 + 1; i++)
+        for (i = 0; i < nTaps / 2 + 1; i++)
         {
             double t = (i - (nTaps / 2)) / (double)samplesPerSymbol;
             double Ts = 1.0;
@@ -75,18 +79,19 @@ public:
         }
 
         // normalize
-        if (!normaliseUpsampledAmplitude)
+        if (normalise == Normalise::Energy)
         {
             // normalize energy
             double sum = 0;
-            for(i = 0; i < (int)m_taps.size() - 1; i++)
+            for (i = 0; i < (int)m_taps.size() - 1; i++)
                 sum += std::pow(m_taps[i], 2.0) * 2;
             sum += std::pow(m_taps[i], 2.0);
             sum = std::sqrt(sum);
-            for(i = 0; i < (int)m_taps.size(); i++)
+            for (i = 0; i < (int)m_taps.size(); i++)
                 m_taps[i] /= sum;
+
         }
-        else
+        else if (normalise == Normalise::Amplitude)
         {
             // Calculate maximum output of filter, assuming upsampled bipolar input E.g. [1 0 0 -1 0 0..]
             // This doesn't necessarily include the centre tap, so we try each offset
@@ -102,9 +107,24 @@ public:
                     maxGain = g;
             }
             // Scale up so maximum out is 1
-            for(i = 0; i < (int)m_taps.size(); i++)
+            for (i = 0; i < (int)m_taps.size(); i++)
                 m_taps[i] /= maxGain;
         }
+        else if (normalise == Gain)
+        {
+            // Normalise to 0dB gain
+            double sum = 0;
+            for (i = 0; i < (int)m_taps.size() - 1; i++)
+                sum += m_taps[i] * 2;
+            sum += m_taps[i];
+            for (i = 0; i < (int)m_taps.size(); i++)
+                m_taps[i] /= sum;
+        }
+        /*printf("rrc=[");
+        for (int i = 0; i < m_taps.size(); i++) {
+            printf("%f ", m_taps[i]);
+        }
+        printf("];\n");*/
     }
 
     Type filter(Type sample)

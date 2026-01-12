@@ -91,7 +91,7 @@ Description: SDR/Analyzer/Generator front-end for various hardware
  Builds on Linux, Windows and Mac O/S
  Reception modes supported:
    Analog: AM, ATV, NFM, WFM, SSB, broadcast FM, APT, ILS, VOR
-   Digital: D-Star, Yaesu SF, DMR, dPMR, FreeDV, M17, DAB, DVB-S, LoRa, ADS-B, Packet (AX.25/APRS), AIS, FT8, Navtex, Radiosonde, RTTY, Pager
+   Digital: D-Star, Yaesu SF, DMR, dPMR, FreeDV, M17, DAB, DVB-S, LoRa, ADS-B, Packet (AX.25/APRS), AIS, FT8, Navtex, Radiosonde, RTTY, Pager, Inmarsat C
    Analyzer: Generic channel
  Transmission modes supported:
    Analog: AM, ATV, NFM, SSB, WFM

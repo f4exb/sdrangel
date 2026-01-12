@@ -40,13 +40,17 @@ FreqScannerSink::FreqScannerSink() :
         m_binsPerChannel(16),
         m_averageCount(0)
 {
-   
     applySettings(m_settings, QStringList(), true);
     applyChannelSettings(m_channelSampleRate, m_channelFrequencyOffset, 16, 4, true);
 }
 
 FreqScannerSink::~FreqScannerSink()
 {
+    if (m_fftSequence >= 0)
+    {
+        FFTFactory* fftFactory = DSPEngine::instance()->getFFTFactory();
+        fftFactory->releaseEngine(m_fftSize, false, m_fftSequence);
+    }
 }
 
 void FreqScannerSink::feed(const SampleVector::const_iterator& begin, const SampleVector::const_iterator& end)

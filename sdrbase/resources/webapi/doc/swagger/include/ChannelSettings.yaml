@@ -77,6 +77,8 @@ ChannelSettings:
       $ref: "/doc/swagger/include/HeatMap.yaml#/HeatMapSettings"
     ILSDemodSettings:
       $ref: "/doc/swagger/include/ILSDemod.yaml#/ILSDemodSettings"
+    InmarsatDemodSettings:
+      $ref: "/doc/swagger/include/InmarsatDemod.yaml#/InmarsatDemodSettings"
     InterferometerSettings:
       $ref: "/doc/swagger/include/Interferometer.yaml#/InterferometerSettings"
     IEEE_802_15_4_ModSettings:

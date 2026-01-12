@@ -684,8 +684,8 @@ void DATVModSource::applyChannelSettings(int channelSampleRate, int channelFrequ
     if (m_settings.m_symbolRate > 0)
         m_samplesPerSymbol = m_channelSampleRate/m_settings.m_symbolRate;
 
-    m_pulseShapeI.create(m_settings.m_rollOff, 8, m_samplesPerSymbol, false);
-    m_pulseShapeQ.create(m_settings.m_rollOff, 8, m_samplesPerSymbol, false);
+    m_pulseShapeI.create(m_settings.m_rollOff, 8, m_samplesPerSymbol, RootRaisedCosine<Real>::Energy);
+    m_pulseShapeQ.create(m_settings.m_rollOff, 8, m_samplesPerSymbol, RootRaisedCosine<Real>::Energy);
 }
 
 void DATVModSource::applySettings(const DATVModSettings& settings, bool force)
@@ -901,8 +901,8 @@ void DATVModSource::applySettings(const DATVModSettings& settings, bool force)
     if (m_settings.m_symbolRate > 0)
         m_samplesPerSymbol = m_channelSampleRate/m_settings.m_symbolRate;
 
-    m_pulseShapeI.create(m_settings.m_rollOff, 8, m_samplesPerSymbol, false);
-    m_pulseShapeQ.create(m_settings.m_rollOff, 8, m_samplesPerSymbol, false);
+    m_pulseShapeI.create(m_settings.m_rollOff, 8, m_samplesPerSymbol, RootRaisedCosine<Real>::Energy);
+    m_pulseShapeQ.create(m_settings.m_rollOff, 8, m_samplesPerSymbol, RootRaisedCosine<Real>::Energy);
 
     checkBitrates();
 }

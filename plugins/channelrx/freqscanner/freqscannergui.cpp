@@ -90,7 +90,11 @@ bool FreqScannerGUI::handleMessage(const Message& message)
     {
         qDebug("FreqScannerGUI::handleMessage: FreqScanner::MsgConfigureFreqScanner");
         const FreqScanner::MsgConfigureFreqScanner& cfg = (FreqScanner::MsgConfigureFreqScanner&) message;
-        m_settings = cfg.getSettings();
+        if (cfg.getForce()) {
+            m_settings = cfg.getSettings();
+        } else {
+            m_settings.applySettings(cfg.getSettingsKeys(), cfg.getSettings());
+        }
         blockApplySettings(true);
         m_channelMarker.updateSettings(static_cast<const ChannelMarker*>(m_settings.m_channelMarker));
         displaySettings();
