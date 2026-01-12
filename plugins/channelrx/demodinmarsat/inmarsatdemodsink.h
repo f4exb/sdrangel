@@ -219,7 +219,7 @@ private:
     int m_rrcBufferIndex;
 
     static const int SAMPLES_PER_SYMBOL = InmarsatDemodSettings::CHANNEL_SAMPLE_RATE / InmarsatDemodSettings::BAUD_RATE;
-    static const int m_maxSamplesPerSymbol = SAMPLES_PER_SYMBOL * 2;
+    static const int MAX_SAMPLES_PER_SYMBOL = SAMPLES_PER_SYMBOL * 2;
     static const int COSTAS_LOOP_RATE = InmarsatDemodSettings::BAUD_RATE; // Costas loop is run at symbol rate
 
     int m_sampleIdx;

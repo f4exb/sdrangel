@@ -40,7 +40,6 @@ Complex AGC::processOneSample(const Complex& iq, bool locked)
     Complex z = m_gain * iq;
 
     m_agcMovingAverage(abs(z));
-    //qDebug() << "abs" << abs(z) << "m_agcGain" << m_agcGain << "m_agcMovingAverage.instantAverage()" << m_agcMovingAverage.instantAverage();
 
     Real agcRef = 1.0f; // Target amplitude
     Real agcMu = locked ? 0.03 : 0.3; // How fast we want to respond to changes in average
@@ -119,7 +118,6 @@ void FrequencyOffsetEstimate::processOneSample(Complex& iq, bool locked)
             idx -= m_fftSize; // Negative freqs are in second half
         }
         m_currentFreqOffsetHz = ((idx * hzPerBin) / 2); // Divide by two, as the squaring operation doubles the freq
-        //qDebug() << "Max val" << maxVal << "maxIdx" << maxIdx << "freqOffset" << m_freqOffsetHz;
 
         Real magRatio = sqrt(m_currentFreqMagSq) / sqrt(m_freqMagSq);
 
@@ -133,7 +131,6 @@ void FrequencyOffsetEstimate::processOneSample(Complex& iq, bool locked)
                 m_freqOffsetBin = maxIdx;
                 m_freqOffsetHz = m_currentFreqOffsetHz;
                 m_freqOffsetNCO.setFreq(-m_freqOffsetHz, InmarsatDemodSettings::CHANNEL_SAMPLE_RATE);
-                //qDebug() << "Setting CFO" << m_freqOffsetHz << "(" << CalcDb::dbPower(m_currentFreqMagSq) << "/" << CalcDb::dbPower(m_freqMagSq) << ")";
             }
         }
 
@@ -257,7 +254,6 @@ Complex CMAEqualizer::processOneSample(Complex x, bool update, bool training)
     Real mod = abs(y);
     Real R = 1.0f;
     Real error = mod * mod - R * R;
-    //printf("x=%f+i%f y=%f+i%f d=%f error=%f+i%f\n", x.real(), x.imag(), y.real(), y.imag(), d.real(), m_error.real(), m_error.imag());
     if (update)
     {
         Real mu = 0.001f;
@@ -327,7 +323,7 @@ InmarsatDemodSink::InmarsatDemodSink(InmarsatDemod *stdCDemod) :
 
     m_sampleIdx = 0;
 
-    m_adjustedSPS = m_maxSamplesPerSymbol; // ok: 20, 15,  fail: 10, 9, 5
+    m_adjustedSPS = MAX_SAMPLES_PER_SYMBOL;
     m_adjustment = 0;
     m_totalSampleCount = 0;
     m_error = 0;
@@ -487,7 +483,7 @@ void InmarsatDemodSink::processOneSample(Complex &ci)
 
         m_totalSampleCount++;
         m_filteredSamples.enqueue(rrc);
-        while (m_filteredSamples.size() > m_maxSamplesPerSymbol)
+        while (m_filteredSamples.size() > MAX_SAMPLES_PER_SYMBOL)
         {
             m_filteredSamples.dequeue();
 
@@ -498,9 +494,6 @@ void InmarsatDemodSink::processOneSample(Complex &ci)
                 int currentIdx = m_filteredSamples.size()-1;
                 int midIdx = currentIdx - (SAMPLES_PER_SYMBOL/2.0f);
                 int previousIdx = currentIdx - SAMPLES_PER_SYMBOL;
-
-                //qDebug() << "diff" << (m_prevTotalSampleCount - m_totalSampleCount);
-                //qDebug() << "m_totalSampleCount" << m_totalSampleCount << "m_prevTotalSampleCount" << m_prevTotalSampleCount << "diff" << (m_prevTotalSampleCount - m_totalSampleCount) << "currentIdx" << currentIdx << "previousIdx" << previousIdx << "midIdx" << midIdx << "mu" << m_mu;
 
                 Complex previous = m_filteredSamples[previousIdx];
                 Complex mid = m_filteredSamples[midIdx];
@@ -516,8 +509,6 @@ void InmarsatDemodSink::processOneSample(Complex &ci)
                 m_mu = wrap(m_mu);
 
                 int adjustment = (int)round(m_mu * SAMPLES_PER_SYMBOL);
-
-                //qDebug() << "m_mu" << m_mu << "m_error" << m_error << "m_errorSum" << m_errorSum << "adjustment" << adjustment;
 
                 m_adjustedSPS = SAMPLES_PER_SYMBOL - m_adjustment; // Positve mu indicates late, so reduce time to next sample
                 m_adjustment = adjustment;
@@ -536,7 +527,6 @@ void InmarsatDemodSink::processOneSample(Complex &ci)
                 m_lockAverage(iNorm - qNorm);
                 float lockThresh = 0.45;
                 m_locked = m_lockAverage.instantAverage() > lockThresh;
-                //qDebug() << "m_lockAverage.instantAverage()" << m_lockAverage.instantAverage();
 
                 // Equalizer (runs at symbol rate)
                 if (   (m_settings.m_equalizer == InmarsatDemodSettings::CMA)
@@ -556,9 +546,6 @@ void InmarsatDemodSink::processOneSample(Complex &ci)
                 m_symbolBuffer.push(m_bit, m_eq);
                 if (m_symbolBuffer.checkUW())
                 {
-                    /*if (m_syncedToUW && (m_symbolCounter != m_symbolBuffer.size() - 1)) {
-                        qDebug() << "Already synced" << m_symbolCounter << m_symbolBuffer.size();
-                    }*/
                     m_symbolCounter = 0;
                     if (!m_syncedToUW && (m_settings.m_equalizer == InmarsatDemodSettings::LMS))
                     {
