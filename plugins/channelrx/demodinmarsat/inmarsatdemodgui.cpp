@@ -1968,7 +1968,7 @@ void InmarsatDemodGUI::makeUIConnections()
 {
     QObject::connect(ui->deltaFrequency, &ValueDialZ::changed, this, &InmarsatDemodGUI::on_deltaFrequency_changed);
     QObject::connect(ui->rfBW, &QSlider::valueChanged, this, &InmarsatDemodGUI::on_rfBW_valueChanged);
-    QObject::connect(ui->equalizer, &QComboBox::currentIndexChanged, this, &InmarsatDemodGUI::on_equalizer_currentIndexChanged);
+    QObject::connect(ui->equalizer, QOverload<int>::of(&QComboBox::currentIndexChanged), this, &InmarsatDemodGUI::on_equalizer_currentIndexChanged);
     QObject::connect(ui->rrcRolloff, &QDial::valueChanged, this, &InmarsatDemodGUI::on_rrcRolloff_valueChanged);
     QObject::connect(ui->pllBW, &QDial::valueChanged, this, &InmarsatDemodGUI::on_pllBW_valueChanged);
     QObject::connect(ui->ssBW, &QDial::valueChanged, this, &InmarsatDemodGUI::on_ssBW_valueChanged);
