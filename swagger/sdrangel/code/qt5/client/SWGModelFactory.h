@@ -115,6 +115,8 @@
 #include "SWGDVSerialDevices.h"
 #include "SWGDemodAnalyzerActions.h"
 #include "SWGDemodAnalyzerSettings.h"
+#include "SWGDenoiserActions.h"
+#include "SWGDenoiserSettings.h"
 #include "SWGDeviceActions.h"
 #include "SWGDeviceConfig.h"
 #include "SWGDeviceListItem.h"
@@ -896,6 +898,16 @@ namespace SWGSDRangel {
     }
     if(QString("SWGDemodAnalyzerSettings").compare(type) == 0) {
       SWGDemodAnalyzerSettings *obj = new SWGDemodAnalyzerSettings();
+      obj->init();
+      return obj;
+    }
+    if(QString("SWGDenoiserActions").compare(type) == 0) {
+      SWGDenoiserActions *obj = new SWGDenoiserActions();
+      obj->init();
+      return obj;
+    }
+    if(QString("SWGDenoiserSettings").compare(type) == 0) {
+      SWGDenoiserSettings *obj = new SWGDenoiserSettings();
       obj->init();
       return obj;
     }

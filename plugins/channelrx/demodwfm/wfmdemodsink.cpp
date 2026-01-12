@@ -67,6 +67,8 @@ void WFMDemodSink::feed(const SampleVector::const_iterator& begin, const SampleV
 	Real demod;
 	double msq;
 	float fmDev;
+    QList<ObjectPipe*> dataPipes;
+    MainCore::instance()->getDataPipes().getDataPipes(m_channel, "demod", dataPipes);
 
 	for (SampleVector::const_iterator it = begin; it != end; ++it)
 	{
@@ -103,7 +105,7 @@ void WFMDemodSink::feed(const SampleVector::const_iterator& begin, const SampleV
 
 			m_squelchOpen = (m_squelchState > (m_settings.m_rfBandwidth / 20));
 
-			if (m_squelchOpen && !m_settings.m_audioMute) { // squelch open and not mute
+			if (m_squelchOpen && (!m_settings.m_audioMute || dataPipes.size() > 0)) { // squelch open and not mute
                 demod = m_phaseDiscri.phaseDiscriminatorDelta(rf[i], msq, fmDev);
             } else {
                 demod = 0;
@@ -114,8 +116,8 @@ void WFMDemodSink::feed(const SampleVector::const_iterator& begin, const SampleV
 			if (m_interpolator.decimate(&m_interpolatorDistanceRemain, e, &ci))
 			{
 				qint16 sample = (qint16)(ci.real() * 3276.8f * m_settings.m_volume);
-				m_audioBuffer[m_audioBufferFill].l = sample;
-				m_audioBuffer[m_audioBufferFill].r = sample;
+				m_audioBuffer[m_audioBufferFill].l = m_settings.m_audioMute ? 0 : sample;
+				m_audioBuffer[m_audioBufferFill].r = m_settings.m_audioMute ? 0 : sample;
 
 				++m_audioBufferFill;
 
@@ -136,9 +138,6 @@ void WFMDemodSink::feed(const SampleVector::const_iterator& begin, const SampleV
 
                 if (m_demodBufferFill >= m_demodBuffer.size())
                 {
-                    QList<ObjectPipe*> dataPipes;
-                    MainCore::instance()->getDataPipes().getDataPipes(m_channel, "demod", dataPipes);
-
                     if (dataPipes.size() > 0)
                     {
                         QList<ObjectPipe*>::iterator it = dataPipes.begin();

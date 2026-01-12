@@ -25,6 +25,7 @@
 #include "SWGAFCActions.h"
 #include "SWGAMBEActions.h"
 #include "SWGDemodAnalyzerActions.h"
+#include "SWGDenoiserActions.h"
 #include "SWGGS232ControllerActions.h"
 #include "SWGLimeRFEActions.h"
 #include "SWGMapActions.h"
@@ -107,6 +108,9 @@ public:
     SWGDemodAnalyzerActions* getDemodAnalyzerActions();
     void setDemodAnalyzerActions(SWGDemodAnalyzerActions* demod_analyzer_actions);
 
+    SWGDenoiserActions* getDenoiserActions();
+    void setDenoiserActions(SWGDenoiserActions* denoiser_actions);
+
 
     virtual bool isSet() override;
 
@@ -161,6 +165,9 @@ private:
 
     SWGDemodAnalyzerActions* demod_analyzer_actions;
     bool m_demod_analyzer_actions_isSet;
+
+    SWGDenoiserActions* denoiser_actions;
+    bool m_denoiser_actions_isSet;
 
 };
 

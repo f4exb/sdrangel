@@ -968,6 +968,36 @@ if(ENABLE_CHANNELRX_DEMODINMARSAT)
     endif ()
 endif()
 
+# For denoiser feature
+if(LINUX AND ENABLE_FEATURE_DENOISER)
+    if (WIN32)
+        set(RNNOISE_LIBRARIES "${SDRANGEL_BINARY_LIB_DIR}/rnnoise.lib" CACHE INTERNAL "")
+        set(RNNOISE_ARGS "-DRNN_ENABLE_X86_RTCD=OFF")
+    elseif (LINUX)
+        set(RNNOISE_LIBRARIES "${EXTERNAL_BUILD_LIBRARIES}/lib${LIB_SUFFIX}/librnnoise${CMAKE_SHARED_LIBRARY_SUFFIX}" CACHE INTERNAL "")
+        set(RNNOISE_ARGS "-DRNN_ENABLE_X86_RTCD=ON")
+    endif()
+    ExternalProject_Add(rnnoise
+        GIT_REPOSITORY https://github.com/f4exb/rnnoise.git
+        GIT_TAG "main"
+        PREFIX "${EXTERNAL_BUILD_LIBRARIES}/rnnoise"
+        CMAKE_ARGS ${COMMON_CMAKE_ARGS}
+        ${RNNOISE_ARGS}
+        -DRNNOISE_BUILD=ON
+        BUILD_BYPRODUCTS "${RNNOISE_LIBRARIES}"
+        INSTALL_COMMAND ""
+        TEST_COMMAND ""
+        )
+    ExternalProject_Get_Property(rnnoise source_dir binary_dir)
+    set(RNNOISE_DEPENDS rnnoise CACHE INTERNAL "")
+    set_global_cache(RNNOISE_FOUND ON)
+    set(RNNOISE_EXTERNAL ON CACHE INTERNAL "")
+    set(RNNOISE_INCLUDE_DIR "${EXTERNAL_BUILD_LIBRARIES}/rnnoise/src/rnnoise/include" CACHE INTERNAL "")
+    if (WIN32)
+        install(FILES "${SDRANGEL_BINARY_BIN_DIR}/rnnoise${CMAKE_SHARED_LIBRARY_SUFFIX}" DESTINATION "${INSTALL_LIB_DIR}")
+    endif ()
+endif()
+
 # VkFFT (header only library)
 ExternalProject_Add(vkfft
         GIT_REPOSITORY https://github.com/DTolm/VkFFT.git

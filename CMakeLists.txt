@@ -153,6 +153,7 @@ option(ENABLE_FEATURE_REMOTECONTROL "Enable feature remote control plugin" ON)
 option(ENABLE_FEATURE_SKYMAP "Enable feature sky map plugin" ON)
 option(ENABLE_FEATURE_SID "Enable feature sid plugin" ON)
 option(ENABLE_FEATURE_MORSEDECODER "Enable feature morsedecoder plugin" ON)
+option(ENABLE_FEATURE_DENOISER "Enable feature denoiser plugin" ON)
 
 # on windows always build external libraries
 if(WIN32)
@@ -826,6 +827,7 @@ if (NOT ENABLE_EXTERNAL_LIBRARIES OR (ENABLE_EXTERNAL_LIBRARIES STREQUAL "AUTO")
     find_package(FFmpeg COMPONENTS AVCODEC AVFORMAT AVUTIL SWSCALE)
     find_package(GGMorse)
     find_package(LibInmarsatC)
+    find_package(RNnoise)
 
     # Devices
     if(ENABLE_AIRSPY)

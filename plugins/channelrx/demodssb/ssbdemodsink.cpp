@@ -123,6 +123,8 @@ void SSBDemodSink::processOneSample(Complex &ci)
 	int n_out = 0;
 	int decim = 1<<(m_spanLog2 - 1);
 	unsigned char decim_mask = decim - 1; // counter LSB bit mask for decimation by 2^(m_scaleLog2 - 1)
+    QList<ObjectPipe*> dataPipes;
+    MainCore::instance()->getDataPipes().getDataPipes(m_channel, "demod", dataPipes);
 
     if (m_dsb) {
         n_out = DSBFilter->runDSB(ci, &sideband);
@@ -182,64 +184,58 @@ void SSBDemodSink::processOneSample(Complex &ci)
             m_squelchDelayLine.write(sideband[i]*agcVal);
         }
 
-        if (m_audioMute)
+        fftfilt::cmplx z = (m_agcActive && m_agcClamping) ?
+            fftfilt::cmplx{m_lowpassI.filter(delayedSample.real()), m_lowpassQ.filter(delayedSample.imag())}
+            : delayedSample;
+        qint16 sample_l;
+        qint16 sample_r;
+
+        if (m_audioBinaual)
         {
-            m_audioBuffer[m_audioBufferFill].r = 0;
-            m_audioBuffer[m_audioBufferFill].l = 0;
+            Real left  = m_audioFlipChannels ? z.imag() : z.real();
+            Real right = m_audioFlipChannels ? z.real() : z.imag();
+            left  = std::clamp(left  * m_volume, -32767.0f, 32767.0f);
+            right = std::clamp(right * m_volume, -32767.0f, 32767.0f);
+            sample_l = (qint16) left;
+            sample_r = (qint16) right;
+
+            m_demodBuffer[m_demodBufferFill++] = z.real();
+            m_demodBuffer[m_demodBufferFill++] = z.imag();
         }
         else
         {
-            fftfilt::cmplx z = (m_agcActive && m_agcClamping) ?
-                fftfilt::cmplx{m_lowpassI.filter(delayedSample.real()), m_lowpassQ.filter(delayedSample.imag())}
-                : delayedSample;
+            Real demod = (z.real() + z.imag()) * 0.7;
+            qint16 sample = (qint16)(std::clamp(demod * m_volume, -32767.0f, 32767.0f));
+            sample_l = sample;
+            sample_r = sample;
+            m_demodBuffer[m_demodBufferFill++] = (z.real() + z.imag()) * 0.7;
+        }
 
-            if (m_audioBinaual)
+        m_audioBuffer[m_audioBufferFill].l = m_audioMute ? 0 : sample_l;
+        m_audioBuffer[m_audioBufferFill].r = m_audioMute ? 0 : sample_r;
+
+        if (m_demodBufferFill >= m_demodBuffer.size())
+        {
+            if (dataPipes.size() > 0)
             {
-                Real left  = m_audioFlipChannels ? z.imag() : z.real();
-                Real right = m_audioFlipChannels ? z.real() : z.imag();
-                left  = std::clamp(left  * m_volume, -32767.0f, 32767.0f);
-                right = std::clamp(right * m_volume, -32767.0f, 32767.0f);
-                m_audioBuffer[m_audioBufferFill].l = (qint16)left;
-                m_audioBuffer[m_audioBufferFill].r = (qint16)right;
+                QList<ObjectPipe*>::iterator it = dataPipes.begin();
 
-                m_demodBuffer[m_demodBufferFill++] = z.real();
-                m_demodBuffer[m_demodBufferFill++] = z.imag();
-            }
-            else
-            {
-                Real demod = (z.real() + z.imag()) * 0.7;
-                qint16 sample = (qint16)(std::clamp(demod * m_volume, -32767.0f, 32767.0f));
-                m_audioBuffer[m_audioBufferFill].l = sample;
-                m_audioBuffer[m_audioBufferFill].r = sample;
-                m_demodBuffer[m_demodBufferFill++] = (z.real() + z.imag()) * 0.7;
-            }
-
-            if (m_demodBufferFill >= m_demodBuffer.size())
-            {
-                QList<ObjectPipe*> dataPipes;
-                MainCore::instance()->getDataPipes().getDataPipes(m_channel, "demod", dataPipes);
-
-                if (dataPipes.size() > 0)
+                for (; it != dataPipes.end(); ++it)
                 {
-                    QList<ObjectPipe*>::iterator it = dataPipes.begin();
+                    DataFifo *fifo = qobject_cast<DataFifo*>((*it)->m_element);
 
-                    for (; it != dataPipes.end(); ++it)
+                    if (fifo)
                     {
-                        DataFifo *fifo = qobject_cast<DataFifo*>((*it)->m_element);
-
-                        if (fifo)
-                        {
-                            fifo->write(
-                                (quint8*) &m_demodBuffer[0],
-                                m_demodBuffer.size() * sizeof(qint16),
-                                m_audioBinaual ? DataFifo::DataTypeCI16 : DataFifo::DataTypeI16
-                            );
-                        }
+                        fifo->write(
+                            (quint8*) &m_demodBuffer[0],
+                            m_demodBuffer.size() * sizeof(qint16),
+                            m_audioBinaual ? DataFifo::DataTypeCI16 : DataFifo::DataTypeI16
+                        );
                     }
                 }
-
-                m_demodBufferFill = 0;
             }
+
+            m_demodBufferFill = 0;
         }
 
         ++m_audioBufferFill;

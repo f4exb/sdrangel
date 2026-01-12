@@ -149,6 +149,8 @@ void WDSPRxSink::feed(const SampleVector::const_iterator& begin, const SampleVec
     }
 
     Complex ci;
+    QList<ObjectPipe*> dataPipes;
+    MainCore::instance()->getDataPipes().getDataPipes(m_channel, "demod", dataPipes);
 
 	for(SampleVector::const_iterator it = begin; it < end; ++it)
 	{
@@ -159,7 +161,7 @@ void WDSPRxSink::feed(const SampleVector::const_iterator& begin, const SampleVec
         {
             while (!m_interpolator.interpolate(&m_interpolatorDistanceRemain, c, &ci))
             {
-                processOneSample(ci);
+                processOneSample(ci, dataPipes);
                 m_interpolatorDistanceRemain += m_interpolatorDistance;
             }
         }
@@ -167,7 +169,7 @@ void WDSPRxSink::feed(const SampleVector::const_iterator& begin, const SampleVec
         {
             if (m_interpolator.decimate(&m_interpolatorDistanceRemain, c, &ci))
             {
-                processOneSample(ci);
+                processOneSample(ci, dataPipes);
                 m_interpolatorDistanceRemain += m_interpolatorDistance;
             }
         }
@@ -181,7 +183,7 @@ void WDSPRxSink::getMagSqLevels(double& avg, double& peak, int& nbSamples) const
     nbSamples = m_sCount;
 }
 
-void WDSPRxSink::processOneSample(const Complex &ci)
+void WDSPRxSink::processOneSample(const Complex &ci, QList<ObjectPipe*>& dataPipes)
 {
     m_rxa->get_inbuff()[2*m_inCount] = ci.imag() / SDR_RX_SCALEF;
     m_rxa->get_inbuff()[2*m_inCount+1] = ci.real() / SDR_RX_SCALEF;
@@ -196,20 +198,13 @@ void WDSPRxSink::processOneSample(const Complex &ci)
 
         for (int i = 0; i < m_rxa->get_outsize(); i++)
         {
-            if (m_settings.m_audioMute)
-            {
-                m_audioBuffer[m_audioBufferFill].r = 0;
-                m_audioBuffer[m_audioBufferFill].l = 0;
-            }
-            else
-            {
-                const double& dr = m_rxa->get_outbuff()[2*i+1];
-                const double& di = m_rxa->get_outbuff()[2*i];
-                qint16 zr = dr * 32768.0;
-                qint16 zi = di * 32768.0;
-                m_audioBuffer[m_audioBufferFill].r = zr;
-                m_audioBuffer[m_audioBufferFill].l = zi;
+            const double& dr = m_rxa->get_outbuff()[2*i+1];
+            const double& di = m_rxa->get_outbuff()[2*i];
+            qint16 zr = dr * 32768.0;
+            qint16 zi = di * 32768.0;
 
+            if (!dataPipes.empty())
+            {
                 if (m_settings.m_audioBinaural)
                 {
                     m_demodBuffer[m_demodBufferFill++] = zr;
@@ -224,28 +219,34 @@ void WDSPRxSink::processOneSample(const Complex &ci)
 
                 if (m_demodBufferFill >= m_demodBuffer.size())
                 {
-                    QList<ObjectPipe*> dataPipes;
-                    MainCore::instance()->getDataPipes().getDataPipes(m_channel, "demod", dataPipes);
-
-                    if (!dataPipes.empty())
+                    for (auto dataPipe : dataPipes)
                     {
-                        for (auto dataPipe : dataPipes)
-                        {
-                            DataFifo *fifo = qobject_cast<DataFifo*>(dataPipe->m_element);
+                        DataFifo *fifo = qobject_cast<DataFifo*>(dataPipe->m_element);
 
-                            if (fifo)
-                            {
-                                fifo->write(
-                                    (quint8*) &m_demodBuffer[0],
-                                    m_demodBuffer.size() * sizeof(qint16),
-                                    m_settings.m_audioBinaural ? DataFifo::DataTypeCI16 : DataFifo::DataTypeI16
-                                );
-                            }
+                        if (fifo)
+                        {
+                            fifo->write(
+                                (quint8*) &m_demodBuffer[0],
+                                m_demodBuffer.size() * sizeof(qint16),
+                                m_settings.m_audioBinaural ? DataFifo::DataTypeCI16 : DataFifo::DataTypeI16
+                            );
                         }
-                }
+                    }
 
                     m_demodBufferFill = 0;
                 }
+            }
+
+            if (m_settings.m_audioMute)
+            {
+                m_audioBuffer[m_audioBufferFill].r = 0;
+                m_audioBuffer[m_audioBufferFill].l = 0;
+            }
+            else
+            {
+                m_audioBuffer[m_audioBufferFill].r = zr;
+                m_audioBuffer[m_audioBufferFill].l = zi;
+
             } // audio sample
 
             if (++m_audioBufferFill == m_audioBuffer.size())

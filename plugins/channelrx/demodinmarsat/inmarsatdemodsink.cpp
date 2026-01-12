@@ -556,9 +556,9 @@ void InmarsatDemodSink::processOneSample(Complex &ci)
                 m_symbolBuffer.push(m_bit, m_eq);
                 if (m_symbolBuffer.checkUW())
                 {
-                    if (m_syncedToUW && (m_symbolCounter != m_symbolBuffer.size() - 1)) {
+                    /*if (m_syncedToUW && (m_symbolCounter != m_symbolBuffer.size() - 1)) {
                         qDebug() << "Already synced" << m_symbolCounter << m_symbolBuffer.size();
-                    }
+                    }*/
                     m_symbolCounter = 0;
                     if (!m_syncedToUW && (m_settings.m_equalizer == InmarsatDemodSettings::LMS))
                     {
