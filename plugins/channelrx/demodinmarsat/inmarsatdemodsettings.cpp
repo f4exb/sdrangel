@@ -59,6 +59,7 @@ void InmarsatDemodSettings::resetToDefaults()
 {
     m_inputFrequencyOffset = 0;
     m_rfBandwidth = 4000.0f;
+    m_equalizer = NONE;
     m_rrcRolloff = 1.0f;
     m_pllBW = 2*M_PI/100.0;
     m_ssBW = 2*M_PI/100.0;
@@ -104,6 +105,8 @@ QByteArray InmarsatDemodSettings::serialize() const
     s.writeFloat(6, m_rrcRolloff);
     s.writeFloat(7, m_pllBW);
     s.writeFloat(8, m_ssBW);
+
+    s.writeS32(9, (int) m_equalizer);
 
     s.writeBool(10, m_udpEnabled);
     s.writeString(11, m_udpAddress);
@@ -167,6 +170,8 @@ bool InmarsatDemodSettings::deserialize(const QByteArray& data)
         d.readFloat(6, &m_rrcRolloff, 1.0f);
         d.readFloat(7, &m_pllBW, 2*M_PI/100.0);
         d.readFloat(8, &m_ssBW, 2*M_PI/100.0);
+
+        d.readS32(9, (int *) &m_equalizer, (int) NONE);
 
         d.readBool(10, &m_udpEnabled);
         d.readString(11, &m_udpAddress);
@@ -243,6 +248,9 @@ void InmarsatDemodSettings::applySettings(const QStringList& settingsKeys, const
     }
     if (settingsKeys.contains("rfBandwidth")) {
         m_rfBandwidth = settings.m_rfBandwidth;
+    }
+    if (settingsKeys.contains("equalizer")) {
+        m_equalizer = settings.m_equalizer;
     }
     if (settingsKeys.contains("rrcRolloff")) {
         m_rrcRolloff = settings.m_rrcRolloff;
@@ -330,6 +338,9 @@ QString InmarsatDemodSettings::getDebugString(const QStringList& settingsKeys, b
     }
     if (settingsKeys.contains("rfBandwidth") || force) {
         ostr << " m_rfBandwidth: " << m_rfBandwidth;
+    }
+    if (settingsKeys.contains("equalizer") || force) {
+        ostr << " m_equalizer: " << m_equalizer;
     }
     if (settingsKeys.contains("rrcRolloff") || force) {
         ostr << " m_rrcRolloff: " << m_rrcRolloff;

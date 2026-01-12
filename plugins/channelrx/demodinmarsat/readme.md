@@ -2,7 +2,7 @@
 
 <h2>Introduction</h2>
 
-This plugin can be used to demodulate Inmarsat C data packets. They are transmitted by four geostationary satellites.
+This plugin can be used to demodulate Inmarsat C data packets. They are transmitted by four geostationary satellites, using right-hand circular polarization (RHCP).
 
 The packets are BPSK modulated with a symbol rate of 1,200 symbols/s and a data rate of 600 bit/s. 
 The packets are decoded from within frames of 639 bytes that take 8.64 seconds to receive.
@@ -47,52 +47,68 @@ Average total power in dB relative to a +/- 1.0 amplitude signal received in the
 
 <h3>4: RF Bandwidth</h3>
 
-This specifies the bandwidth of a LPF that is applied to the input signal to limit the RF bandwidth. This should be at least 3 kHz.
+This specifies the bandwidth of a LPF that is applied to the input signal to limit the RF bandwidth. This should be at least 2.4 kHz.
 
-<h3>5: PLL Status</h3>
+<h3>5: Equalizer</h3>
 
-The PLL status icon shows whether the Costas Loop in the demodulator is locked. When unlocked, the padlock icon will appear unlocked. When locked, the padlock icon will appear locked and the background will be green.
+The Equalizer combobox allows selection of an equalizer to use, which can help to overcome some forms of channel distortion. Options are:
+
+  - None: No equalizer will be used. 
+  - CMA: Constant Modulus Algorithm equalizer.
+  - LMS: Least Mean Squares equalizer.
+
+<h3>6: EVM</h3>
+
+EVM (Error Vector Magnitude) measurement in % over the last 10,240 received symbols (one frames worth). Lower values indicate better quality signals.
+
+<h3>7: Status</h3>
+
+The status icon shows the status of the demodulator:
+
+  - When the background is green, the demodulator is synchronized to the start of a frame.
+  - When the background is yellow, the demodulator Costas Loop is locked, but it is not yet synchronized to the start of a frame.
+  - When the background is grey, the Costas Loop is not locked, which suggests either no signal or too weak a signal to lock on to.
 
 Checking the icon will diplay additional PLL status and parameters, but these typically shouldn't require modification.
 
-<h3>6: UDP</h3>
+<h3>8: UDP</h3>
 
-When checked, received packets are forwarded to the specified UDP address (7) and port (8).
+When checked, received packets are forwarded to the specified UDP address (9) and port (10).
 
-<h3>7: UDP address</h3>
+<h3>9: UDP address</h3>
 
 IP address of the host to forward received packets to via UDP.
 
-<h3>8: UDP port</h3>
+<h3>10: UDP port</h3>
 
 UDP port number to forward received packets to.
 
-<h3>9: Filter Packets by Type</h3>
+<h3>11: Filter Packets by Type</h3>
 
 Entering a regular expression in the Type field displays only packets where the type, displayed in the Type column, matches the regular expression.
 
-<h3>10: Filter Packets by Message</h3>
+<h3>12: Filter Packets by Message</h3>
 
 Entering a regular expression in the Message field displays only packets where the message, displayed in the Message column, matches the regular expression.
 
-<h3>11: Use Date and Time from File</h3>
+<h3>13: Use Date and Time from File</h3>
 
 When checked, if the source device is a File Input device, the date and time used for
 packet reception time is taken from the file playback time. Otherwise, the current system clock time is used.
 
-<h3>12: Start/stop Logging Packets to .csv File</h3>
+<h3>14: Start/stop Logging Packets to .csv File</h3>
 
 When checked, writes all received packets to a .csv file.
 
-<h3>13: .csv Log Filename</h3>
+<h3>15: .csv Log Filename</h3>
 
 Click to specify the name of the .csv file which received packets are logged to.
 
-<h3>14: Read Data from .csv File</h3>
+<h3>16: Read Data from .csv File</h3>
 
 Click to specify a previously written .csv log file, which is read and used to update the table.
 
-<h3>15: Clear Packets from table</h3>
+<h3>17: Clear Packets from table</h3>
 
 Pressing this button clears all packets from the tables.
 

@@ -280,6 +280,82 @@
        </widget>
       </item>
       <item>
+       <widget class="QLabel" name="equalizerLabel">
+        <property name="text">
+         <string>Eq</string>
+        </property>
+       </widget>
+      </item>
+      <item>
+       <widget class="QComboBox" name="equalizer">
+        <property name="toolTip">
+         <string>Equalizer</string>
+        </property>
+        <item>
+         <property name="text">
+          <string>None</string>
+         </property>
+        </item>
+        <item>
+         <property name="text">
+          <string>CMA</string>
+         </property>
+        </item>
+        <item>
+         <property name="text">
+          <string>LMS</string>
+         </property>
+        </item>
+       </widget>
+      </item>
+      <item>
+       <widget class="Line" name="line_4">
+        <property name="orientation">
+         <enum>Qt::Orientation::Vertical</enum>
+        </property>
+       </widget>
+      </item>
+      <item>
+       <widget class="QLabel" name="evmLabel">
+        <property name="text">
+         <string>EVM</string>
+        </property>
+       </widget>
+      </item>
+      <item>
+       <widget class="QLabel" name="evm">
+        <property name="minimumSize">
+         <size>
+          <width>36</width>
+          <height>0</height>
+         </size>
+        </property>
+        <property name="toolTip">
+         <string>Error vector magnitude averaged over last second</string>
+        </property>
+        <property name="text">
+         <string>100.0</string>
+        </property>
+        <property name="alignment">
+         <set>Qt::AlignmentFlag::AlignRight|Qt::AlignmentFlag::AlignTrailing|Qt::AlignmentFlag::AlignVCenter</set>
+        </property>
+       </widget>
+      </item>
+      <item>
+       <widget class="QLabel" name="evmUnits">
+        <property name="text">
+         <string>%</string>
+        </property>
+       </widget>
+      </item>
+      <item>
+       <widget class="Line" name="evmLine">
+        <property name="orientation">
+         <enum>Qt::Orientation::Vertical</enum>
+        </property>
+       </widget>
+      </item>
+      <item>
        <widget class="QLabel" name="rrcRolloffLabel">
         <property name="text">
          <string>RRC</string>

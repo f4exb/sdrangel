@@ -35,6 +35,11 @@ struct InmarsatDemodSettings
 {
     qint32 m_inputFrequencyOffset;
     float m_rfBandwidth;
+    enum Equalizer {
+        NONE,
+        CMA,                            //!< Constant Modulus
+        LMS                             //!< Least Mean Square
+    } m_equalizer;
     float m_rrcRolloff;
     float m_pllBW;                      //!< Costas loop bandwidth in rad/sample
     float m_ssBW;                       //!< Symbol sync bandwidth normalised to symbol rate (E.g. 0.05 for 5%)
@@ -69,7 +74,7 @@ struct InmarsatDemodSettings
 
     static const int CHANNEL_SAMPLE_RATE = 48000;
     static const int BAUD_RATE = 1200;
-    static const int m_scopeStreams = 11;
+    static const int m_scopeStreams = 13;
 
     InmarsatDemodSettings();
     void resetToDefaults();

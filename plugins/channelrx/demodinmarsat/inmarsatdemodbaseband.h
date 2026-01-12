@@ -74,8 +74,8 @@ public:
     void getMagSqLevels(double& avg, double& peak, int& nbSamples) {
         m_sink.getMagSqLevels(avg, peak, nbSamples);
     }
-    void getPLLStatus(bool &locked,  Real &coarseFreqCurrent, Real &coarseFreqCurrentPower, Real &coarseFreq, Real &coarseFreqPower, Real &fineFreq) const {
-        m_sink.getPLLStatus(locked, coarseFreqCurrent, coarseFreqCurrentPower, coarseFreq, coarseFreqPower, fineFreq);
+    void getPLLStatus(bool &locked,  Real &coarseFreqCurrent, Real &coarseFreqCurrentPower, Real &coarseFreq, Real &coarseFreqPower, Real &fineFreq, Real &evm, bool &synced) const {
+        m_sink.getPLLStatus(locked, coarseFreqCurrent, coarseFreqCurrentPower, coarseFreq, coarseFreqPower, fineFreq, evm, synced);
     }
     void setMessageQueueToChannel(MessageQueue *messageQueue) { m_sink.setMessageQueueToChannel(messageQueue); }
     void setBasebandSampleRate(int sampleRate);

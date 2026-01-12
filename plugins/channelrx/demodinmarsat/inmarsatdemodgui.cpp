@@ -1362,6 +1362,12 @@ void InmarsatDemodGUI::on_rfBW_valueChanged(int value)
     applySetting("rfBandwidth");
 }
 
+void InmarsatDemodGUI::on_equalizer_currentIndexChanged(int index)
+{
+    m_settings.m_equalizer = (InmarsatDemodSettings::Equalizer) index;
+    applySetting("equalizer");
+}
+
 void InmarsatDemodGUI::on_rrcRolloff_valueChanged(int value)
 {
     ui->rrcRolloffText->setText(QString("%1").arg(value / 100.0, 0, 'f', 2));
@@ -1578,7 +1584,7 @@ InmarsatDemodGUI::InmarsatDemodGUI(PluginAPI* pluginAPI, DeviceUISet *deviceUISe
     m_scopeVis->setGLScope(ui->glScope);
     ui->glScope->connectTimer(MainCore::instance()->getMasterTimer());
     ui->scopeGUI->setBuddies(m_scopeVis->getInputMessageQueue(), m_scopeVis, ui->glScope);
-    ui->scopeGUI->setStreams(QStringList({"IQ", "MagSq", "IQ AGC", "AGC gain/avg", "IQ CFO", "IQ RRC", "TED Er", "TED Er Sum", "CL", "IQ Derot", "Bit/mu"}));
+    ui->scopeGUI->setStreams(QStringList({"IQ", "MagSq", "IQ AGC", "AGC gain/avg", "IQ CFO", "IQ RRC", "TED Er", "TED Er Sum", "CL", "IQ Derot", "Eq", "Eq Er", "Bit/mu"}));
 
     // Scope settings to display the IQ waveforms
     ui->scopeGUI->setPreTrigger(1);
@@ -1735,6 +1741,8 @@ void InmarsatDemodGUI::displaySettings()
     ui->rfBWText->setText(QString("%1k").arg(m_settings.m_rfBandwidth / 1000.0, 0, 'f', 1));
     ui->rfBW->setValue(m_settings.m_rfBandwidth / 100.0);
 
+    ui->equalizer->setCurrentIndex((int) m_settings.m_equalizer);
+
     ui->rrcRolloffText->setText(QString("%1").arg(m_settings.m_rrcRolloff, 0, 'f', 2));
     ui->rrcRolloff->setValue(m_settings.m_rrcRolloff * 100.0);
 
@@ -1822,11 +1830,18 @@ void InmarsatDemodGUI::tick()
     Real coarseFreq;
     Real coarseFreqPower;
     Real fineFreq;
-    m_inmarsatDemod->getPLLStatus(locked, coarseFreqCurrent, coarseFreqCurrentPower, coarseFreq, coarseFreqPower, fineFreq);
+    Real evm;
+    bool synced;
+    m_inmarsatDemod->getPLLStatus(locked, coarseFreqCurrent, coarseFreqCurrentPower, coarseFreq, coarseFreqPower, fineFreq, evm, synced);
 
-    if (locked)
+    if (synced)
     {
         ui->pll->setStyleSheet("QToolButton { background-color : green; }");
+        ui->pll->setIcon(QIcon(":/locked.png").pixmap(QSize(20, 20)));
+    }
+    else if (locked)
+    {
+        ui->pll->setStyleSheet("QToolButton { background-color : yellow; }");
         ui->pll->setIcon(QIcon(":/locked.png").pixmap(QSize(20, 20)));
     }
     else
@@ -1843,6 +1858,8 @@ void InmarsatDemodGUI::tick()
         .arg(std::round(coarseFreq))
         .arg(std::round(CalcDb::dbPower(coarseFreqPower)))
     );
+
+    ui->evm->setText(QString("%1").arg(evm * 100.0f, 0, 'f', 1));
 
     m_tickCount++;
 }
@@ -1951,6 +1968,7 @@ void InmarsatDemodGUI::makeUIConnections()
 {
     QObject::connect(ui->deltaFrequency, &ValueDialZ::changed, this, &InmarsatDemodGUI::on_deltaFrequency_changed);
     QObject::connect(ui->rfBW, &QSlider::valueChanged, this, &InmarsatDemodGUI::on_rfBW_valueChanged);
+    QObject::connect(ui->equalizer, &QComboBox::currentIndexChanged, this, &InmarsatDemodGUI::on_equalizer_currentIndexChanged);
     QObject::connect(ui->rrcRolloff, &QDial::valueChanged, this, &InmarsatDemodGUI::on_rrcRolloff_valueChanged);
     QObject::connect(ui->pllBW, &QDial::valueChanged, this, &InmarsatDemodGUI::on_pllBW_valueChanged);
     QObject::connect(ui->ssBW, &QDial::valueChanged, this, &InmarsatDemodGUI::on_ssBW_valueChanged);

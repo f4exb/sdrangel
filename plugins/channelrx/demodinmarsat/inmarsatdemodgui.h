@@ -226,6 +226,7 @@ private slots:
     void on_messages_itemSelectionChanged();
     void on_deltaFrequency_changed(qint64 value);
     void on_rfBW_valueChanged(int index);
+    void on_equalizer_currentIndexChanged(int index);
     void on_rrcRolloff_valueChanged(int value);
     void on_pll_clicked(bool checked=false);
     void on_pllBW_valueChanged(int value);

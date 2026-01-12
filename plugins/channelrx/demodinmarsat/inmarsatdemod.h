@@ -136,8 +136,8 @@ public:
         m_basebandSink->getMagSqLevels(avg, peak, nbSamples);
     }
 
-    void getPLLStatus(bool &locked, Real &coarseFreqCurrent, Real &coarseFreqCurrentPower, Real &coarseFreq, Real &coarseFreqPower, Real &fineFreq) const {
-        m_basebandSink->getPLLStatus(locked, coarseFreqCurrent, coarseFreqCurrentPower, coarseFreq, coarseFreqPower, fineFreq);
+    void getPLLStatus(bool &locked, Real &coarseFreqCurrent, Real &coarseFreqCurrentPower, Real &coarseFreq, Real &coarseFreqPower, Real &fineFreq, Real &evm, bool &synced) const {
+        m_basebandSink->getPLLStatus(locked, coarseFreqCurrent, coarseFreqCurrentPower, coarseFreq, coarseFreqPower, fineFreq, evm, synced);
     }
 
     uint32_t getNumberOfDeviceStreams() const;

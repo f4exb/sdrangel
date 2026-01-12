@@ -39,6 +39,7 @@ class ChannelAPI;
 class InmarsatDemod;
 class ScopeVis;
 
+// Automatic Gain Control
 class AGC {
 public:
     AGC();
@@ -77,6 +78,52 @@ private:
     Real magSq(int bin) const;
 };
 
+// Circular symbol/bit buffer for unique word detection, EVM calculation and equalizer training
+class SymbolBuffer {
+public:
+    SymbolBuffer(int size=64*162);
+    void push(quint8 bit, Complex symbol);
+    bool checkUW() const;
+    Complex getSymbol(int idx) const;
+    float evm() const;
+    qsizetype size() const { return m_bits.size(); }
+private:
+    QVector<quint8> m_bits;
+    QVector<Complex> m_symbols;
+    QVector<float> m_error;
+    double m_totalError;
+    int m_idx;
+    int m_count;
+};
+
+class Equalizer {
+public:
+    Equalizer(int samplesPerSymbol);
+    virtual Complex processOneSample(Complex x, bool update, bool training=false) = 0;
+    Complex getError() const { return m_error; }
+    void printTaps() const;
+protected:
+    int m_samplesPerSymbol;
+    QVector<Complex> m_delay;
+    QVector<Complex> m_taps;
+    int m_idx;
+    Complex m_error;
+};
+
+// Constant Modulus Equalizer
+class CMAEqualizer : public Equalizer {
+public:
+    CMAEqualizer(int samplesPerSymbol);
+    Complex processOneSample(Complex x, bool update, bool training=false) override;
+};
+
+// Least Mean Square Equalizer
+class LMSEqualizer : public Equalizer {
+public:
+    LMSEqualizer(int samplesPerSymbol);
+    Complex processOneSample(Complex x, bool update, bool training=false) override;
+};
+
 class InmarsatDemodSink : public ChannelSampleSink {
 public:
     InmarsatDemodSink(InmarsatDemod *stdcDemod);
@@ -110,7 +157,8 @@ public:
         m_magsqCount = 0;
     }
 
-    void getPLLStatus(bool &locked, Real &coarseFreqCurrent, Real &coarseFreqCurrentPower, Real &coarseFreq, Real &coarseFreqPower, Real &fineFreq) const;
+    void getPLLStatus(bool &locked, Real &coarseFreqCurrent, Real &coarseFreqCurrentPower, Real &coarseFreq, Real &coarseFreqPower,
+        Real &fineFreq, Real& evm, bool &synced) const;
 
 private:
     struct MagSqLevelsStore
@@ -147,6 +195,15 @@ private:
 
     inmarsatc::decoder::Decoder m_decoder;
     inmarsatc::frameParser::PacketDecoder m_parser;
+
+    SymbolBuffer m_symbolBuffer;
+    int m_symbolCounter;
+    bool m_syncedToUW;
+
+    Equalizer *m_equalizer;
+    Complex m_eq;
+    Complex m_eqError;
+    float m_evm;
 
     CostasLoop m_costasLoop;
     Complex m_ref;
@@ -192,7 +249,7 @@ private:
     void decodeBits();
     MessageQueue *getMessageQueueToChannel() { return m_messageQueueToChannel; }
     void sampleToScopeA(Complex sample, Real magsq, Complex postAGC, Real agcGain, Real agcAvg, Complex postCFO);
-    void sampleToScopeB(Complex rrc, Complex tedError, Complex tedErrorSum, Complex ref, Complex derot, int bit, Real mu);
+    void sampleToScopeB(Complex rrc, Complex tedError, Complex tedErrorSum, Complex ref, Complex derot, Complex eq, Complex eqEerror, int bit, Real mu);
 };
 
 #endif // INCLUDE_INMARSATDEMODSINK_H
