@@ -30,6 +30,7 @@
         "XTRX_DIR": "/opt/install/xtrx-images",
         "GGMORSE_DIR": "/opt/install/ggmorse",
         "RNNOISE_DIR": "/opt/install/rnnoise",
+        "INMARSATC_DIR": "/opt/install/inmarsatc",
         "CMAKE_INSTALL_PREFIX": "/opt/install/sdrangel"
       },
       "warnings": {
