@@ -143,7 +143,7 @@ bool InmarsatDemod::handleMessage(const Message& cmd)
 {
     if (MsgConfigureInmarsatDemod::match(cmd))
     {
-        MsgConfigureInmarsatDemod& cfg = (MsgConfigureInmarsatDemod&) cmd;
+        const MsgConfigureInmarsatDemod& cfg = (const MsgConfigureInmarsatDemod&) cmd;
         qDebug() << "InmarsatDemod::handleMessage: MsgConfigureInmarsatDemod";
         applySettings(cfg.getSettings(), cfg.getSettingsKeys(), cfg.getForce());
 
@@ -151,7 +151,7 @@ bool InmarsatDemod::handleMessage(const Message& cmd)
     }
     else if (DSPSignalNotification::match(cmd))
     {
-        DSPSignalNotification& notif = (DSPSignalNotification&) cmd;
+        const DSPSignalNotification& notif = (const DSPSignalNotification&) cmd;
         m_basebandSampleRate = notif.getSampleRate();
         m_centerFrequency = notif.getCenterFrequency();
         // Forward to the sink
@@ -168,7 +168,7 @@ bool InmarsatDemod::handleMessage(const Message& cmd)
     else if (MainCore::MsgPacket::match(cmd))
     {
         // Forward to GUI
-        MainCore::MsgPacket& report = (MainCore::MsgPacket&)cmd;
+        const MainCore::MsgPacket& report = (const MainCore::MsgPacket&)cmd;
         if (getMessageQueueToGUI())
         {
             MainCore::MsgPacket *msg = new MainCore::MsgPacket(report);

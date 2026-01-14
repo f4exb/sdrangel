@@ -79,7 +79,7 @@ ChannelGUI* InmarsatDemodPlugin::createRxChannelGUI(
 {
     (void) deviceUISet;
     (void) rxChannel;
-    return 0;
+    return nullptr;
 }
 #else
 ChannelGUI* InmarsatDemodPlugin::createRxChannelGUI(DeviceUISet *deviceUISet, BasebandSampleSink *rxChannel) const

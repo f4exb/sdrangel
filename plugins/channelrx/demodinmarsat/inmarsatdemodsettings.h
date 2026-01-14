@@ -86,8 +86,8 @@ struct InmarsatDemodSettings
     void applySettings(const QStringList& settingsKeys, const InmarsatDemodSettings& settings);
     QString getDebugString(const QStringList& settingsKeys, bool force = false) const;
     void appendDefaultColumnSettings();
-    void appendDefaultColumnIndexes(QList<int>& list, int size);
-    void appendDefaultColumnSizes(QList<int>& list, int size);
+    void appendDefaultColumnIndexes(QList<int>& list, int size) const;
+    void appendDefaultColumnSizes(QList<int>& list, int size) const;
 };
 
 #endif /* INCLUDE_INMARSATDEMODSETTINGS_H */

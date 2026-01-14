@@ -41,14 +41,14 @@ void InmarsatDemodSettings::appendDefaultColumnSettings()
     appendDefaultColumnSizes(m_messagesColumnSizes, INMARSATDEMOD_MESSAGES_COLUMNS);
 }
 
-void InmarsatDemodSettings::appendDefaultColumnIndexes(QList<int>& list, int size)
+void InmarsatDemodSettings::appendDefaultColumnIndexes(QList<int>& list, int size) const
 {
     while (list.size() < size) {
         list.append(list.size());
     }
 }
 
-void InmarsatDemodSettings::appendDefaultColumnSizes(QList<int>& list, int size)
+void InmarsatDemodSettings::appendDefaultColumnSizes(QList<int>& list, int size) const
 {
     while (list.size() < size) {
         list.append(-1);

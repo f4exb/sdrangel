@@ -68,7 +68,7 @@ public:
         { }
     };
 
-    InmarsatDemod(DeviceAPI *deviceAPI);
+    explicit InmarsatDemod(DeviceAPI *deviceAPI);
     virtual ~InmarsatDemod();
     virtual void destroy() { delete this; }
     virtual void setDeviceAPI(DeviceAPI *deviceAPI);
