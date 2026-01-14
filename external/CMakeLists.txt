@@ -322,11 +322,19 @@ if (NOT FAAD_FOUND AND NOT USE_PRECOMPILED_LIBS)
 endif (NOT FAAD_FOUND AND NOT USE_PRECOMPILED_LIBS)
 
 if (NOT FFTW3F_FOUND AND NOT USE_PRECOMPILED_LIBS)
+    if (WIN32)
+        set(FFTW3F_LIBRARIES "${SDRANGEL_BINARY_LIB_DIR}/libfftw3f.lib" CACHE INTERNAL "")
+    elseif (LINUX)
+        set(FFTW3F_LIBRARIES "${EXTERNAL_BUILD_LIBRARIES}/lib${LIB_SUFFIX}/libfftw3f${CMAKE_SHARED_LIBRARY_SUFFIX}" CACHE INTERNAL "")
+    elseif (APPLE)
+        set(FFTW3F_LIBRARIES "${EXTERNAL_BUILD_LIBRARIES}/fftw3f/src/fftw3f-build/.libs/libfftw3f.a" CACHE INTERNAL "")
+    endif ()
     ExternalProject_Add(fftw3f
             URL http://fftw.org/fftw-3.3.10.tar.gz
             PREFIX "${EXTERNAL_BUILD_LIBRARIES}/fftw3f"
             CONFIGURE_COMMAND <SOURCE_DIR>/configure --prefix=<INSTALL_DIR> --enable-float
             BUILD_COMMAND ${MAKE}
+            BUILD_BYPRODUCTS "${FFTW3F_LIBRARIES}"
             INSTALL_COMMAND ""
             TEST_COMMAND ""
             )
@@ -335,13 +343,6 @@ if (NOT FFTW3F_FOUND AND NOT USE_PRECOMPILED_LIBS)
     set_global_cache(FFTW3F_FOUND ON)
     set(FFTW3F_EXTERNAL ON CACHE INTERNAL "")
     set(FFTW3F_INCLUDE_DIRS "${source_dir}/api" "${binary_dir}" CACHE INTERNAL "")
-    if (WIN32)
-        set(FFTW3F_LIBRARIES "${SDRANGEL_BINARY_LIB_DIR}/libfftw3f.lib" CACHE INTERNAL "")
-    elseif (LINUX)
-        set(FFTW3F_LIBRARIES "${EXTERNAL_BUILD_LIBRARIES}/lib${LIB_SUFFIX}/libfftw3f${CMAKE_SHARED_LIBRARY_SUFFIX}" CACHE INTERNAL "")
-    elseif (APPLE)
-        set(FFTW3F_LIBRARIES "${binary_dir}/.libs/libfftw3f.a" CACHE INTERNAL "")
-    endif ()
 endif (NOT FFTW3F_FOUND AND NOT USE_PRECOMPILED_LIBS)
 
 # Can't build Boost using ExternalProject_Add, as we want to use find_package(Boost) as it defines many variables,
@@ -964,7 +965,7 @@ if(ENABLE_CHANNELRX_DEMODINMARSAT)
     elseif (APPLE)
         install(DIRECTORY "${binary_dir}" DESTINATION "${INSTALL_LIB_DIR}"
                 FILES_MATCHING PATTERN "libinmarsatc*${CMAKE_SHARED_LIBRARY_SUFFIX}")
-        set(MACOS_EXTERNAL_LIBS_FIXUP "${MACOS_EXTERNAL_LIBS_FIXUP};${binary_dir}/src")
+        set(MACOS_EXTERNAL_LIBS_FIXUP "${MACOS_EXTERNAL_LIBS_FIXUP};${binary_dir}")
     endif ()
 endif()
 

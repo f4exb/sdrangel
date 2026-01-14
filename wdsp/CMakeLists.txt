@@ -152,6 +152,10 @@ target_link_libraries(wdsp
     Qt::Core
 )
 
+if(DEFINED FFTW3F_DEPENDS)
+    add_dependencies(wdsp ${FFTW3F_DEPENDS})
+endif()
+
 set_target_properties(wdsp PROPERTIES WINDOWS_EXPORT_ALL_SYMBOLS true)
 if (MSVC)
     set_target_properties(wdsp PROPERTIES INTERPROCEDURAL_OPTIMIZATION false)
