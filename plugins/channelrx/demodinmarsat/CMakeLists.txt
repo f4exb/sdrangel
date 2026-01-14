@@ -55,6 +55,10 @@ if(NOT BUILD_SHARED_LIBS)
     set_property(GLOBAL APPEND PROPERTY STATIC_PLUGINS_PROPERTY ${TARGET_NAME})
 endif()
 
+if(DEFINED INMARSATC_DEPENDS)
+    add_dependencies(${TARGET_NAME} ${INMARSATC_DEPENDS})
+endif()
+
 target_link_libraries(${TARGET_NAME} PRIVATE
     Qt::Core
     ${TARGET_LIB}

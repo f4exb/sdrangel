@@ -45,7 +45,7 @@
 
 #include "inmarsatdemod.h"
 
-MultipartMessage::MultipartMessage(int id, std::map<std::string, std::string> params, const QDateTime& dateTime) :
+MultipartMessage::MultipartMessage(int id, std::map<std::string, std::string>& params, const QDateTime& dateTime) :
     m_id(id),
     m_icon(nullptr),
     m_latitude(0.0f),
@@ -54,7 +54,7 @@ MultipartMessage::MultipartMessage(int id, std::map<std::string, std::string> pa
     update(params, dateTime);
 }
 
-void MultipartMessage::update(std::map<std::string, std::string> params, const QDateTime& dateTime)
+void MultipartMessage::update(std::map<std::string, std::string>& params, const QDateTime& dateTime)
 {
     m_dateTime = dateTime;
     m_service = QString::fromStdString(params["serviceCodeAndAddressName"]);
@@ -1324,7 +1324,7 @@ void InmarsatDemodGUI::handleInputMessages()
 {
     Message* message;
 
-    while ((message = getInputMessageQueue()->pop()) != 0)
+    while ((message = getInputMessageQueue()->pop()) != nullptr)
     {
         if (handleMessage(*message))
         {

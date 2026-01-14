@@ -42,7 +42,7 @@ class ScopeVis;
 // Automatic Gain Control
 class AGC {
 public:
-    AGC();
+    explicit AGC();
     Complex processOneSample(const Complex &iq, bool locked);
     Real getGain() const { return m_gain; }
     Real getAverage() const { return m_agcMovingAverage.instantAverage(); }
@@ -54,7 +54,7 @@ private:
 
 class FrequencyOffsetEstimate {
 public:
-    FrequencyOffsetEstimate();
+    explicit FrequencyOffsetEstimate();
     ~FrequencyOffsetEstimate();
     void processOneSample(Complex& iq, bool locked);
     Real getFreqHz() const { return m_freqOffsetHz; }
@@ -81,7 +81,7 @@ private:
 // Circular symbol/bit buffer for unique word detection, EVM calculation and equalizer training
 class SymbolBuffer {
 public:
-    SymbolBuffer(int size=64*162);
+    explicit SymbolBuffer(int size=64*162);
     void push(quint8 bit, Complex symbol);
     bool checkUW() const;
     Complex getSymbol(int idx) const;
@@ -98,7 +98,7 @@ private:
 
 class Equalizer {
 public:
-    Equalizer(int samplesPerSymbol);
+    explicit Equalizer(int samplesPerSymbol);
     virtual ~Equalizer() {}
     virtual Complex processOneSample(Complex x, bool update, bool training=false) = 0;
     Complex getError() const { return m_error; }
@@ -114,14 +114,14 @@ protected:
 // Constant Modulus Equalizer
 class CMAEqualizer : public Equalizer {
 public:
-    CMAEqualizer(int samplesPerSymbol);
+    explicit CMAEqualizer(int samplesPerSymbol);
     Complex processOneSample(Complex x, bool update, bool training=false) override;
 };
 
 // Least Mean Square Equalizer
 class LMSEqualizer : public Equalizer {
 public:
-    LMSEqualizer(int samplesPerSymbol);
+    explicit LMSEqualizer(int samplesPerSymbol);
     Complex processOneSample(Complex x, bool update, bool training=false) override;
 };
 

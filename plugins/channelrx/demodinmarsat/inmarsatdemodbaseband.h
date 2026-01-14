@@ -64,7 +64,7 @@ public:
         { }
     };
 
-    InmarsatDemodBaseband(InmarsatDemod *packetDemod);
+    explicit InmarsatDemodBaseband(InmarsatDemod *packetDemod);
     ~InmarsatDemodBaseband();
     void reset();
     void startWork();

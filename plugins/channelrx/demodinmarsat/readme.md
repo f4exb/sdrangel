@@ -121,3 +121,8 @@ Right click on the table headers to select which columns are visible. Columns ca
 
 Right clicking on a cell in the table will show a context menu, allowing the contents to be copied.
 If the message contains coordinates, an option to find that location on the [Map Feature](../../feature/map/readme.md) will be shown.
+
+<h3>Waveforms</h3>
+
+The Waveforms rollup has a scope that can display various signals within the demodulator.
+To see a constellation diagram for the recevied symbols, set the X & Y traces to IQ Derot Real & Imag, and Display to XY trace.

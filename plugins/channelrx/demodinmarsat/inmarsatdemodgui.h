@@ -62,8 +62,8 @@ struct MessagePart {
 class MultipartMessage {
 public:
 
-    MultipartMessage(int id, std::map<std::string, std::string> params, const QDateTime& dateTime);
-    void update(std::map<std::string, std::string> params, const QDateTime& dateTime);
+    explicit MultipartMessage(int id, std::map<std::string, std::string>& params, const QDateTime& dateTime);
+    void update(std::map<std::string, std::string>& params, const QDateTime& dateTime);
     void addPart(const MessagePart& part);
     QString getMessage() const;
     int getParts() const { return m_parts.size(); }
@@ -157,7 +157,7 @@ private:
     QRegularExpression m_typeRE;
     QRegularExpression m_messageRE;
 
-    explicit InmarsatDemodGUI(PluginAPI* pluginAPI, DeviceUISet *deviceUISet, BasebandSampleSink *rxChannel, QWidget* parent = 0);
+    explicit InmarsatDemodGUI(PluginAPI* pluginAPI, DeviceUISet *deviceUISet, BasebandSampleSink *rxChannel, QWidget* parent = nullptr);
     virtual ~InmarsatDemodGUI();
 
     void blockApplySettings(bool block);
