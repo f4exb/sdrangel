@@ -117,6 +117,7 @@ QByteArray SSBDemodSettings::serialize() const
     s.writeFloat(33, m_dnrSigmaFactor);
     s.writeS32(34, m_dnrNbPeaks);
     s.writeFloat(35, m_dnrAlpha);
+    s.writeBool(36, m_audioMute);
 
     for (unsigned int i = 0; i <  10; i++)
     {
@@ -206,6 +207,7 @@ bool SSBDemodSettings::deserialize(const QByteArray& data)
         d.readFloat(33, &m_dnrSigmaFactor, 4.0f);
         d.readS32(34, &m_dnrNbPeaks, 20);
         d.readFloat(35, &m_dnrAlpha, 1.0);
+        d.readBool(36, &m_audioMute, false);
 
         for (unsigned int i = 0; (i < 10); i++)
         {
