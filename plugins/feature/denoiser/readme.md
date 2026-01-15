@@ -13,7 +13,7 @@ It connects to the "demod" stream of Rx channels similarly to the Demod analyzer
   - WFM demodulator
   - WDSP plugin (multimode)
 
-Note that this plugin is available only in Linux
+Note that this plugin is available only in Linux or Mac.
 
 The following noise reduction schemes are covered. It can be selected via the (6) combo box:
 
