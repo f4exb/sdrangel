@@ -518,6 +518,8 @@ void BFMDemodGUI::displaySettings()
     ui->afBW->setValue(m_settings.m_afBandwidth/1000.0);
     ui->afBWText->setText(QString("%1 kHz").arg(m_settings.m_afBandwidth/1000.0));
 
+	ui->deEmphasis->setCurrentIndex((int) m_settings.m_deEmphasis);
+
     ui->volume->setValue(m_settings.m_volume * 10.0);
     ui->volumeText->setText(QString("%1").arg(m_settings.m_volume, 0, 'f', 1));
 
