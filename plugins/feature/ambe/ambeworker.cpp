@@ -50,7 +50,11 @@ AMBEWorker::~AMBEWorker()
 
 bool AMBEWorker::open(const std::string& deviceRef)
 {
-    return m_dvController.open(deviceRef);
+    if (deviceRef.empty()) {
+        return false;
+    } else {
+        return m_dvController.open(deviceRef);
+    }
 }
 
 void AMBEWorker::close()
