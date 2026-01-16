@@ -1375,6 +1375,8 @@ void WDSPRxGUI::tick()
     double powDbPeak;
     int nbMagsqSamples;
     m_wdspRx->getMagSqLevels(powDbAvg, powDbPeak, nbMagsqSamples); // powers directly in dB
+    powDbAvg = powDbAvg == 0.0 ? WDSPRxSettings::m_minPowerThresholdDB : powDbAvg;
+    powDbPeak = powDbPeak == 0.0 ? WDSPRxSettings::m_minPowerThresholdDB : powDbPeak;
 
     ui->channelPowerMeter->levelChanged(
             (WDSPRxSettings::m_mminPowerThresholdDBf + powDbAvg) / WDSPRxSettings::m_mminPowerThresholdDBf,
