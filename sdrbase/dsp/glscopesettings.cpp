@@ -47,6 +47,8 @@ GLScopeSettings::GLScopeSettings(const GLScopeSettings& t)
     m_tracesData = t.m_tracesData;
     m_triggersData = t.m_triggersData;
     m_displayMode = t.m_displayMode;
+    m_displayXYPoints = t.m_displayXYPoints;
+    m_displayXYPolarGrid = t.m_displayXYPolarGrid;
     m_traceIntensity = t.m_traceIntensity;
     m_gridIntensity = t.m_gridIntensity;
     m_time = t.m_time;
@@ -61,6 +63,8 @@ GLScopeSettings::~GLScopeSettings()
 void GLScopeSettings::resetToDefaults()
 {
     m_displayMode = DisplayX;
+    m_displayXYPoints = false;
+    m_displayXYPolarGrid = false;
     m_traceIntensity = 50;
     m_gridIntensity = 10;
     m_time = 1;
@@ -82,6 +86,9 @@ QByteArray GLScopeSettings::serialize() const
     // s.writeS32(5, m_timeOfs);
     s.writeS32(6, m_traceLenMult);
     s.writeBool(7, m_freerun);
+
+    s.writeBool(8, m_displayXYPoints);
+    s.writeBool(9, m_displayXYPolarGrid);
 
     std::vector<TraceData>::const_iterator traceDataIt = m_tracesData.begin();
     unsigned int i = 0;
@@ -152,6 +159,8 @@ bool GLScopeSettings::deserialize(const QByteArray& data)
         // d.readS32(5, &m_timeOfs, 0);
         d.readS32(6, &m_traceLenMult, 1);
         d.readBool(7, &m_freerun, true);
+        d.readBool(8, &m_displayXYPoints, false);
+        d.readBool(9, &m_displayXYPolarGrid, false);
         d.readS32(201, &m_trigPre, 0);
 
         uint32_t nbTracesSaved;
@@ -472,6 +481,8 @@ GLScopeSettings& GLScopeSettings::operator=(const GLScopeSettings& t)
         m_tracesData = t.m_tracesData;
         m_triggersData = t.m_triggersData;
         m_displayMode = t.m_displayMode;
+        m_displayXYPoints = t.m_displayXYPoints;
+        m_displayXYPolarGrid = t.m_displayXYPolarGrid;
         m_traceIntensity = t.m_traceIntensity;
         m_gridIntensity = t.m_gridIntensity;
         m_time = t.m_time;

@@ -157,6 +157,8 @@ public:
     };
 
     DisplayMode m_displayMode;
+    bool m_displayXYPoints;
+    bool m_displayXYPolarGrid;
     int m_traceIntensity;
     int m_gridIntensity;
     int m_time;
