@@ -3,7 +3,7 @@ name: SDRangel Windows release build and signing
 on:
   push:
     branches:
-      - master
+      - windows_release
     tags:
       - 'v*'
 

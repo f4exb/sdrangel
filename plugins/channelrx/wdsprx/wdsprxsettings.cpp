@@ -133,6 +133,7 @@ QByteArray WDSPRxSettings::serialize() const
     s.writeBool(   8, m_audioBinaural);
     s.writeBool(   9, m_audioFlipChannels);
     s.writeBool(  10, m_dsb);
+    s.writeBool(  19, m_audioMute);
     // AGC
     s.writeBool(  11, m_agc);
     s.writeS32(   12, (int) m_agcMode);
@@ -346,6 +347,7 @@ bool WDSPRxSettings::deserialize(const QByteArray& data)
         d.readBool(   8, &m_audioBinaural, false);
         d.readBool(   9, &m_audioFlipChannels, false);
         d.readBool(  10, &m_dsb, false);
+        d.readBool(  19, &m_audioMute, false);
         // AGC
         d.readBool(  11, &m_agc, true);
         d.readS32(   12, &tmp, 2);

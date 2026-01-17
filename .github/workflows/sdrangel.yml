@@ -9,7 +9,7 @@ on:
       - mac_ci
       - fix-*
       - feature-*
-    tags:
+    tags-ignore:
       - 'v*'
   pull_request:
 
