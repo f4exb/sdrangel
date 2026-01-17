@@ -859,7 +859,7 @@ void GLScope::drawMarkers()
 {
     QVector4D markerColor(1.0f, 1.0f, 1.0f, 0.3f);
 
-    if ((m_markers1.size() > 0) && ((m_displayMode == DisplayX) || (m_displayMode == DisplayXYH) || (m_displayMode == DisplayXYV))) // Draw markers1
+    if ((m_markers1.size() > 0) && ((m_displayMode == DisplayX) || (m_displayMode == DisplayXYH) || (m_displayMode == DisplayXYV)|| (m_displayMode == DisplayPol))) // Draw markers1
     {
         // crosshairs
         for (int i = 0; i < m_markers1.size(); i++)
@@ -924,8 +924,22 @@ void GLScope::drawMarkers()
         }
     }
 
-    if ((m_markers2.size() > 0) && ((m_displayMode == DisplayY) || (m_displayMode == DisplayXYH) || (m_displayMode == DisplayXYV))) // Draw markers2
+    if ((m_markers2.size() > 0) && ((m_displayMode == DisplayY) || (m_displayMode == DisplayXYH) || (m_displayMode == DisplayXYV) || (m_displayMode == DisplayPol))) // Draw markers2
     {
+        QMatrix4x4 *marker2Matrix;
+        QRectF *marker2Rect;
+
+        if (m_displayMode == DisplayPol)
+        {
+            marker2Matrix = &m_glScopeMatrix1;
+            marker2Rect = &m_glScopeRect1;
+        }
+        else
+        {
+            marker2Matrix = &m_glScopeMatrix2;
+            marker2Rect = &m_glScopeRect2;
+        }
+
         // crosshairs
         for (int i = 0; i < m_markers2.size(); i++)
         {
@@ -933,12 +947,12 @@ void GLScope::drawMarkers()
                 (float) m_markers2.at(i).m_point.x(), 0,
                 (float) m_markers2.at(i).m_point.x(), 1
             };
-            m_glShaderSimple.drawSegments(m_glScopeMatrix2, markerColor, h, 2);
+            m_glShaderSimple.drawSegments(*marker2Matrix, markerColor, h, 2);
             GLfloat v[] {
                 0, (float) m_markers2.at(i).m_point.y(),
                 1, (float) m_markers2.at(i).m_point.y()
             };
-            m_glShaderSimple.drawSegments(m_glScopeMatrix2, markerColor, v, 2);
+            m_glShaderSimple.drawSegments(*marker2Matrix, markerColor, v, 2);
         }
 
         // text
@@ -950,20 +964,20 @@ void GLScope::drawMarkers()
                     m_markers2.at(i).m_timeStr,
                     QColor(255, 255, 255, 192),
                     m_textOverlayFont,
-                    m_markers2.at(i).m_point.x() * m_glScopeRect2.width(),
-                    m_glScopeRect2.height(),
+                    m_markers2.at(i).m_point.x() * marker2Rect->width(),
+                    marker2Rect->height(),
                     m_markers2.at(i).m_point.x() < 0.5f,
                     false,
-                    m_glScopeRect2);
+                    *marker2Rect);
                 drawTextOverlay(
                     m_markers2.at(i).m_valueStr,
                     QColor(255, 255, 255, 192),
                     m_textOverlayFont,
                     0,
-                    m_markers2.at(i).m_point.y() * m_glScopeRect2.height(),
+                    m_markers2.at(i).m_point.y() * marker2Rect->height(),
                     true,
                     m_markers2.at(i).m_point.y() < 0.5f,
-                    m_glScopeRect2);
+                    *marker2Rect);
             }
             else
             {
@@ -971,20 +985,20 @@ void GLScope::drawMarkers()
                     m_markers2.at(i).m_timeDeltaStr,
                     QColor(255, 255, 255, 192),
                     m_textOverlayFont,
-                    m_markers2.at(i).m_point.x() * m_glScopeRect2.width(),
+                    m_markers2.at(i).m_point.x() * marker2Rect->width(),
                     0,
                     m_markers2.at(i).m_point.x() < 0.5f,
                     true,
-                    m_glScopeRect2);
+                    *marker2Rect);
                 drawTextOverlay(
                     m_markers2.at(i).m_valueDeltaStr,
                     QColor(255, 255, 255, 192),
                     m_textOverlayFont,
-                    m_glScopeRect2.width(),
-                    m_markers2.at(i).m_point.y() * m_glScopeRect2.height(),
+                    marker2Rect->width(),
+                    m_markers2.at(i).m_point.y() * marker2Rect->height(),
                     false,
                     m_markers2.at(i).m_point.y() < 0.5f,
-                    m_glScopeRect2);
+                    *marker2Rect);
             }
         }
     }
@@ -2259,10 +2273,6 @@ void GLScope::setColorPalette(int nbVertices, int modulo, GLfloat *colors)
 
 void GLScope::mousePressEvent(QMouseEvent* event)
 {
-    if (m_displayMode == DisplayPol) { // Ignore mouse press on Polar displays
-        return;
-    }
-
     const QPointF& ep = event->localPos(); // x, y pixel position in whole scope window
     bool doUpdate = false;
 
@@ -2272,18 +2282,29 @@ void GLScope::mousePressEvent(QMouseEvent* event)
         p1.rx() = (ep.x()/width() -  m_glScopeRect1.left()) / m_glScopeRect1.width();
         p1.ry() = (ep.y()/height() - m_glScopeRect1.top()) / m_glScopeRect1.height();
 
-        QPointF p2 = ep; // relative position in graph #2
-        p2.rx() = (ep.x()/width() -  m_glScopeRect2.left()) / m_glScopeRect2.width();
-        p2.ry() = (ep.y()/height() - m_glScopeRect2.top()) / m_glScopeRect2.height();
+        QPointF p2 = ep; // relative position in graph #1 or #2
+        if (m_displayMode == DisplayPol)
+        {
+            p2.rx() = (ep.x()/width() -  m_glScopeRect1.left()) / m_glScopeRect1.width();
+            p2.ry() = (ep.y()/height() - m_glScopeRect1.top()) / m_glScopeRect1.height();
+        }
+        else
+        {
+            p2.rx() = (ep.x()/width() -  m_glScopeRect2.left()) / m_glScopeRect2.width();
+            p2.ry() = (ep.y()/height() - m_glScopeRect2.top()) / m_glScopeRect2.height();
+        }
+
+        bool m1 = (m_displayMode != DisplayPol) || ((m_displayMode == DisplayPol) && !(event->modifiers() & Qt::AltModifier));
+        bool m2 = (m_displayMode != DisplayPol) || ((m_displayMode == DisplayPol) && (event->modifiers() & Qt::AltModifier));
 
         if (event->modifiers() & Qt::ShiftModifier)
         {
-            if ((p1.x() >= 0) && (p1.y() >= 0) && (p1.x() <= 1) && (p1.y() <= 1))
+            if (m1 && (p1.x() >= 0) && (p1.y() >= 0) && (p1.x() <= 1) && (p1.y() <= 1))
             {
                 m_markers1.clear();
                 doUpdate = true;
             }
-            if ((p2.x() >= 0) && (p2.y() >= 0) && (p2.x() <= 1) && (p2.y() <= 1))
+            if (m2 && (p2.x() >= 0) && (p2.y() >= 0) && (p2.x() <= 1) && (p2.y() <= 1))
             {
                 m_markers2.clear();
                 doUpdate = true;
@@ -2291,12 +2312,12 @@ void GLScope::mousePressEvent(QMouseEvent* event)
         }
         else
         {
-            if ((m_markers1.size() > 0) && (p1.x() >= 0) && (p1.y() >= 0) && (p1.x() <= 1) && (p1.y() <= 1))
+            if (m1 && (m_markers1.size() > 0) && (p1.x() >= 0) && (p1.y() >= 0) && (p1.x() <= 1) && (p1.y() <= 1))
             {
                 m_markers1.pop_back();
                 doUpdate = true;
             }
-            if ((m_markers2.size() > 0) && (p2.x() >= 0) && (p2.y() >= 0) && (p2.x() <= 1) && (p2.y() <= 1))
+            if (m2 && (m_markers2.size() > 0) && (p2.x() >= 0) && (p2.y() >= 0) && (p2.x() <= 1) && (p2.y() <= 1))
             {
                 m_markers2.pop_back();
                 doUpdate = true;
@@ -2311,12 +2332,21 @@ void GLScope::mousePressEvent(QMouseEvent* event)
             p1.rx() = (ep.x()/width() -  m_glScopeRect1.left()) / m_glScopeRect1.width();
             p1.ry() = (ep.y()/height() - m_glScopeRect1.top()) / m_glScopeRect1.height();
 
-            QPointF p2 = ep; // relative position in graph #2
-            p2.rx() = (ep.x()/width() -  m_glScopeRect2.left()) / m_glScopeRect2.width();
-            p2.ry() = (ep.y()/height() - m_glScopeRect2.top()) / m_glScopeRect2.height();
+            QPointF p2 = ep; // relative position in graph #1 or #2
+            if (m_displayMode == DisplayPol)
+            {
+                p2.rx() = (ep.x()/width() -  m_glScopeRect1.left()) / m_glScopeRect1.width();
+                p2.ry() = (ep.y()/height() - m_glScopeRect1.top()) / m_glScopeRect1.height();
+            }
+            else
+            {
+                p2.rx() = (ep.x()/width() -  m_glScopeRect2.left()) / m_glScopeRect2.width();
+                p2.ry() = (ep.y()/height() - m_glScopeRect2.top()) / m_glScopeRect2.height();
+            }
 
             if ((p1.x() >= 0) && (p1.y() >= 0) && (p1.x() <= 1) && (p1.y() <= 1) &&
-                ((m_displayMode == DisplayX) || (m_displayMode == DisplayXYV) || (m_displayMode == DisplayXYH)))
+                ((m_displayMode == DisplayX) || (m_displayMode == DisplayXYV) || (m_displayMode == DisplayXYH)
+                    || ((m_displayMode == DisplayPol) && !(event->modifiers() & Qt::AltModifier))))
             {
                 if (m_markers1.size() < 2)
                 {
@@ -2341,14 +2371,29 @@ void GLScope::mousePressEvent(QMouseEvent* event)
             }
 
             if ((p2.x() >= 0) && (p2.y() >= 0) && (p2.x() <= 1) && (p2.y() <= 1) &&
-                ((m_displayMode == DisplayY) || (m_displayMode == DisplayXYV) || (m_displayMode == DisplayXYH)))
+                ((m_displayMode == DisplayY) || (m_displayMode == DisplayXYV) || (m_displayMode == DisplayXYH)
+                    || ((m_displayMode == DisplayPol) && (event->modifiers() & Qt::AltModifier))))
             {
+                ScaleEngine *m2xScale;
+                ScaleEngine *m2yScale;
+
+                if (m_displayMode == DisplayPol)
+                {
+                    m2xScale = &m_x1Scale;
+                    m2yScale = &m_y1Scale;
+                }
+                else
+                {
+                    m2xScale = &m_x2Scale;
+                    m2yScale = &m_y2Scale;
+                }
+
                 if (m_markers2.size() < 2)
                 {
                     m_markers2.push_back(ScopeMarker());
                     m_markers2.back().m_point = p2;
-                    m_markers2.back().m_time = p2.x() * m_x2Scale.getRange() + m_x2Scale.getRangeMin();
-                    m_markers2.back().m_value = (1.0f - p2.y()) * m_y2Scale.getRange() + m_y2Scale.getRangeMin();
+                    m_markers2.back().m_time = p2.x() * m2xScale->getRange() + m2xScale->getRangeMin();
+                    m_markers2.back().m_value = (1.0f - p2.y()) * m2yScale->getRange() + m2yScale->getRangeMin();
                     m_markers2.back().m_timeStr = displayScaled(m_markers2.back().m_time, 'f', 1);
                     m_markers2.back().m_valueStr = displayScaled(m_markers2.back().m_value, 'f', 1);
 
