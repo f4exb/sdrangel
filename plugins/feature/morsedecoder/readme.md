@@ -65,7 +65,7 @@ Lock the pitch and speed to the current values detected by GGMorse. Unlock to re
 
 <h3>11: Decoder cost factor</h3>
 
-This is the GGMorse decoder cost factor. Successful decodes yield from a few millis to a few tens of millis.
+This is the GGMorse decoder cost factor. Most successful decodes yield from a few millis to a few tens of millis.
 
 <h3>11a: Show decoder threshold</h3>
 
@@ -86,6 +86,10 @@ Push this button to clear the text in the text window (15)
 <h3>15: Decoded Text</h3>
 
 This area shows the decoded text. New text appears every 3 seconds which is the GGMorse analysis window length.
+
+The intensity of the text is proportional to the cost of the decoding function displayed in (11) (the lower the more confident and the brighter) with the following formula on the 25..255 scale (if lower than 25 which is the background intensity it is not displayed):
+
+$f(cost) = \frac{255}{1+2cost}$
 
 <h3>16. Waveforms view</h3>
 

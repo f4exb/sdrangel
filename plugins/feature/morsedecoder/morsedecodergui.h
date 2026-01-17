@@ -80,7 +80,7 @@ private:
 	void displaySampleRate(int sampleRate);
 	void updateChannelList();
 	bool handleMessage(const Message& message);
-    void textReceived(const QString& text);
+    void textReceived(const QString& text, float cost = 0.0f);
     void updateMorseStats(float estPitch, float estWPM, float cost);
     void makeUIConnections();
 

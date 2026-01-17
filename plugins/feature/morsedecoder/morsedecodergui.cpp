@@ -114,7 +114,7 @@ bool MorseDecoderGUI::handleMessage(const Message& message)
     else if (MorseDecoder::MsgReportText::match(message))
     {
         MorseDecoder::MsgReportText& report = (MorseDecoder::MsgReportText&) message;
-        textReceived(report.getText());
+        textReceived(report.getText(), report.m_costFunction);
         updateMorseStats(report.m_estimatedPitchHz, report.m_estimatedSpeedWPM, report.m_costFunction);
     }
 
@@ -133,8 +133,15 @@ void MorseDecoderGUI::handleInputMessages()
     }
 }
 
-void MorseDecoderGUI::textReceived(const QString& text)
+void MorseDecoderGUI::textReceived(const QString& text, float cost)
 {
+    // Set text color based on cost
+    int light = static_cast<int>(255.0f / (1 + 2*cost));
+
+    if (light < 25) {
+        return; // too faint to display
+    }
+
     // Is the scroll bar at the bottom?
     int scrollPos = ui->text->verticalScrollBar()->value();
     bool atBottom = scrollPos >= ui->text->verticalScrollBar()->maximum();
@@ -145,6 +152,7 @@ void MorseDecoderGUI::textReceived(const QString& text)
 
     // Restore scroll position
     ui->text->verticalScrollBar()->setValue(scrollPos);
+    ui->text->setTextColor(QColor(light, light, light));
 
     // Format and insert text
     ui->text->insertPlainText(MorseDecoderSettings::formatText(text));
