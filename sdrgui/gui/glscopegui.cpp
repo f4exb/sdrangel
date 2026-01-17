@@ -444,11 +444,13 @@ void GLScopeGUI::on_polar_toggled(bool checked)
 void GLScopeGUI::on_polarPoints_toggled(bool checked)
 {
     m_glScope->setDisplayXYPoints(checked);
+    m_settings.m_displayXYPoints = checked;
 }
 
 void GLScopeGUI::on_polarGrid_toggled(bool checked)
 {
     m_glScope->setDisplayXYPolarGrid(checked);
+    m_settings.m_displayXYPolarGrid = checked;
 }
 
 void GLScopeGUI::on_traceIntensity_valueChanged(int value)
@@ -1503,6 +1505,8 @@ void GLScopeGUI::displaySettings()
     const GLScopeSettings::TriggerData& triggerData = m_settings.m_triggersData[m_ctlTriggerIndex];
     setTriggerUI(triggerData);
     setDisplayMode(m_settings.m_displayMode);
+    ui->polarPoints->setChecked(m_settings.m_displayXYPoints);
+    ui->polarGrid->setChecked(m_settings.m_displayXYPolarGrid);
     ui->traceIntensity->setToolTip(QString("Trace intensity: %1").arg(m_settings.m_traceIntensity));
     ui->traceIntensity->setValue(m_settings.m_traceIntensity);
     m_glScope->setDisplayTraceIntensity(m_settings.m_traceIntensity);
