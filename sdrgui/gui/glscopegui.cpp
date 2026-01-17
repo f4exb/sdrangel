@@ -1654,7 +1654,7 @@ void GLScopeGUI::setDisplayMode(GLScopeSettings::DisplayMode displayMode)
     ui->verticalXY->setEnabled(nbTraces > 1);
     ui->polar->setEnabled(nbTraces > 1);
 
-    if (ui->trace->maximum() == 1)
+    if (ui->trace->maximum() == 0)
     {
         ui->onlyX->setChecked(true);
         ui->onlyX->setEnabled(false);
