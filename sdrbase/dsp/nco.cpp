@@ -23,7 +23,6 @@
 #include <cmath>
 #include "dsp/nco.h"
 
-
 Real NCO::m_table[NCO::TableSize];
 bool NCO::m_tableInitialized = false;
 
@@ -47,62 +46,73 @@ NCO::NCO()
 
 void NCO::setFreq(Real freq, Real sampleRate)
 {
-	m_phaseIncrement = (freq * TableSize) / sampleRate;
-	qDebug("NCO freq: %f phase inc %d", freq, m_phaseIncrement);
+	m_phaseIncrement = (unsigned) std::round((freq * 4294967296.0) / sampleRate);
+	qDebug("NCO freq: %f phase inc: %u sr: %f", freq, m_phaseIncrement, sampleRate);
 }
 
-float NCO::next()
+Real NCO::next()
 {
 	nextPhase();
-	return m_table[m_phase];
+	return get();
 }
 
 Complex NCO::nextIQ()
 {
 	nextPhase();
-	return Complex(m_table[m_phase], -m_table[(m_phase + TableSize / 4) % TableSize]);
+	return getIQ();
 }
 
 Complex NCO::nextQI()
 {
-	nextPhase();
-	return Complex(-m_table[(m_phase + TableSize / 4) % TableSize], m_table[m_phase]);
+	Complex iq = nextIQ();
+	return Complex(iq.imag(), iq.real());
 }
 
 void NCO::nextIQMul(Real& i, Real& q)
 {
-    nextPhase();
     Real x = i;
     Real y = q;
-    const Real& u = m_table[m_phase];
-    const Real& v = -m_table[(m_phase + TableSize / 4) % TableSize];
-    i = x*u - y*v;
-    q = x*v + y*u;
+	Complex iq = nextIQ();
+    i = x*iq.real() - y*iq.imag();
+    q = x*iq.imag() + y*iq.real();
 }
 
-float NCO::get()
+Real NCO::get()
 {
-	return m_table[m_phase];
+	unsigned intBits = (m_phase >> IntShift) & IntMask;
+	unsigned fracBits = m_phase & FracMask;
+	unsigned i = intBits;
+	unsigned j = (i + 1) & IntMask;
+	Real frac = ((Real) fracBits) / Denom;
+	return m_table[i] + frac * (m_table[j] - m_table[i]); // Linear interpolation
 }
 
 Complex NCO::getIQ()
 {
-	return Complex(m_table[m_phase], -m_table[(m_phase + TableSize / 4) % TableSize]);
+	unsigned intBits = (m_phase >> IntShift) & IntMask;
+	unsigned fracBits = m_phase & FracMask;
+	unsigned i = intBits;
+	unsigned j = (i + 1) & IntMask;
+	unsigned k = (i + TableSize / 4) & IntMask;
+	unsigned l = (j + TableSize / 4) & IntMask;
+	Real frac = ((Real) fracBits) / Denom;
+	Real s = m_table[i] + frac * (m_table[j] - m_table[i]); // Linear interpolation for sin
+	Real c = m_table[k] + frac * (m_table[l] - m_table[k]); // Linear interpolation for cos
+	return Complex(s, -c);
 }
 
 void NCO::getIQ(Complex& c)
 {
-	c.real(m_table[m_phase]);
-	c.imag(-m_table[(m_phase + TableSize / 4) % TableSize]);
+	c = getIQ();
 }
 
 Complex NCO::getQI()
 {
-	return Complex(-m_table[(m_phase + TableSize / 4) % TableSize], m_table[m_phase]);
+	Complex iq = getIQ();
+	return Complex(iq.imag(), iq.real());
 }
 
 void NCO::getQI(Complex& c)
 {
-	c.imag(m_table[m_phase]);
-	c.real(-m_table[(m_phase + TableSize / 4) % TableSize]);
+	c = getQI();
 }

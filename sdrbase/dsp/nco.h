@@ -23,18 +23,26 @@
 #include "dsp/dsptypes.h"
 #include "export.h"
 
+// Numerically Controlled Oscillator (NCO), using 12-bit LUT and Q12.20 fixed-point phase accumulator with linear interpolation
 class SDRBASE_API NCO {
 private:
-	enum {
-		TableSize = (1 << 12),
-	};
+
+	constexpr static unsigned TableBits = 12;
+	constexpr static unsigned TableSize = 1 << TableBits;
+
+	constexpr static unsigned IntShift = 32 - TableBits;
+	constexpr static unsigned IntMask = TableSize - 1u;
+	constexpr static unsigned FracMask = ((1u << IntShift) - 1u);
+
+	constexpr static float Denom = 1u << IntShift;
+
 	static Real m_table[TableSize];
 	static bool m_tableInitialized;
 
 	static void initTable();
 
-	int m_phaseIncrement;
-	int m_phase;
+	unsigned m_phaseIncrement;
+	unsigned m_phase;
 
 public:
 	NCO();
@@ -44,11 +52,7 @@ public:
 
 	void nextPhase()        //!< Increment phase
 	{
-		m_phase += m_phaseIncrement;
-		while(m_phase >= TableSize)
-			m_phase -= TableSize;
-		while(m_phase < 0)
-			m_phase += TableSize;
+		m_phase += m_phaseIncrement; // No need to wrap, as that is handled by overflow
 	}
 
 	Real next();            //!< Return next real sample
