@@ -19,7 +19,6 @@
 ///////////////////////////////////////////////////////////////////////////////////
 
 #include <QtGlobal>
-#include <cstdio>
 #include <cmath>
 #include "dsp/nco.h"
 
@@ -77,7 +76,7 @@ void NCO::nextIQMul(Real& i, Real& q)
     q = x*iq.imag() + y*iq.real();
 }
 
-Real NCO::get()
+Real NCO::get() const
 {
 	unsigned intBits = (m_phase >> IntShift) & IntMask;
 	unsigned fracBits = m_phase & FracMask;
@@ -87,7 +86,7 @@ Real NCO::get()
 	return m_table[i] + frac * (m_table[j] - m_table[i]); // Linear interpolation
 }
 
-Complex NCO::getIQ()
+Complex NCO::getIQ() const
 {
 	unsigned intBits = (m_phase >> IntShift) & IntMask;
 	unsigned fracBits = m_phase & FracMask;
@@ -101,18 +100,18 @@ Complex NCO::getIQ()
 	return Complex(s, -c);
 }
 
-void NCO::getIQ(Complex& c)
+void NCO::getIQ(Complex& c) const
 {
 	c = getIQ();
 }
 
-Complex NCO::getQI()
+Complex NCO::getQI() const
 {
 	Complex iq = getIQ();
 	return Complex(iq.imag(), iq.real());
 }
 
-void NCO::getQI(Complex& c)
+void NCO::getQI(Complex& c) const
 {
 	c = getQI();
 }

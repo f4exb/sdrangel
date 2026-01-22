@@ -59,11 +59,11 @@ public:
 	Complex nextIQ();       //!< Return next complex sample
 	Complex nextQI();       //!< Return next complex sample (reversed)
 	void nextIQMul(Real& i, Real& q); //!< multiply I,Q separately with next sample
-	Real get();             //!< Return current real sample (no phase increment)
-	Complex getIQ();        //!< Return current complex sample (no phase increment)
-	void getIQ(Complex& c); //!< Sets to the current complex sample (no phase increment)
-	Complex getQI();        //!< Return current complex sample (no phase increment, reversed)
-	void getQI(Complex& c); //!< Sets to the current complex sample (no phase increment, reversed)
+	Real get() const;                 //!< Return current real sample (no phase increment)
+	Complex getIQ() const;            //!< Return current complex sample (no phase increment)
+	void getIQ(Complex& c) const;     //!< Sets to the current complex sample (no phase increment)
+	Complex getQI() const;            //!< Return current complex sample (no phase increment, reversed)
+	void getQI(Complex& c) const;     //!< Sets to the current complex sample (no phase increment, reversed)
 };
 
 #endif // INCLUDE_NCO_H
