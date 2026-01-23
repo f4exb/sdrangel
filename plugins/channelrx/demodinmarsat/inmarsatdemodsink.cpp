@@ -325,7 +325,6 @@ InmarsatDemodSink::InmarsatDemodSink(InmarsatDemod *stdCDemod) :
 
     m_adjustedSPS = MAX_SAMPLES_PER_SYMBOL;
     m_adjustment = 0;
-    m_totalSampleCount = 0;
     m_error = 0;
     m_errorSum = 0;
     m_mu = 0.0;
@@ -512,7 +511,6 @@ void InmarsatDemodSink::processOneSample(Complex &ci)
 
                 m_adjustedSPS = SAMPLES_PER_SYMBOL - m_adjustment; // Positve mu indicates late, so reduce time to next sample
                 m_adjustment = adjustment;
-                m_prevTotalSampleCount = m_totalSampleCount;
 
                 // Costas loop for fine phase/freq correction - runs at symbol rate
 
