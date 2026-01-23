@@ -160,7 +160,9 @@ void RemoteTCPInputTCPHandler::connectToHost(const QString& address, quint16 por
 #endif
         connect(m_webSocket, &QWebSocket::sslErrors, this, &RemoteTCPInputTCPHandler::sslErrors);
         m_webSocket->open(QUrl(QString("wss://%1:%2").arg(address).arg(port)));
-        m_dataSocket = new WebSocket(m_webSocket);
+        if (m_webSocket) {
+            m_dataSocket = new WebSocket(m_webSocket);
+        }
 #else
         qWarning() << "RemoteTCPInput unable to use wss protocol as SSL is not supported";
 #endif
@@ -177,7 +179,9 @@ void RemoteTCPInputTCPHandler::connectToHost(const QString& address, quint16 por
         connect(m_tcpSocket, &QAbstractSocket::errorOccurred, this, &RemoteTCPInputTCPHandler::errorOccurred);
 #endif
         m_tcpSocket->connectToHost(address, port);
-        m_dataSocket = new TCPSocket(m_tcpSocket);
+        if (m_tcpSocket) { // Can be set to nullptr by RemoteTCPInputTCPHandler::errorOccurred while connecting
+            m_dataSocket = new TCPSocket(m_tcpSocket);
+        }
     }
 }
 
