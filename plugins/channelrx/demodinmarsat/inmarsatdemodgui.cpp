@@ -506,8 +506,8 @@ QString MultipartMessage::decodeAddress(QString serviceCode, QString addressHex,
 
             if (coordinates)
             {
-                int lat1Deg = west ? -latDeg : latDeg;
-                int lon1Deg = south ? -lonDeg : lonDeg;
+                int lat1Deg = south ? -latDeg : latDeg;
+                int lon1Deg = west ? -lonDeg : lonDeg;
                 int lat2Deg = lat1Deg + latExtentEast;
                 int lon2Deg = lon1Deg + latExtentNorth;
                 *latitude = lat1Deg + lat2Deg / 2;
@@ -545,8 +545,8 @@ QString MultipartMessage::decodeAddress(QString serviceCode, QString addressHex,
 
             if (coordinates)
             {
-                int lat1Deg = west ? -latDeg : latDeg;
-                int lon1Deg = south ? -lonDeg : lonDeg;
+                int lat1Deg = south ? -latDeg : latDeg;
+                int lon1Deg = west ? -lonDeg : lonDeg;
                 QGeoCoordinate centre(lat1Deg, lon1Deg);
 
                 *latitude = lat1Deg;
