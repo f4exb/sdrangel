@@ -65,7 +65,7 @@ FrequencyOffsetEstimate::FrequencyOffsetEstimate() :
     FFTFactory *fftFactory = DSPEngine::instance()->getFFTFactory();
     m_fftSequence = fftFactory->getEngine(m_fftSize, false, &m_fft);
     m_fftCounter = 0;
-    m_fftWindow.create(FFTWindow::Rectangle, m_fftSize);
+    m_fftWindow.create(FFTWindow::Hanning, m_fftSize);
 }
 
 FrequencyOffsetEstimate::~FrequencyOffsetEstimate()
@@ -108,16 +108,32 @@ void FrequencyOffsetEstimate::processOneSample(Complex& iq, bool locked)
             }
         }
 
+        Real idx = maxIdx;
+        if (maxIdx > m_fftSize / 2) {
+            idx -= m_fftSize; // Negative freqs are in second half
+        }
+
         // Calculate power for current peak bin and frequency we're locked too
         m_currentFreqMagSq = magSq(maxIdx);
         m_freqMagSq = magSq(m_freqOffsetBin);
 
-        Real hzPerBin = InmarsatDemodSettings::CHANNEL_SAMPLE_RATE / (Real) m_fftSize;
-        int idx = maxIdx;
-        if (maxIdx > m_fftSize / 2) {
-            idx -= m_fftSize; // Negative freqs are in second half
+        // Quadratic interpolation using two bins either side of peak
+        if ((maxIdx != m_fftSize / 2) && (maxIdx != m_fftSize / 2 - 1))
+        {
+            int alphaIdx = maxIdx == 0 ? m_fftSize - 1 : maxIdx - 1;
+            int gammaIdx = maxIdx == m_fftSize - 1 ? 0 : maxIdx + 1;
+            Real alpha = sqrt(magSq(alphaIdx));
+            Real beta  = sqrt(m_currentFreqMagSq);
+            Real gamma = sqrt(magSq(gammaIdx));
+            Real p = 0.5f * (alpha - gamma) / (alpha - 2.0f * beta + gamma);
+            Real b = beta - 0.25f * (alpha - gamma) * p;
+
+            m_currentFreqMagSq = b * b; // Interpolated power
+            idx = idx + p; // Interpolated fractional bin
         }
-        m_currentFreqOffsetHz = ((idx * hzPerBin) / 2); // Divide by two, as the squaring operation doubles the freq
+
+        const Real hzPerBin = InmarsatDemodSettings::CHANNEL_SAMPLE_RATE / (Real) m_fftSize;
+        m_currentFreqOffsetHz = (idx * hzPerBin) / 2.0f; // Divide by two, as the squaring operation doubles the freq
 
         Real magRatio = sqrt(m_currentFreqMagSq) / sqrt(m_freqMagSq);
 
@@ -480,7 +496,6 @@ void InmarsatDemodSink::processOneSample(Complex &ci)
 
         // Symbol synchronizer
 
-        m_totalSampleCount++;
         m_filteredSamples.enqueue(rrc);
         while (m_filteredSamples.size() > MAX_SAMPLES_PER_SYMBOL)
         {
