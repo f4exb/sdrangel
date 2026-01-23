@@ -232,8 +232,6 @@ private:
     Real m_mu;
     int m_adjustedSPS;
     int m_adjustment;
-    qint64 m_totalSampleCount;
-    qint64 m_prevTotalSampleCount;
     int m_bit;
     uint8_t m_bits[DEMODULATOR_SYMBOLSPERCHUNK];
     int m_bitCount;
