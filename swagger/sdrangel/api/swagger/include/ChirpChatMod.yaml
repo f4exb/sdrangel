@@ -139,6 +139,12 @@ ChirpChatModSettings:
     udpPort:
       description: UDP port to listen for messages to transmit on
       type: integer
+    invertRamps:
+      type: integer
+      description: >
+        Invert chirp ramps
+          * 0 - Normal chirp ramps (upchirps for preamble and payload)
+          * 1 - Inverted chirp ramps (downchirps for preamble and payload)
     rgbColor:
       type: integer
     title:

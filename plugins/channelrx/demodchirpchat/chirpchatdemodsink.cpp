@@ -158,7 +158,7 @@ void ChirpChatDemodSink::processSample(const Complex& ci)
     }
     else if (m_state == ChirpChatStateDetectPreamble) // look for preamble
     {
-        m_fft->in()[m_fftCounter++] = ci * m_downChirps[m_chirp]; // de-chirp the up ramp
+        m_fft->in()[m_fftCounter++] = ci * (m_settings.m_invertRamps ? m_upChirps[m_chirp] : m_downChirps[m_chirp]); // de-chirp the preamble ramp
 
         if (m_fftCounter == m_fftLength)
         {
@@ -177,6 +177,11 @@ void ChirpChatDemodSink::processSample(const Complex& ci)
                 m_spectrumBuffer,
                 m_fftInterpolation
             ) / m_fftInterpolation;
+
+            // When ramps are inverted, FFT output interpretation is reversed
+            if (m_settings.m_invertRamps) {
+                imax = (m_nbSymbols - imax) % m_nbSymbols;
+            }
 
             if (m_magsqQueue.size() > m_settings.m_preambleChirps) {
                 m_magsqQueue.pop();
@@ -246,8 +251,8 @@ void ChirpChatDemodSink::processSample(const Complex& ci)
     }
     else if (m_state == ChirpChatStatePreamble) // preamble found look for SFD start
     {
-        m_fft->in()[m_fftCounter] = ci * m_downChirps[m_chirp];  // de-chirp the up ramp
-        m_fftSFD->in()[m_fftCounter] = ci * m_upChirps[m_chirp]; // de-chirp the down ramp
+        m_fft->in()[m_fftCounter] = ci * (m_settings.m_invertRamps ? m_upChirps[m_chirp] : m_downChirps[m_chirp]);  // de-chirp the preamble ramp
+        m_fftSFD->in()[m_fftCounter] = ci * (m_settings.m_invertRamps ? m_downChirps[m_chirp] : m_upChirps[m_chirp]); // de-chirp the SFD ramp
         m_fftCounter++;
 
         if (m_fftCounter == m_fftLength)
@@ -283,6 +288,11 @@ void ChirpChatDemodSink::processSample(const Complex& ci)
                 m_spectrumBuffer,
                 m_fftInterpolation
             ) / m_fftInterpolation;
+
+            // When ramps are inverted, FFT output interpretation is reversed
+            if (m_settings.m_invertRamps) {
+                imax = (m_nbSymbols - imax) % m_nbSymbols;
+            }
 
             m_preambleHistory[m_chirpCount] = imax;
             m_chirpCount++;
@@ -374,7 +384,7 @@ void ChirpChatDemodSink::processSample(const Complex& ci)
     }
     else if (m_state == ChirpChatStateReadPayload)
     {
-        m_fft->in()[m_fftCounter] = ci * m_downChirps[m_chirp]; // de-chirp the up ramp
+        m_fft->in()[m_fftCounter] = ci * (m_settings.m_invertRamps ? m_upChirps[m_chirp] : m_downChirps[m_chirp]); // de-chirp the payload ramp
         m_fftCounter++;
 
         if (m_fftCounter == m_fftLength)
@@ -436,6 +446,11 @@ void ChirpChatDemodSink::processSample(const Complex& ci)
                         m_spectrumBuffer,
                         m_fftInterpolation
                     );
+                }
+
+                // When ramps are inverted, FFT output interpretation is reversed
+                if (m_settings.m_invertRamps) {
+                    imax = (m_nbSymbols * m_fftInterpolation - imax) % (m_nbSymbols * m_fftInterpolation);
                 }
 
                 symbol = evalSymbol(imax) % m_nbSymbolsEff;

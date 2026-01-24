@@ -82,6 +82,7 @@ private slots:
 	void on_udpSend_stateChanged(int state);
 	void on_udpAddress_editingFinished();
 	void on_udpPort_editingFinished();
+	void on_invertRamps_stateChanged(int state);
 	void onWidgetRolled(QWidget* widget, bool rollDown);
 	void onMenuDialogCalled(const QPoint& p);
     void channelMarkerHighlightedByCursor();

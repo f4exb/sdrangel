@@ -120,6 +120,12 @@ In practice it is difficult to make correct decodes if only one FFT bin is used 
 
 This is the number of chirps expected in the preamble and has to be agreed between the transmitter and receiver.
 
+<h3>15: Invert chirp ramps</h3>
+
+The LoRa standard is up-chirps for the preamble, down-chirps for the SFD and up-chirps for the payload.
+
+When you check this option it inverts the direction of the chirps thus becoming down-chirps for the preamble, up-chirps for the SFD and down-chirps for the payload.
+
 <h3>A: Payload controls and indicators</h3>
 
 ![ChirpChat Demodulator payload controls](../../../doc/img/ChirpChatDemod_payload.png)
@@ -284,3 +290,43 @@ Controls are the usual controls of spectrum displays with the following restrict
 
   - The window type is non operating because the FFT window is chosen by (7)
   - The FFT size can be changed however it is set to 2<sup>SF</sup> where SF is the spread factor and thus displays correctly
+
+
+<h2>Common LoRa settings</h2>
+
+CR is the code rate and translates to FEC according to the following table
+
+| CR  | FEC |
+| --- | --- |
+| 4/5 | 1   |
+| 4/6 | 2   |
+| 4/7 | 3   |
+| 4/8 | 4   |
+
+When DE is on set DE to 2 else 0
+
+<h3>Generic</h3>
+
+| Use Case              | SF        | CR      | BW (kHz) | DE Enabled? | Notes                                                       |
+| --------------------- | --------- | ------- | -------- | ----------- | ----------------------------------------------------------- |
+| High rate/short range | SF7       | 4/5     | 500      | Off         | Fastest, urban/close devices             |
+| Balanced/general IoT  | SF7–SF9   | 4/5–4/6 | 125–250  | Off         | TTN default, good for gateways           |
+| Long range/rural      | SF10–SF12 | 4/6–4/8 | 125      | On          | Max sensitivity (-137 dBm), slow airtime |
+| Extreme range         | SF12      | 4/8     | 125      | On          | Best for weak signals, long packets     |
+
+<h3>Meshtastic</h3>
+
+<h4>Quick facts</h4>
+
+  - Uses 0x2B sync byte
+  - In Europe the default channel is centered on 869.525 MHz
+
+<h4>Presets table</h4>
+
+| Preset              | SF | CR   | BW (kHz) | DE? | Use Case                                             |
+| ------------------- | -- | ---- | -------- | --- | ---------------------------------------------------- |
+| LONG_FAST (default) | 11 | 4/8  | 250      | On  | Long range, moderate speed                |
+| MEDIUM_SLOW         | 10 | 4/7  | 250      | On  | Balanced range/reliability​                 |
+| SHORT_FAST          | 9  | 4/7  | 250      | Off | Urban/short hops, faster​                   |
+| SHORT_TURBO         | 7  | 4/5  | 500      | Off | Max speed, shortest range (region-limited)​ |
+| LONG_SLOW           | 12 | 4/8  | 125      | On  | Extreme range, slowest meshtastic​                   |

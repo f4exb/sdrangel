@@ -72,6 +72,12 @@ Thus available bandwidths are:
 
 The ChirpChat signal is oversampled by four therefore it needs a baseband of at least four times the bandwidth. This drives the maximum value on the slider automatically.
 
+<h3>16: Invert chirp ramps</h3>
+
+The LoRa standard is up-chirps for the preamble, down-chirps for the SFD and up-chirps for the payload.
+
+When you check this option it inverts the direction of the chirps thus becoming down-chirps for the preamble, up-chirps for the SFD and down-chirps for the payload.
+
 <h3>5: Spread Factor</h3>
 
 This is the Spread Factor parameter of the ChirpChat signal. This is the log2 of the possible frequency shifts used over the bandwidth (3). The number of symbols is 2<sup>SF-DE</sup> where SF is the spread factor and DE the  Distance Enhancement factor (6).

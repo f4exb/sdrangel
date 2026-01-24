@@ -66,6 +66,8 @@ SWGChirpChatDemodSettings::SWGChirpChatDemodSettings() {
     m_udp_address_isSet = false;
     udp_port = 0;
     m_udp_port_isSet = false;
+    invert_ramps = 0;
+    m_invert_ramps_isSet = false;
     rgb_color = 0;
     m_rgb_color_isSet = false;
     title = nullptr;
@@ -134,6 +136,8 @@ SWGChirpChatDemodSettings::init() {
     m_udp_address_isSet = false;
     udp_port = 0;
     m_udp_port_isSet = false;
+    invert_ramps = 0;
+    m_invert_ramps_isSet = false;
     rgb_color = 0;
     m_rgb_color_isSet = false;
     title = new QString("");
@@ -180,6 +184,7 @@ SWGChirpChatDemodSettings::cleanup() {
     if(udp_address != nullptr) { 
         delete udp_address;
     }
+
 
 
     if(title != nullptr) { 
@@ -252,6 +257,8 @@ SWGChirpChatDemodSettings::fromJsonObject(QJsonObject &pJson) {
     ::SWGSDRangel::setValue(&udp_address, pJson["udpAddress"], "QString", "QString");
     
     ::SWGSDRangel::setValue(&udp_port, pJson["udpPort"], "qint32", "");
+    
+    ::SWGSDRangel::setValue(&invert_ramps, pJson["invertRamps"], "qint32", "");
     
     ::SWGSDRangel::setValue(&rgb_color, pJson["rgbColor"], "qint32", "");
     
@@ -347,6 +354,9 @@ SWGChirpChatDemodSettings::asJsonObject() {
     }
     if(m_udp_port_isSet){
         obj->insert("udpPort", QJsonValue(udp_port));
+    }
+    if(m_invert_ramps_isSet){
+        obj->insert("invertRamps", QJsonValue(invert_ramps));
     }
     if(m_rgb_color_isSet){
         obj->insert("rgbColor", QJsonValue(rgb_color));
@@ -576,6 +586,16 @@ SWGChirpChatDemodSettings::setUdpPort(qint32 udp_port) {
 }
 
 qint32
+SWGChirpChatDemodSettings::getInvertRamps() {
+    return invert_ramps;
+}
+void
+SWGChirpChatDemodSettings::setInvertRamps(qint32 invert_ramps) {
+    this->invert_ramps = invert_ramps;
+    this->m_invert_ramps_isSet = true;
+}
+
+qint32
 SWGChirpChatDemodSettings::getRgbColor() {
     return rgb_color;
 }
@@ -745,6 +765,9 @@ SWGChirpChatDemodSettings::isSet(){
             isObjectUpdated = true; break;
         }
         if(m_udp_port_isSet){
+            isObjectUpdated = true; break;
+        }
+        if(m_invert_ramps_isSet){
             isObjectUpdated = true; break;
         }
         if(m_rgb_color_isSet){

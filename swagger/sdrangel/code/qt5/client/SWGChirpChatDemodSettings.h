@@ -102,6 +102,9 @@ public:
     qint32 getUdpPort();
     void setUdpPort(qint32 udp_port);
 
+    qint32 getInvertRamps();
+    void setInvertRamps(qint32 invert_ramps);
+
     qint32 getRgbColor();
     void setRgbColor(qint32 rgb_color);
 
@@ -195,6 +198,9 @@ private:
 
     qint32 udp_port;
     bool m_udp_port_isSet;
+
+    qint32 invert_ramps;
+    bool m_invert_ramps_isSet;
 
     qint32 rgb_color;
     bool m_rgb_color_isSet;
