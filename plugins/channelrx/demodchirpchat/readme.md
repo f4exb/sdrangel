@@ -171,6 +171,8 @@ LoRa mode only. This is the number of parity bits in the Hamming code used in th
 
 When a header is expected this control is disabled because the value used is the one found in the header.
 
+In FT8 mode there is no FEC as FEC is handled within the FT payload (with LDPC)
+
 <h4>A.9: Payload CRC presence</h4>
 
 LoRa mode: Use this checkbox to tell if you expect a 2 byte CRC at the end of the payload. FT mode: there is always a CRC.

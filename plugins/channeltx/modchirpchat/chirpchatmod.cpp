@@ -231,6 +231,17 @@ void ChirpChatMod::applySettings(const ChirpChatModSettings& settings, bool forc
         m_encoder.setNbSymbolBits(settings.m_spreadFactor, settings.m_deBits);
     }
 
+    if ((settings.m_spreadFactor != m_settings.m_spreadFactor)
+     || (settings.m_bandwidthIndex != m_settings.m_bandwidthIndex) || force)
+    {
+        if (getMessageQueueToGUI())
+        {
+            m_currentPayloadTime = (m_symbols.size()*(1<<settings.m_spreadFactor)*1000.0) / ChirpChatModSettings::bandwidths[settings.m_bandwidthIndex];
+            MsgReportPayloadTime *rpt = MsgReportPayloadTime::create(m_currentPayloadTime, m_symbols.size());
+            getMessageQueueToGUI()->push(rpt);
+        }
+    }
+
     if ((settings.m_codingScheme != m_settings.m_codingScheme) || force)
     {
         reverseAPIKeys.append("codingScheme");
@@ -299,7 +310,6 @@ void ChirpChatMod::applySettings(const ChirpChatModSettings& settings, bool forc
     }
 
     ChirpChatModBaseband::MsgConfigureChirpChatModPayload *payloadMsg = nullptr;
-    std::vector<unsigned short> symbols;
 
     if ((settings.m_messageType == ChirpChatModSettings::MessageNone)
         && ((settings.m_messageType != m_settings.m_messageType) || force))
@@ -318,18 +328,19 @@ void ChirpChatMod::applySettings(const ChirpChatModSettings& settings, bool forc
         || (settings.m_textMessage != m_settings.m_textMessage)
         || (settings.m_bytesMessage != m_settings.m_bytesMessage) || force)
     {
-        m_encoder.encode(settings, symbols);
-        payloadMsg = ChirpChatModBaseband::MsgConfigureChirpChatModPayload::create(symbols);
+        m_symbols.clear();
+        m_encoder.encode(settings, m_symbols);
+        payloadMsg = ChirpChatModBaseband::MsgConfigureChirpChatModPayload::create(m_symbols);
     }
 
     if (payloadMsg)
     {
         m_basebandSource->getInputMessageQueue()->push(payloadMsg);
-        m_currentPayloadTime = (symbols.size()*(1<<settings.m_spreadFactor)*1000.0) / ChirpChatModSettings::bandwidths[settings.m_bandwidthIndex];
+        m_currentPayloadTime = (m_symbols.size()*(1<<settings.m_spreadFactor)*1000.0) / ChirpChatModSettings::bandwidths[settings.m_bandwidthIndex];
 
         if (getMessageQueueToGUI())
         {
-            MsgReportPayloadTime *rpt = MsgReportPayloadTime::create(m_currentPayloadTime, symbols.size());
+            MsgReportPayloadTime *rpt = MsgReportPayloadTime::create(m_currentPayloadTime, m_symbols.size());
             getMessageQueueToGUI()->push(rpt);
         }
     }

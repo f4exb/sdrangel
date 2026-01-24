@@ -113,7 +113,7 @@ To populate messages you can specify your callsign (10.5), the other party calls
   - **LoRa**: LoRa compatible
   - **ASCII**: 7 bit plain ASCII without FEC and CRC. Requires exactly 7 bit effective samples thus SF-DE = 7 where SF is the spreading factor (5) and DE the distance enhancement factor (6)
   - **TTY**: 5 bit Baudot (Teletype) without FEC and CRC. Requires exactly 5 bit effective samples thus SF-DE = 5 where SF is the spreading factor (5) and DE the distance enhancement factor (6)
-  - **FT**: FT8/FT4 coding is applied using data in (10.5) to (10.8) to encode the 174 bit message payload with CRC and FEC as per FT8/FT4 protocol using a type 1 (standard) type of message. Note that the report (10.8) must comply with the FT rule (coded "-35" to "+99" with a leading 0 for the number) and would usually represent the integer part of the S/N ratio in the ChirpChat demodulator receiver. Calls should not be prefixed nor suffixed and the first 4 characters of the locator must represent a valid 4 character grid square. Plain text messages (13 characters) are also supported with the 0.0 type of message using the text entered in the message box (11). These 174 bits are packed into (SF - DE) bits symbols padded with zero bits if necessary. For the details of the FT protocol see: https://wsjt.sourceforge.io/FT4_FT8_QEX.pdf
+  - **FT**: FT8/FT4 coding is applied using data in (10.5) to (10.8) to encode the 174 bit message payload with CRC and FEC as per FT8/FT4 protocol using a type 1 (standard) type of message. Note that the report (10.8) must comply with the FT rule (coded "-35" to "+99" with a leading 0 for the number) and would usually represent the integer part of the S/N ratio in the ChirpChat demodulator receiver. Calls should not be prefixed nor suffixed and the first 4 characters of the locator must represent a valid 4 character grid square. Plain text messages (13 characters) are also supported with the 0.0 type of message using the text entered in the message box (11). These 174 bits are packed into (SF - DE) bits symbols padded with zero bits if necessary. For the details of the FT protocol see: https://wsjt.sourceforge.io/FT4_FT8_QEX.pdf For example for SF=9 and DE=3 we have 6 bits per symbols so the 174 bits are packed in exactly 29 symbols this should appear in the message length ML (13)
 
 <h4>10.2: Number of FEC parity bits (LoRa)</h4>
 
@@ -235,9 +235,9 @@ This window lets you edit the message selected in (10.9). You can use `%n` place
 
 Use this line editor to specify the hex string used as the bytes message.
 
-<h3>13: Symbol time</h3>
+<h3>13: Symbol time and message length</h3>
 
-This is the duration of a symbol or chirp in milliseconds
+This is the duration of a symbol or chirp in milliseconds followed by the message length in the number of symbols
 
 <h3>14: Payload time</h3>
 
