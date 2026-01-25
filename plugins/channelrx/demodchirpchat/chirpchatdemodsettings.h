@@ -65,6 +65,7 @@ struct ChirpChatDemodSettings
     bool m_hasCRC;                 //!< Payload has CRC (LoRa)
     bool m_hasHeader;              //!< Header present before actual payload (LoRa)
     bool m_sendViaUDP;             //!< Send decoded message via UDP
+    bool m_invertRamps;            //!< Invert chirp ramps vs standard LoRa (up/down/up is standard)
     QString m_udpAddress;          //!< UDP address where to send message
     uint16_t m_udpPort;            //!< UDP port where to send message
     uint32_t m_rgbColor;
@@ -96,6 +97,8 @@ struct ChirpChatDemodSettings
     bool hasSyncWord() const;             //!< Only LoRa has a syncword (for the moment)
     QByteArray serialize() const;
     bool deserialize(const QByteArray& data);
+    void applySettings(const QStringList& settingsKeys, const ChirpChatDemodSettings& settings);
+    QString getDebugString(const QStringList& settingsKeys, bool force=false) const;
 };
 
 

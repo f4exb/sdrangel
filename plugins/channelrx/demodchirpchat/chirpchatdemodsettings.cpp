@@ -80,6 +80,7 @@ void ChirpChatDemodSettings::resetToDefaults()
     m_hasCRC = true;
     m_hasHeader = true;
     m_sendViaUDP = false;
+    m_invertRamps = false;
     m_udpAddress = "127.0.0.1";
     m_udpPort = 9999;
     m_rgbColor = QColor(255, 0, 255).rgb();
@@ -121,6 +122,7 @@ QByteArray ChirpChatDemodSettings::serialize() const
     s.writeBool(15, m_hasHeader);
     s.writeU32(17, m_preambleChirps);
     s.writeS32(18, (int) m_fftWindow);
+    s.writeBool(19, m_invertRamps);
     s.writeBool(20, m_useReverseAPI);
     s.writeString(21, m_reverseAPIAddress);
     s.writeU32(22, m_reverseAPIPort);
@@ -188,6 +190,7 @@ bool ChirpChatDemodSettings::deserialize(const QByteArray& data)
         d.readU32(17, &m_preambleChirps, 8);
         d.readS32(18, &tmp, (int) FFTWindow::Rectangle);
         m_fftWindow = (FFTWindow::Function) tmp;
+        d.readBool(19, &m_invertRamps, false);
         d.readBool(20, &m_useReverseAPI, false);
         d.readString(21, &m_reverseAPIAddress, "127.0.0.1");
         d.readU32(22, &utmp, 0);
@@ -230,6 +233,113 @@ bool ChirpChatDemodSettings::deserialize(const QByteArray& data)
         resetToDefaults();
         return false;
     }
+}
+
+void ChirpChatDemodSettings::applySettings(const QStringList& settingsKeys, const ChirpChatDemodSettings& settings)
+{
+    if (settingsKeys.contains("inputFrequencyOffset"))
+        m_inputFrequencyOffset = settings.m_inputFrequencyOffset;
+    if (settingsKeys.contains("bandwidthIndex"))
+        m_bandwidthIndex = settings.m_bandwidthIndex;
+    if (settingsKeys.contains("spreadFactor"))
+        m_spreadFactor = settings.m_spreadFactor;
+    if (settingsKeys.contains("deBits"))
+        m_deBits = settings.m_deBits;
+    if (settingsKeys.contains("fftWindow"))
+        m_fftWindow = settings.m_fftWindow;
+    if (settingsKeys.contains("codingScheme"))
+        m_codingScheme = settings.m_codingScheme;
+    if (settingsKeys.contains("decodeActive"))
+        m_decodeActive = settings.m_decodeActive;
+    if (settingsKeys.contains("eomSquelchTenths"))
+        m_eomSquelchTenths = settings.m_eomSquelchTenths;
+    if (settingsKeys.contains("nbSymbolsMax"))
+        m_nbSymbolsMax = settings.m_nbSymbolsMax;
+    if (settingsKeys.contains("preambleChirps"))
+        m_preambleChirps = settings.m_preambleChirps;
+    if (settingsKeys.contains("nbParityBits"))
+        m_nbParityBits = settings.m_nbParityBits;
+    if (settingsKeys.contains("packetLength"))
+        m_packetLength = settings.m_packetLength;
+    if (settingsKeys.contains("hasCRC"))
+        m_hasCRC = settings.m_hasCRC;
+    if (settingsKeys.contains("hasHeader"))
+        m_hasHeader = settings.m_hasHeader;
+    if (settingsKeys.contains("sendViaUDP"))
+        m_sendViaUDP = settings.m_sendViaUDP;
+    if (settingsKeys.contains("invertRamps"))
+        m_invertRamps = settings.m_invertRamps;
+    if (settingsKeys.contains("udpAddress"))
+        m_udpAddress = settings.m_udpAddress;
+    if (settingsKeys.contains("udpPort"))
+        m_udpPort = settings.m_udpPort;
+    if (settingsKeys.contains("useReverseAPI"))
+        m_useReverseAPI = settings.m_useReverseAPI;
+    if (settingsKeys.contains("reverseAPIAddress"))
+        m_reverseAPIAddress = settings.m_reverseAPIAddress;
+    if (settingsKeys.contains("reverseAPIPort"))
+        m_reverseAPIPort = settings.m_reverseAPIPort;
+    if (settingsKeys.contains("reverseAPIDeviceIndex"))
+        m_reverseAPIDeviceIndex = settings.m_reverseAPIDeviceIndex;
+    if (settingsKeys.contains("reverseAPIChannelIndex"))
+        m_reverseAPIChannelIndex = settings.m_reverseAPIChannelIndex;
+    if (settingsKeys.contains("streamIndex"))
+        m_streamIndex = settings.m_streamIndex;
+}
+
+QString ChirpChatDemodSettings::getDebugString(const QStringList& settingsKeys, bool force) const
+{
+    QString debug;
+
+    if (force || settingsKeys.contains("inputFrequencyOffset"))
+        debug += QString("InputFrequencyOffset: %1 ").arg(m_inputFrequencyOffset);
+    if (force || settingsKeys.contains("bandwidthIndex"))
+        debug += QString("BandwidthIndex: %1 ").arg(m_bandwidthIndex);
+    if (force || settingsKeys.contains("spreadFactor"))
+        debug += QString("SpreadFactor: %1 ").arg(m_spreadFactor);
+    if (force || settingsKeys.contains("deBits"))
+        debug += QString("DEBits: %1 ").arg(m_deBits);
+    if (force || settingsKeys.contains("fftWindow"))
+        debug += QString("FFTWindow: %1 ").arg((int) m_fftWindow);
+    if (force || settingsKeys.contains("codingScheme"))
+        debug += QString("CodingScheme: %1 ").arg((int) m_codingScheme);
+    if (force || settingsKeys.contains("decodeActive"))
+        debug += QString("DecodeActive: %1 ").arg(m_decodeActive);
+    if (force || settingsKeys.contains("eomSquelchTenths"))
+        debug += QString("EOMSquelchTenths: %1 ").arg(m_eomSquelchTenths);
+    if (force || settingsKeys.contains("nbSymbolsMax"))
+        debug += QString("NbSymbolsMax: %1 ").arg(m_nbSymbolsMax);
+    if (force || settingsKeys.contains("preambleChirps"))
+        debug += QString("PreambleChirps: %1 ").arg(m_preambleChirps);
+    if (force || settingsKeys.contains("nbParityBits"))
+        debug += QString("NbParityBits: %1 ").arg(m_nbParityBits);
+    if (force || settingsKeys.contains("packetLength"))
+        debug += QString("PacketLength: %1 ").arg(m_packetLength);
+    if (force || settingsKeys.contains("hasCRC"))
+        debug += QString("HasCRC: %1 ").arg(m_hasCRC);
+    if (force || settingsKeys.contains("hasHeader"))
+        debug += QString("HasHeader: %1 ").arg(m_hasHeader);
+    if (force || settingsKeys.contains("sendViaUDP"))
+        debug += QString("SendViaUDP: %1 ").arg(m_sendViaUDP);
+    if (force || settingsKeys.contains("invertRamps"))
+        debug += QString("InvertRamps: %1 ").arg(m_invertRamps);
+    if (force || settingsKeys.contains("udpAddress"))
+        debug += QString("UDPAddress: %1 ").arg(m_udpAddress);
+    if (force || settingsKeys.contains("udpPort"))
+        debug += QString("UDPPort: %1 ").arg(m_udpPort);
+    if (force || settingsKeys.contains("useReverseAPI"))
+        debug += QString("UseReverseAPI: %1 ").arg(m_useReverseAPI);
+    if (force || settingsKeys.contains("reverseAPIAddress"))
+        debug += QString("ReverseAPIAddress: %1 ").arg(m_reverseAPIAddress);
+    if (force || settingsKeys.contains("reverseAPIPort"))
+        debug += QString("ReverseAPIPort: %1 ").arg(m_reverseAPIPort);
+    if (force || settingsKeys.contains("reverseAPIDeviceIndex"))
+        debug += QString("ReverseAPIDeviceIndex: %1 ").arg(m_reverseAPIDeviceIndex);
+    if (force || settingsKeys.contains("reverseAPIChannelIndex"))
+        debug += QString("ReverseAPIChannelIndex: %1 ").arg(m_reverseAPIChannelIndex);
+    if (force || settingsKeys.contains("streamIndex"))
+        debug += QString("StreamIndex: %1 ").arg(m_streamIndex);
+    return debug;
 }
 
 unsigned int ChirpChatDemodSettings::getNbSFDFourths() const

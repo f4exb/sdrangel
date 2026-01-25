@@ -84,6 +84,7 @@ struct ChirpChatModSettings
     bool m_udpEnabled;
     QString m_udpAddress;
     uint16_t m_udpPort;
+    bool m_invertRamps;            //!< Invert chirp ramps vs standard LoRa (up/down/up is standard)
     uint32_t m_rgbColor;
     QString m_title;
     int m_streamIndex;
@@ -113,6 +114,8 @@ struct ChirpChatModSettings
     void setRollupState(Serializable *rollupState) { m_rollupState = rollupState; }
     QByteArray serialize() const;
     bool deserialize(const QByteArray& data);
+    void applySettings(const QStringList& settingsKeys, const ChirpChatModSettings& settings);
+    QString getDebugString(const QStringList& settingsKeys, bool force=false) const;
 };
 
 

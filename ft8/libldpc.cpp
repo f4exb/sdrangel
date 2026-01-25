@@ -396,7 +396,7 @@ void LDPC::ft8_crc(int msg1[], int msglen, int out[14])
         }
     }
 
-    for (int i = 0; i < msglen + 14; i++)
+    for (int i = 0; i < 14; i++)
     {
         out[i] = msg[msglen + i];
     }

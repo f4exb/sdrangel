@@ -2634,7 +2634,7 @@ int FT8::decode(const float ll174[], int a174[], FT8Params& _params, int use_osd
 // apply (174, 91) generator mastrix to obtain the 83 parity bits
 // append the 83 bits to the 91 bits message + crc to obbain the 174 bit payload
 //
-void FT8::encode(int a174[], int s77[])
+void FT8::encode(int a174[], const int s77[])
 {
     int a91[91]; // msg + CRC
     std::fill(a91, a91 + 91, 0);

@@ -359,6 +359,12 @@ void ChirpChatModGUI::on_udpPort_editingFinished()
     applySettings();
 }
 
+void ChirpChatModGUI::on_invertRamps_stateChanged(int state)
+{
+    m_settings.m_invertRamps = (state == Qt::Checked);
+    applySettings();
+}
+
 void ChirpChatModGUI::onWidgetRolled(QWidget* widget, bool rollDown)
 {
     (void) widget;
@@ -541,6 +547,7 @@ void ChirpChatModGUI::displaySettings()
     ui->udpEnabled->setChecked(m_settings.m_udpEnabled);
     ui->udpAddress->setText(m_settings.m_udpAddress);
     ui->udpPort->setText(QString::number(m_settings.m_udpPort));
+    ui->invertRamps->setChecked(m_settings.m_invertRamps);
     getRollupContents()->restoreState(m_rollupState);
     updateAbsoluteCenterFrequency();
     blockApplySettings(false);
@@ -658,6 +665,7 @@ void ChirpChatModGUI::makeUIConnections()
     QObject::connect(ui->udpEnabled, &QCheckBox::clicked, this, &ChirpChatModGUI::on_udpEnabled_clicked);
     QObject::connect(ui->udpAddress, &QLineEdit::editingFinished, this, &ChirpChatModGUI::on_udpAddress_editingFinished);
     QObject::connect(ui->udpPort, &QLineEdit::editingFinished, this, &ChirpChatModGUI::on_udpPort_editingFinished);
+    QObject::connect(ui->invertRamps, &QCheckBox::stateChanged, this, &ChirpChatModGUI::on_invertRamps_stateChanged);
 }
 
 void ChirpChatModGUI::updateAbsoluteCenterFrequency()

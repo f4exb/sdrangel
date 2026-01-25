@@ -88,6 +88,7 @@ void ChirpChatModSettings::resetToDefaults()
     m_udpEnabled = false;
     m_udpAddress = "127.0.0.1";
     m_udpPort = 9998;
+    m_invertRamps = false;
     m_rgbColor = QColor(255, 0, 255).rgb();
     m_title = "ChirpChat Modulator";
     m_streamIndex = 0;
@@ -169,11 +170,7 @@ QByteArray ChirpChatModSettings::serialize() const
     s.writeU32(9, m_syncWord);
     s.writeU32(10, m_preambleChirps);
     s.writeS32(11, m_quietMillis);
-    s.writeBool(12, m_useReverseAPI);
-    s.writeString(13, m_reverseAPIAddress);
-    s.writeU32(14, m_reverseAPIPort);
-    s.writeU32(15, m_reverseAPIDeviceIndex);
-    s.writeU32(16, m_reverseAPIChannelIndex);
+    s.writeBool(12, m_invertRamps);
     s.writeString(20, m_beaconMessage);
     s.writeString(21, m_cqMessage);
     s.writeString(22, m_replyMessage);
@@ -250,19 +247,7 @@ bool ChirpChatModSettings::deserialize(const QByteArray& data)
         d.readU32(10, &m_preambleChirps, 8);
         d.readS32(11, &m_quietMillis, 1000);
         d.readBool(11, &m_useReverseAPI, false);
-        d.readString(12, &m_reverseAPIAddress, "127.0.0.1");
-        d.readU32(13, &utmp, 0);
-
-        if ((utmp > 1023) && (utmp < 65535)) {
-            m_reverseAPIPort = utmp;
-        } else {
-            m_reverseAPIPort = 8888;
-        }
-
-        d.readU32(14, &utmp, 0);
-        m_reverseAPIDeviceIndex = utmp > 99 ? 99 : utmp;
-        d.readU32(15, &utmp, 0);
-        m_reverseAPIChannelIndex = utmp > 99 ? 99 : utmp;
+        d.readBool(12, &m_invertRamps, false);
         d.readString(20, &m_beaconMessage, "VVV DE %1 %2");
         d.readString(21, &m_cqMessage, "CQ DE %1 %2");
         d.readString(22, &m_replyMessage, "%2 %1 %3");
@@ -326,4 +311,182 @@ bool ChirpChatModSettings::deserialize(const QByteArray& data)
         resetToDefaults();
         return false;
     }
+}
+
+void ChirpChatModSettings::applySettings(const QStringList& settingsKeys, const ChirpChatModSettings& settings)
+{
+    if (settingsKeys.contains("inputFrequencyOffset"))
+        m_inputFrequencyOffset = settings.m_inputFrequencyOffset;
+    if (settingsKeys.contains("bandwidthIndex"))
+        m_bandwidthIndex = settings.m_bandwidthIndex;
+    if (settingsKeys.contains("spreadFactor"))
+        m_spreadFactor = settings.m_spreadFactor;
+    if (settingsKeys.contains("deBits"))
+        m_deBits = settings.m_deBits;
+    if (settingsKeys.contains("codingScheme"))
+        m_codingScheme = settings.m_codingScheme;
+    if (settingsKeys.contains("preambleChirps"))
+        m_preambleChirps = settings.m_preambleChirps;
+    if (settingsKeys.contains("quietMillis"))
+        m_quietMillis = settings.m_quietMillis;
+    if (settingsKeys.contains("invertRamps"))
+        m_invertRamps = settings.m_invertRamps;
+    if (settingsKeys.contains("syncWord"))
+        m_syncWord = settings.m_syncWord;
+    if (settingsKeys.contains("channelMute"))
+        m_channelMute = settings.m_channelMute;
+    if (settingsKeys.contains("title"))
+        m_title = settings.m_title;
+    if (settingsKeys.contains("udpEnabled"))
+        m_udpEnabled = settings.m_udpEnabled;
+    if (settingsKeys.contains("udpAddress"))
+        m_udpAddress = settings.m_udpAddress;
+    if (settingsKeys.contains("udpPort"))
+        m_udpPort = settings.m_udpPort;
+    if (settingsKeys.contains("streamIndex"))
+        m_streamIndex = settings.m_streamIndex;
+    if (settingsKeys.contains("useReverseAPI"))
+        m_useReverseAPI = settings.m_useReverseAPI;
+    if (settingsKeys.contains("reverseAPIAddress"))
+        m_reverseAPIAddress = settings.m_reverseAPIAddress;
+    if (settingsKeys.contains("reverseAPIPort"))
+        m_reverseAPIPort = settings.m_reverseAPIPort;
+    if (settingsKeys.contains("reverseAPIDeviceIndex"))
+        m_reverseAPIDeviceIndex = settings.m_reverseAPIDeviceIndex;
+    if (settingsKeys.contains("reverseAPIChannelIndex"))
+        m_reverseAPIChannelIndex = settings.m_reverseAPIChannelIndex;
+    if (settingsKeys.contains("workspaceIndex"))
+        m_workspaceIndex = settings.m_workspaceIndex;
+    if (settingsKeys.contains("geometryBytes"))
+        m_geometryBytes = settings.m_geometryBytes;
+    if (settingsKeys.contains("hidden"))
+        m_hidden = settings.m_hidden;
+    if (settingsKeys.contains("channelMarker") && m_channelMarker && settings.m_channelMarker)
+        m_channelMarker->deserialize(settings.m_channelMarker->serialize());
+    if (settingsKeys.contains("rollupState") && m_rollupState && settings.m_rollupState)
+        m_rollupState->deserialize(settings.m_rollupState->serialize());
+    if (settingsKeys.contains("beaconMessage"))
+        m_beaconMessage = settings.m_beaconMessage;
+    if (settingsKeys.contains("cqMessage"))
+        m_cqMessage = settings.m_cqMessage;
+    if (settingsKeys.contains("replyMessage"))
+        m_replyMessage = settings.m_replyMessage;
+    if (settingsKeys.contains("reportMessage"))
+        m_reportMessage = settings.m_reportMessage;
+    if (settingsKeys.contains("replyReportMessage"))
+        m_replyReportMessage = settings.m_replyReportMessage;
+    if (settingsKeys.contains("rrrMessage"))
+        m_rrrMessage = settings.m_rrrMessage;
+    if (settingsKeys.contains("73Message"))
+        m_73Message = settings.m_73Message;
+    if (settingsKeys.contains("qsoTextMessage"))
+        m_qsoTextMessage = settings.m_qsoTextMessage;
+    if (settingsKeys.contains("textMessage"))
+        m_textMessage = settings.m_textMessage;
+    if (settingsKeys.contains("bytesMessage"))
+        m_bytesMessage = settings.m_bytesMessage;
+    if (settingsKeys.contains("messageType"))
+        m_messageType = settings.m_messageType;
+    if (settingsKeys.contains("nbParityBits"))
+        m_nbParityBits = settings.m_nbParityBits;
+    if (settingsKeys.contains("hasCRC"))
+        m_hasCRC = settings.m_hasCRC;
+    if (settingsKeys.contains("hasHeader"))
+        m_hasHeader = settings.m_hasHeader;
+    if (settingsKeys.contains("myCall"))
+        m_myCall = settings.m_myCall;
+    if (settingsKeys.contains("urCall"))
+        m_urCall = settings.m_urCall;
+    if (settingsKeys.contains("myLoc"))
+        m_myLoc = settings.m_myLoc;
+    if (settingsKeys.contains("myRpt"))
+        m_myRpt = settings.m_myRpt;
+    if (settingsKeys.contains("messageRepeat"))
+        m_messageRepeat = settings.m_messageRepeat;
+}
+
+QString ChirpChatModSettings::getDebugString(const QStringList& settingsKeys, bool force) const
+{
+    QString debug;
+    if (settingsKeys.contains("inputFrequencyOffset") || force)
+        debug += QString("Input Frequency Offset: %1\n").arg(m_inputFrequencyOffset);
+    if (settingsKeys.contains("bandwidthIndex") || force)
+        debug += QString("Bandwidth Index: %1\n").arg(m_bandwidthIndex);
+    if (settingsKeys.contains("spreadFactor") || force)
+        debug += QString("Spread Factor: %1\n").arg(m_spreadFactor);
+    if (settingsKeys.contains("deBits") || force)
+        debug += QString("DE Bits: %1\n").arg(m_deBits);
+    if (settingsKeys.contains("codingScheme") || force)
+        debug += QString("Coding Scheme: %1\n").arg(m_codingScheme);
+    if (settingsKeys.contains("preambleChirps") || force)
+        debug += QString("Preamble Chirps: %1\n").arg(m_preambleChirps);
+    if (settingsKeys.contains("quietMillis") || force)
+        debug += QString("Quiet Millis: %1\n").arg(m_quietMillis);
+    if (settingsKeys.contains("invertRamps") || force)
+        debug += QString("Invert Ramps: %1\n").arg(m_invertRamps);
+    if (settingsKeys.contains("syncWord") || force)
+        debug += QString("Sync Word: %1\n").arg(m_syncWord);
+    if (settingsKeys.contains("channelMute") || force)
+        debug += QString("Channel Mute: %1\n").arg(m_channelMute);
+    if (settingsKeys.contains("title") || force)
+        debug += QString("Title: %1\n").arg(m_title);
+    if (settingsKeys.contains("udpEnabled") || force)
+        debug += QString("UDP Enabled: %1\n").arg(m_udpEnabled);
+    if (settingsKeys.contains("udpAddress") || force)
+        debug += QString("UDP Address: %1\n").arg(m_udpAddress);
+    if (settingsKeys.contains("udpPort") || force)
+        debug += QString("UDP Port: %1\n").arg(m_udpPort);
+    if (settingsKeys.contains("streamIndex") || force)
+        debug += QString("Stream Index: %1\n").arg(m_streamIndex);
+    if (settingsKeys.contains("useReverseAPI") || force)
+        debug += QString("Use Reverse API: %1\n").arg(m_useReverseAPI);
+    if (settingsKeys.contains("reverseAPIAddress") || force)
+        debug += QString("Reverse API Address: %1\n").arg(m_reverseAPIAddress);
+    if (settingsKeys.contains("reverseAPIPort") || force)
+        debug += QString("Reverse API Port: %1\n").arg(m_reverseAPIPort);
+    if (settingsKeys.contains("reverseAPIDeviceIndex") || force)
+        debug += QString("Reverse API Device Index: %1\n").arg(m_reverseAPIDeviceIndex);
+    if (settingsKeys.contains("reverseAPIChannelIndex") || force)
+        debug += QString("Reverse API Channel Index: %1\n").arg(m_reverseAPIChannelIndex);
+    if (settingsKeys.contains("workspaceIndex") || force)
+        debug += QString("Workspace Index: %1\n").arg(m_workspaceIndex);
+    if (settingsKeys.contains("hidden") || force)
+        debug += QString("Hidden: %1\n").arg(m_hidden);
+    if (settingsKeys.contains("beaconMessage") || force)
+        debug += QString("Beacon Message: %1\n").arg(m_beaconMessage);
+    if (settingsKeys.contains("cqMessage") || force)
+        debug += QString("CQ Message: %1\n").arg(m_cqMessage);
+    if (settingsKeys.contains("replyMessage") || force)
+        debug += QString("Reply Message: %1\n").arg(m_replyMessage);
+    if (settingsKeys.contains("reportMessage") || force)
+        debug += QString("Report Message: %1\n").arg(m_reportMessage);
+    if (settingsKeys.contains("replyReportMessage") || force)
+        debug += QString("Reply Report Message: %1\n").arg(m_replyReportMessage);
+    if (settingsKeys.contains("rrrMessage") || force)
+        debug += QString("RRR Message: %1\n").arg(m_rrrMessage);
+    if (settingsKeys.contains("73Message") || force)
+        debug += QString("73 Message: %1\n").arg(m_73Message);
+    if (settingsKeys.contains("qsoTextMessage") || force)
+        debug += QString("QSO Text Message: %1\n").arg(m_qsoTextMessage);
+    if (settingsKeys.contains("textMessage") || force)
+        debug += QString("Text Message: %1\n").arg(m_textMessage);
+    if (settingsKeys.contains("messageType") || force)
+        debug += QString("Message Type: %1\n").arg(m_messageType);
+    if (settingsKeys.contains("nbParityBits") || force)
+        debug += QString("Number of Parity Bits: %1\n").arg(m_nbParityBits);
+    if (settingsKeys.contains("hasCRC") || force)
+        debug += QString("Has CRC: %1\n").arg(m_hasCRC);
+    if (settingsKeys.contains("hasHeader") || force)
+        debug += QString("Has Header: %1\n").arg(m_hasHeader);
+    if (settingsKeys.contains("myCall") || force)
+        debug += QString("My Call: %1\n").arg(m_myCall);
+    if (settingsKeys.contains("urCall") || force)
+        debug += QString("UR Call: %1\n").arg(m_urCall);
+    if (settingsKeys.contains("myLoc") || force)
+        debug += QString("My Loc: %1\n").arg(m_myLoc);
+    if (settingsKeys.contains("myRpt") || force)
+        debug += QString("My Rpt: %1\n").arg(m_myRpt);
+    if (settingsKeys.contains("messageRepeat") || force)
+        debug += QString("Message Repeat: %1\n").arg(m_messageRepeat);
+    return debug;
 }

@@ -197,7 +197,7 @@ void ChirpChatModSource::modulateSample()
     }
     else if (m_state == ChirpChatStatePreamble)
     {
-        m_modPhasor += m_phaseIncrements[m_chirp]; // up chirps
+        m_modPhasor += (m_settings.m_invertRamps ? -1 : 1) * m_phaseIncrements[m_chirp]; // preamble chirps
         m_modSample = Complex(std::polar(0.891235351562 * SDR_TX_SCALED, m_modPhasor));
         m_fftCounter++;
 
@@ -228,7 +228,7 @@ void ChirpChatModSource::modulateSample()
     }
     else if (m_state == ChirpChatStateSyncWord)
     {
-        m_modPhasor += m_phaseIncrements[m_chirp]; // up chirps
+        m_modPhasor += (m_settings.m_invertRamps ? -1 : 1) * m_phaseIncrements[m_chirp]; // sync chirps same orientation as preamble
         m_modSample = Complex(std::polar(0.891235351562 * SDR_TX_SCALED, m_modPhasor));
         m_fftCounter++;
 
@@ -251,7 +251,7 @@ void ChirpChatModSource::modulateSample()
     }
     else if (m_state == ChirpChatStateSFD)
     {
-        m_modPhasor -= m_phaseIncrements[m_chirp]; // down chirps
+        m_modPhasor -= (m_settings.m_invertRamps ? -1 : 1) * m_phaseIncrements[m_chirp]; // SFD chirps
         m_modSample = Complex(std::polar(0.891235351562 * SDR_TX_SCALED, m_modPhasor));
         m_fftCounter++;
         m_sampleCounter++;
@@ -280,7 +280,7 @@ void ChirpChatModSource::modulateSample()
     }
     else if (m_state == ChirpChatStatePayload)
     {
-        m_modPhasor += m_phaseIncrements[m_chirp]; // up chirps
+        m_modPhasor += (m_settings.m_invertRamps ? -1 : 1) * m_phaseIncrements[m_chirp]; // payload chirps
         m_modSample = Complex(std::polar(0.891235351562 * SDR_TX_SCALED, m_modPhasor));
         m_fftCounter++;
 
