@@ -338,6 +338,12 @@ void ChirpChatDemodGUI::on_udpPort_editingFinished()
     applySettings();
 }
 
+void ChirpChatDemodGUI::on_invertRamps_stateChanged(int state)
+{
+    m_settings.m_invertRamps = (state == Qt::Checked);
+    applySettings();
+}
+
 void ChirpChatDemodGUI::onWidgetRolled(QWidget* widget, bool rollDown)
 {
     (void) widget;
@@ -529,6 +535,7 @@ void ChirpChatDemodGUI::displaySettings()
     }
 
     ui->messageLengthAuto->setChecked(m_settings.m_autoNbSymbolsMax);
+    ui->invertRamps->setChecked(m_settings.m_invertRamps);
 
     displaySquelch();
     updateIndexLabel();
@@ -854,6 +861,7 @@ void ChirpChatDemodGUI::makeUIConnections()
     QObject::connect(ui->udpSend, &QCheckBox::stateChanged, this, &ChirpChatDemodGUI::on_udpSend_stateChanged);
     QObject::connect(ui->udpAddress, &QLineEdit::editingFinished, this, &ChirpChatDemodGUI::on_udpAddress_editingFinished);
     QObject::connect(ui->udpPort, &QLineEdit::editingFinished, this, &ChirpChatDemodGUI::on_udpPort_editingFinished);
+    QObject::connect(ui->invertRamps, &QCheckBox::stateChanged, this, &ChirpChatDemodGUI::on_invertRamps_stateChanged);
 }
 
 void ChirpChatDemodGUI::updateAbsoluteCenterFrequency()

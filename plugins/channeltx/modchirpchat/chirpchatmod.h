@@ -167,6 +167,7 @@ private:
     ChirpChatModEncoder m_encoder; // TODO: check if it needs to be on its own thread
     ChirpChatModSettings m_settings;
     float m_currentPayloadTime;
+    std::vector<unsigned short> m_symbols;
 
     SampleVector m_sampleBuffer;
     QRecursiveMutex m_settingsMutex;

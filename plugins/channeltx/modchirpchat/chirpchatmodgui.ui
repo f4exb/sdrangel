@@ -215,6 +215,23 @@
         </property>
        </widget>
       </item>
+      <item>
+       <widget class="Line" name="line_2">
+        <property name="orientation">
+         <enum>Qt::Vertical</enum>
+        </property>
+       </widget>
+      </item>
+      <item>
+       <widget class="QCheckBox" name="invertRamps">
+        <property name="toolTip">
+         <string>Invert preamble, SFD and payload ramps</string>
+        </property>
+        <property name="text">
+         <string>Inv</string>
+        </property>
+       </widget>
+      </item>
      </layout>
     </item>
     <item>

@@ -432,6 +432,14 @@ void ChirpChatDemod::applySettings(const ChirpChatDemodSettings& settings, bool 
             << " m_sendViaUDP: " << settings.m_sendViaUDP
             << " m_udpAddress: " << settings.m_udpAddress
             << " m_udpPort: " << settings.m_udpPort
+            << " m_decodeActive: " << settings.m_decodeActive
+            << " m_eomSquelchTenths: " << settings.m_eomSquelchTenths
+            << " m_nbSymbolsMax: " << settings.m_nbSymbolsMax
+            << " m_preambleChirps: " << settings.m_preambleChirps
+            << " m_streamIndex: " << settings.m_streamIndex
+            << " m_useReverseAPI: " << settings.m_useReverseAPI
+            << " m_fftWindow: " << settings.m_fftWindow
+            << " m_invertRamps: " << settings.m_invertRamps
             << " m_rgbColor: " << settings.m_rgbColor
             << " m_title: " << settings.m_title
             << " force: " << force;
@@ -532,6 +540,9 @@ void ChirpChatDemod::applySettings(const ChirpChatDemodSettings& settings, bool 
     }
     if ((settings.m_autoNbSymbolsMax != m_settings.m_autoNbSymbolsMax) || force) {
         reverseAPIKeys.append("autoNbSymbolsMax");
+    }
+    if ((settings.m_invertRamps != m_settings.m_invertRamps) || force) {
+        reverseAPIKeys.append("invertRamps");
     }
 
     if ((settings.m_udpAddress != m_settings.m_udpAddress) || force)
@@ -694,6 +705,9 @@ void ChirpChatDemod::webapiUpdateChannelSettings(
         uint16_t port = response.getChirpChatDemodSettings()->getUdpPort();
         settings.m_udpPort = port < 1024 ? 1024 : port;
     }
+    if (channelSettingsKeys.contains("invertRamps")) {
+        settings.m_invertRamps = response.getChirpChatDemodSettings()->getInvertRamps() != 0;
+    }
     if (channelSettingsKeys.contains("rgbColor")) {
         settings.m_rgbColor = response.getChirpChatDemodSettings()->getRgbColor();
     }
@@ -757,6 +771,7 @@ void ChirpChatDemod::webapiFormatChannelSettings(SWGSDRangel::SWGChannelSettings
     response.getChirpChatDemodSettings()->setHasCrc(settings.m_hasCRC ? 1 : 0);
     response.getChirpChatDemodSettings()->setHasHeader(settings.m_hasHeader ? 1 : 0);
     response.getChirpChatDemodSettings()->setSendViaUdp(settings.m_sendViaUDP ? 1 : 0);
+    response.getChirpChatDemodSettings()->setInvertRamps(settings.m_invertRamps ? 1 : 0);
 
     if (response.getChirpChatDemodSettings()->getUdpAddress()) {
         *response.getChirpChatDemodSettings()->getUdpAddress() = settings.m_udpAddress;
@@ -977,6 +992,9 @@ void ChirpChatDemod::webapiFormatChannelSettings(
     }
     if (channelSettingsKeys.contains("updPort") || force) {
         swgChirpChatDemodSettings->setUdpPort(settings.m_udpPort);
+    }
+    if (channelSettingsKeys.contains("invertRamps") || force) {
+        swgChirpChatDemodSettings->setInvertRamps(settings.m_invertRamps ? 1 : 0);
     }
     if (channelSettingsKeys.contains("rgbColor") || force) {
         swgChirpChatDemodSettings->setRgbColor(settings.m_rgbColor);

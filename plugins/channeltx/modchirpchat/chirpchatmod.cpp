@@ -186,6 +186,21 @@ void ChirpChatMod::applySettings(const ChirpChatModSettings& settings, bool forc
             << " m_73message: " << settings.m_73Message
             << " m_qsoTextMessage: " << settings.m_qsoTextMessage
             << " m_textMessage: " << settings.m_textMessage
+            << " m_bytesMessage: " << settings.m_bytesMessage.toHex()
+            << " m_spreadFactor: " << settings.m_spreadFactor
+            << " m_deBits: " << settings.m_deBits
+            << " m_codingScheme: " << settings.m_codingScheme
+            << " m_nbParityBits: " << settings.m_nbParityBits
+            << " m_hasCRC: " << settings.m_hasCRC
+            << " m_hasHeader: " << settings.m_hasHeader
+            << " m_messageType: " << settings.m_messageType
+            << " m_preambleChirps: " << settings.m_preambleChirps
+            << " m_quietMillis: " << settings.m_quietMillis
+            << " m_messageRepeat: " << settings.m_messageRepeat
+            << " m_udpEnabled: " << settings.m_udpEnabled
+            << " m_udpAddress: " << settings.m_udpAddress
+            << " m_udpPort: " << settings.m_udpPort
+            << " m_invertRamps: " << settings.m_invertRamps
             << " m_useReverseAPI: " << settings.m_useReverseAPI
             << " m_reverseAPIAddress: " << settings.m_reverseAPIAddress
             << " m_reverseAPIAddress: " << settings.m_reverseAPIPort
@@ -214,6 +229,17 @@ void ChirpChatMod::applySettings(const ChirpChatModSettings& settings, bool forc
     if ((settings.m_spreadFactor != m_settings.m_spreadFactor)
      || (settings.m_deBits != m_settings.m_deBits) || force) {
         m_encoder.setNbSymbolBits(settings.m_spreadFactor, settings.m_deBits);
+    }
+
+    if ((settings.m_spreadFactor != m_settings.m_spreadFactor)
+     || (settings.m_bandwidthIndex != m_settings.m_bandwidthIndex) || force)
+    {
+        if (getMessageQueueToGUI())
+        {
+            m_currentPayloadTime = (m_symbols.size()*(1<<settings.m_spreadFactor)*1000.0) / ChirpChatModSettings::bandwidths[settings.m_bandwidthIndex];
+            MsgReportPayloadTime *rpt = MsgReportPayloadTime::create(m_currentPayloadTime, m_symbols.size());
+            getMessageQueueToGUI()->push(rpt);
+        }
     }
 
     if ((settings.m_codingScheme != m_settings.m_codingScheme) || force)
@@ -273,9 +299,17 @@ void ChirpChatMod::applySettings(const ChirpChatModSettings& settings, bool forc
     if ((settings.m_bytesMessage != m_settings.m_bytesMessage) || force) {
         reverseAPIKeys.append("bytesMessage");
     }
+    if ((settings.m_preambleChirps != m_settings.m_preambleChirps) || force) {
+        reverseAPIKeys.append("preambleChirps");
+    }
+    if ((settings.m_quietMillis != m_settings.m_quietMillis) || force) {
+        reverseAPIKeys.append("quietMillis");
+    }
+    if ((settings.m_invertRamps != m_settings.m_invertRamps) || force) {
+        reverseAPIKeys.append("invertRamps");
+    }
 
     ChirpChatModBaseband::MsgConfigureChirpChatModPayload *payloadMsg = nullptr;
-    std::vector<unsigned short> symbols;
 
     if ((settings.m_messageType == ChirpChatModSettings::MessageNone)
         && ((settings.m_messageType != m_settings.m_messageType) || force))
@@ -294,18 +328,19 @@ void ChirpChatMod::applySettings(const ChirpChatModSettings& settings, bool forc
         || (settings.m_textMessage != m_settings.m_textMessage)
         || (settings.m_bytesMessage != m_settings.m_bytesMessage) || force)
     {
-        m_encoder.encode(settings, symbols);
-        payloadMsg = ChirpChatModBaseband::MsgConfigureChirpChatModPayload::create(symbols);
+        m_symbols.clear();
+        m_encoder.encode(settings, m_symbols);
+        payloadMsg = ChirpChatModBaseband::MsgConfigureChirpChatModPayload::create(m_symbols);
     }
 
     if (payloadMsg)
     {
         m_basebandSource->getInputMessageQueue()->push(payloadMsg);
-        m_currentPayloadTime = (symbols.size()*(1<<settings.m_spreadFactor)*1000.0) / ChirpChatModSettings::bandwidths[settings.m_bandwidthIndex];
+        m_currentPayloadTime = (m_symbols.size()*(1<<settings.m_spreadFactor)*1000.0) / ChirpChatModSettings::bandwidths[settings.m_bandwidthIndex];
 
         if (getMessageQueueToGUI())
         {
-            MsgReportPayloadTime *rpt = MsgReportPayloadTime::create(m_currentPayloadTime, symbols.size());
+            MsgReportPayloadTime *rpt = MsgReportPayloadTime::create(m_currentPayloadTime, m_symbols.size());
             getMessageQueueToGUI()->push(rpt);
         }
     }
@@ -552,6 +587,9 @@ void ChirpChatMod::webapiUpdateChannelSettings(
     if (channelSettingsKeys.contains("udpPort")) {
         settings.m_udpPort = response.getChirpChatModSettings()->getUdpPort();
     }
+    if (channelSettingsKeys.contains("invertRamps")) {
+        settings.m_invertRamps = response.getChirpChatModSettings()->getInvertRamps();
+    }
     if (channelSettingsKeys.contains("rgbColor")) {
         settings.m_rgbColor = response.getChirpChatModSettings()->getRgbColor();
     }
@@ -703,6 +741,7 @@ void ChirpChatMod::webapiFormatChannelSettings(SWGSDRangel::SWGChannelSettings& 
     response.getChirpChatModSettings()->setUdpEnabled(settings.m_udpEnabled);
     response.getChirpChatModSettings()->setUdpAddress(new QString(settings.m_udpAddress));
     response.getChirpChatModSettings()->setUdpPort(settings.m_udpPort);
+    response.getChirpChatModSettings()->setInvertRamps(settings.m_invertRamps ? 1 : 0);
 
     response.getChirpChatModSettings()->setRgbColor(settings.m_rgbColor);
 
@@ -934,6 +973,9 @@ void ChirpChatMod::webapiFormatChannelSettings(
     }
     if (channelSettingsKeys.contains("udpPort") || force) {
         swgChirpChatModSettings->setUdpPort(settings.m_udpPort);
+    }
+    if (channelSettingsKeys.contains("invertRamps") || force) {
+        swgChirpChatModSettings->setInvertRamps(settings.m_invertRamps ? 1 : 0);
     }
 
     if (channelSettingsKeys.contains("rgbColor") || force) {

@@ -273,7 +273,7 @@ public:
     // adds the 14 bit CRC to obtain 91 bits
     // apply (174, 91) generator mastrix to obtain the 83 parity bits
     // append the 83 bits to the 91 bits message e+ crc to obtain the 174 bit payload
-    static void encode(int a174[], int s77[]);
+    static void encode(int a174[], const int s77[]);
 
     //
     // set ones and zero symbol indexes

@@ -4457,7 +4457,11 @@ margin-bottom: 20px;
     },
     "udpPort" : {
       "type" : "integer",
-      "description" : "UDP destination properties"
+      "description" : "UDP destination port"
+    },
+    "invertRamps" : {
+      "type" : "integer",
+      "description" : "Invert chirp ramps\n  * 0 - Normal chirp ramps (upchirps for preamble and payload)\n  * 1 - Inverted chirp ramps (downchirps for preamble and payload)\n"
     },
     "rgbColor" : {
       "type" : "integer"
@@ -4656,6 +4660,10 @@ margin-bottom: 20px;
     "udpPort" : {
       "type" : "integer",
       "description" : "UDP port to listen for messages to transmit on"
+    },
+    "invertRamps" : {
+      "type" : "integer",
+      "description" : "Invert chirp ramps\n  * 0 - Normal chirp ramps (upchirps for preamble and payload)\n  * 1 - Inverted chirp ramps (downchirps for preamble and payload)\n"
     },
     "rgbColor" : {
       "type" : "integer"
@@ -59832,7 +59840,7 @@ except ApiException as e:
           </div>
           <div id="generator">
             <div class="content">
-              Generated 2026-01-10T11:16:10.140+01:00
+              Generated 2026-01-24T10:44:52.632+01:00
             </div>
           </div>
       </div>
