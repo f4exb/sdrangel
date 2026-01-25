@@ -27,7 +27,7 @@
 #include <fstream>
 
 #include "dsp/channelsamplesource.h"
-#include "dsp/ncof.h"
+#include "dsp/nco.h"
 #include "dsp/interpolator.h"
 #include "dsp/fftfilt.h"
 #include "dsp/cwkeyer.h"
@@ -79,8 +79,8 @@ private:
     SSBModSettings m_settings;
     ChannelAPI *m_channel;
 
-    NCOF m_carrierNco;
-    NCOF m_toneNco;
+    NCO m_carrierNco;
+    NCO m_toneNco;
     Complex m_modSample;
 
     Interpolator m_interpolator;

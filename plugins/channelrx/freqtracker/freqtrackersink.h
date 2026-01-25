@@ -23,7 +23,7 @@
 #include <vector>
 
 #include "dsp/channelsamplesink.h"
-#include "dsp/ncof.h"
+#include "dsp/nco.h"
 #include "dsp/interpolator.h"
 #include "util/movingaverage.h"
 #include "dsp/phaselockcomplex.h"
@@ -103,7 +103,7 @@ private:
     Complex m_sum;
   	int m_undersampleCount;
 
-	NCOF m_nco;
+	NCO m_nco;
     PhaseLockComplex m_pll;
     FreqLockComplex m_fll;
 	Interpolator m_interpolator;

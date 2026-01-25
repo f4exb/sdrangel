@@ -163,7 +163,6 @@ set(sdrbase_SOURCES
     dsp/mimochannel.cpp
     dsp/morsedemod.cpp
     dsp/nco.cpp
-    dsp/ncof.cpp
     dsp/phaselock.cpp
     dsp/phaselockcomplex.cpp
     dsp/projector.cpp
@@ -413,7 +412,6 @@ set(sdrbase_HEADERS
     dsp/movingaverage.h
     dsp/morsedemod.h
     dsp/nco.h
-    dsp/ncof.h
     dsp/phasediscri.h
     dsp/phaselock.h
     dsp/phaselockcomplex.h

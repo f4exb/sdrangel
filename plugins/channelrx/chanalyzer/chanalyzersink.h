@@ -22,7 +22,7 @@
 #include "dsp/channelsamplesink.h"
 #include "dsp/interpolator.h"
 #include "dsp/decimatorc.h"
-#include "dsp/ncof.h"
+#include "dsp/nco.h"
 #include "dsp/fftcorr.h"
 #include "dsp/fftfilt.h"
 #include "dsp/phaselockcomplex.h"
@@ -65,7 +65,7 @@ private:
 	bool m_usb;
 	double m_magsq;
 
-	NCOF m_nco;
+	NCO m_nco;
 	Interpolator m_interpolator;
 	Real m_interpolatorDistance;
 	Real m_interpolatorDistanceRemain;

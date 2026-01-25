@@ -28,7 +28,6 @@
 
 #include "dsp/channelsamplesource.h"
 #include "dsp/nco.h"
-#include "dsp/ncof.h"
 #include "dsp/interpolator.h"
 #include "dsp/firfilter.h"
 #include "dsp/filterrc.h"
@@ -80,8 +79,8 @@ private:
     ChannelAPI *m_channel;
 
     NCO m_carrierNco;
-    NCOF m_toneNco;
-    NCOF m_ctcssNco;
+    NCO m_toneNco;
+    NCO m_ctcssNco;
     NFMModDCS m_dcsMod;
     float m_modPhasor = 0.0f; //!< baseband modulator phasor
     Complex m_modSample;

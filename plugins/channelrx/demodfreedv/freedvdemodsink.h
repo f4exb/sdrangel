@@ -25,7 +25,7 @@
 #include <QRecursiveMutex>
 
 #include "dsp/channelsamplesink.h"
-#include "dsp/ncof.h"
+#include "dsp/nco.h"
 #include "dsp/interpolator.h"
 #include "dsp/fftfilt.h"
 #include "dsp/agc.h"
@@ -171,7 +171,7 @@ private:
     DoubleBufferFIFO<fftfilt::cmplx> m_squelchDelayLine;
     bool m_audioActive;         //!< True if an audio signal is produced (no AGC or AGC and above threshold)
 
-	NCOF m_nco;
+	NCO m_nco;
     Interpolator m_interpolator;
     Real m_interpolatorDistance;
     Real m_interpolatorDistanceRemain;
