@@ -25,7 +25,7 @@
 #include "dsp/filerecordinterface.h"
 #include "dsp/decimatorc.h"
 #include "dsp/samplesimplefifo.h"
-#include "dsp/ncof.h"
+#include "dsp/nco.h"
 
 #include "filesinksettings.h"
 
@@ -65,7 +65,7 @@ private:
     int m_channelFrequencyOffset;
     int m_sinkSampleRate;
     int64_t m_centerFrequency;
-	NCOF m_nco;
+	NCO m_nco;
     DecimatorC m_decimator;
     SampleVector m_sampleBuffer;
     FileSinkSettings m_settings;

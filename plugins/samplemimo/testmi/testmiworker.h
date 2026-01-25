@@ -25,7 +25,7 @@
 #include <QDebug>
 
 #include "dsp/decimators.h"
-#include "dsp/ncof.h"
+#include "dsp/nco.h"
 #include "util/messagequeue.h"
 
 #include "testmisettings.h"
@@ -70,8 +70,8 @@ private:
 	SampleVector m_convertBuffer;
     SampleMIFifo* m_sampleFifo;
     int m_streamIndex;
-	NCOF m_nco;
-    NCOF m_toneNco;
+	NCO m_nco;
+    NCO m_toneNco;
 	int m_frequencyShift;
 	int m_toneFrequency;
 	TestMIStreamSettings::Modulation m_modulation;

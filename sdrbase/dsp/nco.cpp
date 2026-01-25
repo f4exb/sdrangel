@@ -43,10 +43,21 @@ NCO::NCO()
 	m_phaseIncrement = 0;
 }
 
-void NCO::setFreq(Real freq, Real sampleRate)
+uint64_t NCO::prsg63()
 {
-	m_phaseIncrement = (unsigned) std::round((freq * 4294967296.0) / sampleRate);
-	qDebug("NCO freq: %f phase inc: %u sr: %f", freq, m_phaseIncrement, sampleRate);
+	m_lfsr = m_lfsr << 32 | (m_lfsr << 1 ^ m_lfsr << 2) >> 32;
+	m_lfsr = m_lfsr << 32 | (m_lfsr << 1 ^ m_lfsr << 2) >> 32;
+	return m_lfsr;
+}
+
+void NCO::setFreq(Real freq, Real sampleRate, bool integerPhase, int ditherBits)
+{
+	m_phaseIncrement = (Phase) std::round((freq * pow(2.0, PhaseBits)) / sampleRate);
+	if (integerPhase) {
+		m_phaseIncrement &= ~FracMask;
+	}
+	m_ditherMask = (1ull << ditherBits) - 1;
+	qDebug("NCO freq: %f phase inc: %u sr: %f dither: %d", freq, m_phaseIncrement, sampleRate, ditherBits);
 }
 
 Real NCO::next()
@@ -67,6 +78,26 @@ Complex NCO::nextQI()
 	return Complex(iq.imag(), iq.real());
 }
 
+Complex NCO::nextIQ(float imbalance)
+{
+	nextPhase();
+	Phase phaseQ = imbalance < 0.0f ? m_phase + (Phase) (imbalance * powf(2.0f, PhaseBits)) : m_phase;
+	Phase phaseI = imbalance < 0.0f ? m_phase : m_phase + (Phase) (imbalance * powf(2.0f, PhaseBits));
+	Phase phaseIIntBits = (phaseI >> IntShift) & IntMask;
+	Phase phaseIFracBits = phaseI & FracMask;
+	Phase phaseQIntBits = (phaseQ >> IntShift) & IntMask;
+	Phase phaseQFracBits = phaseQ & FracMask;
+	unsigned i = phaseIIntBits;
+	unsigned j = (i + 1) & IntMask;
+	unsigned k = (phaseQIntBits + TableSize / 4) & IntMask;
+	unsigned l = (k + 1) & IntMask;
+	Frac fracI = ((Frac) phaseIFracBits) / Denom;
+	Frac fracQ = ((Frac) phaseQFracBits) / Denom;
+	Frac s = m_table[i] + fracI * (m_table[j] - m_table[i]); // Linear interpolation for sin
+	Frac c = m_table[k] + fracQ * (m_table[l] - m_table[k]); // Linear interpolation for cos
+	return Complex(s, -c);
+}
+
 void NCO::nextIQMul(Real& i, Real& q)
 {
     Real x = i;
@@ -78,25 +109,25 @@ void NCO::nextIQMul(Real& i, Real& q)
 
 Real NCO::get() const
 {
-	unsigned intBits = (m_phase >> IntShift) & IntMask;
-	unsigned fracBits = m_phase & FracMask;
+	Phase intBits = (m_phaseDithered >> IntShift) & IntMask;
+	Phase fracBits = m_phaseDithered & FracMask;
 	unsigned i = intBits;
 	unsigned j = (i + 1) & IntMask;
-	Real frac = ((Real) fracBits) / Denom;
+	Frac frac = ((Frac) fracBits) / Denom;
 	return m_table[i] + frac * (m_table[j] - m_table[i]); // Linear interpolation
 }
 
 Complex NCO::getIQ() const
 {
-	unsigned intBits = (m_phase >> IntShift) & IntMask;
-	unsigned fracBits = m_phase & FracMask;
+	Phase intBits = (m_phaseDithered >> IntShift) & IntMask;
+	Phase fracBits = m_phaseDithered & FracMask;
 	unsigned i = intBits;
 	unsigned j = (i + 1) & IntMask;
 	unsigned k = (i + TableSize / 4) & IntMask;
 	unsigned l = (j + TableSize / 4) & IntMask;
-	Real frac = ((Real) fracBits) / Denom;
-	Real s = m_table[i] + frac * (m_table[j] - m_table[i]); // Linear interpolation for sin
-	Real c = m_table[k] + frac * (m_table[l] - m_table[k]); // Linear interpolation for cos
+	Frac frac = ((Frac) fracBits) / Denom;
+	Frac s = m_table[i] + frac * (m_table[j] - m_table[i]); // Linear interpolation for sin
+	Frac c = m_table[k] + frac * (m_table[l] - m_table[k]); // Linear interpolation for cos
 	return Complex(s, -c);
 }
 

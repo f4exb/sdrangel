@@ -28,7 +28,7 @@
 
 #include "dsp/samplesinkfifo.h"
 #include "dsp/decimators.h"
-#include "dsp/ncof.h"
+#include "dsp/nco.h"
 #include "util/messagequeue.h"
 
 #include "testsourcesettings.h"
@@ -70,8 +70,8 @@ private:
     quint32 m_chunksize;
 	SampleVector m_convertBuffer;
 	SampleSinkFifo* m_sampleFifo;
-	NCOF m_nco;
-    NCOF m_toneNco;
+	NCO m_nco;
+    NCO m_toneNco;
 	int m_frequencyShift;
 	int m_toneFrequency;
 	TestSourceSettings::Modulation m_modulation;
