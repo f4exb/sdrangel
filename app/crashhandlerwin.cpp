@@ -122,7 +122,7 @@ static LRESULT CALLBACK WindowProc(HWND hWnd, UINT message, WPARAM wParam, LPARA
         {
 
         case IDC_EXIT_BUTTON:
-            PostQuitMessage(0);
+            exit(1);
             break;
 
         case IDC_GITHUB_BUTTON:
@@ -249,6 +249,7 @@ static LRESULT CALLBACK WindowProc(HWND hWnd, UINT message, WPARAM wParam, LPARA
     default:
         return DefWindowProc(hWnd, message, wParam, lParam);
     }
+
     return 0;
 }
 
@@ -386,9 +387,18 @@ static LONG crashHandler(struct _EXCEPTION_POINTERS *ExceptionInfo)
 
     RegisterClassEx(&wc);
 
+    LPVOID arg;
+#ifdef UNICODE
+    int unicodeStrLen = MultiByteToWideChar(CP_ACP, 0, reportBuffer, -1, NULL, 0);
+    wchar_t *unicode = new wchar_t[unicodeStrLen];
+    MultiByteToWideChar(CP_ACP, 0, reportBuffer, -1, unicode, unicodeStrLen);
+    arg = unicode;
+#else
+    arg = reportBuffer;
+#endif
     hWindow = CreateWindow(windowClass, TEXT("SDRangel Crash"), WS_OVERLAPPEDWINDOW,
         CW_USEDEFAULT, 0, 640, 500,
-        NULL, NULL, hInstance, (LPVOID) reportBuffer
+        NULL, NULL, hInstance, arg
     );
     if (hWindow)
     {
@@ -397,7 +407,7 @@ static LONG crashHandler(struct _EXCEPTION_POINTERS *ExceptionInfo)
         UpdateWindow(hWindow);
 
         MSG msg;
-        while (GetMessage(&msg, nullptr, 0, 0))
+        while (GetMessage(&msg, hWindow, 0, 0))
         {
             TranslateMessage(&msg);
             DispatchMessage(&msg);
@@ -410,6 +420,9 @@ static LONG crashHandler(struct _EXCEPTION_POINTERS *ExceptionInfo)
     }
 
     delete[] reportBuffer;
+#ifdef UNICODE
+    delete[] unicode;
+#endif
 
     return EXCEPTION_EXECUTE_HANDLER;
 }
