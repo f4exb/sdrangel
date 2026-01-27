@@ -574,7 +574,7 @@ parts:
         plugin: cmake
         source: https://github.com/EttusResearch/uhd.git
         source-type: git
-        source-commit: v4.7.0.0
+        source-commit: v4.9.0.1
         source-subdir: host
         build-packages:
             - libusb-1.0-0-dev
