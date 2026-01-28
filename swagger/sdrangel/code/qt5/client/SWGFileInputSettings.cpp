@@ -28,6 +28,8 @@ SWGFileInputSettings::SWGFileInputSettings(QString* json) {
 }
 
 SWGFileInputSettings::SWGFileInputSettings() {
+    title = nullptr;
+    m_title_isSet = false;
     file_name = nullptr;
     m_file_name_isSet = false;
     acceleration_factor = 0;
@@ -50,6 +52,8 @@ SWGFileInputSettings::~SWGFileInputSettings() {
 
 void
 SWGFileInputSettings::init() {
+    title = new QString("");
+    m_title_isSet = false;
     file_name = new QString("");
     m_file_name_isSet = false;
     acceleration_factor = 0;
@@ -68,6 +72,9 @@ SWGFileInputSettings::init() {
 
 void
 SWGFileInputSettings::cleanup() {
+    if(title != nullptr) { 
+        delete title;
+    }
     if(file_name != nullptr) { 
         delete file_name;
     }
@@ -92,6 +99,8 @@ SWGFileInputSettings::fromJson(QString &json) {
 
 void
 SWGFileInputSettings::fromJsonObject(QJsonObject &pJson) {
+    ::SWGSDRangel::setValue(&title, pJson["title"], "QString", "QString");
+    
     ::SWGSDRangel::setValue(&file_name, pJson["fileName"], "QString", "QString");
     
     ::SWGSDRangel::setValue(&acceleration_factor, pJson["accelerationFactor"], "qint32", "");
@@ -122,6 +131,9 @@ SWGFileInputSettings::asJson ()
 QJsonObject*
 SWGFileInputSettings::asJsonObject() {
     QJsonObject* obj = new QJsonObject();
+    if(title != nullptr && *title != QString("")){
+        toJsonValue(QString("title"), title, obj, QString("QString"));
+    }
     if(file_name != nullptr && *file_name != QString("")){
         toJsonValue(QString("fileName"), file_name, obj, QString("QString"));
     }
@@ -145,6 +157,16 @@ SWGFileInputSettings::asJsonObject() {
     }
 
     return obj;
+}
+
+QString*
+SWGFileInputSettings::getTitle() {
+    return title;
+}
+void
+SWGFileInputSettings::setTitle(QString* title) {
+    this->title = title;
+    this->m_title_isSet = true;
 }
 
 QString*
@@ -222,6 +244,9 @@ bool
 SWGFileInputSettings::isSet(){
     bool isObjectUpdated = false;
     do{
+        if(title && *title != QString("")){
+            isObjectUpdated = true; break;
+        }
         if(file_name && *file_name != QString("")){
             isObjectUpdated = true; break;
         }

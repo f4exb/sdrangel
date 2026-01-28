@@ -1,6 +1,8 @@
 SigMFFileInputSettings:
   description: SigMFFileInput
   properties:
+    title:
+      type: string
     fileName:
       description: The name (path) of the file being read without extension
       type: string

@@ -52,6 +52,7 @@ struct LimeSDRMIMOSettings
     };
 
     // General
+    QString    m_title;
     qint32    m_devSampleRate;
     uint8_t   m_gpioDir;          //!< GPIO pin direction LSB first; 0 input, 1 output
     uint8_t   m_gpioPins;         //!< GPIO pins to write; LSB first

@@ -27,6 +27,7 @@ PlutoSDROutputSettings::PlutoSDROutputSettings()
 
 void PlutoSDROutputSettings::resetToDefaults()
 {
+    m_title = "PlutoSDROutput";
 	m_centerFrequency = 435000 * 1000;
 	m_LOppmTenths = 0;
 	m_log2Interp = 0;
@@ -66,6 +67,7 @@ QByteArray PlutoSDROutputSettings::serialize() const
     s.writeString(18, m_reverseAPIAddress);
     s.writeU32(19, m_reverseAPIPort);
     s.writeU32(20, m_reverseAPIDeviceIndex);
+    s.writeString(21, m_title);
 
 	return s.final();
 }
@@ -119,6 +121,7 @@ bool PlutoSDROutputSettings::deserialize(const QByteArray& data)
 
         d.readU32(20, &uintval, 0);
         m_reverseAPIDeviceIndex = uintval > 99 ? 99 : uintval;
+        d.readString(21, &m_title, "PlutoSDROutput");
 
 		return true;
 	}
@@ -131,6 +134,9 @@ bool PlutoSDROutputSettings::deserialize(const QByteArray& data)
 
 void PlutoSDROutputSettings::applySettings(const QStringList& settingsKeys, const PlutoSDROutputSettings& settings)
 {
+    if (settingsKeys.contains("title")) {
+        m_title = settings.m_title;
+    }
     if (settingsKeys.contains("centerFrequency")) {
         m_centerFrequency = settings.m_centerFrequency;
     }
@@ -188,6 +194,9 @@ QString PlutoSDROutputSettings::getDebugString(const QStringList& settingsKeys, 
 {
     std::ostringstream ostr;
 
+    if (settingsKeys.contains("title") || force) {
+        ostr << " m_title: " << m_title.toStdString();
+    }
     if (settingsKeys.contains("centerFrequency") || force) {
         ostr << " m_centerFrequency: " << m_centerFrequency;
     }

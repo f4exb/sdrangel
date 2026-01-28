@@ -28,6 +28,7 @@ PerseusSettings::PerseusSettings()
 
 void PerseusSettings::resetToDefaults()
 {
+    m_title = "Perseus";
     m_centerFrequency = 7150*1000;
     m_LOppmTenths = 0;
     m_devSampleRateIndex = 0;
@@ -63,6 +64,7 @@ QByteArray PerseusSettings::serialize() const
     s.writeU32(12, m_reverseAPIPort);
     s.writeU32(13, m_reverseAPIDeviceIndex);
     s.writeBool(14, m_iqOrder);
+    s.writeString(15, m_title);
 
     return s.final();
 }
@@ -111,6 +113,7 @@ bool PerseusSettings::deserialize(const QByteArray& data)
         d.readU32(13, &uintval, 0);
         m_reverseAPIDeviceIndex = uintval > 99 ? 99 : uintval;
         d.readBool(14, &m_iqOrder, true);
+        d.readString(15, &m_title, "Perseus");
 
         return true;
     }
@@ -123,6 +126,9 @@ bool PerseusSettings::deserialize(const QByteArray& data)
 
 void PerseusSettings::applySettings(const QStringList& settingsKeys, const PerseusSettings& settings)
 {
+    if (settingsKeys.contains("title")) {
+        m_title = settings.m_title;
+    }
     if (settingsKeys.contains("centerFrequency")) {
         m_centerFrequency = settings.m_centerFrequency;
     }
@@ -174,6 +180,9 @@ QString PerseusSettings::getDebugString(const QStringList& settingsKeys, bool fo
 {
     std::ostringstream ostr;
 
+    if (settingsKeys.contains("title") || force) {
+        ostr << " m_title: " << m_title.toStdString();
+    }
     if (settingsKeys.contains("centerFrequency") || force) {
         ostr << " m_centerFrequency: " << m_centerFrequency;
     }

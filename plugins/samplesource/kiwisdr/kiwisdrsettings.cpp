@@ -28,6 +28,7 @@ KiwiSDRSettings::KiwiSDRSettings()
 
 void KiwiSDRSettings::resetToDefaults()
 {
+    m_title = "KiwiSDR";
     m_centerFrequency = 1450000;
 
 	m_gain = 20;
@@ -49,6 +50,8 @@ QByteArray KiwiSDRSettings::serialize() const
 	s.writeString(2, m_serverAddress);
 	s.writeU32(3, m_gain);
 	s.writeBool(4, m_useAGC);
+    s.writeBool(5, m_dcBlock);
+    s.writeString(6, m_title);
 
     s.writeBool(100, m_useReverseAPI);
     s.writeString(101, m_reverseAPIAddress);
@@ -75,6 +78,8 @@ bool KiwiSDRSettings::deserialize(const QByteArray& data)
 		d.readString(2, &m_serverAddress, "127.0.0.1:8073");
 		d.readU32(3, &m_gain, 20);
 		d.readBool(4, &m_useAGC, true);
+        d.readBool(5, &m_dcBlock, false);
+        d.readString(6, &m_title, "KiwiSDR");
 
 		d.readBool(100, &m_useReverseAPI, false);
 		d.readString(101, &m_reverseAPIAddress, "127.0.0.1");
@@ -101,6 +106,9 @@ bool KiwiSDRSettings::deserialize(const QByteArray& data)
 
 void KiwiSDRSettings::applySettings(const QStringList& settingsKeys, const KiwiSDRSettings& settings)
 {
+    if (settingsKeys.contains("title")) {
+        m_title = settings.m_title;
+    }
     if (settingsKeys.contains("centerFrequency")) {
         m_centerFrequency = settings.m_centerFrequency;
     }
@@ -134,6 +142,9 @@ QString KiwiSDRSettings::getDebugString(const QStringList& settingsKeys, bool fo
 {
     std::ostringstream ostr;
 
+    if (settingsKeys.contains("title") || force) {
+        ostr << " m_title: " << m_title.toStdString();
+    }
     if (settingsKeys.contains("centerFrequency") || force) {
         ostr << " m_centerFrequency: " << m_centerFrequency;
     }

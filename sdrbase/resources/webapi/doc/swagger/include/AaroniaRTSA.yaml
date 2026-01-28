@@ -1,6 +1,8 @@
 AaroniaRTSASettings:
   description: AaroniaRTSA
   properties:
+    title:
+      type: string
     centerFrequency:
       description: Sets the center frequency (Hz) of the distant IQ demodulator
       type: integer
@@ -37,6 +39,8 @@ AaroniaRTSAReport:
 AaroniaRTSAOutputSettings:
   description: AaroniaRTSAOutput
   properties:
+    title:
+      type: string
     centerFrequency:
       description: Sets the center frequency (Hz) of the distant IQ demodulator
       type: integer

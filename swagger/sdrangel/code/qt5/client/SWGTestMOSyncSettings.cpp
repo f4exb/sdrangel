@@ -28,6 +28,8 @@ SWGTestMOSyncSettings::SWGTestMOSyncSettings(QString* json) {
 }
 
 SWGTestMOSyncSettings::SWGTestMOSyncSettings() {
+    title = nullptr;
+    m_title_isSet = false;
     center_frequency = 0L;
     m_center_frequency_isSet = false;
     sample_rate = 0L;
@@ -44,6 +46,8 @@ SWGTestMOSyncSettings::~SWGTestMOSyncSettings() {
 
 void
 SWGTestMOSyncSettings::init() {
+    title = new QString("");
+    m_title_isSet = false;
     center_frequency = 0L;
     m_center_frequency_isSet = false;
     sample_rate = 0L;
@@ -56,6 +60,9 @@ SWGTestMOSyncSettings::init() {
 
 void
 SWGTestMOSyncSettings::cleanup() {
+    if(title != nullptr) { 
+        delete title;
+    }
 
 
 
@@ -73,6 +80,8 @@ SWGTestMOSyncSettings::fromJson(QString &json) {
 
 void
 SWGTestMOSyncSettings::fromJsonObject(QJsonObject &pJson) {
+    ::SWGSDRangel::setValue(&title, pJson["title"], "QString", "QString");
+    
     ::SWGSDRangel::setValue(&center_frequency, pJson["centerFrequency"], "qint64", "");
     
     ::SWGSDRangel::setValue(&sample_rate, pJson["sampleRate"], "qint64", "");
@@ -97,6 +106,9 @@ SWGTestMOSyncSettings::asJson ()
 QJsonObject*
 SWGTestMOSyncSettings::asJsonObject() {
     QJsonObject* obj = new QJsonObject();
+    if(title != nullptr && *title != QString("")){
+        toJsonValue(QString("title"), title, obj, QString("QString"));
+    }
     if(m_center_frequency_isSet){
         obj->insert("centerFrequency", QJsonValue(center_frequency));
     }
@@ -111,6 +123,16 @@ SWGTestMOSyncSettings::asJsonObject() {
     }
 
     return obj;
+}
+
+QString*
+SWGTestMOSyncSettings::getTitle() {
+    return title;
+}
+void
+SWGTestMOSyncSettings::setTitle(QString* title) {
+    this->title = title;
+    this->m_title_isSet = true;
 }
 
 qint64
@@ -158,6 +180,9 @@ bool
 SWGTestMOSyncSettings::isSet(){
     bool isObjectUpdated = false;
     do{
+        if(title && *title != QString("")){
+            isObjectUpdated = true; break;
+        }
         if(m_center_frequency_isSet){
             isObjectUpdated = true; break;
         }

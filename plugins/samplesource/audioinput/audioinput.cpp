@@ -403,6 +403,9 @@ void AudioInput::webapiUpdateDeviceSettings(
         const QStringList& deviceSettingsKeys,
         SWGSDRangel::SWGDeviceSettings& response)
 {
+    if (deviceSettingsKeys.contains("title")) {
+        settings.m_title = *response.getAudioInputSettings()->getTitle();
+    }
     if (deviceSettingsKeys.contains("device")) {
         settings.m_deviceName = *response.getAudioInputSettings()->getDevice();
     }
@@ -443,6 +446,12 @@ void AudioInput::webapiUpdateDeviceSettings(
 
 void AudioInput::webapiFormatDeviceSettings(SWGSDRangel::SWGDeviceSettings& response, const AudioInputSettings& settings)
 {
+    if (response.getAudioInputSettings()->getTitle()) {
+        *response.getAudioInputSettings()->getTitle() = settings.m_title;
+    } else {
+        response.getAudioInputSettings()->setTitle(new QString(settings.m_title));
+    }
+
     response.getAudioInputSettings()->setDevice(new QString(settings.m_deviceName));
     response.getAudioInputSettings()->setDevSampleRate(settings.m_sampleRate);
     response.getAudioInputSettings()->setVolume(settings.m_volume);
@@ -475,6 +484,9 @@ void AudioInput::webapiReverseSendSettings(const QList<QString>& deviceSettingsK
 
     // transfer data that has been modified. When force is on transfer all data except reverse API data
 
+    if (deviceSettingsKeys.contains("title") || force) {
+        swgAudioInputSettings->setTitle(new QString(settings.m_title));
+    }
     if (deviceSettingsKeys.contains("device") || force) {
         swgAudioInputSettings->setDevice(new QString(settings.m_deviceName));
     }

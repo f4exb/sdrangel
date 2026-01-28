@@ -1,6 +1,8 @@
 AudioInputSettings:
   description: AudioInput
   properties:
+    title:
+      type: string
     device:
       description: The name of the audio device
       type: string

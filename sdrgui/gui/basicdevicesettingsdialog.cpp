@@ -47,6 +47,16 @@ BasicDeviceSettingsDialog::~BasicDeviceSettingsDialog()
     delete ui;
 }
 
+void BasicDeviceSettingsDialog::setTitle(const QString& title)
+{
+    ui->title->setText(title);
+}
+
+QString BasicDeviceSettingsDialog::getTitle() const
+{
+    return ui->title->text();
+}
+
 void BasicDeviceSettingsDialog::setReplayBytesPerSecond(int bytesPerSecond)
 {
     bool enabled = bytesPerSecond > 0;
@@ -150,6 +160,11 @@ void BasicDeviceSettingsDialog::on_reverseAPIDeviceIndex_editingFinished()
     } else {
         m_reverseAPIDeviceIndex = reverseAPIDeviceIndex;
     }
+}
+
+void BasicDeviceSettingsDialog::on_titleReset_clicked()
+{
+    ui->title->setText(m_defaultTitle);
 }
 
 void BasicDeviceSettingsDialog::on_presets_clicked()

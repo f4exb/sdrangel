@@ -42,6 +42,9 @@ public:
     virtual void fromJsonObject(QJsonObject &json) override;
     virtual SWGAudioCATSISOSettings* fromJson(QString &jsonString) override;
 
+    QString* getTitle();
+    void setTitle(QString* title);
+
     qint64 getRxCenterFrequency();
     void setRxCenterFrequency(qint64 rx_center_frequency);
 
@@ -139,6 +142,9 @@ public:
     virtual bool isSet() override;
 
 private:
+    QString* title;
+    bool m_title_isSet;
+
     qint64 rx_center_frequency;
     bool m_rx_center_frequency_isSet;
 

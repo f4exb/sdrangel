@@ -399,6 +399,9 @@ void KiwiSDRInput::webapiUpdateDeviceSettings(
         const QStringList& deviceSettingsKeys,
         SWGSDRangel::SWGDeviceSettings& response)
 {
+    if (deviceSettingsKeys.contains("title")) {
+        settings.m_title = *response.getKiwiSdrSettings()->getTitle();
+    }
     if (deviceSettingsKeys.contains("gain")) {
         settings.m_gain = response.getKiwiSdrSettings()->getGain();
     }
@@ -441,6 +444,12 @@ int KiwiSDRInput::webapiReportGet(
 
 void KiwiSDRInput::webapiFormatDeviceSettings(SWGSDRangel::SWGDeviceSettings& response, const KiwiSDRSettings& settings)
 {
+    if (response.getKiwiSdrSettings()->getTitle()) {
+        *response.getKiwiSdrSettings()->getTitle() = settings.m_title;
+    } else {
+        response.getKiwiSdrSettings()->setTitle(new QString(settings.m_title));
+    }
+
     response.getKiwiSdrSettings()->setGain(settings.m_gain);
     response.getKiwiSdrSettings()->setUseAgc(settings.m_useAGC ? 1 : 0);
     response.getKiwiSdrSettings()->setDcBlock(settings.m_dcBlock ? 1 : 0);

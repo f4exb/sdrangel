@@ -28,6 +28,8 @@ SWGRemoteInputSettings::SWGRemoteInputSettings(QString* json) {
 }
 
 SWGRemoteInputSettings::SWGRemoteInputSettings() {
+    title = nullptr;
+    m_title_isSet = false;
     api_address = nullptr;
     m_api_address_isSet = false;
     api_port = 0;
@@ -60,6 +62,8 @@ SWGRemoteInputSettings::~SWGRemoteInputSettings() {
 
 void
 SWGRemoteInputSettings::init() {
+    title = new QString("");
+    m_title_isSet = false;
     api_address = new QString("");
     m_api_address_isSet = false;
     api_port = 0;
@@ -88,6 +92,9 @@ SWGRemoteInputSettings::init() {
 
 void
 SWGRemoteInputSettings::cleanup() {
+    if(title != nullptr) { 
+        delete title;
+    }
     if(api_address != nullptr) { 
         delete api_address;
     }
@@ -121,6 +128,8 @@ SWGRemoteInputSettings::fromJson(QString &json) {
 
 void
 SWGRemoteInputSettings::fromJsonObject(QJsonObject &pJson) {
+    ::SWGSDRangel::setValue(&title, pJson["title"], "QString", "QString");
+    
     ::SWGSDRangel::setValue(&api_address, pJson["apiAddress"], "QString", "QString");
     
     ::SWGSDRangel::setValue(&api_port, pJson["apiPort"], "qint32", "");
@@ -161,6 +170,9 @@ SWGRemoteInputSettings::asJson ()
 QJsonObject*
 SWGRemoteInputSettings::asJsonObject() {
     QJsonObject* obj = new QJsonObject();
+    if(title != nullptr && *title != QString("")){
+        toJsonValue(QString("title"), title, obj, QString("QString"));
+    }
     if(api_address != nullptr && *api_address != QString("")){
         toJsonValue(QString("apiAddress"), api_address, obj, QString("QString"));
     }
@@ -199,6 +211,16 @@ SWGRemoteInputSettings::asJsonObject() {
     }
 
     return obj;
+}
+
+QString*
+SWGRemoteInputSettings::getTitle() {
+    return title;
+}
+void
+SWGRemoteInputSettings::setTitle(QString* title) {
+    this->title = title;
+    this->m_title_isSet = true;
 }
 
 QString*
@@ -326,6 +348,9 @@ bool
 SWGRemoteInputSettings::isSet(){
     bool isObjectUpdated = false;
     do{
+        if(title && *title != QString("")){
+            isObjectUpdated = true; break;
+        }
         if(api_address && *api_address != QString("")){
             isObjectUpdated = true; break;
         }

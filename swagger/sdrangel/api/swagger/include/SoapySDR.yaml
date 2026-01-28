@@ -1,6 +1,8 @@
 SoapySDRInputSettings:
   description: SoapySDR
   properties:
+    title:
+      type: string
     centerFrequency:
       type: integer
       format: int64
@@ -78,6 +80,8 @@ SoapySDRInputSettings:
 SoapySDROutputSettings:
   description: SoapySDR
   properties:
+    title:
+      type: string
     centerFrequency:
       type: integer
       format: int64

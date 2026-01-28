@@ -1253,6 +1253,9 @@ void LimeSDROutput::webapiUpdateDeviceSettings(
         const QStringList& deviceSettingsKeys,
         SWGSDRangel::SWGDeviceSettings& response)
 {
+    if (deviceSettingsKeys.contains("title")) {
+        settings.m_title = *response.getLimeSdrOutputSettings()->getTitle();
+    }
     if (deviceSettingsKeys.contains("antennaPath")) {
         settings.m_antennaPath = (LimeSDROutputSettings::PathRFE) response.getLimeSdrOutputSettings()->getAntennaPath();
     }
@@ -1330,6 +1333,12 @@ int LimeSDROutput::webapiReportGet(
 }
 void LimeSDROutput::webapiFormatDeviceSettings(SWGSDRangel::SWGDeviceSettings& response, const LimeSDROutputSettings& settings)
 {
+    if (response.getLimeSdrOutputSettings()->getTitle()) {
+        *response.getLimeSdrOutputSettings()->getTitle() = settings.m_title;
+    } else {
+        response.getLimeSdrOutputSettings()->setTitle(new QString(settings.m_title));
+    }
+
     response.getLimeSdrOutputSettings()->setAntennaPath((int) settings.m_antennaPath);
     response.getLimeSdrOutputSettings()->setCenterFrequency(settings.m_centerFrequency);
     response.getLimeSdrOutputSettings()->setDevSampleRate(settings.m_devSampleRate);
@@ -1438,6 +1447,9 @@ void LimeSDROutput::webapiReverseSendSettings(const QList<QString>& deviceSettin
 
     // transfer data that has been modified. When force is on transfer all data except reverse API data
 
+    if (deviceSettingsKeys.contains("title") || force) {
+        swgLimeSdrOutputSettings->setTitle(new QString(settings.m_title));
+    }
     if (deviceSettingsKeys.contains("antennaPath") || force) {
         swgLimeSdrOutputSettings->setAntennaPath((int) settings.m_antennaPath);
     }

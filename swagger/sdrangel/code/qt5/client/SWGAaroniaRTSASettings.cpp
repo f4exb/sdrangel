@@ -28,6 +28,8 @@ SWGAaroniaRTSASettings::SWGAaroniaRTSASettings(QString* json) {
 }
 
 SWGAaroniaRTSASettings::SWGAaroniaRTSASettings() {
+    title = nullptr;
+    m_title_isSet = false;
     center_frequency = 0L;
     m_center_frequency_isSet = false;
     sample_rate = 0;
@@ -50,6 +52,8 @@ SWGAaroniaRTSASettings::~SWGAaroniaRTSASettings() {
 
 void
 SWGAaroniaRTSASettings::init() {
+    title = new QString("");
+    m_title_isSet = false;
     center_frequency = 0L;
     m_center_frequency_isSet = false;
     sample_rate = 0;
@@ -68,6 +72,9 @@ SWGAaroniaRTSASettings::init() {
 
 void
 SWGAaroniaRTSASettings::cleanup() {
+    if(title != nullptr) { 
+        delete title;
+    }
 
 
     if(server_address != nullptr) { 
@@ -92,6 +99,8 @@ SWGAaroniaRTSASettings::fromJson(QString &json) {
 
 void
 SWGAaroniaRTSASettings::fromJsonObject(QJsonObject &pJson) {
+    ::SWGSDRangel::setValue(&title, pJson["title"], "QString", "QString");
+    
     ::SWGSDRangel::setValue(&center_frequency, pJson["centerFrequency"], "qint64", "");
     
     ::SWGSDRangel::setValue(&sample_rate, pJson["sampleRate"], "qint32", "");
@@ -122,6 +131,9 @@ SWGAaroniaRTSASettings::asJson ()
 QJsonObject*
 SWGAaroniaRTSASettings::asJsonObject() {
     QJsonObject* obj = new QJsonObject();
+    if(title != nullptr && *title != QString("")){
+        toJsonValue(QString("title"), title, obj, QString("QString"));
+    }
     if(m_center_frequency_isSet){
         obj->insert("centerFrequency", QJsonValue(center_frequency));
     }
@@ -145,6 +157,16 @@ SWGAaroniaRTSASettings::asJsonObject() {
     }
 
     return obj;
+}
+
+QString*
+SWGAaroniaRTSASettings::getTitle() {
+    return title;
+}
+void
+SWGAaroniaRTSASettings::setTitle(QString* title) {
+    this->title = title;
+    this->m_title_isSet = true;
 }
 
 qint64
@@ -222,6 +244,9 @@ bool
 SWGAaroniaRTSASettings::isSet(){
     bool isObjectUpdated = false;
     do{
+        if(title && *title != QString("")){
+            isObjectUpdated = true; break;
+        }
         if(m_center_frequency_isSet){
             isObjectUpdated = true; break;
         }

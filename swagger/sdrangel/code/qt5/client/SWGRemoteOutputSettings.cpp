@@ -28,6 +28,8 @@ SWGRemoteOutputSettings::SWGRemoteOutputSettings(QString* json) {
 }
 
 SWGRemoteOutputSettings::SWGRemoteOutputSettings() {
+    title = nullptr;
+    m_title_isSet = false;
     nb_fec_blocks = 0;
     m_nb_fec_blocks_isSet = false;
     nb_tx_bytes = 0;
@@ -60,6 +62,8 @@ SWGRemoteOutputSettings::~SWGRemoteOutputSettings() {
 
 void
 SWGRemoteOutputSettings::init() {
+    title = new QString("");
+    m_title_isSet = false;
     nb_fec_blocks = 0;
     m_nb_fec_blocks_isSet = false;
     nb_tx_bytes = 0;
@@ -88,6 +92,9 @@ SWGRemoteOutputSettings::init() {
 
 void
 SWGRemoteOutputSettings::cleanup() {
+    if(title != nullptr) { 
+        delete title;
+    }
 
 
     if(api_address != nullptr) { 
@@ -119,6 +126,8 @@ SWGRemoteOutputSettings::fromJson(QString &json) {
 
 void
 SWGRemoteOutputSettings::fromJsonObject(QJsonObject &pJson) {
+    ::SWGSDRangel::setValue(&title, pJson["title"], "QString", "QString");
+    
     ::SWGSDRangel::setValue(&nb_fec_blocks, pJson["nbFECBlocks"], "qint32", "");
     
     ::SWGSDRangel::setValue(&nb_tx_bytes, pJson["nbTxBytes"], "qint32", "");
@@ -159,6 +168,9 @@ SWGRemoteOutputSettings::asJson ()
 QJsonObject*
 SWGRemoteOutputSettings::asJsonObject() {
     QJsonObject* obj = new QJsonObject();
+    if(title != nullptr && *title != QString("")){
+        toJsonValue(QString("title"), title, obj, QString("QString"));
+    }
     if(m_nb_fec_blocks_isSet){
         obj->insert("nbFECBlocks", QJsonValue(nb_fec_blocks));
     }
@@ -197,6 +209,16 @@ SWGRemoteOutputSettings::asJsonObject() {
     }
 
     return obj;
+}
+
+QString*
+SWGRemoteOutputSettings::getTitle() {
+    return title;
+}
+void
+SWGRemoteOutputSettings::setTitle(QString* title) {
+    this->title = title;
+    this->m_title_isSet = true;
 }
 
 qint32
@@ -324,6 +346,9 @@ bool
 SWGRemoteOutputSettings::isSet(){
     bool isObjectUpdated = false;
     do{
+        if(title && *title != QString("")){
+            isObjectUpdated = true; break;
+        }
         if(m_nb_fec_blocks_isSet){
             isObjectUpdated = true; break;
         }

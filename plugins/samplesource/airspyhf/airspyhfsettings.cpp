@@ -27,6 +27,7 @@ AirspyHFSettings::AirspyHFSettings()
 
 void AirspyHFSettings::resetToDefaults()
 {
+    m_title = "AirspyHF";
 	m_centerFrequency = 7150*1000;
 	m_LOppmTenths = 0;
 	m_devSampleRateIndex = 0;
@@ -78,6 +79,7 @@ QByteArray AirspyHFSettings::serialize() const
     s.writeFloat(23, m_replayLength);
     s.writeFloat(24, m_replayStep);
     s.writeBool(25, m_replayLoop);
+    s.writeString(26, m_title);
 
 	return s.final();
 }
@@ -129,6 +131,7 @@ bool AirspyHFSettings::deserialize(const QByteArray& data)
         d.readFloat(23, &m_replayLength, 20.0f);
         d.readFloat(24, &m_replayStep, 5.0f);
         d.readBool(25, &m_replayLoop, false);
+        d.readString(26, &m_title, "AirspyHF");
 
 		return true;
 	}
@@ -141,6 +144,9 @@ bool AirspyHFSettings::deserialize(const QByteArray& data)
 
 void AirspyHFSettings::applySettings(const QStringList& settingsKeys, const AirspyHFSettings& settings)
 {
+    if (settingsKeys.contains("title")) {
+        m_title = settings.m_title;
+    }
     if (settingsKeys.contains("centerFrequency")) {
         m_centerFrequency = settings.m_centerFrequency;
     }
@@ -216,6 +222,9 @@ QString AirspyHFSettings::getDebugString(const QStringList& settingsKeys, bool f
 {
     std::ostringstream ostr;
 
+    if (settingsKeys.contains("title") || force) {
+        ostr << " m_title: " << m_title.toStdString();
+    }
     if (settingsKeys.contains("centerFrequency") || force) {
         ostr << " m_centerFrequency: " << m_centerFrequency;
     }

@@ -22,7 +22,9 @@
 
 class Serializable;
 
-struct FileOutputSettings {
+struct FileOutputSettings
+{
+    QString m_title;
     quint64 m_centerFrequency;
     quint64 m_sampleRate;
     quint32 m_log2Interp;

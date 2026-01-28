@@ -26,6 +26,7 @@ LimeSDRMIMOSettings::LimeSDRMIMOSettings()
 
 void LimeSDRMIMOSettings::resetToDefaults()
 {
+    m_title = "LimeSDRMIMO";
     m_devSampleRate = 3200000;
     m_gpioDir = 0;
     m_gpioPins = 0;
@@ -101,6 +102,7 @@ QByteArray LimeSDRMIMOSettings::serialize() const
     s.writeString(9, m_reverseAPIAddress);
     s.writeU32(10, m_reverseAPIPort);
     s.writeU32(11, m_reverseAPIDeviceIndex);
+    s.writeString(12, m_title);
 
     s.writeU64(20, m_rxCenterFrequency);
     s.writeU32(21, m_log2HardDecim);
@@ -181,6 +183,9 @@ bool LimeSDRMIMOSettings::deserialize(const QByteArray& data)
         d.readBool(8, &m_useReverseAPI, false);
         d.readString(9, &m_reverseAPIAddress, "127.0.0.1");
         d.readU32(10, &uintval, 0);
+        d.readU32(11, &uintval, 0);
+        m_reverseAPIDeviceIndex = uintval > 99 ? 99 : uintval;
+        d.readString(12, &m_title, "LimeSDRMIMO");
 
         if ((uintval > 1023) && (uintval < 65535)) {
             m_reverseAPIPort = uintval;
@@ -259,6 +264,9 @@ bool LimeSDRMIMOSettings::deserialize(const QByteArray& data)
 
 void LimeSDRMIMOSettings::applySettings(const QStringList& settingsKeys, const LimeSDRMIMOSettings& settings)
 {
+    if (settingsKeys.contains("title")) {
+        m_title = settings.m_title;
+    }
     if (settingsKeys.contains("devSampleRate")) {
         m_devSampleRate = settings.m_devSampleRate;
     }
@@ -427,6 +435,9 @@ QString LimeSDRMIMOSettings::getDebugString(const QStringList& settingsKeys, boo
 {
     std::ostringstream ostr;
 
+    if (settingsKeys.contains("title") || force) {
+        ostr << " m_title: " << m_title.toStdString();
+    }
     if (settingsKeys.contains("devSampleRate") || force) {
         ostr << " m_devSampleRate: " << m_devSampleRate;
     }

@@ -42,6 +42,9 @@ public:
     virtual void fromJsonObject(QJsonObject &json) override;
     virtual SWGFileInputSettings* fromJson(QString &jsonString) override;
 
+    QString* getTitle();
+    void setTitle(QString* title);
+
     QString* getFileName();
     void setFileName(QString* file_name);
 
@@ -67,6 +70,9 @@ public:
     virtual bool isSet() override;
 
 private:
+    QString* title;
+    bool m_title_isSet;
+
     QString* file_name;
     bool m_file_name_isSet;
 

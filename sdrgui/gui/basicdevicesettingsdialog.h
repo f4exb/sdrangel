@@ -1,5 +1,5 @@
 ///////////////////////////////////////////////////////////////////////////////////////
-// Copyright (C) 2017-2018 Edouard Griffiths, F4EXB <f4exb06@gmail.com>              //
+// Copyright (C) 2017-2026 Edouard Griffiths, F4EXB <f4exb06@gmail.com>              //
 // Copyright (C) 2023 Jon Beniston, M7RCE <jon@beniston.com>                         //
 //                                                                                   //
 // This program is free software; you can redistribute it and/or modify              //
@@ -42,13 +42,17 @@ public:
     void setReverseAPIAddress(const QString& address);
     void setReverseAPIPort(uint16_t port);
     void setReverseAPIDeviceIndex(uint16_t deviceIndex);
+    void setDefaultTitle(const QString& title) { m_defaultTitle = title; }
+    void setTitle(const QString& title);
     void setReplayBytesPerSecond(int bytesPerSecond);
     void setReplayLength(float replayLength);
     float getReplayLength() const { return m_replayLength; }
     void setReplayStep(float replayStep);
     float getReplayStep() const { return m_replayStep; }
+    QString getTitle() const;
 
 private slots:
+    void on_titleReset_clicked();
     void on_reverseAPI_toggled(bool checked);
     void on_reverseAPIAddress_editingFinished();
     void on_reverseAPIPort_editingFinished();
@@ -64,6 +68,7 @@ private:
     QString m_reverseAPIAddress;
     uint16_t m_reverseAPIPort;
     uint16_t m_reverseAPIDeviceIndex;
+    QString m_defaultTitle;
     bool m_hasChanged;
     int m_replayBytesPerSecond;
     float m_replayLength;

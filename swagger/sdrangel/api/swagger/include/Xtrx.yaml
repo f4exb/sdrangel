@@ -1,6 +1,8 @@
 XtrxInputSettings:
   description: XTRX
   properties:
+    title:
+      type: string
     centerFrequency:
       type: integer
       format: int64
@@ -88,6 +90,8 @@ XtrxInputReport:
 XtrxOutputSettings:
   description: XTRX
   properties:
+    title:
+      type: string
     centerFrequency:
       type: integer
       format: int64
@@ -151,6 +155,8 @@ XtrxOutputReport:
 XtrxMIMOSettings:
   description: XTRX
   properties:
+    title:
+      type: string
     extClock:
       description: Boolean 1 if external clock source else 0
       type: integer

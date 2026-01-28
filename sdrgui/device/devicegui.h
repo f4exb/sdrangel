@@ -74,6 +74,8 @@ public:
     DeviceType getDeviceType() const { return m_deviceType; }
     void setTitle(const QString& title);
     QString getTitle() const;
+    void setDefaultTitle(const QString& title) { m_defaultTitle = title; }
+    QString getDefaultTitle() const { return m_defaultTitle; }
     void setToolTip(const QString& tooltip);
     void setIndex(int index);
     int getIndex() const { return m_deviceSetIndex; }
@@ -94,6 +96,7 @@ protected:
 
     DeviceUISet* m_deviceUISet;
     DeviceType m_deviceType;
+    QString m_defaultTitle;
     int m_deviceSetIndex;
     int m_workspaceIndex;
     QString m_helpURL;

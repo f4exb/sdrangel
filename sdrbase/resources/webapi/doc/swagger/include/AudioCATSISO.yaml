@@ -1,6 +1,8 @@
 AudioCATSISOSettings:
   description: AudioCATSISO
   properties:
+    title:
+      type: string
     rxCenterFrequency:
       type: integer
       format: int64

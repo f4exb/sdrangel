@@ -42,6 +42,9 @@ public:
     virtual void fromJsonObject(QJsonObject &json) override;
     virtual SWGAudioOutputSettings* fromJson(QString &jsonString) override;
 
+    QString* getTitle();
+    void setTitle(QString* title);
+
     QString* getDeviceName();
     void setDeviceName(QString* device_name);
 
@@ -67,6 +70,9 @@ public:
     virtual bool isSet() override;
 
 private:
+    QString* title;
+    bool m_title_isSet;
+
     QString* device_name;
     bool m_device_name_isSet;
 

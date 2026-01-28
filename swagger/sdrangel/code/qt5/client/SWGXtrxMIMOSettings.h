@@ -42,6 +42,9 @@ public:
     virtual void fromJsonObject(QJsonObject &json) override;
     virtual SWGXtrxMIMOSettings* fromJson(QString &jsonString) override;
 
+    QString* getTitle();
+    void setTitle(QString* title);
+
     qint32 getExtClock();
     void setExtClock(qint32 ext_clock);
 
@@ -181,6 +184,9 @@ public:
     virtual bool isSet() override;
 
 private:
+    QString* title;
+    bool m_title_isSet;
+
     qint32 ext_clock;
     bool m_ext_clock_isSet;
 

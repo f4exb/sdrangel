@@ -332,6 +332,9 @@ void AudioOutput::webapiUpdateDeviceSettings(
         const QStringList& deviceSettingsKeys,
         SWGSDRangel::SWGDeviceSettings& response)
 {
+    if (deviceSettingsKeys.contains("title")) {
+        settings.m_title = *response.getAudioOutputSettings()->getTitle();
+    }
     if (deviceSettingsKeys.contains("deviceName")) {
         settings.m_deviceName = *response.getAudioOutputSettings()->getDeviceName();
     }
@@ -357,6 +360,12 @@ void AudioOutput::webapiUpdateDeviceSettings(
 
 void AudioOutput::webapiFormatDeviceSettings(SWGSDRangel::SWGDeviceSettings& response, const AudioOutputSettings& settings)
 {
+    if (response.getAudioOutputSettings()->getTitle()) {
+        *response.getAudioOutputSettings()->getTitle() = settings.m_title;
+    } else {
+        response.getAudioOutputSettings()->setTitle(new QString(settings.m_title));
+    }
+
     response.getAudioOutputSettings()->setDeviceName(new QString(settings.m_deviceName));
     response.getAudioOutputSettings()->setVolume(settings.m_volume);
     response.getAudioOutputSettings()->setIqMapping((int) settings.m_iqMapping);
@@ -463,4 +472,3 @@ void AudioOutput::networkManagerFinished(QNetworkReply *reply)
 
     reply->deleteLater();
 }
-

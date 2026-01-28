@@ -30,6 +30,7 @@ AudioOutputSettings::AudioOutputSettings()
 
 void AudioOutputSettings::resetToDefaults()
 {
+    m_title = "AudioOutput";
     m_deviceName = "";
     m_volume = 1.0f;
     m_iqMapping = LR;
@@ -45,6 +46,7 @@ QByteArray AudioOutputSettings::serialize() const
 
     s.writeString(1, m_deviceName);
     s.writeFloat(3, m_volume);
+    s.writeString(4, m_title);
     s.writeS32(5, (int)m_iqMapping);
 
     s.writeBool(24, m_useReverseAPI);
@@ -71,6 +73,7 @@ bool AudioOutputSettings::deserialize(const QByteArray& data)
 
         d.readString(1, &m_deviceName, "");
         d.readFloat(3, &m_volume, 1.0f);
+        d.readString(4, &m_title, "AudioOutput");
         d.readS32(5, (int *)&m_iqMapping, IQMapping::LR);
 
         d.readBool(24, &m_useReverseAPI, false);

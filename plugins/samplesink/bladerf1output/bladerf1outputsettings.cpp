@@ -28,6 +28,7 @@ BladeRF1OutputSettings::BladeRF1OutputSettings()
 
 void BladeRF1OutputSettings::resetToDefaults()
 {
+    m_title = "BladeRF1";
 	m_centerFrequency = 435000*1000;
 	m_devSampleRate = 3072000;
 	m_vga1 = -20;
@@ -59,6 +60,7 @@ QByteArray BladeRF1OutputSettings::serialize() const
     s.writeString(10, m_reverseAPIAddress);
     s.writeU32(11, m_reverseAPIPort);
     s.writeU32(12, m_reverseAPIDeviceIndex);
+    s.writeString(13, m_title);
 
 	return s.final();
 }
@@ -100,6 +102,7 @@ bool BladeRF1OutputSettings::deserialize(const QByteArray& data)
 
         d.readU32(12, &uintval, 0);
         m_reverseAPIDeviceIndex = uintval > 99 ? 99 : uintval;
+        d.readString(13, &m_title, "BladeRF1");
 
 		return true;
 	}

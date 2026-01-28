@@ -70,6 +70,7 @@ struct TestMIStreamSettings {
 
 struct TestMISettings
 {
+    QString m_title;
     bool m_useReverseAPI;
     QString m_reverseAPIAddress;
     uint16_t m_reverseAPIPort;

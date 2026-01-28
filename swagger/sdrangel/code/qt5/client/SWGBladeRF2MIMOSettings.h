@@ -42,6 +42,9 @@ public:
     virtual void fromJsonObject(QJsonObject &json) override;
     virtual SWGBladeRF2MIMOSettings* fromJson(QString &jsonString) override;
 
+    QString* getTitle();
+    void setTitle(QString* title);
+
     qint32 getDevSampleRate();
     void setDevSampleRate(qint32 dev_sample_rate);
 
@@ -133,6 +136,9 @@ public:
     virtual bool isSet() override;
 
 private:
+    QString* title;
+    bool m_title_isSet;
+
     qint32 dev_sample_rate;
     bool m_dev_sample_rate_isSet;
 

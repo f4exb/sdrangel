@@ -1,6 +1,8 @@
 PerseusSettings:
   description: Perseus
   properties:
+    title:
+      type: string
     centerFrequency:
       type: integer
       format: int64

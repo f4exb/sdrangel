@@ -28,6 +28,8 @@ SWGAaroniaRTSAOutputSettings::SWGAaroniaRTSAOutputSettings(QString* json) {
 }
 
 SWGAaroniaRTSAOutputSettings::SWGAaroniaRTSAOutputSettings() {
+    title = nullptr;
+    m_title_isSet = false;
     center_frequency = 0L;
     m_center_frequency_isSet = false;
     sample_rate = 0;
@@ -50,6 +52,8 @@ SWGAaroniaRTSAOutputSettings::~SWGAaroniaRTSAOutputSettings() {
 
 void
 SWGAaroniaRTSAOutputSettings::init() {
+    title = new QString("");
+    m_title_isSet = false;
     center_frequency = 0L;
     m_center_frequency_isSet = false;
     sample_rate = 0;
@@ -68,6 +72,9 @@ SWGAaroniaRTSAOutputSettings::init() {
 
 void
 SWGAaroniaRTSAOutputSettings::cleanup() {
+    if(title != nullptr) { 
+        delete title;
+    }
 
 
     if(server_address != nullptr) { 
@@ -92,6 +99,8 @@ SWGAaroniaRTSAOutputSettings::fromJson(QString &json) {
 
 void
 SWGAaroniaRTSAOutputSettings::fromJsonObject(QJsonObject &pJson) {
+    ::SWGSDRangel::setValue(&title, pJson["title"], "QString", "QString");
+    
     ::SWGSDRangel::setValue(&center_frequency, pJson["centerFrequency"], "qint64", "");
     
     ::SWGSDRangel::setValue(&sample_rate, pJson["sampleRate"], "qint32", "");
@@ -122,6 +131,9 @@ SWGAaroniaRTSAOutputSettings::asJson ()
 QJsonObject*
 SWGAaroniaRTSAOutputSettings::asJsonObject() {
     QJsonObject* obj = new QJsonObject();
+    if(title != nullptr && *title != QString("")){
+        toJsonValue(QString("title"), title, obj, QString("QString"));
+    }
     if(m_center_frequency_isSet){
         obj->insert("centerFrequency", QJsonValue(center_frequency));
     }
@@ -145,6 +157,16 @@ SWGAaroniaRTSAOutputSettings::asJsonObject() {
     }
 
     return obj;
+}
+
+QString*
+SWGAaroniaRTSAOutputSettings::getTitle() {
+    return title;
+}
+void
+SWGAaroniaRTSAOutputSettings::setTitle(QString* title) {
+    this->title = title;
+    this->m_title_isSet = true;
 }
 
 qint64
@@ -222,6 +244,9 @@ bool
 SWGAaroniaRTSAOutputSettings::isSet(){
     bool isObjectUpdated = false;
     do{
+        if(title && *title != QString("")){
+            isObjectUpdated = true; break;
+        }
         if(m_center_frequency_isSet){
             isObjectUpdated = true; break;
         }

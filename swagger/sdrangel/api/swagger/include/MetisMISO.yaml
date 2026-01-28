@@ -1,6 +1,8 @@
 MetisMISOSettings:
   description: MetisMISOSettings
   properties:
+    title:
+      type: string
     nbReceivers:
       type: integer
       description: Number of activated receivers

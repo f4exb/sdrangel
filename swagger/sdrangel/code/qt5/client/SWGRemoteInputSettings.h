@@ -42,6 +42,9 @@ public:
     virtual void fromJsonObject(QJsonObject &json) override;
     virtual SWGRemoteInputSettings* fromJson(QString &jsonString) override;
 
+    QString* getTitle();
+    void setTitle(QString* title);
+
     QString* getApiAddress();
     void setApiAddress(QString* api_address);
 
@@ -82,6 +85,9 @@ public:
     virtual bool isSet() override;
 
 private:
+    QString* title;
+    bool m_title_isSet;
+
     QString* api_address;
     bool m_api_address_isSet;
 

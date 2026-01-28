@@ -51,6 +51,7 @@ void RTLSDRSettings::resetToDefaults()
     m_reverseAPIAddress = "127.0.0.1";
     m_reverseAPIPort = 8888;
     m_reverseAPIDeviceIndex = 0;
+    m_title = "RTL-SDR";
 }
 
 QByteArray RTLSDRSettings::serialize() const
@@ -81,6 +82,7 @@ QByteArray RTLSDRSettings::serialize() const
     s.writeFloat(23, m_replayLength);
     s.writeFloat(24, m_replayStep);
     s.writeBool(25, m_replayLoop);
+    s.writeString(26, m_title);
 
 	return s.final();
 }
@@ -133,6 +135,7 @@ bool RTLSDRSettings::deserialize(const QByteArray& data)
         d.readFloat(23, &m_replayLength, 20.0f);
         d.readFloat(24, &m_replayStep, 5.0f);
         d.readBool(25, &m_replayLoop, false);
+        d.readString(26, &m_title, "RTL-SDR");
 
 		return true;
 	}
@@ -223,12 +226,18 @@ void RTLSDRSettings::applySettings(const QStringList& settingsKeys, const RTLSDR
     if (settingsKeys.contains("reverseAPIDeviceIndex")) {
         m_reverseAPIDeviceIndex = settings.m_reverseAPIDeviceIndex;
     }
+    if (settingsKeys.contains("title")) {
+        m_title = settings.m_title;
+    }
 }
 
 QString RTLSDRSettings::getDebugString(const QStringList& settingsKeys, bool force) const
 {
     std::ostringstream ostr;
 
+    if (settingsKeys.contains("title") || force) {
+        ostr << " m_title: " << m_title.toStdString();
+    }
     if (settingsKeys.contains("centerFrequency") || force) {
         ostr << " m_centerFrequency: " << m_centerFrequency;
     }

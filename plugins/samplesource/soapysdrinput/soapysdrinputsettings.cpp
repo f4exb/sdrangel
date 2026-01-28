@@ -30,6 +30,7 @@ SoapySDRInputSettings::SoapySDRInputSettings()
 
 void SoapySDRInputSettings::resetToDefaults()
 {
+    m_title = "SoapySDRInput";
     m_centerFrequency = 435000*1000;
     m_LOppmTenths = 0;
     m_devSampleRate = 1024000;
@@ -85,6 +86,7 @@ QByteArray SoapySDRInputSettings::serialize() const
     s.writeU32(25, m_reverseAPIPort);
     s.writeU32(26, m_reverseAPIDeviceIndex);
     s.writeBool(27, m_iqOrder);
+    s.writeString(28, m_title);
 
     return s.final();
 }
@@ -148,6 +150,7 @@ bool SoapySDRInputSettings::deserialize(const QByteArray& data)
         d.readU32(26, &uintval, 0);
         m_reverseAPIDeviceIndex = uintval > 99 ? 99 : uintval;
         d.readBool(27, &m_iqOrder, true);
+        d.readString(28, &m_title, "SoapySDRInput");
 
         return true;
     }
@@ -191,4 +194,3 @@ void SoapySDRInputSettings::deserializeArgumentMap(const QByteArray& data, QMap<
     (*stream) >> map;
     delete stream;
 }
-

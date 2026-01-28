@@ -48,6 +48,7 @@ void TestMIStreamSettings::resetToDefaults()
 
 TestMISettings::TestMISettings()
 {
+    m_title = "TestMI";
     m_useReverseAPI = false;
     m_reverseAPIAddress = "127.0.0.1";
     m_reverseAPIPort = 8888;
@@ -80,6 +81,7 @@ QByteArray TestMISettings::serialize() const
     s.writeString(2, m_reverseAPIAddress);
     s.writeU32(3, m_reverseAPIPort);
     s.writeU32(4, m_reverseAPIDeviceIndex);
+    s.writeString(5, m_title);
 
     for (unsigned int i = 0; i < m_streams.size(); i++)
     {
@@ -173,9 +175,3 @@ bool TestMISettings::deserialize(const QByteArray& data)
         return false;
     }
 }
-
-
-
-
-
-

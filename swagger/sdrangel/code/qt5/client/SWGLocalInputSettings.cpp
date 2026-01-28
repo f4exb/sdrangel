@@ -28,6 +28,8 @@ SWGLocalInputSettings::SWGLocalInputSettings(QString* json) {
 }
 
 SWGLocalInputSettings::SWGLocalInputSettings() {
+    title = nullptr;
+    m_title_isSet = false;
     dc_block = 0;
     m_dc_block_isSet = false;
     iq_correction = 0;
@@ -48,6 +50,8 @@ SWGLocalInputSettings::~SWGLocalInputSettings() {
 
 void
 SWGLocalInputSettings::init() {
+    title = new QString("");
+    m_title_isSet = false;
     dc_block = 0;
     m_dc_block_isSet = false;
     iq_correction = 0;
@@ -64,6 +68,9 @@ SWGLocalInputSettings::init() {
 
 void
 SWGLocalInputSettings::cleanup() {
+    if(title != nullptr) { 
+        delete title;
+    }
 
 
 
@@ -85,6 +92,8 @@ SWGLocalInputSettings::fromJson(QString &json) {
 
 void
 SWGLocalInputSettings::fromJsonObject(QJsonObject &pJson) {
+    ::SWGSDRangel::setValue(&title, pJson["title"], "QString", "QString");
+    
     ::SWGSDRangel::setValue(&dc_block, pJson["dcBlock"], "qint32", "");
     
     ::SWGSDRangel::setValue(&iq_correction, pJson["iqCorrection"], "qint32", "");
@@ -113,6 +122,9 @@ SWGLocalInputSettings::asJson ()
 QJsonObject*
 SWGLocalInputSettings::asJsonObject() {
     QJsonObject* obj = new QJsonObject();
+    if(title != nullptr && *title != QString("")){
+        toJsonValue(QString("title"), title, obj, QString("QString"));
+    }
     if(m_dc_block_isSet){
         obj->insert("dcBlock", QJsonValue(dc_block));
     }
@@ -133,6 +145,16 @@ SWGLocalInputSettings::asJsonObject() {
     }
 
     return obj;
+}
+
+QString*
+SWGLocalInputSettings::getTitle() {
+    return title;
+}
+void
+SWGLocalInputSettings::setTitle(QString* title) {
+    this->title = title;
+    this->m_title_isSet = true;
 }
 
 qint32
@@ -200,6 +222,9 @@ bool
 SWGLocalInputSettings::isSet(){
     bool isObjectUpdated = false;
     do{
+        if(title && *title != QString("")){
+            isObjectUpdated = true; break;
+        }
         if(m_dc_block_isSet){
             isObjectUpdated = true; break;
         }

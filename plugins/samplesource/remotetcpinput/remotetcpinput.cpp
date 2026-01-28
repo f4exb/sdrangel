@@ -414,6 +414,9 @@ void RemoteTCPInput::webapiUpdateDeviceSettings(
     const QStringList& deviceSettingsKeys,
     SWGSDRangel::SWGDeviceSettings& response)
 {
+    if (deviceSettingsKeys.contains("title")) {
+        settings.m_title = *response.getRemoteTcpInputSettings()->getTitle();
+    }
     if (deviceSettingsKeys.contains("centerFrequency")) {
         settings.m_centerFrequency = response.getRemoteTcpInputSettings()->getCenterFrequency();
     }
@@ -490,6 +493,12 @@ void RemoteTCPInput::webapiUpdateDeviceSettings(
 
 void RemoteTCPInput::webapiFormatDeviceSettings(SWGSDRangel::SWGDeviceSettings& response, const RemoteTCPInputSettings& settings)
 {
+    if (response.getRemoteTcpInputSettings()->getTitle()) {
+        *response.getRemoteTcpInputSettings()->getTitle() = settings.m_title;
+    } else {
+        response.getRemoteTcpInputSettings()->setTitle(new QString(settings.m_title));
+    }
+
     response.getRemoteTcpInputSettings()->setCenterFrequency(settings.m_centerFrequency);
     response.getRemoteTcpInputSettings()->setLoPpmCorrection(settings.m_loPpmCorrection);
     response.getRemoteTcpInputSettings()->setDcBlock(settings.m_dcBlock ? 1 : 0);

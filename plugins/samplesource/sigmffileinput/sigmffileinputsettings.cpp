@@ -30,6 +30,7 @@ SigMFFileInputSettings::SigMFFileInputSettings()
 
 void SigMFFileInputSettings::resetToDefaults()
 {
+    m_title = "SigMFFileInput";
     m_fileName = "./test.sdriq";
     m_accelerationFactor = 1;
     m_trackLoop = false;
@@ -51,6 +52,7 @@ QByteArray SigMFFileInputSettings::serialize() const
     s.writeString(6, m_reverseAPIAddress);
     s.writeU32(7, m_reverseAPIPort);
     s.writeU32(8, m_reverseAPIDeviceIndex);
+    s.writeString(9, m_title);
 
     return s.final();
 }
@@ -84,6 +86,7 @@ bool SigMFFileInputSettings::deserialize(const QByteArray& data)
 
         d.readU32(8, &uintval, 0);
         m_reverseAPIDeviceIndex = uintval > 99 ? 99 : uintval;
+        d.readString(9, &m_title, "SigMFFileInput");
 
         return true;
     }
@@ -96,6 +99,9 @@ bool SigMFFileInputSettings::deserialize(const QByteArray& data)
 
 void SigMFFileInputSettings::applySettings(const QStringList& settingsKeys, const SigMFFileInputSettings& settings)
 {
+    if (settingsKeys.contains("title")) {
+        m_title = settings.m_title;
+    }
     if (settingsKeys.contains("fileName")) {
         m_fileName = settings.m_fileName;
     }
@@ -126,6 +132,9 @@ QString SigMFFileInputSettings::getDebugString(const QStringList& settingsKeys, 
 {
     std::ostringstream ostr;
 
+    if (settingsKeys.contains("title") || force) {
+        ostr << " m_title: " << m_title.toStdString();
+    }
     if (settingsKeys.contains("m_fileName") || force) {
         ostr << " m_fileName: " << m_fileName.toStdString();
     }

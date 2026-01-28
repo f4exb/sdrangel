@@ -1646,6 +1646,12 @@ void LimeSDRMIMO::webapiFormatDeviceSettings(
     const LimeSDRMIMOSettings& settings)
 {
     // Common
+    if (response.getLimeSdrMimoSettings()->getTitle()) {
+        *response.getLimeSdrMimoSettings()->getTitle() = settings.m_title;
+    } else {
+        response.getLimeSdrMimoSettings()->setTitle(new QString(settings.m_title));
+    }
+
     response.getLimeSdrMimoSettings()->setDevSampleRate(settings.m_devSampleRate);
     response.getLimeSdrMimoSettings()->setExtClock(settings.m_extClock ? 1 : 0);
     response.getLimeSdrMimoSettings()->setExtClockFreq(settings.m_extClockFreq);
@@ -1722,6 +1728,9 @@ void LimeSDRMIMO::webapiUpdateDeviceSettings(
     SWGSDRangel::SWGDeviceSettings& response)
 {
     // Common
+    if (deviceSettingsKeys.contains("title")) {
+        settings.m_title = *response.getLimeSdrMimoSettings()->getTitle();
+    }
     if (deviceSettingsKeys.contains("devSampleRate")) {
         settings.m_devSampleRate = response.getLimeSdrMimoSettings()->getDevSampleRate();
     }
@@ -1972,6 +1981,9 @@ void LimeSDRMIMO::webapiReverseSendSettings(const QList<QString>& deviceSettings
     SWGSDRangel::SWGLimeSdrMIMOSettings *swgLimeSdrMIMOSettings = swgDeviceSettings->getLimeSdrMimoSettings();
 
     // Common
+    if (deviceSettingsKeys.contains("title") || force) {
+        swgLimeSdrMIMOSettings->setTitle(new QString(settings.m_title));
+    }
     if (deviceSettingsKeys.contains("devSampleRate") || force) {
         swgLimeSdrMIMOSettings->setDevSampleRate(settings.m_devSampleRate);
     }

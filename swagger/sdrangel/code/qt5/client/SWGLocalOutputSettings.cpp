@@ -28,6 +28,8 @@ SWGLocalOutputSettings::SWGLocalOutputSettings(QString* json) {
 }
 
 SWGLocalOutputSettings::SWGLocalOutputSettings() {
+    title = nullptr;
+    m_title_isSet = false;
     use_reverse_api = 0;
     m_use_reverse_api_isSet = false;
     reverse_api_address = nullptr;
@@ -44,6 +46,8 @@ SWGLocalOutputSettings::~SWGLocalOutputSettings() {
 
 void
 SWGLocalOutputSettings::init() {
+    title = new QString("");
+    m_title_isSet = false;
     use_reverse_api = 0;
     m_use_reverse_api_isSet = false;
     reverse_api_address = new QString("");
@@ -56,6 +60,9 @@ SWGLocalOutputSettings::init() {
 
 void
 SWGLocalOutputSettings::cleanup() {
+    if(title != nullptr) { 
+        delete title;
+    }
 
     if(reverse_api_address != nullptr) { 
         delete reverse_api_address;
@@ -75,6 +82,8 @@ SWGLocalOutputSettings::fromJson(QString &json) {
 
 void
 SWGLocalOutputSettings::fromJsonObject(QJsonObject &pJson) {
+    ::SWGSDRangel::setValue(&title, pJson["title"], "QString", "QString");
+    
     ::SWGSDRangel::setValue(&use_reverse_api, pJson["useReverseAPI"], "qint32", "");
     
     ::SWGSDRangel::setValue(&reverse_api_address, pJson["reverseAPIAddress"], "QString", "QString");
@@ -99,6 +108,9 @@ SWGLocalOutputSettings::asJson ()
 QJsonObject*
 SWGLocalOutputSettings::asJsonObject() {
     QJsonObject* obj = new QJsonObject();
+    if(title != nullptr && *title != QString("")){
+        toJsonValue(QString("title"), title, obj, QString("QString"));
+    }
     if(m_use_reverse_api_isSet){
         obj->insert("useReverseAPI", QJsonValue(use_reverse_api));
     }
@@ -113,6 +125,16 @@ SWGLocalOutputSettings::asJsonObject() {
     }
 
     return obj;
+}
+
+QString*
+SWGLocalOutputSettings::getTitle() {
+    return title;
+}
+void
+SWGLocalOutputSettings::setTitle(QString* title) {
+    this->title = title;
+    this->m_title_isSet = true;
 }
 
 qint32
@@ -160,6 +182,9 @@ bool
 SWGLocalOutputSettings::isSet(){
     bool isObjectUpdated = false;
     do{
+        if(title && *title != QString("")){
+            isObjectUpdated = true; break;
+        }
         if(m_use_reverse_api_isSet){
             isObjectUpdated = true; break;
         }

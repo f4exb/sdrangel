@@ -616,6 +616,9 @@ void FileInput::webapiUpdateDeviceSettings(
         const QStringList& deviceSettingsKeys,
         SWGSDRangel::SWGDeviceSettings& response)
 {
+    if (deviceSettingsKeys.contains("title")) {
+        settings.m_title = *response.getFileInputSettings()->getTitle();
+    }
     if (deviceSettingsKeys.contains("fileName")) {
         settings.m_fileName = *response.getFileInputSettings()->getFileName();
     }
@@ -680,6 +683,12 @@ int FileInput::webapiReportGet(
 
 void FileInput::webapiFormatDeviceSettings(SWGSDRangel::SWGDeviceSettings& response, const FileInputSettings& settings)
 {
+    if (response.getFileInputSettings()->getTitle()) {
+        *response.getFileInputSettings()->getTitle() = settings.m_title;
+    } else {
+        response.getFileInputSettings()->setTitle(new QString(settings.m_title));
+    }
+
     response.getFileInputSettings()->setFileName(new QString(settings.m_fileName));
     response.getFileInputSettings()->setAccelerationFactor(settings.m_accelerationFactor);
     response.getFileInputSettings()->setLoop(settings.m_loop ? 1 : 0);

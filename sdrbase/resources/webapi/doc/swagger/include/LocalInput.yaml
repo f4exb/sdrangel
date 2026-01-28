@@ -1,6 +1,8 @@
 LocalInputSettings:
   description: LocalInput
   properties:
+    title:
+      type: string
     dcBlock:
       type: integer
     iqCorrection:

@@ -28,6 +28,8 @@ SWGSDRPlayV3Settings::SWGSDRPlayV3Settings(QString* json) {
 }
 
 SWGSDRPlayV3Settings::SWGSDRPlayV3Settings() {
+    title = nullptr;
+    m_title_isSet = false;
     center_frequency = 0L;
     m_center_frequency_isSet = false;
     l_oppm_tenths = 0;
@@ -90,6 +92,8 @@ SWGSDRPlayV3Settings::~SWGSDRPlayV3Settings() {
 
 void
 SWGSDRPlayV3Settings::init() {
+    title = new QString("");
+    m_title_isSet = false;
     center_frequency = 0L;
     m_center_frequency_isSet = false;
     l_oppm_tenths = 0;
@@ -148,6 +152,9 @@ SWGSDRPlayV3Settings::init() {
 
 void
 SWGSDRPlayV3Settings::cleanup() {
+    if(title != nullptr) { 
+        delete title;
+    }
 
 
 
@@ -190,6 +197,8 @@ SWGSDRPlayV3Settings::fromJson(QString &json) {
 
 void
 SWGSDRPlayV3Settings::fromJsonObject(QJsonObject &pJson) {
+    ::SWGSDRangel::setValue(&title, pJson["title"], "QString", "QString");
+    
     ::SWGSDRangel::setValue(&center_frequency, pJson["centerFrequency"], "qint64", "");
     
     ::SWGSDRangel::setValue(&l_oppm_tenths, pJson["LOppmTenths"], "qint32", "");
@@ -260,6 +269,9 @@ SWGSDRPlayV3Settings::asJson ()
 QJsonObject*
 SWGSDRPlayV3Settings::asJsonObject() {
     QJsonObject* obj = new QJsonObject();
+    if(title != nullptr && *title != QString("")){
+        toJsonValue(QString("title"), title, obj, QString("QString"));
+    }
     if(m_center_frequency_isSet){
         obj->insert("centerFrequency", QJsonValue(center_frequency));
     }
@@ -343,6 +355,16 @@ SWGSDRPlayV3Settings::asJsonObject() {
     }
 
     return obj;
+}
+
+QString*
+SWGSDRPlayV3Settings::getTitle() {
+    return title;
+}
+void
+SWGSDRPlayV3Settings::setTitle(QString* title) {
+    this->title = title;
+    this->m_title_isSet = true;
 }
 
 qint64
@@ -620,6 +642,9 @@ bool
 SWGSDRPlayV3Settings::isSet(){
     bool isObjectUpdated = false;
     do{
+        if(title && *title != QString("")){
+            isObjectUpdated = true; break;
+        }
         if(m_center_frequency_isSet){
             isObjectUpdated = true; break;
         }

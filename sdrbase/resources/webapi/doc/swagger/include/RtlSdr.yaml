@@ -1,6 +1,8 @@
 RtlSdrSettings:
   description: RTLSDR
   properties:
+    title:
+      type: string
     devSampleRate:
       type: integer
     lowSampleRate:

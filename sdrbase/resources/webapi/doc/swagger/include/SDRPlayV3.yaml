@@ -1,6 +1,8 @@
 SDRPlayV3Settings:
   description: SDRplayV3
   properties:
+    title:
+      type: string
     centerFrequency:
       type: integer
       format: int64

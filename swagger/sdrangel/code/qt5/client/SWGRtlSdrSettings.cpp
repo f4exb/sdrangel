@@ -28,6 +28,8 @@ SWGRtlSdrSettings::SWGRtlSdrSettings(QString* json) {
 }
 
 SWGRtlSdrSettings::SWGRtlSdrSettings() {
+    title = nullptr;
+    m_title_isSet = false;
     dev_sample_rate = 0;
     m_dev_sample_rate_isSet = false;
     low_sample_rate = 0;
@@ -78,6 +80,8 @@ SWGRtlSdrSettings::~SWGRtlSdrSettings() {
 
 void
 SWGRtlSdrSettings::init() {
+    title = new QString("");
+    m_title_isSet = false;
     dev_sample_rate = 0;
     m_dev_sample_rate_isSet = false;
     low_sample_rate = 0;
@@ -124,6 +128,9 @@ SWGRtlSdrSettings::init() {
 
 void
 SWGRtlSdrSettings::cleanup() {
+    if(title != nullptr) { 
+        delete title;
+    }
 
 
 
@@ -160,6 +167,8 @@ SWGRtlSdrSettings::fromJson(QString &json) {
 
 void
 SWGRtlSdrSettings::fromJsonObject(QJsonObject &pJson) {
+    ::SWGSDRangel::setValue(&title, pJson["title"], "QString", "QString");
+    
     ::SWGSDRangel::setValue(&dev_sample_rate, pJson["devSampleRate"], "qint32", "");
     
     ::SWGSDRangel::setValue(&low_sample_rate, pJson["lowSampleRate"], "qint32", "");
@@ -218,6 +227,9 @@ SWGRtlSdrSettings::asJson ()
 QJsonObject*
 SWGRtlSdrSettings::asJsonObject() {
     QJsonObject* obj = new QJsonObject();
+    if(title != nullptr && *title != QString("")){
+        toJsonValue(QString("title"), title, obj, QString("QString"));
+    }
     if(m_dev_sample_rate_isSet){
         obj->insert("devSampleRate", QJsonValue(dev_sample_rate));
     }
@@ -283,6 +295,16 @@ SWGRtlSdrSettings::asJsonObject() {
     }
 
     return obj;
+}
+
+QString*
+SWGRtlSdrSettings::getTitle() {
+    return title;
+}
+void
+SWGRtlSdrSettings::setTitle(QString* title) {
+    this->title = title;
+    this->m_title_isSet = true;
 }
 
 qint32
@@ -500,6 +522,9 @@ bool
 SWGRtlSdrSettings::isSet(){
     bool isObjectUpdated = false;
     do{
+        if(title && *title != QString("")){
+            isObjectUpdated = true; break;
+        }
         if(m_dev_sample_rate_isSet){
             isObjectUpdated = true; break;
         }

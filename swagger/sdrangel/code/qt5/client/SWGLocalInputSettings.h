@@ -42,6 +42,9 @@ public:
     virtual void fromJsonObject(QJsonObject &json) override;
     virtual SWGLocalInputSettings* fromJson(QString &jsonString) override;
 
+    QString* getTitle();
+    void setTitle(QString* title);
+
     qint32 getDcBlock();
     void setDcBlock(qint32 dc_block);
 
@@ -64,6 +67,9 @@ public:
     virtual bool isSet() override;
 
 private:
+    QString* title;
+    bool m_title_isSet;
+
     qint32 dc_block;
     bool m_dc_block_isSet;
 

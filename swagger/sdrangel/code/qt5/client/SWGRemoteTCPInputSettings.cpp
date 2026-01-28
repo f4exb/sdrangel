@@ -28,6 +28,8 @@ SWGRemoteTCPInputSettings::SWGRemoteTCPInputSettings(QString* json) {
 }
 
 SWGRemoteTCPInputSettings::SWGRemoteTCPInputSettings() {
+    title = nullptr;
+    m_title_isSet = false;
     center_frequency = 0L;
     m_center_frequency_isSet = false;
     lo_ppm_correction = 0;
@@ -86,6 +88,8 @@ SWGRemoteTCPInputSettings::~SWGRemoteTCPInputSettings() {
 
 void
 SWGRemoteTCPInputSettings::init() {
+    title = new QString("");
+    m_title_isSet = false;
     center_frequency = 0L;
     m_center_frequency_isSet = false;
     lo_ppm_correction = 0;
@@ -140,6 +144,9 @@ SWGRemoteTCPInputSettings::init() {
 
 void
 SWGRemoteTCPInputSettings::cleanup() {
+    if(title != nullptr) { 
+        delete title;
+    }
 
 
 
@@ -184,6 +191,8 @@ SWGRemoteTCPInputSettings::fromJson(QString &json) {
 
 void
 SWGRemoteTCPInputSettings::fromJsonObject(QJsonObject &pJson) {
+    ::SWGSDRangel::setValue(&title, pJson["title"], "QString", "QString");
+    
     ::SWGSDRangel::setValue(&center_frequency, pJson["centerFrequency"], "qint64", "");
     
     ::SWGSDRangel::setValue(&lo_ppm_correction, pJson["loPpmCorrection"], "qint32", "");
@@ -250,6 +259,9 @@ SWGRemoteTCPInputSettings::asJson ()
 QJsonObject*
 SWGRemoteTCPInputSettings::asJsonObject() {
     QJsonObject* obj = new QJsonObject();
+    if(title != nullptr && *title != QString("")){
+        toJsonValue(QString("title"), title, obj, QString("QString"));
+    }
     if(m_center_frequency_isSet){
         obj->insert("centerFrequency", QJsonValue(center_frequency));
     }
@@ -327,6 +339,16 @@ SWGRemoteTCPInputSettings::asJsonObject() {
     }
 
     return obj;
+}
+
+QString*
+SWGRemoteTCPInputSettings::getTitle() {
+    return title;
+}
+void
+SWGRemoteTCPInputSettings::setTitle(QString* title) {
+    this->title = title;
+    this->m_title_isSet = true;
 }
 
 qint64
@@ -584,6 +606,9 @@ bool
 SWGRemoteTCPInputSettings::isSet(){
     bool isObjectUpdated = false;
     do{
+        if(title && *title != QString("")){
+            isObjectUpdated = true; break;
+        }
         if(m_center_frequency_isSet){
             isObjectUpdated = true; break;
         }

@@ -28,6 +28,7 @@ TestSourceSettings::TestSourceSettings()
 
 void TestSourceSettings::resetToDefaults()
 {
+    m_title = "TestSource";
     m_centerFrequency = 435000*1000;
     m_frequencyShift = 0;
     m_sampleRate = 768*1000;
@@ -54,6 +55,7 @@ QByteArray TestSourceSettings::serialize() const
 {
     SimpleSerializer s(1);
 
+    s.writeString(1, m_title);
     s.writeS32(2, m_frequencyShift);
     s.writeU32(3, m_sampleRate);
     s.writeU32(4, m_log2Decim);
@@ -92,6 +94,7 @@ bool TestSourceSettings::deserialize(const QByteArray& data)
         int intval;
         uint32_t utmp;
 
+        d.readString(1, &m_title, "TestSource");
         d.readS32(2, &m_frequencyShift, 0);
         d.readU32(3, &m_sampleRate, 768*1000);
         d.readU32(4, &m_log2Decim, 4);
@@ -147,6 +150,9 @@ bool TestSourceSettings::deserialize(const QByteArray& data)
 
 void TestSourceSettings::applySettings(const QStringList& settingsKeys, const TestSourceSettings& settings)
 {
+    if (settingsKeys.contains("title")) {
+        m_title = settings.m_title;
+    }
     if (settingsKeys.contains("centerFrequency")) {
         m_centerFrequency = settings.m_centerFrequency;
     }
@@ -213,6 +219,9 @@ QString TestSourceSettings::getDebugString(const QStringList& settingsKeys, bool
 {
     std::ostringstream ostr;
 
+    if (settingsKeys.contains("title") || force) {
+        ostr << " m_title: " << m_title.toStdString();
+    }
     if (settingsKeys.contains("centerFrequency") || force) {
         ostr << " m_centerFrequency: " << m_centerFrequency;
     }

@@ -28,6 +28,8 @@ SWGPlutoSdrInputSettings::SWGPlutoSdrInputSettings(QString* json) {
 }
 
 SWGPlutoSdrInputSettings::SWGPlutoSdrInputSettings() {
+    title = nullptr;
+    m_title_isSet = false;
     center_frequency = 0L;
     m_center_frequency_isSet = false;
     dev_sample_rate = 0;
@@ -86,6 +88,8 @@ SWGPlutoSdrInputSettings::~SWGPlutoSdrInputSettings() {
 
 void
 SWGPlutoSdrInputSettings::init() {
+    title = new QString("");
+    m_title_isSet = false;
     center_frequency = 0L;
     m_center_frequency_isSet = false;
     dev_sample_rate = 0;
@@ -140,6 +144,9 @@ SWGPlutoSdrInputSettings::init() {
 
 void
 SWGPlutoSdrInputSettings::cleanup() {
+    if(title != nullptr) { 
+        delete title;
+    }
 
 
 
@@ -180,6 +187,8 @@ SWGPlutoSdrInputSettings::fromJson(QString &json) {
 
 void
 SWGPlutoSdrInputSettings::fromJsonObject(QJsonObject &pJson) {
+    ::SWGSDRangel::setValue(&title, pJson["title"], "QString", "QString");
+    
     ::SWGSDRangel::setValue(&center_frequency, pJson["centerFrequency"], "qint64", "");
     
     ::SWGSDRangel::setValue(&dev_sample_rate, pJson["devSampleRate"], "qint32", "");
@@ -246,6 +255,9 @@ SWGPlutoSdrInputSettings::asJson ()
 QJsonObject*
 SWGPlutoSdrInputSettings::asJsonObject() {
     QJsonObject* obj = new QJsonObject();
+    if(title != nullptr && *title != QString("")){
+        toJsonValue(QString("title"), title, obj, QString("QString"));
+    }
     if(m_center_frequency_isSet){
         obj->insert("centerFrequency", QJsonValue(center_frequency));
     }
@@ -323,6 +335,16 @@ SWGPlutoSdrInputSettings::asJsonObject() {
     }
 
     return obj;
+}
+
+QString*
+SWGPlutoSdrInputSettings::getTitle() {
+    return title;
+}
+void
+SWGPlutoSdrInputSettings::setTitle(QString* title) {
+    this->title = title;
+    this->m_title_isSet = true;
 }
 
 qint64
@@ -580,6 +602,9 @@ bool
 SWGPlutoSdrInputSettings::isSet(){
     bool isObjectUpdated = false;
     do{
+        if(title && *title != QString("")){
+            isObjectUpdated = true; break;
+        }
         if(m_center_frequency_isSet){
             isObjectUpdated = true; break;
         }

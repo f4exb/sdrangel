@@ -23,7 +23,9 @@
 #include <QByteArray>
 #include <QString>
 
-struct LocalInputSettings {
+struct LocalInputSettings
+{
+    QString  m_title;
     bool    m_dcBlock;
     bool    m_iqCorrection;
     bool     m_useReverseAPI;

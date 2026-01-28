@@ -24,7 +24,9 @@
 #include <QVariant>
 #include <QMap>
 
-struct SoapySDROutputSettings {
+struct SoapySDROutputSettings
+{
+    QString m_title;
     quint64 m_centerFrequency;
     int m_LOppmTenths;
     qint32 m_devSampleRate;

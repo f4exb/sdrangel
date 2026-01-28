@@ -28,6 +28,7 @@ SDRPlayV3Settings::SDRPlayV3Settings()
 
 void SDRPlayV3Settings::resetToDefaults()
 {
+    m_title = "SDRplayV3";
     m_centerFrequency = 7040*1000;
     m_LOppmTenths = 0;
     m_ifFrequencyIndex = 0;
@@ -93,6 +94,7 @@ QByteArray SDRPlayV3Settings::serialize() const
     s.writeFloat(30, m_replayLength);
     s.writeFloat(31, m_replayStep);
     s.writeBool(32, m_replayLoop);
+    s.writeString(33, m_title);
 
     return s.final();
 }
@@ -150,6 +152,7 @@ bool SDRPlayV3Settings::deserialize(const QByteArray& data)
         d.readFloat(30, &m_replayLength, 20.0f);
         d.readFloat(31, &m_replayStep, 5.0f);
         d.readBool(32, &m_replayLoop, false);
+        d.readString(33, &m_title, "SDRplayV3");
 
         return true;
     }
@@ -162,6 +165,9 @@ bool SDRPlayV3Settings::deserialize(const QByteArray& data)
 
 void SDRPlayV3Settings::applySettings(const QStringList& settingsKeys, const SDRPlayV3Settings& settings)
 {
+    if (settingsKeys.contains("title")) {
+        m_title = settings.m_title;
+    }
     if (settingsKeys.contains("centerFrequency")) {
         m_centerFrequency = settings.m_centerFrequency;
     }
@@ -258,6 +264,9 @@ QString SDRPlayV3Settings::getDebugString(const QStringList& settingsKeys, bool 
 {
     std::ostringstream ostr;
 
+    if (settingsKeys.contains("title") || force) {
+        ostr << " m_title: " << m_title.toStdString();
+    }
     if (settingsKeys.contains("centerFrequency") || force) {
         ostr << " m_centerFrequency: " << m_centerFrequency;
     }

@@ -969,7 +969,7 @@ bool LimeSDRInput::applySettings(const LimeSDRInputSettings& settings, const QLi
     if (settingsKeys.contains("devSampleRate")
        || settingsKeys.contains("log2HardDecim") || force)
     {
-        
+
         if(!settings.m_splitFreq) {
             forwardChangeAllDSP = true; //m_settings.m_devSampleRate != settings.m_devSampleRate;
             qDebug() << "LimeSDRInput::applySettings: Split is false, val:" << settings.m_splitFreq;
@@ -1436,6 +1436,9 @@ void LimeSDRInput::webapiUpdateDeviceSettings(
         const QStringList& deviceSettingsKeys,
         SWGSDRangel::SWGDeviceSettings& response)
 {
+    if (deviceSettingsKeys.contains("title")) {
+        settings.m_title = *response.getLimeSdrInputSettings()->getTitle();
+    }
     if (deviceSettingsKeys.contains("antennaPath")) {
         settings.m_antennaPath = (LimeSDRInputSettings::PathRFE) response.getLimeSdrInputSettings()->getAntennaPath();
     }
@@ -1527,6 +1530,12 @@ void LimeSDRInput::webapiUpdateDeviceSettings(
 
 void LimeSDRInput::webapiFormatDeviceSettings(SWGSDRangel::SWGDeviceSettings& response, const LimeSDRInputSettings& settings)
 {
+    if (response.getLimeSdrInputSettings()->getTitle()) {
+        *response.getLimeSdrInputSettings()->getTitle() = settings.m_title;
+    } else {
+        response.getLimeSdrInputSettings()->setTitle(new QString(settings.m_title));
+    }
+
     response.getLimeSdrInputSettings()->setAntennaPath((int) settings.m_antennaPath);
     response.getLimeSdrInputSettings()->setCenterFrequency(settings.m_centerFrequency);
     response.getLimeSdrInputSettings()->setDcBlock(settings.m_dcBlock ? 1 : 0);
@@ -1654,6 +1663,9 @@ void LimeSDRInput::webapiReverseSendSettings(const QList<QString>& deviceSetting
 
     // transfer data that has been modified. When force is on transfer all data except reverse API data
 
+    if (deviceSettingsKeys.contains("title") || force) {
+        swgLimeSdrInputSettings->setTitle(new QString(settings.m_title));
+    }
     if (deviceSettingsKeys.contains("antennaPath") || force) {
         swgLimeSdrInputSettings->setAntennaPath((int) settings.m_antennaPath);
     }

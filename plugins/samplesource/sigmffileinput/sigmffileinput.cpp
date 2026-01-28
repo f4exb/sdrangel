@@ -884,6 +884,9 @@ void SigMFFileInput::webapiUpdateDeviceSettings(
         const QStringList& deviceSettingsKeys,
         SWGSDRangel::SWGDeviceSettings& response)
 {
+    if (deviceSettingsKeys.contains("title")) {
+        settings.m_title = *response.getSigMfFileInputSettings()->getTitle();
+    }
     if (deviceSettingsKeys.contains("fileName")) {
         settings.m_fileName = *response.getSigMfFileInputSettings()->getFileName();
     }
@@ -1030,6 +1033,12 @@ int SigMFFileInput::webapiActionsPost(
 
 void SigMFFileInput::webapiFormatDeviceSettings(SWGSDRangel::SWGDeviceSettings& response, const SigMFFileInputSettings& settings)
 {
+    if (response.getSigMfFileInputSettings()->getTitle()) {
+        *response.getSigMfFileInputSettings()->getTitle() = settings.m_title;
+    } else {
+        response.getSigMfFileInputSettings()->setTitle(new QString(settings.m_title));
+    }
+
     response.getSigMfFileInputSettings()->setFileName(new QString(settings.m_fileName));
     response.getSigMfFileInputSettings()->setAccelerationFactor(settings.m_accelerationFactor);
     response.getSigMfFileInputSettings()->setTrackLoop(settings.m_trackLoop ? 1 : 0);

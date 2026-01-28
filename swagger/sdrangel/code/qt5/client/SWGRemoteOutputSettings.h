@@ -42,6 +42,9 @@ public:
     virtual void fromJsonObject(QJsonObject &json) override;
     virtual SWGRemoteOutputSettings* fromJson(QString &jsonString) override;
 
+    QString* getTitle();
+    void setTitle(QString* title);
+
     qint32 getNbFecBlocks();
     void setNbFecBlocks(qint32 nb_fec_blocks);
 
@@ -82,6 +85,9 @@ public:
     virtual bool isSet() override;
 
 private:
+    QString* title;
+    bool m_title_isSet;
+
     qint32 nb_fec_blocks;
     bool m_nb_fec_blocks_isSet;
 

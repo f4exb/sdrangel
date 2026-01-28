@@ -55,6 +55,7 @@ struct RTLSDRSettings {
     QString m_reverseAPIAddress;
     uint16_t m_reverseAPIPort;
     uint16_t m_reverseAPIDeviceIndex;
+	QString m_title;
 
 	RTLSDRSettings();
 	void resetToDefaults();

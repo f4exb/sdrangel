@@ -32,6 +32,7 @@ struct AudioInputSettings {
 		FC_POS_CENTER
 	} fcPos_t;
 
+    QString m_title;
     QString m_deviceName;       // Including realm, as from getFullDeviceName below
     int m_sampleRate;
     float m_volume;

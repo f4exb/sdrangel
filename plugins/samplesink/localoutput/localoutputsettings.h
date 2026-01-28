@@ -23,7 +23,9 @@
 #include <QByteArray>
 #include <QString>
 
-struct LocalOutputSettings {
+struct LocalOutputSettings
+{
+    QString m_title;
     bool     m_useReverseAPI;
     QString  m_reverseAPIAddress;
     uint16_t m_reverseAPIPort;

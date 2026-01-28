@@ -1,6 +1,8 @@
 TestMISettings:
   description: TestMISettings
   properties:
+    title:
+      type: string
     useReverseAPI:
       description: Synchronize with reverse API (1 for yes, 0 for no)
       type: integer

@@ -28,6 +28,7 @@ struct RemoteTCPInputSettings
 {
     static const int m_maxGains = 3;
 
+    QString  m_title;
     uint64_t m_centerFrequency;
     qint32   m_loPpmCorrection;
     bool     m_dcBlock;

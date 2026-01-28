@@ -35,6 +35,7 @@ struct PlutoSDROutputSettings {
     };
 
     // global settings to be saved
+    QString m_title;
 	quint64 m_centerFrequency;
 	// common device settings
     quint64 m_devSampleRate;      //!< Host interface sample rate

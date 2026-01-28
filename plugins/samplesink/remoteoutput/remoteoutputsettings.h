@@ -23,7 +23,9 @@
 #include <QByteArray>
 #include <QString>
 
-struct RemoteOutputSettings {
+struct RemoteOutputSettings
+{
+    QString m_title;
     quint32 m_nbFECBlocks;
     quint32 m_nbTxBytes;
     QString m_apiAddress;

@@ -42,6 +42,7 @@ struct XTRXMIMOSettings
     } TxAntenna;
 
     // common
+    QString  m_title;
     bool     m_extClock;     //!< True if external clock source
     uint32_t m_extClockFreq; //!< Frequency (Hz) of external clock source
     uint8_t  m_gpioDir;      //!< GPIO pin direction LSB first; 0 input, 1 output

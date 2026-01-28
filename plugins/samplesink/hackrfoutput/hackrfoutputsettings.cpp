@@ -28,6 +28,7 @@ HackRFOutputSettings::HackRFOutputSettings()
 
 void HackRFOutputSettings::resetToDefaults()
 {
+    m_title = "HackRF";
 	m_centerFrequency = 435000 * 1000;
 	m_LOppmTenths = 0;
 	m_biasT = false;
@@ -63,6 +64,7 @@ QByteArray HackRFOutputSettings::serialize() const
     s.writeU32(12, m_reverseAPIDeviceIndex);
     s.writeBool(13, m_transverterMode);
     s.writeS64(14, m_transverterDeltaFrequency);
+    s.writeString(15, m_title);
 
 	return s.final();
 }
@@ -105,6 +107,7 @@ bool HackRFOutputSettings::deserialize(const QByteArray& data)
         m_reverseAPIDeviceIndex = uintval > 99 ? 99 : uintval;
         d.readBool(13, &m_transverterMode, false);
         d.readS64(14, &m_transverterDeltaFrequency, 0);
+        d.readString(15, &m_title, "HackRF");
 
 		return true;
 	}
@@ -117,6 +120,9 @@ bool HackRFOutputSettings::deserialize(const QByteArray& data)
 
 void HackRFOutputSettings::applySettings(const QStringList& settingsKeys, const HackRFOutputSettings& settings)
 {
+    if (settingsKeys.contains("title")) {
+        m_title = settings.m_title;
+    }
     if (settingsKeys.contains("centerFrequency")) {
         m_centerFrequency = settings.m_centerFrequency;
     }
@@ -168,6 +174,9 @@ QString HackRFOutputSettings::getDebugString(const QStringList& settingsKeys, bo
 {
     std::ostringstream ostr;
 
+    if (settingsKeys.contains("title") || force) {
+        ostr << " m_title: " << m_title.toStdString();
+    }
     if (settingsKeys.contains("centerFrequency") || force) {
         ostr << " m_centerFrequency: " << m_centerFrequency;
     }

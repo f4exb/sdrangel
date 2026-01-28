@@ -1223,6 +1223,9 @@ void XTRXMIMO::webapiUpdateDeviceSettings(
     SWGSDRangel::SWGDeviceSettings& response)
 {
     // common
+    if (deviceSettingsKeys.contains("title")) {
+        settings.m_title = *response.getXtrxMimoSettings()->getTitle();
+    }
     if (deviceSettingsKeys.contains("extClock")) {
         settings.m_extClock = response.getXtrxMimoSettings()->getExtClock() != 0;
     }
@@ -1371,6 +1374,12 @@ void XTRXMIMO::webapiFormatDeviceSettings(
     const XTRXMIMOSettings& settings)
 {
     // common
+    if (response.getXtrxMimoSettings()->getTitle()) {
+        *response.getXtrxMimoSettings()->getTitle() = settings.m_title;
+    } else {
+        response.getXtrxMimoSettings()->setTitle(new QString(settings.m_title));
+    }
+
     response.getXtrxMimoSettings()->setExtClock(settings.m_extClock ? 1 : 0);
     response.getXtrxMimoSettings()->setExtClockFreq(settings.m_extClockFreq);
 

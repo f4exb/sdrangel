@@ -758,6 +758,9 @@ void PlutoSDROutput::webapiUpdateDeviceSettings(
         const QStringList& deviceSettingsKeys,
         SWGSDRangel::SWGDeviceSettings& response)
 {
+    if (deviceSettingsKeys.contains("title")) {
+        settings.m_title = *response.getPlutoSdrOutputSettings()->getTitle();
+    }
     if (deviceSettingsKeys.contains("centerFrequency")) {
         settings.m_centerFrequency = response.getPlutoSdrOutputSettings()->getCenterFrequency();
     }
@@ -826,6 +829,12 @@ int PlutoSDROutput::webapiReportGet(
 
 void PlutoSDROutput::webapiFormatDeviceSettings(SWGSDRangel::SWGDeviceSettings& response, const PlutoSDROutputSettings& settings)
 {
+    if (response.getPlutoSdrOutputSettings()->getTitle()) {
+        *response.getPlutoSdrOutputSettings()->getTitle() = settings.m_title;
+    } else {
+        response.getPlutoSdrOutputSettings()->setTitle(new QString(settings.m_title));
+    }
+
     response.getPlutoSdrOutputSettings()->setCenterFrequency(settings.m_centerFrequency);
     response.getPlutoSdrOutputSettings()->setDevSampleRate(settings.m_devSampleRate);
     response.getPlutoSdrOutputSettings()->setLOppmTenths(settings.m_LOppmTenths);
@@ -872,6 +881,9 @@ void PlutoSDROutput::webapiReverseSendSettings(const QList<QString>& deviceSetti
 
     // transfer data that has been modified. When force is on transfer all data except reverse API data
 
+    if (deviceSettingsKeys.contains("title") || force) {
+        swgPlutoSdrOutputSettings->setTitle(new QString(settings.m_title));
+    }
     if (deviceSettingsKeys.contains("centerFrequency") || force) {
         swgPlutoSdrOutputSettings->setCenterFrequency(settings.m_centerFrequency);
     }

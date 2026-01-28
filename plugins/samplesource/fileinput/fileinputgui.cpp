@@ -31,6 +31,7 @@
 #include "gui/glspectrum.h"
 #include "gui/basicdevicesettingsdialog.h"
 #include "gui/dialogpositioner.h"
+#include "mainspectrum/mainspectrumgui.h"
 #include "dsp/dspcommands.h"
 
 #include "fileinputgui.h"
@@ -229,13 +230,17 @@ void FileInputGUI::updateSampleRateAndFrequency()
 void FileInputGUI::displaySettings()
 {
     blockApplySettings(true);
+    setTitle(m_settings.m_title);
+    m_deviceUISet->m_mainSpectrumGUI->setTitle(m_settings.m_title);
     ui->playLoop->setChecked(m_settings.m_loop);
     ui->acceleration->setCurrentIndex(FileInputSettings::getAccelerationIndex(m_settings.m_accelerationFactor));
+
     if (!m_settings.m_fileName.isEmpty() && (m_settings.m_fileName != ui->fileNameText->text()))
     {
-	ui->crcLabel->setStyleSheet("QLabel { background:rgb(79,79,79); }");
-	configureFileName();
+        ui->crcLabel->setStyleSheet("QLabel { background:rgb(79,79,79); }");
+        configureFileName();
     }
+
     ui->fileNameText->setText(m_settings.m_fileName);
     blockApplySettings(false);
 }
@@ -450,17 +455,30 @@ void FileInputGUI::openDeviceSettingsDialog(const QPoint& p)
         dialog.setReverseAPIAddress(m_settings.m_reverseAPIAddress);
         dialog.setReverseAPIPort(m_settings.m_reverseAPIPort);
         dialog.setReverseAPIDeviceIndex(m_settings.m_reverseAPIDeviceIndex);
+        dialog.setTitle(m_settings.m_title);
+        dialog.setDefaultTitle(getDefaultTitle());
 
         dialog.move(p);
         new DialogPositioner(&dialog, false);
         dialog.exec();
 
-        m_settings.m_useReverseAPI = dialog.useReverseAPI();
-        m_settings.m_reverseAPIAddress = dialog.getReverseAPIAddress();
-        m_settings.m_reverseAPIPort = dialog.getReverseAPIPort();
-        m_settings.m_reverseAPIDeviceIndex = dialog.getReverseAPIDeviceIndex();
+        if (dialog.result() == QDialog::Accepted)
+        {
+            m_settings.m_title = dialog.getTitle();
+            setTitle(m_settings.m_title);
+            m_deviceUISet->m_mainSpectrumGUI->setTitle(m_settings.m_title);
+            m_settings.m_useReverseAPI = dialog.useReverseAPI();
+            m_settings.m_reverseAPIAddress = dialog.getReverseAPIAddress();
+            m_settings.m_reverseAPIPort = dialog.getReverseAPIPort();
+            m_settings.m_reverseAPIDeviceIndex = dialog.getReverseAPIDeviceIndex();
+            m_settingsKeys.append("title");
+            m_settingsKeys.append("useReverseAPI");
+            m_settingsKeys.append("reverseAPIAddress");
+            m_settingsKeys.append("reverseAPIPort");
+            m_settingsKeys.append("reverseAPIDeviceIndex");
 
-        sendSettings();
+            sendSettings();
+        }
     }
 
     resetContextMenuType();

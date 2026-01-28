@@ -28,6 +28,7 @@ XTRXOutputSettings::XTRXOutputSettings()
 
 void XTRXOutputSettings::resetToDefaults()
 {
+    m_title = "XTRXOutput";
     m_centerFrequency = 435000*1000;
     m_devSampleRate = 5e6;
     m_log2HardInterp = 2;
@@ -65,6 +66,7 @@ QByteArray XTRXOutputSettings::serialize() const
     s.writeString(13, m_reverseAPIAddress);
     s.writeU32(14, m_reverseAPIPort);
     s.writeU32(15, m_reverseAPIDeviceIndex);
+    s.writeString(16, m_title);
 
     return s.final();
 }
@@ -108,6 +110,7 @@ bool XTRXOutputSettings::deserialize(const QByteArray& data)
 
         d.readU32(15, &uintval, 0);
         m_reverseAPIDeviceIndex = uintval > 99 ? 99 : uintval;
+        d.readString(16, &m_title, "XTRXOutput");
 
         return true;
     }
@@ -121,6 +124,9 @@ bool XTRXOutputSettings::deserialize(const QByteArray& data)
 
 void XTRXOutputSettings::applySettings(const QStringList& settingsKeys, const XTRXOutputSettings& settings)
 {
+    if (settingsKeys.contains("title")) {
+        m_title = settings.m_title;
+    }
     if (settingsKeys.contains("centerFrequency")) {
         m_centerFrequency = settings.m_centerFrequency;
     }
@@ -175,6 +181,9 @@ QString XTRXOutputSettings::getDebugString(const QStringList& settingsKeys, bool
 {
     std::ostringstream ostr;
 
+    if (settingsKeys.contains("title") || force) {
+        ostr << " m_title: " << m_title.toStdString();
+    }
     if (settingsKeys.contains("centerFrequency") || force) {
         ostr << " m_centerFrequency: " << m_centerFrequency;
     }

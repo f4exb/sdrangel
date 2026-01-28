@@ -26,6 +26,7 @@
 
 struct AudioOutputSettings {
 
+    QString m_title;
     QString m_deviceName;       // Including realm, as from getFullDeviceName below
     float m_volume;
     enum IQMapping {

@@ -47,6 +47,7 @@ struct TestSourceSettings {
         ModulationLast
     } Modulation;
 
+    QString m_title;
     quint64 m_centerFrequency;
 	qint32 m_frequencyShift;
 	quint32 m_sampleRate;

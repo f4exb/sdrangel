@@ -399,6 +399,9 @@ void RemoteOutput::webapiUpdateDeviceSettings(
         const QStringList& deviceSettingsKeys,
         SWGSDRangel::SWGDeviceSettings& response)
 {
+    if (deviceSettingsKeys.contains("title")) {
+        settings.m_title = *response.getRemoteOutputSettings()->getTitle();
+    }
     if (deviceSettingsKeys.contains("nbFECBlocks")) {
         settings.m_nbFECBlocks = response.getRemoteOutputSettings()->getNbFecBlocks();
     }
@@ -450,6 +453,12 @@ int RemoteOutput::webapiReportGet(
 
 void RemoteOutput::webapiFormatDeviceSettings(SWGSDRangel::SWGDeviceSettings& response, const RemoteOutputSettings& settings)
 {
+    if (response.getRemoteOutputSettings()->getTitle()) {
+        *response.getRemoteOutputSettings()->getTitle() = settings.m_title;
+    } else {
+        response.getRemoteOutputSettings()->setTitle(new QString(settings.m_title));
+    }
+
     response.getRemoteOutputSettings()->setNbFecBlocks(settings.m_nbFECBlocks);
     response.getRemoteOutputSettings()->setNbTxBytes(settings.m_nbTxBytes);
     response.getRemoteOutputSettings()->setApiAddress(new QString(settings.m_apiAddress));
@@ -656,6 +665,9 @@ void RemoteOutput::webapiReverseSendSettings(const QList<QString>& deviceSetting
 
     // transfer data that has been modified. When force is on transfer all data except reverse API data
 
+    if (deviceSettingsKeys.contains("title") || force) {
+        swgRemoteOutputSettings->setTitle(new QString(settings.m_title));
+    }
     if (deviceSettingsKeys.contains("nbFECBlocks") || force) {
         swgRemoteOutputSettings->setNbFecBlocks(settings.m_nbFECBlocks);
     }

@@ -42,6 +42,9 @@ public:
     virtual void fromJsonObject(QJsonObject &json) override;
     virtual SWGMetisMISOSettings* fromJson(QString &jsonString) override;
 
+    QString* getTitle();
+    void setTitle(QString* title);
+
     qint32 getNbReceivers();
     void setNbReceivers(qint32 nb_receivers);
 
@@ -172,6 +175,9 @@ public:
     virtual bool isSet() override;
 
 private:
+    QString* title;
+    bool m_title_isSet;
+
     qint32 nb_receivers;
     bool m_nb_receivers_isSet;
 

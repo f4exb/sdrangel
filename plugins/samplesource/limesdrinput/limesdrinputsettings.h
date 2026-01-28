@@ -46,6 +46,7 @@ struct LimeSDRInputSettings
     } GainMode;
 
     // global settings to be saved
+    QString  m_title;
     uint64_t m_centerFrequency;
     int      m_devSampleRate;
     uint32_t m_log2HardDecim;

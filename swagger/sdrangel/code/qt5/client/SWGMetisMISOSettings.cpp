@@ -28,6 +28,8 @@ SWGMetisMISOSettings::SWGMetisMISOSettings(QString* json) {
 }
 
 SWGMetisMISOSettings::SWGMetisMISOSettings() {
+    title = nullptr;
+    m_title_isSet = false;
     nb_receivers = 0;
     m_nb_receivers_isSet = false;
     tx_enable = 0;
@@ -120,6 +122,8 @@ SWGMetisMISOSettings::~SWGMetisMISOSettings() {
 
 void
 SWGMetisMISOSettings::init() {
+    title = new QString("");
+    m_title_isSet = false;
     nb_receivers = 0;
     m_nb_receivers_isSet = false;
     tx_enable = 0;
@@ -208,6 +212,9 @@ SWGMetisMISOSettings::init() {
 
 void
 SWGMetisMISOSettings::cleanup() {
+    if(title != nullptr) { 
+        delete title;
+    }
 
 
 
@@ -265,6 +272,8 @@ SWGMetisMISOSettings::fromJson(QString &json) {
 
 void
 SWGMetisMISOSettings::fromJsonObject(QJsonObject &pJson) {
+    ::SWGSDRangel::setValue(&title, pJson["title"], "QString", "QString");
+    
     ::SWGSDRangel::setValue(&nb_receivers, pJson["nbReceivers"], "qint32", "");
     
     ::SWGSDRangel::setValue(&tx_enable, pJson["txEnable"], "qint32", "");
@@ -365,6 +374,9 @@ SWGMetisMISOSettings::asJson ()
 QJsonObject*
 SWGMetisMISOSettings::asJsonObject() {
     QJsonObject* obj = new QJsonObject();
+    if(title != nullptr && *title != QString("")){
+        toJsonValue(QString("title"), title, obj, QString("QString"));
+    }
     if(m_nb_receivers_isSet){
         obj->insert("nbReceivers", QJsonValue(nb_receivers));
     }
@@ -493,6 +505,16 @@ SWGMetisMISOSettings::asJsonObject() {
     }
 
     return obj;
+}
+
+QString*
+SWGMetisMISOSettings::getTitle() {
+    return title;
+}
+void
+SWGMetisMISOSettings::setTitle(QString* title) {
+    this->title = title;
+    this->m_title_isSet = true;
 }
 
 qint32
@@ -920,6 +942,9 @@ bool
 SWGMetisMISOSettings::isSet(){
     bool isObjectUpdated = false;
     do{
+        if(title && *title != QString("")){
+            isObjectUpdated = true; break;
+        }
         if(m_nb_receivers_isSet){
             isObjectUpdated = true; break;
         }

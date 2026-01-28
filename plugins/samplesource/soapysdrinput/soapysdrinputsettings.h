@@ -32,6 +32,7 @@ struct SoapySDRInputSettings {
         FC_POS_CENTER
     } fcPos_t;
 
+    QString m_title;
     quint64 m_centerFrequency;
     qint32 m_LOppmTenths;
     qint32 m_devSampleRate;

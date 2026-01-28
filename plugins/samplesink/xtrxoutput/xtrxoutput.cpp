@@ -1170,6 +1170,9 @@ void XTRXOutput::webapiUpdateDeviceSettings(
         const QStringList& deviceSettingsKeys,
         SWGSDRangel::SWGDeviceSettings& response)
 {
+    if (deviceSettingsKeys.contains("title")) {
+        settings.m_title = *response.getXtrxOutputSettings()->getTitle();
+    }
     if (deviceSettingsKeys.contains("centerFrequency")) {
         settings.m_centerFrequency = response.getXtrxOutputSettings()->getCenterFrequency();
     }
@@ -1222,6 +1225,12 @@ void XTRXOutput::webapiUpdateDeviceSettings(
 
 void XTRXOutput::webapiFormatDeviceSettings(SWGSDRangel::SWGDeviceSettings& response, const XTRXOutputSettings& settings)
 {
+    if (response.getXtrxOutputSettings()->getTitle()) {
+        *response.getXtrxOutputSettings()->getTitle() = settings.m_title;
+    } else {
+        response.getXtrxOutputSettings()->setTitle(new QString(settings.m_title));
+    }
+
     response.getXtrxOutputSettings()->setCenterFrequency(settings.m_centerFrequency);
     response.getXtrxOutputSettings()->setDevSampleRate(settings.m_devSampleRate);
     response.getXtrxOutputSettings()->setLog2HardInterp(settings.m_log2HardInterp);
@@ -1321,6 +1330,9 @@ void XTRXOutput::webapiReverseSendSettings(const QList<QString>& deviceSettingsK
 
     // transfer data that has been modified. When force is on transfer all data except reverse API data
 
+    if (deviceSettingsKeys.contains("title") || force) {
+        swgXtrxOutputSettings->setTitle(new QString(settings.m_title));
+    }
     if (deviceSettingsKeys.contains("centerFrequency") || force) {
         swgXtrxOutputSettings->setCenterFrequency(settings.m_centerFrequency);
     }

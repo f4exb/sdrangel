@@ -28,6 +28,8 @@ SWGKiwiSDRSettings::SWGKiwiSDRSettings(QString* json) {
 }
 
 SWGKiwiSDRSettings::SWGKiwiSDRSettings() {
+    title = nullptr;
+    m_title_isSet = false;
     gain = 0;
     m_gain_isSet = false;
     use_agc = 0;
@@ -54,6 +56,8 @@ SWGKiwiSDRSettings::~SWGKiwiSDRSettings() {
 
 void
 SWGKiwiSDRSettings::init() {
+    title = new QString("");
+    m_title_isSet = false;
     gain = 0;
     m_gain_isSet = false;
     use_agc = 0;
@@ -76,6 +80,9 @@ SWGKiwiSDRSettings::init() {
 
 void
 SWGKiwiSDRSettings::cleanup() {
+    if(title != nullptr) { 
+        delete title;
+    }
 
 
 
@@ -102,6 +109,8 @@ SWGKiwiSDRSettings::fromJson(QString &json) {
 
 void
 SWGKiwiSDRSettings::fromJsonObject(QJsonObject &pJson) {
+    ::SWGSDRangel::setValue(&title, pJson["title"], "QString", "QString");
+    
     ::SWGSDRangel::setValue(&gain, pJson["gain"], "qint32", "");
     
     ::SWGSDRangel::setValue(&use_agc, pJson["useAGC"], "qint32", "");
@@ -136,6 +145,9 @@ SWGKiwiSDRSettings::asJson ()
 QJsonObject*
 SWGKiwiSDRSettings::asJsonObject() {
     QJsonObject* obj = new QJsonObject();
+    if(title != nullptr && *title != QString("")){
+        toJsonValue(QString("title"), title, obj, QString("QString"));
+    }
     if(m_gain_isSet){
         obj->insert("gain", QJsonValue(gain));
     }
@@ -165,6 +177,16 @@ SWGKiwiSDRSettings::asJsonObject() {
     }
 
     return obj;
+}
+
+QString*
+SWGKiwiSDRSettings::getTitle() {
+    return title;
+}
+void
+SWGKiwiSDRSettings::setTitle(QString* title) {
+    this->title = title;
+    this->m_title_isSet = true;
 }
 
 qint32
@@ -262,6 +284,9 @@ bool
 SWGKiwiSDRSettings::isSet(){
     bool isObjectUpdated = false;
     do{
+        if(title && *title != QString("")){
+            isObjectUpdated = true; break;
+        }
         if(m_gain_isSet){
             isObjectUpdated = true; break;
         }

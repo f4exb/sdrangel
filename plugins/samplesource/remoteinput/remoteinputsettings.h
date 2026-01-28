@@ -23,7 +23,9 @@
 #include <QByteArray>
 #include <QString>
 
-struct RemoteInputSettings {
+struct RemoteInputSettings
+{
+    QString m_title;
     QString m_apiAddress;
     quint16 m_apiPort;
     QString m_dataAddress;

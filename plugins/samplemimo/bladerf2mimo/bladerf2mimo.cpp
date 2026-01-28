@@ -907,6 +907,9 @@ void BladeRF2MIMO::webapiUpdateDeviceSettings(
         const QStringList& deviceSettingsKeys,
         SWGSDRangel::SWGDeviceSettings& response)
 {
+    if (deviceSettingsKeys.contains("title")) {
+        settings.m_title = *response.getBladeRf2MimoSettings()->getTitle();
+    }
     if (deviceSettingsKeys.contains("devSampleRate")) {
         settings.m_devSampleRate = response.getBladeRf2MimoSettings()->getDevSampleRate();
     }
@@ -1001,6 +1004,12 @@ void BladeRF2MIMO::webapiUpdateDeviceSettings(
 
 void BladeRF2MIMO::webapiFormatDeviceSettings(SWGSDRangel::SWGDeviceSettings& response, const BladeRF2MIMOSettings& settings)
 {
+    if (response.getBladeRf2MimoSettings()->getTitle()) {
+        *response.getBladeRf2MimoSettings()->getTitle() = settings.m_title;
+    } else {
+        response.getBladeRf2MimoSettings()->setTitle(new QString(settings.m_title));
+    }
+
     response.getBladeRf2MimoSettings()->setDevSampleRate(settings.m_devSampleRate);
     response.getBladeRf2MimoSettings()->setLOppmTenths(settings.m_LOppmTenths);
 
@@ -1097,6 +1106,9 @@ void BladeRF2MIMO::webapiReverseSendSettings(const QList<QString>& deviceSetting
 
     // transfer data that has been modified. When force is on transfer all data except reverse API data
 
+    if (deviceSettingsKeys.contains("title") || force) {
+        swgBladeRF2MIMOSettings->setTitle(new QString(settings.m_title));
+    }
     if (deviceSettingsKeys.contains("devSampleRate") || force) {
         swgBladeRF2MIMOSettings->setDevSampleRate(settings.m_devSampleRate);
     }

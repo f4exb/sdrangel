@@ -520,6 +520,9 @@ void RTLSDRInput::webapiUpdateDeviceSettings(
         const QStringList& deviceSettingsKeys,
         SWGSDRangel::SWGDeviceSettings& response)
 {
+    if (deviceSettingsKeys.contains("title")) {
+        settings.m_title = *response.getRtlSdrSettings()->getTitle();
+    }
     if (deviceSettingsKeys.contains("agc")) {
         settings.m_agc = response.getRtlSdrSettings()->getAgc() != 0;
     }
@@ -587,6 +590,12 @@ void RTLSDRInput::webapiUpdateDeviceSettings(
 
 void RTLSDRInput::webapiFormatDeviceSettings(SWGSDRangel::SWGDeviceSettings& response, const RTLSDRSettings& settings)
 {
+    if (response.getRtlSdrSettings()->getTitle()) {
+        *response.getRtlSdrSettings()->getTitle() = settings.m_title;
+    } else {
+        response.getRtlSdrSettings()->setTitle(new QString(settings.m_title));
+    }
+
     response.getRtlSdrSettings()->setAgc(settings.m_agc ? 1 : 0);
     response.getRtlSdrSettings()->setCenterFrequency(settings.m_centerFrequency);
     response.getRtlSdrSettings()->setDcBlock(settings.m_dcBlock ? 1 : 0);
@@ -680,6 +689,9 @@ void RTLSDRInput::webapiReverseSendSettings(const QList<QString>& deviceSettings
 
     // transfer data that has been modified. When force is on transfer all data except reverse API data
 
+    if (deviceSettingsKeys.contains("title") || force) {
+        swgRtlSdrSettings->setTitle(new QString(settings.m_title));
+    }
     if (deviceSettingsKeys.contains("agc") || force) {
         swgRtlSdrSettings->setAgc(settings.m_agc ? 1 : 0);
     }

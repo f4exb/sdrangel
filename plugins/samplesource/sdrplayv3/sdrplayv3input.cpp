@@ -848,6 +848,9 @@ void SDRPlayV3Input::webapiUpdateDeviceSettings(
         const QStringList& deviceSettingsKeys,
         SWGSDRangel::SWGDeviceSettings& response)
 {
+    if (deviceSettingsKeys.contains("title")) {
+        settings.m_title = *response.getSdrPlayV3Settings()->getTitle();
+    }
     if (deviceSettingsKeys.contains("centerFrequency")) {
         settings.m_centerFrequency = response.getSdrPlayV3Settings()->getCenterFrequency();
     }
@@ -933,6 +936,12 @@ void SDRPlayV3Input::webapiUpdateDeviceSettings(
 
 void SDRPlayV3Input::webapiFormatDeviceSettings(SWGSDRangel::SWGDeviceSettings& response, const SDRPlayV3Settings& settings)
 {
+    if (response.getSdrPlayV3Settings()->getTitle()) {
+        *response.getSdrPlayV3Settings()->getTitle() = settings.m_title;
+    } else {
+        response.getSdrPlayV3Settings()->setTitle(new QString(settings.m_title));
+    }
+
     response.getSdrPlayV3Settings()->setCenterFrequency(settings.m_centerFrequency);
     response.getSdrPlayV3Settings()->setLOppmTenths(settings.m_LOppmTenths);
     response.getSdrPlayV3Settings()->setIfFrequencyIndex(settings.m_ifFrequencyIndex);
@@ -1038,6 +1047,9 @@ void SDRPlayV3Input::webapiReverseSendSettings(const QList<QString>& deviceSetti
 
     // transfer data that has been modified. When force is on transfer all data except reverse API data
 
+    if (deviceSettingsKeys.contains("title") || force) {
+        swgSDRPlayV3Settings->setTitle(new QString(settings.m_title));
+    }
     if (deviceSettingsKeys.contains("centerFrequency") || force) {
         swgSDRPlayV3Settings->setCenterFrequency(settings.m_centerFrequency);
     }
@@ -1476,4 +1488,3 @@ const int *SDRPlayV3LNA::getAttenuations(int deviceId, qint64 frequency)
     }
     return lnaAttenuation;
 }
-

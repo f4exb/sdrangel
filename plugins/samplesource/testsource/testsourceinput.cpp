@@ -495,6 +495,9 @@ void TestSourceInput::webapiUpdateDeviceSettings(
     const QStringList& deviceSettingsKeys,
     SWGSDRangel::SWGDeviceSettings& response)
 {
+    if (deviceSettingsKeys.contains("title")) {
+        settings.m_title = *response.getTestSourceSettings()->getTitle();
+    }
     if (deviceSettingsKeys.contains("centerFrequency")) {
         settings.m_centerFrequency = response.getTestSourceSettings()->getCenterFrequency();
     }
@@ -567,6 +570,12 @@ void TestSourceInput::webapiUpdateDeviceSettings(
 
 void TestSourceInput::webapiFormatDeviceSettings(SWGSDRangel::SWGDeviceSettings& response, const TestSourceSettings& settings)
 {
+    if (response.getTestSourceSettings()->getTitle()) {
+        *response.getTestSourceSettings()->getTitle() = settings.m_title;
+    } else {
+        response.getTestSourceSettings()->setTitle(new QString(settings.m_title));
+    }
+
     response.getTestSourceSettings()->setCenterFrequency(settings.m_centerFrequency);
     response.getTestSourceSettings()->setFrequencyShift(settings.m_frequencyShift);
     response.getTestSourceSettings()->setSampleRate(settings.m_sampleRate);
@@ -607,6 +616,9 @@ void TestSourceInput::webapiReverseSendSettings(const QList<QString>& deviceSett
 
     // transfer data that has been modified. When force is on transfer all data except reverse API data
 
+    if (deviceSettingsKeys.contains("title") || force) {
+        swgTestSourceSettings->setTitle(new QString(settings.m_title));
+    }
     if (deviceSettingsKeys.contains("centerFrequency") || force) {
         swgTestSourceSettings->setCenterFrequency(settings.m_centerFrequency);
     }

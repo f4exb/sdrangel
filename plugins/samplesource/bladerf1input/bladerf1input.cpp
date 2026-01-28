@@ -545,6 +545,13 @@ int Bladerf1Input::webapiSettingsGet(
 
 void Bladerf1Input::webapiFormatDeviceSettings(SWGSDRangel::SWGDeviceSettings& response, const BladeRF1InputSettings& settings)
 {
+    if (response.getBladeRf1InputSettings()->getTitle()) {
+        *response.getBladeRf1InputSettings()->getTitle() = settings.m_title;
+    } else {
+        response.getBladeRf1InputSettings()->setTitle(new QString(settings.m_title));
+    }
+
+    response.getBladeRf1InputSettings()->setTitle(new QString(settings.m_title));
     response.getBladeRf1InputSettings()->setCenterFrequency(settings.m_centerFrequency);
     response.getBladeRf1InputSettings()->setDevSampleRate(settings.m_devSampleRate);
     response.getBladeRf1InputSettings()->setLnaGain(settings.m_lnaGain);
@@ -600,6 +607,9 @@ void Bladerf1Input::webapiUpdateDeviceSettings(
         const QStringList& deviceSettingsKeys,
         SWGSDRangel::SWGDeviceSettings& response)
 {
+    if (deviceSettingsKeys.contains("title")) {
+        settings.m_title = *response.getBladeRf1InputSettings()->getTitle();
+    }
     if (deviceSettingsKeys.contains("centerFrequency")) {
         settings.m_centerFrequency = response.getBladeRf1InputSettings()->getCenterFrequency();
     }
@@ -695,6 +705,9 @@ void Bladerf1Input::webapiReverseSendSettings(const QList<QString>& deviceSettin
 
     // transfer data that has been modified. When force is on transfer all data except reverse API data
 
+    if (deviceSettingsKeys.contains("title") || force) {
+        swgBladeRF1Settings->setTitle(new QString(settings.m_title));
+    }
     if (deviceSettingsKeys.contains("centerFrequency") || force) {
         swgBladeRF1Settings->setCenterFrequency(settings.m_centerFrequency);
     }

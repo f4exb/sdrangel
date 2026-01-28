@@ -1,6 +1,8 @@
 HackRFInputSettings:
   description: HackRF
   properties:
+    title:
+      type: string
     centerFrequency:
       type: integer
       format: int64
@@ -51,6 +53,8 @@ HackRFInputSettings:
 HackRFOutputSettings:
   description: HackRF
   properties:
+    title:
+      type: string
     centerFrequency:
       type: integer
       format: int64
@@ -85,4 +89,3 @@ HackRFOutputSettings:
       type: integer
     reverseAPIDeviceIndex:
       type: integer
-

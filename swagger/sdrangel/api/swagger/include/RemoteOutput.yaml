@@ -1,6 +1,8 @@
 RemoteOutputSettings:
   description: RemoteOutput
   properties:
+    title:
+      type: string
     nbFECBlocks:
       type: integer
     nbTxBytes:

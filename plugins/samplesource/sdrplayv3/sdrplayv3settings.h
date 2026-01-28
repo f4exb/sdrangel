@@ -31,6 +31,7 @@ struct SDRPlayV3Settings {
         FC_POS_CENTER
     } fcPos_t;
 
+    QString m_title;
     uint64_t m_centerFrequency;
     int32_t  m_LOppmTenths;
     uint32_t m_ifFrequencyIndex;

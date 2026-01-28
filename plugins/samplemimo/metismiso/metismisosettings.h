@@ -23,8 +23,10 @@
 
 #include <QString>
 
-struct MetisMISOSettings {
+struct MetisMISOSettings
+{
     static const int m_maxReceivers = 8;
+    QString m_title;
     unsigned int m_nbReceivers;
     bool m_txEnable;
     quint64 m_rxCenterFrequencies[m_maxReceivers];
