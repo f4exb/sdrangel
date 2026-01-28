@@ -69,6 +69,7 @@ AudioCATSISOSettings::AudioCATSISOSettings()
 
 void AudioCATSISOSettings::resetToDefaults()
 {
+    m_title = "AudioCATSISO";
     m_txEnable = false;
     m_pttSpectrumLink = true;
     m_rxCenterFrequency = 14200000;
@@ -106,6 +107,7 @@ void AudioCATSISOSettings::resetToDefaults()
 
 AudioCATSISOSettings::AudioCATSISOSettings(const AudioCATSISOSettings& other)
 {
+    m_title = other.m_title;
     m_txEnable = other.m_txEnable;
     m_pttSpectrumLink = other.m_pttSpectrumLink;
     m_rxCenterFrequency = other.m_rxCenterFrequency;
@@ -155,6 +157,7 @@ QByteArray AudioCATSISOSettings::serialize() const
     s.writeBool(9, m_transverterMode);
     s.writeS64(10, m_transverterDeltaFrequency);
     s.writeS32(11, m_rxSampleRate); // Serialize RX sample rate
+    s.writeString(12, m_title);
 
     s.writeString(21, m_txDeviceName);
     s.writeU64(22, m_txCenterFrequency);
@@ -210,6 +213,7 @@ bool AudioCATSISOSettings::deserialize(const QByteArray& data)
         d.readBool(9, &m_transverterMode, false);
         d.readS64(10, &m_transverterDeltaFrequency, 0);
         d.readS32(11, &m_rxSampleRate, 48000); // Deserialize RX sample rate
+        d.readString(12, &m_title, "AudioCATSISO");
 
         d.readString(21, &m_txDeviceName, "");
         d.readU64(22, &m_txCenterFrequency, 14200000);
@@ -255,6 +259,9 @@ bool AudioCATSISOSettings::deserialize(const QByteArray& data)
 
 void AudioCATSISOSettings::applySettings(const QStringList& settingsKeys, const AudioCATSISOSettings& settings)
 {
+    if (settingsKeys.contains("title")) {
+        m_title = settings.m_title;
+    }
     if (settingsKeys.contains("transverterMode")) {
         m_transverterMode = settings.m_transverterMode;
     }
@@ -361,6 +368,9 @@ QString AudioCATSISOSettings::getDebugString(const QStringList& settingsKeys, bo
 {
     std::ostringstream ostr;
 
+    if (settingsKeys.contains("title") || force) {
+        ostr << " m_title: " << m_title.toStdString();
+    }
     if (settingsKeys.contains("transverterMode") || force) {
         ostr << " m_transverterMode: " << m_transverterMode;
     }

@@ -42,6 +42,9 @@ public:
     virtual void fromJsonObject(QJsonObject &json) override;
     virtual SWGPlutoSdrInputSettings* fromJson(QString &jsonString) override;
 
+    QString* getTitle();
+    void setTitle(QString* title);
+
     qint64 getCenterFrequency();
     void setCenterFrequency(qint64 center_frequency);
 
@@ -121,6 +124,9 @@ public:
     virtual bool isSet() override;
 
 private:
+    QString* title;
+    bool m_title_isSet;
+
     qint64 center_frequency;
     bool m_center_frequency_isSet;
 

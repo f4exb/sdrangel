@@ -679,6 +679,10 @@ void TestMI::webapiUpdateDeviceSettings(
 
     }
 
+
+    if (deviceSettingsKeys.contains("title")) {
+        settings.m_title = *response.getTestMiSettings()->getTitle();
+    }
     if (deviceSettingsKeys.contains("useReverseAPI")) {
         settings.m_useReverseAPI = response.getTestMiSettings()->getUseReverseApi() != 0;
     }
@@ -720,6 +724,12 @@ void TestMI::webapiFormatDeviceSettings(SWGSDRangel::SWGDeviceSettings& response
         streams->back()->setIFactor(it->m_iFactor);
         streams->back()->setQFactor(it->m_qFactor);
         streams->back()->setPhaseImbalance(it->m_phaseImbalance);
+    }
+
+    if (response.getTestMiSettings()->getTitle()) {
+        *response.getTestMiSettings()->getTitle() = settings.m_title;
+    } else {
+        response.getTestMiSettings()->setTitle(new QString(settings.m_title));
     }
 
     response.getTestMiSettings()->setUseReverseApi(settings.m_useReverseAPI ? 1 : 0);

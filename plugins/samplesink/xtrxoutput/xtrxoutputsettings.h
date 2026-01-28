@@ -34,6 +34,7 @@
 struct XTRXOutputSettings
 {
     // global settings to be saved
+    QString m_title;
     uint64_t m_centerFrequency;
     double   m_devSampleRate;
     uint32_t m_log2HardInterp;

@@ -1,6 +1,8 @@
 RemoteInputSettings:
   description: RemoteInput
   properties:
+    title:
+      type: string
     apiAddress:
       type: string
     apiPort:

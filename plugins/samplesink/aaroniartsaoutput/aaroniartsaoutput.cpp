@@ -375,6 +375,9 @@ void AaroniaRTSAOutput::webapiUpdateDeviceSettings(
         const QStringList& deviceSettingsKeys,
         SWGSDRangel::SWGDeviceSettings& response)
 {
+    if (deviceSettingsKeys.contains("title")) {
+        settings.m_title = *response.getAaroniaRtsaOutputSettings()->getTitle();
+    }
     if (deviceSettingsKeys.contains("centerFrequency")) {
         settings.m_centerFrequency = response.getAaroniaRtsaOutputSettings()->getCenterFrequency();
     }
@@ -400,6 +403,12 @@ void AaroniaRTSAOutput::webapiUpdateDeviceSettings(
 
 void AaroniaRTSAOutput::webapiFormatDeviceSettings(SWGSDRangel::SWGDeviceSettings& response, const AaroniaRTSAOutputSettings& settings)
 {
+    if (response.getAaroniaRtsaOutputSettings()->getTitle()) {
+        *response.getAaroniaRtsaOutputSettings()->getTitle() = settings.m_title;
+    } else {
+        response.getAaroniaRtsaOutputSettings()->setTitle(new QString(settings.m_title));
+    }
+
     response.getAaroniaRtsaOutputSettings()->setCenterFrequency(settings.m_centerFrequency);
     response.getAaroniaRtsaOutputSettings()->setSampleRate(settings.m_sampleRate);
 

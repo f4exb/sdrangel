@@ -29,6 +29,7 @@ TestMOSyncSettings::TestMOSyncSettings()
 
 void TestMOSyncSettings::resetToDefaults()
 {
+    m_title = "TestMOSync";
     m_centerFrequency = 435000*1000;
     m_sampleRate = 48000;
     m_log2Interp = 0;
@@ -50,6 +51,7 @@ QByteArray TestMOSyncSettings::serialize() const
     s.writeString(7, m_reverseAPIAddress);
     s.writeU32(8, m_reverseAPIPort);
     s.writeU32(9, m_reverseAPIDeviceIndex);
+    s.writeString(10, m_title);
 
     return s.final();
 }
@@ -73,9 +75,9 @@ bool TestMOSyncSettings::deserialize(const QByteArray& data)
         d.readU32(2, &m_log2Interp, 0);
         d.readS32(3, &intval, 2);
         m_fcPosTx = (fcPos_t) intval;
-        d.readBool(1, &m_useReverseAPI, false);
-        d.readString(2, &m_reverseAPIAddress, "127.0.0.1");
-        d.readU32(3, &utmp, 0);
+        d.readBool(6, &m_useReverseAPI, false);
+        d.readString(7, &m_reverseAPIAddress, "127.0.0.1");
+        d.readU32(8, &utmp, 0);
 
         if ((utmp > 1023) && (utmp < 65535)) {
             m_reverseAPIPort = utmp;
@@ -83,8 +85,10 @@ bool TestMOSyncSettings::deserialize(const QByteArray& data)
             m_reverseAPIPort = 8888;
         }
 
-        d.readU32(4, &utmp, 0);
+        d.readU32(9, &utmp, 0);
         m_reverseAPIDeviceIndex = utmp > 99 ? 99 : utmp;
+
+        d.readString(10, &m_title, "TestMOSync");
 
         return true;
     }
@@ -97,6 +101,9 @@ bool TestMOSyncSettings::deserialize(const QByteArray& data)
 
 void TestMOSyncSettings::applySettings(const QStringList& settingsKeys, const TestMOSyncSettings& settings)
 {
+    if (settingsKeys.contains("title")) {
+        m_title = settings.m_title;
+    }
     if (settingsKeys.contains("centerFrequency")) {
         m_centerFrequency = settings.m_centerFrequency;
     }
@@ -127,6 +134,9 @@ QString TestMOSyncSettings::getDebugString(const QStringList& settingsKeys, bool
 {
     std::ostringstream ostr;
 
+    if (settingsKeys.contains("title") || force) {
+        ostr << " m_title: " << m_title.toStdString();
+    }
     if (settingsKeys.contains("centerFrequency") || force) {
         ostr << " m_centerFrequency: " << m_centerFrequency;
     }

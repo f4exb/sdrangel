@@ -28,6 +28,8 @@ SWGAudioCATSISOSettings::SWGAudioCATSISOSettings(QString* json) {
 }
 
 SWGAudioCATSISOSettings::SWGAudioCATSISOSettings() {
+    title = nullptr;
+    m_title_isSet = false;
     rx_center_frequency = 0L;
     m_rx_center_frequency_isSet = false;
     rx_sample_rate = 0;
@@ -98,6 +100,8 @@ SWGAudioCATSISOSettings::~SWGAudioCATSISOSettings() {
 
 void
 SWGAudioCATSISOSettings::init() {
+    title = new QString("");
+    m_title_isSet = false;
     rx_center_frequency = 0L;
     m_rx_center_frequency_isSet = false;
     rx_sample_rate = 0;
@@ -164,6 +168,9 @@ SWGAudioCATSISOSettings::init() {
 
 void
 SWGAudioCATSISOSettings::cleanup() {
+    if(title != nullptr) { 
+        delete title;
+    }
 
 
 
@@ -214,6 +221,8 @@ SWGAudioCATSISOSettings::fromJson(QString &json) {
 
 void
 SWGAudioCATSISOSettings::fromJsonObject(QJsonObject &pJson) {
+    ::SWGSDRangel::setValue(&title, pJson["title"], "QString", "QString");
+    
     ::SWGSDRangel::setValue(&rx_center_frequency, pJson["rxCenterFrequency"], "qint64", "");
     
     ::SWGSDRangel::setValue(&rx_sample_rate, pJson["rxSampleRate"], "qint32", "");
@@ -292,6 +301,9 @@ SWGAudioCATSISOSettings::asJson ()
 QJsonObject*
 SWGAudioCATSISOSettings::asJsonObject() {
     QJsonObject* obj = new QJsonObject();
+    if(title != nullptr && *title != QString("")){
+        toJsonValue(QString("title"), title, obj, QString("QString"));
+    }
     if(m_rx_center_frequency_isSet){
         obj->insert("rxCenterFrequency", QJsonValue(rx_center_frequency));
     }
@@ -387,6 +399,16 @@ SWGAudioCATSISOSettings::asJsonObject() {
     }
 
     return obj;
+}
+
+QString*
+SWGAudioCATSISOSettings::getTitle() {
+    return title;
+}
+void
+SWGAudioCATSISOSettings::setTitle(QString* title) {
+    this->title = title;
+    this->m_title_isSet = true;
 }
 
 qint64
@@ -704,6 +726,9 @@ bool
 SWGAudioCATSISOSettings::isSet(){
     bool isObjectUpdated = false;
     do{
+        if(title && *title != QString("")){
+            isObjectUpdated = true; break;
+        }
         if(m_rx_center_frequency_isSet){
             isObjectUpdated = true; break;
         }

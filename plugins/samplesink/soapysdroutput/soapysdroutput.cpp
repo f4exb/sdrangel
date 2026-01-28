@@ -1388,6 +1388,9 @@ void SoapySDROutput::webapiUpdateDeviceSettings(
         const QStringList& deviceSettingsKeys,
         SWGSDRangel::SWGDeviceSettings& response)
 {
+    if (deviceSettingsKeys.contains("title")) {
+        settings.m_title = *response.getSoapySdrOutputSettings()->getTitle();
+    }
     if (deviceSettingsKeys.contains("centerFrequency")) {
         settings.m_centerFrequency = response.getSoapySdrOutputSettings()->getCenterFrequency();
     }
@@ -1550,6 +1553,12 @@ int SoapySDROutput::webapiRun(
 
 void SoapySDROutput::webapiFormatDeviceSettings(SWGSDRangel::SWGDeviceSettings& response, const SoapySDROutputSettings& settings)
 {
+    if (response.getSoapySdrOutputSettings()->getTitle()) {
+        *response.getSoapySdrOutputSettings()->getTitle() = settings.m_title;
+    } else {
+        response.getSoapySdrOutputSettings()->setTitle(new QString(settings.m_title));
+    }
+
     response.getSoapySdrOutputSettings()->setCenterFrequency(settings.m_centerFrequency);
     response.getSoapySdrOutputSettings()->setLOppmTenths(settings.m_LOppmTenths);
     response.getSoapySdrOutputSettings()->setDevSampleRate(settings.m_devSampleRate);
@@ -1851,6 +1860,9 @@ void SoapySDROutput::webapiReverseSendSettings(QList<QString>& deviceSettingsKey
 
     // transfer data that has been modified. When force is on transfer all data except reverse API data
 
+    if (deviceSettingsKeys.contains("title") || force) {
+        swgSoapySDROutputSettings->setTitle(new QString(settings.m_title));
+    }
     if (deviceSettingsKeys.contains("centerFrequency") || force) {
         swgSoapySDROutputSettings->setCenterFrequency(settings.m_centerFrequency);
     }

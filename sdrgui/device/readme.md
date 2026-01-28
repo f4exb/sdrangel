@@ -28,9 +28,17 @@ All device types have common settings. Clicking on the button opens a dialog to 
 
 ![Basic device settings dialog](../../doc/img/BasicDeviceSettings.png)
 
-<h4>A.2.1: Toggle reverse API feature</h4>
+<h4>A.2.1: Edit device title</h4>
 
-Use this checkbox to toggle on/off the reverse API feature. With reverse API engaged the changes in the device settings are forwarded to an API endpoint given by address (A.2.2), port (A.2.3) and device index A.2.4) in the same format as the SDRangel REST API device settings endpoint. With the values of the screenshot the API URL is: `http://127.0.0.1:8888/sdrangel/deviceset/0/device/settings` The JSON payload follows the same format as the SDRangel REST API device settings. For example with HackRF Rx this would be something like:
+You can change the device title in this text area.
+
+<h4>A.2.2: Reset device title to default</h4>
+
+Push this button to reset the device title to device type and sequence number
+
+<h4>A.2.3: Toggle reverse API feature</h4>
+
+Use this checkbox to toggle on/off the reverse API feature. With reverse API engaged the changes in the device settings are forwarded to an API endpoint given by address and port that follows and device index (A.2.4) in the same format as the SDRangel REST API device settings endpoint. With the values of the screenshot the API URL is: `http://127.0.0.1:8888/sdrangel/deviceset/0/device/settings` The JSON payload follows the same format as the SDRangel REST API device settings. For example with HackRF Rx this would be something like:
 
 ```
 {
@@ -59,26 +67,29 @@ The start and stop actions are also forwarded with the `/sdrangel/deviceset/{dev
 
 More details on this feature can be found on the corresponding Wiki page.
 
-<h4>A.2.2: API address</h4>
-
-This is the IP address of the API endpoint
-
-<h4>A.2.3: API port</h4>
-
-This is the IP port of the API endpoint
-
 <h4>A.2.4: Device index</h4>
 
 This is the targeted device index
 
-<h4>A.2.5: Cancel changes and exit dialog</h4>
+<h4>A.2.5: Replay buffer length</h4>
+
+For devices with replay feature this sets the replay buffer length
+
+<h4>A.2.6: Replay step</h4>
+
+For devices with replay feature this sets the replay step
+
+<h4>A.2.7: Device preset dialog</h4>
+
+This button opens a dialog to manage device presets
+
+<h4>A.2.8: Cancel changes and exit dialog</h4>
 
 Do not make any changes and exit dialog
 
-<h4>A.2.6: Validate and exit dialog</h4>
+<h4>A.2.9: Validate and exit dialog</h4>
 
 Validates the data (saves it in the channel marker object) and exits the dialog
-
 
 <h3>A.3: Change device</h3>
 
@@ -176,7 +187,7 @@ Add a new channel by clicking on the `Apply` button. You may click it several ti
 
 <h3>A.7: Title</h3>
 
-The window title shows the device type and a sequence number.
+The window title shows the device type by default and it can be changed in the Device common settings (see A.2) . The tooltip always shows the device type with a sequence number and serial number if available.
 
 You may click on this area and drag the window with the mouse.
 

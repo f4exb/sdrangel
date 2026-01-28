@@ -1,6 +1,8 @@
 BladeRF2InputSettings:
   description: BladeRF2
   properties:
+    title:
+      type: string
     centerFrequency:
       type: integer
       format: int64
@@ -64,6 +66,8 @@ BladeRF2InputReport:
 BladeRF2OutputSettings:
   description: BladeRF2
   properties:
+    title:
+      type: string
     centerFrequency:
       type: integer
       format: int64
@@ -109,6 +113,8 @@ BladeRF2OutputReport:
 BladeRF2MIMOSettings:
   description: BladeRF2
   properties:
+    title:
+      type: string
     devSampleRate:
       type: integer
     LOppmTenths:

@@ -28,6 +28,8 @@ SWGPerseusSettings::SWGPerseusSettings(QString* json) {
 }
 
 SWGPerseusSettings::SWGPerseusSettings() {
+    title = nullptr;
+    m_title_isSet = false;
     center_frequency = 0L;
     m_center_frequency_isSet = false;
     l_oppm_tenths = 0;
@@ -66,6 +68,8 @@ SWGPerseusSettings::~SWGPerseusSettings() {
 
 void
 SWGPerseusSettings::init() {
+    title = new QString("");
+    m_title_isSet = false;
     center_frequency = 0L;
     m_center_frequency_isSet = false;
     l_oppm_tenths = 0;
@@ -100,6 +104,9 @@ SWGPerseusSettings::init() {
 
 void
 SWGPerseusSettings::cleanup() {
+    if(title != nullptr) { 
+        delete title;
+    }
 
 
 
@@ -130,6 +137,8 @@ SWGPerseusSettings::fromJson(QString &json) {
 
 void
 SWGPerseusSettings::fromJsonObject(QJsonObject &pJson) {
+    ::SWGSDRangel::setValue(&title, pJson["title"], "QString", "QString");
+    
     ::SWGSDRangel::setValue(&center_frequency, pJson["centerFrequency"], "qint64", "");
     
     ::SWGSDRangel::setValue(&l_oppm_tenths, pJson["LOppmTenths"], "qint32", "");
@@ -176,6 +185,9 @@ SWGPerseusSettings::asJson ()
 QJsonObject*
 SWGPerseusSettings::asJsonObject() {
     QJsonObject* obj = new QJsonObject();
+    if(title != nullptr && *title != QString("")){
+        toJsonValue(QString("title"), title, obj, QString("QString"));
+    }
     if(m_center_frequency_isSet){
         obj->insert("centerFrequency", QJsonValue(center_frequency));
     }
@@ -223,6 +235,16 @@ SWGPerseusSettings::asJsonObject() {
     }
 
     return obj;
+}
+
+QString*
+SWGPerseusSettings::getTitle() {
+    return title;
+}
+void
+SWGPerseusSettings::setTitle(QString* title) {
+    this->title = title;
+    this->m_title_isSet = true;
 }
 
 qint64
@@ -380,6 +402,9 @@ bool
 SWGPerseusSettings::isSet(){
     bool isObjectUpdated = false;
     do{
+        if(title && *title != QString("")){
+            isObjectUpdated = true; break;
+        }
         if(m_center_frequency_isSet){
             isObjectUpdated = true; break;
         }

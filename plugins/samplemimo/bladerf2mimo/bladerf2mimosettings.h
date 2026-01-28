@@ -30,6 +30,7 @@ struct BladeRF2MIMOSettings {
         FC_POS_CENTER
     } fcPos_t;
 
+    QString  m_title;
     qint32   m_devSampleRate;
     qint32   m_LOppmTenths;
 

@@ -23,7 +23,9 @@
 #include <QtGlobal>
 #include <QString>
 
-struct BladeRF2OutputSettings {
+struct BladeRF2OutputSettings
+{
+    QString m_title;
     quint64 m_centerFrequency;
     int m_LOppmTenths;
     qint32 m_devSampleRate;

@@ -27,6 +27,7 @@ RemoteOutputSettings::RemoteOutputSettings()
 
 void RemoteOutputSettings::resetToDefaults()
 {
+    m_title = "RemoteOutput";
     m_nbFECBlocks = 0;
     m_nbTxBytes = 2;
     m_apiAddress = "127.0.0.1";
@@ -45,6 +46,7 @@ QByteArray RemoteOutputSettings::serialize() const
 {
     SimpleSerializer s(1);
 
+    s.writeString(2, m_title);
     s.writeU32(3, m_nbTxBytes);
     s.writeU32(4, m_nbFECBlocks);
     s.writeString(5, m_apiAddress);
@@ -75,7 +77,8 @@ bool RemoteOutputSettings::deserialize(const QByteArray& data)
     {
         quint32 uintval;
 
-        d.readU32(4, &m_nbTxBytes, 2);
+        d.readString(2, &m_title, "RemoteOutput");
+        d.readU32(3, &m_nbTxBytes, 2);
         d.readU32(4, &m_nbFECBlocks, 0);
         d.readString(5, &m_apiAddress, "127.0.0.1");
         d.readU32(6, &uintval, 9090);
@@ -109,6 +112,9 @@ bool RemoteOutputSettings::deserialize(const QByteArray& data)
 
 void RemoteOutputSettings::applySettings(const QStringList& settingsKeys, const RemoteOutputSettings& settings)
 {
+    if (settingsKeys.contains("title")) {
+        m_title = settings.m_title;
+    }
     if (settingsKeys.contains("nbFECBlocks")) {
         m_nbFECBlocks = settings.m_nbFECBlocks;
     }
@@ -151,6 +157,9 @@ QString RemoteOutputSettings::getDebugString(const QStringList& settingsKeys, bo
 {
     std::ostringstream ostr;
 
+    if (settingsKeys.contains("title") || force) {
+        ostr << " m_title: " << m_title.toStdString();
+    }
     if (settingsKeys.contains("nbFECBlocks") || force) {
         ostr << " m_nbFECBlocks: " << m_nbFECBlocks;
     }
@@ -190,4 +199,3 @@ QString RemoteOutputSettings::getDebugString(const QStringList& settingsKeys, bo
 
     return QString(ostr.str().c_str());
 }
-

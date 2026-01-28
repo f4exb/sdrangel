@@ -26,6 +26,7 @@ FCDProPlusSettings::FCDProPlusSettings()
 
 void FCDProPlusSettings::resetToDefaults()
 {
+    m_title = "FCDProPlus";
 	m_centerFrequency = 435000000;
 	m_rangeLow = true;
 	m_lnaGain = true;
@@ -70,6 +71,7 @@ QByteArray FCDProPlusSettings::serialize() const
     s.writeU32(16, m_reverseAPIPort);
     s.writeU32(17, m_reverseAPIDeviceIndex);
     s.writeBool(18, m_iqOrder);
+    s.writeString(19, m_title);
 
 	return s.final();
 }
@@ -116,6 +118,7 @@ bool FCDProPlusSettings::deserialize(const QByteArray& data)
         d.readU32(17, &uintval, 0);
         m_reverseAPIDeviceIndex = uintval > 99 ? 99 : uintval;
         d.readBool(18, &m_iqOrder, true);
+        d.readString(19, &m_title, "FCDProPlus");
 
 		return true;
 	}
@@ -128,6 +131,9 @@ bool FCDProPlusSettings::deserialize(const QByteArray& data)
 
 void FCDProPlusSettings::applySettings(const QStringList& settingsKeys, const FCDProPlusSettings& settings)
 {
+    if (settingsKeys.contains("title")) {
+        m_title = settings.m_title;
+    }
     if (settingsKeys.contains("centerFrequency")) {
         m_centerFrequency = settings.m_centerFrequency;
     }
@@ -197,6 +203,9 @@ QString FCDProPlusSettings::getDebugString(const QStringList& settingsKeys, bool
 {
     std::ostringstream ostr;
 
+    if (settingsKeys.contains("title") || force) {
+        ostr << " m_title: " << m_title.toStdString();
+    }
     if (settingsKeys.contains("centerFrequency") || force) {
         ostr << " m_centerFrequency: " << m_centerFrequency;
     }

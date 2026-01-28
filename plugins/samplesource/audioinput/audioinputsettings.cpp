@@ -29,6 +29,7 @@ AudioInputSettings::AudioInputSettings()
 
 void AudioInputSettings::resetToDefaults()
 {
+    m_title = "AudioInput";
     m_deviceName = "";
     m_sampleRate = 48000;
     m_volume = 1.0f;
@@ -55,6 +56,7 @@ QByteArray AudioInputSettings::serialize() const
     s.writeBool(6, m_dcBlock);
     s.writeBool(7, m_iqImbalance);
     s.writeS32(8, (int) m_fcPos);
+    s.writeString(9, m_title);
 
     s.writeBool(24, m_useReverseAPI);
     s.writeString(25, m_reverseAPIAddress);
@@ -88,6 +90,7 @@ bool AudioInputSettings::deserialize(const QByteArray& data)
         d.readBool(7, &m_iqImbalance, false);
         d.readS32(8, &intval, 2);
         m_fcPos = (fcPos_t) intval;
+        d.readString(9, &m_title, "AudioInput");
 
         d.readBool(24, &m_useReverseAPI, false);
         d.readString(25, &m_reverseAPIAddress, "127.0.0.1");
@@ -113,6 +116,9 @@ bool AudioInputSettings::deserialize(const QByteArray& data)
 
 void AudioInputSettings::applySettings(const QStringList& settingsKeys, const AudioInputSettings& settings)
 {
+    if (settingsKeys.contains("title")) {
+        m_title = settings.m_title;
+    }
     if (settingsKeys.contains("deviceName")) {
         m_deviceName = settings.m_deviceName;
     }
@@ -155,6 +161,9 @@ QString AudioInputSettings::getDebugString(const QStringList& settingsKeys, bool
 {
     std::ostringstream ostr;
 
+    if (settingsKeys.contains("title") || force) {
+        ostr << " m_title: " << m_title.toStdString();
+    }
     if (settingsKeys.contains("deviceName") || force) {
         ostr << " m_deviceName: " << m_deviceName.toStdString();
     }

@@ -28,6 +28,7 @@ PlutoSDRInputSettings::PlutoSDRInputSettings()
 
 void PlutoSDRInputSettings::resetToDefaults()
 {
+    m_title = "PlutoSDR";
 	m_centerFrequency = 435000 * 1000;
 	m_fcPos = FC_POS_CENTER;
 	m_LOppmTenths = 0;
@@ -83,6 +84,7 @@ QByteArray PlutoSDRInputSettings::serialize() const
     s.writeBool(23, m_hwRFDCBlock);
     s.writeBool(24, m_hwIQCorrection);
     s.writeBool(25, m_iqOrder);
+    s.writeString(26, m_title);
 
 	return s.final();
 }
@@ -155,6 +157,7 @@ bool PlutoSDRInputSettings::deserialize(const QByteArray& data)
         d.readBool(23, &m_hwRFDCBlock, true);
         d.readBool(24, &m_hwIQCorrection, true);
         d.readBool(25, &m_iqOrder, true);
+        d.readString(26, &m_title, "PlutoSDR");
 
 		return true;
 	}
@@ -235,6 +238,9 @@ void PlutoSDRInputSettings::translateGainMode(GainMode mode, QString& s)
 
 void PlutoSDRInputSettings::applySettings(const QStringList& settingsKeys, const PlutoSDRInputSettings& settings)
 {
+    if (settingsKeys.contains("title")) {
+        m_title = settings.m_title;
+    }
     if (settingsKeys.contains("centerFrequency")) {
         m_centerFrequency = settings.m_centerFrequency;
     }
@@ -316,6 +322,9 @@ QString PlutoSDRInputSettings::getDebugString(const QStringList& settingsKeys, b
 {
     std::ostringstream ostr;
 
+    if (settingsKeys.contains("title") || force) {
+        ostr << " m_title: " << m_title.toStdString();
+    }
     if (settingsKeys.contains("centerFrequency") || force) {
         ostr << " m_centerFrequency: " << m_centerFrequency;
     }

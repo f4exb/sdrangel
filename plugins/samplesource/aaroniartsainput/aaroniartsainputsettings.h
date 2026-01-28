@@ -36,6 +36,7 @@ struct AaroniaRTSAInputSettings {
         ConnectionDisconnected // 4 - magenta
     };
 
+    QString m_title;
     quint64 m_centerFrequency;
     int m_sampleRate;
 	QString m_serverAddress;

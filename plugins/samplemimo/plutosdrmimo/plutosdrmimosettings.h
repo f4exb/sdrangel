@@ -63,6 +63,7 @@ struct PlutoSDRMIMOSettings {
     } GainMode;
 
     // Common
+    QString m_title;
     quint64 m_devSampleRate;      //!< Host interface sample rate
     qint32  m_LOppmTenths;        //!< XO correction
 

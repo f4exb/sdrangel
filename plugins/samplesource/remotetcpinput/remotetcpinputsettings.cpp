@@ -26,6 +26,7 @@ RemoteTCPInputSettings::RemoteTCPInputSettings()
 
 void RemoteTCPInputSettings::resetToDefaults()
 {
+    m_title = "RemoteTCPInput";
     m_centerFrequency = 435000000;
     m_loPpmCorrection = 0;
     m_dcBlock = false;
@@ -102,6 +103,7 @@ QByteArray RemoteTCPInputSettings::serialize() const
     s.writeBool(40, m_squelchEnabled);
     s.writeFloat(41, m_squelch);
     s.writeFloat(42, m_squelchGate);
+    s.writeString(50, m_title);
 
     return s.final();
 }
@@ -167,6 +169,7 @@ bool RemoteTCPInputSettings::deserialize(const QByteArray& data)
         d.readBool(40, &m_squelchEnabled, false);
         d.readFloat(41, &m_squelch, -100.0f);
         d.readFloat(42, &m_squelchGate, 0.001f);
+        d.readString(50, &m_title, "RemoteTCPInput");
 
         return true;
     }
@@ -179,6 +182,9 @@ bool RemoteTCPInputSettings::deserialize(const QByteArray& data)
 
 void RemoteTCPInputSettings::applySettings(const QStringList& settingsKeys, const RemoteTCPInputSettings& settings)
 {
+    if (settingsKeys.contains("title")) {
+        m_title = settings.m_title;
+    }
     if (settingsKeys.contains("centerFrequency")) {
         m_centerFrequency = settings.m_centerFrequency;
     }
@@ -288,6 +294,9 @@ QString RemoteTCPInputSettings::getDebugString(const QStringList& settingsKeys, 
 {
     std::ostringstream ostr;
 
+    if (settingsKeys.contains("title") || force) {
+        ostr << " m_title: " << m_title.toStdString();
+    }
     if (settingsKeys.contains("centerFrequency") || force) {
         ostr << " m_centerFrequency: " << m_centerFrequency;
     }

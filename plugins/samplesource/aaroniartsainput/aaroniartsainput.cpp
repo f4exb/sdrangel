@@ -384,6 +384,9 @@ void AaroniaRTSAInput::webapiUpdateDeviceSettings(
         const QStringList& deviceSettingsKeys,
         SWGSDRangel::SWGDeviceSettings& response)
 {
+    if (deviceSettingsKeys.contains("title")) {
+        settings.m_title = *response.getAaroniaRtsaSettings()->getTitle();;
+    }
     if (deviceSettingsKeys.contains("centerFrequency")) {
 		settings.m_centerFrequency = response.getAaroniaRtsaSettings()->getCenterFrequency();
     }
@@ -420,6 +423,12 @@ int AaroniaRTSAInput::webapiReportGet(
 
 void AaroniaRTSAInput::webapiFormatDeviceSettings(SWGSDRangel::SWGDeviceSettings& response, const AaroniaRTSAInputSettings& settings)
 {
+    if (response.getAaroniaRtsaSettings()->getTitle()) {
+        *response.getAaroniaRtsaSettings()->getTitle() = settings.m_title;
+    } else {
+        response.getAaroniaRtsaSettings()->setTitle(new QString(settings.m_title));
+    }
+
 	response.getAaroniaRtsaSettings()->setCenterFrequency(settings.m_centerFrequency);
     response.getAaroniaRtsaSettings()->setSampleRate(settings.m_sampleRate);
 
@@ -457,6 +466,9 @@ void AaroniaRTSAInput::webapiReverseSendSettings(const QList<QString>& deviceSet
 
     // transfer data that has been modified. When force is on transfer all data except reverse API data
 
+    if (deviceSettingsKeys.contains("title") || force) {
+        swgAaroniaRTSASettings->setTitle(new QString(settings.m_title));
+    }
     if (deviceSettingsKeys.contains("centerFrequency") || force) {
         swgAaroniaRTSASettings->setCenterFrequency(settings.m_centerFrequency);
     }

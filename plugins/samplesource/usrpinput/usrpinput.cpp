@@ -1145,6 +1145,9 @@ void USRPInput::webapiUpdateDeviceSettings(
         const QStringList& deviceSettingsKeys,
         SWGSDRangel::SWGDeviceSettings& response)
 {
+    if (deviceSettingsKeys.contains("title")) {
+        settings.m_title = *response.getUsrpInputSettings()->getTitle();
+    }
     if (deviceSettingsKeys.contains("antennaPath")) {
         settings.m_antennaPath = *response.getUsrpInputSettings()->getAntennaPath();
     }
@@ -1206,6 +1209,12 @@ void USRPInput::webapiUpdateDeviceSettings(
 
 void USRPInput::webapiFormatDeviceSettings(SWGSDRangel::SWGDeviceSettings& response, const USRPInputSettings& settings)
 {
+    if (response.getUsrpInputSettings()->getTitle()) {
+        *response.getUsrpInputSettings()->getTitle() = settings.m_title;
+    } else {
+        response.getUsrpInputSettings()->setTitle(new QString(settings.m_title));
+    }
+
     response.getUsrpInputSettings()->setAntennaPath(new QString(settings.m_antennaPath));
     response.getUsrpInputSettings()->setCenterFrequency(settings.m_centerFrequency);
     response.getUsrpInputSettings()->setDcBlock(settings.m_dcBlock ? 1 : 0);
@@ -1302,6 +1311,9 @@ void USRPInput::webapiReverseSendSettings(const QList<QString>& deviceSettingsKe
 
     // transfer data that has been modified. When force is on transfer all data except reverse API data
 
+    if (deviceSettingsKeys.contains("title") || force) {
+        swgUsrpInputSettings->setTitle(new QString(settings.m_title));
+    }
     if (deviceSettingsKeys.contains("antennaPath") || force) {
         swgUsrpInputSettings->setAntennaPath(new QString(settings.m_antennaPath));
     }

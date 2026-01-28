@@ -28,6 +28,7 @@ BladeRF1InputSettings::BladeRF1InputSettings()
 
 void BladeRF1InputSettings::resetToDefaults()
 {
+    m_title = "BladeRF1";
 	m_centerFrequency = 435000*1000;
     m_devSampleRate = 3072000;
 	m_lnaGain = 0;
@@ -70,6 +71,7 @@ QByteArray BladeRF1InputSettings::serialize() const
     s.writeU32(15, m_reverseAPIPort);
     s.writeU32(16, m_reverseAPIDeviceIndex);
     s.writeBool(17, m_iqOrder);
+    s.writeString(18, m_title);
 
 	return s.final();
 }
@@ -117,6 +119,7 @@ bool BladeRF1InputSettings::deserialize(const QByteArray& data)
         d.readU32(16, &uintval, 0);
         m_reverseAPIDeviceIndex = uintval > 99 ? 99 : uintval;
         d.readBool(17, &m_iqOrder);
+        d.readString(18, &m_title, "BladeRF1");
 
 		return true;
 	}
@@ -129,6 +132,9 @@ bool BladeRF1InputSettings::deserialize(const QByteArray& data)
 
 void BladeRF1InputSettings::applySettings(const QStringList& settingsKeys, const BladeRF1InputSettings& settings)
 {
+    if (settingsKeys.contains("title")) {
+        m_title = settings.m_title;
+    }
     if (settingsKeys.contains("centerFrequency")) {
         m_centerFrequency = settings.m_centerFrequency;
     }
@@ -189,6 +195,9 @@ QString BladeRF1InputSettings::getDebugString(const QStringList& settingsKeys, b
 {
     std::ostringstream ostr;
 
+    if (settingsKeys.contains("title") || force) {
+        ostr << " m_title: " << m_title.toStdString();
+    }
     if (settingsKeys.contains("centerFrequency") || force) {
         ostr << " m_centerFrequency: " << m_centerFrequency;
     }
@@ -249,4 +258,3 @@ QString BladeRF1InputSettings::getDebugString(const QStringList& settingsKeys, b
 
     return QString(ostr.str().c_str());
 }
-

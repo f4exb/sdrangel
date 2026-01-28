@@ -31,6 +31,7 @@ struct HackRFOutputSettings {
 		FC_POS_CENTER
 	} fcPos_t;
 
+	QString m_title;
 	quint64 m_centerFrequency;
 	qint32  m_LOppmTenths;
 	quint32 m_bandwidth;

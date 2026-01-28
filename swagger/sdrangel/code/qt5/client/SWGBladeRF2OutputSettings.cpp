@@ -28,6 +28,8 @@ SWGBladeRF2OutputSettings::SWGBladeRF2OutputSettings(QString* json) {
 }
 
 SWGBladeRF2OutputSettings::SWGBladeRF2OutputSettings() {
+    title = nullptr;
+    m_title_isSet = false;
     center_frequency = 0L;
     m_center_frequency_isSet = false;
     l_oppm_tenths = 0;
@@ -62,6 +64,8 @@ SWGBladeRF2OutputSettings::~SWGBladeRF2OutputSettings() {
 
 void
 SWGBladeRF2OutputSettings::init() {
+    title = new QString("");
+    m_title_isSet = false;
     center_frequency = 0L;
     m_center_frequency_isSet = false;
     l_oppm_tenths = 0;
@@ -92,6 +96,9 @@ SWGBladeRF2OutputSettings::init() {
 
 void
 SWGBladeRF2OutputSettings::cleanup() {
+    if(title != nullptr) { 
+        delete title;
+    }
 
 
 
@@ -120,6 +127,8 @@ SWGBladeRF2OutputSettings::fromJson(QString &json) {
 
 void
 SWGBladeRF2OutputSettings::fromJsonObject(QJsonObject &pJson) {
+    ::SWGSDRangel::setValue(&title, pJson["title"], "QString", "QString");
+    
     ::SWGSDRangel::setValue(&center_frequency, pJson["centerFrequency"], "qint64", "");
     
     ::SWGSDRangel::setValue(&l_oppm_tenths, pJson["LOppmTenths"], "qint32", "");
@@ -162,6 +171,9 @@ SWGBladeRF2OutputSettings::asJson ()
 QJsonObject*
 SWGBladeRF2OutputSettings::asJsonObject() {
     QJsonObject* obj = new QJsonObject();
+    if(title != nullptr && *title != QString("")){
+        toJsonValue(QString("title"), title, obj, QString("QString"));
+    }
     if(m_center_frequency_isSet){
         obj->insert("centerFrequency", QJsonValue(center_frequency));
     }
@@ -203,6 +215,16 @@ SWGBladeRF2OutputSettings::asJsonObject() {
     }
 
     return obj;
+}
+
+QString*
+SWGBladeRF2OutputSettings::getTitle() {
+    return title;
+}
+void
+SWGBladeRF2OutputSettings::setTitle(QString* title) {
+    this->title = title;
+    this->m_title_isSet = true;
 }
 
 qint64
@@ -340,6 +362,9 @@ bool
 SWGBladeRF2OutputSettings::isSet(){
     bool isObjectUpdated = false;
     do{
+        if(title && *title != QString("")){
+            isObjectUpdated = true; break;
+        }
         if(m_center_frequency_isSet){
             isObjectUpdated = true; break;
         }

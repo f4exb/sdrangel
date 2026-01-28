@@ -26,6 +26,7 @@ XTRXMIMOSettings::XTRXMIMOSettings()
 void XTRXMIMOSettings::resetToDefaults()
 {
     // common
+    m_title = "XTRXMIMO";
     m_extClock = false;
     m_extClockFreq = 0; // Auto
     m_useReverseAPI = false;
@@ -88,6 +89,7 @@ QByteArray XTRXMIMOSettings::serialize() const
     s.writeString(6, m_reverseAPIAddress);
     s.writeU32(7, m_reverseAPIPort);
     s.writeU32(8, m_reverseAPIDeviceIndex);
+    s.writeString(9, m_title);
     // Rx
     s.writeU32(20, m_log2HardDecim);
     s.writeU32(21, m_log2SoftDecim);
@@ -161,6 +163,7 @@ bool XTRXMIMOSettings::deserialize(const QByteArray& data)
         }
         d.readU32(8, &uintval, 0);
         m_reverseAPIDeviceIndex = uintval > 99 ? 99 : uintval;
+        d.readString(9, &m_title, "XTRXMIMO");
         // Rx
         d.readU32(20, &m_log2HardDecim, 1);
         d.readU32(21, &m_log2SoftDecim, 0);
@@ -219,6 +222,9 @@ bool XTRXMIMOSettings::deserialize(const QByteArray& data)
 
 void XTRXMIMOSettings::applySettings(const QStringList& settingsKeys, const XTRXMIMOSettings& settings)
 {
+    if (settingsKeys.contains("title")) {
+        m_title = settings.m_title;
+    }
     if (settingsKeys.contains("extClock")) {
         m_extClock = settings.m_extClock;
     }
@@ -354,6 +360,9 @@ QString XTRXMIMOSettings::getDebugString(const QStringList& settingsKeys, bool f
 {
     std::ostringstream ostr;
 
+    if (settingsKeys.contains("title") || force) {
+        ostr << " m_title: " << m_title.toStdString();
+    }
     if (settingsKeys.contains("extClock") || force) {
         ostr << " m_extClock: " << m_extClock;
     }

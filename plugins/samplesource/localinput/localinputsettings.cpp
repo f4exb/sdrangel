@@ -27,6 +27,7 @@ LocalInputSettings::LocalInputSettings()
 
 void LocalInputSettings::resetToDefaults()
 {
+    m_title = "LocalInput";
     m_dcBlock = false;
     m_iqCorrection = false;
     m_useReverseAPI = false;
@@ -45,6 +46,7 @@ QByteArray LocalInputSettings::serialize() const
     s.writeString(4, m_reverseAPIAddress);
     s.writeU32(5, m_reverseAPIPort);
     s.writeU32(6, m_reverseAPIDeviceIndex);
+    s.writeString(7, m_title);
 
     return s.final();
 }
@@ -77,6 +79,7 @@ bool LocalInputSettings::deserialize(const QByteArray& data)
 
         d.readU32(6, &uintval, 0);
         m_reverseAPIDeviceIndex = uintval > 99 ? 99 : uintval;
+        d.readString(7, &m_title, "LocalInput");
 
         return true;
     }
@@ -89,6 +92,9 @@ bool LocalInputSettings::deserialize(const QByteArray& data)
 
 void LocalInputSettings::applySettings(const QStringList& settingsKeys, const LocalInputSettings& settings)
 {
+    if (settingsKeys.contains("title")) {
+        m_title = settings.m_title;
+    }
     if (settingsKeys.contains("dcBlock")) {
         m_dcBlock = settings.m_dcBlock;
     }
@@ -113,6 +119,9 @@ QString LocalInputSettings::getDebugString(const QStringList& settingsKeys, bool
 {
     std::ostringstream ostr;
 
+    if (settingsKeys.contains("title") || force) {
+        ostr << " m_title: " << m_title.toStdString();
+    }
     if (settingsKeys.contains("dcBlock") || force) {
         ostr << " m_dcBlock: " << m_dcBlock;
     }

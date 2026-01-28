@@ -26,6 +26,7 @@ MetisMISOSettings::MetisMISOSettings()
 
 MetisMISOSettings::MetisMISOSettings(const MetisMISOSettings& other)
 {
+    m_title = other.m_title;
     m_nbReceivers = other.m_nbReceivers;
     m_txEnable = other.m_txEnable;
     std::copy(other.m_rxCenterFrequencies, other.m_rxCenterFrequencies + m_maxReceivers, m_rxCenterFrequencies);
@@ -58,6 +59,7 @@ MetisMISOSettings::MetisMISOSettings(const MetisMISOSettings& other)
 
 void MetisMISOSettings::resetToDefaults()
 {
+    m_title = "MetisMISO";
     m_nbReceivers = 1;
     m_txEnable = false;
     std::fill(m_rxCenterFrequencies, m_rxCenterFrequencies + m_maxReceivers, 7074000);
@@ -118,6 +120,7 @@ QByteArray MetisMISOSettings::serialize() const
     s.writeS32(24, m_spectrumStreamIndex);
     s.writeBool(25, m_streamLock);
     s.writeBool(26, m_rxLock);
+    s.writeString(27, m_title);
 
     for (int i = 0; i < m_maxReceivers; i++)
     {
@@ -183,6 +186,7 @@ bool MetisMISOSettings::deserialize(const QByteArray& data)
         d.readS32(24, &m_spectrumStreamIndex, 0);
         d.readBool(25, &m_streamLock, false);
         d.readBool(26, &m_rxLock, false);
+        d.readString(27, &m_title, "MetisMISO");
 
         return true;
     }
@@ -195,6 +199,9 @@ bool MetisMISOSettings::deserialize(const QByteArray& data)
 
 void MetisMISOSettings::applySettings(const QStringList& settingsKeys, const MetisMISOSettings& settings)
 {
+    if (settingsKeys.contains("title")) {
+        m_title = settings.m_title;
+    }
     if (settingsKeys.contains("nbReceivers")) {
         m_nbReceivers = settings.m_nbReceivers;
     }
@@ -327,6 +334,9 @@ QString MetisMISOSettings::getDebugString(const QStringList& settingsKeys, bool 
 {
     std::ostringstream ostr;
 
+    if (settingsKeys.contains("title") || force) {
+        ostr << " m_title: " << m_title.toStdString();
+    }
     if (settingsKeys.contains("nbReceivers") || force) {
         ostr << " m_nbReceivers: " << m_nbReceivers;
     }

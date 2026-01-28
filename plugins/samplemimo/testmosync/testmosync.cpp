@@ -401,6 +401,12 @@ void TestMOSync::webapiFormatDeviceSettings(
         SWGSDRangel::SWGDeviceSettings& response,
         const TestMOSyncSettings& settings)
 {
+    if (response.getTestMoSyncSettings()->getTitle()) {
+        *response.getTestMoSyncSettings()->getTitle() = settings.m_title;
+    } else {
+        response.getTestMoSyncSettings()->setTitle(new QString(settings.m_title));
+    }
+
     response.getTestMoSyncSettings()->setCenterFrequency(settings.m_centerFrequency);
     response.getTestMoSyncSettings()->setFcPosTx((int) settings.m_fcPosTx);
     response.getTestMoSyncSettings()->setLog2Interp(settings.m_log2Interp);
@@ -412,6 +418,9 @@ void TestMOSync::webapiUpdateDeviceSettings(
         const QStringList& deviceSettingsKeys,
         SWGSDRangel::SWGDeviceSettings& response)
 {
+    if (deviceSettingsKeys.contains("title")) {
+        settings.m_title = *response.getTestMoSyncSettings()->getTitle();
+    }
     if (deviceSettingsKeys.contains("centerFrequency")) {
         settings.m_centerFrequency = response.getTestMoSyncSettings()->getCenterFrequency();
     }

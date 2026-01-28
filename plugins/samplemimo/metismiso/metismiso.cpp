@@ -484,6 +484,9 @@ void MetisMISO::webapiUpdateDeviceSettings(
         const QStringList& deviceSettingsKeys,
         SWGSDRangel::SWGDeviceSettings& response)
 {
+    if (deviceSettingsKeys.contains("title")) {
+        settings.m_title = *response.getMetisMisoSettings()->getTitle();
+    }
     if (deviceSettingsKeys.contains("nbReceivers")) {
         settings.m_nbReceivers = response.getMetisMisoSettings()->getNbReceivers();
     }
@@ -614,6 +617,12 @@ void MetisMISO::webapiUpdateDeviceSettings(
 
 void MetisMISO::webapiFormatDeviceSettings(SWGSDRangel::SWGDeviceSettings& response, const MetisMISOSettings& settings)
 {
+    if (response.getMetisMisoSettings()->getTitle()) {
+        *response.getMetisMisoSettings()->getTitle() = settings.m_title;
+    } else {
+        response.getMetisMisoSettings()->setTitle(new QString(settings.m_title));
+    }
+
     response.getMetisMisoSettings()->setNbReceivers(settings.m_nbReceivers);
     response.getMetisMisoSettings()->setTxEnable(settings.m_txEnable ? 1 : 0);
 
@@ -676,6 +685,9 @@ void MetisMISO::webapiReverseSendSettings(const QList<QString>& deviceSettingsKe
     swgDeviceSettings->setMetisMisoSettings(new SWGSDRangel::SWGMetisMISOSettings());
     SWGSDRangel::SWGMetisMISOSettings *swgMetisMISOSettings = swgDeviceSettings->getMetisMisoSettings();
 
+    if (deviceSettingsKeys.contains("title") || force) {
+        swgMetisMISOSettings->setTitle(new QString(settings.m_title));
+    }
     if (deviceSettingsKeys.contains("nbReceivers") || force) {
         swgMetisMISOSettings->setNbReceivers(settings.m_nbReceivers);
     }

@@ -1,6 +1,8 @@
 FileInputSettings:
   description: FileInput
   properties:
+    title:
+      type: string
     fileName:
       description: The name (path) of the file being read
       type: string

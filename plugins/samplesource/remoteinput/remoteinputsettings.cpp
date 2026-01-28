@@ -28,6 +28,7 @@ RemoteInputSettings::RemoteInputSettings()
 
 void RemoteInputSettings::resetToDefaults()
 {
+    m_title = "RemoteInput";
     m_apiAddress = "127.0.0.1";
     m_apiPort = 8091;
     m_dataAddress = "127.0.0.1";
@@ -46,6 +47,7 @@ QByteArray RemoteInputSettings::serialize() const
 {
     SimpleSerializer s(1);
 
+    s.writeString(1, m_title);
     s.writeString(3, m_multicastAddress);
     s.writeBool(4, m_multicastJoin);
     s.writeString(5, m_apiAddress);
@@ -76,6 +78,7 @@ bool RemoteInputSettings::deserialize(const QByteArray& data)
     {
         quint32 uintval;
 
+        d.readString(1, &m_title, "RemoteInput");
         d.readString(3, &m_multicastAddress, "224.0.0.1");
         d.readBool(4, &m_multicastJoin, false);
         d.readString(5, &m_apiAddress, "127.0.0.1");
@@ -110,6 +113,9 @@ bool RemoteInputSettings::deserialize(const QByteArray& data)
 
 void RemoteInputSettings::applySettings(const QStringList& settingsKeys, const RemoteInputSettings& settings)
 {
+    if (settingsKeys.contains("title")) {
+        m_title = settings.m_title;
+    }
     if (settingsKeys.contains("apiAddress")) {
         m_apiAddress = settings.m_apiAddress;
     }
@@ -152,6 +158,9 @@ QString RemoteInputSettings::getDebugString(const QStringList& settingsKeys, boo
 {
     std::ostringstream ostr;
 
+    if (settingsKeys.contains("title") || force) {
+        ostr << " m_title: " << m_title.toStdString();
+    }
     if (settingsKeys.contains("apiAddress") || force) {
         ostr << " m_apiAddress: " << m_apiAddress.toStdString();
     }
@@ -191,4 +200,3 @@ QString RemoteInputSettings::getDebugString(const QStringList& settingsKeys, boo
 
     return QString(ostr.str().c_str());
 }
-

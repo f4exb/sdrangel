@@ -664,6 +664,9 @@ void AirspyInput::webapiUpdateDeviceSettings(
         const QStringList& deviceSettingsKeys,
         SWGSDRangel::SWGDeviceSettings& response)
 {
+    if (deviceSettingsKeys.contains("title")) {
+        settings.m_title = *response.getAirspySettings()->getTitle();
+    }
     if (deviceSettingsKeys.contains("centerFrequency")) {
         settings.m_centerFrequency = response.getAirspySettings()->getCenterFrequency();
     }
@@ -741,6 +744,12 @@ int AirspyInput::webapiReportGet(
 
 void AirspyInput::webapiFormatDeviceSettings(SWGSDRangel::SWGDeviceSettings& response, const AirspySettings& settings)
 {
+    if (response.getAirspySettings()->getTitle()) {
+        *response.getAirspySettings()->getTitle() = settings.m_title;
+    } else {
+        response.getAirspySettings()->setTitle(new QString(settings.m_title));
+    }
+
     response.getAirspySettings()->setCenterFrequency(settings.m_centerFrequency);
     response.getAirspySettings()->setLOppmTenths(settings.m_LOppmTenths);
     response.getAirspySettings()->setDevSampleRateIndex(settings.m_devSampleRateIndex);
@@ -792,6 +801,9 @@ void AirspyInput::webapiReverseSendSettings(const QList<QString>& deviceSettings
 
     // transfer data that has been modified. When force is on transfer all data except reverse API data
 
+    if (deviceSettingsKeys.contains("title") || force) {
+        swgAirspySettings->setTitle(new QString(settings.m_title));
+    }
     if (deviceSettingsKeys.contains("centerFrequency") || force) {
         swgAirspySettings->setCenterFrequency(settings.m_centerFrequency);
     }

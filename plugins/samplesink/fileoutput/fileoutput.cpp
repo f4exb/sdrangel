@@ -411,6 +411,12 @@ int FileOutput::webapiRun(
 
 void FileOutput::webapiFormatDeviceSettings(SWGSDRangel::SWGDeviceSettings& response, const FileOutputSettings& settings)
 {
+    if (response.getFileOutputSettings()->getTitle()) {
+        *response.getFileOutputSettings()->getTitle() = settings.m_title;
+    } else {
+        response.getFileOutputSettings()->setTitle(new QString(settings.m_title));
+    }
+
     response.getFileOutputSettings()->setFileName(new QString(settings.m_fileName));
     response.getFileOutputSettings()->setCenterFrequency(settings.m_centerFrequency);
     response.getFileOutputSettings()->setSampleRate(settings.m_sampleRate);
@@ -433,6 +439,9 @@ void FileOutput::webapiUpdateDeviceSettings(
         const QStringList& deviceSettingsKeys,
         SWGSDRangel::SWGDeviceSettings& response)
 {
+    if (deviceSettingsKeys.contains("title")) {
+        settings.m_title = *response.getFileOutputSettings()->getTitle();
+    }
     if (deviceSettingsKeys.contains("fileName")) {
         settings.m_fileName = *response.getFileOutputSettings()->getFileName();
     }

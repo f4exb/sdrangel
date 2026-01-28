@@ -26,6 +26,7 @@ AirspySettings::AirspySettings()
 
 void AirspySettings::resetToDefaults()
 {
+    m_title = "Airspy";
 	m_centerFrequency = 435000*1000;
 	m_devSampleRateIndex = 0;
 	m_LOppmTenths = 0;
@@ -71,6 +72,7 @@ QByteArray AirspySettings::serialize() const
     s.writeU32(17, m_reverseAPIPort);
     s.writeU32(18, m_reverseAPIDeviceIndex);
     s.writeBool(19, m_iqOrder);
+    s.writeString(20, m_title);
 
 	return s.final();
 }
@@ -118,6 +120,7 @@ bool AirspySettings::deserialize(const QByteArray& data)
         d.readU32(18, &uintval, 0);
         m_reverseAPIDeviceIndex = uintval > 99 ? 99 : uintval;
         d.readBool(19, &m_iqOrder, true);
+        d.readString(20, &m_title, "Airspy");
 
 		return true;
 	}
@@ -130,6 +133,9 @@ bool AirspySettings::deserialize(const QByteArray& data)
 
 void AirspySettings::applySettings(const QStringList& settingsKeys, const AirspySettings& settings)
 {
+    if (settingsKeys.contains("title")) {
+        m_title = settings.m_title;
+    }
     if (settingsKeys.contains("centerFrequency")) {
         m_centerFrequency = settings.m_centerFrequency;
     }
@@ -196,6 +202,9 @@ QString AirspySettings::getDebugString(const QStringList& settingsKeys, bool for
 {
     std::ostringstream ostr;
 
+    if (settingsKeys.contains("title") || force) {
+        ostr << " m_title: " << m_title.toStdString();
+    }
     if (settingsKeys.contains("centerFrequency") || force) {
         ostr << " m_centerFrequency: " << m_centerFrequency;
     }

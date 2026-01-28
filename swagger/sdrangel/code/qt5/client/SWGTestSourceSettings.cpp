@@ -28,6 +28,8 @@ SWGTestSourceSettings::SWGTestSourceSettings(QString* json) {
 }
 
 SWGTestSourceSettings::SWGTestSourceSettings() {
+    title = nullptr;
+    m_title_isSet = false;
     center_frequency = 0L;
     m_center_frequency_isSet = false;
     frequency_shift = 0;
@@ -76,6 +78,8 @@ SWGTestSourceSettings::~SWGTestSourceSettings() {
 
 void
 SWGTestSourceSettings::init() {
+    title = new QString("");
+    m_title_isSet = false;
     center_frequency = 0L;
     m_center_frequency_isSet = false;
     frequency_shift = 0;
@@ -120,6 +124,9 @@ SWGTestSourceSettings::init() {
 
 void
 SWGTestSourceSettings::cleanup() {
+    if(title != nullptr) { 
+        delete title;
+    }
 
 
 
@@ -155,6 +162,8 @@ SWGTestSourceSettings::fromJson(QString &json) {
 
 void
 SWGTestSourceSettings::fromJsonObject(QJsonObject &pJson) {
+    ::SWGSDRangel::setValue(&title, pJson["title"], "QString", "QString");
+    
     ::SWGSDRangel::setValue(&center_frequency, pJson["centerFrequency"], "qint64", "");
     
     ::SWGSDRangel::setValue(&frequency_shift, pJson["frequencyShift"], "qint32", "");
@@ -211,6 +220,9 @@ SWGTestSourceSettings::asJson ()
 QJsonObject*
 SWGTestSourceSettings::asJsonObject() {
     QJsonObject* obj = new QJsonObject();
+    if(title != nullptr && *title != QString("")){
+        toJsonValue(QString("title"), title, obj, QString("QString"));
+    }
     if(m_center_frequency_isSet){
         obj->insert("centerFrequency", QJsonValue(center_frequency));
     }
@@ -273,6 +285,16 @@ SWGTestSourceSettings::asJsonObject() {
     }
 
     return obj;
+}
+
+QString*
+SWGTestSourceSettings::getTitle() {
+    return title;
+}
+void
+SWGTestSourceSettings::setTitle(QString* title) {
+    this->title = title;
+    this->m_title_isSet = true;
 }
 
 qint64
@@ -480,6 +502,9 @@ bool
 SWGTestSourceSettings::isSet(){
     bool isObjectUpdated = false;
     do{
+        if(title && *title != QString("")){
+            isObjectUpdated = true; break;
+        }
         if(m_center_frequency_isSet){
             isObjectUpdated = true; break;
         }

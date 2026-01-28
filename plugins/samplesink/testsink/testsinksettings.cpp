@@ -28,6 +28,7 @@ TestSinkSettings::TestSinkSettings()
 
 void TestSinkSettings::resetToDefaults()
 {
+    m_title = "TestSink";
     m_centerFrequency = 435000*1000;
     m_sampleRate = 48000;
     m_log2Interp = 0;
@@ -54,6 +55,7 @@ QByteArray TestSinkSettings::serialize() const
     s.writeString(8, m_reverseAPIAddress);
     s.writeU32(9, m_reverseAPIPort);
     s.writeU32(10, m_reverseAPIDeviceIndex);
+    s.writeString(11, m_title);
     return s.final();
 }
 
@@ -94,6 +96,7 @@ bool TestSinkSettings::deserialize(const QByteArray& data)
 
         d.readU32(10, &uintval, 0);
         m_reverseAPIDeviceIndex = uintval > 99 ? 99 : uintval;
+        d.readString(11, &m_title, "TestSink");
 
         return true;
     }

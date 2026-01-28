@@ -28,6 +28,7 @@ USRPInputSettings::USRPInputSettings()
 
 void USRPInputSettings::resetToDefaults()
 {
+    m_title = "USRP";
     m_masterClockRate = -1; // Calculated by UHD
     m_centerFrequency = 435000*1000;
     m_devSampleRate = 3000000;
@@ -80,6 +81,7 @@ QByteArray USRPInputSettings::serialize() const
     s.writeBool(20, m_replayLoop);
     s.writeU32(21, m_gpioDir);
     s.writeU32(22, m_gpioPins);
+    s.writeString(23, m_title);
 
     return s.final();
 }
@@ -132,6 +134,7 @@ bool USRPInputSettings::deserialize(const QByteArray& data)
         m_gpioDir = uintval & 0xFF;
         d.readU32(22, &uintval, 0);
         m_gpioPins = uintval & 0xFF;
+        d.readString(23, &m_title, "USRP");
 
         return true;
     }
@@ -145,6 +148,9 @@ bool USRPInputSettings::deserialize(const QByteArray& data)
 
 void USRPInputSettings::applySettings(const QStringList& settingsKeys, const USRPInputSettings& settings)
 {
+    if (settingsKeys.contains("title")) {
+        m_title = settings.m_title;
+    }
     if (settingsKeys.contains("masterClockRate")) {
         m_masterClockRate = settings.m_masterClockRate;
     }
@@ -223,6 +229,9 @@ QString USRPInputSettings::getDebugString(const QStringList& settingsKeys, bool 
 {
     std::ostringstream ostr;
 
+    if (settingsKeys.contains("title") || force) {
+        ostr << " m_title: " << m_title.toStdString();
+    }
     if (settingsKeys.contains("masterClockRate") || force) {
         ostr << " m_masterClockRate: " << m_masterClockRate;
     }

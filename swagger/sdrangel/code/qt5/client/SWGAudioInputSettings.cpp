@@ -28,6 +28,8 @@ SWGAudioInputSettings::SWGAudioInputSettings(QString* json) {
 }
 
 SWGAudioInputSettings::SWGAudioInputSettings() {
+    title = nullptr;
+    m_title_isSet = false;
     device = nullptr;
     m_device_isSet = false;
     dev_sample_rate = 0;
@@ -60,6 +62,8 @@ SWGAudioInputSettings::~SWGAudioInputSettings() {
 
 void
 SWGAudioInputSettings::init() {
+    title = new QString("");
+    m_title_isSet = false;
     device = new QString("");
     m_device_isSet = false;
     dev_sample_rate = 0;
@@ -88,6 +92,9 @@ SWGAudioInputSettings::init() {
 
 void
 SWGAudioInputSettings::cleanup() {
+    if(title != nullptr) { 
+        delete title;
+    }
     if(device != nullptr) { 
         delete device;
     }
@@ -117,6 +124,8 @@ SWGAudioInputSettings::fromJson(QString &json) {
 
 void
 SWGAudioInputSettings::fromJsonObject(QJsonObject &pJson) {
+    ::SWGSDRangel::setValue(&title, pJson["title"], "QString", "QString");
+    
     ::SWGSDRangel::setValue(&device, pJson["device"], "QString", "QString");
     
     ::SWGSDRangel::setValue(&dev_sample_rate, pJson["devSampleRate"], "qint32", "");
@@ -157,6 +166,9 @@ SWGAudioInputSettings::asJson ()
 QJsonObject*
 SWGAudioInputSettings::asJsonObject() {
     QJsonObject* obj = new QJsonObject();
+    if(title != nullptr && *title != QString("")){
+        toJsonValue(QString("title"), title, obj, QString("QString"));
+    }
     if(device != nullptr && *device != QString("")){
         toJsonValue(QString("device"), device, obj, QString("QString"));
     }
@@ -195,6 +207,16 @@ SWGAudioInputSettings::asJsonObject() {
     }
 
     return obj;
+}
+
+QString*
+SWGAudioInputSettings::getTitle() {
+    return title;
+}
+void
+SWGAudioInputSettings::setTitle(QString* title) {
+    this->title = title;
+    this->m_title_isSet = true;
 }
 
 QString*
@@ -322,6 +344,9 @@ bool
 SWGAudioInputSettings::isSet(){
     bool isObjectUpdated = false;
     do{
+        if(title && *title != QString("")){
+            isObjectUpdated = true; break;
+        }
         if(device && *device != QString("")){
             isObjectUpdated = true; break;
         }

@@ -28,6 +28,7 @@ AaroniaRTSAInputSettings::AaroniaRTSAInputSettings()
 
 void AaroniaRTSAInputSettings::resetToDefaults()
 {
+    m_title = "AaroniaRTSAInput";
     m_centerFrequency = 1450000;
     m_sampleRate = 200000;
 	m_serverAddress = "127.0.0.1:8073";
@@ -41,6 +42,7 @@ QByteArray AaroniaRTSAInputSettings::serialize() const
 {
     SimpleSerializer s(2);
 
+    s.writeString(1, m_title);
 	s.writeString(2, m_serverAddress);
     s.writeS32(3, m_sampleRate);
     s.writeBool(100, m_useReverseAPI);
@@ -65,6 +67,7 @@ bool AaroniaRTSAInputSettings::deserialize(const QByteArray& data)
     {
 		uint32_t utmp;
 
+        d.readString(1, &m_title, "AaroniaRTSAInput");
 		d.readString(2, &m_serverAddress, "127.0.0.1:8073");
         d.readS32(3, &m_sampleRate, 200000);
 		d.readBool(100, &m_useReverseAPI, false);
@@ -92,6 +95,9 @@ bool AaroniaRTSAInputSettings::deserialize(const QByteArray& data)
 
 void AaroniaRTSAInputSettings::applySettings(const QStringList& settingsKeys, const AaroniaRTSAInputSettings& settings)
 {
+    if (settingsKeys.contains("title")) {
+        m_title = settings.m_title;
+    }
     if (settingsKeys.contains("centerFrequency")) {
         m_centerFrequency = settings.m_centerFrequency;
     }
@@ -119,6 +125,9 @@ QString AaroniaRTSAInputSettings::getDebugString(const QStringList& settingsKeys
 {
     std::ostringstream ostr;
 
+    if (settingsKeys.contains("title") || force) {
+        ostr << " m_title: " << m_title.toStdString();
+    }
     if (settingsKeys.contains("centerFrequency") || force) {
         ostr << " m_centerFrequency: " << m_centerFrequency;
     }

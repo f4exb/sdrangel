@@ -433,6 +433,9 @@ void RemoteInput::webapiUpdateDeviceSettings(
     const QStringList& deviceSettingsKeys,
     SWGSDRangel::SWGDeviceSettings& response)
 {
+    if (deviceSettingsKeys.contains("title")) {
+        settings.m_title = *response.getRemoteInputSettings()->getTitle();
+    }
     if (deviceSettingsKeys.contains("apiAddress")) {
         settings.m_apiAddress = *response.getRemoteInputSettings()->getApiAddress();
     }
@@ -473,6 +476,12 @@ void RemoteInput::webapiUpdateDeviceSettings(
 
 void RemoteInput::webapiFormatDeviceSettings(SWGSDRangel::SWGDeviceSettings& response, const RemoteInputSettings& settings)
 {
+    if (response.getRemoteInputSettings()->getTitle()) {
+        *response.getRemoteInputSettings()->getTitle() = settings.m_title;
+    } else {
+        response.getRemoteInputSettings()->setTitle(new QString(settings.m_title));
+    }
+
     response.getRemoteInputSettings()->setApiAddress(new QString(settings.m_apiAddress));
     response.getRemoteInputSettings()->setApiPort(settings.m_apiPort);
     response.getRemoteInputSettings()->setDataAddress(new QString(settings.m_dataAddress));
@@ -529,6 +538,9 @@ void RemoteInput::webapiReverseSendSettings(const QList<QString>& deviceSettings
 
     // transfer data that has been modified. When force is on transfer all data except reverse API data
 
+    if (deviceSettingsKeys.contains("title") || force) {
+        swgRemoteInputSettings->setTitle(new QString(settings.m_title));
+    }
     if (deviceSettingsKeys.contains("apiAddress") || force) {
         swgRemoteInputSettings->setApiAddress(new QString(settings.m_apiAddress));
     }
@@ -700,5 +712,3 @@ void RemoteInput::analyzeRemoteChannelSettingsReply(const QJsonObject& jsonObjec
         m_guiMessageQueue->push(msg);
     }
 }
-
-

@@ -28,6 +28,8 @@ SWGXtrxInputSettings::SWGXtrxInputSettings(QString* json) {
 }
 
 SWGXtrxInputSettings::SWGXtrxInputSettings() {
+    title = nullptr;
+    m_title_isSet = false;
     center_frequency = 0L;
     m_center_frequency_isSet = false;
     dev_sample_rate = 0;
@@ -82,6 +84,8 @@ SWGXtrxInputSettings::~SWGXtrxInputSettings() {
 
 void
 SWGXtrxInputSettings::init() {
+    title = new QString("");
+    m_title_isSet = false;
     center_frequency = 0L;
     m_center_frequency_isSet = false;
     dev_sample_rate = 0;
@@ -132,6 +136,9 @@ SWGXtrxInputSettings::init() {
 
 void
 SWGXtrxInputSettings::cleanup() {
+    if(title != nullptr) { 
+        delete title;
+    }
 
 
 
@@ -170,6 +177,8 @@ SWGXtrxInputSettings::fromJson(QString &json) {
 
 void
 SWGXtrxInputSettings::fromJsonObject(QJsonObject &pJson) {
+    ::SWGSDRangel::setValue(&title, pJson["title"], "QString", "QString");
+    
     ::SWGSDRangel::setValue(&center_frequency, pJson["centerFrequency"], "qint64", "");
     
     ::SWGSDRangel::setValue(&dev_sample_rate, pJson["devSampleRate"], "qint32", "");
@@ -232,6 +241,9 @@ SWGXtrxInputSettings::asJson ()
 QJsonObject*
 SWGXtrxInputSettings::asJsonObject() {
     QJsonObject* obj = new QJsonObject();
+    if(title != nullptr && *title != QString("")){
+        toJsonValue(QString("title"), title, obj, QString("QString"));
+    }
     if(m_center_frequency_isSet){
         obj->insert("centerFrequency", QJsonValue(center_frequency));
     }
@@ -303,6 +315,16 @@ SWGXtrxInputSettings::asJsonObject() {
     }
 
     return obj;
+}
+
+QString*
+SWGXtrxInputSettings::getTitle() {
+    return title;
+}
+void
+SWGXtrxInputSettings::setTitle(QString* title) {
+    this->title = title;
+    this->m_title_isSet = true;
 }
 
 qint64
@@ -540,6 +562,9 @@ bool
 SWGXtrxInputSettings::isSet(){
     bool isObjectUpdated = false;
     do{
+        if(title && *title != QString("")){
+            isObjectUpdated = true; break;
+        }
         if(m_center_frequency_isSet){
             isObjectUpdated = true; break;
         }

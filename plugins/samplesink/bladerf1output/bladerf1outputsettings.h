@@ -26,7 +26,9 @@
 
 #include <libbladeRF.h>
 
-struct BladeRF1OutputSettings {
+struct BladeRF1OutputSettings
+{
+	QString m_title;
 	quint64 m_centerFrequency;
 	qint32 m_devSampleRate;
 	qint32 m_vga1;

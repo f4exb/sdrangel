@@ -299,6 +299,9 @@ void LocalOutput::webapiUpdateDeviceSettings(
         const QStringList& deviceSettingsKeys,
         SWGSDRangel::SWGDeviceSettings& response)
 {
+    if (deviceSettingsKeys.contains("title")) {
+        settings.m_title = *response.getLocalOutputSettings()->getTitle();
+    }
     if (deviceSettingsKeys.contains("useReverseAPI")) {
         settings.m_useReverseAPI = response.getLocalOutputSettings()->getUseReverseApi() != 0;
     }
@@ -315,6 +318,12 @@ void LocalOutput::webapiUpdateDeviceSettings(
 
 void LocalOutput::webapiFormatDeviceSettings(SWGSDRangel::SWGDeviceSettings& response, const LocalOutputSettings& settings)
 {
+    if (response.getLocalOutputSettings()->getTitle()) {
+        *response.getLocalOutputSettings()->getTitle() = settings.m_title;
+    } else {
+        response.getLocalOutputSettings()->setTitle(new QString(settings.m_title));
+    }
+
     response.getLocalOutputSettings()->setUseReverseApi(settings.m_useReverseAPI ? 1 : 0);
 
     if (response.getLocalOutputSettings()->getReverseApiAddress()) {

@@ -104,6 +104,7 @@ public:
         R
     };
 
+    QString m_title;
     quint64 m_rxCenterFrequency;
     quint64 m_txCenterFrequency;
     bool    m_transverterMode;

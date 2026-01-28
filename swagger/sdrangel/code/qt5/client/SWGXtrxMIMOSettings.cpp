@@ -28,6 +28,8 @@ SWGXtrxMIMOSettings::SWGXtrxMIMOSettings(QString* json) {
 }
 
 SWGXtrxMIMOSettings::SWGXtrxMIMOSettings() {
+    title = nullptr;
+    m_title_isSet = false;
     ext_clock = 0;
     m_ext_clock_isSet = false;
     ext_clock_freq = 0;
@@ -126,6 +128,8 @@ SWGXtrxMIMOSettings::~SWGXtrxMIMOSettings() {
 
 void
 SWGXtrxMIMOSettings::init() {
+    title = new QString("");
+    m_title_isSet = false;
     ext_clock = 0;
     m_ext_clock_isSet = false;
     ext_clock_freq = 0;
@@ -220,6 +224,9 @@ SWGXtrxMIMOSettings::init() {
 
 void
 SWGXtrxMIMOSettings::cleanup() {
+    if(title != nullptr) { 
+        delete title;
+    }
 
 
 
@@ -280,6 +287,8 @@ SWGXtrxMIMOSettings::fromJson(QString &json) {
 
 void
 SWGXtrxMIMOSettings::fromJsonObject(QJsonObject &pJson) {
+    ::SWGSDRangel::setValue(&title, pJson["title"], "QString", "QString");
+    
     ::SWGSDRangel::setValue(&ext_clock, pJson["extClock"], "qint32", "");
     
     ::SWGSDRangel::setValue(&ext_clock_freq, pJson["extClockFreq"], "qint32", "");
@@ -386,6 +395,9 @@ SWGXtrxMIMOSettings::asJson ()
 QJsonObject*
 SWGXtrxMIMOSettings::asJsonObject() {
     QJsonObject* obj = new QJsonObject();
+    if(title != nullptr && *title != QString("")){
+        toJsonValue(QString("title"), title, obj, QString("QString"));
+    }
     if(m_ext_clock_isSet){
         obj->insert("extClock", QJsonValue(ext_clock));
     }
@@ -523,6 +535,16 @@ SWGXtrxMIMOSettings::asJsonObject() {
     }
 
     return obj;
+}
+
+QString*
+SWGXtrxMIMOSettings::getTitle() {
+    return title;
+}
+void
+SWGXtrxMIMOSettings::setTitle(QString* title) {
+    this->title = title;
+    this->m_title_isSet = true;
 }
 
 qint32
@@ -980,6 +1002,9 @@ bool
 SWGXtrxMIMOSettings::isSet(){
     bool isObjectUpdated = false;
     do{
+        if(title && *title != QString("")){
+            isObjectUpdated = true; break;
+        }
         if(m_ext_clock_isSet){
             isObjectUpdated = true; break;
         }

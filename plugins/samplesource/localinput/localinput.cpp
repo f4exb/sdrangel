@@ -306,6 +306,9 @@ void LocalInput::webapiUpdateDeviceSettings(
         const QStringList& deviceSettingsKeys,
         SWGSDRangel::SWGDeviceSettings& response)
 {
+    if (deviceSettingsKeys.contains("title")) {
+        settings.m_title = *response.getLocalInputSettings()->getTitle();
+    }
     if (deviceSettingsKeys.contains("dcBlock")) {
         settings.m_dcBlock = response.getLocalInputSettings()->getDcBlock() != 0;
     }
@@ -328,6 +331,12 @@ void LocalInput::webapiUpdateDeviceSettings(
 
 void LocalInput::webapiFormatDeviceSettings(SWGSDRangel::SWGDeviceSettings& response, const LocalInputSettings& settings)
 {
+    if (response.getLocalInputSettings()->getTitle()) {
+        *response.getLocalInputSettings()->getTitle() = settings.m_title;
+    } else {
+        response.getLocalInputSettings()->setTitle(new QString(settings.m_title));
+    }
+
     response.getLocalInputSettings()->setDcBlock(settings.m_dcBlock ? 1 : 0);
     response.getLocalInputSettings()->setIqCorrection(settings.m_iqCorrection);
 

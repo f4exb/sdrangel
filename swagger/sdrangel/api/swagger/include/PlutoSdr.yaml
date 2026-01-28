@@ -1,6 +1,8 @@
 PlutoSdrInputSettings:
   description: PlutoSDR
   properties:
+    title:
+      type: string
     centerFrequency:
       type: integer
       format: int64
@@ -69,6 +71,8 @@ PlutoSdrInputSettings:
 PlutoSdrOutputSettings:
   description: PlutoSDR
   properties:
+    title:
+      type: string
     centerFrequency:
       type: integer
       format: int64
@@ -116,6 +120,8 @@ PlutoSdrOutputSettings:
 PlutoSdrMIMOSettings:
   description: PlutoSDR
   properties:
+    title:
+      type: string
     devSampleRate:
       type: integer
     LOppmTenths:

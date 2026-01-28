@@ -1,6 +1,8 @@
 KiwiSDRSettings:
   description: KiwiSDR
   properties:
+    title:
+      type: string
     gain:
       type: integer
     useAGC:

@@ -794,6 +794,9 @@ void PlutoSDRMIMO::webapiUpdateDeviceSettings(
         const QStringList& deviceSettingsKeys,
         SWGSDRangel::SWGDeviceSettings& response)
 {
+    if (deviceSettingsKeys.contains("title")) {
+        settings.m_title = *response.getPlutoSdrMimoSettings()->getTitle();
+    }
     if (deviceSettingsKeys.contains("devSampleRate")) {
         settings.m_devSampleRate = response.getPlutoSdrMimoSettings()->getDevSampleRate();
     }
@@ -924,6 +927,12 @@ void PlutoSDRMIMO::webapiUpdateDeviceSettings(
 
 void PlutoSDRMIMO::webapiFormatDeviceSettings(SWGSDRangel::SWGDeviceSettings& response, const PlutoSDRMIMOSettings& settings)
 {
+    if (response.getPlutoSdrMimoSettings()->getTitle()) {
+        *response.getPlutoSdrMimoSettings()->getTitle() = settings.m_title;
+    } else {
+        response.getPlutoSdrMimoSettings()->setTitle(new QString(settings.m_title));
+    }
+
     response.getPlutoSdrMimoSettings()->setDevSampleRate(settings.m_devSampleRate);
     response.getPlutoSdrMimoSettings()->setLOppmTenths(settings.m_LOppmTenths);
     response.getPlutoSdrMimoSettings()->setRxCenterFrequency(settings.m_rxCenterFrequency);
@@ -1029,6 +1038,9 @@ void PlutoSDRMIMO::webapiReverseSendSettings(const QList<QString>& deviceSetting
 
     // transfer data that has been modified. When force is on transfer all data except reverse API data
 
+    if (deviceSettingsKeys.contains("title")) {
+        swgPlutoSDRMIMOSettings->setTitle(new QString(settings.m_title));
+    }
     if (deviceSettingsKeys.contains("devSampleRate") || force) {
         swgPlutoSDRMIMOSettings->setDevSampleRate(settings.m_devSampleRate);
     }

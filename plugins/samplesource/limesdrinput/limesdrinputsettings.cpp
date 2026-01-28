@@ -27,6 +27,7 @@ LimeSDRInputSettings::LimeSDRInputSettings()
 
 void LimeSDRInputSettings::resetToDefaults()
 {
+    m_title = "LimeSDR";
     m_centerFrequency = 435000*1000;
     m_devSampleRate = 5000000;
     m_log2HardDecim = 3;
@@ -98,6 +99,7 @@ QByteArray LimeSDRInputSettings::serialize() const
     s.writeFloat(31, m_replayStep);
     s.writeBool(32, m_replayLoop);
     s.writeBool(33, m_splitFreq);
+    s.writeString(34, m_title);
 
     return s.final();
 }
@@ -161,6 +163,7 @@ bool LimeSDRInputSettings::deserialize(const QByteArray& data)
         d.readFloat(31, &m_replayStep, 5.0f);
         d.readBool(32, &m_replayLoop, false);
         d.readBool(33, &m_splitFreq, false);
+        d.readString(34, &m_title, "LimeSDR");
 
         return true;
     }
@@ -174,6 +177,9 @@ bool LimeSDRInputSettings::deserialize(const QByteArray& data)
 
 void LimeSDRInputSettings::applySettings(const QStringList& settingsKeys, const LimeSDRInputSettings& settings)
 {
+    if (settingsKeys.contains("title")) {
+        m_title = settings.m_title;
+    }
     if (settingsKeys.contains("centerFrequency")) {
         m_centerFrequency = settings.m_centerFrequency;
     }
@@ -279,6 +285,9 @@ QString LimeSDRInputSettings::getDebugString(const QStringList& settingsKeys, bo
 {
     std::ostringstream ostr;
 
+    if (settingsKeys.contains("title") || force) {
+        ostr << " m_title: " << m_title.toStdString();
+    }
     if (settingsKeys.contains("centerFrequency") || force) {
         ostr << " m_centerFrequency: " << m_centerFrequency;
     }

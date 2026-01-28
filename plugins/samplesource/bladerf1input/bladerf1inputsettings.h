@@ -32,6 +32,7 @@ struct BladeRF1InputSettings {
 		FC_POS_CENTER
 	} fcPos_t;
 
+	QString m_title;
 	quint64 m_centerFrequency;
     qint32 m_devSampleRate;
 	qint32 m_lnaGain;

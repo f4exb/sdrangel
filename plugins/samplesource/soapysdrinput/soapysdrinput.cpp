@@ -1451,6 +1451,9 @@ void SoapySDRInput::webapiUpdateDeviceSettings(
         qDebug("SoapySDRInput::webapiUpdateDeviceSettings %s", qPrintable(deviceSettingsKeys.at(i)));
     }
 
+    if (deviceSettingsKeys.contains("title")) {
+        settings.m_title = *response.getSoapySdrInputSettings()->getTitle();
+    }
     if (deviceSettingsKeys.contains("centerFrequency")) {
         settings.m_centerFrequency = response.getSoapySdrInputSettings()->getCenterFrequency();
     }
@@ -1639,6 +1642,12 @@ int SoapySDRInput::webapiRun(
 
 void SoapySDRInput::webapiFormatDeviceSettings(SWGSDRangel::SWGDeviceSettings& response, const SoapySDRInputSettings& settings)
 {
+    if (response.getSoapySdrInputSettings()->getTitle()) {
+        *response.getSoapySdrInputSettings()->getTitle() = settings.m_title;
+    } else {
+        response.getSoapySdrInputSettings()->setTitle(new QString(settings.m_title));
+    }
+
     response.getSoapySdrInputSettings()->setCenterFrequency(settings.m_centerFrequency);
     response.getSoapySdrInputSettings()->setLOppmTenths(settings.m_LOppmTenths);
     response.getSoapySdrInputSettings()->setDevSampleRate(settings.m_devSampleRate);

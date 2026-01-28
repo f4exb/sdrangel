@@ -30,6 +30,7 @@ struct KiwiSDRSettings {
 	bool m_useAGC;
     bool m_dcBlock;
 
+	QString m_title;
     quint64 m_centerFrequency;
 	QString m_serverAddress;
 

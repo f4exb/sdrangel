@@ -28,6 +28,8 @@ SWGFCDProPlusSettings::SWGFCDProPlusSettings(QString* json) {
 }
 
 SWGFCDProPlusSettings::SWGFCDProPlusSettings() {
+    title = nullptr;
+    m_title_isSet = false;
     center_frequency = 0L;
     m_center_frequency_isSet = false;
     log2_decim = 0;
@@ -76,6 +78,8 @@ SWGFCDProPlusSettings::~SWGFCDProPlusSettings() {
 
 void
 SWGFCDProPlusSettings::init() {
+    title = new QString("");
+    m_title_isSet = false;
     center_frequency = 0L;
     m_center_frequency_isSet = false;
     log2_decim = 0;
@@ -120,6 +124,9 @@ SWGFCDProPlusSettings::init() {
 
 void
 SWGFCDProPlusSettings::cleanup() {
+    if(title != nullptr) { 
+        delete title;
+    }
 
 
 
@@ -155,6 +162,8 @@ SWGFCDProPlusSettings::fromJson(QString &json) {
 
 void
 SWGFCDProPlusSettings::fromJsonObject(QJsonObject &pJson) {
+    ::SWGSDRangel::setValue(&title, pJson["title"], "QString", "QString");
+    
     ::SWGSDRangel::setValue(&center_frequency, pJson["centerFrequency"], "qint64", "");
     
     ::SWGSDRangel::setValue(&log2_decim, pJson["log2Decim"], "qint32", "");
@@ -211,6 +220,9 @@ SWGFCDProPlusSettings::asJson ()
 QJsonObject*
 SWGFCDProPlusSettings::asJsonObject() {
     QJsonObject* obj = new QJsonObject();
+    if(title != nullptr && *title != QString("")){
+        toJsonValue(QString("title"), title, obj, QString("QString"));
+    }
     if(m_center_frequency_isSet){
         obj->insert("centerFrequency", QJsonValue(center_frequency));
     }
@@ -273,6 +285,16 @@ SWGFCDProPlusSettings::asJsonObject() {
     }
 
     return obj;
+}
+
+QString*
+SWGFCDProPlusSettings::getTitle() {
+    return title;
+}
+void
+SWGFCDProPlusSettings::setTitle(QString* title) {
+    this->title = title;
+    this->m_title_isSet = true;
 }
 
 qint64
@@ -480,6 +502,9 @@ bool
 SWGFCDProPlusSettings::isSet(){
     bool isObjectUpdated = false;
     do{
+        if(title && *title != QString("")){
+            isObjectUpdated = true; break;
+        }
         if(m_center_frequency_isSet){
             isObjectUpdated = true; break;
         }

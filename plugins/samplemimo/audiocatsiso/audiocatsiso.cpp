@@ -728,6 +728,9 @@ void AudioCATSISO::webapiUpdateDeviceSettings(
         const QStringList& deviceSettingsKeys,
         SWGSDRangel::SWGDeviceSettings& response)
 {
+    if (deviceSettingsKeys.contains("title")) {
+        settings.m_title = *response.getAudioCatsisoSettings()->getTitle();
+    }
     if (deviceSettingsKeys.contains("rxCenterFrequency")) {
         settings.m_rxCenterFrequency = response.getAudioCatsisoSettings()->getRxCenterFrequency();
     }
@@ -828,6 +831,12 @@ void AudioCATSISO::webapiUpdateDeviceSettings(
 
 void AudioCATSISO::webapiFormatDeviceSettings(SWGSDRangel::SWGDeviceSettings& response, const AudioCATSISOSettings& settings)
 {
+    if (response.getAudioCatsisoSettings()->getTitle()) {
+        *response.getAudioCatsisoSettings()->getTitle() = settings.m_title;
+    } else {
+        response.getAudioCatsisoSettings()->setTitle(new QString(settings.m_title));
+    }
+
     response.getAudioCatsisoSettings()->setRxCenterFrequency(settings.m_rxCenterFrequency);
     response.getAudioCatsisoSettings()->setRxSampleRate(settings.m_rxSampleRate);
     response.getAudioCatsisoSettings()->setTxCenterFrequency(settings.m_txCenterFrequency);
@@ -882,6 +891,9 @@ void AudioCATSISO::webapiReverseSendSettings(const QList<QString>& deviceSetting
 
     // transfer data that has been modified. When force is on transfer all data except reverse API data
 
+    if (deviceSettingsKeys.contains("title")) {
+        swgAudioCATSISOSettings->setTitle(new QString(settings.m_title));
+    }
     if (deviceSettingsKeys.contains("rxCenterFrequency")) {
         swgAudioCATSISOSettings->setRxCenterFrequency(settings.m_rxCenterFrequency);
     }

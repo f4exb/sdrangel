@@ -591,6 +591,9 @@ void FCDProPlusInput::webapiUpdateDeviceSettings(
         const QStringList& deviceSettingsKeys,
         SWGSDRangel::SWGDeviceSettings& response)
 {
+    if (deviceSettingsKeys.contains("title")) {
+        settings.m_title = *response.getFcdProPlusSettings()->getTitle();
+    }
     if (deviceSettingsKeys.contains("centerFrequency")) {
         settings.m_centerFrequency = response.getFcdProPlusSettings()->getCenterFrequency();
     }
@@ -655,6 +658,12 @@ void FCDProPlusInput::webapiUpdateDeviceSettings(
 
 void FCDProPlusInput::webapiFormatDeviceSettings(SWGSDRangel::SWGDeviceSettings& response, const FCDProPlusSettings& settings)
 {
+    if (response.getFcdProPlusSettings()->getTitle()) {
+        *response.getFcdProPlusSettings()->getTitle() = settings.m_title;
+    } else {
+        response.getFcdProPlusSettings()->setTitle(new QString(settings.m_title));
+    }
+
     response.getFcdProPlusSettings()->setCenterFrequency(settings.m_centerFrequency);
     response.getFcdProPlusSettings()->setLog2Decim(settings.m_log2Decim);
     response.getFcdProPlusSettings()->setIqOrder(settings.m_iqOrder ? 1 : 0);
@@ -695,6 +704,9 @@ void FCDProPlusInput::webapiReverseSendSettings(const QList<QString>& deviceSett
 
     // transfer data that has been modified. When force is on transfer all data except reverse API data
 
+    if (deviceSettingsKeys.contains("title") || force) {
+        swgFCDProPlusSettings->setTitle(new QString(settings.m_title));
+    }
     if (deviceSettingsKeys.contains("centerFrequency") || force) {
         swgFCDProPlusSettings->setCenterFrequency(settings.m_centerFrequency);
     }

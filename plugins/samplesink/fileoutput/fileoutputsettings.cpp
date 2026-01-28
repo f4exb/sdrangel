@@ -28,6 +28,7 @@ FileOutputSettings::FileOutputSettings()
 
 void FileOutputSettings::resetToDefaults()
 {
+    m_title = "FileOutput";
     m_centerFrequency = 435000*1000;
     m_sampleRate = 48000;
     m_log2Interp = 0;
@@ -50,6 +51,7 @@ QByteArray FileOutputSettings::serialize() const
     s.writeString(5, m_reverseAPIAddress);
     s.writeU32(6, m_reverseAPIPort);
     s.writeU32(7, m_reverseAPIDeviceIndex);
+    s.writeString(9, m_title);
 
     if (m_spectrumGUI) {
         s.writeBlob(8, m_spectrumGUI->serialize());
@@ -87,6 +89,7 @@ bool FileOutputSettings::deserialize(const QByteArray& data)
 
         d.readU32(7, &uintval, 0);
         m_reverseAPIDeviceIndex = uintval > 99 ? 99 : uintval;
+        d.readString(9, &m_title, "FileOutput");
 
         if (m_spectrumGUI)
         {
@@ -106,6 +109,9 @@ bool FileOutputSettings::deserialize(const QByteArray& data)
 
 void FileOutputSettings::applySettings(const QStringList& settingsKeys, const FileOutputSettings& settings)
 {
+    if (settingsKeys.contains("title")) {
+        m_title = settings.m_title;
+    }
     if (settingsKeys.contains("centerFrequency")) {
         m_centerFrequency = settings.m_centerFrequency;
     }
@@ -136,6 +142,9 @@ QString FileOutputSettings::getDebugString(const QStringList& settingsKeys, bool
 {
     std::ostringstream ostr;
 
+    if (settingsKeys.contains("title") || force) {
+        ostr << " m_title: " << m_title.toStdString();
+    }
     if (settingsKeys.contains("centerFrequency") || force) {
         ostr << " m_centerFrequency: " << m_centerFrequency;
     }

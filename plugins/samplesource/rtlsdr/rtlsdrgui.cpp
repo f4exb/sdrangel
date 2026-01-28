@@ -32,6 +32,7 @@
 #include "ui_rtlsdrgui.h"
 #include "gui/colormapper.h"
 #include "gui/glspectrum.h"
+#include "mainspectrum/mainspectrumgui.h"
 #include "gui/basicdevicesettingsdialog.h"
 #include "gui/dialogpositioner.h"
 #include "dsp/dspcommands.h"
@@ -310,6 +311,8 @@ void RTLSDRGui::displayFcTooltip()
 
 void RTLSDRGui::displaySettings()
 {
+    setTitle(m_settings.m_title);
+    getDeviceUISet()->m_mainSpectrumGUI->setTitle(m_settings.m_title);
     ui->transverter->setDeltaFrequency(m_settings.m_transverterDeltaFrequency);
     ui->transverter->setDeltaFrequencyActive(m_settings.m_transverterMode);
     ui->transverter->setIQOrder(m_settings.m_iqOrder);
@@ -573,28 +576,37 @@ void RTLSDRGui::openDeviceSettingsDialog(const QPoint& p)
         dialog.setReverseAPIAddress(m_settings.m_reverseAPIAddress);
         dialog.setReverseAPIPort(m_settings.m_reverseAPIPort);
         dialog.setReverseAPIDeviceIndex(m_settings.m_reverseAPIDeviceIndex);
+        dialog.setDefaultTitle(getDefaultTitle());
+        dialog.setTitle(m_settings.m_title);
 
         dialog.move(p);
         new DialogPositioner(&dialog, false);
         dialog.exec();
 
-        m_settings.m_useReverseAPI = dialog.useReverseAPI();
-        m_settings.m_reverseAPIAddress = dialog.getReverseAPIAddress();
-        m_settings.m_reverseAPIPort = dialog.getReverseAPIPort();
-        m_settings.m_reverseAPIDeviceIndex = dialog.getReverseAPIDeviceIndex();
-        m_settings.m_replayLength = dialog.getReplayLength();
-        m_settings.m_replayStep = dialog.getReplayStep();
-        displayReplayLength();
-        displayReplayOffset();
-        displayReplayStep();
-        m_settingsKeys.append("useReverseAPI");
-        m_settingsKeys.append("reverseAPIAddress");
-        m_settingsKeys.append("reverseAPIPort");
-        m_settingsKeys.append("reverseAPIDeviceIndex");
-        m_settingsKeys.append("replayLength");
-        m_settingsKeys.append("replayStep");
+        if (dialog.result() == QDialog::Accepted)
+        {
+            m_settings.m_useReverseAPI = dialog.useReverseAPI();
+            m_settings.m_reverseAPIAddress = dialog.getReverseAPIAddress();
+            m_settings.m_reverseAPIPort = dialog.getReverseAPIPort();
+            m_settings.m_reverseAPIDeviceIndex = dialog.getReverseAPIDeviceIndex();
+            m_settings.m_replayLength = dialog.getReplayLength();
+            m_settings.m_replayStep = dialog.getReplayStep();
+            m_settings.m_title = dialog.getTitle();
+            setTitle(m_settings.m_title);
+            getDeviceUISet()->m_mainSpectrumGUI->setTitle(m_settings.m_title);
+            displayReplayLength();
+            displayReplayOffset();
+            displayReplayStep();
+            m_settingsKeys.append("useReverseAPI");
+            m_settingsKeys.append("reverseAPIAddress");
+            m_settingsKeys.append("reverseAPIPort");
+            m_settingsKeys.append("reverseAPIDeviceIndex");
+            m_settingsKeys.append("replayLength");
+            m_settingsKeys.append("replayStep");
+            m_settingsKeys.append("title");
 
-        sendSettings();
+            sendSettings();
+        }
     }
 
     resetContextMenuType();

@@ -557,6 +557,9 @@ void HackRFOutput::webapiUpdateDeviceSettings(
     const QStringList& deviceSettingsKeys,
     SWGSDRangel::SWGDeviceSettings& response)
 {
+    if (deviceSettingsKeys.contains("title")) {
+        settings.m_title = *response.getHackRfOutputSettings()->getTitle();
+    }
     if (deviceSettingsKeys.contains("centerFrequency")) {
         settings.m_centerFrequency = response.getHackRfOutputSettings()->getCenterFrequency();
     }
@@ -609,6 +612,12 @@ void HackRFOutput::webapiUpdateDeviceSettings(
 
 void HackRFOutput::webapiFormatDeviceSettings(SWGSDRangel::SWGDeviceSettings& response, const HackRFOutputSettings& settings)
 {
+    if (response.getHackRfOutputSettings()->getTitle()) {
+        *response.getHackRfOutputSettings()->getTitle() = settings.m_title;
+    } else {
+        response.getHackRfOutputSettings()->setTitle(new QString(settings.m_title));
+    }
+
     response.getHackRfOutputSettings()->setCenterFrequency(settings.m_centerFrequency);
     response.getHackRfOutputSettings()->setLOppmTenths(settings.m_LOppmTenths);
     response.getHackRfOutputSettings()->setBandwidth(settings.m_bandwidth);
@@ -672,6 +681,9 @@ void HackRFOutput::webapiReverseSendSettings(const QList<QString>& deviceSetting
 
     // transfer data that has been modified. When force is on transfer all data except reverse API data
 
+    if (deviceSettingsKeys.contains("title") || force) {
+        swgHackRFOutputSettings->setTitle(new QString(settings.m_title));
+    }
     if (deviceSettingsKeys.contains("centerFrequency") || force) {
         swgHackRFOutputSettings->setCenterFrequency(settings.m_centerFrequency);
     }

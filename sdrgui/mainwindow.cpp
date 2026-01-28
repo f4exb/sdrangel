@@ -1410,6 +1410,7 @@ void MainWindow::sampleSourceCreateUI(
     deviceGUI->setIndex(deviceSetIndex);
     deviceGUI->setToolTip(samplingDevice->displayedName);
     deviceGUI->setTitle(samplingDevice->displayedName.split(" ")[0]);
+    deviceGUI->setDefaultTitle(samplingDevice->displayedName.split(" ")[0]);
     deviceGUI->setCurrentDeviceIndex(deviceIndex);
     QStringList channelNames;
     m_pluginManager->listRxChannels(channelNames);
@@ -1566,6 +1567,7 @@ void MainWindow::sampleSinkCreateUI(
     deviceGUI->setIndex(deviceSetIndex);
     deviceGUI->setToolTip(samplingDevice->displayedName);
     deviceGUI->setTitle(samplingDevice->displayedName.split(" ")[0]);
+    deviceGUI->setDefaultTitle(samplingDevice->displayedName.split(" ")[0]);
     deviceGUI->setCurrentDeviceIndex(deviceIndex);
     QStringList channelNames;
     m_pluginManager->listTxChannels(channelNames);
@@ -1703,6 +1705,7 @@ void MainWindow::sampleMIMOCreateUI(
     deviceGUI->setIndex(deviceSetIndex);
     deviceGUI->setToolTip(samplingDevice->displayedName);
     deviceGUI->setTitle(samplingDevice->displayedName.split(" ")[0]);
+    deviceGUI->setDefaultTitle(samplingDevice->displayedName.split(" ")[0]);
     deviceGUI->setCurrentDeviceIndex(deviceIndex);
     QStringList channelNames;
     QStringList tmpChannelNames;

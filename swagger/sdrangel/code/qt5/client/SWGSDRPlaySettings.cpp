@@ -28,6 +28,8 @@ SWGSDRPlaySettings::SWGSDRPlaySettings(QString* json) {
 }
 
 SWGSDRPlaySettings::SWGSDRPlaySettings() {
+    title = nullptr;
+    m_title_isSet = false;
     center_frequency = 0L;
     m_center_frequency_isSet = false;
     tuner_gain = 0;
@@ -76,6 +78,8 @@ SWGSDRPlaySettings::~SWGSDRPlaySettings() {
 
 void
 SWGSDRPlaySettings::init() {
+    title = new QString("");
+    m_title_isSet = false;
     center_frequency = 0L;
     m_center_frequency_isSet = false;
     tuner_gain = 0;
@@ -120,6 +124,9 @@ SWGSDRPlaySettings::init() {
 
 void
 SWGSDRPlaySettings::cleanup() {
+    if(title != nullptr) { 
+        delete title;
+    }
 
 
 
@@ -155,6 +162,8 @@ SWGSDRPlaySettings::fromJson(QString &json) {
 
 void
 SWGSDRPlaySettings::fromJsonObject(QJsonObject &pJson) {
+    ::SWGSDRangel::setValue(&title, pJson["title"], "QString", "QString");
+    
     ::SWGSDRangel::setValue(&center_frequency, pJson["centerFrequency"], "qint64", "");
     
     ::SWGSDRangel::setValue(&tuner_gain, pJson["tunerGain"], "qint32", "");
@@ -211,6 +220,9 @@ SWGSDRPlaySettings::asJson ()
 QJsonObject*
 SWGSDRPlaySettings::asJsonObject() {
     QJsonObject* obj = new QJsonObject();
+    if(title != nullptr && *title != QString("")){
+        toJsonValue(QString("title"), title, obj, QString("QString"));
+    }
     if(m_center_frequency_isSet){
         obj->insert("centerFrequency", QJsonValue(center_frequency));
     }
@@ -273,6 +285,16 @@ SWGSDRPlaySettings::asJsonObject() {
     }
 
     return obj;
+}
+
+QString*
+SWGSDRPlaySettings::getTitle() {
+    return title;
+}
+void
+SWGSDRPlaySettings::setTitle(QString* title) {
+    this->title = title;
+    this->m_title_isSet = true;
 }
 
 qint64
@@ -480,6 +502,9 @@ bool
 SWGSDRPlaySettings::isSet(){
     bool isObjectUpdated = false;
     do{
+        if(title && *title != QString("")){
+            isObjectUpdated = true; break;
+        }
         if(m_center_frequency_isSet){
             isObjectUpdated = true; break;
         }

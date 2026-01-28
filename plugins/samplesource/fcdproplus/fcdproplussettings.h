@@ -30,6 +30,7 @@ struct FCDProPlusSettings {
 		FC_POS_CENTER
 	} fcPos_t;
 
+	QString m_title;
 	quint64 m_centerFrequency;
 	bool m_rangeLow;
 	bool m_lnaGain;

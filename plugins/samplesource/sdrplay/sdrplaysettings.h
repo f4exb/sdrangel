@@ -33,6 +33,7 @@ struct SDRPlaySettings {
 		FC_POS_CENTER
 	} fcPos_t;
 
+	QString m_title;
 	uint64_t m_centerFrequency;
 	qint32 m_tunerGain;
 	int32_t  m_LOppmTenths;

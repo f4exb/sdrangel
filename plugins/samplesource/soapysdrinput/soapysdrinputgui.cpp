@@ -27,6 +27,7 @@
 #include "gui/glspectrum.h"
 #include "gui/basicdevicesettingsdialog.h"
 #include "gui/dialogpositioner.h"
+#include "mainspectrum/mainspectrumgui.h"
 #include "soapygui/discreterangegui.h"
 #include "soapygui/intervalrangegui.h"
 #include "soapygui/stringrangegui.h"
@@ -707,6 +708,8 @@ void SoapySDRInputGui::displaySettings()
 {
     blockApplySettings(true);
 
+    setTitle(m_settings.m_title);
+    getDeviceUISet()->m_mainSpectrumGUI->setTitle(m_settings.m_title);
     ui->transverter->setDeltaFrequency(m_settings.m_transverterDeltaFrequency);
     ui->transverter->setDeltaFrequencyActive(m_settings.m_transverterMode);
     ui->transverter->setIQOrder(m_settings.m_iqOrder);
@@ -935,17 +938,25 @@ void SoapySDRInputGui::openDeviceSettingsDialog(const QPoint& p)
         dialog.setReverseAPIAddress(m_settings.m_reverseAPIAddress);
         dialog.setReverseAPIPort(m_settings.m_reverseAPIPort);
         dialog.setReverseAPIDeviceIndex(m_settings.m_reverseAPIDeviceIndex);
+        dialog.setTitle(m_settings.m_title);
+        dialog.setDefaultTitle(getDefaultTitle());
 
         dialog.move(p);
         new DialogPositioner(&dialog, false);
         dialog.exec();
 
-        m_settings.m_useReverseAPI = dialog.useReverseAPI();
-        m_settings.m_reverseAPIAddress = dialog.getReverseAPIAddress();
-        m_settings.m_reverseAPIPort = dialog.getReverseAPIPort();
-        m_settings.m_reverseAPIDeviceIndex = dialog.getReverseAPIDeviceIndex();
+        if (dialog.result() == QDialog::Accepted)
+        {
+            m_settings.m_title = dialog.getTitle();
+            setTitle(m_settings.m_title);
+            getDeviceUISet()->m_mainSpectrumGUI->setTitle(m_settings.m_title);
+            m_settings.m_useReverseAPI = dialog.useReverseAPI();
+            m_settings.m_reverseAPIAddress = dialog.getReverseAPIAddress();
+            m_settings.m_reverseAPIPort = dialog.getReverseAPIPort();
+            m_settings.m_reverseAPIDeviceIndex = dialog.getReverseAPIDeviceIndex();
 
-        sendSettings();
+            sendSettings();
+        }
     }
 
     resetContextMenuType();

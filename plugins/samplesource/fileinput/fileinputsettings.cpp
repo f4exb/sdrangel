@@ -32,6 +32,7 @@ FileInputSettings::FileInputSettings()
 
 void FileInputSettings::resetToDefaults()
 {
+    m_title = "FileInput";
     m_fileName = "";
     m_accelerationFactor = 1;
     m_loop = true;
@@ -51,6 +52,7 @@ QByteArray FileInputSettings::serialize() const
     s.writeString(5, m_reverseAPIAddress);
     s.writeU32(6, m_reverseAPIPort);
     s.writeU32(7, m_reverseAPIDeviceIndex);
+    s.writeString(8, m_title);
 
     return s.final();
 }
@@ -83,6 +85,7 @@ bool FileInputSettings::deserialize(const QByteArray& data)
 
         d.readU32(7, &uintval, 0);
         m_reverseAPIDeviceIndex = uintval > 99 ? 99 : uintval;
+        d.readString(8, &m_title, "FileInput");
 
         return true;
     }
@@ -148,6 +151,9 @@ int FileInputSettings::getAccelerationValue(int accelerationIndex)
 
 void FileInputSettings::applySettings(const QStringList& settingsKeys, const FileInputSettings& settings)
 {
+    if (settingsKeys.contains("title")) {
+        m_title = settings.m_title;
+    }
     if (settingsKeys.contains("fileName")) {
         m_fileName = settings.m_fileName;
     }
@@ -175,6 +181,9 @@ QString FileInputSettings::getDebugString(const QStringList& settingsKeys, bool 
 {
     std::ostringstream ostr;
 
+    if (settingsKeys.contains("title") || force) {
+        ostr << " m_title: " << m_title.toStdString();
+    }
     if (settingsKeys.contains("m_fileName") || force) {
         ostr << " m_fileName: " << m_fileName.toStdString();
     }

@@ -28,6 +28,8 @@ SWGBladeRF2InputSettings::SWGBladeRF2InputSettings(QString* json) {
 }
 
 SWGBladeRF2InputSettings::SWGBladeRF2InputSettings() {
+    title = nullptr;
+    m_title_isSet = false;
     center_frequency = 0L;
     m_center_frequency_isSet = false;
     l_oppm_tenths = 0;
@@ -72,6 +74,8 @@ SWGBladeRF2InputSettings::~SWGBladeRF2InputSettings() {
 
 void
 SWGBladeRF2InputSettings::init() {
+    title = new QString("");
+    m_title_isSet = false;
     center_frequency = 0L;
     m_center_frequency_isSet = false;
     l_oppm_tenths = 0;
@@ -112,6 +116,9 @@ SWGBladeRF2InputSettings::init() {
 
 void
 SWGBladeRF2InputSettings::cleanup() {
+    if(title != nullptr) { 
+        delete title;
+    }
 
 
 
@@ -145,6 +152,8 @@ SWGBladeRF2InputSettings::fromJson(QString &json) {
 
 void
 SWGBladeRF2InputSettings::fromJsonObject(QJsonObject &pJson) {
+    ::SWGSDRangel::setValue(&title, pJson["title"], "QString", "QString");
+    
     ::SWGSDRangel::setValue(&center_frequency, pJson["centerFrequency"], "qint64", "");
     
     ::SWGSDRangel::setValue(&l_oppm_tenths, pJson["LOppmTenths"], "qint32", "");
@@ -197,6 +206,9 @@ SWGBladeRF2InputSettings::asJson ()
 QJsonObject*
 SWGBladeRF2InputSettings::asJsonObject() {
     QJsonObject* obj = new QJsonObject();
+    if(title != nullptr && *title != QString("")){
+        toJsonValue(QString("title"), title, obj, QString("QString"));
+    }
     if(m_center_frequency_isSet){
         obj->insert("centerFrequency", QJsonValue(center_frequency));
     }
@@ -253,6 +265,16 @@ SWGBladeRF2InputSettings::asJsonObject() {
     }
 
     return obj;
+}
+
+QString*
+SWGBladeRF2InputSettings::getTitle() {
+    return title;
+}
+void
+SWGBladeRF2InputSettings::setTitle(QString* title) {
+    this->title = title;
+    this->m_title_isSet = true;
 }
 
 qint64
@@ -440,6 +462,9 @@ bool
 SWGBladeRF2InputSettings::isSet(){
     bool isObjectUpdated = false;
     do{
+        if(title && *title != QString("")){
+            isObjectUpdated = true; break;
+        }
         if(m_center_frequency_isSet){
             isObjectUpdated = true; break;
         }

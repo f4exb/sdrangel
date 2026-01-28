@@ -27,6 +27,7 @@ LocalOutputSettings::LocalOutputSettings()
 
 void LocalOutputSettings::resetToDefaults()
 {
+    m_title = "LocalOutput";
     m_useReverseAPI = false;
     m_reverseAPIAddress = "127.0.0.1";
     m_reverseAPIPort = 8888;
@@ -37,6 +38,7 @@ QByteArray LocalOutputSettings::serialize() const
 {
     SimpleSerializer s(1);
 
+    s.writeString(1, m_title);
     s.writeString(4, m_reverseAPIAddress);
     s.writeU32(5, m_reverseAPIPort);
     s.writeU32(6, m_reverseAPIDeviceIndex);
@@ -58,6 +60,7 @@ bool LocalOutputSettings::deserialize(const QByteArray& data)
     {
         quint32 uintval;
 
+        d.readString(1, &m_title, "LocalOutput");
         d.readString(4, &m_reverseAPIAddress, "127.0.0.1");
         d.readU32(5, &uintval, 0);
 
@@ -81,6 +84,9 @@ bool LocalOutputSettings::deserialize(const QByteArray& data)
 
 void LocalOutputSettings::applySettings(const QStringList& settingsKeys, const LocalOutputSettings& settings)
 {
+    if (settingsKeys.contains("title")) {
+        m_title = settings.m_title;
+    }
     if (settingsKeys.contains("useReverseAPI")) {
         m_useReverseAPI = settings.m_useReverseAPI;
     }
@@ -99,6 +105,9 @@ QString LocalOutputSettings::getDebugString(const QStringList& settingsKeys, boo
 {
     std::ostringstream ostr;
 
+    if (settingsKeys.contains("title") || force) {
+        ostr << " m_title: " << m_title.toStdString();
+    }
     if (settingsKeys.contains("useReverseAPI") || force) {
         ostr << " m_useReverseAPI: " << m_useReverseAPI;
     }

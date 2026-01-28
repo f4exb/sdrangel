@@ -1,6 +1,8 @@
 USRPInputSettings:
   description: USRP
   properties:
+    title:
+      type: string
     centerFrequency:
       type: integer
       format: int64
@@ -49,6 +51,8 @@ USRPInputSettings:
 USRPOutputSettings:
   description: USRP
   properties:
+    title:
+      type: string
     centerFrequency:
       type: integer
       format: int64

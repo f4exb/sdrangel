@@ -1,6 +1,8 @@
 AirspySettings:
   description: Airspy
   properties:
+    title:
+      type: string
     centerFrequency:
       type: integer
       format: int64

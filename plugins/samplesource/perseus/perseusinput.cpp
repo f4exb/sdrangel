@@ -489,6 +489,9 @@ void PerseusInput::webapiUpdateDeviceSettings(
     const QStringList& deviceSettingsKeys,
     SWGSDRangel::SWGDeviceSettings& response)
 {
+    if (deviceSettingsKeys.contains("title")) {
+        settings.m_title = *response.getPerseusSettings()->getTitle();
+    }
     if (deviceSettingsKeys.contains("centerFrequency")) {
         settings.m_centerFrequency = response.getPerseusSettings()->getCenterFrequency();
     }
@@ -551,6 +554,12 @@ int PerseusInput::webapiReportGet(
 
 void PerseusInput::webapiFormatDeviceSettings(SWGSDRangel::SWGDeviceSettings& response, const PerseusSettings& settings)
 {
+    if (response.getPerseusSettings()->getTitle()) {
+        *response.getPerseusSettings()->getTitle() = settings.m_title;
+    } else {
+        response.getPerseusSettings()->setTitle(new QString(settings.m_title));
+    }
+
     response.getPerseusSettings()->setCenterFrequency(settings.m_centerFrequency);
     response.getPerseusSettings()->setLOppmTenths(settings.m_LOppmTenths);
     response.getPerseusSettings()->setDevSampleRateIndex(settings.m_devSampleRateIndex);
@@ -597,6 +606,9 @@ void PerseusInput::webapiReverseSendSettings(const QList<QString>& deviceSetting
 
     // transfer data that has been modified. When force is on transfer all data except reverse API data
 
+    if (deviceSettingsKeys.contains("title") || force) {
+        swgPerseusSettings->setTitle(new QString(settings.m_title));
+    }
     if (deviceSettingsKeys.contains("centerFrequency") || force) {
         swgPerseusSettings->setCenterFrequency(settings.m_centerFrequency);
     }

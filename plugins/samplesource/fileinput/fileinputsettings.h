@@ -24,6 +24,7 @@
 #include <QByteArray>
 
 struct FileInputSettings {
+    QString m_title;
     QString m_fileName;
     quint32 m_accelerationFactor;
     bool m_loop;

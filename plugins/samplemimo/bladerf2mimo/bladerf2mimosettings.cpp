@@ -26,6 +26,7 @@ BladeRF2MIMOSettings::BladeRF2MIMOSettings()
 
 void BladeRF2MIMOSettings::resetToDefaults()
 {
+    m_title = "BladeRF2MIMO";
     m_devSampleRate = 3072000;
     m_LOppmTenths = 0;
 
@@ -66,6 +67,7 @@ QByteArray BladeRF2MIMOSettings::serialize() const
 
     s.writeS32(1, m_devSampleRate);
     s.writeS32(2, m_LOppmTenths);
+    s.writeString(3, m_title);
 
     s.writeU64(10, m_rxCenterFrequency);
     s.writeU32(11, m_log2Decim);
@@ -117,6 +119,7 @@ bool BladeRF2MIMOSettings::deserialize(const QByteArray& data)
 
         d.readS32(1, &m_devSampleRate, 3072000);
         d.readS32(2, &m_LOppmTenths, 0);
+        d.readString(3, &m_title, "BladeRF2MIMO");
 
         d.readU64(10, &m_rxCenterFrequency, 435000*1000);
         d.readU32(11, &m_log2Decim);
@@ -169,6 +172,9 @@ bool BladeRF2MIMOSettings::deserialize(const QByteArray& data)
 
 void BladeRF2MIMOSettings::applySettings(const QStringList& settingsKeys, const BladeRF2MIMOSettings& settings)
 {
+    if (settingsKeys.contains("title")) {
+        m_title = settings.m_title;
+    }
     if (settingsKeys.contains("devSampleRate")) {
         m_devSampleRate = settings.m_devSampleRate;
     }
@@ -262,6 +268,9 @@ QString BladeRF2MIMOSettings::getDebugString(const QStringList& settingsKeys, bo
 {
     std::ostringstream ostr;
 
+    if (settingsKeys.contains("title") || force) {
+        ostr << " m_title: " << m_title.toStdString();
+    }
     if (settingsKeys.contains("devSampleRate") || force) {
         ostr << " m_devSampleRate: " << m_devSampleRate;
     }
@@ -352,6 +361,3 @@ QString BladeRF2MIMOSettings::getDebugString(const QStringList& settingsKeys, bo
 
     return QString(ostr.str().c_str());
 }
-
-
-

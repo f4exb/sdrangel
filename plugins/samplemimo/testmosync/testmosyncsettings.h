@@ -27,6 +27,7 @@ struct TestMOSyncSettings {
         FC_POS_CENTER
     } fcPos_t;
 
+    QString m_title;
     quint64 m_centerFrequency;
     quint64 m_sampleRate;
     quint32 m_log2Interp;

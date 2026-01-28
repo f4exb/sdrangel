@@ -28,6 +28,8 @@ SWGLimeSdrMIMOSettings::SWGLimeSdrMIMOSettings(QString* json) {
 }
 
 SWGLimeSdrMIMOSettings::SWGLimeSdrMIMOSettings() {
+    title = nullptr;
+    m_title_isSet = false;
     dev_sample_rate = 0;
     m_dev_sample_rate_isSet = false;
     gpio_dir = 0;
@@ -144,6 +146,8 @@ SWGLimeSdrMIMOSettings::~SWGLimeSdrMIMOSettings() {
 
 void
 SWGLimeSdrMIMOSettings::init() {
+    title = new QString("");
+    m_title_isSet = false;
     dev_sample_rate = 0;
     m_dev_sample_rate_isSet = false;
     gpio_dir = 0;
@@ -256,6 +260,9 @@ SWGLimeSdrMIMOSettings::init() {
 
 void
 SWGLimeSdrMIMOSettings::cleanup() {
+    if(title != nullptr) { 
+        delete title;
+    }
 
 
 
@@ -325,6 +332,8 @@ SWGLimeSdrMIMOSettings::fromJson(QString &json) {
 
 void
 SWGLimeSdrMIMOSettings::fromJsonObject(QJsonObject &pJson) {
+    ::SWGSDRangel::setValue(&title, pJson["title"], "QString", "QString");
+    
     ::SWGSDRangel::setValue(&dev_sample_rate, pJson["devSampleRate"], "qint32", "");
     
     ::SWGSDRangel::setValue(&gpio_dir, pJson["gpioDir"], "qint32", "");
@@ -449,6 +458,9 @@ SWGLimeSdrMIMOSettings::asJson ()
 QJsonObject*
 SWGLimeSdrMIMOSettings::asJsonObject() {
     QJsonObject* obj = new QJsonObject();
+    if(title != nullptr && *title != QString("")){
+        toJsonValue(QString("title"), title, obj, QString("QString"));
+    }
     if(m_dev_sample_rate_isSet){
         obj->insert("devSampleRate", QJsonValue(dev_sample_rate));
     }
@@ -613,6 +625,16 @@ SWGLimeSdrMIMOSettings::asJsonObject() {
     }
 
     return obj;
+}
+
+QString*
+SWGLimeSdrMIMOSettings::getTitle() {
+    return title;
+}
+void
+SWGLimeSdrMIMOSettings::setTitle(QString* title) {
+    this->title = title;
+    this->m_title_isSet = true;
 }
 
 qint32
@@ -1160,6 +1182,9 @@ bool
 SWGLimeSdrMIMOSettings::isSet(){
     bool isObjectUpdated = false;
     do{
+        if(title && *title != QString("")){
+            isObjectUpdated = true; break;
+        }
         if(m_dev_sample_rate_isSet){
             isObjectUpdated = true; break;
         }

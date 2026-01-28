@@ -42,6 +42,9 @@ public:
     virtual void fromJsonObject(QJsonObject &json) override;
     virtual SWGLocalOutputSettings* fromJson(QString &jsonString) override;
 
+    QString* getTitle();
+    void setTitle(QString* title);
+
     qint32 getUseReverseApi();
     void setUseReverseApi(qint32 use_reverse_api);
 
@@ -58,6 +61,9 @@ public:
     virtual bool isSet() override;
 
 private:
+    QString* title;
+    bool m_title_isSet;
+
     qint32 use_reverse_api;
     bool m_use_reverse_api_isSet;
 

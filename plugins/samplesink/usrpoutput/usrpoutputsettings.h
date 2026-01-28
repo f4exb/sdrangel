@@ -32,6 +32,7 @@
  */
 struct USRPOutputSettings
 {
+    QString  m_title;
     int      m_masterClockRate;
     // global settings to be saved
     uint64_t m_centerFrequency;

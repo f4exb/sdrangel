@@ -1,6 +1,8 @@
 LimeSdrInputSettings:
   description: LimeSDR
   properties:
+    title:
+      type: string
     centerFrequency:
       type: integer
       format: int64
@@ -72,6 +74,8 @@ LimeSdrInputSettings:
 LimeSdrOutputSettings:
   description: LimeSDR
   properties:
+    title:
+      type: string
     centerFrequency:
       type: integer
       format: int64
@@ -124,6 +128,8 @@ LimeSdrMIMOSettings:
   description: LimeSDR
   properties:
     # General
+    title:
+      type: string
     devSampleRate:
       type: integer
     gpioDir:

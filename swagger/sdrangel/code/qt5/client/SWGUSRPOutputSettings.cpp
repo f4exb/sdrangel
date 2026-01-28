@@ -28,6 +28,8 @@ SWGUSRPOutputSettings::SWGUSRPOutputSettings(QString* json) {
 }
 
 SWGUSRPOutputSettings::SWGUSRPOutputSettings() {
+    title = nullptr;
+    m_title_isSet = false;
     center_frequency = 0L;
     m_center_frequency_isSet = false;
     dev_sample_rate = 0;
@@ -68,6 +70,8 @@ SWGUSRPOutputSettings::~SWGUSRPOutputSettings() {
 
 void
 SWGUSRPOutputSettings::init() {
+    title = new QString("");
+    m_title_isSet = false;
     center_frequency = 0L;
     m_center_frequency_isSet = false;
     dev_sample_rate = 0;
@@ -104,6 +108,9 @@ SWGUSRPOutputSettings::init() {
 
 void
 SWGUSRPOutputSettings::cleanup() {
+    if(title != nullptr) { 
+        delete title;
+    }
 
 
 
@@ -139,6 +146,8 @@ SWGUSRPOutputSettings::fromJson(QString &json) {
 
 void
 SWGUSRPOutputSettings::fromJsonObject(QJsonObject &pJson) {
+    ::SWGSDRangel::setValue(&title, pJson["title"], "QString", "QString");
+    
     ::SWGSDRangel::setValue(&center_frequency, pJson["centerFrequency"], "qint64", "");
     
     ::SWGSDRangel::setValue(&dev_sample_rate, pJson["devSampleRate"], "qint32", "");
@@ -187,6 +196,9 @@ SWGUSRPOutputSettings::asJson ()
 QJsonObject*
 SWGUSRPOutputSettings::asJsonObject() {
     QJsonObject* obj = new QJsonObject();
+    if(title != nullptr && *title != QString("")){
+        toJsonValue(QString("title"), title, obj, QString("QString"));
+    }
     if(m_center_frequency_isSet){
         obj->insert("centerFrequency", QJsonValue(center_frequency));
     }
@@ -237,6 +249,16 @@ SWGUSRPOutputSettings::asJsonObject() {
     }
 
     return obj;
+}
+
+QString*
+SWGUSRPOutputSettings::getTitle() {
+    return title;
+}
+void
+SWGUSRPOutputSettings::setTitle(QString* title) {
+    this->title = title;
+    this->m_title_isSet = true;
 }
 
 qint64
@@ -404,6 +426,9 @@ bool
 SWGUSRPOutputSettings::isSet(){
     bool isObjectUpdated = false;
     do{
+        if(title && *title != QString("")){
+            isObjectUpdated = true; break;
+        }
         if(m_center_frequency_isSet){
             isObjectUpdated = true; break;
         }
