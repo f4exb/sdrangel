@@ -23,7 +23,7 @@ jobs:
         run: |
           sudo apt-get update
           sudo apt-get install software-properties-common
-          add-apt-repository ppa:ettusresearch/uhd
+          add-apt-repository -y ppa:ettusresearch/uhd
           apt-get update
           sudo apt-get -y install build-essential cmake git xxd \
             devscripts fakeroot debhelper libfftw3-dev qtbase5-dev libopengl-dev libqt5opengl5-dev \
