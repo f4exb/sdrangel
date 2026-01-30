@@ -431,8 +431,8 @@ modules:
       - -DINSTALL_UDEV_RULES=OFF
     sources:
       - type: archive
-        url: https://github.com/EttusResearch/uhd/archive/refs/tags/v4.5.0.0.tar.gz
-        sha256: ca8217b1f0591fb99432a94f225e74fb4d0fe541d496ec1386221b6438d4875d
+        url: https://github.com/EttusResearch/uhd/archive/refs/tags/v4.9.0.1.tar.gz
+        sha256: 0be26a139f23041c1fb6e9666d84cba839460e3c756057dc48dc067cc356a7bc
       - type: patch
         paths:
           - uhd-disable-ascii-art-dft.patch
