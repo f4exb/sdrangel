@@ -85,7 +85,7 @@ UDPSinkSink::UDPSinkSink() :
 	//DSPEngine::instance()->addAudioSink(&m_audioFifo);
 
     applyChannelSettings(m_channelSampleRate, m_channelFrequencyOffset, true);
-    applySettings(m_settings, true);
+    applySettings(QStringList(), m_settings, true);
 }
 
 UDPSinkSink::~UDPSinkSink()
@@ -365,43 +365,20 @@ void UDPSinkSink::applyChannelSettings(int channelSampleRate, int channelFrequen
     m_channelFrequencyOffset = channelFrequencyOffset;
 }
 
-void UDPSinkSink::applySettings(const UDPSinkSettings& settings, bool force)
+void UDPSinkSink::applySettings(const QStringList& settingsKeys, const UDPSinkSettings& settings, bool force)
 {
-    qDebug() << "UDPSinkSink::applySettings:"
-            << " m_inputFrequencyOffset: " << settings.m_inputFrequencyOffset
-            << " m_audioActive: " << settings.m_audioActive
-            << " m_audioStereo: " << settings.m_audioStereo
-            << " m_gain: " << settings.m_gain
-            << " m_volume: " << settings.m_volume
-            << " m_squelchEnabled: " << settings.m_squelchEnabled
-            << " m_squelchdB: " << settings.m_squelchdB
-            << " m_squelchGate" << settings.m_squelchGate
-            << " m_agc" << settings.m_agc
-            << " m_sampleFormat: " << settings.m_sampleFormat
-            << " m_outputSampleRate: " << settings.m_outputSampleRate
-            << " m_rfBandwidth: " << settings.m_rfBandwidth
-            << " m_fmDeviation: " << settings.m_fmDeviation
-            << " m_udpAddressStr: " << settings.m_udpAddress
-            << " m_udpPort: " << settings.m_udpPort
-            << " m_audioPort: " << settings.m_audioPort
-            << " m_streamIndex: " << settings.m_streamIndex
-            << " m_useReverseAPI: " << settings.m_useReverseAPI
-            << " m_reverseAPIAddress: " << settings.m_reverseAPIAddress
-            << " m_reverseAPIPort: " << settings.m_reverseAPIPort
-            << " m_reverseAPIDeviceIndex: " << settings.m_reverseAPIDeviceIndex
-            << " m_reverseAPIChannelIndex: " << settings.m_reverseAPIChannelIndex
-            << " force: " << force;
+    qDebug() << "UDPSinkSink::applySettings:" << settings.getDebugString(settingsKeys, force);
 
-    if ((settings.m_audioActive != m_settings.m_audioActive) || force)
+    if ((settingsKeys.contains("audioActive") && (settings.m_audioActive != m_settings.m_audioActive)) || force)
     {
         if (settings.m_audioActive) {
             m_audioBufferFill = 0;
         }
     }
 
-    if ((settings.m_inputFrequencyOffset != m_settings.m_inputFrequencyOffset) ||
-        (settings.m_rfBandwidth != m_settings.m_rfBandwidth) ||
-        (settings.m_outputSampleRate != m_settings.m_outputSampleRate) || force)
+    if ((settingsKeys.contains("inputFrequencyOffset") && (settings.m_inputFrequencyOffset != m_settings.m_inputFrequencyOffset)) ||
+        (settingsKeys.contains("rfBandwidth") && (settings.m_rfBandwidth != m_settings.m_rfBandwidth)) ||
+        (settingsKeys.contains("outputSampleRate") && (settings.m_outputSampleRate != m_settings.m_outputSampleRate)) || force)
     {
         m_interpolator.create(16, m_channelSampleRate, settings.m_rfBandwidth / 2.0);
         m_sampleDistanceRemain = m_channelSampleRate / settings.m_outputSampleRate;
@@ -432,7 +409,7 @@ void UDPSinkSink::applySettings(const UDPSinkSettings& settings, bool force)
         m_outMovingAverage.resize(settings.m_outputSampleRate * 0.01, 1e-10); // 10 ms
     }
 
-    if ((settings.m_squelchGate != m_settings.m_squelchGate) || force)
+    if ((settingsKeys.contains("squelchGate") && (settings.m_squelchGate != m_settings.m_squelchGate)) || force)
     {
         if ((settings.m_sampleFormat == UDPSinkSettings::FormatLSB) ||
             (settings.m_sampleFormat == UDPSinkSettings::FormatLSBMono) ||
@@ -452,27 +429,27 @@ void UDPSinkSink::applySettings(const UDPSinkSettings& settings, bool force)
         m_agc.setStepDownDelay(stepDownDelay); // same delay for up and down
     }
 
-    if ((settings.m_squelchdB != m_settings.m_squelchdB) || force)
+    if ((settingsKeys.contains("squelchdB") && (settings.m_squelchdB != m_settings.m_squelchdB)) || force)
     {
         m_squelch = CalcDb::powerFromdB(settings.m_squelchdB);
         m_agc.setThreshold(m_squelch*(1<<23));
     }
 
-    if ((settings.m_udpAddress != m_settings.m_udpAddress) || force)
+    if ((settingsKeys.contains("udpAddress") && (settings.m_udpAddress != m_settings.m_udpAddress)) || force)
     {
         m_udpBuffer16->setAddress(const_cast<QString&>(settings.m_udpAddress));
         m_udpBufferMono16->setAddress(const_cast<QString&>(settings.m_udpAddress));
         m_udpBuffer24->setAddress(const_cast<QString&>(settings.m_udpAddress));
     }
 
-    if ((settings.m_udpPort != m_settings.m_udpPort) || force)
+    if ((settingsKeys.contains("udpPort") && (settings.m_udpPort != m_settings.m_udpPort)) || force)
     {
         m_udpBuffer16->setPort(settings.m_udpPort);
         m_udpBufferMono16->setPort(settings.m_udpPort);
         m_udpBuffer24->setPort(settings.m_udpPort);
     }
 
-    if ((settings.m_audioPort != m_settings.m_audioPort) || force)
+    if ((settingsKeys.contains("audioPort") && (settings.m_audioPort != m_settings.m_audioPort)) || force)
     {
         disconnect(m_audioSocket, SIGNAL(readyRead()), this, SLOT(audioReadyRead()));
         delete m_audioSocket;
@@ -489,9 +466,13 @@ void UDPSinkSink::applySettings(const UDPSinkSettings& settings, bool force)
         }
     }
 
-    if ((settings.m_fmDeviation != m_settings.m_fmDeviation) || force) {
+    if ((settingsKeys.contains("fmDeviation") && (settings.m_fmDeviation != m_settings.m_fmDeviation)) || force) {
         m_phaseDiscri.setFMScaling((float) settings.m_outputSampleRate / (2.0f * settings.m_fmDeviation));
     }
 
-    m_settings = settings;
+    if (force) {
+        m_settings = settings;
+    } else {
+        m_settings.applySettings(settingsKeys, settings);
+    }
 }

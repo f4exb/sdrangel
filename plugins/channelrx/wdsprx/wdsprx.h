@@ -49,20 +49,23 @@ public:
 
     public:
         const WDSPRxSettings& getSettings() const { return m_settings; }
+        const QStringList& getSettingsKeys() const { return m_settingsKeys; }
         bool getForce() const { return m_force; }
 
-        static MsgConfigureWDSPRx* create(const WDSPRxSettings& settings, bool force)
+        static MsgConfigureWDSPRx* create(const QStringList& settingsKeys, const WDSPRxSettings& settings, bool force)
         {
-            return new MsgConfigureWDSPRx(settings, force);
+            return new MsgConfigureWDSPRx(settingsKeys, settings, force);
         }
 
     private:
         WDSPRxSettings m_settings;
+        QStringList m_settingsKeys;
         bool m_force;
 
-        MsgConfigureWDSPRx(const WDSPRxSettings& settings, bool force) :
+        MsgConfigureWDSPRx( const QStringList& settingsKeys, const WDSPRxSettings& settings, bool force) :
             Message(),
             m_settings(settings),
+            m_settingsKeys(settingsKeys),
             m_force(force)
         { }
     };
@@ -162,7 +165,7 @@ private:
     QNetworkRequest m_networkRequest;
 
 	bool handleMessage(const Message& cmd) final;
-	void applySettings(const WDSPRxSettings& settings, bool force = false);
+	void applySettings( const QStringList& settingsKeys, const WDSPRxSettings& settings, bool force = false);
     void sendSampleRateToDemodAnalyzer() const;
     void webapiFormatChannelReport(SWGSDRangel::SWGChannelReport& response);
     void webapiReverseSendSettings(const QList<QString>& channelSettingsKeys, const WDSPRxSettings& settings, bool force);

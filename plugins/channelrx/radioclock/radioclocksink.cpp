@@ -47,9 +47,9 @@ RadioClockSink::RadioClockSink() :
         m_zeroCount(0),
         m_sampleBufferIndex(0),
         m_gotMarker(false)
-{   
+{
     m_phaseDiscri.setFMScaling(RadioClockSettings::RADIOCLOCK_CHANNEL_SAMPLE_RATE / (2.0f * 20.0/M_PI));
-    applySettings(m_settings, true);
+    applySettings(QStringList(), m_settings, true);
     applyChannelSettings(m_channelSampleRate, m_channelFrequencyOffset, true);
 
     for (int i = 0; i < RadioClockSettings::m_scopeStreams; i++) {
@@ -999,27 +999,23 @@ void RadioClockSink::applyChannelSettings(int channelSampleRate, int channelFreq
     m_channelFrequencyOffset = channelFrequencyOffset;
 }
 
-void RadioClockSink::applySettings(const RadioClockSettings& settings, bool force)
+void RadioClockSink::applySettings(const QStringList& settingsKeys, const RadioClockSettings& settings, bool force)
 {
-    qDebug() << "RadioClockSink::applySettings:"
-            << " m_rfBandwidth: " << settings.m_rfBandwidth
-            << " m_threshold: " << settings.m_threshold
-            << " m_modulation: " << settings.m_modulation
-            << " force: " << force;
+    qDebug() << "RadioClockSink::applySettings:" << settings.getDebugString(settingsKeys, force);
 
-    if ((settings.m_rfBandwidth != m_settings.m_rfBandwidth) || force)
+    if ((settingsKeys.contains("rfBandwidth") && (settings.m_rfBandwidth != m_settings.m_rfBandwidth)) || force)
     {
         m_interpolator.create(16, m_channelSampleRate, settings.m_rfBandwidth / 2.2);
         m_interpolatorDistance = (Real) m_channelSampleRate / (Real) RadioClockSettings::RADIOCLOCK_CHANNEL_SAMPLE_RATE;
         m_interpolatorDistanceRemain = m_interpolatorDistance;
     }
 
-    if ((settings.m_threshold != m_settings.m_threshold) || force)
+    if ((settingsKeys.contains("threshold") && (settings.m_threshold != m_settings.m_threshold)) || force)
     {
         m_linearThreshold = CalcDb::powerFromdB(-settings.m_threshold);
     }
 
-    if ((settings.m_modulation != m_settings.m_modulation) || force)
+    if ((settingsKeys.contains("modulation") && (settings.m_modulation != m_settings.m_modulation)) || force)
     {
         m_gotMinuteMarker = false;
         m_lowCount = 0;
@@ -1032,5 +1028,9 @@ void RadioClockSink::applySettings(const RadioClockSettings& settings, bool forc
         }
     }
 
-    m_settings = settings;
+    if (force) {
+        m_settings = settings;
+    } else {
+        m_settings.applySettings(settingsKeys, settings);
+    }
 }

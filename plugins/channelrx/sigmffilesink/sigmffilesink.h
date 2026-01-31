@@ -46,20 +46,23 @@ public:
 
     public:
         const SigMFFileSinkSettings& getSettings() const { return m_settings; }
+        const QStringList& getSettingsKeys() const { return m_settingsKeys; }
         bool getForce() const { return m_force; }
 
-        static MsgConfigureSigMFFileSink* create(const SigMFFileSinkSettings& settings, bool force)
+        static MsgConfigureSigMFFileSink* create(const QStringList& settingsKeys, const SigMFFileSinkSettings& settings, bool force)
         {
-            return new MsgConfigureSigMFFileSink(settings, force);
+            return new MsgConfigureSigMFFileSink(settingsKeys, settings, force);
         }
 
     private:
         SigMFFileSinkSettings m_settings;
+        QStringList m_settingsKeys;
         bool m_force;
 
-        MsgConfigureSigMFFileSink(const SigMFFileSinkSettings& settings, bool force) :
+        MsgConfigureSigMFFileSink(const QStringList& settingsKeys, const SigMFFileSinkSettings& settings, bool force) :
             Message(),
             m_settings(settings),
+            m_settingsKeys(settingsKeys),
             m_force(force)
         { }
     };
@@ -177,20 +180,20 @@ private:
     QNetworkRequest m_networkRequest;
 
     virtual bool handleMessage(const Message& cmd);
-    void applySettings(const SigMFFileSinkSettings& settings, bool force = false);
+    void applySettings(const QStringList& settingsKeys, const SigMFFileSinkSettings& settings, bool force = false);
     void propagateSampleRateAndFrequency(uint32_t index, uint32_t log2Decim);
     DeviceSampleSource *getLocalDevice(uint32_t index);
 
     void webapiFormatChannelReport(SWGSDRangel::SWGChannelReport& response);
-    void webapiReverseSendSettings(QList<QString>& channelSettingsKeys, const SigMFFileSinkSettings& settings, bool force);
+    void webapiReverseSendSettings(const QList<QString>& channelSettingsKeys, const SigMFFileSinkSettings& settings, bool force);
     void sendChannelSettings(
         const QList<ObjectPipe*>& pipes,
-        QList<QString>& channelSettingsKeys,
+        const QList<QString>& channelSettingsKeys,
         const SigMFFileSinkSettings& settings,
         bool force
     );
     void webapiFormatChannelSettings(
-        QList<QString>& channelSettingsKeys,
+        const QList<QString>& channelSettingsKeys,
         SWGSDRangel::SWGChannelSettings *swgChannelSettings,
         const SigMFFileSinkSettings& settings,
         bool force

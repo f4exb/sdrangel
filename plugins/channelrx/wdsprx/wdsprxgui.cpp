@@ -146,7 +146,7 @@ void WDSPRxGUI::channelMarkerChangedByCursor()
 {
     ui->deltaFrequency->setValue(m_channelMarker.getCenterFrequency());
     m_settings.m_inputFrequencyOffset = m_channelMarker.getCenterFrequency();
-    applySettings();
+    applySettings(QStringList("inputFrequencyOffset"));
 }
 
 void WDSPRxGUI::channelMarkerHighlightedByCursor()
@@ -159,7 +159,7 @@ void WDSPRxGUI::on_audioBinaural_toggled(bool binaural)
 	m_audioBinaural = binaural;
 	m_settings.m_audioBinaural = binaural;
     m_settings.m_profiles[m_settings.m_profileIndex].m_audioBinaural = m_settings.m_audioBinaural;
-	applySettings();
+	applySettings(QStringList("audioBinaural"));
 }
 
 void WDSPRxGUI::on_audioFlipChannels_toggled(bool flip)
@@ -167,7 +167,7 @@ void WDSPRxGUI::on_audioFlipChannels_toggled(bool flip)
 	m_audioFlipChannels = flip;
 	m_settings.m_audioFlipChannels = flip;
     m_settings.m_profiles[m_settings.m_profileIndex].m_audioFlipChannels = m_settings.m_audioFlipChannels;
-	applySettings();
+	applySettings(QStringList("audioFlipChannels"));
 }
 
 void WDSPRxGUI::on_dsb_toggled(bool dsb)
@@ -181,7 +181,7 @@ void WDSPRxGUI::on_deltaFrequency_changed(qint64 value)
     m_channelMarker.setCenterFrequency((int) value);
     m_settings.m_inputFrequencyOffset = m_channelMarker.getCenterFrequency();
     updateAbsoluteCenterFrequency();
-    applySettings();
+    applySettings(QStringList("inputFrequencyOffset"));
 }
 
 void WDSPRxGUI::on_BW_valueChanged(int value)
@@ -201,14 +201,14 @@ void WDSPRxGUI::on_volume_valueChanged(int value)
 {
 	ui->volumeText->setText(QString("%1").arg(value));
 	m_settings.m_volume = (Real) CalcDb::powerFromdB(value);
-	applySettings();
+	applySettings(QStringList("volume"));
 }
 
 void WDSPRxGUI::on_agc_toggled(bool checked)
 {
     m_settings.m_agc = checked;
     m_settings.m_profiles[m_settings.m_profileIndex].m_agc = m_settings.m_agc;
-    applySettings();
+    applySettings(QStringList("agc"));
 }
 
 void WDSPRxGUI::on_agcGain_valueChanged(int value)
@@ -217,42 +217,42 @@ void WDSPRxGUI::on_agcGain_valueChanged(int value)
     ui->agcGainText->setText(s);
     m_settings.m_agcGain = value;
     m_settings.m_profiles[m_settings.m_profileIndex].m_agcGain = m_settings.m_agcGain;
-    applySettings();
+    applySettings(QStringList("agcGain"));
 }
 
 void WDSPRxGUI::on_dnr_toggled(bool checked)
 {
     m_settings.m_dnr = checked;
     m_settings.m_profiles[m_settings.m_profileIndex].m_dnr = m_settings.m_dnr;
-    applySettings();
+    applySettings(QStringList("dnr"));
 }
 
 void WDSPRxGUI::on_dnb_toggled(bool checked)
 {
     m_settings.m_dnb = checked;
     m_settings.m_profiles[m_settings.m_profileIndex].m_dnb = m_settings.m_dnb;
-    applySettings();
+    applySettings(QStringList("dnb"));
 }
 
 void WDSPRxGUI::on_anf_toggled(bool checked)
 {
     m_settings.m_anf = checked;
     m_settings.m_profiles[m_settings.m_profileIndex].m_anf = m_settings.m_anf;
-    applySettings();
+    applySettings(QStringList("anf"));
 }
 
 void WDSPRxGUI::on_cwPeaking_toggled(bool checked)
 {
     m_settings.m_cwPeaking = checked;
     m_settings.m_profiles[m_settings.m_profileIndex].m_cwPeaking = m_settings.m_cwPeaking;
-    applySettings();
+    applySettings(QStringList("cwPeaking"));
 }
 
 void WDSPRxGUI::on_squelch_toggled(bool checked)
 {
     m_settings.m_squelch = checked;
     m_settings.m_profiles[m_settings.m_profileIndex].m_squelch = m_settings.m_squelch;
-    applySettings();
+    applySettings(QStringList("squelch"));
 }
 
 void WDSPRxGUI::on_squelchThreshold_valueChanged(int value)
@@ -260,14 +260,14 @@ void WDSPRxGUI::on_squelchThreshold_valueChanged(int value)
     m_settings.m_squelchThreshold = value;
     m_settings.m_profiles[m_settings.m_profileIndex].m_squelchThreshold = m_settings.m_squelchThreshold;
     ui->squelchThresholdText->setText(tr("%1").arg(m_settings.m_squelchThreshold));
-    applySettings();
+    applySettings(QStringList("squelchThreshold"));
 }
 
 void WDSPRxGUI::on_equalizer_toggled(bool checked)
 {
     m_settings.m_equalizer = checked;
     m_settings.m_profiles[m_settings.m_profileIndex].m_equalizer = m_settings.m_equalizer;
-    applySettings();
+    applySettings(QStringList("equalizer"));
 }
 
 void WDSPRxGUI::on_rit_toggled(bool checked)
@@ -275,7 +275,7 @@ void WDSPRxGUI::on_rit_toggled(bool checked)
     m_settings.m_rit = checked;
     m_settings.m_profiles[m_settings.m_profileIndex].m_rit = m_settings.m_rit;
     m_channelMarker.setShift(checked ? (int) m_settings.m_ritFrequency: 0);
-    applySettings();
+    applySettings(QStringList("rit"));
 }
 
 void WDSPRxGUI::on_ritFrequency_valueChanged(int value)
@@ -284,7 +284,7 @@ void WDSPRxGUI::on_ritFrequency_valueChanged(int value)
     m_settings.m_profiles[m_settings.m_profileIndex].m_ritFrequency = m_settings.m_ritFrequency;
     ui->ritFrequencyText->setText(tr("%1").arg(value));
     m_channelMarker.setShift(m_settings.m_rit ? value: 0);
-    applySettings();
+    applySettings(QStringList("ritFrequency"));
 }
 
 void WDSPRxGUI::on_dbOrS_toggled(bool checked)
@@ -299,7 +299,7 @@ void WDSPRxGUI::on_audioMute_toggled(bool checked)
 {
 	m_audioMute = checked;
 	m_settings.m_audioMute = checked;
-	applySettings();
+	applySettings(QStringList("audioMute"));
 }
 
 void WDSPRxGUI::on_spanLog2_valueChanged(int value)
@@ -325,7 +325,7 @@ void WDSPRxGUI::on_flipSidebands_clicked(bool checked)
 void WDSPRxGUI::on_fftWindow_currentIndexChanged(int index)
 {
     m_settings.m_profiles[m_settings.m_profileIndex].m_fftWindow = index;
-    applySettings();
+    applySettings(QStringList("fftWindow"));
 }
 
 void WDSPRxGUI::on_profileIndex_valueChanged(int value)
@@ -469,7 +469,14 @@ void WDSPRxGUI::onMenuDialogCalled(const QPoint &p)
             updateIndexLabel();
         }
 
-        applySettings();
+        applySettings(QStringList() << "rgbColor"
+                                         << "title"
+                                         << "useReverseAPI"
+                                         << "reverseAPIAddress"
+                                         << "reverseAPIPort"
+                                         << "reverseAPIDeviceIndex"
+                                         << "reverseAPIChannelIndex"
+                                         << "streamIndex");
     }
 
     resetContextMenuType();
@@ -481,7 +488,7 @@ void WDSPRxGUI::onWidgetRolled(const QWidget* widget, bool rollDown)
     (void) rollDown;
 
     getRollupContents()->saveState(m_rollupState);
-    applySettings();
+    applySettings(QStringList());
 }
 
 WDSPRxGUI::WDSPRxGUI(PluginAPI* pluginAPI, DeviceUISet *deviceUISet, BasebandSampleSink *rxChannel, QWidget* parent) :
@@ -626,11 +633,11 @@ bool WDSPRxGUI::blockApplySettings(bool block)
     return ret;
 }
 
-void WDSPRxGUI::applySettings(bool force)
+void WDSPRxGUI::applySettings(const QStringList& settingsKeys, bool force)
 {
 	if (m_doApplySettings)
 	{
-        WDSPRx::MsgConfigureWDSPRx* message = WDSPRx::MsgConfigureWDSPRx::create( m_settings, force);
+        WDSPRx::MsgConfigureWDSPRx* message = WDSPRx::MsgConfigureWDSPRx::create(settingsKeys, m_settings, force);
         m_wdspRx->getInputMessageQueue()->push(message);
 	}
 }
@@ -763,7 +770,7 @@ void WDSPRxGUI::applyBandwidths(unsigned int spanLog2, bool force)
     m_settings.m_profiles[m_settings.m_profileIndex].m_highCutoff = (Real) (bw * 100);
     m_settings.m_profiles[m_settings.m_profileIndex].m_lowCutoff = (Real) (lw * 100);
 
-    applySettings(force);
+    applySettings(QStringList({"dsb", "spanLog2", "highCutoff", "lowCutoff"}), force);
 
     bool wasBlocked = blockApplySettings(true);
     m_channelMarker.setBandwidth(bw * 200);
@@ -932,7 +939,7 @@ void WDSPRxGUI::audioSelect(const QPoint& p)
     if (audioSelect.m_selected)
     {
         m_settings.m_audioDeviceName = audioSelect.m_audioDeviceName;
-        applySettings();
+        applySettings(QStringList("audioDeviceName"));
     }
 }
 
@@ -963,17 +970,17 @@ void WDSPRxGUI::agcSetup(int iValueChanged)
     case WDSPRxAGCDialog::ValueChanged::ChangedMode:
         m_settings.m_agcMode = m_agcDialog->getAGCMode();
         m_settings.m_profiles[m_settings.m_profileIndex].m_agcMode = m_settings.m_agcMode;
-        applySettings();
+        applySettings(QStringList("agcMode"));
         break;
     case WDSPRxAGCDialog::ValueChanged::ChangedSlope:
         m_settings.m_agcSlope = m_agcDialog->getAGCSlope();
         m_settings.m_profiles[m_settings.m_profileIndex].m_agcSlope = m_settings.m_agcSlope;
-        applySettings();
+        applySettings(QStringList("agcSlope"));
         break;
     case WDSPRxAGCDialog::ValueChanged::ChangedHangThreshold:
         m_settings.m_agcHangThreshold = m_agcDialog->getAGCHangThreshold();
         m_settings.m_profiles[m_settings.m_profileIndex].m_agcHangThreshold = m_settings.m_agcHangThreshold;
-        applySettings();
+        applySettings(QStringList("agcHangThreshold"));
         break;
     default:
         break;
@@ -1011,37 +1018,37 @@ void WDSPRxGUI::dnbSetup(int32_t iValueChanged)
     case WDSPRxDNBDialog::ValueChanged::ChangedNB:
         m_settings.m_nbScheme = m_dnbDialog->getNBScheme();
         m_settings.m_profiles[m_settings.m_profileIndex].m_nbScheme = m_settings.m_nbScheme;
-        applySettings();
+        applySettings(QStringList("nbScheme"));
         break;
     case WDSPRxDNBDialog::ValueChanged::ChangedNB2Mode:
         m_settings.m_nb2Mode = m_dnbDialog->getNB2Mode();
         m_settings.m_profiles[m_settings.m_profileIndex].m_nb2Mode = m_settings.m_nb2Mode;
-        applySettings();
+        applySettings(QStringList("nb2Mode"));
         break;
     case WDSPRxDNBDialog::ValueChanged::ChangedNBSlewTime:
         m_settings.m_nbSlewTime = m_dnbDialog->getNBSlewTime();
         m_settings.m_profiles[m_settings.m_profileIndex].m_nbSlewTime = m_settings.m_nbSlewTime;
-        applySettings();
+        applySettings(QStringList("nbSlewTime"));
         break;
     case WDSPRxDNBDialog::ValueChanged::ChangedNBLeadTime:
         m_settings.m_nbLeadTime = m_dnbDialog->getNBLeadTime();
         m_settings.m_profiles[m_settings.m_profileIndex].m_nbLeadTime = m_settings.m_nbLeadTime;
-        applySettings();
+        applySettings(QStringList("nbLeadTime"));
         break;
     case WDSPRxDNBDialog::ValueChanged::ChangedNBLagTime:
         m_settings.m_nbLagTime = m_dnbDialog->getNBLagTime();
         m_settings.m_profiles[m_settings.m_profileIndex].m_nbLagTime = m_settings.m_nbLagTime;
-        applySettings();
+        applySettings(QStringList("nbLagTime"));
         break;
     case WDSPRxDNBDialog::ValueChanged::ChangedNBThreshold:
         m_settings.m_nbThreshold = m_dnbDialog->getNBThreshold();
         m_settings.m_profiles[m_settings.m_profileIndex].m_nbThreshold = m_settings.m_nbThreshold;
-        applySettings();
+        applySettings(QStringList("nbThreshold"));
         break;
     case WDSPRxDNBDialog::ValueChanged::ChangedNBAvgTime:
         m_settings.m_nbAvgTime = m_dnbDialog->getNBAvgTime();
         m_settings.m_profiles[m_settings.m_profileIndex].m_nbAvgTime = m_settings.m_nbAvgTime;
-        applySettings();
+        applySettings(QStringList("nbAvgTime"));
         break;
     default:
         break;
@@ -1078,32 +1085,32 @@ void WDSPRxGUI::dnrSetup(int32_t iValueChanged)
     case WDSPRxDNRDialog::ValueChanged::ChangedSNB:
         m_settings.m_snb = m_dnrDialog->getSNB();
         m_settings.m_profiles[m_settings.m_profileIndex].m_snb = m_settings.m_snb;
-        applySettings();
+        applySettings(QStringList("snb"));
         break;
     case WDSPRxDNRDialog::ValueChanged::ChangedNR:
         m_settings.m_nrScheme = m_dnrDialog->getNRScheme();
         m_settings.m_profiles[m_settings.m_profileIndex].m_nrScheme = m_settings.m_nrScheme;
-        applySettings();
+        applySettings(QStringList("nrScheme"));
         break;
     case WDSPRxDNRDialog::ValueChanged::ChangedNR2Gain:
         m_settings.m_nr2Gain = m_dnrDialog->getNR2Gain();
         m_settings.m_profiles[m_settings.m_profileIndex].m_nr2Gain = m_settings.m_nr2Gain;
-        applySettings();
+        applySettings(QStringList("nr2Gain"));
         break;
     case WDSPRxDNRDialog::ValueChanged::ChangedNR2NPE:
         m_settings.m_nr2NPE = m_dnrDialog->getNR2NPE();
         m_settings.m_profiles[m_settings.m_profileIndex].m_nr2NPE = m_settings.m_nr2NPE;
-        applySettings();
+        applySettings(QStringList("nr2NPE"));
         break;
     case WDSPRxDNRDialog::ValueChanged::ChangedNRPosition:
         m_settings.m_nrPosition = m_dnrDialog->getNRPosition();
         m_settings.m_profiles[m_settings.m_profileIndex].m_nrPosition = m_settings.m_nrPosition;
-        applySettings();
+        applySettings(QStringList("nrPosition"));
         break;
     case WDSPRxDNRDialog::ValueChanged::ChangedNR2Artifacts:
         m_settings.m_nr2ArtifactReduction = m_dnrDialog->getNR2ArtifactReduction();
         m_settings.m_profiles[m_settings.m_profileIndex].m_nr2ArtifactReduction = m_settings.m_nr2ArtifactReduction;
-        applySettings();
+        applySettings(QStringList("nr2ArtifactReduction"));
         break;
     default:
         break;
@@ -1137,17 +1144,17 @@ void WDSPRxGUI::cwPeakSetup(int iValueChanged)
     case WDSPRxCWPeakDialog::ChangedCWPeakFrequency:
         m_settings.m_cwPeakFrequency = m_cwPeakDialog->getCWPeakFrequency();
         m_settings.m_profiles[m_settings.m_profileIndex].m_cwPeakFrequency = m_settings.m_cwPeakFrequency;
-        applySettings();
+        applySettings(QStringList("cwPeakFrequency"));
         break;
     case WDSPRxCWPeakDialog::ChangedCWBandwidth:
         m_settings.m_cwBandwidth = m_cwPeakDialog->getCWBandwidth();
         m_settings.m_profiles[m_settings.m_profileIndex].m_cwBandwidth = m_settings.m_cwBandwidth;
-        applySettings();
+        applySettings(QStringList("cwBandwidth"));
         break;
     case WDSPRxCWPeakDialog::ChangedCWGain:
         m_settings.m_cwGain = m_cwPeakDialog->getCWGain();
         m_settings.m_profiles[m_settings.m_profileIndex].m_cwGain = m_settings.m_cwGain;
-        applySettings();
+        applySettings(QStringList("cwGain"));
         break;
     default:
         break;
@@ -1199,7 +1206,7 @@ void WDSPRxGUI::amSetup(int iValueChanged)
     {
         m_settings.m_amFadeLevel = m_amDialog->getFadeLevel();
         m_settings.m_profiles[m_settings.m_profileIndex].m_amFadeLevel = m_settings.m_amFadeLevel;
-        applySettings();
+        applySettings(QStringList("amFadeLevel"));
     }
 }
 
@@ -1216,37 +1223,37 @@ void WDSPRxGUI::fmSetup(int iValueChanged)
     case WDSPRxFMDialog::ChangedDeviation:
         m_settings.m_fmDeviation = m_fmDialog->getDeviation();
         m_settings.m_profiles[m_settings.m_profileIndex].m_fmDeviation = m_settings.m_fmDeviation;
-        applySettings();
+        applySettings(QStringList("fmDeviation"));
         break;
     case WDSPRxFMDialog::ChangedAFLow:
         m_settings.m_fmAFLow = m_fmDialog->getAFLow();
         m_settings.m_profiles[m_settings.m_profileIndex].m_fmAFLow = m_settings.m_fmAFLow;
-        applySettings();
+        applySettings(QStringList("fmAFLow"));
         break;
     case WDSPRxFMDialog::ChangedAFHigh:
         m_settings.m_fmAFHigh = m_fmDialog->getAFHigh();
         m_settings.m_profiles[m_settings.m_profileIndex].m_fmAFHigh = m_settings.m_fmAFHigh;
-        applySettings();
+        applySettings(QStringList("fmAFHigh"));
         break;
     case WDSPRxFMDialog::ChangedAFLimiter:
         m_settings.m_fmAFLimiter = m_fmDialog->getAFLimiter();
         m_settings.m_profiles[m_settings.m_profileIndex].m_fmAFLimiter = m_settings.m_fmAFLimiter;
-        applySettings();
+        applySettings(QStringList("fmAFLimiter"));
         break;
     case WDSPRxFMDialog::ChangedAFLimiterGain:
         m_settings.m_fmAFLimiterGain = m_fmDialog->getAFLimiterGain();
         m_settings.m_profiles[m_settings.m_profileIndex].m_fmAFLimiterGain = m_settings.m_fmAFLimiterGain;
-        applySettings();
+        applySettings(QStringList("fmAFLimiterGain"));
         break;
     case WDSPRxFMDialog::ChangedCTCSSNotch:
         m_settings.m_fmCTCSSNotch = m_fmDialog->getCTCSSNotch();
         m_settings.m_profiles[m_settings.m_profileIndex].m_fmCTCSSNotch = m_settings.m_fmCTCSSNotch;
-        applySettings();
+        applySettings(QStringList("fmCTCSSNotch"));
         break;
     case WDSPRxFMDialog::ChangedCTCSSNotchFrequency:
         m_settings.m_fmCTCSSNotchFrequency = m_fmDialog->getCTCSSNotchFrequency();
         m_settings.m_profiles[m_settings.m_profileIndex].m_fmCTCSSNotchFrequency = m_settings.m_fmCTCSSNotchFrequency;
-        applySettings();
+        applySettings(QStringList("fmCTCSSNotchFrequency"));
         break;
     default:
         break;
@@ -1281,22 +1288,22 @@ void WDSPRxGUI::squelchSetup(int iValueChanged)
     case WDSPRxSquelchDialog::ChangedMode:
         m_settings.m_squelchMode = m_squelchDialog->getMode();
         m_settings.m_profiles[m_settings.m_profileIndex].m_squelchMode = m_settings.m_squelchMode;
-        applySettings();
+        applySettings(QStringList("squelchMode"));
         break;
     case WDSPRxSquelchDialog::ChangedSSQLTauMute:
         m_settings.m_ssqlTauMute = m_squelchDialog->getSSQLTauMute();
         m_settings.m_profiles[m_settings.m_profileIndex].m_ssqlTauMute = m_settings.m_ssqlTauMute;
-        applySettings();
+        applySettings(QStringList("ssqlTauMute"));
         break;
     case WDSPRxSquelchDialog::ChangedSSQLTauUnmute:
         m_settings.m_ssqlTauUnmute = m_squelchDialog->getSSQLTauUnmute();
         m_settings.m_profiles[m_settings.m_profileIndex].m_ssqlTauUnmute = m_settings.m_ssqlTauUnmute;
-        applySettings();
+        applySettings(QStringList("ssqlTauUnmute"));
         break;
     case WDSPRxSquelchDialog::ChangedAMSQMaxTail:
         m_settings.m_amsqMaxTail = m_squelchDialog->getAMSQMaxTail();
         m_settings.m_profiles[m_settings.m_profileIndex].m_amsqMaxTail = m_settings.m_amsqMaxTail;
-        applySettings();
+        applySettings(QStringList("amsqMaxTail"));
         break;
     default:
         break;
@@ -1329,12 +1336,12 @@ void WDSPRxGUI::equalizerSetup(int iValueChanged)
     case WDSPRxEqDialog::ChangedFrequency:
         m_settings.m_eqF = m_equalizerDialog->getEqF();
         m_settings.m_profiles[m_settings.m_profileIndex].m_eqF = m_settings.m_eqF;
-        applySettings();
+        applySettings(QStringList("eqF"));
         break;
     case WDSPRxEqDialog::ChangedGain:
         m_settings.m_eqG = m_equalizerDialog->getEqG();
         m_settings.m_profiles[m_settings.m_profileIndex].m_eqG = m_settings.m_eqG;
-        applySettings();
+        applySettings(QStringList("eqG"));
         break;
     default:
         break;
@@ -1365,7 +1372,7 @@ void WDSPRxGUI::panSetup(int iValueChanged)
     {
         m_settings.m_audioPan = m_panDialog->getPan();
         m_settings.m_profiles[m_settings.m_profileIndex].m_audioPan = m_settings.m_audioPan;
-        applySettings();
+        applySettings(QStringList("audioPan"));
     }
 }
 

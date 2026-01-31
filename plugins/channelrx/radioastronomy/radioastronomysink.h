@@ -41,7 +41,7 @@ public:
     virtual void feed(const SampleVector::const_iterator& begin, const SampleVector::const_iterator& end);
 
     void applyChannelSettings(int channelSampleRate, int channelFrequencyOffset, bool force = false);
-    void applySettings(const RadioAstronomySettings& settings, bool force = false);
+    void applySettings(const QStringList& settingsKeys, const RadioAstronomySettings& settings, bool force = false);
     void setMessageQueueToChannel(MessageQueue *messageQueue) { m_messageQueueToChannel = messageQueue; }
     void setChannel(ChannelAPI *channel) { m_channel = channel; }
     void startMeasurements();

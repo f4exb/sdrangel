@@ -134,7 +134,7 @@ WDSPRxSink::WDSPRxSink() :
     m_rxa->setPassband(0, m_Bandwidth);
 
     applyChannelSettings(m_channelSampleRate, m_channelFrequencyOffset, true);
-	applySettings(m_settings, true);
+	applySettings(QStringList(), m_settings, true);
 }
 
 WDSPRxSink::~WDSPRxSink()
@@ -329,47 +329,15 @@ void WDSPRxSink::applyAudioSampleRate(int sampleRate)
     }
 }
 
-void WDSPRxSink::applySettings(const WDSPRxSettings& settings, bool force)
+void WDSPRxSink::applySettings(const QStringList& settingsKeys, const WDSPRxSettings& settings, bool force)
 {
-    qDebug() << "WDSPRxSink::applySettings:"
-            << " m_demod: " << settings.m_demod
-            << " m_inputFrequencyOffset: " << settings.m_inputFrequencyOffset
-            << " m_profileIndex: " << settings.m_profileIndex
-            << " m_spanLog2: " << settings.m_profiles[settings.m_profileIndex].m_spanLog2
-            << " m_highCutoff: " << settings.m_profiles[settings.m_profileIndex].m_highCutoff
-            << " m_lowCutoff: " << settings.m_profiles[settings.m_profileIndex].m_lowCutoff
-            << " m_fftWindow: " << settings.m_profiles[settings.m_profileIndex].m_fftWindow << "]"
-            << " m_volume: " << settings.m_volume
-            << " m_audioBinaural: " << settings.m_audioBinaural
-            << " m_audioFlipChannels: " << settings.m_audioFlipChannels
-            << " m_dsb: " << settings.m_dsb
-            << " m_audioMute: " << settings.m_audioMute
-            << " m_agc: " << settings.m_agc
-            << " m_agcMode: " << settings.m_agcMode
-            << " m_agcGain: " << settings.m_agcGain
-            << " m_agcSlope: " << settings.m_agcSlope
-            << " m_agcHangThreshold: " << settings.m_agcHangThreshold
-            << " m_audioDeviceName: " << settings.m_audioDeviceName
-            << " m_dnr: " << settings.m_dnr
-            << " m_nrScheme: " << settings.m_nrScheme
-            << " m_nrPosition: "<< settings.m_nrPosition
-            << " m_nr2Gain: " << settings.m_nr2Gain
-            << " m_nr2NPE: " << settings.m_nr2NPE
-            << " m_nr2ArtifactReduction: " << settings.m_nr2ArtifactReduction
-            << " m_rit: " << settings.m_rit
-            << " m_ritFrequency: " <<  settings.m_ritFrequency
-            << " m_streamIndex: " << settings.m_streamIndex
-            << " m_useReverseAPI: " << settings.m_useReverseAPI
-            << " m_reverseAPIAddress: " << settings.m_reverseAPIAddress
-            << " m_reverseAPIPort: " << settings.m_reverseAPIPort
-            << " m_reverseAPIDeviceIndex: " << settings.m_reverseAPIDeviceIndex
-            << " m_reverseAPIChannelIndex: " << settings.m_reverseAPIChannelIndex
-            << " force: " << force;
+    qDebug() << "WDSPRxSink::applySettings:" << settings.getDebugString(settingsKeys, force);
 
 
     // RIT
 
-    if ((m_settings.m_rit != settings.m_rit) || (m_settings.m_ritFrequency != settings.m_ritFrequency) || force)
+    if ((settingsKeys.contains("rit") && (m_settings.m_rit != settings.m_rit)) ||
+        (settingsKeys.contains("ritFrequency") && (m_settings.m_ritFrequency != settings.m_ritFrequency)) || force)
     {
         m_rxa->shift->SetFreq(settings.m_ritFrequency);
         m_rxa->shift->SetRun(settings.m_rit ? 1 : 0);
@@ -377,11 +345,11 @@ void WDSPRxSink::applySettings(const WDSPRxSettings& settings, bool force)
 
     // Filter and mode
 
-    if((m_settings.m_profiles[m_settings.m_profileIndex].m_highCutoff != settings.m_profiles[settings.m_profileIndex].m_highCutoff) ||
-        (m_settings.m_profiles[m_settings.m_profileIndex].m_lowCutoff != settings.m_profiles[settings.m_profileIndex].m_lowCutoff) ||
-        (m_settings.m_profiles[m_settings.m_profileIndex].m_fftWindow != settings.m_profiles[settings.m_profileIndex].m_fftWindow) ||
-        (m_settings.m_demod != settings.m_demod) ||
-        (m_settings.m_dsb != settings.m_dsb) || force)
+    if((settingsKeys.contains("highCutoff") && (m_settings.m_profiles[m_settings.m_profileIndex].m_highCutoff != settings.m_profiles[settings.m_profileIndex].m_highCutoff)) ||
+        (settingsKeys.contains("lowCutoff") && (m_settings.m_profiles[m_settings.m_profileIndex].m_lowCutoff != settings.m_profiles[settings.m_profileIndex].m_lowCutoff)) ||
+        (settingsKeys.contains("fftWindow") && (m_settings.m_profiles[m_settings.m_profileIndex].m_fftWindow != settings.m_profiles[settings.m_profileIndex].m_fftWindow)) ||
+        (settingsKeys.contains("demod") && (m_settings.m_demod != settings.m_demod)) ||
+        (settingsKeys.contains("dsb") && (m_settings.m_dsb != settings.m_dsb)) || force)
     {
         float band;
         float low;
@@ -480,14 +448,14 @@ void WDSPRxSink::applySettings(const WDSPRxSettings& settings, bool force)
         }
     }
 
-    if ((m_settings.m_profiles[settings.m_profileIndex].m_spanLog2 != settings.m_profiles[settings.m_profileIndex].m_spanLog2) || force) {
+    if ((settingsKeys.contains("spanLog2") && (m_settings.m_profiles[settings.m_profileIndex].m_spanLog2 != settings.m_profiles[settings.m_profileIndex].m_spanLog2)) || force) {
         m_spectrumProbe.setSpanLog2(settings.m_profiles[settings.m_profileIndex].m_spanLog2);
     }
 
     // Noise Reduction
 
-    if ((m_settings.m_dnr != settings.m_dnr)
-    || (m_settings.m_nrScheme != settings.m_nrScheme) || force)
+    if ((settingsKeys.contains("dnr") && (m_settings.m_dnr != settings.m_dnr))
+    || (settingsKeys.contains("nrScheme") && (m_settings.m_nrScheme != settings.m_nrScheme)) || force)
     {
         m_rxa->setANRRun(0);
         m_rxa->setEMNRRun(0);
@@ -508,7 +476,7 @@ void WDSPRxSink::applySettings(const WDSPRxSettings& settings, bool force)
         }
     }
 
-    if ((m_settings.m_nrPosition != settings.m_nrPosition) || force)
+    if ((settingsKeys.contains("nrPosition") && (m_settings.m_nrPosition != settings.m_nrPosition)) || force)
     {
         switch (settings.m_nrPosition)
         {
@@ -525,7 +493,7 @@ void WDSPRxSink::applySettings(const WDSPRxSettings& settings, bool force)
         }
     }
 
-    if ((m_settings.m_nr2Gain != settings.m_nr2Gain) || force)
+    if ((settingsKeys.contains("nr2Gain") && (m_settings.m_nr2Gain != settings.m_nr2Gain)) || force)
     {
         switch (settings.m_nr2Gain)
         {
@@ -543,7 +511,7 @@ void WDSPRxSink::applySettings(const WDSPRxSettings& settings, bool force)
         }
     }
 
-    if ((m_settings.m_nr2NPE != settings.m_nr2NPE) || force)
+    if ((settingsKeys.contains("nr2NPE") && (m_settings.m_nr2NPE != settings.m_nr2NPE)) || force)
     {
         switch (settings.m_nr2NPE)
         {
@@ -558,41 +526,41 @@ void WDSPRxSink::applySettings(const WDSPRxSettings& settings, bool force)
         }
     }
 
-    if ((m_settings.m_nr2ArtifactReduction != settings.m_nr2ArtifactReduction) || force) {
+    if ((settingsKeys.contains("nr2ArtifactReduction") && (m_settings.m_nr2ArtifactReduction != settings.m_nr2ArtifactReduction)) || force) {
         m_rxa->emnr->setAeRun(settings.m_nr2ArtifactReduction ? 1 : 0);
     }
 
-    if ((m_settings.m_anf != settings.m_anf) || force) {
+    if ((settingsKeys.contains("anf") && (m_settings.m_anf != settings.m_anf)) || force) {
         m_rxa->setANFRun(settings.m_anf ? 1 : 0);
     }
 
     // Caution: Causes corruption
-    if ((m_settings.m_snb != settings.m_snb) || force) {
+    if ((settingsKeys.contains("snb") && (m_settings.m_snb != settings.m_snb)) || force) {
         m_rxa->setSNBARun(settings.m_snb ? 1 : 0);
     }
 
     // CW Peaking
 
-    if ((m_settings.m_cwPeaking != settings.m_cwPeaking) || force) {
+    if ((settingsKeys.contains("cwPeaking") && (m_settings.m_cwPeaking != settings.m_cwPeaking)) || force) {
         m_rxa->speak->setRun(settings.m_cwPeaking ? 1 : 0);
     }
 
-    if ((m_settings.m_cwPeakFrequency != settings.m_cwPeakFrequency) || force) {
+    if ((settingsKeys.contains("cwPeakFrequency") && (m_settings.m_cwPeakFrequency != settings.m_cwPeakFrequency)) || force) {
         m_rxa->speak->setFreq(settings.m_cwPeakFrequency);
     }
 
-    if ((m_settings.m_cwBandwidth != settings.m_cwBandwidth) || force) {
+    if ((settingsKeys.contains("cwBandwidth") && (m_settings.m_cwBandwidth != settings.m_cwBandwidth)) || force) {
         m_rxa->speak->setBandwidth(settings.m_cwBandwidth);
     }
 
-    if ((m_settings.m_cwGain != settings.m_cwGain) || force) {
+    if ((settingsKeys.contains("cwGain") && (m_settings.m_cwGain != settings.m_cwGain)) || force) {
         m_rxa->speak->setGain(settings.m_cwGain);
     }
 
     // Noise Blanker
 
-    if ((m_settings.m_dnb != settings.m_dnb)
-    || (m_settings.m_nbScheme != settings.m_nbScheme) || force)
+    if ((settingsKeys.contains("dnb") && (m_settings.m_dnb != settings.m_dnb))
+    || (settingsKeys.contains("nbScheme") && (m_settings.m_nbScheme != settings.m_nbScheme)) || force)
     {
         m_rxa->anb->setRun(0);
         m_rxa->nob->setRun(0);
@@ -613,31 +581,31 @@ void WDSPRxSink::applySettings(const WDSPRxSettings& settings, bool force)
         }
     }
 
-    if ((m_settings.m_nbSlewTime != settings.m_nbSlewTime) || force)
+    if ((settingsKeys.contains("nbSlewTime") && (m_settings.m_nbSlewTime != settings.m_nbSlewTime)) || force)
     {
         m_rxa->anb->setTau(settings.m_nbSlewTime * 0.001);
         m_rxa->nob->setTau(settings.m_nbSlewTime * 0.001);
     }
 
-    if ((m_settings.m_nbLeadTime != settings.m_nbLeadTime) || force)
+    if ((settingsKeys.contains("nbLeadTime") && (m_settings.m_nbLeadTime != settings.m_nbLeadTime)) || force)
     {
         m_rxa->anb->setAdvtime(settings.m_nbLeadTime * 0.001);
         m_rxa->nob->setAdvtime(settings.m_nbLeadTime * 0.001);
     }
 
-    if ((m_settings.m_nbLagTime != settings.m_nbLagTime) || force)
+    if ((settingsKeys.contains("nbLagTime") && (m_settings.m_nbLagTime != settings.m_nbLagTime)) || force)
     {
         m_rxa->anb->setHangtime(settings.m_nbLagTime * 0.001);
         m_rxa->nob->setHangtime(settings.m_nbLagTime * 0.001);
     }
 
-    if ((m_settings.m_nbThreshold != settings.m_nbThreshold) || force)
+    if ((settingsKeys.contains("nbThreshold") && (m_settings.m_nbThreshold != settings.m_nbThreshold)) || force)
     {
         m_rxa->anb->setThreshold(settings.m_nbThreshold);
         m_rxa->nob->setThreshold(settings.m_nbThreshold);
     }
 
-    if ((m_settings.m_nbAvgTime != settings.m_nbAvgTime) || force)
+    if ((settingsKeys.contains("nbAvgTime") && (m_settings.m_nbAvgTime != settings.m_nbAvgTime)) || force)
     {
         m_rxa->anb->setBacktau(settings.m_nbAvgTime * 0.001);
         m_rxa->nob->setBacktau(settings.m_nbAvgTime * 0.001);
@@ -645,43 +613,43 @@ void WDSPRxSink::applySettings(const WDSPRxSettings& settings, bool force)
 
     // AM option
 
-    if ((m_settings.m_amFadeLevel != settings.m_amFadeLevel) || force) {
+    if ((settingsKeys.contains("amFadeLevel") && (m_settings.m_amFadeLevel != settings.m_amFadeLevel)) || force) {
         m_rxa->amd->setFadeLevel(settings.m_amFadeLevel);
     }
 
     // FM options
 
-    if ((m_settings.m_fmDeviation != settings.m_fmDeviation) || force) {
+    if ((settingsKeys.contains("fmDeviation") && (m_settings.m_fmDeviation != settings.m_fmDeviation)) || force) {
         m_rxa->fmd->setDeviation(settings.m_fmDeviation);
     }
 
-    if ((m_settings.m_fmAFLow != settings.m_fmAFLow)
-    || (m_settings.m_fmAFHigh != settings.m_fmAFHigh) || force)
+    if ((settingsKeys.contains("fmAFLow") && (m_settings.m_fmAFLow != settings.m_fmAFLow))
+    || (settingsKeys.contains("fmAFHigh") && (m_settings.m_fmAFHigh != settings.m_fmAFHigh)) || force)
     {
         m_rxa->fmd->setAFFilter(settings.m_fmAFLow, settings.m_fmAFHigh);
     }
 
-    if ((m_settings.m_fmAFLimiter != settings.m_fmAFLimiter) || force) {
+    if ((settingsKeys.contains("fmAFLimiter") && (m_settings.m_fmAFLimiter != settings.m_fmAFLimiter)) || force) {
         m_rxa->fmd->setLimRun(settings.m_fmAFLimiter ? 1 : 0);
     }
 
-    if ((m_settings.m_fmAFLimiterGain != settings.m_fmAFLimiterGain) || force) {
+    if ((settingsKeys.contains("fmAFLimiterGain") && (m_settings.m_fmAFLimiterGain != settings.m_fmAFLimiterGain)) || force) {
         m_rxa->fmd->setLimGain(settings.m_fmAFLimiterGain);
     }
 
-    if ((m_settings.m_fmCTCSSNotch != settings.m_fmCTCSSNotch) || force) {
+    if ((settingsKeys.contains("fmCTCSSNotch") && (m_settings.m_fmCTCSSNotch != settings.m_fmCTCSSNotch)) || force) {
         m_rxa->fmd->setCTCSSRun(settings.m_fmCTCSSNotch ? 1 : 0);
     }
 
-    if ((m_settings.m_fmCTCSSNotchFrequency != settings.m_fmCTCSSNotchFrequency) || force) {
+    if ((settingsKeys.contains("fmCTCSSNotchFrequency") && (m_settings.m_fmCTCSSNotchFrequency != settings.m_fmCTCSSNotchFrequency)) || force) {
         m_rxa->fmd->setCTCSSFreq(settings.m_fmCTCSSNotchFrequency);
     }
 
     // Squelch
 
-    if ((m_settings.m_squelch != settings.m_squelch)
-    || (m_settings.m_squelchThreshold != settings.m_squelchThreshold)
-    || (m_settings.m_squelchMode != settings.m_squelchMode) || force)
+    if ((settingsKeys.contains("squelch") && (m_settings.m_squelch != settings.m_squelch))
+    || (settingsKeys.contains("squelchThreshold") && (m_settings.m_squelchThreshold != settings.m_squelchThreshold))
+    || (settingsKeys.contains("squelchMode") && (m_settings.m_squelchMode != settings.m_squelchMode)) || force)
     {
         m_rxa->ssql->setRun(0);
         m_rxa->amsq->setRun(0);
@@ -719,39 +687,39 @@ void WDSPRxSink::applySettings(const WDSPRxSettings& settings, bool force)
         }
     }
 
-    if ((m_settings.m_ssqlTauMute != settings.m_ssqlTauMute) || force) {
+    if ((settingsKeys.contains("ssqlTauMute") && (m_settings.m_ssqlTauMute != settings.m_ssqlTauMute)) || force) {
         m_rxa->ssql->setTauMute(settings.m_ssqlTauMute);
     }
 
-    if ((m_settings.m_ssqlTauUnmute != settings.m_ssqlTauUnmute) || force) {
+    if ((settingsKeys.contains("ssqlTauUnmute") && (m_settings.m_ssqlTauUnmute != settings.m_ssqlTauUnmute)) || force) {
         m_rxa->ssql->setTauUnMute(settings.m_ssqlTauUnmute);
     }
 
-    if ((m_settings.m_amsqMaxTail != settings.m_amsqMaxTail) || force) {
+    if ((settingsKeys.contains("amsqMaxTail") && (m_settings.m_amsqMaxTail != settings.m_amsqMaxTail)) || force) {
         m_rxa->amsq->setMaxTail(settings.m_amsqMaxTail);
     }
 
     // Equalizer
 
-    if ((m_settings.m_equalizer != settings.m_equalizer) || force) {
+    if ((settingsKeys.contains("equalizer") && (m_settings.m_equalizer != settings.m_equalizer)) || force) {
         m_rxa->eqp->setRun(settings.m_equalizer ? 1 : 0);
     }
 
-    if ((m_settings.m_eqF != settings.m_eqF)
-    || (m_settings.m_eqG != settings.m_eqG) || force)
+    if ((settingsKeys.contains("eqF") && (m_settings.m_eqF != settings.m_eqF))
+    || (settingsKeys.contains("eqG") && (m_settings.m_eqG != settings.m_eqG)) || force)
     {
         m_rxa->eqp->setProfile(10, settings.m_eqF.data(), settings.m_eqG.data());
     }
 
     // Audio panel
 
-    if ((m_settings.m_volume != settings.m_volume) || force) {
+    if ((settingsKeys.contains("volume") && (m_settings.m_volume != settings.m_volume)) || force) {
         m_rxa->panel->setGain1(settings.m_volume);
     }
 
-    if ((m_settings.m_audioBinaural != settings.m_audioBinaural)
-    || (m_settings.m_audioPan != settings.m_audioPan)
-    || (m_settings.m_audioFlipChannels != settings.m_audioFlipChannels) || force)
+    if ((settingsKeys.contains("audioBinaural") && (m_settings.m_audioBinaural != settings.m_audioBinaural))
+    || (settingsKeys.contains("audioPan") && (m_settings.m_audioPan != settings.m_audioPan))
+    || (settingsKeys.contains("audioFlipChannels") && (m_settings.m_audioFlipChannels != settings.m_audioFlipChannels)) || force)
     {
         if (settings.m_audioBinaural)
         {
@@ -767,11 +735,11 @@ void WDSPRxSink::applySettings(const WDSPRxSettings& settings, bool force)
 
     // AGC
 
-    if ((m_settings.m_agc != settings.m_agc)
-    || (m_settings.m_agcMode != settings.m_agcMode)
-    || (m_settings.m_agcSlope != settings.m_agcSlope)
-    || (m_settings.m_agcHangThreshold != settings.m_agcHangThreshold)
-    || (m_settings.m_agcGain != settings.m_agcGain) || force)
+    if ((settingsKeys.contains("agc") && (m_settings.m_agc != settings.m_agc))
+    || (settingsKeys.contains("agcMode") && (m_settings.m_agcMode != settings.m_agcMode))
+    || (settingsKeys.contains("agcSlope") && (m_settings.m_agcSlope != settings.m_agcSlope))
+    || (settingsKeys.contains("agcHangThreshold") && (m_settings.m_agcHangThreshold != settings.m_agcHangThreshold))
+    || (settingsKeys.contains("agcGain") && (m_settings.m_agcGain != settings.m_agcGain)) || force)
     {
         m_rxa->agc->setSlope(settings.m_agcSlope);
         m_rxa->agc->setTop((float) settings.m_agcGain);
@@ -816,5 +784,9 @@ void WDSPRxSink::applySettings(const WDSPRxSettings& settings, bool force)
         }
     }
 
-    m_settings = settings;
+    if (force) {
+        m_settings = settings;
+    } else {
+        m_settings.applySettings(settingsKeys, settings);
+    }
 }

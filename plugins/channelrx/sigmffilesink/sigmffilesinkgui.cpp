@@ -47,7 +47,7 @@ void SigMFFileSinkGUI::resetToDefaults()
 {
     m_settings.resetToDefaults();
     displaySettings();
-    applySettings(true);
+    applySettings(QStringList(), true);
 }
 
 QByteArray SigMFFileSinkGUI::serialize() const
@@ -60,7 +60,7 @@ bool SigMFFileSinkGUI::deserialize(const QByteArray& data)
     if (m_settings.deserialize(data))
     {
         displaySettings();
-        applySettings(true);
+        applySettings(QStringList(), true);
         return true;
     }
     else
@@ -85,7 +85,7 @@ bool SigMFFileSinkGUI::handleMessage(const Message& message)
         if (m_fixedPosition)
         {
             setFrequencyFromPos();
-            applySettings();
+            applySettings(QStringList());
         }
         else
         {
@@ -217,7 +217,7 @@ SigMFFileSinkGUI::SigMFFileSinkGUI(PluginAPI* pluginAPI, DeviceUISet *deviceUISe
 
     displaySettings();
     makeUIConnections();
-    applySettings(true);
+    applySettings(QStringList(), true);
     DialPopup::addPopupsToChildDials(this);
     m_resizer.enableChildMouseTracking();
 }
@@ -233,13 +233,13 @@ void SigMFFileSinkGUI::blockApplySettings(bool block)
     m_doApplySettings = !block;
 }
 
-void SigMFFileSinkGUI::applySettings(bool force)
+void SigMFFileSinkGUI::applySettings(const QStringList& settingsKeys, bool force)
 {
     if (m_doApplySettings)
     {
         setTitleColor(m_channelMarker.getColor());
 
-        SigMFFileSink::MsgConfigureSigMFFileSink* message = SigMFFileSink::MsgConfigureSigMFFileSink::create(m_settings, force);
+        SigMFFileSink::MsgConfigureSigMFFileSink* message = SigMFFileSink::MsgConfigureSigMFFileSink::create(settingsKeys, m_settings, force);
         m_sigMFFileSink->getInputMessageQueue()->push(message);
     }
 }
@@ -325,7 +325,7 @@ void SigMFFileSinkGUI::channelMarkerChangedByCursor()
     ui->deltaFrequency->setValue(m_channelMarker.getCenterFrequency());
     m_settings.m_inputFrequencyOffset = m_channelMarker.getCenterFrequency();
     setPosFromFrequency();
-	applySettings();
+	applySettings(QStringList("inputFrequencyOffset"));
 }
 
 void SigMFFileSinkGUI::channelMarkerHighlightedByCursor()
@@ -352,7 +352,7 @@ void SigMFFileSinkGUI::onWidgetRolled(QWidget* widget, bool rollDown)
     (void) rollDown;
 
     getRollupContents()->saveState(m_rollupState);
-    applySettings();
+    applySettings(QStringList());
 }
 
 void SigMFFileSinkGUI::onMenuDialogCalled(const QPoint &p)
@@ -397,7 +397,16 @@ void SigMFFileSinkGUI::onMenuDialogCalled(const QPoint &p)
             updateIndexLabel();
         }
 
-        applySettings();
+        applySettings(QStringList({
+            "rgbColor",
+            "title",
+            "useReverseAPI",
+            "reverseAPIAddress",
+            "reverseAPIPort",
+            "reverseAPIDeviceIndex",
+            "reverseAPIChannelIndex",
+            "streamIndex"
+        }));
     }
 
     resetContextMenuType();
@@ -411,7 +420,7 @@ void SigMFFileSinkGUI::on_deltaFrequency_changed(qint64 value)
         m_settings.m_inputFrequencyOffset = m_channelMarker.getCenterFrequency();
         updateAbsoluteCenterFrequency();
         setPosFromFrequency();
-        applySettings();
+        applySettings(QStringList("inputFrequencyOffset"));
     }
 }
 
@@ -421,7 +430,7 @@ void SigMFFileSinkGUI::on_decimationFactor_currentIndexChanged(int index)
     applyDecimation();
     displayRate();
     displayPos();
-    applySettings();
+    applySettings(QStringList("log2Decim"));
 
     if (m_fixedPosition) {
         setFrequencyFromPos();
@@ -433,7 +442,7 @@ void SigMFFileSinkGUI::on_decimationFactor_currentIndexChanged(int index)
 void SigMFFileSinkGUI::on_recordSampleSize_currentIndexChanged(int index)
 {
     m_settings.m_log2RecordSampleSize = index + 3;
-    applySettings();
+    applySettings(QStringList("log2RecordSampleSize"));
 }
 
 void SigMFFileSinkGUI::on_fixedPosition_toggled(bool checked)
@@ -446,7 +455,7 @@ void SigMFFileSinkGUI::on_fixedPosition_toggled(bool checked)
     if (m_fixedPosition)
     {
         setFrequencyFromPos();
-        applySettings();
+        applySettings(QStringList("inputFrequencyOffset"));
     }
 }
 
@@ -458,7 +467,7 @@ void SigMFFileSinkGUI::on_position_valueChanged(int value)
     if (m_fixedPosition)
     {
         setFrequencyFromPos();
-        applySettings();
+        applySettings(QStringList("inputFrequencyOffset"));
     }
 }
 
@@ -478,35 +487,35 @@ void SigMFFileSinkGUI::on_spectrumSquelch_toggled(bool checked)
 
     ui->squelchedRecording->setEnabled(checked);
 
-    applySettings();
+    applySettings(QStringList("spectrumSquelchMode"));
 }
 
 void SigMFFileSinkGUI::on_squelchLevel_valueChanged(int value)
 {
 	m_settings.m_spectrumSquelch = value;
 	ui->squelchLevelText->setText(tr("%1").arg(m_settings.m_spectrumSquelch));
-    applySettings();
+    applySettings(QStringList("spectrumSquelch"));
 }
 
 void SigMFFileSinkGUI::on_preRecordTime_valueChanged(int value)
 {
     m_settings.m_preRecordTime = value;
     ui->preRecordTimeText->setText(tr("%1").arg(m_settings.m_preRecordTime));
-    applySettings();
+    applySettings(QStringList("preRecordTime"));
 }
 
 void SigMFFileSinkGUI::on_postSquelchTime_valueChanged(int value)
 {
     m_settings.m_squelchPostRecordTime = value;
     ui->postSquelchTimeText->setText(tr("%1").arg(m_settings.m_squelchPostRecordTime));
-    applySettings();
+    applySettings(QStringList("squelchPostRecordTime"));
 }
 
 void SigMFFileSinkGUI::on_squelchedRecording_toggled(bool checked)
 {
     ui->record->setEnabled(!checked);
     m_settings.m_squelchRecordingEnable = checked;
-    applySettings();
+    applySettings(QStringList("squelchRecordingEnable"));
 }
 
 void SigMFFileSinkGUI::on_record_toggled(bool checked)
@@ -537,7 +546,7 @@ void SigMFFileSinkGUI::on_showFileDialog_clicked(bool checked)
         {
             m_settings.m_fileRecordName = fileNames.at(0);
 		    ui->fileNameText->setText(m_settings.m_fileRecordName);
-            applySettings();
+            applySettings(QStringList("fileRecordName"));
         }
     }
 }

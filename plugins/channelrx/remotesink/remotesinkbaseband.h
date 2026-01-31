@@ -40,20 +40,23 @@ public:
 
     public:
         const RemoteSinkSettings& getSettings() const { return m_settings; }
+        const QStringList& getSettingsKeys() const { return m_settingsKeys; }
         bool getForce() const { return m_force; }
 
-        static MsgConfigureRemoteSinkBaseband* create(const RemoteSinkSettings& settings, bool force)
+        static MsgConfigureRemoteSinkBaseband* create(const QStringList& settingsKeys, const RemoteSinkSettings& settings, bool force)
         {
-            return new MsgConfigureRemoteSinkBaseband(settings, force);
+            return new MsgConfigureRemoteSinkBaseband(settingsKeys, settings, force);
         }
 
     private:
         RemoteSinkSettings m_settings;
+        QStringList m_settingsKeys;
         bool m_force;
 
-        MsgConfigureRemoteSinkBaseband(const RemoteSinkSettings& settings, bool force) :
+        MsgConfigureRemoteSinkBaseband(const QStringList& settingsKeys, const RemoteSinkSettings& settings, bool force) :
             Message(),
             m_settings(settings),
+            m_settingsKeys(settingsKeys),
             m_force(force)
         { }
     };
@@ -86,7 +89,7 @@ private:
     QRecursiveMutex m_mutex;
 
     bool handleMessage(const Message& cmd);
-    void applySettings(const RemoteSinkSettings& settings, bool force = false);
+    void applySettings(const QStringList& settingsKeys, const RemoteSinkSettings& settings, bool force = false);
 
 private slots:
     void handleInputMessages();

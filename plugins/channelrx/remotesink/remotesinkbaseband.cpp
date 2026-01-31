@@ -127,7 +127,7 @@ bool RemoteSinkBaseband::handleMessage(const Message& cmd)
         MsgConfigureRemoteSinkBaseband& cfg = (MsgConfigureRemoteSinkBaseband&) cmd;
         qDebug() << "RemoteSinkBaseband::handleMessage: MsgConfigureRemoteSinkBaseband";
 
-        applySettings(cfg.getSettings(), cfg.getForce());
+        applySettings(cfg.getSettingsKeys(), cfg.getSettings(), cfg.getForce());
 
         return true;
     }
@@ -149,21 +149,23 @@ bool RemoteSinkBaseband::handleMessage(const Message& cmd)
     }
 }
 
-void RemoteSinkBaseband::applySettings(const RemoteSinkSettings& settings, bool force)
+void RemoteSinkBaseband::applySettings(const QStringList& settingsKeys, const RemoteSinkSettings& settings, bool force)
 {
-    qDebug() << "RemoteSinkBaseband::applySettings:"
-        << "m_log2Decim:" << settings.m_log2Decim
-        << "m_filterChainHash:" << settings.m_filterChainHash
-        << " force: " << force;
+    qDebug() << "RemoteSinkBaseband::applySettings:" << settings.getDebugString(settingsKeys, force);
 
-    if ((settings.m_log2Decim != m_settings.m_log2Decim)
-     || (settings.m_filterChainHash != m_settings.m_filterChainHash) || force)
+    if ((settingsKeys.contains("log2Decim") && (settings.m_log2Decim != m_settings.m_log2Decim))
+     || (settingsKeys.contains("filterChainHash") && (settings.m_filterChainHash != m_settings.m_filterChainHash)) || force)
     {
         m_channelizer->setDecimation(settings.m_log2Decim, settings.m_filterChainHash);
     }
 
-    m_sink.applySettings(settings, force);
-    m_settings = settings;
+    m_sink.applySettings(settingsKeys, settings, force);
+
+    if (force) {
+        m_settings = settings;
+    } else {
+        m_settings.applySettings(settingsKeys, settings);
+    }
 }
 
 int RemoteSinkBaseband::getChannelSampleRate() const

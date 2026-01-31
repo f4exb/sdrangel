@@ -49,8 +49,8 @@ void UDPSinkGUI::resetToDefaults()
 {
     m_settings.resetToDefaults();
     displaySettings();
-    applySettingsImmediate(true);
-    applySettings(true);
+    applySettingsImmediate(QStringList(), true);
+    applySettings(QStringList(), true);
 }
 
 QByteArray UDPSinkGUI::serialize() const
@@ -63,8 +63,8 @@ bool UDPSinkGUI::deserialize(const QByteArray& data)
     if(m_settings.deserialize(data))
     {
         displaySettings();
-        applySettingsImmediate(true);
-        applySettings(true);
+        applySettingsImmediate(QStringList(), true);
+        applySettings(QStringList(), true);
         return true;
     } else {
         resetToDefaults();
@@ -118,7 +118,7 @@ void UDPSinkGUI::channelMarkerChangedByCursor()
 {
     ui->deltaFrequency->setValue(m_channelMarker.getCenterFrequency());
     m_settings.m_inputFrequencyOffset = m_channelMarker.getCenterFrequency();
-    applySettingsImmediate();
+    applySettingsImmediate(QStringList("inputFrequencyOffset"));
 }
 
 void UDPSinkGUI::channelMarkerHighlightedByCursor()
@@ -219,8 +219,8 @@ UDPSinkGUI::UDPSinkGUI(PluginAPI* pluginAPI, DeviceUISet *deviceUISet, BasebandS
 
 	displaySettings();
     makeUIConnections();
-	applySettingsImmediate(true);
-	applySettings(true);
+	applySettingsImmediate(QStringList(), true);
+	applySettings(QStringList(), true);
     DialPopup::addPopupsToChildDials(this);
     m_resizer.enableChildMouseTracking();
 }
@@ -389,20 +389,20 @@ void UDPSinkGUI::setSampleFormat(int index)
     }
 }
 
-void UDPSinkGUI::applySettingsImmediate(bool force)
+void UDPSinkGUI::applySettingsImmediate(const QStringList& settingsKeys, bool force)
 {
 	if (m_doApplySettings)
 	{
-        UDPSink::MsgConfigureUDPSink* message = UDPSink::MsgConfigureUDPSink::create( m_settings, force);
+        UDPSink::MsgConfigureUDPSink* message = UDPSink::MsgConfigureUDPSink::create(settingsKeys, m_settings, force);
         m_udpSink->getInputMessageQueue()->push(message);
 	}
 }
 
-void UDPSinkGUI::applySettings(bool force)
+void UDPSinkGUI::applySettings( const QStringList& settingsKeys, bool force)
 {
 	if (m_doApplySettings)
 	{
-        UDPSink::MsgConfigureUDPSink* message = UDPSink::MsgConfigureUDPSink::create( m_settings, force);
+        UDPSink::MsgConfigureUDPSink* message = UDPSink::MsgConfigureUDPSink::create(settingsKeys, m_settings, force);
         m_udpSink->getInputMessageQueue()->push(message);
 
 		ui->applyBtn->setEnabled(false);
@@ -415,7 +415,7 @@ void UDPSinkGUI::on_deltaFrequency_changed(qint64 value)
     m_channelMarker.setCenterFrequency(value);
     m_settings.m_inputFrequencyOffset = m_channelMarker.getCenterFrequency();
     updateAbsoluteCenterFrequency();
-    applySettings();
+    applySettings(QStringList("inputFrequencyOffset"));
 }
 
 void UDPSinkGUI::on_sampleFormat_currentIndexChanged(int index)
@@ -543,39 +543,39 @@ void UDPSinkGUI::on_applyBtn_clicked()
 
     ui->glSpectrum->setSampleRate(m_settings.m_outputSampleRate);
 
-	applySettings();
+	applySettings(QStringList({"rfBandwidth", "outputSampleRate"}));
 }
 
 void UDPSinkGUI::on_audioActive_toggled(bool active)
 {
     m_settings.m_audioActive = active;
-	applySettingsImmediate();
+	applySettingsImmediate(QStringList("audioActive"));
 }
 
 void UDPSinkGUI::on_audioStereo_toggled(bool stereo)
 {
     m_settings.m_audioStereo = stereo;
-	applySettingsImmediate();
+	applySettingsImmediate(QStringList("audioStereo"));
 }
 
 void UDPSinkGUI::on_agc_toggled(bool agc)
 {
     m_settings.m_agc = agc;
-    applySettingsImmediate();
+    applySettingsImmediate(QStringList("agc"));
 }
 
 void UDPSinkGUI::on_gain_valueChanged(int value)
 {
     m_settings.m_gain = value / 10.0;
 	ui->gainText->setText(tr("%1").arg(value/10.0, 0, 'f', 1));
-	applySettingsImmediate();
+	applySettingsImmediate(QStringList("gain"));
 }
 
 void UDPSinkGUI::on_volume_valueChanged(int value)
 {
     m_settings.m_volume = value;
 	ui->volumeText->setText(QString("%1").arg(value));
-	applySettingsImmediate();
+	applySettingsImmediate(QStringList("volume"));
 }
 
 void UDPSinkGUI::on_squelch_valueChanged(int value)
@@ -593,14 +593,14 @@ void UDPSinkGUI::on_squelch_valueChanged(int value)
         m_settings.m_squelchEnabled = true;
     }
 
-    applySettingsImmediate();
+    applySettingsImmediate(QStringList("squelchdB"));
 }
 
 void UDPSinkGUI::on_squelchGate_valueChanged(int value)
 {
     m_settings.m_squelchGate = value;
     ui->squelchGateText->setText(tr("%1").arg(value*10.0, 0, 'f', 0));
-    applySettingsImmediate();
+    applySettingsImmediate(QStringList("squelchGate"));
 }
 
 void UDPSinkGUI::onWidgetRolled(QWidget* widget, bool rollDown)
@@ -610,7 +610,7 @@ void UDPSinkGUI::onWidgetRolled(QWidget* widget, bool rollDown)
 	}
 
     getRollupContents()->saveState(m_rollupState);
-    applySettings();
+    applySettings(QStringList());
 }
 
 void UDPSinkGUI::onMenuDialogCalled(const QPoint &p)
@@ -655,7 +655,16 @@ void UDPSinkGUI::onMenuDialogCalled(const QPoint &p)
             updateIndexLabel();
         }
 
-        applySettingsImmediate();
+        applySettingsImmediate(QStringList({
+            "title",
+            "rgbColor",
+            "useReverseAPI",
+            "reverseAPIAddress",
+            "reverseAPIPort",
+            "reverseAPIDeviceIndex",
+            "reverseAPIChannelIndex",
+            "streamIndex"
+        }));
     }
 
     resetContextMenuType();

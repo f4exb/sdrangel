@@ -44,7 +44,7 @@ RemoteSinkSink::RemoteSinkSink() :
         m_dataPort(9090)
 {
     qDebug("RemoteSinkSink::RemoteSinkSink");
-    applySettings(m_settings, true);
+    applySettings(QStringList(), m_settings, true);
 }
 
 RemoteSinkSink::~RemoteSinkSink()
@@ -222,33 +222,32 @@ void RemoteSinkSink::feed(const SampleVector::const_iterator& begin, const Sampl
     }
 }
 
-void RemoteSinkSink::applySettings(const RemoteSinkSettings& settings, bool force)
+void RemoteSinkSink::applySettings(const QStringList& settingsKeys, const RemoteSinkSettings& settings, bool force)
 {
-    qDebug() << "RemoteSinkSink::applySettings:"
-            << " m_nbFECBlocks: " << settings.m_nbFECBlocks
-            << " m_dataAddress: " << settings.m_dataAddress
-            << " m_dataPort: " << settings.m_dataPort
-            << " m_streamIndex: " << settings.m_streamIndex
-            << " force: " << force;
+    qDebug() << "RemoteSinkSink::applySettings:" << settings.getDebugString(settingsKeys, force);
 
-    if ((m_settings.m_dataAddress != settings.m_dataAddress) || force) {
+    if ((settingsKeys.contains("dataAddress") && (m_settings.m_dataAddress != settings.m_dataAddress)) || force) {
         m_dataAddress = settings.m_dataAddress;
     }
 
-    if ((m_settings.m_dataPort != settings.m_dataPort) || force) {
+    if ((settingsKeys.contains("dataPort") && (m_settings.m_dataPort != settings.m_dataPort)) || force) {
         m_dataPort = settings.m_dataPort;
     }
 
-    if ((m_settings.m_log2Decim != settings.m_log2Decim)
-     || (m_settings.m_filterChainHash != settings.m_filterChainHash)
-     || (m_settings.m_nbFECBlocks != settings.m_nbFECBlocks) || force)
+    if ((settingsKeys.contains("log2Decim") && (m_settings.m_log2Decim != settings.m_log2Decim))
+     || (settingsKeys.contains("filterChainHash") && (m_settings.m_filterChainHash != settings.m_filterChainHash))
+     || (settingsKeys.contains("nbFECBlocks") && (m_settings.m_nbFECBlocks != settings.m_nbFECBlocks)) || force)
     {
         double shiftFactor = HBFilterChainConverter::getShiftFactor(settings.m_log2Decim, settings.m_filterChainHash);
         m_frequencyOffset = round(shiftFactor*m_basebandSampleRate);
         setNbBlocksFEC(settings.m_nbFECBlocks);
     }
 
-    m_settings = settings;
+    if (force) {
+        m_settings = settings;
+    } else {
+        m_settings.applySettings(settingsKeys, settings);
+    }
 }
 
 void RemoteSinkSink::applyBasebandSampleRate(uint32_t sampleRate)

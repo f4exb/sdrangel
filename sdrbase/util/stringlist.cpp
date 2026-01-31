@@ -1,6 +1,6 @@
 #include "stringlist.h"
 
-bool StringListUtil::containsAll(const QStringList &haystack, const QStringList &needles)
+static bool StringListUtil::containsAll(const QStringList &haystack, const QStringList &needles)
 {
     for (const auto &s : needles) {
         if (!haystack.contains(s))   // optionally add Qt::CaseSensitivity
@@ -9,7 +9,7 @@ bool StringListUtil::containsAll(const QStringList &haystack, const QStringList 
     return true;
 }
 
-bool StringListUtil::containsAny(const QStringList &haystack, const QStringList &needles)
+static bool StringListUtil::containsAny(const QStringList &haystack, const QStringList &needles)
 {
     for (const auto &s : needles) {
         if (haystack.contains(s))    // optionally add Qt::CaseSensitivity

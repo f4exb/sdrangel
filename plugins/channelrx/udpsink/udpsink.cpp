@@ -59,7 +59,7 @@ UDPSink::UDPSink(DeviceAPI *deviceAPI) :
     m_basebandSink->setSpectrum(&m_spectrumVis);
     m_basebandSink->moveToThread(m_thread);
 
-	applySettings(m_settings, true);
+	applySettings(QStringList(), m_settings, true);
 
     m_deviceAPI->addChannelSink(this);
     m_deviceAPI->addChannelSinkAPI(this);
@@ -144,7 +144,7 @@ bool UDPSink::handleMessage(const Message& cmd)
         MsgConfigureUDPSink& cfg = (MsgConfigureUDPSink&) cmd;
         qDebug("UDPSink::handleMessage: MsgConfigureUDPSink");
 
-        applySettings(cfg.getSettings(), cfg.getForce());
+        applySettings(cfg.getSettingsKeys(), cfg.getSettings(), cfg.getForce());
 
         return true;
     }
@@ -173,94 +173,20 @@ void UDPSink::setCenterFrequency(qint64 frequency)
 {
     UDPSinkSettings settings = m_settings;
     settings.m_inputFrequencyOffset = frequency;
-    applySettings(settings, false);
+    applySettings(QStringList("inputFrequencyOffset"), settings, false);
 
     if (m_guiMessageQueue) // forward to GUI if any
     {
-        MsgConfigureUDPSink *msgToGUI = MsgConfigureUDPSink::create(settings, false);
+        MsgConfigureUDPSink *msgToGUI = MsgConfigureUDPSink::create(QStringList("inputFrequencyOffset"), settings, false);
         m_guiMessageQueue->push(msgToGUI);
     }
 }
 
-void UDPSink::applySettings(const UDPSinkSettings& settings, bool force)
+void UDPSink::applySettings(const QStringList& settingsKeys, const UDPSinkSettings& settings, bool force)
 {
-    qDebug() << "UDPSink::applySettings:"
-            << " m_inputFrequencyOffset: " << settings.m_inputFrequencyOffset
-            << " m_audioActive: " << settings.m_audioActive
-            << " m_audioStereo: " << settings.m_audioStereo
-            << " m_gain: " << settings.m_gain
-            << " m_volume: " << settings.m_volume
-            << " m_squelchEnabled: " << settings.m_squelchEnabled
-            << " m_squelchdB: " << settings.m_squelchdB
-            << " m_squelchGate" << settings.m_squelchGate
-            << " m_agc" << settings.m_agc
-            << " m_sampleFormat: " << settings.m_sampleFormat
-            << " m_outputSampleRate: " << settings.m_outputSampleRate
-            << " m_rfBandwidth: " << settings.m_rfBandwidth
-            << " m_fmDeviation: " << settings.m_fmDeviation
-            << " m_udpAddressStr: " << settings.m_udpAddress
-            << " m_udpPort: " << settings.m_udpPort
-            << " m_audioPort: " << settings.m_audioPort
-            << " m_streamIndex: " << settings.m_streamIndex
-            << " m_useReverseAPI: " << settings.m_useReverseAPI
-            << " m_reverseAPIAddress: " << settings.m_reverseAPIAddress
-            << " m_reverseAPIPort: " << settings.m_reverseAPIPort
-            << " m_reverseAPIDeviceIndex: " << settings.m_reverseAPIDeviceIndex
-            << " m_reverseAPIChannelIndex: " << settings.m_reverseAPIChannelIndex
-            << " force: " << force;
+    qDebug() << "UDPSink::applySettings:" << settings.getDebugString(settingsKeys, force);
 
-    QList<QString> reverseAPIKeys;
-
-    if ((settings.m_inputFrequencyOffset != m_settings.m_inputFrequencyOffset) || force) {
-        reverseAPIKeys.append("inputFrequencyOffset");
-    }
-    if ((settings.m_audioActive != m_settings.m_audioActive) || force) {
-        reverseAPIKeys.append("audioActive");
-    }
-    if ((settings.m_audioStereo != m_settings.m_audioStereo) || force) {
-        reverseAPIKeys.append("audioStereo");
-    }
-    if ((settings.m_gain != m_settings.m_gain) || force) {
-        reverseAPIKeys.append("gain");
-    }
-    if ((settings.m_volume != m_settings.m_volume) || force) {
-        reverseAPIKeys.append("volume");
-    }
-    if ((settings.m_squelchEnabled != m_settings.m_squelchEnabled) || force) {
-        reverseAPIKeys.append("squelchEnabled");
-    }
-    if ((settings.m_squelchdB != m_settings.m_squelchdB) || force) {
-        reverseAPIKeys.append("squelchDB");
-    }
-    if ((settings.m_squelchGate != m_settings.m_squelchGate) || force) {
-        reverseAPIKeys.append("squelchGate");
-    }
-    if ((settings.m_agc != m_settings.m_agc) || force) {
-        reverseAPIKeys.append("agc");
-    }
-    if ((settings.m_sampleFormat != m_settings.m_sampleFormat) || force) {
-        reverseAPIKeys.append("sampleFormat");
-    }
-    if ((settings.m_outputSampleRate != m_settings.m_outputSampleRate) || force) {
-        reverseAPIKeys.append("outputSampleRate");
-    }
-    if ((settings.m_rfBandwidth != m_settings.m_rfBandwidth) || force) {
-        reverseAPIKeys.append("rfBandwidth");
-    }
-    if ((settings.m_fmDeviation != m_settings.m_fmDeviation) || force) {
-        reverseAPIKeys.append("fmDeviation");
-    }
-    if ((settings.m_udpAddress != m_settings.m_udpAddress) || force) {
-        reverseAPIKeys.append("udpAddress");
-    }
-    if ((settings.m_udpPort != m_settings.m_udpPort) || force) {
-        reverseAPIKeys.append("udpPort");
-    }
-    if ((settings.m_audioPort != m_settings.m_audioPort) || force) {
-        reverseAPIKeys.append("audioPort");
-    }
-
-    if (m_settings.m_streamIndex != settings.m_streamIndex)
+    if (settingsKeys.contains("streamIndex") && m_settings.m_streamIndex != settings.m_streamIndex)
     {
         if (m_deviceAPI->getSampleMIMO()) // change of stream is possible for MIMO devices only
         {
@@ -271,28 +197,26 @@ void UDPSink::applySettings(const UDPSinkSettings& settings, bool force)
             m_settings.m_streamIndex = settings.m_streamIndex; // make sure ChannelAPI::getStreamIndex() is consistent
             emit streamIndexChanged(settings.m_streamIndex);
         }
-
-        reverseAPIKeys.append("streamIndex");
     }
 
-    UDPSinkBaseband::MsgConfigureUDPSinkBaseband *msg = UDPSinkBaseband::MsgConfigureUDPSinkBaseband::create(settings, force);
+    UDPSinkBaseband::MsgConfigureUDPSinkBaseband *msg = UDPSinkBaseband::MsgConfigureUDPSinkBaseband::create(settingsKeys, settings, force);
     m_basebandSink->getInputMessageQueue()->push(msg);
 
-    if (settings.m_useReverseAPI)
+    if (settingsKeys.contains("useReverseAPI") && settings.m_useReverseAPI)
     {
-        bool fullUpdate = ((m_settings.m_useReverseAPI != settings.m_useReverseAPI) && settings.m_useReverseAPI) ||
-                (m_settings.m_reverseAPIAddress != settings.m_reverseAPIAddress) ||
-                (m_settings.m_reverseAPIPort != settings.m_reverseAPIPort) ||
-                (m_settings.m_reverseAPIDeviceIndex != settings.m_reverseAPIDeviceIndex) ||
-                (m_settings.m_reverseAPIChannelIndex != settings.m_reverseAPIChannelIndex);
-        webapiReverseSendSettings(reverseAPIKeys, settings, fullUpdate || force);
+        bool fullUpdate = ((settingsKeys.contains("useReverseAPI") && m_settings.m_useReverseAPI != settings.m_useReverseAPI) && settings.m_useReverseAPI) ||
+                (settingsKeys.contains("reverseAPIAddress") && m_settings.m_reverseAPIAddress != settings.m_reverseAPIAddress) ||
+                (settingsKeys.contains("reverseAPIPort") && m_settings.m_reverseAPIPort != settings.m_reverseAPIPort) ||
+                (settingsKeys.contains("reverseAPIDeviceIndex") && m_settings.m_reverseAPIDeviceIndex != settings.m_reverseAPIDeviceIndex) ||
+                (settingsKeys.contains("reverseAPIChannelIndex") && m_settings.m_reverseAPIChannelIndex != settings.m_reverseAPIChannelIndex);
+        webapiReverseSendSettings(settingsKeys, settings, fullUpdate || force);
     }
 
     QList<ObjectPipe*> pipes;
     MainCore::instance()->getMessagePipes().getMessagePipes(this, "settings", pipes);
 
     if (pipes.size() > 0) {
-        sendChannelSettings(pipes, reverseAPIKeys, settings, force);
+        sendChannelSettings(pipes, settingsKeys, settings, force);
     }
 
     m_settings = settings;
@@ -307,14 +231,14 @@ bool UDPSink::deserialize(const QByteArray& data)
 {
     if (m_settings.deserialize(data))
     {
-        MsgConfigureUDPSink *msg = MsgConfigureUDPSink::create(m_settings, true);
+        MsgConfigureUDPSink *msg = MsgConfigureUDPSink::create(QStringList(), m_settings, true);
         m_inputMessageQueue.push(msg);
         return true;
     }
     else
     {
         m_settings.resetToDefaults();
-        MsgConfigureUDPSink *msg = MsgConfigureUDPSink::create(m_settings, true);
+        MsgConfigureUDPSink *msg = MsgConfigureUDPSink::create(QStringList(), m_settings, true);
         m_inputMessageQueue.push(msg);
         return false;
     }
@@ -350,13 +274,13 @@ int UDPSink::webapiSettingsPutPatch(
     UDPSinkSettings settings = m_settings;
     webapiUpdateChannelSettings(settings, channelSettingsKeys, response);
 
-    MsgConfigureUDPSink *msg = MsgConfigureUDPSink::create(settings, force);
+    MsgConfigureUDPSink *msg = MsgConfigureUDPSink::create(channelSettingsKeys, settings, force);
     m_inputMessageQueue.push(msg);
 
     qDebug("getUdpSinkSettings::webapiSettingsPutPatch: forward to GUI: %p", m_guiMessageQueue);
     if (m_guiMessageQueue) // forward to GUI if any
     {
-        MsgConfigureUDPSink *msgToGUI = MsgConfigureUDPSink::create(settings, force);
+        MsgConfigureUDPSink *msgToGUI = MsgConfigureUDPSink::create(channelSettingsKeys, settings, force);
         m_guiMessageQueue->push(msgToGUI);
     }
 
@@ -564,7 +488,7 @@ void UDPSink::webapiFormatChannelReport(SWGSDRangel::SWGChannelReport& response)
     response.getUdpSinkReport()->setInputSampleRate(m_channelSampleRate);
 }
 
-void UDPSink::webapiReverseSendSettings(QList<QString>& channelSettingsKeys, const UDPSinkSettings& settings, bool force)
+void UDPSink::webapiReverseSendSettings(const QList<QString>& channelSettingsKeys, const UDPSinkSettings& settings, bool force)
 {
     SWGSDRangel::SWGChannelSettings *swgChannelSettings = new SWGSDRangel::SWGChannelSettings();
     webapiFormatChannelSettings(channelSettingsKeys, swgChannelSettings, settings, force);
@@ -591,7 +515,7 @@ void UDPSink::webapiReverseSendSettings(QList<QString>& channelSettingsKeys, con
 
 void UDPSink::sendChannelSettings(
     const QList<ObjectPipe*>& pipes,
-    QList<QString>& channelSettingsKeys,
+    const QList<QString>& channelSettingsKeys,
     const UDPSinkSettings& settings,
     bool force)
 {
@@ -615,7 +539,7 @@ void UDPSink::sendChannelSettings(
 }
 
 void UDPSink::webapiFormatChannelSettings(
-        QList<QString>& channelSettingsKeys,
+        const QList<QString>& channelSettingsKeys,
         SWGSDRangel::SWGChannelSettings *swgChannelSettings,
         const UDPSinkSettings& settings,
         bool force

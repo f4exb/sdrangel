@@ -23,6 +23,7 @@
 #include "dsp/dspcommands.h"
 #include "dsp/sigmffilerecord.h"
 #include "dsp/spectrumvis.h"
+#include "util/stringlist.h"
 
 #include "sigmffilesinkmessages.h"
 #include "sigmffilesinksink.h"
@@ -241,15 +242,13 @@ void SigMFFileSinkSink::applyChannelSettings(
     m_preRecordBuffer.reset();
 }
 
-void SigMFFileSinkSink::applySettings(const SigMFFileSinkSettings& settings, bool force)
+void SigMFFileSinkSink::applySettings(const QStringList& settingsKeys, const SigMFFileSinkSettings& settings, bool force)
 {
-    qDebug() << "SigMFFileSinkSink::applySettings:"
-        << "m_fileRecordName: " << settings.m_fileRecordName
-        << "force: " << force;
+    qDebug() << "SigMFFileSinkSink::applySettings:" << settings.getDebugString(settingsKeys, force);
 
     QString fileRecordName = settings.m_fileRecordName;
 
-    if ((settings.m_fileRecordName != m_settings.m_fileRecordName) || force)
+    if ((settingsKeys.contains("fileRecordName") && (settings.m_fileRecordName != m_settings.m_fileRecordName)) || force)
     {
         QStringList dotBreakout = settings.m_fileRecordName.split(QLatin1Char('.'));
 
@@ -284,7 +283,7 @@ void SigMFFileSinkSink::applySettings(const SigMFFileSinkSettings& settings, boo
         }
     }
 
-    if ((settings.m_preRecordTime != m_settings.m_squelchPostRecordTime) || force)
+    if ((StringListUtil::containsAny(settingsKeys, {"preRecordTime", "squelchPostRecordTime"})  && (settings.m_preRecordTime != m_settings.m_squelchPostRecordTime)) || force)
     {
         m_preRecordBuffer.setSize(settings.m_preRecordTime * m_sinkSampleRate);
 
@@ -293,11 +292,16 @@ void SigMFFileSinkSink::applySettings(const SigMFFileSinkSettings& settings, boo
         }
     }
 
-    if ((settings.m_log2RecordSampleSize != m_settings.m_log2RecordSampleSize) || force) {
+    if ((settingsKeys.contains("log2RecordSampleSize") && (settings.m_log2RecordSampleSize != m_settings.m_log2RecordSampleSize)) || force) {
         m_fileSink.setLog2RecordSampleSize(settings.m_log2RecordSampleSize);
     }
 
-    m_settings = settings;
+    if (force) {
+        m_settings = settings;
+    } else {
+        m_settings.applySettings(settingsKeys, settings);
+    }
+
     m_settings.m_fileRecordName = fileRecordName;
 }
 

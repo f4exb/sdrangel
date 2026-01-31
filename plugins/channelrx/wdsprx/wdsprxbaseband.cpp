@@ -121,7 +121,7 @@ bool WDSPRxBaseband::handleMessage(const Message& cmd)
         MsgConfigureWDSPRxBaseband& cfg = (MsgConfigureWDSPRxBaseband&) cmd;
         qDebug() << "WDSPRxBaseband::handleMessage: MsgConfigureWDSPRxBaseband";
 
-        applySettings(cfg.getSettings(), cfg.getForce());
+        applySettings(cfg.getSettingsKeys(), cfg.getSettings(), cfg.getForce());
 
         return true;
     }
@@ -177,9 +177,9 @@ bool WDSPRxBaseband::handleMessage(const Message& cmd)
     }
 }
 
-void WDSPRxBaseband::applySettings(const WDSPRxSettings& settings, bool force)
+void WDSPRxBaseband::applySettings(const QStringList& settingsKeys, const WDSPRxSettings& settings, bool force)
 {
-    if ((settings.m_inputFrequencyOffset != m_settings.m_inputFrequencyOffset) || force)
+    if ((settingsKeys.contains("inputFrequencyOffset") && settings.m_inputFrequencyOffset != m_settings.m_inputFrequencyOffset) || force)
     {
         m_channelizer.setChannelization(m_audioSampleRate, settings.m_inputFrequencyOffset);
         m_sink.applyChannelSettings(m_channelizer.getChannelSampleRate(), m_channelizer.getChannelFrequencyOffset());
@@ -191,7 +191,7 @@ void WDSPRxBaseband::applySettings(const WDSPRxSettings& settings, bool force)
         }
     }
 
-    if ((settings.m_profiles[settings.m_profileIndex].m_spanLog2 != m_settings.m_profiles[settings.m_profileIndex].m_spanLog2) || force)
+    if ((settingsKeys.contains("spanLog2") && settings.m_profiles[settings.m_profileIndex].m_spanLog2 != m_settings.m_profiles[settings.m_profileIndex].m_spanLog2) || force)
     {
         if (m_spectrumVis)
         {
@@ -200,7 +200,7 @@ void WDSPRxBaseband::applySettings(const WDSPRxSettings& settings, bool force)
         }
     }
 
-    if ((settings.m_audioDeviceName != m_settings.m_audioDeviceName) || force)
+    if ((settingsKeys.contains("audioDeviceName") && settings.m_audioDeviceName != m_settings.m_audioDeviceName) || force)
     {
         AudioDeviceManager *audioDeviceManager = DSPEngine::instance()->getAudioDeviceManager();
         int audioDeviceIndex = audioDeviceManager->getOutputDeviceIndex(settings.m_audioDeviceName);
@@ -228,9 +228,13 @@ void WDSPRxBaseband::applySettings(const WDSPRxSettings& settings, bool force)
         }
     }
 
-    m_sink.applySettings(settings, force);
+    m_sink.applySettings(settingsKeys, settings, force);
 
-    m_settings = settings;
+    if (force) {
+        m_settings = settings;
+    } else {
+        m_settings.applySettings(settingsKeys, settings);
+    }
 }
 
 int WDSPRxBaseband::getChannelSampleRate() const

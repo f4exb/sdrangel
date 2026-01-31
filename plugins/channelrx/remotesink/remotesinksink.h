@@ -45,7 +45,7 @@ public:
     void init();
 
     void setNbTxBytes(uint32_t nbTxBytes) { m_nbTxBytes = nbTxBytes; }
-    void applySettings(const RemoteSinkSettings& settings, bool force = false);
+    void applySettings(const QStringList& settingsKeys, const RemoteSinkSettings& settings, bool force = false);
     void applyBasebandSampleRate(uint32_t sampleRate);
     void setDeviceCenterFrequency(uint64_t frequency) { m_deviceCenterFrequency = frequency; }
     void setDeviceIndex(uint32_t deviceIndex) { m_deviceIndex = deviceIndex; }

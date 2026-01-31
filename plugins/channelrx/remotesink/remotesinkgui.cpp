@@ -44,7 +44,7 @@ void RemoteSinkGUI::resetToDefaults()
 {
     m_settings.resetToDefaults();
     displaySettings();
-    applySettings(true);
+    applySettings(QStringList(), true);
 }
 
 QByteArray RemoteSinkGUI::serialize() const
@@ -56,7 +56,7 @@ bool RemoteSinkGUI::deserialize(const QByteArray& data)
 {
     if(m_settings.deserialize(data)) {
         displaySettings();
-        applySettings(true);
+        applySettings(QStringList(), true);
         return true;
     } else {
         resetToDefaults();
@@ -131,7 +131,7 @@ RemoteSinkGUI::RemoteSinkGUI(PluginAPI* pluginAPI, DeviceUISet *deviceUISet, Bas
 
     displaySettings();
     makeUIConnections();
-    applySettings(true);
+    applySettings(QStringList(), true);
     DialPopup::addPopupsToChildDials(this);
     m_resizer.enableChildMouseTracking();
 }
@@ -146,13 +146,13 @@ void RemoteSinkGUI::blockApplySettings(bool block)
     m_doApplySettings = !block;
 }
 
-void RemoteSinkGUI::applySettings(bool force)
+void RemoteSinkGUI::applySettings(const QStringList& settingsKeys, bool force)
 {
     if (m_doApplySettings)
     {
         setTitleColor(m_channelMarker.getColor());
 
-        RemoteSink::MsgConfigureRemoteSink* message = RemoteSink::MsgConfigureRemoteSink::create(m_settings, force);
+        RemoteSink::MsgConfigureRemoteSink* message = RemoteSink::MsgConfigureRemoteSink::create(settingsKeys, m_settings, force);
         m_remoteSink->getInputMessageQueue()->push(message);
     }
 }
@@ -228,7 +228,7 @@ void RemoteSinkGUI::onWidgetRolled(QWidget* widget, bool rollDown)
     (void) rollDown;
 
     getRollupContents()->saveState(m_rollupState);
-    applySettings();
+    applySettings(QStringList());
 }
 
 void RemoteSinkGUI::onMenuDialogCalled(const QPoint &p)
@@ -273,7 +273,9 @@ void RemoteSinkGUI::onMenuDialogCalled(const QPoint &p)
             updateIndexLabel();
         }
 
-        applySettings();
+        applySettings(QStringList({"color", "title", "useReverseAPI", "reverseAPIAddress",
+                                   "reverseAPIPort", "reverseAPIDeviceIndex", "reverseAPIChannelIndex",
+                                   "streamIndex"}));
     }
 
     resetContextMenuType();
@@ -294,7 +296,7 @@ void RemoteSinkGUI::on_position_valueChanged(int value)
 void RemoteSinkGUI::on_dataAddress_returnPressed()
 {
     m_settings.m_dataAddress = ui->dataAddress->text();
-    applySettings();
+    applySettings(QStringList({"dataAddress"}));
 }
 
 void RemoteSinkGUI::on_dataPort_returnPressed()
@@ -311,7 +313,7 @@ void RemoteSinkGUI::on_dataPort_returnPressed()
         m_settings.m_dataPort = dataPort;
     }
 
-    applySettings();
+    applySettings(QStringList({"dataPort"}));
 }
 
 void RemoteSinkGUI::on_dataApplyButton_clicked(bool checked)
@@ -327,7 +329,7 @@ void RemoteSinkGUI::on_dataApplyButton_clicked(bool checked)
         m_settings.m_dataPort = udpDataPort;
     }
 
-    applySettings();
+    applySettings(QStringList({"dataAddress", "dataPort"}));
 }
 
 void RemoteSinkGUI::on_nbFECBlocks_valueChanged(int value)
@@ -338,13 +340,13 @@ void RemoteSinkGUI::on_nbFECBlocks_valueChanged(int value)
     QString s = QString::number(nbOriginalBlocks + nbFECBlocks, 'f', 0);
     QString s1 = QString::number(nbFECBlocks, 'f', 0);
     ui->nominalNbBlocksText->setText(tr("%1/%2").arg(s).arg(s1));
-    applySettings();
+    applySettings(QStringList({"nbFECBlocks"}));
 }
 
 void RemoteSinkGUI::on_nbTxBytes_currentIndexChanged(int index)
 {
     m_settings.m_nbTxBytes = 1 << index;
-    applySettings();
+    applySettings(QStringList({"nbTxBytes"}));
 }
 
 void RemoteSinkGUI::applyDecimation()
@@ -370,7 +372,7 @@ void RemoteSinkGUI::applyPosition()
 
     updateAbsoluteCenterFrequency();
     displayRateAndShift();
-    applySettings();
+    applySettings(QStringList());
 }
 
 void RemoteSinkGUI::tick()

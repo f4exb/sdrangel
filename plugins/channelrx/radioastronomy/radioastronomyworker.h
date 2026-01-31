@@ -39,20 +39,23 @@ public:
 
     public:
         const RadioAstronomySettings& getSettings() const { return m_settings; }
+        const QStringList& getSettingsKeys() const { return m_settingsKeys; }
         bool getForce() const { return m_force; }
 
-        static MsgConfigureRadioAstronomyWorker* create(const RadioAstronomySettings& settings, bool force)
+        static MsgConfigureRadioAstronomyWorker* create(const QStringList& settingsKeys, const RadioAstronomySettings& settings, bool force)
         {
-            return new MsgConfigureRadioAstronomyWorker(settings, force);
+            return new MsgConfigureRadioAstronomyWorker(settingsKeys, settings, force);
         }
 
     private:
         RadioAstronomySettings m_settings;
+        QStringList m_settingsKeys;
         bool m_force;
 
-        MsgConfigureRadioAstronomyWorker(const RadioAstronomySettings& settings, bool force) :
+        MsgConfigureRadioAstronomyWorker(const QStringList& settingsKeys, const RadioAstronomySettings& settings, bool force) :
             Message(),
             m_settings(settings),
+            m_settingsKeys(settingsKeys),
             m_force(force)
         { }
     };

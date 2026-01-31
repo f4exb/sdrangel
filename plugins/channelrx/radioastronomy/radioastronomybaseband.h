@@ -41,20 +41,23 @@ public:
 
     public:
         const RadioAstronomySettings& getSettings() const { return m_settings; }
+        const QStringList& getSettingsKeys() const { return m_settingsKeys; }
         bool getForce() const { return m_force; }
 
-        static MsgConfigureRadioAstronomyBaseband* create(const RadioAstronomySettings& settings, bool force)
+        static MsgConfigureRadioAstronomyBaseband* create(const QStringList& settingsKeys, const RadioAstronomySettings& settings, bool force)
         {
-            return new MsgConfigureRadioAstronomyBaseband(settings, force);
+            return new MsgConfigureRadioAstronomyBaseband(settingsKeys, settings, force);
         }
 
     private:
         RadioAstronomySettings m_settings;
+        QStringList m_settingsKeys;
         bool m_force;
 
-        MsgConfigureRadioAstronomyBaseband(const RadioAstronomySettings& settings, bool force) :
+        MsgConfigureRadioAstronomyBaseband(const QStringList& settingsKeys, const RadioAstronomySettings& settings, bool force) :
             Message(),
             m_settings(settings),
+            m_settingsKeys(settingsKeys),
             m_force(force)
         { }
     };
@@ -87,7 +90,7 @@ private:
 
     bool handleMessage(const Message& cmd);
     void calculateOffset(RadioAstronomySink *sink);
-    void applySettings(const RadioAstronomySettings& settings, bool force = false);
+    void applySettings(const QStringList& settingsKeys, const RadioAstronomySettings& settings, bool force = false);
 
 private slots:
     void handleInputMessages();
