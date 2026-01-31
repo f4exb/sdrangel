@@ -22,6 +22,9 @@ jobs:
       - name: Install dependencies
         run: |
           sudo apt-get update
+          sudo apt-get install software-properties-common
+          add-apt-repository -y ppa:ettusresearch/uhd
+          apt-get update
           sudo apt-get -y install build-essential cmake git xxd \
             devscripts fakeroot debhelper libfftw3-dev qtbase5-dev libopengl-dev libqt5opengl5-dev \
             qttools5-dev qttools5-dev-tools qtmultimedia5-dev libqt5multimedia5-plugins libqt5websockets5-dev \
