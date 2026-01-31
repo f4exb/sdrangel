@@ -51,7 +51,7 @@ public:
         int channelFrequencyOffset,
         int64_t centerFrequency,
         bool force = false);
-    void applySettings(const FileSinkSettings& settings, bool force = false);
+    void applySettings(const QStringList& settingsKeys, const FileSinkSettings& settings, bool force = false);
     uint64_t getMsCount() const { return m_msCount; }
     uint64_t getByteCount() const { return m_byteCount; }
     unsigned int getNbTracks() const { return m_nbCaptures; }

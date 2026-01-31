@@ -50,7 +50,7 @@ AISDemodSink::AISDemodSink(AISDemod *aisDemod) :
         m_sampleBuffer[i].resize(m_sampleBufferSize);
     }
 
-    applySettings(m_settings, true);
+    applySettings(m_settings, QStringList(), true);
     applyChannelSettings(m_channelSampleRate, m_channelFrequencyOffset, true);
 }
 
@@ -398,23 +398,22 @@ void AISDemodSink::applyChannelSettings(int channelSampleRate, int channelFreque
     qDebug() << "AISDemodSink::applyChannelSettings: m_samplesPerSymbol: " << m_samplesPerSymbol;
 }
 
-void AISDemodSink::applySettings(const AISDemodSettings& settings, bool force)
+void AISDemodSink::applySettings(const AISDemodSettings& settings, const QStringList& settingsKeys, bool force)
 {
-    qDebug() << "AISDemodSink::applySettings:"
-            << " force: " << force;
+    qDebug() << "AISDemodSink::applySettings:" << settings.getDebugString(settingsKeys, force);
 
-    if ((settings.m_rfBandwidth != m_settings.m_rfBandwidth) || force)
+    if ((settingsKeys.contains("rfBandwidth")) || force)
     {
         m_interpolator.create(16, m_channelSampleRate, settings.m_rfBandwidth / 2.2);
         m_interpolatorDistance = (Real) m_channelSampleRate / (Real) AISDemodSettings::AISDEMOD_CHANNEL_SAMPLE_RATE;
         m_interpolatorDistanceRemain = m_interpolatorDistance;
     }
-    if ((settings.m_fmDeviation != m_settings.m_fmDeviation) || force)
+    if ((settingsKeys.contains("fmDeviation")) || force)
     {
         m_phaseDiscri.setFMScaling(AISDemodSettings::AISDEMOD_CHANNEL_SAMPLE_RATE / (2.0f * settings.m_fmDeviation));
     }
 
-    if ((settings.m_baud != m_settings.m_baud) || force)
+    if ((settingsKeys.contains("baud")) || force)
     {
         m_samplesPerSymbol = AISDemodSettings::AISDEMOD_CHANNEL_SAMPLE_RATE / settings.m_baud;
         qDebug() << "AISDemodSink::applySettings: m_samplesPerSymbol: " << m_samplesPerSymbol << " baud " << settings.m_baud;
@@ -447,5 +446,9 @@ void AISDemodSink::applySettings(const AISDemodSettings& settings, bool force)
         }
     }
 
-    m_settings = settings;
+    if (force) {
+        m_settings = settings;
+    } else {
+        m_settings.applySettings(settingsKeys, settings);
+    }
 }

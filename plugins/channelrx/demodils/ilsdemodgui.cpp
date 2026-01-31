@@ -111,7 +111,7 @@ void ILSDemodGUI::resetToDefaults()
 {
     m_settings.resetToDefaults();
     displaySettings();
-    applySettings(true);
+    applySettings(QStringList(), true);
 }
 
 QByteArray ILSDemodGUI::serialize() const
@@ -124,7 +124,7 @@ bool ILSDemodGUI::deserialize(const QByteArray& data)
     if(m_settings.deserialize(data))
     {
         displaySettings();
-        applySettings(true);
+        applySettings(QStringList(), true);
         return true;
     }
     else
@@ -269,7 +269,7 @@ void ILSDemodGUI::channelMarkerChangedByCursor()
 {
     ui->deltaFrequency->setValue(m_channelMarker.getCenterFrequency());
     m_settings.m_inputFrequencyOffset = m_channelMarker.getCenterFrequency();
-    applySettings();
+    applySettings(QStringList({"inputFrequencyOffset"}));
 }
 
 void ILSDemodGUI::channelMarkerHighlightedByCursor()
@@ -282,7 +282,7 @@ void ILSDemodGUI::on_deltaFrequency_changed(qint64 value)
     m_channelMarker.setCenterFrequency(value);
     m_settings.m_inputFrequencyOffset = m_channelMarker.getCenterFrequency();
     updateAbsoluteCenterFrequency();
-    applySettings();
+    applySettings(QStringList({"inputFrequencyOffset"}));
 }
 
 void ILSDemodGUI::on_rfBW_valueChanged(int value)
@@ -291,7 +291,7 @@ void ILSDemodGUI::on_rfBW_valueChanged(int value)
     ui->rfBWText->setText(formatFrequency((int)bw));
     m_channelMarker.setBandwidth(bw);
     m_settings.m_rfBandwidth = bw;
-    applySettings();
+    applySettings(QStringList({"rfBandwidth"}));
 }
 
 void ILSDemodGUI::on_mode_currentIndexChanged(int index)
@@ -320,7 +320,7 @@ void ILSDemodGUI::on_mode_currentIndexChanged(int index)
         closePipes();
     }
     ui->frequency->setCurrentIndex(freqIdx);
-    applySettings();
+    applySettings(QStringList({"mode"}));
 }
 
 void ILSDemodGUI::on_frequency_currentIndexChanged(int index)
@@ -337,52 +337,52 @@ void ILSDemodGUI::on_frequency_currentIndexChanged(int index)
         double frequency = text.toDouble() * 1e6;
         ChannelWebAPIUtils::setCenterFrequency(m_ilsDemod->getDeviceSetIndex(), frequency);
     }
-    applySettings();
+    applySettings(QStringList({"frequencyIndex"}));
 }
 
 void ILSDemodGUI::on_average_clicked(bool checked)
 {
     m_settings.m_average = checked;
-    applySettings();
+    applySettings(QStringList({"average"}));
 }
 
 void ILSDemodGUI::on_volume_valueChanged(int value)
 {
     ui->volumeText->setText(QString("%1").arg(value / 10.0, 0, 'f', 1));
     m_settings.m_volume = value / 10.0;
-    applySettings();
+    applySettings(QStringList({"volume"}));
 }
 
 void ILSDemodGUI::on_squelch_valueChanged(int value)
 {
     ui->squelchText->setText(QString("%1 dB").arg(value));
     m_settings.m_squelch = value;
-    applySettings();
+    applySettings(QStringList({"squelch"}));
 }
 
 void ILSDemodGUI::on_audioMute_toggled(bool checked)
 {
     m_settings.m_audioMute = checked;
-    applySettings();
+    applySettings(QStringList({"audioMute"}));
 }
 
 void ILSDemodGUI::on_thresh_valueChanged(int value)
 {
     ui->threshText->setText(QString("%1").arg(value / 10.0, 0, 'f', 1));
     m_settings.m_identThreshold = value / 10.0;
-    applySettings();
+    applySettings(QStringList({"identThreshold"}));
 }
 
 void ILSDemodGUI::on_ddmUnits_currentIndexChanged(int index)
 {
     m_settings.m_ddmUnits = (ILSDemodSettings::DDMUnits) index;
-    applySettings();
+    applySettings(QStringList({"ddmUnits"}));
 }
 
 void ILSDemodGUI::on_ident_editingFinished()
 {
    m_settings.m_ident = ui->ident->currentText();
-   applySettings();
+   applySettings(QStringList({"ident"}));
 }
 
 // 3.1.3.7.3 Note 1
@@ -418,14 +418,14 @@ void ILSDemodGUI::on_ident_currentIndexChanged(int index)
         m_disableDrawILS = false;
     }
     drawILSOnMap();
-    applySettings();
+    applySettings(QStringList({"ident"}));
 }
 
 void ILSDemodGUI::on_runway_editingFinished()
 {
     m_settings.m_runway = ui->runway->text();
     drawILSOnMap();
-    applySettings();
+    applySettings(QStringList({"runway"}));
 }
 
 void ILSDemodGUI::on_findOnMap_clicked()
@@ -852,87 +852,87 @@ void ILSDemodGUI::updateGPSAngle()
 void ILSDemodGUI::on_trueBearing_valueChanged(double value)
 {
     m_settings.m_trueBearing = (float) value;
-    applySettings();
+    applySettings(QStringList({"trueBearing"}));
     drawILSOnMap();
 }
 
 void ILSDemodGUI::on_elevation_valueChanged(int value)
 {
     m_settings.m_elevation = value;
-    applySettings();
+    applySettings(QStringList({"elevation"}));
     drawILSOnMap();
 }
 
 void ILSDemodGUI::on_latitude_editingFinished()
 {
     m_settings.m_latitude = ui->latitude->text();
-    applySettings();
+    applySettings(QStringList({"latitude"}));
     drawILSOnMap();
 }
 
 void ILSDemodGUI::on_longitude_editingFinished()
 {
     m_settings.m_longitude = ui->longitude->text();
-    applySettings();
+    applySettings(QStringList({"longitude"}));
     drawILSOnMap();
 }
 
 void ILSDemodGUI::on_glidePath_valueChanged(double value)
 {
     m_settings.m_glidePath = value;
-    applySettings();
+    applySettings(QStringList({"glidePath"}));
     drawILSOnMap();
 }
 
 void ILSDemodGUI::on_height_valueChanged(double value)
 {
     m_settings.m_refHeight = (float)value;
-    applySettings();
+    applySettings(QStringList({"refHeight"}));
     drawILSOnMap();
 }
 
 void ILSDemodGUI::on_courseWidth_valueChanged(double value)
 {
     m_settings.m_courseWidth = (float)value;
-    applySettings();
+    applySettings(QStringList({"courseWidth"}));
     drawILSOnMap();
 }
 
 void ILSDemodGUI::on_slope_valueChanged(double value)
 {
     m_settings.m_slope = (float)value;
-    applySettings();
+    applySettings(QStringList({"slope"}));
     drawILSOnMap();
 }
 
 void ILSDemodGUI::on_udpEnabled_clicked(bool checked)
 {
     m_settings.m_udpEnabled = checked;
-    applySettings();
+    applySettings(QStringList({"udpEnabled"}));
 }
 
 void ILSDemodGUI::on_udpAddress_editingFinished()
 {
     m_settings.m_udpAddress = ui->udpAddress->text();
-    applySettings();
+    applySettings(QStringList({"udpAddress"}));
 }
 
 void ILSDemodGUI::on_udpPort_editingFinished()
 {
     m_settings.m_udpPort = ui->udpPort->text().toInt();
-    applySettings();
+    applySettings(QStringList({"udpPort"}));
 }
 
 void ILSDemodGUI::on_channel1_currentIndexChanged(int index)
 {
     m_settings.m_scopeCh1 = index;
-    applySettings();
+    applySettings(QStringList({"scopeCh1"}));
 }
 
 void ILSDemodGUI::on_channel2_currentIndexChanged(int index)
 {
     m_settings.m_scopeCh2 = index;
-    applySettings();
+    applySettings(QStringList({"scopeCh2"}));
 }
 
 void ILSDemodGUI::onWidgetRolled(QWidget* widget, bool rollDown)
@@ -941,7 +941,7 @@ void ILSDemodGUI::onWidgetRolled(QWidget* widget, bool rollDown)
     (void) rollDown;
 
     getRollupContents()->saveState(m_rollupState);
-    applySettings();
+    applySettings(QStringList());
 }
 
 void ILSDemodGUI::onMenuDialogCalled(const QPoint &p)
@@ -986,7 +986,8 @@ void ILSDemodGUI::onMenuDialogCalled(const QPoint &p)
             updateIndexLabel();
         }
 
-        applySettings();
+        applySettings(QStringList({"rgbColor", "title", "useReverseAPI", "reverseAPIAddress",
+                                   "reverseAPIPort", "reverseAPIDeviceIndex", "reverseAPIChannelIndex", "streamIndex"}));
     }
 
     resetContextMenuType();
@@ -1101,7 +1102,7 @@ ILSDemodGUI::ILSDemodGUI(PluginAPI* pluginAPI, DeviceUISet *deviceUISet, Baseban
 
     displaySettings();
     makeUIConnections();
-    applySettings(true);
+    applySettings(QStringList(), true); // force full settings apply
     m_resizer.enableChildMouseTracking();
     drawILSOnMap();
 
@@ -1153,11 +1154,11 @@ void ILSDemodGUI::blockApplySettings(bool block)
     m_doApplySettings = !block;
 }
 
-void ILSDemodGUI::applySettings(bool force)
+void ILSDemodGUI::applySettings(const QStringList& settingsKeys, bool force)
 {
     if (m_doApplySettings)
     {
-        ILSDemod::MsgConfigureILSDemod* message = ILSDemod::MsgConfigureILSDemod::create( m_settings, force);
+        ILSDemod::MsgConfigureILSDemod* message = ILSDemod::MsgConfigureILSDemod::create(settingsKeys, m_settings, force);
         m_ilsDemod->getInputMessageQueue()->push(message);
     }
 }
@@ -1277,7 +1278,7 @@ void ILSDemodGUI::audioSelect(const QPoint& p)
     if (audioSelect.m_selected)
     {
         m_settings.m_audioDeviceName = audioSelect.m_audioDeviceName;
-        applySettings();
+        applySettings(QStringList({"audioDeviceName"}));
     }
 }
 
@@ -1329,7 +1330,7 @@ void ILSDemodGUI::tick()
 void ILSDemodGUI::on_logEnable_clicked(bool checked)
 {
     m_settings.m_logEnabled = checked;
-    applySettings();
+    applySettings(QStringList({"logEnabled"}));
 }
 
 void ILSDemodGUI::on_logFilename_clicked()
@@ -1345,7 +1346,7 @@ void ILSDemodGUI::on_logFilename_clicked()
         {
             m_settings.m_logFilename = fileNames[0];
             ui->logFilename->setToolTip(QString(".csv log filename: %1").arg(m_settings.m_logFilename));
-            applySettings();
+            applySettings(QStringList({"logFilename"}));
         }
     }
 }
@@ -1521,4 +1522,3 @@ void ILSDemodGUI::handleChannelMessageQueue(MessageQueue* messageQueue)
         }
     }
 }
-

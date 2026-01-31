@@ -47,19 +47,22 @@ public:
 
     public:
         const ChannelAnalyzerSettings& getSettings() const { return m_settings; }
+        const QStringList& getSettingsKeys() const { return m_settingsKeys; }
         bool getForce() const { return m_force; }
 
-        static MsgConfigureChannelAnalyzer* create(const ChannelAnalyzerSettings& settings, bool force) {
-            return new MsgConfigureChannelAnalyzer(settings, force);
+        static MsgConfigureChannelAnalyzer* create(const ChannelAnalyzerSettings& settings, const QStringList& settingsKeys, bool force) {
+            return new MsgConfigureChannelAnalyzer(settings, settingsKeys, force);
         }
 
     private:
         ChannelAnalyzerSettings m_settings;
+        QStringList m_settingsKeys;
         bool m_force;
 
-        MsgConfigureChannelAnalyzer(const ChannelAnalyzerSettings& settings, bool force) :
+        MsgConfigureChannelAnalyzer(const ChannelAnalyzerSettings& settings, const QStringList& settingsKeys, bool force) :
             Message(),
             m_settings(settings),
+            m_settingsKeys(settingsKeys),
             m_force(force)
         { }
     };
@@ -149,16 +152,16 @@ private:
     QNetworkRequest m_networkRequest;
 
 	virtual bool handleMessage(const Message& cmd);
-	void applySettings(const ChannelAnalyzerSettings& settings, bool force = false);
-    void webapiReverseSendSettings(QList<QString>& channelSettingsKeys, const ChannelAnalyzerSettings& settings, bool force);
+	void applySettings(const ChannelAnalyzerSettings& settings, const QStringList& settingsKeys, bool force = false);
+    void webapiReverseSendSettings(const QList<QString>& channelSettingsKeys, const ChannelAnalyzerSettings& settings, bool force);
     void sendChannelSettings(
         const QList<ObjectPipe*>& pipes,
-        QList<QString>& channelSettingsKeys,
+        const QList<QString>& channelSettingsKeys,
         const ChannelAnalyzerSettings& settings,
         bool force
     );
     void webapiFormatChannelSettings(
-        QList<QString>& channelSettingsKeys,
+        const QList<QString>& channelSettingsKeys,
         SWGSDRangel::SWGChannelSettings *swgChannelSettings,
         const ChannelAnalyzerSettings& settings,
         bool force

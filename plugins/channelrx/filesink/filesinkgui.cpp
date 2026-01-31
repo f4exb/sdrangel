@@ -48,7 +48,7 @@ void FileSinkGUI::resetToDefaults()
 {
     m_settings.resetToDefaults();
     displaySettings();
-    applySettings(true);
+    applySettings(QStringList(), true);
 }
 
 QByteArray FileSinkGUI::serialize() const
@@ -61,7 +61,7 @@ bool FileSinkGUI::deserialize(const QByteArray& data)
     if (m_settings.deserialize(data))
     {
         displaySettings();
-        applySettings(true);
+        applySettings(QStringList(), true);
         return true;
     }
     else
@@ -86,7 +86,7 @@ bool FileSinkGUI::handleMessage(const Message& message)
         if (m_fixedPosition)
         {
             setFrequencyFromPos();
-            applySettings();
+            applySettings(QStringList(), true);
         }
         else
         {
@@ -103,6 +103,7 @@ bool FileSinkGUI::handleMessage(const Message& message)
         ui->glSpectrumGUI->updateSettings();
         m_channelMarker.updateSettings(static_cast<const ChannelMarker*>(m_settings.m_channelMarker));
         displaySettings();
+        applySettings(QStringList(), true);
         blockApplySettings(false);
         return true;
     }
@@ -230,7 +231,7 @@ FileSinkGUI::FileSinkGUI(PluginAPI* pluginAPI, DeviceUISet *deviceUISet, Baseban
 
     displaySettings();
     makeUIConnections();
-    applySettings(true);
+    applySettings(QStringList(), true);
     DialPopup::addPopupsToChildDials(this);
     m_resizer.enableChildMouseTracking();
 }
@@ -246,13 +247,13 @@ void FileSinkGUI::blockApplySettings(bool block)
     m_doApplySettings = !block;
 }
 
-void FileSinkGUI::applySettings(bool force)
+void FileSinkGUI::applySettings(const QStringList& settingsKeys, bool force)
 {
     if (m_doApplySettings)
     {
         setTitleColor(m_channelMarker.getColor());
 
-        FileSink::MsgConfigureFileSink* message = FileSink::MsgConfigureFileSink::create(m_settings, force);
+        FileSink::MsgConfigureFileSink* message = FileSink::MsgConfigureFileSink::create(settingsKeys, m_settings, force);
         m_fileSink->getInputMessageQueue()->push(message);
     }
 }
@@ -331,7 +332,7 @@ void FileSinkGUI::channelMarkerChangedByCursor()
     ui->deltaFrequency->setValue(m_channelMarker.getCenterFrequency());
     m_settings.m_inputFrequencyOffset = m_channelMarker.getCenterFrequency();
     setPosFromFrequency();
-	applySettings();
+	applySettings(QStringList("inputFrequencyOffset"));
 }
 
 void FileSinkGUI::channelMarkerHighlightedByCursor()
@@ -358,7 +359,7 @@ void FileSinkGUI::onWidgetRolled(QWidget* widget, bool rollDown)
     (void) rollDown;
 
     getRollupContents()->saveState(m_rollupState);
-    applySettings();
+    applySettings(QStringList());
 }
 
 void FileSinkGUI::onMenuDialogCalled(const QPoint &p)
@@ -403,7 +404,14 @@ void FileSinkGUI::onMenuDialogCalled(const QPoint &p)
             updateIndexLabel();
         }
 
-        applySettings();
+        applySettings(QStringList() << "rgbColor"
+            << "title"
+            << "useReverseAPI"
+            << "reverseAPIAddress"
+            << "reverseAPIPort"
+            << "reverseAPIDeviceIndex"
+            << "reverseAPIChannelIndex"
+            << "streamIndex");
     }
 
     resetContextMenuType();
@@ -417,7 +425,7 @@ void FileSinkGUI::on_deltaFrequency_changed(qint64 value)
         m_settings.m_inputFrequencyOffset = m_channelMarker.getCenterFrequency();
         updateAbsoluteCenterFrequency();
         setPosFromFrequency();
-        applySettings();
+        applySettings(QStringList("inputFrequencyOffset"));
     }
 }
 
@@ -427,7 +435,7 @@ void FileSinkGUI::on_decimationFactor_currentIndexChanged(int index)
     applyDecimation();
     displayRate();
     displayPos();
-    applySettings();
+    applySettings(QStringList("log2Decim"));
 
     if (m_fixedPosition) {
         setFrequencyFromPos();
@@ -446,7 +454,7 @@ void FileSinkGUI::on_fixedPosition_toggled(bool checked)
     if (m_fixedPosition)
     {
         setFrequencyFromPos();
-        applySettings();
+        applySettings(QStringList("inputFrequencyOffset"));
     }
 }
 
@@ -458,7 +466,7 @@ void FileSinkGUI::on_position_valueChanged(int value)
     if (m_fixedPosition)
     {
         setFrequencyFromPos();
-        applySettings();
+        applySettings(QStringList("inputFrequencyOffset"));
     }
 }
 
@@ -476,35 +484,35 @@ void FileSinkGUI::on_spectrumSquelch_toggled(bool checked)
         ui->squelchedRecording->blockSignals(false);
     }
 
-    applySettings();
+    applySettings(QStringList("spectrumSquelchMode"));
 }
 
 void FileSinkGUI::on_squelchLevel_valueChanged(int value)
 {
 	m_settings.m_spectrumSquelch = value;
 	ui->squelchLevelText->setText(tr("%1").arg(m_settings.m_spectrumSquelch));
-    applySettings();
+    applySettings(QStringList("spectrumSquelch"));
 }
 
 void FileSinkGUI::on_preRecordTime_valueChanged(int value)
 {
     m_settings.m_preRecordTime = value;
     ui->preRecordTimeText->setText(tr("%1").arg(m_settings.m_preRecordTime));
-    applySettings();
+    applySettings(QStringList("preRecordTime"));
 }
 
 void FileSinkGUI::on_postSquelchTime_valueChanged(int value)
 {
     m_settings.m_squelchPostRecordTime = value;
     ui->postSquelchTimeText->setText(tr("%1").arg(m_settings.m_squelchPostRecordTime));
-    applySettings();
+    applySettings(QStringList("squelchPostRecordTime"));
 }
 
 void FileSinkGUI::on_squelchedRecording_toggled(bool checked)
 {
     ui->record->setEnabled(!checked);
     m_settings.m_squelchRecordingEnable = checked;
-    applySettings();
+    applySettings(QStringList("squelchRecordingEnable"));
 }
 
 void FileSinkGUI::on_record_toggled(bool checked)
@@ -534,7 +542,7 @@ void FileSinkGUI::on_showFileDialog_clicked(bool checked)
         {
             m_settings.m_fileRecordName = fileNames.at(0);
 		    ui->fileNameText->setText(m_settings.m_fileRecordName);
-            applySettings();
+            applySettings(QStringList("fileRecordName"));
         }
     }
 }

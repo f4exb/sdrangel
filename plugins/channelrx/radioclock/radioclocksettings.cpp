@@ -166,4 +166,119 @@ bool RadioClockSettings::deserialize(const QByteArray& data)
     }
 }
 
+void RadioClockSettings::applySettings(const QStringList& settingsKeys, const RadioClockSettings& settings)
+{
+    if (settingsKeys.contains("frequencyMode")) {
+        m_frequencyMode = settings.m_frequencyMode;
+    }
+    if (settingsKeys.contains("inputFrequencyOffset")) {
+        m_inputFrequencyOffset = settings.m_inputFrequencyOffset;
+    }
+    if (settingsKeys.contains("frequency")) {
+        m_frequency = settings.m_frequency;
+    }
+    if (settingsKeys.contains("rfBandwidth")) {
+        m_rfBandwidth = settings.m_rfBandwidth;
+    }
+    if (settingsKeys.contains("threshold")) {
+        m_threshold = settings.m_threshold;
+    }
+    if (settingsKeys.contains("modulation")) {
+        m_modulation = settings.m_modulation;
+    }
+    if (settingsKeys.contains("timezone")) {
+        m_timezone = settings.m_timezone;
+    }
+    if (settingsKeys.contains("rgbColor")) {
+        m_rgbColor = settings.m_rgbColor;
+    }
+    if (settingsKeys.contains("title")) {
+        m_title = settings.m_title;
+    }
+    if (settingsKeys.contains("streamIndex")) {
+        m_streamIndex = settings.m_streamIndex;
+    }
+    if (settingsKeys.contains("useReverseAPI")) {
+        m_useReverseAPI = settings.m_useReverseAPI;
+    }
+    if (settingsKeys.contains("reverseAPIAddress")) {
+        m_reverseAPIAddress = settings.m_reverseAPIAddress;
+    }
+    if (settingsKeys.contains("reverseAPIPort")) {
+        m_reverseAPIPort = settings.m_reverseAPIPort;
+    }
+    if (settingsKeys.contains("reverseAPIDeviceIndex")) {
+        m_reverseAPIDeviceIndex = settings.m_reverseAPIDeviceIndex;
+    }
+    if (settingsKeys.contains("reverseAPIChannelIndex")) {
+        m_reverseAPIChannelIndex = settings.m_reverseAPIChannelIndex;
+    }
+    if (settingsKeys.contains("workspaceIndex")) {
+        m_workspaceIndex = settings.m_workspaceIndex;
+    }
+    if (settingsKeys.contains("geometryBytes")) {
+        m_geometryBytes = settings.m_geometryBytes;
+    }
+    if (settingsKeys.contains("hidden")) {
+        m_hidden = settings.m_hidden;
+    }
+}
 
+QString RadioClockSettings::getDebugString(const QStringList& settingsKeys, bool force) const
+{
+    std::ostringstream ostr;
+
+    if (settingsKeys.contains("frequencyMode") || force) {
+        ostr << " m_frequencyMode: " << m_frequencyMode;
+    }
+    if (settingsKeys.contains("inputFrequencyOffset") || force) {
+        ostr << " m_inputFrequencyOffset: " << m_inputFrequencyOffset;
+    }
+    if (settingsKeys.contains("frequency") || force) {
+        ostr << " m_frequency: " << m_frequency;
+    }
+    if (settingsKeys.contains("rfBandwidth") || force) {
+        ostr << " m_rfBandwidth: " << m_rfBandwidth;
+    }
+    if (settingsKeys.contains("threshold") || force) {
+        ostr << " m_threshold: " << m_threshold;
+    }
+    if (settingsKeys.contains("modulation") || force) {
+        ostr << " m_modulation: " << m_modulation;
+    }
+    if (settingsKeys.contains("timezone") || force) {
+        ostr << " m_timezone: " << m_timezone;
+    }
+    if (settingsKeys.contains("rgbColor") || force) {
+        ostr << " m_rgbColor: " << m_rgbColor;
+    }
+    if (settingsKeys.contains("title") || force) {
+        ostr << " m_title: " << m_title.toStdString();
+    }
+    if (settingsKeys.contains("streamIndex") || force) {
+        ostr << " m_streamIndex: " << m_streamIndex;
+    }
+    if (settingsKeys.contains("useReverseAPI") || force) {
+        ostr << " m_useReverseAPI: " << m_useReverseAPI;
+    }
+    if (settingsKeys.contains("reverseAPIAddress") || force) {
+        ostr << " m_reverseAPIAddress: " << m_reverseAPIAddress.toStdString();
+    }
+    if (settingsKeys.contains("reverseAPIPort") || force) {
+        ostr << " m_reverseAPIPort: " << m_reverseAPIPort;
+    }
+    if (settingsKeys.contains("reverseAPIDeviceIndex") || force) {
+        ostr << " m_reverseAPIDeviceIndex: " << m_reverseAPIDeviceIndex;
+    }
+    if (settingsKeys.contains("reverseAPIChannelIndex") || force) {
+        ostr << " m_reverseAPIChannelIndex: " << m_reverseAPIChannelIndex;
+    }
+    if (settingsKeys.contains("workspaceIndex") || force) {
+        ostr << " m_workspaceIndex: " << m_workspaceIndex;
+    }
+    if (settingsKeys.contains("hidden") || force) {
+        ostr << " m_hidden: " << m_hidden;
+    }
+
+    return QString(ostr.str().c_str());
+}

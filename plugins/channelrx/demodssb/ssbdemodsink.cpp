@@ -76,7 +76,7 @@ SSBDemodSink::SSBDemodSink() :
     m_lowpassQ.create(101, m_audioSampleRate, m_Bandwidth * 1.2);
 
     applyChannelSettings(m_channelSampleRate, m_channelFrequencyOffset, true);
-	applySettings(m_settings, true);
+	applySettings(QStringList(), m_settings, true);
 }
 
 SSBDemodSink::~SSBDemodSink()
@@ -342,39 +342,9 @@ void SSBDemodSink::applyAudioSampleRate(int sampleRate)
     }
 }
 
-void SSBDemodSink::applySettings(const SSBDemodSettings& settings, bool force)
+void SSBDemodSink::applySettings(const QStringList& settingsKeys, const SSBDemodSettings& settings, bool force)
 {
-    qDebug() << "SSBDemodSink::applySettings:"
-            << " m_inputFrequencyOffset: " << settings.m_inputFrequencyOffset
-            << " m_filterIndex: " << settings.m_filterIndex
-            << " [m_spanLog2: " << settings.m_filterBank[settings.m_filterIndex].m_spanLog2
-            << " m_rfBandwidth: " << settings.m_filterBank[settings.m_filterIndex].m_rfBandwidth
-            << " m_lowCutoff: " << settings.m_filterBank[settings.m_filterIndex].m_lowCutoff
-            << " m_fftWindow: " << settings.m_filterBank[settings.m_filterIndex].m_fftWindow << "]"
-            << " m_volume: " << settings.m_volume
-            << " m_audioBinaual: " << settings.m_audioBinaural
-            << " m_audioFlipChannels: " << settings.m_audioFlipChannels
-            << " m_dsb: " << settings.m_dsb
-            << " m_audioMute: " << settings.m_audioMute
-            << " m_agcActive: " << settings.m_agc
-            << " m_agcClamping: " << settings.m_agcClamping
-            << " m_agcTimeLog2: " << settings.m_agcTimeLog2
-            << " agcPowerThreshold: " << settings.m_agcPowerThreshold
-            << " agcThresholdGate: " << settings.m_agcThresholdGate
-            << " m_dnr: " << settings.m_dnr
-            << " m_dnrScheme: " << settings.m_dnrScheme
-            << " m_dnrAboveAvgFactor: " << settings.m_dnrAboveAvgFactor
-            << " m_dnrSigmaFactor: " << settings.m_dnrSigmaFactor
-            << " m_dnrNbPeaks: " << settings.m_dnrNbPeaks
-            << " m_dnrAlpha: " << settings.m_dnrAlpha
-            << " m_audioDeviceName: " << settings.m_audioDeviceName
-            << " m_streamIndex: " << settings.m_streamIndex
-            << " m_useReverseAPI: " << settings.m_useReverseAPI
-            << " m_reverseAPIAddress: " << settings.m_reverseAPIAddress
-            << " m_reverseAPIPort: " << settings.m_reverseAPIPort
-            << " m_reverseAPIDeviceIndex: " << settings.m_reverseAPIDeviceIndex
-            << " m_reverseAPIChannelIndex: " << settings.m_reverseAPIChannelIndex
-            << " force: " << force;
+    qDebug() << "SSBDemodSink::applySettings:" << settings.getDebugString(settingsKeys, force);
 
     if((m_settings.m_filterBank[m_settings.m_filterIndex].m_rfBandwidth != settings.m_filterBank[settings.m_filterIndex].m_rfBandwidth) ||
         (m_settings.m_filterBank[m_settings.m_filterIndex].m_lowCutoff != settings.m_filterBank[settings.m_filterIndex].m_lowCutoff) ||
@@ -412,16 +382,16 @@ void SSBDemodSink::applySettings(const SSBDemodSettings& settings, bool force)
         m_lowpassQ.create(101, m_audioSampleRate, m_Bandwidth * 1.2);
     }
 
-    if ((m_settings.m_volume != settings.m_volume) || force)
+    if ((settingsKeys.contains("volume")) || force)
     {
         m_volume = settings.m_volume;
         m_volume /= 4.0; // for 3276.8
     }
 
-    if ((m_settings.m_agcTimeLog2 != settings.m_agcTimeLog2) ||
-        (m_settings.m_agcPowerThreshold != settings.m_agcPowerThreshold) ||
-        (m_settings.m_agcThresholdGate != settings.m_agcThresholdGate) ||
-        (m_settings.m_agcClamping != settings.m_agcClamping) || force)
+    if ((settingsKeys.contains("agcTimeLog2")) ||
+        (settingsKeys.contains("agcPowerThreshold")) ||
+        (settingsKeys.contains("agcThresholdGate")) ||
+        (settingsKeys.contains("agcClamping")) || force)
     {
         int agcNbSamples = (m_audioSampleRate / 1000) * (1<<settings.m_agcTimeLog2);
         m_agc.setThresholdEnable(settings.m_agcPowerThreshold != -SSBDemodSettings::m_minPowerThresholdDB);
@@ -460,27 +430,27 @@ void SSBDemodSink::applySettings(const SSBDemodSettings& settings, bool force)
             << " agcClamping: " << agcClamping;
     }
 
-    if ((m_settings.m_dnr != settings.m_dnr) || force) {
+    if ((settingsKeys.contains("dnr")) || force) {
         setDNR(settings.m_dnr);
     }
 
-    if ((m_settings.m_dnrScheme != settings.m_dnrScheme) || force) {
+    if ((settingsKeys.contains("dnrScheme")) || force) {
         SSBFilter->setDNRScheme((FFTNoiseReduction::Scheme) settings.m_dnrScheme);
     }
 
-    if ((m_settings.m_dnrAboveAvgFactor != settings.m_dnrAboveAvgFactor) || force) {
+    if ((settingsKeys.contains("dnrAboveAvgFactor")) || force) {
         SSBFilter->setDNRAboveAvgFactor(settings.m_dnrAboveAvgFactor);
     }
 
-    if ((m_settings.m_dnrSigmaFactor != settings.m_dnrSigmaFactor) || force) {
+    if ((settingsKeys.contains("dnrSigmaFactor")) || force) {
         SSBFilter->setDNRSigmaFactor(settings.m_dnrSigmaFactor);
     }
 
-    if ((m_settings.m_dnrNbPeaks != settings.m_dnrNbPeaks) || force) {
+    if ((settingsKeys.contains("dnrNbPeaks")) || force) {
         SSBFilter->setDNRNbPeaks(settings.m_dnrNbPeaks);
     }
 
-    if ((m_settings.m_dnrAlpha != settings.m_dnrAlpha) || force) {
+    if ((settingsKeys.contains("dnrAlpha")) || force) {
         SSBFilter->setDNRAlpha(settings.m_dnrAlpha);
     }
 
@@ -490,5 +460,10 @@ void SSBDemodSink::applySettings(const SSBDemodSettings& settings, bool force)
     m_dsb = settings.m_dsb;
     m_audioMute = settings.m_audioMute;
     m_agcActive = settings.m_agc;
-    m_settings = settings;
+
+    if (force) {
+        m_settings = settings;
+    } else {
+        m_settings.applySettings(settingsKeys, settings);
+    }
 }

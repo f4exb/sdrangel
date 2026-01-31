@@ -173,6 +173,129 @@ bool FileSinkSettings::deserialize(const QByteArray& data)
     }
 }
 
+void FileSinkSettings::applySettings(const QStringList& settingsKeys, const FileSinkSettings& settings)
+{
+    if (settingsKeys.contains("inputFrequencyOffset")) {
+        m_inputFrequencyOffset = settings.m_inputFrequencyOffset;
+    }
+    if (settingsKeys.contains("fileRecordName")) {
+        m_fileRecordName = settings.m_fileRecordName;
+    }
+    if (settingsKeys.contains("rgbColor")) {
+        m_rgbColor = settings.m_rgbColor;
+    }
+    if (settingsKeys.contains("title")) {
+        m_title = settings.m_title;
+    }
+    if (settingsKeys.contains("log2Decim")) {
+        m_log2Decim = settings.m_log2Decim;
+    }
+    if (settingsKeys.contains("spectrumSquelchMode")) {
+        m_spectrumSquelchMode = settings.m_spectrumSquelchMode;
+    }
+    if (settingsKeys.contains("spectrumSquelch")) {
+        m_spectrumSquelch = settings.m_spectrumSquelch;
+    }
+    if (settingsKeys.contains("preRecordTime")) {
+        m_preRecordTime = settings.m_preRecordTime;
+    }
+    if (settingsKeys.contains("squelchPostRecordTime")) {
+        m_squelchPostRecordTime = settings.m_squelchPostRecordTime;
+    }
+    if (settingsKeys.contains("squelchRecordingEnable")) {
+        m_squelchRecordingEnable = settings.m_squelchRecordingEnable;
+    }
+    if (settingsKeys.contains("streamIndex")) {
+        m_streamIndex = settings.m_streamIndex;
+    }
+    if (settingsKeys.contains("useReverseAPI")) {
+        m_useReverseAPI = settings.m_useReverseAPI;
+    }
+    if (settingsKeys.contains("reverseAPIAddress")) {
+        m_reverseAPIAddress = settings.m_reverseAPIAddress;
+    }
+    if (settingsKeys.contains("reverseAPIPort")) {
+        m_reverseAPIPort = settings.m_reverseAPIPort;
+    }
+    if (settingsKeys.contains("reverseAPIDeviceIndex")) {
+        m_reverseAPIDeviceIndex = settings.m_reverseAPIDeviceIndex;
+    }
+    if (settingsKeys.contains("reverseAPIChannelIndex")) {
+        m_reverseAPIChannelIndex = settings.m_reverseAPIChannelIndex;
+    }
+    if (settingsKeys.contains("workspaceIndex")) {
+        m_workspaceIndex = settings.m_workspaceIndex;
+    }
+    if (settingsKeys.contains("geometryBytes")) {
+        m_geometryBytes = settings.m_geometryBytes;
+    }
+    if (settingsKeys.contains("hidden")) {
+        m_hidden = settings.m_hidden;
+    }
+}
+
+QString FileSinkSettings::getDebugString(const QStringList& settingsKeys, bool force) const
+{
+    std::ostringstream ostr;
+
+    if (settingsKeys.contains("inputFrequencyOffset") || force) {
+        ostr << " m_inputFrequencyOffset: " << m_inputFrequencyOffset;
+    }
+    if (settingsKeys.contains("fileRecordName") || force) {
+        ostr << " m_fileRecordName: " << m_fileRecordName.toStdString();
+    }
+    if (settingsKeys.contains("rgbColor") || force) {
+        ostr << " m_rgbColor: " << m_rgbColor;
+    }
+    if (settingsKeys.contains("title") || force) {
+        ostr << " m_title: " << m_title.toStdString();
+    }
+    if (settingsKeys.contains("log2Decim") || force) {
+        ostr << " m_log2Decim: " << m_log2Decim;
+    }
+    if (settingsKeys.contains("spectrumSquelchMode") || force) {
+        ostr << " m_spectrumSquelchMode: " << m_spectrumSquelchMode;
+    }
+    if (settingsKeys.contains("spectrumSquelch") || force) {
+        ostr << " m_spectrumSquelch: " << m_spectrumSquelch;
+    }
+    if (settingsKeys.contains("preRecordTime") || force) {
+        ostr << " m_preRecordTime: " << m_preRecordTime;
+    }
+    if (settingsKeys.contains("squelchPostRecordTime") || force) {
+        ostr << " m_squelchPostRecordTime: " << m_squelchPostRecordTime;
+    }
+    if (settingsKeys.contains("squelchRecordingEnable") || force) {
+        ostr << " m_squelchRecordingEnable: " << m_squelchRecordingEnable;
+    }
+    if (settingsKeys.contains("streamIndex") || force) {
+        ostr << " m_streamIndex: " << m_streamIndex;
+    }
+    if (settingsKeys.contains("useReverseAPI") || force) {
+        ostr << " m_useReverseAPI: " << m_useReverseAPI;
+    }
+    if (settingsKeys.contains("reverseAPIAddress") || force) {
+        ostr << " m_reverseAPIAddress: " << m_reverseAPIAddress.toStdString();
+    }
+    if (settingsKeys.contains("reverseAPIPort") || force) {
+        ostr << " m_reverseAPIPort: " << m_reverseAPIPort;
+    }
+    if (settingsKeys.contains("reverseAPIDeviceIndex") || force) {
+        ostr << " m_reverseAPIDeviceIndex: " << m_reverseAPIDeviceIndex;
+    }
+    if (settingsKeys.contains("reverseAPIChannelIndex") || force) {
+        ostr << " m_reverseAPIChannelIndex: " << m_reverseAPIChannelIndex;
+    }
+    if (settingsKeys.contains("workspaceIndex") || force) {
+        ostr << " m_workspaceIndex: " << m_workspaceIndex;
+    }
+    if (settingsKeys.contains("hidden") || force) {
+        ostr << " m_hidden: " << m_hidden;
+    }
+
+    return QString(ostr.str().c_str());
+}
+
 unsigned int FileSinkSettings::getNbFixedShiftIndexes(int log2Decim)
 {
     int decim = (1<<log2Decim);
@@ -202,5 +325,3 @@ int FileSinkSettings::getOffsetFromFixedShiftIndex(int sampleRate, int log2Decim
     int mid = decim - 1;
     return ((shiftIndex - mid) * sampleRate) / (2*decim);
 }
-
-

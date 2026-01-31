@@ -139,7 +139,7 @@ bool ILSDemodBaseband::handleMessage(const Message& cmd)
         MsgConfigureILSDemodBaseband& cfg = (MsgConfigureILSDemodBaseband&) cmd;
         qDebug() << "ILSDemodBaseband::handleMessage: MsgConfigureILSDemodBaseband";
 
-        applySettings(cfg.getSettings(), cfg.getForce());
+        applySettings(cfg.getSettingsKeys(), cfg.getSettings(), cfg.getForce());
 
         return true;
     }
@@ -164,9 +164,9 @@ bool ILSDemodBaseband::handleMessage(const Message& cmd)
     }
 }
 
-void ILSDemodBaseband::applySettings(const ILSDemodSettings& settings, bool force)
+void ILSDemodBaseband::applySettings(const QStringList& settingsKeys, const ILSDemodSettings& settings, bool force)
 {
-    if ((settings.m_inputFrequencyOffset != m_settings.m_inputFrequencyOffset) || force)
+    if ((settingsKeys.contains("m_inputFrequencyOffset") && (settings.m_inputFrequencyOffset != m_settings.m_inputFrequencyOffset)) || force)
     {
         m_channelizer->setChannelization(ILSDemodSettings::ILSDEMOD_CHANNEL_SAMPLE_RATE, settings.m_inputFrequencyOffset);
         m_sink.applyChannelSettings(m_channelizer->getChannelSampleRate(), m_channelizer->getChannelFrequencyOffset());
@@ -177,7 +177,7 @@ void ILSDemodBaseband::applySettings(const ILSDemodSettings& settings, bool forc
         }
     }
 
-    if ((settings.m_audioDeviceName != m_settings.m_audioDeviceName) || force)
+    if ((settingsKeys.contains("m_audioDeviceName") && (settings.m_audioDeviceName != m_settings.m_audioDeviceName)) || force)
     {
         AudioDeviceManager *audioDeviceManager = DSPEngine::instance()->getAudioDeviceManager();
         int audioDeviceIndex = audioDeviceManager->getOutputDeviceIndex(settings.m_audioDeviceName);
@@ -194,9 +194,13 @@ void ILSDemodBaseband::applySettings(const ILSDemodSettings& settings, bool forc
         }
     }
 
-    m_sink.applySettings(settings, force);
+    m_sink.applySettings(settingsKeys, settings, force);
 
-    m_settings = settings;
+    if (force) {
+        m_settings = settings;
+    } else {
+        m_settings.applySettings(settingsKeys, settings);
+    }
 }
 
 int ILSDemodBaseband::getChannelSampleRate() const
@@ -209,4 +213,3 @@ void ILSDemodBaseband::setBasebandSampleRate(int sampleRate)
     m_channelizer->setBasebandSampleRate(sampleRate);
     m_sink.applyChannelSettings(m_channelizer->getChannelSampleRate(), m_channelizer->getChannelFrequencyOffset());
 }
-

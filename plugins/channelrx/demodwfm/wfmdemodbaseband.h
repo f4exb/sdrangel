@@ -42,20 +42,23 @@ public:
 
     public:
         const WFMDemodSettings& getSettings() const { return m_settings; }
+        const QStringList& getSettingsKeys() const { return m_settingsKeys; }
         bool getForce() const { return m_force; }
 
-        static MsgConfigureWFMDemodBaseband* create(const WFMDemodSettings& settings, bool force)
+        static MsgConfigureWFMDemodBaseband* create(const QStringList& settingsKeys, const WFMDemodSettings& settings, bool force)
         {
-            return new MsgConfigureWFMDemodBaseband(settings, force);
+            return new MsgConfigureWFMDemodBaseband(settingsKeys, settings, force);
         }
 
     private:
         WFMDemodSettings m_settings;
+        QStringList m_settingsKeys;
         bool m_force;
 
-        MsgConfigureWFMDemodBaseband(const WFMDemodSettings& settings, bool force) :
+        MsgConfigureWFMDemodBaseband(const QStringList& settingsKeys, const WFMDemodSettings& settings, bool force) :
             Message(),
             m_settings(settings),
+            m_settingsKeys(settingsKeys),
             m_force(force)
         { }
     };
@@ -89,7 +92,7 @@ private:
     QDateTime m_audioFifoErrorDateTime;
 
     bool handleMessage(const Message& cmd);
-    void applySettings(const WFMDemodSettings& settings, bool force = false);
+    void applySettings(const QStringList& settingsKeys, const WFMDemodSettings& settings, bool force = false);
 
 private slots:
     void handleInputMessages();

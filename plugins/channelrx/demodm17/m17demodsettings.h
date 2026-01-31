@@ -67,6 +67,7 @@ struct M17DemodSettings
     QByteArray serialize() const;
     bool deserialize(const QByteArray& data);
     void applySettings(const QStringList& settingsKeys, const M17DemodSettings& settings);
+    QString getDebugString(const QStringList& settingsKeys, bool force=false) const;
 };
 
 

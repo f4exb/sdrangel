@@ -169,7 +169,7 @@ FreeDVDemodSink::FreeDVDemodSink() :
     m_SSBFilterBufferIndex = 0;
 
     applyChannelSettings(m_channelSampleRate, m_channelFrequencyOffset, true);
-	applySettings(m_settings, true);
+	applySettings(QStringList(), m_settings, true);
 }
 
 FreeDVDemodSink::~FreeDVDemodSink()
@@ -503,26 +503,11 @@ void FreeDVDemodSink::applyFreeDVMode(FreeDVDemodSettings::FreeDVMode mode)
     }
 }
 
-void FreeDVDemodSink::applySettings(const FreeDVDemodSettings& settings, bool force)
+void FreeDVDemodSink::applySettings(const QStringList& settingsKeys, const FreeDVDemodSettings& settings, bool force)
 {
-    qDebug() << "FreeDVDemodSink::applySettings:"
-            << " m_inputFrequencyOffset: " << settings.m_inputFrequencyOffset
-            << " m_freeDVMode: " << (int) settings.m_freeDVMode
-            << " m_volume: " << settings.m_volume
-            << " m_volumeIn: " << settings.m_volumeIn
-            << " m_spanLog2: " << settings.m_spanLog2
-            << " m_audioMute: " << settings.m_audioMute
-            << " m_agcActive: " << settings.m_agc
-            << " m_audioDeviceName: " << settings.m_audioDeviceName
-            << " m_streamIndex: " << settings.m_streamIndex
-            << " m_useReverseAPI: " << settings.m_useReverseAPI
-            << " m_reverseAPIAddress: " << settings.m_reverseAPIAddress
-            << " m_reverseAPIPort: " << settings.m_reverseAPIPort
-            << " m_reverseAPIDeviceIndex: " << settings.m_reverseAPIDeviceIndex
-            << " m_reverseAPIChannelIndex: " << settings.m_reverseAPIChannelIndex
-            << " force: " << force;
+    qDebug() << "FreeDVDemodSink::applySettings:" << settings.getDebugString(settingsKeys, force);
 
-    if ((m_settings.m_volume != settings.m_volume) || force)
+    if ((settingsKeys.contains("m_volume") && (settings.m_volume != m_settings.m_volume)) || force)
     {
         m_volume = settings.m_volume;
         m_volume /= 4.0; // for 3276.8
@@ -531,7 +516,12 @@ void FreeDVDemodSink::applySettings(const FreeDVDemodSettings& settings, bool fo
     m_spanLog2 = settings.m_spanLog2;
     m_audioMute = settings.m_audioMute;
     m_agcActive = settings.m_agc;
-    m_settings = settings;
+
+    if (force) {
+        m_settings = settings;
+    } else {
+        m_settings.applySettings(settingsKeys, settings);
+    }
 }
 
 void FreeDVDemodSink::getSNRLevels(double& avg, double& peak, int& nbSamples)

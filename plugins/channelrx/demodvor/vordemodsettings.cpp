@@ -166,4 +166,137 @@ bool VORDemodSettings::deserialize(const QByteArray& data)
     }
 }
 
+void VORDemodSettings::applySettings(const QStringList& settingsKeys, const VORDemodSettings& settings)
+{
+    if (settingsKeys.contains("inputFrequencyOffset")) {
+        m_inputFrequencyOffset = settings.m_inputFrequencyOffset;
+    }
+    if (settingsKeys.contains("navId")) {
+        m_navId = settings.m_navId;
+    }
+    if (settingsKeys.contains("squelch")) {
+        m_squelch = settings.m_squelch;
+    }
+    if (settingsKeys.contains("volume")) {
+        m_volume = settings.m_volume;
+    }
+    if (settingsKeys.contains("audioMute")) {
+        m_audioMute = settings.m_audioMute;
+    }
+    if (settingsKeys.contains("identBandpassEnable")) {
+        m_identBandpassEnable = settings.m_identBandpassEnable;
+    }
+    if (settingsKeys.contains("rgbColor")) {
+        m_rgbColor = settings.m_rgbColor;
+    }
+    if (settingsKeys.contains("title")) {
+        m_title = settings.m_title;
+    }
+    if (settingsKeys.contains("audioDeviceName")) {
+        m_audioDeviceName = settings.m_audioDeviceName;
+    }
+    if (settingsKeys.contains("streamIndex")) {
+        m_streamIndex = settings.m_streamIndex;
+    }
+    if (settingsKeys.contains("useReverseAPI")) {
+        m_useReverseAPI = settings.m_useReverseAPI;
+    }
+    if (settingsKeys.contains("reverseAPIAddress")) {
+        m_reverseAPIAddress = settings.m_reverseAPIAddress;
+    }
+    if (settingsKeys.contains("reverseAPIPort")) {
+        m_reverseAPIPort = settings.m_reverseAPIPort;
+    }
+    if (settingsKeys.contains("reverseAPIDeviceIndex")) {
+        m_reverseAPIDeviceIndex = settings.m_reverseAPIDeviceIndex;
+    }
+    if (settingsKeys.contains("reverseAPIChannelIndex")) {
+        m_reverseAPIChannelIndex = settings.m_reverseAPIChannelIndex;
+    }
+    if (settingsKeys.contains("identThreshold")) {
+        m_identThreshold = settings.m_identThreshold;
+    }
+    if (settingsKeys.contains("refThresholdDB")) {
+        m_refThresholdDB = settings.m_refThresholdDB;
+    }
+    if (settingsKeys.contains("varThresholdDB")) {
+        m_varThresholdDB = settings.m_varThresholdDB;
+    }
+    if (settingsKeys.contains("workspaceIndex")) {
+        m_workspaceIndex = settings.m_workspaceIndex;
+    }
+    if (settingsKeys.contains("geometryBytes")) {
+        m_geometryBytes = settings.m_geometryBytes;
+    }
+    if (settingsKeys.contains("hidden")) {
+        m_hidden = settings.m_hidden;
+    }
+}
 
+QString VORDemodSettings::getDebugString(const QStringList& settingsKeys, bool force) const
+{
+    std::ostringstream ostr;
+
+    if (settingsKeys.contains("inputFrequencyOffset") || force) {
+        ostr << " m_inputFrequencyOffset: " << m_inputFrequencyOffset;
+    }
+    if (settingsKeys.contains("navId") || force) {
+        ostr << " m_navId: " << m_navId;
+    }
+    if (settingsKeys.contains("squelch") || force) {
+        ostr << " m_squelch: " << m_squelch;
+    }
+    if (settingsKeys.contains("volume") || force) {
+        ostr << " m_volume: " << m_volume;
+    }
+    if (settingsKeys.contains("audioMute") || force) {
+        ostr << " m_audioMute: " << m_audioMute;
+    }
+    if (settingsKeys.contains("identBandpassEnable") || force) {
+        ostr << " m_identBandpassEnable: " << m_identBandpassEnable;
+    }
+    if (settingsKeys.contains("rgbColor") || force) {
+        ostr << " m_rgbColor: " << m_rgbColor;
+    }
+    if (settingsKeys.contains("title") || force) {
+        ostr << " m_title: " << m_title.toStdString();
+    }
+    if (settingsKeys.contains("audioDeviceName") || force) {
+        ostr << " m_audioDeviceName: " << m_audioDeviceName.toStdString();
+    }
+    if (settingsKeys.contains("streamIndex") || force) {
+        ostr << " m_streamIndex: " << m_streamIndex;
+    }
+    if (settingsKeys.contains("useReverseAPI") || force) {
+        ostr << " m_useReverseAPI: " << m_useReverseAPI;
+    }
+    if (settingsKeys.contains("reverseAPIAddress") || force) {
+        ostr << " m_reverseAPIAddress: " << m_reverseAPIAddress.toStdString();
+    }
+    if (settingsKeys.contains("reverseAPIPort") || force) {
+        ostr << " m_reverseAPIPort: " << m_reverseAPIPort;
+    }
+    if (settingsKeys.contains("reverseAPIDeviceIndex") || force) {
+        ostr << " m_reverseAPIDeviceIndex: " << m_reverseAPIDeviceIndex;
+    }
+    if (settingsKeys.contains("reverseAPIChannelIndex") || force) {
+        ostr << " m_reverseAPIChannelIndex: " << m_reverseAPIChannelIndex;
+    }
+    if (settingsKeys.contains("identThreshold") || force) {
+        ostr << " m_identThreshold: " << m_identThreshold;
+    }
+    if (settingsKeys.contains("refThresholdDB") || force) {
+        ostr << " m_refThresholdDB: " << m_refThresholdDB;
+    }
+    if (settingsKeys.contains("varThresholdDB") || force) {
+        ostr << " m_varThresholdDB: " << m_varThresholdDB;
+    }
+    if (settingsKeys.contains("workspaceIndex") || force) {
+        ostr << " m_workspaceIndex: " << m_workspaceIndex;
+    }
+    if (settingsKeys.contains("hidden") || force) {
+        ostr << " m_hidden: " << m_hidden;
+    }
+
+    return QString(ostr.str().c_str());
+}

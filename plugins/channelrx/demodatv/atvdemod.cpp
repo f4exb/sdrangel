@@ -50,7 +50,7 @@ ATVDemod::ATVDemod(DeviceAPI *deviceAPI) :
     );
     m_basebandSink->moveToThread(&m_thread);
 
-    applySettings(m_settings, true);
+    applySettings(QStringList(), m_settings, true);
 
     m_deviceAPI->addChannelSink(this);
     m_deviceAPI->addChannelSinkAPI(this);
@@ -106,7 +106,7 @@ void ATVDemod::start()
     DSPSignalNotification* notifToSink = new DSPSignalNotification(m_basebandSampleRate, m_centerFrequency);
     m_basebandSink->getInputMessageQueue()->push(notifToSink);
 
-    ATVDemodBaseband::MsgConfigureATVDemodBaseband *msg = ATVDemodBaseband::MsgConfigureATVDemodBaseband::create(m_settings, true);
+    ATVDemodBaseband::MsgConfigureATVDemodBaseband *msg = ATVDemodBaseband::MsgConfigureATVDemodBaseband::create(QStringList(), m_settings, true);
     m_basebandSink->getInputMessageQueue()->push(msg);
 }
 
@@ -129,7 +129,7 @@ bool ATVDemod::handleMessage(const Message& cmd)
     if (MsgConfigureATVDemod::match(cmd))
     {
         MsgConfigureATVDemod& cfg = (MsgConfigureATVDemod&) cmd;
-        applySettings(cfg.getSettings(), cfg.getForce());
+        applySettings(cfg.getSettingsKeys(), cfg.getSettings(), cfg.getForce());
 
         return true;
     }
@@ -161,41 +161,20 @@ void ATVDemod::setCenterFrequency(qint64 frequency)
 {
     ATVDemodSettings settings = m_settings;
     settings.m_inputFrequencyOffset = frequency;
-    applySettings(settings, false);
+    applySettings(QStringList("inputFrequencyOffset"), settings, false);
 
     if (getMessageQueueToGUI())
     {
-        MsgConfigureATVDemod *msg = MsgConfigureATVDemod::create(settings, false);
+        MsgConfigureATVDemod *msg = MsgConfigureATVDemod::create(QStringList("inputFrequencyOffset"), settings, false);
         getMessageQueueToGUI()->push(msg);
     }
 }
 
-void ATVDemod::applySettings(const ATVDemodSettings& settings, bool force)
+void ATVDemod::applySettings(const QStringList& settingsKeys, const ATVDemodSettings& settings, bool force)
 {
-    qDebug() << "ATVDemod::applySettings:"
-            << "m_inputFrequencyOffset:" << settings.m_inputFrequencyOffset
-            << "m_bfoFrequency:" << settings.m_bfoFrequency
-            << "m_atvModulation:" << settings.m_atvModulation
-            << "m_fmDeviation:" << settings.m_fmDeviation
-            << "m_fftFiltering:" << settings.m_fftFiltering
-            << "m_fftOppBandwidth:" << settings.m_fftOppBandwidth
-            << "m_fftBandwidth:" << settings.m_fftBandwidth
-            << "m_nbLines:" << settings.m_nbLines
-            << "m_fps:" << settings.m_fps
-            << "m_atvStd:" << settings.m_atvStd
-            << "m_hSync:" << settings.m_hSync
-            << "m_vSync:" << settings.m_vSync
-            << "m_invertVideo:" << settings.m_invertVideo
-            << "m_halfFrames:" << settings.m_halfFrames
-            << "m_levelSynchroTop:" << settings.m_levelSynchroTop
-            << "m_levelBlack:" << settings.m_levelBlack
-            << "m_rgbColor:" << settings.m_rgbColor
-            << "m_title:" << settings.m_title
-            << "m_udpAddress:" << settings.m_udpAddress
-            << "m_udpPort:" << settings.m_udpPort
-            << "force:" << force;
+    qDebug() << "ATVDemod::applySettings:" << settings.getDebugString(settingsKeys, force);
 
-    if (m_settings.m_streamIndex != settings.m_streamIndex)
+    if (settingsKeys.contains("m_streamIndex") && m_settings.m_streamIndex != settings.m_streamIndex)
     {
         if (m_deviceAPI->getSampleMIMO()) // change of stream is possible for MIMO devices only
         {
@@ -208,10 +187,14 @@ void ATVDemod::applySettings(const ATVDemodSettings& settings, bool force)
         }
     }
 
-    ATVDemodBaseband::MsgConfigureATVDemodBaseband *msg = ATVDemodBaseband::MsgConfigureATVDemodBaseband::create(settings, force);
+    ATVDemodBaseband::MsgConfigureATVDemodBaseband *msg = ATVDemodBaseband::MsgConfigureATVDemodBaseband::create(settingsKeys, settings, force);
     m_basebandSink->getInputMessageQueue()->push(msg);
 
-    m_settings = settings;
+    if (force) {
+        m_settings = settings;
+    } else {
+        m_settings.applySettings(settingsKeys, settings);
+    }
 }
 
 void ATVDemod::handleIndexInDeviceSetChanged(int index)

@@ -562,3 +562,396 @@ bool WDSPRxSettings::deserialize(const QByteArray& data)
         return false;
     }
 }
+
+void WDSPRxSettings::applySettings(const QStringList& settingsKeys, const WDSPRxSettings& settings)
+{
+    if (settingsKeys.contains("demod")) {
+        m_demod = settings.m_demod;
+    }
+    if (settingsKeys.contains("inputFrequencyOffset")) {
+        m_inputFrequencyOffset = settings.m_inputFrequencyOffset;
+    }
+    if (settingsKeys.contains("volume")) {
+        m_volume = settings.m_volume;
+    }
+    if (settingsKeys.contains("audioBinaural")) {
+        m_audioBinaural = settings.m_audioBinaural;
+    }
+    if (settingsKeys.contains("audioFlipChannels")) {
+        m_audioFlipChannels = settings.m_audioFlipChannels;
+    }
+    if (settingsKeys.contains("audioPan")) {
+        m_audioPan = settings.m_audioPan;
+    }
+    if (settingsKeys.contains("dsb")) {
+        m_dsb = settings.m_dsb;
+    }
+    if (settingsKeys.contains("audioMute")) {
+        m_audioMute = settings.m_audioMute;
+    }
+    if (settingsKeys.contains("dbOrS")) {
+        m_dbOrS = settings.m_dbOrS;
+    }
+    if (settingsKeys.contains("agc")) {
+        m_agc = settings.m_agc;
+    }
+    if (settingsKeys.contains("agcMode")) {
+        m_agcMode = settings.m_agcMode;
+    }
+    if (settingsKeys.contains("agcGain")) {
+        m_agcGain = settings.m_agcGain;
+    }
+    if (settingsKeys.contains("agcSlope")) {
+        m_agcSlope = settings.m_agcSlope;
+    }
+    if (settingsKeys.contains("agcHangThreshold")) {
+        m_agcHangThreshold = settings.m_agcHangThreshold;
+    }
+    if (settingsKeys.contains("dnb")) {
+        m_dnb = settings.m_dnb;
+    }
+    if (settingsKeys.contains("nbScheme")) {
+        m_nbScheme = settings.m_nbScheme;
+    }
+    if (settingsKeys.contains("nb2Mode")) {
+        m_nb2Mode = settings.m_nb2Mode;
+    }
+    if (settingsKeys.contains("nbSlewTime")) {
+        m_nbSlewTime = settings.m_nbSlewTime;
+    }
+    if (settingsKeys.contains("nbLeadTime")) {
+        m_nbLeadTime = settings.m_nbLeadTime;
+    }
+    if (settingsKeys.contains("nbLagTime")) {
+        m_nbLagTime = settings.m_nbLagTime;
+    }
+    if (settingsKeys.contains("nbThreshold")) {
+        m_nbThreshold = settings.m_nbThreshold;
+    }
+    if (settingsKeys.contains("nbAvgTime")) {
+        m_nbAvgTime = settings.m_nbAvgTime;
+    }
+    if (settingsKeys.contains("dnr")) {
+        m_dnr = settings.m_dnr;
+    }
+    if (settingsKeys.contains("snb")) {
+        m_snb = settings.m_snb;
+    }
+    if (settingsKeys.contains("anf")) {
+        m_anf = settings.m_anf;
+    }
+    if (settingsKeys.contains("nrScheme")) {
+        m_nrScheme = settings.m_nrScheme;
+    }
+    if (settingsKeys.contains("nr2Gain")) {
+        m_nr2Gain = settings.m_nr2Gain;
+    }
+    if (settingsKeys.contains("nr2NPE")) {
+        m_nr2NPE = settings.m_nr2NPE;
+    }
+    if (settingsKeys.contains("nrPosition")) {
+        m_nrPosition = settings.m_nrPosition;
+    }
+    if (settingsKeys.contains("nr2ArtifactReduction")) {
+        m_nr2ArtifactReduction = settings.m_nr2ArtifactReduction;
+    }
+    if (settingsKeys.contains("amFadeLevel")) {
+        m_amFadeLevel = settings.m_amFadeLevel;
+    }
+    if (settingsKeys.contains("cwPeaking")) {
+        m_cwPeaking = settings.m_cwPeaking;
+    }
+    if (settingsKeys.contains("cwPeakFrequency")) {
+        m_cwPeakFrequency = settings.m_cwPeakFrequency;
+    }
+    if (settingsKeys.contains("cwBandwidth")) {
+        m_cwBandwidth = settings.m_cwBandwidth;
+    }
+    if (settingsKeys.contains("cwGain")) {
+        m_cwGain = settings.m_cwGain;
+    }
+    if (settingsKeys.contains("fmDeviation")) {
+        m_fmDeviation = settings.m_fmDeviation;
+    }
+    if (settingsKeys.contains("fmAFLow")) {
+        m_fmAFLow = settings.m_fmAFLow;
+    }
+    if (settingsKeys.contains("fmAFHigh")) {
+        m_fmAFHigh = settings.m_fmAFHigh;
+    }
+    if (settingsKeys.contains("fmAFLimiter")) {
+        m_fmAFLimiter = settings.m_fmAFLimiter;
+    }
+    if (settingsKeys.contains("fmAFLimiterGain")) {
+        m_fmAFLimiterGain = settings.m_fmAFLimiterGain;
+    }
+    if (settingsKeys.contains("fmCTCSSNotch")) {
+        m_fmCTCSSNotch = settings.m_fmCTCSSNotch;
+    }
+    if (settingsKeys.contains("fmCTCSSNotchFrequency")) {
+        m_fmCTCSSNotchFrequency = settings.m_fmCTCSSNotchFrequency;
+    }
+    if (settingsKeys.contains("squelch")) {
+        m_squelch = settings.m_squelch;
+    }
+    if (settingsKeys.contains("squelchThreshold")) {
+        m_squelchThreshold = settings.m_squelchThreshold;
+    }
+    if (settingsKeys.contains("squelchMode")) {
+        m_squelchMode = settings.m_squelchMode;
+    }
+    if (settingsKeys.contains("ssqlTauMute")) {
+        m_ssqlTauMute = settings.m_ssqlTauMute;
+    }
+    if (settingsKeys.contains("ssqlTauUnmute")) {
+        m_ssqlTauUnmute = settings.m_ssqlTauUnmute;
+    }
+    if (settingsKeys.contains("amsqMaxTail")) {
+        m_amsqMaxTail = settings.m_amsqMaxTail;
+    }
+    if (settingsKeys.contains("equalizer")) {
+        m_equalizer = settings.m_equalizer;
+    }
+    if (settingsKeys.contains("rit")) {
+        m_rit = settings.m_rit;
+    }
+    if (settingsKeys.contains("ritFrequency")) {
+        m_ritFrequency = settings.m_ritFrequency;
+    }
+    if (settingsKeys.contains("rgbColor")) {
+        m_rgbColor = settings.m_rgbColor;
+    }
+    if (settingsKeys.contains("title")) {
+        m_title = settings.m_title;
+    }
+    if (settingsKeys.contains("audioDeviceName")) {
+        m_audioDeviceName = settings.m_audioDeviceName;
+    }
+    if (settingsKeys.contains("streamIndex")) {
+        m_streamIndex = settings.m_streamIndex;
+    }
+    if (settingsKeys.contains("useReverseAPI")) {
+        m_useReverseAPI = settings.m_useReverseAPI;
+    }
+    if (settingsKeys.contains("reverseAPIAddress")) {
+        m_reverseAPIAddress = settings.m_reverseAPIAddress;
+    }
+    if (settingsKeys.contains("reverseAPIPort")) {
+        m_reverseAPIPort = settings.m_reverseAPIPort;
+    }
+    if (settingsKeys.contains("reverseAPIDeviceIndex")) {
+        m_reverseAPIDeviceIndex = settings.m_reverseAPIDeviceIndex;
+    }
+    if (settingsKeys.contains("reverseAPIChannelIndex")) {
+        m_reverseAPIChannelIndex = settings.m_reverseAPIChannelIndex;
+    }
+    if (settingsKeys.contains("workspaceIndex")) {
+        m_workspaceIndex = settings.m_workspaceIndex;
+    }
+    if (settingsKeys.contains("geometryBytes")) {
+        m_geometryBytes = settings.m_geometryBytes;
+    }
+    if (settingsKeys.contains("hidden")) {
+        m_hidden = settings.m_hidden;
+    }
+    if (settingsKeys.contains("profileIndex")) {
+        m_profileIndex = settings.m_profileIndex;
+    }
+}
+
+QString WDSPRxSettings::getDebugString(const QStringList& settingsKeys, bool force) const
+{
+    std::ostringstream ostr;
+
+    if (settingsKeys.contains("demod") || force) {
+        ostr << " m_demod: " << m_demod;
+    }
+    if (settingsKeys.contains("inputFrequencyOffset") || force) {
+        ostr << " m_inputFrequencyOffset: " << m_inputFrequencyOffset;
+    }
+    if (settingsKeys.contains("volume") || force) {
+        ostr << " m_volume: " << m_volume;
+    }
+    if (settingsKeys.contains("audioBinaural") || force) {
+        ostr << " m_audioBinaural: " << m_audioBinaural;
+    }
+    if (settingsKeys.contains("audioFlipChannels") || force) {
+        ostr << " m_audioFlipChannels: " << m_audioFlipChannels;
+    }
+    if (settingsKeys.contains("audioPan") || force) {
+        ostr << " m_audioPan: " << m_audioPan;
+    }
+    if (settingsKeys.contains("dsb") || force) {
+        ostr << " m_dsb: " << m_dsb;
+    }
+    if (settingsKeys.contains("audioMute") || force) {
+        ostr << " m_audioMute: " << m_audioMute;
+    }
+    if (settingsKeys.contains("dbOrS") || force) {
+        ostr << " m_dbOrS: " << m_dbOrS;
+    }
+    if (settingsKeys.contains("agc") || force) {
+        ostr << " m_agc: " << m_agc;
+    }
+    if (settingsKeys.contains("agcMode") || force) {
+        ostr << " m_agcMode: " << m_agcMode;
+    }
+    if (settingsKeys.contains("agcGain") || force) {
+        ostr << " m_agcGain: " << m_agcGain;
+    }
+    if (settingsKeys.contains("agcSlope") || force) {
+        ostr << " m_agcSlope: " << m_agcSlope;
+    }
+    if (settingsKeys.contains("agcHangThreshold") || force) {
+        ostr << " m_agcHangThreshold: " << m_agcHangThreshold;
+    }
+    if (settingsKeys.contains("dnb") || force) {
+        ostr << " m_dnb: " << m_dnb;
+    }
+    if (settingsKeys.contains("nbScheme") || force) {
+        ostr << " m_nbScheme: " << m_nbScheme;
+    }
+    if (settingsKeys.contains("nb2Mode") || force) {
+        ostr << " m_nb2Mode: " << m_nb2Mode;
+    }
+    if (settingsKeys.contains("nbSlewTime") || force) {
+        ostr << " m_nbSlewTime: " << m_nbSlewTime;
+    }
+    if (settingsKeys.contains("nbLeadTime") || force) {
+        ostr << " m_nbLeadTime: " << m_nbLeadTime;
+    }
+    if (settingsKeys.contains("nbLagTime") || force) {
+        ostr << " m_nbLagTime: " << m_nbLagTime;
+    }
+    if (settingsKeys.contains("nbThreshold") || force) {
+        ostr << " m_nbThreshold: " << m_nbThreshold;
+    }
+    if (settingsKeys.contains("nbAvgTime") || force) {
+        ostr << " m_nbAvgTime: " << m_nbAvgTime;
+    }
+    if (settingsKeys.contains("dnr") || force) {
+        ostr << " m_dnr: " << m_dnr;
+    }
+    if (settingsKeys.contains("snb") || force) {
+        ostr << " m_snb: " << m_snb;
+    }
+    if (settingsKeys.contains("anf") || force) {
+        ostr << " m_anf: " << m_anf;
+    }
+    if (settingsKeys.contains("nrScheme") || force) {
+        ostr << " m_nrScheme: " << m_nrScheme;
+    }
+    if (settingsKeys.contains("nr2Gain") || force) {
+        ostr << " m_nr2Gain: " << m_nr2Gain;
+    }
+    if (settingsKeys.contains("nr2NPE") || force) {
+        ostr << " m_nr2NPE: " << m_nr2NPE;
+    }
+    if (settingsKeys.contains("nrPosition") || force) {
+        ostr << " m_nrPosition: " << m_nrPosition;
+    }
+    if (settingsKeys.contains("nr2ArtifactReduction") || force) {
+        ostr << " m_nr2ArtifactReduction: " << m_nr2ArtifactReduction;
+    }
+    if (settingsKeys.contains("amFadeLevel") || force) {
+        ostr << " m_amFadeLevel: " << m_amFadeLevel;
+    }
+    if (settingsKeys.contains("cwPeaking") || force) {
+        ostr << " m_cwPeaking: " << m_cwPeaking;
+    }
+    if (settingsKeys.contains("cwPeakFrequency") || force) {
+        ostr << " m_cwPeakFrequency: " << m_cwPeakFrequency;
+    }
+    if (settingsKeys.contains("cwBandwidth") || force) {
+        ostr << " m_cwBandwidth: " << m_cwBandwidth;
+    }
+    if (settingsKeys.contains("cwGain") || force) {
+        ostr << " m_cwGain: " << m_cwGain;
+    }
+    if (settingsKeys.contains("fmDeviation") || force) {
+        ostr << " m_fmDeviation: " << m_fmDeviation;
+    }
+    if (settingsKeys.contains("fmAFLow") || force) {
+        ostr << " m_fmAFLow: " << m_fmAFLow;
+    }
+    if (settingsKeys.contains("fmAFHigh") || force) {
+        ostr << " m_fmAFHigh: " << m_fmAFHigh;
+    }
+    if (settingsKeys.contains("fmAFLimiter") || force) {
+        ostr << " m_fmAFLimiter: " << m_fmAFLimiter;
+    }
+    if (settingsKeys.contains("fmAFLimiterGain") || force) {
+        ostr << " m_fmAFLimiterGain: " << m_fmAFLimiterGain;
+    }
+    if (settingsKeys.contains("fmCTCSSNotch") || force) {
+        ostr << " m_fmCTCSSNotch: " << m_fmCTCSSNotch;
+    }
+    if (settingsKeys.contains("fmCTCSSNotchFrequency") || force) {
+        ostr << " m_fmCTCSSNotchFrequency: " << m_fmCTCSSNotchFrequency;
+    }
+    if (settingsKeys.contains("squelch") || force) {
+        ostr << " m_squelch: " << m_squelch;
+    }
+    if (settingsKeys.contains("squelchThreshold") || force) {
+        ostr << " m_squelchThreshold: " << m_squelchThreshold;
+    }
+    if (settingsKeys.contains("squelchMode") || force) {
+        ostr << " m_squelchMode: " << m_squelchMode;
+    }
+    if (settingsKeys.contains("ssqlTauMute") || force) {
+        ostr << " m_ssqlTauMute: " << m_ssqlTauMute;
+    }
+    if (settingsKeys.contains("ssqlTauUnmute") || force) {
+        ostr << " m_ssqlTauUnmute: " << m_ssqlTauUnmute;
+    }
+    if (settingsKeys.contains("amsqMaxTail") || force) {
+        ostr << " m_amsqMaxTail: " << m_amsqMaxTail;
+    }
+    if (settingsKeys.contains("equalizer") || force) {
+        ostr << " m_equalizer: " << m_equalizer;
+    }
+    if (settingsKeys.contains("rit") || force) {
+        ostr << " m_rit: " << m_rit;
+    }
+    if (settingsKeys.contains("ritFrequency") || force) {
+        ostr << " m_ritFrequency: " << m_ritFrequency;
+    }
+    if (settingsKeys.contains("rgbColor") || force) {
+        ostr << " m_rgbColor: " << m_rgbColor;
+    }
+    if (settingsKeys.contains("title") || force) {
+        ostr << " m_title: " << m_title.toStdString();
+    }
+    if (settingsKeys.contains("audioDeviceName") || force) {
+        ostr << " m_audioDeviceName: " << m_audioDeviceName.toStdString();
+    }
+    if (settingsKeys.contains("streamIndex") || force) {
+        ostr << " m_streamIndex: " << m_streamIndex;
+    }
+    if (settingsKeys.contains("useReverseAPI") || force) {
+        ostr << " m_useReverseAPI: " << m_useReverseAPI;
+    }
+    if (settingsKeys.contains("reverseAPIAddress") || force) {
+        ostr << " m_reverseAPIAddress: " << m_reverseAPIAddress.toStdString();
+    }
+    if (settingsKeys.contains("reverseAPIPort") || force) {
+        ostr << " m_reverseAPIPort: " << m_reverseAPIPort;
+    }
+    if (settingsKeys.contains("reverseAPIDeviceIndex") || force) {
+        ostr << " m_reverseAPIDeviceIndex: " << m_reverseAPIDeviceIndex;
+    }
+    if (settingsKeys.contains("reverseAPIChannelIndex") || force) {
+        ostr << " m_reverseAPIChannelIndex: " << m_reverseAPIChannelIndex;
+    }
+    if (settingsKeys.contains("workspaceIndex") || force) {
+        ostr << " m_workspaceIndex: " << m_workspaceIndex;
+    }
+    if (settingsKeys.contains("hidden") || force) {
+        ostr << " m_hidden: " << m_hidden;
+    }
+    if (settingsKeys.contains("profileIndex") || force) {
+        ostr << " m_profileIndex: " << m_profileIndex;
+    }
+
+    return QString(ostr.str().c_str());
+}

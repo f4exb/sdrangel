@@ -60,7 +60,7 @@ NFMDemod::NFMDemod(DeviceAPI *devieAPI) :
 {
     qDebug("NFMDemod::NFMDemod");
 	setObjectName(m_channelId);
-	applySettings(m_settings, true);
+	applySettings(QStringList(), m_settings, true);
 
     m_deviceAPI->addChannelSink(this);
     m_deviceAPI->addChannelSinkAPI(this);
@@ -155,7 +155,7 @@ void NFMDemod::start()
 
     m_thread->start();
 
-    NFMDemodBaseband::MsgConfigureNFMDemodBaseband *msg = NFMDemodBaseband::MsgConfigureNFMDemodBaseband::create(m_settings, true);
+    NFMDemodBaseband::MsgConfigureNFMDemodBaseband *msg = NFMDemodBaseband::MsgConfigureNFMDemodBaseband::create(QStringList(), m_settings, true);
     m_basebandSink->getInputMessageQueue()->push(msg);
 
     m_running = true;
@@ -180,7 +180,7 @@ bool NFMDemod::handleMessage(const Message& cmd)
 	    MsgConfigureNFMDemod& cfg = (MsgConfigureNFMDemod&) cmd;
 		qDebug() << "NFMDemod::handleMessage: MsgConfigureNFMDemod";
 
-        applySettings(cfg.getSettings(), cfg.getForce());
+        applySettings(cfg.getSettingsKeys(), cfg.getSettings(), cfg.getForce());
 
         return true;
 	}
@@ -218,91 +218,20 @@ void NFMDemod::setCenterFrequency(qint64 frequency)
 {
     NFMDemodSettings settings = m_settings;
     settings.m_inputFrequencyOffset = frequency;
-    applySettings(settings, false);
+    applySettings(QStringList("inputFrequencyOffset"), settings, false);
 
     if (m_guiMessageQueue) // forward to GUI if any
     {
-        MsgConfigureNFMDemod *msgToGUI = MsgConfigureNFMDemod::create(settings, false);
+        MsgConfigureNFMDemod *msgToGUI = MsgConfigureNFMDemod::create(QStringList("inputFrequencyOffset"), settings, false);
         m_guiMessageQueue->push(msgToGUI);
     }
 }
 
-void NFMDemod::applySettings(const NFMDemodSettings& settings, bool force)
+void NFMDemod::applySettings(const QStringList& settingsKeys, const NFMDemodSettings& settings, bool force)
 {
-    qDebug() << "NFMDemod::applySettings:"
-            << " m_inputFrequencyOffset: " << settings.m_inputFrequencyOffset
-            << " m_rfBandwidth: " << settings.m_rfBandwidth
-            << " m_afBandwidth: " << settings.m_afBandwidth
-            << " m_fmDeviation: " << settings.m_fmDeviation
-            << " m_volume: " << settings.m_volume
-            << " m_squelchGate: " << settings.m_squelchGate
-            << " m_deltaSquelch: " << settings.m_deltaSquelch
-            << " m_squelch: " << settings.m_squelch
-            << " m_ctcssIndex: " << settings.m_ctcssIndex
-            << " m_ctcssOn: " << settings.m_ctcssOn
-            << " m_dcsOn: " << settings.m_dcsOn
-            << " m_dcsCode: " << Qt::oct << settings.m_dcsCode << Qt::dec
-            << " m_dcsPositive: " << settings.m_dcsPositive
-            << " m_highPass: " << settings.m_highPass
-            << " m_audioMute: " << settings.m_audioMute
-            << " m_audioDeviceName: " << settings.m_audioDeviceName
-            << " m_streamIndex: " << settings.m_streamIndex
-            << " m_useReverseAPI: " << settings.m_useReverseAPI
-            << " m_reverseAPIAddress: " << settings.m_reverseAPIAddress
-            << " m_reverseAPIPort: " << settings.m_reverseAPIPort
-            << " m_reverseAPIDeviceIndex: " << settings.m_reverseAPIDeviceIndex
-            << " m_reverseAPIChannelIndex: " << settings.m_reverseAPIChannelIndex
-            << " force: " << force;
+    qDebug() << "NFMDemod::applySettings:" << settings.getDebugString(settingsKeys, force);
 
-    QList<QString> reverseAPIKeys;
-
-    if ((settings.m_inputFrequencyOffset != m_settings.m_inputFrequencyOffset) || force) {
-        reverseAPIKeys.append("inputFrequencyOffset");
-    }
-    if ((settings.m_volume != m_settings.m_volume) || force) {
-        reverseAPIKeys.append("volume");
-    }
-    if ((settings.m_ctcssOn != m_settings.m_ctcssOn) || force) {
-        reverseAPIKeys.append("ctcssOn");
-    }
-    if ((settings.m_audioMute != m_settings.m_audioMute) || force) {
-        reverseAPIKeys.append("audioMute");
-    }
-    if ((settings.m_rgbColor != m_settings.m_rgbColor) || force) {
-        reverseAPIKeys.append("rgbColor");
-    }
-    if ((settings.m_title != m_settings.m_title) || force) {
-        reverseAPIKeys.append("title");
-    }
-    if ((settings.m_rfBandwidth != m_settings.m_rfBandwidth) || force) {
-        reverseAPIKeys.append("rfBandwidth");
-    }
-    if ((settings.m_fmDeviation != m_settings.m_fmDeviation) || force) {
-        reverseAPIKeys.append("fmDeviation");
-    }
-    if ((settings.m_afBandwidth != m_settings.m_afBandwidth) || force) {
-        reverseAPIKeys.append("afBandwidth");
-    }
-    if ((settings.m_squelchGate != m_settings.m_squelchGate) || force) {
-        reverseAPIKeys.append("squelchGate");
-    }
-    if ((settings.m_squelch != m_settings.m_squelch) || force) {
-        reverseAPIKeys.append("squelch");
-    }
-    if ((settings.m_deltaSquelch != m_settings.m_deltaSquelch) || force) {
-        reverseAPIKeys.append("deltaSquelch");
-    }
-    if ((settings.m_ctcssIndex != m_settings.m_ctcssIndex) || force) {
-        reverseAPIKeys.append("ctcssIndex");
-    }
-    if ((settings.m_highPass != m_settings.m_highPass) || force) {
-        reverseAPIKeys.append("highPass");
-    }
-    if ((settings.m_audioDeviceName != m_settings.m_audioDeviceName) || force) {
-        reverseAPIKeys.append("audioDeviceName");
-    }
-
-    if (m_settings.m_streamIndex != settings.m_streamIndex)
+    if (settingsKeys.contains("streamIndex") && (m_settings.m_streamIndex != settings.m_streamIndex))
     {
         if (m_deviceAPI->getSampleMIMO()) // change of stream is possible for MIMO devices only
         {
@@ -313,34 +242,36 @@ void NFMDemod::applySettings(const NFMDemodSettings& settings, bool force)
             m_settings.m_streamIndex = settings.m_streamIndex; // make sure ChannelAPI::getStreamIndex() is consistent
             emit streamIndexChanged(settings.m_streamIndex);
         }
-
-        reverseAPIKeys.append("streamIndex");
     }
 
     if (m_running)
     {
-        NFMDemodBaseband::MsgConfigureNFMDemodBaseband *msg = NFMDemodBaseband::MsgConfigureNFMDemodBaseband::create(settings, force);
+        NFMDemodBaseband::MsgConfigureNFMDemodBaseband *msg = NFMDemodBaseband::MsgConfigureNFMDemodBaseband::create(settingsKeys, settings, force);
         m_basebandSink->getInputMessageQueue()->push(msg);
     }
 
-    if (settings.m_useReverseAPI)
+    if (settingsKeys.contains("useReverseAPI") && (m_settings.m_useReverseAPI != settings.m_useReverseAPI))
     {
-        bool fullUpdate = ((m_settings.m_useReverseAPI != settings.m_useReverseAPI) && settings.m_useReverseAPI) ||
-                (m_settings.m_reverseAPIAddress != settings.m_reverseAPIAddress) ||
-                (m_settings.m_reverseAPIPort != settings.m_reverseAPIPort) ||
-                (m_settings.m_reverseAPIDeviceIndex != settings.m_reverseAPIDeviceIndex) ||
-                (m_settings.m_reverseAPIChannelIndex != settings.m_reverseAPIChannelIndex);
-        webapiReverseSendSettings(reverseAPIKeys, settings, fullUpdate || force);
+        bool fullUpdate = ((settingsKeys.contains("useReverseAPI") && (m_settings.m_useReverseAPI != settings.m_useReverseAPI)) && settings.m_useReverseAPI) ||
+                (settingsKeys.contains("reverseAPIAddress") && (m_settings.m_reverseAPIAddress != settings.m_reverseAPIAddress)) ||
+                (settingsKeys.contains("reverseAPIPort") && (m_settings.m_reverseAPIPort != settings.m_reverseAPIPort)) ||
+                (settingsKeys.contains("reverseAPIDeviceIndex") && (m_settings.m_reverseAPIDeviceIndex != settings.m_reverseAPIDeviceIndex)) ||
+                (settingsKeys.contains("reverseAPIChannelIndex") && (m_settings.m_reverseAPIChannelIndex != settings.m_reverseAPIChannelIndex));
+        webapiReverseSendSettings(settingsKeys, settings, fullUpdate || force);
     }
 
     QList<ObjectPipe*> pipes;
     MainCore::instance()->getMessagePipes().getMessagePipes(this, "settings", pipes);
 
     if (pipes.size() > 0) {
-        sendChannelSettings(pipes, reverseAPIKeys, settings, force);
+        sendChannelSettings(pipes, settingsKeys, settings, force);
     }
 
-    m_settings = settings;
+    if (force) {
+        m_settings = settings;
+    } else {
+        m_settings.applySettings(settingsKeys, settings);
+    }
 }
 
 QByteArray NFMDemod::serialize() const
@@ -358,7 +289,7 @@ bool NFMDemod::deserialize(const QByteArray& data)
         success = false;
     }
 
-    MsgConfigureNFMDemod *msg = MsgConfigureNFMDemod::create(m_settings, true);
+    MsgConfigureNFMDemod *msg = MsgConfigureNFMDemod::create(QStringList(), m_settings, true);
     m_inputMessageQueue.push(msg);
 
     return success;
@@ -413,12 +344,12 @@ int NFMDemod::webapiSettingsPutPatch(
     NFMDemodSettings settings = m_settings;
     webapiUpdateChannelSettings(settings, channelSettingsKeys, response);
 
-    MsgConfigureNFMDemod *msg = MsgConfigureNFMDemod::create(settings, force);
+    MsgConfigureNFMDemod *msg = MsgConfigureNFMDemod::create(channelSettingsKeys, settings, force);
     m_inputMessageQueue.push(msg);
 
     if (m_guiMessageQueue) // forward to GUI if any
     {
-        MsgConfigureNFMDemod *msgToGUI = MsgConfigureNFMDemod::create(settings, force);
+        MsgConfigureNFMDemod *msgToGUI = MsgConfigureNFMDemod::create(channelSettingsKeys, settings, force);
         m_guiMessageQueue->push(msgToGUI);
     }
 
@@ -611,7 +542,7 @@ void NFMDemod::webapiFormatChannelReport(SWGSDRangel::SWGChannelReport& response
     }
 }
 
-void NFMDemod::webapiReverseSendSettings(QList<QString>& channelSettingsKeys, const NFMDemodSettings& settings, bool force)
+void NFMDemod::webapiReverseSendSettings(const QList<QString>& channelSettingsKeys, const NFMDemodSettings& settings, bool force)
 {
     SWGSDRangel::SWGChannelSettings *swgChannelSettings = new SWGSDRangel::SWGChannelSettings();
     webapiFormatChannelSettings(channelSettingsKeys, swgChannelSettings, settings, force);
@@ -638,7 +569,7 @@ void NFMDemod::webapiReverseSendSettings(QList<QString>& channelSettingsKeys, co
 
 void NFMDemod::sendChannelSettings(
     const QList<ObjectPipe*>& pipes,
-    QList<QString>& channelSettingsKeys,
+    const QList<QString>& channelSettingsKeys,
     const NFMDemodSettings& settings,
     bool force)
 {
@@ -662,7 +593,7 @@ void NFMDemod::sendChannelSettings(
 }
 
 void NFMDemod::webapiFormatChannelSettings(
-        QList<QString>& channelSettingsKeys,
+        const QList<QString>& channelSettingsKeys,
         SWGSDRangel::SWGChannelSettings *swgChannelSettings,
         const NFMDemodSettings& settings,
         bool force

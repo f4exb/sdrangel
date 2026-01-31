@@ -44,20 +44,23 @@ public:
 
     public:
         const NavtexDemodSettings& getSettings() const { return m_settings; }
+        const QStringList& getSettingsKeys() const { return m_settingsKeys; }
         bool getForce() const { return m_force; }
 
-        static MsgConfigureNavtexDemodBaseband* create(const NavtexDemodSettings& settings, bool force)
+        static MsgConfigureNavtexDemodBaseband* create(const QStringList& settingsKeys, const NavtexDemodSettings& settings, bool force)
         {
-            return new MsgConfigureNavtexDemodBaseband(settings, force);
+            return new MsgConfigureNavtexDemodBaseband(settingsKeys, settings, force);
         }
 
     private:
         NavtexDemodSettings m_settings;
+        QStringList m_settingsKeys;
         bool m_force;
 
-        MsgConfigureNavtexDemodBaseband(const NavtexDemodSettings& settings, bool force) :
+        MsgConfigureNavtexDemodBaseband(const QStringList& settingsKeys, const NavtexDemodSettings& settings, bool force) :
             Message(),
             m_settings(settings),
+            m_settingsKeys(settingsKeys),
             m_force(force)
         { }
     };
@@ -93,7 +96,7 @@ private:
 
     bool handleMessage(const Message& cmd);
     void calculateOffset(NavtexDemodSink *sink);
-    void applySettings(const NavtexDemodSettings& settings, bool force = false);
+    void applySettings(const QStringList& settingsKeys, const NavtexDemodSettings& settings, bool force = false);
 
 private slots:
     void handleInputMessages();
@@ -101,4 +104,3 @@ private slots:
 };
 
 #endif // INCLUDE_NAVTEXDEMODBASEBAND_H
-

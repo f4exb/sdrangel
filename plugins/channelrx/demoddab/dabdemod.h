@@ -44,19 +44,22 @@ public:
     public:
         const DABDemodSettings& getSettings() const { return m_settings; }
         bool getForce() const { return m_force; }
+        const QStringList& getSettingsKeys() const { return m_settingsKeys; }
 
-        static MsgConfigureDABDemod* create(const DABDemodSettings& settings, bool force)
+        static MsgConfigureDABDemod* create(const QStringList& settingsKeys, const DABDemodSettings& settings, bool force)
         {
-            return new MsgConfigureDABDemod(settings, force);
+            return new MsgConfigureDABDemod(settingsKeys, settings, force);
         }
 
     private:
         DABDemodSettings m_settings;
+        QStringList m_settingsKeys;
         bool m_force;
 
-        MsgConfigureDABDemod(const DABDemodSettings& settings, bool force) :
+        MsgConfigureDABDemod(const QStringList& settingsKeys, const DABDemodSettings& settings, bool force) :
             Message(),
             m_settings(settings),
+            m_settingsKeys(settingsKeys),
             m_force(force)
         { }
     };
@@ -411,11 +414,11 @@ private:
     QNetworkRequest m_networkRequest;
 
     virtual bool handleMessage(const Message& cmd);
-    void applySettings(const DABDemodSettings& settings, bool force = false);
+    void applySettings(const QStringList& settingsKeys, const DABDemodSettings& settings, bool force = false);
     void sendSampleRateToDemodAnalyzer();
-    void webapiReverseSendSettings(QList<QString>& channelSettingsKeys, const DABDemodSettings& settings, bool force);
+    void webapiReverseSendSettings(const QList<QString>& channelSettingsKeys, const DABDemodSettings& settings, bool force);
     void webapiFormatChannelSettings(
-        QList<QString>& channelSettingsKeys,
+        const QList<QString>& channelSettingsKeys,
         SWGSDRangel::SWGChannelSettings *swgChannelSettings,
         const DABDemodSettings& settings,
         bool force

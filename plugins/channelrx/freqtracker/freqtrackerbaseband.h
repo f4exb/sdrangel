@@ -40,20 +40,23 @@ public:
 
     public:
         const FreqTrackerSettings& getSettings() const { return m_settings; }
+        const QStringList& getSettingsKeys() const { return m_settingsKeys; }
         bool getForce() const { return m_force; }
 
-        static MsgConfigureFreqTrackerBaseband* create(const FreqTrackerSettings& settings, bool force)
+        static MsgConfigureFreqTrackerBaseband* create(const QStringList& settingsKeys, const FreqTrackerSettings& settings, bool force)
         {
-            return new MsgConfigureFreqTrackerBaseband(settings, force);
+            return new MsgConfigureFreqTrackerBaseband(settingsKeys, settings, force);
         }
 
     private:
         FreqTrackerSettings m_settings;
+        QStringList m_settingsKeys;
         bool m_force;
 
-        MsgConfigureFreqTrackerBaseband(const FreqTrackerSettings& settings, bool force) :
+        MsgConfigureFreqTrackerBaseband(const QStringList& settingsKeys, const FreqTrackerSettings& settings, bool force) :
             Message(),
             m_settings(settings),
+            m_settingsKeys(settingsKeys),
             m_force(force)
         { }
     };
@@ -88,7 +91,7 @@ private:
     QRecursiveMutex m_mutex;
 
     bool handleMessage(const Message& cmd);
-    void applySettings(const FreqTrackerSettings& settings, bool force = false);
+    void applySettings(const QStringList& settingsKeys, const FreqTrackerSettings& settings, bool force = false);
 
 private slots:
     void handleInputMessages();

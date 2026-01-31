@@ -101,7 +101,7 @@ void APTDemodGUI::resetToDefaults()
 {
     m_settings.resetToDefaults();
     displaySettings();
-    applySettings(true);
+    applySettings(QStringList(), true);
 }
 
 QByteArray APTDemodGUI::serialize() const
@@ -114,7 +114,7 @@ bool APTDemodGUI::deserialize(const QByteArray& data)
     if(m_settings.deserialize(data))
     {
         displaySettings();
-        applySettings(true);
+        applySettings(QStringList(), true);
         return true;
     } else {
         resetToDefaults();
@@ -296,7 +296,7 @@ void APTDemodGUI::channelMarkerChangedByCursor()
 {
     ui->deltaFrequency->setValue(m_channelMarker.getCenterFrequency());
     m_settings.m_inputFrequencyOffset = m_channelMarker.getCenterFrequency();
-    applySettings();
+    applySettings(QStringList("inputFrequencyOffset"), false);
 }
 
 void APTDemodGUI::channelMarkerHighlightedByCursor()
@@ -309,7 +309,7 @@ void APTDemodGUI::on_deltaFrequency_changed(qint64 value)
     m_channelMarker.setCenterFrequency(value);
     m_settings.m_inputFrequencyOffset = m_channelMarker.getCenterFrequency();
     updateAbsoluteCenterFrequency();
-    applySettings();
+    applySettings(QStringList("inputFrequencyOffset"), false);
 }
 
 void APTDemodGUI::on_rfBW_valueChanged(int value)
@@ -318,14 +318,14 @@ void APTDemodGUI::on_rfBW_valueChanged(int value)
     ui->rfBWText->setText(QString("%1k").arg(value / 10.0, 0, 'f', 1));
     m_channelMarker.setBandwidth(bw);
     m_settings.m_rfBandwidth = bw;
-    applySettings();
+    applySettings(QStringList("rfBandwidth"), false);
 }
 
 void APTDemodGUI::on_fmDev_valueChanged(int value)
 {
     ui->fmDevText->setText(QString("%1k").arg(value / 10.0, 0, 'f', 1));
     m_settings.m_fmDeviation = value * 100.0;
-    applySettings();
+    applySettings(QStringList("fmDeviation"), false);
 }
 
 void APTDemodGUI::displayLabels()
@@ -385,7 +385,7 @@ void APTDemodGUI::on_channels_currentIndexChanged(int index)
         m_settings.m_precipitationOverlay = false;
     }
     displayLabels();
-    applySettings();
+    applySettings(QStringList("channels"), false);
 }
 
 void APTDemodGUI::on_transparencyThreshold_valueChanged(int value)
@@ -394,13 +394,14 @@ void APTDemodGUI::on_transparencyThreshold_valueChanged(int value)
     ui->transparencyThresholdText->setText(QString::number(m_settings.m_transparencyThreshold));
     // Don't applySettings while tracking, as processing an image takes a long time
     if (!ui->transparencyThreshold->isSliderDown()) {
-        applySettings();
+        applySettings(QStringList("transparencyThreshold"), false);
     }
 }
 
 void APTDemodGUI::on_transparencyThreshold_sliderReleased()
 {
-    applySettings();
+    m_settings.m_transparencyThreshold = ui->transparencyThreshold->value();
+    applySettings(QStringList("transparencyThreshold"), false);
 }
 
 void APTDemodGUI::on_opacityThreshold_valueChanged(int value)
@@ -409,43 +410,44 @@ void APTDemodGUI::on_opacityThreshold_valueChanged(int value)
     ui->opacityThresholdText->setText(QString::number(m_settings.m_opacityThreshold));
     // Don't applySettings while tracking, as processing an image takes a long time
     if (!ui->opacityThreshold->isSliderDown()) {
-        applySettings();
+        applySettings(QStringList("opacityThreshold"), false);
     }
 }
 
 void APTDemodGUI::on_opacityThreshold_sliderReleased()
 {
-    applySettings();
+    m_settings.m_opacityThreshold = ui->opacityThreshold->value();
+    applySettings(QStringList("opacityThreshold"), false);
 }
 
 void APTDemodGUI::on_cropNoise_clicked(bool checked)
 {
     m_settings.m_cropNoise = checked;
-    applySettings();
+    applySettings(QStringList("cropNoise"), false);
 }
 
 void APTDemodGUI::on_denoise_clicked(bool checked)
 {
     m_settings.m_denoise = checked;
-    applySettings();
+    applySettings(QStringList("denoise"), false);
 }
 
 void APTDemodGUI::on_linear_clicked(bool checked)
 {
     m_settings.m_linearEqualise = checked;
-    applySettings();
+    applySettings(QStringList("linearEqualise"), false);
 }
 
 void APTDemodGUI::on_histogram_clicked(bool checked)
 {
     m_settings.m_histogramEqualise = checked;
-    applySettings();
+    applySettings(QStringList("histogramEqualise"), false);
 }
 
 void APTDemodGUI::on_precipitation_clicked(bool checked)
 {
     m_settings.m_precipitationOverlay = checked;
-    applySettings();
+    applySettings(QStringList("precipitationOverlay"), false);
 }
 
 void APTDemodGUI::on_flip_clicked(bool checked)
@@ -456,13 +458,13 @@ void APTDemodGUI::on_flip_clicked(bool checked)
     } else {
         ui->image->setAlignment(Qt::AlignTop | Qt::AlignHCenter);
     }
-    applySettings();
+    applySettings(QStringList("flip"), false);
 }
 
 void APTDemodGUI::on_startStop_clicked(bool checked)
 {
     m_settings.m_decodeEnabled = checked;
-    applySettings();
+    applySettings(QStringList("decodeEnabled"), false);
 }
 
 void APTDemodGUI::resetDecoder()
@@ -490,7 +492,21 @@ void APTDemodGUI::on_showSettings_clicked()
     if (dialog.exec() == QDialog::Accepted)
     {
         displayPalettes();
-        applySettings();
+        applySettings(QStringList({
+            "satelliteTrackerControl",
+            "satelliteName",
+            "autoSave",
+            "saveCombined",
+            "saveSeparate",
+            "saveProjection",
+            "autoSavePath",
+            "autoSaveMinScanLines",
+            "scanlinesPerImageUpdate",
+            "horizontalPixelsPerDegree",
+            "verticalPixelsPerDegree",
+            "satTimeOffset",
+            "satYaw",
+        }), false);
     }
 }
 
@@ -551,7 +567,7 @@ void APTDemodGUI::onWidgetRolled(QWidget* widget, bool rollDown)
     (void) rollDown;
 
     getRollupContents()->saveState(m_rollupState);
-    applySettings();
+    applySettings(QStringList(), false);
 }
 
 void APTDemodGUI::onMenuDialogCalled(const QPoint &p)
@@ -596,7 +612,19 @@ void APTDemodGUI::onMenuDialogCalled(const QPoint &p)
             updateIndexLabel();
         }
 
-        applySettings();
+        applySettings(QStringList(
+            {
+                "rgbColor",
+                "title",
+                "useReverseAPI",
+                "reverseAPIAddress",
+                "reverseAPIPort",
+                "reverseAPIDeviceIndex",
+                "reverseAPIChannelIndex",
+                "streamIndex"
+            }),
+            false
+        );
     }
 
     resetContextMenuType();
@@ -679,7 +707,7 @@ APTDemodGUI::APTDemodGUI(PluginAPI* pluginAPI, DeviceUISet *deviceUISet, Baseban
 
     displaySettings();
     makeUIConnections();
-    applySettings(true);
+    applySettings(QStringList(), true);
     DialPopup::addPopupsToChildDials(this);
     m_resizer.enableChildMouseTracking();
 }
@@ -743,11 +771,11 @@ void APTDemodGUI::blockApplySettings(bool block)
     m_doApplySettings = !block;
 }
 
-void APTDemodGUI::applySettings(bool force)
+void APTDemodGUI::applySettings(const QStringList& settingsKeys, bool force)
 {
     if (m_doApplySettings)
     {
-        APTDemod::MsgConfigureAPTDemod* message = APTDemod::MsgConfigureAPTDemod::create( m_settings, force);
+        APTDemod::MsgConfigureAPTDemod* message = APTDemod::MsgConfigureAPTDemod::create(settingsKeys, m_settings, force);
         m_aptDemod->getInputMessageQueue()->push(message);
     }
 }

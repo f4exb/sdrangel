@@ -54,7 +54,7 @@ public:
     void setVideoTabIndex(int videoTabIndex) { m_videoTabIndex = videoTabIndex; }
 
     void applyChannelSettings(int channelSampleRate, int channelFrequencyOffset, bool force = false);
-    void applySettings(const ATVDemodSettings& settings, bool force = false);
+    void applySettings(const QStringList& settingsKeys, const ATVDemodSettings& settings, bool force = false);
 
 private:
     struct ATVConfigPrivate

@@ -88,7 +88,7 @@ private:
 	virtual ~NFMDemodGUI();
 
 	void blockApplySettings(bool block);
-	void applySettings(bool force = false);
+	void applySettings(const QStringList& settingsKeys, bool force = false);
 	void displaySettings();
 	void setCtcssFreq(Real ctcssFreq);
 	void setDcsCode(unsigned int dcsCode);

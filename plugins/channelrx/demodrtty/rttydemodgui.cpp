@@ -56,7 +56,7 @@ void RttyDemodGUI::resetToDefaults()
 {
     m_settings.resetToDefaults();
     displaySettings();
-    applySettings(true);
+    applySettings(QStringList(), true);
 }
 
 QByteArray RttyDemodGUI::serialize() const
@@ -68,7 +68,7 @@ bool RttyDemodGUI::deserialize(const QByteArray& data)
 {
     if(m_settings.deserialize(data)) {
         displaySettings();
-        applySettings(true);
+        applySettings(QStringList(), true);
         return true;
     } else {
         resetToDefaults();
@@ -181,7 +181,7 @@ void RttyDemodGUI::channelMarkerChangedByCursor()
 {
     ui->deltaFrequency->setValue(m_channelMarker.getCenterFrequency());
     m_settings.m_inputFrequencyOffset = m_channelMarker.getCenterFrequency();
-    applySettings();
+    applySettings(QStringList({"inputFrequencyOffset"}));
 }
 
 void RttyDemodGUI::channelMarkerHighlightedByCursor()
@@ -194,7 +194,7 @@ void RttyDemodGUI::on_deltaFrequency_changed(qint64 value)
     m_channelMarker.setCenterFrequency(value);
     m_settings.m_inputFrequencyOffset = m_channelMarker.getCenterFrequency();
     updateAbsoluteCenterFrequency();
-    applySettings();
+    applySettings(QStringList({"inputFrequencyOffset"}));
 }
 
 void RttyDemodGUI::on_rfBW_valueChanged(int value)
@@ -203,40 +203,40 @@ void RttyDemodGUI::on_rfBW_valueChanged(int value)
     ui->rfBWText->setText(formatFrequency((int)bw));
     m_channelMarker.setBandwidth(bw);
     m_settings.m_rfBandwidth = bw;
-    applySettings();
+    applySettings(QStringList({"rfBandwidth"}));
 }
 
 void RttyDemodGUI::on_baudRate_currentIndexChanged(int index)
 {
     (void) index;
     m_settings.m_baudRate = ui->baudRate->currentText().toFloat();
-    applySettings();
+    applySettings(QStringList({"baudRate"}));
 }
 
 void RttyDemodGUI::on_frequencyShift_valueChanged(int value)
 {
     ui->frequencyShiftText->setText(formatFrequency(value));
     m_settings.m_frequencyShift = value;
-    applySettings();
+    applySettings(QStringList({"frequencyShift"}));
 }
 
 void RttyDemodGUI::on_squelch_valueChanged(int value)
 {
     ui->squelchText->setText(QString("%1 dB").arg(value));
     m_settings.m_squelch = value;
-    applySettings();
+    applySettings(QStringList({"squelch"}));
 }
 
 void RttyDemodGUI::on_characterSet_currentIndexChanged(int index)
 {
     m_settings.m_characterSet = (Baudot::CharacterSet) index;
-    applySettings();
+    applySettings(QStringList({"characterSet"}));
 }
 
 void RttyDemodGUI::on_suppressCRLF_clicked(bool checked)
 {
     m_settings.m_suppressCRLF = checked;
-    applySettings();
+    applySettings(QStringList({"suppressCRLF"}));
 }
 
 void RttyDemodGUI::on_mode_currentIndexChanged(int index)
@@ -267,20 +267,20 @@ void RttyDemodGUI::on_mode_currentIndexChanged(int index)
     ui->rfBWText->setEnabled(custom);
 
     //m_settings.m_mode = index;
-    applySettings();
+    //applySettings(QStringList({"mode"}));
 }
 
 
 void RttyDemodGUI::on_filter_currentIndexChanged(int index)
 {
     m_settings.m_filter = (RttyDemodSettings::FilterType)index;
-    applySettings();
+    applySettings(QStringList({"filter"}));
 }
 
 void RttyDemodGUI::on_atc_clicked(bool checked)
 {
     m_settings.m_atc = checked;
-    applySettings();
+    applySettings(QStringList({"atc"}));
 }
 
 void RttyDemodGUI::on_endian_clicked(bool checked)
@@ -291,7 +291,7 @@ void RttyDemodGUI::on_endian_clicked(bool checked)
     } else {
         ui->endian->setText("LSB");
     }
-    applySettings();
+    applySettings(QStringList({"msbFirst"}));
 }
 
 void RttyDemodGUI::on_spaceHigh_clicked(bool checked)
@@ -303,13 +303,13 @@ void RttyDemodGUI::on_spaceHigh_clicked(bool checked)
     else {
         ui->spaceHigh->setText("S-M");
     }
-    applySettings();
+    applySettings(QStringList({"spaceHigh"}));
 }
 
 void RttyDemodGUI::on_unshiftOnSpace_clicked(bool checked)
 {
     m_settings.m_unshiftOnSpace = checked;
-    applySettings();
+    applySettings(QStringList({"unshiftOnSpace"}));
 }
 
 void RttyDemodGUI::on_clearTable_clicked()
@@ -320,31 +320,31 @@ void RttyDemodGUI::on_clearTable_clicked()
 void RttyDemodGUI::on_udpEnabled_clicked(bool checked)
 {
     m_settings.m_udpEnabled = checked;
-    applySettings();
+    applySettings(QStringList({"udpEnabled"}));
 }
 
 void RttyDemodGUI::on_udpAddress_editingFinished()
 {
     m_settings.m_udpAddress = ui->udpAddress->text();
-    applySettings();
+    applySettings(QStringList({"udpAddress"}));
 }
 
 void RttyDemodGUI::on_udpPort_editingFinished()
 {
     m_settings.m_udpPort = ui->udpPort->text().toInt();
-    applySettings();
+    applySettings(QStringList({"udpPort"}));
 }
 
 void RttyDemodGUI::on_channel1_currentIndexChanged(int index)
 {
     m_settings.m_scopeCh1 = index;
-    applySettings();
+    applySettings(QStringList({"scopeCh1"}));
 }
 
 void RttyDemodGUI::on_channel2_currentIndexChanged(int index)
 {
     m_settings.m_scopeCh2 = index;
-    applySettings();
+    applySettings(QStringList({"scopeCh2"}));
 }
 
 void RttyDemodGUI::onWidgetRolled(QWidget* widget, bool rollDown)
@@ -353,7 +353,7 @@ void RttyDemodGUI::onWidgetRolled(QWidget* widget, bool rollDown)
     (void) rollDown;
 
     getRollupContents()->saveState(m_rollupState);
-    applySettings();
+    applySettings(QStringList());
 }
 
 void RttyDemodGUI::onMenuDialogCalled(const QPoint &p)
@@ -398,7 +398,16 @@ void RttyDemodGUI::onMenuDialogCalled(const QPoint &p)
             updateIndexLabel();
         }
 
-        applySettings();
+        applySettings(QStringList({
+            "rgbColor",
+            "title",
+            "useReverseAPI",
+            "reverseAPIAddress",
+            "reverseAPIPort",
+            "reverseAPIDeviceIndex",
+            "reverseAPIChannelIndex",
+            "streamIndex"
+        }));
     }
 
     resetContextMenuType();
@@ -492,7 +501,7 @@ RttyDemodGUI::RttyDemodGUI(PluginAPI* pluginAPI, DeviceUISet *deviceUISet, Baseb
 
     displaySettings();
     makeUIConnections();
-    applySettings(true);
+    applySettings(QStringList(), true);
     m_resizer.enableChildMouseTracking();
 }
 
@@ -506,11 +515,11 @@ void RttyDemodGUI::blockApplySettings(bool block)
     m_doApplySettings = !block;
 }
 
-void RttyDemodGUI::applySettings(bool force)
+void RttyDemodGUI::applySettings(const QStringList& settingsKeys, bool force)
 {
     if (m_doApplySettings)
     {
-        RttyDemod::MsgConfigureRttyDemod* message = RttyDemod::MsgConfigureRttyDemod::create( m_settings, force);
+        RttyDemod::MsgConfigureRttyDemod* message = RttyDemod::MsgConfigureRttyDemod::create(settingsKeys, m_settings, force);
         m_rttyDemod->getInputMessageQueue()->push(message);
     }
 }
@@ -624,7 +633,7 @@ void RttyDemodGUI::tick()
 void RttyDemodGUI::on_logEnable_clicked(bool checked)
 {
     m_settings.m_logEnabled = checked;
-    applySettings();
+    applySettings(QStringList({"logEnabled"}));
 }
 
 void RttyDemodGUI::on_logFilename_clicked()
@@ -639,7 +648,7 @@ void RttyDemodGUI::on_logFilename_clicked()
         {
             m_settings.m_logFilename = fileNames[0];
             ui->logFilename->setToolTip(QString(".txt log filename: %1").arg(m_settings.m_logFilename));
-            applySettings();
+            applySettings(QStringList({"logFilename"}));
         }
     }
 }
@@ -673,4 +682,3 @@ void RttyDemodGUI::updateAbsoluteCenterFrequency()
 {
     setStatusFrequency(m_deviceCenterFrequency + m_settings.m_inputFrequencyOffset);
 }
-

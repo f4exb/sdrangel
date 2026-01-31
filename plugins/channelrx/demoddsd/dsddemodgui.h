@@ -115,7 +115,7 @@ private:
 	virtual ~DSDDemodGUI();
 
 	void blockApplySettings(bool block);
-	void applySettings(bool force = false);
+	void applySettings(const QStringList& settingsKeys, bool force = false);
     void displaySettings();
     void updateAMBEFeaturesList();
 	void updateMyPosition();

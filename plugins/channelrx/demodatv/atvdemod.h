@@ -43,20 +43,23 @@ public:
     public:
         const ATVDemodSettings& getSettings() const { return m_settings; }
         bool getForce() const { return m_force; }
+        const QStringList& getSettingsKeys() const { return m_settingsKeys; }
 
-        static MsgConfigureATVDemod* create(const ATVDemodSettings& settings, bool force)
+        static MsgConfigureATVDemod* create(const QStringList& settingsKeys, const ATVDemodSettings& settings, bool force)
         {
-            return new MsgConfigureATVDemod(settings, force);
+            return new MsgConfigureATVDemod(settingsKeys, settings, force);
         }
 
     private:
         ATVDemodSettings m_settings;
         bool m_force;
+        QStringList m_settingsKeys;
 
-        MsgConfigureATVDemod(const ATVDemodSettings& settings, bool force) :
+        MsgConfigureATVDemod(const QStringList& settingsKeys, const ATVDemodSettings& settings, bool force) :
             Message(),
             m_settings(settings),
-            m_force(force)
+            m_force(force),
+            m_settingsKeys(settingsKeys)
         { }
     };
 
@@ -112,7 +115,7 @@ private:
     int m_basebandSampleRate; //!< sample rate stored from device message used when starting baseband sink
 
 	virtual bool handleMessage(const Message& cmd);
-    void applySettings(const ATVDemodSettings& settings, bool force = false);
+    void applySettings(const QStringList& settingsKeys, const ATVDemodSettings& settings, bool force = false);
 
 private slots:
     void handleIndexInDeviceSetChanged(int index);

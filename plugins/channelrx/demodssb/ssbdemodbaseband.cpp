@@ -120,7 +120,7 @@ bool SSBDemodBaseband::handleMessage(const Message& cmd)
         MsgConfigureSSBDemodBaseband& cfg = (MsgConfigureSSBDemodBaseband&) cmd;
         qDebug() << "SSBDemodBaseband::handleMessage: MsgConfigureSSBDemodBaseband";
 
-        applySettings(cfg.getSettings(), cfg.getForce());
+        applySettings(cfg.getSettingsKeys(), cfg.getSettings(), cfg.getForce());
 
         return true;
     }
@@ -176,9 +176,9 @@ bool SSBDemodBaseband::handleMessage(const Message& cmd)
     }
 }
 
-void SSBDemodBaseband::applySettings(const SSBDemodSettings& settings, bool force)
+void SSBDemodBaseband::applySettings(const QStringList& settingsKeys, const SSBDemodSettings& settings, bool force)
 {
-    if ((settings.m_inputFrequencyOffset != m_settings.m_inputFrequencyOffset) || force)
+    if ((settingsKeys.contains("inputFrequencyOffset")) || force)
     {
         m_channelizer.setChannelization(m_audioSampleRate, settings.m_inputFrequencyOffset);
         m_sink.applyChannelSettings(m_channelizer.getChannelSampleRate(), m_channelizer.getChannelFrequencyOffset());
@@ -199,7 +199,7 @@ void SSBDemodBaseband::applySettings(const SSBDemodSettings& settings, bool forc
         }
     }
 
-    if ((settings.m_audioDeviceName != m_settings.m_audioDeviceName) || force)
+    if ((settingsKeys.contains("audioDeviceName")) || force)
     {
         AudioDeviceManager *audioDeviceManager = DSPEngine::instance()->getAudioDeviceManager();
         int audioDeviceIndex = audioDeviceManager->getOutputDeviceIndex(settings.m_audioDeviceName);
@@ -227,9 +227,13 @@ void SSBDemodBaseband::applySettings(const SSBDemodSettings& settings, bool forc
         }
     }
 
-    m_sink.applySettings(settings, force);
+    m_sink.applySettings(settingsKeys, settings, force);
 
-    m_settings = settings;
+    if (force) {
+        m_settings = settings;
+    } else {
+        m_settings.applySettings(settingsKeys, settings);
+    }
 }
 
 int SSBDemodBaseband::getChannelSampleRate() const

@@ -77,6 +77,8 @@ struct PacketDemodSettings
     void setRollupState(Serializable *rollupState) { m_rollupState = rollupState; }
     QByteArray serialize() const;
     bool deserialize(const QByteArray& data);
+    void applySettings(const QStringList& settingsKeys, const PacketDemodSettings& settings);
+    QString getDebugString(const QStringList& settingsKeys, bool force=false) const;
     int getBaudRate() const;
 };
 

@@ -117,6 +117,8 @@ public:
     QString getDefaultReporterCallsign() const;
     QString getDefaultReporterLocator() const;
     QString getDefaultReporterSoftware() const;
+    void applySettings(const QStringList& settingsKeys, const FT8DemodSettings& settings);
+    QString getDebugString(const QStringList& settingsKeys, bool force=false) const;
 
     static const int m_ft8SampleRate;
     static const int m_minPowerThresholdDB;

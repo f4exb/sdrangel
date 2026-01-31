@@ -59,6 +59,8 @@ struct FileSinkSettings
     void setRollupState(Serializable *rollupState) { m_rollupState = rollupState; }
     QByteArray serialize() const;
     bool deserialize(const QByteArray& data);
+    void applySettings(const QStringList& settingsKeys, const FileSinkSettings& settings);
+    QString getDebugString(const QStringList& settingsKeys, bool force=false) const;
 
     static unsigned int getNbFixedShiftIndexes(int log2Decim);
     static int getHalfBand(int sampleRate, int log2Decim);

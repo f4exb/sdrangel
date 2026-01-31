@@ -142,7 +142,7 @@ void SSBDemodGUI::channelMarkerChangedByCursor()
 {
     ui->deltaFrequency->setValue(m_channelMarker.getCenterFrequency());
     m_settings.m_inputFrequencyOffset = m_channelMarker.getCenterFrequency();
-    applySettings();
+    applySettings(QStringList("inputFrequencyOffset"));
 }
 
 void SSBDemodGUI::channelMarkerHighlightedByCursor()
@@ -154,14 +154,14 @@ void SSBDemodGUI::on_audioBinaural_toggled(bool binaural)
 {
 	m_audioBinaural = binaural;
 	m_settings.m_audioBinaural = binaural;
-	applySettings();
+	applySettings(QStringList("audioBinaural"));
 }
 
 void SSBDemodGUI::on_audioFlipChannels_toggled(bool flip)
 {
 	m_audioFlipChannels = flip;
 	m_settings.m_audioFlipChannels = flip;
-	applySettings();
+	applySettings(QStringList("audioFlipChannels"));
 }
 
 void SSBDemodGUI::on_dsb_toggled(bool dsb)
@@ -175,7 +175,7 @@ void SSBDemodGUI::on_deltaFrequency_changed(qint64 value)
     m_channelMarker.setCenterFrequency(value);
     m_settings.m_inputFrequencyOffset = m_channelMarker.getCenterFrequency();
     updateAbsoluteCenterFrequency();
-    applySettings();
+    applySettings(QStringList("inputFrequencyOffset"));
 }
 
 void SSBDemodGUI::on_BW_valueChanged(int value)
@@ -195,27 +195,27 @@ void SSBDemodGUI::on_volume_valueChanged(int value)
 {
 	ui->volumeText->setText(QString("%1").arg(value));
 	m_settings.m_volume = CalcDb::powerFromdB(value);
-	applySettings();
+	applySettings(QStringList("volume"));
 }
 
 void SSBDemodGUI::on_agc_toggled(bool checked)
 {
     m_settings.m_agc = checked;
-    applySettings();
+    applySettings(QStringList("agc"));
     displayAGC();
 }
 
 void SSBDemodGUI::on_agcClamping_toggled(bool checked)
 {
     m_settings.m_agcClamping = checked;
-    applySettings();
+    applySettings(QStringList("agcClamping"));
 }
 
 void SSBDemodGUI::on_dnr_toggled(bool checked)
 {
     m_settings.m_dnr = checked;
     m_settings.m_filterBank[m_settings.m_filterIndex].m_dnr = m_settings.m_dnr;
-    applySettings();
+    applySettings(QStringList({"dnr", "filterBank"}));
 }
 
 void SSBDemodGUI::on_agcTimeLog2_valueChanged(int value)
@@ -223,14 +223,14 @@ void SSBDemodGUI::on_agcTimeLog2_valueChanged(int value)
     QString s = QString::number((1<<value), 'f', 0);
     ui->agcTimeText->setText(s);
     m_settings.m_agcTimeLog2 = value;
-    applySettings();
+    applySettings(QStringList("agcTimeLog2"));
 }
 
 void SSBDemodGUI::on_agcPowerThreshold_valueChanged(int value)
 {
     displayAGCPowerThreshold(value);
     m_settings.m_agcPowerThreshold = value;
-    applySettings();
+    applySettings(QStringList("agcPowerThreshold"));
 }
 
 void SSBDemodGUI::on_agcThresholdGate_valueChanged(int value)
@@ -239,14 +239,14 @@ void SSBDemodGUI::on_agcThresholdGate_valueChanged(int value)
     QString s = QString::number(agcThresholdGate, 'f', 0);
     ui->agcThresholdGateText->setText(s);
     m_settings.m_agcThresholdGate = agcThresholdGate;
-    applySettings();
+    applySettings(QStringList("agcThresholdGate"));
 }
 
 void SSBDemodGUI::on_audioMute_toggled(bool checked)
 {
 	m_audioMute = checked;
 	m_settings.m_audioMute = checked;
-	applySettings();
+	applySettings(QStringList("audioMute"));
 }
 
 void SSBDemodGUI::on_spanLog2_valueChanged(int value)
@@ -258,6 +258,8 @@ void SSBDemodGUI::on_spanLog2_valueChanged(int value)
     }
 
     applyBandwidths(s2max - ui->spanLog2->value());
+    m_settings.m_filterBank[m_settings.m_filterIndex].m_spanLog2 = s2max - ui->spanLog2->value();
+    applySettings(QStringList({"spanLog2", "filterBank"}));
 }
 
 void SSBDemodGUI::on_flipSidebands_clicked(bool checked)
@@ -272,7 +274,7 @@ void SSBDemodGUI::on_flipSidebands_clicked(bool checked)
 void SSBDemodGUI::on_fftWindow_currentIndexChanged(int index)
 {
     m_settings.m_filterBank[m_settings.m_filterIndex].m_fftWindow = (FFTWindow::Function) index;
-    applySettings();
+    applySettings(QStringList({"fftWindow", "filterBank"}));
 }
 
 void SSBDemodGUI::on_filterIndex_valueChanged(int value)
@@ -339,7 +341,16 @@ void SSBDemodGUI::onMenuDialogCalled(const QPoint &p)
             updateIndexLabel();
         }
 
-        applySettings();
+        applySettings(QStringList({
+            "rgbColor",
+            "title",
+            "useReverseAPI",
+            "reverseAPIAddress",
+            "reverseAPIPort",
+            "reverseAPIDeviceIndex",
+            "reverseAPIChannelIndex",
+            "streamIndex"
+        }));
     }
 
     resetContextMenuType();
@@ -351,7 +362,7 @@ void SSBDemodGUI::onWidgetRolled(QWidget* widget, bool rollDown)
     (void) rollDown;
 
     getRollupContents()->saveState(m_rollupState);
-    applySettings();
+    applySettings(QStringList());
 }
 
 SSBDemodGUI::SSBDemodGUI(PluginAPI* pluginAPI, DeviceUISet *deviceUISet, BasebandSampleSink *rxChannel, QWidget* parent) :
@@ -458,11 +469,11 @@ bool SSBDemodGUI::blockApplySettings(bool block)
     return ret;
 }
 
-void SSBDemodGUI::applySettings(bool force)
+void SSBDemodGUI::applySettings(const QStringList& channelSettingsKeys, bool force)
 {
 	if (m_doApplySettings)
 	{
-        SSBDemod::MsgConfigureSSBDemod* message = SSBDemod::MsgConfigureSSBDemod::create( m_settings, force);
+        SSBDemod::MsgConfigureSSBDemod* message = SSBDemod::MsgConfigureSSBDemod::create(channelSettingsKeys, m_settings, force);
         m_ssbDemod->getInputMessageQueue()->push(message);
 	}
 }
@@ -597,7 +608,13 @@ void SSBDemodGUI::applyBandwidths(unsigned int spanLog2, bool force)
     m_settings.m_filterBank[m_settings.m_filterIndex].m_rfBandwidth = bw * 100;
     m_settings.m_filterBank[m_settings.m_filterIndex].m_lowCutoff = lw * 100;
 
-    applySettings(force);
+    applySettings(QStringList({
+        "dsb",
+        "spanLog2",
+        "rfBandwidth",
+        "lowCutoff",
+        "filterBank"
+    }), force);
 
     bool wasBlocked = blockApplySettings(true);
     m_channelMarker.setBandwidth(bw * 200);
@@ -772,7 +789,7 @@ void SSBDemodGUI::audioSelect(const QPoint& p)
     if (audioSelect.m_selected)
     {
         m_settings.m_audioDeviceName = audioSelect.m_audioDeviceName;
-        applySettings();
+        applySettings(QStringList("audioDeviceName"));
     }
 }
 
@@ -805,27 +822,27 @@ void SSBDemodGUI::dnrSetup(int32_t iValueChanged)
     case FFTNRDialog::ValueChanged::ChangedScheme:
         m_settings.m_dnrScheme = m_fftNRDialog->getScheme();
         m_settings.m_filterBank[m_settings.m_filterIndex].m_dnrScheme = m_settings.m_dnrScheme;
-        applySettings();
+        applySettings(QStringList({"dnrScheme", "filterBank"}));
         break;
     case FFTNRDialog::ValueChanged::ChangedAboveAvgFactor:
         m_settings.m_dnrAboveAvgFactor = m_fftNRDialog->getAboveAvgFactor();
         m_settings.m_filterBank[m_settings.m_filterIndex].m_dnrAboveAvgFactor = m_settings.m_dnrAboveAvgFactor;
-        applySettings();
+        applySettings(QStringList({"dnrAboveAvgFactor", "filterBank"}));
         break;
     case FFTNRDialog::ValueChanged::ChangedSigmaFactor:
         m_settings.m_dnrSigmaFactor = m_fftNRDialog->getSigmaFactor();
         m_settings.m_filterBank[m_settings.m_filterIndex].m_dnrSigmaFactor = m_settings.m_dnrSigmaFactor;
-        applySettings();
+        applySettings(QStringList({"dnrSigmaFactor", "filterBank"}));
         break;
     case FFTNRDialog::ValueChanged::ChangedNbPeaks:
         m_settings.m_dnrNbPeaks = m_fftNRDialog->getNbPeaks();
         m_settings.m_filterBank[m_settings.m_filterIndex].m_dnrNbPeaks = m_settings.m_dnrNbPeaks;
-        applySettings();
+        applySettings(QStringList({"dnrNbPeaks", "filterBank"}));
         break;
     case FFTNRDialog::ValueChanged::ChangedAlpha:
         m_settings.m_dnrAlpha = m_fftNRDialog->getAlpha();
         m_settings.m_filterBank[m_settings.m_filterIndex].m_dnrAlpha = m_settings.m_dnrAlpha;
-        applySettings();
+        applySettings(QStringList({"dnrAlpha", "filterBank"}));
         break;
     default:
         break;

@@ -73,7 +73,7 @@ void DATVDemodGUI::resetToDefaults()
 {
     m_settings.resetToDefaults();
     displaySettings();
-	applySettings(true);
+	applySettings(QStringList(), true);
 }
 
 QByteArray DATVDemodGUI::serialize() const
@@ -86,7 +86,7 @@ bool DATVDemodGUI::deserialize(const QByteArray& arrData)
     if (m_settings.deserialize(arrData))
     {
         displaySettings();
-        applySettings(true);
+        applySettings(QStringList(), true);
         return true;
     }
     else
@@ -150,7 +150,7 @@ void DATVDemodGUI::channelMarkerChangedByCursor()
 {
     ui->deltaFrequency->setValue(m_channelMarker.getCenterFrequency());
     m_settings.m_centerFrequency = m_channelMarker.getCenterFrequency();
-    applySettings();
+    applySettings(QStringList("centerFrequency"));
 }
 
 void DATVDemodGUI::channelMarkerHighlightedByCursor()
@@ -165,7 +165,7 @@ void DATVDemodGUI::onWidgetRolled(QWidget* widget, bool rollDown)
     (void) rollDown;
 
     getRollupContents()->saveState(m_rollupState);
-    applySettings();
+    applySettings(QStringList());
 }
 
 void DATVDemodGUI::onMenuDialogCalled(const QPoint &p)
@@ -210,7 +210,10 @@ void DATVDemodGUI::onMenuDialogCalled(const QPoint &p)
             updateIndexLabel();
         }
 
-        applySettings();
+        applySettings(QStringList({"title", "color",
+            "useReverseAPI", "reverseAPIAddress", "reverseAPIPort",
+            "reverseAPIDeviceIndex", "reverseAPIChannelIndex",
+            "streamIndex"}));
     }
 
     resetContextMenuType();
@@ -481,7 +484,7 @@ void DATVDemodGUI::displaySystemConfiguration()
     ui->cmbFEC->blockSignals(false);
 }
 
-void DATVDemodGUI::applySettings(bool force)
+void DATVDemodGUI::applySettings(const QStringList& settingsKeys, const bool force)
 {
     if (m_blnDoApplySettings)
     {
@@ -492,7 +495,7 @@ void DATVDemodGUI::applySettings(bool force)
         QString msg = tr("DATVDemodGUI::applySettings: force: %1").arg(force ? "true" : "false");
         m_settings.debug(msg);
 
-        DATVDemod::MsgConfigureDATVDemod* message = DATVDemod::MsgConfigureDATVDemod::create(m_settings, force);
+        DATVDemod::MsgConfigureDATVDemod* message = DATVDemod::MsgConfigureDATVDemod::create(settingsKeys, m_settings, force);
 	    m_datvDemod->getInputMessageQueue()->push(message);
     }
 }
@@ -524,7 +527,7 @@ void DATVDemodGUI::audioSelect(const QPoint& p)
     if (audioSelect.m_selected)
     {
         m_settings.m_audioDeviceName = audioSelect.m_audioDeviceName;
-        applySettings();
+        applySettings(QStringList("audioDeviceName"));
     }
 }
 
@@ -538,7 +541,7 @@ void DATVDemodGUI::ldpcToolSelect(const QPoint& p)
     if (ldpcDialog.exec() == QDialog::Accepted)
     {
         m_settings.m_softLDPCMaxTrials = ldpcDialog.getMaxTrials();
-        applySettings();
+        applySettings(QStringList("softLDPCMaxTrials"));
     }
 }
 
@@ -683,7 +686,7 @@ void DATVDemodGUI::on_cmbStandard_currentIndexChanged(int index)
 
     m_settings.validateSystemConfiguration();
     displaySystemConfiguration();
-    applySettings();
+    applySettings(QStringList("standard"));
 }
 
 void DATVDemodGUI::on_cmbModulation_currentIndexChanged(int arg1)
@@ -693,7 +696,7 @@ void DATVDemodGUI::on_cmbModulation_currentIndexChanged(int arg1)
     m_settings.m_modulation = DATVDemodSettings::getModulationFromStr(strModulation);
     m_settings.validateSystemConfiguration();
     displaySystemConfiguration();
-
+    applySettings(QStringList("modulation"));
     //Viterbi only for BPSK and QPSK
     if ((m_settings.m_modulation != DATVDemodSettings::BPSK)
         && (m_settings.m_modulation != DATVDemodSettings::QPSK))
@@ -701,7 +704,7 @@ void DATVDemodGUI::on_cmbModulation_currentIndexChanged(int arg1)
         ui->chkViterbi->setChecked(false);
     }
 
-    applySettings();
+    applySettings(QStringList("modulation"));
 }
 
 void DATVDemodGUI::on_cmbFEC_currentIndexChanged(int arg1)
@@ -709,31 +712,31 @@ void DATVDemodGUI::on_cmbFEC_currentIndexChanged(int arg1)
     (void) arg1;
     QString strFEC = ui->cmbFEC->currentText();
     m_settings.m_fec = DATVDemodSettings::getCodeRateFromStr(strFEC);
-    applySettings();
+    applySettings(QStringList("fec"));
 }
 
 void DATVDemodGUI::on_softLDPC_clicked()
 {
     m_settings.m_softLDPC = ui->softLDPC->isChecked();
-    applySettings();
+    applySettings(QStringList("softLDPC"));
 }
 
 void DATVDemodGUI::on_maxBitflips_valueChanged(int value)
 {
     m_settings.m_maxBitflips = value;
-    applySettings();
+    applySettings(QStringList("maxBitflips"));
 }
 
 void DATVDemodGUI::on_chkViterbi_clicked()
 {
     m_settings.m_viterbi = ui->chkViterbi->isChecked();
-    applySettings();
+    applySettings(QStringList("viterbi"));
 }
 
 void DATVDemodGUI::on_chkHardMetric_clicked()
 {
     m_settings.m_hardMetric = ui->chkHardMetric->isChecked();
-    applySettings();
+    applySettings(QStringList("hardMetric"));
 }
 
 void DATVDemodGUI::on_resetDefaults_clicked()
@@ -747,7 +750,7 @@ void DATVDemodGUI::on_spiSymbolRate_valueChanged(int value)
     ui->datvStdSR->blockSignals(true);
     ui->datvStdSR->setValue(indexFromSymbolRate(value));
     ui->datvStdSR->blockSignals(false);
-    applySettings();
+    applySettings(QStringList("symbolRate"));
 }
 
 void DATVDemodGUI::on_datvStdSR_valueChanged(int value)
@@ -761,19 +764,19 @@ void DATVDemodGUI::on_datvStdSR_valueChanged(int value)
     m_channelMarker.setBandwidth(m_settings.m_rfBandwidth);
     ui->rfBandwidth->blockSignals(false);
     ui->spiSymbolRate->blockSignals(false);
-    applySettings();
+    applySettings(QStringList({"symbolRate", "rfBandwidth"}));
 }
 
 void DATVDemodGUI::on_spiNotchFilters_valueChanged(int value)
 {
     m_settings.m_notchFilters = value;
-    applySettings();
+    applySettings(QStringList("notchFilters"));
 }
 
 void DATVDemodGUI::on_chkAllowDrift_clicked()
 {
     m_settings.m_allowDrift = ui->chkAllowDrift->isChecked();
-    applySettings();
+    applySettings(QStringList("allowDrift"));
 }
 
 void DATVDemodGUI::on_fullScreen_clicked()
@@ -819,45 +822,45 @@ void DATVDemodGUI::on_deltaFrequency_changed(qint64 value)
     m_channelMarker.setCenterFrequency(value);
     m_settings.m_centerFrequency = m_channelMarker.getCenterFrequency();
     updateAbsoluteCenterFrequency();
-    applySettings();
+    applySettings(QStringList("centerFrequency"));
 }
 
 void DATVDemodGUI::on_rfBandwidth_changed(qint64 value)
 {
     m_channelMarker.setBandwidth(value);
     m_settings.m_rfBandwidth = m_channelMarker.getBandwidth();
-    applySettings();
+    applySettings(QStringList("rfBandwidth"));
 }
 
 void DATVDemodGUI::on_chkFastlock_clicked()
 {
     m_settings.m_fastLock = ui->chkFastlock->isChecked();
-    applySettings();
+    applySettings(QStringList("fastLock"));
 }
 
 void DATVDemodGUI::on_audioMute_toggled(bool checked)
 {
     m_settings.m_audioMute = checked;
-	applySettings();
+	applySettings(QStringList("audioMute"));
 }
 
 void DATVDemodGUI::on_videoMute_toggled(bool checked)
 {
     m_settings.m_videoMute = checked;
-	applySettings();
+	applySettings(QStringList("videoMute"));
 }
 
 void DATVDemodGUI::on_audioVolume_valueChanged(int value)
 {
     ui->audioVolumeText->setText(tr("%1").arg(value));
     m_settings.m_audioVolume = value;
-    applySettings();
+    applySettings(QStringList("audioVolume"));
 }
 
 void DATVDemodGUI::on_udpTS_clicked(bool checked)
 {
     m_settings.m_udpTS = checked;
-    applySettings();
+    applySettings(QStringList("udpTS"));
 }
 
 void DATVDemodGUI::on_StreamMetaDataChanged(DataTSMetaData2 *objMetaData)
@@ -907,7 +910,7 @@ void DATVDemodGUI::on_playerEnable_clicked()
         connect(m_datvDemod->getUDPStream(), &DATVUDPStream::fifoData, this, &DATVDemodGUI::on_StreamDataAvailable);
     }
 
-    applySettings();
+    applySettings(QStringList("playerEnable"));
 }
 
 void DATVDemodGUI::displayRRCParameters(bool blnVisible)
@@ -929,25 +932,25 @@ void DATVDemodGUI::on_cmbFilter_currentIndexChanged(int index)
     }
 
     displayRRCParameters(index == 2);
-    applySettings();
+    applySettings(QStringList("filter"));
 }
 
 void DATVDemodGUI::on_spiRollOff_valueChanged(int value)
 {
     m_settings.m_rollOff = ((float) value) / 100.0f;
-    applySettings();
+    applySettings(QStringList("rollOff"));
 }
 
 void DATVDemodGUI::on_spiExcursion_valueChanged(int value)
 {
     m_settings.m_excursion = value;
-    applySettings();
+    applySettings(QStringList("excursion"));
 }
 
 void DATVDemodGUI::on_udpTSAddress_editingFinished()
 {
     m_settings.m_udpTSAddress = ui->udpTSAddress->text();
-    applySettings();
+    applySettings(QStringList("udpTSAddress"));
 }
 
 void DATVDemodGUI::on_udpTSPort_editingFinished()
@@ -961,7 +964,7 @@ void DATVDemodGUI::on_udpTSPort_editingFinished()
 
     m_settings.m_udpTSPort = udpPort;
     ui->udpTSPort->setText(tr("%1").arg(udpPort));
-    applySettings();
+    applySettings(QStringList("udpTSPort"));
 }
 
 void DATVDemodGUI::makeUIConnections()

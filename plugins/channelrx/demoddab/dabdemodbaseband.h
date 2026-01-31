@@ -42,20 +42,23 @@ public:
 
     public:
         const DABDemodSettings& getSettings() const { return m_settings; }
+        const QStringList& getSettingsKeys() const { return m_settingsKeys; }
         bool getForce() const { return m_force; }
 
-        static MsgConfigureDABDemodBaseband* create(const DABDemodSettings& settings, bool force)
+        static MsgConfigureDABDemodBaseband* create(const QStringList& settingsKeys, const DABDemodSettings& settings, bool force)
         {
-            return new MsgConfigureDABDemodBaseband(settings, force);
+            return new MsgConfigureDABDemodBaseband(settingsKeys, settings, force);
         }
 
     private:
         DABDemodSettings m_settings;
+        QStringList m_settingsKeys;
         bool m_force;
 
-        MsgConfigureDABDemodBaseband(const DABDemodSettings& settings, bool force) :
+        MsgConfigureDABDemodBaseband(const QStringList& settingsKeys, const DABDemodSettings& settings, bool force) :
             Message(),
             m_settings(settings),
+            m_settingsKeys(settingsKeys),
             m_force(force)
         { }
     };
@@ -89,7 +92,7 @@ private:
     QRecursiveMutex m_mutex;
 
     bool handleMessage(const Message& cmd);
-    void applySettings(const DABDemodSettings& settings, bool force = false);
+    void applySettings(const QStringList& settingsKeys, const DABDemodSettings& settings, bool force = false);
 
 private slots:
     void handleInputMessages();

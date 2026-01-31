@@ -208,3 +208,146 @@ bool DSCDemodSettings::deserialize(const QByteArray& data)
     }
 }
 
+void DSCDemodSettings::applySettings(const QStringList& settingsKeys, const DSCDemodSettings& settings)
+{
+    if (settingsKeys.contains("inputFrequencyOffset")) {
+        m_inputFrequencyOffset = settings.m_inputFrequencyOffset;
+    }
+    if (settingsKeys.contains("rfBandwidth")) {
+        m_rfBandwidth = settings.m_rfBandwidth;
+    }
+    if (settingsKeys.contains("filterInvalid")) {
+        m_filterInvalid = settings.m_filterInvalid;
+    }
+    if (settingsKeys.contains("filterColumn")) {
+        m_filterColumn = settings.m_filterColumn;
+    }
+    if (settingsKeys.contains("filter")) {
+        m_filter = settings.m_filter;
+    }
+    if (settingsKeys.contains("udpEnabled")) {
+        m_udpEnabled = settings.m_udpEnabled;
+    }
+    if (settingsKeys.contains("udpAddress")) {
+        m_udpAddress = settings.m_udpAddress;
+    }
+    if (settingsKeys.contains("udpPort")) {
+        m_udpPort = settings.m_udpPort;
+    }
+    if (settingsKeys.contains("feed")) {
+        m_feed = settings.m_feed;
+    }
+    if (settingsKeys.contains("rgbColor")) {
+        m_rgbColor = settings.m_rgbColor;
+    }
+    if (settingsKeys.contains("title")) {
+        m_title = settings.m_title;
+    }
+    if (settingsKeys.contains("streamIndex")) {
+        m_streamIndex = settings.m_streamIndex;
+    }
+    if (settingsKeys.contains("useReverseAPI")) {
+        m_useReverseAPI = settings.m_useReverseAPI;
+    }
+    if (settingsKeys.contains("reverseAPIAddress")) {
+        m_reverseAPIAddress = settings.m_reverseAPIAddress;
+    }
+    if (settingsKeys.contains("reverseAPIPort")) {
+        m_reverseAPIPort = settings.m_reverseAPIPort;
+    }
+    if (settingsKeys.contains("reverseAPIDeviceIndex")) {
+        m_reverseAPIDeviceIndex = settings.m_reverseAPIDeviceIndex;
+    }
+    if (settingsKeys.contains("reverseAPIChannelIndex")) {
+        m_reverseAPIChannelIndex = settings.m_reverseAPIChannelIndex;
+    }
+    if (settingsKeys.contains("logFilename")) {
+        m_logFilename = settings.m_logFilename;
+    }
+    if (settingsKeys.contains("logEnabled")) {
+        m_logEnabled = settings.m_logEnabled;
+    }
+    if (settingsKeys.contains("useFileTime")) {
+        m_useFileTime = settings.m_useFileTime;
+    }
+    if (settingsKeys.contains("workspaceIndex")) {
+        m_workspaceIndex = settings.m_workspaceIndex;
+    }
+    if (settingsKeys.contains("hidden")) {
+        m_hidden = settings.m_hidden;
+    }
+}
+
+QString DSCDemodSettings::getDebugString(const QStringList& settingsKeys, bool force) const
+{
+    std::ostringstream ostr;
+
+    if (settingsKeys.contains("inputFrequencyOffset") || force) {
+        ostr << " m_inputFrequencyOffset: " << m_inputFrequencyOffset;
+    }
+    if (settingsKeys.contains("rfBandwidth") || force) {
+        ostr << " m_rfBandwidth: " << m_rfBandwidth;
+    }
+    if (settingsKeys.contains("filterInvalid") || force) {
+        ostr << " m_filterInvalid: " << m_filterInvalid;
+    }
+    if (settingsKeys.contains("filterColumn") || force) {
+        ostr << " m_filterColumn: " << m_filterColumn;
+    }
+    if (settingsKeys.contains("filter") || force) {
+        ostr << " m_filter: " << m_filter.toStdString();
+    }
+    if (settingsKeys.contains("udpEnabled") || force) {
+        ostr << " m_udpEnabled: " << m_udpEnabled;
+    }
+    if (settingsKeys.contains("udpAddress") || force) {
+        ostr << " m_udpAddress: " << m_udpAddress.toStdString();
+    }
+    if (settingsKeys.contains("udpPort") || force) {
+        ostr << " m_udpPort: " << m_udpPort;
+    }
+    if (settingsKeys.contains("feed") || force) {
+        ostr << " m_feed: " << m_feed;
+    }
+    if (settingsKeys.contains("rgbColor") || force) {
+        ostr << " m_rgbColor: " << m_rgbColor;
+    }
+    if (settingsKeys.contains("title") || force) {
+        ostr << " m_title: " << m_title.toStdString();
+    }
+    if (settingsKeys.contains("streamIndex") || force) {
+        ostr << " m_streamIndex: " << m_streamIndex;
+    }
+    if (settingsKeys.contains("useReverseAPI") || force) {
+        ostr << " m_useReverseAPI: " << m_useReverseAPI;
+    }
+    if (settingsKeys.contains("reverseAPIAddress") || force) {
+        ostr << " m_reverseAPIAddress: " << m_reverseAPIAddress.toStdString();
+    }
+    if (settingsKeys.contains("reverseAPIPort") || force) {
+        ostr << " m_reverseAPIPort: " << m_reverseAPIPort;
+    }
+    if (settingsKeys.contains("reverseAPIDeviceIndex") || force) {
+        ostr << " m_reverseAPIDeviceIndex: " << m_reverseAPIDeviceIndex;
+    }
+    if (settingsKeys.contains("reverseAPIChannelIndex") || force) {
+        ostr << " m_reverseAPIChannelIndex: " << m_reverseAPIChannelIndex;
+    }
+    if (settingsKeys.contains("logFilename") || force) {
+        ostr << " m_logFilename: " << m_logFilename.toStdString();
+    }
+    if (settingsKeys.contains("logEnabled") || force) {
+        ostr << " m_logEnabled: " << m_logEnabled;
+    }
+    if (settingsKeys.contains("useFileTime") || force) {
+        ostr << " m_useFileTime: " << m_useFileTime;
+    }
+    if (settingsKeys.contains("workspaceIndex") || force) {
+        ostr << " m_workspaceIndex: " << m_workspaceIndex;
+    }
+    if (settingsKeys.contains("hidden") || force) {
+        ostr << " m_hidden: " << m_hidden;
+    }
+
+    return QString(ostr.str().c_str());
+}

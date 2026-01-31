@@ -52,19 +52,22 @@ public:
 
     public:
         const PagerDemodSettings& getSettings() const { return m_settings; }
+        const QStringList& getSettingsKeys() const { return m_settingsKeys; }
         bool getForce() const { return m_force; }
 
-        static MsgConfigurePagerDemod* create(const PagerDemodSettings& settings, bool force) {
-            return new MsgConfigurePagerDemod(settings, force);
+        static MsgConfigurePagerDemod* create(const QStringList& settingsKeys, const PagerDemodSettings& settings, bool force) {
+            return new MsgConfigurePagerDemod(settingsKeys, settings, force);
         }
 
     private:
         PagerDemodSettings m_settings;
+        QStringList m_settingsKeys;
         bool m_force;
 
-        MsgConfigurePagerDemod(const PagerDemodSettings& settings, bool force) :
+        MsgConfigurePagerDemod(const QStringList& settingsKeys, const PagerDemodSettings& settings, bool force) :
             Message(),
             m_settings(settings),
+            m_settingsKeys(settingsKeys),
             m_force(force)
         { }
     };
@@ -211,11 +214,11 @@ private:
     QNetworkRequest m_networkRequest;
 
     virtual bool handleMessage(const Message& cmd);
-    void applySettings(const PagerDemodSettings& settings, bool force = false);
+    void applySettings(const QStringList& settingsKeys, const PagerDemodSettings& settings, bool force = false);
     void sendSampleRateToDemodAnalyzer();
-    void webapiReverseSendSettings(QList<QString>& channelSettingsKeys, const PagerDemodSettings& settings, bool force);
+    void webapiReverseSendSettings(const QList<QString>& channelSettingsKeys, const PagerDemodSettings& settings, bool force);
     void webapiFormatChannelSettings(
-        QList<QString>& channelSettingsKeys,
+        const QList<QString>& channelSettingsKeys,
         SWGSDRangel::SWGChannelSettings *swgChannelSettings,
         const PagerDemodSettings& settings,
         bool force

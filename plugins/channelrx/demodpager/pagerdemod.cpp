@@ -52,7 +52,7 @@ PagerDemod::PagerDemod(DeviceAPI *deviceAPI) :
     m_basebandSink->setChannel(this);
     m_basebandSink->moveToThread(&m_thread);
 
-    applySettings(m_settings, true);
+    applySettings(QStringList(), m_settings, true);
 
     m_deviceAPI->addChannelSink(this);
     m_deviceAPI->addChannelSinkAPI(this);
@@ -126,7 +126,7 @@ void PagerDemod::start()
     DSPSignalNotification *dspMsg = new DSPSignalNotification(m_basebandSampleRate, m_centerFrequency);
     m_basebandSink->getInputMessageQueue()->push(dspMsg);
 
-    PagerDemodBaseband::MsgConfigurePagerDemodBaseband *msg = PagerDemodBaseband::MsgConfigurePagerDemodBaseband::create(m_settings, true);
+    PagerDemodBaseband::MsgConfigurePagerDemodBaseband *msg = PagerDemodBaseband::MsgConfigurePagerDemodBaseband::create(QStringList(), m_settings, true);
     m_basebandSink->getInputMessageQueue()->push(msg);
 }
 
@@ -144,7 +144,7 @@ bool PagerDemod::handleMessage(const Message& cmd)
     {
         const MsgConfigurePagerDemod& cfg = (const MsgConfigurePagerDemod&) cmd;
         qDebug() << "PagerDemod::handleMessage: MsgConfigurePagerDemod";
-        applySettings(cfg.getSettings(), cfg.getForce());
+        applySettings(cfg.getSettingsKeys(), cfg.getSettings(), cfg.getForce());
 
         return true;
     }
@@ -232,64 +232,20 @@ void PagerDemod::setCenterFrequency(qint64 frequency)
 {
     PagerDemodSettings settings = m_settings;
     settings.m_inputFrequencyOffset = frequency;
-    applySettings(settings, false);
+    applySettings(QStringList("inputFrequencyOffset"), settings, false);
 
     if (m_guiMessageQueue) // forward to GUI if any
     {
-        MsgConfigurePagerDemod *msgToGUI = MsgConfigurePagerDemod::create(settings, false);
+        MsgConfigurePagerDemod *msgToGUI = MsgConfigurePagerDemod::create(QStringList("inputFrequencyOffset"), settings, false);
         m_guiMessageQueue->push(msgToGUI);
     }
 }
 
-void PagerDemod::applySettings(const PagerDemodSettings& settings, bool force)
+void PagerDemod::applySettings(const QStringList& settingsKeys, const PagerDemodSettings& settings, bool force)
 {
-    qDebug() << "PagerDemod::applySettings:"
-            << " m_logEnabled: " << settings.m_logEnabled
-            << " m_logFilename: " << settings.m_logFilename
-            << " m_streamIndex: " << settings.m_streamIndex
-            << " m_useReverseAPI: " << settings.m_useReverseAPI
-            << " m_reverseAPIAddress: " << settings.m_reverseAPIAddress
-            << " m_reverseAPIPort: " << settings.m_reverseAPIPort
-            << " m_reverseAPIDeviceIndex: " << settings.m_reverseAPIDeviceIndex
-            << " m_reverseAPIChannelIndex: " << settings.m_reverseAPIChannelIndex
-            << " force: " << force;
+    qDebug() << "PagerDemod::applySettings:" << settings.getDebugString(settingsKeys, force);
 
-    QList<QString> reverseAPIKeys;
-
-    if ((settings.m_baud != m_settings.m_baud) || force) {
-        reverseAPIKeys.append("baud");
-    }
-    if ((settings.m_decode != m_settings.m_decode) || force) {
-        reverseAPIKeys.append("decode");
-    }
-    if ((settings.m_reverse != m_settings.m_reverse) || force) {
-        reverseAPIKeys.append("reverse");
-    }
-    if ((settings.m_inputFrequencyOffset != m_settings.m_inputFrequencyOffset) || force) {
-        reverseAPIKeys.append("inputFrequencyOffset");
-    }
-    if ((settings.m_rfBandwidth != m_settings.m_rfBandwidth) || force) {
-        reverseAPIKeys.append("rfBandwidth");
-    }
-    if ((settings.m_fmDeviation != m_settings.m_fmDeviation) || force) {
-        reverseAPIKeys.append("fmDeviation");
-    }
-    if ((settings.m_udpEnabled != m_settings.m_udpEnabled) || force) {
-        reverseAPIKeys.append("udpEnabled");
-    }
-    if ((settings.m_udpAddress != m_settings.m_udpAddress) || force) {
-        reverseAPIKeys.append("udpAddress");
-    }
-    if ((settings.m_udpPort != m_settings.m_udpPort) || force) {
-        reverseAPIKeys.append("udpPort");
-    }
-    if ((settings.m_logFilename != m_settings.m_logFilename) || force) {
-        reverseAPIKeys.append("logFilename");
-    }
-    if ((settings.m_logEnabled != m_settings.m_logEnabled) || force) {
-        reverseAPIKeys.append("logEnabled");
-    }
-    if (m_settings.m_streamIndex != settings.m_streamIndex)
+    if (settingsKeys.contains("streamIndex") && (m_settings.m_streamIndex != settings.m_streamIndex))
     {
         if (m_deviceAPI->getSampleMIMO()) // change of stream is possible for MIMO devices only
         {
@@ -300,25 +256,23 @@ void PagerDemod::applySettings(const PagerDemodSettings& settings, bool force)
             m_settings.m_streamIndex = settings.m_streamIndex; // make sure ChannelAPI::getStreamIndex() is consistent
             emit streamIndexChanged(settings.m_streamIndex);
         }
-
-        reverseAPIKeys.append("streamIndex");
     }
 
-    PagerDemodBaseband::MsgConfigurePagerDemodBaseband *msg = PagerDemodBaseband::MsgConfigurePagerDemodBaseband::create(settings, force);
+    PagerDemodBaseband::MsgConfigurePagerDemodBaseband *msg = PagerDemodBaseband::MsgConfigurePagerDemodBaseband::create(settingsKeys, settings, force);
     m_basebandSink->getInputMessageQueue()->push(msg);
 
-    if (settings.m_useReverseAPI)
+    if (settingsKeys.contains("useReverseAPI") && settings.m_useReverseAPI)
     {
-        bool fullUpdate = ((m_settings.m_useReverseAPI != settings.m_useReverseAPI) && settings.m_useReverseAPI) ||
-                (m_settings.m_reverseAPIAddress != settings.m_reverseAPIAddress) ||
-                (m_settings.m_reverseAPIPort != settings.m_reverseAPIPort) ||
-                (m_settings.m_reverseAPIDeviceIndex != settings.m_reverseAPIDeviceIndex) ||
-                (m_settings.m_reverseAPIChannelIndex != settings.m_reverseAPIChannelIndex);
-        webapiReverseSendSettings(reverseAPIKeys, settings, fullUpdate || force);
+        bool fullUpdate = ((settingsKeys.contains("useReverseAPI") && (m_settings.m_useReverseAPI != settings.m_useReverseAPI)) && settings.m_useReverseAPI) ||
+                (settingsKeys.contains("reverseAPIAddress") && (m_settings.m_reverseAPIAddress != settings.m_reverseAPIAddress)) ||
+                (settingsKeys.contains("reverseAPIPort") && (m_settings.m_reverseAPIPort != settings.m_reverseAPIPort)) ||
+                (settingsKeys.contains("reverseAPIDeviceIndex") && (m_settings.m_reverseAPIDeviceIndex != settings.m_reverseAPIDeviceIndex)) ||
+                (settingsKeys.contains("reverseAPIChannelIndex") && (m_settings.m_reverseAPIChannelIndex != settings.m_reverseAPIChannelIndex));
+        webapiReverseSendSettings(settingsKeys, settings, fullUpdate || force);
     }
 
-    if ((settings.m_logEnabled != m_settings.m_logEnabled)
-        || (settings.m_logFilename != m_settings.m_logFilename)
+    if ((settingsKeys.contains("logEnabled") && (settings.m_logEnabled != m_settings.m_logEnabled))
+        || (settingsKeys.contains("logFilename") && (settings.m_logFilename != m_settings.m_logFilename))
         || force)
     {
         if (m_logFile.isOpen())
@@ -347,7 +301,11 @@ void PagerDemod::applySettings(const PagerDemodSettings& settings, bool force)
         }
     }
 
-    m_settings = settings;
+    if (force) {
+        m_settings = settings;
+    } else {
+        m_settings.applySettings(settingsKeys, settings);
+    }
 }
 
 QByteArray PagerDemod::serialize() const
@@ -359,14 +317,14 @@ bool PagerDemod::deserialize(const QByteArray& data)
 {
     if (m_settings.deserialize(data))
     {
-        MsgConfigurePagerDemod *msg = MsgConfigurePagerDemod::create(m_settings, true);
+        MsgConfigurePagerDemod *msg = MsgConfigurePagerDemod::create(QStringList(), m_settings, true);
         m_inputMessageQueue.push(msg);
         return true;
     }
     else
     {
         m_settings.resetToDefaults();
-        MsgConfigurePagerDemod *msg = MsgConfigurePagerDemod::create(m_settings, true);
+        MsgConfigurePagerDemod *msg = MsgConfigurePagerDemod::create(QStringList(), m_settings, true);
         m_inputMessageQueue.push(msg);
         return false;
     }
@@ -421,13 +379,13 @@ int PagerDemod::webapiSettingsPutPatch(
     PagerDemodSettings settings = m_settings;
     webapiUpdateChannelSettings(settings, channelSettingsKeys, response);
 
-    MsgConfigurePagerDemod *msg = MsgConfigurePagerDemod::create(settings, force);
+    MsgConfigurePagerDemod *msg = MsgConfigurePagerDemod::create(channelSettingsKeys, settings, force);
     m_inputMessageQueue.push(msg);
 
     qDebug("PagerDemod::webapiSettingsPutPatch: forward to GUI: %p", m_guiMessageQueue);
     if (m_guiMessageQueue) // forward to GUI if any
     {
-        MsgConfigurePagerDemod *msgToGUI = MsgConfigurePagerDemod::create(settings, force);
+        MsgConfigurePagerDemod *msgToGUI = MsgConfigurePagerDemod::create(channelSettingsKeys, settings, force);
         m_guiMessageQueue->push(msgToGUI);
     }
 
@@ -607,7 +565,7 @@ void PagerDemod::webapiFormatChannelReport(SWGSDRangel::SWGChannelReport& respon
     response.getPagerDemodReport()->setChannelSampleRate(m_basebandSink->getChannelSampleRate());
 }
 
-void PagerDemod::webapiReverseSendSettings(QList<QString>& channelSettingsKeys, const PagerDemodSettings& settings, bool force)
+void PagerDemod::webapiReverseSendSettings(const QList<QString>& channelSettingsKeys, const PagerDemodSettings& settings, bool force)
 {
    SWGSDRangel::SWGChannelSettings *swgChannelSettings = new SWGSDRangel::SWGChannelSettings();
     webapiFormatChannelSettings(channelSettingsKeys, swgChannelSettings, settings, force);
@@ -633,7 +591,7 @@ void PagerDemod::webapiReverseSendSettings(QList<QString>& channelSettingsKeys, 
 }
 
 void PagerDemod::webapiFormatChannelSettings(
-        QList<QString>& channelSettingsKeys,
+        const QList<QString>& channelSettingsKeys,
         SWGSDRangel::SWGChannelSettings *swgChannelSettings,
         const PagerDemodSettings& settings,
         bool force

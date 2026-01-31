@@ -44,7 +44,7 @@ public:
     virtual void feed(const SampleVector::const_iterator& begin, const SampleVector::const_iterator& end);
 
     void applyChannelSettings(int channelSampleRate, int channelFrequencyOffset, bool force = false);
-    void applySettings(const VORDemodSettings& settings, bool force = false);
+    void applySettings(const QStringList& settingsKeys, const VORDemodSettings& settings, bool force = false);
     void setMessageQueueToChannel(MessageQueue *messageQueue);
     void applyAudioSampleRate(int sampleRate);
 

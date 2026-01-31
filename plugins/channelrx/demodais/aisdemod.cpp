@@ -54,7 +54,7 @@ AISDemod::AISDemod(DeviceAPI *deviceAPI) :
     m_basebandSink->setChannel(this);
     m_basebandSink->moveToThread(&m_thread);
 
-    applySettings(m_settings, true);
+    applySettings(m_settings, QStringList(), true);
 
     m_deviceAPI->addChannelSink(this);
     m_deviceAPI->addChannelSinkAPI(this);
@@ -128,7 +128,7 @@ void AISDemod::start()
     DSPSignalNotification *dspMsg = new DSPSignalNotification(m_basebandSampleRate, m_centerFrequency);
     m_basebandSink->getInputMessageQueue()->push(dspMsg);
 
-    AISDemodBaseband::MsgConfigureAISDemodBaseband *msg = AISDemodBaseband::MsgConfigureAISDemodBaseband::create(m_settings, true);
+    AISDemodBaseband::MsgConfigureAISDemodBaseband *msg = AISDemodBaseband::MsgConfigureAISDemodBaseband::create(m_settings, QStringList(), true);
     m_basebandSink->getInputMessageQueue()->push(msg);
 }
 
@@ -146,7 +146,7 @@ bool AISDemod::handleMessage(const Message& cmd)
     {
         MsgConfigureAISDemod& cfg = (MsgConfigureAISDemod&) cmd;
         qDebug() << "AISDemod::handleMessage: MsgConfigureAISDemod";
-        applySettings(cfg.getSettings(), cfg.getForce());
+        applySettings(cfg.getSettings(), cfg.getSettingsKeys(), cfg.getForce());
 
         return true;
     }
@@ -251,27 +251,18 @@ void AISDemod::setCenterFrequency(qint64 frequency)
 {
     AISDemodSettings settings = m_settings;
     settings.m_inputFrequencyOffset = frequency;
-    applySettings(settings, false);
+    applySettings(settings, QStringList({"inputFrequencyOffset"}), false);
 
     if (m_guiMessageQueue) // forward to GUI if any
     {
-        MsgConfigureAISDemod *msgToGUI = MsgConfigureAISDemod::create(settings, false);
+        MsgConfigureAISDemod *msgToGUI = MsgConfigureAISDemod::create(settings, QStringList({"inputFrequencyOffset"}), false);
         m_guiMessageQueue->push(msgToGUI);
     }
 }
 
-void AISDemod::applySettings(const AISDemodSettings& settings, bool force)
+void AISDemod::applySettings(const AISDemodSettings& settings, const QStringList& settingsKeys, bool force)
 {
-    qDebug() << "AISDemod::applySettings:"
-            << " m_logEnabled: " << settings.m_logEnabled
-            << " m_logFilename: " << settings.m_logFilename
-            << " m_streamIndex: " << settings.m_streamIndex
-            << " m_useReverseAPI: " << settings.m_useReverseAPI
-            << " m_reverseAPIAddress: " << settings.m_reverseAPIAddress
-            << " m_reverseAPIPort: " << settings.m_reverseAPIPort
-            << " m_reverseAPIDeviceIndex: " << settings.m_reverseAPIDeviceIndex
-            << " m_reverseAPIChannelIndex: " << settings.m_reverseAPIChannelIndex
-            << " force: " << force;
+    qDebug() << "AISDemod::applySettings:"  << settings.getDebugString(settingsKeys, force);
 
     QList<QString> reverseAPIKeys;
 
@@ -311,7 +302,8 @@ void AISDemod::applySettings(const AISDemodSettings& settings, bool force)
     if ((settings.m_useFileTime != m_settings.m_useFileTime) || force) {
         reverseAPIKeys.append("useFileTime");
     }
-    if (m_settings.m_streamIndex != settings.m_streamIndex)
+
+    if (settingsKeys.contains("streamIndex"))
     {
         if (m_deviceAPI->getSampleMIMO()) // change of stream is possible for MIMO devices only
         {
@@ -326,17 +318,18 @@ void AISDemod::applySettings(const AISDemodSettings& settings, bool force)
         reverseAPIKeys.append("streamIndex");
     }
 
-    AISDemodBaseband::MsgConfigureAISDemodBaseband *msg = AISDemodBaseband::MsgConfigureAISDemodBaseband::create(settings, force);
+    AISDemodBaseband::MsgConfigureAISDemodBaseband *msg = AISDemodBaseband::MsgConfigureAISDemodBaseband::create(settings, settingsKeys, force);
     m_basebandSink->getInputMessageQueue()->push(msg);
 
     if (settings.m_useReverseAPI)
     {
-        bool fullUpdate = ((m_settings.m_useReverseAPI != settings.m_useReverseAPI) && settings.m_useReverseAPI) ||
-                (m_settings.m_reverseAPIAddress != settings.m_reverseAPIAddress) ||
-                (m_settings.m_reverseAPIPort != settings.m_reverseAPIPort) ||
-                (m_settings.m_reverseAPIDeviceIndex != settings.m_reverseAPIDeviceIndex) ||
-                (m_settings.m_reverseAPIChannelIndex != settings.m_reverseAPIChannelIndex);
-        webapiReverseSendSettings(reverseAPIKeys, settings, fullUpdate || force);
+        bool fullUpdate = settingsKeys.contains("useReverseAPI") ||
+                settingsKeys.contains("reverseAPIAddress") ||
+                settingsKeys.contains("reverseAPIPort") ||
+                settingsKeys.contains("reverseAPIDeviceIndex") ||
+                settingsKeys.contains("reverseAPIChannelIndex") ||
+                settingsKeys.contains("reverseAPIChannelType");
+        webapiReverseSendSettings(settingsKeys, settings, fullUpdate || force);
     }
 
     if ((settings.m_logEnabled != m_settings.m_logEnabled)
@@ -381,14 +374,14 @@ bool AISDemod::deserialize(const QByteArray& data)
 {
     if (m_settings.deserialize(data))
     {
-        MsgConfigureAISDemod *msg = MsgConfigureAISDemod::create(m_settings, true);
+        MsgConfigureAISDemod *msg = MsgConfigureAISDemod::create(m_settings, QStringList(), true);
         m_inputMessageQueue.push(msg);
         return true;
     }
     else
     {
         m_settings.resetToDefaults();
-        MsgConfigureAISDemod *msg = MsgConfigureAISDemod::create(m_settings, true);
+        MsgConfigureAISDemod *msg = MsgConfigureAISDemod::create(m_settings, QStringList(), true);
         m_inputMessageQueue.push(msg);
         return false;
     }
@@ -443,13 +436,13 @@ int AISDemod::webapiSettingsPutPatch(
     AISDemodSettings settings = m_settings;
     webapiUpdateChannelSettings(settings, channelSettingsKeys, response);
 
-    MsgConfigureAISDemod *msg = MsgConfigureAISDemod::create(settings, force);
+    MsgConfigureAISDemod *msg = MsgConfigureAISDemod::create(settings, channelSettingsKeys, force);
     m_inputMessageQueue.push(msg);
 
     qDebug("AISDemod::webapiSettingsPutPatch: forward to GUI: %p", m_guiMessageQueue);
     if (m_guiMessageQueue) // forward to GUI if any
     {
-        MsgConfigureAISDemod *msgToGUI = MsgConfigureAISDemod::create(settings, force);
+        MsgConfigureAISDemod *msgToGUI = MsgConfigureAISDemod::create(settings, channelSettingsKeys, force);
         m_guiMessageQueue->push(msgToGUI);
     }
 
@@ -612,7 +605,7 @@ void AISDemod::webapiFormatChannelSettings(SWGSDRangel::SWGChannelSettings& resp
     }
 }
 
-void AISDemod::webapiReverseSendSettings(QList<QString>& channelSettingsKeys, const AISDemodSettings& settings, bool force)
+void AISDemod::webapiReverseSendSettings(const QList<QString>& channelSettingsKeys, const AISDemodSettings& settings, bool force)
 {
     SWGSDRangel::SWGChannelSettings *swgChannelSettings = new SWGSDRangel::SWGChannelSettings();
     webapiFormatChannelSettings(channelSettingsKeys, swgChannelSettings, settings, force);
@@ -638,7 +631,7 @@ void AISDemod::webapiReverseSendSettings(QList<QString>& channelSettingsKeys, co
 }
 
 void AISDemod::webapiFormatChannelSettings(
-        QList<QString>& channelSettingsKeys,
+        const QList<QString>& channelSettingsKeys,
         SWGSDRangel::SWGChannelSettings *swgChannelSettings,
         const AISDemodSettings& settings,
         bool force

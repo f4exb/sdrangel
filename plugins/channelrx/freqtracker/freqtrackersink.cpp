@@ -247,38 +247,17 @@ void FreqTrackerSink::applyChannelSettings(int sinkSampleRate, int channelSample
     m_undersampleCount = 0;
 }
 
-void FreqTrackerSink::applySettings(const FreqTrackerSettings& settings, bool force)
+void FreqTrackerSink::applySettings(const QStringList& settingsKeys, const FreqTrackerSettings& settings, bool force)
 {
-    if (!settings.m_tracking)
-    {
-        qDebug() << "FreqTrackerSink::applySettings:"
-                << " m_inputFrequencyOffset: " << settings.m_inputFrequencyOffset
-                << " m_rfBandwidth: " << settings.m_rfBandwidth
-                << " m_log2Decim: " << settings.m_log2Decim
-                << " m_squelch: " << settings.m_squelch
-                << " m_rgbColor: " << settings.m_rgbColor
-                << " m_title: " << settings.m_title
-                << " m_alphaEMA: " << settings.m_alphaEMA
-                << " m_tracking: " << settings.m_tracking
-                << " m_trackerType: " << settings.m_trackerType
-                << " m_pllPskOrder: " << settings.m_pllPskOrder
-                << " m_rrc: " << settings.m_rrc
-                << " m_rrcRolloff: " << settings.m_rrcRolloff
-                << " m_streamIndex: " << settings.m_streamIndex
-                << " m_useReverseAPI: " << settings.m_useReverseAPI
-                << " m_reverseAPIAddress: " << settings.m_reverseAPIAddress
-                << " m_reverseAPIPort: " << settings.m_reverseAPIPort
-                << " m_reverseAPIDeviceIndex: " << settings.m_reverseAPIDeviceIndex
-                << " m_reverseAPIChannelIndex: " << settings.m_reverseAPIChannelIndex
-                << " force: " << force;
+    if (!settings.m_tracking) {
+        qDebug() << "FreqTrackerSink::applySettings:" << settings.getDebugString(settingsKeys, force);
     }
 
-
-    if ((m_settings.m_squelch != settings.m_squelch) || force) {
+    if ((settingsKeys.contains("m_squelch") && (m_settings.m_squelch != settings.m_squelch)) || force) {
         m_squelchLevel = CalcDb::powerFromdB(settings.m_squelch);
     }
 
-    if ((m_settings.m_tracking != settings.m_tracking) || force)
+    if ((settingsKeys.contains("m_tracking") && (m_settings.m_tracking != settings.m_tracking)) || force)
     {
         m_avgDeltaFreq = 0.0;
         m_lastCorrAbs = 0;
@@ -290,7 +269,7 @@ void FreqTrackerSink::applySettings(const FreqTrackerSettings& settings, bool fo
         }
     }
 
-    if ((m_settings.m_trackerType != settings.m_trackerType) || force)
+    if ((settingsKeys.contains("m_trackerType") && (m_settings.m_trackerType != settings.m_trackerType)) || force)
     {
         m_lastCorrAbs = 0;
         m_avgDeltaFreq = 0.0;
@@ -308,7 +287,7 @@ void FreqTrackerSink::applySettings(const FreqTrackerSettings& settings, bool fo
         }
     }
 
-    if ((m_settings.m_pllPskOrder != settings.m_pllPskOrder) || force)
+    if ((settingsKeys.contains("m_pllPskOrder") && (m_settings.m_pllPskOrder != settings.m_pllPskOrder)) || force)
     {
         if (settings.m_pllPskOrder < 32) {
             m_pll.setPskOrder(settings.m_pllPskOrder);
@@ -317,9 +296,9 @@ void FreqTrackerSink::applySettings(const FreqTrackerSettings& settings, bool fo
 
     bool useInterpolator = false;
 
-    if ((m_settings.m_rrcRolloff != settings.m_rrcRolloff)
-     || (m_settings.m_rfBandwidth != settings.m_rfBandwidth)
-     || (m_settings.m_squelchGate != settings.m_squelchGate) || force) {
+    if ((settingsKeys.contains("m_rrcRolloff") && (m_settings.m_rrcRolloff != settings.m_rrcRolloff))
+     || (settingsKeys.contains("m_rfBandwidth") && (m_settings.m_rfBandwidth != settings.m_rfBandwidth))
+     || (settingsKeys.contains("m_squelchGate") && (m_settings.m_squelchGate != settings.m_squelchGate)) || force) {
         useInterpolator = true;
     }
 
@@ -331,7 +310,11 @@ void FreqTrackerSink::applySettings(const FreqTrackerSettings& settings, bool fo
         m_undersampleCount = 0;
     }
 
-    m_settings = settings;
+    if (force) {
+        m_settings = settings;
+    } else {
+        m_settings.applySettings(settingsKeys, settings);
+    }
 
     if (useInterpolator) {
         setInterpolator();

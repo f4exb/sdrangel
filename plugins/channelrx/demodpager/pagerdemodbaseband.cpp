@@ -134,7 +134,7 @@ bool PagerDemodBaseband::handleMessage(const Message& cmd)
         const MsgConfigurePagerDemodBaseband& cfg = (const MsgConfigurePagerDemodBaseband&) cmd;
         qDebug() << "PagerDemodBaseband::handleMessage: MsgConfigurePagerDemodBaseband";
 
-        applySettings(cfg.getSettings(), cfg.getForce());
+        applySettings(cfg.getSettingsKeys(), cfg.getSettings(), cfg.getForce());
 
         return true;
     }
@@ -154,17 +154,21 @@ bool PagerDemodBaseband::handleMessage(const Message& cmd)
     }
 }
 
-void PagerDemodBaseband::applySettings(const PagerDemodSettings& settings, bool force)
+void PagerDemodBaseband::applySettings(const QStringList& settingsKeys, const PagerDemodSettings& settings, bool force)
 {
-    if ((settings.m_inputFrequencyOffset != m_settings.m_inputFrequencyOffset) || force)
+    if ((settingsKeys.contains("inputFrequencyOffset") && settings.m_inputFrequencyOffset != m_settings.m_inputFrequencyOffset) || force)
     {
         m_channelizer->setChannelization(PagerDemodSettings::m_channelSampleRate, settings.m_inputFrequencyOffset);
         m_sink.applyChannelSettings(m_channelizer->getChannelSampleRate(), m_channelizer->getChannelFrequencyOffset());
     }
 
-    m_sink.applySettings(settings, force);
+    m_sink.applySettings(settingsKeys, settings, force);
 
-    m_settings = settings;
+    if (force) {
+        m_settings = settings;
+    } else {
+        m_settings.applySettings(settingsKeys, settings);
+    }
 }
 
 int PagerDemodBaseband::getChannelSampleRate() const

@@ -51,7 +51,7 @@ RttyDemodSink::RttyDemodSink() :
 
     m_sampleBuffer.resize(m_sampleBufferSize);
 
-    applySettings(m_settings, true);
+    applySettings(QStringList(), m_settings, true);
     applyChannelSettings(m_channelSampleRate, m_channelFrequencyOffset, true);
 
     FFTFactory *fftFactory = DSPEngine::instance()->getFFTFactory();
@@ -581,24 +581,19 @@ void RttyDemodSink::init()
     m_rttyDecoder.init();
 }
 
-void RttyDemodSink::applySettings(const RttyDemodSettings& settings, bool force)
+void RttyDemodSink::applySettings(const QStringList& settingsKeys, const RttyDemodSettings& settings, bool force)
 {
-    qDebug() << "RttyDemodSink::applySettings:"
-            << " m_rfBandwidth: " << settings.m_rfBandwidth
-            << " m_baudRate: " << settings.m_baudRate
-            << " m_frequencyShift: " << settings.m_frequencyShift
-            << " m_characterSet: " << settings.m_characterSet
-            << " m_unshiftOnSpace: " << settings.m_unshiftOnSpace
-            << " force: " << force;
+    qDebug() << "RttyDemodSink::applySettings:" << settings.getDebugString(settingsKeys, force);
 
-    if ((settings.m_rfBandwidth != m_settings.m_rfBandwidth) || force)
+    if ((settingsKeys.contains("rfBandwidth") && (settings.m_rfBandwidth != m_settings.m_rfBandwidth)) || force)
     {
         m_interpolator.create(16, m_channelSampleRate, settings.m_rfBandwidth / 2.2);
         m_interpolatorDistance = (Real) m_channelSampleRate / (Real) RttyDemodSettings::RTTYDEMOD_CHANNEL_SAMPLE_RATE;
         m_interpolatorDistanceRemain = m_interpolatorDistance;
     }
 
-    if ((settings.m_baudRate != m_settings.m_baudRate) || (settings.m_filter != m_settings.m_filter) || force)
+    if ((settingsKeys.contains("baudRate") && (settings.m_baudRate != m_settings.m_baudRate)) ||
+        (settingsKeys.contains("filter") && (settings.m_filter != m_settings.m_filter)) || force)
     {
         m_envelope1.create(301, RttyDemodSettings::RTTYDEMOD_CHANNEL_SAMPLE_RATE, 2);
         m_envelope2.create(301, RttyDemodSettings::RTTYDEMOD_CHANNEL_SAMPLE_RATE, 2);
@@ -628,14 +623,15 @@ void RttyDemodSink::applySettings(const RttyDemodSettings& settings, bool force)
         //m_raisedCosine1.printTaps("rcos");
     }
 
-    if ((settings.m_characterSet != m_settings.m_characterSet) || force) {
+    if ((settingsKeys.contains("characterSet") && (settings.m_characterSet != m_settings.m_characterSet)) || force) {
         m_rttyDecoder.setCharacterSet(settings.m_characterSet);
     }
-    if ((settings.m_unshiftOnSpace != m_settings.m_unshiftOnSpace) || force) {
+    if ((settingsKeys.contains("unshiftOnSpace") && (settings.m_unshiftOnSpace != m_settings.m_unshiftOnSpace)) || force) {
         m_rttyDecoder.setUnshiftOnSpace(settings.m_unshiftOnSpace);
     }
 
-    if ((settings.m_baudRate != m_settings.m_baudRate) || (settings.m_frequencyShift != m_settings.m_frequencyShift) || force)
+    if ((settingsKeys.contains("baudRate") && (settings.m_baudRate != m_settings.m_baudRate)) ||
+        (settingsKeys.contains("frequencyShift") && (settings.m_frequencyShift != m_settings.m_frequencyShift)) || force)
     {
         delete[] m_exp;
         delete[] m_prods1;
@@ -665,6 +661,9 @@ void RttyDemodSink::applySettings(const RttyDemodSettings& settings, bool force)
         m_freq2Average.reset();
     }
 
-    m_settings = settings;
+    if (force) {
+        m_settings = settings;
+    } else {
+        m_settings.applySettings(settingsKeys, settings);
+    }
 }
-

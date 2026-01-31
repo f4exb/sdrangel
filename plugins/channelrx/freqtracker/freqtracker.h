@@ -46,20 +46,23 @@ public:
 
     public:
         const FreqTrackerSettings& getSettings() const { return m_settings; }
+        const QStringList& getSettingsKeys() const { return m_settingsKeys; }
         bool getForce() const { return m_force; }
 
-        static MsgConfigureFreqTracker* create(const FreqTrackerSettings& settings, bool force)
+        static MsgConfigureFreqTracker* create(const QStringList& settingsKeys, const FreqTrackerSettings& settings, bool force)
         {
-            return new MsgConfigureFreqTracker(settings, force);
+            return new MsgConfigureFreqTracker(settingsKeys, settings, force);
         }
 
     private:
         FreqTrackerSettings m_settings;
+        QStringList m_settingsKeys;
         bool m_force;
 
-        MsgConfigureFreqTracker(const FreqTrackerSettings& settings, bool force) :
+        MsgConfigureFreqTracker(const QStringList& settingsKeys, const FreqTrackerSettings& settings, bool force) :
             Message(),
             m_settings(settings),
+            m_settingsKeys(settingsKeys),
             m_force(force)
         { }
     };
@@ -159,17 +162,17 @@ private:
     QNetworkRequest m_networkRequest;
 
 	virtual bool handleMessage(const Message& cmd);
-    void applySettings(const FreqTrackerSettings& settings, bool force = false);
+    void applySettings(const QStringList& settingsKeys, const FreqTrackerSettings& settings, bool force = false);
     void webapiFormatChannelReport(SWGSDRangel::SWGChannelReport& response);
-    void webapiReverseSendSettings(QList<QString>& channelSettingsKeys, const FreqTrackerSettings& settings, bool force);
+    void webapiReverseSendSettings(const QList<QString>& channelSettingsKeys, const FreqTrackerSettings& settings, bool force);
     void sendChannelSettings(
         const QList<ObjectPipe*>& pipes,
-        QList<QString>& channelSettingsKeys,
+        const QList<QString>& channelSettingsKeys,
         const FreqTrackerSettings& settings,
         bool force
     );
     void webapiFormatChannelSettings(
-        QList<QString>& channelSettingsKeys,
+        const QList<QString>& channelSettingsKeys,
         SWGSDRangel::SWGChannelSettings *swgChannelSettings,
         const FreqTrackerSettings& settings,
         bool force

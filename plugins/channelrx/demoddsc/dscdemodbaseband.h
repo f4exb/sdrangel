@@ -44,20 +44,23 @@ public:
 
     public:
         const DSCDemodSettings& getSettings() const { return m_settings; }
+        const QStringList& getSettingsKeys() const { return m_settingsKeys; }
         bool getForce() const { return m_force; }
 
-        static MsgConfigureDSCDemodBaseband* create(const DSCDemodSettings& settings, bool force)
+        static MsgConfigureDSCDemodBaseband* create(const QStringList& settingsKeys, const DSCDemodSettings& settings, bool force)
         {
-            return new MsgConfigureDSCDemodBaseband(settings, force);
+            return new MsgConfigureDSCDemodBaseband(settingsKeys, settings, force);
         }
 
     private:
         DSCDemodSettings m_settings;
+        QStringList m_settingsKeys;
         bool m_force;
 
-        MsgConfigureDSCDemodBaseband(const DSCDemodSettings& settings, bool force) :
+        MsgConfigureDSCDemodBaseband(const QStringList& settingsKeys, const DSCDemodSettings& settings, bool force) :
             Message(),
             m_settings(settings),
+            m_settingsKeys(settingsKeys),
             m_force(force)
         { }
     };
@@ -93,7 +96,7 @@ private:
 
     bool handleMessage(const Message& cmd);
     void calculateOffset(DSCDemodSink *sink);
-    void applySettings(const DSCDemodSettings& settings, bool force = false);
+    void applySettings(const QStringList& settingsKeys, const DSCDemodSettings& settings, bool force = false);
 
 private slots:
     void handleInputMessages();
@@ -101,4 +104,3 @@ private slots:
 };
 
 #endif // INCLUDE_DSCDEMODBASEBAND_H
-

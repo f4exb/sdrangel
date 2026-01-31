@@ -39,7 +39,7 @@ HeatMapSink::HeatMapSink() :
     resetMagLevels();
     m_sampleBuffer.resize(m_sampleBufferSize);
 
-    applySettings(m_settings, true);
+    applySettings(QStringList(), m_settings, true);
     applyChannelSettings(m_channelSampleRate, m_channelFrequencyOffset, true);
 }
 
@@ -170,17 +170,13 @@ void HeatMapSink::applyChannelSettings(int channelSampleRate, int channelFrequen
     m_channelFrequencyOffset = channelFrequencyOffset;
 }
 
-void HeatMapSink::applySettings(const HeatMapSettings& settings, bool force)
+void HeatMapSink::applySettings(const QStringList& settingsKeys, const HeatMapSettings& settings, bool force)
 {
-    qDebug() << "HeatMapSink::applySettings:"
-            << " sampleRate: " << settings.m_sampleRate
-            << " averagePeriodUS: " << settings.m_averagePeriodUS
-            << " pulseThreshold: " << settings.m_pulseThreshold
-            << " force: " << force;
+    qDebug() << "HeatMapSink::applySettings:" << settings.getDebugString(settingsKeys, force);
 
-    if ((settings.m_rfBandwidth != m_settings.m_rfBandwidth)
-        || (settings.m_averagePeriodUS != m_settings.m_averagePeriodUS)
-        || (settings.m_sampleRate != m_settings.m_sampleRate)
+    if ((settingsKeys.contains("rfBandwidth") && (settings.m_rfBandwidth != m_settings.m_rfBandwidth))
+        || (settingsKeys.contains("averagePeriodUS") && (settings.m_averagePeriodUS != m_settings.m_averagePeriodUS))
+        || (settingsKeys.contains("sampleRate") && (settings.m_sampleRate != m_settings.m_sampleRate))
         || force)
     {
         m_interpolator.create(16, m_channelSampleRate, settings.m_rfBandwidth / 2.2);
@@ -188,8 +184,8 @@ void HeatMapSink::applySettings(const HeatMapSettings& settings, bool force)
         m_interpolatorDistanceRemain = m_interpolatorDistance;
     }
 
-    if ((settings.m_averagePeriodUS != m_settings.m_averagePeriodUS)
-        || (settings.m_sampleRate != m_settings.m_sampleRate)
+    if ((settingsKeys.contains("averagePeriodUS") && (settings.m_averagePeriodUS != m_settings.m_averagePeriodUS))
+        || (settingsKeys.contains("sampleRate") && (settings.m_sampleRate != m_settings.m_sampleRate))
         || force)
     {
         m_averageCnt = (int)((settings.m_averagePeriodUS * (qint64)settings.m_sampleRate / 1e6));
@@ -211,12 +207,15 @@ void HeatMapSink::applySettings(const HeatMapSettings& settings, bool force)
         }
     }
 
-    if ((settings.m_pulseThreshold != m_settings.m_pulseThreshold) || force)
+    if ((settingsKeys.contains("pulseThreshold") && (settings.m_pulseThreshold != m_settings.m_pulseThreshold)) || force)
     {
         m_pulseThresholdLinear = std::pow(10.0, settings.m_pulseThreshold / 20.0);
         qDebug() << "m_pulseThresholdLinear" << m_pulseThresholdLinear;
     }
 
-    m_settings = settings;
+    if (force) {
+        m_settings = settings;
+    } else {
+        m_settings.applySettings(settingsKeys, settings);
+    }
 }
-

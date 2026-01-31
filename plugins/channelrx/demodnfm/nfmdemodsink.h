@@ -66,7 +66,7 @@ public:
     }
 
     void applyChannelSettings(int channelSampleRate, int channelFrequencyOffset, bool force = false);
-    void applySettings(const NFMDemodSettings& settings, bool force = false);
+    void applySettings(const QStringList& settingsKeys, const NFMDemodSettings& settings, bool force = false);
     void setMessageQueueToGUI(MessageQueue *messageQueue) { m_messageQueueToGUI = messageQueue; }
 
     AudioFifo *getAudioFifo() { return &m_audioFifo; }

@@ -45,7 +45,7 @@ DSCDemodSink::DSCDemodSink(DSCDemod *dscDemod) :
         m_sampleBuffer[i].resize(m_sampleBufferSize);
     }
 
-    applySettings(m_settings, true);
+    applySettings(QStringList(), m_settings, true);
     applyChannelSettings(m_channelSampleRate, m_channelFrequencyOffset, true);
 
     m_lowpassComplex1.create(301, DSCDemodSettings::DSCDEMOD_CHANNEL_SAMPLE_RATE, DSCDemodSettings::DSCDEMOD_BAUD_RATE * 1.1);
@@ -316,13 +316,11 @@ void DSCDemodSink::init()
     m_messageBuffer = "";
 }
 
-void DSCDemodSink::applySettings(const DSCDemodSettings& settings, bool force)
+void DSCDemodSink::applySettings(const QStringList& settingsKeys, const DSCDemodSettings& settings, bool force)
 {
-    qDebug() << "DSCDemodSink::applySettings:"
-            << " m_rfBandwidth: " << settings.m_rfBandwidth
-            << " force: " << force;
+    qDebug() << "DSCDemodSink::applySettings:" << settings.getDebugString(settingsKeys, force);
 
-    if ((settings.m_rfBandwidth != m_settings.m_rfBandwidth) || force)
+    if ((settingsKeys.contains("rfBandwidth") && (settings.m_rfBandwidth != m_settings.m_rfBandwidth)) || force)
     {
         m_interpolator.create(16, m_channelSampleRate, settings.m_rfBandwidth / 2.2);
         m_interpolatorDistance = (Real) m_channelSampleRate / (Real) DSCDemodSettings::DSCDEMOD_CHANNEL_SAMPLE_RATE;
@@ -343,7 +341,10 @@ void DSCDemodSink::applySettings(const DSCDemodSettings& settings, bool force)
 
         m_movMax1.setSize(m_samplesPerBit * 8);
         m_movMax2.setSize(m_samplesPerBit * 8);
+        m_settings = settings;
     }
-
-    m_settings = settings;
+    else
+    {
+        m_settings.applySettings(settingsKeys, settings);
+    }
 }

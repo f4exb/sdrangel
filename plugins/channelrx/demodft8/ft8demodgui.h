@@ -141,7 +141,7 @@ private:
 	virtual ~FT8DemodGUI();
 
     bool blockApplySettings(bool block);
-	void applySettings(bool force = false);
+	void applySettings(const QStringList& settingsKeys, bool force = false);
 	void applyBandwidths(unsigned int spanLog2, bool force = false);
     unsigned int spanLog2Max();
 	void displaySettings();

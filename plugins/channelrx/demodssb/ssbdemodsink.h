@@ -43,7 +43,7 @@ public:
 
 	void setSpectrumSink(SpectrumVis* spectrumSink) { m_spectrumSink = spectrumSink; }
 	void applyChannelSettings(int inputSampleRate, int inputFrequencyOffset, bool force = false);
-	void applySettings(const SSBDemodSettings& settings, bool force = false);
+	void applySettings(const QStringList& settingsKeys, const SSBDemodSettings& settings, bool force = false);
     void applyAudioSampleRate(int sampleRate);
 
     AudioFifo *getAudioFifo() { return &m_audioFifo; }

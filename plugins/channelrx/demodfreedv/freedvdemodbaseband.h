@@ -39,20 +39,23 @@ public:
 
     public:
         const FreeDVDemodSettings& getSettings() const { return m_settings; }
+        const QStringList& getSettingsKeys() const { return m_settingsKeys; }
         bool getForce() const { return m_force; }
 
-        static MsgConfigureFreeDVDemodBaseband* create(const FreeDVDemodSettings& settings, bool force)
+        static MsgConfigureFreeDVDemodBaseband* create(const QStringList& settingsKeys, const FreeDVDemodSettings& settings, bool force)
         {
-            return new MsgConfigureFreeDVDemodBaseband(settings, force);
+            return new MsgConfigureFreeDVDemodBaseband(settingsKeys, settings, force);
         }
 
     private:
         FreeDVDemodSettings m_settings;
+        QStringList m_settingsKeys;
         bool m_force;
 
-        MsgConfigureFreeDVDemodBaseband(const FreeDVDemodSettings& settings, bool force) :
+        MsgConfigureFreeDVDemodBaseband(const QStringList& settingsKeys, const FreeDVDemodSettings& settings, bool force) :
             Message(),
             m_settings(settings),
+            m_settingsKeys(settingsKeys),
             m_force(force)
         { }
     };
@@ -113,7 +116,7 @@ private:
 
     MessageQueue *getMessageQueueToGUI() { return m_messageQueueToGUI; }
     bool handleMessage(const Message& cmd);
-    void applySettings(const FreeDVDemodSettings& settings, bool force = false);
+    void applySettings(const QStringList& settingsKeys, const FreeDVDemodSettings& settings, bool force = false);
 
 private slots:
     void handleInputMessages();

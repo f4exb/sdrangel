@@ -58,7 +58,7 @@ NavtexDemod::NavtexDemod(DeviceAPI *deviceAPI) :
     m_basebandSink->setChannel(this);
     m_basebandSink->moveToThread(&m_thread);
 
-    applySettings(m_settings, true);
+    applySettings(QStringList(), m_settings, true);
 
     m_deviceAPI->addChannelSink(this);
     m_deviceAPI->addChannelSinkAPI(this);
@@ -132,7 +132,7 @@ void NavtexDemod::start()
     DSPSignalNotification *dspMsg = new DSPSignalNotification(m_basebandSampleRate, m_centerFrequency);
     m_basebandSink->getInputMessageQueue()->push(dspMsg);
 
-    NavtexDemodBaseband::MsgConfigureNavtexDemodBaseband *msg = NavtexDemodBaseband::MsgConfigureNavtexDemodBaseband::create(m_settings, true);
+    NavtexDemodBaseband::MsgConfigureNavtexDemodBaseband *msg = NavtexDemodBaseband::MsgConfigureNavtexDemodBaseband::create(QStringList(), m_settings, true);
     m_basebandSink->getInputMessageQueue()->push(msg);
 }
 
@@ -150,7 +150,7 @@ bool NavtexDemod::handleMessage(const Message& cmd)
     {
         MsgConfigureNavtexDemod& cfg = (MsgConfigureNavtexDemod&) cmd;
         qDebug() << "NavtexDemod::handleMessage: MsgConfigureNavtexDemod";
-        applySettings(cfg.getSettings(), cfg.getForce());
+        applySettings(cfg.getSettingsKeys(), cfg.getSettings(), cfg.getForce());
 
         return true;
     }
@@ -244,61 +244,20 @@ void NavtexDemod::setCenterFrequency(qint64 frequency)
 {
     NavtexDemodSettings settings = m_settings;
     settings.m_inputFrequencyOffset = frequency;
-    applySettings(settings, false);
+    applySettings(QStringList("inputFrequencyOffset"), settings, false);
 
     if (m_guiMessageQueue) // forward to GUI if any
     {
-        MsgConfigureNavtexDemod *msgToGUI = MsgConfigureNavtexDemod::create(settings, false);
+        MsgConfigureNavtexDemod *msgToGUI = MsgConfigureNavtexDemod::create(QStringList("inputFrequencyOffset"), settings, false);
         m_guiMessageQueue->push(msgToGUI);
     }
 }
 
-void NavtexDemod::applySettings(const NavtexDemodSettings& settings, bool force)
+void NavtexDemod::applySettings(const QStringList& settingsKeys, const NavtexDemodSettings& settings, bool force)
 {
-    qDebug() << "NavtexDemod::applySettings:"
-            << " m_logEnabled: " << settings.m_logEnabled
-            << " m_logFilename: " << settings.m_logFilename
-            << " m_streamIndex: " << settings.m_streamIndex
-            << " m_useReverseAPI: " << settings.m_useReverseAPI
-            << " m_reverseAPIAddress: " << settings.m_reverseAPIAddress
-            << " m_reverseAPIPort: " << settings.m_reverseAPIPort
-            << " m_reverseAPIDeviceIndex: " << settings.m_reverseAPIDeviceIndex
-            << " m_reverseAPIChannelIndex: " << settings.m_reverseAPIChannelIndex
-            << " force: " << force;
+    qDebug() << "NavtexDemod::applySettings:" << settings.getDebugString(settingsKeys, force);
 
-    QList<QString> reverseAPIKeys;
-
-    if ((settings.m_inputFrequencyOffset != m_settings.m_inputFrequencyOffset) || force) {
-        reverseAPIKeys.append("inputFrequencyOffset");
-    }
-    if ((settings.m_rfBandwidth != m_settings.m_rfBandwidth) || force) {
-        reverseAPIKeys.append("rfBandwidth");
-    }
-    if ((settings.m_navArea != m_settings.m_navArea) || force) {
-        reverseAPIKeys.append("navArea");
-    }
-    if ((settings.m_filterStation != m_settings.m_filterStation) || force) {
-        reverseAPIKeys.append("filterStation");
-    }
-    if ((settings.m_filterType != m_settings.m_filterType) || force) {
-        reverseAPIKeys.append("filterType");
-    }
-    if ((settings.m_udpEnabled != m_settings.m_udpEnabled) || force) {
-        reverseAPIKeys.append("udpEnabled");
-    }
-    if ((settings.m_udpAddress != m_settings.m_udpAddress) || force) {
-        reverseAPIKeys.append("udpAddress");
-    }
-    if ((settings.m_udpPort != m_settings.m_udpPort) || force) {
-        reverseAPIKeys.append("udpPort");
-    }
-    if ((settings.m_logFilename != m_settings.m_logFilename) || force) {
-        reverseAPIKeys.append("logFilename");
-    }
-    if ((settings.m_logEnabled != m_settings.m_logEnabled) || force) {
-        reverseAPIKeys.append("logEnabled");
-    }
-    if (m_settings.m_streamIndex != settings.m_streamIndex)
+    if (settingsKeys.contains("streamIndex") && (m_settings.m_streamIndex != settings.m_streamIndex))
     {
         if (m_deviceAPI->getSampleMIMO()) // change of stream is possible for MIMO devices only
         {
@@ -309,25 +268,23 @@ void NavtexDemod::applySettings(const NavtexDemodSettings& settings, bool force)
             m_settings.m_streamIndex = settings.m_streamIndex; // make sure ChannelAPI::getStreamIndex() is consistent
             emit streamIndexChanged(settings.m_streamIndex);
         }
-
-        reverseAPIKeys.append("streamIndex");
     }
 
-    NavtexDemodBaseband::MsgConfigureNavtexDemodBaseband *msg = NavtexDemodBaseband::MsgConfigureNavtexDemodBaseband::create(settings, force);
+    NavtexDemodBaseband::MsgConfigureNavtexDemodBaseband *msg = NavtexDemodBaseband::MsgConfigureNavtexDemodBaseband::create(settingsKeys, settings, force);
     m_basebandSink->getInputMessageQueue()->push(msg);
 
     if (settings.m_useReverseAPI)
     {
-        bool fullUpdate = ((m_settings.m_useReverseAPI != settings.m_useReverseAPI) && settings.m_useReverseAPI) ||
-                (m_settings.m_reverseAPIAddress != settings.m_reverseAPIAddress) ||
-                (m_settings.m_reverseAPIPort != settings.m_reverseAPIPort) ||
-                (m_settings.m_reverseAPIDeviceIndex != settings.m_reverseAPIDeviceIndex) ||
-                (m_settings.m_reverseAPIChannelIndex != settings.m_reverseAPIChannelIndex);
-        webapiReverseSendSettings(reverseAPIKeys, settings, fullUpdate || force);
+        bool fullUpdate = ((settingsKeys.contains("useReverseAPI") && (m_settings.m_useReverseAPI != settings.m_useReverseAPI)) && settings.m_useReverseAPI) ||
+                (settingsKeys.contains("reverseAPIAddress") && (m_settings.m_reverseAPIAddress != settings.m_reverseAPIAddress)) ||
+                (settingsKeys.contains("reverseAPIPort") && (m_settings.m_reverseAPIPort != settings.m_reverseAPIPort)) ||
+                (settingsKeys.contains("reverseAPIDeviceIndex") && (m_settings.m_reverseAPIDeviceIndex != settings.m_reverseAPIDeviceIndex)) ||
+                (settingsKeys.contains("reverseAPIChannelIndex") && (m_settings.m_reverseAPIChannelIndex != settings.m_reverseAPIChannelIndex));
+        webapiReverseSendSettings(settingsKeys, settings, fullUpdate || force);
     }
 
-    if ((settings.m_logEnabled != m_settings.m_logEnabled)
-        || (settings.m_logFilename != m_settings.m_logFilename)
+    if ((settingsKeys.contains("logEnabled") && (m_settings.m_logEnabled != settings.m_logEnabled))
+        || (settingsKeys.contains("logFilename") && (m_settings.m_logFilename != settings.m_logFilename))
         || force)
     {
         if (m_logFile.isOpen())
@@ -356,7 +313,11 @@ void NavtexDemod::applySettings(const NavtexDemodSettings& settings, bool force)
         }
     }
 
-    m_settings = settings;
+    if (force) {
+        m_settings = settings;
+    } else {
+        m_settings.applySettings(settingsKeys, settings);
+    }
 }
 
 void NavtexDemod::sendSampleRateToDemodAnalyzer()
@@ -387,14 +348,14 @@ bool NavtexDemod::deserialize(const QByteArray& data)
 {
     if (m_settings.deserialize(data))
     {
-        MsgConfigureNavtexDemod *msg = MsgConfigureNavtexDemod::create(m_settings, true);
+        MsgConfigureNavtexDemod *msg = MsgConfigureNavtexDemod::create(QStringList(), m_settings, true);
         m_inputMessageQueue.push(msg);
         return true;
     }
     else
     {
         m_settings.resetToDefaults();
-        MsgConfigureNavtexDemod *msg = MsgConfigureNavtexDemod::create(m_settings, true);
+        MsgConfigureNavtexDemod *msg = MsgConfigureNavtexDemod::create(QStringList(), m_settings, true);
         m_inputMessageQueue.push(msg);
         return false;
     }
@@ -430,13 +391,13 @@ int NavtexDemod::webapiSettingsPutPatch(
     NavtexDemodSettings settings = m_settings;
     webapiUpdateChannelSettings(settings, channelSettingsKeys, response);
 
-    MsgConfigureNavtexDemod *msg = MsgConfigureNavtexDemod::create(settings, force);
+    MsgConfigureNavtexDemod *msg = MsgConfigureNavtexDemod::create(channelSettingsKeys, settings, force);
     m_inputMessageQueue.push(msg);
 
     qDebug("NavtexDemod::webapiSettingsPutPatch: forward to GUI: %p", m_guiMessageQueue);
     if (m_guiMessageQueue) // forward to GUI if any
     {
-        MsgConfigureNavtexDemod *msgToGUI = MsgConfigureNavtexDemod::create(settings, force);
+        MsgConfigureNavtexDemod *msgToGUI = MsgConfigureNavtexDemod::create(channelSettingsKeys, settings, force);
         m_guiMessageQueue->push(msgToGUI);
     }
 
@@ -611,7 +572,7 @@ void NavtexDemod::webapiFormatChannelReport(SWGSDRangel::SWGChannelReport& respo
     response.getNavtexDemodReport()->setChannelSampleRate(m_basebandSink->getChannelSampleRate());
 }
 
-void NavtexDemod::webapiReverseSendSettings(QList<QString>& channelSettingsKeys, const NavtexDemodSettings& settings, bool force)
+void NavtexDemod::webapiReverseSendSettings(const QList<QString>& channelSettingsKeys, const NavtexDemodSettings& settings, bool force)
 {
     SWGSDRangel::SWGChannelSettings *swgChannelSettings = new SWGSDRangel::SWGChannelSettings();
     webapiFormatChannelSettings(channelSettingsKeys, swgChannelSettings, settings, force);
@@ -637,7 +598,7 @@ void NavtexDemod::webapiReverseSendSettings(QList<QString>& channelSettingsKeys,
 }
 
 void NavtexDemod::webapiFormatChannelSettings(
-        QList<QString>& channelSettingsKeys,
+        const QList<QString>& channelSettingsKeys,
         SWGSDRangel::SWGChannelSettings *swgChannelSettings,
         const NavtexDemodSettings& settings,
         bool force
@@ -747,4 +708,3 @@ void NavtexDemod::handleIndexInDeviceSetChanged(int index)
         .arg(index);
     m_basebandSink->setFifoLabel(fifoLabel);
 }
-

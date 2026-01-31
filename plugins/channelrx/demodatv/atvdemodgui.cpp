@@ -55,7 +55,7 @@ void ATVDemodGUI::resetToDefaults()
 {
     m_settings.resetToDefaults();
     displaySettings();
-    applySettings(true);
+    applySettings(QStringList(), true);
 }
 
 QByteArray ATVDemodGUI::serialize() const
@@ -68,14 +68,14 @@ bool ATVDemodGUI::deserialize(const QByteArray& data)
     if(m_settings.deserialize(data))
     {
         displaySettings();
-        applySettings(true); // will have true
+        applySettings(QStringList(), true); // will have true
         return true;
     }
     else
     {
         m_settings.resetToDefaults();
         displaySettings();
-        applySettings(true); // will have true
+        applySettings(QStringList(), true); // will have true
         return false;
     }
 }
@@ -184,7 +184,7 @@ void ATVDemodGUI::channelMarkerChangedByCursor()
     qDebug("ATVDemodGUI::channelMarkerChangedByCursor");
     ui->deltaFrequency->setValue(m_channelMarker.getCenterFrequency());
     m_settings.m_inputFrequencyOffset = m_channelMarker.getCenterFrequency();
-    applySettings();
+    applySettings(QStringList("inputFrequencyOffset"), false);
 }
 
 void ATVDemodGUI::channelMarkerHighlightedByCursor()
@@ -247,7 +247,16 @@ void ATVDemodGUI::onMenuDialogCalled(const QPoint &p)
             updateIndexLabel();
         }
 
-        applySettings();
+        applySettings(QStringList({
+            "rgbColor",
+            "title",
+            "useReverseAPI",
+            "reverseAPIAddress",
+            "reverseAPIPort",
+            "reverseAPIDeviceIndex",
+            "reverseAPIChannelIndex"
+        }),
+        false);
     }
 
     resetContextMenuType();
@@ -259,7 +268,7 @@ void ATVDemodGUI::onWidgetRolled(QWidget* widget, bool rollDown)
     (void) rollDown;
 
     getRollupContents()->saveState(m_rollupState);
-    applySettings();
+    applySettings(QStringList(), false);
 }
 
 ATVDemodGUI::ATVDemodGUI(PluginAPI* objPluginAPI, DeviceUISet *deviceUISet, BasebandSampleSink *rxChannel, QWidget* objParent) :
@@ -343,13 +352,13 @@ ATVDemodGUI::~ATVDemodGUI()
     delete ui;
 }
 
-void ATVDemodGUI::applySettings(bool force)
+void ATVDemodGUI::applySettings(const QStringList& settingsKeys, bool force)
 {
     qDebug() << "ATVDemodGUI::applySettings: " << force << " m_doApplySettings: " << m_doApplySettings;
 
     if (m_doApplySettings)
     {
-		ATVDemod::MsgConfigureATVDemod *msg = ATVDemod::MsgConfigureATVDemod::create(m_settings, force);
+		ATVDemod::MsgConfigureATVDemod *msg = ATVDemod::MsgConfigureATVDemod::create(settingsKeys, m_settings, force);
 		m_atvDemod->getInputMessageQueue()->push(msg);
     }
 }
@@ -459,58 +468,58 @@ void ATVDemodGUI::on_synchLevel_valueChanged(int value)
 {
     ui->synchLevelText->setText(QString("%1 mV").arg(value));
     m_settings.m_levelSynchroTop = value / 1000.0f;
-    applySettings();
+    applySettings(QStringList("levelSynchroTop"), false);
 }
 
 void ATVDemodGUI::on_blackLevel_valueChanged(int value)
 {
     ui->blackLevelText->setText(QString("%1 mV").arg(value));
     m_settings.m_levelBlack = value / 1000.0f;
-    applySettings();
+    applySettings(QStringList("levelBlack"), false);
 }
 
 void ATVDemodGUI::on_hSync_clicked()
 {
     m_settings.m_hSync = ui->hSync->isChecked();
-    applySettings();
+    applySettings(QStringList("hSync"), false);
 }
 
 void ATVDemodGUI::on_vSync_clicked()
 {
     m_settings.m_vSync = ui->vSync->isChecked();
-    applySettings();
+    applySettings(QStringList("vSync"), false);
 }
 
 void ATVDemodGUI::on_invertVideo_clicked()
 {
     m_settings.m_invertVideo = ui->invertVideo->isChecked();
-    applySettings();
+    applySettings(QStringList("invertVideo"), false);
 }
 
 void ATVDemodGUI::on_halfImage_clicked()
 {
     m_settings.m_halfFrames = ui->halfImage->isChecked();
-    applySettings();
+    applySettings(QStringList("halfFrames"), false);
 }
 
 void ATVDemodGUI::on_nbLines_currentIndexChanged(int index)
 {
     m_settings.m_nbLines = ATVDemodSettings::getNumberOfLines(index);
     applySampleRate();
-    applySettings();
+    applySettings(QStringList("nbLines"), false);
 }
 
 void ATVDemodGUI::on_fps_currentIndexChanged(int index)
 {
     m_settings.m_fps = ATVDemodSettings::getFps(index);
     applySampleRate();
-    applySettings();
+    applySettings(QStringList("fps"), false);
 }
 
 void ATVDemodGUI::on_standard_currentIndexChanged(int index)
 {
     m_settings.m_atvStd = (ATVDemodSettings::ATVStd) index;
-    applySettings();
+    applySettings(QStringList("atvStd"), false);
 }
 
 void ATVDemodGUI::on_reset_clicked(bool checked)
@@ -524,7 +533,7 @@ void ATVDemodGUI::on_modulation_currentIndexChanged(int index)
     m_settings.m_atvModulation = (ATVDemodSettings::ATVModulation) index;
     setRFFiltersSlidersRange(m_basebandSampleRate);
     setChannelMarkerBandwidth();
-    applySettings();
+    applySettings(QStringList("atvModulation"), false);
 }
 
 void ATVDemodGUI::on_rfBW_valueChanged(int value)
@@ -532,7 +541,7 @@ void ATVDemodGUI::on_rfBW_valueChanged(int value)
     m_settings.m_fftBandwidth = value * m_rfSliderDivisor;
     ui->rfBWText->setText(QString("%1k").arg((value * m_rfSliderDivisor) / 1000.0, 0, 'f', 0));
     setChannelMarkerBandwidth();
-    applySettings();
+    applySettings(QStringList("fftBandwidth"), false);
 }
 
 void ATVDemodGUI::on_rfOppBW_valueChanged(int value)
@@ -540,7 +549,7 @@ void ATVDemodGUI::on_rfOppBW_valueChanged(int value)
     m_settings.m_fftOppBandwidth = value * m_rfSliderDivisor;
     ui->rfOppBWText->setText(QString("%1k").arg((value * m_rfSliderDivisor) / 1000.0, 0, 'f', 0));
     setChannelMarkerBandwidth();
-    applySettings();
+    applySettings(QStringList("fftOppBandwidth"), false);
 }
 
 void ATVDemodGUI::on_rfFiltering_toggled(bool checked)
@@ -548,7 +557,7 @@ void ATVDemodGUI::on_rfFiltering_toggled(bool checked)
     m_settings.m_fftFiltering = checked;
     setRFFiltersSlidersRange(m_basebandSampleRate);
     setChannelMarkerBandwidth();
-    applySettings();
+    applySettings(QStringList("fftFiltering"), false);
 }
 
 void ATVDemodGUI::on_deltaFrequency_changed(qint64 value)
@@ -556,21 +565,21 @@ void ATVDemodGUI::on_deltaFrequency_changed(qint64 value)
     m_settings.m_inputFrequencyOffset = value;
     m_channelMarker.setCenterFrequency(value);
     updateAbsoluteCenterFrequency();
-    applySettings();
+    applySettings(QStringList("inputFrequencyOffset"), false);
 }
 
 void ATVDemodGUI::on_bfo_valueChanged(int value)
 {
     m_settings.m_bfoFrequency = value;
     ui->bfoText->setText(QString("%1").arg(value * 1.0, 0, 'f', 0));
-    applySettings();
+    applySettings(QStringList("bfoFrequency"), false);
 }
 
 void ATVDemodGUI::on_fmDeviation_valueChanged(int value)
 {
     m_settings.m_fmDeviation = value / 1000.0f;
     ui->fmDeviationText->setText(QString("%1").arg(value / 10.0, 0, 'f', 1));
-    applySettings();
+    applySettings(QStringList("fmDeviation"), false);
 }
 
 void ATVDemodGUI::on_amScaleFactor_valueChanged(int value)
@@ -578,7 +587,7 @@ void ATVDemodGUI::on_amScaleFactor_valueChanged(int value)
     m_settings.m_amScalingFactor = value;
     ui->amScaleFactor->setValue(m_settings.m_amScalingFactor);
     ui->amScaleFactorText->setText(QString("%1").arg(m_settings.m_amScalingFactor));
-    applySettings();
+    applySettings(QStringList("amScalingFactor"), false);
 }
 
 void ATVDemodGUI::on_amScaleOffset_valueChanged(int value)
@@ -586,7 +595,7 @@ void ATVDemodGUI::on_amScaleOffset_valueChanged(int value)
     m_settings.m_amOffsetFactor = value;
     ui->amScaleOffset->setValue(m_settings.m_amOffsetFactor);
     ui->amScaleOffsetText->setText(QString("%1").arg(m_settings.m_amOffsetFactor));
-    applySettings();
+    applySettings(QStringList("amOffsetFactor"), false);
 }
 
 void ATVDemodGUI::on_screenTabWidget_currentChanged(int index)

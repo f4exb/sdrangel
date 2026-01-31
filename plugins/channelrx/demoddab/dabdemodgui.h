@@ -90,7 +90,7 @@ private:
     virtual ~DABDemodGUI();
 
     void blockApplySettings(bool block);
-    void applySettings(bool force = false);
+    void applySettings(const QStringList& channelSettingsKeys, bool force = false);
     void displaySettings();
     void updateEnsembleName(const QString& ensemble);
     int findProgramRowById(int id);

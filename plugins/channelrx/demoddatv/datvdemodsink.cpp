@@ -31,6 +31,9 @@
 #include <QMutexLocker>
 
 #include "datvdemodreport.h"
+#ifndef SERVER_MODE
+#include "datvideorender.h"
+#endif
 
 const unsigned int DATVDemodSink::m_rfFilterFftLength = 512;
 
@@ -68,9 +71,11 @@ DATVDemodSink::~DATVDemodSink()
     stopVideo();
     CleanUpDATVFramework();
 
+#ifndef SERVER_MODE
     if (m_videoThread) {
         delete m_videoThread;
     }
+#endif
 }
 
 void DATVDemodSink::stopVideo()
@@ -100,6 +105,8 @@ void DATVDemodSink::SetVideoRender(DATVideoRender *screen)
     m_videoRender->setAudioFIFO(&m_audioFifo);
     m_videoThread = new DATVideoRenderThread(m_videoRender, m_videoStream);
     m_videoThread->setObjectName("vtDATVDemodSink");
+#else
+    (void) screen;
 #endif
 }
 
@@ -1372,11 +1379,11 @@ void DATVDemodSink::applyChannelSettings(int channelSampleRate, int channelFrequ
     m_settings.m_centerFrequency = channelFrequencyOffset;
 
     if (callApplySettings) {
-        applySettings(m_settings, true);
+        applySettings(QStringList(), m_settings, true);
     }
 }
 
-void DATVDemodSink::applySettings(const DATVDemodSettings& settings, bool force)
+void DATVDemodSink::applySettings(const QStringList& settingsKeys, const DATVDemodSettings& settings, bool force)
 {
     QString msg = QObject::tr("DATVDemodSink::applySettings: force: %1").arg(force);
     settings.debug(msg);
@@ -1388,21 +1395,21 @@ void DATVDemodSink::applySettings(const DATVDemodSettings& settings, bool force)
     }
 
 #ifndef SERVER_MODE
-    if ((settings.m_audioVolume) != (m_settings.m_audioVolume) || force)
+    if ((settingsKeys.contains("audioVolume") && (settings.m_audioVolume != m_settings.m_audioVolume)) || force)
     {
         if (m_videoRender) {
             m_videoRender->setAudioVolume(settings.m_audioVolume);
         }
     }
 
-    if ((settings.m_audioMute) != (m_settings.m_audioMute) || force)
+    if ((settingsKeys.contains("audioMute") && (settings.m_audioMute != m_settings.m_audioMute)) || force)
     {
         if (m_videoRender) {
             m_videoRender->setAudioMute(settings.m_audioMute);
         }
     }
 
-    if ((settings.m_videoMute) != (m_settings.m_videoMute) || force)
+    if ((settingsKeys.contains("videoMute") && (settings.m_videoMute != m_settings.m_videoMute)) || force)
     {
         if (m_videoRender) {
             m_videoRender->setVideoMute(settings.m_videoMute);
@@ -1410,9 +1417,9 @@ void DATVDemodSink::applySettings(const DATVDemodSettings& settings, bool force)
     }
 #endif
 
-    if ((m_settings.m_rfBandwidth != settings.m_rfBandwidth)
-     || (m_settings.m_symbolRate != settings.m_symbolRate)
-     || (m_settings.m_centerFrequency != settings.m_centerFrequency) || force)
+    if (settingsKeys.contains("rfBandwidth") ||
+        settingsKeys.contains("symbolRate") ||
+        settingsKeys.contains("centerFrequency") || force)
     {
         m_interpolator.create(m_interpolatorPhaseSteps, m_channelSampleRate, settings.m_rfBandwidth / 2.2,  m_interpolatorTapsPerPhase);
         m_interpolatorDistanceRemain = 0;
@@ -1420,7 +1427,7 @@ void DATVDemodSink::applySettings(const DATVDemodSettings& settings, bool force)
         m_nco.setFreq(-(float) settings.m_centerFrequency, (float) m_channelSampleRate);
     }
 
-    if ((m_settings.m_udpTS != settings.m_udpTS) || force)
+    if ((settingsKeys.contains("udpTS") && (m_settings.m_udpTS != settings.m_udpTS)) || force)
     {
         m_udpStream.setActive(settings.m_udpTS);
 
@@ -1429,17 +1436,17 @@ void DATVDemodSink::applySettings(const DATVDemodSettings& settings, bool force)
         }
     }
 
-    if ((m_settings.m_symbolRate != settings.m_symbolRate) || force) {
+    if ((settingsKeys.contains("symbolRate") && (m_settings.m_symbolRate != settings.m_symbolRate)) || force) {
         if (r_videoplayer) {
             r_videoplayer->setSymbolRate(settings.m_symbolRate);
         }
     }
 
-    if ((m_settings.m_udpTSAddress != settings.m_udpTSAddress) || force) {
+    if ((settingsKeys.contains("udpTSAddress") && (m_settings.m_udpTSAddress != settings.m_udpTSAddress)) || force) {
         m_udpStream.setAddress(settings.m_udpTSAddress);
     }
 
-    if ((m_settings.m_udpTSPort != settings.m_udpTSPort) || force) {
+    if ((settingsKeys.contains("udpTSPort") && (m_settings.m_udpTSPort != settings.m_udpTSPort)) || force) {
         m_udpStream.setPort(settings.m_udpTSPort);
     }
 
@@ -1447,7 +1454,11 @@ void DATVDemodSink::applySettings(const DATVDemodSettings& settings, bool force)
         m_blnNeedConfigUpdate = true;
     }
 
-    m_settings = settings;
+    if (force) {
+        m_settings = settings;
+    } else {
+        m_settings.applySettings(settingsKeys, settings);
+    }
 }
 
 int DATVDemodSink::getLeanDVBCodeRateFromDATV(DATVDemodSettings::DATVCodeRate datvCodeRate)

@@ -134,7 +134,7 @@ bool HeatMapBaseband::handleMessage(const Message& cmd)
         MsgConfigureHeatMapBaseband& cfg = (MsgConfigureHeatMapBaseband&) cmd;
         qDebug() << "HeatMapBaseband::handleMessage: MsgConfigureHeatMapBaseband";
 
-        applySettings(cfg.getSettings(), cfg.getForce());
+        applySettings(cfg.getSettingsKeys(), cfg.getSettings(), cfg.getForce());
 
         return true;
     }
@@ -154,19 +154,24 @@ bool HeatMapBaseband::handleMessage(const Message& cmd)
     }
 }
 
-void HeatMapBaseband::applySettings(const HeatMapSettings& settings, bool force)
+void HeatMapBaseband::applySettings(const QStringList& settingsKeys, const HeatMapSettings& settings, bool force)
 {
-    if ((settings.m_inputFrequencyOffset != m_settings.m_inputFrequencyOffset)
-        || (settings.m_sampleRate != m_settings.m_sampleRate)
+    if ((settingsKeys.contains("inputFrequencyOffset") && (settings.m_inputFrequencyOffset != m_settings.m_inputFrequencyOffset))
+        || (settingsKeys.contains("sampleRate") && (settings.m_sampleRate != m_settings.m_sampleRate))
         || force)
     {
         m_channelizer->setChannelization(settings.m_sampleRate, settings.m_inputFrequencyOffset);
         m_sink.applyChannelSettings(m_channelizer->getChannelSampleRate(), m_channelizer->getChannelFrequencyOffset());
     }
 
-    m_sink.applySettings(settings, force);
+    m_sink.applySettings(settingsKeys, settings, force);
 
-    m_settings = settings;
+    if (force)
+    {
+        m_settings = settings;
+    }   else {
+        m_settings.applySettings(settingsKeys, settings);
+    }
 }
 
 void HeatMapBaseband::setBasebandSampleRate(int sampleRate)
@@ -174,4 +179,3 @@ void HeatMapBaseband::setBasebandSampleRate(int sampleRate)
     m_channelizer->setBasebandSampleRate(sampleRate);
     m_sink.applyChannelSettings(m_channelizer->getChannelSampleRate(), m_channelizer->getChannelFrequencyOffset());
 }
-

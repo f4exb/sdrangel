@@ -153,7 +153,7 @@ bool FileSinkBaseband::handleMessage(const Message& cmd)
         MsgConfigureFileSinkBaseband& cfg = (MsgConfigureFileSinkBaseband&) cmd;
         qDebug() << "FileSinkBaseband::handleMessage: MsgConfigureFileSinkBaseband";
 
-        applySettings(cfg.getSettings(), cfg.getForce());
+        applySettings(cfg.getSettingsKeys(), cfg.getSettings(), cfg.getForce());
 
         return true;
     }
@@ -197,17 +197,12 @@ bool FileSinkBaseband::handleMessage(const Message& cmd)
     }
 }
 
-void FileSinkBaseband::applySettings(const FileSinkSettings& settings, bool force)
+void FileSinkBaseband::applySettings(const QStringList& settingsKeys, const FileSinkSettings& settings, bool force)
 {
-    qDebug() << "FileSinkBaseband::applySettings:"
-        << "m_log2Decim:" << settings.m_log2Decim
-        << "m_inputFrequencyOffset:" << settings.m_inputFrequencyOffset
-        << "m_fileRecordName: " << settings.m_fileRecordName
-        << "m_centerFrequency: " << m_centerFrequency
-        << "force: " << force;
+    qDebug() << "FileSinkBaseband::applySettings:" << settings.getDebugString(settingsKeys, force);
 
-    if ((settings.m_log2Decim != m_settings.m_log2Decim)
-     || (settings.m_inputFrequencyOffset != m_settings.m_inputFrequencyOffset) || force)
+    if ((settingsKeys.contains("log2Decim") && (settings.m_log2Decim != m_settings.m_log2Decim))
+     || (settingsKeys.contains("inputFrequencyOffset") && (settings.m_inputFrequencyOffset != m_settings.m_inputFrequencyOffset)) || force)
     {
         int desiredSampleRate = m_channelizer.getBasebandSampleRate() / (1<<settings.m_log2Decim);
         m_channelizer.setChannelization(desiredSampleRate, settings.m_inputFrequencyOffset);
@@ -218,18 +213,23 @@ void FileSinkBaseband::applySettings(const FileSinkSettings& settings, bool forc
             m_centerFrequency + settings.m_inputFrequencyOffset);
     }
 
-    if ((settings.m_spectrumSquelchMode != m_settings.m_spectrumSquelchMode) || force) {
+    if ((settingsKeys.contains("spectrumSquelchMode") && (settings.m_spectrumSquelchMode != m_settings.m_spectrumSquelchMode)) || force) {
         if (!settings.m_spectrumSquelchMode) {
             m_squelchOpen = false;
         }
     }
 
-    if ((settings.m_spectrumSquelch != m_settings.m_spectrumSquelch) || force) {
+    if ((settingsKeys.contains("spectrumSquelch") && (settings.m_spectrumSquelch != m_settings.m_spectrumSquelch)) || force) {
         m_squelchLevel = CalcDb::powerFromdB(settings.m_spectrumSquelch);
     }
 
-    m_sink.applySettings(settings, force);
-    m_settings = settings;
+    m_sink.applySettings(settingsKeys, settings, force);
+
+    if (force) {
+        m_settings = settings;
+    } else {
+        m_settings.applySettings(settingsKeys, settings);
+    }
 }
 
 int FileSinkBaseband::getChannelSampleRate() const

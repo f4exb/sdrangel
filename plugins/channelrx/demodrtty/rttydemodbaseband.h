@@ -44,20 +44,23 @@ public:
 
     public:
         const RttyDemodSettings& getSettings() const { return m_settings; }
+        const QStringList& getSettingsKeys() const { return m_settingsKeys; }
         bool getForce() const { return m_force; }
 
-        static MsgConfigureRttyDemodBaseband* create(const RttyDemodSettings& settings, bool force)
+        static MsgConfigureRttyDemodBaseband* create(const QStringList& settingsKeys, const RttyDemodSettings& settings, bool force)
         {
-            return new MsgConfigureRttyDemodBaseband(settings, force);
+            return new MsgConfigureRttyDemodBaseband(settingsKeys, settings, force);
         }
 
     private:
         RttyDemodSettings m_settings;
+        QStringList m_settingsKeys;
         bool m_force;
 
-        MsgConfigureRttyDemodBaseband(const RttyDemodSettings& settings, bool force) :
+        MsgConfigureRttyDemodBaseband(const QStringList& settingsKeys, const RttyDemodSettings& settings, bool force) :
             Message(),
             m_settings(settings),
+            m_settingsKeys(settingsKeys),
             m_force(force)
         { }
     };
@@ -93,7 +96,7 @@ private:
 
     bool handleMessage(const Message& cmd);
     void calculateOffset(RttyDemodSink *sink);
-    void applySettings(const RttyDemodSettings& settings, bool force = false);
+    void applySettings(const QStringList& settingsKeys, const RttyDemodSettings& settings, bool force = false);
 
 private slots:
     void handleInputMessages();
@@ -101,4 +104,3 @@ private slots:
 };
 
 #endif // INCLUDE_RTTYDEMODBASEBAND_H
-

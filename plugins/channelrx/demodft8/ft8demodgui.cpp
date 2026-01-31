@@ -362,7 +362,7 @@ void FT8DemodGUI::channelMarkerChangedByCursor()
 {
     ui->deltaFrequency->setValue(m_channelMarker.getCenterFrequency());
     m_settings.m_inputFrequencyOffset = m_channelMarker.getCenterFrequency();
-    applySettings();
+    applySettings(QStringList("inputFrequencyOffset"));
 }
 
 void FT8DemodGUI::channelMarkerHighlightedByCursor()
@@ -375,7 +375,7 @@ void FT8DemodGUI::on_deltaFrequency_changed(qint64 value)
     m_channelMarker.setCenterFrequency(value);
     m_settings.m_inputFrequencyOffset = m_channelMarker.getCenterFrequency();
     updateAbsoluteCenterFrequency();
-    applySettings();
+    applySettings(QStringList("inputFrequencyOffset"));
 }
 
 void FT8DemodGUI::on_BW_valueChanged(int value)
@@ -395,13 +395,13 @@ void FT8DemodGUI::on_volume_valueChanged(int value)
 {
 	ui->volumeText->setText(QString("%1").arg(value));
 	m_settings.m_volume = CalcDb::powerFromdB(value);
-	applySettings();
+	applySettings(QStringList("volume"));
 }
 
 void FT8DemodGUI::on_agc_toggled(bool checked)
 {
     m_settings.m_agc = checked;
-    applySettings();
+    applySettings(QStringList("agc"));
 }
 
 void FT8DemodGUI::on_spanLog2_valueChanged(int value)
@@ -418,7 +418,7 @@ void FT8DemodGUI::on_spanLog2_valueChanged(int value)
 void FT8DemodGUI::on_fftWindow_currentIndexChanged(int index)
 {
     m_settings.m_filterBank[m_settings.m_filterIndex].m_fftWindow = (FFTWindow::Function) index;
-    applySettings();
+    applySettings(QStringList({"filterBank", "fftWindow"}));
 }
 
 void FT8DemodGUI::on_filterIndex_valueChanged(int value)
@@ -460,7 +460,7 @@ void FT8DemodGUI::on_applyBandPreset_clicked()
     {
         m_settings.m_inputFrequencyOffset = channelShift * 1000; // Hz
         displaySettings();
-        applySettings();
+        applySettings(QStringList("inputFrequencyOffset"));
     }
 }
 
@@ -473,13 +473,13 @@ void FT8DemodGUI::on_clearMessages_clicked()
 void FT8DemodGUI::on_recordWav_toggled(bool checked)
 {
     m_settings.m_recordWav = checked;
-    applySettings();
+    applySettings(QStringList("recordWav"));
 }
 
 void FT8DemodGUI::on_logMessages_toggled(bool checked)
 {
     m_settings.m_logMessages = checked;
-    applySettings();
+    applySettings(QStringList("logMessages"));
 }
 
 void FT8DemodGUI::on_settings_clicked()
@@ -559,7 +559,7 @@ void FT8DemodGUI::on_settings_clicked()
         }
 
         if (changed) {
-            applySettings();
+            applySettings(settingsKeys);
         }
     }
 }
@@ -606,7 +606,16 @@ void FT8DemodGUI::onMenuDialogCalled(const QPoint &p)
             updateIndexLabel();
         }
 
-        applySettings();
+        applySettings(QStringList({
+            "rgbColor",
+            "title",
+            "useReverseAPI",
+            "reverseAPIAddress",
+            "reverseAPIPort",
+            "reverseAPIDeviceIndex",
+            "reverseAPIChannelIndex",
+            "streamIndex"
+        }));
     }
 
     resetContextMenuType();
@@ -618,7 +627,7 @@ void FT8DemodGUI::onWidgetRolled(QWidget* widget, bool rollDown)
     (void) rollDown;
 
     getRollupContents()->saveState(m_rollupState);
-    applySettings();
+    applySettings(QStringList());
 }
 
 FT8DemodGUI::FT8DemodGUI(PluginAPI* pluginAPI, DeviceUISet *deviceUISet, BasebandSampleSink *rxChannel, QWidget* parent) :
@@ -718,11 +727,11 @@ bool FT8DemodGUI::blockApplySettings(bool block)
     return ret;
 }
 
-void FT8DemodGUI::applySettings(bool force)
+void FT8DemodGUI::applySettings(const QStringList& settingsKeys, const bool force)
 {
 	if (m_doApplySettings)
 	{
-        FT8Demod::MsgConfigureFT8Demod* message = FT8Demod::MsgConfigureFT8Demod::create( m_settings, force);
+        FT8Demod::MsgConfigureFT8Demod* message = FT8Demod::MsgConfigureFT8Demod::create(settingsKeys, m_settings, force);
         m_ft8Demod->getInputMessageQueue()->push(message);
 	}
 }
@@ -800,7 +809,7 @@ void FT8DemodGUI::applyBandwidths(unsigned int spanLog2, bool force)
     m_settings.m_filterBank[m_settings.m_filterIndex].m_rfBandwidth = bw * 100;
     m_settings.m_filterBank[m_settings.m_filterIndex].m_lowCutoff = lw * 100;
 
-    applySettings(force);
+    applySettings(QStringList({"filterBank", "spanLog2", "lowCutoff", "rfBandwidth"}), force);
 
     bool wasBlocked = blockApplySettings(true);
     m_channelMarker.setBandwidth(bw * 200);

@@ -60,7 +60,7 @@ RadiosondeDemodSink::RadiosondeDemodSink(RadiosondeDemod *radiosondeDemod) :
     m_demodBufferFill = 0;
     m_sampleBuffer.resize(m_sampleBufferSize);
 
-    applySettings(m_settings, true);
+    applySettings(QStringList(), m_settings, true);
     applyChannelSettings(m_channelSampleRate, m_channelFrequencyOffset, true);
 }
 
@@ -525,24 +525,23 @@ void RadiosondeDemodSink::applyChannelSettings(int channelSampleRate, int channe
     qDebug() << "RadiosondeDemodSink::applyChannelSettings: m_samplesPerSymbol: " << m_samplesPerSymbol;
 }
 
-void RadiosondeDemodSink::applySettings(const RadiosondeDemodSettings& settings, bool force)
+void RadiosondeDemodSink::applySettings(const QStringList& settingsKeys, const RadiosondeDemodSettings& settings, bool force)
 {
-    qDebug() << "RadiosondeDemodSink::applySettings:"
-            << " force: " << force;
+    qDebug() << "RadiosondeDemodSink::applySettings:" << settings.getDebugString(settingsKeys, force);
 
-    if ((settings.m_rfBandwidth != m_settings.m_rfBandwidth) || force)
+    if ((settingsKeys.contains("rfBandwidth") && (settings.m_rfBandwidth != m_settings.m_rfBandwidth)) || force)
     {
         m_interpolator.create(16, m_channelSampleRate, settings.m_rfBandwidth / 2.2);
         m_interpolatorDistance = (Real) m_channelSampleRate / (Real) RadiosondeDemodSettings::RADIOSONDEDEMOD_CHANNEL_SAMPLE_RATE;
         m_interpolatorDistanceRemain = m_interpolatorDistance;
         m_lowpass.create(301, RadiosondeDemodSettings::RADIOSONDEDEMOD_CHANNEL_SAMPLE_RATE, settings.m_rfBandwidth / 2.0f);
     }
-    if ((settings.m_fmDeviation != m_settings.m_fmDeviation) || force)
+    if ((settingsKeys.contains("fmDeviation") && (settings.m_fmDeviation != m_settings.m_fmDeviation)) || force)
     {
         m_phaseDiscri.setFMScaling(RadiosondeDemodSettings::RADIOSONDEDEMOD_CHANNEL_SAMPLE_RATE / (2.0f * settings.m_fmDeviation));
     }
 
-    if ((settings.m_baud != m_settings.m_baud) || force)
+    if ((settingsKeys.contains("baud") && (settings.m_baud != m_settings.m_baud)) || force)
     {
         m_samplesPerSymbol = RadiosondeDemodSettings::RADIOSONDEDEMOD_CHANNEL_SAMPLE_RATE / settings.m_baud;
         qDebug() << "RadiosondeDemodSink::applySettings: m_samplesPerSymbol: " << m_samplesPerSymbol << " baud " << settings.m_baud;
@@ -579,5 +578,9 @@ void RadiosondeDemodSink::applySettings(const RadiosondeDemodSettings& settings,
         }
     }
 
-    m_settings = settings;
+    if (force) {
+        m_settings = settings;
+    } else {
+        m_settings.applySettings(settingsKeys, settings);
+    }
 }

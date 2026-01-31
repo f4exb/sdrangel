@@ -60,7 +60,7 @@ AMDemod::AMDemod(DeviceAPI *deviceAPI) :
         m_lastTs(0)
 {
     setObjectName(m_channelId);
-	applySettings(m_settings, true);
+	applySettings(QStringList(), m_settings, true);
 
     m_deviceAPI->addChannelSink(this);
     m_deviceAPI->addChannelSinkAPI(this);
@@ -140,7 +140,7 @@ void AMDemod::start()
     DSPSignalNotification *dspMsg = new DSPSignalNotification(m_basebandSampleRate, m_centerFrequency);
     m_basebandSink->getInputMessageQueue()->push(dspMsg);
 
-    AMDemodBaseband::MsgConfigureAMDemodBaseband *msg = AMDemodBaseband::MsgConfigureAMDemodBaseband::create(m_settings, true);
+    AMDemodBaseband::MsgConfigureAMDemodBaseband *msg = AMDemodBaseband::MsgConfigureAMDemodBaseband::create(QStringList(), m_settings, true);
     m_basebandSink->getInputMessageQueue()->push(msg);
 
     m_running = true;
@@ -164,7 +164,7 @@ bool AMDemod::handleMessage(const Message& cmd)
 	{
         MsgConfigureAMDemod& cfg = (MsgConfigureAMDemod&) cmd;
         qDebug() << "AMDemod::handleMessage: MsgConfigureAMDemod";
-        applySettings(cfg.getSettings(), cfg.getForce());
+        applySettings(cfg.getSettingsKeys(), cfg.getSettings(), cfg.getForce());
 
 		return true;
 	}
@@ -205,92 +205,20 @@ void AMDemod::setCenterFrequency(qint64 frequency)
 {
     AMDemodSettings settings = m_settings;
     settings.m_inputFrequencyOffset = frequency;
-    applySettings(settings, false);
+    applySettings(QStringList("inputFrequencyOffset"), settings, false);
 
     if (m_guiMessageQueue) // forward to GUI if any
     {
-        MsgConfigureAMDemod *msgToGUI = MsgConfigureAMDemod::create(settings, false);
+        MsgConfigureAMDemod *msgToGUI = MsgConfigureAMDemod::create(QStringList("inputFrequencyOffset"), settings, false);
         m_guiMessageQueue->push(msgToGUI);
     }
 }
 
-void AMDemod::applySettings(const AMDemodSettings& settings, bool force)
+void AMDemod::applySettings(const QStringList& settingsKeys, const AMDemodSettings& settings, bool force)
 {
-    qDebug() << "AMDemod::applySettings:"
-            << " m_inputFrequencyOffset: " << settings.m_inputFrequencyOffset
-            << " m_rfBandwidth: " << settings.m_rfBandwidth
-            << " m_afBandwidth: " << settings.m_afBandwidth
-            << " m_volume: " << settings.m_volume
-            << " m_squelch: " << settings.m_squelch
-            << " m_audioMute: " << settings.m_audioMute
-            << " m_bandpassEnable: " << settings.m_bandpassEnable
-            << " m_audioDeviceName: " << settings.m_audioDeviceName
-            << " m_pll: " << settings.m_pll
-            << " m_syncAMOperation: " << (int) settings.m_syncAMOperation
-            << " m_frequencyMode: " << settings.m_frequencyMode
-            << " m_frequency: " << settings.m_frequency
-            << " m_snap: " << settings.m_snap
-            << " m_streamIndex: " << settings.m_streamIndex
-            << " m_useReverseAPI: " << settings.m_useReverseAPI
-            << " m_reverseAPIAddress: " << settings.m_reverseAPIAddress
-            << " m_reverseAPIPort: " << settings.m_reverseAPIPort
-            << " m_reverseAPIDeviceIndex: " << settings.m_reverseAPIDeviceIndex
-            << " m_reverseAPIChannelIndex: " << settings.m_reverseAPIChannelIndex
-            << " force: " << force;
+    qDebug() << "AMDemod::applySettings:" << settings.getDebugString(settingsKeys, force);
 
-    QList<QString> reverseAPIKeys;
-
-    if ((m_settings.m_rfBandwidth != settings.m_rfBandwidth) || force) {
-        reverseAPIKeys.append("rfBandwidth");
-    }
-    if ((m_settings.m_afBandwidth != settings.m_afBandwidth) || force) {
-        reverseAPIKeys.append("afBandwidth");
-    }
-    if ((m_settings.m_bandpassEnable != settings.m_bandpassEnable) || force) {
-        reverseAPIKeys.append("bandpassEnable");
-    }
-    if ((m_settings.m_squelch != settings.m_squelch) || force) {
-        reverseAPIKeys.append("squelch");
-    }
-    if ((settings.m_audioDeviceName != m_settings.m_audioDeviceName) || force) {
-        reverseAPIKeys.append("audioDeviceName");
-    }
-
-    if ((m_settings.m_pll != settings.m_pll) || force)
-    {
-        reverseAPIKeys.append("pll");
-        reverseAPIKeys.append("syncAMOperation");
-    }
-
-    if ((m_settings.m_syncAMOperation != settings.m_syncAMOperation) || force)
-    {
-        reverseAPIKeys.append("pll");
-        reverseAPIKeys.append("syncAMOperation");
-    }
-
-    if ((m_settings.m_inputFrequencyOffset != settings.m_inputFrequencyOffset) || force) {
-        reverseAPIKeys.append("inputFrequencyOffset");
-    }
-
-    if ((m_settings.m_audioMute != settings.m_audioMute) || force) {
-        reverseAPIKeys.append("audioMute");
-    }
-
-    if ((m_settings.m_volume != settings.m_volume) || force) {
-        reverseAPIKeys.append("volume");
-    }
-
-    if ((m_settings.m_frequencyMode != settings.m_frequencyMode) || force) {
-        reverseAPIKeys.append("frequencyMode");
-    }
-    if ((m_settings.m_frequency != settings.m_frequency) || force) {
-        reverseAPIKeys.append("frequency");
-    }
-    if ((m_settings.m_snap != settings.m_snap) || force) {
-        reverseAPIKeys.append("snap");
-    }
-
-    if (m_settings.m_streamIndex != settings.m_streamIndex)
+    if (settingsKeys.contains("streamIndex"))
     {
         if (m_deviceAPI->getSampleMIMO()) // change of stream is possible for MIMO devices only
         {
@@ -301,34 +229,36 @@ void AMDemod::applySettings(const AMDemodSettings& settings, bool force)
             m_settings.m_streamIndex = settings.m_streamIndex; // make sure ChannelAPI::getStreamIndex() is consistent
             emit streamIndexChanged(settings.m_streamIndex);
         }
-
-        reverseAPIKeys.append("streamIndex");
     }
 
     if (m_running)
     {
-        AMDemodBaseband::MsgConfigureAMDemodBaseband *msg = AMDemodBaseband::MsgConfigureAMDemodBaseband::create(settings, force);
+        AMDemodBaseband::MsgConfigureAMDemodBaseband *msg = AMDemodBaseband::MsgConfigureAMDemodBaseband::create(settingsKeys, settings, force);
         m_basebandSink->getInputMessageQueue()->push(msg);
     }
 
     if (settings.m_useReverseAPI)
     {
-        bool fullUpdate = ((m_settings.m_useReverseAPI != settings.m_useReverseAPI) && settings.m_useReverseAPI) ||
-                (m_settings.m_reverseAPIAddress != settings.m_reverseAPIAddress) ||
-                (m_settings.m_reverseAPIPort != settings.m_reverseAPIPort) ||
-                (m_settings.m_reverseAPIDeviceIndex != settings.m_reverseAPIDeviceIndex) ||
-                (m_settings.m_reverseAPIChannelIndex != settings.m_reverseAPIChannelIndex);
-        webapiReverseSendSettings(reverseAPIKeys, settings, fullUpdate || force);
+        bool fullUpdate = (settingsKeys.contains("useReverseAPI")) ||
+                (settingsKeys.contains("reverseAPIAddress")) ||
+                (settingsKeys.contains("reverseAPIPort")) ||
+                (settingsKeys.contains("reverseAPIDeviceIndex")) ||
+                (settingsKeys.contains("reverseAPIChannelIndex"));
+        webapiReverseSendSettings(settingsKeys, settings, fullUpdate || force);
     }
 
     QList<ObjectPipe*> pipes;
     MainCore::instance()->getMessagePipes().getMessagePipes(this, "settings", pipes);
 
     if (pipes.size() > 0) {
-        sendChannelSettings(pipes, reverseAPIKeys, settings, force);
+        sendChannelSettings(pipes, settingsKeys, settings, force);
     }
 
-    m_settings = settings;
+    if (force) {
+        m_settings = settings;
+    } else {
+        m_settings.applySettings(settingsKeys, settings);
+    }
 }
 
 QByteArray AMDemod::serialize() const
@@ -340,14 +270,14 @@ bool AMDemod::deserialize(const QByteArray& data)
 {
     if (m_settings.deserialize(data))
     {
-        MsgConfigureAMDemod *msg = MsgConfigureAMDemod::create(m_settings, true);
+        MsgConfigureAMDemod *msg = MsgConfigureAMDemod::create(QStringList(), m_settings, true);
         m_inputMessageQueue.push(msg);
         return true;
     }
     else
     {
         m_settings.resetToDefaults();
-        MsgConfigureAMDemod *msg = MsgConfigureAMDemod::create(m_settings, true);
+        MsgConfigureAMDemod *msg = MsgConfigureAMDemod::create(QStringList(), m_settings, true);
         m_inputMessageQueue.push(msg);
         return false;
     }
@@ -402,13 +332,13 @@ int AMDemod::webapiSettingsPutPatch(
     AMDemodSettings settings = m_settings;
     webapiUpdateChannelSettings(settings, channelSettingsKeys, response);
 
-    MsgConfigureAMDemod *msg = MsgConfigureAMDemod::create(settings, force);
+    MsgConfigureAMDemod *msg = MsgConfigureAMDemod::create(channelSettingsKeys, settings, force);
     m_inputMessageQueue.push(msg);
 
     qDebug("AMDemod::webapiSettingsPutPatch: forward to GUI: %p", m_guiMessageQueue);
     if (m_guiMessageQueue) // forward to GUI if any
     {
-        MsgConfigureAMDemod *msgToGUI = MsgConfigureAMDemod::create(settings, force);
+        MsgConfigureAMDemod *msgToGUI = MsgConfigureAMDemod::create(channelSettingsKeys, settings, force);
         m_guiMessageQueue->push(msgToGUI);
     }
 
@@ -598,7 +528,7 @@ void AMDemod::webapiFormatChannelReport(SWGSDRangel::SWGChannelReport& response)
     response.getAmDemodReport()->setChannelSampleRate(m_basebandSink->getChannelSampleRate());
 }
 
-void AMDemod::webapiReverseSendSettings(QList<QString>& channelSettingsKeys, const AMDemodSettings& settings, bool force)
+void AMDemod::webapiReverseSendSettings(const QList<QString>& channelSettingsKeys, const AMDemodSettings& settings, bool force)
 {
     SWGSDRangel::SWGChannelSettings *swgChannelSettings = new SWGSDRangel::SWGChannelSettings();
     webapiFormatChannelSettings(channelSettingsKeys, swgChannelSettings, settings, force);
@@ -625,7 +555,7 @@ void AMDemod::webapiReverseSendSettings(QList<QString>& channelSettingsKeys, con
 
 void AMDemod::sendChannelSettings(
     const QList<ObjectPipe*>& pipes,
-    QList<QString>& channelSettingsKeys,
+    const QList<QString>& channelSettingsKeys,
     const AMDemodSettings& settings,
     bool force)
 {
@@ -649,7 +579,7 @@ void AMDemod::sendChannelSettings(
 }
 
 void AMDemod::webapiFormatChannelSettings(
-        QList<QString>& channelSettingsKeys,
+        const QList<QString>& channelSettingsKeys,
         SWGSDRangel::SWGChannelSettings *swgChannelSettings,
         const AMDemodSettings& settings,
         bool force

@@ -122,7 +122,7 @@ void DABDemodGUI::resetToDefaults()
 {
     m_settings.resetToDefaults();
     displaySettings();
-    applySettings(true);
+    applySettings(QStringList(), true);
 }
 
 QByteArray DABDemodGUI::serialize() const
@@ -134,7 +134,7 @@ bool DABDemodGUI::deserialize(const QByteArray& data)
 {
     if(m_settings.deserialize(data)) {
         displaySettings();
-        applySettings(true);
+        applySettings(QStringList(), true);
         return true;
     } else {
         resetToDefaults();
@@ -203,7 +203,7 @@ void DABDemodGUI::on_programs_cellDoubleClicked(int row, int column)
     double centreFreq = frequencyInHz-m_settings.m_inputFrequencyOffset;
     ChannelWebAPIUtils::setCenterFrequency(m_dabDemod->getDeviceSetIndex(), centreFreq);
     clearProgram();
-    applySettings();
+    applySettings(QStringList({"program"}));
 }
 
 // Ensemble name can sometimes be decoded after program name, so we
@@ -365,7 +365,7 @@ void DABDemodGUI::channelMarkerChangedByCursor()
 {
     ui->deltaFrequency->setValue(m_channelMarker.getCenterFrequency());
     m_settings.m_inputFrequencyOffset = m_channelMarker.getCenterFrequency();
-    applySettings();
+    applySettings(QStringList({"inputFrequencyOffset"}));
 }
 
 void DABDemodGUI::channelMarkerHighlightedByCursor()
@@ -378,20 +378,20 @@ void DABDemodGUI::on_deltaFrequency_changed(qint64 value)
     m_channelMarker.setCenterFrequency(value);
     m_settings.m_inputFrequencyOffset = m_channelMarker.getCenterFrequency();
     updateAbsoluteCenterFrequency();
-    applySettings();
+    applySettings(QStringList({"inputFrequencyOffset"}));
 }
 
 void DABDemodGUI::on_audioMute_toggled(bool checked)
 {
     m_settings.m_audioMute = checked;
-    applySettings();
+    applySettings(QStringList({"audioMute"}));
 }
 
 void DABDemodGUI::on_volume_valueChanged(int value)
 {
     ui->volumeText->setText(QString("%1").arg(value / 10.0, 0, 'f', 1));
     m_settings.m_volume = value / 10.0;
-    applySettings();
+    applySettings(QStringList({"volume"}));
 }
 
 void DABDemodGUI::on_rfBW_valueChanged(int value)
@@ -400,14 +400,14 @@ void DABDemodGUI::on_rfBW_valueChanged(int value)
     ui->rfBWText->setText(QString("%1k").arg(value / 10.0, 0, 'f', 1));
     m_channelMarker.setBandwidth(bw);
     m_settings.m_rfBandwidth = bw;
-    applySettings();
+    applySettings(QStringList({"rfBandwidth"}));
 }
 
 void DABDemodGUI::on_filter_editingFinished()
 {
     m_settings.m_filter = ui->filter->text();
     filter();
-    applySettings();
+    applySettings(QStringList({"filter"}));
 }
 
 void DABDemodGUI::on_clearTable_clicked()
@@ -446,7 +446,7 @@ void DABDemodGUI::onWidgetRolled(QWidget* widget, bool rollDown)
     (void) rollDown;
 
     getRollupContents()->saveState(m_rollupState);
-    applySettings();
+    applySettings(QStringList());
 }
 
 void DABDemodGUI::onMenuDialogCalled(const QPoint &p)
@@ -491,7 +491,9 @@ void DABDemodGUI::onMenuDialogCalled(const QPoint &p)
             updateIndexLabel();
         }
 
-        applySettings();
+        applySettings(QStringList({"rgbColor", "title", "useReverseAPI", "reverseAPIAddress",
+                                   "reverseAPIPort", "reverseAPIDeviceIndex", "reverseAPIChannelIndex",
+                                   "streamIndex"}));
     }
 
     resetContextMenuType();
@@ -574,7 +576,7 @@ DABDemodGUI::DABDemodGUI(PluginAPI* pluginAPI, DeviceUISet *deviceUISet, Baseban
 
     displaySettings();
     makeUIConnections();
-    applySettings(true);
+    applySettings(QStringList(), true);
     m_resizer.enableChildMouseTracking();
 }
 
@@ -588,11 +590,11 @@ void DABDemodGUI::blockApplySettings(bool block)
     m_doApplySettings = !block;
 }
 
-void DABDemodGUI::applySettings(bool force)
+void DABDemodGUI::applySettings(const QStringList& channelSettingsKeys, bool force)
 {
     if (m_doApplySettings)
     {
-        DABDemod::MsgConfigureDABDemod* message = DABDemod::MsgConfigureDABDemod::create( m_settings, force);
+        DABDemod::MsgConfigureDABDemod* message = DABDemod::MsgConfigureDABDemod::create(channelSettingsKeys, m_settings, force);
         m_dabDemod->getInputMessageQueue()->push(message);
     }
 }
@@ -706,7 +708,7 @@ void DABDemodGUI::audioSelect(const QPoint& p)
     if (audioSelect.m_selected)
     {
         m_settings.m_audioDeviceName = audioSelect.m_audioDeviceName;
-        applySettings();
+        applySettings(QStringList({"audioDeviceName"}));
     }
 }
 
@@ -796,4 +798,3 @@ void DABDemodGUI::on_findOnMap_clicked()
     qDebug() << "Finding " << id;
     FeatureWebAPIUtils::mapFind(id);
 }
-

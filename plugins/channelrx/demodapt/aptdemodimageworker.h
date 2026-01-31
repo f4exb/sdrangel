@@ -49,20 +49,23 @@ public:
 
     public:
         const APTDemodSettings& getSettings() const { return m_settings; }
+        const QStringList& getSettingsKeys() const { return m_settingsKeys; }
         bool getForce() const { return m_force; }
 
-        static MsgConfigureAPTDemodImageWorker* create(const APTDemodSettings& settings, bool force)
+        static MsgConfigureAPTDemodImageWorker* create(const QStringList& settingsKeys, const APTDemodSettings& settings, bool force)
         {
-            return new MsgConfigureAPTDemodImageWorker(settings, force);
+            return new MsgConfigureAPTDemodImageWorker(settingsKeys, settings, force);
         }
 
     private:
         APTDemodSettings m_settings;
+        QStringList m_settingsKeys;
         bool m_force;
 
-        MsgConfigureAPTDemodImageWorker(const APTDemodSettings& settings, bool force) :
+        MsgConfigureAPTDemodImageWorker(const QStringList& settingsKeys, const APTDemodSettings& settings, bool force) :
             Message(),
             m_settings(settings),
+            m_settingsKeys(settingsKeys),
             m_force(force)
         { }
     };

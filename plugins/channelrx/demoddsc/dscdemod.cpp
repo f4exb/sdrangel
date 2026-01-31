@@ -58,7 +58,7 @@ DSCDemod::DSCDemod(DeviceAPI *deviceAPI) :
     m_basebandSink->setChannel(this);
     m_basebandSink->moveToThread(&m_thread);
 
-    applySettings(m_settings, true);
+    applySettings(QStringList(), m_settings, true);
 
     m_deviceAPI->addChannelSink(this);
     m_deviceAPI->addChannelSinkAPI(this);
@@ -132,7 +132,7 @@ void DSCDemod::start()
     DSPSignalNotification *dspMsg = new DSPSignalNotification(m_basebandSampleRate, m_centerFrequency);
     m_basebandSink->getInputMessageQueue()->push(dspMsg);
 
-    DSCDemodBaseband::MsgConfigureDSCDemodBaseband *msg = DSCDemodBaseband::MsgConfigureDSCDemodBaseband::create(m_settings, true);
+    DSCDemodBaseband::MsgConfigureDSCDemodBaseband *msg = DSCDemodBaseband::MsgConfigureDSCDemodBaseband::create(QStringList(), m_settings, true);
     m_basebandSink->getInputMessageQueue()->push(msg);
 }
 
@@ -150,7 +150,7 @@ bool DSCDemod::handleMessage(const Message& cmd)
     {
         MsgConfigureDSCDemod& cfg = (MsgConfigureDSCDemod&) cmd;
         qDebug() << "DSCDemod::handleMessage: MsgConfigureDSCDemod";
-        applySettings(cfg.getSettings(), cfg.getForce());
+        applySettings(cfg.getSettingsKeys(), cfg.getSettings(), cfg.getForce());
 
         return true;
     }
@@ -257,64 +257,20 @@ void DSCDemod::setCenterFrequency(qint64 frequency)
 {
     DSCDemodSettings settings = m_settings;
     settings.m_inputFrequencyOffset = frequency;
-    applySettings(settings, false);
+    applySettings(QStringList("inputFrequencyOffset"), settings, false);
 
     if (m_guiMessageQueue) // forward to GUI if any
     {
-        MsgConfigureDSCDemod *msgToGUI = MsgConfigureDSCDemod::create(settings, false);
+        MsgConfigureDSCDemod *msgToGUI = MsgConfigureDSCDemod::create(QStringList("inputFrequencyOffset"), settings, false);
         m_guiMessageQueue->push(msgToGUI);
     }
 }
 
-void DSCDemod::applySettings(const DSCDemodSettings& settings, bool force)
+void DSCDemod::applySettings(const QStringList& settingsKeys, const DSCDemodSettings& settings, bool force)
 {
-    qDebug() << "DSCDemod::applySettings:"
-            << " m_logEnabled: " << settings.m_logEnabled
-            << " m_logFilename: " << settings.m_logFilename
-            << " m_streamIndex: " << settings.m_streamIndex
-            << " m_useReverseAPI: " << settings.m_useReverseAPI
-            << " m_reverseAPIAddress: " << settings.m_reverseAPIAddress
-            << " m_reverseAPIPort: " << settings.m_reverseAPIPort
-            << " m_reverseAPIDeviceIndex: " << settings.m_reverseAPIDeviceIndex
-            << " m_reverseAPIChannelIndex: " << settings.m_reverseAPIChannelIndex
-            << " force: " << force;
+    qDebug() << "DSCDemod::applySettings:" << settings.getDebugString(settingsKeys, force);
 
-    QList<QString> reverseAPIKeys;
-
-    if ((settings.m_inputFrequencyOffset != m_settings.m_inputFrequencyOffset) || force) {
-        reverseAPIKeys.append("inputFrequencyOffset");
-    }
-    if ((settings.m_rfBandwidth != m_settings.m_rfBandwidth) || force) {
-        reverseAPIKeys.append("rfBandwidth");
-    }
-    if ((settings.m_filterInvalid != m_settings.m_filterInvalid) || force) {
-        reverseAPIKeys.append("filterInvalid");
-    }
-    if ((settings.m_filterColumn != m_settings.m_filterColumn) || force) {
-        reverseAPIKeys.append("filterColumn");
-    }
-    if ((settings.m_filter != m_settings.m_filter) || force) {
-        reverseAPIKeys.append("filter");
-    }
-    if ((settings.m_udpEnabled != m_settings.m_udpEnabled) || force) {
-        reverseAPIKeys.append("udpEnabled");
-    }
-    if ((settings.m_udpAddress != m_settings.m_udpAddress) || force) {
-        reverseAPIKeys.append("udpAddress");
-    }
-    if ((settings.m_udpPort != m_settings.m_udpPort) || force) {
-        reverseAPIKeys.append("udpPort");
-    }
-    if ((settings.m_logFilename != m_settings.m_logFilename) || force) {
-        reverseAPIKeys.append("logFilename");
-    }
-    if ((settings.m_logEnabled != m_settings.m_logEnabled) || force) {
-        reverseAPIKeys.append("logEnabled");
-    }
-    if ((settings.m_useFileTime != m_settings.m_useFileTime) || force) {
-        reverseAPIKeys.append("useFileTime");
-    }
-    if (m_settings.m_streamIndex != settings.m_streamIndex)
+    if (settingsKeys.contains("streamIndex") && (settings.m_streamIndex != m_settings.m_streamIndex))
     {
         if (m_deviceAPI->getSampleMIMO()) // change of stream is possible for MIMO devices only
         {
@@ -325,25 +281,23 @@ void DSCDemod::applySettings(const DSCDemodSettings& settings, bool force)
             m_settings.m_streamIndex = settings.m_streamIndex; // make sure ChannelAPI::getStreamIndex() is consistent
             emit streamIndexChanged(settings.m_streamIndex);
         }
-
-        reverseAPIKeys.append("streamIndex");
     }
 
-    DSCDemodBaseband::MsgConfigureDSCDemodBaseband *msg = DSCDemodBaseband::MsgConfigureDSCDemodBaseband::create(settings, force);
+    DSCDemodBaseband::MsgConfigureDSCDemodBaseband *msg = DSCDemodBaseband::MsgConfigureDSCDemodBaseband::create(settingsKeys, settings, force);
     m_basebandSink->getInputMessageQueue()->push(msg);
 
     if (settings.m_useReverseAPI)
     {
-        bool fullUpdate = ((m_settings.m_useReverseAPI != settings.m_useReverseAPI) && settings.m_useReverseAPI) ||
-                (m_settings.m_reverseAPIAddress != settings.m_reverseAPIAddress) ||
-                (m_settings.m_reverseAPIPort != settings.m_reverseAPIPort) ||
-                (m_settings.m_reverseAPIDeviceIndex != settings.m_reverseAPIDeviceIndex) ||
-                (m_settings.m_reverseAPIChannelIndex != settings.m_reverseAPIChannelIndex);
-        webapiReverseSendSettings(reverseAPIKeys, settings, fullUpdate || force);
+        bool fullUpdate = ((settingsKeys.contains("useReverseAPI") && (settings.m_useReverseAPI != m_settings.m_useReverseAPI)) && settings.m_useReverseAPI) ||
+                (settingsKeys.contains("reverseAPIAddress") && (settings.m_reverseAPIAddress != m_settings.m_reverseAPIAddress)) ||
+                (settingsKeys.contains("reverseAPIPort") && (settings.m_reverseAPIPort != m_settings.m_reverseAPIPort)) ||
+                (settingsKeys.contains("reverseAPIDeviceIndex") && (settings.m_reverseAPIDeviceIndex != m_settings.m_reverseAPIDeviceIndex)) ||
+                (settingsKeys.contains("reverseAPIChannelIndex") && (settings.m_reverseAPIChannelIndex != m_settings.m_reverseAPIChannelIndex));
+        webapiReverseSendSettings(settingsKeys, settings, fullUpdate || force);
     }
 
-    if ((settings.m_logEnabled != m_settings.m_logEnabled)
-        || (settings.m_logFilename != m_settings.m_logFilename)
+    if ((settingsKeys.contains("logEnabled") && (settings.m_logEnabled != m_settings.m_logEnabled))
+        || (settingsKeys.contains("logFilename") && (settings.m_logFilename != m_settings.m_logFilename))
         || force)
     {
         if (m_logFile.isOpen())
@@ -372,7 +326,11 @@ void DSCDemod::applySettings(const DSCDemodSettings& settings, bool force)
         }
     }
 
-    m_settings = settings;
+    if (force) {
+        m_settings = settings;
+    } else {
+        m_settings.applySettings(settingsKeys, settings);
+    }
 }
 
 void DSCDemod::sendSampleRateToDemodAnalyzer()
@@ -403,14 +361,14 @@ bool DSCDemod::deserialize(const QByteArray& data)
 {
     if (m_settings.deserialize(data))
     {
-        MsgConfigureDSCDemod *msg = MsgConfigureDSCDemod::create(m_settings, true);
+        MsgConfigureDSCDemod *msg = MsgConfigureDSCDemod::create(QStringList(), m_settings, true);
         m_inputMessageQueue.push(msg);
         return true;
     }
     else
     {
         m_settings.resetToDefaults();
-        MsgConfigureDSCDemod *msg = MsgConfigureDSCDemod::create(m_settings, true);
+        MsgConfigureDSCDemod *msg = MsgConfigureDSCDemod::create(QStringList(), m_settings, true);
         m_inputMessageQueue.push(msg);
         return false;
     }
@@ -446,13 +404,13 @@ int DSCDemod::webapiSettingsPutPatch(
     DSCDemodSettings settings = m_settings;
     webapiUpdateChannelSettings(settings, channelSettingsKeys, response);
 
-    MsgConfigureDSCDemod *msg = MsgConfigureDSCDemod::create(settings, force);
+    MsgConfigureDSCDemod *msg = MsgConfigureDSCDemod::create(channelSettingsKeys, settings, force);
     m_inputMessageQueue.push(msg);
 
     qDebug("DSCDemod::webapiSettingsPutPatch: forward to GUI: %p", m_guiMessageQueue);
     if (m_guiMessageQueue) // forward to GUI if any
     {
-        MsgConfigureDSCDemod *msgToGUI = MsgConfigureDSCDemod::create(settings, force);
+        MsgConfigureDSCDemod *msgToGUI = MsgConfigureDSCDemod::create(channelSettingsKeys, settings, force);
         m_guiMessageQueue->push(msgToGUI);
     }
 
@@ -631,7 +589,7 @@ void DSCDemod::webapiFormatChannelReport(SWGSDRangel::SWGChannelReport& response
     response.getDscDemodReport()->setChannelSampleRate(m_basebandSink->getChannelSampleRate());
 }
 
-void DSCDemod::webapiReverseSendSettings(QList<QString>& channelSettingsKeys, const DSCDemodSettings& settings, bool force)
+void DSCDemod::webapiReverseSendSettings(const QList<QString>& channelSettingsKeys, const DSCDemodSettings& settings, bool force)
 {
     SWGSDRangel::SWGChannelSettings *swgChannelSettings = new SWGSDRangel::SWGChannelSettings();
     webapiFormatChannelSettings(channelSettingsKeys, swgChannelSettings, settings, force);
@@ -657,7 +615,7 @@ void DSCDemod::webapiReverseSendSettings(QList<QString>& channelSettingsKeys, co
 }
 
 void DSCDemod::webapiFormatChannelSettings(
-        QList<QString>& channelSettingsKeys,
+        const QList<QString>& channelSettingsKeys,
         SWGSDRangel::SWGChannelSettings *swgChannelSettings,
         const DSCDemodSettings& settings,
         bool force

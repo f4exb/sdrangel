@@ -70,7 +70,7 @@ ATVDemodSink::ATVDemodSink() :
 
     m_objPhaseDiscri.setFMScaling(1.0f);
 
-	applySettings(m_settings, true);
+	applySettings(QStringList(), m_settings, true);
     applyChannelSettings(m_channelSampleRate, m_channelFrequencyOffset, true);
 }
 
@@ -465,33 +465,11 @@ void ATVDemodSink::applyChannelSettings(int channelSampleRate, int channelFreque
     m_channelFrequencyOffset = channelFrequencyOffset;
 }
 
-void ATVDemodSink::applySettings(const ATVDemodSettings& settings, bool force)
+void ATVDemodSink::applySettings(const QStringList& settingsKeys, const ATVDemodSettings& settings, bool force)
 {
-    qDebug() << "ATVDemodSink::applySettings:"
-            << "m_inputFrequencyOffset:" << settings.m_inputFrequencyOffset
-            << "m_bfoFrequency:" << settings.m_bfoFrequency
-            << "m_atvModulation:" << settings.m_atvModulation
-            << "m_fmDeviation:" << settings.m_fmDeviation
-            << "m_fftFiltering:" << settings.m_fftFiltering
-            << "m_fftOppBandwidth:" << settings.m_fftOppBandwidth
-            << "m_fftBandwidth:" << settings.m_fftBandwidth
-            << "m_nbLines:" << settings.m_nbLines
-            << "m_fps:" << settings.m_fps
-            << "m_atvStd:" << settings.m_atvStd
-            << "m_hSync:" << settings.m_hSync
-            << "m_vSync:" << settings.m_vSync
-            << "m_invertVideo:" << settings.m_invertVideo
-            << "m_halfFrames:" << settings.m_halfFrames
-            << "m_levelSynchroTop:" << settings.m_levelSynchroTop
-            << "m_levelBlack:" << settings.m_levelBlack
-            << "m_rgbColor:" << settings.m_rgbColor
-            << "m_title:" << settings.m_title
-            << "m_udpAddress:" << settings.m_udpAddress
-            << "m_udpPort:" << settings.m_udpPort
-            << "force:" << force;
+    qDebug() << "ATVDemodSink::applySettings:" << settings.getDebugString(settingsKeys, force);
 
-    if ((settings.m_fftBandwidth != m_settings.m_fftBandwidth)
-     || (settings.m_fftOppBandwidth != m_settings.m_fftOppBandwidth) || force)
+    if (settingsKeys.contains("fftBandwidth") || settingsKeys.contains("fftOppBandwidth") || force)
     {
         m_DSBFilter->create_asym_filter(
             settings.m_fftOppBandwidth / (float) m_channelSampleRate,
@@ -501,7 +479,7 @@ void ATVDemodSink::applySettings(const ATVDemodSettings& settings, bool force)
         m_DSBFilterBufferIndex = 0;
     }
 
-    if ((settings.m_bfoFrequency != m_settings.m_bfoFrequency) || force)
+    if (settingsKeys.contains("bfoFrequency") || force)
     {
         m_bfoPLL.configure((float) settings.m_bfoFrequency / (float) m_channelSampleRate,
                 100.0 / m_channelSampleRate,
@@ -509,9 +487,7 @@ void ATVDemodSink::applySettings(const ATVDemodSettings& settings, bool force)
         m_bfoFilter.setFrequencies(m_channelSampleRate, settings.m_bfoFrequency);
     }
 
-    if ((settings.m_nbLines != m_settings.m_nbLines)
-     || (settings.m_fps != m_settings.m_fps)
-     || (settings.m_atvStd != m_settings.m_atvStd) || force)
+    if (settingsKeys.contains("nbLines") || settingsKeys.contains("fps") || settingsKeys.contains("atvStd") || force)
     {
         unsigned int samplesPerLineNom;
         ATVDemodSettings::getBaseValues(m_channelSampleRate, settings.m_nbLines * settings.m_fps, samplesPerLineNom);
@@ -539,13 +515,17 @@ void ATVDemodSink::applySettings(const ATVDemodSettings& settings, bool force)
         m_fieldIndex = 0;
     }
 
-    if ((settings.m_fmDeviation != m_settings.m_fmDeviation) || force) {
+    if (settingsKeys.contains("fmDeviation") || force) {
         m_objPhaseDiscri.setFMScaling(1.0f / settings.m_fmDeviation);
     }
 
-    if ((settings.m_levelBlack != m_settings.m_levelBlack) || force) {
+    if (settingsKeys.contains("levelBlack") || force) {
         m_sampleRangeCorrection = 255.0f / (1.0f - m_settings.m_levelBlack);
     }
 
-    m_settings = settings;
+    if (force) {
+        m_settings = settings;
+    } else {
+        m_settings.applySettings(settingsKeys, settings);
+    }
 }

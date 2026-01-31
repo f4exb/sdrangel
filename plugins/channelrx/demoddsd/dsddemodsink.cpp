@@ -67,7 +67,7 @@ DSDDemodSink::DSDDemodSink() :
     m_magsqPeak = 0.0f;
     m_magsqCount = 0;
 
-	applySettings(m_settings, true);
+	applySettings(QStringList(), m_settings, true);
     applyChannelSettings(m_channelSampleRate, m_channelFrequencyOffset, true);
 }
 
@@ -365,33 +365,11 @@ void DSDDemodSink::applyChannelSettings(int channelSampleRate, int channelFreque
 }
 
 
-void DSDDemodSink::applySettings(const DSDDemodSettings& settings, bool force)
+void DSDDemodSink::applySettings(const QStringList& settingsKeys, const DSDDemodSettings& settings, bool force)
 {
-    qDebug() << "DSDDemodSink::applySettings: "
-            << " m_inputFrequencyOffset: " << settings.m_inputFrequencyOffset
-            << " m_rfBandwidth: " << settings.m_rfBandwidth
-            << " m_fmDeviation: " << settings.m_fmDeviation
-            << " m_demodGain: " << settings.m_demodGain
-            << " m_volume: " << settings.m_volume
-            << " m_baudRate: " << settings.m_baudRate
-            << " m_squelchGate" << settings.m_squelchGate
-            << " m_squelch: " << settings.m_squelch
-            << " m_audioMute: " << settings.m_audioMute
-            << " m_enableCosineFiltering: " << settings.m_enableCosineFiltering
-            << " m_syncOrConstellation: " << settings.m_syncOrConstellation
-            << " m_slot1On: " << settings.m_slot1On
-            << " m_slot2On: " << settings.m_slot2On
-            << " m_tdmaStereo: " << settings.m_tdmaStereo
-            << " m_pllLock: " << settings.m_pllLock
-            << " m_highPassFilter: "<< settings.m_highPassFilter
-            << " m_audioDeviceName: " << settings.m_audioDeviceName
-            << " m_traceLengthMutliplier: " << settings.m_traceLengthMutliplier
-            << " m_traceStroke: " << settings.m_traceStroke
-            << " m_traceDecay: " << settings.m_traceDecay
-            << " m_streamIndex: " << settings.m_streamIndex
-            << " force: " << force;
+    qDebug() << "DSDDemodSink::applySettings: " << settings.getDebugString(settingsKeys, force);
 
-    if ((settings.m_rfBandwidth != m_settings.m_rfBandwidth) || force)
+    if ((settingsKeys.contains("rfBandwidth") && (settings.m_rfBandwidth != m_settings.m_rfBandwidth)) || force)
     {
         m_interpolator.create(16, m_channelSampleRate, (settings.m_rfBandwidth) / 2.2);
         m_interpolatorDistanceRemain = 0;
@@ -399,54 +377,58 @@ void DSDDemodSink::applySettings(const DSDDemodSettings& settings, bool force)
         //m_phaseDiscri.setFMScaling((float) settings.m_rfBandwidth / (float) settings.m_fmDeviation);
     }
 
-    if ((settings.m_fmDeviation != m_settings.m_fmDeviation) || force)
+    if ((settingsKeys.contains("fmDeviation") && (settings.m_fmDeviation != m_settings.m_fmDeviation)) || force)
     {
         m_phaseDiscri.setFMScaling(48000.0f / (2.0f*settings.m_fmDeviation));
     }
 
-    if ((settings.m_squelchGate != m_settings.m_squelchGate) || force)
+    if ((settingsKeys.contains("squelchGate") && (settings.m_squelchGate != m_settings.m_squelchGate)) || force)
     {
         m_squelchGate = 480 * settings.m_squelchGate; // gate is given in 10s of ms at 48000 Hz audio sample rate
         m_squelchCount = 0; // reset squelch open counter
     }
 
-    if ((settings.m_squelch != m_settings.m_squelch) || force)
+    if ((settingsKeys.contains("squelch") && (settings.m_squelch != m_settings.m_squelch)) || force)
     {
         // input is a value in dB
         m_squelchLevel = std::pow(10.0, settings.m_squelch / 10.0);
     }
 
-    if ((settings.m_volume != m_settings.m_volume) || force)
+    if ((settingsKeys.contains("volume") && (settings.m_volume != m_settings.m_volume)) || force)
     {
         m_dsdDecoder.setAudioGain(settings.m_volume);
     }
 
-    if ((settings.m_baudRate != m_settings.m_baudRate) || force)
+    if ((settingsKeys.contains("baudRate") && (settings.m_baudRate != m_settings.m_baudRate)) || force)
     {
         m_dsdDecoder.setBaudRate(settings.m_baudRate);
     }
 
-    if ((settings.m_enableCosineFiltering != m_settings.m_enableCosineFiltering) || force)
+    if ((settingsKeys.contains("enableCosineFiltering") && (settings.m_enableCosineFiltering != m_settings.m_enableCosineFiltering)) || force)
     {
         m_dsdDecoder.enableCosineFiltering(settings.m_enableCosineFiltering);
     }
 
-    if ((settings.m_tdmaStereo != m_settings.m_tdmaStereo) || force)
+    if ((settingsKeys.contains("tdmaStereo") && (settings.m_tdmaStereo != m_settings.m_tdmaStereo)) || force)
     {
         m_dsdDecoder.setTDMAStereo(settings.m_tdmaStereo);
     }
 
-    if ((settings.m_pllLock != m_settings.m_pllLock) || force)
+    if ((settingsKeys.contains("pllLock") && (settings.m_pllLock != m_settings.m_pllLock)) || force)
     {
         m_dsdDecoder.setSymbolPLLLock(settings.m_pllLock);
     }
 
-    if ((settings.m_highPassFilter != m_settings.m_highPassFilter) || force)
+    if ((settingsKeys.contains("highPassFilter") && (settings.m_highPassFilter != m_settings.m_highPassFilter)) || force)
     {
         m_dsdDecoder.useHPMbelib(settings.m_highPassFilter);
     }
 
-    m_settings = settings;
+    if (force) {
+        m_settings = settings;
+    } else {
+        m_settings.applySettings(settingsKeys, settings);
+    }
 }
 
 void DSDDemodSink::configureMyPosition(float myLatitude, float myLongitude)

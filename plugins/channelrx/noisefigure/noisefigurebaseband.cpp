@@ -133,7 +133,7 @@ bool NoiseFigureBaseband::handleMessage(const Message& cmd)
         MsgConfigureNoiseFigureBaseband& cfg = (MsgConfigureNoiseFigureBaseband&) cmd;
         qDebug() << "NoiseFigureBaseband::handleMessage: MsgConfigureNoiseFigureBaseband";
 
-        applySettings(cfg.getSettings(), cfg.getForce());
+        applySettings(cfg.getSettingsKeys(), cfg.getSettings(), cfg.getForce());
 
         return true;
     }
@@ -154,11 +154,15 @@ bool NoiseFigureBaseband::handleMessage(const Message& cmd)
     }
 }
 
-void NoiseFigureBaseband::applySettings(const NoiseFigureSettings& settings, bool force)
+void NoiseFigureBaseband::applySettings(const QStringList& settingsKeys, const NoiseFigureSettings& settings, bool force)
 {
-    m_sink.applySettings(settings, force);
+    m_sink.applySettings(settingsKeys, settings, force);
 
-    m_settings = settings;
+    if (force) {
+        m_settings = settings;
+    } else {
+        m_settings.applySettings(settingsKeys, settings);
+    }
 }
 
 void NoiseFigureBaseband::setBasebandSampleRate(int sampleRate)

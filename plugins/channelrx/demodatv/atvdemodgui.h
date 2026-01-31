@@ -91,7 +91,7 @@ private:
     explicit ATVDemodGUI(PluginAPI* objPluginAPI, DeviceUISet *deviceUISet, BasebandSampleSink *rxChannel, QWidget* objParent = 0);
 	virtual ~ATVDemodGUI();
 
-	void applySettings(bool force = false);
+	void applySettings(const QStringList& settingsKeys, bool force = false);
     void displaySettings();
     void displayRFBandwidths();
     void applySampleRate();

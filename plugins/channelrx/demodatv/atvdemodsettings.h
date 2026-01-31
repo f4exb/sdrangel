@@ -91,6 +91,8 @@ struct ATVDemodSettings
     void setRollupState(Serializable *rollupState) { m_rollupState = rollupState; }
     QByteArray serialize() const;
     bool deserialize(const QByteArray& data);
+    void applySettings(const QStringList& settingsKeys, const ATVDemodSettings& settings);
+    QString getDebugString(const QStringList& settingsKeys, bool force=false) const;
 
     int getRFSliderDivisor(unsigned int sampleRate);
 

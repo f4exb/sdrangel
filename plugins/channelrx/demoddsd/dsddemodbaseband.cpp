@@ -118,7 +118,7 @@ bool DSDDemodBaseband::handleMessage(const Message& cmd)
         MsgConfigureDSDDemodBaseband& cfg = (MsgConfigureDSDDemodBaseband&) cmd;
         qDebug() << "DSDDemodBaseband::handleMessage: MsgConfigureDSDDemodBaseband";
 
-        applySettings(cfg.getSettings(), cfg.getForce());
+        applySettings(cfg.getSettingsKeys(), cfg.getSettings(), cfg.getForce());
 
         return true;
     }
@@ -145,9 +145,9 @@ bool DSDDemodBaseband::handleMessage(const Message& cmd)
     }
 }
 
-void DSDDemodBaseband::applySettings(const DSDDemodSettings& settings, bool force)
+void DSDDemodBaseband::applySettings(const QStringList& settingsKeys, const DSDDemodSettings& settings, bool force)
 {
-    if ((settings.m_inputFrequencyOffset != m_settings.m_inputFrequencyOffset) || force)
+    if ((settingsKeys.contains("inputFrequencyOffset") && (settings.m_inputFrequencyOffset != m_settings.m_inputFrequencyOffset)) || force)
     {
         m_channelizer.setChannelization(48000, settings.m_inputFrequencyOffset);
         m_sink.applyChannelSettings(m_channelizer.getChannelSampleRate(), m_channelizer.getChannelFrequencyOffset());
@@ -159,7 +159,7 @@ void DSDDemodBaseband::applySettings(const DSDDemodSettings& settings, bool forc
         }
     }
 
-    if ((settings.m_audioDeviceName != m_settings.m_audioDeviceName) || force)
+    if ((settingsKeys.contains("audioDeviceName") && (settings.m_audioDeviceName != m_settings.m_audioDeviceName)) || force)
     {
         AudioDeviceManager *audioDeviceManager = DSPEngine::instance()->getAudioDeviceManager();
         int audioDeviceIndex = audioDeviceManager->getOutputDeviceIndex(settings.m_audioDeviceName);
@@ -175,9 +175,13 @@ void DSDDemodBaseband::applySettings(const DSDDemodSettings& settings, bool forc
         }
     }
 
-    m_sink.applySettings(settings, force);
+    m_sink.applySettings(settingsKeys, settings, force);
 
-    m_settings = settings;
+    if (force) {
+        m_settings = settings;
+    } else {
+        m_settings.applySettings(settingsKeys, settings);
+    }
 }
 
 int DSDDemodBaseband::getChannelSampleRate() const

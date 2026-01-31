@@ -174,7 +174,7 @@ bool FT8DemodBaseband::handleMessage(const Message& cmd)
         MsgConfigureFT8DemodBaseband& cfg = (MsgConfigureFT8DemodBaseband&) cmd;
         qDebug() << "FT8DemodBaseband::handleMessage: MsgConfigureFT8DemodBaseband";
 
-        applySettings(cfg.getSettings(), cfg.getForce());
+        applySettings(cfg.getSettingsKeys(), cfg.getSettings(), cfg.getForce());
 
         return true;
     }
@@ -208,9 +208,9 @@ bool FT8DemodBaseband::handleMessage(const Message& cmd)
     }
 }
 
-void FT8DemodBaseband::applySettings(const FT8DemodSettings& settings, bool force)
+void FT8DemodBaseband::applySettings(const QStringList& settingsKeys, const FT8DemodSettings& settings, bool force)
 {
-    if ((settings.m_inputFrequencyOffset != m_settings.m_inputFrequencyOffset) || force)
+    if ((settingsKeys.contains("inputFrequencyOffset") && (settings.m_inputFrequencyOffset != m_settings.m_inputFrequencyOffset)) || force)
     {
         m_ft8DemodWorker->invalidateSequence();
         m_ft8DemodWorker->setBaseFrequency(m_deviceCenterFrequency + settings.m_inputFrequencyOffset);
@@ -241,56 +241,61 @@ void FT8DemodBaseband::applySettings(const FT8DemodSettings& settings, bool forc
         m_ft8DemodWorker->setHighFrequency(settings.m_filterBank[settings.m_filterIndex].m_rfBandwidth);
     }
 
-    if ((settings.m_recordWav != m_settings.m_recordWav) || force) {
+    if ((settingsKeys.contains("recordWav") && (settings.m_recordWav != m_settings.m_recordWav)) || force) {
         m_ft8DemodWorker->setRecordSamples(settings.m_recordWav);
     }
 
-    if ((settings.m_logMessages != m_settings.m_logMessages) || force) {
+    if ((settingsKeys.contains("logMessages") && (settings.m_logMessages != m_settings.m_logMessages)) || force) {
         m_ft8DemodWorker->setLogMessages(settings.m_logMessages);
     }
 
-    if ((settings.m_enablePSKReporter != m_settings.m_enablePSKReporter) || force) {
+    if ((settingsKeys.contains("enablePSKReporter") && (settings.m_enablePSKReporter != m_settings.m_enablePSKReporter)) || force) {
         m_ft8DemodWorker->setEnablePskReporter(settings.m_enablePSKReporter);
     }
 
-    if ((settings.m_pskReporterCallsign != m_settings.m_pskReporterCallsign) || force) {
+    if ((settingsKeys.contains("pskReporterCallsign") && (settings.m_pskReporterCallsign != m_settings.m_pskReporterCallsign)) || force) {
         m_pskReporterWorker->setMyCallsign(settings.m_pskReporterCallsign);
     }
 
-    if ((settings.m_pskReporterLocator != m_settings.m_pskReporterLocator) || force) {
+    if ((settingsKeys.contains("pskReporterLocator") && (settings.m_pskReporterLocator != m_settings.m_pskReporterLocator)) || force) {
         m_pskReporterWorker->setMyLocator(settings.m_pskReporterLocator);
     }
 
-    if ((settings.m_pskReporterSoftware != m_settings.m_pskReporterSoftware) || force) {
+    if ((settingsKeys.contains("pskReporterSoftware") && (settings.m_pskReporterSoftware != m_settings.m_pskReporterSoftware)) || force) {
         m_pskReporterWorker->setDecoderInfo(settings.m_pskReporterSoftware);
     }
 
-    if ((settings.m_nbDecoderThreads != m_settings.m_nbDecoderThreads) || force) {
+    if ((settingsKeys.contains("nbDecoderThreads") && (settings.m_nbDecoderThreads != m_settings.m_nbDecoderThreads)) || force) {
         m_ft8DemodWorker->setNbDecoderThreads(settings.m_nbDecoderThreads);
     }
 
-    if ((settings.m_decoderTimeBudget != m_settings.m_decoderTimeBudget) || force) {
+    if ((settingsKeys.contains("decoderTimeBudget") && (settings.m_decoderTimeBudget != m_settings.m_decoderTimeBudget)) || force) {
         m_ft8DemodWorker->setDecoderTimeBudget(settings.m_decoderTimeBudget);
     }
 
-    if ((settings.m_useOSD != m_settings.m_useOSD) || force) {
+    if ((settingsKeys.contains("useOSD") && (settings.m_useOSD != m_settings.m_useOSD)) || force) {
         m_ft8DemodWorker->setUseOSD(settings.m_useOSD);
     }
 
-    if ((settings.m_osdDepth != m_settings.m_osdDepth) || force) {
+    if ((settingsKeys.contains("osdDepth") && (settings.m_osdDepth != m_settings.m_osdDepth)) || force) {
         m_ft8DemodWorker->setOSDDepth(settings.m_osdDepth);
     }
 
-    if ((settings.m_osdLDPCThreshold != m_settings.m_osdLDPCThreshold) || force) {
+    if ((settingsKeys.contains("osdLDPCThreshold") && (settings.m_osdLDPCThreshold != m_settings.m_osdLDPCThreshold)) || force) {
         m_ft8DemodWorker->setOSDLDPCThreshold(settings.m_osdLDPCThreshold);
     }
 
-    if ((settings.m_verifyOSD != m_settings.m_verifyOSD) || force) {
+    if ((settingsKeys.contains("verifyOSD") && (settings.m_verifyOSD != m_settings.m_verifyOSD)) || force) {
         m_ft8DemodWorker->setVerifyOSD(settings.m_verifyOSD);
     }
 
-    m_sink.applySettings(settings, force);
-    m_settings = settings;
+    m_sink.applySettings(settingsKeys, settings, force);
+
+    if (force) {
+        m_settings = settings;
+    } else {
+        m_settings.applySettings(settingsKeys, settings);
+    }
 }
 
 int FT8DemodBaseband::getChannelSampleRate() const

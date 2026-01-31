@@ -49,7 +49,7 @@ VORDemodSCSink::VORDemodSCSink() :
 
 	m_magsq = 0.0;
 
-	applySettings(m_settings, true);
+	applySettings(QStringList(), m_settings, true);
     applyChannelSettings(m_channelSampleRate, m_channelFrequencyOffset, true);
 }
 
@@ -281,21 +281,15 @@ void VORDemodSCSink::applyChannelSettings(int channelSampleRate, int channelFreq
     m_channelFrequencyOffset = channelFrequencyOffset;
 }
 
-void VORDemodSCSink::applySettings(const VORDemodSettings& settings, bool force)
+void VORDemodSCSink::applySettings(const QStringList& settingsKeys, const VORDemodSettings& settings, bool force)
 {
-    qDebug() << "VORDemodSCSink::applySettings:"
-            << " m_volume: " << settings.m_volume
-            << " m_squelch: " << settings.m_squelch
-            << " m_audioMute: " << settings.m_audioMute
-            << " m_audioDeviceName: " << settings.m_audioDeviceName
-            << " m_identBandpassEnable: " << settings.m_identBandpassEnable
-            << " force: " << force;
+    qDebug() << "VORDemodSCSink::applySettings:" << settings.getDebugString(settingsKeys, force);
 
-    if ((m_settings.m_squelch != settings.m_squelch) || force) {
+    if ((settingsKeys.contains("squelch") && (m_settings.m_squelch != settings.m_squelch)) || force) {
         m_squelchLevel = CalcDb::powerFromdB(settings.m_squelch);
     }
 
-    if (m_settings.m_navId != settings.m_navId)
+    if ((settingsKeys.contains("navId") && (m_settings.m_navId != settings.m_navId)) || force)
     {
         // Reset state when navId changes, so we don't report old ident for new navId
         m_morseDemod.reset();
@@ -303,7 +297,7 @@ void VORDemodSCSink::applySettings(const VORDemodSettings& settings, bool force)
         m_varGoertzel.reset();
     }
 
-    if ((m_settings.m_identBandpassEnable != settings.m_identBandpassEnable) || force)
+    if ((settingsKeys.contains("identBandpassEnable") && (m_settings.m_identBandpassEnable != settings.m_identBandpassEnable)) || force)
     {
         if (settings.m_identBandpassEnable) {
             m_bandpass.create(1001, m_audioSampleRate, 970.0f, 1070.0f);
@@ -313,8 +307,13 @@ void VORDemodSCSink::applySettings(const VORDemodSettings& settings, bool force)
         //m_bandpass.printTaps("audio_bpf");
     }
 
-    m_settings = settings;
-    m_morseDemod.applySettings(m_settings.m_identThreshold);
+    if (force) {
+        m_settings = settings;
+    } else {
+        m_settings.applySettings(settingsKeys, settings);
+    }
+
+    m_morseDemod.applySettings(settings.m_identThreshold);
 }
 
 void VORDemodSCSink::applyAudioSampleRate(int sampleRate)

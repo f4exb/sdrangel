@@ -84,7 +84,7 @@ public:
     RDSParser& getRDSParser() { return m_rdsParser; }
 
     void applyChannelSettings(int channelSampleRate, int channelFrequencyOffset, bool force = false);
-    void applySettings(const BFMDemodSettings& settings, bool force = false);
+    void applySettings(const QStringList& keys, const BFMDemodSettings& settings, bool force = false);
 
     AudioFifo *getAudioFifo() { return &m_audioFifo; }
     void setAudioFifoLabel(const QString& label) { m_audioFifo.setLabel(label); }

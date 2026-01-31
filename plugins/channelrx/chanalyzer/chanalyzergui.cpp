@@ -226,14 +226,14 @@ bool ChannelAnalyzerGUI::deserialize(const QByteArray& data)
     if (m_settings.deserialize(data))
     {
         displaySettings();
-        applySettings(true); // will have true
+        applySettings(QStringList(), true); // will have true
         return true;
     }
     else
     {
         m_settings.resetToDefaults();
         displaySettings();
-        applySettings(true); // will have true
+        applySettings(QStringList(), true); // will have true
         return false;
     }
 }
@@ -291,7 +291,7 @@ void ChannelAnalyzerGUI::channelMarkerChangedByCursor()
     ui->deltaFrequency->setValue(m_channelMarker.getCenterFrequency());
     m_settings.m_inputFrequencyOffset = m_channelMarker.getCenterFrequency();
     updateAbsoluteCenterFrequency();
-	applySettings();
+	applySettings(QStringList({"inputFrequencyOffset"}));
 }
 
 void ChannelAnalyzerGUI::channelMarkerHighlightedByCursor()
@@ -324,7 +324,7 @@ void ChannelAnalyzerGUI::on_rationalDownSamplerRate_changed(quint64 value)
 {
     m_settings.m_rationalDownSamplerRate = value;
     setSinkSampleRate();
-    applySettings();
+    applySettings(QStringList({"rationalDownSamplerRate"}));
 }
 
 void ChannelAnalyzerGUI::on_pll_toggled(bool checked)
@@ -335,7 +335,7 @@ void ChannelAnalyzerGUI::on_pll_toggled(bool checked)
 
 	m_settings.m_pll = checked;
     setPLLVisibility();
-    applySettings();
+    applySettings(QStringList({"pll"}));
 }
 
 void ChannelAnalyzerGUI::on_pllType_currentIndexChanged(int index)
@@ -343,7 +343,7 @@ void ChannelAnalyzerGUI::on_pllType_currentIndexChanged(int index)
     m_settings.m_fll = (index == 1);
     m_settings.m_costasLoop = (index == 2);
     setPLLVisibility();
-    applySettings();
+    applySettings(QStringList({"fll", "costasLoop"}));
 }
 
 void ChannelAnalyzerGUI::on_pllPskOrder_currentIndexChanged(int index)
@@ -352,7 +352,7 @@ void ChannelAnalyzerGUI::on_pllPskOrder_currentIndexChanged(int index)
         m_settings.m_pllPskOrder = (1<<(index+1));
     else
         m_settings.m_pllPskOrder = (1<<index);
-    applySettings();
+    applySettings(QStringList({"pllPskOrder"}));
 }
 
 void ChannelAnalyzerGUI::on_pllBandwidth_valueChanged(int value)
@@ -360,7 +360,7 @@ void ChannelAnalyzerGUI::on_pllBandwidth_valueChanged(int value)
     m_settings.m_pllBandwidth = value/1000.0;
     QString bandwidthStr = QString::number(m_settings.m_pllBandwidth, 'f', 3);
     ui->pllBandwidthText->setText(bandwidthStr);
-    applySettings();
+    applySettings(QStringList({"pllBandwidth"}));
 }
 
 void ChannelAnalyzerGUI::on_pllDampingFactor_valueChanged(int value)
@@ -368,7 +368,7 @@ void ChannelAnalyzerGUI::on_pllDampingFactor_valueChanged(int value)
     m_settings.m_pllDampingFactor = value/10.0;
     QString factorStr = QString::number(m_settings.m_pllDampingFactor, 'f', 1);
     ui->pllDampingFactorText->setText(factorStr);
-    applySettings();
+    applySettings(QStringList({"pllDampingFactor"}));
 }
 
 void ChannelAnalyzerGUI::on_pllLoopGain_valueChanged(int value)
@@ -376,14 +376,14 @@ void ChannelAnalyzerGUI::on_pllLoopGain_valueChanged(int value)
     m_settings.m_pllLoopGain = value;
     QString gainStr = QString::number(m_settings.m_pllLoopGain, 'f', 0);
     ui->pllLoopGainText->setText(gainStr);
-    applySettings();
+    applySettings(QStringList({"pllLoopGain"}));
 }
 
 void ChannelAnalyzerGUI::on_useRationalDownsampler_toggled(bool checked)
 {
     m_settings.m_rationalDownSample = checked;
     setSinkSampleRate();
-    applySettings();
+    applySettings(QStringList({"rationalDownSample"}));
 }
 
 void ChannelAnalyzerGUI::on_signalSelect_currentIndexChanged(int index)
@@ -397,7 +397,7 @@ void ChannelAnalyzerGUI::on_signalSelect_currentIndexChanged(int index)
     }
 
     ui->scopeGUI->traceLengthChange();
-    applySettings();
+    applySettings(QStringList({"inputType"}));
 }
 
 void ChannelAnalyzerGUI::on_deltaFrequency_changed(qint64 value)
@@ -405,13 +405,13 @@ void ChannelAnalyzerGUI::on_deltaFrequency_changed(qint64 value)
     m_channelMarker.setCenterFrequency(value);
     m_settings.m_inputFrequencyOffset = m_channelMarker.getCenterFrequency();
     updateAbsoluteCenterFrequency();
-    applySettings();
+    applySettings(QStringList({"inputFrequencyOffset"}));
 }
 
 void ChannelAnalyzerGUI::on_rrcFilter_toggled(bool checked)
 {
     m_settings.m_rrc = checked;
-    applySettings();
+    applySettings(QStringList({"rrc"}));
 }
 
 void ChannelAnalyzerGUI::on_rrcRolloff_valueChanged(int value)
@@ -419,7 +419,7 @@ void ChannelAnalyzerGUI::on_rrcRolloff_valueChanged(int value)
     m_settings.m_rrcRolloff = value;
     QString rolloffStr = QString::number(value/100.0, 'f', 2);
     ui->rrcRolloffText->setText(rolloffStr);
-    applySettings();
+    applySettings(QStringList({"rrcRolloff"}));
 }
 
 void ChannelAnalyzerGUI::on_BW_valueChanged(int value)
@@ -428,7 +428,7 @@ void ChannelAnalyzerGUI::on_BW_valueChanged(int value)
     setFiltersUIBoundaries();
     m_settings.m_bandwidth = ui->BW->value() * 100;
     m_settings.m_lowCutoff = ui->lowCut->value() * 100;
-	applySettings();
+	applySettings(QStringList({"bandwidth", "lowCutoff"}));
 }
 
 void ChannelAnalyzerGUI::on_lowCut_valueChanged(int value)
@@ -437,7 +437,7 @@ void ChannelAnalyzerGUI::on_lowCut_valueChanged(int value)
 	setFiltersUIBoundaries();
 	m_settings.m_bandwidth = ui->BW->value() * 100;
 	m_settings.m_lowCutoff = ui->lowCut->value() * 100;
-	applySettings();
+	applySettings(QStringList({"bandwidth", "lowCutoff"}));
 }
 
 void ChannelAnalyzerGUI::on_log2Decim_currentIndexChanged(int index)
@@ -448,7 +448,7 @@ void ChannelAnalyzerGUI::on_log2Decim_currentIndexChanged(int index)
 
     m_settings.m_log2Decim = index;
     setSinkSampleRate();
-    applySettings();
+    applySettings(QStringList({"log2Decim"}));
 }
 
 void ChannelAnalyzerGUI::on_ssb_toggled(bool checked)
@@ -460,7 +460,7 @@ void ChannelAnalyzerGUI::on_ssb_toggled(bool checked)
 	    ui->BWLabel->setText("BP");
 	}
     setFiltersUIBoundaries();
-    applySettings();
+    applySettings(QStringList({"ssb"}));
 }
 
 void ChannelAnalyzerGUI::onWidgetRolled(QWidget* widget, bool rollDown)
@@ -469,7 +469,7 @@ void ChannelAnalyzerGUI::onWidgetRolled(QWidget* widget, bool rollDown)
     (void) rollDown;
 
     getRollupContents()->saveState(m_rollupState);
-    applySettings();
+    applySettings(QStringList({"rollupState"}));
 }
 
 void ChannelAnalyzerGUI::onMenuDialogCalled(const QPoint& p)
@@ -514,7 +514,16 @@ void ChannelAnalyzerGUI::onMenuDialogCalled(const QPoint& p)
             updateIndexLabel();
         }
 
-        applySettings();
+        applySettings(QStringList({
+            "rgbColor",
+            "title",
+            "useReverseAPI",
+            "reverseAPIAddress",
+            "reverseAPIPort",
+            "reverseAPIDeviceIndex",
+            "reverseAPIChannelIndex",
+            "streamIndex"
+        }));
     }
 
     resetContextMenuType();
@@ -596,7 +605,7 @@ ChannelAnalyzerGUI::ChannelAnalyzerGUI(PluginAPI* pluginAPI, DeviceUISet *device
 
 	displaySettings();
     makeUIConnections();
-	applySettings(true);
+	applySettings(QStringList(), true); // will have true
     DialPopup::addPopupsToChildDials(this);
     m_resizer.enableChildMouseTracking();
 }
@@ -704,12 +713,12 @@ void ChannelAnalyzerGUI::blockApplySettings(bool block)
     m_doApplySettings = !block;
 }
 
-void ChannelAnalyzerGUI::applySettings(bool force)
+void ChannelAnalyzerGUI::applySettings(const QStringList& settingsKeys, bool force)
 {
 	if (m_doApplySettings)
 	{
         ChannelAnalyzer::MsgConfigureChannelAnalyzer* message =
-                ChannelAnalyzer::MsgConfigureChannelAnalyzer::create( m_settings, force);
+                ChannelAnalyzer::MsgConfigureChannelAnalyzer::create( m_settings, settingsKeys, force);
         m_channelAnalyzer->getInputMessageQueue()->push(message);
 	}
 }

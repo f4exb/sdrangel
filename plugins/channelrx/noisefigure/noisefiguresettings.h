@@ -103,6 +103,8 @@ struct NoiseFigureSettings
     bool deserialize(const QByteArray& data);
     QByteArray serializeENRs(QList<ENR *> enrs) const;
     void deserializeENRs(const QByteArray& data, QList<ENR *>& enrs);
+    void applySettings(const QStringList& settingsKeys, const NoiseFigureSettings& settings);
+    QString getDebugString(const QStringList& settingsKeys, bool force=false) const;
 };
 
 #endif /* INCLUDE_NOISEFIGURESETTINGS_H */

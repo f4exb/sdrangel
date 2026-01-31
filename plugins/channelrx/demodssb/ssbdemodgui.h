@@ -98,7 +98,7 @@ private:
 	virtual ~SSBDemodGUI();
 
     bool blockApplySettings(bool block);
-	void applySettings(bool force = false);
+	void applySettings(const QStringList& channelSettingsKeys, bool force = false);
 	void applyBandwidths(unsigned int spanLog2, bool force = false);
     unsigned int spanLog2Max();
 	void displaySettings();

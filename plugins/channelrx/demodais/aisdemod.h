@@ -52,20 +52,23 @@ public:
 
     public:
         const AISDemodSettings& getSettings() const { return m_settings; }
+        const QStringList& getSettingsKeys() const { return m_settingsKeys; }
         bool getForce() const { return m_force; }
 
-        static MsgConfigureAISDemod* create(const AISDemodSettings& settings, bool force)
+        static MsgConfigureAISDemod* create(const AISDemodSettings& settings, const QStringList& settingsKeys, bool force)
         {
-            return new MsgConfigureAISDemod(settings, force);
+            return new MsgConfigureAISDemod(settings, settingsKeys, force);
         }
 
     private:
         AISDemodSettings m_settings;
+        QStringList m_settingsKeys;
         bool m_force;
 
-        MsgConfigureAISDemod(const AISDemodSettings& settings, bool force) :
+        MsgConfigureAISDemod(const AISDemodSettings& settings, const QStringList& settingsKeys, bool force) :
             Message(),
             m_settings(settings),
+            m_settingsKeys(settingsKeys),
             m_force(force)
         { }
     };
@@ -184,11 +187,11 @@ private:
     QNetworkRequest m_networkRequest;
 
     virtual bool handleMessage(const Message& cmd);
-    void applySettings(const AISDemodSettings& settings, bool force = false);
+    void applySettings(const AISDemodSettings& settings, const QStringList& settingsKeys, bool force = false);
     void sendSampleRateToDemodAnalyzer();
-    void webapiReverseSendSettings(QList<QString>& channelSettingsKeys, const AISDemodSettings& settings, bool force);
+    void webapiReverseSendSettings(const QList<QString>& channelSettingsKeys, const AISDemodSettings& settings, bool force);
     void webapiFormatChannelSettings(
-        QList<QString>& channelSettingsKeys,
+        const QList<QString>& channelSettingsKeys,
         SWGSDRangel::SWGChannelSettings *swgChannelSettings,
         const AISDemodSettings& settings,
         bool force

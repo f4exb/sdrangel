@@ -125,7 +125,7 @@ bool ChannelAnalyzerBaseband::handleMessage(const Message& cmd)
         MsgConfigureChannelAnalyzerBaseband& cfg = (MsgConfigureChannelAnalyzerBaseband&) cmd;
         qDebug() << "ChannelAnalyzerBaseband::handleMessage: MsgConfigureChannelAnalyzerBaseband";
 
-        applySettings(cfg.getSettings(), cfg.getForce());
+        applySettings(cfg.getSettings(), cfg.getSettingsKeys(), cfg.getForce());
 
         return true;
     }
@@ -148,7 +148,7 @@ bool ChannelAnalyzerBaseband::handleMessage(const Message& cmd)
     }
 }
 
-void ChannelAnalyzerBaseband::applySettings(const ChannelAnalyzerSettings& settings, bool force)
+void ChannelAnalyzerBaseband::applySettings(const ChannelAnalyzerSettings& settings, const QStringList& settingsKeys, bool force)
 {
     if ((settings.m_log2Decim != m_settings.m_log2Decim)
      || (settings.m_inputFrequencyOffset != m_settings.m_inputFrequencyOffset)
@@ -160,7 +160,7 @@ void ChannelAnalyzerBaseband::applySettings(const ChannelAnalyzerSettings& setti
         m_sink.applyChannelSettings(m_channelizer->getChannelSampleRate(), desiredSampleRate, m_channelizer->getChannelFrequencyOffset());
     }
 
-    m_sink.applySettings(settings, force);
+    m_sink.applySettings(settings, settingsKeys, force);
     m_settings = settings;
 }
 

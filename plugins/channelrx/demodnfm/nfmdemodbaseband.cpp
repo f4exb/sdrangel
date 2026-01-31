@@ -121,7 +121,7 @@ bool NFMDemodBaseband::handleMessage(const Message& cmd)
         MsgConfigureNFMDemodBaseband& cfg = (MsgConfigureNFMDemodBaseband&) cmd;
         qDebug() << "NFMDemodBaseband::handleMessage: MsgConfigureNFMDemodBaseband";
 
-        applySettings(cfg.getSettings(), cfg.getForce());
+        applySettings(cfg.getSettingsKeys(), cfg.getSettings(), cfg.getForce());
 
         return true;
     }
@@ -148,9 +148,9 @@ bool NFMDemodBaseband::handleMessage(const Message& cmd)
     }
 }
 
-void NFMDemodBaseband::applySettings(const NFMDemodSettings& settings, bool force)
+void NFMDemodBaseband::applySettings(const QStringList& settingsKeys, const NFMDemodSettings& settings, const bool force)
 {
-    if ((settings.m_inputFrequencyOffset != m_settings.m_inputFrequencyOffset) || force)
+    if ((settingsKeys.contains("inputFrequencyOffset") && (settings.m_inputFrequencyOffset != m_settings.m_inputFrequencyOffset)) || force)
     {
         m_channelizer.setChannelization(m_sink.getAudioSampleRate(), settings.m_inputFrequencyOffset);
         m_sink.applyChannelSettings(m_channelizer.getChannelSampleRate(), m_channelizer.getChannelFrequencyOffset());
@@ -162,7 +162,7 @@ void NFMDemodBaseband::applySettings(const NFMDemodSettings& settings, bool forc
         }
     }
 
-    if ((settings.m_audioDeviceName != m_settings.m_audioDeviceName) || force)
+    if ((settingsKeys.contains("audioDeviceName") && (settings.m_audioDeviceName != m_settings.m_audioDeviceName)) || force)
     {
         AudioDeviceManager *audioDeviceManager = DSPEngine::instance()->getAudioDeviceManager();
         int audioDeviceIndex = audioDeviceManager->getOutputDeviceIndex(settings.m_audioDeviceName);
@@ -179,9 +179,13 @@ void NFMDemodBaseband::applySettings(const NFMDemodSettings& settings, bool forc
         }
     }
 
-    m_sink.applySettings(settings, force);
+    m_sink.applySettings(settingsKeys, settings, force);
 
-    m_settings = settings;
+    if (force) {
+        m_settings = settings;
+    } else {
+        m_settings.applySettings(settingsKeys, settings);
+    }
 }
 
 int NFMDemodBaseband::getChannelSampleRate() const

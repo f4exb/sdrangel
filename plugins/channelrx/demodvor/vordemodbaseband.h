@@ -39,20 +39,23 @@ public:
 
     public:
         const VORDemodSettings& getSettings() const { return m_settings; }
+        const QStringList& getSettingsKeys() const { return m_settingsKeys; }
         bool getForce() const { return m_force; }
 
-        static MsgConfigureVORDemodBaseband* create(const VORDemodSettings& settings, bool force)
+        static MsgConfigureVORDemodBaseband* create(const QStringList& settingsKeys, const VORDemodSettings& settings, bool force)
         {
-            return new MsgConfigureVORDemodBaseband(settings, force);
+            return new MsgConfigureVORDemodBaseband(settingsKeys, settings, force);
         }
 
     private:
         VORDemodSettings m_settings;
+        QStringList m_settingsKeys;
         bool m_force;
 
-        MsgConfigureVORDemodBaseband(const VORDemodSettings& settings, bool force) :
+        MsgConfigureVORDemodBaseband(const QStringList& settingsKeys, const VORDemodSettings& settings, bool force) :
             Message(),
             m_settings(settings),
+            m_settingsKeys(settingsKeys),
             m_force(force)
         { }
     };
@@ -85,7 +88,7 @@ private:
     QRecursiveMutex m_mutex;
 
     bool handleMessage(const Message& cmd);
-    void applySettings(const VORDemodSettings& settings, bool force = false);
+    void applySettings(const QStringList& settingsKeys, const VORDemodSettings& settings, bool force = false);
 
 private slots:
     void handleInputMessages();

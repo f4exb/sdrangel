@@ -41,7 +41,7 @@ NavtexDemodSink::NavtexDemodSink() :
 
     m_sampleBuffer.resize(m_sampleBufferSize);
 
-    applySettings(m_settings, true);
+    applySettings(QStringList(), m_settings, true);
     applyChannelSettings(m_channelSampleRate, m_channelFrequencyOffset, true);
 
     m_lowpassComplex1.create(301, NavtexDemodSettings::NAVTEXDEMOD_CHANNEL_SAMPLE_RATE, NavtexDemodSettings::NAVTEXDEMOD_BAUD_RATE * 1.1);
@@ -457,13 +457,11 @@ void NavtexDemodSink::init()
     m_messageBuffer = "";
 }
 
-void NavtexDemodSink::applySettings(const NavtexDemodSettings& settings, bool force)
+void NavtexDemodSink::applySettings(const QStringList& settingsKeys, const NavtexDemodSettings& settings, bool force)
 {
-    qDebug() << "NavtexDemodSink::applySettings:"
-            << " m_rfBandwidth: " << settings.m_rfBandwidth
-            << " force: " << force;
+    qDebug() << "NavtexDemodSink::applySettings:" << settings.getDebugString(settingsKeys, force);
 
-    if ((settings.m_rfBandwidth != m_settings.m_rfBandwidth) || force)
+    if ((settingsKeys.contains("rfBandwidth") && (settings.m_rfBandwidth != m_settings.m_rfBandwidth)) || force)
     {
         m_interpolator.create(16, m_channelSampleRate, settings.m_rfBandwidth / 2.2);
         m_interpolatorDistance = (Real) m_channelSampleRate / (Real) NavtexDemodSettings::NAVTEXDEMOD_CHANNEL_SAMPLE_RATE;
@@ -485,8 +483,10 @@ void NavtexDemodSink::applySettings(const NavtexDemodSettings& settings, bool fo
         // while something is being transmitted
         m_movMax1.setSize(m_samplesPerBit * 8);
         m_movMax2.setSize(m_samplesPerBit * 8);
+        m_settings = settings;
     }
-
-    m_settings = settings;
+    else
+    {
+        m_settings.applySettings(settingsKeys, settings);
+    }
 }
-

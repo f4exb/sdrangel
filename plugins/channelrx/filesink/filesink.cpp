@@ -62,7 +62,7 @@ FileSink::FileSink(DeviceAPI *deviceAPI) :
 {
     setObjectName(m_channelId);
 
-    applySettings(m_settings, true);
+    applySettings(QStringList(), m_settings, true);
 
     m_deviceAPI->addChannelSink(this);
     m_deviceAPI->addChannelSinkAPI(this);
@@ -181,7 +181,7 @@ void FileSink::start()
     DSPSignalNotification *dspMsg = new DSPSignalNotification(m_basebandSampleRate, m_centerFrequency);
     m_basebandSink->getInputMessageQueue()->push(dspMsg);
 
-    FileSinkBaseband::MsgConfigureFileSinkBaseband *msg = FileSinkBaseband::MsgConfigureFileSinkBaseband::create(m_settings, true);
+    FileSinkBaseband::MsgConfigureFileSinkBaseband *msg = FileSinkBaseband::MsgConfigureFileSinkBaseband::create(QStringList(), m_settings, true);
     m_basebandSink->getInputMessageQueue()->push(msg);
 
     if (getMessageQueueToGUI())
@@ -241,7 +241,7 @@ bool FileSink::handleMessage(const Message& cmd)
     {
         MsgConfigureFileSink& cfg = (MsgConfigureFileSink&) cmd;
         qDebug() << "FileSink::handleMessage: MsgConfigureFileSink";
-        applySettings(cfg.getSettings(), cfg.getForce());
+        applySettings(cfg.getSettingsKeys(), cfg.getSettings(), cfg.getForce());
 
         return true;
     }
@@ -261,14 +261,14 @@ bool FileSink::deserialize(const QByteArray& data)
     (void) data;
     if (m_settings.deserialize(data))
     {
-        MsgConfigureFileSink *msg = MsgConfigureFileSink::create(m_settings, true);
+        MsgConfigureFileSink *msg = MsgConfigureFileSink::create(QStringList(), m_settings, true);
         m_inputMessageQueue.push(msg);
         return true;
     }
     else
     {
         m_settings.resetToDefaults();
-        MsgConfigureFileSink *msg = MsgConfigureFileSink::create(m_settings, true);
+        MsgConfigureFileSink *msg = MsgConfigureFileSink::create(QStringList(), m_settings, true);
         m_inputMessageQueue.push(msg);
         return false;
     }
@@ -322,48 +322,11 @@ DeviceSampleSource *FileSink::getLocalDevice(uint32_t index)
     return nullptr;
 }
 
-void FileSink::applySettings(const FileSinkSettings& settings, bool force)
+void FileSink::applySettings(const QStringList& settingsKeys, const FileSinkSettings& settings, bool force)
 {
-    qDebug() << "FileSink::applySettings:"
-        << "m_inputFrequencyOffset: " << settings.m_inputFrequencyOffset
-        << "m_log2Decim: " << settings.m_log2Decim
-        << "m_fileRecordName: " << settings.m_fileRecordName
-        << "force: " << force;
+    qDebug() << "FileSink::applySettings:" << settings.getDebugString(settingsKeys, force);
 
-    QList<QString> reverseAPIKeys;
-
-    if ((settings.m_inputFrequencyOffset != m_settings.m_inputFrequencyOffset) || force) {
-        reverseAPIKeys.append("inputFrequencyOffset");
-    }
-    if ((settings.m_fileRecordName != m_settings.m_fileRecordName) || force) {
-        reverseAPIKeys.append("fileRecordName");
-    }
-    if ((settings.m_rgbColor != m_settings.m_rgbColor) || force) {
-        reverseAPIKeys.append("rgbColor");
-    }
-    if ((settings.m_title != m_settings.m_title) || force) {
-        reverseAPIKeys.append("title");
-    }
-    if ((settings.m_log2Decim != m_settings.m_log2Decim) || force) {
-        reverseAPIKeys.append("log2Decim");
-    }
-    if ((settings.m_spectrumSquelchMode != m_settings.m_spectrumSquelchMode) || force) {
-        reverseAPIKeys.append("spectrumSquelchMode");
-    }
-    if ((settings.m_spectrumSquelch != m_settings.m_spectrumSquelch) || force) {
-        reverseAPIKeys.append("spectrumSquelch");
-    }
-    if ((settings.m_preRecordTime != m_settings.m_preRecordTime) || force) {
-        reverseAPIKeys.append("preRecordTime");
-    }
-    if ((settings.m_squelchPostRecordTime != m_settings.m_squelchPostRecordTime) || force) {
-        reverseAPIKeys.append("squelchPostRecordTime");
-    }
-    if ((settings.m_squelchRecordingEnable != m_settings.m_squelchRecordingEnable) || force) {
-        reverseAPIKeys.append("squelchRecordingEnable");
-    }
-
-    if (m_settings.m_streamIndex != settings.m_streamIndex)
+    if (settingsKeys.contains("streamIndex") && (m_settings.m_streamIndex != settings.m_streamIndex))
     {
         if (m_deviceAPI->getSampleMIMO()) // change of stream is possible for MIMO devices only
         {
@@ -374,34 +337,40 @@ void FileSink::applySettings(const FileSinkSettings& settings, bool force)
             m_settings.m_streamIndex = settings.m_streamIndex; // make sure ChannelAPI::getStreamIndex() is consistent
             emit streamIndexChanged(settings.m_streamIndex);
         }
-
-        reverseAPIKeys.append("streamIndex");
     }
 
     if (m_running)
     {
-        FileSinkBaseband::MsgConfigureFileSinkBaseband *msg = FileSinkBaseband::MsgConfigureFileSinkBaseband::create(settings, force);
+        FileSinkBaseband::MsgConfigureFileSinkBaseband *msg = FileSinkBaseband::MsgConfigureFileSinkBaseband::create(settingsKeys, settings, force);
         m_basebandSink->getInputMessageQueue()->push(msg);
     }
 
-    if ((settings.m_useReverseAPI) && (reverseAPIKeys.size() != 0))
+    if ((settingsKeys.contains("useReverseAPI") && (settings.m_useReverseAPI)) ||
+        (settingsKeys.contains("reverseAPIAddress") && (m_settings.m_reverseAPIAddress != settings.m_reverseAPIAddress)) ||
+        (settingsKeys.contains("reverseAPIPort") && (m_settings.m_reverseAPIPort != settings.m_reverseAPIPort)) ||
+        (settingsKeys.contains("reverseAPIDeviceIndex") && (m_settings.m_reverseAPIDeviceIndex != settings.m_reverseAPIDeviceIndex)) ||
+        (settingsKeys.contains("reverseAPIChannelIndex") && (m_settings.m_reverseAPIChannelIndex != settings.m_reverseAPIChannelIndex)))
     {
-        bool fullUpdate = ((m_settings.m_useReverseAPI != settings.m_useReverseAPI) && settings.m_useReverseAPI) ||
-                (m_settings.m_reverseAPIAddress != settings.m_reverseAPIAddress) ||
-                (m_settings.m_reverseAPIPort != settings.m_reverseAPIPort) ||
-                (m_settings.m_reverseAPIDeviceIndex != settings.m_reverseAPIDeviceIndex) ||
-                (m_settings.m_reverseAPIChannelIndex != settings.m_reverseAPIChannelIndex);
-        webapiReverseSendSettings(reverseAPIKeys, settings, fullUpdate || force);
+        bool fullUpdate = ((settingsKeys.contains("useReverseAPI") && (m_settings.m_useReverseAPI != settings.m_useReverseAPI)) && settings.m_useReverseAPI) ||
+                (settingsKeys.contains("reverseAPIAddress") && (m_settings.m_reverseAPIAddress != settings.m_reverseAPIAddress)) ||
+                (settingsKeys.contains("reverseAPIPort") && (m_settings.m_reverseAPIPort != settings.m_reverseAPIPort)) ||
+                (settingsKeys.contains("reverseAPIDeviceIndex") && (m_settings.m_reverseAPIDeviceIndex != settings.m_reverseAPIDeviceIndex)) ||
+                (settingsKeys.contains("reverseAPIChannelIndex") && (m_settings.m_reverseAPIChannelIndex != settings.m_reverseAPIChannelIndex));
+        webapiReverseSendSettings(settingsKeys, settings, fullUpdate || force);
     }
 
     QList<ObjectPipe*> pipes;
     MainCore::instance()->getMessagePipes().getMessagePipes(this, "settings", pipes);
 
     if (pipes.size() > 0) {
-        sendChannelSettings(pipes, reverseAPIKeys, settings, force);
+        sendChannelSettings(pipes, settingsKeys, settings, force);
     }
 
-    m_settings = settings;
+    if (force) {
+        m_settings = settings;
+    } else {
+        m_settings.applySettings(settingsKeys, settings);
+    }
 }
 
 void FileSink::record(bool record)
@@ -470,13 +439,13 @@ int FileSink::webapiSettingsPutPatch(
     FileSinkSettings settings = m_settings;
     webapiUpdateChannelSettings(settings, channelSettingsKeys, response);
 
-    MsgConfigureFileSink *msg = MsgConfigureFileSink::create(settings, force);
+    MsgConfigureFileSink *msg = MsgConfigureFileSink::create(channelSettingsKeys, settings, force);
     m_inputMessageQueue.push(msg);
 
     qDebug("FileSink::webapiSettingsPutPatch: forward to GUI: %p", m_guiMessageQueue);
     if (m_guiMessageQueue) // forward to GUI if any
     {
-        MsgConfigureFileSink *msgToGUI = MsgConfigureFileSink::create(settings, force);
+        MsgConfigureFileSink *msgToGUI = MsgConfigureFileSink::create(channelSettingsKeys, settings, force);
         m_guiMessageQueue->push(msgToGUI);
     }
 
@@ -697,7 +666,7 @@ void FileSink::webapiFormatChannelReport(SWGSDRangel::SWGChannelReport& response
     }
 }
 
-void FileSink::webapiReverseSendSettings(QList<QString>& channelSettingsKeys, const FileSinkSettings& settings, bool force)
+void FileSink::webapiReverseSendSettings(const QList<QString>& channelSettingsKeys, const FileSinkSettings& settings, bool force)
 {
     SWGSDRangel::SWGChannelSettings *swgChannelSettings = new SWGSDRangel::SWGChannelSettings();
     webapiFormatChannelSettings(channelSettingsKeys, swgChannelSettings, settings, force);
@@ -724,7 +693,7 @@ void FileSink::webapiReverseSendSettings(QList<QString>& channelSettingsKeys, co
 
 void FileSink::sendChannelSettings(
     const QList<ObjectPipe*>& pipes,
-    QList<QString>& channelSettingsKeys,
+    const QList<QString>& channelSettingsKeys,
     const FileSinkSettings& settings,
     bool force)
 {
@@ -748,7 +717,7 @@ void FileSink::sendChannelSettings(
 }
 
 void FileSink::webapiFormatChannelSettings(
-        QList<QString>& channelSettingsKeys,
+        const QList<QString>& channelSettingsKeys,
         SWGSDRangel::SWGChannelSettings *swgChannelSettings,
         const FileSinkSettings& settings,
         bool force

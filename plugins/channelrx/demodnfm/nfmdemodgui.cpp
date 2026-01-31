@@ -55,7 +55,7 @@ void NFMDemodGUI::resetToDefaults()
 {
     m_settings.resetToDefaults();
     displaySettings();
-    applySettings();
+    applySettings(QStringList(), true);
 }
 
 QByteArray NFMDemodGUI::serialize() const
@@ -67,7 +67,7 @@ bool NFMDemodGUI::deserialize(const QByteArray& data)
 {
     if(m_settings.deserialize(data)) {
         displaySettings();
-        applySettings(true);
+        applySettings(QStringList(), true);
         return true;
     } else {
         resetToDefaults();
@@ -132,7 +132,7 @@ void NFMDemodGUI::channelMarkerChangedByCursor()
 {
     ui->deltaFrequency->setValue(m_channelMarker.getCenterFrequency());
     m_settings.m_inputFrequencyOffset = m_channelMarker.getCenterFrequency();
-    applySettings();
+    applySettings(QStringList("inputFrequencyOffset"));
 }
 
 void NFMDemodGUI::channelMarkerHighlightedByCursor()
@@ -145,7 +145,7 @@ void NFMDemodGUI::on_deltaFrequency_changed(qint64 value)
     m_channelMarker.setCenterFrequency(value);
     m_settings.m_inputFrequencyOffset = m_channelMarker.getCenterFrequency();
     updateAbsoluteCenterFrequency();
-    applySettings();
+    applySettings(QStringList("inputFrequencyOffset"));
 }
 
 void NFMDemodGUI::on_channelSpacingApply_clicked()
@@ -168,7 +168,7 @@ void NFMDemodGUI::on_channelSpacingApply_clicked()
     ui->rfBW->blockSignals(false);
     ui->afBW->blockSignals(false);
     ui->fmDev->blockSignals(false);
-	applySettings();
+	applySettings(QStringList({"rfBandwidth", "afBandwidth", "fmDeviation"}));
 }
 
 void NFMDemodGUI::on_rfBW_valueChanged(int value)
@@ -182,35 +182,35 @@ void NFMDemodGUI::on_rfBW_valueChanged(int value)
     ui->channelSpacing->update();
     ui->channelSpacing->blockSignals(false);
 
-	applySettings();
+	applySettings(QStringList({"rfBandwidth"}));
 }
 
 void NFMDemodGUI::on_afBW_valueChanged(int value)
 {
 	ui->afBWText->setText(QString("%1k").arg(value / 10.0, 0, 'f', 1));
 	m_settings.m_afBandwidth = value * 100.0;
-	applySettings();
+	applySettings(QStringList({"afBandwidth"}));
 }
 
 void NFMDemodGUI::on_fmDev_valueChanged(int value)
 {
 	ui->fmDevText->setText(QString("%1%2k").arg(QChar(0xB1, 0x00)).arg(value / 10.0, 0, 'f', 1));
 	m_settings.m_fmDeviation = value * 200.0;
-	applySettings();
+	applySettings(QStringList({"fmDeviation"}));
 }
 
 void NFMDemodGUI::on_volume_valueChanged(int value)
 {
 	ui->volumeText->setText(QString("%1").arg(value));
 	m_settings.m_volume = value / 100.0;
-	applySettings();
+	applySettings(QStringList({"volume"}));
 }
 
 void NFMDemodGUI::on_squelchGate_valueChanged(int value)
 {
     ui->squelchGateText->setText(QString("%1").arg(value * 10.0f, 0, 'f', 0));
     m_settings.m_squelchGate = value;
-	applySettings();
+	applySettings(QStringList({"squelchGate"}));
 }
 
 void NFMDemodGUI::on_deltaSquelch_toggled(bool checked)
@@ -228,7 +228,7 @@ void NFMDemodGUI::on_deltaSquelch_toggled(bool checked)
         ui->squelch->setToolTip(tr("Squelch power threshold (dB)"));
     }
     m_settings.m_deltaSquelch = checked;
-    applySettings();
+    applySettings(QStringList({"deltaSquelch"}));
 }
 
 void NFMDemodGUI::on_squelch_valueChanged(int value)
@@ -246,19 +246,19 @@ void NFMDemodGUI::on_squelch_valueChanged(int value)
         ui->squelch->setToolTip(tr("Squelch power threshold (dB)"));
     }
     m_settings.m_squelch = value * 1.0;
-	applySettings();
+	applySettings(QStringList({"squelch"}));
 }
 
 void NFMDemodGUI::on_ctcssOn_toggled(bool checked)
 {
 	m_settings.m_ctcssOn = checked;
-	applySettings();
+	applySettings(QStringList({"ctcssOn"}));
 }
 
 void NFMDemodGUI::on_dcsOn_toggled(bool checked)
 {
     m_settings.m_dcsOn = checked;
-    applySettings();
+    applySettings(QStringList({"dcsOn"}));
 }
 
 void NFMDemodGUI::on_dcsCode_currentIndexChanged(int index)
@@ -266,7 +266,7 @@ void NFMDemodGUI::on_dcsCode_currentIndexChanged(int index)
     if (index == 0)
     {
         m_settings.m_dcsCode = 0;
-        applySettings();
+        applySettings(QStringList({"dcsCode"}));
     }
     else
     {
@@ -280,7 +280,7 @@ void NFMDemodGUI::on_dcsCode_currentIndexChanged(int index)
         {
             m_settings.m_dcsCode = dcsCode;
             m_settings.m_dcsPositive = positive;
-            applySettings();
+            applySettings(QStringList({"dcsCode", "dcsPositive"}));
         }
     }
 }
@@ -288,19 +288,19 @@ void NFMDemodGUI::on_dcsCode_currentIndexChanged(int index)
 void NFMDemodGUI::on_highPassFilter_toggled(bool checked)
 {
     m_settings.m_highPass = checked;
-    applySettings();
+    applySettings(QStringList({"highPass"}));
 }
 
 void NFMDemodGUI::on_audioMute_toggled(bool checked)
 {
 	m_settings.m_audioMute = checked;
-	applySettings();
+	applySettings(QStringList({"audioMute"}));
 }
 
 void NFMDemodGUI::on_ctcss_currentIndexChanged(int index)
 {
 	m_settings.m_ctcssIndex = index;
-	applySettings();
+	applySettings(QStringList({"ctcssIndex"}));
 }
 
 void NFMDemodGUI::onWidgetRolled(QWidget* widget, bool rollDown)
@@ -313,7 +313,7 @@ void NFMDemodGUI::onWidgetRolled(QWidget* widget, bool rollDown)
 	*/
 
     getRollupContents()->saveState(m_rollupState);
-    applySettings();
+    applySettings(QStringList());
 }
 
 void NFMDemodGUI::onMenuDialogCalled(const QPoint &p)
@@ -358,7 +358,16 @@ void NFMDemodGUI::onMenuDialogCalled(const QPoint &p)
             updateIndexLabel();
         }
 
-        applySettings();
+        applySettings(QStringList({
+            "title",
+            "rgbColor",
+            "useReverseAPI",
+            "reverseAPIAddress",
+            "reverseAPIPort",
+            "reverseAPIDeviceIndex",
+            "reverseAPIChannelIndex",
+            "streamIndex"
+        }));
     }
 
     resetContextMenuType();
@@ -462,7 +471,7 @@ NFMDemodGUI::NFMDemodGUI(PluginAPI* pluginAPI, DeviceUISet *deviceUISet, Baseban
 
 	displaySettings();
     makeUIConnections();
-	applySettings(true);
+	applySettings(QStringList(), true);
     DialPopup::addPopupsToChildDials(this);
     m_resizer.enableChildMouseTracking();
 }
@@ -472,13 +481,13 @@ NFMDemodGUI::~NFMDemodGUI()
 	delete ui;
 }
 
-void NFMDemodGUI::applySettings(bool force)
+void NFMDemodGUI::applySettings(const QStringList& settingsKeys, bool force)
 {
 	if (m_doApplySettings)
 	{
 		qDebug() << "NFMDemodGUI::applySettings";
 
-        NFMDemod::MsgConfigureNFMDemod* message = NFMDemod::MsgConfigureNFMDemod::create( m_settings, force);
+        NFMDemod::MsgConfigureNFMDemod* message = NFMDemod::MsgConfigureNFMDemod::create(settingsKeys, m_settings, force);
         m_nfmDemod->getInputMessageQueue()->push(message);
 	}
 }
@@ -612,7 +621,7 @@ void NFMDemodGUI::audioSelect(const QPoint& p)
     if (audioSelect.m_selected)
     {
         m_settings.m_audioDeviceName = audioSelect.m_audioDeviceName;
-        applySettings();
+        applySettings(QStringList({"audioDeviceName"}));
     }
 }
 

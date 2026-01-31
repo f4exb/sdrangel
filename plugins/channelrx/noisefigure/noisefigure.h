@@ -50,20 +50,23 @@ public:
 
     public:
         const NoiseFigureSettings& getSettings() const { return m_settings; }
+        const QStringList& getSettingsKeys() const { return m_settingsKeys; }
         bool getForce() const { return m_force; }
 
-        static MsgConfigureNoiseFigure* create(const NoiseFigureSettings& settings, bool force)
+        static MsgConfigureNoiseFigure* create(const QStringList& settingsKeys, const NoiseFigureSettings& settings, bool force)
         {
-            return new MsgConfigureNoiseFigure(settings, force);
+            return new MsgConfigureNoiseFigure(settingsKeys, settings, force);
         }
 
     private:
         NoiseFigureSettings m_settings;
+        QStringList m_settingsKeys;
         bool m_force;
 
-        MsgConfigureNoiseFigure(const NoiseFigureSettings& settings, bool force) :
+        MsgConfigureNoiseFigure(const QStringList& settingsKeys, const NoiseFigureSettings& settings, bool force) :
             Message(),
             m_settings(settings),
+            m_settingsKeys(settingsKeys),
             m_force(force)
         { }
     };
@@ -260,10 +263,10 @@ private:
     QNetworkRequest m_networkRequest;
 
     virtual bool handleMessage(const Message& cmd);
-    void applySettings(const NoiseFigureSettings& settings, bool force = false);
-    void webapiReverseSendSettings(QList<QString>& channelSettingsKeys, const NoiseFigureSettings& settings, bool force);
+    void applySettings(const QStringList& settingsKeys, const NoiseFigureSettings& settings, bool force = false);
+    void webapiReverseSendSettings(const QList<QString>& channelSettingsKeys, const NoiseFigureSettings& settings, bool force);
     void webapiFormatChannelSettings(
-        QList<QString>& channelSettingsKeys,
+        const QList<QString>& channelSettingsKeys,
         SWGSDRangel::SWGChannelSettings *swgChannelSettings,
         const NoiseFigureSettings& settings,
         bool force

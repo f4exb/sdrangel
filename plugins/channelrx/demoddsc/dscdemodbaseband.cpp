@@ -136,7 +136,7 @@ bool DSCDemodBaseband::handleMessage(const Message& cmd)
         MsgConfigureDSCDemodBaseband& cfg = (MsgConfigureDSCDemodBaseband&) cmd;
         qDebug() << "DSCDemodBaseband::handleMessage: MsgConfigureDSCDemodBaseband";
 
-        applySettings(cfg.getSettings(), cfg.getForce());
+        applySettings(cfg.getSettingsKeys(), cfg.getSettings(), cfg.getForce());
 
         return true;
     }
@@ -157,17 +157,21 @@ bool DSCDemodBaseband::handleMessage(const Message& cmd)
     }
 }
 
-void DSCDemodBaseband::applySettings(const DSCDemodSettings& settings, bool force)
+void DSCDemodBaseband::applySettings(const QStringList& settingsKeys, const DSCDemodSettings& settings, bool force)
 {
-    if ((settings.m_inputFrequencyOffset != m_settings.m_inputFrequencyOffset) || force)
+    if ((settingsKeys.contains("inputFrequencyOffset") && (settings.m_inputFrequencyOffset != m_settings.m_inputFrequencyOffset)) || force)
     {
         m_channelizer->setChannelization(DSCDemodSettings::DSCDEMOD_CHANNEL_SAMPLE_RATE, settings.m_inputFrequencyOffset);
         m_sink.applyChannelSettings(m_channelizer->getChannelSampleRate(), m_channelizer->getChannelFrequencyOffset());
     }
 
-    m_sink.applySettings(settings, force);
+    m_sink.applySettings(settingsKeys, settings, force);
 
-    m_settings = settings;
+    if (force) {
+        m_settings = settings;
+    } else {
+        m_settings.applySettings(settingsKeys, settings);
+    }
 }
 
 int DSCDemodBaseband::getChannelSampleRate() const
@@ -180,4 +184,3 @@ void DSCDemodBaseband::setBasebandSampleRate(int sampleRate)
     m_channelizer->setBasebandSampleRate(sampleRate);
     m_sink.applyChannelSettings(m_channelizer->getChannelSampleRate(), m_channelizer->getChannelFrequencyOffset());
 }
-

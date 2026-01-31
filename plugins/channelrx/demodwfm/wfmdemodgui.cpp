@@ -54,7 +54,7 @@ void WFMDemodGUI::resetToDefaults()
 {
     m_settings.resetToDefaults();
     displaySettings();
-    applySettings();
+    applySettings(QStringList(), true);
 }
 
 QByteArray WFMDemodGUI::serialize() const
@@ -66,7 +66,7 @@ bool WFMDemodGUI::deserialize(const QByteArray& data)
 {
     if(m_settings.deserialize(data)) {
         displaySettings();
-        applySettings(true);
+        applySettings(QStringList(), true);
         return true;
     } else {
         resetToDefaults();
@@ -119,7 +119,7 @@ void WFMDemodGUI::channelMarkerChangedByCursor()
 {
     ui->deltaFrequency->setValue(m_channelMarker.getCenterFrequency());
     m_settings.m_inputFrequencyOffset = m_channelMarker.getCenterFrequency();
-    applySettings();
+    applySettings(QStringList("inputFrequencyOffset"));
 }
 
 void WFMDemodGUI::channelMarkerHighlightedByCursor()
@@ -132,41 +132,41 @@ void WFMDemodGUI::on_deltaFrequency_changed(qint64 value)
     m_channelMarker.setCenterFrequency(value);
     m_settings.m_inputFrequencyOffset = m_channelMarker.getCenterFrequency();
     updateAbsoluteCenterFrequency();
-    applySettings();
+    applySettings(QStringList("inputFrequencyOffset"));
 }
 
 void WFMDemodGUI::on_rfBW_changed(quint64 value)
 {
     m_channelMarker.setBandwidth(value);
     m_settings.m_rfBandwidth = value;
-    applySettings();
+    applySettings(QStringList("rfBandwidth"));
 }
 
 void WFMDemodGUI::on_afBW_valueChanged(int value)
 {
     ui->afBWText->setText(QString("%1 kHz").arg(value));
     m_settings.m_afBandwidth = value * 1000.0;
-	applySettings();
+	applySettings(QStringList("afBandwidth"));
 }
 
 void WFMDemodGUI::on_volume_valueChanged(int value)
 {
     ui->volumeText->setText(QString("%1").arg(value / 10.0, 0, 'f', 1));
     m_settings.m_volume = value / 10.0;
-	applySettings();
+	applySettings(QStringList("volume"));
 }
 
 void WFMDemodGUI::on_squelch_valueChanged(int value)
 {
 	ui->squelchText->setText(QString("%1 dB").arg(value));
     m_settings.m_squelch = value;
-	applySettings();
+	applySettings(QStringList("squelch"));
 }
 
 void WFMDemodGUI::on_audioMute_toggled(bool checked)
 {
     m_settings.m_audioMute = checked;
-    applySettings();
+    applySettings(QStringList("audioMute"));
 }
 
 void WFMDemodGUI::onWidgetRolled(QWidget* widget, bool rollDown)
@@ -175,7 +175,7 @@ void WFMDemodGUI::onWidgetRolled(QWidget* widget, bool rollDown)
     (void) rollDown;
 
     getRollupContents()->saveState(m_rollupState);
-    applySettings();
+    applySettings(QStringList());
 }
 
 void WFMDemodGUI::onMenuDialogCalled(const QPoint &p)
@@ -220,7 +220,7 @@ void WFMDemodGUI::onMenuDialogCalled(const QPoint &p)
             updateIndexLabel();
         }
 
-        applySettings();
+        applySettings(QStringList({"title", "rgbColor", "useReverseAPI", "reverseAPIAddress", "reverseAPIPort", "reverseAPIDeviceIndex", "reverseAPIChannelIndex", "streamIndex"}), true);
     }
 
     resetContextMenuType();
@@ -284,7 +284,7 @@ WFMDemodGUI::WFMDemodGUI(PluginAPI* pluginAPI, DeviceUISet *deviceUISet, Baseban
 
     displaySettings();
     makeUIConnections();
-	applySettings(true);
+	applySettings(QStringList(), true);
     m_resizer.enableChildMouseTracking();
 }
 
@@ -298,11 +298,11 @@ void WFMDemodGUI::blockApplySettings(bool block)
     m_doApplySettings = !block;
 }
 
-void WFMDemodGUI::applySettings(bool force)
+void WFMDemodGUI::applySettings(const QStringList& settingsKeys, bool force)
 {
 	if (m_doApplySettings)
 	{
-        WFMDemod::MsgConfigureWFMDemod* msgConfig = WFMDemod::MsgConfigureWFMDemod::create( m_settings, force);
+        WFMDemod::MsgConfigureWFMDemod* msgConfig = WFMDemod::MsgConfigureWFMDemod::create(settingsKeys, m_settings, force);
         m_wfmDemod->getInputMessageQueue()->push(msgConfig);
 	}
 }
@@ -362,7 +362,7 @@ void WFMDemodGUI::audioSelect(const QPoint& p)
     if (audioSelect.m_selected)
     {
         m_settings.m_audioDeviceName = audioSelect.m_audioDeviceName;
-        applySettings();
+        applySettings(QStringList("audioDeviceName"));
     }
 }
 

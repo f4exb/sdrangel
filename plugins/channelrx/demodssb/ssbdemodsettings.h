@@ -98,6 +98,8 @@ struct SSBDemodSettings
     void setRollupState(Serializable *rollupState) { m_rollupState = rollupState; }
     QByteArray serialize() const;
     bool deserialize(const QByteArray& data);
+    void applySettings(const QStringList& settingsKeys, const SSBDemodSettings& settings);
+    QString getDebugString(const QStringList& settingsKeys, bool force=false) const;
 
     static const int m_minPowerThresholdDB;
     static const float m_mminPowerThresholdDBf;

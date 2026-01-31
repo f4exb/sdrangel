@@ -53,7 +53,7 @@ DATVDemod::DATVDemod(DeviceAPI *deviceAPI) :
     m_basebandSink = new DATVDemodBaseband();
     m_basebandSink->moveToThread(&m_thread);
 
-    applySettings(m_settings, true);
+    applySettings(QStringList(), m_settings, true);
 
     m_deviceAPI->addChannelSink(this);
     m_deviceAPI->addChannelSinkAPI(this);
@@ -123,7 +123,7 @@ void DATVDemod::start()
     m_basebandSink->startWork();
     m_thread.start();
 
-    DATVDemodBaseband::MsgConfigureDATVDemodBaseband *msg = DATVDemodBaseband::MsgConfigureDATVDemodBaseband::create(m_settings, true);
+    DATVDemodBaseband::MsgConfigureDATVDemodBaseband *msg = DATVDemodBaseband::MsgConfigureDATVDemodBaseband::create(QStringList(), m_settings, true);
     m_basebandSink->getInputMessageQueue()->push(msg);
 }
 
@@ -141,7 +141,7 @@ bool DATVDemod::handleMessage(const Message& cmd)
 	{
         MsgConfigureDATVDemod& objCfg = (MsgConfigureDATVDemod&) cmd;
         qDebug() << "DATVDemod::handleMessage: MsgConfigureDATVDemod";
-        applySettings(objCfg.getSettings(), objCfg.getForce());
+        applySettings(objCfg.getSettingsKeys(), objCfg.getSettings(), objCfg.getForce());
 
         return true;
 	}
@@ -172,104 +172,21 @@ void DATVDemod::setCenterFrequency(qint64 frequency)
 {
     DATVDemodSettings settings = m_settings;
     settings.m_centerFrequency = frequency;
-    applySettings(settings, false);
+    applySettings(QStringList("centerFrequency"), settings, false);
 
     if (m_guiMessageQueue) // forward to GUI if any
     {
-        MsgConfigureDATVDemod *msgToGUI = MsgConfigureDATVDemod::create(settings, false);
+        MsgConfigureDATVDemod *msgToGUI = MsgConfigureDATVDemod::create(QStringList("centerFrequency"), settings, false);
         m_guiMessageQueue->push(msgToGUI);
     }
 }
 
-void DATVDemod::applySettings(const DATVDemodSettings& settings, bool force)
+void DATVDemod::applySettings(const QList<QString>& settingsKeys, const DATVDemodSettings& settings, bool force)
 {
     QString debugMsg = tr("DATVDemod::applySettings: force: %1").arg(force);
     settings.debug(debugMsg);
 
-    QList<QString> reverseAPIKeys;
-
-    if (settings.m_rgbColor != m_settings.m_rgbColor) {
-        reverseAPIKeys.append("rgbColor");
-    }
-    if (settings.m_title != m_settings.m_title) {
-        reverseAPIKeys.append("title");
-    }
-    if (settings.m_rfBandwidth != m_settings.m_rfBandwidth) {
-        reverseAPIKeys.append("rfBandwidth");
-    }
-    if (settings.m_centerFrequency != m_settings.m_centerFrequency) {
-        reverseAPIKeys.append("centerFrequency");
-    }
-    if (settings.m_standard != m_settings.m_standard) {
-        reverseAPIKeys.append("standard");
-    }
-    if (settings.m_modulation != m_settings.m_modulation) {
-        reverseAPIKeys.append("modulation");
-    }
-    if (settings.m_fec != m_settings.m_fec) {
-        reverseAPIKeys.append("fec");
-    }
-    if (settings.m_softLDPC != m_settings.m_softLDPC) {
-        reverseAPIKeys.append("softLDPC");
-    }
-    if (settings.m_softLDPCMaxTrials != m_settings.m_softLDPCMaxTrials) {
-        reverseAPIKeys.append("softLDPCMaxTrials");
-    }
-    if (settings.m_maxBitflips != m_settings.m_maxBitflips) {
-        reverseAPIKeys.append("maxBitflips");
-    }
-    if (settings.m_audioMute != m_settings.m_audioMute) {
-        reverseAPIKeys.append("audioMute");
-    }
-    if (settings.m_audioDeviceName != m_settings.m_audioDeviceName) {
-        reverseAPIKeys.append("audioDeviceName");
-    }
-    if (settings.m_symbolRate != m_settings.m_symbolRate) {
-        reverseAPIKeys.append("symbolRate");
-    }
-    if (settings.m_notchFilters != m_settings.m_notchFilters) {
-        reverseAPIKeys.append("notchFilters");
-    }
-    if (settings.m_allowDrift != m_settings.m_allowDrift) {
-        reverseAPIKeys.append("allowDrift");
-    }
-    if (settings.m_fastLock != m_settings.m_fastLock) {
-        reverseAPIKeys.append("fastLock");
-    }
-    if (settings.m_filter != m_settings.m_filter) {
-        reverseAPIKeys.append("filter");
-    }
-    if (settings.m_hardMetric != m_settings.m_hardMetric) {
-        reverseAPIKeys.append("hardMetric");
-    }
-    if (settings.m_rollOff != m_settings.m_rollOff) {
-        reverseAPIKeys.append("rollOff");
-    }
-    if (settings.m_viterbi != m_settings.m_viterbi) {
-        reverseAPIKeys.append("viterbi");
-    }
-    if (settings.m_excursion != m_settings.m_excursion) {
-        reverseAPIKeys.append("excursion");
-    }
-    if (settings.m_audioVolume != m_settings.m_audioVolume) {
-        reverseAPIKeys.append("audioVolume");
-    }
-    if (settings.m_videoMute != m_settings.m_videoMute) {
-        reverseAPIKeys.append("videoMute");
-    }
-    if (settings.m_udpTSAddress != m_settings.m_udpTSAddress) {
-        reverseAPIKeys.append("udpTSAddress");
-    }
-    if (settings.m_udpTSPort != m_settings.m_udpTSPort) {
-        reverseAPIKeys.append("udpTSPort");
-    }
-    if (settings.m_udpTS != m_settings.m_udpTS) {
-        reverseAPIKeys.append("udpTS");
-    }
-    if (settings.m_playerEnable != m_settings.m_playerEnable) {
-        reverseAPIKeys.append("playerEnable");
-    }
-    if (m_settings.m_streamIndex != settings.m_streamIndex)
+    if (settingsKeys.contains("streamIndex") && (settings.m_streamIndex != m_settings.m_streamIndex))
     {
         if (m_deviceAPI->getSampleMIMO()) // change of stream is possible for MIMO devices only
         {
@@ -280,28 +197,26 @@ void DATVDemod::applySettings(const DATVDemodSettings& settings, bool force)
             m_settings.m_streamIndex = settings.m_streamIndex; // make sure ChannelAPI::getStreamIndex() is consistent
             emit streamIndexChanged(settings.m_streamIndex);
         }
-
-        reverseAPIKeys.append("streamIndex");
     }
 
-    DATVDemodBaseband::MsgConfigureDATVDemodBaseband *msg = DATVDemodBaseband::MsgConfigureDATVDemodBaseband::create(settings, force);
+    DATVDemodBaseband::MsgConfigureDATVDemodBaseband *msg = DATVDemodBaseband::MsgConfigureDATVDemodBaseband::create(settingsKeys, settings, force);
     m_basebandSink->getInputMessageQueue()->push(msg);
 
     if (settings.m_useReverseAPI)
     {
-        bool fullUpdate = ((m_settings.m_useReverseAPI != settings.m_useReverseAPI) && settings.m_useReverseAPI) ||
-                (m_settings.m_reverseAPIAddress != settings.m_reverseAPIAddress) ||
-                (m_settings.m_reverseAPIPort != settings.m_reverseAPIPort) ||
-                (m_settings.m_reverseAPIDeviceIndex != settings.m_reverseAPIDeviceIndex) ||
-                (m_settings.m_reverseAPIChannelIndex != settings.m_reverseAPIChannelIndex);
-        webapiReverseSendSettings(reverseAPIKeys, settings, fullUpdate || force);
+        bool fullUpdate = ((settingsKeys.contains("useReverseAPI") && (settings.m_useReverseAPI != m_settings.m_useReverseAPI)) && settings.m_useReverseAPI) ||
+                (settingsKeys.contains("reverseAPIAddress") && (settings.m_reverseAPIAddress != m_settings.m_reverseAPIAddress)) ||
+                (settingsKeys.contains("reverseAPIPort") && (settings.m_reverseAPIPort != m_settings.m_reverseAPIPort)) ||
+                (settingsKeys.contains("reverseAPIDeviceIndex") && (settings.m_reverseAPIDeviceIndex != m_settings.m_reverseAPIDeviceIndex)) ||
+                (settingsKeys.contains("reverseAPIChannelIndex") && (settings.m_reverseAPIChannelIndex != m_settings.m_reverseAPIChannelIndex));
+        webapiReverseSendSettings(settingsKeys, settings, fullUpdate || force);
     }
 
     QList<ObjectPipe*> pipes;
     MainCore::instance()->getMessagePipes().getMessagePipes(this, "settings", pipes);
 
     if (pipes.size() > 0) {
-        sendChannelSettings(pipes, reverseAPIKeys, settings, force);
+        sendChannelSettings(pipes, settingsKeys, settings, force);
     }
 
     m_settings = settings;
@@ -353,14 +268,14 @@ int DATVDemod::webapiSettingsPutPatch(
     DATVDemodSettings settings = m_settings;
     webapiUpdateChannelSettings(settings, channelSettingsKeys, response);
 
-    MsgConfigureDATVDemod *msg = MsgConfigureDATVDemod::create(settings, force);
+    MsgConfigureDATVDemod *msg = MsgConfigureDATVDemod::create(channelSettingsKeys, settings, force);
     m_inputMessageQueue.push(msg);
 
     qDebug("DATVDemod::webapiSettingsPutPatch: forward to GUI: %p", m_guiMessageQueue);
 
     if (m_guiMessageQueue) // forward to GUI if any
     {
-        MsgConfigureDATVDemod *msgToGUI = MsgConfigureDATVDemod::create(settings, force);
+        MsgConfigureDATVDemod *msgToGUI = MsgConfigureDATVDemod::create(channelSettingsKeys, settings, force);
         m_guiMessageQueue->push(msgToGUI);
     }
 
@@ -589,7 +504,7 @@ void DATVDemod::webapiFormatChannelReport(SWGSDRangel::SWGChannelReport& respons
 
 void DATVDemod::sendChannelSettings(
     const QList<ObjectPipe*>& pipes,
-    QList<QString>& channelSettingsKeys,
+    const QList<QString>& channelSettingsKeys,
     const DATVDemodSettings& settings,
     bool force)
 {
@@ -613,7 +528,7 @@ void DATVDemod::sendChannelSettings(
 }
 
 void DATVDemod::webapiFormatChannelSettings(
-        QList<QString>& channelSettingsKeys,
+        const QList<QString>& channelSettingsKeys,
         SWGSDRangel::SWGChannelSettings *swgChannelSettings,
         const DATVDemodSettings& settings,
         bool force
@@ -728,7 +643,7 @@ void DATVDemod::webapiFormatChannelSettings(
     }
 }
 
-void DATVDemod::webapiReverseSendSettings(QList<QString>& channelSettingsKeys, const DATVDemodSettings& settings, bool force)
+void DATVDemod::webapiReverseSendSettings(const QList<QString>& channelSettingsKeys, const DATVDemodSettings& settings, bool force)
 {
     SWGSDRangel::SWGChannelSettings *swgChannelSettings = new SWGSDRangel::SWGChannelSettings();
     webapiFormatChannelSettings(channelSettingsKeys, swgChannelSettings, settings, force);

@@ -343,6 +343,198 @@ int ATVDemodSettings::getNumberOfLinesIndex(int nbLines)
     }
 }
 
+void ATVDemodSettings::applySettings(const QStringList& settingsKeys, const ATVDemodSettings& settings)
+{
+    if (settingsKeys.contains("inputFrequencyOffset")) {
+        m_inputFrequencyOffset = settings.m_inputFrequencyOffset;
+    }
+    if (settingsKeys.contains("bfoFrequency")) {
+        m_bfoFrequency = settings.m_bfoFrequency;
+    }
+    if (settingsKeys.contains("atvModulation")) {
+        m_atvModulation = settings.m_atvModulation;
+    }
+    if (settingsKeys.contains("fmDeviation")) {
+        m_fmDeviation = settings.m_fmDeviation;
+    }
+    if (settingsKeys.contains("amScalingFactor")) {
+        m_amScalingFactor = settings.m_amScalingFactor;
+    }
+    if (settingsKeys.contains("amOffsetFactor")) {
+        m_amOffsetFactor = settings.m_amOffsetFactor;
+    }
+    if (settingsKeys.contains("fftFiltering")) {
+        m_fftFiltering = settings.m_fftFiltering;
+    }
+    if (settingsKeys.contains("fftOppBandwidth")) {
+        m_fftOppBandwidth = settings.m_fftOppBandwidth;
+    }
+    if (settingsKeys.contains("fftBandwidth")) {
+        m_fftBandwidth = settings.m_fftBandwidth;
+    }
+    if (settingsKeys.contains("nbLines")) {
+        m_nbLines = settings.m_nbLines;
+    }
+    if (settingsKeys.contains("fps")) {
+        m_fps = settings.m_fps;
+    }
+    if (settingsKeys.contains("atvStd")) {
+        m_atvStd = settings.m_atvStd;
+    }
+    if (settingsKeys.contains("hSync")) {
+        m_hSync = settings.m_hSync;
+    }
+    if (settingsKeys.contains("vSync")) {
+        m_vSync = settings.m_vSync;
+    }
+    if (settingsKeys.contains("invertVideo")) {
+        m_invertVideo = settings.m_invertVideo;
+    }
+    if (settingsKeys.contains("halfFrames")) {
+        m_halfFrames = settings.m_halfFrames;
+    }
+    if (settingsKeys.contains("levelSynchroTop")) {
+        m_levelSynchroTop = settings.m_levelSynchroTop;
+    }
+    if (settingsKeys.contains("levelBlack")) {
+        m_levelBlack = settings.m_levelBlack;
+    }
+    if (settingsKeys.contains("rgbColor")) {
+        m_rgbColor = settings.m_rgbColor;
+    }
+    if (settingsKeys.contains("title")) {
+        m_title = settings.m_title;
+    }
+    if (settingsKeys.contains("udpAddress")) {
+        m_udpAddress = settings.m_udpAddress;
+    }
+    if (settingsKeys.contains("udpPort")) {
+        m_udpPort = settings.m_udpPort;
+    }
+    if (settingsKeys.contains("streamIndex")) {
+        m_streamIndex = settings.m_streamIndex;
+    }
+    if (settingsKeys.contains("useReverseAPI")) {
+        m_useReverseAPI = settings.m_useReverseAPI;
+    }
+    if (settingsKeys.contains("reverseAPIAddress")) {
+        m_reverseAPIAddress = settings.m_reverseAPIAddress;
+    }
+    if (settingsKeys.contains("reverseAPIPort")) {
+        m_reverseAPIPort = settings.m_reverseAPIPort;
+    }
+    if (settingsKeys.contains("reverseAPIDeviceIndex")) {
+        m_reverseAPIDeviceIndex = settings.m_reverseAPIDeviceIndex;
+    }
+    if (settingsKeys.contains("reverseAPIChannelIndex")) {
+        m_reverseAPIChannelIndex = settings.m_reverseAPIChannelIndex;
+    }
+    if (settingsKeys.contains("workspaceIndex")) {
+        m_workspaceIndex = settings.m_workspaceIndex;
+    }
+    if (settingsKeys.contains("hidden")) {
+        m_hidden = settings.m_hidden;
+    }
+}
+
+QString ATVDemodSettings::getDebugString(const QStringList& settingsKeys, bool force) const
+{
+    std::ostringstream ostr;
+
+    if (settingsKeys.contains("inputFrequencyOffset") || force) {
+        ostr << " m_inputFrequencyOffset: " << m_inputFrequencyOffset;
+    }
+    if (settingsKeys.contains("bfoFrequency") || force) {
+        ostr << " m_bfoFrequency: " << m_bfoFrequency;
+    }
+    if (settingsKeys.contains("atvModulation") || force) {
+        ostr << " m_atvModulation: " << m_atvModulation;
+    }
+    if (settingsKeys.contains("fmDeviation") || force) {
+        ostr << " m_fmDeviation: " << m_fmDeviation;
+    }
+    if (settingsKeys.contains("amScalingFactor") || force) {
+        ostr << " m_amScalingFactor: " << m_amScalingFactor;
+    }
+    if (settingsKeys.contains("amOffsetFactor") || force) {
+        ostr << " m_amOffsetFactor: " << m_amOffsetFactor;
+    }
+    if (settingsKeys.contains("fftFiltering") || force) {
+        ostr << " m_fftFiltering: " << m_fftFiltering;
+    }
+    if (settingsKeys.contains("fftOppBandwidth") || force) {
+        ostr << " m_fftOppBandwidth: " << m_fftOppBandwidth;
+    }
+    if (settingsKeys.contains("fftBandwidth") || force) {
+        ostr << " m_fftBandwidth: " << m_fftBandwidth;
+    }
+    if (settingsKeys.contains("nbLines") || force) {
+        ostr << " m_nbLines: " << m_nbLines;
+    }
+    if (settingsKeys.contains("fps") || force) {
+        ostr << " m_fps: " << m_fps;
+    }
+    if (settingsKeys.contains("atvStd") || force) {
+        ostr << " m_atvStd: " << m_atvStd;
+    }
+    if (settingsKeys.contains("hSync") || force) {
+        ostr << " m_hSync: " << m_hSync;
+    }
+    if (settingsKeys.contains("vSync") || force) {
+        ostr << " m_vSync: " << m_vSync;
+    }
+    if (settingsKeys.contains("invertVideo") || force) {
+        ostr << " m_invertVideo: " << m_invertVideo;
+    }
+    if (settingsKeys.contains("halfFrames") || force) {
+        ostr << " m_halfFrames: " << m_halfFrames;
+    }
+    if (settingsKeys.contains("levelSynchroTop") || force) {
+        ostr << " m_levelSynchroTop: " << m_levelSynchroTop;
+    }
+    if (settingsKeys.contains("levelBlack") || force) {
+        ostr << " m_levelBlack: " << m_levelBlack;
+    }
+    if (settingsKeys.contains("rgbColor") || force) {
+        ostr << " m_rgbColor: " << m_rgbColor;
+    }
+    if (settingsKeys.contains("title") || force) {
+        ostr << " m_title: " << m_title.toStdString();
+    }
+    if (settingsKeys.contains("udpAddress") || force) {
+        ostr << " m_udpAddress: " << m_udpAddress.toStdString();
+    }
+    if (settingsKeys.contains("udpPort") || force) {
+        ostr << " m_udpPort: " << m_udpPort;
+    }
+    if (settingsKeys.contains("streamIndex") || force) {
+        ostr << " m_streamIndex: " << m_streamIndex;
+    }
+    if (settingsKeys.contains("useReverseAPI") || force) {
+        ostr << " m_useReverseAPI: " << m_useReverseAPI;
+    }
+    if (settingsKeys.contains("reverseAPIAddress") || force) {
+        ostr << " m_reverseAPIAddress: " << m_reverseAPIAddress.toStdString();
+    }
+    if (settingsKeys.contains("reverseAPIPort") || force) {
+        ostr << " m_reverseAPIPort: " << m_reverseAPIPort;
+    }
+    if (settingsKeys.contains("reverseAPIDeviceIndex") || force) {
+        ostr << " m_reverseAPIDeviceIndex: " << m_reverseAPIDeviceIndex;
+    }
+    if (settingsKeys.contains("reverseAPIChannelIndex") || force) {
+        ostr << " m_reverseAPIChannelIndex: " << m_reverseAPIChannelIndex;
+    }
+    if (settingsKeys.contains("workspaceIndex") || force) {
+        ostr << " m_workspaceIndex: " << m_workspaceIndex;
+    }
+    if (settingsKeys.contains("hidden") || force) {
+        ostr << " m_hidden: " << m_hidden;
+    }
+
+    return QString(ostr.str().c_str());
+}
+
 float ATVDemodSettings::getNominalLineTime(int nbLines, int fps)
 {
     return 1.0f / ((float) nbLines * (float) fps);

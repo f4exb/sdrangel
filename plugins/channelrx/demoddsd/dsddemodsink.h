@@ -47,7 +47,7 @@ public:
 
     void applyAudioSampleRate(int sampleRate);
     void applyChannelSettings(int channelSampleRate, int channelFrequencyOffset, bool force = false);
-	void applySettings(const DSDDemodSettings& settings, bool force = false);
+	void applySettings(const QStringList& settingsKeys, const DSDDemodSettings& settings, bool force = false);
     AudioFifo *getAudioFifo1() { return &m_audioFifo1; }
     AudioFifo *getAudioFifo2() { return &m_audioFifo2; }
     void setAudioFifoLabel(const QString& label) {

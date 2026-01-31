@@ -55,7 +55,7 @@ void FreqTrackerGUI::resetToDefaults()
 {
     m_settings.resetToDefaults();
     displaySettings();
-	applySettings(true);
+	applySettings(QStringList(), true);
 }
 
 QByteArray FreqTrackerGUI::serialize() const
@@ -67,7 +67,7 @@ bool FreqTrackerGUI::deserialize(const QByteArray& data)
 {
     if(m_settings.deserialize(data)) {
         displaySettings();
-        applySettings(true);
+        applySettings(QStringList(), true);
         return true;
     } else {
         resetToDefaults();
@@ -141,7 +141,7 @@ void FreqTrackerGUI::channelMarkerChangedByCursor()
 {
     ui->deltaFrequency->setValue(m_channelMarker.getCenterFrequency());
     m_settings.m_inputFrequencyOffset = m_channelMarker.getCenterFrequency();
-	applySettings();
+	applySettings(QStringList("inputFrequencyOffset"));
 }
 
 void FreqTrackerGUI::channelMarkerHighlightedByCursor()
@@ -154,7 +154,7 @@ void FreqTrackerGUI::on_deltaFrequency_changed(qint64 value)
     m_channelMarker.setCenterFrequency(value);
     m_settings.m_inputFrequencyOffset = m_channelMarker.getCenterFrequency();
     updateAbsoluteCenterFrequency();
-    applySettings();
+    applySettings(QStringList("inputFrequencyOffset"));
 }
 
 void FreqTrackerGUI::on_log2Decim_currentIndexChanged(int index)
@@ -169,7 +169,7 @@ void FreqTrackerGUI::on_log2Decim_currentIndexChanged(int index)
         ui->rfBW->setMaximum(sinkSampleRate/100);
     }
 
-    applySettings();
+    applySettings(QStringList("log2Decim"));
 }
 
 void FreqTrackerGUI::on_rfBW_valueChanged(int value)
@@ -177,7 +177,7 @@ void FreqTrackerGUI::on_rfBW_valueChanged(int value)
 	ui->rfBWText->setText(QString("%1 kHz").arg(value / 10.0, 0, 'f', 1));
 	m_channelMarker.setBandwidth(value * 100);
 	m_settings.m_rfBandwidth = value * 100;
-	applySettings();
+	applySettings(QStringList("rfBandwidth"));
 }
 
 void FreqTrackerGUI::on_tracking_toggled(bool checked)
@@ -189,7 +189,7 @@ void FreqTrackerGUI::on_tracking_toggled(bool checked)
     }
 
     m_settings.m_tracking = checked;
-    applySettings();
+    applySettings(QStringList("tracking"));
 }
 
 void FreqTrackerGUI::on_alphaEMA_valueChanged(int value)
@@ -197,13 +197,13 @@ void FreqTrackerGUI::on_alphaEMA_valueChanged(int value)
     m_settings.m_alphaEMA = value / 100.0;
     QString alphaEMAStr = QString::number(m_settings.m_alphaEMA, 'f', 2);
     ui->alphaEMAText->setText(alphaEMAStr);
-    applySettings();
+    applySettings(QStringList("alphaEMA"));
 }
 
 void FreqTrackerGUI::on_trackerType_currentIndexChanged(int index)
 {
     m_settings.m_trackerType = (FreqTrackerSettings::TrackerType) index;
-    applySettings();
+    applySettings(QStringList("trackerType"));
 }
 
 void FreqTrackerGUI::on_pllPskOrder_currentIndexChanged(int index)
@@ -213,13 +213,13 @@ void FreqTrackerGUI::on_pllPskOrder_currentIndexChanged(int index)
     }
 
     m_settings.m_pllPskOrder = 1<<index;
-    applySettings();
+    applySettings(QStringList("pllPskOrder"));
 }
 
 void FreqTrackerGUI::on_rrc_toggled(bool checked)
 {
     m_settings.m_rrc = checked;
-    applySettings();
+    applySettings(QStringList("rrc"));
 }
 
 void FreqTrackerGUI::on_rrcRolloff_valueChanged(int value)
@@ -227,21 +227,21 @@ void FreqTrackerGUI::on_rrcRolloff_valueChanged(int value)
     m_settings.m_rrcRolloff = value < 0 ? 0 : value > 100 ? 100 : value;
     QString rolloffStr = QString::number(value/100.0, 'f', 2);
     ui->rrcRolloffText->setText(rolloffStr);
-    applySettings();
+    applySettings(QStringList("rrcRolloff"));
 }
 
 void FreqTrackerGUI::on_squelch_valueChanged(int value)
 {
 	ui->squelchText->setText(QString("%1 dB").arg(value));
 	m_settings.m_squelch = value;
-	applySettings();
+	applySettings(QStringList("squelch"));
 }
 
 void FreqTrackerGUI::on_squelchGate_valueChanged(int value)
 {
     ui->squelchGateText->setText(QString("%1").arg(value * 10.0f, 0, 'f', 0));
     m_settings.m_squelchGate = value;
-	applySettings();
+	applySettings(QStringList("squelchGate"));
 }
 
 void FreqTrackerGUI::on_spanLog2_valueChanged(int value)
@@ -259,7 +259,7 @@ void FreqTrackerGUI::onWidgetRolled(QWidget* widget, bool rollDown)
     (void) rollDown;
 
     getRollupContents()->saveState(m_rollupState);
-    applySettings();
+    applySettings(QStringList());
 }
 
 void FreqTrackerGUI::onMenuDialogCalled(const QPoint &p)
@@ -304,7 +304,8 @@ void FreqTrackerGUI::onMenuDialogCalled(const QPoint &p)
             updateIndexLabel();
         }
 
-        applySettings();
+        applySettings(QStringList({"rgbColor", "title", "useReverseAPI", "reverseAPIAddress",
+                                    "reverseAPIPort", "reverseAPIDeviceIndex", "reverseAPIChannelIndex", "streamIndex"}));
     }
 
     resetContextMenuType();
@@ -375,7 +376,7 @@ FreqTrackerGUI::FreqTrackerGUI(PluginAPI* pluginAPI, DeviceUISet *deviceUISet, B
 
 	displaySettings();
     makeUIConnections();
-	applySettings(true);
+	applySettings(QStringList(), true);
     DialPopup::addPopupsToChildDials(this);
     m_resizer.enableChildMouseTracking();
 }
@@ -390,11 +391,11 @@ void FreqTrackerGUI::blockApplySettings(bool block)
     m_doApplySettings = !block;
 }
 
-void FreqTrackerGUI::applySettings(bool force)
+void FreqTrackerGUI::applySettings(const QStringList& settingsKeys, bool force)
 {
 	if (m_doApplySettings)
 	{
-	    FreqTracker::MsgConfigureFreqTracker* message = FreqTracker::MsgConfigureFreqTracker::create( m_settings, force);
+	    FreqTracker::MsgConfigureFreqTracker* message = FreqTracker::MsgConfigureFreqTracker::create(settingsKeys, m_settings, force);
 	    m_freqTracker->getInputMessageQueue()->push(message);
 	}
 }
@@ -403,7 +404,7 @@ void FreqTrackerGUI::applySpectrumBandwidth(int spanLog2, bool force)
 {
     displaySpectrumBandwidth(spanLog2);
     m_settings.m_spanLog2 = spanLog2;
-    applySettings(force);
+    applySettings(QStringList("spanLog2"), force);
 }
 
 void FreqTrackerGUI::displaySettings()

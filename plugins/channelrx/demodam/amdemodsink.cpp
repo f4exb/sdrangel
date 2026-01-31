@@ -60,7 +60,7 @@ AMDemodSink::AMDemodSink() :
     m_pll.computeCoefficients(0.05, 0.707, 1000);
     m_syncAMBuffIndex = 0;
 
-	applySettings(m_settings, true);
+	applySettings(QStringList(), m_settings, true);
     applyChannelSettings(m_channelSampleRate, m_channelFrequencyOffset, true);
 }
 
@@ -264,24 +264,13 @@ void AMDemodSink::applyChannelSettings(int channelSampleRate, int channelFrequen
     m_channelFrequencyOffset = channelFrequencyOffset;
 }
 
-void AMDemodSink::applySettings(const AMDemodSettings& settings, bool force)
+void AMDemodSink::applySettings(const QStringList& settingsKeys, const AMDemodSettings& settings, bool force)
 {
-    qDebug() << "AMDemodSink::applySettings:"
-            << " m_inputFrequencyOffset: " << settings.m_inputFrequencyOffset
-            << " m_rfBandwidth: " << settings.m_rfBandwidth
-            << " m_volume: " << settings.m_volume
-            << " m_squelch: " << settings.m_squelch
-            << " m_audioMute: " << settings.m_audioMute
-            << " m_bandpassEnable: " << settings.m_bandpassEnable
-            << " m_afBandwidth: " << settings.m_afBandwidth
-            << " m_audioDeviceName: " << settings.m_audioDeviceName
-            << " m_pll: " << settings.m_pll
-            << " m_syncAMOperation: " << (int) settings.m_syncAMOperation
-            << " force: " << force;
+    qDebug() << "AMDemodSink::applySettings:" << settings.getDebugString(settingsKeys, force);
 
-    if((m_settings.m_rfBandwidth != settings.m_rfBandwidth) ||
-        (m_settings.m_bandpassEnable != settings.m_bandpassEnable) ||
-        (m_settings.m_afBandwidth != settings.m_afBandwidth) || force)
+    if((settingsKeys.contains("rfBandwidth") && (settings.m_rfBandwidth != m_settings.m_rfBandwidth)) ||
+        (settingsKeys.contains("bandpassEnable") && (settings.m_bandpassEnable != m_settings.m_bandpassEnable)) ||
+        (settingsKeys.contains("afBandwidth") && (settings.m_afBandwidth != m_settings.m_afBandwidth)) || force)
     {
         m_interpolator.create(16, m_channelSampleRate, settings.m_rfBandwidth / 2.2f);
         m_interpolatorDistanceRemain = 0;
@@ -291,11 +280,11 @@ void AMDemodSink::applySettings(const AMDemodSettings& settings, bool force)
         DSBFilter->create_dsb_filter((2.0f * settings.m_rfBandwidth) / (float) m_audioSampleRate);
     }
 
-    if ((m_settings.m_squelch != settings.m_squelch) || force) {
+    if ((settingsKeys.contains("squelch") && (m_settings.m_squelch != settings.m_squelch)) || force) {
         m_squelchLevel = CalcDb::powerFromdB(settings.m_squelch);
     }
 
-    if ((m_settings.m_pll != settings.m_pll) || force)
+    if ((settingsKeys.contains("pll") && (m_settings.m_pll != settings.m_pll)) || force)
     {
         if (settings.m_pll)
         {
@@ -308,11 +297,15 @@ void AMDemodSink::applySettings(const AMDemodSettings& settings, bool force)
         }
     }
 
-    if ((m_settings.m_syncAMOperation != settings.m_syncAMOperation) || force) {
+    if ((settingsKeys.contains("syncAMOperation") && (m_settings.m_syncAMOperation != settings.m_syncAMOperation)) || force) {
         m_syncAMBuffIndex = 0;
     }
 
-    m_settings = settings;
+    if (force) {
+        m_settings = settings;
+    } else {
+        m_settings.applySettings(settingsKeys, settings);
+    }
 }
 
 void AMDemodSink::applyAudioSampleRate(int sampleRate)

@@ -140,7 +140,7 @@ private:
     virtual ~HeatMapGUI();
 
     void blockApplySettings(bool block);
-    void applySettings(bool force = false);
+    void applySettings(const QStringList& settingsKeys, bool force = false);
     void displaySettings();
     bool handleMessage(const Message& message);
     void makeUIConnections();
@@ -222,4 +222,3 @@ private slots:
 };
 
 #endif // INCLUDE_HEATMAPGUI_H
-

@@ -72,7 +72,7 @@ void BFMDemodGUI::resetToDefaults()
     ui->g14AltFrequencies->setEnabled(false);
 	blockApplySettings(false);
 
-	applySettings();
+	applySettings(QStringList(), true);
 }
 
 QByteArray BFMDemodGUI::serialize() const
@@ -84,7 +84,7 @@ bool BFMDemodGUI::deserialize(const QByteArray& data)
 {
     if(m_settings.deserialize(data)) {
         displaySettings();
-        applySettings(true);
+        applySettings(QStringList(), true);
         return true;
     } else {
         resetToDefaults();
@@ -148,7 +148,7 @@ void BFMDemodGUI::channelMarkerChangedByCursor()
 {
     ui->deltaFrequency->setValue(m_channelMarker.getCenterFrequency());
     m_settings.m_inputFrequencyOffset = m_channelMarker.getCenterFrequency();
-    applySettings();
+    applySettings(QStringList({"inputFrequencyOffset"}));
 }
 
 void BFMDemodGUI::channelMarkerHighlightedByCursor()
@@ -161,7 +161,7 @@ void BFMDemodGUI::on_deltaFrequency_changed(qint64 value)
     m_channelMarker.setCenterFrequency(value);
     m_settings.m_inputFrequencyOffset = m_channelMarker.getCenterFrequency();
     updateAbsoluteCenterFrequency();
-    applySettings();
+    applySettings(QStringList({"inputFrequencyOffset"}));
 }
 
 void BFMDemodGUI::on_rfBW_valueChanged(int value)
@@ -169,40 +169,40 @@ void BFMDemodGUI::on_rfBW_valueChanged(int value)
 	ui->rfBWText->setText(QString("%1 kHz").arg(BFMDemodSettings::getRFBW(value) / 1000.0));
 	m_channelMarker.setBandwidth(BFMDemodSettings::getRFBW(value));
 	m_settings.m_rfBandwidth = BFMDemodSettings::getRFBW(value);
-	applySettings();
+	applySettings(QStringList({"rfBandwidth"}));
 }
 
 void BFMDemodGUI::on_afBW_valueChanged(int value)
 {
 	ui->afBWText->setText(QString("%1 kHz").arg(value));
 	m_settings.m_afBandwidth = value * 1000.0;
-	applySettings();
+	applySettings(QStringList({"afBandwidth"}));
 }
 
 void BFMDemodGUI::on_deEmphasis_currentIndexChanged(int index)
 {
 	m_settings.m_deEmphasis = static_cast<BFMDemodSettings::DeEmphasis>(index);
-	applySettings();
+	applySettings(QStringList({"deEmphasis"}));
 }
 
 void BFMDemodGUI::on_volume_valueChanged(int value)
 {
 	ui->volumeText->setText(QString("%1").arg(value / 10.0, 0, 'f', 1));
 	m_settings.m_volume = value / 10.0;
-	applySettings();
+	applySettings(QStringList({"volume"}));
 }
 
 void BFMDemodGUI::on_squelch_valueChanged(int value)
 {
 	ui->squelchText->setText(QString("%1 dB").arg(value));
 	m_settings.m_squelch = value;
-	applySettings();
+	applySettings(QStringList({"squelch"}));
 }
 
 void BFMDemodGUI::on_audioMute_toggled(bool mute)
 {
 	m_settings.m_audioMute = mute;
-	applySettings();
+	applySettings(QStringList({"audioMute"}));
 }
 
 void BFMDemodGUI::on_audioStereo_toggled(bool stereo)
@@ -213,25 +213,25 @@ void BFMDemodGUI::on_audioStereo_toggled(bool stereo)
 	}
 
 	m_settings.m_audioStereo = stereo;
-	applySettings();
+	applySettings(QStringList({"audioStereo"}));
 }
 
 void BFMDemodGUI::on_lsbStereo_toggled(bool lsb)
 {
     m_settings.m_lsbStereo = lsb;
-	applySettings();
+	applySettings(QStringList({"lsbStereo"}));
 }
 
 void BFMDemodGUI::on_showPilot_clicked()
 {
     m_settings.m_showPilot = ui->showPilot->isChecked();
-	applySettings();
+	applySettings(QStringList({"showPilot"}));
 }
 
 void BFMDemodGUI::on_rds_clicked()
 {
     m_settings.m_rdsActive = ui->rds->isChecked();
-	applySettings();
+	applySettings(QStringList({"rdsActive"}));
 }
 
 void BFMDemodGUI::on_clearData_clicked(bool checked)
@@ -339,7 +339,7 @@ void BFMDemodGUI::onWidgetRolled(QWidget* widget, bool rollDown)
     (void) rollDown;
 
     getRollupContents()->saveState(m_rollupState);
-    applySettings();
+    applySettings(QStringList());
 }
 
 void BFMDemodGUI::onMenuDialogCalled(const QPoint &p)
@@ -384,7 +384,9 @@ void BFMDemodGUI::onMenuDialogCalled(const QPoint &p)
             updateIndexLabel();
         }
 
-        applySettings();
+        applySettings(QStringList({"title", "rgbColor", "useReverseAPI",
+			"reverseAPIAddress", "reverseAPIPort", "reverseAPIDeviceIndex",
+			"reverseAPIChannelIndex", "streamIndex"}));
     }
 
     resetContextMenuType();
@@ -472,7 +474,7 @@ BFMDemodGUI::BFMDemodGUI(PluginAPI* pluginAPI, DeviceUISet *deviceUISet, Baseban
 	rdsUpdate(true);
 	displaySettings();
     makeUIConnections();
-	applySettings(true);
+	applySettings(QStringList(), true);
     m_resizer.enableChildMouseTracking();
 }
 
@@ -486,11 +488,11 @@ void BFMDemodGUI::blockApplySettings(bool block)
     m_doApplySettings = !block;
 }
 
-void BFMDemodGUI::applySettings(bool force)
+void BFMDemodGUI::applySettings(const QStringList& channelSettingsKeys, bool force)
 {
 	if (m_doApplySettings)
 	{
-        BFMDemod::MsgConfigureBFMDemod* msgConfig = BFMDemod::MsgConfigureBFMDemod::create( m_settings, force);
+        BFMDemod::MsgConfigureBFMDemod* msgConfig = BFMDemod::MsgConfigureBFMDemod::create(channelSettingsKeys, m_settings, force);
         m_bfmDemod->getInputMessageQueue()->push(msgConfig);
 	}
 }
@@ -562,7 +564,7 @@ void BFMDemodGUI::audioSelect(const QPoint& p)
     if (audioSelect.m_selected)
     {
         m_settings.m_audioDeviceName = audioSelect.m_audioDeviceName;
-        applySettings();
+        applySettings(QStringList({"audioDeviceName"}));
     }
 }
 

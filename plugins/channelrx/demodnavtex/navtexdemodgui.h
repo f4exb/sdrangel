@@ -101,7 +101,7 @@ private:
     virtual ~NavtexDemodGUI();
 
     void blockApplySettings(bool block);
-    void applySettings(bool force = false);
+    void applySettings(const QStringList& settingsKeys, bool force = false);
     void displaySettings();
     void messageReceived(const NavtexMessage& message, int errors, float rssi);
     bool handleMessage(const Message& message);
@@ -146,4 +146,3 @@ private slots:
 };
 
 #endif // INCLUDE_NAVTEXDEMODGUI_H
-

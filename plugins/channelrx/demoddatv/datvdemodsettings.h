@@ -125,6 +125,8 @@ struct DATVDemodSettings
     void debug(const QString& msg) const;
     bool isDifferent(const DATVDemodSettings& other); // true if a change of settings should trigger DVB framework config update
     void validateSystemConfiguration();
+    void applySettings(const QStringList& settingsKeys, const DATVDemodSettings& settings);
+    QString getDebugString(const QStringList& settingsKeys, bool force=false) const;
 
     static DATVModulation getModulationFromStr(const QString& str);
     static DATVCodeRate getCodeRateFromStr(const QString& str);

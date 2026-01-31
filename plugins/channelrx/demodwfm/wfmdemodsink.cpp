@@ -50,7 +50,7 @@ WFMDemodSink::WFMDemodSink() :
     m_demodBuffer.resize(1<<12);
     m_demodBufferFill = 0;
 
-	applySettings(m_settings, true);
+	applySettings(QStringList(), m_settings, true);
     applyChannelSettings(m_channelSampleRate, m_channelFrequencyOffset, true);
 }
 
@@ -219,26 +219,12 @@ void WFMDemodSink::applyChannelSettings(int channelSampleRate, int channelFreque
     m_channelFrequencyOffset = channelFrequencyOffset;
 }
 
-void WFMDemodSink::applySettings(const WFMDemodSettings& settings, bool force)
+void WFMDemodSink::applySettings(const QStringList& settingsKeys, const WFMDemodSettings& settings, bool force)
 {
-    qDebug() << "WFMDemodSink::applySettings:"
-            << " m_inputFrequencyOffset: " << settings.m_inputFrequencyOffset
-            << " m_rfBandwidth: " << settings.m_rfBandwidth
-            << " m_afBandwidth: " << settings.m_afBandwidth
-            << " m_volume: " << settings.m_volume
-            << " m_squelch: " << settings.m_squelch
-            << " m_audioDeviceName: " << settings.m_audioDeviceName
-            << " m_audioMute: " << settings.m_audioMute
-            << " m_streamIndex: " << settings.m_streamIndex
-            << " m_useReverseAPI: " << settings.m_useReverseAPI
-            << " m_reverseAPIAddress: " << settings.m_reverseAPIAddress
-            << " m_reverseAPIPort: " << settings.m_reverseAPIPort
-            << " m_reverseAPIDeviceIndex: " << settings.m_reverseAPIDeviceIndex
-            << " m_reverseAPIChannelIndex: " << settings.m_reverseAPIChannelIndex
-            << " force: " << force;
+    qDebug() << "WFMDemodSink::applySettings:" << settings.getDebugString(settingsKeys, force);
 
-    if((settings.m_afBandwidth != m_settings.m_afBandwidth) ||
-       (settings.m_rfBandwidth != m_settings.m_rfBandwidth) || force)
+    if((settingsKeys.contains("afBandwidth") && (settings.m_afBandwidth != m_settings.m_afBandwidth)) ||
+       (settingsKeys.contains("rfBandwidth") && (settings.m_rfBandwidth != m_settings.m_rfBandwidth)) || force)
     {
         qDebug() << "WFMDemodSink::applySettings: m_interpolator.create";
         m_interpolator.create(16, m_channelSampleRate, settings.m_afBandwidth);
@@ -255,11 +241,15 @@ void WFMDemodSink::applySettings(const WFMDemodSettings& settings, bool force)
         qDebug("WFMDemodSink::applySettings: m_fmExcursion: %f", m_fmExcursion);
     }
 
-    if ((settings.m_squelch != m_settings.m_squelch) || force)
+    if ((settingsKeys.contains("squelch") && (settings.m_squelch != m_settings.m_squelch)) || force)
     {
         qDebug() << "WFMDemodSink::applySettings: set m_squelchLevel";
         m_squelchLevel = pow(10.0, settings.m_squelch / 10.0);
     }
 
-    m_settings = settings;
+    if (force) {
+        m_settings = settings;
+    } else {
+        m_settings.applySettings(settingsKeys, settings);
+    }
 }

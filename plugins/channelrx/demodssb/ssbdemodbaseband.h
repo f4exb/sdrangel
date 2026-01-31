@@ -41,20 +41,23 @@ public:
 
     public:
         const SSBDemodSettings& getSettings() const { return m_settings; }
+        const QStringList& getSettingsKeys() const { return m_settingsKeys; }
         bool getForce() const { return m_force; }
 
-        static MsgConfigureSSBDemodBaseband* create(const SSBDemodSettings& settings, bool force)
+        static MsgConfigureSSBDemodBaseband* create(const QStringList& settingsKeys, const SSBDemodSettings& settings, bool force)
         {
-            return new MsgConfigureSSBDemodBaseband(settings, force);
+            return new MsgConfigureSSBDemodBaseband(settingsKeys, settings, force);
         }
 
     private:
         SSBDemodSettings m_settings;
+        QStringList m_settingsKeys;
         bool m_force;
 
-        MsgConfigureSSBDemodBaseband(const SSBDemodSettings& settings, bool force) :
+        MsgConfigureSSBDemodBaseband(const QStringList& settingsKeys, const SSBDemodSettings& settings, bool force) :
             Message(),
             m_settings(settings),
+            m_settingsKeys(settingsKeys),
             m_force(force)
         { }
     };
@@ -89,7 +92,7 @@ private:
     QRecursiveMutex m_mutex;
 
     bool handleMessage(const Message& cmd);
-    void applySettings(const SSBDemodSettings& settings, bool force = false);
+    void applySettings(const QStringList& settingsKeys, const SSBDemodSettings& settings, bool force = false);
     MessageQueue *getMessageQueueToGUI() { return m_messageQueueToGUI; }
 
 private slots:

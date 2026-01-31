@@ -50,7 +50,7 @@ public:
     virtual void feed(const SampleVector::const_iterator& begin, const SampleVector::const_iterator& end);
 
     void applyChannelSettings(int channelSampleRate, int channelFrequencyOffset, bool force = false);
-    void applySettings(const APTDemodSettings& settings, bool force = false);
+    void applySettings(const QStringList& settingsKeys, const APTDemodSettings& settings, bool force = false);
     void setImageWorkerMessageQueue(MessageQueue *messageQueue) { m_imageWorkerMessageQueue = messageQueue; }
 
     double getMagSq() const { return m_magsq; }

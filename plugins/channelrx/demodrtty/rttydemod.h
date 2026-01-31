@@ -49,20 +49,23 @@ public:
 
     public:
         const RttyDemodSettings& getSettings() const { return m_settings; }
+        const QStringList& getSettingsKeys() const { return m_settingsKeys; }
         bool getForce() const { return m_force; }
 
-        static MsgConfigureRttyDemod* create(const RttyDemodSettings& settings, bool force)
+        static MsgConfigureRttyDemod* create(const QStringList& settingsKeys, const RttyDemodSettings& settings, bool force)
         {
-            return new MsgConfigureRttyDemod(settings, force);
+            return new MsgConfigureRttyDemod(settingsKeys, settings, force);
         }
 
     private:
         RttyDemodSettings m_settings;
+        QStringList m_settingsKeys;
         bool m_force;
 
-        MsgConfigureRttyDemod(const RttyDemodSettings& settings, bool force) :
+        MsgConfigureRttyDemod(const QStringList& settingsKeys, const RttyDemodSettings& settings, bool force) :
             Message(),
             m_settings(settings),
+            m_settingsKeys(settingsKeys),
             m_force(force)
         { }
     };
@@ -198,11 +201,11 @@ private:
     QNetworkRequest m_networkRequest;
 
     virtual bool handleMessage(const Message& cmd);
-    void applySettings(const RttyDemodSettings& settings, bool force = false);
+    void applySettings(const QStringList& settingsKeys, const RttyDemodSettings& settings, bool force = false);
     void sendSampleRateToDemodAnalyzer();
-    void webapiReverseSendSettings(QList<QString>& channelSettingsKeys, const RttyDemodSettings& settings, bool force);
+    void webapiReverseSendSettings(const QList<QString>& channelSettingsKeys, const RttyDemodSettings& settings, bool force);
     void webapiFormatChannelSettings(
-        QList<QString>& channelSettingsKeys,
+        const QList<QString>& channelSettingsKeys,
         SWGSDRangel::SWGChannelSettings *swgChannelSettings,
         const RttyDemodSettings& settings,
         bool force
@@ -216,4 +219,3 @@ private slots:
 };
 
 #endif // INCLUDE_RTTYDEMOD_H
-

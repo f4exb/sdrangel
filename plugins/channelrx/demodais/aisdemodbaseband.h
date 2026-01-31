@@ -44,20 +44,23 @@ public:
 
     public:
         const AISDemodSettings& getSettings() const { return m_settings; }
+        const QStringList& getSettingsKeys() const { return m_settingsKeys; }
         bool getForce() const { return m_force; }
 
-        static MsgConfigureAISDemodBaseband* create(const AISDemodSettings& settings, bool force)
+        static MsgConfigureAISDemodBaseband* create(const AISDemodSettings& settings, const QStringList& settingsKeys, bool force)
         {
-            return new MsgConfigureAISDemodBaseband(settings, force);
+            return new MsgConfigureAISDemodBaseband(settings, settingsKeys, force);
         }
 
     private:
         AISDemodSettings m_settings;
+        QStringList m_settingsKeys;
         bool m_force;
 
-        MsgConfigureAISDemodBaseband(const AISDemodSettings& settings, bool force) :
+        MsgConfigureAISDemodBaseband(const AISDemodSettings& settings, const QStringList& settingsKeys, bool force) :
             Message(),
             m_settings(settings),
+            m_settingsKeys(settingsKeys),
             m_force(force)
         { }
     };
@@ -92,7 +95,7 @@ private:
 
     bool handleMessage(const Message& cmd);
     void calculateOffset(AISDemodSink *sink);
-    void applySettings(const AISDemodSettings& settings, bool force = false);
+    void applySettings(const AISDemodSettings& settings, const QStringList& settingsKeys, bool force = false);
 
 private slots:
     void handleInputMessages();

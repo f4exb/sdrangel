@@ -94,7 +94,7 @@ private:
     virtual ~RadiosondeDemodGUI();
 
     void blockApplySettings(bool block);
-    void applySettings(bool force = false);
+    void applySettings(const QStringList& settingsKeys, bool force = false);
     void displaySettings();
     void frameReceived(const QByteArray& frame, const QDateTime& dateTime, int errorsCorrected, int threshold, bool loadCSV);
     bool handleMessage(const Message& message);

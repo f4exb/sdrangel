@@ -507,7 +507,7 @@ DABDemodSink::DABDemodSink() :
     m_demodBuffer.resize(1<<13);
     m_demodBufferFill = 0;
 
-    applySettings(m_settings, true);
+    applySettings(QStringList(), m_settings, true);
     applyChannelSettings(m_channelSampleRate, m_channelFrequencyOffset, true);
 
     m_api.dabMode = 1; // Latest DAB spec only has mode 1
@@ -613,19 +613,18 @@ void DABDemodSink::applyChannelSettings(int channelSampleRate, int channelFreque
     m_channelFrequencyOffset = channelFrequencyOffset;
 }
 
-void DABDemodSink::applySettings(const DABDemodSettings& settings, bool force)
+void DABDemodSink::applySettings(const QStringList& settingsKeys, const DABDemodSettings& settings, bool force)
 {
-    qDebug() << "DABDemodSink::applySettings:"
-            << " force: " << force;
+    qDebug() << "DABDemodSink::applySettings:" << settings.getDebugString(settingsKeys, force);
 
-    if ((settings.m_rfBandwidth != m_settings.m_rfBandwidth) || force)
+    if ((settingsKeys.contains("rfBandwidth") && (settings.m_rfBandwidth != m_settings.m_rfBandwidth)) || force)
     {
         m_interpolator.create(16, m_channelSampleRate, settings.m_rfBandwidth / 2.2);
         m_interpolatorDistance = (Real) m_channelSampleRate / (Real) DABDEMOD_CHANNEL_SAMPLE_RATE;
         m_interpolatorDistanceRemain = m_interpolatorDistance;
     }
 
-    if ((settings.m_program != m_settings.m_program) || force)
+    if ((settingsKeys.contains("program") && (settings.m_program != m_settings.m_program)) || force)
     {
         if (!settings.m_program.isEmpty()) {
             setProgram(settings.m_program);

@@ -129,7 +129,7 @@ void PagerDemodGUI::resetToDefaults()
 {
     m_settings.resetToDefaults();
     displaySettings();
-    applySettings(true);
+    applySettings(QStringList(), true);
 }
 
 QByteArray PagerDemodGUI::serialize() const
@@ -141,7 +141,7 @@ bool PagerDemodGUI::deserialize(const QByteArray& data)
 {
     if(m_settings.deserialize(data)) {
         displaySettings();
-        applySettings(true);
+        applySettings(QStringList(), true);
         return true;
     } else {
         resetToDefaults();
@@ -341,7 +341,7 @@ void PagerDemodGUI::channelMarkerChangedByCursor()
 {
     ui->deltaFrequency->setValue(m_channelMarker.getCenterFrequency());
     m_settings.m_inputFrequencyOffset = m_channelMarker.getCenterFrequency();
-    applySettings();
+    applySettings(QStringList("inputFrequencyOffset"));
 }
 
 void PagerDemodGUI::channelMarkerHighlightedByCursor()
@@ -354,7 +354,7 @@ void PagerDemodGUI::on_deltaFrequency_changed(qint64 value)
     m_channelMarker.setCenterFrequency(value);
     m_settings.m_inputFrequencyOffset = m_channelMarker.getCenterFrequency();
     updateAbsoluteCenterFrequency();
-    applySettings();
+    applySettings(QStringList("inputFrequencyOffset"));
 }
 
 void PagerDemodGUI::on_rfBW_valueChanged(int value)
@@ -363,34 +363,34 @@ void PagerDemodGUI::on_rfBW_valueChanged(int value)
     ui->rfBWText->setText(QString("%1k").arg(value / 10.0, 0, 'f', 1));
     m_channelMarker.setBandwidth(bw);
     m_settings.m_rfBandwidth = bw;
-    applySettings();
+    applySettings(QStringList("rfBandwidth"));
 }
 
 void PagerDemodGUI::on_fmDev_valueChanged(int value)
 {
     ui->fmDevText->setText(QString("%1k").arg(value / 10.0, 0, 'f', 1));
     m_settings.m_fmDeviation = value * 100.0;
-    applySettings();
+    applySettings(QStringList("fmDeviation"));
 }
 
 void PagerDemodGUI::on_baud_currentIndexChanged(int index)
 {
     (void)index;
     m_settings.m_baud = ui->baud->currentText().toInt();
-    applySettings();
+    applySettings(QStringList("baud"));
 }
 
 void PagerDemodGUI::on_decode_currentIndexChanged(int index)
 {
     m_settings.m_decode = (PagerDemodSettings::Decode)index;
-    applySettings();
+    applySettings(QStringList("decode"));
 }
 
 void PagerDemodGUI::on_filterAddress_editingFinished()
 {
     m_settings.m_filterAddress = ui->filterAddress->text();
     filter();
-    applySettings();
+    applySettings(QStringList("filterAddress"));
 }
 
 void PagerDemodGUI::on_clearTable_clicked()
@@ -401,31 +401,31 @@ void PagerDemodGUI::on_clearTable_clicked()
 void PagerDemodGUI::on_udpEnabled_clicked(bool checked)
 {
     m_settings.m_udpEnabled = checked;
-    applySettings();
+    applySettings(QStringList("udpEnabled"));
 }
 
 void PagerDemodGUI::on_udpAddress_editingFinished()
 {
     m_settings.m_udpAddress = ui->udpAddress->text();
-    applySettings();
+    applySettings(QStringList("udpAddress"));
 }
 
 void PagerDemodGUI::on_udpPort_editingFinished()
 {
     m_settings.m_udpPort = ui->udpPort->text().toInt();
-    applySettings();
+    applySettings(QStringList("udpPort"));
 }
 
 void PagerDemodGUI::on_channel1_currentIndexChanged(int index)
 {
     m_settings.m_scopeCh1 = index;
-    applySettings();
+    applySettings(QStringList("scopeCh1"));
 }
 
 void PagerDemodGUI::on_channel2_currentIndexChanged(int index)
 {
     m_settings.m_scopeCh2 = index;
-    applySettings();
+    applySettings(QStringList("scopeCh2"));
 }
 
 void PagerDemodGUI::filterRow(int row)
@@ -455,7 +455,7 @@ void PagerDemodGUI::onWidgetRolled(QWidget* widget, bool rollDown)
     (void) rollDown;
 
     getRollupContents()->saveState(m_rollupState);
-    applySettings();
+    applySettings(QStringList());
 }
 
 void PagerDemodGUI::onMenuDialogCalled(const QPoint &p)
@@ -500,7 +500,8 @@ void PagerDemodGUI::onMenuDialogCalled(const QPoint &p)
             updateIndexLabel();
         }
 
-        applySettings();
+        applySettings(QStringList({"title", "rgbColor", "useReverseAPI", "reverseAPIAddress",
+            "reverseAPIPort", "reverseAPIDeviceIndex", "reverseAPIChannelIndex", "streamIndex"}));
     }
 
     resetContextMenuType();
@@ -515,8 +516,10 @@ PagerDemodGUI::PagerDemodGUI(PluginAPI* pluginAPI, DeviceUISet *deviceUISet, Bas
     m_deviceCenterFrequency(0),
     m_basebandSampleRate(1),
     m_doApplySettings(true),
-    m_tickCount(0),
-    m_speech(nullptr)
+    m_tickCount(0)
+#ifdef QT_TEXTTOSPEECH_FOUND
+    , m_speech(nullptr)
+#endif
 {
     setAttribute(Qt::WA_DeleteOnClose, true);
     m_helpURL = "plugins/channelrx/demodpager/readme.md";
@@ -591,7 +594,7 @@ PagerDemodGUI::PagerDemodGUI(PluginAPI* pluginAPI, DeviceUISet *deviceUISet, Bas
 
     displaySettings();
     makeUIConnections();
-    applySettings(true);
+    applySettings(QStringList(), true);
     m_resizer.enableChildMouseTracking();
 }
 
@@ -624,11 +627,11 @@ void PagerDemodGUI::blockApplySettings(bool block)
     m_doApplySettings = !block;
 }
 
-void PagerDemodGUI::applySettings(bool force)
+void PagerDemodGUI::applySettings(const QStringList& settingsKeys, bool force)
 {
     if (m_doApplySettings)
     {
-        PagerDemod::MsgConfigurePagerDemod* message = PagerDemod::MsgConfigurePagerDemod::create( m_settings, force);
+        PagerDemod::MsgConfigurePagerDemod* message = PagerDemod::MsgConfigurePagerDemod::create(settingsKeys, m_settings, force);
         m_pagerDemod->getInputMessageQueue()->push(message);
     }
 }
@@ -738,8 +741,9 @@ void PagerDemodGUI::on_charset_clicked()
 {
     PagerDemodCharsetDialog dialog(&m_settings);
     new DialogPositioner(&dialog, true);
+
     if (dialog.exec() == QDialog::Accepted) {
-        applySettings();
+        applySettings(QStringList({"sevenbit", "unicode", "reverse"}));
     }
 }
 
@@ -747,17 +751,18 @@ void PagerDemodGUI::on_notifications_clicked()
 {
     PagerDemodNotificationDialog dialog(&m_settings);
     new DialogPositioner(&dialog, true);
+
     if (dialog.exec() == QDialog::Accepted)
     {
         enableSpeechIfNeeded();
-        applySettings();
+        applySettings(QStringList({"notificationSettings"}));
     }
 }
 
 void PagerDemodGUI::on_filterDuplicates_clicked(bool checked)
 {
     m_settings.m_filterDuplicates = checked;
-    applySettings();
+    applySettings(QStringList({"filterDuplicates"}));
 }
 
 void PagerDemodGUI::on_filterDuplicates_rightClicked(const QPoint &p)
@@ -766,15 +771,16 @@ void PagerDemodGUI::on_filterDuplicates_rightClicked(const QPoint &p)
 
     PagerDemodFilterDialog dialog(&m_settings);
     new DialogPositioner(&dialog, true);
+
     if (dialog.exec() == QDialog::Accepted) {
-        applySettings();
+        applySettings(QStringList({"duplicateMatchLastOnly", "duplicateMatchMessageOnly"}));
     }
 }
 
 void PagerDemodGUI::on_logEnable_clicked(bool checked)
 {
     m_settings.m_logEnabled = checked;
-    applySettings();
+    applySettings(QStringList({"logEnabled"}));
 }
 
 void PagerDemodGUI::on_logFilename_clicked()
@@ -790,7 +796,7 @@ void PagerDemodGUI::on_logFilename_clicked()
         {
             m_settings.m_logFilename = fileNames[0];
             ui->logFilename->setToolTip(QString(".csv log filename: %1").arg(m_settings.m_logFilename));
-            applySettings();
+            applySettings(QStringList({"logFilename"}));
         }
     }
 }

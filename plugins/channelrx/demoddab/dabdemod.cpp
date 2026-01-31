@@ -69,7 +69,7 @@ DABDemod::DABDemod(DeviceAPI *deviceAPI) :
     m_basebandSink->setChannel(this);
     m_basebandSink->moveToThread(&m_thread);
 
-    applySettings(m_settings, true);
+    applySettings(QStringList(), m_settings, true);
 
     m_deviceAPI->addChannelSink(this);
     m_deviceAPI->addChannelSinkAPI(this);
@@ -143,7 +143,7 @@ void DABDemod::start()
     DSPSignalNotification *dspMsg = new DSPSignalNotification(m_basebandSampleRate, m_centerFrequency);
     m_basebandSink->getInputMessageQueue()->push(dspMsg);
 
-    DABDemodBaseband::MsgConfigureDABDemodBaseband *msg = DABDemodBaseband::MsgConfigureDABDemodBaseband::create(m_settings, true);
+    DABDemodBaseband::MsgConfigureDABDemodBaseband *msg = DABDemodBaseband::MsgConfigureDABDemodBaseband::create(QStringList(), m_settings, true);
     m_basebandSink->getInputMessageQueue()->push(msg);
 }
 
@@ -161,7 +161,7 @@ bool DABDemod::handleMessage(const Message& cmd)
     {
         MsgConfigureDABDemod& cfg = (MsgConfigureDABDemod&) cmd;
         qDebug() << "DABDemod::handleMessage: MsgConfigureDABDemod";
-        applySettings(cfg.getSettings(), cfg.getForce());
+        applySettings(cfg.getSettingsKeys(), cfg.getSettings(), cfg.getForce());
 
         return true;
     }
@@ -313,25 +313,18 @@ void DABDemod::setCenterFrequency(qint64 frequency)
 {
     DABDemodSettings settings = m_settings;
     settings.m_inputFrequencyOffset = frequency;
-    applySettings(settings, false);
+    applySettings(QStringList({"inputFrequencyOffset"}), settings, false);
 
     if (m_guiMessageQueue) // forward to GUI if any
     {
-        MsgConfigureDABDemod *msgToGUI = MsgConfigureDABDemod::create(settings, false);
+        MsgConfigureDABDemod *msgToGUI = MsgConfigureDABDemod::create(QStringList({"inputFrequencyOffset"}), settings, false);
         m_guiMessageQueue->push(msgToGUI);
     }
 }
 
-void DABDemod::applySettings(const DABDemodSettings& settings, bool force)
+void DABDemod::applySettings(const QStringList& settingsKeys, const DABDemodSettings& settings, bool force)
 {
-    qDebug() << "DABDemod::applySettings:"
-            << " m_streamIndex: " << settings.m_streamIndex
-            << " m_useReverseAPI: " << settings.m_useReverseAPI
-            << " m_reverseAPIAddress: " << settings.m_reverseAPIAddress
-            << " m_reverseAPIPort: " << settings.m_reverseAPIPort
-            << " m_reverseAPIDeviceIndex: " << settings.m_reverseAPIDeviceIndex
-            << " m_reverseAPIChannelIndex: " << settings.m_reverseAPIChannelIndex
-            << " force: " << force;
+    qDebug() << "DABDemod::applySettings:" << settings.getDebugString(settingsKeys, force);
 
     QList<QString> reverseAPIKeys;
 
@@ -353,7 +346,7 @@ void DABDemod::applySettings(const DABDemodSettings& settings, bool force)
     if ((settings.m_audioDeviceName != m_settings.m_audioDeviceName) || force) {
         reverseAPIKeys.append("audioDeviceName");
     }
-    if (m_settings.m_streamIndex != settings.m_streamIndex)
+    if (settingsKeys.contains("streamIndex") && (settings.m_streamIndex != m_settings.m_streamIndex))
     {
         if (m_deviceAPI->getSampleMIMO()) // change of stream is possible for MIMO devices only
         {
@@ -368,17 +361,17 @@ void DABDemod::applySettings(const DABDemodSettings& settings, bool force)
         reverseAPIKeys.append("streamIndex");
     }
 
-    DABDemodBaseband::MsgConfigureDABDemodBaseband *msg = DABDemodBaseband::MsgConfigureDABDemodBaseband::create(settings, force);
+    DABDemodBaseband::MsgConfigureDABDemodBaseband *msg = DABDemodBaseband::MsgConfigureDABDemodBaseband::create(settingsKeys, settings, force);
     m_basebandSink->getInputMessageQueue()->push(msg);
 
-    if (settings.m_useReverseAPI)
+    if (settingsKeys.contains("useReverseAPI") && settings.m_useReverseAPI)
     {
-        bool fullUpdate = ((m_settings.m_useReverseAPI != settings.m_useReverseAPI) && settings.m_useReverseAPI) ||
-                (m_settings.m_reverseAPIAddress != settings.m_reverseAPIAddress) ||
-                (m_settings.m_reverseAPIPort != settings.m_reverseAPIPort) ||
-                (m_settings.m_reverseAPIDeviceIndex != settings.m_reverseAPIDeviceIndex) ||
-                (m_settings.m_reverseAPIChannelIndex != settings.m_reverseAPIChannelIndex);
-        webapiReverseSendSettings(reverseAPIKeys, settings, fullUpdate || force);
+        bool fullUpdate = ((settingsKeys.contains("useReverseAPI") && (m_settings.m_useReverseAPI != settings.m_useReverseAPI)) && settings.m_useReverseAPI) ||
+                (settingsKeys.contains("reverseAPIAddress") && (m_settings.m_reverseAPIAddress != settings.m_reverseAPIAddress)) ||
+                (settingsKeys.contains("reverseAPIPort") && (m_settings.m_reverseAPIPort != settings.m_reverseAPIPort)) ||
+                (settingsKeys.contains("reverseAPIDeviceIndex") && (m_settings.m_reverseAPIDeviceIndex != settings.m_reverseAPIDeviceIndex)) ||
+                (settingsKeys.contains("reverseAPIChannelIndex") && (m_settings.m_reverseAPIChannelIndex != settings.m_reverseAPIChannelIndex));
+        webapiReverseSendSettings(settingsKeys, settings, fullUpdate || force);
     }
 
     m_settings = settings;
@@ -393,14 +386,14 @@ bool DABDemod::deserialize(const QByteArray& data)
 {
     if (m_settings.deserialize(data))
     {
-        MsgConfigureDABDemod *msg = MsgConfigureDABDemod::create(m_settings, true);
+        MsgConfigureDABDemod *msg = MsgConfigureDABDemod::create(QStringList(), m_settings, true);
         m_inputMessageQueue.push(msg);
         return true;
     }
     else
     {
         m_settings.resetToDefaults();
-        MsgConfigureDABDemod *msg = MsgConfigureDABDemod::create(m_settings, true);
+        MsgConfigureDABDemod *msg = MsgConfigureDABDemod::create(QStringList(), m_settings, true);
         m_inputMessageQueue.push(msg);
         return false;
     }
@@ -455,13 +448,13 @@ int DABDemod::webapiSettingsPutPatch(
     DABDemodSettings settings = m_settings;
     webapiUpdateChannelSettings(settings, channelSettingsKeys, response);
 
-    MsgConfigureDABDemod *msg = MsgConfigureDABDemod::create(settings, force);
+    MsgConfigureDABDemod *msg = MsgConfigureDABDemod::create(channelSettingsKeys, settings, force);
     m_inputMessageQueue.push(msg);
 
     qDebug("DABDemod::webapiSettingsPutPatch: forward to GUI: %p", m_guiMessageQueue);
     if (m_guiMessageQueue) // forward to GUI if any
     {
-        MsgConfigureDABDemod *msgToGUI = MsgConfigureDABDemod::create(settings, force);
+        MsgConfigureDABDemod *msgToGUI = MsgConfigureDABDemod::create(channelSettingsKeys, settings, force);
         m_guiMessageQueue->push(msgToGUI);
     }
 
@@ -583,7 +576,7 @@ void DABDemod::webapiFormatChannelSettings(SWGSDRangel::SWGChannelSettings& resp
     }
 }
 
-void DABDemod::webapiReverseSendSettings(QList<QString>& channelSettingsKeys, const DABDemodSettings& settings, bool force)
+void DABDemod::webapiReverseSendSettings(const QList<QString>& channelSettingsKeys, const DABDemodSettings& settings, bool force)
 {
     SWGSDRangel::SWGChannelSettings *swgChannelSettings = new SWGSDRangel::SWGChannelSettings();
     webapiFormatChannelSettings(channelSettingsKeys, swgChannelSettings, settings, force);
@@ -609,7 +602,7 @@ void DABDemod::webapiReverseSendSettings(QList<QString>& channelSettingsKeys, co
 }
 
 void DABDemod::webapiFormatChannelSettings(
-        QList<QString>& channelSettingsKeys,
+        const QList<QString>& channelSettingsKeys,
         SWGSDRangel::SWGChannelSettings *swgChannelSettings,
         const DABDemodSettings& settings,
         bool force
