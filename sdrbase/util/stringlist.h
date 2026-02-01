@@ -3,11 +3,13 @@
 
 #include <QStringList>
 
-namespace StringListUtil {
+#include "export.h"
+class SDRBASE_API StringListUtil {
 
-static bool containsAll(const QStringList &haystack, const QStringList &needles);
-static bool containsAny(const QStringList &haystack, const QStringList &needles);
+public:
+    static bool containsAll(const QStringList &haystack, const QStringList &needles);
+    static bool containsAny(const QStringList &haystack, const QStringList &needles);
 
-} // namespace StringListUtil
+};
 
 #endif // SDRBASE_UTIL_STRINGLIST_H_
