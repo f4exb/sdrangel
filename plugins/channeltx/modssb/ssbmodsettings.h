@@ -93,6 +93,8 @@ struct SSBModSettings
     void setCWKeyerGUI(Serializable *cwKeyerGUI) { m_cwKeyerGUI = cwKeyerGUI; }
     QByteArray serialize() const;
     bool deserialize(const QByteArray& data);
+    void applySettings(const QStringList& settingsKeys, const SSBModSettings& settings);
+    QString getDebugString(const QStringList& settingsKeys, bool force=false) const;
     const CWKeyerSettings& getCWKeyerSettings() const { return m_cwKeyerSettings; }
     void setCWKeyerSettings(const CWKeyerSettings& cwKeyerSettings) { m_cwKeyerSettings = cwKeyerSettings; }
 };

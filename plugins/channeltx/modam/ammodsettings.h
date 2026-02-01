@@ -77,6 +77,8 @@ struct AMModSettings
     bool deserialize(const QByteArray& data);
     const CWKeyerSettings& getCWKeyerSettings() const { return m_cwKeyerSettings; }
     void setCWKeyerSettings(const CWKeyerSettings& cwKeyerSettings) { m_cwKeyerSettings = cwKeyerSettings; }
+    void applySettings(const QStringList& settingsKeys, const AMModSettings& settings);
+    QString getDebugString(const QStringList& settingsKeys, bool force=false) const;
 };
 
 

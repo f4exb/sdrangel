@@ -70,7 +70,7 @@ private:
 
     void processFifo(SampleVector& data, unsigned int iBegin, unsigned int iEnd);
     bool handleMessage(const Message& cmd);
-    void applySettings(const DATVModSettings& settings, bool force = false);
+    void applySettings(const QStringList& settingsKeys, const DATVModSettings& settings, bool force = false);
 
 private slots:
     void handleInputMessages();

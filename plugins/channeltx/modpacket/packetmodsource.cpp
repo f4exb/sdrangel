@@ -54,7 +54,7 @@ PacketModSource::PacketModSource() :
     m_demodBuffer.resize(1<<12);
     m_demodBufferFill = 0;
 
-    applySettings(m_settings, true);
+    applySettings(QStringList(), m_settings, true);
     applyChannelSettings(m_channelSampleRate, m_channelFrequencyOffset, true);
 }
 
@@ -319,21 +319,21 @@ void PacketModSource::calculateLevel(Real& sample)
     }
 }
 
-void PacketModSource::applySettings(const PacketModSettings& settings, bool force)
+void PacketModSource::applySettings(const QStringList& settingsKeys, const PacketModSettings& settings, bool force)
 {
     // Only recreate filters if settings have changed
-    if ((settings.m_lpfTaps != m_settings.m_lpfTaps) || (settings.m_rfBandwidth != m_settings.m_rfBandwidth) || force)
+    if ((settingsKeys.contains("lpfTaps") && (settings.m_lpfTaps != m_settings.m_lpfTaps)) || (settings.m_rfBandwidth != m_settings.m_rfBandwidth) || force)
     {
         qDebug() << "PacketModSource::applySettings: Creating new lpf with taps " << settings.m_lpfTaps << " rfBW " << settings.m_rfBandwidth;
         m_lowpass.create(settings.m_lpfTaps, m_channelSampleRate, settings.m_rfBandwidth / 2.0);
     }
-    if ((settings.m_preEmphasisTau != m_settings.m_preEmphasisTau) || (settings.m_preEmphasisHighFreq != m_settings.m_preEmphasisHighFreq) || force)
+    if ((settingsKeys.contains("preEmphasisTau") && (settings.m_preEmphasisTau != m_settings.m_preEmphasisTau)) || (settingsKeys.contains("preEmphasisHighFreq") && (settings.m_preEmphasisHighFreq != m_settings.m_preEmphasisHighFreq)) || force)
     {
         qDebug() << "PacketModSource::applySettings: Creating new preemphasis filter with tau " << settings.m_preEmphasisTau << " highFreq " << settings.m_preEmphasisHighFreq  << " sampleRate " << m_channelSampleRate;
         m_preemphasisFilter.configure(m_channelSampleRate, settings.m_preEmphasisTau, settings.m_preEmphasisHighFreq);
     }
-    if ((settings.m_bpfLowCutoff != m_settings.m_bpfLowCutoff) || (settings.m_bpfHighCutoff != m_settings.m_bpfHighCutoff)
-        || (settings.m_bpfTaps != m_settings.m_bpfTaps)|| force)
+    if ((settingsKeys.contains("bpfLowCutoff") && (settings.m_bpfLowCutoff != m_settings.m_bpfLowCutoff)) || (settingsKeys.contains("bpfHighCutoff") && (settings.m_bpfHighCutoff != m_settings.m_bpfHighCutoff))
+        || (settingsKeys.contains("bpfTaps") && (settings.m_bpfTaps != m_settings.m_bpfTaps))|| force)
     {
         qDebug() << "PacketModSource::applySettings: Recreating bandpass filter: "
                 << " m_bpfTaps: " << settings.m_bpfTaps
@@ -342,7 +342,7 @@ void PacketModSource::applySettings(const PacketModSettings& settings, bool forc
                 << " m_bpfHighCutoff: " << settings.m_bpfHighCutoff;
         m_bandpass.create(settings.m_bpfTaps, m_channelSampleRate, settings.m_bpfLowCutoff, settings.m_bpfHighCutoff);
     }
-    if ((settings.m_beta != m_settings.m_beta) || (settings.m_symbolSpan != m_settings.m_symbolSpan) || (settings.m_baud != m_settings.m_baud) || force)
+    if ((settingsKeys.contains("beta") && (settings.m_beta != m_settings.m_beta)) || (settingsKeys.contains("symbolSpan") && (settings.m_symbolSpan != m_settings.m_symbolSpan)) || (settingsKeys.contains("baud") && (settings.m_baud != m_settings.m_baud)) || force)
     {
         qDebug() << "PacketModSource::applySettings: Recreating pulse shaping filter: "
                 << " beta: " << settings.m_beta
@@ -351,9 +351,9 @@ void PacketModSource::applySettings(const PacketModSettings& settings, bool forc
                 << " baud:" << settings.m_baud;
         m_pulseShape.create(settings.m_beta, settings.m_symbolSpan, m_channelSampleRate/settings.m_baud);
     }
-    if ((settings.m_polynomial != m_settings.m_polynomial) || force)
+    if ((settingsKeys.contains("polynomial") && (settings.m_polynomial != m_settings.m_polynomial)) || force)
         m_scrambler.setPolynomial(settings.m_polynomial);
-    if ((settings.m_spectrumRate != m_settings.m_spectrumRate) || force)
+    if ((settingsKeys.contains("spectrumRate") && (settings.m_spectrumRate != m_settings.m_spectrumRate)) || force)
     {
         m_interpolatorDistanceRemain = 0;
         m_interpolatorConsumed = false;
@@ -361,7 +361,11 @@ void PacketModSource::applySettings(const PacketModSettings& settings, bool forc
         m_interpolator.create(48, settings.m_spectrumRate, settings.m_spectrumRate / 2.2, 3.0);
     }
 
-    m_settings = settings;
+    if (force) {
+        m_settings = settings;
+    } else {
+        m_settings.applySettings(settingsKeys, settings);
+    }
 
     // Precalculate FM sensensity and linear gain to save doing it in the loop
     m_phaseSensitivity = 2.0f * M_PI * m_settings.m_fmDeviation / (double)m_channelSampleRate;

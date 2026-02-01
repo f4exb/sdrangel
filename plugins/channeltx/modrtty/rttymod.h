@@ -50,20 +50,23 @@ public:
 
     public:
         const RttyModSettings& getSettings() const { return m_settings; }
+        const QStringList& getSettingKeys() const { return m_settingKeys; }
         bool getForce() const { return m_force; }
 
-        static MsgConfigureRttyMod* create(const RttyModSettings& settings, bool force)
+        static MsgConfigureRttyMod* create(const QStringList& settingKeys, const RttyModSettings& settings, bool force)
         {
-            return new MsgConfigureRttyMod(settings, force);
+            return new MsgConfigureRttyMod(settingKeys, settings, force);
         }
 
     private:
         RttyModSettings m_settings;
+        QStringList m_settingKeys;
         bool m_force;
 
-        MsgConfigureRttyMod(const RttyModSettings& settings, bool force) :
+        MsgConfigureRttyMod(const QStringList& settingKeys, const RttyModSettings& settings, bool force) :
             Message(),
             m_settings(settings),
+            m_settingKeys(settingKeys),
             m_force(force)
         { }
     };
@@ -219,18 +222,18 @@ private:
     QUdpSocket *m_udpSocket;
 
     virtual bool handleMessage(const Message& cmd);
-    void applySettings(const RttyModSettings& settings, bool force = false);
+    void applySettings(const QStringList& settingsKeys, const RttyModSettings& settings, bool force = false);
     void sendSampleRateToDemodAnalyzer();
     void webapiFormatChannelReport(SWGSDRangel::SWGChannelReport& response);
-    void webapiReverseSendSettings(QList<QString>& channelSettingsKeys, const RttyModSettings& settings, bool force);
+    void webapiReverseSendSettings(const QList<QString>& channelSettingsKeys, const RttyModSettings& settings, bool force);
     void sendChannelSettings(
         const QList<ObjectPipe*>& pipes,
-        QList<QString>& channelSettingsKeys,
+        const QList<QString>& channelSettingsKeys,
         const RttyModSettings& settings,
         bool force
     );
     void webapiFormatChannelSettings(
-        QList<QString>& channelSettingsKeys,
+        const QList<QString>& channelSettingsKeys,
         SWGSDRangel::SWGChannelSettings *swgChannelSettings,
         const RttyModSettings& settings,
         bool force

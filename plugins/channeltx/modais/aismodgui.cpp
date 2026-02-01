@@ -57,7 +57,7 @@ void AISModGUI::resetToDefaults()
 {
     m_settings.resetToDefaults();
     displaySettings();
-    applySettings(true);
+    applySettings(QStringList(), true);
 }
 
 QByteArray AISModGUI::serialize() const
@@ -69,7 +69,7 @@ bool AISModGUI::deserialize(const QByteArray& data)
 {
     if(m_settings.deserialize(data)) {
         displaySettings();
-        applySettings(true);
+        applySettings(QStringList(), true);
         return true;
     } else {
         resetToDefaults();
@@ -116,7 +116,7 @@ void AISModGUI::channelMarkerChangedByCursor()
 {
     ui->deltaFrequency->setValue(m_channelMarker.getCenterFrequency());
     m_settings.m_inputFrequencyOffset = m_channelMarker.getCenterFrequency();
-    applySettings();
+    applySettings(QStringList("inputFrequencyOffset"));
 }
 
 void AISModGUI::handleSourceMessages()
@@ -138,7 +138,7 @@ void AISModGUI::on_deltaFrequency_changed(qint64 value)
     m_channelMarker.setCenterFrequency(value);
     m_settings.m_inputFrequencyOffset = m_channelMarker.getCenterFrequency();
     updateAbsoluteCenterFrequency();
-    applySettings();
+    applySettings(QStringList("inputFrequencyOffset"));
 }
 
 void AISModGUI::on_mode_currentIndexChanged(int value)
@@ -160,7 +160,7 @@ void AISModGUI::on_mode_currentIndexChanged(int value)
     ui->fmDev->setValue(m_settings.m_fmDeviation / 100.0);
     ui->btText->setText(QString("%1").arg(m_settings.m_bt, 0, 'f', 1));
     ui->bt->setValue(m_settings.m_bt * 10);
-    applySettings();
+    applySettings(QStringList({"rfBandwidth", "fmDeviation", "bt"}));
 }
 
 void AISModGUI::on_rfBW_valueChanged(int value)
@@ -169,34 +169,34 @@ void AISModGUI::on_rfBW_valueChanged(int value)
     ui->rfBWText->setText(QString("%1k").arg(value / 10.0, 0, 'f', 1));
     m_channelMarker.setBandwidth(bw);
     m_settings.m_rfBandwidth = bw;
-    applySettings();
+    applySettings(QStringList("rfBandwidth"));
 }
 
 void AISModGUI::on_fmDev_valueChanged(int value)
 {
     ui->fmDevText->setText(QString("%1k").arg(value / 10.0, 0, 'f', 1));
     m_settings.m_fmDeviation = value * 100.0;
-    applySettings();
+    applySettings(QStringList("fmDeviation"));
 }
 
 void AISModGUI::on_bt_valueChanged(int value)
 {
     ui->btText->setText(QString("%1").arg(value / 10.0, 0, 'f', 1));
     m_settings.m_bt = value / 10.0;
-    applySettings();
+    applySettings(QStringList("bt"));
 }
 
 void AISModGUI::on_gain_valueChanged(int value)
 {
     ui->gainText->setText(QString("%1dB").arg(value));
     m_settings.m_gain = value;
-    applySettings();
+    applySettings(QStringList("gain"));
 }
 
 void AISModGUI::on_channelMute_toggled(bool checked)
 {
     m_settings.m_channelMute = checked;
-    applySettings();
+    applySettings(QStringList("channelMute"));
 }
 
 void AISModGUI::on_insertPosition_clicked()
@@ -216,61 +216,61 @@ void AISModGUI::on_txButton_clicked()
 void AISModGUI::on_message_returnPressed()
 {
     m_settings.m_data = ui->message->text();
-    applySettings();
+    applySettings(QStringList("data"));
 }
 
 void AISModGUI::on_msgId_currentIndexChanged(int index)
 {
     m_settings.m_msgType = (AISModSettings::MsgType) index;
-    applySettings();
+    applySettings(QStringList("msgType"));
 }
 
 void AISModGUI::on_mmsi_editingFinished()
 {
     m_settings.m_mmsi = ui->mmsi->text();
-    applySettings();
+    applySettings(QStringList("mmsi"));
 }
 
 void AISModGUI::on_status_currentIndexChanged(int index)
 {
     m_settings.m_status = (AISModSettings::Status) index;
-    applySettings();
+    applySettings(QStringList("status"));
 }
 
 void AISModGUI::on_latitude_valueChanged(double value)
 {
     m_settings.m_latitude = (float)value;
-    applySettings();
+    applySettings(QStringList("latitude"));
 }
 
 void AISModGUI::on_longitude_valueChanged(double value)
 {
     m_settings.m_longitude = (float)value;
-    applySettings();
+    applySettings(QStringList("longitude"));
 }
 
 void AISModGUI::on_course_valueChanged(double value)
 {
     m_settings.m_course = (float)value;
-    applySettings();
+    applySettings(QStringList("course"));
 }
 
 void AISModGUI::on_speed_valueChanged(double value)
 {
     m_settings.m_speed = (float)value;
-    applySettings();
+    applySettings(QStringList("speed"));
 }
 
 void AISModGUI::on_heading_valueChanged(int value)
 {
     m_settings.m_heading = value;
-    applySettings();
+    applySettings(QStringList("heading"));
 }
 
 void AISModGUI::on_message_editingFinished()
 {
     m_settings.m_data = ui->message->text();
-    applySettings();
+    applySettings(QStringList("data"));
 }
 
 // Encode the message specified in individual settings in to a hex string (data settings) and put in message field
@@ -283,7 +283,7 @@ void AISModGUI::on_encode_clicked()
 void AISModGUI::on_repeat_toggled(bool checked)
 {
     m_settings.m_repeat = checked;
-    applySettings();
+    applySettings(QStringList("repeat"));
 }
 
 void AISModGUI::repeatSelect(const QPoint& p)
@@ -295,7 +295,7 @@ void AISModGUI::repeatSelect(const QPoint& p)
     {
         m_settings.m_repeatDelay = dialog.m_repeatDelay;
         m_settings.m_repeatCount = dialog.m_repeatCount;
-        applySettings();
+        applySettings(QStringList({"repeatDelay", "repeatCount"}));
     }
 }
 
@@ -320,26 +320,26 @@ void AISModGUI::txSettingsSelect(const QPoint& p)
         m_settings.m_rfNoise = dialog.m_rfNoise;
         m_settings.m_writeToFile = dialog.m_writeToFile;
         displaySettings();
-        applySettings();
+        applySettings(QStringList({"rampUpBits", "rampDownBits", "rampRange", "baud", "symbolSpan", "rfNoise", "writeToFile"}));
     }
 }
 
 void AISModGUI::on_udpEnabled_clicked(bool checked)
 {
     m_settings.m_udpEnabled = checked;
-    applySettings();
+    applySettings(QStringList("udpEnabled"));
 }
 
 void AISModGUI::on_udpAddress_editingFinished()
 {
     m_settings.m_udpAddress = ui->udpAddress->text();
-    applySettings();
+    applySettings(QStringList("udpAddress"));
 }
 
 void AISModGUI::on_udpPort_editingFinished()
 {
     m_settings.m_udpPort = ui->udpPort->text().toInt();
-    applySettings();
+    applySettings(QStringList("udpPort"));
 }
 
 void AISModGUI::onWidgetRolled(QWidget* widget, bool rollDown)
@@ -348,7 +348,7 @@ void AISModGUI::onWidgetRolled(QWidget* widget, bool rollDown)
     (void) rollDown;
 
     getRollupContents()->saveState(m_rollupState);
-    applySettings();
+    applySettings(QStringList());
 }
 
 void AISModGUI::onMenuDialogCalled(const QPoint &p)
@@ -393,7 +393,7 @@ void AISModGUI::onMenuDialogCalled(const QPoint &p)
             updateIndexLabel();
         }
 
-        applySettings();
+        applySettings(QStringList({"title", "rgbColor", "useReverseAPI", "reverseAPIAddress", "reverseAPIPort", "reverseAPIDeviceIndex", "reverseAPIChannelIndex", "streamIndex"}));
     }
 
     resetContextMenuType();
@@ -505,7 +505,7 @@ AISModGUI::AISModGUI(PluginAPI* pluginAPI, DeviceUISet *deviceUISet, BasebandSam
 
     displaySettings();
     makeUIConnections();
-    applySettings();
+    applySettings(QStringList(), true);
     DialPopup::addPopupsToChildDials(this);
     m_resizer.enableChildMouseTracking();
 }
@@ -527,11 +527,11 @@ void AISModGUI::blockApplySettings(bool block)
     m_doApplySettings = !block;
 }
 
-void AISModGUI::applySettings(bool force)
+void AISModGUI::applySettings(const QStringList& settingsKeys, bool force)
 {
     if (m_doApplySettings)
     {
-        AISMod::MsgConfigureAISMod *msg = AISMod::MsgConfigureAISMod::create(m_settings, force);
+        AISMod::MsgConfigureAISMod *msg = AISMod::MsgConfigureAISMod::create(settingsKeys, m_settings, force);
         m_aisMod->getInputMessageQueue()->push(msg);
     }
 }

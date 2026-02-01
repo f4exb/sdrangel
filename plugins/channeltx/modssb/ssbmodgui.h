@@ -98,7 +98,7 @@ private:
     virtual ~SSBModGUI();
 
     bool blockApplySettings(bool block);
-    void applySettings(bool force = false);
+    void applySettings(const QStringList& settingKeys, bool force = false);
     void applyBandwidths(int spanLog2, bool force = false);
     void displaySettings();
     void updateWithStreamData();

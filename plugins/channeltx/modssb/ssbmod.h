@@ -50,20 +50,23 @@ public:
 
     public:
         const SSBModSettings& getSettings() const { return m_settings; }
+        const QStringList& getSettingKeys() const { return m_settingKeys; }
         bool getForce() const { return m_force; }
 
-        static MsgConfigureSSBMod* create(const SSBModSettings& settings, bool force)
+        static MsgConfigureSSBMod* create(const QStringList& settingKeys, const SSBModSettings& settings, bool force)
         {
-            return new MsgConfigureSSBMod(settings, force);
+            return new MsgConfigureSSBMod(settingKeys, settings, force);
         }
 
     private:
         SSBModSettings m_settings;
+        QStringList m_settingKeys;
         bool m_force;
 
-        MsgConfigureSSBMod(const SSBModSettings& settings, bool force) :
+        MsgConfigureSSBMod(const QStringList& settingKeys, const SSBModSettings& settings, bool force) :
             Message(),
             m_settings(settings),
+            m_settingKeys(settingKeys),
             m_force(force)
         { }
     };
@@ -275,7 +278,7 @@ private:
     QObject *m_levelMeter;
 
     bool handleMessage(const Message& cmd) final;
-    void applySettings(const SSBModSettings& settings, bool force = false);
+    void applySettings(const QStringList& settingKeys, const SSBModSettings& settings, bool force = false);
     void sendSampleRateToDemodAnalyzer() const;
     void openFileStream();
     void seekFileStream(int seekPercentage);

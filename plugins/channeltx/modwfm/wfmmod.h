@@ -48,20 +48,23 @@ public:
 
     public:
         const WFMModSettings& getSettings() const { return m_settings; }
+        const QStringList& getSettingsKeys() const { return m_settingsKeys; }
         bool getForce() const { return m_force; }
 
-        static MsgConfigureWFMMod* create(const WFMModSettings& settings, bool force)
+        static MsgConfigureWFMMod* create(const QStringList& settingsKeys, const WFMModSettings& settings, bool force)
         {
-            return new MsgConfigureWFMMod(settings, force);
+            return new MsgConfigureWFMMod(settingsKeys, settings, force);
         }
 
     private:
         WFMModSettings m_settings;
+        QStringList m_settingsKeys;
         bool m_force;
 
-        MsgConfigureWFMMod(const WFMModSettings& settings, bool force) :
+        MsgConfigureWFMMod(const QStringList& settingsKeys, const WFMModSettings& settings, bool force) :
             Message(),
             m_settings(settings),
+            m_settingsKeys(settingsKeys),
             m_force(force)
         { }
     };
@@ -278,21 +281,21 @@ private:
     static const int m_levelNbSamples;
 
     virtual bool handleMessage(const Message& cmd);
-    void applySettings(const WFMModSettings& settings, bool force = false);
+    void applySettings(const QStringList& settingsKeys, const WFMModSettings& settings, bool force = false);
     void sendSampleRateToDemodAnalyzer();
     void openFileStream();
     void seekFileStream(int seekPercentage);
     void webapiFormatChannelReport(SWGSDRangel::SWGChannelReport& response);
-    void webapiReverseSendSettings(QList<QString>& channelSettingsKeys, const WFMModSettings& settings, bool force);
+    void webapiReverseSendSettings(const QList<QString>& channelSettingsKeys, const WFMModSettings& settings, bool force);
     void webapiReverseSendCWSettings(const CWKeyerSettings& settings);
     void sendChannelSettings(
         const QList<ObjectPipe*>& pipes,
-        QList<QString>& channelSettingsKeys,
+        const QList<QString>& channelSettingsKeys,
         const WFMModSettings& settings,
         bool force
     );
     void webapiFormatChannelSettings(
-        QList<QString>& channelSettingsKeys,
+        const QList<QString>& channelSettingsKeys,
         SWGSDRangel::SWGChannelSettings *swgChannelSettings,
         const WFMModSettings& settings,
         bool force

@@ -187,3 +187,204 @@ bool ATVModSettings::deserialize(const QByteArray& data)
         return false;
     }
 }
+
+void ATVModSettings::applySettings(const QStringList& settingsKeys, const ATVModSettings& settings)
+{
+    if (settingsKeys.contains("inputFrequencyOffset")) {
+        m_inputFrequencyOffset = settings.m_inputFrequencyOffset;
+    }
+    if (settingsKeys.contains("rfBandwidth")) {
+        m_rfBandwidth = settings.m_rfBandwidth;
+    }
+    if (settingsKeys.contains("rfOppBandwidth")) {
+        m_rfOppBandwidth = settings.m_rfOppBandwidth;
+    }
+    if (settingsKeys.contains("atvStd")) {
+        m_atvStd = settings.m_atvStd;
+    }
+    if (settingsKeys.contains("nbLines")) {
+        m_nbLines = settings.m_nbLines;
+    }
+    if (settingsKeys.contains("fps")) {
+        m_fps = settings.m_fps;
+    }
+    if (settingsKeys.contains("atvModInput")) {
+        m_atvModInput = settings.m_atvModInput;
+    }
+    if (settingsKeys.contains("uniformLevel")) {
+        m_uniformLevel = settings.m_uniformLevel;
+    }
+    if (settingsKeys.contains("atvModulation")) {
+        m_atvModulation = settings.m_atvModulation;
+    }
+    if (settingsKeys.contains("videoPlayLoop")) {
+        m_videoPlayLoop = settings.m_videoPlayLoop;
+    }
+    if (settingsKeys.contains("videoPlay")) {
+        m_videoPlay = settings.m_videoPlay;
+    }
+    if (settingsKeys.contains("cameraPlay")) {
+        m_cameraPlay = settings.m_cameraPlay;
+    }
+    if (settingsKeys.contains("channelMute")) {
+        m_channelMute = settings.m_channelMute;
+    }
+    if (settingsKeys.contains("invertedVideo")) {
+        m_invertedVideo = settings.m_invertedVideo;
+    }
+    if (settingsKeys.contains("rfScalingFactor")) {
+        m_rfScalingFactor = settings.m_rfScalingFactor;
+    }
+    if (settingsKeys.contains("fmExcursion")) {
+        m_fmExcursion = settings.m_fmExcursion;
+    }
+    if (settingsKeys.contains("forceDecimator")) {
+        m_forceDecimator = settings.m_forceDecimator;
+    }
+    if (settingsKeys.contains("showOverlayText")) {
+        m_showOverlayText = settings.m_showOverlayText;
+    }
+    if (settingsKeys.contains("overlayText")) {
+        m_overlayText = settings.m_overlayText;
+    }
+    if (settingsKeys.contains("rgbColor")) {
+        m_rgbColor = settings.m_rgbColor;
+    }
+    if (settingsKeys.contains("title")) {
+        m_title = settings.m_title;
+    }
+    if (settingsKeys.contains("imageFileName")) {
+        m_imageFileName = settings.m_imageFileName;
+    }
+    if (settingsKeys.contains("videoFileName")) {
+        m_videoFileName = settings.m_videoFileName;
+    }
+    if (settingsKeys.contains("streamIndex")) {
+        m_streamIndex = settings.m_streamIndex;
+    }
+    if (settingsKeys.contains("useReverseAPI")) {
+        m_useReverseAPI = settings.m_useReverseAPI;
+    }
+    if (settingsKeys.contains("reverseAPIAddress")) {
+        m_reverseAPIAddress = settings.m_reverseAPIAddress;
+    }
+    if (settingsKeys.contains("reverseAPIPort")) {
+        m_reverseAPIPort = settings.m_reverseAPIPort;
+    }
+    if (settingsKeys.contains("reverseAPIDeviceIndex")) {
+        m_reverseAPIDeviceIndex = settings.m_reverseAPIDeviceIndex;
+    }
+    if (settingsKeys.contains("reverseAPIChannelIndex")) {
+        m_reverseAPIChannelIndex = settings.m_reverseAPIChannelIndex;
+    }
+    if (settingsKeys.contains("workspaceIndex")) {
+        m_workspaceIndex = settings.m_workspaceIndex;
+    }
+    if (settingsKeys.contains("geometryBytes")) {
+        m_geometryBytes = settings.m_geometryBytes;
+    }
+    if (settingsKeys.contains("hidden")) {
+        m_hidden = settings.m_hidden;
+    }
+}
+
+QString ATVModSettings::getDebugString(const QStringList& settingsKeys, bool force) const
+{
+    std::ostringstream ostr;
+
+    if (settingsKeys.contains("inputFrequencyOffset") || force) {
+        ostr << " m_inputFrequencyOffset: " << m_inputFrequencyOffset;
+    }
+    if (settingsKeys.contains("rfBandwidth") || force) {
+        ostr << " m_rfBandwidth: " << m_rfBandwidth;
+    }
+    if (settingsKeys.contains("rfOppBandwidth") || force) {
+        ostr << " m_rfOppBandwidth: " << m_rfOppBandwidth;
+    }
+    if (settingsKeys.contains("atvStd") || force) {
+        ostr << " m_atvStd: " << m_atvStd;
+    }
+    if (settingsKeys.contains("nbLines") || force) {
+        ostr << " m_nbLines: " << m_nbLines;
+    }
+    if (settingsKeys.contains("fps") || force) {
+        ostr << " m_fps: " << m_fps;
+    }
+    if (settingsKeys.contains("atvModInput") || force) {
+        ostr << " m_atvModInput: " << m_atvModInput;
+    }
+    if (settingsKeys.contains("uniformLevel") || force) {
+        ostr << " m_uniformLevel: " << m_uniformLevel;
+    }
+    if (settingsKeys.contains("atvModulation") || force) {
+        ostr << " m_atvModulation: " << m_atvModulation;
+    }
+    if (settingsKeys.contains("videoPlayLoop") || force) {
+        ostr << " m_videoPlayLoop: " << m_videoPlayLoop;
+    }
+    if (settingsKeys.contains("videoPlay") || force) {
+        ostr << " m_videoPlay: " << m_videoPlay;
+    }
+    if (settingsKeys.contains("cameraPlay") || force) {
+        ostr << " m_cameraPlay: " << m_cameraPlay;
+    }
+    if (settingsKeys.contains("channelMute") || force) {
+        ostr << " m_channelMute: " << m_channelMute;
+    }
+    if (settingsKeys.contains("invertedVideo") || force) {
+        ostr << " m_invertedVideo: " << m_invertedVideo;
+    }
+    if (settingsKeys.contains("rfScalingFactor") || force) {
+        ostr << " m_rfScalingFactor: " << m_rfScalingFactor;
+    }
+    if (settingsKeys.contains("fmExcursion") || force) {
+        ostr << " m_fmExcursion: " << m_fmExcursion;
+    }
+    if (settingsKeys.contains("forceDecimator") || force) {
+        ostr << " m_forceDecimator: " << m_forceDecimator;
+    }
+    if (settingsKeys.contains("showOverlayText") || force) {
+        ostr << " m_showOverlayText: " << m_showOverlayText;
+    }
+    if (settingsKeys.contains("overlayText") || force) {
+        ostr << " m_overlayText: " << m_overlayText.toStdString();
+    }
+    if (settingsKeys.contains("rgbColor") || force) {
+        ostr << " m_rgbColor: " << m_rgbColor;
+    }
+    if (settingsKeys.contains("title") || force) {
+        ostr << " m_title: " << m_title.toStdString();
+    }
+    if (settingsKeys.contains("imageFileName") || force) {
+        ostr << " m_imageFileName: " << m_imageFileName.toStdString();
+    }
+    if (settingsKeys.contains("videoFileName") || force) {
+        ostr << " m_videoFileName: " << m_videoFileName.toStdString();
+    }
+    if (settingsKeys.contains("streamIndex") || force) {
+        ostr << " m_streamIndex: " << m_streamIndex;
+    }
+    if (settingsKeys.contains("useReverseAPI") || force) {
+        ostr << " m_useReverseAPI: " << m_useReverseAPI;
+    }
+    if (settingsKeys.contains("reverseAPIAddress") || force) {
+        ostr << " m_reverseAPIAddress: " << m_reverseAPIAddress.toStdString();
+    }
+    if (settingsKeys.contains("reverseAPIPort") || force) {
+        ostr << " m_reverseAPIPort: " << m_reverseAPIPort;
+    }
+    if (settingsKeys.contains("reverseAPIDeviceIndex") || force) {
+        ostr << " m_reverseAPIDeviceIndex: " << m_reverseAPIDeviceIndex;
+    }
+    if (settingsKeys.contains("reverseAPIChannelIndex") || force) {
+        ostr << " m_reverseAPIChannelIndex: " << m_reverseAPIChannelIndex;
+    }
+    if (settingsKeys.contains("workspaceIndex") || force) {
+        ostr << " m_workspaceIndex: " << m_workspaceIndex;
+    }
+    if (settingsKeys.contains("hidden") || force) {
+        ostr << " m_hidden: " << m_hidden;
+    }
+
+    return QString(ostr.str().c_str());
+}

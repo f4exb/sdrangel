@@ -86,7 +86,7 @@ private:
 
     void transmit(const QString& str);
     void blockApplySettings(bool block);
-    void applySettings(bool force = false);
+    void applySettings( const QStringList& settingKeys, bool force = false);
     void displaySettings();
     QString formatFrequency(int frequency) const;
     bool handleMessage(const Message& message);

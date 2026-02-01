@@ -112,7 +112,7 @@ DATVModGUI::DATVModGUI(PluginAPI* pluginAPI, DeviceUISet *deviceUISet, BasebandS
 
     displaySettings();
     makeUIConnections();
-    applySettings(true);
+    applySettings(QStringList(), true);
     m_resizer.enableChildMouseTracking();
     if (!m_settings.m_tsFileName.isEmpty())
         configureTsFileName();
@@ -138,7 +138,7 @@ bool DATVModGUI::deserialize(const QByteArray& data)
     if (m_settings.deserialize(data))
     {
         displaySettings();
-        applySettings(true);
+        applySettings(QStringList(), true);
         if (!m_settings.m_tsFileName.isEmpty())
             configureTsFileName();
         return true;
@@ -147,7 +147,7 @@ bool DATVModGUI::deserialize(const QByteArray& data)
     {
         m_settings.resetToDefaults();
         displaySettings();
-        applySettings(true);
+        applySettings(QStringList(), true);
         return false;
     }
 }
@@ -233,7 +233,7 @@ void DATVModGUI::channelMarkerChangedByCursor()
 {
     ui->deltaFrequency->setValue(m_channelMarker.getCenterFrequency());
     m_settings.m_inputFrequencyOffset = m_channelMarker.getCenterFrequency();
-    applySettings();
+    applySettings(QStringList("inputFrequencyOffset"));
 }
 
 void DATVModGUI::handleSourceMessages()
@@ -254,7 +254,7 @@ void DATVModGUI::on_deltaFrequency_changed(qint64 value)
     m_channelMarker.setCenterFrequency(value);
     m_settings.m_inputFrequencyOffset = value;
     updateAbsoluteCenterFrequency();
-    applySettings();
+    applySettings(QStringList("inputFrequencyOffset"));
 }
 
 void DATVModGUI::on_dvbStandard_currentIndexChanged(int index)
@@ -305,7 +305,7 @@ void DATVModGUI::on_dvbStandard_currentIndexChanged(int index)
 
     m_doApplySettings = true;
 
-    applySettings();
+    applySettings(QStringList("standard"));
 }
 
 void DATVModGUI::updateFEC()
@@ -380,14 +380,14 @@ void DATVModGUI::on_modulation_currentIndexChanged(int index)
     updateFEC();
     setImageBitrate();
     m_doApplySettings = true;
-    applySettings();
+    applySettings(QStringList("modulation"));
 }
 
 void DATVModGUI::on_rollOff_currentIndexChanged(int index)
 {
     (void) index;
     m_settings.m_rollOff = ui->rollOff->currentText().toFloat();
-    applySettings();
+    applySettings(QStringList("rollOff"));
 }
 
 void DATVModGUI::on_fec_currentIndexChanged(int index)
@@ -395,14 +395,14 @@ void DATVModGUI::on_fec_currentIndexChanged(int index)
     (void) index;
     m_settings.m_fec = DATVModSettings::mapCodeRate(ui->fec->currentText());
     setImageBitrate();
-    applySettings();
+    applySettings(QStringList("fec"));
 }
 
 void DATVModGUI::on_symbolRate_valueChanged(int value)
 {
     m_settings.m_symbolRate = value;
     setImageBitrate();
-    applySettings();
+    applySettings(QStringList("symbolRate"));
 }
 
 void DATVModGUI::on_rfBW_valueChanged(int value)
@@ -410,7 +410,7 @@ void DATVModGUI::on_rfBW_valueChanged(int value)
     m_settings.m_rfBandwidth = value * 100000;
     ui->rfBWText->setText(QString("%1M").arg(m_settings.m_rfBandwidth / 1e6, 0, 'f', 1));
     setChannelMarkerBandwidth();
-    applySettings();
+    applySettings(QStringList("rfBandwidth"));
 }
 
 void DATVModGUI::setChannelMarkerBandwidth()
@@ -426,13 +426,13 @@ void DATVModGUI::on_inputSelect_currentIndexChanged(int index)
 {
     m_settings.m_source = (DATVModSettings::DATVSource) index;
     setImageBitrate();
-    applySettings();
+    applySettings(QStringList("source"));
 }
 
 void DATVModGUI::on_channelMute_toggled(bool checked)
 {
     m_settings.m_channelMute = checked;
-    applySettings();
+    applySettings(QStringList("channelMute"));
 }
 
 void DATVModGUI::on_imageFileDialog_clicked(bool checked)
@@ -447,32 +447,32 @@ void DATVModGUI::on_imageFileDialog_clicked(bool checked)
         m_settings.m_imageFileName = fileName;
         ui->tsImageFileText->setText(m_settings.m_imageFileName);
         m_settings.m_imageFileName = fileName;
-        applySettings();
+        applySettings(QStringList("imageFileName"));
     }
 }
 
 void DATVModGUI::on_tsImageTimestamp_toggled(bool checked)
 {
     m_settings.m_imageOverlayTimestamp = checked;
-    applySettings();
+    applySettings(QStringList("imageOverlayTimestamp"));
 }
 
 void DATVModGUI::on_imageServiceProvider_editingFinished()
 {
     m_settings.m_imageServiceProvider = ui->imageServiceProvider->text();
-    applySettings();
+    applySettings(QStringList("imageServiceProvider"));
 }
 
 void DATVModGUI::on_imageServiceName_editingFinished()
 {
     m_settings.m_imageServiceName = ui->imageServiceName->text();
-    applySettings();
+    applySettings(QStringList("imageServiceName"));
 }
 
 void DATVModGUI::on_imageCodec_currentIndexChanged(int index)
 {
     m_settings.m_imageCodec = (DATVModSettings::DATVCodec) index;
-    applySettings();
+    applySettings(QStringList("imageCodec"));
 }
 
 void DATVModGUI::on_tsFileDialog_clicked(bool checked)
@@ -493,7 +493,7 @@ void DATVModGUI::on_tsFileDialog_clicked(bool checked)
 void DATVModGUI::on_playLoop_toggled(bool checked)
 {
     m_settings.m_tsFilePlayLoop = checked;
-    applySettings();
+    applySettings(QStringList("tsFilePlayLoop"));
 }
 
 void DATVModGUI::on_playFile_toggled(bool checked)
@@ -501,7 +501,7 @@ void DATVModGUI::on_playFile_toggled(bool checked)
     m_settings.m_tsFilePlay = checked;
     ui->navTimeSlider->setEnabled(!checked);
     m_enableNavTime = !checked;
-    applySettings();
+    applySettings(QStringList("tsFilePlay"));
 }
 
 void DATVModGUI::on_navTimeSlider_valueChanged(int value)
@@ -522,13 +522,13 @@ void DATVModGUI::configureTsFileName()
 void DATVModGUI::on_udpAddress_editingFinished()
 {
     m_settings.m_udpAddress = ui->udpAddress->text();
-    applySettings();
+    applySettings(QStringList("udpAddress"));
 }
 
 void DATVModGUI::on_udpPort_valueChanged(int value)
 {
     m_settings.m_udpPort = value;
-    applySettings();
+    applySettings(QStringList("udpPort"));
 }
 
 void DATVModGUI::onWidgetRolled(QWidget* widget, bool rollDown)
@@ -537,7 +537,7 @@ void DATVModGUI::onWidgetRolled(QWidget* widget, bool rollDown)
     (void) rollDown;
 
     getRollupContents()->saveState(m_rollupState);
-    applySettings();
+    applySettings(QStringList());
 }
 
 void DATVModGUI::onMenuDialogCalled(const QPoint &p)
@@ -582,7 +582,10 @@ void DATVModGUI::onMenuDialogCalled(const QPoint &p)
             updateIndexLabel();
         }
 
-        applySettings();
+        applySettings(QStringList({"title", "rgbColor", "useReverseAPI",
+                                   "reverseAPIAddress", "reverseAPIPort",
+                                   "reverseAPIDeviceIndex", "reverseAPIChannelIndex",
+                                   "streamIndex"}));
     }
 
     resetContextMenuType();
@@ -593,7 +596,7 @@ void DATVModGUI::blockApplySettings(bool block)
     m_doApplySettings = !block;
 }
 
-void DATVModGUI::applySettings(bool force)
+void DATVModGUI::applySettings(const QStringList& settingsKeys, bool force)
 {
     if (m_doApplySettings)
     {
@@ -601,7 +604,7 @@ void DATVModGUI::applySettings(bool force)
                 m_channelMarker.getCenterFrequency());
         m_datvMod->getInputMessageQueue()->push(msgChan);
 
-        DATVMod::MsgConfigureDATVMod *msg = DATVMod::MsgConfigureDATVMod::create(m_settings, force);
+        DATVMod::MsgConfigureDATVMod *msg = DATVMod::MsgConfigureDATVMod::create(settingsKeys, m_settings, force);
         m_datvMod->getInputMessageQueue()->push(msg);
     }
 }

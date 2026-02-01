@@ -135,7 +135,7 @@ bool DATVModBaseband::handleMessage(const Message& cmd)
         QMutexLocker mutexLocker(&m_mutex);
         DATVMod::MsgConfigureDATVMod& cfg = (DATVMod::MsgConfigureDATVMod&) cmd;
 
-        applySettings(cfg.getSettings(), cfg.getForce());
+        applySettings(cfg.getSettingsKeys(), cfg.getSettings(), cfg.getForce());
 
         return true;
     }
@@ -201,9 +201,9 @@ bool DATVModBaseband::handleMessage(const Message& cmd)
     }
 }
 
-void DATVModBaseband::applySettings(const DATVModSettings& settings, bool force)
+void DATVModBaseband::applySettings(const QStringList& settingsKeys, const DATVModSettings& settings, bool force)
 {
-    m_source.applySettings(settings, force);
+    m_source.applySettings(settingsKeys, settings, force);
     m_settings = settings;
 }
 

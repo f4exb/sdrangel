@@ -51,20 +51,23 @@ public:
 
     public:
         const FreeDVModSettings& getSettings() const { return m_settings; }
+        const QStringList& getSettingsKeys() const { return m_settingsKeys; }
         bool getForce() const { return m_force; }
 
-        static MsgConfigureFreeDVMod* create(const FreeDVModSettings& settings, bool force)
+        static MsgConfigureFreeDVMod* create(const QStringList& settingsKeys, const FreeDVModSettings& settings, bool force)
         {
-            return new MsgConfigureFreeDVMod(settings, force);
+            return new MsgConfigureFreeDVMod(settingsKeys, settings, force);
         }
 
     private:
         FreeDVModSettings m_settings;
+        QStringList m_settingsKeys;
         bool m_force;
 
-        MsgConfigureFreeDVMod(const FreeDVModSettings& settings, bool force) :
+        MsgConfigureFreeDVMod(const QStringList& settingsKeys, const FreeDVModSettings& settings, bool force) :
             Message(),
             m_settings(settings),
+            m_settingsKeys(settingsKeys),
             m_force(force)
         { }
     };
@@ -273,20 +276,20 @@ private:
     QNetworkRequest m_networkRequest;
 
     virtual bool handleMessage(const Message& cmd);
-    void applySettings(const FreeDVModSettings& settings, bool force = false);
+    void applySettings(const QStringList& settingsKeys, const FreeDVModSettings& settings, bool force = false);
     void openFileStream();
     void seekFileStream(int seekPercentage);
     void webapiFormatChannelReport(SWGSDRangel::SWGChannelReport& response);
-    void webapiReverseSendSettings(QList<QString>& channelSettingsKeys, const FreeDVModSettings& settings, bool force);
+    void webapiReverseSendSettings(const QList<QString>& channelSettingsKeys, const FreeDVModSettings& settings, bool force);
     void webapiReverseSendCWSettings(const CWKeyerSettings& settings);
     void sendChannelSettings(
         const QList<ObjectPipe*>& pipes,
-        QList<QString>& channelSettingsKeys,
+        const QList<QString>& channelSettingsKeys,
         const FreeDVModSettings& settings,
         bool force
     );
     void webapiFormatChannelSettings(
-        QList<QString>& channelSettingsKeys,
+        const QList<QString>& channelSettingsKeys,
         SWGSDRangel::SWGChannelSettings *swgChannelSettings,
         const FreeDVModSettings& settings,
         bool force

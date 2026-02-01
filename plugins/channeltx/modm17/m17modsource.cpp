@@ -65,7 +65,7 @@ M17ModSource::M17ModSource() :
     m_processor->moveToThread(&m_processorThread);
     m_processorThread.start();
 
-    applySettings(m_settings, QList<QString>(), true);
+    applySettings(QStringList(), m_settings, true);
     applyChannelSettings(m_channelSampleRate, m_channelFrequencyOffset, true);
 }
 
@@ -525,7 +525,7 @@ void M17ModSource::applyFeedbackAudioSampleRate(int sampleRate)
     m_feedbackAudioSampleRate = sampleRate;
 }
 
-void M17ModSource::applySettings(const M17ModSettings& settings, const QList<QString>& settingsKeys, bool force)
+void M17ModSource::applySettings(const QStringList& settingsKeys, const M17ModSettings& settings, bool force)
 {
     if (settingsKeys.contains("rfBandwidth") || force)
     {

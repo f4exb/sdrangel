@@ -62,7 +62,7 @@ NFMMod::NFMMod(DeviceAPI *deviceAPI) :
 {
 	setObjectName(m_channelId);
 
-    applySettings(m_settings, true);
+    applySettings(QStringList(), m_settings, true);
 
     m_deviceAPI->addChannelSource(this);
     m_deviceAPI->addChannelSourceAPI(this);
@@ -139,7 +139,7 @@ void NFMMod::start()
     DSPSignalNotification *dspMsg = new DSPSignalNotification(m_basebandSampleRate, m_centerFrequency);
     m_basebandSource->getInputMessageQueue()->push(dspMsg);
 
-    NFMModBaseband::MsgConfigureNFMModBaseband *msg = NFMModBaseband::MsgConfigureNFMModBaseband::create(m_settings, true);
+    NFMModBaseband::MsgConfigureNFMModBaseband *msg = NFMModBaseband::MsgConfigureNFMModBaseband::create(QStringList(), m_settings, true);
     m_basebandSource->getInputMessageQueue()->push(msg);
 
     m_running = true;
@@ -168,11 +168,11 @@ void NFMMod::setCenterFrequency(qint64 frequency)
 {
     NFMModSettings settings = m_settings;
     settings.m_inputFrequencyOffset = frequency;
-    applySettings(settings, false);
+    applySettings(QStringList("inputFrequencyOffset"), settings, false);
 
     if (m_guiMessageQueue) // forward to GUI if any
     {
-        MsgConfigureNFMMod *msgToGUI = MsgConfigureNFMMod::create(settings, false);
+        MsgConfigureNFMMod *msgToGUI = MsgConfigureNFMMod::create(QStringList("inputFrequencyOffset"), settings, false);
         m_guiMessageQueue->push(msgToGUI);
     }
 }
@@ -184,7 +184,7 @@ bool NFMMod::handleMessage(const Message& cmd)
         auto& cfg = (const MsgConfigureNFMMod&) cmd;
         qDebug() << "NFMMod::handleMessage: MsgConfigureNFMMod";
 
-        applySettings(cfg.getSettings(), cfg.getForce());
+        applySettings(cfg.getSettingsKeys(), cfg.getSettings(), cfg.getForce());
 
         return true;
     }
@@ -271,7 +271,7 @@ bool NFMMod::handleMessage(const Message& cmd)
     else if (DSPSignalNotification::match(cmd))
     {
         auto& notif = (const DSPSignalNotification&) cmd;
-    
+
         m_centerFrequency = notif.getCenterFrequency();
         m_basebandSampleRate = notif.getSampleRate();
 
@@ -337,83 +337,11 @@ void NFMMod::seekFileStream(int seekPercentage)
     }
 }
 
-void NFMMod::applySettings(const NFMModSettings& settings, bool force)
+void NFMMod::applySettings(const QStringList& settingsKeys, const NFMModSettings& settings, bool force)
 {
-    qDebug() << "NFMMod::applySettings:"
-            << " m_inputFrequencyOffset: " << settings.m_inputFrequencyOffset
-            << " m_rfBandwidth: " << settings.m_rfBandwidth
-            << " m_afBandwidth: " << settings.m_afBandwidth
-            << " m_fmDeviation: " << settings.m_fmDeviation
-            << " m_volumeFactor: " << settings.m_volumeFactor
-            << " m_toneFrequency: " << settings.m_toneFrequency
-            << " m_ctcssIndex: " << settings.m_ctcssIndex
-            << " m_ctcssOn: " << settings.m_ctcssOn
-            << " m_dcsOn: " << settings.m_dcsOn
-            << " m_dcsCode: " << settings.m_dcsCode
-            << " m_dcsPositive: " << settings.m_dcsPositive
-            << " m_channelMute: " << settings.m_channelMute
-            << " m_playLoop: " << settings.m_playLoop
-            << " m_modAFInput " << settings.m_modAFInput
-            << " m_audioDeviceName: " << settings.m_audioDeviceName
-            << " m_useReverseAPI: " << settings.m_useReverseAPI
-            << " m_reverseAPIAddress: " << settings.m_reverseAPIAddress
-            << " m_reverseAPIAddress: " << settings.m_reverseAPIPort
-            << " m_reverseAPIDeviceIndex: " << settings.m_reverseAPIDeviceIndex
-            << " m_reverseAPIChannelIndex: " << settings.m_reverseAPIChannelIndex
-            << " force: " << force;
+    qDebug() << "NFMMod::applySettings:" << settings.getDebugString(settingsKeys, force);
 
-    QList<QString> reverseAPIKeys;
-
-    if ((settings.m_inputFrequencyOffset != m_settings.m_inputFrequencyOffset) || force) {
-        reverseAPIKeys.append("inputFrequencyOffset");
-    }
-    if ((settings.m_fmDeviation != m_settings.m_fmDeviation) || force) {
-        reverseAPIKeys.append("fmDeviation");
-    }
-    if ((settings.m_volumeFactor != m_settings.m_volumeFactor) || force) {
-        reverseAPIKeys.append("volumeFactor");
-    }
-    if ((settings.m_ctcssOn != m_settings.m_ctcssOn) || force) {
-        reverseAPIKeys.append("ctcssOn");
-    }
-    if ((settings.m_channelMute != m_settings.m_channelMute) || force) {
-        reverseAPIKeys.append("channelMute");
-    }
-    if ((settings.m_playLoop != m_settings.m_playLoop) || force) {
-        reverseAPIKeys.append("playLoop");
-    }
-    if ((settings.m_modAFInput != m_settings.m_modAFInput) || force) {
-        reverseAPIKeys.append("modAFInput");
-    }
-    if((settings.m_rfBandwidth != m_settings.m_rfBandwidth) || force) {
-        reverseAPIKeys.append("rfBandwidth");
-    }
-    if ((settings.m_afBandwidth != m_settings.m_afBandwidth) || force) {
-        reverseAPIKeys.append("afBandwidth");
-    }
-    if ((settings.m_toneFrequency != m_settings.m_toneFrequency) || force) {
-        reverseAPIKeys.append("toneFrequency");
-    }
-    if ((settings.m_ctcssIndex != m_settings.m_ctcssIndex) || force) {
-        reverseAPIKeys.append("ctcssIndex");
-    }
-    if ((settings.m_dcsOn != m_settings.m_dcsOn) || force) {
-        reverseAPIKeys.append("dcsOn");
-    }
-    if ((settings.m_dcsCode != m_settings.m_dcsCode) || force) {
-        reverseAPIKeys.append("dcsCode");
-    }
-    if ((settings.m_dcsPositive != m_settings.m_dcsPositive) || force) {
-        reverseAPIKeys.append("dcsPositive");
-    }
-    if ((settings.m_audioDeviceName != m_settings.m_audioDeviceName) || force) {
-        reverseAPIKeys.append("audioDeviceName");
-    }
-    if ((settings.m_feedbackAudioDeviceName != m_settings.m_feedbackAudioDeviceName) || force) {
-        reverseAPIKeys.append("feedbackAudioDeviceName");
-    }
-
-    if (m_settings.m_streamIndex != settings.m_streamIndex)
+    if (settingsKeys.contains("streamIndex") && m_settings.m_streamIndex != settings.m_streamIndex)
     {
         if (m_deviceAPI->getSampleMIMO()) // change of stream is possible for MIMO devices only
         {
@@ -424,31 +352,29 @@ void NFMMod::applySettings(const NFMModSettings& settings, bool force)
             m_settings.m_streamIndex = settings.m_streamIndex; // make sure ChannelAPI::getStreamIndex() is consistent
             emit streamIndexChanged(settings.m_streamIndex);
         }
-
-        reverseAPIKeys.append("streamIndex");
     }
 
     if (m_running)
     {
-        NFMModBaseband::MsgConfigureNFMModBaseband *msg = NFMModBaseband::MsgConfigureNFMModBaseband::create(settings, force);
+        NFMModBaseband::MsgConfigureNFMModBaseband *msg = NFMModBaseband::MsgConfigureNFMModBaseband::create(settingsKeys, settings, force);
         m_basebandSource->getInputMessageQueue()->push(msg);
     }
 
-    if (settings.m_useReverseAPI)
+    if (settingsKeys.contains("useReverseAPI") && settings.m_useReverseAPI)
     {
-        bool fullUpdate = ((m_settings.m_useReverseAPI != settings.m_useReverseAPI) && settings.m_useReverseAPI) ||
-                (m_settings.m_reverseAPIAddress != settings.m_reverseAPIAddress) ||
-                (m_settings.m_reverseAPIPort != settings.m_reverseAPIPort) ||
-                (m_settings.m_reverseAPIDeviceIndex != settings.m_reverseAPIDeviceIndex) ||
-                (m_settings.m_reverseAPIChannelIndex != settings.m_reverseAPIChannelIndex);
-        webapiReverseSendSettings(reverseAPIKeys, settings, fullUpdate || force);
+        bool fullUpdate = ((settingsKeys.contains("useReverseAPI") && m_settings.m_useReverseAPI != settings.m_useReverseAPI) && settings.m_useReverseAPI) ||
+                (settingsKeys.contains("reverseAPIAddress") && m_settings.m_reverseAPIAddress != settings.m_reverseAPIAddress) ||
+                (settingsKeys.contains("reverseAPIPort") && m_settings.m_reverseAPIPort != settings.m_reverseAPIPort) ||
+                (settingsKeys.contains("reverseAPIDeviceIndex") && m_settings.m_reverseAPIDeviceIndex != settings.m_reverseAPIDeviceIndex) ||
+                (settingsKeys.contains("reverseAPIChannelIndex") && m_settings.m_reverseAPIChannelIndex != settings.m_reverseAPIChannelIndex);
+        webapiReverseSendSettings(settingsKeys, settings, fullUpdate || force);
     }
 
     QList<ObjectPipe*> pipes;
     MainCore::instance()->getMessagePipes().getMessagePipes(this, "settings", pipes);
 
     if (!pipes.empty()) {
-        sendChannelSettings(pipes, reverseAPIKeys, settings, force);
+        sendChannelSettings(pipes, settingsKeys, settings, force);
     }
 
     m_settings = settings;
@@ -469,7 +395,7 @@ bool NFMMod::deserialize(const QByteArray& data)
         success = false;
     }
 
-    MsgConfigureNFMMod *msg = MsgConfigureNFMMod::create(m_settings, true);
+    MsgConfigureNFMMod *msg = MsgConfigureNFMMod::create(QStringList(), m_settings, true);
     m_inputMessageQueue.push(msg);
 
     return success;
@@ -545,12 +471,12 @@ int NFMMod::webapiSettingsPutPatch(
         }
     }
 
-    MsgConfigureNFMMod *msg = MsgConfigureNFMMod::create(settings, force);
+    MsgConfigureNFMMod *msg = MsgConfigureNFMMod::create(channelSettingsKeys, settings, force);
     m_inputMessageQueue.push(msg);
 
     if (m_guiMessageQueue) // forward to GUI if any
     {
-        MsgConfigureNFMMod *msgToGUI = MsgConfigureNFMMod::create(settings, force);
+        MsgConfigureNFMMod *msgToGUI = MsgConfigureNFMMod::create(channelSettingsKeys, settings, force);
         m_guiMessageQueue->push(msgToGUI);
     }
 

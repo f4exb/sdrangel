@@ -56,7 +56,7 @@ WFMModSource::WFMModSource() :
     m_demodBuffer.resize(1<<12);
     m_demodBufferFill = 0;
 
-    applySettings(m_settings, true);
+    applySettings(QStringList(), m_settings, true);
     applyChannelSettings(m_channelSampleRate, m_channelFrequencyOffset, true);
 }
 
@@ -407,9 +407,9 @@ void WFMModSource::applyFeedbackAudioSampleRate(int sampleRate)
     m_feedbackAudioSampleRate = sampleRate;
 }
 
-void WFMModSource::applySettings(const WFMModSettings& settings, bool force)
+void WFMModSource::applySettings(const QStringList& settingsKeys, const WFMModSettings& settings, bool force)
 {
-    if ((settings.m_afBandwidth != m_settings.m_afBandwidth) || force)
+    if ((settingsKeys.contains("afBandwidth") && (settings.m_afBandwidth != m_settings.m_afBandwidth)) || force)
     {
         m_interpolatorDistanceRemain = 0;
         m_interpolatorConsumed = false;
@@ -417,20 +417,20 @@ void WFMModSource::applySettings(const WFMModSettings& settings, bool force)
         m_interpolator.create(48, m_audioSampleRate, settings.m_afBandwidth / 2.2, 3.0);
     }
 
-    if ((settings.m_rfBandwidth != m_settings.m_rfBandwidth) || force)
+    if ((settingsKeys.contains("rfBandwidth") && (settings.m_rfBandwidth != m_settings.m_rfBandwidth)) || force)
     {
         Real lowCut = -(settings.m_rfBandwidth / 2.2) / m_channelSampleRate;
         Real hiCut  = (settings.m_rfBandwidth / 2.2) / m_channelSampleRate;
         m_rfFilter->create_filter(lowCut, hiCut);
     }
 
-    if ((settings.m_toneFrequency != m_settings.m_toneFrequency) || force)
+    if ((settingsKeys.contains("toneFrequency") && (settings.m_toneFrequency != m_settings.m_toneFrequency)) || force)
     {
         m_toneNco.setFreq(settings.m_toneFrequency, m_channelSampleRate);
         m_cwToneNco.setFreq(settings.m_toneFrequency, m_audioSampleRate);
     }
 
-    if ((settings.m_modAFInput != m_settings.m_modAFInput) || force)
+    if ((settingsKeys.contains("modAFInput") && (settings.m_modAFInput != m_settings.m_modAFInput)) || force)
     {
         if (settings.m_modAFInput == WFMModSettings::WFMModInputAudio) {
             connect(&m_audioFifo, SIGNAL(dataReady()), this, SLOT(handleAudio()));
@@ -439,7 +439,11 @@ void WFMModSource::applySettings(const WFMModSettings& settings, bool force)
         }
     }
 
-    m_settings = settings;
+    if (force) {
+        m_settings = settings;
+    } else {
+        m_settings.applySettings(settingsKeys, settings);
+    }
 }
 
 void WFMModSource::applyChannelSettings(int channelSampleRate, int channelFrequencyOffset, bool force)

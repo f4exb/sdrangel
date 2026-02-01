@@ -142,14 +142,14 @@ void FreeDVModGUI::channelMarkerChangedByCursor()
 {
     ui->deltaFrequency->setValue(m_channelMarker.getCenterFrequency());
     m_settings.m_inputFrequencyOffset = m_channelMarker.getCenterFrequency();
-    applySettings();
+    applySettings(QStringList("inputFrequencyOffset"));
 }
 
 void FreeDVModGUI::channelMarkerUpdate()
 {
     m_settings.m_rgbColor = m_channelMarker.getColor().rgb();
     displaySettings();
-    applySettings();
+    applySettings(QStringList("rgbColor"));
 }
 
 void FreeDVModGUI::handleSourceMessages()
@@ -170,7 +170,7 @@ void FreeDVModGUI::on_deltaFrequency_changed(qint64 value)
     m_channelMarker.setCenterFrequency(value);
     m_settings.m_inputFrequencyOffset = m_channelMarker.getCenterFrequency();
     updateAbsoluteCenterFrequency();
-    applySettings();
+    applySettings(QStringList("inputFrequencyOffset"));
 }
 
 void FreeDVModGUI::on_spanLog2_valueChanged(int value)
@@ -185,27 +185,27 @@ void FreeDVModGUI::on_spanLog2_valueChanged(int value)
 void FreeDVModGUI::on_gaugeInput_toggled(bool checked)
 {
     m_settings.m_gaugeInputElseModem = checked;
-    applySettings();
+    applySettings(QStringList("gaugeInputElseModem"));
 }
 
 void FreeDVModGUI::on_toneFrequency_valueChanged(int value)
 {
     ui->toneFrequencyText->setText(QString("%1k").arg(value / 100.0, 0, 'f', 2));
     m_settings.m_toneFrequency = value * 10.0;
-    applySettings();
+    applySettings(QStringList("toneFrequency"));
 }
 
 void FreeDVModGUI::on_volume_valueChanged(int value)
 {
     ui->volumeText->setText(QString("%1").arg(value / 10.0, 0, 'f', 1));
     m_settings.m_volumeFactor = value / 10.0;
-    applySettings();
+    applySettings(QStringList("volumeFactor"));
 }
 
 void FreeDVModGUI::on_audioMute_toggled(bool checked)
 {
     m_settings.m_audioMute = checked;
-	applySettings();
+	applySettings(QStringList("audioMute"));
 }
 
 void FreeDVModGUI::on_freeDVMode_currentIndexChanged(int index)
@@ -213,13 +213,13 @@ void FreeDVModGUI::on_freeDVMode_currentIndexChanged(int index)
     m_settings.m_freeDVMode = (FreeDVModSettings::FreeDVMode) index;
     m_channelMarker.setBandwidth(FreeDVModSettings::getHiCutoff(m_settings.m_freeDVMode) * 2);
     m_channelMarker.setLowCutoff(FreeDVModSettings::getLowCutoff(m_settings.m_freeDVMode));
-    applySettings();
+    applySettings(QStringList("freeDVMode"));
 }
 
 void FreeDVModGUI::on_playLoop_toggled(bool checked)
 {
     m_settings.m_playLoop = checked;
-    applySettings();
+    applySettings(QStringList("playLoop"));
 }
 
 void FreeDVModGUI::on_play_toggled(bool checked)
@@ -228,7 +228,7 @@ void FreeDVModGUI::on_play_toggled(bool checked)
     ui->morseKeyer->setEnabled(!checked);
     ui->mic->setEnabled(!checked);
     m_settings.m_modAFInput = checked ? FreeDVModSettings::FreeDVModInputFile : FreeDVModSettings::FreeDVModInputNone;
-    applySettings();
+    applySettings(QStringList("modAFInput"));
     ui->navTimeSlider->setEnabled(!checked);
     m_enableNavTime = !checked;
 }
@@ -239,7 +239,7 @@ void FreeDVModGUI::on_tone_toggled(bool checked)
     ui->morseKeyer->setEnabled(!checked);
     ui->mic->setEnabled(!checked);
     m_settings.m_modAFInput = checked ? FreeDVModSettings::FreeDVModInputTone : FreeDVModSettings::FreeDVModInputNone;
-    applySettings();
+    applySettings(QStringList("modAFInput"));
 }
 
 void FreeDVModGUI::on_morseKeyer_toggled(bool checked)
@@ -248,7 +248,7 @@ void FreeDVModGUI::on_morseKeyer_toggled(bool checked)
     ui->tone->setEnabled(!checked); // release other source inputs
     ui->mic->setEnabled(!checked);
     m_settings.m_modAFInput = checked ? FreeDVModSettings::FreeDVModInputCWTone : FreeDVModSettings::FreeDVModInputNone;
-    applySettings();
+    applySettings(QStringList("modAFInput"));
 }
 
 void FreeDVModGUI::on_mic_toggled(bool checked)
@@ -257,7 +257,7 @@ void FreeDVModGUI::on_mic_toggled(bool checked)
     ui->morseKeyer->setEnabled(!checked);
     ui->tone->setEnabled(!checked); // release other source inputs
     m_settings.m_modAFInput = checked ? FreeDVModSettings::FreeDVModInputAudio : FreeDVModSettings::FreeDVModInputNone;
-    applySettings();
+    applySettings(QStringList("modAFInput"));
 }
 
 void FreeDVModGUI::on_navTimeSlider_valueChanged(int value)
@@ -301,7 +301,7 @@ void FreeDVModGUI::onWidgetRolled(QWidget* widget, bool rollDown)
     (void) rollDown;
 
     getRollupContents()->saveState(m_rollupState);
-    applySettings();
+    applySettings(QStringList());
 }
 
 void FreeDVModGUI::onMenuDialogCalled(const QPoint &p)
@@ -346,7 +346,16 @@ void FreeDVModGUI::onMenuDialogCalled(const QPoint &p)
             updateIndexLabel();
         }
 
-        applySettings();
+        applySettings(QStringList({
+            "rgbColor",
+            "title",
+            "useReverseAPI",
+            "reverseAPIAddress",
+            "reverseAPIPort",
+            "reverseAPIDeviceIndex",
+            "reverseAPIChannelIndex",
+            "streamIndex"
+        }));
     }
 
     resetContextMenuType();
@@ -442,11 +451,11 @@ bool FreeDVModGUI::blockApplySettings(bool block)
     return ret;
 }
 
-void FreeDVModGUI::applySettings(bool force)
+void FreeDVModGUI::applySettings(const QStringList& settingsKeys, bool force)
 {
 	if (m_doApplySettings)
 	{
-		FreeDVMod::MsgConfigureFreeDVMod *msg = FreeDVMod::MsgConfigureFreeDVMod::create(m_settings, force);
+		FreeDVMod::MsgConfigureFreeDVMod *msg = FreeDVMod::MsgConfigureFreeDVMod::create(settingsKeys, m_settings, force);
 		m_freeDVMod->getInputMessageQueue()->push(msg);
 	}
 }
@@ -455,7 +464,7 @@ void FreeDVModGUI::applyBandwidths(int spanLog2, bool force)
 {
     displayBandwidths(spanLog2);
     m_settings.m_spanLog2 = spanLog2;
-    applySettings(force);
+    applySettings(QStringList("spanLog2"), force);
 }
 
 void FreeDVModGUI::displayBandwidths(int spanLog2)
@@ -560,7 +569,7 @@ void FreeDVModGUI::audioSelect(const QPoint& p)
     if (audioSelect.m_selected)
     {
         m_settings.m_audioDeviceName = audioSelect.m_audioDeviceName;
-        applySettings();
+        applySettings(QStringList("audioDeviceName"));
     }
 }
 

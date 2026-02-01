@@ -48,7 +48,7 @@ void FileSourceGUI::resetToDefaults()
 {
     m_settings.resetToDefaults();
     displaySettings();
-    applySettings(true);
+    applySettings(QStringList(), true);
 }
 
 QByteArray FileSourceGUI::serialize() const
@@ -60,7 +60,7 @@ bool FileSourceGUI::deserialize(const QByteArray& data)
 {
     if(m_settings.deserialize(data)) {
         displaySettings();
-        applySettings(true);
+        applySettings(QStringList(), true);
         return true;
     } else {
         resetToDefaults();
@@ -215,7 +215,7 @@ FileSourceGUI::FileSourceGUI(PluginAPI* pluginAPI, DeviceUISet *deviceUISet, Bas
 
     displaySettings();
     makeUIConnections();
-    applySettings(true);
+    applySettings(QStringList(), true);
     m_resizer.enableChildMouseTracking();
 }
 
@@ -229,13 +229,13 @@ void FileSourceGUI::blockApplySettings(bool block)
     m_doApplySettings = !block;
 }
 
-void FileSourceGUI::applySettings(bool force)
+void FileSourceGUI::applySettings(const QStringList& settingsKeys, bool force)
 {
     if (m_doApplySettings)
     {
         setTitleColor(m_channelMarker.getColor());
 
-        FileSource::MsgConfigureFileSource* message = FileSource::MsgConfigureFileSource::create(m_settings, force);
+        FileSource::MsgConfigureFileSource* message = FileSource::MsgConfigureFileSource::create(settingsKeys, m_settings, force);
         m_fileSource->getInputMessageQueue()->push(message);
     }
 }
@@ -243,7 +243,7 @@ void FileSourceGUI::applySettings(bool force)
 void FileSourceGUI::configureFileName()
 {
 	qDebug() << "FileSourceGui::configureFileName: " << m_settings.m_fileName.toStdString().c_str();
-    applySettings();
+    applySettings(QStringList("fileName"));
 }
 
 void FileSourceGUI::updateWithAcquisition()
@@ -364,7 +364,7 @@ void FileSourceGUI::onWidgetRolled(QWidget* widget, bool rollDown)
     (void) rollDown;
 
     getRollupContents()->saveState(m_rollupState);
-    applySettings();
+    applySettings(QStringList());
 }
 
 void FileSourceGUI::onMenuDialogCalled(const QPoint &p)
@@ -408,7 +408,9 @@ void FileSourceGUI::onMenuDialogCalled(const QPoint &p)
             updateIndexLabel();
         }
 
-        applySettings();
+        applySettings(QStringList({"title", "rgbColor", "useReverseAPI", "reverseAPIAddress",
+                                    "reverseAPIPort", "reverseAPIDeviceIndex", "reverseAPIChannelIndex",
+                                    "streamIndex"}));
     }
 
     resetContextMenuType();
@@ -430,7 +432,7 @@ void FileSourceGUI::on_gain_valueChanged(int value)
 {
     ui->gainText->setText(tr("%1 dB").arg(value));
     m_settings.m_gainDB = value;
-    applySettings();
+    applySettings(QStringList({"gainDB"}));
 }
 
 void FileSourceGUI::on_showFileDialog_clicked(bool checked)
@@ -453,7 +455,7 @@ void FileSourceGUI::on_playLoop_toggled(bool checked)
     if (m_doApplySettings)
     {
         m_settings.m_loop = checked;
-        FileSource::MsgConfigureFileSource *message = FileSource::MsgConfigureFileSource::create(m_settings, false);
+        FileSource::MsgConfigureFileSource *message = FileSource::MsgConfigureFileSource::create(QStringList({"loop"}), m_settings, false);
         m_fileSource->getInputMessageQueue()->push(message);
     }
 }
@@ -498,7 +500,7 @@ void FileSourceGUI::applyPosition()
 
     updateAbsoluteCenterFrequency();
     displayRateAndShift();
-    applySettings();
+    applySettings(QStringList({"log2Interp", "filterChainHash"}));
 }
 
 void FileSourceGUI::tick()

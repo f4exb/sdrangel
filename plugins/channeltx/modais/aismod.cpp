@@ -67,7 +67,7 @@ AISMod::AISMod(DeviceAPI *deviceAPI) :
     m_basebandSource->setChannel(this);
     m_basebandSource->moveToThread(m_thread);
 
-    applySettings(m_settings, true);
+    applySettings(QStringList(), m_settings, true);
 
     m_deviceAPI->addChannelSource(this);
     m_deviceAPI->addChannelSourceAPI(this);
@@ -133,11 +133,11 @@ void AISMod::setCenterFrequency(qint64 frequency)
 {
     AISModSettings settings = m_settings;
     settings.m_inputFrequencyOffset = frequency;
-    applySettings(settings, false);
+    applySettings(QStringList("inputFrequencyOffset"), settings, false);
 
     if (m_guiMessageQueue) // forward to GUI if any
     {
-        MsgConfigureAISMod *msgToGUI = MsgConfigureAISMod::create(settings, false);
+        MsgConfigureAISMod *msgToGUI = MsgConfigureAISMod::create(QStringList("inputFrequencyOffset"), settings, false);
         m_guiMessageQueue->push(msgToGUI);
     }
 }
@@ -149,7 +149,7 @@ bool AISMod::handleMessage(const Message& cmd)
         MsgConfigureAISMod& cfg = (MsgConfigureAISMod&) cmd;
         qDebug() << "AISMod::handleMessage: MsgConfigureAISMod";
 
-        applySettings(cfg.getSettings(), cfg.getForce());
+        applySettings(cfg.getSettingsKeys(), cfg.getSettings(), cfg.getForce());
 
         return true;
     }
@@ -311,141 +311,13 @@ void AISMod::encode()
     }
 }
 
-void AISMod::applySettings(const AISModSettings& settings, bool force)
+void AISMod::applySettings(const QStringList& settingsKeys, const AISModSettings& settings, bool force)
 {
-    qDebug() << "AISMod::applySettings:"
-            << " m_inputFrequencyOffset: " << settings.m_inputFrequencyOffset
-            << " m_rfBandwidth: " << settings.m_rfBandwidth
-            << " m_fmDeviation: " << settings.m_fmDeviation
-            << " m_gain: " << settings.m_gain
-            << " m_channelMute: " << settings.m_channelMute
-            << " m_repeat: " << settings.m_repeat
-            << " m_repeatDelay: " << settings.m_repeatDelay
-            << " m_repeatCount: " << settings.m_repeatCount
-            << " m_useReverseAPI: " << settings.m_useReverseAPI
-            << " m_reverseAPIAddress: " << settings.m_reverseAPIAddress
-            << " m_reverseAPIAddress: " << settings.m_reverseAPIPort
-            << " m_reverseAPIDeviceIndex: " << settings.m_reverseAPIDeviceIndex
-            << " m_reverseAPIChannelIndex: " << settings.m_reverseAPIChannelIndex
-            << " force: " << force;
+    qDebug() << "AISMod::applySettings:" << settings.getDebugString(settingsKeys, force);
 
-    QList<QString> reverseAPIKeys;
-
-    if ((settings.m_inputFrequencyOffset != m_settings.m_inputFrequencyOffset) || force) {
-        reverseAPIKeys.append("inputFrequencyOffset");
-    }
-
-    if ((settings.m_rfBandwidth != m_settings.m_rfBandwidth) || force) {
-        reverseAPIKeys.append("rfBandwidth");
-    }
-
-    if ((settings.m_fmDeviation != m_settings.m_fmDeviation) || force) {
-        reverseAPIKeys.append("fmDeviation");
-    }
-
-    if ((settings.m_gain != m_settings.m_gain) || force) {
-        reverseAPIKeys.append("gain");
-    }
-
-    if ((settings.m_channelMute != m_settings.m_channelMute) || force) {
-        reverseAPIKeys.append("channelMute");
-    }
-
-    if ((settings.m_repeat != m_settings.m_repeat) || force) {
-        reverseAPIKeys.append("repeat");
-    }
-
-    if ((settings.m_baud != m_settings.m_baud) || force) {
-        reverseAPIKeys.append("baud");
-    }
-
-    if ((settings.m_repeatDelay != m_settings.m_repeatDelay) || force) {
-        reverseAPIKeys.append("repeatDelay");
-    }
-
-    if ((settings.m_repeatCount != m_settings.m_repeatCount) || force) {
-        reverseAPIKeys.append("repeatCount");
-    }
-
-    if ((settings.m_rampUpBits != m_settings.m_rampUpBits) || force) {
-        reverseAPIKeys.append("rampUpBits");
-    }
-
-    if ((settings.m_rampDownBits != m_settings.m_rampDownBits) || force) {
-        reverseAPIKeys.append("rampDownBits");
-    }
-
-    if ((settings.m_rampRange != m_settings.m_rampRange) || force) {
-        reverseAPIKeys.append("rampRange");
-    }
-
-    if ((settings.m_rfNoise != m_settings.m_rfNoise) || force) {
-        reverseAPIKeys.append("rfNoise");
-    }
-
-    if ((settings.m_writeToFile != m_settings.m_writeToFile) || force) {
-        reverseAPIKeys.append("writeToFile");
-    }
-
-    if ((settings.m_msgType != m_settings.m_msgType) || force) {
-        reverseAPIKeys.append("msgType");
-    }
-
-    if ((settings.m_mmsi != m_settings.m_mmsi) || force) {
-        reverseAPIKeys.append("mmsi");
-    }
-
-    if ((settings.m_status != m_settings.m_status) || force) {
-        reverseAPIKeys.append("status");
-    }
-
-    if ((settings.m_latitude != m_settings.m_latitude) || force) {
-        reverseAPIKeys.append("latitude");
-    }
-
-    if ((settings.m_longitude != m_settings.m_longitude) || force) {
-        reverseAPIKeys.append("longitude");
-    }
-
-    if ((settings.m_course != m_settings.m_course) || force) {
-        reverseAPIKeys.append("course");
-    }
-
-    if ((settings.m_speed != m_settings.m_speed) || force) {
-        reverseAPIKeys.append("speed");
-    }
-
-    if ((settings.m_heading != m_settings.m_heading) || force) {
-        reverseAPIKeys.append("heading");
-    }
-
-    if ((settings.m_data != m_settings.m_data) || force) {
-        reverseAPIKeys.append("data");
-    }
-
-    if ((settings.m_bt != m_settings.m_bt) || force) {
-        reverseAPIKeys.append("bt");
-    }
-
-    if ((settings.m_symbolSpan != m_settings.m_symbolSpan) || force) {
-        reverseAPIKeys.append("symbolSpan");
-    }
-
-    if ((settings.m_udpEnabled != m_settings.m_udpEnabled) || force) {
-        reverseAPIKeys.append("udpEnabled");
-    }
-
-    if ((settings.m_udpAddress != m_settings.m_udpAddress) || force) {
-        reverseAPIKeys.append("udpAddress");
-    }
-
-    if ((settings.m_udpPort != m_settings.m_udpPort) || force) {
-        reverseAPIKeys.append("udpPort");
-    }
-
-    if (   (settings.m_udpEnabled != m_settings.m_udpEnabled)
-        || (settings.m_udpAddress != m_settings.m_udpAddress)
-        || (settings.m_udpPort != m_settings.m_udpPort)
+    if ((settingsKeys.contains("udpEnabled") && (settings.m_udpEnabled != m_settings.m_udpEnabled))
+        || (settingsKeys.contains("udpAddress") && (settings.m_udpAddress != m_settings.m_udpAddress))
+        || (settingsKeys.contains("udpPort") && (settings.m_udpPort != m_settings.m_udpPort))
         || force)
     {
         if (settings.m_udpEnabled)
@@ -454,7 +326,7 @@ void AISMod::applySettings(const AISModSettings& settings, bool force)
             closeUDP();
     }
 
-    if (m_settings.m_streamIndex != settings.m_streamIndex)
+    if (settingsKeys.contains("streamIndex") && (m_settings.m_streamIndex != settings.m_streamIndex))
     {
         if (m_deviceAPI->getSampleMIMO()) // change of stream is possible for MIMO devices only
         {
@@ -465,28 +337,26 @@ void AISMod::applySettings(const AISModSettings& settings, bool force)
             m_settings.m_streamIndex = settings.m_streamIndex; // make sure ChannelAPI::getStreamIndex() is consistent
             emit streamIndexChanged(settings.m_streamIndex);
         }
-
-        reverseAPIKeys.append("streamIndex");
     }
 
-    AISModBaseband::MsgConfigureAISModBaseband *msg = AISModBaseband::MsgConfigureAISModBaseband::create(settings, force);
+    AISModBaseband::MsgConfigureAISModBaseband *msg = AISModBaseband::MsgConfigureAISModBaseband::create(settingsKeys, settings, force);
     m_basebandSource->getInputMessageQueue()->push(msg);
 
-    if (settings.m_useReverseAPI)
+    if (settingsKeys.contains("useReverseAPI") && settings.m_useReverseAPI)
     {
-        bool fullUpdate = ((m_settings.m_useReverseAPI != settings.m_useReverseAPI) && settings.m_useReverseAPI) ||
-                (m_settings.m_reverseAPIAddress != settings.m_reverseAPIAddress) ||
-                (m_settings.m_reverseAPIPort != settings.m_reverseAPIPort) ||
-                (m_settings.m_reverseAPIDeviceIndex != settings.m_reverseAPIDeviceIndex) ||
-                (m_settings.m_reverseAPIChannelIndex != settings.m_reverseAPIChannelIndex);
-        webapiReverseSendSettings(reverseAPIKeys, settings, fullUpdate || force);
+        bool fullUpdate = ((settingsKeys.contains("useReverseAPI") && (m_settings.m_useReverseAPI != settings.m_useReverseAPI)) && settings.m_useReverseAPI) ||
+                (settingsKeys.contains("reverseAPIAddress") && (m_settings.m_reverseAPIAddress != settings.m_reverseAPIAddress)) ||
+                (settingsKeys.contains("reverseAPIPort") && (m_settings.m_reverseAPIPort != settings.m_reverseAPIPort)) ||
+                (settingsKeys.contains("reverseAPIDeviceIndex") && (m_settings.m_reverseAPIDeviceIndex != settings.m_reverseAPIDeviceIndex)) ||
+                (settingsKeys.contains("reverseAPIChannelIndex") && (m_settings.m_reverseAPIChannelIndex != settings.m_reverseAPIChannelIndex));
+        webapiReverseSendSettings(settingsKeys, settings, fullUpdate || force);
     }
 
     QList<ObjectPipe*> pipes;
     MainCore::instance()->getMessagePipes().getMessagePipes(this, "settings", pipes);
 
     if (pipes.size() > 0) {
-        sendChannelSettings(pipes, reverseAPIKeys, settings, force);
+        sendChannelSettings(pipes, settingsKeys, settings, force);
     }
 
     m_settings = settings;
@@ -507,7 +377,7 @@ bool AISMod::deserialize(const QByteArray& data)
         success = false;
     }
 
-    MsgConfigureAISMod *msg = MsgConfigureAISMod::create(m_settings, true);
+    MsgConfigureAISMod *msg = MsgConfigureAISMod::create(QStringList(), m_settings, true);
     m_inputMessageQueue.push(msg);
 
     return success;
@@ -563,12 +433,12 @@ int AISMod::webapiSettingsPutPatch(
     AISModSettings settings = m_settings;
     webapiUpdateChannelSettings(settings, channelSettingsKeys, response);
 
-    MsgConfigureAISMod *msg = MsgConfigureAISMod::create(settings, force);
+    MsgConfigureAISMod *msg = MsgConfigureAISMod::create(channelSettingsKeys, settings, force);
     m_inputMessageQueue.push(msg);
 
     if (m_guiMessageQueue) // forward to GUI if any
     {
-        MsgConfigureAISMod *msgToGUI = MsgConfigureAISMod::create(settings, force);
+        MsgConfigureAISMod *msgToGUI = MsgConfigureAISMod::create(channelSettingsKeys, settings, force);
         m_guiMessageQueue->push(msgToGUI);
     }
 
@@ -857,7 +727,7 @@ void AISMod::webapiFormatChannelReport(SWGSDRangel::SWGChannelReport& response)
     response.getAisModReport()->setChannelSampleRate(m_basebandSource->getChannelSampleRate());
 }
 
-void AISMod::webapiReverseSendSettings(QList<QString>& channelSettingsKeys, const AISModSettings& settings, bool force)
+void AISMod::webapiReverseSendSettings(const QList<QString>& channelSettingsKeys, const AISModSettings& settings, bool force)
 {
     SWGSDRangel::SWGChannelSettings *swgChannelSettings = new SWGSDRangel::SWGChannelSettings();
     webapiFormatChannelSettings(channelSettingsKeys, swgChannelSettings, settings, force);
@@ -884,7 +754,7 @@ void AISMod::webapiReverseSendSettings(QList<QString>& channelSettingsKeys, cons
 
 void AISMod::sendChannelSettings(
     const QList<ObjectPipe*>& pipes,
-    QList<QString>& channelSettingsKeys,
+    const QList<QString>& channelSettingsKeys,
     const AISModSettings& settings,
     bool force)
 {
@@ -908,7 +778,7 @@ void AISMod::sendChannelSettings(
 }
 
 void AISMod::webapiFormatChannelSettings(
-        QList<QString>& channelSettingsKeys,
+        const QList<QString>& channelSettingsKeys,
         SWGSDRangel::SWGChannelSettings *swgChannelSettings,
         const AISModSettings& settings,
         bool force

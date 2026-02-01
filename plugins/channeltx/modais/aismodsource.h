@@ -64,7 +64,7 @@ public:
     }
     void setSpectrumSink(BasebandSampleSink *sampleSink) { m_spectrumSink = sampleSink; }
     void setScopeSink(ScopeVis* scopeSink) { m_scopeSink = scopeSink; }
-    void applySettings(const AISModSettings& settings, bool force = false);
+    void applySettings(const QStringList& settingsKeys, const AISModSettings& settings, bool force = false);
     void applyChannelSettings(int channelSampleRate, int channelFrequencyOffset, bool force = false);
     void addTXPacket(const QString& data);
     void addTXPacket(QByteArray data);

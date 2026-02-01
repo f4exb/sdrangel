@@ -40,20 +40,23 @@ public:
 
     public:
         const AMModSettings& getSettings() const { return m_settings; }
+        const QStringList& getSettingsKeys() const { return m_settingsKeys; }
         bool getForce() const { return m_force; }
 
-        static MsgConfigureAMModBaseband* create(const AMModSettings& settings, bool force)
+        static MsgConfigureAMModBaseband* create(const QStringList& settingsKeys, const AMModSettings& settings, bool force)
         {
-            return new MsgConfigureAMModBaseband(settings, force);
+            return new MsgConfigureAMModBaseband(settingsKeys, settings, force);
         }
 
     private:
         AMModSettings m_settings;
+        QStringList m_settingsKeys;
         bool m_force;
 
-        MsgConfigureAMModBaseband(const AMModSettings& settings, bool force) :
+        MsgConfigureAMModBaseband(const QStringList& settingsKeys, const AMModSettings& settings, bool force) :
             Message(),
             m_settings(settings),
+            m_settingsKeys(settingsKeys),
             m_force(force)
         { }
     };
@@ -92,7 +95,7 @@ private:
 
     void processFifo(SampleVector& data, unsigned int iBegin, unsigned int iEnd);
     bool handleMessage(const Message& cmd);
-    void applySettings(const AMModSettings& settings, bool force = false);
+    void applySettings(const QStringList& settingsKeys, const AMModSettings& settings, bool force = false);
 
 private slots:
     void handleInputMessages();

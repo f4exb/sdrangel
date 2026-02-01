@@ -45,7 +45,7 @@ void RemoteSourceGUI::resetToDefaults()
 {
     m_settings.resetToDefaults();
     displaySettings();
-    applySettings(true);
+    applySettings(QStringList(), true);
 }
 
 QByteArray RemoteSourceGUI::serialize() const
@@ -57,7 +57,7 @@ bool RemoteSourceGUI::deserialize(const QByteArray& data)
 {
     if(m_settings.deserialize(data)) {
         displaySettings();
-        applySettings(true);
+        applySettings(QStringList(), true);
         return true;
     } else {
         resetToDefaults();
@@ -208,7 +208,7 @@ RemoteSourceGUI::RemoteSourceGUI(PluginAPI* pluginAPI, DeviceUISet *deviceUISet,
     makeUIConnections();
     displayPosition();
     displayRateAndShift();
-    applySettings(true);
+    applySettings(QStringList(), true);
     m_resizer.enableChildMouseTracking();
 }
 
@@ -222,13 +222,13 @@ void RemoteSourceGUI::blockApplySettings(bool block)
     m_doApplySettings = !block;
 }
 
-void RemoteSourceGUI::applySettings(bool force)
+void RemoteSourceGUI::applySettings(const QStringList& settingsKeys, bool force)
 {
     if (m_doApplySettings)
     {
         setTitleColor(m_channelMarker.getColor());
 
-        RemoteSource::MsgConfigureRemoteSource* message = RemoteSource::MsgConfigureRemoteSource::create(m_settings, force);
+        RemoteSource::MsgConfigureRemoteSource* message = RemoteSource::MsgConfigureRemoteSource::create(settingsKeys, m_settings, force);
         m_remoteSrc->getInputMessageQueue()->push(message);
     }
 }
@@ -305,7 +305,7 @@ void RemoteSourceGUI::onWidgetRolled(QWidget* widget, bool rollDown)
     (void) rollDown;
 
     getRollupContents()->saveState(m_rollupState);
-    applySettings();
+    applySettings(QStringList());
 }
 
 void RemoteSourceGUI::onMenuDialogCalled(const QPoint &p)
@@ -350,7 +350,7 @@ void RemoteSourceGUI::onMenuDialogCalled(const QPoint &p)
             updateIndexLabel();
         }
 
-        applySettings();
+        applySettings(QStringList({"color", "title", "useReverseAPI", "reverseAPIAddress", "reverseAPIPort", "reverseAPIDeviceIndex", "reverseAPIChannelIndex", "streamIndex"}));
     }
 
     resetContextMenuType();
@@ -371,7 +371,7 @@ void RemoteSourceGUI::on_position_valueChanged(int value)
 void RemoteSourceGUI::on_dataAddress_returnPressed()
 {
     m_settings.m_dataAddress = ui->dataAddress->text();
-    applySettings();
+    applySettings(QStringList({"dataAddress"}));
 }
 
 void RemoteSourceGUI::on_dataPort_returnPressed()
@@ -385,7 +385,7 @@ void RemoteSourceGUI::on_dataPort_returnPressed()
         m_settings.m_dataPort = dataPort;
     }
 
-    applySettings();
+    applySettings(QStringList({"dataPort"}));
 }
 
 void RemoteSourceGUI::on_dataApplyButton_clicked(bool checked)
@@ -400,7 +400,7 @@ void RemoteSourceGUI::on_dataApplyButton_clicked(bool checked)
         m_settings.m_dataPort = udpDataPort;
     }
 
-    applySettings();
+    applySettings(QStringList({"dataAddress", "dataPort"}));
 }
 
 void RemoteSourceGUI::on_eventCountsReset_clicked(bool checked)
@@ -436,7 +436,7 @@ void RemoteSourceGUI::applyPosition()
 
     updateAbsoluteCenterFrequency();
     displayRateAndShift();
-    applySettings();
+    applySettings(QStringList());
 }
 
 void RemoteSourceGUI::displayEventCounts()
@@ -505,4 +505,3 @@ void RemoteSourceGUI::updateAbsoluteCenterFrequency()
     int shift = m_shiftFrequencyFactor * m_basebandSampleRate;
     setStatusFrequency(m_deviceCenterFrequency + shift);
 }
-

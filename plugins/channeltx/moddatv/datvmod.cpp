@@ -66,7 +66,7 @@ DATVMod::DATVMod(DeviceAPI *deviceAPI) :
     m_basebandSource = new DATVModBaseband();
     m_basebandSource->moveToThread(m_thread);
 
-    applySettings(m_settings, true);
+    applySettings(QStringList(), m_settings, true);
 
     m_deviceAPI->addChannelSource(this);
     m_deviceAPI->addChannelSourceAPI(this);
@@ -164,7 +164,7 @@ bool DATVMod::handleMessage(const Message& cmd)
         MsgConfigureDATVMod& cfg = (MsgConfigureDATVMod&) cmd;
         qDebug() << "DATVMod::handleMessage: MsgConfigureDATVMod";
 
-        applySettings(cfg.getSettings(), cfg.getForce());
+        applySettings(cfg.getSettingsKeys(), cfg.getSettings(), cfg.getForce());
 
         return true;
     }
@@ -228,102 +228,18 @@ void DATVMod::setCenterFrequency(qint64 frequency)
 {
     DATVModSettings settings = m_settings;
     settings.m_inputFrequencyOffset = frequency;
-    applySettings(settings, false);
+    applySettings(QStringList("inputFrequencyOffset"), settings, false);
 
     if (m_guiMessageQueue) {
-        m_guiMessageQueue->push(MsgConfigureDATVMod::create(settings, false));
+        m_guiMessageQueue->push(MsgConfigureDATVMod::create(QStringList("inputFrequencyOffset"), settings, false));
     }
 }
 
-void DATVMod::applySettings(const DATVModSettings& settings, bool force)
+void DATVMod::applySettings(const QStringList& settingsKeys, const DATVModSettings& settings, bool force)
 {
-    qDebug() << "DATVMod::applySettings:"
-            << " m_inputFrequencyOffset: " << settings.m_inputFrequencyOffset
-            << " m_rfBandwidth: " << settings.m_rfBandwidth
-            << " m_standard: " << (int) settings.m_standard
-            << " m_source: " << (int) settings.m_source
-            << " m_modulation: " << (int) settings.m_modulation
-            << " m_fec: " << (int) settings.m_fec
-            << " m_symbolRate: " << settings.m_symbolRate
-            << " m_rollOff: " << settings.m_rollOff
-            << " m_source: " << settings.m_source
-            << " m_imageFileName: " << settings.m_imageFileName
-            << " m_imageOverlayTimestamp: " << settings.m_imageOverlayTimestamp
-            << " m_imageServiceProvider: " << settings.m_imageServiceProvider
-            << " m_imageServiceName: " << settings.m_imageServiceName
-            << " m_imageCodec: " << (int) settings.m_imageCodec
-            << " m_tsFileName: " << settings.m_tsFileName
-            << " m_tsFilePlayLoop: " << settings.m_tsFilePlayLoop
-            << " m_tsFilePlay: " << settings.m_tsFilePlay
-            << " m_udpAddress: " << settings.m_udpAddress
-            << " m_udpPort: " << settings.m_udpPort
-            << " m_channelMute: " << settings.m_channelMute
-            << " force: " << force;
+    qDebug() << "DATVMod::applySettings:" << settings.getDebugString(settingsKeys, force);
 
-    QList<QString> reverseAPIKeys;
-
-    if ((settings.m_inputFrequencyOffset != m_settings.m_inputFrequencyOffset) || force) {
-        reverseAPIKeys.append("inputFrequencyOffset");
-    }
-    if ((settings.m_rfBandwidth != m_settings.m_rfBandwidth) || force) {
-        reverseAPIKeys.append("rfBandwidth");
-    }
-    if ((settings.m_standard != m_settings.m_standard) || force) {
-        reverseAPIKeys.append("standard");
-    }
-    if ((settings.m_modulation != m_settings.m_modulation) || force) {
-        reverseAPIKeys.append("modulation");
-    }
-    if ((settings.m_modulation != m_settings.m_modulation) || force) {
-        reverseAPIKeys.append("modulation");
-    }
-    if ((settings.m_fec != m_settings.m_fec) || force) {
-        reverseAPIKeys.append("fec");
-    }
-    if ((settings.m_symbolRate != m_settings.m_symbolRate) || force) {
-        reverseAPIKeys.append("symbolRate");
-    }
-    if ((settings.m_rollOff != m_settings.m_rollOff) || force) {
-        reverseAPIKeys.append("rollOff");
-    }
-    if ((settings.m_tsFilePlayLoop != m_settings.m_tsFilePlayLoop) || force) {
-        reverseAPIKeys.append("tsSource");
-    }
-    if ((settings.m_imageFileName != m_settings.m_imageFileName) || force) {
-        reverseAPIKeys.append("imageFileName");
-    }
-    if ((settings.m_imageOverlayTimestamp != m_settings.m_imageOverlayTimestamp) || force) {
-        reverseAPIKeys.append("imageOverlayTimestamp");
-    }
-    if ((settings.m_imageServiceProvider != m_settings.m_imageServiceProvider) || force) {
-        reverseAPIKeys.append("imageServiceProvider");
-    }
-    if ((settings.m_imageServiceName != m_settings.m_imageServiceName) || force) {
-        reverseAPIKeys.append("imageServiceName");
-    }
-    if ((settings.m_imageCodec != m_settings.m_imageCodec) || force) {
-        reverseAPIKeys.append("imageCodec");
-    }
-    if ((settings.m_tsFileName != m_settings.m_tsFileName) || force) {
-        reverseAPIKeys.append("tsFileName");
-    }
-    if ((settings.m_tsFilePlayLoop != m_settings.m_tsFilePlayLoop) || force) {
-        reverseAPIKeys.append("tsFilePlayLoop");
-    }
-    if ((settings.m_tsFilePlay != m_settings.m_tsFilePlay) || force) {
-        reverseAPIKeys.append("tsFilePlay");
-    }
-    if ((settings.m_udpAddress != m_settings.m_udpAddress) || force) {
-        reverseAPIKeys.append("udpAddress");
-    }
-    if ((settings.m_udpPort != m_settings.m_udpPort) || force) {
-        reverseAPIKeys.append("udpPort");
-    }
-    if ((settings.m_channelMute != m_settings.m_channelMute) || force) {
-        reverseAPIKeys.append("channelMute");
-    }
-
-    if (m_settings.m_streamIndex != settings.m_streamIndex)
+    if (settingsKeys.contains("streamIndex") && m_settings.m_streamIndex != settings.m_streamIndex)
     {
         if (m_deviceAPI->getSampleMIMO()) // change of stream is possible for MIMO devices only
         {
@@ -334,28 +250,26 @@ void DATVMod::applySettings(const DATVModSettings& settings, bool force)
             m_settings.m_streamIndex = settings.m_streamIndex; // make sure ChannelAPI::getStreamIndex() is consistent
             emit streamIndexChanged(settings.m_streamIndex);
         }
-
-        reverseAPIKeys.append("streamIndex");
     }
 
-    MsgConfigureDATVMod *msg = MsgConfigureDATVMod::create(settings, force);
+    MsgConfigureDATVMod *msg = MsgConfigureDATVMod::create(settingsKeys, settings, force);
     m_basebandSource->getInputMessageQueue()->push(msg);
 
-    if (settings.m_useReverseAPI)
+    if (settingsKeys.contains("useReverseAPI") && settings.m_useReverseAPI)
     {
-        bool fullUpdate = ((m_settings.m_useReverseAPI != settings.m_useReverseAPI) && settings.m_useReverseAPI) ||
-                (m_settings.m_reverseAPIAddress != settings.m_reverseAPIAddress) ||
-                (m_settings.m_reverseAPIPort != settings.m_reverseAPIPort) ||
-                (m_settings.m_reverseAPIDeviceIndex != settings.m_reverseAPIDeviceIndex) ||
-                (m_settings.m_reverseAPIChannelIndex != settings.m_reverseAPIChannelIndex);
-        webapiReverseSendSettings(reverseAPIKeys, settings, fullUpdate || force);
+        bool fullUpdate = ((settingsKeys.contains("useReverseAPI") && m_settings.m_useReverseAPI != settings.m_useReverseAPI) && settings.m_useReverseAPI) ||
+                (settingsKeys.contains("reverseAPIAddress") && m_settings.m_reverseAPIAddress != settings.m_reverseAPIAddress) ||
+                (settingsKeys.contains("reverseAPIPort") && m_settings.m_reverseAPIPort != settings.m_reverseAPIPort) ||
+                (settingsKeys.contains("reverseAPIDeviceIndex") && m_settings.m_reverseAPIDeviceIndex != settings.m_reverseAPIDeviceIndex) ||
+                (settingsKeys.contains("reverseAPIChannelIndex") && m_settings.m_reverseAPIChannelIndex != settings.m_reverseAPIChannelIndex);
+        webapiReverseSendSettings(settingsKeys, settings, fullUpdate || force);
     }
 
     QList<ObjectPipe*> pipes;
     MainCore::instance()->getMessagePipes().getMessagePipes(this, "settings", pipes);
 
     if (pipes.size() > 0) {
-        sendChannelSettings(pipes, reverseAPIKeys, settings, force);
+        sendChannelSettings(pipes, settingsKeys, settings, force);
     }
 
     m_settings = settings;
@@ -370,14 +284,14 @@ bool DATVMod::deserialize(const QByteArray& data)
 {
     if (m_settings.deserialize(data))
     {
-        MsgConfigureDATVMod *msg = MsgConfigureDATVMod::create(m_settings, true);
+        MsgConfigureDATVMod *msg = MsgConfigureDATVMod::create(QStringList(), m_settings, true);
         m_inputMessageQueue.push(msg);
         return true;
     }
     else
     {
         m_settings.resetToDefaults();
-        MsgConfigureDATVMod *msg = MsgConfigureDATVMod::create(m_settings, true);
+        MsgConfigureDATVMod *msg = MsgConfigureDATVMod::create(QStringList(), m_settings, true);
         m_inputMessageQueue.push(msg);
         return false;
     }
@@ -420,11 +334,11 @@ int DATVMod::webapiSettingsPutPatch(
         m_inputMessageQueue.push(msgChan);
     }
 
-    MsgConfigureDATVMod *msg = MsgConfigureDATVMod::create(settings, force);
+    MsgConfigureDATVMod *msg = MsgConfigureDATVMod::create(channelSettingsKeys, settings, force);
     m_inputMessageQueue.push(msg);
 
     if (m_guiMessageQueue) {
-        m_guiMessageQueue->push(MsgConfigureDATVMod::create(settings, force));
+        m_guiMessageQueue->push(MsgConfigureDATVMod::create(channelSettingsKeys, settings, force));
     }
 
     if (channelSettingsKeys.contains("tsFileName"))
@@ -641,7 +555,7 @@ void DATVMod::webapiFormatChannelReport(SWGSDRangel::SWGChannelReport& response)
     response.getDatvModReport()->setUdpByteCount(udpBytes);
 }
 
-void DATVMod::webapiReverseSendSettings(QList<QString>& channelSettingsKeys, const DATVModSettings& settings, bool force)
+void DATVMod::webapiReverseSendSettings(const QList<QString>& channelSettingsKeys, const DATVModSettings& settings, bool force)
 {
     SWGSDRangel::SWGChannelSettings *swgChannelSettings = new SWGSDRangel::SWGChannelSettings();
     webapiFormatChannelSettings(channelSettingsKeys, swgChannelSettings, settings, force);
@@ -668,7 +582,7 @@ void DATVMod::webapiReverseSendSettings(QList<QString>& channelSettingsKeys, con
 
 void DATVMod::sendChannelSettings(
     const QList<ObjectPipe*>& pipes,
-    QList<QString>& channelSettingsKeys,
+    const QList<QString>& channelSettingsKeys,
     const DATVModSettings& settings,
     bool force)
 {
@@ -692,7 +606,7 @@ void DATVMod::sendChannelSettings(
 }
 
 void DATVMod::webapiFormatChannelSettings(
-        QList<QString>& channelSettingsKeys,
+        const QList<QString>& channelSettingsKeys,
         SWGSDRangel::SWGChannelSettings *swgChannelSettings,
         const DATVModSettings& settings,
         bool force

@@ -143,7 +143,7 @@ bool UDPSourceBaseband::handleMessage(const Message& cmd)
         MsgConfigureUDPSourceBaseband& cfg = (MsgConfigureUDPSourceBaseband&) cmd;
         qDebug() << "UDPSourceBaseband::handleMessage: MsgConfigureAMModBaseband";
 
-        applySettings(cfg.getSettings(), cfg.getForce());
+        applySettings(cfg.getSettingsKeys(), cfg.getSettings(), cfg.getForce());
 
         return true;
     }
@@ -187,9 +187,9 @@ bool UDPSourceBaseband::handleMessage(const Message& cmd)
     }
 }
 
-void UDPSourceBaseband::applySettings(const UDPSourceSettings& settings, bool force)
+void UDPSourceBaseband::applySettings(const QStringList& settingsKeys, const UDPSourceSettings& settings, bool force)
 {
-    m_source.applySettings(settings, force);
+    m_source.applySettings(settingsKeys, settings, force);
     m_settings = settings;
 }
 

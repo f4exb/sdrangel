@@ -52,7 +52,7 @@ PSK31Source::PSK31Source() :
     m_interpolatorDistance = (Real)m_channelSampleRate / (Real)m_spectrumRate;
     m_interpolator.create(48, m_spectrumRate, m_spectrumRate / 2.2, 3.0);
 
-    applySettings(m_settings, true);
+    applySettings(QStringList(), m_settings, true);
     applyChannelSettings(m_channelSampleRate, m_channelFrequencyOffset, true);
 }
 
@@ -231,20 +231,20 @@ void PSK31Source::calculateLevel(Real& sample)
     }
 }
 
-void PSK31Source::applySettings(const PSK31Settings& settings, bool force)
+void PSK31Source::applySettings(const QStringList& settingsKeys, const PSK31Settings& settings, bool force)
 {
-    if ((settings.m_baud != m_settings.m_baud) || force)
+    if ((settingsKeys.contains("baud") && (settings.m_baud != m_settings.m_baud)) || force)
     {
         m_samplesPerSymbol = m_channelSampleRate / settings.m_baud;
         qDebug() << "m_samplesPerSymbol: " << m_samplesPerSymbol << " (" << m_channelSampleRate << "/" << settings.m_baud << ")";
     }
 
-    if ((settings.m_lpfTaps != m_settings.m_lpfTaps) || (settings.m_rfBandwidth != m_settings.m_rfBandwidth) || force)
+    if ((settingsKeys.contains("lpfTaps") && (settings.m_lpfTaps != m_settings.m_lpfTaps)) || (settingsKeys.contains("rfBandwidth") && (settings.m_rfBandwidth != m_settings.m_rfBandwidth)) || force)
     {
         qDebug() << "PSK31Source::applySettings: Creating new lpf with taps " << settings.m_lpfTaps << " rfBW " << settings.m_rfBandwidth;
         m_lowpass.create(settings.m_lpfTaps, m_channelSampleRate, settings.m_rfBandwidth / 2.0);
     }
-    if ((settings.m_beta != m_settings.m_beta) || (settings.m_symbolSpan != m_settings.m_symbolSpan) || (settings.m_baud != m_settings.m_baud) || force)
+    if ((settingsKeys.contains("beta") && (settings.m_beta != m_settings.m_beta)) || (settingsKeys.contains("symbolSpan") && (settings.m_symbolSpan != m_settings.m_symbolSpan)) || (settingsKeys.contains("baud") && (settings.m_baud != m_settings.m_baud)) || force)
     {
         qDebug() << "PSK31Source::applySettings: Recreating pulse shaping filter: "
                 << " beta: " << settings.m_beta
@@ -254,7 +254,11 @@ void PSK31Source::applySettings(const PSK31Settings& settings, bool force)
         m_pulseShape.create(settings.m_beta, settings.m_symbolSpan, m_channelSampleRate/settings.m_baud, true);
     }
 
-    m_settings = settings;
+    if (force) {
+        m_settings = settings;
+    } else {
+        m_settings.applySettings(settingsKeys, settings);
+    }
 
     m_linearGain = powf(10.0f,  m_settings.m_gain/20.0f);
 }

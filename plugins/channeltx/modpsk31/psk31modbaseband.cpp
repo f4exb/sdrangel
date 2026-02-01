@@ -145,7 +145,7 @@ bool PSK31Baseband::handleMessage(const Message& cmd)
         MsgConfigurePSK31Baseband& cfg = (MsgConfigurePSK31Baseband&) cmd;
         qDebug() << "PSK31Baseband::handleMessage: MsgConfigurePSK31Baseband";
 
-        applySettings(cfg.getSettings(), cfg.getForce());
+        applySettings(cfg.getSettingsKeys(), cfg.getSettings(), cfg.getForce());
 
         return true;
     }
@@ -181,18 +181,22 @@ bool PSK31Baseband::handleMessage(const Message& cmd)
     }
 }
 
-void PSK31Baseband::applySettings(const PSK31Settings& settings, bool force)
+void PSK31Baseband::applySettings(const QStringList& settingsKeys, const PSK31Settings& settings, bool force)
 {
-    if ((settings.m_inputFrequencyOffset != m_settings.m_inputFrequencyOffset) || force)
+    if ((settingsKeys.contains("inputFrequencyOffset") && (settings.m_inputFrequencyOffset != m_settings.m_inputFrequencyOffset)) || force)
     {
         // Use fixed sample rate of 48000, so Cosine filter doesn't have a massive number of taps at high baseband sample rates (See #1862)
         m_channelizer->setChannelization(48000, settings.m_inputFrequencyOffset);
         m_source.applyChannelSettings(m_channelizer->getChannelSampleRate(), m_channelizer->getChannelFrequencyOffset());
     }
 
-    m_source.applySettings(settings, force);
+    m_source.applySettings(settingsKeys, settings, force);
 
-    m_settings = settings;
+    if (force) {
+        m_settings = settings;
+    } else {
+        m_settings.applySettings(settingsKeys, settings);
+    }
 }
 
 int PSK31Baseband::getChannelSampleRate() const

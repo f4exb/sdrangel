@@ -141,7 +141,7 @@ bool FileSourceBaseband::handleMessage(const Message& cmd)
         MsgConfigureFileSourceBaseband& cfg = (MsgConfigureFileSourceBaseband&) cmd;
         qDebug() << "FileSourceBaseband::handleMessage: MsgConfigureFileSourceBaseband";
 
-        applySettings(cfg.getSettings(), cfg.getForce());
+        applySettings(cfg.getSettingsKeys(), cfg.getSettings(), cfg.getForce());
 
         return true;
     }
@@ -187,23 +187,17 @@ bool FileSourceBaseband::handleMessage(const Message& cmd)
     }
 }
 
-void FileSourceBaseband::applySettings(const FileSourceSettings& settings, bool force)
+void FileSourceBaseband::applySettings(const QStringList& settingsKeys, const FileSourceSettings& settings, bool force)
 {
-    qDebug() << "FileSourceBaseband::applySettings:"
-        << "m_fileName:" << settings.m_fileName
-        << "m_loop:" << settings.m_loop
-        << "m_gainDB:" << settings.m_gainDB
-        << "m_log2Interp:" << settings.m_log2Interp
-        << "m_filterChainHash:" << settings.m_filterChainHash
-        << " force: " << force;
+    qDebug() << "FileSourceBaseband::applySettings:" << settings.getDebugString(settingsKeys, force);
 
-    if ((m_settings.m_filterChainHash != settings.m_filterChainHash)
-     || (m_settings.m_log2Interp != settings.m_log2Interp) || force)
+    if ((settingsKeys.contains("filterChainHash") && (m_settings.m_filterChainHash != settings.m_filterChainHash))
+     || (settingsKeys.contains("log2Interp") && (m_settings.m_log2Interp != settings.m_log2Interp)) || force)
     {
         m_channelizer->setInterpolation(settings.m_log2Interp, settings.m_filterChainHash);
     }
 
-    m_source.applySettings(settings, force);
+    m_source.applySettings(settingsKeys, settings, force);
     m_settings = settings;
 }
 

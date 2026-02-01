@@ -59,7 +59,7 @@ NFMModSource::NFMModSource() :
         0.25   // release (s)
     );
 
-    applySettings(m_settings, true);
+    applySettings(QStringList(), m_settings, true);
     applyChannelSettings(m_channelSampleRate, m_channelFrequencyOffset, true);
 }
 
@@ -416,33 +416,33 @@ void NFMModSource::applyFeedbackAudioSampleRate(int sampleRate)
     m_feedbackAudioSampleRate = sampleRate;
 }
 
-void NFMModSource::applySettings(const NFMModSettings& settings, bool force)
+void NFMModSource::applySettings(const QStringList& settingsKeys, const NFMModSettings& settings, bool force)
 {
-    if ((settings.m_rfBandwidth != m_settings.m_rfBandwidth)
-     || (settings.m_afBandwidth != m_settings.m_afBandwidth) || force)
+    if ((settingsKeys.contains("rfBandwidth") && settings.m_rfBandwidth != m_settings.m_rfBandwidth)
+     || (settingsKeys.contains("afBandwidth") && settings.m_afBandwidth != m_settings.m_afBandwidth) || force)
     {
         m_settings.m_rfBandwidth = settings.m_rfBandwidth;
         m_settings.m_afBandwidth = settings.m_afBandwidth;
         applyAudioSampleRate(m_audioSampleRate);
     }
 
-    if ((settings.m_toneFrequency != m_settings.m_toneFrequency) || force) {
+    if ((settingsKeys.contains("toneFrequency") && settings.m_toneFrequency != m_settings.m_toneFrequency) || force) {
         m_toneNco.setFreq(settings.m_toneFrequency, (float) m_audioSampleRate);
     }
 
-    if ((settings.m_ctcssIndex != m_settings.m_ctcssIndex) || force) {
+    if ((settingsKeys.contains("ctcssIndex") && settings.m_ctcssIndex != m_settings.m_ctcssIndex) || force) {
         m_ctcssNco.setFreq(NFMModSettings::getCTCSSFreq(settings.m_ctcssIndex), (float) m_audioSampleRate);
     }
 
-    if ((settings.m_dcsCode != m_settings.m_dcsCode) || force) {
+    if ((settingsKeys.contains("dcsCode") && settings.m_dcsCode != m_settings.m_dcsCode) || force) {
         m_dcsMod.setDCS(settings.m_dcsCode);
     }
 
-    if ((settings.m_dcsPositive != m_settings.m_dcsPositive) || force) {
+    if ((settingsKeys.contains("dcsPositive") && settings.m_dcsPositive != m_settings.m_dcsPositive) || force) {
         m_dcsMod.setPositive(settings.m_dcsPositive);
     }
 
-    if ((settings.m_modAFInput != m_settings.m_modAFInput) || force)
+    if ((settingsKeys.contains("modAFInput") && settings.m_modAFInput != m_settings.m_modAFInput) || force)
     {
         if (settings.m_modAFInput == NFMModSettings::NFMModInputAudio) {
             connect(&m_audioFifo, SIGNAL(dataReady()), this, SLOT(handleAudio()));
@@ -451,7 +451,11 @@ void NFMModSource::applySettings(const NFMModSettings& settings, bool force)
         }
     }
 
-    m_settings = settings;
+    if (force) {
+        m_settings = settings;
+    } else {
+        m_settings.applySettings(settingsKeys, settings);
+    }
 }
 
 void NFMModSource::applyChannelSettings(int channelSampleRate, int channelFrequencyOffset, bool force)

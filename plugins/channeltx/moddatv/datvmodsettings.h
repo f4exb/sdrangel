@@ -126,6 +126,8 @@ struct DATVModSettings
     static QString mapCodeRate(DATVCodeRate codeRate);
     static DATVModulation mapModulation(const QString& string);
     static QString mapModulation(DATVModulation modulation);
+    void applySettings(const QStringList& settingsKeys, const DATVModSettings& settings);
+    QString getDebugString(const QStringList& settingsKeys, bool force=false) const;
 
     static const int m_udpBufferSize = 5000000;
 

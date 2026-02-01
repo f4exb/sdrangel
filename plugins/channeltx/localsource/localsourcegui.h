@@ -85,7 +85,7 @@ private:
     virtual ~LocalSourceGUI();
 
     void blockApplySettings(bool block);
-    void applySettings(bool force = false);
+    void applySettings(const QStringList& keys, bool force = false);
     void displaySettings();
     void displayRateAndShift();
     void updateLocalDevices();

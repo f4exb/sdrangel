@@ -46,7 +46,7 @@ void UDPSourceGUI::resetToDefaults()
 {
     m_settings.resetToDefaults();
     displaySettings();
-    applySettings(true);
+    applySettings(QStringList(), true);
 }
 
 QByteArray UDPSourceGUI::serialize() const
@@ -59,7 +59,7 @@ bool UDPSourceGUI::deserialize(const QByteArray& data)
     if(m_settings.deserialize(data))
     {
         displaySettings();
-        applySettings(true);
+        applySettings(QStringList(), true);
         return true;
     } else {
         resetToDefaults();
@@ -175,7 +175,7 @@ UDPSourceGUI::UDPSourceGUI(PluginAPI* pluginAPI, DeviceUISet *deviceUISet, Baseb
 
     displaySettings();
     makeUIConnections();
-    applySettings(true);
+    applySettings(QStringList(), true);
     DialPopup::addPopupsToChildDials(this);
     m_resizer.enableChildMouseTracking();
 }
@@ -190,7 +190,7 @@ void UDPSourceGUI::blockApplySettings(bool block)
     m_doApplySettings = !block;
 }
 
-void UDPSourceGUI::applySettings(bool force)
+void UDPSourceGUI::applySettings(const QStringList& settingsKeys, bool force)
 {
     if (m_doApplySettings)
     {
@@ -199,7 +199,7 @@ void UDPSourceGUI::applySettings(bool force)
                 m_settings.m_inputFrequencyOffset);
         m_udpSource->getInputMessageQueue()->push(msgChan);
 
-        UDPSource::MsgConfigureUDPSource* message = UDPSource::MsgConfigureUDPSource::create( m_settings, force);
+        UDPSource::MsgConfigureUDPSource* message = UDPSource::MsgConfigureUDPSource::create(settingsKeys, m_settings, force);
         m_udpSource->getInputMessageQueue()->push(message);
 
         ui->applyBtn->setEnabled(false);
@@ -269,7 +269,7 @@ void UDPSourceGUI::channelMarkerChangedByCursor()
 {
     ui->deltaFrequency->setValue(m_channelMarker.getCenterFrequency());
     m_settings.m_inputFrequencyOffset = m_channelMarker.getCenterFrequency();
-    applySettings();
+    applySettings(QStringList("inputFrequencyOffset"));
 }
 
 void UDPSourceGUI::on_deltaFrequency_changed(qint64 value)
@@ -277,7 +277,7 @@ void UDPSourceGUI::on_deltaFrequency_changed(qint64 value)
     m_settings.m_inputFrequencyOffset = value;
     m_channelMarker.setCenterFrequency(value);
     updateAbsoluteCenterFrequency();
-    applySettings();
+    applySettings(QStringList("inputFrequencyOffset"));
 }
 
 void UDPSourceGUI::on_sampleFormat_currentIndexChanged(int index)
@@ -415,14 +415,14 @@ void UDPSourceGUI::on_gainIn_valueChanged(int value)
 {
     m_settings.m_gainIn = value / 10.0;
     ui->gainInText->setText(tr("%1").arg(m_settings.m_gainIn, 0, 'f', 1));
-    applySettings();
+    applySettings(QStringList("gainIn"));
 }
 
 void UDPSourceGUI::on_gainOut_valueChanged(int value)
 {
     m_settings.m_gainOut = value / 10.0;
     ui->gainOutText->setText(tr("%1").arg(m_settings.m_gainOut, 0, 'f', 1));
-    applySettings();
+    applySettings(QStringList("gainOut"));
 }
 
 void UDPSourceGUI::on_squelch_valueChanged(int value)
@@ -436,20 +436,20 @@ void UDPSourceGUI::on_squelch_valueChanged(int value)
         ui->squelchText->setText("---");
     }
 
-    applySettings();
+    applySettings(QStringList({"squelch", "squelchEnabled"}));
 }
 
 void UDPSourceGUI::on_squelchGate_valueChanged(int value)
 {
     m_settings.m_squelchGate = value / 100.0;
     ui->squelchGateText->setText(tr("%1").arg(roundf(value * 10.0), 0, 'f', 0));
-    applySettings();
+    applySettings(QStringList("squelchGate"));
 }
 
 void UDPSourceGUI::on_channelMute_toggled(bool checked)
 {
     m_settings.m_channelMute = checked;
-    applySettings();
+    applySettings(QStringList("channelMute"));
 }
 
 void UDPSourceGUI::on_applyBtn_clicked()
@@ -462,7 +462,7 @@ void UDPSourceGUI::on_applyBtn_clicked()
 
     ui->glSpectrum->setSampleRate(m_settings.m_inputSampleRate);
 
-    applySettings();
+    applySettings(QStringList("inputSampleRate"));
 }
 
 void UDPSourceGUI::on_resetUDPReadIndex_clicked()
@@ -473,13 +473,13 @@ void UDPSourceGUI::on_resetUDPReadIndex_clicked()
 void UDPSourceGUI::on_autoRWBalance_toggled(bool checked)
 {
     m_settings.m_autoRWBalance = checked;
-    applySettings();
+    applySettings(QStringList("autoRWBalance"));
 }
 
 void UDPSourceGUI::on_stereoInput_toggled(bool checked)
 {
     m_settings.m_stereoInput = checked;
-    applySettings();
+    applySettings(QStringList("stereoInput"));
 }
 
 void UDPSourceGUI::onWidgetRolled(QWidget* widget, bool rollDown)
@@ -490,7 +490,7 @@ void UDPSourceGUI::onWidgetRolled(QWidget* widget, bool rollDown)
     }
 
     getRollupContents()->saveState(m_rollupState);
-    applySettings();
+    applySettings(QStringList());
 }
 
 void UDPSourceGUI::onMenuDialogCalled(const QPoint &p)
@@ -534,7 +534,9 @@ void UDPSourceGUI::onMenuDialogCalled(const QPoint &p)
             updateIndexLabel();
         }
 
-        applySettings();
+        applySettings(QStringList({"rgbColor", "useReverseAPI", "reverseAPIAddress",
+                                   "reverseAPIPort", "reverseAPIDeviceIndex", "reverseAPIChannelIndex",
+                                   "streamIndex"}));
     }
 
     resetContextMenuType();

@@ -239,7 +239,7 @@ DATVModSource::DATVModSource() :
     m_interpolatorDistance = 1.0f;
 
     applyChannelSettings(m_channelSampleRate, m_channelFrequencyOffset, true);
-    applySettings(m_settings, true);
+    applySettings(QStringList(), m_settings, true);
 }
 
 DATVModSource::~DATVModSource()
@@ -688,32 +688,13 @@ void DATVModSource::applyChannelSettings(int channelSampleRate, int channelFrequ
     m_pulseShapeQ.create(m_settings.m_rollOff, 8, m_samplesPerSymbol, RootRaisedCosine<Real>::Energy);
 }
 
-void DATVModSource::applySettings(const DATVModSettings& settings, bool force)
+void DATVModSource::applySettings(const QStringList& settingsKeys, const DATVModSettings& settings, bool force)
 {
-    qDebug() << "DATVModSource::applySettings:"
-            << " m_inputFrequencyOffset: " << settings.m_inputFrequencyOffset
-            << " m_rfBandwidth: " << settings.m_rfBandwidth
-            << " m_source: " << (int) settings.m_source
-            << " m_standard: " << (int) settings.m_standard
-            << " m_modulation: " << (int) settings.m_modulation
-            << " m_fec: " << (int) settings.m_fec
-            << " m_symbolRate: " << (int) settings.m_symbolRate
-            << " m_rollOff: " << (int) settings.m_rollOff
-            << " m_imageFileName: " << settings.m_imageFileName
-            << " m_imageOverlayTimestamp: " << settings.m_imageOverlayTimestamp
-            << " m_imageServiceProvider: " << settings.m_imageServiceProvider
-            << " m_imageServiceName: " << settings.m_imageServiceName
-            << " m_tsFileName: " << settings.m_tsFileName
-            << " m_tsFilePlayLoop: " << settings.m_tsFilePlayLoop
-            << " m_tsFilePlay: " << settings.m_tsFilePlay
-            << " m_udpAddress: " << settings.m_udpAddress
-            << " m_udpPort: " << settings.m_udpPort
-            << " m_channelMute: " << settings.m_channelMute
-            << " force: " << force;
+    qDebug() << "DATVModSource::applySettings:" << settings.getDebugString(settingsKeys, force);
 
-    if ((settings.m_rfBandwidth != m_settings.m_rfBandwidth)
-        || (settings.m_modulation != m_settings.m_modulation)
-        || (settings.m_symbolRate != m_settings.m_symbolRate)
+    if ((settingsKeys.contains("m_rfBandwidth") && settings.m_rfBandwidth != m_settings.m_rfBandwidth)
+        || (settingsKeys.contains("m_modulation") && settings.m_modulation != m_settings.m_modulation)
+        || (settingsKeys.contains("m_symbolRate") && settings.m_symbolRate != m_settings.m_symbolRate)
         || force)
     {
         if (settings.m_symbolRate > 0)
@@ -737,9 +718,9 @@ void DATVModSource::applySettings(const DATVModSettings& settings, bool force)
             qWarning() << "DATVModSource::applySettings: symbolRate must be greater than 0.";
     }
 
-    if ((settings.m_source != m_settings.m_source)
-        || (settings.m_udpAddress != m_settings.m_udpAddress)
-        || (settings.m_udpPort != m_settings.m_udpPort)
+    if ((settingsKeys.contains("m_source") && settings.m_source != m_settings.m_source)
+        || (settingsKeys.contains("m_udpAddress") && settings.m_udpAddress != m_settings.m_udpAddress)
+        || (settingsKeys.contains("m_udpPort") && settings.m_udpPort != m_settings.m_udpPort)
         || force)
     {
         if (m_udpSocket)
@@ -759,8 +740,8 @@ void DATVModSource::applySettings(const DATVModSettings& settings, bool force)
         }
     }
 
-    if ((settings.m_standard != m_settings.m_standard)
-        || (settings.m_modulation != m_settings.m_modulation)
+    if ((settingsKeys.contains("m_standard") && settings.m_standard != m_settings.m_standard)
+        || (settingsKeys.contains("m_modulation") && settings.m_modulation != m_settings.m_modulation)
         || force)
     {
         m_symbolSel = 0;
@@ -769,10 +750,10 @@ void DATVModSource::applySettings(const DATVModSettings& settings, bool force)
         m_sampleIdx = 0;
     }
 
-    if ((settings.m_standard != m_settings.m_standard)
-        || (settings.m_modulation != m_settings.m_modulation)
-        || (settings.m_fec != m_settings.m_fec)
-        || (settings.m_rollOff != m_settings.m_rollOff)
+    if ((settingsKeys.contains("m_standard") && settings.m_standard != m_settings.m_standard)
+        || (settingsKeys.contains("m_modulation") && settings.m_modulation != m_settings.m_modulation)
+        || (settingsKeys.contains("m_fec") && settings.m_fec != m_settings.m_fec)
+        || (settingsKeys.contains("m_rollOff") && settings.m_rollOff != m_settings.m_rollOff)
         || force)
     {
         if (settings.m_standard == DATVModSettings::DVB_S)
@@ -884,15 +865,15 @@ void DATVModSource::applySettings(const DATVModSettings& settings, bool force)
         }
     }
 
-    if (settings.m_imageServiceProvider != m_settings.m_imageServiceProvider || force) {
+    if ((settingsKeys.contains("m_imageServiceProvider") && settings.m_imageServiceProvider != m_settings.m_imageServiceProvider) || force) {
         m_tsGenerator.set_service_provider(settings.m_imageServiceProvider.toStdString());
     }
 
-    if (settings.m_imageServiceName != m_settings.m_imageServiceName || force) {
+    if ((settingsKeys.contains("m_imageServiceName") && settings.m_imageServiceName != m_settings.m_imageServiceName) || force) {
         m_tsGenerator.set_service_name(settings.m_imageServiceName.toStdString());
     }
 
-    if (settings.m_imageCodec != m_settings.m_imageCodec || force) {
+    if ((settingsKeys.contains("m_imageCodec") && settings.m_imageCodec != m_settings.m_imageCodec) || force) {
         m_tsGenerator.set_codec(settings.m_imageCodec);
     }
 

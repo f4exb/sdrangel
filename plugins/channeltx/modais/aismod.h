@@ -49,20 +49,23 @@ public:
 
     public:
         const AISModSettings& getSettings() const { return m_settings; }
+        const QStringList& getSettingsKeys() const { return m_settingsKeys; }
         bool getForce() const { return m_force; }
 
-        static MsgConfigureAISMod* create(const AISModSettings& settings, bool force)
+        static MsgConfigureAISMod* create(const QStringList& settingsKeys, const AISModSettings& settings, bool force)
         {
-            return new MsgConfigureAISMod(settings, force);
+            return new MsgConfigureAISMod(settingsKeys, settings, force);
         }
 
     private:
         AISModSettings m_settings;
+        QStringList m_settingsKeys;
         bool m_force;
 
-        MsgConfigureAISMod(const AISModSettings& settings, bool force) :
+        MsgConfigureAISMod(const QStringList& settingsKeys, const AISModSettings& settings, bool force) :
             Message(),
             m_settings(settings),
+            m_settingsKeys(settingsKeys),
             m_force(force)
         { }
     };
@@ -240,18 +243,18 @@ private:
     QUdpSocket *m_udpSocket;
 
     virtual bool handleMessage(const Message& cmd);
-    void applySettings(const AISModSettings& settings, bool force = false);
+    void applySettings(const QStringList& settingsKeys, const AISModSettings& settings, bool force = false);
     void sendSampleRateToDemodAnalyzer();
     void webapiFormatChannelReport(SWGSDRangel::SWGChannelReport& response);
-    void webapiReverseSendSettings(QList<QString>& channelSettingsKeys, const AISModSettings& settings, bool force);
+    void webapiReverseSendSettings(const QList<QString>& channelSettingsKeys, const AISModSettings& settings, bool force);
     void sendChannelSettings(
         const QList<ObjectPipe*>& pipes,
-        QList<QString>& channelSettingsKeys,
+        const QList<QString>& channelSettingsKeys,
         const AISModSettings& settings,
         bool force
     );
     void webapiFormatChannelSettings(
-        QList<QString>& channelSettingsKeys,
+        const QList<QString>& channelSettingsKeys,
         SWGSDRangel::SWGChannelSettings *swgChannelSettings,
         const AISModSettings& settings,
         bool force

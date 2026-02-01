@@ -42,20 +42,23 @@ public:
 
     public:
         const SSBModSettings& getSettings() const { return m_settings; }
+        const QStringList& getSettingKeys() const { return m_settingKeys; }
         bool getForce() const { return m_force; }
 
-        static MsgConfigureSSBModBaseband* create(const SSBModSettings& settings, bool force)
+        static MsgConfigureSSBModBaseband* create(const QStringList& settingKeys, const SSBModSettings& settings, bool force)
         {
-            return new MsgConfigureSSBModBaseband(settings, force);
+            return new MsgConfigureSSBModBaseband(settingKeys, settings, force);
         }
 
     private:
         SSBModSettings m_settings;
+        QStringList m_settingKeys;
         bool m_force;
 
-        MsgConfigureSSBModBaseband(const SSBModSettings& settings, bool force) :
+        MsgConfigureSSBModBaseband(const QStringList& settingKeys, const SSBModSettings& settings, bool force) :
             Message(),
             m_settings(settings),
+            m_settingKeys(settingKeys),
             m_force(force)
         { }
     };
@@ -96,7 +99,7 @@ private:
 
     void processFifo(SampleVector& data, unsigned int iBegin, unsigned int iEnd);
     bool handleMessage(const Message& cmd);
-    void applySettings(const SSBModSettings& settings, bool force = false);
+    void applySettings(const QStringList& settingKeys, const SSBModSettings& settings, bool force = false);
 
 private slots:
     void handleInputMessages();

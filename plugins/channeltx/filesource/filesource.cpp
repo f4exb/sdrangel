@@ -62,7 +62,7 @@ FileSource::FileSource(DeviceAPI *deviceAPI) :
     m_basebandSource = new FileSourceBaseband();
     m_basebandSource->moveToThread(m_thread);
 
-    applySettings(m_settings, true);
+    applySettings(QStringList(), m_settings, true);
 
     m_deviceAPI->addChannelSource(this);
     m_deviceAPI->addChannelSourceAPI(this);
@@ -154,7 +154,7 @@ bool FileSource::handleMessage(const Message& cmd)
     {
         MsgConfigureFileSource& cfg = (MsgConfigureFileSource&) cmd;
         qDebug() << "FileSource::handleMessage: MsgConfigureFileSource";
-        applySettings(cfg.getSettings(), cfg.getForce());
+        applySettings(cfg.getSettingsKeys(), cfg.getSettings(), cfg.getForce());
         return true;
     }
 	else if (MsgConfigureFileSourceWork::match(cmd))
@@ -200,65 +200,30 @@ bool FileSource::deserialize(const QByteArray& data)
     (void) data;
     if (m_settings.deserialize(data))
     {
-        MsgConfigureFileSource *msg = MsgConfigureFileSource::create(m_settings, true);
+        MsgConfigureFileSource *msg = MsgConfigureFileSource::create(QStringList(), m_settings, true);
         m_inputMessageQueue.push(msg);
         return true;
     }
     else
     {
         m_settings.resetToDefaults();
-        MsgConfigureFileSource *msg = MsgConfigureFileSource::create(m_settings, true);
+        MsgConfigureFileSource *msg = MsgConfigureFileSource::create(QStringList(), m_settings, true);
         m_inputMessageQueue.push(msg);
         return false;
     }
 }
 
-void FileSource::applySettings(const FileSourceSettings& settings, bool force)
+void FileSource::applySettings(const QStringList& settingsKeys, const FileSourceSettings& settings, bool force)
 {
-    qDebug() << "FileSource::applySettings:"
-        << "m_fileName:" << settings.m_fileName
-        << "m_loop:" << settings.m_loop
-        << "m_gainDB:" << settings.m_gainDB
-        << "m_log2Interp:" << settings.m_log2Interp
-        << "m_filterChainHash:" << settings.m_filterChainHash
-        << "m_useReverseAPI:" << settings.m_useReverseAPI
-        << "m_reverseAPIAddress:" << settings.m_reverseAPIAddress
-        << "m_reverseAPIChannelIndex:" << settings.m_reverseAPIChannelIndex
-        << "m_reverseAPIDeviceIndex:" << settings.m_reverseAPIDeviceIndex
-        << "m_reverseAPIPort:" << settings.m_reverseAPIPort
-        << "m_rgbColor:" << settings.m_rgbColor
-        << "m_title:" << settings.m_title
-        << " force: " << force;
+    qDebug() << "FileSource::applySettings:" << settings.getDebugString(settingsKeys, force);
 
-    QList<QString> reverseAPIKeys;
-
-    if ((m_settings.m_fileName != settings.m_fileName) || force)
+    if ((settingsKeys.contains("fileName") && (m_settings.m_fileName != settings.m_fileName)) || force)
     {
-        reverseAPIKeys.append("fileName");
         FileSourceBaseband::MsgConfigureFileSourceName *msg = FileSourceBaseband::MsgConfigureFileSourceName::create(settings.m_fileName);
         m_basebandSource->getInputMessageQueue()->push(msg);
     }
 
-    if ((m_settings.m_loop != settings.m_loop) || force) {
-        reverseAPIKeys.append("loop");
-    }
-    if ((m_settings.m_log2Interp != settings.m_log2Interp) || force) {
-        reverseAPIKeys.append("log2Interp");
-    }
-    if ((m_settings.m_filterChainHash != settings.m_filterChainHash) || force) {
-        reverseAPIKeys.append("filterChainHash");
-    }
-    if ((m_settings.m_gainDB != settings.m_gainDB) || force) {
-        reverseAPIKeys.append("gainDB");
-    }
-    if ((m_settings.m_rgbColor != settings.m_rgbColor) || force) {
-        reverseAPIKeys.append("rgbColor");
-    }
-    if ((m_settings.m_title != settings.m_title) || force) {
-        reverseAPIKeys.append("title");
-    }
-
-    if (m_settings.m_streamIndex != settings.m_streamIndex)
+    if (settingsKeys.contains("streamIndex") && (m_settings.m_streamIndex != settings.m_streamIndex))
     {
         if (m_deviceAPI->getSampleMIMO()) // change of stream is possible for MIMO devices only
         {
@@ -269,28 +234,26 @@ void FileSource::applySettings(const FileSourceSettings& settings, bool force)
             m_settings.m_streamIndex = settings.m_streamIndex; // make sure ChannelAPI::getStreamIndex() is consistent
             emit streamIndexChanged(settings.m_streamIndex);
         }
-
-        reverseAPIKeys.append("streamIndex");
     }
 
-    FileSourceBaseband::MsgConfigureFileSourceBaseband *msg = FileSourceBaseband::MsgConfigureFileSourceBaseband::create(settings, force);
+    FileSourceBaseband::MsgConfigureFileSourceBaseband *msg = FileSourceBaseband::MsgConfigureFileSourceBaseband::create(settingsKeys, settings, force);
     m_basebandSource->getInputMessageQueue()->push(msg);
 
-    if (settings.m_useReverseAPI)
+    if (settingsKeys.contains("useReverseAPI") && settings.m_useReverseAPI)
     {
-        bool fullUpdate = ((m_settings.m_useReverseAPI != settings.m_useReverseAPI) && settings.m_useReverseAPI) ||
-                (m_settings.m_reverseAPIAddress != settings.m_reverseAPIAddress) ||
-                (m_settings.m_reverseAPIPort != settings.m_reverseAPIPort) ||
-                (m_settings.m_reverseAPIDeviceIndex != settings.m_reverseAPIDeviceIndex) ||
-                (m_settings.m_reverseAPIChannelIndex != settings.m_reverseAPIChannelIndex);
-        webapiReverseSendSettings(reverseAPIKeys, settings, fullUpdate || force);
+        bool fullUpdate = ((settingsKeys.contains("useReverseAPI") && (m_settings.m_useReverseAPI != settings.m_useReverseAPI)) && settings.m_useReverseAPI) ||
+                (settingsKeys.contains("reverseAPIAddress") && (m_settings.m_reverseAPIAddress != settings.m_reverseAPIAddress)) ||
+                (settingsKeys.contains("reverseAPIPort") && (m_settings.m_reverseAPIPort != settings.m_reverseAPIPort)) ||
+                (settingsKeys.contains("reverseAPIDeviceIndex") && (m_settings.m_reverseAPIDeviceIndex != settings.m_reverseAPIDeviceIndex)) ||
+                (settingsKeys.contains("reverseAPIChannelIndex") && (m_settings.m_reverseAPIChannelIndex != settings.m_reverseAPIChannelIndex));
+        webapiReverseSendSettings(settingsKeys, settings, fullUpdate || force);
     }
 
     QList<ObjectPipe*> pipes;
     MainCore::instance()->getMessagePipes().getMessagePipes(this, "settings", pipes);
 
     if (pipes.size() > 0) {
-        sendChannelSettings(pipes, reverseAPIKeys, settings, force);
+        sendChannelSettings(pipes, settingsKeys, settings, force);
     }
 
     m_settings = settings;
@@ -343,13 +306,13 @@ int FileSource::webapiSettingsPutPatch(
     FileSourceSettings settings = m_settings;
     webapiUpdateChannelSettings(settings, channelSettingsKeys, response);
 
-    MsgConfigureFileSource *msg = MsgConfigureFileSource::create(settings, force);
+    MsgConfigureFileSource *msg = MsgConfigureFileSource::create(channelSettingsKeys, settings, force);
     m_inputMessageQueue.push(msg);
 
     qDebug("FileSource::webapiSettingsPutPatch: forward to GUI: %p", m_guiMessageQueue);
     if (m_guiMessageQueue) // forward to GUI if any
     {
-        MsgConfigureFileSource *msgToGUI = MsgConfigureFileSource::create(settings, force);
+        MsgConfigureFileSource *msgToGUI = MsgConfigureFileSource::create(channelSettingsKeys, settings, force);
         m_guiMessageQueue->push(msgToGUI);
     }
 
@@ -570,7 +533,7 @@ void FileSource::webapiFormatChannelReport(SWGSDRangel::SWGChannelReport& respon
     response.getFileSourceReport()->setChannelPowerDb(CalcDb::dbPower(getMagSq()));
 }
 
-void FileSource::webapiReverseSendSettings(QList<QString>& channelSettingsKeys, const FileSourceSettings& settings, bool force)
+void FileSource::webapiReverseSendSettings(const QList<QString>& channelSettingsKeys, const FileSourceSettings& settings, bool force)
 {
     SWGSDRangel::SWGChannelSettings *swgChannelSettings = new SWGSDRangel::SWGChannelSettings();
     webapiFormatChannelSettings(channelSettingsKeys, swgChannelSettings, settings, force);
@@ -597,7 +560,7 @@ void FileSource::webapiReverseSendSettings(QList<QString>& channelSettingsKeys, 
 
 void FileSource::sendChannelSettings(
     const QList<ObjectPipe*>& pipes,
-    QList<QString>& channelSettingsKeys,
+    const QList<QString>& channelSettingsKeys,
     const FileSourceSettings& settings,
     bool force)
 {
@@ -621,7 +584,7 @@ void FileSource::sendChannelSettings(
 }
 
 void FileSource::webapiFormatChannelSettings(
-        QList<QString>& channelSettingsKeys,
+        const QList<QString>& channelSettingsKeys,
         SWGSDRangel::SWGChannelSettings *swgChannelSettings,
         const FileSourceSettings& settings,
         bool force

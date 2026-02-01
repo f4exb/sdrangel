@@ -145,7 +145,7 @@ bool ATVModBaseband::handleMessage(const Message& cmd)
         MsgConfigureATVModBaseband& cfg = (MsgConfigureATVModBaseband&) cmd;
         qDebug() << "AMModBaseband::handleMessage: MsgConfigureATVModBaseband";
 
-        applySettings(cfg.getSettings(), cfg.getForce());
+        applySettings(cfg.getSettingsKeys(), cfg.getSettings(), cfg.getForce());
 
         return true;
     }
@@ -227,32 +227,17 @@ bool ATVModBaseband::handleMessage(const Message& cmd)
     }
 }
 
-void ATVModBaseband::applySettings(const ATVModSettings& settings, bool force)
+void ATVModBaseband::applySettings(const QStringList& settingsKeys, const ATVModSettings& settings, bool force)
 {
-    qDebug() << "ATVModBaseband::applySettings:"
-            << " m_inputFrequencyOffset: " << settings.m_inputFrequencyOffset
-            << " m_rfBandwidth: " << settings.m_rfBandwidth
-            << " m_rfOppBandwidth: " << settings.m_rfOppBandwidth
-            << " m_atvStd: " << (int) settings.m_atvStd
-            << " m_nbLines: " << settings.m_nbLines
-            << " m_fps: " << settings.m_fps
-            << " m_atvModInput: " << (int) settings.m_atvModInput
-            << " m_uniformLevel: " << settings.m_uniformLevel
-            << " m_atvModulation: " << (int) settings.m_atvModulation
-            << " m_videoPlayLoop: " << settings.m_videoPlayLoop
-            << " m_videoPlay: " << settings.m_videoPlay
-            << " m_cameraPlay: " << settings.m_cameraPlay
-            << " m_channelMute: " << settings.m_channelMute
-            << " m_invertedVideo: " << settings.m_invertedVideo
-            << " m_rfScalingFactor: " << settings.m_rfScalingFactor
-            << " m_fmExcursion: " << settings.m_fmExcursion
-            << " m_forceDecimator: " << settings.m_forceDecimator
-            << " m_showOverlayText: " << settings.m_showOverlayText
-            << " m_overlayText: " << settings.m_overlayText
-            << " force: " << force;
+    qDebug() << "ATVModBaseband::applySettings:" << settings.getDebugString(settingsKeys, force);
 
-    m_source.applySettings(settings, force);
-    m_settings = settings;
+    m_source.applySettings(settingsKeys, settings, force);
+
+    if (force) {
+        m_settings = settings;
+    } else {
+        m_settings.applySettings(settingsKeys, settings);
+    }
 }
 
 int ATVModBaseband::getChannelSampleRate() const

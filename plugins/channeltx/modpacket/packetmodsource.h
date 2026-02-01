@@ -64,7 +64,7 @@ public:
         numSamples = m_levelNbSamples;
     }
     void setSpectrumSink(BasebandSampleSink *sampleSink) { m_spectrumSink = sampleSink; }
-    void applySettings(const PacketModSettings& settings, bool force = false);
+    void applySettings(const QStringList& settingsKeys, const PacketModSettings& settings, bool force = false);
     void applyChannelSettings(int channelSampleRate, int channelFrequencyOffset, bool force = false);
     void addTXPacket(QString callsign, QString to, QString via, QString data);
     void addTXPacket(QByteArray data);

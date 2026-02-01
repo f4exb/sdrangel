@@ -60,7 +60,7 @@ RemoteSource::RemoteSource(DeviceAPI *deviceAPI) :
     m_basebandSource = new RemoteSourceBaseband();
     m_basebandSource->moveToThread(m_thread);
 
-    applySettings(m_settings, true);
+    applySettings(QStringList(), m_settings, true);
 
     m_deviceAPI->addChannelSource(this);
     m_deviceAPI->addChannelSourceAPI(this);
@@ -147,7 +147,7 @@ bool RemoteSource::handleMessage(const Message& cmd)
     {
         MsgConfigureRemoteSource& cfg = (MsgConfigureRemoteSource&) cmd;
         qDebug() << "MsgConfigureRemoteSource::handleMessage: MsgConfigureRemoteSource";
-        applySettings(cfg.getSettings(), cfg.getForce());
+        applySettings(cfg.getSettingsKeys(), cfg.getSettings(), cfg.getForce());
 
         return true;
     }
@@ -189,56 +189,29 @@ bool RemoteSource::deserialize(const QByteArray& data)
     (void) data;
     if (m_settings.deserialize(data))
     {
-        MsgConfigureRemoteSource *msg = MsgConfigureRemoteSource::create(m_settings, true);
+        MsgConfigureRemoteSource *msg = MsgConfigureRemoteSource::create(QStringList(), m_settings, true);
         m_inputMessageQueue.push(msg);
         return true;
     }
     else
     {
         m_settings.resetToDefaults();
-        MsgConfigureRemoteSource *msg = MsgConfigureRemoteSource::create(m_settings, true);
+        MsgConfigureRemoteSource *msg = MsgConfigureRemoteSource::create(QStringList(), m_settings, true);
         m_inputMessageQueue.push(msg);
         return false;
     }
 }
 
-void RemoteSource::applySettings(const RemoteSourceSettings& settings, bool force)
+void RemoteSource::applySettings(const QStringList& settingsKeys, const RemoteSourceSettings& settings, bool force)
 {
-    qDebug() << "RemoteSource::applySettings:"
-            << "m_log2Interp:" << settings.m_log2Interp
-            << "m_filterChainHash:" << settings.m_filterChainHash
-            << "m_dataAddress:" << settings.m_dataAddress
-            << "m_dataPort:" << settings.m_dataPort
-            << "m_rgbColor:" << settings.m_rgbColor
-            << "m_title:" << settings.m_title
-            << "m_useReverseAPI:" << settings.m_useReverseAPI
-            << "m_reverseAPIAddress:" << settings.m_reverseAPIAddress
-            << "m_reverseAPIChannelIndex:" << settings.m_reverseAPIChannelIndex
-            << "m_reverseAPIDeviceIndex:" << settings.m_reverseAPIDeviceIndex
-            << "m_reverseAPIPort:" << settings.m_reverseAPIPort
-            << "force:" << force;
+    qDebug() << "RemoteSource::applySettings:" << settings.getDebugString(settingsKeys, force);
 
-    QList<QString> reverseAPIKeys;
-
-    if ((m_settings.m_log2Interp != settings.m_log2Interp) || force) {
-        reverseAPIKeys.append("log2Interp");
-    }
-    if ((m_settings.m_filterChainHash != settings.m_filterChainHash) || force) {
-        reverseAPIKeys.append("filterChainHash");
-    }
-    if ((m_settings.m_dataAddress != settings.m_dataAddress) || force) {
-        reverseAPIKeys.append("dataAddress");
-    }
-    if ((m_settings.m_dataPort != settings.m_dataPort) || force) {
-        reverseAPIKeys.append("dataPort");
-    }
-
-    if ((m_settings.m_log2Interp != settings.m_log2Interp)
-     || (m_settings.m_filterChainHash != settings.m_filterChainHash) || force) {
+    if ((settingsKeys.contains("log2Interp") && (m_settings.m_log2Interp != settings.m_log2Interp))
+     || (settingsKeys.contains("filterChainHash") && (m_settings.m_filterChainHash != settings.m_filterChainHash)) || force) {
         calculateFrequencyOffset(settings.m_log2Interp, settings.m_filterChainHash);
     }
 
-    if (m_settings.m_streamIndex != settings.m_streamIndex)
+    if (settingsKeys.contains("streamIndex") && (m_settings.m_streamIndex != settings.m_streamIndex))
     {
         if (m_deviceAPI->getSampleMIMO()) // change of stream is possible for MIMO devices only
         {
@@ -249,11 +222,9 @@ void RemoteSource::applySettings(const RemoteSourceSettings& settings, bool forc
             m_settings.m_streamIndex = settings.m_streamIndex; // make sure ChannelAPI::getStreamIndex() is consistent
             emit streamIndexChanged(settings.m_streamIndex);
         }
-
-        reverseAPIKeys.append("streamIndex");
     }
 
-    RemoteSourceBaseband::MsgConfigureRemoteSourceBaseband *msg = RemoteSourceBaseband::MsgConfigureRemoteSourceBaseband::create(settings, force);
+    RemoteSourceBaseband::MsgConfigureRemoteSourceBaseband *msg = RemoteSourceBaseband::MsgConfigureRemoteSourceBaseband::create(settingsKeys, settings, force);
     m_basebandSource->getInputMessageQueue()->push(msg);
 
     if (settings.m_useReverseAPI)
@@ -263,14 +234,14 @@ void RemoteSource::applySettings(const RemoteSourceSettings& settings, bool forc
                 (m_settings.m_reverseAPIPort != settings.m_reverseAPIPort) ||
                 (m_settings.m_reverseAPIDeviceIndex != settings.m_reverseAPIDeviceIndex) ||
                 (m_settings.m_reverseAPIChannelIndex != settings.m_reverseAPIChannelIndex);
-        webapiReverseSendSettings(reverseAPIKeys, settings, fullUpdate || force);
+        webapiReverseSendSettings(settingsKeys, settings, fullUpdate || force);
     }
 
     QList<ObjectPipe*> pipes;
     MainCore::instance()->getMessagePipes().getMessagePipes(this, "settings", pipes);
 
     if (pipes.size() > 0) {
-        sendChannelSettings(pipes, reverseAPIKeys, settings, force);
+        sendChannelSettings(pipes, settingsKeys, settings, force);
     }
 
     m_settings = settings;
@@ -323,13 +294,13 @@ int RemoteSource::webapiSettingsPutPatch(
     RemoteSourceSettings settings = m_settings;
     webapiUpdateChannelSettings(settings, channelSettingsKeys, response);
 
-    MsgConfigureRemoteSource *msg = MsgConfigureRemoteSource::create(settings, force);
+    MsgConfigureRemoteSource *msg = MsgConfigureRemoteSource::create(channelSettingsKeys, settings, force);
     m_inputMessageQueue.push(msg);
 
     qDebug("RemoteSource::webapiSettingsPutPatch: forward to GUI: %p", m_guiMessageQueue);
     if (m_guiMessageQueue) // forward to GUI if any
     {
-        MsgConfigureRemoteSource *msgToGUI = MsgConfigureRemoteSource::create(settings, force);
+        MsgConfigureRemoteSource *msgToGUI = MsgConfigureRemoteSource::create(channelSettingsKeys, settings, force);
         m_guiMessageQueue->push(msgToGUI);
     }
 
@@ -487,7 +458,7 @@ void RemoteSource::webapiFormatChannelReport(SWGSDRangel::SWGChannelReport& resp
     response.getRemoteSourceReport()->setDeviceSampleRate(m_deviceAPI->getSampleSink()->getSampleRate());
 }
 
-void RemoteSource::webapiReverseSendSettings(QList<QString>& channelSettingsKeys, const RemoteSourceSettings& settings, bool force)
+void RemoteSource::webapiReverseSendSettings(const QList<QString>& channelSettingsKeys, const RemoteSourceSettings& settings, bool force)
 {
     SWGSDRangel::SWGChannelSettings *swgChannelSettings = new SWGSDRangel::SWGChannelSettings();
     webapiFormatChannelSettings(channelSettingsKeys, swgChannelSettings, settings, force);
@@ -514,7 +485,7 @@ void RemoteSource::webapiReverseSendSettings(QList<QString>& channelSettingsKeys
 
 void RemoteSource::sendChannelSettings(
     const QList<ObjectPipe*>& pipes,
-    QList<QString>& channelSettingsKeys,
+    const QList<QString>& channelSettingsKeys,
     const RemoteSourceSettings& settings,
     bool force)
 {
@@ -538,7 +509,7 @@ void RemoteSource::sendChannelSettings(
 }
 
 void RemoteSource::webapiFormatChannelSettings(
-        QList<QString>& channelSettingsKeys,
+        const QList<QString>& channelSettingsKeys,
         SWGSDRangel::SWGChannelSettings *swgChannelSettings,
         const RemoteSourceSettings& settings,
         bool force

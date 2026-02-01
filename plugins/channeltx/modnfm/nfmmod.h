@@ -49,20 +49,23 @@ public:
 
     public:
         const NFMModSettings& getSettings() const { return m_settings; }
+        const QStringList& getSettingsKeys() const { return m_settingsKeys; }
         bool getForce() const { return m_force; }
 
-        static MsgConfigureNFMMod* create(const NFMModSettings& settings, bool force)
+        static MsgConfigureNFMMod* create(const QStringList& settingsKeys, const NFMModSettings& settings, bool force)
         {
-            return new MsgConfigureNFMMod(settings, force);
+            return new MsgConfigureNFMMod(settingsKeys, settings, force);
         }
 
     private:
         NFMModSettings m_settings;
+        QStringList m_settingsKeys;
         bool m_force;
 
-        MsgConfigureNFMMod(const NFMModSettings& settings, bool force) :
+        MsgConfigureNFMMod(const QStringList& settingsKeys, const NFMModSettings& settings, bool force) :
             Message(),
             m_settings(settings),
+            m_settingsKeys(settingsKeys),
             m_force(force)
         { }
     };
@@ -273,7 +276,7 @@ private:
     QObject *m_levelMeter = nullptr;
 
     bool handleMessage(const Message& cmd) final;
-    void applySettings(const NFMModSettings& settings, bool force = false);
+    void applySettings(const QStringList& settingsKeys, const NFMModSettings& settings, bool force = false);
     void sendSampleRateToDemodAnalyzer() const;
     void openFileStream();
     void seekFileStream(int seekPercentage);

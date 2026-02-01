@@ -251,48 +251,6 @@ void WDSPRx::applySettings(const QStringList& settingsKeys, const WDSPRxSettings
 {
     qDebug() << "WDSPRx::applySettings:" << settings.getDebugString(settingsKeys, force);
 
-    QList<QString> reverseAPIKeys;
-
-    if ((m_settings.m_inputFrequencyOffset != settings.m_inputFrequencyOffset) || force) {
-        reverseAPIKeys.append("inputFrequencyOffset");
-    }
-    if ((m_settings.m_profileIndex != settings.m_profileIndex) || force) {
-        reverseAPIKeys.append("filterIndex");
-    }
-    if ((m_settings.m_profiles[m_settings.m_profileIndex].m_spanLog2 != settings.m_profiles[settings.m_profileIndex].m_spanLog2) || force) {
-        reverseAPIKeys.append("spanLog2");
-    }
-    if ((m_settings.m_profiles[m_settings.m_profileIndex].m_highCutoff != settings.m_profiles[settings.m_profileIndex].m_highCutoff) || force) {
-        reverseAPIKeys.append("rfBandwidth");
-    }
-    if ((m_settings.m_profiles[m_settings.m_profileIndex].m_lowCutoff != settings.m_profiles[settings.m_profileIndex].m_lowCutoff) || force) {
-        reverseAPIKeys.append("lowCutoff");
-    }
-    if ((m_settings.m_profiles[m_settings.m_profileIndex].m_fftWindow != settings.m_profiles[settings.m_profileIndex].m_fftWindow) || force) {
-        reverseAPIKeys.append("fftWindow");
-    }
-    if ((m_settings.m_volume != settings.m_volume) || force) {
-        reverseAPIKeys.append("volume");
-    }
-    if ((settings.m_audioDeviceName != m_settings.m_audioDeviceName) || force) {
-        reverseAPIKeys.append("audioDeviceName");
-    }
-    if ((m_settings.m_audioBinaural != settings.m_audioBinaural) || force) {
-        reverseAPIKeys.append("audioBinaural");
-    }
-    if ((m_settings.m_audioFlipChannels != settings.m_audioFlipChannels) || force) {
-        reverseAPIKeys.append("audioFlipChannels");
-    }
-    if ((m_settings.m_dsb != settings.m_dsb) || force) {
-        reverseAPIKeys.append("dsb");
-    }
-    if ((m_settings.m_audioMute != settings.m_audioMute) || force) {
-        reverseAPIKeys.append("audioMute");
-    }
-    if ((m_settings.m_agc != settings.m_agc) || force) {
-        reverseAPIKeys.append("agc");
-    }
-
     if (settingsKeys.contains("streamIndex") && m_settings.m_streamIndex != settings.m_streamIndex)
     {
         if (m_deviceAPI->getSampleMIMO()) // change of stream is possible for MIMO devices only
@@ -304,8 +262,6 @@ void WDSPRx::applySettings(const QStringList& settingsKeys, const WDSPRxSettings
             m_settings.m_streamIndex = settings.m_streamIndex; // make sure ChannelAPI::getStreamIndex() is consistent
             emit streamIndexChanged(settings.m_streamIndex);
         }
-
-        reverseAPIKeys.append("streamIndex");
     }
 
     if ((settingsKeys.contains("dsb") && (settings.m_dsb != m_settings.m_dsb))
@@ -332,14 +288,14 @@ void WDSPRx::applySettings(const QStringList& settingsKeys, const WDSPRxSettings
                 (settingsKeys.contains("reverseAPIPort") && (m_settings.m_reverseAPIPort != settings.m_reverseAPIPort)) ||
                 (settingsKeys.contains("reverseAPIDeviceIndex") && (m_settings.m_reverseAPIDeviceIndex != settings.m_reverseAPIDeviceIndex)) ||
                 (settingsKeys.contains("reverseAPIChannelIndex") && (m_settings.m_reverseAPIChannelIndex != settings.m_reverseAPIChannelIndex));
-        webapiReverseSendSettings(reverseAPIKeys, settings, fullUpdate || force);
+        webapiReverseSendSettings(settingsKeys, settings, fullUpdate || force);
     }
 
     QList<ObjectPipe*> pipes;
     MainCore::instance()->getMessagePipes().getMessagePipes(this, "settings", pipes);
 
     if (!pipes.empty()) {
-        sendChannelSettings(pipes, reverseAPIKeys, settings, force);
+        sendChannelSettings(pipes, settingsKeys, settings, force);
     }
 
     if (force) {

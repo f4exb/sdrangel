@@ -69,7 +69,7 @@ public:
         m_magsqCount = 0;
     }
 
-    void applySettings(const FileSourceSettings& settings, bool force = false);
+    void applySettings(const QStringList& settingsKeys, const FileSourceSettings& settings, bool force = false);
     void setMessageQueueToGUI(MessageQueue *messageQueue) { m_guiMessageQueue = messageQueue; }
 
 	void openFileStream(const QString& fileName);

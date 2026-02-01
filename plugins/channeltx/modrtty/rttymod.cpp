@@ -65,7 +65,7 @@ RttyMod::RttyMod(DeviceAPI *deviceAPI) :
     m_basebandSource->setChannel(this);
     m_basebandSource->moveToThread(m_thread);
 
-    applySettings(m_settings, true);
+    applySettings(QStringList(), m_settings, true);
 
     m_deviceAPI->addChannelSource(this);
     m_deviceAPI->addChannelSourceAPI(this);
@@ -134,7 +134,7 @@ bool RttyMod::handleMessage(const Message& cmd)
         MsgConfigureRttyMod& cfg = (MsgConfigureRttyMod&) cmd;
         qDebug() << "RttyMod::handleMessage: MsgConfigureRttyMod";
 
-        applySettings(cfg.getSettings(), cfg.getForce());
+        applySettings(cfg.getSettingKeys(), cfg.getSettings(), cfg.getForce());
 
         return true;
     }
@@ -183,133 +183,22 @@ void RttyMod::setCenterFrequency(qint64 frequency)
 {
     RttyModSettings settings = m_settings;
     settings.m_inputFrequencyOffset = frequency;
-    applySettings(settings, false);
+    applySettings(QStringList("inputFrequencyOffset"), settings, false);
 
     if (m_guiMessageQueue) // forward to GUI if any
     {
-        MsgConfigureRttyMod *msgToGUI = MsgConfigureRttyMod::create(settings, false);
+        MsgConfigureRttyMod *msgToGUI = MsgConfigureRttyMod::create(QStringList("inputFrequencyOffset"), settings, false);
         m_guiMessageQueue->push(msgToGUI);
     }
 }
 
-void RttyMod::applySettings(const RttyModSettings& settings, bool force)
+void RttyMod::applySettings(const QStringList& settingsKeys, const RttyModSettings& settings, bool force)
 {
-    qDebug() << "RttyMod::applySettings:"
-            << " m_inputFrequencyOffset: " << settings.m_inputFrequencyOffset
-            << " m_baud: " << settings.m_baud
-            << " m_rfBandwidth: " << settings.m_rfBandwidth
-            << " m_frequencyShift: " << settings.m_frequencyShift
-            << " m_gain: " << settings.m_gain
-            << " m_channelMute: " << settings.m_channelMute
-            << " m_repeat: " << settings.m_repeat
-            << " m_repeatCount: " << settings.m_repeatCount
-            << " m_text: " << settings.m_text
-            << " m_characterSet: " << settings.m_characterSet
-            << " m_unshiftOnSpace: " << settings.m_unshiftOnSpace
-            << " m_msbFirst: " << settings.m_msbFirst
-            << " m_spaceHigh: " << settings.m_spaceHigh
-            << " m_prefixCRLF: " << settings.m_prefixCRLF
-            << " m_postfixCRLF: " << settings.m_postfixCRLF
-            << " m_useReverseAPI: " << settings.m_useReverseAPI
-            << " m_reverseAPIAddress: " << settings.m_reverseAPIAddress
-            << " m_reverseAPIAddress: " << settings.m_reverseAPIPort
-            << " m_reverseAPIDeviceIndex: " << settings.m_reverseAPIDeviceIndex
-            << " m_reverseAPIChannelIndex: " << settings.m_reverseAPIChannelIndex
-            << " force: " << force;
+    qDebug() << "RttyMod::applySettings:" << settings.getDebugString(settingsKeys, force);
 
-    QList<QString> reverseAPIKeys;
-
-    if ((settings.m_inputFrequencyOffset != m_settings.m_inputFrequencyOffset) || force) {
-        reverseAPIKeys.append("inputFrequencyOffset");
-    }
-
-    if ((settings.m_baud != m_settings.m_baud) || force) {
-        reverseAPIKeys.append("baud");
-    }
-
-    if ((settings.m_rfBandwidth != m_settings.m_rfBandwidth) || force) {
-        reverseAPIKeys.append("rfBandwidth");
-    }
-
-    if ((settings.m_frequencyShift != m_settings.m_frequencyShift) || force) {
-        reverseAPIKeys.append("frequencyShift");
-    }
-
-    if ((settings.m_gain != m_settings.m_gain) || force) {
-        reverseAPIKeys.append("gain");
-    }
-
-    if ((settings.m_channelMute != m_settings.m_channelMute) || force) {
-        reverseAPIKeys.append("channelMute");
-    }
-
-    if ((settings.m_repeat != m_settings.m_repeat) || force) {
-        reverseAPIKeys.append("repeat");
-    }
-
-    if ((settings.m_repeatCount != m_settings.m_repeatCount) || force) {
-        reverseAPIKeys.append("repeatCount");
-    }
-
-    if ((settings.m_lpfTaps != m_settings.m_lpfTaps) || force) {
-        reverseAPIKeys.append("lpfTaps");
-    }
-
-    if ((settings.m_rfNoise != m_settings.m_rfNoise) || force) {
-        reverseAPIKeys.append("rfNoise");
-    }
-
-    if ((settings.m_text != m_settings.m_text) || force) {
-        reverseAPIKeys.append("text");
-    }
-
-    if ((settings.m_beta != m_settings.m_beta) || force) {
-        reverseAPIKeys.append("beta");
-    }
-
-    if ((settings.m_symbolSpan != m_settings.m_symbolSpan) || force) {
-        reverseAPIKeys.append("symbolSpan");
-    }
-
-    if ((settings.m_characterSet != m_settings.m_characterSet) || force) {
-        reverseAPIKeys.append("characterSet");
-    }
-
-    if ((settings.m_unshiftOnSpace != m_settings.m_unshiftOnSpace) || force) {
-        reverseAPIKeys.append("unshiftOnSpace");
-    }
-
-    if ((settings.m_msbFirst != m_settings.m_msbFirst) || force) {
-        reverseAPIKeys.append("msbFirst");
-    }
-
-    if ((settings.m_spaceHigh != m_settings.m_spaceHigh) || force) {
-        reverseAPIKeys.append("spaceHigh");
-    }
-
-    if ((settings.m_prefixCRLF != m_settings.m_prefixCRLF) || force) {
-        reverseAPIKeys.append("prefixCRLF");
-    }
-
-    if ((settings.m_postfixCRLF != m_settings.m_postfixCRLF) || force) {
-        reverseAPIKeys.append("postfixCRLF");
-    }
-
-    if ((settings.m_udpEnabled != m_settings.m_udpEnabled) || force) {
-        reverseAPIKeys.append("udpEnabled");
-    }
-
-    if ((settings.m_udpAddress != m_settings.m_udpAddress) || force) {
-        reverseAPIKeys.append("udpAddress");
-    }
-
-    if ((settings.m_udpPort != m_settings.m_udpPort) || force) {
-        reverseAPIKeys.append("udpPort");
-    }
-
-    if (   (settings.m_udpEnabled != m_settings.m_udpEnabled)
-        || (settings.m_udpAddress != m_settings.m_udpAddress)
-        || (settings.m_udpPort != m_settings.m_udpPort)
+    if ((settingsKeys.contains("udpEnabled") && (settings.m_udpEnabled != m_settings.m_udpEnabled))
+        || (settingsKeys.contains("udpAddress") && (settings.m_udpAddress != m_settings.m_udpAddress))
+        || (settingsKeys.contains("udpPort") && (settings.m_udpPort != m_settings.m_udpPort))
         || force)
     {
         if (settings.m_udpEnabled)
@@ -318,7 +207,7 @@ void RttyMod::applySettings(const RttyModSettings& settings, bool force)
             closeUDP();
     }
 
-    if (m_settings.m_streamIndex != settings.m_streamIndex)
+    if (settingsKeys.contains("streamIndex") && m_settings.m_streamIndex != settings.m_streamIndex)
     {
         if (m_deviceAPI->getSampleMIMO()) // change of stream is possible for MIMO devices only
         {
@@ -329,31 +218,33 @@ void RttyMod::applySettings(const RttyModSettings& settings, bool force)
             m_settings.m_streamIndex = settings.m_streamIndex; // make sure ChannelAPI::getStreamIndex() is consistent
             emit streamIndexChanged(settings.m_streamIndex);
         }
-
-        reverseAPIKeys.append("streamIndex");
     }
 
-    RttyModBaseband::MsgConfigureRttyModBaseband *msg = RttyModBaseband::MsgConfigureRttyModBaseband::create(settings, force);
+    RttyModBaseband::MsgConfigureRttyModBaseband *msg = RttyModBaseband::MsgConfigureRttyModBaseband::create(settingsKeys, settings, force);
     m_basebandSource->getInputMessageQueue()->push(msg);
 
-    if (settings.m_useReverseAPI)
+    if (settingsKeys.contains("useReverseAPI") && settings.m_useReverseAPI)
     {
-        bool fullUpdate = ((m_settings.m_useReverseAPI != settings.m_useReverseAPI) && settings.m_useReverseAPI) ||
-                (m_settings.m_reverseAPIAddress != settings.m_reverseAPIAddress) ||
-                (m_settings.m_reverseAPIPort != settings.m_reverseAPIPort) ||
-                (m_settings.m_reverseAPIDeviceIndex != settings.m_reverseAPIDeviceIndex) ||
-                (m_settings.m_reverseAPIChannelIndex != settings.m_reverseAPIChannelIndex);
-        webapiReverseSendSettings(reverseAPIKeys, settings, fullUpdate || force);
+        bool fullUpdate = ((settingsKeys.contains("useReverseAPI") && (m_settings.m_useReverseAPI != settings.m_useReverseAPI)) && settings.m_useReverseAPI) ||
+                (settingsKeys.contains("reverseAPIAddress") && (m_settings.m_reverseAPIAddress != settings.m_reverseAPIAddress)) ||
+                (settingsKeys.contains("reverseAPIPort") && (m_settings.m_reverseAPIPort != settings.m_reverseAPIPort)) ||
+                (settingsKeys.contains("reverseAPIDeviceIndex") && (m_settings.m_reverseAPIDeviceIndex != settings.m_reverseAPIDeviceIndex)) ||
+                (settingsKeys.contains("reverseAPIChannelIndex") && (m_settings.m_reverseAPIChannelIndex != settings.m_reverseAPIChannelIndex));
+        webapiReverseSendSettings(settingsKeys, settings, fullUpdate || force);
     }
 
     QList<ObjectPipe*> pipes;
     MainCore::instance()->getMessagePipes().getMessagePipes(this, "settings", pipes);
 
     if (pipes.size() > 0) {
-        sendChannelSettings(pipes, reverseAPIKeys, settings, force);
+        sendChannelSettings(pipes, settingsKeys, settings, force);
     }
 
-    m_settings = settings;
+    if (force) {
+        m_settings = settings;
+    } else {
+        m_settings.applySettings(settingsKeys, settings);
+    }
 }
 
 QByteArray RttyMod::serialize() const
@@ -371,7 +262,7 @@ bool RttyMod::deserialize(const QByteArray& data)
         success = false;
     }
 
-    MsgConfigureRttyMod *msg = MsgConfigureRttyMod::create(m_settings, true);
+    MsgConfigureRttyMod *msg = MsgConfigureRttyMod::create(QStringList(), m_settings, true);
     m_inputMessageQueue.push(msg);
 
     return success;
@@ -427,12 +318,12 @@ int RttyMod::webapiSettingsPutPatch(
     RttyModSettings settings = m_settings;
     webapiUpdateChannelSettings(settings, channelSettingsKeys, response);
 
-    MsgConfigureRttyMod *msg = MsgConfigureRttyMod::create(settings, force);
+    MsgConfigureRttyMod *msg = MsgConfigureRttyMod::create(channelSettingsKeys, settings, force);
     m_inputMessageQueue.push(msg);
 
     if (m_guiMessageQueue) // forward to GUI if any
     {
-        MsgConfigureRttyMod *msgToGUI = MsgConfigureRttyMod::create(settings, force);
+        MsgConfigureRttyMod *msgToGUI = MsgConfigureRttyMod::create(channelSettingsKeys, settings, force);
         m_guiMessageQueue->push(msgToGUI);
     }
 
@@ -694,7 +585,7 @@ void RttyMod::webapiFormatChannelReport(SWGSDRangel::SWGChannelReport& response)
     response.getRttyModReport()->setChannelSampleRate(m_basebandSource->getChannelSampleRate());
 }
 
-void RttyMod::webapiReverseSendSettings(QList<QString>& channelSettingsKeys, const RttyModSettings& settings, bool force)
+void RttyMod::webapiReverseSendSettings(const QList<QString>& channelSettingsKeys, const RttyModSettings& settings, bool force)
 {
     SWGSDRangel::SWGChannelSettings *swgChannelSettings = new SWGSDRangel::SWGChannelSettings();
     webapiFormatChannelSettings(channelSettingsKeys, swgChannelSettings, settings, force);
@@ -721,7 +612,7 @@ void RttyMod::webapiReverseSendSettings(QList<QString>& channelSettingsKeys, con
 
 void RttyMod::sendChannelSettings(
     const QList<ObjectPipe*>& pipes,
-    QList<QString>& channelSettingsKeys,
+    const QList<QString>& channelSettingsKeys,
     const RttyModSettings& settings,
     bool force)
 {
@@ -745,7 +636,7 @@ void RttyMod::sendChannelSettings(
 }
 
 void RttyMod::webapiFormatChannelSettings(
-        QList<QString>& channelSettingsKeys,
+        const QList<QString>& channelSettingsKeys,
         SWGSDRangel::SWGChannelSettings *swgChannelSettings,
         const RttyModSettings& settings,
         bool force

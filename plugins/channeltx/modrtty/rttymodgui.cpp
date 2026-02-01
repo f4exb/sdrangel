@@ -58,7 +58,7 @@ void RttyModGUI::resetToDefaults()
 {
     m_settings.resetToDefaults();
     displaySettings();
-    applySettings(true);
+    applySettings(QStringList(), true);
 }
 
 QByteArray RttyModGUI::serialize() const
@@ -70,7 +70,7 @@ bool RttyModGUI::deserialize(const QByteArray& data)
 {
     if (m_settings.deserialize(data)) {
         displaySettings();
-        applySettings(true);
+        applySettings(QStringList(), true);
         return true;
     } else {
         resetToDefaults();
@@ -155,7 +155,7 @@ void RttyModGUI::channelMarkerChangedByCursor()
 {
     ui->deltaFrequency->setValue(m_channelMarker.getCenterFrequency());
     m_settings.m_inputFrequencyOffset = m_channelMarker.getCenterFrequency();
-    applySettings();
+    applySettings(QStringList("inputFrequencyOffset"));
 }
 
 void RttyModGUI::handleSourceMessages()
@@ -176,7 +176,7 @@ void RttyModGUI::on_deltaFrequency_changed(qint64 value)
     m_channelMarker.setCenterFrequency(value);
     m_settings.m_inputFrequencyOffset = m_channelMarker.getCenterFrequency();
     updateAbsoluteCenterFrequency();
-    applySettings();
+    applySettings(QStringList("inputFrequencyOffset"));
 }
 
 void RttyModGUI::on_mode_currentIndexChanged(int index)
@@ -206,7 +206,7 @@ void RttyModGUI::on_mode_currentIndexChanged(int index)
     ui->rfBW->setEnabled(custom);
     ui->rfBWText->setEnabled(custom);
 
-    applySettings();
+    applySettings(QStringList());
 }
 
 void RttyModGUI::on_rfBW_valueChanged(int value)
@@ -215,27 +215,27 @@ void RttyModGUI::on_rfBW_valueChanged(int value)
     ui->rfBWText->setText(formatFrequency(bw));
     m_channelMarker.setBandwidth(bw);
     m_settings.m_rfBandwidth = bw;
-    applySettings();
+    applySettings(QStringList("rfBandwidth"));
 }
 
 void RttyModGUI::on_baudRate_currentIndexChanged(int index)
 {
     (void)index;
     m_settings.m_baud = ui->baudRate->currentText().toFloat();
-    applySettings();
+    applySettings(QStringList("baud"));
 }
 
 void RttyModGUI::on_frequencyShift_valueChanged(int value)
 {
     m_settings.m_frequencyShift = value;
     ui->frequencyShiftText->setText(formatFrequency(m_settings.m_frequencyShift));
-    applySettings();
+    applySettings(QStringList("frequencyShift"));
 }
 
 void RttyModGUI::on_characterSet_currentIndexChanged(int index)
 {
     m_settings.m_characterSet = (Baudot::CharacterSet)index;
-    applySettings();
+    applySettings(QStringList("characterSet"));
 }
 
 void RttyModGUI::on_endian_clicked(bool checked)
@@ -246,7 +246,7 @@ void RttyModGUI::on_endian_clicked(bool checked)
     } else {
         ui->endian->setText("LSB");
     }
-    applySettings();
+    applySettings(QStringList("msbFirst"));
 }
 
 void RttyModGUI::on_spaceHigh_clicked(bool checked)
@@ -257,13 +257,13 @@ void RttyModGUI::on_spaceHigh_clicked(bool checked)
     } else {
         ui->spaceHigh->setText("S-M");
     }
-    applySettings();
+    applySettings(QStringList("spaceHigh"));
 }
 
 void RttyModGUI::on_unshiftOnSpace_clicked(bool checked)
 {
     m_settings.m_unshiftOnSpace = checked;
-    applySettings();
+    applySettings(QStringList("unshiftOnSpace"));
 }
 
 void RttyModGUI::on_clearTransmittedText_clicked()
@@ -275,13 +275,13 @@ void RttyModGUI::on_gain_valueChanged(int value)
 {
     ui->gainText->setText(QString("%1dB").arg(value));
     m_settings.m_gain = value;
-    applySettings();
+    applySettings(QStringList("gain"));
 }
 
 void RttyModGUI::on_channelMute_toggled(bool checked)
 {
     m_settings.m_channelMute = checked;
-    applySettings();
+    applySettings(QStringList("channelMute"));
 }
 
 void RttyModGUI::on_txButton_clicked()
@@ -298,13 +298,13 @@ void RttyModGUI::on_text_returnPressed()
 void RttyModGUI::on_text_editingFinished()
 {
     m_settings.m_text = ui->text->currentText();
-    applySettings();
+    applySettings(QStringList("text"));
 }
 
 void RttyModGUI::on_repeat_toggled(bool checked)
 {
     m_settings.m_repeat = checked;
-    applySettings();
+    applySettings(QStringList("repeat"));
 }
 
 void RttyModGUI::repeatSelect(const QPoint& p)
@@ -316,7 +316,7 @@ void RttyModGUI::repeatSelect(const QPoint& p)
     if (dialog.exec() == QDialog::Accepted)
     {
         m_settings.m_repeatCount = dialog.m_repeatCount;
-        applySettings();
+        applySettings(QStringList("repeatCount"));
     }
 }
 
@@ -329,26 +329,26 @@ void RttyModGUI::txSettingsSelect(const QPoint& p)
     if (dialog.exec() == QDialog::Accepted)
     {
         displaySettings();
-        applySettings();
+        applySettings(QStringList());
     }
 }
 
 void RttyModGUI::on_udpEnabled_clicked(bool checked)
 {
     m_settings.m_udpEnabled = checked;
-    applySettings();
+    applySettings(QStringList("udpEnabled"));
 }
 
 void RttyModGUI::on_udpAddress_editingFinished()
 {
     m_settings.m_udpAddress = ui->udpAddress->text();
-    applySettings();
+    applySettings(QStringList("udpAddress"));
 }
 
 void RttyModGUI::on_udpPort_editingFinished()
 {
     m_settings.m_udpPort = ui->udpPort->text().toInt();
-    applySettings();
+    applySettings(QStringList("udpPort"));
 }
 
 void RttyModGUI::onWidgetRolled(QWidget* widget, bool rollDown)
@@ -357,7 +357,7 @@ void RttyModGUI::onWidgetRolled(QWidget* widget, bool rollDown)
     (void) rollDown;
 
     getRollupContents()->saveState(m_rollupState);
-    applySettings();
+    applySettings(QStringList());
 }
 
 void RttyModGUI::onMenuDialogCalled(const QPoint &p)
@@ -402,7 +402,8 @@ void RttyModGUI::onMenuDialogCalled(const QPoint &p)
             updateIndexLabel();
         }
 
-        applySettings();
+        applySettings(QStringList({"rgbColor", "title", "useReverseAPI", "reverseAPIAddress",
+                                    "reverseAPIPort", "reverseAPIDeviceIndex", "reverseAPIChannelIndex", "streamIndex"}));
     }
 
     resetContextMenuType();
@@ -485,7 +486,7 @@ RttyModGUI::RttyModGUI(PluginAPI* pluginAPI, DeviceUISet *deviceUISet, BasebandS
 
     displaySettings();
     makeUIConnections();
-    applySettings();
+    applySettings(QStringList(), true);
     DialPopup::addPopupsToChildDials(this);
     m_resizer.enableChildMouseTracking();
 
@@ -510,11 +511,11 @@ void RttyModGUI::blockApplySettings(bool block)
     m_doApplySettings = !block;
 }
 
-void RttyModGUI::applySettings(bool force)
+void RttyModGUI::applySettings(const QStringList& settingKeys, bool force)
 {
     if (m_doApplySettings)
     {
-        RttyMod::MsgConfigureRttyMod *msg = RttyMod::MsgConfigureRttyMod::create(m_settings, force);
+        RttyMod::MsgConfigureRttyMod *msg = RttyMod::MsgConfigureRttyMod::create(settingKeys, m_settings, force);
         m_rttyMod->getInputMessageQueue()->push(msg);
     }
 }

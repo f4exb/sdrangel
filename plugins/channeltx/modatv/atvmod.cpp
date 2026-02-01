@@ -65,7 +65,7 @@ ATVMod::ATVMod(DeviceAPI *deviceAPI) :
     m_basebandSource = new ATVModBaseband();
     m_basebandSource->moveToThread(m_thread);
 
-    applySettings(m_settings, true);
+    applySettings(QStringList(), m_settings, true);
 
     m_deviceAPI->addChannelSource(this);
     m_deviceAPI->addChannelSourceAPI(this);
@@ -163,7 +163,7 @@ bool ATVMod::handleMessage(const Message& cmd)
         MsgConfigureATVMod& cfg = (MsgConfigureATVMod&) cmd;
         qDebug() << "ATVMod::handleMessage: MsgConfigureATVMod";
 
-        applySettings(cfg.getSettings(), cfg.getForce());
+        applySettings(cfg.getSettingsKeys(), cfg.getSettings(), cfg.getForce());
 
         return true;
     }
@@ -242,103 +242,20 @@ void ATVMod::setCenterFrequency(qint64 frequency)
 {
     ATVModSettings settings = m_settings;
     settings.m_inputFrequencyOffset = frequency;
-    applySettings(settings, false);
+    applySettings(QStringList("inputFrequencyOffset"), settings, false);
 
     if (m_guiMessageQueue) // forward to GUI if any
     {
-        MsgConfigureATVMod *msgToGUI = MsgConfigureATVMod::create(settings, false);
+        MsgConfigureATVMod *msgToGUI = MsgConfigureATVMod::create(QStringList("inputFrequencyOffset"), settings, false);
         m_guiMessageQueue->push(msgToGUI);
     }
 }
 
-void ATVMod::applySettings(const ATVModSettings& settings, bool force)
+void ATVMod::applySettings(const QStringList& settingsKeys, const ATVModSettings& settings, bool force)
 {
-    qDebug() << "ATVMod::applySettings:"
-            << " m_inputFrequencyOffset: " << settings.m_inputFrequencyOffset
-            << " m_rfBandwidth: " << settings.m_rfBandwidth
-            << " m_rfOppBandwidth: " << settings.m_rfOppBandwidth
-            << " m_atvStd: " << (int) settings.m_atvStd
-            << " m_nbLines: " << settings.m_nbLines
-            << " m_fps: " << settings.m_fps
-            << " m_atvModInput: " << (int) settings.m_atvModInput
-            << " m_uniformLevel: " << settings.m_uniformLevel
-            << " m_atvModulation: " << (int) settings.m_atvModulation
-            << " m_videoPlayLoop: " << settings.m_videoPlayLoop
-            << " m_videoPlay: " << settings.m_videoPlay
-            << " m_cameraPlay: " << settings.m_cameraPlay
-            << " m_channelMute: " << settings.m_channelMute
-            << " m_invertedVideo: " << settings.m_invertedVideo
-            << " m_rfScalingFactor: " << settings.m_rfScalingFactor
-            << " m_fmExcursion: " << settings.m_fmExcursion
-            << " m_forceDecimator: " << settings.m_forceDecimator
-            << " m_showOverlayText: " << settings.m_showOverlayText
-            << " m_overlayText: " << settings.m_overlayText
-            << " force: " << force;
+    qDebug() << "ATVMod::applySettings:" << settings.getDebugString(settingsKeys, force);
 
-    QList<QString> reverseAPIKeys;
-
-    if ((settings.m_inputFrequencyOffset != m_settings.m_inputFrequencyOffset) || force) {
-        reverseAPIKeys.append("inputFrequencyOffset");
-    }
-    if ((settings.m_rfBandwidth != m_settings.m_rfBandwidth) || force) {
-        reverseAPIKeys.append("rfBandwidth");
-    }
-    if ((settings.m_rfOppBandwidth != m_settings.m_rfOppBandwidth) || force) {
-        reverseAPIKeys.append("rfOppBandwidth");
-    }
-    if ((settings.m_atvStd != m_settings.m_atvStd) || force) {
-        reverseAPIKeys.append("atvStd");
-    }
-    if ((settings.m_nbLines != m_settings.m_nbLines) || force) {
-        reverseAPIKeys.append("nbLines");
-    }
-    if ((settings.m_fps != m_settings.m_fps) || force) {
-        reverseAPIKeys.append("fps");
-    }
-    if ((settings.m_atvModInput != m_settings.m_atvModInput) || force) {
-        reverseAPIKeys.append("atvModInput");
-    }
-    if ((settings.m_uniformLevel != m_settings.m_uniformLevel) || force) {
-        reverseAPIKeys.append("uniformLevel");
-    }
-    if ((settings.m_uniformLevel != m_settings.m_uniformLevel) || force) {
-        reverseAPIKeys.append("uniformLevel");
-    }
-    if ((settings.m_atvModulation != m_settings.m_atvModulation) || force) {
-        reverseAPIKeys.append("atvModulation");
-    }
-    if ((settings.m_videoPlayLoop != m_settings.m_videoPlayLoop) || force) {
-        reverseAPIKeys.append("videoPlayLoop");
-    }
-    if ((settings.m_videoPlay != m_settings.m_videoPlay) || force) {
-        reverseAPIKeys.append("videoPlay");
-    }
-    if ((settings.m_cameraPlay != m_settings.m_cameraPlay) || force) {
-        reverseAPIKeys.append("cameraPlay");
-    }
-    if ((settings.m_channelMute != m_settings.m_channelMute) || force) {
-        reverseAPIKeys.append("channelMute");
-    }
-    if ((settings.m_invertedVideo != m_settings.m_invertedVideo) || force) {
-        reverseAPIKeys.append("invertedVideo");
-    }
-    if ((settings.m_rfScalingFactor != m_settings.m_rfScalingFactor) || force) {
-        reverseAPIKeys.append("rfScalingFactor");
-    }
-    if ((settings.m_fmExcursion != m_settings.m_fmExcursion) || force) {
-        reverseAPIKeys.append("fmExcursion");
-    }
-    if ((settings.m_forceDecimator != m_settings.m_forceDecimator) || force) {
-        reverseAPIKeys.append("forceDecimator");
-    }
-    if ((settings.m_showOverlayText != m_settings.m_showOverlayText) || force) {
-        reverseAPIKeys.append("showOverlayText");
-    }
-    if ((settings.m_overlayText != m_settings.m_overlayText) || force) {
-        reverseAPIKeys.append("overlayText");
-    }
-
-    if (m_settings.m_streamIndex != settings.m_streamIndex)
+    if (settingsKeys.contains("streamIndex") && m_settings.m_streamIndex != settings.m_streamIndex)
     {
         if (m_deviceAPI->getSampleMIMO()) // change of stream is possible for MIMO devices only
         {
@@ -349,28 +266,26 @@ void ATVMod::applySettings(const ATVModSettings& settings, bool force)
             m_settings.m_streamIndex = settings.m_streamIndex; // make sure ChannelAPI::getStreamIndex() is consistent
             emit streamIndexChanged(settings.m_streamIndex);
         }
-
-        reverseAPIKeys.append("streamIndex");
     }
 
-    ATVModBaseband::MsgConfigureATVModBaseband *msg = ATVModBaseband::MsgConfigureATVModBaseband::create(settings, force);
+    ATVModBaseband::MsgConfigureATVModBaseband *msg = ATVModBaseband::MsgConfigureATVModBaseband::create(settingsKeys,settings, force);
     m_basebandSource->getInputMessageQueue()->push(msg);
 
-    if (settings.m_useReverseAPI)
+    if (settingsKeys.contains("useReverseAPI") && settings.m_useReverseAPI)
     {
-        bool fullUpdate = ((m_settings.m_useReverseAPI != settings.m_useReverseAPI) && settings.m_useReverseAPI) ||
-                (m_settings.m_reverseAPIAddress != settings.m_reverseAPIAddress) ||
-                (m_settings.m_reverseAPIPort != settings.m_reverseAPIPort) ||
-                (m_settings.m_reverseAPIDeviceIndex != settings.m_reverseAPIDeviceIndex) ||
-                (m_settings.m_reverseAPIChannelIndex != settings.m_reverseAPIChannelIndex);
-        webapiReverseSendSettings(reverseAPIKeys, settings, fullUpdate || force);
+        bool fullUpdate = ((settingsKeys.contains("useReverseAPI") && m_settings.m_useReverseAPI != settings.m_useReverseAPI) && settings.m_useReverseAPI) ||
+                (settingsKeys.contains("reverseAPIAddress") && m_settings.m_reverseAPIAddress != settings.m_reverseAPIAddress) ||
+                (settingsKeys.contains("reverseAPIPort") && m_settings.m_reverseAPIPort != settings.m_reverseAPIPort) ||
+                (settingsKeys.contains("reverseAPIDeviceIndex") && m_settings.m_reverseAPIDeviceIndex != settings.m_reverseAPIDeviceIndex) ||
+                (settingsKeys.contains("reverseAPIChannelIndex") && m_settings.m_reverseAPIChannelIndex != settings.m_reverseAPIChannelIndex);
+        webapiReverseSendSettings(settingsKeys, settings, fullUpdate || force);
     }
 
     QList<ObjectPipe*> pipes;
     MainCore::instance()->getMessagePipes().getMessagePipes(this, "settings", pipes);
 
     if (pipes.size() > 0) {
-        sendChannelSettings(pipes, reverseAPIKeys, settings, force);
+        sendChannelSettings(pipes, settingsKeys, settings, force);
     }
 
     m_settings = settings;
@@ -385,14 +300,14 @@ bool ATVMod::deserialize(const QByteArray& data)
 {
     if (m_settings.deserialize(data))
     {
-        MsgConfigureATVMod *msg = MsgConfigureATVMod::create(m_settings, true);
+        MsgConfigureATVMod *msg = MsgConfigureATVMod::create(QStringList(), m_settings, true);
         m_inputMessageQueue.push(msg);
         return true;
     }
     else
     {
         m_settings.resetToDefaults();
-        MsgConfigureATVMod *msg = MsgConfigureATVMod::create(m_settings, true);
+        MsgConfigureATVMod *msg = MsgConfigureATVMod::create(QStringList(), m_settings, true);
         m_inputMessageQueue.push(msg);
         return false;
     }
@@ -435,12 +350,12 @@ int ATVMod::webapiSettingsPutPatch(
         m_inputMessageQueue.push(msgChan);
     }
 
-    MsgConfigureATVMod *msg = MsgConfigureATVMod::create(settings, force);
+    MsgConfigureATVMod *msg = MsgConfigureATVMod::create(channelSettingsKeys, settings, force);
     m_inputMessageQueue.push(msg);
 
     if (m_guiMessageQueue) // forward to GUI if any
     {
-        MsgConfigureATVMod *msgToGUI = MsgConfigureATVMod::create(settings, force);
+        MsgConfigureATVMod *msgToGUI = MsgConfigureATVMod::create(channelSettingsKeys, settings, force);
         m_guiMessageQueue->push(msgToGUI);
     }
 
@@ -676,7 +591,7 @@ void ATVMod::webapiFormatChannelReport(SWGSDRangel::SWGChannelReport& response)
     response.getAtvModReport()->setChannelSampleRate(m_basebandSource->getChannelSampleRate());
 }
 
-void ATVMod::webapiReverseSendSettings(QList<QString>& channelSettingsKeys, const ATVModSettings& settings, bool force)
+void ATVMod::webapiReverseSendSettings(const QList<QString>& channelSettingsKeys, const ATVModSettings& settings, bool force)
 {
     SWGSDRangel::SWGChannelSettings *swgChannelSettings = new SWGSDRangel::SWGChannelSettings();
     webapiFormatChannelSettings(channelSettingsKeys, swgChannelSettings, settings, force);
@@ -703,7 +618,7 @@ void ATVMod::webapiReverseSendSettings(QList<QString>& channelSettingsKeys, cons
 
 void ATVMod::sendChannelSettings(
     const QList<ObjectPipe*>& pipes,
-    QList<QString>& channelSettingsKeys,
+    const QList<QString>& channelSettingsKeys,
     const ATVModSettings& settings,
     bool force)
 {
@@ -727,7 +642,7 @@ void ATVMod::sendChannelSettings(
 }
 
 void ATVMod::webapiFormatChannelSettings(
-        QList<QString>& channelSettingsKeys,
+        const QList<QString>& channelSettingsKeys,
         SWGSDRangel::SWGChannelSettings *swgChannelSettings,
         const ATVModSettings& settings,
         bool force

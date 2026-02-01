@@ -149,14 +149,14 @@ void SSBModGUI::channelMarkerChangedByCursor()
 {
     ui->deltaFrequency->setValue(m_channelMarker.getCenterFrequency());
     m_settings.m_inputFrequencyOffset = m_channelMarker.getCenterFrequency();
-    applySettings();
+    applySettings(QStringList("inputFrequencyOffset"));
 }
 
 void SSBModGUI::channelMarkerUpdate()
 {
     m_settings.m_rgbColor = m_channelMarker.getColor().rgb();
     displaySettings();
-    applySettings();
+    applySettings(QStringList("rgbColor"));
 }
 
 void SSBModGUI::handleSourceMessages()
@@ -177,7 +177,7 @@ void SSBModGUI::on_deltaFrequency_changed(qint64 value)
     m_channelMarker.setCenterFrequency(value);
     m_settings.m_inputFrequencyOffset = m_channelMarker.getCenterFrequency();
     updateAbsoluteCenterFrequency();
-    applySettings();
+    applySettings(QStringList("inputFrequencyOffset"));
 }
 
 void SSBModGUI::on_flipSidebands_clicked(bool checked)
@@ -198,13 +198,13 @@ void SSBModGUI::on_dsb_toggled(bool dsb)
 void SSBModGUI::on_audioBinaural_toggled(bool checked)
 {
     m_settings.m_audioBinaural = checked;
-	applySettings();
+	applySettings(QStringList("audioBinaural"));
 }
 
 void SSBModGUI::on_audioFlipChannels_toggled(bool checked)
 {
     m_settings.m_audioFlipChannels = checked;
-	applySettings();
+	applySettings(QStringList("audioFlipChannels"));
 }
 
 void SSBModGUI::on_spanLog2_valueChanged(int value)
@@ -232,26 +232,26 @@ void SSBModGUI::on_toneFrequency_valueChanged(int value)
 {
     ui->toneFrequencyText->setText(QString("%1k").arg(value / 100.0, 0, 'f', 2));
     m_settings.m_toneFrequency = value * 10.0;
-    applySettings();
+    applySettings(QStringList("toneFrequency"));
 }
 
 void SSBModGUI::on_volume_valueChanged(int value)
 {
     ui->volumeText->setText(QString("%1").arg(value / 10.0, 0, 'f', 1));
     m_settings.m_volumeFactor = value / 10.0;
-    applySettings();
+    applySettings(QStringList("volumeFactor"));
 }
 
 void SSBModGUI::on_audioMute_toggled(bool checked)
 {
     m_settings.m_audioMute = checked;
-	applySettings();
+	applySettings(QStringList("audioMute"));
 }
 
 void SSBModGUI::on_playLoop_toggled(bool checked)
 {
     m_settings.m_playLoop = checked;
-    applySettings();
+    applySettings(QStringList("playLoop"));
 }
 
 void SSBModGUI::on_play_toggled(bool checked)
@@ -260,7 +260,7 @@ void SSBModGUI::on_play_toggled(bool checked)
     ui->morseKeyer->setEnabled(!checked);
     ui->mic->setEnabled(!checked);
     m_settings.m_modAFInput = checked ? SSBModSettings::SSBModInputFile : SSBModSettings::SSBModInputNone;
-    applySettings();
+    applySettings(QStringList("modAFInput"));
     ui->navTimeSlider->setEnabled(!checked);
     m_enableNavTime = !checked;
 }
@@ -271,7 +271,7 @@ void SSBModGUI::on_tone_toggled(bool checked)
     ui->morseKeyer->setEnabled(!checked);
     ui->mic->setEnabled(!checked);
     m_settings.m_modAFInput = checked ? SSBModSettings::SSBModInputTone : SSBModSettings::SSBModInputNone;
-    applySettings();
+    applySettings(QStringList("modAFInput"));
 }
 
 void SSBModGUI::on_morseKeyer_toggled(bool checked)
@@ -280,7 +280,7 @@ void SSBModGUI::on_morseKeyer_toggled(bool checked)
     ui->tone->setEnabled(!checked); // release other source inputs
     ui->mic->setEnabled(!checked);
     m_settings.m_modAFInput = checked ? SSBModSettings::SSBModInputCWTone : SSBModSettings::SSBModInputNone;
-    applySettings();
+    applySettings(QStringList("modAFInput"));
 }
 
 void SSBModGUI::on_mic_toggled(bool checked)
@@ -289,40 +289,40 @@ void SSBModGUI::on_mic_toggled(bool checked)
     ui->morseKeyer->setEnabled(!checked);
     ui->tone->setEnabled(!checked); // release other source inputs
     m_settings.m_modAFInput = checked ? SSBModSettings::SSBModInputAudio : SSBModSettings::SSBModInputNone;
-    applySettings();
+    applySettings(QStringList("modAFInput"));
 }
 
 void SSBModGUI::on_feedbackEnable_toggled(bool checked)
 {
     m_settings.m_feedbackAudioEnable = checked;
-    applySettings();
+    applySettings(QStringList("feedbackAudioEnable"));
 }
 
 void SSBModGUI::on_feedbackVolume_valueChanged(int value)
 {
     ui->feedbackVolumeText->setText(QString("%1").arg(value / 100.0, 0, 'f', 2));
     m_settings.m_feedbackVolumeFactor = value / 100.0;
-    applySettings();
+    applySettings(QStringList("feedbackVolumeFactor"));
 }
 
 void SSBModGUI::on_agc_toggled(bool checked)
 {
     m_settings.m_agc = checked;
-    applySettings();
+    applySettings(QStringList("agc"));
 }
 
 void SSBModGUI::on_cmpPreGain_valueChanged(int value)
 {
     m_settings.m_cmpPreGainDB = value;
     ui->cmpPreGainText->setText(QString("%1").arg(value));
-    applySettings();
+    applySettings(QStringList("cmpPreGainDB"));
 }
 
 void SSBModGUI::on_cmpThreshold_valueChanged(int value)
 {
     m_settings.m_cmpThresholdDB = value;
     ui->cmpThresholdText->setText(QString("%1").arg(value));
-    applySettings();
+    applySettings(QStringList("cmpThresholdDB"));
 }
 
 void SSBModGUI::on_navTimeSlider_valueChanged(int value)
@@ -366,7 +366,7 @@ void SSBModGUI::onWidgetRolled(QWidget* widget, bool rollDown)
     (void) rollDown;
 
     getRollupContents()->saveState(m_rollupState);
-    applySettings();
+    applySettings(QStringList());
 }
 
 void SSBModGUI::onMenuDialogCalled(const QPoint &p)
@@ -411,7 +411,8 @@ void SSBModGUI::onMenuDialogCalled(const QPoint &p)
             updateIndexLabel();
         }
 
-        applySettings();
+        applySettings(QStringList({"rgbColor", "title", "useReverseAPI", "reverseAPIAddress",
+            "reverseAPIPort", "reverseAPIDeviceIndex", "reverseAPIChannelIndex", "streamIndex"}));
     }
 
     resetContextMenuType();
@@ -524,7 +525,7 @@ bool SSBModGUI::blockApplySettings(bool block)
     return ret;
 }
 
-void SSBModGUI::applySettings(bool force)
+void SSBModGUI::applySettings(const QStringList& settingsKeys, bool force)
 {
 	if (m_doApplySettings)
 	{
@@ -542,7 +543,7 @@ void SSBModGUI::applySettings(bool force)
             mod_settings.m_usb = false;
         }
 
-		SSBMod::MsgConfigureSSBMod *msg = SSBMod::MsgConfigureSSBMod::create(mod_settings, force);
+		SSBMod::MsgConfigureSSBMod *msg = SSBMod::MsgConfigureSSBMod::create(settingsKeys, mod_settings, force);
 		m_ssbMod->getInputMessageQueue()->push(msg);
 	}
 }
@@ -664,7 +665,7 @@ void SSBModGUI::applyBandwidths(int spanLog2, bool force)
     m_settings.m_bandwidth = bw * 100;
     m_settings.m_lowCutoff = lw * 100;
 
-    applySettings(force);
+    applySettings(QStringList({"dsb", "spanLog2", "bandwidth", "lowCutoff"}), force);
 
     bool applySettingsWereBlocked = blockApplySettings(true);
     m_channelMarker.setBandwidth(bw * 200);
@@ -797,7 +798,7 @@ void SSBModGUI::audioSelect(const QPoint& p)
     if (audioSelect.m_selected)
     {
         m_settings.m_audioDeviceName = audioSelect.m_audioDeviceName;
-        applySettings();
+        applySettings(QStringList("audioDeviceName"));
     }
 }
 
@@ -812,7 +813,7 @@ void SSBModGUI::audioFeedbackSelect(const QPoint& p)
     if (audioSelect.m_selected)
     {
         m_settings.m_feedbackAudioDeviceName = audioSelect.m_audioDeviceName;
-        applySettings();
+        applySettings(QStringList("feedbackAudioDeviceName"));
     }
 }
 

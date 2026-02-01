@@ -40,20 +40,23 @@ public:
 
     public:
         const LocalSourceSettings& getSettings() const { return m_settings; }
+        const QStringList& getSettingsKeys() const { return m_settingsKeys; }
         bool getForce() const { return m_force; }
 
-        static MsgConfigureLocalSourceBaseband* create(const LocalSourceSettings& settings, bool force)
+        static MsgConfigureLocalSourceBaseband* create(const QStringList& settingsKeys, const LocalSourceSettings& settings, bool force)
         {
-            return new MsgConfigureLocalSourceBaseband(settings, force);
+            return new MsgConfigureLocalSourceBaseband(settingsKeys, settings, force);
         }
 
     private:
         LocalSourceSettings m_settings;
+        QStringList m_settingsKeys;
         bool m_force;
 
-        MsgConfigureLocalSourceBaseband(const LocalSourceSettings& settings, bool force) :
+        MsgConfigureLocalSourceBaseband(const QStringList& settingsKeys, const LocalSourceSettings& settings, bool force) :
             Message(),
             m_settings(settings),
+            m_settingsKeys(settingsKeys),
             m_force(force)
         { }
     };
@@ -118,7 +121,7 @@ private:
 
     void processFifo(SampleVector& data, unsigned int iBegin, unsigned int iEnd);
     bool handleMessage(const Message& cmd);
-    void applySettings(const LocalSourceSettings& settings, bool force = false);
+    void applySettings(const QStringList& settingsKeys, const LocalSourceSettings& settings, bool force = false);
 
 private slots:
     void handleInputMessages();
