@@ -65,6 +65,8 @@ struct DOA2Settings
     void setScopeGUI(Serializable *scopeGUI) { m_scopeGUI = scopeGUI; }
     QByteArray serialize() const;
     bool deserialize(const QByteArray& data);
+    void applySettings(const QStringList& settingsKeys, const DOA2Settings& settings);
+    QString getDebugString(const QStringList& settingsKeys, bool force=false) const;
     static int getAveragingValue(int averagingIndex);
     static int getAveragingIndex(int averagingValue);
     static const int m_averagingMaxExponent = 5; //!< Max 1M (10 * 10^5)

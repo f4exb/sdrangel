@@ -41,7 +41,7 @@ void DOA2GUI::resetToDefaults()
 {
     m_settings.resetToDefaults();
     displaySettings();
-    applySettings(true);
+    applySettings(QStringList(), true);
 }
 
 QByteArray DOA2GUI::serialize() const
@@ -54,7 +54,7 @@ bool DOA2GUI::deserialize(const QByteArray& data)
     if (m_settings.deserialize(data))
     {
         displaySettings();
-        applySettings(true);
+        applySettings(QStringList(), true);
         return true;
     }
     else
@@ -150,7 +150,7 @@ DOA2GUI::DOA2GUI(PluginAPI* pluginAPI, DeviceUISet *deviceUISet, MIMOChannel *ch
     displaySettings();
     makeUIConnections();
     displayRateAndShift();
-    applySettings(true);
+    applySettings(QStringList(), true);
 
     connect(&MainCore::instance()->getMasterTimer(), SIGNAL(timeout()), this, SLOT(tick()));
 
@@ -170,13 +170,13 @@ void DOA2GUI::blockApplySettings(bool block)
     m_doApplySettings = !block;
 }
 
-void DOA2GUI::applySettings(bool force)
+void DOA2GUI::applySettings(const QStringList& settingsKeys, bool force)
 {
     if (m_doApplySettings)
     {
         setTitleColor(m_channelMarker.getColor());
 
-        DOA2::MsgConfigureDOA2* message = DOA2::MsgConfigureDOA2::create(m_settings, force);
+        DOA2::MsgConfigureDOA2* message = DOA2::MsgConfigureDOA2::create(settingsKeys, m_settings, force);
         m_doa2->getInputMessageQueue()->push(message);
     }
 }
@@ -284,7 +284,7 @@ void DOA2GUI::onWidgetRolled(const QWidget* widget, bool rollDown)
     (void) rollDown;
 
     getRollupContents()->saveState(m_rollupState);
-    applySettings();
+    applySettings(QStringList());
 }
 
 void DOA2GUI::onMenuDialogCalled(const QPoint &p)
@@ -315,7 +315,8 @@ void DOA2GUI::onMenuDialogCalled(const QPoint &p)
         setTitle(m_channelMarker.getTitle());
         setTitleColor(m_settings.m_rgbColor);
 
-        applySettings();
+        applySettings(QStringList({"rgbColor", "title", "useReverseAPI", "reverseAPIAddress",
+                                     "reverseAPIPort", "reverseAPIDeviceIndex", "reverseAPIChannelIndex"}));
     }
 
     resetContextMenuType();
@@ -338,14 +339,14 @@ void DOA2GUI::on_phaseCorrection_valueChanged(int value)
 {
     m_settings.m_phase = value;
     ui->phaseCorrectionText->setText(tr("%1").arg(value));
-    applySettings();
+    applySettings(QStringList({"phase"}));
 }
 
 void DOA2GUI::on_correlationType_currentIndexChanged(int index)
 {
     m_settings.m_correlationType = (DOA2Settings::CorrelationType) index;
     updateScopeFScale();
-    applySettings();
+    applySettings(QStringList({"correlationType"}));
 }
 
 void DOA2GUI::on_antAz_valueChanged(int value)
@@ -353,28 +354,28 @@ void DOA2GUI::on_antAz_valueChanged(int value)
     m_settings.m_antennaAz = value;
     ui->compass->setAzAnt(value);
     updateDOA();
-    applySettings();
+    applySettings(QStringList({"antennaAz"}));
 }
 
 void DOA2GUI::on_baselineDistance_valueChanged(int value)
 {
     m_settings.m_basebandDistance = value < 1 ? 1 : value;
     updateDOA();
-    applySettings();
+    applySettings(QStringList({"basebandDistance"}));
 }
 
 void DOA2GUI::on_squelch_valueChanged(int value)
 {
     m_settings.m_squelchdB = value;
     ui->squelchText->setText(tr("%1").arg(m_settings.m_squelchdB, 3));
-    applySettings();
+    applySettings(QStringList({"squelchdB"}));
 }
 
 void DOA2GUI::on_fftAveraging_currentIndexChanged(int index)
 {
     qDebug("DOA2GUI::on_averaging_currentIndexChanged: %d", index);
     m_settings.m_fftAveragingIndex = index;
-    applySettings();
+    applySettings(QStringList({"fftAveragingIndex"}));
     setFFTAveragingTooltip();
 }
 
@@ -417,7 +418,7 @@ void DOA2GUI::applyPosition()
 
     displayRateAndShift();
     updateAbsoluteCenterFrequency();
-    applySettings();
+    applySettings(QStringList({"filterChainHash", "log2Decim"}));
 }
 
 void DOA2GUI::tick()

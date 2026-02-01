@@ -168,6 +168,123 @@ bool DOA2Settings::deserialize(const QByteArray& data)
     }
 }
 
+void DOA2Settings::applySettings(const QStringList& settingsKeys, const DOA2Settings& settings)
+{
+    if (settingsKeys.contains("correlationType")) {
+        m_correlationType = settings.m_correlationType;
+    }
+    if (settingsKeys.contains("rgbColor")) {
+        m_rgbColor = settings.m_rgbColor;
+    }
+    if (settingsKeys.contains("title")) {
+        m_title = settings.m_title;
+    }
+    if (settingsKeys.contains("log2Decim")) {
+        m_log2Decim = settings.m_log2Decim;
+    }
+    if (settingsKeys.contains("filterChainHash")) {
+        m_filterChainHash = settings.m_filterChainHash;
+    }
+    if (settingsKeys.contains("phase")) {
+        m_phase = settings.m_phase;
+    }
+    if (settingsKeys.contains("antennaAz")) {
+        m_antennaAz = settings.m_antennaAz;
+    }
+    if (settingsKeys.contains("basebandDistance")) {
+        m_basebandDistance = settings.m_basebandDistance;
+    }
+    if (settingsKeys.contains("squelchdB")) {
+        m_squelchdB = settings.m_squelchdB;
+    }
+    if (settingsKeys.contains("fftAveragingIndex")) {
+        m_fftAveragingIndex = settings.m_fftAveragingIndex;
+    }
+    if (settingsKeys.contains("useReverseAPI")) {
+        m_useReverseAPI = settings.m_useReverseAPI;
+    }
+    if (settingsKeys.contains("reverseAPIAddress")) {
+        m_reverseAPIAddress = settings.m_reverseAPIAddress;
+    }
+    if (settingsKeys.contains("reverseAPIPort")) {
+        m_reverseAPIPort = settings.m_reverseAPIPort;
+    }
+    if (settingsKeys.contains("reverseAPIDeviceIndex")) {
+        m_reverseAPIDeviceIndex = settings.m_reverseAPIDeviceIndex;
+    }
+    if (settingsKeys.contains("reverseAPIChannelIndex")) {
+        m_reverseAPIChannelIndex = settings.m_reverseAPIChannelIndex;
+    }
+    if (settingsKeys.contains("workspaceIndex")) {
+        m_workspaceIndex = settings.m_workspaceIndex;
+    }
+    if (settingsKeys.contains("geometryBytes")) {
+        m_geometryBytes = settings.m_geometryBytes;
+    }
+    if (settingsKeys.contains("hidden")) {
+        m_hidden = settings.m_hidden;
+    }
+}
+
+QString DOA2Settings::getDebugString(const QStringList& settingsKeys, bool force) const
+{
+    std::ostringstream ostr;
+
+    if (settingsKeys.contains("correlationType") || force) {
+        ostr << " m_correlationType: " << (int)m_correlationType;
+    }
+    if (settingsKeys.contains("rgbColor") || force) {
+        ostr << " m_rgbColor: " << m_rgbColor;
+    }
+    if (settingsKeys.contains("title") || force) {
+        ostr << " m_title: " << m_title.toStdString();
+    }
+    if (settingsKeys.contains("log2Decim") || force) {
+        ostr << " m_log2Decim: " << m_log2Decim;
+    }
+    if (settingsKeys.contains("filterChainHash") || force) {
+        ostr << " m_filterChainHash: " << m_filterChainHash;
+    }
+    if (settingsKeys.contains("phase") || force) {
+        ostr << " m_phase: " << m_phase;
+    }
+    if (settingsKeys.contains("antennaAz") || force) {
+        ostr << " m_antennaAz: " << m_antennaAz;
+    }
+    if (settingsKeys.contains("basebandDistance") || force) {
+        ostr << " m_basebandDistance: " << m_basebandDistance;
+    }
+    if (settingsKeys.contains("squelchdB") || force) {
+        ostr << " m_squelchdB: " << m_squelchdB;
+    }
+    if (settingsKeys.contains("fftAveragingIndex") || force) {
+        ostr << " m_fftAveragingIndex: " << m_fftAveragingIndex;
+    }
+    if (settingsKeys.contains("useReverseAPI") || force) {
+        ostr << " m_useReverseAPI: " << m_useReverseAPI;
+    }
+    if (settingsKeys.contains("reverseAPIAddress") || force) {
+        ostr << " m_reverseAPIAddress: " << m_reverseAPIAddress.toStdString();
+    }
+    if (settingsKeys.contains("reverseAPIPort") || force) {
+        ostr << " m_reverseAPIPort: " << m_reverseAPIPort;
+    }
+    if (settingsKeys.contains("reverseAPIDeviceIndex") || force) {
+        ostr << " m_reverseAPIDeviceIndex: " << m_reverseAPIDeviceIndex;
+    }
+    if (settingsKeys.contains("reverseAPIChannelIndex") || force) {
+        ostr << " m_reverseAPIChannelIndex: " << m_reverseAPIChannelIndex;
+    }
+    if (settingsKeys.contains("workspaceIndex") || force) {
+        ostr << " m_workspaceIndex: " << m_workspaceIndex;
+    }
+    if (settingsKeys.contains("hidden") || force) {
+        ostr << " m_hidden: " << m_hidden;
+    }
+
+    return QString(ostr.str().c_str());
+}
+
 int DOA2Settings::getAveragingValue(int averagingIndex)
 {
     if (averagingIndex <= 0) {

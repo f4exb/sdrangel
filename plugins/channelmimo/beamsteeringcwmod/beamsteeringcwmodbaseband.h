@@ -39,20 +39,23 @@ public:
 
     public:
         const BeamSteeringCWModSettings& getSettings() const { return m_settings; }
+        const QStringList& getSettingsKeys() const { return m_settingsKeys; }
         bool getForce() const { return m_force; }
 
-        static MsgConfigureBeamSteeringCWModBaseband* create(const BeamSteeringCWModSettings& settings, bool force)
+        static MsgConfigureBeamSteeringCWModBaseband* create(const QStringList& settingsKeys, const BeamSteeringCWModSettings& settings, bool force)
         {
-            return new MsgConfigureBeamSteeringCWModBaseband(settings, force);
+            return new MsgConfigureBeamSteeringCWModBaseband(settingsKeys, settings, force);
         }
 
     private:
         BeamSteeringCWModSettings m_settings;
+        QStringList m_settingsKeys;
         bool m_force;
 
-        MsgConfigureBeamSteeringCWModBaseband(const BeamSteeringCWModSettings& settings, bool force) :
+        MsgConfigureBeamSteeringCWModBaseband(const QStringList& settingsKeys, const BeamSteeringCWModSettings& settings, bool force) :
             Message(),
             m_settings(settings),
+            m_settingsKeys(settingsKeys),
             m_force(force)
         { }
     };
@@ -85,7 +88,7 @@ public:
 private:
     void processFifo(std::vector<SampleVector>& data, unsigned int ibegin, unsigned int iend);
     bool handleMessage(const Message& cmd);
-    void applySettings(const BeamSteeringCWModSettings& settings, bool force = false);
+    void applySettings(const QStringList& settingsKeys, const BeamSteeringCWModSettings& settings, bool force = false);
 
     BeamSteeringCWModSettings m_settings;
     SampleMOFifo m_sampleMOFifo;

@@ -118,7 +118,7 @@ void BeamSteeringCWMod::startSources()
     m_basebandSource->getInputMessageQueue()->push(sig);
 
     BeamSteeringCWModBaseband::MsgConfigureBeamSteeringCWModBaseband *msg = BeamSteeringCWModBaseband::MsgConfigureBeamSteeringCWModBaseband::create(
-        m_settings, true);
+        QStringList(), m_settings, true);
     m_basebandSource->getInputMessageQueue()->push(msg);
 }
 
@@ -152,42 +152,13 @@ void BeamSteeringCWMod::feed(const SampleVector::const_iterator& begin, const Sa
     (void) sinkIndex;
 }
 
-void BeamSteeringCWMod::applySettings(const BeamSteeringCWModSettings& settings, bool force)
+void BeamSteeringCWMod::applySettings(const QStringList& settingsKeys, const BeamSteeringCWModSettings& settings, bool force)
 {
-    qDebug() << "BeamSteeringCWMod::applySettings: "
-        << "m_steerDegrees: " << settings.m_steerDegrees
-        << "m_channelOutput: " << settings.m_channelOutput
-        << "m_filterChainHash: " << settings.m_filterChainHash
-        << "m_log2Interp: " << settings.m_log2Interp
-        << "m_filterChainHash: " << settings.m_filterChainHash
-        << "m_useReverseAPI: " << settings.m_useReverseAPI
-        << "m_reverseAPIAddress: " << settings.m_reverseAPIAddress
-        << "m_reverseAPIPort: " << settings.m_reverseAPIPort
-        << "m_reverseAPIDeviceIndex: " << settings.m_reverseAPIDeviceIndex
-        << "m_reverseAPIChannelIndex: " << settings.m_reverseAPIChannelIndex
-        << "m_title: " << settings.m_title;
-
-    QList<QString> reverseAPIKeys;
-
-    if ((m_settings.m_steerDegrees != settings.m_steerDegrees) || force) {
-        reverseAPIKeys.append("steerDegrees");
-    }
-    if ((m_settings.m_channelOutput != settings.m_channelOutput) || force) {
-        reverseAPIKeys.append("channelOutput");
-    }
-    if ((m_settings.m_filterChainHash != settings.m_filterChainHash) || force) {
-        reverseAPIKeys.append("filterChainHash");
-    }
-    if ((m_settings.m_log2Interp != settings.m_log2Interp) || force) {
-        reverseAPIKeys.append("log2Interp");
-    }
-    if ((m_settings.m_filterChainHash != settings.m_filterChainHash) || force) {
-        reverseAPIKeys.append("filterChainHash");
-    }
+    qDebug() << "BeamSteeringCWMod::applySettings: " << settings.getDebugString(settingsKeys, force);
 
     if (m_running)
     {
-        BeamSteeringCWModBaseband::MsgConfigureBeamSteeringCWModBaseband *msg = BeamSteeringCWModBaseband::MsgConfigureBeamSteeringCWModBaseband::create(settings, force);
+        BeamSteeringCWModBaseband::MsgConfigureBeamSteeringCWModBaseband *msg = BeamSteeringCWModBaseband::MsgConfigureBeamSteeringCWModBaseband::create(settingsKeys, settings, force);
         m_basebandSource->getInputMessageQueue()->push(msg);
     }
 
@@ -195,10 +166,14 @@ void BeamSteeringCWMod::applySettings(const BeamSteeringCWModSettings& settings,
     MainCore::instance()->getMessagePipes().getMessagePipes(this, "settings", pipes);
 
     if (!pipes.empty()) {
-        sendChannelSettings(pipes, reverseAPIKeys, settings, force);
+        sendChannelSettings(pipes, settingsKeys, settings, force);
     }
 
-    m_settings = settings;
+    if (force) {
+        m_settings = settings;
+    } else {
+        m_settings.applySettings(settingsKeys, settings);
+    }
 }
 
 void BeamSteeringCWMod::handleInputMessages()
@@ -220,7 +195,7 @@ bool BeamSteeringCWMod::handleMessage(const Message& cmd)
     {
         auto& cfg = (const MsgConfigureBeamSteeringCWMod&) cmd;
         qDebug() << "BeamSteeringCWMod::handleMessage: MsgConfigureBeamSteeringCWMod";
-        applySettings(cfg.getSettings(), cfg.getForce());
+        applySettings(cfg.getSettingsKeys(), cfg.getSettings(), cfg.getForce());
         return true;
     }
     else if (DSPMIMOSignalNotification::match(cmd))
@@ -274,14 +249,14 @@ bool BeamSteeringCWMod::deserialize(const QByteArray& data)
     (void) data;
     if (m_settings.deserialize(data))
     {
-        MsgConfigureBeamSteeringCWMod *msg = MsgConfigureBeamSteeringCWMod::create(m_settings, true);
+        MsgConfigureBeamSteeringCWMod *msg = MsgConfigureBeamSteeringCWMod::create(QStringList(), m_settings, true);
         m_inputMessageQueue.push(msg);
         return true;
     }
     else
     {
         m_settings.resetToDefaults();
-        MsgConfigureBeamSteeringCWMod *msg = MsgConfigureBeamSteeringCWMod::create(m_settings, true);
+        MsgConfigureBeamSteeringCWMod *msg = MsgConfigureBeamSteeringCWMod::create(QStringList(), m_settings, true);
         m_inputMessageQueue.push(msg);
         return false;
     }
@@ -334,12 +309,12 @@ int BeamSteeringCWMod::webapiSettingsPutPatch(
     BeamSteeringCWModSettings settings = m_settings;
     webapiUpdateChannelSettings(settings, channelSettingsKeys, response);
 
-    MsgConfigureBeamSteeringCWMod *msg = MsgConfigureBeamSteeringCWMod::create(settings, force);
+    MsgConfigureBeamSteeringCWMod *msg = MsgConfigureBeamSteeringCWMod::create(channelSettingsKeys, settings, force);
     m_inputMessageQueue.push(msg);
 
     if (getMessageQueueToGUI()) // forward to GUI if any
     {
-        MsgConfigureBeamSteeringCWMod *msgToGUI = MsgConfigureBeamSteeringCWMod::create(settings, force);
+        MsgConfigureBeamSteeringCWMod *msgToGUI = MsgConfigureBeamSteeringCWMod::create(channelSettingsKeys, settings, force);
         getMessageQueueToGUI()->push(msgToGUI);
     }
 

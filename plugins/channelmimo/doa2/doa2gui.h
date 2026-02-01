@@ -84,7 +84,7 @@ private:
 	~DOA2GUI() final;
 
 	void blockApplySettings(bool block);
-	void applySettings(bool force = false);
+	void applySettings(const QStringList& settingsKeys, bool force = false);
     void applyDecimation();
     void applyPosition();
 	void displaySettings();

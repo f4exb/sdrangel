@@ -183,7 +183,7 @@ void Interferometer::pull(SampleVector::iterator& begin, unsigned int nbSamples,
 
 void Interferometer::applySettings(const InterferometerSettings& settings, const QList<QString>& settingsKeys, bool force)
 {
-    qDebug() << "Interferometer::applySettings:" << settings.getDebugString(settingsKeys, force) << "force: " << force;
+    qDebug() << "Interferometer::applySettings:" << settings.getDebugString(settingsKeys, force);
 
     if (m_running && (settingsKeys.contains("log2Decim")
         || settingsKeys.contains("filterChainHash") || force))

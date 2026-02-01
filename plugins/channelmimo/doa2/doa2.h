@@ -45,20 +45,23 @@ public:
 
     public:
         const DOA2Settings& getSettings() const { return m_settings; }
+        const QStringList& getSettingsKeys() const { return m_settingsKeys; }
         bool getForce() const { return m_force; }
 
-        static MsgConfigureDOA2* create(const DOA2Settings& settings, bool force)
+        static MsgConfigureDOA2* create(const QStringList& settingsKeys, const DOA2Settings& settings, bool force)
         {
-            return new MsgConfigureDOA2(settings, force);
+            return new MsgConfigureDOA2(settingsKeys, settings, force);
         }
 
     private:
         DOA2Settings m_settings;
+        QStringList m_settingsKeys;
         bool m_force;
 
-        MsgConfigureDOA2(const DOA2Settings& settings, bool force) :
+        MsgConfigureDOA2(const QStringList& settingsKeys, const DOA2Settings& settings, bool force) :
             Message(),
             m_settings(settings),
+            m_settingsKeys(settingsKeys),
             m_force(force)
         { }
     };
@@ -175,7 +178,7 @@ private:
     qint64 m_deviceCenterFrequency;
 
 	bool handleMessage(const Message& cmd) final; //!< Processing of a message. Returns true if message has actually been processed
-    void applySettings(const DOA2Settings& settings, bool force = false);
+    void applySettings(const QStringList& settingsKeys, const DOA2Settings& settings, bool force = false);
     static void validateFilterChainHash(DOA2Settings& settings);
     void calculateFrequencyOffset();
     void webapiFormatChannelReport(SWGSDRangel::SWGChannelReport& response) const;

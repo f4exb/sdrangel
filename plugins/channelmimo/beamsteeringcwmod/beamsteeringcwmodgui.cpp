@@ -38,7 +38,7 @@ void BeamSteeringCWModGUI::resetToDefaults()
 {
     m_settings.resetToDefaults();
     displaySettings();
-    applySettings(true);
+    applySettings(QStringList(), true);
 }
 
 QByteArray BeamSteeringCWModGUI::serialize() const
@@ -50,7 +50,7 @@ bool BeamSteeringCWModGUI::deserialize(const QByteArray& data)
 {
     if(m_settings.deserialize(data)) {
         displaySettings();
-        applySettings(true);
+        applySettings(QStringList(), true);
         return true;
     } else {
         resetToDefaults();
@@ -128,7 +128,7 @@ BeamSteeringCWModGUI::BeamSteeringCWModGUI(PluginAPI* pluginAPI, DeviceUISet *de
     displaySettings();
     makeUIConnections();
     displayRateAndShift();
-    applySettings(true);
+    applySettings(QStringList(), true);
     m_resizer.enableChildMouseTracking();
 }
 
@@ -142,13 +142,13 @@ void BeamSteeringCWModGUI::blockApplySettings(bool block)
     m_doApplySettings = !block;
 }
 
-void BeamSteeringCWModGUI::applySettings(bool force)
+void BeamSteeringCWModGUI::applySettings(const QStringList& settingsKeys, bool force)
 {
     if (m_doApplySettings)
     {
         setTitleColor(m_channelMarker.getColor());
 
-        BeamSteeringCWMod::MsgConfigureBeamSteeringCWMod* message = BeamSteeringCWMod::MsgConfigureBeamSteeringCWMod::create(m_settings, force);
+        BeamSteeringCWMod::MsgConfigureBeamSteeringCWMod* message = BeamSteeringCWMod::MsgConfigureBeamSteeringCWMod::create(settingsKeys, m_settings, force);
         m_bsCWSource->getInputMessageQueue()->push(message);
     }
 }
@@ -216,7 +216,7 @@ void BeamSteeringCWModGUI::onWidgetRolled(const QWidget* widget, bool rollDown)
     (void) rollDown;
 
     getRollupContents()->saveState(m_rollupState);
-    applySettings();
+    applySettings(QStringList());
 }
 
 void BeamSteeringCWModGUI::onMenuDialogCalled(const QPoint &p)
@@ -247,7 +247,15 @@ void BeamSteeringCWModGUI::onMenuDialogCalled(const QPoint &p)
         setTitle(m_channelMarker.getTitle());
         setTitleColor(m_settings.m_rgbColor);
 
-        applySettings();
+        applySettings(QStringList({
+            "rgbColor",
+            "title",
+            "useReverseAPI",
+            "reverseAPIAddress",
+            "reverseAPIPort",
+            "reverseAPIDeviceIndex",
+            "reverseAPIChannelIndex"
+        }));
     }
 
     resetContextMenuType();
@@ -256,7 +264,7 @@ void BeamSteeringCWModGUI::onMenuDialogCalled(const QPoint &p)
 void BeamSteeringCWModGUI::on_channelOutput_currentIndexChanged(int index)
 {
     m_settings.m_channelOutput = index;
-    applySettings();
+    applySettings(QStringList("channelOutput"));
 }
 
 void BeamSteeringCWModGUI::on_interpolationFactor_currentIndexChanged(int index)
@@ -275,7 +283,7 @@ void BeamSteeringCWModGUI::on_steeringDegrees_valueChanged(int value)
 {
     m_settings.m_steerDegrees = value;
     ui->steeringDegreesText->setText(tr("%1").arg(m_settings.m_steerDegrees));
-    applySettings();
+    applySettings(QStringList("steerDegrees"));
 }
 
 void BeamSteeringCWModGUI::applyInterpolation()
@@ -301,7 +309,7 @@ void BeamSteeringCWModGUI::applyPosition()
 
     displayRateAndShift();
     updateAbsoluteCenterFrequency();
-    applySettings();
+    applySettings(QStringList({"filterChainHash", "log2Interp"}));
 }
 
 void BeamSteeringCWModGUI::tick()
