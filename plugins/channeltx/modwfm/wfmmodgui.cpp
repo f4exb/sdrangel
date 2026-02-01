@@ -58,7 +58,7 @@ void WFMModGUI::resetToDefaults()
 {
     m_settings.resetToDefaults();
     displaySettings();
-    applySettings(true);
+    applySettings(QStringList(), true);
 }
 
 QByteArray WFMModGUI::serialize() const
@@ -70,7 +70,7 @@ bool WFMModGUI::deserialize(const QByteArray& data)
 {
     if(m_settings.deserialize(data)) {
         displaySettings();
-        applySettings(true);
+        applySettings(QStringList(), true);
         return true;
     } else {
         resetToDefaults();
@@ -131,7 +131,7 @@ void WFMModGUI::channelMarkerChangedByCursor()
 {
     ui->deltaFrequency->setValue(m_channelMarker.getCenterFrequency());
     m_settings.m_inputFrequencyOffset = m_channelMarker.getCenterFrequency();
-	applySettings();
+	applySettings(QStringList("inputFrequencyOffset"));
 }
 
 void WFMModGUI::handleSourceMessages()
@@ -152,7 +152,7 @@ void WFMModGUI::on_deltaFrequency_changed(qint64 value)
     m_channelMarker.setCenterFrequency(value);
     m_settings.m_inputFrequencyOffset = m_channelMarker.getCenterFrequency();
     updateAbsoluteCenterFrequency();
-    applySettings();
+    applySettings(QStringList("inputFrequencyOffset"));
 }
 
 void WFMModGUI::on_rfBW_currentIndexChanged(int index)
@@ -160,47 +160,47 @@ void WFMModGUI::on_rfBW_currentIndexChanged(int index)
     float rfBW = WFMModSettings::getRFBW(index);
 	m_channelMarker.setBandwidth(rfBW);
 	m_settings.m_rfBandwidth = rfBW;
-	applySettings();
+	applySettings(QStringList("rfBandwidth"));
 }
 
 void WFMModGUI::on_afBW_valueChanged(int value)
 {
 	ui->afBWText->setText(QString("%1k").arg(value));
 	m_settings.m_afBandwidth = value * 1000.0;
-	applySettings();
+	applySettings(QStringList("afBandwidth"));
 }
 
 void WFMModGUI::on_fmDev_valueChanged(int value)
 {
 	ui->fmDevText->setText(QString("%1k").arg(value));
 	m_settings.m_fmDeviation = value * 1000.0;
-	applySettings();
+	applySettings(QStringList("fmDeviation"));
 }
 
 void WFMModGUI::on_volume_valueChanged(int value)
 {
 	ui->volumeText->setText(QString("%1").arg(value / 10.0, 0, 'f', 1));
 	m_settings.m_volumeFactor = value / 10.0;
-	applySettings();
+	applySettings(QStringList("volumeFactor"));
 }
 
 void WFMModGUI::on_toneFrequency_valueChanged(int value)
 {
     ui->toneFrequencyText->setText(QString("%1k").arg(value / 100.0, 0, 'f', 2));
     m_settings.m_toneFrequency = value * 10.0;
-    applySettings();
+    applySettings(QStringList("toneFrequency"));
 }
 
 void WFMModGUI::on_channelMute_toggled(bool checked)
 {
     m_settings.m_channelMute = checked;
-	applySettings();
+	applySettings(QStringList("channelMute"));
 }
 
 void WFMModGUI::on_playLoop_toggled(bool checked)
 {
     m_settings.m_playLoop = checked;
-	applySettings();
+	applySettings(QStringList("playLoop"));
 }
 
 void WFMModGUI::on_play_toggled(bool checked)
@@ -209,7 +209,7 @@ void WFMModGUI::on_play_toggled(bool checked)
     ui->mic->setEnabled(!checked);
     ui->morseKeyer->setEnabled(!checked);
     m_settings.m_modAFInput = checked ? WFMModSettings::WFMModInputFile : WFMModSettings::WFMModInputNone;
-    applySettings();
+    applySettings(QStringList("modAFInput"));
     ui->navTimeSlider->setEnabled(!checked);
     m_enableNavTime = !checked;
 }
@@ -220,7 +220,7 @@ void WFMModGUI::on_tone_toggled(bool checked)
     ui->mic->setEnabled(!checked);
     ui->morseKeyer->setEnabled(!checked);
     m_settings.m_modAFInput = checked ? WFMModSettings::WFMModInputTone : WFMModSettings::WFMModInputNone;
-    applySettings();
+    applySettings(QStringList("modAFInput"));
 }
 
 void WFMModGUI::on_morseKeyer_toggled(bool checked)
@@ -229,7 +229,7 @@ void WFMModGUI::on_morseKeyer_toggled(bool checked)
     ui->mic->setEnabled(!checked);
     ui->play->setEnabled(!checked);
     m_settings.m_modAFInput = checked ? WFMModSettings::WFMModInputCWTone : WFMModSettings::WFMModInputNone;
-    applySettings();
+    applySettings(QStringList("modAFInput"));
 }
 
 void WFMModGUI::on_mic_toggled(bool checked)
@@ -238,20 +238,20 @@ void WFMModGUI::on_mic_toggled(bool checked)
     ui->tone->setEnabled(!checked); // release other source inputs
     ui->morseKeyer->setEnabled(!checked);
     m_settings.m_modAFInput = checked ? WFMModSettings::WFMModInputAudio : WFMModSettings::WFMModInputNone;
-    applySettings();
+    applySettings(QStringList("modAFInput"));
 }
 
 void WFMModGUI::on_feedbackEnable_toggled(bool checked)
 {
     m_settings.m_feedbackAudioEnable = checked;
-    applySettings();
+    applySettings(QStringList("feedbackAudioEnable"));
 }
 
 void WFMModGUI::on_feedbackVolume_valueChanged(int value)
 {
     ui->feedbackVolumeText->setText(QString("%1").arg(value / 100.0, 0, 'f', 2));
     m_settings.m_feedbackVolumeFactor = value / 100.0;
-    applySettings();
+    applySettings(QStringList("feedbackVolumeFactor"));
 }
 
 void WFMModGUI::on_navTimeSlider_valueChanged(int value)
@@ -295,7 +295,7 @@ void WFMModGUI::onWidgetRolled(QWidget* widget, bool rollDown)
     (void) rollDown;
 
     getRollupContents()->saveState(m_rollupState);
-    applySettings();
+    applySettings(QStringList());
 }
 
 void WFMModGUI::onMenuDialogCalled(const QPoint &p)
@@ -340,7 +340,9 @@ void WFMModGUI::onMenuDialogCalled(const QPoint &p)
             updateIndexLabel();
         }
 
-        applySettings();
+        applySettings(QStringList({"title", "rgbColor", "useReverseAPI",
+            "reverseAPIAddress", "reverseAPIPort", "reverseAPIDeviceIndex",
+            "reverseAPIChannelIndex", "streamIndex"}));
     }
 
     resetContextMenuType();
@@ -427,7 +429,7 @@ WFMModGUI::WFMModGUI(PluginAPI* pluginAPI, DeviceUISet *deviceUISet, BasebandSam
 
 	displaySettings();
     makeUIConnections();
-    applySettings(true);
+    applySettings(QStringList(), true);
     DialPopup::addPopupsToChildDials(this);
     m_resizer.enableChildMouseTracking();
 }
@@ -442,11 +444,11 @@ void WFMModGUI::blockApplySettings(bool block)
     m_doApplySettings = !block;
 }
 
-void WFMModGUI::applySettings(bool force)
+void WFMModGUI::applySettings(const QStringList& settingsKeys, bool force)
 {
 	if (m_doApplySettings)
 	{
-		WFMMod::MsgConfigureWFMMod *msgConf = WFMMod::MsgConfigureWFMMod::create(m_settings, force);
+		WFMMod::MsgConfigureWFMMod *msgConf = WFMMod::MsgConfigureWFMMod::create(settingsKeys, m_settings, force);
 		m_wfmMod->getInputMessageQueue()->push(msgConf);
 	}
 }
@@ -528,7 +530,7 @@ void WFMModGUI::audioSelect(const QPoint& p)
     if (audioSelect.m_selected)
     {
         m_settings.m_audioDeviceName = audioSelect.m_audioDeviceName;
-        applySettings();
+        applySettings(QStringList("audioDeviceName"));
     }
 }
 
@@ -543,7 +545,7 @@ void WFMModGUI::audioFeedbackSelect(const QPoint& p)
     if (audioSelect.m_selected)
     {
         m_settings.m_feedbackAudioDeviceName = audioSelect.m_audioDeviceName;
-        applySettings();
+        applySettings(QStringList("feedbackAudioDeviceName"));
     }
 }
 

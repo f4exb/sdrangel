@@ -126,7 +126,7 @@ bool ATVDemodBaseband::handleMessage(const Message& cmd)
         MsgConfigureATVDemodBaseband& cfg = (MsgConfigureATVDemodBaseband&) cmd;
         qDebug() << "ATVDemodBaseband::handleMessage: MsgConfigureATVDemodBaseband";
 
-        applySettings(cfg.getSettings(), cfg.getForce());
+        applySettings(cfg.getSettingsKeys(), cfg.getSettings(), cfg.getForce());
 
         return true;
     }
@@ -147,18 +147,18 @@ bool ATVDemodBaseband::handleMessage(const Message& cmd)
     }
 }
 
-void ATVDemodBaseband::applySettings(const ATVDemodSettings& settings, bool force)
+void ATVDemodBaseband::applySettings(const QStringList& settingsKeys, const ATVDemodSettings& settings, bool force)
 {
-    qDebug("ATVDemodBaseband::applySettings");
+    qDebug() << "ATVDemodBaseband::applySettings" << settings.getDebugString(settingsKeys, force);
 
-    if ((settings.m_inputFrequencyOffset != m_settings.m_inputFrequencyOffset)|| force)
+    if ((settingsKeys.contains("m_inputFrequencyOffset") && (settings.m_inputFrequencyOffset != m_settings.m_inputFrequencyOffset)) || force)
     {
         unsigned int desiredSampleRate = m_channelizer->getBasebandSampleRate();
         m_channelizer->setChannelization(desiredSampleRate, settings.m_inputFrequencyOffset);
         m_sink.applyChannelSettings(m_channelizer->getChannelSampleRate(), m_channelizer->getChannelFrequencyOffset());
     }
 
-    m_sink.applySettings(settings, force);
+    m_sink.applySettings(settingsKeys, settings, force);
     m_settings = settings;
 }
 

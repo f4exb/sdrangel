@@ -61,7 +61,7 @@ WFMDemod::WFMDemod(DeviceAPI* deviceAPI) :
         m_basebandSampleRate(0)
 {
 	setObjectName(m_channelId);
-	applySettings(m_settings, true);
+	applySettings(QStringList(), m_settings, true);
 
     m_deviceAPI->addChannelSink(this);
     m_deviceAPI->addChannelSinkAPI(this);
@@ -145,7 +145,7 @@ void WFMDemod::start()
     m_basebandSink->reset();
     m_thread->start();
 
-    WFMDemodBaseband::MsgConfigureWFMDemodBaseband *msg = WFMDemodBaseband::MsgConfigureWFMDemodBaseband::create(m_settings, true);
+    WFMDemodBaseband::MsgConfigureWFMDemodBaseband *msg = WFMDemodBaseband::MsgConfigureWFMDemodBaseband::create(QStringList(), m_settings, true);
     m_basebandSink->getInputMessageQueue()->push(msg);
 
     m_running = true;
@@ -170,7 +170,7 @@ bool WFMDemod::handleMessage(const Message& cmd)
         MsgConfigureWFMDemod& cfg = (MsgConfigureWFMDemod&) cmd;
         qDebug("WFMDemod::handleMessage: MsgConfigureWFMDemod");
 
-        applySettings(cfg.getSettings(), cfg.getForce());
+        applySettings(cfg.getSettingsKeys(), cfg.getSettings(), cfg.getForce());
 
         return true;
     }
@@ -211,64 +211,20 @@ void WFMDemod::setCenterFrequency(qint64 frequency)
 {
     WFMDemodSettings settings = m_settings;
     settings.m_inputFrequencyOffset = frequency;
-    applySettings(settings, false);
+    applySettings(QStringList("inputFrequencyOffset"), settings, false);
 
     if (m_guiMessageQueue) // forward to GUI if any
     {
-        MsgConfigureWFMDemod *msgToGUI = MsgConfigureWFMDemod::create(settings, false);
+        MsgConfigureWFMDemod *msgToGUI = MsgConfigureWFMDemod::create(QStringList("inputFrequencyOffset"), settings, false);
         m_guiMessageQueue->push(msgToGUI);
     }
 }
 
-void WFMDemod::applySettings(const WFMDemodSettings& settings, bool force)
+void WFMDemod::applySettings(const QStringList& settingsKeys, const WFMDemodSettings& settings, bool force)
 {
-    qDebug() << "WFMDemod::applySettings:"
-            << " m_inputFrequencyOffset: " << settings.m_inputFrequencyOffset
-            << " m_rfBandwidth: " << settings.m_rfBandwidth
-            << " m_afBandwidth: " << settings.m_afBandwidth
-            << " m_volume: " << settings.m_volume
-            << " m_squelch: " << settings.m_squelch
-            << " m_audioDeviceName: " << settings.m_audioDeviceName
-            << " m_audioMute: " << settings.m_audioMute
-            << " m_streamIndex: " << settings.m_streamIndex
-            << " m_useReverseAPI: " << settings.m_useReverseAPI
-            << " m_reverseAPIAddress: " << settings.m_reverseAPIAddress
-            << " m_reverseAPIPort: " << settings.m_reverseAPIPort
-            << " m_reverseAPIDeviceIndex: " << settings.m_reverseAPIDeviceIndex
-            << " m_reverseAPIChannelIndex: " << settings.m_reverseAPIChannelIndex
-            << " force: " << force;
+    qDebug() << "WFMDemod::applySettings:" << settings.getDebugString(settingsKeys, force);
 
-    QList<QString> reverseAPIKeys;
-
-    if((settings.m_inputFrequencyOffset != m_settings.m_inputFrequencyOffset) || force) {
-        reverseAPIKeys.append("inputFrequencyOffset");
-    }
-    if((settings.m_rfBandwidth != m_settings.m_rfBandwidth) || force) {
-        reverseAPIKeys.append("rfBandwidth");
-    }
-    if((settings.m_afBandwidth != m_settings.m_afBandwidth) || force) {
-        reverseAPIKeys.append("afBandwidth");
-    }
-    if((settings.m_volume != m_settings.m_volume) || force) {
-        reverseAPIKeys.append("volume");
-    }
-    if((settings.m_squelch != m_settings.m_squelch) || force) {
-        reverseAPIKeys.append("squelch");
-    }
-    if((settings.m_audioMute != m_settings.m_audioMute) || force) {
-        reverseAPIKeys.append("audioMute");
-    }
-    if((settings.m_audioDeviceName != m_settings.m_audioDeviceName) || force) {
-        reverseAPIKeys.append("audioDeviceName");
-    }
-    if((settings.m_title != m_settings.m_title) || force) {
-        reverseAPIKeys.append("title");
-    }
-    if((settings.m_rgbColor != m_settings.m_rgbColor) || force) {
-        reverseAPIKeys.append("rgbColor");
-    }
-
-    if (m_settings.m_streamIndex != settings.m_streamIndex)
+    if (settingsKeys.contains("streamIndex") && (m_settings.m_streamIndex != settings.m_streamIndex))
     {
         if (m_deviceAPI->getSampleMIMO()) // change of stream is possible for MIMO devices only
         {
@@ -279,34 +235,36 @@ void WFMDemod::applySettings(const WFMDemodSettings& settings, bool force)
             m_settings.m_streamIndex = settings.m_streamIndex; // make sure ChannelAPI::getStreamIndex() is consistent
             emit streamIndexChanged(settings.m_streamIndex);
         }
-
-        reverseAPIKeys.append("streamIndex");
     }
 
     if (m_running)
     {
-        WFMDemodBaseband::MsgConfigureWFMDemodBaseband *msg = WFMDemodBaseband::MsgConfigureWFMDemodBaseband::create(settings, force);
+        WFMDemodBaseband::MsgConfigureWFMDemodBaseband *msg = WFMDemodBaseband::MsgConfigureWFMDemodBaseband::create(settingsKeys, settings, force);
         m_basebandSink->getInputMessageQueue()->push(msg);
     }
 
-    if (settings.m_useReverseAPI)
+    if (settingsKeys.contains("useReverseAPI") && (m_settings.m_useReverseAPI != settings.m_useReverseAPI))
     {
-        bool fullUpdate = ((m_settings.m_useReverseAPI != settings.m_useReverseAPI) && settings.m_useReverseAPI) ||
-                (m_settings.m_reverseAPIAddress != settings.m_reverseAPIAddress) ||
-                (m_settings.m_reverseAPIPort != settings.m_reverseAPIPort) ||
-                (m_settings.m_reverseAPIDeviceIndex != settings.m_reverseAPIDeviceIndex) ||
-                (m_settings.m_reverseAPIChannelIndex != settings.m_reverseAPIChannelIndex);
-        webapiReverseSendSettings(reverseAPIKeys, settings, fullUpdate || force);
+        bool fullUpdate = ((settingsKeys.contains("useReverseAPI") && (m_settings.m_useReverseAPI != settings.m_useReverseAPI)) && settings.m_useReverseAPI) ||
+                (settingsKeys.contains("reverseAPIAddress") && (m_settings.m_reverseAPIAddress != settings.m_reverseAPIAddress)) ||
+                (settingsKeys.contains("reverseAPIPort") && (m_settings.m_reverseAPIPort != settings.m_reverseAPIPort)) ||
+                (settingsKeys.contains("reverseAPIDeviceIndex") && (m_settings.m_reverseAPIDeviceIndex != settings.m_reverseAPIDeviceIndex)) ||
+                (settingsKeys.contains("reverseAPIChannelIndex") && (m_settings.m_reverseAPIChannelIndex != settings.m_reverseAPIChannelIndex));
+        webapiReverseSendSettings(settingsKeys, settings, fullUpdate || force);
     }
 
     QList<ObjectPipe*> pipes;
     MainCore::instance()->getMessagePipes().getMessagePipes(this, "settings", pipes);
 
     if (pipes.size() > 0) {
-        sendChannelSettings(pipes, reverseAPIKeys, settings, force);
+        sendChannelSettings(pipes, settingsKeys, settings, force);
     }
 
-    m_settings = settings;
+    if (force) {
+        m_settings = settings;
+    } else {
+        m_settings.applySettings(settingsKeys, settings);
+    }
 }
 
 QByteArray WFMDemod::serialize() const
@@ -318,14 +276,14 @@ bool WFMDemod::deserialize(const QByteArray& data)
 {
     if (m_settings.deserialize(data))
     {
-        MsgConfigureWFMDemod *msg = MsgConfigureWFMDemod::create(m_settings, true);
+        MsgConfigureWFMDemod *msg = MsgConfigureWFMDemod::create(QStringList(), m_settings, true);
         m_inputMessageQueue.push(msg);
         return true;
     }
     else
     {
         m_settings.resetToDefaults();
-        MsgConfigureWFMDemod *msg = MsgConfigureWFMDemod::create(m_settings, true);
+        MsgConfigureWFMDemod *msg = MsgConfigureWFMDemod::create(QStringList(), m_settings, true);
         m_inputMessageQueue.push(msg);
         return false;
     }
@@ -381,13 +339,13 @@ int WFMDemod::webapiSettingsPutPatch(
     WFMDemodSettings settings = m_settings;
     webapiUpdateChannelSettings(settings, channelSettingsKeys, response);
 
-    MsgConfigureWFMDemod *msg = MsgConfigureWFMDemod::create(settings, force);
+    MsgConfigureWFMDemod *msg = MsgConfigureWFMDemod::create(channelSettingsKeys, settings, force);
     m_inputMessageQueue.push(msg);
 
     qDebug("WFMDemod::webapiSettingsPutPatch: forward to GUI: %p", m_guiMessageQueue);
     if (m_guiMessageQueue) // forward to GUI if any
     {
-        MsgConfigureWFMDemod *msgToGUI = MsgConfigureWFMDemod::create(settings, force);
+        MsgConfigureWFMDemod *msgToGUI = MsgConfigureWFMDemod::create(channelSettingsKeys, settings, force);
         m_guiMessageQueue->push(msgToGUI);
     }
 
@@ -545,7 +503,7 @@ void WFMDemod::webapiFormatChannelReport(SWGSDRangel::SWGChannelReport& response
     response.getWfmDemodReport()->setChannelSampleRate(m_basebandSink->getChannelSampleRate());
 }
 
-void WFMDemod::webapiReverseSendSettings(QList<QString>& channelSettingsKeys, const WFMDemodSettings& settings, bool force)
+void WFMDemod::webapiReverseSendSettings(const QList<QString>& channelSettingsKeys, const WFMDemodSettings& settings, bool force)
 {
     SWGSDRangel::SWGChannelSettings *swgChannelSettings = new SWGSDRangel::SWGChannelSettings();
     webapiFormatChannelSettings(channelSettingsKeys, swgChannelSettings, settings, force);
@@ -572,7 +530,7 @@ void WFMDemod::webapiReverseSendSettings(QList<QString>& channelSettingsKeys, co
 
 void WFMDemod::sendChannelSettings(
     const QList<ObjectPipe*>& pipes,
-    QList<QString>& channelSettingsKeys,
+    const QList<QString>& channelSettingsKeys,
     const WFMDemodSettings& settings,
     bool force)
 {
@@ -596,7 +554,7 @@ void WFMDemod::sendChannelSettings(
 }
 
 void WFMDemod::webapiFormatChannelSettings(
-        QList<QString>& channelSettingsKeys,
+        const QList<QString>& channelSettingsKeys,
         SWGSDRangel::SWGChannelSettings *swgChannelSettings,
         const WFMDemodSettings& settings,
         bool force

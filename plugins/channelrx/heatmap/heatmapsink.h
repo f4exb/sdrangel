@@ -48,7 +48,7 @@ public:
 
     void setScopeSink(ScopeVis* scopeSink) { m_scopeSink = scopeSink; }
     void applyChannelSettings(int channelSampleRate, int channelFrequencyOffset, bool force = false);
-    void applySettings(const HeatMapSettings& settings, bool force = false);
+    void applySettings(const QStringList& settingsKeys, const HeatMapSettings& settings, bool force = false);
     void setMessageQueueToChannel(MessageQueue *messageQueue) { m_messageQueueToChannel = messageQueue; }
     void setChannel(ChannelAPI *channel) { m_channel = channel; }
 
@@ -150,4 +150,3 @@ private:
 };
 
 #endif // INCLUDE_HEATMAPSINK_H
-

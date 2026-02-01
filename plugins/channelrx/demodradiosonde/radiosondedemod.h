@@ -56,19 +56,22 @@ public:
     public:
         const RadiosondeDemodSettings& getSettings() const { return m_settings; }
         bool getForce() const { return m_force; }
+        const QStringList& getSettingsKeys() const { return m_settingsKeys; }
 
-        static MsgConfigureRadiosondeDemod* create(const RadiosondeDemodSettings& settings, bool force)
+        static MsgConfigureRadiosondeDemod* create(const QStringList& settingsKeys, const RadiosondeDemodSettings& settings, bool force)
         {
-            return new MsgConfigureRadiosondeDemod(settings, force);
+            return new MsgConfigureRadiosondeDemod(settingsKeys, settings, force);
         }
 
     private:
         RadiosondeDemodSettings m_settings;
+        QStringList m_settingsKeys;
         bool m_force;
 
-        MsgConfigureRadiosondeDemod(const RadiosondeDemodSettings& settings, bool force) :
+        MsgConfigureRadiosondeDemod(const QStringList& settingsKeys, const RadiosondeDemodSettings& settings, bool force) :
             Message(),
             m_settings(settings),
+            m_settingsKeys(settingsKeys),
             m_force(force)
         { }
     };
@@ -189,11 +192,11 @@ private:
     QHash<QString, RS41Subframe *> m_subframes; // Hash of serial to subframes
 
     virtual bool handleMessage(const Message& cmd);
-    void applySettings(const RadiosondeDemodSettings& settings, bool force = false);
+    void applySettings(const QStringList& settingsKeys, const RadiosondeDemodSettings& settings, bool force = false);
     void sendSampleRateToDemodAnalyzer();
-    void webapiReverseSendSettings(QList<QString>& channelSettingsKeys, const RadiosondeDemodSettings& settings, bool force);
+    void webapiReverseSendSettings(const QStringList& channelSettingsKeys, const RadiosondeDemodSettings& settings, bool force);
     void webapiFormatChannelSettings(
-        QList<QString>& channelSettingsKeys,
+        const QStringList& channelSettingsKeys,
         SWGSDRangel::SWGChannelSettings *swgChannelSettings,
         const RadiosondeDemodSettings& settings,
         bool force

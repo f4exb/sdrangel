@@ -743,7 +743,7 @@ void RadioAstronomyGUI::on_powerAutoscale_toggled(bool checked)
     ui->powerStartTime->setEnabled(!m_settings.m_powerAutoscale);
     ui->powerEndTime->setEnabled(!m_settings.m_powerAutoscale);
     powerAutoscale();
-    applySettings();
+    applySettings(QStringList("powerAutoscale"));
 }
 
 void RadioAstronomyGUI::powerAutoscaleY(bool adjustAxis)
@@ -800,7 +800,7 @@ void RadioAstronomyGUI::on_powerReference_valueChanged(double value)
     if (m_powerYAxis) {
         m_powerYAxis->setRange(m_settings.m_powerReference - m_settings.m_powerRange, m_settings.m_powerReference);
     }
-    applySettings();
+    applySettings(QStringList("powerReference"));
 }
 
 void RadioAstronomyGUI::on_powerRange_valueChanged(double value)
@@ -821,7 +821,7 @@ void RadioAstronomyGUI::on_powerRange_valueChanged(double value)
     if (m_powerYAxis) {
         m_powerYAxis->setRange(m_settings.m_powerReference - m_settings.m_powerRange, m_settings.m_powerReference);
     }
-    applySettings();
+    applySettings(QStringList("powerRange"));
 }
 
 void RadioAstronomyGUI::on_powerStartTime_dateTimeChanged(QDateTime value)
@@ -899,7 +899,7 @@ void RadioAstronomyGUI::resetToDefaults()
 {
     m_settings.resetToDefaults();
     displaySettings();
-    applySettings(true);
+    applySettings(QStringList(), true);
 }
 
 QByteArray RadioAstronomyGUI::serialize() const
@@ -911,7 +911,7 @@ bool RadioAstronomyGUI::deserialize(const QByteArray& data)
 {
     if(m_settings.deserialize(data)) {
         displaySettings();
-        applySettings(true);
+        applySettings(QStringList(), true);
         return true;
     } else {
         resetToDefaults();
@@ -925,7 +925,7 @@ void RadioAstronomyGUI::updateAvailableFeatures(const AvailableChannelOrFeatureL
     if (renameFrom.contains(m_settings.m_starTracker))
     {
         m_settings.m_starTracker = renameTo[renameFrom.indexOf(m_settings.m_starTracker)];
-        applySettings();
+        applySettings(QStringList("starTracker"));
     }
 
     ui->starTracker->blockSignals(true);
@@ -948,7 +948,7 @@ void RadioAstronomyGUI::updateAvailableFeatures(const AvailableChannelOrFeatureL
     if (m_settings.m_starTracker != newText)
     {
        m_settings.m_starTracker = newText;
-       applySettings();
+       applySettings(QStringList("starTracker"));
     }
 }
 
@@ -1091,7 +1091,7 @@ void RadioAstronomyGUI::channelMarkerChangedByCursor()
 {
     ui->deltaFrequency->setValue(m_channelMarker.getCenterFrequency());
     m_settings.m_inputFrequencyOffset = m_channelMarker.getCenterFrequency();
-    applySettings();
+    applySettings(QStringList("inputFrequencyOffset"));
 }
 
 void RadioAstronomyGUI::channelMarkerHighlightedByCursor()
@@ -1191,7 +1191,7 @@ void RadioAstronomyGUI::on_deltaFrequency_changed(qint64 value)
     m_channelMarker.setCenterFrequency(value);
     m_settings.m_inputFrequencyOffset = m_channelMarker.getCenterFrequency();
     updateAbsoluteCenterFrequency();
-    applySettings();
+    applySettings(QStringList("inputFrequencyOffset"));
 }
 
 void RadioAstronomyGUI::on_sampleRate_changed(qint64 value)
@@ -1200,7 +1200,7 @@ void RadioAstronomyGUI::on_sampleRate_changed(qint64 value)
     m_settings.m_sampleRate = sr;
     updateBWLimits();
     updateIntegrationTime();
-    applySettings();
+    applySettings(QStringList("sampleRate"));
 }
 
 void RadioAstronomyGUI::on_rfBW_changed(qint64 value)
@@ -1208,20 +1208,20 @@ void RadioAstronomyGUI::on_rfBW_changed(qint64 value)
     float bw = value;
     m_channelMarker.setBandwidth(bw);
     m_settings.m_rfBandwidth = bw;
-    applySettings();
+    applySettings(QStringList("rfBandwidth"));
 }
 
 void RadioAstronomyGUI::on_integration_changed(qint64 value)
 {
     m_settings.m_integration = value;
     updateIntegrationTime();
-    applySettings();
+    applySettings(QStringList("integration"));
 }
 
 void RadioAstronomyGUI::on_recalibrate_toggled(bool checked)
 {
     m_settings.m_recalibrate = checked;
-    applySettings();
+    applySettings(QStringList("recalibrate"));
     if (checked) {
         recalibrate();
     }
@@ -1231,7 +1231,7 @@ void RadioAstronomyGUI::on_showCalSettings_clicked()
 {
     RadioAstronomyCalibrationDialog dialog(&m_settings);
     if (dialog.exec() == QDialog::Accepted) {
-        applySettings();
+        applySettings(QStringList({"gpioEnabled", "gpioPin", "gpioSense", "startCalCommand", "stopCalCommand", "calCommandDelay"}));
     }
 }
 
@@ -1541,7 +1541,7 @@ void RadioAstronomyGUI::on_savePowerData_rightClicked(const QPoint& point)
                 m_settings.m_powerAutoSaveCSVFilename = fileNames[0];
                 ui->savePowerData->setChecked(true);
                 ui->savePowerData->setToolTip(QString("Left click to save data to a .csv file.\nRight click to disable auto save.\nAuto saving to %1").arg(m_settings.m_powerAutoSaveCSVFilename));
-                applySettings();
+                applySettings(QStringList("powerAutoSaveCSVFilename"));
                 savePowerData(m_settings.m_powerAutoSaveCSVFilename);
             }
         }
@@ -1551,7 +1551,7 @@ void RadioAstronomyGUI::on_savePowerData_rightClicked(const QPoint& point)
         ui->savePowerData->setChecked(false);
         ui->savePowerData->setToolTip("Left click to save data to a .csv file.\nRight click to auto-save data to a .csv file");
         m_settings.m_powerAutoSaveCSVFilename = "";
-        applySettings();
+        applySettings(QStringList("powerAutoSaveCSVFilename"));
     }
 }
 
@@ -1836,7 +1836,7 @@ void RadioAstronomyGUI::on_saveSpectrumData_rightClicked(const QPoint &point)
                 m_settings.m_spectrumAutoSaveCSVFilename = fileNames[0];
                 ui->saveSpectrumData->setChecked(true);
                 ui->saveSpectrumData->setToolTip(QString("Left click to save data to a .csv file.\nRight click to disable auto save.\nAuto saving to %1").arg(m_settings.m_spectrumAutoSaveCSVFilename));
-                applySettings();
+                applySettings(QStringList("spectrumAutoSaveCSVFilename"));
                 saveSpectrumData(m_settings.m_spectrumAutoSaveCSVFilename);
             }
         }
@@ -1846,7 +1846,7 @@ void RadioAstronomyGUI::on_saveSpectrumData_rightClicked(const QPoint &point)
         ui->saveSpectrumData->setChecked(false);
         ui->saveSpectrumData->setToolTip("Left click to save data to a .csv file.\nRight click to auto-save data to a .csv file");
         m_settings.m_spectrumAutoSaveCSVFilename = "";
-        applySettings();
+        applySettings(QStringList("spectrumAutoSaveCSVFilename"));
     }
 }
 
@@ -2019,7 +2019,7 @@ void RadioAstronomyGUI::onWidgetRolled(QWidget* widget, bool rollDown)
     (void) rollDown;
 
     getRollupContents()->saveState(m_rollupState);
-    applySettings();
+    applySettings(QStringList());
 }
 
 void RadioAstronomyGUI::onMenuDialogCalled(const QPoint &p)
@@ -2064,7 +2064,9 @@ void RadioAstronomyGUI::onMenuDialogCalled(const QPoint &p)
             updateIndexLabel();
         }
 
-        applySettings();
+        applySettings(QStringList({"title", "rgbColor", "useReverseAPI", "reverseAPIAddress",
+                                    "reverseAPIPort", "reverseAPIDeviceIndex", "reverseAPIChannelIndex",
+                                    "streamIndex"}));
     }
 
     resetContextMenuType();
@@ -2320,7 +2322,7 @@ RadioAstronomyGUI::RadioAstronomyGUI(PluginAPI* pluginAPI, DeviceUISet *deviceUI
 
     displaySettings();
     makeUIConnections();
-    applySettings(true);
+    applySettings(QStringList(), true); // Force apply all settings
     m_resizer.enableChildMouseTracking();
 
     create2DImage();
@@ -2418,11 +2420,11 @@ void RadioAstronomyGUI::blockApplySettings(bool block)
     m_doApplySettings = !block;
 }
 
-void RadioAstronomyGUI::applySettings(bool force)
+void RadioAstronomyGUI::applySettings(const QStringList& settingsKeys, bool force)
 {
     if (m_doApplySettings)
     {
-        RadioAstronomy::MsgConfigureRadioAstronomy* message = RadioAstronomy::MsgConfigureRadioAstronomy::create( m_settings, force);
+        RadioAstronomy::MsgConfigureRadioAstronomy* message = RadioAstronomy::MsgConfigureRadioAstronomy::create(settingsKeys, m_settings, force);
         m_radioAstronomy->getInputMessageQueue()->push(message);
     }
 }
@@ -2712,7 +2714,7 @@ void RadioAstronomyGUI::updateRotatorList(const AvailableChannelOrFeatureList& r
     if (renameFrom.contains(m_settings.m_rotator))
     {
         m_settings.m_rotator = renameTo[renameFrom.indexOf(m_settings.m_rotator)];
-        applySettings();
+        applySettings(QStringList("rotator"));
     }
 
     // Update list of rotators
@@ -2744,26 +2746,26 @@ void RadioAstronomyGUI::updateRotatorList(const AvailableChannelOrFeatureList& r
 void RadioAstronomyGUI::on_fftSize_currentIndexChanged(int index)
 {
     m_settings.m_fftSize = 1 << (4+index);
-    applySettings();
+    applySettings(QStringList("fftSize"));
     updateIntegrationTime();
 }
 
 void RadioAstronomyGUI::on_fftWindow_currentIndexChanged(int index)
 {
     m_settings.m_fftWindow = (RadioAstronomySettings::FFTWindow)index;
-    applySettings();
+    applySettings(QStringList("fftWindow"));
 }
 
 void RadioAstronomyGUI::on_filterFreqs_editingFinished()
 {
     m_settings.m_filterFreqs = ui->filterFreqs->text();
-    applySettings();
+    applySettings(QStringList("filterFreqs"));
 }
 
 void RadioAstronomyGUI::on_gainVariation_valueChanged(double value)
 {
     m_settings.m_gainVariation = value;
-    applySettings();
+    applySettings(QStringList("gainVariation"));
     updateTSys0();
 }
 
@@ -2771,7 +2773,7 @@ void RadioAstronomyGUI::on_gainVariation_valueChanged(double value)
 void RadioAstronomyGUI::on_sourceType_currentIndexChanged(int index)
 {
     m_settings.m_sourceType = (RadioAstronomySettings::SourceType)index;
-    applySettings();
+    applySettings(QStringList("sourceType"));
     if (m_settings.m_sourceType == RadioAstronomySettings::SUN)
     {
         // Mean diameter of Sun in degrees from Earth
@@ -2797,7 +2799,7 @@ void RadioAstronomyGUI::on_omegaS_valueChanged(double value)
     } else if ((m_settings.m_sourceType == RadioAstronomySettings::CAS_A) && (value != 0.08333)) {
         ui->sourceType->setCurrentIndex((int)RadioAstronomySettings::COMPACT);
     }
-    applySettings();
+    applySettings(QStringList("omegaS"));
 }
 
 void RadioAstronomyGUI::updateOmegaA()
@@ -2818,7 +2820,7 @@ void RadioAstronomyGUI::on_omegaAUnits_currentIndexChanged(int index)
     } else {
         ui->omegaALabel->setText(QString("%1<sub>A</sub>").arg(QChar(937)));
     }
-    applySettings();
+    applySettings(QStringList("omegaAUnits"));
 }
 
 void RadioAstronomyGUI::on_omegaSUnits_currentIndexChanged(int index)
@@ -2832,19 +2834,19 @@ void RadioAstronomyGUI::on_omegaSUnits_currentIndexChanged(int index)
     {
         ui->sourceType->setCurrentIndex((int)RadioAstronomySettings::COMPACT);
     }
-    applySettings();
+    applySettings(QStringList("omegaSUnits"));
 }
 
 void RadioAstronomyGUI::on_starTracker_currentTextChanged(const QString& text)
 {
     m_settings.m_starTracker = text;
-    applySettings();
+    applySettings(QStringList("starTracker"));
 }
 
 void RadioAstronomyGUI::on_rotator_currentTextChanged(const QString& text)
 {
     m_settings.m_rotator = text;
-    applySettings();
+    applySettings(QStringList("rotator"));
     setColumnPrecisionFromRotator();
 }
 
@@ -2890,7 +2892,7 @@ void RadioAstronomyGUI::on_showSensors_clicked()
     {
         m_sensors[0].setName(m_settings.m_sensorName[0]);
         m_sensors[1].setName(m_settings.m_sensorName[1]);
-        applySettings();
+        applySettings(QStringList("sensorName"));
     }
 }
 
@@ -2934,7 +2936,7 @@ void RadioAstronomyGUI::on_powerChartSelect_currentIndexChanged(int index)
     updatePowerMarkerTableVisibility();
     updatePowerChartWidgetsVisibility();
     plotPowerChart();
-    applySettings();
+    applySettings(QStringList("powerYData"));
 }
 
 void RadioAstronomyGUI::updatePowerChartWidgetsVisibility()
@@ -3033,7 +3035,7 @@ void RadioAstronomyGUI::on_powerYUnits_currentIndexChanged(int index)
         ui->powerColourScaleMinUnits->setText(text);
         ui->powerColourScaleMaxUnits->setText(text);
     }
-    applySettings();
+    applySettings(QStringList("powerYUnits"));
     plotPowerChart();
 }
 
@@ -3470,20 +3472,20 @@ void RadioAstronomyGUI::on_power2DAutoscale_clicked()
 void RadioAstronomyGUI::on_power2DLinkSweep_toggled(bool checked)
 {
     m_settings.m_power2DLinkSweep = checked;
-    applySettings();
+    applySettings(QStringList("power2DLinkSweep"));
 }
 
 void RadioAstronomyGUI::on_power2DSweepType_currentIndexChanged(int index)
 {
     m_settings.m_power2DSweepType = (RadioAstronomySettings::SweepType)index;
-    applySettings();
+    applySettings(QStringList("power2DSweepType"));
     plot2DChart();
 }
 
 void RadioAstronomyGUI::on_power2DWidth_valueChanged(int value)
 {
     m_settings.m_power2DWidth = value;
-    applySettings();
+    applySettings(QStringList("power2DWidth"));
     create2DImage();
     plot2DChart();
 }
@@ -3491,7 +3493,7 @@ void RadioAstronomyGUI::on_power2DWidth_valueChanged(int value)
 void RadioAstronomyGUI::on_power2DHeight_valueChanged(int value)
 {
     m_settings.m_power2DHeight = value;
-    applySettings();
+    applySettings(QStringList("power2DHeight"));
     create2DImage();
     plot2DChart();
 }
@@ -3499,7 +3501,7 @@ void RadioAstronomyGUI::on_power2DHeight_valueChanged(int value)
 void RadioAstronomyGUI::on_power2DXMin_valueChanged(double value)
 {
     m_settings.m_power2DXMin = value;
-    applySettings();
+    applySettings(QStringList("power2DXMin"));
     if (m_2DXAxis)
     {
         m_2DXAxis->setMin(m_settings.m_power2DXMin);
@@ -3510,7 +3512,7 @@ void RadioAstronomyGUI::on_power2DXMin_valueChanged(double value)
 void RadioAstronomyGUI::on_power2DXMax_valueChanged(double value)
 {
     m_settings.m_power2DXMax = value;
-    applySettings();
+    applySettings(QStringList("power2DXMax"));
     if (m_2DXAxis)
     {
         m_2DXAxis->setMax(m_settings.m_power2DXMax);
@@ -3521,7 +3523,7 @@ void RadioAstronomyGUI::on_power2DXMax_valueChanged(double value)
 void RadioAstronomyGUI::on_power2DYMin_valueChanged(double value)
 {
     m_settings.m_power2DYMin = value;
-    applySettings();
+    applySettings(QStringList("power2DYMin"));
     if (m_2DYAxis)
     {
         m_2DYAxis->setMin(m_settings.m_power2DYMin);
@@ -3532,7 +3534,7 @@ void RadioAstronomyGUI::on_power2DYMin_valueChanged(double value)
 void RadioAstronomyGUI::on_power2DYMax_valueChanged(double value)
 {
     m_settings.m_power2DYMax = value;
-    applySettings();
+    applySettings(QStringList("power2DYMax"));
     if (m_2DYAxis)
     {
         m_2DYAxis->setMax(m_settings.m_power2DYMax);
@@ -3565,7 +3567,7 @@ void RadioAstronomyGUI::powerColourAutoscale()
 void RadioAstronomyGUI::on_powerColourAutoscale_toggled(bool checked)
 {
     m_settings.m_powerColourAutoscale = checked;
-    applySettings();
+    applySettings(QStringList("powerColourAutoscale"));
     if (m_settings.m_powerColourAutoscale) {
         powerColourAutoscale();
     }
@@ -3585,7 +3587,7 @@ void RadioAstronomyGUI::on_powerColourScaleMin_valueChanged(double value)
 {
     m_settings.m_powerColourScaleMin = value;
     updatePowerColourScaleStep();
-    applySettings();
+    applySettings(QStringList("powerColourScaleMin"));
     recolour2DImage();
 }
 
@@ -3593,7 +3595,7 @@ void RadioAstronomyGUI::on_powerColourScaleMax_valueChanged(double value)
 {
     m_settings.m_powerColourScaleMax = value;
     updatePowerColourScaleStep();
-    applySettings();
+    applySettings(QStringList("powerColourScaleMax"));
     recolour2DImage();
 }
 
@@ -3601,7 +3603,7 @@ void RadioAstronomyGUI::on_powerColourPalette_currentIndexChanged(int index)
 {
     (void) index;
     m_settings.m_powerColourPalette = ui->powerColourPalette->currentText();
-    applySettings();
+    applySettings(QStringList("powerColourPalette"));
     recolour2DImage();
 }
 
@@ -3980,7 +3982,7 @@ void RadioAstronomyGUI::on_spectrumReference_valueChanged(double value)
     m_settings.m_spectrumReference = value;
     spectrumUpdateYRange();
     if (!m_settings.m_spectrumAutoscale) {
-        applySettings();
+        applySettings(QStringList("spectrumReference"));
     }
 }
 
@@ -4001,7 +4003,7 @@ void RadioAstronomyGUI::on_spectrumRange_valueChanged(double value)
     }
     spectrumUpdateYRange();
     if (!m_settings.m_spectrumAutoscale) {
-        applySettings();
+        applySettings(QStringList("spectrumRange"));
     }
 }
 
@@ -4009,7 +4011,7 @@ void RadioAstronomyGUI::on_spectrumSpan_valueChanged(double value)
 {
     m_settings.m_spectrumSpan = value;
     spectrumUpdateXRange();
-    applySettings();
+    applySettings(QStringList("spectrumSpan"));
 }
 
 void RadioAstronomyGUI::on_spectrumCenterFreq_valueChanged(double value)
@@ -4023,7 +4025,7 @@ void RadioAstronomyGUI::on_spectrumCenterFreq_valueChanged(double value)
     }
     m_settings.m_spectrumCenterFreqOffset = offset;
     spectrumUpdateXRange();
-    applySettings();
+    applySettings(QStringList("spectrumCenterFreqOffset"));
 }
 
 void RadioAstronomyGUI::spectrumUpdateXRange(FFTMeasurement* fft)
@@ -4075,7 +4077,7 @@ void RadioAstronomyGUI::on_spectrumAutoscale_toggled(bool checked)
     ui->spectrumCenterFreq->setEnabled(!m_settings.m_spectrumAutoscale);
     ui->spectrumSpan->setEnabled(!m_settings.m_spectrumAutoscale);
     spectrumAutoscale();
-    applySettings();
+    applySettings(QStringList("spectrumAutoscale"));
 }
 
 // Get minimum and maximum values in a series
@@ -4170,7 +4172,7 @@ void RadioAstronomyGUI::on_spectrumYUnits_currentIndexChanged(int index)
         ui->spectrumMarkerTable->horizontalHeaderItem(SPECTRUM_MARKER_COL_VALUE)->setText("Tsource (K)");
     }
     plotFFTMeasurement();
-    applySettings();
+    applySettings(QStringList("spectrumYScale"));
 }
 
 void RadioAstronomyGUI::on_spectrumBaseline_currentIndexChanged(int index)
@@ -4180,7 +4182,7 @@ void RadioAstronomyGUI::on_spectrumBaseline_currentIndexChanged(int index)
     if ((m_settings.m_powerYData == RadioAstronomySettings::PY_TSOURCE) || (m_settings.m_powerYData == RadioAstronomySettings::PY_FLUX)) {
         plotPowerChart();
     }
-    applySettings();
+    applySettings(QStringList("spectrumBaseline"));
 }
 
 // Convert frequency shift to velocity in km/s (+ve approaching)
@@ -5052,35 +5054,35 @@ void RadioAstronomyGUI::on_tempRX_valueChanged(double value)
         m_settings.m_tempRX = Units::noiseFigureToNoiseTemp(value);
     }
     updateTSys0();
-    applySettings();
+    applySettings(QStringList("tempRX"));
 }
 
 void RadioAstronomyGUI::on_tempCMB_valueChanged(double value)
 {
     m_settings.m_tempCMB = value;
     updateTSys0();
-    applySettings();
+    applySettings(QStringList("tempCMB"));
 }
 
 void RadioAstronomyGUI::on_tempGal_valueChanged(double value)
 {
     m_settings.m_tempGal = value;
     updateTSys0();
-    applySettings();
+    applySettings(QStringList("tempGal"));
 }
 
 void RadioAstronomyGUI::on_tempSP_valueChanged(double value)
 {
     m_settings.m_tempSP = value;
     updateTSys0();
-    applySettings();
+    applySettings(QStringList("tempSP"));
 }
 
 void RadioAstronomyGUI::on_tempAtm_valueChanged(double value)
 {
     m_settings.m_tempAtm = value;
     updateTSys0();
-    applySettings();
+    applySettings(QStringList("tempAtm"));
 }
 
 void RadioAstronomyGUI::on_tempAir_valueChanged(double value)
@@ -5089,7 +5091,7 @@ void RadioAstronomyGUI::on_tempAir_valueChanged(double value)
     if (m_settings.m_tempAtmLink) {
         calcAtmosphericTemp();
     }
-    applySettings();
+    applySettings(QStringList("tempAir"));
 }
 
 void RadioAstronomyGUI::on_zenithOpacity_valueChanged(double value)
@@ -5098,7 +5100,7 @@ void RadioAstronomyGUI::on_zenithOpacity_valueChanged(double value)
     if (m_settings.m_tempAtmLink) {
         calcAtmosphericTemp();
     }
-    applySettings();
+    applySettings(QStringList("zenithOpacity"));
 }
 
 void RadioAstronomyGUI::on_elevation_valueChanged(double value)
@@ -5107,7 +5109,7 @@ void RadioAstronomyGUI::on_elevation_valueChanged(double value)
     if (m_settings.m_tempAtmLink) {
         calcAtmosphericTemp();
     }
-    applySettings();
+    applySettings(QStringList("elevation"));
 }
 
 void RadioAstronomyGUI::on_elevationLink_toggled(bool checked)
@@ -5115,7 +5117,7 @@ void RadioAstronomyGUI::on_elevationLink_toggled(bool checked)
     m_settings.m_elevationLink = checked;
     ui->elevation->setValue(m_elevation);
     ui->elevation->setEnabled(!m_settings.m_elevationLink);
-    applySettings();
+    applySettings(QStringList("elevationLink"));
 }
 
 void RadioAstronomyGUI::on_tempAtmLink_toggled(bool checked)
@@ -5125,7 +5127,7 @@ void RadioAstronomyGUI::on_tempAtmLink_toggled(bool checked)
     if (checked) {
         calcAtmosphericTemp();
     }
-    applySettings();
+    applySettings(QStringList("tempAtmLink"));
 }
 
 void RadioAstronomyGUI::on_tempAirLink_toggled(bool checked)
@@ -5137,7 +5139,7 @@ void RadioAstronomyGUI::on_tempAirLink_toggled(bool checked)
         ui->tempAir->setValue(m_airTemps.lastValue());
         calcAtmosphericTemp();
     }
-    applySettings();
+    applySettings(QStringList("tempAirLink"));
 }
 
 void RadioAstronomyGUI::on_tempGalLink_toggled(bool checked)
@@ -5147,7 +5149,7 @@ void RadioAstronomyGUI::on_tempGalLink_toggled(bool checked)
         calcGalacticBackgroundTemp();
     }
     ui->tempGal->setEnabled(!m_settings.m_tempGalLink);
-    applySettings();
+    applySettings(QStringList("tempGalLink"));
 }
 
 void RadioAstronomyGUI::on_tCalHotSelect_currentIndexChanged(int value)
@@ -5177,7 +5179,7 @@ void RadioAstronomyGUI::on_tCalHot_valueChanged(double value)
     }
     m_settings.m_tCalHot = (float)temp;
     calibrate();
-    applySettings();
+    applySettings(QStringList("tCalHot"));
 }
 
 void RadioAstronomyGUI::on_tCalColdSelect_currentIndexChanged(int value)
@@ -5207,7 +5209,7 @@ void RadioAstronomyGUI::on_tCalCold_valueChanged(double value)
     }
     m_settings.m_tCalCold = (float)temp;
     calibrate();
-    applySettings();
+    applySettings(QStringList("tCalCold"));
 }
 
 void RadioAstronomyGUI::on_spectrumLine_currentIndexChanged(int value)
@@ -5215,7 +5217,7 @@ void RadioAstronomyGUI::on_spectrumLine_currentIndexChanged(int value)
     m_settings.m_line = (RadioAstronomySettings::Line)value;
     displaySpectrumLineFrequency();
     plotFFTMeasurement();
-    applySettings();
+    applySettings(QStringList("line"));
 }
 
 void RadioAstronomyGUI::displaySpectrumLineFrequency()
@@ -5245,27 +5247,27 @@ void RadioAstronomyGUI::on_spectrumLineFrequency_valueChanged(double value)
 {
     m_settings.m_lineCustomFrequency = value * 1e6;
     plotFFTMeasurement();
-    applySettings();
+    applySettings(QStringList("lineCustomFrequency"));
 }
 
 void RadioAstronomyGUI::on_refFrame_currentIndexChanged(int value)
 {
     m_settings.m_refFrame = (RadioAstronomySettings::RefFrame)value;
     plotFFTMeasurement();
-    applySettings();
+    applySettings(QStringList("refFrame"));
 }
 
 void RadioAstronomyGUI::on_sunDistanceToGC_valueChanged(double value)
 {
     m_settings.m_sunDistanceToGC = value;
-    applySettings();
+    applySettings(QStringList("sunDistanceToGC"));
     calcDistances();
 }
 
 void RadioAstronomyGUI::on_sunOrbitalVelocity_valueChanged(double value)
 {
     m_settings.m_sunOrbitalVelocity = value;
-    applySettings();
+    applySettings(QStringList("sunOrbitalVelocity"));
     calcDistances();
 }
 
@@ -5346,7 +5348,7 @@ void RadioAstronomyGUI::on_saveSpectrumChartImages_clicked()
 void RadioAstronomyGUI::on_spectrumReverseXAxis_toggled(bool checked)
 {
     m_settings.m_spectrumReverseXAxis = checked;
-    applySettings();
+    applySettings(QStringList("spectrumReverseXAxis"));
     if (ui->spectrumChartSelect->currentIndex() == 0) {
         plotFFTMeasurement();
     } else {
@@ -5358,7 +5360,7 @@ void RadioAstronomyGUI::on_powerShowPeak_toggled(bool checked)
 {
     m_settings.m_powerPeaks = checked;
     updatePowerMarkerTableVisibility();
-    applySettings();
+    applySettings(QStringList("powerPeaks"));
     if (m_powerPeakSeries)
     {
         m_powerPeakSeries->setVisible(checked);
@@ -5374,7 +5376,7 @@ void RadioAstronomyGUI::on_spectrumPeak_toggled(bool checked)
     m_settings.m_spectrumPeaks = checked;
     updateSpectrumMarkerTableVisibility();
     plotFFTMeasurement();
-    applySettings();
+    applySettings(QStringList("spectrumPeaks"));
     if (m_fftChart)
     {
         if (checked) {
@@ -5391,7 +5393,7 @@ void RadioAstronomyGUI::on_powerShowMarker_toggled(bool checked)
 {
     m_settings.m_powerMarkers = checked;
     updatePowerMarkerTableVisibility();
-    applySettings();
+    applySettings(QStringList("powerMarkers"));
     if (m_powerMarkerSeries)
     {
         m_powerMarkerSeries->setVisible(checked);
@@ -5406,7 +5408,7 @@ void RadioAstronomyGUI::on_powerShowMarker_toggled(bool checked)
 void RadioAstronomyGUI::on_powerShowAvg_toggled(bool checked)
 {
     m_settings.m_powerAvg = checked;
-    applySettings();
+    applySettings(QStringList("powerAvg"));
     ui->powerChartAvgWidgets->setVisible(checked);
     getRollupContents()->arrangeRollups();
     if (checked) {
@@ -5417,7 +5419,7 @@ void RadioAstronomyGUI::on_powerShowAvg_toggled(bool checked)
 void RadioAstronomyGUI::on_powerShowLegend_toggled(bool checked)
 {
     m_settings.m_powerLegend = checked;
-    applySettings();
+    applySettings(QStringList("powerLegend"));
     if (m_powerChart)
     {
         if (checked) {
@@ -5431,7 +5433,7 @@ void RadioAstronomyGUI::on_powerShowLegend_toggled(bool checked)
 void RadioAstronomyGUI::on_powerShowTsys0_toggled(bool checked)
 {
     m_settings.m_powerShowTsys0 = checked;
-    applySettings();
+    applySettings(QStringList("powerShowTsys0"));
     if (m_powerTsys0Series) {
         m_powerTsys0Series->setVisible(checked);
     }
@@ -5440,21 +5442,21 @@ void RadioAstronomyGUI::on_powerShowTsys0_toggled(bool checked)
 void RadioAstronomyGUI::on_powerShowAirTemp_toggled(bool checked)
 {
     m_settings.m_powerShowAirTemp = checked;
-    applySettings();
+    applySettings(QStringList("powerShowAirTemp"));
     m_airTemps.clicked(checked);
 }
 
 void RadioAstronomyGUI::on_powerShowSensor1_toggled(bool checked)
 {
     m_settings.m_sensorVisible[0] = checked;
-    applySettings();
+    applySettings(QStringList("sensorVisible"));
     m_sensors[0].clicked(checked);
 }
 
 void RadioAstronomyGUI::on_powerShowSensor2_toggled(bool checked)
 {
     m_settings.m_sensorVisible[1] = checked;
-    applySettings();
+    applySettings(QStringList("sensorVisible"));
     m_sensors[1].clicked(checked);
 }
 
@@ -5512,7 +5514,7 @@ void RadioAstronomyGUI::updateSpectrumMarkerTableVisibility()
 void RadioAstronomyGUI::on_spectrumMarker_toggled(bool checked)
 {
     m_settings.m_spectrumMarkers = checked;
-    applySettings();
+    applySettings(QStringList("spectrumMarkers"));
     updateSpectrumMarkerTableVisibility();
     m_fftMarkerSeries->setVisible(checked);
     if (checked)
@@ -5533,7 +5535,7 @@ void RadioAstronomyGUI::on_spectrumMarker_toggled(bool checked)
 void RadioAstronomyGUI::on_spectrumTemp_toggled(bool checked)
 {
     m_settings.m_spectrumTemp = checked;
-    applySettings();
+    applySettings(QStringList("spectrumTemp"));
     ui->spectrumGaussianWidgets->setVisible(checked);
     m_fftGaussianSeries->setVisible(checked);
     updateSpectrumSelect();
@@ -5543,7 +5545,7 @@ void RadioAstronomyGUI::on_spectrumTemp_toggled(bool checked)
 void RadioAstronomyGUI::on_spectrumShowLegend_toggled(bool checked)
 {
     m_settings.m_spectrumLegend = checked;
-    applySettings();
+    applySettings(QStringList("spectrumLegend"));
     if (m_fftChart)
     {
         m_fftChart->legend()->setVisible(checked);
@@ -5554,7 +5556,7 @@ void RadioAstronomyGUI::on_spectrumShowLegend_toggled(bool checked)
 void RadioAstronomyGUI::on_spectrumShowRefLine_toggled(bool checked)
 {
     m_settings.m_spectrumRefLine = checked;
-    applySettings();
+    applySettings(QStringList("spectrumRefLine"));
     ui->spectrumRefLineWidgets->setVisible(checked);
     if (m_fftHlineSeries)
     {
@@ -5568,7 +5570,7 @@ void RadioAstronomyGUI::on_spectrumShowRefLine_toggled(bool checked)
 void RadioAstronomyGUI::on_spectrumShowLAB_toggled(bool checked)
 {
     m_settings.m_spectrumLAB = checked;
-    applySettings();
+    applySettings(QStringList("spectrumLAB"));
     m_fftLABSeries->setVisible(m_settings.m_spectrumLAB);
     if (m_settings.m_spectrumLAB) {
         plotLAB(); // Replot in case data needs to be downloaded
@@ -5621,7 +5623,7 @@ void RadioAstronomyGUI::updateDistanceColumns()
 void RadioAstronomyGUI::on_spectrumShowDistance_toggled(bool checked)
 {
     m_settings.m_spectrumDistance = checked;
-    applySettings();
+    applySettings(QStringList("spectrumDistance"));
     if (m_settings.m_spectrumDistance && !m_settings.m_spectrumRefLine) {
         ui->spectrumShowRefLine->setChecked(true);
     }
@@ -5888,7 +5890,7 @@ void RadioAstronomyGUI::calcColumnDensity()
 void RadioAstronomyGUI::on_powerShowGaussian_clicked(bool checked)
 {
     m_settings.m_powerShowGaussian = checked;
-    applySettings();
+    applySettings(QStringList("powerShowGaussian"));
     ui->powerGaussianWidgets->setVisible(checked);
     m_powerGaussianSeries->setVisible(checked);
     updatePowerSelect();
@@ -6029,7 +6031,7 @@ void RadioAstronomyGUI::plotPowerFiltered()
 void RadioAstronomyGUI::on_powerShowFiltered_clicked(bool checked)
 {
     m_settings.m_powerShowFiltered = checked;
-    applySettings();
+    applySettings(QStringList("powerShowFiltered"));
     ui->powerFilterWidgets->setVisible(checked);
     m_powerFilteredSeries->setVisible(checked);
     getRollupContents()->arrangeRollups();
@@ -6039,21 +6041,21 @@ void RadioAstronomyGUI::on_powerShowFiltered_clicked(bool checked)
 void RadioAstronomyGUI::on_powerFilter_currentIndexChanged(int index)
 {
     m_settings.m_powerFilter = (RadioAstronomySettings::PowerFilter)index;
-    applySettings();
+    applySettings(QStringList("powerFilter"));
     plotPowerFiltered();
 }
 
 void RadioAstronomyGUI::on_powerFilterN_valueChanged(int value)
 {
     m_settings.m_powerFilterN = value;
-    applySettings();
+    applySettings(QStringList("powerFilterN"));
     plotPowerFiltered();
 }
 
 void RadioAstronomyGUI::on_powerShowMeasurement_clicked(bool checked)
 {
     m_settings.m_powerShowMeasurement = checked;
-    applySettings();
+    applySettings(QStringList("powerShowMeasurement"));
     m_powerSeries->setVisible(checked);
 }
 
@@ -6241,7 +6243,7 @@ void RadioAstronomyGUI::displayRunModeSettings()
 void RadioAstronomyGUI::on_runMode_currentIndexChanged(int index)
 {
     m_settings.m_runMode = (RadioAstronomySettings::RunMode)index;
-    applySettings();
+    applySettings(QStringList("runMode"));
     displayRunModeSettings();
 }
 
@@ -6263,49 +6265,49 @@ void RadioAstronomyGUI::on_sweepType_currentIndexChanged(int index)
 void RadioAstronomyGUI::on_sweep1Start_valueChanged(double value)
 {
     m_settings.m_sweep1Start = value;
-    applySettings();
+    applySettings(QStringList("sweep1Start"));
 }
 
 void RadioAstronomyGUI::on_sweep1Stop_valueChanged(double value)
 {
     m_settings.m_sweep1Stop = value;
-    applySettings();
+    applySettings(QStringList("sweep1Stop"));
 }
 
 void RadioAstronomyGUI::on_sweep1Step_valueChanged(double value)
 {
     m_settings.m_sweep1Step = value;
-    applySettings();
+    applySettings(QStringList("sweep1Step"));
 }
 
 void RadioAstronomyGUI::on_sweep1Delay_valueChanged(double value)
 {
     m_settings.m_sweep1Delay = value;
-    applySettings();
+    applySettings(QStringList("sweep1Delay"));
 }
 
 void RadioAstronomyGUI::on_sweep2Start_valueChanged(double value)
 {
     m_settings.m_sweep2Start = value;
-    applySettings();
+    applySettings(QStringList("sweep2Start"));
 }
 
 void RadioAstronomyGUI::on_sweep2Stop_valueChanged(double value)
 {
     m_settings.m_sweep2Stop = value;
-    applySettings();
+    applySettings(QStringList("sweep2Stop"));
 }
 
 void RadioAstronomyGUI::on_sweep2Step_valueChanged(double value)
 {
     m_settings.m_sweep2Step = value;
-    applySettings();
+    applySettings(QStringList("sweep2Step"));
 }
 
 void RadioAstronomyGUI::on_sweep2Delay_valueChanged(double value)
 {
     m_settings.m_sweep2Delay = value;
-    applySettings();
+    applySettings(QStringList("sweep2Delay"));
 }
 
 void RadioAstronomyGUI::on_sweepStartAtTime_currentIndexChanged(int index)
@@ -6313,13 +6315,13 @@ void RadioAstronomyGUI::on_sweepStartAtTime_currentIndexChanged(int index)
     m_settings.m_sweepStartAtTime = ui->sweepStartAtTime->currentIndex() == 1;
     ui->sweepStartDateTime->setVisible(index == 1);
     getRollupContents()->arrangeRollups();
-    applySettings();
+    applySettings(QStringList("sweepStartAtTime"));
 }
 
 void RadioAstronomyGUI::on_sweepStartDateTime_dateTimeChanged(const QDateTime& dateTime)
 {
     m_settings.m_sweepStartDateTime = dateTime;
-    applySettings();
+    applySettings(QStringList("sweepStartDateTime"));
 }
 
 void RadioAstronomyGUI::on_startStop_clicked(bool checked)
@@ -6327,7 +6329,7 @@ void RadioAstronomyGUI::on_startStop_clicked(bool checked)
     if (checked)
     {
         ui->startStop->setStyleSheet("QToolButton { background-color : green; }");
-        applySettings();
+        applySettings(QStringList("startStop"));
         if (m_settings.m_power2DLinkSweep)
         {
             update2DSettingsFromSweep();
@@ -6341,6 +6343,7 @@ void RadioAstronomyGUI::on_startStop_clicked(bool checked)
         if (m_settings.m_runMode != RadioAstronomySettings::SWEEP) {
             ui->startStop->setStyleSheet("QToolButton { background-color : blue; }");
         }
+        applySettings(QStringList("startStop"));
     }
 }
 

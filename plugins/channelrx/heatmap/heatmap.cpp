@@ -51,7 +51,7 @@ HeatMap::HeatMap(DeviceAPI *deviceAPI) :
     m_basebandSink->setChannel(this);
     m_basebandSink->moveToThread(&m_thread);
 
-    applySettings(m_settings, true);
+    applySettings(QStringList(), m_settings, true);
 
     m_deviceAPI->addChannelSink(this);
     m_deviceAPI->addChannelSinkAPI(this);
@@ -125,7 +125,7 @@ void HeatMap::start()
     DSPSignalNotification *dspMsg = new DSPSignalNotification(m_basebandSampleRate, m_centerFrequency);
     m_basebandSink->getInputMessageQueue()->push(dspMsg);
 
-    HeatMapBaseband::MsgConfigureHeatMapBaseband *msg = HeatMapBaseband::MsgConfigureHeatMapBaseband::create(m_settings, true);
+    HeatMapBaseband::MsgConfigureHeatMapBaseband *msg = HeatMapBaseband::MsgConfigureHeatMapBaseband::create(QStringList(), m_settings, true);
     m_basebandSink->getInputMessageQueue()->push(msg);
 }
 
@@ -143,7 +143,7 @@ bool HeatMap::handleMessage(const Message& cmd)
     {
         MsgConfigureHeatMap& cfg = (MsgConfigureHeatMap&) cmd;
         qDebug() << "HeatMap::handleMessage: MsgConfigureHeatMap";
-        applySettings(cfg.getSettings(), cfg.getForce());
+        applySettings(cfg.getSettingsKeys(), cfg.getSettings(), cfg.getForce());
 
         return true;
     }
@@ -178,35 +178,20 @@ void HeatMap::setCenterFrequency(qint64 frequency)
 {
     HeatMapSettings settings = m_settings;
     settings.m_inputFrequencyOffset = frequency;
-    applySettings(settings, false);
+    applySettings(QStringList("inputFrequencyOffset"), settings, false);
 
     if (m_guiMessageQueue) // forward to GUI if any
     {
-        MsgConfigureHeatMap *msgToGUI = MsgConfigureHeatMap::create(settings, false);
+        MsgConfigureHeatMap *msgToGUI = MsgConfigureHeatMap::create(QStringList("inputFrequencyOffset"), settings, false);
         m_guiMessageQueue->push(msgToGUI);
     }
 }
 
-void HeatMap::applySettings(const HeatMapSettings& settings, bool force)
+void HeatMap::applySettings(const QStringList& settingsKeys, const HeatMapSettings& settings, bool force)
 {
-    qDebug() << "HeatMap::applySettings:"
-            << " m_streamIndex: " << settings.m_streamIndex
-            << " m_useReverseAPI: " << settings.m_useReverseAPI
-            << " m_reverseAPIAddress: " << settings.m_reverseAPIAddress
-            << " m_reverseAPIPort: " << settings.m_reverseAPIPort
-            << " m_reverseAPIDeviceIndex: " << settings.m_reverseAPIDeviceIndex
-            << " m_reverseAPIChannelIndex: " << settings.m_reverseAPIChannelIndex
-            << " force: " << force;
+    qDebug() << "HeatMap::applySettings:" << settings.getDebugString(settingsKeys, force);
 
-    QList<QString> reverseAPIKeys;
-
-    if ((settings.m_inputFrequencyOffset != m_settings.m_inputFrequencyOffset) || force) {
-        reverseAPIKeys.append("inputFrequencyOffset");
-    }
-    if ((settings.m_rfBandwidth != m_settings.m_rfBandwidth) || force) {
-        reverseAPIKeys.append("rfBandwidth");
-    }
-    if (m_settings.m_streamIndex != settings.m_streamIndex)
+    if (settingsKeys.contains("streamIndex") && (m_settings.m_streamIndex != settings.m_streamIndex))
     {
         if (m_deviceAPI->getSampleMIMO()) // change of stream is possible for MIMO devices only
         {
@@ -217,24 +202,26 @@ void HeatMap::applySettings(const HeatMapSettings& settings, bool force)
             m_settings.m_streamIndex = settings.m_streamIndex; // make sure ChannelAPI::getStreamIndex() is consistent
             emit streamIndexChanged(settings.m_streamIndex);
         }
-
-        reverseAPIKeys.append("streamIndex");
     }
 
-    HeatMapBaseband::MsgConfigureHeatMapBaseband *msg = HeatMapBaseband::MsgConfigureHeatMapBaseband::create(settings, force);
+    HeatMapBaseband::MsgConfigureHeatMapBaseband *msg = HeatMapBaseband::MsgConfigureHeatMapBaseband::create(settingsKeys, settings, force);
     m_basebandSink->getInputMessageQueue()->push(msg);
 
-    if (settings.m_useReverseAPI)
+    if (settingsKeys.contains("useReverseAPI") && settings.m_useReverseAPI)
     {
-        bool fullUpdate = ((m_settings.m_useReverseAPI != settings.m_useReverseAPI) && settings.m_useReverseAPI) ||
-                (m_settings.m_reverseAPIAddress != settings.m_reverseAPIAddress) ||
-                (m_settings.m_reverseAPIPort != settings.m_reverseAPIPort) ||
-                (m_settings.m_reverseAPIDeviceIndex != settings.m_reverseAPIDeviceIndex) ||
-                (m_settings.m_reverseAPIChannelIndex != settings.m_reverseAPIChannelIndex);
-        webapiReverseSendSettings(reverseAPIKeys, settings, fullUpdate || force);
+        bool fullUpdate = ((settingsKeys.contains("useReverseAPI") && (m_settings.m_useReverseAPI != settings.m_useReverseAPI)) && settings.m_useReverseAPI) ||
+                (settingsKeys.contains("reverseAPIAddress") && (m_settings.m_reverseAPIAddress != settings.m_reverseAPIAddress)) ||
+                (settingsKeys.contains("reverseAPIPort") && (m_settings.m_reverseAPIPort != settings.m_reverseAPIPort)) ||
+                (settingsKeys.contains("reverseAPIDeviceIndex") && (m_settings.m_reverseAPIDeviceIndex != settings.m_reverseAPIDeviceIndex)) ||
+                (settingsKeys.contains("reverseAPIChannelIndex") && (m_settings.m_reverseAPIChannelIndex != settings.m_reverseAPIChannelIndex));
+        webapiReverseSendSettings(settingsKeys, settings, fullUpdate || force);
     }
 
-    m_settings = settings;
+    if (force) {
+        m_settings = settings;
+    } else {
+        m_settings.applySettings(settingsKeys, settings);
+    }
 }
 
 QByteArray HeatMap::serialize() const
@@ -246,14 +233,14 @@ bool HeatMap::deserialize(const QByteArray& data)
 {
     if (m_settings.deserialize(data))
     {
-        MsgConfigureHeatMap *msg = MsgConfigureHeatMap::create(m_settings, true);
+        MsgConfigureHeatMap *msg = MsgConfigureHeatMap::create(QStringList(), m_settings, true);
         m_inputMessageQueue.push(msg);
         return true;
     }
     else
     {
         m_settings.resetToDefaults();
-        MsgConfigureHeatMap *msg = MsgConfigureHeatMap::create(m_settings, true);
+        MsgConfigureHeatMap *msg = MsgConfigureHeatMap::create(QStringList(), m_settings, true);
         m_inputMessageQueue.push(msg);
         return false;
     }
@@ -289,13 +276,13 @@ int HeatMap::webapiSettingsPutPatch(
     HeatMapSettings settings = m_settings;
     webapiUpdateChannelSettings(settings, channelSettingsKeys, response);
 
-    MsgConfigureHeatMap *msg = MsgConfigureHeatMap::create(settings, force);
+    MsgConfigureHeatMap *msg = MsgConfigureHeatMap::create(channelSettingsKeys, settings, force);
     m_inputMessageQueue.push(msg);
 
     qDebug("HeatMap::webapiSettingsPutPatch: forward to GUI: %p", m_guiMessageQueue);
     if (m_guiMessageQueue) // forward to GUI if any
     {
-        MsgConfigureHeatMap *msgToGUI = MsgConfigureHeatMap::create(settings, force);
+        MsgConfigureHeatMap *msgToGUI = MsgConfigureHeatMap::create(channelSettingsKeys, settings, force);
         m_guiMessageQueue->push(msgToGUI);
     }
 
@@ -446,7 +433,7 @@ void HeatMap::webapiFormatChannelSettings(SWGSDRangel::SWGChannelSettings& respo
     }
 }
 
-void HeatMap::webapiReverseSendSettings(QList<QString>& channelSettingsKeys, const HeatMapSettings& settings, bool force)
+void HeatMap::webapiReverseSendSettings(const QList<QString>& channelSettingsKeys, const HeatMapSettings& settings, bool force)
 {
     SWGSDRangel::SWGChannelSettings *swgChannelSettings = new SWGSDRangel::SWGChannelSettings();
     webapiFormatChannelSettings(channelSettingsKeys, swgChannelSettings, settings, force);
@@ -472,7 +459,7 @@ void HeatMap::webapiReverseSendSettings(QList<QString>& channelSettingsKeys, con
 }
 
 void HeatMap::webapiFormatChannelSettings(
-        QList<QString>& channelSettingsKeys,
+        const QList<QString>& channelSettingsKeys,
         SWGSDRangel::SWGChannelSettings *swgChannelSettings,
         const HeatMapSettings& settings,
         bool force
@@ -572,4 +559,3 @@ void HeatMap::handleIndexInDeviceSetChanged(int index)
         .arg(index);
     m_basebandSink->setFifoLabel(fifoLabel);
 }
-

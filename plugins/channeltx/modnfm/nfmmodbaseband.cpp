@@ -150,7 +150,7 @@ bool NFMModBaseband::handleMessage(const Message& cmd)
         MsgConfigureNFMModBaseband& cfg = (MsgConfigureNFMModBaseband&) cmd;
         qDebug() << "NFMModBaseband::handleMessage: MsgConfigureNFMModBaseband";
 
-        applySettings(cfg.getSettings(), cfg.getForce());
+        applySettings(cfg.getSettingsKeys(), cfg.getSettings(), cfg.getForce());
 
         return true;
     }
@@ -182,9 +182,9 @@ bool NFMModBaseband::handleMessage(const Message& cmd)
     }
 }
 
-void NFMModBaseband::applySettings(const NFMModSettings& settings, bool force)
+void NFMModBaseband::applySettings(const QStringList& settingsKeys, const NFMModSettings& settings, bool force)
 {
-    if ((settings.m_inputFrequencyOffset != m_settings.m_inputFrequencyOffset) || force)
+    if ((settingsKeys.contains("m_inputFrequencyOffset") && settings.m_inputFrequencyOffset != m_settings.m_inputFrequencyOffset) || force)
     {
         m_channelizer->setChannelization(m_source.getAudioSampleRate(), settings.m_inputFrequencyOffset);
         m_source.applyChannelSettings(m_channelizer->getChannelSampleRate(), m_channelizer->getChannelFrequencyOffset());
@@ -192,7 +192,7 @@ void NFMModBaseband::applySettings(const NFMModSettings& settings, bool force)
 
     }
 
-    if ((settings.m_audioDeviceName != m_settings.m_audioDeviceName) || force)
+    if ((settingsKeys.contains("m_audioDeviceName") && settings.m_audioDeviceName != m_settings.m_audioDeviceName) || force)
     {
         AudioDeviceManager *audioDeviceManager = DSPEngine::instance()->getAudioDeviceManager();
         int audioDeviceIndex = audioDeviceManager->getInputDeviceIndex(settings.m_audioDeviceName);
@@ -207,7 +207,7 @@ void NFMModBaseband::applySettings(const NFMModSettings& settings, bool force)
         }
     }
 
-    if ((settings.m_modAFInput != m_settings.m_modAFInput) || force)
+    if ((settingsKeys.contains("m_modAFInput") && settings.m_modAFInput != m_settings.m_modAFInput) || force)
     {
         AudioDeviceManager *audioDeviceManager = DSPEngine::instance()->getAudioDeviceManager();
         int audioDeviceIndex = audioDeviceManager->getInputDeviceIndex(settings.m_audioDeviceName);
@@ -219,7 +219,7 @@ void NFMModBaseband::applySettings(const NFMModSettings& settings, bool force)
         }
     }
 
-    if ((settings.m_feedbackAudioDeviceName != m_settings.m_feedbackAudioDeviceName) || force)
+    if ((settingsKeys.contains("m_feedbackAudioDeviceName") && settings.m_feedbackAudioDeviceName != m_settings.m_feedbackAudioDeviceName) || force)
     {
         AudioDeviceManager *audioDeviceManager = DSPEngine::instance()->getAudioDeviceManager();
         int audioDeviceIndex = audioDeviceManager->getOutputDeviceIndex(settings.m_feedbackAudioDeviceName);
@@ -232,9 +232,13 @@ void NFMModBaseband::applySettings(const NFMModSettings& settings, bool force)
         }
     }
 
-    m_source.applySettings(settings, force);
+    m_source.applySettings(settingsKeys, settings, force);
 
-    m_settings = settings;
+    if (force) {
+        m_settings = settings;
+    } else {
+        m_settings.applySettings(settingsKeys, settings);
+    }
 }
 
 int NFMModBaseband::getChannelSampleRate() const

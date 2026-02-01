@@ -146,7 +146,7 @@ bool AISModBaseband::handleMessage(const Message& cmd)
         MsgConfigureAISModBaseband& cfg = (MsgConfigureAISModBaseband&) cmd;
         qDebug() << "AISModBaseband::handleMessage: MsgConfigureAISModBaseband";
 
-        applySettings(cfg.getSettings(), cfg.getForce());
+        applySettings(cfg.getSettingsKeys(), cfg.getSettings(), cfg.getForce());
 
         return true;
     }
@@ -189,7 +189,7 @@ bool AISModBaseband::handleMessage(const Message& cmd)
     }
 }
 
-void AISModBaseband::applySettings(const AISModSettings& settings, bool force)
+void AISModBaseband::applySettings(const QStringList& settingsKeys, const AISModSettings& settings, bool force)
 {
     if ((settings.m_inputFrequencyOffset != m_settings.m_inputFrequencyOffset) || force)
     {
@@ -197,7 +197,7 @@ void AISModBaseband::applySettings(const AISModSettings& settings, bool force)
         m_source.applyChannelSettings(m_channelizer->getChannelSampleRate(), m_channelizer->getChannelFrequencyOffset());
     }
 
-    m_source.applySettings(settings, force);
+    m_source.applySettings(settingsKeys, settings, force);
 
     m_settings = settings;
 }

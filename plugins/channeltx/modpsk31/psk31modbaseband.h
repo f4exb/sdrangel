@@ -41,20 +41,23 @@ public:
 
     public:
         const PSK31Settings& getSettings() const { return m_settings; }
+        const QStringList& getSettingsKeys() const { return m_settingsKeys; }
         bool getForce() const { return m_force; }
 
-        static MsgConfigurePSK31Baseband* create(const PSK31Settings& settings, bool force)
+        static MsgConfigurePSK31Baseband* create(const QStringList& settingsKeys, const PSK31Settings& settings, bool force)
         {
-            return new MsgConfigurePSK31Baseband(settings, force);
+            return new MsgConfigurePSK31Baseband(settingsKeys, settings, force);
         }
 
     private:
         PSK31Settings m_settings;
+        QStringList m_settingsKeys;
         bool m_force;
 
-        MsgConfigurePSK31Baseband(const PSK31Settings& settings, bool force) :
+        MsgConfigurePSK31Baseband(const QStringList& settingsKeys, const PSK31Settings& settings, bool force) :
             Message(),
             m_settings(settings),
+            m_settingsKeys(settingsKeys),
             m_force(force)
         { }
     };
@@ -90,7 +93,7 @@ private:
 
     void processFifo(SampleVector& data, unsigned int iBegin, unsigned int iEnd);
     bool handleMessage(const Message& cmd);
-    void applySettings(const PSK31Settings& settings, bool force = false);
+    void applySettings(const QStringList& settingsKeys, const PSK31Settings& settings, bool force = false);
 
 private slots:
     void handleInputMessages();

@@ -124,7 +124,7 @@ ATVModGUI::ATVModGUI(PluginAPI* pluginAPI, DeviceUISet *deviceUISet, BasebandSam
 
     displaySettings();
     makeUIConnections();
-    applySettings(true);
+    applySettings(QStringList(), true);
     DialPopup::addPopupsToChildDials(this);
     m_resizer.enableChildMouseTracking();
 }
@@ -149,14 +149,14 @@ bool ATVModGUI::deserialize(const QByteArray& data)
     if(m_settings.deserialize(data))
     {
         displaySettings();
-        applySettings(true); // will have true
+        applySettings(QStringList(), true);
         return true;
     }
     else
     {
         m_settings.resetToDefaults();
         displaySettings();
-        applySettings(true); // will have true
+        applySettings(QStringList(), true);
         return false;
     }
 }
@@ -260,7 +260,7 @@ void ATVModGUI::channelMarkerChangedByCursor()
 {
     ui->deltaFrequency->setValue(m_channelMarker.getCenterFrequency());
     m_settings.m_inputFrequencyOffset = m_channelMarker.getCenterFrequency();
-	applySettings();
+	applySettings(QStringList("inputFrequencyOffset"));
 }
 
 void ATVModGUI::setRFFiltersSlidersRange(int sampleRate)
@@ -458,7 +458,7 @@ void ATVModGUI::on_deltaFrequency_changed(qint64 value)
     m_channelMarker.setCenterFrequency(value);
     m_settings.m_inputFrequencyOffset = value;
     updateAbsoluteCenterFrequency();
-    applySettings();
+    applySettings(QStringList("inputFrequencyOffset"));
 }
 
 void ATVModGUI::on_modulation_currentIndexChanged(int index)
@@ -466,21 +466,21 @@ void ATVModGUI::on_modulation_currentIndexChanged(int index)
     m_settings.m_atvModulation = (ATVModSettings::ATVModulation) index;
     setRFFiltersSlidersRange(m_atvMod->getEffectiveSampleRate());
     setChannelMarkerBandwidth();
-    applySettings();
+    applySettings(QStringList("atvModulation"));
 }
 
 void ATVModGUI::on_rfScaling_valueChanged(int value)
 {
     ui->rfScalingText->setText(tr("%1").arg(value));
     m_settings.m_rfScalingFactor = value * 327.68f;
-    applySettings();
+    applySettings(QStringList("rfScalingFactor"));
 }
 
 void ATVModGUI::on_fmExcursion_valueChanged(int value)
 {
     ui->fmExcursionText->setText(tr("%1").arg(value / 10.0, 0, 'f', 1));
     m_settings.m_fmExcursion = value / 1000.0; // pro mill
-    applySettings();
+    applySettings(QStringList("fmExcursion"));
 }
 
 void ATVModGUI::on_rfBW_valueChanged(int value)
@@ -488,7 +488,7 @@ void ATVModGUI::on_rfBW_valueChanged(int value)
 	ui->rfBWText->setText(QString("%1k").arg((value*m_rfSliderDivisor) / 1000.0, 0, 'f', 1));
 	m_settings.m_rfBandwidth = value * m_rfSliderDivisor * 1.0f;
 	setChannelMarkerBandwidth();
-	applySettings();
+	applySettings(QStringList("rfBandwidth"));
 }
 
 void ATVModGUI::on_rfOppBW_valueChanged(int value)
@@ -496,7 +496,7 @@ void ATVModGUI::on_rfOppBW_valueChanged(int value)
     ui->rfOppBWText->setText(QString("%1k").arg((value*m_rfSliderDivisor) / 1000.0, 0, 'f', 1));
     m_settings.m_rfOppBandwidth = value * m_rfSliderDivisor * 1.0f;
     setChannelMarkerBandwidth();
-    applySettings();
+    applySettings(QStringList("rfOppBandwidth"));
 }
 
 void ATVModGUI::setChannelMarkerBandwidth()
@@ -534,52 +534,52 @@ void ATVModGUI::on_nbLines_currentIndexChanged(int index)
 {
     (void) index;
     m_settings.m_nbLines = getNbLines();
-    applySettings();
+    applySettings(QStringList("nbLines"));
 }
 
 void ATVModGUI::on_fps_currentIndexChanged(int index)
 {
     (void) index;
     m_settings.m_fps = getFPS();
-    applySettings();
+    applySettings(QStringList("fps"));
 }
 
 
 void ATVModGUI::on_standard_currentIndexChanged(int index)
 {
     m_settings.m_atvStd = (ATVModSettings::ATVStd) index;
-    applySettings();
+    applySettings(QStringList("atvStd"));
 }
 
 void ATVModGUI::on_uniformLevel_valueChanged(int value)
 {
 	ui->uniformLevelText->setText(QString("%1").arg(value));
 	m_settings.m_uniformLevel = value / 100.0f;
-	applySettings();
+	applySettings(QStringList("uniformLevel"));
 }
 
 void ATVModGUI::on_invertVideo_clicked(bool checked)
 {
     m_settings.m_invertedVideo = checked;
-    applySettings();
+    applySettings(QStringList("invertedVideo"));
 }
 
 void ATVModGUI::on_inputSelect_currentIndexChanged(int index)
 {
     m_settings.m_atvModInput = (ATVModSettings::ATVModInput) index;
-    applySettings();
+    applySettings(QStringList("atvModInput"));
 }
 
 void ATVModGUI::on_channelMute_toggled(bool checked)
 {
     m_settings.m_channelMute = checked;
-	applySettings();
+	applySettings(QStringList("channelMute"));
 }
 
 void ATVModGUI::on_forceDecimator_toggled(bool checked)
 {
     m_settings.m_forceDecimator = checked;
-    applySettings();
+    applySettings(QStringList("forceDecimator"));
 }
 
 void ATVModGUI::on_imageFileDialog_clicked(bool checked)
@@ -613,7 +613,7 @@ void ATVModGUI::on_videoFileDialog_clicked(bool checked)
 void ATVModGUI::on_playLoop_toggled(bool checked)
 {
     m_settings.m_videoPlayLoop = checked;
-    applySettings();
+    applySettings(QStringList("videoPlayLoop"));
 }
 
 void ATVModGUI::on_playVideo_toggled(bool checked)
@@ -621,7 +621,7 @@ void ATVModGUI::on_playVideo_toggled(bool checked)
     m_settings.m_videoPlay = checked;
     ui->navTimeSlider->setEnabled(!checked);
     m_enableNavTime = !checked;
-    applySettings();
+    applySettings(QStringList("videoPlay"));
 }
 
 void ATVModGUI::on_navTimeSlider_valueChanged(int value)
@@ -636,7 +636,7 @@ void ATVModGUI::on_navTimeSlider_valueChanged(int value)
 void ATVModGUI::on_playCamera_toggled(bool checked)
 {
     m_settings.m_cameraPlay = checked;
-    applySettings();
+    applySettings(QStringList("cameraPlay"));
 }
 
 void ATVModGUI::on_camSelect_currentIndexChanged(int index)
@@ -667,14 +667,14 @@ void ATVModGUI::on_cameraManualFPS_valueChanged(int value)
 void ATVModGUI::on_overlayTextShow_toggled(bool checked)
 {
     m_settings.m_showOverlayText = checked;
-    applySettings();
+    applySettings(QStringList("showOverlayText"));
 }
 
 void ATVModGUI::on_overlayText_textEdited(const QString& arg1)
 {
     (void) arg1;
     m_settings.m_overlayText = arg1;
-    applySettings();
+    applySettings(QStringList("overlayText"));
 }
 
 void ATVModGUI::configureImageFileName()
@@ -697,7 +697,7 @@ void ATVModGUI::onWidgetRolled(QWidget* widget, bool rollDown)
     (void) rollDown;
 
     getRollupContents()->saveState(m_rollupState);
-    applySettings();
+    applySettings(QStringList());
 }
 
 void ATVModGUI::onMenuDialogCalled(const QPoint &p)
@@ -742,7 +742,9 @@ void ATVModGUI::onMenuDialogCalled(const QPoint &p)
             updateIndexLabel();
         }
 
-        applySettings();
+        applySettings(QStringList({"title", "rgbColor", "useReverseAPI",
+            "reverseAPIAddress", "reverseAPIPort", "reverseAPIDeviceIndex",
+            "reverseAPIChannelIndex", "streamIndex"}));
     }
 
     resetContextMenuType();
@@ -753,7 +755,7 @@ void ATVModGUI::blockApplySettings(bool block)
     m_doApplySettings = !block;
 }
 
-void ATVModGUI::applySettings(bool force)
+void ATVModGUI::applySettings(const QStringList& settingsKeys, bool force)
 {
 	if (m_doApplySettings)
 	{
@@ -761,7 +763,7 @@ void ATVModGUI::applySettings(bool force)
 		        m_channelMarker.getCenterFrequency());
         m_atvMod->getInputMessageQueue()->push(msgChan);
 
-		ATVMod::MsgConfigureATVMod *msg = ATVMod::MsgConfigureATVMod::create(m_settings, force);
+		ATVMod::MsgConfigureATVMod *msg = ATVMod::MsgConfigureATVMod::create(settingsKeys, m_settings, force);
 		m_atvMod->getInputMessageQueue()->push(msg);
 	}
 }

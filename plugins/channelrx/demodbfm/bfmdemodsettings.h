@@ -71,6 +71,8 @@ struct BFMDemodSettings
     void setSpectrumGUI(Serializable *spectrumGUI) { m_spectrumGUI = spectrumGUI; }
     QByteArray serialize() const;
     bool deserialize(const QByteArray& data);
+    void applySettings(const QStringList& settingsKeys, const BFMDemodSettings& settings);
+    QString getDebugString(const QStringList& settingsKeys, bool force=false) const;
 
     static int getRFBW(int index);
     static int getRFBWIndex(int rfbw);

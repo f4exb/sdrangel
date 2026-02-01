@@ -170,7 +170,7 @@ bool BeamSteeringCWModBaseband::handleMessage(const Message& cmd)
         MsgConfigureBeamSteeringCWModBaseband& cfg = (MsgConfigureBeamSteeringCWModBaseband&) cmd;
         qDebug() << "BeamSteeringCWModBaseband::handleMessage: MsgConfigureBeamSteeringCWModBaseband";
 
-        applySettings(cfg.getSettings(), cfg.getForce());
+        applySettings(cfg.getSettingsKeys(), cfg.getSettings(), cfg.getForce());
 
         return true;
     }
@@ -200,9 +200,9 @@ bool BeamSteeringCWModBaseband::handleMessage(const Message& cmd)
     }
 }
 
-void BeamSteeringCWModBaseband::applySettings(const BeamSteeringCWModSettings& settings, bool force)
+void BeamSteeringCWModBaseband::applySettings(const QStringList& settingsKeys, const BeamSteeringCWModSettings& settings, bool force)
 {
-    if ((m_settings.m_filterChainHash != settings.m_filterChainHash) || (m_settings.m_log2Interp != settings.m_log2Interp) || force)
+    if ((settingsKeys.contains("filterChainHash") && (m_settings.m_filterChainHash != settings.m_filterChainHash)) || (settingsKeys.contains("log2Interp") && (m_settings.m_log2Interp != settings.m_log2Interp)) || force)
     {
         for (int i = 0; i < 2; i++)
         {
@@ -211,14 +211,14 @@ void BeamSteeringCWModBaseband::applySettings(const BeamSteeringCWModSettings& s
         }
     }
 
-    if ((m_settings.m_steerDegrees != settings.m_steerDegrees) || force)
+    if ((settingsKeys.contains("steerDegrees") && (m_settings.m_steerDegrees != settings.m_steerDegrees)) || force)
     {
         float steeringAngle = settings.m_steerDegrees / 180.0f;
         steeringAngle = steeringAngle < -M_PI ? -M_PI : steeringAngle > M_PI ? M_PI : steeringAngle;
         m_streamSources[1].setPhase(M_PI*cos(steeringAngle));
     }
 
-    if ((m_settings.m_channelOutput != settings.m_channelOutput) || force)
+    if ((settingsKeys.contains("channelOutput") && (m_settings.m_channelOutput != settings.m_channelOutput)) || force)
     {
         if (settings.m_channelOutput == 0)
         {
@@ -242,5 +242,9 @@ void BeamSteeringCWModBaseband::applySettings(const BeamSteeringCWModSettings& s
         }
     }
 
-    m_settings = settings;
+    if (force) {
+        m_settings = settings;
+    } else {
+        m_settings.applySettings(settingsKeys, settings);
+    }
 }

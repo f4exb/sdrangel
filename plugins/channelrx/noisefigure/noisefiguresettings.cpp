@@ -253,3 +253,180 @@ void NoiseFigureSettings::deserializeENRs(const QByteArray& data, QList<ENR *>& 
     (*stream) >> enrs;
     delete stream;
 }
+
+void NoiseFigureSettings::applySettings(const QStringList& settingsKeys, const NoiseFigureSettings& settings)
+{
+    if (settingsKeys.contains("inputFrequencyOffset")) {
+        m_inputFrequencyOffset = settings.m_inputFrequencyOffset;
+    }
+    if (settingsKeys.contains("fftSize")) {
+        m_fftSize = settings.m_fftSize;
+    }
+    if (settingsKeys.contains("fftCount")) {
+        m_fftCount = settings.m_fftCount;
+    }
+    if (settingsKeys.contains("sweepSpec")) {
+        m_sweepSpec = settings.m_sweepSpec;
+    }
+    if (settingsKeys.contains("startValue")) {
+        m_startValue = settings.m_startValue;
+    }
+    if (settingsKeys.contains("stopValue")) {
+        m_stopValue = settings.m_stopValue;
+    }
+    if (settingsKeys.contains("steps")) {
+        m_steps = settings.m_steps;
+    }
+    if (settingsKeys.contains("step")) {
+        m_step = settings.m_step;
+    }
+    if (settingsKeys.contains("sweepList")) {
+        m_sweepList = settings.m_sweepList;
+    }
+    if (settingsKeys.contains("visaDevice")) {
+        m_visaDevice = settings.m_visaDevice;
+    }
+    if (settingsKeys.contains("powerOnSCPI")) {
+        m_powerOnSCPI = settings.m_powerOnSCPI;
+    }
+    if (settingsKeys.contains("powerOffSCPI")) {
+        m_powerOffSCPI = settings.m_powerOffSCPI;
+    }
+    if (settingsKeys.contains("powerOnCommand")) {
+        m_powerOnCommand = settings.m_powerOnCommand;
+    }
+    if (settingsKeys.contains("powerOffCommand")) {
+        m_powerOffCommand = settings.m_powerOffCommand;
+    }
+    if (settingsKeys.contains("powerDelay")) {
+        m_powerDelay = settings.m_powerDelay;
+    }
+    if (settingsKeys.contains("interpolation")) {
+        m_interpolation = settings.m_interpolation;
+    }
+    if (settingsKeys.contains("setting")) {
+        m_setting = settings.m_setting;
+    }
+    if (settingsKeys.contains("rgbColor")) {
+        m_rgbColor = settings.m_rgbColor;
+    }
+    if (settingsKeys.contains("title")) {
+        m_title = settings.m_title;
+    }
+    if (settingsKeys.contains("streamIndex")) {
+        m_streamIndex = settings.m_streamIndex;
+    }
+    if (settingsKeys.contains("useReverseAPI")) {
+        m_useReverseAPI = settings.m_useReverseAPI;
+    }
+    if (settingsKeys.contains("reverseAPIAddress")) {
+        m_reverseAPIAddress = settings.m_reverseAPIAddress;
+    }
+    if (settingsKeys.contains("reverseAPIPort")) {
+        m_reverseAPIPort = settings.m_reverseAPIPort;
+    }
+    if (settingsKeys.contains("reverseAPIDeviceIndex")) {
+        m_reverseAPIDeviceIndex = settings.m_reverseAPIDeviceIndex;
+    }
+    if (settingsKeys.contains("reverseAPIChannelIndex")) {
+        m_reverseAPIChannelIndex = settings.m_reverseAPIChannelIndex;
+    }
+    if (settingsKeys.contains("workspaceIndex")) {
+        m_workspaceIndex = settings.m_workspaceIndex;
+    }
+    if (settingsKeys.contains("geometryBytes")) {
+        m_geometryBytes = settings.m_geometryBytes;
+    }
+    if (settingsKeys.contains("hidden")) {
+        m_hidden = settings.m_hidden;
+    }
+}
+
+QString NoiseFigureSettings::getDebugString(const QStringList& settingsKeys, bool force) const
+{
+    std::ostringstream ostr;
+
+    if (settingsKeys.contains("inputFrequencyOffset") || force) {
+        ostr << " m_inputFrequencyOffset: " << m_inputFrequencyOffset;
+    }
+    if (settingsKeys.contains("fftSize") || force) {
+        ostr << " m_fftSize: " << m_fftSize;
+    }
+    if (settingsKeys.contains("fftCount") || force) {
+        ostr << " m_fftCount: " << m_fftCount;
+    }
+    if (settingsKeys.contains("sweepSpec") || force) {
+        ostr << " m_sweepSpec: " << m_sweepSpec;
+    }
+    if (settingsKeys.contains("startValue") || force) {
+        ostr << " m_startValue: " << m_startValue;
+    }
+    if (settingsKeys.contains("stopValue") || force) {
+        ostr << " m_stopValue: " << m_stopValue;
+    }
+    if (settingsKeys.contains("steps") || force) {
+        ostr << " m_steps: " << m_steps;
+    }
+    if (settingsKeys.contains("step") || force) {
+        ostr << " m_step: " << m_step;
+    }
+    if (settingsKeys.contains("sweepList") || force) {
+        ostr << " m_sweepList: " << m_sweepList.toStdString();
+    }
+    if (settingsKeys.contains("visaDevice") || force) {
+        ostr << " m_visaDevice: " << m_visaDevice.toStdString();
+    }
+    if (settingsKeys.contains("powerOnSCPI") || force) {
+        ostr << " m_powerOnSCPI: " << m_powerOnSCPI.toStdString();
+    }
+    if (settingsKeys.contains("powerOffSCPI") || force) {
+        ostr << " m_powerOffSCPI: " << m_powerOffSCPI.toStdString();
+    }
+    if (settingsKeys.contains("powerOnCommand") || force) {
+        ostr << " m_powerOnCommand: " << m_powerOnCommand.toStdString();
+    }
+    if (settingsKeys.contains("powerOffCommand") || force) {
+        ostr << " m_powerOffCommand: " << m_powerOffCommand.toStdString();
+    }
+    if (settingsKeys.contains("powerDelay") || force) {
+        ostr << " m_powerDelay: " << m_powerDelay;
+    }
+    if (settingsKeys.contains("interpolation") || force) {
+        ostr << " m_interpolation: " << m_interpolation;
+    }
+    if (settingsKeys.contains("setting") || force) {
+        ostr << " m_setting: " << m_setting.toStdString();
+    }
+    if (settingsKeys.contains("rgbColor") || force) {
+        ostr << " m_rgbColor: " << m_rgbColor;
+    }
+    if (settingsKeys.contains("title") || force) {
+        ostr << " m_title: " << m_title.toStdString();
+    }
+    if (settingsKeys.contains("streamIndex") || force) {
+        ostr << " m_streamIndex: " << m_streamIndex;
+    }
+    if (settingsKeys.contains("useReverseAPI") || force) {
+        ostr << " m_useReverseAPI: " << m_useReverseAPI;
+    }
+    if (settingsKeys.contains("reverseAPIAddress") || force) {
+        ostr << " m_reverseAPIAddress: " << m_reverseAPIAddress.toStdString();
+    }
+    if (settingsKeys.contains("reverseAPIPort") || force) {
+        ostr << " m_reverseAPIPort: " << m_reverseAPIPort;
+    }
+    if (settingsKeys.contains("reverseAPIDeviceIndex") || force) {
+        ostr << " m_reverseAPIDeviceIndex: " << m_reverseAPIDeviceIndex;
+    }
+    if (settingsKeys.contains("reverseAPIChannelIndex") || force) {
+        ostr << " m_reverseAPIChannelIndex: " << m_reverseAPIChannelIndex;
+    }
+    if (settingsKeys.contains("workspaceIndex") || force) {
+        ostr << " m_workspaceIndex: " << m_workspaceIndex;
+    }
+    if (settingsKeys.contains("hidden") || force) {
+        ostr << " m_hidden: " << m_hidden;
+    }
+
+    return QString(ostr.str().c_str());
+}

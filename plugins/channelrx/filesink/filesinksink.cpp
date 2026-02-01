@@ -29,6 +29,7 @@
 #include "filesinksink.h"
 #include "dsp/filerecord.h"
 #include "dsp/wavfilerecord.h"
+#include "util/stringlist.h"
 
 FileSinkSink::FileSinkSink() :
     m_sinkSampleRate(0),
@@ -273,7 +274,7 @@ void FileSinkSink::applyChannelSettings(
     m_preRecordBuffer.reset();
 }
 
-void FileSinkSink::applySettings(const FileSinkSettings& settings, bool force)
+void FileSinkSink::applySettings(const QStringList& settingsKeys, const FileSinkSettings& settings, bool force)
 {
     qDebug() << "FileSinkSink::applySettings:"
         << "m_fileRecordName: " << settings.m_fileRecordName
@@ -281,7 +282,7 @@ void FileSinkSink::applySettings(const FileSinkSettings& settings, bool force)
 
     QString fileRecordName = settings.m_fileRecordName;
 
-    if ((settings.m_fileRecordName != m_settings.m_fileRecordName) || force)
+    if ((settingsKeys.contains("fileRecordName") && (settings.m_fileRecordName != m_settings.m_fileRecordName)) || force)
     {
         QFileInfo fileInfo(settings.m_fileRecordName);
         QString extension = fileInfo.suffix();
@@ -316,7 +317,7 @@ void FileSinkSink::applySettings(const FileSinkSettings& settings, bool force)
         }
     }
 
-    if ((settings.m_preRecordTime != m_settings.m_squelchPostRecordTime) || force)
+    if ((StringListUtil::containsAny(settingsKeys, QStringList({"preRecordTime", "squelchPostRecordTime"})) && (settings.m_preRecordTime != m_settings.m_squelchPostRecordTime)) || force)
     {
         m_preRecordBuffer.setSize(settings.m_preRecordTime * m_sinkSampleRate);
 
@@ -325,7 +326,12 @@ void FileSinkSink::applySettings(const FileSinkSettings& settings, bool force)
         }
     }
 
-    m_settings = settings;
+    if (force) {
+        m_settings = settings;
+    } else {
+        m_settings.applySettings(settingsKeys, settings);
+    }
+
     m_settings.m_fileRecordName = fileRecordName;
 }
 

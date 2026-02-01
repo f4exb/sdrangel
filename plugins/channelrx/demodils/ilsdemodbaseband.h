@@ -45,20 +45,23 @@ public:
 
     public:
         const ILSDemodSettings& getSettings() const { return m_settings; }
+        const QStringList& getSettingsKeys() const { return m_settingsKeys; }
         bool getForce() const { return m_force; }
 
-        static MsgConfigureILSDemodBaseband* create(const ILSDemodSettings& settings, bool force)
+        static MsgConfigureILSDemodBaseband* create(const QStringList& settingsKeys, const ILSDemodSettings& settings, bool force)
         {
-            return new MsgConfigureILSDemodBaseband(settings, force);
+            return new MsgConfigureILSDemodBaseband(settingsKeys, settings, force);
         }
 
     private:
         ILSDemodSettings m_settings;
+        QStringList m_settingsKeys;
         bool m_force;
 
-        MsgConfigureILSDemodBaseband(const ILSDemodSettings& settings, bool force) :
+        MsgConfigureILSDemodBaseband(const QStringList& settingsKeys, const ILSDemodSettings& settings, bool force) :
             Message(),
             m_settings(settings),
+            m_settingsKeys(settingsKeys),
             m_force(force)
         { }
     };
@@ -100,7 +103,7 @@ private:
 
     bool handleMessage(const Message& cmd);
     void calculateOffset(ILSDemodSink *sink);
-    void applySettings(const ILSDemodSettings& settings, bool force = false);
+    void applySettings(const QStringList& settingsKeys, const ILSDemodSettings& settings, bool force = false);
 
 private slots:
     void handleInputMessages();
@@ -108,4 +111,3 @@ private slots:
 };
 
 #endif // INCLUDE_ILSDEMODBASEBAND_H
-

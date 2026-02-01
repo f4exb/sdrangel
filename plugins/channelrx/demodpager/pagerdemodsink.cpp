@@ -54,7 +54,7 @@ PagerDemodSink::PagerDemodSink() :
     m_demodBuffer.resize(1<<12);
     m_demodBufferFill = 0;
 
-    applySettings(m_settings, true);
+    applySettings(QStringList(), m_settings, true);
     applyChannelSettings(m_channelSampleRate, m_channelFrequencyOffset, true);
     m_sampleBuffer.resize(m_sampleBufferSize);
 }
@@ -633,15 +633,11 @@ void PagerDemodSink::applyChannelSettings(int channelSampleRate, int channelFreq
     m_channelFrequencyOffset = channelFrequencyOffset;
 }
 
-void PagerDemodSink::applySettings(const PagerDemodSettings& settings, bool force)
+void PagerDemodSink::applySettings(const QStringList& settingsKeys, const PagerDemodSettings& settings, bool force)
 {
-    qDebug() << "PagerDemodSink::applySettings:"
-            << " rfBandwidth: " << settings.m_rfBandwidth
-            << " fmDeviation: " << settings.m_fmDeviation
-            << " baud: " << settings.m_baud
-            << " force: " << force;
+    qDebug() << "PagerDemodSink::applySettings:" << settings.getDebugString(settingsKeys, force);
 
-    if ((settings.m_rfBandwidth != m_settings.m_rfBandwidth) || force)
+    if ((settingsKeys.contains("rfBandwidth") && (settings.m_rfBandwidth != m_settings.m_rfBandwidth)) || force)
     {
         m_interpolator.create(16, m_channelSampleRate, settings.m_rfBandwidth / 2.2);
         m_interpolatorDistance = (Real) m_channelSampleRate / (Real) PagerDemodSettings::m_channelSampleRate;
@@ -649,12 +645,12 @@ void PagerDemodSink::applySettings(const PagerDemodSettings& settings, bool forc
         m_lowpass.create(301, PagerDemodSettings::m_channelSampleRate, settings.m_rfBandwidth / 2.0f);
     }
 
-    if ((settings.m_fmDeviation != m_settings.m_fmDeviation) || force)
+    if ((settingsKeys.contains("fmDeviation") && (settings.m_fmDeviation != m_settings.m_fmDeviation)) || force)
     {
         m_phaseDiscri.setFMScaling(PagerDemodSettings::m_channelSampleRate / (2.0f * settings.m_fmDeviation));
     }
 
-    if ((settings.m_baud != m_settings.m_baud) || force)
+    if ((settingsKeys.contains("baud") && (settings.m_baud != m_settings.m_baud)) || force)
     {
         m_samplesPerSymbol = PagerDemodSettings::m_channelSampleRate / settings.m_baud;
         qDebug() << "PagerDemodSink::applySettings: m_samplesPerSymbol: " << m_samplesPerSymbol;
@@ -663,5 +659,9 @@ void PagerDemodSink::applySettings(const PagerDemodSettings& settings, bool forc
         m_lowpassBaud.create(301, PagerDemodSettings::m_channelSampleRate, settings.m_baud * 5.0f);
     }
 
-    m_settings = settings;
+    if (force) {
+        m_settings = settings;
+    } else {
+        m_settings.applySettings(settingsKeys, settings);
+    }
 }

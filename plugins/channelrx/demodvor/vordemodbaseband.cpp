@@ -133,7 +133,7 @@ bool VORDemodBaseband::handleMessage(const Message& cmd)
         MsgConfigureVORDemodBaseband& cfg = (MsgConfigureVORDemodBaseband&) cmd;
         qDebug() << "VORDemodBaseband::handleMessage: MsgConfigureVORDemodBaseband";
 
-        applySettings(cfg.getSettings(), cfg.getForce());
+        applySettings(cfg.getSettingsKeys(), cfg.getSettings(), cfg.getForce());
 
         return true;
     }
@@ -160,9 +160,9 @@ bool VORDemodBaseband::handleMessage(const Message& cmd)
     }
 }
 
-void VORDemodBaseband::applySettings(const VORDemodSettings& settings, bool force)
+void VORDemodBaseband::applySettings(const QStringList& settingsKeys, const VORDemodSettings& settings, bool force)
 {
-    if ((settings.m_inputFrequencyOffset != m_settings.m_inputFrequencyOffset) || force)
+    if ((settingsKeys.contains("inputFrequencyOffset") && (settings.m_inputFrequencyOffset != m_settings.m_inputFrequencyOffset)) || force)
     {
         m_channelizer.setChannelization(m_sink.getAudioSampleRate(), settings.m_inputFrequencyOffset);
         m_sink.applyChannelSettings(m_channelizer.getChannelSampleRate(), m_channelizer.getChannelFrequencyOffset());
@@ -174,7 +174,7 @@ void VORDemodBaseband::applySettings(const VORDemodSettings& settings, bool forc
         }
     }
 
-    if ((settings.m_audioDeviceName != m_settings.m_audioDeviceName) || force)
+    if ((settingsKeys.contains("audioDeviceName") && (settings.m_audioDeviceName != m_settings.m_audioDeviceName)) || force)
     {
         AudioDeviceManager *audioDeviceManager = DSPEngine::instance()->getAudioDeviceManager();
         int audioDeviceIndex = audioDeviceManager->getOutputDeviceIndex(settings.m_audioDeviceName);
@@ -191,7 +191,11 @@ void VORDemodBaseband::applySettings(const VORDemodSettings& settings, bool forc
         }
     }
 
-    m_sink.applySettings(settings, force);
+    m_sink.applySettings(settingsKeys, settings, force);
 
-    m_settings = settings;
+    if (force) {
+        m_settings = settings;
+    } else {
+        m_settings.applySettings(settingsKeys, settings);
+    }
 }

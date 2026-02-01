@@ -51,7 +51,7 @@ UDPSourceSource::UDPSourceSource() :
 
     m_udpHandler.start();
 
-    applySettings(m_settings, true);
+    applySettings(QStringList(), m_settings, true);
     applyChannelSettings(m_channelSampleRate, m_channelFrequencyOffset, true);
 }
 
@@ -319,33 +319,13 @@ void UDPSourceSource::applyChannelSettings(int channelSampleRate, int channelFre
     m_channelFrequencyOffset = channelFrequencyOffset;
 }
 
-void UDPSourceSource::applySettings(const UDPSourceSettings& settings, bool force)
+void UDPSourceSource::applySettings(const QStringList& settingsKeys, const UDPSourceSettings& settings, bool force)
 {
-    qDebug() << "UDPSourceSource::applySettings:"
-            << " m_inputFrequencyOffset: " << settings.m_inputFrequencyOffset
-            << " m_sampleFormat: " << settings.m_sampleFormat
-            << " m_inputSampleRate: " << settings.m_inputSampleRate
-            << " m_rfBandwidth: " << settings.m_rfBandwidth
-            << " m_lowCutoff: " << settings.m_lowCutoff
-            << " m_fmDeviation: " << settings.m_fmDeviation
-            << " m_amModFactor: " << settings.m_amModFactor
-            << " m_udpAddressStr: " << settings.m_udpAddress
-            << " m_udpPort: " << settings.m_udpPort
-            << " m_multicastAddress: " << settings.m_multicastAddress
-            << " m_multicastJoin: " << settings.m_multicastJoin
-            << " m_channelMute: " << settings.m_channelMute
-            << " m_gainIn: " << settings.m_gainIn
-            << " m_gainOut: " << settings.m_gainOut
-            << " m_squelchGate: " << settings.m_squelchGate
-            << " m_squelch: " << settings.m_squelch << "dB"
-            << " m_squelchEnabled: " << settings.m_squelchEnabled
-            << " m_autoRWBalance: " << settings.m_autoRWBalance
-            << " m_stereoInput: " << settings.m_stereoInput
-            << " force: " << force;
+    qDebug() << "UDPSourceSource::applySettings:" << settings.getDebugString(settingsKeys, force);
 
-    if((settings.m_rfBandwidth != m_settings.m_rfBandwidth) ||
-       (settings.m_lowCutoff != m_settings.m_lowCutoff) ||
-       (settings.m_inputSampleRate != m_settings.m_inputSampleRate) || force)
+    if((settingsKeys.contains("rfBandwidth") && (settings.m_rfBandwidth != m_settings.m_rfBandwidth)) ||
+       (settingsKeys.contains("lowCutoff") && (settings.m_lowCutoff != m_settings.m_lowCutoff)) ||
+       (settingsKeys.contains("inputSampleRate") && (settings.m_inputSampleRate != m_settings.m_inputSampleRate)) || force)
     {
         m_interpolatorDistanceRemain = 0;
         m_interpolatorConsumed = false;
@@ -368,33 +348,33 @@ void UDPSourceSource::applySettings(const UDPSourceSettings& settings, bool forc
         m_SSBFilter->create_filter(settings.m_lowCutoff / settings.m_inputSampleRate, settings.m_rfBandwidth / settings.m_inputSampleRate);
     }
 
-    if ((settings.m_squelch != m_settings.m_squelch) || force)
+    if ((settingsKeys.contains("squelch") && (settings.m_squelch != m_settings.m_squelch)) || force)
     {
         m_squelch = CalcDb::powerFromdB(settings.m_squelch);
     }
 
-    if ((settings.m_squelchGate != m_settings.m_squelchGate) || force)
+    if ((settingsKeys.contains("squelchGate") && (settings.m_squelchGate != m_settings.m_squelchGate)) || force)
     {
         m_squelchThreshold = m_channelSampleRate * settings.m_squelchGate;
         initSquelch(m_squelchOpen);
     }
 
-    if ((settings.m_udpAddress != m_settings.m_udpAddress) ||
-        (settings.m_udpPort != m_settings.m_udpPort) ||
-        (settings.m_multicastAddress != m_settings.m_multicastAddress) ||
-        (settings.m_multicastJoin != m_settings.m_multicastJoin) || force)
+    if ((settingsKeys.contains("udpAddress") && (settings.m_udpAddress != m_settings.m_udpAddress)) ||
+        (settingsKeys.contains("udpPort") && (settings.m_udpPort != m_settings.m_udpPort)) ||
+        (settingsKeys.contains("multicastAddress") && (settings.m_multicastAddress != m_settings.m_multicastAddress)) ||
+        (settingsKeys.contains("multicastJoin") && (settings.m_multicastJoin != m_settings.m_multicastJoin)) || force)
     {
         m_udpHandler.configureUDPLink(settings.m_udpAddress, settings.m_udpPort, settings.m_multicastAddress, settings.m_multicastJoin);
     }
 
-    if ((settings.m_channelMute != m_settings.m_channelMute) || force)
+    if ((settingsKeys.contains("channelMute") && (settings.m_channelMute != m_settings.m_channelMute)) || force)
     {
         if (!settings.m_channelMute) {
             m_udpHandler.resetReadIndex();
         }
     }
 
-    if ((settings.m_autoRWBalance != m_settings.m_autoRWBalance) || force)
+    if ((settingsKeys.contains("autoRWBalance") && (settings.m_autoRWBalance != m_settings.m_autoRWBalance)) || force)
     {
         m_udpHandler.setAutoRWBalance(settings.m_autoRWBalance);
 
@@ -409,7 +389,11 @@ void UDPSourceSource::applySettings(const UDPSourceSettings& settings, bool forc
         }
     }
 
-    m_settings = settings;
+    if (force) {
+        m_settings = settings;
+    } else {
+        m_settings.applySettings(settingsKeys, settings);
+    }
 }
 
 void UDPSourceSource::sampleRateCorrection(float rawDeltaRatio, float correctionFactor)

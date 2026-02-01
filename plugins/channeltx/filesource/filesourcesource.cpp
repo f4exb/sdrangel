@@ -306,20 +306,18 @@ void FileSourceSource::handleEOF()
     }
 }
 
-void FileSourceSource::applySettings(const FileSourceSettings& settings, bool force)
+void FileSourceSource::applySettings(const QStringList& settingsKeys, const FileSourceSettings& settings, bool force)
 {
-    qDebug() << "FileSourceSource::applySettings:"
-        << "m_fileName:" << settings.m_fileName
-        << "m_loop:" << settings.m_loop
-        << "m_gainDB:" << settings.m_gainDB
-        << "m_log2Interp:" << settings.m_log2Interp
-        << "m_filterChainHash:" << settings.m_filterChainHash
-        << " force: " << force;
+    qDebug() << "FileSourceSource::applySettings:" << settings.getDebugString(settingsKeys, force);
 
 
-    if ((m_settings.m_gainDB != settings.m_gainDB) || force) {
+    if ((settingsKeys.contains("gainDB") && (m_settings.m_gainDB != settings.m_gainDB)) || force) {
         m_linearGain = CalcDb::powerFromdB(settings.m_gainDB/2.0); // Divide by two for power gain to voltage gain conversion
     }
 
-    m_settings = settings;
+    if (force) {
+        m_settings = settings;
+    } else {
+        m_settings.applySettings(settingsKeys, settings);
+    }
 }

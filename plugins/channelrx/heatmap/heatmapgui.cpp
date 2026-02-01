@@ -63,7 +63,7 @@ void HeatMapGUI::resetToDefaults()
 {
     m_settings.resetToDefaults();
     displaySettings();
-    applySettings(true);
+    applySettings(QStringList(), true);
 }
 
 QByteArray HeatMapGUI::serialize() const
@@ -75,7 +75,7 @@ bool HeatMapGUI::deserialize(const QByteArray& data)
 {
     if(m_settings.deserialize(data)) {
         displaySettings();
-        applySettings(true);
+        applySettings(QStringList(), true);
         return true;
     } else {
         resetToDefaults();
@@ -128,7 +128,7 @@ void HeatMapGUI::channelMarkerChangedByCursor()
 {
     ui->deltaFrequency->setValue(m_channelMarker.getCenterFrequency());
     m_settings.m_inputFrequencyOffset = m_channelMarker.getCenterFrequency();
-    applySettings();
+    applySettings(QStringList("inputFrequencyOffset"));
 }
 
 void HeatMapGUI::channelMarkerHighlightedByCursor()
@@ -141,7 +141,7 @@ void HeatMapGUI::on_deltaFrequency_changed(qint64 value)
     m_channelMarker.setCenterFrequency(value);
     m_settings.m_inputFrequencyOffset = m_channelMarker.getCenterFrequency();
     updateAbsoluteCenterFrequency();
-    applySettings();
+    applySettings(QStringList("inputFrequencyOffset"));
 }
 
 void HeatMapGUI::on_rfBW_valueChanged(int value)
@@ -150,7 +150,7 @@ void HeatMapGUI::on_rfBW_valueChanged(int value)
     ui->rfBWText->setText(QString("%1k").arg(value / 10.0, 0, 'f', 1));
     m_channelMarker.setBandwidth(bw);
     m_settings.m_rfBandwidth = bw;
-    applySettings();
+    applySettings(QStringList("rfBandwidth"));
 }
 
 void HeatMapGUI::on_minPower_valueChanged(double value)
@@ -160,7 +160,7 @@ void HeatMapGUI::on_minPower_valueChanged(double value)
     if (m_powerYAxis) {
         m_powerYAxis->setMin(m_settings.m_minPower);
     }
-    applySettings();
+    applySettings(QStringList("minPower"));
 }
 
 void HeatMapGUI::on_maxPower_valueChanged(double value)
@@ -170,7 +170,7 @@ void HeatMapGUI::on_maxPower_valueChanged(double value)
     if (m_powerYAxis) {
         m_powerYAxis->setMax(m_settings.m_maxPower);
     }
-    applySettings();
+    applySettings(QStringList("maxPower"));
 }
 
 void HeatMapGUI::on_colorMap_currentIndexChanged(int index)
@@ -181,14 +181,14 @@ void HeatMapGUI::on_colorMap_currentIndexChanged(int index)
         m_colorMap = ColorMap::getColorMap(m_settings.m_colorMapName);
     }
     plotMap();
-    applySettings();
+    applySettings(QStringList("colorMapName"));
 }
 
 void HeatMapGUI::on_pulseTH_valueChanged(int value)
 {
     m_settings.m_pulseThreshold = (float)value;
     ui->pulseTHText->setText(QString::number(value));
-    applySettings();
+    applySettings(QStringList("pulseThreshold"));
 }
 
 const QStringList HeatMapGUI::m_averagePeriodTexts = {
@@ -199,7 +199,7 @@ void HeatMapGUI::on_averagePeriod_valueChanged(int value)
 {
     m_settings.m_averagePeriodUS = (int)std::pow(10.0f, (float)value);
     ui->averagePeriodText->setText(m_averagePeriodTexts[value-1]);
-    applySettings();
+    applySettings(QStringList("averagePeriodUS"));
 }
 
 const QStringList HeatMapGUI::m_sampleRateTexts = {
@@ -213,7 +213,7 @@ void HeatMapGUI::on_sampleRate_valueChanged(int value)
     ui->averagePeriod->setMinimum(std::max(1, static_cast<int> (m_averagePeriodTexts.size()) - value));
     ui->rfBW->setMaximum(m_settings.m_sampleRate/100);
     m_scopeVis->setLiveRate(m_settings.m_sampleRate);
-    applySettings();
+    applySettings(QStringList("sampleRate"));
 }
 
 void HeatMapGUI::on_mode_currentIndexChanged(int index)
@@ -238,7 +238,7 @@ void HeatMapGUI::on_mode_currentIndexChanged(int index)
             }
             plotMap();
         }
-        applySettings();
+        applySettings(QStringList("mode"));
     }
 }
 
@@ -265,7 +265,7 @@ void HeatMapGUI::on_displayChart_clicked(bool checked)
 {
     m_settings.m_displayChart = checked;
     displayPowerChart();
-    applySettings();
+    applySettings(QStringList("displayChart"));
 }
 
 void HeatMapGUI::on_clearHeatMap_clicked()
@@ -434,7 +434,7 @@ void HeatMapGUI::on_txPosition_clicked(bool checked)
 {
     m_settings.m_txPosValid = checked;
     displayTXPosition(checked);
-    applySettings();
+    applySettings(QStringList("txPosValid"));
 }
 
 void HeatMapGUI::on_txLatitude_editingFinished()
@@ -442,7 +442,7 @@ void HeatMapGUI::on_txLatitude_editingFinished()
     m_settings.m_txLatitude = ui->txLatitude->text().toFloat();
     updateRange();
     sendTxToMap();
-    applySettings();
+    applySettings(QStringList("txLatitude"));
 }
 
 void HeatMapGUI::on_txLongitude_editingFinished()
@@ -450,14 +450,14 @@ void HeatMapGUI::on_txLongitude_editingFinished()
     m_settings.m_txLongitude = ui->txLongitude->text().toFloat();
     updateRange();
     sendTxToMap();
-    applySettings();
+    applySettings(QStringList("txLongitude"));
 }
 
 void HeatMapGUI::on_txPower_valueChanged(double value)
 {
     m_settings.m_txPower = (float)value;
     sendTxToMap();
-    applySettings();
+    applySettings(QStringList("txPower"));
 }
 
 void HeatMapGUI::on_txPositionSet_clicked(bool checked)
@@ -470,7 +470,7 @@ void HeatMapGUI::on_txPositionSet_clicked(bool checked)
     m_settings.m_txLongitude = m_longitude;
     updateRange();
     sendTxToMap();
-    applySettings();
+    applySettings(QStringList({"txPositionSet", "txLatitude", "txLongitude"}));
 }
 
 void HeatMapGUI::onWidgetRolled(QWidget* widget, bool rollDown)
@@ -479,7 +479,7 @@ void HeatMapGUI::onWidgetRolled(QWidget* widget, bool rollDown)
     (void) rollDown;
 
     getRollupContents()->saveState(m_rollupState);
-    applySettings();
+    applySettings(QStringList());
 }
 
 void HeatMapGUI::onMenuDialogCalled(const QPoint &p)
@@ -524,7 +524,16 @@ void HeatMapGUI::onMenuDialogCalled(const QPoint &p)
             updateIndexLabel();
         }
 
-        applySettings();
+        applySettings(QStringList({
+            "rgbColor",
+            "title",
+            "useReverseAPI",
+            "reverseAPIAddress",
+            "reverseAPIPort",
+            "reverseAPIDeviceIndex",
+            "reverseAPIChannelIndex",
+            "streamIndex"
+        }));
     }
 
     resetContextMenuType();
@@ -639,7 +648,7 @@ HeatMapGUI::HeatMapGUI(PluginAPI* pluginAPI, DeviceUISet *deviceUISet, BasebandS
 
     displaySettings();
     makeUIConnections();
-    applySettings(true);
+    applySettings(QStringList({}), true);
     DialPopup::addPopupsToChildDials(this);
     m_resizer.enableChildMouseTracking();
 
@@ -660,11 +669,11 @@ void HeatMapGUI::blockApplySettings(bool block)
     m_doApplySettings = !block;
 }
 
-void HeatMapGUI::applySettings(bool force)
+void HeatMapGUI::applySettings(const QStringList& settingsKeys, bool force)
 {
     if (m_doApplySettings)
     {
-        HeatMap::MsgConfigureHeatMap* message = HeatMap::MsgConfigureHeatMap::create(m_settings, force);
+        HeatMap::MsgConfigureHeatMap* message = HeatMap::MsgConfigureHeatMap::create(settingsKeys, m_settings, force);
         m_heatMap->getInputMessageQueue()->push(message);
     }
 }
@@ -1581,77 +1590,77 @@ void HeatMapGUI::on_displayAverage_clicked(bool checked)
 {
     m_settings.m_displayAverage = checked;
     m_powerAverageSeries->setVisible(checked);
-    applySettings();
+    applySettings(QStringList("displayAverage"));
 }
 
 void HeatMapGUI::on_displayMax_clicked(bool checked)
 {
     m_settings.m_displayMax = checked;
     m_powerMaxPeakSeries->setVisible(checked);
-    applySettings();
+    applySettings(QStringList("displayMax"));
 }
 
 void HeatMapGUI::on_displayMin_clicked(bool checked)
 {
     m_settings.m_displayMin = checked;
     m_powerMinPeakSeries->setVisible(checked);
-    applySettings();
+    applySettings(QStringList("displayMin"));
 }
 
 void HeatMapGUI::on_displayPulseAverage_clicked(bool checked)
 {
     m_settings.m_displayPulseAverage = checked;
     m_powerPulseAverageSeries->setVisible(checked);
-    applySettings();
+    applySettings(QStringList("displayPulseAverage"));
 }
 
 void HeatMapGUI::on_displayPathLoss_clicked(bool checked)
 {
     m_settings.m_displayPathLoss = checked;
     m_powerPathLossSeries->setVisible(checked);
-    applySettings();
+    applySettings(QStringList("displayPathLoss"));
 }
 
 void HeatMapGUI::on_displayMins_valueChanged(int value)
 {
     m_settings.m_displayMins = value;
     updateAxis();
-    applySettings();
+    applySettings(QStringList("displayMins"));
 }
 
 void HeatMapGUI::on_recordAverage_clicked(bool checked)
 {
     m_settings.m_recordAverage = checked;
     resizeMap(0, 0);
-    applySettings();
+    applySettings(QStringList("recordAverage"));
 }
 
 void HeatMapGUI::on_recordMax_clicked(bool checked)
 {
     m_settings.m_recordMax = checked;
     resizeMap(0, 0);
-    applySettings();
+    applySettings(QStringList("recordMax"));
 }
 
 void HeatMapGUI::on_recordMin_clicked(bool checked)
 {
     m_settings.m_recordMin = checked;
     resizeMap(0, 0);
-    applySettings();
+    applySettings(QStringList("recordMin"));
 }
 
 void HeatMapGUI::on_recordPulseAverage_clicked(bool checked)
 {
     m_settings.m_recordPulseAverage = checked;
     resizeMap(0, 0);
-    applySettings();
+    applySettings(QStringList("recordPulseAverage"));
 }
 
 void HeatMapGUI::on_recordPathLoss_clicked(bool checked)
 {
     m_settings.m_recordPathLoss = checked;
     resizeMap(0, 0);
-    applySettings();
+    applySettings(QStringList("recordPathLoss"));
 }
 
 QString HeatMapGUI::formatCoord(float coord) const

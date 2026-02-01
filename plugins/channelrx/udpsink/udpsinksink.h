@@ -48,7 +48,7 @@ public:
 	virtual void feed(const SampleVector::const_iterator& begin, const SampleVector::const_iterator& end);
 
     void applyChannelSettings(int channelSampleRate, int channelFrequencyOffset, bool force = true);
-    void applySettings(const UDPSinkSettings& settings, bool force = false);
+    void applySettings(const QStringList& settingsKeys, const UDPSinkSettings& settings, bool force = false);
 
     AudioFifo *getAudioFifo() { return &m_audioFifo; }
     void setAudioFifoLabel(const QString& label) { m_audioFifo.setLabel(label); }

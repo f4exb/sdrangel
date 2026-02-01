@@ -70,6 +70,8 @@ struct PSK31Settings
     void setRollupState(Serializable *rollupState) { m_rollupState = rollupState; }
     QByteArray serialize() const;
     bool deserialize(const QByteArray& data);
+    void applySettings(const QStringList& settingsKeys, const PSK31Settings& settings);
+    QString getDebugString(const QStringList& settingsKeys, bool force=false) const;
 };
 
 #endif /* PLUGINS_CHANNELTX_MODPSK31_PSK31MODSETTINGS_H */

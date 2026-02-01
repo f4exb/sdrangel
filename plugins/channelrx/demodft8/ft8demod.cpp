@@ -62,7 +62,7 @@ FT8Demod::FT8Demod(DeviceAPI *deviceAPI) :
 {
 	setObjectName(m_channelId);
 
-	applySettings(m_settings, true);
+	applySettings(QStringList(), m_settings, true);
 
     m_deviceAPI->addChannelSink(this);
     m_deviceAPI->addChannelSinkAPI(this);
@@ -187,7 +187,7 @@ void FT8Demod::start()
 
     m_thread->start();
 
-    FT8DemodBaseband::MsgConfigureFT8DemodBaseband *msg = FT8DemodBaseband::MsgConfigureFT8DemodBaseband::create(m_settings, true);
+    FT8DemodBaseband::MsgConfigureFT8DemodBaseband *msg = FT8DemodBaseband::MsgConfigureFT8DemodBaseband::create(QStringList(), m_settings, true);
     m_basebandSink->getInputMessageQueue()->push(msg);
 
     m_running = true;
@@ -214,7 +214,7 @@ bool FT8Demod::handleMessage(const Message& cmd)
         MsgConfigureFT8Demod& cfg = (MsgConfigureFT8Demod&) cmd;
         qDebug("FT8Demod::handleMessage: MsgConfigureFT8Demod");
 
-        applySettings(cfg.getSettings(), cfg.getForce());
+        applySettings(cfg.getSettingsKeys(), cfg.getSettings(), cfg.getForce());
 
         return true;
     }
@@ -251,98 +251,20 @@ void FT8Demod::setCenterFrequency(qint64 frequency)
 {
     FT8DemodSettings settings = m_settings;
     settings.m_inputFrequencyOffset = frequency;
-    applySettings(settings, false);
+    applySettings(QStringList("inputFrequencyOffset"), settings, false);
 
     if (m_guiMessageQueue) // forward to GUI if any
     {
-        MsgConfigureFT8Demod *msgToGUI = MsgConfigureFT8Demod::create(settings, false);
+        MsgConfigureFT8Demod *msgToGUI = MsgConfigureFT8Demod::create(QStringList("inputFrequencyOffset"), settings, false);
         m_guiMessageQueue->push(msgToGUI);
     }
 }
 
-void FT8Demod::applySettings(const FT8DemodSettings& settings, bool force)
+void FT8Demod::applySettings(const QStringList& settingsKeys, const FT8DemodSettings& settings, bool force)
 {
-    qDebug() << "FT8Demod::applySettings:"
-            << " m_inputFrequencyOffset: " << settings.m_inputFrequencyOffset
-            << " m_filterIndex: " << settings.m_filterIndex
-            << " [m_spanLog2: " << settings.m_filterBank[settings.m_filterIndex].m_spanLog2
-            << " m_rfBandwidth: " << settings.m_filterBank[settings.m_filterIndex].m_rfBandwidth
-            << " m_lowCutoff: " << settings.m_filterBank[settings.m_filterIndex].m_lowCutoff
-            << " m_fftWindow: " << settings.m_filterBank[settings.m_filterIndex].m_fftWindow << "]"
-            << " m_volume: " << settings.m_volume
-            << " m_agcActive: " << settings.m_agc
-            << " m_streamIndex: " << settings.m_streamIndex
-            << " m_useReverseAPI: " << settings.m_useReverseAPI
-            << " m_reverseAPIAddress: " << settings.m_reverseAPIAddress
-            << " m_reverseAPIPort: " << settings.m_reverseAPIPort
-            << " m_reverseAPIDeviceIndex: " << settings.m_reverseAPIDeviceIndex
-            << " m_reverseAPIChannelIndex: " << settings.m_reverseAPIChannelIndex
-            << " force: " << force;
+    qDebug() << "FT8Demod::applySettings:" << settings.getDebugString(settingsKeys, force);
 
-    QList<QString> reverseAPIKeys;
-
-    if ((m_settings.m_inputFrequencyOffset != settings.m_inputFrequencyOffset) || force) {
-        reverseAPIKeys.append("inputFrequencyOffset");
-    }
-    if ((m_settings.m_filterIndex != settings.m_filterIndex) || force) {
-        reverseAPIKeys.append("filterIndex");
-    }
-    if ((m_settings.m_filterBank[m_settings.m_filterIndex].m_spanLog2 != settings.m_filterBank[settings.m_filterIndex].m_spanLog2) || force) {
-        reverseAPIKeys.append("spanLog2");
-    }
-    if ((m_settings.m_filterBank[m_settings.m_filterIndex].m_rfBandwidth != settings.m_filterBank[settings.m_filterIndex].m_rfBandwidth) || force) {
-        reverseAPIKeys.append("rfBandwidth");
-    }
-    if ((m_settings.m_filterBank[m_settings.m_filterIndex].m_lowCutoff != settings.m_filterBank[settings.m_filterIndex].m_lowCutoff) || force) {
-        reverseAPIKeys.append("lowCutoff");
-    }
-    if ((m_settings.m_filterBank[m_settings.m_filterIndex].m_fftWindow != settings.m_filterBank[settings.m_filterIndex].m_fftWindow) || force) {
-        reverseAPIKeys.append("fftWindow");
-    }
-    if ((m_settings.m_volume != settings.m_volume) || force) {
-        reverseAPIKeys.append("volume");
-    }
-    if ((m_settings.m_agc != settings.m_agc) || force) {
-        reverseAPIKeys.append("agc");
-    }
-    if ((m_settings.m_recordWav != settings.m_recordWav) || force) {
-        reverseAPIKeys.append("recordWav");
-    }
-    if ((m_settings.m_logMessages != settings.m_logMessages) || force) {
-        reverseAPIKeys.append("logMessages");
-    }
-    if ((m_settings.m_nbDecoderThreads != settings.m_nbDecoderThreads) || force) {
-        reverseAPIKeys.append("nbDecoderThreads");
-    }
-    if ((m_settings.m_decoderTimeBudget != settings.m_decoderTimeBudget) || force) {
-        reverseAPIKeys.append("decoderTimeBudget");
-    }
-    if ((m_settings.m_useOSD != settings.m_useOSD) || force) {
-        reverseAPIKeys.append("useOSD");
-    }
-    if ((m_settings.m_osdDepth != settings.m_osdDepth) || force) {
-        reverseAPIKeys.append("osdDepth");
-    }
-    if ((m_settings.m_osdLDPCThreshold != settings.m_osdLDPCThreshold) || force) {
-        reverseAPIKeys.append("osdLDPCThreshold");
-    }
-    if ((m_settings.m_verifyOSD != settings.m_verifyOSD) || force) {
-        reverseAPIKeys.append("verifyOSD");
-    }
-    if ((m_settings.m_enablePSKReporter != settings.m_enablePSKReporter) || force) {
-        reverseAPIKeys.append("enablePSKReporter");
-    }
-    if ((m_settings.m_pskReporterCallsign != settings.m_pskReporterCallsign) || force) {
-        reverseAPIKeys.append("pskReporterCallsign");
-    }
-    if ((m_settings.m_pskReporterLocator != settings.m_pskReporterLocator) || force) {
-        reverseAPIKeys.append("pskReporterLocator");
-    }
-    if ((m_settings.m_pskReporterSoftware != settings.m_pskReporterSoftware) || force) {
-        reverseAPIKeys.append("pskReporterSoftware");
-    }
-
-    if (m_settings.m_streamIndex != settings.m_streamIndex)
+    if (settingsKeys.contains("streamIndex") && (m_settings.m_streamIndex != settings.m_streamIndex))
     {
         if (m_deviceAPI->getSampleMIMO()) // change of stream is possible for MIMO devices only
         {
@@ -353,12 +275,10 @@ void FT8Demod::applySettings(const FT8DemodSettings& settings, bool force)
             m_settings.m_streamIndex = settings.m_streamIndex; // make sure ChannelAPI::getStreamIndex() is consistent
             emit streamIndexChanged(settings.m_streamIndex);
         }
-
-        reverseAPIKeys.append("streamIndex");
     }
 
-    if ((settings.m_filterBank[settings.m_filterIndex].m_rfBandwidth != m_settings.m_filterBank[m_settings.m_filterIndex].m_rfBandwidth)
-     || (settings.m_filterBank[settings.m_filterIndex].m_lowCutoff != m_settings.m_filterBank[m_settings.m_filterIndex].m_lowCutoff) || force)
+    if ((settingsKeys.contains("rfBandwidth") && (settings.m_filterBank[settings.m_filterIndex].m_rfBandwidth != m_settings.m_filterBank[m_settings.m_filterIndex].m_rfBandwidth))
+     || (settingsKeys.contains("lowCutoff") && (settings.m_filterBank[settings.m_filterIndex].m_lowCutoff != m_settings.m_filterBank[m_settings.m_filterIndex].m_lowCutoff)) || force)
     {
         SpectrumSettings spectrumSettings = m_spectrumVis.getSettings();
         spectrumSettings.m_usb = (settings.m_filterBank[settings.m_filterIndex].m_lowCutoff < settings.m_filterBank[settings.m_filterIndex].m_rfBandwidth);
@@ -368,28 +288,32 @@ void FT8Demod::applySettings(const FT8DemodSettings& settings, bool force)
 
     if (m_running)
     {
-        FT8DemodBaseband::MsgConfigureFT8DemodBaseband *msg = FT8DemodBaseband::MsgConfigureFT8DemodBaseband::create(settings, force);
+        FT8DemodBaseband::MsgConfigureFT8DemodBaseband *msg = FT8DemodBaseband::MsgConfigureFT8DemodBaseband::create(settingsKeys, settings, force);
         m_basebandSink->getInputMessageQueue()->push(msg);
     }
 
     if (settings.m_useReverseAPI)
     {
-        bool fullUpdate = ((m_settings.m_useReverseAPI != settings.m_useReverseAPI) && settings.m_useReverseAPI) ||
-                (m_settings.m_reverseAPIAddress != settings.m_reverseAPIAddress) ||
-                (m_settings.m_reverseAPIPort != settings.m_reverseAPIPort) ||
-                (m_settings.m_reverseAPIDeviceIndex != settings.m_reverseAPIDeviceIndex) ||
-                (m_settings.m_reverseAPIChannelIndex != settings.m_reverseAPIChannelIndex);
-        webapiReverseSendSettings(reverseAPIKeys, settings, fullUpdate || force);
+        bool fullUpdate = ((settingsKeys.contains("useReverseAPI") && (m_settings.m_useReverseAPI != settings.m_useReverseAPI)) && settings.m_useReverseAPI) ||
+                (settingsKeys.contains("reverseAPIAddress") && (m_settings.m_reverseAPIAddress != settings.m_reverseAPIAddress)) ||
+                (settingsKeys.contains("reverseAPIPort") && (m_settings.m_reverseAPIPort != settings.m_reverseAPIPort)) ||
+                (settingsKeys.contains("reverseAPIDeviceIndex") && (m_settings.m_reverseAPIDeviceIndex != settings.m_reverseAPIDeviceIndex)) ||
+                (settingsKeys.contains("reverseAPIChannelIndex") && (m_settings.m_reverseAPIChannelIndex != settings.m_reverseAPIChannelIndex));
+        webapiReverseSendSettings(settingsKeys, settings, fullUpdate || force);
     }
 
     QList<ObjectPipe*> pipes;
     MainCore::instance()->getMessagePipes().getMessagePipes(this, "settings", pipes);
 
     if (pipes.size() > 0) {
-        sendChannelSettings(pipes, reverseAPIKeys, settings, force);
+        sendChannelSettings(pipes, settingsKeys, settings, force);
     }
 
-    m_settings = settings;
+    if (force) {
+        m_settings = settings;
+    } else {
+        m_settings.applySettings(settingsKeys, settings);
+    }
 }
 
 QByteArray FT8Demod::serialize() const
@@ -401,14 +325,14 @@ bool FT8Demod::deserialize(const QByteArray& data)
 {
     if (m_settings.deserialize(data))
     {
-        MsgConfigureFT8Demod *msg = MsgConfigureFT8Demod::create(m_settings, true);
+        MsgConfigureFT8Demod *msg = MsgConfigureFT8Demod::create(QStringList(), m_settings, true);
         m_inputMessageQueue.push(msg);
         return true;
     }
     else
     {
         m_settings.resetToDefaults();
-        MsgConfigureFT8Demod *msg = MsgConfigureFT8Demod::create(m_settings, true);
+        MsgConfigureFT8Demod *msg = MsgConfigureFT8Demod::create(QStringList(), m_settings, true);
         m_inputMessageQueue.push(msg);
         return false;
     }
@@ -467,13 +391,13 @@ int FT8Demod::webapiSettingsPutPatch(
     FT8DemodSettings settings = m_settings;
     webapiUpdateChannelSettings(settings, channelSettingsKeys, response);
 
-    MsgConfigureFT8Demod *msg = MsgConfigureFT8Demod::create(settings, force);
+    MsgConfigureFT8Demod *msg = MsgConfigureFT8Demod::create(channelSettingsKeys, settings, force);
     m_inputMessageQueue.push(msg);
 
     qDebug("FT8Demod::webapiSettingsPutPatch: forward to GUI: %p", m_guiMessageQueue);
     if (m_guiMessageQueue) // forward to GUI if any
     {
-        MsgConfigureFT8Demod *msgToGUI = MsgConfigureFT8Demod::create(settings, force);
+        MsgConfigureFT8Demod *msgToGUI = MsgConfigureFT8Demod::create(channelSettingsKeys, settings, force);
         m_guiMessageQueue->push(msgToGUI);
     }
 
@@ -696,7 +620,7 @@ void FT8Demod::webapiFormatChannelReport(SWGSDRangel::SWGChannelReport& response
     }
 }
 
-void FT8Demod::webapiReverseSendSettings(QList<QString>& channelSettingsKeys, const FT8DemodSettings& settings, bool force)
+void FT8Demod::webapiReverseSendSettings(const QList<QString>& channelSettingsKeys, const FT8DemodSettings& settings, bool force)
 {
     SWGSDRangel::SWGChannelSettings *swgChannelSettings = new SWGSDRangel::SWGChannelSettings();
     webapiFormatChannelSettings(channelSettingsKeys, swgChannelSettings, settings, force);
@@ -723,7 +647,7 @@ void FT8Demod::webapiReverseSendSettings(QList<QString>& channelSettingsKeys, co
 
 void FT8Demod::sendChannelSettings(
     const QList<ObjectPipe*>& pipes,
-    QList<QString>& channelSettingsKeys,
+    const QList<QString>& channelSettingsKeys,
     const FT8DemodSettings& settings,
     bool force)
 {
@@ -749,7 +673,7 @@ void FT8Demod::sendChannelSettings(
 }
 
 void FT8Demod::webapiFormatChannelSettings(
-        QList<QString>& channelSettingsKeys,
+        const QList<QString>& channelSettingsKeys,
         SWGSDRangel::SWGChannelSettings *swgChannelSettings,
         const FT8DemodSettings& settings,
         bool force

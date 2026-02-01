@@ -121,6 +121,8 @@ struct PagerDemodSettings
     void setScopeGUI(Serializable *scopeGUI) { m_scopeGUI = scopeGUI; }
     QByteArray serialize() const;
     bool deserialize(const QByteArray& data);
+    void applySettings(const QStringList& settingsKeys, const PagerDemodSettings& settings);
+    QString getDebugString(const QStringList& settingsKeys, bool force=false) const;
     QByteArray serializeIntList(const QList<qint32>& ints) const;
     void deserializeIntList(const QByteArray& data, QList<qint32>& ints);
 };

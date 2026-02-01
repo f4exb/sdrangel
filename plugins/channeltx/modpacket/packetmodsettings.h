@@ -97,6 +97,8 @@ struct PacketModSettings
     bool deserialize(const QByteArray& data);
     bool setMode(QString mode);
     QString getMode() const;
+    void applySettings(const QStringList& settingsKeys, const PacketModSettings& settings);
+    QString getDebugString(const QStringList& settingsKeys, bool force=false) const;
 };
 
 #endif /* PLUGINS_CHANNELTX_MODPACKET_PACKETMODSETTINGS_H */

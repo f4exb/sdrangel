@@ -93,6 +93,8 @@ struct IEEE_802_15_4_ModSettings
     bool setPHY(QString phy);
     QString getPHY() const;
     int getChipRate() const;
+    void applySettings(const QStringList& settingsKeys, const IEEE_802_15_4_ModSettings& settings);
+    QString getDebugString(const QStringList& settingsKeys, bool force=false) const;
 };
 
 #endif /* INCLUDE_IEEE_802_15_4_MODSETTINGS_H */

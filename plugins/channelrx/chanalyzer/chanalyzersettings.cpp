@@ -196,3 +196,177 @@ bool ChannelAnalyzerSettings::deserialize(const QByteArray& data)
         return false;
     }
 }
+
+void ChannelAnalyzerSettings::applySettings(const QStringList& settingsKeys, const ChannelAnalyzerSettings& settings)
+{
+    if (settingsKeys.contains("inputFrequencyOffset")) {
+        m_inputFrequencyOffset = settings.m_inputFrequencyOffset;
+    }
+    if (settingsKeys.contains("rationalDownSample")) {
+        m_rationalDownSample = settings.m_rationalDownSample;
+    }
+    if (settingsKeys.contains("rationalDownSamplerRate")) {
+        m_rationalDownSamplerRate = settings.m_rationalDownSamplerRate;
+    }
+    if (settingsKeys.contains("bandwidth")) {
+        m_bandwidth = settings.m_bandwidth;
+    }
+    if (settingsKeys.contains("lowCutoff")) {
+        m_lowCutoff = settings.m_lowCutoff;
+    }
+    if (settingsKeys.contains("log2Decim")) {
+        m_log2Decim = settings.m_log2Decim;
+    }
+    if (settingsKeys.contains("ssb")) {
+        m_ssb = settings.m_ssb;
+    }
+    if (settingsKeys.contains("pll")) {
+        m_pll = settings.m_pll;
+    }
+    if (settingsKeys.contains("fll")) {
+        m_fll = settings.m_fll;
+    }
+    if (settingsKeys.contains("costasLoop")) {
+        m_costasLoop = settings.m_costasLoop;
+    }
+    if (settingsKeys.contains("rrc")) {
+        m_rrc = settings.m_rrc;
+    }
+    if (settingsKeys.contains("rrcRolloff")) {
+        m_rrcRolloff = settings.m_rrcRolloff;
+    }
+    if (settingsKeys.contains("pllPskOrder")) {
+        m_pllPskOrder = settings.m_pllPskOrder;
+    }
+    if (settingsKeys.contains("pllBandwidth")) {
+        m_pllBandwidth = settings.m_pllBandwidth;
+    }
+    if (settingsKeys.contains("pllDampingFactor")) {
+        m_pllDampingFactor = settings.m_pllDampingFactor;
+    }
+    if (settingsKeys.contains("pllLoopGain")) {
+        m_pllLoopGain = settings.m_pllLoopGain;
+    }
+    if (settingsKeys.contains("inputType")) {
+        m_inputType = settings.m_inputType;
+    }
+    if (settingsKeys.contains("rgbColor")) {
+        m_rgbColor = settings.m_rgbColor;
+    }
+    if (settingsKeys.contains("title")) {
+        m_title = settings.m_title;
+    }
+    if (settingsKeys.contains("streamIndex")) {
+        m_streamIndex = settings.m_streamIndex;
+    }
+    if (settingsKeys.contains("useReverseAPI")) {
+        m_useReverseAPI = settings.m_useReverseAPI;
+    }
+    if (settingsKeys.contains("reverseAPIAddress")) {
+        m_reverseAPIAddress = settings.m_reverseAPIAddress;
+    }
+    if (settingsKeys.contains("reverseAPIPort")) {
+        m_reverseAPIPort = settings.m_reverseAPIPort;
+    }
+    if (settingsKeys.contains("reverseAPIDeviceIndex")) {
+        m_reverseAPIDeviceIndex = settings.m_reverseAPIDeviceIndex;
+    }
+    if (settingsKeys.contains("reverseAPIChannelIndex")) {
+        m_reverseAPIChannelIndex = settings.m_reverseAPIChannelIndex;
+    }
+    if (settingsKeys.contains("workspaceIndex")) {
+        m_workspaceIndex = settings.m_workspaceIndex;
+    }
+    if (settingsKeys.contains("hidden")) {
+        m_hidden = settings.m_hidden;
+    }
+}
+
+QString ChannelAnalyzerSettings::getDebugString(const QStringList& settingsKeys, bool force) const
+{
+    std::ostringstream ostr;
+
+    if (settingsKeys.contains("inputFrequencyOffset") || force) {
+        ostr << " m_inputFrequencyOffset: " << m_inputFrequencyOffset;
+    }
+    if (settingsKeys.contains("rationalDownSample") || force) {
+        ostr << " m_rationalDownSample: " << m_rationalDownSample;
+    }
+    if (settingsKeys.contains("rationalDownSamplerRate") || force) {
+        ostr << " m_rationalDownSamplerRate: " << m_rationalDownSamplerRate;
+    }
+    if (settingsKeys.contains("bandwidth") || force) {
+        ostr << " m_bandwidth: " << m_bandwidth;
+    }
+    if (settingsKeys.contains("lowCutoff") || force) {
+        ostr << " m_lowCutoff: " << m_lowCutoff;
+    }
+    if (settingsKeys.contains("log2Decim") || force) {
+        ostr << " m_log2Decim: " << m_log2Decim;
+    }
+    if (settingsKeys.contains("ssb") || force) {
+        ostr << " m_ssb: " << m_ssb;
+    }
+    if (settingsKeys.contains("pll") || force) {
+        ostr << " m_pll: " << m_pll;
+    }
+    if (settingsKeys.contains("fll") || force) {
+        ostr << " m_fll: " << m_fll;
+    }
+    if (settingsKeys.contains("costasLoop") || force) {
+        ostr << " m_costasLoop: " << m_costasLoop;
+    }
+    if (settingsKeys.contains("rrc") || force) {
+        ostr << " m_rrc: " << m_rrc;
+    }
+    if (settingsKeys.contains("rrcRolloff") || force) {
+        ostr << " m_rrcRolloff: " << m_rrcRolloff;
+    }
+    if (settingsKeys.contains("pllPskOrder") || force) {
+        ostr << " m_pllPskOrder: " << m_pllPskOrder;
+    }
+    if (settingsKeys.contains("pllBandwidth") || force) {
+        ostr << " m_pllBandwidth: " << m_pllBandwidth;
+    }
+    if (settingsKeys.contains("pllDampingFactor") || force) {
+        ostr << " m_pllDampingFactor: " << m_pllDampingFactor;
+    }
+    if (settingsKeys.contains("pllLoopGain") || force) {
+        ostr << " m_pllLoopGain: " << m_pllLoopGain;
+    }
+    if (settingsKeys.contains("inputType") || force) {
+        ostr << " m_inputType: " << m_inputType;
+    }
+    if (settingsKeys.contains("rgbColor") || force) {
+        ostr << " m_rgbColor: " << m_rgbColor;
+    }
+    if (settingsKeys.contains("title") || force) {
+        ostr << " m_title: " << m_title.toStdString();
+    }
+    if (settingsKeys.contains("streamIndex") || force) {
+        ostr << " m_streamIndex: " << m_streamIndex;
+    }
+    if (settingsKeys.contains("useReverseAPI") || force) {
+        ostr << " m_useReverseAPI: " << m_useReverseAPI;
+    }
+    if (settingsKeys.contains("reverseAPIAddress") || force) {
+        ostr << " m_reverseAPIAddress: " << m_reverseAPIAddress.toStdString();
+    }
+    if (settingsKeys.contains("reverseAPIPort") || force) {
+        ostr << " m_reverseAPIPort: " << m_reverseAPIPort;
+    }
+    if (settingsKeys.contains("reverseAPIDeviceIndex") || force) {
+        ostr << " m_reverseAPIDeviceIndex: " << m_reverseAPIDeviceIndex;
+    }
+    if (settingsKeys.contains("reverseAPIChannelIndex") || force) {
+        ostr << " m_reverseAPIChannelIndex: " << m_reverseAPIChannelIndex;
+    }
+    if (settingsKeys.contains("workspaceIndex") || force) {
+        ostr << " m_workspaceIndex: " << m_workspaceIndex;
+    }
+    if (settingsKeys.contains("hidden") || force) {
+        ostr << " m_hidden: " << m_hidden;
+    }
+
+    return QString(ostr.str().c_str());
+}

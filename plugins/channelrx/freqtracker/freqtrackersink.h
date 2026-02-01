@@ -45,7 +45,7 @@ public:
     virtual void feed(const SampleVector::const_iterator& begin, const SampleVector::const_iterator& end);
 
     void setSpectrumSink(SpectrumVis* spectrumSink) { m_spectrumSink = spectrumSink; }
-    void applySettings(const FreqTrackerSettings& settings, bool force = false);
+    void applySettings(const QStringList& settingsKeys, const FreqTrackerSettings& settings, bool force = false);
     void applyChannelSettings(int sinkSampleRate, int channelSampleRate, int channelFrequencyOffset, bool force = false);
     void setMessageQueueToInput(MessageQueue *messageQueue) { m_messageQueueToInput = messageQueue;}
 

@@ -509,4 +509,665 @@ bool RadioAstronomySettings::deserialize(const QByteArray& data)
     }
 }
 
+void RadioAstronomySettings::applySettings(const QStringList& settingsKeys, const RadioAstronomySettings& settings)
+{
+    if (settingsKeys.contains("inputFrequencyOffset")) {
+        m_inputFrequencyOffset = settings.m_inputFrequencyOffset;
+    }
+    if (settingsKeys.contains("sampleRate")) {
+        m_sampleRate = settings.m_sampleRate;
+    }
+    if (settingsKeys.contains("rfBandwidth")) {
+        m_rfBandwidth = settings.m_rfBandwidth;
+    }
+    if (settingsKeys.contains("integration")) {
+        m_integration = settings.m_integration;
+    }
+    if (settingsKeys.contains("fftSize")) {
+        m_fftSize = settings.m_fftSize;
+    }
+    if (settingsKeys.contains("fftWindow")) {
+        m_fftWindow = settings.m_fftWindow;
+    }
+    if (settingsKeys.contains("filterFreqs")) {
+        m_filterFreqs = settings.m_filterFreqs;
+    }
+    if (settingsKeys.contains("starTracker")) {
+        m_starTracker = settings.m_starTracker;
+    }
+    if (settingsKeys.contains("rotator")) {
+        m_rotator = settings.m_rotator;
+    }
+    if (settingsKeys.contains("tempRX")) {
+        m_tempRX = settings.m_tempRX;
+    }
+    if (settingsKeys.contains("tempCMB")) {
+        m_tempCMB = settings.m_tempCMB;
+    }
+    if (settingsKeys.contains("tempGal")) {
+        m_tempGal = settings.m_tempGal;
+    }
+    if (settingsKeys.contains("tempSP")) {
+        m_tempSP = settings.m_tempSP;
+    }
+    if (settingsKeys.contains("tempAtm")) {
+        m_tempAtm = settings.m_tempAtm;
+    }
+    if (settingsKeys.contains("tempAir")) {
+        m_tempAir = settings.m_tempAir;
+    }
+    if (settingsKeys.contains("zenithOpacity")) {
+        m_zenithOpacity = settings.m_zenithOpacity;
+    }
+    if (settingsKeys.contains("elevation")) {
+        m_elevation = settings.m_elevation;
+    }
+    if (settingsKeys.contains("tempGalLink")) {
+        m_tempGalLink = settings.m_tempGalLink;
+    }
+    if (settingsKeys.contains("tempAtmLink")) {
+        m_tempAtmLink = settings.m_tempAtmLink;
+    }
+    if (settingsKeys.contains("tempAirLink")) {
+        m_tempAirLink = settings.m_tempAirLink;
+    }
+    if (settingsKeys.contains("elevationLink")) {
+        m_elevationLink = settings.m_elevationLink;
+    }
+    if (settingsKeys.contains("gainVariation")) {
+        m_gainVariation = settings.m_gainVariation;
+    }
+    if (settingsKeys.contains("sourceType")) {
+        m_sourceType = settings.m_sourceType;
+    }
+    if (settingsKeys.contains("omegaS")) {
+        m_omegaS = settings.m_omegaS;
+    }
+    if (settingsKeys.contains("omegaSUnits")) {
+        m_omegaSUnits = settings.m_omegaSUnits;
+    }
+    if (settingsKeys.contains("omegaAUnits")) {
+        m_omegaAUnits = settings.m_omegaAUnits;
+    }
+    if (settingsKeys.contains("spectrumPeaks")) {
+        m_spectrumPeaks = settings.m_spectrumPeaks;
+    }
+    if (settingsKeys.contains("spectrumMarkers")) {
+        m_spectrumMarkers = settings.m_spectrumMarkers;
+    }
+    if (settingsKeys.contains("spectrumTemp")) {
+        m_spectrumTemp = settings.m_spectrumTemp;
+    }
+    if (settingsKeys.contains("spectrumReverseXAxis")) {
+        m_spectrumReverseXAxis = settings.m_spectrumReverseXAxis;
+    }
+    if (settingsKeys.contains("spectrumRefLine")) {
+        m_spectrumRefLine = settings.m_spectrumRefLine;
+    }
+    if (settingsKeys.contains("spectrumLAB")) {
+        m_spectrumLAB = settings.m_spectrumLAB;
+    }
+    if (settingsKeys.contains("spectrumDistance")) {
+        m_spectrumDistance = settings.m_spectrumDistance;
+    }
+    if (settingsKeys.contains("spectrumLegend")) {
+        m_spectrumLegend = settings.m_spectrumLegend;
+    }
+    if (settingsKeys.contains("spectrumReference")) {
+        m_spectrumReference = settings.m_spectrumReference;
+    }
+    if (settingsKeys.contains("spectrumRange")) {
+        m_spectrumRange = settings.m_spectrumRange;
+    }
+    if (settingsKeys.contains("spectrumSpan")) {
+        m_spectrumSpan = settings.m_spectrumSpan;
+    }
+    if (settingsKeys.contains("spectrumCenterFreqOffset")) {
+        m_spectrumCenterFreqOffset = settings.m_spectrumCenterFreqOffset;
+    }
+    if (settingsKeys.contains("spectrumAutoscale")) {
+        m_spectrumAutoscale = settings.m_spectrumAutoscale;
+    }
+    if (settingsKeys.contains("spectrumYScale")) {
+        m_spectrumYScale = settings.m_spectrumYScale;
+    }
+    if (settingsKeys.contains("spectrumBaseline")) {
+        m_spectrumBaseline = settings.m_spectrumBaseline;
+    }
+    if (settingsKeys.contains("recalibrate")) {
+        m_recalibrate = settings.m_recalibrate;
+    }
+    if (settingsKeys.contains("tCalHot")) {
+        m_tCalHot = settings.m_tCalHot;
+    }
+    if (settingsKeys.contains("tCalCold")) {
+        m_tCalCold = settings.m_tCalCold;
+    }
+    if (settingsKeys.contains("line")) {
+        m_line = settings.m_line;
+    }
+    if (settingsKeys.contains("lineCustomFrequency")) {
+        m_lineCustomFrequency = settings.m_lineCustomFrequency;
+    }
+    if (settingsKeys.contains("refFrame")) {
+        m_refFrame = settings.m_refFrame;
+    }
+    if (settingsKeys.contains("sunDistanceToGC")) {
+        m_sunDistanceToGC = settings.m_sunDistanceToGC;
+    }
+    if (settingsKeys.contains("sunOrbitalVelocity")) {
+        m_sunOrbitalVelocity = settings.m_sunOrbitalVelocity;
+    }
+    if (settingsKeys.contains("powerPeaks")) {
+        m_powerPeaks = settings.m_powerPeaks;
+    }
+    if (settingsKeys.contains("powerMarkers")) {
+        m_powerMarkers = settings.m_powerMarkers;
+    }
+    if (settingsKeys.contains("powerAvg")) {
+        m_powerAvg = settings.m_powerAvg;
+    }
+    if (settingsKeys.contains("powerLegend")) {
+        m_powerLegend = settings.m_powerLegend;
+    }
+    if (settingsKeys.contains("powerShowTsys0")) {
+        m_powerShowTsys0 = settings.m_powerShowTsys0;
+    }
+    if (settingsKeys.contains("powerShowAirTemp")) {
+        m_powerShowAirTemp = settings.m_powerShowAirTemp;
+    }
+    if (settingsKeys.contains("powerShowGaussian")) {
+        m_powerShowGaussian = settings.m_powerShowGaussian;
+    }
+    if (settingsKeys.contains("powerShowFiltered")) {
+        m_powerShowFiltered = settings.m_powerShowFiltered;
+    }
+    if (settingsKeys.contains("powerShowMeasurement")) {
+        m_powerShowMeasurement = settings.m_powerShowMeasurement;
+    }
+    if (settingsKeys.contains("powerReference")) {
+        m_powerReference = settings.m_powerReference;
+    }
+    if (settingsKeys.contains("powerRange")) {
+        m_powerRange = settings.m_powerRange;
+    }
+    if (settingsKeys.contains("powerAutoscale")) {
+        m_powerAutoscale = settings.m_powerAutoscale;
+    }
+    if (settingsKeys.contains("powerYData")) {
+        m_powerYData = settings.m_powerYData;
+    }
+    if (settingsKeys.contains("powerYUnits")) {
+        m_powerYUnits = settings.m_powerYUnits;
+    }
+    if (settingsKeys.contains("powerFilter")) {
+        m_powerFilter = settings.m_powerFilter;
+    }
+    if (settingsKeys.contains("powerFilterN")) {
+        m_powerFilterN = settings.m_powerFilterN;
+    }
+    if (settingsKeys.contains("power2DLinkSweep")) {
+        m_power2DLinkSweep = settings.m_power2DLinkSweep;
+    }
+    if (settingsKeys.contains("power2DSweepType")) {
+        m_power2DSweepType = settings.m_power2DSweepType;
+    }
+    if (settingsKeys.contains("power2DWidth")) {
+        m_power2DWidth = settings.m_power2DWidth;
+    }
+    if (settingsKeys.contains("power2DHeight")) {
+        m_power2DHeight = settings.m_power2DHeight;
+    }
+    if (settingsKeys.contains("power2DXMin")) {
+        m_power2DXMin = settings.m_power2DXMin;
+    }
+    if (settingsKeys.contains("power2DXMax")) {
+        m_power2DXMax = settings.m_power2DXMax;
+    }
+    if (settingsKeys.contains("power2DYMin")) {
+        m_power2DYMin = settings.m_power2DYMin;
+    }
+    if (settingsKeys.contains("power2DYMax")) {
+        m_power2DYMax = settings.m_power2DYMax;
+    }
+    if (settingsKeys.contains("powerColourAutoscale")) {
+        m_powerColourAutoscale = settings.m_powerColourAutoscale;
+    }
+    if (settingsKeys.contains("powerColourScaleMin")) {
+        m_powerColourScaleMin = settings.m_powerColourScaleMin;
+    }
+    if (settingsKeys.contains("powerColourScaleMax")) {
+        m_powerColourScaleMax = settings.m_powerColourScaleMax;
+    }
+    if (settingsKeys.contains("powerColourPalette")) {
+        m_powerColourPalette = settings.m_powerColourPalette;
+    }
+    if (settingsKeys.contains("runMode")) {
+        m_runMode = settings.m_runMode;
+    }
+    if (settingsKeys.contains("sweepStartAtTime")) {
+        m_sweepStartAtTime = settings.m_sweepStartAtTime;
+    }
+    if (settingsKeys.contains("sweepStartDateTime")) {
+        m_sweepStartDateTime = settings.m_sweepStartDateTime;
+    }
+    if (settingsKeys.contains("sweepType")) {
+        m_sweepType = settings.m_sweepType;
+    }
+    if (settingsKeys.contains("sweep1Start")) {
+        m_sweep1Start = settings.m_sweep1Start;
+    }
+    if (settingsKeys.contains("sweep1Stop")) {
+        m_sweep1Stop = settings.m_sweep1Stop;
+    }
+    if (settingsKeys.contains("sweep1Step")) {
+        m_sweep1Step = settings.m_sweep1Step;
+    }
+    if (settingsKeys.contains("sweep1Delay")) {
+        m_sweep1Delay = settings.m_sweep1Delay;
+    }
+    if (settingsKeys.contains("sweep2Start")) {
+        m_sweep2Start = settings.m_sweep2Start;
+    }
+    if (settingsKeys.contains("sweep2Stop")) {
+        m_sweep2Stop = settings.m_sweep2Stop;
+    }
+    if (settingsKeys.contains("sweep2Step")) {
+        m_sweep2Step = settings.m_sweep2Step;
+    }
+    if (settingsKeys.contains("sweep2Delay")) {
+        m_sweep2Delay = settings.m_sweep2Delay;
+    }
+    if (settingsKeys.contains("gpioEnabled")) {
+        m_gpioEnabled = settings.m_gpioEnabled;
+    }
+    if (settingsKeys.contains("gpioPin")) {
+        m_gpioPin = settings.m_gpioPin;
+    }
+    if (settingsKeys.contains("gpioSense")) {
+        m_gpioSense = settings.m_gpioSense;
+    }
+    if (settingsKeys.contains("startCalCommand")) {
+        m_startCalCommand = settings.m_startCalCommand;
+    }
+    if (settingsKeys.contains("stopCalCommand")) {
+        m_stopCalCommand = settings.m_stopCalCommand;
+    }
+    if (settingsKeys.contains("calCommandDelay")) {
+        m_calCommandDelay = settings.m_calCommandDelay;
+    }
+    if (settingsKeys.contains("sensorMeasurePeriod")) {
+        m_sensorMeasurePeriod = settings.m_sensorMeasurePeriod;
+    }
+    if (settingsKeys.contains("spectrumAutoSaveCSVFilename")) {
+        m_spectrumAutoSaveCSVFilename = settings.m_spectrumAutoSaveCSVFilename;
+    }
+    if (settingsKeys.contains("powerAutoSaveCSVFilename")) {
+        m_powerAutoSaveCSVFilename = settings.m_powerAutoSaveCSVFilename;
+    }
+    if (settingsKeys.contains("rgbColor")) {
+        m_rgbColor = settings.m_rgbColor;
+    }
+    if (settingsKeys.contains("title")) {
+        m_title = settings.m_title;
+    }
+    if (settingsKeys.contains("streamIndex")) {
+        m_streamIndex = settings.m_streamIndex;
+    }
+    if (settingsKeys.contains("useReverseAPI")) {
+        m_useReverseAPI = settings.m_useReverseAPI;
+    }
+    if (settingsKeys.contains("reverseAPIAddress")) {
+        m_reverseAPIAddress = settings.m_reverseAPIAddress;
+    }
+    if (settingsKeys.contains("reverseAPIPort")) {
+        m_reverseAPIPort = settings.m_reverseAPIPort;
+    }
+    if (settingsKeys.contains("reverseAPIDeviceIndex")) {
+        m_reverseAPIDeviceIndex = settings.m_reverseAPIDeviceIndex;
+    }
+    if (settingsKeys.contains("reverseAPIChannelIndex")) {
+        m_reverseAPIChannelIndex = settings.m_reverseAPIChannelIndex;
+    }
+    if (settingsKeys.contains("workspaceIndex")) {
+        m_workspaceIndex = settings.m_workspaceIndex;
+    }
+    if (settingsKeys.contains("geometryBytes")) {
+        m_geometryBytes = settings.m_geometryBytes;
+    }
+    if (settingsKeys.contains("hidden")) {
+        m_hidden = settings.m_hidden;
+    }
+}
 
+QString RadioAstronomySettings::getDebugString(const QStringList& settingsKeys, bool force) const
+{
+    std::ostringstream ostr;
+
+    if (settingsKeys.contains("inputFrequencyOffset") || force) {
+        ostr << " m_inputFrequencyOffset: " << m_inputFrequencyOffset;
+    }
+    if (settingsKeys.contains("sampleRate") || force) {
+        ostr << " m_sampleRate: " << m_sampleRate;
+    }
+    if (settingsKeys.contains("rfBandwidth") || force) {
+        ostr << " m_rfBandwidth: " << m_rfBandwidth;
+    }
+    if (settingsKeys.contains("integration") || force) {
+        ostr << " m_integration: " << m_integration;
+    }
+    if (settingsKeys.contains("fftSize") || force) {
+        ostr << " m_fftSize: " << m_fftSize;
+    }
+    if (settingsKeys.contains("fftWindow") || force) {
+        ostr << " m_fftWindow: " << m_fftWindow;
+    }
+    if (settingsKeys.contains("filterFreqs") || force) {
+        ostr << " m_filterFreqs: " << m_filterFreqs.toStdString();
+    }
+    if (settingsKeys.contains("starTracker") || force) {
+        ostr << " m_starTracker: " << m_starTracker.toStdString();
+    }
+    if (settingsKeys.contains("rotator") || force) {
+        ostr << " m_rotator: " << m_rotator.toStdString();
+    }
+    if (settingsKeys.contains("tempRX") || force) {
+        ostr << " m_tempRX: " << m_tempRX;
+    }
+    if (settingsKeys.contains("tempCMB") || force) {
+        ostr << " m_tempCMB: " << m_tempCMB;
+    }
+    if (settingsKeys.contains("tempGal") || force) {
+        ostr << " m_tempGal: " << m_tempGal;
+    }
+    if (settingsKeys.contains("tempSP") || force) {
+        ostr << " m_tempSP: " << m_tempSP;
+    }
+    if (settingsKeys.contains("tempAtm") || force) {
+        ostr << " m_tempAtm: " << m_tempAtm;
+    }
+    if (settingsKeys.contains("tempAir") || force) {
+        ostr << " m_tempAir: " << m_tempAir;
+    }
+    if (settingsKeys.contains("zenithOpacity") || force) {
+        ostr << " m_zenithOpacity: " << m_zenithOpacity;
+    }
+    if (settingsKeys.contains("elevation") || force) {
+        ostr << " m_elevation: " << m_elevation;
+    }
+    if (settingsKeys.contains("tempGalLink") || force) {
+        ostr << " m_tempGalLink: " << m_tempGalLink;
+    }
+    if (settingsKeys.contains("tempAtmLink") || force) {
+        ostr << " m_tempAtmLink: " << m_tempAtmLink;
+    }
+    if (settingsKeys.contains("tempAirLink") || force) {
+        ostr << " m_tempAirLink: " << m_tempAirLink;
+    }
+    if (settingsKeys.contains("elevationLink") || force) {
+        ostr << " m_elevationLink: " << m_elevationLink;
+    }
+    if (settingsKeys.contains("gainVariation") || force) {
+        ostr << " m_gainVariation: " << m_gainVariation;
+    }
+    if (settingsKeys.contains("sourceType") || force) {
+        ostr << " m_sourceType: " << m_sourceType;
+    }
+    if (settingsKeys.contains("omegaS") || force) {
+        ostr << " m_omegaS: " << m_omegaS;
+    }
+    if (settingsKeys.contains("omegaSUnits") || force) {
+        ostr << " m_omegaSUnits: " << m_omegaSUnits;
+    }
+    if (settingsKeys.contains("omegaAUnits") || force) {
+        ostr << " m_omegaAUnits: " << m_omegaAUnits;
+    }
+    if (settingsKeys.contains("spectrumPeaks") || force) {
+        ostr << " m_spectrumPeaks: " << m_spectrumPeaks;
+    }
+    if (settingsKeys.contains("spectrumMarkers") || force) {
+        ostr << " m_spectrumMarkers: " << m_spectrumMarkers;
+    }
+    if (settingsKeys.contains("spectrumTemp") || force) {
+        ostr << " m_spectrumTemp: " << m_spectrumTemp;
+    }
+    if (settingsKeys.contains("spectrumReverseXAxis") || force) {
+        ostr << " m_spectrumReverseXAxis: " << m_spectrumReverseXAxis;
+    }
+    if (settingsKeys.contains("spectrumRefLine") || force) {
+        ostr << " m_spectrumRefLine: " << m_spectrumRefLine;
+    }
+    if (settingsKeys.contains("spectrumLAB") || force) {
+        ostr << " m_spectrumLAB: " << m_spectrumLAB;
+    }
+    if (settingsKeys.contains("spectrumDistance") || force) {
+        ostr << " m_spectrumDistance: " << m_spectrumDistance;
+    }
+    if (settingsKeys.contains("spectrumLegend") || force) {
+        ostr << " m_spectrumLegend: " << m_spectrumLegend;
+    }
+    if (settingsKeys.contains("spectrumReference") || force) {
+        ostr << " m_spectrumReference: " << m_spectrumReference;
+    }
+    if (settingsKeys.contains("spectrumRange") || force) {
+        ostr << " m_spectrumRange: " << m_spectrumRange;
+    }
+    if (settingsKeys.contains("spectrumSpan") || force) {
+        ostr << " m_spectrumSpan: " << m_spectrumSpan;
+    }
+    if (settingsKeys.contains("spectrumCenterFreqOffset") || force) {
+        ostr << " m_spectrumCenterFreqOffset: " << m_spectrumCenterFreqOffset;
+    }
+    if (settingsKeys.contains("spectrumAutoscale") || force) {
+        ostr << " m_spectrumAutoscale: " << m_spectrumAutoscale;
+    }
+    if (settingsKeys.contains("spectrumYScale") || force) {
+        ostr << " m_spectrumYScale: " << m_spectrumYScale;
+    }
+    if (settingsKeys.contains("spectrumBaseline") || force) {
+        ostr << " m_spectrumBaseline: " << m_spectrumBaseline;
+    }
+    if (settingsKeys.contains("recalibrate") || force) {
+        ostr << " m_recalibrate: " << m_recalibrate;
+    }
+    if (settingsKeys.contains("tCalHot") || force) {
+        ostr << " m_tCalHot: " << m_tCalHot;
+    }
+    if (settingsKeys.contains("tCalCold") || force) {
+        ostr << " m_tCalCold: " << m_tCalCold;
+    }
+    if (settingsKeys.contains("line") || force) {
+        ostr << " m_line: " << m_line;
+    }
+    if (settingsKeys.contains("lineCustomFrequency") || force) {
+        ostr << " m_lineCustomFrequency: " << m_lineCustomFrequency;
+    }
+    if (settingsKeys.contains("refFrame") || force) {
+        ostr << " m_refFrame: " << m_refFrame;
+    }
+    if (settingsKeys.contains("sunDistanceToGC") || force) {
+        ostr << " m_sunDistanceToGC: " << m_sunDistanceToGC;
+    }
+    if (settingsKeys.contains("sunOrbitalVelocity") || force) {
+        ostr << " m_sunOrbitalVelocity: " << m_sunOrbitalVelocity;
+    }
+    if (settingsKeys.contains("powerPeaks") || force) {
+        ostr << " m_powerPeaks: " << m_powerPeaks;
+    }
+    if (settingsKeys.contains("powerMarkers") || force) {
+        ostr << " m_powerMarkers: " << m_powerMarkers;
+    }
+    if (settingsKeys.contains("powerAvg") || force) {
+        ostr << " m_powerAvg: " << m_powerAvg;
+    }
+    if (settingsKeys.contains("powerLegend") || force) {
+        ostr << " m_powerLegend: " << m_powerLegend;
+    }
+    if (settingsKeys.contains("powerShowTsys0") || force) {
+        ostr << " m_powerShowTsys0: " << m_powerShowTsys0;
+    }
+    if (settingsKeys.contains("powerShowAirTemp") || force) {
+        ostr << " m_powerShowAirTemp: " << m_powerShowAirTemp;
+    }
+    if (settingsKeys.contains("powerShowGaussian") || force) {
+        ostr << " m_powerShowGaussian: " << m_powerShowGaussian;
+    }
+    if (settingsKeys.contains("powerShowFiltered") || force) {
+        ostr << " m_powerShowFiltered: " << m_powerShowFiltered;
+    }
+    if (settingsKeys.contains("powerShowMeasurement") || force) {
+        ostr << " m_powerShowMeasurement: " << m_powerShowMeasurement;
+    }
+    if (settingsKeys.contains("powerReference") || force) {
+        ostr << " m_powerReference: " << m_powerReference;
+    }
+    if (settingsKeys.contains("powerRange") || force) {
+        ostr << " m_powerRange: " << m_powerRange;
+    }
+    if (settingsKeys.contains("powerAutoscale") || force) {
+        ostr << " m_powerAutoscale: " << m_powerAutoscale;
+    }
+    if (settingsKeys.contains("powerYData") || force) {
+        ostr << " m_powerYData: " << m_powerYData;
+    }
+    if (settingsKeys.contains("powerYUnits") || force) {
+        ostr << " m_powerYUnits: " << m_powerYUnits;
+    }
+    if (settingsKeys.contains("powerFilter") || force) {
+        ostr << " m_powerFilter: " << m_powerFilter;
+    }
+    if (settingsKeys.contains("powerFilterN") || force) {
+        ostr << " m_powerFilterN: " << m_powerFilterN;
+    }
+    if (settingsKeys.contains("power2DLinkSweep") || force) {
+        ostr << " m_power2DLinkSweep: " << m_power2DLinkSweep;
+    }
+    if (settingsKeys.contains("power2DSweepType") || force) {
+        ostr << " m_power2DSweepType: " << m_power2DSweepType;
+    }
+    if (settingsKeys.contains("power2DWidth") || force) {
+        ostr << " m_power2DWidth: " << m_power2DWidth;
+    }
+    if (settingsKeys.contains("power2DHeight") || force) {
+        ostr << " m_power2DHeight: " << m_power2DHeight;
+    }
+    if (settingsKeys.contains("power2DXMin") || force) {
+        ostr << " m_power2DXMin: " << m_power2DXMin;
+    }
+    if (settingsKeys.contains("power2DXMax") || force) {
+        ostr << " m_power2DXMax: " << m_power2DXMax;
+    }
+    if (settingsKeys.contains("power2DYMin") || force) {
+        ostr << " m_power2DYMin: " << m_power2DYMin;
+    }
+    if (settingsKeys.contains("power2DYMax") || force) {
+        ostr << " m_power2DYMax: " << m_power2DYMax;
+    }
+    if (settingsKeys.contains("powerColourAutoscale") || force) {
+        ostr << " m_powerColourAutoscale: " << m_powerColourAutoscale;
+    }
+    if (settingsKeys.contains("powerColourScaleMin") || force) {
+        ostr << " m_powerColourScaleMin: " << m_powerColourScaleMin;
+    }
+    if (settingsKeys.contains("powerColourScaleMax") || force) {
+        ostr << " m_powerColourScaleMax: " << m_powerColourScaleMax;
+    }
+    if (settingsKeys.contains("powerColourPalette") || force) {
+        ostr << " m_powerColourPalette: " << m_powerColourPalette.toStdString();
+    }
+    if (settingsKeys.contains("runMode") || force) {
+        ostr << " m_runMode: " << m_runMode;
+    }
+    if (settingsKeys.contains("sweepStartAtTime") || force) {
+        ostr << " m_sweepStartAtTime: " << m_sweepStartAtTime;
+    }
+    if (settingsKeys.contains("sweepStartDateTime") || force) {
+        ostr << " m_sweepStartDateTime: " << m_sweepStartDateTime.toString().toStdString();
+    }
+    if (settingsKeys.contains("sweepType") || force) {
+        ostr << " m_sweepType: " << m_sweepType;
+    }
+    if (settingsKeys.contains("sweep1Start") || force) {
+        ostr << " m_sweep1Start: " << m_sweep1Start;
+    }
+    if (settingsKeys.contains("sweep1Stop") || force) {
+        ostr << " m_sweep1Stop: " << m_sweep1Stop;
+    }
+    if (settingsKeys.contains("sweep1Step") || force) {
+        ostr << " m_sweep1Step: " << m_sweep1Step;
+    }
+    if (settingsKeys.contains("sweep1Delay") || force) {
+        ostr << " m_sweep1Delay: " << m_sweep1Delay;
+    }
+    if (settingsKeys.contains("sweep2Start") || force) {
+        ostr << " m_sweep2Start: " << m_sweep2Start;
+    }
+    if (settingsKeys.contains("sweep2Stop") || force) {
+        ostr << " m_sweep2Stop: " << m_sweep2Stop;
+    }
+    if (settingsKeys.contains("sweep2Step") || force) {
+        ostr << " m_sweep2Step: " << m_sweep2Step;
+    }
+    if (settingsKeys.contains("sweep2Delay") || force) {
+        ostr << " m_sweep2Delay: " << m_sweep2Delay;
+    }
+    if (settingsKeys.contains("gpioEnabled") || force) {
+        ostr << " m_gpioEnabled: " << m_gpioEnabled;
+    }
+    if (settingsKeys.contains("gpioPin") || force) {
+        ostr << " m_gpioPin: " << m_gpioPin;
+    }
+    if (settingsKeys.contains("gpioSense") || force) {
+        ostr << " m_gpioSense: " << m_gpioSense;
+    }
+    if (settingsKeys.contains("startCalCommand") || force) {
+        ostr << " m_startCalCommand: " << m_startCalCommand.toStdString();
+    }
+    if (settingsKeys.contains("stopCalCommand") || force) {
+        ostr << " m_stopCalCommand: " << m_stopCalCommand.toStdString();
+    }
+    if (settingsKeys.contains("calCommandDelay") || force) {
+        ostr << " m_calCommandDelay: " << m_calCommandDelay;
+    }
+    if (settingsKeys.contains("sensorMeasurePeriod") || force) {
+        ostr << " m_sensorMeasurePeriod: " << m_sensorMeasurePeriod;
+    }
+    if (settingsKeys.contains("spectrumAutoSaveCSVFilename") || force) {
+        ostr << " m_spectrumAutoSaveCSVFilename: " << m_spectrumAutoSaveCSVFilename.toStdString();
+    }
+    if (settingsKeys.contains("powerAutoSaveCSVFilename") || force) {
+        ostr << " m_powerAutoSaveCSVFilename: " << m_powerAutoSaveCSVFilename.toStdString();
+    }
+    if (settingsKeys.contains("rgbColor") || force) {
+        ostr << " m_rgbColor: " << m_rgbColor;
+    }
+    if (settingsKeys.contains("title") || force) {
+        ostr << " m_title: " << m_title.toStdString();
+    }
+    if (settingsKeys.contains("streamIndex") || force) {
+        ostr << " m_streamIndex: " << m_streamIndex;
+    }
+    if (settingsKeys.contains("useReverseAPI") || force) {
+        ostr << " m_useReverseAPI: " << m_useReverseAPI;
+    }
+    if (settingsKeys.contains("reverseAPIAddress") || force) {
+        ostr << " m_reverseAPIAddress: " << m_reverseAPIAddress.toStdString();
+    }
+    if (settingsKeys.contains("reverseAPIPort") || force) {
+        ostr << " m_reverseAPIPort: " << m_reverseAPIPort;
+    }
+    if (settingsKeys.contains("reverseAPIDeviceIndex") || force) {
+        ostr << " m_reverseAPIDeviceIndex: " << m_reverseAPIDeviceIndex;
+    }
+    if (settingsKeys.contains("reverseAPIChannelIndex") || force) {
+        ostr << " m_reverseAPIChannelIndex: " << m_reverseAPIChannelIndex;
+    }
+    if (settingsKeys.contains("workspaceIndex") || force) {
+        ostr << " m_workspaceIndex: " << m_workspaceIndex;
+    }
+    if (settingsKeys.contains("hidden") || force) {
+        ostr << " m_hidden: " << m_hidden;
+    }
+
+    return QString(ostr.str().c_str());
+}

@@ -35,7 +35,7 @@ APTDemodSink::APTDemodSink() :
 
     m_magsq = 0.0;
 
-    applySettings(m_settings, true);
+    applySettings(QStringList(), m_settings, true);
     applyChannelSettings(m_channelSampleRate, m_channelFrequencyOffset, true);
 
     m_samplesLength = APTDEMOD_AUDIO_SAMPLE_RATE * APT_MAX_HEIGHT / 2;   // APT broadcasts at 2 lines per second
@@ -176,25 +176,30 @@ void APTDemodSink::applyChannelSettings(int channelSampleRate, int channelFreque
     m_channelFrequencyOffset = channelFrequencyOffset;
 }
 
-void APTDemodSink::applySettings(const APTDemodSettings& settings, bool force)
+void APTDemodSink::applySettings(const QStringList& settingsKeys, const APTDemodSettings& settings, bool force)
 {
-    qDebug() << "APTDemodSink::applySettings:"
-             << " m_rfBandwidth: " << settings.m_rfBandwidth
-             << " m_fmDeviation: " << settings.m_fmDeviation
-             << " m_decodeEnabled: " << settings.m_decodeEnabled
-             << " force: " << force;
+    qDebug() << "APTDemodSink::applySettings:" << settings.getDebugString(settingsKeys, force);
 
-    if ((settings.m_rfBandwidth != m_settings.m_rfBandwidth) || force)
+    if (settingsKeys.contains("decodeEnabled") || force)
+    {
+        m_settings.m_decodeEnabled = settings.m_decodeEnabled;
+    }
+
+    if ((settingsKeys.contains("rfBandwidth") && (settings.m_rfBandwidth != m_settings.m_rfBandwidth)) || force)
     {
         m_interpolator.create(16, m_channelSampleRate, settings.m_rfBandwidth, 2.2);
         m_interpolatorDistance = (Real) m_channelSampleRate / (Real) APTDEMOD_AUDIO_SAMPLE_RATE;
         m_interpolatorDistanceRemain = m_interpolatorDistance;
     }
 
-    if ((settings.m_fmDeviation != m_settings.m_fmDeviation) || force)
+    if ((settingsKeys.contains("fmDeviation") && (settings.m_fmDeviation != m_settings.m_fmDeviation)) || force)
     {
         m_phaseDiscri.setFMScaling(APTDEMOD_AUDIO_SAMPLE_RATE / (2.0f * settings.m_fmDeviation));
     }
 
-    m_settings = settings;
+    if (force) {
+        m_settings = settings;
+    } else {
+        m_settings.applySettings(settingsKeys, settings);
+    }
 }

@@ -60,7 +60,7 @@ RemoteSink::RemoteSink(DeviceAPI *deviceAPI) :
 {
     setObjectName(m_channelId);
     updateWithDeviceData();
-    applySettings(m_settings, true);
+    applySettings(QStringList(), m_settings, true);
 
     m_deviceAPI->addChannelSink(this);
     m_deviceAPI->addChannelSinkAPI(this);
@@ -145,7 +145,7 @@ void RemoteSink::start()
         m_basebandSink->setBasebandSampleRate(m_basebandSampleRate);
     }
 
-    RemoteSinkBaseband::MsgConfigureRemoteSinkBaseband *msg = RemoteSinkBaseband::MsgConfigureRemoteSinkBaseband::create(m_settings, true);
+    RemoteSinkBaseband::MsgConfigureRemoteSinkBaseband *msg = RemoteSinkBaseband::MsgConfigureRemoteSinkBaseband::create(QStringList(), m_settings, true);
     m_basebandSink->getInputMessageQueue()->push(msg);
 
     m_running = true;
@@ -170,7 +170,7 @@ bool RemoteSink::handleMessage(const Message& cmd)
     {
         MsgConfigureRemoteSink& cfg = (MsgConfigureRemoteSink&) cmd;
         qDebug() << "RemoteSink::handleMessage: MsgConfigureRemoteSink";
-        applySettings(cfg.getSettings(), cfg.getForce());
+        applySettings(cfg.getSettingsKeys(), cfg.getSettings(), cfg.getForce());
 
         return true;
     }
@@ -212,48 +212,43 @@ bool RemoteSink::deserialize(const QByteArray& data)
     (void) data;
     if (m_settings.deserialize(data))
     {
-        MsgConfigureRemoteSink *msg = MsgConfigureRemoteSink::create(m_settings, true);
+        MsgConfigureRemoteSink *msg = MsgConfigureRemoteSink::create(QStringList(), m_settings, true);
         m_inputMessageQueue.push(msg);
         return true;
     }
     else
     {
         m_settings.resetToDefaults();
-        MsgConfigureRemoteSink *msg = MsgConfigureRemoteSink::create(m_settings, true);
+        MsgConfigureRemoteSink *msg = MsgConfigureRemoteSink::create(QStringList(), m_settings, true);
         m_inputMessageQueue.push(msg);
         return false;
     }
 }
 
-void RemoteSink::applySettings(const RemoteSinkSettings& settings, bool force)
+void RemoteSink::applySettings(const QStringList& settingsKeys, const RemoteSinkSettings& settings, bool force)
 {
-    qDebug() << "RemoteSink::applySettings:"
-            << " m_nbFECBlocks: " << settings.m_nbFECBlocks
-            << " m_dataAddress: " << settings.m_dataAddress
-            << " m_dataPort: " << settings.m_dataPort
-            << " m_streamIndex: " << settings.m_streamIndex
-            << " force: " << force;
+    qDebug() << "RemoteSink::applySettings:" << settings.getDebugString(settingsKeys, force);
 
     QList<QString> reverseAPIKeys;
     bool frequencyOffsetChange = false;
 
-    if ((m_settings.m_nbFECBlocks != settings.m_nbFECBlocks) || force) {
+    if ((settingsKeys.contains("nbFECBlocks") && (m_settings.m_nbFECBlocks != settings.m_nbFECBlocks)) || force) {
         reverseAPIKeys.append("nbFECBlocks");
     }
-    if ((m_settings.m_dataAddress != settings.m_dataAddress) || force) {
+    if ((settingsKeys.contains("dataAddress") && (m_settings.m_dataAddress != settings.m_dataAddress)) || force) {
         reverseAPIKeys.append("dataAddress");
     }
-    if ((m_settings.m_dataPort != settings.m_dataPort) || force) {
+    if ((settingsKeys.contains("dataPort") && (m_settings.m_dataPort != settings.m_dataPort)) || force) {
         reverseAPIKeys.append("dataPort");
     }
-    if ((m_settings.m_rgbColor != settings.m_rgbColor) || force) {
+    if ((settingsKeys.contains("rgbColor") && (m_settings.m_rgbColor != settings.m_rgbColor)) || force) {
         reverseAPIKeys.append("rgbColor");
     }
-    if ((m_settings.m_title != settings.m_title) || force) {
+    if ((settingsKeys.contains("title") && (m_settings.m_title != settings.m_title)) || force) {
         reverseAPIKeys.append("title");
     }
 
-    if ((m_settings.m_deviceCenterFrequency != settings.m_deviceCenterFrequency) || force)
+    if ((settingsKeys.contains("deviceCenterFrequency") && (m_settings.m_deviceCenterFrequency != settings.m_deviceCenterFrequency)) || force)
     {
         reverseAPIKeys.append("deviceCenterFrequency");
 
@@ -264,19 +259,19 @@ void RemoteSink::applySettings(const RemoteSinkSettings& settings, bool force)
         }
     }
 
-    if ((m_settings.m_log2Decim != settings.m_log2Decim) || force)
+    if ((settingsKeys.contains("log2Decim") && (m_settings.m_log2Decim != settings.m_log2Decim)) || force)
     {
         reverseAPIKeys.append("log2Decim");
         frequencyOffsetChange = true;
     }
 
-    if ((m_settings.m_filterChainHash != settings.m_filterChainHash) || force)
+    if ((settingsKeys.contains("filterChainHash") && (m_settings.m_filterChainHash != settings.m_filterChainHash)) || force)
     {
         reverseAPIKeys.append("filterChainHash");
         frequencyOffsetChange = true;
     }
 
-    if ((m_settings.m_nbTxBytes != settings.m_nbTxBytes) || force)
+    if ((settingsKeys.contains("nbTxBytes") && (m_settings.m_nbTxBytes != settings.m_nbTxBytes)) || force)
     {
         reverseAPIKeys.append("nbTxBytes");
         stop();
@@ -284,7 +279,7 @@ void RemoteSink::applySettings(const RemoteSinkSettings& settings, bool force)
         m_basebandSink->setNbTxBytes(settings.m_nbTxBytes);
     }
 
-    if (m_settings.m_streamIndex != settings.m_streamIndex)
+    if ((settingsKeys.contains("streamIndex") && (m_settings.m_streamIndex != settings.m_streamIndex)) || force)
     {
         if (m_deviceAPI->getSampleMIMO()) // change of stream is possible for MIMO devices only
         {
@@ -301,17 +296,17 @@ void RemoteSink::applySettings(const RemoteSinkSettings& settings, bool force)
 
     if (m_running)
     {
-        RemoteSinkBaseband::MsgConfigureRemoteSinkBaseband *msg = RemoteSinkBaseband::MsgConfigureRemoteSinkBaseband::create(settings, force);
+        RemoteSinkBaseband::MsgConfigureRemoteSinkBaseband *msg = RemoteSinkBaseband::MsgConfigureRemoteSinkBaseband::create(settingsKeys, settings, force);
         m_basebandSink->getInputMessageQueue()->push(msg);
     }
 
-    if ((settings.m_useReverseAPI) && (reverseAPIKeys.size() != 0))
+    if (( settingsKeys.contains("useReverseAPI") && (m_settings.m_useReverseAPI != settings.m_useReverseAPI)) && settings.m_useReverseAPI && (reverseAPIKeys.size() != 0))
     {
-        bool fullUpdate = ((m_settings.m_useReverseAPI != settings.m_useReverseAPI) && settings.m_useReverseAPI) ||
-                (m_settings.m_reverseAPIAddress != settings.m_reverseAPIAddress) ||
-                (m_settings.m_reverseAPIPort != settings.m_reverseAPIPort) ||
-                (m_settings.m_reverseAPIDeviceIndex != settings.m_reverseAPIDeviceIndex) ||
-                (m_settings.m_reverseAPIChannelIndex != settings.m_reverseAPIChannelIndex);
+        bool fullUpdate = ((settingsKeys.contains("useReverseAPI") && (m_settings.m_useReverseAPI != settings.m_useReverseAPI)) && settings.m_useReverseAPI) ||
+                (settingsKeys.contains("reverseAPIAddress") && (m_settings.m_reverseAPIAddress != settings.m_reverseAPIAddress)) ||
+                (settingsKeys.contains("reverseAPIPort") && (m_settings.m_reverseAPIPort != settings.m_reverseAPIPort)) ||
+                (settingsKeys.contains("reverseAPIDeviceIndex") && (m_settings.m_reverseAPIDeviceIndex != settings.m_reverseAPIDeviceIndex)) ||
+                (settingsKeys.contains("reverseAPIChannelIndex") && (m_settings.m_reverseAPIChannelIndex != settings.m_reverseAPIChannelIndex));
         webapiReverseSendSettings(reverseAPIKeys, settings, fullUpdate || force);
     }
 
@@ -385,14 +380,14 @@ int RemoteSink::webapiSettingsPutPatch(
     RemoteSinkSettings settings = m_settings;
     webapiUpdateChannelSettings(settings, channelSettingsKeys, response);
 
-    MsgConfigureRemoteSink *msg = MsgConfigureRemoteSink::create(settings, force);
+    MsgConfigureRemoteSink *msg = MsgConfigureRemoteSink::create(channelSettingsKeys, settings, force);
     m_inputMessageQueue.push(msg);
 
     qDebug("RemoteSink::webapiSettingsPutPatch: forward to GUI: %p", m_guiMessageQueue);
 
     if (m_guiMessageQueue) // forward to GUI if any
     {
-        MsgConfigureRemoteSink *msgToGUI = MsgConfigureRemoteSink::create(settings, force);
+        MsgConfigureRemoteSink *msgToGUI = MsgConfigureRemoteSink::create(channelSettingsKeys, settings, force);
         m_guiMessageQueue->push(msgToGUI);
     }
 

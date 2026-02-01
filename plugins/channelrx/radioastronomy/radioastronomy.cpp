@@ -82,7 +82,7 @@ RadioAstronomy::RadioAstronomy(DeviceAPI *deviceAPI) :
     m_worker->setMessageQueueToChannel(getInputMessageQueue());
     m_worker->moveToThread(&m_workerThread);
 
-    applySettings(m_settings, true);
+    applySettings(QStringList(), m_settings, true);
 
     m_deviceAPI->addChannelSink(this);
     m_deviceAPI->addChannelSinkAPI(this);
@@ -200,8 +200,8 @@ void RadioAstronomy::start()
     m_workerThread.start();
 
     m_basebandSink->getInputMessageQueue()->push(new DSPSignalNotification(m_basebandSampleRate, m_centerFrequency));
-    m_basebandSink->getInputMessageQueue()->push(RadioAstronomyBaseband::MsgConfigureRadioAstronomyBaseband::create(m_settings, true));
-    m_worker->getInputMessageQueue()->push(RadioAstronomyWorker::MsgConfigureRadioAstronomyWorker::create(m_settings, true));
+    m_basebandSink->getInputMessageQueue()->push(RadioAstronomyBaseband::MsgConfigureRadioAstronomyBaseband::create(QStringList(), m_settings, true));
+    m_worker->getInputMessageQueue()->push(RadioAstronomyWorker::MsgConfigureRadioAstronomyWorker::create(QStringList(), m_settings, true));
 }
 
 void RadioAstronomy::stop()
@@ -219,11 +219,11 @@ void RadioAstronomy::setCenterFrequency(qint64 frequency)
 {
     RadioAstronomySettings settings = m_settings;
     settings.m_inputFrequencyOffset = frequency;
-    applySettings(settings, false);
+    applySettings(QStringList("inputFrequencyOffset"), settings, false);
 
     if (m_guiMessageQueue) // forward to GUI if any
     {
-        MsgConfigureRadioAstronomy *msgToGUI = MsgConfigureRadioAstronomy::create(settings, false);
+        MsgConfigureRadioAstronomy *msgToGUI = MsgConfigureRadioAstronomy::create(QStringList("inputFrequencyOffset"), settings, false);
         m_guiMessageQueue->push(msgToGUI);
     }
 }
@@ -234,7 +234,7 @@ bool RadioAstronomy::handleMessage(const Message& cmd)
     {
         MsgConfigureRadioAstronomy& cfg = (MsgConfigureRadioAstronomy&) cmd;
         qDebug() << "RadioAstronomy::handleMessage: MsgConfigureRadioAstronomy";
-        applySettings(cfg.getSettings(), cfg.getForce());
+        applySettings(cfg.getSettingsKeys(), cfg.getSettings(), cfg.getForce());
 
         return true;
     }
@@ -683,16 +683,9 @@ void RadioAstronomy::sweepComplete()
     }
 }
 
-void RadioAstronomy::applySettings(const RadioAstronomySettings& settings, bool force)
+void RadioAstronomy::applySettings(const QStringList& settingsKeys, const RadioAstronomySettings& settings, bool force)
 {
-    qDebug() << "RadioAstronomy::applySettings:"
-            << " m_streamIndex: " << settings.m_streamIndex
-            << " m_useReverseAPI: " << settings.m_useReverseAPI
-            << " m_reverseAPIAddress: " << settings.m_reverseAPIAddress
-            << " m_reverseAPIPort: " << settings.m_reverseAPIPort
-            << " m_reverseAPIDeviceIndex: " << settings.m_reverseAPIDeviceIndex
-            << " m_reverseAPIChannelIndex: " << settings.m_reverseAPIChannelIndex
-            << " force: " << force;
+    qDebug() << "RadioAstronomy::applySettings:" << settings.getDebugString(settingsKeys, force);
 
     QList<QString> reverseAPIKeys;
 
@@ -762,7 +755,7 @@ void RadioAstronomy::applySettings(const RadioAstronomySettings& settings, bool 
         reverseAPIKeys.append("sweep2Delay");
     }
 
-    if ((m_settings.m_starTracker != settings.m_starTracker)
+    if ((settingsKeys.contains("starTracker") && (m_settings.m_starTracker != settings.m_starTracker))
         || (!settings.m_starTracker.isEmpty() && (m_selectedPipe == nullptr)) // Change in available pipes
         || force)
     {
@@ -783,7 +776,7 @@ void RadioAstronomy::applySettings(const RadioAstronomySettings& settings, bool 
         reverseAPIKeys.append("starTracker");
     }
 
-    if (m_settings.m_streamIndex != settings.m_streamIndex)
+    if (settingsKeys.contains("streamIndex") && (m_settings.m_streamIndex != settings.m_streamIndex))
     {
         if (m_deviceAPI->getSampleMIMO()) // change of stream is possible for MIMO devices only
         {
@@ -798,21 +791,25 @@ void RadioAstronomy::applySettings(const RadioAstronomySettings& settings, bool 
         reverseAPIKeys.append("streamIndex");
     }
 
-    m_basebandSink->getInputMessageQueue()->push(RadioAstronomyBaseband::MsgConfigureRadioAstronomyBaseband::create(settings, force));
+    m_basebandSink->getInputMessageQueue()->push(RadioAstronomyBaseband::MsgConfigureRadioAstronomyBaseband::create(settingsKeys, settings, force));
 
-    m_worker->getInputMessageQueue()->push(RadioAstronomyWorker::MsgConfigureRadioAstronomyWorker::create(settings, force));
+    m_worker->getInputMessageQueue()->push(RadioAstronomyWorker::MsgConfigureRadioAstronomyWorker::create(settingsKeys, settings, force));
 
-    if (settings.m_useReverseAPI)
+    if (settingsKeys.contains("useReverseAPI") && settings.m_useReverseAPI)
     {
-        bool fullUpdate = ((m_settings.m_useReverseAPI != settings.m_useReverseAPI) && settings.m_useReverseAPI) ||
-                (m_settings.m_reverseAPIAddress != settings.m_reverseAPIAddress) ||
-                (m_settings.m_reverseAPIPort != settings.m_reverseAPIPort) ||
-                (m_settings.m_reverseAPIDeviceIndex != settings.m_reverseAPIDeviceIndex) ||
-                (m_settings.m_reverseAPIChannelIndex != settings.m_reverseAPIChannelIndex);
+        bool fullUpdate = ((settingsKeys.contains("useReverseAPI") && (m_settings.m_useReverseAPI != settings.m_useReverseAPI)) && settings.m_useReverseAPI) ||
+                (settingsKeys.contains("reverseAPIAddress") && (m_settings.m_reverseAPIAddress != settings.m_reverseAPIAddress)) ||
+                (settingsKeys.contains("reverseAPIPort") && (m_settings.m_reverseAPIPort != settings.m_reverseAPIPort)) ||
+                (settingsKeys.contains("reverseAPIDeviceIndex") && (m_settings.m_reverseAPIDeviceIndex != settings.m_reverseAPIDeviceIndex)) ||
+                (settingsKeys.contains("reverseAPIChannelIndex") && (m_settings.m_reverseAPIChannelIndex != settings.m_reverseAPIChannelIndex));
         webapiReverseSendSettings(reverseAPIKeys, settings, fullUpdate || force);
     }
 
-    m_settings = settings;
+    if (force) {
+        m_settings = settings;
+    } else {
+        m_settings.applySettings(settingsKeys, settings);
+    }
 }
 
 QByteArray RadioAstronomy::serialize() const
@@ -824,14 +821,14 @@ bool RadioAstronomy::deserialize(const QByteArray& data)
 {
     if (m_settings.deserialize(data))
     {
-        MsgConfigureRadioAstronomy *msg = MsgConfigureRadioAstronomy::create(m_settings, true);
+        MsgConfigureRadioAstronomy *msg = MsgConfigureRadioAstronomy::create(QStringList(), m_settings, true);
         m_inputMessageQueue.push(msg);
         return true;
     }
     else
     {
         m_settings.resetToDefaults();
-        MsgConfigureRadioAstronomy *msg = MsgConfigureRadioAstronomy::create(m_settings, true);
+        MsgConfigureRadioAstronomy *msg = MsgConfigureRadioAstronomy::create(QStringList(), m_settings, true);
         m_inputMessageQueue.push(msg);
         return false;
     }
@@ -867,13 +864,13 @@ int RadioAstronomy::webapiSettingsPutPatch(
     RadioAstronomySettings settings = m_settings;
     webapiUpdateChannelSettings(settings, channelSettingsKeys, response);
 
-    MsgConfigureRadioAstronomy *msg = MsgConfigureRadioAstronomy::create(settings, force);
+    MsgConfigureRadioAstronomy *msg = MsgConfigureRadioAstronomy::create(channelSettingsKeys, settings, force);
     m_inputMessageQueue.push(msg);
 
     qDebug("RadioAstronomy::webapiSettingsPutPatch: forward to GUI: %p", m_guiMessageQueue);
     if (m_guiMessageQueue) // forward to GUI if any
     {
-        MsgConfigureRadioAstronomy *msgToGUI = MsgConfigureRadioAstronomy::create(settings, force);
+        MsgConfigureRadioAstronomy *msgToGUI = MsgConfigureRadioAstronomy::create(channelSettingsKeys, settings, force);
         m_guiMessageQueue->push(msgToGUI);
     }
 
@@ -1087,7 +1084,7 @@ void RadioAstronomy::webapiFormatChannelSettings(SWGSDRangel::SWGChannelSettings
     }
 }
 
-void RadioAstronomy::webapiReverseSendSettings(QList<QString>& channelSettingsKeys, const RadioAstronomySettings& settings, bool force)
+void RadioAstronomy::webapiReverseSendSettings(const QList<QString>& channelSettingsKeys, const RadioAstronomySettings& settings, bool force)
 {
     SWGSDRangel::SWGChannelSettings *swgChannelSettings = new SWGSDRangel::SWGChannelSettings();
     webapiFormatChannelSettings(channelSettingsKeys, swgChannelSettings, settings, force);
@@ -1113,7 +1110,7 @@ void RadioAstronomy::webapiReverseSendSettings(QList<QString>& channelSettingsKe
 }
 
 void RadioAstronomy::webapiFormatChannelSettings(
-        QList<QString>& channelSettingsKeys,
+        const QList<QString>& channelSettingsKeys,
         SWGSDRangel::SWGChannelSettings *swgChannelSettings,
         const RadioAstronomySettings& settings,
         bool force

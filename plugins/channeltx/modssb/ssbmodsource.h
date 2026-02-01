@@ -69,7 +69,7 @@ public:
         peakLevel = m_peakLevelOut;
         numSamples = m_levelNbSamples;
     }
-    void applySettings(const SSBModSettings& settings, bool force = false);
+    void applySettings(const QStringList& settingKeys, const SSBModSettings& settings, bool force = false);
     void applyChannelSettings(int channelSampleRate, int channelFrequencyOffset, bool force = false);
     void setSpectrumSink(SpectrumVis *sampleSink) { m_spectrumSink = sampleSink; }
 

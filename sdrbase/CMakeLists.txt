@@ -276,6 +276,7 @@ set(sdrbase_SOURCES
     #util/spinlock.cpp
     util/spyserverlist.cpp
     util/stix.cpp
+    util/stringlist.cpp
     util/rtty.cpp
     util/uid.cpp
     util/units.cpp
@@ -540,6 +541,7 @@ set(sdrbase_HEADERS
     #util/spinlock.h
     util/spyserverlist.h
     util/stix.h
+    util/stringlist.h
     util/uid.h
     util/units.h
     util/timeutil.h

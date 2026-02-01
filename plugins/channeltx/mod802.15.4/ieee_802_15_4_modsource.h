@@ -98,7 +98,7 @@ public:
     MessageQueue *getInputMessageQueue() { return &m_inputMessageQueue; } //!< Get the queue for asynchronous inbound communication
     void setSpectrumSink(BasebandSampleSink *sampleSink) { m_spectrumSink = sampleSink; }
     void setScopeSink(ScopeVis* scopeSink) { m_scopeSink = scopeSink; }
-    void applySettings(const IEEE_802_15_4_ModSettings& settings, bool force = false);
+    void applySettings(const QStringList& settingsKeys, const IEEE_802_15_4_ModSettings& settings, bool force = false);
     void applyChannelSettings(int channelSampleRate, int channelFrequencyOffset, bool force = false);
     bool handleMessage(const Message& cmd);
 

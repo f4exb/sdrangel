@@ -64,7 +64,7 @@ IEEE_802_15_4_Mod::IEEE_802_15_4_Mod(DeviceAPI *deviceAPI) :
     m_basebandSource->setSpectrumSampleSink(&m_spectrumVis);
     m_basebandSource->moveToThread(m_thread);
 
-    applySettings(m_settings, true);
+    applySettings(QStringList(), m_settings, true);
 
     m_deviceAPI->addChannelSource(this);
     m_deviceAPI->addChannelSourceAPI(this);
@@ -133,7 +133,7 @@ bool IEEE_802_15_4_Mod::handleMessage(const Message& cmd)
         MsgConfigureIEEE_802_15_4_Mod& cfg = (MsgConfigureIEEE_802_15_4_Mod&) cmd;
         qDebug() << "IEEE_802_15_4_Mod::handleMessage: MsgConfigureIEEE_802_15_4_Mod";
 
-        applySettings(cfg.getSettings(), cfg.getForce());
+        applySettings(cfg.getSettingsKeys(), cfg.getSettings(), cfg.getForce());
 
         return true;
     }
@@ -171,203 +171,20 @@ void IEEE_802_15_4_Mod::setCenterFrequency(qint64 frequency)
 {
     IEEE_802_15_4_ModSettings settings = m_settings;
     settings.m_inputFrequencyOffset = frequency;
-    applySettings(settings, false);
+    applySettings(QStringList("inputFrequencyOffset"), settings, false);
 
     if (m_guiMessageQueue) // forward to GUI if any
     {
-        MsgConfigureIEEE_802_15_4_Mod *msgToGUI = MsgConfigureIEEE_802_15_4_Mod::create(settings, false);
+        MsgConfigureIEEE_802_15_4_Mod *msgToGUI = MsgConfigureIEEE_802_15_4_Mod::create(QStringList("inputFrequencyOffset"), settings, false);
         m_guiMessageQueue->push(msgToGUI);
     }
 }
 
-void IEEE_802_15_4_Mod::applySettings(const IEEE_802_15_4_ModSettings& settings, bool force)
+void IEEE_802_15_4_Mod::applySettings(const QStringList& settingsKeys, const IEEE_802_15_4_ModSettings& settings, bool force)
 {
-    qDebug() << "IEEE_802_15_4_Mod::applySettings:"
-            << " m_inputFrequencyOffset: " << settings.m_inputFrequencyOffset
-            << " m_modulation: " << settings.m_modulation
-            << " m_bitRate: " << settings.m_bitRate
-            << " m_subGHzBand: " << settings.m_subGHzBand
-            << " m_rfBandwidth: " << settings.m_rfBandwidth
-            << " m_gain: " << settings.m_gain
-            << " m_channelMute: " << settings.m_channelMute
-            << " m_repeat: " << settings.m_repeat
-            << " m_repeatDelay: " << settings.m_repeatDelay
-            << " m_repeatCount: " << settings.m_repeatCount
-            << " m_rampUpBits: " << settings.m_rampUpBits
-            << " m_rampDownBits: " << settings.m_rampDownBits
-            << " m_rampRange: " << settings.m_rampRange
-            << " m_modulateWhileRamping: "<< settings.m_modulateWhileRamping
-            << " m_lpfTaps: " <<  settings.m_lpfTaps
-            << " m_bbNoise: " << settings.m_bbNoise
-            << " m_writeToFile: " << settings.m_writeToFile
-            << " m_spectrumRate: " << settings.m_spectrumRate
-            << " m_data: " << settings.m_data
-            << " m_rgbColor: " << settings.m_rgbColor
-            << " m_title: " << settings.m_title
-            << " m_streamIndex: " << settings.m_streamIndex
-            << " m_useReverseAPI: " << settings.m_useReverseAPI
-            << " m_reverseAPIAddress: " << settings.m_reverseAPIAddress
-            << " m_reverseAPIAddress: " << settings.m_reverseAPIPort
-            << " m_reverseAPIDeviceIndex: " << settings.m_reverseAPIDeviceIndex
-            << " m_reverseAPIChannelIndex: " << settings.m_reverseAPIChannelIndex
-            << " m_scramble: " << settings.m_scramble
-            << " m_polynomial: " << settings.m_polynomial
-            << " m_pulseShaping: " << settings.m_pulseShaping
-            << " m_beta: " << settings.m_beta
-            << " m_symbolSpan: " << settings.m_symbolSpan
-            << " m_udpEnabled: " << settings.m_udpEnabled
-            << " m_udpBytesFormat: " << settings.m_udpBytesFormat
-            << " m_udpAddress: " << settings.m_udpAddress
-            << " m_udpPort: " << settings.m_udpPort
-            << " force: " << force;
+    qDebug() << "IEEE_802_15_4_Mod::applySettings:" << settings.getDebugString(settingsKeys, force);
 
-    QList<QString> reverseAPIKeys;
-
-    if ((settings.m_inputFrequencyOffset != m_settings.m_inputFrequencyOffset) || force) {
-        reverseAPIKeys.append("inputFrequencyOffset");
-    }
-
-    if ((settings.m_modulation != m_settings.m_modulation) || force) {
-        reverseAPIKeys.append("modulation");
-    }
-
-    if ((settings.m_bitRate != m_settings.m_bitRate) || force) {
-        reverseAPIKeys.append("bitRate");
-    }
-
-    if ((settings.m_subGHzBand != m_settings.m_subGHzBand) || force) {
-        reverseAPIKeys.append("subGHzBand");
-    }
-
-    if ((settings.m_rfBandwidth != m_settings.m_rfBandwidth) || force) {
-        reverseAPIKeys.append("rfBandwidth");
-    }
-
-    if ((settings.m_gain != m_settings.m_gain) || force) {
-        reverseAPIKeys.append("gain");
-    }
-
-    if ((settings.m_channelMute != m_settings.m_channelMute) || force) {
-        reverseAPIKeys.append("channelMute");
-    }
-
-    if ((settings.m_repeat != m_settings.m_repeat) || force) {
-        reverseAPIKeys.append("repeat");
-    }
-
-    if ((settings.m_repeatDelay != m_settings.m_repeatDelay) || force) {
-        reverseAPIKeys.append("repeatDelay");
-    }
-
-    if ((settings.m_repeatCount != m_settings.m_repeatCount) || force) {
-        reverseAPIKeys.append("repeatCount");
-    }
-
-    if ((settings.m_rampUpBits != m_settings.m_rampUpBits) || force) {
-        reverseAPIKeys.append("rampUpBits");
-    }
-
-    if ((settings.m_rampDownBits != m_settings.m_rampDownBits) || force) {
-        reverseAPIKeys.append("rampDownBits");
-    }
-
-    if ((settings.m_rampRange != m_settings.m_rampRange) || force) {
-        reverseAPIKeys.append("rampRange");
-    }
-
-    if ((settings.m_modulateWhileRamping != m_settings.m_modulateWhileRamping) || force) {
-        reverseAPIKeys.append("modulateWhileRamping");
-    }
-
-    if ((settings.m_lpfTaps != m_settings.m_lpfTaps) || force) {
-        reverseAPIKeys.append("lpfTaps");
-    }
-
-    if ((settings.m_bbNoise != m_settings.m_bbNoise) || force) {
-        reverseAPIKeys.append("bbNoise");
-    }
-
-    if ((settings.m_writeToFile != m_settings.m_writeToFile) || force) {
-        reverseAPIKeys.append("writeToFile");
-    }
-
-    if ((settings.m_spectrumRate != m_settings.m_spectrumRate) || force) {
-        reverseAPIKeys.append("spectrumRate");
-    }
-
-    if ((settings.m_data != m_settings.m_data) || force) {
-        reverseAPIKeys.append("data");
-    }
-
-    if ((settings.m_rgbColor != m_settings.m_rgbColor) || force) {
-        reverseAPIKeys.append("rgbColor");
-    }
-
-    if ((settings.m_title != m_settings.m_title) || force) {
-        reverseAPIKeys.append("title");
-    }
-
-    if ((settings.m_streamIndex != m_settings.m_streamIndex) || force) {
-        reverseAPIKeys.append("streamIndex");
-    }
-
-    if ((settings.m_useReverseAPI != m_settings.m_useReverseAPI) || force) {
-        reverseAPIKeys.append("useReverseAPI");
-    }
-
-    if ((settings.m_reverseAPIAddress != m_settings.m_reverseAPIAddress) || force) {
-        reverseAPIKeys.append("reverseAPIAddress");
-    }
-
-    if ((settings.m_reverseAPIPort != m_settings.m_reverseAPIPort) || force) {
-        reverseAPIKeys.append("reverseAPIPort");
-    }
-
-    if ((settings.m_reverseAPIDeviceIndex != m_settings.m_reverseAPIDeviceIndex) || force) {
-        reverseAPIKeys.append("reverseAPIDeviceIndex");
-    }
-
-    if ((settings.m_reverseAPIChannelIndex != m_settings.m_reverseAPIChannelIndex) || force) {
-        reverseAPIKeys.append("reverseAPIChannelIndex");
-    }
-
-    if ((settings.m_scramble != m_settings.m_scramble) || force) {
-        reverseAPIKeys.append("scramble");
-    }
-
-    if ((settings.m_polynomial != m_settings.m_polynomial) || force) {
-        reverseAPIKeys.append("polynomial");
-    }
-
-    if ((settings.m_pulseShaping != m_settings.m_pulseShaping) || force) {
-        reverseAPIKeys.append("pulseShaping");
-    }
-
-    if ((settings.m_beta != m_settings.m_beta) || force) {
-        reverseAPIKeys.append("beta");
-    }
-
-    if ((settings.m_symbolSpan != m_settings.m_symbolSpan) || force) {
-        reverseAPIKeys.append("symbolSpan");
-    }
-
-    if ((settings.m_udpEnabled != m_settings.m_udpEnabled) || force) {
-        reverseAPIKeys.append("udpEnabled");
-    }
-
-    if ((settings.m_udpBytesFormat != m_settings.m_udpBytesFormat) || force) {
-        reverseAPIKeys.append("udpBytesFormat");
-    }
-
-    if ((settings.m_udpAddress != m_settings.m_udpAddress) || force) {
-        reverseAPIKeys.append("udpAddress");
-    }
-
-    if ((settings.m_udpPort != m_settings.m_udpPort) || force) {
-        reverseAPIKeys.append("udpPort");
-    }
-
-    if (m_settings.m_streamIndex != settings.m_streamIndex)
+    if (settingsKeys.contains("streamIndex") && m_settings.m_streamIndex != settings.m_streamIndex)
     {
         if (m_deviceAPI->getSampleMIMO()) // change of stream is possible for MIMO devices only
         {
@@ -378,28 +195,26 @@ void IEEE_802_15_4_Mod::applySettings(const IEEE_802_15_4_ModSettings& settings,
             m_settings.m_streamIndex = settings.m_streamIndex; // make sure ChannelAPI::getStreamIndex() is consistent
             emit streamIndexChanged(settings.m_streamIndex);
         }
-
-        reverseAPIKeys.append("streamIndex");
     }
 
-    IEEE_802_15_4_ModBaseband::MsgConfigureIEEE_802_15_4_ModBaseband *msg = IEEE_802_15_4_ModBaseband::MsgConfigureIEEE_802_15_4_ModBaseband::create(settings, force);
+    IEEE_802_15_4_ModBaseband::MsgConfigureIEEE_802_15_4_ModBaseband *msg = IEEE_802_15_4_ModBaseband::MsgConfigureIEEE_802_15_4_ModBaseband::create(settingsKeys, settings, force);
     m_basebandSource->getInputMessageQueue()->push(msg);
 
-    if (settings.m_useReverseAPI)
+    if (settingsKeys.contains("useReverseAPI") && settings.m_useReverseAPI)
     {
-        bool fullUpdate = ((m_settings.m_useReverseAPI != settings.m_useReverseAPI) && settings.m_useReverseAPI) ||
-                (m_settings.m_reverseAPIAddress != settings.m_reverseAPIAddress) ||
-                (m_settings.m_reverseAPIPort != settings.m_reverseAPIPort) ||
-                (m_settings.m_reverseAPIDeviceIndex != settings.m_reverseAPIDeviceIndex) ||
-                (m_settings.m_reverseAPIChannelIndex != settings.m_reverseAPIChannelIndex);
-        webapiReverseSendSettings(reverseAPIKeys, settings, fullUpdate || force);
+        bool fullUpdate = ((settingsKeys.contains("useReverseAPI") && m_settings.m_useReverseAPI != settings.m_useReverseAPI) && settings.m_useReverseAPI) ||
+                (settingsKeys.contains("reverseAPIAddress") && m_settings.m_reverseAPIAddress != settings.m_reverseAPIAddress) ||
+                (settingsKeys.contains("reverseAPIPort") && m_settings.m_reverseAPIPort != settings.m_reverseAPIPort) ||
+                (settingsKeys.contains("reverseAPIDeviceIndex") && m_settings.m_reverseAPIDeviceIndex != settings.m_reverseAPIDeviceIndex) ||
+                (settingsKeys.contains("reverseAPIChannelIndex") && m_settings.m_reverseAPIChannelIndex != settings.m_reverseAPIChannelIndex);
+        webapiReverseSendSettings(settingsKeys, settings, fullUpdate || force);
     }
 
     QList<ObjectPipe*> pipes;
     MainCore::instance()->getMessagePipes().getMessagePipes(this, "settings", pipes);
 
     if (pipes.size() > 0) {
-        sendChannelSettings(pipes, reverseAPIKeys, settings, force);
+        sendChannelSettings(pipes, settingsKeys, settings, force);
     }
 
     m_settings = settings;
@@ -420,7 +235,7 @@ bool IEEE_802_15_4_Mod::deserialize(const QByteArray& data)
         success = false;
     }
 
-    MsgConfigureIEEE_802_15_4_Mod *msg = MsgConfigureIEEE_802_15_4_Mod::create(m_settings, true);
+    MsgConfigureIEEE_802_15_4_Mod *msg = MsgConfigureIEEE_802_15_4_Mod::create(QStringList(), m_settings, true);
     m_inputMessageQueue.push(msg);
 
     return success;
@@ -457,12 +272,12 @@ int IEEE_802_15_4_Mod::webapiSettingsPutPatch(
     IEEE_802_15_4_ModSettings settings = m_settings;
     webapiUpdateChannelSettings(settings, channelSettingsKeys, response);
 
-    MsgConfigureIEEE_802_15_4_Mod *msg = MsgConfigureIEEE_802_15_4_Mod::create(settings, force);
+    MsgConfigureIEEE_802_15_4_Mod *msg = MsgConfigureIEEE_802_15_4_Mod::create(channelSettingsKeys, settings, force);
     m_inputMessageQueue.push(msg);
 
     if (m_guiMessageQueue) // forward to GUI if any
     {
-        MsgConfigureIEEE_802_15_4_Mod *msgToGUI = MsgConfigureIEEE_802_15_4_Mod::create(settings, force);
+        MsgConfigureIEEE_802_15_4_Mod *msgToGUI = MsgConfigureIEEE_802_15_4_Mod::create(channelSettingsKeys, settings, force);
         m_guiMessageQueue->push(msgToGUI);
     }
 
@@ -740,7 +555,7 @@ void IEEE_802_15_4_Mod::webapiFormatChannelReport(SWGSDRangel::SWGChannelReport&
     response.getIeee802154ModReport()->setChannelSampleRate(m_basebandSource->getChannelSampleRate());
 }
 
-void IEEE_802_15_4_Mod::webapiReverseSendSettings(QList<QString>& channelSettingsKeys, const IEEE_802_15_4_ModSettings& settings, bool force)
+void IEEE_802_15_4_Mod::webapiReverseSendSettings(const QList<QString>& channelSettingsKeys, const IEEE_802_15_4_ModSettings& settings, bool force)
 {
     SWGSDRangel::SWGChannelSettings *swgChannelSettings = new SWGSDRangel::SWGChannelSettings();
     webapiFormatChannelSettings(channelSettingsKeys, swgChannelSettings, settings, force);
@@ -767,7 +582,7 @@ void IEEE_802_15_4_Mod::webapiReverseSendSettings(QList<QString>& channelSetting
 
 void IEEE_802_15_4_Mod::sendChannelSettings(
     const QList<ObjectPipe*>& pipes,
-    QList<QString>& channelSettingsKeys,
+    const QList<QString>& channelSettingsKeys,
     const IEEE_802_15_4_ModSettings& settings,
     bool force)
 {
@@ -791,7 +606,7 @@ void IEEE_802_15_4_Mod::sendChannelSettings(
 }
 
 void IEEE_802_15_4_Mod::webapiFormatChannelSettings(
-        QList<QString>& channelSettingsKeys,
+        const QList<QString>& channelSettingsKeys,
         SWGSDRangel::SWGChannelSettings *swgChannelSettings,
         const IEEE_802_15_4_ModSettings& settings,
         bool force

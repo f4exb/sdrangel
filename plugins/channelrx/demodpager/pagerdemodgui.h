@@ -97,7 +97,7 @@ private:
     virtual ~PagerDemodGUI();
 
     void blockApplySettings(bool block);
-    void applySettings(bool force = false);
+    void applySettings(const QStringList& settingsKeys, bool force = false);
     void displaySettings();
     QString selectMessage(int functionBits, const QString &numericMessage, const QString &alphaMessage) const;
     void messageReceived(const QDateTime dateTime, int address, int functionBits,

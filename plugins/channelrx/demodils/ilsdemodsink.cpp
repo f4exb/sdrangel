@@ -58,7 +58,7 @@ ILSDemodSink::ILSDemodSink() :
     m_sampleBuffer.resize(m_sampleBufferSize);
     m_spectrumSampleBuffer.resize(m_sampleBufferSize);
 
-    applySettings(m_settings, true);
+    applySettings(QStringList(), m_settings, true);
     applyChannelSettings(m_channelSampleRate, m_channelFrequencyOffset, true);
 
     FFTFactory *fftFactory = DSPEngine::instance()->getFFTFactory();
@@ -404,28 +404,22 @@ void ILSDemodSink::applyChannelSettings(int channelSampleRate, int channelFreque
 
 }
 
-void ILSDemodSink::applySettings(const ILSDemodSettings& settings, bool force)
+void ILSDemodSink::applySettings(const QStringList& settingsKeys, const ILSDemodSettings& settings, bool force)
 {
-    qDebug() << "ILSDemodSink::applySettings:"
-            << " m_rfBandwidth: " << settings.m_rfBandwidth
-            << " m_volume: " << settings.m_volume
-            << " m_squelch: " << settings.m_squelch
-            << " m_audioMute: " << settings.m_audioMute
-            << " m_audioDeviceName: " << settings.m_audioDeviceName
-            << " force: " << force;
+    qDebug() << "ILSDemodSink::applySettings:" << settings.getDebugString(settingsKeys, force);
 
-    if ((m_settings.m_squelch != settings.m_squelch) || force) {
+    if ((settingsKeys.contains("squelch") && (settings.m_squelch != m_settings.m_squelch)) || force) {
         m_squelchLevel = CalcDb::powerFromdB(settings.m_squelch);
     }
 
-    if ((settings.m_rfBandwidth != m_settings.m_rfBandwidth) || force)
+    if ((settingsKeys.contains("rfBandwidth") && (settings.m_rfBandwidth != m_settings.m_rfBandwidth)) || force)
     {
         m_interpolator.create(16, m_channelSampleRate, settings.m_rfBandwidth / 2.2);
         m_interpolatorDistance = (Real) m_channelSampleRate / (Real) ILSDemodSettings::ILSDEMOD_CHANNEL_SAMPLE_RATE;
         m_interpolatorDistanceRemain = m_interpolatorDistance;
     }
 
-    if ((settings.m_identThreshold != m_settings.m_identThreshold) || force) {
+    if ((settingsKeys.contains("identThreshold") && (settings.m_identThreshold != m_settings.m_identThreshold)) || force) {
         m_morseDemod.applySettings(settings.m_identThreshold);
     }
 
@@ -435,9 +429,13 @@ void ILSDemodSink::applySettings(const ILSDemodSettings& settings, bool force)
         m_modDepth150Average.reset();
         m_ddmAverage.reset();
         m_decimator.setLog2Decim(ILSDemodSettings::ILSDEMOD_SPECTRUM_DECIM_LOG2);
+        m_settings = settings;
+    }
+    else
+    {
+        m_settings.applySettings(settingsKeys, settings);
     }
 
-    m_settings = settings;
 }
 
 void ILSDemodSink::applyAudioSampleRate(int sampleRate)
@@ -466,4 +464,3 @@ void ILSDemodSink::applyAudioSampleRate(int sampleRate)
 
     m_audioSampleRate = sampleRate;
 }
-

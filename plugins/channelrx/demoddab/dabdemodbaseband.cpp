@@ -138,7 +138,7 @@ bool DABDemodBaseband::handleMessage(const Message& cmd)
         MsgConfigureDABDemodBaseband& cfg = (MsgConfigureDABDemodBaseband&) cmd;
         qDebug() << "DABDemodBaseband::handleMessage: MsgConfigureDABDemodBaseband";
 
-        applySettings(cfg.getSettings(), cfg.getForce());
+        applySettings(cfg.getSettingsKeys(), cfg.getSettings(), cfg.getForce());
 
         return true;
     }
@@ -174,15 +174,15 @@ bool DABDemodBaseband::handleMessage(const Message& cmd)
     }
 }
 
-void DABDemodBaseband::applySettings(const DABDemodSettings& settings, bool force)
+void DABDemodBaseband::applySettings(const QStringList& settingsKeys, const DABDemodSettings& settings, bool force)
 {
-    if ((settings.m_inputFrequencyOffset != m_settings.m_inputFrequencyOffset) || force)
+    if ((settingsKeys.contains("inputFrequencyOffset") && (settings.m_inputFrequencyOffset != m_settings.m_inputFrequencyOffset)) || force)
     {
         m_channelizer->setChannelization(DABDEMOD_CHANNEL_SAMPLE_RATE, settings.m_inputFrequencyOffset);
         m_sink.applyChannelSettings(m_channelizer->getChannelSampleRate(), m_channelizer->getChannelFrequencyOffset());
     }
 
-    if ((settings.m_audioDeviceName != m_settings.m_audioDeviceName) || force)
+    if ((settingsKeys.contains("audioDeviceName") && (settings.m_audioDeviceName != m_settings.m_audioDeviceName)) || force)
     {
         AudioDeviceManager *audioDeviceManager = DSPEngine::instance()->getAudioDeviceManager();
         int audioDeviceIndex = audioDeviceManager->getOutputDeviceIndex(settings.m_audioDeviceName);
@@ -196,9 +196,13 @@ void DABDemodBaseband::applySettings(const DABDemodSettings& settings, bool forc
             m_sink.applyAudioSampleRate(audioSampleRate);
         }
     }
-    m_sink.applySettings(settings, force);
+    m_sink.applySettings(settingsKeys, settings, force);
 
-    m_settings = settings;
+    if (force) {
+        m_settings = settings;
+    } else {
+        m_settings.applySettings(settingsKeys, settings);
+    }
 }
 
 void DABDemodBaseband::setBasebandSampleRate(int sampleRate)

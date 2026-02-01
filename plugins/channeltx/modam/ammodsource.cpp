@@ -46,7 +46,7 @@ AMModSource::AMModSource() :
 
 	m_magsq = 0.0;
 
-    applySettings(m_settings, true);
+    applySettings(QStringList(), m_settings, true);
     applyChannelSettings(m_channelSampleRate, m_channelFrequencyOffset, true);
 }
 
@@ -350,19 +350,19 @@ void AMModSource::applyFeedbackAudioSampleRate(int sampleRate)
     m_feedbackAudioSampleRate = sampleRate;
 }
 
-void AMModSource::applySettings(const AMModSettings& settings, bool force)
+void AMModSource::applySettings(const QStringList& settingsKeys, const AMModSettings& settings, bool force)
 {
-    if ((settings.m_rfBandwidth != m_settings.m_rfBandwidth) || force)
+    if ((settingsKeys.contains("rfBandwidth") && settings.m_rfBandwidth != m_settings.m_rfBandwidth) || force)
     {
         m_settings.m_rfBandwidth = settings.m_rfBandwidth;
         applyAudioSampleRate(m_audioSampleRate);
     }
 
-    if ((settings.m_toneFrequency != m_settings.m_toneFrequency) || force) {
+    if ((settingsKeys.contains("toneFrequency") && settings.m_toneFrequency != m_settings.m_toneFrequency) || force) {
         m_toneNco.setFreq(settings.m_toneFrequency, (float) m_audioSampleRate);
     }
 
-    if ((settings.m_modAFInput != m_settings.m_modAFInput) || force)
+    if ((settingsKeys.contains("modAFInput") && settings.m_modAFInput != m_settings.m_modAFInput) || force)
     {
         if (settings.m_modAFInput == AMModSettings::AMModInputAudio) {
             connect(&m_audioFifo, SIGNAL(dataReady()), this, SLOT(handleAudio()));
@@ -371,7 +371,11 @@ void AMModSource::applySettings(const AMModSettings& settings, bool force)
         }
     }
 
-    m_settings = settings;
+    if (force) {
+        m_settings = settings;
+    } else {
+        m_settings.applySettings(settingsKeys, settings);
+    }
 }
 
 void AMModSource::applyChannelSettings(int channelSampleRate, int channelFrequencyOffset, bool force)

@@ -40,20 +40,23 @@ public:
 
     public:
         const NFMDemodSettings& getSettings() const { return m_settings; }
+        const QStringList& getSettingsKeys() const { return m_settingsKeys; }
         bool getForce() const { return m_force; }
 
-        static MsgConfigureNFMDemodBaseband* create(const NFMDemodSettings& settings, bool force)
+        static MsgConfigureNFMDemodBaseband* create(const QStringList& settingsKeys, const NFMDemodSettings& settings, bool force)
         {
-            return new MsgConfigureNFMDemodBaseband(settings, force);
+            return new MsgConfigureNFMDemodBaseband(settingsKeys, settings, force);
         }
 
     private:
         NFMDemodSettings m_settings;
+        QStringList m_settingsKeys;
         bool m_force;
 
-        MsgConfigureNFMDemodBaseband(const NFMDemodSettings& settings, bool force) :
+        MsgConfigureNFMDemodBaseband(const QStringList& settingsKeys, const NFMDemodSettings& settings, bool force) :
             Message(),
             m_settings(settings),
+            m_settingsKeys(settingsKeys),
             m_force(force)
         { }
     };
@@ -83,7 +86,7 @@ private:
     QRecursiveMutex m_mutex;
 
     bool handleMessage(const Message& cmd);
-    void applySettings(const NFMDemodSettings& settings, bool force = false);
+    void applySettings(const QStringList& settingsKeys, const NFMDemodSettings& settings, bool force = false);
 
 private slots:
     void handleInputMessages();

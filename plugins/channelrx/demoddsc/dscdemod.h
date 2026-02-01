@@ -53,20 +53,23 @@ public:
 
     public:
         const DSCDemodSettings& getSettings() const { return m_settings; }
+        const QStringList& getSettingsKeys() const { return m_settingsKeys; }
         bool getForce() const { return m_force; }
 
-        static MsgConfigureDSCDemod* create(const DSCDemodSettings& settings, bool force)
+        static MsgConfigureDSCDemod* create(const QStringList& settingsKeys, const DSCDemodSettings& settings, bool force)
         {
-            return new MsgConfigureDSCDemod(settings, force);
+            return new MsgConfigureDSCDemod(settingsKeys, settings, force);
         }
 
     private:
         DSCDemodSettings m_settings;
+        QStringList m_settingsKeys;
         bool m_force;
 
-        MsgConfigureDSCDemod(const DSCDemodSettings& settings, bool force) :
+        MsgConfigureDSCDemod(const QStringList& settingsKeys, const DSCDemodSettings& settings, bool force) :
             Message(),
             m_settings(settings),
+            m_settingsKeys(settingsKeys),
             m_force(force)
         { }
     };
@@ -184,11 +187,11 @@ private:
     QNetworkRequest m_networkRequest;
 
     virtual bool handleMessage(const Message& cmd);
-    void applySettings(const DSCDemodSettings& settings, bool force = false);
+    void applySettings(const QStringList& settingsKeys, const DSCDemodSettings& settings, bool force = false);
     void sendSampleRateToDemodAnalyzer();
-    void webapiReverseSendSettings(QList<QString>& channelSettingsKeys, const DSCDemodSettings& settings, bool force);
+    void webapiReverseSendSettings(const QList<QString>& channelSettingsKeys, const DSCDemodSettings& settings, bool force);
     void webapiFormatChannelSettings(
-        QList<QString>& channelSettingsKeys,
+        const QList<QString>& channelSettingsKeys,
         SWGSDRangel::SWGChannelSettings *swgChannelSettings,
         const DSCDemodSettings& settings,
         bool force
@@ -202,4 +205,3 @@ private slots:
 };
 
 #endif // INCLUDE_DSCDEMOD_H
-

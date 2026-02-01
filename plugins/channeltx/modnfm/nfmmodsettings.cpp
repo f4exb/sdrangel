@@ -359,3 +359,206 @@ int NFMModSettings::getCTCSSFreqIndex(float ctcssFreq)
     return CTCSSFrequencies::m_nbFreqs - 1;
 }
 
+void NFMModSettings::applySettings(const QStringList& settingsKeys, const NFMModSettings& settings)
+{
+    if (settingsKeys.contains("inputFrequencyOffset")) {
+        m_inputFrequencyOffset = settings.m_inputFrequencyOffset;
+    }
+    if (settingsKeys.contains("rfBandwidth")) {
+        m_rfBandwidth = settings.m_rfBandwidth;
+    }
+    if (settingsKeys.contains("afBandwidth")) {
+        m_afBandwidth = settings.m_afBandwidth;
+    }
+    if (settingsKeys.contains("fmDeviation")) {
+        m_fmDeviation = settings.m_fmDeviation;
+    }
+    if (settingsKeys.contains("toneFrequency")) {
+        m_toneFrequency = settings.m_toneFrequency;
+    }
+    if (settingsKeys.contains("volumeFactor")) {
+        m_volumeFactor = settings.m_volumeFactor;
+    }
+    if (settingsKeys.contains("channelMute")) {
+        m_channelMute = settings.m_channelMute;
+    }
+    if (settingsKeys.contains("playLoop")) {
+        m_playLoop = settings.m_playLoop;
+    }
+    if (settingsKeys.contains("ctcssOn")) {
+        m_ctcssOn = settings.m_ctcssOn;
+    }
+    if (settingsKeys.contains("ctcssIndex")) {
+        m_ctcssIndex = settings.m_ctcssIndex;
+    }
+    if (settingsKeys.contains("dcsOn")) {
+        m_dcsOn = settings.m_dcsOn;
+    }
+    if (settingsKeys.contains("dcsCode")) {
+        m_dcsCode = settings.m_dcsCode;
+    }
+    if (settingsKeys.contains("dcsPositive")) {
+        m_dcsPositive = settings.m_dcsPositive;
+    }
+    if (settingsKeys.contains("preEmphasisOn")) {
+        m_preEmphasisOn = settings.m_preEmphasisOn;
+    }
+    if (settingsKeys.contains("bpfOn")) {
+        m_bpfOn = settings.m_bpfOn;
+    }
+    if (settingsKeys.contains("rgbColor")) {
+        m_rgbColor = settings.m_rgbColor;
+    }
+    if (settingsKeys.contains("title")) {
+        m_title = settings.m_title;
+    }
+    if (settingsKeys.contains("modAFInput")) {
+        m_modAFInput = settings.m_modAFInput;
+    }
+    if (settingsKeys.contains("audioDeviceName")) {
+        m_audioDeviceName = settings.m_audioDeviceName;
+    }
+    if (settingsKeys.contains("feedbackAudioDeviceName")) {
+        m_feedbackAudioDeviceName = settings.m_feedbackAudioDeviceName;
+    }
+    if (settingsKeys.contains("feedbackVolumeFactor")) {
+        m_feedbackVolumeFactor = settings.m_feedbackVolumeFactor;
+    }
+    if (settingsKeys.contains("feedbackAudioEnable")) {
+        m_feedbackAudioEnable = settings.m_feedbackAudioEnable;
+    }
+    if (settingsKeys.contains("compressorEnable")) {
+        m_compressorEnable = settings.m_compressorEnable;
+    }
+    if (settingsKeys.contains("streamIndex")) {
+        m_streamIndex = settings.m_streamIndex;
+    }
+    if (settingsKeys.contains("useReverseAPI")) {
+        m_useReverseAPI = settings.m_useReverseAPI;
+    }
+    if (settingsKeys.contains("reverseAPIAddress")) {
+        m_reverseAPIAddress = settings.m_reverseAPIAddress;
+    }
+    if (settingsKeys.contains("reverseAPIPort")) {
+        m_reverseAPIPort = settings.m_reverseAPIPort;
+    }
+    if (settingsKeys.contains("reverseAPIDeviceIndex")) {
+        m_reverseAPIDeviceIndex = settings.m_reverseAPIDeviceIndex;
+    }
+    if (settingsKeys.contains("reverseAPIChannelIndex")) {
+        m_reverseAPIChannelIndex = settings.m_reverseAPIChannelIndex;
+    }
+    if (settingsKeys.contains("workspaceIndex")) {
+        m_workspaceIndex = settings.m_workspaceIndex;
+    }
+    if (settingsKeys.contains("geometryBytes")) {
+        m_geometryBytes = settings.m_geometryBytes;
+    }
+    if (settingsKeys.contains("hidden")) {
+        m_hidden = settings.m_hidden;
+    }
+    if (settingsKeys.contains("cwKeyerSettings")) {
+        m_cwKeyerSettings = settings.m_cwKeyerSettings;
+    }
+}
+
+QString NFMModSettings::getDebugString(const QStringList& settingsKeys, bool force) const
+{
+    std::ostringstream ostr;
+
+    if (settingsKeys.contains("inputFrequencyOffset") || force) {
+        ostr << " m_inputFrequencyOffset: " << m_inputFrequencyOffset;
+    }
+    if (settingsKeys.contains("rfBandwidth") || force) {
+        ostr << " m_rfBandwidth: " << m_rfBandwidth;
+    }
+    if (settingsKeys.contains("afBandwidth") || force) {
+        ostr << " m_afBandwidth: " << m_afBandwidth;
+    }
+    if (settingsKeys.contains("fmDeviation") || force) {
+        ostr << " m_fmDeviation: " << m_fmDeviation;
+    }
+    if (settingsKeys.contains("toneFrequency") || force) {
+        ostr << " m_toneFrequency: " << m_toneFrequency;
+    }
+    if (settingsKeys.contains("volumeFactor") || force) {
+        ostr << " m_volumeFactor: " << m_volumeFactor;
+    }
+    if (settingsKeys.contains("channelMute") || force) {
+        ostr << " m_channelMute: " << m_channelMute;
+    }
+    if (settingsKeys.contains("playLoop") || force) {
+        ostr << " m_playLoop: " << m_playLoop;
+    }
+    if (settingsKeys.contains("ctcssOn") || force) {
+        ostr << " m_ctcssOn: " << m_ctcssOn;
+    }
+    if (settingsKeys.contains("ctcssIndex") || force) {
+        ostr << " m_ctcssIndex: " << m_ctcssIndex;
+    }
+    if (settingsKeys.contains("dcsOn") || force) {
+        ostr << " m_dcsOn: " << m_dcsOn;
+    }
+    if (settingsKeys.contains("dcsCode") || force) {
+        ostr << " m_dcsCode: " << m_dcsCode;
+    }
+    if (settingsKeys.contains("dcsPositive") || force) {
+        ostr << " m_dcsPositive: " << m_dcsPositive;
+    }
+    if (settingsKeys.contains("preEmphasisOn") || force) {
+        ostr << " m_preEmphasisOn: " << m_preEmphasisOn;
+    }
+    if (settingsKeys.contains("bpfOn") || force) {
+        ostr << " m_bpfOn: " << m_bpfOn;
+    }
+    if (settingsKeys.contains("rgbColor") || force) {
+        ostr << " m_rgbColor: " << m_rgbColor;
+    }
+    if (settingsKeys.contains("title") || force) {
+        ostr << " m_title: " << m_title.toStdString();
+    }
+    if (settingsKeys.contains("modAFInput") || force) {
+        ostr << " m_modAFInput: " << m_modAFInput;
+    }
+    if (settingsKeys.contains("audioDeviceName") || force) {
+        ostr << " m_audioDeviceName: " << m_audioDeviceName.toStdString();
+    }
+    if (settingsKeys.contains("feedbackAudioDeviceName") || force) {
+        ostr << " m_feedbackAudioDeviceName: " << m_feedbackAudioDeviceName.toStdString();
+    }
+    if (settingsKeys.contains("feedbackVolumeFactor") || force) {
+        ostr << " m_feedbackVolumeFactor: " << m_feedbackVolumeFactor;
+    }
+    if (settingsKeys.contains("feedbackAudioEnable") || force) {
+        ostr << " m_feedbackAudioEnable: " << m_feedbackAudioEnable;
+    }
+    if (settingsKeys.contains("compressorEnable") || force) {
+        ostr << " m_compressorEnable: " << m_compressorEnable;
+    }
+    if (settingsKeys.contains("streamIndex") || force) {
+        ostr << " m_streamIndex: " << m_streamIndex;
+    }
+    if (settingsKeys.contains("useReverseAPI") || force) {
+        ostr << " m_useReverseAPI: " << m_useReverseAPI;
+    }
+    if (settingsKeys.contains("reverseAPIAddress") || force) {
+        ostr << " m_reverseAPIAddress: " << m_reverseAPIAddress.toStdString();
+    }
+    if (settingsKeys.contains("reverseAPIPort") || force) {
+        ostr << " m_reverseAPIPort: " << m_reverseAPIPort;
+    }
+    if (settingsKeys.contains("reverseAPIDeviceIndex") || force) {
+        ostr << " m_reverseAPIDeviceIndex: " << m_reverseAPIDeviceIndex;
+    }
+    if (settingsKeys.contains("reverseAPIChannelIndex") || force) {
+        ostr << " m_reverseAPIChannelIndex: " << m_reverseAPIChannelIndex;
+    }
+    if (settingsKeys.contains("workspaceIndex") || force) {
+        ostr << " m_workspaceIndex: " << m_workspaceIndex;
+    }
+    if (settingsKeys.contains("hidden") || force) {
+        ostr << " m_hidden: " << m_hidden;
+    }
+
+    return QString(ostr.str().c_str());
+}

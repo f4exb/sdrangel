@@ -66,7 +66,7 @@ FreeDVModSource::FreeDVModSource() :
 
 	m_magsq = 0.0;
 
-    applySettings(m_settings, true);
+    applySettings(QStringList(), m_settings, true);
     applyChannelSettings(m_channelSampleRate, m_channelFrequencyOffset, true);
 }
 
@@ -536,13 +536,13 @@ void FreeDVModSource::applyFreeDVMode(FreeDVModSettings::FreeDVMode mode)
     }
 }
 
-void FreeDVModSource::applySettings(const FreeDVModSettings& settings, bool force)
+void FreeDVModSource::applySettings(const QStringList& settingsKeys, const FreeDVModSettings& settings, bool force)
 {
-    if ((settings.m_toneFrequency != m_settings.m_toneFrequency) || force) {
+    if ((settingsKeys.contains("toneFrequency") && (settings.m_toneFrequency != m_settings.m_toneFrequency)) || force) {
         m_toneNco.setFreq(settings.m_toneFrequency, m_channelSampleRate);
     }
 
-    if ((settings.m_modAFInput != m_settings.m_modAFInput) || force)
+    if ((settingsKeys.contains("modAFInput") && (settings.m_modAFInput != m_settings.m_modAFInput)) || force)
     {
         if (settings.m_modAFInput == FreeDVModSettings::FreeDVModInputAudio) {
             connect(&m_audioFifo, SIGNAL(dataReady()), this, SLOT(handleAudio()));
@@ -551,7 +551,11 @@ void FreeDVModSource::applySettings(const FreeDVModSettings& settings, bool forc
         }
     }
 
-    m_settings = settings;
+    if (force) {
+        m_settings = settings;
+    } else {
+        m_settings.applySettings(settingsKeys, settings);
+    }
 }
 
 void FreeDVModSource::handleAudio()

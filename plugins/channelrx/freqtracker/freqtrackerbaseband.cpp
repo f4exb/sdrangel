@@ -105,7 +105,7 @@ bool FreqTrackerBaseband::handleMessage(const Message& cmd)
         MsgConfigureFreqTrackerBaseband& cfg = (MsgConfigureFreqTrackerBaseband&) cmd;
         qDebug() << "FreqTrackerBaseband::handleMessage: MsgConfigureFreqTrackerBaseband";
 
-        applySettings(cfg.getSettings(), cfg.getForce());
+        applySettings(cfg.getSettingsKeys(), cfg.getSettings(), cfg.getForce());
 
         return true;
     }
@@ -132,10 +132,10 @@ bool FreqTrackerBaseband::handleMessage(const Message& cmd)
     }
 }
 
-void FreqTrackerBaseband::applySettings(const FreqTrackerSettings& settings, bool force)
+void FreqTrackerBaseband::applySettings(const QStringList& settingsKeys, const FreqTrackerSettings& settings, bool force)
 {
-    if ((m_settings.m_inputFrequencyOffset != settings.m_inputFrequencyOffset)
-     || (m_settings.m_log2Decim != settings.m_log2Decim)|| force)
+    if ((settingsKeys.contains("inputFrequencyOffset") && (m_settings.m_inputFrequencyOffset != settings.m_inputFrequencyOffset))
+     || (settingsKeys.contains("log2Decim") && (m_settings.m_log2Decim != settings.m_log2Decim)) || force)
     {
         m_channelizer->setChannelization(m_basebandSampleRate/(1<<settings.m_log2Decim), settings.m_inputFrequencyOffset);
         m_sink.applyChannelSettings(
@@ -145,9 +145,13 @@ void FreqTrackerBaseband::applySettings(const FreqTrackerSettings& settings, boo
         );
     }
 
-    m_sink.applySettings(settings, force);
+    m_sink.applySettings(settingsKeys, settings, force);
 
-    m_settings = settings;
+    if (force) {
+        m_settings = settings;
+    } else {
+        m_settings.applySettings(settingsKeys, settings);
+    }
 }
 
 int FreqTrackerBaseband::getChannelSampleRate() const

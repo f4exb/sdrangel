@@ -142,20 +142,23 @@ public:
 
     public:
         const DATVDemodSettings& getSettings() const { return m_settings; }
+        const QStringList& getSettingsKeys() const { return m_settingsKeys; }
         bool getForce() const { return m_force; }
 
-        static MsgConfigureDATVDemod* create(const DATVDemodSettings& settings, bool force)
+        static MsgConfigureDATVDemod* create(const QStringList& settingsKeys, const DATVDemodSettings& settings, bool force)
         {
-            return new MsgConfigureDATVDemod(settings, force);
+            return new MsgConfigureDATVDemod(settingsKeys, settings, force);
         }
 
     private:
         DATVDemodSettings m_settings;
+        QStringList m_settingsKeys;
         bool m_force;
 
-        MsgConfigureDATVDemod(const DATVDemodSettings& settings, bool force) :
+        MsgConfigureDATVDemod(const QStringList& settingsKeys, const DATVDemodSettings& settings, bool force) :
             Message(),
             m_settings(settings),
+            m_settingsKeys(settingsKeys),
             m_force(force)
         { }
     };
@@ -170,17 +173,17 @@ private:
     QNetworkRequest m_networkRequest;
 
 	virtual bool handleMessage(const Message& cmd);
-    void applySettings(const DATVDemodSettings& settings, bool force = false);
+    void applySettings(const QList<QString>& settingsKeys, const DATVDemodSettings& settings, bool force = false);
     void webapiFormatChannelReport(SWGSDRangel::SWGChannelReport& response);
-    void webapiReverseSendSettings(QList<QString>& channelSettingsKeys, const DATVDemodSettings& settings, bool force);
+    void webapiReverseSendSettings(const QList<QString>& channelSettingsKeys, const DATVDemodSettings& settings, bool force);
     void sendChannelSettings(
         const QList<ObjectPipe*>& pipes,
-        QList<QString>& channelSettingsKeys,
+        const QList<QString>& channelSettingsKeys,
         const DATVDemodSettings& settings,
         bool force
     );
     void webapiFormatChannelSettings(
-        QList<QString>& channelSettingsKeys,
+        const QList<QString>& channelSettingsKeys,
         SWGSDRangel::SWGChannelSettings *swgChannelSettings,
         const DATVDemodSettings& settings,
         bool force

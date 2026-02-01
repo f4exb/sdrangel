@@ -92,7 +92,7 @@ private:
     virtual ~FileSourceGUI();
 
     void blockApplySettings(bool block);
-    void applySettings(bool force = false);
+    void applySettings(const QStringList& settingsKeys, bool force = false);
     void configureFileName();
 	void updateWithAcquisition();
 	void updateWithStreamData();

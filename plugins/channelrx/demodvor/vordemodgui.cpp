@@ -54,7 +54,7 @@ void VORDemodGUI::resetToDefaults()
 {
     m_settings.resetToDefaults();
     displaySettings();
-    applySettings(true);
+    applySettings(QStringList(), true);
 }
 
 QByteArray VORDemodGUI::serialize() const
@@ -66,7 +66,7 @@ bool VORDemodGUI::deserialize(const QByteArray& data)
 {
     if(m_settings.deserialize(data)) {
         displaySettings();
-        applySettings(true);
+        applySettings(QStringList(), true);
         return true;
     } else {
         resetToDefaults();
@@ -178,7 +178,7 @@ void VORDemodGUI::channelMarkerChangedByCursor()
 {
     ui->deltaFrequency->setValue(m_channelMarker.getCenterFrequency());
     m_settings.m_inputFrequencyOffset = m_channelMarker.getCenterFrequency();
-	applySettings();
+	applySettings(QStringList("inputFrequencyOffset"));
 }
 
 void VORDemodGUI::channelMarkerHighlightedByCursor()
@@ -191,40 +191,40 @@ void VORDemodGUI::on_deltaFrequency_changed(qint64 value)
     m_channelMarker.setCenterFrequency(value);
     m_settings.m_inputFrequencyOffset = m_channelMarker.getCenterFrequency();
     updateAbsoluteCenterFrequency();
-    applySettings();
+    applySettings(QStringList("inputFrequencyOffset"));
 }
 
 void VORDemodGUI::on_thresh_valueChanged(int value)
 {
     ui->threshText->setText(QString("%1").arg(value / 10.0, 0, 'f', 1));
     m_settings.m_identThreshold = value / 10.0;
-    applySettings();
+    applySettings(QStringList("identThreshold"));
 }
 
 void VORDemodGUI::on_volume_valueChanged(int value)
 {
     ui->volumeText->setText(QString("%1").arg(value / 10.0, 0, 'f', 1));
     m_settings.m_volume = value / 10.0;
-    applySettings();
+    applySettings(QStringList("volume"));
 }
 
 void VORDemodGUI::on_squelch_valueChanged(int value)
 {
     ui->squelchText->setText(QString("%1 dB").arg(value));
     m_settings.m_squelch = value;
-    applySettings();
+    applySettings(QStringList("squelch"));
 }
 
 void VORDemodGUI::on_audioMute_toggled(bool checked)
 {
     m_settings.m_audioMute = checked;
-    applySettings();
+    applySettings(QStringList("audioMute"));
 }
 
 void VORDemodGUI::on_identBandpassEnable_toggled(bool checked)
 {
     m_settings.m_identBandpassEnable = checked;
-    applySettings();
+    applySettings(QStringList("identBandpassEnable"));
 }
 
 void VORDemodGUI::onWidgetRolled(QWidget* widget, bool rollDown)
@@ -233,7 +233,7 @@ void VORDemodGUI::onWidgetRolled(QWidget* widget, bool rollDown)
     (void) rollDown;
 
     getRollupContents()->saveState(m_rollupState);
-    applySettings();
+    applySettings(QStringList());
 }
 
 void VORDemodGUI::onMenuDialogCalled(const QPoint &p)
@@ -278,7 +278,9 @@ void VORDemodGUI::onMenuDialogCalled(const QPoint &p)
             updateIndexLabel();
         }
 
-        applySettings();
+        applySettings(QStringList({ "rgbColor", "title", "useReverseAPI", "reverseAPIAddress",
+                                    "reverseAPIPort", "reverseAPIDeviceIndex", "reverseAPIChannelIndex",
+                                    "streamIndex" }));
     }
 
     resetContextMenuType();
@@ -337,7 +339,7 @@ VORDemodGUI::VORDemodGUI(PluginAPI* pluginAPI, DeviceUISet *deviceUISet, Baseban
 
     displaySettings();
     makeUIConnections();
-    applySettings(true);
+    applySettings(QStringList(), true);
     DialPopup::addPopupsToChildDials(this);
     m_resizer.enableChildMouseTracking();
 }
@@ -352,11 +354,11 @@ void VORDemodGUI::blockApplySettings(bool block)
     m_doApplySettings = !block;
 }
 
-void VORDemodGUI::applySettings(bool force)
+void VORDemodGUI::applySettings(const QStringList& settingsKeys, bool force)
 {
     if (m_doApplySettings)
     {
-        VORDemod::MsgConfigureVORDemod* message = VORDemod::MsgConfigureVORDemod::create( m_settings, force);
+        VORDemod::MsgConfigureVORDemod* message = VORDemod::MsgConfigureVORDemod::create(settingsKeys, m_settings, force);
         m_vorDemod->getInputMessageQueue()->push(message);
     }
 }
@@ -420,7 +422,7 @@ void VORDemodGUI::audioSelect(const QPoint& p)
     if (audioSelect.m_selected)
     {
         m_settings.m_audioDeviceName = audioSelect.m_audioDeviceName;
-        applySettings();
+        applySettings(QStringList("audioDeviceName"));
     }
 }
 

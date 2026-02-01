@@ -62,7 +62,7 @@ WDSPRx::WDSPRx(DeviceAPI *deviceAPI) :
 {
 	setObjectName(m_channelId);
 
-	applySettings(m_settings, true);
+	applySettings(QStringList(), m_settings, true);
 
     m_deviceAPI->addChannelSink(this);
     m_deviceAPI->addChannelSinkAPI(this);
@@ -174,7 +174,7 @@ void WDSPRx::start()
 
     m_thread->start();
 
-    WDSPRxBaseband::MsgConfigureWDSPRxBaseband *msg = WDSPRxBaseband::MsgConfigureWDSPRxBaseband::create(m_settings, true);
+    WDSPRxBaseband::MsgConfigureWDSPRxBaseband *msg = WDSPRxBaseband::MsgConfigureWDSPRxBaseband::create(QStringList(), m_settings, true);
     m_basebandSink->getInputMessageQueue()->push(msg);
 
     m_running = true;
@@ -201,7 +201,7 @@ bool WDSPRx::handleMessage(const Message& cmd)
         auto& cfg = (const MsgConfigureWDSPRx&) cmd;
         qDebug("WDSPRx::handleMessage: MsgConfigureWDSPRx");
 
-        applySettings(cfg.getSettings(), cfg.getForce());
+        applySettings(cfg.getSettingsKeys(), cfg.getSettings(), cfg.getForce());
 
         return true;
     }
@@ -238,86 +238,20 @@ void WDSPRx::setCenterFrequency(qint64 frequency)
 {
     WDSPRxSettings settings = m_settings;
     settings.m_inputFrequencyOffset = (qint32) frequency;
-    applySettings(settings, false);
+    applySettings(QStringList("inputFrequencyOffset"), settings);
 
     if (m_guiMessageQueue) // forward to GUI if any
     {
-        MsgConfigureWDSPRx *msgToGUI = MsgConfigureWDSPRx::create(settings, false);
+        MsgConfigureWDSPRx *msgToGUI = MsgConfigureWDSPRx::create(QStringList("inputFrequencyOffset"), settings, false);
         m_guiMessageQueue->push(msgToGUI);
     }
 }
 
-void WDSPRx::applySettings(const WDSPRxSettings& settings, bool force)
+void WDSPRx::applySettings(const QStringList& settingsKeys, const WDSPRxSettings& settings, bool force)
 {
-    qDebug() << "WDSPRx::applySettings:"
-            << " m_inputFrequencyOffset: " << settings.m_inputFrequencyOffset
-            << " m_profileIndex: " << settings.m_profileIndex
-            << " [m_spanLog2: " << settings.m_profiles[settings.m_profileIndex].m_spanLog2
-            << " m_highCutoff: " << settings.m_profiles[settings.m_profileIndex].m_highCutoff
-            << " m_lowCutoff: " << settings.m_profiles[settings.m_profileIndex].m_lowCutoff
-            << " m_fftWindow: " << settings.m_profiles[settings.m_profileIndex].m_fftWindow << "]"
-            << " m_volume: " << settings.m_volume
-            << " m_audioBinaual: " << settings.m_audioBinaural
-            << " m_audioFlipChannels: " << settings.m_audioFlipChannels
-            << " m_dsb: " << settings.m_dsb
-            << " m_audioMute: " << settings.m_audioMute
-            << " m_agcActive: " << settings.m_agc
-            << " m_agcMode: " << settings.m_agcMode
-            << " m_agcGain: " << settings.m_agcGain
-            << " m_agcSlope: " << settings.m_agcSlope
-            << " m_agcHangThreshold: " << settings.m_agcHangThreshold
-            << " m_audioDeviceName: " << settings.m_audioDeviceName
-            << " m_streamIndex: " << settings.m_streamIndex
-            << " m_useReverseAPI: " << settings.m_useReverseAPI
-            << " m_reverseAPIAddress: " << settings.m_reverseAPIAddress
-            << " m_reverseAPIPort: " << settings.m_reverseAPIPort
-            << " m_reverseAPIDeviceIndex: " << settings.m_reverseAPIDeviceIndex
-            << " m_reverseAPIChannelIndex: " << settings.m_reverseAPIChannelIndex
-            << " force: " << force;
+    qDebug() << "WDSPRx::applySettings:" << settings.getDebugString(settingsKeys, force);
 
-    QList<QString> reverseAPIKeys;
-
-    if ((m_settings.m_inputFrequencyOffset != settings.m_inputFrequencyOffset) || force) {
-        reverseAPIKeys.append("inputFrequencyOffset");
-    }
-    if ((m_settings.m_profileIndex != settings.m_profileIndex) || force) {
-        reverseAPIKeys.append("filterIndex");
-    }
-    if ((m_settings.m_profiles[m_settings.m_profileIndex].m_spanLog2 != settings.m_profiles[settings.m_profileIndex].m_spanLog2) || force) {
-        reverseAPIKeys.append("spanLog2");
-    }
-    if ((m_settings.m_profiles[m_settings.m_profileIndex].m_highCutoff != settings.m_profiles[settings.m_profileIndex].m_highCutoff) || force) {
-        reverseAPIKeys.append("rfBandwidth");
-    }
-    if ((m_settings.m_profiles[m_settings.m_profileIndex].m_lowCutoff != settings.m_profiles[settings.m_profileIndex].m_lowCutoff) || force) {
-        reverseAPIKeys.append("lowCutoff");
-    }
-    if ((m_settings.m_profiles[m_settings.m_profileIndex].m_fftWindow != settings.m_profiles[settings.m_profileIndex].m_fftWindow) || force) {
-        reverseAPIKeys.append("fftWindow");
-    }
-    if ((m_settings.m_volume != settings.m_volume) || force) {
-        reverseAPIKeys.append("volume");
-    }
-    if ((settings.m_audioDeviceName != m_settings.m_audioDeviceName) || force) {
-        reverseAPIKeys.append("audioDeviceName");
-    }
-    if ((m_settings.m_audioBinaural != settings.m_audioBinaural) || force) {
-        reverseAPIKeys.append("audioBinaural");
-    }
-    if ((m_settings.m_audioFlipChannels != settings.m_audioFlipChannels) || force) {
-        reverseAPIKeys.append("audioFlipChannels");
-    }
-    if ((m_settings.m_dsb != settings.m_dsb) || force) {
-        reverseAPIKeys.append("dsb");
-    }
-    if ((m_settings.m_audioMute != settings.m_audioMute) || force) {
-        reverseAPIKeys.append("audioMute");
-    }
-    if ((m_settings.m_agc != settings.m_agc) || force) {
-        reverseAPIKeys.append("agc");
-    }
-
-    if (m_settings.m_streamIndex != settings.m_streamIndex)
+    if (settingsKeys.contains("streamIndex") && m_settings.m_streamIndex != settings.m_streamIndex)
     {
         if (m_deviceAPI->getSampleMIMO()) // change of stream is possible for MIMO devices only
         {
@@ -328,13 +262,11 @@ void WDSPRx::applySettings(const WDSPRxSettings& settings, bool force)
             m_settings.m_streamIndex = settings.m_streamIndex; // make sure ChannelAPI::getStreamIndex() is consistent
             emit streamIndexChanged(settings.m_streamIndex);
         }
-
-        reverseAPIKeys.append("streamIndex");
     }
 
-    if ((settings.m_dsb != m_settings.m_dsb)
-    || (settings.m_profiles[settings.m_profileIndex].m_highCutoff != m_settings.m_profiles[m_settings.m_profileIndex].m_highCutoff)
-    || (settings.m_profiles[settings.m_profileIndex].m_lowCutoff != m_settings.m_profiles[m_settings.m_profileIndex].m_lowCutoff) || force)
+    if ((settingsKeys.contains("dsb") && (settings.m_dsb != m_settings.m_dsb))
+    || (settingsKeys.contains("highCutoff") && (settings.m_profiles[settings.m_profileIndex].m_highCutoff != m_settings.m_profiles[m_settings.m_profileIndex].m_highCutoff))
+    || (settingsKeys.contains("lowCutoff") && (settings.m_profiles[settings.m_profileIndex].m_lowCutoff != m_settings.m_profiles[m_settings.m_profileIndex].m_lowCutoff)) || force)
     {
         SpectrumSettings spectrumSettings = m_spectrumVis.getSettings();
         spectrumSettings.m_ssb = !settings.m_dsb;
@@ -345,28 +277,32 @@ void WDSPRx::applySettings(const WDSPRxSettings& settings, bool force)
 
     if (m_running)
     {
-        WDSPRxBaseband::MsgConfigureWDSPRxBaseband *msg = WDSPRxBaseband::MsgConfigureWDSPRxBaseband::create(settings, force);
+        WDSPRxBaseband::MsgConfigureWDSPRxBaseband *msg = WDSPRxBaseband::MsgConfigureWDSPRxBaseband::create(settingsKeys, settings, force);
         m_basebandSink->getInputMessageQueue()->push(msg);
     }
 
-    if (settings.m_useReverseAPI)
+    if (settingsKeys.contains("useReverseAPI") && settings.m_useReverseAPI)
     {
-        bool fullUpdate = ((m_settings.m_useReverseAPI != settings.m_useReverseAPI) && settings.m_useReverseAPI) ||
-                (m_settings.m_reverseAPIAddress != settings.m_reverseAPIAddress) ||
-                (m_settings.m_reverseAPIPort != settings.m_reverseAPIPort) ||
-                (m_settings.m_reverseAPIDeviceIndex != settings.m_reverseAPIDeviceIndex) ||
-                (m_settings.m_reverseAPIChannelIndex != settings.m_reverseAPIChannelIndex);
-        webapiReverseSendSettings(reverseAPIKeys, settings, fullUpdate || force);
+        bool fullUpdate = ((settingsKeys.contains("useReverseAPI") && (m_settings.m_useReverseAPI != settings.m_useReverseAPI)) && settings.m_useReverseAPI) ||
+                (settingsKeys.contains("reverseAPIAddress") && (m_settings.m_reverseAPIAddress != settings.m_reverseAPIAddress)) ||
+                (settingsKeys.contains("reverseAPIPort") && (m_settings.m_reverseAPIPort != settings.m_reverseAPIPort)) ||
+                (settingsKeys.contains("reverseAPIDeviceIndex") && (m_settings.m_reverseAPIDeviceIndex != settings.m_reverseAPIDeviceIndex)) ||
+                (settingsKeys.contains("reverseAPIChannelIndex") && (m_settings.m_reverseAPIChannelIndex != settings.m_reverseAPIChannelIndex));
+        webapiReverseSendSettings(settingsKeys, settings, fullUpdate || force);
     }
 
     QList<ObjectPipe*> pipes;
     MainCore::instance()->getMessagePipes().getMessagePipes(this, "settings", pipes);
 
     if (!pipes.empty()) {
-        sendChannelSettings(pipes, reverseAPIKeys, settings, force);
+        sendChannelSettings(pipes, settingsKeys, settings, force);
     }
 
-    m_settings = settings;
+    if (force) {
+        m_settings = settings;
+    } else {
+        m_settings.applySettings(settingsKeys, settings);
+    }
 }
 
 QByteArray WDSPRx::serialize() const
@@ -378,14 +314,14 @@ bool WDSPRx::deserialize(const QByteArray& data)
 {
     if (m_settings.deserialize(data))
     {
-        MsgConfigureWDSPRx *msg = MsgConfigureWDSPRx::create(m_settings, true);
+        MsgConfigureWDSPRx *msg = MsgConfigureWDSPRx::create(QStringList(), m_settings, true);
         m_inputMessageQueue.push(msg);
         return true;
     }
     else
     {
         m_settings.resetToDefaults();
-        MsgConfigureWDSPRx *msg = MsgConfigureWDSPRx::create(m_settings, true);
+        MsgConfigureWDSPRx *msg = MsgConfigureWDSPRx::create(QStringList(), m_settings, true);
         m_inputMessageQueue.push(msg);
         return false;
     }
@@ -444,13 +380,13 @@ int WDSPRx::webapiSettingsPutPatch(
     WDSPRxSettings settings = m_settings;
     webapiUpdateChannelSettings(settings, channelSettingsKeys, response);
 
-    MsgConfigureWDSPRx *msg = MsgConfigureWDSPRx::create(settings, force);
+    MsgConfigureWDSPRx *msg = MsgConfigureWDSPRx::create(channelSettingsKeys, settings, force);
     m_inputMessageQueue.push(msg);
 
     qDebug("WDSPRx::webapiSettingsPutPatch: forward to GUI: %p", m_guiMessageQueue);
     if (m_guiMessageQueue) // forward to GUI if any
     {
-        MsgConfigureWDSPRx *msgToGUI = MsgConfigureWDSPRx::create(settings, force);
+        MsgConfigureWDSPRx *msgToGUI = MsgConfigureWDSPRx::create(channelSettingsKeys, settings, force);
         m_guiMessageQueue->push(msgToGUI);
     }
 

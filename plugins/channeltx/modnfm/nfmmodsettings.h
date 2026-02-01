@@ -105,6 +105,8 @@ struct NFMModSettings
     static int getNbCTCSSFreq();
     static float getCTCSSFreq(int index);
     static int getCTCSSFreqIndex(float ctcssFreq);
+    void applySettings(const QStringList& settingsKeys, const NFMModSettings& settings);
+    QString getDebugString(const QStringList& settingsKeys, bool force=false) const;
 };
 
 

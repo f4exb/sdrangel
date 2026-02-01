@@ -349,6 +349,228 @@ void DATVDemodSettings::validateSystemConfiguration()
     }
 }
 
+void DATVDemodSettings::applySettings(const QStringList& settingsKeys, const DATVDemodSettings& settings)
+{
+    if (settingsKeys.contains("rgbColor")) {
+        m_rgbColor = settings.m_rgbColor;
+    }
+    if (settingsKeys.contains("title")) {
+        m_title = settings.m_title;
+    }
+    if (settingsKeys.contains("rfBandwidth")) {
+        m_rfBandwidth = settings.m_rfBandwidth;
+    }
+    if (settingsKeys.contains("centerFrequency")) {
+        m_centerFrequency = settings.m_centerFrequency;
+    }
+    if (settingsKeys.contains("standard")) {
+        m_standard = settings.m_standard;
+    }
+    if (settingsKeys.contains("modulation")) {
+        m_modulation = settings.m_modulation;
+    }
+    if (settingsKeys.contains("fec")) {
+        m_fec = settings.m_fec;
+    }
+    if (settingsKeys.contains("softLDPC")) {
+        m_softLDPC = settings.m_softLDPC;
+    }
+    if (settingsKeys.contains("softLDPCMaxTrials")) {
+        m_softLDPCMaxTrials = settings.m_softLDPCMaxTrials;
+    }
+    if (settingsKeys.contains("maxBitflips")) {
+        m_maxBitflips = settings.m_maxBitflips;
+    }
+    if (settingsKeys.contains("audioMute")) {
+        m_audioMute = settings.m_audioMute;
+    }
+    if (settingsKeys.contains("audioDeviceName")) {
+        m_audioDeviceName = settings.m_audioDeviceName;
+    }
+    if (settingsKeys.contains("symbolRate")) {
+        m_symbolRate = settings.m_symbolRate;
+    }
+    if (settingsKeys.contains("notchFilters")) {
+        m_notchFilters = settings.m_notchFilters;
+    }
+    if (settingsKeys.contains("allowDrift")) {
+        m_allowDrift = settings.m_allowDrift;
+    }
+    if (settingsKeys.contains("fastLock")) {
+        m_fastLock = settings.m_fastLock;
+    }
+    if (settingsKeys.contains("filter")) {
+        m_filter = settings.m_filter;
+    }
+    if (settingsKeys.contains("hardMetric")) {
+        m_hardMetric = settings.m_hardMetric;
+    }
+    if (settingsKeys.contains("rollOff")) {
+        m_rollOff = settings.m_rollOff;
+    }
+    if (settingsKeys.contains("viterbi")) {
+        m_viterbi = settings.m_viterbi;
+    }
+    if (settingsKeys.contains("excursion")) {
+        m_excursion = settings.m_excursion;
+    }
+    if (settingsKeys.contains("audioVolume")) {
+        m_audioVolume = settings.m_audioVolume;
+    }
+    if (settingsKeys.contains("videoMute")) {
+        m_videoMute = settings.m_videoMute;
+    }
+    if (settingsKeys.contains("udpTSAddress")) {
+        m_udpTSAddress = settings.m_udpTSAddress;
+    }
+    if (settingsKeys.contains("udpTSPort")) {
+        m_udpTSPort = settings.m_udpTSPort;
+    }
+    if (settingsKeys.contains("udpTS")) {
+        m_udpTS = settings.m_udpTS;
+    }
+    if (settingsKeys.contains("playerEnable")) {
+        m_playerEnable = settings.m_playerEnable;
+    }
+    if (settingsKeys.contains("streamIndex")) {
+        m_streamIndex = settings.m_streamIndex;
+    }
+    if (settingsKeys.contains("useReverseAPI")) {
+        m_useReverseAPI = settings.m_useReverseAPI;
+    }
+    if (settingsKeys.contains("reverseAPIAddress")) {
+        m_reverseAPIAddress = settings.m_reverseAPIAddress;
+    }
+    if (settingsKeys.contains("reverseAPIPort")) {
+        m_reverseAPIPort = settings.m_reverseAPIPort;
+    }
+    if (settingsKeys.contains("reverseAPIDeviceIndex")) {
+        m_reverseAPIDeviceIndex = settings.m_reverseAPIDeviceIndex;
+    }
+    if (settingsKeys.contains("reverseAPIChannelIndex")) {
+        m_reverseAPIChannelIndex = settings.m_reverseAPIChannelIndex;
+    }
+    if (settingsKeys.contains("workspaceIndex")) {
+        m_workspaceIndex = settings.m_workspaceIndex;
+    }
+    if (settingsKeys.contains("hidden")) {
+        m_hidden = settings.m_hidden;
+    }
+}
+
+QString DATVDemodSettings::getDebugString(const QStringList& settingsKeys, bool force) const
+{
+    std::ostringstream ostr;
+
+    if (settingsKeys.contains("rgbColor") || force) {
+        ostr << " m_rgbColor: " << m_rgbColor;
+    }
+    if (settingsKeys.contains("title") || force) {
+        ostr << " m_title: " << m_title.toStdString();
+    }
+    if (settingsKeys.contains("rfBandwidth") || force) {
+        ostr << " m_rfBandwidth: " << m_rfBandwidth;
+    }
+    if (settingsKeys.contains("centerFrequency") || force) {
+        ostr << " m_centerFrequency: " << m_centerFrequency;
+    }
+    if (settingsKeys.contains("standard") || force) {
+        ostr << " m_standard: " << m_standard;
+    }
+    if (settingsKeys.contains("modulation") || force) {
+        ostr << " m_modulation: " << m_modulation;
+    }
+    if (settingsKeys.contains("fec") || force) {
+        ostr << " m_fec: " << m_fec;
+    }
+    if (settingsKeys.contains("softLDPC") || force) {
+        ostr << " m_softLDPC: " << m_softLDPC;
+    }
+    if (settingsKeys.contains("softLDPCMaxTrials") || force) {
+        ostr << " m_softLDPCMaxTrials: " << m_softLDPCMaxTrials;
+    }
+    if (settingsKeys.contains("maxBitflips") || force) {
+        ostr << " m_maxBitflips: " << m_maxBitflips;
+    }
+    if (settingsKeys.contains("audioMute") || force) {
+        ostr << " m_audioMute: " << m_audioMute;
+    }
+    if (settingsKeys.contains("audioDeviceName") || force) {
+        ostr << " m_audioDeviceName: " << m_audioDeviceName.toStdString();
+    }
+    if (settingsKeys.contains("symbolRate") || force) {
+        ostr << " m_symbolRate: " << m_symbolRate;
+    }
+    if (settingsKeys.contains("notchFilters") || force) {
+        ostr << " m_notchFilters: " << m_notchFilters;
+    }
+    if (settingsKeys.contains("allowDrift") || force) {
+        ostr << " m_allowDrift: " << m_allowDrift;
+    }
+    if (settingsKeys.contains("fastLock") || force) {
+        ostr << " m_fastLock: " << m_fastLock;
+    }
+    if (settingsKeys.contains("filter") || force) {
+        ostr << " m_filter: " << m_filter;
+    }
+    if (settingsKeys.contains("hardMetric") || force) {
+        ostr << " m_hardMetric: " << m_hardMetric;
+    }
+    if (settingsKeys.contains("rollOff") || force) {
+        ostr << " m_rollOff: " << m_rollOff;
+    }
+    if (settingsKeys.contains("viterbi") || force) {
+        ostr << " m_viterbi: " << m_viterbi;
+    }
+    if (settingsKeys.contains("excursion") || force) {
+        ostr << " m_excursion: " << m_excursion;
+    }
+    if (settingsKeys.contains("audioVolume") || force) {
+        ostr << " m_audioVolume: " << m_audioVolume;
+    }
+    if (settingsKeys.contains("videoMute") || force) {
+        ostr << " m_videoMute: " << m_videoMute;
+    }
+    if (settingsKeys.contains("udpTSAddress") || force) {
+        ostr << " m_udpTSAddress: " << m_udpTSAddress.toStdString();
+    }
+    if (settingsKeys.contains("udpTSPort") || force) {
+        ostr << " m_udpTSPort: " << m_udpTSPort;
+    }
+    if (settingsKeys.contains("udpTS") || force) {
+        ostr << " m_udpTS: " << m_udpTS;
+    }
+    if (settingsKeys.contains("playerEnable") || force) {
+        ostr << " m_playerEnable: " << m_playerEnable;
+    }
+    if (settingsKeys.contains("streamIndex") || force) {
+        ostr << " m_streamIndex: " << m_streamIndex;
+    }
+    if (settingsKeys.contains("useReverseAPI") || force) {
+        ostr << " m_useReverseAPI: " << m_useReverseAPI;
+    }
+    if (settingsKeys.contains("reverseAPIAddress") || force) {
+        ostr << " m_reverseAPIAddress: " << m_reverseAPIAddress.toStdString();
+    }
+    if (settingsKeys.contains("reverseAPIPort") || force) {
+        ostr << " m_reverseAPIPort: " << m_reverseAPIPort;
+    }
+    if (settingsKeys.contains("reverseAPIDeviceIndex") || force) {
+        ostr << " m_reverseAPIDeviceIndex: " << m_reverseAPIDeviceIndex;
+    }
+    if (settingsKeys.contains("reverseAPIChannelIndex") || force) {
+        ostr << " m_reverseAPIChannelIndex: " << m_reverseAPIChannelIndex;
+    }
+    if (settingsKeys.contains("workspaceIndex") || force) {
+        ostr << " m_workspaceIndex: " << m_workspaceIndex;
+    }
+    if (settingsKeys.contains("hidden") || force) {
+        ostr << " m_hidden: " << m_hidden;
+    }
+
+    return QString(ostr.str().c_str());
+}
+
 DATVDemodSettings::DATVModulation DATVDemodSettings::getModulationFromStr(const QString& str)
 {
     if (str == "BPSK") {
@@ -591,4 +813,3 @@ DATVDemodSettings::DATVModulation DATVDemodSettings::getModulationFromLeanDVBCod
         return DATVDemodSettings::DATVModulation::MOD_UNSET;
     }
 }
-

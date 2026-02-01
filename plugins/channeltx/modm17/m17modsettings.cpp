@@ -346,3 +346,119 @@ void M17ModSettings::applySettings(const QStringList& settingsKeys, const M17Mod
         m_rollupState = settings.m_rollupState;
     }
 }
+
+QString M17ModSettings::getDebugString(const QStringList& settingsKeys, bool force) const
+{
+    std::ostringstream ostr;
+
+    if (settingsKeys.contains("inputFrequencyOffset") || force) {
+        ostr << " m_inputFrequencyOffset: " << m_inputFrequencyOffset;
+    }
+    if (settingsKeys.contains("rfBandwidth") || force) {
+        ostr << " m_rfBandwidth: " << m_rfBandwidth;
+    }
+    if (settingsKeys.contains("fmDeviation") || force) {
+        ostr << " m_fmDeviation: " << m_fmDeviation;
+    }
+    if (settingsKeys.contains("toneFrequency") || force) {
+        ostr << " m_toneFrequency: " << m_toneFrequency;
+    }
+    if (settingsKeys.contains("volumeFactor") || force) {
+        ostr << " m_volumeFactor: " << m_volumeFactor;
+    }
+    if (settingsKeys.contains("channelMute") || force) {
+        ostr << " m_channelMute: " << m_channelMute;
+    }
+    if (settingsKeys.contains("playLoop") || force) {
+        ostr << " m_playLoop: " << m_playLoop;
+    }
+    if (settingsKeys.contains("rgbColor") || force) {
+        ostr << " m_rgbColor: " << m_rgbColor;
+    }
+    if (settingsKeys.contains("title") || force) {
+        ostr << " m_title: " << m_title.toStdString();
+    }
+    if (settingsKeys.contains("m17Mode") || force) {
+        ostr << " m_m17Mode: " << m_m17Mode;
+    }
+    if (settingsKeys.contains("audioType") || force) {
+        ostr << " m_audioType: " << m_audioType;
+    }
+    if (settingsKeys.contains("packetType") || force) {
+        ostr << " m_packetType: " << m_packetType;
+    }
+    if (settingsKeys.contains("audioDeviceName") || force) {
+        ostr << " m_audioDeviceName: " << m_audioDeviceName.toStdString();
+    }
+    if (settingsKeys.contains("feedbackAudioDeviceName") || force) {
+        ostr << " m_feedbackAudioDeviceName: " << m_feedbackAudioDeviceName.toStdString();
+    }
+    if (settingsKeys.contains("feedbackVolumeFactor") || force) {
+        ostr << " m_feedbackVolumeFactor: " << m_feedbackVolumeFactor;
+    }
+    if (settingsKeys.contains("feedbackAudioEnable") || force) {
+        ostr << " m_feedbackAudioEnable: " << m_feedbackAudioEnable;
+    }
+    if (settingsKeys.contains("streamIndex") || force) {
+        ostr << " m_streamIndex: " << m_streamIndex;
+    }
+    if (settingsKeys.contains("useReverseAPI") || force) {
+        ostr << " m_useReverseAPI: " << m_useReverseAPI;
+    }
+    if (settingsKeys.contains("reverseAPIAddress") || force) {
+        ostr << " m_reverseAPIAddress: " << m_reverseAPIAddress.toStdString();
+    }
+    if (settingsKeys.contains("reverseAPIPort") || force) {
+        ostr << " m_reverseAPIPort: " << m_reverseAPIPort;
+    }
+    if (settingsKeys.contains("reverseAPIDeviceIndex") || force) {
+        ostr << " m_reverseAPIDeviceIndex: " << m_reverseAPIDeviceIndex;
+    }
+    if (settingsKeys.contains("reverseAPIChannelIndex") || force) {
+        ostr << " m_reverseAPIChannelIndex: " << m_reverseAPIChannelIndex;
+    }
+    if (settingsKeys.contains("workspaceIndex") || force) {
+        ostr << " m_workspaceIndex: " << m_workspaceIndex;
+    }
+    if (settingsKeys.contains("hidden") || force) {
+        ostr << " m_hidden: " << m_hidden;
+    }
+    if (settingsKeys.contains("sourceCall") || force) {
+        ostr << " m_sourceCall: " << m_sourceCall.toStdString();
+    }
+    if (settingsKeys.contains("destCall") || force) {
+        ostr << " m_destCall: " << m_destCall.toStdString();
+    }
+    if (settingsKeys.contains("insertPosition") || force) {
+        ostr << " m_insertPosition: " << m_insertPosition;
+    }
+    if (settingsKeys.contains("can") || force) {
+        ostr << " m_can: " << (int)m_can;
+    }
+    if (settingsKeys.contains("smsText") || force) {
+        ostr << " m_smsText: " << m_smsText.toStdString();
+    }
+    if (settingsKeys.contains("loopPacket") || force) {
+        ostr << " m_loopPacket: " << m_loopPacket;
+    }
+    if (settingsKeys.contains("loopPacketInterval") || force) {
+        ostr << " m_loopPacketInterval: " << m_loopPacketInterval;
+    }
+    if (settingsKeys.contains("aprsCallsign") || force) {
+        ostr << " m_aprsCallsign: " << m_aprsCallsign.toStdString();
+    }
+    if (settingsKeys.contains("aprsTo") || force) {
+        ostr << " m_aprsTo: " << m_aprsTo.toStdString();
+    }
+    if (settingsKeys.contains("aprsVia") || force) {
+        ostr << " m_aprsVia: " << m_aprsVia.toStdString();
+    }
+    if (settingsKeys.contains("aprsData") || force) {
+        ostr << " m_aprsData: " << m_aprsData.toStdString();
+    }
+    if (settingsKeys.contains("aprsInsertPosition") || force) {
+        ostr << " m_aprsInsertPosition: " << m_aprsInsertPosition;
+    }
+
+    return QString(ostr.str().c_str());
+}

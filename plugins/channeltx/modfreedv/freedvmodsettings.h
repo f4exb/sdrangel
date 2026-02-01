@@ -94,6 +94,8 @@ struct FreeDVModSettings
     static int getHiCutoff(FreeDVMode freeDVMode);
     static int getLowCutoff(FreeDVMode freeDVMode);
     static int getModSampleRate(FreeDVMode freeDVMode);
+    void applySettings(const QStringList& settingsKeys, const FreeDVModSettings& settings);
+    QString getDebugString(const QStringList& settingsKeys, bool force=false) const;
 };
 
 

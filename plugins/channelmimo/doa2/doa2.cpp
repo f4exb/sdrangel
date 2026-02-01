@@ -156,82 +156,41 @@ void DOA2::pull(SampleVector::iterator& begin, unsigned int nbSamples, unsigned 
     (void) sourceIndex;
 }
 
-void DOA2::applySettings(const DOA2Settings& settings, bool force)
+void DOA2::applySettings(const QStringList& settingsKeys, const DOA2Settings& settings, bool force)
 {
-    qDebug() << "DOA2::applySettings: "
-        << "m_correlationType: " << settings.m_correlationType
-        << "m_filterChainHash: " << settings.m_filterChainHash
-        << "m_log2Decim: " << settings.m_log2Decim
-        << "m_phase: " << settings.m_phase
-        << "m_antennaAz:" << settings.m_antennaAz
-        << "m_basebandDistance: " << settings.m_basebandDistance
-        << "m_squelchdB: " << settings.m_squelchdB
-        << "m_fftAveragingIndex: "<< settings.m_fftAveragingIndex
-        << "m_useReverseAPI: " << settings.m_useReverseAPI
-        << "m_reverseAPIAddress: " << settings.m_reverseAPIAddress
-        << "m_reverseAPIPort: " << settings.m_reverseAPIPort
-        << "m_reverseAPIDeviceIndex: " << settings.m_reverseAPIDeviceIndex
-        << "m_reverseAPIChannelIndex: " << settings.m_reverseAPIChannelIndex
-        << "m_title: " << settings.m_title;
+    qDebug() << "DOA2::applySettings: " << settings.getDebugString(settingsKeys, force);
 
-    QList<QString> reverseAPIKeys;
 
-    if ((m_settings.m_correlationType != settings.m_correlationType) || force) {
-        reverseAPIKeys.append("correlationType");
-    }
-    if ((m_settings.m_filterChainHash != settings.m_filterChainHash) || force) {
-        reverseAPIKeys.append("filterChainHash");
-    }
-    if ((m_settings.m_log2Decim != settings.m_log2Decim) || force) {
-        reverseAPIKeys.append("log2Decim");
-    }
-    if ((m_settings.m_phase != settings.m_phase) || force) {
-        reverseAPIKeys.append("phase");
-    }
-    if ((m_settings.m_title != settings.m_title) || force) {
-        reverseAPIKeys.append("title");
-    }
-    if ((m_settings.m_antennaAz != settings.m_antennaAz) || force) {
-        reverseAPIKeys.append("antennaAz");
-    }
-    if ((m_settings.m_basebandDistance != settings.m_basebandDistance) || force) {
-        reverseAPIKeys.append("basebandDistance");
-    }
-
-    if ((m_settings.m_squelchdB != settings.m_squelchdB) || force)
+    if ((settingsKeys.contains("squelchdB") && m_settings.m_squelchdB != settings.m_squelchdB) || force)
     {
-        reverseAPIKeys.append("squelchdB");
-
         if (m_running) {
             m_basebandSink->setMagThreshold((float) CalcDb::powerFromdB(settings.m_squelchdB));
         }
     }
 
-    if ((m_settings.m_fftAveragingIndex != settings.m_fftAveragingIndex) || force)
+    if ((settingsKeys.contains("fftAveragingIndex") && m_settings.m_fftAveragingIndex != settings.m_fftAveragingIndex) || force)
     {
-        reverseAPIKeys.append("m_fftAveragingIndex");
-
         if (m_running) {
             m_basebandSink->setFFTAveraging(DOA2Settings::getAveragingValue(settings.m_fftAveragingIndex));
         }
     }
 
-    if (m_running && ((m_settings.m_log2Decim != settings.m_log2Decim)
-    || (m_settings.m_filterChainHash != settings.m_filterChainHash) || force))
+    if (m_running && ((settingsKeys.contains("log2Decim") && m_settings.m_log2Decim != settings.m_log2Decim)
+    || (settingsKeys.contains("filterChainHash") && m_settings.m_filterChainHash != settings.m_filterChainHash) || force))
     {
         DOA2Baseband::MsgConfigureChannelizer *msg = DOA2Baseband::MsgConfigureChannelizer::create(
             settings.m_log2Decim, settings.m_filterChainHash);
         m_basebandSink->getInputMessageQueue()->push(msg);
     }
 
-    if (m_running && ((m_settings.m_correlationType != settings.m_correlationType) || force))
+    if (m_running && ((settingsKeys.contains("correlationType") && m_settings.m_correlationType != settings.m_correlationType) || force))
     {
         DOA2Baseband::MsgConfigureCorrelation *msg = DOA2Baseband::MsgConfigureCorrelation::create(
             settings.m_correlationType);
         m_basebandSink->getInputMessageQueue()->push(msg);
     }
 
-    if (m_running && ((m_settings.m_phase != settings.m_phase) || force)) {
+    if (m_running && ((settingsKeys.contains("phase") && m_settings.m_phase != settings.m_phase) || force)) {
         m_basebandSink->setPhase(settings.m_phase);
     }
 
@@ -239,7 +198,7 @@ void DOA2::applySettings(const DOA2Settings& settings, bool force)
     MainCore::instance()->getMessagePipes().getMessagePipes(this, "settings", pipes);
 
     if (!pipes.empty()) {
-        sendChannelSettings(pipes, reverseAPIKeys, settings, force);
+        sendChannelSettings(pipes, settingsKeys, settings, force);
     }
 
     m_settings = settings;
@@ -264,7 +223,7 @@ bool DOA2::handleMessage(const Message& cmd)
     {
         auto& cfg = (const MsgConfigureDOA2&) cmd;
         qDebug() << "DOA2::handleMessage: MsgConfigureDOA2";
-        applySettings(cfg.getSettings(), cfg.getForce());
+        applySettings(cfg.getSettingsKeys(), cfg.getSettings(), cfg.getForce());
         return true;
     }
     else if (DSPMIMOSignalNotification::match(cmd))
@@ -320,14 +279,14 @@ bool DOA2::deserialize(const QByteArray& data)
     (void) data;
     if (m_settings.deserialize(data))
     {
-        MsgConfigureDOA2 *msg = MsgConfigureDOA2::create(m_settings, true);
+        MsgConfigureDOA2 *msg = MsgConfigureDOA2::create(QStringList(), m_settings, true);
         m_inputMessageQueue.push(msg);
         return true;
     }
     else
     {
         m_settings.resetToDefaults();
-        MsgConfigureDOA2 *msg = MsgConfigureDOA2::create(m_settings, true);
+        MsgConfigureDOA2 *msg = MsgConfigureDOA2::create(QStringList(), m_settings, true);
         m_inputMessageQueue.push(msg);
         return false;
     }
@@ -400,12 +359,12 @@ int DOA2::webapiSettingsPutPatch(
     DOA2Settings settings = m_settings;
     webapiUpdateChannelSettings(settings, channelSettingsKeys, response);
 
-    MsgConfigureDOA2 *msg = MsgConfigureDOA2::create(settings, force);
+    MsgConfigureDOA2 *msg = MsgConfigureDOA2::create(channelSettingsKeys, settings, force);
     m_inputMessageQueue.push(msg);
 
     if (getMessageQueueToGUI()) // forward to GUI if any
     {
-        MsgConfigureDOA2 *msgToGUI = MsgConfigureDOA2::create(settings, force);
+        MsgConfigureDOA2 *msgToGUI = MsgConfigureDOA2::create(channelSettingsKeys, settings, force);
         getMessageQueueToGUI()->push(msgToGUI);
     }
 

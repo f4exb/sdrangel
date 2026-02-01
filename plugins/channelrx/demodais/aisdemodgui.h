@@ -113,7 +113,7 @@ private:
     virtual ~AISDemodGUI();
 
     void blockApplySettings(bool block);
-    void applySettings(bool force = false);
+    void applySettings(const QStringList& settingsKeys, bool force = false);
     void displaySettings();
     void messageReceived(const QByteArray& message, const QDateTime& dateTime, int slot, int slots);
     bool handleMessage(const Message& message);

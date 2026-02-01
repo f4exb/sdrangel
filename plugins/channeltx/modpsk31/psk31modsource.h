@@ -55,7 +55,7 @@ public:
     }
     void setMessageQueueToGUI(MessageQueue* messageQueue) { m_messageQueueToGUI = messageQueue; }
     void setSpectrumSink(BasebandSampleSink *sampleSink) { m_spectrumSink = sampleSink; }
-    void applySettings(const PSK31Settings& settings, bool force = false);
+    void applySettings(const QStringList& settingsKeys, const PSK31Settings& settings, bool force = false);
     void applyChannelSettings(int channelSampleRate, int channelFrequencyOffset, bool force = false);
     void addTXText(QString data);
     void setChannel(ChannelAPI *channel) { m_channel = channel; }

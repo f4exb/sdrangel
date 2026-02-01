@@ -72,14 +72,14 @@ qint64 IEEE_802_15_4_ModGUI::getCenterFrequency() const {
 void IEEE_802_15_4_ModGUI::setCenterFrequency(qint64 centerFrequency)
 {
     m_channelMarker.setCenterFrequency(centerFrequency);
-    applySettings();
+    applySettings(QStringList(), true);
 }
 
 void IEEE_802_15_4_ModGUI::resetToDefaults()
 {
     m_settings.resetToDefaults();
     displaySettings();
-    applySettings(true);
+    applySettings(QStringList(), true);
 }
 
 QByteArray IEEE_802_15_4_ModGUI::serialize() const
@@ -91,7 +91,7 @@ bool IEEE_802_15_4_ModGUI::deserialize(const QByteArray& data)
 {
     if(m_settings.deserialize(data)) {
         displaySettings();
-        applySettings(true);
+        applySettings(QStringList(), true);
         return true;
     } else {
         resetToDefaults();
@@ -134,7 +134,7 @@ void IEEE_802_15_4_ModGUI::channelMarkerChangedByCursor()
 {
     ui->deltaFrequency->setValue(m_channelMarker.getCenterFrequency());
     m_settings.m_inputFrequencyOffset = m_channelMarker.getCenterFrequency();
-    applySettings();
+    applySettings(QStringList(), true);
 }
 
 void IEEE_802_15_4_ModGUI::handleSourceMessages()
@@ -177,7 +177,7 @@ void IEEE_802_15_4_ModGUI::on_deltaFrequency_changed(qint64 value)
     m_channelMarker.setCenterFrequency(value);
     m_settings.m_inputFrequencyOffset = m_channelMarker.getCenterFrequency();
     updateAbsoluteCenterFrequency();
-    applySettings();
+    applySettings(QStringList("inputFrequencyOffset"));
 }
 
 void IEEE_802_15_4_ModGUI::on_phy_currentIndexChanged(int value)
@@ -196,7 +196,7 @@ void IEEE_802_15_4_ModGUI::on_phy_currentIndexChanged(int value)
     ui->glSpectrum->setSampleRate(m_settings.m_spectrumRate);
     displayChipRate(m_settings);
     checkSampleRate();
-    applySettings();
+    applySettings(QStringList("phy"));
 
     // Remove custom PHY when deselected, as we no longer know how to set it
     if (value < 6)
@@ -209,20 +209,20 @@ void IEEE_802_15_4_ModGUI::on_rfBW_valueChanged(int value)
     displayRFBandwidth(bw);
     m_channelMarker.setBandwidth(bw);
     m_settings.m_rfBandwidth = bw;
-    applySettings();
+    applySettings(QStringList("rfBandwidth"));
 }
 
 void IEEE_802_15_4_ModGUI::on_gain_valueChanged(int value)
 {
     ui->gainText->setText(QString("%1dB").arg(value));
     m_settings.m_gain = value;
-    applySettings();
+    applySettings(QStringList("gain"));
 }
 
 void IEEE_802_15_4_ModGUI::on_channelMute_toggled(bool checked)
 {
     m_settings.m_channelMute = checked;
-    applySettings();
+    applySettings(QStringList("channelMute"));
 }
 
 void IEEE_802_15_4_ModGUI::on_txButton_clicked()
@@ -238,13 +238,13 @@ void IEEE_802_15_4_ModGUI::on_frame_returnPressed()
 void IEEE_802_15_4_ModGUI::on_frame_editingFinished()
 {
     m_settings.m_data = ui->frame->text();
-    applySettings();
+    applySettings(QStringList("data"));
 }
 
 void IEEE_802_15_4_ModGUI::on_repeat_toggled(bool checked)
 {
     m_settings.m_repeat = checked;
-    applySettings();
+    applySettings(QStringList("repeat"));
 }
 
 void IEEE_802_15_4_ModGUI::repeatSelect(const QPoint& p)
@@ -256,7 +256,7 @@ void IEEE_802_15_4_ModGUI::repeatSelect(const QPoint& p)
     {
         m_settings.m_repeatDelay = dialog.m_repeatDelay;
         m_settings.m_repeatCount = dialog.m_repeatCount;
-        applySettings();
+        applySettings(QStringList({"repeatDDelay", "repeatCount"}));
     }
 }
 
@@ -298,26 +298,41 @@ void IEEE_802_15_4_ModGUI::txSettingsSelect(const QPoint& p)
         m_settings.m_bbNoise = dialog.m_bbNoise;
         m_settings.m_writeToFile = dialog.m_writeToFile;
         displaySettings();
-        applySettings();
+        applySettings(QStringList({
+            "rampUpBits",
+            "rampDownBits",
+            "rampRange",
+            "modulateWhileRamping",
+            "modulation",
+            "bitRate",
+            "pulseShaping",
+            "beta",
+            "symbolSpan",
+            "scramble",
+            "polynomial",
+            "lpfTaps",
+            "bbNoise",
+            "writeToFile"
+        }));
     }
 }
 
 void IEEE_802_15_4_ModGUI::on_udpEnabled_clicked(bool checked)
 {
     m_settings.m_udpEnabled = checked;
-    applySettings();
+    applySettings(QStringList("udpEnabled"));
 }
 
 void IEEE_802_15_4_ModGUI::on_udpAddress_editingFinished()
 {
     m_settings.m_udpAddress = ui->udpAddress->text();
-    applySettings();
+    applySettings(QStringList("udpAddress"));
 }
 
 void IEEE_802_15_4_ModGUI::on_udpPort_editingFinished()
 {
     m_settings.m_udpPort = ui->udpPort->text().toInt();
-    applySettings();
+    applySettings(QStringList("udpPort"));
 }
 
 void IEEE_802_15_4_ModGUI::onWidgetRolled(QWidget* widget, bool rollDown)
@@ -326,7 +341,7 @@ void IEEE_802_15_4_ModGUI::onWidgetRolled(QWidget* widget, bool rollDown)
     (void) rollDown;
 
     getRollupContents()->saveState(m_rollupState);
-    applySettings();
+    applySettings(QStringList());
 }
 
 void IEEE_802_15_4_ModGUI::onMenuDialogCalled(const QPoint &p)
@@ -371,7 +386,16 @@ void IEEE_802_15_4_ModGUI::onMenuDialogCalled(const QPoint &p)
             updateIndexLabel();
         }
 
-        applySettings();
+        applySettings(QStringList({
+            "rgbColor",
+            "title",
+            "useReverseAPI",
+            "reverseAPIAddress",
+            "reverseAPIPort",
+            "reverseAPIDeviceIndex",
+            "reverseAPIChannelIndex",
+            "streamIndex"
+        }));
     }
 
     resetContextMenuType();
@@ -480,7 +504,7 @@ IEEE_802_15_4_ModGUI::IEEE_802_15_4_ModGUI(PluginAPI* pluginAPI, DeviceUISet *de
 
     displaySettings();
     makeUIConnections();
-    applySettings();
+    applySettings(QStringList(), true);
     DialPopup::addPopupsToChildDials(this);
     m_resizer.enableChildMouseTracking();
 }
@@ -503,11 +527,11 @@ void IEEE_802_15_4_ModGUI::blockApplySettings(bool block)
     m_doApplySettings = !block;
 }
 
-void IEEE_802_15_4_ModGUI::applySettings(bool force)
+void IEEE_802_15_4_ModGUI::applySettings(const QStringList& settingsKeys, bool force)
 {
     if (m_doApplySettings)
     {
-        IEEE_802_15_4_Mod::MsgConfigureIEEE_802_15_4_Mod *msg = IEEE_802_15_4_Mod::MsgConfigureIEEE_802_15_4_Mod::create(m_settings, force);
+        IEEE_802_15_4_Mod::MsgConfigureIEEE_802_15_4_Mod *msg = IEEE_802_15_4_Mod::MsgConfigureIEEE_802_15_4_Mod::create(settingsKeys, m_settings, force);
         m_IEEE_802_15_4_Mod->getInputMessageQueue()->push(msg);
     }
 }

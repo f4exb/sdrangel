@@ -49,20 +49,23 @@ public:
 
     public:
         const SSBDemodSettings& getSettings() const { return m_settings; }
+        const QStringList& getSettingsKeys() const { return m_settingsKeys; }
         bool getForce() const { return m_force; }
 
-        static MsgConfigureSSBDemod* create(const SSBDemodSettings& settings, bool force)
+        static MsgConfigureSSBDemod* create(const QStringList& settingsKeys, const SSBDemodSettings& settings, bool force)
         {
-            return new MsgConfigureSSBDemod(settings, force);
+            return new MsgConfigureSSBDemod(settingsKeys, settings, force);
         }
 
     private:
         SSBDemodSettings m_settings;
+        QStringList m_settingsKeys;
         bool m_force;
 
-        MsgConfigureSSBDemod(const SSBDemodSettings& settings, bool force) :
+        MsgConfigureSSBDemod(const QStringList& settingsKeys, const SSBDemodSettings& settings, bool force) :
             Message(),
             m_settings(settings),
+            m_settingsKeys(settingsKeys),
             m_force(force)
         { }
     };
@@ -162,18 +165,18 @@ private:
     QNetworkRequest m_networkRequest;
 
 	virtual bool handleMessage(const Message& cmd);
-	void applySettings(const SSBDemodSettings& settings, bool force = false);
+	void applySettings(const QStringList& settingsKeys, const SSBDemodSettings& settings, bool force = false);
     void sendSampleRateToDemodAnalyzer();
     void webapiFormatChannelReport(SWGSDRangel::SWGChannelReport& response);
-    void webapiReverseSendSettings(QList<QString>& channelSettingsKeys, const SSBDemodSettings& settings, bool force);
+    void webapiReverseSendSettings(const QList<QString>& channelSettingsKeys, const SSBDemodSettings& settings, bool force);
     void sendChannelSettings(
         const QList<ObjectPipe*>& pipes,
-        QList<QString>& channelSettingsKeys,
+        const QList<QString>& channelSettingsKeys,
         const SSBDemodSettings& settings,
         bool force
     );
     void webapiFormatChannelSettings(
-        QList<QString>& channelSettingsKeys,
+        const QList<QString>& channelSettingsKeys,
         SWGSDRangel::SWGChannelSettings *swgChannelSettings,
         const SSBDemodSettings& settings,
         bool force

@@ -292,25 +292,7 @@ void M17Mod::seekFileStream(int seekPercentage)
 
 void M17Mod::applySettings(const M17ModSettings& settings, const QList<QString>& settingsKeys, bool force)
 {
-    qDebug() << "M17Mod::applySettings:"
-            << " settingsKeys: " << settingsKeys
-            << " m_inputFrequencyOffset: " << settings.m_inputFrequencyOffset
-            << " m_rfBandwidth: " << settings.m_rfBandwidth
-            << " m_fmDeviation: " << settings.m_fmDeviation
-            << " m_volumeFactor: " << settings.m_volumeFactor
-            << " m_toneFrequency: " << settings.m_toneFrequency
-            << " m_channelMute: " << settings.m_channelMute
-            << " m_playLoop: " << settings.m_playLoop
-            << " m_m17Mode " << settings.m_m17Mode
-            << " m_audioType " << settings.m_audioType
-            << " m_packetType " << settings.m_packetType
-            << " m_audioDeviceName: " << settings.m_audioDeviceName
-            << " m_useReverseAPI: " << settings.m_useReverseAPI
-            << " m_reverseAPIAddress: " << settings.m_reverseAPIAddress
-            << " m_reverseAPIAddress: " << settings.m_reverseAPIPort
-            << " m_reverseAPIDeviceIndex: " << settings.m_reverseAPIDeviceIndex
-            << " m_reverseAPIChannelIndex: " << settings.m_reverseAPIChannelIndex
-            << " force: " << force;
+    qDebug() << "M17Mod::applySettings:" << settings.getDebugString(settingsKeys, force);
 
     if (settingsKeys.contains("loopPacketInterval") || force) {
         m_loopPacketTimer.setInterval(settings.m_loopPacketInterval*1000);

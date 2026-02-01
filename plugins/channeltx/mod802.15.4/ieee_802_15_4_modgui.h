@@ -93,7 +93,7 @@ private:
     void checkSampleRate();
     void transmit();
     void blockApplySettings(bool block);
-    void applySettings(bool force = false);
+    void applySettings(const QStringList& settingsKeys, bool force = false);
     void displaySettings();
     void displayRFBandwidth(int bandwidth);
     void displayChipRate(const IEEE_802_15_4_ModSettings& settings);

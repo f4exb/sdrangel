@@ -42,20 +42,23 @@ public:
 
     public:
         const NoiseFigureSettings& getSettings() const { return m_settings; }
+        const QStringList& getSettingsKeys() const { return m_settingsKeys; }
         bool getForce() const { return m_force; }
 
-        static MsgConfigureNoiseFigureBaseband* create(const NoiseFigureSettings& settings, bool force)
+        static MsgConfigureNoiseFigureBaseband* create(const QStringList& settingsKeys, const NoiseFigureSettings& settings, bool force)
         {
-            return new MsgConfigureNoiseFigureBaseband(settings, force);
+            return new MsgConfigureNoiseFigureBaseband(settingsKeys, settings, force);
         }
 
     private:
         NoiseFigureSettings m_settings;
+        QStringList m_settingsKeys;
         bool m_force;
 
-        MsgConfigureNoiseFigureBaseband(const NoiseFigureSettings& settings, bool force) :
+        MsgConfigureNoiseFigureBaseband(const QStringList& settingsKeys, const NoiseFigureSettings& settings, bool force) :
             Message(),
             m_settings(settings),
+            m_settingsKeys(settingsKeys),
             m_force(force)
         { }
     };
@@ -89,7 +92,7 @@ private:
 
     bool handleMessage(const Message& cmd);
     void calculateOffset(NoiseFigureSink *sink);
-    void applySettings(const NoiseFigureSettings& settings, bool force = false);
+    void applySettings(const QStringList& settingsKeys, const NoiseFigureSettings& settings, bool force = false);
 
 private slots:
     void handleInputMessages();

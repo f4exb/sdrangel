@@ -67,7 +67,7 @@ public:
     int getDataRate() const { return getDVBSDataBitrate(m_settings); }
 
     void applyChannelSettings(int channelSampleRate, int channelFrequencyOffset, bool force = false);
-    void applySettings(const DATVModSettings& settings, bool force = false);
+    void applySettings(const QStringList& settingsKeys, const DATVModSettings& settings, bool force = false);
     void openTsFile(const QString& fileName);
     void seekTsFileStream(int seekPercentage);
     void reportTsFileSourceStreamTiming();

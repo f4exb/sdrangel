@@ -46,7 +46,7 @@ public:
 	virtual void feed(const SampleVector::const_iterator& begin, const SampleVector::const_iterator& end);
 
 	void applyChannelSettings(int channelSampleRate, int channelFrequencyOffset, bool force = false);
-	void applySettings(const FreeDVDemodSettings& settings, bool force = false);
+	void applySettings(const QStringList& settingsKeys, const FreeDVDemodSettings& settings, bool force = false);
     void applyAudioSampleRate(int sampleRate);
 	void applyFreeDVMode(FreeDVDemodSettings::FreeDVMode mode);
     AudioFifo *getAudioFifo() { return &m_audioFifo; }

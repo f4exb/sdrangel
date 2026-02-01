@@ -213,3 +213,191 @@ bool RttyDemodSettings::deserialize(const QByteArray& data)
     }
 }
 
+void RttyDemodSettings::applySettings(const QStringList& settingsKeys, const RttyDemodSettings& settings)
+{
+    if (settingsKeys.contains("inputFrequencyOffset")) {
+        m_inputFrequencyOffset = settings.m_inputFrequencyOffset;
+    }
+    if (settingsKeys.contains("rfBandwidth")) {
+        m_rfBandwidth = settings.m_rfBandwidth;
+    }
+    if (settingsKeys.contains("baudRate")) {
+        m_baudRate = settings.m_baudRate;
+    }
+    if (settingsKeys.contains("frequencyShift")) {
+        m_frequencyShift = settings.m_frequencyShift;
+    }
+    if (settingsKeys.contains("udpEnabled")) {
+        m_udpEnabled = settings.m_udpEnabled;
+    }
+    if (settingsKeys.contains("udpAddress")) {
+        m_udpAddress = settings.m_udpAddress;
+    }
+    if (settingsKeys.contains("udpPort")) {
+        m_udpPort = settings.m_udpPort;
+    }
+    if (settingsKeys.contains("characterSet")) {
+        m_characterSet = settings.m_characterSet;
+    }
+    if (settingsKeys.contains("suppressCRLF")) {
+        m_suppressCRLF = settings.m_suppressCRLF;
+    }
+    if (settingsKeys.contains("unshiftOnSpace")) {
+        m_unshiftOnSpace = settings.m_unshiftOnSpace;
+    }
+    if (settingsKeys.contains("filter")) {
+        m_filter = settings.m_filter;
+    }
+    if (settingsKeys.contains("atc")) {
+        m_atc = settings.m_atc;
+    }
+    if (settingsKeys.contains("msbFirst")) {
+        m_msbFirst = settings.m_msbFirst;
+    }
+    if (settingsKeys.contains("spaceHigh")) {
+        m_spaceHigh = settings.m_spaceHigh;
+    }
+    if (settingsKeys.contains("squelch")) {
+        m_squelch = settings.m_squelch;
+    }
+    if (settingsKeys.contains("rgbColor")) {
+        m_rgbColor = settings.m_rgbColor;
+    }
+    if (settingsKeys.contains("title")) {
+        m_title = settings.m_title;
+    }
+    if (settingsKeys.contains("streamIndex")) {
+        m_streamIndex = settings.m_streamIndex;
+    }
+    if (settingsKeys.contains("useReverseAPI")) {
+        m_useReverseAPI = settings.m_useReverseAPI;
+    }
+    if (settingsKeys.contains("reverseAPIAddress")) {
+        m_reverseAPIAddress = settings.m_reverseAPIAddress;
+    }
+    if (settingsKeys.contains("reverseAPIPort")) {
+        m_reverseAPIPort = settings.m_reverseAPIPort;
+    }
+    if (settingsKeys.contains("reverseAPIDeviceIndex")) {
+        m_reverseAPIDeviceIndex = settings.m_reverseAPIDeviceIndex;
+    }
+    if (settingsKeys.contains("reverseAPIChannelIndex")) {
+        m_reverseAPIChannelIndex = settings.m_reverseAPIChannelIndex;
+    }
+    if (settingsKeys.contains("scopeCh1")) {
+        m_scopeCh1 = settings.m_scopeCh1;
+    }
+    if (settingsKeys.contains("scopeCh2")) {
+        m_scopeCh2 = settings.m_scopeCh2;
+    }
+    if (settingsKeys.contains("logFilename")) {
+        m_logFilename = settings.m_logFilename;
+    }
+    if (settingsKeys.contains("logEnabled")) {
+        m_logEnabled = settings.m_logEnabled;
+    }
+    if (settingsKeys.contains("workspaceIndex")) {
+        m_workspaceIndex = settings.m_workspaceIndex;
+    }
+    if (settingsKeys.contains("geometryBytes")) {
+        m_geometryBytes = settings.m_geometryBytes;
+    }
+    if (settingsKeys.contains("hidden")) {
+        m_hidden = settings.m_hidden;
+    }
+}
+
+QString RttyDemodSettings::getDebugString(const QStringList& settingsKeys, bool force) const
+{
+    std::ostringstream ostr;
+
+    if (settingsKeys.contains("inputFrequencyOffset") || force) {
+        ostr << " m_inputFrequencyOffset: " << m_inputFrequencyOffset;
+    }
+    if (settingsKeys.contains("rfBandwidth") || force) {
+        ostr << " m_rfBandwidth: " << m_rfBandwidth;
+    }
+    if (settingsKeys.contains("baudRate") || force) {
+        ostr << " m_baudRate: " << m_baudRate;
+    }
+    if (settingsKeys.contains("frequencyShift") || force) {
+        ostr << " m_frequencyShift: " << m_frequencyShift;
+    }
+    if (settingsKeys.contains("udpEnabled") || force) {
+        ostr << " m_udpEnabled: " << m_udpEnabled;
+    }
+    if (settingsKeys.contains("udpAddress") || force) {
+        ostr << " m_udpAddress: " << m_udpAddress.toStdString();
+    }
+    if (settingsKeys.contains("udpPort") || force) {
+        ostr << " m_udpPort: " << m_udpPort;
+    }
+    if (settingsKeys.contains("characterSet") || force) {
+        ostr << " m_characterSet: " << m_characterSet;
+    }
+    if (settingsKeys.contains("suppressCRLF") || force) {
+        ostr << " m_suppressCRLF: " << m_suppressCRLF;
+    }
+    if (settingsKeys.contains("unshiftOnSpace") || force) {
+        ostr << " m_unshiftOnSpace: " << m_unshiftOnSpace;
+    }
+    if (settingsKeys.contains("filter") || force) {
+        ostr << " m_filter: " << m_filter;
+    }
+    if (settingsKeys.contains("atc") || force) {
+        ostr << " m_atc: " << m_atc;
+    }
+    if (settingsKeys.contains("msbFirst") || force) {
+        ostr << " m_msbFirst: " << m_msbFirst;
+    }
+    if (settingsKeys.contains("spaceHigh") || force) {
+        ostr << " m_spaceHigh: " << m_spaceHigh;
+    }
+    if (settingsKeys.contains("squelch") || force) {
+        ostr << " m_squelch: " << m_squelch;
+    }
+    if (settingsKeys.contains("rgbColor") || force) {
+        ostr << " m_rgbColor: " << m_rgbColor;
+    }
+    if (settingsKeys.contains("title") || force) {
+        ostr << " m_title: " << m_title.toStdString();
+    }
+    if (settingsKeys.contains("streamIndex") || force) {
+        ostr << " m_streamIndex: " << m_streamIndex;
+    }
+    if (settingsKeys.contains("useReverseAPI") || force) {
+        ostr << " m_useReverseAPI: " << m_useReverseAPI;
+    }
+    if (settingsKeys.contains("reverseAPIAddress") || force) {
+        ostr << " m_reverseAPIAddress: " << m_reverseAPIAddress.toStdString();
+    }
+    if (settingsKeys.contains("reverseAPIPort") || force) {
+        ostr << " m_reverseAPIPort: " << m_reverseAPIPort;
+    }
+    if (settingsKeys.contains("reverseAPIDeviceIndex") || force) {
+        ostr << " m_reverseAPIDeviceIndex: " << m_reverseAPIDeviceIndex;
+    }
+    if (settingsKeys.contains("reverseAPIChannelIndex") || force) {
+        ostr << " m_reverseAPIChannelIndex: " << m_reverseAPIChannelIndex;
+    }
+    if (settingsKeys.contains("scopeCh1") || force) {
+        ostr << " m_scopeCh1: " << m_scopeCh1;
+    }
+    if (settingsKeys.contains("scopeCh2") || force) {
+        ostr << " m_scopeCh2: " << m_scopeCh2;
+    }
+    if (settingsKeys.contains("logFilename") || force) {
+        ostr << " m_logFilename: " << m_logFilename.toStdString();
+    }
+    if (settingsKeys.contains("logEnabled") || force) {
+        ostr << " m_logEnabled: " << m_logEnabled;
+    }
+    if (settingsKeys.contains("workspaceIndex") || force) {
+        ostr << " m_workspaceIndex: " << m_workspaceIndex;
+    }
+    if (settingsKeys.contains("hidden") || force) {
+        ostr << " m_hidden: " << m_hidden;
+    }
+
+    return QString(ostr.str().c_str());
+}

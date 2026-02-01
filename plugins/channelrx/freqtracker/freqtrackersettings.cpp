@@ -190,3 +190,150 @@ bool FreqTrackerSettings::deserialize(const QByteArray& data)
         return false;
     }
 }
+
+void FreqTrackerSettings::applySettings(const QStringList& settingsKeys, const FreqTrackerSettings& settings)
+{
+    if (settingsKeys.contains("inputFrequencyOffset")) {
+        m_inputFrequencyOffset = settings.m_inputFrequencyOffset;
+    }
+    if (settingsKeys.contains("rfBandwidth")) {
+        m_rfBandwidth = settings.m_rfBandwidth;
+    }
+    if (settingsKeys.contains("log2Decim")) {
+        m_log2Decim = settings.m_log2Decim;
+    }
+    if (settingsKeys.contains("squelch")) {
+        m_squelch = settings.m_squelch;
+    }
+    if (settingsKeys.contains("rgbColor")) {
+        m_rgbColor = settings.m_rgbColor;
+    }
+    if (settingsKeys.contains("title")) {
+        m_title = settings.m_title;
+    }
+    if (settingsKeys.contains("spanLog2")) {
+        m_spanLog2 = settings.m_spanLog2;
+    }
+    if (settingsKeys.contains("alphaEMA")) {
+        m_alphaEMA = settings.m_alphaEMA;
+    }
+    if (settingsKeys.contains("tracking")) {
+        m_tracking = settings.m_tracking;
+    }
+    if (settingsKeys.contains("trackerType")) {
+        m_trackerType = settings.m_trackerType;
+    }
+    if (settingsKeys.contains("pllPskOrder")) {
+        m_pllPskOrder = settings.m_pllPskOrder;
+    }
+    if (settingsKeys.contains("rrc")) {
+        m_rrc = settings.m_rrc;
+    }
+    if (settingsKeys.contains("rrcRolloff")) {
+        m_rrcRolloff = settings.m_rrcRolloff;
+    }
+    if (settingsKeys.contains("squelchGate")) {
+        m_squelchGate = settings.m_squelchGate;
+    }
+    if (settingsKeys.contains("streamIndex")) {
+        m_streamIndex = settings.m_streamIndex;
+    }
+    if (settingsKeys.contains("useReverseAPI")) {
+        m_useReverseAPI = settings.m_useReverseAPI;
+    }
+    if (settingsKeys.contains("reverseAPIAddress")) {
+        m_reverseAPIAddress = settings.m_reverseAPIAddress;
+    }
+    if (settingsKeys.contains("reverseAPIPort")) {
+        m_reverseAPIPort = settings.m_reverseAPIPort;
+    }
+    if (settingsKeys.contains("reverseAPIDeviceIndex")) {
+        m_reverseAPIDeviceIndex = settings.m_reverseAPIDeviceIndex;
+    }
+    if (settingsKeys.contains("reverseAPIChannelIndex")) {
+        m_reverseAPIChannelIndex = settings.m_reverseAPIChannelIndex;
+    }
+    if (settingsKeys.contains("workspaceIndex")) {
+        m_workspaceIndex = settings.m_workspaceIndex;
+    }
+    if (settingsKeys.contains("geometryBytes")) {
+        m_geometryBytes = settings.m_geometryBytes;
+    }
+    if (settingsKeys.contains("hidden")) {
+        m_hidden = settings.m_hidden;
+    }
+}
+
+QString FreqTrackerSettings::getDebugString(const QStringList& settingsKeys, bool force) const
+{
+    std::ostringstream ostr;
+
+    if (settingsKeys.contains("inputFrequencyOffset") || force) {
+        ostr << " m_inputFrequencyOffset: " << m_inputFrequencyOffset;
+    }
+    if (settingsKeys.contains("rfBandwidth") || force) {
+        ostr << " m_rfBandwidth: " << m_rfBandwidth;
+    }
+    if (settingsKeys.contains("log2Decim") || force) {
+        ostr << " m_log2Decim: " << m_log2Decim;
+    }
+    if (settingsKeys.contains("squelch") || force) {
+        ostr << " m_squelch: " << m_squelch;
+    }
+    if (settingsKeys.contains("rgbColor") || force) {
+        ostr << " m_rgbColor: " << m_rgbColor;
+    }
+    if (settingsKeys.contains("title") || force) {
+        ostr << " m_title: " << m_title.toStdString();
+    }
+    if (settingsKeys.contains("spanLog2") || force) {
+        ostr << " m_spanLog2: " << m_spanLog2;
+    }
+    if (settingsKeys.contains("alphaEMA") || force) {
+        ostr << " m_alphaEMA: " << m_alphaEMA;
+    }
+    if (settingsKeys.contains("tracking") || force) {
+        ostr << " m_tracking: " << m_tracking;
+    }
+    if (settingsKeys.contains("trackerType") || force) {
+        ostr << " m_trackerType: " << m_trackerType;
+    }
+    if (settingsKeys.contains("pllPskOrder") || force) {
+        ostr << " m_pllPskOrder: " << m_pllPskOrder;
+    }
+    if (settingsKeys.contains("rrc") || force) {
+        ostr << " m_rrc: " << m_rrc;
+    }
+    if (settingsKeys.contains("rrcRolloff") || force) {
+        ostr << " m_rrcRolloff: " << m_rrcRolloff;
+    }
+    if (settingsKeys.contains("squelchGate") || force) {
+        ostr << " m_squelchGate: " << m_squelchGate;
+    }
+    if (settingsKeys.contains("streamIndex") || force) {
+        ostr << " m_streamIndex: " << m_streamIndex;
+    }
+    if (settingsKeys.contains("useReverseAPI") || force) {
+        ostr << " m_useReverseAPI: " << m_useReverseAPI;
+    }
+    if (settingsKeys.contains("reverseAPIAddress") || force) {
+        ostr << " m_reverseAPIAddress: " << m_reverseAPIAddress.toStdString();
+    }
+    if (settingsKeys.contains("reverseAPIPort") || force) {
+        ostr << " m_reverseAPIPort: " << m_reverseAPIPort;
+    }
+    if (settingsKeys.contains("reverseAPIDeviceIndex") || force) {
+        ostr << " m_reverseAPIDeviceIndex: " << m_reverseAPIDeviceIndex;
+    }
+    if (settingsKeys.contains("reverseAPIChannelIndex") || force) {
+        ostr << " m_reverseAPIChannelIndex: " << m_reverseAPIChannelIndex;
+    }
+    if (settingsKeys.contains("workspaceIndex") || force) {
+        ostr << " m_workspaceIndex: " << m_workspaceIndex;
+    }
+    if (settingsKeys.contains("hidden") || force) {
+        ostr << " m_hidden: " << m_hidden;
+    }
+
+    return QString(ostr.str().c_str());
+}

@@ -52,6 +52,8 @@ struct BeamSteeringCWModSettings
     void setRollupState(Serializable *RollupState) { m_rollupState = RollupState; }
     QByteArray serialize() const;
     bool deserialize(const QByteArray& data);
+    void applySettings(const QStringList& settingsKeys, const BeamSteeringCWModSettings& settings);
+    QString getDebugString(const QStringList& settingsKeys, bool force=false) const;
 };
 
 #endif /* INCLUDE_BEAMSTEERINGCWMODSETTINGS_H_ */

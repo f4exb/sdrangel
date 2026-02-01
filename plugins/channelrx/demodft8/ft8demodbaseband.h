@@ -47,20 +47,23 @@ public:
 
     public:
         const FT8DemodSettings& getSettings() const { return m_settings; }
+        const QStringList& getSettingsKeys() const { return m_settingsKeys; }
         bool getForce() const { return m_force; }
 
-        static MsgConfigureFT8DemodBaseband* create(const FT8DemodSettings& settings, bool force)
+        static MsgConfigureFT8DemodBaseband* create(const QStringList& settingsKeys, const FT8DemodSettings& settings, bool force)
         {
-            return new MsgConfigureFT8DemodBaseband(settings, force);
+            return new MsgConfigureFT8DemodBaseband(settingsKeys, settings, force);
         }
 
     private:
         FT8DemodSettings m_settings;
+        QStringList m_settingsKeys;
         bool m_force;
 
-        MsgConfigureFT8DemodBaseband(const FT8DemodSettings& settings, bool force) :
+        MsgConfigureFT8DemodBaseband(const QStringList& settingsKeys, const FT8DemodSettings& settings, bool force) :
             Message(),
             m_settings(settings),
+            m_settingsKeys(settingsKeys),
             m_force(force)
         { }
     };
@@ -110,7 +113,7 @@ private:
     QRecursiveMutex m_mutex;
 
     bool handleMessage(const Message& cmd);
-    void applySettings(const FT8DemodSettings& settings, bool force = false);
+    void applySettings(const QStringList& settingsKeys, const FT8DemodSettings& settings, bool force = false);
     MessageQueue *getMessageQueueToGUI() { return m_messageQueueToGUI; }
 
 private slots:

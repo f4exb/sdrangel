@@ -58,7 +58,7 @@ RttyDemod::RttyDemod(DeviceAPI *deviceAPI) :
     m_basebandSink->setChannel(this);
     m_basebandSink->moveToThread(&m_thread);
 
-    applySettings(m_settings, true);
+    applySettings(QStringList(), m_settings, true);
 
     m_deviceAPI->addChannelSink(this);
     m_deviceAPI->addChannelSinkAPI(this);
@@ -132,7 +132,7 @@ void RttyDemod::start()
     DSPSignalNotification *dspMsg = new DSPSignalNotification(m_basebandSampleRate, m_centerFrequency);
     m_basebandSink->getInputMessageQueue()->push(dspMsg);
 
-    RttyDemodBaseband::MsgConfigureRttyDemodBaseband *msg = RttyDemodBaseband::MsgConfigureRttyDemodBaseband::create(m_settings, true);
+    RttyDemodBaseband::MsgConfigureRttyDemodBaseband *msg = RttyDemodBaseband::MsgConfigureRttyDemodBaseband::create(QStringList(), m_settings, true);
     m_basebandSink->getInputMessageQueue()->push(msg);
 }
 
@@ -150,8 +150,7 @@ bool RttyDemod::handleMessage(const Message& cmd)
     {
         MsgConfigureRttyDemod& cfg = (MsgConfigureRttyDemod&) cmd;
         qDebug() << "RttyDemod::handleMessage: MsgConfigureRttyDemod";
-        applySettings(cfg.getSettings(), cfg.getForce());
-
+        applySettings(cfg.getSettingsKeys(), cfg.getSettings(), cfg.getForce());
         return true;
     }
     else if (DSPSignalNotification::match(cmd))
@@ -229,27 +228,18 @@ void RttyDemod::setCenterFrequency(qint64 frequency)
 {
     RttyDemodSettings settings = m_settings;
     settings.m_inputFrequencyOffset = frequency;
-    applySettings(settings, false);
+    applySettings(QStringList({"inputFrequencyOffset"}), settings, false);
 
     if (m_guiMessageQueue) // forward to GUI if any
     {
-        MsgConfigureRttyDemod *msgToGUI = MsgConfigureRttyDemod::create(settings, false);
+        MsgConfigureRttyDemod *msgToGUI = MsgConfigureRttyDemod::create(QStringList({"inputFrequencyOffset"}), settings, false);
         m_guiMessageQueue->push(msgToGUI);
     }
 }
 
-void RttyDemod::applySettings(const RttyDemodSettings& settings, bool force)
+void RttyDemod::applySettings(const QStringList& settingsKeys, const RttyDemodSettings& settings, bool force)
 {
-    qDebug() << "RttyDemod::applySettings:"
-            << " m_logEnabled: " << settings.m_logEnabled
-            << " m_logFilename: " << settings.m_logFilename
-            << " m_streamIndex: " << settings.m_streamIndex
-            << " m_useReverseAPI: " << settings.m_useReverseAPI
-            << " m_reverseAPIAddress: " << settings.m_reverseAPIAddress
-            << " m_reverseAPIPort: " << settings.m_reverseAPIPort
-            << " m_reverseAPIDeviceIndex: " << settings.m_reverseAPIDeviceIndex
-            << " m_reverseAPIChannelIndex: " << settings.m_reverseAPIChannelIndex
-            << " force: " << force;
+    qDebug() << "RttyDemod::applySettings:" << settings.getDebugString(settingsKeys, force);
 
     QList<QString> reverseAPIKeys;
 
@@ -298,7 +288,7 @@ void RttyDemod::applySettings(const RttyDemodSettings& settings, bool force)
     if ((settings.m_logEnabled != m_settings.m_logEnabled) || force) {
         reverseAPIKeys.append("logEnabled");
     }
-    if (m_settings.m_streamIndex != settings.m_streamIndex)
+    if (settingsKeys.contains("streamIndex") && (settings.m_streamIndex != m_settings.m_streamIndex))
     {
         if (m_deviceAPI->getSampleMIMO()) // change of stream is possible for MIMO devices only
         {
@@ -313,21 +303,21 @@ void RttyDemod::applySettings(const RttyDemodSettings& settings, bool force)
         reverseAPIKeys.append("streamIndex");
     }
 
-    RttyDemodBaseband::MsgConfigureRttyDemodBaseband *msg = RttyDemodBaseband::MsgConfigureRttyDemodBaseband::create(settings, force);
+    RttyDemodBaseband::MsgConfigureRttyDemodBaseband *msg = RttyDemodBaseband::MsgConfigureRttyDemodBaseband::create(settingsKeys, settings, force);
     m_basebandSink->getInputMessageQueue()->push(msg);
 
-    if (settings.m_useReverseAPI)
+    if (settingsKeys.contains("useReverseAPI") && settings.m_useReverseAPI)
     {
-        bool fullUpdate = ((m_settings.m_useReverseAPI != settings.m_useReverseAPI) && settings.m_useReverseAPI) ||
-                (m_settings.m_reverseAPIAddress != settings.m_reverseAPIAddress) ||
-                (m_settings.m_reverseAPIPort != settings.m_reverseAPIPort) ||
-                (m_settings.m_reverseAPIDeviceIndex != settings.m_reverseAPIDeviceIndex) ||
-                (m_settings.m_reverseAPIChannelIndex != settings.m_reverseAPIChannelIndex);
+        bool fullUpdate = (settingsKeys.contains("useReverseAPI") && (m_settings.m_useReverseAPI != settings.m_useReverseAPI) && settings.m_useReverseAPI) ||
+                (settingsKeys.contains("reverseAPIAddress") && (m_settings.m_reverseAPIAddress != settings.m_reverseAPIAddress)) ||
+                (settingsKeys.contains("reverseAPIPort") && (m_settings.m_reverseAPIPort != settings.m_reverseAPIPort)) ||
+                (settingsKeys.contains("reverseAPIDeviceIndex") && (m_settings.m_reverseAPIDeviceIndex != settings.m_reverseAPIDeviceIndex)) ||
+                (settingsKeys.contains("reverseAPIChannelIndex") && (m_settings.m_reverseAPIChannelIndex != settings.m_reverseAPIChannelIndex));
         webapiReverseSendSettings(reverseAPIKeys, settings, fullUpdate || force);
     }
 
-    if ((settings.m_logEnabled != m_settings.m_logEnabled)
-        || (settings.m_logFilename != m_settings.m_logFilename)
+    if ((settingsKeys.contains("logEnabled") && (settings.m_logEnabled != m_settings.m_logEnabled))
+        || (settingsKeys.contains("logFilename") && (settings.m_logFilename != m_settings.m_logFilename))
         || force)
     {
         if (m_logFile.isOpen())
@@ -381,14 +371,14 @@ bool RttyDemod::deserialize(const QByteArray& data)
 {
     if (m_settings.deserialize(data))
     {
-        MsgConfigureRttyDemod *msg = MsgConfigureRttyDemod::create(m_settings, true);
+        MsgConfigureRttyDemod *msg = MsgConfigureRttyDemod::create(QStringList(), m_settings, true);
         m_inputMessageQueue.push(msg);
         return true;
     }
     else
     {
         m_settings.resetToDefaults();
-        MsgConfigureRttyDemod *msg = MsgConfigureRttyDemod::create(m_settings, true);
+        MsgConfigureRttyDemod *msg = MsgConfigureRttyDemod::create(QStringList(), m_settings, true);
         m_inputMessageQueue.push(msg);
         return false;
     }
@@ -424,13 +414,13 @@ int RttyDemod::webapiSettingsPutPatch(
     RttyDemodSettings settings = m_settings;
     webapiUpdateChannelSettings(settings, channelSettingsKeys, response);
 
-    MsgConfigureRttyDemod *msg = MsgConfigureRttyDemod::create(settings, force);
+    MsgConfigureRttyDemod *msg = MsgConfigureRttyDemod::create(channelSettingsKeys, settings, force);
     m_inputMessageQueue.push(msg);
 
     qDebug("RttyDemod::webapiSettingsPutPatch: forward to GUI: %p", m_guiMessageQueue);
     if (m_guiMessageQueue) // forward to GUI if any
     {
-        MsgConfigureRttyDemod *msgToGUI = MsgConfigureRttyDemod::create(settings, force);
+        MsgConfigureRttyDemod *msgToGUI = MsgConfigureRttyDemod::create(channelSettingsKeys, settings, force);
         m_guiMessageQueue->push(msgToGUI);
     }
 
@@ -625,7 +615,7 @@ void RttyDemod::webapiFormatChannelReport(SWGSDRangel::SWGChannelReport& respons
     response.getRttyDemodReport()->setChannelSampleRate(m_basebandSink->getChannelSampleRate());
 }
 
-void RttyDemod::webapiReverseSendSettings(QList<QString>& channelSettingsKeys, const RttyDemodSettings& settings, bool force)
+void RttyDemod::webapiReverseSendSettings(const QList<QString>& channelSettingsKeys, const RttyDemodSettings& settings, bool force)
 {
     SWGSDRangel::SWGChannelSettings *swgChannelSettings = new SWGSDRangel::SWGChannelSettings();
     webapiFormatChannelSettings(channelSettingsKeys, swgChannelSettings, settings, force);
@@ -651,7 +641,7 @@ void RttyDemod::webapiReverseSendSettings(QList<QString>& channelSettingsKeys, c
 }
 
 void RttyDemod::webapiFormatChannelSettings(
-        QList<QString>& channelSettingsKeys,
+        const QList<QString>& channelSettingsKeys,
         SWGSDRangel::SWGChannelSettings *swgChannelSettings,
         const RttyDemodSettings& settings,
         bool force
@@ -776,4 +766,3 @@ void RttyDemod::handleIndexInDeviceSetChanged(int index)
         .arg(index);
     m_basebandSink->setFifoLabel(fifoLabel);
 }
-

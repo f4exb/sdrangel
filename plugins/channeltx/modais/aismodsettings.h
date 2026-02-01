@@ -109,6 +109,8 @@ struct AISModSettings
     Real getRfBandwidth(int modeIndex);
     Real getFMDeviation(int modeIndex);
     float getBT(int modeIndex);
+    void applySettings(const QStringList& settingsKeys, const AISModSettings& settings);
+    QString getDebugString(const QStringList& settingsKeys, bool force=false) const;
 };
 
 #endif /* PLUGINS_CHANNELTX_MODAIS_AISMODSETTINGS_H */

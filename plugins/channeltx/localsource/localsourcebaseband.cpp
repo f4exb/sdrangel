@@ -137,7 +137,7 @@ bool LocalSourceBaseband::handleMessage(const Message& cmd)
         MsgConfigureLocalSourceBaseband& cfg = (MsgConfigureLocalSourceBaseband&) cmd;
         qDebug() << "LocalSourceBaseband::handleMessage: MsgConfigureLocalSourceBaseband";
 
-        applySettings(cfg.getSettings(), cfg.getForce());
+        applySettings(cfg.getSettingsKeys(), cfg.getSettings(), cfg.getForce());
 
         return true;
     }
@@ -184,23 +184,22 @@ bool LocalSourceBaseband::handleMessage(const Message& cmd)
     }
 }
 
-void LocalSourceBaseband::applySettings(const LocalSourceSettings& settings, bool force)
+void LocalSourceBaseband::applySettings(const QStringList& settingsKeys, const LocalSourceSettings& settings, bool force)
 {
-    qDebug() << "LocalSourceBaseband::applySettings:"
-        << "m_localDeviceIndex:" << settings.m_localDeviceIndex
-        << "m_log2Interp:" << settings.m_log2Interp
-        << "m_filterChainHash:" << settings.m_filterChainHash
-        << "m_play:" << settings.m_play
-        << " force: " << force;
+    qDebug() << "LocalSourceBaseband::applySettings:" << settings.getDebugString(settingsKeys, force);
 
-    if ((settings.m_log2Interp != m_settings.m_log2Interp)
-     || (settings.m_filterChainHash != m_settings.m_filterChainHash) || force)
+    if ((settingsKeys.contains("log2Interp") && (settings.m_log2Interp != m_settings.m_log2Interp))
+     || (settingsKeys.contains("filterChainHash") && (settings.m_filterChainHash != m_settings.m_filterChainHash)) || force)
     {
         m_channelizer->setInterpolation(m_settings.m_log2Interp, m_settings.m_filterChainHash);
     }
 
     //m_source.applySettings(settings, force);
-    m_settings = settings;
+    if (force) {
+        m_settings = settings;
+    } else {
+        m_settings.applySettings(settingsKeys, settings);
+    }
 }
 
 int LocalSourceBaseband::getChannelSampleRate() const

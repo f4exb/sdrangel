@@ -208,3 +208,159 @@ bool NavtexDemodSettings::deserialize(const QByteArray& data)
     }
 }
 
+void NavtexDemodSettings::applySettings(const QStringList& settingsKeys, const NavtexDemodSettings& settings)
+{
+    if (settingsKeys.contains("inputFrequencyOffset")) {
+        m_inputFrequencyOffset = settings.m_inputFrequencyOffset;
+    }
+    if (settingsKeys.contains("rfBandwidth")) {
+        m_rfBandwidth = settings.m_rfBandwidth;
+    }
+    if (settingsKeys.contains("navArea")) {
+        m_navArea = settings.m_navArea;
+    }
+    if (settingsKeys.contains("filterStation")) {
+        m_filterStation = settings.m_filterStation;
+    }
+    if (settingsKeys.contains("filterType")) {
+        m_filterType = settings.m_filterType;
+    }
+    if (settingsKeys.contains("udpEnabled")) {
+        m_udpEnabled = settings.m_udpEnabled;
+    }
+    if (settingsKeys.contains("udpAddress")) {
+        m_udpAddress = settings.m_udpAddress;
+    }
+    if (settingsKeys.contains("udpPort")) {
+        m_udpPort = settings.m_udpPort;
+    }
+    if (settingsKeys.contains("rgbColor")) {
+        m_rgbColor = settings.m_rgbColor;
+    }
+    if (settingsKeys.contains("title")) {
+        m_title = settings.m_title;
+    }
+    if (settingsKeys.contains("streamIndex")) {
+        m_streamIndex = settings.m_streamIndex;
+    }
+    if (settingsKeys.contains("useReverseAPI")) {
+        m_useReverseAPI = settings.m_useReverseAPI;
+    }
+    if (settingsKeys.contains("reverseAPIAddress")) {
+        m_reverseAPIAddress = settings.m_reverseAPIAddress;
+    }
+    if (settingsKeys.contains("reverseAPIPort")) {
+        m_reverseAPIPort = settings.m_reverseAPIPort;
+    }
+    if (settingsKeys.contains("reverseAPIDeviceIndex")) {
+        m_reverseAPIDeviceIndex = settings.m_reverseAPIDeviceIndex;
+    }
+    if (settingsKeys.contains("reverseAPIChannelIndex")) {
+        m_reverseAPIChannelIndex = settings.m_reverseAPIChannelIndex;
+    }
+    if (settingsKeys.contains("scopeCh1")) {
+        m_scopeCh1 = settings.m_scopeCh1;
+    }
+    if (settingsKeys.contains("scopeCh2")) {
+        m_scopeCh2 = settings.m_scopeCh2;
+    }
+    if (settingsKeys.contains("logFilename")) {
+        m_logFilename = settings.m_logFilename;
+    }
+    if (settingsKeys.contains("logEnabled")) {
+        m_logEnabled = settings.m_logEnabled;
+    }
+    if (settingsKeys.contains("workspaceIndex")) {
+        m_workspaceIndex = settings.m_workspaceIndex;
+    }
+    if (settingsKeys.contains("geometryBytes")) {
+        m_geometryBytes = settings.m_geometryBytes;
+    }
+    if (settingsKeys.contains("hidden")) {
+        m_hidden = settings.m_hidden;
+    }
+    if (settingsKeys.contains("columnIndexes")) {
+        for (int i = 0; i < NAVTEXDEMOD_COLUMNS; i++) {
+            m_columnIndexes[i] = settings.m_columnIndexes[i];
+        }
+    }
+    if (settingsKeys.contains("columnSizes")) {
+        for (int i = 0; i < NAVTEXDEMOD_COLUMNS; i++) {
+            m_columnSizes[i] = settings.m_columnSizes[i];
+        }
+    }
+}
+
+QString NavtexDemodSettings::getDebugString(const QStringList& settingsKeys, bool force) const
+{
+    std::ostringstream ostr;
+
+    if (settingsKeys.contains("inputFrequencyOffset") || force) {
+        ostr << " m_inputFrequencyOffset: " << m_inputFrequencyOffset;
+    }
+    if (settingsKeys.contains("rfBandwidth") || force) {
+        ostr << " m_rfBandwidth: " << m_rfBandwidth;
+    }
+    if (settingsKeys.contains("navArea") || force) {
+        ostr << " m_navArea: " << m_navArea;
+    }
+    if (settingsKeys.contains("filterStation") || force) {
+        ostr << " m_filterStation: " << m_filterStation.toStdString();
+    }
+    if (settingsKeys.contains("filterType") || force) {
+        ostr << " m_filterType: " << m_filterType.toStdString();
+    }
+    if (settingsKeys.contains("udpEnabled") || force) {
+        ostr << " m_udpEnabled: " << m_udpEnabled;
+    }
+    if (settingsKeys.contains("udpAddress") || force) {
+        ostr << " m_udpAddress: " << m_udpAddress.toStdString();
+    }
+    if (settingsKeys.contains("udpPort") || force) {
+        ostr << " m_udpPort: " << m_udpPort;
+    }
+    if (settingsKeys.contains("rgbColor") || force) {
+        ostr << " m_rgbColor: " << m_rgbColor;
+    }
+    if (settingsKeys.contains("title") || force) {
+        ostr << " m_title: " << m_title.toStdString();
+    }
+    if (settingsKeys.contains("streamIndex") || force) {
+        ostr << " m_streamIndex: " << m_streamIndex;
+    }
+    if (settingsKeys.contains("useReverseAPI") || force) {
+        ostr << " m_useReverseAPI: " << m_useReverseAPI;
+    }
+    if (settingsKeys.contains("reverseAPIAddress") || force) {
+        ostr << " m_reverseAPIAddress: " << m_reverseAPIAddress.toStdString();
+    }
+    if (settingsKeys.contains("reverseAPIPort") || force) {
+        ostr << " m_reverseAPIPort: " << m_reverseAPIPort;
+    }
+    if (settingsKeys.contains("reverseAPIDeviceIndex") || force) {
+        ostr << " m_reverseAPIDeviceIndex: " << m_reverseAPIDeviceIndex;
+    }
+    if (settingsKeys.contains("reverseAPIChannelIndex") || force) {
+        ostr << " m_reverseAPIChannelIndex: " << m_reverseAPIChannelIndex;
+    }
+    if (settingsKeys.contains("scopeCh1") || force) {
+        ostr << " m_scopeCh1: " << m_scopeCh1;
+    }
+    if (settingsKeys.contains("scopeCh2") || force) {
+        ostr << " m_scopeCh2: " << m_scopeCh2;
+    }
+    if (settingsKeys.contains("logFilename") || force) {
+        ostr << " m_logFilename: " << m_logFilename.toStdString();
+    }
+    if (settingsKeys.contains("logEnabled") || force) {
+        ostr << " m_logEnabled: " << m_logEnabled;
+    }
+    if (settingsKeys.contains("workspaceIndex") || force) {
+        ostr << " m_workspaceIndex: " << m_workspaceIndex;
+    }
+    if (settingsKeys.contains("hidden") || force) {
+        ostr << " m_hidden: " << m_hidden;
+    }
+
+    return QString(ostr.str().c_str());
+}

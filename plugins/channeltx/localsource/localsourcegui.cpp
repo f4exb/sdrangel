@@ -43,7 +43,7 @@ void LocalSourceGUI::resetToDefaults()
 {
     m_settings.resetToDefaults();
     displaySettings();
-    applySettings(true);
+    applySettings(QStringList(), true);
 }
 
 QByteArray LocalSourceGUI::serialize() const
@@ -55,7 +55,7 @@ bool LocalSourceGUI::deserialize(const QByteArray& data)
 {
     if(m_settings.deserialize(data)) {
         displaySettings();
-        applySettings(true);
+        applySettings(QStringList(), true);
         return true;
     } else {
         resetToDefaults();
@@ -129,7 +129,7 @@ LocalSourceGUI::LocalSourceGUI(PluginAPI* pluginAPI, DeviceUISet *deviceUISet, B
     updateLocalDevices();
     displaySettings();
     makeUIConnections();
-    applySettings(true);
+    applySettings(QStringList(), true);
     m_resizer.enableChildMouseTracking();
 }
 
@@ -143,13 +143,13 @@ void LocalSourceGUI::blockApplySettings(bool block)
     m_doApplySettings = !block;
 }
 
-void LocalSourceGUI::applySettings(bool force)
+void LocalSourceGUI::applySettings(const QStringList& keys, bool force)
 {
     if (m_doApplySettings)
     {
         setTitleColor(m_channelMarker.getColor());
 
-        LocalSource::MsgConfigureLocalSource* message = LocalSource::MsgConfigureLocalSource::create(m_settings, force);
+        LocalSource::MsgConfigureLocalSource* message = LocalSource::MsgConfigureLocalSource::create(keys, m_settings, force);
         m_localSource->getInputMessageQueue()->push(message);
     }
 }
@@ -232,7 +232,7 @@ void LocalSourceGUI::onWidgetRolled(QWidget* widget, bool rollDown)
     (void) rollDown;
 
     getRollupContents()->saveState(m_rollupState);
-    applySettings();
+    applySettings(QStringList());
 }
 
 void LocalSourceGUI::onMenuDialogCalled(const QPoint &p)
@@ -277,7 +277,7 @@ void LocalSourceGUI::onMenuDialogCalled(const QPoint &p)
             updateIndexLabel();
         }
 
-        applySettings();
+        applySettings(QStringList({"color", "title", "useReverseAPI", "reverseAPIAddress", "reverseAPIPort", "reverseAPIDeviceIndex", "reverseAPIChannelIndex", "streamIndex"}), true);
     }
 
     resetContextMenuType();
@@ -298,7 +298,7 @@ void LocalSourceGUI::on_position_valueChanged(int value)
 void LocalSourceGUI::on_localDevice_currentIndexChanged(int index)
 {
     m_settings.m_localDeviceIndex = ui->localDevice->itemData(index).toInt();
-    applySettings();
+    applySettings(QStringList("localDeviceIndex"));
 }
 
 void LocalSourceGUI::on_localDevicesRefresh_clicked(bool checked)
@@ -310,7 +310,7 @@ void LocalSourceGUI::on_localDevicesRefresh_clicked(bool checked)
 void LocalSourceGUI::on_localDevicePlay_toggled(bool checked)
 {
     m_settings.m_play = checked;
-    applySettings();
+    applySettings(QStringList("play"));
 }
 
 void LocalSourceGUI::applyInterpolation()
@@ -336,7 +336,7 @@ void LocalSourceGUI::applyPosition()
 
     updateAbsoluteCenterFrequency();
     displayRateAndShift();
-    applySettings();
+    applySettings(QStringList({"filterChainHash", "log2Interp"}));
 }
 
 void LocalSourceGUI::tick()

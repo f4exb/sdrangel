@@ -350,3 +350,342 @@ bool PacketModSettings::deserialize(const QByteArray& data)
         return false;
     }
 }
+
+void PacketModSettings::applySettings(const QStringList& settingsKeys, const PacketModSettings& settings)
+{
+    if (settingsKeys.contains("inputFrequencyOffset")) {
+        m_inputFrequencyOffset = settings.m_inputFrequencyOffset;
+    }
+    if (settingsKeys.contains("modulation")) {
+        m_modulation = settings.m_modulation;
+    }
+    if (settingsKeys.contains("baud")) {
+        m_baud = settings.m_baud;
+    }
+    if (settingsKeys.contains("rfBandwidth")) {
+        m_rfBandwidth = settings.m_rfBandwidth;
+    }
+    if (settingsKeys.contains("fmDeviation")) {
+        m_fmDeviation = settings.m_fmDeviation;
+    }
+    if (settingsKeys.contains("gain")) {
+        m_gain = settings.m_gain;
+    }
+    if (settingsKeys.contains("channelMute")) {
+        m_channelMute = settings.m_channelMute;
+    }
+    if (settingsKeys.contains("repeat")) {
+        m_repeat = settings.m_repeat;
+    }
+    if (settingsKeys.contains("repeatDelay")) {
+        m_repeatDelay = settings.m_repeatDelay;
+    }
+    if (settingsKeys.contains("repeatCount")) {
+        m_repeatCount = settings.m_repeatCount;
+    }
+    if (settingsKeys.contains("rampUpBits")) {
+        m_rampUpBits = settings.m_rampUpBits;
+    }
+    if (settingsKeys.contains("rampDownBits")) {
+        m_rampDownBits = settings.m_rampDownBits;
+    }
+    if (settingsKeys.contains("rampRange")) {
+        m_rampRange = settings.m_rampRange;
+    }
+    if (settingsKeys.contains("modulateWhileRamping")) {
+        m_modulateWhileRamping = settings.m_modulateWhileRamping;
+    }
+    if (settingsKeys.contains("markFrequency")) {
+        m_markFrequency = settings.m_markFrequency;
+    }
+    if (settingsKeys.contains("spaceFrequency")) {
+        m_spaceFrequency = settings.m_spaceFrequency;
+    }
+    if (settingsKeys.contains("ax25PreFlags")) {
+        m_ax25PreFlags = settings.m_ax25PreFlags;
+    }
+    if (settingsKeys.contains("ax25PostFlags")) {
+        m_ax25PostFlags = settings.m_ax25PostFlags;
+    }
+    if (settingsKeys.contains("ax25Control")) {
+        m_ax25Control = settings.m_ax25Control;
+    }
+    if (settingsKeys.contains("ax25PID")) {
+        m_ax25PID = settings.m_ax25PID;
+    }
+    if (settingsKeys.contains("preEmphasis")) {
+        m_preEmphasis = settings.m_preEmphasis;
+    }
+    if (settingsKeys.contains("preEmphasisTau")) {
+        m_preEmphasisTau = settings.m_preEmphasisTau;
+    }
+    if (settingsKeys.contains("preEmphasisHighFreq")) {
+        m_preEmphasisHighFreq = settings.m_preEmphasisHighFreq;
+    }
+    if (settingsKeys.contains("lpfTaps")) {
+        m_lpfTaps = settings.m_lpfTaps;
+    }
+    if (settingsKeys.contains("bbNoise")) {
+        m_bbNoise = settings.m_bbNoise;
+    }
+    if (settingsKeys.contains("rfNoise")) {
+        m_rfNoise = settings.m_rfNoise;
+    }
+    if (settingsKeys.contains("writeToFile")) {
+        m_writeToFile = settings.m_writeToFile;
+    }
+    if (settingsKeys.contains("spectrumRate")) {
+        m_spectrumRate = settings.m_spectrumRate;
+    }
+    if (settingsKeys.contains("callsign")) {
+        m_callsign = settings.m_callsign;
+    }
+    if (settingsKeys.contains("to")) {
+        m_to = settings.m_to;
+    }
+    if (settingsKeys.contains("via")) {
+        m_via = settings.m_via;
+    }
+    if (settingsKeys.contains("data")) {
+        m_data = settings.m_data;
+    }
+    if (settingsKeys.contains("bpf")) {
+        m_bpf = settings.m_bpf;
+    }
+    if (settingsKeys.contains("bpfLowCutoff")) {
+        m_bpfLowCutoff = settings.m_bpfLowCutoff;
+    }
+    if (settingsKeys.contains("bpfHighCutoff")) {
+        m_bpfHighCutoff = settings.m_bpfHighCutoff;
+    }
+    if (settingsKeys.contains("bpfTaps")) {
+        m_bpfTaps = settings.m_bpfTaps;
+    }
+    if (settingsKeys.contains("scramble")) {
+        m_scramble = settings.m_scramble;
+    }
+    if (settingsKeys.contains("polynomial")) {
+        m_polynomial = settings.m_polynomial;
+    }
+    if (settingsKeys.contains("pulseShaping")) {
+        m_pulseShaping = settings.m_pulseShaping;
+    }
+    if (settingsKeys.contains("beta")) {
+        m_beta = settings.m_beta;
+    }
+    if (settingsKeys.contains("symbolSpan")) {
+        m_symbolSpan = settings.m_symbolSpan;
+    }
+    if (settingsKeys.contains("rgbColor")) {
+        m_rgbColor = settings.m_rgbColor;
+    }
+    if (settingsKeys.contains("title")) {
+        m_title = settings.m_title;
+    }
+    if (settingsKeys.contains("streamIndex")) {
+        m_streamIndex = settings.m_streamIndex;
+    }
+    if (settingsKeys.contains("useReverseAPI")) {
+        m_useReverseAPI = settings.m_useReverseAPI;
+    }
+    if (settingsKeys.contains("reverseAPIAddress")) {
+        m_reverseAPIAddress = settings.m_reverseAPIAddress;
+    }
+    if (settingsKeys.contains("reverseAPIPort")) {
+        m_reverseAPIPort = settings.m_reverseAPIPort;
+    }
+    if (settingsKeys.contains("reverseAPIDeviceIndex")) {
+        m_reverseAPIDeviceIndex = settings.m_reverseAPIDeviceIndex;
+    }
+    if (settingsKeys.contains("reverseAPIChannelIndex")) {
+        m_reverseAPIChannelIndex = settings.m_reverseAPIChannelIndex;
+    }
+    if (settingsKeys.contains("udpEnabled")) {
+        m_udpEnabled = settings.m_udpEnabled;
+    }
+    if (settingsKeys.contains("udpAddress")) {
+        m_udpAddress = settings.m_udpAddress;
+    }
+    if (settingsKeys.contains("udpPort")) {
+        m_udpPort = settings.m_udpPort;
+    }
+    if (settingsKeys.contains("workspaceIndex")) {
+        m_workspaceIndex = settings.m_workspaceIndex;
+    }
+    if (settingsKeys.contains("geometryBytes")) {
+        m_geometryBytes = settings.m_geometryBytes;
+    }
+    if (settingsKeys.contains("hidden")) {
+        m_hidden = settings.m_hidden;
+    }
+}
+
+QString PacketModSettings::getDebugString(const QStringList& settingsKeys, bool force) const
+{
+    std::ostringstream ostr;
+
+    if (settingsKeys.contains("inputFrequencyOffset") || force) {
+        ostr << " m_inputFrequencyOffset: " << m_inputFrequencyOffset;
+    }
+    if (settingsKeys.contains("modulation") || force) {
+        ostr << " m_modulation: " << m_modulation;
+    }
+    if (settingsKeys.contains("baud") || force) {
+        ostr << " m_baud: " << m_baud;
+    }
+    if (settingsKeys.contains("rfBandwidth") || force) {
+        ostr << " m_rfBandwidth: " << m_rfBandwidth;
+    }
+    if (settingsKeys.contains("fmDeviation") || force) {
+        ostr << " m_fmDeviation: " << m_fmDeviation;
+    }
+    if (settingsKeys.contains("gain") || force) {
+        ostr << " m_gain: " << m_gain;
+    }
+    if (settingsKeys.contains("channelMute") || force) {
+        ostr << " m_channelMute: " << m_channelMute;
+    }
+    if (settingsKeys.contains("repeat") || force) {
+        ostr << " m_repeat: " << m_repeat;
+    }
+    if (settingsKeys.contains("repeatDelay") || force) {
+        ostr << " m_repeatDelay: " << m_repeatDelay;
+    }
+    if (settingsKeys.contains("repeatCount") || force) {
+        ostr << " m_repeatCount: " << m_repeatCount;
+    }
+    if (settingsKeys.contains("rampUpBits") || force) {
+        ostr << " m_rampUpBits: " << m_rampUpBits;
+    }
+    if (settingsKeys.contains("rampDownBits") || force) {
+        ostr << " m_rampDownBits: " << m_rampDownBits;
+    }
+    if (settingsKeys.contains("rampRange") || force) {
+        ostr << " m_rampRange: " << m_rampRange;
+    }
+    if (settingsKeys.contains("modulateWhileRamping") || force) {
+        ostr << " m_modulateWhileRamping: " << m_modulateWhileRamping;
+    }
+    if (settingsKeys.contains("markFrequency") || force) {
+        ostr << " m_markFrequency: " << m_markFrequency;
+    }
+    if (settingsKeys.contains("spaceFrequency") || force) {
+        ostr << " m_spaceFrequency: " << m_spaceFrequency;
+    }
+    if (settingsKeys.contains("ax25PreFlags") || force) {
+        ostr << " m_ax25PreFlags: " << m_ax25PreFlags;
+    }
+    if (settingsKeys.contains("ax25PostFlags") || force) {
+        ostr << " m_ax25PostFlags: " << m_ax25PostFlags;
+    }
+    if (settingsKeys.contains("ax25Control") || force) {
+        ostr << " m_ax25Control: " << m_ax25Control;
+    }
+    if (settingsKeys.contains("ax25PID") || force) {
+        ostr << " m_ax25PID: " << m_ax25PID;
+    }
+    if (settingsKeys.contains("preEmphasis") || force) {
+        ostr << " m_preEmphasis: " << m_preEmphasis;
+    }
+    if (settingsKeys.contains("preEmphasisTau") || force) {
+        ostr << " m_preEmphasisTau: " << m_preEmphasisTau;
+    }
+    if (settingsKeys.contains("preEmphasisHighFreq") || force) {
+        ostr << " m_preEmphasisHighFreq: " << m_preEmphasisHighFreq;
+    }
+    if (settingsKeys.contains("lpfTaps") || force) {
+        ostr << " m_lpfTaps: " << m_lpfTaps;
+    }
+    if (settingsKeys.contains("bbNoise") || force) {
+        ostr << " m_bbNoise: " << m_bbNoise;
+    }
+    if (settingsKeys.contains("rfNoise") || force) {
+        ostr << " m_rfNoise: " << m_rfNoise;
+    }
+    if (settingsKeys.contains("writeToFile") || force) {
+        ostr << " m_writeToFile: " << m_writeToFile;
+    }
+    if (settingsKeys.contains("spectrumRate") || force) {
+        ostr << " m_spectrumRate: " << m_spectrumRate;
+    }
+    if (settingsKeys.contains("callsign") || force) {
+        ostr << " m_callsign: " << m_callsign.toStdString();
+    }
+    if (settingsKeys.contains("to") || force) {
+        ostr << " m_to: " << m_to.toStdString();
+    }
+    if (settingsKeys.contains("via") || force) {
+        ostr << " m_via: " << m_via.toStdString();
+    }
+    if (settingsKeys.contains("data") || force) {
+        ostr << " m_data: " << m_data.toStdString();
+    }
+    if (settingsKeys.contains("bpf") || force) {
+        ostr << " m_bpf: " << m_bpf;
+    }
+    if (settingsKeys.contains("bpfLowCutoff") || force) {
+        ostr << " m_bpfLowCutoff: " << m_bpfLowCutoff;
+    }
+    if (settingsKeys.contains("bpfHighCutoff") || force) {
+        ostr << " m_bpfHighCutoff: " << m_bpfHighCutoff;
+    }
+    if (settingsKeys.contains("bpfTaps") || force) {
+        ostr << " m_bpfTaps: " << m_bpfTaps;
+    }
+    if (settingsKeys.contains("scramble") || force) {
+        ostr << " m_scramble: " << m_scramble;
+    }
+    if (settingsKeys.contains("polynomial") || force) {
+        ostr << " m_polynomial: " << m_polynomial;
+    }
+    if (settingsKeys.contains("pulseShaping") || force) {
+        ostr << " m_pulseShaping: " << m_pulseShaping;
+    }
+    if (settingsKeys.contains("beta") || force) {
+        ostr << " m_beta: " << m_beta;
+    }
+    if (settingsKeys.contains("symbolSpan") || force) {
+        ostr << " m_symbolSpan: " << m_symbolSpan;
+    }
+    if (settingsKeys.contains("rgbColor") || force) {
+        ostr << " m_rgbColor: " << m_rgbColor;
+    }
+    if (settingsKeys.contains("title") || force) {
+        ostr << " m_title: " << m_title.toStdString();
+    }
+    if (settingsKeys.contains("streamIndex") || force) {
+        ostr << " m_streamIndex: " << m_streamIndex;
+    }
+    if (settingsKeys.contains("useReverseAPI") || force) {
+        ostr << " m_useReverseAPI: " << m_useReverseAPI;
+    }
+    if (settingsKeys.contains("reverseAPIAddress") || force) {
+        ostr << " m_reverseAPIAddress: " << m_reverseAPIAddress.toStdString();
+    }
+    if (settingsKeys.contains("reverseAPIPort") || force) {
+        ostr << " m_reverseAPIPort: " << m_reverseAPIPort;
+    }
+    if (settingsKeys.contains("reverseAPIDeviceIndex") || force) {
+        ostr << " m_reverseAPIDeviceIndex: " << m_reverseAPIDeviceIndex;
+    }
+    if (settingsKeys.contains("reverseAPIChannelIndex") || force) {
+        ostr << " m_reverseAPIChannelIndex: " << m_reverseAPIChannelIndex;
+    }
+    if (settingsKeys.contains("udpEnabled") || force) {
+        ostr << " m_udpEnabled: " << m_udpEnabled;
+    }
+    if (settingsKeys.contains("udpAddress") || force) {
+        ostr << " m_udpAddress: " << m_udpAddress.toStdString();
+    }
+    if (settingsKeys.contains("udpPort") || force) {
+        ostr << " m_udpPort: " << m_udpPort;
+    }
+    if (settingsKeys.contains("workspaceIndex") || force) {
+        ostr << " m_workspaceIndex: " << m_workspaceIndex;
+    }
+    if (settingsKeys.contains("hidden") || force) {
+        ostr << " m_hidden: " << m_hidden;
+    }
+
+    return QString(ostr.str().c_str());
+}

@@ -41,20 +41,23 @@ public:
 
     public:
         const WDSPRxSettings& getSettings() const { return m_settings; }
+        const QStringList& getSettingsKeys() const { return m_settingsKeys; }
         bool getForce() const { return m_force; }
 
-        static MsgConfigureWDSPRxBaseband* create(const WDSPRxSettings& settings, bool force)
+        static MsgConfigureWDSPRxBaseband* create(const QStringList& settingsKeys, const WDSPRxSettings& settings, bool force)
         {
-            return new MsgConfigureWDSPRxBaseband(settings, force);
+            return new MsgConfigureWDSPRxBaseband(settingsKeys, settings, force);
         }
 
     private:
         WDSPRxSettings m_settings;
+        QStringList m_settingsKeys;
         bool m_force;
 
-        MsgConfigureWDSPRxBaseband(const WDSPRxSettings& settings, bool force) :
+        MsgConfigureWDSPRxBaseband(const QStringList& settingsKeys, const WDSPRxSettings& settings, bool force) :
             Message(),
             m_settings(settings),
+            m_settingsKeys(settingsKeys),
             m_force(force)
         { }
     };
@@ -89,7 +92,7 @@ private:
     QRecursiveMutex m_mutex;
 
     bool handleMessage(const Message& cmd);
-    void applySettings(const WDSPRxSettings& settings, bool force = false);
+    void applySettings(const QStringList& settingsKeys, const WDSPRxSettings& settings, bool force = false);
     MessageQueue *getMessageQueueToGUI() { return m_messageQueueToGUI; }
 
 private slots:

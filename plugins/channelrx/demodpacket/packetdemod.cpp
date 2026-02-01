@@ -57,7 +57,7 @@ PacketDemod::PacketDemod(DeviceAPI *deviceAPI) :
     m_basebandSink->setChannel(this);
     m_basebandSink->moveToThread(&m_thread);
 
-    applySettings(m_settings, true);
+    applySettings(QStringList(), m_settings, true);
 
     m_deviceAPI->addChannelSink(this);
     m_deviceAPI->addChannelSinkAPI(this);
@@ -131,7 +131,7 @@ void PacketDemod::start()
     DSPSignalNotification *dspMsg = new DSPSignalNotification(m_basebandSampleRate, m_centerFrequency);
     m_basebandSink->getInputMessageQueue()->push(dspMsg);
 
-    PacketDemodBaseband::MsgConfigurePacketDemodBaseband *msg = PacketDemodBaseband::MsgConfigurePacketDemodBaseband::create(m_settings, true);
+    PacketDemodBaseband::MsgConfigurePacketDemodBaseband *msg = PacketDemodBaseband::MsgConfigurePacketDemodBaseband::create(QStringList(), m_settings, true);
     m_basebandSink->getInputMessageQueue()->push(msg);
 }
 
@@ -149,7 +149,7 @@ bool PacketDemod::handleMessage(const Message& cmd)
     {
         MsgConfigurePacketDemod& cfg = (MsgConfigurePacketDemod&) cmd;
         qDebug() << "PacketDemod::handleMessage: MsgConfigurePacketDemod";
-        applySettings(cfg.getSettings(), cfg.getForce());
+        applySettings(cfg.getSettingsKeys(), cfg.getSettings(), cfg.getForce());
 
         return true;
     }
@@ -243,61 +243,20 @@ void PacketDemod::setCenterFrequency(qint64 frequency)
 {
     PacketDemodSettings settings = m_settings;
     settings.m_inputFrequencyOffset = frequency;
-    applySettings(settings, false);
+    applySettings(QStringList("inputFrequencyOffset"), settings, false);
 
     if (m_guiMessageQueue) // forward to GUI if any
     {
-        MsgConfigurePacketDemod *msgToGUI = MsgConfigurePacketDemod::create(settings, false);
+        MsgConfigurePacketDemod *msgToGUI = MsgConfigurePacketDemod::create(QStringList("inputFrequencyOffset"), settings, false);
         m_guiMessageQueue->push(msgToGUI);
     }
 }
 
-void PacketDemod::applySettings(const PacketDemodSettings& settings, bool force)
+void PacketDemod::applySettings(const QStringList& settingsKeys, const PacketDemodSettings& settings, bool force)
 {
-    qDebug() << "PacketDemod::applySettings:"
-            << " m_logEnabled: " << settings.m_logEnabled
-            << " m_logFilename: " << settings.m_logFilename
-            << " m_streamIndex: " << settings.m_streamIndex
-            << " m_useReverseAPI: " << settings.m_useReverseAPI
-            << " m_reverseAPIAddress: " << settings.m_reverseAPIAddress
-            << " m_reverseAPIPort: " << settings.m_reverseAPIPort
-            << " m_reverseAPIDeviceIndex: " << settings.m_reverseAPIDeviceIndex
-            << " m_reverseAPIChannelIndex: " << settings.m_reverseAPIChannelIndex
-            << " force: " << force;
+    qDebug() << "PacketDemod::applySettings:" << settings.getDebugString(settingsKeys, force);
 
-    QList<QString> reverseAPIKeys;
-
-    if ((settings.m_inputFrequencyOffset != m_settings.m_inputFrequencyOffset) || force) {
-        reverseAPIKeys.append("inputFrequencyOffset");
-    }
-    if ((settings.m_mode != m_settings.m_mode) || force) {
-        reverseAPIKeys.append("mode");
-    }
-    if ((settings.m_rfBandwidth != m_settings.m_rfBandwidth) || force) {
-        reverseAPIKeys.append("rfBandwidth");
-    }
-    if ((settings.m_fmDeviation != m_settings.m_fmDeviation) || force) {
-        reverseAPIKeys.append("fmDeviation");
-    }
-    if ((settings.m_udpEnabled != m_settings.m_udpEnabled) || force) {
-        reverseAPIKeys.append("udpEnabled");
-    }
-    if ((settings.m_udpAddress != m_settings.m_udpAddress) || force) {
-        reverseAPIKeys.append("udpAddress");
-    }
-    if ((settings.m_udpPort != m_settings.m_udpPort) || force) {
-        reverseAPIKeys.append("udpPort");
-    }
-    if ((settings.m_logFilename != m_settings.m_logFilename) || force) {
-        reverseAPIKeys.append("logFilename");
-    }
-    if ((settings.m_logEnabled != m_settings.m_logEnabled) || force) {
-        reverseAPIKeys.append("logEnabled");
-    }
-    if ((settings.m_useFileTime != m_settings.m_useFileTime) || force) {
-        reverseAPIKeys.append("useFileTime");
-    }
-    if (m_settings.m_streamIndex != settings.m_streamIndex)
+    if (settingsKeys.contains("streamIndex") && (m_settings.m_streamIndex != settings.m_streamIndex))
     {
         if (m_deviceAPI->getSampleMIMO()) // change of stream is possible for MIMO devices only
         {
@@ -308,25 +267,23 @@ void PacketDemod::applySettings(const PacketDemodSettings& settings, bool force)
             m_settings.m_streamIndex = settings.m_streamIndex; // make sure ChannelAPI::getStreamIndex() is consistent
             emit streamIndexChanged(settings.m_streamIndex);
         }
-
-        reverseAPIKeys.append("streamIndex");
     }
 
-    PacketDemodBaseband::MsgConfigurePacketDemodBaseband *msg = PacketDemodBaseband::MsgConfigurePacketDemodBaseband::create(settings, force);
+    PacketDemodBaseband::MsgConfigurePacketDemodBaseband *msg = PacketDemodBaseband::MsgConfigurePacketDemodBaseband::create(settingsKeys, settings, force);
     m_basebandSink->getInputMessageQueue()->push(msg);
 
-    if (settings.m_useReverseAPI)
+    if (settingsKeys.contains("useReverseAPI") && settings.m_useReverseAPI)
     {
-        bool fullUpdate = ((m_settings.m_useReverseAPI != settings.m_useReverseAPI) && settings.m_useReverseAPI) ||
-                (m_settings.m_reverseAPIAddress != settings.m_reverseAPIAddress) ||
-                (m_settings.m_reverseAPIPort != settings.m_reverseAPIPort) ||
-                (m_settings.m_reverseAPIDeviceIndex != settings.m_reverseAPIDeviceIndex) ||
-                (m_settings.m_reverseAPIChannelIndex != settings.m_reverseAPIChannelIndex);
-        webapiReverseSendSettings(reverseAPIKeys, settings, fullUpdate || force);
+        bool fullUpdate = ((settingsKeys.contains("useReverseAPI") && (m_settings.m_useReverseAPI != settings.m_useReverseAPI)) && settings.m_useReverseAPI) ||
+                (settingsKeys.contains("reverseAPIAddress") && (m_settings.m_reverseAPIAddress != settings.m_reverseAPIAddress)) ||
+                (settingsKeys.contains("reverseAPIPort") && (m_settings.m_reverseAPIPort != settings.m_reverseAPIPort)) ||
+                (settingsKeys.contains("reverseAPIDeviceIndex") && (m_settings.m_reverseAPIDeviceIndex != settings.m_reverseAPIDeviceIndex)) ||
+                (settingsKeys.contains("reverseAPIChannelIndex") && (m_settings.m_reverseAPIChannelIndex != settings.m_reverseAPIChannelIndex));
+        webapiReverseSendSettings(settingsKeys, settings, fullUpdate || force);
     }
 
-    if ((settings.m_logEnabled != m_settings.m_logEnabled)
-        || (settings.m_logFilename != m_settings.m_logFilename)
+    if ((settingsKeys.contains("logEnabled") && (settings.m_logEnabled != m_settings.m_logEnabled))
+        || (settingsKeys.contains("logFilename") && (settings.m_logFilename != m_settings.m_logFilename))
         || force)
     {
         if (m_logFile.isOpen())
@@ -355,7 +312,11 @@ void PacketDemod::applySettings(const PacketDemodSettings& settings, bool force)
         }
     }
 
-    m_settings = settings;
+    if (force) {
+        m_settings = settings;
+    } else {
+        m_settings.applySettings(settingsKeys, settings);
+    }
 }
 
 void PacketDemod::sendSampleRateToDemodAnalyzer()
@@ -386,14 +347,14 @@ bool PacketDemod::deserialize(const QByteArray& data)
 {
     if (m_settings.deserialize(data))
     {
-        MsgConfigurePacketDemod *msg = MsgConfigurePacketDemod::create(m_settings, true);
+        MsgConfigurePacketDemod *msg = MsgConfigurePacketDemod::create(QStringList(), m_settings, true);
         m_inputMessageQueue.push(msg);
         return true;
     }
     else
     {
         m_settings.resetToDefaults();
-        MsgConfigurePacketDemod *msg = MsgConfigurePacketDemod::create(m_settings, true);
+        MsgConfigurePacketDemod *msg = MsgConfigurePacketDemod::create(QStringList(), m_settings, true);
         m_inputMessageQueue.push(msg);
         return false;
     }
@@ -429,13 +390,13 @@ int PacketDemod::webapiSettingsPutPatch(
     PacketDemodSettings settings = m_settings;
     webapiUpdateChannelSettings(settings, channelSettingsKeys, response);
 
-    MsgConfigurePacketDemod *msg = MsgConfigurePacketDemod::create(settings, force);
+    MsgConfigurePacketDemod *msg = MsgConfigurePacketDemod::create(channelSettingsKeys, settings, force);
     m_inputMessageQueue.push(msg);
 
     qDebug("PacketDemod::webapiSettingsPutPatch: forward to GUI: %p", m_guiMessageQueue);
     if (m_guiMessageQueue) // forward to GUI if any
     {
-        MsgConfigurePacketDemod *msgToGUI = MsgConfigurePacketDemod::create(settings, force);
+        MsgConfigurePacketDemod *msgToGUI = MsgConfigurePacketDemod::create(channelSettingsKeys, settings, force);
         m_guiMessageQueue->push(msgToGUI);
     }
 
@@ -594,7 +555,7 @@ void PacketDemod::webapiFormatChannelReport(SWGSDRangel::SWGChannelReport& respo
     response.getPacketDemodReport()->setChannelSampleRate(m_basebandSink->getChannelSampleRate());
 }
 
-void PacketDemod::webapiReverseSendSettings(QList<QString>& channelSettingsKeys, const PacketDemodSettings& settings, bool force)
+void PacketDemod::webapiReverseSendSettings(const QList<QString>& channelSettingsKeys, const PacketDemodSettings& settings, bool force)
 {
     SWGSDRangel::SWGChannelSettings *swgChannelSettings = new SWGSDRangel::SWGChannelSettings();
     webapiFormatChannelSettings(channelSettingsKeys, swgChannelSettings, settings, force);
@@ -620,7 +581,7 @@ void PacketDemod::webapiReverseSendSettings(QList<QString>& channelSettingsKeys,
 }
 
 void PacketDemod::webapiFormatChannelSettings(
-        QList<QString>& channelSettingsKeys,
+        const QList<QString>& channelSettingsKeys,
         SWGSDRangel::SWGChannelSettings *swgChannelSettings,
         const PacketDemodSettings& settings,
         bool force

@@ -127,7 +127,7 @@ void NavtexDemodGUI::resetToDefaults()
 {
     m_settings.resetToDefaults();
     displaySettings();
-    applySettings(true);
+    applySettings(QStringList(), true);
 }
 
 QByteArray NavtexDemodGUI::serialize() const
@@ -139,7 +139,7 @@ bool NavtexDemodGUI::deserialize(const QByteArray& data)
 {
     if(m_settings.deserialize(data)) {
         displaySettings();
-        applySettings(true);
+        applySettings(QStringList(), true);
         return true;
     } else {
         resetToDefaults();
@@ -303,7 +303,7 @@ void NavtexDemodGUI::channelMarkerChangedByCursor()
 {
     ui->deltaFrequency->setValue(m_channelMarker.getCenterFrequency());
     m_settings.m_inputFrequencyOffset = m_channelMarker.getCenterFrequency();
-    applySettings();
+    applySettings(QStringList("inputFrequencyOffset"));
 }
 
 void NavtexDemodGUI::channelMarkerHighlightedByCursor()
@@ -313,9 +313,11 @@ void NavtexDemodGUI::channelMarkerHighlightedByCursor()
 
 void NavtexDemodGUI::updateTxStation()
 {
-    const NavtexTransmitter *transmitter = NavtexTransmitter::getTransmitter(QDateTime::currentDateTimeUtc().time(),
-                                                                             m_settings.m_navArea,
-                                                                             getFrequency());
+    const NavtexTransmitter *transmitter = NavtexTransmitter::getTransmitter(
+        QDateTime::currentDateTimeUtc().time(),
+        m_settings.m_navArea,
+        getFrequency()
+    );
     if (transmitter)
     {
         ui->txStation->setText(transmitter->m_station);
@@ -339,7 +341,7 @@ void NavtexDemodGUI::on_deltaFrequency_changed(qint64 value)
     m_channelMarker.setCenterFrequency(value);
     m_settings.m_inputFrequencyOffset = m_channelMarker.getCenterFrequency();
     updateAbsoluteCenterFrequency();
-    applySettings();
+    applySettings(QStringList("inputFrequencyOffset"));
 }
 
 void NavtexDemodGUI::on_rfBW_valueChanged(int value)
@@ -348,7 +350,7 @@ void NavtexDemodGUI::on_rfBW_valueChanged(int value)
     ui->rfBWText->setText(QString("%1 Hz").arg((int)bw));
     m_channelMarker.setBandwidth(bw);
     m_settings.m_rfBandwidth = bw;
-    applySettings();
+    applySettings(QStringList("rfBandwidth"));
 }
 
 void NavtexDemodGUI::on_filterStation_currentIndexChanged(int index)
@@ -357,7 +359,7 @@ void NavtexDemodGUI::on_filterStation_currentIndexChanged(int index)
 
     m_settings.m_filterStation = ui->filterStation->currentText();
     filter();
-    applySettings();
+    applySettings(QStringList("filterStation"));
 }
 
 void NavtexDemodGUI::on_filterType_currentIndexChanged(int index)
@@ -366,7 +368,7 @@ void NavtexDemodGUI::on_filterType_currentIndexChanged(int index)
 
     m_settings.m_filterType = ui->filterType->currentText();
     filter();
-    applySettings();
+    applySettings(QStringList("filterType"));
 }
 
 void NavtexDemodGUI::on_clearTable_clicked()
@@ -378,19 +380,19 @@ void NavtexDemodGUI::on_clearTable_clicked()
 void NavtexDemodGUI::on_udpEnabled_clicked(bool checked)
 {
     m_settings.m_udpEnabled = checked;
-    applySettings();
+    applySettings(QStringList("udpEnabled"));
 }
 
 void NavtexDemodGUI::on_udpAddress_editingFinished()
 {
     m_settings.m_udpAddress = ui->udpAddress->text();
-    applySettings();
+    applySettings(QStringList("udpAddress"));
 }
 
 void NavtexDemodGUI::on_udpPort_editingFinished()
 {
     m_settings.m_udpPort = ui->udpPort->text().toInt();
-    applySettings();
+    applySettings(QStringList("udpPort"));
 }
 
 void NavtexDemodGUI::filterRow(int row)
@@ -424,19 +426,19 @@ void NavtexDemodGUI::on_navArea_currentIndexChanged(int index)
 {
     m_settings.m_navArea = index + 1;
     updateTxStation();
-    applySettings();
+    applySettings(QStringList("navArea"));
 }
 
 void NavtexDemodGUI::on_channel1_currentIndexChanged(int index)
 {
     m_settings.m_scopeCh1 = index;
-    applySettings();
+    applySettings(QStringList("scopeCh1"));
 }
 
 void NavtexDemodGUI::on_channel2_currentIndexChanged(int index)
 {
     m_settings.m_scopeCh2 = index;
-    applySettings();
+    applySettings(QStringList("scopeCh2"));
 }
 
 void NavtexDemodGUI::onWidgetRolled(QWidget* widget, bool rollDown)
@@ -445,7 +447,7 @@ void NavtexDemodGUI::onWidgetRolled(QWidget* widget, bool rollDown)
     (void) rollDown;
 
     getRollupContents()->saveState(m_rollupState);
-    applySettings();
+    applySettings(QStringList());
 }
 
 void NavtexDemodGUI::onMenuDialogCalled(const QPoint &p)
@@ -490,7 +492,16 @@ void NavtexDemodGUI::onMenuDialogCalled(const QPoint &p)
             updateIndexLabel();
         }
 
-        applySettings();
+        applySettings(QStringList({
+            "title",
+            "rgbColor",
+            "useReverseAPI",
+            "reverseAPIAddress",
+            "reverseAPIPort",
+            "reverseAPIDeviceIndex",
+            "reverseAPIChannelIndex",
+            "streamIndex"
+        }));
     }
 
     resetContextMenuType();
@@ -605,7 +616,7 @@ NavtexDemodGUI::NavtexDemodGUI(PluginAPI* pluginAPI, DeviceUISet *deviceUISet, B
 
     displaySettings();
     makeUIConnections();
-    applySettings(true);
+    applySettings(QStringList(), true);
     m_resizer.enableChildMouseTracking();
 }
 
@@ -652,11 +663,11 @@ void NavtexDemodGUI::blockApplySettings(bool block)
     m_doApplySettings = !block;
 }
 
-void NavtexDemodGUI::applySettings(bool force)
+void NavtexDemodGUI::applySettings(const QStringList& settingsKeys, const bool force)
 {
     if (m_doApplySettings)
     {
-        NavtexDemod::MsgConfigureNavtexDemod* message = NavtexDemod::MsgConfigureNavtexDemod::create( m_settings, force);
+        NavtexDemod::MsgConfigureNavtexDemod* message = NavtexDemod::MsgConfigureNavtexDemod::create(settingsKeys, m_settings, force);
         m_navtexDemod->getInputMessageQueue()->push(message);
     }
 }
@@ -754,7 +765,7 @@ void NavtexDemodGUI::tick()
 void NavtexDemodGUI::on_logEnable_clicked(bool checked)
 {
     m_settings.m_logEnabled = checked;
-    applySettings();
+    applySettings(QStringList("logEnabled"));
 }
 
 void NavtexDemodGUI::on_logFilename_clicked()
@@ -770,7 +781,7 @@ void NavtexDemodGUI::on_logFilename_clicked()
         {
             m_settings.m_logFilename = fileNames[0];
             ui->logFilename->setToolTip(QString(".csv log filename: %1").arg(m_settings.m_logFilename));
-            applySettings();
+            applySettings(QStringList("logFilename"));
         }
     }
 }
@@ -874,4 +885,3 @@ void NavtexDemodGUI::updateAbsoluteCenterFrequency()
     setStatusFrequency(m_deviceCenterFrequency + m_settings.m_inputFrequencyOffset);
     updateTxStation();
 }
-

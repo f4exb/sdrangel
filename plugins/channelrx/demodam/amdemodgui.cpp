@@ -55,7 +55,7 @@ void AMDemodGUI::resetToDefaults()
 {
     m_settings.resetToDefaults();
     displaySettings();
-	applySettings(true);
+	applySettings(QStringList(), true);
 }
 
 QByteArray AMDemodGUI::serialize() const
@@ -67,7 +67,7 @@ bool AMDemodGUI::deserialize(const QByteArray& data)
 {
     if(m_settings.deserialize(data)) {
         displaySettings();
-        applySettings(true);
+        applySettings(QStringList(), true);
         return true;
     } else {
         resetToDefaults();
@@ -237,7 +237,7 @@ void AMDemodGUI::on_frequencyMode_currentIndexChanged(int index)
     }
 
     updateAbsoluteCenterFrequency();
-    applySettings();
+    applySettings(QStringList("frequencyMode"));
 }
 
 // Calculate input frequency offset, when device center frequency changes
@@ -253,7 +253,7 @@ void AMDemodGUI::calcOffset()
         m_channelMarker.setCenterFrequency(offset);
         m_settings.m_inputFrequencyOffset = m_channelMarker.getCenterFrequency();
         updateAbsoluteCenterFrequency();
-        applySettings();
+        applySettings(QStringList("inputFrequencyOffset"));
     }
 }
 
@@ -285,7 +285,7 @@ void AMDemodGUI::channelMarkerChangedByCursor()
     ui->deltaFrequency->blockSignals(false);
 
     updateAbsoluteCenterFrequency();
-    applySettings();
+    applySettings(QStringList({"inputFrequencyOffset", "frequency"}));
 }
 
 void AMDemodGUI::on_deltaFrequency_changed(qint64 value)
@@ -316,7 +316,7 @@ void AMDemodGUI::on_deltaFrequency_changed(qint64 value)
     m_channelMarker.setCenterFrequency(offset);
     m_settings.m_inputFrequencyOffset = m_channelMarker.getCenterFrequency();
     updateAbsoluteCenterFrequency();
-    applySettings();
+    applySettings(QStringList({"frequency", "inputFrequencyOffset"}));
 }
 
 void AMDemodGUI::on_pll_toggled(bool checked)
@@ -328,19 +328,19 @@ void AMDemodGUI::on_pll_toggled(bool checked)
     }
 
     m_settings.m_pll = checked;
-    applySettings();
+    applySettings(QStringList("pll"));
 }
 
 void AMDemodGUI::on_ssb_toggled(bool checked)
 {
     m_settings.m_syncAMOperation = checked ? m_samUSB ? AMDemodSettings::SyncAMUSB : AMDemodSettings::SyncAMLSB : AMDemodSettings::SyncAMDSB;
-    applySettings();
+    applySettings(QStringList("syncAMOperation"));
 }
 
 void AMDemodGUI::on_bandpassEnable_toggled(bool checked)
 {
     m_settings.m_bandpassEnable = checked;
-    applySettings();
+    applySettings(QStringList("bandpassEnable"));
 }
 
 void AMDemodGUI::on_rfBW_valueChanged(int value)
@@ -349,34 +349,34 @@ void AMDemodGUI::on_rfBW_valueChanged(int value)
     m_channelMarker.setBandwidth(value * 100);
     m_settings.m_rfBandwidth = value * 100;
     ui->afBW->setMaximum(value);
-    applySettings();
+    applySettings(QStringList("rfBandwidth"));
 }
 
 void AMDemodGUI::on_afBW_valueChanged(int value)
 {
     ui->afBWText->setText(QString("%1 kHz").arg(value / 10.0, 0, 'f', 1));
     m_settings.m_afBandwidth = value * 100;
-    applySettings();
+    applySettings(QStringList("afBandwidth"));
 }
 
 void AMDemodGUI::on_volume_valueChanged(int value)
 {
 	ui->volumeText->setText(QString("%1").arg(value / 10.0, 0, 'f', 1));
 	m_settings.m_volume = value / 10.0;
-	applySettings();
+	applySettings(QStringList("volume"));
 }
 
 void AMDemodGUI::on_squelch_valueChanged(int value)
 {
 	ui->squelchText->setText(QString("%1 dB").arg(value));
 	m_settings.m_squelch = value;
-	applySettings();
+	applySettings(QStringList("squelch"));
 }
 
 void AMDemodGUI::on_audioMute_toggled(bool checked)
 {
     m_settings.m_audioMute = checked;
-	applySettings();
+	applySettings(QStringList("audioMute"));
 }
 
 void AMDemodGUI::onWidgetRolled(QWidget* widget, bool rollDown)
@@ -389,7 +389,7 @@ void AMDemodGUI::onWidgetRolled(QWidget* widget, bool rollDown)
 	*/
 
     getRollupContents()->saveState(m_rollupState);
-    applySettings();
+    applySettings(QStringList());
 }
 
 void AMDemodGUI::onMenuDialogCalled(const QPoint &p)
@@ -434,7 +434,10 @@ void AMDemodGUI::onMenuDialogCalled(const QPoint &p)
             updateIndexLabel();
         }
 
-        applySettings();
+        applySettings(QStringList({"title", "rgbColor", "useReverseAPI",
+                                   "reverseAPIAddress", "reverseAPIPort",
+                                   "reverseAPIDeviceIndex", "reverseAPIChannelIndex",
+                                   "streamIndex"}));
     }
 
     resetContextMenuType();
@@ -507,7 +510,7 @@ AMDemodGUI::AMDemodGUI(PluginAPI* pluginAPI, DeviceUISet *deviceUISet, BasebandS
 
 	displaySettings();
     makeUIConnections();
-	applySettings(true);
+	applySettings(QStringList(), true);
     m_resizer.enableChildMouseTracking();
 }
 
@@ -521,11 +524,11 @@ void AMDemodGUI::blockApplySettings(bool block)
     m_doApplySettings = !block;
 }
 
-void AMDemodGUI::applySettings(bool force)
+void AMDemodGUI::applySettings(const QStringList& settingsKeys, bool force)
 {
 	if (m_doApplySettings)
 	{
-	    AMDemod::MsgConfigureAMDemod* message = AMDemod::MsgConfigureAMDemod::create( m_settings, force);
+	    AMDemod::MsgConfigureAMDemod* message = AMDemod::MsgConfigureAMDemod::create(settingsKeys, m_settings, force);
 	    m_amDemod->getInputMessageQueue()->push(message);
 	}
 }
@@ -626,7 +629,7 @@ void AMDemodGUI::audioSelect(const QPoint& p)
     if (audioSelect.m_selected)
     {
         m_settings.m_audioDeviceName = audioSelect.m_audioDeviceName;
-        applySettings();
+        applySettings(QStringList("audioDeviceName"));
     }
 }
 
@@ -646,7 +649,7 @@ void AMDemodGUI::samSSBSelect(const QPoint& p)
         if (m_settings.m_syncAMOperation != AMDemodSettings::SyncAMDSB)
         {
             m_settings.m_syncAMOperation = m_samUSB ? AMDemodSettings::SyncAMUSB : AMDemodSettings::SyncAMLSB;
-            applySettings();
+            applySettings(QStringList("syncAMOperation"));
         }
     }
 }
@@ -685,7 +688,7 @@ void AMDemodGUI::snapClicked()
     }
 
     displaySnap();
-    applySettings();
+    applySettings(QStringList({"snap"}));
 }
 
 void AMDemodGUI::applySnap()

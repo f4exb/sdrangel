@@ -76,6 +76,8 @@ struct RadioClockSettings
     void setScopeGUI(Serializable *scopeGUI) { m_scopeGUI = scopeGUI; }
     QByteArray serialize() const;
     bool deserialize(const QByteArray& data);
+    void applySettings(const QStringList& settingsKeys, const RadioClockSettings& settings);
+    QString getDebugString(const QStringList& settingsKeys, bool force=false) const;
 
     enum DST {
         UNKNOWN,

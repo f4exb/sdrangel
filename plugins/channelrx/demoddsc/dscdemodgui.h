@@ -121,7 +121,7 @@ private:
     virtual ~DSCDemodGUI();
 
     void blockApplySettings(bool block);
-    void applySettings(bool force = false);
+    void applySettings(const QStringList& settingsKeys, bool force = false);
     void displaySettings();
     void messageReceived(const DSCMessage& message, int errors, float rssi);
     bool handleMessage(const Message& message);
@@ -168,4 +168,3 @@ private slots:
 };
 
 #endif // INCLUDE_DSCDEMODGUI_H
-

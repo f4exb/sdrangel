@@ -57,7 +57,7 @@ FreeDVDemod::FreeDVDemod(DeviceAPI *deviceAPI) :
     m_basebandSink->setSpectrumSink(&m_spectrumVis);
     m_basebandSink->moveToThread(m_thread);
 
-    applySettings(m_settings, true);
+    applySettings(QStringList(), m_settings, true);
 
     m_deviceAPI->addChannelSink(this);
     m_deviceAPI->addChannelSinkAPI(this);
@@ -147,7 +147,7 @@ bool FreeDVDemod::handleMessage(const Message& cmd)
         MsgConfigureFreeDVDemod& cfg = (MsgConfigureFreeDVDemod&) cmd;
         qDebug("FreeDVDemod::handleMessage: MsgConfigureFreeDVDemod");
 
-        applySettings(cfg.getSettings(), cfg.getForce());
+        applySettings(cfg.getSettingsKeys(), cfg.getSettings(), cfg.getForce());
 
         return true;
     }
@@ -184,58 +184,20 @@ void FreeDVDemod::setCenterFrequency(qint64 frequency)
 {
     FreeDVDemodSettings settings = m_settings;
     settings.m_inputFrequencyOffset = frequency;
-    applySettings(settings, false);
+    applySettings(QStringList("inputFrequencyOffset"), settings, false);
 
     if (m_guiMessageQueue) // forward to GUI if any
     {
-        MsgConfigureFreeDVDemod *msgToGUI = MsgConfigureFreeDVDemod::create(settings, false);
+        MsgConfigureFreeDVDemod *msgToGUI = MsgConfigureFreeDVDemod::create(QStringList("inputFrequencyOffset"), settings, false);
         m_guiMessageQueue->push(msgToGUI);
     }
 }
 
-void FreeDVDemod::applySettings(const FreeDVDemodSettings& settings, bool force)
+void FreeDVDemod::applySettings(const QStringList& settingsKeys, const FreeDVDemodSettings& settings, bool force)
 {
-    qDebug() << "FreeDVDemod::applySettings:"
-            << " m_inputFrequencyOffset: " << settings.m_inputFrequencyOffset
-            << " m_freeDVMode: " << (int) settings.m_freeDVMode
-            << " m_volume: " << settings.m_volume
-            << " m_volumeIn: " << settings.m_volumeIn
-            << " m_spanLog2: " << settings.m_spanLog2
-            << " m_audioMute: " << settings.m_audioMute
-            << " m_agcActive: " << settings.m_agc
-            << " m_audioDeviceName: " << settings.m_audioDeviceName
-            << " m_streamIndex: " << settings.m_streamIndex
-            << " m_useReverseAPI: " << settings.m_useReverseAPI
-            << " m_reverseAPIAddress: " << settings.m_reverseAPIAddress
-            << " m_reverseAPIPort: " << settings.m_reverseAPIPort
-            << " m_reverseAPIDeviceIndex: " << settings.m_reverseAPIDeviceIndex
-            << " m_reverseAPIChannelIndex: " << settings.m_reverseAPIChannelIndex
-            << " force: " << force;
+    qDebug() << "FreeDVDemod::applySettings:" << settings.getDebugString(settingsKeys, force);
 
-    QList<QString> reverseAPIKeys;
-
-    if((m_settings.m_inputFrequencyOffset != settings.m_inputFrequencyOffset) || force) {
-        reverseAPIKeys.append("inputFrequencyOffset");
-    }
-    if ((m_settings.m_volume != settings.m_volume) || force) {
-        reverseAPIKeys.append("volume");
-    }
-    if ((m_settings.m_volumeIn != settings.m_volumeIn) || force) {
-        reverseAPIKeys.append("volumeIn");
-    }
-    if ((settings.m_audioDeviceName != m_settings.m_audioDeviceName) || force) {
-        reverseAPIKeys.append("audioDeviceName");
-    }
-    if ((m_settings.m_spanLog2 != settings.m_spanLog2) || force) {
-        reverseAPIKeys.append("spanLog2");
-    }
-    if ((m_settings.m_audioMute != settings.m_audioMute) || force) {
-        reverseAPIKeys.append("audioMute");
-    }
-    if ((m_settings.m_agc != settings.m_agc) || force) {
-        reverseAPIKeys.append("agc");
-    }
-    if (m_settings.m_streamIndex != settings.m_streamIndex)
+    if (settingsKeys.contains("streamIndex") && (m_settings.m_streamIndex != settings.m_streamIndex))
     {
         if (m_deviceAPI->getSampleMIMO()) // change of stream is possible for MIMO devices only
         {
@@ -246,12 +208,10 @@ void FreeDVDemod::applySettings(const FreeDVDemodSettings& settings, bool force)
             m_settings.m_streamIndex = settings.m_streamIndex; // make sure ChannelAPI::getStreamIndex() is consistent
             emit streamIndexChanged(settings.m_streamIndex);
         }
-
-        reverseAPIKeys.append("streamIndex");
     }
 
-    if ((settings.m_freeDVMode != m_settings.m_freeDVMode)
-     || (settings.m_spanLog2 != m_settings.m_spanLog2) || force)
+    if ((settingsKeys.contains("freeDVMode") && (settings.m_freeDVMode != m_settings.m_freeDVMode))
+     || (settingsKeys.contains("spanLog2") && (settings.m_spanLog2 != m_settings.m_spanLog2)) || force)
     {
         DSPSignalNotification *msg = new DSPSignalNotification(
             FreeDVDemodSettings::getModSampleRate(settings.m_freeDVMode)/(1<<settings.m_spanLog2),
@@ -259,27 +219,31 @@ void FreeDVDemod::applySettings(const FreeDVDemodSettings& settings, bool force)
         m_spectrumVis.getInputMessageQueue()->push(msg);
     }
 
-    FreeDVDemodBaseband::MsgConfigureFreeDVDemodBaseband *msg = FreeDVDemodBaseband::MsgConfigureFreeDVDemodBaseband::create(settings, force);
+    FreeDVDemodBaseband::MsgConfigureFreeDVDemodBaseband *msg = FreeDVDemodBaseband::MsgConfigureFreeDVDemodBaseband::create(settingsKeys, settings, force);
     m_basebandSink->getInputMessageQueue()->push(msg);
 
     if (settings.m_useReverseAPI)
     {
-        bool fullUpdate = ((m_settings.m_useReverseAPI != settings.m_useReverseAPI) && settings.m_useReverseAPI) ||
-                (m_settings.m_reverseAPIAddress != settings.m_reverseAPIAddress) ||
-                (m_settings.m_reverseAPIPort != settings.m_reverseAPIPort) ||
-                (m_settings.m_reverseAPIDeviceIndex != settings.m_reverseAPIDeviceIndex) ||
-                (m_settings.m_reverseAPIChannelIndex != settings.m_reverseAPIChannelIndex);
-        webapiReverseSendSettings(reverseAPIKeys, settings, fullUpdate || force);
+        bool fullUpdate = ((settingsKeys.contains("useReverseAPI") && (m_settings.m_useReverseAPI != settings.m_useReverseAPI)) && settings.m_useReverseAPI) ||
+                (settingsKeys.contains("reverseAPIAddress") && (m_settings.m_reverseAPIAddress != settings.m_reverseAPIAddress)) ||
+                (settingsKeys.contains("reverseAPIPort") && (m_settings.m_reverseAPIPort != settings.m_reverseAPIPort)) ||
+                (settingsKeys.contains("reverseAPIDeviceIndex") && (m_settings.m_reverseAPIDeviceIndex != settings.m_reverseAPIDeviceIndex)) ||
+                (settingsKeys.contains("reverseAPIChannelIndex") && (m_settings.m_reverseAPIChannelIndex != settings.m_reverseAPIChannelIndex));
+        webapiReverseSendSettings(settingsKeys, settings, fullUpdate || force);
     }
 
     QList<ObjectPipe*> pipes;
     MainCore::instance()->getMessagePipes().getMessagePipes(this, "settings", pipes);
 
     if (pipes.size() > 0) {
-        sendChannelSettings(pipes, reverseAPIKeys, settings, force);
+        sendChannelSettings(pipes, settingsKeys, settings, force);
     }
 
-    m_settings = settings;
+    if (force) {
+        m_settings = settings;
+    } else {
+        m_settings.applySettings(settingsKeys, settings);
+    }
 }
 
 QByteArray FreeDVDemod::serialize() const
@@ -291,14 +255,14 @@ bool FreeDVDemod::deserialize(const QByteArray& data)
 {
     if (m_settings.deserialize(data))
     {
-        MsgConfigureFreeDVDemod *msg = MsgConfigureFreeDVDemod::create(m_settings, true);
+        MsgConfigureFreeDVDemod *msg = MsgConfigureFreeDVDemod::create(QStringList(), m_settings, true);
         m_inputMessageQueue.push(msg);
         return true;
     }
     else
     {
         m_settings.resetToDefaults();
-        MsgConfigureFreeDVDemod *msg = MsgConfigureFreeDVDemod::create(m_settings, true);
+        MsgConfigureFreeDVDemod *msg = MsgConfigureFreeDVDemod::create(QStringList(), m_settings, true);
         m_inputMessageQueue.push(msg);
         return false;
     }
@@ -334,13 +298,13 @@ int FreeDVDemod::webapiSettingsPutPatch(
     FreeDVDemodSettings settings = m_settings;
     webapiUpdateChannelSettings(settings, channelSettingsKeys, response);
 
-    MsgConfigureFreeDVDemod *msg = MsgConfigureFreeDVDemod::create(settings, force);
+    MsgConfigureFreeDVDemod *msg = MsgConfigureFreeDVDemod::create(channelSettingsKeys, settings, force);
     m_inputMessageQueue.push(msg);
 
     qDebug("FreeDVDemod::webapiSettingsPutPatch: forward to GUI: %p", m_guiMessageQueue);
     if (m_guiMessageQueue) // forward to GUI if any
     {
-        MsgConfigureFreeDVDemod *msgToGUI = MsgConfigureFreeDVDemod::create(settings, force);
+        MsgConfigureFreeDVDemod *msgToGUI = MsgConfigureFreeDVDemod::create(channelSettingsKeys, settings, force);
         m_guiMessageQueue->push(msgToGUI);
     }
 
@@ -516,7 +480,7 @@ void FreeDVDemod::webapiFormatChannelReport(SWGSDRangel::SWGChannelReport& respo
     response.getFreeDvDemodReport()->setChannelSampleRate(m_basebandSink->getChannelSampleRate());
 }
 
-void FreeDVDemod::webapiReverseSendSettings(QList<QString>& channelSettingsKeys, const FreeDVDemodSettings& settings, bool force)
+void FreeDVDemod::webapiReverseSendSettings(const QList<QString>& channelSettingsKeys, const FreeDVDemodSettings& settings, bool force)
 {
     SWGSDRangel::SWGChannelSettings *swgChannelSettings = new SWGSDRangel::SWGChannelSettings();
     webapiFormatChannelSettings(channelSettingsKeys, swgChannelSettings, settings, force);
@@ -543,7 +507,7 @@ void FreeDVDemod::webapiReverseSendSettings(QList<QString>& channelSettingsKeys,
 
 void FreeDVDemod::sendChannelSettings(
     const QList<ObjectPipe*>& pipes,
-    QList<QString>& channelSettingsKeys,
+    const QList<QString>& channelSettingsKeys,
     const FreeDVDemodSettings& settings,
     bool force)
 {
@@ -567,7 +531,7 @@ void FreeDVDemod::sendChannelSettings(
 }
 
 void FreeDVDemod::webapiFormatChannelSettings(
-        QList<QString>& channelSettingsKeys,
+        const QList<QString>& channelSettingsKeys,
         SWGSDRangel::SWGChannelSettings *swgChannelSettings,
         const FreeDVDemodSettings& settings,
         bool force

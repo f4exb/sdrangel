@@ -134,7 +134,7 @@ bool RadioAstronomyBaseband::handleMessage(const Message& cmd)
         MsgConfigureRadioAstronomyBaseband& cfg = (MsgConfigureRadioAstronomyBaseband&) cmd;
         qDebug() << "RadioAstronomyBaseband::handleMessage: MsgConfigureRadioAstronomyBaseband";
 
-        applySettings(cfg.getSettings(), cfg.getForce());
+        applySettings(cfg.getSettingsKeys(), cfg.getSettings(), cfg.getForce());
 
         return true;
     }
@@ -173,19 +173,23 @@ bool RadioAstronomyBaseband::handleMessage(const Message& cmd)
     }
 }
 
-void RadioAstronomyBaseband::applySettings(const RadioAstronomySettings& settings, bool force)
+void RadioAstronomyBaseband::applySettings(const QStringList& settingsKeys, const RadioAstronomySettings& settings, bool force)
 {
-    if ((settings.m_inputFrequencyOffset != m_settings.m_inputFrequencyOffset)
-        || (settings.m_sampleRate != m_settings.m_sampleRate)
+    if ((settingsKeys.contains("inputFrequencyOffset") && (settings.m_inputFrequencyOffset != m_settings.m_inputFrequencyOffset))
+        || (settingsKeys.contains("sampleRate") && (settings.m_sampleRate != m_settings.m_sampleRate))
         || force)
     {
         m_channelizer->setChannelization(settings.m_sampleRate, settings.m_inputFrequencyOffset);
         m_sink.applyChannelSettings(m_channelizer->getChannelSampleRate(), m_channelizer->getChannelFrequencyOffset());
     }
 
-    m_sink.applySettings(settings, force);
+    m_sink.applySettings(settingsKeys, settings, force);
 
-    m_settings = settings;
+    if (force) {
+        m_settings = settings;
+    } else {
+        m_settings.applySettings(settingsKeys, settings);
+    }
 }
 
 void RadioAstronomyBaseband::setBasebandSampleRate(int sampleRate)

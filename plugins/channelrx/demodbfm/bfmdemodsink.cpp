@@ -76,7 +76,7 @@ BFMDemodSink::BFMDemodSink() :
     m_demodBuffer.resize(1<<13);
     m_demodBufferFill = 0;
 
-	applySettings(m_settings, true);
+	applySettings(QStringList(), m_settings, true);
     applyChannelSettings(m_channelSampleRate, m_channelFrequencyOffset, true);
 }
 
@@ -331,37 +331,23 @@ void BFMDemodSink::applyChannelSettings(int channelSampleRate, int channelFreque
     m_channelFrequencyOffset = channelFrequencyOffset;
 }
 
-void BFMDemodSink::applySettings(const BFMDemodSettings& settings, bool force)
+void BFMDemodSink::applySettings(const QStringList& settingsKeys, const BFMDemodSettings& settings, bool force)
 {
-    qDebug() << "BFMDemodSink::applySettings: MsgConfigureBFMDemod:"
-            << " m_inputFrequencyOffset: " << settings.m_inputFrequencyOffset
-            << " m_rfBandwidth: " << settings.m_rfBandwidth
-            << " m_afBandwidth: " << settings.m_afBandwidth
-            << " m_deEmphasis: " << settings.getDeEmphasisTimeConstant()
-            << " m_volume: " << settings.m_volume
-            << " m_squelch: " << settings.m_squelch
-            << " m_audioStereo: " << settings.m_audioStereo
-            << " m_lsbStereo: " << settings.m_lsbStereo
-            << " m_showPilot: " << settings.m_showPilot
-            << " m_rdsActive: " << settings.m_rdsActive
-            << " m_audioDeviceName: " << settings.m_audioDeviceName
-            << " m_streamIndex: " << settings.m_streamIndex
-            << " m_useReverseAPI: " << settings.m_useReverseAPI
-            << " force: " << force;
+    qDebug() << "BFMDemodSink::applySettings: MsgConfigureBFMDemod:" << settings.getDebugString(settingsKeys, force);
 
-    if ((settings.m_audioStereo && (settings.m_audioStereo != m_settings.m_audioStereo)) || force)
+    if ((settingsKeys.contains("audioStereo") && (settings.m_audioStereo != m_settings.m_audioStereo)) || force)
     {
         m_pilotPLL.configure(19000.0/m_channelSampleRate, 50.0/m_channelSampleRate, 0.01);
         applyAudioSampleRate(m_audioSampleRate); // re-apply audio sample rate to reconfigure interpolators
     }
 
-    if ((settings.getDeEmphasisTimeConstant() != m_settings.getDeEmphasisTimeConstant()) || force)
+    if ((settingsKeys.contains("deEmphasis") && (settings.getDeEmphasisTimeConstant() != m_settings.getDeEmphasisTimeConstant())) || force)
     {
         m_deemphasisFilterX.configure(settings.getDeEmphasisTimeConstant() * m_audioSampleRate);
         m_deemphasisFilterY.configure(settings.getDeEmphasisTimeConstant() * m_audioSampleRate);
     }
 
-    if ((settings.m_afBandwidth != m_settings.m_afBandwidth) || force)
+    if ((settingsKeys.contains("afBandwidth") && (settings.m_afBandwidth != m_settings.m_afBandwidth)) || force)
     {
         m_interpolator.create(16, m_channelSampleRate, settings.m_afBandwidth);
         m_interpolatorDistanceRemain = (Real) m_channelSampleRate / m_audioSampleRate;
@@ -378,7 +364,7 @@ void BFMDemodSink::applySettings(const BFMDemodSettings& settings, bool force)
         m_lowpass.create(21, m_audioSampleRate, settings.m_afBandwidth);
     }
 
-    if ((settings.m_rfBandwidth != m_settings.m_rfBandwidth) || force)
+    if ((settingsKeys.contains("rfBandwidth") && (settings.m_rfBandwidth != m_settings.m_rfBandwidth)) || force)
     {
         Real lowCut = -(settings.m_rfBandwidth / 2.0) / m_channelSampleRate;
         Real hiCut  = (settings.m_rfBandwidth / 2.0) / m_channelSampleRate;
@@ -386,7 +372,7 @@ void BFMDemodSink::applySettings(const BFMDemodSettings& settings, bool force)
         m_phaseDiscri.setFMScaling(m_channelSampleRate / m_fmExcursion);
     }
 
-    if ((settings.m_squelch != m_settings.m_squelch) || force) {
+    if ((settingsKeys.contains("squelch") && (settings.m_squelch != m_settings.m_squelch)) || force) {
         m_squelchLevel = std::pow(10.0, settings.m_squelch / 10.0);
     }
 

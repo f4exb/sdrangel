@@ -220,7 +220,7 @@ void NoiseFigureGUI::resetToDefaults()
 {
     m_settings.resetToDefaults();
     displaySettings();
-    applySettings(true);
+    applySettings(QStringList(), true);
 }
 
 QByteArray NoiseFigureGUI::serialize() const
@@ -232,7 +232,7 @@ bool NoiseFigureGUI::deserialize(const QByteArray& data)
 {
     if(m_settings.deserialize(data)) {
         displaySettings();
-        applySettings(true);
+        applySettings(QStringList(), true);
         return true;
     } else {
         resetToDefaults();
@@ -312,7 +312,7 @@ void NoiseFigureGUI::channelMarkerChangedByCursor()
 {
     ui->deltaFrequency->setValue(m_channelMarker.getCenterFrequency());
     m_settings.m_inputFrequencyOffset = m_channelMarker.getCenterFrequency();
-    applySettings();
+    applySettings(QStringList("inputFrequencyOffset"));
 }
 
 void NoiseFigureGUI::channelMarkerHighlightedByCursor()
@@ -325,20 +325,20 @@ void NoiseFigureGUI::on_deltaFrequency_changed(qint64 value)
     m_channelMarker.setCenterFrequency(value);
     m_settings.m_inputFrequencyOffset = m_channelMarker.getCenterFrequency();
     updateAbsoluteCenterFrequency();
-    applySettings();
+    applySettings(QStringList("inputFrequencyOffset"));
 }
 
 void NoiseFigureGUI::on_fftCount_valueChanged(int value)
 {
     m_settings.m_fftCount = 10000 * value;
     ui->fftCountText->setText(QString("%1k").arg(m_settings.m_fftCount / 1000));
-    applySettings();
+    applySettings(QStringList("fftCount"));
 }
 
 void NoiseFigureGUI::on_setting_currentTextChanged(const QString& text)
 {
     m_settings.m_setting = text;
-    applySettings();
+    applySettings(QStringList("setting"));
 }
 
 void NoiseFigureGUI::updateFreqWidgets()
@@ -361,44 +361,44 @@ void NoiseFigureGUI::on_frequencySpec_currentIndexChanged(int index)
 {
     m_settings.m_sweepSpec = (NoiseFigureSettings::SweepSpec)index;
     updateFreqWidgets();
-    applySettings();
+    applySettings(QStringList("sweepSpec"));
 }
 
 void NoiseFigureGUI::on_start_valueChanged(double value)
 {
     m_settings.m_startValue = value;
-    applySettings();
+    applySettings(QStringList("startValue"));
 }
 
 void NoiseFigureGUI::on_stop_valueChanged(double value)
 {
     m_settings.m_stopValue = value;
-    applySettings();
+    applySettings(QStringList("stopValue"));
 }
 
 void NoiseFigureGUI::on_steps_valueChanged(int value)
 {
     m_settings.m_steps = value;
-    applySettings();
+    applySettings(QStringList("steps"));
 }
 
 void NoiseFigureGUI::on_step_valueChanged(double value)
 {
     m_settings.m_step = value;
-    applySettings();
+    applySettings(QStringList("step"));
 }
 
 void NoiseFigureGUI::on_list_editingFinished()
 {
     m_settings.m_sweepList = ui->list->text().trimmed();
-    applySettings();
+    applySettings(QStringList("sweepList"));
 }
 
 void NoiseFigureGUI::on_fftSize_currentIndexChanged(int index)
 {
     m_settings.m_fftSize = 1 << (index + 6);
     updateBW();
-    applySettings();
+    applySettings(QStringList("fftSize"));
 }
 
 void NoiseFigureGUI::on_startStop_clicked()
@@ -517,7 +517,7 @@ void NoiseFigureGUI::on_enr_clicked()
     NoiseFigureENRDialog dialog(&m_settings);
     if (dialog.exec() == QDialog::Accepted)
     {
-        applySettings();
+        applySettings(QStringList({"enrSettings", "interpolation"}));
     }
 }
 
@@ -526,7 +526,7 @@ void NoiseFigureGUI::on_control_clicked()
     NoiseFigureControlDialog dialog(&m_settings);
     if (dialog.exec() == QDialog::Accepted)
     {
-        applySettings();
+        applySettings(QStringList({"controlSettings", "powerDelay", "visaDevice", "powerOnCommand", "powerOffCommand", "powerOnSCPI", "powerOffSCPI"}));
     }
 }
 
@@ -536,7 +536,7 @@ void NoiseFigureGUI::onWidgetRolled(QWidget* widget, bool rollDown)
     (void) rollDown;
 
     getRollupContents()->saveState(m_rollupState);
-    applySettings();
+    applySettings(QStringList());
 }
 
 void NoiseFigureGUI::onMenuDialogCalled(const QPoint &p)
@@ -581,7 +581,7 @@ void NoiseFigureGUI::onMenuDialogCalled(const QPoint &p)
             updateIndexLabel();
         }
 
-        applySettings();
+        applySettings(QStringList({"useReverseAPI", "reverseAPIAddress", "reverseAPIPort", "reverseAPIDeviceIndex", "reverseAPIChannelIndex", "streamIndex"}));
     }
 
     resetContextMenuType();
@@ -668,7 +668,7 @@ NoiseFigureGUI::NoiseFigureGUI(PluginAPI* pluginAPI, DeviceUISet *deviceUISet, B
 
     displaySettings();
     makeUIConnections();
-    applySettings(true);
+    applySettings(QStringList(), true);
     m_resizer.enableChildMouseTracking();
 }
 
@@ -700,11 +700,11 @@ void NoiseFigureGUI::blockApplySettings(bool block)
     m_doApplySettings = !block;
 }
 
-void NoiseFigureGUI::applySettings(bool force)
+void NoiseFigureGUI::applySettings(const QStringList& settingsKeys, bool force)
 {
     if (m_doApplySettings)
     {
-        NoiseFigure::MsgConfigureNoiseFigure* message = NoiseFigure::MsgConfigureNoiseFigure::create( m_settings, force);
+        NoiseFigure::MsgConfigureNoiseFigure* message = NoiseFigure::MsgConfigureNoiseFigure::create(settingsKeys, m_settings, force);
         m_noiseFigure->getInputMessageQueue()->push(message);
     }
 }

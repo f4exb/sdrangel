@@ -66,7 +66,7 @@ public:
     Real getHiCutoff() const { return m_hiCutoff; }
     void setSpectrumSink(BasebandSampleSink *sampleSink) { m_spectrumSink = sampleSink; }
 
-    void applySettings(const FreeDVModSettings& settings, bool force = false);
+    void applySettings(const QStringList& settingsKeys, const FreeDVModSettings& settings, bool force = false);
     void applyChannelSettings(int channelSampleRate, int channelFrequencyOffset, bool force = false);
     void applyFreeDVMode(FreeDVModSettings::FreeDVMode mode);
 

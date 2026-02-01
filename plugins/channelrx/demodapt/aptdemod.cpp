@@ -62,7 +62,7 @@ APTDemod::APTDemod(DeviceAPI *deviceAPI) :
     m_basebandSink->setImagWorkerMessageQueue(m_imageWorker->getInputMessageQueue());
     m_imageWorker->moveToThread(&m_imageThread);
 
-    applySettings(m_settings, true);
+    applySettings(QStringList(), m_settings, true);
 
     m_deviceAPI->addChannelSink(this);
     m_deviceAPI->addChannelSinkAPI(this);
@@ -149,7 +149,7 @@ void APTDemod::startBasebandSink()
     DSPSignalNotification *dspMsg = new DSPSignalNotification(m_basebandSampleRate, m_centerFrequency);
     m_basebandSink->getInputMessageQueue()->push(dspMsg);
 
-    APTDemodBaseband::MsgConfigureAPTDemodBaseband *msg = APTDemodBaseband::MsgConfigureAPTDemodBaseband::create(m_settings, true);
+    APTDemodBaseband::MsgConfigureAPTDemodBaseband *msg = APTDemodBaseband::MsgConfigureAPTDemodBaseband::create(QStringList(), m_settings, true);
     m_basebandSink->getInputMessageQueue()->push(msg);
 }
 
@@ -161,7 +161,7 @@ void APTDemod::startImageWorker()
     m_imageWorker->startWork();
     m_imageThread.start();
 
-    APTDemodImageWorker::MsgConfigureAPTDemodImageWorker *msg = APTDemodImageWorker::MsgConfigureAPTDemodImageWorker::create(m_settings, true);
+    APTDemodImageWorker::MsgConfigureAPTDemodImageWorker *msg = APTDemodImageWorker::MsgConfigureAPTDemodImageWorker::create(QStringList(), m_settings, true);
     m_imageWorker->getInputMessageQueue()->push(msg);
 }
 
@@ -202,7 +202,7 @@ bool APTDemod::handleMessage(const Message& cmd)
     {
         MsgConfigureAPTDemod& cfg = (MsgConfigureAPTDemod&) cmd;
         qDebug() << "APTDemod::handleMessage: MsgConfigureAPTDemod";
-        applySettings(cfg.getSettings(), cfg.getForce());
+        applySettings(cfg.getSettingsKeys(), cfg.getSettings(), cfg.getForce());
 
         return true;
     }
@@ -239,116 +239,20 @@ void APTDemod::setCenterFrequency(qint64 frequency)
 {
     APTDemodSettings settings = m_settings;
     settings.m_inputFrequencyOffset = frequency;
-    applySettings(settings, false);
+    applySettings(QStringList({"inputFrequencyOffset"}), settings, false);
 
     if (m_guiMessageQueue) // forward to GUI if any
     {
-        MsgConfigureAPTDemod *msgToGUI = MsgConfigureAPTDemod::create(settings, false);
+        MsgConfigureAPTDemod *msgToGUI = MsgConfigureAPTDemod::create(QStringList({"inputFrequencyOffset"}), settings, false);
         m_guiMessageQueue->push(msgToGUI);
     }
 }
 
-void APTDemod::applySettings(const APTDemodSettings& settings, bool force)
+void APTDemod::applySettings(const QStringList& settingsKeys, const APTDemodSettings& settings, bool force)
 {
-    qDebug() << "APTDemod::applySettings:"
-             << " m_cropNoise: " << settings.m_cropNoise
-             << " m_denoise: " << settings.m_denoise
-             << " m_linearEqualise: " << settings.m_linearEqualise
-             << " m_histogramEqualise: " << settings.m_histogramEqualise
-             << " m_precipitationOverlay: " << settings.m_precipitationOverlay
-             << " m_flip: " << settings.m_flip
-             << " m_channels: " << settings.m_channels
-             << " m_decodeEnabled: " << settings.m_decodeEnabled
-             << " m_autoSave: " << settings.m_autoSave
-             << " m_autoSavePath: " << settings.m_autoSavePath
-             << " m_autoSaveMinScanLines: " << settings.m_autoSaveMinScanLines
-             << " m_streamIndex: " << settings.m_streamIndex
-             << " m_useReverseAPI: " << settings.m_useReverseAPI
-             << " m_reverseAPIAddress: " << settings.m_reverseAPIAddress
-             << " m_reverseAPIPort: " << settings.m_reverseAPIPort
-             << " m_reverseAPIDeviceIndex: " << settings.m_reverseAPIDeviceIndex
-             << " m_reverseAPIChannelIndex: " << settings.m_reverseAPIChannelIndex
-             << " force: " << force;
+    qDebug() << "APTDemod::applySettings:" << settings.getDebugString(settingsKeys, force);
 
-    QList<QString> reverseAPIKeys;
-
-    if ((settings.m_inputFrequencyOffset != m_settings.m_inputFrequencyOffset) || force) {
-        reverseAPIKeys.append("inputFrequencyOffset");
-    }
-    if ((settings.m_rfBandwidth != m_settings.m_rfBandwidth) || force) {
-        reverseAPIKeys.append("rfBandwidth");
-    }
-    if ((settings.m_fmDeviation != m_settings.m_fmDeviation) || force) {
-        reverseAPIKeys.append("fmDeviation");
-    }
-    if ((settings.m_denoise != m_settings.m_denoise) || force) {
-        reverseAPIKeys.append("denoise");
-    }
-    if ((settings.m_linearEqualise != m_settings.m_linearEqualise) || force) {
-        reverseAPIKeys.append("linearEqualise");
-    }
-    if ((settings.m_histogramEqualise != m_settings.m_histogramEqualise) || force) {
-        reverseAPIKeys.append("histogramEqualise");
-    }
-    if ((settings.m_precipitationOverlay != m_settings.m_precipitationOverlay) || force) {
-        reverseAPIKeys.append("precipitationOverlay");
-    }
-    if ((settings.m_flip != m_settings.m_flip) || force) {
-        reverseAPIKeys.append("flip");
-    }
-    if ((settings.m_channels != m_settings.m_channels) || force) {
-        reverseAPIKeys.append("channels");
-    }
-    if ((settings.m_decodeEnabled != m_settings.m_decodeEnabled) || force) {
-        reverseAPIKeys.append("decodeEnabled");
-    }
-    if ((settings.m_autoSave != m_settings.m_autoSave) || force) {
-        reverseAPIKeys.append("autoSave");
-    }
-    if ((settings.m_autoSavePath != m_settings.m_autoSavePath) || force) {
-        reverseAPIKeys.append("autoSavePath");
-    }
-    if ((settings.m_autoSaveMinScanLines != m_settings.m_autoSaveMinScanLines) || force) {
-        reverseAPIKeys.append("autoSaveMinScanLines");
-    }
-    if ((settings.m_saveCombined != m_settings.m_saveCombined) || force) {
-        reverseAPIKeys.append("saveCombined");
-    }
-    if ((settings.m_saveSeparate != m_settings.m_saveSeparate) || force) {
-        reverseAPIKeys.append("saveSeparate");
-    }
-    if ((settings.m_saveProjection != m_settings.m_saveProjection) || force) {
-        reverseAPIKeys.append("saveProjection");
-    }
-    if ((settings.m_scanlinesPerImageUpdate != m_settings.m_scanlinesPerImageUpdate) || force) {
-        reverseAPIKeys.append("scanlinesPerImageUpdate");
-    }
-    if ((settings.m_transparencyThreshold != m_settings.m_transparencyThreshold) || force) {
-        reverseAPIKeys.append("transparencyThreshold");
-    }
-    if ((settings.m_opacityThreshold != m_settings.m_opacityThreshold) || force) {
-        reverseAPIKeys.append("opacityThreshold");
-    }
-    if ((settings.m_palettes != m_settings.m_palettes) || force) {
-        reverseAPIKeys.append("palettes");
-    }
-    if ((settings.m_palette != m_settings.m_palette) || force) {
-        reverseAPIKeys.append("palette");
-    }
-    if ((settings.m_horizontalPixelsPerDegree != m_settings.m_horizontalPixelsPerDegree) || force) {
-        reverseAPIKeys.append("horizontalPixelsPerDegree");
-    }
-    if ((settings.m_verticalPixelsPerDegree != m_settings.m_verticalPixelsPerDegree) || force) {
-        reverseAPIKeys.append("verticalPixelsPerDegree");
-    }
-    if ((settings.m_satTimeOffset != m_settings.m_satTimeOffset) || force) {
-        reverseAPIKeys.append("satTimeOffset");
-    }
-    if ((settings.m_satYaw != m_settings.m_satYaw) || force) {
-        reverseAPIKeys.append("satYaw");
-    }
-
-    if (m_settings.m_streamIndex != settings.m_streamIndex)
+    if (settingsKeys.contains("streamIndex"))
     {
         if (m_deviceAPI->getSampleMIMO()) // change of stream is possible for MIMO devices only
         {
@@ -359,26 +263,24 @@ void APTDemod::applySettings(const APTDemodSettings& settings, bool force)
             m_settings.m_streamIndex = settings.m_streamIndex; // make sure ChannelAPI::getStreamIndex() is consistent
             emit streamIndexChanged(settings.m_streamIndex);
         }
-
-        reverseAPIKeys.append("streamIndex");
     }
 
     APTDemodBaseband::MsgConfigureAPTDemodBaseband *msg
-        = APTDemodBaseband::MsgConfigureAPTDemodBaseband::create(settings, force);
+        = APTDemodBaseband::MsgConfigureAPTDemodBaseband::create(settingsKeys, settings, force);
     m_basebandSink->getInputMessageQueue()->push(msg);
 
     APTDemodImageWorker::MsgConfigureAPTDemodImageWorker *msgToImg
-        = APTDemodImageWorker::MsgConfigureAPTDemodImageWorker::create(settings, force);
+        = APTDemodImageWorker::MsgConfigureAPTDemodImageWorker::create(settingsKeys, settings, force);
     m_imageWorker->getInputMessageQueue()->push(msgToImg);
 
     if (settings.m_useReverseAPI)
     {
-        bool fullUpdate = ((m_settings.m_useReverseAPI != settings.m_useReverseAPI) && settings.m_useReverseAPI) ||
-                (m_settings.m_reverseAPIAddress != settings.m_reverseAPIAddress) ||
-                (m_settings.m_reverseAPIPort != settings.m_reverseAPIPort) ||
-                (m_settings.m_reverseAPIDeviceIndex != settings.m_reverseAPIDeviceIndex) ||
-                (m_settings.m_reverseAPIChannelIndex != settings.m_reverseAPIChannelIndex);
-        webapiReverseSendSettings(reverseAPIKeys, settings, fullUpdate || force);
+        bool fullUpdate = (settingsKeys.contains("useReverseAPI")) ||
+                (settingsKeys.contains("reverseAPIAddress")) ||
+                (settingsKeys.contains("reverseAPIPort")) ||
+                (settingsKeys.contains("reverseAPIDeviceIndex")) ||
+                (settingsKeys.contains("reverseAPIChannelIndex"));
+        webapiReverseSendSettings(settingsKeys, settings, fullUpdate || force);
     }
 
     m_settings = settings;
@@ -393,14 +295,14 @@ bool APTDemod::deserialize(const QByteArray& data)
 {
     if (m_settings.deserialize(data))
     {
-        MsgConfigureAPTDemod *msg = MsgConfigureAPTDemod::create(m_settings, true);
+        MsgConfigureAPTDemod *msg = MsgConfigureAPTDemod::create(QStringList(), m_settings, true);
         m_inputMessageQueue.push(msg);
         return true;
     }
     else
     {
         m_settings.resetToDefaults();
-        MsgConfigureAPTDemod *msg = MsgConfigureAPTDemod::create(m_settings, true);
+        MsgConfigureAPTDemod *msg = MsgConfigureAPTDemod::create(QStringList(), m_settings, true);
         m_inputMessageQueue.push(msg);
         return false;
     }
@@ -436,13 +338,13 @@ int APTDemod::webapiSettingsPutPatch(
     APTDemodSettings settings = m_settings;
     webapiUpdateChannelSettings(settings, channelSettingsKeys, response);
 
-    MsgConfigureAPTDemod *msg = MsgConfigureAPTDemod::create(settings, force);
+    MsgConfigureAPTDemod *msg = MsgConfigureAPTDemod::create(channelSettingsKeys, settings, force);
     m_inputMessageQueue.push(msg);
 
     qDebug("APTDemod::webapiSettingsPutPatch: forward to GUI: %p", m_guiMessageQueue);
     if (m_guiMessageQueue) // forward to GUI if any
     {
-        MsgConfigureAPTDemod *msgToGUI = MsgConfigureAPTDemod::create(settings, force);
+        MsgConfigureAPTDemod *msgToGUI = MsgConfigureAPTDemod::create(channelSettingsKeys, settings, force);
         m_guiMessageQueue->push(msgToGUI);
     }
 
@@ -645,7 +547,7 @@ void APTDemod::webapiFormatChannelSettings(SWGSDRangel::SWGChannelSettings& resp
     }
 }
 
-void APTDemod::webapiReverseSendSettings(QList<QString>& channelSettingsKeys, const APTDemodSettings& settings, bool force)
+void APTDemod::webapiReverseSendSettings(const QList<QString>& channelSettingsKeys, const APTDemodSettings& settings, bool force)
 {
     SWGSDRangel::SWGChannelSettings *swgChannelSettings = new SWGSDRangel::SWGChannelSettings();
     webapiFormatChannelSettings(channelSettingsKeys, swgChannelSettings, settings, force);
@@ -671,7 +573,7 @@ void APTDemod::webapiReverseSendSettings(QList<QString>& channelSettingsKeys, co
 }
 
 void APTDemod::webapiFormatChannelSettings(
-        QList<QString>& channelSettingsKeys,
+        const QList<QString>& channelSettingsKeys,
         SWGSDRangel::SWGChannelSettings *swgChannelSettings,
         const APTDemodSettings& settings,
         bool force
@@ -825,9 +727,9 @@ int APTDemod::webapiActionsPost(
                     settings.m_aosDateTime = QDateTime::fromString(*aos->getDateTime(), Qt::ISODateWithMs);
                     settings.m_northToSouth = aos->getNorthToSouthPass();
 
-                    m_inputMessageQueue.push(MsgConfigureAPTDemod::create(settings, false));
+                    m_inputMessageQueue.push(MsgConfigureAPTDemod::create(channelActionsKeys, settings, false));
                     if (m_guiMessageQueue) {
-                        m_guiMessageQueue->push(MsgConfigureAPTDemod::create(settings, false));
+                        m_guiMessageQueue->push(MsgConfigureAPTDemod::create(channelActionsKeys, settings, false));
                     }
                 }
 
@@ -858,10 +760,10 @@ int APTDemod::webapiActionsPost(
                     // Disable decoder
                     APTDemodSettings settings = m_settings;
                     settings.m_decodeEnabled = false;
-                    m_inputMessageQueue.push(MsgConfigureAPTDemod::create(settings, false));
+                    m_inputMessageQueue.push(MsgConfigureAPTDemod::create(channelActionsKeys, settings, false));
 
                     if (m_guiMessageQueue) {
-                        m_guiMessageQueue->push(MsgConfigureAPTDemod::create(settings, false));
+                        m_guiMessageQueue->push(MsgConfigureAPTDemod::create(channelActionsKeys, settings, false));
                     }
                 }
 

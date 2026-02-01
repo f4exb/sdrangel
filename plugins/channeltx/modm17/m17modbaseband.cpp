@@ -221,7 +221,7 @@ void M17ModBaseband::applySettings(const M17ModSettings& settings, const QList<Q
         }
     }
 
-    m_source.applySettings(settings, settingsKeys, force);
+    m_source.applySettings(settingsKeys, settings, force);
 
     if (force) {
         m_settings = settings;

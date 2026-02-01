@@ -129,7 +129,7 @@ bool APTDemodBaseband::handleMessage(const Message& cmd)
         MsgConfigureAPTDemodBaseband& cfg = (MsgConfigureAPTDemodBaseband&) cmd;
         qDebug() << "APTDemodBaseband::handleMessage: MsgConfigureAPTDemodBaseband";
 
-        applySettings(cfg.getSettings(), cfg.getForce());
+        applySettings(cfg.getSettingsKeys(), cfg.getSettings(), cfg.getForce());
 
         return true;
     }
@@ -154,17 +154,21 @@ bool APTDemodBaseband::handleMessage(const Message& cmd)
     }
 }
 
-void APTDemodBaseband::applySettings(const APTDemodSettings& settings, bool force)
+void APTDemodBaseband::applySettings(const QStringList& settingsKeys, const APTDemodSettings& settings, bool force)
 {
-    if ((settings.m_inputFrequencyOffset != m_settings.m_inputFrequencyOffset) || force)
+    if ((settingsKeys.contains("m_inputFrequencyOffset")) || force)
     {
         m_channelizer->setChannelization(APTDEMOD_AUDIO_SAMPLE_RATE, settings.m_inputFrequencyOffset);
         m_sink.applyChannelSettings(m_channelizer->getChannelSampleRate(), m_channelizer->getChannelFrequencyOffset());
     }
 
-    m_sink.applySettings(settings, force);
+    m_sink.applySettings(settingsKeys, settings, force);
 
-    m_settings = settings;
+    if (force) {
+        m_settings = settings;
+    } else {
+        m_settings.applySettings(settingsKeys, settings);
+    }
 }
 
 void APTDemodBaseband::setBasebandSampleRate(int sampleRate)

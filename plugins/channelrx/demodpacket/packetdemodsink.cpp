@@ -47,7 +47,7 @@ PacketDemodSink::PacketDemodSink(PacketDemod *packetDemod) :
     m_demodBuffer.resize(1<<12);
     m_demodBufferFill = 0;
 
-    applySettings(m_settings, true);
+    applySettings(QStringList(), m_settings, true);
     applyChannelSettings(m_channelSampleRate, m_channelFrequencyOffset, true);
 }
 
@@ -305,18 +305,17 @@ void PacketDemodSink::applyChannelSettings(int channelSampleRate, int channelFre
     m_channelFrequencyOffset = channelFrequencyOffset;
 }
 
-void PacketDemodSink::applySettings(const PacketDemodSettings& settings, bool force)
+void PacketDemodSink::applySettings(const QStringList& settingsKeys, const PacketDemodSettings& settings, bool force)
 {
-    qDebug() << "PacketDemodSink::applySettings:"
-            << " force: " << force;
+    qDebug() << "PacketDemodSink::applySettings:" << settings.getDebugString(settingsKeys, force);
 
-    if ((settings.m_rfBandwidth != m_settings.m_rfBandwidth) || force)
+    if ((settingsKeys.contains("rfBandwidth") && (settings.m_rfBandwidth != m_settings.m_rfBandwidth)) || force)
     {
         m_interpolator.create(16, m_channelSampleRate, settings.m_rfBandwidth / 2.2);
         m_interpolatorDistance = (Real) m_channelSampleRate / (Real) PacketDemodSettings::PACKETDEMOD_CHANNEL_SAMPLE_RATE;
         m_interpolatorDistanceRemain = m_interpolatorDistance;
     }
-    if ((settings.m_fmDeviation != m_settings.m_fmDeviation) || force)
+    if ((settingsKeys.contains("fmDeviation") && (settings.m_fmDeviation != m_settings.m_fmDeviation)) || force)
     {
         m_phaseDiscri.setFMScaling(PacketDemodSettings::PACKETDEMOD_CHANNEL_SAMPLE_RATE / (2.0f * settings.m_fmDeviation));
     }
@@ -352,7 +351,11 @@ void PacketDemodSink::applySettings(const PacketDemodSettings& settings, bool fo
         m_onesCount = 0;
         m_gotSOP = false;
         m_byteCount = 0;
+        m_settings = settings;
+    }
+    else
+    {
+        m_settings.applySettings(settingsKeys, settings);
     }
 
-    m_settings = settings;
 }

@@ -44,20 +44,23 @@ public:
 
     public:
         const PagerDemodSettings& getSettings() const { return m_settings; }
+        const QStringList& getSettingsKeys() const { return m_settingsKeys; }
         bool getForce() const { return m_force; }
 
-        static MsgConfigurePagerDemodBaseband* create(const PagerDemodSettings& settings, bool force)
+        static MsgConfigurePagerDemodBaseband* create(const QStringList& settingsKeys, const PagerDemodSettings& settings, bool force)
         {
-            return new MsgConfigurePagerDemodBaseband(settings, force);
+            return new MsgConfigurePagerDemodBaseband(settingsKeys, settings, force);
         }
 
     private:
         PagerDemodSettings m_settings;
+        QStringList m_settingsKeys;
         bool m_force;
 
-        MsgConfigurePagerDemodBaseband(const PagerDemodSettings& settings, bool force) :
+        MsgConfigurePagerDemodBaseband(const QStringList& settingsKeys, const PagerDemodSettings& settings, bool force) :
             Message(),
             m_settings(settings),
+            m_settingsKeys(settingsKeys),
             m_force(force)
         { }
     };
@@ -93,7 +96,7 @@ private:
 
     bool handleMessage(const Message& cmd);
     void calculateOffset(PagerDemodSink *sink);
-    void applySettings(const PagerDemodSettings& settings, bool force = false);
+    void applySettings(const QStringList& settingsKeys, const PagerDemodSettings& settings, bool force = false);
 
 private slots:
     void handleInputMessages();

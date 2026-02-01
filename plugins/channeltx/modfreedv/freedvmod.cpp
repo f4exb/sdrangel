@@ -68,7 +68,7 @@ FreeDVMod::FreeDVMod(DeviceAPI *deviceAPI) :
     m_basebandSource->setInputFileStream(&m_ifstream);
     m_basebandSource->moveToThread(m_thread);
 
-    applySettings(m_settings, true);
+    applySettings(QStringList(), m_settings, true);
 
     m_deviceAPI->addChannelSource(this);
     m_deviceAPI->addChannelSourceAPI(this);
@@ -138,11 +138,11 @@ void FreeDVMod::setCenterFrequency(qint64 frequency)
 {
     FreeDVModSettings settings = m_settings;
     settings.m_inputFrequencyOffset = frequency;
-    applySettings(settings, false);
+    applySettings(QStringList("inputFrequencyOffset"), settings, false);
 
     if (m_guiMessageQueue) // forward to GUI if any
     {
-        MsgConfigureFreeDVMod *msgToGUI = MsgConfigureFreeDVMod::create(settings, false);
+        MsgConfigureFreeDVMod *msgToGUI = MsgConfigureFreeDVMod::create(QStringList("inputFrequencyOffset"), settings, false);
         m_guiMessageQueue->push(msgToGUI);
     }
 }
@@ -154,7 +154,7 @@ bool FreeDVMod::handleMessage(const Message& cmd)
         MsgConfigureFreeDVMod& cfg = (MsgConfigureFreeDVMod&) cmd;
         qDebug() << "FreeDVMod::handleMessage: MsgConfigureFreeDVMod";
 
-        applySettings(cfg.getSettings(), cfg.getForce());
+        applySettings(cfg.getSettingsKeys(), cfg.getSettings(), cfg.getForce());
 
         return true;
     }
@@ -259,57 +259,9 @@ void FreeDVMod::seekFileStream(int seekPercentage)
     }
 }
 
-void FreeDVMod::applySettings(const FreeDVModSettings& settings, bool force)
+void FreeDVMod::applySettings(const QStringList& settingsKeys, const FreeDVModSettings& settings, bool force)
 {
-    QList<QString> reverseAPIKeys;
-
-    if ((settings.m_inputFrequencyOffset != m_settings.m_inputFrequencyOffset) || force) {
-        reverseAPIKeys.append("inputFrequencyOffset");
-    }
-    if ((settings.m_toneFrequency != m_settings.m_toneFrequency) || force) {
-        reverseAPIKeys.append("toneFrequency");
-    }
-    if ((settings.m_volumeFactor != m_settings.m_volumeFactor) || force) {
-        reverseAPIKeys.append("volumeFactor");
-    }
-    if ((settings.m_spanLog2 != m_settings.m_spanLog2) || force) {
-        reverseAPIKeys.append("spanLog2");
-    }
-    if ((settings.m_audioMute != m_settings.m_audioMute) || force) {
-        reverseAPIKeys.append("audioMute");
-    }
-    if ((settings.m_playLoop != m_settings.m_playLoop) || force) {
-        reverseAPIKeys.append("playLoop");
-    }
-    if ((settings.m_playLoop != m_settings.m_gaugeInputElseModem) || force) {
-        reverseAPIKeys.append("gaugeInputElseModem");
-    }
-    if ((settings.m_rgbColor != m_settings.m_rgbColor) || force) {
-        reverseAPIKeys.append("rgbColor");
-    }
-    if ((settings.m_title != m_settings.m_title) || force) {
-        reverseAPIKeys.append("title");
-    }
-    if ((settings.m_freeDVMode != m_settings.m_freeDVMode) || force) {
-        reverseAPIKeys.append("freeDVMode");
-    }
-    if ((settings.m_modAFInput != m_settings.m_modAFInput) || force) {
-        reverseAPIKeys.append("modAFInput");
-    }
-    if ((settings.m_audioDeviceName != m_settings.m_audioDeviceName) || force) {
-        reverseAPIKeys.append("audioDeviceName");
-    }
-    if ((settings.m_toneFrequency != m_settings.m_toneFrequency) || force) {
-        reverseAPIKeys.append("toneFrequency");
-    }
-    if ((m_settings.m_freeDVMode != settings.m_freeDVMode) || force) {
-        reverseAPIKeys.append("freeDVMode");
-    }
-    if ((settings.m_audioDeviceName != m_settings.m_audioDeviceName) || force) {
-        reverseAPIKeys.append("audioDeviceName");
-    }
-
-    if (m_settings.m_streamIndex != settings.m_streamIndex)
+    if (settingsKeys.contains("streamIndex") && m_settings.m_streamIndex != settings.m_streamIndex)
     {
         if (m_deviceAPI->getSampleMIMO()) // change of stream is possible for MIMO devices only
         {
@@ -320,12 +272,10 @@ void FreeDVMod::applySettings(const FreeDVModSettings& settings, bool force)
             m_settings.m_streamIndex = settings.m_streamIndex; // make sure ChannelAPI::getStreamIndex() is consistent
             emit streamIndexChanged(settings.m_streamIndex);
         }
-
-        reverseAPIKeys.append("streamIndex");
     }
 
-    if ((settings.m_freeDVMode != m_settings.m_freeDVMode)
-     || (settings.m_spanLog2 != m_settings.m_spanLog2) || force)
+    if ((settingsKeys.contains("freeDVMode") && settings.m_freeDVMode != m_settings.m_freeDVMode)
+     || (settingsKeys.contains("spanLog2") && settings.m_spanLog2 != m_settings.m_spanLog2) || force)
     {
         DSPSignalNotification *msg = new DSPSignalNotification(
             FreeDVModSettings::getModSampleRate(settings.m_freeDVMode)/(1<<settings.m_spanLog2),
@@ -333,24 +283,24 @@ void FreeDVMod::applySettings(const FreeDVModSettings& settings, bool force)
         m_spectrumVis.getInputMessageQueue()->push(msg);
     }
 
-    FreeDVModBaseband::MsgConfigureFreeDVModBaseband *msg = FreeDVModBaseband::MsgConfigureFreeDVModBaseband::create(settings, force);
+    FreeDVModBaseband::MsgConfigureFreeDVModBaseband *msg = FreeDVModBaseband::MsgConfigureFreeDVModBaseband::create(settingsKeys, settings, force);
     m_basebandSource->getInputMessageQueue()->push(msg);
 
-    if (settings.m_useReverseAPI)
+    if (settingsKeys.contains("useReverseAPI") && settings.m_useReverseAPI)
     {
-        bool fullUpdate = ((m_settings.m_useReverseAPI != settings.m_useReverseAPI) && settings.m_useReverseAPI) ||
-                (m_settings.m_reverseAPIAddress != settings.m_reverseAPIAddress) ||
-                (m_settings.m_reverseAPIPort != settings.m_reverseAPIPort) ||
-                (m_settings.m_reverseAPIDeviceIndex != settings.m_reverseAPIDeviceIndex) ||
-                (m_settings.m_reverseAPIChannelIndex != settings.m_reverseAPIChannelIndex);
-        webapiReverseSendSettings(reverseAPIKeys, settings, fullUpdate || force);
+        bool fullUpdate = ((settingsKeys.contains("useReverseAPI") && m_settings.m_useReverseAPI != settings.m_useReverseAPI) && settings.m_useReverseAPI) ||
+                (settingsKeys.contains("reverseAPIAddress") && m_settings.m_reverseAPIAddress != settings.m_reverseAPIAddress) ||
+                (settingsKeys.contains("reverseAPIPort") && m_settings.m_reverseAPIPort != settings.m_reverseAPIPort) ||
+                (settingsKeys.contains("reverseAPIDeviceIndex") && m_settings.m_reverseAPIDeviceIndex != settings.m_reverseAPIDeviceIndex) ||
+                (settingsKeys.contains("reverseAPIChannelIndex") && m_settings.m_reverseAPIChannelIndex != settings.m_reverseAPIChannelIndex);
+        webapiReverseSendSettings(settingsKeys, settings, fullUpdate || force);
     }
 
     QList<ObjectPipe*> pipes;
     MainCore::instance()->getMessagePipes().getMessagePipes(this, "settings", pipes);
 
     if (pipes.size() > 0) {
-        sendChannelSettings(pipes, reverseAPIKeys, settings, force);
+        sendChannelSettings(pipes, settingsKeys, settings, force);
     }
 
     m_settings = settings;
@@ -365,14 +315,14 @@ bool FreeDVMod::deserialize(const QByteArray& data)
 {
     if (m_settings.deserialize(data))
     {
-        MsgConfigureFreeDVMod *msg = MsgConfigureFreeDVMod::create(m_settings, true);
+        MsgConfigureFreeDVMod *msg = MsgConfigureFreeDVMod::create(QStringList(), m_settings, true);
         m_inputMessageQueue.push(msg);
         return true;
     }
     else
     {
         m_settings.resetToDefaults();
-        MsgConfigureFreeDVMod *msg = MsgConfigureFreeDVMod::create(m_settings, true);
+        MsgConfigureFreeDVMod *msg = MsgConfigureFreeDVMod::create(QStringList(), m_settings, true);
         m_inputMessageQueue.push(msg);
         return false;
     }
@@ -429,12 +379,12 @@ int FreeDVMod::webapiSettingsPutPatch(
         }
     }
 
-    MsgConfigureFreeDVMod *msg = MsgConfigureFreeDVMod::create(settings, force);
+    MsgConfigureFreeDVMod *msg = MsgConfigureFreeDVMod::create(channelSettingsKeys, settings, force);
     m_inputMessageQueue.push(msg);
 
     if (m_guiMessageQueue) // forward to GUI if any
     {
-        MsgConfigureFreeDVMod *msgToGUI = MsgConfigureFreeDVMod::create(settings, force);
+        MsgConfigureFreeDVMod *msgToGUI = MsgConfigureFreeDVMod::create(channelSettingsKeys, settings, force);
         m_guiMessageQueue->push(msgToGUI);
     }
 
@@ -616,7 +566,7 @@ void FreeDVMod::webapiFormatChannelReport(SWGSDRangel::SWGChannelReport& respons
     response.getFreeDvModReport()->setChannelSampleRate(m_basebandSource->getChannelSampleRate());
 }
 
-void FreeDVMod::webapiReverseSendSettings(QList<QString>& channelSettingsKeys, const FreeDVModSettings& settings, bool force)
+void FreeDVMod::webapiReverseSendSettings(const QList<QString>& channelSettingsKeys, const FreeDVModSettings& settings, bool force)
 {
     SWGSDRangel::SWGChannelSettings *swgChannelSettings = new SWGSDRangel::SWGChannelSettings();
     webapiFormatChannelSettings(channelSettingsKeys, swgChannelSettings, settings, force);
@@ -675,7 +625,7 @@ void FreeDVMod::webapiReverseSendCWSettings(const CWKeyerSettings& cwKeyerSettin
 
 void FreeDVMod::sendChannelSettings(
     const QList<ObjectPipe*>& pipes,
-    QList<QString>& channelSettingsKeys,
+    const QList<QString>& channelSettingsKeys,
     const FreeDVModSettings& settings,
     bool force)
 {
@@ -699,7 +649,7 @@ void FreeDVMod::sendChannelSettings(
 }
 
 void FreeDVMod::webapiFormatChannelSettings(
-        QList<QString>& channelSettingsKeys,
+        const QList<QString>& channelSettingsKeys,
         SWGSDRangel::SWGChannelSettings *swgChannelSettings,
         const FreeDVModSettings& settings,
         bool force

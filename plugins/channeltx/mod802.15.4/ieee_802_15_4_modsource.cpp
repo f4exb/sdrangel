@@ -59,7 +59,7 @@ IEEE_802_15_4_ModSource::IEEE_802_15_4_ModSource() :
     m_pulseShapeQ.create(1, 6, m_channelSampleRate/300000, true);
     m_specSampleBuffer.resize(m_specSampleBufferSize);
     m_scopeSampleBuffer.resize(m_scopeSampleBufferSize);
-    applySettings(m_settings, true);
+    applySettings(QStringList(), m_settings, true);
     applyChannelSettings(m_channelSampleRate, m_channelFrequencyOffset, true);
     connect(&m_inputMessageQueue, SIGNAL(messageEnqueued()), this, SLOT(handleInputMessages()));
 }
@@ -311,15 +311,16 @@ void IEEE_802_15_4_ModSource::calculateLevel(Real& sample)
     }
 }
 
-void IEEE_802_15_4_ModSource::applySettings(const IEEE_802_15_4_ModSettings& settings, bool force)
+void IEEE_802_15_4_ModSource::applySettings(const QStringList& settingsKeys, const IEEE_802_15_4_ModSettings& settings, bool force)
 {
     // Only recreate filters if settings have changed
-    if ((settings.m_lpfTaps != m_settings.m_lpfTaps) || (settings.m_rfBandwidth != m_settings.m_rfBandwidth) || force)
+    if ((settingsKeys.contains("lpfTaps") && (settings.m_lpfTaps != m_settings.m_lpfTaps)) ||
+        (settingsKeys.contains("rfBandwidth") && (settings.m_rfBandwidth != m_settings.m_rfBandwidth)) || force)
     {
         qDebug() << "IEEE_802_15_4_ModSource::applySettings: Creating new lpf with taps " << settings.m_lpfTaps << " rfBW " << settings.m_rfBandwidth;
         m_lowpass.create(settings.m_lpfTaps, m_channelSampleRate, settings.m_rfBandwidth / 2.0);
     }
-    if ((settings.m_spectrumRate != m_settings.m_spectrumRate) || force)
+    if ((settingsKeys.contains("spectrumRate") && (settings.m_spectrumRate != m_settings.m_spectrumRate)) || force)
     {
         m_interpolatorDistanceRemain = 0;
         m_interpolatorConsumed = false;
@@ -350,12 +351,12 @@ void IEEE_802_15_4_ModSource::applySettings(const IEEE_802_15_4_ModSettings& set
         qCritical("Sample rate is not a high enough multiple of the chip rate");
     }
 
-    if ((settings.m_pulseShaping != m_settings.m_pulseShaping)
-        || (settings.m_beta != m_settings.m_beta)
-        || (settings.m_symbolSpan != m_settings.m_symbolSpan)
-        || (settings.m_bitRate != m_settings.m_bitRate)
-        || (settings.m_modulation != m_settings.m_modulation)
-        || (settings.m_subGHzBand != m_settings.m_subGHzBand)
+    if ((settingsKeys.contains("pulseShaping") && (settings.m_pulseShaping != m_settings.m_pulseShaping))
+        || (settingsKeys.contains("beta") && (settings.m_beta != m_settings.m_beta))
+        || (settingsKeys.contains("symbolSpan") && (settings.m_symbolSpan != m_settings.m_symbolSpan))
+        || (settingsKeys.contains("bitRate") && (settings.m_bitRate != m_settings.m_bitRate))
+        || (settingsKeys.contains("modulation") && (settings.m_modulation != m_settings.m_modulation))
+        || (settingsKeys.contains("subGHzBand") && (settings.m_subGHzBand != m_settings.m_subGHzBand))
         || force)
     {
         qDebug() << "IEEE_802_15_4_ModSource::applySettings: Recreating pulse shaping filter: "
@@ -378,11 +379,15 @@ void IEEE_802_15_4_ModSource::applySettings(const IEEE_802_15_4_ModSettings& set
         }
     }
 
-    if ((settings.m_polynomial != m_settings.m_polynomial) || force) {
+    if ((settingsKeys.contains("polynomial") && (settings.m_polynomial != m_settings.m_polynomial)) || force) {
         m_scrambler.setPolynomial(settings.m_polynomial);
     }
 
-    m_settings = settings;
+    if (force) {
+        m_settings = settings;
+    } else {
+        m_settings.applySettings(settingsKeys, settings);
+    }
 
     // Precalculate linear gain to save doing it in the loop
     m_linearGain = powf(10.0f,  m_settings.m_gain/20.0f);

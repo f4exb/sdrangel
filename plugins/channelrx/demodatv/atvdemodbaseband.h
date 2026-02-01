@@ -41,20 +41,23 @@ public:
 
     public:
         const ATVDemodSettings& getSettings() const { return m_settings; }
+        const QStringList& getSettingsKeys() const { return m_settingsKeys; }
         bool getForce() const { return m_force; }
 
-        static MsgConfigureATVDemodBaseband* create(const ATVDemodSettings& settings, bool force)
+        static MsgConfigureATVDemodBaseband* create(const QStringList& settingsKeys, const ATVDemodSettings& settings, bool force)
         {
-            return new MsgConfigureATVDemodBaseband(settings, force);
+            return new MsgConfigureATVDemodBaseband(settingsKeys, settings, force);
         }
 
     private:
         ATVDemodSettings m_settings;
+        QStringList m_settingsKeys;
         bool m_force;
 
-        MsgConfigureATVDemodBaseband(const ATVDemodSettings& settings, bool force) :
+        MsgConfigureATVDemodBaseband(const QStringList& settingsKeys, const ATVDemodSettings& settings, bool force) :
             Message(),
             m_settings(settings),
+            m_settingsKeys(settingsKeys),
             m_force(force)
         { }
     };
@@ -87,7 +90,7 @@ private:
     QRecursiveMutex m_mutex;
 
     bool handleMessage(const Message& cmd);
-    void applySettings(const ATVDemodSettings& settings, bool force = false);
+    void applySettings(const QStringList& settingsKeys, const ATVDemodSettings& settings, bool force = false);
 
 private slots:
     void handleInputMessages();

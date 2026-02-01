@@ -134,7 +134,7 @@ bool NavtexDemodBaseband::handleMessage(const Message& cmd)
         MsgConfigureNavtexDemodBaseband& cfg = (MsgConfigureNavtexDemodBaseband&) cmd;
         qDebug() << "NavtexDemodBaseband::handleMessage: MsgConfigureNavtexDemodBaseband";
 
-        applySettings(cfg.getSettings(), cfg.getForce());
+        applySettings(cfg.getSettingsKeys(), cfg.getSettings(), cfg.getForce());
 
         return true;
     }
@@ -155,17 +155,21 @@ bool NavtexDemodBaseband::handleMessage(const Message& cmd)
     }
 }
 
-void NavtexDemodBaseband::applySettings(const NavtexDemodSettings& settings, bool force)
+void NavtexDemodBaseband::applySettings(const QStringList& settingsKeys, const NavtexDemodSettings& settings, bool force)
 {
-    if ((settings.m_inputFrequencyOffset != m_settings.m_inputFrequencyOffset) || force)
+    if ((settingsKeys.contains("inputFrequencyOffset") && (settings.m_inputFrequencyOffset != m_settings.m_inputFrequencyOffset)) || force)
     {
         m_channelizer->setChannelization(NavtexDemodSettings::NAVTEXDEMOD_CHANNEL_SAMPLE_RATE, settings.m_inputFrequencyOffset);
         m_sink.applyChannelSettings(m_channelizer->getChannelSampleRate(), m_channelizer->getChannelFrequencyOffset());
     }
 
-    m_sink.applySettings(settings, force);
+    m_sink.applySettings(settingsKeys, settings, force);
 
-    m_settings = settings;
+    if (force) {
+        m_settings = settings;
+    } else {
+        m_settings.applySettings(settingsKeys, settings);
+    }
 }
 
 int NavtexDemodBaseband::getChannelSampleRate() const
@@ -178,4 +182,3 @@ void NavtexDemodBaseband::setBasebandSampleRate(int sampleRate)
     m_channelizer->setBasebandSampleRate(sampleRate);
     m_sink.applyChannelSettings(m_channelizer->getChannelSampleRate(), m_channelizer->getChannelFrequencyOffset());
 }
-

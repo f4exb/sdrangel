@@ -39,20 +39,23 @@ public:
 
     public:
         const FileSourceSettings& getSettings() const { return m_settings; }
+        const QStringList& getSettingsKeys() const { return m_settingsKeys; }
         bool getForce() const { return m_force; }
 
-        static MsgConfigureFileSourceBaseband* create(const FileSourceSettings& settings, bool force)
+        static MsgConfigureFileSourceBaseband* create(const QStringList& settingsKeys, const FileSourceSettings& settings, bool force)
         {
-            return new MsgConfigureFileSourceBaseband(settings, force);
+            return new MsgConfigureFileSourceBaseband(settingsKeys, settings, force);
         }
 
     private:
         FileSourceSettings m_settings;
+        QStringList m_settingsKeys;
         bool m_force;
 
-        MsgConfigureFileSourceBaseband(const FileSourceSettings& settings, bool force) :
+        MsgConfigureFileSourceBaseband(const QStringList& settingsKeys, const FileSourceSettings& settings, bool force) :
             Message(),
             m_settings(settings),
+            m_settingsKeys(settingsKeys),
             m_force(force)
         { }
     };
@@ -152,7 +155,7 @@ private:
 
     void processFifo(SampleVector& data, unsigned int iBegin, unsigned int iEnd);
     bool handleMessage(const Message& cmd);
-    void applySettings(const FileSourceSettings& settings, bool force = false);
+    void applySettings(const QStringList& settingsKeys, const FileSourceSettings& settings, bool force = false);
 
 private slots:
     void handleInputMessages();

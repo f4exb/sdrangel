@@ -56,7 +56,7 @@ LocalSource::LocalSource(DeviceAPI *deviceAPI) :
     m_basebandSource = new LocalSourceBaseband();
     m_basebandSource->moveToThread(m_thread);
 
-    applySettings(m_settings, true);
+    applySettings(QStringList(), m_settings, true);
 
     m_deviceAPI->addChannelSource(this);
     m_deviceAPI->addChannelSourceAPI(this);
@@ -145,7 +145,7 @@ bool LocalSource::handleMessage(const Message& cmd)
     {
         MsgConfigureLocalSource& cfg = (MsgConfigureLocalSource&) cmd;
         qDebug() << "LocalSource::handleMessage: MsgConfigureLocalSink";
-        applySettings(cfg.getSettings(), cfg.getForce());
+        applySettings(cfg.getSettingsKeys(), cfg.getSettings(), cfg.getForce());
 
         return true;
     }
@@ -165,14 +165,14 @@ bool LocalSource::deserialize(const QByteArray& data)
     (void) data;
     if (m_settings.deserialize(data))
     {
-        MsgConfigureLocalSource *msg = MsgConfigureLocalSource::create(m_settings, true);
+        MsgConfigureLocalSource *msg = MsgConfigureLocalSource::create(QStringList(), m_settings, true);
         m_inputMessageQueue.push(msg);
         return true;
     }
     else
     {
         m_settings.resetToDefaults();
-        MsgConfigureLocalSource *msg = MsgConfigureLocalSource::create(m_settings, true);
+        MsgConfigureLocalSource *msg = MsgConfigureLocalSource::create(QStringList(), m_settings, true);
         m_inputMessageQueue.push(msg);
         return false;
     }
@@ -253,33 +253,12 @@ void LocalSource::propagateSampleRateAndFrequency(uint32_t index, uint32_t log2I
     }
 }
 
-void LocalSource::applySettings(const LocalSourceSettings& settings, bool force)
+void LocalSource::applySettings(const QStringList& settingsKeys, const LocalSourceSettings& settings, bool force)
 {
-    qDebug() << "LocalSource::applySettings:"
-        << "m_localDeviceIndex:" << settings.m_localDeviceIndex
-        << "m_log2Interp:" << settings.m_log2Interp
-        << "m_filterChainHash:" << settings.m_filterChainHash
-        << "m_play:" << settings.m_play
-        << "m_rgbColor:" << settings.m_rgbColor
-        << "m_title:" << settings.m_title
-        << "m_useReverseAPI:" << settings.m_useReverseAPI
-        << "m_reverseAPIAddress:" << settings.m_reverseAPIAddress
-        << "m_reverseAPIChannelIndex:" << settings.m_reverseAPIChannelIndex
-        << "m_reverseAPIDeviceIndex:" << settings.m_reverseAPIDeviceIndex
-        << "m_reverseAPIPort:" << settings.m_reverseAPIPort
-        << " force: " << force;
+    qDebug() << "LocalSource::applySettings:" << settings.getDebugString(settingsKeys, force);
 
-    QList<QString> reverseAPIKeys;
-
-    if ((settings.m_log2Interp != m_settings.m_log2Interp) || force) {
-        reverseAPIKeys.append("log2Interp");
-    }
-    if ((settings.m_filterChainHash != m_settings.m_filterChainHash) || force) {
-        reverseAPIKeys.append("filterChainHash");
-    }
-    if ((settings.m_localDeviceIndex != m_settings.m_localDeviceIndex) || force)
+    if ((settingsKeys.contains("localDeviceIndex") && (settings.m_localDeviceIndex != m_settings.m_localDeviceIndex)) || force)
     {
-        reverseAPIKeys.append("localDeviceIndex");
         propagateSampleRateAndFrequency(settings.m_localDeviceIndex, settings.m_log2Interp);
         DeviceSampleSink *deviceSampleSink = getLocalDevice(settings.m_localDeviceIndex);
         LocalSourceBaseband::MsgConfigureLocalDeviceSampleSink *msg =
@@ -287,23 +266,22 @@ void LocalSource::applySettings(const LocalSourceSettings& settings, bool force)
         m_basebandSource->getInputMessageQueue()->push(msg);
     }
 
-    if ((settings.m_log2Interp != m_settings.m_log2Interp)
-     || (settings.m_filterChainHash != m_settings.m_filterChainHash) || force)
+    if ((settingsKeys.contains("log2Interp") && (settings.m_log2Interp != m_settings.m_log2Interp))
+     || (settingsKeys.contains("filterChainHash") && (settings.m_filterChainHash != m_settings.m_filterChainHash)) || force)
     {
         calculateFrequencyOffset(settings.m_log2Interp, settings.m_filterChainHash);
         propagateSampleRateAndFrequency(m_settings.m_localDeviceIndex, settings.m_log2Interp);
     }
 
-    if ((settings.m_play != m_settings.m_play) || force)
+    if ((settingsKeys.contains("play") && (settings.m_play != m_settings.m_play)) || force)
     {
-        reverseAPIKeys.append("play");
         LocalSourceBaseband::MsgConfigureLocalSourceWork *msg = LocalSourceBaseband::MsgConfigureLocalSourceWork::create(
             settings.m_play
         );
         m_basebandSource->getInputMessageQueue()->push(msg);
     }
 
-    if (m_settings.m_streamIndex != settings.m_streamIndex)
+    if ((settingsKeys.contains("streamIndex") && (m_settings.m_streamIndex != settings.m_streamIndex)))
     {
         if (m_deviceAPI->getSampleMIMO()) // change of stream is possible for MIMO devices only
         {
@@ -314,28 +292,26 @@ void LocalSource::applySettings(const LocalSourceSettings& settings, bool force)
             m_settings.m_streamIndex = settings.m_streamIndex; // make sure ChannelAPI::getStreamIndex() is consistent
             emit streamIndexChanged(settings.m_streamIndex);
         }
-
-        reverseAPIKeys.append("streamIndex");
     }
 
-    LocalSourceBaseband::MsgConfigureLocalSourceBaseband *msg = LocalSourceBaseband::MsgConfigureLocalSourceBaseband::create(settings, force);
+    LocalSourceBaseband::MsgConfigureLocalSourceBaseband *msg = LocalSourceBaseband::MsgConfigureLocalSourceBaseband::create(settingsKeys, settings, force);
     m_basebandSource->getInputMessageQueue()->push(msg);
 
-    if ((settings.m_useReverseAPI) && (reverseAPIKeys.size() != 0))
+    if ((settingsKeys.contains("useReverseAPI") && (settings.m_useReverseAPI)))
     {
-        bool fullUpdate = ((m_settings.m_useReverseAPI != settings.m_useReverseAPI) && settings.m_useReverseAPI) ||
-                (m_settings.m_reverseAPIAddress != settings.m_reverseAPIAddress) ||
-                (m_settings.m_reverseAPIPort != settings.m_reverseAPIPort) ||
-                (m_settings.m_reverseAPIDeviceIndex != settings.m_reverseAPIDeviceIndex) ||
-                (m_settings.m_reverseAPIChannelIndex != settings.m_reverseAPIChannelIndex);
-        webapiReverseSendSettings(reverseAPIKeys, settings, fullUpdate || force);
+        bool fullUpdate = ((settingsKeys.contains("useReverseAPI") && (m_settings.m_useReverseAPI != settings.m_useReverseAPI)) && settings.m_useReverseAPI) ||
+                (settingsKeys.contains("reverseAPIAddress") && (m_settings.m_reverseAPIAddress != settings.m_reverseAPIAddress)) ||
+                (settingsKeys.contains("reverseAPIPort") && (m_settings.m_reverseAPIPort != settings.m_reverseAPIPort)) ||
+                (settingsKeys.contains("reverseAPIDeviceIndex") && (m_settings.m_reverseAPIDeviceIndex != settings.m_reverseAPIDeviceIndex)) ||
+                (settingsKeys.contains("reverseAPIChannelIndex") && (m_settings.m_reverseAPIChannelIndex != settings.m_reverseAPIChannelIndex));
+        webapiReverseSendSettings(settingsKeys, settings, fullUpdate || force);
     }
 
     QList<ObjectPipe*> pipes;
     MainCore::instance()->getMessagePipes().getMessagePipes(this, "settings", pipes);
 
     if (pipes.size() > 0) {
-        sendChannelSettings(pipes, reverseAPIKeys, settings, force);
+        sendChannelSettings(pipes, settingsKeys, settings, force);
     }
 
     m_settings = settings;
@@ -388,13 +364,13 @@ int LocalSource::webapiSettingsPutPatch(
     LocalSourceSettings settings = m_settings;
     webapiUpdateChannelSettings(settings, channelSettingsKeys, response);
 
-    MsgConfigureLocalSource *msg = MsgConfigureLocalSource::create(settings, force);
+    MsgConfigureLocalSource *msg = MsgConfigureLocalSource::create(channelSettingsKeys, settings, force);
     m_inputMessageQueue.push(msg);
 
     qDebug("LocalSource::webapiSettingsPutPatch: forward to GUI: %p", m_guiMessageQueue);
     if (m_guiMessageQueue) // forward to GUI if any
     {
-        MsgConfigureLocalSource *msgToGUI = MsgConfigureLocalSource::create(settings, force);
+        MsgConfigureLocalSource *msgToGUI = MsgConfigureLocalSource::create(channelSettingsKeys, settings, force);
         m_guiMessageQueue->push(msgToGUI);
     }
 
@@ -511,7 +487,7 @@ void LocalSource::webapiFormatChannelSettings(SWGSDRangel::SWGChannelSettings& r
     }
 }
 
-void LocalSource::webapiReverseSendSettings(QList<QString>& channelSettingsKeys, const LocalSourceSettings& settings, bool force)
+void LocalSource::webapiReverseSendSettings(const QList<QString>& channelSettingsKeys, const LocalSourceSettings& settings, bool force)
 {
     SWGSDRangel::SWGChannelSettings *swgChannelSettings = new SWGSDRangel::SWGChannelSettings();
     webapiFormatChannelSettings(channelSettingsKeys, swgChannelSettings, settings, force);
@@ -538,7 +514,7 @@ void LocalSource::webapiReverseSendSettings(QList<QString>& channelSettingsKeys,
 
 void LocalSource::sendChannelSettings(
     const QList<ObjectPipe*>& pipes,
-    QList<QString>& channelSettingsKeys,
+    const QList<QString>& channelSettingsKeys,
     const LocalSourceSettings& settings,
     bool force)
 {
@@ -562,7 +538,7 @@ void LocalSource::sendChannelSettings(
 }
 
 void LocalSource::webapiFormatChannelSettings(
-        QList<QString>& channelSettingsKeys,
+        const QList<QString>& channelSettingsKeys,
         SWGSDRangel::SWGChannelSettings *swgChannelSettings,
         const LocalSourceSettings& settings,
         bool force

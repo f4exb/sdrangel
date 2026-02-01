@@ -117,7 +117,7 @@ bool FreeDVDemodBaseband::handleMessage(const Message& cmd)
         qDebug() << "FreeDVDemodBaseband::handleMessage: MsgConfigureFreeDVDemodBaseband";
         MsgConfigureFreeDVDemodBaseband& cfg = (MsgConfigureFreeDVDemodBaseband&) cmd;
 
-        applySettings(cfg.getSettings(), cfg.getForce());
+        applySettings(cfg.getSettingsKeys(), cfg.getSettings(), cfg.getForce());
 
         return true;
     }
@@ -146,15 +146,15 @@ bool FreeDVDemodBaseband::handleMessage(const Message& cmd)
     }
 }
 
-void FreeDVDemodBaseband::applySettings(const FreeDVDemodSettings& settings, bool force)
+void FreeDVDemodBaseband::applySettings(const QStringList& settingsKeys, const FreeDVDemodSettings& settings, bool force)
 {
-    if ((settings.m_inputFrequencyOffset != m_settings.m_inputFrequencyOffset) || force)
+    if ((settingsKeys.contains("inputFrequencyOffset") && (settings.m_inputFrequencyOffset != m_settings.m_inputFrequencyOffset)) || force)
     {
         m_channelizer->setChannelization(m_sink.getModemSampleRate(), settings.m_inputFrequencyOffset);
         m_sink.applyChannelSettings(m_channelizer->getChannelSampleRate(), m_channelizer->getChannelFrequencyOffset());
     }
 
-    if ((settings.m_audioDeviceName != m_settings.m_audioDeviceName) || force)
+    if ((settingsKeys.contains("audioDeviceName") && (settings.m_audioDeviceName != m_settings.m_audioDeviceName)) || force)
     {
         AudioDeviceManager *audioDeviceManager = DSPEngine::instance()->getAudioDeviceManager();
         int audioDeviceIndex = audioDeviceManager->getOutputDeviceIndex(settings.m_audioDeviceName);
@@ -168,7 +168,7 @@ void FreeDVDemodBaseband::applySettings(const FreeDVDemodSettings& settings, boo
         }
     }
 
-    if ((settings.m_freeDVMode != m_settings.m_freeDVMode) || force)
+    if ((settingsKeys.contains("freeDVMode") && (settings.m_freeDVMode != m_settings.m_freeDVMode)) || force)
     {
         uint32_t modemSampleRate = FreeDVDemodSettings::getModSampleRate(settings.m_freeDVMode);
 
@@ -187,8 +187,13 @@ void FreeDVDemodBaseband::applySettings(const FreeDVDemodSettings& settings, boo
         m_sink.applyFreeDVMode(settings.m_freeDVMode);
     }
 
-    m_sink.applySettings(settings, force);
-    m_settings = settings;
+    m_sink.applySettings(settingsKeys, settings, force);
+
+    if (force) {
+        m_settings = settings;
+    } else {
+        m_settings.applySettings(settingsKeys, settings);
+    }
 }
 
 int FreeDVDemodBaseband::getChannelSampleRate() const

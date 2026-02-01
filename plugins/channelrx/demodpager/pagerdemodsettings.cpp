@@ -237,6 +237,202 @@ bool PagerDemodSettings::deserialize(const QByteArray& data)
     }
 }
 
+void PagerDemodSettings::applySettings(const QStringList& settingsKeys, const PagerDemodSettings& settings)
+{
+    if (settingsKeys.contains("baud")) {
+        m_baud = settings.m_baud;
+    }
+    if (settingsKeys.contains("inputFrequencyOffset")) {
+        m_inputFrequencyOffset = settings.m_inputFrequencyOffset;
+    }
+    if (settingsKeys.contains("rfBandwidth")) {
+        m_rfBandwidth = settings.m_rfBandwidth;
+    }
+    if (settingsKeys.contains("fmDeviation")) {
+        m_fmDeviation = settings.m_fmDeviation;
+    }
+    if (settingsKeys.contains("decode")) {
+        m_decode = settings.m_decode;
+    }
+    if (settingsKeys.contains("udpEnabled")) {
+        m_udpEnabled = settings.m_udpEnabled;
+    }
+    if (settingsKeys.contains("udpAddress")) {
+        m_udpAddress = settings.m_udpAddress;
+    }
+    if (settingsKeys.contains("udpPort")) {
+        m_udpPort = settings.m_udpPort;
+    }
+    if (settingsKeys.contains("filterAddress")) {
+        m_filterAddress = settings.m_filterAddress;
+    }
+    if (settingsKeys.contains("scopeCh1")) {
+        m_scopeCh1 = settings.m_scopeCh1;
+    }
+    if (settingsKeys.contains("scopeCh2")) {
+        m_scopeCh2 = settings.m_scopeCh2;
+    }
+    if (settingsKeys.contains("rgbColor")) {
+        m_rgbColor = settings.m_rgbColor;
+    }
+    if (settingsKeys.contains("title")) {
+        m_title = settings.m_title;
+    }
+    if (settingsKeys.contains("streamIndex")) {
+        m_streamIndex = settings.m_streamIndex;
+    }
+    if (settingsKeys.contains("useReverseAPI")) {
+        m_useReverseAPI = settings.m_useReverseAPI;
+    }
+    if (settingsKeys.contains("reverseAPIAddress")) {
+        m_reverseAPIAddress = settings.m_reverseAPIAddress;
+    }
+    if (settingsKeys.contains("reverseAPIPort")) {
+        m_reverseAPIPort = settings.m_reverseAPIPort;
+    }
+    if (settingsKeys.contains("reverseAPIDeviceIndex")) {
+        m_reverseAPIDeviceIndex = settings.m_reverseAPIDeviceIndex;
+    }
+    if (settingsKeys.contains("reverseAPIChannelIndex")) {
+        m_reverseAPIChannelIndex = settings.m_reverseAPIChannelIndex;
+    }
+    if (settingsKeys.contains("reverse")) {
+        m_reverse = settings.m_reverse;
+    }
+    if (settingsKeys.contains("sevenbit")) {
+        m_sevenbit = settings.m_sevenbit;
+    }
+    if (settingsKeys.contains("unicode")) {
+        m_unicode = settings.m_unicode;
+    }
+    if (settingsKeys.contains("logFilename")) {
+        m_logFilename = settings.m_logFilename;
+    }
+    if (settingsKeys.contains("logEnabled")) {
+        m_logEnabled = settings.m_logEnabled;
+    }
+    if (settingsKeys.contains("workspaceIndex")) {
+        m_workspaceIndex = settings.m_workspaceIndex;
+    }
+    if (settingsKeys.contains("geometryBytes")) {
+        m_geometryBytes = settings.m_geometryBytes;
+    }
+    if (settingsKeys.contains("hidden")) {
+        m_hidden = settings.m_hidden;
+    }
+    if (settingsKeys.contains("notificationSettings")) {
+        m_notificationSettings = settings.m_notificationSettings;
+    }
+    if (settingsKeys.contains("filterDuplicates")) {
+        m_filterDuplicates = settings.m_filterDuplicates;
+    }
+    if (settingsKeys.contains("duplicateMatchMessageOnly")) {
+        m_duplicateMatchMessageOnly = settings.m_duplicateMatchMessageOnly;
+    }
+    if (settingsKeys.contains("duplicateMatchLastOnly")) {
+        m_duplicateMatchLastOnly = settings.m_duplicateMatchLastOnly;
+    }
+    if (settingsKeys.contains("messageColumnIndexes")) {
+        for (int i = 0; i < PAGERDEMOD_MESSAGE_COLUMNS; i++) {
+            m_messageColumnIndexes[i] = settings.m_messageColumnIndexes[i];
+        }
+    }
+    if (settingsKeys.contains("messageColumnSizes")) {
+        for (int i = 0; i < PAGERDEMOD_MESSAGE_COLUMNS; i++) {
+            m_messageColumnSizes[i] = settings.m_messageColumnSizes[i];
+        }
+    }
+}
+
+QString PagerDemodSettings::getDebugString(const QStringList& settingsKeys, bool force) const
+{
+    std::ostringstream ostr;
+
+    if (settingsKeys.contains("baud") || force) {
+        ostr << " m_baud: " << m_baud;
+    }
+    if (settingsKeys.contains("inputFrequencyOffset") || force) {
+        ostr << " m_inputFrequencyOffset: " << m_inputFrequencyOffset;
+    }
+    if (settingsKeys.contains("rfBandwidth") || force) {
+        ostr << " m_rfBandwidth: " << m_rfBandwidth;
+    }
+    if (settingsKeys.contains("fmDeviation") || force) {
+        ostr << " m_fmDeviation: " << m_fmDeviation;
+    }
+    if (settingsKeys.contains("decode") || force) {
+        ostr << " m_decode: " << m_decode;
+    }
+    if (settingsKeys.contains("udpEnabled") || force) {
+        ostr << " m_udpEnabled: " << m_udpEnabled;
+    }
+    if (settingsKeys.contains("udpAddress") || force) {
+        ostr << " m_udpAddress: " << m_udpAddress.toStdString();
+    }
+    if (settingsKeys.contains("udpPort") || force) {
+        ostr << " m_udpPort: " << m_udpPort;
+    }
+    if (settingsKeys.contains("filterAddress") || force) {
+        ostr << " m_filterAddress: " << m_filterAddress.toStdString();
+    }
+    if (settingsKeys.contains("scopeCh1") || force) {
+        ostr << " m_scopeCh1: " << m_scopeCh1;
+    }
+    if (settingsKeys.contains("scopeCh2") || force) {
+        ostr << " m_scopeCh2: " << m_scopeCh2;
+    }
+    if (settingsKeys.contains("rgbColor") || force) {
+        ostr << " m_rgbColor: " << m_rgbColor;
+    }
+    if (settingsKeys.contains("title") || force) {
+        ostr << " m_title: " << m_title.toStdString();
+    }
+    if (settingsKeys.contains("streamIndex") || force) {
+        ostr << " m_streamIndex: " << m_streamIndex;
+    }
+    if (settingsKeys.contains("useReverseAPI") || force) {
+        ostr << " m_useReverseAPI: " << m_useReverseAPI;
+    }
+    if (settingsKeys.contains("reverseAPIAddress") || force) {
+        ostr << " m_reverseAPIAddress: " << m_reverseAPIAddress.toStdString();
+    }
+    if (settingsKeys.contains("reverseAPIPort") || force) {
+        ostr << " m_reverseAPIPort: " << m_reverseAPIPort;
+    }
+    if (settingsKeys.contains("reverseAPIDeviceIndex") || force) {
+        ostr << " m_reverseAPIDeviceIndex: " << m_reverseAPIDeviceIndex;
+    }
+    if (settingsKeys.contains("reverseAPIChannelIndex") || force) {
+        ostr << " m_reverseAPIChannelIndex: " << m_reverseAPIChannelIndex;
+    }
+    if (settingsKeys.contains("reverse") || force) {
+        ostr << " m_reverse: " << m_reverse;
+    }
+    if (settingsKeys.contains("logFilename") || force) {
+        ostr << " m_logFilename: " << m_logFilename.toStdString();
+    }
+    if (settingsKeys.contains("logEnabled") || force) {
+        ostr << " m_logEnabled: " << m_logEnabled;
+    }
+    if (settingsKeys.contains("workspaceIndex") || force) {
+        ostr << " m_workspaceIndex: " << m_workspaceIndex;
+    }
+    if (settingsKeys.contains("hidden") || force) {
+        ostr << " m_hidden: " << m_hidden;
+    }
+    if (settingsKeys.contains("filterDuplicates") || force) {
+        ostr << " m_filterDuplicates: " << m_filterDuplicates;
+    }
+    if (settingsKeys.contains("duplicateMatchMessageOnly") || force) {
+        ostr << " m_duplicateMatchMessageOnly: " << m_duplicateMatchMessageOnly;
+    }
+    if (settingsKeys.contains("duplicateMatchLastOnly") || force) {
+        ostr << " m_duplicateMatchLastOnly: " << m_duplicateMatchLastOnly;
+    }
+
+    return QString(ostr.str().c_str());
+}
+
 QByteArray PagerDemodSettings::serializeIntList(const QList<qint32>& ints) const
 {
     QByteArray data;

@@ -145,7 +145,7 @@ ATVModSource::ATVModSource() :
     m_interpolatorDistance = 1.0f;
 
     applyChannelSettings(m_channelSampleRate, m_channelFrequencyOffset, true);
-    applySettings(m_settings, true); // does applyStandard() too;
+    applySettings(QStringList(), m_settings, true); // does applyStandard() too;
 
     m_lineType = getLineType(m_settings.m_atvStd, m_lineCount);
 }
@@ -978,35 +978,15 @@ void ATVModSource::applyChannelSettings(int channelSampleRate, int channelFreque
     m_channelFrequencyOffset = channelFrequencyOffset;
 }
 
-void ATVModSource::applySettings(const ATVModSettings& settings, bool force)
+void ATVModSource::applySettings(const QStringList& settingsKeys, const ATVModSettings& settings, bool force)
 {
-    qDebug() << "ATVModSource::applySettings:"
-            << " m_inputFrequencyOffset: " << settings.m_inputFrequencyOffset
-            << " m_rfBandwidth: " << settings.m_rfBandwidth
-            << " m_rfOppBandwidth: " << settings.m_rfOppBandwidth
-            << " m_atvStd: " << (int) settings.m_atvStd
-            << " m_nbLines: " << settings.m_nbLines
-            << " m_fps: " << settings.m_fps
-            << " m_atvModInput: " << (int) settings.m_atvModInput
-            << " m_uniformLevel: " << settings.m_uniformLevel
-            << " m_atvModulation: " << (int) settings.m_atvModulation
-            << " m_videoPlayLoop: " << settings.m_videoPlayLoop
-            << " m_videoPlay: " << settings.m_videoPlay
-            << " m_cameraPlay: " << settings.m_cameraPlay
-            << " m_channelMute: " << settings.m_channelMute
-            << " m_invertedVideo: " << settings.m_invertedVideo
-            << " m_rfScalingFactor: " << settings.m_rfScalingFactor
-            << " m_fmExcursion: " << settings.m_fmExcursion
-            << " m_forceDecimator: " << settings.m_forceDecimator
-            << " m_showOverlayText: " << settings.m_showOverlayText
-            << " m_overlayText: " << settings.m_overlayText
-            << " force: " << force;
+    qDebug() << "ATVModSource::applySettings:" << settings.getDebugString(settingsKeys, force);
 
-    if ((settings.m_atvStd != m_settings.m_atvStd)
-        || (settings.m_nbLines != m_settings.m_nbLines)
-        || (settings.m_fps != m_settings.m_fps)
-        || (settings.m_rfBandwidth != m_settings.m_rfBandwidth)
-        || (settings.m_atvModulation != m_settings.m_atvModulation) || force)
+    if ((settingsKeys.contains("atvStd") && (settings.m_atvStd != m_settings.m_atvStd))
+        || (settingsKeys.contains("nbLines") && (settings.m_nbLines != m_settings.m_nbLines))
+        || (settingsKeys.contains("fps") && (settings.m_fps != m_settings.m_fps))
+        || (settingsKeys.contains("rfBandwidth") && (settings.m_rfBandwidth != m_settings.m_rfBandwidth))
+        || (settingsKeys.contains("atvModulation") && (settings.m_atvModulation != m_settings.m_atvModulation)) || force)
     {
         getBaseValues(m_channelSampleRate, settings.m_nbLines * settings.m_fps, m_tvSampleRate, m_pointsPerLine);
 
@@ -1034,10 +1014,10 @@ void ATVModSource::applySettings(const ATVModSettings& settings, bool force)
         }
     }
 
-    if ((settings.m_rfOppBandwidth != m_settings.m_rfOppBandwidth)
-        || (settings.m_rfBandwidth != m_settings.m_rfBandwidth)
-        || (settings.m_nbLines != m_settings.m_nbLines) // difference in line period may have changed TV sample rate
-        || (settings.m_fps != m_settings.m_fps)         //
+    if ((settingsKeys.contains("rfOppBandwidth") && (settings.m_rfOppBandwidth != m_settings.m_rfOppBandwidth))
+        || (settingsKeys.contains("rfBandwidth") && (settings.m_rfBandwidth != m_settings.m_rfBandwidth))
+        || (settingsKeys.contains("nbLines") && (settings.m_nbLines != m_settings.m_nbLines)) // difference in line period may have changed TV sample rate
+        || (settingsKeys.contains("fps") && (settings.m_fps != m_settings.m_fps))         //
         || force)
     {
         m_DSBFilter->create_asym_filter(
@@ -1048,7 +1028,7 @@ void ATVModSource::applySettings(const ATVModSettings& settings, bool force)
         m_DSBFilterBufferIndex = 0;
     }
 
-    if ((settings.m_showOverlayText != m_settings.m_showOverlayText) || force)
+    if ((settingsKeys.contains("showOverlayText") && (settings.m_showOverlayText != m_settings.m_showOverlayText)) || force)
     {
         if (!m_imageFromFile.empty())
         {
@@ -1065,7 +1045,11 @@ void ATVModSource::applySettings(const ATVModSettings& settings, bool force)
         }
     }
 
-    m_settings = settings;
+    if (force) {
+        m_settings = settings;
+    } else {
+        m_settings.applySettings(settingsKeys, settings);
+    }
 }
 
 void ATVModSource::reportVideoFileSourceStreamTiming()

@@ -59,7 +59,7 @@ void NFMModGUI::resetToDefaults()
 {
     m_settings.resetToDefaults();
     displaySettings();
-    applySettings(true);
+    applySettings(QStringList(), true);
 }
 
 QByteArray NFMModGUI::serialize() const
@@ -71,7 +71,7 @@ bool NFMModGUI::deserialize(const QByteArray& data)
 {
     if(m_settings.deserialize(data)) {
         displaySettings();
-        applySettings(true);
+        applySettings(QStringList(), true);
         return true;
     } else {
         resetToDefaults();
@@ -132,7 +132,7 @@ void NFMModGUI::channelMarkerChangedByCursor()
 {
     ui->deltaFrequency->setValue(m_channelMarker.getCenterFrequency());
     m_settings.m_inputFrequencyOffset = m_channelMarker.getCenterFrequency();
-	applySettings();
+	applySettings(QStringList("inputFrequencyOffset"));
 }
 
 void NFMModGUI::handleSourceMessages()
@@ -153,7 +153,7 @@ void NFMModGUI::on_deltaFrequency_changed(qint64 value)
     m_channelMarker.setCenterFrequency(value);
     m_settings.m_inputFrequencyOffset = m_channelMarker.getCenterFrequency();
     updateAbsoluteCenterFrequency();
-    applySettings();
+    applySettings(QStringList("inputFrequencyOffset"));
 }
 
 void NFMModGUI::on_channelSpacingApply_clicked()
@@ -175,7 +175,7 @@ void NFMModGUI::on_channelSpacingApply_clicked()
     ui->rfBW->blockSignals(false);
     ui->afBW->blockSignals(false);
     ui->fmDev->blockSignals(false);
-	applySettings();
+	applySettings(QStringList({ "rfBandwidth", "afBandwidth", "fmDeviation" }));
 }
 
 void NFMModGUI::on_rfBW_valueChanged(int value)
@@ -188,53 +188,53 @@ void NFMModGUI::on_rfBW_valueChanged(int value)
     ui->channelSpacing->setCurrentIndex(NFMModSettings::getChannelSpacingIndex(m_settings.m_rfBandwidth));
     ui->channelSpacing->blockSignals(false);
 
-    applySettings();
+    applySettings(QStringList("rfBandwidth"));
 }
 
 void NFMModGUI::on_afBW_valueChanged(int value)
 {
 	ui->afBWText->setText(QString("%1k").arg(value / 10.0, 0, 'f', 1));
 	m_settings.m_afBandwidth = value * 100.0;
-	applySettings();
+	applySettings(QStringList("afBandwidth"));
 }
 
 void NFMModGUI::on_preEmphasis_toggled(bool checked)
 {
     m_settings.m_preEmphasisOn = checked;
-    applySettings();
+    applySettings(QStringList("preEmphasisOn"));
 }
 
 void NFMModGUI::on_fmDev_valueChanged(int value)
 {
 	ui->fmDevText->setText(QString("%1%2k").arg(QChar(0xB1, 0x00)).arg(value / 10.0, 0, 'f', 1));
 	m_settings.m_fmDeviation = value * 200.0;
-	applySettings();
+	applySettings(QStringList("fmDeviation"));
 }
 
 void NFMModGUI::on_volume_valueChanged(int value)
 {
 	ui->volumeText->setText(QString("%1").arg(value / 10.0, 0, 'f', 1));
 	m_settings.m_volumeFactor = value / 10.0;
-	applySettings();
+	applySettings(QStringList("volumeFactor"));
 }
 
 void NFMModGUI::on_toneFrequency_valueChanged(int value)
 {
     ui->toneFrequencyText->setText(QString("%1k").arg(value / 100.0, 0, 'f', 2));
     m_settings.m_toneFrequency = value * 10.0;
-    applySettings();
+    applySettings(QStringList("toneFrequency"));
 }
 
 void NFMModGUI::on_channelMute_toggled(bool checked)
 {
     m_settings.m_channelMute = checked;
-	applySettings();
+	applySettings(QStringList("channelMute"));
 }
 
 void NFMModGUI::on_playLoop_toggled(bool checked)
 {
     m_settings.m_playLoop = checked;
-	applySettings();
+	applySettings(QStringList("playLoop"));
 }
 
 void NFMModGUI::on_play_toggled(bool checked)
@@ -243,7 +243,7 @@ void NFMModGUI::on_play_toggled(bool checked)
     ui->mic->setEnabled(!checked);
     ui->morseKeyer->setEnabled(!checked);
     m_settings.m_modAFInput = checked ? NFMModSettings::NFMModInputFile : NFMModSettings::NFMModInputNone;
-    applySettings();
+    applySettings(QStringList("modAFInput"));
     ui->navTimeSlider->setEnabled(!checked);
     m_enableNavTime = !checked;
 }
@@ -254,7 +254,7 @@ void NFMModGUI::on_tone_toggled(bool checked)
     ui->mic->setEnabled(!checked);
     ui->morseKeyer->setEnabled(!checked);
     m_settings.m_modAFInput = checked ? NFMModSettings::NFMModInputTone : NFMModSettings::NFMModInputNone;
-    applySettings();
+    applySettings(QStringList("modAFInput"));
 }
 
 void NFMModGUI::on_morseKeyer_toggled(bool checked)
@@ -263,7 +263,7 @@ void NFMModGUI::on_morseKeyer_toggled(bool checked)
     ui->mic->setEnabled(!checked);
     ui->play->setEnabled(!checked);
     m_settings.m_modAFInput = checked ? NFMModSettings::NFMModInputCWTone : NFMModSettings::NFMModInputNone;
-    applySettings();
+    applySettings(QStringList("modAFInput"));
 }
 
 void NFMModGUI::on_mic_toggled(bool checked)
@@ -272,26 +272,26 @@ void NFMModGUI::on_mic_toggled(bool checked)
     ui->tone->setEnabled(!checked); // release other source inputs
     ui->morseKeyer->setEnabled(!checked);
     m_settings.m_modAFInput = checked ? NFMModSettings::NFMModInputAudio : NFMModSettings::NFMModInputNone;
-    applySettings();
+    applySettings(QStringList("modAFInput"));
 }
 
 void NFMModGUI::on_compressor_toggled(bool checked)
 {
     m_settings.m_compressorEnable = checked;
-    applySettings();
+    applySettings(QStringList("compressorEnable"));
 }
 
 void NFMModGUI::on_feedbackEnable_toggled(bool checked)
 {
     m_settings.m_feedbackAudioEnable = checked;
-    applySettings();
+    applySettings(QStringList("feedbackAudioEnable"));
 }
 
 void NFMModGUI::on_feedbackVolume_valueChanged(int value)
 {
     ui->feedbackVolumeText->setText(QString("%1").arg(value / 100.0, 0, 'f', 2));
     m_settings.m_feedbackVolumeFactor = value / 100.0;
-    applySettings();
+    applySettings(QStringList("feedbackVolumeFactor"));
 }
 
 void NFMModGUI::on_navTimeSlider_valueChanged(int value)
@@ -325,21 +325,21 @@ void NFMModGUI::on_showFileDialog_clicked(bool checked)
 void NFMModGUI::on_ctcss_currentIndexChanged(int index)
 {
     m_settings.m_ctcssIndex = index;
-    applySettings();
+    applySettings(QStringList("ctcssIndex"));
 }
 
 void NFMModGUI::on_ctcssOn_toggled(bool checked)
 {
     ui->dcsOn->setEnabled(!checked);
     m_settings.m_ctcssOn = checked;
-    applySettings();
+    applySettings(QStringList("ctcssOn"));
 }
 
 void NFMModGUI::on_dcsOn_toggled(bool checked)
 {
     ui->ctcssOn->setEnabled(!checked);
     m_settings.m_dcsOn = checked;
-    applySettings();
+    applySettings(QStringList("dcsOn"));
 }
 
 void NFMModGUI::on_dcsCode_editingFinished()
@@ -350,20 +350,20 @@ void NFMModGUI::on_dcsCode_editingFinished()
     if (ok)
     {
         m_settings.m_dcsCode = dcsCode;
-        applySettings();
+        applySettings(QStringList("dcsCode"));
     }
 }
 
 void NFMModGUI::on_dcsPositive_toggled(bool checked)
 {
     m_settings.m_dcsPositive = checked;
-    applySettings();
+    applySettings(QStringList("dcsPositive"));
 }
 
 void NFMModGUI::on_bpf_toggled(bool checked)
 {
     m_settings.m_bpfOn = checked;
-    applySettings();
+    applySettings(QStringList("bpfOn"));
 }
 
 void NFMModGUI::configureFileName()
@@ -379,7 +379,7 @@ void NFMModGUI::onWidgetRolled(QWidget* widget, bool rollDown)
     (void) rollDown;
 
     getRollupContents()->saveState(m_rollupState);
-    applySettings();
+    applySettings(QStringList());
 }
 
 void NFMModGUI::onMenuDialogCalled(const QPoint &p)
@@ -424,7 +424,8 @@ void NFMModGUI::onMenuDialogCalled(const QPoint &p)
             updateIndexLabel();
         }
 
-        applySettings();
+        applySettings(QStringList({ "rgbColor", "title", "useReverseAPI", "reverseAPIAddress",
+            "reverseAPIPort", "reverseAPIDeviceIndex", "reverseAPIChannelIndex", "streamIndex" }));
     }
 
     resetContextMenuType();
@@ -517,7 +518,7 @@ NFMModGUI::NFMModGUI(PluginAPI* pluginAPI, DeviceUISet *deviceUISet, BasebandSam
 
     displaySettings();
     makeUIConnections();
-    applySettings();
+    applySettings(QStringList(), true);
     DialPopup::addPopupsToChildDials(this);
     m_resizer.enableChildMouseTracking();
 }
@@ -532,11 +533,11 @@ void NFMModGUI::blockApplySettings(bool block)
     m_doApplySettings = !block;
 }
 
-void NFMModGUI::applySettings(bool force)
+void NFMModGUI::applySettings(const QStringList& settingsKeys, const bool force)
 {
 	if (m_doApplySettings)
 	{
-		NFMMod::MsgConfigureNFMMod *msg = NFMMod::MsgConfigureNFMMod::create(m_settings, force);
+		NFMMod::MsgConfigureNFMMod *msg = NFMMod::MsgConfigureNFMMod::create(settingsKeys, m_settings, force);
 		m_nfmMod->getInputMessageQueue()->push(msg);
 	}
 }
@@ -633,7 +634,7 @@ void NFMModGUI::audioSelect(const QPoint& p)
     if (audioSelect.m_selected)
     {
         m_settings.m_audioDeviceName = audioSelect.m_audioDeviceName;
-        applySettings();
+        applySettings(QStringList("audioDeviceName"));
     }
 }
 
@@ -648,7 +649,7 @@ void NFMModGUI::audioFeedbackSelect(const QPoint& p)
     if (audioSelect.m_selected)
     {
         m_settings.m_feedbackAudioDeviceName = audioSelect.m_audioDeviceName;
-        applySettings();
+        applySettings(QStringList("feedbackAudioDeviceName"));
     }
 }
 

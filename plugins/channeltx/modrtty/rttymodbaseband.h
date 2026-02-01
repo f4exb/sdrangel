@@ -41,20 +41,23 @@ public:
 
     public:
         const RttyModSettings& getSettings() const { return m_settings; }
+        const QStringList& getSettingsKeys() const { return m_settingsKeys; }
         bool getForce() const { return m_force; }
 
-        static MsgConfigureRttyModBaseband* create(const RttyModSettings& settings, bool force)
+        static MsgConfigureRttyModBaseband* create(const QStringList& settingsKeys, const RttyModSettings& settings, bool force)
         {
-            return new MsgConfigureRttyModBaseband(settings, force);
+            return new MsgConfigureRttyModBaseband(settingsKeys, settings, force);
         }
 
     private:
         RttyModSettings m_settings;
+        QStringList m_settingsKeys;
         bool m_force;
 
-        MsgConfigureRttyModBaseband(const RttyModSettings& settings, bool force) :
+        MsgConfigureRttyModBaseband(const QStringList& settingsKeys, const RttyModSettings& settings, bool force) :
             Message(),
             m_settings(settings),
+            m_settingsKeys(settingsKeys),
             m_force(force)
         { }
     };
@@ -90,7 +93,7 @@ private:
 
     void processFifo(SampleVector& data, unsigned int iBegin, unsigned int iEnd);
     bool handleMessage(const Message& cmd);
-    void applySettings(const RttyModSettings& settings, bool force = false);
+    void applySettings(const QStringList& settingsKeys, const RttyModSettings& settings, bool force = false);
 
 private slots:
     void handleInputMessages();

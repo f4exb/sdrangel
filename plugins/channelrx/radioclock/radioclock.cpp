@@ -56,7 +56,7 @@ RadioClock::RadioClock(DeviceAPI *deviceAPI) :
     m_basebandSink->setChannel(this);
     m_basebandSink->moveToThread(&m_thread);
 
-    applySettings(m_settings, true);
+    applySettings(QStringList(), m_settings, true);
 
     m_deviceAPI->addChannelSink(this);
     m_deviceAPI->addChannelSinkAPI(this);
@@ -130,7 +130,7 @@ void RadioClock::start()
     DSPSignalNotification *dspMsg = new DSPSignalNotification(m_basebandSampleRate, m_centerFrequency);
     m_basebandSink->getInputMessageQueue()->push(dspMsg);
 
-    RadioClockBaseband::MsgConfigureRadioClockBaseband *msg = RadioClockBaseband::MsgConfigureRadioClockBaseband::create(m_settings, true);
+    RadioClockBaseband::MsgConfigureRadioClockBaseband *msg = RadioClockBaseband::MsgConfigureRadioClockBaseband::create(QStringList(), m_settings, true);
     m_basebandSink->getInputMessageQueue()->push(msg);
 }
 
@@ -146,11 +146,11 @@ void RadioClock::setCenterFrequency(qint64 frequency)
 {
     RadioClockSettings settings = m_settings;
     settings.m_inputFrequencyOffset = frequency;
-    applySettings(settings, false);
+    applySettings(QStringList("inputFrequencyOffset"), settings, false);
 
     if (m_guiMessageQueue) // forward to GUI if any
     {
-        MsgConfigureRadioClock *msgToGUI = MsgConfigureRadioClock::create(settings, false);
+        MsgConfigureRadioClock *msgToGUI = MsgConfigureRadioClock::create(QStringList("inputFrequencyOffset"), settings, false);
         m_guiMessageQueue->push(msgToGUI);
     }
 }
@@ -161,7 +161,7 @@ bool RadioClock::handleMessage(const Message& cmd)
     {
         MsgConfigureRadioClock& cfg = (MsgConfigureRadioClock&) cmd;
         qDebug() << "RadioClock::handleMessage: MsgConfigureRadioClock";
-        applySettings(cfg.getSettings(), cfg.getForce());
+        applySettings(cfg.getSettingsKeys(), cfg.getSettings(), cfg.getForce());
 
         return true;
     }
@@ -216,41 +216,11 @@ ScopeVis *RadioClock::getScopeSink()
     return m_basebandSink->getScopeSink();
 }
 
-void RadioClock::applySettings(const RadioClockSettings& settings, bool force)
+void RadioClock::applySettings(const QStringList& settingsKeys, const RadioClockSettings& settings, bool force)
 {
-    qDebug() << "RadioClock::applySettings:"
-            << " m_streamIndex: " << settings.m_streamIndex
-            << " m_useReverseAPI: " << settings.m_useReverseAPI
-            << " m_reverseAPIAddress: " << settings.m_reverseAPIAddress
-            << " m_reverseAPIPort: " << settings.m_reverseAPIPort
-            << " m_reverseAPIDeviceIndex: " << settings.m_reverseAPIDeviceIndex
-            << " m_reverseAPIChannelIndex: " << settings.m_reverseAPIChannelIndex
-            << " force: " << force;
+    qDebug() << "RadioClock::applySettings:" << settings.getDebugString(settingsKeys, force);
 
-    QList<QString> reverseAPIKeys;
-
-    if ((settings.m_frequencyMode != m_settings.m_frequencyMode) || force) {
-        reverseAPIKeys.append("frequencyMode");
-    }
-    if ((settings.m_inputFrequencyOffset != m_settings.m_inputFrequencyOffset) || force) {
-        reverseAPIKeys.append("inputFrequencyOffset");
-    }
-    if ((settings.m_frequency != m_settings.m_frequency) || force) {
-        reverseAPIKeys.append("frequency");
-    }
-    if ((settings.m_rfBandwidth != m_settings.m_rfBandwidth) || force) {
-        reverseAPIKeys.append("rfBandwidth");
-    }
-    if ((settings.m_threshold != m_settings.m_threshold) || force) {
-        reverseAPIKeys.append("threshold");
-    }
-    if ((settings.m_modulation != m_settings.m_modulation) || force) {
-        reverseAPIKeys.append("modulation");
-    }
-    if ((settings.m_timezone != m_settings.m_timezone) || force) {
-        reverseAPIKeys.append("timezone");
-    }
-    if (m_settings.m_streamIndex != settings.m_streamIndex)
+    if (settingsKeys.contains("streamIndex") && m_settings.m_streamIndex != settings.m_streamIndex)
     {
         if (m_deviceAPI->getSampleMIMO()) // change of stream is possible for MIMO devices only
         {
@@ -261,24 +231,26 @@ void RadioClock::applySettings(const RadioClockSettings& settings, bool force)
             m_settings.m_streamIndex = settings.m_streamIndex; // make sure ChannelAPI::getStreamIndex() is consistent
             emit streamIndexChanged(settings.m_streamIndex);
         }
-
-        reverseAPIKeys.append("streamIndex");
     }
 
-    RadioClockBaseband::MsgConfigureRadioClockBaseband *msg = RadioClockBaseband::MsgConfigureRadioClockBaseband::create(settings, force);
+    RadioClockBaseband::MsgConfigureRadioClockBaseband *msg = RadioClockBaseband::MsgConfigureRadioClockBaseband::create(settingsKeys, settings, force);
     m_basebandSink->getInputMessageQueue()->push(msg);
 
-    if (settings.m_useReverseAPI)
+    if (settingsKeys.contains("useReverseAPI") && settings.m_useReverseAPI)
     {
-        bool fullUpdate = ((m_settings.m_useReverseAPI != settings.m_useReverseAPI) && settings.m_useReverseAPI) ||
-                (m_settings.m_reverseAPIAddress != settings.m_reverseAPIAddress) ||
-                (m_settings.m_reverseAPIPort != settings.m_reverseAPIPort) ||
-                (m_settings.m_reverseAPIDeviceIndex != settings.m_reverseAPIDeviceIndex) ||
-                (m_settings.m_reverseAPIChannelIndex != settings.m_reverseAPIChannelIndex);
-        webapiReverseSendSettings(reverseAPIKeys, settings, fullUpdate || force);
+        bool fullUpdate = ((settingsKeys.contains("useReverseAPI") && m_settings.m_useReverseAPI != settings.m_useReverseAPI) && settings.m_useReverseAPI) ||
+                (settingsKeys.contains("reverseAPIAddress") && m_settings.m_reverseAPIAddress != settings.m_reverseAPIAddress) ||
+                (settingsKeys.contains("reverseAPIPort") && m_settings.m_reverseAPIPort != settings.m_reverseAPIPort) ||
+                (settingsKeys.contains("reverseAPIDeviceIndex") && m_settings.m_reverseAPIDeviceIndex != settings.m_reverseAPIDeviceIndex) ||
+                (settingsKeys.contains("reverseAPIChannelIndex") && m_settings.m_reverseAPIChannelIndex != settings.m_reverseAPIChannelIndex);
+        webapiReverseSendSettings(settingsKeys, settings, fullUpdate || force);
     }
 
-    m_settings = settings;
+    if (force) {
+        m_settings = settings;
+    } else {
+        m_settings.applySettings(settingsKeys, settings);
+    }
 }
 
 QByteArray RadioClock::serialize() const
@@ -290,14 +262,14 @@ bool RadioClock::deserialize(const QByteArray& data)
 {
     if (m_settings.deserialize(data))
     {
-        MsgConfigureRadioClock *msg = MsgConfigureRadioClock::create(m_settings, true);
+        MsgConfigureRadioClock *msg = MsgConfigureRadioClock::create(QStringList(), m_settings, true);
         m_inputMessageQueue.push(msg);
         return true;
     }
     else
     {
         m_settings.resetToDefaults();
-        MsgConfigureRadioClock *msg = MsgConfigureRadioClock::create(m_settings, true);
+        MsgConfigureRadioClock *msg = MsgConfigureRadioClock::create(QStringList(), m_settings, true);
         m_inputMessageQueue.push(msg);
         return false;
     }
@@ -340,13 +312,13 @@ int RadioClock::webapiSettingsPutPatch(
         settings.m_frequency = m_centerFrequency + settings.m_inputFrequencyOffset;
     }
 
-    MsgConfigureRadioClock *msg = MsgConfigureRadioClock::create(settings, force);
+    MsgConfigureRadioClock *msg = MsgConfigureRadioClock::create(channelSettingsKeys, settings, force);
     m_inputMessageQueue.push(msg);
 
     qDebug("RadioClock::webapiSettingsPutPatch: forward to GUI: %p", m_guiMessageQueue);
     if (m_guiMessageQueue) // forward to GUI if any
     {
-        MsgConfigureRadioClock *msgToGUI = MsgConfigureRadioClock::create(settings, force);
+        MsgConfigureRadioClock *msgToGUI = MsgConfigureRadioClock::create(channelSettingsKeys, settings, force);
         m_guiMessageQueue->push(msgToGUI);
     }
 
@@ -501,7 +473,7 @@ void RadioClock::webapiFormatChannelReport(SWGSDRangel::SWGChannelReport& respon
     response.getRadioClockReport()->setTime(new QString(m_dateTime.time().toString()));
 }
 
-void RadioClock::webapiReverseSendSettings(QList<QString>& channelSettingsKeys, const RadioClockSettings& settings, bool force)
+void RadioClock::webapiReverseSendSettings(const QList<QString>& channelSettingsKeys, const RadioClockSettings& settings, bool force)
 {
     SWGSDRangel::SWGChannelSettings *swgChannelSettings = new SWGSDRangel::SWGChannelSettings();
     webapiFormatChannelSettings(channelSettingsKeys, swgChannelSettings, settings, force);
@@ -538,7 +510,7 @@ int RadioClock::webapiReportGet(
 }
 
 void RadioClock::webapiFormatChannelSettings(
-        QList<QString>& channelSettingsKeys,
+        const QList<QString>& channelSettingsKeys,
         SWGSDRangel::SWGChannelSettings *swgChannelSettings,
         const RadioClockSettings& settings,
         bool force

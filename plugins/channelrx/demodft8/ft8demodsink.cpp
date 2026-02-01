@@ -88,7 +88,7 @@ FT8DemodSink::FT8DemodSink() :
 	SSBFilter = new fftfilt(m_LowCutoff / FT8DemodSettings::m_ft8SampleRate, m_Bandwidth / FT8DemodSettings::m_ft8SampleRate, m_ssbFftLen);
 
     applyChannelSettings(m_channelSampleRate, m_channelFrequencyOffset, true);
-	applySettings(m_settings, true);
+	applySettings(QStringList(), m_settings, true);
 }
 
 FT8DemodSink::~FT8DemodSink()
@@ -265,24 +265,9 @@ void FT8DemodSink::applyFT8SampleRate()
     }
 }
 
-void FT8DemodSink::applySettings(const FT8DemodSettings& settings, bool force)
+void FT8DemodSink::applySettings(const QStringList& settingsKeys, const FT8DemodSettings& settings, bool force)
 {
-    qDebug() << "FT8DemodSink::applySettings:"
-            << " m_inputFrequencyOffset: " << settings.m_inputFrequencyOffset
-            << " m_filterIndex: " << settings.m_filterIndex
-            << " [m_spanLog2: " << settings.m_filterBank[settings.m_filterIndex].m_spanLog2
-            << " m_rfBandwidth: " << settings.m_filterBank[settings.m_filterIndex].m_rfBandwidth
-            << " m_lowCutoff: " << settings.m_filterBank[settings.m_filterIndex].m_lowCutoff
-            << " m_fftWindow: " << settings.m_filterBank[settings.m_filterIndex].m_fftWindow << "]"
-            << " m_volume: " << settings.m_volume
-            << " m_agcActive: " << settings.m_agc
-            << " m_streamIndex: " << settings.m_streamIndex
-            << " m_useReverseAPI: " << settings.m_useReverseAPI
-            << " m_reverseAPIAddress: " << settings.m_reverseAPIAddress
-            << " m_reverseAPIPort: " << settings.m_reverseAPIPort
-            << " m_reverseAPIDeviceIndex: " << settings.m_reverseAPIDeviceIndex
-            << " m_reverseAPIChannelIndex: " << settings.m_reverseAPIChannelIndex
-            << " force: " << force;
+    qDebug() << "FT8DemodSink::applySettings:" << settings.getDebugString(settingsKeys, force);
 
     if((m_settings.m_filterBank[m_settings.m_filterIndex].m_rfBandwidth != settings.m_filterBank[settings.m_filterIndex].m_rfBandwidth) ||
         (m_settings.m_filterBank[m_settings.m_filterIndex].m_lowCutoff != settings.m_filterBank[settings.m_filterIndex].m_lowCutoff) ||
@@ -317,7 +302,7 @@ void FT8DemodSink::applySettings(const FT8DemodSettings& settings, bool force)
         SSBFilter->create_filter(m_LowCutoff / (float) FT8DemodSettings::m_ft8SampleRate, m_Bandwidth / (float) FT8DemodSettings::m_ft8SampleRate, settings.m_filterBank[settings.m_filterIndex].m_fftWindow);
     }
 
-    if ((m_settings.m_volume != settings.m_volume) || force)
+    if ((settingsKeys.contains("volume") && (m_settings.m_volume != settings.m_volume)) || force)
     {
         m_volume = settings.m_volume;
         m_volume /= 4.0; // for 3276.8
@@ -325,7 +310,12 @@ void FT8DemodSink::applySettings(const FT8DemodSettings& settings, bool force)
 
     m_spanLog2 = settings.m_filterBank[settings.m_filterIndex].m_spanLog2;
     m_agcActive = settings.m_agc;
-    m_settings = settings;
+
+    if (force) {
+        m_settings = settings;
+    } else {
+        m_settings.applySettings(settingsKeys, settings);
+    }
 }
 
 void FT8DemodSink::calculateLevel(int16_t& sample)

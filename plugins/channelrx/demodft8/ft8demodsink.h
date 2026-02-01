@@ -42,7 +42,7 @@ public:
 	void setSpectrumSink(SpectrumVis* spectrumSink) { m_spectrumSink = spectrumSink; }
     void setFT8Buffer(FT8Buffer *buffer) { m_ft8Buffer = buffer; }
 	void applyChannelSettings(int inputSampleRate, int inputFrequencyOffset, bool force = false);
-	void applySettings(const FT8DemodSettings& settings, bool force = false);
+	void applySettings(const QStringList& settingsKeys, const FT8DemodSettings& settings, bool force = false);
     void applyFT8SampleRate();
 
     double getMagSq() const { return m_magsq; }
@@ -150,4 +150,3 @@ private:
 };
 
 #endif // INCLUDE_FT8DEMODSINK_H
-

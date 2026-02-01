@@ -58,7 +58,7 @@ void PacketModGUI::resetToDefaults()
 {
     m_settings.resetToDefaults();
     displaySettings();
-    applySettings(true);
+    applySettings(QStringList(), true);
 }
 
 QByteArray PacketModGUI::serialize() const
@@ -70,7 +70,7 @@ bool PacketModGUI::deserialize(const QByteArray& data)
 {
     if(m_settings.deserialize(data)) {
         displaySettings();
-        applySettings(true);
+        applySettings(QStringList(), true);
         return true;
     } else {
         resetToDefaults();
@@ -116,7 +116,7 @@ void PacketModGUI::channelMarkerChangedByCursor()
 {
     ui->deltaFrequency->setValue(m_channelMarker.getCenterFrequency());
     m_settings.m_inputFrequencyOffset = m_channelMarker.getCenterFrequency();
-    applySettings();
+    applySettings(QStringList("inputFrequencyOffset"));
 }
 
 void PacketModGUI::handleSourceMessages()
@@ -137,7 +137,7 @@ void PacketModGUI::on_deltaFrequency_changed(qint64 value)
     m_channelMarker.setCenterFrequency(value);
     m_settings.m_inputFrequencyOffset = m_channelMarker.getCenterFrequency();
     updateAbsoluteCenterFrequency();
-    applySettings();
+    applySettings(QStringList("inputFrequencyOffset"));
 }
 
 void PacketModGUI::on_mode_currentIndexChanged(int value)
@@ -155,7 +155,7 @@ void PacketModGUI::on_mode_currentIndexChanged(int value)
     ui->fmDev->setValue(m_settings.m_fmDeviation / 100.0);
     ui->glSpectrum->setCenterFrequency(m_settings.m_spectrumRate/4);
     ui->glSpectrum->setSampleRate(m_settings.m_spectrumRate/2);
-    applySettings();
+    applySettings(QStringList("mode"));
 
     // Remove custom mode when deselected, as we no longer know how to set it
     if (value < 2)
@@ -168,27 +168,27 @@ void PacketModGUI::on_rfBW_valueChanged(int value)
     ui->rfBWText->setText(QString("%1k").arg(value / 10.0, 0, 'f', 1));
     m_channelMarker.setBandwidth(bw);
     m_settings.m_rfBandwidth = bw;
-    applySettings();
+    applySettings(QStringList("rfBandwidth"));
 }
 
 void PacketModGUI::on_fmDev_valueChanged(int value)
 {
     ui->fmDevText->setText(QString("%1k").arg(value / 10.0, 0, 'f', 1));
     m_settings.m_fmDeviation = value * 100.0;
-    applySettings();
+    applySettings(QStringList("fmDeviation"));
 }
 
 void PacketModGUI::on_gain_valueChanged(int value)
 {
     ui->gainText->setText(QString("%1dB").arg(value));
     m_settings.m_gain = value;
-    applySettings();
+    applySettings(QStringList("gain"));
 }
 
 void PacketModGUI::on_channelMute_toggled(bool checked)
 {
     m_settings.m_channelMute = checked;
-    applySettings();
+    applySettings(QStringList("channelMute"));
 }
 
 void PacketModGUI::on_txButton_clicked()
@@ -204,25 +204,25 @@ void PacketModGUI::on_packet_returnPressed()
 void PacketModGUI::on_callsign_editingFinished()
 {
     m_settings.m_callsign = ui->callsign->text();
-    applySettings();
+    applySettings(QStringList("callsign"));
 }
 
 void PacketModGUI::on_to_currentTextChanged(const QString &text)
 {
     m_settings.m_to = text;
-    applySettings();
+    applySettings(QStringList("to"));
 }
 
 void PacketModGUI::on_via_currentTextChanged(const QString &text)
 {
     m_settings.m_via = text;
-    applySettings();
+    applySettings(QStringList("via"));
 }
 
 void PacketModGUI::on_packet_editingFinished()
 {
     m_settings.m_data = ui->packet->text();
-    applySettings();
+    applySettings(QStringList("data"));
 }
 
 void PacketModGUI::on_insertPosition_clicked()
@@ -267,19 +267,19 @@ void PacketModGUI::on_insertPosition_clicked()
 void PacketModGUI::on_repeat_toggled(bool checked)
 {
     m_settings.m_repeat = checked;
-    applySettings();
+    applySettings(QStringList("repeat"));
 }
 
 void PacketModGUI::on_preEmphasis_toggled(bool checked)
 {
     m_settings.m_preEmphasis = checked;
-    applySettings();
+    applySettings(QStringList("preEmphasis"));
 }
 
 void PacketModGUI::on_bpf_toggled(bool checked)
 {
     m_settings.m_bpf = checked;
-    applySettings();
+    applySettings(QStringList("bpf"));
 }
 
 void PacketModGUI::preEmphasisSelect(const QPoint& p)
@@ -292,7 +292,7 @@ void PacketModGUI::preEmphasisSelect(const QPoint& p)
     {
         m_settings.m_preEmphasisTau = dialog.m_tau;
         m_settings.m_preEmphasisHighFreq = dialog.m_highFreq;
-        applySettings();
+        applySettings(QStringList({"preEmphasisTau", "preEmphasisHighFreq"}));
     }
 }
 
@@ -307,7 +307,7 @@ void PacketModGUI::bpfSelect(const QPoint& p)
         m_settings.m_bpfLowCutoff = dialog.m_lowFreq;
         m_settings.m_bpfHighCutoff = dialog.m_highFreq;
         m_settings.m_bpfTaps = dialog.m_taps;
-        applySettings();
+        applySettings(QStringList({"bpfLowCutoff", "bpfHighCutoff", "bpfTaps"}));
     }
 }
 
@@ -321,7 +321,7 @@ void PacketModGUI::repeatSelect(const QPoint& p)
     {
         m_settings.m_repeatDelay = dialog.m_repeatDelay;
         m_settings.m_repeatCount = dialog.m_repeatCount;
-        applySettings();
+        applySettings(QStringList({"repeatDelay", "repeatCount"}));
     }
 }
 
@@ -366,26 +366,26 @@ void PacketModGUI::txSettingsSelect(const QPoint& p)
         m_settings.m_rfNoise = dialog.m_rfNoise;
         m_settings.m_writeToFile = dialog.m_writeToFile;
         displaySettings();
-        applySettings();
+        applySettings(QStringList({"rampUpBits", "rampDownBits", "rampRange", "modulateWhileRamping", "modulation", "baud", "markFrequency", "spaceFrequency", "pulseShaping", "beta", "symbolSpan", "scramble", "polynomial", "ax25PreFlags", "ax25PostFlags", "ax25Control", "ax25PID", "lpfTaps", "bbNoise", "rfNoise", "writeToFile"}));
     }
 }
 
 void PacketModGUI::on_udpEnabled_clicked(bool checked)
 {
     m_settings.m_udpEnabled = checked;
-    applySettings();
+    applySettings(QStringList("udpEnabled"));
 }
 
 void PacketModGUI::on_udpAddress_editingFinished()
 {
     m_settings.m_udpAddress = ui->udpAddress->text();
-    applySettings();
+    applySettings(QStringList("udpAddress"));
 }
 
 void PacketModGUI::on_udpPort_editingFinished()
 {
     m_settings.m_udpPort = ui->udpPort->text().toInt();
-    applySettings();
+    applySettings(QStringList("udpPort"));
 }
 
 void PacketModGUI::onWidgetRolled(QWidget* widget, bool rollDown)
@@ -394,7 +394,7 @@ void PacketModGUI::onWidgetRolled(QWidget* widget, bool rollDown)
     (void) rollDown;
 
     getRollupContents()->saveState(m_rollupState);
-    applySettings();
+    applySettings(QStringList());
 }
 
 void PacketModGUI::onMenuDialogCalled(const QPoint &p)
@@ -439,7 +439,7 @@ void PacketModGUI::onMenuDialogCalled(const QPoint &p)
             updateIndexLabel();
         }
 
-        applySettings();
+        applySettings(QStringList({"useReverseAPI", "reverseAPIAddress", "reverseAPIPort", "reverseAPIDeviceIndex", "reverseAPIChannelIndex", "title", "rgbColor", "streamIndex"}));
     }
 
     resetContextMenuType();
@@ -527,7 +527,7 @@ PacketModGUI::PacketModGUI(PluginAPI* pluginAPI, DeviceUISet *deviceUISet, Baseb
 
     displaySettings();
     makeUIConnections();
-    applySettings();
+    applySettings(QStringList(), true);
     DialPopup::addPopupsToChildDials(this);
     m_resizer.enableChildMouseTracking();
 }
@@ -551,11 +551,11 @@ void PacketModGUI::blockApplySettings(bool block)
     m_doApplySettings = !block;
 }
 
-void PacketModGUI::applySettings(bool force)
+void PacketModGUI::applySettings(const QStringList& settingsKeys, bool force)
 {
     if (m_doApplySettings)
     {
-        PacketMod::MsgConfigurePacketMod *msg = PacketMod::MsgConfigurePacketMod::create(m_settings, force);
+        PacketMod::MsgConfigurePacketMod *msg = PacketMod::MsgConfigurePacketMod::create(settingsKeys, m_settings, force);
         m_packetMod->getInputMessageQueue()->push(msg);
     }
 }

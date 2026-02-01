@@ -45,7 +45,7 @@ ChannelAnalyzerSink::ChannelAnalyzerSink() :
         m_costasLoop.computeCoefficients(m_settings.m_pllBandwidth);
 
     applyChannelSettings(m_channelSampleRate, m_sinkSampleRate, m_channelFrequencyOffset, true);
-	applySettings(m_settings, true);
+	applySettings(m_settings, QStringList(), true);
 }
 
 ChannelAnalyzerSink::~ChannelAnalyzerSink()
@@ -243,26 +243,9 @@ void ChannelAnalyzerSink::setFilters(int sampleRate, float bandwidth, float lowC
     RRCFilter->create_rrc_filter(bandwidth / sampleRate, m_settings.m_rrcRolloff / 100.0);
 }
 
-void ChannelAnalyzerSink::applySettings(const ChannelAnalyzerSettings& settings, bool force)
+void ChannelAnalyzerSink::applySettings(const ChannelAnalyzerSettings& settings, const QStringList& settingsKeys, bool force)
 {
-    qDebug() << "ChannelAnalyzerSink::applySettings:"
-            << " m_inputFrequencyOffset: " << settings.m_inputFrequencyOffset
-            << " m_rcc: " << settings.m_rrc
-            << " m_rrcRolloff: " << settings.m_rrcRolloff / 100.0
-            << " m_bandwidth: " << settings.m_bandwidth
-            << " m_lowCutoff: " << settings.m_lowCutoff
-            << " m_log2Decim: " << settings.m_log2Decim
-            << " m_rationalDownSample: " << settings.m_rationalDownSample
-            << " m_rationalDownSamplerRate: " << settings.m_rationalDownSamplerRate
-            << " m_ssb: " << settings.m_ssb
-            << " m_pll: " << settings.m_pll
-            << " m_fll: " << settings.m_fll
-            << " m_costasLoop: " << settings.m_costasLoop
-            << " m_pllPskOrder: " << settings.m_pllPskOrder
-            << " m_pllBandwidth: " << settings.m_pllBandwidth
-            << " m_pllDampingFactor: " << settings.m_pllDampingFactor
-            << " m_pllLoopGain: " << settings.m_pllLoopGain
-            << " m_inputType: " << (int) settings.m_inputType;
+    qDebug() << "ChannelAnalyzerSink::applySettings:" << settings.getDebugString(settingsKeys, force);
     bool doApplySampleRate = false;
 
     if ((settings.m_bandwidth != m_settings.m_bandwidth) ||
@@ -331,7 +314,11 @@ void ChannelAnalyzerSink::applySettings(const ChannelAnalyzerSettings& settings,
         }
     }
 
-    m_settings = settings;
+    if (force) {
+        m_settings = settings;
+    } else {
+        m_settings.applySettings(settingsKeys, settings);
+    }
 
     qDebug() << "ChannelAnalyzerSink::applySettings:"
         << " m_rationalDownSample: " << settings.m_rationalDownSample;

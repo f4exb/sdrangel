@@ -52,7 +52,7 @@ public:
 	void setSpectrumSink(SpectrumVis* spectrumSink) { m_spectrumSink = spectrumSink; }
     void setScopeSink(ScopeVis* scopeSink) { m_scopeSink = scopeSink; }
     void applyChannelSettings(int channelSampleRate, int channelFrequencyOffset, bool force = false);
-    void applySettings(const ILSDemodSettings& settings, bool force = false);
+    void applySettings(const QStringList& settingsKeys, const ILSDemodSettings& settings, bool force = false);
     void setMessageQueueToChannel(MessageQueue *messageQueue) { m_messageQueueToChannel = messageQueue; m_morseDemod.setMessageQueueToChannel(messageQueue); }
     void setChannel(ChannelAPI *channel) { m_channel = channel; }
     void applyAudioSampleRate(int sampleRate);
@@ -166,4 +166,3 @@ private:
 };
 
 #endif // INCLUDE_ILSDEMODSINK_H
-

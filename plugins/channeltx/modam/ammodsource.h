@@ -65,7 +65,7 @@ public:
         peakLevel = m_peakLevelOut;
         numSamples = m_levelNbSamples;
     }
-    void applySettings(const AMModSettings& settings, bool force = false);
+    void applySettings(const QStringList& settingsKeys, const AMModSettings& settings, bool force = false);
     void applyChannelSettings(int channelSampleRate, int channelFrequencyOffset, bool force = false);
 
 private:

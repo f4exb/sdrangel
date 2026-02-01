@@ -120,7 +120,7 @@ void PacketDemodGUI::resetToDefaults()
 {
     m_settings.resetToDefaults();
     displaySettings();
-    applySettings(true);
+    applySettings(QStringList(), true);
 }
 
 QByteArray PacketDemodGUI::serialize() const
@@ -132,7 +132,7 @@ bool PacketDemodGUI::deserialize(const QByteArray& data)
 {
     if(m_settings.deserialize(data)) {
         displaySettings();
-        applySettings(true);
+        applySettings(QStringList(), true);
         return true;
     } else {
         resetToDefaults();
@@ -242,7 +242,7 @@ void PacketDemodGUI::channelMarkerChangedByCursor()
 {
     ui->deltaFrequency->setValue(m_channelMarker.getCenterFrequency());
     m_settings.m_inputFrequencyOffset = m_channelMarker.getCenterFrequency();
-    applySettings();
+    applySettings(QStringList({"inputFrequencyOffset"}));
 }
 
 void PacketDemodGUI::channelMarkerHighlightedByCursor()
@@ -255,7 +255,7 @@ void PacketDemodGUI::on_deltaFrequency_changed(qint64 value)
     m_channelMarker.setCenterFrequency(value);
     m_settings.m_inputFrequencyOffset = m_channelMarker.getCenterFrequency();
     updateAbsoluteCenterFrequency();
-    applySettings();
+    applySettings(QStringList({"inputFrequencyOffset"}));
 }
 
 void PacketDemodGUI::on_mode_currentIndexChanged(int value)
@@ -271,35 +271,35 @@ void PacketDemodGUI::on_rfBW_valueChanged(int value)
     ui->rfBWText->setText(QString("%1k").arg(value / 10.0, 0, 'f', 1));
     m_channelMarker.setBandwidth(bw);
     m_settings.m_rfBandwidth = bw;
-    applySettings();
+    applySettings(QStringList({"rfBandwidth"}));
 }
 
 void PacketDemodGUI::on_fmDev_valueChanged(int value)
 {
     ui->fmDevText->setText(QString("%1k").arg(value / 10.0, 0, 'f', 1));
     m_settings.m_fmDeviation = value * 100.0;
-    applySettings();
+    applySettings(QStringList({"fmDeviation"}));
 }
 
 void PacketDemodGUI::on_filterFrom_editingFinished()
 {
     m_settings.m_filterFrom = ui->filterFrom->text();
     filter();
-    applySettings();
+    applySettings(QStringList({"filterFrom"}));
 }
 
 void PacketDemodGUI::on_filterTo_editingFinished()
 {
     m_settings.m_filterTo = ui->filterTo->text();
     filter();
-    applySettings();
+    applySettings(QStringList({"filterTo"}));
 }
 
 void PacketDemodGUI::on_filterPID_stateChanged(int state)
 {
     m_settings.m_filterPID = state==Qt::Checked ? "f0" : "";
     filter();
-    applySettings();
+    applySettings(QStringList({"filterPID"}));
 }
 
 void PacketDemodGUI::on_clearTable_clicked()
@@ -310,19 +310,19 @@ void PacketDemodGUI::on_clearTable_clicked()
 void PacketDemodGUI::on_udpEnabled_clicked(bool checked)
 {
     m_settings.m_udpEnabled = checked;
-    applySettings();
+    applySettings(QStringList({"udpEnabled"}));
 }
 
 void PacketDemodGUI::on_udpAddress_editingFinished()
 {
     m_settings.m_udpAddress = ui->udpAddress->text();
-    applySettings();
+    applySettings(QStringList({"udpAddress"}));
 }
 
 void PacketDemodGUI::on_udpPort_editingFinished()
 {
     m_settings.m_udpPort = ui->udpPort->text().toInt();
-    applySettings();
+    applySettings(QStringList({"udpPort"}));
 }
 
 void PacketDemodGUI::filterRow(int row)
@@ -367,7 +367,7 @@ void PacketDemodGUI::onWidgetRolled(QWidget* widget, bool rollDown)
     (void) rollDown;
 
     getRollupContents()->saveState(m_rollupState);
-    applySettings();
+    applySettings(QStringList());
 }
 
 void PacketDemodGUI::onMenuDialogCalled(const QPoint &p)
@@ -412,7 +412,16 @@ void PacketDemodGUI::onMenuDialogCalled(const QPoint &p)
             updateIndexLabel();
         }
 
-        applySettings();
+        applySettings(QStringList({
+            "rgbColor",
+            "title",
+            "useReverseAPI",
+            "reverseAPIAddress",
+            "reverseAPIPort",
+            "reverseAPIDeviceIndex",
+            "reverseAPIChannelIndex",
+            "streamIndex"
+        }));
     }
 
     resetContextMenuType();
@@ -486,7 +495,7 @@ PacketDemodGUI::PacketDemodGUI(PluginAPI* pluginAPI, DeviceUISet *deviceUISet, B
 
     displaySettings();
     makeUIConnections();
-    applySettings(true);
+    applySettings(QStringList(), true);
     m_resizer.enableChildMouseTracking();
 }
 
@@ -500,11 +509,11 @@ void PacketDemodGUI::blockApplySettings(bool block)
     m_doApplySettings = !block;
 }
 
-void PacketDemodGUI::applySettings(bool force)
+void PacketDemodGUI::applySettings(const QStringList& settingsKeys, bool force)
 {
     if (m_doApplySettings)
     {
-        PacketDemod::MsgConfigurePacketDemod* message = PacketDemod::MsgConfigurePacketDemod::create( m_settings, force);
+        PacketDemod::MsgConfigurePacketDemod* message = PacketDemod::MsgConfigurePacketDemod::create(settingsKeys, m_settings, force);
         m_packetDemod->getInputMessageQueue()->push(message);
     }
 }
@@ -601,7 +610,7 @@ void PacketDemodGUI::tick()
 void PacketDemodGUI::on_logEnable_clicked(bool checked)
 {
     m_settings.m_logEnabled = checked;
-    applySettings();
+    applySettings(QStringList({"logEnabled"}));
 }
 
 void PacketDemodGUI::on_logFilename_clicked()
@@ -617,7 +626,7 @@ void PacketDemodGUI::on_logFilename_clicked()
         {
             m_settings.m_logFilename = fileNames[0];
             ui->logFilename->setToolTip(QString(".csv log filename: %1").arg(m_settings.m_logFilename));
-            applySettings();
+            applySettings(QStringList({"logFilename"}));
         }
     }
 }
@@ -689,7 +698,7 @@ void PacketDemodGUI::on_logOpen_clicked()
 void PacketDemodGUI::on_useFileTime_toggled(bool checked)
 {
     m_settings.m_useFileTime = checked;
-    applySettings();
+    applySettings(QStringList({"useFileTime"}));
 }
 
 void PacketDemodGUI::makeUIConnections()

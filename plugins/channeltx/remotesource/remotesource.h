@@ -47,20 +47,23 @@ public:
 
     public:
         const RemoteSourceSettings& getSettings() const { return m_settings; }
+        const QStringList& getSettingsKeys() const { return m_settingsKeys; }
         bool getForce() const { return m_force; }
 
-        static MsgConfigureRemoteSource* create(const RemoteSourceSettings& settings, bool force)
+        static MsgConfigureRemoteSource* create(const QStringList& settingsKeys, const RemoteSourceSettings& settings, bool force)
         {
-            return new MsgConfigureRemoteSource(settings, force);
+            return new MsgConfigureRemoteSource(settingsKeys, settings, force);
         }
 
     private:
         RemoteSourceSettings m_settings;
+        QStringList m_settingsKeys;
         bool m_force;
 
-        MsgConfigureRemoteSource(const RemoteSourceSettings& settings, bool force) :
+        MsgConfigureRemoteSource(const QStringList& settingsKeys, const RemoteSourceSettings& settings, bool force) :
             Message(),
             m_settings(settings),
+            m_settingsKeys(settingsKeys),
             m_force(force)
         { }
     };
@@ -236,19 +239,19 @@ private:
     uint32_t m_basebandSampleRate;
 
     virtual bool handleMessage(const Message& cmd);
-    void applySettings(const RemoteSourceSettings& settings, bool force = false);
+    void applySettings(const QStringList& settingsKeys, const RemoteSourceSettings& settings, bool force = false);
     static void validateFilterChainHash(RemoteSourceSettings& settings);
     void calculateFrequencyOffset(uint32_t log2Interp, uint32_t filterChainHash);
     void webapiFormatChannelReport(SWGSDRangel::SWGChannelReport& response);
-    void webapiReverseSendSettings(QList<QString>& channelSettingsKeys, const RemoteSourceSettings& settings, bool force);
+    void webapiReverseSendSettings(const QList<QString>& channelSettingsKeys, const RemoteSourceSettings& settings, bool force);
     void sendChannelSettings(
         const QList<ObjectPipe*>& pipes,
-        QList<QString>& channelSettingsKeys,
+        const QList<QString>& channelSettingsKeys,
         const RemoteSourceSettings& settings,
         bool force
     );
     void webapiFormatChannelSettings(
-        QList<QString>& channelSettingsKeys,
+        const QList<QString>& channelSettingsKeys,
         SWGSDRangel::SWGChannelSettings *swgChannelSettings,
         const RemoteSourceSettings& settings,
         bool force

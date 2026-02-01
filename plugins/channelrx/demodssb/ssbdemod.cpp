@@ -62,7 +62,7 @@ SSBDemod::SSBDemod(DeviceAPI *deviceAPI) :
 {
 	setObjectName(m_channelId);
 
-	applySettings(m_settings, true);
+	applySettings(QStringList(), m_settings, true);
 
     m_deviceAPI->addChannelSink(this);
     m_deviceAPI->addChannelSinkAPI(this);
@@ -172,7 +172,7 @@ void SSBDemod::start()
 
     m_thread->start();
 
-    SSBDemodBaseband::MsgConfigureSSBDemodBaseband *msg = SSBDemodBaseband::MsgConfigureSSBDemodBaseband::create(m_settings, true);
+    SSBDemodBaseband::MsgConfigureSSBDemodBaseband *msg = SSBDemodBaseband::MsgConfigureSSBDemodBaseband::create(QStringList(), m_settings, true);
     m_basebandSink->getInputMessageQueue()->push(msg);
 
     m_running = true;
@@ -199,7 +199,7 @@ bool SSBDemod::handleMessage(const Message& cmd)
         MsgConfigureSSBDemod& cfg = (MsgConfigureSSBDemod&) cmd;
         qDebug("SSBDemod::handleMessage: MsgConfigureSSBDemod");
 
-        applySettings(cfg.getSettings(), cfg.getForce());
+        applySettings(cfg.getSettingsKeys(), cfg.getSettings(), cfg.getForce());
 
         return true;
     }
@@ -236,122 +236,20 @@ void SSBDemod::setCenterFrequency(qint64 frequency)
 {
     SSBDemodSettings settings = m_settings;
     settings.m_inputFrequencyOffset = frequency;
-    applySettings(settings, false);
+    applySettings(QStringList("inputFrequencyOffset"), settings, false);
 
     if (m_guiMessageQueue) // forward to GUI if any
     {
-        MsgConfigureSSBDemod *msgToGUI = MsgConfigureSSBDemod::create(settings, false);
+        MsgConfigureSSBDemod *msgToGUI = MsgConfigureSSBDemod::create(QStringList("inputFrequencyOffset"), settings, false);
         m_guiMessageQueue->push(msgToGUI);
     }
 }
 
-void SSBDemod::applySettings(const SSBDemodSettings& settings, bool force)
+void SSBDemod::applySettings(const QStringList& settingsKeys, const SSBDemodSettings& settings, bool force)
 {
-    qDebug() << "SSBDemod::applySettings:"
-            << " m_inputFrequencyOffset: " << settings.m_inputFrequencyOffset
-            << " m_filterIndex: " << settings.m_filterIndex
-            << " [m_spanLog2: " << settings.m_filterBank[settings.m_filterIndex].m_spanLog2
-            << " m_rfBandwidth: " << settings.m_filterBank[settings.m_filterIndex].m_rfBandwidth
-            << " m_lowCutoff: " << settings.m_filterBank[settings.m_filterIndex].m_lowCutoff
-            << " m_fftWindow: " << settings.m_filterBank[settings.m_filterIndex].m_fftWindow << "]"
-            << " m_volume: " << settings.m_volume
-            << " m_audioBinaual: " << settings.m_audioBinaural
-            << " m_audioFlipChannels: " << settings.m_audioFlipChannels
-            << " m_dsb: " << settings.m_dsb
-            << " m_audioMute: " << settings.m_audioMute
-            << " m_agcActive: " << settings.m_agc
-            << " m_agcClamping: " << settings.m_agcClamping
-            << " m_agcTimeLog2: " << settings.m_agcTimeLog2
-            << " agcPowerThreshold: " << settings.m_agcPowerThreshold
-            << " agcThresholdGate: " << settings.m_agcThresholdGate
-            << " m_dnr: " << settings.m_dnr
-            << " m_dnrScheme: " << settings.m_dnrScheme
-            << " m_dnrAboveAvgFactor: " << settings.m_dnrAboveAvgFactor
-            << " m_dnrSigmaFactor: " << settings.m_dnrSigmaFactor
-            << " m_dnrNbPeaks: " << settings.m_dnrNbPeaks
-            << " m_dnrAlpha: " << settings.m_dnrAlpha
-            << " m_audioDeviceName: " << settings.m_audioDeviceName
-            << " m_streamIndex: " << settings.m_streamIndex
-            << " m_useReverseAPI: " << settings.m_useReverseAPI
-            << " m_reverseAPIAddress: " << settings.m_reverseAPIAddress
-            << " m_reverseAPIPort: " << settings.m_reverseAPIPort
-            << " m_reverseAPIDeviceIndex: " << settings.m_reverseAPIDeviceIndex
-            << " m_reverseAPIChannelIndex: " << settings.m_reverseAPIChannelIndex
-            << " force: " << force;
+    qDebug() << "SSBDemod::applySettings:" << settings.getDebugString(settingsKeys, force);
 
-    QList<QString> reverseAPIKeys;
-
-    if ((m_settings.m_inputFrequencyOffset != settings.m_inputFrequencyOffset) || force) {
-        reverseAPIKeys.append("inputFrequencyOffset");
-    }
-    if ((m_settings.m_filterIndex != settings.m_filterIndex) || force) {
-        reverseAPIKeys.append("filterIndex");
-    }
-    if ((m_settings.m_filterBank[m_settings.m_filterIndex].m_spanLog2 != settings.m_filterBank[settings.m_filterIndex].m_spanLog2) || force) {
-        reverseAPIKeys.append("spanLog2");
-    }
-    if ((m_settings.m_filterBank[m_settings.m_filterIndex].m_rfBandwidth != settings.m_filterBank[settings.m_filterIndex].m_rfBandwidth) || force) {
-        reverseAPIKeys.append("rfBandwidth");
-    }
-    if ((m_settings.m_filterBank[m_settings.m_filterIndex].m_lowCutoff != settings.m_filterBank[settings.m_filterIndex].m_lowCutoff) || force) {
-        reverseAPIKeys.append("lowCutoff");
-    }
-    if ((m_settings.m_filterBank[m_settings.m_filterIndex].m_fftWindow != settings.m_filterBank[settings.m_filterIndex].m_fftWindow) || force) {
-        reverseAPIKeys.append("fftWindow");
-    }
-    if ((m_settings.m_volume != settings.m_volume) || force) {
-        reverseAPIKeys.append("volume");
-    }
-    if ((m_settings.m_agcTimeLog2 != settings.m_agcTimeLog2) || force) {
-        reverseAPIKeys.append("agcTimeLog2");
-    }
-    if ((m_settings.m_agcPowerThreshold != settings.m_agcPowerThreshold) || force) {
-        reverseAPIKeys.append("agcPowerThreshold");
-    }
-    if ((m_settings.m_agcThresholdGate != settings.m_agcThresholdGate) || force) {
-        reverseAPIKeys.append("agcThresholdGate");
-    }
-    if ((m_settings.m_agcClamping != settings.m_agcClamping) || force) {
-        reverseAPIKeys.append("agcClamping");
-    }
-    if ((settings.m_audioDeviceName != m_settings.m_audioDeviceName) || force) {
-        reverseAPIKeys.append("audioDeviceName");
-    }
-    if ((m_settings.m_audioBinaural != settings.m_audioBinaural) || force) {
-        reverseAPIKeys.append("audioBinaural");
-    }
-    if ((m_settings.m_audioFlipChannels != settings.m_audioFlipChannels) || force) {
-        reverseAPIKeys.append("audioFlipChannels");
-    }
-    if ((m_settings.m_dsb != settings.m_dsb) || force) {
-        reverseAPIKeys.append("dsb");
-    }
-    if ((m_settings.m_audioMute != settings.m_audioMute) || force) {
-        reverseAPIKeys.append("audioMute");
-    }
-    if ((m_settings.m_agc != settings.m_agc) || force) {
-        reverseAPIKeys.append("agc");
-    }
-    if ((m_settings.m_dnr != settings.m_dnr) || force) {
-        reverseAPIKeys.append("dnr");
-    }
-    if ((m_settings.m_dnrScheme != settings.m_dnrScheme) || force) {
-        reverseAPIKeys.append("dnrScheme");
-    }
-    if ((m_settings.m_dnrAboveAvgFactor != settings.m_dnrAboveAvgFactor) || force) {
-        reverseAPIKeys.append("dnrAboveAvgFactor");
-    }
-    if ((m_settings.m_dnrSigmaFactor != settings.m_dnrSigmaFactor) || force) {
-        reverseAPIKeys.append("dnrSigmaFactor");
-    }
-    if ((m_settings.m_dnrNbPeaks != settings.m_dnrNbPeaks) || force) {
-        reverseAPIKeys.append("dnrNbPeaks");
-    }
-    if ((m_settings.m_dnrAlpha != settings.m_dnrAlpha) || force) {
-        reverseAPIKeys.append("dnrAlpha");
-    }
-
-    if (m_settings.m_streamIndex != settings.m_streamIndex)
+    if (settingsKeys.contains("streamIndex"))
     {
         if (m_deviceAPI->getSampleMIMO()) // change of stream is possible for MIMO devices only
         {
@@ -362,11 +260,9 @@ void SSBDemod::applySettings(const SSBDemodSettings& settings, bool force)
             m_settings.m_streamIndex = settings.m_streamIndex; // make sure ChannelAPI::getStreamIndex() is consistent
             emit streamIndexChanged(settings.m_streamIndex);
         }
-
-        reverseAPIKeys.append("streamIndex");
     }
 
-    if ((settings.m_dsb != m_settings.m_dsb)
+    if ((settingsKeys.contains("dsb") && (settings.m_dsb != m_settings.m_dsb))
      || (settings.m_filterBank[settings.m_filterIndex].m_rfBandwidth != m_settings.m_filterBank[m_settings.m_filterIndex].m_rfBandwidth)
      || (settings.m_filterBank[settings.m_filterIndex].m_lowCutoff != m_settings.m_filterBank[m_settings.m_filterIndex].m_lowCutoff) || force)
     {
@@ -379,28 +275,32 @@ void SSBDemod::applySettings(const SSBDemodSettings& settings, bool force)
 
     if (m_running)
     {
-        SSBDemodBaseband::MsgConfigureSSBDemodBaseband *msg = SSBDemodBaseband::MsgConfigureSSBDemodBaseband::create(settings, force);
+        SSBDemodBaseband::MsgConfigureSSBDemodBaseband *msg = SSBDemodBaseband::MsgConfigureSSBDemodBaseband::create(settingsKeys, settings, force);
         m_basebandSink->getInputMessageQueue()->push(msg);
     }
 
     if (settings.m_useReverseAPI)
     {
-        bool fullUpdate = ((m_settings.m_useReverseAPI != settings.m_useReverseAPI) && settings.m_useReverseAPI) ||
-                (m_settings.m_reverseAPIAddress != settings.m_reverseAPIAddress) ||
-                (m_settings.m_reverseAPIPort != settings.m_reverseAPIPort) ||
-                (m_settings.m_reverseAPIDeviceIndex != settings.m_reverseAPIDeviceIndex) ||
-                (m_settings.m_reverseAPIChannelIndex != settings.m_reverseAPIChannelIndex);
-        webapiReverseSendSettings(reverseAPIKeys, settings, fullUpdate || force);
+        bool fullUpdate = (settingsKeys.contains("useReverseAPI") ||
+                (settingsKeys.contains("reverseAPIAddress")) ||
+                (settingsKeys.contains("reverseAPIPort")) ||
+                (settingsKeys.contains("reverseAPIDeviceIndex")) ||
+                (settingsKeys.contains("reverseAPIChannelIndex")));
+        webapiReverseSendSettings(settingsKeys, settings, fullUpdate || force);
     }
 
     QList<ObjectPipe*> pipes;
     MainCore::instance()->getMessagePipes().getMessagePipes(this, "settings", pipes);
 
     if (pipes.size() > 0) {
-        sendChannelSettings(pipes, reverseAPIKeys, settings, force);
+        sendChannelSettings(pipes, settingsKeys, settings, force);
     }
 
-    m_settings = settings;
+    if (force || !settingsKeys.isEmpty()) {
+        m_settings = settings;
+    } else {
+        m_settings.applySettings(settingsKeys, settings);
+    }
 }
 
 QByteArray SSBDemod::serialize() const
@@ -412,14 +312,14 @@ bool SSBDemod::deserialize(const QByteArray& data)
 {
     if (m_settings.deserialize(data))
     {
-        MsgConfigureSSBDemod *msg = MsgConfigureSSBDemod::create(m_settings, true);
+        MsgConfigureSSBDemod *msg = MsgConfigureSSBDemod::create(QStringList(), m_settings, true);
         m_inputMessageQueue.push(msg);
         return true;
     }
     else
     {
         m_settings.resetToDefaults();
-        MsgConfigureSSBDemod *msg = MsgConfigureSSBDemod::create(m_settings, true);
+        MsgConfigureSSBDemod *msg = MsgConfigureSSBDemod::create(QStringList(), m_settings, true);
         m_inputMessageQueue.push(msg);
         return false;
     }
@@ -478,13 +378,13 @@ int SSBDemod::webapiSettingsPutPatch(
     SSBDemodSettings settings = m_settings;
     webapiUpdateChannelSettings(settings, channelSettingsKeys, response);
 
-    MsgConfigureSSBDemod *msg = MsgConfigureSSBDemod::create(settings, force);
+    MsgConfigureSSBDemod *msg = MsgConfigureSSBDemod::create(channelSettingsKeys, settings, force);
     m_inputMessageQueue.push(msg);
 
     qDebug("SSBDemod::webapiSettingsPutPatch: forward to GUI: %p", m_guiMessageQueue);
     if (m_guiMessageQueue) // forward to GUI if any
     {
-        MsgConfigureSSBDemod *msgToGUI = MsgConfigureSSBDemod::create(settings, force);
+        MsgConfigureSSBDemod *msgToGUI = MsgConfigureSSBDemod::create(channelSettingsKeys, settings, force);
         m_guiMessageQueue->push(msgToGUI);
     }
 
@@ -721,7 +621,7 @@ void SSBDemod::webapiFormatChannelReport(SWGSDRangel::SWGChannelReport& response
     }
 }
 
-void SSBDemod::webapiReverseSendSettings(QList<QString>& channelSettingsKeys, const SSBDemodSettings& settings, bool force)
+void SSBDemod::webapiReverseSendSettings(const QList<QString>& channelSettingsKeys, const SSBDemodSettings& settings, bool force)
 {
     SWGSDRangel::SWGChannelSettings *swgChannelSettings = new SWGSDRangel::SWGChannelSettings();
     webapiFormatChannelSettings(channelSettingsKeys, swgChannelSettings, settings, force);
@@ -748,7 +648,7 @@ void SSBDemod::webapiReverseSendSettings(QList<QString>& channelSettingsKeys, co
 
 void SSBDemod::sendChannelSettings(
     const QList<ObjectPipe*>& pipes,
-    QList<QString>& channelSettingsKeys,
+    const QList<QString>& channelSettingsKeys,
     const SSBDemodSettings& settings,
     bool force)
 {
@@ -774,7 +674,7 @@ void SSBDemod::sendChannelSettings(
 }
 
 void SSBDemod::webapiFormatChannelSettings(
-        QList<QString>& channelSettingsKeys,
+        const QList<QString>& channelSettingsKeys,
         SWGSDRangel::SWGChannelSettings *swgChannelSettings,
         const SSBDemodSettings& settings,
         bool force

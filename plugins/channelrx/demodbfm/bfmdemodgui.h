@@ -91,7 +91,7 @@ private:
 	virtual ~BFMDemodGUI();
 
     void blockApplySettings(bool block);
-	void applySettings(bool force = false);
+	void applySettings(const QStringList& settingsKeys, bool force = false);
     void displaySettings();
 	void rdsUpdate(bool force);
 	void rdsUpdateFixedFields();

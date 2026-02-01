@@ -44,20 +44,23 @@ public:
 
     public:
         const RadiosondeDemodSettings& getSettings() const { return m_settings; }
+        const QStringList& getSettingsKeys() const { return m_settingsKeys; }
         bool getForce() const { return m_force; }
 
-        static MsgConfigureRadiosondeDemodBaseband* create(const RadiosondeDemodSettings& settings, bool force)
+        static MsgConfigureRadiosondeDemodBaseband* create(const QStringList& settingsKeys, const RadiosondeDemodSettings& settings, bool force)
         {
-            return new MsgConfigureRadiosondeDemodBaseband(settings, force);
+            return new MsgConfigureRadiosondeDemodBaseband(settingsKeys, settings, force);
         }
 
     private:
         RadiosondeDemodSettings m_settings;
+        QStringList m_settingsKeys;
         bool m_force;
 
-        MsgConfigureRadiosondeDemodBaseband(const RadiosondeDemodSettings& settings, bool force) :
+        MsgConfigureRadiosondeDemodBaseband(const QStringList& settingsKeys, const RadiosondeDemodSettings& settings, bool force) :
             Message(),
             m_settings(settings),
+            m_settingsKeys(settingsKeys),
             m_force(force)
         { }
     };
@@ -92,7 +95,7 @@ private:
 
     bool handleMessage(const Message& cmd);
     void calculateOffset(RadiosondeDemodSink *sink);
-    void applySettings(const RadiosondeDemodSettings& settings, bool force = false);
+    void applySettings(const QStringList& settingsKeys, const RadiosondeDemodSettings& settings, bool force = false);
 
 private slots:
     void handleInputMessages();

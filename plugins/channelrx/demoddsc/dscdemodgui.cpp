@@ -153,7 +153,7 @@ void DSCDemodGUI::resetToDefaults()
 {
     m_settings.resetToDefaults();
     displaySettings();
-    applySettings(true);
+    applySettings(QStringList(), true);
 }
 
 QByteArray DSCDemodGUI::serialize() const
@@ -165,7 +165,7 @@ bool DSCDemodGUI::deserialize(const QByteArray& data)
 {
     if(m_settings.deserialize(data)) {
         displaySettings();
-        applySettings(true);
+        applySettings(QStringList(), true);
         return true;
     } else {
         resetToDefaults();
@@ -401,7 +401,7 @@ void DSCDemodGUI::channelMarkerChangedByCursor()
 {
     ui->deltaFrequency->setValue(m_channelMarker.getCenterFrequency());
     m_settings.m_inputFrequencyOffset = m_channelMarker.getCenterFrequency();
-    applySettings();
+    applySettings(QStringList({"inputFrequencyOffset"}));
 }
 
 void DSCDemodGUI::channelMarkerHighlightedByCursor()
@@ -414,28 +414,28 @@ void DSCDemodGUI::on_deltaFrequency_changed(qint64 value)
     m_channelMarker.setCenterFrequency(value);
     m_settings.m_inputFrequencyOffset = m_channelMarker.getCenterFrequency();
     updateAbsoluteCenterFrequency();
-    applySettings();
+    applySettings(QStringList({"inputFrequencyOffset"}));
 }
 
 void DSCDemodGUI::on_filterInvalid_clicked(bool checked)
 {
     m_settings.m_filterInvalid = checked;
     filter();
-    applySettings();
+    applySettings(QStringList({"filterInvalid"}));
 }
 
 void DSCDemodGUI::on_filterColumn_currentIndexChanged(int index)
 {
     m_settings.m_filterColumn = index;
     filter();
-    applySettings();
+    applySettings(QStringList({"filterColumn"}));
 }
 
 void DSCDemodGUI::on_filter_editingFinished()
 {
     m_settings.m_filter = ui->filter->text();
     filter();
-    applySettings();
+    applySettings(QStringList({"filter"}));
 }
 
 void DSCDemodGUI::on_clearTable_clicked()
@@ -446,19 +446,19 @@ void DSCDemodGUI::on_clearTable_clicked()
 void DSCDemodGUI::on_udpEnabled_clicked(bool checked)
 {
     m_settings.m_udpEnabled = checked;
-    applySettings();
+    applySettings(QStringList({"udpEnabled"}));
 }
 
 void DSCDemodGUI::on_udpAddress_editingFinished()
 {
     m_settings.m_udpAddress = ui->udpAddress->text();
-    applySettings();
+    applySettings(QStringList({"udpAddress"}));
 }
 
 void DSCDemodGUI::on_udpPort_editingFinished()
 {
     m_settings.m_udpPort = ui->udpPort->text().toInt();
-    applySettings();
+    applySettings(QStringList({"udpPort"}));
 }
 
 void DSCDemodGUI::filterRow(int row)
@@ -496,7 +496,7 @@ void DSCDemodGUI::onWidgetRolled(QWidget* widget, bool rollDown)
     (void) rollDown;
 
     getRollupContents()->saveState(m_rollupState);
-    applySettings();
+    applySettings(QStringList());
 }
 
 void DSCDemodGUI::onMenuDialogCalled(const QPoint &p)
@@ -541,7 +541,16 @@ void DSCDemodGUI::onMenuDialogCalled(const QPoint &p)
             updateIndexLabel();
         }
 
-        applySettings();
+        applySettings(QStringList({
+            "rgbColor",
+            "title",
+            "useReverseAPI",
+            "reverseAPIAddress",
+            "reverseAPIPort",
+            "reverseAPIDeviceIndex",
+            "reverseAPIChannelIndex",
+            "streamIndex"
+        }));
     }
 
     resetContextMenuType();
@@ -667,7 +676,7 @@ DSCDemodGUI::DSCDemodGUI(PluginAPI* pluginAPI, DeviceUISet *deviceUISet, Baseban
 
     displaySettings();
     makeUIConnections();
-    applySettings(true);
+    applySettings(QStringList(), true);
     m_resizer.enableChildMouseTracking();
 }
 
@@ -975,11 +984,11 @@ void DSCDemodGUI::blockApplySettings(bool block)
     m_doApplySettings = !block;
 }
 
-void DSCDemodGUI::applySettings(bool force)
+void DSCDemodGUI::applySettings(const QStringList& settingsKeys, bool force)
 {
     if (m_doApplySettings)
     {
-        DSCDemod::MsgConfigureDSCDemod* message = DSCDemod::MsgConfigureDSCDemod::create( m_settings, force);
+        DSCDemod::MsgConfigureDSCDemod* message = DSCDemod::MsgConfigureDSCDemod::create(settingsKeys, m_settings, force);
         m_dscDemod->getInputMessageQueue()->push(message);
     }
 }
@@ -1070,7 +1079,7 @@ void DSCDemodGUI::tick()
 void DSCDemodGUI::on_feed_clicked(bool checked)
 {
     m_settings.m_feed = checked;
-    applySettings();
+    applySettings(QStringList({"feed"}));
 }
 
 void DSCDemodGUI::on_feed_rightClicked(const QPoint &point)
@@ -1085,7 +1094,7 @@ void DSCDemodGUI::on_feed_rightClicked(const QPoint &point)
 void DSCDemodGUI::on_logEnable_clicked(bool checked)
 {
     m_settings.m_logEnabled = checked;
-    applySettings();
+    applySettings(QStringList({"logEnabled"}));
 }
 
 void DSCDemodGUI::on_logFilename_clicked()
@@ -1101,7 +1110,7 @@ void DSCDemodGUI::on_logFilename_clicked()
         {
             m_settings.m_logFilename = fileNames[0];
             ui->logFilename->setToolTip(QString(".csv log filename: %1").arg(m_settings.m_logFilename));
-            applySettings();
+            applySettings(QStringList({"logFilename"}));
         }
     }
 }
@@ -1179,7 +1188,7 @@ void DSCDemodGUI::on_logOpen_clicked()
 void DSCDemodGUI::on_useFileTime_toggled(bool checked)
 {
     m_settings.m_useFileTime = checked;
-    applySettings();
+    applySettings(QStringList({"useFileTime"}));
 }
 
 void DSCDemodGUI::makeUIConnections()

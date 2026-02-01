@@ -44,20 +44,23 @@ public:
 
     public:
         const UDPSourceSettings& getSettings() const { return m_settings; }
+        const QStringList& getSettingsKeys() const { return m_settingsKeys; }
         bool getForce() const { return m_force; }
 
-        static MsgConfigureUDPSource* create(const UDPSourceSettings& settings, bool force)
+        static MsgConfigureUDPSource* create(const QStringList& settingsKeys, const UDPSourceSettings& settings, bool force)
         {
-            return new MsgConfigureUDPSource(settings, force);
+            return new MsgConfigureUDPSource(settingsKeys, settings, force);
         }
 
     private:
         UDPSourceSettings m_settings;
+        QStringList m_settingsKeys;
         bool m_force;
 
-        MsgConfigureUDPSource(const UDPSourceSettings& settings, bool force) :
+        MsgConfigureUDPSource(const QStringList& settingsKeys, const UDPSourceSettings& settings, bool force) :
             Message(),
             m_settings(settings),
+            m_settingsKeys(settingsKeys),
             m_force(force)
         {
         }
@@ -183,17 +186,17 @@ private:
 
     virtual bool handleMessage(const Message& cmd);
 
-    void applySettings(const UDPSourceSettings& settings, bool force = false);
+    void applySettings(const QStringList& settingsKeys, const UDPSourceSettings& settings, bool force = false);
     void webapiFormatChannelReport(SWGSDRangel::SWGChannelReport& response);
-    void webapiReverseSendSettings(QList<QString>& channelSettingsKeys, const UDPSourceSettings& settings, bool force);
+    void webapiReverseSendSettings(const QList<QString>& channelSettingsKeys, const UDPSourceSettings& settings, bool force);
     void sendChannelSettings(
         const QList<ObjectPipe*>& pipes,
-        QList<QString>& channelSettingsKeys,
+        const QList<QString>& channelSettingsKeys,
         const UDPSourceSettings& settings,
         bool force
     );
     void webapiFormatChannelSettings(
-        QList<QString>& channelSettingsKeys,
+        const QList<QString>& channelSettingsKeys,
         SWGSDRangel::SWGChannelSettings *swgChannelSettings,
         const UDPSourceSettings& settings,
         bool force

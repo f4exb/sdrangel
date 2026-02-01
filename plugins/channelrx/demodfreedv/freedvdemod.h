@@ -46,20 +46,23 @@ public:
 
     public:
         const FreeDVDemodSettings& getSettings() const { return m_settings; }
+        const QStringList& getSettingsKeys() const { return m_settingsKeys; }
         bool getForce() const { return m_force; }
 
-        static MsgConfigureFreeDVDemod* create(const FreeDVDemodSettings& settings, bool force)
+        static MsgConfigureFreeDVDemod* create(const QStringList& settingsKeys, const FreeDVDemodSettings& settings, bool force)
         {
-            return new MsgConfigureFreeDVDemod(settings, force);
+            return new MsgConfigureFreeDVDemod(settingsKeys, settings, force);
         }
 
     private:
         FreeDVDemodSettings m_settings;
+        QStringList m_settingsKeys;
         bool m_force;
 
-        MsgConfigureFreeDVDemod(const FreeDVDemodSettings& settings, bool force) :
+        MsgConfigureFreeDVDemod(const QStringList& settingsKeys, const FreeDVDemodSettings& settings, bool force) :
             Message(),
             m_settings(settings),
+            m_settingsKeys(settingsKeys),
             m_force(force)
         { }
     };
@@ -170,17 +173,17 @@ private:
     QNetworkRequest m_networkRequest;
 
 	virtual bool handleMessage(const Message& cmd);
-	void applySettings(const FreeDVDemodSettings& settings, bool force = false);
+	void applySettings(const QStringList& settingsKeys, const FreeDVDemodSettings& settings, bool force = false);
     void webapiFormatChannelReport(SWGSDRangel::SWGChannelReport& response);
-    void webapiReverseSendSettings(QList<QString>& channelSettingsKeys, const FreeDVDemodSettings& settings, bool force);
+    void webapiReverseSendSettings(const QList<QString>& channelSettingsKeys, const FreeDVDemodSettings& settings, bool force);
     void sendChannelSettings(
         const QList<ObjectPipe*>& pipes,
-        QList<QString>& channelSettingsKeys,
+        const QList<QString>& channelSettingsKeys,
         const FreeDVDemodSettings& settings,
         bool force
     );
     void webapiFormatChannelSettings(
-        QList<QString>& channelSettingsKeys,
+        const QList<QString>& channelSettingsKeys,
         SWGSDRangel::SWGChannelSettings *swgChannelSettings,
         const FreeDVDemodSettings& settings,
         bool force

@@ -66,7 +66,7 @@ NFMDemodSink::NFMDemodSink() :
     m_dcsDetector.setSampleRate(CTCSS_DETECTOR_RATE);
     m_dcsDetector.setEqWindow(23);
 
-    applySettings(m_settings, true);
+    applySettings(QStringList(), m_settings, true);
     applyChannelSettings(m_channelSampleRate, m_channelFrequencyOffset, true);
 }
 
@@ -302,55 +302,38 @@ void NFMDemodSink::applyChannelSettings(int channelSampleRate, int channelFreque
     m_channelFrequencyOffset = channelFrequencyOffset;
 }
 
-void NFMDemodSink::applySettings(const NFMDemodSettings& settings, bool force)
+void NFMDemodSink::applySettings(const QStringList& settingsKeys, const NFMDemodSettings& settings, bool force)
 {
-    qDebug() << "NFMDemodSink::applySettings:"
-            << " m_inputFrequencyOffset: " << settings.m_inputFrequencyOffset
-            << " m_rfBandwidth: " << settings.m_rfBandwidth
-            << " m_afBandwidth: " << settings.m_afBandwidth
-            << " m_fmDeviation: " << settings.m_fmDeviation
-            << " m_volume: " << settings.m_volume
-            << " m_squelchGate: " << settings.m_squelchGate
-            << " m_deltaSquelch: " << settings.m_deltaSquelch
-            << " m_squelch: " << settings.m_squelch
-            << " m_ctcssIndex: " << settings.m_ctcssIndex
-            << " m_ctcssOn: " << settings.m_ctcssOn
-            << " m_dcsOn: " << settings.m_dcsOn
-            << " m_dcsCode: " << settings.m_dcsCode
-            << " m_dcsPositive: " << settings.m_dcsPositive
-            << " m_highPass: " << settings.m_highPass
-            << " m_audioMute: " << settings.m_audioMute
-            << " m_audioDeviceName: " << settings.m_audioDeviceName
-            << " force: " << force;
+    qDebug() << "NFMDemodSink::applySettings:" << settings.getDebugString(settingsKeys, force);
 
-    if ((settings.m_rfBandwidth != m_settings.m_rfBandwidth) || force)
+    if ((settingsKeys.contains("rfBandwidth") && (settings.m_rfBandwidth != m_settings.m_rfBandwidth)) || force)
     {
         m_interpolator.create(16, m_channelSampleRate, settings.m_rfBandwidth / 2.2);
         m_interpolatorDistance = Real(m_channelSampleRate) / Real(m_audioSampleRate);
         m_interpolatorDistanceRemain = m_interpolatorDistance;
     }
 
-    if ((settings.m_fmDeviation != m_settings.m_fmDeviation) || force) {
+    if ((settingsKeys.contains("fmDeviation") && (settings.m_fmDeviation != m_settings.m_fmDeviation)) || force) {
         Real lowCut = -Real(settings.m_fmDeviation) / m_channelSampleRate;
         Real hiCut  = Real(settings.m_fmDeviation) / m_channelSampleRate;
         m_rfFilter.create_filter(lowCut, hiCut);
         m_phaseDiscri.setFMScaling(Real(m_audioSampleRate) / (2.0f * settings.m_fmDeviation));
     }
 
-    if ((settings.m_afBandwidth != m_settings.m_afBandwidth) || force)
+    if ((settingsKeys.contains("afBandwidth") && (settings.m_afBandwidth != m_settings.m_afBandwidth)) || force)
     {
         m_bandpass.create(m_filterTaps, m_audioSampleRate, 300.0, settings.m_afBandwidth);
         m_lowpass.create(m_filterTaps, m_audioSampleRate, settings.m_afBandwidth);
     }
 
-    if ((settings.m_squelchGate != m_settings.m_squelchGate) || force)
+    if ((settingsKeys.contains("squelchGate") && (settings.m_squelchGate != m_settings.m_squelchGate)) || force)
     {
         m_squelchGate = (m_audioSampleRate / 100) * settings.m_squelchGate; // gate is given in 10s of ms at 48000 Hz audio sample rate
         m_squelchCount = 0; // reset squelch open counter
     }
 
-    if ((settings.m_squelch != m_settings.m_squelch) ||
-        (settings.m_deltaSquelch != m_settings.m_deltaSquelch) || force)
+    if ((settingsKeys.contains("squelch") && (settings.m_squelch != m_settings.m_squelch)) ||
+        (settingsKeys.contains("deltaSquelch") && (settings.m_deltaSquelch != m_settings.m_deltaSquelch)) || force)
     {
         if (settings.m_deltaSquelch)
         { // input is a value in negative centis
@@ -367,17 +350,21 @@ void NFMDemodSink::applySettings(const NFMDemodSettings& settings, bool force)
         m_squelchCount = 0; // reset squelch open counter
     }
 
-    if ((settings.m_ctcssIndex != m_settings.m_ctcssIndex) || force) {
+    if ((settingsKeys.contains("ctcssIndex") && (settings.m_ctcssIndex != m_settings.m_ctcssIndex)) || force) {
         setSelectedCtcssIndex(settings.m_ctcssIndex);
     }
 
-    if ((settings.m_dcsCode != m_settings.m_dcsCode) ||
-        (settings.m_dcsPositive != m_settings.m_dcsPositive) || force)
+    if ((settingsKeys.contains("dcsCode") && (settings.m_dcsCode != m_settings.m_dcsCode)) ||
+        (settingsKeys.contains("dcsPositive") && (settings.m_dcsPositive != m_settings.m_dcsPositive)) || force)
     {
         setSelectedDcsCode(settings.m_dcsCode, settings.m_dcsPositive);
     }
 
-    m_settings = settings;
+    if (force) {
+        m_settings = settings;
+    } else {
+        m_settings.applySettings(settingsKeys, settings);
+    }
 }
 
 void NFMDemodSink::applyAudioSampleRate(unsigned int sampleRate)

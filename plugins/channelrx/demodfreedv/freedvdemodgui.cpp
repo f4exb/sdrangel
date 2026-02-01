@@ -131,7 +131,7 @@ void FreeDVDemodGUI::channelMarkerChangedByCursor()
 {
     ui->deltaFrequency->setValue(m_channelMarker.getCenterFrequency());
     m_settings.m_inputFrequencyOffset = m_channelMarker.getCenterFrequency();
-    applySettings();
+    applySettings(QStringList({"inputFrequencyOffset"}));
 }
 
 void FreeDVDemodGUI::channelMarkerHighlightedByCursor()
@@ -144,7 +144,7 @@ void FreeDVDemodGUI::on_deltaFrequency_changed(qint64 value)
     m_channelMarker.setCenterFrequency(value);
     m_settings.m_inputFrequencyOffset = m_channelMarker.getCenterFrequency();
     updateAbsoluteCenterFrequency();
-    applySettings();
+    applySettings(QStringList({"inputFrequencyOffset"}));
 }
 
 void FreeDVDemodGUI::on_reSync_clicked(bool checked)
@@ -160,34 +160,34 @@ void FreeDVDemodGUI::on_freeDVMode_currentIndexChanged(int index)
     m_channelMarker.setBandwidth(FreeDVDemodSettings::getHiCutoff(m_settings.m_freeDVMode) * 2);
     m_channelMarker.setLowCutoff(FreeDVDemodSettings::getLowCutoff(m_settings.m_freeDVMode));
     m_channelMarker.setSidebands(ChannelMarker::usb);
-    applySettings();
+    applySettings(QStringList({"freeDVMode"}));
 }
 
 void FreeDVDemodGUI::on_volume_valueChanged(int value)
 {
 	ui->volumeText->setText(QString("%1").arg(value / 10.0, 0, 'f', 1));
 	m_settings.m_volume = value / 10.0;
-	applySettings();
+	applySettings(QStringList({"volume"}));
 }
 
 void FreeDVDemodGUI::on_volumeIn_valueChanged(int value)
 {
 	ui->volumeInText->setText(QString("%1").arg(value / 10.0, 0, 'f', 1));
 	m_settings.m_volumeIn = value / 10.0;
-	applySettings();
+	applySettings(QStringList({"volumeIn"}));
 }
 
 void FreeDVDemodGUI::on_agc_toggled(bool checked)
 {
     m_settings.m_agc = checked;
-    applySettings();
+    applySettings(QStringList({"agc"}));
 }
 
 void FreeDVDemodGUI::on_audioMute_toggled(bool checked)
 {
 	m_audioMute = checked;
 	m_settings.m_audioMute = checked;
-	applySettings();
+	applySettings(QStringList({"audioMute"}));
 }
 
 void FreeDVDemodGUI::on_spanLog2_valueChanged(int value)
@@ -241,7 +241,16 @@ void FreeDVDemodGUI::onMenuDialogCalled(const QPoint &p)
             updateIndexLabel();
         }
 
-        applySettings();
+        applySettings(QStringList({
+            "title",
+            "rgbColor",
+            "useReverseAPI",
+            "reverseAPIAddress",
+            "reverseAPIPort",
+            "reverseAPIDeviceIndex",
+            "reverseAPIChannelIndex",
+            "streamIndex"
+        }));
     }
 
     resetContextMenuType();
@@ -253,7 +262,7 @@ void FreeDVDemodGUI::onWidgetRolled(QWidget* widget, bool rollDown)
     (void) rollDown;
 
     getRollupContents()->saveState(m_rollupState);
-    applySettings();
+    applySettings(QStringList());
 }
 
 FreeDVDemodGUI::FreeDVDemodGUI(PluginAPI* pluginAPI, DeviceUISet *deviceUISet, BasebandSampleSink *rxChannel, QWidget* parent) :
@@ -350,11 +359,11 @@ bool FreeDVDemodGUI::blockApplySettings(bool block)
     return ret;
 }
 
-void FreeDVDemodGUI::applySettings(bool force)
+void FreeDVDemodGUI::applySettings(const QStringList& settingsKeys, bool force)
 {
 	if (m_doApplySettings)
 	{
-        FreeDVDemod::MsgConfigureFreeDVDemod* message = FreeDVDemod::MsgConfigureFreeDVDemod::create( m_settings, force);
+        FreeDVDemod::MsgConfigureFreeDVDemod* message = FreeDVDemod::MsgConfigureFreeDVDemod::create(settingsKeys, m_settings, force);
         m_freeDVDemod->getInputMessageQueue()->push(message);
 	}
 }
@@ -363,7 +372,7 @@ void FreeDVDemodGUI::applyBandwidths(int spanLog2, bool force)
 {
     displayBandwidths(spanLog2);
     m_settings.m_spanLog2 = spanLog2;
-    applySettings(force);
+    applySettings(QStringList({"spanLog2"}), force);
 }
 
 void FreeDVDemodGUI::displayBandwidths(int spanLog2)
@@ -449,7 +458,7 @@ void FreeDVDemodGUI::audioSelect(const QPoint& p)
     if (audioSelect.m_selected)
     {
         m_settings.m_audioDeviceName = audioSelect.m_audioDeviceName;
-        applySettings();
+        applySettings(QStringList({"audioDeviceName"}));
     }
 }
 

@@ -115,7 +115,7 @@ public:
         return r_cnrMeter ? r_cnrMeter->m_nbAvg : 1;
     }
 
-    void applySettings(const DATVDemodSettings& settings, bool force = false);
+    void applySettings(const QStringList& settingsKeys, const DATVDemodSettings& settings, bool force = false);
 	void applyChannelSettings(int channelSampleRate, int channelFrequencyOffset, bool force = false);
 
 private:
@@ -316,7 +316,7 @@ private:
     leansdr::datvvideoplayer<leansdr::tspacket> *r_videoplayer;
 
     //CONSTELLATION
-#ifndef SERVER_MODE    
+#ifndef SERVER_MODE
     leansdr::datvconstellation<leansdr::f32> *r_scope_symbols;
     leansdr::datvdvbs2constellation<leansdr::f32> *r_scope_symbols_dvbs2;
 #endif

@@ -355,3 +355,192 @@ int DATVModSettings::getDVBSDataBitrate() const
 
     return std::round(m_symbolRate * bitsPerSymbol * fecFactor * plFactor);
 }
+
+void DATVModSettings::applySettings(const QStringList& settingsKeys, const DATVModSettings& settings)
+{
+    if (settingsKeys.contains("inputFrequencyOffset")) {
+        m_inputFrequencyOffset = settings.m_inputFrequencyOffset;
+    }
+    if (settingsKeys.contains("rfBandwidth")) {
+        m_rfBandwidth = settings.m_rfBandwidth;
+    }
+    if (settingsKeys.contains("standard")) {
+        m_standard = settings.m_standard;
+    }
+    if (settingsKeys.contains("modulation")) {
+        m_modulation = settings.m_modulation;
+    }
+    if (settingsKeys.contains("fec")) {
+        m_fec = settings.m_fec;
+    }
+    if (settingsKeys.contains("symbolRate")) {
+        m_symbolRate = settings.m_symbolRate;
+    }
+    if (settingsKeys.contains("rollOff")) {
+        m_rollOff = settings.m_rollOff;
+    }
+    if (settingsKeys.contains("source")) {
+        m_source = settings.m_source;
+    }
+    if (settingsKeys.contains("imageFileName")) {
+        m_imageFileName = settings.m_imageFileName;
+    }
+    if (settingsKeys.contains("imageOverlayTimestamp")) {
+        m_imageOverlayTimestamp = settings.m_imageOverlayTimestamp;
+    }
+    if (settingsKeys.contains("imageServiceProvider")) {
+        m_imageServiceProvider = settings.m_imageServiceProvider;
+    }
+    if (settingsKeys.contains("imageServiceName")) {
+        m_imageServiceName = settings.m_imageServiceName;
+    }
+    if (settingsKeys.contains("imageCodec")) {
+        m_imageCodec = settings.m_imageCodec;
+    }
+    if (settingsKeys.contains("tsFileName")) {
+        m_tsFileName = settings.m_tsFileName;
+    }
+    if (settingsKeys.contains("tsFilePlayLoop")) {
+        m_tsFilePlayLoop = settings.m_tsFilePlayLoop;
+    }
+    if (settingsKeys.contains("tsFilePlay")) {
+        m_tsFilePlay = settings.m_tsFilePlay;
+    }
+    if (settingsKeys.contains("udpAddress")) {
+        m_udpAddress = settings.m_udpAddress;
+    }
+    if (settingsKeys.contains("udpPort")) {
+        m_udpPort = settings.m_udpPort;
+    }
+    if (settingsKeys.contains("channelMute")) {
+        m_channelMute = settings.m_channelMute;
+    }
+    if (settingsKeys.contains("rgbColor")) {
+        m_rgbColor = settings.m_rgbColor;
+    }
+    if (settingsKeys.contains("title")) {
+        m_title = settings.m_title;
+    }
+    if (settingsKeys.contains("streamIndex")) {
+        m_streamIndex = settings.m_streamIndex;
+    }
+    if (settingsKeys.contains("useReverseAPI")) {
+        m_useReverseAPI = settings.m_useReverseAPI;
+    }
+    if (settingsKeys.contains("reverseAPIAddress")) {
+        m_reverseAPIAddress = settings.m_reverseAPIAddress;
+    }
+    if (settingsKeys.contains("reverseAPIPort")) {
+        m_reverseAPIPort = settings.m_reverseAPIPort;
+    }
+    if (settingsKeys.contains("reverseAPIDeviceIndex")) {
+        m_reverseAPIDeviceIndex = settings.m_reverseAPIDeviceIndex;
+    }
+    if (settingsKeys.contains("reverseAPIChannelIndex")) {
+        m_reverseAPIChannelIndex = settings.m_reverseAPIChannelIndex;
+    }
+    if (settingsKeys.contains("workspaceIndex")) {
+        m_workspaceIndex = settings.m_workspaceIndex;
+    }
+    if (settingsKeys.contains("geometryBytes")) {
+        m_geometryBytes = settings.m_geometryBytes;
+    }
+    if (settingsKeys.contains("hidden")) {
+        m_hidden = settings.m_hidden;
+    }
+}
+
+QString DATVModSettings::getDebugString(const QStringList& settingsKeys, bool force) const
+{
+    std::ostringstream ostr;
+
+    if (settingsKeys.contains("inputFrequencyOffset") || force) {
+        ostr << " m_inputFrequencyOffset: " << m_inputFrequencyOffset;
+    }
+    if (settingsKeys.contains("rfBandwidth") || force) {
+        ostr << " m_rfBandwidth: " << m_rfBandwidth;
+    }
+    if (settingsKeys.contains("standard") || force) {
+        ostr << " m_standard: " << m_standard;
+    }
+    if (settingsKeys.contains("modulation") || force) {
+        ostr << " m_modulation: " << m_modulation;
+    }
+    if (settingsKeys.contains("fec") || force) {
+        ostr << " m_fec: " << m_fec;
+    }
+    if (settingsKeys.contains("symbolRate") || force) {
+        ostr << " m_symbolRate: " << m_symbolRate;
+    }
+    if (settingsKeys.contains("rollOff") || force) {
+        ostr << " m_rollOff: " << m_rollOff;
+    }
+    if (settingsKeys.contains("source") || force) {
+        ostr << " m_source: " << m_source;
+    }
+    if (settingsKeys.contains("imageFileName") || force) {
+        ostr << " m_imageFileName: " << m_imageFileName.toStdString();
+    }
+    if (settingsKeys.contains("imageOverlayTimestamp") || force) {
+        ostr << " m_imageOverlayTimestamp: " << m_imageOverlayTimestamp;
+    }
+    if (settingsKeys.contains("imageServiceProvider") || force) {
+        ostr << " m_imageServiceProvider: " << m_imageServiceProvider.toStdString();
+    }
+    if (settingsKeys.contains("imageServiceName") || force) {
+        ostr << " m_imageServiceName: " << m_imageServiceName.toStdString();
+    }
+    if (settingsKeys.contains("imageCodec") || force) {
+        ostr << " m_imageCodec: " << m_imageCodec;
+    }
+    if (settingsKeys.contains("tsFileName") || force) {
+        ostr << " m_tsFileName: " << m_tsFileName.toStdString();
+    }
+    if (settingsKeys.contains("tsFilePlayLoop") || force) {
+        ostr << " m_tsFilePlayLoop: " << m_tsFilePlayLoop;
+    }
+    if (settingsKeys.contains("tsFilePlay") || force) {
+        ostr << " m_tsFilePlay: " << m_tsFilePlay;
+    }
+    if (settingsKeys.contains("udpAddress") || force) {
+        ostr << " m_udpAddress: " << m_udpAddress.toStdString();
+    }
+    if (settingsKeys.contains("udpPort") || force) {
+        ostr << " m_udpPort: " << m_udpPort;
+    }
+    if (settingsKeys.contains("channelMute") || force) {
+        ostr << " m_channelMute: " << m_channelMute;
+    }
+    if (settingsKeys.contains("rgbColor") || force) {
+        ostr << " m_rgbColor: " << m_rgbColor;
+    }
+    if (settingsKeys.contains("title") || force) {
+        ostr << " m_title: " << m_title.toStdString();
+    }
+    if (settingsKeys.contains("streamIndex") || force) {
+        ostr << " m_streamIndex: " << m_streamIndex;
+    }
+    if (settingsKeys.contains("useReverseAPI") || force) {
+        ostr << " m_useReverseAPI: " << m_useReverseAPI;
+    }
+    if (settingsKeys.contains("reverseAPIAddress") || force) {
+        ostr << " m_reverseAPIAddress: " << m_reverseAPIAddress.toStdString();
+    }
+    if (settingsKeys.contains("reverseAPIPort") || force) {
+        ostr << " m_reverseAPIPort: " << m_reverseAPIPort;
+    }
+    if (settingsKeys.contains("reverseAPIDeviceIndex") || force) {
+        ostr << " m_reverseAPIDeviceIndex: " << m_reverseAPIDeviceIndex;
+    }
+    if (settingsKeys.contains("reverseAPIChannelIndex") || force) {
+        ostr << " m_reverseAPIChannelIndex: " << m_reverseAPIChannelIndex;
+    }
+    if (settingsKeys.contains("workspaceIndex") || force) {
+        ostr << " m_workspaceIndex: " << m_workspaceIndex;
+    }
+    if (settingsKeys.contains("hidden") || force) {
+        ostr << " m_hidden: " << m_hidden;
+    }
+
+    return QString(ostr.str().c_str());
+}

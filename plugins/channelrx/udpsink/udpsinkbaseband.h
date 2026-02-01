@@ -38,20 +38,23 @@ public:
         MESSAGE_CLASS_DECLARATION
     public:
         const UDPSinkSettings& getSettings() const { return m_settings; }
+        const QStringList& getSettingsKeys() const { return m_settingsKeys; }
         bool getForce() const { return m_force; }
 
-        static MsgConfigureUDPSinkBaseband* create(const UDPSinkSettings& settings, bool force)
+        static MsgConfigureUDPSinkBaseband* create(const QStringList& settingsKeys, const UDPSinkSettings& settings, bool force)
         {
-            return new MsgConfigureUDPSinkBaseband(settings, force);
+            return new MsgConfigureUDPSinkBaseband(settingsKeys, settings, force);
         }
 
     private:
         UDPSinkSettings m_settings;
+        QStringList m_settingsKeys;
         bool m_force;
 
-        MsgConfigureUDPSinkBaseband(const UDPSinkSettings& settings, bool force) :
+        MsgConfigureUDPSinkBaseband(const QStringList& settingsKeys, const UDPSinkSettings& settings, bool force) :
             Message(),
             m_settings(settings),
+            m_settingsKeys(settingsKeys),
             m_force(force)
         {
         }
@@ -101,7 +104,7 @@ private:
     QRecursiveMutex m_mutex;
 
     bool handleMessage(const Message& cmd);
-    void applySettings(const UDPSinkSettings& settings, bool force = false);
+    void applySettings(const QStringList& settingsKeys, const UDPSinkSettings& settings, bool force = false);
 
 private slots:
     void handleInputMessages();

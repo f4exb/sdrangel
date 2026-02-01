@@ -58,7 +58,7 @@ void PSK31GUI::resetToDefaults()
 {
     m_settings.resetToDefaults();
     displaySettings();
-    applySettings(true);
+    applySettings(QStringList(), true);
 }
 
 QByteArray PSK31GUI::serialize() const
@@ -70,7 +70,7 @@ bool PSK31GUI::deserialize(const QByteArray& data)
 {
     if (m_settings.deserialize(data)) {
         displaySettings();
-        applySettings(true);
+        applySettings(QStringList(), true);
         return true;
     } else {
         resetToDefaults();
@@ -154,7 +154,7 @@ void PSK31GUI::channelMarkerChangedByCursor()
 {
     ui->deltaFrequency->setValue(m_channelMarker.getCenterFrequency());
     m_settings.m_inputFrequencyOffset = m_channelMarker.getCenterFrequency();
-    applySettings();
+    applySettings(QStringList("inputFrequencyOffset"));
 }
 
 void PSK31GUI::handleSourceMessages()
@@ -175,7 +175,7 @@ void PSK31GUI::on_deltaFrequency_changed(qint64 value)
     m_channelMarker.setCenterFrequency(value);
     m_settings.m_inputFrequencyOffset = m_channelMarker.getCenterFrequency();
     updateAbsoluteCenterFrequency();
-    applySettings();
+    applySettings(QStringList("inputFrequencyOffset"));
 }
 
 void PSK31GUI::on_rfBW_valueChanged(int value)
@@ -184,7 +184,7 @@ void PSK31GUI::on_rfBW_valueChanged(int value)
     ui->rfBWText->setText(QString("%1 Hz").arg(bw));
     m_channelMarker.setBandwidth(bw);
     m_settings.m_rfBandwidth = bw;
-    applySettings();
+    applySettings(QStringList("rfBandwidth"));
 }
 
 void PSK31GUI::on_clearTransmittedText_clicked()
@@ -196,13 +196,13 @@ void PSK31GUI::on_gain_valueChanged(int value)
 {
     ui->gainText->setText(QString("%1dB").arg(value));
     m_settings.m_gain = value;
-    applySettings();
+    applySettings(QStringList("gain"));
 }
 
 void PSK31GUI::on_channelMute_toggled(bool checked)
 {
     m_settings.m_channelMute = checked;
-    applySettings();
+    applySettings(QStringList("channelMute"));
 }
 
 void PSK31GUI::on_txButton_clicked()
@@ -219,13 +219,13 @@ void PSK31GUI::on_text_returnPressed()
 void PSK31GUI::on_text_editingFinished()
 {
     m_settings.m_text = ui->text->currentText();
-    applySettings();
+    applySettings(QStringList("text"));
 }
 
 void PSK31GUI::on_repeat_toggled(bool checked)
 {
     m_settings.m_repeat = checked;
-    applySettings();
+    applySettings(QStringList("repeat"));
 }
 
 void PSK31GUI::repeatSelect(const QPoint& p)
@@ -237,7 +237,7 @@ void PSK31GUI::repeatSelect(const QPoint& p)
     if (dialog.exec() == QDialog::Accepted)
     {
         m_settings.m_repeatCount = dialog.m_repeatCount;
-        applySettings();
+        applySettings(QStringList("repeatCount"));
     }
 }
 
@@ -250,26 +250,26 @@ void PSK31GUI::txSettingsSelect(const QPoint& p)
     if (dialog.exec() == QDialog::Accepted)
     {
         displaySettings();
-        applySettings();
+        applySettings(QStringList({"modulationType", "filterAlpha", "filterBeta", "preemphasis", "udpEnabled", "udpAddress", "udpPort"}));
     }
 }
 
 void PSK31GUI::on_udpEnabled_clicked(bool checked)
 {
     m_settings.m_udpEnabled = checked;
-    applySettings();
+    applySettings(QStringList("udpEnabled"));
 }
 
 void PSK31GUI::on_udpAddress_editingFinished()
 {
     m_settings.m_udpAddress = ui->udpAddress->text();
-    applySettings();
+    applySettings(QStringList("udpAddress"));
 }
 
 void PSK31GUI::on_udpPort_editingFinished()
 {
     m_settings.m_udpPort = ui->udpPort->text().toInt();
-    applySettings();
+    applySettings(QStringList("udpPort"));
 }
 
 void PSK31GUI::onWidgetRolled(QWidget* widget, bool rollDown)
@@ -278,7 +278,7 @@ void PSK31GUI::onWidgetRolled(QWidget* widget, bool rollDown)
     (void) rollDown;
 
     getRollupContents()->saveState(m_rollupState);
-    applySettings();
+    applySettings(QStringList());
 }
 
 void PSK31GUI::onMenuDialogCalled(const QPoint &p)
@@ -323,7 +323,7 @@ void PSK31GUI::onMenuDialogCalled(const QPoint &p)
             updateIndexLabel();
         }
 
-        applySettings();
+        applySettings(QStringList({"channelMarker", "useReverseAPI", "reverseAPIAddress", "reverseAPIPort", "reverseAPIDeviceIndex", "reverseAPIChannelIndex", "streamIndex"}));
     }
 
     resetContextMenuType();
@@ -406,7 +406,7 @@ PSK31GUI::PSK31GUI(PluginAPI* pluginAPI, DeviceUISet *deviceUISet, BasebandSampl
 
     displaySettings();
     makeUIConnections();
-    applySettings();
+    applySettings(QStringList(), true);
     DialPopup::addPopupsToChildDials(this);
     m_resizer.enableChildMouseTracking();
 
@@ -431,11 +431,11 @@ void PSK31GUI::blockApplySettings(bool block)
     m_doApplySettings = !block;
 }
 
-void PSK31GUI::applySettings(bool force)
+void PSK31GUI::applySettings(const QStringList& settingsKeys, bool force)
 {
     if (m_doApplySettings)
     {
-        PSK31::MsgConfigurePSK31 *msg = PSK31::MsgConfigurePSK31::create(m_settings, force);
+        PSK31::MsgConfigurePSK31 *msg = PSK31::MsgConfigurePSK31::create(settingsKeys, m_settings, force);
         m_psk31Mod->getInputMessageQueue()->push(msg);
     }
 }

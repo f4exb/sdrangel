@@ -40,7 +40,7 @@ NoiseFigureSink::NoiseFigureSink() :
 {
     m_magsq = 0.0;
 
-    applySettings(m_settings, true);
+    applySettings(QStringList(), m_settings, true);
     applyChannelSettings(m_channelSampleRate, 0, true);
 }
 
@@ -129,12 +129,11 @@ void NoiseFigureSink::applyChannelSettings(int channelSampleRate, int channelFre
     m_channelSampleRate = channelSampleRate;
 }
 
-void NoiseFigureSink::applySettings(const NoiseFigureSettings& settings, bool force)
+void NoiseFigureSink::applySettings(const QStringList& settingsKeys, const NoiseFigureSettings& settings, bool force)
 {
-    qDebug() << "NoiseFigureSink::applySettings:"
-            << " force: " << force;
+    qDebug() << "NoiseFigureSink::applySettings:" << settings.getDebugString(settingsKeys, force);
 
-    if ((settings.m_fftSize != m_settings.m_fftSize) || force)
+    if ((settingsKeys.contains("fftSize") && (settings.m_fftSize != m_settings.m_fftSize)) || force)
     {
         FFTFactory *fftFactory = DSPEngine::instance()->getFFTFactory();
         if (m_fftSequence >= 0) {
@@ -144,11 +143,15 @@ void NoiseFigureSink::applySettings(const NoiseFigureSettings& settings, bool fo
         m_fftCounter = 0;
    }
 
-    if ((settings.m_fftCount != m_settings.m_fftCount) || force)
+    if ((settingsKeys.contains("fftCount") && (settings.m_fftCount != m_settings.m_fftCount)) || force)
     {
         m_powerSum = 0.0;
         m_count = 0;
     }
 
-    m_settings = settings;
+    if (force) {
+        m_settings = settings;
+    } else {
+        m_settings.applySettings(settingsKeys, settings);
+    }
 }

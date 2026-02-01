@@ -128,7 +128,7 @@ bool DATVDemodBaseband::handleMessage(const Message& cmd)
         MsgConfigureDATVDemodBaseband& cfg = (MsgConfigureDATVDemodBaseband&) cmd;
         qDebug() << "DATVDemodBaseband::handleMessage: MsgConfigureDATVDemodBaseband";
 
-        applySettings(cfg.getSettings(), cfg.getForce());
+        applySettings(cfg.getSettingsKeys(), cfg.getSettings(), cfg.getForce());
 
         return true;
     }
@@ -149,12 +149,12 @@ bool DATVDemodBaseband::handleMessage(const Message& cmd)
     }
 }
 
-void DATVDemodBaseband::applySettings(const DATVDemodSettings& settings, bool force)
+void DATVDemodBaseband::applySettings(const QStringList& settingsKeys, const DATVDemodSettings& settings, bool force)
 {
-    qDebug("DATVDemodBaseband::applySettings");
+    qDebug() << "DATVDemodBaseband::applySettings" << settings.getDebugString(settingsKeys, force);
 
-    if ((settings.m_centerFrequency != m_settings.m_centerFrequency) ||
-        (settings.m_symbolRate != m_settings.m_symbolRate) || force)
+    if ((settingsKeys.contains("centerFrequency") && (settings.m_centerFrequency != m_settings.m_centerFrequency)) ||
+        (settingsKeys.contains("symbolRate") && (settings.m_symbolRate != m_settings.m_symbolRate)) || force)
     {
         unsigned int desiredSampleRate = 2 * settings.m_symbolRate; // m_channelizer->getBasebandSampleRate();
         m_channelizer->setChannelization(desiredSampleRate, settings.m_centerFrequency);
@@ -162,15 +162,20 @@ void DATVDemodBaseband::applySettings(const DATVDemodSettings& settings, bool fo
         m_sink->applyChannelSettings(m_channelizer->getChannelSampleRate(), m_channelizer->getChannelFrequencyOffset());
     }
 
-    if ((settings.m_audioDeviceName != m_settings.m_audioDeviceName) || force)
+    if ((settingsKeys.contains("audioDeviceName") && (settings.m_audioDeviceName != m_settings.m_audioDeviceName)) || force)
     {
         AudioDeviceManager *audioDeviceManager = DSPEngine::instance()->getAudioDeviceManager();
         int audioDeviceIndex = audioDeviceManager->getOutputDeviceIndex(settings.m_audioDeviceName);
         audioDeviceManager->addAudioSink(m_sink->getAudioFifo(), getInputMessageQueue(), audioDeviceIndex);
     }
 
-    m_sink->applySettings(settings, force);
-    m_settings = settings;
+    m_sink->applySettings(settingsKeys, settings, force);
+
+    if (force) {
+        m_settings = settings;
+    } else {
+        m_settings.applySettings(settingsKeys, settings);
+    }
 }
 
 int DATVDemodBaseband::getChannelSampleRate() const

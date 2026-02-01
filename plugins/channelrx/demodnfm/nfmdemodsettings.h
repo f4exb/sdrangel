@@ -72,6 +72,8 @@ struct NFMDemodSettings
     void setRollupState(Serializable *rollupState) { m_rollupState = rollupState; }
     QByteArray serialize() const;
     bool deserialize(const QByteArray& data);
+    void applySettings(const QStringList& settingsKeys, const NFMDemodSettings& settings);
+    QString getDebugString(const QStringList& settingsKeys, bool force=false) const;
 
     static int getChannelSpacing(int index);
     static int getChannelSpacingIndex(int channelSpacing);

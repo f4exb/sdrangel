@@ -136,7 +136,7 @@ bool AISDemodBaseband::handleMessage(const Message& cmd)
         MsgConfigureAISDemodBaseband& cfg = (MsgConfigureAISDemodBaseband&) cmd;
         qDebug() << "AISDemodBaseband::handleMessage: MsgConfigureAISDemodBaseband";
 
-        applySettings(cfg.getSettings(), cfg.getForce());
+        applySettings(cfg.getSettings(), cfg.getSettingsKeys(), cfg.getForce());
 
         return true;
     }
@@ -156,7 +156,7 @@ bool AISDemodBaseband::handleMessage(const Message& cmd)
     }
 }
 
-void AISDemodBaseband::applySettings(const AISDemodSettings& settings, bool force)
+void AISDemodBaseband::applySettings(const AISDemodSettings& settings, const QStringList& settingsKeys, bool force)
 {
     if ((settings.m_inputFrequencyOffset != m_settings.m_inputFrequencyOffset) || force)
     {
@@ -164,9 +164,13 @@ void AISDemodBaseband::applySettings(const AISDemodSettings& settings, bool forc
         m_sink.applyChannelSettings(m_channelizer->getChannelSampleRate(), m_channelizer->getChannelFrequencyOffset());
     }
 
-    m_sink.applySettings(settings, force);
+    m_sink.applySettings(settings, settingsKeys, force);
 
-    m_settings = settings;
+    if (force) {
+        m_settings = settings;
+    } else {
+        m_settings.applySettings(settingsKeys, settings);
+    }
 }
 
 void AISDemodBaseband::setBasebandSampleRate(int sampleRate)

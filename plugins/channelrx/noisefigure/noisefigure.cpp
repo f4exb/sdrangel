@@ -67,7 +67,7 @@ NoiseFigure::NoiseFigure(DeviceAPI *deviceAPI) :
     m_basebandSink->setChannel(this);
     m_basebandSink->moveToThread(&m_thread);
 
-    applySettings(m_settings, true);
+    applySettings(QStringList(), m_settings, true);
 
     m_deviceAPI->addChannelSink(this);
     m_deviceAPI->addChannelSinkAPI(this);
@@ -128,11 +128,11 @@ void NoiseFigure::setCenterFrequency(qint64 frequency)
 {
     NoiseFigureSettings settings = m_settings;
     settings.m_inputFrequencyOffset = frequency;
-    applySettings(settings, false);
+    applySettings(QStringList("inputFrequencyOffset"), settings, false);
 
     if (m_guiMessageQueue) // forward to GUI if any
     {
-        MsgConfigureNoiseFigure *msgToGUI = MsgConfigureNoiseFigure::create(settings, false);
+        MsgConfigureNoiseFigure *msgToGUI = MsgConfigureNoiseFigure::create(QStringList("inputFrequencyOffset"), settings, false);
         m_guiMessageQueue->push(msgToGUI);
     }
 }
@@ -154,7 +154,7 @@ void NoiseFigure::start()
     DSPSignalNotification *dspMsg = new DSPSignalNotification(m_basebandSampleRate, m_centerFrequency);
     m_basebandSink->getInputMessageQueue()->push(dspMsg);
 
-    NoiseFigureBaseband::MsgConfigureNoiseFigureBaseband *msg = NoiseFigureBaseband::MsgConfigureNoiseFigureBaseband::create(m_settings, true);
+    NoiseFigureBaseband::MsgConfigureNoiseFigureBaseband *msg = NoiseFigureBaseband::MsgConfigureNoiseFigureBaseband::create(QStringList(), m_settings, true);
     m_basebandSink->getInputMessageQueue()->push(msg);
 }
 
@@ -448,7 +448,7 @@ bool NoiseFigure::handleMessage(const Message& cmd)
     {
         MsgConfigureNoiseFigure& cfg = (MsgConfigureNoiseFigure&) cmd;
         qDebug() << "NoiseFigure::handleMessage: MsgConfigureNoiseFigure";
-        applySettings(cfg.getSettings(), cfg.getForce());
+        applySettings(cfg.getSettingsKeys(), cfg.getSettings(), cfg.getForce());
 
         return true;
     }
@@ -518,40 +518,16 @@ bool NoiseFigure::handleMessage(const Message& cmd)
     }
 }
 
-void NoiseFigure::applySettings(const NoiseFigureSettings& settings, bool force)
+void NoiseFigure::applySettings(const QStringList& settingsKeys, const NoiseFigureSettings& settings, bool force)
 {
-    qDebug() << "NoiseFigure::applySettings:"
-            << " m_inputFrequencyOffset: " << settings.m_inputFrequencyOffset
-            << " m_fftSize: " << settings.m_fftSize
-            << " m_fftCount: " << settings.m_fftCount
-            << " m_sweepSpec: " << settings.m_sweepSpec
-            << " m_startValue: " << settings.m_startValue
-            << " m_stopValue: " << settings.m_stopValue
-            << " m_steps: " << settings.m_steps
-            << " m_step: " << settings.m_step
-            << " m_sweepList: " << settings.m_sweepList
-            << " m_setting: " << settings.m_setting
-            << " m_visaDevice: " << settings.m_visaDevice
-            << " m_powerOnSCPI: " << settings.m_powerOnSCPI
-            << " m_powerOffSCPI: " << settings.m_powerOffSCPI
-            << " m_powerOnCommand: " << settings.m_powerOnCommand
-            << " m_powerOffCommand: " << settings.m_powerOffCommand
-            << " m_powerDelay: " << settings.m_powerDelay
-            << " m_enr: " << settings.m_enr
-            << " m_streamIndex: " << settings.m_streamIndex
-            << " m_useReverseAPI: " << settings.m_useReverseAPI
-            << " m_reverseAPIAddress: " << settings.m_reverseAPIAddress
-            << " m_reverseAPIPort: " << settings.m_reverseAPIPort
-            << " m_reverseAPIDeviceIndex: " << settings.m_reverseAPIDeviceIndex
-            << " m_reverseAPIChannelIndex: " << settings.m_reverseAPIChannelIndex
-            << " force: " << force;
+    qDebug() << "NoiseFigure::applySettings:" << settings.getDebugString(settingsKeys, force);
 
     QList<QString> reverseAPIKeys;
 
     if ((settings.m_inputFrequencyOffset != m_settings.m_inputFrequencyOffset) || force) {
         reverseAPIKeys.append("inputFrequencyOffset");
     }
-    if (m_settings.m_streamIndex != settings.m_streamIndex)
+    if (settingsKeys.contains("streamIndex") && (m_settings.m_streamIndex != settings.m_streamIndex))
     {
         if (m_deviceAPI->getSampleMIMO()) // change of stream is possible for MIMO devices only
         {
@@ -566,16 +542,16 @@ void NoiseFigure::applySettings(const NoiseFigureSettings& settings, bool force)
         reverseAPIKeys.append("streamIndex");
     }
 
-    NoiseFigureBaseband::MsgConfigureNoiseFigureBaseband *msg = NoiseFigureBaseband::MsgConfigureNoiseFigureBaseband::create(settings, force);
+    NoiseFigureBaseband::MsgConfigureNoiseFigureBaseband *msg = NoiseFigureBaseband::MsgConfigureNoiseFigureBaseband::create(settingsKeys, settings, force);
     m_basebandSink->getInputMessageQueue()->push(msg);
 
-    if (settings.m_useReverseAPI)
+    if (settingsKeys.contains("useReverseAPI") && settings.m_useReverseAPI)
     {
-        bool fullUpdate = ((m_settings.m_useReverseAPI != settings.m_useReverseAPI) && settings.m_useReverseAPI) ||
-                (m_settings.m_reverseAPIAddress != settings.m_reverseAPIAddress) ||
-                (m_settings.m_reverseAPIPort != settings.m_reverseAPIPort) ||
-                (m_settings.m_reverseAPIDeviceIndex != settings.m_reverseAPIDeviceIndex) ||
-                (m_settings.m_reverseAPIChannelIndex != settings.m_reverseAPIChannelIndex);
+        bool fullUpdate = ((settingsKeys.contains("useReverseAPI") && (m_settings.m_useReverseAPI != settings.m_useReverseAPI)) && settings.m_useReverseAPI) ||
+                (settingsKeys.contains("reverseAPIAddress") && (m_settings.m_reverseAPIAddress != settings.m_reverseAPIAddress)) ||
+                (settingsKeys.contains("reverseAPIPort") && (m_settings.m_reverseAPIPort != settings.m_reverseAPIPort)) ||
+                (settingsKeys.contains("reverseAPIDeviceIndex") && (m_settings.m_reverseAPIDeviceIndex != settings.m_reverseAPIDeviceIndex)) ||
+                (settingsKeys.contains("reverseAPIChannelIndex") && (m_settings.m_reverseAPIChannelIndex != settings.m_reverseAPIChannelIndex));
         webapiReverseSendSettings(reverseAPIKeys, settings, fullUpdate || force);
     }
 
@@ -591,14 +567,14 @@ bool NoiseFigure::deserialize(const QByteArray& data)
 {
     if (m_settings.deserialize(data))
     {
-        MsgConfigureNoiseFigure *msg = MsgConfigureNoiseFigure::create(m_settings, true);
+        MsgConfigureNoiseFigure *msg = MsgConfigureNoiseFigure::create(QStringList(), m_settings, true);
         m_inputMessageQueue.push(msg);
         return true;
     }
     else
     {
         m_settings.resetToDefaults();
-        MsgConfigureNoiseFigure *msg = MsgConfigureNoiseFigure::create(m_settings, true);
+        MsgConfigureNoiseFigure *msg = MsgConfigureNoiseFigure::create(QStringList(), m_settings, true);
         m_inputMessageQueue.push(msg);
         return false;
     }
@@ -634,13 +610,13 @@ int NoiseFigure::webapiSettingsPutPatch(
     NoiseFigureSettings settings = m_settings;
     webapiUpdateChannelSettings(settings, channelSettingsKeys, response);
 
-    MsgConfigureNoiseFigure *msg = MsgConfigureNoiseFigure::create(settings, force);
+    MsgConfigureNoiseFigure *msg = MsgConfigureNoiseFigure::create(channelSettingsKeys, settings, force);
     m_inputMessageQueue.push(msg);
 
     qDebug("NoiseFigure::webapiSettingsPutPatch: forward to GUI: %p", m_guiMessageQueue);
     if (m_guiMessageQueue) // forward to GUI if any
     {
-        MsgConfigureNoiseFigure *msgToGUI = MsgConfigureNoiseFigure::create(settings, force);
+        MsgConfigureNoiseFigure *msgToGUI = MsgConfigureNoiseFigure::create(channelSettingsKeys, settings, force);
         m_guiMessageQueue->push(msgToGUI);
     }
 
@@ -784,7 +760,7 @@ void NoiseFigure::webapiFormatChannelSettings(SWGSDRangel::SWGChannelSettings& r
     }
 }
 
-void NoiseFigure::webapiReverseSendSettings(QList<QString>& channelSettingsKeys, const NoiseFigureSettings& settings, bool force)
+void NoiseFigure::webapiReverseSendSettings(const QList<QString>& channelSettingsKeys, const NoiseFigureSettings& settings, bool force)
 {
     SWGSDRangel::SWGChannelSettings *swgChannelSettings = new SWGSDRangel::SWGChannelSettings();
     webapiFormatChannelSettings(channelSettingsKeys, swgChannelSettings, settings, force);
@@ -810,7 +786,7 @@ void NoiseFigure::webapiReverseSendSettings(QList<QString>& channelSettingsKeys,
 }
 
 void NoiseFigure::webapiFormatChannelSettings(
-        QList<QString>& channelSettingsKeys,
+        const QList<QString>& channelSettingsKeys,
         SWGSDRangel::SWGChannelSettings *swgChannelSettings,
         const NoiseFigureSettings& settings,
         bool force

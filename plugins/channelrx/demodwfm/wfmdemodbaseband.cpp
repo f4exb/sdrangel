@@ -120,7 +120,7 @@ bool WFMDemodBaseband::handleMessage(const Message& cmd)
         MsgConfigureWFMDemodBaseband& cfg = (MsgConfigureWFMDemodBaseband&) cmd;
         qDebug() << "WFMDemodBaseband::handleMessage: MsgConfigureWFMDemodBaseband";
 
-        applySettings(cfg.getSettings(), cfg.getForce());
+        applySettings(cfg.getSettingsKeys(), cfg.getSettings(), cfg.getForce());
 
         return true;
     }
@@ -147,10 +147,10 @@ bool WFMDemodBaseband::handleMessage(const Message& cmd)
     }
 }
 
-void WFMDemodBaseband::applySettings(const WFMDemodSettings& settings, bool force)
+void WFMDemodBaseband::applySettings(const QStringList& settingsKeys, const WFMDemodSettings& settings, bool force)
 {
-    if ((settings.m_rfBandwidth != m_settings.m_rfBandwidth)
-     || (settings.m_inputFrequencyOffset != m_settings.m_inputFrequencyOffset) || force)
+    if ((settingsKeys.contains("rfBandwidth") && settings.m_rfBandwidth != m_settings.m_rfBandwidth)
+     || (settingsKeys.contains("inputFrequencyOffset") && settings.m_inputFrequencyOffset != m_settings.m_inputFrequencyOffset) || force)
     {
         m_channelizer->setChannelization(WFMDemodSettings::requiredBW(settings.m_rfBandwidth), settings.m_inputFrequencyOffset);
         m_sink.applyChannelSettings(m_channelizer->getChannelSampleRate(), m_channelizer->getChannelFrequencyOffset());
@@ -162,7 +162,7 @@ void WFMDemodBaseband::applySettings(const WFMDemodSettings& settings, bool forc
         }
     }
 
-    if ((settings.m_audioDeviceName != m_settings.m_audioDeviceName) || force)
+    if ((settingsKeys.contains("audioDeviceName") && settings.m_audioDeviceName != m_settings.m_audioDeviceName) || force)
     {
         AudioDeviceManager *audioDeviceManager = DSPEngine::instance()->getAudioDeviceManager();
         int audioDeviceIndex = audioDeviceManager->getOutputDeviceIndex(settings.m_audioDeviceName);
@@ -176,9 +176,13 @@ void WFMDemodBaseband::applySettings(const WFMDemodSettings& settings, bool forc
         }
     }
 
-    m_sink.applySettings(settings, force);
+    m_sink.applySettings(settingsKeys, settings, force);
 
-    m_settings = settings;
+    if (force) {
+        m_settings = settings;
+    } else {
+        m_settings.applySettings(settingsKeys, settings);
+    }
 }
 
 int WFMDemodBaseband::getChannelSampleRate() const

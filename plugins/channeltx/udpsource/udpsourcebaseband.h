@@ -39,20 +39,23 @@ public:
 
     public:
         const UDPSourceSettings& getSettings() const { return m_settings; }
+        const QStringList& getSettingsKeys() const { return m_settingsKeys; }
         bool getForce() const { return m_force; }
 
-        static MsgConfigureUDPSourceBaseband* create(const UDPSourceSettings& settings, bool force)
+        static MsgConfigureUDPSourceBaseband* create(const QStringList& settingsKeys, const UDPSourceSettings& settings, bool force)
         {
-            return new MsgConfigureUDPSourceBaseband(settings, force);
+            return new MsgConfigureUDPSourceBaseband(settingsKeys, settings, force);
         }
 
     private:
         UDPSourceSettings m_settings;
+        QStringList m_settingsKeys;
         bool m_force;
 
-        MsgConfigureUDPSourceBaseband(const UDPSourceSettings& settings, bool force) :
+        MsgConfigureUDPSourceBaseband(const QStringList& settingsKeys, const UDPSourceSettings& settings, bool force) :
             Message(),
             m_settings(settings),
+            m_settingsKeys(settingsKeys),
             m_force(force)
         { }
     };
@@ -149,7 +152,7 @@ private:
 
     void processFifo(SampleVector& data, unsigned int iBegin, unsigned int iEnd);
     bool handleMessage(const Message& cmd);
-    void applySettings(const UDPSourceSettings& settings, bool force = false);
+    void applySettings(const QStringList& settingsKeys, const UDPSourceSettings& settings, bool force = false);
 
 private slots:
     void handleInputMessages();

@@ -66,7 +66,7 @@ ILSDemod::ILSDemod(DeviceAPI *deviceAPI) :
     m_basebandSink->setChannel(this);
     m_basebandSink->moveToThread(&m_thread);
 
-    applySettings(m_settings, true);
+    applySettings(QStringList(), m_settings, true);
 
     m_deviceAPI->addChannelSink(this);
     m_deviceAPI->addChannelSinkAPI(this);
@@ -149,7 +149,7 @@ void ILSDemod::start()
     DSPSignalNotification *dspMsg = new DSPSignalNotification(m_basebandSampleRate, m_centerFrequency);
     m_basebandSink->getInputMessageQueue()->push(dspMsg);
 
-    ILSDemodBaseband::MsgConfigureILSDemodBaseband *msg = ILSDemodBaseband::MsgConfigureILSDemodBaseband::create(m_settings, true);
+    ILSDemodBaseband::MsgConfigureILSDemodBaseband *msg = ILSDemodBaseband::MsgConfigureILSDemodBaseband::create(QStringList(), m_settings, true);
     m_basebandSink->getInputMessageQueue()->push(msg);
 
     m_running = true;
@@ -174,7 +174,7 @@ bool ILSDemod::handleMessage(const Message& cmd)
     {
         MsgConfigureILSDemod& cfg = (MsgConfigureILSDemod&) cmd;
         qDebug() << "ILSDemod::handleMessage: MsgConfigureILSDemod";
-        applySettings(cfg.getSettings(), cfg.getForce());
+        applySettings(cfg.getSettingsKeys(), cfg.getSettings(), cfg.getForce());
 
         return true;
     }
@@ -287,103 +287,20 @@ void ILSDemod::setCenterFrequency(qint64 frequency)
 {
     ILSDemodSettings settings = m_settings;
     settings.m_inputFrequencyOffset = frequency;
-    applySettings(settings, false);
+    applySettings(QStringList("inputFrequencyOffset"), settings, false);
 
     if (m_guiMessageQueue) // forward to GUI if any
     {
-        MsgConfigureILSDemod *msgToGUI = MsgConfigureILSDemod::create(settings, false);
+        MsgConfigureILSDemod *msgToGUI = MsgConfigureILSDemod::create(QStringList("inputFrequencyOffset"), settings, false);
         m_guiMessageQueue->push(msgToGUI);
     }
 }
 
-void ILSDemod::applySettings(const ILSDemodSettings& settings, bool force)
+void ILSDemod::applySettings(const QStringList& settingsKeys, const ILSDemodSettings& settings, bool force)
 {
-    qDebug() << "ILSDemod::applySettings:"
-            << " m_logEnabled: " << settings.m_logEnabled
-            << " m_logFilename: " << settings.m_logFilename
-            << " m_streamIndex: " << settings.m_streamIndex
-            << " m_useReverseAPI: " << settings.m_useReverseAPI
-            << " m_reverseAPIAddress: " << settings.m_reverseAPIAddress
-            << " m_reverseAPIPort: " << settings.m_reverseAPIPort
-            << " m_reverseAPIDeviceIndex: " << settings.m_reverseAPIDeviceIndex
-            << " m_reverseAPIChannelIndex: " << settings.m_reverseAPIChannelIndex
-            << " force: " << force;
+    qDebug() << "ILSDemod::applySettings:" << settings.getDebugString(settingsKeys, force);
 
-    QList<QString> reverseAPIKeys;
-
-    if ((settings.m_inputFrequencyOffset != m_settings.m_inputFrequencyOffset) || force) {
-        reverseAPIKeys.append("inputFrequencyOffset");
-    }
-    if ((settings.m_rfBandwidth != m_settings.m_rfBandwidth) || force) {
-        reverseAPIKeys.append("rfBandwidth");
-    }
-    if ((settings.m_mode != m_settings.m_mode) || force) {
-        reverseAPIKeys.append("mode");
-    }
-    if ((settings.m_frequencyIndex != m_settings.m_frequencyIndex) || force) {
-        reverseAPIKeys.append("frequencyIndex");
-    }
-    if ((settings.m_squelch != m_settings.m_squelch) || force) {
-        reverseAPIKeys.append("squelch");
-    }
-    if ((settings.m_volume != m_settings.m_volume) || force) {
-        reverseAPIKeys.append("volume");
-    }
-    if ((settings.m_audioMute != m_settings.m_audioMute) || force) {
-        reverseAPIKeys.append("audioMute");
-    }
-    if ((settings.m_average != m_settings.m_average) || force) {
-        reverseAPIKeys.append("average");
-    }
-    if ((settings.m_ddmUnits != m_settings.m_ddmUnits) || force) {
-        reverseAPIKeys.append("ddmUnits");
-    }
-    if ((settings.m_identThreshold != m_settings.m_identThreshold) || force) {
-        reverseAPIKeys.append("identThreshold");
-    }
-    if ((settings.m_ident != m_settings.m_ident) || force) {
-        reverseAPIKeys.append("ident");
-    }
-    if ((settings.m_runway != m_settings.m_runway) || force) {
-        reverseAPIKeys.append("runway");
-    }
-    if ((settings.m_trueBearing != m_settings.m_trueBearing) || force) {
-        reverseAPIKeys.append("trueBearing");
-    }
-    if ((settings.m_latitude != m_settings.m_latitude) || force) {
-        reverseAPIKeys.append("latitude");
-    }
-    if ((settings.m_longitude != m_settings.m_longitude) || force) {
-        reverseAPIKeys.append("longitude");
-    }
-    if ((settings.m_elevation != m_settings.m_elevation) || force) {
-        reverseAPIKeys.append("elevation");
-    }
-    if ((settings.m_glidePath != m_settings.m_glidePath) || force) {
-        reverseAPIKeys.append("glidePath");
-    }
-    if ((settings.m_refHeight != m_settings.m_refHeight) || force) {
-        reverseAPIKeys.append("refHeight");
-    }
-    if ((settings.m_courseWidth != m_settings.m_courseWidth) || force) {
-        reverseAPIKeys.append("courseWidth");
-    }
-    if ((settings.m_udpEnabled != m_settings.m_udpEnabled) || force) {
-        reverseAPIKeys.append("udpEnabled");
-    }
-    if ((settings.m_udpAddress != m_settings.m_udpAddress) || force) {
-        reverseAPIKeys.append("udpAddress");
-    }
-    if ((settings.m_udpPort != m_settings.m_udpPort) || force) {
-        reverseAPIKeys.append("udpPort");
-    }
-    if ((settings.m_logFilename != m_settings.m_logFilename) || force) {
-        reverseAPIKeys.append("logFilename");
-    }
-    if ((settings.m_logEnabled != m_settings.m_logEnabled) || force) {
-        reverseAPIKeys.append("logEnabled");
-    }
-    if (m_settings.m_streamIndex != settings.m_streamIndex)
+    if (settingsKeys.contains("streamIndex") && (m_settings.m_streamIndex != settings.m_streamIndex))
     {
         if (m_deviceAPI->getSampleMIMO()) // change of stream is possible for MIMO devices only
         {
@@ -394,28 +311,26 @@ void ILSDemod::applySettings(const ILSDemodSettings& settings, bool force)
             m_settings.m_streamIndex = settings.m_streamIndex; // make sure ChannelAPI::getStreamIndex() is consistent
             emit streamIndexChanged(settings.m_streamIndex);
         }
-
-        reverseAPIKeys.append("streamIndex");
     }
 
     if (m_running)
     {
-        ILSDemodBaseband::MsgConfigureILSDemodBaseband *msg = ILSDemodBaseband::MsgConfigureILSDemodBaseband::create(settings, force);
+        ILSDemodBaseband::MsgConfigureILSDemodBaseband *msg = ILSDemodBaseband::MsgConfigureILSDemodBaseband::create(settingsKeys, settings, force);
         m_basebandSink->getInputMessageQueue()->push(msg);
     }
 
     if (settings.m_useReverseAPI)
     {
-        bool fullUpdate = ((m_settings.m_useReverseAPI != settings.m_useReverseAPI) && settings.m_useReverseAPI) ||
-                (m_settings.m_reverseAPIAddress != settings.m_reverseAPIAddress) ||
-                (m_settings.m_reverseAPIPort != settings.m_reverseAPIPort) ||
-                (m_settings.m_reverseAPIDeviceIndex != settings.m_reverseAPIDeviceIndex) ||
-                (m_settings.m_reverseAPIChannelIndex != settings.m_reverseAPIChannelIndex);
-        webapiReverseSendSettings(reverseAPIKeys, settings, fullUpdate || force);
+        bool fullUpdate = ((settingsKeys.contains("useReverseAPI") && (m_settings.m_useReverseAPI != settings.m_useReverseAPI)) && settings.m_useReverseAPI) ||
+                (settingsKeys.contains("reverseAPIAddress") && (m_settings.m_reverseAPIAddress != settings.m_reverseAPIAddress)) ||
+                (settingsKeys.contains("reverseAPIPort") && (m_settings.m_reverseAPIPort != settings.m_reverseAPIPort)) ||
+                (settingsKeys.contains("reverseAPIDeviceIndex") && (m_settings.m_reverseAPIDeviceIndex != settings.m_reverseAPIDeviceIndex)) ||
+                (settingsKeys.contains("reverseAPIChannelIndex") && (m_settings.m_reverseAPIChannelIndex != settings.m_reverseAPIChannelIndex));
+        webapiReverseSendSettings(settingsKeys, settings, fullUpdate || force);
     }
 
-    if ((settings.m_logEnabled != m_settings.m_logEnabled)
-        || (settings.m_logFilename != m_settings.m_logFilename)
+    if ((settingsKeys.contains("logEnabled") && (settings.m_logEnabled != m_settings.m_logEnabled))
+        || (settingsKeys.contains("logFilename") && (settings.m_logFilename != m_settings.m_logFilename))
         || force)
     {
         if (m_logFile.isOpen())
@@ -444,7 +359,11 @@ void ILSDemod::applySettings(const ILSDemodSettings& settings, bool force)
         }
     }
 
-    m_settings = settings;
+    if (force) {
+        m_settings = settings;
+    } else {
+        m_settings.applySettings(settingsKeys, settings);
+    }
 }
 
 void ILSDemod::sendSampleRateToDemodAnalyzer()
@@ -475,14 +394,14 @@ bool ILSDemod::deserialize(const QByteArray& data)
 {
     if (m_settings.deserialize(data))
     {
-        MsgConfigureILSDemod *msg = MsgConfigureILSDemod::create(m_settings, true);
+        MsgConfigureILSDemod *msg = MsgConfigureILSDemod::create(QStringList(), m_settings, true);
         m_inputMessageQueue.push(msg);
         return true;
     }
     else
     {
         m_settings.resetToDefaults();
-        MsgConfigureILSDemod *msg = MsgConfigureILSDemod::create(m_settings, true);
+        MsgConfigureILSDemod *msg = MsgConfigureILSDemod::create(QStringList(), m_settings, true);
         m_inputMessageQueue.push(msg);
         return false;
     }
@@ -518,13 +437,13 @@ int ILSDemod::webapiSettingsPutPatch(
     ILSDemodSettings settings = m_settings;
     webapiUpdateChannelSettings(settings, channelSettingsKeys, response);
 
-    MsgConfigureILSDemod *msg = MsgConfigureILSDemod::create(settings, force);
+    MsgConfigureILSDemod *msg = MsgConfigureILSDemod::create(channelSettingsKeys, settings, force);
     m_inputMessageQueue.push(msg);
 
     qDebug("ILSDemod::webapiSettingsPutPatch: forward to GUI: %p", m_guiMessageQueue);
     if (m_guiMessageQueue) // forward to GUI if any
     {
-        MsgConfigureILSDemod *msgToGUI = MsgConfigureILSDemod::create(settings, force);
+        MsgConfigureILSDemod *msgToGUI = MsgConfigureILSDemod::create(channelSettingsKeys, settings, force);
         m_guiMessageQueue->push(msgToGUI);
     }
 
@@ -761,7 +680,7 @@ void ILSDemod::webapiFormatChannelReport(SWGSDRangel::SWGChannelReport& response
     response.getIlsDemodReport()->setDm150(m_dm150);
 }
 
-void ILSDemod::webapiReverseSendSettings(QList<QString>& channelSettingsKeys, const ILSDemodSettings& settings, bool force)
+void ILSDemod::webapiReverseSendSettings(const QList<QString>& channelSettingsKeys, const ILSDemodSettings& settings, bool force)
 {
     SWGSDRangel::SWGChannelSettings *swgChannelSettings = new SWGSDRangel::SWGChannelSettings();
     webapiFormatChannelSettings(channelSettingsKeys, swgChannelSettings, settings, force);
@@ -787,7 +706,7 @@ void ILSDemod::webapiReverseSendSettings(QList<QString>& channelSettingsKeys, co
 }
 
 void ILSDemod::webapiFormatChannelSettings(
-        QList<QString>& channelSettingsKeys,
+        const QList<QString>& channelSettingsKeys,
         SWGSDRangel::SWGChannelSettings *swgChannelSettings,
         const ILSDemodSettings& settings,
         bool force
@@ -939,4 +858,3 @@ void ILSDemod::handleIndexInDeviceSetChanged(int index)
         .arg(index);
     m_basebandSink->setFifoLabel(fifoLabel);
 }
-

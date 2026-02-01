@@ -137,7 +137,7 @@ bool RemoteSourceBaseband::handleMessage(const Message& cmd)
         MsgConfigureRemoteSourceBaseband& cfg = (MsgConfigureRemoteSourceBaseband&) cmd;
         qDebug() << "RemoteSourceBaseband::handleMessage: MsgConfigureRemoteSourceBaseband";
 
-        applySettings(cfg.getSettings(), cfg.getForce());
+        applySettings(cfg.getSettingsKeys(), cfg.getSettings(), cfg.getForce());
 
         return true;
     }
@@ -161,27 +161,26 @@ bool RemoteSourceBaseband::handleMessage(const Message& cmd)
     }
 }
 
-void RemoteSourceBaseband::applySettings(const RemoteSourceSettings& settings, bool force)
+void RemoteSourceBaseband::applySettings(const QStringList& settingsKeys, const RemoteSourceSettings& settings, bool force)
 {
-    qDebug() << "RemoteSourceBaseband::applySettings:"
-        << "m_log2Interp:" << settings.m_log2Interp
-        << "m_filterChainHash:" << settings.m_filterChainHash
-        << "m_dataAddress:" << settings.m_dataAddress
-        << "m_dataPort:" << settings.m_dataPort
-        << "force:" << force;
+    qDebug() << "RemoteSourceBaseband::applySettings:" << settings.getDebugString(settingsKeys, force);
 
-    if ((settings.m_dataAddress != m_settings.m_dataAddress)
-     || (settings.m_dataPort != m_settings.m_dataPort) || force) {
+    if ((settingsKeys.contains("dataAddress") && (settings.m_dataAddress != m_settings.m_dataAddress))
+     || (settingsKeys.contains("dataPort") && (settings.m_dataPort != m_settings.m_dataPort)) || force) {
         m_source.dataBind(settings.m_dataAddress, settings.m_dataPort);
     }
 
-    if ((m_settings.m_filterChainHash != settings.m_filterChainHash)
-     || (m_settings.m_log2Interp != settings.m_log2Interp) || force)
+    if ((settingsKeys.contains("filterChainHash") && (m_settings.m_filterChainHash != settings.m_filterChainHash))
+     || (settingsKeys.contains("log2Interp") && (m_settings.m_log2Interp != settings.m_log2Interp)) || force)
     {
         m_channelizer->setInterpolation(settings.m_log2Interp, settings.m_filterChainHash);
     }
 
-    m_settings = settings;
+    if (force) {
+        m_settings = settings;
+    } else {
+        m_settings.applySettings(settingsKeys, settings);
+    }
 }
 
 int RemoteSourceBaseband::getChannelSampleRate() const

@@ -64,7 +64,7 @@ public:
     }
 
     void applyChannelSettings(int channelSampleRate, int channelFrequencyOffset, bool force = false);
-    void applySettings(const ATVModSettings& settings, bool force = false);
+    void applySettings(const QStringList& settingsKeys, const ATVModSettings& settings, bool force = false);
     void openImage(const QString& fileName);
     void openVideo(const QString& fileName);
     void seekVideoFileStream(int seekPercentage);

@@ -50,20 +50,23 @@ public:
 
     public:
         const RadioAstronomySettings& getSettings() const { return m_settings; }
+        const QStringList& getSettingsKeys() const { return m_settingsKeys; }
         bool getForce() const { return m_force; }
 
-        static MsgConfigureRadioAstronomy* create(const RadioAstronomySettings& settings, bool force)
+        static MsgConfigureRadioAstronomy* create(const QStringList& settingsKeys, const RadioAstronomySettings& settings, bool force)
         {
-            return new MsgConfigureRadioAstronomy(settings, force);
+            return new MsgConfigureRadioAstronomy(settingsKeys, settings, force);
         }
 
     private:
         RadioAstronomySettings m_settings;
+        QStringList m_settingsKeys;
         bool m_force;
 
-        MsgConfigureRadioAstronomy(const RadioAstronomySettings& settings, bool force) :
+        MsgConfigureRadioAstronomy(const QStringList& settingsKeys, const RadioAstronomySettings& settings, bool force) :
             Message(),
             m_settings(settings),
+            m_settingsKeys(settingsKeys),
             m_force(force)
         { }
     };
@@ -482,10 +485,10 @@ private:
     QMetaObject::Connection m_sweepTimerConnection;
 
     virtual bool handleMessage(const Message& cmd);
-    void applySettings(const RadioAstronomySettings& settings, bool force = false);
-    void webapiReverseSendSettings(QList<QString>& channelSettingsKeys, const RadioAstronomySettings& settings, bool force);
+    void applySettings(const QStringList& settingsKeys, const RadioAstronomySettings& settings, bool force = false);
+    void webapiReverseSendSettings(const QList<QString>& channelSettingsKeys, const RadioAstronomySettings& settings, bool force);
     void webapiFormatChannelSettings(
-        QList<QString>& channelSettingsKeys,
+        const QList<QString>& channelSettingsKeys,
         SWGSDRangel::SWGChannelSettings *swgChannelSettings,
         const RadioAstronomySettings& settings,
         bool force

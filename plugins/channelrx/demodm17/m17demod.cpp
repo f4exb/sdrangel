@@ -257,24 +257,7 @@ void M17Demod::setCenterFrequency(qint64 frequency)
 
 void M17Demod::applySettings(const M17DemodSettings& settings, const QList<QString>& settingsKeys, bool force)
 {
-    qDebug() << "M17Demod::applySettings: "
-            << " settingsKeys: " << settingsKeys
-            << " m_inputFrequencyOffset: " << settings.m_inputFrequencyOffset
-            << " m_rfBandwidth: " << settings.m_rfBandwidth
-            << " m_fmDeviation: " << settings.m_fmDeviation
-            << " m_volume: " << settings.m_volume
-            << " m_baudRate: " << settings.m_baudRate
-            << " m_squelchGate" << settings.m_squelchGate
-            << " m_squelch: " << settings.m_squelch
-            << " m_audioMute: " << settings.m_audioMute
-            << " m_syncOrConstellation: " << settings.m_syncOrConstellation
-            << " m_highPassFilter: "<< settings.m_highPassFilter
-            << " m_audioDeviceName: " << settings.m_audioDeviceName
-            << " m_traceLengthMutliplier: " << settings.m_traceLengthMutliplier
-            << " m_traceStroke: " << settings.m_traceStroke
-            << " m_traceDecay: " << settings.m_traceDecay
-            << " m_streamIndex: " << settings.m_streamIndex
-            << " force: " << force;
+    qDebug() << "M17Demod::applySettings: " << settings.getDebugString(settingsKeys, force);
 
     if (settingsKeys.contains("streamIndex"))
     {

@@ -50,7 +50,7 @@ AISModSource::AISModSource() :
     m_scopeSampleBuffer.resize(m_scopeSampleBufferSize);
     m_specSampleBuffer.resize(m_specSampleBufferSize);
 
-    applySettings(m_settings, true);
+    applySettings(QStringList(), m_settings, true);
     applyChannelSettings(m_channelSampleRate, m_channelFrequencyOffset, true);
 }
 
@@ -311,11 +311,11 @@ void AISModSource::calculateLevel(Real& sample)
     }
 }
 
-void AISModSource::applySettings(const AISModSettings& settings, bool force)
+void AISModSource::applySettings(const QStringList& settingsKeys, const AISModSettings& settings, bool force)
 {
-    if ((settings.m_bt != m_settings.m_bt)
-     || (settings.m_symbolSpan != m_settings.m_symbolSpan)
-     || (settings.m_baud != m_settings.m_baud) || force)
+    if ((settingsKeys.contains("bt") && (settings.m_bt != m_settings.m_bt))
+     || (settingsKeys.contains("symbolSpan") && (settings.m_symbolSpan != m_settings.m_symbolSpan))
+     || (settingsKeys.contains("baud") && (settings.m_baud != m_settings.m_baud)) || force)
     {
         qDebug() << "AISModSource::applySettings: Recreating pulse shaping filter: "
                 << " SampleRate:" << AISModSettings::AISMOD_SAMPLE_RATE
@@ -326,7 +326,7 @@ void AISModSource::applySettings(const AISModSettings& settings, bool force)
         m_pulseShape.create(settings.m_bt, settings.m_symbolSpan, AISModSettings::AISMOD_SAMPLE_RATE/settings.m_baud);
     }
 
-    if ((settings.m_data != m_settings.m_data) || force)
+    if ((settingsKeys.contains("data") && (settings.m_data != m_settings.m_data)) || force)
     {
         qDebug() << "AISModSource::applySettings: new data: " << settings.m_data;
         addTXPacket(settings.m_data);

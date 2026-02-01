@@ -89,7 +89,7 @@ private:
 	virtual ~FreqTrackerGUI();
 
     void blockApplySettings(bool block);
-	void applySettings(bool force = false);
+	void applySettings(const QStringList& settingsKeys, bool force = false);
 	void applySpectrumBandwidth(int spanLog2, bool force = false);
 	void displaySettings();
 	void displaySpectrumBandwidth(int spanLog2);

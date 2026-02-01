@@ -140,7 +140,7 @@ bool FreeDVModBaseband::handleMessage(const Message& cmd)
         MsgConfigureFreeDVModBaseband& cfg = (MsgConfigureFreeDVModBaseband&) cmd;
         qDebug() << "FreeDVModBaseband::handleMessage: MsgConfigureFreeDVModBaseband";
 
-        applySettings(cfg.getSettings(), cfg.getForce());
+        applySettings(cfg.getSettingsKeys(), cfg.getSettings(), cfg.getForce());
 
         return true;
     }
@@ -171,9 +171,9 @@ bool FreeDVModBaseband::handleMessage(const Message& cmd)
     }
 }
 
-void FreeDVModBaseband::applySettings(const FreeDVModSettings& settings, bool force)
+void FreeDVModBaseband::applySettings(const QStringList& settingsKeys, const FreeDVModSettings& settings, bool force)
 {
-    if ((settings.m_freeDVMode != m_settings.m_freeDVMode) || force)
+    if ((settingsKeys.contains("m_freeDVMode") && settings.m_freeDVMode != m_settings.m_freeDVMode) || force)
     {
         int modemSampleRate = FreeDVModSettings::getModSampleRate(settings.m_freeDVMode);
         m_source.applyFreeDVMode(settings.m_freeDVMode);
@@ -181,13 +181,13 @@ void FreeDVModBaseband::applySettings(const FreeDVModSettings& settings, bool fo
         m_source.applyChannelSettings(m_channelizer->getChannelSampleRate(), m_channelizer->getChannelFrequencyOffset());
     }
 
-    if ((settings.m_inputFrequencyOffset != m_settings.m_inputFrequencyOffset) || force)
+    if ((settingsKeys.contains("m_inputFrequencyOffset") && settings.m_inputFrequencyOffset != m_settings.m_inputFrequencyOffset) || force)
     {
         m_channelizer->setChannelization(m_source.getModemSampleRate(), settings.m_inputFrequencyOffset);
         m_source.applyChannelSettings(m_channelizer->getChannelSampleRate(), m_channelizer->getChannelFrequencyOffset());
     }
 
-    if ((settings.m_audioDeviceName != m_settings.m_audioDeviceName) || force)
+    if ((settingsKeys.contains("m_audioDeviceName") && settings.m_audioDeviceName != m_settings.m_audioDeviceName) || force)
     {
         AudioDeviceManager *audioDeviceManager = DSPEngine::instance()->getAudioDeviceManager();
         int audioDeviceIndex = audioDeviceManager->getInputDeviceIndex(settings.m_audioDeviceName);
@@ -199,7 +199,7 @@ void FreeDVModBaseband::applySettings(const FreeDVModSettings& settings, bool fo
         }
     }
 
-    if ((settings.m_modAFInput != m_settings.m_modAFInput) || force)
+    if ((settingsKeys.contains("m_modAFInput") && settings.m_modAFInput != m_settings.m_modAFInput) || force)
     {
         AudioDeviceManager *audioDeviceManager = DSPEngine::instance()->getAudioDeviceManager();
         int audioDeviceIndex = audioDeviceManager->getInputDeviceIndex(settings.m_audioDeviceName);
@@ -211,9 +211,13 @@ void FreeDVModBaseband::applySettings(const FreeDVModSettings& settings, bool fo
         }
     }
 
-    m_source.applySettings(settings, force);
+    m_source.applySettings(settingsKeys, settings, force);
 
-    m_settings = settings;
+    if (force) {
+        m_settings = settings;
+    } else {
+        m_settings.applySettings(settingsKeys, settings);
+    }
 }
 
 int FreeDVModBaseband::getChannelSampleRate() const

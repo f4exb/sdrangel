@@ -49,7 +49,7 @@ public:
     virtual void feed(const SampleVector::const_iterator& begin, const SampleVector::const_iterator& end);
 
     void applyChannelSettings(int channelSampleRate, int channelFrequencyOffset, bool force = false);
-    void applySettings(const DABDemodSettings& settings, bool force = false);
+    void applySettings(const QStringList& settingsKeys, const DABDemodSettings& settings, bool force = false);
     void applyAudioSampleRate(int sampleRate);
     void applyDABAudioSampleRate(int sampleRate);
     int getAudioSampleRate() const { return m_audioSampleRate; }

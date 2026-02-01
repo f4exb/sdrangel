@@ -71,7 +71,7 @@ SSBModSource::SSBModSource() :
         0.25   // release (s)
     );
 
-    applySettings(m_settings, true);
+    applySettings(QStringList(), m_settings, true);
     applyChannelSettings(m_channelSampleRate, m_channelFrequencyOffset, true);
 }
 
@@ -652,14 +652,14 @@ void SSBModSource::applyFeedbackAudioSampleRate(int sampleRate)
     m_feedbackAudioSampleRate = sampleRate;
 }
 
-void SSBModSource::applySettings(const SSBModSettings& settings, bool force)
+void SSBModSource::applySettings(const QStringList& settingKeys, const SSBModSettings& settings, bool force)
 {
     float band = settings.m_bandwidth;
     float lowCutoff = settings.m_lowCutoff;
     bool usb = settings.m_usb;
 
-    if ((settings.m_bandwidth != m_settings.m_bandwidth) ||
-        (settings.m_lowCutoff != m_settings.m_lowCutoff) || force)
+    if ((settingKeys.contains("bandwidth") && (settings.m_bandwidth != m_settings.m_bandwidth)) ||
+        (settingKeys.contains("lowCutoff") && (settings.m_lowCutoff != m_settings.m_lowCutoff)) || force)
     {
         if (band < 100.0f) // at least 100 Hz
         {
@@ -679,11 +679,11 @@ void SSBModSource::applySettings(const SSBModSettings& settings, bool force)
         m_DSBFilter->create_dsb_filter((2.0f * band) / (float) m_audioSampleRate);
     }
 
-    if ((settings.m_toneFrequency != m_settings.m_toneFrequency) || force) {
+    if ((settingKeys.contains("toneFrequency") && (settings.m_toneFrequency != m_settings.m_toneFrequency)) || force) {
         m_toneNco.setFreq(settings.m_toneFrequency, (float) m_audioSampleRate);
     }
 
-    if ((settings.m_dsb != m_settings.m_dsb) || force)
+    if ((settingKeys.contains("dsb") && (settings.m_dsb != m_settings.m_dsb)) || force)
     {
         if (settings.m_dsb)
         {
@@ -697,7 +697,7 @@ void SSBModSource::applySettings(const SSBModSettings& settings, bool force)
         }
     }
 
-    if ((settings.m_modAFInput != m_settings.m_modAFInput) || force)
+    if ((settingKeys.contains("modAFInput") && (settings.m_modAFInput != m_settings.m_modAFInput)) || force)
     {
         if (settings.m_modAFInput == SSBModSettings::SSBModInputAudio) {
             connect(&m_audioFifo, SIGNAL(dataReady()), this, SLOT(handleAudio()));
@@ -706,8 +706,8 @@ void SSBModSource::applySettings(const SSBModSettings& settings, bool force)
         }
     }
 
-    if ((settings.m_cmpThresholdDB != m_settings.m_cmpThresholdDB) ||
-        (settings.m_cmpPreGainDB != m_settings.m_cmpPreGainDB) || force)
+    if ((settingKeys.contains("cmpThresholdDB") && (settings.m_cmpThresholdDB != m_settings.m_cmpThresholdDB)) ||
+        (settingKeys.contains("cmpPreGainDB") && (settings.m_cmpPreGainDB != m_settings.m_cmpPreGainDB)) || force)
     {
         m_audioCompressor.initSimple(
             m_audioSampleRate,
@@ -720,7 +720,12 @@ void SSBModSource::applySettings(const SSBModSettings& settings, bool force)
         );
     }
 
-    m_settings = settings;
+    if (force) {
+        m_settings = settings;
+    } else {
+        m_settings.applySettings(settingKeys, settings);
+    }
+
     m_settings.m_bandwidth = band;
     m_settings.m_lowCutoff = lowCutoff;
     m_settings.m_usb = usb;

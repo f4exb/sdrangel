@@ -54,7 +54,7 @@ UDPSource::UDPSource(DeviceAPI *deviceAPI) :
     m_basebandSource->setSpectrumSink(&m_spectrumVis);
     m_basebandSource->moveToThread(m_thread);
 
-    applySettings(m_settings, true);
+    applySettings(QStringList(), m_settings, true);
 
     m_deviceAPI->addChannelSource(this);
     m_deviceAPI->addChannelSourceAPI(this);
@@ -119,11 +119,11 @@ void UDPSource::setCenterFrequency(qint64 frequency)
 {
     UDPSourceSettings settings = m_settings;
     settings.m_inputFrequencyOffset = frequency;
-    applySettings(settings, false);
+    applySettings(QStringList("inputFrequencyOffset"), settings, false);
 
     if (m_guiMessageQueue) // forward to GUI if any
     {
-        MsgConfigureUDPSource *msgToGUI = MsgConfigureUDPSource::create(settings, false);
+        MsgConfigureUDPSource *msgToGUI = MsgConfigureUDPSource::create(QStringList("inputFrequencyOffset"), settings, false);
         m_guiMessageQueue->push(msgToGUI);
     }
 }
@@ -148,7 +148,7 @@ bool UDPSource::handleMessage(const Message& cmd)
         MsgConfigureUDPSource& cfg = (MsgConfigureUDPSource&) cmd;
         qDebug() << "UDPSource::handleMessage: MsgConfigureUDPSource";
 
-        applySettings(cfg.getSettings(), cfg.getForce());
+        applySettings(cfg.getSettingsKeys(), cfg.getSettings(), cfg.getForce());
 
         return true;
     }
@@ -184,96 +184,17 @@ void UDPSource::resetReadIndex()
     m_basebandSource->getInputMessageQueue()->push(cmd);
 }
 
-void UDPSource::applySettings(const UDPSourceSettings& settings, bool force)
+void UDPSource::applySettings(const QStringList& settingsKeys, const UDPSourceSettings& settings, bool force)
 {
-    qDebug() << "UDPSource::applySettings:"
-            << " m_inputFrequencyOffset: " << settings.m_inputFrequencyOffset
-            << " m_sampleFormat: " << settings.m_sampleFormat
-            << " m_inputSampleRate: " << settings.m_inputSampleRate
-            << " m_rfBandwidth: " << settings.m_rfBandwidth
-            << " m_lowCutoff: " << settings.m_lowCutoff
-            << " m_fmDeviation: " << settings.m_fmDeviation
-            << " m_amModFactor: " << settings.m_amModFactor
-            << " m_udpAddressStr: " << settings.m_udpAddress
-            << " m_udpPort: " << settings.m_udpPort
-            << " m_multicastAddress: " << settings.m_multicastAddress
-            << " m_multicastJoin: " << settings.m_multicastJoin
-            << " m_channelMute: " << settings.m_channelMute
-            << " m_gainIn: " << settings.m_gainIn
-            << " m_gainOut: " << settings.m_gainOut
-            << " m_squelchGate: " << settings.m_squelchGate
-            << " m_squelch: " << settings.m_squelch << "dB"
-            << " m_squelchEnabled: " << settings.m_squelchEnabled
-            << " m_autoRWBalance: " << settings.m_autoRWBalance
-            << " m_stereoInput: " << settings.m_stereoInput
-            << " force: " << force;
+    qDebug() << "UDPSource::applySettings:" << settings.getDebugString(settingsKeys, force);
 
-    QList<QString> reverseAPIKeys;
-
-    if ((settings.m_inputFrequencyOffset != m_settings.m_inputFrequencyOffset) || force) {
-        reverseAPIKeys.append("inputFrequencyOffset");
-    }
-    if ((settings.m_sampleFormat != m_settings.m_sampleFormat) || force) {
-        reverseAPIKeys.append("sampleFormat");
-    }
-
-    if ((settings.m_inputSampleRate != m_settings.m_inputSampleRate) || force)
+    if ((settingsKeys.contains("inputSampleRate") && (settings.m_inputSampleRate != m_settings.m_inputSampleRate)) || force)
     {
-        reverseAPIKeys.append("inputSampleRate");
         DSPSignalNotification *msg = new DSPSignalNotification(settings.m_inputSampleRate, 0);
         m_spectrumVis.getInputMessageQueue()->push(msg);
     }
 
-    if ((settings.m_rfBandwidth != m_settings.m_rfBandwidth) || force) {
-        reverseAPIKeys.append("rfBandwidth");
-    }
-    if ((settings.m_lowCutoff != m_settings.m_lowCutoff) || force) {
-        reverseAPIKeys.append("lowCutoff");
-    }
-    if ((settings.m_fmDeviation != m_settings.m_fmDeviation) || force) {
-        reverseAPIKeys.append("fmDeviation");
-    }
-    if ((settings.m_amModFactor != m_settings.m_amModFactor) || force) {
-        reverseAPIKeys.append("amModFactor");
-    }
-    if ((settings.m_udpAddress != m_settings.m_udpAddress) || force) {
-        reverseAPIKeys.append("udpAddress");
-    }
-    if ((settings.m_udpPort != m_settings.m_udpPort) || force) {
-        reverseAPIKeys.append("udpPort");
-    }
-    if ((settings.m_multicastAddress != m_settings.m_multicastAddress) || force) {
-        reverseAPIKeys.append("multicastAddress");
-    }
-    if ((settings.m_multicastJoin != m_settings.m_multicastJoin) || force) {
-        reverseAPIKeys.append("multicastJoin");
-    }
-    if ((settings.m_channelMute != m_settings.m_channelMute) || force) {
-        reverseAPIKeys.append("channelMute");
-    }
-    if ((settings.m_gainIn != m_settings.m_gainIn) || force) {
-        reverseAPIKeys.append("gainIn");
-    }
-    if ((settings.m_gainOut != m_settings.m_gainOut) || force) {
-        reverseAPIKeys.append("gainOut");
-    }
-    if ((settings.m_squelchGate != m_settings.m_squelchGate) || force) {
-        reverseAPIKeys.append("squelchGate");
-    }
-    if ((settings.m_squelch != m_settings.m_squelch) || force) {
-        reverseAPIKeys.append("squelch");
-    }
-    if ((settings.m_squelchEnabled != m_settings.m_squelchEnabled) || force) {
-        reverseAPIKeys.append("squelchEnabled");
-    }
-    if ((settings.m_autoRWBalance != m_settings.m_autoRWBalance) || force) {
-        reverseAPIKeys.append("autoRWBalance");
-    }
-    if ((settings.m_stereoInput != m_settings.m_stereoInput) || force) {
-        reverseAPIKeys.append("stereoInput");
-    }
-
-    if (m_settings.m_streamIndex != settings.m_streamIndex)
+    if (settingsKeys.contains("streamIndex") && (m_settings.m_streamIndex != settings.m_streamIndex))
     {
         if (m_deviceAPI->getSampleMIMO()) // change of stream is possible for MIMO devices only
         {
@@ -284,28 +205,26 @@ void UDPSource::applySettings(const UDPSourceSettings& settings, bool force)
             m_settings.m_streamIndex = settings.m_streamIndex; // make sure ChannelAPI::getStreamIndex() is consistent
             emit streamIndexChanged(settings.m_streamIndex);
         }
-
-        reverseAPIKeys.append("streamIndex");
     }
 
-    UDPSourceBaseband::MsgConfigureUDPSourceBaseband *msg = UDPSourceBaseband::MsgConfigureUDPSourceBaseband::create(settings, force);
+    UDPSourceBaseband::MsgConfigureUDPSourceBaseband *msg = UDPSourceBaseband::MsgConfigureUDPSourceBaseband::create(settingsKeys, settings, force);
     m_basebandSource->getInputMessageQueue()->push(msg);
 
-    if (settings.m_useReverseAPI)
+    if (settingsKeys.contains("useReverseAPI") && settings.m_useReverseAPI)
     {
-        bool fullUpdate = ((m_settings.m_useReverseAPI != settings.m_useReverseAPI) && settings.m_useReverseAPI) ||
-                (m_settings.m_reverseAPIAddress != settings.m_reverseAPIAddress) ||
-                (m_settings.m_reverseAPIPort != settings.m_reverseAPIPort) ||
-                (m_settings.m_reverseAPIDeviceIndex != settings.m_reverseAPIDeviceIndex) ||
-                (m_settings.m_reverseAPIChannelIndex != settings.m_reverseAPIChannelIndex);
-        webapiReverseSendSettings(reverseAPIKeys, settings, fullUpdate || force);
+        bool fullUpdate = ((settingsKeys.contains("useReverseAPI") && (m_settings.m_useReverseAPI != settings.m_useReverseAPI)) && settings.m_useReverseAPI) ||
+                (settingsKeys.contains("reverseAPIAddress") && (m_settings.m_reverseAPIAddress != settings.m_reverseAPIAddress)) ||
+                (settingsKeys.contains("reverseAPIPort") && (m_settings.m_reverseAPIPort != settings.m_reverseAPIPort)) ||
+                (settingsKeys.contains("reverseAPIDeviceIndex") && (m_settings.m_reverseAPIDeviceIndex != settings.m_reverseAPIDeviceIndex)) ||
+                (settingsKeys.contains("reverseAPIChannelIndex") && (m_settings.m_reverseAPIChannelIndex != settings.m_reverseAPIChannelIndex));
+        webapiReverseSendSettings(settingsKeys, settings, fullUpdate || force);
     }
 
     QList<ObjectPipe*> pipes;
     MainCore::instance()->getMessagePipes().getMessagePipes(this, "settings", pipes);
 
     if (pipes.size() > 0) {
-        sendChannelSettings(pipes, reverseAPIKeys, settings, force);
+        sendChannelSettings(pipes, settingsKeys, settings, force);
     }
 
     m_settings = settings;
@@ -320,14 +239,14 @@ bool UDPSource::deserialize(const QByteArray& data)
 {
     if (m_settings.deserialize(data))
     {
-        MsgConfigureUDPSource *msg = MsgConfigureUDPSource::create(m_settings, true);
+        MsgConfigureUDPSource *msg = MsgConfigureUDPSource::create(QStringList(), m_settings, true);
         m_inputMessageQueue.push(msg);
         return true;
     }
     else
     {
         m_settings.resetToDefaults();
-        MsgConfigureUDPSource *msg = MsgConfigureUDPSource::create(m_settings, true);
+        MsgConfigureUDPSource *msg = MsgConfigureUDPSource::create(QStringList(), m_settings, true);
         m_inputMessageQueue.push(msg);
         return false;
     }
@@ -371,12 +290,12 @@ int UDPSource::webapiSettingsPutPatch(
         m_inputMessageQueue.push(msgChan);
     }
 
-    MsgConfigureUDPSource *msg = MsgConfigureUDPSource::create(settings, force);
+    MsgConfigureUDPSource *msg = MsgConfigureUDPSource::create(channelSettingsKeys, settings, force);
     m_inputMessageQueue.push(msg);
 
     if (m_guiMessageQueue) // forward to GUI if any
     {
-        MsgConfigureUDPSource *msgToGUI = MsgConfigureUDPSource::create(settings, force);
+        MsgConfigureUDPSource *msgToGUI = MsgConfigureUDPSource::create(channelSettingsKeys, settings, force);
         m_guiMessageQueue->push(msgToGUI);
     }
 
@@ -598,7 +517,7 @@ void UDPSource::webapiFormatChannelReport(SWGSDRangel::SWGChannelReport& respons
     response.getUdpSourceReport()->setChannelSampleRate(m_basebandSource->getChannelSampleRate());
 }
 
-void UDPSource::webapiReverseSendSettings(QList<QString>& channelSettingsKeys, const UDPSourceSettings& settings, bool force)
+void UDPSource::webapiReverseSendSettings(const QList<QString>& channelSettingsKeys, const UDPSourceSettings& settings, bool force)
 {
     SWGSDRangel::SWGChannelSettings *swgChannelSettings = new SWGSDRangel::SWGChannelSettings();
     webapiFormatChannelSettings(channelSettingsKeys, swgChannelSettings, settings, force);
@@ -625,7 +544,7 @@ void UDPSource::webapiReverseSendSettings(QList<QString>& channelSettingsKeys, c
 
 void UDPSource::sendChannelSettings(
     const QList<ObjectPipe*>& pipes,
-    QList<QString>& channelSettingsKeys,
+    const QList<QString>& channelSettingsKeys,
     const UDPSourceSettings& settings,
     bool force)
 {
@@ -649,7 +568,7 @@ void UDPSource::sendChannelSettings(
 }
 
 void UDPSource::webapiFormatChannelSettings(
-        QList<QString>& channelSettingsKeys,
+        const QList<QString>& channelSettingsKeys,
         SWGSDRangel::SWGChannelSettings *swgChannelSettings,
         const UDPSourceSettings& settings,
         bool force

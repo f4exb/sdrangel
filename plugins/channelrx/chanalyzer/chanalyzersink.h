@@ -43,7 +43,7 @@ public:
     virtual void feed(const SampleVector::const_iterator& begin, const SampleVector::const_iterator& end);
 
     void applyChannelSettings(int channelSampleRate, int sinkSampleRate, int channelFrequencyOffset, bool force = false);
-	void applySettings(const ChannelAnalyzerSettings& settings, bool force = false);
+	void applySettings(const ChannelAnalyzerSettings& settings, const QStringList& settingsKeys, bool force = false);
 
 	double getMagSq() const { return m_magsq; }
 	double getMagSqAvg() const { return (double) m_channelPowerAvg; }

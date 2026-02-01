@@ -46,20 +46,23 @@ public:
 
     public:
         const ATVModSettings& getSettings() const { return m_settings; }
+        const QStringList& getSettingsKeys() const { return m_settingsKeys; }
         bool getForce() const { return m_force; }
 
-        static MsgConfigureATVMod* create(const ATVModSettings& settings, bool force)
+        static MsgConfigureATVMod* create(const QStringList& settingsKeys, const ATVModSettings& settings, bool force)
         {
-            return new MsgConfigureATVMod(settings, force);
+            return new MsgConfigureATVMod(settingsKeys, settings, force);
         }
 
     private:
         ATVModSettings m_settings;
+        QStringList m_settingsKeys;
         bool m_force;
 
-        MsgConfigureATVMod(const ATVModSettings& settings, bool force) :
+        MsgConfigureATVMod(const QStringList& settingsKeys, const ATVModSettings& settings, bool force) :
             Message(),
             m_settings(settings),
+            m_settingsKeys(settingsKeys),
             m_force(force)
         { }
     };
@@ -324,17 +327,17 @@ private:
     QNetworkRequest m_networkRequest;
 
     virtual bool handleMessage(const Message& cmd);
-    void applySettings(const ATVModSettings& settings, bool force = false);
+    void applySettings(const QStringList& settingsKeys, const ATVModSettings& settings, bool force = false);
     void webapiFormatChannelReport(SWGSDRangel::SWGChannelReport& response);
-    void webapiReverseSendSettings(QList<QString>& channelSettingsKeys, const ATVModSettings& settings, bool force);
+    void webapiReverseSendSettings(const QList<QString>& channelSettingsKeys, const ATVModSettings& settings, bool force);
     void sendChannelSettings(
         const QList<ObjectPipe*>& pipes,
-        QList<QString>& channelSettingsKeys,
+        const QList<QString>& channelSettingsKeys,
         const ATVModSettings& settings,
         bool force
     );
     void webapiFormatChannelSettings(
-        QList<QString>& channelSettingsKeys,
+        const QList<QString>& channelSettingsKeys,
         SWGSDRangel::SWGChannelSettings *swgChannelSettings,
         const ATVModSettings& settings,
         bool force

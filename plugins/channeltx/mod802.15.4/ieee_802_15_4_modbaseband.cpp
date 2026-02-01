@@ -141,7 +141,7 @@ bool IEEE_802_15_4_ModBaseband::handleMessage(const Message& cmd)
         MsgConfigureIEEE_802_15_4_ModBaseband& cfg = (MsgConfigureIEEE_802_15_4_ModBaseband&) cmd;
         qDebug() << "IEEE_802_15_4_ModBaseband::handleMessage: MsgConfigureIEEE_802_15_4_ModBaseband";
 
-        applySettings(cfg.getSettings(), cfg.getForce());
+        applySettings(cfg.getSettingsKeys(), cfg.getSettings(), cfg.getForce());
 
         return true;
     }
@@ -170,19 +170,19 @@ bool IEEE_802_15_4_ModBaseband::handleMessage(const Message& cmd)
     }
 }
 
-void IEEE_802_15_4_ModBaseband::applySettings(const IEEE_802_15_4_ModSettings& settings, bool force)
+void IEEE_802_15_4_ModBaseband::applySettings(const QStringList& settingsKeys, const IEEE_802_15_4_ModSettings& settings, bool force)
 {
-    if ((settings.m_inputFrequencyOffset != m_settings.m_inputFrequencyOffset) || force)
+    if ((settingsKeys.contains("inputFrequencyOffset") && (settings.m_inputFrequencyOffset != m_settings.m_inputFrequencyOffset)) || force)
     {
         m_channelizer->setChannelization(m_channelizer->getChannelSampleRate(), settings.m_inputFrequencyOffset);
         m_source.applyChannelSettings(m_channelizer->getChannelSampleRate(), m_channelizer->getChannelFrequencyOffset());
     }
 
-    m_source.applySettings(settings, force);
+    m_source.applySettings(settingsKeys, settings, force);
 
-    if ((settings.m_udpEnabled != m_settings.m_udpEnabled)
-        || (settings.m_udpAddress != m_settings.m_udpAddress)
-        || (settings.m_udpPort != m_settings.m_udpPort)
+    if ((settingsKeys.contains("udpEnabled") && (settings.m_udpEnabled != m_settings.m_udpEnabled))
+        || (settingsKeys.contains("udpAddress") && (settings.m_udpAddress != m_settings.m_udpAddress))
+        || (settingsKeys.contains("udpPort") && (settings.m_udpPort != m_settings.m_udpPort))
         || force)
     {
         qDebug() << "IEEE_802_15_4_ModBaseband::applySettings:"
@@ -200,7 +200,11 @@ void IEEE_802_15_4_ModBaseband::applySettings(const IEEE_802_15_4_ModSettings& s
         }
     }
 
-    m_settings = settings;
+    if (force) {
+        m_settings = settings;
+    } else {
+        m_settings.applySettings(settingsKeys, settings);
+    }
 }
 
 int IEEE_802_15_4_ModBaseband::getChannelSampleRate() const

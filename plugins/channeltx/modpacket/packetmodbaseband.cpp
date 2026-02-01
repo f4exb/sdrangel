@@ -145,7 +145,7 @@ bool PacketModBaseband::handleMessage(const Message& cmd)
         MsgConfigurePacketModBaseband& cfg = (MsgConfigurePacketModBaseband&) cmd;
         qDebug() << "PacketModBaseband::handleMessage: MsgConfigurePacketModBaseband";
 
-        applySettings(cfg.getSettings(), cfg.getForce());
+        applySettings(cfg.getSettingsKeys(), cfg.getSettings(), cfg.getForce());
 
         return true;
     }
@@ -188,7 +188,7 @@ bool PacketModBaseband::handleMessage(const Message& cmd)
     }
 }
 
-void PacketModBaseband::applySettings(const PacketModSettings& settings, bool force)
+void PacketModBaseband::applySettings(const QStringList& settingsKeys, const PacketModSettings& settings, bool force)
 {
     if ((settings.m_inputFrequencyOffset != m_settings.m_inputFrequencyOffset) || force)
     {
@@ -196,9 +196,13 @@ void PacketModBaseband::applySettings(const PacketModSettings& settings, bool fo
         m_source.applyChannelSettings(m_channelizer->getChannelSampleRate(), m_channelizer->getChannelFrequencyOffset());
     }
 
-    m_source.applySettings(settings, force);
+    m_source.applySettings(settingsKeys, settings, force);
 
-    m_settings = settings;
+    if (force) {
+        m_settings = settings;
+    } else {
+        m_settings.applySettings(settingsKeys, settings);
+    }
 }
 
 int PacketModBaseband::getChannelSampleRate() const

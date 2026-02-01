@@ -41,20 +41,23 @@ public:
 
     public:
         const BFMDemodSettings& getSettings() const { return m_settings; }
+        const QStringList& getSettingsKeys() const { return m_settingsKeys; }
         bool getForce() const { return m_force; }
 
-        static MsgConfigureBFMDemodBaseband* create(const BFMDemodSettings& settings, bool force)
+        static MsgConfigureBFMDemodBaseband* create(const QStringList& settingsKeys, const BFMDemodSettings& settings, bool force)
         {
-            return new MsgConfigureBFMDemodBaseband(settings, force);
+            return new MsgConfigureBFMDemodBaseband(settingsKeys, settings, force);
         }
 
     private:
         BFMDemodSettings m_settings;
+        QStringList m_settingsKeys;
         bool m_force;
 
-        MsgConfigureBFMDemodBaseband(const BFMDemodSettings& settings, bool force) :
+        MsgConfigureBFMDemodBaseband(const QStringList& settingsKeys, const BFMDemodSettings& settings, bool force) :
             Message(),
             m_settings(settings),
+            m_settingsKeys(settingsKeys),
             m_force(force)
         { }
     };
@@ -103,7 +106,7 @@ private:
     MessageQueue *getMessageQueueToGUI() { return m_messageQueueToGUI; }
 
     bool handleMessage(const Message& cmd);
-    void applySettings(const BFMDemodSettings& settings, bool force = false);
+    void applySettings(const QStringList& settingsKeys, const BFMDemodSettings& settings, bool force = false);
 
 private slots:
     void handleInputMessages();

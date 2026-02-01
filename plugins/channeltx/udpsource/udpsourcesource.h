@@ -52,7 +52,7 @@ public:
     void resetReadIndex();
 
     void applyChannelSettings(int channelSampleRate, int channelFrequencyOffset, bool force = false);
-    void applySettings(const UDPSourceSettings& settings, bool force = false);
+    void applySettings(const QStringList& settingsKeys, const UDPSourceSettings& settings, bool force = false);
 
     void getLevels(qreal& rmsLevel, qreal& peakLevel, int& numSamples) const
     {

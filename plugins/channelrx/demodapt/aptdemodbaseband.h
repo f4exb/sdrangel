@@ -40,20 +40,23 @@ public:
 
     public:
         const APTDemodSettings& getSettings() const { return m_settings; }
+        const QStringList& getSettingsKeys() const { return m_settingsKeys; }
         bool getForce() const { return m_force; }
 
-        static MsgConfigureAPTDemodBaseband* create(const APTDemodSettings& settings, bool force)
+        static MsgConfigureAPTDemodBaseband* create(const QStringList& settingsKeys, const APTDemodSettings& settings, bool force)
         {
-            return new MsgConfigureAPTDemodBaseband(settings, force);
+            return new MsgConfigureAPTDemodBaseband(settingsKeys, settings, force);
         }
 
     private:
         APTDemodSettings m_settings;
+        QStringList m_settingsKeys;
         bool m_force;
 
-        MsgConfigureAPTDemodBaseband(const APTDemodSettings& settings, bool force) :
+        MsgConfigureAPTDemodBaseband(const QStringList& settingsKeys, const APTDemodSettings& settings, bool force) :
             Message(),
             m_settings(settings),
+            m_settingsKeys(settingsKeys),
             m_force(force)
         { }
     };
@@ -85,7 +88,7 @@ private:
 
     bool handleMessage(const Message& cmd);
     void calculateOffset(APTDemodSink *sink);
-    void applySettings(const APTDemodSettings& settings, bool force = false);
+    void applySettings(const QStringList& settingsKeys, const APTDemodSettings& settings, bool force = false);
 
 private slots:
     void handleInputMessages();

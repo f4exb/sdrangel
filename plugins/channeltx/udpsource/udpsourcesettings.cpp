@@ -214,7 +214,191 @@ bool UDPSourceSettings::deserialize(const QByteArray& data)
     }
 }
 
+void UDPSourceSettings::applySettings(const QStringList& settingsKeys, const UDPSourceSettings& settings)
+{
+    if (settingsKeys.contains("sampleFormat")) {
+        m_sampleFormat = settings.m_sampleFormat;
+    }
+    if (settingsKeys.contains("inputSampleRate")) {
+        m_inputSampleRate = settings.m_inputSampleRate;
+    }
+    if (settingsKeys.contains("inputFrequencyOffset")) {
+        m_inputFrequencyOffset = settings.m_inputFrequencyOffset;
+    }
+    if (settingsKeys.contains("rfBandwidth")) {
+        m_rfBandwidth = settings.m_rfBandwidth;
+    }
+    if (settingsKeys.contains("lowCutoff")) {
+        m_lowCutoff = settings.m_lowCutoff;
+    }
+    if (settingsKeys.contains("fmDeviation")) {
+        m_fmDeviation = settings.m_fmDeviation;
+    }
+    if (settingsKeys.contains("amModFactor")) {
+        m_amModFactor = settings.m_amModFactor;
+    }
+    if (settingsKeys.contains("channelMute")) {
+        m_channelMute = settings.m_channelMute;
+    }
+    if (settingsKeys.contains("gainIn")) {
+        m_gainIn = settings.m_gainIn;
+    }
+    if (settingsKeys.contains("gainOut")) {
+        m_gainOut = settings.m_gainOut;
+    }
+    if (settingsKeys.contains("squelch")) {
+        m_squelch = settings.m_squelch;
+    }
+    if (settingsKeys.contains("squelchGate")) {
+        m_squelchGate = settings.m_squelchGate;
+    }
+    if (settingsKeys.contains("squelchEnabled")) {
+        m_squelchEnabled = settings.m_squelchEnabled;
+    }
+    if (settingsKeys.contains("autoRWBalance")) {
+        m_autoRWBalance = settings.m_autoRWBalance;
+    }
+    if (settingsKeys.contains("stereoInput")) {
+        m_stereoInput = settings.m_stereoInput;
+    }
+    if (settingsKeys.contains("rgbColor")) {
+        m_rgbColor = settings.m_rgbColor;
+    }
+    if (settingsKeys.contains("udpAddress")) {
+        m_udpAddress = settings.m_udpAddress;
+    }
+    if (settingsKeys.contains("udpPort")) {
+        m_udpPort = settings.m_udpPort;
+    }
+    if (settingsKeys.contains("multicastAddress")) {
+        m_multicastAddress = settings.m_multicastAddress;
+    }
+    if (settingsKeys.contains("multicastJoin")) {
+        m_multicastJoin = settings.m_multicastJoin;
+    }
+    if (settingsKeys.contains("title")) {
+        m_title = settings.m_title;
+    }
+    if (settingsKeys.contains("streamIndex")) {
+        m_streamIndex = settings.m_streamIndex;
+    }
+    if (settingsKeys.contains("useReverseAPI")) {
+        m_useReverseAPI = settings.m_useReverseAPI;
+    }
+    if (settingsKeys.contains("reverseAPIAddress")) {
+        m_reverseAPIAddress = settings.m_reverseAPIAddress;
+    }
+    if (settingsKeys.contains("reverseAPIPort")) {
+        m_reverseAPIPort = settings.m_reverseAPIPort;
+    }
+    if (settingsKeys.contains("reverseAPIDeviceIndex")) {
+        m_reverseAPIDeviceIndex = settings.m_reverseAPIDeviceIndex;
+    }
+    if (settingsKeys.contains("reverseAPIChannelIndex")) {
+        m_reverseAPIChannelIndex = settings.m_reverseAPIChannelIndex;
+    }
+    if (settingsKeys.contains("workspaceIndex")) {
+        m_workspaceIndex = settings.m_workspaceIndex;
+    }
+    if (settingsKeys.contains("geometryBytes")) {
+        m_geometryBytes = settings.m_geometryBytes;
+    }
+    if (settingsKeys.contains("hidden")) {
+        m_hidden = settings.m_hidden;
+    }
+}
 
+QString UDPSourceSettings::getDebugString(const QStringList& settingsKeys, bool force) const
+{
+    std::ostringstream ostr;
 
+    if (settingsKeys.contains("sampleFormat") || force) {
+        ostr << " m_sampleFormat: " << (int)m_sampleFormat;
+    }
+    if (settingsKeys.contains("inputSampleRate") || force) {
+        ostr << " m_inputSampleRate: " << m_inputSampleRate;
+    }
+    if (settingsKeys.contains("inputFrequencyOffset") || force) {
+        ostr << " m_inputFrequencyOffset: " << m_inputFrequencyOffset;
+    }
+    if (settingsKeys.contains("rfBandwidth") || force) {
+        ostr << " m_rfBandwidth: " << m_rfBandwidth;
+    }
+    if (settingsKeys.contains("lowCutoff") || force) {
+        ostr << " m_lowCutoff: " << m_lowCutoff;
+    }
+    if (settingsKeys.contains("fmDeviation") || force) {
+        ostr << " m_fmDeviation: " << m_fmDeviation;
+    }
+    if (settingsKeys.contains("amModFactor") || force) {
+        ostr << " m_amModFactor: " << m_amModFactor;
+    }
+    if (settingsKeys.contains("channelMute") || force) {
+        ostr << " m_channelMute: " << m_channelMute;
+    }
+    if (settingsKeys.contains("gainIn") || force) {
+        ostr << " m_gainIn: " << m_gainIn;
+    }
+    if (settingsKeys.contains("gainOut") || force) {
+        ostr << " m_gainOut: " << m_gainOut;
+    }
+    if (settingsKeys.contains("squelch") || force) {
+        ostr << " m_squelch: " << m_squelch;
+    }
+    if (settingsKeys.contains("squelchGate") || force) {
+        ostr << " m_squelchGate: " << m_squelchGate;
+    }
+    if (settingsKeys.contains("squelchEnabled") || force) {
+        ostr << " m_squelchEnabled: " << m_squelchEnabled;
+    }
+    if (settingsKeys.contains("autoRWBalance") || force) {
+        ostr << " m_autoRWBalance: " << m_autoRWBalance;
+    }
+    if (settingsKeys.contains("stereoInput") || force) {
+        ostr << " m_stereoInput: " << m_stereoInput;
+    }
+    if (settingsKeys.contains("rgbColor") || force) {
+        ostr << " m_rgbColor: " << m_rgbColor;
+    }
+    if (settingsKeys.contains("udpAddress") || force) {
+        ostr << " m_udpAddress: " << m_udpAddress.toStdString();
+    }
+    if (settingsKeys.contains("udpPort") || force) {
+        ostr << " m_udpPort: " << m_udpPort;
+    }
+    if (settingsKeys.contains("multicastAddress") || force) {
+        ostr << " m_multicastAddress: " << m_multicastAddress.toStdString();
+    }
+    if (settingsKeys.contains("multicastJoin") || force) {
+        ostr << " m_multicastJoin: " << m_multicastJoin;
+    }
+    if (settingsKeys.contains("title") || force) {
+        ostr << " m_title: " << m_title.toStdString();
+    }
+    if (settingsKeys.contains("streamIndex") || force) {
+        ostr << " m_streamIndex: " << m_streamIndex;
+    }
+    if (settingsKeys.contains("useReverseAPI") || force) {
+        ostr << " m_useReverseAPI: " << m_useReverseAPI;
+    }
+    if (settingsKeys.contains("reverseAPIAddress") || force) {
+        ostr << " m_reverseAPIAddress: " << m_reverseAPIAddress.toStdString();
+    }
+    if (settingsKeys.contains("reverseAPIPort") || force) {
+        ostr << " m_reverseAPIPort: " << m_reverseAPIPort;
+    }
+    if (settingsKeys.contains("reverseAPIDeviceIndex") || force) {
+        ostr << " m_reverseAPIDeviceIndex: " << m_reverseAPIDeviceIndex;
+    }
+    if (settingsKeys.contains("reverseAPIChannelIndex") || force) {
+        ostr << " m_reverseAPIChannelIndex: " << m_reverseAPIChannelIndex;
+    }
+    if (settingsKeys.contains("workspaceIndex") || force) {
+        ostr << " m_workspaceIndex: " << m_workspaceIndex;
+    }
+    if (settingsKeys.contains("hidden") || force) {
+        ostr << " m_hidden: " << m_hidden;
+    }
 
-
+    return QString(ostr.str().c_str());
+}

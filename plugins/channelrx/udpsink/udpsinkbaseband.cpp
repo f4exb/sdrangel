@@ -109,7 +109,7 @@ bool UDPSinkBaseband::handleMessage(const Message& cmd)
         MsgConfigureUDPSinkBaseband& cfg = (MsgConfigureUDPSinkBaseband&) cmd;
         qDebug() << "UDPSinkBaseband::handleMessage: MsgConfigureUDPSinkBaseband";
 
-        applySettings(cfg.getSettings(), cfg.getForce());
+        applySettings(cfg.getSettingsKeys(), cfg.getSettings(), cfg.getForce());
 
         return true;
     }
@@ -139,9 +139,9 @@ bool UDPSinkBaseband::handleMessage(const Message& cmd)
     }
 }
 
-void UDPSinkBaseband::applySettings(const UDPSinkSettings& settings, bool force)
+void UDPSinkBaseband::applySettings(const QStringList& settingsKeys, const UDPSinkSettings& settings, bool force)
 {
-    if ((settings.m_audioActive != m_settings.m_audioActive) || force)
+    if ((settingsKeys.contains("audioActive") && (settings.m_audioActive != m_settings.m_audioActive)) || force)
     {
         if (settings.m_audioActive) {
             DSPEngine::instance()->getAudioDeviceManager()->addAudioSink(m_sink.getAudioFifo(), getInputMessageQueue());
@@ -150,15 +150,20 @@ void UDPSinkBaseband::applySettings(const UDPSinkSettings& settings, bool force)
         }
     }
 
-    if ((settings.m_outputSampleRate != m_settings.m_outputSampleRate)
-     || (settings.m_inputFrequencyOffset != m_settings.m_inputFrequencyOffset) || force)
+    if ((settingsKeys.contains("outputSampleRate") && (settings.m_outputSampleRate != m_settings.m_outputSampleRate))
+     || (settingsKeys.contains("inputFrequencyOffset") && (settings.m_inputFrequencyOffset != m_settings.m_inputFrequencyOffset)) || force)
     {
         m_channelizer->setChannelization(settings.m_outputSampleRate, settings.m_inputFrequencyOffset);
         m_sink.applyChannelSettings(m_channelizer->getChannelSampleRate(), m_channelizer->getChannelFrequencyOffset());
     }
 
-    m_sink.applySettings(settings, force);
-    m_settings = settings;
+    m_sink.applySettings(settingsKeys, settings, force);
+
+    if (force) {
+        m_settings = settings;
+    } else {
+        m_settings.applySettings(settingsKeys, settings);
+    }
 }
 
 int UDPSinkBaseband::getChannelSampleRate() const

@@ -218,4 +218,260 @@ bool APTDemodSettings::deserialize(const QByteArray& data)
     }
 }
 
+void APTDemodSettings::applySettings(const QStringList& settingsKeys, const APTDemodSettings& settings)
+{
+    if (settingsKeys.contains("inputFrequencyOffset")) {
+        m_inputFrequencyOffset = settings.m_inputFrequencyOffset;
+    }
+    if (settingsKeys.contains("rfBandwidth")) {
+        m_rfBandwidth = settings.m_rfBandwidth;
+    }
+    if (settingsKeys.contains("fmDeviation")) {
+        m_fmDeviation = settings.m_fmDeviation;
+    }
+    if (settingsKeys.contains("cropNoise")) {
+        m_cropNoise = settings.m_cropNoise;
+    }
+    if (settingsKeys.contains("denoise")) {
+        m_denoise = settings.m_denoise;
+    }
+    if (settingsKeys.contains("linearEqualise")) {
+        m_linearEqualise = settings.m_linearEqualise;
+    }
+    if (settingsKeys.contains("histogramEqualise")) {
+        m_histogramEqualise = settings.m_histogramEqualise;
+    }
+    if (settingsKeys.contains("precipitationOverlay")) {
+        m_precipitationOverlay = settings.m_precipitationOverlay;
+    }
+    if (settingsKeys.contains("flip")) {
+        m_flip = settings.m_flip;
+    }
+    if (settingsKeys.contains("channels")) {
+        m_channels = settings.m_channels;
+    }
+    if (settingsKeys.contains("decodeEnabled")) {
+        m_decodeEnabled = settings.m_decodeEnabled;
+    }
+    if (settingsKeys.contains("satelliteTrackerControl")) {
+        m_satelliteTrackerControl = settings.m_satelliteTrackerControl;
+    }
+    if (settingsKeys.contains("satelliteName")) {
+        m_satelliteName = settings.m_satelliteName;
+    }
+    if (settingsKeys.contains("autoSave")) {
+        m_autoSave = settings.m_autoSave;
+    }
+    if (settingsKeys.contains("autoSavePath")) {
+        m_autoSavePath = settings.m_autoSavePath;
+    }
+    if (settingsKeys.contains("autoSaveMinScanLines")) {
+        m_autoSaveMinScanLines = settings.m_autoSaveMinScanLines;
+    }
+    if (settingsKeys.contains("saveCombined")) {
+        m_saveCombined = settings.m_saveCombined;
+    }
+    if (settingsKeys.contains("saveSeparate")) {
+        m_saveSeparate = settings.m_saveSeparate;
+    }
+    if (settingsKeys.contains("saveProjection")) {
+        m_saveProjection = settings.m_saveProjection;
+    }
+    if (settingsKeys.contains("scanlinesPerImageUpdate")) {
+        m_scanlinesPerImageUpdate = settings.m_scanlinesPerImageUpdate;
+    }
+    if (settingsKeys.contains("transparencyThreshold")) {
+        m_transparencyThreshold = settings.m_transparencyThreshold;
+    }
+    if (settingsKeys.contains("opacityThreshold")) {
+        m_opacityThreshold = settings.m_opacityThreshold;
+    }
+    if (settingsKeys.contains("palettes")) {
+        m_palettes = settings.m_palettes;
+    }
+    if (settingsKeys.contains("palette")) {
+        m_palette = settings.m_palette;
+    }
+    if (settingsKeys.contains("horizontalPixelsPerDegree")) {
+        m_horizontalPixelsPerDegree = settings.m_horizontalPixelsPerDegree;
+    }
+    if (settingsKeys.contains("verticalPixelsPerDegree")) {
+        m_verticalPixelsPerDegree = settings.m_verticalPixelsPerDegree;
+    }
+    if (settingsKeys.contains("satTimeOffset")) {
+        m_satTimeOffset = settings.m_satTimeOffset;
+    }
+    if (settingsKeys.contains("satYaw")) {
+        m_satYaw = settings.m_satYaw;
+    }
+    if (settingsKeys.contains("rgbColor")) {
+        m_rgbColor = settings.m_rgbColor;
+    }
+    if (settingsKeys.contains("title")) {
+        m_title = settings.m_title;
+    }
+    if (settingsKeys.contains("streamIndex")) {
+        m_streamIndex = settings.m_streamIndex;
+    }
+    if (settingsKeys.contains("useReverseAPI")) {
+        m_useReverseAPI = settings.m_useReverseAPI;
+    }
+    if (settingsKeys.contains("reverseAPIAddress")) {
+        m_reverseAPIAddress = settings.m_reverseAPIAddress;
+    }
+    if (settingsKeys.contains("reverseAPIPort")) {
+        m_reverseAPIPort = settings.m_reverseAPIPort;
+    }
+    if (settingsKeys.contains("reverseAPIDeviceIndex")) {
+        m_reverseAPIDeviceIndex = settings.m_reverseAPIDeviceIndex;
+    }
+    if (settingsKeys.contains("reverseAPIChannelIndex")) {
+        m_reverseAPIChannelIndex = settings.m_reverseAPIChannelIndex;
+    }
+    if (settingsKeys.contains("workspaceIndex")) {
+        m_workspaceIndex = settings.m_workspaceIndex;
+    }
+    if (settingsKeys.contains("hidden")) {
+        m_hidden = settings.m_hidden;
+    }
+    if (settingsKeys.contains("tle")) {
+        m_tle = settings.m_tle;
+    }
+    if (settingsKeys.contains("aosDateTime")) {
+        m_aosDateTime = settings.m_aosDateTime;
+    }
+    if (settingsKeys.contains("northToSouth")) {
+        m_northToSouth = settings.m_northToSouth;
+    }
+}
 
+QString APTDemodSettings::getDebugString(const QStringList& settingsKeys, bool force) const
+{
+    std::ostringstream ostr;
+
+    if (settingsKeys.contains("inputFrequencyOffset") || force) {
+        ostr << " m_inputFrequencyOffset: " << m_inputFrequencyOffset;
+    }
+    if (settingsKeys.contains("rfBandwidth") || force) {
+        ostr << " m_rfBandwidth: " << m_rfBandwidth;
+    }
+    if (settingsKeys.contains("fmDeviation") || force) {
+        ostr << " m_fmDeviation: " << m_fmDeviation;
+    }
+    if (settingsKeys.contains("cropNoise") || force) {
+        ostr << " m_cropNoise: " << m_cropNoise;
+    }
+    if (settingsKeys.contains("denoise") || force) {
+        ostr << " m_denoise: " << m_denoise;
+    }
+    if (settingsKeys.contains("linearEqualise") || force) {
+        ostr << " m_linearEqualise: " << m_linearEqualise;
+    }
+    if (settingsKeys.contains("histogramEqualise") || force) {
+        ostr << " m_histogramEqualise: " << m_histogramEqualise;
+    }
+    if (settingsKeys.contains("precipitationOverlay") || force) {
+        ostr << " m_precipitationOverlay: " << m_precipitationOverlay;
+    }
+    if (settingsKeys.contains("flip") || force) {
+        ostr << " m_flip: " << m_flip;
+    }
+    if (settingsKeys.contains("channels") || force) {
+        ostr << " m_channels: " << m_channels;
+    }
+    if (settingsKeys.contains("decodeEnabled") || force) {
+        ostr << " m_decodeEnabled: " << m_decodeEnabled;
+    }
+    if (settingsKeys.contains("satelliteTrackerControl") || force) {
+        ostr << " m_satelliteTrackerControl: " << m_satelliteTrackerControl;
+    }
+    if (settingsKeys.contains("satelliteName") || force) {
+        ostr << " m_satelliteName: " << m_satelliteName.toStdString();
+    }
+    if (settingsKeys.contains("autoSave") || force) {
+        ostr << " m_autoSave: " << m_autoSave;
+    }
+    if (settingsKeys.contains("autoSavePath") || force) {
+        ostr << " m_autoSavePath: " << m_autoSavePath.toStdString();
+    }
+    if (settingsKeys.contains("autoSaveMinScanLines") || force) {
+        ostr << " m_autoSaveMinScanLines: " << m_autoSaveMinScanLines;
+    }
+    if (settingsKeys.contains("saveCombined") || force) {
+        ostr << " m_saveCombined: " << m_saveCombined;
+    }
+    if (settingsKeys.contains("saveSeparate") || force) {
+        ostr << " m_saveSeparate: " << m_saveSeparate;
+    }
+    if (settingsKeys.contains("saveProjection") || force) {
+        ostr << " m_saveProjection: " << m_saveProjection;
+    }
+    if (settingsKeys.contains("scanlinesPerImageUpdate") || force) {
+        ostr << " m_scanlinesPerImageUpdate: " << m_scanlinesPerImageUpdate;
+    }
+    if (settingsKeys.contains("transparencyThreshold") || force) {
+        ostr << " m_transparencyThreshold: " << m_transparencyThreshold;
+    }
+    if (settingsKeys.contains("opacityThreshold") || force) {
+        ostr << " m_opacityThreshold: " << m_opacityThreshold;
+    }
+    if (settingsKeys.contains("palettes") || force) {
+        ostr << " m_palettes: " << m_palettes.join(";").toStdString();
+    }
+    if (settingsKeys.contains("palette") || force) {
+        ostr << " m_palette: " << m_palette;
+    }
+    if (settingsKeys.contains("horizontalPixelsPerDegree") || force) {
+        ostr << " m_horizontalPixelsPerDegree: " << m_horizontalPixelsPerDegree;
+    }
+    if (settingsKeys.contains("verticalPixelsPerDegree") || force) {
+        ostr << " m_verticalPixelsPerDegree: " << m_verticalPixelsPerDegree;
+    }
+    if (settingsKeys.contains("satTimeOffset") || force) {
+        ostr << " m_satTimeOffset: " << m_satTimeOffset;
+    }
+    if (settingsKeys.contains("satYaw") || force) {
+        ostr << " m_satYaw: " << m_satYaw;
+    }
+    if (settingsKeys.contains("rgbColor") || force) {
+        ostr << " m_rgbColor: " << m_rgbColor;
+    }
+    if (settingsKeys.contains("title") || force) {
+        ostr << " m_title: " << m_title.toStdString();
+    }
+    if (settingsKeys.contains("streamIndex") || force) {
+        ostr << " m_streamIndex: " << m_streamIndex;
+    }
+    if (settingsKeys.contains("useReverseAPI") || force) {
+        ostr << " m_useReverseAPI: " << m_useReverseAPI;
+    }
+    if (settingsKeys.contains("reverseAPIAddress") || force) {
+        ostr << " m_reverseAPIAddress: " << m_reverseAPIAddress.toStdString();
+    }
+    if (settingsKeys.contains("reverseAPIPort") || force) {
+        ostr << " m_reverseAPIPort: " << m_reverseAPIPort;
+    }
+    if (settingsKeys.contains("reverseAPIDeviceIndex") || force) {
+        ostr << " m_reverseAPIDeviceIndex: " << m_reverseAPIDeviceIndex;
+    }
+    if (settingsKeys.contains("reverseAPIChannelIndex") || force) {
+        ostr << " m_reverseAPIChannelIndex: " << m_reverseAPIChannelIndex;
+    }
+    if (settingsKeys.contains("workspaceIndex") || force) {
+        ostr << " m_workspaceIndex: " << m_workspaceIndex;
+    }
+    if (settingsKeys.contains("hidden") || force) {
+        ostr << " m_hidden: " << m_hidden;
+    }
+    if (settingsKeys.contains("tle") || force) {
+        ostr << " m_tle: " << m_tle.toStdString();
+    }
+    if (settingsKeys.contains("aosDateTime") || force) {
+        ostr << " m_aosDateTime: " << m_aosDateTime.toString().toStdString();
+    }
+    if (settingsKeys.contains("northToSouth") || force) {
+        ostr << " m_northToSouth: " << m_northToSouth;
+    }
+
+    return QString(ostr.str().c_str());
+}

@@ -46,22 +46,25 @@ public:
 
     public:
         const NFMDemodSettings& getSettings() const { return m_settings; }
+        const QStringList& getSettingsKeys() const { return m_settingsKeys; }
         bool getForce() const { return m_force; }
 
-        static MsgConfigureNFMDemod* create(const NFMDemodSettings& settings, bool force)
+        static MsgConfigureNFMDemod* create(const QStringList& settingsKeys, const NFMDemodSettings& settings, bool force)
         {
-            return new MsgConfigureNFMDemod(settings, force);
+            return new MsgConfigureNFMDemod(settingsKeys, settings, force);
         }
 
     private:
         NFMDemodSettings m_settings;
+        QStringList m_settingsKeys;
         bool m_force;
 
-        MsgConfigureNFMDemod(const NFMDemodSettings& settings, bool force) :
+        MsgConfigureNFMDemod(const QStringList& settingsKeys, const NFMDemodSettings& settings, bool force) :
             Message(),
             m_settings(settings),
+            m_settingsKeys(settingsKeys),
             m_force(force)
-        { }
+        {}
     };
 
     NFMDemod(DeviceAPI *deviceAPI);
@@ -156,18 +159,18 @@ private:
     static const int m_udpBlockSize;
 
 	virtual bool handleMessage(const Message& cmd);
-    void applySettings(const NFMDemodSettings& settings, bool force = false);
+    void applySettings(const QStringList& settingsKeys, const NFMDemodSettings& settings, bool force = false);
     void sendSampleRateToDemodAnalyzer();
     void webapiFormatChannelReport(SWGSDRangel::SWGChannelReport& response);
-    void webapiReverseSendSettings(QList<QString>& channelSettingsKeys, const NFMDemodSettings& settings, bool force);
+    void webapiReverseSendSettings(const QList<QString>& channelSettingsKeys, const NFMDemodSettings& settings, bool force);
     void sendChannelSettings(
         const QList<ObjectPipe*>& pipes,
-        QList<QString>& channelSettingsKeys,
+        const QList<QString>& channelSettingsKeys,
         const NFMDemodSettings& settings,
         bool force
     );
     void webapiFormatChannelSettings(
-        QList<QString>& channelSettingsKeys,
+        const QList<QString>& channelSettingsKeys,
         SWGSDRangel::SWGChannelSettings *swgChannelSettings,
         const NFMDemodSettings& settings,
         bool force

@@ -132,7 +132,7 @@ void AISDemodGUI::resetToDefaults()
 {
     m_settings.resetToDefaults();
     displaySettings();
-    applySettings(true);
+    applySettings(QStringList(), true);
 }
 
 QByteArray AISDemodGUI::serialize() const
@@ -144,7 +144,7 @@ bool AISDemodGUI::deserialize(const QByteArray& data)
 {
     if(m_settings.deserialize(data)) {
         displaySettings();
-        applySettings(true);
+        applySettings(QStringList(), true);
         return true;
     } else {
         resetToDefaults();
@@ -548,7 +548,7 @@ void AISDemodGUI::channelMarkerChangedByCursor()
 {
     ui->deltaFrequency->setValue(m_channelMarker.getCenterFrequency());
     m_settings.m_inputFrequencyOffset = m_channelMarker.getCenterFrequency();
-    applySettings();
+    applySettings(QStringList({"inputFrequencyOffset"}));
 }
 
 void AISDemodGUI::channelMarkerHighlightedByCursor()
@@ -561,7 +561,7 @@ void AISDemodGUI::on_deltaFrequency_changed(qint64 value)
     m_channelMarker.setCenterFrequency(value);
     m_settings.m_inputFrequencyOffset = m_channelMarker.getCenterFrequency();
     updateAbsoluteCenterFrequency();
-    applySettings();
+    applySettings(QStringList({"inputFrequencyOffset"}));
 }
 
 void AISDemodGUI::on_rfBW_valueChanged(int value)
@@ -570,28 +570,28 @@ void AISDemodGUI::on_rfBW_valueChanged(int value)
     ui->rfBWText->setText(QString("%1k").arg(value / 10.0, 0, 'f', 1));
     m_channelMarker.setBandwidth(bw);
     m_settings.m_rfBandwidth = bw;
-    applySettings();
+    applySettings(QStringList({"rfBandwidth"}));
 }
 
 void AISDemodGUI::on_fmDev_valueChanged(int value)
 {
     ui->fmDevText->setText(QString("%1k").arg(value / 10.0, 0, 'f', 1));
     m_settings.m_fmDeviation = value * 100.0;
-    applySettings();
+    applySettings(QStringList({"fmDeviation"}));
 }
 
 void AISDemodGUI::on_threshold_valueChanged(int value)
 {
     ui->thresholdText->setText(QString("%1").arg(value));
     m_settings.m_correlationThreshold = value;
-    applySettings();
+    applySettings(QStringList({"correlationThreshold"}));
 }
 
 void AISDemodGUI::on_filterMMSI_editingFinished()
 {
     m_settings.m_filterMMSI = ui->filterMMSI->text();
     filter();
-    applySettings();
+    applySettings(QStringList({"filterMMSI"}));
 }
 
 void AISDemodGUI::on_clearTable_clicked()
@@ -602,25 +602,25 @@ void AISDemodGUI::on_clearTable_clicked()
 void AISDemodGUI::on_udpEnabled_clicked(bool checked)
 {
     m_settings.m_udpEnabled = checked;
-    applySettings();
+    applySettings(QStringList({"udpEnabled"}));
 }
 
 void AISDemodGUI::on_udpAddress_editingFinished()
 {
     m_settings.m_udpAddress = ui->udpAddress->text();
-    applySettings();
+    applySettings(QStringList({"udpAddress"}));
 }
 
 void AISDemodGUI::on_udpPort_editingFinished()
 {
     m_settings.m_udpPort = ui->udpPort->text().toInt();
-    applySettings();
+    applySettings(QStringList({"udpPort"}));
 }
 
 void AISDemodGUI::on_udpFormat_currentIndexChanged(int value)
 {
     m_settings.m_udpFormat = (AISDemodSettings::UDPFormat)value;
-    applySettings();
+    applySettings(QStringList({"udpFormat"}));
 }
 
 void AISDemodGUI::on_messages_cellDoubleClicked(int row, int column)
@@ -662,7 +662,7 @@ void AISDemodGUI::onWidgetRolled(QWidget* widget, bool rollDown)
     (void) rollDown;
 
     getRollupContents()->saveState(m_rollupState);
-    applySettings();
+    applySettings(QStringList());
 }
 
 void AISDemodGUI::onMenuDialogCalled(const QPoint &p)
@@ -707,7 +707,8 @@ void AISDemodGUI::onMenuDialogCalled(const QPoint &p)
             updateIndexLabel();
         }
 
-        applySettings();
+        applySettings(QStringList({"title", "rgbColor", "useReverseAPI", "reverseAPIAddress",
+                                   "reverseAPIPort", "reverseAPIDeviceIndex", "reverseAPIChannelIndex", "streamIndex"}));
     }
 
     resetContextMenuType();
@@ -831,7 +832,7 @@ AISDemodGUI::AISDemodGUI(PluginAPI* pluginAPI, DeviceUISet *deviceUISet, Baseban
 
     displaySettings();
     makeUIConnections();
-    applySettings(true);
+    applySettings(QStringList(), true);
     DialPopup::addPopupsToChildDials(this);
     m_resizer.enableChildMouseTracking();
 }
@@ -864,11 +865,11 @@ void AISDemodGUI::blockApplySettings(bool block)
     m_doApplySettings = !block;
 }
 
-void AISDemodGUI::applySettings(bool force)
+void AISDemodGUI::applySettings(const QStringList& settingsKeys, const bool force)
 {
     if (m_doApplySettings)
     {
-        AISDemod::MsgConfigureAISDemod* message = AISDemod::MsgConfigureAISDemod::create( m_settings, force);
+        AISDemod::MsgConfigureAISDemod* message = AISDemod::MsgConfigureAISDemod::create( m_settings, settingsKeys, force);
         m_aisDemod->getInputMessageQueue()->push(message);
     }
 }
@@ -973,13 +974,13 @@ void AISDemodGUI::on_showSlotMap_clicked(bool checked)
 {
     ui->slotMapWidget->setVisible(checked);
     m_settings.m_showSlotMap = checked;
-    applySettings();
+    applySettings(QStringList({"showSlotMap"}));
 }
 
 void AISDemodGUI::on_logEnable_clicked(bool checked)
 {
     m_settings.m_logEnabled = checked;
-    applySettings();
+    applySettings(QStringList({"logEnabled"}));
 }
 
 void AISDemodGUI::on_logFilename_clicked()
@@ -995,7 +996,7 @@ void AISDemodGUI::on_logFilename_clicked()
         {
             m_settings.m_logFilename = fileNames[0];
             ui->logFilename->setToolTip(QString(".csv log filename: %1").arg(m_settings.m_logFilename));
-            applySettings();
+            applySettings(QStringList({"logFilename"}));
         }
     }
 }
@@ -1092,7 +1093,7 @@ void AISDemodGUI::on_logOpen_clicked()
 void AISDemodGUI::on_useFileTime_toggled(bool checked)
 {
     m_settings.m_useFileTime = checked;
-    applySettings();
+    applySettings(QStringList({"useFileTime"}));
 }
 
 void AISDemodGUI::makeUIConnections()

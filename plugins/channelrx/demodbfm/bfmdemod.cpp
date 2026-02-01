@@ -58,7 +58,7 @@ BFMDemod::BFMDemod(DeviceAPI *deviceAPI) :
     m_basebandSampleRate(0)
 {
 	setObjectName(m_channelId);
-	applySettings(m_settings, true);
+	applySettings(QStringList(), m_settings, true);
 
     m_deviceAPI->addChannelSink(this);
     m_deviceAPI->addChannelSinkAPI(this);
@@ -140,7 +140,7 @@ void BFMDemod::start()
     DSPSignalNotification *dspMsg = new DSPSignalNotification(m_basebandSampleRate, 0);
     m_basebandSink->getInputMessageQueue()->push(dspMsg);
 
-    BFMDemodBaseband::MsgConfigureBFMDemodBaseband *msg = BFMDemodBaseband::MsgConfigureBFMDemodBaseband::create(m_settings, true);
+    BFMDemodBaseband::MsgConfigureBFMDemodBaseband *msg = BFMDemodBaseband::MsgConfigureBFMDemodBaseband::create(QStringList(), m_settings, true);
     m_basebandSink->getInputMessageQueue()->push(msg);
 
     SpectrumSettings spectrumSettings = m_spectrumVis.getSettings();
@@ -170,7 +170,7 @@ bool BFMDemod::handleMessage(const Message& cmd)
         MsgConfigureBFMDemod& cfg = (MsgConfigureBFMDemod&) cmd;
         qDebug() << "BFMDemod::handleMessage: MsgConfigureBFMDemod";
 
-        applySettings(cfg.getSettings(), cfg.getForce());
+        applySettings(cfg.getSettingsKeys(), cfg.getSettings(), cfg.getForce());
 
         return true;
     }
@@ -202,73 +202,20 @@ void BFMDemod::setCenterFrequency(qint64 frequency)
 {
     BFMDemodSettings settings = m_settings;
     settings.m_inputFrequencyOffset = frequency;
-    applySettings(settings, false);
+    applySettings(QStringList({"inputFrequencyOffset"}), settings, false);
 
     if (m_guiMessageQueue) // forward to GUI if any
     {
-        MsgConfigureBFMDemod *msgToGUI = MsgConfigureBFMDemod::create(settings, false);
+        MsgConfigureBFMDemod *msgToGUI = MsgConfigureBFMDemod::create(QStringList({"inputFrequencyOffset"}), settings, false);
         m_guiMessageQueue->push(msgToGUI);
     }
 }
 
-void BFMDemod::applySettings(const BFMDemodSettings& settings, bool force)
+void BFMDemod::applySettings(const QStringList& settingsKeys, const BFMDemodSettings& settings, bool force)
 {
-    qDebug() << "BFMDemod::applySettings: MsgConfigureBFMDemod:"
-            << " m_inputFrequencyOffset: " << settings.m_inputFrequencyOffset
-            << " m_rfBandwidth: " << settings.m_rfBandwidth
-            << " m_afBandwidth: " << settings.m_afBandwidth
-            << " m_deEmphasis: " << settings.getDeEmphasisTimeConstant()
-            << " m_volume: " << settings.m_volume
-            << " m_squelch: " << settings.m_squelch
-            << " m_audioStereo: " << settings.m_audioStereo
-            << " m_lsbStereo: " << settings.m_lsbStereo
-            << " m_showPilot: " << settings.m_showPilot
-            << " m_rdsActive: " << settings.m_rdsActive
-            << " m_audioDeviceName: " << settings.m_audioDeviceName
-            << " m_streamIndex: " << settings.m_streamIndex
-            << " m_useReverseAPI: " << settings.m_useReverseAPI
-            << " force: " << force;
+    qDebug() << "BFMDemod::applySettings: MsgConfigureBFMDemod:" << settings.getDebugString(settingsKeys, force);
 
-    QList<QString> reverseAPIKeys;
-
-    if ((settings.m_inputFrequencyOffset != m_settings.m_inputFrequencyOffset) || force) {
-        reverseAPIKeys.append("inputFrequencyOffset");
-    }
-    if ((settings.m_volume != m_settings.m_volume) || force) {
-        reverseAPIKeys.append("volume");
-    }
-    if ((settings.m_audioMute != m_settings.m_audioMute) || force) {
-        reverseAPIKeys.append("audioMute");
-    }
-    if ((settings.m_audioStereo != m_settings.m_audioStereo) || force) {
-        reverseAPIKeys.append("audioStereo");
-    }
-    if ((settings.m_lsbStereo != m_settings.m_lsbStereo) || force) {
-        reverseAPIKeys.append("lsbStereo");
-    }
-    if ((settings.m_showPilot != m_settings.m_showPilot) || force) {
-        reverseAPIKeys.append("showPilot");
-    }
-    if ((settings.m_rdsActive != m_settings.m_rdsActive) || force) {
-        reverseAPIKeys.append("rdsActive");
-    }
-    if ((settings.m_afBandwidth != m_settings.m_afBandwidth) || force) {
-        reverseAPIKeys.append("afBandwidth");
-    }
-    if ((settings.m_rfBandwidth != m_settings.m_rfBandwidth) || force) {
-        reverseAPIKeys.append("rfBandwidth");
-    }
-    if ((settings.m_deEmphasis != m_settings.m_deEmphasis) || force) {
-        reverseAPIKeys.append("deEmphasis");
-    }
-    if ((settings.m_squelch != m_settings.m_squelch) || force) {
-        reverseAPIKeys.append("squelch");
-    }
-    if ((settings.m_audioDeviceName != m_settings.m_audioDeviceName) || force) {
-        reverseAPIKeys.append("audioDeviceName");
-    }
-
-    if (m_settings.m_streamIndex != settings.m_streamIndex)
+    if (settingsKeys.contains("streamIndex") && (settings.m_streamIndex != m_settings.m_streamIndex))
     {
         if (m_deviceAPI->getSampleMIMO()) // change of stream is possible for MIMO devices only
         {
@@ -279,34 +226,36 @@ void BFMDemod::applySettings(const BFMDemodSettings& settings, bool force)
             m_settings.m_streamIndex = settings.m_streamIndex; // make sure ChannelAPI::getStreamIndex() is consistent
             emit streamIndexChanged(settings.m_streamIndex);
         }
-
-        reverseAPIKeys.append("streamIndex");
     }
 
     if (m_running)
     {
-        BFMDemodBaseband::MsgConfigureBFMDemodBaseband *msg = BFMDemodBaseband::MsgConfigureBFMDemodBaseband::create(settings, force);
+        BFMDemodBaseband::MsgConfigureBFMDemodBaseband *msg = BFMDemodBaseband::MsgConfigureBFMDemodBaseband::create(settingsKeys, settings, force);
         m_basebandSink->getInputMessageQueue()->push(msg);
     }
 
     if (settings.m_useReverseAPI)
     {
-        bool fullUpdate = ((m_settings.m_useReverseAPI != settings.m_useReverseAPI) && settings.m_useReverseAPI) ||
-                (m_settings.m_reverseAPIAddress != settings.m_reverseAPIAddress) ||
-                (m_settings.m_reverseAPIPort != settings.m_reverseAPIPort) ||
-                (m_settings.m_reverseAPIDeviceIndex != settings.m_reverseAPIDeviceIndex) ||
-                (m_settings.m_reverseAPIChannelIndex != settings.m_reverseAPIChannelIndex);
-        webapiReverseSendSettings(reverseAPIKeys, settings, fullUpdate || force);
+        bool fullUpdate = ((settingsKeys.contains("useReverseAPI") && (m_settings.m_useReverseAPI != settings.m_useReverseAPI)) && settings.m_useReverseAPI) ||
+                (settingsKeys.contains("reverseAPIAddress") && (m_settings.m_reverseAPIAddress != settings.m_reverseAPIAddress)) ||
+                (settingsKeys.contains("reverseAPIPort") && (m_settings.m_reverseAPIPort != settings.m_reverseAPIPort)) ||
+                (settingsKeys.contains("reverseAPIDeviceIndex") && (m_settings.m_reverseAPIDeviceIndex != settings.m_reverseAPIDeviceIndex)) ||
+                (settingsKeys.contains("reverseAPIChannelIndex") && (m_settings.m_reverseAPIChannelIndex != settings.m_reverseAPIChannelIndex));
+        webapiReverseSendSettings(settingsKeys, settings, fullUpdate || force);
     }
 
     QList<ObjectPipe*> pipes;
     MainCore::instance()->getMessagePipes().getMessagePipes(this, "settings", pipes);
 
     if (pipes.size() > 0) {
-        sendChannelSettings(pipes, reverseAPIKeys, settings, force);
+        sendChannelSettings(pipes, settingsKeys, settings, force);
     }
 
-    m_settings = settings;
+    if (force) {
+        m_settings = settings;
+    } else {
+        m_settings.applySettings(settingsKeys, settings);
+    }
 }
 
 QByteArray BFMDemod::serialize() const
@@ -318,14 +267,14 @@ bool BFMDemod::deserialize(const QByteArray& data)
 {
     if (m_settings.deserialize(data))
     {
-        MsgConfigureBFMDemod *msg = MsgConfigureBFMDemod::create(m_settings, true);
+        MsgConfigureBFMDemod *msg = MsgConfigureBFMDemod::create(QStringList(), m_settings, true);
         m_inputMessageQueue.push(msg);
         return true;
     }
     else
     {
         m_settings.resetToDefaults();
-        MsgConfigureBFMDemod *msg = MsgConfigureBFMDemod::create(m_settings, true);
+        MsgConfigureBFMDemod *msg = MsgConfigureBFMDemod::create(QStringList(), m_settings, true);
         m_inputMessageQueue.push(msg);
         return false;
     }
@@ -361,13 +310,13 @@ int BFMDemod::webapiSettingsPutPatch(
     BFMDemodSettings settings = m_settings;
     webapiUpdateChannelSettings(settings, channelSettingsKeys, response);
 
-    MsgConfigureBFMDemod *msg = MsgConfigureBFMDemod::create(settings, force);
+    MsgConfigureBFMDemod *msg = MsgConfigureBFMDemod::create(channelSettingsKeys, settings, force);
     m_inputMessageQueue.push(msg);
 
     qDebug("BFMDemod::webapiSettingsPutPatch: forward to GUI: %p", m_guiMessageQueue);
     if (m_guiMessageQueue) // forward to GUI if any
     {
-        MsgConfigureBFMDemod *msgToGUI = MsgConfigureBFMDemod::create(settings, force);
+        MsgConfigureBFMDemod *msgToGUI = MsgConfigureBFMDemod::create(channelSettingsKeys, settings, force);
         m_guiMessageQueue->push(msgToGUI);
     }
 
@@ -609,7 +558,7 @@ void BFMDemod::webapiFormatRDSReport(SWGSDRangel::SWGRDSReport *report)
     }
 }
 
-void BFMDemod::webapiReverseSendSettings(QList<QString>& channelSettingsKeys, const BFMDemodSettings& settings, bool force)
+void BFMDemod::webapiReverseSendSettings(const QStringList& channelSettingsKeys, const BFMDemodSettings& settings, bool force)
 {
     SWGSDRangel::SWGChannelSettings *swgChannelSettings = new SWGSDRangel::SWGChannelSettings();
     webapiFormatChannelSettings(channelSettingsKeys, swgChannelSettings, settings, force);
@@ -636,7 +585,7 @@ void BFMDemod::webapiReverseSendSettings(QList<QString>& channelSettingsKeys, co
 
 void BFMDemod::sendChannelSettings(
     const QList<ObjectPipe*>& pipes,
-    QList<QString>& channelSettingsKeys,
+    const QStringList& channelSettingsKeys,
     const BFMDemodSettings& settings,
     bool force)
 {
@@ -660,7 +609,7 @@ void BFMDemod::sendChannelSettings(
 }
 
 void BFMDemod::webapiFormatChannelSettings(
-        QList<QString>& channelSettingsKeys,
+        const QStringList& channelSettingsKeys,
         SWGSDRangel::SWGChannelSettings *swgChannelSettings,
         const BFMDemodSettings& settings,
         bool force

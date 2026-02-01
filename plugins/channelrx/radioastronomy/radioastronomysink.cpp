@@ -42,7 +42,7 @@ RadioAstronomySink::RadioAstronomySink(RadioAstronomy *aisDemod) :
 {
     m_magsq = 0.0;
 
-    applySettings(m_settings, true);
+    applySettings(QStringList(), m_settings, true);
     applyChannelSettings(m_channelSampleRate, m_channelFrequencyOffset, true);
 }
 
@@ -241,18 +241,12 @@ void RadioAstronomySink::applyChannelSettings(int channelSampleRate, int channel
     m_channelFrequencyOffset = channelFrequencyOffset;
 }
 
-void RadioAstronomySink::applySettings(const RadioAstronomySettings& settings, bool force)
+void RadioAstronomySink::applySettings(const QStringList& settingsKeys, const RadioAstronomySettings& settings, bool force)
 {
-    qDebug() << "RadioAstronomySink::applySettings:"
-            << " m_sampleRate: " << settings.m_sampleRate
-            << " m_rfBandwidth: " << settings.m_rfBandwidth
-            << " m_fftSize: " << settings.m_fftSize
-            << " m_fftWindow: " << settings.m_fftWindow
-            << " m_filterFreqs: " << settings.m_filterFreqs
-            << " force: " << force;
+    qDebug() << "RadioAstronomySink::applySettings:" << settings.getDebugString(settingsKeys, force);
 
-    if ((settings.m_rfBandwidth != m_settings.m_rfBandwidth)
-        || (settings.m_sampleRate != m_settings.m_sampleRate)
+    if ((settingsKeys.contains("rfBandwidth") && (settings.m_rfBandwidth != m_settings.m_rfBandwidth))
+        || (settingsKeys.contains("sampleRate") && (settings.m_sampleRate != m_settings.m_sampleRate))
         || force)
     {
         m_interpolator.create(16, m_channelSampleRate, settings.m_rfBandwidth / 2.0f); // 2.0 rather than 2.2 as in other plugins, to reduce rolloff at edge of band
@@ -260,7 +254,7 @@ void RadioAstronomySink::applySettings(const RadioAstronomySettings& settings, b
         m_interpolatorDistanceRemain = m_interpolatorDistance;
     }
 
-    if ((settings.m_fftSize != m_settings.m_fftSize) || force)
+    if ((settingsKeys.contains("fftSize") && (settings.m_fftSize != m_settings.m_fftSize)) || force)
     {
         FFTFactory *fftFactory = DSPEngine::instance()->getFFTFactory();
         if (m_fftSequence >= 0) {
@@ -275,8 +269,8 @@ void RadioAstronomySink::applySettings(const RadioAstronomySettings& settings, b
         m_fftSumCount = 0;
    }
 
-    if ((settings.m_fftSize != m_settings.m_fftSize)
-        || (settings.m_fftWindow != m_settings.m_fftWindow)
+    if ((settingsKeys.contains("fftSize") && (settings.m_fftSize != m_settings.m_fftSize))
+        || (settingsKeys.contains("fftWindow") && (settings.m_fftWindow != m_settings.m_fftWindow))
         || force)
     {
         if (settings.m_fftWindow == RadioAstronomySettings::HAN) {
@@ -286,7 +280,7 @@ void RadioAstronomySink::applySettings(const RadioAstronomySettings& settings, b
         }
     }
 
-    if ((settings.m_filterFreqs != m_settings.m_filterFreqs) || force)
+    if ((settingsKeys.contains("filterFreqs") && (settings.m_filterFreqs != m_settings.m_filterFreqs)) || force)
     {
         m_filterBins.clear();
         QStringList filterFreqs = settings.m_filterFreqs.split(" ");
@@ -300,5 +294,9 @@ void RadioAstronomySink::applySettings(const RadioAstronomySettings& settings, b
         }
     }
 
-    m_settings = settings;
+    if (force) {
+        m_settings = settings;
+    } else {
+        m_settings.applySettings(settingsKeys, settings);
+    }
 }

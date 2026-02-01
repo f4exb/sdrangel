@@ -52,7 +52,7 @@ void RadioClockGUI::resetToDefaults()
 {
     m_settings.resetToDefaults();
     displaySettings();
-    applySettings(true);
+    applySettings(QStringList(), true);
 }
 
 QByteArray RadioClockGUI::serialize() const
@@ -64,7 +64,7 @@ bool RadioClockGUI::deserialize(const QByteArray& data)
 {
     if(m_settings.deserialize(data)) {
         displaySettings();
-        applySettings(true);
+        applySettings(QStringList(), true);
         return true;
     } else {
         resetToDefaults();
@@ -155,7 +155,7 @@ void RadioClockGUI::calcOffset()
         m_channelMarker.setCenterFrequency(offset);
         m_settings.m_inputFrequencyOffset = m_channelMarker.getCenterFrequency();
         updateAbsoluteCenterFrequency();
-        applySettings();
+        applySettings(QStringList("inputFrequencyOffset"));
     }
 }
 
@@ -190,7 +190,7 @@ void RadioClockGUI::channelMarkerChangedByCursor()
     ui->deltaFrequency->blockSignals(false);
 
     updateAbsoluteCenterFrequency();
-    applySettings();
+    applySettings(QStringList({"inputFrequencyOffset", "frequency"}));
 }
 
 void RadioClockGUI::channelMarkerHighlightedByCursor()
@@ -219,7 +219,7 @@ void RadioClockGUI::on_frequencyMode_currentIndexChanged(int index)
     ui->deltaFrequency->blockSignals(false);
 
     updateAbsoluteCenterFrequency();
-    applySettings();
+    applySettings(QStringList({"frequencyMode"}));
 }
 
 void RadioClockGUI::on_deltaFrequency_changed(qint64 value)
@@ -240,7 +240,7 @@ void RadioClockGUI::on_deltaFrequency_changed(qint64 value)
     m_channelMarker.setCenterFrequency(offset);
     m_settings.m_inputFrequencyOffset = m_channelMarker.getCenterFrequency();
     updateAbsoluteCenterFrequency();
-    applySettings();
+    applySettings(QStringList({"inputFrequencyOffset"}));
 }
 
 void RadioClockGUI::on_rfBW_valueChanged(int value)
@@ -248,27 +248,27 @@ void RadioClockGUI::on_rfBW_valueChanged(int value)
     ui->rfBWText->setText(QString("%1 Hz").arg(value));
     m_channelMarker.setBandwidth(value);
     m_settings.m_rfBandwidth = value;
-    applySettings();
+    applySettings(QStringList({"rfBandwidth"}));
 }
 
 void RadioClockGUI::on_threshold_valueChanged(int value)
 {
     ui->thresholdText->setText(QString("%1 dB").arg(value));
     m_settings.m_threshold = value;
-    applySettings();
+    applySettings(QStringList({"threshold"}));
 }
 
 void RadioClockGUI::on_modulation_currentIndexChanged(int index)
 {
     m_settings.m_modulation = (RadioClockSettings::Modulation)index;
-    applySettings();
+    applySettings(QStringList({"modulation"}));
 }
 
 void RadioClockGUI::on_timezone_currentIndexChanged(int index)
 {
     m_settings.m_timezone = (RadioClockSettings::DisplayTZ)index;
     displayDateTime();
-    applySettings();
+    applySettings(QStringList({"timezone"}));
 }
 
 void RadioClockGUI::onWidgetRolled(QWidget* widget, bool rollDown)
@@ -277,7 +277,7 @@ void RadioClockGUI::onWidgetRolled(QWidget* widget, bool rollDown)
     (void) rollDown;
 
     getRollupContents()->saveState(m_rollupState);
-    applySettings();
+    applySettings(QStringList());
 }
 
 void RadioClockGUI::onMenuDialogCalled(const QPoint &p)
@@ -322,7 +322,8 @@ void RadioClockGUI::onMenuDialogCalled(const QPoint &p)
             updateIndexLabel();
         }
 
-        applySettings();
+        applySettings(QStringList({"rgbColor", "title", "useReverseAPI", "reverseAPIAddress",
+            "reverseAPIPort", "reverseAPIDeviceIndex", "reverseAPIChannelIndex", "streamIndex"}));
     }
 
     resetContextMenuType();
@@ -390,7 +391,7 @@ RadioClockGUI::RadioClockGUI(PluginAPI* pluginAPI, DeviceUISet *deviceUISet, Bas
 
     displaySettings();
     makeUIConnections();
-    applySettings(true);
+    applySettings(QStringList(), true);
     DialPopup::addPopupsToChildDials(this);
     m_resizer.enableChildMouseTracking();
 }
@@ -405,11 +406,11 @@ void RadioClockGUI::blockApplySettings(bool block)
     m_doApplySettings = !block;
 }
 
-void RadioClockGUI::applySettings(bool force)
+void RadioClockGUI::applySettings(const QStringList& settingsKeys, bool force)
 {
     if (m_doApplySettings)
     {
-        RadioClock::MsgConfigureRadioClock* message = RadioClock::MsgConfigureRadioClock::create( m_settings, force);
+        RadioClock::MsgConfigureRadioClock* message = RadioClock::MsgConfigureRadioClock::create(settingsKeys, m_settings, force);
         m_radioClock->getInputMessageQueue()->push(message);
     }
 }

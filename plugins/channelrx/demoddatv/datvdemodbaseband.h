@@ -41,20 +41,23 @@ public:
 
     public:
         const DATVDemodSettings& getSettings() const { return m_settings; }
+        const QStringList& getSettingsKeys() const { return m_settingsKeys; }
         bool getForce() const { return m_force; }
 
-        static MsgConfigureDATVDemodBaseband* create(const DATVDemodSettings& settings, bool force)
+        static MsgConfigureDATVDemodBaseband* create(const QStringList& settingsKeys, const DATVDemodSettings& settings, bool force)
         {
-            return new MsgConfigureDATVDemodBaseband(settings, force);
+            return new MsgConfigureDATVDemodBaseband(settingsKeys, settings, force);
         }
 
     private:
         DATVDemodSettings m_settings;
+        QStringList m_settingsKeys;
         bool m_force;
 
-        MsgConfigureDATVDemodBaseband(const DATVDemodSettings& settings, bool force) :
+        MsgConfigureDATVDemodBaseband(const QStringList& settingsKeys, const DATVDemodSettings& settings, bool force) :
             Message(),
             m_settings(settings),
+            m_settingsKeys(settingsKeys),
             m_force(force)
         { }
     };
@@ -106,7 +109,7 @@ private:
     QRecursiveMutex m_mutex;
 
     bool handleMessage(const Message& cmd);
-    void applySettings(const DATVDemodSettings& settings, bool force = false);
+    void applySettings(const QStringList& settingsKeys, const DATVDemodSettings& settings, bool force = false);
 
 private slots:
     void handleInputMessages();
