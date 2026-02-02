@@ -33,7 +33,7 @@
 const PluginDescriptor MetisMISOPlugin::m_pluginDescriptor = {
     QStringLiteral("MetisMISO"),
 	QStringLiteral("Metis MISO"),
-    QStringLiteral("7.22.7"),
+    QStringLiteral("7.23.1"),
 	QStringLiteral("(c) Edouard Griffiths, F4EXB"),
 	QStringLiteral("https://github.com/f4exb/sdrangel"),
 	true,

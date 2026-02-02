@@ -33,7 +33,7 @@
 const PluginDescriptor AISDemodPlugin::m_pluginDescriptor = {
     AISDemod::m_channelId,
     QStringLiteral("AIS Demodulator"),
-    QStringLiteral("7.22.10"),
+    QStringLiteral("7.23.1"),
     QStringLiteral("(c) Jon Beniston, M7RCE"),
     QStringLiteral("https://github.com/f4exb/sdrangel"),
     true,
