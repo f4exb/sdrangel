@@ -15,6 +15,7 @@ finish-args:
   - --socket=pulseaudio
   - --socket=x11
   - --filesystem=xdg-documents
+  - --system-talk-name=org.freedesktop.GeoClue2
 cleanup-commands:
   - /app/cleanup-BaseApp.sh
   - mkdir -p ${FLATPAK_DEST}/lib/ffmpeg
@@ -53,8 +54,8 @@ modules:
       - --disable-static
     sources:
       - type: archive
-        url: https://github.com/libusb/libusb/releases/download/v1.0.27/libusb-1.0.27.tar.bz2
-        sha256: ffaa41d741a8a3bee244ac8e54a72ea05bf2879663c098c82fc5757853441575
+        url: https://github.com/libusb/libusb/releases/download/v1.0.29/libusb-1.0.29.tar.bz2
+        sha256: 5977fc950f8d1395ccea9bd48c06b3f808fd3c2c961b44b0c2e6e29fc3a70a85
     post-install:
       - install -Dm644 COPYING ${FLATPAK_DEST}/share/licenses/libusb/COPYING
 
@@ -63,15 +64,16 @@ modules:
       - --without-python
     sources:
       - type: archive
-        url: https://download.gnome.org/sources/libxml2/2.10/libxml2-2.10.4.tar.xz
-        sha256: ed0c91c5845008f1936739e4eee2035531c1c94742c6541f44ee66d885948d45
+        url: https://download.gnome.org/sources/libxml2/2.15/libxml2-2.15.1.tar.xz
+        sha256: c008bac08fd5c7b4a87f7b8a71f283fa581d80d80ff8d2efd3b26224c39bc54c
 
   - name: boost
     buildsystem: simple
     sources:
       - type: archive
-        url: https://sourceforge.net/projects/boost/files/boost/1.83.0/boost_1_83_0.tar.bz2
-        sha256: 6478edfe2f3305127cffe8caf73ea0176c53769f4bf1585be237eb30798c3b8e
+        # 1.88.0 brings breaking changes for uhd
+        url: https://sourceforge.net/projects/boost/files/boost/1.87.0/boost_1_87_0.tar.bz2
+        sha256: af57be25cb4c4f4b413ed692fe378affb4352ea50fbe294a11ef548f4d527d89
     build-commands:
       - ./bootstrap.sh --prefix=/app
       - ./b2 -j $FLATPAK_BUILDER_N_JOBS
@@ -104,8 +106,8 @@ modules:
       - --disable-fontset
     sources:
       - type: archive
-        url: https://github.com/vim/vim/archive/refs/tags/v9.0.2059.tar.gz
-        sha256: 5b20c2fed3844ffbd2bef51d2e6de8e5c07f9c3cfb84e2679a729b69f178f8d6
+        url: https://github.com/vim/vim/archive/refs/tags/v9.1.2045.tar.gz
+        sha256: af5bb47954653eec32239ba41505c4fe1067b71fd7e52d8012c5daa52f4caa2c
 
   - name: python-cheetah
     buildsystem: simple
@@ -120,8 +122,8 @@ modules:
     buildsystem: simple
     sources:
       - type: archive
-        url: https://files.pythonhosted.org/packages/fa/0b/29bc5a230948bf209d3ed3165006d257e547c02c3c2a96f6286320dfe8dc/mako-1.3.6.tar.gz
-        sha256: 9ec3a1583713479fae654f83ed9fa8c9a4c16b7bb0daba0e6bbebff50c0d983d
+        url: https://files.pythonhosted.org/packages/9e/38/bd5b78a920a64d708fe6bc8e0a2c075e1389d53bef8413725c63ba041535/mako-1.3.10.tar.gz
+        sha256: 99579a6f39583fa7e5630a28c3c1f440e4e97a414b80372649c0ce338da2ea28
     build-commands:
       - python setup.py install --prefix=/app --root=/
 
@@ -129,8 +131,8 @@ modules:
     buildsystem: simple
     sources:
       - type: archive
-        url: https://files.pythonhosted.org/packages/d5/ae/09427bea9227a33ec834ed5461432752fd5d02b14f93dd68406c91684622/flit_core-3.10.1.tar.gz
-        sha256: 66e5b87874a0d6e39691f0e22f09306736b633548670ad3c09ec9db03c5662f7
+        url: https://files.pythonhosted.org/packages/69/59/b6fc2188dfc7ea4f936cd12b49d707f66a1cb7a1d2c16172963534db741b/flit_core-3.12.0.tar.gz
+        sha256: 18f63100d6f94385c6ed57a72073443e1a71a4acb4339491615d0f16d6ff01b2
     build-commands:
       - pip3 install --no-index --find-links=file://${PWD} --prefix=${FLATPAK_DEST}
         --no-build-isolation .
@@ -139,8 +141,8 @@ modules:
     buildsystem: simple
     sources:
       - type: archive
-        url: https://files.pythonhosted.org/packages/c0/79/406a9f56c435caaaca4a1c66397e4f63ecd48a72a6c4fc1d9ecdaac66acb/pyproject_metadata-0.9.0.tar.gz
-        sha256: 8511c00a4cad96686af6a6b4143433298beb96105a9379afdc9b0328f4f260c9
+        url: https://files.pythonhosted.org/packages/75/bd/74706b3671c443944f487a42a0148a507b733c60600df1d34cde41e6d10b/pyproject_metadata-0.10.0.tar.gz
+        sha256: 7f5bd0ef398b60169556cb17ea261d715caf7f8561238151f51b2305084ba8d4
     build-commands:
       - pip3 install --no-index --find-links=file://${PWD} --prefix=${FLATPAK_DEST}
         --no-build-isolation .
@@ -149,8 +151,8 @@ modules:
     buildsystem: simple
     sources:
       - type: archive
-        url: https://files.pythonhosted.org/packages/67/66/91d242ea8dd1729addd36069318ba2cd03874872764f316c3bb51b633ed2/meson_python-0.17.1.tar.gz
-        sha256: efb91f69f2e19eef7bc9a471ed2a4e730088cc6b39eacaf3e49fc4f930eb5f83
+        url: https://files.pythonhosted.org/packages/26/bd/fdb26366443620f1a8a4d4ec7bfa37d1fbbe7bf737b257c205bbcf95ba95/meson_python-0.18.0.tar.gz
+        sha256: c56a99ec9df669a40662fe46960321af6e4b14106c14db228709c1628e23848d
     build-commands:
       - pip3 install --no-index --find-links=file://${PWD} --prefix=${FLATPAK_DEST}
         --no-build-isolation .
@@ -159,8 +161,8 @@ modules:
     buildsystem: simple
     sources:
       - type: archive
-        url: https://files.pythonhosted.org/packages/25/ca/1166b75c21abd1da445b97bf1fa2f14f423c6cfb4fc7c4ef31dccf9f6a94/numpy-2.1.3.tar.gz
-        sha256: aa08e04e08aaf974d4458def539dece0d28146d866a39da5639596f4921fd761
+        url: https://files.pythonhosted.org/packages/a4/7a/6a3d14e205d292b738db449d0de649b373a59edb0d0b4493821d0a3e8718/numpy-2.4.0.tar.gz
+        sha256: 6e504f7b16118198f138ef31ba24d985b124c2c469fe8467007cf30fd992f934
     build-commands:
       - pip3 install --no-index --find-links=file://${PWD} --prefix=${FLATPAK_DEST}
         --no-build-isolation .
@@ -172,8 +174,8 @@ modules:
       cxxflags: -std=c++14
     sources:
       - type: archive
-        url: https://github.com/opencv/opencv/archive/refs/tags/4.8.1.tar.gz
-        sha256: 62f650467a60a38794d681ae7e66e3e8cfba38f445e0bf87867e2f2cdc8be9d5
+        url: https://github.com/opencv/opencv/archive/refs/tags/4.13.0.tar.gz
+        sha256: 1d40ca017ea51c533cf9fd5cbde5b5fe7ae248291ddf2af99d4c17cf8e13017d
 
   - name: libpostproc
     config-opts:
@@ -189,10 +191,8 @@ modules:
       - --enable-postproc
     sources:
       - type: archive
-        url: https://ffmpeg.org/releases/ffmpeg-6.0.tar.xz
-        sha256: 57be87c22d9b49c112b6d24bc67d42508660e6b718b3db89c44e47e289137082
-      - type: patch
-        path: ffmpeg-fix-assembling.patch
+        url: https://ffmpeg.org/releases/ffmpeg-7.1.tar.xz
+        sha256: 40973d44970dbc83ef302b0609f2e74982be2d85916dd2ee7472d30678a7abe6
 
   - name: libaio
     no-autogen: true
@@ -210,7 +210,7 @@ modules:
     sources:
       - type: git
         url: https://github.com/f4exb/cm256cc.git
-        commit: 6f4a51802f5f302577d6d270a9fc0cb7a1ee28ef
+        commit: da87adbe3e583877870cb159d37e0456549b2c29
 
   - name: mbelib
     buildsystem: cmake-ninja
@@ -227,8 +227,8 @@ modules:
       - -Wno-dev
     sources:
       - type: archive
-        url: https://github.com/f4exb/serialDV/archive/refs/tags/v1.1.4.tar.gz
-        sha256: 0764701ac7b52ab4e7db26d91b0c0d5206377574a8ce4d705c9ec99b8f85ef79
+        url: https://github.com/f4exb/serialDV/archive/refs/tags/v1.1.5.tar.gz
+        sha256: 9ff90d85ff613e81659a2d661515e01d3c1f3ad1cade58908838b97fdd7ab5d2
 
   - name: dsdcc
     buildsystem: cmake-ninja
@@ -237,8 +237,8 @@ modules:
       - -DUSE_MBELIB=ON
     sources:
       - type: archive
-        url: https://github.com/f4exb/dsdcc/archive/refs/tags/v1.9.4.tar.gz
-        sha256: 23b96630c5d2d3d2f8dabfd6e36aea34b670a286c835790af811f209cf408960
+        url: https://github.com/f4exb/dsdcc/archive/refs/tags/v1.9.6.tar.gz
+        sha256: 43505fe537b12492860a44d0373b6b2a7edacbaec058160b5007c341af1b40d9
 
   - name: codec2
     buildsystem: cmake-ninja
@@ -264,22 +264,23 @@ modules:
       - -Wno-dev
     sources:
       - type: git
-        url: https://github.com/JvanKatwijk/dab-cmdline.git
-        commit: a09145a128fc2824ca5a04b2a5897b820328183f
+        url: https://github.com/srcejon/dab-cmdline.git
+        # branch: msvc
+        commit: 4c7ab58857a1de71f585728ffcbc4916db9b56c7
 
   - name: hidapi
     buildsystem: cmake-ninja
     sources:
       - type: archive
-        url: https://github.com/libusb/hidapi/archive/refs/tags/hidapi-0.14.0.tar.gz
-        sha256: a5714234abe6e1f53647dd8cba7d69f65f71c558b7896ed218864ffcf405bcbd
+        url: https://github.com/libusb/hidapi/archive/refs/tags/hidapi-0.15.0.tar.gz
+        sha256: 5d84dec684c27b97b921d2f3b73218cb773cf4ea915caee317ac8fc73cef8136
 
   - name: graphviz
     buildsystem: cmake-ninja
     sources:
       - type: archive
-        url: https://gitlab.com/graphviz/graphviz/-/archive/12.0.0/graphviz-12.0.0.tar.gz
-        sha256: ea12b4f73e7c7eb9fb9c1c29f7763491306c322f6f2332a352d09debc37f0ed7
+        url: https://gitlab.com/graphviz/graphviz/-/archive/14.1.1/graphviz-14.1.1.tar.gz
+        sha256: 8a212d58ada30df56511d6a581f3e4417e82802d6560e5720c19195bc593e1cc
 
   - name: libsigmf
     buildsystem: cmake-ninja
@@ -301,7 +302,7 @@ modules:
     sources:
       - type: git
         url: https://github.com/dnwrnr/sgp4.git
-        commit: 6a448b4850e5fbf8c1ca03bb5f6013a9fdc1fd91
+        commit: d176906dbfaf8361eee1f83bd1dc1bacc6582798
 
   - name: aptdec
     buildsystem: cmake-ninja
@@ -309,14 +310,14 @@ modules:
       - type: git
         url: https://github.com/srcejon/aptdec.git
         # branch: libaptdec
-        commit: 3e8297a912f89a3c42af0845b83a209a6cd13c55
+        commit: d037f77cfaff946318e39293ae97fc2e68595f0f
 
   - name: ggmorse
     buildsystem: cmake-ninja
     sources:
       - type: git
         url: https://github.com/f4exb/ggmorse.git
-        commit: 75c335f343aa15514c6437c5c19c7ea54ea3ce7e
+        commit: 3662036c7ee37223f29d59a653a571d2c399eea0
 
   - name: hamlib
     sources:
@@ -336,8 +337,8 @@ modules:
   - name: airspyhf
     buildsystem: cmake-ninja
     config-opts:
-      - -Wno-dev
       - -DINSTALL_UDEV_RULES=OFF
+      - -Wno-dev
     sources:
       - type: archive
         url: https://github.com/airspy/airspyhf/archive/refs/tags/1.6.8.tar.gz
@@ -346,61 +347,60 @@ modules:
   - name: bladerf
     buildsystem: cmake-ninja
     build-options:
-      cflags: "-Wno-calloc-transposed-args"
+      cflags: -Wno-calloc-transposed-args
     sources:
       - type: git
         url: https://github.com/Nuand/bladeRF.git
-        tag: '2023.02'
-        commit: 41ef63460956e833c9b321252245257ab3946055
+        tag: '2025.10'
+        commit: fcf9423325ae49f5fdd2e5b52ab68bfc2576ad47
 
   - name: rtlsdr
     buildsystem: cmake-ninja
     config-opts:
-      - -Wno-dev
       - -DDETACH_KERNEL_DRIVER=ON
+      - -Wno-dev
     sources:
       - type: git
         url: https://github.com/steve-m/librtlsdr.git
-        commit: 619ac3186ea0ffc092615e1f59f7397e5e6f668c
+        # latest master for 2.0.2 versioning fix
+        commit: ae0dd6d4f09088d13500a854091b45ad281ca4f0
 
   - name: plutosdr
     buildsystem: cmake-ninja
     config-opts:
-      - -Wno-dev
       - -DINSTALL_UDEV_RULE=OFF
       - -DHAVE_DNS_SD=OFF
+      - -Wno-dev
     sources:
       - type: archive
-        url: https://github.com/analogdevicesinc/libiio/archive/refs/tags/v0.24.tar.gz
-        sha256: a2b5d848531ea64fd9f95327dfd5a588bd227d9577281ec375e822702c6a52d5
+        url: https://github.com/analogdevicesinc/libiio/archive/refs/tags/v0.26.tar.gz
+        sha256: fb445fb860ef1248759f45d4273a4eff360534480ec87af64c6b8db3b99be7e5
 
   - name: hackrf
     buildsystem: cmake-ninja
     subdir: host
     config-opts:
-      - -Wno-dev
       - -DINSTALL_UDEV_RULE=OFF
+      - -Wno-dev
     sources:
       - type: archive
-        url: https://github.com/greatscottgadgets/hackrf/archive/refs/tags/v2023.01.1.tar.gz
-        sha256: fd10cd3650900aef7546e7a40a2d475db9dd1eab86b5d6f0c1188c91bedadd31
+        url: https://github.com/greatscottgadgets/hackrf/archive/refs/tags/v2026.01.3.tar.gz
+        sha256: 48238f3a21189fa8cbe67838584cc045b9e5433767db8c9c30c1da02a1489f2c
 
   - name: limesdr
     buildsystem: cmake-ninja
     config-opts:
-      - -Wno-dev
       - -DENABLE_QUICKTEST=OFF
       - -DENABLE_GUI=OFF
       - -DENABLE_SOAPY_LMS7=OFF
       - -DENABLE_EXAMPLES=OFF
       - -DENABLE_UTILITIES=OFF
       - -DENABLE_HEADERS=ON
+      - -Wno-dev
     sources:
       - type: archive
-        url: https://github.com/myriadrf/LimeSuite/archive/refs/tags/v22.09.0.tar.gz
-        sha256: 521e45298e1ffd0fd65006598e1edf37bd92a13667afaab262582fc681f1cf16
-      - type: patch
-        path: limesdr-fix-gcc-13-build.patch
+        url: https://github.com/myriadrf/LimeSuite/archive/refs/tags/v23.11.0.tar.gz
+        sha256: fd8a448b92bc5ee4012f0ba58785f3c7e0a4d342b24e26275318802dfe00eb33
 
   - name: perseus
     buildsystem: cmake-ninja
@@ -415,8 +415,8 @@ modules:
     buildsystem: cmake-ninja
     subdir: sources
     config-opts:
-      - -Wno-dev
       - -DENABLE_SOAPY=NO
+      - -Wno-dev
     sources:
       - type: git
         url: https://github.com/xtrx-sdr/images.git
@@ -426,17 +426,28 @@ modules:
     buildsystem: cmake-ninja
     subdir: host
     config-opts:
-      - -Wno-dev
       - -DENABLE_PYTHON_API=OFF
       - -DINSTALL_UDEV_RULES=OFF
+      - -Wno-dev
     sources:
       - type: archive
-        url: https://github.com/EttusResearch/uhd/archive/refs/tags/v4.5.0.0.tar.gz
-        sha256: ca8217b1f0591fb99432a94f225e74fb4d0fe541d496ec1386221b6438d4875d
+        # 4.9.0.0 has possible breaking API changes
+        url: https://github.com/EttusResearch/uhd/archive/refs/tags/v4.8.0.0.tar.gz
+        sha256: a2159491949477dca67f5a9b05f5a80d8c2b32e91b95dd7fac8ddd3893e36d09
       - type: patch
         paths:
           - uhd-disable-ascii-art-dft.patch
           - uhd-disable-latency-utils.patch
+
+  - name: uhd_images
+    buildsystem: simple
+    sources:
+      - type: archive
+        url: https://github.com/EttusResearch/uhd/releases/download/v4.8.0.0/uhd-images_4.8.0.0.tar.xz
+        sha256: 602ee2b9806d5d9ae40a9b068e55ba084e6becea51fdbd956d1f0229d553bf44
+    build-commands:
+      - install -Dm644 LICENSE -t ${FLATPAK_DEST}/share/uhd/images
+      - for f in usrp_b2*; do install -m644 $f -t ${FLATPAK_DEST}/share/uhd/images; done
 
   - name: libmirisdr
     buildsystem: cmake-ninja
@@ -461,27 +472,47 @@ modules:
     config-opts:
       - -Wno-dev
     sources:
-      - type: archive
-        url: https://github.com/pothosware/SoapyRemote/archive/refs/tags/soapy-remote-0.5.2.tar.gz
-        sha256: 66a372d85c984e7279b4fdc0a7f5b0d7ba340e390bc4b8bd626a6523cd3c3c76
+      - type: git
+        url: https://github.com/pothosware/SoapyRemote.git
+        # latest master for multiple fixes
+        commit: 40c3ef9053b63885b7444ce7e9ef00d2c7964c9d
 
   - name: soapy_uhd
     buildsystem: cmake-ninja
     config-opts:
       - -Wno-dev
     sources:
-      - type: archive
-        url: https://github.com/pothosware/SoapyUHD/archive/refs/tags/soapy-uhd-0.4.1.tar.gz
-        sha256: 9779cce2e732cd41905b6cf8ea85edbbf51b1ac918e6180bd4891eebb4c8d085
+      - type: git
+        url: https://github.com/pothosware/SoapyUHD.git
+        # latest master for multiple fixes
+        commit: 2a5d381f68fd05d5b3c0e7db56c36892ea99b4ae
 
   - name: soapy_redpitaya
     buildsystem: cmake-ninja
     config-opts:
       - -Wno-dev
     sources:
-      - type: archive
-        url: https://github.com/pothosware/SoapyRedPitaya/archive/refs/tags/soapy-redpitaya-0.1.1.tar.gz
-        sha256: 71306b1bdc4bd53b059e374797e4ad86672221d5f8534bda60f2dc726005be50
+      - type: git
+        url: https://github.com/pothosware/SoapyRedPitaya.git
+        # latest master for multiple fixes
+        commit: 0702140487231658d200d488dfde7db3e41a5538
+
+  - name: inmarsatc
+    buildsystem: cmake-ninja
+    sources:
+      - type: git
+        url: https://github.com/cropinghigh/inmarsatc.git
+        commit: cda1242e79981d71cd8608e971c8dbc691942b10
+
+  - name: rnnoise
+    sources:
+      - type: git
+        url: https://github.com/xiph/rnnoise.git
+        # latest main for multiple fixes
+        commit: 70f1d256acd4b34a572f999a05c87bf00b67730d
+      - type: file
+        url: https://media.xiph.org/rnnoise/models/rnnoise_data-0a8755f8e2d834eff6a54714ecc7d75f9932e845df35f8b59bc52a7cfe6e8b37.tar.gz
+        sha256: 0a8755f8e2d834eff6a54714ecc7d75f9932e845df35f8b59bc52a7cfe6e8b37
 
   - name: sdrangel
     buildsystem: cmake-ninja
@@ -491,11 +522,14 @@ modules:
         x86_64:
           config-opts:
             - -DARCH_OPT=nehalem
+        aarch64:
+          config-opts:
+            - -DARCH_OPT=armv8-a
     config-opts:
-      - -Wno-dev
       - -DCMAKE_BUILD_TYPE=RelWithDebInfo
-      - -DRX_SAMPLE_24BIT=ON
       - -DENABLE_QT6=ON
+      - -DRX_SAMPLE_24BIT=ON
+      - -Wno-dev
     sources:
       - type: dir
         path: ..
