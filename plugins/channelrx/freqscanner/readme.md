@@ -9,9 +9,9 @@ This plugin can be used to scan a range of frequencies looking for a transmissio
 With the Run Mode (11) set to Multiplex, it can also repeatedly cycle through frequencies listening for a fixed period of time. This can be used, for example, to
 receive both AIS and ADS-B data via a single SDR.
 
-Note that when scanning, the device centre frequency will often not be set exactly to the frequencies you enter. 
+Note that when scanning, the device centre frequency will often not be set exactly to the frequencies you enter.
 The Frequency Scanner will typically try to set the device centre frequency in order to
-scan as many frequencies simultanously as possible, and also avoid having a DC offset within the bandwidth of a scanned frequency. 
+scan as many frequencies simultanously as possible, and also avoid having a DC offset within the bandwidth of a scanned frequency.
 The demodulator channel's frequency offset option will be used so that it receives at the specified frequency.
 
 <h2>Interface</h2>
@@ -59,14 +59,18 @@ t_rx: When Run Mode (11) is Multiplex, specifies the time in seconds the channel
 
 This specifies the bandwidth of the channels to be scanned.
 
-<h3>9: Pri - Priority</h3>
+<h3>9: Channel shift</h3>
+
+This shift is applied to the controlled channel from the scanned center frequency. This is useful for SSB or CW or generally whenever the signal of interest is only on one side of the controlled channel center frequency.
+
+<h3>10: Pri - Priority</h3>
 
 Specifies which frequency will be chosen as the active frequency, when multiple frequencies exceed the threshold (4):
 
 - Max power: The frequency with the highest power will be chosen
 - Table order: The frequency first in the frequency table (14) will be chosen.
 
-<h3>10: Meas - Power Measurement</h3>
+<h3>11: Meas - Power Measurement</h3>
 
 Specifies how power is measured. In both cases, a FFT is used.
 FFT size is typically the same as used for the Main Spectrum, but may be increased to ensure at least 8 bins cover the channel bandwidth (8).
@@ -74,11 +78,11 @@ The first and last bins are excluded from the measurement (to reduce spectral le
 
 - Peak: Power is the highest value in all of the bins, averaged over the scan time (6).
 - Total: Power is the sum of power in all of the bins, averaged over the scan time (6).
- 
+
 Peak can be used when you wish to set the threshold roughly according to the level displayed in the Main Spectrum.
 Total is potentially more useful for wideband signals, that are close to the noise floor.
 
-<h3>11: Run Mode</h3>
+<h3>12: Run Mode</h3>
 
 Specifies the run mode:
 
@@ -87,18 +91,18 @@ Specifies the run mode:
 - Scan only: All frequencies are scanned repeatedly. The channel will not be tuned. This mode is just for counting how often frequencies are active, which can be seen in the Active Count column in the frequency table (14).
 - Multiplex: Frequencies will be stepped through sequentially and repeatedly, with the channel (1) being tuned for the time specified by t_rx (7).
 
-<h3>12: Start/Stop Scanning</h3>
+<h3>13: Start/Stop Scanning</h3>
 
 Press this button to start or stop scanning.
 
-<h3>13: Status Text</h3>
+<h3>14: Status Text</h3>
 
 Displays the current status of the Frequency Scanner.
 
 - "Scanning": When scanning for active frequencies.
 - Frequency and annotation for active frequency.
 
-<h3>14: Frequency Table</h3>
+<h3>15: Frequency Table</h3>
 
 The frequency table contains the list of frequencies to be scanned, along with results of a scan. The columns are:
 
@@ -123,32 +127,32 @@ Right clicking on a cell will display a popup menu:
 - Remove selected rows.
 - Tune selected channel (1) to the frequency in the row clicked on.
 
-<h3>15: Add</h3>
+<h3>16: Add</h3>
 
 Press to add a single row to the frequency table (14).
 
-<h3>16: Add Range</h3>
+<h3>17: Add Range</h3>
 
 Press to add a range of frequencies to the frequency table (14). A dialog is displayed with start and stop frequencies, as well as a step value.
 The step value should typically be an integer multiple of the channel bandwidth (8).
 
-<h3>17: Remove</h3>
+<h3>18: Remove</h3>
 
 Removes the selected rows from the frequency table (14). Press Ctrl-A to select all rows.
 
-<h3>18: Remove Inactive</h3>
+<h3>19: Remove Inactive</h3>
 
 Removes all rows with Active Count of 0.
 
-<h3>19: Up</h3>
+<h3>20: Up</h3>
 
 Moves the selected rows up the frequency table (14).
 
-<h3>20: Down</h3>
+<h3>21: Down</h3>
 
 Moves the selected rows the the frequency table (14).
 
-<h3>21: Import Frequencies from .csv</h3>
+<h3>22: Import Frequencies from .csv</h3>
 
 Imports frequencies from a .csv file.
 
@@ -156,11 +160,11 @@ The expected column names are "Freq (Hz)", "Enable", "Notes", "Channel", "Ch BW 
 
 Annotations are not included. These should be imported via the Spectrum Markers dialog.
 
-<h3>22: Export Frequencies to .csv</h3>
+<h3>23: Export Frequencies to .csv</h3>
 
 Exports frequencies to a .csv file. Note that annotations are not included. These should be exported via the Spectrum Markers dialog.
 
-<h3>23: Clear Active Count</h3>
+<h3>24: Clear Active Count</h3>
 
 Press to reset the value in the Active Count column to 0 for all rows.
 

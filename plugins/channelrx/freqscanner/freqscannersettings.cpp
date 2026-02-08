@@ -38,6 +38,7 @@ void FreqScannerSettings::resetToDefaults()
 {
     m_inputFrequencyOffset = 0;
     m_channelBandwidth = 25000;
+    m_channelShift = 0;
     m_channelFrequencyOffset = 25000;
     m_threshold = -60.0f;
     m_channel = "";
@@ -83,6 +84,7 @@ QByteArray FreqScannerSettings::serialize() const
     s.writeS32(13, (int)m_measurement);
     s.writeS32(14, (int)m_mode);
     s.writeList(15, m_frequencySettings);
+    s.writeS32(16, m_channelShift);
 
     s.writeList(20, m_columnIndexes);
     s.writeList(21, m_columnSizes);
@@ -136,6 +138,8 @@ bool FreqScannerSettings::deserialize(const QByteArray& data)
         d.readS32(13, (int*)&m_measurement, (int)PEAK);
         d.readS32(14, (int*)&m_mode, (int)CONTINUOUS);
         d.readList(15, &m_frequencySettings);
+        d.readS32(16, &m_channelShift, 0);
+
         if (m_frequencySettings.size() == 0)
         {
             // Try reading old settings
@@ -211,6 +215,9 @@ void FreqScannerSettings::applySettings(const QStringList& settingsKeys, const F
     }
     if (settingsKeys.contains("channelFrequencyOffset")) {
         m_channelFrequencyOffset = settings.m_channelFrequencyOffset;
+    }
+    if (settingsKeys.contains("channelShift")) {
+        m_channelShift = settings.m_channelShift;
     }
     if (settingsKeys.contains("threshold")) {
         m_threshold = settings.m_threshold;
@@ -289,6 +296,9 @@ QString FreqScannerSettings::getDebugString(const QStringList& settingsKeys, boo
     }
     if (settingsKeys.contains("channelFrequencyOffset") || force) {
         ostr << " m_channelFrequencyOffset: " << m_channelFrequencyOffset;
+    }
+    if (settingsKeys.contains("channelShift") || force) {
+        ostr << " m_channelShift: " << m_channelShift;
     }
     if (settingsKeys.contains("threshold") || force) {
         ostr << " m_threshold: " << m_threshold;
@@ -471,4 +481,3 @@ FreqScannerSettings::FrequencySettings *FreqScannerSettings::getFrequencySetting
     }
     return nullptr;
 }
-

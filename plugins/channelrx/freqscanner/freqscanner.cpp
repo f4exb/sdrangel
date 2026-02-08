@@ -526,7 +526,7 @@ void FreqScanner::processScanResults(const QDateTime& fftStartTime, const QList<
                             applyChannelSetting(channel);
 
                             // Tune the channel
-                            ChannelWebAPIUtils::setFrequencyOffset(m_scanDeviceSetIndex, m_scanChannelIndex, offset);
+                            ChannelWebAPIUtils::setFrequencyOffset(m_scanDeviceSetIndex, m_scanChannelIndex, offset + m_settings.m_channelShift);
 
                             // Unmute the channel
                             ChannelWebAPIUtils::setAudioMute(m_scanDeviceSetIndex, m_scanChannelIndex, false);
@@ -922,6 +922,9 @@ void FreqScanner::webapiUpdateChannelSettings(
     if (channelSettingsKeys.contains("channelBandwidth")) {
         settings.m_channelBandwidth = response.getFreqScannerSettings()->getChannelBandwidth();
     }
+    if (channelSettingsKeys.contains("channelShift")) {
+        settings.m_channelShift = response.getFreqScannerSettings()->getChannelShift();
+    }
     if (channelSettingsKeys.contains("threshold")) {
         settings.m_threshold = response.getFreqScannerSettings()->getThreshold();
     }
@@ -1019,6 +1022,7 @@ void FreqScanner::webapiFormatChannelSettings(SWGSDRangel::SWGChannelSettings& r
 {
     response.getFreqScannerSettings()->setChannelFrequencyOffset(settings.m_channelFrequencyOffset);
     response.getFreqScannerSettings()->setChannelBandwidth(settings.m_channelBandwidth);
+    response.getFreqScannerSettings()->setChannelShift(settings.m_channelShift);
     response.getFreqScannerSettings()->setThreshold(settings.m_threshold);
 
     QList<SWGSDRangel::SWGFreqScannerFrequency *> *frequencies = createFrequencyList(settings);
@@ -1139,6 +1143,9 @@ void FreqScanner::webapiFormatChannelSettings(
     }
     if (channelSettingsKeys.contains("channelBandwidth") || force) {
         swgFreqScannerSettings->setChannelBandwidth(settings.m_channelBandwidth);
+    }
+    if (channelSettingsKeys.contains("channelShift") || force) {
+        swgFreqScannerSettings->setChannelShift(settings.m_channelShift);
     }
     if (channelSettingsKeys.contains("threshold") || force) {
         swgFreqScannerSettings->setThreshold(settings.m_threshold);
