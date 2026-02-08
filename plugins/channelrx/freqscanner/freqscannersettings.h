@@ -47,6 +47,7 @@ struct FreqScannerSettings
     qint32 m_inputFrequencyOffset;  //!< Not modifiable in GUI
     qint32 m_channelBandwidth;      //!< Channel bandwidth
     qint32 m_channelFrequencyOffset;//!< Minimum DC offset of tuned channel
+    qint32 m_channelShift;          //!< Channel frequency shift
     Real m_threshold;               //!< Power threshold in dB
     QString m_channel;              //!< Channel (E.g: R1:4) to tune to active frequency
     QList<FrequencySettings> m_frequencySettings; //!< Frequencies to scan and corresponding settings

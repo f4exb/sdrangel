@@ -327,6 +327,12 @@ void FreqScannerGUI::on_channelBandwidth_changed(qint64 value)
     applySetting("channelBandwidth");
 }
 
+void FreqScannerGUI::on_channelShift_changed(qint64 value)
+{
+    m_settings.m_channelShift = value;
+    applySetting("channelShift");
+}
+
 void FreqScannerGUI::on_scanTime_valueChanged(int value)
 {
     ui->scanTimeText->setText(QString("%1 s").arg(value / 10.0, 0, 'f', 1));
@@ -484,6 +490,9 @@ FreqScannerGUI::FreqScannerGUI(PluginAPI* pluginAPI, DeviceUISet *deviceUISet, B
     ui->channelBandwidth->setColorMapper(ColorMapper(ColorMapper::GrayGreenYellow));
     ui->channelBandwidth->setValueRange(true, 8, 0, 9999999);
 
+    ui->channelShift->setColorMapper(ColorMapper(ColorMapper::GrayGold));
+    ui->channelShift->setValueRange(false, 5, -50000, 50000);
+
     m_channelMarker.setColor(Qt::yellow);
     m_channelMarker.setCenterFrequency(m_settings.m_inputFrequencyOffset);
     m_channelMarker.setTitle("Frequency Scanner");
@@ -589,6 +598,7 @@ void FreqScannerGUI::displaySettings()
     }
     ui->deltaFrequency->setValue(m_settings.m_channelFrequencyOffset);
     ui->channelBandwidth->setValue(m_settings.m_channelBandwidth);
+    ui->channelShift->setValue(m_settings.m_channelShift);
     ui->scanTime->setValue(m_settings.m_scanTime * 10.0);
     ui->scanTimeText->setText(QString("%1 s").arg(m_settings.m_scanTime, 0, 'f', 1));
     ui->retransmitTime->setValue(m_settings.m_retransmitTime * 10.0);
@@ -1217,6 +1227,7 @@ void FreqScannerGUI::makeUIConnections()
     QObject::connect(ui->channels, QOverload<int>::of(&QComboBox::currentIndexChanged), this, &FreqScannerGUI::on_channels_currentIndexChanged);
     QObject::connect(ui->deltaFrequency, &ValueDialZ::changed, this, &FreqScannerGUI::on_deltaFrequency_changed);
     QObject::connect(ui->channelBandwidth, &ValueDialZ::changed, this, &FreqScannerGUI::on_channelBandwidth_changed);
+    QObject::connect(ui->channelShift, &ValueDialZ::changed, this, &FreqScannerGUI::on_channelShift_changed);
     QObject::connect(ui->scanTime, &QDial::valueChanged, this, &FreqScannerGUI::on_scanTime_valueChanged);
     QObject::connect(ui->retransmitTime, &QDial::valueChanged, this, &FreqScannerGUI::on_retransmitTime_valueChanged);
     QObject::connect(ui->tuneTime, &QDial::valueChanged, this, &FreqScannerGUI::on_tuneTime_valueChanged);

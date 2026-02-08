@@ -4,6 +4,9 @@ FreqScannerSettings:
     channelBandwidth:
       description: channel RF bandwidth in Hz
       type: integer
+    channelShift:
+      description: controlled channel frequency shift in Hz
+      type: integer
     channelFrequencyOffset:
       description: channel center frequency shift from baseband center in Hz
       type: integer

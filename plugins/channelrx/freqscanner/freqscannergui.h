@@ -126,6 +126,7 @@ private slots:
     void on_channels_currentIndexChanged(int index);
     void on_deltaFrequency_changed(qint64 value);
     void on_channelBandwidth_changed(qint64 index);
+    void on_channelShift_changed(qint64 index);
     void on_scanTime_valueChanged(int value);
     void on_retransmitTime_valueChanged(int value);
     void on_tuneTime_valueChanged(int value);

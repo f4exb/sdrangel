@@ -49,6 +49,9 @@ public:
     qint32 getChannelBandwidth();
     void setChannelBandwidth(qint32 channel_bandwidth);
 
+    qint32 getChannelShift();
+    void setChannelShift(qint32 channel_shift);
+
     qint32 getChannelFrequencyOffset();
     void setChannelFrequencyOffset(qint32 channel_frequency_offset);
 
@@ -115,6 +118,9 @@ public:
 private:
     qint32 channel_bandwidth;
     bool m_channel_bandwidth_isSet;
+
+    qint32 channel_shift;
+    bool m_channel_shift_isSet;
 
     qint32 channel_frequency_offset;
     bool m_channel_frequency_offset_isSet;

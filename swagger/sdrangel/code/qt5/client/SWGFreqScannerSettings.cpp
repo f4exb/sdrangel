@@ -30,6 +30,8 @@ SWGFreqScannerSettings::SWGFreqScannerSettings(QString* json) {
 SWGFreqScannerSettings::SWGFreqScannerSettings() {
     channel_bandwidth = 0;
     m_channel_bandwidth_isSet = false;
+    channel_shift = 0;
+    m_channel_shift_isSet = false;
     channel_frequency_offset = 0;
     m_channel_frequency_offset_isSet = false;
     threshold = 0.0f;
@@ -80,6 +82,8 @@ void
 SWGFreqScannerSettings::init() {
     channel_bandwidth = 0;
     m_channel_bandwidth_isSet = false;
+    channel_shift = 0;
+    m_channel_shift_isSet = false;
     channel_frequency_offset = 0;
     m_channel_frequency_offset_isSet = false;
     threshold = 0.0f;
@@ -124,6 +128,7 @@ SWGFreqScannerSettings::init() {
 
 void
 SWGFreqScannerSettings::cleanup() {
+
 
 
 
@@ -175,6 +180,8 @@ SWGFreqScannerSettings::fromJson(QString &json) {
 void
 SWGFreqScannerSettings::fromJsonObject(QJsonObject &pJson) {
     ::SWGSDRangel::setValue(&channel_bandwidth, pJson["channelBandwidth"], "qint32", "");
+    
+    ::SWGSDRangel::setValue(&channel_shift, pJson["channelShift"], "qint32", "");
     
     ::SWGSDRangel::setValue(&channel_frequency_offset, pJson["channelFrequencyOffset"], "qint32", "");
     
@@ -234,6 +241,9 @@ SWGFreqScannerSettings::asJsonObject() {
     QJsonObject* obj = new QJsonObject();
     if(m_channel_bandwidth_isSet){
         obj->insert("channelBandwidth", QJsonValue(channel_bandwidth));
+    }
+    if(m_channel_shift_isSet){
+        obj->insert("channelShift", QJsonValue(channel_shift));
     }
     if(m_channel_frequency_offset_isSet){
         obj->insert("channelFrequencyOffset", QJsonValue(channel_frequency_offset));
@@ -307,6 +317,16 @@ void
 SWGFreqScannerSettings::setChannelBandwidth(qint32 channel_bandwidth) {
     this->channel_bandwidth = channel_bandwidth;
     this->m_channel_bandwidth_isSet = true;
+}
+
+qint32
+SWGFreqScannerSettings::getChannelShift() {
+    return channel_shift;
+}
+void
+SWGFreqScannerSettings::setChannelShift(qint32 channel_shift) {
+    this->channel_shift = channel_shift;
+    this->m_channel_shift_isSet = true;
 }
 
 qint32
@@ -515,6 +535,9 @@ SWGFreqScannerSettings::isSet(){
     bool isObjectUpdated = false;
     do{
         if(m_channel_bandwidth_isSet){
+            isObjectUpdated = true; break;
+        }
+        if(m_channel_shift_isSet){
             isObjectUpdated = true; break;
         }
         if(m_channel_frequency_offset_isSet){
