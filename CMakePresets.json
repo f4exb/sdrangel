@@ -5,6 +5,7 @@
       "name": "default",
       "binaryDir": "build",
       "cacheVariables": {
+        "CMAKE_BUILD_TYPE": "RelWithDebInfo",
         "DEBUG_OUTPUT": "ON",
         "AIRSPYHF_DIR": "/opt/install/libairspyhf",
         "AIRSPY_DIR": "/opt/install/libairspy",

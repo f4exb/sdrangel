@@ -27,6 +27,7 @@
 #include <QFontDatabase>
 #include <QSysInfo>
 #include <QSettings>
+#include <exception>
 #ifdef __APPLE__
 #if (QT_VERSION < QT_VERSION_CHECK(6, 0, 0))
 #include <QGLFormat>
@@ -45,6 +46,40 @@
 #include "remotetcpsinkstarter.h"
 #include "dsp/dsptypes.h"
 #include "crashhandler.h"
+
+class SDRangelApplication final : public QApplication
+{
+public:
+    SDRangelApplication(int &argc, char **argv) : QApplication(argc, argv)
+    {
+    }
+
+    bool notify(QObject *receiver, QEvent *event) override
+    {
+        static bool s_exitRequested = false;
+        try {
+            return QApplication::notify(receiver, event);
+        } catch (const std::bad_alloc &ex) {
+            qCritical() << "Out of memory in event handler:" << ex.what();
+            if (receiver && receiver->metaObject()) {
+                qCritical() << "Failed on object:" << receiver << receiver->metaObject()->className();
+            } else {
+                qCritical() << "Failed on object: (null)";
+            }
+        } catch (const std::exception &ex) {
+            qCritical("Unhandled exception in event handler: %s", ex.what());
+        }  catch (...) {
+            qCritical("Unhandled non-standard exception in event handler.");
+        }
+
+        if (!s_exitRequested) {
+            s_exitRequested = true;
+            QCoreApplication::exit(EXIT_FAILURE);
+        }
+
+        return false;
+    }
+};
 
 static int runQtApplication(int argc, char* argv[], qtwebapp::LoggerWithFile *logger)
 {
@@ -81,7 +116,7 @@ static int runQtApplication(int argc, char* argv[], qtwebapp::LoggerWithFile *lo
         qputenv("QT_SCALE_FACTOR", scaleFactor.toLatin1());
     }
 
-	QApplication a(argc, argv);
+    SDRangelApplication a(argc, argv);
 
 #if 1
     qApp->setStyle(QStyleFactory::create("fusion"));

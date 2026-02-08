@@ -22,6 +22,7 @@
 
 #include <QCoreApplication>
 #include <QSysInfo>
+#include <exception>
 
 #include <signal.h>
 #include <vector>
@@ -31,6 +32,40 @@
 #include "mainserver.h"
 #include "remotetcpsinkstarter.h"
 #include "dsp/dsptypes.h"
+
+class SDRangelServerApplication final : public QCoreApplication
+{
+public:
+    SDRangelServerApplication(int &argc, char **argv) : QCoreApplication(argc, argv)
+    {
+    }
+
+    bool notify(QObject *receiver, QEvent *event) override
+    {
+        static bool s_exitRequested = false;
+        try {
+            return QCoreApplication::notify(receiver, event);
+        } catch (const std::bad_alloc &ex) {
+            qCritical() << "Out of memory in event handler:" << ex.what();
+            if (receiver && receiver->metaObject()) {
+                qCritical() << "Failed on object:" << receiver << receiver->metaObject()->className();
+            } else {
+                qCritical() << "Failed on object: (null)";
+            }
+        } catch (const std::exception &ex) {
+            qCritical("Unhandled exception in event handler: %s", ex.what());
+        } catch (...) {
+            qCritical("Unhandled non-standard exception in event handler.");
+        }
+
+        if (!s_exitRequested) {
+            s_exitRequested = true;
+            QCoreApplication::exit(EXIT_FAILURE);
+        }
+
+        return false;
+    }
+};
 
 void handler(int sig) {
     fprintf(stderr, "quit the application by signal(%d).\n", sig);
@@ -59,7 +94,7 @@ void catchUnixSignals(const std::vector<int>& quitSignals) {
 
 static int runQtApplication(int argc, char* argv[], qtwebapp::LoggerWithFile *logger)
 {
-    QCoreApplication a(argc, argv);
+    SDRangelServerApplication a(argc, argv);
 
     QCoreApplication::setOrganizationName("f4exb");
     QCoreApplication::setApplicationName("SDRangelSrv");
