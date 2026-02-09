@@ -40,7 +40,8 @@ public:
         TestGolay2312,
         TestFT8,
         TestCallsign,
-        TestFT8Protocols
+        TestFT8Protocols,
+        TestFFTRRCFilter
     } TestType;
 
     ParserBench();
