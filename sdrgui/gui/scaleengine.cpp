@@ -94,7 +94,8 @@ QString ScaleEngine::formatTick(double value, int decimalPlaces)
 		}
 
 		tmp = m_makeOpposite ? -actual : actual;
-		str += QString("%1").arg(tmp, 2, 'f', decimalPlaces, QChar('0'));
+		const int fieldWidth = (str.isEmpty() ? 1 : 2) + (decimalPlaces == 0 ? 0 : 1 + decimalPlaces);
+		str += QString("%1").arg(tmp, fieldWidth, 'f', decimalPlaces, QChar('0'));
 
 		return str;
 	}
