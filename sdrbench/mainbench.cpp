@@ -75,6 +75,8 @@ void MainBench::run()
         testFT8Protocols(m_parser.getArgsStr());
     } else if (m_parser.getTestType() == ParserBench::TestFFTRRCFilter) {
         testFFTRRCFilter();
+    } else if (m_parser.getTestType() == ParserBench::TestFIRRRCFilter) {
+        testFIRRRCFilter();
     } else {
         qDebug() << "MainBench::run: unknown test type: " << m_parser.getTestType();
     }

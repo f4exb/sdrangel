@@ -153,6 +153,7 @@ set(sdrbase_SOURCES
     dsp/filerecord.cpp
     dsp/filerecordinterface.cpp
     dsp/firfilter.cpp
+    dsp/firfilterrrc.cpp
     dsp/fmpreemphasis.cpp
     dsp/freqlockcomplex.cpp
     dsp/interpolator.cpp
@@ -383,6 +384,7 @@ set(sdrbase_HEADERS
     dsp/filerecord.h
     dsp/filerecordinterface.h
     dsp/firfilter.h
+    dsp/firfilterrrc.h
     dsp/fmpreemphasis.h
     dsp/freqlockcomplex.h
     dsp/gfft.h

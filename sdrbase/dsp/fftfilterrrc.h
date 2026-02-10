@@ -68,9 +68,11 @@ public:
      *
      * The filter bandwidth extends from -symbolRate*(1+rolloff)/2 to
      * +symbolRate*(1+rolloff)/2 in normalized frequency (0 to 0.5 = Nyquist).
+     *
+     * Creates mathematically correct RRC frequency response for use in
+     * digital communications applications.
      */
     void create(float symbolRate, float rolloff);
-
     /**
      * @brief Process one complex input sample through the filter
      *

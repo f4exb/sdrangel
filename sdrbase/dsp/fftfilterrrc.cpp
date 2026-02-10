@@ -78,10 +78,9 @@ void FFTFilterRRC::create(float symbolRate, float rolloff)
         m_rolloff = 1.0f;
     }
 
-    // Initialize filter to zero
+    // Create filter directly in frequency domain
     std::fill(m_filter, m_filter + m_fftLen, Complex(0.0f, 0.0f));
 
-    // Compute frequency-domain RRC response for each FFT bin
     for (int i = 0; i < m_fftLen; i++) {
         m_filter[i] = computeRRCResponse(m_symbolRate, m_rolloff, i, m_fftLen);
     }
@@ -121,23 +120,23 @@ FFTFilterRRC::Complex FFTFilterRRC::computeRRCResponse(
     // Absolute frequency
     float absFreq = std::abs(freq);
 
-    // Symbol time (inverse of symbol rate)
-    float T = 1.0f / symbolRate;
-
     // Compute frequency boundaries
-    float f1 = (1.0f - rolloff) / (2.0f * T);  // Start of transition band
-    float f2 = (1.0f + rolloff) / (2.0f * T);  // End of transition band
+    // For RRC: passband is Rs/2, where Rs is symbol rate
+    // Transition band: Rs/2 * (1-beta) to Rs/2 * (1+beta)
+    float f1 = symbolRate * (1.0f - rolloff) / 2.0f;  // Start of transition band
+    float f2 = symbolRate * (1.0f + rolloff) / 2.0f;  // End of transition band
 
     Complex response;
 
     if (absFreq <= f1) {
         // Passband: constant response
-        response = Complex(std::sqrt(T), 0.0f);
+        response = Complex(1.0f, 0.0f);
     } else if (absFreq > f1 && absFreq <= f2) {
         // Transition band: raised cosine roll-off
-        // H(f) = sqrt(T) * 0.5 * [1 + cos(pi*T/beta * (|f| - (1-beta)/(2T)))]
-        float arg = (M_PI * T / rolloff) * (absFreq - f1);
-        float amplitude = std::sqrt(T) * 0.5f * (1.0f + std::cos(arg));
+        // H(f) = 0.5 * [1 + cos(pi/beta * (|f|/Rs - (1-beta)/2))]
+        float normalizedFreq = absFreq / symbolRate;  // Normalize by symbol rate
+        float arg = (M_PI / rolloff) * (normalizedFreq - (1.0f - rolloff) / 2.0f);
+        float amplitude = 0.5f * (1.0f + std::cos(arg));
         response = Complex(amplitude, 0.0f);
     } else {
         // Stopband: zero response

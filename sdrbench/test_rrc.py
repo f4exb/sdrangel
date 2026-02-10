@@ -2,13 +2,13 @@
 import matplotlib.pyplot as plt
 import numpy as np
 
-with open('../build/test_fftrrc_filter.txt', 'r') as f:
+with open('../build/test_rrc_filter.txt', 'r') as f:
     filter_data = f.read()
 
 filter_out = [float(x) for x in filter_data.splitlines()]
 xf = np.array(filter_out)
 
-with open('../build/test_fftrrc.txt', 'r') as f:
+with open('../build/test_rrc.txt', 'r') as f:
     data = f.read()
 
 out = [float(x) for x in data.splitlines()]
@@ -24,7 +24,7 @@ ax2.set_xlabel('Index')
 ax2.set_ylabel('Amplitude')
 ax2.grid(True)
 
-ax1.set_title('FFTRRC Filter Output (Real Part)')
+ax1.set_title('RRC Filter Output (Real Part)')
 ax1.plot(x)
 # ax1.scatter(marks, x[marks],
 #             color='red', marker='.', s=100, zorder=5, edgecolors='black')
