@@ -172,7 +172,7 @@ void SIDMain::applySettings(const SIDSettings& settings, const QList<QString>& s
                 settingsKeys.contains("reverseAPIAddress") ||
                 settingsKeys.contains("reverseAPIPort") ||
                 settingsKeys.contains("reverseAPIFeatureSetIndex") ||
-                settingsKeys.contains("m_reverseAPIFeatureIndex");
+                settingsKeys.contains("reverseAPIFeatureIndex");
         webapiReverseSendSettings(settingsKeys, settings, fullUpdate || force);
     }
 

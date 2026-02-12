@@ -184,7 +184,7 @@ QString FileInputSettings::getDebugString(const QStringList& settingsKeys, bool 
     if (settingsKeys.contains("title") || force) {
         ostr << " m_title: " << m_title.toStdString();
     }
-    if (settingsKeys.contains("m_fileName") || force) {
+    if (settingsKeys.contains("fileName") || force) {
         ostr << " m_fileName: " << m_fileName.toStdString();
     }
     if (settingsKeys.contains("accelerationFactor") || force) {

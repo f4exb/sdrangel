@@ -301,7 +301,7 @@ void GS232Controller::applySettings(const GS232ControllerSettings& settings, con
                 settingsKeys.contains("reverseAPIAddress") ||
                 settingsKeys.contains("reverseAPIPort") ||
                 settingsKeys.contains("reverseAPIFeatureSetIndex") ||
-                settingsKeys.contains("m_reverseAPIFeatureIndex");
+                settingsKeys.contains("reverseAPIFeatureIndex");
         webapiReverseSendSettings(settingsKeys, settings, fullUpdate || force);
     }
 
@@ -742,4 +742,3 @@ void GS232Controller::scanSerialPorts()
         m_serialPorts = serialPorts;
     }
 }
-

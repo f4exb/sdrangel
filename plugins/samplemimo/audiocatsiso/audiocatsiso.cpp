@@ -969,7 +969,7 @@ void AudioCATSISO::webapiReverseSendSettings(const QList<QString>& deviceSetting
     if (deviceSettingsKeys.contains("catPTTMethodIndex")) {
         swgAudioCATSISOSettings->setCatPttMethodIndex(settings.m_catPTTMethodIndex);
     }
-    if (deviceSettingsKeys.contains("m_catDTRHigh")) {
+    if (deviceSettingsKeys.contains("catDTRHigh")) {
         swgAudioCATSISOSettings->setCatDtrHigh(settings.m_catDTRHigh ? 1 : 0);
     }
     if (deviceSettingsKeys.contains("catRTSHigh")) {

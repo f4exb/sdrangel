@@ -163,7 +163,7 @@ void StarTrackerWorker::applySettings(const StarTrackerSettings& settings, const
     if (settingsKeys.contains("drawSunOnMap")
      || settingsKeys.contains("drawMoonOnMap")
      || settingsKeys.contains("drawStarOnMap")
-     || settingsKeys.contains("m_target"))
+     || settingsKeys.contains("target"))
     {
         if (!settings.m_drawSunOnMap && m_settings.m_drawSunOnMap)
             removeFromMap("Sun");

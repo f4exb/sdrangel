@@ -249,15 +249,19 @@ void FreqTrackerSink::applyChannelSettings(int sinkSampleRate, int channelSample
 
 void FreqTrackerSink::applySettings(const QStringList& settingsKeys, const FreqTrackerSettings& settings, bool force)
 {
+    if (settingsKeys.empty()) {
+        return; // nothing to apply
+    }
+
     if (!settings.m_tracking) {
         qDebug() << "FreqTrackerSink::applySettings:" << settings.getDebugString(settingsKeys, force);
     }
 
-    if ((settingsKeys.contains("m_squelch") && (m_settings.m_squelch != settings.m_squelch)) || force) {
+    if ((settingsKeys.contains("squelch") && (m_settings.m_squelch != settings.m_squelch)) || force) {
         m_squelchLevel = CalcDb::powerFromdB(settings.m_squelch);
     }
 
-    if ((settingsKeys.contains("m_tracking") && (m_settings.m_tracking != settings.m_tracking)) || force)
+    if ((settingsKeys.contains("tracking") && (m_settings.m_tracking != settings.m_tracking)) || force)
     {
         m_avgDeltaFreq = 0.0;
         m_lastCorrAbs = 0;
@@ -269,7 +273,7 @@ void FreqTrackerSink::applySettings(const QStringList& settingsKeys, const FreqT
         }
     }
 
-    if ((settingsKeys.contains("m_trackerType") && (m_settings.m_trackerType != settings.m_trackerType)) || force)
+    if ((settingsKeys.contains("trackerType") && (m_settings.m_trackerType != settings.m_trackerType)) || force)
     {
         m_lastCorrAbs = 0;
         m_avgDeltaFreq = 0.0;
@@ -287,7 +291,7 @@ void FreqTrackerSink::applySettings(const QStringList& settingsKeys, const FreqT
         }
     }
 
-    if ((settingsKeys.contains("m_pllPskOrder") && (m_settings.m_pllPskOrder != settings.m_pllPskOrder)) || force)
+    if ((settingsKeys.contains("pllPskOrder") && (m_settings.m_pllPskOrder != settings.m_pllPskOrder)) || force)
     {
         if (settings.m_pllPskOrder < 32) {
             m_pll.setPskOrder(settings.m_pllPskOrder);
@@ -296,9 +300,9 @@ void FreqTrackerSink::applySettings(const QStringList& settingsKeys, const FreqT
 
     bool useInterpolator = false;
 
-    if ((settingsKeys.contains("m_rrcRolloff") && (m_settings.m_rrcRolloff != settings.m_rrcRolloff))
-     || (settingsKeys.contains("m_rfBandwidth") && (m_settings.m_rfBandwidth != settings.m_rfBandwidth))
-     || (settingsKeys.contains("m_squelchGate") && (m_settings.m_squelchGate != settings.m_squelchGate)) || force) {
+    if ((settingsKeys.contains("rrcRolloff") && (m_settings.m_rrcRolloff != settings.m_rrcRolloff))
+     || (settingsKeys.contains("rfBandwidth") && (m_settings.m_rfBandwidth != settings.m_rfBandwidth))
+     || (settingsKeys.contains("squelchGate") && (m_settings.m_squelchGate != settings.m_squelchGate)) || force) {
         useInterpolator = true;
     }
 

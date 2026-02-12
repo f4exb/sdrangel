@@ -220,7 +220,7 @@ void APRS::applySettings(const APRSSettings& settings, const QList<QString>& set
                 settingsKeys.contains("reverseAPIAddress") ||
                 settingsKeys.contains("reverseAPIPort") ||
                 settingsKeys.contains("reverseAPIFeatureSetIndex") ||
-                settingsKeys.contains("m_reverseAPIFeatureIndex");
+                settingsKeys.contains("reverseAPIFeatureIndex");
         webapiReverseSendSettings(settingsKeys, settings, fullUpdate || force);
     }
 

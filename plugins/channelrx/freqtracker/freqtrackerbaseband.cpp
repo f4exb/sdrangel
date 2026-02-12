@@ -134,6 +134,10 @@ bool FreqTrackerBaseband::handleMessage(const Message& cmd)
 
 void FreqTrackerBaseband::applySettings(const QStringList& settingsKeys, const FreqTrackerSettings& settings, bool force)
 {
+    if (settingsKeys.empty()) {
+        return; // nothing to apply
+    }
+
     if ((settingsKeys.contains("inputFrequencyOffset") && (m_settings.m_inputFrequencyOffset != settings.m_inputFrequencyOffset))
      || (settingsKeys.contains("log2Decim") && (m_settings.m_log2Decim != settings.m_log2Decim)) || force)
     {

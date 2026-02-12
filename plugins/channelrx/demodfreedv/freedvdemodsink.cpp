@@ -507,7 +507,7 @@ void FreeDVDemodSink::applySettings(const QStringList& settingsKeys, const FreeD
 {
     qDebug() << "FreeDVDemodSink::applySettings:" << settings.getDebugString(settingsKeys, force);
 
-    if ((settingsKeys.contains("m_volume") && (settings.m_volume != m_settings.m_volume)) || force)
+    if ((settingsKeys.contains("volume") && (settings.m_volume != m_settings.m_volume)) || force)
     {
         m_volume = settings.m_volume;
         m_volume /= 4.0; // for 3276.8

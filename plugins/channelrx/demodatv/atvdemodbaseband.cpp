@@ -151,7 +151,7 @@ void ATVDemodBaseband::applySettings(const QStringList& settingsKeys, const ATVD
 {
     qDebug() << "ATVDemodBaseband::applySettings" << settings.getDebugString(settingsKeys, force);
 
-    if ((settingsKeys.contains("m_inputFrequencyOffset") && (settings.m_inputFrequencyOffset != m_settings.m_inputFrequencyOffset)) || force)
+    if ((settingsKeys.contains("inputFrequencyOffset") && (settings.m_inputFrequencyOffset != m_settings.m_inputFrequencyOffset)) || force)
     {
         unsigned int desiredSampleRate = m_channelizer->getBasebandSampleRate();
         m_channelizer->setChannelization(desiredSampleRate, settings.m_inputFrequencyOffset);

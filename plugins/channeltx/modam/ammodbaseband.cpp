@@ -185,14 +185,14 @@ bool AMModBaseband::handleMessage(const Message& cmd)
 
 void AMModBaseband::applySettings(const QStringList& settingsKeys, const AMModSettings& settings, bool force)
 {
-    if ((settingsKeys.contains("m_inputFrequencyOffset") && (m_settings.m_inputFrequencyOffset != settings.m_inputFrequencyOffset)) || force)
+    if ((settingsKeys.contains("inputFrequencyOffset") && (m_settings.m_inputFrequencyOffset != settings.m_inputFrequencyOffset)) || force)
     {
         m_channelizer->setChannelization(m_source.getAudioSampleRate(), settings.m_inputFrequencyOffset);
         m_source.applyChannelSettings(m_channelizer->getChannelSampleRate(), m_channelizer->getChannelFrequencyOffset());
         m_source.applyAudioSampleRate(m_source.getAudioSampleRate()); // reapply in case of channel sample rate change
     }
 
-    if ((settingsKeys.contains("m_audioDeviceName") && (settings.m_audioDeviceName != m_settings.m_audioDeviceName)) || force)
+    if ((settingsKeys.contains("audioDeviceName") && (settings.m_audioDeviceName != m_settings.m_audioDeviceName)) || force)
     {
         AudioDeviceManager *audioDeviceManager = DSPEngine::instance()->getAudioDeviceManager();
         int audioDeviceIndex = audioDeviceManager->getInputDeviceIndex(settings.m_audioDeviceName);
@@ -207,7 +207,7 @@ void AMModBaseband::applySettings(const QStringList& settingsKeys, const AMModSe
         }
     }
 
-    if ((settingsKeys.contains("m_modAFInput") && (settings.m_modAFInput != m_settings.m_modAFInput)) || force)
+    if ((settingsKeys.contains("modAFInput") && (settings.m_modAFInput != m_settings.m_modAFInput)) || force)
     {
         AudioDeviceManager *audioDeviceManager = DSPEngine::instance()->getAudioDeviceManager();
         int audioDeviceIndex = audioDeviceManager->getInputDeviceIndex(settings.m_audioDeviceName);
@@ -219,7 +219,7 @@ void AMModBaseband::applySettings(const QStringList& settingsKeys, const AMModSe
         }
     }
 
-    if ((settingsKeys.contains("m_feedbackAudioDeviceName") && (settings.m_feedbackAudioDeviceName != m_settings.m_feedbackAudioDeviceName)) || force)
+    if ((settingsKeys.contains("feedbackAudioDeviceName") && (settings.m_feedbackAudioDeviceName != m_settings.m_feedbackAudioDeviceName)) || force)
     {
         AudioDeviceManager *audioDeviceManager = DSPEngine::instance()->getAudioDeviceManager();
         int audioDeviceIndex = audioDeviceManager->getOutputDeviceIndex(settings.m_feedbackAudioDeviceName);

@@ -145,7 +145,7 @@ void Radiosonde::applySettings(const RadiosondeSettings& settings, const QList<Q
                 settingsKeys.contains("reverseAPIAddress") ||
                 settingsKeys.contains("reverseAPIPort") ||
                 settingsKeys.contains("reverseAPIFeatureSetIndex") ||
-                settingsKeys.contains("m_reverseAPIFeatureIndex");
+                settingsKeys.contains("reverseAPIFeatureIndex");
         webapiReverseSendSettings(settingsKeys, settings, fullUpdate || force);
     }
 
