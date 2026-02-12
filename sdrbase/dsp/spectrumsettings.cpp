@@ -87,6 +87,8 @@ void SpectrumSettings::resetToDefaults()
 #else
     m_showAllControls = true;
 #endif
+	m_frequencyZoomFactor = 1.0f;
+	m_frequencyZoomPos = 0.5f;
 }
 
 QByteArray SpectrumSettings::serialize() const
@@ -131,7 +133,7 @@ QByteArray SpectrumSettings::serialize() const
     s.writeS32(37, m_measurementChSpacing);
     s.writeS32(38, m_measurementAdjChBandwidth);
     s.writeS32(39, m_measurementHarmonics);
-    // 41, 42 used below
+    // 40, 41 used below
     s.writeBool(42, m_measurementHighlight);
     s.writeS32(43, m_measurementPeaks);
     s.writeS32(44, (int)m_measurementsPosition);
@@ -140,6 +142,8 @@ QByteArray SpectrumSettings::serialize() const
     s.writeBool(47, m_findHistogramPeaks);
     s.writeBool(48, m_truncateFreqScale);
     s.writeBool(49, m_showAllControls);
+	s.writeFloat(50, m_frequencyZoomFactor);
+    s.writeFloat(51, m_frequencyZoomPos);
     s.writeS32(100, m_histogramMarkers.size());
 
 	for (int i = 0; i < m_histogramMarkers.size(); i++) {
@@ -249,6 +253,8 @@ bool SpectrumSettings::deserialize(const QByteArray& data)
 #else
         d.readBool(49, &m_showAllControls, true);
 #endif
+		d.readFloat(50, &m_frequencyZoomFactor, 1.0f);
+		d.readFloat(51, &m_frequencyZoomPos, 0.5f);
 
 		int histogramMarkersSize;
 		d.readS32(100, &histogramMarkersSize, 0);
