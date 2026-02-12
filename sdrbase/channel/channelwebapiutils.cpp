@@ -966,6 +966,38 @@ bool ChannelWebAPIUtils::setFrequencyOffset(unsigned int deviceIndex, int channe
     return false;
 }
 
+bool ChannelWebAPIUtils::getAudioMute(unsigned int deviceIndex, int channelIndex, bool& mute)
+{
+    SWGSDRangel::SWGChannelSettings channelSettingsResponse;
+    QString errorResponse;
+    int httpRC;
+    QJsonObject* jsonObj;
+
+    ChannelAPI* channel = MainCore::instance()->getChannel(deviceIndex, channelIndex);
+    if (channel != nullptr)
+    {
+        httpRC = channel->webapiSettingsGet(channelSettingsResponse, errorResponse);
+        if (httpRC / 100 != 2)
+        {
+            qWarning("ChannelWebAPIUtils::getAudioMute: get channel settings error %d: %s",
+                httpRC, qPrintable(errorResponse));
+            return false;
+        }
+
+        jsonObj = channelSettingsResponse.asJsonObject();
+
+        int muteInt;
+        if (WebAPIUtils::getSubObjectInt(*jsonObj, "audioMute", muteInt))
+        {
+            mute = (bool) muteInt;
+            delete jsonObj;
+            return true;
+        }
+        delete jsonObj;
+    }
+    return false;
+}
+
 bool ChannelWebAPIUtils::setAudioMute(unsigned int deviceIndex, int channelIndex, bool mute)
 {
     SWGSDRangel::SWGChannelSettings channelSettingsResponse;

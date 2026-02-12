@@ -240,7 +240,7 @@ bool FreqScanner::handleMessage(const Message& cmd)
     }
     else if (MsgStartScan::match(cmd))
     {
-        muteAll(m_settings);
+        muteAll();
         startScan();
 
         return true;
@@ -248,6 +248,7 @@ bool FreqScanner::handleMessage(const Message& cmd)
     else if (MsgStopScan::match(cmd))
     {
         stopScan();
+        unmuteAll();
 
         return true;
     }
@@ -304,7 +305,7 @@ void FreqScanner::initScan()
     // if (m_scanChannelIndex < 0) { // Always false
     //     applyChannelSetting(m_settings.m_channel);
     // }
-    ChannelWebAPIUtils::setAudioMute(m_scanDeviceSetIndex, m_scanChannelIndex, true);
+    mute(m_scanDeviceSetIndex, m_scanChannelIndex);
 
     if (m_centerFrequency != m_stepStartFrequency) {
         setDeviceCenterFrequency(m_stepStartFrequency);
@@ -529,7 +530,7 @@ void FreqScanner::processScanResults(const QDateTime& fftStartTime, const QList<
                             ChannelWebAPIUtils::setFrequencyOffset(m_scanDeviceSetIndex, m_scanChannelIndex, offset + m_settings.m_channelShift);
 
                             // Unmute the channel
-                            ChannelWebAPIUtils::setAudioMute(m_scanDeviceSetIndex, m_scanChannelIndex, false);
+                            unmute(m_scanDeviceSetIndex, m_scanChannelIndex);
 
                             // Apply squelch
                             if (!activeFrequencySettings->m_squelch.isEmpty())
@@ -706,28 +707,84 @@ void FreqScanner::setCenterFrequency(qint64 frequency)
     }
 }
 
+// Ensure a channel is muted and remember if we muted it, as opposed to user having manually muted it
+void FreqScanner::mute(unsigned int deviceSetIndex, unsigned int channelIndex)
+{
+    QString channel = QString("R%1:%2").arg(deviceSetIndex).arg(channelIndex);
+
+    if (m_autoMutedChannels.contains(channel) && (m_autoMutedChannels[channel] == true)) {
+        return; // Already muted
+    }
+
+    bool muted = false;
+    if (ChannelWebAPIUtils::getAudioMute(deviceSetIndex, channelIndex, muted))
+    {
+        if (!muted)
+        {
+            ChannelWebAPIUtils::setAudioMute(deviceSetIndex, channelIndex, true);
+            m_autoMutedChannels.insert(channel, true);
+        }
+        else
+        {
+            m_autoMutedChannels.insert(channel, false);
+        }
+    }
+}
+
+// Unmute channel if it was auto-muted
+void FreqScanner::unmute(unsigned int deviceSetIndex, unsigned int channelIndex)
+{
+    QString channel = QString("R%1:%2").arg(deviceSetIndex).arg(channelIndex);
+    bool autoMuted = m_autoMutedChannels[channel];
+
+    if (autoMuted)
+    {
+        ChannelWebAPIUtils::setAudioMute(deviceSetIndex, channelIndex, false);
+        m_autoMutedChannels.insert(channel, false);
+    }
+}
+
 // Mute all channels
-void FreqScanner::muteAll(const FreqScannerSettings& settings)
+void FreqScanner::muteAll()
 {
     QStringList channels;
 
-    channels.append(settings.m_channel);
-    for (int i = 0; i < settings.m_frequencySettings.size(); i++)
+    channels.append(m_settings.m_channel);
+    for (int i = 0; i < m_settings.m_frequencySettings.size(); i++)
     {
-        QString channel = settings.m_frequencySettings[i].m_channel;
+        QString channel = m_settings.m_frequencySettings[i].m_channel;
         if (!channel.isEmpty() && !channels.contains(channel)) {
             channels.append(channel);
         }
     }
 
+    m_autoMutedChannels.clear();
     for (const auto& channel : channels)
     {
         unsigned int deviceSetIndex, channelIndex;
 
         if (MainCore::getDeviceAndChannelIndexFromId(channel, deviceSetIndex, channelIndex)) {
-            ChannelWebAPIUtils::setAudioMute(deviceSetIndex, channelIndex, true);
+            mute(deviceSetIndex, channelIndex);
         }
     }
+}
+
+// Unmute all channels that were auto-muted
+void FreqScanner::unmuteAll()
+{
+    for (auto it = m_autoMutedChannels.begin(); it != m_autoMutedChannels.end(); ++it)
+    {
+        QString channel = it.key();
+        bool autoMuted = it.value();
+        if (autoMuted)
+        {
+            unsigned int deviceSetIndex, channelIndex;
+            if (MainCore::getDeviceAndChannelIndexFromId(channel, deviceSetIndex, channelIndex)) {
+                unmute(deviceSetIndex, channelIndex);
+            }
+        }
+    }
+    m_autoMutedChannels.clear();
 }
 
 void FreqScanner::applyChannelSetting(const QString& channel)

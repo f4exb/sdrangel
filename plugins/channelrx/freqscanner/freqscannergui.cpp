@@ -1052,6 +1052,30 @@ void FreqScannerGUI::setAllEnabled(bool enable)
     }
 }
 
+// Mute all channels
+void FreqScannerGUI::muteAll()
+{
+    QStringList channels;
+
+    channels.append(m_settings.m_channel);
+    for (int i = 0; i < m_settings.m_frequencySettings.size(); i++)
+    {
+        QString channel = m_settings.m_frequencySettings[i].m_channel;
+        if (!channel.isEmpty() && !channels.contains(channel)) {
+            channels.append(channel);
+        }
+    }
+
+    for (const auto& channel : channels)
+    {
+        unsigned int deviceSetIndex, channelIndex;
+
+        if (MainCore::getDeviceAndChannelIndexFromId(channel, deviceSetIndex, channelIndex)) {
+            ChannelWebAPIUtils::setAudioMute(deviceSetIndex, channelIndex, true);
+        }
+    }
+}
+
 void FreqScannerGUI::table_customContextMenuRequested(QPoint pos)
 {
     QTableWidgetItem* item = ui->table->itemAt(pos);
@@ -1120,7 +1144,7 @@ void FreqScannerGUI::table_customContextMenuRequested(QPoint pos)
                 }
 
                 // Mute all channels
-                m_freqScanner->muteAll(m_settings);
+                muteAll();
 
                 // Tune to frequency
                 if ((frequency - m_settings.m_channelBandwidth / 2 < m_deviceCenterFrequency - m_basebandSampleRate / 2)

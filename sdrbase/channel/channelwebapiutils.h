@@ -91,6 +91,7 @@ public:
     static bool stop(unsigned int deviceIndex, int subsystemIndex=0);
     static bool getFrequencyOffset(unsigned int deviceIndex, int channelIndex, int& offset);
     static bool setFrequencyOffset(unsigned int deviceIndex, int channelIndex, int offset);
+    static bool getAudioMute(unsigned int deviceIndex, int channelIndex, bool& mute);
     static bool setAudioMute(unsigned int deviceIndex, int channelIndex, bool mute);
     static bool startStopFileSinks(unsigned int deviceIndex, bool start);
     static bool satelliteAOS(const QString name, bool northToSouthPass, const QString &tle, QDateTime dateTime);

@@ -102,6 +102,7 @@ private:
     void updateChannelsCombo(QComboBox *combo, const AvailableChannelOrFeatureList& channels, const QString& channel, bool empty);
     void updateChannelsList(const AvailableChannelOrFeatureList& channels, const QStringList& renameFrom, const QStringList& renameTo);
     void setAllEnabled(bool enable);
+    void muteAll();
 
     void leaveEvent(QEvent*);
     void enterEvent(EnterEventType*);
