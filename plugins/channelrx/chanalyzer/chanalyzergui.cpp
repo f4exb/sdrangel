@@ -30,12 +30,14 @@
 #include "gui/basicchannelsettingsdialog.h"
 #include "gui/dialpopup.h"
 #include "gui/dialogpositioner.h"
+#include "gui/crightclickenabler.h"
 #include "plugin/pluginapi.h"
 #include "util/db.h"
 #include "maincore.h"
 
 #include "ui_chanalyzergui.h"
 #include "chanalyzer.h"
+#include "rrcfilterdialog.h"
 #include "chanalyzergui.h"
 
 ChannelAnalyzerGUI* ChannelAnalyzerGUI::create(PluginAPI* pluginAPI, DeviceUISet *deviceUISet, BasebandSampleSink *rxChannel)
@@ -559,6 +561,9 @@ ChannelAnalyzerGUI::ChannelAnalyzerGUI(PluginAPI* pluginAPI, DeviceUISet *device
     m_channelAnalyzer->setScopeVis(m_scopeVis);
 	m_channelAnalyzer->setMessageQueueToGUI(getInputMessageQueue());
 
+    m_rrcRightClickEnabler = new CRightClickEnabler(ui->rrcFilter);
+    connect(m_rrcRightClickEnabler, SIGNAL(rightClick(const QPoint &)), this, SLOT(rrcSetupDialog(const QPoint &)));
+
     ui->deltaFrequencyLabel->setText(QString("%1f").arg(QChar(0x94, 0x03)));
     ui->deltaFrequency->setColorMapper(ColorMapper(ColorMapper::GrayGold));
     ui->deltaFrequency->setValueRange(false, 8, -99999999, 99999999);
@@ -733,6 +738,47 @@ void ChannelAnalyzerGUI::enterEvent(EnterEventType* event)
 {
 	m_channelMarker.setHighlighted(true);
     ChannelGUI::enterEvent(event);
+}
+
+void ChannelAnalyzerGUI::rrcSetupDialog(const QPoint& p)
+{
+    m_rrcFilterDialog = new RRCFilterDialog();
+    m_rrcFilterDialog->move(p);
+    m_rrcFilterDialog->setRRCType(m_settings.m_rrcType);
+    m_rrcFilterDialog->setRRCSymbolSpan(m_settings.m_rrcSymbolSpan);
+    m_rrcFilterDialog->setRRCNormalization(m_settings.m_rrcNormalization);
+    m_rrcFilterDialog->setRRCFFTLog2Size(m_settings.m_rrcFFTLog2Size);
+    QObject::connect(m_rrcFilterDialog, &RRCFilterDialog::valueChanged, this, &ChannelAnalyzerGUI::rrcSetup);
+    m_rrcFilterDialog->exec();
+    m_rrcFilterDialog->deleteLater();
+    m_rrcFilterDialog = nullptr;
+}
+
+void ChannelAnalyzerGUI::rrcSetup(int iValueChanged)
+{
+    auto valueChanged = static_cast<RRCFilterDialog::ValueChanged>(iValueChanged);
+
+    switch(valueChanged)
+    {
+        case RRCFilterDialog::ValueChanged::ChangedRRCType:
+            m_settings.m_rrcType = m_rrcFilterDialog->getRRCType();
+            applySettings(QStringList({"rrcType"}));
+            break;
+        case RRCFilterDialog::ValueChanged::ChangedRRCSymbolSpan:
+            m_settings.m_rrcSymbolSpan = m_rrcFilterDialog->getRRCSymbolSpan();
+            applySettings(QStringList({"rrcSymbolSpan"}));
+            break;
+        case RRCFilterDialog::ValueChanged::ChangedRRCNormalization:
+            m_settings.m_rrcNormalization = m_rrcFilterDialog->getRRCNormalization();
+            applySettings(QStringList({"rrcNormalization"}));
+            break;
+        case RRCFilterDialog::ValueChanged::ChangedRRCFFTLog2Size:
+            m_settings.m_rrcFFTLog2Size = m_rrcFilterDialog->getRRCFFTLog2Size();
+            applySettings(QStringList({"rrcFFTLog2Size"}));
+            break;
+        default:
+            break;
+    }
 }
 
 void ChannelAnalyzerGUI::makeUIConnections()

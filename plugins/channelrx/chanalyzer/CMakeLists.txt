@@ -8,7 +8,9 @@ set(chanalyzer_SOURCES
     chanalyzersink.cpp
     chanalyzerbaseband.cpp
 	chanalyzerwebapiadapter.cpp
+    rrcfilterdialog.cpp
 	chanalyzergui.ui
+    rrcfilterdialog.ui
 )
 
 set(chanalyzer_HEADERS
@@ -19,6 +21,7 @@ set(chanalyzer_HEADERS
     chanalyzersink.h
     chanalyzerbaseband.h
 	chanalyzerwebapiadapter.h
+    rrcfilterdialog.h
 )
 
 include_directories(

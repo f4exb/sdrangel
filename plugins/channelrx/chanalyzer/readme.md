@@ -122,7 +122,14 @@ Average total power in dB relative to a +/- 1.0 amplitude signal received in the
 
 <h3>10. Toggle root raised cosine filter</h3>
 
-Use this toggle button to activate or de-activate the root raised cosine (RRC) filter. When active the bandpass boxcar filter is replaced by a RRC filter. This takes effect only in normal (DSB) mode (see control 14).
+Use this toggle button to activate or de-activate the root raised cosine (RRC) filter. When active the bandpass boxcar filter is replaced by a RRC filter. This takes effect only in normal (DSB) mode (see control 14). Note that the bandwidth of the filter should be equal to the symbol rate regardless of the actual bandwidth.
+
+Right clicking on the button gives access to the RRC filter options:
+
+  - Choice between FFT and FIR filter
+  - Size of the FFT filter
+  - Symbol span for the FIR filter
+  - Normalization type for the FIR filter
 
 <h3>11. Tune RRC filter rolloff factor</h3>
 

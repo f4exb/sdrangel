@@ -46,6 +46,10 @@ void ChannelAnalyzerSettings::resetToDefaults()
     m_costasLoop = false;
     m_rrc = false;
     m_rrcRolloff = 35; // 0.35
+    m_rrcType = RRCFIR;
+    m_rrcSymbolSpan = 8;
+    m_rrcNormalization = RRCNormGain;
+    m_rrcFFTLog2Size = 9; // 512
     m_pllPskOrder = 1;
     m_pllBandwidth = 0.002f;
     m_pllDampingFactor = 0.5f;
@@ -110,6 +114,10 @@ QByteArray ChannelAnalyzerSettings::serialize() const
     s.writeS32(29, m_workspaceIndex);
     s.writeBlob(30, m_geometryBytes);
     s.writeBool(31, m_hidden);
+    s.writeS32(32, m_rrcType);
+    s.writeS32(33, m_rrcSymbolSpan);
+    s.writeS32(34, m_rrcNormalization);
+    s.writeS32(35, m_rrcFFTLog2Size);
 
     return s.final();
 }
@@ -187,6 +195,12 @@ bool ChannelAnalyzerSettings::deserialize(const QByteArray& data)
         d.readS32(29, &m_workspaceIndex, 0);
         d.readBlob(30, &m_geometryBytes);
         d.readBool(31, &m_hidden, false);
+        d.readS32(32, &tmp, 0);
+        m_rrcType = (RRCType) tmp;
+        d.readS32(33, &m_rrcSymbolSpan, 8);
+        d.readS32(34, &tmp, 2);
+        m_rrcNormalization = (RRCNormalization) tmp;
+        d.readS32(35, &m_rrcFFTLog2Size, 9);
 
         return true;
     }
@@ -234,6 +248,18 @@ void ChannelAnalyzerSettings::applySettings(const QStringList& settingsKeys, con
     }
     if (settingsKeys.contains("rrcRolloff")) {
         m_rrcRolloff = settings.m_rrcRolloff;
+    }
+    if (settingsKeys.contains("rrcType")) {
+        m_rrcType = settings.m_rrcType;
+    }
+    if (settingsKeys.contains("rrcSymbolSpan")) {
+        m_rrcSymbolSpan = settings.m_rrcSymbolSpan;
+    }
+    if (settingsKeys.contains("rrcNormalization")) {
+        m_rrcNormalization = settings.m_rrcNormalization;
+    }
+    if (settingsKeys.contains("rrcFFTLog2Size")) {
+        m_rrcFFTLog2Size = settings.m_rrcFFTLog2Size;
     }
     if (settingsKeys.contains("pllPskOrder")) {
         m_pllPskOrder = settings.m_pllPskOrder;
@@ -321,6 +347,18 @@ QString ChannelAnalyzerSettings::getDebugString(const QStringList& settingsKeys,
     }
     if (settingsKeys.contains("rrcRolloff") || force) {
         ostr << " m_rrcRolloff: " << m_rrcRolloff;
+    }
+    if (settingsKeys.contains("rrcType") || force) {
+        ostr << " m_rrcType: " << m_rrcType;
+    }
+    if (settingsKeys.contains("rrcSymbolSpan") || force) {
+        ostr << " m_rrcSymbolSpan: " << m_rrcSymbolSpan;
+    }
+    if (settingsKeys.contains("rrcNormalization") || force) {
+        ostr << " m_rrcNormalization: " << m_rrcNormalization;
+    }
+    if (settingsKeys.contains("rrcFFTLog2Size") || force) {
+        ostr << " m_rrcFFTLog2Size: " << m_rrcFFTLog2Size;
     }
     if (settingsKeys.contains("pllPskOrder") || force) {
         ostr << " m_pllPskOrder: " << m_pllPskOrder;

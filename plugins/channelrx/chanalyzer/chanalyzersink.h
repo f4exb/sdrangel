@@ -25,6 +25,8 @@
 #include "dsp/nco.h"
 #include "dsp/fftcorr.h"
 #include "dsp/fftfilt.h"
+#include "dsp/firfilterrrc.h"
+#include "dsp/fftfilterrrc.h"
 #include "dsp/phaselockcomplex.h"
 #include "dsp/freqlockcomplex.h"
 #include "dsp/costasloop.h"
@@ -57,6 +59,22 @@ public:
     static const unsigned int m_ssbFftLen;
 
 private:
+    class RRCHelper {
+    public:
+        RRCHelper(int flen);
+        ~RRCHelper();
+        void setUseFFT(bool useFFT);
+        void create(float symbolRate, float rolloff, unsigned int samplesPerSymbol, FIRFilterRRC::Normalization normalization);
+        int runFilt(const std::complex<float> & in, std::complex<float> **out);
+    private:
+        bool m_useFFT;
+        FIRFilterRRC* m_filterFIR;
+        FFTFilterRRC* m_filterFFT;
+        std::complex<float>* m_buffer;
+        int m_bufferPos;
+        int flen2;
+    };
+
     int m_channelSampleRate;
 	int m_channelFrequencyOffset;
     int m_sinkSampleRate;
@@ -76,7 +94,7 @@ private:
 
 	fftfilt* SSBFilter;
 	fftfilt* DSBFilter;
-	fftfilt* RRCFilter;
+	RRCHelper* m_rrcHelper;
 	fftcorr* m_corr;
 
 	SampleVector m_sampleBuffer;
