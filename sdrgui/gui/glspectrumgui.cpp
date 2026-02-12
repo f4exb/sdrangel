@@ -146,6 +146,7 @@ bool GLSpectrumGUI::deserialize(const QByteArray& data)
     {
         m_glSpectrum->setHistogramMarkers(m_settings.getHistogramMarkers());
         m_glSpectrum->setWaterfallMarkers(m_settings.getWaterfallMarkers());
+        m_glSpectrum->setFrequencyZooming(m_settings.m_frequencyZoomFactor, m_settings.m_frequencyZoomPos);
         setAveragingCombo();
         displaySettings(); // ends with blockApplySettings(false)
         applySettings();
@@ -997,6 +998,13 @@ bool GLSpectrumGUI::handleMessage(const Message& message)
         if (m_markersDialog) {
             m_markersDialog->updateWaterfallMarkersDisplay();
         }
+        return true;
+    }
+    else if (SpectrumVis::MsgFrequencyZooming::match(message))
+    {
+        const SpectrumVis::MsgFrequencyZooming& report = (const SpectrumVis::MsgFrequencyZooming&) message;
+        m_settings.m_frequencyZoomFactor = report.getFrequencyZoomFactor();
+        m_settings.m_frequencyZoomPos = report.getFrequencyZoomPos();
         return true;
     }
     else if (SpectrumVis::MsgStartStop::match(message))

@@ -236,6 +236,7 @@ public:
     void setCalibrationInterpMode(SpectrumSettings::CalibrationInterpolationMode mode);
     void setIsDeviceSpectrum(bool isDeviceSpectrum) { m_isDeviceSpectrum = isDeviceSpectrum; }
     bool isDeviceSpectrum() const { return m_isDeviceSpectrum; }
+    void setFrequencyZooming(float frequencyZoomFactor, float frequencyZoomPos);
 
 private:
     struct ChannelMarkerState {

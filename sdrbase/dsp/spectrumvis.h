@@ -228,9 +228,6 @@ private:
 	int m_fftBufferFill;
 	bool m_needMoreSamples;
 
-    float m_frequencyZoomFactor;
-    float m_frequencyZoomPos;
-
 	Real m_scalef;
 	GLSpectrumInterface* m_glSpectrum;
     WSSpectrum m_wsSpectrum;

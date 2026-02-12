@@ -53,7 +53,7 @@ MESSAGE_CLASS_DEFINITION(GLSpectrumView::MsgReportCalibrationShift, Message)
 MESSAGE_CLASS_DEFINITION(GLSpectrumView::MsgReportHistogramMarkersChange, Message)
 MESSAGE_CLASS_DEFINITION(GLSpectrumView::MsgReportWaterfallMarkersChange, Message)
 
-const float GLSpectrumView::m_maxFrequencyZoom = 10.0f;
+const float GLSpectrumView::m_maxFrequencyZoom = 50.0f;
 const float GLSpectrumView::m_annotationMarkerHeight = 20.0f;
 
 GLSpectrumView::GLSpectrumView(QWidget* parent) :
@@ -4541,16 +4541,27 @@ void GLSpectrumView::resetFrequencyZoom()
 
 void GLSpectrumView::updateFFTLimits()
 {
-    if (!m_spectrumVis) {
-        return;
+    if (m_spectrumVis)
+    {
+        m_spectrumVis->getInputMessageQueue()->push(SpectrumVis::MsgFrequencyZooming::create(
+            m_frequencyZoomFactor, m_frequencyZoomPos
+        ));
     }
 
-    SpectrumVis::MsgFrequencyZooming *msg = SpectrumVis::MsgFrequencyZooming::create(
-        m_frequencyZoomFactor, m_frequencyZoomPos
-    );
+    if (m_messageQueueToGUI)
+    {
+        m_messageQueueToGUI->push(SpectrumVis::MsgFrequencyZooming::create(
+            m_frequencyZoomFactor, m_frequencyZoomPos
+        ));
+    }
 
-    m_spectrumVis->getInputMessageQueue()->push(msg);
     m_changesPending = true;
+}
+
+void GLSpectrumView::setFrequencyZooming(float frequencyZoomFactor, float frequencyZoomPos)
+{
+    m_frequencyZoomFactor = frequencyZoomFactor;
+    frequencyZoom(frequencyZoomPos);
 }
 
 void GLSpectrumView::setFrequencyScale()

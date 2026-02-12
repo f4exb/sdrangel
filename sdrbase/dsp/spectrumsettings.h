@@ -142,6 +142,8 @@ public:
     MeasurementsPosition m_measurementsPosition;
     int m_measurementPrecision;
     bool m_showAllControls;
+    float m_frequencyZoomFactor;
+    float m_frequencyZoomPos;
 
 	static const int m_log2FFTSizeMin = 6;   // 64
 	static const int m_log2FFTSizeMax = 15;  // 32k

@@ -110,6 +110,7 @@ public:
     void setCalibrationInterpMode(SpectrumSettings::CalibrationInterpolationMode mode) { m_spectrum->setCalibrationInterpMode(mode); }
     void setIsDeviceSpectrum(bool isDeviceSpectrum) { m_spectrum->setIsDeviceSpectrum(isDeviceSpectrum); }
     bool isDeviceSpectrum() const { return m_spectrum->isDeviceSpectrum(); }
+    void setFrequencyZooming(float frequencyZoomFactor, float frequencyZoomPos) { m_spectrum->setFrequencyZooming(frequencyZoomFactor, frequencyZoomPos); }
 
 private:
     QSplitter *m_splitter;

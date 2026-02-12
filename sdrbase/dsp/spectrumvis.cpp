@@ -52,8 +52,6 @@ SpectrumVis::SpectrumVis(Real scalef) :
     m_psd(4096),
 	m_fftBufferFill(0),
 	m_needMoreSamples(false),
-    m_frequencyZoomFactor(1.0f),
-    m_frequencyZoomPos(0.5f),
 	m_scalef(scalef),
 	m_glSpectrum(nullptr),
     m_specMax(0.0f),
@@ -119,10 +117,10 @@ void SpectrumVis::feed(const Complex *begin, unsigned int length)
 
     Complex c;
     Real v;
-    int fftMin = (m_frequencyZoomFactor == 1.0f) ?
-        0 : (m_frequencyZoomPos - (0.5f / m_frequencyZoomFactor)) * m_settings.m_fftSize;
-    int fftMax = (m_frequencyZoomFactor == 1.0f) ?
-        m_settings.m_fftSize : (m_frequencyZoomPos + (0.5f / m_frequencyZoomFactor)) * m_settings.m_fftSize;
+    int fftMin = (m_settings.m_frequencyZoomFactor == 1.0f) ?
+        0 : (m_settings.m_frequencyZoomPos - (0.5f / m_settings.m_frequencyZoomFactor)) * m_settings.m_fftSize;
+    int fftMax = (m_settings.m_frequencyZoomFactor == 1.0f) ?
+        m_settings.m_fftSize : (m_settings.m_frequencyZoomPos + (0.5f / m_settings.m_frequencyZoomFactor)) * m_settings.m_fftSize;
 
     if (m_settings.m_averagingMode == SpectrumSettings::AvgModeNone)
     {
@@ -422,10 +420,10 @@ void SpectrumVis::feed(const SampleVector::const_iterator& cbegin, const SampleV
 
 void SpectrumVis::processFFT(bool positiveOnly)
 {
-    int fftMin = (m_frequencyZoomFactor == 1.0f) ?
-        0 : (m_frequencyZoomPos - (0.5f / m_frequencyZoomFactor)) * m_settings.m_fftSize;
-    int fftMax = (m_frequencyZoomFactor == 1.0f) ?
-        m_settings.m_fftSize : (m_frequencyZoomPos + (0.5f / m_frequencyZoomFactor)) * m_settings.m_fftSize;
+    int fftMin = (m_settings.m_frequencyZoomFactor == 1.0f) ?
+        0 : (m_settings.m_frequencyZoomPos - (0.5f / m_settings.m_frequencyZoomFactor)) * m_settings.m_fftSize;
+    int fftMax = (m_settings.m_frequencyZoomFactor == 1.0f) ?
+        m_settings.m_fftSize : (m_settings.m_frequencyZoomPos + (0.5f / m_settings.m_frequencyZoomFactor)) * m_settings.m_fftSize;
 
     // apply fft window (and copy from m_fftBuffer to m_fftIn)
     m_window.apply(&m_fftBuffer[0], m_fft->in());
@@ -736,10 +734,10 @@ void SpectrumVis::processFFT(bool positiveOnly)
 
 void SpectrumVis::getZoomedPSDCopy(std::vector<Real>& copy) const
 {
-    int fftMin = (m_frequencyZoomFactor == 1.0f) ?
-        0 : (m_frequencyZoomPos - (0.5f / m_frequencyZoomFactor)) * m_settings.m_fftSize;
-    int fftMax = (m_frequencyZoomFactor == 1.0f) ?
-        m_settings.m_fftSize : (m_frequencyZoomPos + (0.5f / m_frequencyZoomFactor)) * m_settings.m_fftSize;
+    int fftMin = (m_settings.m_frequencyZoomFactor == 1.0f) ?
+        0 : (m_settings.m_frequencyZoomPos - (0.5f / m_settings.m_frequencyZoomFactor)) * m_settings.m_fftSize;
+    int fftMax = (m_settings.m_frequencyZoomFactor == 1.0f) ?
+        m_settings.m_fftSize : (m_settings.m_frequencyZoomPos + (0.5f / m_settings.m_frequencyZoomFactor)) * m_settings.m_fftSize;
     copy.assign(m_psd.begin() + fftMin, m_psd.begin() + fftMax);
 }
 
@@ -832,8 +830,8 @@ bool SpectrumVis::handleMessage(const Message& message)
     else if (MsgFrequencyZooming::match(message))
     {
         MsgFrequencyZooming& cmd = (MsgFrequencyZooming&) message;
-        m_frequencyZoomFactor = cmd.getFrequencyZoomFactor();
-        m_frequencyZoomPos = cmd.getFrequencyZoomPos();
+        m_settings.m_frequencyZoomFactor = cmd.getFrequencyZoomFactor();
+        m_settings.m_frequencyZoomPos = cmd.getFrequencyZoomPos();
         return true;
     }
 	else
