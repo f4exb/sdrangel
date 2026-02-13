@@ -104,7 +104,7 @@ void FreqTrackerSink::feed(const SampleVector::const_iterator& begin, const Samp
 	}
 }
 
-void FreqTrackerSink::processOneSample(Complex &ci)
+void FreqTrackerSink::processOneSample(const Complex &ci)
 {
     Complex sideband;
 	int decim = 1<<m_settings.m_spanLog2;

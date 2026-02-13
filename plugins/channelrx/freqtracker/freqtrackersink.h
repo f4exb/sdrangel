@@ -136,7 +136,7 @@ private:
     void setInterpolator();
     void connectTimer();
     void disconnectTimer();
-    void processOneSample(Complex &ci);
+    void processOneSample(const Complex &ci);
 
 private slots:
 	void tick();
