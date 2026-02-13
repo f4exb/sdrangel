@@ -418,7 +418,7 @@
       <item>
        <widget class="ButtonSwitch" name="rrcFilter">
         <property name="toolTip">
-         <string>Toggle RRC filter</string>
+         <string>Toggle RRC filter - Right click for options</string>
         </property>
         <property name="text">
          <string/>

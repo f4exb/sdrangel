@@ -32,7 +32,7 @@
 #include "freqtrackersettings.h"
 
 class SpectrumVis;
-class fftfilt;
+class FIRFilterRRC;
 class MessageQueue;
 class QTimer;
 
@@ -110,7 +110,7 @@ private:
 	Real m_interpolatorDistance;
 	Real m_interpolatorDistanceRemain;
 
-	fftfilt* m_rrcFilter;
+	FIRFilterRRC* m_rrcFilter;
 
 	Real m_squelchLevel;
 	uint32_t m_squelchCount;
@@ -136,7 +136,7 @@ private:
     void setInterpolator();
     void connectTimer();
     void disconnectTimer();
-    void processOneSample(Complex &ci);
+    void processOneSample(const Complex &ci);
 
 private slots:
 	void tick();

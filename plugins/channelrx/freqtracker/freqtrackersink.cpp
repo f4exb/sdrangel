@@ -20,7 +20,7 @@
 #include <QDebug>
 
 #include "dsp/dspengine.h"
-#include "dsp/fftfilt.h"
+#include "dsp/firfilterrrc.h"
 #include "dsp/spectrumvis.h"
 #include "util/db.h"
 #include "util/messagequeue.h"
@@ -58,7 +58,8 @@ FreqTrackerSink::FreqTrackerSink() :
     m_sampleBuffer.resize(m_sampleBufferSize);
     m_sum = Complex{0.0, 0.0};
 
-    m_rrcFilter = new fftfilt(m_settings.m_rfBandwidth / m_sinkSampleRate, 2*1024);
+    m_rrcFilter = new FIRFilterRRC();
+    m_rrcFilter->create(m_settings.m_rfBandwidth / m_sinkSampleRate, m_settings.m_rrcRolloff / 100.0f, 8, FIRFilterRRC::Normalization::Energy);
     m_pll.computeCoefficients(0.002f, 0.5f, 10.0f); // bandwidth, damping factor, loop gain
     applyChannelSettings(m_channelSampleRate, m_inputFrequencyOffset, true);
 }
@@ -103,10 +104,9 @@ void FreqTrackerSink::feed(const SampleVector::const_iterator& begin, const Samp
 	}
 }
 
-void FreqTrackerSink::processOneSample(Complex &ci)
+void FreqTrackerSink::processOneSample(const Complex &ci)
 {
-    fftfilt::cmplx *sideband;
-    int n_out;
+    Complex sideband;
 	int decim = 1<<m_settings.m_spanLog2;
     m_sum += ci;
 
@@ -120,72 +120,64 @@ void FreqTrackerSink::processOneSample(Complex &ci)
         m_undersampleCount = 0;
     }
 
-    if (m_settings.m_rrc)
-    {
-        n_out = m_rrcFilter->runFilt(ci, &sideband);
-    }
-    else
-    {
-        n_out = 1;
-        sideband = &ci;
+    if (m_settings.m_rrc) {
+        sideband = m_rrcFilter->filter(ci);
+    } else {
+        sideband = ci;
     }
 
-    for (int i = 0; i < n_out; i++)
+    Real re = sideband.real() / SDR_RX_SCALEF;
+    Real im = sideband.imag() / SDR_RX_SCALEF;
+    Real magsq = re*re + im*im;
+    m_movingAverage(magsq);
+    m_magsq = m_movingAverage.asDouble();
+    m_magsqSum += magsq;
+
+    if (magsq > m_magsqPeak)
     {
-        Real re = sideband[i].real() / SDR_RX_SCALEF;
-        Real im = sideband[i].imag() / SDR_RX_SCALEF;
-        Real magsq = re*re + im*im;
-        m_movingAverage(magsq);
-        m_magsq = m_movingAverage.asDouble();
-        m_magsqSum += magsq;
+        m_magsqPeak = magsq;
+    }
 
-        if (magsq > m_magsqPeak)
+    m_magsqCount++;
+
+    if (m_magsq < m_squelchLevel)
+    {
+        if (m_squelchGate > 0)
         {
-            m_magsqPeak = magsq;
-        }
-
-        m_magsqCount++;
-
-        if (m_magsq < m_squelchLevel)
-        {
-            if (m_squelchGate > 0)
-            {
-                if (m_squelchCount > 0) {
-                    m_squelchCount--;
-                }
-
-                m_squelchOpen = m_squelchCount >= m_squelchGate;
+            if (m_squelchCount > 0) {
+                m_squelchCount--;
             }
-            else
-            {
-                m_squelchOpen = false;
-            }
+
+            m_squelchOpen = m_squelchCount >= m_squelchGate;
         }
         else
         {
-            if (m_squelchGate > 0)
-            {
-                if (m_squelchCount < 2*m_squelchGate) {
-                    m_squelchCount++;
-                }
-
-                m_squelchOpen = m_squelchCount >= m_squelchGate;
-            }
-            else
-            {
-                m_squelchOpen = true;
-            }
+            m_squelchOpen = false;
         }
-
-        if (m_squelchOpen)
+    }
+    else
+    {
+        if (m_squelchGate > 0)
         {
-            if (m_settings.m_trackerType == FreqTrackerSettings::TrackerFLL) {
-                m_fll.feed(re, im);
-            } else if (m_settings.m_trackerType == FreqTrackerSettings::TrackerPLL) {
-                m_pll.feed(re, im);
+            if (m_squelchCount < 2*m_squelchGate) {
+                m_squelchCount++;
             }
-        }
 
+            m_squelchOpen = m_squelchCount >= m_squelchGate;
+        }
+        else
+        {
+            m_squelchOpen = true;
+        }
+    }
+
+    if (m_squelchOpen)
+    {
+        if (m_settings.m_trackerType == FreqTrackerSettings::TrackerFLL) {
+            m_fll.feed(re, im);
+        } else if (m_settings.m_trackerType == FreqTrackerSettings::TrackerPLL) {
+            m_pll.feed(re, im);
+        }
     }
 
     if (m_spectrumSink && (m_sampleBufferCount == m_sampleBufferSize))
@@ -249,15 +241,19 @@ void FreqTrackerSink::applyChannelSettings(int sinkSampleRate, int channelSample
 
 void FreqTrackerSink::applySettings(const QStringList& settingsKeys, const FreqTrackerSettings& settings, bool force)
 {
+    if (settingsKeys.empty()) {
+        return; // nothing to apply
+    }
+
     if (!settings.m_tracking) {
         qDebug() << "FreqTrackerSink::applySettings:" << settings.getDebugString(settingsKeys, force);
     }
 
-    if ((settingsKeys.contains("m_squelch") && (m_settings.m_squelch != settings.m_squelch)) || force) {
+    if ((settingsKeys.contains("squelch") && (m_settings.m_squelch != settings.m_squelch)) || force) {
         m_squelchLevel = CalcDb::powerFromdB(settings.m_squelch);
     }
 
-    if ((settingsKeys.contains("m_tracking") && (m_settings.m_tracking != settings.m_tracking)) || force)
+    if ((settingsKeys.contains("tracking") && (m_settings.m_tracking != settings.m_tracking)) || force)
     {
         m_avgDeltaFreq = 0.0;
         m_lastCorrAbs = 0;
@@ -269,7 +265,7 @@ void FreqTrackerSink::applySettings(const QStringList& settingsKeys, const FreqT
         }
     }
 
-    if ((settingsKeys.contains("m_trackerType") && (m_settings.m_trackerType != settings.m_trackerType)) || force)
+    if ((settingsKeys.contains("trackerType") && (m_settings.m_trackerType != settings.m_trackerType)) || force)
     {
         m_lastCorrAbs = 0;
         m_avgDeltaFreq = 0.0;
@@ -287,7 +283,7 @@ void FreqTrackerSink::applySettings(const QStringList& settingsKeys, const FreqT
         }
     }
 
-    if ((settingsKeys.contains("m_pllPskOrder") && (m_settings.m_pllPskOrder != settings.m_pllPskOrder)) || force)
+    if ((settingsKeys.contains("pllPskOrder") && (m_settings.m_pllPskOrder != settings.m_pllPskOrder)) || force)
     {
         if (settings.m_pllPskOrder < 32) {
             m_pll.setPskOrder(settings.m_pllPskOrder);
@@ -296,9 +292,9 @@ void FreqTrackerSink::applySettings(const QStringList& settingsKeys, const FreqT
 
     bool useInterpolator = false;
 
-    if ((settingsKeys.contains("m_rrcRolloff") && (m_settings.m_rrcRolloff != settings.m_rrcRolloff))
-     || (settingsKeys.contains("m_rfBandwidth") && (m_settings.m_rfBandwidth != settings.m_rfBandwidth))
-     || (settingsKeys.contains("m_squelchGate") && (m_settings.m_squelchGate != settings.m_squelchGate)) || force) {
+    if ((settingsKeys.contains("rrcRolloff") && (m_settings.m_rrcRolloff != settings.m_rrcRolloff))
+     || (settingsKeys.contains("rfBandwidth") && (m_settings.m_rfBandwidth != settings.m_rfBandwidth))
+     || (settingsKeys.contains("squelchGate") && (m_settings.m_squelchGate != settings.m_squelchGate)) || force) {
         useInterpolator = true;
     }
 
@@ -329,7 +325,7 @@ void FreqTrackerSink::setInterpolator()
     m_interpolator.create(16, m_channelSampleRate, m_settings.m_rfBandwidth / 2.2f);
     m_interpolatorDistanceRemain = 0;
     m_interpolatorDistance = (Real) m_channelSampleRate / (Real) m_sinkSampleRate;
-    m_rrcFilter->create_rrc_filter(m_settings.m_rfBandwidth / m_sinkSampleRate, m_settings.m_rrcRolloff / 100.0);
+    m_rrcFilter->create(m_settings.m_rfBandwidth / m_sinkSampleRate, m_settings.m_rrcRolloff / 100.0f, 8, FIRFilterRRC::Normalization::Energy);
     m_squelchGate = (m_sinkSampleRate / 100) * m_settings.m_squelchGate; // gate is given in 10s of ms at channel sample rate
 }
 

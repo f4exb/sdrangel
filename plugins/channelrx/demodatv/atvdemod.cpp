@@ -174,7 +174,7 @@ void ATVDemod::applySettings(const QStringList& settingsKeys, const ATVDemodSett
 {
     qDebug() << "ATVDemod::applySettings:" << settings.getDebugString(settingsKeys, force);
 
-    if (settingsKeys.contains("m_streamIndex") && m_settings.m_streamIndex != settings.m_streamIndex)
+    if (settingsKeys.contains("streamIndex") && m_settings.m_streamIndex != settings.m_streamIndex)
     {
         if (m_deviceAPI->getSampleMIMO()) // change of stream is possible for MIMO devices only
         {

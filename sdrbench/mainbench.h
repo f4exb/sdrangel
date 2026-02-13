@@ -57,6 +57,8 @@ private:
     void testDecimateFI();
     void testDecimateFF();
     void testGolay2312();
+    void testFFTRRCFilter();
+    void testFIRRRCFilter();
     void testFT8(const QString& wavFile, const QString& argsStr); //!< use with sdrbench/samples/ft8/230105_091630.wav in -f option
     void testFT8Protocols(const QString& argsStr);
     void testCallsign(const QString& argsStr);

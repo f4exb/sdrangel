@@ -477,7 +477,7 @@ void DABDemod::webapiUpdateChannelSettings(
     if (channelSettingsKeys.contains("program")) {
         settings.m_program = *response.getDabDemodSettings()->getProgram();
     }
-    if (channelSettingsKeys.contains("m_volume")) {
+    if (channelSettingsKeys.contains("volume")) {
         settings.m_volume = response.getDabDemodSettings()->getVolume();
     }
     if (channelSettingsKeys.contains("audioMute")) {

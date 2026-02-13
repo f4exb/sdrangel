@@ -415,7 +415,7 @@ void APTDemod::webapiUpdateChannelSettings(
     if (channelSettingsKeys.contains("transparencyThreshold")) {
         settings.m_transparencyThreshold = response.getAptDemodSettings()->getTransparencyThreshold();
     }
-    if (channelSettingsKeys.contains("m_opacityThreshold")) {
+    if (channelSettingsKeys.contains("opacityThreshold")) {
         settings.m_opacityThreshold = response.getAptDemodSettings()->getOpacityThreshold();
     }
     if (channelSettingsKeys.contains("palettes")) {

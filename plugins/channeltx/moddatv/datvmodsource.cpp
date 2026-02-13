@@ -692,9 +692,9 @@ void DATVModSource::applySettings(const QStringList& settingsKeys, const DATVMod
 {
     qDebug() << "DATVModSource::applySettings:" << settings.getDebugString(settingsKeys, force);
 
-    if ((settingsKeys.contains("m_rfBandwidth") && settings.m_rfBandwidth != m_settings.m_rfBandwidth)
-        || (settingsKeys.contains("m_modulation") && settings.m_modulation != m_settings.m_modulation)
-        || (settingsKeys.contains("m_symbolRate") && settings.m_symbolRate != m_settings.m_symbolRate)
+    if ((settingsKeys.contains("rfBandwidth") && settings.m_rfBandwidth != m_settings.m_rfBandwidth)
+        || (settingsKeys.contains("modulation") && settings.m_modulation != m_settings.m_modulation)
+        || (settingsKeys.contains("symbolRate") && settings.m_symbolRate != m_settings.m_symbolRate)
         || force)
     {
         if (settings.m_symbolRate > 0)
@@ -718,9 +718,9 @@ void DATVModSource::applySettings(const QStringList& settingsKeys, const DATVMod
             qWarning() << "DATVModSource::applySettings: symbolRate must be greater than 0.";
     }
 
-    if ((settingsKeys.contains("m_source") && settings.m_source != m_settings.m_source)
-        || (settingsKeys.contains("m_udpAddress") && settings.m_udpAddress != m_settings.m_udpAddress)
-        || (settingsKeys.contains("m_udpPort") && settings.m_udpPort != m_settings.m_udpPort)
+    if ((settingsKeys.contains("source") && settings.m_source != m_settings.m_source)
+        || (settingsKeys.contains("udpAddress") && settings.m_udpAddress != m_settings.m_udpAddress)
+        || (settingsKeys.contains("udpPort") && settings.m_udpPort != m_settings.m_udpPort)
         || force)
     {
         if (m_udpSocket)
@@ -740,8 +740,8 @@ void DATVModSource::applySettings(const QStringList& settingsKeys, const DATVMod
         }
     }
 
-    if ((settingsKeys.contains("m_standard") && settings.m_standard != m_settings.m_standard)
-        || (settingsKeys.contains("m_modulation") && settings.m_modulation != m_settings.m_modulation)
+    if ((settingsKeys.contains("standard") && settings.m_standard != m_settings.m_standard)
+        || (settingsKeys.contains("modulation") && settings.m_modulation != m_settings.m_modulation)
         || force)
     {
         m_symbolSel = 0;
@@ -750,10 +750,10 @@ void DATVModSource::applySettings(const QStringList& settingsKeys, const DATVMod
         m_sampleIdx = 0;
     }
 
-    if ((settingsKeys.contains("m_standard") && settings.m_standard != m_settings.m_standard)
-        || (settingsKeys.contains("m_modulation") && settings.m_modulation != m_settings.m_modulation)
-        || (settingsKeys.contains("m_fec") && settings.m_fec != m_settings.m_fec)
-        || (settingsKeys.contains("m_rollOff") && settings.m_rollOff != m_settings.m_rollOff)
+    if ((settingsKeys.contains("standard") && settings.m_standard != m_settings.m_standard)
+        || (settingsKeys.contains("modulation") && settings.m_modulation != m_settings.m_modulation)
+        || (settingsKeys.contains("fec") && settings.m_fec != m_settings.m_fec)
+        || (settingsKeys.contains("rollOff") && settings.m_rollOff != m_settings.m_rollOff)
         || force)
     {
         if (settings.m_standard == DATVModSettings::DVB_S)
@@ -865,15 +865,15 @@ void DATVModSource::applySettings(const QStringList& settingsKeys, const DATVMod
         }
     }
 
-    if ((settingsKeys.contains("m_imageServiceProvider") && settings.m_imageServiceProvider != m_settings.m_imageServiceProvider) || force) {
+    if ((settingsKeys.contains("imageServiceProvider") && settings.m_imageServiceProvider != m_settings.m_imageServiceProvider) || force) {
         m_tsGenerator.set_service_provider(settings.m_imageServiceProvider.toStdString());
     }
 
-    if ((settingsKeys.contains("m_imageServiceName") && settings.m_imageServiceName != m_settings.m_imageServiceName) || force) {
+    if ((settingsKeys.contains("imageServiceName") && settings.m_imageServiceName != m_settings.m_imageServiceName) || force) {
         m_tsGenerator.set_service_name(settings.m_imageServiceName.toStdString());
     }
 
-    if ((settingsKeys.contains("m_imageCodec") && settings.m_imageCodec != m_settings.m_imageCodec) || force) {
+    if ((settingsKeys.contains("imageCodec") && settings.m_imageCodec != m_settings.m_imageCodec) || force) {
         m_tsGenerator.set_codec(settings.m_imageCodec);
     }
 

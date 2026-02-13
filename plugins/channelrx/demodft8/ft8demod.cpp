@@ -440,7 +440,7 @@ void FT8Demod::webapiUpdateChannelSettings(
     if (channelSettingsKeys.contains("recordWav")) {
         settings.m_recordWav = response.getFt8DemodSettings()->getRecordWav() != 0;
     }
-    if (channelSettingsKeys.contains("m_logMessages")) {
+    if (channelSettingsKeys.contains("logMessages")) {
         settings.m_logMessages = response.getFt8DemodSettings()->getLogMessages() != 0;
     }
     if (channelSettingsKeys.contains("nbDecoderThreads")) {

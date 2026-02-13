@@ -1,0 +1,258 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<ui version="4.0">
+ <class>RRCFilterDialog</class>
+ <widget class="QDialog" name="RRCFilterDialog">
+  <property name="geometry">
+   <rect>
+    <x>0</x>
+    <y>0</y>
+    <width>407</width>
+    <height>197</height>
+   </rect>
+  </property>
+  <property name="windowTitle">
+   <string>RRC Filter Settings</string>
+  </property>
+  <layout class="QVBoxLayout" name="verticalLayout">
+   <item>
+    <widget class="QGroupBox" name="firGroup">
+     <property name="minimumSize">
+      <size>
+       <width>370</width>
+       <height>70</height>
+      </size>
+     </property>
+     <property name="toolTip">
+      <string>Use a FIR RRC filter</string>
+     </property>
+     <property name="styleSheet">
+      <string notr="true">QGroupBox { 
+     border: 1px solid gray; 
+ } </string>
+     </property>
+     <property name="title">
+      <string>FIR</string>
+     </property>
+     <property name="checkable">
+      <bool>true</bool>
+     </property>
+     <property name="checked">
+      <bool>false</bool>
+     </property>
+     <widget class="QLabel" name="symbolSpanLabel">
+      <property name="geometry">
+       <rect>
+        <x>10</x>
+        <y>30</y>
+        <width>91</width>
+        <height>26</height>
+       </rect>
+      </property>
+      <property name="text">
+       <string>Symbol Span</string>
+      </property>
+     </widget>
+     <widget class="QSpinBox" name="symbolSpan">
+      <property name="geometry">
+       <rect>
+        <x>100</x>
+        <y>30</y>
+        <width>70</width>
+        <height>29</height>
+       </rect>
+      </property>
+      <property name="toolTip">
+       <string>Symbol span</string>
+      </property>
+      <property name="alignment">
+       <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
+      </property>
+      <property name="minimum">
+       <number>6</number>
+      </property>
+      <property name="maximum">
+       <number>12</number>
+      </property>
+      <property name="value">
+       <number>8</number>
+      </property>
+     </widget>
+     <widget class="QLabel" name="normalizationLabel">
+      <property name="geometry">
+       <rect>
+        <x>180</x>
+        <y>30</y>
+        <width>101</width>
+        <height>26</height>
+       </rect>
+      </property>
+      <property name="text">
+       <string>Normalization</string>
+      </property>
+     </widget>
+     <widget class="QComboBox" name="normalization">
+      <property name="geometry">
+       <rect>
+        <x>280</x>
+        <y>30</y>
+        <width>101</width>
+        <height>32</height>
+       </rect>
+      </property>
+      <property name="toolTip">
+       <string>RRC normalization type</string>
+      </property>
+      <item>
+       <property name="text">
+        <string>Energy</string>
+       </property>
+      </item>
+      <item>
+       <property name="text">
+        <string>Amplitude</string>
+       </property>
+      </item>
+      <item>
+       <property name="text">
+        <string>Gain</string>
+       </property>
+      </item>
+     </widget>
+    </widget>
+   </item>
+   <item>
+    <widget class="QGroupBox" name="fftGroup">
+     <property name="minimumSize">
+      <size>
+       <width>370</width>
+       <height>70</height>
+      </size>
+     </property>
+     <property name="toolTip">
+      <string>Use a FFT RRC filter</string>
+     </property>
+     <property name="styleSheet">
+      <string notr="true">QGroupBox { 
+     border: 1px solid gray; 
+ } </string>
+     </property>
+     <property name="title">
+      <string>FFT</string>
+     </property>
+     <property name="checkable">
+      <bool>true</bool>
+     </property>
+     <property name="checked">
+      <bool>false</bool>
+     </property>
+     <widget class="QLabel" name="fftSizeLabel">
+      <property name="geometry">
+       <rect>
+        <x>10</x>
+        <y>30</y>
+        <width>81</width>
+        <height>26</height>
+       </rect>
+      </property>
+      <property name="text">
+       <string>FFT Size</string>
+      </property>
+     </widget>
+     <widget class="QComboBox" name="fftSize">
+      <property name="geometry">
+       <rect>
+        <x>80</x>
+        <y>30</y>
+        <width>94</width>
+        <height>32</height>
+       </rect>
+      </property>
+      <property name="toolTip">
+       <string>Size of FFT filter</string>
+      </property>
+      <item>
+       <property name="text">
+        <string>128</string>
+       </property>
+      </item>
+      <item>
+       <property name="text">
+        <string>256</string>
+       </property>
+      </item>
+      <item>
+       <property name="text">
+        <string>512</string>
+       </property>
+      </item>
+      <item>
+       <property name="text">
+        <string>1024</string>
+       </property>
+      </item>
+      <item>
+       <property name="text">
+        <string>2048</string>
+       </property>
+      </item>
+      <item>
+       <property name="text">
+        <string>4096</string>
+       </property>
+      </item>
+      <item>
+       <property name="text">
+        <string>8192</string>
+       </property>
+      </item>
+     </widget>
+    </widget>
+   </item>
+   <item>
+    <widget class="QDialogButtonBox" name="buttonBox">
+     <property name="orientation">
+      <enum>Qt::Horizontal</enum>
+     </property>
+     <property name="standardButtons">
+      <set>QDialogButtonBox::Close</set>
+     </property>
+    </widget>
+   </item>
+  </layout>
+ </widget>
+ <resources/>
+ <connections>
+  <connection>
+   <sender>buttonBox</sender>
+   <signal>accepted()</signal>
+   <receiver>RRCFilterDialog</receiver>
+   <slot>accept()</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>248</x>
+     <y>254</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>157</x>
+     <y>274</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>buttonBox</sender>
+   <signal>rejected()</signal>
+   <receiver>RRCFilterDialog</receiver>
+   <slot>reject()</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>316</x>
+     <y>260</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>286</x>
+     <y>274</y>
+    </hint>
+   </hints>
+  </connection>
+ </connections>
+</ui>

@@ -332,8 +332,6 @@ InmarsatDemodSink::InmarsatDemodSink(InmarsatDemod *stdCDemod) :
 {
     m_magsq = 0.0;
 
-    m_rrcFilter = new fftfilt(m_settings.m_rfBandwidth / (float) m_channelSampleRate, RRC_FILTER_SIZE);
-
     m_rrcI.create(m_settings.m_rrcRolloff, 5, SAMPLES_PER_SYMBOL, RootRaisedCosine<Real>::Gain);
     m_rrcQ.create(m_settings.m_rrcRolloff, 5, SAMPLES_PER_SYMBOL, RootRaisedCosine<Real>::Gain);
 
@@ -358,8 +356,6 @@ InmarsatDemodSink::InmarsatDemodSink(InmarsatDemod *stdCDemod) :
 
 InmarsatDemodSink::~InmarsatDemodSink()
 {
-    delete m_rrcFilter;
-    m_rrcFilter = nullptr;
     delete m_equalizer;
     m_equalizer = nullptr;
 }
@@ -473,10 +469,8 @@ void InmarsatDemodSink::processOneSample(Complex &ci)
     // Send signals to scope that are updated for each invocation of this method
     sampleToScopeA(cScaled, magsq, agcZ, m_agc.getGain(), m_agc.getAverage(), cCFO);
 
-    // RRC Matched filter
-    fftfilt::cmplx *rrcFilterOut = nullptr;
-    int n_out = m_rrcFilter->runFilt(cCFO, &rrcFilterOut);
-
+    // Bufferized RRC Matched filter
+    int n_out;
     m_rrcBuffer[m_rrcBufferIndex++] = cCFO;
 
     if (m_rrcBufferIndex == RRC_FILTER_SIZE/2)
@@ -491,7 +485,6 @@ void InmarsatDemodSink::processOneSample(Complex &ci)
 
     for (int i = 0; i < n_out; i++)
     {
-        //Complex rrc = rrcFilterOut[i];
         Complex rrc (m_rrcI.filter(m_rrcBuffer[i].real()), m_rrcQ.filter(m_rrcBuffer[i].imag()));
 
         // Symbol synchronizer
@@ -702,10 +695,6 @@ void InmarsatDemodSink::applySettings(const InmarsatDemodSettings& settings, con
         Real freqMax = freqMaxHz * 2 * M_PI / COSTAS_LOOP_RATE;
         m_costasLoop.setMaxFreq(freqMax);
         m_costasLoop.setMinFreq(-freqMax);
-    }
-
-    if (settingsKeys.contains("rfBandwidth") || settingsKeys.contains("rrcRolloff") || force) {
-        m_rrcFilter->create_rrc_filter(settings.m_rfBandwidth / (float) m_channelSampleRate, settings.m_rrcRolloff);
     }
 
     if (settingsKeys.contains("pllBandwidth") || force) {

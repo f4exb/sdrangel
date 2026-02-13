@@ -227,6 +227,10 @@ void FreqTracker::setCenterFrequency(qint64 frequency)
 
 void FreqTracker::applySettings(const QStringList& settingsKeys, const FreqTrackerSettings& settings, bool force)
 {
+    if (settingsKeys.empty()) {
+        return; // nothing to apply
+    }
+
     if (!settings.m_tracking) {
         qDebug() << "FreqTracker::applySettings:" << settings.getDebugString(settingsKeys, force);
     }

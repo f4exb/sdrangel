@@ -166,7 +166,7 @@ bool ILSDemodBaseband::handleMessage(const Message& cmd)
 
 void ILSDemodBaseband::applySettings(const QStringList& settingsKeys, const ILSDemodSettings& settings, bool force)
 {
-    if ((settingsKeys.contains("m_inputFrequencyOffset") && (settings.m_inputFrequencyOffset != m_settings.m_inputFrequencyOffset)) || force)
+    if ((settingsKeys.contains("inputFrequencyOffset") && (settings.m_inputFrequencyOffset != m_settings.m_inputFrequencyOffset)) || force)
     {
         m_channelizer->setChannelization(ILSDemodSettings::ILSDEMOD_CHANNEL_SAMPLE_RATE, settings.m_inputFrequencyOffset);
         m_sink.applyChannelSettings(m_channelizer->getChannelSampleRate(), m_channelizer->getChannelFrequencyOffset());
@@ -177,7 +177,7 @@ void ILSDemodBaseband::applySettings(const QStringList& settingsKeys, const ILSD
         }
     }
 
-    if ((settingsKeys.contains("m_audioDeviceName") && (settings.m_audioDeviceName != m_settings.m_audioDeviceName)) || force)
+    if ((settingsKeys.contains("audioDeviceName") && (settings.m_audioDeviceName != m_settings.m_audioDeviceName)) || force)
     {
         AudioDeviceManager *audioDeviceManager = DSPEngine::instance()->getAudioDeviceManager();
         int audioDeviceIndex = audioDeviceManager->getOutputDeviceIndex(settings.m_audioDeviceName);

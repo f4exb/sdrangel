@@ -34,6 +34,19 @@ struct ChannelAnalyzerSettings
         InputAutoCorr
     };
 
+    enum RRCType
+    {
+        RRCFIR,
+        RRCFFT
+    };
+
+    enum RRCNormalization
+    {
+        RRCNormEnergy,
+        RRCNormAmpltude,
+        RRCNormGain
+    };
+
     int m_inputFrequencyOffset;
     bool m_rationalDownSample;
     quint32 m_rationalDownSamplerRate;
@@ -46,6 +59,10 @@ struct ChannelAnalyzerSettings
     bool m_costasLoop;
     bool m_rrc;
     quint32 m_rrcRolloff; //!< in 100ths
+    RRCType m_rrcType;
+    int m_rrcSymbolSpan;
+    RRCNormalization m_rrcNormalization;
+    int m_rrcFFTLog2Size;
     unsigned int m_pllPskOrder;
     float m_pllBandwidth;
     float m_pllDampingFactor;

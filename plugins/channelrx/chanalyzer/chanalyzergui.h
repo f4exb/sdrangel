@@ -35,6 +35,8 @@ class BasebandSampleSink;
 class ChannelAnalyzer;
 class SpectrumVis;
 class ScopeVis;
+class RRCFilterDialog;
+class CRightClickEnabler;
 
 namespace Ui {
 	class ChannelAnalyzerGUI;
@@ -83,6 +85,8 @@ private:
 	SpectrumVis* m_spectrumVis;
 	ScopeVis* m_scopeVis;
 	MessageQueue m_inputMessageQueue;
+	RRCFilterDialog* m_rrcFilterDialog;
+	CRightClickEnabler* m_rrcRightClickEnabler;
 
 	explicit ChannelAnalyzerGUI(PluginAPI* pluginAPI, DeviceUISet *deviceUISet, BasebandSampleSink *rxChannel, QWidget* parent = nullptr);
 	virtual ~ChannelAnalyzerGUI();
@@ -123,6 +127,8 @@ private slots:
 	void on_ssb_toggled(bool checked);
 	void onWidgetRolled(QWidget* widget, bool rollDown);
     void onMenuDialogCalled(const QPoint& p);
+	void rrcSetupDialog(const QPoint& p);
+	void rrcSetup(int valueChanged);
     void handleInputMessages();
 	void tick();
 };

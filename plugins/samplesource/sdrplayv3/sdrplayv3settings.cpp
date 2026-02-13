@@ -231,7 +231,7 @@ void SDRPlayV3Settings::applySettings(const QStringList& settingsKeys, const SDR
     if (settingsKeys.contains("iqOrder")) {
         m_iqOrder = settings.m_iqOrder;
     }
-    if (settingsKeys.contains("m_transverterDeltaFrequency")) {
+    if (settingsKeys.contains("transverterDeltaFrequency")) {
         m_transverterDeltaFrequency = settings.m_transverterDeltaFrequency;
     }
     if (settingsKeys.contains("replayOffset")) {

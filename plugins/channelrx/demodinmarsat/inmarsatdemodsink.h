@@ -25,7 +25,6 @@
 #include "dsp/channelsamplesink.h"
 #include "dsp/nco.h"
 #include "dsp/interpolator.h"
-#include "dsp/fftfilt.h"
 #include "dsp/fftengine.h"
 #include "dsp/fftwindow.h"
 #include "dsp/costasloop.h"
@@ -213,7 +212,6 @@ private:
     bool m_locked;
 
     static const int RRC_FILTER_SIZE = 256;
-    fftfilt *m_rrcFilter;
     Complex m_rrcBuffer[RRC_FILTER_SIZE];
     RootRaisedCosine<Real> m_rrcI;                       //!< Square root raised cosine filter for I samples
     RootRaisedCosine<Real> m_rrcQ;                       //!< Square root raised cosine filter for Q samples

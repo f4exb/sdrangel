@@ -420,32 +420,6 @@ void fftfilt::create_asym_filter(float fopp, float fin, FFTWindow::Function wf)
     }
 }
 
-// This filter is constructed directly from frequency domain response. Run with runFilt.
-void fftfilt::create_rrc_filter(float fb, float a)
-{
-    std::fill(filter, filter+flen, 0);
-
-    for (int i = 0; i < flen; i++) {
-        filter[i] = frrc(fb, a, i, flen);
-    }
-
-    // normalize the output filter for unity gain
-    float scale = 0, mag;
-    for (int i = 0; i < flen; i++)
-    {
-        mag = abs(filter[i]);
-        if (mag > scale) {
-            scale = mag;
-        }
-    }
-    if (scale != 0)
-    {
-        for (int i = 0; i < flen; i++) {
-            filter[i] /= scale;
-        }
-    }
-}
-
 // test bypass
 int fftfilt::noFilt(const cmplx & in, cmplx **out)
 {
@@ -687,4 +661,3 @@ void sfft::fetch(float *result)
 		*result = itr->bins.real() * itr->bins.real()
                         + itr->bins.imag() * itr->bins.imag();
 }
-

@@ -145,6 +145,7 @@ set(sdrbase_SOURCES
     dsp/fftengine.cpp
     dsp/fftfactory.cpp
     dsp/fftfilt.cpp
+    dsp/fftfilterrrc.cpp
     dsp/fftnr.cpp
     dsp/fftwindow.cpp
     dsp/filterrc.cpp
@@ -152,6 +153,7 @@ set(sdrbase_SOURCES
     dsp/filerecord.cpp
     dsp/filerecordinterface.cpp
     dsp/firfilter.cpp
+    dsp/firfilterrrc.cpp
     dsp/fmpreemphasis.cpp
     dsp/freqlockcomplex.cpp
     dsp/interpolator.cpp
@@ -373,6 +375,7 @@ set(sdrbase_HEADERS
     dsp/fftengine.h
     dsp/fftfactory.h
     dsp/fftfilt.h
+    dsp/fftfilterrrc.h
     dsp/fftnr.h
     dsp/fftwengine.h
     dsp/fftwindow.h
@@ -381,6 +384,7 @@ set(sdrbase_HEADERS
     dsp/filerecord.h
     dsp/filerecordinterface.h
     dsp/firfilter.h
+    dsp/firfilterrrc.h
     dsp/fmpreemphasis.h
     dsp/freqlockcomplex.h
     dsp/gfft.h

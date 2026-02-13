@@ -461,7 +461,7 @@ bool PlutoSDRMIMO::applySettings(const PlutoSDRMIMOSettings& settings, const QLi
         settingsKeys.contains("lpfRxFIREnable") ||
         settingsKeys.contains("lpfRxFIRlog2Decim") ||
         settingsKeys.contains("lpfRxFIRBW") ||
-        settingsKeys.contains("m_lpfRxFIRGain") || force)
+        settingsKeys.contains("lpfRxFIRGain") || force)
     {
         if (plutoBox)
         {

@@ -202,7 +202,7 @@ void PERTester::applySettings(const PERTesterSettings& settings, const QList<QSt
                 settingsKeys.contains("reverseAPIAddress") ||
                 settingsKeys.contains("reverseAPIPort") ||
                 settingsKeys.contains("reverseAPIFeatureSetIndex") ||
-                settingsKeys.contains("m_reverseAPIFeatureIndex");
+                settingsKeys.contains("reverseAPIFeatureIndex");
         webapiReverseSendSettings(settingsKeys, settings, fullUpdate || force);
     }
 
