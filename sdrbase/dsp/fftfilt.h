@@ -52,7 +52,6 @@ public:
     void create_filter(const std::vector<std::pair<float, float>>& limits, bool pass = true); //!< Windowless version
 	void create_dsb_filter(float f2, FFTWindow::Function wf = FFTWindow::Blackman);
     void create_asym_filter(float fopp, float fin, FFTWindow::Function wf = FFTWindow::Blackman); //!< two different filters for in band and opposite band
-    void create_rrc_filter(float fb, float a); //!< root raised cosine. fb is half the band pass
 
 	int noFilt(const cmplx& in, cmplx **out);
 	int runFilt(const cmplx& in, cmplx **out);
