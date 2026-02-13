@@ -20,3 +20,7 @@
 #include "loggerwithfile.h"
 
 void installCrashHandler(qtwebapp::LoggerWithFile *logger);
+
+#ifdef _WIN32
+void logWindowsStackTrace();
+#endif

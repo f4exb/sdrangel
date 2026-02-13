@@ -38,6 +38,102 @@ static HWND hExitButton;
 
 static qtwebapp::LoggerWithFile *crashLogger;
 
+static void appendStackTrace(char *&reportBufferPtr, int &reportBufferRemaining)
+{
+    STACKFRAME64 stack;
+    CONTEXT context;
+    HANDLE process;
+    DWORD64 displacement;
+    ULONG frame;
+    BOOL symInit;
+    char symName[(MAX_PATH * sizeof(TCHAR))];
+    char storage[sizeof(IMAGEHLP_SYMBOL64) + (sizeof(symName))];
+    IMAGEHLP_SYMBOL64* symbol;
+
+    RtlCaptureContext(&context);
+    memset(&stack, 0, sizeof(STACKFRAME64));
+#if defined(_AMD64_)
+    stack.AddrPC.Offset    = context.Rip;
+    stack.AddrPC.Mode      = AddrModeFlat;
+    stack.AddrStack.Offset = context.Rsp;
+    stack.AddrStack.Mode   = AddrModeFlat;
+    stack.AddrFrame.Offset = context.Rbp;
+    stack.AddrFrame.Mode   = AddrModeFlat;
+#else
+    stack.AddrPC.Offset    = context.Eip;
+    stack.AddrPC.Mode      = AddrModeFlat;
+    stack.AddrStack.Offset = context.Esp;
+    stack.AddrStack.Mode   = AddrModeFlat;
+    stack.AddrFrame.Offset = context.Ebp;
+    stack.AddrFrame.Mode   = AddrModeFlat;
+#endif
+    displacement = 0;
+    process = GetCurrentProcess();
+    symInit = SymInitialize(process, "plugins", TRUE);
+    symbol = (IMAGEHLP_SYMBOL64*) storage;
+
+    if (!symInit)
+    {
+        int written = snprintf(reportBufferPtr, reportBufferRemaining, "(symbol init failed)\r\n");
+        if (written > 0)
+        {
+            reportBufferPtr += written;
+            reportBufferRemaining -= written;
+        }
+        return;
+    }
+
+    for (frame = 0; reportBufferRemaining > 0; frame++)
+    {
+        BOOL result = StackWalk(IMAGE_FILE_MACHINE_AMD64,
+            process,
+            GetCurrentThread(),
+            &stack,
+            &context,
+            NULL,
+            SymFunctionTableAccess64,
+            SymGetModuleBase64,
+            NULL);
+
+        if (result)
+        {
+            symbol->SizeOfStruct = sizeof(storage);
+            symbol->MaxNameLength = sizeof(symName);
+
+            BOOL symResult = SymGetSymFromAddr64(process, (ULONG64)stack.AddrPC.Offset, &displacement, symbol);
+            if (symResult) {
+                UnDecorateSymbolName(symbol->Name, (PSTR)symName, sizeof(symName), UNDNAME_COMPLETE);
+            }
+
+            int written = snprintf(
+                reportBufferPtr,
+                reportBufferRemaining,
+                "%02u 0x%p  %s\r\n",
+                frame,
+                stack.AddrPC.Offset,
+                symResult ? symbol->Name : "Unknown"
+            );
+            if (written > 0)
+            {
+                if (written <= reportBufferRemaining)
+                {
+                    reportBufferPtr += written;
+                    reportBufferRemaining -= written;
+                }
+                else
+                {
+                    reportBufferPtr += reportBufferRemaining;
+                    reportBufferRemaining = 0;
+                }
+            }
+        }
+        else
+        {
+            break;
+        }
+    }
+}
+
 static void ScaleWindow(HWND wnd, int x, int y, int w, int h)
 {
     int dpi = GetDpiForWindow(wnd);
@@ -273,88 +369,7 @@ static LONG crashHandler(struct _EXCEPTION_POINTERS *ExceptionInfo)
     reportBufferRemaining -= written;
 
     // Create stack trace
-
-    STACKFRAME64 stack;
-    CONTEXT context;
-    HANDLE process;
-    DWORD64 displacement;
-    ULONG frame;
-    BOOL symInit;
-    char symName[(MAX_PATH * sizeof(TCHAR))];
-    char storage[sizeof(IMAGEHLP_SYMBOL64) + (sizeof(symName))];
-    IMAGEHLP_SYMBOL64* symbol;
-
-    RtlCaptureContext(&context);
-    memset(&stack, 0, sizeof(STACKFRAME64));
-#if defined(_AMD64_)
-    stack.AddrPC.Offset    = context.Rip;
-    stack.AddrPC.Mode      = AddrModeFlat;
-    stack.AddrStack.Offset = context.Rsp;
-    stack.AddrStack.Mode   = AddrModeFlat;
-    stack.AddrFrame.Offset = context.Rbp;
-    stack.AddrFrame.Mode   = AddrModeFlat;
-#else
-    stack.AddrPC.Offset    = context.Eip;
-    stack.AddrPC.Mode      = AddrModeFlat;
-    stack.AddrStack.Offset = context.Esp;
-    stack.AddrStack.Mode   = AddrModeFlat;
-    stack.AddrFrame.Offset = context.Ebp;
-    stack.AddrFrame.Mode   = AddrModeFlat;
-#endif
-    displacement = 0;
-    process = GetCurrentProcess();
-    symInit = SymInitialize(process, "plugins", TRUE);
-    symbol = (IMAGEHLP_SYMBOL64*) storage;
-
-    for (frame = 0; reportBufferRemaining > 0; frame++)
-    {
-        BOOL result = StackWalk(IMAGE_FILE_MACHINE_AMD64,
-            process,
-            GetCurrentThread(),
-            &stack,
-            &context,
-            NULL,
-            SymFunctionTableAccess64,
-            SymGetModuleBase64,
-            NULL);
-
-        if (result)
-        {
-            symbol->SizeOfStruct = sizeof(storage);
-            symbol->MaxNameLength = sizeof(symName);
-
-            BOOL symResult = SymGetSymFromAddr64(process, (ULONG64)stack.AddrPC.Offset, &displacement, symbol);
-            if (symResult) {
-                UnDecorateSymbolName(symbol->Name, (PSTR)symName, sizeof(symName), UNDNAME_COMPLETE);
-            }
-
-            written = snprintf(
-                reportBufferPtr,
-                reportBufferRemaining,
-                "%02u 0x%p  %s\r\n",
-                frame,
-                stack.AddrPC.Offset,
-                symResult ? symbol->Name : "Unknown"
-            );
-            if (written > 0)
-            {
-                if (written <= reportBufferRemaining)
-                {
-                    reportBufferPtr += written;
-                    reportBufferRemaining -= written;
-                }
-                else
-                {
-                    reportBufferPtr += reportBufferRemaining;
-                    reportBufferRemaining = 0;
-                }
-            }
-        }
-        else
-        {
-            break;
-        }
-    }
+    appendStackTrace(reportBufferPtr, reportBufferRemaining);
 
     // Append log file
     if (crashLogger)
@@ -431,4 +446,23 @@ void installCrashHandler(qtwebapp::LoggerWithFile *logger)
 {
     crashLogger = logger;
     SetUnhandledExceptionFilter(crashHandler);
+}
+
+void logWindowsStackTrace()
+{
+    const int reportBufferSize = 64 * 1024;
+    char *reportBuffer = new char[reportBufferSize];
+    char *reportBufferPtr = reportBuffer;
+    int reportBufferRemaining = reportBufferSize;
+
+    int written = snprintf(reportBufferPtr, reportBufferRemaining, "Stack trace (DbgHelp):\r\n");
+    if (written > 0)
+    {
+        reportBufferPtr += written;
+        reportBufferRemaining -= written;
+    }
+
+    appendStackTrace(reportBufferPtr, reportBufferRemaining);
+    qCritical("%s", reportBuffer);
+    delete[] reportBuffer;
 }

@@ -28,6 +28,11 @@
 #include <QSysInfo>
 #include <QSettings>
 #include <exception>
+#include <cstdlib>
+#if defined(HAVE_LIBUNWIND)
+#include <libunwind.h>
+#include <cxxabi.h>
+#endif
 #ifdef __APPLE__
 #if (QT_VERSION < QT_VERSION_CHECK(6, 0, 0))
 #include <QGLFormat>
@@ -46,6 +51,50 @@
 #include "remotetcpsinkstarter.h"
 #include "dsp/dsptypes.h"
 #include "crashhandler.h"
+
+static void logExceptionStackTrace()
+{
+#if defined(HAVE_LIBUNWIND)
+    unw_context_t context;
+    unw_cursor_t cursor;
+    if (unw_getcontext(&context) != 0) {
+        qCritical("Failed to capture unwind context.");
+        return;
+    }
+    if (unw_init_local(&cursor, &context) != 0) {
+        qCritical("Failed to initialize unwind cursor.");
+        return;
+    }
+
+    qCritical("Stack trace (libunwind):");
+    int frame = 0;
+    while (unw_step(&cursor) > 0 && frame < 64) {
+        unw_word_t pc = 0;
+        unw_word_t offset = 0;
+        char symbol[256];
+        symbol[0] = '\0';
+
+        if (unw_get_reg(&cursor, UNW_REG_IP, &pc) != 0) {
+            pc = 0;
+        }
+
+        if (unw_get_proc_name(&cursor, symbol, sizeof(symbol), &offset) == 0) {
+            int status = 0;
+            char *demangled = abi::__cxa_demangle(symbol, nullptr, nullptr, &status);
+            const char *name = (status == 0 && demangled) ? demangled : symbol;
+            qCritical("#%d 0x%llx %s + 0x%llx", frame, static_cast<unsigned long long>(pc), name,
+                      static_cast<unsigned long long>(offset));
+            std::free(demangled);
+        } else {
+            qCritical("#%d 0x%llx <unknown>", frame, static_cast<unsigned long long>(pc));
+        }
+
+        ++frame;
+    }
+#else
+    qCritical("Stack trace unavailable (libunwind not enabled).");
+#endif
+}
 
 class SDRangelApplication final : public QApplication
 {
@@ -66,10 +115,25 @@ public:
             } else {
                 qCritical() << "Failed on object: (null)";
             }
+#ifdef _WIN32
+            logWindowsStackTrace();
+#else
+            logExceptionStackTrace();
+#endif
         } catch (const std::exception &ex) {
             qCritical("Unhandled exception in event handler: %s", ex.what());
+#ifdef _WIN32
+            logWindowsStackTrace();
+#else
+            logExceptionStackTrace();
+#endif
         }  catch (...) {
             qCritical("Unhandled non-standard exception in event handler.");
+#ifdef _WIN32
+            logWindowsStackTrace();
+#else
+            logExceptionStackTrace();
+#endif
         }
 
         if (!s_exitRequested) {
