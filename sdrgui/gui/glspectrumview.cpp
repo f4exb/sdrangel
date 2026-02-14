@@ -741,6 +741,15 @@ void GLSpectrumView::updateWaterfall(const Real *spectrum)
             *pix++ = m_waterfallPalette[(int)v];
         }
 
+        // Replicate Nyquist sample (spectrum[0]) to end of positive side
+        int v = (int)((spectrum[0] - m_referenceLevel) * 2.4 * 100.0 / m_powerRange + 240.0);
+        if (v > 239) {
+            v = 239;
+        } else if (v < 0) {
+            v = 0;
+        }
+        *pix++ = m_waterfallPalette[(int)v];
+
         m_waterfallBufferPos++;
     }
 }
@@ -763,6 +772,15 @@ void GLSpectrumView::update3DSpectrogram(const Real *spectrum)
 
             *pix++ = v;
         }
+
+        // Replicate Nyquist sample (spectrum[0]) to end of positive side
+        int v = (int)((spectrum[0] - m_referenceLevel) * 2.4 * 100.0 / m_powerRange + 240.0);
+        if (v > 255) {
+            v = 255;
+        } else if (v < 0) {
+            v = 0;
+        }
+        *pix++ = v;
 
         m_3DSpectrogramBufferPos++;
     }
@@ -1005,15 +1023,15 @@ void GLSpectrumView::paintGL()
         // paint 3D spectrogram
         if (m_3DSpectrogramTexturePos + m_3DSpectrogramBufferPos < m_3DSpectrogramTextureHeight)
         {
-            m_glShaderSpectrogram.subTexture(0, m_3DSpectrogramTexturePos, m_nbBins, m_3DSpectrogramBufferPos,  m_3DSpectrogramBuffer->scanLine(0));
+            m_glShaderSpectrogram.subTexture(0, m_3DSpectrogramTexturePos, m_nbBins + 1, m_3DSpectrogramBufferPos,  m_3DSpectrogramBuffer->scanLine(0));
             m_3DSpectrogramTexturePos += m_3DSpectrogramBufferPos;
         }
         else
         {
             int breakLine = m_3DSpectrogramTextureHeight - m_3DSpectrogramTexturePos;
             int linesLeft = m_3DSpectrogramTexturePos + m_3DSpectrogramBufferPos - m_3DSpectrogramTextureHeight;
-            m_glShaderSpectrogram.subTexture(0, m_3DSpectrogramTexturePos, m_nbBins, breakLine,  m_3DSpectrogramBuffer->scanLine(0));
-            m_glShaderSpectrogram.subTexture(0, 0, m_nbBins, linesLeft,  m_3DSpectrogramBuffer->scanLine(breakLine));
+            m_glShaderSpectrogram.subTexture(0, m_3DSpectrogramTexturePos, m_nbBins + 1, breakLine,  m_3DSpectrogramBuffer->scanLine(0));
+            m_glShaderSpectrogram.subTexture(0, 0, m_nbBins + 1, linesLeft,  m_3DSpectrogramBuffer->scanLine(breakLine));
             m_3DSpectrogramTexturePos = linesLeft;
         }
 
@@ -1045,15 +1063,15 @@ void GLSpectrumView::paintGL()
 
             if (m_waterfallTexturePos + m_waterfallBufferPos < m_waterfallTextureHeight)
             {
-                m_glShaderWaterfall.subTexture(0, m_waterfallTexturePos, m_nbBins, m_waterfallBufferPos,  m_waterfallBuffer->scanLine(0));
+                m_glShaderWaterfall.subTexture(0, m_waterfallTexturePos, m_nbBins + 1, m_waterfallBufferPos,  m_waterfallBuffer->scanLine(0));
                 m_waterfallTexturePos += m_waterfallBufferPos;
             }
             else
             {
                 int breakLine = m_waterfallTextureHeight - m_waterfallTexturePos;
                 int linesLeft = m_waterfallTexturePos + m_waterfallBufferPos - m_waterfallTextureHeight;
-                m_glShaderWaterfall.subTexture(0, m_waterfallTexturePos, m_nbBins, breakLine,  m_waterfallBuffer->scanLine(0));
-                m_glShaderWaterfall.subTexture(0, 0, m_nbBins, linesLeft,  m_waterfallBuffer->scanLine(breakLine));
+                m_glShaderWaterfall.subTexture(0, m_waterfallTexturePos, m_nbBins + 1, breakLine,  m_waterfallBuffer->scanLine(0));
+                m_glShaderWaterfall.subTexture(0, 0, m_nbBins + 1, linesLeft,  m_waterfallBuffer->scanLine(breakLine));
                 m_waterfallTexturePos = linesLeft;
             }
 
@@ -3388,7 +3406,7 @@ void GLSpectrumView::applyChanges()
     bool waterfallFFTSizeChanged = true;
 
     if (m_waterfallBuffer) {
-        waterfallFFTSizeChanged = m_waterfallBuffer->width() != m_nbBins;
+        waterfallFFTSizeChanged = m_waterfallBuffer->width() != m_nbBins + 1;
     }
 
     bool windowSizeChanged = m_waterfallTextureHeight != m_waterfallHeight;
@@ -3399,7 +3417,7 @@ void GLSpectrumView::applyChanges()
             delete m_waterfallBuffer;
         }
 
-        m_waterfallBuffer = new QImage(m_nbBins, m_waterfallHeight, QImage::Format_ARGB32);
+        m_waterfallBuffer = new QImage(m_nbBins + 1, m_waterfallHeight, QImage::Format_ARGB32);
         m_waterfallBuffer->fill(qRgb(0x00, 0x00, 0x00));
 
         if (m_waterfallHeight > 0) {
@@ -3412,7 +3430,7 @@ void GLSpectrumView::applyChanges()
             delete m_3DSpectrogramBuffer;
         }
 
-        m_3DSpectrogramBuffer = new QImage(m_nbBins, m_waterfallHeight, QImage::Format_Grayscale8);
+        m_3DSpectrogramBuffer = new QImage(m_nbBins + 1, m_waterfallHeight, QImage::Format_Grayscale8);
         m_3DSpectrogramBuffer->fill(qRgb(0x00, 0x00, 0x00));
 
         if (m_waterfallHeight > 0) {
