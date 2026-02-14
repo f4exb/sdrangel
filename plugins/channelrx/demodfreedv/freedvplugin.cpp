@@ -30,7 +30,7 @@
 const PluginDescriptor FreeDVPlugin::m_pluginDescriptor = {
     FreeDVDemod::m_channelId,
 	QStringLiteral("FreeDV Demodulator"),
-    QStringLiteral("7.23.1"),
+    QStringLiteral("7.23.2"),
 	QStringLiteral("(c) Edouard Griffiths, F4EXB"),
 	QStringLiteral("https://github.com/f4exb/sdrangel"),
 	true,

@@ -20,7 +20,7 @@ set(CMAKE_EXPORT_COMPILE_COMMANDS ON)
 # configure version
 set(sdrangel_VERSION_MAJOR "7")
 set(sdrangel_VERSION_MINOR "23")
-set(sdrangel_VERSION_PATCH "1")
+set(sdrangel_VERSION_PATCH "2")
 set(sdrangel_VERSION_SUFFIX "")
 
 # SDRAngel cmake options
@@ -49,11 +49,11 @@ option(BUILD_SHARED_LIBS "Build using shared libraries" ON)
 set(HAVE_LIBUNWIND OFF)
 if(ENABLE_LIBUNWIND AND UNIX AND NOT ANDROID)
   find_package(PkgConfig QUIET)
-  
+
   if(PKG_CONFIG_FOUND)
     pkg_check_modules(LIBUNWIND QUIET libunwind)
   endif()
-  
+
   # Fall back to find_library if pkg-config doesn't find it
   if(NOT LIBUNWIND_FOUND)
     find_library(LIBUNWIND_LIB unwind)
@@ -68,7 +68,7 @@ if(ENABLE_LIBUNWIND AND UNIX AND NOT ANDROID)
       set(LIBUNWIND_FOUND TRUE)
     endif()
   endif()
-  
+
   if(LIBUNWIND_FOUND)
     if(NOT LIBUNWIND_LIBRARIES)
       set(LIBUNWIND_LIBRARIES unwind)

@@ -34,7 +34,7 @@
 const PluginDescriptor AntennaToolsPlugin::m_pluginDescriptor = {
     AntennaTools::m_featureId,
     QStringLiteral("Antenna Tools"),
-    QStringLiteral("7.22.3"),
+    QStringLiteral("7.23.2"),
     QStringLiteral("(c) Jon Beniston, M7RCE"),
     QStringLiteral("https://github.com/f4exb/sdrangel"),
     true,

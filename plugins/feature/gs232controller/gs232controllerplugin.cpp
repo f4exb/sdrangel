@@ -34,7 +34,7 @@
 const PluginDescriptor GS232ControllerPlugin::m_pluginDescriptor = {
     GS232Controller::m_featureId,
     QStringLiteral("Rotator Controller"),
-    QStringLiteral("7.22.7"),
+    QStringLiteral("7.23.2"),
     QStringLiteral("(c) Jon Beniston, M7RCE"),
     QStringLiteral("https://github.com/f4exb/sdrangel"),
     true,

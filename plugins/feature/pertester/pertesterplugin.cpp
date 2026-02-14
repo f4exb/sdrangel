@@ -34,7 +34,7 @@
 const PluginDescriptor PERTesterPlugin::m_pluginDescriptor = {
     PERTester::m_featureId,
     QStringLiteral("Packet Error Rate Tester"),
-    QStringLiteral("7.22.3"),
+    QStringLiteral("7.23.2"),
     QStringLiteral("(c) Jon Beniston, M7RCE"),
     QStringLiteral("https://github.com/f4exb/sdrangel"),
     true,
