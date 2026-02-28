@@ -217,6 +217,7 @@ bool NavtexDemod::handleMessage(const Message& cmd)
                     << report.getErrors() << ","
                     << report.getRSSI()
                     << "\n";
+                m_logStream.flush();
             }
         }
 
