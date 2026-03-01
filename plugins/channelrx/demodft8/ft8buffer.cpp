@@ -18,6 +18,7 @@
 ///////////////////////////////////////////////////////////////////////////////////
 
 #include <QMutexLocker>
+#include <algorithm>
 
 #include "ft8demodsettings.h"
 #include "ft8buffer.h"
@@ -46,8 +47,10 @@ void FT8Buffer::feed(int16_t sample)
     }
 }
 
-void FT8Buffer::getCurrentBuffer(int16_t *bufferCopy)
+void FT8Buffer::getCurrentBuffer(int16_t *bufferCopy, int samplesToCopy)
 {
     QMutexLocker mlock(&m_mutex);
-    std::copy(&m_buffer[m_sampleIndex], &m_buffer[m_sampleIndex + m_bufferSize], bufferCopy);
+    const int samples = std::max(1, std::min(samplesToCopy, m_bufferSize));
+    const int start = m_sampleIndex + m_bufferSize - samples;
+    std::copy(&m_buffer[start], &m_buffer[start + samples], bufferCopy);
 }

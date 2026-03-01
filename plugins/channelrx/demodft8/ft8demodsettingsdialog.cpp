@@ -27,6 +27,7 @@ FT8DemodSettingsDialog::FT8DemodSettingsDialog(FT8DemodSettings& settings, QStri
     m_settingsKeys(settingsKeys)
 {
     ui->setupUi(this);
+    ui->decoderMode->setCurrentIndex(m_settings.m_decoderMode);
     ui->decoderNbThreads->setValue(m_settings.m_nbDecoderThreads);
     ui->decoderTimeBudget->setValue(m_settings.m_decoderTimeBudget);
     ui->osdEnable->setChecked(m_settings.m_useOSD);
@@ -108,6 +109,33 @@ void FT8DemodSettingsDialog::reject()
 {
     m_settingsKeys.clear();
     QDialog::reject();
+}
+
+void FT8DemodSettingsDialog::on_decoderMode_currentIndexChanged(int index)
+{
+    const int previousDecoderMode = m_settings.m_decoderMode;
+    const QList<FT8DemodBandPreset> previousDefaults = FT8DemodSettings::getBandPresetsForMode(previousDecoderMode);
+    const bool hadDefaultBandPresets = FT8DemodSettings::areBandPresetsEqual(m_settings.m_bandPresets, previousDefaults);
+
+    m_settings.m_decoderMode = (index >= FT8DemodSettings::DecoderModeFT8) && (index <= FT8DemodSettings::DecoderModeFT4) ?
+        index : FT8DemodSettings::DecoderModeFT8;
+
+    if (hadDefaultBandPresets)
+    {
+        m_settings.resetBandPresets(m_settings.m_decoderMode);
+        ui->bands->blockSignals(true);
+        ui->bands->setRowCount(0);
+        populateBandsTable();
+        ui->bands->blockSignals(false);
+
+        if (!m_settingsKeys.contains("bandPresets")) {
+            m_settingsKeys.append("bandPresets");
+        }
+    }
+
+    if (!m_settingsKeys.contains("decoderMode")) {
+        m_settingsKeys.append("decoderMode");
+    }
 }
 
 void FT8DemodSettingsDialog::on_decoderNbThreads_valueChanged(int value)

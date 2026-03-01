@@ -103,7 +103,7 @@ private:
     MessageQueue *m_messageQueueToGUI;
     SpectrumVis *m_spectrumVis;
     FT8Buffer m_ft8Buffer;
-    int m_tickCount;
+    qint64 m_lastProcessPeriodIndex;
     QThread *m_workerThread;
     FT8DemodWorker *m_ft8DemodWorker;
     QThread *m_pskReporterThread;

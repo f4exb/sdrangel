@@ -50,6 +50,7 @@ void FT8DemodSettings::resetToDefaults()
     m_agc = false;
     m_recordWav = false;
     m_logMessages = false;
+    m_decoderMode = DecoderModeFT8;
     m_nbDecoderThreads = 3;
     m_decoderTimeBudget = 0.5;
     m_useOSD = false;
@@ -78,22 +79,78 @@ void FT8DemodSettings::resetToDefaults()
 
 void FT8DemodSettings::resetBandPresets()
 {
-    m_bandPresets.clear();
-    m_bandPresets.push_back(FT8DemodBandPreset{ "160m",   1840, 0});
-    m_bandPresets.push_back(FT8DemodBandPreset{  "80m",   3573, 0});
-    m_bandPresets.push_back(FT8DemodBandPreset{  "60m",   5357, 0});
-    m_bandPresets.push_back(FT8DemodBandPreset{  "40m",   7074, 0});
-    m_bandPresets.push_back(FT8DemodBandPreset{  "30m",  10136, 0});
-    m_bandPresets.push_back(FT8DemodBandPreset{  "20m",  14074, 0});
-    m_bandPresets.push_back(FT8DemodBandPreset{  "17m",  18100, 0});
-    m_bandPresets.push_back(FT8DemodBandPreset{  "15m",  21074, 0});
-    m_bandPresets.push_back(FT8DemodBandPreset{  "12m",  24915, 0});
-    m_bandPresets.push_back(FT8DemodBandPreset{  "10m",  28074, 0});
-    m_bandPresets.push_back(FT8DemodBandPreset{   "6m",  50313, 0});
-    m_bandPresets.push_back(FT8DemodBandPreset{   "4m",  70100, 0});
-    m_bandPresets.push_back(FT8DemodBandPreset{   "2m", 144120, 0});
-    m_bandPresets.push_back(FT8DemodBandPreset{"1.25m", 222065, 0});
-    m_bandPresets.push_back(FT8DemodBandPreset{ "70cm", 432065, 0});
+    resetBandPresets(m_decoderMode);
+}
+
+void FT8DemodSettings::resetBandPresets(int decoderMode)
+{
+    m_bandPresets = getBandPresetsForMode(decoderMode);
+}
+
+QList<FT8DemodBandPreset> FT8DemodSettings::getBandPresetsForMode(int decoderMode)
+{
+    QList<FT8DemodBandPreset> bandPresets;
+
+    if (decoderMode == DecoderModeFT4)
+    {
+        bandPresets.push_back(FT8DemodBandPreset{ "160m",   1840, 0});
+        bandPresets.push_back(FT8DemodBandPreset{  "80m",   3575, 0});
+        bandPresets.push_back(FT8DemodBandPreset{  "60m",   5357, 0});
+        bandPresets.push_back(FT8DemodBandPreset{  "40m",   7047, 500});
+        bandPresets.push_back(FT8DemodBandPreset{  "30m",  10140, 0});
+        bandPresets.push_back(FT8DemodBandPreset{  "20m",  14080, 0});
+        bandPresets.push_back(FT8DemodBandPreset{  "17m",  18104, 0});
+        bandPresets.push_back(FT8DemodBandPreset{  "15m",  21140, 0});
+        bandPresets.push_back(FT8DemodBandPreset{  "12m",  24919, 0});
+        bandPresets.push_back(FT8DemodBandPreset{  "10m",  28180, 0});
+        bandPresets.push_back(FT8DemodBandPreset{   "6m",  50318, 0});
+        bandPresets.push_back(FT8DemodBandPreset{   "4m",  70154, 0});
+        bandPresets.push_back(FT8DemodBandPreset{   "2m", 144170, 0});
+        bandPresets.push_back(FT8DemodBandPreset{"1.25m", 222065, 0});
+        bandPresets.push_back(FT8DemodBandPreset{ "70cm", 432065, 0});
+    }
+    else
+    {
+        bandPresets.push_back(FT8DemodBandPreset{ "160m",   1840, 0});
+        bandPresets.push_back(FT8DemodBandPreset{  "80m",   3573, 0});
+        bandPresets.push_back(FT8DemodBandPreset{  "60m",   5357, 0});
+        bandPresets.push_back(FT8DemodBandPreset{  "40m",   7074, 0});
+        bandPresets.push_back(FT8DemodBandPreset{  "30m",  10136, 0});
+        bandPresets.push_back(FT8DemodBandPreset{  "20m",  14074, 0});
+        bandPresets.push_back(FT8DemodBandPreset{  "17m",  18100, 0});
+        bandPresets.push_back(FT8DemodBandPreset{  "15m",  21074, 0});
+        bandPresets.push_back(FT8DemodBandPreset{  "12m",  24915, 0});
+        bandPresets.push_back(FT8DemodBandPreset{  "10m",  28074, 0});
+        bandPresets.push_back(FT8DemodBandPreset{   "6m",  50313, 0});
+        bandPresets.push_back(FT8DemodBandPreset{   "4m",  70100, 0});
+        bandPresets.push_back(FT8DemodBandPreset{   "2m", 144174, 0});
+        bandPresets.push_back(FT8DemodBandPreset{"1.25m", 222065, 0});
+        bandPresets.push_back(FT8DemodBandPreset{ "70cm", 432174, 0});
+    }
+
+    return bandPresets;
+}
+
+bool FT8DemodSettings::areBandPresetsEqual(const QList<FT8DemodBandPreset>& left, const QList<FT8DemodBandPreset>& right)
+{
+    if (left.size() != right.size()) {
+        return false;
+    }
+
+    for (int i = 0; i < left.size(); i++)
+    {
+        if (left[i].m_name != right[i].m_name) {
+            return false;
+        }
+        if (left[i].m_baseFrequency != right[i].m_baseFrequency) {
+            return false;
+        }
+        if (left[i].m_channelOffset != right[i].m_channelOffset) {
+            return false;
+        }
+    }
+
+    return true;
 }
 
 QByteArray FT8DemodSettings::serialize() const
@@ -117,6 +174,7 @@ QByteArray FT8DemodSettings::serialize() const
     s.writeU32(5, m_rgbColor);
     s.writeBool(6, m_recordWav);
     s.writeBool(7, m_logMessages);
+    s.writeS32(10, m_decoderMode);
     s.writeS32(8, m_nbDecoderThreads);
     s.writeFloat(9, m_decoderTimeBudget);
     s.writeBool(11, m_agc);
@@ -190,6 +248,8 @@ bool FT8DemodSettings::deserialize(const QByteArray& data)
         d.readU32(5, &m_rgbColor);
         d.readBool(6, &m_recordWav, false);
         d.readBool(7, &m_logMessages, false);
+        d.readS32(10, &m_decoderMode, DecoderModeFT8);
+        m_decoderMode = (m_decoderMode >= DecoderModeFT8) && (m_decoderMode <= DecoderModeFT4) ? m_decoderMode : DecoderModeFT8;
         d.readS32(8, &m_nbDecoderThreads, 3);
         d.readFloat(9, &m_decoderTimeBudget, 0.5);
         d.readBool(11, &m_agc, false);
@@ -268,6 +328,9 @@ void FT8DemodSettings::applySettings(const QStringList& settingsKeys, const FT8D
     }
     if (settingsKeys.contains("logMessages")) {
         m_logMessages = settings.m_logMessages;
+    }
+    if (settingsKeys.contains("decoderMode")) {
+        m_decoderMode = settings.m_decoderMode;
     }
     if (settingsKeys.contains("nbDecoderThreads")) {
         m_nbDecoderThreads = settings.m_nbDecoderThreads;
@@ -358,6 +421,9 @@ QString FT8DemodSettings::getDebugString(const QStringList& settingsKeys, bool f
     }
     if (settingsKeys.contains("logMessages") || force) {
         ostr << " m_logMessages: " << m_logMessages;
+    }
+    if (settingsKeys.contains("decoderMode") || force) {
+        ostr << " m_decoderMode: " << getDecoderModeString(m_decoderMode).toStdString();
     }
     if (settingsKeys.contains("nbDecoderThreads") || force) {
         ostr << " m_nbDecoderThreads: " << m_nbDecoderThreads;
@@ -457,4 +523,19 @@ QString FT8DemodSettings::getDefaultReporterLocator() const
 QString FT8DemodSettings::getDefaultReporterSoftware() const
 {
     return QCoreApplication::applicationName() + " " + QCoreApplication::applicationVersion();
+}
+
+QString FT8DemodSettings::getDecoderModeString(int decoderMode)
+{
+    return decoderMode == DecoderModeFT4 ? "FT4" : "FT8";
+}
+
+int FT8DemodSettings::getDecoderFrameDurationMs(int decoderMode)
+{
+    return decoderMode == DecoderModeFT4 ? 7500 : 15000;
+}
+
+int FT8DemodSettings::getDecoderFrameSamples(int decoderMode)
+{
+    return (m_ft8SampleRate * getDecoderFrameDurationMs(decoderMode)) / 1000;
 }

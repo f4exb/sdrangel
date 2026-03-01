@@ -23,7 +23,6 @@
 const char PskReporterWorker::hostname[] = "report.pskreporter.info";
 const char PskReporterWorker::service[] = "4739";
 const char PskReporterWorker::test_service[] = "14739";
-const char PskReporterWorker::txMode[] = "FT8";
 const unsigned char PskReporterWorker::rxDescriptor[] = {
         0x00, 0x03,              // Template Set ID
         0x00, 0x24,              // Length
@@ -69,6 +68,7 @@ const unsigned char PskReporterWorker::txDescriptor[] = {
 }; // "PSKREPORTER_TX"
 
 PskReporterWorker::PskReporterWorker() :
+    m_txMode("FT8"),
     m_udpSocket(new QUdpSocket(this))
 {
     connect(&m_reportQueue, &MessageQueue::messageEnqueued,
@@ -126,10 +126,11 @@ void PskReporterWorker::processFT8Messages(const QList<FT8Message>& ft8Messages,
         txPtr +=1;
 
         // Station Mode
-        const size_t modeLen = strlen(txMode);
+        const QByteArray txMode = m_txMode.toUtf8();
+        const size_t modeLen = txMode.size();
         *(uint8_t  *)&txInfoData[txPtr] = (uint8_t)modeLen;
         txPtr += 1;
-        memcpy(&txInfoData[txPtr], txMode, modeLen);
+        memcpy(&txInfoData[txPtr], txMode.constData(), modeLen);
         txPtr += modeLen;
 
         // Station locator

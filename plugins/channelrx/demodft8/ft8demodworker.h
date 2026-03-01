@@ -44,6 +44,7 @@ public:
     void setEnablePskReporter(bool enablePskReporter) { m_enablePskReporter = enablePskReporter; }
     void setNbDecoderThreads(int nbDecoderThreads) { m_nbDecoderThreads = nbDecoderThreads; }
     void setDecoderTimeBudget(float decoderTimeBudget) { m_decoderTimeBudget = decoderTimeBudget; }
+    void setDecoderMode(int decoderMode);
     void setUseOSD(bool useOSD) { m_useOSD = useOSD; }
     void setOSDDepth(int osdDepth) { m_osdDepth = osdDepth; }
     void setOSDLDPCThreshold(int osdLDPCThreshold) { m_osdLDPCThreshold = osdLDPCThreshold; }
@@ -97,12 +98,14 @@ private:
     bool m_enablePskReporter;
     int m_nbDecoderThreads;
     float m_decoderTimeBudget;
+    int m_decoderMode;
     bool m_useOSD;
     int m_osdDepth;
     int m_osdLDPCThreshold;
     bool m_verifyOSD;
     int m_lowFreq;
     int m_highFreq;
+    bool m_unsupportedModeWarningPending;
     bool m_invalidSequence;
     qint64 m_baseFrequency;
     FT8::FT8Decoder m_ft8Decoder;

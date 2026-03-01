@@ -145,12 +145,14 @@ FT8DemodWorker::FT8DemodWorker() :
     m_enablePskReporter(false),
     m_nbDecoderThreads(6),
     m_decoderTimeBudget(0.5),
+    m_decoderMode(FT8DemodSettings::DecoderModeFT8),
     m_useOSD(false),
     m_osdDepth(0),
     m_osdLDPCThreshold(70),
     m_verifyOSD(false),
     m_lowFreq(200),
     m_highFreq(3000),
+    m_unsupportedModeWarningPending(true),
     m_invalidSequence(true),
     m_baseFrequency(0),
     m_guiReportingMessageQueue(nullptr),
@@ -180,11 +182,21 @@ FT8DemodWorker::FT8DemodWorker() :
 FT8DemodWorker::~FT8DemodWorker()
 {}
 
+void FT8DemodWorker::setDecoderMode(int decoderMode)
+{
+    m_decoderMode = decoderMode;
+    m_unsupportedModeWarningPending = true;
+}
+
 void FT8DemodWorker::processBuffer(int16_t *buffer, QDateTime periodTS)
 {
-    qDebug("FT8DemodWorker::processBuffer: %6.3f %s %d:%f [%d:%d]",
+    const int frameSampleCount = FT8DemodSettings::getDecoderFrameSamples(m_decoderMode);
+    const QString decoderMode = FT8DemodSettings::getDecoderModeString(m_decoderMode);
+
+    qDebug("FT8DemodWorker::processBuffer: %6.3f %s mode:%s %d:%f [%d:%d]",
         m_baseFrequency / 1000000.0,
         qPrintable(periodTS.toString("yyyy-MM-dd HH:mm:ss")),
+        qPrintable(decoderMode),
         m_nbDecoderThreads,
         m_decoderTimeBudget,
         m_lowFreq,
@@ -195,6 +207,32 @@ void FT8DemodWorker::processBuffer(int16_t *buffer, QDateTime periodTS)
     {
         qDebug("FT8DemodWorker::processBuffer: invalid sequence");
         m_invalidSequence = false;
+        return;
+    }
+
+    if (m_decoderMode != FT8DemodSettings::DecoderModeFT8)
+    {
+        if (m_unsupportedModeWarningPending)
+        {
+            qWarning("FT8DemodWorker::processBuffer: %s decoding is not implemented yet", qPrintable(decoderMode));
+            m_unsupportedModeWarningPending = false;
+        }
+
+        if (m_recordSamples)
+        {
+            WavFileRecord *wavFileRecord = new WavFileRecord(FT8DemodSettings::m_ft8SampleRate);
+            QFileInfo wfi(QDir(m_samplesPath), periodTS.toString("yyyyMMdd_HHmmss"));
+            QString wpath = wfi.absoluteFilePath();
+            qDebug("FT8DemodWorker::processBuffer: WAV file: %s.wav", qPrintable(wpath));
+            wavFileRecord->setFileName(wpath);
+            wavFileRecord->setFileBaseIsFileName(true);
+            wavFileRecord->setMono(true);
+            wavFileRecord->startRecording();
+            wavFileRecord->writeMono(buffer, frameSampleCount);
+            wavFileRecord->stopRecording();
+            delete wavFileRecord;
+        }
+
         return;
     }
 
@@ -211,11 +249,11 @@ void FT8DemodWorker::processBuffer(int16_t *buffer, QDateTime periodTS)
     m_ft8Decoder.getParams().use_osd = m_useOSD ? 1 : 0;
     m_ft8Decoder.getParams().osd_depth = m_osdDepth;
     m_ft8Decoder.getParams().osd_ldpc_thresh = m_osdLDPCThreshold;
-    std::vector<float> samples(15*FT8DemodSettings::m_ft8SampleRate);
+    std::vector<float> samples(frameSampleCount);
 
     std::transform(
         buffer,
-        buffer + (15*FT8DemodSettings::m_ft8SampleRate),
+        buffer + frameSampleCount,
         samples.begin(),
         [](const int16_t& s) -> float { return s / 32768.0f; }
     );
@@ -275,9 +313,10 @@ void FT8DemodWorker::processBuffer(int16_t *buffer, QDateTime periodTS)
                 continue;
             }
 
-            QString logMessage = QString("%1 %2 Rx FT8 %3 %4 %5 %6 %7 %8")
+            QString logMessage = QString("%1 %2 Rx %3 %4 %5 %6 %7 %8 %9")
                 .arg(periodTS.toString("yyyyMMdd_HHmmss"))
                 .arg(baseFrequencyMHz, 9, 'f', 3)
+                .arg(decoderMode)
                 .arg(ft8Message.snr, 6)
                 .arg(ft8Message.dt, 4, 'f', 1)
                 .arg(ft8Message.df, 4, 'f', 0)
@@ -301,8 +340,9 @@ void FT8DemodWorker::processBuffer(int16_t *buffer, QDateTime periodTS)
 
             if ((ft8Message.loc.size() == 4) && (ft8Message.loc != "RR73") && Maidenhead::fromMaidenhead(ft8Message.loc, latitude, longitude))
             {
-                QString text = QString("%1\nMode: FT8\nFrequency: %2 Hz\nLocator: %3\nSNR: %4\nLast heard: %5")
+                QString text = QString("%1\nMode: %2\nFrequency: %3 Hz\nLocator: %4\nSNR: %5\nLast heard: %6")
                                     .arg(ft8Message.call2)
+                                    .arg(decoderMode)
                                     .arg(baseFrequencyMHz*1000000 + ft8Message.df)
                                     .arg(ft8Message.loc)
                                     .arg(ft8Message.snr)
@@ -361,7 +401,7 @@ void FT8DemodWorker::processBuffer(int16_t *buffer, QDateTime periodTS)
         wavFileRecord->setFileBaseIsFileName(true);
         wavFileRecord->setMono(true);
         wavFileRecord->startRecording();
-        wavFileRecord->writeMono(buffer, 15*FT8DemodSettings::m_ft8SampleRate);
+        wavFileRecord->writeMono(buffer, frameSampleCount);
         wavFileRecord->stopRecording();
         delete wavFileRecord;
     }

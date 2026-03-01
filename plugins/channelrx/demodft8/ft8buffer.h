@@ -31,7 +31,7 @@ public:
     ~FT8Buffer();
 
     void feed(int16_t sample);
-    void getCurrentBuffer(int16_t *bufferCopy);
+    void getCurrentBuffer(int16_t *bufferCopy, int samplesToCopy);
 
 private:
     int16_t *m_buffer;

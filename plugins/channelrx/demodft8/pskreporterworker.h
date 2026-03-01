@@ -39,6 +39,7 @@ public:
     void setMyCallsign(const QString& callsign) { m_myCallsign = callsign; }
     void setMyLocator(const QString& locator) { m_myLocator = locator; }
     void setDecoderInfo(const QString& decoderInfo) { m_decoderInfo = decoderInfo; }
+    void setTxMode(const QString& txMode) { m_txMode = txMode; }
     void setTestMode(bool isTestMode) { m_isTestMode = isTestMode; }
 
 private:
@@ -52,6 +53,7 @@ private:
     QString m_myCallsign;
     QString m_myLocator;
     QString m_decoderInfo;
+    QString m_txMode;
     bool    m_isTestMode = false;
     MessageQueue m_reportQueue;
     QQueue<FT8Message> m_ft8MessageQueue;
@@ -66,7 +68,6 @@ private:
     static const char hostname[];
     static const char service[];
     static const char test_service[];
-    static const char txMode[];
     static const unsigned char rxDescriptor[];
     static const unsigned char txDescriptor[];
 

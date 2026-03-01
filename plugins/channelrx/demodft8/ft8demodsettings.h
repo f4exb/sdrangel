@@ -54,6 +54,11 @@ struct FT8DemodBandPreset
 class FT8DemodSettings
 {
 public:
+    enum DecoderMode {
+        DecoderModeFT8,
+        DecoderModeFT4
+    };
+
     enum MessageCol {
         MESSAGE_COL_UTC,
         MESSAGE_COL_TYPE,
@@ -76,6 +81,7 @@ public:
     bool m_agc;
     bool m_recordWav;
     bool m_logMessages;
+    int m_decoderMode;
     int m_nbDecoderThreads;
     float m_decoderTimeBudget;
     bool m_useOSD;
@@ -114,11 +120,17 @@ public:
     QByteArray serialize() const;
     bool deserialize(const QByteArray& data);
     void resetBandPresets();
+    void resetBandPresets(int decoderMode);
     QString getDefaultReporterCallsign() const;
     QString getDefaultReporterLocator() const;
     QString getDefaultReporterSoftware() const;
     void applySettings(const QStringList& settingsKeys, const FT8DemodSettings& settings);
     QString getDebugString(const QStringList& settingsKeys, bool force=false) const;
+    static QString getDecoderModeString(int decoderMode);
+    static int getDecoderFrameDurationMs(int decoderMode);
+    static int getDecoderFrameSamples(int decoderMode);
+    static QList<FT8DemodBandPreset> getBandPresetsForMode(int decoderMode);
+    static bool areBandPresetsEqual(const QList<FT8DemodBandPreset>& left, const QList<FT8DemodBandPreset>& right);
 
     static const int m_ft8SampleRate;
     static const int m_minPowerThresholdDB;
