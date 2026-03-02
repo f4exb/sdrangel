@@ -91,6 +91,8 @@ private:
         const QSet<QString> *m_validCallsigns;
     };
 
+    bool processFT4Experimental(int16_t *buffer, int frameSampleCount, FT8Callback& ft8Callback);
+
     QString m_samplesPath;
     QString m_logsPath;
     bool m_recordSamples;

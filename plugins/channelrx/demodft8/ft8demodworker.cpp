@@ -21,6 +21,10 @@
 #include <QDir>
 #include <QDateTime>
 
+#include <array>
+#include <algorithm>
+#include <cmath>
+
 #include "channel/channelapi.h"
 #include "dsp/wavfilerecord.h"
 #include "util/messagequeue.h"
@@ -31,6 +35,125 @@
 
 #include "ft8demodsettings.h"
 #include "ft8demodworker.h"
+#include "libldpc.h"
+#include "osd.h"
+
+namespace {
+
+// 87 data symbols, 4 sync blocks of 4 symbols each, total 103 symbols per frame
+constexpr int kFT4SymbolSamples = 576; // Number of samples per symbol at 12 kHz sample rate
+constexpr int kFT4TotalSymbols = 103; // Number of symbols in a complete FT4 frame (including sync and data symbols and excluding the 2 ramp symbols)
+constexpr int kFT4DataSymbols = 87; // Number of data symbols in a FT4 frame
+constexpr int kFT4FrameSamples = kFT4TotalSymbols * kFT4SymbolSamples; // Total number of samples in a FT4 frame
+const float kFT4ToneSpacing = FT8DemodSettings::m_ft8SampleRate / static_cast<float>(kFT4SymbolSamples); // Tone spacing in Hz
+
+// Costas arrays for FT4 sync detection, indexed by block and symbol index within block
+const std::array<std::array<int, 4>, 4> kFT4SyncTones = {{
+    {{0, 1, 3, 2}},
+    {{1, 0, 2, 3}},
+    {{2, 3, 1, 0}},
+    {{3, 2, 0, 1}}
+}};
+
+const std::array<int, 77> kFT4Rvec = {{
+    0,1,0,0,1,0,1,0,0,1,0,1,1,1,1,0,1,0,0,0,1,0,0,1,1,0,1,1,0,
+    1,0,0,1,0,1,1,0,0,0,0,1,0,0,0,1,0,1,0,0,1,1,1,1,0,0,1,0,1,
+    0,1,0,1,0,1,1,0,1,1,1,1,1,0,0,0,1,0,1
+}};
+
+struct FT4Candidate {
+    int start;
+    float tone0;
+    float sync;
+    float noise;
+    float score;
+};
+
+float goertzelPower(const int16_t *samples, int sampleCount, float sampleRate, float frequency)
+{
+    const float omega = 2.0f * static_cast<float>(M_PI) * frequency / sampleRate;
+    const float coeff = 2.0f * std::cos(omega);
+    float q0 = 0.0f;
+    float q1 = 0.0f;
+    float q2 = 0.0f;
+
+    for (int i = 0; i < sampleCount; i++)
+    {
+        q0 = coeff * q1 - q2 + (samples[i] / 32768.0f);
+        q2 = q1;
+        q1 = q0;
+    }
+
+    return q1 * q1 + q2 * q2 - coeff * q1 * q2;
+}
+
+float symbolTonePower(const int16_t *buffer, int start, int symbolIndex, float tone0, int tone)
+{
+    const int symbolStart = start + symbolIndex * kFT4SymbolSamples;
+    const float frequency = tone0 + tone * kFT4ToneSpacing;
+    return goertzelPower(&buffer[symbolStart], kFT4SymbolSamples, FT8DemodSettings::m_ft8SampleRate, frequency);
+}
+
+void collectFT4SyncMetrics(const int16_t *buffer, int start, float tone0, float& sync, float& noise)
+{
+    sync = 0.0f;
+    noise = 0.0f;
+
+    for (int block = 0; block < 4; block++)
+    {
+        const int symbolOffset = block * 33;
+
+        for (int index = 0; index < 4; index++)
+        {
+            const int symbolIndex = symbolOffset + index;
+            const int expectedTone = kFT4SyncTones[block][index];
+
+            for (int tone = 0; tone < 4; tone++)
+            {
+                const float power = symbolTonePower(buffer, start, symbolIndex, tone0, tone);
+
+                if (tone == expectedTone) {
+                    sync += power;
+                } else {
+                    noise += power;
+                }
+            }
+        }
+    }
+}
+
+void buildFT4BitMetrics(const int16_t *buffer, int start, float tone0, std::array<float, 174>& bitMetrics)
+{
+    int bitIndex = 0;
+
+    for (int symbolIndex = 0; symbolIndex < kFT4TotalSymbols; symbolIndex++)
+    {
+        const bool inSync = (symbolIndex < 4)
+                         || (symbolIndex >= 33 && symbolIndex < 37)
+                         || (symbolIndex >= 66 && symbolIndex < 70)
+                         || (symbolIndex >= 99);
+
+        if (inSync) {
+            continue;
+        }
+
+        std::array<float, 4> tonePower;
+
+        for (int tone = 0; tone < 4; tone++) {
+            tonePower[tone] = symbolTonePower(buffer, start, symbolIndex, tone0, tone);
+        }
+
+        const float b0Zero = std::max(tonePower[0], tonePower[1]);
+        const float b0One = std::max(tonePower[2], tonePower[3]);
+        const float b1Zero = std::max(tonePower[0], tonePower[3]);
+        const float b1One = std::max(tonePower[1], tonePower[2]);
+
+        bitMetrics[bitIndex++] = b0Zero - b0One;
+        bitMetrics[bitIndex++] = b1Zero - b1One;
+    }
+}
+
+} // namespace
 
 FT8DemodWorker::FT8Callback::FT8Callback(
     const QDateTime& periodTS,
@@ -120,17 +243,6 @@ int FT8DemodWorker::FT8Callback::hcb(
 
     cycle_mu.unlock();
 
-    // qDebug("FT8DemodWorker::FT8Callback::hcb: %6.3f %d %3d %3d %5.2f %6.1f %s (%s)",
-    //     m_baseFrequency / 1000000.0,
-    //     pass,
-    //     (int)snr,
-    //     correct_bits,
-    //     off - 0.5,
-    //     hz0,
-    //     msg.c_str(),
-    //     comment
-    // );
-
     return 2; // 2 => new decode, do subtract.
 }
 
@@ -188,6 +300,129 @@ void FT8DemodWorker::setDecoderMode(int decoderMode)
     m_unsupportedModeWarningPending = true;
 }
 
+bool FT8DemodWorker::processFT4Experimental(int16_t *buffer, int frameSampleCount, FT8Callback& ft8Callback)
+{
+    if (frameSampleCount < kFT4FrameSamples) {
+        return false;
+    }
+
+    const int maxStart = frameSampleCount - kFT4FrameSamples;
+    const float maxTone0 = m_highFreq - 3.0f * kFT4ToneSpacing;
+
+    if (maxTone0 <= m_lowFreq) {
+        return false;
+    }
+
+    std::vector<int> startCandidates;
+    startCandidates.reserve(64);
+
+    auto addStartCandidate = [&](int start)
+    {
+        start = std::max(0, std::min(start, maxStart));
+
+        if (std::find(startCandidates.begin(), startCandidates.end(), start) == startCandidates.end()) {
+            startCandidates.push_back(start);
+        }
+    };
+
+    for (int start = 0; start <= std::min(maxStart, 14000); start += kFT4SymbolSamples) {
+        addStartCandidate(start);
+    }
+
+    const int nominalStart = maxStart / 2;
+    addStartCandidate(std::max(0, nominalStart - 2 * kFT4SymbolSamples));
+    addStartCandidate(std::max(0, nominalStart - kFT4SymbolSamples));
+    addStartCandidate(nominalStart);
+    addStartCandidate(std::min(maxStart, nominalStart + kFT4SymbolSamples));
+    addStartCandidate(std::min(maxStart, nominalStart + 2 * kFT4SymbolSamples));
+    addStartCandidate(maxStart);
+
+    std::vector<FT4Candidate> candidates;
+
+    for (int start : startCandidates)
+    {
+        for (float tone0 = m_lowFreq; tone0 <= maxTone0; tone0 += kFT4ToneSpacing)
+        {
+            float sync = 0.0f;
+            float noise = 0.0f;
+            collectFT4SyncMetrics(buffer, start, tone0, sync, noise);
+            const float score = sync - 1.25f * (noise / 3.0f);
+
+            candidates.push_back(FT4Candidate{start, tone0, sync, noise, score});
+        }
+    }
+
+    if (candidates.empty()) {
+        return false;
+    }
+
+    std::sort(candidates.begin(), candidates.end(), [](const FT4Candidate& lhs, const FT4Candidate& rhs) {
+        return lhs.score > rhs.score;
+    });
+
+    const int maxDecodeCandidates = std::min(48, static_cast<int>(candidates.size()));
+    const int ldpcThreshold = std::max(48, m_osdLDPCThreshold - 18);
+    int decodedCount = 0;
+
+    for (int candidateIndex = 0; candidateIndex < maxDecodeCandidates; candidateIndex++)
+    {
+        const FT4Candidate& candidate = candidates[candidateIndex];
+        std::array<float, 174> llr;
+        buildFT4BitMetrics(buffer, candidate.start, candidate.tone0, llr);
+
+        int plain[174];
+        int ldpcOk = 0;
+        FT8::LDPC::ldpc_decode(llr.data(), m_ft8Decoder.getParams().ldpc_iters, plain, &ldpcOk);
+
+        if (ldpcOk < ldpcThreshold) {
+            continue;
+        }
+
+        int a174[174];
+
+        for (int i = 0; i < 174; i++) {
+            a174[i] = plain[i];
+        }
+
+        bool crcOk = FT8::OSD::check_crc(a174);
+
+        if (!crcOk && m_useOSD)
+        {
+            int oplain[91];
+            int depth = -1;
+            std::array<float, 174> llrCopy = llr;
+
+            if (FT8::OSD::osd_decode(llrCopy.data(), m_osdDepth, oplain, &depth))
+            {
+                FT8::OSD::ldpc_encode(oplain, a174);
+                crcOk = FT8::OSD::check_crc(a174);
+            }
+        }
+
+        if (!crcOk) {
+            continue;
+        }
+
+        int a91[91];
+
+        for (int i = 0; i < 91; i++) {
+            a91[i] = a174[i];
+        }
+
+        for (int i = 0; i < 77; i++) {
+            a91[i] ^= kFT4Rvec[i];
+        }
+
+        const float snrLinear = (candidate.sync + 1.0e-9f) / ((candidate.noise / 3.0f) + 1.0e-9f);
+        const float snr = 10.0f * std::log10(snrLinear) - 12.0f;
+        const float offset = 0.5f + static_cast<float>(candidate.start) / FT8DemodSettings::m_ft8SampleRate;
+        ft8Callback.hcb(a91, candidate.tone0, offset, "FT4-EXP", snr, 0, ldpcOk);
+        decodedCount++;
+    }
+
+    return decodedCount > 0;
+}
+
 void FT8DemodWorker::processBuffer(int16_t *buffer, QDateTime periodTS)
 {
     const int frameSampleCount = FT8DemodSettings::getDecoderFrameSamples(m_decoderMode);
@@ -210,32 +445,6 @@ void FT8DemodWorker::processBuffer(int16_t *buffer, QDateTime periodTS)
         return;
     }
 
-    if (m_decoderMode != FT8DemodSettings::DecoderModeFT8)
-    {
-        if (m_unsupportedModeWarningPending)
-        {
-            qWarning("FT8DemodWorker::processBuffer: %s decoding is not implemented yet", qPrintable(decoderMode));
-            m_unsupportedModeWarningPending = false;
-        }
-
-        if (m_recordSamples)
-        {
-            WavFileRecord *wavFileRecord = new WavFileRecord(FT8DemodSettings::m_ft8SampleRate);
-            QFileInfo wfi(QDir(m_samplesPath), periodTS.toString("yyyyMMdd_HHmmss"));
-            QString wpath = wfi.absoluteFilePath();
-            qDebug("FT8DemodWorker::processBuffer: WAV file: %s.wav", qPrintable(wpath));
-            wavFileRecord->setFileName(wpath);
-            wavFileRecord->setFileBaseIsFileName(true);
-            wavFileRecord->setMono(true);
-            wavFileRecord->startRecording();
-            wavFileRecord->writeMono(buffer, frameSampleCount);
-            wavFileRecord->stopRecording();
-            delete wavFileRecord;
-        }
-
-        return;
-    }
-
     QString channelReference = "d0c0"; // default
 
     if (m_channel) {
@@ -245,36 +454,59 @@ void FT8DemodWorker::processBuffer(int16_t *buffer, QDateTime periodTS)
     int hints[2] = { 2, 0 }; // CQ
     FT8Callback ft8Callback(periodTS, m_baseFrequency, m_packing, channelReference);
     ft8Callback.setValidCallsigns((m_useOSD && m_verifyOSD) ? &m_validCallsigns : nullptr);
-    m_ft8Decoder.getParams().nthreads = m_nbDecoderThreads;
-    m_ft8Decoder.getParams().use_osd = m_useOSD ? 1 : 0;
-    m_ft8Decoder.getParams().osd_depth = m_osdDepth;
-    m_ft8Decoder.getParams().osd_ldpc_thresh = m_osdLDPCThreshold;
-    std::vector<float> samples(frameSampleCount);
 
-    std::transform(
-        buffer,
-        buffer + frameSampleCount,
-        samples.begin(),
-        [](const int16_t& s) -> float { return s / 32768.0f; }
-    );
+    if (m_decoderMode == FT8DemodSettings::DecoderModeFT8)
+    {
+        m_ft8Decoder.getParams().nthreads = m_nbDecoderThreads;
+        m_ft8Decoder.getParams().use_osd = m_useOSD ? 1 : 0;
+        m_ft8Decoder.getParams().osd_depth = m_osdDepth;
+        m_ft8Decoder.getParams().osd_ldpc_thresh = m_osdLDPCThreshold;
+        std::vector<float> samples(frameSampleCount);
 
-    m_ft8Decoder.entry(
-        samples.data(),
-        samples.size(),
-        0.5 * FT8DemodSettings::m_ft8SampleRate,
-        FT8DemodSettings::m_ft8SampleRate,
-        m_lowFreq,
-        m_highFreq,
-        hints,
-        hints,
-        m_decoderTimeBudget,
-        m_decoderTimeBudget,
-        &ft8Callback,
-        0,
-        (struct FT8::cdecode *) nullptr
-    );
+        std::transform(
+            buffer,
+            buffer + frameSampleCount,
+            samples.begin(),
+            [](const int16_t& s) -> float { return s / 32768.0f; }
+        );
 
-    m_ft8Decoder.wait(m_decoderTimeBudget + 1.0); // add one second to budget to force quit threads
+        m_ft8Decoder.entry(
+            samples.data(),
+            samples.size(),
+            0.5 * FT8DemodSettings::m_ft8SampleRate,
+            FT8DemodSettings::m_ft8SampleRate,
+            m_lowFreq,
+            m_highFreq,
+            hints,
+            hints,
+            m_decoderTimeBudget,
+            m_decoderTimeBudget,
+            &ft8Callback,
+            0,
+            (struct FT8::cdecode *) nullptr
+        );
+
+        m_ft8Decoder.wait(m_decoderTimeBudget + 1.0); // add one second to budget to force quit threads
+    }
+    else if (m_decoderMode == FT8DemodSettings::DecoderModeFT4)
+    {
+        const bool decoded = processFT4Experimental(buffer, frameSampleCount, ft8Callback);
+
+        if (!decoded && m_unsupportedModeWarningPending)
+        {
+            qWarning("FT8DemodWorker::processBuffer: FT4 experimental decoder did not find valid messages");
+            m_unsupportedModeWarningPending = false;
+        }
+    }
+    else
+    {
+        if (m_unsupportedModeWarningPending)
+        {
+            qWarning("FT8DemodWorker::processBuffer: %s decoding is not supported", qPrintable(decoderMode));
+            m_unsupportedModeWarningPending = false;
+        }
+    }
+
     qDebug("FT8DemodWorker::processBuffer: done: at %6.3f %d messages",
         m_baseFrequency / 1000000.0, (int)ft8Callback.getReportMessage()->getFT8Messages().size());
 

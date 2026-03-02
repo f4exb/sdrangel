@@ -492,6 +492,12 @@ void FT8DemodGUI::on_settings_clicked()
     {
         bool changed = false;
 
+        if (settingsKeys.contains("decoderMode"))
+        {
+            m_settings.m_decoderMode = settings.m_decoderMode;
+            changed = true;
+        }
+
         if (settingsKeys.contains("nbDecoderThreads"))
         {
             m_settings.m_nbDecoderThreads = settings.m_nbDecoderThreads;
@@ -556,6 +562,7 @@ void FT8DemodGUI::on_settings_clicked()
         {
             m_settings.m_bandPresets = settings.m_bandPresets;
             populateBandPresets();
+            changed = true;
         }
 
         if (changed) {
