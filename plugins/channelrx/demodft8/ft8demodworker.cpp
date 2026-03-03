@@ -302,125 +302,39 @@ void FT8DemodWorker::setDecoderMode(int decoderMode)
 
 bool FT8DemodWorker::processFT4Experimental(int16_t *buffer, int frameSampleCount, FT8Callback& ft8Callback)
 {
-    if (frameSampleCount < kFT4FrameSamples) {
-        return false;
-    }
+    std::vector<float> samples(frameSampleCount);
+    std::transform(
+        buffer,
+        buffer + frameSampleCount,
+        samples.begin(),
+        [](const int16_t& s) -> float { return s / 32768.0f; }
+    );
 
-    const int maxStart = frameSampleCount - kFT4FrameSamples;
-    const float maxTone0 = m_highFreq - 3.0f * kFT4ToneSpacing;
-
-    if (maxTone0 <= m_lowFreq) {
-        return false;
-    }
-
-    std::vector<int> startCandidates;
-    startCandidates.reserve(64);
-
-    auto addStartCandidate = [&](int start)
-    {
-        start = std::max(0, std::min(start, maxStart));
-
-        if (std::find(startCandidates.begin(), startCandidates.end(), start) == startCandidates.end()) {
-            startCandidates.push_back(start);
-        }
-    };
-
-    for (int start = 0; start <= std::min(maxStart, 14000); start += kFT4SymbolSamples) {
-        addStartCandidate(start);
-    }
-
-    const int nominalStart = maxStart / 2;
-    addStartCandidate(std::max(0, nominalStart - 2 * kFT4SymbolSamples));
-    addStartCandidate(std::max(0, nominalStart - kFT4SymbolSamples));
-    addStartCandidate(nominalStart);
-    addStartCandidate(std::min(maxStart, nominalStart + kFT4SymbolSamples));
-    addStartCandidate(std::min(maxStart, nominalStart + 2 * kFT4SymbolSamples));
-    addStartCandidate(maxStart);
-
-    std::vector<FT4Candidate> candidates;
-
-    for (int start : startCandidates)
-    {
-        for (float tone0 = m_lowFreq; tone0 <= maxTone0; tone0 += kFT4ToneSpacing)
-        {
-            float sync = 0.0f;
-            float noise = 0.0f;
-            collectFT4SyncMetrics(buffer, start, tone0, sync, noise);
-            const float score = sync - 1.25f * (noise / 3.0f);
-
-            candidates.push_back(FT4Candidate{start, tone0, sync, noise, score});
-        }
-    }
-
-    if (candidates.empty()) {
-        return false;
-    }
-
-    std::sort(candidates.begin(), candidates.end(), [](const FT4Candidate& lhs, const FT4Candidate& rhs) {
-        return lhs.score > rhs.score;
-    });
-
-    const int maxDecodeCandidates = std::min(48, static_cast<int>(candidates.size()));
-    const int ldpcThreshold = std::max(48, m_osdLDPCThreshold - 18);
-    int decodedCount = 0;
-
-    for (int candidateIndex = 0; candidateIndex < maxDecodeCandidates; candidateIndex++)
-    {
-        const FT4Candidate& candidate = candidates[candidateIndex];
-        std::array<float, 174> llr;
-        buildFT4BitMetrics(buffer, candidate.start, candidate.tone0, llr);
-
-        int plain[174];
-        int ldpcOk = 0;
-        FT8::LDPC::ldpc_decode(llr.data(), m_ft8Decoder.getParams().ldpc_iters, plain, &ldpcOk);
-
-        if (ldpcOk < ldpcThreshold) {
-            continue;
-        }
-
-        int a174[174];
-
-        for (int i = 0; i < 174; i++) {
-            a174[i] = plain[i];
-        }
-
-        bool crcOk = FT8::OSD::check_crc(a174);
-
-        if (!crcOk && m_useOSD)
-        {
-            int oplain[91];
-            int depth = -1;
-            std::array<float, 174> llrCopy = llr;
-
-            if (FT8::OSD::osd_decode(llrCopy.data(), m_osdDepth, oplain, &depth))
-            {
-                FT8::OSD::ldpc_encode(oplain, a174);
-                crcOk = FT8::OSD::check_crc(a174);
-            }
-        }
-
-        if (!crcOk) {
-            continue;
-        }
-
-        int a91[91];
-
-        for (int i = 0; i < 91; i++) {
-            a91[i] = a174[i];
-        }
-
-        for (int i = 0; i < 77; i++) {
-            a91[i] ^= kFT4Rvec[i];
-        }
-
-        const float snrLinear = (candidate.sync + 1.0e-9f) / ((candidate.noise / 3.0f) + 1.0e-9f);
-        const float snr = 10.0f * std::log10(snrLinear) - 12.0f;
-        const float offset = 0.5f + static_cast<float>(candidate.start) / FT8DemodSettings::m_ft8SampleRate;
-        ft8Callback.hcb(a91, candidate.tone0, offset, "FT4-EXP", snr, 0, ldpcOk);
-        decodedCount++;
-    }
-
-    return decodedCount > 0;
+    int hints[2] = { 2, 0 }; // CQ
+    const int previousMessageCount = ft8Callback.getReportMessage()->getFT8Messages().size();
+    m_ft4Decoder.getParams().nthreads = m_nbDecoderThreads;
+    m_ft4Decoder.getParams().ldpc_iters = m_ft8Decoder.getParams().ldpc_iters;
+    m_ft4Decoder.getParams().use_osd = m_useOSD ? 1 : 0;
+    m_ft4Decoder.getParams().osd_depth = m_osdDepth;
+    m_ft4Decoder.getParams().osd_ldpc_thresh = m_osdLDPCThreshold;
+    m_ft4Decoder.entry(
+        samples.data(),
+        samples.size(),
+        0.5 * FT8DemodSettings::m_ft8SampleRate,
+        FT8DemodSettings::m_ft8SampleRate,
+        m_lowFreq,
+        m_highFreq,
+        hints,
+        hints,
+        m_decoderTimeBudget,
+        m_decoderTimeBudget,
+        &ft8Callback,
+        0,
+        (struct FT8::cdecode *) nullptr
+    );
+    m_ft4Decoder.wait(m_decoderTimeBudget + 1.0);
+    const int currentMessageCount = ft8Callback.getReportMessage()->getFT8Messages().size();
+    return currentMessageCount > previousMessageCount;
 }
 
 void FT8DemodWorker::processBuffer(int16_t *buffer, QDateTime periodTS)
