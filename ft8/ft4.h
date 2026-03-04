@@ -33,7 +33,7 @@ public:
         use_osd(1),
         osd_depth(0),
         osd_ldpc_thresh(70),
-        max_candidates(48)
+        max_candidates(96)
     {}
 };
 

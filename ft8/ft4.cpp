@@ -73,12 +73,31 @@ public:
     }
 
 private:
-    static float binPower(const FFTEngine::ffts_t& bins, int symbolIndex, int toneBin)
+    static float binPowerInterpolated(const FFTEngine::ffts_t& bins, int symbolIndex, float toneBin)
     {
-        return std::abs(bins[symbolIndex][toneBin]);
+        const int binCount = bins[symbolIndex].size();
+
+        if (binCount <= 0) {
+            return 0.0f;
+        }
+
+        if (toneBin <= 0.0f) {
+            return std::abs(bins[symbolIndex][0]);
+        }
+
+        if (toneBin >= static_cast<float>(binCount - 1)) {
+            return std::abs(bins[symbolIndex][binCount - 1]);
+        }
+
+        const int lowerBin = static_cast<int>(std::floor(toneBin));
+        const int upperBin = lowerBin + 1;
+        const float frac = toneBin - lowerBin;
+        const float p0 = std::abs(bins[symbolIndex][lowerBin]);
+        const float p1 = std::abs(bins[symbolIndex][upperBin]);
+        return p0 + frac * (p1 - p0);
     }
 
-    void collectSyncMetrics(const FFTEngine::ffts_t& bins, int toneBin, float& sync, float& noise) const
+    void collectSyncMetrics(const FFTEngine::ffts_t& bins, float toneBin, float& sync, float& noise) const
     {
         sync = 0.0f;
         noise = 0.0f;
@@ -94,7 +113,7 @@ private:
 
                 for (int tone = 0; tone < 4; tone++)
                 {
-                    const float power = binPower(bins, symbolIndex, toneBin + tone);
+                    const float power = binPowerInterpolated(bins, symbolIndex, toneBin + tone);
 
                     if (tone == expectedTone) {
                         sync += power;
@@ -106,36 +125,38 @@ private:
         }
     }
 
-    int refineToneBin(const FFTEngine::ffts_t& bins, int toneBin) const
+    float refineToneBin(const FFTEngine::ffts_t& bins, int toneBin) const
     {
-        float bestSync = -1.0f;
-        int bestToneBin = toneBin;
-
-        for (int delta = -1; delta <= 1; delta++)
-        {
-            int candidateToneBin = toneBin + delta;
-
-            if (candidateToneBin < 0) {
-                continue;
-            }
-
+        auto scoreAt = [&](float candidateToneBin) {
             float sync = 0.0f;
             float noise = 0.0f;
             collectSyncMetrics(bins, candidateToneBin, sync, noise);
+            return sync - 0.9f * (noise / 3.0f);
+        };
 
-            if (sync > bestSync)
-            {
-                bestSync = sync;
-                bestToneBin = candidateToneBin;
-            }
+        const float left = scoreAt(toneBin - 1.0f);
+        const float center = scoreAt(toneBin);
+        const float right = scoreAt(toneBin + 1.0f);
+        const float denom = left - 2.0f * center + right;
+        float frac = 0.0f;
+
+        if (std::fabs(denom) > 1.0e-12f) {
+            frac = 0.5f * (left - right) / denom;
         }
 
-        return bestToneBin;
+        if (frac > 0.5f) {
+            frac = 0.5f;
+        } else if (frac < -0.5f) {
+            frac = -0.5f;
+        }
+
+        return toneBin + frac;
     }
 
-    void buildBitMetrics(const FFTEngine::ffts_t& bins, int toneBin, std::array<float, 174>& bitMetrics) const
+    void buildBitMetrics(const FFTEngine::ffts_t& bins, float toneBin, std::array<float, 174>& bitMetrics) const
     {
         int bitIndex = 0;
+        float llrAbsSum = 0.0f;
 
         for (int symbolIndex = 0; symbolIndex < kFT4TotalSymbols; symbolIndex++)
         {
@@ -151,16 +172,38 @@ private:
             std::array<float, 4> tonePower;
 
             for (int tone = 0; tone < 4; tone++) {
-                tonePower[tone] = binPower(bins, symbolIndex, toneBin + tone);
+                tonePower[tone] = binPowerInterpolated(bins, symbolIndex, toneBin + tone);
             }
+
+            const float symbolAvg = 0.25f * (tonePower[0] + tonePower[1] + tonePower[2] + tonePower[3]) + 1.0e-6f;
+            const float llrScale = 6.0f / symbolAvg;
 
             const float b0Zero = std::max(tonePower[0], tonePower[1]);
             const float b0One = std::max(tonePower[2], tonePower[3]);
             const float b1Zero = std::max(tonePower[0], tonePower[3]);
             const float b1One = std::max(tonePower[1], tonePower[2]);
 
-            bitMetrics[bitIndex++] = b0Zero - b0One;
-            bitMetrics[bitIndex++] = b1Zero - b1One;
+            const float llr0 = (b0Zero - b0One) * llrScale;
+            const float llr1 = (b1Zero - b1One) * llrScale;
+            bitMetrics[bitIndex++] = llr0;
+            bitMetrics[bitIndex++] = llr1;
+            llrAbsSum += std::fabs(llr0) + std::fabs(llr1);
+        }
+
+        if (bitIndex <= 0) {
+            return;
+        }
+
+        const float meanAbs = llrAbsSum / bitIndex;
+
+        if (meanAbs < 1.0e-5f) {
+            return;
+        }
+
+        const float globalScale = 4.0f / meanAbs;
+
+        for (int i = 0; i < bitIndex; i++) {
+            bitMetrics[i] *= globalScale;
         }
     }
 
@@ -182,7 +225,42 @@ private:
             return;
         }
 
+        std::vector<int> coarseStarts;
         std::vector<int> startCandidates;
+
+        auto addCoarseStart = [&](int start)
+        {
+            start = std::max(0, std::min(start, maxStart));
+
+            if (std::find(coarseStarts.begin(), coarseStarts.end(), start) == coarseStarts.end()) {
+                coarseStarts.push_back(start);
+            }
+        };
+
+        for (int start = 0; start <= std::min(maxStart, 14000); start += kFT4SymbolSamples) {
+            addCoarseStart(start);
+        }
+
+        const int nominalStart = maxStart / 2;
+        addCoarseStart(std::max(0, nominalStart - 2 * kFT4SymbolSamples));
+        addCoarseStart(std::max(0, nominalStart - kFT4SymbolSamples));
+        addCoarseStart(nominalStart);
+        addCoarseStart(std::min(maxStart, nominalStart + kFT4SymbolSamples));
+        addCoarseStart(std::min(maxStart, nominalStart + 2 * kFT4SymbolSamples));
+        addCoarseStart(maxStart);
+
+        const int eighthSymbol = kFT4SymbolSamples / 8;
+        const std::array<int, 9> fineOffsets = {{
+            -4 * eighthSymbol,
+            -3 * eighthSymbol,
+            -2 * eighthSymbol,
+            -eighthSymbol,
+            0,
+            eighthSymbol,
+            2 * eighthSymbol,
+            3 * eighthSymbol,
+            4 * eighthSymbol
+        }};
 
         auto addStartCandidate = [&](int start)
         {
@@ -193,17 +271,12 @@ private:
             }
         };
 
-        for (int start = 0; start <= std::min(maxStart, 14000); start += kFT4SymbolSamples) {
-            addStartCandidate(start);
+        for (int coarseStart : coarseStarts)
+        {
+            for (int offset : fineOffsets) {
+                addStartCandidate(coarseStart + offset);
+            }
         }
-
-        const int nominalStart = maxStart / 2;
-        addStartCandidate(std::max(0, nominalStart - 2 * kFT4SymbolSamples));
-        addStartCandidate(std::max(0, nominalStart - kFT4SymbolSamples));
-        addStartCandidate(nominalStart);
-        addStartCandidate(std::min(maxStart, nominalStart + kFT4SymbolSamples));
-        addStartCandidate(std::min(maxStart, nominalStart + 2 * kFT4SymbolSamples));
-        addStartCandidate(maxStart);
 
         struct FT4Frame
         {
@@ -245,14 +318,19 @@ private:
         for (int frameIndex = 0; frameIndex < static_cast<int>(frames.size()); frameIndex++)
         {
             const FT4Frame& frame = frames[frameIndex];
-            const int maxToneBin = std::min(maxToneBinByHz, static_cast<int>(frame.bins[0].size()) - 4);
+            const int maxToneBin = std::min(maxToneBinByHz, static_cast<int>(frame.bins[0].size()) - 5);
 
             for (int toneBin = minToneBin; toneBin <= maxToneBin; toneBin++)
             {
                 float sync = 0.0f;
                 float noise = 0.0f;
                 collectSyncMetrics(frame.bins, toneBin, sync, noise);
-                const float score = sync - 1.25f * (noise / 3.0f);
+                
+                if (sync < 1.8f) {
+                    continue;
+                }
+                
+                const float score = sync - 1.0f * (noise / 3.0f);
                 candidates.push_back(FT4Candidate{frameIndex, frame.start, toneBin, sync, noise, score});
             }
         }
@@ -265,14 +343,14 @@ private:
             return lhs.score > rhs.score;
         });
 
-        const int maxDecodeCandidates = std::min(m_params.max_candidates, static_cast<int>(candidates.size()));
-        const int ldpcThreshold = std::max(48, m_params.osd_ldpc_thresh - 18);
+        const int maxDecodeCandidates = std::min(200, static_cast<int>(candidates.size()));
+        const int ldpcThreshold = std::max(25, m_params.osd_ldpc_thresh - 50);
 
         for (int candidateIndex = 0; candidateIndex < maxDecodeCandidates; candidateIndex++)
         {
             const FT4Candidate& candidate = candidates[candidateIndex];
             const FT4Frame& frame = frames[candidate.frameIndex];
-            const int refinedToneBin = refineToneBin(frame.bins, candidate.toneBin);
+            const float refinedToneBin = refineToneBin(frame.bins, candidate.toneBin);
             std::array<float, 174> llr;
             buildBitMetrics(frame.bins, refinedToneBin, llr);
 
@@ -280,7 +358,15 @@ private:
             int ldpcOk = 0;
             LDPC::ldpc_decode(llr.data(), m_params.ldpc_iters, plain, &ldpcOk);
 
-            if (ldpcOk < ldpcThreshold) {
+            const float candidateHz = candidate.toneBin * binSpacing;
+
+            if (ldpcOk < ldpcThreshold)
+            {
+                if (candidateHz >= 1400 && candidateHz <= 2500)
+                {
+                    qDebug("FT4Worker::decode: Candidate at %.1f Hz rejected: ldpcOk=%d < threshold=%d",
+                        candidateHz, ldpcOk, ldpcThreshold);
+                }
                 continue;
             }
 
@@ -321,6 +407,11 @@ private:
 
             const float snrLinear = (candidate.sync + 1.0e-9f) / ((candidate.noise / 3.0f) + 1.0e-9f);
             const float snr = 10.0f * std::log10(snrLinear) - 12.0f;
+            
+            if (snr < -26.0f) {
+                continue;
+            }
+            
             const float off = static_cast<float>(m_start) / m_rate + static_cast<float>(candidate.start) / m_rate;
             const float tone0 = refinedToneBin * binSpacing;
             m_cb->hcb(a91, tone0, off, "FT4-EXP", snr, 0, ldpcOk);

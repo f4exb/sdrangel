@@ -208,7 +208,8 @@ void MainBench::testFT4(const QString& wavFile, const QString& argsStr)
 
     FT8::FT4Decoder decoder;
     decoder.getParams().nthreads = nthreads;
-    decoder.getParams().use_osd = 0;
+    decoder.getParams().use_osd = 1;
+    decoder.getParams().osd_depth = 6;
 
     decoder.entry(
         samples.data(),
@@ -235,28 +236,15 @@ void MainBench::testFT4(const QString& wavFile, const QString& argsStr)
         qDebug("MainBench::testFT4: %s", qPrintable(QString::fromStdString(msg.first)));
     }
 
-    // if (msgMap.size() != 15)
-    // {
-    //     qDebug("MainBench::testFT4: failed: invalid size: %lu expected 15", msgMap.size());
-    //     return;
-    // }
+    if (msgMap.size() != 2)
+    {
+        qDebug("MainBench::testFT4: failed: invalid size: %lu expected 2", msgMap.size());
+        return;
+    }
 
     QStringList messages = {
-        "CQ DF5SF JN39",
-        "CQ DL1SVA JO64",
-        "CQ DL7CO JO42",
-        "CQ F4BAL JO10",
-        "CQ LA1XJA JO49",
-        "CQ ON7VG JO21",
-        "CQ OZ1BJF JO55",
-        "CQ S51TA JN75",
-        "HA3PT SQ8AA -18",
-        "JA2KFQ EI4KF -17",
-        "LY3PW DF2FE R-13",
-        "N9GQA DG9NAY JN58",
-        "OK1HEH OH8NW 73  ",
-        "UN6T EA1FQ IN53",
-        "W5SUM G8OO -18"
+        "CQ R3YBG KO73",
+        "CQ YU7ZZ KN05"
     };
 
     for (const auto &msg : messages)
