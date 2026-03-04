@@ -175,16 +175,15 @@ private:
                 tonePower[tone] = binPowerInterpolated(bins, symbolIndex, toneBin + tone);
             }
 
-            const float symbolAvg = 0.25f * (tonePower[0] + tonePower[1] + tonePower[2] + tonePower[3]) + 1.0e-6f;
-            const float llrScale = 6.0f / symbolAvg;
+            const float epsilon = 1.0e-6f;
+            const float b0Zero = std::max(tonePower[0], tonePower[1]) + epsilon;
+            const float b0One = std::max(tonePower[2], tonePower[3]) + epsilon;
+            const float b1Zero = std::max(tonePower[0], tonePower[3]) + epsilon;
+            const float b1One = std::max(tonePower[1], tonePower[2]) + epsilon;
 
-            const float b0Zero = std::max(tonePower[0], tonePower[1]);
-            const float b0One = std::max(tonePower[2], tonePower[3]);
-            const float b1Zero = std::max(tonePower[0], tonePower[3]);
-            const float b1One = std::max(tonePower[1], tonePower[2]);
+            const float llr0 = std::log(b0Zero / b0One);
+            const float llr1 = std::log(b1Zero / b1One);
 
-            const float llr0 = (b0Zero - b0One) * llrScale;
-            const float llr1 = (b1Zero - b1One) * llrScale;
             bitMetrics[bitIndex++] = llr0;
             bitMetrics[bitIndex++] = llr1;
             llrAbsSum += std::fabs(llr0) + std::fabs(llr1);
@@ -200,10 +199,19 @@ private:
             return;
         }
 
-        const float globalScale = 4.0f / meanAbs;
+        const float targetMean = 3.0f;
+        const float globalScale = targetMean / meanAbs;
 
         for (int i = 0; i < bitIndex; i++) {
-            bitMetrics[i] *= globalScale;
+            float scaled = bitMetrics[i] * globalScale;
+
+            if (scaled > 8.0f) {
+                scaled = 8.0f;
+            } else if (scaled < -8.0f) {
+                scaled = -8.0f;
+            }
+
+            bitMetrics[i] = scaled;
         }
     }
 
@@ -325,11 +333,11 @@ private:
                 float sync = 0.0f;
                 float noise = 0.0f;
                 collectSyncMetrics(frame.bins, toneBin, sync, noise);
-                
+
                 if (sync < 1.8f) {
                     continue;
                 }
-                
+
                 const float score = sync - 1.0f * (noise / 3.0f);
                 candidates.push_back(FT4Candidate{frameIndex, frame.start, toneBin, sync, noise, score});
             }
@@ -358,15 +366,8 @@ private:
             int ldpcOk = 0;
             LDPC::ldpc_decode(llr.data(), m_params.ldpc_iters, plain, &ldpcOk);
 
-            const float candidateHz = candidate.toneBin * binSpacing;
-
             if (ldpcOk < ldpcThreshold)
             {
-                if (candidateHz >= 1400 && candidateHz <= 2500)
-                {
-                    qDebug("FT4Worker::decode: Candidate at %.1f Hz rejected: ldpcOk=%d < threshold=%d",
-                        candidateHz, ldpcOk, ldpcThreshold);
-                }
                 continue;
             }
 
@@ -407,13 +408,13 @@ private:
 
             const float snrLinear = (candidate.sync + 1.0e-9f) / ((candidate.noise / 3.0f) + 1.0e-9f);
             const float snr = 10.0f * std::log10(snrLinear) - 12.0f;
-            
+                        const float tone0 = refinedToneBin * binSpacing;
+
             if (snr < -26.0f) {
                 continue;
             }
-            
+
             const float off = static_cast<float>(m_start) / m_rate + static_cast<float>(candidate.start) / m_rate;
-            const float tone0 = refinedToneBin * binSpacing;
             m_cb->hcb(a91, tone0, off, "FT4-EXP", snr, 0, ldpcOk);
         }
     }
