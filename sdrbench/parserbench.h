@@ -39,6 +39,7 @@ public:
         TestDecimatorsSupII,
         TestGolay2312,
         TestFT8,
+        TestFT4,
         TestCallsign,
         TestFT8Protocols,
         TestFFTRRCFilter,
