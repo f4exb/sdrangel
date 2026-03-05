@@ -24,6 +24,7 @@
 #include <QString>
 #include <QJsonArray>
 #include <QTimer>
+#include <QUrl>
 
 #include "SWGDeviceSettings.h"
 #include "SWGDeviceReport.h"
@@ -97,6 +98,12 @@ public:
     static bool satelliteAOS(const QString name, bool northToSouthPass, const QString &tle, QDateTime dateTime);
     static bool satelliteLOS(const QString name);
     static bool getDeviceSetting(unsigned int deviceIndex, const QString &setting, int &value);
+    static bool getDeviceSetting(unsigned int deviceIndex, const QString &setting, QString &value);
+    static QUrl buildChannelSettingsURL(
+        const QString& reverseAPIAddress,
+        unsigned int reverseAPIPort,
+        unsigned int reverseAPIDeviceIndex,
+        unsigned int reverseAPIChannelIndex);
     static bool getDeviceReportValue(unsigned int deviceIndex, const QString &key, QString &value);
     static bool getDeviceReportList(unsigned int deviceIndex, const QString &key, const QString &subKey, QList<int> &values);
     static bool getDevicePosition(unsigned int deviceIndex, float& latitude, float& longitude, float& altitude);
@@ -138,4 +145,3 @@ protected:
 };
 
 #endif // SDRBASE_CHANNEL_CHANNELWEBAPIUTILS_H_
-

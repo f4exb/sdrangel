@@ -292,15 +292,15 @@ bool FileInput::start()
 	QMutexLocker mutexLocker(&m_mutex);
 	qDebug() << "FileInput::start";
 
-#ifdef ANDROID
-    m_inputFile.seek(0);
-#else
-	if (m_ifstream.tellg() != (std::streampos)0)
-    {
-		m_ifstream.clear();
-		m_ifstream.seekg(sizeof(FileRecord::Header), std::ios::beg);
-	}
-#endif
+	#ifdef ANDROID
+	    m_inputFile.seek(0);
+	#else
+		if (m_ifstream.tellg() != (std::streampos)0)
+	    {
+			m_ifstream.clear();
+			m_ifstream.seekg(m_dataStartPos, std::ios::beg);
+		}
+	#endif
 
 	if (!m_sampleFifo.setSize(m_settings.m_accelerationFactor * m_sampleRate * sizeof(Sample)))
     {

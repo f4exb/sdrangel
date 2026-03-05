@@ -341,10 +341,12 @@ void RemoteTCPInputGui::displayEnabled()
     bool enableSquelchEnable;
     bool enableSquelch;
     bool sdra;
+    bool spyServer;
 
     if (state == DeviceAPI::StRunning)
     {
         sdra = m_sdra;
+        spyServer = m_spyServer;
         remoteControl = m_remoteControl;
         enableMessages = !m_iqOnly;
         enableSquelchEnable = !m_iqOnly;
@@ -353,6 +355,7 @@ void RemoteTCPInputGui::displayEnabled()
     else
     {
         sdra = m_settings.m_protocol == "SDRangel";
+        spyServer = m_settings.m_protocol == "Spy Server";
         remoteControl = m_settings.m_overrideRemoteSettings;
         enableMessages = false;
         enableSquelchEnable = m_settings.m_overrideRemoteSettings;
@@ -371,18 +374,18 @@ void RemoteTCPInputGui::displayEnabled()
     ui->channelSampleRateLabel->setEnabled(m_settings.m_channelDecimation && sdra && remoteControl);
     ui->channelSampleRateUnit->setEnabled(m_settings.m_channelDecimation && sdra && remoteControl);
 
-    ui->devSampleRateLabel->setEnabled(!m_spyServer && remoteControl);
-    ui->devSampleRate->setEnabled(!m_spyServer && remoteControl);
-    ui->devSampleRateUnits->setEnabled(!m_spyServer && remoteControl);
-    ui->agc->setEnabled(!m_spyServer && remoteControl);
-    ui->rfBWLabel->setEnabled(!m_spyServer && remoteControl);
-    ui->rfBW->setEnabled(!m_spyServer && remoteControl);
-    ui->rfBWUnits->setEnabled(!m_spyServer && remoteControl);
-    ui->dcOffset->setEnabled(!m_spyServer && remoteControl);
-    ui->iqImbalance->setEnabled(!m_spyServer && remoteControl);
-    ui->ppm->setEnabled(!m_spyServer && remoteControl);
-    ui->ppmLabel->setEnabled(!m_spyServer && remoteControl);
-    ui->ppmText->setEnabled(!m_spyServer && remoteControl);
+    ui->devSampleRateLabel->setEnabled(!spyServer && remoteControl);
+    ui->devSampleRate->setEnabled(!spyServer && remoteControl);
+    ui->devSampleRateUnits->setEnabled(!spyServer && remoteControl);
+    ui->agc->setEnabled(!spyServer && remoteControl);
+    ui->rfBWLabel->setEnabled(!spyServer && remoteControl);
+    ui->rfBW->setEnabled(!spyServer && remoteControl);
+    ui->rfBWUnits->setEnabled(!spyServer && remoteControl);
+    ui->dcOffset->setEnabled(!spyServer && remoteControl);
+    ui->iqImbalance->setEnabled(!spyServer && remoteControl);
+    ui->ppm->setEnabled(!spyServer && remoteControl);
+    ui->ppmLabel->setEnabled(!spyServer && remoteControl);
+    ui->ppmText->setEnabled(!spyServer && remoteControl);
 
     ui->centerFrequency->setEnabled(remoteControl);
     ui->biasTee->setEnabled(remoteControl);

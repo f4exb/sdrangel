@@ -85,6 +85,12 @@ else()
     message(STATUS "Not building demodchirpchat (ENABLE_CHANNELRX_DEMODCHIRPCHAT=${ENABLE_CHANNELRX_DEMODCHIRPCHAT})")
 endif()
 
+if (ENABLE_CHANNELRX_DEMODMESHTASTIC)
+    add_subdirectory(demodmeshtastic)
+else()
+    message(STATUS "Not building demodmeshtastic (ENABLE_CHANNELRX_DEMODMESHTASTIC=${ENABLE_CHANNELRX_DEMODMESHTASTIC})")
+endif()
+
 if (ENABLE_CHANNELRX_DEMODVOR)
     add_subdirectory(demodvor)
 else()
