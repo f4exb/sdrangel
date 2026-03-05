@@ -111,6 +111,16 @@ QString TestFT4Callback::get_name()
     return "test";
 }
 
+// The sdrbench/samples/ft8/20260304_180052.wav file should contain the following 7 messages
+// according to JTDX 2.2.159 decode:
+// 180052 -10  0.2  728 : CQ YU7ZZ KN05              Serbia
+// 180052  -5 -0.0  871 : CQ R3YBG KO73              EU Russia
+// 180052 -13 -0.2 1357 : AO5SQ EA3HKA JN11          Spain
+// 180052 -11  0.0 1508 : CQ PA8DC JO21              Netherlands
+// 180052  -5  0.3 1922 : II3WOG GI0WHI IO74         N. Ireland
+// 180052   0  0.2 1952 : W4WWQ 9A6T -11             Croatia
+// 180052 -16 -0.0 2404 : CQ LA1PHA JP76             Norway
+
 void MainBench::testFT4(const QString& wavFile, const QString& argsStr)
 {
     int nthreads = 8;    // number of threads (default)
