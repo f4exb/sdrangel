@@ -50,6 +50,11 @@ std::vector<float> gfsk_r(
 std::vector<float> gfsk_window(int samples_per_symbol, float b);
 std::string trim(const std::string &s);
 
+std::vector<float> hamming(int n); // return a Hamming window of length n.
+std::vector<float> blackman(int n); // blackman window
+std::vector<float> sym_blackman(int n); // symmetric blackman window
+std::vector<float> blackmanharris(int n); // blackman-harris window
+
 typedef unsigned long ulong;
 typedef unsigned int uint;
 

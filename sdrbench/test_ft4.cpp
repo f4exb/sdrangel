@@ -216,7 +216,7 @@ void MainBench::testFT4(const QString& wavFile, const QString& argsStr)
 
     wfile.close();
 
-    FT8::FT4Decoder decoder;
+    FT8::FT4DecoderLight decoder;
     decoder.getParams().nthreads = nthreads;
     decoder.getParams().use_osd = 1;
     decoder.getParams().osd_depth = 6;

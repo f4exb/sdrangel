@@ -112,7 +112,7 @@ private:
     bool m_invalidSequence;
     qint64 m_baseFrequency;
     FT8::FT8Decoder m_ft8Decoder;
-    FT8::FT4Decoder m_ft4Decoder;
+    FT8::FT4DecoderLight m_ft4Decoder;
     FT8::Packing m_packing;
     MessageQueue *m_guiReportingMessageQueue;
     MessageQueue *m_pskReportingMessageQueue;

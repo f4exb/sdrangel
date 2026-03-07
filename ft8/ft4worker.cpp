@@ -62,7 +62,7 @@ FT4Worker::FT4Worker(
     int start,
     int rate,
     CallbackInterface *cb,
-    const FT4Params& params
+    const FT4ParamsLight& params
 ) :
     m_samples(samples),
     m_minHz(minHz),
@@ -369,6 +369,7 @@ void FT4Worker::decode()
 
         int plain[174];
         int ldpcOk = 0;
+        int correct_bits = 0;
         LDPC::ldpc_decode(llr.data(), m_params.ldpc_iters, plain, &ldpcOk);
 
         if (ldpcOk < ldpcThreshold)
@@ -378,8 +379,15 @@ void FT4Worker::decode()
 
         int a174[174];
 
-        for (int i = 0; i < 174; i++) {
+        for (int i = 0; i < 174; i++)
+        {
             a174[i] = plain[i];
+
+            if (llr.data()[i] < 0 && a174[i] == 1) {
+                correct_bits += 1;
+            } else if (llr.data()[i] > 0 && a174[i] == 0) {
+                correct_bits += 1;
+            }
         }
 
         bool crcOk = OSD::check_crc(a174);
@@ -420,7 +428,7 @@ void FT4Worker::decode()
         }
 
         const float off = static_cast<float>(m_start) / m_rate + static_cast<float>(candidate.start) / m_rate;
-        m_cb->hcb(a91, tone0, off, "FT4-EXP", snr, 0, ldpcOk);
+        m_cb->hcb(a91, tone0, off, "FT4-EXP", snr, 0, correct_bits);
     }
 }
 

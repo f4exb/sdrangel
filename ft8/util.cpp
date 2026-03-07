@@ -338,4 +338,76 @@ std::string trim(const std::string &s) {
     return rtrim(ltrim(s));
 }
 
+//
+// return a Hamming window of length n.
+//
+std::vector<float> hamming(int n)
+{
+    std::vector<float> h(n);
+
+    for (int k = 0; k < n; k++) {
+        h[k] = 0.54 - 0.46 * cos(2 * M_PI * k / (n - 1.0));
+    }
+
+    return h;
+}
+
+//
+// blackman window
+//
+std::vector<float> blackman(int n)
+{
+    std::vector<float> h(n);
+
+    for (int k = 0; k < n; k++) {
+        h[k] = 0.42 - 0.5 * cos(2 * M_PI * k / n) + 0.08 * cos(4 * M_PI * k / n);
+    }
+
+    return h;
+}
+
+//
+// symmetric blackman window
+//
+std::vector<float> sym_blackman(int n)
+{
+    std::vector<float> h(n);
+
+    for (int k = 0; k < (n / 2) + 1; k++) {
+        h[k] = 0.42 - 0.5 * cos(2 * M_PI * k / n) + 0.08 * cos(4 * M_PI * k / n);
+    }
+
+    for (int k = n - 1; k >= (n / 2) + 1; --k) {
+        h[k] = h[(n - 1) - k];
+    }
+
+    return h;
+}
+
+//
+// blackman-harris window
+//
+std::vector<float> blackmanharris(int n)
+{
+    float a0 = 0.35875;
+    float a1 = 0.48829;
+    float a2 = 0.14128;
+    float a3 = 0.01168;
+    std::vector<float> h(n);
+
+    for (int k = 0; k < n; k++)
+    {
+        // symmetric
+        h[k] = a0 - a1 * cos(2 * M_PI * k / (n - 1)) + a2 * cos(4 * M_PI * k / (n - 1)) - a3 * cos(6 * M_PI * k / (n - 1));
+        // periodic
+        // h[k] =
+        //  a0
+        //  - a1 * cos(2 * M_PI * k / n)
+        //  + a2 * cos(4 * M_PI * k / n)
+        //  - a3 * cos(6 * M_PI * k / n);
+    }
+
+    return h;
+}
+
 } // namespace FT8

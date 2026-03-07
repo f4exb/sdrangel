@@ -40,7 +40,7 @@ public:
         int start,
         int rate,
         CallbackInterface *cb,
-        const FT4Params& params
+        const FT4ParamsLight& params
     );
 
     void start_work();
@@ -59,7 +59,7 @@ private:
     int m_start;
     int m_rate;
     CallbackInterface *m_cb;
-    FT4Params m_params;
+    FT4ParamsLight m_params;
     FFTEngine m_fftEngine;
 };
 
