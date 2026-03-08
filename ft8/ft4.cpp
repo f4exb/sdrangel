@@ -2913,7 +2913,7 @@ float FT4::guess_snr(const FFTEngine::ffts_t &m103)
         raw = 0.1;
     }
 
-    raw /= (2500.0 / 2.7); // 2.7 hz noise b/w -> 2500 hz b/w
+    raw /= (2500.0 / 12.0); // 9.0 hz noise b/w -> 2500 hz b/w (FT4: 3.33x wider than FT8's 2.7 Hz) + adjust
     float snr = 10 * log10(raw);
     snr += 5;
     snr *= 1.4;

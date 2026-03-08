@@ -246,15 +246,19 @@ void MainBench::testFT4(const QString& wavFile, const QString& argsStr)
         qDebug("MainBench::testFT4: %s", qPrintable(QString::fromStdString(msg.first)));
     }
 
-    if (msgMap.size() != 2)
+    if (msgMap.size() != 6)
     {
-        qDebug("MainBench::testFT4: failed: invalid size: %lu expected 2", msgMap.size());
+        qDebug("MainBench::testFT4: failed: invalid size: %lu expected 6", msgMap.size());
         return;
     }
 
     QStringList messages = {
+        "AO5SQ EA3HKA JN11",
+        "CQ LA1PHA JP76",
+        "CQ PA8DC JO21",
         "CQ R3YBG KO73",
-        "CQ YU7ZZ KN05"
+        "CQ YU7ZZ KN05",
+        "W4WWQ 9A6T -11"
     };
 
     for (const auto &msg : messages)
