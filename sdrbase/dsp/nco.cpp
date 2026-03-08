@@ -52,7 +52,7 @@ uint64_t NCO::prsg63()
 
 void NCO::setFreq(Real freq, Real sampleRate, bool integerPhase, int ditherBits)
 {
-	m_phaseIncrement = (Phase) std::round((freq * pow(2.0, PhaseBits)) / sampleRate);
+	m_phaseIncrement = (Phase) (qint64) std::round((freq * pow(2.0, PhaseBits)) / sampleRate);
 	if (integerPhase) {
 		m_phaseIncrement &= ~FracMask;
 	}
