@@ -2918,8 +2918,9 @@ float FT4::guess_snr(const FFTEngine::ffts_t &m103)
 
     raw /= (2500.0 / 9.0); // 9.0 hz noise b/w -> 2500 hz b/w (FT4: 3.33x wider than FT8's 2.7 Hz)
     float snr = 10 * log10(raw);
+    // empirically adjust to match WSJT-X's SNR numbers
     snr += 5;
-    snr *= 1.4;
+    snr *= 1.2;
     return snr;
 }
 

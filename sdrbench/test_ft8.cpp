@@ -111,6 +111,24 @@ QString TestFT8Callback::get_name()
     return "test";
 }
 
+// JTDX decodes (16):
+// 091630  -2  1.1  675 ~ W5SUM G8OO -18             England
+// 091630 -10  1.1 2277 ~ CQ DL1SVA JO64             Germany
+// 091630 -13  1.1 2607 ~ OK1HEH OH8NW 73            Finland
+// 091630  -9  0.4 1502 ~ HA3PT SQ8AA -18            Poland
+// 091630  -1  1.4 2044 ~ N9GQA DG9NAY JN58          Germany
+// 091630  -3  0.9  888 ~ CQ S51TA JN75              Slovenia
+// 091630  -5  1.2 1193 ~ LY3PW DF2FE R-13           Germany
+// 091630  -5  1.4 1776 ~ UN6T EA1FQ IN53            Spain
+// 091630 -12  1.1  763 ~ CQ OZ1BJF JO55             Denmark
+// 091630  -1  1.0 1120 ~ CQ ON7VG JO21              Belgium
+// 091630 -21  1.2 2526 ~ CQ LA1XJA JO49            *Norway
+// 091630 -13  1.1 1240 ~ CQ F4BAL JO10              France
+// 091630 -14  1.0 1893 ~ CQ DF5SF JN39              Germany
+// 091630  -3  1.1  533 ~ JA2KFQ EI4KF -17           Ireland
+// 091630 -14  2.6  905 ~ CQ YO7LCB KN15             Romania <= missed this one
+// 091630 -14  1.8  925 ~ CQ DL7CO JO42              Germany
+
 void MainBench::testFT8(const QString& wavFile, const QString& argsStr)
 {
     int nthreads = 8;    // number of threads (default)
