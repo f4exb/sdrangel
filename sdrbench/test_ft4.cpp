@@ -219,8 +219,9 @@ void MainBench::testFT4(const QString& wavFile, const QString& argsStr)
     FT8::FT4Decoder decoder;
     decoder.getParams().nthreads = nthreads;
     decoder.getParams().use_osd = 1;
-    decoder.getParams().osd_depth = 6;
-    decoder.getParams().osd_ldpc_thresh = 77;  // Require at least 77/83 correct LDPC bits before OSD
+    decoder.getParams().osd_depth = 3; // OSD candidates must be in top 3 to be considered
+    decoder.getParams().osd_ldpc_thresh = 75;  // Require at least 75/83 correct LDPC bits before OSD
+    decoder.getParams().subtract_edge_symbols = 0; // Experimental: model pre/post ramp symbols in subtraction
 
     decoder.entry(
         samples.data(),

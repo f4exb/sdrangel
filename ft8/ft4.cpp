@@ -3443,6 +3443,29 @@ void FT4::subtract(
         ramp = 1;
     }
 
+    if (params.subtract_edge_symbols)
+    {
+        int sym = bin0 + re103[0];
+        float phase = phases[0];
+        float amp = amps[0];
+        float hz = sym * bin_hz;
+        float dtheta = 2 * M_PI / (rate_ / hz); // advance per sample
+
+        for (int jj = 0; jj < ramp; jj++)
+        {
+            int iii = off0 - ramp + jj;
+
+            if (iii < 0 || iii >= (int)moved.size()) {
+                continue;
+            }
+
+            float theta = phase + (jj - ramp) * dtheta;
+            float x = amp * cos(theta);
+            x *= jj / (float)ramp;
+            moved[iii] -= x;
+        }
+    }
+
     // initial ramp part of first symbol.
     {
         int sym = bin0 + re103[0];
@@ -3547,6 +3570,29 @@ void FT4::subtract(
             theta += dtheta;
             dtheta += inc;
             theta += adj / (2.0 * ramp);
+        }
+    }
+
+    if (params.subtract_edge_symbols)
+    {
+        int sym = bin0 + re103[102];
+        float phase = phases[102];
+        float amp = amps[102];
+        float hz = sym * bin_hz;
+        float dtheta = 2 * M_PI / (rate_ / hz); // advance per sample
+
+        for (int jj = 0; jj < ramp; jj++)
+        {
+            int iii = off0 + block * 103 + jj;
+
+            if (iii < 0 || iii >= (int)moved.size()) {
+                continue;
+            }
+
+            float theta = phase + (block + jj) * dtheta;
+            float x = amp * cos(theta);
+            x *= 1.0 - (jj / (float)ramp);
+            moved[iii] -= x;
         }
     }
 

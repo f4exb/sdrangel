@@ -86,6 +86,7 @@ public:
     int second_count;
     int soft_phase_win;
     float subtract_ramp;
+    int subtract_edge_symbols; // model one extra tapered symbol at frame start/end during subtraction (does not yield significant improvement)
     int soft_ones;
     int soft_pairs;
     int soft_triples;
@@ -155,6 +156,7 @@ public:
         second_count = 3;
         soft_phase_win = 2;
         subtract_ramp = 0.11;
+        subtract_edge_symbols = 0;
         soft_ones = 2;
         soft_pairs = 1;
         soft_triples = 1;
@@ -180,6 +182,7 @@ public:
     int use_osd;
     int osd_depth;
     int osd_ldpc_thresh;
+    int subtract_edge_symbols;
     int max_candidates;
 
     FT4ParamsLight() :
@@ -188,6 +191,7 @@ public:
         use_osd(1),
         osd_depth(0),
         osd_ldpc_thresh(70),
+        subtract_edge_symbols(0),
         max_candidates(96)
     {}
 };
