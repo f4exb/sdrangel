@@ -511,9 +511,9 @@ private:
     int one_iter(const std::vector<float> &samples200, int best_off, float hz_for_cb);
     //
     // estimate SNR, yielding numbers vaguely similar to WSJT-X.
-    // m79 is a 79x8 complex FFT output.
+    // m103 is a 103x4 complex FFT output.
     //
-    float guess_snr(const FFTEngine::ffts_t &m79);
+    float guess_snr(const FFTEngine::ffts_t &m103);
     //
     // compare phases of successive symbols to guess whether
     // the starting offset is a little too high or low.
@@ -525,7 +525,7 @@ private:
     // a phase that depends on the symbol's frequency;
     // a particular offset error causes a phase error
     // that depends on frequency.
-    // hz0 is actual FFT bin number of m79[...][0] (always 4).
+    // hz0 is actual FFT bin number of m103[...][0].
     //
     // the output adj_hz is relative to the FFT bin center;
     // a positive number means the real signal seems to be
@@ -534,16 +534,16 @@ private:
     // adj_off is the amount to change the offset, in samples.
     // should be subtracted from offset.
     //
-    void fine(const FFTEngine::ffts_t &m79, int, float &adj_hz, float &adj_off);
+    void fine(const FFTEngine::ffts_t &m103, int, float &adj_hz, float &adj_off);
     //
     // subtract a corrected decoded signal from nsamples_,
     // perhaps revealing a weaker signal underneath,
     // to be decoded in a subsequent pass.
     //
-    // re79[] holds the error-corrected symbol numbers.
+    // re103[] holds the error-corrected symbol numbers.
     //
     void subtract(
-        const std::vector<int> re79,
+        const std::vector<int> re103,
         float hz0,
         float hz1,
         float off_sec
@@ -565,7 +565,7 @@ private:
         float,
         int use_osd,
         const char *comment1,
-        const FFTEngine::ffts_t &m79
+        const FFTEngine::ffts_t &m103
     );
     //
     // given 174 bits corrected by LDPC, work
@@ -576,7 +576,7 @@ private:
     //
     std::vector<int> recode(int a174[]);
     //
-    // the signal is at roughly 25 hz in samples200.
+    // the signal is centered around 46.8 Hz in samples200.
     //
     // return 2 if it decodes to a brand-new message.
     // return 1 if it decodes but we've already seen it,
