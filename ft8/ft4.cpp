@@ -267,7 +267,7 @@ std::vector<Strength> FT4::coarse(const FFTEngine::ffts_t &bins, int si0, int si
             float s = one_coarse_strength(bins, bi, si);
             Strength st;
             st.strength_ = s;
-            st.hz_ = bi * 20.833;
+            st.hz_ = bi * bin_hz;
             st.off_ = si * block;
             sv.push_back(st);
         }
@@ -599,7 +599,7 @@ void FT4::go(int npasses)
         for (int hz_frac_i = 0; hz_frac_i < params.coarse_hz_n; hz_frac_i++)
         {
             // shift down by hz_frac
-            float hz_frac = hz_frac_i * (20.833 / params.coarse_hz_n);
+            float hz_frac = hz_frac_i * ((rate_ / (float)block) / params.coarse_hz_n);
             std::vector<float> samples1;
 
             if (hz_frac_i == 0) {
@@ -742,7 +742,8 @@ float FT4::one_strength_known(
 {
     int block = blocksize(rate);
     // assert(syms.size() == 103);
-    int bin0 = round(hz / 20.833);
+    float bin_hz = rate / (float)block;
+    int bin0 = round(hz / bin_hz);
     float sig = 0;
     float noise = 0;
     float sum7 = 0;
@@ -861,12 +862,14 @@ int FT4::search_time_fine_known(
         off0 = 0;
     }
 
+    int block = blocksize(rate);
+    float bin_hz = rate / (float)block;
+
     // nearest FFT bin center.
-    float hz0 = round(hz / 20.833) * 20.833;
+    float hz0 = round(hz / bin_hz) * bin_hz;
     // move hz to hz0, so it is centered in a symbol-sized bin.
     std::vector<float> downsamples = fft_shift_f(bins, rate, hz - hz0);
     int best_off = -1;
-    int block = blocksize(rate);
     float best_sum = 0.0;
 
     for (int g = off0; g <= offN; g += gran)
@@ -2913,7 +2916,7 @@ float FT4::guess_snr(const FFTEngine::ffts_t &m103)
         raw = 0.1;
     }
 
-    raw /= (2500.0 / 12.0); // 9.0 hz noise b/w -> 2500 hz b/w (FT4: 3.33x wider than FT8's 2.7 Hz) + adjust
+    raw /= (2500.0 / 9.0); // 9.0 hz noise b/w -> 2500 hz b/w (FT4: 3.33x wider than FT8's 2.7 Hz)
     float snr = 10 * log10(raw);
     snr += 5;
     snr *= 1.4;
@@ -3444,7 +3447,7 @@ void FT4::subtract(
         int sym = bin0 + re103[0];
         float phase = phases[0];
         float amp = amps[0];
-        float hz = 20.833 * sym;
+        float hz = sym * bin_hz;
         float dtheta = 2 * M_PI / (rate_ / hz); // advance per sample
 
         for (int jj = 0; jj < ramp; jj++)
@@ -3462,7 +3465,7 @@ void FT4::subtract(
         int sym = bin0 + re103[si];
         float phase = phases[si];
         float amp = amps[si];
-        float hz = 20.833 * sym;
+        float hz = sym * bin_hz;
         float dtheta = 2 * M_PI / (rate_ / hz); // advance per sample
 
         // we've already done the first ramp for this symbol.
@@ -3495,7 +3498,7 @@ void FT4::subtract(
         else
         {
             int sym1 = bin0 + re103[si + 1];
-            hz1 = 20.833 * sym1;
+            hz1 = sym1 * bin_hz;
             phase1 = phases[si + 1];
         }
 
