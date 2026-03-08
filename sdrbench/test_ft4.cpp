@@ -88,7 +88,7 @@ int TestFT4Callback::hcb(
 
     cycle_mu.unlock();
 
-    qDebug("TestFT8Callback::hcb: %3s %d %3d %3d %5.2f %6.1f %s [%s:%s:%s] (%s)",
+    qDebug("TestFT4Callback::hcb: %3s %d %3d %3d %5.2f %6.1f %s [%s:%s:%s] (%s)",
         type.c_str(),
         pass,
         (int)snr,
@@ -220,6 +220,7 @@ void MainBench::testFT4(const QString& wavFile, const QString& argsStr)
     decoder.getParams().nthreads = nthreads;
     decoder.getParams().use_osd = 1;
     decoder.getParams().osd_depth = 6;
+    decoder.getParams().osd_ldpc_thresh = 77;  // Require at least 77/83 correct LDPC bits before OSD
 
     decoder.entry(
         samples.data(),
