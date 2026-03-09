@@ -632,35 +632,6 @@ private:
 }; // class FT4
 
 
-class FT8_API FT4DecoderLight : public QObject
-{
-    Q_OBJECT
-public:
-    ~FT4DecoderLight();
-    void entry(
-        float xsamples[],
-        int nsamples,
-        int start,
-        int rate,
-        float min_hz,
-        float max_hz,
-        int hints1[],
-        int hints2[],
-        double time_left,
-        double total_time_left,
-        CallbackInterface *cb,
-        int,
-        struct cdecode *
-    );
-    void wait(double time_left);
-    void forceQuit();
-    FT4ParamsLight& getParams() { return params; }
-
-private:
-    FT4ParamsLight params;
-    std::vector<QThread*> threads;
-};
-
 class FT8_API FT4Decoder : public QObject {
     Q_OBJECT
 public:

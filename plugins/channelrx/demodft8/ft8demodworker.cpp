@@ -38,123 +38,6 @@
 #include "libldpc.h"
 #include "osd.h"
 
-namespace {
-
-// 87 data symbols, 4 sync blocks of 4 symbols each, total 103 symbols per frame
-constexpr int kFT4SymbolSamples = 576; // Number of samples per symbol at 12 kHz sample rate
-constexpr int kFT4TotalSymbols = 103; // Number of symbols in a complete FT4 frame (including sync and data symbols and excluding the 2 ramp symbols)
-constexpr int kFT4DataSymbols = 87; // Number of data symbols in a FT4 frame
-constexpr int kFT4FrameSamples = kFT4TotalSymbols * kFT4SymbolSamples; // Total number of samples in a FT4 frame
-const float kFT4ToneSpacing = FT8DemodSettings::m_ft8SampleRate / static_cast<float>(kFT4SymbolSamples); // Tone spacing in Hz
-
-// Costas arrays for FT4 sync detection, indexed by block and symbol index within block
-const std::array<std::array<int, 4>, 4> kFT4SyncTones = {{
-    {{0, 1, 3, 2}},
-    {{1, 0, 2, 3}},
-    {{2, 3, 1, 0}},
-    {{3, 2, 0, 1}}
-}};
-
-const std::array<int, 77> kFT4Rvec = {{
-    0,1,0,0,1,0,1,0,0,1,0,1,1,1,1,0,1,0,0,0,1,0,0,1,1,0,1,1,0,
-    1,0,0,1,0,1,1,0,0,0,0,1,0,0,0,1,0,1,0,0,1,1,1,1,0,0,1,0,1,
-    0,1,0,1,0,1,1,0,1,1,1,1,1,0,0,0,1,0,1
-}};
-
-struct FT4Candidate {
-    int start;
-    float tone0;
-    float sync;
-    float noise;
-    float score;
-};
-
-float goertzelPower(const int16_t *samples, int sampleCount, float sampleRate, float frequency)
-{
-    const float omega = 2.0f * static_cast<float>(M_PI) * frequency / sampleRate;
-    const float coeff = 2.0f * std::cos(omega);
-    float q0 = 0.0f;
-    float q1 = 0.0f;
-    float q2 = 0.0f;
-
-    for (int i = 0; i < sampleCount; i++)
-    {
-        q0 = coeff * q1 - q2 + (samples[i] / 32768.0f);
-        q2 = q1;
-        q1 = q0;
-    }
-
-    return q1 * q1 + q2 * q2 - coeff * q1 * q2;
-}
-
-float symbolTonePower(const int16_t *buffer, int start, int symbolIndex, float tone0, int tone)
-{
-    const int symbolStart = start + symbolIndex * kFT4SymbolSamples;
-    const float frequency = tone0 + tone * kFT4ToneSpacing;
-    return goertzelPower(&buffer[symbolStart], kFT4SymbolSamples, FT8DemodSettings::m_ft8SampleRate, frequency);
-}
-
-void collectFT4SyncMetrics(const int16_t *buffer, int start, float tone0, float& sync, float& noise)
-{
-    sync = 0.0f;
-    noise = 0.0f;
-
-    for (int block = 0; block < 4; block++)
-    {
-        const int symbolOffset = block * 33;
-
-        for (int index = 0; index < 4; index++)
-        {
-            const int symbolIndex = symbolOffset + index;
-            const int expectedTone = kFT4SyncTones[block][index];
-
-            for (int tone = 0; tone < 4; tone++)
-            {
-                const float power = symbolTonePower(buffer, start, symbolIndex, tone0, tone);
-
-                if (tone == expectedTone) {
-                    sync += power;
-                } else {
-                    noise += power;
-                }
-            }
-        }
-    }
-}
-
-void buildFT4BitMetrics(const int16_t *buffer, int start, float tone0, std::array<float, 174>& bitMetrics)
-{
-    int bitIndex = 0;
-
-    for (int symbolIndex = 0; symbolIndex < kFT4TotalSymbols; symbolIndex++)
-    {
-        const bool inSync = (symbolIndex < 4)
-                         || (symbolIndex >= 33 && symbolIndex < 37)
-                         || (symbolIndex >= 66 && symbolIndex < 70)
-                         || (symbolIndex >= 99);
-
-        if (inSync) {
-            continue;
-        }
-
-        std::array<float, 4> tonePower;
-
-        for (int tone = 0; tone < 4; tone++) {
-            tonePower[tone] = symbolTonePower(buffer, start, symbolIndex, tone0, tone);
-        }
-
-        const float b0Zero = std::max(tonePower[0], tonePower[1]);
-        const float b0One = std::max(tonePower[2], tonePower[3]);
-        const float b1Zero = std::max(tonePower[0], tonePower[3]);
-        const float b1One = std::max(tonePower[1], tonePower[2]);
-
-        bitMetrics[bitIndex++] = b0Zero - b0One;
-        bitMetrics[bitIndex++] = b1Zero - b1One;
-    }
-}
-
-} // namespace
-
 FT8DemodWorker::FT8Callback::FT8Callback(
     const QDateTime& periodTS,
     qint64 baseFrequency,
@@ -300,7 +183,7 @@ void FT8DemodWorker::setDecoderMode(int decoderMode)
     m_unsupportedModeWarningPending = true;
 }
 
-bool FT8DemodWorker::processFT4Experimental(int16_t *buffer, int frameSampleCount, FT8Callback& ft8Callback)
+bool FT8DemodWorker::processFT4(int16_t *buffer, int frameSampleCount, FT8Callback& ft8Callback)
 {
     std::vector<float> samples(frameSampleCount);
     std::transform(
@@ -404,7 +287,7 @@ void FT8DemodWorker::processBuffer(int16_t *buffer, QDateTime periodTS)
     }
     else if (m_decoderMode == FT8DemodSettings::DecoderModeFT4)
     {
-        const bool decoded = processFT4Experimental(buffer, frameSampleCount, ft8Callback);
+        const bool decoded = processFT4(buffer, frameSampleCount, ft8Callback);
 
         if (!decoded && m_unsupportedModeWarningPending)
         {

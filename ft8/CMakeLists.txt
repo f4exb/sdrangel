@@ -3,7 +3,6 @@ project(ft8)
 set(ft8_SOURCES
     arrays.cpp
     fft.cpp
-    ft4worker.cpp
     ft4.cpp
     fftbuffers.cpp
     ft8.cpp
@@ -21,7 +20,6 @@ set(ft8_SOURCES
 set(ft8_HEADERS
     arrays.h
     fft.h
-    ft4worker.h
     fftbuffers.h
     ft8.h
     ft8plan.h
