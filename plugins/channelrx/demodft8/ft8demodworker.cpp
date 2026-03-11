@@ -183,7 +183,42 @@ void FT8DemodWorker::setDecoderMode(int decoderMode)
     m_unsupportedModeWarningPending = true;
 }
 
-bool FT8DemodWorker::processFT4(int16_t *buffer, int frameSampleCount, FT8Callback& ft8Callback)
+
+void FT8DemodWorker::processFT8(int16_t *buffer, int frameSampleCount, FT8Callback& ft8Callback, int *hints)
+{
+    m_ft8Decoder.getParams().nthreads = m_nbDecoderThreads;
+    m_ft8Decoder.getParams().use_osd = m_useOSD ? 1 : 0;
+    m_ft8Decoder.getParams().osd_depth = m_osdDepth;
+    m_ft8Decoder.getParams().osd_ldpc_thresh = m_osdLDPCThreshold;
+    std::vector<float> samples(frameSampleCount);
+
+    std::transform(
+        buffer,
+        buffer + frameSampleCount,
+        samples.begin(),
+        [](const int16_t& s) -> float { return s / 32768.0f; }
+    );
+
+    m_ft8Decoder.entry(
+        samples.data(),
+        samples.size(),
+        0.5 * FT8DemodSettings::m_ft8SampleRate,
+        FT8DemodSettings::m_ft8SampleRate,
+        m_lowFreq,
+        m_highFreq,
+        hints,
+        hints,
+        m_decoderTimeBudget,
+        m_decoderTimeBudget,
+        &ft8Callback,
+        0,
+        (struct FT8::cdecode *) nullptr
+    );
+
+    m_ft8Decoder.wait(m_decoderTimeBudget + 1.0); // add one second to budget to force quit threads
+}
+
+void FT8DemodWorker::processFT4(int16_t *buffer, int frameSampleCount, FT8Callback& ft8Callback, int *hints)
 {
     std::vector<float> samples(frameSampleCount);
     std::transform(
@@ -193,8 +228,6 @@ bool FT8DemodWorker::processFT4(int16_t *buffer, int frameSampleCount, FT8Callba
         [](const int16_t& s) -> float { return s / 32768.0f; }
     );
 
-    int hints[2] = { 2, 0 }; // CQ
-    const int previousMessageCount = ft8Callback.getReportMessage()->getFT8Messages().size();
     m_ft4Decoder.getParams().nthreads = m_nbDecoderThreads;
     m_ft4Decoder.getParams().ldpc_iters = m_ft8Decoder.getParams().ldpc_iters;
     m_ft4Decoder.getParams().use_osd = m_useOSD ? 1 : 0;
@@ -215,9 +248,8 @@ bool FT8DemodWorker::processFT4(int16_t *buffer, int frameSampleCount, FT8Callba
         0,
         (struct FT8::cdecode *) nullptr
     );
+
     m_ft4Decoder.wait(m_decoderTimeBudget + 1.0);
-    const int currentMessageCount = ft8Callback.getReportMessage()->getFT8Messages().size();
-    return currentMessageCount > previousMessageCount;
 }
 
 void FT8DemodWorker::processBuffer(int16_t *buffer, QDateTime periodTS)
@@ -252,48 +284,10 @@ void FT8DemodWorker::processBuffer(int16_t *buffer, QDateTime periodTS)
     FT8Callback ft8Callback(periodTS, m_baseFrequency, m_packing, channelReference);
     ft8Callback.setValidCallsigns((m_useOSD && m_verifyOSD) ? &m_validCallsigns : nullptr);
 
-    if (m_decoderMode == FT8DemodSettings::DecoderModeFT8)
-    {
-        m_ft8Decoder.getParams().nthreads = m_nbDecoderThreads;
-        m_ft8Decoder.getParams().use_osd = m_useOSD ? 1 : 0;
-        m_ft8Decoder.getParams().osd_depth = m_osdDepth;
-        m_ft8Decoder.getParams().osd_ldpc_thresh = m_osdLDPCThreshold;
-        std::vector<float> samples(frameSampleCount);
-
-        std::transform(
-            buffer,
-            buffer + frameSampleCount,
-            samples.begin(),
-            [](const int16_t& s) -> float { return s / 32768.0f; }
-        );
-
-        m_ft8Decoder.entry(
-            samples.data(),
-            samples.size(),
-            0.5 * FT8DemodSettings::m_ft8SampleRate,
-            FT8DemodSettings::m_ft8SampleRate,
-            m_lowFreq,
-            m_highFreq,
-            hints,
-            hints,
-            m_decoderTimeBudget,
-            m_decoderTimeBudget,
-            &ft8Callback,
-            0,
-            (struct FT8::cdecode *) nullptr
-        );
-
-        m_ft8Decoder.wait(m_decoderTimeBudget + 1.0); // add one second to budget to force quit threads
-    }
-    else if (m_decoderMode == FT8DemodSettings::DecoderModeFT4)
-    {
-        const bool decoded = processFT4(buffer, frameSampleCount, ft8Callback);
-
-        if (!decoded && m_unsupportedModeWarningPending)
-        {
-            qWarning("FT8DemodWorker::processBuffer: FT4 experimental decoder did not find valid messages");
-            m_unsupportedModeWarningPending = false;
-        }
+    if (m_decoderMode == FT8DemodSettings::DecoderModeFT8) {
+        processFT8(buffer, frameSampleCount, ft8Callback, hints);
+    } else if (m_decoderMode == FT8DemodSettings::DecoderModeFT4) {
+        processFT4(buffer, frameSampleCount, ft8Callback, hints);
     }
     else
     {
