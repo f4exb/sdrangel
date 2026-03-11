@@ -211,6 +211,10 @@ This button will open a dialog for more settings
 
 ![FT8 Demodulator plugin C1 GUI](../../../doc/img/FT8Demod_plugin_C1.png)
 
+<h4>Mode</h4>
+
+(not on the picture). You now have the choice between FT8 and FT4 modes.
+
 <h4>C.1.1: Number of decoder threads</h4>
 
 When processing the audio baseband several instances of the core decoder will be spawned in separate threads. This adjusts the number of threads. You have to experiment with it to find which is the best number for you. The default of 3 will normally yield good results comparable if no better to what is obtained with the original WSJT-X software.
@@ -257,7 +261,7 @@ Use this push button to revert to default values for the reporting station detai
 
 <h4>C.1.12: Band presets table</h4>
 
-This table shows the band presets values that will appear in (C.5)
+This table shows the band presets values according to FT mode that will appear in (C.5)
 
   - **Name**: name of the preset (by default the band wavelength denomination) that will be shown in (C.5)
   - **F (kHz)**: Base frequency in kHz. This is the RF zero frequency of the FT8 baseband
@@ -285,6 +289,8 @@ Move down the preset designated by the selected cell in the table.
 
 This restores the default band preset values:
 
+- For FT8
+
   - **160m**: 1840 kHz
   - **80m**: 3573 kHz
   - **60m**: 5357 kHz
@@ -297,9 +303,27 @@ This restores the default band preset values:
   - **10m**: 28074 kHz
   - **6m**: 50313 kHz
   - **4m**: 70100 kHz
-  - **2m**: 144120 kHz
+  - **2m**: 144174 kHz
   - **1.25m**: 222065 kHz
-  - **70cm**: 432065 kHz
+  - **70cm**: 432174 kHz
+
+- For FT4
+
+  - **160m**: 1840 kHz (shared with FT8)
+  - **80m**: 3575 kHz
+  - **60m**: 5357 kHz (shared with FT8)
+  - **40m**: 7047.5 kHz
+  - **30m**: 10140 kHz
+  - **20m**: 14080 kHz
+  - **17m**: 18104 kHz
+  - **15m**: 21140 kHz
+  - **12m**: 24919 kHz
+  - **10m**: 28180 kHz
+  - **6m**: 50318 kHz
+  - **4m**: 70154 kHz (not normalized)
+  - **2m**: 144170 kHz
+  - **1.25m**: 222065 kHz
+  - **70cm**: 432174 kHz (not normalized)
 
 Channel offsets are all set to 0 kHz.
 

@@ -107,7 +107,7 @@ QList<FT8DemodBandPreset> FT8DemodSettings::getBandPresetsForMode(int decoderMod
         bandPresets.push_back(FT8DemodBandPreset{   "4m",  70154, 0});
         bandPresets.push_back(FT8DemodBandPreset{   "2m", 144170, 0});
         bandPresets.push_back(FT8DemodBandPreset{"1.25m", 222065, 0});
-        bandPresets.push_back(FT8DemodBandPreset{ "70cm", 432065, 0});
+        bandPresets.push_back(FT8DemodBandPreset{ "70cm", 432174, 0});
     }
     else
     {
