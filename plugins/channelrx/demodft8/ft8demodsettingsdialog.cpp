@@ -66,6 +66,7 @@ void FT8DemodSettingsDialog::populateBandsTable()
 {
     // Add to messages table
     int row = ui->bands->rowCount();
+    m_settings.m_bandPresets = FT8DemodSettings::getBandPresetsForMode(m_settings.m_decoderMode);
 
     for (const auto& band : m_settings.m_bandPresets)
     {
