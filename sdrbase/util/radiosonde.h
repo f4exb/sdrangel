@@ -43,6 +43,7 @@
 #define RS41_ID_GPSRAW            0x7d
 #define RS41_ID_GPSPOS            0x7b
 #define RS41_ID_EMPTY             0x76
+#define RS41_ID_POSDATETIME       0x82
 
 #define RS41_RS_N                 255
 #define RS41_RS_K                 231
@@ -108,6 +109,7 @@ public:
     void decodeMeas(const QByteArray ba);
     void decodeGPSInfo(const QByteArray ba);
     void decodeGPSPos(const QByteArray ba);
+    void decodePosDateTime(const QByteArray ba);
 
     float getPressureFloat(const RS41Subframe *subframe);
     QString getPressureString(const RS41Subframe *subframe);

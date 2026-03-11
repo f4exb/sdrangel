@@ -64,6 +64,9 @@ RS41Frame::RS41Frame(const QByteArray ba) :
         case RS41_ID_GPSPOS:
             decodeGPSPos(ba.mid(i+2, blockLength));
             break;
+        case RS41_ID_POSDATETIME:
+            decodePosDateTime(ba.mid(i+2, blockLength));
+            break;
         case RS41_ID_EMPTY:
             break;
         }
@@ -166,6 +169,39 @@ void RS41Frame::decodeGPSPos(const QByteArray ba)
         // Convert cm/s to m/s
         // Calculate speed / heading
         Coordinates::ecefVelToSpeedHeading(m_latitude, m_longitude, velX / 100.0, velY / 100.0, velZ / 100.0, m_speed, m_verticalRate, m_heading);
+    }
+}
+
+void RS41Frame::decodePosDateTime(const QByteArray ba)
+{
+    m_posValid = true;
+    int32_t ecefX = (int32_t)getUInt32(ba, 0x0);
+    int32_t ecefY = (int32_t)getUInt32(ba, 0x4);
+    int32_t ecefZ = (int32_t)getUInt32(ba, 0x8);
+    Coordinates::ecefToGeodetic(ecefX / 100.0, ecefY / 100.0, ecefZ / 100.0, m_latitude, m_longitude, m_height);
+    if ((m_height < -1000) || (m_height > 80000)) {
+        m_posValid = false;
+        return;
+    }
+    int32_t velX = (int16_t)getUInt16(ba, 0xc);
+    int32_t velY = (int16_t)getUInt16(ba, 0xe);
+    int32_t velZ = (int16_t)getUInt16(ba, 0x10);
+    Coordinates::ecefVelToSpeedHeading(m_latitude, m_longitude, velX / 100.0, velY / 100.0, velZ / 100.0, m_speed, m_verticalRate, m_heading);
+
+    if (ba.size() >= 26)
+    {
+        m_gpsInfoValid = true;
+        uint16_t year = getUInt16(ba, 0x12);
+        uint8_t month = ba[0x14] & 0xff;
+        uint8_t day = ba[0x15] & 0xff;
+        uint8_t hour = ba[0x16] & 0xff;
+        uint8_t minute = ba[0x17] & 0xff;
+        uint8_t second = ba[0x18] & 0xff;
+        int msec = 0;
+        if ((ba[0x19] & 0xff) < 100) {
+            msec = (ba[0x19] & 0xff) * 10;
+        }
+        m_gpsDateTime = QDateTime(QDate(year, month, day), QTime(hour, minute, second, msec), Qt::UTC);
     }
 }
 
