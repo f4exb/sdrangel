@@ -245,23 +245,6 @@ public:
     // append the 83 bits to the 91 bits message e+ crc to obtain the 174 bit payload
     static void encode(int a174[], const int s77[]);
 
-    //
-    // set ones and zero symbol indexes
-    //
-    static void set_ones_zeroes(int ones[], int zeroes[], int nbBits, int bitIndex);
-
-    //
-    // mags is the vector of 2^nbSymbolBits vector of magnitudes at each symbol time
-    // ll174 is the resulting 174 soft bits of payload
-    // used in FT-chirp modulation scheme - generalized to any number of symbol bits
-    //
-    static void soft_decode_mags(FT4Params& params, const std::vector<std::vector<float>>& mags, int nbSymbolBits, float ll174[]);
-
-    //
-    // Generic Gray decoding for magnitudes (floats)
-    //
-    static std::vector<std::vector<float>> un_gray_code_r_gen(const std::vector<std::vector<float>> &mags);
-
 private:
     //
     // reduce the sample rate from arate to brate.
@@ -382,12 +365,6 @@ private:
     // this helps, but why?
     //
     std::vector<std::vector<float>> convert_to_snr(const std::vector<std::vector<float>> &m79);
-    //
-    // normalize levels by windowed median.
-    // this helps, but why?
-    //
-    static std::vector<std::vector<float>> convert_to_snr_gen(const FT4Params& params, int nbSymbolBits, const std::vector<std::vector<float>> &mags);
-    //
     // normalize levels by windowed median.
     // this helps, but why?
     //
@@ -405,17 +382,6 @@ private:
         Stats &bests,
         Stats &all
     );
-    //
-    // generalized version of the above for any number of symbols and no Costas
-    // used by FT-chirp decoder
-    //
-    static void make_stats_gen(
-        const std::vector<std::vector<float>> &mags,
-        int nbSymbolBits,
-        Stats &bests,
-        Stats &all
-    );
-    //
     // convert 79x8 complex FFT bins to magnitudes.
     //
     // exploits local phase coherence by decreasing magnitudes of bins

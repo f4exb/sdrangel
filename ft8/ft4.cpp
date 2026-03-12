@@ -1179,32 +1179,6 @@ std::vector<std::vector<float>> FT4::un_gray_code_r(const std::vector<std::vecto
 }
 
 //
-// Generic Gray decoding for magnitudes (floats)
-//
-std::vector<std::vector<float>> FT4::un_gray_code_r_gen(const std::vector<std::vector<float>> &mags)
-{
-    if (mags.size() == 0) {
-        return mags;
-    }
-
-    std::vector<std::vector<float>> magsa(mags.size());
-    int nsyms = mags.front().size();
-
-    for (unsigned int si = 0; si < mags.size(); si++)
-    {
-        magsa[si].resize(nsyms);
-
-        for (int bini = 0; bini < nsyms; bini++)
-        {
-            int grayi = bini ^ (bini >> 1);
-            magsa[si][bini] = mags[si][grayi];
-        }
-    }
-
-    return magsa;
-}
-
-//
 // normalize levels by windowed median.
 // this helps, but why?
 //
@@ -1382,93 +1356,6 @@ std::vector<std::vector<std::complex<float>>> FT4::c_convert_to_snr(
     return n103;
 }
 
-std::vector<std::vector<float>> FT4::convert_to_snr_gen(const FT4Params& params, int nbSymbolBits, const std::vector<std::vector<float>> &mags)
-{
-    if (params.snr_how < 0 || params.snr_win < 0) {
-        return mags;
-    }
-
-    //
-    // for each symbol time, what's its "noise" level?
-    //
-    std::vector<float> mm(mags.size());
-    int nbSymbols = 1<<nbSymbolBits;
-
-    for (int si = 0; si < (int) mags.size(); si++)
-    {
-        std::vector<float> v(nbSymbols);
-        float sum = 0.0;
-
-        for (int bini = 0; bini < nbSymbols; bini++)
-        {
-            float x = mags[si][bini];
-            v[bini] = x;
-            sum += x;
-        }
-
-        if (params.snr_how != 1) {
-            std::sort(v.begin(), v.end());
-        }
-
-        int mid = nbSymbols / 2;
-
-        if (params.snr_how == 0) {
-            // median
-            mm[si] = (v[mid-1] + v[mid]) / 2;
-        } else if (params.snr_how == 1) {
-            mm[si] = sum / nbSymbols;
-        } else if (params.snr_how == 2) {
-            // all but strongest tone.
-            mm[si] = std::accumulate(v.begin(), v.end() - 1, 0.0f) / (v.size() - 1);
-        } else if (params.snr_how == 3) {
-            mm[si] = v.front(); // weakest tone
-        } else if (params.snr_how == 4) {
-            mm[si] = v.back(); // strongest tone
-        } else if (params.snr_how == 5) {
-            mm[si] = v[v.size()-2]; // second-strongest tone
-        } else {
-            mm[si] = 1.0;
-        }
-    }
-
-    // we're going to take a windowed average.
-    std::vector<float> winwin;
-
-    if (params.snr_win > 0) {
-        winwin = blackman(2 * params.snr_win + 1);
-    } else {
-        winwin.push_back(1.0);
-    }
-
-    std::vector<std::vector<float>> snr(mags.size());
-
-    for (int si = 0; si < (int) mags.size(); si++)
-    {
-        float sum = 0;
-
-        for (int dd = si - params.snr_win; dd <= si + params.snr_win; dd++)
-        {
-            int wi = dd - (si - params.snr_win);
-
-            if (dd >= 0 && dd < (int) mags.size()) {
-                sum += mm[dd] * winwin[wi];
-            } else if (dd < 0) {
-                sum += mm[0] * winwin[wi];
-            } else {
-                sum += mm[mags.size()-1] * winwin[wi];
-            }
-        }
-
-        snr[si].resize(nbSymbols);
-
-        for (int bi = 0; bi < nbSymbols; bi++) {
-            snr[si][bi] = mags[si][bi] / sum;
-        }
-    }
-
-    return snr;
-}
-
 //
 // statistics to decide soft probabilities,
 // to drive LDPC decoder.
@@ -1541,39 +1428,6 @@ void FT4::make_stats(
 
             bests.add(mx);
         }
-    }
-}
-
-//
-// generalized version of the above for any number of symbols and no Costas
-// used by FT-chirp decoder
-// Probably not needed here. The FT8 one may be used.
-//
-void FT4::make_stats_gen(
-    const std::vector<std::vector<float>> &mags,
-    int nbSymbolBits,
-    Stats &bests,
-    Stats &all
-)
-{
-    int nbBins = 1<<nbSymbolBits;
-
-    for (unsigned int si = 0; si < mags.size(); si++)
-    {
-        float mx = 0;
-
-        for (int bi = 0; bi < nbBins; bi++)
-        {
-            float x = mags[si][bi];
-
-            if (x > mx) {
-                mx = x;
-            }
-
-            all.add(x);
-        }
-
-        bests.add(mx);
     }
 }
 
@@ -1874,87 +1728,6 @@ void FT4::soft_decode(const FFTEngine::ffts_t &c103, float ll174[])
 }
 
 //
-// mags is the vector of 2^nbSymbolBits vector of magnitudes at each symbol time
-// ll174 is the resulting 174 soft bits of payload
-// used in FT-chirp modulation scheme - generalized to any number of symbol bits
-//
-void FT4::soft_decode_mags(FT4Params& params, const std::vector<std::vector<float>>& mags_, int nbSymbolBits, float ll174[])
-{
-    if ((nbSymbolBits > 16) || (nbSymbolBits < 1)) {
-        return;
-    }
-
-    std::vector<std::vector<float>> mags = convert_to_snr_gen(params, nbSymbolBits, mags_);
-    // statistics to decide soft probabilities.
-    // distribution of strongest tones, and
-    // distribution of noise.
-    Stats bests(params.problt_how_sig, params.log_tail, params.log_rate);
-    Stats all(params.problt_how_noise, params.log_tail, params.log_rate);
-    make_stats_gen(mags, nbSymbolBits, bests, all);
-    mags = un_gray_code_r_gen(mags);
-    int lli = 0;
-    int zoX = 1<<(nbSymbolBits-1);
-    int zoY = nbSymbolBits;
-    std::vector<int> zeroi(zoX*zoY);
-    std::vector<int> onei(zoX*zoY);
-
-    for (int biti = 0; biti < nbSymbolBits; biti++)
-    {
-        int i = biti * zoX;
-        set_ones_zeroes(&onei[i], &zeroi[i], nbSymbolBits, biti);
-    }
-
-    for (unsigned int si = 0; si < mags.size(); si++)
-    {
-        // for each of the symbol bits, look at the strongest tone
-        // that would make it a zero, and the strongest tone that
-        // would make it a one. use Bayes to decide which is more
-        // likely, comparing each against the distribution of noise
-        // and the distribution of strongest tones.
-        // most-significant-bit first.
-        for (int biti = nbSymbolBits - 1; biti >= 0; biti--)
-        {
-            // strongest tone that would make this bit be zero.
-            int got_best_zero = 0;
-            float best_zero = 0;
-
-            for (int i = 0; i < 1<<(nbSymbolBits-1); i++)
-            {
-                float x = mags[si][zeroi[i+biti*zoX]];
-                // printf("FT8::soft_decode_mags:: biti: %d i: %d zeroi: %d x: %f best_zero: %f\n", biti, i, zeroi[i+biti*zoX], x, best_zero);
-
-                if (got_best_zero == 0 || x > best_zero)
-                {
-                    got_best_zero = 1;
-                    best_zero = x;
-                }
-            }
-
-            // strongest tone that would make this bit be one.
-            int got_best_one = 0;
-            float best_one = 0;
-
-            for (int i = 0; i < 1<<(nbSymbolBits-1); i++)
-            {
-                float x = mags[si][onei[i+biti*zoX]];
-                // printf("FT8::soft_decode_mags:: biti: %d i: %d onei: %d x: %f best_one: %f\n", biti, i, onei[i+biti*zoX], x, best_one);
-
-                if (got_best_one == 0 || x > best_one)
-                {
-                    got_best_one = 1;
-                    best_one = x;
-                }
-            }
-
-            // printf("FT8::soft_decode_mags: biti: %d best_zero: %f best_one: %f\n", biti, best_zero, best_one);
-
-            float ll = bayes(params, best_zero, best_one, lli, bests, all);
-            ll174[lli++] = ll;
-        }
-    }
-}
-
-//
 // c103 is 103x4 complex tones, before un-gray-coding.
 //
 void FT4::c_soft_decode(const FFTEngine::ffts_t &c103x, float ll174[])
@@ -2141,43 +1914,6 @@ void FT4::c_soft_decode(const FFTEngine::ffts_t &c103x, float ll174[])
         }
     }
     // assert(lli == 174);
-}
-
-//
-// set ones and zero symbol indexes. Bit index is LSB
-//
-void FT4::set_ones_zeroes(int ones[], int zeroes[], int nbBits, int bitIndex)
-{
-    int nbIndexes = 1 << (nbBits - 1);
-
-    if (bitIndex == 0)
-    {
-        for (int i = 0; i < nbIndexes; i++)
-        {
-            zeroes[i] = i<<1;
-            ones[i] = zeroes[i] | 1;
-        }
-    }
-    else if (bitIndex == nbBits - 1)
-    {
-        for (int i = 0; i < nbIndexes; i++)
-        {
-            zeroes[i] = i;
-            ones[i] = (1<<(nbBits-1)) | zeroes[i];
-        }
-    }
-    else
-    {
-        int mask = (1<<nbBits) - 1;
-        int maskLow = (1<<bitIndex) - 1;
-        int maskHigh = mask ^ maskLow;
-
-        for (int i = 0; i < nbIndexes; i++)
-        {
-            zeroes[i] = (i & maskLow) + ((i & maskHigh)<<1);
-            ones[i] = zeroes[i] + (1<<bitIndex);
-        }
-    }
 }
 
 //
