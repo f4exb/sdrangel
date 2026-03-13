@@ -20,6 +20,10 @@ if (ENABLE_CHANNELTX_MODCHIRPCHAT)
     add_subdirectory(modchirpchat)
 endif()
 
+if (ENABLE_CHANNELTX_MODMESHTASTIC)
+    add_subdirectory(modmeshtastic)
+endif()
+
 if (ENABLE_CHANNELTX_MODNFM)
     add_subdirectory(modnfm)
 endif()

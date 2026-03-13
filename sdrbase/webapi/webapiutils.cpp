@@ -37,6 +37,7 @@ const QMap<QString, QString> WebAPIUtils::m_channelURIToSettingsKey = {
     {"sdrangel.channel.chanalyzerng", "ChannelAnalyzerSettings"}, // remap
     {"org.f4exb.sdrangelove.channel.chanalyzer", "ChannelAnalyzerSettings"}, // remap
     {"sdrangel.channel.chirpchatdemod", "ChirpChatDemodSettings"},
+    {"sdrangel.channel.meshtasticdemod", "ChirpChatDemodSettings"}, // alias: Meshtastic uses ChirpChatDemodSettings schema
     {"sdrangel.channel.modchirpchat", "ChirpChatModSettings"},
     {"sdrangel.channel.demodatv", "ATVDemodSettings"},
     {"sdrangel.channel.demoddatv", "DATVDemodSettings"},
@@ -162,6 +163,7 @@ const QMap<QString, QString> WebAPIUtils::m_channelTypeToSettingsKey = {
     {"BFMDemod", "BFMDemodSettings"},
     {"ChannelAnalyzer", "ChannelAnalyzerSettings"},
     {"ChirpChatDemod", "ChirpChatDemodSettings"},
+    {"MeshtasticDemod", "ChirpChatDemodSettings"}, // alias: Meshtastic uses ChirpChatDemodSettings schema
     {"ChirpChatMod", "ChirpChatModSettings"},
     {"ChannelPower", "ChannelPowerSettings"},
     {"DATVDemod", "DATVDemodSettings"},

@@ -228,7 +228,7 @@ bool RemoteTCPInput::handleMessage(const Message& message)
     {
         qDebug() << "RemoteTCPInput::handleMessage:" << message.getIdentifier();
         const RemoteTCPInputTCPHandler::MsgReportConnection& report = (const RemoteTCPInputTCPHandler::MsgReportConnection&) message;
-        if (report.getConnected())
+        if (!report.getConnected())
         {
             qDebug() << "Disconnected - stopping DSP";
             m_deviceAPI->stopDeviceEngine();
@@ -443,6 +443,9 @@ void RemoteTCPInput::webapiUpdateDeviceSettings(
     }
     if (deviceSettingsKeys.contains("agc")) {
         settings.m_agc = response.getRemoteTcpInputSettings()->getAgc() != 0;
+    }
+    if (deviceSettingsKeys.contains("gain")) {
+        settings.m_gain[0] = response.getRemoteTcpInputSettings()->getGain();
     }
     if (deviceSettingsKeys.contains("rfBW")) {
         settings.m_rfBW = response.getRemoteTcpInputSettings()->getRfBw();

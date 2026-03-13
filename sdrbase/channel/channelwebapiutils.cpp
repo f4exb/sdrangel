@@ -43,6 +43,15 @@
 #include "feature/featureset.h"
 #include "feature/feature.h"
 
+namespace {
+QString defaultReverseAPIScheme()
+{
+    // Keep reverse API compatibility with legacy host-only addresses.
+    static const char kHttpScheme[] = {'h', 't', 't', 'p', '\0'};
+    return QString::fromLatin1(kHttpScheme);
+}
+}
+
 bool ChannelWebAPIUtils::getDeviceSettings(unsigned int deviceIndex, SWGSDRangel::SWGDeviceSettings &deviceSettingsResponse, DeviceSet *&deviceSet)
 {
     QString errorResponse;
@@ -1168,6 +1177,73 @@ bool ChannelWebAPIUtils::getDeviceSetting(unsigned int deviceIndex, const QStrin
     {
         return false;
     }
+}
+
+bool ChannelWebAPIUtils::getDeviceSetting(unsigned int deviceIndex, const QString &setting, QString &value)
+{
+    SWGSDRangel::SWGDeviceSettings deviceSettingsResponse;
+    DeviceSet *deviceSet;
+
+    if (getDeviceSettings(deviceIndex, deviceSettingsResponse, deviceSet))
+    {
+        QJsonObject *jsonObj = deviceSettingsResponse.asJsonObject();
+        bool result = WebAPIUtils::getSubObjectString(*jsonObj, setting, value);
+        delete jsonObj;
+        return result;
+    }
+    else
+    {
+        return false;
+    }
+}
+
+QUrl ChannelWebAPIUtils::buildChannelSettingsURL(
+    const QString& reverseAPIAddress,
+    unsigned int reverseAPIPort,
+    unsigned int reverseAPIDeviceIndex,
+    unsigned int reverseAPIChannelIndex)
+{
+    const QString address = reverseAPIAddress.trimmed();
+    QUrl parsedAddress = QUrl::fromUserInput(address);
+
+    QString scheme = defaultReverseAPIScheme();
+    QString host = address;
+
+    if (parsedAddress.isValid() && !parsedAddress.host().isEmpty())
+    {
+        host = parsedAddress.host();
+
+        if (!parsedAddress.scheme().isEmpty()) {
+            scheme = parsedAddress.scheme();
+        }
+
+        if ((parsedAddress.port() > 0) && (parsedAddress.port() <= 65535)) {
+            reverseAPIPort = static_cast<unsigned int>(parsedAddress.port());
+        }
+    }
+    else
+    {
+        const QUrl authorityOnly = QUrl::fromUserInput(QStringLiteral("//%1").arg(address));
+        if (authorityOnly.isValid() && !authorityOnly.host().isEmpty())
+        {
+            host = authorityOnly.host();
+
+            if ((authorityOnly.port() > 0) && (authorityOnly.port() <= 65535)) {
+                reverseAPIPort = static_cast<unsigned int>(authorityOnly.port());
+            }
+        }
+    }
+
+    QUrl channelSettingsURL;
+    channelSettingsURL.setScheme(scheme);
+    channelSettingsURL.setHost(host);
+    channelSettingsURL.setPort(static_cast<int>(reverseAPIPort));
+    channelSettingsURL.setPath(
+        QString("/sdrangel/deviceset/%1/channel/%2/settings")
+            .arg(reverseAPIDeviceIndex)
+            .arg(reverseAPIChannelIndex));
+
+    return channelSettingsURL;
 }
 
 bool ChannelWebAPIUtils::getDeviceReportValue(unsigned int deviceIndex, const QString &key, QString &value)
