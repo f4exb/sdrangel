@@ -2191,7 +2191,7 @@ void FT4::soft_decode_triples(
 // given log likelihood for each bit, try LDPC and OSD decoders.
 // on success, puts corrected 174 bits into a174[].
 //
-int FT4::decode(const float ll174[], int a174[], FT4Params& _params, int use_osd, std::string &comment)
+int FT4::decode(const float ll174[], int a174[], FT8Params& _params, int use_osd, std::string &comment)
 {
     int plain[174];  // will be 0/1 bits.
     int ldpc_ok = 0; // 83 will mean success.

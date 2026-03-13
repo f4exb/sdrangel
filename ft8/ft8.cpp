@@ -47,71 +47,6 @@
 
 namespace FT8 {
 
-namespace {
-
-template<typename ParamsT>
-float bayesImpl(
-    const double apriori174[],
-    ParamsT& params,
-    float best_zero,
-    float best_one,
-    int lli,
-    Stats &bests,
-    Stats &all
-)
-{
-    float maxlog = 4.97;
-    float ll = 0;
-    float pzero = 0.5;
-    float pone = 0.5;
-
-    if (params.use_apriori)
-    {
-        pzero = 1.0 - apriori174[lli];
-        pone = apriori174[lli];
-    }
-
-    // zero
-    float a = pzero * bests.problt(best_zero) * (1.0 - all.problt(best_one));
-
-    if (params.bayes_how == 1) {
-        a *= all.problt(all.mean() + (best_zero - best_one));
-    }
-
-    // one
-    float b = pone * bests.problt(best_one) * (1.0 - all.problt(best_zero));
-
-    if (params.bayes_how == 1) {
-        b *= all.problt(all.mean() + (best_one - best_zero));
-    }
-
-    float p;
-
-    if (a + b == 0) {
-        p = 0.5;
-    } else {
-        p = a / (a + b);
-    }
-
-    if (1 - p == 0.0) {
-        ll = maxlog;
-    } else {
-        ll = log(p / (1 - p));
-    }
-
-    if (ll > maxlog) {
-        ll = maxlog;
-    }
-
-    if (ll < -maxlog) {
-        ll = -maxlog;
-    }
-
-    return ll;
-}
-
-} // namespace
-
 // a-priori probability of each of the 174 LDPC codeword
 // bits being one. measured from reconstructed correct
 // codewords, into ft8bits, then python bprob.py.
@@ -1731,6 +1666,7 @@ std::vector<std::vector<float>> FT8::soft_c2m(const FFTEngine::ffts_t &c79)
 //
 // returns log-likelihood, zero is positive, one is negative.
 //
+// Works for all FT modes with 174 bits, by looking up apriori probabilities in the same table.
 float FT8::bayes(
     FT8Params& params,
     float best_zero,
@@ -1740,9 +1676,55 @@ float FT8::bayes(
     Stats &all
 )
 {
-    return bayesImpl(apriori174, params, best_zero, best_one, lli, bests, all);
-}
+    float maxlog = 4.97;
+    float ll = 0;
+    float pzero = 0.5;
+    float pone = 0.5;
 
+    if (params.use_apriori)
+    {
+        pzero = 1.0 - apriori174[lli];
+        pone = apriori174[lli];
+    }
+
+    // zero
+    float a = pzero * bests.problt(best_zero) * (1.0 - all.problt(best_one));
+
+    if (params.bayes_how == 1) {
+        a *= all.problt(all.mean() + (best_zero - best_one));
+    }
+
+    // one
+    float b = pone * bests.problt(best_one) * (1.0 - all.problt(best_zero));
+
+    if (params.bayes_how == 1) {
+        b *= all.problt(all.mean() + (best_one - best_zero));
+    }
+
+    float p;
+
+    if (a + b == 0) {
+        p = 0.5;
+    } else {
+        p = a / (a + b);
+    }
+
+    if (1 - p == 0.0) {
+        ll = maxlog;
+    } else {
+        ll = log(p / (1 - p));
+    }
+
+    if (ll > maxlog) {
+        ll = maxlog;
+    }
+
+    if (ll < -maxlog) {
+        ll = -maxlog;
+    }
+
+    return ll;
+}
 
 //
 // c79 is 79x8 complex tones, before un-gray-coding.

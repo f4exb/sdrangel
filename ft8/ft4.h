@@ -32,32 +32,7 @@ namespace FT8 {
 //   add 2 ramp symbols at start and end to make 105 symbols
 // total transmission time is 5.04 seconds
 
-// tunable parameters
-using FT4Params = FT8Params;
-
-class FT8_API FT4ParamsLight
-{
-public:
-    int nthreads;
-    int ldpc_iters;
-    int use_osd;
-    int osd_depth;
-    int osd_ldpc_thresh;
-    int subtract_edge_symbols;
-    int max_candidates;
-
-    FT4ParamsLight() :
-        nthreads(8),
-        ldpc_iters(25),
-        use_osd(1),
-        osd_depth(0),
-        osd_ldpc_thresh(70),
-        subtract_edge_symbols(0),
-        max_candidates(96)
-    {}
-};
-
-// The FT8 worker
+// The FT4 worker
 class FT8_API FT4 : public QObject
 {
     Q_OBJECT
@@ -94,12 +69,12 @@ public:
     //
     std::vector<Strength> coarse(const FFTEngine::ffts_t &bins, int si0, int si1);
 
-    FT4Params& getParams() { return params; }
+    FT8Params& getParams() { return params; }
     //
     // given log likelihood for each bit, try LDPC and OSD decoders.
     // on success, puts corrected 174 bits into a174[].
     //
-    static int decode(const float ll174[], int a174[], FT4Params& params, int use_osd, std::string &comment);
+    static int decode(const float ll174[], int a174[], FT8Params& params, int use_osd, std::string &comment);
     // encode a 77 bit message into a 174 bit payload
     // adds the 14 bit CRC to obtain 91 bits
     // apply (174, 91) generator mastrix to obtain the 83 parity bits
@@ -409,7 +384,7 @@ private:
 signals:
     void finished();
 private:
-    FT4Params params;
+    FT8Params params;
     FFTEngine *fftEngine_;
     int npasses_;
     static const double apriori174[];
@@ -464,9 +439,9 @@ public:
     );
     void wait(double time_left); //!< wait for all threads to finish
     void forceQuit(); //!< force quit all threads
-    FT4Params& getParams() { return params; }
+    FT8Params& getParams() { return params; }
 private:
-    FT4Params params;
+    FT8Params params;
     std::vector<QThread*> threads;
     std::vector<FFTEngine*> fftEngines;
 }; // FT4Decoder
