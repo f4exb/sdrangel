@@ -47,6 +47,71 @@
 
 namespace FT8 {
 
+namespace {
+
+template<typename ParamsT>
+float bayesImpl(
+    const double apriori174[],
+    ParamsT& params,
+    float best_zero,
+    float best_one,
+    int lli,
+    Stats &bests,
+    Stats &all
+)
+{
+    float maxlog = 4.97;
+    float ll = 0;
+    float pzero = 0.5;
+    float pone = 0.5;
+
+    if (params.use_apriori)
+    {
+        pzero = 1.0 - apriori174[lli];
+        pone = apriori174[lli];
+    }
+
+    // zero
+    float a = pzero * bests.problt(best_zero) * (1.0 - all.problt(best_one));
+
+    if (params.bayes_how == 1) {
+        a *= all.problt(all.mean() + (best_zero - best_one));
+    }
+
+    // one
+    float b = pone * bests.problt(best_one) * (1.0 - all.problt(best_zero));
+
+    if (params.bayes_how == 1) {
+        b *= all.problt(all.mean() + (best_one - best_zero));
+    }
+
+    float p;
+
+    if (a + b == 0) {
+        p = 0.5;
+    } else {
+        p = a / (a + b);
+    }
+
+    if (1 - p == 0.0) {
+        ll = maxlog;
+    } else {
+        ll = log(p / (1 - p));
+    }
+
+    if (ll > maxlog) {
+        ll = maxlog;
+    }
+
+    if (ll < -maxlog) {
+        ll = -maxlog;
+    }
+
+    return ll;
+}
+
+} // namespace
+
 // a-priori probability of each of the 174 LDPC codeword
 // bits being one. measured from reconstructed correct
 // codewords, into ft8bits, then python bprob.py.
@@ -1675,71 +1740,9 @@ float FT8::bayes(
     Stats &all
 )
 {
-    float maxlog = 4.97;
-    float ll = 0;
-    float pzero = 0.5;
-    float pone = 0.5;
-
-    if (params.use_apriori)
-    {
-        pzero = 1.0 - apriori174[lli];
-        pone = apriori174[lli];
-    }
-
-    //
-    // Bayes combining rule normalization from:
-    // http://cs.wellesley.edu/~anderson/writing/naive-bayes.pdf
-    //
-    // a = P(zero)P(e0|zero)P(e1|zero)
-    // b = P(one)P(e0|one)P(e1|one)
-    // p = a / (a + b)
-    //
-    // also see Mark Owen's book Practical Signal Processing,
-    // Chapter 6.
-    //
-
-    // zero
-    float a = pzero * bests.problt(best_zero) * (1.0 - all.problt(best_one));
-    // printf("FT8::bayes: a: %f bp: %f ap: %f \n", a, bests.problt(best_zero), all.problt(best_one));
-
-    if (params.bayes_how == 1) {
-        a *= all.problt(all.mean() + (best_zero - best_one));
-    }
-
-    // one
-    float b = pone * bests.problt(best_one) * (1.0 - all.problt(best_zero));
-    // printf("FT8::bayes: b: %f bp: %f ap: %f \n", b, bests.problt(best_one), all.problt(best_zero));
-
-    if (params.bayes_how == 1) {
-        b *= all.problt(all.mean() + (best_one - best_zero));
-    }
-
-    float p;
-
-    if (a + b == 0) {
-        p = 0.5;
-    } else {
-        p = a / (a + b);
-    }
-
-    // printf("FT8::bayes: all.mean: %f a: %f b: %f p: %f\n", all.mean(), a, b, p);
-
-    if (1 - p == 0.0) {
-        ll = maxlog;
-    } else {
-        ll = log(p / (1 - p));
-    }
-
-    if (ll > maxlog) {
-        ll = maxlog;
-    }
-
-    if (ll < -maxlog) {
-        ll = -maxlog;
-    }
-
-    return ll;
+    return bayesImpl(apriori174, params, best_zero, best_one, lli, bests, all);
 }
+
 
 //
 // c79 is 79x8 complex tones, before un-gray-coding.

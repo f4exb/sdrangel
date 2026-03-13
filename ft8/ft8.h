@@ -36,6 +36,21 @@
 class QThread;
 
 namespace FT8 {
+
+// FT8 characteristics:
+// 1920-point FFT at 12000 samples/second
+// 6.25 Hz spacing, 0.16 seconds/symbol
+// encode chain:
+//   77 bits
+//   append 14 bits CRC (for 91 bits)
+//   LDPC(174,91) yields 174 bits
+//   that's 58 3-bit FSK-8 symbols
+//   gray code each 3 bits
+//   insert three 7-symbol Costas sync arrays
+//     at symbol #s 0, 36, 72 of final signal
+//   thus: 79 FSK-8 symbols
+// total transmission time is 12.64 seconds
+
 // Callback interface to get the results
 class FT8_API CallbackInterface
 {
@@ -51,7 +66,6 @@ public:
     ) = 0; //!< virtual nathod called each time there is a result
     virtual QString get_name() = 0;
 };
-
 
 class FT8_API Strength
 {
@@ -71,20 +85,7 @@ struct FT8_API cdecode
     int *bits; // 174
 };
 
-// 1920-point FFT at 12000 samples/second
-// 6.25 Hz spacing, 0.16 seconds/symbol
-// encode chain:
-//   77 bits
-//   append 14 bits CRC (for 91 bits)
-//   LDPC(174,91) yields 174 bits
-//   that's 58 3-bit FSK-8 symbols
-//   gray code each 3 bits
-//   insert three 7-symbol Costas sync arrays
-//     at symbol #s 0, 36, 72 of final signal
-//   thus: 79 FSK-8 symbols
-// total transmission time is 12.64 seconds
-
-// tunable parameters
+// tunable parameters for all FT decoders
 class FT8_API FT8Params
 {
 public:
@@ -140,6 +141,7 @@ public:
     int second_count;
     int soft_phase_win;
     float subtract_ramp;
+    int subtract_edge_symbols; // model one extra tapered symbol at frame start/end during subtraction
     int soft_ones;
     int soft_pairs;
     int soft_triples;
@@ -209,6 +211,7 @@ public:
         second_count = 3;
         soft_phase_win = 2;
         subtract_ramp = 0.11;
+        subtract_edge_symbols = 0;
         soft_ones = 2;
         soft_pairs = 1;
         soft_triples = 1;
@@ -230,6 +233,8 @@ public:
 class FT8_API FT8 : public QObject
 {
     Q_OBJECT
+    friend class FT4;
+
 public:
     FT8(
         const std::vector<float> &samples,
@@ -457,6 +462,7 @@ private:
     // next.
     //
     std::vector<std::vector<float>> soft_c2m(const FFTEngine::ffts_t &c79);
+public:
     //
     // guess the probability that a bit is zero vs one,
     // based on strengths of strongest tones that would
@@ -472,6 +478,7 @@ private:
         Stats &bests,
         Stats &all
     );
+private:
     //
     // c79 is 79x8 complex tones, before un-gray-coding.
     //

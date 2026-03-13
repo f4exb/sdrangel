@@ -17,162 +17,23 @@ class QThread;
 
 namespace FT8 {
 
-// 1920-point FFT at 12000 samples/second
-// 6.25 Hz spacing, 0.16 seconds/symbol
+// FT4 characteristics:
+// 576-point FFT at 12000 samples/second
+// 23.4 Hz spacing, 0.048 seconds/symbol
 // encode chain:
 //   77 bits
 //   append 14 bits CRC (for 91 bits)
 //   LDPC(174,91) yields 174 bits
-//   that's 58 3-bit FSK-8 symbols
-//   gray code each 3 bits
-//   insert three 7-symbol Costas sync arrays
-//     at symbol #s 0, 36, 72 of final signal
-//   thus: 79 FSK-8 symbols
-// total transmission time is 12.64 seconds
+//   that's 87 2-bit FSK-4 symbols
+//   gray code each 2 bits
+//   insert four 4-symbol Costas sync arrays
+//     at positions: 0-3, 33-36, 66-69, 99-102
+//   thus: 103 FSK-4 symbols
+//   add 2 ramp symbols at start and end to make 105 symbols
+// total transmission time is 5.04 seconds
 
 // tunable parameters
-class FT8_API FT4Params
-{
-public:
-    int nthreads;            // number of parallel threads, for multi-core
-    int npasses_one;         // number of spectral subtraction passes
-    int npasses_two;         // number of spectral subtraction passes
-    int ldpc_iters;          // how hard LDPC decoding should work
-    int snr_win;             // averaging window, in symbols, for SNR conversion
-    int snr_how;             // technique to measure "N" for SNR. 0 means median of the 8 tones.
-    float shoulder200;       // for 200 sps bandpass filter
-    float shoulder200_extra; // for bandpass filter
-    float second_hz_win;     // +/- hz
-    int second_hz_n;         // divide total window into this many pieces
-    float second_off_win;    // +/- search window in symbol-times
-    int second_off_n;
-    int third_hz_n;
-    float third_hz_win;
-    int third_off_n;
-    float third_off_win;
-    float log_tail;
-    float log_rate;
-    int problt_how_noise;
-    int problt_how_sig;
-    int use_apriori;
-    int use_hints;           // 1 means use all hints, 2 means just CQ hints
-    int win_type;
-    int use_osd;
-    int osd_depth;           // 6; // don't increase beyond 6, produces too much garbage
-    int osd_ldpc_thresh;     // demand this many correct LDPC parity bits before OSD
-    int ncoarse;             // number of offsets per hz produced by coarse()
-    int ncoarse_blocks;
-    float tminus;            // start looking at 0.5 - tminus seconds
-    float tplus;
-    int coarse_off_n;
-    int coarse_hz_n;
-    float already_hz;
-    float overlap;
-    int overlap_edges;
-    float nyquist;
-    int oddrate;
-    float pass0_frac;
-    int reduce_how;
-    float go_extra;
-    int do_reduce;
-    int pass_threshold;
-    int strength_how;
-    int known_strength_how;
-    int coarse_strength_how;
-    float reduce_shoulder;
-    float reduce_factor;
-    float reduce_extra;
-    float coarse_all;
-    int second_count;
-    int soft_phase_win;
-    float subtract_ramp;
-    int subtract_edge_symbols; // model one extra tapered symbol at frame start/end during subtraction (does not yield significant improvement)
-    int soft_ones;
-    int soft_pairs;
-    int soft_triples;
-    int do_second;
-    int do_fine_hz;
-    int do_fine_off;
-    int do_third;
-    float fine_thresh;
-    int fine_max_off;
-    int fine_max_tone;
-    int known_sparse;
-    float c_soft_weight;
-    int c_soft_win;
-    int bayes_how;
-
-    FT4Params()
-    {
-        nthreads = 8;            // number of parallel threads, for multi-core
-        npasses_one = 3;         // number of spectral subtraction passes
-        npasses_two = 3;         // number of spectral subtraction passes
-        ldpc_iters = 25;         // how hard LDPC decoding should work
-        snr_win = 7;             // averaging window, in symbols, for SNR conversion
-        snr_how = 3;             // technique to measure "N" for SNR. 0 means median of the 8 tones.
-        shoulder200 = 10;        // for 200 sps bandpass filter
-        shoulder200_extra = 0.0; // for bandpass filter
-        second_hz_win = 3.5;     // +/- hz
-        second_hz_n = 8;         // divide total window into this many pieces
-        second_off_win = 0.5;    // +/- search window in symbol-times
-        second_off_n = 10;
-        third_hz_n = 3;
-        third_hz_win = 0.25;
-        third_off_n = 4;
-        third_off_win = 0.075;
-        log_tail = 0.1;
-        log_rate = 8.0;
-        problt_how_noise = 0;    // Gaussian
-        problt_how_sig = 0;      // Gaussian
-        use_apriori = 1;
-        use_hints = 2;           // 1 means use all hints, 2 means just CQ hints
-        win_type = 1;
-        use_osd = 1;
-        osd_depth = 0;           // 6; // don't increase beyond 6, produces too much garbage
-        osd_ldpc_thresh = 70;    // demand this many correct LDPC parity bits before OSD
-        ncoarse = 1;             // number of offsets per hz produced by coarse()
-        ncoarse_blocks = 1;
-        tminus = 2.2;            // start looking at 0.5 - tminus seconds
-        tplus = 2.4;
-        coarse_off_n = 4;
-        coarse_hz_n = 4;
-        already_hz = 27;
-        overlap = 20;
-        overlap_edges = 0;
-        nyquist = 0.925;
-        oddrate = 1;
-        pass0_frac = 1.0;
-        reduce_how = 2;
-        go_extra = 3.5;
-        do_reduce = 1;
-        pass_threshold = 1;
-        strength_how = 4;
-        known_strength_how = 7;
-        coarse_strength_how = 6;
-        reduce_shoulder = -1;
-        reduce_factor = 0.25;
-        reduce_extra = 0;
-        coarse_all = -1;
-        second_count = 3;
-        soft_phase_win = 2;
-        subtract_ramp = 0.11;
-        subtract_edge_symbols = 0;
-        soft_ones = 2;
-        soft_pairs = 1;
-        soft_triples = 1;
-        do_second = 1;
-        do_fine_hz = 1;
-        do_fine_off = 1;
-        do_third = 2;
-        fine_thresh = 0.19;
-        fine_max_off = 2;
-        fine_max_tone = 4;
-        known_sparse = 1;
-        c_soft_weight = 7;
-        c_soft_win = 2;
-        bayes_how = 1;
-    }
-}; // class FT4Params
+using FT4Params = FT8Params;
 
 class FT8_API FT4ParamsLight
 {
@@ -393,22 +254,6 @@ private:
     // next.
     //
     std::vector<std::vector<float>> soft_c2m(const FFTEngine::ffts_t &c79);
-    //
-    // guess the probability that a bit is zero vs one,
-    // based on strengths of strongest tones that would
-    // give it those values. for soft LDPC decoding.
-    //
-    // returns log-likelihood, zero is positive, one is negative.
-    //
-    static float bayes(
-        FT4Params& params,
-        float best_zero,
-        float best_one,
-        int lli,
-        Stats &bests,
-        Stats &all
-    );
-    //
     // c79 is 79x8 complex tones, before un-gray-coding.
     //
     void soft_decode(const FFTEngine::ffts_t &c79, float ll174[]);

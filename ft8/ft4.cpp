@@ -1548,88 +1548,6 @@ std::vector<std::vector<float>> FT4::soft_c2m(const FFTEngine::ffts_t &c103)
 }
 
 //
-// guess the probability that a bit is zero vs one,
-// based on strengths of strongest tones that would
-// give it those values. for soft LDPC decoding.
-//
-// returns log-likelihood, zero is positive, one is negative.
-//
-float FT4::bayes(
-    FT4Params& params,
-    float best_zero,
-    float best_one,
-    int lli,
-    Stats &bests,
-    Stats &all
-)
-{
-    float maxlog = 4.97;
-    float ll = 0;
-    float pzero = 0.5;
-    float pone = 0.5;
-
-    if (params.use_apriori)
-    {
-        pzero = 1.0 - apriori174[lli];
-        pone = apriori174[lli];
-    }
-
-    //
-    // Bayes combining rule normalization from:
-    // http://cs.wellesley.edu/~anderson/writing/naive-bayes.pdf
-    //
-    // a = P(zero)P(e0|zero)P(e1|zero)
-    // b = P(one)P(e0|one)P(e1|one)
-    // p = a / (a + b)
-    //
-    // also see Mark Owen's book Practical Signal Processing,
-    // Chapter 6.
-    //
-
-    // zero
-    float a = pzero * bests.problt(best_zero) * (1.0 - all.problt(best_one));
-    // printf("FT8::bayes: a: %f bp: %f ap: %f \n", a, bests.problt(best_zero), all.problt(best_one));
-
-    if (params.bayes_how == 1) {
-        a *= all.problt(all.mean() + (best_zero - best_one));
-    }
-
-    // one
-    float b = pone * bests.problt(best_one) * (1.0 - all.problt(best_zero));
-    // printf("FT8::bayes: b: %f bp: %f ap: %f \n", b, bests.problt(best_one), all.problt(best_zero));
-
-    if (params.bayes_how == 1) {
-        b *= all.problt(all.mean() + (best_one - best_zero));
-    }
-
-    float p;
-
-    if (a + b == 0) {
-        p = 0.5;
-    } else {
-        p = a / (a + b);
-    }
-
-    // printf("FT8::bayes: all.mean: %f a: %f b: %f p: %f\n", all.mean(), a, b, p);
-
-    if (1 - p == 0.0) {
-        ll = maxlog;
-    } else {
-        ll = log(p / (1 - p));
-    }
-
-    if (ll > maxlog) {
-        ll = maxlog;
-    }
-
-    if (ll < -maxlog) {
-        ll = -maxlog;
-    }
-
-    return ll;
-}
-
-//
 // c103 is 103x4 complex tones, before un-gray-coding.
 //
 void FT4::soft_decode(const FFTEngine::ffts_t &c103, float ll174[])
@@ -1720,7 +1638,7 @@ void FT4::soft_decode(const FFTEngine::ffts_t &c103, float ll174[])
                 }
             }
 
-            float ll = bayes(params, best_zero, best_one, lli, bests, all);
+            float ll = FT8::bayes(params, best_zero, best_one, lli, bests, all);
             ll174[lli++] = ll;
         }
     }
@@ -1909,7 +1827,7 @@ void FT4::c_soft_decode(const FFTEngine::ffts_t &c103x, float ll174[])
                 }
             }
 
-            float ll = bayes(params, best_zero, best_one, lli, bests, all);
+            float ll = FT8::bayes(params, best_zero, best_one, lli, bests, all);
             ll174[lli++] = ll;
         }
     }
@@ -2084,7 +2002,7 @@ void FT4::soft_decode_pairs(
             float best_zero = bitinfo[si * 2 + i].zero;
             float best_one = bitinfo[si * 2 + i].one;
             // ll174[lli++] = best_zero > best_one ? 4.99 : -4.99;
-            float ll = bayes(params, best_zero, best_one, lli, bests, all);
+            float ll = FT8::bayes(params, best_zero, best_one, lli, bests, all);
             ll174[lli++] = ll;
         }
     }
@@ -2262,7 +2180,7 @@ void FT4::soft_decode_triples(
             float best_zero = bitinfo[si * 2 + i].zero;
             float best_one = bitinfo[si * 2 + i].one;
             // ll174[lli++] = best_zero > best_one ? 4.99 : -4.99;
-            float ll = bayes(params, best_zero, best_one, lli, bests, all);
+            float ll = FT8::bayes(params, best_zero, best_one, lli, bests, all);
             ll174[lli++] = ll;
         }
     }
