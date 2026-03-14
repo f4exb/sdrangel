@@ -238,7 +238,7 @@ int FT8::blocksize(int rate) const
 // look for potential psignals by searching FFT bins for Costas symbol
 // blocks. returns a vector of candidate positions.
 //
-std::vector<Strength> FT8::coarse(const FFTEngine::ffts_t &bins, int si0, int si1)
+std::vector<Strength> FT8::coarse(const FFTEngine::ffts_t &bins, int si0, int si1) const
 {
     int block = blocksize(rate_);
     int nbins = bins[0].size();
@@ -386,7 +386,7 @@ std::vector<float> FT8::reduce_rate(
 
 void FT8::go(int npasses)
 {
-    if (0)
+    if (false)
     {
         fprintf(stderr, "go: %.0f .. %.0f, %.0f, rate=%d\n",
                 min_hz_, max_hz_, max_hz_ - min_hz_, rate_);
@@ -1849,7 +1849,7 @@ void FT8::soft_decode(const FFTEngine::ffts_t &c79, float ll174[]) const
 // ll174 is the resulting 174 soft bits of payload
 // used in FT-chirp modulation scheme - generalized to any number of symbol bits
 //
-void FT8::soft_decode_mags(FT8Params& params, const std::vector<std::vector<float>>& mags_, int nbSymbolBits, float ll174[])
+void FT8::soft_decode_mags(const FT8Params& params, const std::vector<std::vector<float>>& mags_, int nbSymbolBits, float ll174[])
 {
     if ((nbSymbolBits > 16) || (nbSymbolBits < 1)) {
         return;
@@ -2166,7 +2166,7 @@ void FT8::set_ones_zeroes(int ones[], int zeroes[], int nbBits, int bitIndex)
 // each returned element is < 0 for 1, > 0 for zero,
 // scaled by str.
 //
-std::vector<float> FT8::extract_bits(const std::vector<int> &syms, const std::vector<float> str) const
+std::vector<float> FT8::extract_bits(const std::vector<int> &syms, const std::vector<float>& str) const
 {
     // assert(syms.size() == 79);
     // assert(str.size() == 79);
@@ -3566,7 +3566,7 @@ int FT8::try_decode(
 // used to help ensure that subtraction subtracts
 // at the right place.
 //
-std::vector<int> FT8::recode(int a174[]) const
+std::vector<int> FT8::recode(const int a174[]) const
 {
     int i174 = 0;
     int costas[] = {3, 1, 4, 0, 6, 5, 2};
@@ -3620,8 +3620,8 @@ void FT8Decoder::entry(
     int rate,
     float min_hz,
     float max_hz,
-    int hints1[],
-    int hints2[],
+    const int hints1[],
+    const int hints2[],
     double time_left,
     double total_time_left,
     CallbackInterface *cb,

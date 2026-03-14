@@ -26,7 +26,7 @@ namespace FT8 {
 
 class LDPC {
 public:
-    static void ldpc_decode(float llcodeword[], int iters, int plain[], int *ok);
+    static void ldpc_decode(const float llcodeword[], int iters, int plain[], int *ok);
     static void ldpc_decode_log(float codeword[], int iters, int plain[], int *ok);
     static void ft8_crc(int msg1[], int msglen, int out[14]);
     static void gauss_jordan(int rows, int cols, int m[174][2 * 91], int which[91], int *ok);

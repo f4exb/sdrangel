@@ -330,16 +330,13 @@ void FT8DemodBaseband::tick()
     const qint64 periodIndex = nowMs / periodMs;
     const int periodOffsetMs = nowMs % periodMs;
 
-    if (periodOffsetMs < activeWindowMs)
+    if (periodOffsetMs < activeWindowMs && m_lastProcessPeriodIndex != periodIndex)
     {
-        if (m_lastProcessPeriodIndex != periodIndex)
-        {
-            const qint64 previousPeriodStartMs = (periodIndex - 1) * periodMs;
-            QDateTime periodTs = QDateTime::fromMSecsSinceEpoch(previousPeriodStartMs, Qt::UTC);
-            const int frameSamples = FT8DemodSettings::getDecoderFrameSamples(m_settings.m_decoderMode);
-            m_ft8Buffer.getCurrentBuffer(m_ft8WorkerBuffer, frameSamples);
-            emit bufferReady(m_ft8WorkerBuffer, periodTs);
-            m_lastProcessPeriodIndex = periodIndex;
-        }
+        const qint64 previousPeriodStartMs = (periodIndex - 1) * periodMs;
+        QDateTime periodTs = QDateTime::fromMSecsSinceEpoch(previousPeriodStartMs, Qt::UTC);
+        const int frameSamples = FT8DemodSettings::getDecoderFrameSamples(m_settings.m_decoderMode);
+        m_ft8Buffer.getCurrentBuffer(m_ft8WorkerBuffer, frameSamples);
+        emit bufferReady(m_ft8WorkerBuffer, periodTs);
+        m_lastProcessPeriodIndex = periodIndex;
     }
 }

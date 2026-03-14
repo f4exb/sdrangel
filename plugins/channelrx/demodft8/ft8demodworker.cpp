@@ -184,7 +184,7 @@ void FT8DemodWorker::setDecoderMode(FT8DemodSettings::DecoderMode decoderMode)
 }
 
 
-void FT8DemodWorker::processFT8(int16_t *buffer, int frameSampleCount, FT8Callback& ft8Callback, int *hints)
+void FT8DemodWorker::processFT8(int16_t *buffer, int frameSampleCount, FT8Callback& ft8Callback, const int *hints)
 {
     m_ft8Decoder.getParams().nthreads = m_nbDecoderThreads;
     m_ft8Decoder.getParams().use_osd = m_useOSD ? 1 : 0;
@@ -218,7 +218,7 @@ void FT8DemodWorker::processFT8(int16_t *buffer, int frameSampleCount, FT8Callba
     m_ft8Decoder.wait(m_decoderTimeBudget + 1.0); // add one second to budget to force quit threads
 }
 
-void FT8DemodWorker::processFT4(int16_t *buffer, int frameSampleCount, FT8Callback& ft8Callback, int *hints)
+void FT8DemodWorker::processFT4(int16_t *buffer, int frameSampleCount, FT8Callback& ft8Callback, const int *hints)
 {
     std::vector<float> samples(frameSampleCount);
     std::transform(

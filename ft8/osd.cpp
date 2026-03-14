@@ -96,7 +96,7 @@ void OSD::ldpc_encode(int plain[91], int codeword[174])
 // ll174 is what was received.
 // ldpc-encode xplain; how close is the
 // result to what we received?
-float OSD::osd_score(int xplain[91], float ll174[174])
+float OSD::osd_score(int xplain[91], const float ll174[174])
 {
     int xcode[174];
     ldpc_encode(xplain, xcode);
@@ -163,7 +163,7 @@ void OSD::matmul(int a[91][91], int b[91], int c[91])
 // first 91 bits are plaintext, remaining 83 are parity.
 // returns 0 or 1, with decoded plain bits in out91[].
 // and actual depth used in *out_depth.
-int OSD::osd_decode(float codeword[174], int depth, int out[91], int *out_depth)
+int OSD::osd_decode(const float codeword[174], int depth, int out[91], int *out_depth)
 {
     // strength = abs(codeword)
     float strength[174];

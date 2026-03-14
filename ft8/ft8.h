@@ -266,7 +266,7 @@ public:
     // look for potential signals by searching FFT bins for Costas symbol
     // blocks. returns a vector of candidate positions.
     //
-    std::vector<Strength> coarse(const FFTEngine::ffts_t &bins, int si0, int si1);
+    std::vector<Strength> coarse(const FFTEngine::ffts_t &bins, int si0, int si1) const;
 
     FT8Params& getParams() { return params; }
     //
@@ -290,7 +290,7 @@ public:
     // ll174 is the resulting 174 soft bits of payload
     // used in FT-chirp modulation scheme - generalized to any number of symbol bits
     //
-    static void soft_decode_mags(FT8Params& params, const std::vector<std::vector<float>>& mags, int nbSymbolBits, float ll174[]);
+    static void soft_decode_mags(const FT8Params& params, const std::vector<std::vector<float>>& mags, int nbSymbolBits, float ll174[]);
 
     //
     // Generic Gray decoding for magnitudes (floats)
@@ -497,7 +497,7 @@ private:
     // each returned element is < 0 for 1, > 0 for zero,
     // scaled by str.
     //
-    std::vector<float> extract_bits(const std::vector<int> &syms, const std::vector<float> str) const;
+    std::vector<float> extract_bits(const std::vector<int> &syms, const std::vector<float>& str) const;
     // decode successive pairs of symbols. exploits the likelihood
     // that they have the same phase, by summing the complex
     // correlations for each possible pair and using the max.
@@ -615,7 +615,7 @@ private:
     // used to help ensure that subtraction subtracts
     // at the right place.
     //
-    std::vector<int> recode(int a174[]) const;
+    std::vector<int> recode(const int a174[]) const;
     //
     // the signal is at roughly 25 hz in samples200.
     //
@@ -679,8 +679,8 @@ public:
         int rate,
         float min_hz,
         float max_hz,
-        int hints1[],
-        int hints2[],
+        const int hints1[],
+        const int hints2[],
         double time_left,
         double total_time_left,
         CallbackInterface *cb,

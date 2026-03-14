@@ -18,6 +18,11 @@
 
 #include <iostream>
 #include <fstream>
+#include <map>
+#include <string>
+#include <vector>
+#include <cstdint>
+#include <cstdio>
 
 #include "mainbench.h"
 #include "dsp/wavfilerecord.h"
@@ -29,7 +34,7 @@ void MainBench::testFT4(const QString& wavFile, const QString& argsStr)
 {
     (void) wavFile;
     (void) argsStr;
-    qWarning("MainBench::testFT8: this version has no FT8 support");
+    qWarning("MainBench::testFT4: this version has no FT8/FT4 support");
 }
 #else
 

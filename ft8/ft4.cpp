@@ -1,13 +1,29 @@
 ///////////////////////////////////////////////////////////////////////////////////
-// Copyright (C) 2026                                                           //
+// Copyright (C) 2026 Edouard Griffiths, F4EXB <f4exb06@gmail.com>               //
 //                                                                               //
-// Experimental FT4 decoder scaffold derived from FT8 decoder architecture.      //
+// This is the code from ft8mon: https://github.com/rtmrtmrtmrtm/ft8mon          //
+// reformatted and adapted to Qt and SDRangel context and FT4 scheme             //
+//                                                                               //
+// This program is free software; you can redistribute it and/or modify          //
+// it under the terms of the GNU General Public License as published by          //
+// the Free Software Foundation as version 3 of the License, or                  //
+// (at your option) any later version.                                           //
+//                                                                               //
+// This program is distributed in the hope that it will be useful,               //
+// but WITHOUT ANY WARRANTY; without even the implied warranty of                //
+// MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the                  //
+// GNU General Public License V3 for more details.                               //
+//                                                                               //
+// You should have received a copy of the GNU General Public License             //
+// along with this program. If not, see <http://www.gnu.org/licenses/>.          //
 ///////////////////////////////////////////////////////////////////////////////////
 
 #include <array>
 #include <cmath>
 #include <algorithm>
 #include <random>
+#include <functional>
+#include <cstdio>
 
 #include <QThread>
 #include <QDebug>
@@ -241,7 +257,7 @@ int FT4::blocksize(float rate) const
 // look for potential psignals by searching FFT bins for Costas symbol
 // blocks. returns a vector of candidate positions.
 //
-std::vector<Strength> FT4::coarse(const FFTEngine::ffts_t &bins, int si0, int si1)
+std::vector<Strength> FT4::coarse(const FFTEngine::ffts_t &bins, int si0, int si1) const
 {
     int block = blocksize(rate_);
     int nbins = bins[0].size();
@@ -420,13 +436,11 @@ void FT4::go(int npasses)
     int irate = round(rate_);
     for (int xrate = 100; xrate < rate_; xrate += 100)
     {
-        if (xrate < rate_ && (params.oddrate || (irate % xrate) == 0))
+        if (xrate < rate_ && (params.oddrate || (irate % xrate) == 0) &&
+            ((max_hz_ - min_hz_) + 93.6 + 2 * params.go_extra) < params.nyquist * (xrate / 2))
         {
-            if (((max_hz_ - min_hz_) + 93.6 + 2 * params.go_extra) < params.nyquist * (xrate / 2))
-            {
-                nrate = xrate;
-                break;
-            }
+            nrate = xrate;
+            break;
         }
     }
 
@@ -459,7 +473,7 @@ void FT4::go(int npasses)
                     t1 - t0);
         }
 
-        if (0)
+        if (false)
         {
             fprintf(stderr, "%.0f..%.0f, range %.0f, rate %.0f -> %d, delta hz %.0f, %.6f sec\n",
                     min_hz_,
@@ -583,7 +597,7 @@ void FT4::go(int npasses)
 
         // just do this once, reuse for every fractional fft_shift
         // and down_v7_f() to 200 sps.
-        std::vector<std::complex<float>> bins = fftEngine_->one_fft(
+        std::vector<std::complex<float>> fbins = fftEngine_->one_fft(
             samples_, 0, samples_.size());
 
         for (int hz_frac_i = 0; hz_frac_i < params.coarse_hz_n; hz_frac_i++)
@@ -595,7 +609,7 @@ void FT4::go(int npasses)
             if (hz_frac_i == 0) {
                 samples1 = samples_;
             } else {
-                samples1 = fft_shift_f(bins, rate_, hz_frac);
+                samples1 = fft_shift_f(fbins, rate_, hz_frac);
             }
 
             for (int off_frac_i = 0; off_frac_i < params.coarse_off_n; off_frac_i++)
@@ -650,7 +664,7 @@ void FT4::go(int npasses)
             }
 
             int off = order[ii].off_;
-            int ret = one_merge(bins, samples_.size(), hz, off);
+            int ret = one_merge(fbins, samples_.size(), hz, off);
 
             if (ret)
             {
@@ -1963,9 +1977,9 @@ void FT4::soft_decode_pairs(
         // FT4 sync blocks are [0..3], [33..36], [66..69], [99..102].
         // Since we process pairs, sync pairs are start/start+1 and start+2/start+3.
         if (si == 0 || si == 33 || si == 66 || si == 99) {
-            bests.add(corrs[kFT4SyncTones[(si / 33)][0] * 4 + kFT4SyncTones[(si / 33)][1]]);
+            bests.add(corrs[kFT4SyncTones[si / 33][0] * 4 + kFT4SyncTones[si / 33][1]]);
         } else if (si == 2 || si == 35 || si == 68 || si == 101) {
-            bests.add(corrs[kFT4SyncTones[((si - 2) / 33)][2] * 4 + kFT4SyncTones[((si - 2) / 33)][3]]);
+            bests.add(corrs[kFT4SyncTones[(si - 2) / 33][2] * 4 + kFT4SyncTones[(si - 2) / 33][3]]);
         } else {
             bests.add(mx);
         }
@@ -2052,7 +2066,7 @@ void FT4::soft_decode_triples(
                     {
                         int bitind = (si + 0) * 2 + (1 - bit);
 
-                        if ((i & (1 << bit)))
+                        if (i & (1 << bit))
                         {
                             // symbol i would make this bit a one.
                             if (x > bitinfo[bitind].one) {
@@ -2077,7 +2091,7 @@ void FT4::soft_decode_triples(
                         {
                             int bitind = (si + 1) * 2 + (1 - bit);
 
-                            if ((i & (1 << bit)))
+                            if (i & (1 << bit))
                             {
                                 // symbol i would make this bit a one.
                                 if (x > bitinfo[bitind].one) {
@@ -2103,7 +2117,7 @@ void FT4::soft_decode_triples(
                         {
                             int bitind = (si + 2) * 2 + (1 - bit);
 
-                            if ((i & (1 << bit)))
+                            if (i & (1 << bit))
                             {
                                 // symbol i would make this bit a one.
                                 if (x > bitinfo[bitind].one) {
@@ -2174,7 +2188,7 @@ int FT4::decode(const float ll174[], int a174[], const FT8Params& _params, int u
 {
     int plain[174];  // will be 0/1 bits.
     int ldpc_ok = 0; // 83 will mean success.
-    LDPC::ldpc_decode((float *)ll174, _params.ldpc_iters, plain, &ldpc_ok);
+    LDPC::ldpc_decode(ll174, _params.ldpc_iters, plain, &ldpc_ok);
     int ok_thresh = 83; // 83 is perfect
 
     if (ldpc_ok >= ok_thresh)
@@ -2200,7 +2214,7 @@ int FT4::decode(const float ll174[], int a174[], const FT8Params& _params, int u
     {
         int oplain[91];
         int got_depth = -1;
-        int osd_ok = OSD::osd_decode((float *)ll174, _params.osd_depth, oplain, &got_depth);
+        int osd_ok = OSD::osd_decode(ll174, _params.osd_depth, oplain, &got_depth);
 
         if (osd_ok)
         {
@@ -3142,22 +3156,22 @@ void FT4::subtract(
 
         // at start of this symbol's off-ramp.
         float theta = phase + (block - ramp) * dtheta;
-        float hz1;
+        float hz1_;
         float phase1;
 
         if (si + 1 >= 103)
         {
-            hz1 = hz;
+            hz1_ = hz;
             phase1 = phase;
         }
         else
         {
             int sym1 = bin0 + re103[si + 1];
-            hz1 = sym1 * bin_hz;
+            hz1_ = sym1 * bin_hz;
             phase1 = phases[si + 1];
         }
 
-        float dtheta1 = 2 * M_PI / (rate_ / hz1);
+        float dtheta1 = 2 * M_PI / (rate_ / hz1_);
         // add this to dtheta for each sample, to gradually
         // change the frequency.
         float inc = (dtheta1 - dtheta) / (2.0 * ramp);

@@ -94,8 +94,8 @@ private:
         const QSet<QString> *m_validCallsigns;
     };
 
-    void processFT8(int16_t *buffer, int frameSampleCount, FT8Callback& ft8Callback, int *hints);
-    void processFT4(int16_t *buffer, int frameSampleCount, FT8Callback& ft8Callback, int *hints);
+    void processFT8(int16_t *buffer, int frameSampleCount, FT8Callback& ft8Callback, const int *hints);
+    void processFT4(int16_t *buffer, int frameSampleCount, FT8Callback& ft8Callback, const int *hints);
 
     QString m_samplesPath;
     QString m_logsPath;
