@@ -42,7 +42,7 @@ public:
         float min_hz,
         float max_hz,
         int start,
-        int rate,
+        float rate,
         const int hints1[],
         const int hints2[],
         double deadline,
@@ -62,7 +62,7 @@ public:
     // return symbol length in samples at the given rate.
     // insist on integer symbol lengths so that we can
     // use whole FFT bins.
-    int blocksize(int rate) const;
+    int blocksize(float rate) const;
     //
     // look for potential signals by searching FFT bins for Costas symbol
     // blocks. returns a vector of candidate positions.
@@ -111,7 +111,7 @@ private:
     //
     float one_strength_known(
         const std::vector<float> &samples,
-        int rate,
+        float rate,
         const std::vector<int> &syms,
         float hz,
         int off
@@ -126,7 +126,7 @@ private:
     );
     int search_time_fine_known(
         const std::vector<std::complex<float>> &bins,
-        int rate,
+        float rate,
         const std::vector<int> &syms,
         int off0,
         int offN,
@@ -150,7 +150,7 @@ private:
     );
     void search_both_known(
         const std::vector<float> &samples,
-        int rate,
+        float rate,
         const std::vector<int> &syms,
         float hz0,
         float off_secs0, // seconds
@@ -167,7 +167,7 @@ private:
         const std::vector<float> &samples,
         int off,
         int len,
-        int rate,
+        float rate,
         float hz
     );
     //
@@ -175,7 +175,7 @@ private:
     //
     std::vector<float> fft_shift_f(
         const std::vector<std::complex<float>> &bins,
-        int rate,
+        float rate,
         float hz
     );
     // shift the frequency by a fraction of 23.4,
@@ -395,7 +395,7 @@ private:
     std::vector<float> nsamples_; // subtract from here
 
     int start_;             // sample number of 0.5 seconds into samples[]
-    int rate_;              // samples/second
+    float rate_;            // samples/second
     double deadline_;       // start time + budget
     double final_deadline_; // keep going this long if no decodes
     std::vector<int> hints1_;
@@ -426,7 +426,7 @@ public:
         const float xsamples[],
         int nsamples,
         int start,
-        int rate,
+        float rate,
         float min_hz,
         float max_hz,
         const int hints1[],

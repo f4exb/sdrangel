@@ -70,7 +70,7 @@ FT4::FT4(
     float min_hz,
     float max_hz,
     int start,
-    int rate,
+    float rate,
     const int hints1[],
     const int hints2[],
     double deadline,
@@ -227,7 +227,7 @@ float FT4::one_coarse_strength(const FFTEngine::ffts_t &bins, int bi0, int si0) 
 // return symbol length in samples at the given rate.
 // insist on integer symbol lengths so that we can
 // use whole FFT bins.
-int FT4::blocksize(int rate) const
+int FT4::blocksize(float rate) const
 {
     // FT4 symbol length is 576 at 12000 samples/second.
     int xblock = (576*rate) / 12000;
@@ -389,7 +389,7 @@ void FT4::go(int npasses)
 {
     if (0)
     {
-        fprintf(stderr, "go: %.0f .. %.0f, %.0f, rate=%d\n",
+        fprintf(stderr, "go: %.0f .. %.0f, %.0f, rate=%.0f\n",
                 min_hz_, max_hz_, max_hz_ - min_hz_, rate_);
     }
 
@@ -417,9 +417,10 @@ void FT4::go(int npasses)
 
     // can we reduce the sample rate?
     int nrate = -1;
+    int irate = round(rate_);
     for (int xrate = 100; xrate < rate_; xrate += 100)
     {
-        if (xrate < rate_ && (params.oddrate || (rate_ % xrate) == 0))
+        if (xrate < rate_ && (params.oddrate || (irate % xrate) == 0))
         {
             if (((max_hz_ - min_hz_) + 93.6 + 2 * params.go_extra) < params.nyquist * (xrate / 2))
             {
@@ -450,7 +451,7 @@ void FT4::go(int npasses)
 
         if (t1 - t0 > 0.1)
         {
-            fprintf(stderr, "reduce oops, size %d -> %d, rate %d -> %d, took %.2f\n",
+            fprintf(stderr, "reduce oops, size %d -> %d, rate %.0f -> %d, took %.2f\n",
                     osize,
                     (int)samples_.size(),
                     rate_,
@@ -460,10 +461,14 @@ void FT4::go(int npasses)
 
         if (0)
         {
-            fprintf(stderr, "%.0f..%.0f, range %.0f, rate %d -> %d, delta hz %.0f, %.6f sec\n",
-                    min_hz_, max_hz_,
+            fprintf(stderr, "%.0f..%.0f, range %.0f, rate %.0f -> %d, delta hz %.0f, %.6f sec\n",
+                    min_hz_,
+                    max_hz_,
                     max_hz_ - min_hz_,
-                    rate_, nrate, delta_hz, t1 - t0);
+                    rate_,
+                    nrate,
+                    delta_hz,
+                    t1 - t0);
         }
 
         if (delta_hz > 0)
@@ -494,8 +499,9 @@ void FT4::go(int npasses)
         int need = start_ + params.tplus * rate_ + 103 * block - samples_.size();
 
         // round up to a whole second, to ease fft plan caching.
-        if ((need % rate_) != 0) {
-            need += rate_ - (need % rate_);
+        int irate = round(rate_);
+        if ((need % irate) != 0) {
+            need += irate - (need % irate);
         }
 
         std::default_random_engine generator;
@@ -718,7 +724,7 @@ float FT4::one_strength(const std::vector<float> &samples200, float hz, int off)
 //
 float FT4::one_strength_known(
     const std::vector<float> &samples,
-    int rate,
+    float rate,
     const std::vector<int> &syms,
     float hz,
     int off
@@ -831,7 +837,7 @@ int FT4::search_time_fine(
 
 int FT4::search_time_fine_known(
     const std::vector<std::complex<float>> &bins,
-    int rate,
+    float rate,
     const std::vector<int> &syms,
     int off0,
     int offN,
@@ -928,7 +934,7 @@ std::vector<Strength> FT4::search_both(
 
 void FT4::search_both_known(
     const std::vector<float> &samples,
-    int rate,
+    float rate,
     const std::vector<int> &syms,
     float hz0,
     float off_secs0, // seconds
@@ -936,7 +942,7 @@ void FT4::search_both_known(
     float &off_out
 )
 {
-    int off0 = round(off_secs0 * (float)rate);
+    int off0 = round(off_secs0 * rate);
     int off_win = params.third_off_win * blocksize(rate_);
 
     if (off_win < 1) {
@@ -997,7 +1003,7 @@ void FT4::search_both_known(
     if (got_best)
     {
         hz_out = best_hz;
-        off_out = best_off / (float)rate;
+        off_out = best_off / rate;
     }
 }
 
@@ -1011,7 +1017,7 @@ std::vector<float> FT4::fft_shift(
     const std::vector<float> &samples,
     int off,
     int len,
-    int rate,
+    float rate,
     float hz
 )
 {
@@ -1046,7 +1052,7 @@ std::vector<float> FT4::fft_shift(
 //
 std::vector<float> FT4::fft_shift_f(
     const std::vector<std::complex<float>> &bins,
-    int rate,
+    float rate,
     float hz
 )
 {
@@ -3429,7 +3435,7 @@ void FT4Decoder::entry(
     const float xsamples[],
     int nsamples,
     int start,
-    int rate,
+    float rate,
     float min_hz,
     float max_hz,
     const int hints1[],

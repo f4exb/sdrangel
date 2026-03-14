@@ -27,7 +27,9 @@ FT8DemodSettingsDialog::FT8DemodSettingsDialog(FT8DemodSettings& settings, QStri
     m_settingsKeys(settingsKeys)
 {
     ui->setupUi(this);
+    ui->decoderMode->blockSignals(true);
     ui->decoderMode->setCurrentIndex(m_settings.m_decoderMode);
+    ui->decoderMode->blockSignals(false);
     ui->decoderNbThreads->setValue(m_settings.m_nbDecoderThreads);
     ui->decoderTimeBudget->setValue(m_settings.m_decoderTimeBudget);
     ui->osdEnable->setChecked(m_settings.m_useOSD);
