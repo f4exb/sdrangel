@@ -27,6 +27,8 @@
 #include "ft4.h"
 #include "packing.h"
 
+#include "ft8demodsettings.h"
+
 class QDateTime;
 class MessageQueue;
 class MsgReportFT8Messages;
@@ -45,7 +47,7 @@ public:
     void setEnablePskReporter(bool enablePskReporter) { m_enablePskReporter = enablePskReporter; }
     void setNbDecoderThreads(int nbDecoderThreads) { m_nbDecoderThreads = nbDecoderThreads; }
     void setDecoderTimeBudget(float decoderTimeBudget) { m_decoderTimeBudget = decoderTimeBudget; }
-    void setDecoderMode(int decoderMode);
+    void setDecoderMode(FT8DemodSettings::DecoderMode decoderMode);
     void setUseOSD(bool useOSD) { m_useOSD = useOSD; }
     void setOSDDepth(int osdDepth) { m_osdDepth = osdDepth; }
     void setOSDLDPCThreshold(int osdLDPCThreshold) { m_osdLDPCThreshold = osdLDPCThreshold; }
@@ -102,7 +104,7 @@ private:
     bool m_enablePskReporter;
     int m_nbDecoderThreads;
     float m_decoderTimeBudget;
-    int m_decoderMode;
+    FT8DemodSettings::DecoderMode m_decoderMode;
     bool m_useOSD;
     int m_osdDepth;
     int m_osdLDPCThreshold;

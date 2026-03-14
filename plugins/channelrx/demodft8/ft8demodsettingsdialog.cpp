@@ -66,9 +66,9 @@ void FT8DemodSettingsDialog::populateBandsTable()
 {
     // Add to messages table
     int row = ui->bands->rowCount();
-    m_settings.m_bandPresets = FT8DemodSettings::getBandPresetsForMode(m_settings.m_decoderMode);
+    const QList<FT8DemodBandPreset>& bandPresets = m_settings.getBandPresets(m_settings.m_decoderMode);
 
-    for (const auto& band : m_settings.m_bandPresets)
+    for (const auto& band : bandPresets)
     {
         ui->bands->setRowCount(row + 1);
 
@@ -85,13 +85,11 @@ void FT8DemodSettingsDialog::populateBandsTable()
         editBaseFrequency->setValidator(new QIntValidator());
         editBaseFrequency->setText(tr("%1").arg(band.m_baseFrequency));
         editBaseFrequency->setAlignment(Qt::AlignRight);
-        editBaseFrequency->setProperty("row", row);
         ui->bands->setCellWidget(row, BAND_BASE_FREQUENCY, editBaseFrequency);
         QLineEdit *editOffsetFrequency = new QLineEdit(ui->bands);
         editOffsetFrequency->setValidator(new QIntValidator());
         editOffsetFrequency->setText(tr("%1").arg(band.m_channelOffset));
         editOffsetFrequency->setAlignment(Qt::AlignRight);
-        editOffsetFrequency->setProperty("row", row);
         ui->bands->setCellWidget(row, BAND_OFFSET_FREQUENCY, editOffsetFrequency);
 
         connect(editBaseFrequency, &QLineEdit::editingFinished, this, &FT8DemodSettingsDialog::baseFrequencyCellChanged);
@@ -114,25 +112,10 @@ void FT8DemodSettingsDialog::reject()
 
 void FT8DemodSettingsDialog::on_decoderMode_currentIndexChanged(int index)
 {
-    const int previousDecoderMode = m_settings.m_decoderMode;
-    const QList<FT8DemodBandPreset> previousDefaults = FT8DemodSettings::getBandPresetsForMode(previousDecoderMode);
-    const bool hadDefaultBandPresets = FT8DemodSettings::areBandPresetsEqual(m_settings.m_bandPresets, previousDefaults);
-
-    m_settings.m_decoderMode = (index >= FT8DemodSettings::DecoderModeFT8) && (index <= FT8DemodSettings::DecoderModeFT4) ?
-        index : FT8DemodSettings::DecoderModeFT8;
-
-    if (hadDefaultBandPresets)
-    {
-        m_settings.resetBandPresets(m_settings.m_decoderMode);
-        ui->bands->blockSignals(true);
-        ui->bands->setRowCount(0);
-        populateBandsTable();
-        ui->bands->blockSignals(false);
-
-        if (!m_settingsKeys.contains("bandPresets")) {
-            m_settingsKeys.append("bandPresets");
-        }
-    }
+    m_settings.m_decoderMode = static_cast<FT8DemodSettings::DecoderMode>(index);
+    ui->bands->setRowCount(0);
+    populateBandsTable();
+    ui->bands->blockSignals(false);
 
     if (!m_settingsKeys.contains("decoderMode")) {
         m_settingsKeys.append("decoderMode");
@@ -276,15 +259,20 @@ void FT8DemodSettingsDialog::on_addBand_clicked()
         newPreset.m_channelOffset = currentEditOffsetFrequency->text().toInt();
     }
 
-    m_settings.m_bandPresets.push_back(newPreset);
+    QList<FT8DemodBandPreset>& bandPresets = m_settings.getBandPresets(m_settings.m_decoderMode);
+    bandPresets.push_back(newPreset);
     ui->bands->blockSignals(true);
     ui->bands->setRowCount(0);
     populateBandsTable();
     ui->bands->scrollToBottom();
     ui->bands->blockSignals(false);
 
-    if (!m_settingsKeys.contains("bandPresets")) {
-        m_settingsKeys.append("bandPresets");
+    if (!m_settingsKeys.contains("ft8BandPresets")) {
+        m_settingsKeys.append("ft8BandPresets");
+    }
+
+    if (!m_settingsKeys.contains("ft4BandPresets")) {
+        m_settingsKeys.append("ft4BandPresets");
     }
 }
 
@@ -296,11 +284,16 @@ void FT8DemodSettingsDialog::on_deleteBand_clicked()
         return;
     }
 
-    m_settings.m_bandPresets.removeAt(currentRow);
+    QList<FT8DemodBandPreset>& bandPresets = m_settings.getBandPresets(m_settings.m_decoderMode);
+    bandPresets.removeAt(currentRow);
     ui->bands->removeRow(currentRow);
 
-    if (!m_settingsKeys.contains("bandPresets")) {
-        m_settingsKeys.append("bandPresets");
+    if (!m_settingsKeys.contains("ft8BandPresets")) {
+        m_settingsKeys.append("ft8BandPresets");
+    }
+
+    if (!m_settingsKeys.contains("ft4BandPresets")) {
+        m_settingsKeys.append("ft4BandPresets");
     }
 }
 
@@ -319,13 +312,18 @@ void FT8DemodSettingsDialog::on_moveBandUp_clicked()
     setRow(currentRow-1, sourceItems);
     ui->bands->blockSignals(false);
 
-    const auto sourceBandPreset = m_settings.m_bandPresets[currentRow];
-    const auto destBandPreset = m_settings.m_bandPresets[currentRow-1];
-    m_settings.m_bandPresets[currentRow] = destBandPreset;
-    m_settings.m_bandPresets[currentRow-1] = sourceBandPreset;
+    QList<FT8DemodBandPreset>& bandPresets = m_settings.getBandPresets(m_settings.m_decoderMode);
+    const auto sourceBandPreset = bandPresets[currentRow];
+    const auto destBandPreset = bandPresets[currentRow-1];
+    bandPresets[currentRow] = destBandPreset;
+    bandPresets[currentRow-1] = sourceBandPreset;
 
-    if (!m_settingsKeys.contains("bandPresets")) {
-        m_settingsKeys.append("bandPresets");
+    if (!m_settingsKeys.contains("ft8BandPresets")) {
+        m_settingsKeys.append("ft8BandPresets");
+    }
+
+    if (!m_settingsKeys.contains("ft4BandPresets")) {
+        m_settingsKeys.append("ft4BandPresets");
     }
 }
 
@@ -344,13 +342,18 @@ void FT8DemodSettingsDialog::on_moveBandDown_clicked()
     setRow(currentRow+1, sourceItems);
     ui->bands->blockSignals(false);
 
-    const auto sourceBandPreset = m_settings.m_bandPresets[currentRow];
-    const auto destBandPreset = m_settings.m_bandPresets[currentRow+1];
-    m_settings.m_bandPresets[currentRow] = destBandPreset;
-    m_settings.m_bandPresets[currentRow+1] = sourceBandPreset;
+    QList<FT8DemodBandPreset>& bandPresets = m_settings.getBandPresets(m_settings.m_decoderMode);
+    const auto sourceBandPreset = bandPresets[currentRow];
+    const auto destBandPreset = bandPresets[currentRow+1];
+    bandPresets[currentRow] = destBandPreset;
+    bandPresets[currentRow+1] = sourceBandPreset;
 
-    if (!m_settingsKeys.contains("bandPresets")) {
-        m_settingsKeys.append("bandPresets");
+    if (!m_settingsKeys.contains("ft8BandPresets")) {
+        m_settingsKeys.append("ft8BandPresets");
+    }
+
+    if (!m_settingsKeys.contains("ft4BandPresets")) {
+        m_settingsKeys.append("ft4BandPresets");
     }
 }
 
@@ -362,19 +365,40 @@ void FT8DemodSettingsDialog::on_restoreBandPresets_clicked()
     populateBandsTable();
     ui->bands->blockSignals(false);
 
-    if (!m_settingsKeys.contains("bandPresets")) {
-        m_settingsKeys.append("bandPresets");
+    if (!m_settingsKeys.contains("ft8BandPresets")) {
+        m_settingsKeys.append("ft8BandPresets");
+    }
+
+    if (!m_settingsKeys.contains("ft4BandPresets")) {
+        m_settingsKeys.append("ft4BandPresets");
     }
 }
 
 void FT8DemodSettingsDialog::textCellChanged(int row, int col)
 {
-    if (col == BAND_NAME) {
-        m_settings.m_bandPresets[row].m_name = ui->bands->item(row, col)->text();
+    if (col == BAND_NAME)
+    {
+        QList<FT8DemodBandPreset>& bandPresets = m_settings.getBandPresets(m_settings.m_decoderMode);
+
+        if ((row < 0) || (row >= bandPresets.size())) {
+            return;
+        }
+
+        QTableWidgetItem *nameItem = ui->bands->item(row, col);
+
+        if (!nameItem) {
+            return;
+        }
+
+        bandPresets[row].m_name = nameItem->text();
     }
 
-    if (!m_settingsKeys.contains("bandPresets")) {
-        m_settingsKeys.append("bandPresets");
+    if (!m_settingsKeys.contains("ft8BandPresets")) {
+        m_settingsKeys.append("ft8BandPresets");
+    }
+
+    if (!m_settingsKeys.contains("ft4BandPresets")) {
+        m_settingsKeys.append("ft4BandPresets");
     }
 }
 
@@ -384,12 +408,36 @@ void FT8DemodSettingsDialog::baseFrequencyCellChanged()
 
     if (editBaseFrequency)
     {
-        int row = editBaseFrequency->property("row").toInt();
-        m_settings.m_bandPresets[row].m_baseFrequency = editBaseFrequency->text().toInt();
+        int row = -1;
+
+        for (int i = 0; i < ui->bands->rowCount(); ++i)
+        {
+            if (ui->bands->cellWidget(i, BAND_BASE_FREQUENCY) == editBaseFrequency)
+            {
+                row = i;
+                break;
+            }
+        }
+
+        if (row < 0) {
+            return;
+        }
+
+        QList<FT8DemodBandPreset>& bandPresets = m_settings.getBandPresets(m_settings.m_decoderMode);
+
+        if (row >= bandPresets.size()) {
+            return;
+        }
+
+        bandPresets[row].m_baseFrequency = editBaseFrequency->text().toInt();
     }
 
-    if (!m_settingsKeys.contains("bandPresets")) {
-        m_settingsKeys.append("bandPresets");
+    if (!m_settingsKeys.contains("ft8BandPresets")) {
+        m_settingsKeys.append("ft8BandPresets");
+    }
+
+    if (!m_settingsKeys.contains("ft4BandPresets")) {
+        m_settingsKeys.append("ft4BandPresets");
     }
 }
 
@@ -399,12 +447,36 @@ void FT8DemodSettingsDialog::offsetFrequencyCellChanged()
 
     if (editOffsetFrequency)
     {
-        int row = editOffsetFrequency->property("row").toInt();
-        m_settings.m_bandPresets[row].m_channelOffset = editOffsetFrequency->text().toInt();
+        int row = -1;
+
+        for (int i = 0; i < ui->bands->rowCount(); ++i)
+        {
+            if (ui->bands->cellWidget(i, BAND_OFFSET_FREQUENCY) == editOffsetFrequency)
+            {
+                row = i;
+                break;
+            }
+        }
+
+        if (row < 0) {
+            return;
+        }
+
+        QList<FT8DemodBandPreset>& bandPresets = m_settings.getBandPresets(m_settings.m_decoderMode);
+
+        if (row >= bandPresets.size()) {
+            return;
+        }
+
+        bandPresets[row].m_channelOffset = editOffsetFrequency->text().toInt();
     }
 
-    if (!m_settingsKeys.contains("bandPresets")) {
-        m_settingsKeys.append("bandPresets");
+    if (!m_settingsKeys.contains("ft8BandPresets")) {
+        m_settingsKeys.append("ft8BandPresets");
+    }
+
+    if (!m_settingsKeys.contains("ft4BandPresets")) {
+        m_settingsKeys.append("ft4BandPresets");
     }
 }
 

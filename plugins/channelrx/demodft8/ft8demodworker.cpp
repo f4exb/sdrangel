@@ -177,7 +177,7 @@ FT8DemodWorker::FT8DemodWorker() :
 FT8DemodWorker::~FT8DemodWorker()
 {}
 
-void FT8DemodWorker::setDecoderMode(int decoderMode)
+void FT8DemodWorker::setDecoderMode(FT8DemodSettings::DecoderMode decoderMode)
 {
     m_decoderMode = decoderMode;
     m_unsupportedModeWarningPending = true;

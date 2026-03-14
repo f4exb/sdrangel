@@ -81,7 +81,7 @@ public:
     bool m_agc;
     bool m_recordWav;
     bool m_logMessages;
-    int m_decoderMode;
+    DecoderMode m_decoderMode;
     int m_nbDecoderThreads;
     float m_decoderTimeBudget;
     bool m_useOSD;
@@ -102,7 +102,8 @@ public:
     // FFTWindow::Function m_fftWindow;
     std::vector<FT8DemodFilterSettings> m_filterBank;
     unsigned int m_filterIndex;
-    QList<FT8DemodBandPreset> m_bandPresets;
+    QList<FT8DemodBandPreset> m_ft8BandPresets;
+    QList<FT8DemodBandPreset> m_ft4BandPresets;
     bool m_enablePSKReporter;
     QString m_pskReporterCallsign;
     QString m_pskReporterLocator;
@@ -120,16 +121,17 @@ public:
     QByteArray serialize() const;
     bool deserialize(const QByteArray& data);
     void resetBandPresets();
-    void resetBandPresets(int decoderMode);
+    QList<FT8DemodBandPreset>& getBandPresets(DecoderMode mode);
+    void resetBandPresets(DecoderMode decoderMode);
     QString getDefaultReporterCallsign() const;
     QString getDefaultReporterLocator() const;
     QString getDefaultReporterSoftware() const;
     void applySettings(const QStringList& settingsKeys, const FT8DemodSettings& settings);
     QString getDebugString(const QStringList& settingsKeys, bool force=false) const;
-    static QString getDecoderModeString(int decoderMode);
-    static int getDecoderFrameDurationMs(int decoderMode);
-    static int getDecoderFrameSamples(int decoderMode);
-    static QList<FT8DemodBandPreset> getBandPresetsForMode(int decoderMode);
+    static QString getDecoderModeString(DecoderMode decoderMode);
+    static int getDecoderFrameDurationMs(DecoderMode decoderMode);
+    static int getDecoderFrameSamples(DecoderMode decoderMode);
+    static QList<FT8DemodBandPreset> getDefaultBandPresetsForMode(DecoderMode decoderMode);
     static bool areBandPresetsEqual(const QList<FT8DemodBandPreset>& left, const QList<FT8DemodBandPreset>& right);
 
     static const int m_ft8SampleRate;

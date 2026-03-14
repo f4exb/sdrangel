@@ -74,7 +74,8 @@ void FT8DemodSettings::resetToDefaults()
     m_pskReporterCallsign = getDefaultReporterCallsign();
     m_pskReporterLocator = getDefaultReporterLocator();
     m_pskReporterSoftware = "SDRangel FT8 Demod";
-    resetBandPresets();
+    resetBandPresets(DecoderModeFT8);
+    resetBandPresets(DecoderModeFT4);
 }
 
 void FT8DemodSettings::resetBandPresets()
@@ -82,12 +83,21 @@ void FT8DemodSettings::resetBandPresets()
     resetBandPresets(m_decoderMode);
 }
 
-void FT8DemodSettings::resetBandPresets(int decoderMode)
+QList<FT8DemodBandPreset>& FT8DemodSettings::getBandPresets(DecoderMode mode)
 {
-    m_bandPresets = getBandPresetsForMode(decoderMode);
+    if (mode == DecoderModeFT4) {
+        return m_ft4BandPresets;
+    } else {
+        return m_ft8BandPresets;
+    }
 }
 
-QList<FT8DemodBandPreset> FT8DemodSettings::getBandPresetsForMode(int decoderMode)
+void FT8DemodSettings::resetBandPresets(DecoderMode decoderMode)
+{
+    getBandPresets(decoderMode) = getDefaultBandPresetsForMode(decoderMode);
+}
+
+QList<FT8DemodBandPreset> FT8DemodSettings::getDefaultBandPresetsForMode(DecoderMode decoderMode)
 {
     QList<FT8DemodBandPreset> bandPresets;
 
@@ -158,11 +168,15 @@ QByteArray FT8DemodSettings::serialize() const
     SimpleSerializer s(1);
     QByteArray bytetmp;
 
-    QDataStream *stream = new QDataStream(&bytetmp, QIODevice::WriteOnly);
-    *stream << m_bandPresets;
-    delete stream;
+    QDataStream *stream8 = new QDataStream(&bytetmp, QIODevice::WriteOnly);
+    *stream8 << m_ft8BandPresets;
+    delete stream8;
     s.writeBlob(2, bytetmp);
 
+    QDataStream *stream4 = new QDataStream(&bytetmp, QIODevice::WriteOnly);
+    *stream4 << m_ft4BandPresets;
+    delete stream4;
+    s.writeBlob(34, bytetmp);
 
     s.writeS32(1, m_inputFrequencyOffset);
     s.writeS32(3, m_volume * 10.0);
@@ -233,7 +247,19 @@ bool FT8DemodSettings::deserialize(const QByteArray& data)
 
         d.readBlob(2, &bytetmp);
         QDataStream readStream(&bytetmp, QIODevice::ReadOnly);
-        readStream >> m_bandPresets;
+        readStream >> m_ft8BandPresets;
+
+        d.readBlob(34, &bytetmp);
+        QDataStream readStream4(&bytetmp, QIODevice::ReadOnly);
+        readStream4 >> m_ft4BandPresets;
+
+        if (m_ft8BandPresets.isEmpty()) {
+            resetBandPresets(DecoderModeFT8);
+        }
+
+        if (m_ft4BandPresets.isEmpty()) {
+            resetBandPresets(DecoderModeFT4);
+        }
 
         d.readS32(1, &m_inputFrequencyOffset, 0);
         d.readS32(3, &tmp, 30);
@@ -248,8 +274,8 @@ bool FT8DemodSettings::deserialize(const QByteArray& data)
         d.readU32(5, &m_rgbColor);
         d.readBool(6, &m_recordWav, false);
         d.readBool(7, &m_logMessages, false);
-        d.readS32(10, &m_decoderMode, DecoderModeFT8);
-        m_decoderMode = (m_decoderMode >= DecoderModeFT8) && (m_decoderMode <= DecoderModeFT4) ? m_decoderMode : DecoderModeFT8;
+        d.readS32(10, &tmp, (int) DecoderModeFT8);
+        m_decoderMode = (tmp >= DecoderModeFT8) && (tmp <= DecoderModeFT4) ? (DecoderMode) tmp : DecoderModeFT8;
         d.readS32(8, &m_nbDecoderThreads, 3);
         d.readFloat(9, &m_decoderTimeBudget, 0.5);
         d.readBool(11, &m_agc, false);
@@ -386,8 +412,11 @@ void FT8DemodSettings::applySettings(const QStringList& settingsKeys, const FT8D
     if (settingsKeys.contains("filterIndex")) {
         m_filterIndex = settings.m_filterIndex;
     }
-    if (settingsKeys.contains("bandPresets")) {
-        m_bandPresets = settings.m_bandPresets;
+    if (settingsKeys.contains("ft8BandPresets")) {
+        m_ft8BandPresets = settings.m_ft8BandPresets;
+    }
+    if (settingsKeys.contains("ft4BandPresets")) {
+        m_ft4BandPresets = settings.m_ft4BandPresets;
     }
     if (settingsKeys.contains("enablePSKReporter")) {
         m_enablePSKReporter = settings.m_enablePSKReporter;
@@ -525,17 +554,17 @@ QString FT8DemodSettings::getDefaultReporterSoftware() const
     return QCoreApplication::applicationName() + " " + QCoreApplication::applicationVersion();
 }
 
-QString FT8DemodSettings::getDecoderModeString(int decoderMode)
+QString FT8DemodSettings::getDecoderModeString(DecoderMode decoderMode)
 {
     return decoderMode == DecoderModeFT4 ? "FT4" : "FT8";
 }
 
-int FT8DemodSettings::getDecoderFrameDurationMs(int decoderMode)
+int FT8DemodSettings::getDecoderFrameDurationMs(DecoderMode decoderMode)
 {
     return decoderMode == DecoderModeFT4 ? 7500 : 15000;
 }
 
-int FT8DemodSettings::getDecoderFrameSamples(int decoderMode)
+int FT8DemodSettings::getDecoderFrameSamples(DecoderMode decoderMode)
 {
     return (m_ft8SampleRate * getDecoderFrameDurationMs(decoderMode)) / 1000;
 }
