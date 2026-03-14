@@ -76,12 +76,12 @@ FT8::FT8(
     float max_hz,
     int start,
     int rate,
-    int hints1[],
-    int hints2[],
+    const int hints1[],
+    const int hints2[],
     double deadline,
     double final_deadline,
     CallbackInterface *cb,
-    std::vector<cdecode> prevdecs,
+    const std::vector<cdecode> &prevdecs,
     FFTEngine *fftEngine
 )
 {
@@ -124,7 +124,7 @@ void FT8::start_work()
 
 // strength of costas block of signal with tone 0 at bi0,
 // and symbol zero at si0.
-float FT8::one_coarse_strength(const FFTEngine::ffts_t &bins, int bi0, int si0)
+float FT8::one_coarse_strength(const FFTEngine::ffts_t &bins, int bi0, int si0) const
 {
     int costas[] = {3, 1, 4, 0, 6, 5, 2};
 
@@ -224,7 +224,7 @@ float FT8::one_coarse_strength(const FFTEngine::ffts_t &bins, int bi0, int si0)
 // return symbol length in samples at the given rate.
 // insist on integer symbol lengths so that we can
 // use whole FFT bins.
-int FT8::blocksize(int rate)
+int FT8::blocksize(int rate) const
 {
     // FT8 symbol length is 1920 at 12000 samples/second.
     int xblock = (1920*rate) / 12000;
@@ -1124,7 +1124,7 @@ FFTEngine::ffts_t FT8::extract(const std::vector<float> &samples200, float, int 
 //
 // m79 is a 79x8 array of complex.
 //
-FFTEngine::ffts_t FT8::un_gray_code_c(const FFTEngine::ffts_t &m79)
+FFTEngine::ffts_t FT8::un_gray_code_c(const FFTEngine::ffts_t &m79) const
 {
     FFTEngine::ffts_t m79a(79);
     int map[] = {0, 1, 3, 2, 6, 4, 5, 7};
@@ -1144,7 +1144,7 @@ FFTEngine::ffts_t FT8::un_gray_code_c(const FFTEngine::ffts_t &m79)
 //
 // m79 is a 79x8 array of float.
 //
-std::vector<std::vector<float>> FT8::un_gray_code_r(const std::vector<std::vector<float>> &m79)
+std::vector<std::vector<float>> FT8::un_gray_code_r(const std::vector<std::vector<float>> &m79) const
 {
     std::vector<std::vector<float>> m79a(79);
     int map[] = {0, 1, 3, 2, 6, 4, 5, 7};
@@ -1191,7 +1191,7 @@ std::vector<std::vector<float>> FT8::un_gray_code_r_gen(const std::vector<std::v
 // normalize levels by windowed median.
 // this helps, but why?
 //
-std::vector<std::vector<float>> FT8::convert_to_snr(const std::vector<std::vector<float>> &m79)
+std::vector<std::vector<float>> FT8::convert_to_snr(const std::vector<std::vector<float>> &m79) const
 {
     if (params.snr_how < 0 || params.snr_win < 0) {
         return m79;
@@ -1281,7 +1281,7 @@ std::vector<std::vector<float>> FT8::convert_to_snr(const std::vector<std::vecto
 //
 std::vector<std::vector<std::complex<float>>> FT8::c_convert_to_snr(
     const std::vector<std::vector<std::complex<float>>> &m79
-)
+) const
 {
     if (params.snr_how < 0 || params.snr_win < 0) {
         return m79;
@@ -1554,7 +1554,7 @@ void FT8::make_stats_gen(
 // number of cycles and thus preserves phase from one symbol to the
 // next.
 //
-std::vector<std::vector<float>> FT8::soft_c2m(const FFTEngine::ffts_t &c79)
+std::vector<std::vector<float>> FT8::soft_c2m(const FFTEngine::ffts_t &c79) const
 {
     std::vector<std::vector<float>> m79(79);
     std::vector<float> raw_phases(79); // of strongest tone in each symbol time
@@ -1729,7 +1729,7 @@ float FT8::bayes(
 //
 // c79 is 79x8 complex tones, before un-gray-coding.
 //
-void FT8::soft_decode(const FFTEngine::ffts_t &c79, float ll174[])
+void FT8::soft_decode(const FFTEngine::ffts_t &c79, float ll174[]) const
 {
     std::vector<std::vector<float>> m79(79);
     // m79 = absolute values of c79.
@@ -1928,7 +1928,7 @@ void FT8::soft_decode_mags(FT8Params& params, const std::vector<std::vector<floa
 //
 // c79 is 79x8 complex tones, before un-gray-coding.
 //
-void FT8::c_soft_decode(const FFTEngine::ffts_t &c79x, float ll174[])
+void FT8::c_soft_decode(const FFTEngine::ffts_t &c79x, float ll174[]) const
 {
     FFTEngine::ffts_t c79 = c_convert_to_snr(c79x);
     int costas[] = {3, 1, 4, 0, 6, 5, 2};
@@ -2166,7 +2166,7 @@ void FT8::set_ones_zeroes(int ones[], int zeroes[], int nbBits, int bitIndex)
 // each returned element is < 0 for 1, > 0 for zero,
 // scaled by str.
 //
-std::vector<float> FT8::extract_bits(const std::vector<int> &syms, const std::vector<float> str)
+std::vector<float> FT8::extract_bits(const std::vector<int> &syms, const std::vector<float> str) const
 {
     // assert(syms.size() == 79);
     // assert(str.size() == 79);
@@ -2196,7 +2196,7 @@ std::vector<float> FT8::extract_bits(const std::vector<int> &syms, const std::ve
 void FT8::soft_decode_pairs(
     const FFTEngine::ffts_t &m79x,
     float ll174[]
-)
+) const
 {
     FFTEngine::ffts_t m79 = c_convert_to_snr(m79x);
 
@@ -2328,7 +2328,7 @@ void FT8::soft_decode_pairs(
 void FT8::soft_decode_triples(
     const FFTEngine::ffts_t &m79x,
     float ll174[]
-)
+) const
 {
     FFTEngine::ffts_t m79 = c_convert_to_snr(m79x);
 
@@ -2585,7 +2585,7 @@ std::vector<std::complex<float>> FT8::fbandpass(
     float low_inner,  // start of flat area
     float high_inner, // end of flat area
     float high_outer  // end of transition
-)
+) const
 {
     // assert(low_outer <= low_inner);
     // assert(low_inner <= high_inner);
@@ -2790,7 +2790,7 @@ int FT8::one_iter(const std::vector<float> &samples200, int best_off, float hz_f
 // estimate SNR, yielding numbers vaguely similar to WSJT-X.
 // m79 is a 79x8 complex FFT output.
 //
-float FT8::guess_snr(const FFTEngine::ffts_t &m79)
+float FT8::guess_snr(const FFTEngine::ffts_t &m79) const
 {
     int costas[] = {3, 1, 4, 0, 6, 5, 2};
     float pnoises = 0;
@@ -2861,7 +2861,7 @@ float FT8::guess_snr(const FFTEngine::ffts_t &m79)
 // adj_off is the amount to change the offset, in samples.
 // should be subtracted from offset.
 //
-void FT8::fine(const FFTEngine::ffts_t &m79, int, float &adj_hz, float &adj_off)
+void FT8::fine(const FFTEngine::ffts_t &m79, int, float &adj_hz, float &adj_off) const
 {
     adj_hz = 0.0;
     adj_off = 0.0;
@@ -3459,7 +3459,7 @@ void FT8::subtract(
 //
 int FT8::try_decode(
     const std::vector<float> &samples200,
-    float ll174[174],
+    const float ll174[174],
     float best_hz,
     int best_off_samples,
     float hz0_for_cb,
@@ -3566,7 +3566,7 @@ int FT8::try_decode(
 // used to help ensure that subtraction subtracts
 // at the right place.
 //
-std::vector<int> FT8::recode(int a174[])
+std::vector<int> FT8::recode(int a174[]) const
 {
     int i174 = 0;
     int costas[] = {3, 1, 4, 0, 6, 5, 2};

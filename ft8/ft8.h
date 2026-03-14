@@ -242,12 +242,12 @@ public:
         float max_hz,
         int start,
         int rate,
-        int hints1[],
-        int hints2[],
+        const int hints1[],
+        const int hints2[],
         double deadline,
         double final_deadline,
         CallbackInterface *cb,
-        std::vector<cdecode> prevdecs,
+        const std::vector<cdecode>& prevdecs,
         FFTEngine *fftEngine
     );
     ~FT8();
@@ -257,11 +257,11 @@ public:
     void start_work();
     // strength of costas block of signal with tone 0 at bi0,
     // and symbol zero at si0.
-    float one_coarse_strength(const FFTEngine::ffts_t &bins, int bi0, int si0);
+    float one_coarse_strength(const FFTEngine::ffts_t &bins, int bi0, int si0) const;
     // return symbol length in samples at the given rate.
     // insist on integer symbol lengths so that we can
     // use whole FFT bins.
-    int blocksize(int rate);
+    int blocksize(int rate) const;
     //
     // look for potential signals by searching FFT bins for Costas symbol
     // blocks. returns a vector of candidate positions.
@@ -407,16 +407,16 @@ private:
     //
     // m79 is a 79x8 array of complex.
     //
-    FFTEngine::ffts_t un_gray_code_c(const FFTEngine::ffts_t &m79);
+    FFTEngine::ffts_t un_gray_code_c(const FFTEngine::ffts_t &m79) const;
     //
     // m79 is a 79x8 array of float.
     //
-    std::vector<std::vector<float>> un_gray_code_r(const std::vector<std::vector<float>> &m79);
+    std::vector<std::vector<float>> un_gray_code_r(const std::vector<std::vector<float>> &m79) const;
     //
     // normalize levels by windowed median.
     // this helps, but why?
     //
-    std::vector<std::vector<float>> convert_to_snr(const std::vector<std::vector<float>> &m79);
+    std::vector<std::vector<float>> convert_to_snr(const std::vector<std::vector<float>> &m79) const;
     //
     // normalize levels by windowed median.
     // this helps, but why?
@@ -428,7 +428,7 @@ private:
     //
     std::vector<std::vector<std::complex<float>>> c_convert_to_snr(
         const std::vector<std::vector<std::complex<float>>> &m79
-    );
+    ) const;
     //
     // statistics to decide soft probabilities,
     // to drive LDPC decoder.
@@ -461,7 +461,7 @@ private:
     // number of cycles and thus preserves phase from one symbol to the
     // next.
     //
-    std::vector<std::vector<float>> soft_c2m(const FFTEngine::ffts_t &c79);
+    std::vector<std::vector<float>> soft_c2m(const FFTEngine::ffts_t &c79) const;
 public:
     //
     // guess the probability that a bit is zero vs one,
@@ -482,11 +482,11 @@ private:
     //
     // c79 is 79x8 complex tones, before un-gray-coding.
     //
-    void soft_decode(const FFTEngine::ffts_t &c79, float ll174[]);
+    void soft_decode(const FFTEngine::ffts_t &c79, float ll174[]) const;
     //
     // c79 is 79x8 complex tones, before un-gray-coding.
     //
-    void c_soft_decode(const FFTEngine::ffts_t &c79x, float ll174[]);
+    void c_soft_decode(const FFTEngine::ffts_t &c79x, float ll174[]) const;
     //
     // turn 79 symbol numbers into 174 bits.
     // strip out the three Costas sync blocks,
@@ -497,18 +497,18 @@ private:
     // each returned element is < 0 for 1, > 0 for zero,
     // scaled by str.
     //
-    std::vector<float> extract_bits(const std::vector<int> &syms, const std::vector<float> str);
+    std::vector<float> extract_bits(const std::vector<int> &syms, const std::vector<float> str) const;
     // decode successive pairs of symbols. exploits the likelihood
     // that they have the same phase, by summing the complex
     // correlations for each possible pair and using the max.
     void soft_decode_pairs(
         const FFTEngine::ffts_t &m79x,
         float ll174[]
-    );
+    ) const;
     void soft_decode_triples(
         const FFTEngine::ffts_t &m79x,
         float ll174[]
-    );
+    ) const;
     //
     // bandpass filter some FFT bins.
     // smooth transition from stop-band to pass-band,
@@ -522,7 +522,7 @@ private:
         float low_inner,  // start of flat area
         float high_inner, // end of flat area
         float high_outer  // end of transition
-    );
+    ) const;
     //
     // move hz down to 25, filter+convert to 200 samples/second.
     //
@@ -554,7 +554,7 @@ private:
     // estimate SNR, yielding numbers vaguely similar to WSJT-X.
     // m79 is a 79x8 complex FFT output.
     //
-    float guess_snr(const FFTEngine::ffts_t &m79);
+    float guess_snr(const FFTEngine::ffts_t &m79) const;
     //
     // compare phases of successive symbols to guess whether
     // the starting offset is a little too high or low.
@@ -575,7 +575,7 @@ private:
     // adj_off is the amount to change the offset, in samples.
     // should be subtracted from offset.
     //
-    void fine(const FFTEngine::ffts_t &m79, int, float &adj_hz, float &adj_off);
+    void fine(const FFTEngine::ffts_t &m79, int, float &adj_hz, float &adj_off) const;
     //
     // subtract a corrected decoded signal from nsamples_,
     // perhaps revealing a weaker signal underneath,
@@ -599,7 +599,7 @@ private:
     //
     int try_decode(
         const std::vector<float> &samples200,
-        float ll174[174],
+        const float ll174[174],
         float best_hz,
         int best_off_samples,
         float hz0_for_cb,
@@ -615,7 +615,7 @@ private:
     // used to help ensure that subtraction subtracts
     // at the right place.
     //
-    std::vector<int> recode(int a174[]);
+    std::vector<int> recode(int a174[]) const;
     //
     // the signal is at roughly 25 hz in samples200.
     //

@@ -178,34 +178,34 @@ private:
         int rate,
         float hz
     );
-    // shift the frequency by a fraction of 6.25,
-    // to center hz on bin 4 (25 hz).
+    // shift the frequency by a fraction of 23.4,
+    // to center hz on bin 2 (46.8 hz).
     std::vector<float> shift200(
         const std::vector<float> &samples200,
         int off,
         int len,
         float hz
     );
-    // returns a mini-FFT of 79 8-tone symbols.
+    // returns a mini-FFT of 103 4-tone symbols.
     FFTEngine::ffts_t extract(const std::vector<float> &samples200, float, int off);
     //
-    // m79 is a 79x8 array of complex.
+    // m103 is a 103x4 array of complex.
     //
-    FFTEngine::ffts_t un_gray_code_c(const FFTEngine::ffts_t &m79) const;
+    FFTEngine::ffts_t un_gray_code_c(const FFTEngine::ffts_t &m103) const;
     //
-    // m79 is a 79x8 array of float.
+    // m103 is a 103x4 array of float.
     //
-    std::vector<std::vector<float>> un_gray_code_r(const std::vector<std::vector<float>> &m79) const;
+    std::vector<std::vector<float>> un_gray_code_r(const std::vector<std::vector<float>> &m103) const;
     //
     // normalize levels by windowed median.
     // this helps, but why?
     //
-    std::vector<std::vector<float>> convert_to_snr(const std::vector<std::vector<float>> &m79) const;
+    std::vector<std::vector<float>> convert_to_snr(const std::vector<std::vector<float>> &m103) const;
     // normalize levels by windowed median.
     // this helps, but why?
     //
     std::vector<std::vector<std::complex<float>>> c_convert_to_snr(
-        const std::vector<std::vector<std::complex<float>>> &m79
+        const std::vector<std::vector<std::complex<float>>> &m103
     ) const;
     //
     // statistics to decide soft probabilities,
@@ -214,11 +214,11 @@ private:
     // distribution of noise.
     //
     static void make_stats(
-        const std::vector<std::vector<float>> &m79,
+        const std::vector<std::vector<float>> &m103,
         Stats &bests,
         Stats &all
     );
-    // convert 79x8 complex FFT bins to magnitudes.
+    // convert 103x4 complex FFT bins to magnitudes.
     //
     // exploits local phase coherence by decreasing magnitudes of bins
     // whose phase is far from the phases of nearby strongest tones.
@@ -228,18 +228,18 @@ private:
     // number of cycles and thus preserves phase from one symbol to the
     // next.
     //
-    std::vector<std::vector<float>> soft_c2m(const FFTEngine::ffts_t &c79) const;
-    // c79 is 79x8 complex tones, before un-gray-coding.
+    std::vector<std::vector<float>> soft_c2m(const FFTEngine::ffts_t &c103) const;
+    // c103 is 103x4 complex tones, before un-gray-coding.
     //
-    void soft_decode(const FFTEngine::ffts_t &c79, float ll174[]);
+    void soft_decode(const FFTEngine::ffts_t &c103, float ll174[]) const;
     //
-    // c79 is 79x8 complex tones, before un-gray-coding.
+    // c103 is 103x4 complex tones, before un-gray-coding.
     //
-    void c_soft_decode(const FFTEngine::ffts_t &c79x, float ll174[]);
+    void c_soft_decode(const FFTEngine::ffts_t &c103x, float ll174[]) const;
     //
-    // turn 79 symbol numbers into 174 bits.
+    // turn 103 symbol numbers into 174 bits.
     // strip out the three Costas sync blocks,
-    // leaving 58 symbol numbers.
+    // leaving 87 symbol numbers.
     // each represents three bits.
     // (all post-un-gray-code).
     // str is per-symbol strength; must be positive.
@@ -251,13 +251,13 @@ private:
     // that they have the same phase, by summing the complex
     // correlations for each possible pair and using the max.
     void soft_decode_pairs(
-        const FFTEngine::ffts_t &m79x,
+        const FFTEngine::ffts_t &m103x,
         float ll174[]
-    );
+    ) const;
     void soft_decode_triples(
-        const FFTEngine::ffts_t &m79x,
+        const FFTEngine::ffts_t &m103x,
         float ll174[]
-    );
+    ) const;
     //
     // bandpass filter some FFT bins.
     // smooth transition from stop-band to pass-band,
@@ -348,7 +348,7 @@ private:
     //
     int try_decode(
         const std::vector<float> &samples200,
-        float ll174[174],
+        const float ll174[174],
         float best_hz,
         int best_off_samples,
         float hz0_for_cb,
@@ -429,8 +429,8 @@ public:
         int rate,
         float min_hz,
         float max_hz,
-        int hints1[],
-        int hints2[],
+        const int hints1[],
+        const int hints2[],
         double time_left,
         double total_time_left,
         CallbackInterface *cb,

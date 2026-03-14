@@ -1071,7 +1071,7 @@ std::vector<float> FT4::fft_shift_f(
     return out;
 }
 
-// shift the frequency by a fraction of 20.833,
+// shift the frequency by a fraction of 23.4,
 // to center hz on bin 2 (46.8 hz).
 std::vector<float> FT4::shift200(
     const std::vector<float> &samples200,
@@ -1532,7 +1532,7 @@ std::vector<std::vector<float>> FT4::soft_c2m(const FFTEngine::ffts_t &c103) con
 //
 // c103 is 103x4 complex tones, before un-gray-coding.
 //
-void FT4::soft_decode(const FFTEngine::ffts_t &c103, float ll174[])
+void FT4::soft_decode(const FFTEngine::ffts_t &c103, float ll174[]) const
 {
     std::vector<std::vector<float>> m103(103);
     // m103 = absolute values of c103.
@@ -1629,7 +1629,7 @@ void FT4::soft_decode(const FFTEngine::ffts_t &c103, float ll174[])
 //
 // c103 is 103x4 complex tones, before un-gray-coding.
 //
-void FT4::c_soft_decode(const FFTEngine::ffts_t &c103x, float ll174[])
+void FT4::c_soft_decode(const FFTEngine::ffts_t &c103x, float ll174[]) const
 {
     FFTEngine::ffts_t c103 = c_convert_to_snr(c103x);
     std::vector<std::complex<float>> maxes(103);
@@ -1857,7 +1857,7 @@ std::vector<float> FT4::extract_bits(const std::vector<int> &syms, const std::ve
 void FT4::soft_decode_pairs(
     const FFTEngine::ffts_t &m103x,
     float ll174[]
-)
+) const
 {
     FFTEngine::ffts_t m103 = c_convert_to_snr(m103x);
 
@@ -1910,7 +1910,7 @@ void FT4::soft_decode_pairs(
                 {
                     int bitind = (si + 0) * 2 + (1 - bit);
 
-                    if ((i & (1 << bit)))
+                    if (i & (1 << bit))
                     {
                         // symbol i would make this bit a one.
                         if (x > bitinfo[bitind].one) {
@@ -1935,7 +1935,7 @@ void FT4::soft_decode_pairs(
                     {
                         int bitind = (si + 1) * 2 + (1 - bit);
 
-                        if ((i & (1 << bit)))
+                        if (i & (1 << bit))
                         {
                             // symbol i would make this bit a one.
                             if (x > bitinfo[bitind].one) {
@@ -1987,7 +1987,7 @@ void FT4::soft_decode_pairs(
 void FT4::soft_decode_triples(
     const FFTEngine::ffts_t &m103x,
     float ll174[]
-)
+) const
 {
     FFTEngine::ffts_t m103 = c_convert_to_snr(m103x);
 
@@ -3234,7 +3234,7 @@ void FT4::subtract(
 //
 int FT4::try_decode(
     const std::vector<float> &samples200,
-    float ll174[174],
+    const float ll174[174],
     float best_hz,
     int best_off_samples,
     float hz0_for_cb,
@@ -3432,8 +3432,8 @@ void FT4Decoder::entry(
     int rate,
     float min_hz,
     float max_hz,
-    int hints1[],
-    int hints2[],
+    const int hints1[],
+    const int hints2[],
     double time_left,
     double total_time_left,
     CallbackInterface *cb,
