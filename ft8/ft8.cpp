@@ -1668,7 +1668,7 @@ std::vector<std::vector<float>> FT8::soft_c2m(const FFTEngine::ffts_t &c79)
 //
 // Works for all FT modes with 174 bits, by looking up apriori probabilities in the same table.
 float FT8::bayes(
-    FT8Params& params,
+    const FT8Params& params,
     float best_zero,
     float best_one,
     int lli,

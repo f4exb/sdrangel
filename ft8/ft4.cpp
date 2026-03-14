@@ -71,12 +71,12 @@ FT4::FT4(
     float max_hz,
     int start,
     int rate,
-    int hints1[],
-    int hints2[],
+    const int hints1[],
+    const int hints2[],
     double deadline,
     double final_deadline,
     CallbackInterface *cb,
-    std::vector<cdecode> prevdecs,
+    const std::vector<cdecode> &prevdecs,
     FFTEngine *fftEngine
 )
 {
@@ -107,10 +107,6 @@ FT4::FT4(
     npasses_ = 1;
 }
 
-FT4::~FT4()
-{
-}
-
 void FT4::start_work()
 {
     go(npasses_);
@@ -119,11 +115,8 @@ void FT4::start_work()
 
 // strength of costas block of signal with tone 0 at bi0,
 // and symbol zero at si0.
-float FT4::one_coarse_strength(const FFTEngine::ffts_t &bins, int bi0, int si0)
+float FT4::one_coarse_strength(const FFTEngine::ffts_t &bins, int bi0, int si0) const
 {
-    // assert(si0 >= 0 && si0 + 103 <= (int)bins.size());
-    // assert(bi0 >= 0 && bi0 + 4 <= (int)bins[0].size());
-
     float sig = 0.0;
     float noise = 0.0;
 
@@ -234,7 +227,7 @@ float FT4::one_coarse_strength(const FFTEngine::ffts_t &bins, int bi0, int si0)
 // return symbol length in samples at the given rate.
 // insist on integer symbol lengths so that we can
 // use whole FFT bins.
-int FT4::blocksize(int rate)
+int FT4::blocksize(int rate) const
 {
     // FT4 symbol length is 576 at 12000 samples/second.
     int xblock = (576*rate) / 12000;
@@ -317,12 +310,10 @@ std::vector<float> FT4::reduce_rate(
     float &delta_hz
 )
 {
-    // assert(brate < arate);
-    // assert(hz1 - hz0 <= brate / 2);
-
     // the pass band is hz0..hz1
     // stop bands are 0..hz00 and hz11..nyquist.
-    float hz00, hz11;
+    float hz00;
+    float hz11;
     hz0 = std::max(0.0f, hz0 - params.reduce_extra);
     hz1 = std::min(arate / 2.0f, hz1 + params.reduce_extra);
 
@@ -424,8 +415,6 @@ void FT4::go(int npasses)
         samples_.resize(nice);
     }
 
-    // assert(min_hz_ >= 0 && max_hz_ + 93.6 <= rate_ / 2);
-
     // can we reduce the sample rate?
     int nrate = -1;
     for (int xrate = 100; xrate < rate_; xrate += 100)
@@ -490,9 +479,6 @@ void FT4::go(int npasses)
             }
         }
 
-        // assert(max_hz_ + 93.6 < nrate / 2);
-        // assert(min_hz_ >= 0);
-
         float ratio = nrate / (float)rate_;
         rate_ = nrate;
         start_ = round(start_ * ratio);
@@ -519,7 +505,6 @@ void FT4::go(int npasses)
 
         for (int i = 0; i < need; i++)
         {
-            // v[i] = 0;
             v[i] = samples_[rnd()];
         }
 
@@ -740,7 +725,6 @@ float FT4::one_strength_known(
 )
 {
     int block = blocksize(rate);
-    // assert(syms.size() == 103);
     float bin_hz = rate / (float)block;
     int bin0 = round(hz / bin_hz);
     float sig = 0;
@@ -842,7 +826,6 @@ int FT4::search_time_fine(
     }
 
     str = best_sum;
-    // assert(best_off >= 0);
     return off0 + best_off;
 }
 
@@ -953,8 +936,6 @@ void FT4::search_both_known(
     float &off_out
 )
 {
-    // assert(hz0 >= 0 && hz0 + 93.6 < rate / 2);
-
     int off0 = round(off_secs0 * (float)rate);
     int off_win = params.third_off_win * blocksize(rate_);
 
@@ -973,7 +954,9 @@ void FT4::search_both_known(
     int best_off = 0;
     float best_strength = 0;
     std::vector<std::complex<float>> bins = fftEngine_->one_fft(samples, 0, samples.size());
-    float hz_start, hz_inc, hz_end;
+    float hz_start;
+    float hz_inc;
+    float hz_end;
 
     if (params.third_hz_n > 1)
     {
@@ -1102,7 +1085,6 @@ std::vector<float> FT4::shift200(
     } else {
         return fft_shift(samples200, off, len, 666.7, hz - 46.8);
     }
-    // return hilbert_shift(samples200, hz - 46.8, hz - 46.8, 200);
 }
 
 // returns a mini-FFT of 103 4-tone symbols.
@@ -1139,7 +1121,7 @@ FFTEngine::ffts_t FT4::extract(const std::vector<float> &samples625, float, int 
 //
 // m103 is a 103x4 array of complex.
 //
-FFTEngine::ffts_t FT4::un_gray_code_c(const FFTEngine::ffts_t &m103)
+FFTEngine::ffts_t FT4::un_gray_code_c(const FFTEngine::ffts_t &m103) const
 {
     FFTEngine::ffts_t m103a(103);
     // FT4 Gray code mapping for 4-FSK: {0, 1, 3, 2}
@@ -1160,7 +1142,7 @@ FFTEngine::ffts_t FT4::un_gray_code_c(const FFTEngine::ffts_t &m103)
 //
 // m103 is a 103x4 array of float.
 //
-std::vector<std::vector<float>> FT4::un_gray_code_r(const std::vector<std::vector<float>> &m103)
+std::vector<std::vector<float>> FT4::un_gray_code_r(const std::vector<std::vector<float>> &m103) const
 {
     std::vector<std::vector<float>> m103a(103);
     // FT4 Gray code mapping for 4-FSK: {0, 1, 3, 2}
@@ -1182,7 +1164,7 @@ std::vector<std::vector<float>> FT4::un_gray_code_r(const std::vector<std::vecto
 // normalize levels by windowed median.
 // this helps, but why?
 //
-std::vector<std::vector<float>> FT4::convert_to_snr(const std::vector<std::vector<float>> &m103)
+std::vector<std::vector<float>> FT4::convert_to_snr(const std::vector<std::vector<float>> &m103) const
 {
     if (params.snr_how < 0 || params.snr_win < 0) {
         return m103;
@@ -1272,7 +1254,7 @@ std::vector<std::vector<float>> FT4::convert_to_snr(const std::vector<std::vecto
 //
 std::vector<std::vector<std::complex<float>>> FT4::c_convert_to_snr(
     const std::vector<std::vector<std::complex<float>>> &m103
-)
+) const
 {
     if (params.snr_how < 0 || params.snr_win < 0) {
         return m103;
@@ -1442,7 +1424,7 @@ void FT4::make_stats(
 // number of cycles and thus preserves phase from one symbol to the
 // next.
 //
-std::vector<std::vector<float>> FT4::soft_c2m(const FFTEngine::ffts_t &c103)
+std::vector<std::vector<float>> FT4::soft_c2m(const FFTEngine::ffts_t &c103) const
 {
     std::vector<std::vector<float>> m103(103);
     std::vector<float> raw_phases(103); // of strongest tone in each symbol time
@@ -1642,7 +1624,6 @@ void FT4::soft_decode(const FFTEngine::ffts_t &c103, float ll174[])
             ll174[lli++] = ll;
         }
     }
-    // assert(lli == 174);
 }
 
 //
@@ -1831,7 +1812,6 @@ void FT4::c_soft_decode(const FFTEngine::ffts_t &c103x, float ll174[])
             ll174[lli++] = ll;
         }
     }
-    // assert(lli == 174);
 }
 
 //
@@ -1844,11 +1824,8 @@ void FT4::c_soft_decode(const FFTEngine::ffts_t &c103x, float ll174[])
 // each returned element is < 0 for 1, > 0 for zero,
 // scaled by str.
 //
-std::vector<float> FT4::extract_bits(const std::vector<int> &syms, const std::vector<float> str)
+std::vector<float> FT4::extract_bits(const std::vector<int> &syms, const std::vector<float>& str) const
 {
-    // assert(syms.size() == 103);
-    // assert(str.size() == 103);
-
     std::vector<float> bits;
 
     for (int si = 0; si < 103; si++)
@@ -2001,12 +1978,10 @@ void FT4::soft_decode_pairs(
         {
             float best_zero = bitinfo[si * 2 + i].zero;
             float best_one = bitinfo[si * 2 + i].one;
-            // ll174[lli++] = best_zero > best_one ? 4.99 : -4.99;
             float ll = FT8::bayes(params, best_zero, best_one, lli, bests, all);
             ll174[lli++] = ll;
         }
     }
-    // assert(lli == 174);
 }
 
 void FT4::soft_decode_triples(
@@ -2179,19 +2154,17 @@ void FT4::soft_decode_triples(
         {
             float best_zero = bitinfo[si * 2 + i].zero;
             float best_one = bitinfo[si * 2 + i].one;
-            // ll174[lli++] = best_zero > best_one ? 4.99 : -4.99;
             float ll = FT8::bayes(params, best_zero, best_one, lli, bests, all);
             ll174[lli++] = ll;
         }
     }
-    // assert(lli == 174);
 }
 
 //
 // given log likelihood for each bit, try LDPC and OSD decoders.
 // on success, puts corrected 174 bits into a174[].
 //
-int FT4::decode(const float ll174[], int a174[], FT8Params& _params, int use_osd, std::string &comment)
+int FT4::decode(const float ll174[], int a174[], const FT8Params& _params, int use_osd, std::string &comment)
 {
     int plain[174];  // will be 0/1 bits.
     int ldpc_ok = 0; // 83 will mean success.
@@ -2257,7 +2230,10 @@ void FT4::encode(int a174[], const int s77[])
     std::copy(s77, s77+77, a91); // copy msg
     LDPC::ft8_crc(a91, 82, &a91[77]); // append CRC - to match OSD::check_crc
     std::copy(a91, a91+91, a174); // copy msg + CRC
-    int sum, n, ni, b;
+    int sum;
+    int n;
+    int ni;
+    int b;
 
     for (int i=0; i<83; i++)
     {
@@ -2288,12 +2264,8 @@ std::vector<std::complex<float>> FT4::fbandpass(
     float low_inner,  // start of flat area
     float high_inner, // end of flat area
     float high_outer  // end of transition
-)
+) const
 {
-    // assert(low_outer <= low_inner);
-    // assert(low_inner <= high_inner);
-    // assert(high_inner <= high_outer);
-
     int nbins = bins0.size();
     std::vector<std::complex<float>> bins1(nbins);
 
@@ -2493,7 +2465,7 @@ int FT4::one_iter(const std::vector<float> &samples200, int best_off, float hz_f
 // estimate SNR, yielding numbers vaguely similar to WSJT-X.
 // m103 is a 103x4 complex FFT output.
 //
-float FT4::guess_snr(const FFTEngine::ffts_t &m103)
+float FT4::guess_snr(const FFTEngine::ffts_t &m103) const
 {
     float pnoises = 0;
     float psignals = 0;
@@ -2597,7 +2569,7 @@ float FT4::guess_snr(const FFTEngine::ffts_t &m103)
 // adj_off is the amount to change the offset, in samples.
 // should be subtracted from offset.
 //
-void FT4::fine(const FFTEngine::ffts_t &m103, int, float &adj_hz, float &adj_off)
+void FT4::fine(const FFTEngine::ffts_t &m103, int, float &adj_hz, float &adj_off) const
 {
     adj_hz = 0.0;
     adj_off = 0.0;
@@ -3051,7 +3023,7 @@ int FT4::one_iter1(
 // re103[] holds the error-corrected symbol numbers.
 //
 void FT4::subtract(
-    const std::vector<int> re103,
+    const std::vector<int>& re103,
     float hz0,
     float hz1,
     float off_sec
@@ -3379,7 +3351,7 @@ int FT4::try_decode(
 // used to help ensure that subtraction subtracts
 // at the right place.
 //
-std::vector<int> FT4::recode(int a174[])
+std::vector<int> FT4::recode(const int a174[]) const
 {
     int i174 = 0;
     std::vector<int> out103;
@@ -3437,8 +3409,7 @@ std::vector<int> FT4::recode(int a174[])
             out103.push_back(sym);
         }
     }
-    // assert(out103.size() == 103);
-    // assert(i174 == 174);
+
     return out103;
 }
 
@@ -3455,7 +3426,7 @@ FT4Decoder::~FT4Decoder()
 // Launch decoding
 //
 void FT4Decoder::entry(
-    float xsamples[],
+    const float xsamples[],
     int nsamples,
     int start,
     int rate,
@@ -3467,7 +3438,7 @@ void FT4Decoder::entry(
     double total_time_left,
     CallbackInterface *cb,
     int nprevdecs,
-    struct cdecode *xprevdecs
+    const struct cdecode *xprevdecs
 )
 {
     double t0 = now();
@@ -3517,7 +3488,7 @@ void FT4Decoder::entry(
             fftEngines.push_back(new FFTEngine());
         }
 
-        FT4 *ft4 = new FT4(
+        auto *ft4 = new FT4(
             samples,
             hz0,
             hz1,
@@ -3535,11 +3506,9 @@ void FT4Decoder::entry(
         ft4->getParams() = getParams(); // transfer parameters
         int npasses = nprevdecs > 0 ? params.npasses_two : params.npasses_one;
         ft4->set_npasses(npasses);
-        QThread *th = new QThread();
+        auto *th = new QThread();
         th->setObjectName(tr("ft4:%1:%2").arg(cb->get_name()).arg(i));
         threads.push_back(th);
-        // std::thread *th = new std::thread([ft4, npasses] () { ft4->go(npasses); });
-        // thv.push_back(std::pair<FT4*, std::thread*>(ft4, th));
         ft4->moveToThread(th);
         QObject::connect(th, &QThread::started, ft4, &FT4::start_work);
         QObject::connect(ft4, &FT4::finished, th, &QThread::quit, Qt::DirectConnection);

@@ -471,7 +471,7 @@ public:
     // returns log-likelihood, zero is positive, one is negative.
     //
     static float bayes(
-        FT8Params& params,
+        const FT8Params& params,
         float best_zero,
         float best_one,
         int lli,
