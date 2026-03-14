@@ -802,7 +802,7 @@ int FT4::search_time_fine(
     }
 
     //
-    // shift in frequency to put hz at 46.8.
+    // shift in frequency to put hz at 41.667.
     // only shift the samples we need, both for speed,
     // and try to always shift down the same number of samples
     // to make it easier to cache fftw plans.
@@ -822,7 +822,7 @@ int FT4::search_time_fine(
 
     for (int g = 0; g <= (offN - off0) && g + 103 * 32 <= len; g += gran)
     {
-        float sum = one_strength(downsamples200, 46.8, g);
+        float sum = one_strength(downsamples200, 41.667, g);
 
         if (sum > best_sum || best_off == -1)
         {
@@ -884,7 +884,7 @@ int FT4::search_time_fine_known(
 
 //
 // search for costas blocks in an MxN time/frequency grid.
-// hz0 +/- hz_win in hz_inc increments. hz0 should be near 46.8.
+// hz0 +/- hz_win in hz_inc increments. hz0 should be near 41.667.
 // off0 +/- off_win in off_inc incremenents.
 //
 std::vector<Strength> FT4::search_both(
@@ -897,7 +897,7 @@ std::vector<Strength> FT4::search_both(
     int off_win
 )
 {
-    // assert(hz0 >= 46.8 - 20.833 / 2 && hz0 <= 46.8 + 20.833 / 2);
+    // assert(hz0 >= 41.667 - 20.833 / 2 && hz0 <= 41.667 + 20.833 / 2);
 
     std::vector<Strength> strengths;
 
@@ -1078,7 +1078,7 @@ std::vector<float> FT4::fft_shift_f(
 }
 
 // shift the frequency by a fraction of 23.4,
-// to center hz on bin 2 (46.8 hz).
+// to center hz on bin 2 (41.667 hz).
 std::vector<float> FT4::shift200(
     const std::vector<float> &samples200,
     int off,
@@ -1086,10 +1086,10 @@ std::vector<float> FT4::shift200(
     float hz
 )
 {
-    if (std::abs(hz - 46.8) < 0.001 && off == 0 && len == (int)samples200.size()) {
+    if (std::abs(hz - 41.667) < 0.001 && off == 0 && len == (int)samples200.size()) {
         return samples200;
     } else {
-        return fft_shift(samples200, off, len, 666.7, hz - 46.8);
+        return fft_shift(samples200, off, len, 666.7, hz - 41.667);
     }
 }
 
@@ -2322,7 +2322,7 @@ std::vector<std::complex<float>> FT4::fbandpass(
 }
 
 //
-// move hz down to 46.8, filter+convert to 666.7 samples/second.
+// move hz down to 41.667, filter+convert to 666.7 samples/second.
 //
 // like fft_shift(). one big FFT, move bins down and
 // zero out those outside the band, then IFFT,
@@ -2342,7 +2342,7 @@ std::vector<float> FT4::down_v7_f(const std::vector<std::complex<float>> &bins, 
 {
     int nbins = bins.size();
     float bin_hz = rate_ / (float)len;
-    int down = round((hz - 46.8) / bin_hz);
+    int down = round((hz - 41.667) / bin_hz);
     std::vector<std::complex<float>> bins1(nbins);
 
     for (int i = 0; i < nbins; i++)
@@ -2358,7 +2358,7 @@ std::vector<float> FT4::down_v7_f(const std::vector<std::complex<float>> &bins, 
 
     // now filter to fit in 666.7 samples/second.
 
-    float low_inner = 46.8 - params.shoulder200_extra;
+    float low_inner = 41.667 - params.shoulder200_extra;
     float low_outer = low_inner - params.shoulder200;
 
     if (low_outer < 0) {
@@ -2410,7 +2410,7 @@ std::vector<float> FT4::down_v7_f(const std::vector<std::complex<float>> &bins, 
     //
 
     //
-    // move down to 46.8 hz and re-sample to 666.7 samples/second,
+    // move down to 41.667 hz and re-sample to 666.7 samples/second,
     // i.e. 32 samples/symbol.
     //
     std::vector<float> samples200 = down_v7_f(bins, len, hz);
@@ -2429,7 +2429,7 @@ int FT4::one_iter(const std::vector<float> &samples200, int best_off, float hz_f
     {
         std::vector<Strength> strengths = search_both(
             samples200,
-            46.8,
+            41.667,
             params.second_hz_n,
             params.second_hz_win,
             best_off,
@@ -2460,7 +2460,7 @@ int FT4::one_iter(const std::vector<float> &samples200, int best_off, float hz_f
     }
     else
     {
-        int ret = one_iter1(samples200, best_off, 46.8, hz_for_cb, hz_for_cb);
+        int ret = one_iter1(samples200, best_off, 41.667, hz_for_cb, hz_for_cb);
         return ret;
     }
 
@@ -2792,7 +2792,7 @@ void FT4::fine(const FFTEngine::ffts_t &m103, int, float &adj_hz, float &adj_off
 }
 
 //
-// the signal is centered around 46.8 Hz in samples200.
+// the signal is centered around 41.667 Hz in samples200.
 //
 // return 2 if it decodes to a brand-new message.
 // return 1 if it decodes but we've already seen it,
@@ -2816,7 +2816,7 @@ int FT4::one_iter1(
     );
 
     // mini 103x4 FFT.
-    FFTEngine::ffts_t m103 = extract(samples200, 46.8, best_off);
+    FFTEngine::ffts_t m103 = extract(samples200, 41.667, best_off);
 
     // look at symbol-to-symbol phase change to try
     // to improve best_hz and best_off.
@@ -2844,7 +2844,7 @@ int FT4::one_iter1(
             }
 
             samples200 = shift200(samples200x, 0, samples200x.size(), best_hz);
-            m103 = extract(samples200, 46.8, best_off);
+            m103 = extract(samples200, 41.667, best_off);
         }
     }
 
@@ -3290,7 +3290,7 @@ int FT4::try_decode(
         // convert starting sample # from 666.7 samples/second back to rate_.
         // also hz.
         float best_off = best_off_samples / 666.7; // convert to seconds
-        best_hz = hz0_for_cb + (best_hz - 46.8);
+        best_hz = hz0_for_cb + (best_hz - 41.667);
 
         if (params.do_third == 2)
         {
