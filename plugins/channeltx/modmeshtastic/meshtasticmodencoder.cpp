@@ -110,9 +110,9 @@ void MeshtasticModEncoder::encodeString(const QString& str, std::vector<unsigned
             QString summary;
             QString error;
 
-            if (Meshtastic::Packet::isCommand(str))
+            if (modemmeshtastic::Packet::isCommand(str))
             {
-                if (!Meshtastic::Packet::buildFrameFromCommand(str, bytes, summary, error))
+                if (!modemmeshtastic::Packet::buildFrameFromCommand(str, bytes, summary, error))
                 {
                     qWarning() << "MeshtasticModEncoder::encodeString: Meshtastic command error:" << error;
                     return;
@@ -141,12 +141,12 @@ void MeshtasticModEncoder::encodeBytes(const QByteArray& bytes, std::vector<unsi
     {
         QByteArray payload(bytes);
 
-        if (Meshtastic::Packet::isCommand(QString::fromUtf8(bytes)))
+        if (modemmeshtastic::Packet::isCommand(QString::fromUtf8(bytes)))
         {
             QString summary;
             QString error;
 
-            if (!Meshtastic::Packet::buildFrameFromCommand(QString::fromUtf8(bytes), payload, summary, error))
+            if (!modemmeshtastic::Packet::buildFrameFromCommand(QString::fromUtf8(bytes), payload, summary, error))
             {
                 qWarning() << "MeshtasticModEncoder::encodeBytes: Meshtastic command error:" << error;
                 return;

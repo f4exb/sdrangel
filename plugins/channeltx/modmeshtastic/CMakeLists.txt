@@ -17,7 +17,6 @@ set(modmeshtastic_SOURCES
     meshtasticmodencoderlora.cpp
     meshtasticmodencoderft.cpp
     meshtasticmodwebapiadapter.cpp
-    ${CMAKE_SOURCE_DIR}/plugins/meshtasticcommon/meshtasticpacket.cpp
 )
 
 set(modmeshtastic_HEADERS
@@ -37,7 +36,7 @@ set(modmeshtastic_HEADERS
 include_directories(
     ${CMAKE_SOURCE_DIR}/swagger/sdrangel/code/qt5/client
     ${meshtasticmod_FT8_INCLUDE}
-    ${CMAKE_SOURCE_DIR}/plugins/meshtasticcommon
+    ${CMAKE_SOURCE_DIR}/modemmeshtastic
 )
 
 if(NOT SERVER_MODE)
@@ -79,6 +78,7 @@ target_link_libraries(${TARGET_NAME} PRIVATE
     ${TARGET_LIB_GUI}
     swagger
     ${meshtasticmod_FT8_LIB}
+    modemmeshtastic
 )
 
 install(TARGETS ${TARGET_NAME} DESTINATION ${INSTALL_FOLDER})

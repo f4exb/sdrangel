@@ -173,7 +173,7 @@ int MeshtasticDemod::findBandwidthIndexForHz(int bandwidthHz) const
 MeshtasticDemodSettings MeshtasticDemod::makePipelineSettingsFromMeshRadio(
     const MeshtasticDemodSettings& baseSettings,
     const QString& presetName,
-    const Meshtastic::TxRadioSettings& meshRadio,
+    const modemmeshtastic::TxRadioSettings& meshRadio,
     qint64 selectedPresetFrequencyHz,
     bool haveSelectedPresetFrequency
 ) const
@@ -265,14 +265,14 @@ std::vector<MeshtasticDemod::PipelineConfig> MeshtasticDemod::buildPipelineConfi
     qint64 selectedPresetFrequencyHz = 0;
     bool haveSelectedPresetFrequency = false;
     {
-        Meshtastic::TxRadioSettings selectedMeshRadio;
+        modemmeshtastic::TxRadioSettings selectedMeshRadio;
         QString error;
         const QString command = QString("MESH:preset=%1;region=%2;channel_num=%3")
             .arg(selectedPreset)
             .arg(region)
             .arg(channelNum);
 
-        if (Meshtastic::Packet::deriveTxRadioSettings(command, selectedMeshRadio, error) && selectedMeshRadio.hasCenterFrequency)
+        if (modemmeshtastic::Packet::deriveTxRadioSettings(command, selectedMeshRadio, error) && selectedMeshRadio.hasCenterFrequency)
         {
             selectedPresetFrequencyHz = selectedMeshRadio.centerFrequencyHz;
             haveSelectedPresetFrequency = true;
@@ -283,14 +283,14 @@ std::vector<MeshtasticDemod::PipelineConfig> MeshtasticDemod::buildPipelineConfi
 
     for (const QString& presetName : orderedPresets)
     {
-        Meshtastic::TxRadioSettings meshRadio;
+        modemmeshtastic::TxRadioSettings meshRadio;
         QString error;
         const QString command = QString("MESH:preset=%1;region=%2;channel_num=%3")
             .arg(presetName)
             .arg(region)
             .arg(channelNum);
 
-        if (!Meshtastic::Packet::deriveTxRadioSettings(command, meshRadio, error))
+        if (!modemmeshtastic::Packet::deriveTxRadioSettings(command, meshRadio, error))
         {
             qDebug() << "MeshtasticDemod::buildPipelineConfigs: skip preset" << presetName << ":" << error;
             continue;
@@ -549,9 +549,9 @@ bool MeshtasticDemod::handleMessage(const Message& cmd)
                 getMessageQueueToGUI()->push(new MeshtasticDemodMsg::MsgReportDecodeBytes(msg)); // make a copy
             }
 
-            Meshtastic::DecodeResult meshResult;
+            modemmeshtastic::DecodeResult meshResult;
 
-            if (Meshtastic::Packet::decodeFrame(m_lastMsgBytes, meshResult, m_settings.m_meshtasticKeySpecList))
+            if (modemmeshtastic::Packet::decodeFrame(m_lastMsgBytes, meshResult, m_settings.m_meshtasticKeySpecList))
             {
                 qInfo() << "MeshtasticDemod::handleMessage:" << meshResult.summary;
 
@@ -567,7 +567,7 @@ bool MeshtasticDemod::handleMessage(const Message& cmd)
                     QVector<QPair<QString, QString>> structuredFields;
                     structuredFields.reserve(meshResult.fields.size());
 
-                    for (const Meshtastic::DecodeResult::Field& field : meshResult.fields) {
+                    for (const modemmeshtastic::DecodeResult::Field& field : meshResult.fields) {
                         structuredFields.append(qMakePair(field.path, field.value));
                     }
 

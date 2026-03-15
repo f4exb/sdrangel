@@ -968,6 +968,7 @@ add_subdirectory(swagger)
 add_subdirectory(devices)
 
 add_subdirectory(modemm17)
+add_subdirectory(modemmeshtastic)
 
 if (FFTW3F_FOUND)
     add_subdirectory(ft8)

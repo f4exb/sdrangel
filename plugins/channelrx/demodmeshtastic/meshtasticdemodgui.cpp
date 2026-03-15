@@ -1054,7 +1054,7 @@ void MeshtasticDemodGUI::editMeshtasticKeys()
         QString error;
         int keyCount = 0;
 
-        if (!Meshtastic::Packet::validateKeySpecList(keyText, error, &keyCount))
+        if (!modemmeshtastic::Packet::validateKeySpecList(keyText, error, &keyCount))
         {
             statusLabel->setStyleSheet("QLabel { color: #ff5555; }");
             statusLabel->setText(QObject::tr("Invalid key list: %1").arg(error));
@@ -1340,10 +1340,10 @@ void MeshtasticDemodGUI::applyMeshtasticProfileFromSelection()
     }
 
     const QString command = QString("MESH:preset=%1;region=%2;channel_num=%3").arg(preset, region).arg(channelNum);
-    Meshtastic::TxRadioSettings meshRadio;
+    modemmeshtastic::TxRadioSettings meshRadio;
     QString error;
 
-    if (!Meshtastic::Packet::deriveTxRadioSettings(command, meshRadio, error))
+    if (!modemmeshtastic::Packet::deriveTxRadioSettings(command, meshRadio, error))
     {
         qWarning() << "MeshtasticDemodGUI::applyMeshtasticProfileFromSelection:" << error;
         return;
@@ -1607,12 +1607,12 @@ void MeshtasticDemodGUI::rebuildMeshtasticChannelOptions()
     int added = 0;
     for (int meshChannel = 0; meshChannel <= 200; ++meshChannel)
     {
-        Meshtastic::TxRadioSettings meshRadio;
+        modemmeshtastic::TxRadioSettings meshRadio;
         QString error;
         const int channelNum = meshChannel + 1; // planner expects 1-based channel_num
         const QString command = QString("MESH:preset=%1;region=%2;channel_num=%3").arg(preset, region).arg(channelNum);
 
-        if (!Meshtastic::Packet::deriveTxRadioSettings(command, meshRadio, error))
+        if (!modemmeshtastic::Packet::deriveTxRadioSettings(command, meshRadio, error))
         {
             if (added > 0) {
                 break;

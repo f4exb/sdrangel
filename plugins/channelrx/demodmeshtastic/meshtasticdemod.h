@@ -42,7 +42,7 @@ class DeviceAPI;
 class QThread;
 class ObjectPipe;
 class MeshtasticDemodDecoder;
-namespace Meshtastic { struct TxRadioSettings; }
+namespace modemmeshtastic { struct TxRadioSettings; }
 
 class MeshtasticDemod : public BasebandSampleSink, public ChannelAPI {
 public:
@@ -195,7 +195,7 @@ private:
     MeshtasticDemodSettings makePipelineSettingsFromMeshRadio(
         const MeshtasticDemodSettings& baseSettings,
         const QString& presetName,
-        const Meshtastic::TxRadioSettings& meshRadio,
+        const modemmeshtastic::TxRadioSettings& meshRadio,
         qint64 selectedPresetFrequencyHz,
         bool haveSelectedPresetFrequency
     ) const;

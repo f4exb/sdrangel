@@ -200,13 +200,13 @@ void MeshtasticModGUI::applyMeshtasticRadioSettingsIfPresent(const QString& payl
         return;
     }
 
-    if (!Meshtastic::Packet::isCommand(payloadText)) {
+    if (!modemmeshtastic::Packet::isCommand(payloadText)) {
         return;
     }
 
-    Meshtastic::TxRadioSettings meshRadio;
+    modemmeshtastic::TxRadioSettings meshRadio;
     QString error;
-    if (!Meshtastic::Packet::deriveTxRadioSettings(payloadText, meshRadio, error))
+    if (!modemmeshtastic::Packet::deriveTxRadioSettings(payloadText, meshRadio, error))
     {
         qWarning() << "MeshtasticModGUI::applyMeshtasticRadioSettingsIfPresent:" << error;
         return;
