@@ -119,7 +119,7 @@ private:
     int m_basebandSampleRate;
 	bool m_doApplySettings;
 
-	MeshtasticDemod* m_chirpChatDemod;
+	MeshtasticDemod* m_meshtasticDemod;
 	SpectrumVis* m_spectrumVis;
     QComboBox* m_meshRegionCombo;
     QComboBox* m_meshPresetCombo;

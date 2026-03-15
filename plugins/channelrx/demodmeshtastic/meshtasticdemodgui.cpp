@@ -873,12 +873,12 @@ void MeshtasticDemodGUI::handleMeshAutoLockSourceObservation()
     }
 
     MeshAutoLockCandidate& candidate = m_meshAutoLockCandidates[m_meshAutoLockCandidateIndex];
-    const double totalPower = std::max(1e-12, m_chirpChatDemod->getTotalPower());
-    const double noisePower = std::max(1e-12, m_chirpChatDemod->getCurrentNoiseLevel());
+    const double totalPower = std::max(1e-12, m_meshtasticDemod->getTotalPower());
+    const double noisePower = std::max(1e-12, m_meshtasticDemod->getCurrentNoiseLevel());
     const double totalDb = CalcDb::dbPower(totalPower);
     const double noiseDb = CalcDb::dbPower(noisePower);
     const double p2nDb = std::max(-20.0, std::min(40.0, totalDb - noiseDb));
-    const bool demodActive = m_chirpChatDemod->getDemodActive();
+    const bool demodActive = m_meshtasticDemod->getDemodActive();
 
     if (!m_meshAutoLockTrafficSeen)
     {
@@ -1149,11 +1149,11 @@ bool MeshtasticDemodGUI::autoTuneDeviceSampleRateForBandwidth(int bandwidthHz, Q
 {
     summary.clear();
 
-    if (!m_chirpChatDemod) {
+    if (!m_meshtasticDemod) {
         return false;
     }
 
-    const int deviceSetIndex = m_chirpChatDemod->getDeviceSetIndex();
+    const int deviceSetIndex = m_meshtasticDemod->getDeviceSetIndex();
 
     if (deviceSetIndex < 0) {
         return false;
@@ -1681,7 +1681,7 @@ void MeshtasticDemodGUI::onMenuDialogCalled(const QPoint &p)
 
         if (m_deviceUISet->m_deviceMIMOEngine)
         {
-            dialog.setNumberOfStreams(m_chirpChatDemod->getNumberOfDeviceStreams());
+            dialog.setNumberOfStreams(m_meshtasticDemod->getNumberOfDeviceStreams());
             dialog.setStreamIndex(m_settings.m_streamIndex);
         }
 
@@ -1786,10 +1786,10 @@ MeshtasticDemodGUI::MeshtasticDemodGUI(PluginAPI* pluginAPI, DeviceUISet *device
 	connect(rollupContents, SIGNAL(widgetRolled(QWidget*,bool)), this, SLOT(onWidgetRolled(QWidget*,bool)));
     connect(this, SIGNAL(customContextMenuRequested(const QPoint &)), this, SLOT(onMenuDialogCalled(const QPoint &)));
 
-	m_chirpChatDemod = (MeshtasticDemod*) rxChannel;
-    m_spectrumVis = m_chirpChatDemod->getSpectrumVis();
+	m_meshtasticDemod = (MeshtasticDemod*) rxChannel;
+    m_spectrumVis = m_meshtasticDemod->getSpectrumVis();
 	m_spectrumVis->setGLSpectrum(ui->glSpectrum);
-    m_chirpChatDemod->setMessageQueueToGUI(getInputMessageQueue());
+    m_meshtasticDemod->setMessageQueueToGUI(getInputMessageQueue());
 
     connect(&MainCore::instance()->getMasterTimer(), SIGNAL(timeout()), this, SLOT(tick()));
 
@@ -1918,7 +1918,7 @@ void MeshtasticDemodGUI::applySettings(bool force)
 	{
         setTitleColor(m_channelMarker.getColor());
         MeshtasticDemod::MsgConfigureMeshtasticDemod* message = MeshtasticDemod::MsgConfigureMeshtasticDemod::create( m_settings, force);
-        m_chirpChatDemod->getInputMessageQueue()->push(message);
+        m_meshtasticDemod->getInputMessageQueue()->push(message);
 	}
 }
 
@@ -3464,10 +3464,10 @@ void MeshtasticDemodGUI::tick()
     {
         m_tickCount = 0;
 
-        ui->nText->setText(tr("%1").arg(CalcDb::dbPower(m_chirpChatDemod->getCurrentNoiseLevel()), 0, 'f', 1));
-        ui->channelPower->setText(tr("%1 dB").arg(CalcDb::dbPower(m_chirpChatDemod->getTotalPower()), 0, 'f', 1));
+        ui->nText->setText(tr("%1").arg(CalcDb::dbPower(m_meshtasticDemod->getCurrentNoiseLevel()), 0, 'f', 1));
+        ui->channelPower->setText(tr("%1 dB").arg(CalcDb::dbPower(m_meshtasticDemod->getTotalPower()), 0, 'f', 1));
 
-        if (m_chirpChatDemod->getDemodActive()) {
+        if (m_meshtasticDemod->getDemodActive()) {
             ui->mute->setStyleSheet("QToolButton { background-color : green; }");
         } else {
             ui->mute->setStyleSheet("QToolButton { background:rgb(79,79,79); }");

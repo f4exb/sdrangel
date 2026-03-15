@@ -1,5 +1,6 @@
 ///////////////////////////////////////////////////////////////////////////////////
-// Copyright (C) 2016-2020, 2022 Edouard Griffiths, F4EXB <f4exb06@gmail.com>    //
+// Copyright (C) 2026 Alejandro Aleman                                           //
+// Copyright (C) 2016-2026 Edouard Griffiths, F4EXB <f4exb06@gmail.com>          //
 // Copyright (C) 2021-2022 Jon Beniston, M7RCE <jon@beniston.com>                //
 //                                                                               //
 // This program is free software; you can redistribute it and/or modify          //
@@ -16,8 +17,8 @@
 // along with this program. If not, see <http://www.gnu.org/licenses/>.          //
 ///////////////////////////////////////////////////////////////////////////////////
 
-#ifndef PLUGINS_CHANNELTX_MODLORA_LORAMODGUI_H_
-#define PLUGINS_CHANNELTX_MODLORA_LORAMODGUI_H_
+#ifndef PLUGINS_CHANNELTX_MODMESHTASTIC_MESHTASTICMODGUI_H_
+#define PLUGINS_CHANNELTX_MODMESHTASTIC_MESHTASTICMODGUI_H_
 
 #include "channel/channelgui.h"
 #include "dsp/channelmarker.h"
@@ -73,7 +74,7 @@ private:
     int m_basebandSampleRate;
     bool m_doApplySettings;
 
-    MeshtasticMod* m_chirpChatMod;
+    MeshtasticMod* m_meshtasticMod;
     MovingAverageUtil<double, double, 20> m_channelPowerDbAvg;
 
     std::size_t m_tickCount;
@@ -132,4 +133,4 @@ private slots:
     void tick();
 };
 
-#endif /* PLUGINS_CHANNELTX_MODLORA_LORAMODGUI_H_ */
+#endif /* PLUGINS_CHANNELTX_MODMESHTASTIC_MESHTASTICMODGUI_H_ */

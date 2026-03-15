@@ -17,6 +17,7 @@ set(meshtastic_SOURCES
     meshtasticdemoddecoderlora.cpp
     meshtasticdemoddecoderft.cpp
 	meshtasticdemodmsg.cpp
+    meshtasticdemodwebapiadapter.cpp
 )
 
 set(meshtastic_HEADERS
@@ -31,6 +32,7 @@ set(meshtastic_HEADERS
     meshtasticdemoddecoderft.h
 	meshtasticdemodmsg.h
 	meshtasticplugin.h
+    meshtasticdemodwebapiadapter.h
 )
 
 include_directories(

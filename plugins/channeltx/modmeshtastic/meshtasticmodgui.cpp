@@ -1,5 +1,6 @@
 ///////////////////////////////////////////////////////////////////////////////////
-// Copyright (C) 2020-2022 Edouard Griffiths, F4EXB <f4exb06@gmail.com>          //
+// Copyright (C) 2026 Alejandro Aleman                                           //
+// Copyright (C) 2020-2026 Edouard Griffiths, F4EXB <f4exb06@gmail.com>          //
 // Copyright (C) 2021-2023 Jon Beniston, M7RCE <jon@beniston.com>                //
 //                                                                               //
 // This program is free software; you can redistribute it and/or modify          //
@@ -531,7 +532,7 @@ void MeshtasticModGUI::onMenuDialogCalled(const QPoint &p)
 
         if (m_deviceUISet->m_deviceMIMOEngine)
         {
-            dialog.setNumberOfStreams(m_chirpChatMod->getNumberOfDeviceStreams());
+            dialog.setNumberOfStreams(m_meshtasticMod->getNumberOfDeviceStreams());
             dialog.setStreamIndex(m_settings.m_streamIndex);
         }
 
@@ -585,8 +586,8 @@ MeshtasticModGUI::MeshtasticModGUI(PluginAPI* pluginAPI, DeviceUISet *deviceUISe
 	connect(rollupContents, SIGNAL(widgetRolled(QWidget*,bool)), this, SLOT(onWidgetRolled(QWidget*,bool)));
 	connect(this, SIGNAL(customContextMenuRequested(const QPoint &)), this, SLOT(onMenuDialogCalled(const QPoint &)));
 
-	m_chirpChatMod = (MeshtasticMod*) channelTx;
-	m_chirpChatMod->setMessageQueueToGUI(getInputMessageQueue());
+	m_meshtasticMod = (MeshtasticMod*) channelTx;
+	m_meshtasticMod->setMessageQueueToGUI(getInputMessageQueue());
 
 	connect(&MainCore::instance()->getMasterTimer(), SIGNAL(timeout()), this, SLOT(tick()));
 
@@ -698,7 +699,7 @@ void MeshtasticModGUI::applySettings(bool force)
 	if (m_doApplySettings)
 	{
 		MeshtasticMod::MsgConfigureMeshtasticMod *msg = MeshtasticMod::MsgConfigureMeshtasticMod::create(m_settings, force);
-		m_chirpChatMod->getInputMessageQueue()->push(msg);
+		m_meshtasticMod->getInputMessageQueue()->push(msg);
 	}
 }
 
@@ -831,11 +832,11 @@ void MeshtasticModGUI::tick()
     else
     {
         m_tickCount = 0;
-        double powDb = CalcDb::dbPower(m_chirpChatMod->getMagSq());
+        double powDb = CalcDb::dbPower(m_meshtasticMod->getMagSq());
         m_channelPowerDbAvg(powDb);
         ui->channelPower->setText(tr("%1 dB").arg(m_channelPowerDbAvg.asDouble(), 0, 'f', 1));
 
-        if (m_chirpChatMod->getModulatorActive()) {
+        if (m_meshtasticMod->getModulatorActive()) {
             ui->playMessage->setStyleSheet("QPushButton { background-color : green; }");
         } else {
             ui->playMessage->setStyleSheet("QPushButton { background:rgb(79,79,79); }");

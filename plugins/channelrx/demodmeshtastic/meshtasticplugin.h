@@ -47,4 +47,4 @@ private:
 	PluginAPI* m_pluginAPI;
 };
 
-#endif // INCLUDE_LoRaPLUGIN_H
+#endif // INCLUDE_MESHTASTICPLUGIN_H
