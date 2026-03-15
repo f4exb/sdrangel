@@ -579,37 +579,6 @@
     <item>
      <layout class="QHBoxLayout" name="schemeLayout">
       <item>
-       <widget class="QLabel" name="schemeLabel">
-        <property name="text">
-         <string>Scheme</string>
-        </property>
-       </widget>
-      </item>
-      <item>
-       <widget class="QComboBox" name="scheme">
-        <item>
-         <property name="text">
-          <string>LoRa</string>
-         </property>
-        </item>
-        <item>
-         <property name="text">
-          <string>ASCII</string>
-         </property>
-        </item>
-        <item>
-         <property name="text">
-          <string>TTY</string>
-         </property>
-        </item>
-        <item>
-         <property name="text">
-          <string>FT</string>
-         </property>
-        </item>
-       </widget>
-      </item>
-      <item>
        <widget class="QToolButton" name="mute">
         <property name="toolTip">
          <string>Run/Stop decoder</string>

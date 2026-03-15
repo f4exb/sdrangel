@@ -328,18 +328,6 @@ void MeshtasticDemodGUI::on_preambleChirps_valueChanged(int value)
     applySettings();
 }
 
-void MeshtasticDemodGUI::on_scheme_currentIndexChanged(int index)
-{
-    m_settings.m_codingScheme = (MeshtasticDemodSettings::CodingScheme) index;
-
-    if (m_settings.m_codingScheme != MeshtasticDemodSettings::CodingLoRa) {
-        resetLoRaStatus();
-    }
-
-    updateControlAvailabilityHints();
-    applySettings();
-}
-
 void MeshtasticDemodGUI::on_mute_toggled(bool checked)
 {
     m_settings.m_decodeActive = !checked;
@@ -1495,7 +1483,6 @@ void MeshtasticDemodGUI::applyMeshtasticProfileFromSelection()
     ui->deBitsText->setText(tr("%1").arg(m_settings.m_deBits));
     ui->preambleChirps->setValue(m_settings.m_preambleChirps);
     ui->preambleChirpsText->setText(tr("%1").arg(m_settings.m_preambleChirps));
-    ui->scheme->setCurrentIndex((int) m_settings.m_codingScheme);
     ui->header->setChecked(m_settings.m_hasHeader);
     ui->fecParity->setValue(m_settings.m_nbParityBits);
     ui->fecParityText->setText(tr("%1").arg(m_settings.m_nbParityBits));
@@ -1827,8 +1814,6 @@ MeshtasticDemodGUI::MeshtasticDemodGUI(PluginAPI* pluginAPI, DeviceUISet *device
     ui->preambleChirps->setToolTip(tr("Expected LoRa preamble chirp count. Meshtastic profiles default to 17 (sub-GHz) or 12 (2.4 GHz)."));
     ui->preambleChirpsLabel->setToolTip(tr("Expected LoRa preamble length in chirps."));
     ui->preambleChirpsText->setToolTip(tr("Current preamble chirp value."));
-    ui->scheme->setToolTip(tr("Decoder mode. Use LoRa for Meshtastic traffic."));
-    ui->schemeLabel->setToolTip(tr("Select decoding scheme."));
     ui->mute->setToolTip(tr("Disable decoder output."));
     ui->clear->setToolTip(tr("Clear decoded message log."));
     ui->eomSquelch->setToolTip(tr("End-of-message squelch threshold."));
@@ -1996,7 +1981,6 @@ void MeshtasticDemodGUI::displaySettings()
     ui->deBitsText->setText(tr("%1").arg(m_settings.m_deBits));
     ui->preambleChirps->setValue(m_settings.m_preambleChirps);
     ui->preambleChirpsText->setText(tr("%1").arg(m_settings.m_preambleChirps));
-    ui->scheme->setCurrentIndex((int) m_settings.m_codingScheme);
     ui->messageLengthText->setText(tr("%1").arg(m_settings.m_nbSymbolsMax));
     ui->messageLength->setValue(m_settings.m_nbSymbolsMax);
     ui->udpSend->setChecked(m_settings.m_sendViaUDP);
@@ -3483,7 +3467,6 @@ void MeshtasticDemodGUI::makeUIConnections()
     QObject::connect(ui->deBits, &QSlider::valueChanged, this, &MeshtasticDemodGUI::on_deBits_valueChanged);
     QObject::connect(ui->fftWindow, QOverload<int>::of(&QComboBox::currentIndexChanged), this, &MeshtasticDemodGUI::on_fftWindow_currentIndexChanged);
     QObject::connect(ui->preambleChirps, &QSlider::valueChanged, this, &MeshtasticDemodGUI::on_preambleChirps_valueChanged);
-    QObject::connect(ui->scheme, QOverload<int>::of(&QComboBox::currentIndexChanged), this, &MeshtasticDemodGUI::on_scheme_currentIndexChanged);
     QObject::connect(ui->mute, &QToolButton::toggled, this, &MeshtasticDemodGUI::on_mute_toggled);
     QObject::connect(ui->clear, &QPushButton::clicked, this, &MeshtasticDemodGUI::on_clear_clicked);
     QObject::connect(ui->eomSquelch, &QDial::valueChanged, this, &MeshtasticDemodGUI::on_eomSquelch_valueChanged);

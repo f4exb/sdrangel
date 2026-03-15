@@ -12,10 +12,7 @@ set(meshtastic_SOURCES
 	meshtasticdemodbaseband.cpp
 	meshtasticplugin.cpp
 	meshtasticdemoddecoder.cpp
-	meshtasticdemoddecodertty.cpp
-    meshtasticdemoddecoderascii.cpp
     meshtasticdemoddecoderlora.cpp
-    meshtasticdemoddecoderft.cpp
 	meshtasticdemodmsg.cpp
     meshtasticdemodwebapiadapter.cpp
 )
@@ -26,10 +23,7 @@ set(meshtastic_HEADERS
 	meshtasticdemodsink.h
 	meshtasticdemodbaseband.h
 	meshtasticdemoddecoder.h
-	meshtasticdemoddecodertty.h
-    meshtasticdemoddecoderascii.h
     meshtasticdemoddecoderlora.h
-    meshtasticdemoddecoderft.h
 	meshtasticdemodmsg.h
 	meshtasticplugin.h
     meshtasticdemodwebapiadapter.h
