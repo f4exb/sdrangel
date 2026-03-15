@@ -58,6 +58,12 @@ const int MeshtasticDemodSettings::nbBandwidths = 3*8 + 4;
 // so SF11/SF12 Meshtastic presets retain enough timing resolution.
 const int MeshtasticDemodSettings::oversampling = 4;
 
+// Static settings values (not user-configurable)
+const MeshtasticDemodSettings::CodingScheme MeshtasticDemodSettings::m_codingScheme = MeshtasticDemodSettings::CodingLoRa;
+const bool MeshtasticDemodSettings::m_autoNbSymbolsMax = false;
+const bool MeshtasticDemodSettings::m_hasHeader = true;
+const bool MeshtasticDemodSettings::m_hasCRC = true;
+
 MeshtasticDemodSettings::MeshtasticDemodSettings() :
     m_inputFrequencyOffset(0),
     m_channelMarker(0),
@@ -72,17 +78,13 @@ void MeshtasticDemodSettings::resetToDefaults()
     m_bandwidthIndex = 5;
     m_spreadFactor = 7;
     m_deBits = 0;
-    m_codingScheme = CodingLoRa;
     m_decodeActive = true;
     m_fftWindow = FFTWindow::Rectangle;
     m_eomSquelchTenths = 60;
     m_nbSymbolsMax = 255;
-    m_autoNbSymbolsMax = false;
     m_preambleChirps = 17;
     m_packetLength = 237;
     m_nbParityBits = 1;
-    m_hasCRC = true;
-    m_hasHeader = true;
     m_sendViaUDP = false;
     m_invertRamps = false;
     m_udpAddress = "127.0.0.1";
@@ -121,14 +123,11 @@ QByteArray MeshtasticDemodSettings::serialize() const
 
     s.writeString(6, m_title);
     s.writeS32(7, m_deBits);
-    s.writeS32(8, m_codingScheme);
     s.writeBool(9, m_decodeActive);
     s.writeS32(10, m_eomSquelchTenths);
     s.writeU32(11, m_nbSymbolsMax);
     s.writeS32(12, m_packetLength);
     s.writeS32(13, m_nbParityBits);
-    s.writeBool(14, m_hasCRC);
-    s.writeBool(15, m_hasHeader);
     s.writeU32(17, m_preambleChirps);
     s.writeS32(18, (int) m_fftWindow);
     s.writeBool(19, m_invertRamps);
@@ -192,15 +191,11 @@ bool MeshtasticDemodSettings::deserialize(const QByteArray& data)
 
         d.readString(6, &m_title, "Meshtastic Demodulator");
         d.readS32(7, &m_deBits, 0);
-        d.readS32(8, &tmp);
-        m_codingScheme = (CodingScheme) tmp;
         d.readBool(9, &m_decodeActive, true);
         d.readS32(10, &m_eomSquelchTenths, 60);
         d.readU32(11, &m_nbSymbolsMax, 255);
         d.readS32(12, &m_packetLength, 237);
         d.readS32(13, &m_nbParityBits, 1);
-        d.readBool(14, &m_hasCRC, true);
-        d.readBool(15, &m_hasHeader, true);
         d.readU32(17, &m_preambleChirps, 17);
         d.readS32(18, &tmp, (int) FFTWindow::Rectangle);
         m_fftWindow = (FFTWindow::Function) tmp;
@@ -266,8 +261,6 @@ void MeshtasticDemodSettings::applySettings(const QStringList& settingsKeys, con
         m_deBits = settings.m_deBits;
     if (settingsKeys.contains("fftWindow"))
         m_fftWindow = settings.m_fftWindow;
-    if (settingsKeys.contains("codingScheme"))
-        m_codingScheme = settings.m_codingScheme;
     if (settingsKeys.contains("decodeActive"))
         m_decodeActive = settings.m_decodeActive;
     if (settingsKeys.contains("eomSquelchTenths"))
@@ -280,10 +273,6 @@ void MeshtasticDemodSettings::applySettings(const QStringList& settingsKeys, con
         m_nbParityBits = settings.m_nbParityBits;
     if (settingsKeys.contains("packetLength"))
         m_packetLength = settings.m_packetLength;
-    if (settingsKeys.contains("hasCRC"))
-        m_hasCRC = settings.m_hasCRC;
-    if (settingsKeys.contains("hasHeader"))
-        m_hasHeader = settings.m_hasHeader;
     if (settingsKeys.contains("sendViaUDP"))
         m_sendViaUDP = settings.m_sendViaUDP;
     if (settingsKeys.contains("invertRamps"))
@@ -330,8 +319,6 @@ QString MeshtasticDemodSettings::getDebugString(const QStringList& settingsKeys,
         debug += QString("DEBits: %1 ").arg(m_deBits);
     if (force || settingsKeys.contains("fftWindow"))
         debug += QString("FFTWindow: %1 ").arg((int) m_fftWindow);
-    if (force || settingsKeys.contains("codingScheme"))
-        debug += QString("CodingScheme: %1 ").arg((int) m_codingScheme);
     if (force || settingsKeys.contains("decodeActive"))
         debug += QString("DecodeActive: %1 ").arg(m_decodeActive);
     if (force || settingsKeys.contains("eomSquelchTenths"))
@@ -344,10 +331,6 @@ QString MeshtasticDemodSettings::getDebugString(const QStringList& settingsKeys,
         debug += QString("NbParityBits: %1 ").arg(m_nbParityBits);
     if (force || settingsKeys.contains("packetLength"))
         debug += QString("PacketLength: %1 ").arg(m_packetLength);
-    if (force || settingsKeys.contains("hasCRC"))
-        debug += QString("HasCRC: %1 ").arg(m_hasCRC);
-    if (force || settingsKeys.contains("hasHeader"))
-        debug += QString("HasHeader: %1 ").arg(m_hasHeader);
     if (force || settingsKeys.contains("sendViaUDP"))
         debug += QString("SendViaUDP: %1 ").arg(m_sendViaUDP);
     if (force || settingsKeys.contains("invertRamps"))

@@ -24,7 +24,7 @@
 #include "meshtasticdemodmsg.h"
 
 MeshtasticDemodDecoder::MeshtasticDemodDecoder() :
-    m_codingScheme(MeshtasticDemodSettings::CodingTTY),
+    m_codingScheme(MeshtasticDemodSettings::CodingLoRa),
     m_spreadFactor(0U),
     m_deBits(0U),
     m_nbSymbolBits(5),

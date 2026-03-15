@@ -520,65 +520,44 @@ void MeshtasticDemodSink::processSample(const Complex& ci)
             double magsq, magsqTotal;
             unsigned short symbol;
 
-            if (m_settings.m_codingScheme == MeshtasticDemodSettings::CodingFT)
+            int imax;
+
+            if (m_settings.m_deBits > 0)
             {
-                std::vector<float> magnitudes;
-                symbol = evalSymbol(
-                    extractMagnitudes(
-                        magnitudes,
-                        m_fft->out(),
-                        m_fftInterpolation,
-                        m_fftLength,
-                        magsq,
-                        magsqTotal,
-                        m_spectrumBuffer,
-                        m_fftInterpolation
-                    )
-                ) % m_nbSymbolsEff;
-                m_decodeMsg->pushBackSymbol(symbol);
-                m_decodeMsg->pushBackMagnitudes(magnitudes);
+                double magSqNoise;
+                imax = argmaxSpreaded(
+                    m_fft->out(),
+                    m_fftInterpolation,
+                    m_fftLength,
+                    magsq,
+                    magSqNoise,
+                    magsqTotal,
+                    m_spectrumBuffer,
+                    m_fftInterpolation
+                );
             }
             else
             {
-                int imax;
-
-                if (m_settings.m_deBits > 0)
-                {
-                    double magSqNoise;
-                    imax = argmaxSpreaded(
-                        m_fft->out(),
-                        m_fftInterpolation,
-                        m_fftLength,
-                        magsq,
-                        magSqNoise,
-                        magsqTotal,
-                        m_spectrumBuffer,
-                        m_fftInterpolation
-                    );
-                }
-                else
-                {
-                    imax = argmax(
-                        m_fft->out(),
-                        m_fftInterpolation,
-                        m_fftLength,
-                        magsq,
-                        magsqTotal,
-                        m_spectrumBuffer,
-                        m_fftInterpolation
-                    );
-                }
-
-                if (m_settings.m_invertRamps) {
-                    imax = (m_nbSymbols * m_fftInterpolation - imax) % (m_nbSymbols * m_fftInterpolation);
-                }
-
-                const bool headerSymbol = (m_settings.m_codingScheme == MeshtasticDemodSettings::CodingLoRa)
-                    && m_settings.m_hasHeader
-                    && (m_chirpCount < 8U);
-                symbol = evalSymbol(imax, headerSymbol) % m_nbSymbolsEff;
-                m_decodeMsg->pushBackSymbol(symbol);
+                imax = argmax(
+                    m_fft->out(),
+                    m_fftInterpolation,
+                    m_fftLength,
+                    magsq,
+                    magsqTotal,
+                    m_spectrumBuffer,
+                    m_fftInterpolation
+                );
             }
+
+            if (m_settings.m_invertRamps) {
+                imax = (m_nbSymbols * m_fftInterpolation - imax) % (m_nbSymbols * m_fftInterpolation);
+            }
+
+            const bool headerSymbol = (m_settings.m_codingScheme == MeshtasticDemodSettings::CodingLoRa)
+                && m_settings.m_hasHeader
+                && (m_chirpCount < 8U);
+            symbol = evalSymbol(imax, headerSymbol) % m_nbSymbolsEff;
+            m_decodeMsg->pushBackSymbol(symbol);
 
             if (m_spectrumSink) {
                 m_spectrumSink->feed(m_spectrumBuffer, m_nbSymbols);

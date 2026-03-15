@@ -85,11 +85,6 @@ private slots:
 	void on_clear_clicked(bool checked);
     void on_eomSquelch_valueChanged(int value);
     void on_messageLength_valueChanged(int value);
-	void on_messageLengthAuto_stateChanged(int state);
-	void on_header_stateChanged(int state);
-	void on_fecParity_valueChanged(int value);
-	void on_crc_stateChanged(int state);
-	void on_packetLength_valueChanged(int value);
 	void on_udpSend_stateChanged(int state);
 	void on_udpAddress_editingFinished();
 	void on_udpPort_editingFinished();
@@ -197,7 +192,6 @@ private:
     void setBandwidths();
     void showLoRaMessage(const Message& message); //!< For LoRa coding scheme
     void showTextMessage(const Message& message); //!< For TTY and ASCII
-    void showFTMessage(const Message& message);   //!< For FT coding scheme
     void setupPipelineViews();
     PipelineView& ensurePipelineView(int pipelineId, const QString& pipelineName);
     void clearPipelineViews();
@@ -215,7 +209,6 @@ private:
 	void displayBytes(const QByteArray& bytes);
 	void displayStatus(const QString& status);
     void displayLoRaStatus(int headerParityStatus, bool headerCRCStatus, int payloadParityStatus, bool payloadCRCStatus);
-    void displayFTStatus(int payloadParityStatus, bool payloadCRCStatus);
 	QString getParityStr(int parityStatus);
     void resetLoRaStatus();
 	bool handleMessage(const Message& message);

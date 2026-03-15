@@ -213,18 +213,8 @@ bool MeshtasticDemodGUI::handleMessage(const Message& message)
     }
     else if (MeshtasticDemodMsg::MsgReportDecodeString::match(message))
     {
-        if ((m_settings.m_codingScheme == MeshtasticDemodSettings::CodingASCII)
-        || (m_settings.m_codingScheme == MeshtasticDemodSettings::CodingTTY)
-        || (m_settings.m_codingScheme == MeshtasticDemodSettings::CodingLoRa)) {
+        if ((m_settings.m_codingScheme == MeshtasticDemodSettings::CodingLoRa)) {
             showTextMessage(message);
-        }
-
-        return true;
-    }
-    else if (MeshtasticDemodMsg::MsgReportDecodeFT::match(message))
-    {
-        if (m_settings.m_codingScheme == MeshtasticDemodSettings::CodingFT) {
-            showFTMessage(message);
         }
 
         return true;
@@ -352,52 +342,6 @@ void MeshtasticDemodGUI::on_messageLength_valueChanged(int value)
 {
     m_settings.m_nbSymbolsMax = value;
     ui->messageLengthText->setText(tr("%1").arg(m_settings.m_nbSymbolsMax));
-    applySettings();
-}
-
-void MeshtasticDemodGUI::on_messageLengthAuto_stateChanged(int state)
-{
-    m_settings.m_autoNbSymbolsMax = (state == Qt::Checked);
-    applySettings();
-}
-
-void MeshtasticDemodGUI::on_header_stateChanged(int state)
-{
-    m_settings.m_hasHeader = (state == Qt::Checked);
-
-    if (!m_settings.m_hasHeader) // put back values from settings
-    {
-        ui->fecParity->blockSignals(true);
-        ui->crc->blockSignals(true);
-        ui->fecParity->setValue(m_settings.m_nbParityBits);
-        ui->fecParityText->setText(tr("%1").arg(m_settings.m_nbParityBits));
-        ui->crc->setChecked(m_settings.m_hasCRC);
-        ui->fecParity->blockSignals(false);
-        ui->crc->blockSignals(false);
-    }
-
-    updateControlAvailabilityHints();
-
-    applySettings();
-}
-
-void MeshtasticDemodGUI::on_fecParity_valueChanged(int value)
-{
-    m_settings.m_nbParityBits = value;
-    ui->fecParityText->setText(tr("%1").arg(m_settings.m_nbParityBits));
-    applySettings();
-}
-
-void MeshtasticDemodGUI::on_crc_stateChanged(int state)
-{
-    m_settings.m_hasCRC = (state == Qt::Checked);
-    applySettings();
-}
-
-void MeshtasticDemodGUI::on_packetLength_valueChanged(int value)
-{
-    m_settings.m_packetLength = value;
-    ui->packetLengthText->setText(tr("%1").arg(m_settings.m_packetLength));
     applySettings();
 }
 
@@ -1356,12 +1300,6 @@ void MeshtasticDemodGUI::applyMeshtasticProfileFromSelection()
         selectionStateChanged = true;
     }
 
-    if (m_settings.m_codingScheme != MeshtasticDemodSettings::CodingLoRa)
-    {
-        m_settings.m_codingScheme = MeshtasticDemodSettings::CodingLoRa;
-        changed = true;
-    }
-
     const int bwIndex = findBandwidthIndex(meshRadio.bandwidthHz);
     if (bwIndex >= 0 && bwIndex != m_settings.m_bandwidthIndex)
     {
@@ -1384,18 +1322,6 @@ void MeshtasticDemodGUI::applyMeshtasticProfileFromSelection()
     if (meshRadio.parityBits > 0 && meshRadio.parityBits != m_settings.m_nbParityBits)
     {
         m_settings.m_nbParityBits = meshRadio.parityBits;
-        changed = true;
-    }
-
-    if (!m_settings.m_hasHeader)
-    {
-        m_settings.m_hasHeader = true;
-        changed = true;
-    }
-
-    if (!m_settings.m_hasCRC)
-    {
-        m_settings.m_hasCRC = true;
         changed = true;
     }
 
@@ -2124,25 +2050,6 @@ void MeshtasticDemodGUI::resetLoRaStatus()
     ui->payloadCRCStatus->setStyleSheet("QLabel { background:rgb(79,79,79); }");
     ui->nbSymbolsText->setText("---");
     ui->nbCodewordsText->setText("---");
-}
-
-void MeshtasticDemodGUI::displayFTStatus(int payloadParityStatus, bool payloadCRCStatus)
-{
-    if (payloadParityStatus == (int) MeshtasticDemodSettings::ParityOK) {
-        ui->payloadFECStatus->setStyleSheet("QLabel { background-color : green; }");
-    } else if (payloadParityStatus == (int) MeshtasticDemodSettings::ParityError) {
-        ui->payloadFECStatus->setStyleSheet("QLabel { background-color : red; }");
-    } else if (payloadParityStatus == (int) MeshtasticDemodSettings::ParityCorrected) {
-        ui->payloadFECStatus->setStyleSheet("QLabel { background-color : blue; }");
-    } else {
-        ui->payloadFECStatus->setStyleSheet("QLabel { background:rgb(79,79,79); }");
-    }
-
-    if (payloadCRCStatus) {
-        ui->payloadCRCStatus->setStyleSheet("QLabel { background-color : green; }");
-    } else {
-        ui->payloadCRCStatus->setStyleSheet("QLabel { background-color : red; }");
-    }
 }
 
 void MeshtasticDemodGUI::setBandwidths()
@@ -3275,31 +3182,6 @@ void MeshtasticDemodGUI::showTextMessage(const Message& message)
     }
 }
 
-void MeshtasticDemodGUI::showFTMessage(const Message& message)
-{
-    const MeshtasticDemodMsg::MsgReportDecodeFT& msg = (MeshtasticDemodMsg::MsgReportDecodeFT&) message;
-    const int pipelineId = msg.getPipelineId();
-    const QString pipelineName = msg.getPipelineName().trimmed().isEmpty()
-        ? (pipelineId < 0 ? QString("Main") : QString("P%1").arg(pipelineId))
-        : msg.getPipelineName();
-
-    QDateTime dt = QDateTime::currentDateTime();
-    QString dateStr = dt.toString("HH:mm:ss");
-    ui->sText->setText(tr("%1").arg(msg.getSingalDb(), 0, 'f', 1));
-    ui->snrText->setText(tr("%1").arg(msg.getSingalDb() - msg.getNoiseDb(), 0, 'f', 1));
-
-    QString status = tr("%1 S:%2 SN:%3 FEC:%4 CRC:%5")
-        .arg(dateStr)
-        .arg(msg.getSingalDb(), 0, 'f', 1)
-        .arg(msg.getSingalDb() - msg.getNoiseDb(), 0, 'f', 1)
-        .arg(getParityStr(msg.getPayloadParityStatus()))
-        .arg(msg.getPayloadCRCStatus() ? "ok" : "err");
-
-    appendPipelineStatusLine(pipelineId, pipelineName, status);
-    appendPipelineLogLine(pipelineId, pipelineName, QString("TXT|%1").arg(msg.getMessage())); // We do not show constituents of the message (call1, ...)
-    displayFTStatus(msg.getPayloadParityStatus(), msg.getPayloadCRCStatus());
-}
-
 void MeshtasticDemodGUI::displayText(const QString& text)
 {
     if (m_pipelineTabs)
@@ -3471,20 +3353,6 @@ void MeshtasticDemodGUI::makeUIConnections()
     QObject::connect(ui->clear, &QPushButton::clicked, this, &MeshtasticDemodGUI::on_clear_clicked);
     QObject::connect(ui->eomSquelch, &QDial::valueChanged, this, &MeshtasticDemodGUI::on_eomSquelch_valueChanged);
     QObject::connect(ui->messageLength, &QDial::valueChanged, this, &MeshtasticDemodGUI::on_messageLength_valueChanged);
-#if QT_VERSION >= QT_VERSION_CHECK(6, 9, 0)
-    QObject::connect(ui->messageLengthAuto, &QCheckBox::checkStateChanged, this, [this](Qt::CheckState state){ on_messageLengthAuto_stateChanged(static_cast<int>(state)); });
-    QObject::connect(ui->header, &QCheckBox::checkStateChanged, this, [this](Qt::CheckState state){ on_header_stateChanged(static_cast<int>(state)); });
-#else
-    QObject::connect(ui->messageLengthAuto, &QCheckBox::stateChanged, this, &MeshtasticDemodGUI::on_messageLengthAuto_stateChanged);
-    QObject::connect(ui->header, &QCheckBox::stateChanged, this, &MeshtasticDemodGUI::on_header_stateChanged);
-#endif
-    QObject::connect(ui->fecParity, &QDial::valueChanged, this, &MeshtasticDemodGUI::on_fecParity_valueChanged);
-#if QT_VERSION >= QT_VERSION_CHECK(6, 9, 0)
-    QObject::connect(ui->crc, &QCheckBox::checkStateChanged, this, [this](Qt::CheckState state){ on_crc_stateChanged(static_cast<int>(state)); });
-#else
-    QObject::connect(ui->crc, &QCheckBox::stateChanged, this, &MeshtasticDemodGUI::on_crc_stateChanged);
-#endif
-    QObject::connect(ui->packetLength, &QDial::valueChanged, this, &MeshtasticDemodGUI::on_packetLength_valueChanged);
 #if QT_VERSION >= QT_VERSION_CHECK(6, 9, 0)
     QObject::connect(ui->udpSend, &QCheckBox::checkStateChanged, this, [this](Qt::CheckState state){ on_udpSend_stateChanged(static_cast<int>(state)); });
 #else

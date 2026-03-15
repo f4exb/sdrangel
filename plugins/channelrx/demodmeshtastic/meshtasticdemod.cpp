@@ -179,9 +179,6 @@ MeshtasticDemodSettings MeshtasticDemod::makePipelineSettingsFromMeshRadio(
 ) const
 {
     MeshtasticDemodSettings out = baseSettings;
-    out.m_codingScheme = MeshtasticDemodSettings::CodingLoRa;
-    out.m_hasHeader = true;
-    out.m_hasCRC = true;
     out.m_spreadFactor = meshRadio.spreadFactor;
     out.m_deBits = meshRadio.deBits;
     out.m_nbParityBits = meshRadio.parityBits;
@@ -829,16 +826,6 @@ void MeshtasticDemod::applySettings(const MeshtasticDemodSettings& settings, boo
         reverseAPIKeys.append("codingScheme");
     }
 
-    if ((settings.m_hasHeader != m_settings.m_hasHeader) || force)
-    {
-        reverseAPIKeys.append("hasHeader");
-    }
-
-    if ((settings.m_hasCRC != m_settings.m_hasCRC) || force)
-    {
-        reverseAPIKeys.append("hasCRC");
-    }
-
     if ((settings.m_nbParityBits != m_settings.m_nbParityBits) || force)
     {
         reverseAPIKeys.append("nbParityBits");
@@ -869,9 +856,6 @@ void MeshtasticDemod::applySettings(const MeshtasticDemodSettings& settings, boo
     }
     if ((settings.m_sendViaUDP != m_settings.m_sendViaUDP) || force) {
         reverseAPIKeys.append("sendViaUDP");
-    }
-    if ((settings.m_autoNbSymbolsMax != m_settings.m_autoNbSymbolsMax) || force) {
-        reverseAPIKeys.append("autoNbSymbolsMax");
     }
     if ((settings.m_invertRamps != m_settings.m_invertRamps) || force) {
         reverseAPIKeys.append("invertRamps");
@@ -997,9 +981,6 @@ void MeshtasticDemod::webapiUpdateChannelSettings(
     if (channelSettingsKeys.contains("fftWindow")) {
         settings.m_fftWindow = (FFTWindow::Function) response.getChirpChatDemodSettings()->getFftWindow();
     }
-    if (channelSettingsKeys.contains("codingScheme")) {
-        settings.m_codingScheme = (MeshtasticDemodSettings::CodingScheme) response.getChirpChatDemodSettings()->getCodingScheme();
-    }
     if (channelSettingsKeys.contains("decodeActive")) {
         settings.m_decodeActive = response.getChirpChatDemodSettings()->getDecodeActive() != 0;
     }
@@ -1009,9 +990,6 @@ void MeshtasticDemod::webapiUpdateChannelSettings(
     if (channelSettingsKeys.contains("nbSymbolsMax")) {
         settings.m_nbSymbolsMax = response.getChirpChatDemodSettings()->getNbSymbolsMax();
     }
-    if (channelSettingsKeys.contains("autoNbSymbolsMax")) {
-        settings.m_autoNbSymbolsMax = response.getChirpChatDemodSettings()->getAutoNbSymbolsMax() != 0;
-    }
     if (channelSettingsKeys.contains("preambleChirps")) {
         settings.m_preambleChirps = response.getChirpChatDemodSettings()->getPreambleChirps();
     }
@@ -1020,12 +998,6 @@ void MeshtasticDemod::webapiUpdateChannelSettings(
     }
     if (channelSettingsKeys.contains("packetLength")) {
         settings.m_packetLength = response.getChirpChatDemodSettings()->getPacketLength();
-    }
-    if (channelSettingsKeys.contains("hasCRC")) {
-        settings.m_hasCRC = response.getChirpChatDemodSettings()->getHasCrc() != 0;
-    }
-    if (channelSettingsKeys.contains("hasHeader")) {
-        settings.m_hasHeader = response.getChirpChatDemodSettings()->getHasHeader() != 0;
     }
     if (channelSettingsKeys.contains("sendViaUDP")) {
         settings.m_sendViaUDP = response.getChirpChatDemodSettings()->getSendViaUdp() != 0;
