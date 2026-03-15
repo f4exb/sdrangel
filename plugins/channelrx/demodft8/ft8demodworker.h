@@ -24,7 +24,10 @@
 #include <QSet>
 
 #include "ft8.h"
+#include "ft4.h"
 #include "packing.h"
+
+#include "ft8demodsettings.h"
 
 class QDateTime;
 class MessageQueue;
@@ -44,6 +47,7 @@ public:
     void setEnablePskReporter(bool enablePskReporter) { m_enablePskReporter = enablePskReporter; }
     void setNbDecoderThreads(int nbDecoderThreads) { m_nbDecoderThreads = nbDecoderThreads; }
     void setDecoderTimeBudget(float decoderTimeBudget) { m_decoderTimeBudget = decoderTimeBudget; }
+    void setDecoderMode(FT8DemodSettings::DecoderMode decoderMode);
     void setUseOSD(bool useOSD) { m_useOSD = useOSD; }
     void setOSDDepth(int osdDepth) { m_osdDepth = osdDepth; }
     void setOSDLDPCThreshold(int osdLDPCThreshold) { m_osdLDPCThreshold = osdLDPCThreshold; }
@@ -90,6 +94,9 @@ private:
         const QSet<QString> *m_validCallsigns;
     };
 
+    void processFT8(int16_t *buffer, int frameSampleCount, FT8Callback& ft8Callback, const int *hints);
+    void processFT4(int16_t *buffer, int frameSampleCount, FT8Callback& ft8Callback, const int *hints);
+
     QString m_samplesPath;
     QString m_logsPath;
     bool m_recordSamples;
@@ -97,15 +104,18 @@ private:
     bool m_enablePskReporter;
     int m_nbDecoderThreads;
     float m_decoderTimeBudget;
+    FT8DemodSettings::DecoderMode m_decoderMode;
     bool m_useOSD;
     int m_osdDepth;
     int m_osdLDPCThreshold;
     bool m_verifyOSD;
     int m_lowFreq;
     int m_highFreq;
+    bool m_unsupportedModeWarningPending;
     bool m_invalidSequence;
     qint64 m_baseFrequency;
     FT8::FT8Decoder m_ft8Decoder;
+    FT8::FT4Decoder m_ft4Decoder;
     FT8::Packing m_packing;
     MessageQueue *m_guiReportingMessageQueue;
     MessageQueue *m_pskReportingMessageQueue;

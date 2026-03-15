@@ -18,6 +18,7 @@
 
 #include <QDebug>
 #include <QThread>
+#include <algorithm>
 
 #include "dsp/dspcommands.h"
 #include "dsp/spectrumvis.h"
@@ -33,6 +34,7 @@ FT8DemodBaseband::FT8DemodBaseband() :
     m_channelizer(&m_sink),
     m_messageQueueToGUI(nullptr),
     m_spectrumVis(nullptr),
+    m_lastProcessPeriodIndex(-1),
     m_deviceCenterFrequency(0)
 {
     qDebug("FT8DemodBaseband::FT8DemodBaseband");
@@ -103,6 +105,7 @@ void FT8DemodBaseband::reset()
     QMutexLocker mutexLocker(&m_mutex);
     m_sampleFifo.reset();
     m_channelSampleRate = 0;
+    m_lastProcessPeriodIndex = -1;
 }
 
 void FT8DemodBaseband::setMessageQueueToGUI(MessageQueue *messageQueue)
@@ -289,6 +292,14 @@ void FT8DemodBaseband::applySettings(const QStringList& settingsKeys, const FT8D
         m_ft8DemodWorker->setVerifyOSD(settings.m_verifyOSD);
     }
 
+    if ((settingsKeys.contains("decoderMode") && (settings.m_decoderMode != m_settings.m_decoderMode)) || force)
+    {
+        m_ft8DemodWorker->setDecoderMode(settings.m_decoderMode);
+        m_pskReporterWorker->setTxMode(FT8DemodSettings::getDecoderModeString(settings.m_decoderMode));
+        m_ft8DemodWorker->invalidateSequence();
+        m_lastProcessPeriodIndex = -1;
+    }
+
     m_sink.applySettings(settingsKeys, settings, force);
 
     if (force) {
@@ -313,20 +324,19 @@ void FT8DemodBaseband::setBasebandSampleRate(int sampleRate)
 void FT8DemodBaseband::tick()
 {
     QDateTime nowUTC = QDateTime::currentDateTimeUtc();
+    const int periodMs = FT8DemodSettings::getDecoderFrameDurationMs(m_settings.m_decoderMode);
+    const int activeWindowMs = std::max(periodMs - 1000, 1);
+    const qint64 nowMs = nowUTC.toMSecsSinceEpoch();
+    const qint64 periodIndex = nowMs / periodMs;
+    const int periodOffsetMs = nowMs % periodMs;
 
-    if (nowUTC.time().second() % 15 < 14)
+    if (periodOffsetMs < activeWindowMs && m_lastProcessPeriodIndex != periodIndex)
     {
-        if (m_tickCount++ == 0)
-        {
-            QDateTime periodTs = nowUTC.addSecs(-15);
-            // qDebug("FT8DemodBaseband::tick: %s", qPrintable(nowUTC.toString("yyyy-MM-dd HH:mm:ss")));
-            m_ft8Buffer.getCurrentBuffer(m_ft8WorkerBuffer);
-            emit bufferReady(m_ft8WorkerBuffer, periodTs);
-            periodTs = nowUTC;
-        }
-    }
-    else
-    {
-        m_tickCount = 0;
+        const qint64 previousPeriodStartMs = (periodIndex - 1) * periodMs;
+        QDateTime periodTs = QDateTime::fromMSecsSinceEpoch(previousPeriodStartMs, Qt::UTC);
+        const int frameSamples = FT8DemodSettings::getDecoderFrameSamples(m_settings.m_decoderMode);
+        m_ft8Buffer.getCurrentBuffer(m_ft8WorkerBuffer, frameSamples);
+        emit bufferReady(m_ft8WorkerBuffer, periodTs);
+        m_lastProcessPeriodIndex = periodIndex;
     }
 }

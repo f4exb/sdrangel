@@ -30,13 +30,12 @@ public:
     static const int gen_sys[174][91];
     static int check_crc(const int a91[91]);
     static void ldpc_encode(int plain[91], int codeword[174]);
-    static float osd_score(int xplain[91], float ll174[174]);
+    static float osd_score(int xplain[91], const float ll174[174]);
     static int osd_check(const int plain[91]);
     static void matmul(int a[91][91], int b[91], int c[91]);
-    static int osd_decode(float codeword[174], int depth, int out[91], int *out_depth);
+    static int osd_decode(const float codeword[174], int depth, int out[91], int *out_depth);
 };
 
 } // namespace FT8
 
 #endif // osd_h
-

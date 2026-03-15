@@ -76,7 +76,7 @@ int LDPC::ldpc_check(int codeword[])
 // iters is how hard to try.
 // ok is the number of parity checks that worked out,
 // ok == 83 means success.
-void LDPC::ldpc_decode(float llcodeword[], int iters, int plain[], int *ok)
+void LDPC::ldpc_decode(const float llcodeword[], int iters, int plain[], int *ok)
 {
     REAL m[83][174];
     REAL e[83][174];

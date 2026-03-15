@@ -27,6 +27,47 @@
      </property>
      <layout class="QVBoxLayout" name="verticalLayout_3">
       <item>
+         <layout class="QHBoxLayout" name="modeGroup">
+          <item>
+           <widget class="QLabel" name="decoderModeLabel">
+            <property name="text">
+             <string>Mode</string>
+            </property>
+           </widget>
+          </item>
+          <item>
+           <widget class="QComboBox" name="decoderMode">
+            <property name="toolTip">
+             <string>Decoder mode. FT4 timing and reporting are wired, decoding support is pending.</string>
+            </property>
+            <item>
+             <property name="text">
+              <string>FT8</string>
+             </property>
+            </item>
+            <item>
+             <property name="text">
+              <string>FT4</string>
+             </property>
+            </item>
+           </widget>
+          </item>
+          <item>
+           <spacer name="horizontalSpacer_4">
+            <property name="orientation">
+             <enum>Qt::Horizontal</enum>
+            </property>
+            <property name="sizeHint" stdset="0">
+             <size>
+              <width>40</width>
+              <height>20</height>
+             </size>
+            </property>
+           </spacer>
+          </item>
+         </layout>
+        </item>
+        <item>
        <layout class="QHBoxLayout" name="threadsGroup">
         <item>
          <widget class="QLabel" name="decoderNbThreadsLabel">

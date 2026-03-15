@@ -1,6 +1,6 @@
 ///////////////////////////////////////////////////////////////////////////////////
 // Copyright (C) 2023 Daniele Forsi <iu5hkx@gmail.com>                           //
-// Copyright (C) 2023 Edouard Griffiths, F4EXB <f4exb06@gmail.com>               //
+// Copyright (C) 2026 Edouard Griffiths, F4EXB <f4exb06@gmail.com>               //
 //                                                                               //
 // This program is free software; you can redistribute it and/or modify          //
 // it under the terms of the GNU General Public License as published by          //
@@ -18,6 +18,11 @@
 
 #include <iostream>
 #include <fstream>
+#include <map>
+#include <string>
+#include <vector>
+#include <cstdint>
+#include <cstdio>
 
 #include "mainbench.h"
 #include "dsp/wavfilerecord.h"
@@ -25,18 +30,18 @@
 #include <QMutex>
 
 #ifndef HAS_FT8
-void MainBench::testFT8(const QString& wavFile, const QString& argsStr)
+void MainBench::testFT4(const QString& wavFile, const QString& argsStr)
 {
     (void) wavFile;
     (void) argsStr;
-    qWarning("MainBench::testFT8: this version has no FT8 support");
+    qWarning("MainBench::testFT4: this version has no FT8/FT4 support");
 }
 #else
 
-#include "ft8/ft8.h"
+#include "ft8/ft4.h"
 #include "ft8/packing.h"
 
-class TestFT8Callback : public FT8::CallbackInterface
+class TestFT4Callback : public FT8::CallbackInterface
 {
 public:
     virtual int hcb(
@@ -59,7 +64,7 @@ private:
 };
 
 
-int TestFT8Callback::hcb(
+int TestFT4Callback::hcb(
     int *a91,
     float hz0,
     float off,
@@ -88,7 +93,7 @@ int TestFT8Callback::hcb(
 
     cycle_mu.unlock();
 
-    qDebug("TestFT8Callback::hcb: %3s %d %3d %3d %5.2f %6.1f %s [%s:%s:%s] (%s)",
+    qDebug("TestFT4Callback::hcb: %3s %d %3d %3d %5.2f %6.1f %s [%s:%s:%s] (%s)",
         type.c_str(),
         pass,
         (int)snr,
@@ -106,30 +111,22 @@ int TestFT8Callback::hcb(
     return 2; // 2 => new decode, do subtract.
 }
 
-QString TestFT8Callback::get_name()
+QString TestFT4Callback::get_name()
 {
     return "test";
 }
 
-// JTDX decodes (16):
-// 091630  -2  1.1  675 ~ W5SUM G8OO -18             England
-// 091630 -10  1.1 2277 ~ CQ DL1SVA JO64             Germany
-// 091630 -13  1.1 2607 ~ OK1HEH OH8NW 73            Finland
-// 091630  -9  0.4 1502 ~ HA3PT SQ8AA -18            Poland
-// 091630  -1  1.4 2044 ~ N9GQA DG9NAY JN58          Germany
-// 091630  -3  0.9  888 ~ CQ S51TA JN75              Slovenia
-// 091630  -5  1.2 1193 ~ LY3PW DF2FE R-13           Germany
-// 091630  -5  1.4 1776 ~ UN6T EA1FQ IN53            Spain
-// 091630 -12  1.1  763 ~ CQ OZ1BJF JO55             Denmark
-// 091630  -1  1.0 1120 ~ CQ ON7VG JO21              Belgium
-// 091630 -21  1.2 2526 ~ CQ LA1XJA JO49            *Norway
-// 091630 -13  1.1 1240 ~ CQ F4BAL JO10              France
-// 091630 -14  1.0 1893 ~ CQ DF5SF JN39              Germany
-// 091630  -3  1.1  533 ~ JA2KFQ EI4KF -17           Ireland
-// 091630 -14  2.6  905 ~ CQ YO7LCB KN15             Romania <= missed this one
-// 091630 -14  1.8  925 ~ CQ DL7CO JO42              Germany
+// The sdrbench/samples/ft8/20260304_180052.wav file should contain the following 7 messages
+// according to JTDX 2.2.159 decode:
+// 180052 -10  0.2  728 : CQ YU7ZZ KN05              Serbia
+// 180052  -5 -0.0  871 : CQ R3YBG KO73              EU Russia
+// 180052 -13 -0.2 1357 : AO5SQ EA3HKA JN11          Spain
+// 180052 -11  0.0 1508 : CQ PA8DC JO21              Netherlands
+// 180052  -5  0.3 1922 : II3WOG GI0WHI IO74         N. Ireland
+// 180052   0  0.2 1952 : W4WWQ 9A6T -11             Croatia
+// 180052 -16 -0.0 2404 : CQ LA1PHA JP76             Norway
 
-void MainBench::testFT8(const QString& wavFile, const QString& argsStr)
+void MainBench::testFT4(const QString& wavFile, const QString& argsStr)
 {
     int nthreads = 8;    // number of threads (default)
     double budget = 2.5; // compute for this many seconds per cycle (default)
@@ -161,9 +158,9 @@ void MainBench::testFT8(const QString& wavFile, const QString& argsStr)
         }
     }
 
-    qDebug("MainBench::testFT8: start nthreads: %d budget: %fs", nthreads, budget);
+    qDebug("MainBench::testFT4: start nthreads: %d budget: %fs", nthreads, budget);
     int hints[2] = { 2, 0 }; // CQ
-    TestFT8Callback testft8Callback;
+    TestFT4Callback testft4Callback;
 
     std::ifstream wfile;
 
@@ -178,31 +175,31 @@ void MainBench::testFT8(const QString& wavFile, const QString& argsStr)
 
     if (!headerOK)
     {
-        qDebug("MainBench::testFT8: test file is not a wave file");
+        qDebug("MainBench::testFT4: test file is not a wave file");
         return;
     }
 
     if (header.m_sampleRate != 12000)
     {
-        qDebug("MainBench::testFT8: wave file sample rate is not 12000 S/s");
+        qDebug("MainBench::testFT4: wave file sample rate is not 12000 S/s");
         return;
     }
 
     if (header.m_bitsPerSample != 16)
     {
-        qDebug("MainBench::testFT8: sample size is not 16 bits");
+        qDebug("MainBench::testFT4: sample size is not 16 bits");
         return;
     }
 
     if (header.m_audioFormat != 1)
     {
-        qDebug("MainBench::testFT8: wav file format is not PCM");
+        qDebug("MainBench::testFT4: wav file format is not PCM");
         return;
     }
 
-    if (header.m_dataHeader.m_size != 360000)
+    if (header.m_dataHeader.m_size != 180000)
     {
-        qDebug("MainBench::testFT8: wave file size is not 15s at 12000 S/s");
+        qDebug("MainBench::testFT4: wave file size is not 7.5s at 12000 S/s");
         return;
     }
 
@@ -224,9 +221,12 @@ void MainBench::testFT8(const QString& wavFile, const QString& argsStr)
 
     wfile.close();
 
-    FT8::FT8Decoder decoder;
+    FT8::FT4Decoder decoder;
     decoder.getParams().nthreads = nthreads;
-    decoder.getParams().use_osd = 0;
+    decoder.getParams().use_osd = 1;
+    decoder.getParams().osd_depth = 3; // OSD candidates must be in top 3 to be considered
+    decoder.getParams().osd_ldpc_thresh = 75;  // Require at least 75/83 correct LDPC bits before OSD
+    decoder.getParams().subtract_edge_symbols = 0; // Experimental: model pre/post ramp symbols in subtraction
 
     decoder.entry(
         samples.data(),
@@ -239,48 +239,45 @@ void MainBench::testFT8(const QString& wavFile, const QString& argsStr)
         hints,
         budget,
         budget,
-        &testft8Callback,
+        &testft4Callback,
         0,
         (struct FT8::cdecode *) nullptr
     );
 
     decoder.wait(budget + 1.0); // add one second to budget to force quit threads
-    const std::map<std::string, bool>& msgMap = testft8Callback.getMsgMap();
-    qDebug("MainBench::testFT8: done %lu decodes", msgMap.size());
-
-    if (msgMap.size() != 15)
+    const std::map<std::string, bool>& msgMap = testft4Callback.getMsgMap();
+    qDebug("MainBench::testFT4: done %lu decodes", msgMap.size());
+    qDebug("MainBench::testFT4: messages:");
+    for (const auto &msg : msgMap)
     {
-        qDebug("MainBench::testFT8: failed: invalid size: %lu expected 15", msgMap.size());
+        qDebug("MainBench::testFT4: %s", qPrintable(QString::fromStdString(msg.first)));
+    }
+
+    if (msgMap.size() != 7)
+    {
+        qDebug("MainBench::testFT4: failed: invalid size: %lu expected 7", msgMap.size());
         return;
     }
 
     QStringList messages = {
-        "CQ DF5SF JN39",
-        "CQ DL1SVA JO64",
-        "CQ DL7CO JO42",
-        "CQ F4BAL JO10",
-        "CQ LA1XJA JO49",
-        "CQ ON7VG JO21",
-        "CQ OZ1BJF JO55",
-        "CQ S51TA JN75",
-        "HA3PT SQ8AA -18",
-        "JA2KFQ EI4KF -17",
-        "LY3PW DF2FE R-13",
-        "N9GQA DG9NAY JN58",
-        "OK1HEH OH8NW 73  ",
-        "UN6T EA1FQ IN53",
-        "W5SUM G8OO -18"
+        "AO5SQ EA3HKA JN11",
+        "CQ LA1PHA JP76",
+        "CQ PA8DC JO21",
+        "CQ R3YBG KO73",
+        "CQ YU7ZZ KN05",
+        "II3WOG GI0WHI IO74",
+        "W4WWQ 9A6T -11"
     };
 
     for (const auto &msg : messages)
     {
         if (msgMap.count(msg.toStdString()) != 1)
         {
-            qDebug("MainBench::testFT8: failed: key: %s", qPrintable(msg));
+            qDebug("MainBench::testFT4: failed: key: %s", qPrintable(msg));
             return;
         }
     }
 
-    qDebug("MainBench::testFT8: success");
+    qDebug("MainBench::testFT4: success");
 }
 #endif

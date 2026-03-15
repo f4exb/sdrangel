@@ -54,6 +54,7 @@ private:
     void setRow(int row, const QList<QTableWidgetItem*>& rowItems);
 
 private slots:
+    void on_decoderMode_currentIndexChanged(int index);
     void accept();
     void reject();
     void on_decoderNbThreads_valueChanged(int value);

@@ -3,6 +3,7 @@ project(ft8)
 set(ft8_SOURCES
     arrays.cpp
     fft.cpp
+    ft4.cpp
     fftbuffers.cpp
     ft8.cpp
     ft8plan.cpp

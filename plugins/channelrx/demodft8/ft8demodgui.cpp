@@ -451,8 +451,8 @@ void FT8DemodGUI::on_filterMessages_toggled(bool checked)
 void FT8DemodGUI::on_applyBandPreset_clicked()
 {
     int bandPresetIndex = ui->bandPreset->currentIndex();
-    int channelShift = m_settings.m_bandPresets[bandPresetIndex].m_channelOffset; // kHz
-    int baseFrequency = m_settings.m_bandPresets[bandPresetIndex].m_baseFrequency; // kHz
+    int channelShift = m_settings.getBandPresets(m_settings.m_decoderMode)[bandPresetIndex].m_channelOffset; // kHz
+    int baseFrequency = m_settings.getBandPresets(m_settings.m_decoderMode)[bandPresetIndex].m_baseFrequency; // kHz
     quint64 deviceFrequency = (baseFrequency - channelShift)*1000; // Hz
     m_ft8Demod->setDeviceCenterFrequency(deviceFrequency, m_settings.m_streamIndex);
 
@@ -491,6 +491,12 @@ void FT8DemodGUI::on_settings_clicked()
     if (dialog.exec() == QDialog::Accepted)
     {
         bool changed = false;
+
+        if (settingsKeys.contains("decoderMode"))
+        {
+            m_settings.m_decoderMode = settings.m_decoderMode;
+            changed = true;
+        }
 
         if (settingsKeys.contains("nbDecoderThreads"))
         {
@@ -552,10 +558,18 @@ void FT8DemodGUI::on_settings_clicked()
             changed = true;
         }
 
-        if (settingsKeys.contains("bandPresets"))
+        if (settingsKeys.contains("ft8BandPresets"))
         {
-            m_settings.m_bandPresets = settings.m_bandPresets;
+            m_settings.m_ft8BandPresets = settings.m_ft8BandPresets;
             populateBandPresets();
+            changed = true;
+        }
+
+        if (settingsKeys.contains("ft4BandPresets"))
+        {
+            m_settings.m_ft4BandPresets = settings.m_ft4BandPresets;
+            populateBandPresets();
+            changed = true;
         }
 
         if (changed) {
@@ -968,7 +982,7 @@ void FT8DemodGUI::populateBandPresets()
     ui->bandPreset->blockSignals(true);
     ui->bandPreset->clear();
 
-    for (const auto& bandPreset : m_settings.m_bandPresets) {
+    for (const auto& bandPreset : m_settings.getBandPresets(m_settings.m_decoderMode)) {
         ui->bandPreset->addItem(bandPreset.m_name);
     }
 

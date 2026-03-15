@@ -21,6 +21,10 @@
 #include <QDir>
 #include <QDateTime>
 
+#include <array>
+#include <algorithm>
+#include <cmath>
+
 #include "channel/channelapi.h"
 #include "dsp/wavfilerecord.h"
 #include "util/messagequeue.h"
@@ -31,6 +35,8 @@
 
 #include "ft8demodsettings.h"
 #include "ft8demodworker.h"
+#include "libldpc.h"
+#include "osd.h"
 
 FT8DemodWorker::FT8Callback::FT8Callback(
     const QDateTime& periodTS,
@@ -120,17 +126,6 @@ int FT8DemodWorker::FT8Callback::hcb(
 
     cycle_mu.unlock();
 
-    // qDebug("FT8DemodWorker::FT8Callback::hcb: %6.3f %d %3d %3d %5.2f %6.1f %s (%s)",
-    //     m_baseFrequency / 1000000.0,
-    //     pass,
-    //     (int)snr,
-    //     correct_bits,
-    //     off - 0.5,
-    //     hz0,
-    //     msg.c_str(),
-    //     comment
-    // );
-
     return 2; // 2 => new decode, do subtract.
 }
 
@@ -145,12 +140,14 @@ FT8DemodWorker::FT8DemodWorker() :
     m_enablePskReporter(false),
     m_nbDecoderThreads(6),
     m_decoderTimeBudget(0.5),
+    m_decoderMode(FT8DemodSettings::DecoderModeFT8),
     m_useOSD(false),
     m_osdDepth(0),
     m_osdLDPCThreshold(70),
     m_verifyOSD(false),
     m_lowFreq(200),
     m_highFreq(3000),
+    m_unsupportedModeWarningPending(true),
     m_invalidSequence(true),
     m_baseFrequency(0),
     m_guiReportingMessageQueue(nullptr),
@@ -180,11 +177,90 @@ FT8DemodWorker::FT8DemodWorker() :
 FT8DemodWorker::~FT8DemodWorker()
 {}
 
+void FT8DemodWorker::setDecoderMode(FT8DemodSettings::DecoderMode decoderMode)
+{
+    m_decoderMode = decoderMode;
+    m_unsupportedModeWarningPending = true;
+}
+
+
+void FT8DemodWorker::processFT8(int16_t *buffer, int frameSampleCount, FT8Callback& ft8Callback, const int *hints)
+{
+    m_ft8Decoder.getParams().nthreads = m_nbDecoderThreads;
+    m_ft8Decoder.getParams().use_osd = m_useOSD ? 1 : 0;
+    m_ft8Decoder.getParams().osd_depth = m_osdDepth;
+    m_ft8Decoder.getParams().osd_ldpc_thresh = m_osdLDPCThreshold;
+    std::vector<float> samples(frameSampleCount);
+
+    std::transform(
+        buffer,
+        buffer + frameSampleCount,
+        samples.begin(),
+        [](const int16_t& s) -> float { return s / 32768.0f; }
+    );
+
+    m_ft8Decoder.entry(
+        samples.data(),
+        samples.size(),
+        0.5 * FT8DemodSettings::m_ft8SampleRate,
+        FT8DemodSettings::m_ft8SampleRate,
+        m_lowFreq,
+        m_highFreq,
+        hints,
+        hints,
+        m_decoderTimeBudget,
+        m_decoderTimeBudget,
+        &ft8Callback,
+        0,
+        (struct FT8::cdecode *) nullptr
+    );
+
+    m_ft8Decoder.wait(m_decoderTimeBudget + 1.0); // add one second to budget to force quit threads
+}
+
+void FT8DemodWorker::processFT4(int16_t *buffer, int frameSampleCount, FT8Callback& ft8Callback, const int *hints)
+{
+    std::vector<float> samples(frameSampleCount);
+    std::transform(
+        buffer,
+        buffer + frameSampleCount,
+        samples.begin(),
+        [](const int16_t& s) -> float { return s / 32768.0f; }
+    );
+
+    m_ft4Decoder.getParams().nthreads = m_nbDecoderThreads;
+    m_ft4Decoder.getParams().ldpc_iters = m_ft8Decoder.getParams().ldpc_iters;
+    m_ft4Decoder.getParams().use_osd = m_useOSD ? 1 : 0;
+    m_ft4Decoder.getParams().osd_depth = m_osdDepth;
+    m_ft4Decoder.getParams().osd_ldpc_thresh = m_osdLDPCThreshold;
+    m_ft4Decoder.entry(
+        samples.data(),
+        samples.size(),
+        0.5 * FT8DemodSettings::m_ft8SampleRate,
+        FT8DemodSettings::m_ft8SampleRate,
+        m_lowFreq,
+        m_highFreq,
+        hints,
+        hints,
+        m_decoderTimeBudget,
+        m_decoderTimeBudget,
+        &ft8Callback,
+        0,
+        (struct FT8::cdecode *) nullptr
+    );
+
+    m_ft4Decoder.wait(m_decoderTimeBudget + 1.0);
+}
+
 void FT8DemodWorker::processBuffer(int16_t *buffer, QDateTime periodTS)
 {
-    qDebug("FT8DemodWorker::processBuffer: %6.3f %s %d:%f [%d:%d]",
+    const int frameSampleCount = FT8DemodSettings::getDecoderFrameSamples(m_decoderMode);
+    const QString decoderMode = FT8DemodSettings::getDecoderModeString(m_decoderMode);
+
+    qDebug("FT8DemodWorker::processBuffer: %6.3f %s mode:%s %d:%f [%d:%d]",
         m_baseFrequency / 1000000.0,
         qPrintable(periodTS.toString("yyyy-MM-dd HH:mm:ss")),
+        qPrintable(decoderMode),
         m_nbDecoderThreads,
         m_decoderTimeBudget,
         m_lowFreq,
@@ -207,36 +283,21 @@ void FT8DemodWorker::processBuffer(int16_t *buffer, QDateTime periodTS)
     int hints[2] = { 2, 0 }; // CQ
     FT8Callback ft8Callback(periodTS, m_baseFrequency, m_packing, channelReference);
     ft8Callback.setValidCallsigns((m_useOSD && m_verifyOSD) ? &m_validCallsigns : nullptr);
-    m_ft8Decoder.getParams().nthreads = m_nbDecoderThreads;
-    m_ft8Decoder.getParams().use_osd = m_useOSD ? 1 : 0;
-    m_ft8Decoder.getParams().osd_depth = m_osdDepth;
-    m_ft8Decoder.getParams().osd_ldpc_thresh = m_osdLDPCThreshold;
-    std::vector<float> samples(15*FT8DemodSettings::m_ft8SampleRate);
 
-    std::transform(
-        buffer,
-        buffer + (15*FT8DemodSettings::m_ft8SampleRate),
-        samples.begin(),
-        [](const int16_t& s) -> float { return s / 32768.0f; }
-    );
+    if (m_decoderMode == FT8DemodSettings::DecoderModeFT8) {
+        processFT8(buffer, frameSampleCount, ft8Callback, hints);
+    } else if (m_decoderMode == FT8DemodSettings::DecoderModeFT4) {
+        processFT4(buffer, frameSampleCount, ft8Callback, hints);
+    }
+    else
+    {
+        if (m_unsupportedModeWarningPending)
+        {
+            qWarning("FT8DemodWorker::processBuffer: %s decoding is not supported", qPrintable(decoderMode));
+            m_unsupportedModeWarningPending = false;
+        }
+    }
 
-    m_ft8Decoder.entry(
-        samples.data(),
-        samples.size(),
-        0.5 * FT8DemodSettings::m_ft8SampleRate,
-        FT8DemodSettings::m_ft8SampleRate,
-        m_lowFreq,
-        m_highFreq,
-        hints,
-        hints,
-        m_decoderTimeBudget,
-        m_decoderTimeBudget,
-        &ft8Callback,
-        0,
-        (struct FT8::cdecode *) nullptr
-    );
-
-    m_ft8Decoder.wait(m_decoderTimeBudget + 1.0); // add one second to budget to force quit threads
     qDebug("FT8DemodWorker::processBuffer: done: at %6.3f %d messages",
         m_baseFrequency / 1000000.0, (int)ft8Callback.getReportMessage()->getFT8Messages().size());
 
@@ -275,9 +336,10 @@ void FT8DemodWorker::processBuffer(int16_t *buffer, QDateTime periodTS)
                 continue;
             }
 
-            QString logMessage = QString("%1 %2 Rx FT8 %3 %4 %5 %6 %7 %8")
+            QString logMessage = QString("%1 %2 Rx %3 %4 %5 %6 %7 %8 %9")
                 .arg(periodTS.toString("yyyyMMdd_HHmmss"))
                 .arg(baseFrequencyMHz, 9, 'f', 3)
+                .arg(decoderMode)
                 .arg(ft8Message.snr, 6)
                 .arg(ft8Message.dt, 4, 'f', 1)
                 .arg(ft8Message.df, 4, 'f', 0)
@@ -301,8 +363,9 @@ void FT8DemodWorker::processBuffer(int16_t *buffer, QDateTime periodTS)
 
             if ((ft8Message.loc.size() == 4) && (ft8Message.loc != "RR73") && Maidenhead::fromMaidenhead(ft8Message.loc, latitude, longitude))
             {
-                QString text = QString("%1\nMode: FT8\nFrequency: %2 Hz\nLocator: %3\nSNR: %4\nLast heard: %5")
+                QString text = QString("%1\nMode: %2\nFrequency: %3 Hz\nLocator: %4\nSNR: %5\nLast heard: %6")
                                     .arg(ft8Message.call2)
+                                    .arg(decoderMode)
                                     .arg(baseFrequencyMHz*1000000 + ft8Message.df)
                                     .arg(ft8Message.loc)
                                     .arg(ft8Message.snr)
@@ -361,7 +424,7 @@ void FT8DemodWorker::processBuffer(int16_t *buffer, QDateTime periodTS)
         wavFileRecord->setFileBaseIsFileName(true);
         wavFileRecord->setMono(true);
         wavFileRecord->startRecording();
-        wavFileRecord->writeMono(buffer, 15*FT8DemodSettings::m_ft8SampleRate);
+        wavFileRecord->writeMono(buffer, frameSampleCount);
         wavFileRecord->stopRecording();
         delete wavFileRecord;
     }
