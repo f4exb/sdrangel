@@ -1,10 +1,5 @@
 project(meshtastic)
 
-if (FT8_SUPPORT)
-    set(meshtastic_FT8_LIB ft8)
-    set(meshtastic_FT8_INCLUDE ${CMAKE_SOURCE_DIR}/ft8)
-endif()
-
 set(meshtastic_SOURCES
 	meshtasticdemod.cpp
 	meshtasticdemodsettings.cpp
@@ -31,7 +26,6 @@ set(meshtastic_HEADERS
 
 include_directories(
     ${CMAKE_SOURCE_DIR}/swagger/sdrangel/code/qt5/client
-    ${meshtastic_FT8_INCLUDE}
     ${CMAKE_SOURCE_DIR}/modemmeshtastic
 )
 
@@ -73,7 +67,6 @@ target_link_libraries(${TARGET_NAME} PRIVATE
 	sdrbase
 	${TARGET_LIB_GUI}
     swagger
-    ${meshtastic_FT8_LIB}
     modemmeshtastic
 )
 

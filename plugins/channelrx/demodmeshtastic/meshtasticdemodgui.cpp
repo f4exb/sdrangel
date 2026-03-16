@@ -1409,10 +1409,8 @@ void MeshtasticDemodGUI::applyMeshtasticProfileFromSelection()
     ui->deBitsText->setText(tr("%1").arg(m_settings.m_deBits));
     ui->preambleChirps->setValue(m_settings.m_preambleChirps);
     ui->preambleChirpsText->setText(tr("%1").arg(m_settings.m_preambleChirps));
-    ui->header->setChecked(m_settings.m_hasHeader);
     ui->fecParity->setValue(m_settings.m_nbParityBits);
     ui->fecParityText->setText(tr("%1").arg(m_settings.m_nbParityBits));
-    ui->crc->setChecked(m_settings.m_hasCRC);
     blockApplySettings(false);
     updateControlAvailabilityHints();
 
@@ -1746,14 +1744,11 @@ MeshtasticDemodGUI::MeshtasticDemodGUI(PluginAPI* pluginAPI, DeviceUISet *device
     ui->eomSquelchLabel->setToolTip(tr("End-of-message squelch level."));
     ui->eomSquelchText->setToolTip(tr("Current end-of-message squelch value."));
     ui->messageLength->setToolTip(tr("Maximum payload symbol length when auto is disabled."));
-    ui->messageLengthAuto->setToolTip(tr("Auto-detect payload symbol length from headers."));
     ui->messageLengthLabel->setToolTip(tr("Maximum payload symbol length."));
     ui->messageLengthText->setToolTip(tr("Current payload symbol length setting."));
-    ui->header->setToolTip(tr("Assume explicit LoRa header mode."));
     ui->fecParity->setToolTip(tr("LoRa coding rate parity denominator (CR)."));
     ui->fecParityLabel->setToolTip(tr("LoRa coding rate parity setting."));
     ui->fecParityText->setToolTip(tr("Current coding rate parity value."));
-    ui->crc->setToolTip(tr("Expect payload CRC."));
     ui->packetLength->setToolTip(tr("Fixed packet length for implicit-header mode."));
     ui->packetLengthLabel->setToolTip(tr("Fixed packet length for implicit header mode."));
     ui->packetLengthText->setToolTip(tr("Current fixed packet length."));
@@ -1780,7 +1775,6 @@ MeshtasticDemodGUI::MeshtasticDemodGUI(PluginAPI* pluginAPI, DeviceUISet *device
     ui->snrLabel->setToolTip(tr("Estimated signal-to-noise ratio."));
     ui->snrText->setToolTip(tr("Current estimated SNR."));
     ui->sUnits->setToolTip(tr("Unit for SNR."));
-    ui->loraLabel->setToolTip(tr("LoRa header/payload status indicators."));
     ui->symbolsCodewordsSeparator->setToolTip(tr("Separator between symbol and codeword counters."));
 
     ui->messageText->setReadOnly(true);
@@ -1846,8 +1840,6 @@ void MeshtasticDemodGUI::updateControlAvailabilityHints()
 
     const QString messageLengthAutoEnabledTip = tr("Auto-detect payload symbol length from headers.");
     const QString messageLengthAutoDisabledTip = tr("Disabled in LoRa explicit-header mode. Payload length is decoded from the LoRa header.");
-    ui->messageLengthAuto->setEnabled(!explicitHeaderMode);
-    ui->messageLengthAuto->setToolTip(explicitHeaderMode ? messageLengthAutoDisabledTip : messageLengthAutoEnabledTip);
 
     const QString messageLengthDefaultTip = tr("Maximum payload symbol length when auto is disabled.");
     const QString messageLengthHeaderTip = tr("Maximum payload symbol clamp in LoRa explicit-header mode. Header still provides nominal payload length.");
@@ -1858,7 +1850,6 @@ void MeshtasticDemodGUI::updateControlAvailabilityHints()
 
     const bool headerControlsEnabled = !m_settings.m_hasHeader;
     ui->fecParity->setEnabled(headerControlsEnabled);
-    ui->crc->setEnabled(headerControlsEnabled);
     ui->packetLength->setEnabled(headerControlsEnabled);
 
     const QString fecParityEnabledTip = tr("LoRa coding rate parity denominator (CR).");
@@ -1870,7 +1861,6 @@ void MeshtasticDemodGUI::updateControlAvailabilityHints()
 
     const QString crcEnabledTip = tr("Expect payload CRC.");
     const QString crcDisabledTip = tr("Disabled in explicit-header mode. CRC expectation is decoded from the LoRa header.");
-    ui->crc->setToolTip(headerControlsEnabled ? crcEnabledTip : crcDisabledTip);
 
     const QString packetLengthEnabledTip = tr("Fixed packet length for implicit-header mode.");
     const QString packetLengthDisabledTip = tr("Disabled in explicit-header mode. Payload length is decoded from the LoRa header.");
@@ -1912,18 +1902,15 @@ void MeshtasticDemodGUI::displaySettings()
     ui->udpSend->setChecked(m_settings.m_sendViaUDP);
     ui->udpAddress->setText(m_settings.m_udpAddress);
     ui->udpPort->setText(tr("%1").arg(m_settings.m_udpPort));
-    ui->header->setChecked(m_settings.m_hasHeader);
 
     if (!m_settings.m_hasHeader)
     {
         ui->fecParity->setValue(m_settings.m_nbParityBits);
         ui->fecParityText->setText(tr("%1").arg(m_settings.m_nbParityBits));
-        ui->crc->setChecked(m_settings.m_hasCRC);
         ui->packetLength->setValue(m_settings.m_packetLength);
         ui->spectrumGUI->setFFTSize(m_settings.m_spreadFactor);
     }
 
-    ui->messageLengthAuto->setChecked(m_settings.m_autoNbSymbolsMax);
     ui->invertRamps->setChecked(m_settings.m_invertRamps);
 
     displaySquelch();
@@ -3058,7 +3045,6 @@ void MeshtasticDemodGUI::showLoRaMessage(const Message& message)
     {
         ui->fecParity->setValue(msg.getNbParityBits());
         ui->fecParityText->setText(tr("%1").arg(msg.getNbParityBits()));
-        ui->crc->setChecked(msg.getHasCRC());
         ui->packetLength->setValue(msg.getPacketSize());
         ui->packetLengthText->setText(tr("%1").arg(msg.getPacketSize()));
         packetLength =  msg.getPacketSize();

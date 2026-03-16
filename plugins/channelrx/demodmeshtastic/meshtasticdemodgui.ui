@@ -6,13 +6,13 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>579</width>
+    <width>605</width>
     <height>680</height>
    </rect>
   </property>
   <property name="minimumSize">
    <size>
-    <width>532</width>
+    <width>605</width>
     <height>680</height>
    </size>
   </property>
@@ -30,7 +30,7 @@
     <rect>
      <x>0</x>
      <y>10</y>
-     <width>571</width>
+     <width>601</width>
      <height>91</height>
     </rect>
    </property>
@@ -565,8 +565,8 @@
     <rect>
      <x>0</x>
      <y>100</y>
-     <width>572</width>
-     <height>301</height>
+     <width>601</width>
+     <height>316</height>
     </rect>
    </property>
    <property name="windowTitle">
@@ -707,63 +707,6 @@
        </widget>
       </item>
       <item>
-       <widget class="QCheckBox" name="messageLengthAuto">
-        <property name="toolTip">
-         <string>Set message length in symbols automatically to provided message length (LoRa and FT only)</string>
-        </property>
-        <property name="text">
-         <string>Auto</string>
-        </property>
-       </widget>
-      </item>
-      <item>
-       <spacer name="horizontalSpacer_4">
-        <property name="orientation">
-         <enum>Qt::Horizontal</enum>
-        </property>
-        <property name="sizeHint" stdset="0">
-         <size>
-          <width>40</width>
-          <height>20</height>
-         </size>
-        </property>
-       </spacer>
-      </item>
-     </layout>
-    </item>
-    <item>
-     <layout class="QHBoxLayout" name="fecLayout">
-      <item>
-       <widget class="QLabel" name="loraLabel">
-        <property name="text">
-         <string>LoRa</string>
-        </property>
-       </widget>
-      </item>
-      <item>
-       <widget class="QCheckBox" name="header">
-        <property name="toolTip">
-         <string>Expect header (explicit) - disables manual FEC and CRC</string>
-        </property>
-        <property name="text">
-         <string>HDR</string>
-        </property>
-       </widget>
-      </item>
-      <item>
-       <widget class="Line" name="line_4">
-        <property name="minimumSize">
-         <size>
-          <width>5</width>
-          <height>0</height>
-         </size>
-        </property>
-        <property name="orientation">
-         <enum>Qt::Vertical</enum>
-        </property>
-       </widget>
-      </item>
-      <item>
        <widget class="QLabel" name="fecParityLabel">
         <property name="text">
          <string>FEC</string>
@@ -816,29 +759,6 @@
        </widget>
       </item>
       <item>
-       <widget class="QCheckBox" name="crc">
-        <property name="toolTip">
-         <string>CRC appended to payload</string>
-        </property>
-        <property name="text">
-         <string>CRC</string>
-        </property>
-       </widget>
-      </item>
-      <item>
-       <widget class="Line" name="line_7">
-        <property name="minimumSize">
-         <size>
-          <width>5</width>
-          <height>0</height>
-         </size>
-        </property>
-        <property name="orientation">
-         <enum>Qt::Vertical</enum>
-        </property>
-       </widget>
-      </item>
-      <item>
        <widget class="QDial" name="packetLength">
         <property name="maximumSize">
          <size>
@@ -878,13 +798,7 @@
        </widget>
       </item>
       <item>
-       <widget class="Line" name="line_6">
-        <property name="minimumSize">
-         <size>
-          <width>5</width>
-          <height>0</height>
-         </size>
-        </property>
+       <widget class="Line" name="line_4">
         <property name="orientation">
          <enum>Qt::Vertical</enum>
         </property>
@@ -980,7 +894,7 @@
        </widget>
       </item>
       <item>
-       <spacer name="horizontalSpacer_5">
+       <spacer name="horizontalSpacer_4">
         <property name="orientation">
          <enum>Qt::Horizontal</enum>
         </property>
@@ -1177,7 +1091,7 @@
     <rect>
      <x>0</x>
      <y>410</y>
-     <width>571</width>
+     <width>601</width>
      <height>260</height>
     </rect>
    </property>

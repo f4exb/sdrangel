@@ -180,15 +180,6 @@ When you check this option it inverts the direction of the chirps thus becoming 
 
 ![Meshtastic Demodulator payload controls](../../../doc/img/MeshtasticDemod_payload.png)
 
-<h4>A.1: Coding scheme</h4>
-
-In addition to the LoRa standard plain ASCII and TTY have been added for pure text messages. ASCII and TTY have no form of FEC.
-
-  - **LoRa**: LoRa standard (see LoRa documentation)
-  - **ASCII**: This is plain 7 bit ASCII coded characters. It needs exactly 7 effective bits per symbols (SF - DE = 7)
-  - **TTY**: Baudot (Teletype) 5 bit encoded characters. It needs exactly 5 effective bits per symbols (SF - DE = 5)
-  - **FT**: FT8/4 protocol. The 174 payload bits are packed into chirp symbols with zero padding if necessary
-
 <h4>A.2: Start/Stop decoder</h4>
 
 You can suspend and resume decoding activity using this button. This is useful if you want to freeze the payload content display.
@@ -203,43 +194,23 @@ During payload detection the maximum power value in the FFT (at argmax) P<sub>ma
 
 This is the expected number of symbols in a message. When a header is present in the payload it should match the size given in the header (A.11).
 
-<h4>A.5: Auto message length</h4>
-
-LoRa and DT modes only. Set message length (A.4) equal to the number of symbols specified (or implied for FT) in the message just received. When messages are sent repeatedly this helps adjusting in possible message length changes automatically.
-
-<h4>A.6: Sync word</h4>
-
-This is the message 1 byte sync word displayed in hexadecimal.
-
-<h4>A.7: Expect header in message</h4>
-
-LoRa mode only. Use this checkbox to tell if you expect or not a header in the message.
-
 <h4>A.8: Number of FEC parity bits</h4>
 
 LoRa mode only. This is the number of parity bits in the Hamming code used in the FEC. The standard values are 1 to 4 for H(4,5) to H(4,8) encoding. 0 is a non-standard value to specify no FEC.
 
-When a header is expected this control is disabled because the value used is the one found in the header.
-
-In FT8 mode there is no FEC as FEC is handled within the FT payload (with LDPC)
-
-<h4>A.9: Payload CRC presence</h4>
-
-LoRa mode: Use this checkbox to tell if you expect a 2 byte CRC at the end of the payload. FT mode: there is always a CRC.
-
-LoRa: When a header is expected this control is disabled because the value used is the one found in the header.
+This control is disabled because the value used is the one found in the header.
 
 <h4>A.10: Packet length</h4>
 
-This is the expected packet length in bytes without header and CRC. For FT this is the number of symbols.
+This is the expected packet length in bytes without header and CRC.
 
-LoRa: When a header is expected this control is disabled because the value used is the one found in the header.
+This control is disabled because the value used is the one found in the header.
 
 <h4>A.11: Number of symbols and codewords</h4>
 
 This is the number of symbols (left of slash) and codewords (right of slash) used for the payload including header and CRC.
 
-<h4>A.12: Header FEC indicator (LoRa)</h4>
+<h4>A.12: Header FEC indicator</h4>
 
 Header uses a H(4,8) FEC. The color of the indicator gives the status of header parity checks:
 
@@ -248,27 +219,27 @@ Header uses a H(4,8) FEC. The color of the indicator gives the status of header 
   - **Blue**: recovered error
   - **Green**: no errors
 
-<h4>A.13: Header CRC indicator (LoRa)</h4>
+<h4>A.13: Header CRC indicator</h4>
 
 The header has a one byte CRC. The color of this indicator gives the CRC status:
 
   - **Green**: CRC OK
   - **Red**: CRC error
 
-<h4>A.14: Payload FEC indicator (LoRa and FT)</h4>
+<h4>A.14: Payload FEC indicator</h4>
 
 The color of the indicator gives the status of payload parity checks:
 
   - **Grey**: undefined
   - **Red**: unrecoverable error. H(4,7) cannot distinguish between recoverable and unrecoverable error. Therefore this is never displayed for H(4,7). For FT it means that LDPC decoding failed.
-  - **Blue**: recovered error (LoRa only)
+  - **Blue**: recovered error
   - **Green**: no errors
 
-<h4>A.15: Payload CRC indicator (LoRa and FT)</h4>
+<h4>A.15: Payload CRC indicator</h4>
 
 The payload can have a two byte CRC. The color of this indicator gives the CRC status:
 
-  - **Grey**: No CRC (LoRa)
+  - **Grey**: No CRC
   - **Green**: CRC OK
   - **Red**: CRC error
 
@@ -276,9 +247,11 @@ The payload can have a two byte CRC. The color of this indicator gives the CRC s
 
 Use this push button to clear the message window (12)
 
+<h3>Live button</h3>
+
 <h3>12: Message window</h3>
 
-This is where the message and status data are displayed. The display varies if the coding scheme is purely text based (TTY, ASCII, FT) or text/binary mixed based (LoRa). The text vs binary consideration concerns the content of the message not the way it is transmitted on air that is by itself binary.
+This is where the message and status data are displayed. The display is text/binary mixed. The text vs binary consideration concerns the content of the message not the way it is transmitted on air that is by itself binary.
 
 <h4>12.a: Text messages</h4>
 
