@@ -357,15 +357,6 @@ void MeshtasticModGUI::on_syncWord_editingFinished()
     }
 }
 
-void MeshtasticModGUI::on_scheme_currentIndexChanged(int index)
-{
-    m_settings.m_codingScheme = (MeshtasticModSettings::CodingScheme) index;
-    ui->fecParity->setEnabled(m_settings.m_codingScheme == MeshtasticModSettings::CodingLoRa);
-    ui->crc->setEnabled(m_settings.m_codingScheme == MeshtasticModSettings::CodingLoRa);
-    ui->header->setEnabled(m_settings.m_codingScheme == MeshtasticModSettings::CodingLoRa);
-    applySettings();
-}
-
 void MeshtasticModGUI::on_fecParity_valueChanged(int value)
 {
     m_settings.m_nbParityBits = value;
@@ -409,14 +400,6 @@ void MeshtasticModGUI::on_report_editingFinished()
     applySettings();
 }
 
-void MeshtasticModGUI::on_msgType_currentIndexChanged(int index)
-{
-    m_settings.m_messageType = (MeshtasticModSettings::MessageType) index;
-    displayCurrentPayloadMessage();
-    applyMeshtasticRadioSettingsIfPresent(getActivePayloadText());
-    applySettings();
-}
-
 void MeshtasticModGUI::on_resetMessages_clicked(bool checked)
 {
     (void) checked;
@@ -429,12 +412,8 @@ void MeshtasticModGUI::on_playMessage_clicked(bool checked)
 {
     (void) checked;
     applyMeshtasticRadioSettingsIfPresent(getActivePayloadText());
-    // Switch to message None then back to current message type to trigger sending process
-    MeshtasticModSettings::MessageType msgType = m_settings.m_messageType;
-    m_settings.m_messageType = MeshtasticModSettings::MessageNone;
     applySettings();
-    m_settings.m_messageType = msgType;
-    applySettings();
+    m_meshtasticMod->sendMessage();
 }
 
 void MeshtasticModGUI::on_repeatMessage_valueChanged(int value)
@@ -590,6 +569,10 @@ MeshtasticModGUI::MeshtasticModGUI(PluginAPI* pluginAPI, DeviceUISet *deviceUISe
 	m_meshtasticMod->setMessageQueueToGUI(getInputMessageQueue());
 
 	connect(&MainCore::instance()->getMasterTimer(), SIGNAL(timeout()), this, SLOT(tick()));
+
+    ui->fecParity->setEnabled(true);
+    ui->crc->setEnabled(true);
+    ui->header->setEnabled(true);
 
     ui->deltaFrequencyLabel->setText(QString("%1f").arg(QChar(0x94, 0x03)));
     ui->deltaFrequency->setColorMapper(ColorMapper(ColorMapper::GrayGold));
@@ -854,7 +837,6 @@ void MeshtasticModGUI::makeUIConnections()
     QObject::connect(ui->idleTime, &QSlider::valueChanged, this, &MeshtasticModGUI::on_idleTime_valueChanged);
     QObject::connect(ui->syncWord, &QLineEdit::editingFinished, this, &MeshtasticModGUI::on_syncWord_editingFinished);
     QObject::connect(ui->channelMute, &QToolButton::toggled, this, &MeshtasticModGUI::on_channelMute_toggled);
-    QObject::connect(ui->scheme, QOverload<int>::of(&QComboBox::currentIndexChanged), this, &MeshtasticModGUI::on_scheme_currentIndexChanged);
     QObject::connect(ui->fecParity, &QDial::valueChanged, this, &MeshtasticModGUI::on_fecParity_valueChanged);
     QObject::connect(ui->crc, &QCheckBox::stateChanged, this, &MeshtasticModGUI::on_crc_stateChanged);
     QObject::connect(ui->header, &QCheckBox::stateChanged, this, &MeshtasticModGUI::on_header_stateChanged);
@@ -862,7 +844,6 @@ void MeshtasticModGUI::makeUIConnections()
     QObject::connect(ui->urCall, &QLineEdit::editingFinished, this, &MeshtasticModGUI::on_urCall_editingFinished);
     QObject::connect(ui->myLocator, &QLineEdit::editingFinished, this, &MeshtasticModGUI::on_myLocator_editingFinished);
     QObject::connect(ui->report, &QLineEdit::editingFinished, this, &MeshtasticModGUI::on_report_editingFinished);
-    QObject::connect(ui->msgType, QOverload<int>::of(&QComboBox::currentIndexChanged), this, &MeshtasticModGUI::on_msgType_currentIndexChanged);
     QObject::connect(ui->resetMessages, &QPushButton::clicked, this, &MeshtasticModGUI::on_resetMessages_clicked);
     QObject::connect(ui->playMessage, &QPushButton::clicked, this, &MeshtasticModGUI::on_playMessage_clicked);
     QObject::connect(ui->repeatMessage, &QDial::valueChanged, this, &MeshtasticModGUI::on_repeatMessage_valueChanged);

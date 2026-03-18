@@ -64,12 +64,12 @@ struct MeshtasticModSettings
     bool m_hasHeader;              //!< Header present before actual payload (LoRa)
     unsigned char m_syncWord;
     bool m_channelMute;
-    CodingScheme m_codingScheme;
+    static const CodingScheme m_codingScheme;
     QString m_myCall;     //!< QSO mode: my callsign
     QString m_urCall;     //!< QSO mode: your callsign
     QString m_myLoc;      //!< QSO mode: my locator
     QString m_myRpt;      //!< QSO mode: my report
-    MessageType m_messageType;
+    static const MessageType m_messageType;
     QString m_beaconMessage;
     QString m_cqMessage;
     QString m_replyMessage;

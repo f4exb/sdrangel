@@ -48,6 +48,7 @@
 
 MESSAGE_CLASS_DEFINITION(MeshtasticMod::MsgConfigureMeshtasticMod, Message)
 MESSAGE_CLASS_DEFINITION(MeshtasticMod::MsgReportPayloadTime, Message)
+MESSAGE_CLASS_DEFINITION(MeshtasticMod::MsgSendMessage, Message)
 
 const char* const MeshtasticMod::m_channelIdURI = "sdrangel.channeltx.modmeshtastic";
 const char* const MeshtasticMod::m_channelId = "MeshtasticMod";
@@ -137,6 +138,12 @@ bool MeshtasticMod::handleMessage(const Message& cmd)
 
         return true;
     }
+    else if (MsgSendMessage::match(cmd))
+    {
+        qDebug() << "MeshtasticMod::handleMessage: MsgSendMessage";
+        sendCurrentSettingsMessage();
+        return true;
+    }
     else if (DSPSignalNotification::match(cmd))
     {
         // Forward to the source
@@ -156,6 +163,40 @@ bool MeshtasticMod::handleMessage(const Message& cmd)
 	{
 		return false;
 	}
+}
+
+void MeshtasticMod::sendMessage()
+{
+    m_inputMessageQueue.push(MsgSendMessage::create());
+}
+
+void MeshtasticMod::sendCurrentSettingsMessage()
+{
+    MeshtasticModBaseband::MsgConfigureMeshtasticModPayload *payloadMsg = nullptr;
+
+    if (m_settings.m_messageType == MeshtasticModSettings::MessageNone)
+    {
+        m_symbols.clear();
+        payloadMsg = MeshtasticModBaseband::MsgConfigureMeshtasticModPayload::create();
+    }
+    else
+    {
+        m_symbols.clear();
+        m_encoder.encode(m_settings, m_symbols);
+        payloadMsg = MeshtasticModBaseband::MsgConfigureMeshtasticModPayload::create(m_symbols);
+    }
+
+    if (payloadMsg)
+    {
+        m_basebandSource->getInputMessageQueue()->push(payloadMsg);
+        m_currentPayloadTime = (m_symbols.size()*(1<<m_settings.m_spreadFactor)*1000.0) / MeshtasticModSettings::bandwidths[m_settings.m_bandwidthIndex];
+
+        if (getMessageQueueToGUI())
+        {
+            MsgReportPayloadTime *rpt = MsgReportPayloadTime::create(m_currentPayloadTime, m_symbols.size());
+            getMessageQueueToGUI()->push(rpt);
+        }
+    }
 }
 
 void MeshtasticMod::setCenterFrequency(qint64 frequency)
@@ -243,12 +284,6 @@ void MeshtasticMod::applySettings(const MeshtasticModSettings& settings, bool fo
         }
     }
 
-    if ((settings.m_codingScheme != m_settings.m_codingScheme) || force)
-    {
-        reverseAPIKeys.append("codingScheme");
-        m_encoder.setCodingScheme(settings.m_codingScheme);
-    }
-
     if ((settings.m_nbParityBits != m_settings.m_nbParityBits || force))
     {
         reverseAPIKeys.append("nbParityBits");
@@ -267,9 +302,6 @@ void MeshtasticMod::applySettings(const MeshtasticModSettings& settings, bool fo
         m_encoder.setLoRaHasHeader(settings.m_hasHeader);
     }
 
-    if ((settings.m_messageType != m_settings.m_messageType) || force) {
-        reverseAPIKeys.append("messageType");
-    }
     if ((settings.m_beaconMessage != m_settings.m_beaconMessage) || force) {
         reverseAPIKeys.append("beaconMessage");
     }
@@ -312,22 +344,7 @@ void MeshtasticMod::applySettings(const MeshtasticModSettings& settings, bool fo
 
     MeshtasticModBaseband::MsgConfigureMeshtasticModPayload *payloadMsg = nullptr;
 
-    if ((settings.m_messageType == MeshtasticModSettings::MessageNone)
-        && ((settings.m_messageType != m_settings.m_messageType) || force))
-    {
-        payloadMsg = MeshtasticModBaseband::MsgConfigureMeshtasticModPayload::create();
-    }
-    else if ((settings.m_messageType != m_settings.m_messageType)
-        || (settings.m_beaconMessage != m_settings.m_beaconMessage)
-        || (settings.m_cqMessage != m_settings.m_cqMessage)
-        || (settings.m_replyMessage != m_settings.m_replyMessage)
-        || (settings.m_reportMessage != m_settings.m_reportMessage)
-        || (settings.m_replyReportMessage != m_settings.m_replyReportMessage)
-        || (settings.m_rrrMessage != m_settings.m_rrrMessage)
-        || (settings.m_73Message != m_settings.m_73Message)
-        || (settings.m_qsoTextMessage != m_settings.m_qsoTextMessage)
-        || (settings.m_textMessage != m_settings.m_textMessage)
-        || (settings.m_bytesMessage != m_settings.m_bytesMessage) || force)
+    if ((settings.m_textMessage != m_settings.m_textMessage) || force)
     {
         m_symbols.clear();
         m_encoder.encode(settings, m_symbols);
@@ -507,9 +524,6 @@ void MeshtasticMod::webapiUpdateChannelSettings(
     if (channelSettingsKeys.contains("channelMute")) {
         settings.m_channelMute = response.getChirpChatModSettings()->getChannelMute() != 0;
     }
-    if (channelSettingsKeys.contains("codingScheme")) {
-        settings.m_codingScheme = (MeshtasticModSettings::CodingScheme) response.getChirpChatModSettings()->getCodingScheme();
-    }
     if (channelSettingsKeys.contains("nbParityBits")) {
         settings.m_nbParityBits = response.getChirpChatModSettings()->getNbParityBits();
     }
@@ -530,9 +544,6 @@ void MeshtasticMod::webapiUpdateChannelSettings(
     }
     if (channelSettingsKeys.contains("myRpt")) {
         settings.m_myRpt = *response.getChirpChatModSettings()->getMyRpt();
-    }
-    if (channelSettingsKeys.contains("messageType")) {
-        settings.m_messageType = (MeshtasticModSettings::MessageType) response.getChirpChatModSettings()->getMessageType();
     }
     if (channelSettingsKeys.contains("beaconMessage")) {
         settings.m_beaconMessage = *response.getChirpChatModSettings()->getBeaconMessage();

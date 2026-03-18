@@ -55,6 +55,9 @@ const int MeshtasticModSettings::bandwidths[] = {
     400000, // 400k / 1
     500000  // 500k / 1
 };
+
+const MeshtasticModSettings::CodingScheme MeshtasticModSettings::m_codingScheme = MeshtasticModSettings::CodingLoRa;
+const MeshtasticModSettings::MessageType MeshtasticModSettings::m_messageType = MeshtasticModSettings::MessageText;
 const int MeshtasticModSettings::nbBandwidths = 3*8 + 4;
 const int MeshtasticModSettings::oversampling = 4;
 
@@ -73,7 +76,6 @@ void MeshtasticModSettings::resetToDefaults()
     m_deBits = 0;
     m_preambleChirps = 8;
     m_quietMillis = 1000;
-    m_codingScheme = CodingLoRa;
     m_nbParityBits = 1;
     m_hasCRC = true;
     m_hasHeader = true;
@@ -225,13 +227,10 @@ bool MeshtasticModSettings::deserialize(const QByteArray& data)
     {
         QByteArray bytetmp;
         unsigned int utmp;
-        int tmp;
 
         d.readS32(1, &m_inputFrequencyOffset, 0);
         d.readS32(2, &m_bandwidthIndex, 0);
         d.readS32(3, &m_spreadFactor, 0);
-        d.readS32(4, &tmp, 0);
-        m_codingScheme = (CodingScheme) tmp;
 
         if (m_channelMarker)
         {
@@ -258,8 +257,6 @@ bool MeshtasticModSettings::deserialize(const QByteArray& data)
         d.readString(27, &m_qsoTextMessage, "%2 %1 Hello LoRa");
         d.readString(28, &m_textMessage, "Hello LoRa");
         d.readBlob(29, &m_bytesMessage);
-        d.readS32(30, &tmp, 0);
-        m_messageType = (MessageType) tmp;
         d.readS32(31, &m_nbParityBits, 1);
         d.readBool(32, &m_hasCRC, true);
         d.readBool(33, &m_hasHeader, true);
@@ -323,8 +320,6 @@ void MeshtasticModSettings::applySettings(const QStringList& settingsKeys, const
         m_spreadFactor = settings.m_spreadFactor;
     if (settingsKeys.contains("deBits"))
         m_deBits = settings.m_deBits;
-    if (settingsKeys.contains("codingScheme"))
-        m_codingScheme = settings.m_codingScheme;
     if (settingsKeys.contains("preambleChirps"))
         m_preambleChirps = settings.m_preambleChirps;
     if (settingsKeys.contains("quietMillis"))
@@ -385,8 +380,6 @@ void MeshtasticModSettings::applySettings(const QStringList& settingsKeys, const
         m_textMessage = settings.m_textMessage;
     if (settingsKeys.contains("bytesMessage"))
         m_bytesMessage = settings.m_bytesMessage;
-    if (settingsKeys.contains("messageType"))
-        m_messageType = settings.m_messageType;
     if (settingsKeys.contains("nbParityBits"))
         m_nbParityBits = settings.m_nbParityBits;
     if (settingsKeys.contains("hasCRC"))

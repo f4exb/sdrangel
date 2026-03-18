@@ -1,10 +1,5 @@
 project(modmeshtastic)
 
-if (FT8_SUPPORT)
-    set(meshtasticmod_FT8_LIB ft8)
-    set(meshtasticmod_FT8_INCLUDE ${CMAKE_SOURCE_DIR}/ft8)
-endif()
-
 set(modmeshtastic_SOURCES
 	meshtasticmod.cpp
 	meshtasticmodsettings.cpp
@@ -12,10 +7,7 @@ set(modmeshtastic_SOURCES
 	meshtasticmodbaseband.cpp
     meshtasticmodplugin.cpp
     meshtasticmodencoder.cpp
-    meshtasticmodencodertty.cpp
-    meshtasticmodencoderascii.cpp
     meshtasticmodencoderlora.cpp
-    meshtasticmodencoderft.cpp
     meshtasticmodwebapiadapter.cpp
 )
 
@@ -26,16 +18,12 @@ set(modmeshtastic_HEADERS
 	meshtasticmodbaseband.h
     meshtasticmodplugin.h
     meshtasticmodencoder.h
-    meshtasticmodencodertty.h
-    meshtasticmodencoderascii.h
     meshtasticmodencoderlora.h
-    meshtasticmodencoderft.h
     meshtasticmodwebapiadapter.h
 )
 
 include_directories(
     ${CMAKE_SOURCE_DIR}/swagger/sdrangel/code/qt5/client
-    ${meshtasticmod_FT8_INCLUDE}
     ${CMAKE_SOURCE_DIR}/modemmeshtastic
 )
 
@@ -77,7 +65,6 @@ target_link_libraries(${TARGET_NAME} PRIVATE
     sdrbase
     ${TARGET_LIB_GUI}
     swagger
-    ${meshtasticmod_FT8_LIB}
     modemmeshtastic
 )
 

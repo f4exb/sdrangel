@@ -109,7 +109,6 @@ private slots:
     void on_idleTime_valueChanged(int value);
     void on_syncWord_editingFinished();
     void on_channelMute_toggled(bool checked);
-    void on_scheme_currentIndexChanged(int index);
     void on_fecParity_valueChanged(int value);
     void on_crc_stateChanged(int state);
     void on_header_stateChanged(int state);
@@ -117,7 +116,6 @@ private slots:
     void on_urCall_editingFinished();
     void on_myLocator_editingFinished();
     void on_report_editingFinished();
-    void on_msgType_currentIndexChanged(int index);
     void on_resetMessages_clicked(bool checked);
     void on_playMessage_clicked(bool checked);
     void on_repeatMessage_valueChanged(int value);

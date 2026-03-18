@@ -29,7 +29,6 @@ public:
     MeshtasticModEncoder();
     ~MeshtasticModEncoder();
 
-    void setCodingScheme(MeshtasticModSettings::CodingScheme codingScheme) { m_codingScheme = codingScheme; }
     void setNbSymbolBits(unsigned int spreadFactor, unsigned int deBits);
     void setLoRaParityBits(unsigned int parityBits) { m_nbParityBits = parityBits; }
     void setLoRaHasHeader(bool hasHeader) { m_hasHeader = hasHeader; }
@@ -38,12 +37,11 @@ public:
     void encode(MeshtasticModSettings settings, std::vector<unsigned short>& symbols);
 
 private:
-    void encodeString(const QString& str, std::vector<unsigned short>& symbols);
     // LoRa functions
     void encodeBytesLoRa(const QByteArray& bytes, std::vector<unsigned short>& symbols);
 
     // General attributes
-    MeshtasticModSettings::CodingScheme m_codingScheme;
+    static const MeshtasticModSettings::CodingScheme m_codingScheme;
     unsigned int m_spreadFactor;
     unsigned int m_deBits;
     unsigned int m_nbSymbolBits;
@@ -54,4 +52,3 @@ private:
 };
 
 #endif // PLUGINS_CHANNELTX_MODMESHTASTIC_MESHTASTICMODENCODER_H_
-

@@ -90,6 +90,21 @@ public:
         {}
     };
 
+    class MsgSendMessage : public Message {
+        MESSAGE_CLASS_DECLARATION
+
+    public:
+        static MsgSendMessage* create()
+        {
+            return new MsgSendMessage();
+        }
+
+    private:
+        MsgSendMessage() :
+            Message()
+        {}
+    };
+
     //=================================================================
 
     MeshtasticMod(DeviceAPI *deviceAPI);
@@ -156,6 +171,7 @@ public:
     void setLevelMeter(QObject *levelMeter);
     uint32_t getNumberOfDeviceStreams() const;
     bool getModulatorActive() const;
+    void sendMessage();
 
     static const char* const m_channelIdURI;
     static const char* const m_channelId;
@@ -196,6 +212,7 @@ private:
     );
     void openUDP(const MeshtasticModSettings& settings);
     void closeUDP();
+    void sendCurrentSettingsMessage();
 
 private slots:
     void networkManagerFinished(QNetworkReply *reply);
