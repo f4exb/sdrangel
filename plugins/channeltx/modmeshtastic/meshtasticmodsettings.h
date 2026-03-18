@@ -60,8 +60,8 @@ struct MeshtasticModSettings
     unsigned int m_preambleChirps; //!< Number of preamble chirps
     int m_quietMillis;             //!< Number of milliseconds to pause between transmissions
     int m_nbParityBits;            //!< Hamming parity bits (LoRa)
-    bool m_hasCRC;                 //!< Payload has CRC (LoRa)
-    bool m_hasHeader;              //!< Header present before actual payload (LoRa)
+    static const bool m_hasCRC;    //!< Payload has CRC (LoRa)
+    static const bool m_hasHeader; //!< Header present before actual payload (LoRa)
     unsigned char m_syncWord;
     bool m_channelMute;
     static const CodingScheme m_codingScheme;
@@ -70,14 +70,6 @@ struct MeshtasticModSettings
     QString m_myLoc;      //!< QSO mode: my locator
     QString m_myRpt;      //!< QSO mode: my report
     static const MessageType m_messageType;
-    QString m_beaconMessage;
-    QString m_cqMessage;
-    QString m_replyMessage;
-    QString m_reportMessage;
-    QString m_replyReportMessage;
-    QString m_rrrMessage;
-    QString m_73Message;
-    QString m_qsoTextMessage;
     QString m_textMessage;
     QByteArray m_bytesMessage;
     int m_messageRepeat;
@@ -106,8 +98,6 @@ struct MeshtasticModSettings
 
     MeshtasticModSettings();
     void resetToDefaults();
-    void setDefaultTemplates();
-    void generateMessages();
     unsigned int getNbSFDFourths() const; //!< Get the number of SFD period fourths (depends on coding scheme)
     bool hasSyncWord() const;             //!< Only LoRa has a syncword (for the moment)
     void setChannelMarker(Serializable *channelMarker) { m_channelMarker = channelMarker; }

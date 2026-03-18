@@ -219,14 +219,6 @@ void MeshtasticMod::applySettings(const MeshtasticModSettings& settings, bool fo
             << " m_rfBandwidth: " << settings.m_bandwidthIndex
             << " bandwidth: " << MeshtasticModSettings::bandwidths[settings.m_bandwidthIndex]
             << " m_channelMute: " << settings.m_channelMute
-            << " m_beaconMessage: " << settings.m_beaconMessage
-            << " m_cqMessage: " << settings.m_cqMessage
-            << " m_replyMessage: " << settings.m_replyMessage
-            << " m_reportMessage:" << settings.m_reportMessage
-            << " m_replyReportMessage: " << settings.m_replyReportMessage
-            << " m_rrrMessage: " << settings.m_rrrMessage
-            << " m_73message: " << settings.m_73Message
-            << " m_qsoTextMessage: " << settings.m_qsoTextMessage
             << " m_textMessage: " << settings.m_textMessage
             << " m_bytesMessage: " << settings.m_bytesMessage.toHex()
             << " m_spreadFactor: " << settings.m_spreadFactor
@@ -290,42 +282,6 @@ void MeshtasticMod::applySettings(const MeshtasticModSettings& settings, bool fo
         m_encoder.setLoRaParityBits(settings.m_nbParityBits);
     }
 
-    if ((settings.m_hasCRC != m_settings.m_hasCRC) || force)
-    {
-        reverseAPIKeys.append("hasCRC");
-        m_encoder.setLoRaHasCRC(settings.m_hasCRC);
-    }
-
-    if ((settings.m_hasHeader != m_settings.m_hasHeader) || force)
-    {
-        reverseAPIKeys.append("hasHeader");
-        m_encoder.setLoRaHasHeader(settings.m_hasHeader);
-    }
-
-    if ((settings.m_beaconMessage != m_settings.m_beaconMessage) || force) {
-        reverseAPIKeys.append("beaconMessage");
-    }
-    if ((settings.m_cqMessage != m_settings.m_cqMessage) || force) {
-        reverseAPIKeys.append("cqMessage");
-    }
-    if ((settings.m_replyMessage != m_settings.m_replyMessage) || force) {
-        reverseAPIKeys.append("replyMessage");
-    }
-    if ((settings.m_reportMessage != m_settings.m_reportMessage) || force) {
-        reverseAPIKeys.append("reportMessage");
-    }
-    if ((settings.m_replyReportMessage != m_settings.m_replyReportMessage) || force) {
-        reverseAPIKeys.append("replyReportMessage");
-    }
-    if ((settings.m_rrrMessage != m_settings.m_rrrMessage) || force) {
-        reverseAPIKeys.append("rrrMessage");
-    }
-    if ((settings.m_73Message != m_settings.m_73Message) || force) {
-        reverseAPIKeys.append("73Message");
-    }
-    if ((settings.m_qsoTextMessage != m_settings.m_qsoTextMessage) || force) {
-        reverseAPIKeys.append("qsoTextMessage");
-    }
     if ((settings.m_textMessage != m_settings.m_textMessage) || force) {
         reverseAPIKeys.append("textMessage");
     }
@@ -527,12 +483,6 @@ void MeshtasticMod::webapiUpdateChannelSettings(
     if (channelSettingsKeys.contains("nbParityBits")) {
         settings.m_nbParityBits = response.getChirpChatModSettings()->getNbParityBits();
     }
-    if (channelSettingsKeys.contains("hasCRC")) {
-        settings.m_hasCRC = response.getChirpChatModSettings()->getHasCrc() != 0;
-    }
-    if (channelSettingsKeys.contains("hasHeader")) {
-        settings.m_hasHeader = response.getChirpChatModSettings()->getHasHeader() != 0;
-    }
     if (channelSettingsKeys.contains("myCall")) {
         settings.m_myCall = *response.getChirpChatModSettings()->getMyCall();
     }
@@ -544,30 +494,6 @@ void MeshtasticMod::webapiUpdateChannelSettings(
     }
     if (channelSettingsKeys.contains("myRpt")) {
         settings.m_myRpt = *response.getChirpChatModSettings()->getMyRpt();
-    }
-    if (channelSettingsKeys.contains("beaconMessage")) {
-        settings.m_beaconMessage = *response.getChirpChatModSettings()->getBeaconMessage();
-    }
-    if (channelSettingsKeys.contains("cqMessage")) {
-        settings.m_cqMessage = *response.getChirpChatModSettings()->getCqMessage();
-    }
-    if (channelSettingsKeys.contains("replyMessage")) {
-        settings.m_replyMessage = *response.getChirpChatModSettings()->getReplyMessage();
-    }
-    if (channelSettingsKeys.contains("reportMessage")) {
-        settings.m_reportMessage = *response.getChirpChatModSettings()->getReportMessage();
-    }
-    if (channelSettingsKeys.contains("replyReportMessage")) {
-        settings.m_replyReportMessage = *response.getChirpChatModSettings()->getReplyReportMessage();
-    }
-    if (channelSettingsKeys.contains("rrrMessage")) {
-        settings.m_rrrMessage = *response.getChirpChatModSettings()->getRrrMessage();
-    }
-    if (channelSettingsKeys.contains("message73")) {
-        settings.m_73Message = *response.getChirpChatModSettings()->getMessage73();
-    }
-    if (channelSettingsKeys.contains("qsoTextMessage")) {
-        settings.m_qsoTextMessage = *response.getChirpChatModSettings()->getQsoTextMessage();
     }
     if (channelSettingsKeys.contains("textMessage")) {
         settings.m_textMessage = *response.getChirpChatModSettings()->getTextMessage();
@@ -685,54 +611,6 @@ void MeshtasticMod::webapiFormatChannelSettings(SWGSDRangel::SWGChannelSettings&
     }
 
     response.getChirpChatModSettings()->setMessageType((int) settings.m_messageType);
-
-    if (response.getChirpChatModSettings()->getBeaconMessage()) {
-        *response.getChirpChatModSettings()->getBeaconMessage() = settings.m_beaconMessage;
-    } else {
-        response.getChirpChatModSettings()->setBeaconMessage(new QString(settings.m_beaconMessage));
-    }
-
-    if (response.getChirpChatModSettings()->getCqMessage()) {
-        *response.getChirpChatModSettings()->getCqMessage() = settings.m_cqMessage;
-    } else {
-        response.getChirpChatModSettings()->setCqMessage(new QString(settings.m_cqMessage));
-    }
-
-    if (response.getChirpChatModSettings()->getReplyMessage()) {
-        *response.getChirpChatModSettings()->getReplyMessage() = settings.m_replyMessage;
-    } else {
-        response.getChirpChatModSettings()->setReplyMessage(new QString(settings.m_replyMessage));
-    }
-
-    if (response.getChirpChatModSettings()->getReportMessage()) {
-        *response.getChirpChatModSettings()->getReportMessage() = settings.m_reportMessage;
-    } else {
-        response.getChirpChatModSettings()->setReportMessage(new QString(settings.m_reportMessage));
-    }
-
-    if (response.getChirpChatModSettings()->getReplyReportMessage()) {
-        *response.getChirpChatModSettings()->getReplyReportMessage() = settings.m_replyReportMessage;
-    } else {
-        response.getChirpChatModSettings()->setReplyReportMessage(new QString(settings.m_replyReportMessage));
-    }
-
-    if (response.getChirpChatModSettings()->getRrrMessage()) {
-        *response.getChirpChatModSettings()->getRrrMessage() = settings.m_rrrMessage;
-    } else {
-        response.getChirpChatModSettings()->setRrrMessage(new QString(settings.m_rrrMessage));
-    }
-
-    if (response.getChirpChatModSettings()->getMessage73()) {
-        *response.getChirpChatModSettings()->getMessage73() = settings.m_73Message;
-    } else {
-        response.getChirpChatModSettings()->setMessage73(new QString(settings.m_73Message));
-    }
-
-    if (response.getChirpChatModSettings()->getQsoTextMessage()) {
-        *response.getChirpChatModSettings()->getQsoTextMessage() = settings.m_qsoTextMessage;
-    } else {
-        response.getChirpChatModSettings()->setQsoTextMessage(new QString(settings.m_qsoTextMessage));
-    }
 
     if (response.getChirpChatModSettings()->getTextMessage()) {
         *response.getChirpChatModSettings()->getTextMessage() = settings.m_textMessage;
@@ -932,30 +810,6 @@ void MeshtasticMod::webapiFormatChannelSettings(
     }
     if (channelSettingsKeys.contains("messageType") || force) {
         swgMeshtasticModSettings->setMessageType((int) settings.m_messageType);
-    }
-    if (channelSettingsKeys.contains("beaconMessage") || force) {
-        swgMeshtasticModSettings->setBeaconMessage(new QString(settings.m_beaconMessage));
-    }
-    if (channelSettingsKeys.contains("cqMessage") || force) {
-        swgMeshtasticModSettings->setCqMessage(new QString(settings.m_cqMessage));
-    }
-    if (channelSettingsKeys.contains("replyMessage") || force) {
-        swgMeshtasticModSettings->setReplyMessage(new QString(settings.m_replyMessage));
-    }
-    if (channelSettingsKeys.contains("reportMessage") || force) {
-        swgMeshtasticModSettings->setReportMessage(new QString(settings.m_reportMessage));
-    }
-    if (channelSettingsKeys.contains("replyReportMessage") || force) {
-        swgMeshtasticModSettings->setReplyReportMessage(new QString(settings.m_replyReportMessage));
-    }
-    if (channelSettingsKeys.contains("rrrMessage") || force) {
-        swgMeshtasticModSettings->setRrrMessage(new QString(settings.m_rrrMessage));
-    }
-    if (channelSettingsKeys.contains("message73") || force) {
-        swgMeshtasticModSettings->setMessage73(new QString(settings.m_73Message));
-    }
-    if (channelSettingsKeys.contains("qsoTextMessage") || force) {
-        swgMeshtasticModSettings->setQsoTextMessage(new QString(settings.m_qsoTextMessage));
     }
     if (channelSettingsKeys.contains("textMessage") || force) {
         swgMeshtasticModSettings->setTextMessage(new QString(settings.m_textMessage));

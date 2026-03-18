@@ -152,22 +152,6 @@ QString MeshtasticModGUI::getActivePayloadText() const
 {
     switch (m_settings.m_messageType)
     {
-    case MeshtasticModSettings::MessageBeacon:
-        return m_settings.m_beaconMessage;
-    case MeshtasticModSettings::MessageCQ:
-        return m_settings.m_cqMessage;
-    case MeshtasticModSettings::MessageReply:
-        return m_settings.m_replyMessage;
-    case MeshtasticModSettings::MessageReport:
-        return m_settings.m_reportMessage;
-    case MeshtasticModSettings::MessageReplyReport:
-        return m_settings.m_replyReportMessage;
-    case MeshtasticModSettings::MessageRRR:
-        return m_settings.m_rrrMessage;
-    case MeshtasticModSettings::Message73:
-        return m_settings.m_73Message;
-    case MeshtasticModSettings::MessageQSOText:
-        return m_settings.m_qsoTextMessage;
     case MeshtasticModSettings::MessageText:
         return m_settings.m_textMessage;
     case MeshtasticModSettings::MessageBytes:
@@ -364,18 +348,6 @@ void MeshtasticModGUI::on_fecParity_valueChanged(int value)
     applySettings();
 }
 
-void MeshtasticModGUI::on_crc_stateChanged(int state)
-{
-	m_settings.m_hasCRC = (state == Qt::Checked);
-	applySettings();
-}
-
-void MeshtasticModGUI::on_header_stateChanged(int state)
-{
-	m_settings.m_hasHeader = (state == Qt::Checked);
-	applySettings();
-}
-
 void MeshtasticModGUI::on_myCall_editingFinished()
 {
     m_settings.m_myCall = ui->myCall->text();
@@ -403,7 +375,6 @@ void MeshtasticModGUI::on_report_editingFinished()
 void MeshtasticModGUI::on_resetMessages_clicked(bool checked)
 {
     (void) checked;
-    m_settings.setDefaultTemplates();
     displayCurrentPayloadMessage();
     applySettings();
 }
@@ -426,30 +397,13 @@ void MeshtasticModGUI::on_repeatMessage_valueChanged(int value)
 void MeshtasticModGUI::on_generateMessages_clicked(bool checked)
 {
     (void) checked;
-    m_settings.generateMessages();
     displayCurrentPayloadMessage();
     applySettings();
 }
 
 void MeshtasticModGUI::on_messageText_editingFinished()
 {
-    if (m_settings.m_messageType == MeshtasticModSettings::MessageBeacon) {
-        m_settings.m_beaconMessage = ui->messageText->toPlainText();
-    } else if (m_settings.m_messageType == MeshtasticModSettings::MessageCQ) {
-        m_settings.m_cqMessage = ui->messageText->toPlainText();
-    } else if (m_settings.m_messageType == MeshtasticModSettings::MessageReply) {
-        m_settings.m_replyMessage = ui->messageText->toPlainText();
-    } else if (m_settings.m_messageType == MeshtasticModSettings::MessageReport) {
-        m_settings.m_reportMessage = ui->messageText->toPlainText();
-    } else if (m_settings.m_messageType == MeshtasticModSettings::MessageReplyReport) {
-        m_settings.m_replyReportMessage = ui->messageText->toPlainText();
-    } else if (m_settings.m_messageType == MeshtasticModSettings::MessageRRR) {
-        m_settings.m_rrrMessage = ui->messageText->toPlainText();
-    } else if (m_settings.m_messageType == MeshtasticModSettings::Message73) {
-        m_settings.m_73Message = ui->messageText->toPlainText();
-    } else if (m_settings.m_messageType == MeshtasticModSettings::MessageQSOText) {
-        m_settings.m_qsoTextMessage = ui->messageText->toPlainText();
-    } else if (m_settings.m_messageType == MeshtasticModSettings::MessageText) {
+    if (m_settings.m_messageType == MeshtasticModSettings::MessageText) {
         m_settings.m_textMessage = ui->messageText->toPlainText();
     }
 
@@ -749,22 +703,6 @@ void MeshtasticModGUI::displayCurrentPayloadMessage()
 
     if (m_settings.m_messageType == MeshtasticModSettings::MessageNone) {
         ui->messageText->clear();
-    } else if (m_settings.m_messageType == MeshtasticModSettings::MessageBeacon) {
-        ui->messageText->setText(m_settings.m_beaconMessage);
-    } else if (m_settings.m_messageType == MeshtasticModSettings::MessageCQ) {
-        ui->messageText->setText(m_settings.m_cqMessage);
-    } else if (m_settings.m_messageType == MeshtasticModSettings::MessageReply) {
-        ui->messageText->setText(m_settings.m_replyMessage);
-    } else if (m_settings.m_messageType == MeshtasticModSettings::MessageReport) {
-        ui->messageText->setText(m_settings.m_reportMessage);
-    } else if (m_settings.m_messageType == MeshtasticModSettings::MessageReplyReport) {
-        ui->messageText->setText(m_settings.m_replyReportMessage);
-    } else if (m_settings.m_messageType == MeshtasticModSettings::MessageRRR) {
-        ui->messageText->setText(m_settings.m_rrrMessage);
-    } else if (m_settings.m_messageType == MeshtasticModSettings::Message73) {
-        ui->messageText->setText(m_settings.m_73Message);
-    } else if (m_settings.m_messageType == MeshtasticModSettings::MessageQSOText) {
-        ui->messageText->setText(m_settings.m_qsoTextMessage);
     } else if (m_settings.m_messageType == MeshtasticModSettings::MessageText) {
         ui->messageText->setText(m_settings.m_textMessage);
     }
@@ -838,8 +776,6 @@ void MeshtasticModGUI::makeUIConnections()
     QObject::connect(ui->syncWord, &QLineEdit::editingFinished, this, &MeshtasticModGUI::on_syncWord_editingFinished);
     QObject::connect(ui->channelMute, &QToolButton::toggled, this, &MeshtasticModGUI::on_channelMute_toggled);
     QObject::connect(ui->fecParity, &QDial::valueChanged, this, &MeshtasticModGUI::on_fecParity_valueChanged);
-    QObject::connect(ui->crc, &QCheckBox::stateChanged, this, &MeshtasticModGUI::on_crc_stateChanged);
-    QObject::connect(ui->header, &QCheckBox::stateChanged, this, &MeshtasticModGUI::on_header_stateChanged);
     QObject::connect(ui->myCall, &QLineEdit::editingFinished, this, &MeshtasticModGUI::on_myCall_editingFinished);
     QObject::connect(ui->urCall, &QLineEdit::editingFinished, this, &MeshtasticModGUI::on_urCall_editingFinished);
     QObject::connect(ui->myLocator, &QLineEdit::editingFinished, this, &MeshtasticModGUI::on_myLocator_editingFinished);

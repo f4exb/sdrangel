@@ -22,12 +22,12 @@
 #include "meshtasticpacket.h"
 
 const MeshtasticModSettings::CodingScheme MeshtasticModEncoder::m_codingScheme = MeshtasticModSettings::CodingLoRa;
+const bool MeshtasticModEncoder::m_hasCRC = true;
+const bool MeshtasticModEncoder::m_hasHeader = true;
 
 MeshtasticModEncoder::MeshtasticModEncoder() :
     m_nbSymbolBits(5),
-    m_nbParityBits(1),
-    m_hasCRC(true),
-    m_hasHeader(true)
+    m_nbParityBits(1)
 {}
 
 MeshtasticModEncoder::~MeshtasticModEncoder()

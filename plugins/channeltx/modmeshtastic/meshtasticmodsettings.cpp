@@ -58,6 +58,8 @@ const int MeshtasticModSettings::bandwidths[] = {
 
 const MeshtasticModSettings::CodingScheme MeshtasticModSettings::m_codingScheme = MeshtasticModSettings::CodingLoRa;
 const MeshtasticModSettings::MessageType MeshtasticModSettings::m_messageType = MeshtasticModSettings::MessageText;
+const bool MeshtasticModSettings::m_hasCRC = true;
+const bool MeshtasticModSettings::m_hasHeader = true;
 const int MeshtasticModSettings::nbBandwidths = 3*8 + 4;
 const int MeshtasticModSettings::oversampling = 4;
 
@@ -77,8 +79,6 @@ void MeshtasticModSettings::resetToDefaults()
     m_preambleChirps = 8;
     m_quietMillis = 1000;
     m_nbParityBits = 1;
-    m_hasCRC = true;
-    m_hasHeader = true;
     m_textMessage = "Hello LoRa";
     m_myCall = "MYCALL";
     m_urCall = "URCALL";
@@ -101,41 +101,6 @@ void MeshtasticModSettings::resetToDefaults()
     m_reverseAPIChannelIndex = 0;
     m_workspaceIndex = 0;
     m_hidden = false;
-
-    setDefaultTemplates();
-}
-
-void MeshtasticModSettings::setDefaultTemplates()
-{
-    // %1: myCall %2: urCall %3: myLoc %4: report
-    m_beaconMessage = "VVV DE %1 %2";   // Beacon
-    m_cqMessage = "CQ DE %1 %2";        // caller calls CQ
-    m_replyMessage = "%1 %2 %3";        // Reply to CQ from caller
-    m_reportMessage = "%1 %2 %3";       // Report to caller
-    m_replyReportMessage = "%1 %2 R%3"; // Report to callee
-    m_rrrMessage = "%1 %2 RRR";         // RRR to callee
-    m_73Message = "%1 %2 73";           // 73 to caller
-    m_qsoTextMessage = "%1 %2 %3";      // Freeflow message to caller - %3 is m_textMessage
-}
-
-void MeshtasticModSettings::generateMessages()
-{
-    m_beaconMessage = m_beaconMessage
-        .arg(m_myCall).arg(m_myLoc);
-    m_cqMessage = m_cqMessage
-        .arg(m_myCall).arg(m_myLoc);
-    m_replyMessage = m_replyMessage
-        .arg(m_urCall).arg(m_myCall).arg(m_myLoc);
-    m_reportMessage = m_reportMessage
-        .arg(m_urCall).arg(m_myCall).arg(m_myRpt);
-    m_replyReportMessage = m_replyReportMessage
-        .arg(m_urCall).arg(m_myCall).arg(m_myRpt);
-    m_rrrMessage = m_rrrMessage
-        .arg(m_urCall).arg(m_myCall);
-    m_73Message = m_73Message
-        .arg(m_urCall).arg(m_myCall);
-    m_qsoTextMessage = m_qsoTextMessage
-        .arg(m_urCall).arg(m_myCall).arg(m_textMessage);
 }
 
 unsigned int MeshtasticModSettings::getNbSFDFourths() const
@@ -173,14 +138,6 @@ QByteArray MeshtasticModSettings::serialize() const
     s.writeU32(10, m_preambleChirps);
     s.writeS32(11, m_quietMillis);
     s.writeBool(12, m_invertRamps);
-    s.writeString(20, m_beaconMessage);
-    s.writeString(21, m_cqMessage);
-    s.writeString(22, m_replyMessage);
-    s.writeString(23, m_reportMessage);
-    s.writeString(24, m_replyReportMessage);
-    s.writeString(25, m_rrrMessage);
-    s.writeString(26, m_73Message);
-    s.writeString(27, m_qsoTextMessage);
     s.writeString(28, m_textMessage);
     s.writeBlob(29, m_bytesMessage);
     s.writeS32(30, (int) m_messageType);
@@ -247,19 +204,9 @@ bool MeshtasticModSettings::deserialize(const QByteArray& data)
         d.readS32(11, &m_quietMillis, 1000);
         d.readBool(11, &m_useReverseAPI, false);
         d.readBool(12, &m_invertRamps, false);
-        d.readString(20, &m_beaconMessage, "VVV DE %1 %2");
-        d.readString(21, &m_cqMessage, "CQ DE %1 %2");
-        d.readString(22, &m_replyMessage, "%2 %1 %3");
-        d.readString(23, &m_reportMessage, "%2 %1 %3");
-        d.readString(24, &m_replyReportMessage, "%2 %1 R%3");
-        d.readString(25, &m_rrrMessage, "%2 %1 RRR");
-        d.readString(26, &m_73Message, "%2 %1 73");
-        d.readString(27, &m_qsoTextMessage, "%2 %1 Hello LoRa");
         d.readString(28, &m_textMessage, "Hello LoRa");
         d.readBlob(29, &m_bytesMessage);
         d.readS32(31, &m_nbParityBits, 1);
-        d.readBool(32, &m_hasCRC, true);
-        d.readBool(33, &m_hasHeader, true);
         d.readString(40, &m_myCall, "MYCALL");
         d.readString(41, &m_urCall, "URCALL");
         d.readString(42, &m_myLoc, "AA00AA");
@@ -360,32 +307,12 @@ void MeshtasticModSettings::applySettings(const QStringList& settingsKeys, const
         m_channelMarker->deserialize(settings.m_channelMarker->serialize());
     if (settingsKeys.contains("rollupState") && m_rollupState && settings.m_rollupState)
         m_rollupState->deserialize(settings.m_rollupState->serialize());
-    if (settingsKeys.contains("beaconMessage"))
-        m_beaconMessage = settings.m_beaconMessage;
-    if (settingsKeys.contains("cqMessage"))
-        m_cqMessage = settings.m_cqMessage;
-    if (settingsKeys.contains("replyMessage"))
-        m_replyMessage = settings.m_replyMessage;
-    if (settingsKeys.contains("reportMessage"))
-        m_reportMessage = settings.m_reportMessage;
-    if (settingsKeys.contains("replyReportMessage"))
-        m_replyReportMessage = settings.m_replyReportMessage;
-    if (settingsKeys.contains("rrrMessage"))
-        m_rrrMessage = settings.m_rrrMessage;
-    if (settingsKeys.contains("73Message"))
-        m_73Message = settings.m_73Message;
-    if (settingsKeys.contains("qsoTextMessage"))
-        m_qsoTextMessage = settings.m_qsoTextMessage;
     if (settingsKeys.contains("textMessage"))
         m_textMessage = settings.m_textMessage;
     if (settingsKeys.contains("bytesMessage"))
         m_bytesMessage = settings.m_bytesMessage;
     if (settingsKeys.contains("nbParityBits"))
         m_nbParityBits = settings.m_nbParityBits;
-    if (settingsKeys.contains("hasCRC"))
-        m_hasCRC = settings.m_hasCRC;
-    if (settingsKeys.contains("hasHeader"))
-        m_hasHeader = settings.m_hasHeader;
     if (settingsKeys.contains("myCall"))
         m_myCall = settings.m_myCall;
     if (settingsKeys.contains("urCall"))
@@ -445,22 +372,6 @@ QString MeshtasticModSettings::getDebugString(const QStringList& settingsKeys, b
         debug += QString("Workspace Index: %1\n").arg(m_workspaceIndex);
     if (settingsKeys.contains("hidden") || force)
         debug += QString("Hidden: %1\n").arg(m_hidden);
-    if (settingsKeys.contains("beaconMessage") || force)
-        debug += QString("Beacon Message: %1\n").arg(m_beaconMessage);
-    if (settingsKeys.contains("cqMessage") || force)
-        debug += QString("CQ Message: %1\n").arg(m_cqMessage);
-    if (settingsKeys.contains("replyMessage") || force)
-        debug += QString("Reply Message: %1\n").arg(m_replyMessage);
-    if (settingsKeys.contains("reportMessage") || force)
-        debug += QString("Report Message: %1\n").arg(m_reportMessage);
-    if (settingsKeys.contains("replyReportMessage") || force)
-        debug += QString("Reply Report Message: %1\n").arg(m_replyReportMessage);
-    if (settingsKeys.contains("rrrMessage") || force)
-        debug += QString("RRR Message: %1\n").arg(m_rrrMessage);
-    if (settingsKeys.contains("73Message") || force)
-        debug += QString("73 Message: %1\n").arg(m_73Message);
-    if (settingsKeys.contains("qsoTextMessage") || force)
-        debug += QString("QSO Text Message: %1\n").arg(m_qsoTextMessage);
     if (settingsKeys.contains("textMessage") || force)
         debug += QString("Text Message: %1\n").arg(m_textMessage);
     if (settingsKeys.contains("messageType") || force)
