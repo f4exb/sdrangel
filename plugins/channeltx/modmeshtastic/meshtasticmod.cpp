@@ -174,17 +174,9 @@ void MeshtasticMod::sendCurrentSettingsMessage()
 {
     MeshtasticModBaseband::MsgConfigureMeshtasticModPayload *payloadMsg = nullptr;
 
-    if (m_settings.m_messageType == MeshtasticModSettings::MessageNone)
-    {
-        m_symbols.clear();
-        payloadMsg = MeshtasticModBaseband::MsgConfigureMeshtasticModPayload::create();
-    }
-    else
-    {
-        m_symbols.clear();
-        m_encoder.encode(m_settings, m_symbols);
-        payloadMsg = MeshtasticModBaseband::MsgConfigureMeshtasticModPayload::create(m_symbols);
-    }
+    m_symbols.clear();
+    m_encoder.encode(m_settings, m_symbols);
+    payloadMsg = MeshtasticModBaseband::MsgConfigureMeshtasticModPayload::create(m_symbols);
 
     if (payloadMsg)
     {

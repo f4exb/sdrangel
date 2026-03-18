@@ -154,8 +154,6 @@ QString MeshtasticModGUI::getActivePayloadText() const
     {
     case MeshtasticModSettings::MessageText:
         return m_settings.m_textMessage;
-    case MeshtasticModSettings::MessageBytes:
-        return QString::fromUtf8(m_settings.m_bytesMessage);
     default:
         return QString();
     }
@@ -635,9 +633,7 @@ void MeshtasticModGUI::displayCurrentPayloadMessage()
 {
     ui->messageText->blockSignals(true);
 
-    if (m_settings.m_messageType == MeshtasticModSettings::MessageNone) {
-        ui->messageText->clear();
-    } else if (m_settings.m_messageType == MeshtasticModSettings::MessageText) {
+    if (m_settings.m_messageType == MeshtasticModSettings::MessageText) {
         ui->messageText->setText(m_settings.m_textMessage);
     }
 
