@@ -348,13 +348,6 @@ void MeshtasticModGUI::on_fecParity_valueChanged(int value)
     applySettings();
 }
 
-void MeshtasticModGUI::on_resetMessages_clicked(bool checked)
-{
-    (void) checked;
-    displayCurrentPayloadMessage();
-    applySettings();
-}
-
 void MeshtasticModGUI::on_playMessage_clicked(bool checked)
 {
     (void) checked;
@@ -367,13 +360,6 @@ void MeshtasticModGUI::on_repeatMessage_valueChanged(int value)
 {
     m_settings.m_messageRepeat = value;
     ui->repeatText->setText(tr("%1").arg(m_settings.m_messageRepeat));
-    applySettings();
-}
-
-void MeshtasticModGUI::on_generateMessages_clicked(bool checked)
-{
-    (void) checked;
-    displayCurrentPayloadMessage();
     applySettings();
 }
 
@@ -501,8 +487,6 @@ MeshtasticModGUI::MeshtasticModGUI(PluginAPI* pluginAPI, DeviceUISet *deviceUISe
 	connect(&MainCore::instance()->getMasterTimer(), SIGNAL(timeout()), this, SLOT(tick()));
 
     ui->fecParity->setEnabled(true);
-    ui->crc->setEnabled(true);
-    ui->header->setEnabled(true);
 
     ui->deltaFrequencyLabel->setText(QString("%1f").arg(QChar(0x94, 0x03)));
     ui->deltaFrequency->setColorMapper(ColorMapper(ColorMapper::GrayGold));
@@ -527,29 +511,13 @@ MeshtasticModGUI::MeshtasticModGUI(PluginAPI* pluginAPI, DeviceUISet *deviceUISe
     ui->idleTimeText->setToolTip(tr("Current idle interval in seconds."));
     ui->syncWord->setToolTip(tr("LoRa sync word in hexadecimal (00-ff)."));
     ui->syncLabel->setToolTip(tr("LoRa sync word."));
-    ui->scheme->setToolTip(tr("Encoder mode. Use LoRa for Meshtastic-compatible payloads."));
-    ui->schemeLabel->setToolTip(tr("Select encoding scheme."));
     ui->fecParity->setToolTip(tr("LoRa coding rate parity denominator (CR)."));
     ui->fecParityLabel->setToolTip(tr("LoRa coding rate parity setting."));
     ui->fecParityText->setToolTip(tr("Current coding rate parity value."));
-    ui->crc->setToolTip(tr("Append payload CRC."));
-    ui->header->setToolTip(tr("Use explicit LoRa header mode."));
     ui->channelMute->setToolTip(tr("Mute this channel output."));
-    ui->myCall->setToolTip(tr("Source callsign used by template messages."));
-    ui->myCallLabel->setToolTip(tr("Source callsign field."));
-    ui->urCall->setToolTip(tr("Destination callsign used by template messages."));
-    ui->urCallLabel->setToolTip(tr("Destination callsign field."));
-    ui->myLocator->setToolTip(tr("Source locator used by template messages."));
-    ui->myLocatorLabel->setToolTip(tr("Source locator field."));
-    ui->report->setToolTip(tr("Signal report used by template messages."));
-    ui->reportLabel->setToolTip(tr("Signal report field."));
-    ui->msgType->setToolTip(tr("Select which payload template is edited/transmitted."));
-    ui->msgTypeLabel->setToolTip(tr("Payload template type."));
-    ui->resetMessages->setToolTip(tr("Reset payload templates to defaults."));
     ui->playMessage->setToolTip(tr("Queue one transmission of current message type."));
     ui->repeatMessage->setToolTip(tr("Number of repetitions for each triggered transmission."));
     ui->repeatLabel->setToolTip(tr("Transmission repetition count."));
-    ui->generateMessages->setToolTip(tr("Generate standardized payload templates from current fields."));
     ui->messageText->setToolTip(tr("Text payload editor. Meshtastic MESH: commands can auto-apply radio settings."));
     ui->msgLabel->setToolTip(tr("Message payload editor."));
     ui->hexText->setToolTip(tr("Raw hexadecimal payload bytes."));
@@ -635,8 +603,6 @@ void MeshtasticModGUI::displaySettings()
     displayBinaryMessage();
 
     ui->fecParity->setEnabled(m_settings.m_codingScheme == MeshtasticModSettings::CodingLoRa);
-    ui->crc->setEnabled(m_settings.m_codingScheme == MeshtasticModSettings::CodingLoRa);
-    ui->header->setEnabled(m_settings.m_codingScheme == MeshtasticModSettings::CodingLoRa);
 
     blockApplySettings(true);
     ui->deltaFrequency->setValue(m_channelMarker.getCenterFrequency());
@@ -652,14 +618,10 @@ void MeshtasticModGUI::displaySettings()
     ui->idleTimeText->setText(tr("%1").arg(m_settings.m_quietMillis / 1000.0, 0, 'f', 1));
     ui->syncWord->setText((tr("%1").arg(m_settings.m_syncWord, 2, 16)));
     ui->channelMute->setChecked(m_settings.m_channelMute);
-    ui->scheme->setCurrentIndex((int) m_settings.m_codingScheme);
     ui->fecParity->setValue(m_settings.m_nbParityBits);
     ui->fecParityText->setText(tr("%1").arg(m_settings.m_nbParityBits));
-    ui->crc->setChecked(m_settings.m_hasCRC);
-    ui->header->setChecked(m_settings.m_hasHeader);
     ui->repeatMessage->setValue(m_settings.m_messageRepeat);
     ui->repeatText->setText(tr("%1").arg(m_settings.m_messageRepeat));
-    ui->msgType->setCurrentIndex((int) m_settings.m_messageType);
     ui->udpEnabled->setChecked(m_settings.m_udpEnabled);
     ui->udpAddress->setText(m_settings.m_udpAddress);
     ui->udpPort->setText(QString::number(m_settings.m_udpPort));
@@ -748,10 +710,8 @@ void MeshtasticModGUI::makeUIConnections()
     QObject::connect(ui->syncWord, &QLineEdit::editingFinished, this, &MeshtasticModGUI::on_syncWord_editingFinished);
     QObject::connect(ui->channelMute, &QToolButton::toggled, this, &MeshtasticModGUI::on_channelMute_toggled);
     QObject::connect(ui->fecParity, &QDial::valueChanged, this, &MeshtasticModGUI::on_fecParity_valueChanged);
-    QObject::connect(ui->resetMessages, &QPushButton::clicked, this, &MeshtasticModGUI::on_resetMessages_clicked);
     QObject::connect(ui->playMessage, &QPushButton::clicked, this, &MeshtasticModGUI::on_playMessage_clicked);
     QObject::connect(ui->repeatMessage, &QDial::valueChanged, this, &MeshtasticModGUI::on_repeatMessage_valueChanged);
-    QObject::connect(ui->generateMessages, &QPushButton::clicked, this, &MeshtasticModGUI::on_generateMessages_clicked);
     QObject::connect(ui->messageText, &CustomTextEdit::editingFinished, this, &MeshtasticModGUI::on_messageText_editingFinished);
     QObject::connect(ui->hexText, &QLineEdit::editingFinished, this, &MeshtasticModGUI::on_hexText_editingFinished);
     QObject::connect(ui->udpEnabled, &QCheckBox::clicked, this, &MeshtasticModGUI::on_udpEnabled_clicked);

@@ -545,37 +545,6 @@
     <item>
      <layout class="QHBoxLayout" name="schemeLayout">
       <item>
-       <widget class="QLabel" name="schemeLabel">
-        <property name="text">
-         <string>Scheme</string>
-        </property>
-       </widget>
-      </item>
-      <item>
-       <widget class="QComboBox" name="scheme">
-        <item>
-         <property name="text">
-          <string>LoRa</string>
-         </property>
-        </item>
-        <item>
-         <property name="text">
-          <string>ASCII</string>
-         </property>
-        </item>
-        <item>
-         <property name="text">
-          <string>TTY</string>
-         </property>
-        </item>
-        <item>
-         <property name="text">
-          <string>FT</string>
-         </property>
-        </item>
-       </widget>
-      </item>
-      <item>
        <widget class="QLabel" name="fecParityLabel">
         <property name="text">
          <string>FEC</string>
@@ -615,26 +584,6 @@
        </widget>
       </item>
       <item>
-       <widget class="QCheckBox" name="crc">
-        <property name="toolTip">
-         <string>Append CRC to payload</string>
-        </property>
-        <property name="text">
-         <string>CRC</string>
-        </property>
-       </widget>
-      </item>
-      <item>
-       <widget class="QCheckBox" name="header">
-        <property name="toolTip">
-         <string>Header (explicit)</string>
-        </property>
-        <property name="text">
-         <string>HDR</string>
-        </property>
-       </widget>
-      </item>
-      <item>
        <widget class="QLabel" name="syncLabel">
         <property name="text">
          <string>Sync</string>
@@ -664,229 +613,6 @@
        </widget>
       </item>
       <item>
-       <spacer name="horizontalSpacer_8">
-        <property name="orientation">
-         <enum>Qt::Horizontal</enum>
-        </property>
-        <property name="sizeHint" stdset="0">
-         <size>
-          <width>40</width>
-          <height>20</height>
-         </size>
-        </property>
-       </spacer>
-      </item>
-     </layout>
-    </item>
-    <item>
-     <layout class="QHBoxLayout" name="callLayout">
-      <item>
-       <widget class="QLabel" name="myCallLabel">
-        <property name="text">
-         <string>MyCall</string>
-        </property>
-       </widget>
-      </item>
-      <item>
-       <widget class="QLineEdit" name="myCall">
-        <property name="focusPolicy">
-         <enum>Qt::ClickFocus</enum>
-        </property>
-        <property name="toolTip">
-         <string>Caller callsign</string>
-        </property>
-        <property name="text">
-         <string/>
-        </property>
-        <property name="maxLength">
-         <number>10</number>
-        </property>
-       </widget>
-      </item>
-      <item>
-       <widget class="QLabel" name="urCallLabel">
-        <property name="minimumSize">
-         <size>
-          <width>50</width>
-          <height>0</height>
-         </size>
-        </property>
-        <property name="text">
-         <string>YourCall</string>
-        </property>
-       </widget>
-      </item>
-      <item>
-       <widget class="QLineEdit" name="urCall">
-        <property name="focusPolicy">
-         <enum>Qt::ClickFocus</enum>
-        </property>
-        <property name="toolTip">
-         <string>Callee callsign</string>
-        </property>
-        <property name="text">
-         <string/>
-        </property>
-        <property name="maxLength">
-         <number>10</number>
-        </property>
-       </widget>
-      </item>
-     </layout>
-    </item>
-    <item>
-     <layout class="QHBoxLayout" name="locLayout">
-      <item>
-       <widget class="QLabel" name="myLocatorLabel">
-        <property name="text">
-         <string>MyLoc</string>
-        </property>
-       </widget>
-      </item>
-      <item>
-       <widget class="QLineEdit" name="myLocator">
-        <property name="focusPolicy">
-         <enum>Qt::ClickFocus</enum>
-        </property>
-        <property name="toolTip">
-         <string>Caller QRA locator</string>
-        </property>
-        <property name="text">
-         <string/>
-        </property>
-        <property name="maxLength">
-         <number>10</number>
-        </property>
-       </widget>
-      </item>
-      <item>
-       <widget class="QLabel" name="reportLabel">
-        <property name="minimumSize">
-         <size>
-          <width>50</width>
-          <height>0</height>
-         </size>
-        </property>
-        <property name="text">
-         <string>Report</string>
-        </property>
-       </widget>
-      </item>
-      <item>
-       <widget class="QLineEdit" name="report">
-        <property name="focusPolicy">
-         <enum>Qt::ClickFocus</enum>
-        </property>
-        <property name="toolTip">
-         <string>Report to callee</string>
-        </property>
-        <property name="text">
-         <string/>
-        </property>
-        <property name="maxLength">
-         <number>10</number>
-        </property>
-       </widget>
-      </item>
-     </layout>
-    </item>
-    <item>
-     <layout class="QHBoxLayout" name="msgLayout">
-      <property name="topMargin">
-       <number>6</number>
-      </property>
-      <property name="bottomMargin">
-       <number>6</number>
-      </property>
-      <item>
-       <widget class="QLabel" name="msgTypeLabel">
-        <property name="text">
-         <string>Type</string>
-        </property>
-       </widget>
-      </item>
-      <item>
-       <widget class="QComboBox" name="msgType">
-        <property name="toolTip">
-         <string>Message type</string>
-        </property>
-        <item>
-         <property name="text">
-          <string>None</string>
-         </property>
-        </item>
-        <item>
-         <property name="text">
-          <string>Beacon</string>
-         </property>
-        </item>
-        <item>
-         <property name="text">
-          <string>CQ</string>
-         </property>
-        </item>
-        <item>
-         <property name="text">
-          <string>Reply</string>
-         </property>
-        </item>
-        <item>
-         <property name="text">
-          <string>Report</string>
-         </property>
-        </item>
-        <item>
-         <property name="text">
-          <string>R-Report</string>
-         </property>
-        </item>
-        <item>
-         <property name="text">
-          <string>RRR</string>
-         </property>
-        </item>
-        <item>
-         <property name="text">
-          <string>73</string>
-         </property>
-        </item>
-        <item>
-         <property name="text">
-          <string>QSO Text</string>
-         </property>
-        </item>
-        <item>
-         <property name="text">
-          <string>Text</string>
-         </property>
-        </item>
-        <item>
-         <property name="text">
-          <string>Bytes</string>
-         </property>
-        </item>
-        <item>
-         <property name="text">
-          <string>Test</string>
-         </property>
-        </item>
-       </widget>
-      </item>
-      <item>
-       <widget class="QPushButton" name="resetMessages">
-        <property name="toolTip">
-         <string>Restore default message templates</string>
-        </property>
-        <property name="text">
-         <string/>
-        </property>
-        <property name="icon">
-         <iconset resource="../../../sdrgui/resources/res.qrc">
-          <normaloff>:/recycle.png</normaloff>:/recycle.png</iconset>
-        </property>
-       </widget>
-      </item>
-      <item>
        <widget class="QPushButton" name="playMessage">
         <property name="toolTip">
          <string>Play message</string>
@@ -902,19 +628,6 @@
          <bool>false</bool>
         </property>
        </widget>
-      </item>
-      <item>
-       <spacer name="horizontalSpacer_4">
-        <property name="orientation">
-         <enum>Qt::Horizontal</enum>
-        </property>
-        <property name="sizeHint" stdset="0">
-         <size>
-          <width>40</width>
-          <height>20</height>
-         </size>
-        </property>
-       </spacer>
       </item>
       <item>
        <widget class="QLabel" name="repeatLabel">
@@ -956,20 +669,17 @@
        </widget>
       </item>
       <item>
-       <widget class="QPushButton" name="generateMessages">
-        <property name="maximumSize">
+       <spacer name="horizontalSpacer_8">
+        <property name="orientation">
+         <enum>Qt::Horizontal</enum>
+        </property>
+        <property name="sizeHint" stdset="0">
          <size>
           <width>40</width>
-          <height>16777215</height>
+          <height>20</height>
          </size>
         </property>
-        <property name="toolTip">
-         <string>Generate standard messages</string>
-        </property>
-        <property name="text">
-         <string>Gen</string>
-        </property>
-       </widget>
+       </spacer>
       </item>
      </layout>
     </item>
