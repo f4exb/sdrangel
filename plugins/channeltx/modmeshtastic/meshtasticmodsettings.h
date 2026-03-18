@@ -65,10 +65,6 @@ struct MeshtasticModSettings
     unsigned char m_syncWord;
     bool m_channelMute;
     static const CodingScheme m_codingScheme;
-    QString m_myCall;     //!< QSO mode: my callsign
-    QString m_urCall;     //!< QSO mode: your callsign
-    QString m_myLoc;      //!< QSO mode: my locator
-    QString m_myRpt;      //!< QSO mode: my report
     static const MessageType m_messageType;
     QString m_textMessage;
     QByteArray m_bytesMessage;

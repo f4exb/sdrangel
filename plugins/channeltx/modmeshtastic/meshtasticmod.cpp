@@ -483,18 +483,6 @@ void MeshtasticMod::webapiUpdateChannelSettings(
     if (channelSettingsKeys.contains("nbParityBits")) {
         settings.m_nbParityBits = response.getChirpChatModSettings()->getNbParityBits();
     }
-    if (channelSettingsKeys.contains("myCall")) {
-        settings.m_myCall = *response.getChirpChatModSettings()->getMyCall();
-    }
-    if (channelSettingsKeys.contains("urCall")) {
-        settings.m_urCall = *response.getChirpChatModSettings()->getUrCall();
-    }
-    if (channelSettingsKeys.contains("myLoc")) {
-        settings.m_myLoc = *response.getChirpChatModSettings()->getMyLoc();
-    }
-    if (channelSettingsKeys.contains("myRpt")) {
-        settings.m_myRpt = *response.getChirpChatModSettings()->getMyRpt();
-    }
     if (channelSettingsKeys.contains("textMessage")) {
         settings.m_textMessage = *response.getChirpChatModSettings()->getTextMessage();
     }
@@ -585,31 +573,6 @@ void MeshtasticMod::webapiFormatChannelSettings(SWGSDRangel::SWGChannelSettings&
     response.getChirpChatModSettings()->setNbParityBits(settings.m_nbParityBits);
     response.getChirpChatModSettings()->setHasCrc(settings.m_hasCRC ? 1 : 0);
     response.getChirpChatModSettings()->setHasHeader(settings.m_hasHeader ? 1 : 0);
-
-    if (response.getChirpChatModSettings()->getMyCall()) {
-        *response.getChirpChatModSettings()->getMyCall() = settings.m_myCall;
-    } else {
-        response.getChirpChatModSettings()->setMyCall(new QString(settings.m_myCall));
-    }
-
-    if (response.getChirpChatModSettings()->getUrCall()) {
-        *response.getChirpChatModSettings()->getUrCall() = settings.m_urCall;
-    } else {
-        response.getChirpChatModSettings()->setUrCall(new QString(settings.m_urCall));
-    }
-
-    if (response.getChirpChatModSettings()->getMyLoc()) {
-        *response.getChirpChatModSettings()->getMyLoc() = settings.m_myLoc;
-    } else {
-        response.getChirpChatModSettings()->setMyLoc(new QString(settings.m_myLoc));
-    }
-
-    if (response.getChirpChatModSettings()->getMyRpt()) {
-        *response.getChirpChatModSettings()->getMyRpt() = settings.m_myRpt;
-    } else {
-        response.getChirpChatModSettings()->setMyRpt(new QString(settings.m_myRpt));
-    }
-
     response.getChirpChatModSettings()->setMessageType((int) settings.m_messageType);
 
     if (response.getChirpChatModSettings()->getTextMessage()) {
@@ -795,18 +758,6 @@ void MeshtasticMod::webapiFormatChannelSettings(
     }
     if (channelSettingsKeys.contains("hasHeader") || force) {
         swgMeshtasticModSettings->setHasHeader(settings.m_hasHeader ? 1 : 0);
-    }
-    if (channelSettingsKeys.contains("myCall") || force) {
-        swgMeshtasticModSettings->setMyCall(new QString(settings.m_myCall));
-    }
-    if (channelSettingsKeys.contains("urCall") || force) {
-        swgMeshtasticModSettings->setUrCall(new QString(settings.m_urCall));
-    }
-    if (channelSettingsKeys.contains("myLoc") || force) {
-        swgMeshtasticModSettings->setMyLoc(new QString(settings.m_myLoc));
-    }
-    if (channelSettingsKeys.contains("myRpt") || force) {
-        swgMeshtasticModSettings->setMyRpt(new QString(settings.m_myRpt));
     }
     if (channelSettingsKeys.contains("messageType") || force) {
         swgMeshtasticModSettings->setMessageType((int) settings.m_messageType);

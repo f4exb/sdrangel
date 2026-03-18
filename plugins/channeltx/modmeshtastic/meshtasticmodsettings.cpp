@@ -80,10 +80,6 @@ void MeshtasticModSettings::resetToDefaults()
     m_quietMillis = 1000;
     m_nbParityBits = 1;
     m_textMessage = "Hello LoRa";
-    m_myCall = "MYCALL";
-    m_urCall = "URCALL";
-    m_myLoc = "AA00AA";
-    m_myRpt = "59";
     m_syncWord = 0x34;
     m_channelMute = false;
     m_messageRepeat = 1;
@@ -144,10 +140,6 @@ QByteArray MeshtasticModSettings::serialize() const
     s.writeS32(31, m_nbParityBits);
     s.writeBool(32, m_hasCRC);
     s.writeBool(33, m_hasHeader);
-    s.writeString(40, m_myCall);
-    s.writeString(41, m_urCall);
-    s.writeString(42, m_myLoc);
-    s.writeString(43, m_myRpt);
     s.writeS32(44, m_messageRepeat);
     s.writeBool(50, m_useReverseAPI);
     s.writeString(51, m_reverseAPIAddress);
@@ -207,10 +199,6 @@ bool MeshtasticModSettings::deserialize(const QByteArray& data)
         d.readString(28, &m_textMessage, "Hello LoRa");
         d.readBlob(29, &m_bytesMessage);
         d.readS32(31, &m_nbParityBits, 1);
-        d.readString(40, &m_myCall, "MYCALL");
-        d.readString(41, &m_urCall, "URCALL");
-        d.readString(42, &m_myLoc, "AA00AA");
-        d.readString(43, &m_myRpt, "59");
         d.readS32(44, &m_messageRepeat, 1);
         d.readBool(50, &m_useReverseAPI, false);
         d.readString(51, &m_reverseAPIAddress, "127.0.0.1");
@@ -313,14 +301,6 @@ void MeshtasticModSettings::applySettings(const QStringList& settingsKeys, const
         m_bytesMessage = settings.m_bytesMessage;
     if (settingsKeys.contains("nbParityBits"))
         m_nbParityBits = settings.m_nbParityBits;
-    if (settingsKeys.contains("myCall"))
-        m_myCall = settings.m_myCall;
-    if (settingsKeys.contains("urCall"))
-        m_urCall = settings.m_urCall;
-    if (settingsKeys.contains("myLoc"))
-        m_myLoc = settings.m_myLoc;
-    if (settingsKeys.contains("myRpt"))
-        m_myRpt = settings.m_myRpt;
     if (settingsKeys.contains("messageRepeat"))
         m_messageRepeat = settings.m_messageRepeat;
 }
@@ -382,14 +362,6 @@ QString MeshtasticModSettings::getDebugString(const QStringList& settingsKeys, b
         debug += QString("Has CRC: %1\n").arg(m_hasCRC);
     if (settingsKeys.contains("hasHeader") || force)
         debug += QString("Has Header: %1\n").arg(m_hasHeader);
-    if (settingsKeys.contains("myCall") || force)
-        debug += QString("My Call: %1\n").arg(m_myCall);
-    if (settingsKeys.contains("urCall") || force)
-        debug += QString("UR Call: %1\n").arg(m_urCall);
-    if (settingsKeys.contains("myLoc") || force)
-        debug += QString("My Loc: %1\n").arg(m_myLoc);
-    if (settingsKeys.contains("myRpt") || force)
-        debug += QString("My Rpt: %1\n").arg(m_myRpt);
     if (settingsKeys.contains("messageRepeat") || force)
         debug += QString("Message Repeat: %1\n").arg(m_messageRepeat);
     return debug;

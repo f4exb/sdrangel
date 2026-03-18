@@ -348,30 +348,6 @@ void MeshtasticModGUI::on_fecParity_valueChanged(int value)
     applySettings();
 }
 
-void MeshtasticModGUI::on_myCall_editingFinished()
-{
-    m_settings.m_myCall = ui->myCall->text();
-    applySettings();
-}
-
-void MeshtasticModGUI::on_urCall_editingFinished()
-{
-    m_settings.m_urCall = ui->urCall->text();
-    applySettings();
-}
-
-void MeshtasticModGUI::on_myLocator_editingFinished()
-{
-    m_settings.m_myLoc = ui->myLocator->text();
-    applySettings();
-}
-
-void MeshtasticModGUI::on_report_editingFinished()
-{
-    m_settings.m_myRpt = ui->report->text();
-    applySettings();
-}
-
 void MeshtasticModGUI::on_resetMessages_clicked(bool checked)
 {
     (void) checked;
@@ -681,10 +657,6 @@ void MeshtasticModGUI::displaySettings()
     ui->fecParityText->setText(tr("%1").arg(m_settings.m_nbParityBits));
     ui->crc->setChecked(m_settings.m_hasCRC);
     ui->header->setChecked(m_settings.m_hasHeader);
-    ui->myCall->setText(m_settings.m_myCall);
-    ui->urCall->setText(m_settings.m_urCall);
-    ui->myLocator->setText(m_settings.m_myLoc);
-    ui->report->setText(m_settings.m_myRpt);
     ui->repeatMessage->setValue(m_settings.m_messageRepeat);
     ui->repeatText->setText(tr("%1").arg(m_settings.m_messageRepeat));
     ui->msgType->setCurrentIndex((int) m_settings.m_messageType);
@@ -776,10 +748,6 @@ void MeshtasticModGUI::makeUIConnections()
     QObject::connect(ui->syncWord, &QLineEdit::editingFinished, this, &MeshtasticModGUI::on_syncWord_editingFinished);
     QObject::connect(ui->channelMute, &QToolButton::toggled, this, &MeshtasticModGUI::on_channelMute_toggled);
     QObject::connect(ui->fecParity, &QDial::valueChanged, this, &MeshtasticModGUI::on_fecParity_valueChanged);
-    QObject::connect(ui->myCall, &QLineEdit::editingFinished, this, &MeshtasticModGUI::on_myCall_editingFinished);
-    QObject::connect(ui->urCall, &QLineEdit::editingFinished, this, &MeshtasticModGUI::on_urCall_editingFinished);
-    QObject::connect(ui->myLocator, &QLineEdit::editingFinished, this, &MeshtasticModGUI::on_myLocator_editingFinished);
-    QObject::connect(ui->report, &QLineEdit::editingFinished, this, &MeshtasticModGUI::on_report_editingFinished);
     QObject::connect(ui->resetMessages, &QPushButton::clicked, this, &MeshtasticModGUI::on_resetMessages_clicked);
     QObject::connect(ui->playMessage, &QPushButton::clicked, this, &MeshtasticModGUI::on_playMessage_clicked);
     QObject::connect(ui->repeatMessage, &QDial::valueChanged, this, &MeshtasticModGUI::on_repeatMessage_valueChanged);

@@ -110,10 +110,6 @@ private slots:
     void on_syncWord_editingFinished();
     void on_channelMute_toggled(bool checked);
     void on_fecParity_valueChanged(int value);
-    void on_myCall_editingFinished();
-    void on_urCall_editingFinished();
-    void on_myLocator_editingFinished();
-    void on_report_editingFinished();
     void on_resetMessages_clicked(bool checked);
     void on_playMessage_clicked(bool checked);
     void on_repeatMessage_valueChanged(int value);
