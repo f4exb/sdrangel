@@ -34,10 +34,13 @@ if(NOT SERVER_MODE)
         ${meshtastic_SOURCES}
         meshtasticdemodgui.cpp
         meshtasticdemodgui.ui
+        meshtastickeysdialog.cpp
+        meshtastickeysdialog.ui
     )
     set(meshtastic_HEADERS
         ${meshtastic_HEADERS}
         meshtasticdemodgui.h
+        meshtastickeysdialog.h
     )
     set(TARGET_NAME ${PLUGINS_PREFIX}demodmeshtastic)
     set(TARGET_LIB "Qt::Widgets")

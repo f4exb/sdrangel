@@ -21,8 +21,6 @@
 
 #include "device/deviceuiset.h"
 #include "device/deviceapi.h"
-#include <QDialog>
-#include <QDialogButtonBox>
 #include <QScrollBar>
 #include <QDebug>
 #include <QCoreApplication>
@@ -30,10 +28,7 @@
 #include <QDateTime>
 #include <QComboBox>
 #include <QCheckBox>
-#include <QMessageBox>
 #include <QPushButton>
-#include <QLabel>
-#include <QHBoxLayout>
 #include <QHeaderView>
 #include <QAbstractItemView>
 #include <QList>
@@ -41,10 +36,8 @@
 #include <QPlainTextEdit>
 #include <QSplitter>
 #include <QTabWidget>
-#include <QTextEdit>
 #include <QTreeWidget>
 #include <QTreeWidgetItem>
-#include <QVBoxLayout>
 #include <algorithm>
 #include <cmath>
 #include <functional>
@@ -69,6 +62,7 @@
 #include "meshtasticdemod.h"
 #include "meshtasticdemodmsg.h"
 #include "meshtasticdemodgui.h"
+#include "meshtastickeysdialog.h"
 #include "meshtasticpacket.h"
 
 namespace
@@ -940,100 +934,31 @@ void MeshtasticDemodGUI::advanceMeshAutoLock()
 
 void MeshtasticDemodGUI::editMeshtasticKeys()
 {
-    QDialog dialog(this);
-    dialog.setWindowTitle(tr("Meshtastic Keys"));
-    dialog.resize(760, 460);
+    MeshtasticKeysDialog dialog(this);
+    dialog.setKeySpecList(m_settings.m_meshtasticKeySpecList);
 
-    QVBoxLayout* layout = new QVBoxLayout(&dialog);
+    if (dialog.exec() != QDialog::Accepted) {
+        return;
+    }
 
-    QLabel* helpLabel = new QLabel(tr(
-        "One key entry per line (or comma/semicolon separated).\n"
-        "Formats: default, none, simple1..simple10, hex:<hex>, b64:<base64>, base64:<base64>, raw hex, raw base64.\n"
-        "Optional channel mapping: channelName=keySpec (example: LongFast=default)."),
-        &dialog);
-    helpLabel->setWordWrap(true);
-    layout->addWidget(helpLabel);
+    m_settings.m_meshtasticKeySpecList = dialog.getKeySpecList();
 
-    QTextEdit* keyEditor = new QTextEdit(&dialog);
-    keyEditor->setPlainText(m_settings.m_meshtasticKeySpecList);
-    keyEditor->setToolTip(tr("Enter one or more key specs used to decrypt Meshtastic packets."));
-    keyEditor->setPlaceholderText("LongFast=default\nnone\nLongSlow=hex:00112233445566778899aabbccddeeff");
-    layout->addWidget(keyEditor, 1);
+    if (m_meshKeysButton)
+    {
+        const bool hasCustomKeys = !m_settings.m_meshtasticKeySpecList.isEmpty();
+        m_meshKeysButton->setText(hasCustomKeys ? tr("Keys*") : tr("Keys..."));
+        m_meshKeysButton->setToolTip(hasCustomKeys ?
+            tr("Custom Meshtastic decode keys configured. Click to edit.") :
+            tr("Open Meshtastic key manager."));
+    }
 
-    QHBoxLayout* statusLayout = new QHBoxLayout();
-    QPushButton* validateButton = new QPushButton(tr("Validate"), &dialog);
-    validateButton->setToolTip(tr("Validate key syntax and count without saving."));
-    QLabel* statusLabel = new QLabel(&dialog);
-    statusLabel->setToolTip(tr("Validation status for the current key list."));
-    statusLabel->setWordWrap(true);
-    statusLayout->addWidget(validateButton);
-    statusLayout->addWidget(statusLabel, 1);
-    layout->addLayout(statusLayout);
+    applySettings();
 
-    QDialogButtonBox* buttons = new QDialogButtonBox(QDialogButtonBox::Ok | QDialogButtonBox::Cancel, &dialog);
-    layout->addWidget(buttons);
-
-    auto validateInput = [keyEditor, statusLabel]() -> bool {
-        const QString keyText = keyEditor->toPlainText().trimmed();
-
-        if (keyText.isEmpty())
-        {
-            statusLabel->setStyleSheet("QLabel { color: #bbbbbb; }");
-            statusLabel->setText(QObject::tr("No custom keys set. Decoder will use environment/default keys."));
-            return true;
-        }
-
-        QString error;
-        int keyCount = 0;
-
-        if (!modemmeshtastic::Packet::validateKeySpecList(keyText, error, &keyCount))
-        {
-            statusLabel->setStyleSheet("QLabel { color: #ff5555; }");
-            statusLabel->setText(QObject::tr("Invalid key list: %1").arg(error));
-            return false;
-        }
-
-        statusLabel->setStyleSheet("QLabel { color: #7cd67c; }");
-        statusLabel->setText(QObject::tr("Valid: %1 key(s) parsed").arg(keyCount));
-        return true;
-    };
-
-    QObject::connect(validateButton, &QPushButton::clicked, &dialog, [validateInput]() {
-        validateInput();
-    });
-
-    QObject::connect(buttons, &QDialogButtonBox::accepted, &dialog, [this, &dialog, keyEditor, validateInput]() {
-        if (!validateInput())
-        {
-            QMessageBox::warning(this, tr("Invalid Keys"), tr("Fix the Meshtastic key list before saving."));
-            return;
-        }
-
-        m_settings.m_meshtasticKeySpecList = keyEditor->toPlainText().trimmed();
-
-        if (m_meshKeysButton)
-        {
-            const bool hasCustomKeys = !m_settings.m_meshtasticKeySpecList.isEmpty();
-            m_meshKeysButton->setText(hasCustomKeys ? tr("Keys*") : tr("Keys..."));
-            m_meshKeysButton->setToolTip(hasCustomKeys ?
-                tr("Custom Meshtastic decode keys configured. Click to edit.") :
-                tr("Open Meshtastic key manager."));
-        }
-
-        applySettings();
-
-        if (m_settings.m_meshtasticKeySpecList.isEmpty()) {
-            displayStatus(tr("MESH KEYS|using environment/default key set"));
-        } else {
-            displayStatus(tr("MESH KEYS|custom key set saved"));
-        }
-
-        dialog.accept();
-    });
-
-    QObject::connect(buttons, &QDialogButtonBox::rejected, &dialog, &QDialog::reject);
-    validateInput();
-    dialog.exec();
+    if (m_settings.m_meshtasticKeySpecList.isEmpty()) {
+        displayStatus(tr("MESH KEYS|using environment/default key set"));
+    } else {
+        displayStatus(tr("MESH KEYS|custom key set saved"));
+    }
 }
 
 int MeshtasticDemodGUI::findBandwidthIndex(int bandwidthHz) const
