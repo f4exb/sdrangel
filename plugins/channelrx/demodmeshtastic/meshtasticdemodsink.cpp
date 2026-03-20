@@ -97,7 +97,7 @@ MeshtasticDemodSink::MeshtasticDemodSink() :
 	m_chirp = 0;
 	m_chirp0 = 0;
 
-    initSF(m_settings.m_spreadFactor, m_settings.m_deBits, m_settings.m_fftWindow);
+    initSF(m_settings.m_spreadFactor, m_settings.m_deBits);
 }
 
 MeshtasticDemodSink::~MeshtasticDemodSink()
@@ -115,7 +115,7 @@ MeshtasticDemodSink::~MeshtasticDemodSink()
     delete[] m_spectrumLine;
 }
 
-void MeshtasticDemodSink::initSF(unsigned int sf, unsigned int deBits, FFTWindow::Function fftWindow)
+void MeshtasticDemodSink::initSF(unsigned int sf, unsigned int deBits)
 {
     if (m_downChirps) {
         delete[] m_downChirps;
@@ -140,8 +140,6 @@ void MeshtasticDemodSink::initSF(unsigned int sf, unsigned int deBits, FFTWindow
     m_nbSymbolsEff = 1 << (sf - deBits);
     m_deLength = 1 << deBits;
     m_fftLength = m_nbSymbols;
-    m_fftWindow.create(fftWindow, m_fftLength);
-    m_fftWindow.setKaiserAlpha(M_PI);
     m_interpolatedFFTLength = m_fftInterpolation*m_fftLength;
     m_preambleTolerance = std::max(1, (m_deLength*static_cast<int>(m_fftInterpolation))/2);
     m_fftSequence = fftFactory->getEngine(m_interpolatedFFTLength, false, &m_fft);
@@ -1260,12 +1258,11 @@ void MeshtasticDemodSink::applySettings(const MeshtasticDemodSettings& settings,
 
     if ((settings.m_spreadFactor != m_settings.m_spreadFactor)
      || (settings.m_deBits != m_settings.m_deBits)
-     || (settings.m_fftWindow != m_settings.m_fftWindow)
      || fftInterpChanged
      || force)
     {
         m_fftInterpolation = desiredFFTInterpolation;
-        initSF(settings.m_spreadFactor, settings.m_deBits, settings.m_fftWindow);
+        initSF(settings.m_spreadFactor, settings.m_deBits);
     }
 
     const unsigned int configuredPreamble = settings.m_preambleChirps > 0U

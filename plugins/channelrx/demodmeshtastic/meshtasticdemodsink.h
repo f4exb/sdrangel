@@ -102,7 +102,6 @@ private:
 
     FFTEngine *m_fft;
     int m_fftSequence;
-    FFTWindow m_fftWindow;
     Complex *m_downChirps;
     Complex *m_upChirps;
     Complex *m_spectrumLine;
@@ -184,7 +183,7 @@ private:
     int m_deLength;                        //!< Number of FFT bins collated to represent one symbol
     int m_preambleTolerance;               //!< Number of FFT bins to collate when looking for preamble
 
-    void initSF(unsigned int sf, unsigned int deBits, FFTWindow::Function fftWindow); //!< Init tables, FFTs, depending on spread factor
+    void initSF(unsigned int sf, unsigned int deBits); //!< Init tables, FFTs, depending on spread factor
     void reset();
     unsigned int argmax(
         const Complex *fftBins,
