@@ -90,12 +90,7 @@ MeshtasticDemodSink::MeshtasticDemodSink() :
         m_minRequiredPreambleChirps,
         std::min(ctorTargetRequired, m_maxRequiredPreambleChirps)
     );
-    m_fftInterpolation = (m_settings.m_codingScheme == MeshtasticDemodSettings::CodingLoRa)
-        ? m_loRaFFTInterpolation
-        : m_legacyFFTInterpolation;
-
-	m_chirp = 0;
-	m_chirp0 = 0;
+    m_fftInterpolation = m_loRaFFTInterpolation;
 
     initSF(m_settings.m_spreadFactor, m_settings.m_deBits);
 }
@@ -138,12 +133,9 @@ void MeshtasticDemodSink::initSF(unsigned int sf, unsigned int deBits)
 
     m_nbSymbols = 1 << sf;
     m_nbSymbolsEff = 1 << (sf - deBits);
-    m_deLength = 1 << deBits;
     m_fftLength = m_nbSymbols;
     m_interpolatedFFTLength = m_fftInterpolation*m_fftLength;
-    m_preambleTolerance = std::max(1, (m_deLength*static_cast<int>(m_fftInterpolation))/2);
     m_fftSequence = fftFactory->getEngine(m_interpolatedFFTLength, false, &m_fft);
-    m_sfdSkip = m_fftLength / 4;
     m_downChirps = new Complex[2*m_nbSymbols]; // Each table is 2 chirps long to allow processing from arbitrary offsets.
     m_upChirps = new Complex[2*m_nbSymbols];
     m_spectrumBuffer = new Complex[m_nbSymbols];
@@ -223,15 +215,6 @@ void MeshtasticDemodSink::feed(const SampleVector::const_iterator& begin, const 
 void MeshtasticDemodSink::reset()
 {
     resetLoRaFrameSync();
-    m_chirp = 0;
-    m_chirp0 = 0;
-    m_fftCounter = 0;
-    m_preambleConsecutive = 0;
-    m_havePrevPreambleBin = false;
-    m_prevPreambleBin = 0;
-    m_preambleBinHistory.clear();
-    m_sfdSkipCounter = 0;
-    m_syncWord = 0;
     m_headerLocked = false;
     m_expectedSymbols = 0;
     m_waitHeaderFeedback = false;
@@ -532,7 +515,6 @@ void MeshtasticDemodSink::resetLoRaFrameSync()
     m_expectedSymbols = 0;
     m_waitHeaderFeedback = false;
     m_headerFeedbackWaitSteps = 0;
-    m_syncWord = 0;
 
     if (!m_loRaPreambleVals.empty()) {
         std::fill(m_loRaPreambleVals.begin(), m_loRaPreambleVals.end(), 0);
@@ -1251,9 +1233,7 @@ void MeshtasticDemodSink::applySettings(const MeshtasticDemodSettings& settings,
             << " m_title: " << settings.m_title
             << " force: " << force;
 
-    const unsigned int desiredFFTInterpolation = (settings.m_codingScheme == MeshtasticDemodSettings::CodingLoRa)
-        ? m_loRaFFTInterpolation
-        : m_legacyFFTInterpolation;
+    const unsigned int desiredFFTInterpolation = m_loRaFFTInterpolation;
     const bool fftInterpChanged = desiredFFTInterpolation != m_fftInterpolation;
 
     if ((settings.m_spreadFactor != m_settings.m_spreadFactor)
