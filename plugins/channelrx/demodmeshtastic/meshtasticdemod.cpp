@@ -821,11 +821,6 @@ void MeshtasticDemod::applySettings(const MeshtasticDemodSettings& settings, boo
         reverseAPIKeys.append("fftWindow");
     }
 
-    if ((settings.m_codingScheme != m_settings.m_codingScheme) || force)
-    {
-        reverseAPIKeys.append("codingScheme");
-    }
-
     if ((settings.m_nbParityBits != m_settings.m_nbParityBits) || force)
     {
         reverseAPIKeys.append("nbParityBits");
