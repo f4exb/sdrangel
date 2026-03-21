@@ -19,6 +19,7 @@
 #include "meshtasticpacket.h"
 
 #include <QByteArrayList>
+#include <QDateTime>
 #include <QDebug>
 #include <QMap>
 #include <QProcessEnvironment>
@@ -459,6 +460,25 @@ static bool readFixed32(const QByteArray& bytes, int& pos, uint32_t& value)
 
     value = readU32LE(bytes.constData() + pos);
     pos += 4;
+    return true;
+}
+
+static bool readFixed64(const QByteArray& bytes, int& pos, uint64_t& value)
+{
+    if ((pos + 8) > bytes.size()) {
+        return false;
+    }
+
+    const char* p = bytes.constData() + pos;
+    value = static_cast<uint64_t>(static_cast<uint8_t>(p[0]))
+        | (static_cast<uint64_t>(static_cast<uint8_t>(p[1])) << 8)
+        | (static_cast<uint64_t>(static_cast<uint8_t>(p[2])) << 16)
+        | (static_cast<uint64_t>(static_cast<uint8_t>(p[3])) << 24)
+        | (static_cast<uint64_t>(static_cast<uint8_t>(p[4])) << 32)
+        | (static_cast<uint64_t>(static_cast<uint8_t>(p[5])) << 40)
+        | (static_cast<uint64_t>(static_cast<uint8_t>(p[6])) << 48)
+        | (static_cast<uint64_t>(static_cast<uint8_t>(p[7])) << 56);
+    pos += 8;
     return true;
 }
 
@@ -1751,6 +1771,9 @@ static bool parseCommand(const QString& command, CommandConfig& cfg, QString& er
     return true;
 }
 
+// Forward declaration: summarizePortPayload is defined after the per-port parsers below.
+static QString summarizePortPayload(const DataFields& d);
+
 static QString summarizeHeader(const Header& h)
 {
     const int hopLimit = h.flags & kFlagHopLimitMask;
@@ -1804,19 +1827,7 @@ static QString summarizeData(const DataFields& d)
         s += QString(" bitfield=0x%1").arg(d.bitfield, 0, 16);
     }
 
-    const QString text = payloadToText(d.payload);
-
-    if (!text.isEmpty()) {
-        s += QString(" text=\"%1\"").arg(text);
-    } else if (!d.payload.isEmpty()) {
-        const int n = std::min<int>(32, static_cast<int>(d.payload.size()));
-        s += QString(" payload_hex=%1").arg(QString(d.payload.left(n).toHex()));
-        if (d.payload.size() > n) {
-            s += "...";
-        }
-    } else {
-        s += " payload=<empty>";
-    }
+    s += summarizePortPayload(d);
 
     return s;
 }
@@ -1858,6 +1869,1183 @@ static void appendHeaderDecodeFields(const Header& h, DecodeResult& result)
     addDecodeField(result, "header.relay_node", QString::number(h.relayNode));
 }
 
+// =============================================================================
+// Per-port protobuf payload decoders
+// Strategy: extend the existing hand-parser with one sub-parser per port type.
+// Each port section has three parts:
+//   1. A plain data struct that holds the decoded fields.
+//   2. A parse*Payload() function that populates the struct from raw bytes.
+//   3. An append*DecodeFields() function that pushes the fields into DecodeResult.
+// =============================================================================
+
+// --- Shared decode helpers ---
+
+/** Zigzag-decode a protobuf sint32 value. */
+static int32_t zigzagDecode32(uint64_t n)
+{
+    return static_cast<int32_t>((n >> 1) ^ static_cast<uint64_t>(-(static_cast<int64_t>(n & 1))));
+}
+
+/** Reinterpret the 4 bytes of a protobuf fixed32 field as an IEEE 754 float. */
+static float fixed32ToFloat(uint32_t v)
+{
+    float f;
+    memcpy(&f, &v, 4);
+    return f;
+}
+
+static double fixed64ToDouble(uint64_t v)
+{
+    double d;
+    memcpy(&d, &v, 8);
+    return d;
+}
+
+static bool decodeCoordinateFromFixed32(uint32_t raw, double& coordinate)
+{
+    const int32_t fixedValue = static_cast<int32_t>(raw);
+    const double scaled = static_cast<double>(fixedValue) / 1e7;
+
+    if (std::isfinite(scaled) && std::fabs(scaled) <= 180.0)
+    {
+        coordinate = scaled;
+        return true;
+    }
+
+    const double floatValue = static_cast<double>(fixed32ToFloat(raw));
+    if (std::isfinite(floatValue) && std::fabs(floatValue) <= 180.0)
+    {
+        coordinate = floatValue;
+        return true;
+    }
+
+    return false;
+}
+
+// =============================================================================
+// POSITION_APP (portnum = 3)
+// Proto: meshtastic/mesh.proto  message Position
+// =============================================================================
+
+struct PositionFields
+{
+    bool hasLatitude = false;
+    double latitude = 0.0;
+
+    bool hasLongitude = false;
+    double longitude = 0.0;
+
+    bool hasLatitudeI = false;
+    int32_t latitudeI = 0;        // degrees * 1e7  (sint32 field 1)
+
+    bool hasLongitudeI = false;
+    int32_t longitudeI = 0;       // degrees * 1e7  (sint32 field 2)
+
+    bool hasAltitude = false;
+    int32_t altitude = 0;         // metres above MSL  (int32 field 3)
+
+    bool hasTime = false;
+    uint32_t time = 0;            // Unix timestamp, deprecated (uint32 field 4)
+
+    bool hasPdop = false;
+    uint32_t pdop = 0;            // position DOP * 100  (uint32 field 8)
+
+    bool hasGroundSpeed = false;
+    uint32_t groundSpeed = 0;     // km/h  (uint32 field 12)
+
+    bool hasGroundTrack = false;
+    uint32_t groundTrack = 0;     // centi-degrees  (uint32 field 13)
+
+    bool hasSatsInView = false;
+    uint32_t satsInView = 0;      // (int32 field 16)
+
+    bool hasTimestamp = false;
+    uint32_t timestamp = 0;       // Unix timestamp, preferred (uint32 field 32)
+};
+
+static bool parsePositionPayload(const QByteArray& bytes, PositionFields& p)
+{
+    int pos = 0;
+
+    while (pos < bytes.size())
+    {
+        uint64_t rawTag = 0;
+        if (!readVarint(bytes, pos, rawTag)) {
+            return false;
+        }
+
+        const uint32_t field = static_cast<uint32_t>(rawTag >> 3);
+        const uint32_t wire  = static_cast<uint32_t>(rawTag & 0x7);
+
+        switch (field)
+        {
+        case 1: {  // latitude_i: sint32
+            if (wire == 0)
+            {
+                uint64_t v = 0;
+                if (!readVarint(bytes, pos, v)) { return false; }
+                p.latitudeI    = zigzagDecode32(v);
+                p.hasLatitudeI = true;
+                p.latitude = p.latitudeI / 1e7;
+                p.hasLatitude = true;
+            }
+            else if (wire == 5)
+            {
+                uint32_t v = 0;
+                if (!readFixed32(bytes, pos, v)) { return false; }
+                double latitude = 0.0;
+                if (decodeCoordinateFromFixed32(v, latitude)) {
+                    p.latitude = latitude;
+                    p.hasLatitude = true;
+                    p.latitudeI = static_cast<int32_t>(std::lround(latitude * 1e7));
+                    p.hasLatitudeI = true;
+                }
+            }
+            else if (wire == 1)
+            {
+                uint64_t v = 0;
+                if (!readFixed64(bytes, pos, v)) { return false; }
+                p.latitude = fixed64ToDouble(v);
+                p.hasLatitude = true;
+            }
+            else
+            {
+                if (!skipField(bytes, pos, wire)) { return false; }
+            }
+            break;
+        }
+        case 2: {  // longitude_i: sint32
+            if (wire == 0)
+            {
+                uint64_t v = 0;
+                if (!readVarint(bytes, pos, v)) { return false; }
+                p.longitudeI    = zigzagDecode32(v);
+                p.hasLongitudeI = true;
+                p.longitude = p.longitudeI / 1e7;
+                p.hasLongitude = true;
+            }
+            else if (wire == 5)
+            {
+                uint32_t v = 0;
+                if (!readFixed32(bytes, pos, v)) { return false; }
+                double longitude = 0.0;
+                if (decodeCoordinateFromFixed32(v, longitude)) {
+                    p.longitude = longitude;
+                    p.hasLongitude = true;
+                    p.longitudeI = static_cast<int32_t>(std::lround(longitude * 1e7));
+                    p.hasLongitudeI = true;
+                }
+            }
+            else if (wire == 1)
+            {
+                uint64_t v = 0;
+                if (!readFixed64(bytes, pos, v)) { return false; }
+                p.longitude = fixed64ToDouble(v);
+                p.hasLongitude = true;
+            }
+            else
+            {
+                if (!skipField(bytes, pos, wire)) { return false; }
+            }
+            break;
+        }
+        case 3: {  // altitude: int32
+            if (wire == 0)
+            {
+                uint64_t v = 0;
+                if (!readVarint(bytes, pos, v)) { return false; }
+                p.altitude    = static_cast<int32_t>(v);
+                p.hasAltitude = true;
+            }
+            else if (wire == 5)
+            {
+                uint32_t v = 0;
+                if (!readFixed32(bytes, pos, v)) { return false; }
+                p.altitude = static_cast<int32_t>(std::lround(static_cast<double>(fixed32ToFloat(v))));
+                p.hasAltitude = true;
+            }
+            else
+            {
+                if (!skipField(bytes, pos, wire)) { return false; }
+            }
+            break;
+        }
+        case 4: {  // time: uint32 (deprecated, still widely used)
+            if (wire == 0)
+            {
+                uint64_t v = 0;
+                if (!readVarint(bytes, pos, v)) { return false; }
+                p.time    = static_cast<uint32_t>(v);
+                p.hasTime = true;
+            }
+            else if (wire == 5)
+            {
+                uint32_t v = 0;
+                if (!readFixed32(bytes, pos, v)) { return false; }
+                p.time = v;
+                p.hasTime = true;
+            }
+            else
+            {
+                if (!skipField(bytes, pos, wire)) { return false; }
+            }
+            break;
+        }
+        case 8: {  // PDOP: uint32
+            if (wire == 0)
+            {
+                uint64_t v = 0;
+                if (!readVarint(bytes, pos, v)) { return false; }
+                p.pdop    = static_cast<uint32_t>(v);
+                p.hasPdop = true;
+            }
+            else
+            {
+                if (!skipField(bytes, pos, wire)) { return false; }
+            }
+            break;
+        }
+        case 12: {  // ground_speed: uint32 (km/h)
+            if (wire == 0)
+            {
+                uint64_t v = 0;
+                if (!readVarint(bytes, pos, v)) { return false; }
+                p.groundSpeed    = static_cast<uint32_t>(v);
+                p.hasGroundSpeed = true;
+            }
+            else
+            {
+                if (!skipField(bytes, pos, wire)) { return false; }
+            }
+            break;
+        }
+        case 13: {  // ground_track: uint32 (centi-degrees)
+            if (wire == 0)
+            {
+                uint64_t v = 0;
+                if (!readVarint(bytes, pos, v)) { return false; }
+                p.groundTrack    = static_cast<uint32_t>(v);
+                p.hasGroundTrack = true;
+            }
+            else
+            {
+                if (!skipField(bytes, pos, wire)) { return false; }
+            }
+            break;
+        }
+        case 16: {  // sats_in_view: int32
+            if (wire == 0)
+            {
+                uint64_t v = 0;
+                if (!readVarint(bytes, pos, v)) { return false; }
+                p.satsInView    = static_cast<uint32_t>(v);
+                p.hasSatsInView = true;
+            }
+            else
+            {
+                if (!skipField(bytes, pos, wire)) { return false; }
+            }
+            break;
+        }
+        case 32: {  // timestamp: uint32 (preferred over field 4)
+            if (wire == 0)
+            {
+                uint64_t v = 0;
+                if (!readVarint(bytes, pos, v)) { return false; }
+                p.timestamp    = static_cast<uint32_t>(v);
+                p.hasTimestamp = true;
+            }
+            else if (wire == 5)
+            {
+                uint32_t v = 0;
+                if (!readFixed32(bytes, pos, v)) { return false; }
+                p.timestamp = v;
+                p.hasTimestamp = true;
+            }
+            else
+            {
+                if (!skipField(bytes, pos, wire)) { return false; }
+            }
+            break;
+        }
+        default:
+            if (!skipField(bytes, pos, wire)) { return false; }
+            break;
+        }
+    }
+
+    if (!p.hasLatitude && p.hasLatitudeI) {
+        p.latitude = p.latitudeI / 1e7;
+        p.hasLatitude = true;
+    }
+    if (!p.hasLongitude && p.hasLongitudeI) {
+        p.longitude = p.longitudeI / 1e7;
+        p.hasLongitude = true;
+    }
+
+    return p.hasLatitude || p.hasLongitude || p.hasAltitude || p.hasTime || p.hasTimestamp;
+}
+
+static void appendPositionDecodeFields(const PositionFields& p, DecodeResult& result)
+{
+    if (p.hasLatitude) {
+        addDecodeField(result, "position.latitude",
+                       QString::number(p.latitude, 'f', 7));
+    }
+    if (p.hasLongitude) {
+        addDecodeField(result, "position.longitude",
+                       QString::number(p.longitude, 'f', 7));
+    }
+    if (p.hasAltitude) {
+        addDecodeField(result, "position.altitude_m", QString::number(p.altitude));
+    }
+
+    // Prefer field 32 (timestamp) over deprecated field 4 (time).
+    const uint32_t ts = p.hasTimestamp ? p.timestamp : (p.hasTime ? p.time : 0u);
+    if (ts != 0) {
+        addDecodeField(result, "position.timestamp", QString::number(ts));
+        const QDateTime dt = QDateTime::fromSecsSinceEpoch(static_cast<qint64>(ts), Qt::UTC);
+        addDecodeField(result, "position.datetime_utc", dt.toString(Qt::ISODate));
+    }
+
+    if (p.hasGroundSpeed) {
+        addDecodeField(result, "position.ground_speed_kmh", QString::number(p.groundSpeed));
+    }
+    if (p.hasGroundTrack) {
+        addDecodeField(result, "position.ground_track_deg",
+                       QString::number(p.groundTrack / 100.0, 'f', 2));
+    }
+    if (p.hasSatsInView) {
+        addDecodeField(result, "position.sats_in_view", QString::number(p.satsInView));
+    }
+    if (p.hasPdop) {
+        addDecodeField(result, "position.pdop", QString::number(p.pdop));
+    }
+}
+
+// =============================================================================
+// NODEINFO_APP (portnum = 4)
+// Proto: meshtastic/mesh.proto  message User
+// =============================================================================
+
+struct UserFields
+{
+    bool    hasId        = false;
+    QString id;                    // node ID string e.g. "!aabbccdd"  (string field 1)
+
+    bool    hasLongName  = false;
+    QString longName;              // human-readable name  (string field 2)
+
+    bool    hasShortName = false;
+    QString shortName;             // 2-4 char callsign  (string field 3)
+
+    bool       hasMacaddr = false;
+    QByteArray macaddr;            // 6-byte MAC address  (bytes field 4)
+
+    bool     hasHwModel  = false;
+    uint32_t hwModel     = 0;     // HardwareModel enum  (uint32 field 5)
+
+    bool hasIsLicensed   = false;
+    bool isLicensed      = false; // licensed amateur radio operator  (bool field 7)
+};
+
+static bool parseUserPayload(const QByteArray& bytes, UserFields& u)
+{
+    int pos = 0;
+
+    while (pos < bytes.size())
+    {
+        uint64_t rawTag = 0;
+        if (!readVarint(bytes, pos, rawTag)) { return false; }
+
+        const uint32_t field = static_cast<uint32_t>(rawTag >> 3);
+        const uint32_t wire  = static_cast<uint32_t>(rawTag & 0x7);
+
+        switch (field)
+        {
+        case 1: {  // id: string
+            if (wire != 2) { return false; }
+            uint64_t len = 0;
+            if (!readVarint(bytes, pos, len)) { return false; }
+            if (len > static_cast<uint64_t>(bytes.size() - pos)) { return false; }
+            u.id    = QString::fromUtf8(bytes.constData() + pos, static_cast<int>(len));
+            u.hasId = true;
+            pos += static_cast<int>(len);
+            break;
+        }
+        case 2: {  // long_name: string
+            if (wire != 2) { return false; }
+            uint64_t len = 0;
+            if (!readVarint(bytes, pos, len)) { return false; }
+            if (len > static_cast<uint64_t>(bytes.size() - pos)) { return false; }
+            u.longName    = QString::fromUtf8(bytes.constData() + pos, static_cast<int>(len));
+            u.hasLongName = true;
+            pos += static_cast<int>(len);
+            break;
+        }
+        case 3: {  // short_name: string
+            if (wire != 2) { return false; }
+            uint64_t len = 0;
+            if (!readVarint(bytes, pos, len)) { return false; }
+            if (len > static_cast<uint64_t>(bytes.size() - pos)) { return false; }
+            u.shortName    = QString::fromUtf8(bytes.constData() + pos, static_cast<int>(len));
+            u.hasShortName = true;
+            pos += static_cast<int>(len);
+            break;
+        }
+        case 4: {  // macaddr: bytes
+            if (wire != 2) { return false; }
+            uint64_t len = 0;
+            if (!readVarint(bytes, pos, len)) { return false; }
+            if (len > static_cast<uint64_t>(bytes.size() - pos)) { return false; }
+            u.macaddr    = bytes.mid(pos, static_cast<int>(len));
+            u.hasMacaddr = true;
+            pos += static_cast<int>(len);
+            break;
+        }
+        case 5: {  // hw_model: HardwareModel (enum → uint32)
+            if (wire != 0) { return false; }
+            uint64_t v = 0;
+            if (!readVarint(bytes, pos, v)) { return false; }
+            u.hwModel    = static_cast<uint32_t>(v);
+            u.hasHwModel = true;
+            break;
+        }
+        case 7: {  // is_licensed: bool
+            if (wire != 0) { return false; }
+            uint64_t v = 0;
+            if (!readVarint(bytes, pos, v)) { return false; }
+            u.isLicensed    = (v != 0);
+            u.hasIsLicensed = true;
+            break;
+        }
+        default:
+            if (!skipField(bytes, pos, wire)) { return false; }
+            break;
+        }
+    }
+
+    return u.hasId || u.hasLongName || u.hasShortName;
+}
+
+static void appendUserDecodeFields(const UserFields& u, DecodeResult& result)
+{
+    if (u.hasId)        { addDecodeField(result, "nodeinfo.id",       u.id); }
+    if (u.hasLongName)  { addDecodeField(result, "nodeinfo.long_name",  u.longName); }
+    if (u.hasShortName) { addDecodeField(result, "nodeinfo.short_name", u.shortName); }
+    if (u.hasMacaddr)   { addDecodeField(result, "nodeinfo.macaddr",    QString(u.macaddr.toHex(':'))); }
+    if (u.hasHwModel)   { addDecodeField(result, "nodeinfo.hw_model",   u.hwModel); }
+    if (u.hasIsLicensed){ addDecodeField(result, "nodeinfo.is_licensed", u.isLicensed); }
+}
+
+// =============================================================================
+// TELEMETRY_APP (portnum = 67)
+// Proto: meshtastic/telemetry.proto  message Telemetry
+//        which embeds DeviceMetrics (field 2) and EnvironmentMetrics (field 3)
+// =============================================================================
+
+struct DeviceMetrics
+{
+    bool  hasBatteryLevel       = false;
+    float batteryLevel          = 0.0f;  // 0–100 %
+
+    bool  hasVoltage            = false;
+    float voltage               = 0.0f;  // V
+
+    bool  hasChannelUtilization = false;
+    float channelUtilization    = 0.0f;  // %
+
+    bool  hasAirUtilTx          = false;
+    float airUtilTx             = 0.0f;  // %
+
+    bool     hasUptimeSeconds   = false;
+    uint32_t uptimeSeconds      = 0;
+};
+
+struct EnvironmentMetrics
+{
+    bool  hasTemperature         = false;
+    float temperature            = 0.0f;  // °C
+
+    bool  hasRelativeHumidity    = false;
+    float relativeHumidity       = 0.0f;  // %
+
+    bool  hasBarometricPressure  = false;
+    float barometricPressure     = 0.0f;  // hPa
+
+    bool  hasGasResistance       = false;
+    float gasResistance          = 0.0f;  // MOhm
+
+    bool  hasIaq                 = false;
+    float iaq                    = 0.0f;  // indoor air quality index
+};
+
+struct TelemetryFields
+{
+    bool     hasTime               = false;
+    uint32_t time                  = 0;
+
+    bool           hasDeviceMetrics      = false;
+    DeviceMetrics  deviceMetrics;
+
+    bool                hasEnvironmentMetrics = false;
+    EnvironmentMetrics  environmentMetrics;
+};
+
+static bool parseDeviceMetrics(const QByteArray& bytes, DeviceMetrics& dm)
+{
+    int pos = 0;
+
+    while (pos < bytes.size())
+    {
+        uint64_t rawTag = 0;
+        if (!readVarint(bytes, pos, rawTag)) { return false; }
+
+        const uint32_t field = static_cast<uint32_t>(rawTag >> 3);
+        const uint32_t wire  = static_cast<uint32_t>(rawTag & 0x7);
+
+        switch (field)
+        {
+        case 1: {  // battery_level: float
+            if (wire == 5)
+            {
+                uint32_t v = 0;
+                if (!readFixed32(bytes, pos, v)) { return false; }
+                dm.batteryLevel = fixed32ToFloat(v);
+                dm.hasBatteryLevel = true;
+            }
+            else if (wire == 0)
+            {
+                uint64_t v = 0;
+                if (!readVarint(bytes, pos, v)) { return false; }
+                dm.batteryLevel = static_cast<float>(v);
+                dm.hasBatteryLevel = true;
+            }
+            else
+            {
+                if (!skipField(bytes, pos, wire)) { return false; }
+            }
+            break;
+        }
+        case 2: {  // voltage: float
+            if (wire == 5)
+            {
+                uint32_t v = 0;
+                if (!readFixed32(bytes, pos, v)) { return false; }
+                dm.voltage = fixed32ToFloat(v);
+                dm.hasVoltage = true;
+            }
+            else if (wire == 0)
+            {
+                uint64_t v = 0;
+                if (!readVarint(bytes, pos, v)) { return false; }
+                const double raw = static_cast<double>(v);
+                dm.voltage = static_cast<float>((raw > 1000.0) ? (raw / 1000.0) : raw);
+                dm.hasVoltage = true;
+            }
+            else
+            {
+                if (!skipField(bytes, pos, wire)) { return false; }
+            }
+            break;
+        }
+        case 3: {  // channel_utilization: float
+            if (wire == 5)
+            {
+                uint32_t v = 0;
+                if (!readFixed32(bytes, pos, v)) { return false; }
+                dm.channelUtilization = fixed32ToFloat(v);
+                dm.hasChannelUtilization = true;
+            }
+            else if (wire == 0)
+            {
+                uint64_t v = 0;
+                if (!readVarint(bytes, pos, v)) { return false; }
+                dm.channelUtilization = static_cast<float>(v);
+                dm.hasChannelUtilization = true;
+            }
+            else
+            {
+                if (!skipField(bytes, pos, wire)) { return false; }
+            }
+            break;
+        }
+        case 4: {  // air_util_tx: float
+            if (wire == 5)
+            {
+                uint32_t v = 0;
+                if (!readFixed32(bytes, pos, v)) { return false; }
+                dm.airUtilTx = fixed32ToFloat(v);
+                dm.hasAirUtilTx = true;
+            }
+            else if (wire == 0)
+            {
+                uint64_t v = 0;
+                if (!readVarint(bytes, pos, v)) { return false; }
+                dm.airUtilTx = static_cast<float>(v);
+                dm.hasAirUtilTx = true;
+            }
+            else
+            {
+                if (!skipField(bytes, pos, wire)) { return false; }
+            }
+            break;
+        }
+        case 5: {  // uptime_seconds: uint32
+            if (wire == 0)
+            {
+                uint64_t v = 0;
+                if (!readVarint(bytes, pos, v)) { return false; }
+                dm.uptimeSeconds = static_cast<uint32_t>(v);
+                dm.hasUptimeSeconds = true;
+            }
+            else if (wire == 5)
+            {
+                uint32_t v = 0;
+                if (!readFixed32(bytes, pos, v)) { return false; }
+                dm.uptimeSeconds = v;
+                dm.hasUptimeSeconds = true;
+            }
+            else
+            {
+                if (!skipField(bytes, pos, wire)) { return false; }
+            }
+            break;
+        }
+        default:
+            if (!skipField(bytes, pos, wire)) { return false; }
+            break;
+        }
+    }
+
+    return true;
+}
+
+static bool parseEnvironmentMetrics(const QByteArray& bytes, EnvironmentMetrics& em)
+{
+    int pos = 0;
+
+    while (pos < bytes.size())
+    {
+        uint64_t rawTag = 0;
+        if (!readVarint(bytes, pos, rawTag)) { return false; }
+
+        const uint32_t field = static_cast<uint32_t>(rawTag >> 3);
+        const uint32_t wire  = static_cast<uint32_t>(rawTag & 0x7);
+
+        switch (field)
+        {
+        case 1: {  // temperature: float (°C)
+            if (wire == 5)
+            {
+                uint32_t v = 0;
+                if (!readFixed32(bytes, pos, v)) { return false; }
+                em.temperature = fixed32ToFloat(v);
+                em.hasTemperature = true;
+            }
+            else if (wire == 0)
+            {
+                uint64_t v = 0;
+                if (!readVarint(bytes, pos, v)) { return false; }
+                em.temperature = static_cast<float>(static_cast<int32_t>(v));
+                em.hasTemperature = true;
+            }
+            else
+            {
+                if (!skipField(bytes, pos, wire)) { return false; }
+            }
+            break;
+        }
+        case 2: {  // relative_humidity: float (%)
+            if (wire == 5)
+            {
+                uint32_t v = 0;
+                if (!readFixed32(bytes, pos, v)) { return false; }
+                em.relativeHumidity = fixed32ToFloat(v);
+                em.hasRelativeHumidity = true;
+            }
+            else if (wire == 0)
+            {
+                uint64_t v = 0;
+                if (!readVarint(bytes, pos, v)) { return false; }
+                em.relativeHumidity = static_cast<float>(v);
+                em.hasRelativeHumidity = true;
+            }
+            else
+            {
+                if (!skipField(bytes, pos, wire)) { return false; }
+            }
+            break;
+        }
+        case 3: {  // barometric_pressure: float (hPa)
+            if (wire == 5)
+            {
+                uint32_t v = 0;
+                if (!readFixed32(bytes, pos, v)) { return false; }
+                em.barometricPressure = fixed32ToFloat(v);
+                em.hasBarometricPressure = true;
+            }
+            else if (wire == 0)
+            {
+                uint64_t v = 0;
+                if (!readVarint(bytes, pos, v)) { return false; }
+                em.barometricPressure = static_cast<float>(v);
+                em.hasBarometricPressure = true;
+            }
+            else
+            {
+                if (!skipField(bytes, pos, wire)) { return false; }
+            }
+            break;
+        }
+        case 4: {  // gas_resistance: float (MOhm)
+            if (wire != 5) { return false; }
+            uint32_t v = 0;
+            if (!readFixed32(bytes, pos, v)) { return false; }
+            em.gasResistance    = fixed32ToFloat(v);
+            em.hasGasResistance = true;
+            break;
+        }
+        case 11: {  // iaq: float (indoor air quality, newer field)
+            if (wire != 5) { return false; }
+            uint32_t v = 0;
+            if (!readFixed32(bytes, pos, v)) { return false; }
+            em.iaq    = fixed32ToFloat(v);
+            em.hasIaq = true;
+            break;
+        }
+        default:
+            if (!skipField(bytes, pos, wire)) { return false; }
+            break;
+        }
+    }
+
+    return true;
+}
+
+static bool parseTelemetryPayload(const QByteArray& bytes, TelemetryFields& t)
+{
+    int pos = 0;
+
+    while (pos < bytes.size())
+    {
+        uint64_t rawTag = 0;
+        if (!readVarint(bytes, pos, rawTag)) { return false; }
+
+        const uint32_t field = static_cast<uint32_t>(rawTag >> 3);
+        const uint32_t wire  = static_cast<uint32_t>(rawTag & 0x7);
+
+        switch (field)
+        {
+        case 1: {  // time: uint32
+            if (wire == 0)
+            {
+                uint64_t v = 0;
+                if (!readVarint(bytes, pos, v)) { return false; }
+                t.time = static_cast<uint32_t>(v);
+                t.hasTime = true;
+            }
+            else if (wire == 5)
+            {
+                uint32_t v = 0;
+                if (!readFixed32(bytes, pos, v)) { return false; }
+                t.time = v;
+                t.hasTime = true;
+            }
+            else
+            {
+                if (!skipField(bytes, pos, wire)) { return false; }
+            }
+            break;
+        }
+        case 2: {  // device_metrics: DeviceMetrics (embedded message)
+            if (wire != 2) { return false; }
+            uint64_t len = 0;
+            if (!readVarint(bytes, pos, len)) { return false; }
+            if (len > static_cast<uint64_t>(bytes.size() - pos)) { return false; }
+            if (!parseDeviceMetrics(bytes.mid(pos, static_cast<int>(len)), t.deviceMetrics)) { return false; }
+            t.hasDeviceMetrics = true;
+            pos += static_cast<int>(len);
+            break;
+        }
+        case 3: {  // environment_metrics: EnvironmentMetrics (embedded message)
+            if (wire != 2) { return false; }
+            uint64_t len = 0;
+            if (!readVarint(bytes, pos, len)) { return false; }
+            if (len > static_cast<uint64_t>(bytes.size() - pos)) { return false; }
+            if (!parseEnvironmentMetrics(bytes.mid(pos, static_cast<int>(len)), t.environmentMetrics)) { return false; }
+            t.hasEnvironmentMetrics = true;
+            pos += static_cast<int>(len);
+            break;
+        }
+        default:
+            if (!skipField(bytes, pos, wire)) { return false; }
+            break;
+        }
+    }
+
+    return t.hasTime || t.hasDeviceMetrics || t.hasEnvironmentMetrics;
+}
+
+static void appendTelemetryDecodeFields(const TelemetryFields& t, DecodeResult& result)
+{
+    if (t.hasTime)
+    {
+        addDecodeField(result, "telemetry.time", QString::number(t.time));
+        const QDateTime dt = QDateTime::fromSecsSinceEpoch(static_cast<qint64>(t.time), Qt::UTC);
+        addDecodeField(result, "telemetry.datetime_utc", dt.toString(Qt::ISODate));
+    }
+
+    if (t.hasDeviceMetrics)
+    {
+        const DeviceMetrics& dm = t.deviceMetrics;
+        if (dm.hasBatteryLevel) {
+            addDecodeField(result, "telemetry.device.battery_level_pct",
+                           QString::number(static_cast<double>(dm.batteryLevel), 'f', 1));
+        }
+        if (dm.hasVoltage) {
+            addDecodeField(result, "telemetry.device.voltage_v",
+                           QString::number(static_cast<double>(dm.voltage), 'f', 3));
+        }
+        if (dm.hasChannelUtilization) {
+            addDecodeField(result, "telemetry.device.channel_util_pct",
+                           QString::number(static_cast<double>(dm.channelUtilization), 'f', 2));
+        }
+        if (dm.hasAirUtilTx) {
+            addDecodeField(result, "telemetry.device.air_util_tx_pct",
+                           QString::number(static_cast<double>(dm.airUtilTx), 'f', 2));
+        }
+        if (dm.hasUptimeSeconds) {
+            addDecodeField(result, "telemetry.device.uptime_s",
+                           QString::number(dm.uptimeSeconds));
+        }
+    }
+
+    if (t.hasEnvironmentMetrics)
+    {
+        const EnvironmentMetrics& em = t.environmentMetrics;
+        if (em.hasTemperature) {
+            addDecodeField(result, "telemetry.env.temperature_c",
+                           QString::number(static_cast<double>(em.temperature), 'f', 2));
+        }
+        if (em.hasRelativeHumidity) {
+            addDecodeField(result, "telemetry.env.humidity_pct",
+                           QString::number(static_cast<double>(em.relativeHumidity), 'f', 1));
+        }
+        if (em.hasBarometricPressure) {
+            addDecodeField(result, "telemetry.env.pressure_hpa",
+                           QString::number(static_cast<double>(em.barometricPressure), 'f', 2));
+        }
+        if (em.hasGasResistance) {
+            addDecodeField(result, "telemetry.env.gas_resistance_moh",
+                           QString::number(static_cast<double>(em.gasResistance), 'f', 3));
+        }
+        if (em.hasIaq) {
+            addDecodeField(result, "telemetry.env.iaq",
+                           QString::number(static_cast<double>(em.iaq), 'f', 1));
+        }
+    }
+}
+
+// =============================================================================
+// TRACEROUTE_APP (portnum = 70)
+// Proto: meshtastic/mesh.proto  message RouteDiscovery
+// =============================================================================
+
+struct RouteDiscoveryFields
+{
+    QVector<uint32_t> route;       // node IDs on forward path  (repeated fixed32 field 1)
+    QVector<int32_t>  snrTowards;  // SNR values forward path in 0.25 dB steps (sint32 field 2)
+    QVector<uint32_t> routeBack;   // node IDs on return path   (repeated fixed32 field 3)
+    QVector<int32_t>  snrBack;     // SNR values return path in 0.25 dB steps  (sint32 field 4)
+};
+
+/** Parse a packed repeated fixed32 block (content only, length already consumed). */
+static void parsePackedFixed32(const QByteArray& bytes, QVector<uint32_t>& out)
+{
+    int pos = 0;
+    while ((pos + 4) <= bytes.size())
+    {
+        out.append(readU32LE(bytes.constData() + pos));
+        pos += 4;
+    }
+}
+
+/** Parse a packed repeated sint32 block (content only, length already consumed). */
+static void parsePackedVarintSint32(const QByteArray& bytes, QVector<int32_t>& out)
+{
+    int pos = 0;
+    while (pos < bytes.size())
+    {
+        uint64_t v = 0;
+        if (!readVarint(bytes, pos, v)) { break; }
+        out.append(zigzagDecode32(v));
+    }
+}
+
+static bool parseRouteDiscoveryPayload(const QByteArray& bytes, RouteDiscoveryFields& r)
+{
+    int pos = 0;
+
+    while (pos < bytes.size())
+    {
+        uint64_t rawTag = 0;
+        if (!readVarint(bytes, pos, rawTag)) { return false; }
+
+        const uint32_t field = static_cast<uint32_t>(rawTag >> 3);
+        const uint32_t wire  = static_cast<uint32_t>(rawTag & 0x7);
+
+        switch (field)
+        {
+        case 1: {  // route: repeated fixed32  (packed wire=2 or individual wire=5)
+            if (wire == 2) {
+                uint64_t len = 0;
+                if (!readVarint(bytes, pos, len)) { return false; }
+                if (len > static_cast<uint64_t>(bytes.size() - pos)) { return false; }
+                parsePackedFixed32(bytes.mid(pos, static_cast<int>(len)), r.route);
+                pos += static_cast<int>(len);
+            } else if (wire == 5) {
+                uint32_t v = 0;
+                if (!readFixed32(bytes, pos, v)) { return false; }
+                r.route.append(v);
+            } else {
+                return false;
+            }
+            break;
+        }
+        case 2: {  // snr_towards: repeated sint32  (packed wire=2 or individual wire=0)
+            if (wire == 2) {
+                uint64_t len = 0;
+                if (!readVarint(bytes, pos, len)) { return false; }
+                if (len > static_cast<uint64_t>(bytes.size() - pos)) { return false; }
+                parsePackedVarintSint32(bytes.mid(pos, static_cast<int>(len)), r.snrTowards);
+                pos += static_cast<int>(len);
+            } else if (wire == 0) {
+                uint64_t v = 0;
+                if (!readVarint(bytes, pos, v)) { return false; }
+                r.snrTowards.append(zigzagDecode32(v));
+            } else {
+                return false;
+            }
+            break;
+        }
+        case 3: {  // route_back: repeated fixed32
+            if (wire == 2) {
+                uint64_t len = 0;
+                if (!readVarint(bytes, pos, len)) { return false; }
+                if (len > static_cast<uint64_t>(bytes.size() - pos)) { return false; }
+                parsePackedFixed32(bytes.mid(pos, static_cast<int>(len)), r.routeBack);
+                pos += static_cast<int>(len);
+            } else if (wire == 5) {
+                uint32_t v = 0;
+                if (!readFixed32(bytes, pos, v)) { return false; }
+                r.routeBack.append(v);
+            } else {
+                return false;
+            }
+            break;
+        }
+        case 4: {  // snr_back: repeated sint32
+            if (wire == 2) {
+                uint64_t len = 0;
+                if (!readVarint(bytes, pos, len)) { return false; }
+                if (len > static_cast<uint64_t>(bytes.size() - pos)) { return false; }
+                parsePackedVarintSint32(bytes.mid(pos, static_cast<int>(len)), r.snrBack);
+                pos += static_cast<int>(len);
+            } else if (wire == 0) {
+                uint64_t v = 0;
+                if (!readVarint(bytes, pos, v)) { return false; }
+                r.snrBack.append(zigzagDecode32(v));
+            } else {
+                return false;
+            }
+            break;
+        }
+        default:
+            if (!skipField(bytes, pos, wire)) { return false; }
+            break;
+        }
+    }
+
+    return !r.route.isEmpty() || !r.routeBack.isEmpty();
+}
+
+static void appendRouteDiscoveryDecodeFields(const RouteDiscoveryFields& r, DecodeResult& result)
+{
+    addDecodeField(result, "traceroute.forward_hops", QString::number(r.route.size()));
+
+    for (int i = 0; i < r.route.size(); ++i)
+    {
+        const QString prefix = QString("traceroute.route[%1]").arg(i);
+        addDecodeField(result, prefix + ".node_id",
+                       QString("!%1").arg(r.route[i], 8, 16, QChar('0')));
+        if (i < r.snrTowards.size()) {
+            addDecodeField(result, prefix + ".snr_towards_db",
+                           QString::number(r.snrTowards[i] / 4.0, 'f', 2));
+        }
+    }
+
+    if (!r.routeBack.isEmpty())
+    {
+        addDecodeField(result, "traceroute.back_hops", QString::number(r.routeBack.size()));
+        for (int i = 0; i < r.routeBack.size(); ++i)
+        {
+            const QString prefix = QString("traceroute.route_back[%1]").arg(i);
+            addDecodeField(result, prefix + ".node_id",
+                           QString("!%1").arg(r.routeBack[i], 8, 16, QChar('0')));
+            if (i < r.snrBack.size()) {
+                addDecodeField(result, prefix + ".snr_back_db",
+                               QString::number(r.snrBack[i] / 4.0, 'f', 2));
+            }
+        }
+    }
+}
+
+static QString summarizePortPayload(const DataFields& d)
+{
+    if (d.payload.isEmpty()) {
+        return " payload=<empty>";
+    }
+
+    const auto appendPayloadHex = [&d]() -> QString {
+        const int n = std::min<int>(32, static_cast<int>(d.payload.size()));
+        QString text = QString(" payload_hex=%1").arg(QString(d.payload.left(n).toHex()));
+        if (d.payload.size() > n) {
+            text += "...";
+        }
+        return text;
+    };
+
+    const QString text = payloadToText(d.payload);
+
+    switch (d.portnum)
+    {
+    case 1: {  // TEXT_MESSAGE_APP
+        if (!text.isEmpty()) {
+            return QString(" text=\"%1\"").arg(text);
+        }
+        return appendPayloadHex();
+    }
+
+    case 3: {  // POSITION_APP
+        PositionFields p;
+        if (!parsePositionPayload(d.payload, p)) {
+            return appendPayloadHex();
+        }
+
+        QString out;
+        if (p.hasLatitude && p.hasLongitude) {
+            out += QString(" lat=%1 lon=%2")
+                       .arg(p.latitude, 0, 'f', 5)
+                       .arg(p.longitude, 0, 'f', 5);
+        }
+        if (p.hasAltitude) {
+            out += QString(" alt=%1m").arg(p.altitude);
+        }
+        if (p.hasGroundSpeed) {
+            out += QString(" spd=%1km/h").arg(p.groundSpeed);
+        }
+        if (p.hasSatsInView) {
+            out += QString(" sats=%1").arg(p.satsInView);
+        }
+
+        return out.isEmpty() ? appendPayloadHex() : out;
+    }
+
+    case 4: {  // NODEINFO_APP
+        UserFields u;
+        if (!parseUserPayload(d.payload, u)) {
+            return appendPayloadHex();
+        }
+
+        QString out;
+        if (u.hasLongName) {
+            out += QString(" name=\"%1\"").arg(u.longName);
+        }
+        if (u.hasShortName) {
+            out += QString(" short=\"%1\"").arg(u.shortName);
+        }
+        if (u.hasId) {
+            out += QString(" id=%1").arg(u.id);
+        }
+
+        return out.isEmpty() ? appendPayloadHex() : out;
+    }
+
+    case 67: {  // TELEMETRY_APP
+        TelemetryFields t;
+        if (!parseTelemetryPayload(d.payload, t))
+        {
+            DeviceMetrics dm;
+            EnvironmentMetrics em;
+            const bool hasDm = parseDeviceMetrics(d.payload, dm);
+            const bool hasEm = parseEnvironmentMetrics(d.payload, em);
+
+            if (!hasDm && !hasEm) {
+                return appendPayloadHex();
+            }
+
+            t.hasDeviceMetrics = hasDm;
+            t.deviceMetrics = dm;
+            t.hasEnvironmentMetrics = hasEm;
+            t.environmentMetrics = em;
+        }
+
+        QString out;
+        if (t.hasDeviceMetrics)
+        {
+            const DeviceMetrics& dm = t.deviceMetrics;
+            if (dm.hasBatteryLevel) {
+                out += QString(" batt=%1%").arg(static_cast<double>(dm.batteryLevel), 0, 'f', 1);
+            }
+            if (dm.hasVoltage) {
+                out += QString(" volt=%1V").arg(static_cast<double>(dm.voltage), 0, 'f', 2);
+            }
+        }
+        if (t.hasEnvironmentMetrics)
+        {
+            const EnvironmentMetrics& em = t.environmentMetrics;
+            if (em.hasTemperature) {
+                out += QString(" temp=%1°C").arg(static_cast<double>(em.temperature), 0, 'f', 1);
+            }
+            if (em.hasRelativeHumidity) {
+                out += QString(" hum=%1%").arg(static_cast<double>(em.relativeHumidity), 0, 'f', 0);
+            }
+            if (em.hasBarometricPressure) {
+                out += QString(" pres=%1hPa").arg(static_cast<double>(em.barometricPressure), 0, 'f', 1);
+            }
+        }
+
+        return out.isEmpty() ? appendPayloadHex() : out;
+    }
+
+    case 70: {  // TRACEROUTE_APP
+        RouteDiscoveryFields r;
+        if (!parseRouteDiscoveryPayload(d.payload, r)) {
+            return appendPayloadHex();
+        }
+
+        QString out = QString(" fwd_hops=%1").arg(r.route.size());
+        if (!r.routeBack.isEmpty()) {
+            out += QString(" back_hops=%1").arg(r.routeBack.size());
+        }
+
+        return out;
+    }
+
+    default:
+        if (!text.isEmpty()) {
+            return QString(" text=\"%1\"").arg(text);
+        }
+        return appendPayloadHex();
+    }
+}
+
+// =============================================================================
+// appendDataDecodeFields — dispatches to per-port decoders for known types,
+// falls back to generic text / hex for everything else.
+// =============================================================================
+
 static void appendDataDecodeFields(const DataFields& d, DecodeResult& result)
 {
     addDecodeField(result, "data.port_name", portToName(d.portnum));
@@ -1885,11 +3073,84 @@ static void appendDataDecodeFields(const DataFields& d, DecodeResult& result)
 
     addDecodeField(result, "data.payload_len", QString::number(d.payload.size()));
 
-    const QString text = payloadToText(d.payload);
-    if (!text.isEmpty()) {
-        addDecodeField(result, "data.text", text);
-    } else if (!d.payload.isEmpty()) {
-        addDecodeField(result, "data.payload_hex", QString(d.payload.toHex()));
+    if (d.payload.isEmpty()) {
+        return;
+    }
+
+    switch (d.portnum)
+    {
+    case 1: {  // TEXT_MESSAGE_APP
+        const QString text = payloadToText(d.payload);
+        if (!text.isEmpty()) {
+            addDecodeField(result, "data.text", text);
+        } else {
+            addDecodeField(result, "data.payload_hex", QString(d.payload.toHex()));
+        }
+        break;
+    }
+    case 3: {  // POSITION_APP
+        PositionFields p;
+        if (parsePositionPayload(d.payload, p)) {
+            appendPositionDecodeFields(p, result);
+        } else {
+            addDecodeField(result, "data.payload_hex", QString(d.payload.toHex()));
+        }
+        break;
+    }
+    case 4: {  // NODEINFO_APP
+        UserFields u;
+        if (parseUserPayload(d.payload, u)) {
+            appendUserDecodeFields(u, result);
+        } else {
+            addDecodeField(result, "data.payload_hex", QString(d.payload.toHex()));
+        }
+        break;
+    }
+    case 67: {  // TELEMETRY_APP
+        TelemetryFields t;
+        if (parseTelemetryPayload(d.payload, t)) {
+            appendTelemetryDecodeFields(t, result);
+        } else {
+            DeviceMetrics dm;
+            EnvironmentMetrics em;
+            const bool hasDm = parseDeviceMetrics(d.payload, dm);
+            const bool hasEm = parseEnvironmentMetrics(d.payload, em);
+
+            if (hasDm || hasEm)
+            {
+                TelemetryFields direct;
+                direct.hasDeviceMetrics = hasDm;
+                direct.deviceMetrics = dm;
+                direct.hasEnvironmentMetrics = hasEm;
+                direct.environmentMetrics = em;
+                appendTelemetryDecodeFields(direct, result);
+                addDecodeField(result, "telemetry.decode_mode", QStringLiteral("direct_metrics_payload"));
+            }
+            else
+            {
+                addDecodeField(result, "data.payload_hex", QString(d.payload.toHex()));
+            }
+        }
+        break;
+    }
+    case 70: {  // TRACEROUTE_APP
+        RouteDiscoveryFields r;
+        if (parseRouteDiscoveryPayload(d.payload, r)) {
+            appendRouteDiscoveryDecodeFields(r, result);
+        } else {
+            addDecodeField(result, "data.payload_hex", QString(d.payload.toHex()));
+        }
+        break;
+    }
+    default: {
+        const QString text = payloadToText(d.payload);
+        if (!text.isEmpty()) {
+            addDecodeField(result, "data.text", text);
+        } else {
+            addDecodeField(result, "data.payload_hex", QString(d.payload.toHex()));
+        }
+        break;
+    }
     }
 }
 
@@ -2065,7 +3326,7 @@ bool Packet::decodeFrame(const QByteArray& frame, DecodeResult& result, const QS
         result.summary = QString("MESH RX|%1 key=none %2")
             .arg(summarizeHeader(h))
             .arg(summarizeData(data));
-        addDecodeField(result, "decode.path", "plain");
+        addDecodeField(result, "decode.path", QStringLiteral("plain"));
         addDecodeField(result, "decode.key_label", result.keyLabel);
         addDecodeField(result, "decode.decrypted", result.decrypted);
         appendDataDecodeFields(data, result);
@@ -2126,7 +3387,7 @@ bool Packet::decodeFrame(const QByteArray& frame, DecodeResult& result, const QS
                 .arg(summarizeHeader(h))
                 .arg(k.label)
                 .arg(summarizeData(data));
-            addDecodeField(result, "decode.path", "aes_ctr_be");
+            addDecodeField(result, "decode.path", QStringLiteral("aes_ctr_be"));
             addDecodeField(result, "decode.key_label", result.keyLabel);
             addDecodeField(result, "decode.decrypted", result.decrypted);
             appendDataDecodeFields(data, result);
@@ -2139,8 +3400,8 @@ bool Packet::decodeFrame(const QByteArray& frame, DecodeResult& result, const QS
     result.summary = QString("MESH RX|%1 undecoded payload_len=%2")
         .arg(summarizeHeader(h))
         .arg(encryptedPayload.size());
-    addDecodeField(result, "decode.path", "undecoded");
-    addDecodeField(result, "decode.key_label", "none");
+    addDecodeField(result, "decode.path", QStringLiteral("undecoded"));
+    addDecodeField(result, "decode.key_label", QStringLiteral("none"));
     addDecodeField(result, "decode.decrypted", false);
 
     if (!encryptedPayload.isEmpty()) {
