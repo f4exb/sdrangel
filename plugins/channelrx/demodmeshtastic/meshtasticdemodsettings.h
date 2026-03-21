@@ -50,7 +50,6 @@ struct MeshtasticDemodSettings
     int m_bandwidthIndex;
     int m_spreadFactor;
     int m_deBits;            //!< Low data rate optimize (DE) bits
-    FFTWindow::Function m_fftWindow;
     static const CodingScheme m_codingScheme;
     bool m_decodeActive;
     int m_eomSquelchTenths;        //!< Squelch factor to trigger end of message (/10)

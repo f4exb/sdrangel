@@ -79,7 +79,6 @@ void MeshtasticDemodSettings::resetToDefaults()
     m_spreadFactor = 7;
     m_deBits = 0;
     m_decodeActive = true;
-    m_fftWindow = FFTWindow::Rectangle;
     m_eomSquelchTenths = 60;
     m_nbSymbolsMax = 255;
     m_preambleChirps = 17;
@@ -129,7 +128,6 @@ QByteArray MeshtasticDemodSettings::serialize() const
     s.writeS32(12, m_packetLength);
     s.writeS32(13, m_nbParityBits);
     s.writeU32(17, m_preambleChirps);
-    s.writeS32(18, (int) m_fftWindow);
     s.writeBool(19, m_invertRamps);
     s.writeBool(20, m_useReverseAPI);
     s.writeString(21, m_reverseAPIAddress);
@@ -170,7 +168,6 @@ bool MeshtasticDemodSettings::deserialize(const QByteArray& data)
     if ((d.getVersion() == 1) || (d.getVersion() == 2) || (d.getVersion() == 3))
     {
         QByteArray bytetmp;
-        int tmp;
         unsigned int utmp;
 
         d.readS32(1, &m_inputFrequencyOffset, 0);
@@ -197,8 +194,6 @@ bool MeshtasticDemodSettings::deserialize(const QByteArray& data)
         d.readS32(12, &m_packetLength, 237);
         d.readS32(13, &m_nbParityBits, 1);
         d.readU32(17, &m_preambleChirps, 17);
-        d.readS32(18, &tmp, (int) FFTWindow::Rectangle);
-        m_fftWindow = (FFTWindow::Function) tmp;
         d.readBool(19, &m_invertRamps, false);
         d.readBool(20, &m_useReverseAPI, false);
         d.readString(21, &m_reverseAPIAddress, "127.0.0.1");
@@ -259,8 +254,6 @@ void MeshtasticDemodSettings::applySettings(const QStringList& settingsKeys, con
         m_spreadFactor = settings.m_spreadFactor;
     if (settingsKeys.contains("deBits"))
         m_deBits = settings.m_deBits;
-    if (settingsKeys.contains("fftWindow"))
-        m_fftWindow = settings.m_fftWindow;
     if (settingsKeys.contains("decodeActive"))
         m_decodeActive = settings.m_decodeActive;
     if (settingsKeys.contains("eomSquelchTenths"))
@@ -317,8 +310,6 @@ QString MeshtasticDemodSettings::getDebugString(const QStringList& settingsKeys,
         debug += QString("SpreadFactor: %1 ").arg(m_spreadFactor);
     if (force || settingsKeys.contains("deBits"))
         debug += QString("DEBits: %1 ").arg(m_deBits);
-    if (force || settingsKeys.contains("fftWindow"))
-        debug += QString("FFTWindow: %1 ").arg((int) m_fftWindow);
     if (force || settingsKeys.contains("decodeActive"))
         debug += QString("DecodeActive: %1 ").arg(m_decodeActive);
     if (force || settingsKeys.contains("eomSquelchTenths"))

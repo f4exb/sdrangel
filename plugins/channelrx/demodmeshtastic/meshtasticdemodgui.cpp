@@ -299,12 +299,6 @@ void MeshtasticDemodGUI::on_deBits_valueChanged(int value)
     applySettings();
 }
 
-void MeshtasticDemodGUI::on_fftWindow_currentIndexChanged(int index)
-{
-    m_settings.m_fftWindow = (FFTWindow::Function) index;
-    applySettings();
-}
-
 void MeshtasticDemodGUI::on_preambleChirps_valueChanged(int value)
 {
     m_settings.m_preambleChirps = value;
@@ -1658,8 +1652,6 @@ MeshtasticDemodGUI::MeshtasticDemodGUI(PluginAPI* pluginAPI, DeviceUISet *device
     ui->deBits->setToolTip(tr("Low data-rate optimization bits (DE)."));
     ui->deBitsLabel->setToolTip(tr("Low data-rate optimization setting."));
     ui->deBitsText->setToolTip(tr("Current low data-rate optimization value."));
-    ui->fftWindow->setToolTip(tr("FFT window used by the LoRa de-chirping stage."));
-    ui->fftWindowLabel->setToolTip(tr("FFT window function."));
     ui->preambleChirps->setToolTip(tr("Expected LoRa preamble chirp count. Meshtastic profiles default to 17 (sub-GHz) or 12 (2.4 GHz)."));
     ui->preambleChirpsLabel->setToolTip(tr("Expected LoRa preamble length in chirps."));
     ui->preambleChirpsText->setToolTip(tr("Current preamble chirp value."));
@@ -1759,9 +1751,6 @@ void MeshtasticDemodGUI::updateControlAvailabilityHints()
 
     const QString fftWindowEnabledTip = tr("FFT window used by the de-chirping stage.");
     const QString fftWindowDisabledTip = tr("Ignored in LoRa mode. The LoRa demodulator uses a fixed internal FFT window.");
-    ui->fftWindow->setEnabled(!loRaMode);
-    ui->fftWindow->setToolTip(loRaMode ? fftWindowDisabledTip : fftWindowEnabledTip);
-    ui->fftWindowLabel->setToolTip(loRaMode ? fftWindowDisabledTip : tr("FFT window function."));
 
     const QString messageLengthAutoEnabledTip = tr("Auto-detect payload symbol length from headers.");
     const QString messageLengthAutoDisabledTip = tr("Disabled in LoRa explicit-header mode. Payload length is decoded from the LoRa header.");
@@ -1818,7 +1807,6 @@ void MeshtasticDemodGUI::displaySettings()
     ui->Spread->setValue(m_settings.m_spreadFactor);
     ui->SpreadText->setText(tr("%1").arg(m_settings.m_spreadFactor));
     ui->deBits->setValue(m_settings.m_deBits);
-    ui->fftWindow->setCurrentIndex((int) m_settings.m_fftWindow);
     ui->deBitsText->setText(tr("%1").arg(m_settings.m_deBits));
     ui->preambleChirps->setValue(m_settings.m_preambleChirps);
     ui->preambleChirpsText->setText(tr("%1").arg(m_settings.m_preambleChirps));
@@ -3258,7 +3246,6 @@ void MeshtasticDemodGUI::makeUIConnections()
     QObject::connect(ui->BW, &QSlider::valueChanged, this, &MeshtasticDemodGUI::on_BW_valueChanged);
     QObject::connect(ui->Spread, &QSlider::valueChanged, this, &MeshtasticDemodGUI::on_Spread_valueChanged);
     QObject::connect(ui->deBits, &QSlider::valueChanged, this, &MeshtasticDemodGUI::on_deBits_valueChanged);
-    QObject::connect(ui->fftWindow, QOverload<int>::of(&QComboBox::currentIndexChanged), this, &MeshtasticDemodGUI::on_fftWindow_currentIndexChanged);
     QObject::connect(ui->preambleChirps, &QSlider::valueChanged, this, &MeshtasticDemodGUI::on_preambleChirps_valueChanged);
     QObject::connect(ui->mute, &QToolButton::toggled, this, &MeshtasticDemodGUI::on_mute_toggled);
     QObject::connect(ui->clear, &QPushButton::clicked, this, &MeshtasticDemodGUI::on_clear_clicked);
