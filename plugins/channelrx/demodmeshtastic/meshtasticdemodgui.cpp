@@ -451,12 +451,9 @@ void MeshtasticDemodGUI::startMeshAutoLock()
     {
         displayStatus(tr("MESH LOCK|switch decoder scheme to LoRa before auto-lock"));
 
-        if (m_meshAutoLockButton)
-        {
-            m_meshAutoLockButton->blockSignals(true);
-            m_meshAutoLockButton->setChecked(false);
-            m_meshAutoLockButton->blockSignals(false);
-        }
+        ui->meshAutoLock->blockSignals(true);
+        ui->meshAutoLock->setChecked(false);
+        ui->meshAutoLock->blockSignals(false);
 
         return;
     }
@@ -514,12 +511,9 @@ void MeshtasticDemodGUI::startMeshAutoLock()
     if (m_meshAutoLockCandidates.isEmpty())
     {
         displayStatus(tr("MESH LOCK|no candidates generated"));
-        if (m_meshAutoLockButton)
-        {
-            m_meshAutoLockButton->blockSignals(true);
-            m_meshAutoLockButton->setChecked(false);
-            m_meshAutoLockButton->blockSignals(false);
-        }
+        ui->meshAutoLock->blockSignals(true);
+        ui->meshAutoLock->setChecked(false);
+        ui->meshAutoLock->blockSignals(false);
         return;
     }
 
@@ -533,9 +527,7 @@ void MeshtasticDemodGUI::startMeshAutoLock()
     m_meshAutoLockArmStartMs = QDateTime::currentMSecsSinceEpoch();
     m_meshAutoLockCandidateStartMs = QDateTime::currentMSecsSinceEpoch();
 
-    if (m_meshAutoLockButton) {
-        m_meshAutoLockButton->setText(tr("Locking..."));
-    }
+    ui->meshAutoLock->setText(tr("Locking..."));
 
     applyMeshAutoLockCandidate(m_meshAutoLockCandidates[m_meshAutoLockCandidateIndex], true);
 
@@ -556,7 +548,7 @@ void MeshtasticDemodGUI::startMeshAutoLock()
 
 void MeshtasticDemodGUI::stopMeshAutoLock(bool keepBestCandidate)
 {
-    if (!m_meshAutoLockActive && (!m_meshAutoLockButton || !m_meshAutoLockButton->isChecked()))
+    if (!m_meshAutoLockActive && !ui->meshAutoLock->isChecked())
     {
         return;
     }
@@ -625,13 +617,10 @@ void MeshtasticDemodGUI::stopMeshAutoLock(bool keepBestCandidate)
     m_meshAutoLockActivityTicks = 0;
     m_meshAutoLockArmStartMs = 0;
 
-    if (m_meshAutoLockButton)
-    {
-        m_meshAutoLockButton->blockSignals(true);
-        m_meshAutoLockButton->setChecked(false);
-        m_meshAutoLockButton->setText(tr("Auto Lock"));
-        m_meshAutoLockButton->blockSignals(false);
-    }
+    ui->meshAutoLock->blockSignals(true);
+    ui->meshAutoLock->setChecked(false);
+    ui->meshAutoLock->setText(tr("Auto Lock"));
+    ui->meshAutoLock->blockSignals(false);
 
     if (keepBestCandidate && (bestIndex >= 0 || bestFallbackIndex >= 0))
     {
@@ -937,14 +926,11 @@ void MeshtasticDemodGUI::editMeshtasticKeys()
 
     m_settings.m_meshtasticKeySpecList = dialog.getKeySpecList();
 
-    if (m_meshKeysButton)
-    {
-        const bool hasCustomKeys = !m_settings.m_meshtasticKeySpecList.isEmpty();
-        m_meshKeysButton->setText(hasCustomKeys ? tr("Keys*") : tr("Keys..."));
-        m_meshKeysButton->setToolTip(hasCustomKeys ?
-            tr("Custom Meshtastic decode keys configured. Click to edit.") :
-            tr("Open Meshtastic key manager."));
-    }
+    const bool hasCustomKeys = !m_settings.m_meshtasticKeySpecList.isEmpty();
+    ui->meshKeys->setText(hasCustomKeys ? tr("Keys*") : tr("Keys..."));
+    ui->meshKeys->setToolTip(hasCustomKeys ?
+        tr("Custom Meshtastic decode keys configured. Click to edit.") :
+        tr("Open Meshtastic key manager."));
 
     applySettings();
 
@@ -1177,13 +1163,9 @@ bool MeshtasticDemodGUI::autoTuneDeviceSampleRateForBandwidth(int bandwidthHz, Q
 
 void MeshtasticDemodGUI::applyMeshtasticProfileFromSelection()
 {
-    if (!m_meshRegionCombo || !m_meshPresetCombo || !m_meshChannelCombo) {
-        return;
-    }
-
-    const QString region = m_meshRegionCombo->currentData().toString();
-    const QString preset = m_meshPresetCombo->currentData().toString();
-    const int meshChannel = m_meshChannelCombo->currentData().toInt();
+    const QString region = ui->meshRegion->currentData().toString();
+    const QString preset = ui->meshPreset->currentData().toString();
+    const int meshChannel = ui->meshChannel->currentData().toInt();
     const int channelNum = meshChannel + 1; // planner expects 1-based channel_num
 
     if (region.isEmpty() || preset.isEmpty()) {
@@ -1343,96 +1325,35 @@ void MeshtasticDemodGUI::applyMeshtasticProfileFromSelection()
 
 void MeshtasticDemodGUI::setupMeshtasticAutoProfileControls()
 {
-    QHBoxLayout* meshLayout = new QHBoxLayout();
-    meshLayout->setSpacing(2);
+    for (int i = 0; i < ui->meshRegion->count(); ++i) {
+        ui->meshRegion->setItemData(i, ui->meshRegion->itemText(i), Qt::UserRole);
+    }
 
-    QLabel* regionLabel = new QLabel("Region", this);
-    regionLabel->setToolTip("Meshtastic region (defines allowed frequency band)");
-    m_meshRegionCombo = new QComboBox(this);
-    m_meshRegionCombo->setToolTip("Meshtastic region. Combined with preset/channel to auto-apply LoRa receive parameters.");
-    m_meshRegionCombo->addItem("US", "US");
-    m_meshRegionCombo->addItem("EU_433", "EU_433");
-    m_meshRegionCombo->addItem("EU_868", "EU_868");
-    m_meshRegionCombo->addItem("ANZ", "ANZ");
-    m_meshRegionCombo->addItem("JP", "JP");
-    m_meshRegionCombo->addItem("CN", "CN");
-    m_meshRegionCombo->addItem("KR", "KR");
-    m_meshRegionCombo->addItem("TW", "TW");
-    m_meshRegionCombo->addItem("IN", "IN");
-    m_meshRegionCombo->addItem("TH", "TH");
-    m_meshRegionCombo->addItem("BR_902", "BR_902");
-    m_meshRegionCombo->addItem("LORA_24", "LORA_24");
+    for (int i = 0; i < ui->meshPreset->count(); ++i) {
+        ui->meshPreset->setItemData(i, ui->meshPreset->itemText(i), Qt::UserRole);
+    }
 
-    QLabel* presetLabel = new QLabel("Preset", this);
-    presetLabel->setToolTip("Meshtastic modem preset (LongFast, MediumSlow, ...)");
-    m_meshPresetCombo = new QComboBox(this);
-    m_meshPresetCombo->setToolTip("Meshtastic modem preset. Applies LoRa BW/SF/CR/DE and header/CRC expectations.");
-    m_meshPresetCombo->addItem("LONG_FAST", "LONG_FAST");
-    m_meshPresetCombo->addItem("LONG_SLOW", "LONG_SLOW");
-    m_meshPresetCombo->addItem("LONG_MODERATE", "LONG_MODERATE");
-    m_meshPresetCombo->addItem("LONG_TURBO", "LONG_TURBO");
-    m_meshPresetCombo->addItem("MEDIUM_FAST", "MEDIUM_FAST");
-    m_meshPresetCombo->addItem("MEDIUM_SLOW", "MEDIUM_SLOW");
-    m_meshPresetCombo->addItem("SHORT_FAST", "SHORT_FAST");
-    m_meshPresetCombo->addItem("SHORT_SLOW", "SHORT_SLOW");
-    m_meshPresetCombo->addItem("SHORT_TURBO", "SHORT_TURBO");
+    ui->meshAutoSampleRate->setChecked(m_settings.m_meshtasticAutoSampleRate);
 
-    QLabel* channelLabel = new QLabel("Channel", this);
-    channelLabel->setToolTip("Meshtastic channel number (zero-based)");
-    m_meshChannelCombo = new QComboBox(this);
-    m_meshChannelCombo->setToolTip("Meshtastic channel number (zero-based, shown with center frequency)");
-    m_meshApplyButton = new QPushButton("Apply", this);
-    m_meshApplyButton->setToolTip("Apply the currently selected Meshtastic region/preset/channel profile now.");
-    m_meshKeysButton = new QPushButton("Keys...", this);
-    m_meshKeysButton->setToolTip("Open key manager to configure Meshtastic decryption keys (hex/base64/default/simple).");
-    m_meshAutoLockButton = new QPushButton("Auto Lock", this);
-    m_meshAutoLockButton->setCheckable(true);
-    m_meshAutoLockButton->setToolTip(
-        "Scan Invert + frequency offset candidates and keep the best lock.\n"
-        "Arms and waits for on-air activity, then scans candidates.\n"
-        "Scores using decode quality plus source-side intensity (demod activity and power/noise).");
-    m_meshAutoSampleRateCheck = new QCheckBox("Auto Input Tune", this);
-    m_meshAutoSampleRateCheck->setChecked(m_settings.m_meshtasticAutoSampleRate);
-    m_meshAutoSampleRateCheck->setToolTip(
-        "Automatically tune source parameters for the selected LoRa profile.\n"
-        "Includes sample-rate/decimation and, where supported, dcBlock/iqCorrection/agc.");
-
-    meshLayout->addWidget(regionLabel);
-    meshLayout->addWidget(m_meshRegionCombo, 1);
-    meshLayout->addWidget(presetLabel);
-    meshLayout->addWidget(m_meshPresetCombo, 1);
-    meshLayout->addWidget(channelLabel);
-    meshLayout->addWidget(m_meshChannelCombo);
-    meshLayout->addWidget(m_meshApplyButton);
-    meshLayout->addWidget(m_meshKeysButton);
-    meshLayout->addWidget(m_meshAutoLockButton);
-    meshLayout->addWidget(m_meshAutoSampleRateCheck);
-
-    ui->payloadLayout->insertLayout(0, meshLayout);
-
-    QObject::connect(m_meshRegionCombo, QOverload<int>::of(&QComboBox::currentIndexChanged), this, &MeshtasticDemodGUI::on_meshRegion_currentIndexChanged);
-    QObject::connect(m_meshPresetCombo, QOverload<int>::of(&QComboBox::currentIndexChanged), this, &MeshtasticDemodGUI::on_meshPreset_currentIndexChanged);
-    QObject::connect(m_meshChannelCombo, QOverload<int>::of(&QComboBox::currentIndexChanged), this, &MeshtasticDemodGUI::on_meshChannel_currentIndexChanged);
-    QObject::connect(m_meshApplyButton, &QPushButton::clicked, this, &MeshtasticDemodGUI::on_meshApply_clicked);
-    QObject::connect(m_meshKeysButton, &QPushButton::clicked, this, &MeshtasticDemodGUI::on_meshKeys_clicked);
-    QObject::connect(m_meshAutoLockButton, &QPushButton::clicked, this, &MeshtasticDemodGUI::on_meshAutoLock_clicked);
-    QObject::connect(m_meshAutoSampleRateCheck, &QCheckBox::toggled, this, &MeshtasticDemodGUI::on_meshAutoSampleRate_toggled);
+    QObject::connect(ui->meshRegion, QOverload<int>::of(&QComboBox::currentIndexChanged), this, &MeshtasticDemodGUI::on_meshRegion_currentIndexChanged);
+    QObject::connect(ui->meshPreset, QOverload<int>::of(&QComboBox::currentIndexChanged), this, &MeshtasticDemodGUI::on_meshPreset_currentIndexChanged);
+    QObject::connect(ui->meshChannel, QOverload<int>::of(&QComboBox::currentIndexChanged), this, &MeshtasticDemodGUI::on_meshChannel_currentIndexChanged);
+    QObject::connect(ui->meshApply, &QPushButton::clicked, this, &MeshtasticDemodGUI::on_meshApply_clicked);
+    QObject::connect(ui->meshKeys, &QPushButton::clicked, this, &MeshtasticDemodGUI::on_meshKeys_clicked);
+    QObject::connect(ui->meshAutoLock, &QPushButton::clicked, this, &MeshtasticDemodGUI::on_meshAutoLock_clicked);
+    QObject::connect(ui->meshAutoSampleRate, &QCheckBox::toggled, this, &MeshtasticDemodGUI::on_meshAutoSampleRate_toggled);
 
     rebuildMeshtasticChannelOptions();
 }
 
 void MeshtasticDemodGUI::rebuildMeshtasticChannelOptions()
 {
-    if (!m_meshRegionCombo || !m_meshPresetCombo || !m_meshChannelCombo) {
-        return;
-    }
-
-    const QString region = m_meshRegionCombo->currentData().toString();
-    const QString preset = m_meshPresetCombo->currentData().toString();
-    const int previousChannel = m_meshChannelCombo->currentData().toInt();
+    const QString region = ui->meshRegion->currentData().toString();
+    const QString preset = ui->meshPreset->currentData().toString();
+    const int previousChannel = ui->meshChannel->currentData().toInt();
 
     m_meshControlsUpdating = true;
-    m_meshChannelCombo->clear();
+    ui->meshChannel->clear();
 
     int added = 0;
     for (int meshChannel = 0; meshChannel <= 200; ++meshChannel)
@@ -1455,23 +1376,23 @@ void MeshtasticDemodGUI::rebuildMeshtasticChannelOptions()
             ? QString("%1 (%2 MHz)").arg(meshChannel).arg(meshRadio.centerFrequencyHz / 1000000.0, 0, 'f', 3)
             : QString::number(meshChannel);
 
-        m_meshChannelCombo->addItem(label, meshChannel);
+        ui->meshChannel->addItem(label, meshChannel);
         added++;
     }
 
     if (added == 0) {
-        m_meshChannelCombo->addItem("0", 0);
+        ui->meshChannel->addItem("0", 0);
     }
 
-    m_meshChannelCombo->setToolTip(tr("Meshtastic channel number (%1 available for %2/%3)")
+    ui->meshChannel->setToolTip(tr("Meshtastic channel number (%1 available for %2/%3)")
         .arg(added)
         .arg(region)
         .arg(preset));
-    int restoreIndex = m_meshChannelCombo->findData(previousChannel);
+    int restoreIndex = ui->meshChannel->findData(previousChannel);
     if (restoreIndex < 0) {
         restoreIndex = 0;
     }
-    m_meshChannelCombo->setCurrentIndex(restoreIndex);
+    ui->meshChannel->setCurrentIndex(restoreIndex);
     m_meshControlsUpdating = false;
 
     qInfo() << "MeshtasticDemodGUI::rebuildMeshtasticChannelOptions:"
@@ -1554,14 +1475,6 @@ MeshtasticDemodGUI::MeshtasticDemodGUI(PluginAPI* pluginAPI, DeviceUISet *device
     m_deviceCenterFrequency(0),
     m_basebandSampleRate(250000),
 	m_doApplySettings(true),
-    m_meshRegionCombo(nullptr),
-    m_meshPresetCombo(nullptr),
-    m_meshChannelCombo(nullptr),
-    m_meshApplyButton(nullptr),
-    m_meshKeysButton(nullptr),
-    m_meshAutoLockButton(nullptr),
-    m_dechirpLiveFollowButton(nullptr),
-    m_meshAutoSampleRateCheck(nullptr),
     m_pipelineTabs(nullptr),
     m_meshControlsUpdating(false),
     m_meshAutoLockActive(false),
@@ -1591,17 +1504,9 @@ MeshtasticDemodGUI::MeshtasticDemodGUI(PluginAPI* pluginAPI, DeviceUISet *device
 	ui->setupUi(rollupContents);
     setupMeshtasticAutoProfileControls();
     setupPipelineViews();
-    if (ui->messageLayout)
-    {
-        m_dechirpLiveFollowButton = new QPushButton(tr("Live"), this);
-        m_dechirpLiveFollowButton->setAutoDefault(false);
-        m_dechirpLiveFollowButton->setMaximumSize(QSize(42, 24));
-        m_dechirpLiveFollowButton->setToolTip(tr("Return de-chirped spectrum to live follow mode."));
-        ui->messageLayout->insertWidget(2, m_dechirpLiveFollowButton);
-        QObject::connect(m_dechirpLiveFollowButton, &QPushButton::clicked, this, [this](bool) {
-            setDechirpInspectionMode(false);
-        });
-    }
+    QObject::connect(ui->dechirpLiveFollow, &QPushButton::clicked, this, [this](bool) {
+        setDechirpInspectionMode(false);
+    });
     updateDechirpModeUI();
     // Mark major sections as vertically expanding so RollupContents does not clamp max height.
     ui->verticalLayoutWidget_2->setSizePolicy(QSizePolicy::Preferred, QSizePolicy::Expanding);
@@ -1832,63 +1737,51 @@ void MeshtasticDemodGUI::displaySettings()
     getRollupContents()->restoreState(m_rollupState);
     updateAbsoluteCenterFrequency();
 
-    if (m_meshKeysButton)
-    {
-        const bool hasCustomKeys = !m_settings.m_meshtasticKeySpecList.trimmed().isEmpty();
-        m_meshKeysButton->setText(hasCustomKeys ? tr("Keys*") : tr("Keys..."));
-        m_meshKeysButton->setToolTip(hasCustomKeys ?
-            tr("Custom Meshtastic decode keys configured. Click to edit.") :
-            tr("Open Meshtastic key manager."));
+    const bool hasCustomKeys = !m_settings.m_meshtasticKeySpecList.trimmed().isEmpty();
+    ui->meshKeys->setText(hasCustomKeys ? tr("Keys*") : tr("Keys..."));
+    ui->meshKeys->setToolTip(hasCustomKeys ?
+        tr("Custom Meshtastic decode keys configured. Click to edit.") :
+        tr("Open Meshtastic key manager."));
+
+    m_meshControlsUpdating = true;
+    ui->meshAutoSampleRate->setChecked(m_settings.m_meshtasticAutoSampleRate);
+    m_meshControlsUpdating = false;
+
+    ui->meshAutoLock->blockSignals(true);
+    ui->meshAutoLock->setChecked(m_meshAutoLockActive);
+    ui->meshAutoLock->setText(m_meshAutoLockActive ? tr("Locking...") : tr("Auto Lock"));
+    ui->meshAutoLock->blockSignals(false);
+
+    m_meshControlsUpdating = true;
+
+    int regionIndex = ui->meshRegion->findData(m_settings.m_meshtasticRegionCode);
+    if (regionIndex < 0) {
+        regionIndex = ui->meshRegion->findData("US");
     }
-
-    if (m_meshAutoSampleRateCheck)
-    {
-        m_meshControlsUpdating = true;
-        m_meshAutoSampleRateCheck->setChecked(m_settings.m_meshtasticAutoSampleRate);
-        m_meshControlsUpdating = false;
+    if (regionIndex < 0) {
+        regionIndex = 0;
     }
+    ui->meshRegion->setCurrentIndex(regionIndex);
 
-    if (m_meshAutoLockButton)
-    {
-        m_meshAutoLockButton->blockSignals(true);
-        m_meshAutoLockButton->setChecked(m_meshAutoLockActive);
-        m_meshAutoLockButton->setText(m_meshAutoLockActive ? tr("Locking...") : tr("Auto Lock"));
-        m_meshAutoLockButton->blockSignals(false);
+    int presetIndex = ui->meshPreset->findData(m_settings.m_meshtasticPresetName);
+    if (presetIndex < 0) {
+        presetIndex = ui->meshPreset->findData("LONG_FAST");
     }
-
-    if (m_meshRegionCombo && m_meshPresetCombo && m_meshChannelCombo)
-    {
-        m_meshControlsUpdating = true;
-
-        int regionIndex = m_meshRegionCombo->findData(m_settings.m_meshtasticRegionCode);
-        if (regionIndex < 0) {
-            regionIndex = m_meshRegionCombo->findData("US");
-        }
-        if (regionIndex < 0) {
-            regionIndex = 0;
-        }
-        m_meshRegionCombo->setCurrentIndex(regionIndex);
-
-        int presetIndex = m_meshPresetCombo->findData(m_settings.m_meshtasticPresetName);
-        if (presetIndex < 0) {
-            presetIndex = m_meshPresetCombo->findData("LONG_FAST");
-        }
-        if (presetIndex < 0) {
-            presetIndex = 0;
-        }
-        m_meshPresetCombo->setCurrentIndex(presetIndex);
-        m_meshControlsUpdating = false;
-
-        rebuildMeshtasticChannelOptions();
-
-        m_meshControlsUpdating = true;
-        int channelIndex = m_meshChannelCombo->findData(m_settings.m_meshtasticChannelIndex);
-        if (channelIndex < 0) {
-            channelIndex = 0;
-        }
-        m_meshChannelCombo->setCurrentIndex(channelIndex);
-        m_meshControlsUpdating = false;
+    if (presetIndex < 0) {
+        presetIndex = 0;
     }
+    ui->meshPreset->setCurrentIndex(presetIndex);
+    m_meshControlsUpdating = false;
+
+    rebuildMeshtasticChannelOptions();
+
+    m_meshControlsUpdating = true;
+    int channelIndex = ui->meshChannel->findData(m_settings.m_meshtasticChannelIndex);
+    if (channelIndex < 0) {
+        channelIndex = 0;
+    }
+    ui->meshChannel->setCurrentIndex(channelIndex);
+    m_meshControlsUpdating = false;
 
     updateControlAvailabilityHints();
     blockApplySettings(false);
@@ -2193,13 +2086,9 @@ void MeshtasticDemodGUI::setDechirpInspectionMode(bool enabled)
 
 void MeshtasticDemodGUI::updateDechirpModeUI()
 {
-    if (!m_dechirpLiveFollowButton) {
-        return;
-    }
-
-    m_dechirpLiveFollowButton->setEnabled(m_dechirpInspectionActive);
-    m_dechirpLiveFollowButton->setText(tr("Live"));
-    m_dechirpLiveFollowButton->setToolTip(m_dechirpInspectionActive
+    ui->dechirpLiveFollow->setEnabled(m_dechirpInspectionActive);
+    ui->dechirpLiveFollow->setText(tr("Live"));
+    ui->dechirpLiveFollow->setToolTip(m_dechirpInspectionActive
         ? tr("Return de-chirped spectrum to live follow mode.")
         : tr("Already in live follow mode."));
 }

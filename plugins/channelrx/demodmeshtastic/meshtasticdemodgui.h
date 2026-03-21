@@ -115,14 +115,6 @@ private:
 
 	MeshtasticDemod* m_meshtasticDemod;
 	SpectrumVis* m_spectrumVis;
-    QComboBox* m_meshRegionCombo;
-    QComboBox* m_meshPresetCombo;
-    QComboBox* m_meshChannelCombo;
-    QPushButton* m_meshApplyButton;
-    QPushButton* m_meshKeysButton;
-    QPushButton* m_meshAutoLockButton;
-    QPushButton* m_dechirpLiveFollowButton;
-    QCheckBox* m_meshAutoSampleRateCheck;
     struct PipelineView
     {
         QWidget *tabWidget = nullptr;
