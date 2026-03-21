@@ -1043,6 +1043,12 @@ int MeshtasticDemodSink::processLoRaFrameSyncStep()
                 m_loRaCFOInt = static_cast<int>(std::floor((m_loRaDownVal - static_cast<int>(m_nbSymbols)) / 2.0));
             }
 
+            // Preserve state-machine net ID bin indices for sync word extraction.
+            // The corrLen-based refinement overwrites m_loRaNetIds but may produce
+            // incorrect results when m_loRaNetIdSamp is not fully populated.
+            const int netIdBin0 = m_loRaNetIds[0];
+            const int netIdBin1 = m_loRaNetIds[1];
+
             const unsigned int upSymCount = std::min<unsigned int>(
                 static_cast<unsigned int>(std::max(0, m_loRaUpSymbToUse)),
                 static_cast<unsigned int>(m_loRaPreambleUpchirps.size() / std::max(1U, m_nbSymbols))
@@ -1158,7 +1164,17 @@ int MeshtasticDemodSink::processLoRaFrameSyncStep()
             m_loRaFrameId++;
             m_decodeMsg = MeshtasticDemodMsg::MsgDecodeSymbols::create();
             m_decodeMsg->setFrameId(m_loRaFrameId);
-            m_decodeMsg->setSyncWord(0U);
+            {
+                // LoRa sync word is encoded across two net-ID chirps.
+                // First chirp (index 0) carries the high nibble, second (index 1) the low nibble.
+                // Each nibble N is mapped to bin N*8. Formula: syncWord = low + 16*high.
+                // Use the coarse state-machine bin values (netIdBin0/1) which are reliably
+                // set from the FFT in LoRaSyncNetId1/2 states, not the refined values which
+                // require m_loRaNetIdSamp to be fully populated.
+                const unsigned int hiNibble = static_cast<unsigned int>(std::round(static_cast<double>(netIdBin0) / 8.0)) & 0xFU;
+                const unsigned int loNibble = static_cast<unsigned int>(std::round(static_cast<double>(netIdBin1) / 8.0)) & 0xFU;
+                m_decodeMsg->setSyncWord(loNibble + 16U * hiNibble);
+            }
             clearSpectrumHistoryForNewFrame();
             m_loRaFrameSymbolCount = 0U;
             m_magsqMax = 0.0;
