@@ -1513,8 +1513,6 @@ MeshtasticDemodGUI::MeshtasticDemodGUI(PluginAPI* pluginAPI, DeviceUISet *device
     ui->spectrumContainer->setSizePolicy(QSizePolicy::Preferred, QSizePolicy::Expanding);
     if (m_pipelineTabs) {
         m_pipelineTabs->setSizePolicy(QSizePolicy::Expanding, QSizePolicy::Expanding);
-    } else {
-        ui->messageText->setSizePolicy(QSizePolicy::Expanding, QSizePolicy::Expanding);
     }
     setSizePolicy(rollupContents->sizePolicy());
     rollupContents->arrangeRollups();
@@ -1575,7 +1573,6 @@ MeshtasticDemodGUI::MeshtasticDemodGUI(PluginAPI* pluginAPI, DeviceUISet *device
     ui->packetLengthLabel->setToolTip(tr("Fixed packet length for implicit header mode."));
     ui->packetLengthText->setToolTip(tr("Current fixed packet length."));
     ui->invertRamps->setToolTip(tr("Invert chirp ramp direction."));
-    ui->messageText->setToolTip(tr("Decoded packet and status log."));
     ui->messageLabel->setToolTip(tr("Decoded output area."));
     ui->udpSend->setToolTip(tr("Forward decoded payload bytes to UDP."));
     ui->udpAddress->setToolTip(tr("Destination UDP address for forwarded payloads."));
@@ -1598,9 +1595,6 @@ MeshtasticDemodGUI::MeshtasticDemodGUI(PluginAPI* pluginAPI, DeviceUISet *device
     ui->snrText->setToolTip(tr("Current estimated SNR."));
     ui->sUnits->setToolTip(tr("Unit for SNR."));
     ui->symbolsCodewordsSeparator->setToolTip(tr("Separator between symbol and codeword counters."));
-
-    ui->messageText->setReadOnly(true);
-    ui->messageText->setReadOnly(true);
 
 	m_channelMarker.setMovable(true);
 	m_channelMarker.setVisible(true);
@@ -1864,20 +1858,7 @@ void MeshtasticDemodGUI::setBandwidths()
 
 void MeshtasticDemodGUI::setupPipelineViews()
 {
-    if (!ui->textLayout || m_pipelineTabs) {
-        return;
-    }
-
-    ui->textLayout->removeWidget(ui->messageText);
-    ui->messageText->hide();
-
-    m_pipelineTabs = new QTabWidget(this);
-    m_pipelineTabs->setTabPosition(QTabWidget::West);
-    m_pipelineTabs->setMovable(false);
-    m_pipelineTabs->setDocumentMode(true);
-    m_pipelineTabs->setMinimumHeight(ui->messageText->minimumHeight());
-    ui->textLayout->addWidget(m_pipelineTabs);
-
+    m_pipelineTabs = ui->pipelineTabs;
     ensurePipelineView(-1, "All");
 }
 
@@ -1939,10 +1920,6 @@ void MeshtasticDemodGUI::clearPipelineViews()
         if (it.value().treeWidget) {
             it.value().treeWidget->clear();
         }
-    }
-
-    if (ui->messageText) {
-        ui->messageText->clear();
     }
 
     m_dechirpSnapshots.clear();
@@ -2972,79 +2949,17 @@ void MeshtasticDemodGUI::showTextMessage(const Message& message)
 
 void MeshtasticDemodGUI::displayText(const QString& text)
 {
-    if (m_pipelineTabs)
-    {
-        appendPipelineLogLine(-1, "All", QString("TXT|%1").arg(text));
-        return;
-    }
-
-    QTextCursor cursor = ui->messageText->textCursor();
-    cursor.movePosition(QTextCursor::End, QTextCursor::MoveAnchor);
-    if (!ui->messageText->document()->isEmpty()) {
-        cursor.insertText("\n");
-    }
-    cursor.insertText(tr("TXT|%1").arg(text));
-    alignTextViewToLatestLineLeft(ui->messageText);
+    appendPipelineLogLine(-1, "All", QString("TXT|%1").arg(text));
 }
 
 void MeshtasticDemodGUI::displayBytes(const QByteArray& bytes)
 {
-    if (m_pipelineTabs)
-    {
-        appendPipelineBytes(-1, "All", bytes);
-        return;
-    }
-
-    QTextCursor cursor = ui->messageText->textCursor();
-    cursor.movePosition(QTextCursor::End, QTextCursor::MoveAnchor);
-
-    if (!ui->messageText->document()->isEmpty()) {
-        cursor.insertText("\n");
-    }
-
-    QByteArray::const_iterator it = bytes.begin();
-    unsigned int i = 0;
-
-    for (;it != bytes.end(); ++it, i++)
-    {
-        unsigned char b = *it;
-
-        if (i%16 == 0) {
-            cursor.insertText(tr("%1|").arg(i, 3, 10, QChar('0')));
-        }
-
-        cursor.insertText(tr("%1").arg(b, 2, 16, QChar('0')));
-
-        if (i%16 == 15) {
-            cursor.insertText("\n");
-        } else if (i%4 == 3) {
-            cursor.insertText("|");
-        } else {
-            cursor.insertText(" ");
-        }
-    }
-
-    alignTextViewToLatestLineLeft(ui->messageText);
+    appendPipelineBytes(-1, "All", bytes);
 }
 
 void MeshtasticDemodGUI::displayStatus(const QString& status)
 {
-    if (m_pipelineTabs)
-    {
-        appendPipelineStatusLine(-1, "All", status);
-        qInfo() << "MeshtasticDemodGUI::displayStatus:" << status;
-        return;
-    }
-
-    QTextCursor cursor = ui->messageText->textCursor();
-    cursor.movePosition(QTextCursor::End, QTextCursor::MoveAnchor);
-
-    if (!ui->messageText->document()->isEmpty()) {
-        cursor.insertText("\n");
-    }
-
-    cursor.insertText(tr(">%1").arg(status));
-    alignTextViewToLatestLineLeft(ui->messageText);
+    appendPipelineStatusLine(-1, "All", status);
     qInfo() << "MeshtasticDemodGUI::displayStatus:" << status;
 }
 

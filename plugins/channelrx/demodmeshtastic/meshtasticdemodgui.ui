@@ -1117,18 +1117,21 @@
        </layout>
       </item>
       <item>
-       <widget class="QPlainTextEdit" name="messageText">
+       <widget class="QTabWidget" name="pipelineTabs">
         <property name="minimumSize">
          <size>
           <width>0</width>
           <height>200</height>
          </size>
         </property>
-        <property name="font">
-         <font>
-          <family>Liberation Mono</family>
-          <pointsize>9</pointsize>
-         </font>
+        <property name="tabPosition">
+         <enum>QTabWidget::West</enum>
+        </property>
+        <property name="movable">
+         <bool>false</bool>
+        </property>
+        <property name="documentMode">
+         <bool>true</bool>
         </property>
        </widget>
       </item>
