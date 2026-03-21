@@ -78,6 +78,7 @@ private:
     unsigned int m_quietSamples;   //!< number of samples during quiet period
     unsigned int m_quarterSamples; //!< number of samples in a quarter chirp
     unsigned int m_repeatCount;    //!< message repetition counter
+    unsigned int m_txFrameToken;   //!< monotonically increasing loopback trace token
     bool m_active;                 //!< modulator is in a sending sequence (including periodic quiet times)
 
     NCO m_carrierNco;
@@ -107,7 +108,7 @@ private:
     void reset();
     void calculateLevel(Real& sample);
     void modulateSample();
-    unsigned short encodeSymbol(unsigned short symbol); //!< Encodes symbol with possible DE bits spacing
+    unsigned short encodeSymbol(unsigned short symbol, bool headerSymbol); //!< Encodes symbol with payload/header DE spacing
 };
 
 #endif // INCLUDE_MESHTASTICMODSOURCE_H

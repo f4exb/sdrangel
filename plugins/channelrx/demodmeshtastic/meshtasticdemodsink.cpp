@@ -17,6 +17,7 @@
 
 #include <QTime>
 #include <QDebug>
+#include <QStringList>
 #include <stdio.h>
 #include <algorithm>
 #include <cmath>
@@ -32,6 +33,22 @@
 #include "meshtasticdemodmsg.h"
 #include "meshtasticdemoddecoderlora.h"
 #include "meshtasticdemodsink.h"
+
+// namespace { // For [LOOPBACK] debug only
+
+// QString symbolPreview(const std::vector<unsigned short>& symbols, unsigned int maxCount)
+// {
+//     QStringList parts;
+//     const unsigned int count = std::min<unsigned int>(maxCount, static_cast<unsigned int>(symbols.size()));
+
+//     for (unsigned int i = 0; i < count; i++) {
+//         parts.append(QString::number(symbols[i]));
+//     }
+
+//     return parts.join(",");
+// }
+
+// } // namespace
 
 MeshtasticDemodSink::MeshtasticDemodSink() :
     m_decodeMsg(nullptr),
@@ -316,6 +333,10 @@ unsigned int MeshtasticDemodSink::evalSymbol(unsigned int rawSymbol, bool header
 
 void MeshtasticDemodSink::tryHeaderLock()
 {
+    if (!m_decodeMsg) {
+        return;
+    }
+
     const std::vector<unsigned short>& symbols = m_decodeMsg->getSymbols();
 
     if (symbols.size() < 8) {
@@ -334,57 +355,84 @@ void MeshtasticDemodSink::tryHeaderLock()
         return;
     }
 
-    bool hasCRC = true;
-    unsigned int nbParityBits = 1U;
-    unsigned int packetLength = 0U;
-    int headerParityStatus = (int) MeshtasticDemodSettings::ParityUndefined;
-    bool headerCRCStatus = false;
+    const unsigned int maxOffset = std::min<unsigned int>(2U, static_cast<unsigned int>(symbols.size()) - 8U);
+    const unsigned int headerSymbolMod = 1U << headerNbSymbolBits;
 
-    MeshtasticDemodDecoderLoRa::decodeHeader(
-        symbols,
-        headerNbSymbolBits,
-        hasCRC,
-        nbParityBits,
-        packetLength,
-        headerParityStatus,
-        headerCRCStatus
-    );
-
-    if (!headerCRCStatus || packetLength == 0U || nbParityBits < 1U || nbParityBits > 4U)
+    for (unsigned int offset = 0U; offset <= maxOffset; offset++)
     {
-        qDebug("MeshtasticDemodSink::tryHeaderLock: header invalid (CRC=%d len=%u CR=%u parity=%d)",
-               headerCRCStatus ? 1 : 0,
-               packetLength,
-               nbParityBits,
-               headerParityStatus);
-        return;
+        const std::vector<unsigned short> baseHeaderSlice(symbols.begin() + offset, symbols.begin() + offset + 8U);
+
+        for (int delta = -2; delta <= 2; delta++)
+        {
+            std::vector<unsigned short> headerSlice(baseHeaderSlice);
+
+            if (delta != 0)
+            {
+                for (auto& sym : headerSlice) {
+                    const int shifted = loRaMod(static_cast<int>(sym) + delta, static_cast<int>(headerSymbolMod));
+                    sym = static_cast<unsigned short>(shifted);
+                }
+            }
+
+            bool hasCRC = true;
+            unsigned int nbParityBits = 1U;
+            unsigned int packetLength = 0U;
+            int headerParityStatus = (int) MeshtasticDemodSettings::ParityUndefined;
+            bool headerCRCStatus = false;
+
+            MeshtasticDemodDecoderLoRa::decodeHeader(
+                headerSlice,
+                headerNbSymbolBits,
+                hasCRC,
+                nbParityBits,
+                packetLength,
+                headerParityStatus,
+                headerCRCStatus
+            );
+
+            if (!headerCRCStatus || packetLength == 0U || nbParityBits < 1U || nbParityBits > 4U) {
+                continue;
+            }
+
+            const double symbolDurationMs = (double)(1U << sf) * 1000.0 / (double)m_bandwidth;
+            const bool ldro = symbolDurationMs > 16.0;
+            const unsigned int sfDenom = sf - (ldro ? 2U : 0U);
+
+            // gr-lora_sdr formula: symb_numb = 8 + ceil(max(0, 2*pay_len - sf + 2 + 5 + has_crc*4) / (sf - 2*ldro)) * (4 + cr)
+            const int numerator = 2 * (int)packetLength - (int)sf + 2 + 5 + (hasCRC ? 4 : 0);
+            unsigned int payloadBlocks = 0;
+
+            if (numerator > 0 && sfDenom > 0) {
+                payloadBlocks = ((unsigned int)numerator + sfDenom - 1U) / sfDenom;
+            }
+
+            const unsigned int expectedSymbols = 8U + payloadBlocks * (4U + nbParityBits);
+
+            if (expectedSymbols > m_settings.m_nbSymbolsMax) {
+                continue;
+            }
+
+            if (offset > 0U)
+            {
+                m_decodeMsg->dropFront(offset);
+                m_loRaFrameSymbolCount = m_loRaFrameSymbolCount > offset
+                    ? (m_loRaFrameSymbolCount - offset)
+                    : 0U;
+            }
+
+            m_expectedSymbols = expectedSymbols;
+            m_headerLocked = true;
+
+            // qDebug("[LOOPBACK][RX] header_realign frameId=%u offset=%u delta=%d", m_loRaFrameId, offset, delta);
+            qDebug("MeshtasticDemodSink::tryHeaderLock: LOCKED len=%u CR=%u CRC=%s LDRO=%s expected=%u symbols offset=%u delta=%d",
+                   packetLength, nbParityBits, hasCRC ? "on" : "off", ldro ? "on" : "off", m_expectedSymbols, offset, delta);
+            return;
+        }
     }
 
-    const double symbolDurationMs = (double)(1U << sf) * 1000.0 / (double)m_bandwidth;
-    const bool ldro = symbolDurationMs > 16.0;
-    const unsigned int sfDenom = sf - (ldro ? 2U : 0U);
-
-    // gr-lora_sdr formula: symb_numb = 8 + ceil(max(0, 2*pay_len - sf + 2 + 5 + has_crc*4) / (sf - 2*ldro)) * (4 + cr)
-    const int numerator = 2 * (int)packetLength - (int)sf + 2 + 5 + (hasCRC ? 4 : 0);
-    unsigned int payloadBlocks = 0;
-
-    if (numerator > 0 && sfDenom > 0) {
-        payloadBlocks = ((unsigned int)numerator + sfDenom - 1U) / sfDenom;
+    if (symbols.size() >= 10U) {
+        qDebug("MeshtasticDemodSink::tryHeaderLock: header invalid after offsets 0..%u deltas -2..2", maxOffset);
     }
-
-    m_expectedSymbols = 8U + payloadBlocks * (4U + nbParityBits);
-
-    if (m_expectedSymbols > m_settings.m_nbSymbolsMax)
-    {
-        qDebug("MeshtasticDemodSink::tryHeaderLock: expected %u > max %u, falling back to EOM",
-               m_expectedSymbols, m_settings.m_nbSymbolsMax);
-        return;
-    }
-
-    m_headerLocked = true;
-
-    qDebug("MeshtasticDemodSink::tryHeaderLock: LOCKED len=%u CR=%u CRC=%s LDRO=%s expected=%u symbols",
-           packetLength, nbParityBits, hasCRC ? "on" : "off", ldro ? "on" : "off", m_expectedSymbols);
 }
 
 bool MeshtasticDemodSink::sendLoRaHeaderProbe()
@@ -418,6 +466,17 @@ bool MeshtasticDemodSink::sendLoRaHeaderProbe()
         m_settings.m_hasCRC
     );
     m_decoderMsgQueue->push(probe);
+
+    // qDebug().noquote() << QString(
+    //     "[LOOPBACK][RX] header_probe token=%1 frameId=%2 sf=%3 de=%4 bw=%5 headerSymbols=[%6]"
+    // )
+    //     .arg(m_loRaFrameId)
+    //     .arg(m_loRaFrameId)
+    //     .arg(m_settings.m_spreadFactor)
+    //     .arg(m_settings.m_deBits)
+    //     .arg(m_bandwidth)
+    //     .arg(symbolPreview(headerSymbols, 8U));
+
     return true;
 }
 
@@ -466,6 +525,14 @@ void MeshtasticDemodSink::applyLoRaHeaderFeedback(
     m_expectedSymbols = expectedSymbols;
     m_headerLocked = true;
     m_loRaReceivedHeader = true;
+
+    // qDebug("[LOOPBACK][RX] header_lock token=%u frameId=%u len=%u cr=%u expected=%u frameSymbols=%u",
+    //     frameId,
+    //     frameId,
+    //     packetLength,
+    //     nbParityBits,
+    //     expectedSymbols,
+    //     m_loRaFrameSymbolCount);
 }
 
 int MeshtasticDemodSink::loRaMod(int a, int b) const
@@ -732,6 +799,12 @@ void MeshtasticDemodSink::finalizeLoRaFrame()
         return;
     }
 
+    // const bool hitExpected = m_headerLocked && (m_loRaFrameSymbolCount >= m_expectedSymbols);
+    // const bool hitMax = (!m_headerLocked) && (m_loRaFrameSymbolCount >= m_settings.m_nbSymbolsMax);
+    // const char *endReason = hitExpected
+    //     ? "expected"
+    //     : (hitMax ? "max" : "other");
+
     qDebug(
         "MeshtasticDemodSink::finalizeLoRaFrame: frameId=%u symbols=%u headerLocked=%d expected=%u",
         m_loRaFrameId,
@@ -739,6 +812,15 @@ void MeshtasticDemodSink::finalizeLoRaFrame()
         m_headerLocked ? 1 : 0,
         m_expectedSymbols
     );
+
+    // qDebug("[LOOPBACK][RX] frame_finalize token=%u frameId=%u reason=%s locked=%d expected=%u actual=%u waitHeader=%d",
+    //     m_loRaFrameId,
+    //     m_loRaFrameId,
+    //     endReason,
+    //     m_headerLocked ? 1 : 0,
+    //     m_expectedSymbols,
+    //     m_loRaFrameSymbolCount,
+    //     m_waitHeaderFeedback ? 1 : 0);
 
     m_decodeMsg->setSignalDb(CalcDb::dbPower(m_magsqOnAvg.asDouble() / (1 << m_settings.m_spreadFactor)));
     m_decodeMsg->setNoiseDb(CalcDb::dbPower(m_magsqOffAvg.asDouble() / (1 << m_settings.m_spreadFactor)));
@@ -1105,21 +1187,6 @@ int MeshtasticDemodSink::processLoRaFrameSyncStep()
         return static_cast<int>(m_loRaSymbolSpan);
     }
 
-    if (m_settings.m_hasHeader
-        && !m_headerLocked
-        && (m_loRaFrameSymbolCount >= 8U)
-        && m_waitHeaderFeedback)
-    {
-        const unsigned int maxWaitSteps = std::max(1U, m_headerFeedbackMaxWaitSteps);
-
-        if (++m_headerFeedbackWaitSteps > maxWaitSteps) {
-            // Safety fallback when async feedback is delayed.
-            m_waitHeaderFeedback = false;
-            qDebug("MeshtasticDemodSink::processLoRaFrameSyncStep: header feedback timeout -> local fallback");
-            tryHeaderLock();
-        }
-    }
-
     std::vector<float> symbolMags;
     const unsigned int rawSymbol = getLoRaSymbolVal(m_loRaInDown.data(), m_loRaPayloadDownchirp.data(), &symbolMags, true);
     const bool headerSymbol = m_settings.m_hasHeader && (m_loRaFrameSymbolCount < 8U);
@@ -1155,14 +1222,9 @@ int MeshtasticDemodSink::processLoRaFrameSyncStep()
 
     if (!m_headerLocked
         && m_settings.m_hasHeader
-        && (m_loRaFrameSymbolCount == 8U))
+        && (m_loRaFrameSymbolCount >= 8U))
     {
-        if (sendLoRaHeaderProbe()) {
-            m_waitHeaderFeedback = true;
-            m_headerFeedbackWaitSteps = 0U;
-        } else {
-            tryHeaderLock();
-        }
+        tryHeaderLock();
     }
 
     if (m_headerLocked)

@@ -2,9 +2,9 @@
 
 <h2>Introduction</h2>
 
-This plugin can be used to code and modulate a transmission signal based on Chirp Spread Spectrum (CSS). The basic idea is to transform each symbol of a MFSK modulation to an ascending frequency ramp shifted in time. It could equally be a descending ramp but this one is reserved to detect a break in the preamble sequence (synchronization). This plugin has been designed to work in conjunction with the ChirpChat demodulator plugin that should be used ideally on the reception side.
+This plugin can be used to code and modulate a transmission signal based the LoRa  Chirp Spread Spectrum (CSS) modulation scheme with a Meshtastic payload.
 
-It has clearly been inspired by the LoRa technique but is designed for experimentation and extension to other protocols mostly inspired by amateur radio techniques using chirp modulation to transmit symbols. Thanks to the MFSK to chirp translation it is possible to adapt any MFSK based mode.
+The basic idea of the CSS modulation is to transform each symbol of a MFSK modulation to an ascending frequency ramp shifted in time. It could equally be a descending ramp but this one is reserved to detect a break in the preamble sequence (synchronization). This plugin has been designed to work in conjunction with the Modmeshtastic demodulator plugin that should be used ideally on the reception side.
 
 LoRa is a property of Semtech and the details of the protocol are not made public. However a LoRa compatible protocol has been implemented based on the reverse engineering performed by the community. It is mainly based on the work done in https://github.com/myriadrf/LoRa-SDR. You can find more information about LoRa and chirp modulation here:
 
@@ -13,7 +13,23 @@ LoRa is a property of Semtech and the details of the protocol are not made publi
 
 This LoRa encoder is designed for experimentation. For production grade applications it is recommended to use dedicated hardware instead.
 
-Modulation characteristics from LoRa have been augmented with more bandwidths and FFT bin collations (DE factor). Plain TTY and ASCII have also been added that match character value to symbols directly. The FT protocol used in FT8 and FT4 is introduced packing the 174 bits payload into (SF -DE) bits symbols. There are plans to add some more of these typically amateur radio MFSK based modes like JT65.
+Modulation characteristics from LoRa have been augmented with more bandwidths and FFT bin collations (DE factor) but this should be rendered ineffective with Meshtastic presets.
+
+<h2>Fixes done by Copilot (GPT 5.3 Codex) from first PR</h2>
+
+- TX header explicit-header sizing (SF-2 first block)
+- TX backend Meshtastic auto-radio-derive (sync word 0x2B, PHY params)
+- RX robust header lock (offset 0..2 + delta -2..+2 scan with realignment)
+  - This is on Rx side (MeshtasticDemodSink)
+- Diagnostic loopback logs with token correlation (commented out)
+- Type mismatches resolved
+
+Now a full end to end test with a Meshtastic text message works:
+
+- ✅ TX emits Meshtastic-compatible sync word (0x2B)
+- ✅ RX header lock resumes with offset/delta scan recovery
+- ✅ Payload CRC validation passes end-to-end
+- ✅ Full decode chain: preamble → sync → header → payload → message text displayed
 
 <h2>Meshtastic frame mode</h2>
 
@@ -94,7 +110,7 @@ Thus available bandwidths are:
   - **488** (500000 / 1024) Hz not in LoRa standard
   - **375** (384000 / 1024) Hz not in LoRa standard
 
-The ChirpChat signal is oversampled by four therefore it needs a baseband of at least four times the bandwidth. This drives the maximum value on the slider automatically.
+The ChirpChat signal is oversampled by four therefore it needs a baseband of at least four times the bandwidth. This drives the maximum value on the slider automatically. When using Meshtastic presets you have to make sure this condition is set yourself.
 
 <h3>16: Invert chirp ramps</h3>
 
@@ -118,7 +134,7 @@ In practice it is difficult on the Rx side to make correct decodes if only one F
 
 <h3>8: Number of preamble chirps</h3>
 
-This is the number of preamble chirps to transmit that are used for the Rx to synchronize. The LoRa standard specifies it can be between 2 and 65535. Here it is limited to the 4 to 20 range that corresponds to realistic values. The RN2483 uses 6 preamble chirps. You may use 12 preamble chirps or more to facilitate signal acquisition with poor SNR on the Rx side.
+This is the number of preamble chirps to transmit that are used for the Rx to synchronize. The LoRa standard specifies it can be between 2 and 65535. Here it is limited to the 4 to 20 range that corresponds to realistic values. The RN2483 uses 6 preamble chirps. You may use 12 preamble chirps or more to facilitate signal acquisition with poor SNR on the Rx side. Meshtastic imposes a number of 17 preamble chirps.
 
 <h3>9: Idle time between transmissions</h3>
 
@@ -128,20 +144,13 @@ When sending a message repeatedly this is the time between the end of one transm
 
 ![Meshtastic Modulator plugin GUI](../../../doc/img/MeshtasticMod_payload.png)
 
-ChirpChat is primarily designed to make QSOs in the amateur radio sense. To be efficient the messages have to be kept short and minimal therefore the standard exchange follows WSJT scheme and is reflected in the sequence of messages you can follow with the message selection combo (10.9): CQ, Reply to CQ, Report to callee, Report to caller (R-Report), RRR and 73.
-
-To populate messages you can specify your callsign (10.5), the other party callsign (10.6), your QRA locator (10.7) and a signal report (10.8)
-
 <h4>10.1: Modulation scheme</h4>
 
-  - **LoRa**: LoRa compatible
-  - **ASCII**: 7 bit plain ASCII without FEC and CRC. Requires exactly 7 bit effective samples thus SF-DE = 7 where SF is the spreading factor (5) and DE the distance enhancement factor (6)
-  - **TTY**: 5 bit Baudot (Teletype) without FEC and CRC. Requires exactly 5 bit effective samples thus SF-DE = 5 where SF is the spreading factor (5) and DE the distance enhancement factor (6)
-  - **FT**: FT8/FT4 coding is applied using data in (10.5) to (10.8) to encode the 174 bit message payload with CRC and FEC as per FT8/FT4 protocol using a type 1 (standard) type of message. Note that the report (10.8) must comply with the FT rule (coded "-35" to "+99" with a leading 0 for the number) and would usually represent the integer part of the S/N ratio in the ChirpChat demodulator receiver. Calls should not be prefixed nor suffixed and the first 4 characters of the locator must represent a valid 4 character grid square. Plain text messages (13 characters) are also supported with the 0.0 type of message using the text entered in the message box (11). These 174 bits are packed into (SF - DE) bits symbols padded with zero bits if necessary. For the details of the FT protocol see: https://wsjt.sourceforge.io/FT4_FT8_QEX.pdf For example for SF=9 and DE=3 we have 6 bits per symbols so the 174 bits are packed in exactly 29 symbols this should appear in the message length ML (13)
+  - **LoRa**: LoRa compatible for Meshtastic
 
-<h4>10.2: Number of FEC parity bits (LoRa)</h4>
+<h4>10.2: Number of FEC parity bits</h4>
 
-This is a LoRa specific feature. Each byte of the payload is split into two four bit nibbles and Hamming code of various "strength" in number of parity bits can be applied to these nibbles. The number of parity bits can vary from 1 to 4. 0 (no FEC) has been added but is not part of the LoRa original standard:
+Each byte of the payload is split into two four bit nibbles and Hamming code of various "strength" in number of parity bits can be applied to these nibbles. The number of parity bits can vary from 1 to 4. 0 (no FEC) has been added but is not part of the LoRa original standard:
 
   - **0**: no FEC
   - **1**: 1 bit parity thus Hamming H(4,5) applies
@@ -149,71 +158,11 @@ This is a LoRa specific feature. Each byte of the payload is split into two four
   - **3**: 3 bit parity thus Hamming H(4,7) applies
   - **4**: 4 bit parity thus Hamming H(4,8) applies
 
-<h4>10.3: Append two byte CRC to payload (LoRa)</h4>
-
-This is a LoRa specific feature. A 2 bytes CRC can be appended to the payload.
-
-<h4>10.4: Send a header at the start of the payload (LoRa)</h4>
-
-This is a LoRa specific feature and is also known as explicit (with header) or implicit (without header) modes. In explicit mode a header with net payload length in bytes, presence of a CRC and number of parity bits is prepended to the actual payload. This header has a 1 byte CRC and is coded with H(4,8) FEC.
-
-<h4>10.5: My callsign (QSO mode)</h4>
-
-Enter your callsign so it can populate message placeholders (See next)
-
-<h4>10.6: Your callsign (QSO mode)</h4>
-
-Enter the other party callsign so it can populate message placeholders (See next)
-
-<h4>10.7: My locator (QSO mode)</h4>
-
-Enter your Maidenhead QRA locator so it can populate message placeholders (See next)
-
-<h4>10.8: My report (QSO mode)</h4>
-
-Enter the signal report you will send to the other party so it can populate message placeholders (See next)
-
 <h4>10.9: Message selector</h4>
 
 This lets you choose which pre-formatted message to send:
 
-  - **None**: empty message. In fact this is used to make a transition to trigger sending of the same message again. It is used internally by the "play" button (11) and can be used with the REST API.
-  - **Beacon**: a beacon message
-  - **CQ**: (QSO mode) CQ general call message
-  - **Reply**: (QSO mode) reply to a CQ call
-  - **Report**: (QSO mode) signal report to the callee of a CQ call
-  - **R-Report**: (QSO mode) signal report to the caller of a CQ call
-  - **RRR**: (QSO mode) report received confirmation to the callee
-  - **73**: (QSO mode) confirmation back to the caller and closing the QSO
-  - **QSO text**: (QSO mode) free form message with callsigns
-  - **Text**: plain text
-  - **Bytes**: binary message in the form of a string of bytes. Use the hex window (12) to specify the message
-
-In FT mode standard FT type messages are generated regardless of placeholders based on MyCall, YourCall, MyLoc, Report and Msg data (entered while in "Text" format). Locators are 4 character grids i.e. only the 4 first characters are taken. Reports must be valid FT reports from -35 to 99 coded as < sign>< zero padded value> (e.g -12, -04, +00, +04, +12) :
-
-  - **Beacon**: DE < MyCall > < MyLoc >
-  - **CQ**: CQ < MyCall> < MyLoc >
-  - **Reply**: < YourCall > < MyCall > < MyLoc >
-  - **Report**: < YourCall > < MyCall > < Report >
-  - **R-Report**: < YourCall > < MyCall > R< Report >
-  - **RRR**: < YourCall > < MyCall > RRR
-  - **73**: < YourCall > < MyCall > 73
-  - **QSO text**: < Msg >
-  - **Text**: < Msg >
-  - **Bytes**: < Msg >
-
-<h4>10.10: Revert to standard messages</h4>
-
-Reformat all predefined messages in standard messages with placeholders. The Generate button (13) replaces the placeholders with the given QSO elements (10.5 to 10.8)
-
-  - **Beacon**: `VVV DE %1 %2`
-  - **CQ**: `CQ DE %1 %2`
-  - **Reply**: `%1 %2 %3`
-  - **Report**: `%1 %2 %3`
-  - **R-Reply**: `%1 %2 R%3`
-  - **RRR**: `%1 %2 RRR`
-  - **73**: `%1 %2 73`
-  - **QSO text**: `%1 %2 %3`
+  - **Text**: plain text, either just text or formatted text for Meshtastic transmission (see above)
 
 <h4>10.11 Play current message immediately</h4>
 
@@ -223,41 +172,15 @@ This starts playing the current selected message immediately. It may be necessar
 
 The message is repeated this number of times (use 0 for infinite). The end of one message sequence and the start of the next is separated by the delay specified with the "Idle" slidebar (9)
 
-<h4>10.13: Generate messages</h4>
-
-This applies the QSO elements (10.5 to 10.8) to the placeholders in messages to generate the final messages:
-
-  - **Beacon**: `VVV DE %1 %2`: `%1` is my call (10.5) and `%2` is my locator (10.7)
-  - **CQ**: `CQ DE %1 %2`: `%1` is my call (10.5) and `%2` is my locator (10.7)
-  - **Reply**: `%1 %2 %3`: `%1` is your call (10.6), `%2` is my call (10.5) and `%3` is my locator (10.7)
-  - **Report**: `%1 %2 %3`: `%1` is your call (10.6), `%2` is my call (10.5) and `%3` is my report (10.8)
-  - **R-Reply**: `%1 %2 R%3`: `%1` is your call (10.6), `%2` is my call (10.5) and `%3` is my report (10.8)
-  - **RRR**: `%1 %2 RRR`: `%1` is your call (10.6) and `%2` is my call (10.5)
-  - **73**: `%1 %2 73`: `%1` is your call (10.6) and `%2` is my call (10.5)
-  - **QSO text**: `%1 %2 %3`: `%1` is your call (10.6), `%2` is my call (10.5) and `%3` is the text specified as the free form text message
-
 <h4>10.14: Sync word</h4>
 
-This is a LoRa specific feature and is the sync word (byte) to transmit entered as a 2 nibble hexadecimal number.
+This is a LoRa specific feature and is the sync word (byte) to transmit entered as a 2 nibble hexadecimal number. For Meshtastic this is 0x2B.
 
 <h3>11: Message text</h3>
 
 This window lets you edit the message selected in (10.9). You can use `%n` placeholders that depend on the type of message selected.
 
-  - **Beacon**: `%1` is my callsign and `%2` is my locator
-  - **CQ message**: `%1` is my callsign and `%2` is my locator
-  - **Reply**: `%1` is the other callsign, `%2` is my callsign and `%3` is my locator
-  - **Report**: `%1` is the other callsign, `%2` is my callsign and `%3` is my report
-  - **R-Report**: `%1` is the other callsign, `%2` is my callsign and `%3` is my report
-  - **RRR**: `%1` is the other callsign and `%2` is my callsign
-  - **73**: `%1` is the other callsign and `%2` is my callsign
-  - **QSO Text**: `%1` is the other callsign, `%2` is my callsign and `%3` is the free text message
   - **Text**: free text message no placeholders
-  - **Bytes**: binary message no placeholders
-
-<h3>12: Message bytes</h3>
-
-Use this line editor to specify the hex string used as the bytes message.
 
 <h3>13: Symbol time and message length</h3>
 

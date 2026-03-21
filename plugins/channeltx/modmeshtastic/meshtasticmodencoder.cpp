@@ -117,5 +117,17 @@ void MeshtasticModEncoder::encodeBytesLoRa(const QByteArray& bytes, std::vector<
         MeshtasticModEncoderLoRa::addChecksum(payload);
     }
 
-    MeshtasticModEncoderLoRa::encodeBytes(payload, symbols, m_nbSymbolBits, m_hasHeader, m_hasCRC, m_nbParityBits);
+    const unsigned int headerNbSymbolBits = (m_hasHeader && (m_spreadFactor > 2U))
+        ? (m_spreadFactor - 2U)
+        : m_nbSymbolBits;
+
+    MeshtasticModEncoderLoRa::encodeBytes(
+        payload,
+        symbols,
+        m_nbSymbolBits,
+        headerNbSymbolBits,
+        m_hasHeader,
+        m_hasCRC,
+        m_nbParityBits
+    );
 }

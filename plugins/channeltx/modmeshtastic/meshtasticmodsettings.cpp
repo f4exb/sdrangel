@@ -76,7 +76,7 @@ void MeshtasticModSettings::resetToDefaults()
     m_bandwidthIndex = 5;
     m_spreadFactor = 7;
     m_deBits = 0;
-    m_preambleChirps = 8;
+    m_preambleChirps = 17;
     m_quietMillis = 1000;
     m_nbParityBits = 1;
     m_textMessage = "Hello LoRa";
@@ -192,7 +192,7 @@ bool MeshtasticModSettings::deserialize(const QByteArray& data)
         d.readBool(8, &m_channelMute, false);
         d.readU32(9, &utmp, 0x34);
         m_syncWord = utmp > 255 ? 0 : utmp;
-        d.readU32(10, &m_preambleChirps, 8);
+        d.readU32(10, &m_preambleChirps, 17);
         d.readS32(11, &m_quietMillis, 1000);
         d.readBool(11, &m_useReverseAPI, false);
         d.readBool(12, &m_invertRamps, false);

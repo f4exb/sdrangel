@@ -55,7 +55,7 @@ struct MODEMMESHTASTIC_API TxRadioSettings
     int spreadFactor = 0;
     int parityBits = 0; // 1..4 maps to CR 4/5 .. 4/8
     int deBits = 0;
-    uint8_t syncWord = 0x00; // Meshtastic_SDR/gr-lora_sdr reference flow uses [0,0]
+    uint8_t syncWord = 0x2B; // Meshtastic LoRa private network sync word
     int preambleChirps = 17;
 
     bool hasCenterFrequency = false;

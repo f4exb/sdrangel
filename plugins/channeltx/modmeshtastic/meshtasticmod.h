@@ -213,6 +213,8 @@ private:
     void openUDP(const MeshtasticModSettings& settings);
     void closeUDP();
     void sendCurrentSettingsMessage();
+    int findBandwidthIndex(int bandwidthHz) const;
+    bool applyMeshtasticRadioSettingsIfPresent(MeshtasticModSettings& settings) const;
 
 private slots:
     void networkManagerFinished(QNetworkReply *reply);

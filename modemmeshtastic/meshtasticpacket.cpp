@@ -1897,7 +1897,7 @@ static bool deriveTxRadioSettingsFromConfig(const CommandConfig& cfg, TxRadioSet
 {
     settings = TxRadioSettings();
     settings.hasCommand = true;
-    settings.syncWord = 0x00;
+    settings.syncWord = 0x2B;
 
     QString presetName = cfg.presetName;
     if (presetName.isEmpty()) {

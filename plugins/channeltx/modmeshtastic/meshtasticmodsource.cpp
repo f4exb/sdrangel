@@ -16,16 +16,35 @@
 ///////////////////////////////////////////////////////////////////////////////////
 
 #include <QDebug>
+#include <QStringList>
 
 #include "meshtasticmodsource.h"
+
+// namespace { // For [LOOPBACK] debug only
+
+// QString symbolPreview(const std::vector<unsigned short>& symbols, unsigned int maxCount)
+// {
+//     QStringList parts;
+//     const unsigned int count = std::min<unsigned int>(maxCount, static_cast<unsigned int>(symbols.size()));
+
+//     for (unsigned int i = 0; i < count; i++) {
+//         parts.append(QString::number(symbols[i]));
+//     }
+
+//     return parts.join(",");
+// }
+
+// } // namespace
 
 const int MeshtasticModSource::m_levelNbSamples = 480; // every 10ms
 
 MeshtasticModSource::MeshtasticModSource() :
     m_channelSampleRate(48000),
     m_channelFrequencyOffset(0),
+    m_bandwidth(MeshtasticModSettings::bandwidths[5]),
     m_phaseIncrements(nullptr),
     m_repeatCount(0),
+    m_txFrameToken(0U),
     m_active(false),
     m_modPhasor(0.0f),
 	m_levelCalcCount(0),
@@ -38,7 +57,12 @@ MeshtasticModSource::MeshtasticModSource() :
     initTest(m_settings.m_spreadFactor, m_settings.m_deBits);
     reset();
     applySettings(m_settings, true);
-    applyChannelSettings(m_channelSampleRate, m_channelFrequencyOffset, true);
+    applyChannelSettings(
+        m_channelSampleRate,
+        MeshtasticModSettings::bandwidths[m_settings.m_bandwidthIndex],
+        m_channelFrequencyOffset,
+        true
+    );
 }
 
 MeshtasticModSource::~MeshtasticModSource()
@@ -235,17 +259,20 @@ void MeshtasticModSource::modulateSample()
         if (m_fftCounter == m_fftLength*MeshtasticModSettings::oversampling)
         {
             m_chirpCount++;
-            m_chirp0 = ((m_settings.m_syncWord >> ((1-m_chirpCount)*4)) & 0xf)*8;
-            m_chirp = (m_chirp0 + m_fftLength)*MeshtasticModSettings::oversampling - 1;
             m_fftCounter = 0;
 
-            if (m_chirpCount == 2)
+            if (m_chirpCount >= 2)
             {
                 m_sampleCounter = 0;
                 m_chirpCount = 0;
                 m_chirp0 = 0;
                 m_chirp = m_fftLength*MeshtasticModSettings::oversampling - 1;
                 m_state = ChirpChatStateSFD;
+            }
+            else
+            {
+                m_chirp0 = ((m_settings.m_syncWord >> ((1-m_chirpCount)*4)) & 0xf)*8;
+                m_chirp = (m_chirp0 + m_fftLength)*MeshtasticModSettings::oversampling - 1;
             }
         }
     }
@@ -273,7 +300,29 @@ void MeshtasticModSource::modulateSample()
         {
             m_fftCounter = 0;
             m_chirpCount = 0;
-            m_chirp0 = encodeSymbol(m_symbols[m_chirpCount]);
+            m_chirp0 = encodeSymbol(m_symbols[m_chirpCount], m_settings.m_hasHeader && (m_chirpCount < 8U));
+            m_txFrameToken++;
+
+            std::vector<unsigned short> mappedPreview;
+            const unsigned int previewCount = std::min<unsigned int>(8U, static_cast<unsigned int>(m_symbols.size()));
+            mappedPreview.reserve(previewCount);
+
+            for (unsigned int i = 0; i < previewCount; i++) {
+                mappedPreview.push_back(encodeSymbol(m_symbols[i], m_settings.m_hasHeader && (i < 8U)));
+            }
+
+            // qDebug().noquote() << QString(
+            //     "[LOOPBACK][TX] frame_start token=%1 sf=%2 de=%3 bw=%4 preamble=%5 symbols=%6 hdrRaw=[%7] hdrMapped=[%8]"
+            // )
+            //     .arg(m_txFrameToken)
+            //     .arg(m_settings.m_spreadFactor)
+            //     .arg(m_settings.m_deBits)
+            //     .arg(m_bandwidth)
+            //     .arg(m_settings.m_preambleChirps)
+            //     .arg(m_symbols.size())
+            //     .arg(symbolPreview(m_symbols, previewCount))
+            //     .arg(symbolPreview(mappedPreview, previewCount));
+
             m_chirp = (m_chirp0 + m_fftLength)*MeshtasticModSettings::oversampling - 1;
             m_state = ChirpChatStatePayload;
         }
@@ -295,7 +344,7 @@ void MeshtasticModSource::modulateSample()
             }
             else
             {
-                m_chirp0 = encodeSymbol(m_symbols[m_chirpCount]);
+                m_chirp0 = encodeSymbol(m_symbols[m_chirpCount], m_settings.m_hasHeader && (m_chirpCount < 8U));
                 m_chirp = (m_chirp0 + m_fftLength)*MeshtasticModSettings::oversampling - 1;
                 m_fftCounter = 0;
             }
@@ -314,16 +363,19 @@ void MeshtasticModSource::modulateSample()
     }
 }
 
-unsigned short MeshtasticModSource::encodeSymbol(unsigned short symbol)
+unsigned short MeshtasticModSource::encodeSymbol(unsigned short symbol, bool headerSymbol)
 {
-    if (m_settings.m_deBits == 0) {
-        return symbol;
+    unsigned int deBits = static_cast<unsigned int>(std::max(0, m_settings.m_deBits));
+
+    if (headerSymbol && deBits < 2U) {
+        deBits = 2U;
     }
 
-    unsigned int deWidth = 1<<m_settings.m_deBits;
-    unsigned int baseSymbol = symbol % (m_fftLength/deWidth); // symbols range control
-    return deWidth*baseSymbol;
-    // return deWidth*baseSymbol + (deWidth/2) - 1;
+    const unsigned int deWidth = 1U << deBits;
+    const unsigned int symbolRange = std::max(1U, m_fftLength / std::max(1U, deWidth));
+    const unsigned int baseSymbol = symbol % symbolRange;
+    const unsigned int rawSymbol = (deWidth * baseSymbol + 1U) % m_fftLength; // match demod evalSymbol shift (raw_bin - 1)
+    return static_cast<unsigned short>(rawSymbol);
 }
 
 void MeshtasticModSource::calculateLevel(Real& sample)

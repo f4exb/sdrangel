@@ -66,6 +66,17 @@ namespace MeshtasticDemodMsg
         void pushBackDechirpedSpectrumLine(const std::vector<float>& spectrumLine) {
             m_dechirpedSpectrum.push_back(spectrumLine);
         }
+        void dropFront(unsigned int count)
+        {
+            const unsigned int symbolsDrop = std::min<unsigned int>(count, static_cast<unsigned int>(m_symbols.size()));
+            m_symbols.erase(m_symbols.begin(), m_symbols.begin() + symbolsDrop);
+
+            const unsigned int magnitudesDrop = std::min<unsigned int>(count, static_cast<unsigned int>(m_magnitudes.size()));
+            m_magnitudes.erase(m_magnitudes.begin(), m_magnitudes.begin() + magnitudesDrop);
+
+            const unsigned int spectrumDrop = std::min<unsigned int>(count, static_cast<unsigned int>(m_dechirpedSpectrum.size()));
+            m_dechirpedSpectrum.erase(m_dechirpedSpectrum.begin(), m_dechirpedSpectrum.begin() + spectrumDrop);
+        }
 
         static MsgDecodeSymbols* create() {
             return new MsgDecodeSymbols();

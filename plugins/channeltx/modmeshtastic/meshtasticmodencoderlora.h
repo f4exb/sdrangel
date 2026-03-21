@@ -30,7 +30,8 @@ public:
     static void encodeBytes(
         const QByteArray& bytes,
         std::vector<unsigned short>& symbols,
-        unsigned int nbSymbolBits,
+        unsigned int payloadNbSymbolBits,
+        unsigned int headerNbSymbolBits,
         bool hasHeader,
         bool hasCRC,
         unsigned int nbParityBits
@@ -43,6 +44,7 @@ private:
         unsigned int& cOfs,
         unsigned int& dOfs,
         const uint8_t *bytes,
+        const unsigned int bytesLength,
         const unsigned int codewordCount
     );
 
