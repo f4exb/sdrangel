@@ -43,7 +43,8 @@ public:
         TestCallsign,
         TestFT8Protocols,
         TestFFTRRCFilter,
-        TestFIRRRCFilter
+        TestFIRRRCFilter,
+        TestMeshtastic
     } TestType;
 
     ParserBench();
