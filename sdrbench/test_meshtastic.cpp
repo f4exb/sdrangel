@@ -137,6 +137,19 @@ void MainBench::testMeshtastic(const QString& argsStr)
             }
         },
         {
+            "nodeinfo_user_field7_len_delimited",
+            "MESH:from=0x11223344;id=0x0000000a;port=NODEINFO_APP;encrypt=0;payload_hex=0a0921313233346162636412064e6f646520411a024e413a020102",
+            "",
+            true,
+            false,
+            {
+                {"data.port_name", "NODEINFO_APP"},
+                {"nodeinfo.id", "!1234abcd"},
+                {"nodeinfo.long_name", "Node A"},
+                {"nodeinfo.short_name", "NA"}
+            }
+        },
+        {
             "telemetry_wrapped",
             "MESH:from=0x11223344;id=0x00000005;port=TELEMETRY_APP;encrypt=0;payload_hex=1208083710f41c28901c",
             "",

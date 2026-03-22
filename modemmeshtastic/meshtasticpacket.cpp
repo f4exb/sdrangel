@@ -2264,59 +2264,96 @@ static bool parseUserPayload(const QByteArray& bytes, UserFields& u)
         switch (field)
         {
         case 1: {  // id: string
-            if (wire != 2) { return false; }
-            uint64_t len = 0;
-            if (!readVarint(bytes, pos, len)) { return false; }
-            if (len > static_cast<uint64_t>(bytes.size() - pos)) { return false; }
-            u.id    = QString::fromUtf8(bytes.constData() + pos, static_cast<int>(len));
-            u.hasId = true;
-            pos += static_cast<int>(len);
+            if (wire == 2)
+            {
+                uint64_t len = 0;
+                if (!readVarint(bytes, pos, len)) { return false; }
+                if (len > static_cast<uint64_t>(bytes.size() - pos)) { return false; }
+                u.id    = QString::fromUtf8(bytes.constData() + pos, static_cast<int>(len));
+                u.hasId = true;
+                pos += static_cast<int>(len);
+            }
+            else
+            {
+                if (!skipField(bytes, pos, wire)) { return false; }
+            }
             break;
         }
         case 2: {  // long_name: string
-            if (wire != 2) { return false; }
-            uint64_t len = 0;
-            if (!readVarint(bytes, pos, len)) { return false; }
-            if (len > static_cast<uint64_t>(bytes.size() - pos)) { return false; }
-            u.longName    = QString::fromUtf8(bytes.constData() + pos, static_cast<int>(len));
-            u.hasLongName = true;
-            pos += static_cast<int>(len);
+            if (wire == 2)
+            {
+                uint64_t len = 0;
+                if (!readVarint(bytes, pos, len)) { return false; }
+                if (len > static_cast<uint64_t>(bytes.size() - pos)) { return false; }
+                u.longName    = QString::fromUtf8(bytes.constData() + pos, static_cast<int>(len));
+                u.hasLongName = true;
+                pos += static_cast<int>(len);
+            }
+            else
+            {
+                if (!skipField(bytes, pos, wire)) { return false; }
+            }
             break;
         }
         case 3: {  // short_name: string
-            if (wire != 2) { return false; }
-            uint64_t len = 0;
-            if (!readVarint(bytes, pos, len)) { return false; }
-            if (len > static_cast<uint64_t>(bytes.size() - pos)) { return false; }
-            u.shortName    = QString::fromUtf8(bytes.constData() + pos, static_cast<int>(len));
-            u.hasShortName = true;
-            pos += static_cast<int>(len);
+            if (wire == 2)
+            {
+                uint64_t len = 0;
+                if (!readVarint(bytes, pos, len)) { return false; }
+                if (len > static_cast<uint64_t>(bytes.size() - pos)) { return false; }
+                u.shortName    = QString::fromUtf8(bytes.constData() + pos, static_cast<int>(len));
+                u.hasShortName = true;
+                pos += static_cast<int>(len);
+            }
+            else
+            {
+                if (!skipField(bytes, pos, wire)) { return false; }
+            }
             break;
         }
         case 4: {  // macaddr: bytes
-            if (wire != 2) { return false; }
-            uint64_t len = 0;
-            if (!readVarint(bytes, pos, len)) { return false; }
-            if (len > static_cast<uint64_t>(bytes.size() - pos)) { return false; }
-            u.macaddr    = bytes.mid(pos, static_cast<int>(len));
-            u.hasMacaddr = true;
-            pos += static_cast<int>(len);
+            if (wire == 2)
+            {
+                uint64_t len = 0;
+                if (!readVarint(bytes, pos, len)) { return false; }
+                if (len > static_cast<uint64_t>(bytes.size() - pos)) { return false; }
+                u.macaddr    = bytes.mid(pos, static_cast<int>(len));
+                u.hasMacaddr = true;
+                pos += static_cast<int>(len);
+            }
+            else
+            {
+                if (!skipField(bytes, pos, wire)) { return false; }
+            }
             break;
         }
         case 5: {  // hw_model: HardwareModel (enum → uint32)
-            if (wire != 0) { return false; }
-            uint64_t v = 0;
-            if (!readVarint(bytes, pos, v)) { return false; }
-            u.hwModel    = static_cast<uint32_t>(v);
-            u.hasHwModel = true;
+            if (wire == 0)
+            {
+                uint64_t v = 0;
+                if (!readVarint(bytes, pos, v)) { return false; }
+                u.hwModel    = static_cast<uint32_t>(v);
+                u.hasHwModel = true;
+            }
+            else
+            {
+                if (!skipField(bytes, pos, wire)) { return false; }
+            }
             break;
         }
-        case 7: {  // is_licensed: bool
-            if (wire != 0) { return false; }
-            uint64_t v = 0;
-            if (!readVarint(bytes, pos, v)) { return false; }
-            u.isLicensed    = (v != 0);
-            u.hasIsLicensed = true;
+        case 6:  // is_licensed: bool (current Meshtastic)
+        case 7: { // is_licensed: bool (legacy compatibility)
+            if (wire == 0)
+            {
+                uint64_t v = 0;
+                if (!readVarint(bytes, pos, v)) { return false; }
+                u.isLicensed    = (v != 0);
+                u.hasIsLicensed = true;
+            }
+            else
+            {
+                if (!skipField(bytes, pos, wire)) { return false; }
+            }
             break;
         }
         default:
@@ -2325,7 +2362,7 @@ static bool parseUserPayload(const QByteArray& bytes, UserFields& u)
         }
     }
 
-    return u.hasId || u.hasLongName || u.hasShortName;
+    return u.hasId || u.hasLongName || u.hasShortName || u.hasMacaddr || u.hasHwModel || u.hasIsLicensed;
 }
 
 static void appendUserDecodeFields(const UserFields& u, DecodeResult& result)
@@ -2967,6 +3004,18 @@ static QString summarizePortPayload(const DataFields& d)
         }
         if (u.hasId) {
             out += QString(" id=%1").arg(u.id);
+        }
+        if (u.hasHwModel) {
+            out += QString(" hw=%1").arg(u.hwModel);
+        }
+        if (u.hasIsLicensed) {
+            out += QString(" licensed=%1").arg(u.isLicensed ? 1 : 0);
+        }
+        if (u.hasMacaddr) {
+            out += QString(" mac=%1").arg(QString(u.macaddr.left(8).toHex()));
+            if (u.macaddr.size() > 8) {
+                out += "...";
+            }
         }
 
         return out.isEmpty() ? appendPayloadHex() : out;
