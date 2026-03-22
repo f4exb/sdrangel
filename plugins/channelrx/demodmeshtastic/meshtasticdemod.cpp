@@ -39,7 +39,7 @@
 #include "SWGChannelSettings.h"
 #include "SWGWorkspaceInfo.h"
 #include "SWGChannelReport.h"
-#include "SWGChirpChatDemodReport.h"
+#include "SWGMeshtasticDemodReport.h"
 
 #include "dsp/dspcommands.h"
 #include "device/deviceapi.h"
@@ -530,6 +530,8 @@ bool MeshtasticDemod::handleMessage(const Message& cmd)
             m_lastMsgHeaderParityStatus = msg.getHeaderParityStatus();
             m_lastMsgPayloadCRC = msg.getPayloadCRCStatus();
             m_lastMsgPayloadParityStatus = msg.getPayloadParityStatus();
+            m_lastMsgPipelineName = msg.getPipelineName();
+            m_lastFrameType = QStringLiteral("LORA_FRAME");
 
             QByteArray bytesCopy(m_lastMsgBytes);
             bytesCopy.truncate(m_lastMsgPacketLength);
@@ -550,6 +552,17 @@ bool MeshtasticDemod::handleMessage(const Message& cmd)
 
             if (modemmeshtastic::Packet::decodeFrame(m_lastMsgBytes, meshResult, m_settings.m_meshtasticKeySpecList))
             {
+                m_lastMsgString = meshResult.summary;
+
+                for (const modemmeshtastic::DecodeResult::Field& field : meshResult.fields)
+                {
+                    if (field.path == QStringLiteral("data.port_name"))
+                    {
+                        m_lastFrameType = field.value;
+                        break;
+                    }
+                }
+
                 qInfo() << "MeshtasticDemod::handleMessage:" << meshResult.summary;
 
                 if (meshResult.dataDecoded && getMessageQueueToGUI())
@@ -654,44 +667,6 @@ bool MeshtasticDemod::handleMessage(const Message& cmd)
 
         if (getMessageQueueToGUI()) {
             getMessageQueueToGUI()->push(new MeshtasticDemodMsg::MsgReportDecodeString(msg)); // make a copy
-        }
-
-        return true;
-    }
-    else if (MeshtasticDemodMsg::MsgReportDecodeFT::match(cmd))
-    {
-        qDebug() << "MeshtasticDemod::handleMessage: MsgReportDecodeFT";
-        MeshtasticDemodMsg::MsgReportDecodeFT& msg = (MeshtasticDemodMsg::MsgReportDecodeFT&) cmd;
-        m_lastMsgSignalDb = msg.getSingalDb();
-        m_lastMsgNoiseDb = msg.getNoiseDb();
-        m_lastMsgSyncWord = msg.getSyncWord();
-        m_lastMsgTimestamp = msg.getMsgTimestamp();
-        m_lastMsgString = msg.getMessage(); // for now we do not handle message components (call1, ...)
-        int nbSymbolBits = m_settings.m_spreadFactor - m_settings.m_deBits;
-        m_lastMsgNbSymbols = (174 / nbSymbolBits) + ((174 % nbSymbolBits) == 0 ? 0 : 1);
-
-        if (m_settings.m_autoNbSymbolsMax)
-        {
-            MeshtasticDemodSettings settings = m_settings;
-            settings.m_nbSymbolsMax = m_lastMsgNbSymbols;
-            applySettings(settings);
-
-            if (getMessageQueueToGUI()) // forward to GUI if any
-            {
-                MsgConfigureMeshtasticDemod *msgToGUI = MsgConfigureMeshtasticDemod::create(settings, false);
-                getMessageQueueToGUI()->push(msgToGUI);
-            }
-        }
-
-        if (m_settings.m_sendViaUDP)
-        {
-            const QByteArray& byteArray = m_lastMsgString.toUtf8();
-            const uint8_t *bytes = reinterpret_cast<const uint8_t*>(byteArray.data());
-            m_udpSink.writeUnbuffered(bytes, byteArray.size());
-        }
-
-        if (getMessageQueueToGUI()) {
-            getMessageQueueToGUI()->push(new MeshtasticDemodMsg::MsgReportDecodeFT(msg)); // make a copy
         }
 
         return true;
@@ -912,8 +887,8 @@ int MeshtasticDemod::webapiSettingsGet(
     QString& errorMessage)
 {
     (void) errorMessage;
-    response.setChirpChatDemodSettings(new SWGSDRangel::SWGChirpChatDemodSettings());
-    response.getChirpChatDemodSettings()->init();
+    response.setMeshtasticDemodSettings(new SWGSDRangel::SWGMeshtasticDemodSettings());
+    response.getMeshtasticDemodSettings()->init();
     webapiFormatChannelSettings(response, m_settings);
 
     return 200;
@@ -958,81 +933,81 @@ void MeshtasticDemod::webapiUpdateChannelSettings(
         SWGSDRangel::SWGChannelSettings& response)
 {
     if (channelSettingsKeys.contains("inputFrequencyOffset")) {
-        settings.m_inputFrequencyOffset = response.getChirpChatDemodSettings()->getInputFrequencyOffset();
+        settings.m_inputFrequencyOffset = response.getMeshtasticDemodSettings()->getInputFrequencyOffset();
     }
     if (channelSettingsKeys.contains("bandwidthIndex")) {
-        settings.m_bandwidthIndex = response.getChirpChatDemodSettings()->getBandwidthIndex();
+        settings.m_bandwidthIndex = response.getMeshtasticDemodSettings()->getBandwidthIndex();
     }
     if (channelSettingsKeys.contains("spreadFactor")) {
-        settings.m_spreadFactor = response.getChirpChatDemodSettings()->getSpreadFactor();
+        settings.m_spreadFactor = response.getMeshtasticDemodSettings()->getSpreadFactor();
     }
     if (channelSettingsKeys.contains("deBits")) {
-        settings.m_deBits = response.getChirpChatDemodSettings()->getDeBits();
+        settings.m_deBits = response.getMeshtasticDemodSettings()->getDeBits();
     }
     if (channelSettingsKeys.contains("decodeActive")) {
-        settings.m_decodeActive = response.getChirpChatDemodSettings()->getDecodeActive() != 0;
+        settings.m_decodeActive = response.getMeshtasticDemodSettings()->getDecodeActive() != 0;
     }
     if (channelSettingsKeys.contains("eomSquelchTenths")) {
-        settings.m_eomSquelchTenths = response.getChirpChatDemodSettings()->getEomSquelchTenths();
+        settings.m_eomSquelchTenths = response.getMeshtasticDemodSettings()->getEomSquelchTenths();
     }
     if (channelSettingsKeys.contains("nbSymbolsMax")) {
-        settings.m_nbSymbolsMax = response.getChirpChatDemodSettings()->getNbSymbolsMax();
+        settings.m_nbSymbolsMax = response.getMeshtasticDemodSettings()->getNbSymbolsMax();
     }
     if (channelSettingsKeys.contains("preambleChirps")) {
-        settings.m_preambleChirps = response.getChirpChatDemodSettings()->getPreambleChirps();
+        settings.m_preambleChirps = response.getMeshtasticDemodSettings()->getPreambleChirps();
     }
     if (channelSettingsKeys.contains("nbParityBits")) {
-        settings.m_nbParityBits = response.getChirpChatDemodSettings()->getNbParityBits();
+        settings.m_nbParityBits = response.getMeshtasticDemodSettings()->getNbParityBits();
     }
     if (channelSettingsKeys.contains("packetLength")) {
-        settings.m_packetLength = response.getChirpChatDemodSettings()->getPacketLength();
+        settings.m_packetLength = response.getMeshtasticDemodSettings()->getPacketLength();
     }
     if (channelSettingsKeys.contains("sendViaUDP")) {
-        settings.m_sendViaUDP = response.getChirpChatDemodSettings()->getSendViaUdp() != 0;
+        settings.m_sendViaUDP = response.getMeshtasticDemodSettings()->getSendViaUdp() != 0;
     }
     if (channelSettingsKeys.contains("udpAddress")) {
-        settings.m_udpAddress = *response.getChirpChatDemodSettings()->getUdpAddress();
+        settings.m_udpAddress = *response.getMeshtasticDemodSettings()->getUdpAddress();
     }
     if (channelSettingsKeys.contains("udpPort"))
     {
-        uint16_t port = response.getChirpChatDemodSettings()->getUdpPort();
+        uint16_t port = response.getMeshtasticDemodSettings()->getUdpPort();
         settings.m_udpPort = port < 1024 ? 1024 : port;
     }
     if (channelSettingsKeys.contains("invertRamps")) {
-        settings.m_invertRamps = response.getChirpChatDemodSettings()->getInvertRamps() != 0;
+        settings.m_invertRamps = response.getMeshtasticDemodSettings()->getInvertRamps() != 0;
     }
     if (channelSettingsKeys.contains("rgbColor")) {
-        settings.m_rgbColor = response.getChirpChatDemodSettings()->getRgbColor();
+        settings.m_rgbColor = response.getMeshtasticDemodSettings()->getRgbColor();
     }
     if (channelSettingsKeys.contains("title")) {
-        settings.m_title = *response.getChirpChatDemodSettings()->getTitle();
+        settings.m_title = *response.getMeshtasticDemodSettings()->getTitle();
     }
     if (channelSettingsKeys.contains("streamIndex")) {
-        settings.m_streamIndex = response.getChirpChatDemodSettings()->getStreamIndex();
+        settings.m_streamIndex = response.getMeshtasticDemodSettings()->getStreamIndex();
     }
     if (channelSettingsKeys.contains("useReverseAPI")) {
-        settings.m_useReverseAPI = response.getChirpChatDemodSettings()->getUseReverseApi() != 0;
+        settings.m_useReverseAPI = response.getMeshtasticDemodSettings()->getUseReverseApi() != 0;
     }
     if (channelSettingsKeys.contains("reverseAPIAddress")) {
-        settings.m_reverseAPIAddress = *response.getChirpChatDemodSettings()->getReverseApiAddress();
+        settings.m_reverseAPIAddress = *response.getMeshtasticDemodSettings()->getReverseApiAddress();
     }
     if (channelSettingsKeys.contains("reverseAPIPort")) {
-        settings.m_reverseAPIPort = response.getChirpChatDemodSettings()->getReverseApiPort();
+        settings.m_reverseAPIPort = response.getMeshtasticDemodSettings()->getReverseApiPort();
     }
     if (channelSettingsKeys.contains("reverseAPIDeviceIndex")) {
-        settings.m_reverseAPIDeviceIndex = response.getChirpChatDemodSettings()->getReverseApiDeviceIndex();
+        settings.m_reverseAPIDeviceIndex = response.getMeshtasticDemodSettings()->getReverseApiDeviceIndex();
     }
     if (channelSettingsKeys.contains("reverseAPIChannelIndex")) {
-        settings.m_reverseAPIChannelIndex = response.getChirpChatDemodSettings()->getReverseApiChannelIndex();
+        settings.m_reverseAPIChannelIndex = response.getMeshtasticDemodSettings()->getReverseApiChannelIndex();
     }
     if (settings.m_spectrumGUI && channelSettingsKeys.contains("spectrumConfig")) {
-        settings.m_spectrumGUI->updateFrom(channelSettingsKeys, response.getChirpChatDemodSettings()->getSpectrumConfig());
+        settings.m_spectrumGUI->updateFrom(channelSettingsKeys, response.getMeshtasticDemodSettings()->getSpectrumConfig());
     }
     if (settings.m_channelMarker && channelSettingsKeys.contains("channelMarker")) {
-        settings.m_channelMarker->updateFrom(channelSettingsKeys, response.getChirpChatDemodSettings()->getChannelMarker());
+        settings.m_channelMarker->updateFrom(channelSettingsKeys, response.getMeshtasticDemodSettings()->getChannelMarker());
     }
     if (settings.m_rollupState && channelSettingsKeys.contains("rollupState")) {
-        settings.m_rollupState->updateFrom(channelSettingsKeys, response.getChirpChatDemodSettings()->getRollupState());
+        settings.m_rollupState->updateFrom(channelSettingsKeys, response.getMeshtasticDemodSettings()->getRollupState());
     }
 }
 
@@ -1041,97 +1016,93 @@ int MeshtasticDemod::webapiReportGet(
     QString& errorMessage)
 {
     (void) errorMessage;
-    response.setChirpChatDemodReport(new SWGSDRangel::SWGChirpChatDemodReport());
-    response.getChirpChatDemodReport()->init();
+    response.setMeshtasticDemodReport(new SWGSDRangel::SWGMeshtasticDemodReport());
+    response.getMeshtasticDemodReport()->init();
     webapiFormatChannelReport(response);
     return 200;
 }
 
 void MeshtasticDemod::webapiFormatChannelSettings(SWGSDRangel::SWGChannelSettings& response, const MeshtasticDemodSettings& settings)
 {
-    response.getChirpChatDemodSettings()->setInputFrequencyOffset(settings.m_inputFrequencyOffset);
-    response.getChirpChatDemodSettings()->setBandwidthIndex(settings.m_bandwidthIndex);
-    response.getChirpChatDemodSettings()->setSpreadFactor(settings.m_spreadFactor);
-    response.getChirpChatDemodSettings()->setDeBits(settings.m_deBits);
-    response.getChirpChatDemodSettings()->setCodingScheme((int) settings.m_codingScheme);
-    response.getChirpChatDemodSettings()->setDecodeActive(settings.m_decodeActive ? 1 : 0);
-    response.getChirpChatDemodSettings()->setEomSquelchTenths(settings.m_eomSquelchTenths);
-    response.getChirpChatDemodSettings()->setNbSymbolsMax(settings.m_nbSymbolsMax);
-    response.getChirpChatDemodSettings()->setAutoNbSymbolsMax(settings.m_autoNbSymbolsMax ? 1 : 0);
-    response.getChirpChatDemodSettings()->setPreambleChirps(settings.m_preambleChirps);
-    response.getChirpChatDemodSettings()->setNbParityBits(settings.m_nbParityBits);
-    response.getChirpChatDemodSettings()->setPacketLength(settings.m_packetLength);
-    response.getChirpChatDemodSettings()->setHasCrc(settings.m_hasCRC ? 1 : 0);
-    response.getChirpChatDemodSettings()->setHasHeader(settings.m_hasHeader ? 1 : 0);
-    response.getChirpChatDemodSettings()->setSendViaUdp(settings.m_sendViaUDP ? 1 : 0);
-    response.getChirpChatDemodSettings()->setInvertRamps(settings.m_invertRamps ? 1 : 0);
+    response.getMeshtasticDemodSettings()->setInputFrequencyOffset(settings.m_inputFrequencyOffset);
+    response.getMeshtasticDemodSettings()->setBandwidthIndex(settings.m_bandwidthIndex);
+    response.getMeshtasticDemodSettings()->setSpreadFactor(settings.m_spreadFactor);
+    response.getMeshtasticDemodSettings()->setDeBits(settings.m_deBits);
+    response.getMeshtasticDemodSettings()->setDecodeActive(settings.m_decodeActive ? 1 : 0);
+    response.getMeshtasticDemodSettings()->setEomSquelchTenths(settings.m_eomSquelchTenths);
+    response.getMeshtasticDemodSettings()->setNbSymbolsMax(settings.m_nbSymbolsMax);
+    response.getMeshtasticDemodSettings()->setPreambleChirps(settings.m_preambleChirps);
+    response.getMeshtasticDemodSettings()->setNbParityBits(settings.m_nbParityBits);
+    response.getMeshtasticDemodSettings()->setPacketLength(settings.m_packetLength);
+    response.getMeshtasticDemodSettings()->setSendViaUdp(settings.m_sendViaUDP ? 1 : 0);
+    response.getMeshtasticDemodSettings()->setInvertRamps(settings.m_invertRamps ? 1 : 0);
 
-    if (response.getChirpChatDemodSettings()->getUdpAddress()) {
-        *response.getChirpChatDemodSettings()->getUdpAddress() = settings.m_udpAddress;
+    if (response.getMeshtasticDemodSettings()->getUdpAddress()) {
+        *response.getMeshtasticDemodSettings()->getUdpAddress() = settings.m_udpAddress;
     } else {
-        response.getChirpChatDemodSettings()->setUdpAddress(new QString(settings.m_udpAddress));
+        response.getMeshtasticDemodSettings()->setUdpAddress(new QString(settings.m_udpAddress));
     }
 
-    response.getChirpChatDemodSettings()->setUdpPort(settings.m_udpPort);
-    response.getChirpChatDemodSettings()->setRgbColor(settings.m_rgbColor);
+    response.getMeshtasticDemodSettings()->setUdpPort(settings.m_udpPort);
+    response.getMeshtasticDemodSettings()->setRgbColor(settings.m_rgbColor);
 
-    if (response.getChirpChatDemodSettings()->getTitle()) {
-        *response.getChirpChatDemodSettings()->getTitle() = settings.m_title;
+    if (response.getMeshtasticDemodSettings()->getTitle()) {
+        *response.getMeshtasticDemodSettings()->getTitle() = settings.m_title;
     } else {
-        response.getChirpChatDemodSettings()->setTitle(new QString(settings.m_title));
+        response.getMeshtasticDemodSettings()->setTitle(new QString(settings.m_title));
     }
 
-    response.getChirpChatDemodSettings()->setUseReverseApi(settings.m_useReverseAPI ? 1 : 0);
+    response.getMeshtasticDemodSettings()->setUseReverseApi(settings.m_useReverseAPI ? 1 : 0);
 
-    if (response.getChirpChatDemodSettings()->getReverseApiAddress()) {
-        *response.getChirpChatDemodSettings()->getReverseApiAddress() = settings.m_reverseAPIAddress;
+    if (response.getMeshtasticDemodSettings()->getReverseApiAddress()) {
+        *response.getMeshtasticDemodSettings()->getReverseApiAddress() = settings.m_reverseAPIAddress;
     } else {
-        response.getChirpChatDemodSettings()->setReverseApiAddress(new QString(settings.m_reverseAPIAddress));
+        response.getMeshtasticDemodSettings()->setReverseApiAddress(new QString(settings.m_reverseAPIAddress));
     }
 
-    response.getChirpChatDemodSettings()->setReverseApiPort(settings.m_reverseAPIPort);
-    response.getChirpChatDemodSettings()->setReverseApiDeviceIndex(settings.m_reverseAPIDeviceIndex);
-    response.getChirpChatDemodSettings()->setReverseApiChannelIndex(settings.m_reverseAPIChannelIndex);
+    response.getMeshtasticDemodSettings()->setReverseApiPort(settings.m_reverseAPIPort);
+    response.getMeshtasticDemodSettings()->setReverseApiDeviceIndex(settings.m_reverseAPIDeviceIndex);
+    response.getMeshtasticDemodSettings()->setReverseApiChannelIndex(settings.m_reverseAPIChannelIndex);
 
     if (settings.m_spectrumGUI)
     {
-        if (response.getChirpChatDemodSettings()->getSpectrumConfig())
+        if (response.getMeshtasticDemodSettings()->getSpectrumConfig())
         {
-            settings.m_spectrumGUI->formatTo(response.getChirpChatDemodSettings()->getSpectrumConfig());
+            settings.m_spectrumGUI->formatTo(response.getMeshtasticDemodSettings()->getSpectrumConfig());
         }
         else
         {
             SWGSDRangel::SWGGLSpectrum *swgGLSpectrum = new SWGSDRangel::SWGGLSpectrum();
             settings.m_spectrumGUI->formatTo(swgGLSpectrum);
-            response.getChirpChatDemodSettings()->setSpectrumConfig(swgGLSpectrum);
+            response.getMeshtasticDemodSettings()->setSpectrumConfig(swgGLSpectrum);
         }
     }
 
     if (settings.m_channelMarker)
     {
-        if (response.getChirpChatDemodSettings()->getChannelMarker())
+        if (response.getMeshtasticDemodSettings()->getChannelMarker())
         {
-            settings.m_channelMarker->formatTo(response.getChirpChatDemodSettings()->getChannelMarker());
+            settings.m_channelMarker->formatTo(response.getMeshtasticDemodSettings()->getChannelMarker());
         }
         else
         {
             SWGSDRangel::SWGChannelMarker *swgChannelMarker = new SWGSDRangel::SWGChannelMarker();
             settings.m_channelMarker->formatTo(swgChannelMarker);
-            response.getChirpChatDemodSettings()->setChannelMarker(swgChannelMarker);
+            response.getMeshtasticDemodSettings()->setChannelMarker(swgChannelMarker);
         }
     }
 
     if (settings.m_rollupState)
     {
-        if (response.getChirpChatDemodSettings()->getRollupState())
+        if (response.getMeshtasticDemodSettings()->getRollupState())
         {
-            settings.m_rollupState->formatTo(response.getChirpChatDemodSettings()->getRollupState());
+            settings.m_rollupState->formatTo(response.getMeshtasticDemodSettings()->getRollupState());
         }
         else
         {
             SWGSDRangel::SWGRollupState *swgRollupState = new SWGSDRangel::SWGRollupState();
             settings.m_rollupState->formatTo(swgRollupState);
-            response.getChirpChatDemodSettings()->setRollupState(swgRollupState);
+            response.getMeshtasticDemodSettings()->setRollupState(swgRollupState);
         }
     }
 }
@@ -1139,28 +1110,29 @@ void MeshtasticDemod::webapiFormatChannelSettings(SWGSDRangel::SWGChannelSetting
 void MeshtasticDemod::webapiFormatChannelReport(SWGSDRangel::SWGChannelReport& response)
 {
     if (m_running && !m_pipelines.empty() && m_pipelines[0].basebandSink) {
-        response.getChirpChatDemodReport()->setChannelSampleRate(m_pipelines[0].basebandSink->getChannelSampleRate());
+        response.getMeshtasticDemodReport()->setChannelSampleRate(m_pipelines[0].basebandSink->getChannelSampleRate());
     }
 
-    response.getChirpChatDemodReport()->setChannelPowerDb(CalcDb::dbPower(getTotalPower()));
-    response.getChirpChatDemodReport()->setSignalPowerDb(m_lastMsgSignalDb);
-    response.getChirpChatDemodReport()->setNoisePowerDb(CalcDb::dbPower(getCurrentNoiseLevel()));
-    response.getChirpChatDemodReport()->setSnrPowerDb(m_lastMsgSignalDb - m_lastMsgNoiseDb);
-    response.getChirpChatDemodReport()->setHasCrc(m_lastMsgHasCRC);
-    response.getChirpChatDemodReport()->setNbParityBits(m_lastMsgNbParityBits);
-    response.getChirpChatDemodReport()->setPacketLength(m_lastMsgPacketLength);
-    response.getChirpChatDemodReport()->setNbSymbols(m_lastMsgNbSymbols);
-    response.getChirpChatDemodReport()->setNbCodewords(m_lastMsgNbCodewords);
-    response.getChirpChatDemodReport()->setHeaderParityStatus(m_lastMsgHeaderParityStatus);
-    response.getChirpChatDemodReport()->setHeaderCrcStatus(m_lastMsgHeaderCRC);
-    response.getChirpChatDemodReport()->setPayloadParityStatus(m_lastMsgPayloadParityStatus);
-    response.getChirpChatDemodReport()->setPayloadCrcStatus(m_lastMsgPayloadCRC);
-    response.getChirpChatDemodReport()->setMessageTimestamp(new QString(m_lastMsgTimestamp));
-    response.getChirpChatDemodReport()->setMessageString(new QString(m_lastMsgString));
-    response.getChirpChatDemodReport()->setDecoding(getDemodActive() ? 1 : 0);
+    response.getMeshtasticDemodReport()->setChannelPowerDb(CalcDb::dbPower(getTotalPower()));
+    response.getMeshtasticDemodReport()->setSignalPowerDb(m_lastMsgSignalDb);
+    response.getMeshtasticDemodReport()->setNoisePowerDb(CalcDb::dbPower(getCurrentNoiseLevel()));
+    response.getMeshtasticDemodReport()->setSnrPowerDb(m_lastMsgSignalDb - m_lastMsgNoiseDb);
+    response.getMeshtasticDemodReport()->setNbParityBits(m_lastMsgNbParityBits);
+    response.getMeshtasticDemodReport()->setPacketLength(m_lastMsgPacketLength);
+    response.getMeshtasticDemodReport()->setNbSymbols(m_lastMsgNbSymbols);
+    response.getMeshtasticDemodReport()->setNbCodewords(m_lastMsgNbCodewords);
+    response.getMeshtasticDemodReport()->setHeaderParityStatus(m_lastMsgHeaderParityStatus);
+    response.getMeshtasticDemodReport()->setHeaderCrcStatus(m_lastMsgHeaderCRC);
+    response.getMeshtasticDemodReport()->setPayloadParityStatus(m_lastMsgPayloadParityStatus);
+    response.getMeshtasticDemodReport()->setPayloadCrcStatus(m_lastMsgPayloadCRC);
+    response.getMeshtasticDemodReport()->setMessageTimestamp(new QString(m_lastMsgTimestamp));
+    response.getMeshtasticDemodReport()->setMessageString(new QString(m_lastMsgString));
+    response.getMeshtasticDemodReport()->setFrameType(new QString(m_lastFrameType));
+    response.getMeshtasticDemodReport()->setChannelType(new QString(m_lastMsgPipelineName));
+    response.getMeshtasticDemodReport()->setDecoding(getDemodActive() ? 1 : 0);
 
-    response.getChirpChatDemodReport()->setMessageBytes(new QList<QString *>);
-    QList<QString *> *bytesStr = response.getChirpChatDemodReport()->getMessageBytes();
+    response.getMeshtasticDemodReport()->setMessageBytes(new QList<QString *>);
+    QList<QString *> *bytesStr = response.getMeshtasticDemodReport()->getMessageBytes();
 
     for (QByteArray::const_iterator it = m_lastMsgBytes.begin(); it != m_lastMsgBytes.end(); ++it)
     {
@@ -1230,8 +1202,8 @@ void MeshtasticDemod::webapiFormatChannelSettings(
     swgChannelSettings->setOriginatorChannelIndex(getIndexInDeviceSet());
     swgChannelSettings->setOriginatorDeviceSetIndex(getDeviceSetIndex());
     swgChannelSettings->setChannelType(new QString(m_channelId));
-    swgChannelSettings->setChirpChatDemodSettings(new SWGSDRangel::SWGChirpChatDemodSettings());
-    SWGSDRangel::SWGChirpChatDemodSettings *swgMeshtasticDemodSettings = swgChannelSettings->getChirpChatDemodSettings();
+    swgChannelSettings->setMeshtasticDemodSettings(new SWGSDRangel::SWGMeshtasticDemodSettings());
+    SWGSDRangel::SWGMeshtasticDemodSettings *swgMeshtasticDemodSettings = swgChannelSettings->getMeshtasticDemodSettings();
 
     // transfer data that has been modified. When force is on transfer all data except reverse API data
 
@@ -1247,9 +1219,6 @@ void MeshtasticDemod::webapiFormatChannelSettings(
     if (channelSettingsKeys.contains("deBits") || force) {
         swgMeshtasticDemodSettings->setDeBits(settings.m_deBits);
     }
-    if (channelSettingsKeys.contains("codingScheme") || force) {
-        swgMeshtasticDemodSettings->setCodingScheme((int) settings.m_codingScheme);
-    }
     if (channelSettingsKeys.contains("decodeActive") || force) {
         swgMeshtasticDemodSettings->setDecodeActive(settings.m_decodeActive ? 1 : 0);
     }
@@ -1259,9 +1228,6 @@ void MeshtasticDemod::webapiFormatChannelSettings(
     if (channelSettingsKeys.contains("nbSymbolsMax") || force) {
         swgMeshtasticDemodSettings->setNbSymbolsMax(settings.m_nbSymbolsMax);
     }
-    if (channelSettingsKeys.contains("autoNbSymbolsMax") || force) {
-        swgMeshtasticDemodSettings->setAutoNbSymbolsMax(settings.m_autoNbSymbolsMax ? 1 : 0);
-    }
     if (channelSettingsKeys.contains("preambleChirps") || force) {
         swgMeshtasticDemodSettings->setPreambleChirps(settings.m_preambleChirps);
     }
@@ -1270,12 +1236,6 @@ void MeshtasticDemod::webapiFormatChannelSettings(
     }
     if (channelSettingsKeys.contains("packetLength") || force) {
         swgMeshtasticDemodSettings->setPacketLength(settings.m_packetLength);
-    }
-    if (channelSettingsKeys.contains("hasCRC") || force) {
-        swgMeshtasticDemodSettings->setHasCrc(settings.m_hasCRC ? 1 : 0);
-    }
-    if (channelSettingsKeys.contains("hasHeader") || force) {
-        swgMeshtasticDemodSettings->setHasHeader(settings.m_hasHeader ? 1 : 0);
     }
     if (channelSettingsKeys.contains("sendViaUDP") || force) {
         swgMeshtasticDemodSettings->setSendViaUdp(settings.m_sendViaUDP ? 1 : 0);

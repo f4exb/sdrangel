@@ -1,0 +1,187 @@
+MeshtasticDemodSettings:
+  description: MeshtasticDemod
+  properties:
+    inputFrequencyOffset:
+      type: integer
+      format: int64
+    bandwidthIndex:
+      type: integer
+      description: >
+        standard bandwidths index:
+          *  0 -    375 Hz (384000 / 1024)
+          *  1 -    750 Hz (384000 / 512)
+          *  2 -   1500 Hz (384000 / 256)
+          *  3 -   2604 Hz (333333 / 128)
+          *  4 -   3125 Hz (400000 / 128)
+          *  5 -   3906 Hz (500000 / 128)
+          *  6 -   5208 Hz (333333 / 64)
+          *  7 -   6250 Hz (400000 / 64)
+          *  8 -   7813 Hz (500000 / 64)
+          *  9 -  10417 Hz (333333 / 32)
+          * 10 -  12500 Hz (400000 / 32)
+          * 11 -  15625 Hz (500000 / 32)
+          * 12 -  20833 Hz (333333 / 16)
+          * 13 -  25000 Hz (400000 / 16)
+          * 14 -  31250 Hz (500000 / 16)
+          * 15 -  41667 Hz (333333 / 8)
+          * 16 -  50000 Hz (400000 / 8)
+          * 17 -  62500 Hz (500000 / 8)
+          * 18 -  83333 Hz (333333 / 4)
+          * 19 - 100000 Hz (400000 / 4)
+          * 20 - 125000 Hz (500000 / 4)
+          * 21 - 166667 Hz (333333 / 2)
+          * 22 - 200000 Hz (400000 / 2)
+          * 23 - 250000 Hz (500000 / 2)
+          * 24 - 333333 Hz (333333 / 1)
+          * 25 - 400000 Hz (400000 / 1)
+          * 26 - 500000 Hz (500000 / 1)
+    spreadFactor:
+      type: integer
+    deBits:
+      description: Low data rate optimize (DE) bits i.e. nb of FFT bins per effective symbol
+      type: integer
+    decodeActive:
+      description: boolean 1 to activate 0 to de-activate decoder
+      type: integer
+    eomSquelchTenths:
+      description: argmax squared magnitude is compared between current multiplied by this factor and maximum during decoding. This value is divided by 10
+      type: integer
+    nbSymbolsMax:
+      description: expected maximum number of symbols in a payload
+      type: integer
+    preambleChirps:
+      description: Number of expected preamble chirps
+      type: integer
+    nbParityBits:
+      description: Hamming FEC parity bits (LoRa)
+      type: integer
+    packetLength:
+      description: expected packet length in number of bytes (LoRa)
+      type: integer
+    sendViaUDP:
+      description: boolean 1 to send decoded message via UDP else 0
+      type: integer
+    udpEnabled:
+      type: integer
+      description: >
+        Boolean - Send via UDP
+          * 0 - Do not send decoded messages via UDP
+          * 1 - Send decoded messages via UDP
+    udpAddress:
+      description: UDP destination udpAddress
+      type: string
+    udpPort:
+      description: UDP destination port
+      type: integer
+    invertRamps:
+      type: integer
+      description: >
+        Invert chirp ramps
+          * 0 - Normal chirp ramps (upchirps for preamble and payload)
+          * 1 - Inverted chirp ramps (downchirps for preamble and payload)
+    rgbColor:
+      type: integer
+    title:
+      type: string
+    streamIndex:
+      description: MIMO channel. Not relevant when connected to SI (single Rx).
+      type: integer
+    useReverseAPI:
+      description: Synchronize with reverse API (1 for yes, 0 for no)
+      type: integer
+    reverseAPIAddress:
+      type: string
+    reverseAPIPort:
+      type: integer
+    reverseAPIDeviceIndex:
+      type: integer
+    reverseAPIChannelIndex:
+      type: integer
+    spectrumConfig:
+      $ref: "/doc/swagger/include/GLSpectrum.yaml#/GLSpectrum"
+    channelMarker:
+      $ref: "/doc/swagger/include/ChannelMarker.yaml#/ChannelMarker"
+    rollupState:
+      $ref: "/doc/swagger/include/RollupState.yaml#/RollupState"
+
+MeshtasticDemodReport:
+  description: MeshtasticDemod
+  properties:
+    channelPowerDB:
+      description: current de-chirped total channel power (dB)
+      type: number
+      format: float
+    noisePowerDB:
+      description: current de-chirped noise argmax power (dB)
+      type: number
+      format: float
+    signalPowerDB:
+      description: last message de-chirped signal argmax power (dB)
+      type: number
+      format: float
+    snrPowerDB:
+      description: last message de-chirped signal to noise ratio power (dB)
+      type: number
+      format: float
+    channelSampleRate:
+      type: integer
+    syncWord:
+      description: 2 bytes sync word (0..65535)
+      type: integer
+    nbParityBits:
+      description: Hamming FEC parity bits (LoRa)
+      type: integer
+    packetLength:
+      description: Packet length in number of bytes (LoRa)
+      type: integer
+    nbSymbols:
+      description: Number of symbols in the payload with header and CRC (LoRa)
+      type: integer
+    nbCodewords:
+      description: Number of codewords in the payload with header and CRC (LoRa)
+      type: integer
+    headerParityStatus:
+      type: integer
+      description: >
+        Header FEC parity status:
+          * 0 - Undefined
+          * 1 - Uncorrectable error
+          * 2 - Corrected error
+          * 3 - OK
+    headerCRCStatus:
+      description: header CRC check status. Boolean 1 if OK else 0
+      type: integer
+    payloadParityStatus:
+      type: integer
+      description: >
+        Payload FEC parity status:
+          * 0 - Undefined
+          * 1 - Uncorrectable error
+          * 2 - Corrected error
+          * 3 - OK
+    payloadCRCStatus:
+      description: payload CRC check status. Boolean 1 if OK else 0
+      type: integer
+    messageTimestamp:
+      description: timestamp of the last decoded message
+      type: string
+    messageString:
+      description: string representation of the last decoded message
+      type: string
+    frameType:
+      description: frame type shown in the GUI tree view (for example LORA_FRAME or POSITION_APP)
+      type: string
+    channelType:
+      description: Channel type code e.g. LONG_FAST
+      type: string
+    messageBytes:
+      description: bytes of the last decoded message as an array of hex string represented bytes (00..FF)
+      type: array
+      items:
+        type: string
+    decoding:
+      type: integer
+      description: >
+        Boolean - decoding status
+          * 0 - no decoding
+          * 1 - decoding

@@ -196,6 +196,7 @@ bool MeshtasticDemodGUI::handleMessage(const Message& message)
     }
     else if (MeshtasticDemodMsg::MsgReportDecodeBytes::match(message))
     {
+        // Populates the upper unstructured view including raw bytes in hex
         const MeshtasticDemodMsg::MsgReportDecodeBytes& msg = (MeshtasticDemodMsg::MsgReportDecodeBytes&) message;
         handleMeshAutoLockObservation(msg);
 
@@ -207,6 +208,7 @@ bool MeshtasticDemodGUI::handleMessage(const Message& message)
     }
     else if (MeshtasticDemodMsg::MsgReportDecodeString::match(message))
     {
+        // Populates the lower structured tree view with decoded fields
         if ((m_settings.m_codingScheme == MeshtasticDemodSettings::CodingLoRa)) {
             showTextMessage(message);
         }

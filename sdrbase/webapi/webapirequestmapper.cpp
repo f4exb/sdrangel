@@ -4625,6 +4625,18 @@ bool WebAPIRequestMapper::getChannelSettings(
             channelSettings->getM17ModSettings()->init();
             channelSettings->getM17ModSettings()->fromJsonObject(settingsJsonObject);
         }
+        else if (channelSettingsKey == "MeshtasticDemodSettings")
+        {
+            channelSettings->setMeshtasticDemodSettings(new SWGSDRangel::SWGMeshtasticDemodSettings());
+            channelSettings->getMeshtasticDemodSettings()->init();
+            channelSettings->getMeshtasticDemodSettings()->fromJsonObject(settingsJsonObject);
+        }
+        else if (channelSettingsKey == "MeshtasticModSettings")
+        {
+            channelSettings->setMeshtasticModSettings(new SWGSDRangel::SWGMeshtasticModSettings());
+            channelSettings->getMeshtasticModSettings()->init();
+            channelSettings->getMeshtasticModSettings()->fromJsonObject(settingsJsonObject);
+        }
         else if (channelSettingsKey == "NFMDemodSettings")
         {
             channelSettings->setNfmDemodSettings(new SWGSDRangel::SWGNFMDemodSettings());
@@ -5719,4 +5731,3 @@ void WebAPIRequestMapper::resetFeatureActions(SWGSDRangel::SWGFeatureActions& fe
     featureActions.setStarTrackerActions(nullptr);
     featureActions.setVorLocalizerActions(nullptr);
 }
-

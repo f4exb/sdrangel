@@ -2,7 +2,7 @@
 
 <h2>Introduction</h2>
 
-This plugin can be used to demodulate and decode transmissions based on Chirp Spread Spectrum (CSS). The basic idea is to transform each symbol of a MFSK modulation to an ascending frequency ramp shifted in time. It could equally be a descending ramp but this one is reserved to detect a break in the preamble sequence (synchronization). This plugin has been designed to work in conjunction with the ChirpChat modulator plugin that should be used ideally on the transmission side.
+This plugin can be used to demodulate and decode transmissions based on Chirp Spread Spectrum (CSS). The basic idea is to transform each symbol of a MFSK modulation to an ascending frequency ramp shifted in time. It could equally be a descending ramp but this one is reserved to detect a break in the preamble sequence (synchronization). This plugin may be used in conjunction with the Meshtastic modulator plugin on the transmission side.
 
 It has clearly been inspired by the LoRa technique but is designed for experimentation and extension to other protocols mostly inspired by amateur radio techniques using chirp modulation to transmit symbols. Thanks to the MFSK to chirp translation it is possible to adapt any MFSK based mode.
 
@@ -83,11 +83,11 @@ Use the wheels to adjust the frequency shift in Hz from the center frequency of 
 
 <h3>2: De-chirped channel power</h3>
 
-This is the total power in the FFT of the de-chirped signal in dB. When no ChirpChat signal is detected this corresponds to the power received in the bandwidth (3). It will show a significant increase in presence of a ChirpChat signal that can be detected.
+This is the total power in the FFT of the de-chirped signal in dB. When no Meshtastic signal is detected this corresponds to the power received in the bandwidth (3). It will show a significant increase in presence of a Meshtastic signal that can be detected.
 
 <h3>3: Bandwidth</h3>
 
-This is the bandwidth of the ChirpChat signal. Similarly to LoRa the signal sweeps between the lower and the upper frequency of this bandwidth. The sample rate of the ChirpChat signal in seconds is exactly one over this bandwidth in Hertz.
+This is the bandwidth of the Meshtastic signal. Similarly to LoRa the signal sweeps between the lower and the upper frequency of this bandwidth. The sample rate of the Meshtastic signal in seconds is exactly one over this bandwidth in Hertz.
 
 In the LoRa standard there are 2 base bandwidths: 500 and 333.333 kHz. A 400 kHz base has been added. Possible bandwidths are obtained by a division of these base bandwidths by a power of two from 1 to 64. Extra divisor of 128 is provided to achieve smaller bandwidths that can fit in a SSB channel. Finally special divisors from a 384 kHz base are provided to allow even more narrow bandwidths.
 
@@ -122,7 +122,7 @@ Thus available bandwidths are:
   - **488** (500000 / 1024) Hz not in LoRa standard
   - **375** (384000 / 1024) Hz not in LoRa standard
 
-The ChirpChat signal is oversampled by two therefore it needs a baseband of at least twice the bandwidth. This drives the maximum value on the slider automatically.
+The Meshtastic signal is oversampled by two therefore it needs a baseband of at least twice the bandwidth. This drives the maximum value on the slider automatically.
 
 <h3>4: De-chirped noise maximum power</h3>
 
@@ -154,11 +154,11 @@ A choice of FFT Windows to apply to the FFT performed on the de-chirped signal i
 
 <h3>8: Spread Factor</h3>
 
-This is the Spread Factor parameter of the ChirpChat signal. This is the log2 of the FFT size used over the bandwidth (3). The number of symbols is 2<sup>SF-DE</sup> where SF is the spread factor and DE the  Distance Enhancement factor (8)
+This is the Spread Factor parameter of the Meshtastic signal. This is the log2 of the FFT size used over the bandwidth (3). The number of symbols is 2<sup>SF-DE</sup> where SF is the spread factor and DE the  Distance Enhancement factor (8)
 
 <h3>9: Distance Enhancement factor</h3>
 
-The LoRa standard specifies 0 (no DE) or 2 (DE active). The ChirpChat DE range is extended to all values between 0 and 4 bits.
+The LoRa standard specifies 0 (no DE) or 2 (DE active). The Meshtastic DE range is extended to all values between 0 and 4 bits.
 
 The LoRa standard also specifies that the LowDataRateOptimizatio flag (thus DE=2 vs DE=0 here) should be set when the symbol time defined as BW / 2^SF exceeds 16 ms (See section 4.1.1.6 of the SX127x datasheet). In practice this happens for SF=11 and SF=12 and large enough bandwidths (you can do the maths).
 
@@ -305,11 +305,11 @@ This is the UDP address and port to where the decoded message is sent when (12) 
 
 <h3>B: De-chirped spectrum</h3>
 
-This is the spectrum of the de-chirped signal when a ChirpChat signal can be decoded. Details on the spectrum view and controls can be found [here](../../../sdrgui/gui/spectrum.md)
+This is the spectrum of the de-chirped signal when a Meshtastic signal can be decoded. Details on the spectrum view and controls can be found [here](../../../sdrgui/gui/spectrum.md)
 
-The frequency span corresponds to the bandwidth of the ChirpChat signal (3). Default FFT size is 2<sup>SF</sup> where SF is the spread factor (7).
+The frequency span corresponds to the bandwidth of the Meshtastic signal (3). Default FFT size is 2<sup>SF</sup> where SF is the spread factor (7).
 
-Sequences of successful ChirpChat signal demodulation are separated by blank lines (generated with a string of high value bins).
+Sequences of successful Meshtastic signal demodulation are separated by blank lines (generated with a string of high value bins).
 
 Controls are the usual controls of spectrum displays with the following restrictions:
 

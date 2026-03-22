@@ -351,7 +351,8 @@ bool MeshtasticDemodDecoder::handleMessage(const Message& cmd)
         if (m_outputMessageQueue)
         {
             qDebug(
-                "MeshtasticDemodDecoder::handleMessage: push report ts=%s bytes=%lld pCRC=%d",
+                "MeshtasticDemodDecoder::handleMessage: push report name=%s ts=%s bytes=%lld pCRC=%d",
+                qPrintable(m_pipelineName),
                 qPrintable(msgTimestamp),
                 static_cast<long long>(msgBytes.size()),
                 m_payloadCRCStatus ? 1 : 0

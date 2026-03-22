@@ -499,8 +499,8 @@ int MeshtasticMod::webapiSettingsGet(
     QString& errorMessage)
 {
     (void) errorMessage;
-    response.setChirpChatModSettings(new SWGSDRangel::SWGChirpChatModSettings());
-    response.getChirpChatModSettings()->init();
+    response.setMeshtasticModSettings(new SWGSDRangel::SWGMeshtasticModSettings());
+    response.getMeshtasticModSettings()->init();
     webapiFormatChannelSettings(response, m_settings);
 
     return 200;
@@ -545,97 +545,82 @@ void MeshtasticMod::webapiUpdateChannelSettings(
         SWGSDRangel::SWGChannelSettings& response)
 {
     if (channelSettingsKeys.contains("inputFrequencyOffset")) {
-        settings.m_inputFrequencyOffset = response.getChirpChatModSettings()->getInputFrequencyOffset();
+        settings.m_inputFrequencyOffset = response.getMeshtasticModSettings()->getInputFrequencyOffset();
     }
     if (channelSettingsKeys.contains("bandwidthIndex")) {
-        settings.m_bandwidthIndex = response.getChirpChatModSettings()->getBandwidthIndex();
+        settings.m_bandwidthIndex = response.getMeshtasticModSettings()->getBandwidthIndex();
     }
     if (channelSettingsKeys.contains("spreadFactor")) {
-        settings.m_spreadFactor = response.getChirpChatModSettings()->getSpreadFactor();
+        settings.m_spreadFactor = response.getMeshtasticModSettings()->getSpreadFactor();
     }
     if (channelSettingsKeys.contains("deBits")) {
-        settings.m_deBits = response.getChirpChatModSettings()->getDeBits();
+        settings.m_deBits = response.getMeshtasticModSettings()->getDeBits();
     }
     if (channelSettingsKeys.contains("preambleChirps")) {
-        settings.m_preambleChirps = response.getChirpChatModSettings()->getPreambleChirps();
+        settings.m_preambleChirps = response.getMeshtasticModSettings()->getPreambleChirps();
     }
     if (channelSettingsKeys.contains("quietMillis")) {
-        settings.m_quietMillis = response.getChirpChatModSettings()->getQuietMillis();
+        settings.m_quietMillis = response.getMeshtasticModSettings()->getQuietMillis();
     }
     if (channelSettingsKeys.contains("syncWord")) {
-        settings.m_syncWord = response.getChirpChatModSettings()->getSyncWord();
+        settings.m_syncWord = response.getMeshtasticModSettings()->getSyncWord();
     }
     if (channelSettingsKeys.contains("syncWord")) {
-        settings.m_syncWord = response.getChirpChatModSettings()->getSyncWord();
+        settings.m_syncWord = response.getMeshtasticModSettings()->getSyncWord();
     }
     if (channelSettingsKeys.contains("channelMute")) {
-        settings.m_channelMute = response.getChirpChatModSettings()->getChannelMute() != 0;
+        settings.m_channelMute = response.getMeshtasticModSettings()->getChannelMute() != 0;
     }
     if (channelSettingsKeys.contains("nbParityBits")) {
-        settings.m_nbParityBits = response.getChirpChatModSettings()->getNbParityBits();
+        settings.m_nbParityBits = response.getMeshtasticModSettings()->getNbParityBits();
     }
     if (channelSettingsKeys.contains("textMessage")) {
-        settings.m_textMessage = *response.getChirpChatModSettings()->getTextMessage();
-    }
-    if (channelSettingsKeys.contains("bytesMessage"))
-    {
-        const QList<QString *> *bytesStr = response.getChirpChatModSettings()->getBytesMessage();
-        settings.m_bytesMessage.clear();
-
-        for (QList<QString *>::const_iterator it = bytesStr->begin(); it != bytesStr->end(); ++it)
-        {
-            bool bStatus = false;
-            unsigned int byteInt = (**it).toUInt(&bStatus, 16);
-
-            if (bStatus) {
-                settings.m_bytesMessage.append((char) (byteInt % 256));
-            }
-        }
+        settings.m_textMessage = *response.getMeshtasticModSettings()->getTextMessage();
     }
     if (channelSettingsKeys.contains("messageRepeat")) {
-        settings.m_messageRepeat = response.getChirpChatModSettings()->getMessageRepeat();
+        settings.m_messageRepeat = response.getMeshtasticModSettings()->getMessageRepeat();
     }
     if (channelSettingsKeys.contains("udpEnabled")) {
-        settings.m_udpEnabled = response.getChirpChatModSettings()->getUdpEnabled();
+        settings.m_udpEnabled = response.getMeshtasticModSettings()->getUdpEnabled();
     }
     if (channelSettingsKeys.contains("udpAddress")) {
-        settings.m_udpAddress = *response.getChirpChatModSettings()->getUdpAddress();
+        settings.m_udpAddress = *response.getMeshtasticModSettings()->getUdpAddress();
     }
     if (channelSettingsKeys.contains("udpPort")) {
-        settings.m_udpPort = response.getChirpChatModSettings()->getUdpPort();
+        settings.m_udpPort = response.getMeshtasticModSettings()->getUdpPort();
     }
     if (channelSettingsKeys.contains("invertRamps")) {
-        settings.m_invertRamps = response.getChirpChatModSettings()->getInvertRamps();
+        settings.m_invertRamps = response.getMeshtasticModSettings()->getInvertRamps();
     }
     if (channelSettingsKeys.contains("rgbColor")) {
-        settings.m_rgbColor = response.getChirpChatModSettings()->getRgbColor();
+        settings.m_rgbColor = response.getMeshtasticModSettings()->getRgbColor();
     }
     if (channelSettingsKeys.contains("title")) {
-        settings.m_title = *response.getChirpChatModSettings()->getTitle();
+        settings.m_title = *response.getMeshtasticModSettings()->getTitle();
     }
     if (channelSettingsKeys.contains("streamIndex")) {
-        settings.m_streamIndex = response.getChirpChatModSettings()->getStreamIndex();
+        settings.m_streamIndex = response.getMeshtasticModSettings()->getStreamIndex();
     }
     if (channelSettingsKeys.contains("useReverseAPI")) {
-        settings.m_useReverseAPI = response.getChirpChatModSettings()->getUseReverseApi() != 0;
+        settings.m_useReverseAPI = response.getMeshtasticModSettings()->getUseReverseApi() != 0;
     }
     if (channelSettingsKeys.contains("reverseAPIAddress")) {
-        settings.m_reverseAPIAddress = *response.getChirpChatModSettings()->getReverseApiAddress();
+        settings.m_reverseAPIAddress = *response.getMeshtasticModSettings()->getReverseApiAddress();
     }
     if (channelSettingsKeys.contains("reverseAPIPort")) {
-        settings.m_reverseAPIPort = response.getChirpChatModSettings()->getReverseApiPort();
+        settings.m_reverseAPIPort = response.getMeshtasticModSettings()->getReverseApiPort();
     }
     if (channelSettingsKeys.contains("reverseAPIDeviceIndex")) {
-        settings.m_reverseAPIDeviceIndex = response.getChirpChatModSettings()->getReverseApiDeviceIndex();
+        settings.m_reverseAPIDeviceIndex = response.getMeshtasticModSettings()->getReverseApiDeviceIndex();
     }
     if (channelSettingsKeys.contains("reverseAPIChannelIndex")) {
-        settings.m_reverseAPIChannelIndex = response.getChirpChatModSettings()->getReverseApiChannelIndex();
+        settings.m_reverseAPIChannelIndex = response.getMeshtasticModSettings()->getReverseApiChannelIndex();
     }
     if (settings.m_channelMarker && channelSettingsKeys.contains("channelMarker")) {
-        settings.m_channelMarker->updateFrom(channelSettingsKeys, response.getChirpChatModSettings()->getChannelMarker());
+        settings.m_channelMarker->updateFrom(channelSettingsKeys, response.getMeshtasticModSettings()->getChannelMarker());
     }
     if (settings.m_rollupState && channelSettingsKeys.contains("rollupState")) {
-        settings.m_rollupState->updateFrom(channelSettingsKeys, response.getChirpChatModSettings()->getChannelMarker());
+        settings.m_rollupState->updateFrom(channelSettingsKeys, response.getMeshtasticModSettings()->getRollupState());
     }
 }
 
@@ -644,108 +629,95 @@ int MeshtasticMod::webapiReportGet(
     QString& errorMessage)
 {
     (void) errorMessage;
-    response.setChirpChatModReport(new SWGSDRangel::SWGChirpChatModReport());
-    response.getChirpChatModReport()->init();
+    response.setMeshtasticModReport(new SWGSDRangel::SWGMeshtasticModReport());
+    response.getMeshtasticModReport()->init();
     webapiFormatChannelReport(response);
     return 200;
 }
 
 void MeshtasticMod::webapiFormatChannelSettings(SWGSDRangel::SWGChannelSettings& response, const MeshtasticModSettings& settings)
 {
-    response.getChirpChatModSettings()->setInputFrequencyOffset(settings.m_inputFrequencyOffset);
-    response.getChirpChatModSettings()->setBandwidthIndex(settings.m_bandwidthIndex);
-    response.getChirpChatModSettings()->setSpreadFactor(settings.m_spreadFactor);
-    response.getChirpChatModSettings()->setDeBits(settings.m_deBits);
-    response.getChirpChatModSettings()->setPreambleChirps(settings.m_preambleChirps);
-    response.getChirpChatModSettings()->setQuietMillis(settings.m_quietMillis);
-    response.getChirpChatModSettings()->setSyncWord(settings.m_syncWord);
-    response.getChirpChatModSettings()->setChannelMute(settings.m_channelMute ? 1 : 0);
-    response.getChirpChatModSettings()->setCodingScheme((int) settings.m_codingScheme);
-    response.getChirpChatModSettings()->setNbParityBits(settings.m_nbParityBits);
-    response.getChirpChatModSettings()->setHasCrc(settings.m_hasCRC ? 1 : 0);
-    response.getChirpChatModSettings()->setHasHeader(settings.m_hasHeader ? 1 : 0);
-    response.getChirpChatModSettings()->setMessageType((int) settings.m_messageType);
+    response.getMeshtasticModSettings()->setInputFrequencyOffset(settings.m_inputFrequencyOffset);
+    response.getMeshtasticModSettings()->setBandwidthIndex(settings.m_bandwidthIndex);
+    response.getMeshtasticModSettings()->setSpreadFactor(settings.m_spreadFactor);
+    response.getMeshtasticModSettings()->setDeBits(settings.m_deBits);
+    response.getMeshtasticModSettings()->setPreambleChirps(settings.m_preambleChirps);
+    response.getMeshtasticModSettings()->setQuietMillis(settings.m_quietMillis);
+    response.getMeshtasticModSettings()->setSyncWord(settings.m_syncWord);
+    response.getMeshtasticModSettings()->setChannelMute(settings.m_channelMute ? 1 : 0);
+    response.getMeshtasticModSettings()->setNbParityBits(settings.m_nbParityBits);
 
-    if (response.getChirpChatModSettings()->getTextMessage()) {
-        *response.getChirpChatModSettings()->getTextMessage() = settings.m_textMessage;
+    if (response.getMeshtasticModSettings()->getTextMessage()) {
+        *response.getMeshtasticModSettings()->getTextMessage() = settings.m_textMessage;
     } else {
-        response.getChirpChatModSettings()->setTextMessage(new QString(settings.m_textMessage));
+        response.getMeshtasticModSettings()->setTextMessage(new QString(settings.m_textMessage));
     }
 
-    response.getChirpChatModSettings()->setBytesMessage(new QList<QString *>);
-    QList<QString *> *bytesStr = response.getChirpChatModSettings()->getBytesMessage();
+    response.getMeshtasticModSettings()->setMessageRepeat(settings.m_messageRepeat);
+    response.getMeshtasticModSettings()->setUdpEnabled(settings.m_udpEnabled);
+    response.getMeshtasticModSettings()->setUdpAddress(new QString(settings.m_udpAddress));
+    response.getMeshtasticModSettings()->setUdpPort(settings.m_udpPort);
+    response.getMeshtasticModSettings()->setInvertRamps(settings.m_invertRamps ? 1 : 0);
 
-    for (QByteArray::const_iterator it = settings.m_bytesMessage.begin(); it != settings.m_bytesMessage.end(); ++it)
-    {
-        unsigned char b = *it;
-        bytesStr->push_back(new QString(tr("%1").arg(b, 2, 16, QChar('0'))));
-    }
+    response.getMeshtasticModSettings()->setRgbColor(settings.m_rgbColor);
 
-    response.getChirpChatModSettings()->setMessageRepeat(settings.m_messageRepeat);
-    response.getChirpChatModSettings()->setUdpEnabled(settings.m_udpEnabled);
-    response.getChirpChatModSettings()->setUdpAddress(new QString(settings.m_udpAddress));
-    response.getChirpChatModSettings()->setUdpPort(settings.m_udpPort);
-    response.getChirpChatModSettings()->setInvertRamps(settings.m_invertRamps ? 1 : 0);
-
-    response.getChirpChatModSettings()->setRgbColor(settings.m_rgbColor);
-
-    if (response.getChirpChatModSettings()->getTitle()) {
-        *response.getChirpChatModSettings()->getTitle() = settings.m_title;
+    if (response.getMeshtasticModSettings()->getTitle()) {
+        *response.getMeshtasticModSettings()->getTitle() = settings.m_title;
     } else {
-        response.getChirpChatModSettings()->setTitle(new QString(settings.m_title));
+        response.getMeshtasticModSettings()->setTitle(new QString(settings.m_title));
     }
 
-    response.getChirpChatModSettings()->setUseReverseApi(settings.m_useReverseAPI ? 1 : 0);
+    response.getMeshtasticModSettings()->setUseReverseApi(settings.m_useReverseAPI ? 1 : 0);
 
-    if (response.getChirpChatModSettings()->getReverseApiAddress()) {
-        *response.getChirpChatModSettings()->getReverseApiAddress() = settings.m_reverseAPIAddress;
+    if (response.getMeshtasticModSettings()->getReverseApiAddress()) {
+        *response.getMeshtasticModSettings()->getReverseApiAddress() = settings.m_reverseAPIAddress;
     } else {
-        response.getChirpChatModSettings()->setReverseApiAddress(new QString(settings.m_reverseAPIAddress));
+        response.getMeshtasticModSettings()->setReverseApiAddress(new QString(settings.m_reverseAPIAddress));
     }
 
-    response.getChirpChatModSettings()->setReverseApiPort(settings.m_reverseAPIPort);
-    response.getChirpChatModSettings()->setReverseApiDeviceIndex(settings.m_reverseAPIDeviceIndex);
-    response.getChirpChatModSettings()->setReverseApiChannelIndex(settings.m_reverseAPIChannelIndex);
+    response.getMeshtasticModSettings()->setReverseApiPort(settings.m_reverseAPIPort);
+    response.getMeshtasticModSettings()->setReverseApiDeviceIndex(settings.m_reverseAPIDeviceIndex);
+    response.getMeshtasticModSettings()->setReverseApiChannelIndex(settings.m_reverseAPIChannelIndex);
 
     if (settings.m_channelMarker)
     {
-        if (response.getChirpChatModSettings()->getChannelMarker())
+        if (response.getMeshtasticModSettings()->getChannelMarker())
         {
-            settings.m_channelMarker->formatTo(response.getChirpChatModSettings()->getChannelMarker());
+            settings.m_channelMarker->formatTo(response.getMeshtasticModSettings()->getChannelMarker());
         }
         else
         {
             SWGSDRangel::SWGChannelMarker *swgChannelMarker = new SWGSDRangel::SWGChannelMarker();
             settings.m_channelMarker->formatTo(swgChannelMarker);
-            response.getChirpChatModSettings()->setChannelMarker(swgChannelMarker);
+            response.getMeshtasticModSettings()->setChannelMarker(swgChannelMarker);
         }
     }
 
     if (settings.m_rollupState)
     {
-        if (response.getChirpChatModSettings()->getRollupState())
+        if (response.getMeshtasticModSettings()->getRollupState())
         {
-            settings.m_rollupState->formatTo(response.getChirpChatModSettings()->getRollupState());
+            settings.m_rollupState->formatTo(response.getMeshtasticModSettings()->getRollupState());
         }
         else
         {
             SWGSDRangel::SWGRollupState *swgRollupState = new SWGSDRangel::SWGRollupState();
             settings.m_rollupState->formatTo(swgRollupState);
-            response.getChirpChatModSettings()->setRollupState(swgRollupState);
+            response.getMeshtasticModSettings()->setRollupState(swgRollupState);
         }
     }
 }
 
 void MeshtasticMod::webapiFormatChannelReport(SWGSDRangel::SWGChannelReport& response)
 {
-    response.getChirpChatModReport()->setChannelPowerDb(CalcDb::dbPower(getMagSq()));
-    response.getChirpChatModReport()->setChannelSampleRate(m_basebandSource->getChannelSampleRate());
+    response.getMeshtasticModReport()->setChannelPowerDb(CalcDb::dbPower(getMagSq()));
+    response.getMeshtasticModReport()->setChannelSampleRate(m_basebandSource->getChannelSampleRate());
     float fourthsMs = ((1<<m_settings.m_spreadFactor) * 250.0) / MeshtasticModSettings::bandwidths[m_settings.m_bandwidthIndex];
     float controlMs = (4*m_settings.m_preambleChirps + 8 + 9) * fourthsMs; // preamble + sync word + SFD
-    response.getChirpChatModReport()->setPayloadTimeMs(m_currentPayloadTime);
-    response.getChirpChatModReport()->setTotalTimeMs(m_currentPayloadTime + controlMs);
-    response.getChirpChatModReport()->setSymbolTimeMs(4.0 * fourthsMs);
-    response.getChirpChatModReport()->setPlaying(getModulatorActive() ? 1 : 0);
+    response.getMeshtasticModReport()->setPayloadTimeMs(m_currentPayloadTime);
+    response.getMeshtasticModReport()->setTotalTimeMs(m_currentPayloadTime + controlMs);
+    response.getMeshtasticModReport()->setSymbolTimeMs(4.0 * fourthsMs);
+    response.getMeshtasticModReport()->setPlaying(getModulatorActive() ? 1 : 0);
 }
 
 void MeshtasticMod::webapiReverseSendSettings(QList<QString>& channelSettingsKeys, const MeshtasticModSettings& settings, bool force)
@@ -809,8 +781,8 @@ void MeshtasticMod::webapiFormatChannelSettings(
     swgChannelSettings->setOriginatorChannelIndex(getIndexInDeviceSet());
     swgChannelSettings->setOriginatorDeviceSetIndex(getDeviceSetIndex());
     swgChannelSettings->setChannelType(new QString(m_channelId));
-    swgChannelSettings->setChirpChatModSettings(new SWGSDRangel::SWGChirpChatModSettings());
-    SWGSDRangel::SWGChirpChatModSettings *swgMeshtasticModSettings = swgChannelSettings->getChirpChatModSettings();
+    swgChannelSettings->setMeshtasticModSettings(new SWGSDRangel::SWGMeshtasticModSettings());
+    SWGSDRangel::SWGMeshtasticModSettings *swgMeshtasticModSettings = swgChannelSettings->getMeshtasticModSettings();
 
     // transfer data that has been modified. When force is on transfer all data except reverse API data
 
@@ -838,35 +810,11 @@ void MeshtasticMod::webapiFormatChannelSettings(
     if (channelSettingsKeys.contains("channelMute") || force) {
         swgMeshtasticModSettings->setChannelMute(settings.m_channelMute ? 1 : 0);
     }
-    if (channelSettingsKeys.contains("codingScheme") || force) {
-        swgMeshtasticModSettings->setCodingScheme((int) settings.m_codingScheme);
-    }
     if (channelSettingsKeys.contains("nbParityBits") || force) {
         swgMeshtasticModSettings->setNbParityBits(settings.m_nbParityBits);
     }
-    if (channelSettingsKeys.contains("hasCRC") || force) {
-        swgMeshtasticModSettings->setHasCrc(settings.m_hasCRC ? 1 : 0);
-    }
-    if (channelSettingsKeys.contains("hasHeader") || force) {
-        swgMeshtasticModSettings->setHasHeader(settings.m_hasHeader ? 1 : 0);
-    }
-    if (channelSettingsKeys.contains("messageType") || force) {
-        swgMeshtasticModSettings->setMessageType((int) settings.m_messageType);
-    }
     if (channelSettingsKeys.contains("textMessage") || force) {
         swgMeshtasticModSettings->setTextMessage(new QString(settings.m_textMessage));
-    }
-
-    if (channelSettingsKeys.contains("bytesMessage") || force)
-    {
-        swgMeshtasticModSettings->setBytesMessage(new QList<QString *>);
-        QList<QString *> *bytesStr = swgMeshtasticModSettings-> getBytesMessage();
-
-        for (QByteArray::const_iterator it = settings.m_bytesMessage.begin(); it != settings.m_bytesMessage.end(); ++it)
-        {
-            unsigned char b = *it;
-            bytesStr->push_back(new QString(tr("%1").arg(b, 2, 16, QChar('0'))));
-        }
     }
 
     if (channelSettingsKeys.contains("messageRepeat") || force) {

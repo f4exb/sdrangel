@@ -181,8 +181,10 @@ private:
     int m_lastMsgHeaderParityStatus;
     bool m_lastMsgPayloadCRC;
     int m_lastMsgPayloadParityStatus;
+    QString m_lastMsgPipelineName;
     QString m_lastMsgTimestamp;
     QString m_lastMsgString;
+    QString m_lastFrameType;
     QByteArray m_lastMsgBytes;
     UDPSinkUtil<uint8_t> m_udpSink;
 

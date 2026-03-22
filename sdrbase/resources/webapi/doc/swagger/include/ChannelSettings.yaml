@@ -87,6 +87,10 @@ ChannelSettings:
       $ref: "/doc/swagger/include/M17Demod.yaml#/M17DemodSettings"
     M17ModSettings:
       $ref: "/doc/swagger/include/M17Mod.yaml#/M17ModSettings"
+    MeshtasticDemodSettings:
+      $ref: "/doc/swagger/include/MeshtasticDemod.yaml#/MeshtasticDemodSettings"
+    MeshtasticModSettings:
+      $ref: "/doc/swagger/include/MeshtasticMod.yaml#/MeshtasticModSettings"
     NavtexDemodSettings:
       $ref: "/doc/swagger/include/NavtexDemod.yaml#/NavtexDemodSettings"
     NFMDemodSettings:

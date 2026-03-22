@@ -106,6 +106,10 @@ SWGChannelSettings::SWGChannelSettings() {
     m_m17_demod_settings_isSet = false;
     m17_mod_settings = nullptr;
     m_m17_mod_settings_isSet = false;
+    meshtastic_demod_settings = nullptr;
+    m_meshtastic_demod_settings_isSet = false;
+    meshtastic_mod_settings = nullptr;
+    m_meshtastic_mod_settings_isSet = false;
     navtex_demod_settings = nullptr;
     m_navtex_demod_settings_isSet = false;
     nfm_demod_settings = nullptr;
@@ -246,6 +250,10 @@ SWGChannelSettings::init() {
     m_m17_demod_settings_isSet = false;
     m17_mod_settings = new SWGM17ModSettings();
     m_m17_mod_settings_isSet = false;
+    meshtastic_demod_settings = new SWGMeshtasticDemodSettings();
+    m_meshtastic_demod_settings_isSet = false;
+    meshtastic_mod_settings = new SWGMeshtasticModSettings();
+    m_meshtastic_mod_settings_isSet = false;
     navtex_demod_settings = new SWGNavtexDemodSettings();
     m_navtex_demod_settings_isSet = false;
     nfm_demod_settings = new SWGNFMDemodSettings();
@@ -414,6 +422,12 @@ SWGChannelSettings::cleanup() {
     }
     if(m17_mod_settings != nullptr) { 
         delete m17_mod_settings;
+    }
+    if(meshtastic_demod_settings != nullptr) { 
+        delete meshtastic_demod_settings;
+    }
+    if(meshtastic_mod_settings != nullptr) { 
+        delete meshtastic_mod_settings;
     }
     if(navtex_demod_settings != nullptr) { 
         delete navtex_demod_settings;
@@ -586,6 +600,10 @@ SWGChannelSettings::fromJsonObject(QJsonObject &pJson) {
     ::SWGSDRangel::setValue(&m17_demod_settings, pJson["M17DemodSettings"], "SWGM17DemodSettings", "SWGM17DemodSettings");
     
     ::SWGSDRangel::setValue(&m17_mod_settings, pJson["M17ModSettings"], "SWGM17ModSettings", "SWGM17ModSettings");
+    
+    ::SWGSDRangel::setValue(&meshtastic_demod_settings, pJson["MeshtasticDemodSettings"], "SWGMeshtasticDemodSettings", "SWGMeshtasticDemodSettings");
+    
+    ::SWGSDRangel::setValue(&meshtastic_mod_settings, pJson["MeshtasticModSettings"], "SWGMeshtasticModSettings", "SWGMeshtasticModSettings");
     
     ::SWGSDRangel::setValue(&navtex_demod_settings, pJson["NavtexDemodSettings"], "SWGNavtexDemodSettings", "SWGNavtexDemodSettings");
     
@@ -773,6 +791,12 @@ SWGChannelSettings::asJsonObject() {
     }
     if((m17_mod_settings != nullptr) && (m17_mod_settings->isSet())){
         toJsonValue(QString("M17ModSettings"), m17_mod_settings, obj, QString("SWGM17ModSettings"));
+    }
+    if((meshtastic_demod_settings != nullptr) && (meshtastic_demod_settings->isSet())){
+        toJsonValue(QString("MeshtasticDemodSettings"), meshtastic_demod_settings, obj, QString("SWGMeshtasticDemodSettings"));
+    }
+    if((meshtastic_mod_settings != nullptr) && (meshtastic_mod_settings->isSet())){
+        toJsonValue(QString("MeshtasticModSettings"), meshtastic_mod_settings, obj, QString("SWGMeshtasticModSettings"));
     }
     if((navtex_demod_settings != nullptr) && (navtex_demod_settings->isSet())){
         toJsonValue(QString("NavtexDemodSettings"), navtex_demod_settings, obj, QString("SWGNavtexDemodSettings"));
@@ -1249,6 +1273,26 @@ SWGChannelSettings::setM17ModSettings(SWGM17ModSettings* m17_mod_settings) {
     this->m_m17_mod_settings_isSet = true;
 }
 
+SWGMeshtasticDemodSettings*
+SWGChannelSettings::getMeshtasticDemodSettings() {
+    return meshtastic_demod_settings;
+}
+void
+SWGChannelSettings::setMeshtasticDemodSettings(SWGMeshtasticDemodSettings* meshtastic_demod_settings) {
+    this->meshtastic_demod_settings = meshtastic_demod_settings;
+    this->m_meshtastic_demod_settings_isSet = true;
+}
+
+SWGMeshtasticModSettings*
+SWGChannelSettings::getMeshtasticModSettings() {
+    return meshtastic_mod_settings;
+}
+void
+SWGChannelSettings::setMeshtasticModSettings(SWGMeshtasticModSettings* meshtastic_mod_settings) {
+    this->meshtastic_mod_settings = meshtastic_mod_settings;
+    this->m_meshtastic_mod_settings_isSet = true;
+}
+
 SWGNavtexDemodSettings*
 SWGChannelSettings::getNavtexDemodSettings() {
     return navtex_demod_settings;
@@ -1639,6 +1683,12 @@ SWGChannelSettings::isSet(){
             isObjectUpdated = true; break;
         }
         if(m17_mod_settings && m17_mod_settings->isSet()){
+            isObjectUpdated = true; break;
+        }
+        if(meshtastic_demod_settings && meshtastic_demod_settings->isSet()){
+            isObjectUpdated = true; break;
+        }
+        if(meshtastic_mod_settings && meshtastic_mod_settings->isSet()){
             isObjectUpdated = true; break;
         }
         if(navtex_demod_settings && navtex_demod_settings->isSet()){
