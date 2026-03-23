@@ -25,6 +25,9 @@
 #include <cmath>
 
 #include "device/deviceuiset.h"
+#include "device/deviceapi.h"
+#include "dsp/devicesamplesink.h"
+#include "dsp/devicesamplemimo.h"
 #include "plugin/pluginapi.h"
 #include "util/db.h"
 #include "dsp/dspengine.h"
@@ -175,6 +178,29 @@ int MeshtasticModGUI::findBandwidthIndex(int bandwidthHz) const
     }
 
     return bestIndex;
+}
+
+bool MeshtasticModGUI::retuneDeviceToFrequency(qint64 centerFrequencyHz)
+{
+    if (!m_deviceUISet || !m_deviceUISet->m_deviceAPI) {
+        return false;
+    }
+
+    DeviceAPI* deviceAPI = m_deviceUISet->m_deviceAPI;
+
+    if (deviceAPI->getDeviceSinkEngine() && deviceAPI->getSampleSink())
+    {
+        deviceAPI->getSampleSink()->setCenterFrequency(centerFrequencyHz);
+        return true;
+    }
+
+    if (deviceAPI->getDeviceMIMOEngine() && deviceAPI->getSampleMIMO())
+    {
+        deviceAPI->getSampleMIMO()->setSinkCenterFrequency(centerFrequencyHz, m_settings.m_streamIndex);
+        return true;
+    }
+
+    return false;
 }
 
 void MeshtasticModGUI::applyMeshtasticRadioSettingsIfPresent(const QString& payloadText)
@@ -342,13 +368,32 @@ void MeshtasticModGUI::applyMeshtasticProfileFromSelection()
 
     if (meshRadio.hasCenterFrequency)
     {
-        if (m_deviceCenterFrequency != 0)
+        if (retuneDeviceToFrequency(meshRadio.centerFrequencyHz))
+        {
+            if (m_settings.m_inputFrequencyOffset != 0)
+            {
+                m_settings.m_inputFrequencyOffset = 0;
+                changed = true;
+            }
+        }
+        else if (m_deviceCenterFrequency != 0)
         {
             const qint64 wantedOffset = meshRadio.centerFrequencyHz - m_deviceCenterFrequency;
-            if (wantedOffset != m_settings.m_inputFrequencyOffset)
+            const qint64 maxOffset = m_basebandSampleRate / 2;
+
+            if (std::abs(wantedOffset) <= maxOffset)
             {
-                m_settings.m_inputFrequencyOffset = static_cast<int>(wantedOffset);
-                changed = true;
+                if (wantedOffset != m_settings.m_inputFrequencyOffset)
+                {
+                    m_settings.m_inputFrequencyOffset = static_cast<int>(wantedOffset);
+                    changed = true;
+                }
+            }
+            else
+            {
+                qWarning() << "MeshtasticModGUI::applyMeshtasticProfileFromSelection: requested frequency"
+                    << meshRadio.centerFrequencyHz
+                    << "is out of channel offset range with current baseband sample rate";
             }
         }
         else

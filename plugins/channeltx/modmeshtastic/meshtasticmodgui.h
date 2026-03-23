@@ -92,6 +92,7 @@ private:
     void setBandwidths();
     QString getActivePayloadText() const;
     int findBandwidthIndex(int bandwidthHz) const;
+    bool retuneDeviceToFrequency(qint64 centerFrequencyHz);
     void applyMeshtasticRadioSettingsIfPresent(const QString& payloadText);
     void setupMeshtasticAutoProfileControls();
     void rebuildMeshtasticChannelOptions();
