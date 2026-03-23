@@ -205,76 +205,9 @@ void MeshtasticMod::setCenterFrequency(qint64 frequency)
     }
 }
 
-bool MeshtasticMod::applyMeshtasticRadioSettingsIfPresent(MeshtasticModSettings& settings) const
-{
-    if (settings.m_codingScheme != MeshtasticModSettings::CodingLoRa) {
-        return false;
-    }
-
-    if (!modemmeshtastic::Packet::isCommand(settings.m_textMessage)) {
-        return false;
-    }
-
-    modemmeshtastic::TxRadioSettings meshRadio;
-    QString error;
-    if (!modemmeshtastic::Packet::deriveTxRadioSettings(settings.m_textMessage, meshRadio, error))
-    {
-        qWarning() << "MeshtasticMod::applyMeshtasticRadioSettingsIfPresent:" << error;
-        return false;
-    }
-
-    bool changed = false;
-
-    if ((meshRadio.spreadFactor > 0) && (meshRadio.spreadFactor != settings.m_spreadFactor)) {
-        settings.m_spreadFactor = meshRadio.spreadFactor;
-        changed = true;
-    }
-
-    if ((meshRadio.parityBits > 0) && (meshRadio.parityBits != settings.m_nbParityBits)) {
-        settings.m_nbParityBits = meshRadio.parityBits;
-        changed = true;
-    }
-
-    if (meshRadio.deBits != settings.m_deBits) {
-        settings.m_deBits = meshRadio.deBits;
-        changed = true;
-    }
-
-    if (meshRadio.syncWord != settings.m_syncWord) {
-        settings.m_syncWord = meshRadio.syncWord;
-        changed = true;
-    }
-
-    if (meshRadio.hasCenterFrequency && (m_deviceAPI != nullptr))
-    {
-        const QList<quint64> centerFrequencies = m_deviceAPI->getCenterFrequency();
-        const int streamIndex = std::max(0, settings.m_streamIndex);
-        const int selectedIndex = (streamIndex < centerFrequencies.size()) ? streamIndex : 0;
-
-        if (!centerFrequencies.isEmpty())
-        {
-            const qint64 deviceCenterFrequency = static_cast<qint64>(centerFrequencies.at(selectedIndex));
-            const qint64 wantedOffset = meshRadio.centerFrequencyHz - deviceCenterFrequency;
-
-            if (wantedOffset != settings.m_inputFrequencyOffset)
-            {
-                settings.m_inputFrequencyOffset = static_cast<int>(wantedOffset);
-                changed = true;
-            }
-        }
-    }
-
-    if (changed) {
-        qInfo() << "MeshtasticMod::applyMeshtasticRadioSettingsIfPresent:" << meshRadio.summary;
-    }
-
-    return changed;
-}
-
 void MeshtasticMod::applySettings(const MeshtasticModSettings& incomingSettings, bool force)
 {
     MeshtasticModSettings settings(incomingSettings);
-    applyMeshtasticRadioSettingsIfPresent(settings);
 
     qDebug() << "MeshtasticMod::applySettings:"
             << " m_inputFrequencyOffset: " << settings.m_inputFrequencyOffset

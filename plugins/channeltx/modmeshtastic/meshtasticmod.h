@@ -213,7 +213,6 @@ private:
     void openUDP(const MeshtasticModSettings& settings);
     void closeUDP();
     void sendCurrentSettingsMessage();
-    bool applyMeshtasticRadioSettingsIfPresent(MeshtasticModSettings& settings) const;
 
 private slots:
     void networkManagerFinished(QNetworkReply *reply);

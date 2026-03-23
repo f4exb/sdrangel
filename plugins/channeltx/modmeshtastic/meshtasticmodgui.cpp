@@ -203,91 +203,6 @@ bool MeshtasticModGUI::retuneDeviceToFrequency(qint64 centerFrequencyHz)
     return false;
 }
 
-void MeshtasticModGUI::applyMeshtasticRadioSettingsIfPresent(const QString& payloadText)
-{
-    if (m_settings.m_codingScheme != MeshtasticModSettings::CodingLoRa) {
-        return;
-    }
-
-    if (!modemmeshtastic::Packet::isCommand(payloadText)) {
-        return;
-    }
-
-    modemmeshtastic::TxRadioSettings meshRadio;
-    QString error;
-    if (!modemmeshtastic::Packet::deriveTxRadioSettings(payloadText, meshRadio, error))
-    {
-        qWarning() << "MeshtasticModGUI::applyMeshtasticRadioSettingsIfPresent:" << error;
-        return;
-    }
-
-    bool changed = false;
-
-    if (meshRadio.spreadFactor > 0 && meshRadio.spreadFactor != m_settings.m_spreadFactor) {
-        m_settings.m_spreadFactor = meshRadio.spreadFactor;
-        changed = true;
-    }
-
-    if (meshRadio.parityBits > 0 && meshRadio.parityBits != m_settings.m_nbParityBits) {
-        m_settings.m_nbParityBits = meshRadio.parityBits;
-        changed = true;
-    }
-
-    if (meshRadio.deBits != m_settings.m_deBits) {
-        m_settings.m_deBits = meshRadio.deBits;
-        changed = true;
-    }
-
-    if (meshRadio.syncWord != m_settings.m_syncWord) {
-        m_settings.m_syncWord = meshRadio.syncWord;
-        changed = true;
-    }
-
-    if (meshRadio.hasCenterFrequency)
-    {
-        if (m_deviceCenterFrequency != 0)
-        {
-            const qint64 wantedOffset = meshRadio.centerFrequencyHz - m_deviceCenterFrequency;
-            if (wantedOffset != m_settings.m_inputFrequencyOffset)
-            {
-                m_settings.m_inputFrequencyOffset = static_cast<int>(wantedOffset);
-                changed = true;
-            }
-        }
-        else
-        {
-            qWarning() << "MeshtasticModGUI::applyMeshtasticRadioSettingsIfPresent: device center frequency unknown, cannot auto-center";
-        }
-    }
-
-    if (!changed) {
-        return;
-    }
-
-    qInfo() << "MeshtasticModGUI::applyMeshtasticRadioSettingsIfPresent:" << meshRadio.summary;
-
-    const int thisBW = MeshtasticModSettings::bandwidths[m_settings.m_bandwidthIndex];
-    m_channelMarker.blockSignals(true);
-    m_channelMarker.setCenterFrequency(m_settings.m_inputFrequencyOffset);
-    m_channelMarker.setBandwidth(thisBW);
-    m_channelMarker.blockSignals(false);
-
-    blockApplySettings(true);
-    ui->deltaFrequency->setValue(m_settings.m_inputFrequencyOffset);
-    ui->bw->setValue(m_settings.m_bandwidthIndex);
-    ui->bwText->setText(QString("%1 Hz").arg(thisBW));
-    ui->spread->setValue(m_settings.m_spreadFactor);
-    ui->spreadText->setText(tr("%1").arg(m_settings.m_spreadFactor));
-    ui->deBits->setValue(m_settings.m_deBits);
-    ui->deBitsText->setText(tr("%1").arg(m_settings.m_deBits));
-    ui->fecParity->setValue(m_settings.m_nbParityBits);
-    ui->fecParityText->setText(tr("%1").arg(m_settings.m_nbParityBits));
-    ui->syncWord->setText(tr("%1").arg(m_settings.m_syncWord, 2, 16));
-    blockApplySettings(false);
-
-    updateAbsoluteCenterFrequency();
-}
-
 void MeshtasticModGUI::applyMeshtasticProfileFromSelection()
 {
     const QString region = ui->meshRegion->currentData().toString();
@@ -600,7 +515,6 @@ void MeshtasticModGUI::on_fecParity_valueChanged(int value)
 void MeshtasticModGUI::on_playMessage_clicked(bool checked)
 {
     (void) checked;
-    applyMeshtasticRadioSettingsIfPresent(getActivePayloadText());
     applySettings();
     m_meshtasticMod->sendMessage();
 }
@@ -618,14 +532,12 @@ void MeshtasticModGUI::on_messageText_editingFinished()
         m_settings.m_textMessage = ui->messageText->toPlainText();
     }
 
-    applyMeshtasticRadioSettingsIfPresent(getActivePayloadText());
     applySettings();
 }
 
 void MeshtasticModGUI::on_hexText_editingFinished()
 {
     m_settings.m_bytesMessage = QByteArray::fromHex(ui->hexText->text().toLatin1());
-    applyMeshtasticRadioSettingsIfPresent(getActivePayloadText());
     applySettings();
 }
 

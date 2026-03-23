@@ -37,22 +37,17 @@ In LoRa coding mode, if the message text starts with `MESH:` the plugin will bui
 
 Quick example (Text mode):
 
-`MESH:from=0x11223344;to=0xffffffff;id=0x1234;channel_name=LongFast;key=default;port=TEXT;text=hello mesh;want_ack=1;hop_limit=3`
+`MESH:from=0x11223344;to=0xffffffff;id=0x1234;key=default;port=TEXT;text=hello mesh;want_ack=1;hop_limit=3`
 
 Supported fields:
 
-  - Header: `to`, `from`, `id`, `hop_limit`, `hop_start`, `want_ack`, `via_mqtt`, `channel_hash` (or `channel`), `channel_name`, `next_hop`, `relay_node`
-  - Preset helper: `preset` / `modem_preset` (`LONG_FAST`, `LONG_SLOW`, `LONG_TURBO`, `LONG_MODERATE`, `MEDIUM_FAST`, `MEDIUM_SLOW`, `SHORT_FAST`, `SHORT_SLOW`, `SHORT_TURBO`) maps to channel naming/hash defaults
-  - Radio planner: `region`, `channel_num`, `frequency`/`freq`/`freq_hz`, `frequency_offset`/`frequency_offset_hz`
+  - Header: `to`, `from`, `id`, `hop_limit`, `hop_start`, `want_ack`, `via_mqtt`, `next_hop`, `relay_node`
   - Data protobuf: `port`/`portnum`, `text`, `payload_hex`, `payload_base64`/`payload_b64`, `want_response`, `dest`, `source`, `request_id`, `reply_id`, `emoji`, `bitfield`
   - Crypto: `key`/`psk` (`default`, `none`, `simple0..10`, `hex:<...>`, `base64:<...>`), `encrypt` (`true|false|auto`)
 
 Notes:
 
   - If `encrypt=true` then `key` must resolve to 16 or 32 bytes.
-  - If `channel_hash` is not provided, it is derived from `channel_name` and `key` using Meshtastic hash rules.
-  - In GUI mode, when the active message is a valid `MESH:` command, the plugin auto-applies LoRa settings (`BW/SF/CR/DE`, `syncword=0x2B`) from `modem_preset`.
-  - If `region` (+ optional `channel_num`) or explicit `frequency` is present, GUI mode also auto-centers the channel when device center frequency is known.
   - If a `MESH:` command is invalid it is rejected (no payload is emitted), and an error is logged.
 
 <h2>Interface</h2>
