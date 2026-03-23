@@ -1574,7 +1574,8 @@ MeshtasticDemodGUI::MeshtasticDemodGUI(PluginAPI* pluginAPI, DeviceUISet *device
     ui->packetLength->setToolTip(tr("Fixed packet length for implicit-header mode."));
     ui->packetLengthLabel->setToolTip(tr("Fixed packet length for implicit header mode."));
     ui->packetLengthText->setToolTip(tr("Current fixed packet length."));
-    ui->invertRamps->setToolTip(tr("Invert chirp ramp direction."));
+    ui->invertRamps->setToolTip(tr("Invert chirp ramp direction. Disabled"));
+    ui->invertRamps->setEnabled(false);
     ui->messageLabel->setToolTip(tr("Decoded output area."));
     ui->udpSend->setToolTip(tr("Forward decoded payload bytes to UDP."));
     ui->udpAddress->setToolTip(tr("Destination UDP address for forwarded payloads."));

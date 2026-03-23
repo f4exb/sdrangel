@@ -731,7 +731,8 @@ MeshtasticModGUI::MeshtasticModGUI(PluginAPI* pluginAPI, DeviceUISet *deviceUISe
     ui->udpAddress->setToolTip(tr("UDP listen address for incoming payloads."));
     ui->udpPort->setToolTip(tr("UDP listen port for incoming payloads."));
     ui->udpSeparator->setToolTip(tr("UDP input controls."));
-    ui->invertRamps->setToolTip(tr("Invert chirp ramp direction."));
+    ui->invertRamps->setToolTip(tr("Invert chirp ramp direction. Disabled"));
+    ui->invertRamps->setEnabled(false);
     ui->channelPower->setToolTip(tr("Estimated channel output power."));
     ui->timesLabel->setToolTip(tr("Estimated timing values for current LoRa frame."));
     ui->timeSymbolText->setToolTip(tr("Estimated LoRa symbol time."));
@@ -953,7 +954,6 @@ void MeshtasticModGUI::makeUIConnections()
     QObject::connect(ui->udpEnabled, &QCheckBox::clicked, this, &MeshtasticModGUI::on_udpEnabled_clicked);
     QObject::connect(ui->udpAddress, &QLineEdit::editingFinished, this, &MeshtasticModGUI::on_udpAddress_editingFinished);
     QObject::connect(ui->udpPort, &QLineEdit::editingFinished, this, &MeshtasticModGUI::on_udpPort_editingFinished);
-    QObject::connect(ui->invertRamps, &QCheckBox::stateChanged, this, &MeshtasticModGUI::on_invertRamps_stateChanged);
     QObject::connect(ui->meshRegion, QOverload<int>::of(&QComboBox::currentIndexChanged), this, &MeshtasticModGUI::on_meshRegion_currentIndexChanged);
     QObject::connect(ui->meshPreset, QOverload<int>::of(&QComboBox::currentIndexChanged), this, &MeshtasticModGUI::on_meshPreset_currentIndexChanged);
     QObject::connect(ui->meshChannel, QOverload<int>::of(&QComboBox::currentIndexChanged), this, &MeshtasticModGUI::on_meshChannel_currentIndexChanged);
