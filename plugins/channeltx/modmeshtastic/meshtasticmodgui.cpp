@@ -196,11 +196,6 @@ void MeshtasticModGUI::applyMeshtasticRadioSettingsIfPresent(const QString& payl
     }
 
     bool changed = false;
-    const int bwIndex = findBandwidthIndex(meshRadio.bandwidthHz);
-    if (bwIndex >= 0 && bwIndex != m_settings.m_bandwidthIndex) {
-        m_settings.m_bandwidthIndex = bwIndex;
-        changed = true;
-    }
 
     if (meshRadio.spreadFactor > 0 && meshRadio.spreadFactor != m_settings.m_spreadFactor) {
         m_settings.m_spreadFactor = meshRadio.spreadFactor;
@@ -265,6 +260,217 @@ void MeshtasticModGUI::applyMeshtasticRadioSettingsIfPresent(const QString& payl
     blockApplySettings(false);
 
     updateAbsoluteCenterFrequency();
+}
+
+void MeshtasticModGUI::applyMeshtasticProfileFromSelection()
+{
+    const QString region = ui->meshRegion->currentData().toString();
+    const QString preset = ui->meshPreset->currentData().toString();
+    const int meshChannel = ui->meshChannel->currentData().toInt();
+    const int channelNum = meshChannel + 1; // planner expects 1-based channel_num
+
+    if (region.isEmpty() || preset.isEmpty()) {
+        return;
+    }
+
+    const QString command = QString("MESH:preset=%1;region=%2;channel_num=%3").arg(preset, region).arg(channelNum);
+    modemmeshtastic::TxRadioSettings meshRadio;
+    QString error;
+
+    if (!modemmeshtastic::Packet::deriveTxRadioSettings(command, meshRadio, error))
+    {
+        qWarning() << "MeshtasticModGUI::applyMeshtasticProfileFromSelection:" << error;
+        return;
+    }
+
+    bool changed = false;
+    bool selectionStateChanged = false;
+
+    if (m_settings.m_meshtasticRegionCode != region)
+    {
+        m_settings.m_meshtasticRegionCode = region;
+        selectionStateChanged = true;
+    }
+    if (m_settings.m_meshtasticPresetName != preset)
+    {
+        m_settings.m_meshtasticPresetName = preset;
+        selectionStateChanged = true;
+    }
+    if (m_settings.m_meshtasticChannelIndex != meshChannel)
+    {
+        m_settings.m_meshtasticChannelIndex = meshChannel;
+        selectionStateChanged = true;
+    }
+
+    const int bwIndex = findBandwidthIndex(meshRadio.bandwidthHz);
+    if (bwIndex >= 0 && bwIndex != m_settings.m_bandwidthIndex)
+    {
+        m_settings.m_bandwidthIndex = bwIndex;
+        changed = true;
+    }
+
+    if (meshRadio.spreadFactor > 0 && meshRadio.spreadFactor != m_settings.m_spreadFactor)
+    {
+        m_settings.m_spreadFactor = meshRadio.spreadFactor;
+        changed = true;
+    }
+
+    if (meshRadio.deBits != m_settings.m_deBits)
+    {
+        m_settings.m_deBits = meshRadio.deBits;
+        changed = true;
+    }
+
+    if (meshRadio.parityBits > 0 && meshRadio.parityBits != m_settings.m_nbParityBits)
+    {
+        m_settings.m_nbParityBits = meshRadio.parityBits;
+        changed = true;
+    }
+
+    const int meshPreambleChirps = meshRadio.preambleChirps;
+    if (m_settings.m_preambleChirps != static_cast<unsigned int>(meshPreambleChirps))
+    {
+        m_settings.m_preambleChirps = static_cast<unsigned int>(meshPreambleChirps);
+        changed = true;
+    }
+
+    if (meshRadio.syncWord != m_settings.m_syncWord)
+    {
+        m_settings.m_syncWord = meshRadio.syncWord;
+        changed = true;
+    }
+
+    if (meshRadio.hasCenterFrequency)
+    {
+        if (m_deviceCenterFrequency != 0)
+        {
+            const qint64 wantedOffset = meshRadio.centerFrequencyHz - m_deviceCenterFrequency;
+            if (wantedOffset != m_settings.m_inputFrequencyOffset)
+            {
+                m_settings.m_inputFrequencyOffset = static_cast<int>(wantedOffset);
+                changed = true;
+            }
+        }
+        else
+        {
+            qWarning() << "MeshtasticModGUI::applyMeshtasticProfileFromSelection: device center frequency unknown, cannot auto-center";
+        }
+    }
+
+    if (!changed && !selectionStateChanged) {
+        return;
+    }
+
+    qInfo() << "MeshtasticModGUI::applyMeshtasticProfileFromSelection:" << meshRadio.summary;
+
+    if (!changed)
+    {
+        applySettings();
+        return;
+    }
+
+    const int thisBW = MeshtasticModSettings::bandwidths[m_settings.m_bandwidthIndex];
+    m_channelMarker.blockSignals(true);
+    m_channelMarker.setCenterFrequency(m_settings.m_inputFrequencyOffset);
+    m_channelMarker.setBandwidth(thisBW);
+    m_channelMarker.blockSignals(false);
+
+    blockApplySettings(true);
+    ui->deltaFrequency->setValue(m_settings.m_inputFrequencyOffset);
+    ui->bw->setValue(m_settings.m_bandwidthIndex);
+    ui->bwText->setText(QString("%1 Hz").arg(thisBW));
+    ui->spread->setValue(m_settings.m_spreadFactor);
+    ui->spreadText->setText(tr("%1").arg(m_settings.m_spreadFactor));
+    ui->deBits->setValue(m_settings.m_deBits);
+    ui->deBitsText->setText(tr("%1").arg(m_settings.m_deBits));
+    ui->preambleChirps->setValue(m_settings.m_preambleChirps);
+    ui->preambleChirpsText->setText(tr("%1").arg(m_settings.m_preambleChirps));
+    ui->fecParity->setValue(m_settings.m_nbParityBits);
+    ui->fecParityText->setText(tr("%1").arg(m_settings.m_nbParityBits));
+    ui->syncWord->setText(tr("%1").arg(m_settings.m_syncWord, 2, 16));
+    blockApplySettings(false);
+
+    updateAbsoluteCenterFrequency();
+    applySettings();
+}
+
+void MeshtasticModGUI::rebuildMeshtasticChannelOptions()
+{
+    const QString region = ui->meshRegion->currentData().toString();
+    const QString preset = ui->meshPreset->currentData().toString();
+    const int previousChannel = ui->meshChannel->currentData().toInt();
+
+    m_meshControlsUpdating = true;
+    ui->meshChannel->clear();
+
+    int added = 0;
+    for (int meshChannel = 0; meshChannel <= 200; ++meshChannel)
+    {
+        modemmeshtastic::TxRadioSettings meshRadio;
+        QString error;
+        const int channelNum = meshChannel + 1; // planner expects 1-based channel_num
+        const QString command = QString("MESH:preset=%1;region=%2;channel_num=%3").arg(preset, region).arg(channelNum);
+
+        if (!modemmeshtastic::Packet::deriveTxRadioSettings(command, meshRadio, error))
+        {
+            if (added > 0) {
+                break;
+            } else {
+                continue;
+            }
+        }
+
+        const QString label = meshRadio.hasCenterFrequency
+            ? QString("%1 (%2 MHz)").arg(meshChannel).arg(meshRadio.centerFrequencyHz / 1000000.0, 0, 'f', 3)
+            : QString::number(meshChannel);
+
+        ui->meshChannel->addItem(label, meshChannel);
+        added++;
+    }
+
+    if (added == 0) {
+        ui->meshChannel->addItem("0", 0);
+    }
+
+    ui->meshChannel->setToolTip(tr("Meshtastic channel number (%1 available for %2/%3)")
+        .arg(added)
+        .arg(region)
+        .arg(preset));
+    int restoreIndex = ui->meshChannel->findData(previousChannel);
+    if (restoreIndex < 0) {
+        restoreIndex = 0;
+    }
+    ui->meshChannel->setCurrentIndex(restoreIndex);
+    m_meshControlsUpdating = false;
+
+    qInfo() << "MeshtasticModGUI::rebuildMeshtasticChannelOptions:"
+            << "region=" << region
+            << "preset=" << preset
+            << "channels=" << added;
+
+    QMetaObject::invokeMethod(this, [this]() {
+        if (!m_meshControlsUpdating) {
+            applyMeshtasticProfileFromSelection();
+        }
+    }, Qt::QueuedConnection);
+}
+
+void MeshtasticModGUI::setupMeshtasticAutoProfileControls()
+{
+    for (int i = 0; i < ui->meshRegion->count(); ++i) {
+        ui->meshRegion->setItemData(i, ui->meshRegion->itemText(i), Qt::UserRole);
+    }
+
+    for (int i = 0; i < ui->meshPreset->count(); ++i) {
+        ui->meshPreset->setItemData(i, ui->meshPreset->itemText(i), Qt::UserRole);
+    }
+
+    QObject::connect(ui->meshRegion, QOverload<int>::of(&QComboBox::currentIndexChanged), this, &MeshtasticModGUI::on_meshRegion_currentIndexChanged);
+    QObject::connect(ui->meshPreset, QOverload<int>::of(&QComboBox::currentIndexChanged), this, &MeshtasticModGUI::on_meshPreset_currentIndexChanged);
+    QObject::connect(ui->meshChannel, QOverload<int>::of(&QComboBox::currentIndexChanged), this, &MeshtasticModGUI::on_meshChannel_currentIndexChanged);
+    QObject::connect(ui->meshApply, &QPushButton::clicked, this, &MeshtasticModGUI::on_meshApply_clicked);
+
+    rebuildMeshtasticChannelOptions();
 }
 
 void MeshtasticModGUI::on_deltaFrequency_changed(qint64 value)
@@ -402,6 +608,49 @@ void MeshtasticModGUI::on_invertRamps_stateChanged(int state)
     applySettings();
 }
 
+void MeshtasticModGUI::on_meshRegion_currentIndexChanged(int index)
+{
+    (void) index;
+    if (m_meshControlsUpdating) {
+        return;
+    }
+
+    rebuildMeshtasticChannelOptions();
+    applyMeshtasticProfileFromSelection();
+}
+
+void MeshtasticModGUI::on_meshPreset_currentIndexChanged(int index)
+{
+    (void) index;
+    if (m_meshControlsUpdating) {
+        return;
+    }
+
+    rebuildMeshtasticChannelOptions();
+    applyMeshtasticProfileFromSelection();
+}
+
+void MeshtasticModGUI::on_meshChannel_currentIndexChanged(int index)
+{
+    (void) index;
+    if (m_meshControlsUpdating) {
+        return;
+    }
+
+    applyMeshtasticProfileFromSelection();
+}
+
+void MeshtasticModGUI::on_meshApply_clicked(bool checked)
+{
+    (void) checked;
+    if (m_meshControlsUpdating) {
+        return;
+    }
+
+    rebuildMeshtasticChannelOptions();
+    applyMeshtasticProfileFromSelection();
+}
+
 void MeshtasticModGUI::onWidgetRolled(QWidget* widget, bool rollDown)
 {
     (void) widget;
@@ -468,6 +717,7 @@ MeshtasticModGUI::MeshtasticModGUI(PluginAPI* pluginAPI, DeviceUISet *deviceUISe
     m_deviceCenterFrequency(0),
     m_basebandSampleRate(125000),
 	m_doApplySettings(true),
+    m_meshControlsUpdating(false),
     m_tickCount(0)
 {
 	setAttribute(Qt::WA_DeleteOnClose, true);
@@ -556,6 +806,7 @@ MeshtasticModGUI::MeshtasticModGUI(PluginAPI* pluginAPI, DeviceUISet *deviceUISe
     m_settings.setRollupState(&m_rollupState);
 
     setBandwidths();
+    setupMeshtasticAutoProfileControls();
     displaySettings();
     makeUIConnections();
     applySettings();
@@ -624,6 +875,38 @@ void MeshtasticModGUI::displaySettings()
     ui->udpAddress->setText(m_settings.m_udpAddress);
     ui->udpPort->setText(QString::number(m_settings.m_udpPort));
     ui->invertRamps->setChecked(m_settings.m_invertRamps);
+
+    m_meshControlsUpdating = true;
+
+    int regionIndex = ui->meshRegion->findData(m_settings.m_meshtasticRegionCode);
+    if (regionIndex < 0) {
+        regionIndex = ui->meshRegion->findData("US");
+    }
+    if (regionIndex < 0) {
+        regionIndex = 0;
+    }
+    ui->meshRegion->setCurrentIndex(regionIndex);
+
+    int presetIndex = ui->meshPreset->findData(m_settings.m_meshtasticPresetName);
+    if (presetIndex < 0) {
+        presetIndex = ui->meshPreset->findData("LONG_FAST");
+    }
+    if (presetIndex < 0) {
+        presetIndex = 0;
+    }
+    ui->meshPreset->setCurrentIndex(presetIndex);
+    m_meshControlsUpdating = false;
+
+    rebuildMeshtasticChannelOptions();
+
+    m_meshControlsUpdating = true;
+    int channelIndex = ui->meshChannel->findData(m_settings.m_meshtasticChannelIndex);
+    if (channelIndex < 0) {
+        channelIndex = 0;
+    }
+    ui->meshChannel->setCurrentIndex(channelIndex);
+    m_meshControlsUpdating = false;
+
     getRollupContents()->restoreState(m_rollupState);
     updateAbsoluteCenterFrequency();
     blockApplySettings(false);
@@ -714,6 +997,10 @@ void MeshtasticModGUI::makeUIConnections()
     QObject::connect(ui->udpAddress, &QLineEdit::editingFinished, this, &MeshtasticModGUI::on_udpAddress_editingFinished);
     QObject::connect(ui->udpPort, &QLineEdit::editingFinished, this, &MeshtasticModGUI::on_udpPort_editingFinished);
     QObject::connect(ui->invertRamps, &QCheckBox::stateChanged, this, &MeshtasticModGUI::on_invertRamps_stateChanged);
+    QObject::connect(ui->meshRegion, QOverload<int>::of(&QComboBox::currentIndexChanged), this, &MeshtasticModGUI::on_meshRegion_currentIndexChanged);
+    QObject::connect(ui->meshPreset, QOverload<int>::of(&QComboBox::currentIndexChanged), this, &MeshtasticModGUI::on_meshPreset_currentIndexChanged);
+    QObject::connect(ui->meshChannel, QOverload<int>::of(&QComboBox::currentIndexChanged), this, &MeshtasticModGUI::on_meshChannel_currentIndexChanged);
+    QObject::connect(ui->meshApply, &QPushButton::clicked, this, &MeshtasticModGUI::on_meshApply_clicked);
 }
 
 void MeshtasticModGUI::updateAbsoluteCenterFrequency()

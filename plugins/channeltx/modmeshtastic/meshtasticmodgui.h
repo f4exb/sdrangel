@@ -73,6 +73,7 @@ private:
     qint64 m_deviceCenterFrequency;
     int m_basebandSampleRate;
     bool m_doApplySettings;
+    bool m_meshControlsUpdating;
 
     MeshtasticMod* m_meshtasticMod;
     MovingAverageUtil<double, double, 20> m_channelPowerDbAvg;
@@ -92,6 +93,9 @@ private:
     QString getActivePayloadText() const;
     int findBandwidthIndex(int bandwidthHz) const;
     void applyMeshtasticRadioSettingsIfPresent(const QString& payloadText);
+    void setupMeshtasticAutoProfileControls();
+    void rebuildMeshtasticChannelOptions();
+    void applyMeshtasticProfileFromSelection();
     bool handleMessage(const Message& message);
     void makeUIConnections();
     void updateAbsoluteCenterFrequency();
@@ -118,6 +122,10 @@ private slots:
     void on_udpAddress_editingFinished();
     void on_udpPort_editingFinished();
     void on_invertRamps_stateChanged(int state);
+    void on_meshRegion_currentIndexChanged(int index);
+    void on_meshPreset_currentIndexChanged(int index);
+    void on_meshChannel_currentIndexChanged(int index);
+    void on_meshApply_clicked(bool checked);
     void onWidgetRolled(QWidget* widget, bool rollDown);
     void onMenuDialogCalled(const QPoint& p);
     void tick();

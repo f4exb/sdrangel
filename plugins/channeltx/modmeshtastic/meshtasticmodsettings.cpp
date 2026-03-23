@@ -87,6 +87,9 @@ void MeshtasticModSettings::resetToDefaults()
     m_udpAddress = "127.0.0.1";
     m_udpPort = 9998;
     m_invertRamps = false;
+    m_meshtasticRegionCode = "US";
+    m_meshtasticPresetName = "LONG_FAST";
+    m_meshtasticChannelIndex = 0;
     m_rgbColor = QColor(255, 0, 255).rgb();
     m_title = "Meshtastic Modulator";
     m_streamIndex = 0;
@@ -158,6 +161,9 @@ QByteArray MeshtasticModSettings::serialize() const
     s.writeS32(60, m_workspaceIndex);
     s.writeBlob(61, m_geometryBytes);
     s.writeBool(62, m_hidden);
+    s.writeString(63, m_meshtasticRegionCode);
+    s.writeString(64, m_meshtasticPresetName);
+    s.writeS32(65, m_meshtasticChannelIndex);
 
     return s.final();
 }
@@ -235,6 +241,9 @@ bool MeshtasticModSettings::deserialize(const QByteArray& data)
         d.readS32(60, &m_workspaceIndex, 0);
         d.readBlob(61, &m_geometryBytes);
         d.readBool(62, &m_hidden, false);
+        d.readString(63, &m_meshtasticRegionCode, "US");
+        d.readString(64, &m_meshtasticPresetName, "LONG_FAST");
+        d.readS32(65, &m_meshtasticChannelIndex, 0);
 
         return true;
     }
@@ -303,6 +312,12 @@ void MeshtasticModSettings::applySettings(const QStringList& settingsKeys, const
         m_nbParityBits = settings.m_nbParityBits;
     if (settingsKeys.contains("messageRepeat"))
         m_messageRepeat = settings.m_messageRepeat;
+    if (settingsKeys.contains("meshtasticRegionCode"))
+        m_meshtasticRegionCode = settings.m_meshtasticRegionCode;
+    if (settingsKeys.contains("meshtasticPresetName"))
+        m_meshtasticPresetName = settings.m_meshtasticPresetName;
+    if (settingsKeys.contains("meshtasticChannelIndex"))
+        m_meshtasticChannelIndex = settings.m_meshtasticChannelIndex;
 }
 
 QString MeshtasticModSettings::getDebugString(const QStringList& settingsKeys, bool force) const
@@ -364,5 +379,11 @@ QString MeshtasticModSettings::getDebugString(const QStringList& settingsKeys, b
         debug += QString("Has Header: %1\n").arg(m_hasHeader);
     if (settingsKeys.contains("messageRepeat") || force)
         debug += QString("Message Repeat: %1\n").arg(m_messageRepeat);
+    if (settingsKeys.contains("meshtasticRegionCode") || force)
+        debug += QString("Meshtastic Region Code: %1\n").arg(m_meshtasticRegionCode);
+    if (settingsKeys.contains("meshtasticPresetName") || force)
+        debug += QString("Meshtastic Preset Name: %1\n").arg(m_meshtasticPresetName);
+    if (settingsKeys.contains("meshtasticChannelIndex") || force)
+        debug += QString("Meshtastic Channel Index: %1\n").arg(m_meshtasticChannelIndex);
     return debug;
 }

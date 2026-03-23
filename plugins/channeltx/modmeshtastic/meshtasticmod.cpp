@@ -205,25 +205,6 @@ void MeshtasticMod::setCenterFrequency(qint64 frequency)
     }
 }
 
-int MeshtasticMod::findBandwidthIndex(int bandwidthHz) const
-{
-    int bestIndex = -1;
-    int bestDelta = 1 << 30;
-
-    for (int i = 0; i < MeshtasticModSettings::nbBandwidths; i++)
-    {
-        const int delta = std::abs(MeshtasticModSettings::bandwidths[i] - bandwidthHz);
-
-        if (delta < bestDelta)
-        {
-            bestDelta = delta;
-            bestIndex = i;
-        }
-    }
-
-    return bestIndex;
-}
-
 bool MeshtasticMod::applyMeshtasticRadioSettingsIfPresent(MeshtasticModSettings& settings) const
 {
     if (settings.m_codingScheme != MeshtasticModSettings::CodingLoRa) {
@@ -243,12 +224,6 @@ bool MeshtasticMod::applyMeshtasticRadioSettingsIfPresent(MeshtasticModSettings&
     }
 
     bool changed = false;
-    const int bwIndex = findBandwidthIndex(meshRadio.bandwidthHz);
-
-    if ((bwIndex >= 0) && (bwIndex != settings.m_bandwidthIndex)) {
-        settings.m_bandwidthIndex = bwIndex;
-        changed = true;
-    }
 
     if ((meshRadio.spreadFactor > 0) && (meshRadio.spreadFactor != settings.m_spreadFactor)) {
         settings.m_spreadFactor = meshRadio.spreadFactor;

@@ -60,6 +60,9 @@ struct MeshtasticModSettings
     QString m_udpAddress;
     uint16_t m_udpPort;
     bool m_invertRamps;            //!< Invert chirp ramps vs standard LoRa (up/down/up is standard)
+    QString m_meshtasticRegionCode;  //!< Meshtastic region code (e.g. "US", "EU_868")
+    QString m_meshtasticPresetName;  //!< Meshtastic modem preset name (e.g. "LONG_FAST")
+    int m_meshtasticChannelIndex;    //!< Meshtastic channel index (0-based)
     uint32_t m_rgbColor;
     QString m_title;
     int m_streamIndex;
