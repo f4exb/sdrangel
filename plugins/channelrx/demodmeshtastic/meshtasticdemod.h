@@ -161,7 +161,9 @@ private:
     };
 
 	DeviceAPI *m_deviceAPI;
+    std::vector<PipelineConfig> m_pipelineConfigs;
     std::vector<PipelineRuntime> m_pipelines;
+    int m_currentPipelineId;
     bool m_running;
     MeshtasticDemodSettings m_settings;
     SpectrumVis m_spectrumVis;
@@ -192,8 +194,9 @@ private:
     QNetworkRequest m_networkRequest;
 
 	virtual bool handleMessage(const Message& cmd);
-    void applySettings(const MeshtasticDemodSettings& settings, bool force = false);
+    void applySettings(MeshtasticDemodSettings settings, bool force = false);
     std::vector<PipelineConfig> buildPipelineConfigs(const MeshtasticDemodSettings& settings) const;
+    void makePipelineConfigFromSettings(int configId, PipelineConfig& config, const MeshtasticDemodSettings& settings) const;
     MeshtasticDemodSettings makePipelineSettingsFromMeshRadio(
         const MeshtasticDemodSettings& baseSettings,
         const QString& presetName,

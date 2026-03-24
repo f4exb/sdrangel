@@ -324,6 +324,40 @@ std::vector<MeshtasticDemod::PipelineConfig> MeshtasticDemod::buildPipelineConfi
     return configs;
 }
 
+void MeshtasticDemod::makePipelineConfigFromSettings(int configId, PipelineConfig& config, const MeshtasticDemodSettings& settings) const
+{
+    const QString region = settings.m_meshtasticRegionCode.trimmed().isEmpty()
+        ? QString("US")
+        : settings.m_meshtasticRegionCode.trimmed();
+    const int channelNum = std::max(1, settings.m_meshtasticChannelIndex + 1);
+
+    modemmeshtastic::TxRadioSettings meshRadio;
+    QString error;
+    const QString command = QString("MESH:preset=%1;region=%2;channel_num=%3")
+        .arg(settings.m_meshtasticPresetName.trimmed().isEmpty() ? QString("LONG_FAST") : settings.m_meshtasticPresetName.trimmed().toUpper())
+        .arg(region)
+        .arg(channelNum);
+    qint64 selectedPresetFrequencyHz = 0;
+    bool haveSelectedPresetFrequency = false;
+
+    if (modemmeshtastic::Packet::deriveTxRadioSettings(command, meshRadio, error) && meshRadio.hasCenterFrequency)
+    {
+        selectedPresetFrequencyHz = meshRadio.centerFrequencyHz;
+        haveSelectedPresetFrequency = true;
+    }
+
+    config.id = configId;
+    config.name = QString("CONF%1").arg(configId);
+    config.presetName = settings.m_meshtasticPresetName;
+    config.settings = makePipelineSettingsFromMeshRadio(
+        settings,
+        config.presetName,
+        meshRadio,
+        selectedPresetFrequencyHz,
+        haveSelectedPresetFrequency
+    );
+}
+
 void MeshtasticDemod::applyPipelineRuntimeSettings(PipelineRuntime& runtime, const MeshtasticDemodSettings& settings, bool force)
 {
     runtime.settings = settings;
@@ -444,27 +478,46 @@ void MeshtasticDemod::syncPipelinesWithSettings(const MeshtasticDemodSettings& s
         return;
     }
 
-    const std::vector<PipelineConfig> configs = buildPipelineConfigs(settings);
-
-    if (!pipelineLayoutMatches(configs))
-    {
-        stopPipelines();
-        startPipelines(configs);
-        return;
+    // Rebuild pipeline configs from the new settings so that region/preset/channel
+    // changes are reflected in the single pipeline entry.
+    for (size_t i = 0; i < m_pipelineConfigs.size(); ++i) {
+        makePipelineConfigFromSettings(m_pipelineConfigs[i].id, m_pipelineConfigs[i], settings);
     }
 
-    for (size_t i = 0; i < configs.size(); ++i)
+    for (size_t i = 0; i < m_pipelineConfigs.size(); ++i)
     {
-        m_pipelines[i].id = configs[i].id;
-        m_pipelines[i].name = configs[i].name;
-        m_pipelines[i].presetName = configs[i].presetName;
+        m_pipelines[i].id = m_pipelineConfigs[i].id;
+        m_pipelines[i].name = m_pipelineConfigs[i].name;
+        m_pipelines[i].presetName = m_pipelineConfigs[i].presetName;
 
         if (m_pipelines[i].decoder) {
-            m_pipelines[i].decoder->setPipelineMetadata(configs[i].id, configs[i].name, configs[i].presetName);
+            m_pipelines[i].decoder->setPipelineMetadata(m_pipelineConfigs[i].id, m_pipelineConfigs[i].name, m_pipelineConfigs[i].presetName);
         }
 
-        applyPipelineRuntimeSettings(m_pipelines[i], configs[i].settings, force);
+        applyPipelineRuntimeSettings(m_pipelines[i], m_pipelineConfigs[i].settings, force);
     }
+
+    // const std::vector<PipelineConfig> configs = buildPipelineConfigs(settings);
+
+    // if (!pipelineLayoutMatches(configs))
+    // {
+    //     stopPipelines();
+    //     startPipelines(configs);
+    //     return;
+    // }
+
+    // for (size_t i = 0; i < configs.size(); ++i)
+    // {
+    //     m_pipelines[i].id = configs[i].id;
+    //     m_pipelines[i].name = configs[i].name;
+    //     m_pipelines[i].presetName = configs[i].presetName;
+
+    //     if (m_pipelines[i].decoder) {
+    //         m_pipelines[i].decoder->setPipelineMetadata(configs[i].id, configs[i].name, configs[i].presetName);
+    //     }
+
+    //     applyPipelineRuntimeSettings(m_pipelines[i], configs[i].settings, force);
+    // }
 }
 
 void MeshtasticDemod::start()
@@ -474,8 +527,12 @@ void MeshtasticDemod::start()
     }
 
     qDebug() << "MeshtasticDemod::start";
-    const std::vector<PipelineConfig> configs = buildPipelineConfigs(m_settings);
-    startPipelines(configs);
+    m_pipelineConfigs.push_back(PipelineConfig());
+    m_currentPipelineId = 0;
+    makePipelineConfigFromSettings(m_currentPipelineId, m_pipelineConfigs.back(), m_settings);
+    startPipelines(m_pipelineConfigs);
+    // const std::vector<PipelineConfig> configs = buildPipelineConfigs(m_settings);
+    // startPipelines(configs);
 
     SpectrumSettings spectrumSettings = m_spectrumVis.getSettings();
     spectrumSettings.m_ssb = true;
@@ -494,6 +551,7 @@ void MeshtasticDemod::stop()
     qDebug() << "MeshtasticDemod::stop";
     m_running = false;
     stopPipelines();
+    m_pipelineConfigs.clear();
 }
 
 bool MeshtasticDemod::handleMessage(const Message& cmd)
@@ -742,7 +800,7 @@ bool MeshtasticDemod::deserialize(const QByteArray& data)
     }
 }
 
-void MeshtasticDemod::applySettings(const MeshtasticDemodSettings& settings, bool force)
+void MeshtasticDemod::applySettings(MeshtasticDemodSettings settings, bool force)
 {
     qDebug() << "MeshtasticDemod::applySettings:"
             << " m_inputFrequencyOffset: " << settings.m_inputFrequencyOffset
@@ -768,6 +826,7 @@ void MeshtasticDemod::applySettings(const MeshtasticDemodSettings& settings, boo
             << " m_invertRamps: " << settings.m_invertRamps
             << " m_rgbColor: " << settings.m_rgbColor
             << " m_title: " << settings.m_title
+            << " m_meshtasticPresetName: " << settings.m_meshtasticPresetName
             << " force: " << force;
 
     QList<QString> reverseAPIKeys;
@@ -862,6 +921,29 @@ void MeshtasticDemod::applySettings(const MeshtasticDemodSettings& settings, boo
         syncPipelinesWithSettings(settings, force);
     }
 
+    // Copy LoRa params derived from the preset (bandwidth, spread factor, etc.) back into
+    // settings so that m_settings and the GUI stay in sync with what was actually applied.
+    if (m_running && !m_pipelineConfigs.empty() &&
+        settings.m_codingScheme == MeshtasticDemodSettings::CodingLoRa)
+    {
+        const MeshtasticDemodSettings& derived = m_pipelineConfigs[0].settings;
+        const bool bwChanged = (settings.m_bandwidthIndex != derived.m_bandwidthIndex);
+
+        settings.m_spreadFactor           = derived.m_spreadFactor;
+        settings.m_deBits                 = derived.m_deBits;
+        settings.m_nbParityBits           = derived.m_nbParityBits;
+        settings.m_preambleChirps         = derived.m_preambleChirps;
+        settings.m_bandwidthIndex         = derived.m_bandwidthIndex;
+        settings.m_inputFrequencyOffset   = derived.m_inputFrequencyOffset;
+
+        if (bwChanged)
+        {
+            DSPSignalNotification *bwMsg = new DSPSignalNotification(
+                MeshtasticDemodSettings::bandwidths[settings.m_bandwidthIndex], 0);
+            m_spectrumVis.getInputMessageQueue()->push(bwMsg);
+        }
+    }
+
     if (settings.m_useReverseAPI)
     {
         bool fullUpdate = ((m_settings.m_useReverseAPI != settings.m_useReverseAPI) && settings.m_useReverseAPI) ||
@@ -880,6 +962,14 @@ void MeshtasticDemod::applySettings(const MeshtasticDemodSettings& settings, boo
     }
 
     m_settings = settings;
+
+    // Forward preset-derived settings back to GUI so controls (e.g. BW slider) reflect
+    // the values actually applied.
+    if (getMessageQueueToGUI())
+    {
+        MsgConfigureMeshtasticDemod *msgToGUI = MsgConfigureMeshtasticDemod::create(m_settings, false);
+        getMessageQueueToGUI()->push(msgToGUI);
+    }
 }
 
 int MeshtasticDemod::webapiSettingsGet(
