@@ -1018,7 +1018,7 @@ void GLSpectrumView::redrawWaterfallAnd3DSpectrogram()
 
         for (int i = 0; i < m_waterfallBuffer->height(); i++)
         {
-            if (idx >= 0 && idx < m_spectrumBuffer.size())
+            if ((idx >= 0) && (idx < (int) m_spectrumBuffer.size()))
             {
                 updateWaterfall(m_spectrumBuffer[idx].m_spectrum, m_fftSize, m_fftMin, m_nbBins);
                 update3DSpectrogram(m_spectrumBuffer[idx].m_spectrum, m_fftSize, m_fftMin, m_nbBins);
