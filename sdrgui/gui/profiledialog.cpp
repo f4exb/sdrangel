@@ -59,6 +59,7 @@ void ProfileDialog::resizeTable()
     ui->table->setItem(row, COL_TOTAL, new QTableWidgetItem("1000.000 ms"));
     ui->table->setItem(row, COL_AVERAGE, new QTableWidgetItem("1000.000 ns/frame"));
     ui->table->setItem(row, COL_LAST, new QTableWidgetItem("1000.000 ms"));
+    ui->table->setItem(row, COL_MAX, new QTableWidgetItem("1000.000 ms"));
     ui->table->setItem(row, COL_NUM_SAMPLES, new QTableWidgetItem("1000000000"));
     ui->table->resizeColumnsToContents();
     ui->table->setRowCount(row);
@@ -79,6 +80,7 @@ void ProfileDialog::updateData()
         double totalTime = data.getTotal();
         double averageTime = data.getAverage();
         double lastTime = data.getLast();
+        double maxTime = data.getMax();
 
         int i = 0;
         for (; i < ui->table->rowCount(); i++)
@@ -90,6 +92,7 @@ void ProfileDialog::updateData()
                 ui->table->item(i, COL_TOTAL)->setData(Qt::DisplayRole, totalTime);
                 ui->table->item(i, COL_AVERAGE)->setData(Qt::DisplayRole, averageTime);
                 ui->table->item(i, COL_LAST)->setData(Qt::DisplayRole, lastTime);
+                ui->table->item(i, COL_MAX)->setData(Qt::DisplayRole, maxTime);
                 ui->table->item(i, COL_NUM_SAMPLES)->setData(Qt::DisplayRole, data.getNumSamples());
                 break;
             }
@@ -105,31 +108,47 @@ void ProfileDialog::updateData()
             QTableWidgetItem *total = new QTableWidgetItem();
             QTableWidgetItem *average = new QTableWidgetItem();
             QTableWidgetItem *last = new QTableWidgetItem();
+            QTableWidgetItem *max = new QTableWidgetItem();
             QTableWidgetItem *numSamples = new QTableWidgetItem();
 
             ui->table->setItem(row, COL_NAME, name);
             ui->table->setItem(row, COL_TOTAL, total);
             ui->table->setItem(row, COL_AVERAGE, average);
             ui->table->setItem(row, COL_LAST, last);
+            ui->table->setItem(row, COL_MAX, max);
             ui->table->setItem(row, COL_NUM_SAMPLES, numSamples);
 
             total->setTextAlignment(Qt::AlignRight | Qt::AlignVCenter);
             average->setTextAlignment(Qt::AlignRight | Qt::AlignVCenter);
             last->setTextAlignment(Qt::AlignRight | Qt::AlignVCenter);
+            max->setTextAlignment(Qt::AlignRight | Qt::AlignVCenter);
             numSamples->setTextAlignment(Qt::AlignRight | Qt::AlignVCenter);
 
             total->setData(Qt::DisplayRole, totalTime);
             average->setData(Qt::DisplayRole, averageTime);
             last->setData(Qt::DisplayRole, lastTime);
+            max->setData(Qt::DisplayRole, maxTime);
             numSamples->setData(Qt::DisplayRole, data.getNumSamples());
 
             ui->table->setItemDelegateForColumn(COL_TOTAL, new NanoSecondsDelegate());
             ui->table->setItemDelegateForColumn(COL_AVERAGE, new NanoSecondsDelegate());
             ui->table->setItemDelegateForColumn(COL_LAST, new NanoSecondsDelegate());
+            ui->table->setItemDelegateForColumn(COL_MAX, new NanoSecondsDelegate());
 
             ui->table->setSortingEnabled(true);
         }
     }
 
     GlobalProfileData::releaseProfileData();
+
+    qint64 msecSinceStart = GlobalProfileData::getMSSinceStart();
+    QString s;
+
+    if (msecSinceStart < 1e3) {
+        s = QString("%1 ms").arg(msecSinceStart);
+    } else {
+        s = QString("%1 s").arg(msecSinceStart/1e3, 0, 'f', 3);
+    }
+    ui->time->setText(s);
+
 }

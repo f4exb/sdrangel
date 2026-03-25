@@ -24,7 +24,41 @@
   </property>
   <layout class="QVBoxLayout" name="verticalLayout">
    <item>
-    <layout class="QHBoxLayout" name="layout">
+    <layout class="QVBoxLayout" name="verticalLayout_2">
+     <item>
+      <layout class="QHBoxLayout" name="horizontalLayout">
+       <item>
+        <widget class="QLabel" name="timeLabel">
+         <property name="text">
+          <string>Runtime</string>
+         </property>
+        </widget>
+       </item>
+       <item>
+        <widget class="QLineEdit" name="time">
+         <property name="toolTip">
+          <string>Elapsed run-time since reset button pressed</string>
+         </property>
+         <property name="readOnly">
+          <bool>true</bool>
+         </property>
+        </widget>
+       </item>
+       <item>
+        <spacer name="horizontalSpacer">
+         <property name="orientation">
+          <enum>Qt::Orientation::Horizontal</enum>
+         </property>
+         <property name="sizeHint" stdset="0">
+          <size>
+           <width>40</width>
+           <height>20</height>
+          </size>
+         </property>
+        </spacer>
+       </item>
+      </layout>
+     </item>
      <item>
       <widget class="QTableWidget" name="table">
        <column>
@@ -61,6 +95,14 @@
        </column>
        <column>
         <property name="text">
+         <string>Max</string>
+        </property>
+        <property name="toolTip">
+         <string>Maximum length of time taken to execute the code</string>
+        </property>
+       </column>
+       <column>
+        <property name="text">
          <string>Samples</string>
         </property>
         <property name="toolTip">
@@ -74,10 +116,10 @@
    <item>
     <widget class="QDialogButtonBox" name="buttonBox">
      <property name="orientation">
-      <enum>Qt::Horizontal</enum>
+      <enum>Qt::Orientation::Horizontal</enum>
      </property>
      <property name="standardButtons">
-      <set>QDialogButtonBox::Close|QDialogButtonBox::Reset</set>
+      <set>QDialogButtonBox::StandardButton::Close|QDialogButtonBox::StandardButton::Reset</set>
      </property>
     </widget>
    </item>

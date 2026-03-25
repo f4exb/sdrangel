@@ -22,6 +22,7 @@
 
 QHash<QString, ProfileData> GlobalProfileData::m_profileData;
 QMutex GlobalProfileData::m_mutex;
+QElapsedTimer GlobalProfileData::m_startTimer;
 
 QHash<QString, ProfileData>& GlobalProfileData::getProfileData()
 {
@@ -38,5 +39,6 @@ void GlobalProfileData::resetProfileData()
 {
     m_mutex.lock();
     m_profileData.clear();
+    m_startTimer.start();
     m_mutex.unlock();
 }

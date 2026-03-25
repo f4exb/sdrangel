@@ -68,19 +68,22 @@ public:
     ProfileData() :
         m_numSamples(0),
         m_last(0),
-        m_total(0)
+        m_total(0),
+        m_max(0)
     { }
 
     void reset()
     {
         m_numSamples = 0;
         m_total = 0;
+        m_max = 0;
     }
 
     void add(qint64 sample)
     {
         m_last = sample;
         m_total += sample;
+        m_max = std::max(m_max, sample);
         m_numSamples++;
     }
 
@@ -95,12 +98,14 @@ public:
 
     qint64 getTotal() const { return m_total; }
     qint64 getLast() const { return m_last; }
+    qint64 getMax() const { return m_max; }
     quint64 getNumSamples() const { return m_numSamples; }
 
 private:
     quint64 m_numSamples;
     qint64 m_last;
     qint64 m_total;
+    qint64 m_max;
 };
 
 // Global thread-safe profile data that can be displayed in the GUI
@@ -112,11 +117,13 @@ public:
     static QHash<QString, ProfileData>& getProfileData();
     static void releaseProfileData();
     static void resetProfileData();
+    static qint64 getMSSinceStart() { return m_startTimer.elapsed(); }
 
 private:
 
     static QHash<QString, ProfileData> m_profileData;
     static QMutex m_mutex;
+    static QElapsedTimer m_startTimer;
 
 };
 
