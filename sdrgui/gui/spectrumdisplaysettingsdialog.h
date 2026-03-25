@@ -1,8 +1,5 @@
 ///////////////////////////////////////////////////////////////////////////////////
-// Copyright (C) 2012 maintech GmbH, Otto-Hahn-Str. 15, 97204 Hoechberg, Germany //
-// written by Christian Daniel                                                   //
-// Copyright (C) 2015-2016, 2018-2019 Edouard Griffiths, F4EXB <f4exb06@gmail.com> //
-// Copyright (C) 2020, 2022 Jon Beniston, M7RCE <jon@beniston.com>               //
+// Copyright (C) 2026 Jon Beniston, M7RCE <jon@beniston.com>                     //
 //                                                                               //
 // This program is free software; you can redistribute it and/or modify          //
 // it under the terms of the GNU General Public License as published by          //
@@ -18,8 +15,8 @@
 // along with this program. If not, see <http://www.gnu.org/licenses/>.          //
 ///////////////////////////////////////////////////////////////////////////////////
 
-#ifndef SDRBASE_GUI_SPECTRUMMEASUREMENTSDIALOG_H_
-#define SDRBASE_GUI_SPECTRUMMEASUREMENTSDIALOG_H_
+#ifndef SDRBASE_GUI_SPECTRUMDISPLAYSETTINGSDIALOG_H_
+#define SDRBASE_GUI_SPECTRUMDISPLAYSETTINGSDIALOG_H_
 
 #include <QDialog>
 
@@ -27,42 +24,43 @@
 #include "export.h"
 
 namespace Ui {
-    class SpectrumMeasurementsDialog;
+    class SpectrumDisplaySettingsDialog;
 }
 
 class GLSpectrum;
 
-class SDRGUI_API SpectrumMeasurementsDialog : public QDialog {
+class SDRGUI_API SpectrumDisplaySettingsDialog : public QDialog {
     Q_OBJECT
 
+    struct MemorySettings {
+        QRgb m_color;
+        QString m_label;
+    };
+
 public:
-    explicit SpectrumMeasurementsDialog(GLSpectrum *glSpectrum, SpectrumSettings *settings, QWidget *parent = nullptr);
-    ~SpectrumMeasurementsDialog();
+    explicit SpectrumDisplaySettingsDialog(GLSpectrum *glSpectrum, SpectrumSettings *settings, int sampleRate, QWidget *parent = nullptr);
+    ~SpectrumDisplaySettingsDialog();
 
 private:
     void displaySettings();
+    void displayMemorySettings();
 
-    Ui::SpectrumMeasurementsDialog *ui;
+    Ui::SpectrumDisplaySettingsDialog *ui;
     GLSpectrum *m_glSpectrum;
     SpectrumSettings *m_settings;
+    int m_sampleRate;
+    QRgb m_spectrumColor;
+    QList<MemorySettings> m_memorySettings;
 
 private slots:
-    void on_measurement_currentIndexChanged(int index);
-    void on_precision_valueChanged(int value);
-    void on_position_currentIndexChanged(int index);
-    void on_highlight_toggled(bool checked);
-    void on_resetMeasurements_clicked(bool checked);
-    void on_centerFrequencyOffset_changed(qint64 value);
-    void on_bandwidth_changed(qint64 value);
-    void on_chSpacing_changed(qint64 value);
-    void on_adjChBandwidth_changed(qint64 value);
-    void on_harmonics_valueChanged(int value);
-    void on_peaks_valueChanged(int value);
-    void on_m1Mask_toggled(bool checked);
-    void on_m2Mask_toggled(bool checked);
-
-signals:
-    void updateMeasurements();
+    void on_waterfallVerticalAxisUnits_currentIndexChanged(int index);
+    void on_waterfallScrollBar_clicked(bool checked=false);
+    void on_scrollLength_valueChanged(int value);
+    void on_spectrumColor_clicked(bool checked=false);
+    void on_memIdx_currentIndexChanged(int index);
+    void on_memColor_clicked(bool checked=false);
+    void on_memLabel_editingFinished();
+    void accept() override;
 };
 
-#endif // SDRBASE_GUI_SPECTRUMMEASUREMENTSDIALOG_H_
+#endif // SDRBASE_GUI_SPECTRUMDISPLAYSETTINGSDIALOG_H_

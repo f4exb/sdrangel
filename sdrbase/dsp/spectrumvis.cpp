@@ -6,6 +6,7 @@
 // Copyright (C) 2022 Jiří Pinkava <jiri.pinkava@rossum.ai>                      //
 // Copyright (C) 2023 Arne Jünemann <das-iro@das-iro.de>                         //
 // Copyright (C) 2023 Vladimir Pleskonjic                                        //
+// Copyright (C) 2026 Jon Beniston, M7RCE <jon@beniston.com>                     //
 //                                                                               //
 // This program is free software; you can redistribute it and/or modify          //
 // it under the terms of the GNU General Public License as published by          //
@@ -30,6 +31,7 @@
 #include "dspengine.h"
 #include "fftfactory.h"
 #include "util/messagequeue.h"
+#include "util/profiler.h"
 
 #include "spectrumvis.h"
 
@@ -38,7 +40,6 @@ MESSAGE_CLASS_DEFINITION(SpectrumVis::MsgConfigureScalingFactor, Message)
 MESSAGE_CLASS_DEFINITION(SpectrumVis::MsgConfigureWSpectrumOpenClose, Message)
 MESSAGE_CLASS_DEFINITION(SpectrumVis::MsgConfigureWSpectrum, Message)
 MESSAGE_CLASS_DEFINITION(SpectrumVis::MsgStartStop, Message)
-MESSAGE_CLASS_DEFINITION(SpectrumVis::MsgFrequencyZooming, Message)
 
 const Real SpectrumVis::m_mult = (10.0f / log2(10.0f));
 
@@ -49,7 +50,7 @@ SpectrumVis::SpectrumVis(Real scalef) :
     m_fftEngineSequence(0),
 	m_fftBuffer(4096),
 	m_powerSpectrum(4096),
-    m_psd(4096),
+    m_mathMemory(4096),
 	m_fftBufferFill(0),
 	m_needMoreSamples(false),
 	m_scalef(scalef),
@@ -57,8 +58,7 @@ SpectrumVis::SpectrumVis(Real scalef) :
     m_specMax(0.0f),
     m_centerFrequency(0),
     m_sampleRate(48000),
-	m_ofs(0),
-    m_powFFTDiv(1.0),
+    m_powFFTMul(1.0f),
     m_guiMessageQueue(nullptr)
 {
 	setObjectName("SpectrumVis");
@@ -103,212 +103,6 @@ void SpectrumVis::feedTriggered(const SampleVector::const_iterator& triggerPoint
 	{
 		feed(triggerPoint, end, positiveOnly); // normal feed from trigger point
 	}*/
-}
-
-void SpectrumVis::feed(const Complex *begin, unsigned int length)
-{
-	if (!m_glSpectrum && !m_wsSpectrum.socketOpened()) {
-		return;
-	}
-
-    if (!m_mutex.tryLock(0)) { // prevent conflicts with configuration process
-        return;
-    }
-
-    Complex c;
-    Real v;
-    int fftMin = (m_settings.m_frequencyZoomFactor == 1.0f) ?
-        0 : (m_settings.m_frequencyZoomPos - (0.5f / m_settings.m_frequencyZoomFactor)) * m_settings.m_fftSize;
-    int fftMax = (m_settings.m_frequencyZoomFactor == 1.0f) ?
-        m_settings.m_fftSize : (m_settings.m_frequencyZoomPos + (0.5f / m_settings.m_frequencyZoomFactor)) * m_settings.m_fftSize;
-
-    if (m_settings.m_averagingMode == SpectrumSettings::AvgModeNone)
-    {
-        for (int i = 0; i < m_settings.m_fftSize; i++)
-        {
-            if (i < (int) length) {
-                c = begin[i];
-            } else {
-                c = Complex{0,0};
-            }
-
-            v = c.real() * c.real() + c.imag() * c.imag();
-            m_psd[i] = v/m_powFFTDiv;
-            v = m_settings.m_linear ? v/m_powFFTDiv : m_mult * log2fapprox(v) + m_ofs;
-            m_powerSpectrum[i] = v;
-        }
-
-        // send new data to visualisation
-        if (m_glSpectrum)
-        {
-            m_glSpectrum->newSpectrum(
-                &m_powerSpectrum.data()[fftMin],
-                fftMax - fftMin,
-                m_settings.m_fftSize
-            );
-        }
-
-        // web socket spectrum connections
-        if (m_wsSpectrum.socketOpened())
-        {
-            m_wsSpectrum.newSpectrum(
-                m_powerSpectrum,
-                m_settings.m_fftSize,
-                m_centerFrequency,
-                m_sampleRate,
-                m_settings.m_linear,
-                m_settings.m_ssb,
-                m_settings.m_usb
-            );
-        }
-    }
-    else if (m_settings.m_averagingMode == SpectrumSettings::AvgModeMoving)
-    {
-        for (int i = 0; i < m_settings.m_fftSize; i++)
-        {
-            if (i < (int) length) {
-                c = begin[i];
-            } else {
-                c = Complex{0,0};
-            }
-
-            v = c.real() * c.real() + c.imag() * c.imag();
-            v = m_movingAverage.storeAndGetAvg(v, i);
-            m_psd[i] = v/m_powFFTDiv;
-            v = m_settings.m_linear ? v/m_powFFTDiv : m_mult * log2fapprox(v) + m_ofs;
-            m_powerSpectrum[i] = v;
-        }
-
-        // send new data to visualisation
-        if (m_glSpectrum)
-        {
-            m_glSpectrum->newSpectrum(
-                &m_powerSpectrum.data()[fftMin],
-                fftMax - fftMin,
-                m_settings.m_fftSize
-            );
-        }
-
-        // web socket spectrum connections
-        if (m_wsSpectrum.socketOpened())
-        {
-            m_wsSpectrum.newSpectrum(
-                m_powerSpectrum,
-                m_settings.m_fftSize,
-                m_centerFrequency,
-                m_sampleRate,
-                m_settings.m_linear,
-                m_settings.m_ssb,
-                m_settings.m_usb
-            );
-        }
-
-        m_movingAverage.nextAverage();
-    }
-    else if (m_settings.m_averagingMode == SpectrumSettings::AvgModeFixed)
-    {
-        double avg;
-
-        for (int i = 0; i < m_settings.m_fftSize; i++)
-        {
-            if (i < (int) length) {
-                c = begin[i];
-            } else {
-                c = Complex{0,0};
-            }
-
-            v = c.real() * c.real() + c.imag() * c.imag();
-
-            // result available
-            if (m_fixedAverage.storeAndGetAvg(avg, v, i))
-            {
-                m_psd[i] = avg/m_powFFTDiv;
-                avg = m_settings.m_linear ? avg/m_powFFTDiv : m_mult * log2fapprox(avg) + m_ofs;
-                m_powerSpectrum[i] = avg;
-            }
-        }
-
-        // result available
-        if (m_fixedAverage.nextAverage())
-        {
-            // send new data to visualisation
-            if (m_glSpectrum)
-            {
-                m_glSpectrum->newSpectrum(
-                    &m_powerSpectrum.data()[fftMin],
-                    fftMax - fftMin,
-                    m_settings.m_fftSize
-                );
-            }
-
-            // web socket spectrum connections
-            if (m_wsSpectrum.socketOpened())
-            {
-                m_wsSpectrum.newSpectrum(
-                    m_powerSpectrum,
-                    m_settings.m_fftSize,
-                    m_centerFrequency,
-                    m_sampleRate,
-                    m_settings.m_linear,
-                    m_settings.m_ssb,
-                    m_settings.m_usb
-                );
-            }
-        }
-    }
-    else if (m_settings.m_averagingMode == SpectrumSettings::AvgModeMax)
-    {
-        double max;
-
-        for (int i = 0; i < m_settings.m_fftSize; i++)
-        {
-            if (i < (int) length) {
-                c = begin[i];
-            } else {
-                c = Complex{0,0};
-            }
-
-            v = c.real() * c.real() + c.imag() * c.imag();
-
-            // result available
-            if (m_max.storeAndGetMax(max, v, i))
-            {
-                m_psd[i] = max/m_powFFTDiv;
-                max = m_settings.m_linear ? max/m_powFFTDiv : m_mult * log2fapprox(max) + m_ofs;
-                m_powerSpectrum[i] = max;
-            }
-        }
-
-        // result available
-        if (m_max.nextMax())
-        {
-            // send new data to visualisation
-            if (m_glSpectrum)
-            {
-                m_glSpectrum->newSpectrum(
-                    &m_powerSpectrum.data()[fftMin],
-                    fftMax - fftMin,
-                    m_settings.m_fftSize
-                );
-            }
-
-            // web socket spectrum connections
-            if (m_wsSpectrum.socketOpened())
-            {
-                m_wsSpectrum.newSpectrum(
-                    m_powerSpectrum,
-                    m_settings.m_fftSize,
-                    m_centerFrequency,
-                    m_sampleRate,
-                    m_settings.m_linear,
-                    m_settings.m_ssb,
-                    m_settings.m_usb
-                );
-            }
-        }
-    }
-
-    m_mutex.unlock();
 }
 
 void SpectrumVis::feed(const ComplexVector::const_iterator& cbegin, const ComplexVector::const_iterator& end, bool positiveOnly)
@@ -418,12 +212,62 @@ void SpectrumVis::feed(const SampleVector::const_iterator& cbegin, const SampleV
 	m_mutex.unlock();
 }
 
+// Compute math operation on linear spectrum values
+void SpectrumVis::mathLinear(std::vector<Real> &spectrum)
+{
+    if (m_settings.m_mathMode == SpectrumSettings::MathModeXMinusAvg)
+    {
+        for (std::size_t i = 0; i < spectrum.size(); i++) {
+            spectrum[i] = std::max(spectrum[i] - (Real) m_mathMovingAverage.storeAndGetAvg(spectrum[i], i), 0.0f);
+        }
+    }
+    else if ((m_settings.m_mathMode == SpectrumSettings::MathModeXMinusM1) || (m_settings.m_mathMode == SpectrumSettings::MathModeXMinusM2))
+    {
+        for (std::size_t i = 0; i < spectrum.size(); i++) {
+            spectrum[i] = std::max(spectrum[i] - m_mathMemory[i], 0.0f);
+        }
+    }
+}
+
+// Compute math operation on dB spectrum values
+void SpectrumVis::mathDB(std::vector<Real> &spectrum)
+{
+    if (m_settings.m_mathMode == SpectrumSettings::MathModeXMinusAvgDB)
+    {
+        for (std::size_t i = 0; i < spectrum.size(); i++) {
+            spectrum[i] -= m_mathMovingAverage.storeAndGetAvg(spectrum[i], i);
+        }
+    }
+    else if (m_settings.m_mathMode == SpectrumSettings::MathModeXMinusAvgPlusMinAvgDB)
+    {
+        Real minAvg = m_mathMovingAverage.getMin();
+        for (std::size_t i = 0; i < spectrum.size(); i++) {
+            spectrum[i] = spectrum[i] - m_mathMovingAverage.storeAndGetAvg(spectrum[i], i) + minAvg;
+        }
+    }
+    else if (m_settings.m_mathMode == SpectrumSettings::MathModeAbsXMinusAvgDB)
+    {
+        for (std::size_t i = 0; i < spectrum.size(); i++) {
+            spectrum[i] = abs(spectrum[i] - m_mathMovingAverage.storeAndGetAvg(spectrum[i], i));
+        }
+    }
+    else if ((m_settings.m_mathMode == SpectrumSettings::MathModeXMinusM1DB) || (m_settings.m_mathMode == SpectrumSettings::MathModeXMinusM2DB))
+    {
+        for (std::size_t i = 0; i < spectrum.size(); i++) {
+            spectrum[i] -= m_mathMemory[i];
+        }
+    }
+    else if ((m_settings.m_mathMode == SpectrumSettings::MathModeAbsXMinusM1DB) || (m_settings.m_mathMode == SpectrumSettings::MathModeAbsXMinusM2DB))
+    {
+        for (std::size_t i = 0; i < spectrum.size(); i++) {
+            spectrum[i] = abs(spectrum[i] - m_mathMemory[i]);
+        }
+    }
+}
+
 void SpectrumVis::processFFT(bool positiveOnly)
 {
-    int fftMin = (m_settings.m_frequencyZoomFactor == 1.0f) ?
-        0 : (m_settings.m_frequencyZoomPos - (0.5f / m_settings.m_frequencyZoomFactor)) * m_settings.m_fftSize;
-    int fftMax = (m_settings.m_frequencyZoomFactor == 1.0f) ?
-        m_settings.m_fftSize : (m_settings.m_frequencyZoomPos + (0.5f / m_settings.m_frequencyZoomFactor)) * m_settings.m_fftSize;
+    PROFILER_START();
 
     // apply fft window (and copy from m_fftBuffer to m_fftIn)
     m_window.apply(&m_fftBuffer[0], m_fft->in());
@@ -436,20 +280,17 @@ void SpectrumVis::processFFT(bool positiveOnly)
     Complex c;
     Real v;
     std::size_t halfSize = m_settings.m_fftSize / 2;
+    bool ready = false;
 
     if (m_settings.m_averagingMode == SpectrumSettings::AvgModeNone)
     {
-        m_specMax = 0.0f;
-
-        if ( positiveOnly )
+        if (positiveOnly)
         {
             for (std::size_t i = 0; i < halfSize; i++)
             {
                 c = fftOut[i];
                 v = c.real() * c.real() + c.imag() * c.imag();
-                m_psd[i] = v/m_powFFTDiv;
-                m_specMax = v > m_specMax ? v : m_specMax;
-                v = m_settings.m_linear ? v/m_powFFTDiv : m_mult * log2fapprox(v) + m_ofs;
+                v *= m_powFFTMul;
                 m_powerSpectrum[i * 2] = v;
                 m_powerSpectrum[i * 2 + 1] = v;
             }
@@ -460,60 +301,32 @@ void SpectrumVis::processFFT(bool positiveOnly)
             {
                 c = fftOut[i + halfSize];
                 v = c.real() * c.real() + c.imag() * c.imag();
-                m_psd[i] = v/m_powFFTDiv;
-                m_specMax = v > m_specMax ? v : m_specMax;
-                v = m_settings.m_linear ? v/m_powFFTDiv : m_mult * log2fapprox(v) + m_ofs;
+                v *= m_powFFTMul;
                 m_powerSpectrum[i] = v;
 
                 c = fftOut[i];
                 v = c.real() * c.real() + c.imag() * c.imag();
-                m_psd[i + halfSize] = v/m_powFFTDiv;
-                m_specMax = v > m_specMax ? v : m_specMax;
-                v = m_settings.m_linear ? v/m_powFFTDiv : m_mult * log2fapprox(v) + m_ofs;
+                v *= m_powFFTMul;
                 m_powerSpectrum[i + halfSize] = v;
             }
         }
 
-        // send new data to visualisation
-        if (m_glSpectrum)
-        {
-            m_glSpectrum->newSpectrum(
-                &m_powerSpectrum.data()[fftMin],
-                fftMax - fftMin,
-                m_settings.m_fftSize
-            );
-        }
-
-        // web socket spectrum connections
-        if (m_wsSpectrum.socketOpened())
-        {
-            m_wsSpectrum.newSpectrum(
-                m_powerSpectrum,
-                m_settings.m_fftSize,
-                m_centerFrequency,
-                m_sampleRate,
-                m_settings.m_linear,
-                m_settings.m_ssb,
-                m_settings.m_usb
-            );
-        }
+        ready = true;
     }
     else if (m_settings.m_averagingMode == SpectrumSettings::AvgModeMoving)
     {
-        m_specMax = 0.0f;
+        double avg;
 
-        if ( positiveOnly )
+        if (positiveOnly)
         {
             for (std::size_t i = 0; i < halfSize; i++)
             {
                 c = fftOut[i];
                 v = c.real() * c.real() + c.imag() * c.imag();
-                v = m_movingAverage.storeAndGetAvg(v, i);
-                m_psd[i] = v/m_powFFTDiv;
-                m_specMax = v > m_specMax ? v : m_specMax;
-                v = m_settings.m_linear ? v/m_powFFTDiv : m_mult * log2fapprox(v) + m_ofs;
-                m_powerSpectrum[i * 2] = v;
-                m_powerSpectrum[i * 2 + 1] = v;
+                v *= m_powFFTMul;
+                avg = m_movingAverage.storeAndGetAvg(v, i);
+                m_powerSpectrum[i * 2] = (Real) avg;
+                m_powerSpectrum[i * 2 + 1] = (Real) avg;
             }
         }
         else
@@ -522,66 +335,36 @@ void SpectrumVis::processFFT(bool positiveOnly)
             {
                 c = fftOut[i + halfSize];
                 v = c.real() * c.real() + c.imag() * c.imag();
-                v = m_movingAverage.storeAndGetAvg(v, i+halfSize);
-                m_psd[i] = v/m_powFFTDiv;
-                m_specMax = v > m_specMax ? v : m_specMax;
-                v = m_settings.m_linear ? v/m_powFFTDiv : m_mult * log2fapprox(v) + m_ofs;
-                m_powerSpectrum[i] = v;
+                v *= m_powFFTMul;
+                avg = m_movingAverage.storeAndGetAvg(v, i+halfSize);
+                m_powerSpectrum[i] = (Real) avg;
 
                 c = fftOut[i];
                 v = c.real() * c.real() + c.imag() * c.imag();
-                v = m_movingAverage.storeAndGetAvg(v, i);
-                m_psd[i + halfSize] = v/m_powFFTDiv;
-                m_specMax = v > m_specMax ? v : m_specMax;
-                v = m_settings.m_linear ? v/m_powFFTDiv : m_mult * log2fapprox(v) + m_ofs;
-                m_powerSpectrum[i + halfSize] = v;
+                v *= m_powFFTMul;
+                avg = m_movingAverage.storeAndGetAvg(v, i);
+                m_powerSpectrum[i + halfSize] = (Real) avg;
             }
         }
 
-        // send new data to visualisation
-        if (m_glSpectrum)
-        {
-            m_glSpectrum->newSpectrum(
-                &m_powerSpectrum.data()[fftMin],
-                fftMax - fftMin,
-                m_settings.m_fftSize
-            );
-        }
-
-        // web socket spectrum connections
-        if (m_wsSpectrum.socketOpened())
-        {
-            m_wsSpectrum.newSpectrum(
-                m_powerSpectrum,
-                m_settings.m_fftSize,
-                m_centerFrequency,
-                m_sampleRate,
-                m_settings.m_linear,
-                m_settings.m_ssb,
-                m_settings.m_usb
-            );
-        }
-
         m_movingAverage.nextAverage();
+        ready = true;
     }
     else if (m_settings.m_averagingMode == SpectrumSettings::AvgModeFixed)
     {
         double avg;
-        Real specMax = 0.0f;
 
-        if ( positiveOnly )
+        if (positiveOnly)
         {
             for (std::size_t i = 0; i < halfSize; i++)
             {
                 c = fftOut[i];
                 v = c.real() * c.real() + c.imag() * c.imag();
+                v *= m_powFFTMul;
 
                 // result available
                 if (m_fixedAverage.storeAndGetAvg(avg, v, i))
                 {
-                    m_psd[i] = avg/m_powFFTDiv;
-                    specMax = avg > specMax ? avg : specMax;
-                    avg = m_settings.m_linear ? avg/m_powFFTDiv : m_mult * log2fapprox(avg) + m_ofs;
                     m_powerSpectrum[i * 2] = avg;
                     m_powerSpectrum[i * 2 + 1] = avg;
                 }
@@ -593,78 +376,44 @@ void SpectrumVis::processFFT(bool positiveOnly)
             {
                 c = fftOut[i + halfSize];
                 v = c.real() * c.real() + c.imag() * c.imag();
+                v *= m_powFFTMul;
 
                 // result available
-                if (m_fixedAverage.storeAndGetAvg(avg, v, i+halfSize))
-                {
-                    m_psd[i] = avg/m_powFFTDiv;
-                    specMax = avg > specMax ? avg : specMax;
-                    avg = m_settings.m_linear ? avg/m_powFFTDiv : m_mult * log2fapprox(avg) + m_ofs;
+                if (m_fixedAverage.storeAndGetAvg(avg, v, i+halfSize)) {
                     m_powerSpectrum[i] = avg;
                 }
 
                 c = fftOut[i];
                 v = c.real() * c.real() + c.imag() * c.imag();
+                v *= m_powFFTMul;
 
                 // result available
-                if (m_fixedAverage.storeAndGetAvg(avg, v, i))
-                {
-                    m_psd[i + halfSize] = avg/m_powFFTDiv;
-                    specMax = avg > specMax ? avg : specMax;
-                    avg = m_settings.m_linear ? avg/m_powFFTDiv : m_mult * log2fapprox(avg) + m_ofs;
+                if (m_fixedAverage.storeAndGetAvg(avg, v, i)) {
                     m_powerSpectrum[i + halfSize] = avg;
                 }
             }
         }
 
         // result available
-        if (m_fixedAverage.nextAverage())
-        {
-            m_specMax = specMax;
-
-            // send new data to visualisation
-            if (m_glSpectrum)
-            {
-                m_glSpectrum->newSpectrum(
-                    &m_powerSpectrum.data()[fftMin],
-                    fftMax - fftMin,
-                    m_settings.m_fftSize
-                );
-            }
-
-            // web socket spectrum connections
-            if (m_wsSpectrum.socketOpened())
-            {
-                m_wsSpectrum.newSpectrum(
-                    m_powerSpectrum,
-                    m_settings.m_fftSize,
-                    m_centerFrequency,
-                    m_sampleRate,
-                    m_settings.m_linear,
-                    m_settings.m_ssb,
-                    m_settings.m_usb
-                );
-            }
+        if (m_fixedAverage.nextAverage()) {
+            ready = true;
         }
     }
     else if (m_settings.m_averagingMode == SpectrumSettings::AvgModeMax)
     {
-        double max;
-        Real specMax = 0.0f;
+        Real max;
 
-        if ( positiveOnly )
+        if (positiveOnly)
         {
             for (std::size_t i = 0; i < halfSize; i++)
             {
                 c = fftOut[i];
                 v = c.real() * c.real() + c.imag() * c.imag();
+                v *= m_powFFTMul;
 
                 // result available
                 if (m_max.storeAndGetMax(max, v, i))
                 {
-                    m_psd[i] = max/m_powFFTDiv;
-                    specMax = max > specMax ? max : specMax;
-                    max = m_settings.m_linear ? max/m_powFFTDiv : m_mult * log2fapprox(max) + m_ofs;
                     m_powerSpectrum[i * 2] = max;
                     m_powerSpectrum[i * 2 + 1] = max;
                 }
@@ -676,69 +425,136 @@ void SpectrumVis::processFFT(bool positiveOnly)
             {
                 c = fftOut[i + halfSize];
                 v = c.real() * c.real() + c.imag() * c.imag();
+                v *= m_powFFTMul;
 
                 // result available
-                if (m_max.storeAndGetMax(max, v, i+halfSize))
-                {
-                    m_psd[i] = max/m_powFFTDiv;
-                    specMax = max > specMax ? max : specMax;
-                    max = m_settings.m_linear ? max/m_powFFTDiv : m_mult * log2fapprox(max) + m_ofs;
+                if (m_max.storeAndGetMax(max, v, i+halfSize)) {
                     m_powerSpectrum[i] = max;
                 }
 
                 c = fftOut[i];
                 v = c.real() * c.real() + c.imag() * c.imag();
+                v *= m_powFFTMul;
 
                 // result available
-                if (m_max.storeAndGetMax(max, v, i))
-                {
-                    m_psd[i + halfSize] = max/m_powFFTDiv;
-                    specMax = max > specMax ? max : specMax;
-                    max = m_settings.m_linear ? max/m_powFFTDiv : m_mult * log2fapprox(max) + m_ofs;
+                if (m_max.storeAndGetMax(max, v, i)) {
                     m_powerSpectrum[i + halfSize] = max;
                 }
             }
         }
 
         // result available
-        if (m_max.nextMax())
-        {
-            m_specMax = specMax;
-
-            // send new data to visualisation
-            if (m_glSpectrum)
-            {
-                m_glSpectrum->newSpectrum(
-                    &m_powerSpectrum.data()[fftMin],
-                    fftMax - fftMin,
-                    m_settings.m_fftSize
-                );
-            }
-
-            // web socket spectrum connections
-            if (m_wsSpectrum.socketOpened())
-            {
-                m_wsSpectrum.newSpectrum(
-                    m_powerSpectrum,
-                    m_settings.m_fftSize,
-                    m_centerFrequency,
-                    m_sampleRate,
-                    m_settings.m_linear,
-                    m_settings.m_ssb,
-                    m_settings.m_usb
-                );
-            }
+        if (m_max.nextMax()) {
+            ready = true;
         }
     }
-}
+    else if (m_settings.m_averagingMode == SpectrumSettings::AvgModeMin)
+    {
+        Real min;
 
-void SpectrumVis::getZoomedPSDCopy(std::vector<Real>& copy) const
-{
-    int fftMin = (m_settings.m_frequencyZoomFactor == 1.0f) ?
-        0 : (m_settings.m_frequencyZoomPos - (0.5f / m_settings.m_frequencyZoomFactor)) * m_settings.m_fftSize;
-    int fftMax = (m_settings.m_frequencyZoomFactor == 1.0f) ?
-        m_settings.m_fftSize : (m_settings.m_frequencyZoomPos + (0.5f / m_settings.m_frequencyZoomFactor)) * m_settings.m_fftSize;
-    copy.assign(m_psd.begin() + fftMin, m_psd.begin() + fftMax);
+        if (positiveOnly)
+        {
+            for (std::size_t i = 0; i < halfSize; i++)
+            {
+                c = fftOut[i];
+                v = c.real() * c.real() + c.imag() * c.imag();
+                v *= m_powFFTMul;
+
+                if (m_min.storeAndGetMin(min, v, i))
+                {
+                    m_powerSpectrum[i * 2] = min;
+                    m_powerSpectrum[i * 2 + 1] = min;
+                }
+            }
+        }
+        else
+        {
+            for (std::size_t i = 0; i < halfSize; i++)
+            {
+                c = fftOut[i + halfSize];
+                v = c.real() * c.real() + c.imag() * c.imag();
+                v *= m_powFFTMul;
+
+                // result available
+                if (m_min.storeAndGetMin(min, v, i+halfSize)) {
+                    m_powerSpectrum[i] = min;
+                }
+
+                c = fftOut[i];
+                v = c.real() * c.real() + c.imag() * c.imag();
+                v *= m_powFFTMul;
+
+                // result available
+                if (m_min.storeAndGetMin(min, v, i)) {
+                    m_powerSpectrum[i + halfSize] = min;
+                }
+            }
+        }
+
+        // result available
+        if (m_min.nextMin()) {
+            ready = true;
+        }
+    }
+
+    if (ready)
+    {
+        // Calculate maximum value in spectrum
+        m_specMax = *std::max_element(&m_powerSpectrum[0], &m_powerSpectrum[m_settings.m_fftSize]);
+
+        // Perform math operation on linear value
+        if (m_settings.m_mathMode != SpectrumSettings::MathModeNone) {
+            mathLinear(m_powerSpectrum);
+        }
+
+        // Convert to dB
+        if (!m_settings.m_linear)
+        {
+            for (int i = 0; i < m_settings.m_fftSize; i++) {
+                m_powerSpectrum[i] = m_mult * log2fapprox(m_powerSpectrum[i]);
+            }
+        }
+
+        // Perform math operation on dB value
+        if (m_settings.m_mathMode != SpectrumSettings::MathModeNone) {
+            mathDB(m_powerSpectrum);
+        }
+
+        if (m_settings.mathAverageUsed()) {
+            m_mathMovingAverage.nextAverage();
+        }
+
+        // Stop profiling before newSpectrum, as we profile that separately
+        PROFILER_STOP("processFFT");
+
+        // send new data to visualisation
+        if (m_glSpectrum)
+        {
+            m_glSpectrum->newSpectrum(
+                &m_powerSpectrum.data()[0],
+                m_settings.m_fftSize
+            );
+        }
+
+        // web socket spectrum connections
+        if (m_wsSpectrum.socketOpened())
+        {
+            m_wsSpectrum.newSpectrum(
+                m_powerSpectrum,
+                m_settings.m_fftSize,
+                m_centerFrequency,
+                m_sampleRate,
+                m_settings.m_linear,
+                m_settings.m_ssb,
+                m_settings.m_usb
+            );
+        }
+    }
+    else
+    {
+        PROFILER_STOP("processFFT");
+    }
+
 }
 
 void SpectrumVis::start()
@@ -827,13 +643,6 @@ bool SpectrumVis::handleMessage(const Message& message)
         setRunning(cmd.getStartStop());
         return true;
     }
-    else if (MsgFrequencyZooming::match(message))
-    {
-        MsgFrequencyZooming& cmd = (MsgFrequencyZooming&) message;
-        m_settings.m_frequencyZoomFactor = cmd.getFrequencyZoomFactor();
-        m_settings.m_frequencyZoomPos = cmd.getFrequencyZoomPos();
-        return true;
-    }
 	else
 	{
 		return false;
@@ -876,14 +685,13 @@ void SpectrumVis::applySettings(const SpectrumSettings& settings, bool force)
         }
 
         m_fftEngineSequence = fftFactory->getEngine(fftSize, false, &m_fft);
-        m_ofs = 20.0f * log10f(1.0f / fftSize);
-        m_powFFTDiv = fftSize * fftSize;
+        m_powFFTMul = 1.0f / (fftSize * fftSize);
 
         if (fftSize > m_settings.m_fftSize)
         {
             m_fftBuffer.resize(fftSize);
             m_powerSpectrum.resize(fftSize);
-            m_psd.resize(fftSize);
+            m_mathMemory.resize(fftSize);
         }
     }
 
@@ -912,6 +720,17 @@ void SpectrumVis::applySettings(const SpectrumSettings& settings, bool force)
         m_movingAverage.resize(fftSize, averagingValue);
         m_fixedAverage.resize(fftSize, averagingValue);
         m_max.resize(fftSize, averagingValue);
+        m_min.resize(fftSize, averagingValue);
+    }
+
+    if ((fftSize != m_settings.m_fftSize)
+        || (settings.m_mathAvgCount != m_settings.m_mathAvgCount) || force)
+    {
+        m_mathMovingAverage.resize(fftSize, settings.m_mathAvgCount);
+    }
+
+    if (settings.m_mathMode != m_settings.m_mathMode) {
+        m_mathMovingAverage.clear();
     }
 
     if ((settings.m_wsSpectrumAddress != m_settings.m_wsSpectrumAddress)
@@ -1085,11 +904,10 @@ void SpectrumVis::webapiUpdateSpectrumSettings(
 }
 
 // To calculate power, the usual equation:
-//    10*log10(V1/V2), where V2=fftSize^2
+//    10*log10(v=V1/V2), where V2=fftSize^2
 // is calculated using log2 instead, with:
-//   ofs=20.0f * log10f(1.0f / fftSize)
-//   mult=(10.0f / log2(10.0f))
-//   dB = m_mult * log2f(v) + m_ofs
+//   mult = 10.0f / log2(10.0f)
+//   dB = m_mult * log2f(v)
 // However, while the gcc version of log2f is twice as fast as log10f,
 // MSVC version is 6x slower.
 // Also, we don't need full accuracy of log2f for calculating the power for the spectrum,
@@ -1127,4 +945,24 @@ float SpectrumVis::log2fapprox(float x) const
     l += e;
 
     return l;
+}
+
+void SpectrumVis::setMathMemory(const QList<Real> &values)
+{
+    QMutexLocker mutexLocker(&m_mutex);
+
+    int s = std::min((int) values.size(), m_settings.m_fftSize);
+
+    for (int i = 0; i < s; i++) {
+        m_mathMemory[i] = values[i];
+    }
+}
+
+void SpectrumVis::getMathMovingAverageCopy(QList<Real>& copy)
+{
+    QMutexLocker mutexLocker(&m_mutex);
+
+    std::vector<Real> averages;
+    m_mathMovingAverage.getAverages<Real>(averages);
+    copy = QList<Real>(averages.begin(), averages.end());
 }

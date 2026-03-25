@@ -1067,7 +1067,7 @@ ILSDemodGUI::ILSDemodGUI(PluginAPI* pluginAPI, DeviceUISet *deviceUISet, Baseban
 
     ui->glSpectrum->setCenterFrequency(0);
     ui->glSpectrum->setSampleRate(ILSDemodSettings::ILSDEMOD_SPECTRUM_SAMPLE_RATE);
-    ui->glSpectrum->setMeasurementParams(SpectrumSettings::MeasurementPeaks, 0, 1000, 90, 150, 1, 5, true, 1);
+    ui->glSpectrum->setMeasurementParams(SpectrumSettings::MeasurementPeaks, 0, 1000, 90, 150, 1, 5, true, 1, 0);
     ui->glSpectrum->setMeasurementsVisible(true);
 
     m_channelMarker.setColor(Qt::yellow);

@@ -24,7 +24,7 @@ template<typename T>
 class MovingAverage2D
 {
 public:
-    MovingAverage2D() : m_data(0), m_sum(0), m_dataSize(0), m_sumSize(0), m_width(0), m_depth(0), m_avgIndex(0) {}
+    MovingAverage2D() : m_data(0), m_sum(0), m_dataSize(0), m_sumSize(0), m_width(0), m_depth(0), m_avgIndex(0), m_count(0) {}
 
     ~MovingAverage2D()
     {
@@ -35,6 +35,15 @@ public:
         if (m_sum) {
             delete[] m_sum;
         }
+    }
+
+    void clear()
+    {
+        std::fill(m_data, m_data+(m_width*m_depth), 0.0);
+        std::fill(m_sum, m_sum+m_width, 0.0);
+
+        m_avgIndex = 0;
+        m_count = 1;
     }
 
     void resize(unsigned int width, unsigned int depth)
@@ -60,10 +69,7 @@ public:
         m_width = width;
         m_depth = depth;
 
-        std::fill(m_data, m_data+(m_width*m_depth), 0.0);
-        std::fill(m_sum, m_sum+m_width, 0.0);
-
-        m_avgIndex = 0;
+        clear();
     }
 
     T storeAndGetAvg(T v, unsigned int index)
@@ -77,7 +83,7 @@ public:
             T first = m_data[m_avgIndex*m_width+index];
             m_sum[index] += (v - first);
             m_data[m_avgIndex*m_width+index] = v;
-            return m_sum[index] / m_depth;
+            return m_sum[index] / m_count;
         }
         else
         {
@@ -104,8 +110,31 @@ public:
         }
     }
 
-    void nextAverage() {
+    void nextAverage()
+    {
         m_avgIndex = m_avgIndex == m_depth-1 ? 0 : m_avgIndex+1;
+        m_count = m_count == m_depth ? m_count : m_count+1;
+    }
+
+    template<typename R>
+    void getAverages(std::vector<R> &values) const
+    {
+        values.resize(m_width);
+        for (int index = 0; index < m_width; index++) {
+            values[index] = (R) (m_sum[index] / m_count);
+        }
+    }
+
+    T getMin() const
+    {
+        T minSum = *std::min_element(m_sum, m_sum + m_width);
+        return minSum / m_count;
+    }
+
+    T getMax() const
+    {
+        T maxSum = *std::max_element(m_sum, m_sum + m_width);
+        return maxSum / m_count;
     }
 
 private:
@@ -116,6 +145,7 @@ private:
     unsigned int m_width;
     unsigned int m_depth;
     unsigned int m_avgIndex;
+    unsigned int m_count;
 };
 
 

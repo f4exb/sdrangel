@@ -2,7 +2,7 @@
 // Copyright (C) 2012 maintech GmbH, Otto-Hahn-Str. 15, 97204 Hoechberg, Germany //
 // written by Christian Daniel                                                   //
 // Copyright (C) 2015-2016, 2018-2019 Edouard Griffiths, F4EXB <f4exb06@gmail.com> //
-// Copyright (C) 2020-2023 Jon Beniston, M7RCE <jon@beniston.com>                //
+// Copyright (C) 2020-2026 Jon Beniston, M7RCE <jon@beniston.com>                //
 //                                                                               //
 // This program is free software; you can redistribute it and/or modify          //
 // it under the terms of the GNU General Public License as published by          //
@@ -176,15 +176,15 @@ public:
             if (dms.captureCount() >= 1) {
                 neg = match.capturedTexts()[1] == "-";
             }
-            if (dms.captureCount() >= 3) {
+            if ((dms.captureCount() >= 3) && (match.capturedTexts().size() >= 3)) {
                 d = match.capturedTexts()[2].toFloat();
             }
             float m = 0.0f;
-            if (dms.captureCount() >= 5) {
+            if ((dms.captureCount() >= 5) && (match.capturedTexts().size() >= 5))  {
                 m = match.capturedTexts()[4].toFloat();
             }
             float s = 0.0f;
-            if (dms.captureCount() >= 7) {
+            if ((dms.captureCount() >= 7) && (match.capturedTexts().size() >= 7)) {
                 s = match.capturedTexts()[6].toFloat();
             }
             degrees = d + m/60.0 + s/(60.0*60.0);
@@ -382,7 +382,6 @@ public:
             int raMins = match.capturedTexts()[2].toInt();
             float raSecs = match.capturedTexts()[3].toFloat();
             ra = raHours + raMins / 60.0f + raSecs / (60.0f * 60.0f);
-            qDebug() << ra << raHours << raMins << raSecs;
             int decDegs = match.capturedTexts()[5].toInt();
             int decMins = match.capturedTexts()[6].toInt();
             float decSecs = match.capturedTexts()[7].toFloat();
@@ -476,6 +475,68 @@ public:
     static T noiseTempToNoiseFigureTo(T tempK, T refTempK=T(290.0))
     {
         return T(10.0) * std::log10(tempK/refTempK+T(1.0));
+    }
+
+    // Convert number using engineering units to double precision. E.g: 10.3M 0.3m -5k 3.4
+    static double engUnitsToDouble(const QString& string, double defaultValue = 0.0, bool *ok = nullptr)
+    {
+        static const QChar micro(0xb5);
+        static const QString pattern = QString(R"((-?)([\d]+)?(\.[\d]+)?([n%1umkMG]?))").arg(micro);
+        static const QMap<QChar, double> map = {
+            {'n', 1e-9},
+            {micro, 1e-6},
+            {'u', 1e-6},
+            {'m', 1e-3},
+            {'k', 1e3},
+            {'M', 1e6},
+            {'G', 1e9}
+        };
+
+        QRegularExpression re(QRegularExpression::anchoredPattern(pattern));
+        QRegularExpressionMatch match;
+
+        match = re.match(string);
+        if (match.hasMatch())
+        {
+            double value = (match.capturedTexts()[1] + match.capturedTexts()[2] + match.capturedTexts()[3]).toDouble();
+            QString units = match.capturedTexts()[4];
+            if (!units.isEmpty()) {
+                value = value * map.value(units[0]);
+            }
+            if (ok) {
+                *ok = true;
+            }
+            return value;
+        }
+        else
+        {
+            if (ok) {
+                *ok = false;
+            }
+            return defaultValue;
+        }
+    }
+
+    // Convert number using engineering units to positive integer
+    static int engUnitsToPosInt(const QString& string, int defaultValue = 0, bool *ok = nullptr)
+    {
+        bool doubleOk;
+        double doubleValue = Units::engUnitsToDouble(string, 0.0, &doubleOk);
+
+        if (doubleOk && (doubleValue >= 0.0) && (trunc(doubleValue) == doubleValue))
+        {
+            if (ok) {
+                *ok = true;
+            }
+            return (int) doubleValue;
+        }
+        else
+        {
+            if (ok) {
+                *ok = false;
+            }
+            return defaultValue;
+        }
     }
 
 };

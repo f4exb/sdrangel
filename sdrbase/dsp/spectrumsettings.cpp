@@ -45,7 +45,7 @@ void SpectrumSettings::resetToDefaults()
 	m_decay = 1;
 	m_decayDivisor = 1;
 	m_histogramStroke = 30;
-	m_displayGridIntensity = 5;
+	m_displayGridIntensity = 15;
 	m_displayTraceIntensity = 50;
 	m_waterfallShare = 0.5;
 	m_displayCurrent = true;
@@ -83,12 +83,46 @@ void SpectrumSettings::resetToDefaults()
     m_measurementPrecision = 1;
     m_findHistogramPeaks = false;
 #ifdef ANDROID
-    m_showAllControls = false;
+    m_showControls = ShowMinimum;
 #else
-    m_showAllControls = true;
+    m_showControls = ShowStandard;
 #endif
 	m_frequencyZoomFactor = 1.0f;
 	m_frequencyZoomPos = 0.5f;
+	m_waterfallTimeUnits = TimeOffset;
+    m_waterfallTimeFormat = "hh:mm:ss";
+	m_scrollBar = false;
+	m_scrollLength = 100000;
+	m_mathMode = MathModeNone;
+	m_mathAvgCount = 100;
+	m_measurementMemMasks = 0x1;
+	m_displayRBW = false;
+	m_displayCursorStats = false;
+	m_displayPeakStats = false;
+
+	m_spectrumMemory.clear();
+	while (m_spectrumMemory.size() < m_maxSpectrumMemories)
+	{
+		SpectrumMemory memory;
+		memory.m_display = false;
+		memory.m_color = QColor(Qt::cyan).darker().rgb();
+		memory.m_label = "";
+		m_spectrumMemory.append(memory);
+	}
+
+	m_spectrumColor = qRgb(255, 255, 63);
+}
+
+// Ensure we have settings for each spectrum memory
+void SpectrumSettings::validateSpectrumMemories()
+{
+	while (m_spectrumMemory.size() < m_maxSpectrumMemories)
+	{
+		SpectrumMemory memory;
+		memory.m_display = false;
+		memory.m_color = QColor(Qt::cyan).darker().rgb();
+		m_spectrumMemory.append(memory);
+	}
 }
 
 QByteArray SpectrumSettings::serialize() const
@@ -141,9 +175,23 @@ QByteArray SpectrumSettings::serialize() const
     s.writeS32(46, m_measurementCenterFrequencyOffset);
     s.writeBool(47, m_findHistogramPeaks);
     s.writeBool(48, m_truncateFreqScale);
-    s.writeBool(49, m_showAllControls);
+	// 49 was showAllControls - replaced by m_showControls
 	s.writeFloat(50, m_frequencyZoomFactor);
     s.writeFloat(51, m_frequencyZoomPos);
+    s.writeS32(52, (int) m_waterfallTimeUnits);
+	s.writeString(53, m_waterfallTimeFormat);
+    s.writeBool(54, m_scrollBar);
+    s.writeS32(55, m_scrollLength);
+	s.writeS32(56, (int)  m_mathMode);
+	s.writeU32(57, m_mathAvgCount);
+	s.writeU32(58, m_measurementMemMasks);
+	s.writeBool(59, m_displayRBW);
+	s.writeBool(60, m_displayCursorStats);
+	s.writeBool(61, m_displayPeakStats);
+	s.writeList(62, m_spectrumMemory);
+	s.writeS32(63, (int) m_showControls);
+	s.writeU32(64, m_spectrumColor);
+
     s.writeS32(100, m_histogramMarkers.size());
 
 	for (int i = 0; i < m_histogramMarkers.size(); i++) {
@@ -207,14 +255,14 @@ bool SpectrumSettings::deserialize(const QByteArray& data)
 		d.readBool(9, &m_displayHistogram, false);
 		d.readS32(10, &m_decay, 1);
 		d.readBool(11, &m_displayGrid, false);
-		d.readS32(13, &m_displayGridIntensity, 5);
+		d.readS32(13, &m_displayGridIntensity, 15);
 		d.readS32(14, &m_decayDivisor, 1);
 		d.readS32(15, &m_histogramStroke, 30);
 		d.readBool(16, &m_displayCurrent, true);
 		d.readS32(17, &m_displayTraceIntensity, 50);
 		d.readReal(18, &m_waterfallShare, 0.66);
 		d.readS32(19, &tmp, 0);
-		m_averagingMode = tmp < 0 ? AvgModeNone : tmp > 3 ? AvgModeMax : (AveragingMode) tmp;
+		m_averagingMode = tmp < 0 ? AvgModeNone : tmp > 4 ? AvgModeMin : (AveragingMode) tmp;
 		d.readS32(20, &tmp, 0);
 		m_averagingIndex = getAveragingIndex(tmp, m_averagingMode);
 	    m_averagingValue = getAveragingValue(m_averagingIndex, m_averagingMode);
@@ -248,13 +296,26 @@ bool SpectrumSettings::deserialize(const QByteArray& data)
         d.readS32(46, &m_measurementCenterFrequencyOffset, 0);
         d.readBool(47, &m_findHistogramPeaks, false);
         d.readBool(48, &m_truncateFreqScale, false);
-#ifdef ANDROID
-        d.readBool(49, &m_showAllControls, false);
-#else
-        d.readBool(49, &m_showAllControls, true);
-#endif
 		d.readFloat(50, &m_frequencyZoomFactor, 1.0f);
 		d.readFloat(51, &m_frequencyZoomPos, 0.5f);
+		d.readS32(52, (int *) &m_waterfallTimeUnits, TimeOffset);
+		d.readString(53, &m_waterfallTimeFormat, "hh:mm:ss");
+		d.readBool(54, &m_scrollBar, false);
+		d.readS32(55, &m_scrollLength, 100000);
+		d.readS32(56, (int *) &m_mathMode, (int) MathModeNone);
+		d.readU32(57, &m_mathAvgCount, 100);
+		d.readU32(58, &m_measurementMemMasks, 0x1);
+		d.readBool(59, &m_displayRBW, false);
+		d.readBool(60, &m_displayCursorStats, false);
+		d.readBool(61, &m_displayPeakStats, false);
+		d.readList(62, &m_spectrumMemory);
+		validateSpectrumMemories();
+#ifdef ANDROID
+		d.readS32(63, (int *) &m_showControls, ShowMinimum);
+#else
+		d.readS32(63, (int *) &m_showControls, ShowStandard);
+#endif
+		d.readU32(64, &m_spectrumColor, qRgb(255, 255, 63));
 
 		int histogramMarkersSize;
 		d.readS32(100, &histogramMarkersSize, 0);
@@ -585,7 +646,7 @@ void SpectrumSettings::updateFrom(const QStringList& keys, const SWGSDRangel::SW
 
 int SpectrumSettings::getAveragingMaxScale(AveragingMode averagingMode)
 {
-    if (averagingMode == AvgModeMoving) {
+	if (averagingMode == AvgModeMoving) {
         return 3; // max 10k
     } else {
         return 5; // max 1M
@@ -670,4 +731,74 @@ QColor SpectrumSettings::intToQColor(int intColor)
     int g = bg % 256;
     int b = bg / 256;
     return QColor(r, g, b);
+}
+
+bool SpectrumSettings::mathAverageUsed() const
+{
+	return (m_mathMode == SpectrumSettings::MathModeXMinusAvg)
+		|| (m_mathMode == SpectrumSettings::MathModeXMinusAvgDB)
+		|| (m_mathMode == SpectrumSettings::MathModeXMinusAvgPlusMinAvgDB)
+		|| (m_mathMode == SpectrumSettings::MathModeAbsXMinusAvgDB);
+}
+
+bool SpectrumSettings::mathUsesDB() const
+{
+	return (m_mathMode == SpectrumSettings::MathModeXMinusAvgDB)
+		|| (m_mathMode == SpectrumSettings::MathModeXMinusAvgPlusMinAvgDB)
+		|| (m_mathMode == SpectrumSettings::MathModeAbsXMinusAvgDB)
+		|| (m_mathMode == SpectrumSettings::MathModeXMinusM1DB)
+		|| (m_mathMode == SpectrumSettings::MathModeAbsXMinusM1DB)
+		|| (m_mathMode == SpectrumSettings::MathModeXMinusM2DB)
+		|| (m_mathMode == SpectrumSettings::MathModeAbsXMinusM2DB)
+		;
+}
+
+QByteArray SpectrumSettings::SpectrumMemory::serialize() const
+{
+	SimpleSerializer s(1);
+
+	s.writeList(1, m_spectrum);
+	s.writeBool(2, m_display);
+	s.writeU32(3, m_color);
+	s.writeString(4, m_label);
+
+	return s.final();
+}
+
+bool SpectrumSettings::SpectrumMemory::deserialize(const QByteArray& data)
+{
+	SimpleDeserializer d(data);
+
+	if (!d.isValid()) {
+		return false;
+	}
+
+	if (d.getVersion() == 1)
+	{
+		d.readList(1, &m_spectrum);
+		d.readBool(2, &m_display, false);
+		d.readU32(3, &m_color, QColor(Qt::cyan).darker().rgb());
+		d.readString(4, &m_label);
+
+		return true;
+	}
+	else
+	{
+		return false;
+	}
+
+}
+
+QDataStream& operator<<(QDataStream& out, const SpectrumSettings::SpectrumMemory& settings)
+{
+	out << settings.serialize();
+	return out;
+}
+
+QDataStream& operator>>(QDataStream& in, SpectrumSettings::SpectrumMemory& settings)
+{
+	QByteArray data;
+	in >> data;
+	settings.deserialize(data);
+	return in;
 }

@@ -26,6 +26,8 @@
 #define INCLUDE_GLSPECTRUMGUI_H
 
 #include <QWidget>
+#include <QComboBox>
+#include <QMenu>
 
 #include "dsp/dsptypes.h"
 #include "dsp/spectrumsettings.h"
@@ -45,13 +47,6 @@ class SDRGUI_API GLSpectrumGUI : public QWidget, public Serializable {
 	Q_OBJECT
 
 public:
-    enum AveragingMode
-    {
-        AvgModeNone,
-        AvgModeMoving,
-        AvgModeFixed,
-        AvgModeMax
-    };
 
 	explicit GLSpectrumGUI(QWidget* parent = NULL);
 	~GLSpectrumGUI();
@@ -77,10 +72,12 @@ private:
 	Real m_calibrationShiftdB;
     static const int m_fpsMs[];
     SpectrumMarkersDialog *m_markersDialog;
+	QMenu *m_contextMenu;
 
     void blockApplySettings(bool block);
 	void applySettings();
     void applySpectrumSettings();
+	void setPowerAndRefRange();
     void displaySettings();
     void displayControls();
 	void setAveragingCombo();
@@ -92,6 +89,17 @@ private:
 	bool handleMessage(const Message& message);
     void displayGotoMarkers();
     QString displayScaled(int64_t value, char type, int precision, bool showMult);
+	void setMathMemory();
+	void convertSpectrum(QList<Real> &spectrum, bool fromDB, bool toDB) const;
+	void memContextMenu(int memoryIdx, const QPoint &p);
+	void loadMem(int memoryIdx);
+	void saveMem(int memoryIdx);
+	void updateMem(int memoryIdx);
+	void applyOffsetToMem(int memoryIdx);
+	void smoothMem(int memoryIdx);
+	void addMem(int memoryIdx);
+	void diffMem(int memoryIdx);
+	int findEquivalentText(QComboBox *combo, int value);
 
 private slots:
 	void on_fftWindow_currentIndexChanged(int index);
@@ -111,10 +119,15 @@ private slots:
 	void on_traceIntensity_valueChanged(int index);
 	void on_averagingMode_currentIndexChanged(int index);
     void on_averaging_currentIndexChanged(int index);
-    void on_linscale_toggled(bool checked);
+	void on_mathMode_currentIndexChanged(int index);
+	void on_mathAvgCount_currentIndexChanged(int index);
+	void on_mathAvgCount_editingFinished();
+	void on_linscale_toggled(bool checked);
     void on_wsSpectrum_toggled(bool checked);
 	void on_markers_clicked(bool checked);
+    void on_load_clicked(bool checked);
     void on_save_clicked(bool checked);
+    void on_saveImage_clicked(bool checked);
 
 	void on_waterfall_toggled(bool checked);
 	void on_spectrogram_toggled(bool checked);
@@ -129,7 +142,7 @@ private slots:
     void on_freeze_toggled(bool checked);
 	void on_calibration_toggled(bool checked);
     void on_gotoMarker_currentIndexChanged(int index);
-    void on_showAllControls_toggled(bool checked);
+    void on_showControls_currentIndexChanged(int index);
 
     void on_measure_clicked(bool checked);
     void on_resetMeasurements_clicked(bool checked);
@@ -145,6 +158,12 @@ private slots:
 	void updateCalibrationPoints();
     void updateMeasurements();
     void closeMarkersDialog();
+
+	void on_showSettingsDialog_clicked(bool checked=false);
+	void on_mem1_clicked(bool checked=false);
+	void on_mem2_clicked(bool checked=false);
+	void mem1ContextMenu(const QPoint &p);
+	void mem2ContextMenu(const QPoint &p);
 
 signals:
     // Emitted when user selects an annotation marker

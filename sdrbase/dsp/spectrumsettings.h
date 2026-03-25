@@ -2,7 +2,7 @@
 // Copyright (C) 2012 maintech GmbH, Otto-Hahn-Str. 15, 97204 Hoechberg, Germany //
 // written by Christian Daniel                                                   //
 // Copyright (C) 2015-2022 Edouard Griffiths, F4EXB <f4exb06@gmail.com>          //
-// Copyright (C) 2022 Jon Beniston, M7RCE <jon@beniston.com>                     //
+// Copyright (C) 2022-2026 Jon Beniston, M7RCE <jon@beniston.com>                //
 //                                                                               //
 // This program is free software; you can redistribute it and/or modify          //
 // it under the terms of the GNU General Public License as published by          //
@@ -34,12 +34,29 @@
 class SDRBASE_API SpectrumSettings : public Serializable
 {
 public:
+
     enum AveragingMode
     {
         AvgModeNone,
         AvgModeMoving,
         AvgModeFixed,
-        AvgModeMax
+        AvgModeMax,
+        AvgModeMin
+    };
+
+    enum MathMode
+    {
+        MathModeNone,
+        MathModeXMinusAvg,
+        MathModeXMinusAvgDB,
+        MathModeXMinusAvgPlusMinAvgDB,
+        MathModeAbsXMinusAvgDB,
+        MathModeXMinusM1,
+        MathModeXMinusM1DB,
+        MathModeAbsXMinusM1DB,
+        MathModeXMinusM2,
+        MathModeXMinusM2DB,
+        MathModeAbsXMinusM2DB
     };
 
     // Bitmask for which selection of markers to display
@@ -81,7 +98,8 @@ public:
         MeasurementAdjacentChannelPower,
         MeasurementOccupiedBandwidth,
         Measurement3dBBandwidth,
-        MeasurementSNR
+        MeasurementSNR,
+        MeasurementMask
     };
 
     enum MeasurementsPosition {
@@ -89,6 +107,28 @@ public:
         PositionBelow,
         PositionLeft,
         PositionRight
+    };
+
+    enum WaterfallTimeUnits {
+        TimeOffset,
+        LocalTime,
+        UTCTime
+    };
+
+    enum ShowControls {
+        ShowMinimum,
+        ShowStandard,
+        ShowAll
+    };
+
+    struct SpectrumMemory {
+        QList<Real> m_spectrum;
+        bool m_display;
+        QRgb m_color;
+        QString m_label;
+
+        QByteArray serialize() const;
+        bool deserialize(const QByteArray& data);
     };
 
 	int m_fftSize;
@@ -141,9 +181,23 @@ public:
     bool m_measurementHighlight;
     MeasurementsPosition m_measurementsPosition;
     int m_measurementPrecision;
-    bool m_showAllControls;
+    enum ShowControls m_showControls;
     float m_frequencyZoomFactor;
     float m_frequencyZoomPos;
+    WaterfallTimeUnits m_waterfallTimeUnits;
+    QString m_waterfallTimeFormat; //!< E.g: "hh:mm:ss.zzz"
+    bool m_scrollBar;
+    int m_scrollLength;
+    MathMode m_mathMode;
+    unsigned int m_mathAvgCount;
+    unsigned int m_measurementMemMasks; // Bitmask for each memory to be used as a mask
+    bool m_displayRBW;
+    bool m_displayCursorStats;
+    bool m_displayPeakStats;
+    QList<SpectrumMemory> m_spectrumMemory;
+    QRgb m_spectrumColor;
+
+    static const int m_maxSpectrumMemories = 2; // As we only have two buttons in GUI
 
 	static const int m_log2FFTSizeMin = 6;   // 64
 	static const int m_log2FFTSizeMax = 15;  // 32k
@@ -151,6 +205,7 @@ public:
     SpectrumSettings();
 	virtual ~SpectrumSettings();
     void resetToDefaults();
+    void validateSpectrumMemories();
 
     virtual QByteArray serialize() const;
     virtual bool deserialize(const QByteArray& data);
@@ -160,6 +215,8 @@ public:
 	QList<SpectrumHistogramMarker>& getHistogramMarkers() { return m_histogramMarkers; }
 	QList<SpectrumWaterfallMarker>& getWaterfallMarkers() { return m_waterfallMarkers; }
     bool getHistogramFindPeaks() { return m_findHistogramPeaks; }
+    bool mathAverageUsed() const;
+    bool mathUsesDB() const;
 
     static int getAveragingMaxScale(AveragingMode averagingMode); //!< Max power of 10 multiplier to 2,5,10 base ex: 2 -> 2,5,10,20,50,100,200,500,1000
     static int getAveragingValue(int averagingIndex, AveragingMode averagingMode);

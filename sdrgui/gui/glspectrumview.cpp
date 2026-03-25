@@ -25,6 +25,7 @@
 
 #include <algorithm>
 
+#include <QtAlgorithms>
 #include <QMouseEvent>
 #include <QOpenGLShaderProgram>
 #include <QOpenGLFunctions>
@@ -42,6 +43,7 @@
 #include "util/messagequeue.h"
 #include "util/db.h"
 #include "util/profiler.h"
+#include "util/csv.h"
 
 #include <QDebug>
 
@@ -52,6 +54,7 @@ MESSAGE_CLASS_DEFINITION(GLSpectrumView::MsgReportPowerScale, Message)
 MESSAGE_CLASS_DEFINITION(GLSpectrumView::MsgReportCalibrationShift, Message)
 MESSAGE_CLASS_DEFINITION(GLSpectrumView::MsgReportHistogramMarkersChange, Message)
 MESSAGE_CLASS_DEFINITION(GLSpectrumView::MsgReportWaterfallMarkersChange, Message)
+MESSAGE_CLASS_DEFINITION(GLSpectrumView::MsgFrequencyZooming, Message)
 
 const float GLSpectrumView::m_maxFrequencyZoom = 50.0f;
 const float GLSpectrumView::m_annotationMarkerHeight = 20.0f;
@@ -66,9 +69,14 @@ GLSpectrumView::GLSpectrumView(QWidget* parent) :
     m_fpsPeriodMs(50),
     m_mouseInside(false),
     m_changesPending(true),
+    m_redrawAll(false),
     m_centerFrequency(100000000),
-    m_referenceLevel(0),
-    m_powerRange(100),
+    m_referenceLevel(0.0f),
+    m_minReferenceLevel(-120.0f),
+    m_maxReferenceLevel(0.0f),
+    m_powerRange(100.0),
+    m_minPowerRange(1.0f),
+    m_maxPowerRange(120.0f),
     m_linear(false),
     m_decay(1),
     m_sampleRate(500000),
@@ -76,6 +84,8 @@ GLSpectrumView::GLSpectrumView(QWidget* parent) :
     m_fftOverlap(0),
     m_fftSize(512),
     m_nbBins(512),
+    m_fftMin(0),
+    m_fftMax(512),
     m_displayGrid(true),
     m_displayGridIntensity(5),
     m_displayTraceIntensity(50),
@@ -106,6 +116,7 @@ GLSpectrumView::GLSpectrumView(QWidget* parent) :
     m_pan3DSpectrogram(false),
     m_scaleZ3DSpectrogram(false),
     m_3DSpectrogramStyle(SpectrumSettings::Outline),
+    m_spectrumColor(255, 255, 63),
     m_colorMapName("Angel"),
     m_scrollFrequency(false),
     m_scrollStartCenterFreq(0),
@@ -137,7 +148,25 @@ GLSpectrumView::GLSpectrumView(QWidget* parent) :
     m_measurementHarmonics(5),
     m_measurementPeaks(5),
     m_measurementHighlight(true),
-    m_measurementPrecision(1)
+    m_measurementPrecision(1),
+    m_measurementMemMasks(0),
+    m_maskTestCount(SpectrumSettings::m_maxSpectrumMemories),
+    m_maskFailCount(SpectrumSettings::m_maxSpectrumMemories),
+    m_maskFails(SpectrumSettings::m_maxSpectrumMemories),
+    m_displayRBW(false),
+    m_displayCursorStats(false),
+    m_displayPeakStats(false),
+    m_cursorOverSpectrum(false),
+    m_cursorFrequency(0.0f),
+    m_spectrumBuffer(0),
+    m_spectrumBufferFFTSize(0),
+    m_spectrumBufferMaxSize(100000),
+    m_scrollBar(nullptr),
+    m_scrollBarEnabled(false),
+    m_scrollBarValue(0),
+    m_waterfallTimeUnits(SpectrumSettings::TimeOffset),
+    m_waterfallTimeFormat("hh:mm:ss"),
+    m_spectrumMemory(SpectrumSettings::m_maxSpectrumMemories)
 {
     // Enable multisampling anti-aliasing (MSAA)
     int multisamples = MainCore::instance()->getSettings().getMultisampling();
@@ -275,6 +304,8 @@ GLSpectrumView::~GLSpectrumView()
         delete m_openGLLogger;
         m_openGLLogger = nullptr;
     }
+
+    clearSpectrumBuffer();
 }
 
 void GLSpectrumView::queueRequestCenterFrequency(qint64 frequency)
@@ -322,6 +353,7 @@ void GLSpectrumView::setReferenceLevel(Real referenceLevel)
     m_mutex.lock();
     m_referenceLevel = referenceLevel;
     m_changesPending = true;
+    redrawWaterfallAnd3DSpectrogram();
     m_mutex.unlock();
     update();
 }
@@ -331,6 +363,7 @@ void GLSpectrumView::setPowerRange(Real powerRange)
     m_mutex.lock();
     m_powerRange = powerRange;
     m_changesPending = true;
+    redrawWaterfallAnd3DSpectrogram();
     m_mutex.unlock();
     update();
 }
@@ -421,11 +454,22 @@ void GLSpectrumView::set3DSpectrogramStyle(SpectrumSettings::SpectrogramStyle st
     update();
 }
 
+void GLSpectrumView::setSpectrumColor(QRgb color)
+{
+    m_mutex.lock();
+    m_spectrumColor = QColor(color);
+    m_changesPending = true;
+    m_redrawAll = true;
+    m_mutex.unlock();
+    update();
+}
+
 void GLSpectrumView::setColorMapName(const QString &colorMapName)
 {
     m_mutex.lock();
     m_colorMapName = colorMapName;
     m_changesPending = true;
+    m_redrawAll = true;
     m_mutex.unlock();
     update();
 }
@@ -448,6 +492,9 @@ void GLSpectrumView::setInvertedWaterfall(bool inv)
     m_invertedWaterfall = inv;
     m_changesPending = true;
     stopDrag();
+    if (m_scrollBar) {
+        m_scrollBar->setInvertedAppearance(!inv);
+    }
     m_mutex.unlock();
     update();
 }
@@ -573,7 +620,8 @@ void GLSpectrumView::setMeasurementParams(
     int harmonics,
     int peaks,
     bool highlight,
-    int precision
+    int precision,
+    unsigned memoryMask
 )
 {
     m_mutex.lock();
@@ -586,12 +634,28 @@ void GLSpectrumView::setMeasurementParams(
     m_measurementPeaks = peaks;
     m_measurementHighlight = highlight;
     m_measurementPrecision = precision;
+    m_measurementMemMasks = memoryMask;
     m_changesPending = true;
     if (m_measurements) {
-        m_measurements->setMeasurementParams(measurement, peaks, precision);
+        m_measurements->setMeasurementParams(measurement, peaks, precision, memoryMask);
     }
     m_mutex.unlock();
     update();
+}
+
+void GLSpectrumView::resetMeasurements()
+{
+    m_mutex.lock();
+    for (int i = 0; i < m_maskFails.size(); ++i)
+    {
+        m_maskTestCount[i] = 0;
+        m_maskFailCount[i] = 0;
+        int s = std::min((int) m_maskFails[i].size(), (int) m_spectrumMemory[i].m_spectrum.size());
+        for (int j = 0; j < s; j++) {
+            m_maskFails[i][j] = m_spectrumMemory[i].m_spectrum[j];
+        }
+    }
+    m_mutex.unlock();
 }
 
 void GLSpectrumView::addChannelMarker(ChannelMarker* channelMarker)
@@ -697,99 +761,486 @@ float GLSpectrumView::getTimeMax() const
     return m_timeScale.getRangeMax();
 }
 
-void GLSpectrumView::newSpectrum(const Real *spectrum, int nbBins, int fftSize)
+void GLSpectrumView::setWaterfallTimeFormat(SpectrumSettings::WaterfallTimeUnits waterfallTimeUnits, const QString& format)
 {
     QMutexLocker mutexLocker(&m_mutex);
 
-    m_displayChanged = true;
-    if (m_changesPending)
-    {
-        m_fftSize = fftSize;
-        m_nbBins = nbBins;
-        return;
+    m_waterfallTimeUnits = waterfallTimeUnits;
+    m_waterfallTimeFormat = format;
+    if (m_waterfallTimeUnits == SpectrumSettings::TimeOffset) {
+        m_timeScale.setTickFormatter(nullptr);
+    } else {
+        m_timeScale.setTickFormatter(this);
     }
-
-    if ((fftSize != m_fftSize) || (m_nbBins != nbBins))
-    {
-        m_fftSize = fftSize;
-        m_nbBins = nbBins;
-        m_changesPending = true;
-        return;
-    }
-
-    updateWaterfall(spectrum);
-    update3DSpectrogram(spectrum);
-    updateHistogram(spectrum);
+    m_changesPending = true;
 }
 
-void GLSpectrumView::updateWaterfall(const Real *spectrum)
+void GLSpectrumView::setStatusLine(bool displayRBW, bool displayCursorStats, bool displayPeakStats)
+{
+    m_displayRBW = displayRBW;
+    m_displayCursorStats = displayCursorStats;
+    m_displayPeakStats = displayPeakStats;
+    m_displayChanged = true;
+}
+
+void GLSpectrumView::setScrolling(bool enabled, int length)
+{
+    m_scrollBar->setVisible(enabled); // Must call before we lock mutex, otherwise we can deadlock
+
+    QMutexLocker mutexLocker(&m_mutex);
+
+    if (!enabled)
+    {
+        if (!m_spectrumBuffer.isEmpty()) {
+            clearSpectrumBuffer();
+        }
+    }
+    else
+    {
+        while (m_spectrumBuffer.size() > length)
+        {
+            if (m_currentSpectrum == m_spectrumBuffer.takeFirst().m_spectrum) {
+                m_currentSpectrum = nullptr;
+            }
+            delete[] m_spectrumBuffer.takeFirst().m_spectrum;
+        }
+    }
+    m_spectrumBuffer.resize(length);
+    m_spectrumBufferMaxSize = length;
+    m_scrollBarEnabled = enabled;
+}
+
+void GLSpectrumView::setScrollBar(QScrollBar* scrollBar)
+{
+    m_scrollBar = scrollBar;
+    connect(m_scrollBar, &QScrollBar::valueChanged, this, &GLSpectrumView::scrollBarValueChanged);
+}
+
+void GLSpectrumView::updateScrollBar()
+{
+    QMutexLocker mutexLocker(&m_mutex);
+
+    if (m_scrollBar && m_waterfallBuffer)
+    {
+        qint64 max = std::max<qint64>(0, (m_spectrumBuffer.size() - 1 - m_waterfallBuffer->height()));
+
+        m_scrollBar->setMaximum(max);
+        m_scrollBar->setPageStep(m_waterfallBuffer->height());
+    }
+}
+
+void GLSpectrumView::scrollBarValueChanged(int value)
+{
+    m_scrollBarValue = value;
+
+    m_redrawAll = true;
+    m_changesPending = true; // Update waterfall time scale
+    m_displayChanged = true;
+}
+
+int GLSpectrumView::scrollBarValue() const
+{
+    // We keep a local copy of scroll bar value, so it can be accessed by any thread
+    return m_scrollBarValue;
+}
+
+// Read spectrum from .csv file
+void GLSpectrumView::readCSV(QTextStream &in, bool append, QString &error)
+{
+    QMutexLocker mutexLocker(&m_mutex);
+
+    if (!append)
+    {
+        clearSpectrumBuffer();
+        m_redrawAll = true;
+        m_changesPending = true;
+    }
+
+    QHash<QString, int> colIndexes = CSV::readHeader(in, {}, error);
+
+    if (error.isEmpty())
+    {
+        if (colIndexes.contains("Frequency") && colIndexes.contains("Power"))
+        {
+            int frequencyCol = colIndexes.value("Frequency");
+            int powerCol = colIndexes.value("Power");
+            int maxCol = std::max({frequencyCol, powerCol});
+            QStringList cols;
+            QVector<qint64> frequencies;
+            QVector<float> power;
+
+            while (CSV::readRow(in, &cols))
+            {
+                if (cols.size() > maxCol)
+                {
+                    frequencies.append(cols[frequencyCol].toLongLong());
+                    power.append(cols[powerCol].toFloat());
+                }
+            }
+            if (power.size() != m_fftSize) {
+                error = QString("CSV data does not contain expected number of points for current FFT size. (Points: %1 - FFT size: %2").arg(power.size()).arg(m_fftSize);
+            } else {
+                newSpectrum(power.data(), m_fftSize, m_sampleRate, frequencies[m_fftSize/2], QDateTime::currentDateTime());
+            }
+        }
+        else if (colIndexes.contains("Date and Time") && colIndexes.contains("Center Frequency (Hz)") && colIndexes.contains("Sample Rate (Hz)") && colIndexes.contains("Power"))
+        {
+            int dateTimeCol = colIndexes.value("Date and Time");
+            int frequencyCol = colIndexes.value("Center Frequency (Hz)");
+            int sampleRateCol = colIndexes.value("Sample Rate (Hz)");
+            int powerCol = colIndexes.value("Power");
+            int maxCol = std::max({dateTimeCol, frequencyCol, sampleRateCol, powerCol});
+            QStringList cols;
+            QVector<float> spectrum;
+
+            while (CSV::readRow(in, &cols))
+            {
+                if (cols.size() > maxCol)
+                {
+                    QDateTime dateTime = QDateTime::fromString(cols[dateTimeCol], Qt::ISODateWithMs);
+                    qint64 centerFrequency = cols[frequencyCol].toLongLong();
+                    quint32 sampleRate = cols[sampleRateCol].toUInt();
+
+                    spectrum.clear();
+                    for (int i = 0; i < m_fftSize; i++)
+                    {
+                        if (powerCol + i < cols.size()) {
+                            spectrum.append(cols[powerCol + i].toFloat());
+                        }
+                    }
+                    if (spectrum.size() != m_fftSize)
+                    {
+                        error = QString("CSV data does not contain expected number of points for current FFT size. (Points: %1 - FFT size: %2").arg(spectrum.size()).arg(m_fftSize);
+                        break;
+                    }
+                    else
+                    {
+                        newSpectrum(spectrum.data(), m_fftSize, sampleRate, centerFrequency, dateTime);
+                    }
+                }
+            }
+        }
+        else
+        {
+            error = "CSV header does not contain required columns";
+        }
+    }
+
+    update();
+}
+
+// Write spectrum to .csv file
+void GLSpectrumView::writeCSV(QTextStream &out)
+{
+    QMutexLocker mutexLocker(&m_mutex);
+
+    if (m_spectrumBuffer.isEmpty())
+    {
+        float frequency = getCenterFrequency() - (getSampleRate() / 2.0f);
+        float rbw = getSampleRate() / (float) m_fftSize;
+        out << "\"Frequency\",\"Power\"\n";
+        for (int i = 0; i < m_fftSize; i++)
+        {
+            out << frequency << "," << m_currentSpectrum[i] << "\n";
+            frequency += rbw;
+        }
+    }
+    else
+    {
+        out << "\"Date and Time\",\"Center Frequency (Hz)\",\"Sample Rate (Hz)\",\"Power\"\n";
+        for (int j = 0; j < m_spectrumBuffer.size(); j++)
+        {
+            out << m_spectrumBuffer[j].m_dateTime.toString(Qt::ISODateWithMs) << "," << m_spectrumBuffer[j].m_centerFrequency << "," << m_spectrumBuffer[j].m_sampleRate << ",";
+            for (int i = 0; i < m_spectrumBufferFFTSize; i++) {
+                out << m_spectrumBuffer[j].m_spectrum[i] << ",";
+            }
+            out << "\n";
+        }
+    }
+}
+
+// Write spectrum/waterfall image to file
+bool GLSpectrumView::writeImage(const QString& filename)
+{
+    QImage image = grabFramebuffer();
+
+    return image.save(filename);
+}
+
+// Get center frequency for currently displayed spectrum (which is selected via the scroll bar)
+qint64 GLSpectrumView::getDisplayedCenterFrequency() const
+{
+    int idx = m_spectrumBuffer.size() - 1 - scrollBarValue();
+
+    if ((idx >= 0) && (idx < m_spectrumBuffer.size())) {
+        return m_spectrumBuffer[idx].m_centerFrequency;
+    } else {
+        return m_centerFrequency;
+    }
+}
+
+// Get sample rate for currently displayed spectrum (which is selected via the scroll bar)
+quint32 GLSpectrumView::getDisplayedSampleRate() const
+{
+    int idx = m_spectrumBuffer.size() - 1 - scrollBarValue();
+
+    if ((idx >= 0) && (idx < m_spectrumBuffer.size())) {
+        return m_spectrumBuffer[idx].m_sampleRate;
+    } else {
+        return m_sampleRate;
+    }
+}
+
+void GLSpectrumView::redrawSpectrum()
+{
+    if (m_spectrumBuffer.size() > 0)
+    {
+        int idx = m_spectrumBuffer.size() - 1 - scrollBarValue();
+        if (idx >= 0 && idx < m_spectrumBuffer.size())
+        {
+            updateHistogram(m_spectrumBuffer[idx].m_spectrum, m_fftSize, m_fftMin, m_nbBins);
+            m_currentSpectrum = m_spectrumBuffer[idx].m_spectrum;
+        }
+    }
+}
+
+void GLSpectrumView::redrawWaterfallAnd3DSpectrogram()
+{
+    if (m_waterfallBuffer && m_spectrumBuffer.size() > 0)
+    {
+        int idx = m_spectrumBuffer.size() - 1 - m_waterfallBuffer->height() - scrollBarValue();
+
+        m_waterfallBufferPos = 0;
+        m_waterfallTexturePos = 0;
+        m_3DSpectrogramBufferPos = 0;
+        m_3DSpectrogramTexturePos = 0;
+
+        for (int i = 0; i < m_waterfallBuffer->height(); i++)
+        {
+            if (idx >= 0 && idx < m_spectrumBuffer.size())
+            {
+                updateWaterfall(m_spectrumBuffer[idx].m_spectrum, m_fftSize, m_fftMin, m_nbBins);
+                update3DSpectrogram(m_spectrumBuffer[idx].m_spectrum, m_fftSize, m_fftMin, m_nbBins);
+            }
+            else
+            {
+                clearWaterfallRow(m_nbBins);
+                clear3DSpectrogramRow(m_nbBins);
+            }
+            idx++;
+        }
+    }
+}
+
+void GLSpectrumView::measure(const Real *spectrum, bool updateGUI)
+{
+    switch (m_measurement)
+    {
+    case SpectrumSettings::MeasurementPeaks:
+        if (updateGUI) {
+            measurePeaks(spectrum);
+        }
+        break;
+    case SpectrumSettings::MeasurementChannelPower:
+        measureChannelPower(spectrum, updateGUI);
+        break;
+    case SpectrumSettings::MeasurementAdjacentChannelPower:
+        measureAdjacentChannelPower(spectrum, updateGUI);
+        break;
+    case SpectrumSettings::MeasurementOccupiedBandwidth:
+        measureOccupiedBandwidth(spectrum, updateGUI);
+        break;
+    case SpectrumSettings::Measurement3dBBandwidth:
+        measure3dBBandwidth(spectrum, updateGUI);
+        break;
+    case SpectrumSettings::MeasurementSNR:
+        measureSNR(spectrum, updateGUI);
+        measureSFDR(spectrum, updateGUI);
+        break;
+    case SpectrumSettings::MeasurementMask:
+        measureMask(spectrum, m_fftSize, updateGUI);
+        break;
+    default:
+        break;
+    }
+}
+
+// newSpectrum can be called at a much faster rate than paintGL for high sample rates
+// Will typically be called from device source engine thread, so shouldn't touch UI
+void GLSpectrumView::newSpectrum(const Real *spectrum, int fftSize)
+{
+    PROFILER_START();
+
+    QMutexLocker mutexLocker(&m_mutex);
+
+    newSpectrum(spectrum, fftSize, m_sampleRate, m_centerFrequency, QDateTime::currentDateTime());
+
+    PROFILER_STOP("newSpectrum");
+}
+
+void GLSpectrumView::newSpectrum(const Real *spectrum, int fftSize, quint32 sampleRate, qint64 centerFrequency, const QDateTime &dateTime)
+{
+    int offset = 0;
+    int idx;
+
+    m_displayChanged = true;
+
+    if (fftSize != m_fftSize)
+    {
+        m_fftSize = fftSize;
+        updateFFTLimits(true);
+        m_changesPending = true;
+    }
+
+    if (m_scrollBarEnabled)
+    {
+        updateSpectrumBuffer(&spectrum[0], m_fftSize, sampleRate, centerFrequency, dateTime);
+        offset = scrollBarValue();
+        idx = m_spectrumBuffer.size() - 1 - offset;
+        m_currentSpectrum = m_spectrumBuffer[idx].m_spectrum;
+    }
+    else
+    {
+        updateSpectrumNoBuffer(&spectrum[0], m_fftSize);
+        m_currentSpectrum = m_spectrumNoBuffer.data();
+    }
+
+    measure(spectrum, false);
+
+    if (m_changesPending) {
+        return;
+    }
+
+    if (offset == 0)
+    {
+        updateWaterfall(spectrum, m_fftSize, m_fftMin, m_nbBins);
+        update3DSpectrogram(spectrum, m_fftSize, m_fftMin, m_nbBins);
+        updateHistogram(spectrum, m_fftSize, m_fftMin, m_nbBins);
+    }
+    else
+    {
+        updateWaterfall(m_spectrumBuffer[idx].m_spectrum, m_fftSize, m_fftMin, m_nbBins);
+        update3DSpectrogram(m_spectrumBuffer[idx].m_spectrum, m_fftSize, m_fftMin, m_nbBins);
+        updateHistogram(m_spectrumBuffer[idx].m_spectrum, m_fftSize, m_fftMin, m_nbBins);
+    }
+}
+
+void GLSpectrumView::updateSpectrumNoBuffer(const Real *spectrum, int fftSize)
+{
+    if (m_spectrumNoBuffer.size() != fftSize) {
+        m_spectrumNoBuffer.resize(fftSize);
+    }
+
+    std::copy(spectrum, spectrum + fftSize, m_spectrumNoBuffer.begin());
+}
+
+void GLSpectrumView::clearSpectrumBuffer()
+{
+    m_currentSpectrum = nullptr; // Make sure we aren't pointing in to a buffer we're about to delete
+    for (const auto& spectrumData : m_spectrumBuffer) {
+        delete[] spectrumData.m_spectrum;
+    }
+    m_spectrumBuffer.clear();
+}
+
+void GLSpectrumView::updateSpectrumBuffer(const Real *spectrum, int fftSize, quint32 sampleRate, qint64 centerFrequency, const QDateTime &dateTime)
+{
+    // Clear buffer when FFT size changes
+    if (fftSize != m_spectrumBufferFFTSize)
+    {
+        clearSpectrumBuffer();
+        m_spectrumBufferFFTSize = fftSize;
+    }
+
+    // Reuse old buffer if possible, otherwise allocate new buffer
+    Real *buffer = nullptr;
+    if (m_spectrumBuffer.size() >= m_spectrumBufferMaxSize) {
+        buffer = m_spectrumBuffer.takeFirst().m_spectrum;
+    }
+    if (!buffer) {
+        buffer = new Real[fftSize];
+    }
+
+    // Store copy of spectrum and current parameters in spectrum buffer
+    std::copy(spectrum, spectrum + fftSize, buffer);
+    Spectrum spectrumData = {buffer, sampleRate, centerFrequency, dateTime};
+    m_spectrumBuffer.append(spectrumData);
+}
+
+void GLSpectrumView::clearWaterfallRow(int nbBins)
 {
     if (m_waterfallBufferPos < m_waterfallBuffer->height())
     {
         quint32* pix = (quint32*)m_waterfallBuffer->scanLine(m_waterfallBufferPos);
 
-        for (int i = 0; i < m_nbBins; i++)
+        for (int i = 0; i <= nbBins; i++) {
+            *pix++ = m_waterfallPalette[0];
+        }
+        m_waterfallBufferPos++;
+    }
+}
+
+void GLSpectrumView::updateWaterfall(const Real *spectrum, int fftSize, int fftMin, int nbBins)
+{
+    if (m_waterfallBufferPos < m_waterfallBuffer->height())
+    {
+        quint32* pix = (quint32*)m_waterfallBuffer->scanLine(m_waterfallBufferPos);
+
+        for (int i = 0; i < nbBins; i++)
         {
-            int v = (int)((spectrum[i] - m_referenceLevel) * 2.4 * 100.0 / m_powerRange + 240.0);
-
-            if (v > 239) {
-                v = 239;
-            } else if (v < 0) {
-                v = 0;
-            }
-
+            int v = (int)((spectrum[fftMin + i] - m_referenceLevel) * 2.4 * 100.0 / m_powerRange + 240.0);
+            v = clampWaterfall(v);
             *pix++ = m_waterfallPalette[(int)v];
         }
 
-        // Replicate Nyquist sample (spectrum[0]) to end of positive side
-        int v = (int)((spectrum[0] - m_referenceLevel) * 2.4 * 100.0 / m_powerRange + 240.0);
-        if (v > 239) {
-            v = 239;
-        } else if (v < 0) {
-            v = 0;
-        }
+        int lastIdx = (fftMin + nbBins) % fftSize;
+        int v = (int)((spectrum[lastIdx] - m_referenceLevel) * 2.4 * 100.0 / m_powerRange + 240.0);
+        v = clampWaterfall(v);
         *pix++ = m_waterfallPalette[(int)v];
 
         m_waterfallBufferPos++;
     }
 }
 
-void GLSpectrumView::update3DSpectrogram(const Real *spectrum)
+void GLSpectrumView::clear3DSpectrogramRow(int nbBins)
 {
     if (m_3DSpectrogramBufferPos < m_3DSpectrogramBuffer->height())
     {
         quint8* pix = (quint8*)m_3DSpectrogramBuffer->scanLine(m_3DSpectrogramBufferPos);
 
-        for (int i = 0; i < m_nbBins; i++)
+        for (int i = 0; i <= nbBins; i++) {
+            *pix++ = 0;
+        }
+        m_3DSpectrogramBufferPos++;
+    }
+}
+
+void GLSpectrumView::update3DSpectrogram(const Real *spectrum, int fftSize, int fftMin, int nbBins)
+{
+    if (m_3DSpectrogramBufferPos < m_3DSpectrogramBuffer->height())
+    {
+        quint8* pix = (quint8*)m_3DSpectrogramBuffer->scanLine(m_3DSpectrogramBufferPos);
+
+        for (int i = 0; i < nbBins; i++)
         {
-            int v = (int)((spectrum[i] - m_referenceLevel) * 2.4 * 100.0 / m_powerRange + 240.0);
-
-            if (v > 255) {
-                v = 255;
-            } else if (v < 0) {
-                v = 0;
-            }
-
+            int v = (int)((spectrum[fftMin + i] - m_referenceLevel) * 2.4 * 100.0 / m_powerRange + 240.0);
+            v = clampPixel(v);
             *pix++ = v;
         }
 
-        // Replicate Nyquist sample (spectrum[0]) to end of positive side
-        int v = (int)((spectrum[0] - m_referenceLevel) * 2.4 * 100.0 / m_powerRange + 240.0);
-        if (v > 255) {
-            v = 255;
-        } else if (v < 0) {
-            v = 0;
-        }
+        int lastIdx = (fftMin + nbBins) % fftSize;
+        int v = (int)((spectrum[lastIdx] - m_referenceLevel) * 2.4 * 100.0 / m_powerRange + 240.0);
+        v = clampPixel(v);
         *pix++ = v;
 
         m_3DSpectrogramBufferPos++;
     }
 }
 
-void GLSpectrumView::updateHistogram(const Real *spectrum)
+void GLSpectrumView::updateHistogram(const Real *spectrum, int fftSize, int fftMin, int nbBins)
 {
     quint8* b = m_histogram;
-    int fftMulSize = 100 * m_nbBins;
+    int fftMulSize = 100 * nbBins;
 
     if ((m_displayHistogram || m_displayMaxHold) && (m_decay != 0))
     {
@@ -811,8 +1262,6 @@ void GLSpectrumView::updateHistogram(const Real *spectrum)
             m_decayDivisorCount = m_decayDivisor;
         }
     }
-
-    m_currentSpectrum = spectrum; // Store spectrum for current spectrum line display
 
 #if 0 //def USE_SSE2
     if(m_decay >= 0) { // normal
@@ -880,9 +1329,9 @@ void GLSpectrumView::updateHistogram(const Real *spectrum)
         }
     }
 #else
-    for (int i = 0; i < m_nbBins; i++)
+    for (int i = 0; i < nbBins; i++)
     {
-        int v = (int)((spectrum[i] - m_referenceLevel) * 100.0 / m_powerRange + 100.0);
+        int v = (int)((spectrum[fftMin + i] - m_referenceLevel) * 100.0 / m_powerRange + 100.0);
 
         if ((v >= 0) && (v <= 99))
         {
@@ -994,8 +1443,18 @@ void GLSpectrumView::paintGL()
 {
     PROFILER_START()
 
-    if (!m_mutex.tryLock(2)) {
+    if (!m_mutex.tryLock(3)) { // Give time for newSpectrum to complete
         return;
+    }
+
+    if (!m_changesPending && (m_waterfallTimeUnits != SpectrumSettings::TimeOffset))
+    {
+        // Waterfall timescale can change on every repaint when displaying real time
+        m_timeScale.requestReCalc();
+        paintLeftScales();
+        if (!m_changesPending) {
+            m_glShaderLeftScale.initTexture(m_leftMarginPixmap.toImage());
+        }
     }
 
     if (m_changesPending)
@@ -1059,7 +1518,6 @@ void GLSpectrumView::paintGL()
                     1, m_invertedWaterfall ? 1.0f : 0.0f,
                     0, m_invertedWaterfall ? 1.0f : 0.0f
             };
-
 
             if (m_waterfallTexturePos + m_waterfallBufferPos < m_waterfallTextureHeight)
             {
@@ -1135,6 +1593,9 @@ void GLSpectrumView::paintGL()
             m_glShaderSimple.drawContour(m_glWaterfallBoxMatrix, color, q3, 4);
         }
     }
+
+    // When zoomed, use the next sample off screen. When not, replicate the Nyquist bin
+    const int lastSampleIdx = (m_fftMin + m_nbBins) % m_fftSize;
 
     // paint histogram
     if (m_displayHistogram || m_displayMaxHold || m_displayCurrent)
@@ -1393,24 +1854,17 @@ void GLSpectrumView::paintGL()
             GLfloat *q3 = m_q3ColorMap.m_array;
             for (int i = 0; i < m_nbBins; i++)
             {
-                Real v = m_maxHold[i] - m_referenceLevel;
-
-                if (v > 0) {
-                    v = 0;
-                } else if (v < -m_powerRange) {
-                    v = -m_powerRange;
-                }
+                Real v = clampPower(m_maxHold[i] - m_referenceLevel);
 
                 q3[4*i] = (GLfloat)i;
                 q3[4*i+1] = -m_powerRange;
                 q3[4*i+2] = (GLfloat)i;
                 q3[4*i+3] = v;
             }
-            // Replicate Nyquist sample to end of positive side
             q3[4*m_nbBins] = (GLfloat) m_nbBins;
-            q3[4*m_nbBins+1] = q3[1];
+            q3[4*m_nbBins+1] = -m_powerRange;
             q3[4*m_nbBins+2] = (GLfloat) m_nbBins;
-            q3[4*m_nbBins+3] = q3[3];
+            q3[4*m_nbBins+3] = clampPower(m_maxHold[lastSampleIdx] - m_referenceLevel);
 
             QVector4D color(0.5f, 0.0f, 0.0f, (float) m_displayTraceIntensity / 100.0f);
             m_glShaderSimple.drawSurfaceStrip(m_glHistogramSpectrumMatrix, color, q3, 2*(m_nbBins+1));
@@ -1421,23 +1875,97 @@ void GLSpectrumView::paintGL()
 
             for (int i = 0; i < m_nbBins; i++)
             {
-                Real v = m_maxHold[i] - m_referenceLevel;
-
-                if (v >= 0) {
-                    v = 0;
-                } else if (v < -m_powerRange) {
-                    v = -m_powerRange;
-                }
+                Real v = clampPower(m_maxHold[i] - m_referenceLevel);
 
                 q3[2*i] = (Real) i;
                 q3[2*i+1] = v;
             }
-            // Replicate Nyquist sample to end of positive side
             q3[2*m_nbBins] = (GLfloat) m_nbBins;
-            q3[2*m_nbBins+1] = q3[1];
+            q3[2*m_nbBins+1] = clampPower(m_maxHold[lastSampleIdx] - m_referenceLevel);
 
             QVector4D color(1.0f, 0.0f, 0.0f, (float) m_displayTraceIntensity / 100.0f);
             m_glShaderSimple.drawPolyline(m_glHistogramSpectrumMatrix, color, q3, m_nbBins+1);
+        }
+    }
+
+    // paint mask violations
+    if ((m_measurement == SpectrumSettings::MeasurementMask) && m_measurementHighlight)
+    {
+        for (int m = 0; m < m_spectrumMemory.size(); m++)
+        {
+            if (   (m_spectrumMemory[m].m_spectrum.size() == m_fftSize)
+                && (m_maskFails[m].size() == m_fftSize)
+                && ((m_measurementMemMasks & (1 << m)) != 0)
+               )
+            {
+                GLfloat *q3 = m_q3ColorMap.m_array;
+                for (int i = 0; i < m_nbBins; i++)
+                {
+                    Real v1 = clampPower(m_maskFails[m][m_fftMin+i] - m_referenceLevel);
+                    Real v2 = clampPower(m_spectrumMemory[m].m_spectrum[m_fftMin+i] - m_referenceLevel);
+
+                    q3[4*i] = (GLfloat)i;
+                    q3[4*i+1] = v2;
+                    q3[4*i+2] = (GLfloat)i;
+                    q3[4*i+3] = v1;
+                }
+                q3[4*m_nbBins] = (GLfloat) m_nbBins;
+                q3[4*m_nbBins+1] = clampPower(m_maskFails[m][lastSampleIdx] - m_referenceLevel);
+                q3[4*m_nbBins+2] = (GLfloat) m_nbBins;
+                q3[4*m_nbBins+3] = q3[3];
+
+                QVector4D color(0.5f, 0.0f, 0.0f, (float) m_displayTraceIntensity / 100.0f);
+                m_glShaderSimple.drawSurfaceStrip(m_glHistogramSpectrumMatrix, color, q3, 2*(m_nbBins+1));
+            }
+        }
+    }
+
+    // paint memory spectrum as lines
+    if (m_displayCurrent)
+    {
+        for (const auto& memory : m_spectrumMemory)
+        {
+            if (memory.m_display && (memory.m_spectrum.size() == m_fftSize))
+            {
+                QColor colorF = QColor::fromRgba(memory.m_color);
+
+                // Draw label
+                if (!memory.m_label.isEmpty())
+                {
+                    float y = (m_powerScale.getRangeMax() - memory.m_spectrum[m_fftMin]) / m_powerScale.getRange() * m_histogramRect.height();
+                    float h = m_topMargin / (float) height();
+
+                    if ((y >= m_histogramRect.top()) && (y + h < m_histogramRect.bottom()))
+                    {
+                        drawTextOverlay(
+                            memory.m_label,
+                            colorF,
+                            m_textOverlayFont,
+                            0.0f,
+                            y,
+                            true,
+                            false, // text above the line
+                            m_histogramRect);
+                    }
+                }
+
+                GLfloat *q3;
+
+                // Draw line
+                q3 = m_q3FFT.m_array;
+                for (int i = 0; i < m_nbBins; i++)
+                {
+                    Real v = clampPower(memory.m_spectrum[m_fftMin+i] - m_referenceLevel);
+                    q3[2*i] = (Real) i;
+                    q3[2*i+1] = v;
+                }
+                q3[2*m_nbBins] = (GLfloat) m_nbBins;
+                q3[2*m_nbBins+1] = clampPower(memory.m_spectrum[lastSampleIdx] - m_referenceLevel);
+
+                QVector4D color;
+                color = QVector4D(colorF.redF(), colorF.greenF(), colorF.blueF(), colorF.alphaF());
+                m_glShaderSimple.drawPolyline(m_glHistogramSpectrumMatrix, color, q3, m_nbBins+1);
+            }
         }
     }
 
@@ -1453,26 +1981,20 @@ void GLSpectrumView::paintGL()
             // Fill under line
             for (int i = 0; i < m_nbBins; i++)
             {
-                Real v = m_currentSpectrum[i] - m_referenceLevel;
-
-                if (v > 0) {
-                    v = 0;
-                } else if (v < bottom) {
-                    v = bottom;
-                }
+                Real v = clampPower(m_currentSpectrum[m_fftMin + i] - m_referenceLevel);
 
                 q3[4*i] = (GLfloat)i;
                 q3[4*i+1] = bottom;
                 q3[4*i+2] = (GLfloat)i;
                 q3[4*i+3] = v;
             }
-            // Replicate Nyquist sample to end of positive side
-            q3[4*m_nbBins] = (GLfloat) m_nbBins;
-            q3[4*m_nbBins+1] = q3[1];
-            q3[4*m_nbBins+2] = (GLfloat) m_nbBins;
-            q3[4*m_nbBins+3] = q3[3];
 
-            QVector4D color(1.0f, 1.0f, 0.25f, (float) m_displayTraceIntensity / 100.0f);
+            q3[4*m_nbBins] = (GLfloat) m_nbBins;
+            q3[4*m_nbBins+1] = bottom;
+            q3[4*m_nbBins+2] = (GLfloat) m_nbBins;
+            q3[4*m_nbBins+3] = clampPower(m_currentSpectrum[lastSampleIdx] - m_referenceLevel);
+
+            QVector4D color(m_spectrumColor.redF(), m_spectrumColor.greenF(), m_spectrumColor.blueF(), (float) m_displayTraceIntensity / 100.0f);
             if (m_spectrumStyle == SpectrumSettings::Gradient) {
                 m_glShaderColorMap.drawSurfaceStrip(m_glHistogramSpectrumMatrix, q3, 2*(m_nbBins+1), bottom, 0.75f);
             } else {
@@ -1482,37 +2004,34 @@ void GLSpectrumView::paintGL()
 
         {
             if (m_histogramFindPeaks) {
-                m_peakFinder.init(m_currentSpectrum[0]);
+                m_peakFinder.init(m_currentSpectrum[m_fftMin]);
             }
 
             // Draw line
             q3 = m_q3FFT.m_array;
             for (int i = 0; i < m_nbBins; i++)
             {
-                Real v = m_currentSpectrum[i] - m_referenceLevel;
-
-                if (v > 0) {
-                    v = 0;
-                } else if (v < bottom) {
-                    v = bottom;
-                }
+                Real q1 = m_currentSpectrum[0];
+                Real q2 = m_currentSpectrum[m_fftMin + i];
+                Real q = m_currentSpectrum[m_fftMin + i] - m_referenceLevel;
+                Real v = clampPower(m_currentSpectrum[m_fftMin + i] - m_referenceLevel);
 
                 q3[2*i] = (Real) i;
                 q3[2*i+1] = v;
 
                 if (m_histogramFindPeaks && (i > 0)) {
-                    m_peakFinder.push(m_currentSpectrum[i], i == m_nbBins - 1);
+                    m_peakFinder.push(m_currentSpectrum[m_fftMin + i], i == m_nbBins - 1);
                 }
             }
-            // Replicate Nyquist sample to end of positive side
+
             q3[2*m_nbBins] = (GLfloat) m_nbBins;
-            q3[2*m_nbBins+1] = q3[1];
+            q3[2*m_nbBins+1] = clampPower(m_currentSpectrum[lastSampleIdx] - m_referenceLevel);
 
             QVector4D color;
             if (m_spectrumStyle == SpectrumSettings::Gradient) {
                 color = QVector4D(m_colorMap[255*3], m_colorMap[255*3+1], m_colorMap[255*3+2], (float) m_displayTraceIntensity / 100.0f);
             } else {
-                color = QVector4D(1.0f, 1.0f, 0.25f, (float) m_displayTraceIntensity / 100.0f);
+                color = QVector4D(m_spectrumColor.redF(), m_spectrumColor.greenF(), m_spectrumColor.blueF(), (float) m_displayTraceIntensity / 100.0f);
             }
             m_glShaderSimple.drawPolyline(m_glHistogramSpectrumMatrix, color, q3, m_nbBins+1);
 
@@ -1815,32 +2334,12 @@ void GLSpectrumView::paintGL()
         m_glShaderInfo.drawSurface(m_glInfoBoxMatrix, tex1, vtx1, 4);
     }
 
-    if (m_currentSpectrum)
-    {
-        switch (m_measurement)
-        {
-        case SpectrumSettings::MeasurementPeaks:
-            measurePeaks();
-            break;
-        case SpectrumSettings::MeasurementChannelPower:
-            measureChannelPower();
-            break;
-        case SpectrumSettings::MeasurementAdjacentChannelPower:
-            measureAdjacentChannelPower();
-            break;
-        case SpectrumSettings::MeasurementOccupiedBandwidth:
-            measureOccupiedBandwidth();
-            break;
-        case SpectrumSettings::Measurement3dBBandwidth:
-            measure3dBBandwidth();
-            break;
-        case SpectrumSettings::MeasurementSNR:
-            measureSNR();
-            measureSFDR();
-            break;
-        default:
-            break;
-        }
+    if (m_displayCursorStats || m_displayPeakStats) {
+        paintStatusLineRight();
+    }
+
+    if (m_currentSpectrum) {
+        measure(&m_currentSpectrum[m_fftMin], true);
     }
 
     m_mutex.unlock();
@@ -1948,8 +2447,8 @@ void GLSpectrumView::drawSpectrumMarkers()
             if (m_histogramMarkers.at(i).m_markerType == SpectrumHistogramMarker::SpectrumMarkerTypePower)
             {
                 float power = m_linear ?
-                    m_currentSpectrum[m_histogramMarkers.at(i).m_fftBin] * (m_useCalibration ? m_calibrationGain : 1.0f):
-                    m_currentSpectrum[m_histogramMarkers.at(i).m_fftBin] + (m_useCalibration ? m_calibrationShiftdB : 0.0f);
+                    m_currentSpectrum[m_fftMin + m_histogramMarkers.at(i).m_fftBin] * (m_useCalibration ? m_calibrationGain : 1.0f):
+                    m_currentSpectrum[m_fftMin + m_histogramMarkers.at(i).m_fftBin] + (m_useCalibration ? m_calibrationShiftdB : 0.0f);
                 ypoint.ry() =
                     (m_powerScale.getRangeMax() - power) / m_powerScale.getRange();
                 ypoint.ry() = ypoint.ry() < 0 ?
@@ -1963,7 +2462,7 @@ void GLSpectrumView::drawSpectrumMarkers()
             }
             else if (m_histogramMarkers.at(i).m_markerType == SpectrumHistogramMarker::SpectrumMarkerTypePowerMax)
             {
-                float power = m_currentSpectrum[m_histogramMarkers.at(i).m_fftBin];
+                float power = m_currentSpectrum[m_fftMin + m_histogramMarkers.at(i).m_fftBin];
 
                 if ((m_histogramMarkers.at(i).m_holdReset) || (power > m_histogramMarkers[i].m_powerMax))
                 {
@@ -2027,7 +2526,7 @@ void GLSpectrumView::drawSpectrumMarkers()
                 float power0, poweri;
 
                 if (m_histogramMarkers.at(0).m_markerType == SpectrumHistogramMarker::SpectrumMarkerTypePower) {
-                    power0 = m_currentSpectrum[m_histogramMarkers.at(0).m_fftBin];
+                    power0 = m_currentSpectrum[m_fftMin + m_histogramMarkers.at(0).m_fftBin];
                 } else if (m_histogramMarkers.at(0).m_markerType == SpectrumHistogramMarker::SpectrumMarkerTypePowerMax) {
                     power0 = m_histogramMarkers.at(0).m_powerMax;
                 } else {
@@ -2035,7 +2534,7 @@ void GLSpectrumView::drawSpectrumMarkers()
                 }
 
                 if (m_histogramMarkers.at(i).m_markerType == SpectrumHistogramMarker::SpectrumMarkerTypePower) {
-                    poweri = m_currentSpectrum[m_histogramMarkers.at(i).m_fftBin];
+                    poweri = m_currentSpectrum[m_fftMin + m_histogramMarkers.at(i).m_fftBin];
                 } else if (m_histogramMarkers.at(i).m_markerType == SpectrumHistogramMarker::SpectrumMarkerTypePowerMax) {
                     poweri = m_histogramMarkers.at(i).m_powerMax;
                 } else {
@@ -2219,55 +2718,25 @@ void GLSpectrumView::drawAnnotationMarkers()
     }
 }
 
-// Find and display peak in info line
-void GLSpectrumView::measurePeak()
-{
-    float power, frequency;
-
-    findPeak(power, frequency);
-
-    drawTextsRight(
-        {
-            "Peak: ",
-            ""
-        },
-        {
-            displayPower(power, m_linear ? 'e' : 'f', m_linear ? 3 : 1),
-            displayFull(frequency)
-        },
-        {
-            m_peakPowerMaxStr,
-            m_peakFrequencyMaxStr
-        },
-        {
-            m_peakPowerUnits,
-            "Hz"
-        }
-    );
-    if (m_measurements) {
-        m_measurements->setPeak(0, frequency, power);
-    }
-}
-
 // Find and display peaks
-void GLSpectrumView::measurePeaks()
+void GLSpectrumView::measurePeaks(const Real *spectrum)
 {
     // Copy current spectrum so we can modify it
-    Real *spectrum = new Real[m_nbBins];
-    std::copy(m_currentSpectrum, m_currentSpectrum + m_nbBins, spectrum);
+    Real *spectrumCopy = new Real[m_nbBins];
+    std::copy(spectrum, spectrum + m_nbBins, spectrumCopy);
 
     for (int i = 0; i < m_measurementPeaks; i++)
     {
         // Find peak
-        int peakBin = findPeakBin(spectrum);
+        int peakBin = findPeakBin(spectrumCopy);
         int left, right;
-        peakWidth(spectrum, peakBin, left, right, 0, m_nbBins);
+        peakWidth(spectrumCopy, peakBin, left, right, 0, m_nbBins);
         left++;
         right--;
 
         float power = m_linear ?
-            spectrum[peakBin] * (m_useCalibration ? m_calibrationGain : 1.0f) :
-            spectrum[peakBin] + (m_useCalibration ? m_calibrationShiftdB : 0.0f);
+            spectrumCopy[peakBin] * (m_useCalibration ? m_calibrationGain : 1.0f) :
+            spectrumCopy[peakBin] + (m_useCalibration ? m_calibrationShiftdB : 0.0f);
         int64_t frequency = binToFrequency(peakBin);
 
         // Add to table
@@ -2293,56 +2762,58 @@ void GLSpectrumView::measurePeaks()
 
         // Remove peak from spectrum so not found on next pass
         for (int j = left; j <= right; j++) {
-            spectrum[j] = -std::numeric_limits<float>::max();
+            spectrumCopy[j] = -std::numeric_limits<float>::max();
         }
     }
 
-    delete[] spectrum;
+    delete[] spectrumCopy;
 }
 
 // Calculate and display channel power
-void GLSpectrumView::measureChannelPower()
+void GLSpectrumView::measureChannelPower(const Real *spectrum, bool updateGUI)
 {
     float power;
+    qint64 centerFrequency = getDisplayedCenterFrequency();
 
-    power = calcChannelPower(m_centerFrequency + m_measurementCenterFrequencyOffset, m_measurementBandwidth);
+    power = calcChannelPower(spectrum, centerFrequency + m_measurementCenterFrequencyOffset, m_measurementBandwidth);
     if (m_measurements) {
-        m_measurements->setChannelPower(power);
+        m_measurements->setChannelPower(power, updateGUI);
     }
-    if (m_measurementHighlight) {
-        drawBandwidthMarkers(m_centerFrequency + m_measurementCenterFrequencyOffset, m_measurementBandwidth, m_measurementLightMarkerColor);
+    if (m_measurementHighlight && updateGUI) {
+        drawBandwidthMarkers(centerFrequency + m_measurementCenterFrequencyOffset, m_measurementBandwidth, m_measurementLightMarkerColor);
     }
 }
 
 // Calculate and display channel power and adjacent channel power
-void GLSpectrumView::measureAdjacentChannelPower()
+void GLSpectrumView::measureAdjacentChannelPower(const Real *spectrum, bool updateGUI)
 {
     float power, powerLeft, powerRight;
+    qint64 centerFrequency = getDisplayedCenterFrequency();
 
-    power = calcChannelPower(m_centerFrequency + m_measurementCenterFrequencyOffset, m_measurementBandwidth);
-    powerLeft = calcChannelPower(m_centerFrequency + m_measurementCenterFrequencyOffset - m_measurementChSpacing, m_measurementAdjChBandwidth);
-    powerRight = calcChannelPower(m_centerFrequency + m_measurementCenterFrequencyOffset + m_measurementChSpacing, m_measurementAdjChBandwidth);
+    power = calcChannelPower(spectrum, centerFrequency + m_measurementCenterFrequencyOffset, m_measurementBandwidth);
+    powerLeft = calcChannelPower(spectrum, centerFrequency + m_measurementCenterFrequencyOffset - m_measurementChSpacing, m_measurementAdjChBandwidth);
+    powerRight = calcChannelPower(spectrum, centerFrequency + m_measurementCenterFrequencyOffset + m_measurementChSpacing, m_measurementAdjChBandwidth);
 
     float leftDiff = powerLeft - power;
     float rightDiff = powerRight - power;
 
     if (m_measurements) {
-        m_measurements->setAdjacentChannelPower(powerLeft, leftDiff, power, powerRight, rightDiff);
+        m_measurements->setAdjacentChannelPower(powerLeft, leftDiff, power, powerRight, rightDiff, updateGUI);
     }
-
-    if (m_measurementHighlight)
+    if (m_measurementHighlight && updateGUI)
     {
-        drawBandwidthMarkers(m_centerFrequency + m_measurementCenterFrequencyOffset, m_measurementBandwidth, m_measurementLightMarkerColor);
-        drawBandwidthMarkers(m_centerFrequency + m_measurementCenterFrequencyOffset - m_measurementChSpacing, m_measurementAdjChBandwidth, m_measurementDarkMarkerColor);
-        drawBandwidthMarkers(m_centerFrequency + m_measurementCenterFrequencyOffset + m_measurementChSpacing, m_measurementAdjChBandwidth, m_measurementDarkMarkerColor);
+        drawBandwidthMarkers(centerFrequency + m_measurementCenterFrequencyOffset, m_measurementBandwidth, m_measurementLightMarkerColor);
+        drawBandwidthMarkers(centerFrequency + m_measurementCenterFrequencyOffset - m_measurementChSpacing, m_measurementAdjChBandwidth, m_measurementDarkMarkerColor);
+        drawBandwidthMarkers(centerFrequency + m_measurementCenterFrequencyOffset + m_measurementChSpacing, m_measurementAdjChBandwidth, m_measurementDarkMarkerColor);
     }
 }
 
 // Measure bandwidth that has 99% of power
-void GLSpectrumView::measureOccupiedBandwidth()
+void GLSpectrumView::measureOccupiedBandwidth(const Real *spectrum, bool updateGUI)
 {
-    float hzPerBin = m_sampleRate / (float) m_fftSize;
-    int start = frequencyToBin(m_centerFrequency + m_measurementCenterFrequencyOffset);
+    float hzPerBin = getDisplayedSampleRate() / (float) m_fftSize;
+    qint64 centerFrequency = getDisplayedCenterFrequency();
+    int start = frequencyToBin(centerFrequency + m_measurementCenterFrequencyOffset);
     float totalPower, power = 0.0f;
     int step = 0;
     int width = 0;
@@ -2350,15 +2821,15 @@ void GLSpectrumView::measureOccupiedBandwidth()
     float gain = m_useCalibration ? m_calibrationGain : 1.0f;
     float shift = m_useCalibration ? m_calibrationShiftdB : 0.0f;
 
-    totalPower = CalcDb::powerFromdB(calcChannelPower(m_centerFrequency + m_measurementCenterFrequencyOffset, m_measurementBandwidth));
+    totalPower = CalcDb::powerFromdB(calcChannelPower(spectrum, centerFrequency + m_measurementCenterFrequencyOffset, m_measurementBandwidth));
     do
     {
         if ((idx >= 0) && (idx < m_nbBins))
         {
             if (m_linear) {
-                power += m_currentSpectrum[idx] * gain;
+                power += spectrum[idx] * gain;
             } else {
-                power += CalcDb::powerFromdB(m_currentSpectrum[idx]) + shift;
+                power += CalcDb::powerFromdB(spectrum[idx]) + shift;
             }
             width++;
         }
@@ -2374,27 +2845,28 @@ void GLSpectrumView::measureOccupiedBandwidth()
 
     float occupiedBandwidth = width * hzPerBin;
     if (m_measurements) {
-        m_measurements->setOccupiedBandwidth(occupiedBandwidth);
+        m_measurements->setOccupiedBandwidth(occupiedBandwidth, updateGUI);
     }
-    if (m_measurementHighlight)
+    if (m_measurementHighlight && updateGUI)
     {
-        drawBandwidthMarkers(m_centerFrequency + m_measurementCenterFrequencyOffset, m_measurementBandwidth, m_measurementDarkMarkerColor);
-        drawBandwidthMarkers(m_centerFrequency + m_measurementCenterFrequencyOffset, occupiedBandwidth, m_measurementLightMarkerColor);
+        qint64 centerFrequency = getDisplayedCenterFrequency();
+        drawBandwidthMarkers(centerFrequency + m_measurementCenterFrequencyOffset, m_measurementBandwidth, m_measurementDarkMarkerColor);
+        drawBandwidthMarkers(centerFrequency + m_measurementCenterFrequencyOffset, occupiedBandwidth, m_measurementLightMarkerColor);
     }
 }
 
 // Measure bandwidth -3dB from peak
-void GLSpectrumView::measure3dBBandwidth()
+void GLSpectrumView::measure3dBBandwidth(const Real *spectrum, bool updateGUI)
 {
     // Find max peak and it's power in dB
-    int peakBin = findPeakBin(m_currentSpectrum);
-    float peakPower = m_linear ? CalcDb::dbPower(m_currentSpectrum[peakBin]) : m_currentSpectrum[peakBin];
+    int peakBin = findPeakBin(spectrum);
+    float peakPower = m_linear ? CalcDb::dbPower(spectrum[peakBin]) : spectrum[peakBin];
 
     // Search right until 3dB from peak
     int rightBin = peakBin;
     for (int i = peakBin + 1; i < m_nbBins; i++)
     {
-        float power = m_linear ? CalcDb::dbPower(m_currentSpectrum[i]) : m_currentSpectrum[i];
+        float power = m_linear ? CalcDb::dbPower(spectrum[i]) : spectrum[i];
         if (peakPower - power > 3.0f)
         {
             rightBin = i - 1;
@@ -2406,7 +2878,7 @@ void GLSpectrumView::measure3dBBandwidth()
     int leftBin = peakBin;
     for (int i = peakBin - 1; i >= 0; i--)
     {
-        float power = m_linear ? CalcDb::dbPower(m_currentSpectrum[i]) : m_currentSpectrum[i];
+        float power = m_linear ? CalcDb::dbPower(spectrum[i]) : spectrum[i];
         if (peakPower - power > 3.0f)
         {
             leftBin = i + 1;
@@ -2417,15 +2889,15 @@ void GLSpectrumView::measure3dBBandwidth()
     // Calculate bandwidth
     int bins = rightBin - leftBin - 1;
     bins = std::max(1, bins);
-    float hzPerBin = m_sampleRate / (float) m_fftSize;
+    float hzPerBin = getDisplayedSampleRate() / (float) m_fftSize;
     float bandwidth = bins * hzPerBin;
     int centerBin = leftBin + (rightBin - leftBin) / 2;
     float centerFrequency = binToFrequency(centerBin);
 
     if (m_measurements) {
-        m_measurements->set3dBBandwidth(bandwidth);
+        m_measurements->set3dBBandwidth(bandwidth, updateGUI);
     }
-    if (m_measurementHighlight) {
+    if (m_measurementHighlight && updateGUI) {
         drawBandwidthMarkers(centerFrequency, bandwidth, m_measurementLightMarkerColor);
     }
 }
@@ -2480,30 +2952,30 @@ float GLSpectrumView::calPower(float power) const
 
 int GLSpectrumView::frequencyToBin(int64_t frequency) const
 {
-    float rbw = (m_ssbSpectrum ? (m_sampleRate/2) : m_sampleRate) / (float)m_fftSize;
+    float rbw = (m_ssbSpectrum ? (getDisplayedSampleRate()/2) : getDisplayedSampleRate()) / (float)m_fftSize;
     return (frequency - m_frequencyScale.getRangeMin()) / rbw;
 }
 
 int64_t GLSpectrumView::binToFrequency(int bin) const
 {
-    float rbw = (m_ssbSpectrum ? (m_sampleRate/2) : m_sampleRate) / (float)m_fftSize;
+    float rbw = (m_ssbSpectrum ? (getDisplayedSampleRate()/2) : getDisplayedSampleRate()) / (float)m_fftSize;
     return m_frequencyScale.getRangeMin() + bin * rbw;
 }
 
 // Find a peak and measure SNR / THD / SINAD
-void GLSpectrumView::measureSNR()
+void GLSpectrumView::measureSNR(const Real *spectrum, bool updateGUI)
 {
     // Find bin with max peak - that will be our signal
-    int sig = findPeakBin(m_currentSpectrum);
+    int sig = findPeakBin(spectrum);
     int sigLeft, sigRight;
-    peakWidth(m_currentSpectrum, sig, sigLeft, sigRight, 0, m_nbBins);
+    peakWidth(spectrum, sig, sigLeft, sigRight, 0, m_nbBins);
     int sigBins = sigRight - sigLeft - 1;
     int binsLeft = sig - sigLeft;
     int binsRight = sigRight - sig;
 
     // Highlight the signal
     float sigFreq = binToFrequency(sig);
-    if (m_measurementHighlight) {
+    if (m_measurementHighlight && updateGUI) {
         drawPeakMarkers(binToFrequency(sigLeft+1), binToFrequency(sigRight-1), m_measurementLightMarkerColor);
     }
 
@@ -2518,16 +2990,16 @@ void GLSpectrumView::measureSNR()
         {
             int hBin = frequencyToBin(hFreq);
             // Check if peak is an adjacent bin
-            if (m_currentSpectrum[hBin-1] > m_currentSpectrum[hBin]) {
+            if (spectrum[hBin-1] > spectrum[hBin]) {
                 hBin--;
-            } else if (m_currentSpectrum[hBin+1] > m_currentSpectrum[hBin]) {
+            } else if (spectrum[hBin+1] > spectrum[hBin]) {
                 hBin++;
             }
             hFreq = binToFrequency(hBin);
             int hLeft, hRight;
-            peakWidth(m_currentSpectrum, hBin, hLeft, hRight, hBin - binsLeft, hBin + binsRight);
+            peakWidth(spectrum, hBin, hLeft, hRight, hBin - binsLeft, hBin + binsRight);
             int hBins = hRight - hLeft - 1;
-            if (m_measurementHighlight) {
+            if (m_measurementHighlight && updateGUI) {
                 drawPeakMarkers(binToFrequency(hLeft+1), binToFrequency(hRight-1), m_measurementDarkMarkerColor);
             }
             hBinsLeft.append(hLeft);
@@ -2548,9 +3020,9 @@ void GLSpectrumView::measureSNR()
     {
         float power;
         if (m_linear) {
-            power = m_currentSpectrum[i] * gain;
+            power = spectrum[i] * gain;
         } else {
-            power = CalcDb::powerFromdB(m_currentSpectrum[i]) + shift;
+            power = CalcDb::powerFromdB(spectrum[i]) + shift;
         }
 
         // Signal power
@@ -2613,16 +3085,16 @@ void GLSpectrumView::measureSNR()
         // Calculate SINAD - Signal to noise and distotion ratio (Should be -THD+N)
         float sinad = CalcDb::dbPower((sigPower + harmonicPower + noisePower) / (harmonicPower + noisePower));
 
-        m_measurements->setSNR(snr, snfr, thdDB, thdpn, sinad);
+        m_measurements->setSNR(snr, snfr, thdDB, thdpn, sinad, updateGUI);
     }
 }
 
-void GLSpectrumView::measureSFDR()
+void GLSpectrumView::measureSFDR(const Real *spectrum, bool updateGUI)
 {
     // Find first peak which is our signal
-    int peakBin = findPeakBin(m_currentSpectrum);
+    int peakBin = findPeakBin(spectrum);
     int peakLeft, peakRight;
-    peakWidth(m_currentSpectrum, peakBin, peakLeft, peakRight, 0, m_nbBins);
+    peakWidth(spectrum, peakBin, peakLeft, peakRight, 0, m_nbBins);
 
     // Find next largest peak, which is the spur
     int nextPeakBin = -1;
@@ -2631,27 +3103,27 @@ void GLSpectrumView::measureSFDR()
     {
         if ((i < peakLeft) || (i > peakRight))
         {
-            if (m_currentSpectrum[i] > nextPeakPower)
+            if (spectrum[i] > nextPeakPower)
             {
                 nextPeakBin = i;
-                nextPeakPower = m_currentSpectrum[i];
+                nextPeakPower = spectrum[i];
             }
         }
     }
     if (nextPeakBin != -1)
     {
         // Calculate SFDR in dB from difference between two peaks
-        float peakPower = calPower(m_currentSpectrum[peakBin]);
-        float nextPeakPower = calPower(m_currentSpectrum[nextPeakBin]);
+        float peakPower = calPower(spectrum[peakBin]);
+        float nextPeakPower = calPower(spectrum[nextPeakBin]);
         float peakPowerDB = CalcDb::dbPower(peakPower);
         float nextPeakPowerDB = CalcDb::dbPower(nextPeakPower);
         float sfdr = peakPowerDB - nextPeakPowerDB;
 
         // Display
         if (m_measurements) {
-            m_measurements->setSFDR(sfdr);
+            m_measurements->setSFDR(sfdr, updateGUI);
         }
-        if (m_measurementHighlight)
+        if (m_measurementHighlight && updateGUI)
         {
             if (m_linear) {
                 drawPowerBandMarkers(peakPower, nextPeakPower, m_measurementDarkMarkerColor);
@@ -2663,17 +3135,17 @@ void GLSpectrumView::measureSFDR()
 }
 
 // Find power and frequency of max peak in current spectrum
-void GLSpectrumView::findPeak(float &power, float &frequency) const
+void GLSpectrumView::findPeak(const Real *spectrum, float &power, float &frequency) const
 {
     int bin;
 
     bin = 0;
-    power = m_currentSpectrum[0];
+    power = spectrum[0];
     for (int i = 1; i < m_nbBins; i++)
     {
-        if (m_currentSpectrum[i] > power)
+        if (spectrum[i] > power)
         {
-            power = m_currentSpectrum[i];
+            power = spectrum[i];
             bin = i;
         }
     }
@@ -2685,9 +3157,9 @@ void GLSpectrumView::findPeak(float &power, float &frequency) const
 }
 
 // Calculate channel power in dB
-float GLSpectrumView::calcChannelPower(int64_t centerFrequency, int channelBandwidth) const
+float GLSpectrumView::calcChannelPower(const Real *spectrum, int64_t centerFrequency, int channelBandwidth) const
 {
-    float hzPerBin = m_sampleRate / (float) m_fftSize;
+    float hzPerBin = getDisplayedSampleRate() / (float) m_fftSize;
     int bins = channelBandwidth / hzPerBin;
     int start = frequencyToBin(centerFrequency) - (bins / 2);
     int end = start + bins;
@@ -2700,18 +3172,65 @@ float GLSpectrumView::calcChannelPower(int64_t centerFrequency, int channelBandw
     {
         float gain = m_useCalibration ? m_calibrationGain : 1.0f;
         for (int i = start; i < end; i++) {
-            power += m_currentSpectrum[i] * gain;
+            power += spectrum[i] * gain;
         }
     }
     else
     {
         float shift = m_useCalibration ? m_calibrationShiftdB : 0.0f;
         for (int i = start; i < end; i++) {
-            power += CalcDb::powerFromdB(m_currentSpectrum[i]) + shift;
+            power += CalcDb::powerFromdB(spectrum[i]) + shift;
         }
     }
 
     return CalcDb::dbPower(power);
+}
+
+// Test if current spectrum exceeds any of the masks held in spectrum memories
+void GLSpectrumView::measureMask(const Real *spectrum, int fftSize, bool updateGUI)
+{
+    if (!updateGUI)
+    {
+        for (int m = 0; m < m_spectrumMemory.size(); m++)
+        {
+            if ((m_measurementMemMasks & (1 << m)) != 0)
+            {
+                if (m_maskFails[m].size() < fftSize) {
+                    m_maskFails[m].resize(fftSize);
+                }
+
+                int s = std::min((int) m_spectrumMemory[m].m_spectrum.size(), fftSize);
+                bool fail = false;
+
+                for (int i = 0; i < s; i++)
+                {
+                    if (spectrum[i] > m_spectrumMemory[m].m_spectrum[i])
+                    {
+                        m_maskFails[m][i] = std::max(m_maskFails[m][i], spectrum[i]);
+                        fail = true;
+                    }
+                }
+
+                m_maskTestCount[m]++;
+                if (fail) {
+                    m_maskFailCount[m]++;
+                }
+            }
+        }
+    }
+    else
+    {
+        for (int m = 0; m < m_spectrumMemory.size(); m++)
+        {
+            if ((m_measurementMemMasks & (1 << m)) != 0)
+            {
+                if (m_measurements && updateGUI) {
+                    m_measurements->setMaskTestResult(m, m_maskTestCount[m], m_maskFailCount[m]);
+                }
+            }
+        }
+
+    }
 }
 
 void GLSpectrumView::stopDrag()
@@ -2727,28 +3246,137 @@ void GLSpectrumView::stopDrag()
     }
 }
 
+// Get text to display on waterfall vertical axis when displaying system time
+// value is [0,m_waterfallHeight], as set in setTimeScaleRange()
+QString GLSpectrumView::formatTick(double value) const
+{
+    int idx = value - scrollBarValue() + m_spectrumBuffer.size() - 1 - m_waterfallHeight;
+
+    if (idx >= 0 && idx < m_spectrumBuffer.size())
+    {
+        QDateTime dt = m_spectrumBuffer[idx].m_dateTime;
+
+        if (m_waterfallTimeUnits == SpectrumSettings::LocalTime) {
+            dt = dt.toLocalTime();
+        } else {
+            dt = dt.toUTC();
+        }
+        return dt.toString(m_waterfallTimeFormat);
+    }
+    else
+    {
+        return "";
+    }
+}
+
+void GLSpectrumView::setTimeScaleRange()
+{
+    if (m_waterfallTimeUnits != SpectrumSettings::TimeOffset)
+    {
+        // System clock times from when spectrum was captured - mapped to actual times in formatTick()
+        if (m_invertedWaterfall) {
+            m_timeScale.setRange(Unit::None, m_waterfallHeight, 0);
+        } else {
+            m_timeScale.setRange(Unit::None, 0, m_waterfallHeight);
+        }
+    }
+    else if (getDisplayedSampleRate() > 0)
+    {
+        float timeScaleDiv = ((float)getDisplayedSampleRate() / (float)m_timingRate);
+
+        if (m_fftSize > m_fftOverlap) {
+            timeScaleDiv *= m_fftSize / (float)(m_fftSize - m_fftOverlap);
+        }
+
+        int idx = scrollBarValue();
+        float timeMin = (idx * m_fftSize) / timeScaleDiv;
+        float timeMax = ((idx + m_waterfallHeight) * m_fftSize) / timeScaleDiv;
+
+        if (!m_invertedWaterfall) {
+            m_timeScale.setRange(m_timingRate > 1 ? Unit::TimeHMS : Unit::Time, timeMax / timeScaleDiv, timeMin);
+        } else {
+            m_timeScale.setRange(m_timingRate > 1 ? Unit::TimeHMS : Unit::Time, timeMin, timeMax);
+        }
+    }
+    else
+    {
+        if (!m_invertedWaterfall) {
+            m_timeScale.setRange(m_timingRate > 1 ? Unit::TimeHMS : Unit::Time, 0, 1);
+        } else {
+            m_timeScale.setRange(m_timingRate > 1 ? Unit::TimeHMS : Unit::Time, 1, 0);
+        }
+    }
+}
+
+void GLSpectrumView::paintLeftScales()
+{
+    QFontMetrics fm(font());
+    int M = fm.horizontalAdvance("-");
+
+    float maxSize = 0.0f;
+
+    m_leftMarginPixmap = QPixmap(m_leftMargin - 1, height());
+    m_leftMarginPixmap.fill(Qt::transparent);
+    {
+        QPainter painter(&m_leftMarginPixmap);
+        painter.setPen(QColor(0xf0, 0xf0, 0xff));
+        painter.setFont(font());
+        const ScaleEngine::TickList* tickList;
+        const ScaleEngine::Tick* tick;
+        if (m_displayWaterfall) {
+            tickList = &m_timeScale.getTickList();
+            for (int i = 0; i < tickList->count(); i++) {
+                tick = &(*tickList)[i];
+                if (tick->major)
+                {
+                    if (tick->textSize > 0)
+                        painter.drawText(QPointF(m_leftMargin - M - tick->textSize, m_waterfallTop + fm.ascent() + tick->textPos), tick->text);
+                    maxSize = std::max(maxSize, tick->textSize);
+                }
+            }
+        }
+        if (m_displayHistogram || m_displayMaxHold || m_displayCurrent) {
+            tickList = &m_powerScale.getTickList();
+            for (int i = 0; i < tickList->count(); i++) {
+                tick = &(*tickList)[i];
+                if (tick->major) {
+                    if (tick->textSize > 0)
+                        painter.drawText(QPointF(m_leftMargin - M - tick->textSize, m_histogramTop + m_histogramHeight - tick->textPos - 1), tick->text);
+                    maxSize = std::max(maxSize, tick->textSize);
+                }
+            }
+        }
+    }
+
+    if (maxSize >= m_leftMargin) {
+        m_changesPending = true; // Recalculate margin
+    }
+}
+
 void GLSpectrumView::applyChanges()
 {
     if (m_nbBins <= 0) {
         return;
     }
 
+    qint64 centerFrequency = getDisplayedCenterFrequency();
+
     QFontMetrics fm(font());
     int M = fm.horizontalAdvance("-");
 
-    m_topMargin = fm.ascent() * 2.0;
-    m_bottomMargin = fm.ascent() * 1.0;
+    m_topMargin = fm.ascent() * 2;
+    m_bottomMargin = fm.ascent() * 1;
     m_infoHeight = fm.height() * 3;
 
-    int waterfallTop = 0;
+    m_waterfallTop = 0;
     m_frequencyScaleHeight = fm.height() * 3; // +1 line for marker frequency scale
     int frequencyScaleTop = 0;
-    int histogramTop = 0;
+    m_histogramTop = 0;
     //int m_leftMargin;
     m_rightMargin = fm.horizontalAdvance("000");
 
     // displays both histogram and waterfall
-    if ((m_displayWaterfall || m_display3DSpectrogram) && (m_displayHistogram | m_displayMaxHold | m_displayCurrent))
+    if ((m_displayWaterfall || m_display3DSpectrogram) && (m_displayHistogram || m_displayMaxHold || m_displayCurrent))
     {
         m_waterfallHeight = height() * m_waterfallShare - 1;
 
@@ -2758,39 +3386,21 @@ void GLSpectrumView::applyChanges()
 
         if (m_invertedWaterfall)
         {
-            histogramTop = m_topMargin;
+            m_histogramTop = m_topMargin;
             m_histogramHeight = height() - m_topMargin - m_waterfallHeight - m_frequencyScaleHeight - m_bottomMargin;
-            waterfallTop = histogramTop + m_histogramHeight + m_frequencyScaleHeight + 1;
-            frequencyScaleTop = histogramTop + m_histogramHeight + 1;
+            m_waterfallTop = m_histogramTop + m_histogramHeight + m_frequencyScaleHeight + 1;
+            frequencyScaleTop = m_histogramTop + m_histogramHeight + 1;
         }
         else
         {
-            waterfallTop = m_topMargin;
-            frequencyScaleTop = waterfallTop + m_waterfallHeight + 1;
-            histogramTop = waterfallTop + m_waterfallHeight + m_frequencyScaleHeight + 1;
+            m_waterfallTop = m_topMargin;
+            frequencyScaleTop = m_waterfallTop + m_waterfallHeight + 1;
+            m_histogramTop = m_waterfallTop + m_waterfallHeight + m_frequencyScaleHeight + 1;
             m_histogramHeight = height() - m_topMargin - m_waterfallHeight - m_frequencyScaleHeight - m_bottomMargin;
         }
 
         m_timeScale.setSize(m_waterfallHeight);
-
-        if (m_sampleRate > 0)
-        {
-            float timeScaleDiv = ((float)m_sampleRate / (float)m_timingRate);
-
-            if (m_fftSize > m_fftOverlap) {
-                timeScaleDiv *= m_fftSize / (float)(m_fftSize - m_fftOverlap);
-            }
-
-            if (!m_invertedWaterfall) {
-                m_timeScale.setRange(m_timingRate > 1 ? Unit::TimeHMS : Unit::Time, (m_waterfallHeight * m_fftSize) / timeScaleDiv, 0);
-            } else {
-                m_timeScale.setRange(m_timingRate > 1 ? Unit::TimeHMS : Unit::Time, 0, (m_waterfallHeight * m_fftSize) / timeScaleDiv);
-            }
-        }
-        else
-        {
-            m_timeScale.setRange(Unit::Time, 0, 1);
-        }
+        setTimeScaleRange();
 
         m_leftMargin = m_timeScale.getScaleWidth();
 
@@ -2803,7 +3413,7 @@ void GLSpectrumView::applyChanges()
         m_glWaterfallBoxMatrix.setToIdentity();
         m_glWaterfallBoxMatrix.translate(
             -1.0f + ((float)(2*m_leftMargin)   / (float) width()),
-            1.0f - ((float)(2*waterfallTop) / (float) height())
+            1.0f - ((float)(2*m_waterfallTop) / (float) height())
         );
         m_glWaterfallBoxMatrix.scale(
             ((float) 2 * (width() - m_leftMargin - m_rightMargin)) / (float) width(),
@@ -2813,7 +3423,7 @@ void GLSpectrumView::applyChanges()
         m_glHistogramBoxMatrix.setToIdentity();
         m_glHistogramBoxMatrix.translate(
             -1.0f + ((float)(2*m_leftMargin)   / (float) width()),
-            1.0f - ((float)(2*histogramTop) / (float) height())
+            1.0f - ((float)(2*m_histogramTop) / (float) height())
         );
         m_glHistogramBoxMatrix.scale(
             ((float) 2 * (width() - m_leftMargin - m_rightMargin)) / (float) width(),
@@ -2823,7 +3433,7 @@ void GLSpectrumView::applyChanges()
         m_glHistogramSpectrumMatrix.setToIdentity();
         m_glHistogramSpectrumMatrix.translate(
             -1.0f + ((float)(2*m_leftMargin)   / (float) width()),
-            1.0f - ((float)(2*histogramTop) / (float) height())
+            1.0f - ((float)(2*m_histogramTop) / (float) height())
         );
         m_glHistogramSpectrumMatrix.scale(
             ((float) 2 * (width() - m_leftMargin - m_rightMargin)) / ((float) width() * (float)(m_nbBins)),
@@ -2858,36 +3468,14 @@ void GLSpectrumView::applyChanges()
     else if (m_displayWaterfall || m_display3DSpectrogram)
     {
         m_histogramHeight = 0;
-        histogramTop = 0;
+        m_histogramTop = 0;
         m_bottomMargin = m_frequencyScaleHeight;
         m_waterfallHeight = height() - m_topMargin - m_frequencyScaleHeight;
-        waterfallTop = m_topMargin;
+        m_waterfallTop = m_topMargin;
         frequencyScaleTop = m_topMargin + m_waterfallHeight + 1;
 
         m_timeScale.setSize(m_waterfallHeight);
-
-        if (m_sampleRate > 0)
-        {
-            float timeScaleDiv = ((float)m_sampleRate / (float)m_timingRate);
-
-            if (m_fftSize > m_fftOverlap) {
-                timeScaleDiv *= m_fftSize / (float)(m_fftSize - m_fftOverlap);
-            }
-
-            if (!m_invertedWaterfall) {
-                m_timeScale.setRange(m_timingRate > 1 ? Unit::TimeHMS : Unit::Time, (m_waterfallHeight * m_fftSize) / timeScaleDiv, 0);
-            } else {
-                m_timeScale.setRange(m_timingRate > 1 ? Unit::TimeHMS : Unit::Time, 0, (m_waterfallHeight * m_fftSize) / timeScaleDiv);
-            }
-        }
-        else
-        {
-            if (!m_invertedWaterfall) {
-                m_timeScale.setRange(m_timingRate > 1 ? Unit::TimeHMS : Unit::Time, 10, 0);
-            } else {
-                m_timeScale.setRange(m_timingRate > 1 ? Unit::TimeHMS : Unit::Time, 0, 10);
-            }
-        }
+        setTimeScaleRange();
 
         m_leftMargin = m_timeScale.getScaleWidth();
 
@@ -2936,7 +3524,7 @@ void GLSpectrumView::applyChanges()
     {
         m_bottomMargin = m_frequencyScaleHeight;
         frequencyScaleTop = height() - m_bottomMargin;
-        histogramTop = m_topMargin - 1;
+        m_histogramTop = m_topMargin - 1;
         m_waterfallHeight = 0;
         m_histogramHeight = height() - m_topMargin - m_frequencyScaleHeight;
 
@@ -2951,7 +3539,7 @@ void GLSpectrumView::applyChanges()
         m_glHistogramSpectrumMatrix.setToIdentity();
         m_glHistogramSpectrumMatrix.translate(
             -1.0f + ((float)(2*m_leftMargin)   / (float) width()),
-            1.0f - ((float)(2*histogramTop) / (float) height())
+            1.0f - ((float)(2*m_histogramTop) / (float) height())
         );
         m_glHistogramSpectrumMatrix.scale(
             ((float) 2 * (width() - m_leftMargin - m_rightMargin)) / ((float) width() * (float)(m_nbBins)),
@@ -2961,7 +3549,7 @@ void GLSpectrumView::applyChanges()
         m_glHistogramBoxMatrix.setToIdentity();
         m_glHistogramBoxMatrix.translate(
             -1.0f + ((float)(2*m_leftMargin)   / (float) width()),
-            1.0f - ((float)(2*histogramTop) / (float) height())
+            1.0f - ((float)(2*m_histogramTop) / (float) height())
         );
         m_glHistogramBoxMatrix.scale(
             ((float) 2 * (width() - m_leftMargin - m_rightMargin)) / (float) width(),
@@ -3022,7 +3610,7 @@ void GLSpectrumView::applyChanges()
     {
         m_histogramRect = QRectF(
             (float) m_leftMargin / (float) width(),
-            (float) (waterfallTop + m_waterfallHeight + m_frequencyScaleHeight) / (float) height(),
+            (float) (m_waterfallTop + m_waterfallHeight + m_frequencyScaleHeight) / (float) height(),
             (float) (width() - m_leftMargin - m_rightMargin) / (float) width(),
             (float) m_histogramHeight / (float) height()
         );
@@ -3055,9 +3643,9 @@ void GLSpectrumView::applyChanges()
     }
 
     // channel overlays
-    int64_t centerFrequency;
+    int64_t centerFrequencyUnused;
     int frequencySpan;
-    getFrequencyZoom(centerFrequency, frequencySpan);
+    getFrequencyZoom(centerFrequencyUnused, frequencySpan);
 
     for (int i = 0; i < m_channelMarkerStates.size(); ++i)
     {
@@ -3065,7 +3653,7 @@ void GLSpectrumView::applyChanges()
 
         qreal xc, pw, nw, dsbw;
         ChannelMarker::sidebands_t sidebands = dv->m_channelMarker->getSidebands();
-        xc = m_centerFrequency + dv->m_channelMarker->getCenterFrequency(); // marker center frequency
+        xc = centerFrequency + dv->m_channelMarker->getCenterFrequency(); // marker center frequency
         dsbw = dv->m_channelMarker->getBandwidth();
 
         if (sidebands == ChannelMarker::usb)
@@ -3111,7 +3699,7 @@ void GLSpectrumView::applyChanges()
         dv->m_glMatrixDsbWaterfall = glMatrixDsb;
         dv->m_glMatrixDsbWaterfall.translate(
             0.0f,
-            (float) waterfallTop / (float) height()
+            (float) m_waterfallTop / (float) height()
         );
         dv->m_glMatrixDsbWaterfall.scale(
             (float) (width() - m_leftMargin - m_rightMargin) / (float) width(),
@@ -3121,7 +3709,7 @@ void GLSpectrumView::applyChanges()
         dv->m_glMatrixDsbHistogram = glMatrixDsb;
         dv->m_glMatrixDsbHistogram.translate(
             0.0f,
-            (float) histogramTop / (float) height()
+            (float) m_histogramTop / (float) height()
         );
         dv->m_glMatrixDsbHistogram.scale(
             (float) (width() - m_leftMargin - m_rightMargin) / (float) width(),
@@ -3154,7 +3742,7 @@ void GLSpectrumView::applyChanges()
         dv->m_glMatrixWaterfall = glMatrix;
         dv->m_glMatrixWaterfall.translate(
             0.0f,
-            (float) waterfallTop / (float) height()
+            (float) m_waterfallTop / (float) height()
         );
         dv->m_glMatrixWaterfall.scale(
             (float) (width() - m_leftMargin - m_rightMargin) / (float) width(),
@@ -3164,7 +3752,7 @@ void GLSpectrumView::applyChanges()
         dv->m_glMatrixHistogram = glMatrix;
         dv->m_glMatrixHistogram.translate(
             0.0f,
-            (float) histogramTop / (float) height()
+            (float) m_histogramTop / (float) height()
         );
         dv->m_glMatrixHistogram.scale(
             (float) (width() - m_leftMargin - m_rightMargin) / (float) width(),
@@ -3184,9 +3772,9 @@ void GLSpectrumView::applyChanges()
 
         /*
         dv->m_glRect.setRect(
-            m_frequencyScale.getPosFromValue(m_centerFrequency + dv->m_channelMarker->getCenterFrequency() - dv->m_channelMarker->getBandwidth() / 2) / (float)(width() - m_leftMargin - m_rightMargin),
+            m_frequencyScale.getPosFromValue(centerFrequency + dv->m_channelMarker->getCenterFrequency() - dv->m_channelMarker->getBandwidth() / 2) / (float)(width() - m_leftMargin - m_rightMargin),
             0,
-            (dv->m_channelMarker->getBandwidth() / (float)m_sampleRate),
+            (dv->m_channelMarker->getBandwidth() / (float)getDisplayedSampleRate()),
             1);
         */
 
@@ -3200,7 +3788,7 @@ void GLSpectrumView::applyChanges()
 
         /*
         if(m_displayHistogram || m_displayMaxHold || m_displayWaterfall) {
-            dv->m_rect.setRect(m_frequencyScale.getPosFromValue(m_centerFrequency + dv->m_channelMarker->getCenterFrequency()) + m_leftMargin - 1,
+            dv->m_rect.setRect(m_frequencyScale.getPosFromValue(centerFrequency + dv->m_channelMarker->getCenterFrequency()) + m_leftMargin - 1,
             m_topMargin,
             5,
             height() - m_topMargin - m_bottomMargin);
@@ -3209,39 +3797,9 @@ void GLSpectrumView::applyChanges()
     }
 
     // prepare left scales (time and power)
-    {
-        m_leftMarginPixmap = QPixmap(m_leftMargin - 1, height());
-        m_leftMarginPixmap.fill(Qt::transparent);
-        {
-            QPainter painter(&m_leftMarginPixmap);
-            painter.setPen(QColor(0xf0, 0xf0, 0xff));
-            painter.setFont(font());
-            const ScaleEngine::TickList* tickList;
-            const ScaleEngine::Tick* tick;
-            if (m_displayWaterfall) {
-                tickList = &m_timeScale.getTickList();
-                for (int i = 0; i < tickList->count(); i++) {
-                    tick = &(*tickList)[i];
-                    if (tick->major) {
-                        if (tick->textSize > 0)
-                            painter.drawText(QPointF(m_leftMargin - M - tick->textSize, waterfallTop + fm.ascent() + tick->textPos), tick->text);
-                    }
-                }
-            }
-            if (m_displayHistogram || m_displayMaxHold || m_displayCurrent) {
-                tickList = &m_powerScale.getTickList();
-                for (int i = 0; i < tickList->count(); i++) {
-                    tick = &(*tickList)[i];
-                    if (tick->major) {
-                        if (tick->textSize > 0)
-                            painter.drawText(QPointF(m_leftMargin - M - tick->textSize, histogramTop + m_histogramHeight - tick->textPos - 1), tick->text);
-                    }
-                }
-            }
-        }
+    paintLeftScales();
+    m_glShaderLeftScale.initTexture(m_leftMarginPixmap.toImage());
 
-        m_glShaderLeftScale.initTexture(m_leftMarginPixmap.toImage());
-    }
     // prepare frequency scale
     if (m_displayWaterfall || m_display3DSpectrogram || m_displayHistogram || m_displayMaxHold || m_displayCurrent) {
         m_frequencyPixmap = QPixmap(width(), m_frequencyScaleHeight);
@@ -3277,12 +3835,12 @@ void GLSpectrumView::applyChanges()
                     qreal xc;
                     int shift;
                     //ChannelMarker::sidebands_t sidebands = dv->m_channelMarker->getSidebands();
-                    xc = m_centerFrequency + dv->m_channelMarker->getCenterFrequency(); // marker center frequency
+                    xc = centerFrequency + dv->m_channelMarker->getCenterFrequency(); // marker center frequency
                     QString ftext;
                     switch (dv->m_channelMarker->getFrequencyScaleDisplayType())
                     {
                     case ChannelMarker::FScaleDisplay_freq:
-                        ftext = QString::number((m_centerFrequency + dv->m_channelMarker->getCenterFrequency())/1e6, 'f', 6);
+                        ftext = QString::number((centerFrequency + dv->m_channelMarker->getCenterFrequency())/1e6, 'f', 6);
                         break;
                     case ChannelMarker::FScaleDisplay_title:
                         ftext = dv->m_channelMarker->getTitle();
@@ -3294,7 +3852,7 @@ void GLSpectrumView::applyChanges()
                         ftext = dv->m_channelMarker->getDisplayAddressReceive();
                         break;
                     default:
-                        ftext = QString::number((m_centerFrequency + dv->m_channelMarker->getCenterFrequency())/1e6, 'f', 6);
+                        ftext = QString::number((centerFrequency + dv->m_channelMarker->getCenterFrequency())/1e6, 'f', 6);
                         break;
                     }
                     if (dv->m_channelMarker->getCenterFrequency() < 0) { // left half of scale
@@ -3392,16 +3950,27 @@ void GLSpectrumView::applyChanges()
         painter.setFont(font());
         painter.drawText(QPointF(m_leftMargin, fm.height() + fm.ascent() / 2 - 2), infoText);
     }
-
     m_glShaderInfo.initTexture(m_infoPixmap.toImage());
 
     // Peak details in top info line
-    QString minFrequencyStr = displayFull(m_centerFrequency - m_sampleRate/2); // This can be wider if negative, while max is positive
-    QString maxFrequencyStr = displayFull(m_centerFrequency + m_sampleRate/2);
+    QString minFrequencyStr = displayFull(centerFrequency - getDisplayedSampleRate()/2); // This can be wider if negative, while max is positive
+    QString maxFrequencyStr = displayFull(centerFrequency + getDisplayedSampleRate()/2);
     m_peakFrequencyMaxStr = minFrequencyStr.size() > maxFrequencyStr.size() ? minFrequencyStr : maxFrequencyStr;
     m_peakFrequencyMaxStr = m_peakFrequencyMaxStr.append("Hz");
     m_peakPowerMaxStr = m_linear ? "8.000e-10" : "-100.0";
     m_peakPowerUnits = m_linear ? "" : "dB";
+
+    m_glShaderSpectrogram.initColorMapTexture(m_colorMapName);
+    m_glShaderColorMap.initColorMapTexture(m_colorMapName);
+    m_colorMap = ColorMap::getColorMap(m_colorMapName);
+    // Why only 240 entries in the palette?
+    for (int i = 0; i <= 239; i++)
+    {
+        ((quint8*)&m_waterfallPalette[i])[0] = (quint8)(m_colorMap[i*3] * 255.0);
+        ((quint8*)&m_waterfallPalette[i])[1] = (quint8)(m_colorMap[i*3+1] * 255.0);
+        ((quint8*)&m_waterfallPalette[i])[2] = (quint8)(m_colorMap[i*3+2] * 255.0);
+        ((quint8*)&m_waterfallPalette[i])[3] = 255;
+    }
 
     bool waterfallFFTSizeChanged = true;
 
@@ -3445,18 +4014,6 @@ void GLSpectrumView::applyChanges()
         m_3DSpectrogramTexturePos = 0;
     }
 
-    m_glShaderSpectrogram.initColorMapTexture(m_colorMapName);
-    m_glShaderColorMap.initColorMapTexture(m_colorMapName);
-    m_colorMap = ColorMap::getColorMap(m_colorMapName);
-    // Why only 240 entries in the palette?
-    for (int i = 0; i <= 239; i++)
-    {
-        ((quint8*)&m_waterfallPalette[i])[0] = (quint8)(m_colorMap[i*3] * 255.0);
-        ((quint8*)&m_waterfallPalette[i])[1] = (quint8)(m_colorMap[i*3+1] * 255.0);
-        ((quint8*)&m_waterfallPalette[i])[2] = (quint8)(m_colorMap[i*3+2] * 255.0);
-        ((quint8*)&m_waterfallPalette[i])[3] = 255;
-    }
-
     bool histogramFFTSizeChanged = true;
 
     if (m_histogramBuffer) {
@@ -3487,6 +4044,21 @@ void GLSpectrumView::applyChanges()
         std::fill(m_q3ColorMap.m_array, m_q3ColorMap.m_array+4*(m_nbBins+1), 0.0f);
     }
 
+    if (m_redrawAll)
+    {
+        redrawSpectrum();
+        redrawWaterfallAnd3DSpectrogram();
+        m_redrawAll = false;
+    }
+    else if (waterfallFFTSizeChanged || windowSizeChanged)
+    {
+        redrawWaterfallAnd3DSpectrogram();
+    }
+    else if (histogramFFTSizeChanged)
+    {
+        redrawSpectrum();
+    }
+
     m_q3TickTime.allocate(4*m_timeScale.getTickList().count());
     m_q3TickFrequency.allocate(4*m_frequencyScale.getTickList().count());
     m_q3TickPower.allocate(6*m_powerScale.getTickList().count());   // 6 as we need 3d points for 3D spectrogram
@@ -3497,13 +4069,13 @@ void GLSpectrumView::applyChanges()
 
 void GLSpectrumView::updateHistogramMarkers()
 {
-    if (m_sampleRate == 0) {
+    if (getDisplayedSampleRate() == 0) {
         return;
     }
     int64_t centerFrequency;
     int frequencySpan;
     getFrequencyZoom(centerFrequency, frequencySpan);
-    int effFftSize = m_fftSize * ((float) frequencySpan / (float) m_sampleRate);
+    int effFftSize = m_fftSize * ((float) frequencySpan / (float) getDisplayedSampleRate());
 
     for (int i = 0; i < m_histogramMarkers.size(); i++)
     {
@@ -3515,7 +4087,7 @@ void GLSpectrumView::updateHistogramMarkers()
         m_histogramMarkers[i].m_point.ry() =
             (m_powerScale.getRangeMax() - powerI) / m_powerScale.getRange();
         // m_histogramMarkers[i].m_fftBin =
-        //     (((m_histogramMarkers[i].m_frequency - m_centerFrequency) / (float) m_sampleRate) + 0.5) * m_fftSize;
+        //     (((m_histogramMarkers[i].m_frequency - centerFrequency) / (float) getDisplayedSampleRate()) + 0.5) * m_fftSize;
         m_histogramMarkers[i].m_fftBin =
             (((m_histogramMarkers[i].m_frequency - centerFrequency) / (float) frequencySpan) + 0.5) * effFftSize;
         m_histogramMarkers[i].m_point.rx() = m_histogramMarkers[i].m_point.rx() < 0 ?
@@ -3530,7 +4102,7 @@ void GLSpectrumView::updateHistogramMarkers()
         m_histogramMarkers[i].m_frequencyStr = displayScaled(
             m_histogramMarkers[i].m_frequency,
             'f',
-            getPrecision((m_centerFrequency*1000)/m_sampleRate),
+            getPrecision((centerFrequency*1000)/getDisplayedSampleRate()),
             false);
         m_histogramMarkers[i].m_powerStr = displayPower(
             powerI,
@@ -3543,7 +4115,7 @@ void GLSpectrumView::updateHistogramMarkers()
             m_histogramMarkers[i].m_deltaFrequencyStr = displayScaled(
                 deltaFrequency,
                 'f',
-                getPrecision(deltaFrequency/m_sampleRate),
+                getPrecision(deltaFrequency/getDisplayedSampleRate()),
                 true);
             float power0 = m_linear ?
                 m_histogramMarkers.at(0).m_power * (m_useCalibration ? m_calibrationGain : 1.0f) :
@@ -3583,7 +4155,7 @@ void GLSpectrumView::updateHistogramPeaks()
                 m_histogramMarkers[i].m_frequencyStr = displayScaled(
                     m_histogramMarkers[i].m_frequency,
                     'f',
-                    getPrecision((m_centerFrequency*1000)/m_sampleRate),
+                    getPrecision((getDisplayedCenterFrequency()*1000)/getDisplayedSampleRate()),
                     false
                 );
             }
@@ -3593,7 +4165,7 @@ void GLSpectrumView::updateHistogramPeaks()
                 m_histogramMarkers[i].m_deltaFrequencyStr = displayScaled(
                     deltaFrequency,
                     'f',
-                    getPrecision(deltaFrequency/m_sampleRate),
+                    getPrecision(deltaFrequency/getDisplayedSampleRate()),
                     true
                 );
             }
@@ -3624,7 +4196,7 @@ void GLSpectrumView::updateWaterfallMarkers()
         m_waterfallMarkers[i].m_frequencyStr = displayScaled(
             m_waterfallMarkers[i].m_frequency,
             'f',
-            getPrecision((m_centerFrequency*1000)/m_sampleRate),
+            getPrecision((getDisplayedCenterFrequency()*1000)/getDisplayedSampleRate()),
             false);
         m_waterfallMarkers[i].m_timeStr = displayScaledF(
             m_waterfallMarkers[i].m_time,
@@ -3638,7 +4210,7 @@ void GLSpectrumView::updateWaterfallMarkers()
             m_waterfallMarkers.back().m_deltaFrequencyStr = displayScaled(
                 deltaFrequency,
                 'f',
-                getPrecision(deltaFrequency/m_sampleRate),
+                getPrecision(deltaFrequency/getDisplayedSampleRate()),
                 true);
             m_waterfallMarkers.back().m_deltaTimeStr = displayScaledF(
                 m_waterfallMarkers.at(i).m_time - m_waterfallMarkers.at(0).m_time,
@@ -3716,13 +4288,13 @@ void GLSpectrumView::updateCalibrationPoints()
         QList<SpectrumCalibrationPoint> sortedCalibrationPoints = m_calibrationPoints;
         std::sort(sortedCalibrationPoints.begin(), sortedCalibrationPoints.end(), calibrationPointsLessThan);
 
-        if (m_centerFrequency <= sortedCalibrationPoints.first().m_frequency)
+        if (getDisplayedCenterFrequency() <= sortedCalibrationPoints.first().m_frequency)
         {
             m_calibrationGain = m_calibrationPoints.first().m_powerCalibratedReference /
                 m_calibrationPoints.first().m_powerRelativeReference;
             m_calibrationShiftdB = CalcDb::dbPower(m_calibrationGain);
         }
-        else if (m_centerFrequency >= sortedCalibrationPoints.last().m_frequency)
+        else if (getDisplayedCenterFrequency() >= sortedCalibrationPoints.last().m_frequency)
         {
             m_calibrationGain = m_calibrationPoints.last().m_powerCalibratedReference /
                 m_calibrationPoints.last().m_powerRelativeReference;
@@ -3735,7 +4307,7 @@ void GLSpectrumView::updateCalibrationPoints()
 
             for (int index = 0; index < sortedCalibrationPoints.size(); index++)
             {
-                if (m_centerFrequency < sortedCalibrationPoints[index].m_frequency)
+                if (getDisplayedCenterFrequency() < sortedCalibrationPoints[index].m_frequency)
                 {
                     highIndex = index;
                     break;
@@ -3749,7 +4321,7 @@ void GLSpectrumView::updateCalibrationPoints()
             // frequency interpolation is always linear
             double deltaFrequency = sortedCalibrationPoints[highIndex].m_frequency -
                 sortedCalibrationPoints[lowIndex].m_frequency;
-            double shiftFrequency = m_centerFrequency - sortedCalibrationPoints[lowIndex].m_frequency;
+            double shiftFrequency = getDisplayedCenterFrequency() - sortedCalibrationPoints[lowIndex].m_frequency;
             double interpolationRatio = shiftFrequency / deltaFrequency;
 
             // calculate low and high gains in linear mode
@@ -3792,7 +4364,7 @@ bool GLSpectrumView::event(QEvent* event)
         {
             if (pan->state() == Qt::GestureStarted)
             {
-                m_scrollStartCenterFreq = m_centerFrequency;
+                m_scrollStartCenterFreq = getDisplayedCenterFrequency();
             }
             else if (pan->state() == Qt::GestureUpdated)
             {
@@ -3809,7 +4381,7 @@ bool GLSpectrumView::event(QEvent* event)
             // https://bugreports.qt.io/browse/QTBUG-109205
             if (!m_pinching)
             {
-                m_scrollStartCenterFreq = m_centerFrequency;
+                m_scrollStartCenterFreq = getDisplayedCenterFrequency();
                 m_pinchStart = pinch->centerPoint();
                 m_pinching = true;
                 m_pinching3D = m_display3DSpectrogram && pointInWaterfallOrSpectrogram(mapFromGlobal(m_pinchStart.toPoint()));
@@ -3856,6 +4428,32 @@ bool GLSpectrumView::event(QEvent* event)
 
 void GLSpectrumView::mouseMoveEvent(QMouseEvent* event)
 {
+    if (m_displayCursorStats)
+    {
+        if ((m_displayMaxHold || m_displayCurrent || m_displayHistogram) && pointInHistogram(event->localPos()))
+        {
+            m_cursorOverSpectrum = true;
+
+            // Calculate frequency under the cursor
+            const QPointF& ep = event->localPos();
+            QPointF pHis = ep;
+            pHis.rx() = (ep.x()/width() - m_histogramRect.left()) / m_histogramRect.width();
+            pHis.ry() = (ep.y()/height() - m_histogramRect.top()) / m_histogramRect.height();
+            m_cursorFrequency = m_frequencyScale.getRangeMin() + pHis.x()*m_frequencyScale.getRange();
+
+            // Calculate FFT bin under the cursor
+            float f = (m_cursorFrequency - m_frequencyScale.getRangeMin()) / m_frequencyScale.getRange(); // [0..1] fraction of zoomed frequency range
+            f += 1.0f / (2.0f * m_nbBins); // Shift by half a bin to get center of bin rather than edge
+            m_cursorFFTBin = (int) (m_fftMin + f * m_nbBins) % m_fftSize;
+
+            m_displayChanged = true;
+        }
+        else
+        {
+            m_cursorOverSpectrum = false;
+        }
+    }
+
     if (m_rotate3DSpectrogram && !m_pinching3D)
     {
         // Rotate 3D Spectrogram
@@ -3955,15 +4553,15 @@ void GLSpectrumView::mouseMoveEvent(QMouseEvent* event)
         // and if so, request an adjustment to the center frequency
         // FIXME: This doesn't take zoom into account, so only works when zoomed out
         Real freqAbs = m_frequencyScale.getValueFromPos(event->x() - m_leftMarginPixmap.width() - 1);
-        Real freqMin = m_centerFrequency - m_sampleRate / 2.0f;
-        Real freqMax = m_centerFrequency + m_sampleRate / 2.0f;
+        Real freqMin = getDisplayedCenterFrequency() - getDisplayedSampleRate() / 2.0f;
+        Real freqMax = getDisplayedCenterFrequency() + getDisplayedSampleRate() / 2.0f;
         if (freqAbs < freqMin) {
-            queueRequestCenterFrequency(m_centerFrequency - (freqMin - freqAbs));
+            queueRequestCenterFrequency(getDisplayedCenterFrequency() - (freqMin - freqAbs));
         } else if (freqAbs > freqMax) {
-            queueRequestCenterFrequency(m_centerFrequency + (freqAbs - freqMax));
+            queueRequestCenterFrequency(getDisplayedCenterFrequency() + (freqAbs - freqMax));
         }
 
-        Real freq = freqAbs - m_centerFrequency;
+        Real freq = freqAbs - getDisplayedCenterFrequency();
         if (m_channelMarkerStates[m_cursorChannel]->m_channelMarker->getMovable()
             && (m_channelMarkerStates[m_cursorChannel]->m_channelMarker->getSourceOrSinkStream() == m_displaySourceOrSink)
             && m_channelMarkerStates[m_cursorChannel]->m_channelMarker->streamIndexApplies(m_displayStreamIndex))
@@ -4031,7 +4629,7 @@ void GLSpectrumView::mousePressEvent(QMouseEvent* event)
     if ((event->button() == Qt::MiddleButton) && (m_displayMaxHold || m_displayCurrent || m_displayHistogram) && pointInHistogram(ep))
     {
         m_scrollFrequency = true;
-        m_scrollStartCenterFreq = m_centerFrequency;
+        m_scrollStartCenterFreq = getDisplayedCenterFrequency();
         m_mousePrevLocalPos = ep;
         return;
     }
@@ -4122,7 +4720,7 @@ void GLSpectrumView::mousePressEvent(QMouseEvent* event)
             float frequency = m_frequencyScale.getRangeMin() + pHis.x()*m_frequencyScale.getRange();
             float powerVal = m_powerScale.getRangeMax() - pHis.y()*m_powerScale.getRange();
             float power = m_linear ? powerVal : CalcDb::powerFromdB(powerVal);
-            int fftBin = (((frequency - m_centerFrequency) / (float) m_sampleRate) * m_fftSize) + (m_fftSize / 2);
+            int fftBin = (((frequency - getDisplayedCenterFrequency()) / (float) getDisplayedSampleRate()) * m_fftSize) + (m_fftSize / 2);
 
             if ((pHis.x() >= 0) && (pHis.x() <= 1) && (pHis.y() >= 0) && (pHis.y() <= 1))
             {
@@ -4135,7 +4733,7 @@ void GLSpectrumView::mousePressEvent(QMouseEvent* event)
                     m_histogramMarkers.back().m_frequencyStr = displayScaled(
                         frequency,
                         'f',
-                        getPrecision((m_centerFrequency*1000)/m_sampleRate),
+                        getPrecision((getDisplayedCenterFrequency()*1000)/getDisplayedSampleRate()),
                         false);
                     m_histogramMarkers.back().m_power = power;
                     m_histogramMarkers.back().m_powerStr = displayPower(
@@ -4149,7 +4747,7 @@ void GLSpectrumView::mousePressEvent(QMouseEvent* event)
                         m_histogramMarkers.back().m_deltaFrequencyStr = displayScaled(
                             deltaFrequency,
                             'f',
-                            getPrecision(deltaFrequency/m_sampleRate),
+                            getPrecision(deltaFrequency/getDisplayedSampleRate()),
                             true);
                         float power0 = m_linear ?
                             m_histogramMarkers.at(0).m_power :
@@ -4183,7 +4781,7 @@ void GLSpectrumView::mousePressEvent(QMouseEvent* event)
                     m_waterfallMarkers.back().m_frequencyStr = displayScaled(
                         frequency,
                         'f',
-                        getPrecision((m_centerFrequency*1000)/m_sampleRate),
+                        getPrecision((getDisplayedCenterFrequency()*1000)/getDisplayedSampleRate()),
                         false);
                     m_waterfallMarkers.back().m_time = time;
                     m_waterfallMarkers.back().m_timeStr = displayScaledF(
@@ -4198,7 +4796,7 @@ void GLSpectrumView::mousePressEvent(QMouseEvent* event)
                         m_waterfallMarkers.back().m_deltaFrequencyStr = displayScaled(
                             deltaFrequency,
                             'f',
-                            getPrecision(deltaFrequency/m_sampleRate),
+                            getPrecision(deltaFrequency/getDisplayedSampleRate()),
                             true);
                         m_waterfallMarkers.back().m_deltaTimeStr = displayScaledF(
                             time - m_waterfallMarkers.at(0).m_time,
@@ -4306,7 +4904,7 @@ void GLSpectrumView::mousePressEvent(QMouseEvent* event)
             setCursor(Qt::SizeHorCursor);
             m_cursorState = CSChannelMoving;
             m_cursorChannel = 0;
-            Real freq = m_frequencyScale.getValueFromPos(event->x() - m_leftMarginPixmap.width() - 1) - m_centerFrequency;
+            Real freq = m_frequencyScale.getValueFromPos(event->x() - m_leftMarginPixmap.width() - 1) - getDisplayedCenterFrequency();
 
             if (m_channelMarkerStates[m_cursorChannel]->m_channelMarker->getMovable()
                 && (m_channelMarkerStates[m_cursorChannel]->m_channelMarker->getSourceOrSinkStream() == m_displaySourceOrSink)
@@ -4383,7 +4981,7 @@ void GLSpectrumView::zoomFactor(const QPointF& p, float factor)
         float zoomFreq = m_frequencyScale.getRangeMin() + pwx*m_frequencyScale.getRange();
 
         // Calculate current centre frequency
-        float currentCF = (m_frequencyZoomFactor == 1) ? m_centerFrequency : ((m_frequencyZoomPos - 0.5) * m_sampleRate + m_centerFrequency);
+        float currentCF = (m_frequencyZoomFactor == 1) ? getDisplayedCenterFrequency() : ((m_frequencyZoomPos - 0.5) * getDisplayedSampleRate() + getDisplayedCenterFrequency());
 
         // Calculate difference from frequency under cursor to centre frequency
         float freqDiff = (currentCF - zoomFreq);
@@ -4401,16 +4999,18 @@ void GLSpectrumView::zoomFactor(const QPointF& p, float factor)
         float zoomedCF = zoomFreq + zoomedFreqDiff;
 
         // Calculate zoom position which will set the desired center frequency
-        float zoomPos = (zoomedCF - m_centerFrequency) / m_sampleRate + 0.5;
+        float zoomPos = (zoomedCF - getDisplayedCenterFrequency()) / getDisplayedSampleRate() + 0.5;
         zoomPos = std::max(0.0f, zoomPos);
         zoomPos = std::min(1.0f, zoomPos);
 
         frequencyZoom(zoomPos);
     }
- }
+}
 
 void GLSpectrumView::zoom(const QPointF& p, int y)
 {
+    QMutexLocker mutexLocker(&m_mutex); // Lock to ensure we don't try to redraw mid calculation of zoom and fftMin/fftMax
+
     float pwx = (p.x() - m_leftMargin) / (width() - m_leftMargin - m_rightMargin); // x position in window
 
     if ((pwx >= 0.0f) && (pwx <= 1.0f))
@@ -4421,8 +5021,8 @@ void GLSpectrumView::zoom(const QPointF& p, int y)
         float zoomFreq = m_frequencyScale.getRangeMin() + pwx*m_frequencyScale.getRange();
 
         // Calculate current centre frequency
-        int adjSampleRate = m_ssbSpectrum ? m_sampleRate/2 : m_sampleRate;
-        qint64 adjCenterFrequency = m_centerFrequency + (m_ssbSpectrum ? m_sampleRate/4 : 0);
+        int adjSampleRate = m_ssbSpectrum ? getDisplayedSampleRate()/2 : getDisplayedSampleRate();
+        qint64 adjCenterFrequency = getDisplayedCenterFrequency() + (m_ssbSpectrum ? getDisplayedSampleRate()/4 : 0);
         float currentCF = (m_frequencyZoomFactor == 1) ?
             adjCenterFrequency : (m_frequencyZoomPos - 0.5) * adjSampleRate + adjCenterFrequency;
 
@@ -4491,7 +5091,8 @@ void GLSpectrumView::zoom(const QPointF& p, int y)
 void GLSpectrumView::frequencyZoom(float zoomPos)
 {
     m_frequencyZoomPos = zoomPos;
-    updateFFTLimits();
+    updateFFTLimits(false);
+    m_displayChanged = true;
 }
 
 void GLSpectrumView::frequencyPan(QMouseEvent *event)
@@ -4509,7 +5110,7 @@ void GLSpectrumView::frequencyPan(QMouseEvent *event)
     m_frequencyZoomPos = m_frequencyZoomPos < lim ? lim : m_frequencyZoomPos > 1 - lim ? 1 - lim : m_frequencyZoomPos;
 
     qDebug("GLSpectrumView::frequencyPan: pw: %f p: %f", pw, m_frequencyZoomPos);
-    updateFFTLimits();
+    updateFFTLimits(false);
 }
 
 void GLSpectrumView::timeZoom(bool zoomInElseOut)
@@ -4540,9 +5141,11 @@ void GLSpectrumView::powerZoom(float pw, bool zoomInElseOut)
         m_referenceLevel = m_referenceLevel + (zoomInElseOut ? -1 : 1);
     } // top
 
-    m_powerRange = m_powerRange < 1 ? 1 : m_powerRange > 100 ? 100 : m_powerRange;
-    m_referenceLevel = m_referenceLevel < -110 ? -110 : m_referenceLevel > 0 ? 0 : m_referenceLevel;
+    m_powerRange = std::clamp(m_powerRange, m_minPowerRange, m_maxPowerRange);
+    m_referenceLevel = std::clamp(m_referenceLevel, m_minReferenceLevel, m_maxReferenceLevel);
     m_changesPending = true;
+    m_displayChanged = true;
+    redrawWaterfallAnd3DSpectrogram();
 
     if (m_messageQueueToGUI) {
         m_messageQueueToGUI->push(new MsgReportPowerScale(m_referenceLevel, m_powerRange));
@@ -4554,25 +5157,32 @@ void GLSpectrumView::resetFrequencyZoom()
     m_frequencyZoomFactor = 1.0f;
     m_frequencyZoomPos = 0.5f;
 
-    updateFFTLimits();
+    updateFFTLimits(false);
 }
 
-void GLSpectrumView::updateFFTLimits()
+void GLSpectrumView::updateFFTLimits(bool fftSizeChangedOnly)
 {
-    if (m_spectrumVis)
+    if (!fftSizeChangedOnly)
     {
-        m_spectrumVis->getInputMessageQueue()->push(SpectrumVis::MsgFrequencyZooming::create(
-            m_frequencyZoomFactor, m_frequencyZoomPos
-        ));
+        if (m_messageQueueToGUI)
+        {
+            m_messageQueueToGUI->push(GLSpectrumView::MsgFrequencyZooming::create(
+                m_frequencyZoomFactor, m_frequencyZoomPos
+            ));
+        }
     }
 
-    if (m_messageQueueToGUI)
-    {
-        m_messageQueueToGUI->push(SpectrumVis::MsgFrequencyZooming::create(
-            m_frequencyZoomFactor, m_frequencyZoomPos
-        ));
+    m_fftMin = m_frequencyZoomFactor == 1.0f ? 0 : (m_frequencyZoomPos - (0.5f / m_frequencyZoomFactor)) * m_fftSize;
+    m_fftMax = m_frequencyZoomFactor == 1.0f ? m_fftSize : (m_frequencyZoomPos + (0.5f / m_frequencyZoomFactor)) * m_fftSize;
+    if (m_fftMin < 0) {
+        m_fftMin = 0;
     }
+    if (m_fftMax > m_fftSize) {
+        m_fftMax = m_fftSize;
+    }
+    m_nbBins = m_fftMax - m_fftMin;
 
+    m_redrawAll = true;
     m_changesPending = true;
 }
 
@@ -4580,6 +5190,18 @@ void GLSpectrumView::setFrequencyZooming(float frequencyZoomFactor, float freque
 {
     m_frequencyZoomFactor = frequencyZoomFactor;
     frequencyZoom(frequencyZoomPos);
+}
+
+void GLSpectrumView::setReferenceLevelRange(Real minReferenceLevel, Real maxReferenceLevel)
+{
+    m_minReferenceLevel = minReferenceLevel;
+    m_maxReferenceLevel = maxReferenceLevel;
+}
+
+void GLSpectrumView::setPowerRangeRange(Real minPowerRange, Real maxPowerRange)
+{
+    m_minPowerRange = minPowerRange;
+    m_maxPowerRange = maxPowerRange;
 }
 
 void GLSpectrumView::setFrequencyScale()
@@ -4615,19 +5237,13 @@ void GLSpectrumView::setPowerScale(int height)
 
 void GLSpectrumView::getFrequencyZoom(int64_t& centerFrequency, int& frequencySpan)
 {
-    int adjSampleRate = m_ssbSpectrum ? m_sampleRate/2 : m_sampleRate;
-    qint64 adjCenterFrequency = m_centerFrequency + (m_ssbSpectrum ? m_sampleRate/4 : 0);
+    int adjSampleRate = m_ssbSpectrum ? getDisplayedSampleRate()/2 : getDisplayedSampleRate();
+    qint64 adjCenterFrequency = getDisplayedCenterFrequency() + (m_ssbSpectrum ? getDisplayedSampleRate()/4 : 0);
     frequencySpan = (m_frequencyZoomFactor == 1) ?
         adjSampleRate : adjSampleRate * (1.0 / m_frequencyZoomFactor);
     centerFrequency = (m_frequencyZoomFactor == 1) ?
         adjCenterFrequency : (m_frequencyZoomPos - 0.5) * adjSampleRate + adjCenterFrequency;
 }
-
-// void GLSpectrumView::updateFFTLimits()
-// {
-// 	m_fftMin = m_frequencyZoomFactor == 1 ? 0 : (m_frequencyZoomPos - (0.5f / m_frequencyZoomFactor)) * m_fftSize;
-// 	m_fftMax = m_frequencyZoomFactor == 1 ? m_fftSize : (m_frequencyZoomPos - (0.5f / m_frequencyZoomFactor)) * m_fftSize;
-// }
 
 void GLSpectrumView::channelMarkerMove(QWheelEvent *event, int mul)
 {
@@ -4650,7 +5266,7 @@ void GLSpectrumView::channelMarkerMove(QWheelEvent *event, int mul)
             }
 
             // calculate scale relative cursor position for new frequency
-            float x_pos = m_frequencyScale.getPosFromValue(m_centerFrequency + freq);
+            float x_pos = m_frequencyScale.getPosFromValue(getDisplayedCenterFrequency() + freq);
 
             if ((x_pos >= 0.0) && (x_pos < m_frequencyScale.getSize())) // cursor must be in scale
             {
@@ -4713,6 +5329,9 @@ void GLSpectrumView::leaveEvent(QEvent* event)
 
 void GLSpectrumView::tick()
 {
+    // Update scroll bar to account for changes to m_spectrumBuffer and waterfall size changes
+    updateScrollBar();
+
     if (m_displayChanged)
     {
         m_displayChanged = false;
@@ -4919,18 +5538,21 @@ void GLSpectrumView::drawTextsRight(const QStringList &text, const QStringList &
     int textWidth, maxWidth;
     for (int i = text.length() - 1; i >= 0; i--)
     {
-        textWidth = fm.horizontalAdvance(units[i]);
-        painter.drawText(QPointF(x - textWidth, y), units[i]);
-        x -= textWidth;
+        if (!text[i].isEmpty() || !value[i].isEmpty())
+        {
+            textWidth = fm.horizontalAdvance(units[i]);
+            painter.drawText(QPointF(x - textWidth, y), units[i]);
+            x -= textWidth;
 
-        textWidth = fm.horizontalAdvance(value[i]);
-        maxWidth = fm.horizontalAdvance(max[i]);
-        painter.drawText(QPointF(x - textWidth, y), value[i]);
-        x -= maxWidth;
+            textWidth = fm.horizontalAdvance(value[i]);
+            maxWidth = fm.horizontalAdvance(max[i]);
+            painter.drawText(QPointF(x - textWidth, y), value[i]);
+            x -= maxWidth;
 
-        textWidth = fm.horizontalAdvance(text[i]);
-        painter.drawText(QPointF(x - textWidth, y), text[i]);
-        x -= textWidth;
+            textWidth = fm.horizontalAdvance(text[i]);
+            painter.drawText(QPointF(x - textWidth, y), text[i]);
+            x -= textWidth;
+        }
     }
 
     m_glShaderTextOverlay.initTexture(m_infoPixmap.toImage());
@@ -5065,26 +5687,110 @@ void GLSpectrumView::drawTextOverlay(
 
 void GLSpectrumView::formatTextInfo(QString& info)
 {
+    QString spacing = "    ";
+
     if (m_useCalibration) {
-        info.append(tr("CAL:%1dB ").arg(QString::number(m_calibrationShiftdB, 'f', 1)));
+        info.append(tr("CAL:%1dB%2").arg(QString::number(m_calibrationShiftdB, 'f', 1)).arg(spacing));
     }
 
     if (m_frequencyZoomFactor != 1.0f) {
-        info.append(tr("%1x ").arg(QString::number(m_frequencyZoomFactor, 'f', 1)));
+        info.append(tr("%1x%2").arg(QString::number(m_frequencyZoomFactor, 'f', 1)).arg(spacing));
     }
 
-    if (m_sampleRate == 0)
+    if (getDisplayedSampleRate() == 0)
     {
-        info.append(tr("CF:%1 SP:%2").arg(m_centerFrequency).arg(m_sampleRate));
+        info.append(tr("CF:%1 SP:%2%3").arg(getDisplayedCenterFrequency()).arg(getDisplayedSampleRate()).arg(spacing));
     }
     else
     {
         int64_t centerFrequency;
         int frequencySpan;
         getFrequencyZoom(centerFrequency, frequencySpan);
-        info.append(tr("CF:%1 ").arg(displayScaled(centerFrequency, 'f', getPrecision(centerFrequency/frequencySpan), true)));
-        info.append(tr("SP:%1 ").arg(displayScaled(frequencySpan, 'f', 3, true)));
+        info.append(tr("CF:%1%2").arg(displayScaled(centerFrequency, 'f', getPrecision(centerFrequency/frequencySpan), true)).arg(spacing));
+        info.append(tr("SP:%1%2").arg(displayScaled(frequencySpan, 'f', 3, true)).arg(spacing));
     }
+
+    if (m_displayRBW)
+    {
+        float rbw = getDisplayedSampleRate() / (float) m_fftSize;
+        info.append(tr("RBW:%1%2").arg(displayScaled(rbw, 'f', 3, true)).arg(spacing));
+    }
+}
+
+// Paint right side of status line, which contains peak power/freq and power/freq under cursor
+void GLSpectrumView::paintStatusLineRight()
+{
+    QString cursorInfo;
+    QString cursorPower;
+    QString cursorFreq;
+    QString cursorPowerUnits;
+    QString cursorFreqUnits;
+
+    if (m_displayCursorStats && m_cursorOverSpectrum && m_currentSpectrum && (m_cursorFFTBin < m_fftSize))
+    {
+        Real power = m_currentSpectrum[m_cursorFFTBin];
+
+        cursorInfo = tr("Cur: ");
+        cursorPower = displayPower(power, m_linear ? 'e' : 'f', m_linear ? 3 : 1);
+        cursorFreq = displayFull(m_cursorFrequency);
+        cursorPowerUnits = m_peakPowerUnits;
+        cursorFreqUnits = "Hz";
+    }
+
+    QString peakInfo;
+    QString peakPower;
+    QString peakFreq;
+    QString peakPowerUnits;
+    QString peakFreqUnits;
+
+    if (m_displayPeakStats && m_currentSpectrum)
+    {
+        float peakPowerValue;
+        float peakFreqValue;
+        findPeak(&m_currentSpectrum[m_fftMin], peakPowerValue, peakFreqValue);
+        peakInfo = tr("Pk: ");
+        peakPower = displayPower(peakPowerValue, m_linear ? 'e' : 'f', m_linear ? 3 : 1);
+        peakFreq = displayFull(peakFreqValue);
+        peakPowerUnits = m_peakPowerUnits;
+        peakFreqUnits = "Hz";
+    }
+
+    if (m_displayCursorStats || m_displayPeakStats)
+    {
+        QString spacing = m_displayCursorStats && m_displayPeakStats ? "    " : "";
+
+        drawTextsRight(
+            {
+                cursorInfo,
+                "",
+                spacing,
+                peakInfo,
+                ""
+            },
+            {
+                cursorPower,
+                cursorFreq,
+                "",
+                peakPower,
+                peakFreq
+            },
+            {
+                m_peakPowerMaxStr,
+                m_peakFrequencyMaxStr,
+                "",
+                m_peakPowerMaxStr,
+                m_peakFrequencyMaxStr
+            },
+            {
+                cursorPowerUnits,
+                cursorFreqUnits,
+                "",
+                peakPowerUnits,
+                peakFreqUnits
+            }
+        );
+    }
+
 }
 
 bool GLSpectrumView::eventFilter(QObject *object, QEvent *event)
@@ -5170,5 +5876,26 @@ bool GLSpectrumView::eventFilter(QObject *object, QEvent *event)
     else
     {
         return QOpenGLWidget::eventFilter(object, event);
+    }
+}
+
+void GLSpectrumView::setMemory(int memoryIdx, const SpectrumSettings::SpectrumMemory &memory)
+{
+    QMutexLocker mutexLocker(&m_mutex);
+    m_spectrumMemory[memoryIdx] = memory;
+    m_displayChanged = true;
+}
+
+void GLSpectrumView::getDisplayedSpectrumCopy(std::vector<Real>& copy, bool zoomed)
+{
+    QMutexLocker mutexLocker(&m_mutex);
+
+    if (m_currentSpectrum)
+    {
+        if (zoomed) {
+            copy.assign(m_currentSpectrum + m_fftMin, m_currentSpectrum + m_fftMax);
+        } else {
+            copy.assign(m_currentSpectrum, m_currentSpectrum + m_fftSize);
+        }
     }
 }

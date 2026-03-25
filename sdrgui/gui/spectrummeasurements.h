@@ -91,14 +91,15 @@ class SDRGUI_API SpectrumMeasurements : public QWidget {
 
 public:
     SpectrumMeasurements(QWidget *parent = nullptr);
-    void setMeasurementParams(SpectrumSettings::Measurement measurement, int peaks, int precision);
-    void setSNR(float snr, float snfr, float thd, float thdpn, float sinad);
-    void setSFDR(float sfdr);
-    void setChannelPower(float power);
-    void setAdjacentChannelPower(float left, float leftACPR, float center, float right, float rightACPR);
-    void setOccupiedBandwidth(float occupiedBandwidth);
-    void set3dBBandwidth(float bandwidth);
+    void setMeasurementParams(SpectrumSettings::Measurement measurement, int peaks, int precision, unsigned memMasks);
+    void setSNR(float snr, float snfr, float thd, float thdpn, float sinad, bool updateGUI);
+    void setSFDR(float sfdr, bool updateGUI);
+    void setChannelPower(float power, bool updateGUI);
+    void setAdjacentChannelPower(float left, float leftACPR, float center, float right, float rightACPR, bool updateGUI);
+    void setOccupiedBandwidth(float occupiedBandwidth, bool updateGUI);
+    void set3dBBandwidth(float bandwidth, bool updateGUI);
     void setPeak(int peak, int64_t frequency, float power);
+    void setMaskTestResult(int memoryIdx, qint64 count, qint64 fails);
     void reset();
 
 private:
@@ -110,8 +111,10 @@ private:
     void createOccupiedBandwidthTable();
     void create3dBBandwidthTable();
     void createSNRTable();
+    void createMaskTable(unsigned memMask);
     void tableContextMenu(QPoint pos);
     void peakTableContextMenu(QPoint pos);
+    void maskTableContextMenu(QPoint pos);
     void rowSelectMenu(QPoint pos);
     void rowSelectMenuChecked(bool checked);
     void columnSelectMenu(QPoint pos);
@@ -119,11 +122,12 @@ private:
     QAction *createCheckableItem(QString &text, int idx, bool checked, bool row);
     void resizeMeasurementsTable();
     void resizePeakTable();
-    void updateMeasurement(int row, float value);
+    void updateMeasurement(int row, float value, bool updateGUI);
     bool checkSpec(const QString &spec, double value) const;
 
     SpectrumSettings::Measurement m_measurement;
     int m_precision;
+    unsigned m_memMask;
 
     SpectrumMeasurementsTable *m_table;
     QMenu *m_rowMenu;
@@ -133,6 +137,8 @@ private:
     SpectrumMeasurementsTable *m_peakTable;
     QBrush m_textBrush;
     QBrush m_redBrush;
+
+    SpectrumMeasurementsTable *m_maskTable;
 
     enum MeasurementsCol {
         COL_CURRENT,
@@ -151,6 +157,11 @@ private:
         COL_FREQUENCY,
         COL_POWER,
         COL_PEAK_EMPTY
+    };
+
+    enum MaskTableCol {
+        COL_MASK_TESTS,
+        COL_MASK_FAILS
     };
 
     static const QStringList m_measurementColumns;

@@ -2596,7 +2596,7 @@ void MeshtasticDemodGUI::replayDechirpSnapshot(const DechirpSnapshot& snapshot)
             }
         }
 
-        ui->glSpectrum->newSpectrum(line.data(), fftSize, fftSize);
+        ui->glSpectrum->newSpectrum(line.data(), fftSize);
     };
 
     // Prime the GL spectrum so pending size/layout changes are applied before replay.

@@ -87,6 +87,7 @@ set(sdrgui_SOURCES
     gui/scidoublespinbox.cpp
     gui/sdrangelsplash.cpp
     gui/spectrumcalibrationpointsdialog.cpp
+    gui/spectrumdisplaysettingsdialog.cpp
     gui/spectrummarkersdialog.cpp
     gui/spectrummeasurementsdialog.cpp
     gui/spectrummeasurements.cpp
@@ -221,6 +222,7 @@ set(sdrgui_HEADERS
     gui/scidoublespinbox.h
     gui/sdrangelsplash.h
     gui/spectrumcalibrationpointsdialog.h
+    gui/spectrumdisplaysettingsdialog.h
     gui/spectrummarkersdialog.h
     gui/spectrummeasurementsdialog.h
     gui/spectrummeasurements.h
@@ -301,6 +303,7 @@ set(sdrgui_FORMS
     gui/spectrummarkersdialog.ui
     gui/spectrummeasurementsdialog.ui
     gui/spectrumcalibrationpointsdialog.ui
+    gui/spectrumdisplaysettingsdialog.ui
     gui/myposdialog.ui
     gui/transverterdialog.ui
     gui/loggingdialog.ui

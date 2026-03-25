@@ -39,6 +39,11 @@ public:
 	};
 	typedef QList<Tick> TickList;
 
+	class TickFormatter {
+	public:
+		virtual QString formatTick(double value) const = 0;
+	};
+
 	ScaleEngine();
 
 	void setOrientation(Qt::Orientation orientation);
@@ -58,6 +63,9 @@ public:
 	const TickList& getTickList();
 
 	float getScaleWidth();
+
+	void setTickFormatter(TickFormatter *tickFormatter) { m_tickFormatter = tickFormatter; }
+	void requestReCalc() { m_recalc = true; }
 
 private:
 	// base configuration
@@ -86,6 +94,8 @@ private:
     bool m_truncateMode; //!< truncate upper digits mode
     bool m_truncated; //!< true if upper digits are truncated
     double m_truncationValue; //!< value to subreact from tick display values
+
+	TickFormatter *m_tickFormatter;
 
 	QString formatTick(double value, int decimalPlaces);
 	void calcCharSize();

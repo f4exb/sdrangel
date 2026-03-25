@@ -3,7 +3,7 @@
 // written by Christian Daniel                                                   //
 // Copyright (C) 2015-2022 Edouard Griffiths, F4EXB <f4exb06@gmail.com>          //
 // Copyright (C) 2018 beta-tester <alpha-beta-release@gmx.net>                   //
-// Copyright (C) 2022-2023 Jon Beniston, M7RCE <jon@beniston.com>                //
+// Copyright (C) 2022-2026 Jon Beniston, M7RCE <jon@beniston.com>                //
 // Copyright (C) 2022 Jiří Pinkava <jiri.pinkava@rossum.ai>                      //
 //                                                                               //
 // OpenGL interface modernization.                                               //
@@ -34,6 +34,8 @@
 #include <QPoint>
 #include <QOpenGLWidget>
 #include <QOpenGLDebugLogger>
+#include <QScrollBar>
+#include <QDateTime>
 #include "gui/qtcompatibility.h"
 #include "gui/scaleengine.h"
 #include "gui/glshadersimple.h"
@@ -47,6 +49,7 @@
 #include "export.h"
 #include "util/incrementalarray.h"
 #include "util/message.h"
+#include "util/circularbuffer.h"
 #include "util/colormap.h"
 #include "util/peakfinder.h"
 
@@ -56,7 +59,7 @@ class SpectrumVis;
 class QOpenGLDebugLogger;
 class SpectrumMeasurements;
 
-class SDRGUI_API GLSpectrumView : public QOpenGLWidget, public GLSpectrumInterface {
+class SDRGUI_API GLSpectrumView : public QOpenGLWidget, public GLSpectrumInterface, public ScaleEngine::TickFormatter {
     Q_OBJECT
 
 public:
@@ -155,6 +158,28 @@ public:
         {}
     };
 
+    class MsgFrequencyZooming : public Message {
+        MESSAGE_CLASS_DECLARATION
+
+    public:
+        float getFrequencyZoomFactor() const { return m_frequencyZoomFactor; }
+        float getFrequencyZoomPos() const { return m_frequencyZoomPos; }
+
+        static MsgFrequencyZooming* create(float frequencyZoomFactor, float frequencyZoomPos) {
+            return new MsgFrequencyZooming(frequencyZoomFactor, frequencyZoomPos);
+        }
+
+    private:
+        float m_frequencyZoomFactor;
+        float m_frequencyZoomPos;
+
+        MsgFrequencyZooming(float frequencyZoomFactor, float frequencyZoomPos) :
+            Message(),
+            m_frequencyZoomFactor(frequencyZoomFactor),
+            m_frequencyZoomPos(frequencyZoomPos)
+        { }
+    };
+
     GLSpectrumView(QWidget* parent = nullptr);
     virtual ~GLSpectrumView();
 
@@ -166,13 +191,16 @@ public:
     void setTimingRate(qint32 timingRate);
     void setFFTOverlap(int overlap);
     void setReferenceLevel(Real referenceLevel);
+    void setReferenceLevelRange(Real minReferenceLevel, Real maxReferenceLevel);
     void setPowerRange(Real powerRange);
+    void setPowerRangeRange(Real minPowerRange, Real maxPowerRange);
     void setDecay(int decay);
     void setDecayDivisor(int decayDivisor);
     void setHistoStroke(int stroke);
     void setDisplayWaterfall(bool display);
     void setDisplay3DSpectrogram(bool display);
     void set3DSpectrogramStyle(SpectrumSettings::SpectrogramStyle style);
+    void setSpectrumColor(QRgb color);
     void setColorMapName(const QString &colorMapName);
     void setSpectrumStyle(SpectrumSettings::SpectrumStyle style);
     void setSsbSpectrum(bool ssbSpectrum);
@@ -190,14 +218,15 @@ public:
     void setMeasurements(SpectrumMeasurements *measurements) { m_measurements = measurements; }
     void setMeasurementParams(SpectrumSettings::Measurement measurement,
                               int centerFrequencyOffset, int bandwidth, int chSpacing, int adjChBandwidth,
-                              int harmonics, int peaks, bool highlight, int precision);
+                              int harmonics, int peaks, bool highlight, int precision, unsigned memoryMask);
+    void resetMeasurements();
     qint32 getSampleRate() const { return m_sampleRate; }
 
     void addChannelMarker(ChannelMarker* channelMarker);
     void removeChannelMarker(ChannelMarker* channelMarker);
     void setMessageQueueToGUI(MessageQueue* messageQueue) { m_messageQueueToGUI = messageQueue; }
 
-    virtual void newSpectrum(const Real* spectrum, int nbBins, int fftSize);
+    virtual void newSpectrum(const Real* spectrum, int fftSize);
     void clearSpectrumHistogram();
 
     Real getWaterfallShare() const { return m_waterfallShare; }
@@ -237,6 +266,17 @@ public:
     void setIsDeviceSpectrum(bool isDeviceSpectrum) { m_isDeviceSpectrum = isDeviceSpectrum; }
     bool isDeviceSpectrum() const { return m_isDeviceSpectrum; }
     void setFrequencyZooming(float frequencyZoomFactor, float frequencyZoomPos);
+    void setWaterfallTimeFormat(SpectrumSettings::WaterfallTimeUnits waterfallTimeUnits, const QString& format);
+    void setStatusLine(bool displayRBW, bool displayCursorStats, bool displayPeakStats);
+    void setScrolling(bool enabled, int length);
+    void setScrollBar(QScrollBar* scrollBar);
+    void readCSV(QTextStream &in, bool append, QString &error);
+    void writeCSV(QTextStream &out);
+    bool writeImage(const QString& filename);
+    void getDisplayedSpectrumCopy(std::vector<Real>& copy, bool zoomed);
+    void setMemory(int memoryIdx, const SpectrumSettings::SpectrumMemory &memory);
+
+    QString formatTick(double value) const override;
 
 private:
     struct ChannelMarkerState {
@@ -282,10 +322,15 @@ private:
     QMutex m_mutex;
     bool m_mouseInside;
     bool m_changesPending;
+    bool m_redrawAll;                   // Call redrawSpectrum/redrawWaterfallAnd3DSpectrogram in applyChanges()
 
     qint64 m_centerFrequency;
     Real m_referenceLevel;
+    Real m_minReferenceLevel;
+    Real m_maxReferenceLevel;
     Real m_powerRange;
+    Real m_minPowerRange;
+    Real m_maxPowerRange;
     bool m_linear;
     int m_decay;
     quint32 m_sampleRate;
@@ -294,6 +339,8 @@ private:
 
     int m_fftSize; //!< FFT size in number of bins
     int m_nbBins;  //!< Number of visible FFT bins (zoom support)
+    int m_fftMin;  //!< First bin when zooming in
+    int m_fftMax;  //!< Last bin when zooming in
 
     bool m_displayGrid;
     int m_displayGridIntensity;
@@ -315,6 +362,8 @@ private:
     int m_histogramHeight;
     int m_waterfallHeight;
     int m_bottomMargin;
+    int m_waterfallTop;
+    int m_histogramTop;
     QFont m_textOverlayFont;
     QPixmap m_leftMarginPixmap;
     QPixmap m_frequencyPixmap;
@@ -357,6 +406,7 @@ private:
     QPixmap m_spectrogramTimePixmap;
     QPixmap m_spectrogramPowerPixmap;
     SpectrumSettings::SpectrogramStyle m_3DSpectrogramStyle;
+    QColor m_spectrumColor;
     QString m_colorMapName;
     SpectrumSettings::SpectrumStyle m_spectrumStyle;
     const float *m_colorMap;
@@ -426,16 +476,56 @@ private:
     int m_measurementPeaks;
     bool m_measurementHighlight;
     int m_measurementPrecision;
+    int m_measurementMemMasks;
+    std::vector<qint64> m_maskTestCount;
+    std::vector<qint64> m_maskFailCount;
+    std::vector<std::vector<Real>> m_maskFails;
     static const QVector4D m_measurementLightMarkerColor;
     static const QVector4D m_measurementDarkMarkerColor;
+
+    bool m_displayRBW;
+    bool m_displayCursorStats;
+    bool m_displayPeakStats;
+    bool m_cursorOverSpectrum;
+    float m_cursorFrequency;
+    int m_cursorFFTBin;
+
+    std::vector<Real> m_spectrumNoBuffer; // Copy of most recent spectrum, when scroll buffer disabled
+
+    // Spectrum scroll buffer
+
+    struct Spectrum {
+        Real *m_spectrum;
+        quint32 m_sampleRate;
+        qint64 m_centerFrequency;
+        QDateTime m_dateTime;
+    };
+
+    CircularBuffer<Spectrum> m_spectrumBuffer;
+    int m_spectrumBufferFFTSize;
+    int m_spectrumBufferMaxSize;
+    QScrollBar* m_scrollBar;
+    bool m_scrollBarEnabled;
+    int m_scrollBarValue;
+
+    SpectrumSettings::WaterfallTimeUnits m_waterfallTimeUnits;
+    QString m_waterfallTimeFormat;
+
+    QVector<SpectrumSettings::SpectrumMemory> m_spectrumMemory;
 
 #ifdef ENABLE_PROFILER
     QString m_profileName;
 #endif
 
-    void updateWaterfall(const Real *spectrum);
-    void update3DSpectrogram(const Real *spectrum);
-    void updateHistogram(const Real *spectrum);
+    void newSpectrum(const Real* spectrum, int fftSize, quint32 sampleRate, qint64 centerFrequency, const QDateTime &dateTime);
+    void updateSpectrumNoBuffer(const Real *spectrum, int fftSize);
+    void clearSpectrumBuffer();
+    void updateSpectrumBuffer(const Real *spectrum, int fftSize, quint32 sampleRate, qint64 centerFrequency, const QDateTime &dateTime);
+    void clearWaterfallRow(int nbBins);
+    void updateWaterfall(const Real *spectrum, int fftSize, int fftMin, int nbBins);
+    void clear3DSpectrogramRow(int nbBins);
+    void update3DSpectrogram(const Real *spectrum, int fftSize, int fftMin, int nbBins);
+    void updateHistogram(const Real *spectrum, int fftSize, int fftMin, int nbBins);
 
     void initializeGL();
     void resizeGL(int width, int height);
@@ -446,18 +536,19 @@ private:
     void drawSpectrumMarkers();
     void drawAnnotationMarkers();
 
-    void measurePeak();
-    void measurePeaks();
-    void measureChannelPower();
-    void measureAdjacentChannelPower();
-    void measureOccupiedBandwidth();
-    void measure3dBBandwidth();
-    void measureSNR();
-    void measureSFDR();
-    float calcChannelPower(int64_t centerFrequency, int channelBandwidth) const;
+    void measure(const Real *spectrum, bool updateGUI);
+    void measurePeaks(const Real *spectrum);
+    void measureChannelPower(const Real *spectrum, bool updateGUI);
+    void measureAdjacentChannelPower(const Real *spectrum, bool updateGUI);
+    void measureOccupiedBandwidth(const Real *spectrum, bool updateGUI);
+    void measure3dBBandwidth(const Real *spectrum, bool updateGUI);
+    void measureSNR(const Real *spectrum, bool updateGUI);
+    void measureSFDR(const Real *spectrum, bool updateGUI);
+    void measureMask(const Real *spectrum, int fftSize, bool updateGUI);
+    float calcChannelPower(const Real *spectrum, int64_t centerFrequency, int channelBandwidth) const;
     float calPower(float power) const;
     int findPeakBin(const Real *spectrum) const;
-    void findPeak(float &power, float &frequency) const;
+    void findPeak(const Real *spectrum, float &power, float &frequency) const;
     void peakWidth(const Real *spectrum, int center, int &left, int &right, int maxLeft, int maxRight) const;
     int frequencyToBin(int64_t frequency) const;
     int64_t binToFrequency(int bin) const;
@@ -478,7 +569,7 @@ private:
     void timeZoom(bool zoomInElseOut);
     void powerZoom(float pw, bool zoomInElseOut);
     void resetFrequencyZoom();
-    void updateFFTLimits();
+    void updateFFTLimits(bool fftSizeOnly);
     void setFrequencyScale();
     void setPowerScale(int height);
     void getFrequencyZoom(int64_t& centerFrequency, int& frequencySpan);
@@ -515,6 +606,16 @@ private:
     void updateSortedAnnotationMarkers();
     void queueRequestCenterFrequency(qint64 frequency);
 
+    void setTimeScaleRange();
+    void redrawSpectrum();
+    void redrawWaterfallAnd3DSpectrogram();
+    void paintLeftScales();
+    void paintStatusLineRight();
+    void updateScrollBar();
+    int scrollBarValue() const;
+    qint64 getDisplayedCenterFrequency() const;
+    quint32 getDisplayedSampleRate() const;
+
     static bool annotationDisplayLessThan(const SpectrumAnnotationMarker *m1, const SpectrumAnnotationMarker *m2)
     {
         if (m1->m_bandwidth == m2->m_bandwidth) {
@@ -529,6 +630,21 @@ private:
         return m1.m_frequency < m2.m_frequency;
     }
 
+    inline Real clampPower(Real value) const
+    {
+        return std::clamp(value, -m_powerRange, 0.0f);
+    }
+
+    inline int clampWaterfall(int value) const
+    {
+        return std::clamp(value, 0, 239);
+    }
+
+    inline int clampPixel(int value) const
+    {
+        return std::clamp(value, 0, 255);
+    }
+
 private slots:
     void cleanup();
     void tick();
@@ -536,6 +652,7 @@ private slots:
     void channelMarkerDestroyed(QObject* object);
     void openGLDebug(const QOpenGLDebugMessage &debugMessage);
     bool eventFilter(QObject *object, QEvent *event);
+    void scrollBarValueChanged(int value);
 
 signals:
     // Emitted when user tries to scroll to frequency currently out of range

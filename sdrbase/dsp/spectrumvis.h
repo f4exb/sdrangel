@@ -3,6 +3,7 @@
 // written by Christian Daniel                                                   //
 // Copyright (C) 2015-2022 Edouard Griffiths, F4EXB <f4exb06@gmail.com>          //
 // Copyright (C) 2022 Jiří Pinkava <jiri.pinkava@rossum.ai>                      //
+// Copyright (C) 2026 Jon Beniston, M7RCE <jon@beniston.com>                     //
 //                                                                               //
 // This program is free software; you can redistribute it and/or modify          //
 // it under the terms of the GNU General Public License as published by          //
@@ -34,6 +35,7 @@
 #include "util/movingaverage2d.h"
 #include "util/fixedaverage2d.h"
 #include "util/max2d.h"
+#include "util/min2d.h"
 #include "websockets/wsspectrum.h"
 
 class GLSpectrumInterface;
@@ -108,35 +110,6 @@ public:
         {}
     };
 
-    class SDRBASE_API MsgFrequencyZooming : public Message {
-        MESSAGE_CLASS_DECLARATION
-
-    public:
-        float getFrequencyZoomFactor() const { return m_frequencyZoomFactor; }
-        float getFrequencyZoomPos() const { return m_frequencyZoomPos; }
-
-        static MsgFrequencyZooming* create(float frequencyZoomFactor, float frequencyZoomPos) {
-            return new MsgFrequencyZooming(frequencyZoomFactor, frequencyZoomPos);
-        }
-
-    private:
-        float m_frequencyZoomFactor;
-        float m_frequencyZoomPos;
-
-        MsgFrequencyZooming(float frequencyZoomFactor, float frequencyZoomPos) :
-            Message(),
-            m_frequencyZoomFactor(frequencyZoomFactor),
-            m_frequencyZoomPos(frequencyZoomPos)
-        { }
-    };
-
-    enum AvgMode
-    {
-        AvgModeNone,
-        AvgModeMovingAvg,
-        AvgModeFixedAvg,
-        AvgModeMax
-    };
 
 	SpectrumVis(Real scalef);
 	virtual ~SpectrumVis();
@@ -148,14 +121,13 @@ public:
     void setScalef(Real scalef);
     void configureWSSpectrum(const QString& address, uint16_t port);
     const SpectrumSettings& getSettings() const { return m_settings; }
-    Real getSpecMax() const { return m_specMax / m_powFFTDiv; }
-    void getPowerSpectrumCopy(std::vector<Real>& copy) { copy.assign(m_powerSpectrum.begin(), m_powerSpectrum.end()); }
-    void getPSDCopy(std::vector<Real>& copy) const { copy.assign(m_psd.begin(), m_psd.begin() + m_settings.m_fftSize); }
-    void getZoomedPSDCopy(std::vector<Real>& copy) const;
+    Real getSpecMax() const { return m_specMax; }
+
+    void setMathMemory(const QList<Real> &values);
+    void getMathMovingAverageCopy(QList<Real>& copy);
 
 	virtual void feed(const SampleVector::const_iterator& begin, const SampleVector::const_iterator& end, bool positiveOnly);
     void feed(const ComplexVector::const_iterator& begin, const ComplexVector::const_iterator& end, bool positiveOnly);
-    virtual void feed(const Complex *begin, unsigned int length); //!< direct FFT feed
 	void feedTriggered(const SampleVector::const_iterator& triggerPoint, const SampleVector::const_iterator& end, bool positiveOnly);
 	virtual void start();
 	virtual void stop();
@@ -220,7 +192,7 @@ private:
 
 	std::vector<Complex> m_fftBuffer;
 	std::vector<Real> m_powerSpectrum; //!< displayable power spectrum
-    std::vector<Real> m_psd; //!< real PSD
+    std::vector<Real> m_mathMemory;
 
     SpectrumSettings m_settings;
 	int m_overlapSize;
@@ -233,15 +205,16 @@ private:
     WSSpectrum m_wsSpectrum;
 	MovingAverage2D<double> m_movingAverage;
 	FixedAverage2D<double> m_fixedAverage;
-	Max2D<double> m_max;
+	Max2D<Real> m_max;
+    Min2D<Real> m_min;
     Real m_specMax;
+    MovingAverage2D<double> m_mathMovingAverage;
 
     uint64_t m_centerFrequency;
     int m_sampleRate;
 
-	Real m_ofs;
-	Real m_powFFTDiv;
-	static const Real m_mult;
+    Real m_powFFTMul;                   //!< 1/fftSize^2
+	static const Real m_mult;           //!< 10/log2(10)
 
     MessageQueue m_inputMessageQueue;
     MessageQueue *m_guiMessageQueue;  //!< Input message queue to the GUI
@@ -257,6 +230,8 @@ private:
     void handleWSOpenClose(bool openClose);
     void handleConfigureWSSpectrum(const QString& address, uint16_t port);
     float log2fapprox(float x) const;
+    void mathLinear(std::vector<Real> &spectrum);
+    void mathDB(std::vector<Real> &spectrum);
 
     static void webapiFormatSpectrumSettings(SWGSDRangel::SWGGLSpectrum& response, const SpectrumSettings& settings);
     static void webapiUpdateSpectrumSettings(

@@ -116,6 +116,13 @@ SINAD is measured as per SNR, but the result is the ratio of the fundamental to 
 
 SFDR is a measurement of the difference in power from the largest peak (the fundamental) to the second largest peak (the strongest spurious signal).
 
+<h2>Mask Test</h2>
+
+The mask test measurement checks whether the spectrum exceeds a user-defined mask. The mask is defined by a set of frequency and power points, held in memory M1 or M2. 
+Any points where the spectrum exceeds the mask are highlighted in red and held. The measurement results table shows the number of spectrum that fail the mask test.
+
+![Spectrum Measurements - Mask Test](../../doc/img/Spectrum_Measurement_Mask_Test.png)
+
 <h2>Specifications</h2>
 
 The measurements table has a Spec column that allows entry of user-defined specifications for the Current, Mean, Min and Max values to be checked against.

@@ -57,6 +57,9 @@ SpectrumMeasurementsDialog::SpectrumMeasurementsDialog(GLSpectrum *glSpectrum, S
     ui->harmonics->setValue(m_settings->m_measurementHarmonics);
     ui->peaks->setValue(m_settings->m_measurementPeaks);
 
+    ui->m1Mask->setChecked(m_settings->m_measurementMemMasks & 1);
+    ui->m2Mask->setChecked(m_settings->m_measurementMemMasks & 2);
+
     displaySettings();
 }
 
@@ -66,11 +69,12 @@ SpectrumMeasurementsDialog::~SpectrumMeasurementsDialog()
 void SpectrumMeasurementsDialog::displaySettings()
 {
     bool show = m_settings->m_measurement != SpectrumSettings::MeasurementNone;
+    bool mask = m_settings->m_measurement == SpectrumSettings::MeasurementMask;
 
     ui->positionLabel->setVisible(show);
     ui->position->setVisible(show);
-    ui->precisionLabel->setVisible(show);
-    ui->precision->setVisible(show);
+    ui->precisionLabel->setVisible(show && !mask);
+    ui->precision->setVisible(show && !mask);
     ui->highlightLabel->setVisible(show);
     ui->highlight->setVisible(show);
 
@@ -98,8 +102,11 @@ void SpectrumMeasurementsDialog::displaySettings()
     bool peaks = (m_settings->m_measurement == SpectrumSettings::MeasurementPeaks);
     ui->peaksLabel->setVisible(peaks && show);
     ui->peaks->setVisible(peaks && show);
-}
 
+    ui->maskLabel->setVisible(mask);
+    ui->m1Mask->setVisible(mask);
+    ui->m2Mask->setVisible(mask);
+}
 
 void SpectrumMeasurementsDialog::on_measurement_currentIndexChanged(int index)
 {
@@ -131,7 +138,7 @@ void SpectrumMeasurementsDialog::on_resetMeasurements_clicked(bool checked)
     (void) checked;
 
     if (m_glSpectrum) {
-        m_glSpectrum->getMeasurements()->reset();
+        m_glSpectrum->resetMeasurements();
     }
 }
 
@@ -168,5 +175,19 @@ void SpectrumMeasurementsDialog::on_harmonics_valueChanged(int value)
 void SpectrumMeasurementsDialog::on_peaks_valueChanged(int value)
 {
     m_settings->m_measurementPeaks = value;
+    emit updateMeasurements();
+}
+
+void SpectrumMeasurementsDialog::on_m1Mask_toggled(bool checked)
+{
+    m_settings->m_measurementMemMasks &= ~1;
+    m_settings->m_measurementMemMasks |= checked ? 1 : 0;
+    emit updateMeasurements();
+}
+
+void SpectrumMeasurementsDialog::on_m2Mask_toggled(bool checked)
+{
+    m_settings->m_measurementMemMasks &= ~2;
+    m_settings->m_measurementMemMasks |= checked ? 2 : 0;
     emit updateMeasurements();
 }
