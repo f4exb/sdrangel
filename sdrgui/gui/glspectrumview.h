@@ -525,7 +525,7 @@ private:
     void updateWaterfall(const Real *spectrum, int fftSize, int fftMin, int nbBins);
     void clear3DSpectrogramRow(int nbBins);
     void update3DSpectrogram(const Real *spectrum, int fftSize, int fftMin, int nbBins);
-    void updateHistogram(const Real *spectrum, int fftSize, int fftMin, int nbBins);
+    void updateHistogram(const Real *spectrum, int fftMin, int nbBins);
 
     void initializeGL();
     void resizeGL(int width, int height);

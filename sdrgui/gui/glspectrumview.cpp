@@ -970,9 +970,9 @@ bool GLSpectrumView::writeImage(const QString& filename)
 // Get center frequency for currently displayed spectrum (which is selected via the scroll bar)
 qint64 GLSpectrumView::getDisplayedCenterFrequency() const
 {
-    std::size_t idx = m_spectrumBuffer.size() - 1 - scrollBarValue();
+    int idx = m_spectrumBuffer.size() - 1 - scrollBarValue();
 
-    if ((idx >= 0) && (idx < m_spectrumBuffer.size())) {
+    if ((idx >= 0) && (idx < (int) m_spectrumBuffer.size())) {
         return m_spectrumBuffer[idx].m_centerFrequency;
     } else {
         return m_centerFrequency;
@@ -982,9 +982,9 @@ qint64 GLSpectrumView::getDisplayedCenterFrequency() const
 // Get sample rate for currently displayed spectrum (which is selected via the scroll bar)
 quint32 GLSpectrumView::getDisplayedSampleRate() const
 {
-    std::size_t idx = m_spectrumBuffer.size() - 1 - scrollBarValue();
+    int idx = m_spectrumBuffer.size() - 1 - scrollBarValue();
 
-    if ((idx >= 0) && (idx < m_spectrumBuffer.size())) {
+    if ((idx >= 0) && (idx < (int) m_spectrumBuffer.size())) {
         return m_spectrumBuffer[idx].m_sampleRate;
     } else {
         return m_sampleRate;
@@ -995,11 +995,11 @@ void GLSpectrumView::redrawSpectrum()
 {
     if (m_spectrumBuffer.size() > 0)
     {
-        std::size_t idx = m_spectrumBuffer.size() - 1 - scrollBarValue();
+        int idx = m_spectrumBuffer.size() - 1 - scrollBarValue();
 
-        if (idx >= 0 && idx < m_spectrumBuffer.size())
+        if (idx >= 0 && idx < (int) m_spectrumBuffer.size())
         {
-            updateHistogram(m_spectrumBuffer[idx].m_spectrum, m_fftSize, m_fftMin, m_nbBins);
+            updateHistogram(m_spectrumBuffer[idx].m_spectrum, m_fftMin, m_nbBins);
             m_currentSpectrum = m_spectrumBuffer[idx].m_spectrum;
         }
     }
@@ -1009,7 +1009,7 @@ void GLSpectrumView::redrawWaterfallAnd3DSpectrogram()
 {
     if (m_waterfallBuffer && m_spectrumBuffer.size() > 0)
     {
-        std::size_t idx = m_spectrumBuffer.size() - 1 - m_waterfallBuffer->height() - scrollBarValue();
+        int idx = m_spectrumBuffer.size() - 1 - m_waterfallBuffer->height() - scrollBarValue();
 
         m_waterfallBufferPos = 0;
         m_waterfallTexturePos = 0;
@@ -1116,13 +1116,13 @@ void GLSpectrumView::newSpectrum(const Real *spectrum, int fftSize, quint32 samp
     {
         updateWaterfall(spectrum, m_fftSize, m_fftMin, m_nbBins);
         update3DSpectrogram(spectrum, m_fftSize, m_fftMin, m_nbBins);
-        updateHistogram(spectrum, m_fftSize, m_fftMin, m_nbBins);
+        updateHistogram(spectrum, m_fftMin, m_nbBins);
     }
     else
     {
         updateWaterfall(m_spectrumBuffer[idx].m_spectrum, m_fftSize, m_fftMin, m_nbBins);
         update3DSpectrogram(m_spectrumBuffer[idx].m_spectrum, m_fftSize, m_fftMin, m_nbBins);
-        updateHistogram(m_spectrumBuffer[idx].m_spectrum, m_fftSize, m_fftMin, m_nbBins);
+        updateHistogram(m_spectrumBuffer[idx].m_spectrum, m_fftMin, m_nbBins);
     }
 }
 
@@ -1238,7 +1238,7 @@ void GLSpectrumView::update3DSpectrogram(const Real *spectrum, int fftSize, int 
     }
 }
 
-void GLSpectrumView::updateHistogram(const Real *spectrum, int fftSize, int fftMin, int nbBins)
+void GLSpectrumView::updateHistogram(const Real *spectrum, int fftMin, int nbBins)
 {
     quint8* b = m_histogram;
     int fftMulSize = 100 * nbBins;
@@ -3248,9 +3248,9 @@ void GLSpectrumView::stopDrag()
 // value is [0,m_waterfallHeight], as set in setTimeScaleRange()
 QString GLSpectrumView::formatTick(double value) const
 {
-    std::size_t idx = value - scrollBarValue() + m_spectrumBuffer.size() - 1 - m_waterfallHeight;
+    int idx = value - scrollBarValue() + m_spectrumBuffer.size() - 1 - m_waterfallHeight;
 
-    if ((idx >= 0) && (idx < m_spectrumBuffer.size()))
+    if ((idx >= 0) && (idx < (int) m_spectrumBuffer.size()))
     {
         QDateTime dt = m_spectrumBuffer[idx].m_dateTime;
 

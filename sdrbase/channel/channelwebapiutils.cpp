@@ -2167,7 +2167,7 @@ void DeviceOpener::deviceSetAdded(int index, DeviceAPI *device)
 
 void DeviceOpener::deviceChanged(int index)
 {
-    (int) index;
+    (void) index;
 
     // Apply device settings
     QString errorMessage;
