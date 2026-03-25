@@ -326,6 +326,16 @@ std::vector<MeshtasticDemod::PipelineConfig> MeshtasticDemod::buildPipelineConfi
 
 void MeshtasticDemod::makePipelineConfigFromSettings(int configId, PipelineConfig& config, const MeshtasticDemodSettings& settings) const
 {
+    // USER preset: all LoRa parameters are user-controlled; skip derivation from the mesh radio table.
+    if (settings.m_meshtasticPresetName.trimmed().compare("USER", Qt::CaseInsensitive) == 0)
+    {
+        config.id = configId;
+        config.name = QString("CONF%1").arg(configId);
+        config.presetName = settings.m_meshtasticPresetName;
+        config.settings = settings;
+        return;
+    }
+
     const QString region = settings.m_meshtasticRegionCode.trimmed().isEmpty()
         ? QString("US")
         : settings.m_meshtasticRegionCode.trimmed();
@@ -923,8 +933,10 @@ void MeshtasticDemod::applySettings(MeshtasticDemodSettings settings, bool force
 
     // Copy LoRa params derived from the preset (bandwidth, spread factor, etc.) back into
     // settings so that m_settings and the GUI stay in sync with what was actually applied.
+    // Skip for USER preset: those parameters are controlled entirely by the user via the GUI.
     if (m_running && !m_pipelineConfigs.empty() &&
-        settings.m_codingScheme == MeshtasticDemodSettings::CodingLoRa)
+        settings.m_codingScheme == MeshtasticDemodSettings::CodingLoRa &&
+        settings.m_meshtasticPresetName.trimmed().compare("USER", Qt::CaseInsensitive) != 0)
     {
         const MeshtasticDemodSettings& derived = m_pipelineConfigs[0].settings;
         const bool bwChanged = (settings.m_bandwidthIndex != derived.m_bandwidthIndex);
@@ -964,8 +976,12 @@ void MeshtasticDemod::applySettings(MeshtasticDemodSettings settings, bool force
     m_settings = settings;
 
     // Forward preset-derived settings back to GUI so controls (e.g. BW slider) reflect
-    // the values actually applied.
-    if (getMessageQueueToGUI())
+    // the values actually applied. Skip for USER preset: no parameters were derived, so
+    // there is nothing to sync back — and echoing would trigger an infinite apply loop
+    // (GUI apply → demod echo → GUI displaySettings → rebuildMeshtasticChannelOptions
+    // → queued apply → …).
+    const bool isUserPreset = m_settings.m_meshtasticPresetName.trimmed().compare("USER", Qt::CaseInsensitive) == 0;
+    if (!isUserPreset && getMessageQueueToGUI())
     {
         MsgConfigureMeshtasticDemod *msgToGUI = MsgConfigureMeshtasticDemod::create(m_settings, false);
         getMessageQueueToGUI()->push(msgToGUI);

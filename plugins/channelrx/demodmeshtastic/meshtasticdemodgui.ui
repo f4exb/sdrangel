@@ -643,6 +643,11 @@
           <string>SHORT_TURBO</string>
          </property>
         </item>
+        <item>
+         <property name="text">
+          <string>USER</string>
+         </property>
+        </item>
        </widget>
       </item>
       <item>

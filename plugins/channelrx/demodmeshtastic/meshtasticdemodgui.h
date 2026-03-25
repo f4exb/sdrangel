@@ -208,7 +208,7 @@ private:
     void setupMeshtasticAutoProfileControls();
     void rebuildMeshtasticChannelOptions();
     bool retuneDeviceToFrequency(qint64 centerFrequencyHz);
-    bool autoTuneDeviceSampleRateForBandwidth(int bandwidthHz, QString& summary);
+    bool autoTuneDeviceSampleRateForBandwidth(int bandwidthHz, QString& summary, int* newBasebandSampleRateOut = nullptr);
     int findBandwidthIndex(int bandwidthHz) const;
     void applyMeshtasticProfileFromSelection();
     void editMeshtasticKeys();

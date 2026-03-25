@@ -59,6 +59,8 @@
 #include "util/db.h"
 #include "maincore.h"
 
+#include <QGraphicsOpacityEffect>
+
 #include "meshtasticdemod.h"
 #include "meshtasticdemodmsg.h"
 #include "meshtasticdemodgui.h"
@@ -384,6 +386,12 @@ void MeshtasticDemodGUI::on_meshPreset_currentIndexChanged(int index)
     if (m_meshControlsUpdating) {
         return;
     }
+
+    ui->meshRegion->setEnabled(index != ui->meshPreset->count() - 1); // USER preset has no region and is the last item
+    ui->BW->setEnabled(index == ui->meshPreset->count() - 1); // USER preset has user-defined bandwidth and is the last item
+    ui->Spread->setEnabled(index == ui->meshPreset->count() - 1); // USER preset has user-defined spread and is the last item
+    ui->deBits->setEnabled(index == ui->meshPreset->count() - 1); // USER preset has user-defined deBits and is the last item
+    ui->preambleChirps->setEnabled(index == ui->meshPreset->count() - 1); // USER preset has user-defined preambleChirps and is the last item
 
     rebuildMeshtasticChannelOptions();
     applyMeshtasticProfileFromSelection();
@@ -984,7 +992,7 @@ bool MeshtasticDemodGUI::retuneDeviceToFrequency(qint64 centerFrequencyHz)
     return false;
 }
 
-bool MeshtasticDemodGUI::autoTuneDeviceSampleRateForBandwidth(int bandwidthHz, QString& summary)
+bool MeshtasticDemodGUI::autoTuneDeviceSampleRateForBandwidth(int bandwidthHz, QString& summary, int* newBasebandSampleRateOut)
 {
     summary.clear();
 
@@ -1133,6 +1141,10 @@ bool MeshtasticDemodGUI::autoTuneDeviceSampleRateForBandwidth(int bandwidthHz, Q
         }
     }
 
+    if (newBasebandSampleRateOut) {
+        *newBasebandSampleRateOut = finalEffectiveRate;
+    }
+
     const bool belowTarget = finalEffectiveRate < minEffectiveRate;
     const bool changed = (finalDevSampleRate != initialDevSampleRate)
         || (finalLog2Decim != initialLog2Decim)
@@ -1171,6 +1183,53 @@ void MeshtasticDemodGUI::applyMeshtasticProfileFromSelection()
     const int channelNum = meshChannel + 1; // planner expects 1-based channel_num
 
     if (region.isEmpty() || preset.isEmpty()) {
+        return;
+    }
+
+    // USER preset: all LoRa parameters and frequency are controlled manually from the GUI.
+    // Skip auto-configuration entirely; just persist the selection and optionally auto-tune sample rate.
+    if (preset == "USER")
+    {
+        bool selectionStateChanged = false;
+
+        if (m_settings.m_meshtasticRegionCode != region)
+        {
+            m_settings.m_meshtasticRegionCode = region;
+            selectionStateChanged = true;
+        }
+
+        if (m_settings.m_meshtasticPresetName != preset)
+        {
+            m_settings.m_meshtasticPresetName = preset;
+            selectionStateChanged = true;
+        }
+
+        const int thisBW = MeshtasticDemodSettings::bandwidths[m_settings.m_bandwidthIndex];
+        QString sampleRateSummary;
+        bool sampleRateChanged = false;
+        int newBasebandSampleRate = 0;
+
+        if (m_settings.m_meshtasticAutoSampleRate) {
+            sampleRateChanged = autoTuneDeviceSampleRateForBandwidth(thisBW, sampleRateSummary, &newBasebandSampleRate);
+        }
+
+        if (sampleRateChanged && newBasebandSampleRate > m_basebandSampleRate) {
+            m_basebandSampleRate = newBasebandSampleRate;
+            setBandwidths();
+        }
+
+        if (selectionStateChanged || sampleRateChanged) {
+            applySettings();
+        }
+
+        const QString statusMsg = tr("MESH CFG|USER preset: BW=%1 Hz SF=%2 DE=%3 preamble=%4%5")
+            .arg(thisBW)
+            .arg(m_settings.m_spreadFactor)
+            .arg(m_settings.m_deBits)
+            .arg(m_settings.m_preambleChirps)
+            .arg(sampleRateSummary.isEmpty() ? QString() : " " + sampleRateSummary);
+        updateControlAvailabilityHints();
+        displayStatus(statusMsg);
         return;
     }
 
@@ -1265,10 +1324,19 @@ void MeshtasticDemodGUI::applyMeshtasticProfileFromSelection()
     QString sampleRateSummary;
     bool sampleRateChanged = false;
 
+    int newBasebandSampleRate = 0;
     if (m_settings.m_meshtasticAutoSampleRate) {
-        sampleRateChanged = autoTuneDeviceSampleRateForBandwidth(thisBW, sampleRateSummary);
+        sampleRateChanged = autoTuneDeviceSampleRateForBandwidth(thisBW, sampleRateSummary, &newBasebandSampleRate);
     } else {
         sampleRateSummary = "auto sample-rate control: disabled";
+    }
+
+    // If the device sample rate was just raised, update m_basebandSampleRate immediately
+    // so that setBandwidths() can widen the BW slider maximum before we write to it.
+    // Without this, the slider silently clamps the desired BW to the old (too-small) max.
+    if (sampleRateChanged && newBasebandSampleRate > m_basebandSampleRate) {
+        m_basebandSampleRate = newBasebandSampleRate;
+        setBandwidths();
     }
 
     if (!changed && !sampleRateChanged && !selectionStateChanged) {
@@ -1357,6 +1425,25 @@ void MeshtasticDemodGUI::rebuildMeshtasticChannelOptions()
     m_meshControlsUpdating = true;
     ui->meshChannel->clear();
 
+    // USER preset: channel selection is not applicable — the user sets all parameters manually
+    if (preset == "USER")
+    {
+        ui->meshChannel->addItem(tr("(user-defined)"), 0);
+        ui->meshChannel->setEnabled(false);
+        ui->meshChannel->setToolTip(tr("Not applicable in USER preset. All LoRa parameters and frequency are set manually."));
+        m_meshControlsUpdating = false;
+        // Do NOT queue applyMeshtasticProfileFromSelection here: this function is
+        // called from displaySettings() on every demod echo-back, and queueing an
+        // apply would create an infinite loop (apply → demod → echo → displaySettings
+        // → rebuildMeshtasticChannelOptions → apply → …).
+        // Initial and explicit applies happen via the constructor's queued call and
+        // direct user actions (Apply button, region/preset combo changes).
+        return;
+    }
+
+    ui->meshChannel->setEnabled(true);
+    ui->meshChannel->setToolTip(tr("Meshtastic channel number (zero-based, shown with center frequency)"));
+
     int added = 0;
     for (int meshChannel = 0; meshChannel <= 200; ++meshChannel)
     {
@@ -1401,14 +1488,6 @@ void MeshtasticDemodGUI::rebuildMeshtasticChannelOptions()
             << "region=" << region
             << "preset=" << preset
             << "channels=" << added;
-
-    // Ensure the rebuilt combo state is actually applied, even when the rebuild
-    // was triggered from code paths where index-change handlers are suppressed.
-    QMetaObject::invokeMethod(this, [this]() {
-        if (!m_meshControlsUpdating) {
-            applyMeshtasticProfileFromSelection();
-        }
-    }, Qt::QueuedConnection);
 }
 
 void MeshtasticDemodGUI::onWidgetRolled(QWidget* widget, bool rollDown)
@@ -1621,7 +1700,9 @@ MeshtasticDemodGUI::MeshtasticDemodGUI(PluginAPI* pluginAPI, DeviceUISet *device
     resetLoRaStatus();
 	applySettings(true);
     // On first creation, combo signals haven't fired yet. Apply selected Meshtastic profile once.
-    applyMeshtasticProfileFromSelection();
+    // Use a queued connection so this runs after SDRangel calls deserialize() on the newly created
+    // object — ensuring the saved preset/settings are in effect before any device retuning occurs.
+    QMetaObject::invokeMethod(this, &MeshtasticDemodGUI::applyMeshtasticProfileFromSelection, Qt::QueuedConnection);
     DialPopup::addPopupsToChildDials(this);
     m_resizer.enableChildMouseTracking();
 }
@@ -1663,6 +1744,31 @@ void MeshtasticDemodGUI::updateControlAvailabilityHints()
     ui->messageLength->setToolTip(messageLengthTip);
     ui->messageLengthLabel->setToolTip(messageLengthTip);
     ui->messageLengthText->setToolTip(messageLengthTip);
+
+    const bool isUserPreset = m_settings.m_meshtasticPresetName.trimmed().compare("USER", Qt::CaseInsensitive) == 0;
+    ui->meshRegion->setEnabled(!isUserPreset);
+    ui->BW->setEnabled(isUserPreset);
+    ui->Spread->setEnabled(isUserPreset);
+    ui->deBits->setEnabled(isUserPreset);
+    ui->preambleChirps->setEnabled(isUserPreset);
+
+    // Apply an opacity effect to give a clear greyed-out appearance when disabled,
+    // because the platform or dark-theme style may not provide enough visual contrast.
+    auto setSliderDimmed = [](QSlider* slider, bool dimmed) {
+        if (dimmed) {
+            if (!qobject_cast<QGraphicsOpacityEffect*>(slider->graphicsEffect())) {
+                auto* effect = new QGraphicsOpacityEffect(slider);
+                effect->setOpacity(0.35);
+                slider->setGraphicsEffect(effect);
+            }
+        } else {
+            slider->setGraphicsEffect(nullptr);
+        }
+    };
+    setSliderDimmed(ui->BW, !isUserPreset);
+    setSliderDimmed(ui->Spread, !isUserPreset);
+    setSliderDimmed(ui->deBits, !isUserPreset);
+    setSliderDimmed(ui->preambleChirps, !isUserPreset);
 
     const bool headerControlsEnabled = !m_settings.m_hasHeader;
     ui->fecParity->setEnabled(headerControlsEnabled);
@@ -1759,6 +1865,12 @@ void MeshtasticDemodGUI::displaySettings()
         regionIndex = 0;
     }
     ui->meshRegion->setCurrentIndex(regionIndex);
+
+    ui->meshRegion->setEnabled(m_settings.m_meshtasticPresetName != "USER");
+    ui->BW->setEnabled(m_settings.m_meshtasticPresetName == "USER");
+    ui->Spread->setEnabled(m_settings.m_meshtasticPresetName == "USER");
+    ui->deBits->setEnabled(m_settings.m_meshtasticPresetName == "USER");
+    ui->preambleChirps->setEnabled(m_settings.m_meshtasticPresetName == "USER");
 
     int presetIndex = ui->meshPreset->findData(m_settings.m_meshtasticPresetName);
     if (presetIndex < 0) {
