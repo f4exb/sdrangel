@@ -666,6 +666,10 @@ elseif(ANDROID)
     )
   endif()
   add_compile_definitions(ANDROID)
+elseif(UNIX)
+  set(CMAKE_FIND_ROOT_PATH "/usr/local")
+  include_directories("/usr/local/include")
+  link_directories("/usr/local/lib")
 endif()
 
 # When building a bundle on MacOS, we want to keep build paths in the library
