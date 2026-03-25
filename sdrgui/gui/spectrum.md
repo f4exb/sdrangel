@@ -286,7 +286,7 @@ Use this combo to select which mathematical operation is applied to the spectrum
 
 <h4>B.4.7: Math moving average length</h4>
 
-When the math mode (B.4.6) is set to a move that requires a moving average (x-μ, x-μ dB, x-μ+∧μ dB, |x-μ| dB) this combo allows selecting the number of samples for the moving average between these values.
+When the math mode (B.4.6) is set to a mode that requires a moving average (x-μ, x-μ dB, x-μ+∧μ dB, |x-μ| dB) this combo allows selecting the number of samples for the moving average.
 One of the predefined values can be selected or a user-defined value can be entered between 2 and 1M.
 
 <h3>B.5: Spectrum display controls - block #5</h3>
@@ -352,7 +352,7 @@ Left clicking M2 toggles display of the spectrum stored in memory M2.
 
 Right clicking M2 display a menu as described above for M1.
 
-<h4>B.6.3.: Load spectrum to CSV file</h4>
+<h4>B.6.3: Load spectrum to CSV file</h4>
 
 Click to specify the name of a .csv file that will be loaded to the current spectrum or spectrum scroll buffer.
 
@@ -449,7 +449,7 @@ Right click to open the [calibration management dialog](spectrumcalibration.md)
 
 <h4>B.7.6: Spectrum Display Settings dialog</h4>
 
-Click to open the Spectrum Display Settings dialog.
+Click to open the Spectrum Display Settings dialog. See below.
 
 <h4>B.7.7: Spectrum controls display</h4>
 
@@ -463,21 +463,21 @@ Selects which of these spectrum controls are displayed. This allows a user to hi
 
 This combo only appears if the spectrum display is the spectrum of a device (i.e. main spectrum) and if there are visible annotation markers. It allows to set the device center frequency to the frequency of the selected annotation marker.
 
-<h2>Spectrum Display Settings dialog</h2>
+<h2>C. Spectrum Display Settings dialog</h2>
 
 The Spectrum Display Settings dialog contains settings that do not have dedicated controls below the spectrum.
 
 ![Spectrum Display Settings dialog](../../doc/img/Spectrum_Display_Settings.png)
 
-<h3>Waterfall Scrolling</h3>
+<h3>C.1: Waterfall Scrolling</h3>
 
 When enabled, a scroll bar will be displayed on the right hand side of the spectrum and spectra will be stored in memory that can be larger than the displayed waterfall.
 The scroll bar can then be used to scroll through and display any spectra in memory. The number of spectra that can be stored in memory can be set via the Length (Spectra) field.
 The amount of RAM required and total time duration of all spectra are displayed underneath.
 
-<h3>Waterfall Axis</h3>
+<h3>C.2: Waterfall Axis</h3>
 
-<h4>Time units</h4>
+<h4>C.2.1: Time units</h4>
 
 Specifies what units will be used for the vertical time axis for the waterfall.
 
@@ -485,7 +485,7 @@ Specifies what units will be used for the vertical time axis for the waterfall.
   - **Local time**: displays local time. Only available when Waterfall Scrolling is enabled.
   - **UTC time**: displays UTC time. Only available when Waterfall Scrolling is enabled.
 
-<h4>Time format</h4>
+<h4>C.2.2: Time format</h4>
 
 When local time or UTC time is used for the time axis, the Time format field species how that time will be formatted. The default is hh:mm:ss. Other examples include:
 
@@ -495,39 +495,39 @@ When local time or UTC time is used for the time axis, the Time format field spe
   - **hh:mm:ss.z** - 14:13:09.12
   - **h:m:s ap** - 2:13:9 pm
 
-<h3>Status Line</h3>
+<h3>C.3: Status Line</h3>
 
 Allows customizing which information is displayed in the status line.
 
-<h4>Display RBW</h4>
+<h4>C.3.1: Display RBW</h4>
 
 When checked, the Resolution Bandwidth (RBW) will be displayed in the status line.
 
-<h4>Display power/frequency under cursor</h4>
+<h4>C.3.2: Display power/frequency under cursor</h4>
 
 When checked, the power and frequency of the FFT bin under the cursor will be displayed in the status line.
 
-<h4>Display peak power/frequency</h4>
+<h4>C.3.3: Display peak power/frequency</h4>
 
 When checked, the power and frequency of the highest peak will be displayed in the status line.
 
-<h3>Spectrum</h3>
+<h3>C.4: Spectrum</h3>
 
-<h4>Colour</h4>
+<h4>C.4.1: Colour</h4>
 
 Specifies the color to draw the spectrum when line (B.2.1) or fill (B.2.2) style is selected.
 
-<h3>Spectrum Memories</h3>
+<h3>C.5: Spectrum Memories</h3>
 
-<h4>Memory</h4>
+<h4>C.5.1: Memory</h4>
 
 Selects which memory settings will be displayed for (M1 or M2).
 
-<h4>Label</h4>
+<h4>C.5.2: Label</h4>
 
 Specifies a text label that will be displayed to the left hand side of the spectrum held in the memory.
 
-<h4>Color</h4>
+<h4>C.5.3: Color</h4>
 
 Specifies the color to draw the spectrum held in the memory.
 
