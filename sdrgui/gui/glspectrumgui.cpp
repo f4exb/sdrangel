@@ -1610,7 +1610,7 @@ void GLSpectrumGUI::smoothMem(int memoryIdx)
     std::copy(m_settings.m_spectrumMemory[memoryIdx].m_spectrum.begin(), m_settings.m_spectrumMemory[memoryIdx].m_spectrum.end(), &temp[l]);
 
     // Average n consequtive samples
-    for (int i = 0; i < size1; i++)
+    for (std::size_t i = 0; i < size1; i++)
     {
         Real sum = 0.0;
         for (int j = 0; j < n; j++) {
@@ -1629,7 +1629,7 @@ void GLSpectrumGUI::addMem(int memoryIdx)
 {
     std::size_t s = std::min(m_settings.m_spectrumMemory[0].m_spectrum.size(), m_settings.m_spectrumMemory[1].m_spectrum.size());
 
-    for (int i = 0; i < s; i++)
+    for (std::size_t i = 0; i < s; i++)
     {
         m_settings.m_spectrumMemory[memoryIdx].m_spectrum[i] =
               m_settings.m_spectrumMemory[0].m_spectrum[i]
@@ -1643,7 +1643,7 @@ void GLSpectrumGUI::diffMem(int memoryIdx)
 {
     std::size_t s = std::min(m_settings.m_spectrumMemory[0].m_spectrum.size(), m_settings.m_spectrumMemory[1].m_spectrum.size());
 
-    for (int i = 0; i < s; i++)
+    for (std::size_t i = 0; i < s; i++)
     {
         m_settings.m_spectrumMemory[memoryIdx].m_spectrum[i] =
               m_settings.m_spectrumMemory[0].m_spectrum[i]

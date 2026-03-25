@@ -3423,7 +3423,7 @@ void MainWindow::startAll()
         startAllDevices(workspace);
     }
     // Start all features
-    for (int featureSetIndex = 0; featureSetIndex < m_featureUIs.size(); featureSetIndex++)
+    for (std::size_t featureSetIndex = 0; featureSetIndex < m_featureUIs.size(); featureSetIndex++)
     {
         for (int featureIndex = 0; featureIndex < m_featureUIs[featureSetIndex]->getNumberOfFeatures(); featureIndex++) {
             FeatureWebAPIUtils::run(featureSetIndex, featureIndex);

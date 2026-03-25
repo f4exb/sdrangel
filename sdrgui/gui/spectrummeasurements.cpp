@@ -725,9 +725,9 @@ void SpectrumMeasurements::updateMeasurement(int row, float value, bool updateGU
 
         QString spec = m_table->item(row, COL_SPEC)->text();
         bool valueOK = checkSpec(spec, value);
-        bool meanOK = checkSpec(spec, mean);
-        bool minOK = checkSpec(spec, m_measurements[row].m_min);
-        bool mmaxOK = checkSpec(spec, m_measurements[row].m_max);
+        checkSpec(spec, mean);
+        checkSpec(spec, m_measurements[row].m_min);
+        checkSpec(spec, m_measurements[row].m_max);
 
         if (!valueOK) {
             m_measurements[row].m_fails++;

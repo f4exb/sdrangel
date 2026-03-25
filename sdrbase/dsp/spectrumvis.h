@@ -126,13 +126,14 @@ public:
     void setMathMemory(const QList<Real> &values);
     void getMathMovingAverageCopy(QList<Real>& copy);
 
-	virtual void feed(const SampleVector::const_iterator& begin, const SampleVector::const_iterator& end, bool positiveOnly);
+	void feed(const SampleVector::const_iterator& begin, const SampleVector::const_iterator& end, bool positiveOnly) override;
     void feed(const ComplexVector::const_iterator& begin, const ComplexVector::const_iterator& end, bool positiveOnly);
+    void feed(const Complex *begin, unsigned int length) override; //!< feed output of FFT
 	void feedTriggered(const SampleVector::const_iterator& triggerPoint, const SampleVector::const_iterator& end, bool positiveOnly);
-	virtual void start();
-	virtual void stop();
-    virtual void pushMessage(Message *msg);
-    virtual QString getSinkName();
+	void start() override;
+	void stop() override;
+    void pushMessage(Message *msg) override;
+    QString getSinkName() override;
     MessageQueue *getInputMessageQueue() { return &m_inputMessageQueue; }
 
     void setMessageQueueToGUI(MessageQueue *queue) { m_guiMessageQueue = queue; }
@@ -221,7 +222,8 @@ private:
 
 	QRecursiveMutex m_mutex;
 
-    void processFFT(bool positiveOnly);
+    void performFFT(bool positiveOnly);
+    void processFFT(const Complex* fftOut, bool reorder, bool positiveOnly, int fftSize);
     void setRunning(bool running) { m_running = running; }
     void applySettings(const SpectrumSettings& settings, bool force = false);
   	bool handleMessage(const Message& message);

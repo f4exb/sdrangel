@@ -105,6 +105,21 @@ void SpectrumVis::feedTriggered(const SampleVector::const_iterator& triggerPoint
 	}*/
 }
 
+void SpectrumVis::feed(const Complex *begin, unsigned int length)
+{
+    if (!m_glSpectrum && !m_wsSpectrum.socketOpened()) {
+        return;
+    }
+
+    if (!m_mutex.tryLock(0)) { // prevent conflicts with configuration process
+        return;
+    }
+
+    processFFT(begin, false, false, length);
+
+    m_mutex.unlock();
+}
+
 void SpectrumVis::feed(const ComplexVector::const_iterator& cbegin, const ComplexVector::const_iterator& end, bool positiveOnly)
 {
     if (!m_running) {
@@ -133,7 +148,7 @@ void SpectrumVis::feed(const ComplexVector::const_iterator& cbegin, const Comple
             std::copy(begin, begin + samplesNeeded, m_fftBuffer.begin() + m_fftBufferFill);
             begin += samplesNeeded;
 
-            processFFT(positiveOnly);
+            performFFT(positiveOnly);
 
 			// advance buffer respecting the fft overlap factor
 			// undefined behavior if the memory regions overlap, valid code for 50% overlap
@@ -187,7 +202,7 @@ void SpectrumVis::feed(const SampleVector::const_iterator& cbegin, const SampleV
 				*it++ = Complex(begin->real() / m_scalef, begin->imag() / m_scalef);
 			}
 
-            processFFT(positiveOnly);
+            performFFT(positiveOnly);
 
 			// advance buffer respecting the fft overlap factor
 			// undefined behavior if the memory regions overlap, valid code for 50% overlap
@@ -265,10 +280,8 @@ void SpectrumVis::mathDB(std::vector<Real> &spectrum)
     }
 }
 
-void SpectrumVis::processFFT(bool positiveOnly)
+void SpectrumVis::performFFT(bool positiveOnly)
 {
-    PROFILER_START();
-
     // apply fft window (and copy from m_fftBuffer to m_fftIn)
     m_window.apply(&m_fftBuffer[0], m_fft->in());
 
@@ -276,17 +289,23 @@ void SpectrumVis::processFFT(bool positiveOnly)
     m_fft->transform();
 
     // extract power spectrum and reorder buckets
-    const Complex* fftOut = m_fft->out();
+    processFFT(m_fft->out(), true, positiveOnly, m_settings.m_fftSize);
+}
+
+void SpectrumVis::processFFT(const Complex* fftOut, bool reorder, bool positiveOnly, int fftSize)
+{
+    PROFILER_START();
+
     Complex c;
     Real v;
-    std::size_t halfSize = m_settings.m_fftSize / 2;
+    int halfSize = fftSize / 2;
     bool ready = false;
 
     if (m_settings.m_averagingMode == SpectrumSettings::AvgModeNone)
     {
         if (positiveOnly)
         {
-            for (std::size_t i = 0; i < halfSize; i++)
+            for (int i = 0; i < halfSize; i++)
             {
                 c = fftOut[i];
                 v = c.real() * c.real() + c.imag() * c.imag();
@@ -295,9 +314,9 @@ void SpectrumVis::processFFT(bool positiveOnly)
                 m_powerSpectrum[i * 2 + 1] = v;
             }
         }
-        else
+        else if (reorder)
         {
-            for (std::size_t i = 0; i < halfSize; i++)
+            for (int i = 0; i < halfSize; i++)
             {
                 c = fftOut[i + halfSize];
                 v = c.real() * c.real() + c.imag() * c.imag();
@@ -310,6 +329,16 @@ void SpectrumVis::processFFT(bool positiveOnly)
                 m_powerSpectrum[i + halfSize] = v;
             }
         }
+        else
+        {
+            for (int i = 0; i < fftSize; i++)
+            {
+                c = fftOut[i];
+                v = c.real() * c.real() + c.imag() * c.imag();
+                v *= m_powFFTMul;
+                m_powerSpectrum[i] = v;
+            }
+        }
 
         ready = true;
     }
@@ -319,7 +348,7 @@ void SpectrumVis::processFFT(bool positiveOnly)
 
         if (positiveOnly)
         {
-            for (std::size_t i = 0; i < halfSize; i++)
+            for (int i = 0; i < halfSize; i++)
             {
                 c = fftOut[i];
                 v = c.real() * c.real() + c.imag() * c.imag();
@@ -329,9 +358,9 @@ void SpectrumVis::processFFT(bool positiveOnly)
                 m_powerSpectrum[i * 2 + 1] = (Real) avg;
             }
         }
-        else
+        else if (reorder)
         {
-            for (std::size_t i = 0; i < halfSize; i++)
+            for (int i = 0; i < halfSize; i++)
             {
                 c = fftOut[i + halfSize];
                 v = c.real() * c.real() + c.imag() * c.imag();
@@ -346,6 +375,17 @@ void SpectrumVis::processFFT(bool positiveOnly)
                 m_powerSpectrum[i + halfSize] = (Real) avg;
             }
         }
+        else
+        {
+            for (int i = 0; i < fftSize; i++)
+            {
+                c = fftOut[i];
+                v = c.real() * c.real() + c.imag() * c.imag();
+                v *= m_powFFTMul;
+                avg = m_movingAverage.storeAndGetAvg(v, i);
+                m_powerSpectrum[i] = (Real) avg;
+            }
+        }
 
         m_movingAverage.nextAverage();
         ready = true;
@@ -356,7 +396,7 @@ void SpectrumVis::processFFT(bool positiveOnly)
 
         if (positiveOnly)
         {
-            for (std::size_t i = 0; i < halfSize; i++)
+            for (int i = 0; i < halfSize; i++)
             {
                 c = fftOut[i];
                 v = c.real() * c.real() + c.imag() * c.imag();
@@ -370,9 +410,9 @@ void SpectrumVis::processFFT(bool positiveOnly)
                 }
             }
         }
-        else
+        else if (reorder)
         {
-            for (std::size_t i = 0; i < halfSize; i++)
+            for (int i = 0; i < halfSize; i++)
             {
                 c = fftOut[i + halfSize];
                 v = c.real() * c.real() + c.imag() * c.imag();
@@ -393,6 +433,20 @@ void SpectrumVis::processFFT(bool positiveOnly)
                 }
             }
         }
+        else
+        {
+            for (int i = 0; i < fftSize; i++)
+            {
+                c = fftOut[i];
+                v = c.real() * c.real() + c.imag() * c.imag();
+                v *= m_powFFTMul;
+
+                // result available
+                if (m_fixedAverage.storeAndGetAvg(avg, v, i)) {
+                    m_powerSpectrum[i] = avg;
+                }
+            }
+        }
 
         // result available
         if (m_fixedAverage.nextAverage()) {
@@ -405,7 +459,7 @@ void SpectrumVis::processFFT(bool positiveOnly)
 
         if (positiveOnly)
         {
-            for (std::size_t i = 0; i < halfSize; i++)
+            for (int i = 0; i < halfSize; i++)
             {
                 c = fftOut[i];
                 v = c.real() * c.real() + c.imag() * c.imag();
@@ -419,9 +473,9 @@ void SpectrumVis::processFFT(bool positiveOnly)
                 }
             }
         }
-        else
+        else if (reorder)
         {
-            for (std::size_t i = 0; i < halfSize; i++)
+            for (int i = 0; i < halfSize; i++)
             {
                 c = fftOut[i + halfSize];
                 v = c.real() * c.real() + c.imag() * c.imag();
@@ -442,6 +496,20 @@ void SpectrumVis::processFFT(bool positiveOnly)
                 }
             }
         }
+        else
+        {
+            for (int i = 0; i < fftSize; i++)
+            {
+                c = fftOut[i];
+                v = c.real() * c.real() + c.imag() * c.imag();
+                v *= m_powFFTMul;
+
+                // result available
+                if (m_max.storeAndGetMax(max, v, i)) {
+                    m_powerSpectrum[i] = max;
+                }
+            }
+        }
 
         // result available
         if (m_max.nextMax()) {
@@ -454,7 +522,7 @@ void SpectrumVis::processFFT(bool positiveOnly)
 
         if (positiveOnly)
         {
-            for (std::size_t i = 0; i < halfSize; i++)
+            for (int i = 0; i < halfSize; i++)
             {
                 c = fftOut[i];
                 v = c.real() * c.real() + c.imag() * c.imag();
@@ -467,9 +535,9 @@ void SpectrumVis::processFFT(bool positiveOnly)
                 }
             }
         }
-        else
+        else if (reorder)
         {
-            for (std::size_t i = 0; i < halfSize; i++)
+            for (int i = 0; i < halfSize; i++)
             {
                 c = fftOut[i + halfSize];
                 v = c.real() * c.real() + c.imag() * c.imag();
@@ -490,6 +558,19 @@ void SpectrumVis::processFFT(bool positiveOnly)
                 }
             }
         }
+        else
+        {
+            for (int i = 0; i < fftSize; i++)
+            {
+                c = fftOut[i];
+                v = c.real() * c.real() + c.imag() * c.imag();
+                v *= m_powFFTMul;
+
+                if (m_min.storeAndGetMin(min, v, i)) {
+                    m_powerSpectrum[i] = min;
+                }
+            }
+        }
 
         // result available
         if (m_min.nextMin()) {
@@ -499,6 +580,10 @@ void SpectrumVis::processFFT(bool positiveOnly)
 
     if (ready)
     {
+        for (int i = fftSize; i < m_settings.m_fftSize; i++) {
+            m_powerSpectrum[i] = 0.0f;
+        }
+
         // Calculate maximum value in spectrum
         m_specMax = *std::max_element(&m_powerSpectrum[0], &m_powerSpectrum[m_settings.m_fftSize]);
 

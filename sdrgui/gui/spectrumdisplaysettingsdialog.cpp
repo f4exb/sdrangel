@@ -164,6 +164,8 @@ void SpectrumDisplaySettingsDialog::on_scrollLength_valueChanged(int value)
 
 void SpectrumDisplaySettingsDialog::on_spectrumColor_clicked(bool checked)
 {
+    (void) checked;
+
     QColorDialog dialog(QColor::fromRgba(m_spectrumColor), ui->spectrumColor);
     if (dialog.exec() == QDialog::Accepted)
     {
@@ -182,6 +184,8 @@ void SpectrumDisplaySettingsDialog::on_memIdx_currentIndexChanged(int index)
 
 void SpectrumDisplaySettingsDialog::on_memColor_clicked(bool checked)
 {
+    (void) checked;
+
     QColorDialog dialog(QColor::fromRgba(m_memorySettings[ui->memIdx->currentIndex()].m_color), ui->memColor);
     if (dialog.exec() == QDialog::Accepted)
     {

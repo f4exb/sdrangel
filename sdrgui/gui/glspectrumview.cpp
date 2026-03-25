@@ -646,7 +646,7 @@ void GLSpectrumView::setMeasurementParams(
 void GLSpectrumView::resetMeasurements()
 {
     m_mutex.lock();
-    for (int i = 0; i < m_maskFails.size(); ++i)
+    for (std::size_t i = 0; i < m_maskFails.size(); ++i)
     {
         m_maskTestCount[i] = 0;
         m_maskFailCount[i] = 0;
@@ -797,7 +797,7 @@ void GLSpectrumView::setScrolling(bool enabled, int length)
     }
     else
     {
-        while (m_spectrumBuffer.size() > length)
+        while (m_spectrumBuffer.size() > (std::size_t) length)
         {
             if (m_currentSpectrum == m_spectrumBuffer.takeFirst().m_spectrum) {
                 m_currentSpectrum = nullptr;
@@ -948,7 +948,7 @@ void GLSpectrumView::writeCSV(QTextStream &out)
     else
     {
         out << "\"Date and Time\",\"Center Frequency (Hz)\",\"Sample Rate (Hz)\",\"Power\"\n";
-        for (int j = 0; j < m_spectrumBuffer.size(); j++)
+        for (std::size_t j = 0; j < m_spectrumBuffer.size(); j++)
         {
             out << m_spectrumBuffer[j].m_dateTime.toString(Qt::ISODateWithMs) << "," << m_spectrumBuffer[j].m_centerFrequency << "," << m_spectrumBuffer[j].m_sampleRate << ",";
             for (int i = 0; i < m_spectrumBufferFFTSize; i++) {
@@ -970,7 +970,7 @@ bool GLSpectrumView::writeImage(const QString& filename)
 // Get center frequency for currently displayed spectrum (which is selected via the scroll bar)
 qint64 GLSpectrumView::getDisplayedCenterFrequency() const
 {
-    int idx = m_spectrumBuffer.size() - 1 - scrollBarValue();
+    std::size_t idx = m_spectrumBuffer.size() - 1 - scrollBarValue();
 
     if ((idx >= 0) && (idx < m_spectrumBuffer.size())) {
         return m_spectrumBuffer[idx].m_centerFrequency;
@@ -982,7 +982,7 @@ qint64 GLSpectrumView::getDisplayedCenterFrequency() const
 // Get sample rate for currently displayed spectrum (which is selected via the scroll bar)
 quint32 GLSpectrumView::getDisplayedSampleRate() const
 {
-    int idx = m_spectrumBuffer.size() - 1 - scrollBarValue();
+    std::size_t idx = m_spectrumBuffer.size() - 1 - scrollBarValue();
 
     if ((idx >= 0) && (idx < m_spectrumBuffer.size())) {
         return m_spectrumBuffer[idx].m_sampleRate;
@@ -995,7 +995,8 @@ void GLSpectrumView::redrawSpectrum()
 {
     if (m_spectrumBuffer.size() > 0)
     {
-        int idx = m_spectrumBuffer.size() - 1 - scrollBarValue();
+        std::size_t idx = m_spectrumBuffer.size() - 1 - scrollBarValue();
+
         if (idx >= 0 && idx < m_spectrumBuffer.size())
         {
             updateHistogram(m_spectrumBuffer[idx].m_spectrum, m_fftSize, m_fftMin, m_nbBins);
@@ -1008,7 +1009,7 @@ void GLSpectrumView::redrawWaterfallAnd3DSpectrogram()
 {
     if (m_waterfallBuffer && m_spectrumBuffer.size() > 0)
     {
-        int idx = m_spectrumBuffer.size() - 1 - m_waterfallBuffer->height() - scrollBarValue();
+        std::size_t idx = m_spectrumBuffer.size() - 1 - m_waterfallBuffer->height() - scrollBarValue();
 
         m_waterfallBufferPos = 0;
         m_waterfallTexturePos = 0;
@@ -1127,7 +1128,7 @@ void GLSpectrumView::newSpectrum(const Real *spectrum, int fftSize, quint32 samp
 
 void GLSpectrumView::updateSpectrumNoBuffer(const Real *spectrum, int fftSize)
 {
-    if (m_spectrumNoBuffer.size() != fftSize) {
+    if (m_spectrumNoBuffer.size() != (std::size_t) fftSize) {
         m_spectrumNoBuffer.resize(fftSize);
     }
 
@@ -1154,7 +1155,7 @@ void GLSpectrumView::updateSpectrumBuffer(const Real *spectrum, int fftSize, qui
 
     // Reuse old buffer if possible, otherwise allocate new buffer
     Real *buffer = nullptr;
-    if (m_spectrumBuffer.size() >= m_spectrumBufferMaxSize) {
+    if (m_spectrumBuffer.size() >= (std::size_t) m_spectrumBufferMaxSize) {
         buffer = m_spectrumBuffer.takeFirst().m_spectrum;
     }
     if (!buffer) {
@@ -1894,7 +1895,7 @@ void GLSpectrumView::paintGL()
         for (int m = 0; m < m_spectrumMemory.size(); m++)
         {
             if (   (m_spectrumMemory[m].m_spectrum.size() == m_fftSize)
-                && (m_maskFails[m].size() == m_fftSize)
+                && (m_maskFails[m].size() == (std::size_t) m_fftSize)
                 && ((m_measurementMemMasks & (1 << m)) != 0)
                )
             {
@@ -2011,9 +2012,6 @@ void GLSpectrumView::paintGL()
             q3 = m_q3FFT.m_array;
             for (int i = 0; i < m_nbBins; i++)
             {
-                Real q1 = m_currentSpectrum[0];
-                Real q2 = m_currentSpectrum[m_fftMin + i];
-                Real q = m_currentSpectrum[m_fftMin + i] - m_referenceLevel;
                 Real v = clampPower(m_currentSpectrum[m_fftMin + i] - m_referenceLevel);
 
                 q3[2*i] = (Real) i;
@@ -3195,7 +3193,7 @@ void GLSpectrumView::measureMask(const Real *spectrum, int fftSize, bool updateG
         {
             if ((m_measurementMemMasks & (1 << m)) != 0)
             {
-                if (m_maskFails[m].size() < fftSize) {
+                if (m_maskFails[m].size() < (std::size_t) fftSize) {
                     m_maskFails[m].resize(fftSize);
                 }
 
@@ -3250,9 +3248,9 @@ void GLSpectrumView::stopDrag()
 // value is [0,m_waterfallHeight], as set in setTimeScaleRange()
 QString GLSpectrumView::formatTick(double value) const
 {
-    int idx = value - scrollBarValue() + m_spectrumBuffer.size() - 1 - m_waterfallHeight;
+    std::size_t idx = value - scrollBarValue() + m_spectrumBuffer.size() - 1 - m_waterfallHeight;
 
-    if (idx >= 0 && idx < m_spectrumBuffer.size())
+    if ((idx >= 0) && (idx < m_spectrumBuffer.size()))
     {
         QDateTime dt = m_spectrumBuffer[idx].m_dateTime;
 

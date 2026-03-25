@@ -120,7 +120,7 @@ public:
     void getAverages(std::vector<R> &values) const
     {
         values.resize(m_width);
-        for (int index = 0; index < m_width; index++) {
+        for (unsigned int index = 0; index < m_width; index++) {
             values[index] = (R) (m_sum[index] / m_count);
         }
     }
