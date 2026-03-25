@@ -96,7 +96,9 @@ When the mouse is inside the time scale (waterfall) the overlap is increased by 
 
 <h2>B. Spectrum controls</h2>
 
-Controls are organized in 7 blocks arranged in a flow layout so that the size of the control area can adapt to the width of the spectrum arranging the blocks from 4 to 1 line as the spectrum widens. The buttons and various controls in each block remain at the same place.
+Not all controls are visible by default. See B.7.8 for how to select which controls are visible.
+
+Controls are organized in 7 blocks arranged in a flow layout so that the size of the control area can adapt to the width of the spectrum arranging the blocks from 5 to 1 line as the spectrum widens. The buttons and various controls in each block remain at the same place.
 
 Narrow (5 lines):
 
@@ -105,8 +107,6 @@ Narrow (5 lines):
 Wide (1 line):
 
 ![Spectrum GUI](../../doc/img/MainWindow_spectrum_gui_wide.png)
-
-Not all controls are visible by default. See B.7.8 for how to select which controls are visible.
 
 The 7 blocks are detailed next:
 
@@ -510,6 +510,12 @@ When checked, the power and frequency of the FFT bin under the cursor will be di
 <h4>Display peak power/frequency</h4>
 
 When checked, the power and frequency of the highest peak will be displayed in the status line.
+
+<h3>Spectrum</h3>
+
+<h4>Colour</h4>
+
+Specifies the color to draw the spectrum when line (B.2.1) or fill (B.2.2) style is selected.
 
 <h3>Spectrum Memories</h3>
 
