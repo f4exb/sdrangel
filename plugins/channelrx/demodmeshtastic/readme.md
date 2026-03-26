@@ -63,6 +63,16 @@ When either selection changes, the demodulator auto-applies LoRa decode paramete
 If the device center frequency is known, the channel offset is also auto-centered to the selected region/preset default channel.
 The demodulator also attempts to auto-tune the device sample rate/decimation (when supported by the device) so effective baseband rate is suitable for the selected LoRa bandwidth.
 
+<h2>Configurations</h2>
+
+The plugin can decode up to 4 different channels in parallel with different decoder configurations provided they are located in the same baseband as the "primary" configuration (index 0).
+
+Only the settings of the primary configuration are persisted. Extra configuration are volatile across SDRangel sessions.
+
+Messages pertaining to a configuration are displayed in the "Cnf_n" tab where n is the configuration index.
+
+See Payload section, controls A.8 to A.10
+
 <h2>Interface</h2>
 
 The top and bottom bars of the channel window are described [here](../../../sdrgui/channel/readme.md)
@@ -191,6 +201,7 @@ When you check this option it inverts the direction of the chirps thus becoming 
 - **SHORT_FAST**: BW=250kHz, SF=7, DE=0, FEC=4/5
 - **SHORT_SLOW**: BW=250kHz, SF=8, DE=0, FEC=4/5
 - **SHORT_TURBO**: BW=500kHz, SF=7, DE=0, FEC=4/5 (a.k.a Short Range / Turbo)
+- **USER**: Modem parameters are set with the RF/Demod settings controls. You can use this for any non-standard setup.
 
 <h4>A.3: Channel selection</h4>
 
@@ -228,33 +239,45 @@ Arms first and waits for on-air activity, then scans Inv + frequency offset cand
 
 when enabled, tries to set source sample-rate/decimation automatically for the selected LoRa bandwidth
 
-<h4>A.8: Start/Stop decoder</h4>
+<h4>A.8: Configutation selector</h4>
+
+This dial button selects which configuration is in focus of the settings controls. The configuration index is shown next. Index 0 is for the primary configuration
+
+<h4>A.9: Add configuration</h4>
+
+Add a new configuration. There is a maximum total number of 4 configurations.
+
+<h4>A.10: Delete configuration</h4>
+
+Delete currently selected configuration. The primary configuration (index 0) cannot be deleted.
+
+<h4>A.11: Start/Stop decoder</h4>
 
 You can suspend and resume decoding activity using this button. This is useful if you want to freeze the payload content display.
 
-<h4>A.9: End Of Message squelch</h4>
+<h4>A.12: End Of Message squelch</h4>
 
 This is used to determine the end of message automatically. It can be de-activated by turning the button completely to the right (as shown on the picture). In this case it relies on the message length set with (A.10).
 
 During payload detection the maximum power value in the FFT (at argmax) P<sub>max</sub> is stored and compared to the current argmax power value P<sub>i</sub> if S<sub>EOM</sub> is this squelch value the end of message is detected if S<sub>EOM</sub> &times; S<sub>i</sub> &lt; S<sub>max</sub>
 
-<h4>A.10: Expected message length in symbols</h4>
+<h4>A.13: Expected message length in symbols</h4>
 
 This is the expected number of symbols in a message. When a header is present in the payload it should match the size given in the header.
 
-<h4>A.11: Number of FEC parity bits</h4>
+<h4>A.14: Number of FEC parity bits</h4>
 
 This is the number of parity bits in the Hamming code used in the FEC and is set in the header therefore this control is disabled. The standard values are 1 to 4 for H(4,5) to H(4,8) encoding.
 
-<h4>A.12: Packet length</h4>
+<h4>A.15: Packet length</h4>
 
 This is the expected packet length in bytes without header and CRC. This control is disabled because the value used is the one found in the header.
 
-<h4>A.13: Number of symbols and codewords</h4>
+<h4>A.16: Number of symbols and codewords</h4>
 
 This is the number of symbols (left of slash) and codewords (right of slash) used for the payload including header and CRC.
 
-<h4>A.14: Indicators</h4>
+<h4>A.17: Indicators</h4>
 
 - Header FEC indicator. The color of the indicator gives the status of header parity checks:
   - **Grey**: undefined

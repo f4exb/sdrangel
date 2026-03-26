@@ -54,6 +54,7 @@
 #include "meshtasticpacket.h"
 
 MESSAGE_CLASS_DEFINITION(MeshtasticDemod::MsgConfigureMeshtasticDemod, Message)
+MESSAGE_CLASS_DEFINITION(MeshtasticDemod::MsgSetExtraPipelineSettings, Message)
 
 const char* const MeshtasticDemod::m_channelIdURI = "sdrangel.channel.meshtasticdemod";
 const char* const MeshtasticDemod::m_channelId = "MeshtasticDemod";
@@ -211,126 +212,13 @@ MeshtasticDemodSettings MeshtasticDemod::makePipelineSettingsFromMeshRadio(
     return out;
 }
 
-std::vector<MeshtasticDemod::PipelineConfig> MeshtasticDemod::buildPipelineConfigs(const MeshtasticDemodSettings& settings) const
-{
-    std::vector<PipelineConfig> configs;
-
-    if (settings.m_codingScheme != MeshtasticDemodSettings::CodingLoRa)
-    {
-        PipelineConfig config;
-        config.id = 0;
-        config.name = "Main";
-        config.presetName = "MAIN";
-        config.settings = settings;
-        configs.push_back(config);
-        return configs;
-    }
-
-    static const std::array<const char*, 9> kPresetOrder = {
-        "LONG_FAST",
-        "LONG_SLOW",
-        "LONG_MODERATE",
-        "LONG_TURBO",
-        "MEDIUM_FAST",
-        "MEDIUM_SLOW",
-        "SHORT_FAST",
-        "SHORT_SLOW",
-        "SHORT_TURBO"
-    };
-
-    const QString selectedPreset = settings.m_meshtasticPresetName.trimmed().isEmpty()
-        ? QString("LONG_FAST")
-        : settings.m_meshtasticPresetName.trimmed().toUpper();
-
-    QStringList orderedPresets;
-    orderedPresets.append(selectedPreset);
-
-    for (const char *preset : kPresetOrder)
-    {
-        const QString p(preset);
-
-        if (!orderedPresets.contains(p)) {
-            orderedPresets.append(p);
-        }
-    }
-
-    const QString region = settings.m_meshtasticRegionCode.trimmed().isEmpty()
-        ? QString("US")
-        : settings.m_meshtasticRegionCode.trimmed();
-    const int channelNum = std::max(1, settings.m_meshtasticChannelIndex + 1);
-
-    qint64 selectedPresetFrequencyHz = 0;
-    bool haveSelectedPresetFrequency = false;
-    {
-        modemmeshtastic::TxRadioSettings selectedMeshRadio;
-        QString error;
-        const QString command = QString("MESH:preset=%1;region=%2;channel_num=%3")
-            .arg(selectedPreset)
-            .arg(region)
-            .arg(channelNum);
-
-        if (modemmeshtastic::Packet::deriveTxRadioSettings(command, selectedMeshRadio, error) && selectedMeshRadio.hasCenterFrequency)
-        {
-            selectedPresetFrequencyHz = selectedMeshRadio.centerFrequencyHz;
-            haveSelectedPresetFrequency = true;
-        }
-    }
-
-    int id = 0;
-
-    for (const QString& presetName : orderedPresets)
-    {
-        modemmeshtastic::TxRadioSettings meshRadio;
-        QString error;
-        const QString command = QString("MESH:preset=%1;region=%2;channel_num=%3")
-            .arg(presetName)
-            .arg(region)
-            .arg(channelNum);
-
-        if (!modemmeshtastic::Packet::deriveTxRadioSettings(command, meshRadio, error))
-        {
-            qDebug() << "MeshtasticDemod::buildPipelineConfigs: skip preset" << presetName << ":" << error;
-            continue;
-        }
-
-        if (!meshRadio.hasLoRaParams) {
-            continue;
-        }
-
-        PipelineConfig config;
-        config.id = id++;
-        config.name = presetName;
-        config.presetName = presetName;
-        config.settings = makePipelineSettingsFromMeshRadio(
-            settings,
-            presetName,
-            meshRadio,
-            selectedPresetFrequencyHz,
-            haveSelectedPresetFrequency
-        );
-        configs.push_back(config);
-    }
-
-    if (configs.empty())
-    {
-        PipelineConfig config;
-        config.id = 0;
-        config.name = "Main";
-        config.presetName = "MAIN";
-        config.settings = settings;
-        configs.push_back(config);
-    }
-
-    return configs;
-}
-
 void MeshtasticDemod::makePipelineConfigFromSettings(int configId, PipelineConfig& config, const MeshtasticDemodSettings& settings) const
 {
     // USER preset: all LoRa parameters are user-controlled; skip derivation from the mesh radio table.
     if (settings.m_meshtasticPresetName.trimmed().compare("USER", Qt::CaseInsensitive) == 0)
     {
         config.id = configId;
-        config.name = QString("CONF%1").arg(configId);
+        config.name = QString("Cnf_%1").arg(configId);
         config.presetName = settings.m_meshtasticPresetName;
         config.settings = settings;
         return;
@@ -357,7 +245,7 @@ void MeshtasticDemod::makePipelineConfigFromSettings(int configId, PipelineConfi
     }
 
     config.id = configId;
-    config.name = QString("CONF%1").arg(configId);
+    config.name = QString("Cnf_%1").arg(configId);
     config.presetName = settings.m_meshtasticPresetName;
     config.settings = makePipelineSettingsFromMeshRadio(
         settings,
@@ -506,28 +394,115 @@ void MeshtasticDemod::syncPipelinesWithSettings(const MeshtasticDemodSettings& s
 
         applyPipelineRuntimeSettings(m_pipelines[i], m_pipelineConfigs[i].settings, force);
     }
+}
 
-    // const std::vector<PipelineConfig> configs = buildPipelineConfigs(settings);
+void MeshtasticDemod::applyExtraPipelineSettings(const QVector<MeshtasticDemodSettings>& settingsList, bool force)
+{
+    if (!m_running) {
+        return;
+    }
 
-    // if (!pipelineLayoutMatches(configs))
-    // {
-    //     stopPipelines();
-    //     startPipelines(configs);
-    //     return;
-    // }
+    // Remove all secondary configs (indices 1+), keeping only the primary (index 0).
+    while (m_pipelineConfigs.size() > 1) {
+        m_pipelineConfigs.pop_back();
+    }
 
-    // for (size_t i = 0; i < configs.size(); ++i)
-    // {
-    //     m_pipelines[i].id = configs[i].id;
-    //     m_pipelines[i].name = configs[i].name;
-    //     m_pipelines[i].presetName = configs[i].presetName;
+    // Build new secondary configs from the provided settings list.
+    // Settings are used as-is (the GUI has already applied preset derivation and frequency offsets).
+    for (int i = 0; i < settingsList.size(); ++i)
+    {
+        PipelineConfig config;
+        const int configId = i + 1;
+        config.id = configId;
+        config.name = QString("Cnf_%1").arg(configId);
+        config.presetName = settingsList[i].m_meshtasticPresetName;
+        config.settings = settingsList[i];
+        m_pipelineConfigs.push_back(config);
+    }
 
-    //     if (m_pipelines[i].decoder) {
-    //         m_pipelines[i].decoder->setPipelineMetadata(configs[i].id, configs[i].name, configs[i].presetName);
-    //     }
+    // Determine if the layout (pipeline count / IDs) has changed.
+    const bool layoutChanged = !pipelineLayoutMatches(m_pipelineConfigs);
 
-    //     applyPipelineRuntimeSettings(m_pipelines[i], configs[i].settings, force);
-    // }
+    if (layoutChanged)
+    {
+        // Stop and destroy all secondary runtimes (primary at index 0 stays).
+        for (int i = static_cast<int>(m_pipelines.size()) - 1; i >= 1; --i)
+        {
+            PipelineRuntime& rt = m_pipelines[i];
+            if (rt.basebandThread)
+            {
+                rt.basebandThread->exit();
+                rt.basebandThread->wait();
+                delete rt.basebandThread;
+                rt.basebandThread = nullptr;
+            }
+            if (rt.decoderThread)
+            {
+                rt.decoderThread->exit();
+                rt.decoderThread->wait();
+                delete rt.decoderThread;
+                rt.decoderThread = nullptr;
+            }
+            rt.basebandSink = nullptr;
+            rt.decoder = nullptr;
+        }
+        while (m_pipelines.size() > 1) {
+            m_pipelines.pop_back();
+        }
+
+        // Start fresh secondary runtimes.
+        for (int i = 1; i < static_cast<int>(m_pipelineConfigs.size()); ++i)
+        {
+            const PipelineConfig& config = m_pipelineConfigs[i];
+            PipelineRuntime runtime;
+            runtime.id = config.id;
+            runtime.name = config.name;
+            runtime.presetName = config.presetName;
+            runtime.settings = config.settings;
+
+            runtime.decoderThread = new QThread();
+            runtime.decoder = new MeshtasticDemodDecoder();
+            runtime.decoder->setOutputMessageQueue(getInputMessageQueue());
+            runtime.decoder->setPipelineMetadata(runtime.id, runtime.name, runtime.presetName);
+            runtime.decoder->moveToThread(runtime.decoderThread);
+            QObject::connect(runtime.decoderThread, &QThread::finished, runtime.decoder, &QObject::deleteLater);
+            runtime.decoderThread->start();
+
+            runtime.basebandThread = new QThread();
+            runtime.basebandSink = new MeshtasticDemodBaseband();
+            // Secondary pipelines (id != 0) do not own the spectrum visualiser.
+            runtime.basebandSink->setDecoderMessageQueue(runtime.decoder->getInputMessageQueue());
+            runtime.decoder->setHeaderFeedbackMessageQueue(runtime.basebandSink->getInputMessageQueue());
+            runtime.basebandSink->moveToThread(runtime.basebandThread);
+            QObject::connect(runtime.basebandThread, &QThread::finished, runtime.basebandSink, &QObject::deleteLater);
+
+            if (m_basebandSampleRate != 0) {
+                runtime.basebandSink->setBasebandSampleRate(m_basebandSampleRate);
+            }
+            runtime.basebandSink->reset();
+            runtime.basebandSink->setFifoLabel(QString("%1[%2]").arg(m_channelId).arg(config.name));
+            runtime.basebandThread->start();
+
+            applyPipelineRuntimeSettings(runtime, runtime.settings, true);
+            m_pipelines.push_back(runtime);
+        }
+    }
+    else
+    {
+        // Layout unchanged — just update settings for each secondary pipeline.
+        for (int i = 1; i < static_cast<int>(m_pipelineConfigs.size()); ++i)
+        {
+            m_pipelines[i].id = m_pipelineConfigs[i].id;
+            m_pipelines[i].name = m_pipelineConfigs[i].name;
+            m_pipelines[i].presetName = m_pipelineConfigs[i].presetName;
+            if (m_pipelines[i].decoder) {
+                m_pipelines[i].decoder->setPipelineMetadata(m_pipelineConfigs[i].id, m_pipelineConfigs[i].name, m_pipelineConfigs[i].presetName);
+            }
+            applyPipelineRuntimeSettings(m_pipelines[i], m_pipelineConfigs[i].settings, force);
+        }
+    }
+
+    qDebug() << "MeshtasticDemod::applyExtraPipelineSettings: total pipelines=" << m_pipelines.size();
 }
 
 void MeshtasticDemod::start()
@@ -575,6 +550,13 @@ bool MeshtasticDemod::handleMessage(const Message& cmd)
 
 		return true;
 	}
+    else if (MsgSetExtraPipelineSettings::match(cmd))
+    {
+        qDebug() << "MeshtasticDemod::handleMessage: MsgSetExtraPipelineSettings";
+        const MsgSetExtraPipelineSettings& msg = static_cast<const MsgSetExtraPipelineSettings&>(cmd);
+        applyExtraPipelineSettings(msg.getSettingsList(), false);
+        return true;
+    }
     else if (MeshtasticDemodMsg::MsgReportDecodeBytes::match(cmd))
     {
         qDebug() << "MeshtasticDemod::handleMessage: MsgReportDecodeBytes";

@@ -95,6 +95,9 @@ private slots:
     void on_meshKeys_clicked(bool checked);
     void on_meshAutoSampleRate_toggled(bool checked);
     void on_meshAutoLock_clicked(bool checked);
+    void on_conf_valueChanged(int value);
+    void on_confAdd_clicked(bool checked);
+    void on_confDel_clicked(bool checked);
 	void onWidgetRolled(QWidget* widget, bool rollDown);
 	void onMenuDialogCalled(const QPoint& p);
     void channelMarkerHighlightedByCursor();
@@ -169,6 +172,12 @@ private:
     QMap<QString, QString> m_pipelineMessageKeyByBase;
     QMap<QString, QVector<QString>> m_pipelinePendingMessageKeysByBase;
     quint64 m_pipelineMessageSequence;
+
+    // Multi-pipeline management
+    static constexpr int kMaxPipelines = 4;
+    int m_focusedPipelineIndex;          //!< 0 = primary; 1-3 = extra (volatile) pipelines
+    QVector<MeshtasticDemodSettings> m_extraPipelineSettings; //!< Settings for extra pipelines; not persisted
+
 	MessageQueue m_inputMessageQueue;
 	unsigned int m_tickCount;
 
@@ -212,6 +221,14 @@ private:
     int findBandwidthIndex(int bandwidthHz) const;
     void applyMeshtasticProfileFromSelection();
     void editMeshtasticKeys();
+    // Multi-pipeline helpers
+    MeshtasticDemodSettings& focusedSettings();
+    const MeshtasticDemodSettings& focusedSettings() const;
+    int pipelineCount() const;
+    void updateConfControls();
+    void loadFocusedSettingsToControls();
+    void applyFocusedPipelineSettings(bool force = false);
+    void pushExtraPipelineSettingsToDemod();
     void startMeshAutoLock();
     void stopMeshAutoLock(bool keepBestCandidate);
     void applyMeshAutoLockCandidate(const MeshAutoLockCandidate& candidate, bool applySettingsNow);

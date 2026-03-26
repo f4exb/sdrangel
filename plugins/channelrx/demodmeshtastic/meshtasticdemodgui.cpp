@@ -257,10 +257,12 @@ void MeshtasticDemodGUI::channelMarkerChangedByCursor()
 
 void MeshtasticDemodGUI::on_deltaFrequency_changed(qint64 value)
 {
-    m_channelMarker.setCenterFrequency(value);
-    m_settings.m_inputFrequencyOffset = m_channelMarker.getCenterFrequency();
-    updateAbsoluteCenterFrequency();
-    applySettings();
+    focusedSettings().m_inputFrequencyOffset = value;
+    if (m_focusedPipelineIndex == 0) {
+        m_channelMarker.setCenterFrequency(value);
+        updateAbsoluteCenterFrequency();
+    }
+    applyFocusedPipelineSettings();
 }
 
 void MeshtasticDemodGUI::channelMarkerHighlightedByCursor()
@@ -270,44 +272,49 @@ void MeshtasticDemodGUI::channelMarkerHighlightedByCursor()
 
 void MeshtasticDemodGUI::on_BW_valueChanged(int value)
 {
+    auto& s = focusedSettings();
     if (value < 0) {
-        m_settings.m_bandwidthIndex = 0;
+        s.m_bandwidthIndex = 0;
     } else if (value < MeshtasticDemodSettings::nbBandwidths) {
-        m_settings.m_bandwidthIndex = value;
+        s.m_bandwidthIndex = value;
     } else {
-        m_settings.m_bandwidthIndex = MeshtasticDemodSettings::nbBandwidths - 1;
+        s.m_bandwidthIndex = MeshtasticDemodSettings::nbBandwidths - 1;
     }
 
-	int thisBW = MeshtasticDemodSettings::bandwidths[value];
+	int thisBW = MeshtasticDemodSettings::bandwidths[s.m_bandwidthIndex];
 	ui->BWText->setText(QString("%1 Hz").arg(thisBW));
-	m_channelMarker.setBandwidth(thisBW);
-	ui->glSpectrum->setSampleRate(thisBW);
-	ui->glSpectrum->setCenterFrequency(thisBW/2);
+    if (m_focusedPipelineIndex == 0) {
+        m_channelMarker.setBandwidth(thisBW);
+        ui->glSpectrum->setSampleRate(thisBW);
+        ui->glSpectrum->setCenterFrequency(thisBW/2);
+    }
 
-	applySettings();
+	applyFocusedPipelineSettings();
 }
 
 void MeshtasticDemodGUI::on_Spread_valueChanged(int value)
 {
-    m_settings.m_spreadFactor = value;
+    focusedSettings().m_spreadFactor = value;
     ui->SpreadText->setText(tr("%1").arg(value));
-    ui->spectrumGUI->setFFTSize(m_settings.m_spreadFactor);
+    if (m_focusedPipelineIndex == 0) {
+        ui->spectrumGUI->setFFTSize(m_settings.m_spreadFactor);
+    }
 
-    applySettings();
+    applyFocusedPipelineSettings();
 }
 
 void MeshtasticDemodGUI::on_deBits_valueChanged(int value)
 {
-    m_settings.m_deBits = value;
-    ui->deBitsText->setText(tr("%1").arg(m_settings.m_deBits));
-    applySettings();
+    focusedSettings().m_deBits = value;
+    ui->deBitsText->setText(tr("%1").arg(value));
+    applyFocusedPipelineSettings();
 }
 
 void MeshtasticDemodGUI::on_preambleChirps_valueChanged(int value)
 {
-    m_settings.m_preambleChirps = value;
-    ui->preambleChirpsText->setText(tr("%1").arg(m_settings.m_preambleChirps));
-    applySettings();
+    focusedSettings().m_preambleChirps = value;
+    ui->preambleChirpsText->setText(tr("%1").arg(value));
+    applyFocusedPipelineSettings();
 }
 
 void MeshtasticDemodGUI::on_mute_toggled(bool checked)
@@ -365,8 +372,8 @@ void MeshtasticDemodGUI::on_udpPort_editingFinished()
 
 void MeshtasticDemodGUI::on_invertRamps_stateChanged(int state)
 {
-    m_settings.m_invertRamps = (state == Qt::Checked);
-    applySettings();
+    focusedSettings().m_invertRamps = (state == Qt::Checked);
+    applyFocusedPipelineSettings();
 }
 
 void MeshtasticDemodGUI::on_meshRegion_currentIndexChanged(int index)
@@ -392,6 +399,7 @@ void MeshtasticDemodGUI::on_meshPreset_currentIndexChanged(int index)
     ui->Spread->setEnabled(index == ui->meshPreset->count() - 1); // USER preset has user-defined spread and is the last item
     ui->deBits->setEnabled(index == ui->meshPreset->count() - 1); // USER preset has user-defined deBits and is the last item
     ui->preambleChirps->setEnabled(index == ui->meshPreset->count() - 1); // USER preset has user-defined preambleChirps and is the last item
+    ui->deltaFrequency->setEnabled(index == ui->meshPreset->count() - 1); // USER preset has user-defined frequency offset and is the last item
 
     rebuildMeshtasticChannelOptions();
     applyMeshtasticProfileFromSelection();
@@ -951,6 +959,153 @@ void MeshtasticDemodGUI::editMeshtasticKeys()
     }
 }
 
+// ────────────────────────────────────────────────────────────────────────────
+// Multi-pipeline helpers
+// ────────────────────────────────────────────────────────────────────────────
+
+MeshtasticDemodSettings& MeshtasticDemodGUI::focusedSettings()
+{
+    if (m_focusedPipelineIndex > 0 && m_focusedPipelineIndex <= m_extraPipelineSettings.size()) {
+        return m_extraPipelineSettings[m_focusedPipelineIndex - 1];
+    }
+    return m_settings;
+}
+
+const MeshtasticDemodSettings& MeshtasticDemodGUI::focusedSettings() const
+{
+    if (m_focusedPipelineIndex > 0 && m_focusedPipelineIndex <= m_extraPipelineSettings.size()) {
+        return m_extraPipelineSettings[m_focusedPipelineIndex - 1];
+    }
+    return m_settings;
+}
+
+int MeshtasticDemodGUI::pipelineCount() const
+{
+    return 1 + m_extraPipelineSettings.size();
+}
+
+void MeshtasticDemodGUI::updateConfControls()
+{
+    const int count = pipelineCount();
+    ui->conf->blockSignals(true);
+    ui->conf->setMaximum(std::max(0, count - 1));
+    ui->conf->setValue(m_focusedPipelineIndex);
+    ui->conf->blockSignals(false);
+    ui->confId->setText(QString::number(m_focusedPipelineIndex));
+    ui->confAdd->setEnabled(count < kMaxPipelines);
+    ui->confDel->setEnabled(m_focusedPipelineIndex > 0); // primary (0) cannot be deleted
+}
+
+void MeshtasticDemodGUI::loadFocusedSettingsToControls()
+{
+    const auto& s = focusedSettings();
+    const int thisBW = MeshtasticDemodSettings::bandwidths[s.m_bandwidthIndex];
+
+    blockApplySettings(true);
+    m_meshControlsUpdating = true;
+
+    ui->deltaFrequency->setValue(s.m_inputFrequencyOffset);
+    ui->BW->setValue(s.m_bandwidthIndex);
+    ui->BWText->setText(QString("%1 Hz").arg(thisBW));
+    ui->Spread->setValue(s.m_spreadFactor);
+    ui->SpreadText->setText(tr("%1").arg(s.m_spreadFactor));
+    ui->deBits->setValue(s.m_deBits);
+    ui->deBitsText->setText(tr("%1").arg(s.m_deBits));
+    ui->preambleChirps->setValue(s.m_preambleChirps);
+    ui->preambleChirpsText->setText(tr("%1").arg(s.m_preambleChirps));
+    ui->invertRamps->setChecked(s.m_invertRamps);
+
+    int regionIndex = ui->meshRegion->findData(s.m_meshtasticRegionCode);
+    if (regionIndex < 0) { regionIndex = ui->meshRegion->findData("US"); }
+    if (regionIndex < 0) { regionIndex = 0; }
+    ui->meshRegion->setCurrentIndex(regionIndex);
+
+    int presetIndex = ui->meshPreset->findData(s.m_meshtasticPresetName);
+    if (presetIndex < 0) { presetIndex = ui->meshPreset->findData("LONG_FAST"); }
+    if (presetIndex < 0) { presetIndex = 0; }
+    ui->meshPreset->setCurrentIndex(presetIndex);
+
+    m_meshControlsUpdating = false;
+    blockApplySettings(false);
+
+    rebuildMeshtasticChannelOptions();
+
+    m_meshControlsUpdating = true;
+    int channelIndex = ui->meshChannel->findData(s.m_meshtasticChannelIndex);
+    if (channelIndex < 0) { channelIndex = 0; }
+    ui->meshChannel->setCurrentIndex(channelIndex);
+    m_meshControlsUpdating = false;
+
+    updateControlAvailabilityHints();
+}
+
+void MeshtasticDemodGUI::applyFocusedPipelineSettings(bool force)
+{
+    if (m_focusedPipelineIndex == 0) {
+        applySettings(force);
+    } else {
+        pushExtraPipelineSettingsToDemod();
+    }
+}
+
+void MeshtasticDemodGUI::pushExtraPipelineSettingsToDemod()
+{
+    if (!m_doApplySettings) {
+        return;
+    }
+    MeshtasticDemod::MsgSetExtraPipelineSettings* msg =
+        MeshtasticDemod::MsgSetExtraPipelineSettings::create(m_extraPipelineSettings);
+    m_meshtasticDemod->getInputMessageQueue()->push(msg);
+}
+
+// ────────────────────────────────────────────────────────────────────────────
+// Conf-dial / add / delete slot handlers
+// ────────────────────────────────────────────────────────────────────────────
+
+void MeshtasticDemodGUI::on_conf_valueChanged(int value)
+{
+    const int newFocus = std::max(0, std::min(value, m_extraPipelineSettings.size()));
+    if (newFocus == m_focusedPipelineIndex) {
+        return;
+    }
+    m_focusedPipelineIndex = newFocus;
+    ui->confId->setText(QString::number(m_focusedPipelineIndex));
+    ui->confDel->setEnabled(m_focusedPipelineIndex > 0);
+    loadFocusedSettingsToControls();
+}
+
+void MeshtasticDemodGUI::on_confAdd_clicked(bool checked)
+{
+    (void) checked;
+    if (pipelineCount() >= kMaxPipelines) {
+        return;
+    }
+    // Seed the new pipeline with a copy of the currently focused settings.
+    m_extraPipelineSettings.append(focusedSettings());
+    m_focusedPipelineIndex = m_extraPipelineSettings.size(); // focus the new pipeline
+    updateConfControls();
+    loadFocusedSettingsToControls();
+    pushExtraPipelineSettingsToDemod();
+    displayStatus(tr("CONF|pipeline %1 added (copy of CONF%2)")
+        .arg(m_focusedPipelineIndex)
+        .arg(m_focusedPipelineIndex - 1));
+}
+
+void MeshtasticDemodGUI::on_confDel_clicked(bool checked)
+{
+    (void) checked;
+    if (m_focusedPipelineIndex == 0 || m_extraPipelineSettings.isEmpty()) {
+        return;
+    }
+    const int removed = m_focusedPipelineIndex;
+    m_extraPipelineSettings.removeAt(m_focusedPipelineIndex - 1);
+    m_focusedPipelineIndex = std::max(0, m_focusedPipelineIndex - 1);
+    updateConfControls();
+    loadFocusedSettingsToControls();
+    pushExtraPipelineSettingsToDemod();
+    displayStatus(tr("CONF|pipeline %1 removed").arg(removed));
+}
+
 int MeshtasticDemodGUI::findBandwidthIndex(int bandwidthHz) const
 {
     int bestIndex = -1;
@@ -1186,47 +1341,52 @@ void MeshtasticDemodGUI::applyMeshtasticProfileFromSelection()
         return;
     }
 
+    auto& s = focusedSettings();
+    const bool isPrimary = (m_focusedPipelineIndex == 0);
+
     // USER preset: all LoRa parameters and frequency are controlled manually from the GUI.
     // Skip auto-configuration entirely; just persist the selection and optionally auto-tune sample rate.
     if (preset == "USER")
     {
         bool selectionStateChanged = false;
 
-        if (m_settings.m_meshtasticRegionCode != region)
+        if (s.m_meshtasticRegionCode != region)
         {
-            m_settings.m_meshtasticRegionCode = region;
+            s.m_meshtasticRegionCode = region;
             selectionStateChanged = true;
         }
 
-        if (m_settings.m_meshtasticPresetName != preset)
+        if (s.m_meshtasticPresetName != preset)
         {
-            m_settings.m_meshtasticPresetName = preset;
+            s.m_meshtasticPresetName = preset;
             selectionStateChanged = true;
         }
 
-        const int thisBW = MeshtasticDemodSettings::bandwidths[m_settings.m_bandwidthIndex];
+        const int thisBW = MeshtasticDemodSettings::bandwidths[s.m_bandwidthIndex];
         QString sampleRateSummary;
         bool sampleRateChanged = false;
         int newBasebandSampleRate = 0;
 
-        if (m_settings.m_meshtasticAutoSampleRate) {
+        // Sample rate auto-tune is a device-level operation — primary pipeline only.
+        if (isPrimary && m_settings.m_meshtasticAutoSampleRate) {
             sampleRateChanged = autoTuneDeviceSampleRateForBandwidth(thisBW, sampleRateSummary, &newBasebandSampleRate);
         }
 
-        if (sampleRateChanged && newBasebandSampleRate > m_basebandSampleRate) {
+        if (isPrimary && sampleRateChanged && newBasebandSampleRate > m_basebandSampleRate) {
             m_basebandSampleRate = newBasebandSampleRate;
             setBandwidths();
         }
 
         if (selectionStateChanged || sampleRateChanged) {
-            applySettings();
+            applyFocusedPipelineSettings();
         }
 
-        const QString statusMsg = tr("MESH CFG|USER preset: BW=%1 Hz SF=%2 DE=%3 preamble=%4%5")
+        const QString statusMsg = tr("MESH CFG|%1USER preset: BW=%2 Hz SF=%3 DE=%4 preamble=%5%6")
+            .arg(isPrimary ? QString() : QString("CONF%1 ").arg(m_focusedPipelineIndex))
             .arg(thisBW)
-            .arg(m_settings.m_spreadFactor)
-            .arg(m_settings.m_deBits)
-            .arg(m_settings.m_preambleChirps)
+            .arg(s.m_spreadFactor)
+            .arg(s.m_deBits)
+            .arg(s.m_preambleChirps)
             .arg(sampleRateSummary.isEmpty() ? QString() : " " + sampleRateSummary);
         updateControlAvailabilityHints();
         displayStatus(statusMsg);
@@ -1246,107 +1406,131 @@ void MeshtasticDemodGUI::applyMeshtasticProfileFromSelection()
     bool changed = false;
     bool selectionStateChanged = false;
 
-    if (m_settings.m_meshtasticRegionCode != region)
+    if (s.m_meshtasticRegionCode != region)
     {
-        m_settings.m_meshtasticRegionCode = region;
+        s.m_meshtasticRegionCode = region;
         selectionStateChanged = true;
     }
-    if (m_settings.m_meshtasticPresetName != preset)
+    if (s.m_meshtasticPresetName != preset)
     {
-        m_settings.m_meshtasticPresetName = preset;
+        s.m_meshtasticPresetName = preset;
         selectionStateChanged = true;
     }
-    if (m_settings.m_meshtasticChannelIndex != meshChannel)
+    if (s.m_meshtasticChannelIndex != meshChannel)
     {
-        m_settings.m_meshtasticChannelIndex = meshChannel;
+        s.m_meshtasticChannelIndex = meshChannel;
         selectionStateChanged = true;
     }
 
     const int bwIndex = findBandwidthIndex(meshRadio.bandwidthHz);
-    if (bwIndex >= 0 && bwIndex != m_settings.m_bandwidthIndex)
+    if (bwIndex >= 0 && bwIndex != s.m_bandwidthIndex)
     {
-        m_settings.m_bandwidthIndex = bwIndex;
+        s.m_bandwidthIndex = bwIndex;
         changed = true;
     }
 
-    if (meshRadio.spreadFactor > 0 && meshRadio.spreadFactor != m_settings.m_spreadFactor)
+    if (meshRadio.spreadFactor > 0 && meshRadio.spreadFactor != s.m_spreadFactor)
     {
-        m_settings.m_spreadFactor = meshRadio.spreadFactor;
+        s.m_spreadFactor = meshRadio.spreadFactor;
         changed = true;
     }
 
-    if (meshRadio.deBits != m_settings.m_deBits)
+    if (meshRadio.deBits != s.m_deBits)
     {
-        m_settings.m_deBits = meshRadio.deBits;
+        s.m_deBits = meshRadio.deBits;
         changed = true;
     }
 
-    if (meshRadio.parityBits > 0 && meshRadio.parityBits != m_settings.m_nbParityBits)
+    if (meshRadio.parityBits > 0 && meshRadio.parityBits != s.m_nbParityBits)
     {
-        m_settings.m_nbParityBits = meshRadio.parityBits;
+        s.m_nbParityBits = meshRadio.parityBits;
         changed = true;
     }
 
     const int meshPreambleChirps = meshRadio.preambleChirps;
-    if (m_settings.m_preambleChirps != static_cast<unsigned int>(meshPreambleChirps))
+    if (s.m_preambleChirps != static_cast<unsigned int>(meshPreambleChirps))
     {
-        m_settings.m_preambleChirps = static_cast<unsigned int>(meshPreambleChirps);
+        s.m_preambleChirps = static_cast<unsigned int>(meshPreambleChirps);
         changed = true;
     }
 
     if (meshRadio.hasCenterFrequency)
     {
-        if (retuneDeviceToFrequency(meshRadio.centerFrequencyHz))
+        if (isPrimary)
         {
-            m_deviceCenterFrequency = meshRadio.centerFrequencyHz;
-            if (m_settings.m_inputFrequencyOffset != 0)
+            // Primary pipeline: try to retune the actual SDR device.
+            if (retuneDeviceToFrequency(meshRadio.centerFrequencyHz))
             {
-                m_settings.m_inputFrequencyOffset = 0;
-                changed = true;
+                m_deviceCenterFrequency = meshRadio.centerFrequencyHz;
+                if (s.m_inputFrequencyOffset != 0)
+                {
+                    s.m_inputFrequencyOffset = 0;
+                    changed = true;
+                }
             }
-        }
-        else if (m_deviceCenterFrequency != 0)
-        {
-            const qint64 wantedOffset = meshRadio.centerFrequencyHz - m_deviceCenterFrequency;
-            if (wantedOffset != m_settings.m_inputFrequencyOffset)
+            else if (m_deviceCenterFrequency != 0)
             {
-                m_settings.m_inputFrequencyOffset = static_cast<int>(wantedOffset);
-                changed = true;
+                const qint64 wantedOffset = meshRadio.centerFrequencyHz - m_deviceCenterFrequency;
+                if (wantedOffset != s.m_inputFrequencyOffset)
+                {
+                    s.m_inputFrequencyOffset = static_cast<int>(wantedOffset);
+                    changed = true;
+                }
+            }
+            else
+            {
+                qWarning() << "MeshtasticDemodGUI::applyMeshtasticProfileFromSelection: cannot retune device and device center frequency unknown";
             }
         }
         else
         {
-            qWarning() << "MeshtasticDemodGUI::applyMeshtasticProfileFromSelection: cannot retune device and device center frequency unknown";
+            // Secondary pipeline: device frequency is owned by the primary; compute the input
+            // frequency offset relative to the current device center frequency.
+            if (m_deviceCenterFrequency != 0)
+            {
+                const qint64 wantedOffset = meshRadio.centerFrequencyHz - m_deviceCenterFrequency;
+                if (wantedOffset != s.m_inputFrequencyOffset)
+                {
+                    s.m_inputFrequencyOffset = static_cast<int>(wantedOffset);
+                    changed = true;
+                }
+            }
         }
     }
 
-    const int thisBW = MeshtasticDemodSettings::bandwidths[m_settings.m_bandwidthIndex];
+    const int thisBW = MeshtasticDemodSettings::bandwidths[s.m_bandwidthIndex];
     QString sampleRateSummary;
     bool sampleRateChanged = false;
 
     int newBasebandSampleRate = 0;
-    if (m_settings.m_meshtasticAutoSampleRate) {
-        sampleRateChanged = autoTuneDeviceSampleRateForBandwidth(thisBW, sampleRateSummary, &newBasebandSampleRate);
-    } else {
-        sampleRateSummary = "auto sample-rate control: disabled";
-    }
+    // Sample rate auto-tune is a device-level operation — primary pipeline only.
+    if (isPrimary)
+    {
+        if (m_settings.m_meshtasticAutoSampleRate) {
+            sampleRateChanged = autoTuneDeviceSampleRateForBandwidth(thisBW, sampleRateSummary, &newBasebandSampleRate);
+        } else {
+            sampleRateSummary = "auto sample-rate control: disabled";
+        }
 
-    // If the device sample rate was just raised, update m_basebandSampleRate immediately
-    // so that setBandwidths() can widen the BW slider maximum before we write to it.
-    // Without this, the slider silently clamps the desired BW to the old (too-small) max.
-    if (sampleRateChanged && newBasebandSampleRate > m_basebandSampleRate) {
-        m_basebandSampleRate = newBasebandSampleRate;
-        setBandwidths();
+        // If the device sample rate was just raised, update m_basebandSampleRate immediately
+        // so that setBandwidths() can widen the BW slider maximum before we write to it.
+        if (sampleRateChanged && newBasebandSampleRate > m_basebandSampleRate) {
+            m_basebandSampleRate = newBasebandSampleRate;
+            setBandwidths();
+        }
     }
 
     if (!changed && !sampleRateChanged && !selectionStateChanged) {
         return;
     }
 
-    qInfo() << "MeshtasticDemodGUI::applyMeshtasticProfileFromSelection:" << meshRadio.summary
+    qInfo() << "MeshtasticDemodGUI::applyMeshtasticProfileFromSelection:"
+            << (isPrimary ? "primary" : QString("CONF%1").arg(m_focusedPipelineIndex))
+            << meshRadio.summary
             << sampleRateSummary;
 
-    QString status = tr("MESH CFG|region=%1 preset=%2 ch=%3 %4")
+    QString status = tr("MESH CFG|%1region=%2 preset=%3 ch=%4 %5")
+        .arg(isPrimary ? QString() : QString("CONF%1 ").arg(m_focusedPipelineIndex))
         .arg(region)
         .arg(preset)
         .arg(meshChannel)
@@ -1360,36 +1544,43 @@ void MeshtasticDemodGUI::applyMeshtasticProfileFromSelection()
 
     if (!changed)
     {
-        applySettings();
+        applyFocusedPipelineSettings();
         displayStatus(status);
         return;
     }
 
-    m_channelMarker.blockSignals(true);
-    m_channelMarker.setCenterFrequency(m_settings.m_inputFrequencyOffset);
-    m_channelMarker.setBandwidth(thisBW);
-    m_channelMarker.blockSignals(false);
+    // Update channel marker (always primary; it represents the channel on the device display).
+    if (isPrimary)
+    {
+        m_channelMarker.blockSignals(true);
+        m_channelMarker.setCenterFrequency(s.m_inputFrequencyOffset);
+        m_channelMarker.setBandwidth(thisBW);
+        m_channelMarker.blockSignals(false);
+    }
 
     blockApplySettings(true);
-    ui->deltaFrequency->setValue(m_settings.m_inputFrequencyOffset);
-    ui->BW->setValue(m_settings.m_bandwidthIndex);
+    ui->deltaFrequency->setValue(s.m_inputFrequencyOffset);
+    ui->BW->setValue(s.m_bandwidthIndex);
     ui->BWText->setText(QString("%1 Hz").arg(thisBW));
-    ui->Spread->setValue(m_settings.m_spreadFactor);
-    ui->SpreadText->setText(tr("%1").arg(m_settings.m_spreadFactor));
-    ui->deBits->setValue(m_settings.m_deBits);
-    ui->deBitsText->setText(tr("%1").arg(m_settings.m_deBits));
-    ui->preambleChirps->setValue(m_settings.m_preambleChirps);
-    ui->preambleChirpsText->setText(tr("%1").arg(m_settings.m_preambleChirps));
-    ui->fecParity->setValue(m_settings.m_nbParityBits);
-    ui->fecParityText->setText(tr("%1").arg(m_settings.m_nbParityBits));
+    ui->Spread->setValue(s.m_spreadFactor);
+    ui->SpreadText->setText(tr("%1").arg(s.m_spreadFactor));
+    ui->deBits->setValue(s.m_deBits);
+    ui->deBitsText->setText(tr("%1").arg(s.m_deBits));
+    ui->preambleChirps->setValue(s.m_preambleChirps);
+    ui->preambleChirpsText->setText(tr("%1").arg(s.m_preambleChirps));
+    ui->fecParity->setValue(s.m_nbParityBits);
+    ui->fecParityText->setText(tr("%1").arg(s.m_nbParityBits));
     blockApplySettings(false);
     updateControlAvailabilityHints();
 
-    ui->glSpectrum->setSampleRate(thisBW);
-    ui->glSpectrum->setCenterFrequency(thisBW/2);
+    if (isPrimary)
+    {
+        ui->glSpectrum->setSampleRate(thisBW);
+        ui->glSpectrum->setCenterFrequency(thisBW/2);
+        updateAbsoluteCenterFrequency();
+    }
 
-    updateAbsoluteCenterFrequency();
-    applySettings();
+    applyFocusedPipelineSettings();
     displayStatus(status);
 }
 
@@ -1577,6 +1768,7 @@ MeshtasticDemodGUI::MeshtasticDemodGUI(PluginAPI* pluginAPI, DeviceUISet *device
     m_replayPendingHasSelection(false),
     m_replaySelectionQueued(false),
     m_pipelineMessageSequence(0),
+    m_focusedPipelineIndex(0),
     m_tickCount(0)
 {
 	setAttribute(Qt::WA_DeleteOnClose, true);
@@ -1584,6 +1776,10 @@ MeshtasticDemodGUI::MeshtasticDemodGUI(PluginAPI* pluginAPI, DeviceUISet *device
     RollupContents *rollupContents = getRollupContents();
 	ui->setupUi(rollupContents);
     setupMeshtasticAutoProfileControls();
+    QObject::connect(ui->conf, QOverload<int>::of(&QDial::valueChanged), this, &MeshtasticDemodGUI::on_conf_valueChanged);
+    QObject::connect(ui->confAdd, &QPushButton::clicked, this, &MeshtasticDemodGUI::on_confAdd_clicked);
+    QObject::connect(ui->confDel, &QPushButton::clicked, this, &MeshtasticDemodGUI::on_confDel_clicked);
+    updateConfControls();
     setupPipelineViews();
     QObject::connect(ui->dechirpLiveFollow, &QPushButton::clicked, this, [this](bool) {
         setDechirpInspectionMode(false);
@@ -1745,12 +1941,13 @@ void MeshtasticDemodGUI::updateControlAvailabilityHints()
     ui->messageLengthLabel->setToolTip(messageLengthTip);
     ui->messageLengthText->setToolTip(messageLengthTip);
 
-    const bool isUserPreset = m_settings.m_meshtasticPresetName.trimmed().compare("USER", Qt::CaseInsensitive) == 0;
+    const bool isUserPreset = focusedSettings().m_meshtasticPresetName.trimmed().compare("USER", Qt::CaseInsensitive) == 0;
     ui->meshRegion->setEnabled(!isUserPreset);
     ui->BW->setEnabled(isUserPreset);
     ui->Spread->setEnabled(isUserPreset);
     ui->deBits->setEnabled(isUserPreset);
     ui->preambleChirps->setEnabled(isUserPreset);
+    ui->deltaFrequency->setEnabled(isUserPreset);
 
     // Apply an opacity effect to give a clear greyed-out appearance when disabled,
     // because the platform or dark-theme style may not provide enough visual contrast.
@@ -1794,30 +1991,37 @@ void MeshtasticDemodGUI::updateControlAvailabilityHints()
 
 void MeshtasticDemodGUI::displaySettings()
 {
-    int thisBW = MeshtasticDemodSettings::bandwidths[m_settings.m_bandwidthIndex];
+    const auto& s = focusedSettings();
+    // Primary pipeline bandwidth for channel marker and spectrum display.
+    const int thisBWPrimary = MeshtasticDemodSettings::bandwidths[m_settings.m_bandwidthIndex];
+    // Focused pipeline bandwidth for the BW slider and its label.
+    const int thisBWFocused = MeshtasticDemodSettings::bandwidths[s.m_bandwidthIndex];
 
+    // Channel marker always reflects the primary pipeline.
     m_channelMarker.blockSignals(true);
     m_channelMarker.setTitle(m_settings.m_title);
     m_channelMarker.setCenterFrequency(m_settings.m_inputFrequencyOffset);
-    m_channelMarker.setBandwidth(thisBW);
+    m_channelMarker.setBandwidth(thisBWPrimary);
     m_channelMarker.blockSignals(false);
     m_channelMarker.setColor(m_settings.m_rgbColor);
     setTitleColor(m_settings.m_rgbColor);
     setTitle(m_channelMarker.getTitle());
 
-	ui->glSpectrum->setSampleRate(thisBW);
-	ui->glSpectrum->setCenterFrequency(thisBW/2);
+	ui->glSpectrum->setSampleRate(thisBWPrimary);
+	ui->glSpectrum->setCenterFrequency(thisBWPrimary/2);
 
     blockApplySettings(true);
-    ui->deltaFrequency->setValue(m_channelMarker.getCenterFrequency());
-    ui->BWText->setText(QString("%1 Hz").arg(thisBW));
-    ui->BW->setValue(m_settings.m_bandwidthIndex);
-    ui->Spread->setValue(m_settings.m_spreadFactor);
-    ui->SpreadText->setText(tr("%1").arg(m_settings.m_spreadFactor));
-    ui->deBits->setValue(m_settings.m_deBits);
-    ui->deBitsText->setText(tr("%1").arg(m_settings.m_deBits));
-    ui->preambleChirps->setValue(m_settings.m_preambleChirps);
-    ui->preambleChirpsText->setText(tr("%1").arg(m_settings.m_preambleChirps));
+    // LoRa controls reflect the focused pipeline.
+    ui->deltaFrequency->setValue(s.m_inputFrequencyOffset);
+    ui->BWText->setText(QString("%1 Hz").arg(thisBWFocused));
+    ui->BW->setValue(s.m_bandwidthIndex);
+    ui->Spread->setValue(s.m_spreadFactor);
+    ui->SpreadText->setText(tr("%1").arg(s.m_spreadFactor));
+    ui->deBits->setValue(s.m_deBits);
+    ui->deBitsText->setText(tr("%1").arg(s.m_deBits));
+    ui->preambleChirps->setValue(s.m_preambleChirps);
+    ui->preambleChirpsText->setText(tr("%1").arg(s.m_preambleChirps));
+    // Global settings always from primary.
     ui->messageLengthText->setText(tr("%1").arg(m_settings.m_nbSymbolsMax));
     ui->messageLength->setValue(m_settings.m_nbSymbolsMax);
     ui->udpSend->setChecked(m_settings.m_sendViaUDP);
@@ -1832,7 +2036,7 @@ void MeshtasticDemodGUI::displaySettings()
         ui->spectrumGUI->setFFTSize(m_settings.m_spreadFactor);
     }
 
-    ui->invertRamps->setChecked(m_settings.m_invertRamps);
+    ui->invertRamps->setChecked(s.m_invertRamps);
 
     displaySquelch();
     updateIndexLabel();
@@ -1856,8 +2060,8 @@ void MeshtasticDemodGUI::displaySettings()
     ui->meshAutoLock->blockSignals(false);
 
     m_meshControlsUpdating = true;
-
-    int regionIndex = ui->meshRegion->findData(m_settings.m_meshtasticRegionCode);
+    // Mesh region/preset/channel reflect the focused pipeline's selection.
+    int regionIndex = ui->meshRegion->findData(s.m_meshtasticRegionCode);
     if (regionIndex < 0) {
         regionIndex = ui->meshRegion->findData("US");
     }
@@ -1866,13 +2070,13 @@ void MeshtasticDemodGUI::displaySettings()
     }
     ui->meshRegion->setCurrentIndex(regionIndex);
 
-    ui->meshRegion->setEnabled(m_settings.m_meshtasticPresetName != "USER");
-    ui->BW->setEnabled(m_settings.m_meshtasticPresetName == "USER");
-    ui->Spread->setEnabled(m_settings.m_meshtasticPresetName == "USER");
-    ui->deBits->setEnabled(m_settings.m_meshtasticPresetName == "USER");
-    ui->preambleChirps->setEnabled(m_settings.m_meshtasticPresetName == "USER");
+    ui->meshRegion->setEnabled(s.m_meshtasticPresetName != "USER");
+    ui->BW->setEnabled(s.m_meshtasticPresetName == "USER");
+    ui->Spread->setEnabled(s.m_meshtasticPresetName == "USER");
+    ui->deBits->setEnabled(s.m_meshtasticPresetName == "USER");
+    ui->preambleChirps->setEnabled(s.m_meshtasticPresetName == "USER");
 
-    int presetIndex = ui->meshPreset->findData(m_settings.m_meshtasticPresetName);
+    int presetIndex = ui->meshPreset->findData(s.m_meshtasticPresetName);
     if (presetIndex < 0) {
         presetIndex = ui->meshPreset->findData("LONG_FAST");
     }
@@ -1885,7 +2089,7 @@ void MeshtasticDemodGUI::displaySettings()
     rebuildMeshtasticChannelOptions();
 
     m_meshControlsUpdating = true;
-    int channelIndex = ui->meshChannel->findData(m_settings.m_meshtasticChannelIndex);
+    int channelIndex = ui->meshChannel->findData(s.m_meshtasticChannelIndex);
     if (channelIndex < 0) {
         channelIndex = 0;
     }
@@ -1893,6 +2097,7 @@ void MeshtasticDemodGUI::displaySettings()
     m_meshControlsUpdating = false;
 
     updateControlAvailabilityHints();
+    updateConfControls();
     blockApplySettings(false);
 }
 

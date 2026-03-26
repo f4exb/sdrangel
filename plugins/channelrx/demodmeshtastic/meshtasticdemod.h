@@ -27,6 +27,7 @@
 #include <vector>
 
 #include <QNetworkRequest>
+#include <QVector>
 
 #include "dsp/basebandsamplesink.h"
 #include "dsp/spectrumvis.h"
@@ -46,6 +47,23 @@ namespace modemmeshtastic { struct TxRadioSettings; }
 
 class MeshtasticDemod : public BasebandSampleSink, public ChannelAPI {
 public:
+    // Carries the full settings for each extra (non-primary) pipeline. Sent from GUI to demod
+    // whenever the secondary pipeline list changes. Index 0 in the vector = pipeline id 1, etc.
+    class MsgSetExtraPipelineSettings : public Message {
+        MESSAGE_CLASS_DECLARATION
+    public:
+        const QVector<MeshtasticDemodSettings>& getSettingsList() const { return m_settingsList; }
+        static MsgSetExtraPipelineSettings* create(const QVector<MeshtasticDemodSettings>& settingsList)
+        {
+            return new MsgSetExtraPipelineSettings(settingsList);
+        }
+    private:
+        QVector<MeshtasticDemodSettings> m_settingsList;
+        MsgSetExtraPipelineSettings(const QVector<MeshtasticDemodSettings>& settingsList) :
+            Message(), m_settingsList(settingsList)
+        { }
+    };
+
     class MsgConfigureMeshtasticDemod : public Message {
         MESSAGE_CLASS_DECLARATION
 
@@ -195,7 +213,6 @@ private:
 
 	virtual bool handleMessage(const Message& cmd);
     void applySettings(MeshtasticDemodSettings settings, bool force = false);
-    std::vector<PipelineConfig> buildPipelineConfigs(const MeshtasticDemodSettings& settings) const;
     void makePipelineConfigFromSettings(int configId, PipelineConfig& config, const MeshtasticDemodSettings& settings) const;
     MeshtasticDemodSettings makePipelineSettingsFromMeshRadio(
         const MeshtasticDemodSettings& baseSettings,
@@ -210,6 +227,7 @@ private:
     void applyPipelineRuntimeSettings(PipelineRuntime& runtime, const MeshtasticDemodSettings& settings, bool force);
     bool pipelineLayoutMatches(const std::vector<PipelineConfig>& configs) const;
     void syncPipelinesWithSettings(const MeshtasticDemodSettings& settings, bool force);
+    void applyExtraPipelineSettings(const QVector<MeshtasticDemodSettings>& settingsList, bool force = false);
     void webapiFormatChannelReport(SWGSDRangel::SWGChannelReport& response);
     void webapiReverseSendSettings(QList<QString>& channelSettingsKeys, const MeshtasticDemodSettings& settings, bool force);
     void sendChannelSettings(
