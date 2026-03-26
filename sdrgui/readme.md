@@ -46,9 +46,24 @@ The different component windows are:
 
 The workspaces are attached to a docking area of the main window and can be undocked to be moved to another display in a multiple screen setup for example.
 
-The workspace has a top bar with the following controls:
+The workspace has a tool bar with the following controls:
 
 ![Workspaces](../doc/img/Workspace_top.png)
+
+Keyboard shortcuts for workspace controls are:
+
+- Ctrl-P: Configuration Presets.
+- Ctrl-S: Start/stop all devices.
+- Ctrl-R: Add RX device.
+- Ctrl-T: Add TX device.
+- Ctrl-M: Add MIMO device.
+- Ctrl-E: Add feature.
+- Ctrl-Shift-P: Feature presets.
+- Ctrl-Shift-C: Cascade windows.
+- Ctrl-Shift-T: Tile windows.
+- Ctrl-Shift-V: Stack windows vertically.
+- Ctrl-Shift-S: Stack windows in columns.
+- Ctrl-Shift-B: Display windows in tabs.
 
 <h3>1.1: Workspace index</h3>
 
