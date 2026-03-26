@@ -90,6 +90,10 @@ QAbstractSpinBox::StepEnabled DMSSpinBox::stepEnabled() const
 {
     QAbstractSpinBox::StepEnabled enabled = QAbstractSpinBox::StepNone;
 
+    if (isReadOnly()) {
+        return enabled;
+    }
+
     if (hasValue() && (m_value < m_maximum)) {
         enabled |= QAbstractSpinBox::StepUpEnabled;
     }
