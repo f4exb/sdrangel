@@ -19,6 +19,7 @@
 #include <QGuiApplication>
 #include <QLayout>
 #include <QTableWidget>
+#include <QScrollBar>
 
 #include "framelesswindowresizer.h"
 
@@ -54,6 +55,11 @@ void FramelessWindowResizer::enableChildMouseTracking()
     {
         table->viewport()->setMouseTracking(true);
         table->viewport()->installEventFilter(this);
+    }
+    // Likewise for scroll bars, such as in GLSpectrum
+    QList<QScrollBar *> scrollBars = m_widget->findChildren<QScrollBar *>();
+    for (auto scrollBar : scrollBars) {
+        scrollBar->installEventFilter(this);
     }
 }
 

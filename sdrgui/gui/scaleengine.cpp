@@ -34,7 +34,10 @@ static double trunc(double d)
 
 QString ScaleEngine::formatTick(double value, int decimalPlaces)
 {
-	if (m_physicalUnit != Unit::TimeHMS)
+	if (m_tickFormatter) {
+		return m_tickFormatter->formatTick(value);
+    }
+	else if (m_physicalUnit != Unit::TimeHMS)
 	{
         if (m_physicalUnit == Unit::Scientific) {
             return QString("%1").arg(m_makeOpposite ? -value : value, 0, 'e', m_fixedDecimalPlaces);
@@ -862,7 +865,8 @@ ScaleEngine::ScaleEngine() :
     m_makeOpposite(false),
     m_truncateMode(false),
     m_truncated(false),
-    m_truncationValue(0.0)
+    m_truncationValue(0.0),
+    m_tickFormatter(nullptr)
 {
 }
 

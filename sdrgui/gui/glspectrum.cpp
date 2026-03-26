@@ -33,11 +33,21 @@
 GLSpectrum::GLSpectrum(QWidget *parent) :
     QWidget(parent)
 {
-    m_splitter = new QSplitter(Qt::Vertical);
+    m_spectrumContainer = new QWidget();
+    QHBoxLayout *hLayout = new QHBoxLayout(m_spectrumContainer);
     m_spectrum = new GLSpectrumView();
+    m_scrollBar = new QScrollBar(Qt::Vertical);
+    m_spectrum->setScrollBar(m_scrollBar);
+    hLayout->addWidget(m_spectrum);
+    hLayout->addWidget(m_scrollBar);
+    hLayout->setContentsMargins(0, 0, 0, 0);
+    hLayout->setSpacing(0);
+
     m_measurements = new SpectrumMeasurements();
     m_spectrum->setMeasurements(m_measurements);
-    m_splitter->addWidget(m_spectrum);
+
+    m_splitter = new QSplitter(Qt::Vertical);
+    m_splitter->addWidget(m_spectrumContainer);
     m_splitter->addWidget(m_measurements);
     m_position = SpectrumSettings::PositionBelow;
     QVBoxLayout *layout = new QVBoxLayout(this);
@@ -63,7 +73,7 @@ void GLSpectrum::setMeasurementsPosition(SpectrumSettings::MeasurementsPosition 
         break;
     case SpectrumSettings::PositionBelow:
         m_splitter->setOrientation(Qt::Vertical);
-        m_splitter->insertWidget(0, m_spectrum);
+        m_splitter->insertWidget(0, m_spectrumContainer);
         break;
     case SpectrumSettings::PositionLeft:
         m_splitter->setOrientation(Qt::Horizontal);
@@ -71,7 +81,7 @@ void GLSpectrum::setMeasurementsPosition(SpectrumSettings::MeasurementsPosition 
         break;
     case SpectrumSettings::PositionRight:
         m_splitter->setOrientation(Qt::Horizontal);
-        m_splitter->insertWidget(0, m_spectrum);
+        m_splitter->insertWidget(0, m_spectrumContainer);
         break;
     }
     m_position = position;
@@ -79,9 +89,9 @@ void GLSpectrum::setMeasurementsPosition(SpectrumSettings::MeasurementsPosition 
 
 void GLSpectrum::setMeasurementParams(SpectrumSettings::Measurement measurement,
                                       int centerFrequencyOffset, int bandwidth, int chSpacing, int adjChBandwidth,
-                                      int harmonics, int peaks, bool highlight, int precision)
+                                      int harmonics, int peaks, bool highlight, int precision, unsigned memoryMask)
 {
-    m_spectrum->setMeasurementParams(measurement, centerFrequencyOffset, bandwidth, chSpacing, adjChBandwidth, harmonics, peaks, highlight, precision);
+    m_spectrum->setMeasurementParams(measurement, centerFrequencyOffset, bandwidth, chSpacing, adjChBandwidth, harmonics, peaks, highlight, precision, memoryMask);
     // Resize splitter so there's just enough space for the measurements table
     // But don't use more than 50%
     QList<int> sizes = m_splitter->sizes();
@@ -147,4 +157,10 @@ void GLSpectrum::setMeasurementParams(SpectrumSettings::Measurement measurement,
     }
     m_splitter->setSizes(sizes);
     //resize(size().expandedTo(minimumSizeHint()));
+}
+
+void GLSpectrum::resetMeasurements()
+{
+    m_measurements->reset();
+    m_spectrum->resetMeasurements();
 }

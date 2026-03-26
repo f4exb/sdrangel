@@ -198,7 +198,8 @@ SpectrumMeasurements::SpectrumMeasurements(QWidget *parent) :
     m_measurement(SpectrumSettings::MeasurementPeaks),
     m_precision(1),
     m_table(nullptr),
-    m_peakTable(nullptr)
+    m_peakTable(nullptr),
+    m_maskTable(nullptr)
 {
     m_textBrush.setColor(Qt::white);  // Should get this from the style sheet?
     m_redBrush.setColor(Qt::red);
@@ -263,6 +264,10 @@ void SpectrumMeasurements::createMeasurementsTable(const QStringList &rows, cons
     // Cell context menu
     m_table->setContextMenuPolicy(Qt::CustomContextMenu);
     connect(m_table, &QTableWidget::customContextMenuRequested, this, &SpectrumMeasurements::tableContextMenu);
+
+    // Enable mouse tracking for FramelessWindowResizer, as table is created after FramelessWindowResizer::enableChildMouseTracking is called
+    m_table->setMouseTracking(true);
+    m_table->viewport()->setMouseTracking(true);
 }
 
 void SpectrumMeasurements::createPeakTable(int peaks)
@@ -306,6 +311,10 @@ void SpectrumMeasurements::createPeakTable(int peaks)
     // Cell context menu
     m_peakTable->setContextMenuPolicy(Qt::CustomContextMenu);
     connect(m_peakTable, &QTableWidget::customContextMenuRequested, this, &SpectrumMeasurements::peakTableContextMenu);
+
+    // Enable mouse tracking for FramelessWindowResizer, as table is created after FramelessWindowResizer::enableChildMouseTracking is called
+    m_peakTable->setMouseTracking(true);
+    m_peakTable->viewport()->setMouseTracking(true);
 }
 
 void SpectrumMeasurements::createTableMenus()
@@ -369,6 +378,52 @@ void SpectrumMeasurements::createSNRTable()
     QStringList units = {" dB", " dB", " dB", " dB", " dB", " dBc"};
 
     createMeasurementsTable(rows, units);
+}
+
+void SpectrumMeasurements::createMaskTable(unsigned memMask)
+{
+    int memories = qPopulationCount(memMask);
+
+    m_maskTable = new SpectrumMeasurementsTable();
+    m_maskTable->horizontalHeader()->setSectionsMovable(true);
+
+    QStringList columns = QStringList{"Tests", "Fails", ""};
+
+    m_maskTable->setColumnCount(columns.size());
+    m_maskTable->setRowCount(memories);
+
+    for (int i = 0; i < columns.size(); i++) {
+        m_maskTable->setHorizontalHeaderItem(i, new QTableWidgetItem(columns[i]));
+    }
+    m_maskTable->horizontalHeader()->setStretchLastSection(true);
+
+    int row = 0;
+    for (int i = 0; i < 32; i++)
+    {
+        if ((memMask & (1 << i)) != 0)
+        {
+            m_maskTable->setVerticalHeaderItem(row, new QTableWidgetItem(QString("M%1").arg(i + 1)));
+
+            for (int j = 0; j < 2; j++)
+            {
+                QTableWidgetItem *item = new QTableWidgetItem();
+                item->setFlags(Qt::ItemIsEnabled);
+                m_maskTable->setItem(row, j, item);
+            }
+            row++;
+        }
+    }
+
+    m_maskTable->setSizePolicy(QSizePolicy::Preferred, QSizePolicy::Preferred);
+    m_maskTable->setSizeAdjustPolicy(QAbstractScrollArea::AdjustToContents);
+
+    // Cell context menu
+    m_maskTable->setContextMenuPolicy(Qt::CustomContextMenu);
+    connect(m_maskTable, &QTableWidget::customContextMenuRequested, this, &SpectrumMeasurements::maskTableContextMenu);
+
+    // Enable mouse tracking for FramelessWindowResizer, as table is created after FramelessWindowResizer::enableChildMouseTracking is called
+    m_maskTable->setMouseTracking(true);
+    m_maskTable->viewport()->setMouseTracking(true);
 }
 
 // Create column select menu item
@@ -458,12 +513,34 @@ void SpectrumMeasurements::peakTableContextMenu(QPoint pos)
         connect(copyAction, &QAction::triggered, this, [text]()->void {
             QClipboard *clipboard = QGuiApplication::clipboard();
             clipboard->setText(text);
-        });
+            });
         tableContextMenu->addAction(copyAction);
         tableContextMenu->addSeparator();
 
         tableContextMenu->popup(m_peakTable->viewport()->mapToGlobal(pos));
-   }
+    }
+}
+
+void SpectrumMeasurements::maskTableContextMenu(QPoint pos)
+{
+    QTableWidgetItem *item = m_maskTable->itemAt(pos);
+    if (item)
+    {
+        QMenu* tableContextMenu = new QMenu(m_maskTable);
+        connect(tableContextMenu, &QMenu::aboutToHide, tableContextMenu, &QMenu::deleteLater);
+
+        // Copy current cell
+        QAction* copyAction = new QAction("Copy", tableContextMenu);
+        const QString text = item->text();
+        connect(copyAction, &QAction::triggered, this, [text]()->void {
+            QClipboard *clipboard = QGuiApplication::clipboard();
+            clipboard->setText(text);
+            });
+        tableContextMenu->addAction(copyAction);
+        tableContextMenu->addSeparator();
+
+        tableContextMenu->popup(m_peakTable->viewport()->mapToGlobal(pos));
+    }
 }
 
 void SpectrumMeasurements::resizeMeasurementsTable()
@@ -495,10 +572,11 @@ void SpectrumMeasurements::resizePeakTable()
     m_peakTable->removeRow(row);
 }
 
-void SpectrumMeasurements::setMeasurementParams(SpectrumSettings::Measurement measurement, int peaks, int precision)
+void SpectrumMeasurements::setMeasurementParams(SpectrumSettings::Measurement measurement, int peaks, int precision, unsigned memMasks)
 {
     if (   (measurement != m_measurement)
         || (m_precision != precision)
+        || (m_memMask != memMasks)
         || ((m_peakTable == nullptr) && (m_table == nullptr))
         || ((m_peakTable != nullptr) && (peaks != m_peakTable->rowCount()))
        )
@@ -508,9 +586,12 @@ void SpectrumMeasurements::setMeasurementParams(SpectrumSettings::Measurement me
         m_peakTable = nullptr;
         delete m_table;
         m_table = nullptr;
+        delete m_maskTable;
+        m_maskTable = nullptr;
 
         m_measurement = measurement;
         m_precision = precision;
+        m_memMask = memMasks;
 
         switch (measurement)
         {
@@ -543,6 +624,11 @@ void SpectrumMeasurements::setMeasurementParams(SpectrumSettings::Measurement me
             createSNRTable();
             layout()->addWidget(m_table);
             break;
+        case SpectrumSettings::MeasurementMask:
+            reset();
+            createMaskTable(m_memMask);
+            layout()->addWidget(m_maskTable);
+            break;
         default:
             break;
         }
@@ -556,6 +642,11 @@ void SpectrumMeasurements::setMeasurementParams(SpectrumSettings::Measurement me
         else if (m_table)
         {
             m_table->show();
+            resize(sizeHint());
+        }
+        else if (m_maskTable)
+        {
+            m_maskTable->show();
             resize(sizeHint());
         }
     }
@@ -575,6 +666,16 @@ void SpectrumMeasurements::reset()
                 if (j != COL_SPEC) {
                     m_table->item(i, j)->setText("");
                 }
+            }
+        }
+    }
+    if (m_maskTable)
+    {
+        for (int i = 0; i < m_maskTable->rowCount(); i++)
+        {
+            for (int j = COL_MASK_TESTS; j <= COL_MASK_FAILS; j++)
+            {
+                m_maskTable->item(i, j)->setData(Qt::DisplayRole, 0);
             }
         }
     }
@@ -614,74 +715,88 @@ bool SpectrumMeasurements::checkSpec(const QString &spec, double value) const
     return false;
 }
 
-void SpectrumMeasurements::updateMeasurement(int row, float value)
+void SpectrumMeasurements::updateMeasurement(int row, float value, bool updateGUI)
 {
-    m_measurements[row].add(value);
-    double mean = m_measurements[row].mean();
-
-    m_table->item(row, COL_CURRENT)->setData(Qt::DisplayRole, value);
-    m_table->item(row, COL_MEAN)->setData(Qt::DisplayRole, mean);
-    m_table->item(row, COL_MIN)->setData(Qt::DisplayRole, m_measurements[row].m_min);
-    m_table->item(row, COL_MAX)->setData(Qt::DisplayRole, m_measurements[row].m_max);
-    m_table->item(row, COL_RANGE)->setData(Qt::DisplayRole, m_measurements[row].m_max - m_measurements[row].m_min);
-    m_table->item(row, COL_STD_DEV)->setData(Qt::DisplayRole, m_measurements[row].stdDev());
-    m_table->item(row, COL_COUNT)->setData(Qt::DisplayRole, m_measurements[row].m_values.size());
-
-    QString spec = m_table->item(row, COL_SPEC)->text();
-    bool valueOK = checkSpec(spec, value);
-    bool meanOK = checkSpec(spec, mean);
-    bool minOK = checkSpec(spec, m_measurements[row].m_min);
-    bool mmaxOK = checkSpec(spec, m_measurements[row].m_max);
-
-    if (!valueOK)
+    if (!updateGUI)
     {
-        m_measurements[row].m_fails++;
-        m_table->item(row, 8)->setData(Qt::DisplayRole, m_measurements[row].m_fails);
+        m_measurements[row].add(value);
+
+        double mean = m_measurements[row].mean();
+
+        QString spec = m_table->item(row, COL_SPEC)->text();
+        bool valueOK = checkSpec(spec, value);
+        checkSpec(spec, mean);
+        checkSpec(spec, m_measurements[row].m_min);
+        checkSpec(spec, m_measurements[row].m_max);
+
+        if (!valueOK) {
+            m_measurements[row].m_fails++;
+        }
     }
+    else
+    {
+        double mean = m_measurements[row].mean();
 
-    // item->setForeground doesn't work, perhaps as we have style sheet applied?
-    m_table->item(row, COL_CURRENT)->setData(Qt::ForegroundRole, valueOK ? m_textBrush : m_redBrush);
-    m_table->item(row, COL_MEAN)->setData(Qt::ForegroundRole, meanOK ? m_textBrush : m_redBrush);
-    m_table->item(row, COL_MIN)->setData(Qt::ForegroundRole, minOK ? m_textBrush : m_redBrush);
-    m_table->item(row, COL_MAX)->setData(Qt::ForegroundRole, mmaxOK ? m_textBrush : m_redBrush);
+        m_table->item(row, COL_CURRENT)->setData(Qt::DisplayRole, value);
+        m_table->item(row, COL_MEAN)->setData(Qt::DisplayRole, mean);
+        m_table->item(row, COL_MIN)->setData(Qt::DisplayRole, m_measurements[row].m_min);
+        m_table->item(row, COL_MAX)->setData(Qt::DisplayRole, m_measurements[row].m_max);
+        m_table->item(row, COL_RANGE)->setData(Qt::DisplayRole, m_measurements[row].m_max - m_measurements[row].m_min);
+        m_table->item(row, COL_STD_DEV)->setData(Qt::DisplayRole, m_measurements[row].stdDev());
+        m_table->item(row, COL_COUNT)->setData(Qt::DisplayRole, m_measurements[row].m_values.size());
+
+        QString spec = m_table->item(row, COL_SPEC)->text();
+        bool valueOK = checkSpec(spec, value);
+        bool meanOK = checkSpec(spec, mean);
+        bool minOK = checkSpec(spec, m_measurements[row].m_min);
+        bool mmaxOK = checkSpec(spec, m_measurements[row].m_max);
+
+        m_table->item(row, 8)->setData(Qt::DisplayRole, m_measurements[row].m_fails);
+
+        // item->setForeground doesn't work, perhaps as we have style sheet applied?
+        m_table->item(row, COL_CURRENT)->setData(Qt::ForegroundRole, valueOK ? m_textBrush : m_redBrush);
+        m_table->item(row, COL_MEAN)->setData(Qt::ForegroundRole, meanOK ? m_textBrush : m_redBrush);
+        m_table->item(row, COL_MIN)->setData(Qt::ForegroundRole, minOK ? m_textBrush : m_redBrush);
+        m_table->item(row, COL_MAX)->setData(Qt::ForegroundRole, mmaxOK ? m_textBrush : m_redBrush);
+    }
 }
 
-void SpectrumMeasurements::setSNR(float snr, float snfr, float thd, float thdpn, float sinad)
+void SpectrumMeasurements::setSNR(float snr, float snfr, float thd, float thdpn, float sinad, bool updateGUI)
 {
-    updateMeasurement(0, snr);
-    updateMeasurement(1, snfr);
-    updateMeasurement(2, thd);
-    updateMeasurement(3, thdpn);
-    updateMeasurement(4, sinad);
+    updateMeasurement(0, snr, updateGUI);
+    updateMeasurement(1, snfr, updateGUI);
+    updateMeasurement(2, thd, updateGUI);
+    updateMeasurement(3, thdpn, updateGUI);
+    updateMeasurement(4, sinad, updateGUI);
 }
 
-void SpectrumMeasurements::setSFDR(float sfdr)
+void SpectrumMeasurements::setSFDR(float sfdr, bool updateGUI)
 {
-    updateMeasurement(5, sfdr);
+    updateMeasurement(5, sfdr, updateGUI);
 }
 
-void SpectrumMeasurements::setChannelPower(float power)
+void SpectrumMeasurements::setChannelPower(float power, bool updateGUI)
 {
-    updateMeasurement(0, power);
+    updateMeasurement(0, power, updateGUI);
 }
 
-void SpectrumMeasurements::setAdjacentChannelPower(float left, float leftACPR, float center, float right, float rightACPR)
+void SpectrumMeasurements::setAdjacentChannelPower(float left, float leftACPR, float center, float right, float rightACPR, bool updateGUI)
 {
-    updateMeasurement(0, left);
-    updateMeasurement(1, leftACPR);
-    updateMeasurement(2, center);
-    updateMeasurement(3, right);
-    updateMeasurement(4, rightACPR);
+    updateMeasurement(0, left, updateGUI);
+    updateMeasurement(1, leftACPR, updateGUI);
+    updateMeasurement(2, center, updateGUI);
+    updateMeasurement(3, right, updateGUI);
+    updateMeasurement(4, rightACPR, updateGUI);
 }
 
-void SpectrumMeasurements::setOccupiedBandwidth(float occupiedBandwidth)
+void SpectrumMeasurements::setOccupiedBandwidth(float occupiedBandwidth, bool updateGUI)
 {
-    updateMeasurement(0, occupiedBandwidth);
+    updateMeasurement(0, occupiedBandwidth, updateGUI);
 }
 
-void SpectrumMeasurements::set3dBBandwidth(float bandwidth)
+void SpectrumMeasurements::set3dBBandwidth(float bandwidth, bool updateGUI)
 {
-    updateMeasurement(0, bandwidth);
+    updateMeasurement(0, bandwidth, updateGUI);
 }
 
 void SpectrumMeasurements::setPeak(int peak, int64_t frequency, float power)
@@ -694,5 +809,30 @@ void SpectrumMeasurements::setPeak(int peak, int64_t frequency, float power)
     else
     {
         qDebug() << "SpectrumMeasurements::setPeak: Attempt to set peak " << peak << " when only " << m_peakTable->rowCount() << " rows in peak table";
+    }
+}
+
+void SpectrumMeasurements::setMaskTestResult(int memoryIdx, qint64 count, qint64 fails)
+{
+    int row = 0;
+
+    for (int i = 0; i < memoryIdx; i++)
+    {
+        if (m_memMask & (1 << i)) {
+            row++;
+        }
+    }
+
+    if (row < m_maskTable->rowCount())
+    {
+        QTableWidgetItem *testsItem = m_maskTable->item(row, COL_MASK_TESTS);
+        QTableWidgetItem *failsItem = m_maskTable->item(row, COL_MASK_FAILS);
+
+        testsItem->setData(Qt::DisplayRole, count);
+        failsItem->setData(Qt::DisplayRole, fails);
+    }
+    else
+    {
+        qDebug() << "SpectrumMeasurements::addMaskTestResult: Result for memory " << memoryIdx << " when only " << m_maskTable->rowCount() << " rows in mask table";
     }
 }

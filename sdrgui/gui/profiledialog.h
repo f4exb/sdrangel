@@ -52,6 +52,7 @@ private:
         COL_TOTAL,
         COL_AVERAGE,
         COL_LAST,
+        COL_MAX,
         COL_NUM_SAMPLES
     };
 

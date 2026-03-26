@@ -7,7 +7,7 @@
     <x>0</x>
     <y>0</y>
     <width>400</width>
-    <height>302</height>
+    <height>315</height>
    </rect>
   </property>
   <property name="minimumSize">
@@ -28,105 +28,6 @@
   <layout class="QVBoxLayout" name="verticalLayout">
    <item>
     <layout class="QGridLayout" name="gridLayout">
-     <item row="2" column="0">
-      <widget class="QLabel" name="highlightLabel">
-       <property name="text">
-        <string>Highlight on spectrum</string>
-       </property>
-      </widget>
-     </item>
-     <item row="9" column="1">
-      <widget class="QSpinBox" name="harmonics">
-       <property name="toolTip">
-        <string>Number of harmonics</string>
-       </property>
-       <property name="maximum">
-        <number>20</number>
-       </property>
-      </widget>
-     </item>
-     <item row="5" column="1">
-      <widget class="ValueDialZ" name="centerFrequencyOffset" native="true">
-       <property name="sizePolicy">
-        <sizepolicy hsizetype="Maximum" vsizetype="Maximum">
-         <horstretch>0</horstretch>
-         <verstretch>0</verstretch>
-        </sizepolicy>
-       </property>
-       <property name="minimumSize">
-        <size>
-         <width>32</width>
-         <height>16</height>
-        </size>
-       </property>
-       <property name="font">
-        <font>
-         <family>DejaVu Sans Mono</family>
-         <pointsize>12</pointsize>
-        </font>
-       </property>
-       <property name="cursor">
-        <cursorShape>PointingHandCursor</cursorShape>
-       </property>
-       <property name="focusPolicy">
-        <enum>Qt::StrongFocus</enum>
-       </property>
-       <property name="toolTip">
-        <string>Center frequency offset (Hz)</string>
-       </property>
-      </widget>
-     </item>
-     <item row="7" column="0">
-      <widget class="QLabel" name="chSpacingLabel">
-       <property name="text">
-        <string>Channel spacing</string>
-       </property>
-       <property name="margin">
-        <number>2</number>
-       </property>
-      </widget>
-     </item>
-     <item row="1" column="1">
-      <widget class="QComboBox" name="position">
-       <property name="toolTip">
-        <string>Where to display the measurements result table</string>
-       </property>
-       <item>
-        <property name="text">
-         <string>Above spectrum</string>
-        </property>
-       </item>
-       <item>
-        <property name="text">
-         <string>Below spectrum</string>
-        </property>
-       </item>
-       <item>
-        <property name="text">
-         <string>Left of spectrum</string>
-        </property>
-       </item>
-       <item>
-        <property name="text">
-         <string>Right of spectrum</string>
-        </property>
-       </item>
-      </widget>
-     </item>
-     <item row="4" column="0">
-      <widget class="QLabel" name="peaksLabel">
-       <property name="text">
-        <string>Peaks</string>
-       </property>
-      </widget>
-     </item>
-     <item row="5" column="0">
-      <widget class="QLabel" name="centerFrequencyOffsetLabel">
-       <property name="text">
-        <string>Center frequency offset</string>
-       </property>
-      </widget>
-     </item>
      <item row="0" column="1">
       <widget class="QComboBox" name="measurement">
        <property name="toolTip">
@@ -170,119 +71,11 @@
          <string>SNR</string>
         </property>
        </item>
-      </widget>
-     </item>
-     <item row="1" column="0">
-      <widget class="QLabel" name="positionLabel">
-       <property name="text">
-        <string>Display results table</string>
-       </property>
-      </widget>
-     </item>
-     <item row="6" column="0">
-      <widget class="QLabel" name="bandwidthLabel">
-       <property name="text">
-        <string>Channel bandwidth</string>
-       </property>
-       <property name="margin">
-        <number>2</number>
-       </property>
-      </widget>
-     </item>
-     <item row="7" column="1">
-      <widget class="ValueDialZ" name="chSpacing" native="true">
-       <property name="sizePolicy">
-        <sizepolicy hsizetype="Maximum" vsizetype="Maximum">
-         <horstretch>0</horstretch>
-         <verstretch>0</verstretch>
-        </sizepolicy>
-       </property>
-       <property name="minimumSize">
-        <size>
-         <width>32</width>
-         <height>16</height>
-        </size>
-       </property>
-       <property name="font">
-        <font>
-         <family>DejaVu Sans Mono</family>
-         <pointsize>12</pointsize>
-        </font>
-       </property>
-       <property name="cursor">
-        <cursorShape>PointingHandCursor</cursorShape>
-       </property>
-       <property name="focusPolicy">
-        <enum>Qt::StrongFocus</enum>
-       </property>
-       <property name="toolTip">
-        <string>Channel spacing (Hz)</string>
-       </property>
-      </widget>
-     </item>
-     <item row="3" column="0">
-      <widget class="QLabel" name="precisionLabel">
-       <property name="text">
-        <string>Results precision</string>
-       </property>
-      </widget>
-     </item>
-     <item row="6" column="1">
-      <widget class="ValueDialZ" name="bandwidth" native="true">
-       <property name="sizePolicy">
-        <sizepolicy hsizetype="Maximum" vsizetype="Maximum">
-         <horstretch>0</horstretch>
-         <verstretch>0</verstretch>
-        </sizepolicy>
-       </property>
-       <property name="minimumSize">
-        <size>
-         <width>32</width>
-         <height>16</height>
-        </size>
-       </property>
-       <property name="font">
-        <font>
-         <family>DejaVu Sans Mono</family>
-         <pointsize>12</pointsize>
-        </font>
-       </property>
-       <property name="cursor">
-        <cursorShape>PointingHandCursor</cursorShape>
-       </property>
-       <property name="focusPolicy">
-        <enum>Qt::StrongFocus</enum>
-       </property>
-       <property name="toolTip">
-        <string>Channel bandwidth (Hz)</string>
-       </property>
-      </widget>
-     </item>
-     <item row="0" column="0">
-      <widget class="QLabel" name="measurementLabel">
-       <property name="text">
-        <string>Measurement</string>
-       </property>
-      </widget>
-     </item>
-     <item row="2" column="1">
-      <widget class="QCheckBox" name="highlight">
-       <property name="toolTip">
-        <string>Whether to highlight the measurements in the spectrum</string>
-       </property>
-       <property name="text">
-        <string/>
-       </property>
-      </widget>
-     </item>
-     <item row="9" column="0">
-      <widget class="QLabel" name="harmonicsLabel">
-       <property name="text">
-        <string>Harmonics</string>
-       </property>
-       <property name="margin">
-        <number>2</number>
-       </property>
+       <item>
+        <property name="text">
+         <string>Mask test</string>
+        </property>
+       </item>
       </widget>
      </item>
      <item row="4" column="1">
@@ -295,26 +88,6 @@
        </property>
        <property name="maximum">
         <number>20</number>
-       </property>
-      </widget>
-     </item>
-     <item row="8" column="0">
-      <widget class="QLabel" name="adjChBandwidthLabel">
-       <property name="text">
-        <string>Adjacent channel bandwidth</string>
-       </property>
-       <property name="margin">
-        <number>2</number>
-       </property>
-      </widget>
-     </item>
-     <item row="3" column="1">
-      <widget class="QSpinBox" name="precision">
-       <property name="toolTip">
-        <string>Precision of results (number of decimal places)</string>
-       </property>
-       <property name="maximum">
-        <number>9</number>
        </property>
       </widget>
      </item>
@@ -342,10 +115,292 @@
         <cursorShape>PointingHandCursor</cursorShape>
        </property>
        <property name="focusPolicy">
-        <enum>Qt::StrongFocus</enum>
+        <enum>Qt::FocusPolicy::StrongFocus</enum>
        </property>
        <property name="toolTip">
         <string>Adjacent channel bandwidth (Hz)</string>
+       </property>
+      </widget>
+     </item>
+     <item row="3" column="0">
+      <widget class="QLabel" name="precisionLabel">
+       <property name="text">
+        <string>Results precision</string>
+       </property>
+      </widget>
+     </item>
+     <item row="9" column="0">
+      <widget class="QLabel" name="harmonicsLabel">
+       <property name="text">
+        <string>Harmonics</string>
+       </property>
+       <property name="margin">
+        <number>2</number>
+       </property>
+      </widget>
+     </item>
+     <item row="3" column="1">
+      <widget class="QSpinBox" name="precision">
+       <property name="toolTip">
+        <string>Precision of results (number of decimal places)</string>
+       </property>
+       <property name="maximum">
+        <number>9</number>
+       </property>
+      </widget>
+     </item>
+     <item row="10" column="1">
+      <layout class="QHBoxLayout" name="maskLayout">
+       <item>
+        <widget class="QToolButton" name="m1Mask">
+         <property name="toolTip">
+          <string>Use memory 2 as mask</string>
+         </property>
+         <property name="text">
+          <string>M1</string>
+         </property>
+         <property name="checkable">
+          <bool>true</bool>
+         </property>
+        </widget>
+       </item>
+       <item>
+        <widget class="QToolButton" name="m2Mask">
+         <property name="toolTip">
+          <string>Use memory 1 as mask</string>
+         </property>
+         <property name="text">
+          <string>M2</string>
+         </property>
+         <property name="checkable">
+          <bool>true</bool>
+         </property>
+        </widget>
+       </item>
+       <item>
+        <spacer name="horizontalSpacer">
+         <property name="orientation">
+          <enum>Qt::Orientation::Horizontal</enum>
+         </property>
+         <property name="sizeHint" stdset="0">
+          <size>
+           <width>40</width>
+           <height>20</height>
+          </size>
+         </property>
+        </spacer>
+       </item>
+      </layout>
+     </item>
+     <item row="9" column="1">
+      <widget class="QSpinBox" name="harmonics">
+       <property name="toolTip">
+        <string>Number of harmonics</string>
+       </property>
+       <property name="maximum">
+        <number>20</number>
+       </property>
+      </widget>
+     </item>
+     <item row="2" column="1">
+      <widget class="QCheckBox" name="highlight">
+       <property name="toolTip">
+        <string>Whether to highlight the measurements in the spectrum</string>
+       </property>
+       <property name="text">
+        <string/>
+       </property>
+      </widget>
+     </item>
+     <item row="2" column="0">
+      <widget class="QLabel" name="highlightLabel">
+       <property name="text">
+        <string>Highlight on spectrum</string>
+       </property>
+      </widget>
+     </item>
+     <item row="4" column="0">
+      <widget class="QLabel" name="peaksLabel">
+       <property name="text">
+        <string>Peaks</string>
+       </property>
+      </widget>
+     </item>
+     <item row="5" column="0">
+      <widget class="QLabel" name="centerFrequencyOffsetLabel">
+       <property name="text">
+        <string>Center frequency offset</string>
+       </property>
+      </widget>
+     </item>
+     <item row="5" column="1">
+      <widget class="ValueDialZ" name="centerFrequencyOffset" native="true">
+       <property name="sizePolicy">
+        <sizepolicy hsizetype="Maximum" vsizetype="Maximum">
+         <horstretch>0</horstretch>
+         <verstretch>0</verstretch>
+        </sizepolicy>
+       </property>
+       <property name="minimumSize">
+        <size>
+         <width>32</width>
+         <height>16</height>
+        </size>
+       </property>
+       <property name="font">
+        <font>
+         <family>DejaVu Sans Mono</family>
+         <pointsize>12</pointsize>
+        </font>
+       </property>
+       <property name="cursor">
+        <cursorShape>PointingHandCursor</cursorShape>
+       </property>
+       <property name="focusPolicy">
+        <enum>Qt::FocusPolicy::StrongFocus</enum>
+       </property>
+       <property name="toolTip">
+        <string>Center frequency offset (Hz)</string>
+       </property>
+      </widget>
+     </item>
+     <item row="6" column="0">
+      <widget class="QLabel" name="bandwidthLabel">
+       <property name="text">
+        <string>Channel bandwidth</string>
+       </property>
+       <property name="margin">
+        <number>2</number>
+       </property>
+      </widget>
+     </item>
+     <item row="6" column="1">
+      <widget class="ValueDialZ" name="bandwidth" native="true">
+       <property name="sizePolicy">
+        <sizepolicy hsizetype="Maximum" vsizetype="Maximum">
+         <horstretch>0</horstretch>
+         <verstretch>0</verstretch>
+        </sizepolicy>
+       </property>
+       <property name="minimumSize">
+        <size>
+         <width>32</width>
+         <height>16</height>
+        </size>
+       </property>
+       <property name="font">
+        <font>
+         <family>DejaVu Sans Mono</family>
+         <pointsize>12</pointsize>
+        </font>
+       </property>
+       <property name="cursor">
+        <cursorShape>PointingHandCursor</cursorShape>
+       </property>
+       <property name="focusPolicy">
+        <enum>Qt::FocusPolicy::StrongFocus</enum>
+       </property>
+       <property name="toolTip">
+        <string>Channel bandwidth (Hz)</string>
+       </property>
+      </widget>
+     </item>
+     <item row="7" column="0">
+      <widget class="QLabel" name="chSpacingLabel">
+       <property name="text">
+        <string>Channel spacing</string>
+       </property>
+       <property name="margin">
+        <number>2</number>
+       </property>
+      </widget>
+     </item>
+     <item row="0" column="0">
+      <widget class="QLabel" name="measurementLabel">
+       <property name="text">
+        <string>Measurement</string>
+       </property>
+      </widget>
+     </item>
+     <item row="1" column="1">
+      <widget class="QComboBox" name="position">
+       <property name="toolTip">
+        <string>Where to display the measurements result table</string>
+       </property>
+       <item>
+        <property name="text">
+         <string>Above spectrum</string>
+        </property>
+       </item>
+       <item>
+        <property name="text">
+         <string>Below spectrum</string>
+        </property>
+       </item>
+       <item>
+        <property name="text">
+         <string>Left of spectrum</string>
+        </property>
+       </item>
+       <item>
+        <property name="text">
+         <string>Right of spectrum</string>
+        </property>
+       </item>
+      </widget>
+     </item>
+     <item row="1" column="0">
+      <widget class="QLabel" name="positionLabel">
+       <property name="text">
+        <string>Display results table</string>
+       </property>
+      </widget>
+     </item>
+     <item row="7" column="1">
+      <widget class="ValueDialZ" name="chSpacing" native="true">
+       <property name="sizePolicy">
+        <sizepolicy hsizetype="Maximum" vsizetype="Maximum">
+         <horstretch>0</horstretch>
+         <verstretch>0</verstretch>
+        </sizepolicy>
+       </property>
+       <property name="minimumSize">
+        <size>
+         <width>32</width>
+         <height>16</height>
+        </size>
+       </property>
+       <property name="font">
+        <font>
+         <family>DejaVu Sans Mono</family>
+         <pointsize>12</pointsize>
+        </font>
+       </property>
+       <property name="cursor">
+        <cursorShape>PointingHandCursor</cursorShape>
+       </property>
+       <property name="focusPolicy">
+        <enum>Qt::FocusPolicy::StrongFocus</enum>
+       </property>
+       <property name="toolTip">
+        <string>Channel spacing (Hz)</string>
+       </property>
+      </widget>
+     </item>
+     <item row="10" column="0">
+      <widget class="QLabel" name="maskLabel">
+       <property name="text">
+        <string>Memories to use as masks</string>
+       </property>
+      </widget>
+     </item>
+     <item row="8" column="0">
+      <widget class="QLabel" name="adjChBandwidthLabel">
+       <property name="text">
+        <string>Adjacent channel bandwidth</string>
+       </property>
+       <property name="margin">
+        <number>2</number>
        </property>
       </widget>
      </item>
@@ -354,7 +409,7 @@
    <item>
     <spacer name="verticalSpacer">
      <property name="orientation">
-      <enum>Qt::Vertical</enum>
+      <enum>Qt::Orientation::Vertical</enum>
      </property>
      <property name="sizeHint" stdset="0">
       <size>
@@ -379,10 +434,10 @@
      <item>
       <widget class="QDialogButtonBox" name="buttonBox">
        <property name="orientation">
-        <enum>Qt::Horizontal</enum>
+        <enum>Qt::Orientation::Horizontal</enum>
        </property>
        <property name="standardButtons">
-        <set>QDialogButtonBox::Close</set>
+        <set>QDialogButtonBox::StandardButton::Close</set>
        </property>
       </widget>
      </item>

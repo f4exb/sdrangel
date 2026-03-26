@@ -27,11 +27,13 @@ bool NCO::m_tableInitialized = false;
 
 void NCO::initTable()
 {
-	if(m_tableInitialized)
+	if (m_tableInitialized) {
 		return;
+	}
 
-	for(int i = 0; i < TableSize; i++)
+	for (unsigned i = 0; i < TableSize; i++) {
 		m_table[i] = cos((2.0 * M_PI * i) / TableSize);
+	}
 
 	m_tableInitialized = true;
 }

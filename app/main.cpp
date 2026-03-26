@@ -50,6 +50,7 @@
 #include "mainwindow.h"
 #include "remotetcpsinkstarter.h"
 #include "dsp/dsptypes.h"
+#include "util/profiler.h"
 #include "crashhandler.h"
 
 static void logExceptionStackTrace()
@@ -338,6 +339,10 @@ int main(int argc, char* argv[])
 
 #ifdef _WIN32
     installCrashHandler(logger);
+#endif
+
+#ifdef ENABLE_PROFILER
+    GlobalProfileData::resetProfileData(); // Start timer
 #endif
 
 	int res = runQtApplication(argc, argv, logger);

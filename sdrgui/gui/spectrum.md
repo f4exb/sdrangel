@@ -1,4 +1,4 @@
-<h1>Spectrum component</h1>
+﻿<h1>Spectrum component</h1>
 
 This page details the spectrum component that takes part of the main spectrum display and is also used in some channel and feature plugins.
 
@@ -28,6 +28,9 @@ A status line is displayed at the left of the top margin. It displays the follow
   - if frequency zooming is active the zooming factor
   - `CF:` followed by the Center Frequency of the displayed spectrum possibly with multiplier suffix (G, M, k)
   - `SP:` followed by the frequency SPan of the displayed spectrum possibly with multiplier suffix (M, k)
+  - `RBW:` followed by the RBW (Resolution BandWidth) of the displayed spectrum possibly with multiplier suffix (k). This is optional and must be enabled in the Spectrum Display Settings dialog.
+  - `Cur:` followed by the power in dB and frequency under the cursor. This is optional and must be enabled in the Spectrum Display Settings dialog.
+  - `Pk:` followed by the power in dB and frequency of the highest peak in the displayed spectrum. This is optional and must be enabled in the Spectrum Display Settings dialog.
 
 <h3>Spectrum markers</h3>
 
@@ -93,9 +96,11 @@ When the mouse is inside the time scale (waterfall) the overlap is increased by 
 
 <h2>B. Spectrum controls</h2>
 
-Controls are organized in 6 blocks arranged in a flow layout so that the size of the control area can adapt to the width of the spectrum arranging the blocks from 4 to 1 line as the spectrum widens. The buttons and various controls in each block remain at the same place.
+Not all controls are visible by default. See B.7.8 for how to select which controls are visible.
 
-Narrow (4 lines):
+Controls are organized in 7 blocks arranged in a flow layout so that the size of the control area can adapt to the width of the spectrum arranging the blocks from 5 to 1 line as the spectrum widens. The buttons and various controls in each block remain at the same place.
+
+Narrow (5 lines):
 
 ![Spectrum GUI](../../doc/img/MainWindow_spectrum_gui_narrow.png)
 
@@ -103,7 +108,7 @@ Wide (1 line):
 
 ![Spectrum GUI](../../doc/img/MainWindow_spectrum_gui_wide.png)
 
-The 6 blocks are detailed next:
+The 7 blocks are detailed next:
 
 ![Spectrum GUI](../../doc/img/MainWindow_spectrum_gui.png)
 
@@ -254,7 +259,8 @@ Use this combo to select which averaging mode is applied:
   - **Mov**: moving average. This is a sliding average over the amount of samples specified next (B.2.5). There is one complete FFT line produced at every FFT sampling period
   - **Fix**: fixed average. Average is done over the amount of samples specified next (B.2.5) and a result is produced at the end of the corresponding period then the next block of averaged samples is processed. There is one complete FFT line produced every FFT sampling period multiplied by the number of averaged samples (4.6). The time scale on the waterfall display is updated accordingly.
   - **Max**: this is not an averaging but a max hold. It will retain the maximum value over the amount of samples specified next (B.2.5). Similarly to the fixed average a result is produced at the end of the corresponding period which results in slowing down the waterfall display. The point of this mode is to make outlying short bursts within the "averaging" period stand out. With averaging they would only cause a modest increase and could be missed out.
-
+  - **Min**: It will retain the minimum value over the amount of samples specified next (B.2.5). Similarly to the fixed average a result is produced at the end of the corresponding period which results in slowing down the waterfall display. This mode is useful to measure the noise floor by retaining the minimum value over the averaging period.
+  
 <h4>B.4.5: Number of averaged samples</h4>
 
 Each FFT bin (squared magnitude) is averaged or max'ed over a number of samples. This combo allows selecting the number of samples between these values: 1 (no averaging), 2, 5, 10, 20, 50, 100, 200, 500, 1k (1000) for all modes and in addition 2k, 5k, 10k, 20k, 50k, 1e5 (100000), 2e5, 5e5, 1M (1000000) for "fixed" and "max" modes. Averaging reduces the noise variance and can be used to better detect weak continuous signals. The fixed averaging mode allows long time monitoring on the waterfall. The max mode helps showing short bursts that may appear during the "averaging" period.
@@ -262,6 +268,26 @@ Each FFT bin (squared magnitude) is averaged or max'ed over a number of samples.
 The resulting spectrum refresh period appears in the tooltip taking sample rate, FFT size (B.2.2), average size (B.2.5) and overlap (B.2.3) into consideration. Averaging size adjustment is valid for fixed average and max modes only:
 
 Period = ((((FFT_size &divide; 2) - overlap) &times; 2) &divide; sample_rate) &times; averaging_size
+
+<h4>B.4.6:Math mode</h4>
+
+Use this combo to select which mathematical operation is applied to the spectrum:
+  - **No**: no math operation.
+  - **x-μ**: difference between current spectrum and a moving average. 
+  - **x-μ dB**: difference between current spectrum and a moving average after values are converted to dB (so x/μ).
+  - **x-μ+∧μ dB**: difference between current spectrum and a moving average after values are converted to dB (so x/μ) and then adding the average back in dB (∧μ) to keep the overall level of the spectrum. This is useful to make outlying short bursts within the "averaging" period stand out while keeping the overall level of the spectrum unchanged. With "x-μ dB" the resulting spectrum would be centered around zero which may not be desirable.
+  - **x-μ dB**: absolute value of difference between current spectrum and a moving average after values are converted to dB (so |x/μ|).
+  - **x-M1**: difference between current spectrum and the spectrum stored in memory M1.
+  - **x-M1 dB**: difference between current spectrum and the spectrum stored in memory M1 after values are converted to dB (so x/M1).
+  - **|x-M1| dB**: absolute value of difference between current spectrum and the spectrum stored in memory M1 after values are converted to dB (so |x/M1|).
+  - **x-M2**: difference between current spectrum and the spectrum stored in memory M2.
+  - **x-M2 dB**: difference between current spectrum and the spectrum stored in memory M2 after values are converted to dB (so x/M1).
+  - **|x-M2| dB**: absolute value of difference between current spectrum and the spectrum stored in memory M1 after values are converted to dB (so |x/M1|).
+
+<h4>B.4.7: Math moving average length</h4>
+
+When the math mode (B.4.6) is set to a mode that requires a moving average (x-μ, x-μ dB, x-μ+∧μ dB, |x-μ| dB) this combo allows selecting the number of samples for the moving average.
+One of the predefined values can be selected or a user-defined value can be entered between 2 and 1M.
 
 <h3>B.5: Spectrum display controls - block #5</h3>
 
@@ -298,17 +324,56 @@ Use this toggle button to switch between spectrum logarithmic and linear scale d
 
 When in linear mode the range control (B.3.3) has no effect because the actual range is between 0 and the reference level. The reference level in dB (B.3.2) still applies but is translated to a linear value e.g -40 dB is 1e-4. In linear mode the scale numbers are formatted using scientific notation so that they always occupy the same space.
 
-<h3>B.6: Spectrum miscellaneous controls - block #6</h3>
+<h3>B.6: Spectrum memory controls - block #6</h3>
 
-![Spectrum GUI F](../../doc/img/MainWindow_spectrum_gui_F.png)
+![Spectrum GUI E](../../doc/img/MainWindow_spectrum_gui_F.png)
 
-<h4>B.6.1: Play/Pause spectrum</h4>
+
+<h4>B.6.1: Memory 1</h4>
+
+Left clicking M1 toggles display of the spectrum stored in memory M1.
+
+Right clicking M1 displays a menu with the following options:
+  - **Clear M1**: clears the spectrum stored in memory M1.
+  - **Set M1 to current spectrum**: stores the current spectrum in memory M1.
+  - **Set M1 to moving average**: stores the moving average in memory M1. This option is only available when the Math mode (B.4.6) is set to a mode that uses the moving average.
+  - **Add offset to M1**: displays a dialog that allows the user to enter a value that will be added to each value in M1. This allows the spectrum to be moved up or down.
+  - **Smooth M1**: smooths the values in M1. Values are set to the average of the neighbouring 5 samples. This can be applied repeatedly to further smooth the spectrum.
+  - **Set M1 to M1+M2**: adds M1 to M2, storing the result in M1.
+  - **Set M1 to M1-M2**: subtracts M2 from M1, storing the result in M1.
+  - **Load M1 from .csv**: loads M1 from a .csv file. The .csv should have a single column named Power, with FFT size rows.
+  - **Save M1 to .csv**: saves M1 to a .csv file.
+
+Colour and label for the M1 spectrum can be set in the Spectrum Display Settings dialog.
+
+<h4>B.6.2: Memory 2</h4>
+
+Left clicking M2 toggles display of the spectrum stored in memory M2.
+
+Right clicking M2 display a menu as described above for M1.
+
+<h4>B.6.3: Load spectrum to CSV file</h4>
+
+Click to specify the name of a .csv file that will be loaded to the current spectrum or spectrum scroll buffer.
+
+<h4>B.6.4: Save spectrum to CSV file</h4>
+
+Click to specify the name of a .csv file that will have the current spectrum or spectrum scroll buffer saved to.
+
+<h4>B.6.5: Save spectrum/waterfall to image file</h4>
+
+Click to specify the name of a .png or .jpg file to save the current display (spectrum and waterfall) to.
+
+<h3>B.7: Spectrum miscellaneous controls - block #7</h3>
+
+![Spectrum GUI F](../../doc/img/MainWindow_spectrum_gui_G.png)
+
+
+<h4>B.7.1: Play/Pause spectrum</h4>
 
 Use this button to freeze the spectrum update. Useful when making measurements with the markers.
 
-<h4>B.6.2: Save spectrum to CSV file</h4>
-
-<h4>B.6.3: Spectrum server control</h4>
+<h4>B.7.2: Spectrum server control</h4>
 
 A websockets based server can be used to send spectrum data to clients. An example of such client can be found in the [SDRangelSpectrum](https://github.com/f4exb/sdrangelspectrum) project.
 
@@ -368,23 +433,103 @@ The server only sends data. Control including FFT details is done via the REST A
 
 </table>
 
-<h4>B.6.4: Spectrum markers dialog</h4>
+<h4>B.7.3: Spectrum markers dialog</h4>
 
 Opens the [spectrum markers dialog](spectrummarkers.md)
 
-<h4>B.6.5: Spectrum measurements dialog</h4>
+<h4>B.7.4: Spectrum measurements dialog</h4>
 
 Opens the [Spectrum measurement control dialog](spectrummeasurements.md) Check this link for details on the available measurements.
 
-<h4>B.6.6: Spectrum calibration</h4>
+<h4>B.7.5: Spectrum calibration</h4>
 
 Use the toggle button to switch between relative and calibrated power readings.
 
 Right click to open the [calibration management dialog](spectrumcalibration.md)
 
-<h4>B.6.7: Go to annotation marker</h4>
+<h4>B.7.6: Spectrum Display Settings dialog</h4>
+
+Click to open the Spectrum Display Settings dialog. See below.
+
+<h4>B.7.7: Spectrum controls display</h4>
+
+Selects which of these spectrum controls are displayed. This allows a user to hide less frequently used controls.
+
+  - **Min**: displays a minimum set of controls.
+  - **Std**: displays the standard set of controls.
+  - **All**: displays all controls.
+
+<h4>B.7.8: Go to annotation marker</h4>
 
 This combo only appears if the spectrum display is the spectrum of a device (i.e. main spectrum) and if there are visible annotation markers. It allows to set the device center frequency to the frequency of the selected annotation marker.
+
+<h2>C. Spectrum Display Settings dialog</h2>
+
+The Spectrum Display Settings dialog contains settings that do not have dedicated controls below the spectrum.
+
+![Spectrum Display Settings dialog](../../doc/img/Spectrum_Display_Settings.png)
+
+<h3>C.1: Waterfall Scrolling</h3>
+
+When enabled, a scroll bar will be displayed on the right hand side of the spectrum and spectra will be stored in memory that can be larger than the displayed waterfall.
+The scroll bar can then be used to scroll through and display any spectra in memory. The number of spectra that can be stored in memory can be set via the Length (Spectra) field.
+The amount of RAM required and total time duration of all spectra are displayed underneath.
+
+<h3>C.2: Waterfall Axis</h3>
+
+<h4>C.2.1: Time units</h4>
+
+Specifies what units will be used for the vertical time axis for the waterfall.
+
+  - **Time offset**: displays a time offset.
+  - **Local time**: displays local time. Only available when Waterfall Scrolling is enabled.
+  - **UTC time**: displays UTC time. Only available when Waterfall Scrolling is enabled.
+
+<h4>C.2.2: Time format</h4>
+
+When local time or UTC time is used for the time axis, the Time format field species how that time will be formatted. The default is hh:mm:ss. Other examples include:
+
+  - **dd.MM.yyyy** - 21.05.2001
+  - **ddd MMMM d yy** - Tue May 21 01
+  - **hh:mm:ss.zzz** - 14:13:09.120
+  - **hh:mm:ss.z** - 14:13:09.12
+  - **h:m:s ap** - 2:13:9 pm
+
+<h3>C.3: Status Line</h3>
+
+Allows customizing which information is displayed in the status line.
+
+<h4>C.3.1: Display RBW</h4>
+
+When checked, the Resolution Bandwidth (RBW) will be displayed in the status line.
+
+<h4>C.3.2: Display power/frequency under cursor</h4>
+
+When checked, the power and frequency of the FFT bin under the cursor will be displayed in the status line.
+
+<h4>C.3.3: Display peak power/frequency</h4>
+
+When checked, the power and frequency of the highest peak will be displayed in the status line.
+
+<h3>C.4: Spectrum</h3>
+
+<h4>C.4.1: Colour</h4>
+
+Specifies the color to draw the spectrum when line (B.2.1) or fill (B.2.2) style is selected.
+
+<h3>C.5: Spectrum Memories</h3>
+
+<h4>C.5.1: Memory</h4>
+
+Selects which memory settings will be displayed for (M1 or M2).
+
+<h4>C.5.2: Label</h4>
+
+Specifies a text label that will be displayed to the left hand side of the spectrum held in the memory.
+
+<h4>C.5.3: Color</h4>
+
+Specifies the color to draw the spectrum held in the memory.
 
 <h2>3D Spectrogram Controls</h2>
 

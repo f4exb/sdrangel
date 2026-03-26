@@ -28,6 +28,7 @@
 #include <QLineEdit>
 #include <QToolTip>
 #include <QFileDialog>
+#include <QInputDialog>
 #include <QMessageBox>
 #include <QScreen>
 
@@ -42,11 +43,14 @@
 #include "gui/spectrumcalibrationpointsdialog.h"
 #include "gui/spectrummeasurementsdialog.h"
 #include "gui/spectrummeasurements.h"
+#include "gui/spectrumdisplaysettingsdialog.h"
 #include "gui/flowlayout.h"
 #include "gui/dialogpositioner.h"
 #include "gui/dialpopup.h"
 #include "util/colormap.h"
 #include "util/db.h"
+#include "util/csv.h"
+#include "util/units.h"
 #include "ui_glspectrumgui.h"
 
 const int GLSpectrumGUI::m_fpsMs[] = {500, 200, 100, 50, 20, 10, 5};
@@ -58,11 +62,13 @@ GLSpectrumGUI::GLSpectrumGUI(QWidget* parent) :
     m_glSpectrum(nullptr),
     m_doApplySettings(true),
     m_calibrationShiftdB(0.0),
-    m_markersDialog(nullptr)
+    m_markersDialog(nullptr),
+    m_contextMenu(nullptr)
 {
     ui->setupUi(this);
 
     // Use the custom flow layout for the 3 main horizontal layouts (lines)
+    ui->verticalLayout->removeItem(ui->Line7Layout);
     ui->verticalLayout->removeItem(ui->Line6Layout);
     ui->verticalLayout->removeItem(ui->Line5Layout);
     ui->verticalLayout->removeItem(ui->Line4Layout);
@@ -76,6 +82,7 @@ GLSpectrumGUI::GLSpectrumGUI(QWidget* parent) :
     flowLayout->addItem(ui->Line4Layout);
     flowLayout->addItem(ui->Line5Layout);
     flowLayout->addItem(ui->Line6Layout);
+    flowLayout->addItem(ui->Line7Layout);
     ui->verticalLayout->addItem(flowLayout);
 
     on_linscale_toggled(false);
@@ -100,6 +107,14 @@ GLSpectrumGUI::GLSpectrumGUI(QWidget* parent) :
 
     CRightClickEnabler *calibrationPointsRightClickEnabler = new CRightClickEnabler(ui->calibration);
     connect(calibrationPointsRightClickEnabler, SIGNAL(rightClick(const QPoint &)), this, SLOT(openCalibrationPointsDialog(const QPoint &)));
+
+    m_contextMenu = new QMenu(this);
+    ui->mem1->setContextMenuPolicy(Qt::CustomContextMenu);
+    connect(ui->mem1, &QWidget::customContextMenuRequested, this, &GLSpectrumGUI::mem1ContextMenu);
+    ui->mem2->setContextMenuPolicy(Qt::CustomContextMenu);
+    connect(ui->mem2, &QWidget::customContextMenuRequested, this, &GLSpectrumGUI::mem2ContextMenu);
+
+    connect(ui->mathAvgCount->lineEdit(), &QLineEdit::editingFinished, this, &GLSpectrumGUI::on_mathAvgCount_editingFinished);
 
     DialPopup::addPopupsToChildDials(this);
 
@@ -178,7 +193,8 @@ void GLSpectrumGUI::updateSettings()
 void GLSpectrumGUI::displaySettings()
 {
     blockApplySettings(true);
-    ui->showAllControls->setChecked(m_settings.m_showAllControls);
+    ui->showControls->setCurrentIndex((int) m_settings.m_showControls);
+    setPowerAndRefRange();
     ui->refLevel->setValue(m_settings.m_refLevel + m_calibrationShiftdB);
     ui->levelRange->setValue(m_settings.m_powerRange);
     ui->decay->setSliderPosition(m_settings.m_decay);
@@ -187,7 +203,7 @@ void GLSpectrumGUI::displaySettings()
     ui->waterfall->setChecked(m_settings.m_displayWaterfall);
     ui->spectrogram->setChecked(m_settings.m_display3DSpectrogram);
     ui->spectrogramStyle->setCurrentIndex((int) m_settings.m_3DSpectrogramStyle);
-    ui->spectrogramStyle->setVisible(m_settings.m_display3DSpectrogram && m_settings.m_showAllControls);
+    ui->spectrogramStyle->setVisible(m_settings.m_display3DSpectrogram && (m_settings.m_showControls == SpectrumSettings::ShowAll));
     ui->colorMap->setCurrentText(m_settings.m_colorMap);
     ui->currentLine->blockSignals(true);
     ui->currentFill->blockSignals(true);
@@ -215,6 +231,8 @@ void GLSpectrumGUI::displaySettings()
     ui->averaging->blockSignals(true);
     ui->averagingMode->blockSignals(true);
     ui->linscale->blockSignals(true);
+    ui->mathMode->blockSignals(true);
+    ui->mathAvgCount->blockSignals(true);
 
     ui->fftWindow->setCurrentIndex(m_settings.m_fftWindow);
 
@@ -245,15 +263,28 @@ void GLSpectrumGUI::displaySettings()
     ui->averagingMode->setCurrentIndex((int) m_settings.m_averagingMode);
     ui->linscale->setChecked(m_settings.m_linear);
     setAveragingToolitp();
+    ui->mathMode->setCurrentIndex((int) m_settings.m_mathMode);
+    int idx = findEquivalentText(ui->mathAvgCount, m_settings.m_mathAvgCount);
+    if (idx >= 0) {
+        ui->mathAvgCount->setCurrentIndex(idx);
+    } else {
+        ui->mathAvgCount->setCurrentText(QString::number(m_settings.m_mathAvgCount));
+    }
+    ui->mathAvgCount->setVisible(m_settings.mathAverageUsed());
     ui->calibration->setChecked(m_settings.m_useCalibration);
     ui->resetMeasurements->setVisible(m_settings.m_measurement >= SpectrumSettings::MeasurementChannelPower);
     displayGotoMarkers();
     displayControls();
 
+    ui->mem1->setChecked(m_settings.m_spectrumMemory[0].m_display);
+    ui->mem2->setChecked(m_settings.m_spectrumMemory[1].m_display);
+
     ui->fftWindow->blockSignals(false);
     ui->averaging->blockSignals(false);
     ui->averagingMode->blockSignals(false);
     ui->linscale->blockSignals(false);
+    ui->mathMode->blockSignals(false);
+    ui->mathAvgCount->blockSignals(false);
     blockApplySettings(false);
 
     updateMeasurements();
@@ -261,33 +292,40 @@ void GLSpectrumGUI::displaySettings()
 
 void GLSpectrumGUI::displayControls()
 {
-    ui->grid->setVisible(m_settings.m_showAllControls);
-    ui->gridIntensity->setVisible(m_settings.m_showAllControls);
-    ui->truncateScale->setVisible(m_settings.m_showAllControls);
-    ui->clearSpectrum->setVisible(m_settings.m_showAllControls);
-    ui->histogram->setVisible(m_settings.m_showAllControls);
-    ui->maxHold->setVisible(m_settings.m_showAllControls);
-    ui->decay->setVisible(m_settings.m_showAllControls);
-    ui->decayDivisor->setVisible(m_settings.m_showAllControls);
-    ui->stroke->setVisible(m_settings.m_showAllControls);
-    ui->currentLine->setVisible(m_settings.m_showAllControls);
-    ui->currentFill->setVisible(m_settings.m_showAllControls);
-    ui->currentGradient->setVisible(m_settings.m_showAllControls);
-    ui->traceIntensity->setVisible(m_settings.m_showAllControls);
-    ui->colorMap->setVisible(m_settings.m_showAllControls);
-    ui->invertWaterfall->setVisible(m_settings.m_showAllControls);
-    ui->waterfall->setVisible(m_settings.m_showAllControls);
-    ui->spectrogram->setVisible(m_settings.m_showAllControls);
-    ui->spectrogramStyle->setVisible(m_settings.m_showAllControls);
-    ui->fftWindow->setVisible(m_settings.m_showAllControls);
-    ui->fftSize->setVisible(m_settings.m_showAllControls);
-    ui->fftOverlap->setVisible(m_settings.m_showAllControls);
-    ui->fps->setVisible(m_settings.m_showAllControls);
-    ui->linscale->setVisible(m_settings.m_showAllControls);
-    ui->save->setVisible(m_settings.m_showAllControls);
-    ui->wsSpectrum->setVisible(m_settings.m_showAllControls);
-    ui->calibration->setVisible(m_settings.m_showAllControls);
-    ui->markers->setVisible(m_settings.m_showAllControls);
+    ui->grid->setVisible(m_settings.m_showControls >= SpectrumSettings::ShowStandard);
+    ui->gridIntensity->setVisible(m_settings.m_showControls >= SpectrumSettings::ShowStandard);
+    ui->truncateScale->setVisible(m_settings.m_showControls >= SpectrumSettings::ShowAll);
+    ui->clearSpectrum->setVisible(m_settings.m_showControls >= SpectrumSettings::ShowAll);
+    ui->histogram->setVisible(m_settings.m_showControls >= SpectrumSettings::ShowStandard);
+    ui->maxHold->setVisible(m_settings.m_showControls >= SpectrumSettings::ShowStandard);
+    ui->decay->setVisible(m_settings.m_showControls >= SpectrumSettings::ShowStandard);
+    ui->decayDivisor->setVisible(m_settings.m_showControls >= SpectrumSettings::ShowStandard);
+    ui->stroke->setVisible(m_settings.m_showControls >= SpectrumSettings::ShowStandard);
+    ui->currentLine->setVisible(m_settings.m_showControls >= SpectrumSettings::ShowStandard);
+    ui->currentFill->setVisible(m_settings.m_showControls >= SpectrumSettings::ShowStandard);
+    ui->currentGradient->setVisible(m_settings.m_showControls >= SpectrumSettings::ShowStandard);
+    ui->traceIntensity->setVisible(m_settings.m_showControls >= SpectrumSettings::ShowStandard);
+    ui->colorMap->setVisible(m_settings.m_showControls >= SpectrumSettings::ShowAll);
+    ui->invertWaterfall->setVisible(m_settings.m_showControls >= SpectrumSettings::ShowStandard);
+    ui->waterfall->setVisible(m_settings.m_showControls >= SpectrumSettings::ShowStandard);
+    ui->spectrogram->setVisible(m_settings.m_showControls >= SpectrumSettings::ShowStandard);
+    ui->spectrogramStyle->setVisible(m_settings.m_showControls >= SpectrumSettings::ShowAll && m_settings.m_display3DSpectrogram);
+    ui->fftWindow->setVisible(m_settings.m_showControls >= SpectrumSettings::ShowStandard);
+    ui->fftSize->setVisible(m_settings.m_showControls >= SpectrumSettings::ShowStandard);
+    ui->fftOverlap->setVisible(m_settings.m_showControls >= SpectrumSettings::ShowAll);
+    ui->mathMode->setVisible(m_settings.m_showControls >= SpectrumSettings::ShowAll);
+    ui->mathAvgCount->setVisible(m_settings.m_showControls >= SpectrumSettings::ShowAll && m_settings.mathAverageUsed());
+    ui->fps->setVisible(m_settings.m_showControls >= SpectrumSettings::ShowAll);
+    ui->linscale->setVisible(m_settings.m_showControls >= SpectrumSettings::ShowStandard);
+    ui->mem1->setVisible(m_settings.m_showControls >= SpectrumSettings::ShowAll);
+    ui->mem2->setVisible(m_settings.m_showControls >= SpectrumSettings::ShowAll);
+    ui->load->setVisible(m_settings.m_showControls >= SpectrumSettings::ShowAll);
+    ui->save->setVisible(m_settings.m_showControls >= SpectrumSettings::ShowAll);
+    ui->saveImage->setVisible(m_settings.m_showControls >= SpectrumSettings::ShowAll);
+    ui->wsSpectrum->setVisible(m_settings.m_showControls >= SpectrumSettings::ShowAll);
+    ui->calibration->setVisible(m_settings.m_showControls >= SpectrumSettings::ShowStandard);
+    ui->markers->setVisible(m_settings.m_showControls >= SpectrumSettings::ShowStandard);
+    ui->measure->setVisible(m_settings.m_showControls >= SpectrumSettings::ShowStandard);
 }
 
 void GLSpectrumGUI::displayGotoMarkers()
@@ -348,6 +386,7 @@ void GLSpectrumGUI::applySpectrumSettings()
     m_glSpectrum->setDisplayWaterfall(m_settings.m_displayWaterfall);
     m_glSpectrum->setDisplay3DSpectrogram(m_settings.m_display3DSpectrogram);
     m_glSpectrum->set3DSpectrogramStyle(m_settings.m_3DSpectrogramStyle);
+    m_glSpectrum->setSpectrumColor(m_settings.m_spectrumColor);
     m_glSpectrum->setColorMapName(m_settings.m_colorMap);
     m_glSpectrum->setSpectrumStyle(m_settings.m_spectrumStyle);
     m_glSpectrum->setInvertedWaterfall(m_settings.m_invertedWaterfall);
@@ -374,7 +413,9 @@ void GLSpectrumGUI::applySpectrumSettings()
     Real powerRange = m_settings.m_linear ? pow(10.0, m_settings.m_refLevel/10.0) :  m_settings.m_powerRange;
     qDebug("GLSpectrumGUI::applySpectrumSettings: refLevel: %e powerRange: %e", refLevel, powerRange);
     m_glSpectrum->setReferenceLevel(refLevel);
+    m_glSpectrum->setReferenceLevelRange(ui->refLevel->minimum(), ui->refLevel->maximum());
     m_glSpectrum->setPowerRange(powerRange);
+    m_glSpectrum->setPowerRangeRange(ui->levelRange->minimum(), ui->levelRange->maximum());
     m_glSpectrum->setFPSPeriodMs(m_settings.m_fpsPeriodMs);
     m_glSpectrum->setFreqScaleTruncationMode(m_settings.m_truncateFreqScale);
     m_glSpectrum->setLinear(m_settings.m_linear);
@@ -386,6 +427,41 @@ void GLSpectrumGUI::applySpectrumSettings()
     m_glSpectrum->setMarkersDisplay(m_settings.m_markersDisplay);
     m_glSpectrum->setCalibrationPoints(m_settings.m_calibrationPoints);
     m_glSpectrum->setCalibrationInterpMode(m_settings.m_calibrationInterpMode);
+
+    m_glSpectrum->setScrolling(m_settings.m_scrollBar, m_settings.m_scrollLength);
+    m_glSpectrum->setWaterfallTimeFormat(m_settings.m_waterfallTimeUnits, m_settings.m_waterfallTimeFormat);
+    m_glSpectrum->setStatusLine(m_settings.m_displayRBW, m_settings.m_displayCursorStats, m_settings.m_displayPeakStats);
+
+    for (int i = 0; i < m_settings.m_spectrumMemory.size(); i++) {
+        m_glSpectrum->setMemory(i, m_settings.m_spectrumMemory[i]);
+    }
+}
+
+void GLSpectrumGUI::setPowerAndRefRange()
+{
+    const Real maxSignal = 120.0f; // 20-bits
+
+    if (   (m_settings.m_mathMode == SpectrumSettings::MathModeXMinusAvgDB)
+        || (m_settings.m_mathMode == SpectrumSettings::MathModeXMinusM1DB)
+        || (m_settings.m_mathMode == SpectrumSettings::MathModeXMinusM2DB)
+       )
+    {
+        ui->levelRange->setRange(1.0f, 2.0f * maxSignal);
+        ui->refLevel->setRange(-maxSignal, maxSignal);
+    }
+    else if (   (m_settings.m_mathMode == SpectrumSettings::MathModeAbsXMinusAvgDB)
+             || (m_settings.m_mathMode == SpectrumSettings::MathModeAbsXMinusM1DB)
+             || (m_settings.m_mathMode == SpectrumSettings::MathModeAbsXMinusM2DB)
+            )
+    {
+        ui->levelRange->setRange(1.0f, maxSignal);
+        ui->refLevel->setRange(0.0f, maxSignal);
+    }
+    else
+    {
+        ui->levelRange->setRange(1.0f, maxSignal);
+        ui->refLevel->setRange(-maxSignal, 0.0f);
+    }
 }
 
 void GLSpectrumGUI::on_fftWindow_currentIndexChanged(int index)
@@ -419,12 +495,14 @@ void GLSpectrumGUI::on_autoscale_clicked(bool checked)
 {
     (void) checked;
 
-    if (!m_spectrumVis) {
+    // Autoscale according to currently displayed spectrum (which may be old, if scrolling enabled)
+
+    if (!m_glSpectrum) {
         return;
     }
 
     std::vector<Real> psd;
-    m_spectrumVis->getZoomedPSDCopy(psd);
+    m_glSpectrum->getDisplayedSpectrumCopy(psd, true);
     int avgRange = m_settings.m_fftSize / 32;
 
     if (psd.size() < (unsigned int) avgRange) {
@@ -440,8 +518,18 @@ void GLSpectrumGUI::on_autoscale_clicked(bool checked)
     }
 
     float minAvg = minSum / avgRange;
-    int minLvl = CalcDb::dbPower(minAvg*2);
-    int maxLvl = CalcDb::dbPower(max*10);
+    int minLvl;
+    int maxLvl;
+    if (m_settings.m_linear)
+    {
+        minLvl = CalcDb::dbPower(minAvg*2);
+        maxLvl = CalcDb::dbPower(max*10);
+    }
+    else
+    {
+        minLvl = minAvg + 3;
+        maxLvl = max + 10;
+    }
 
     m_settings.m_refLevel = maxLvl;
     m_settings.m_powerRange = maxLvl - minLvl;
@@ -458,9 +546,7 @@ void GLSpectrumGUI::on_averagingMode_currentIndexChanged(int index)
     qDebug("GLSpectrumGUI::on_averagingMode_currentIndexChanged: %d", index);
     m_settings.m_averagingMode = index < 0 ?
         SpectrumSettings::AvgModeNone :
-        index > 3 ?
-            SpectrumSettings::AvgModeMax :
-            (SpectrumSettings::AveragingMode) index;
+        (SpectrumSettings::AveragingMode) index;
 
     setAveragingCombo();
     applySettings();
@@ -473,6 +559,30 @@ void GLSpectrumGUI::on_averaging_currentIndexChanged(int index)
     m_settings.m_averagingIndex = index;
     applySettings();
     setAveragingToolitp();
+}
+
+void GLSpectrumGUI::on_mathMode_currentIndexChanged(int index)
+{
+    m_settings.m_mathMode = (SpectrumSettings::MathMode) index;
+    ui->mathAvgCount->setVisible((m_settings.m_showControls >= SpectrumSettings::ShowAll) && m_settings.mathAverageUsed());
+    setMathMemory();
+    applySettings();
+}
+
+void GLSpectrumGUI::on_mathAvgCount_currentIndexChanged(int index)
+{
+    (void) index;
+
+    int value = Units::engUnitsToPosInt(ui->mathAvgCount->currentText(), 2);
+    m_settings.m_mathAvgCount = std::min(std::max(2, value), 1000000);
+    applySettings();
+}
+
+void GLSpectrumGUI::on_mathAvgCount_editingFinished()
+{
+    int value = Units::engUnitsToPosInt(ui->mathAvgCount->currentText(), 2);
+    m_settings.m_mathAvgCount = std::min(std::max(2, value), 1000000);
+    applySettings();
 }
 
 void GLSpectrumGUI::on_linscale_toggled(bool checked)
@@ -543,43 +653,71 @@ void GLSpectrumGUI::closeMarkersDialog()
     m_markersDialog = nullptr;
 }
 
+// Load spectrum data to a CSV file
+void GLSpectrumGUI::on_load_clicked(bool checked)
+{
+    (void) checked;
+
+    QString filename = QFileDialog::getSaveFileName(this, "Select file to read data from", "", "*.csv");
+    if (!filename.isEmpty())
+    {
+        QFile file(filename);
+        if (file.open(QIODevice::ReadOnly | QIODevice::Text))
+        {
+            QTextStream in(&file);
+            QString error;
+
+            // Read in all data
+            m_glSpectrum->readCSV(in, false, error);
+
+            if (!error.isEmpty()) {
+                QMessageBox::critical(this, "Spectrum", QString("Failed to read file %1: %2").arg(filename).arg(error));
+            }
+
+            file.close();
+        }
+        else
+        {
+            QMessageBox::critical(this, "Spectrum", QString("Failed to open file %1").arg(filename));
+        }
+    }
+}
+
 // Save spectrum data to a CSV file
 void GLSpectrumGUI::on_save_clicked(bool checked)
 {
     (void) checked;
 
-    // Get filename to write
-    QFileDialog fileDialog(nullptr, "Select file to save data to", "", "*.csv");
-    fileDialog.setDefaultSuffix("csv");
-    fileDialog.setAcceptMode(QFileDialog::AcceptSave);
-    if (fileDialog.exec())
+    QString filename = QFileDialog::getSaveFileName(this, "Select file to save data to", "", "*.csv");
+    if (!filename.isEmpty())
     {
-        QStringList fileNames = fileDialog.selectedFiles();
-        if (fileNames.size() > 0)
+        QFile file(filename);
+        if (file.open(QIODevice::WriteOnly | QIODevice::Text))
         {
-            // Get spectrum data (This vector can be larger than fftSize)
-            std::vector<Real> spectrum;
-            m_spectrumVis->getPowerSpectrumCopy(spectrum);
+            QTextStream out(&file);
 
-            // Write to text file
-            QFile file(fileNames[0]);
-            if (file.open(QIODevice::WriteOnly))
-            {
-                QTextStream out(&file);
-                float frequency = m_glSpectrum->getCenterFrequency() - (m_glSpectrum->getSampleRate() / 2.0f);
-                float rbw = m_glSpectrum->getSampleRate() / (float)m_settings.m_fftSize;
-                out << "\"Frequency\",\"Power\"\n";
-                for (int i = 0; i < m_settings.m_fftSize; i++)
-                {
-                    out << frequency << "," << spectrum[i] << "\n";
-                    frequency += rbw;
-                }
-                file.close();
-            }
-            else
-            {
-                QMessageBox::critical(this, "Spectrum", QString("Failed to open file %1").arg(fileNames[0]));
-            }
+            // Write out all data in scroll buffer
+            m_glSpectrum->writeCSV(out);
+
+            file.close();
+        }
+        else
+        {
+            QMessageBox::critical(this, "Spectrum", QString("Failed to open file %1").arg(filename));
+        }
+    }
+}
+
+// Save spectrum/waterfall image to file
+void GLSpectrumGUI::on_saveImage_clicked(bool checked)
+{
+    (void) checked;
+
+    QString filename = QFileDialog::getSaveFileName(this, "Select file to save image to", "", "*.jpg *.png");
+    if (!filename.isEmpty())
+    {
+        if (!m_glSpectrum->writeImage(filename)) {
+            QMessageBox::critical(this, "Spectrum", QString("Failed to save image to file %1").arg(filename));
         }
     }
 }
@@ -658,7 +796,7 @@ void GLSpectrumGUI::on_spectrogram_toggled(bool checked)
         ui->waterfall->setChecked(false);
         blockApplySettings(false);
     }
-    ui->spectrogramStyle->setVisible(m_settings.m_display3DSpectrogram && m_settings.m_showAllControls);
+    ui->spectrogramStyle->setVisible(m_settings.m_display3DSpectrogram && (m_settings.m_showControls >= SpectrumSettings::ShowAll));
     applySettings();
 }
 
@@ -719,9 +857,9 @@ void GLSpectrumGUI::on_invertWaterfall_toggled(bool checked)
     applySettings();
 }
 
-void GLSpectrumGUI::on_showAllControls_toggled(bool checked)
+void GLSpectrumGUI::on_showControls_currentIndexChanged(int index)
 {
-    m_settings.m_showAllControls = checked;
+    m_settings.m_showControls = (SpectrumSettings::ShowControls) index;
     displayControls();
     applySettings();
 }
@@ -1000,9 +1138,9 @@ bool GLSpectrumGUI::handleMessage(const Message& message)
         }
         return true;
     }
-    else if (SpectrumVis::MsgFrequencyZooming::match(message))
+    else if (GLSpectrumView::MsgFrequencyZooming::match(message))
     {
-        const SpectrumVis::MsgFrequencyZooming& report = (const SpectrumVis::MsgFrequencyZooming&) message;
+        const GLSpectrumView::MsgFrequencyZooming& report = (const GLSpectrumView::MsgFrequencyZooming&) message;
         m_settings.m_frequencyZoomFactor = report.getFrequencyZoomFactor();
         m_settings.m_frequencyZoomPos = report.getFrequencyZoomPos();
         return true;
@@ -1133,7 +1271,7 @@ void GLSpectrumGUI::on_resetMeasurements_clicked(bool checked)
     (void) checked;
 
     if (m_glSpectrum) {
-        m_glSpectrum->getMeasurements()->reset();
+        m_glSpectrum->resetMeasurements();
     }
 }
 
@@ -1153,7 +1291,385 @@ void GLSpectrumGUI::updateMeasurements()
             m_settings.m_measurementHarmonics,
             m_settings.m_measurementPeaks,
             m_settings.m_measurementHighlight,
-            m_settings.m_measurementPrecision
+            m_settings.m_measurementPrecision,
+            m_settings.m_measurementMemMasks
             );
     }
+}
+
+void GLSpectrumGUI::on_showSettingsDialog_clicked(bool checked)
+{
+    (void) checked;
+
+    SpectrumDisplaySettingsDialog dialog(m_glSpectrum, &m_settings, m_glSpectrum->getSampleRate(), this);
+
+    if (dialog.exec() == QDialog::Accepted) {
+        applySpectrumSettings();
+    }
+}
+
+void GLSpectrumGUI::on_mem1_clicked(bool checked)
+{
+    m_settings.m_spectrumMemory[0].m_display = checked;
+    if (m_glSpectrum) {
+        m_glSpectrum->setMemory(0, m_settings.m_spectrumMemory[0]);
+    }
+}
+
+void GLSpectrumGUI::on_mem2_clicked(bool checked)
+{
+    m_settings.m_spectrumMemory[1].m_display = checked;
+    if (m_glSpectrum) {
+        m_glSpectrum->setMemory(1, m_settings.m_spectrumMemory[1]);
+    }
+}
+
+void GLSpectrumGUI::mem1ContextMenu(const QPoint &p)
+{
+	memContextMenu(0, ui->mem1->mapToGlobal(p));
+}
+
+void GLSpectrumGUI::mem2ContextMenu(const QPoint &p)
+{
+    memContextMenu(1, ui->mem2->mapToGlobal(p));
+}
+
+// Show memory context menu
+void GLSpectrumGUI::memContextMenu(int memoryIdx, const QPoint &p)
+{
+    if (m_glSpectrum && m_spectrumVis)
+    {
+        m_contextMenu->clear();
+
+        bool memNotEmpty = m_settings.m_spectrumMemory[memoryIdx].m_spectrum.size() > 0;
+
+        // Clear memory
+        QAction* clearAction = new QAction(QString("Clear M%1").arg(memoryIdx+1), m_contextMenu);
+        connect(clearAction, &QAction::triggered, this, [this, memoryIdx]()->void {
+            m_settings.m_spectrumMemory[memoryIdx].m_spectrum.clear();
+            updateMem(memoryIdx);
+            });
+        m_contextMenu->addAction(clearAction);
+        clearAction->setEnabled(memNotEmpty);
+
+        // Copy currently displayed spectrum to memory
+        QAction* copyCurrentSpectrumAction = new QAction(QString("Set M%1 to current spectrum").arg(memoryIdx+1), m_contextMenu);
+        connect(copyCurrentSpectrumAction, &QAction::triggered, this, [this, memoryIdx]()->void {
+            std::vector<Real> copy;
+            m_glSpectrum->getDisplayedSpectrumCopy(copy, false);
+            m_settings.m_spectrumMemory[memoryIdx].m_spectrum = QList<Real>(copy.begin(), copy.end());
+            updateMem(memoryIdx);
+        });
+        m_contextMenu->addAction(copyCurrentSpectrumAction);
+
+        // Copy math moving average to memory
+        QAction* copyMovingAverageAction = new QAction(QString("Set M%1 to moving average").arg(memoryIdx+1), m_contextMenu);
+        connect(copyMovingAverageAction, &QAction::triggered, this, [this, memoryIdx]()->void {
+            QList<Real> copy;
+            bool mathDB = m_settings.mathUsesDB();
+            m_spectrumVis->getMathMovingAverageCopy(copy);
+            convertSpectrum(copy, mathDB, !m_settings.m_linear);
+            m_settings.m_spectrumMemory[memoryIdx].m_spectrum = QList<Real>(copy.begin(), copy.end());
+            updateMem(memoryIdx);
+        });
+        m_contextMenu->addAction(copyMovingAverageAction);
+        copyMovingAverageAction->setEnabled(m_settings.mathAverageUsed());
+
+        // Add offset
+        QAction* applyOffsetAction = new QAction(QString("Add offset to M%1").arg(memoryIdx+1), m_contextMenu);
+        connect(applyOffsetAction, &QAction::triggered, this, [this, memoryIdx]()->void {
+            applyOffsetToMem(memoryIdx);
+            });
+        m_contextMenu->addAction(applyOffsetAction);
+        applyOffsetAction->setEnabled(memNotEmpty);
+
+        // Smooth
+        QAction* smoothAction = new QAction(QString("Smooth M%1").arg(memoryIdx+1), m_contextMenu);
+        connect(smoothAction, &QAction::triggered, this, [this, memoryIdx]()->void {
+            smoothMem(memoryIdx);
+            });
+        m_contextMenu->addAction(smoothAction);
+        smoothAction->setEnabled(memNotEmpty);
+
+        bool memAAndBNotEmpty =  (m_settings.m_spectrumMemory[0].m_spectrum.size() > 0)
+                              && (m_settings.m_spectrumMemory[1].m_spectrum.size() > 0);
+
+        // Add mems
+        QAction* addMemAction = new QAction(QString("Set M%1 to M1+M2").arg(memoryIdx+1), m_contextMenu);
+        connect(addMemAction, &QAction::triggered, this, [this, memoryIdx]()->void {
+            addMem(memoryIdx);
+            });
+        m_contextMenu->addAction(addMemAction);
+        addMemAction->setEnabled(memAAndBNotEmpty);
+
+        // Diff mems
+        QAction* diffMemAction = new QAction(QString("Set M%1 to M1-M2").arg(memoryIdx+1), m_contextMenu);
+        connect(diffMemAction, &QAction::triggered, this, [this, memoryIdx]()->void {
+            diffMem(memoryIdx);
+            });
+        m_contextMenu->addAction(diffMemAction);
+        diffMemAction->setEnabled(memAAndBNotEmpty);
+
+        m_contextMenu->addSeparator();
+
+        // Load memory from .csv
+        QAction* loadSpectrumAction = new QAction(QString("Load M%1 from .csv").arg(memoryIdx+1), m_contextMenu);
+        connect(loadSpectrumAction, &QAction::triggered, this, [this, memoryIdx]()->void {
+            loadMem(memoryIdx);
+            });
+        m_contextMenu->addAction(loadSpectrumAction);
+
+        // Save memory to .csv
+        QAction* saveSpectrumAction = new QAction(QString("Save M%1 to .csv").arg(memoryIdx+1), m_contextMenu);
+        connect(saveSpectrumAction, &QAction::triggered, this, [this, memoryIdx]()->void {
+            saveMem(memoryIdx);
+            });
+        m_contextMenu->addAction(saveSpectrumAction);
+        saveSpectrumAction->setEnabled(memNotEmpty);
+
+        m_contextMenu->addSeparator();
+
+        QAction* infoAction = new QAction(QString("M%1 has %2 elements").arg(memoryIdx+1).arg(m_settings.m_spectrumMemory[memoryIdx].m_spectrum.size()), m_contextMenu);
+        m_contextMenu->addAction(infoAction);
+        infoAction->setEnabled(false);
+
+        m_contextMenu->popup(p);
+    }
+}
+
+// Convert spectrum from dB to linear or vice-versa
+void GLSpectrumGUI::convertSpectrum(QList<Real> &spectrum, bool fromDB, bool toDB) const
+{
+    if (toDB && !fromDB)
+    {
+        for (int i = 0; i < spectrum.size(); i++) {
+            spectrum[i] = CalcDb::dbPower(spectrum[i]);
+        }
+    }
+    else if (!toDB && fromDB)
+    {
+        for (int i = 0; i < spectrum.size(); i++) {
+            spectrum[i] = CalcDb::powerFromdB(spectrum[i]);
+        }
+    }
+}
+
+// Set math memory in SpectrumVis to selected memory
+void GLSpectrumGUI::setMathMemory()
+{
+    if (m_spectrumVis)
+    {
+        QList<Real> spectrum;
+
+        if (   (m_settings.m_mathMode == SpectrumSettings::MathModeXMinusM1)
+            || (m_settings.m_mathMode == SpectrumSettings::MathModeXMinusM1DB)
+            || (m_settings.m_mathMode == SpectrumSettings::MathModeAbsXMinusM1DB)
+           )
+        {
+            spectrum = m_settings.m_spectrumMemory[0].m_spectrum;
+        } else if (   (m_settings.m_mathMode == SpectrumSettings::MathModeXMinusM2)
+                   || (m_settings.m_mathMode == SpectrumSettings::MathModeXMinusM2DB)
+                   || (m_settings.m_mathMode == SpectrumSettings::MathModeAbsXMinusM2DB)
+                  )
+        {
+            spectrum = m_settings.m_spectrumMemory[1].m_spectrum;
+        }
+        else
+        {
+            return;
+        }
+
+        convertSpectrum(spectrum, !m_settings.m_linear, m_settings.mathUsesDB());
+        m_spectrumVis->setMathMemory(spectrum);
+    }
+}
+
+// Load from .csv file in to specified memory
+void GLSpectrumGUI::loadMem(int memoryIdx)
+{
+    QFileDialog fileDialog(nullptr, "Select file to load data from", "", "*.csv");
+    fileDialog.setDefaultSuffix("csv");
+    fileDialog.setAcceptMode(QFileDialog::AcceptOpen);
+    if (fileDialog.exec())
+    {
+        QStringList fileNames = fileDialog.selectedFiles();
+        if (fileNames.size() > 0)
+        {
+            // Read from csv file
+            QFile file(fileNames[0]);
+            if (file.open(QIODevice::ReadOnly | QIODevice::Text))
+            {
+                QTextStream in(&file);
+                QString error;
+                QHash<QString, int> colIndexes = CSV::readHeader(in, {"Power"}, error);
+                QList<Real> spectrum;
+
+                if (error.isEmpty())
+                {
+                    int powerCol = colIndexes.value("Power");
+                    int maxCol = std::max({powerCol});
+                    QStringList cols;
+
+                    while (CSV::readRow(in, &cols) && error.isEmpty())
+                    {
+                        if (cols.size() > maxCol)
+                        {
+                            bool ok;
+                            float value = cols[powerCol].toFloat(&ok);
+                            if (ok) {
+                                spectrum.push_back(value);
+                            } else {
+                                error = QString("Failed to convert %1 to float").arg(cols[powerCol]);
+                            }
+                        }
+                    }
+                }
+                if (error.isEmpty())
+                {
+                    m_settings.m_spectrumMemory[memoryIdx].m_spectrum = spectrum;
+                    updateMem(memoryIdx);
+
+                    if (spectrum.size() != m_settings.m_fftSize) {
+                        QMessageBox::warning(this, "Spectrum", QString("Loaded data size (%1) does not match FFT size (%2)").arg(spectrum.size()).arg(m_settings.m_fftSize));
+                    }
+                }
+                else
+                {
+                    QMessageBox::critical(this, "Spectrum", QString("Failed to read file %1\n%2").arg(fileNames[0]).arg(error));
+                }
+            }
+            else
+            {
+                QMessageBox::critical(this, "Spectrum", QString("Failed to open file %1").arg(fileNames[0]));
+            }
+        }
+    }
+}
+
+// Save from specified memory to .csv file
+void GLSpectrumGUI::saveMem(int memoryIdx)
+{
+    // Get filename to write
+    QFileDialog fileDialog(nullptr, "Select file to save data to", "", "*.csv");
+
+    fileDialog.setDefaultSuffix("csv");
+    fileDialog.setAcceptMode(QFileDialog::AcceptSave);
+    if (fileDialog.exec())
+    {
+        QStringList fileNames = fileDialog.selectedFiles();
+
+        if (fileNames.size() > 0)
+        {
+            // Write to csv file
+            QFile file(fileNames[0]);
+
+            if (file.open(QIODevice::WriteOnly | QIODevice::Text))
+            {
+                QTextStream out(&file);
+
+                out << "\"Power\"\n";
+                for (int i = 0; i < m_settings.m_spectrumMemory[memoryIdx].m_spectrum.size(); i++) {
+                    out << m_settings.m_spectrumMemory[memoryIdx].m_spectrum[i] << "\n";
+                }
+
+                file.close();
+            }
+            else
+            {
+                QMessageBox::critical(this, "Spectrum", QString("Failed to open file %1").arg(fileNames[0]));
+            }
+        }
+    }
+}
+
+void GLSpectrumGUI::applyOffsetToMem(int memoryIdx)
+{
+    double offset = QInputDialog::getDouble(this, "Enter offset to apply", "Offset");
+
+    for (int i = 0; i < m_settings.m_spectrumMemory[memoryIdx].m_spectrum.size(); i++) {
+        m_settings.m_spectrumMemory[memoryIdx].m_spectrum[i] += offset;
+    }
+
+    updateMem(memoryIdx);
+}
+
+void GLSpectrumGUI::smoothMem(int memoryIdx)
+{
+    int n = 5;
+    int l = n / 2;
+    std::size_t size1 = m_settings.m_spectrumMemory[memoryIdx].m_spectrum.size();
+    std::size_t size2 = size1 + (n - 1);
+    Real *temp = new Real[size2];
+
+    // Copy and replicate sample at each end
+    for (int i = 0; i < l; i++)
+    {
+        temp[i] = m_settings.m_spectrumMemory[memoryIdx].m_spectrum[0];
+        temp[size2-1-i] = m_settings.m_spectrumMemory[memoryIdx].m_spectrum[size1 - 1];
+    }
+    std::copy(m_settings.m_spectrumMemory[memoryIdx].m_spectrum.begin(), m_settings.m_spectrumMemory[memoryIdx].m_spectrum.end(), &temp[l]);
+
+    // Average n consequtive samples
+    for (std::size_t i = 0; i < size1; i++)
+    {
+        Real sum = 0.0;
+        for (int j = 0; j < n; j++) {
+            sum += temp[i+j];
+        }
+        Real avg = sum / (Real) n;
+        m_settings.m_spectrumMemory[memoryIdx].m_spectrum[i] = avg;
+    }
+
+    delete[] temp;
+
+    updateMem(memoryIdx);
+}
+
+void GLSpectrumGUI::addMem(int memoryIdx)
+{
+    std::size_t s = std::min(m_settings.m_spectrumMemory[0].m_spectrum.size(), m_settings.m_spectrumMemory[1].m_spectrum.size());
+
+    for (std::size_t i = 0; i < s; i++)
+    {
+        m_settings.m_spectrumMemory[memoryIdx].m_spectrum[i] =
+              m_settings.m_spectrumMemory[0].m_spectrum[i]
+            + m_settings.m_spectrumMemory[1].m_spectrum[i];
+    }
+
+    updateMem(memoryIdx);
+}
+
+void GLSpectrumGUI::diffMem(int memoryIdx)
+{
+    std::size_t s = std::min(m_settings.m_spectrumMemory[0].m_spectrum.size(), m_settings.m_spectrumMemory[1].m_spectrum.size());
+
+    for (std::size_t i = 0; i < s; i++)
+    {
+        m_settings.m_spectrumMemory[memoryIdx].m_spectrum[i] =
+              m_settings.m_spectrumMemory[0].m_spectrum[i]
+            - m_settings.m_spectrumMemory[1].m_spectrum[i];
+    }
+
+    updateMem(memoryIdx);
+}
+
+void GLSpectrumGUI::updateMem(int memoryIdx)
+{
+    // Update in GLSpectrum
+    m_glSpectrum->setMemory(memoryIdx, m_settings.m_spectrumMemory[memoryIdx]);
+    // Update in SpectrumVIS
+    setMathMemory();
+}
+
+// Look through items of numerical values using engineering units in a combo box, looking for text with equivalent value. E.g. 1000 == 1k
+int GLSpectrumGUI::findEquivalentText(QComboBox *combo, int value)
+{
+    for (int i = 0; i < combo->count(); i++)
+    {
+        int itemValue = Units::engUnitsToPosInt(combo->itemText(i));
+        if (itemValue == value) {
+            return i;
+        }
+    }
+    return -1;
 }

@@ -2167,6 +2167,8 @@ void DeviceOpener::deviceSetAdded(int index, DeviceAPI *device)
 
 void DeviceOpener::deviceChanged(int index)
 {
+    (void) index;
+
     // Apply device settings
     QString errorMessage;
     if (200 != m_device->getSampleSource()->webapiSettingsPutPatch(false, m_settingsKeys, *m_response, errorMessage)) {

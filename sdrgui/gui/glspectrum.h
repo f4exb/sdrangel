@@ -31,7 +31,7 @@
 class QSplitter;
 class SpectrumMeasurements;
 
-// Combines GLSpectrumView with SpectrumMeasurements in a QSplitter
+// Combines GLSpectrumView with SpectrumMeasurements in a QSplitter and optional QScrollBar
 class SDRGUI_API GLSpectrum : public QWidget, public GLSpectrumInterface {
     Q_OBJECT
 
@@ -50,13 +50,16 @@ public:
     void setTimingRate(qint32 timingRate) { m_spectrum->setTimingRate(timingRate); }
     void setFFTOverlap(int overlap) { m_spectrum->setFFTOverlap(overlap); }
     void setReferenceLevel(Real referenceLevel) { m_spectrum->setReferenceLevel(referenceLevel); }
+    void setReferenceLevelRange(Real minReferenceLevel, Real maxReferenceLevel) { m_spectrum->setReferenceLevelRange(minReferenceLevel, maxReferenceLevel); }
     void setPowerRange(Real powerRange){ m_spectrum->setPowerRange(powerRange); }
+    void setPowerRangeRange(Real minPowerRange, Real maxPowerRange) { m_spectrum->setPowerRangeRange(minPowerRange, maxPowerRange); }
     void setDecay(int decay) { m_spectrum->setDecay(decay); }
     void setDecayDivisor(int decayDivisor) { m_spectrum->setDecayDivisor(decayDivisor); }
     void setHistoStroke(int stroke) { m_spectrum->setHistoStroke(stroke); }
     void setDisplayWaterfall(bool display) { m_spectrum->setDisplayWaterfall(display); }
     void setDisplay3DSpectrogram(bool display) { m_spectrum->setDisplay3DSpectrogram(display); }
     void set3DSpectrogramStyle(SpectrumSettings::SpectrogramStyle style) { m_spectrum->set3DSpectrogramStyle(style); }
+    void setSpectrumColor(QRgb color) { m_spectrum->setSpectrumColor(color); }
     void setColorMapName(const QString &colorMapName) { m_spectrum->setColorMapName(colorMapName); }
     void setSpectrumStyle(SpectrumSettings::SpectrumStyle style) { m_spectrum->setSpectrumStyle(style); }
     void setSsbSpectrum(bool ssbSpectrum) { m_spectrum->setSsbSpectrum(ssbSpectrum); }
@@ -73,12 +76,13 @@ public:
     void setUseCalibration(bool useCalibration) { m_spectrum->setUseCalibration(useCalibration); }
     void setMeasurementParams(SpectrumSettings::Measurement measurement,
                               int centerFrequencyOffset, int bandwidth, int chSpacing, int adjChBandwidth,
-                              int harmonics, int peaks, bool highlight, int precision);
+                              int harmonics, int peaks, bool highlight, int precision, unsigned memoryMask);
+    void resetMeasurements();
     qint32 getSampleRate() const { return m_spectrum->getSampleRate(); }
     void addChannelMarker(ChannelMarker* channelMarker) { m_spectrum->addChannelMarker(channelMarker); }
     void removeChannelMarker(ChannelMarker* channelMarker) { m_spectrum->removeChannelMarker(channelMarker); }
     void setMessageQueueToGUI(MessageQueue* messageQueue) { m_spectrum->setMessageQueueToGUI(messageQueue); }
-    void newSpectrum(const Real* spectrum, int nbBins, int fftSize) { m_spectrum->newSpectrum(spectrum, nbBins, fftSize); }
+    void newSpectrum(const Real* spectrum, int fftSize) { m_spectrum->newSpectrum(spectrum, fftSize); }
     void clearSpectrumHistogram() { m_spectrum->clearSpectrumHistogram(); }
     Real getWaterfallShare() const { return  m_spectrum->getWaterfallShare(); }
     void setWaterfallShare(Real waterfallShare) { m_spectrum->setWaterfallShare(waterfallShare); }
@@ -111,12 +115,22 @@ public:
     void setIsDeviceSpectrum(bool isDeviceSpectrum) { m_spectrum->setIsDeviceSpectrum(isDeviceSpectrum); }
     bool isDeviceSpectrum() const { return m_spectrum->isDeviceSpectrum(); }
     void setFrequencyZooming(float frequencyZoomFactor, float frequencyZoomPos) { m_spectrum->setFrequencyZooming(frequencyZoomFactor, frequencyZoomPos); }
+    void setScrolling(bool enabled, int length) { m_spectrum->setScrolling(enabled, length); }
+    void setWaterfallTimeFormat(SpectrumSettings::WaterfallTimeUnits waterfallTimeUnits, const QString& format) { m_spectrum->setWaterfallTimeFormat(waterfallTimeUnits, format); }
+    void setStatusLine(bool displayRBW, bool displayCursorStats, bool displayPeakStats) { m_spectrum->setStatusLine(displayRBW, displayCursorStats, displayPeakStats); }
+    void readCSV(QTextStream &in, bool append, QString &error) { m_spectrum->readCSV(in, append, error); }
+    void writeCSV(QTextStream &out) { m_spectrum->writeCSV(out); }
+    bool writeImage(const QString& filename) { return m_spectrum->writeImage(filename); }
+    void getDisplayedSpectrumCopy(std::vector<Real>& copy, bool zoomed) const { m_spectrum->getDisplayedSpectrumCopy(copy, zoomed); }
+    void setMemory(int memoryIdx, const SpectrumSettings::SpectrumMemory &memory) { m_spectrum->setMemory(memoryIdx, memory); }
 
 private:
     QSplitter *m_splitter;
     GLSpectrumView *m_spectrum;
     SpectrumMeasurements *m_measurements;
     SpectrumSettings::MeasurementsPosition m_position;
+    QWidget *m_spectrumContainer;
+    QScrollBar *m_scrollBar;
 
 };
 

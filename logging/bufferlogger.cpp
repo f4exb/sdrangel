@@ -20,6 +20,7 @@
 using namespace qtwebapp;
 
 BufferLogger::BufferLogger(int maxSize, QObject *parent) :
+    Logger(parent),
     m_maxSize(maxSize)
 {
 }
@@ -41,7 +42,7 @@ QString BufferLogger::getLog() const
 {
     QString log;
 
-    for (const auto s : m_messages) {
+    for (const auto& s : m_messages) {
         log.append(s);
     }
 

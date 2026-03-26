@@ -65,6 +65,7 @@ DSPDeviceSourceEngine *DSPEngine::addDeviceSourceEngine()
 {
     auto *deviceSourceEngine = new DSPDeviceSourceEngine(m_deviceSourceEnginesUIDSequence);
     auto *deviceThread = new QThread();
+    deviceThread->setObjectName(QString("DSPDeviceSourceEngine thread %1").arg(m_deviceSourceEnginesUIDSequence));
     m_deviceSourceEnginesUIDSequence++;
     m_deviceSourceEngines.push_back(deviceSourceEngine);
     m_deviceEngineReferences.push_back(DeviceEngineReference{0, m_deviceSourceEngines.back(), nullptr, nullptr, deviceThread});
@@ -107,6 +108,7 @@ DSPDeviceSinkEngine *DSPEngine::addDeviceSinkEngine()
 {
     auto *deviceSinkEngine = new DSPDeviceSinkEngine(m_deviceSinkEnginesUIDSequence);
     auto *deviceThread = new QThread();
+    deviceThread->setObjectName(QString("DSPDeviceSinkEngine thread %1").arg(m_deviceSinkEnginesUIDSequence));
     m_deviceSinkEnginesUIDSequence++;
     m_deviceSinkEngines.push_back(deviceSinkEngine);
     m_deviceEngineReferences.push_back(DeviceEngineReference{1, nullptr, m_deviceSinkEngines.back(), nullptr, deviceThread});
@@ -149,6 +151,7 @@ DSPDeviceMIMOEngine *DSPEngine::addDeviceMIMOEngine()
 {
     auto *deviceMIMOEngine = new DSPDeviceMIMOEngine(m_deviceMIMOEnginesUIDSequence);
     auto *deviceThread = new QThread();
+    deviceThread->setObjectName(QString("DSPDeviceMIMOEngine thread %1").arg(m_deviceMIMOEnginesUIDSequence));
     m_deviceMIMOEnginesUIDSequence++;
     m_deviceMIMOEngines.push_back(deviceMIMOEngine);
     m_deviceEngineReferences.push_back(DeviceEngineReference{2, nullptr, nullptr, m_deviceMIMOEngines.back(), deviceThread});

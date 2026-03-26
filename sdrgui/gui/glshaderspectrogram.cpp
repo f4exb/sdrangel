@@ -77,7 +77,7 @@ GLShaderSpectrogram::GLShaderSpectrogram() :
     m_lightRotX(0.0),
     m_lightRotY(0.0),
     m_lightRotZ(0.0),
-    m_gridElements(1024)
+    m_gridElements(0)
 {
 }
 
@@ -154,7 +154,11 @@ void GLShaderSpectrogram::initializeGL(int majorVersion, int minorVersion)
 
 void GLShaderSpectrogram::initGrid(int elements)
 {
-    m_gridElements = std::min(elements, 4096); // Limit to keep memory requirements realistic
+    int gridElements = std::min(elements, 4096); // Limit to keep memory requirements realistic
+    if (gridElements == m_gridElements) {
+        return;
+    }
+    m_gridElements = gridElements;
     qDebug() << "GLShaderSpectrogram::initGrid: requested: " << elements << " actual: " << m_gridElements;
     int e1 = m_gridElements+1;
 

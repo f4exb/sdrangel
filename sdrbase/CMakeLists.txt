@@ -487,6 +487,7 @@ set(sdrbase_HEADERS
     util/azel.h
     util/baudot.h
     util/callsign.h
+    util/circularbuffer.h
     util/colormap.h
     util/coordinates.h
     util/corsproxy.h
