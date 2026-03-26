@@ -455,9 +455,9 @@ Click to open the Spectrum Display Settings dialog. See below.
 
 Selects which of these spectrum controls are displayed. This allows a user to hide less frequently used controls.
 
-  - **Min**: displays a minimum set of controls.
-  - **Std**: displays the standard set of controls.
-  - **All**: displays all controls.
+  - **Min**: displays a minimum set of controls. ![Minimum Controls](../../doc/img/Spectrum_Controls_Minimum.png)
+  - **Std**: displays the standard set of controls. ![Standard Controls](../../doc/img/Spectrum_Controls_Standard.png)
+  - **All**: displays all controls. ![All Controls](../../doc/img/Spectrum_Controls_All.png)
 
 <h4>B.7.8: Go to annotation marker</h4>
 
