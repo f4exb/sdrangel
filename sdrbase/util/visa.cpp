@@ -89,7 +89,8 @@ ViSession VISA::open(const QString& device)
     ViSession session;
     if (isAvailable())
     {
-        if (VI_SUCCESS == viOpen(m_defaultRM, device.toLatin1().data(), VI_NULL, VI_NULL, &session))
+        QByteArray deviceBA = device.toLatin1();
+        if (VI_SUCCESS == viOpen(m_defaultRM, deviceBA.data(), VI_NULL, VI_NULL, &session))
         {
             qDebug() << "VISA::open: Opened VISA device: " << device;
             return session;

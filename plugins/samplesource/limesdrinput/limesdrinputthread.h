@@ -29,6 +29,7 @@
 
 #include "dsp/samplesinkfifo.h"
 #include "dsp/decimators.h"
+#include "dsp/replaybuffer.h"
 #include "limesdr/devicelimesdrshared.h"
 #include "limesdr/devicelimesdr.h"
 

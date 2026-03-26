@@ -28,6 +28,7 @@ Socket::Socket(QObject *socket, QObject *parent) :
 Socket::~Socket()
 {
     delete m_socket;
+    m_socket = nullptr;
 }
 
 TCPSocket::TCPSocket(QTcpSocket *socket) :
@@ -95,7 +96,7 @@ bool TCPSocket::isConnected()
 {
     QTcpSocket *socket = qobject_cast<QTcpSocket *>(m_socket);
 
-    return socket->state() == QAbstractSocket::ConnectedState;
+    return socket && (socket->state() == QAbstractSocket::ConnectedState);
 }
 
 WebSocket::WebSocket(QWebSocket *socket) :
@@ -189,5 +190,5 @@ bool WebSocket::isConnected()
 {
     QWebSocket *socket = qobject_cast<QWebSocket *>(m_socket);
 
-    return socket->state() == QAbstractSocket::ConnectedState;
+    return socket && (socket->state() == QAbstractSocket::ConnectedState);
 }

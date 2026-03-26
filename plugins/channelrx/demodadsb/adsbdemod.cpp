@@ -553,7 +553,7 @@ void ADSBDemod::webapiFormatChannelReport(SWGSDRangel::SWGChannelReport& respons
     for (const auto& report : m_aircraftReport)
     {
         SWGSDRangel::SWGADSBDemodAircraftState *aircraftState = new SWGSDRangel::SWGADSBDemodAircraftState();
-        //aircraftState->setIcao(new QString(report.m_icao));
+        aircraftState->setIcao(new QString(report.m_icao));
         aircraftState->setCallsign(new QString(report.m_callsign));
         aircraftState->setLatitude(report.m_latitude);
         aircraftState->setLongitude(report.m_longitude);
