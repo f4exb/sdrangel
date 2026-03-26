@@ -3046,7 +3046,7 @@ void ADSBDemodGUI::handleADSB(
 
     aircraft->m_rxTime = dateTime;
     aircraft->m_updateTime = QDateTime::currentDateTime();
-    QTime time = dateTime.time();
+    QTime time = aircraft->m_updateTime.time();
     aircraft->m_timeItem->setText(QString("%1:%2:%3").arg(time.hour(), 2, 10, QLatin1Char('0')).arg(time.minute(), 2, 10, QLatin1Char('0')).arg(time.second(), 2, 10, QLatin1Char('0')));
     if (df == 17)
     {
@@ -8397,7 +8397,7 @@ void ADSBDemodGUI::handleImportReply(QNetworkReply* reply)
                         }
                         aircraft->m_rxTime = QDateTime::fromSecsSinceEpoch(state[4].toInt());
                         aircraft->m_updateTime = QDateTime::currentDateTime();
-                        QTime time = aircraft->m_rxTime.time();
+                        QTime time = aircraft->m_updateTime.time();
                         aircraft->m_timeItem->setText(QString("%1:%2:%3").arg(time.hour(), 2, 10, QLatin1Char('0')).arg(time.minute(), 2, 10, QLatin1Char('0')).arg(time.second(), 2, 10, QLatin1Char('0')));
                         aircraft->m_adsbFrameCount++;
                         aircraft->m_adsbFrameCountItem->setData(Qt::DisplayRole, aircraft->m_adsbFrameCount);
