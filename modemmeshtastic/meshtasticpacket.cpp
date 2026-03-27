@@ -120,13 +120,13 @@ struct RegionBand
     bool wideLora;
 };
 
-static const uint8_t kDefaultChannelKey[16] = {
+const std::array<uint8_t, 16> kDefaultChannelKey = {
     0xD4, 0xF1, 0xBB, 0x3A, 0x20, 0x29, 0x07, 0x59,
     0xF0, 0xBC, 0xFF, 0xAB, 0xCF, 0x4E, 0x69, 0x01
 };
 
 // Port numbers from meshtastic/portnums.proto (high value subset is accepted as numeric fallback).
-static QMap<QString, uint32_t> makePortMap()
+QMap<QString, uint32_t> makePortMap()
 {
     QMap<QString, uint32_t> m;
     m.insert("UNKNOWN_APP", 0);
@@ -160,9 +160,9 @@ static QMap<QString, uint32_t> makePortMap()
     return m;
 }
 
-static const QMap<QString, uint32_t> kPortMap = makePortMap();
+const QMap<QString, uint32_t> kPortMap = makePortMap();
 
-static const RegionBand kRegionBands[] = {
+const std::array<RegionBand, 26> kRegionBands = {{
     {"US", 902.0, 928.0, 0.0, false},
     {"EU_433", 433.0, 434.0, 0.0, false},
     {"EU_868", 869.4, 869.65, 0.0, false},
@@ -189,11 +189,11 @@ static const RegionBand kRegionBands[] = {
     {"NP_865", 865.0, 868.0, 0.0, false},
     {"BR_902", 902.0, 907.5, 0.0, false},
     {"LORA_24", 2400.0, 2483.5, 0.0, true}
-};
+}};
 
-static const int kRegionBandsCount = static_cast<int>(sizeof(kRegionBands) / sizeof(kRegionBands[0]));
+const int kRegionBandsCount = static_cast<int>(kRegionBands.size());
 
-static QString trimQuotes(const QString& s)
+QString trimQuotes(const QString& s)
 {
     QString out = s.trimmed();
     if ((out.startsWith('"') && out.endsWith('"')) || (out.startsWith('\'') && out.endsWith('\''))) {
@@ -202,7 +202,7 @@ static QString trimQuotes(const QString& s)
     return out;
 }
 
-static bool parseBool(const QString& s, bool& out)
+bool parseBool(const QString& s, bool& out)
 {
     const QString v = s.trimmed().toLower();
 
@@ -219,7 +219,7 @@ static bool parseBool(const QString& s, bool& out)
     return false;
 }
 
-static bool parseUInt(const QString& s, uint64_t& out)
+bool parseUInt(const QString& s, uint64_t& out)
 {
     QString v = s.trimmed();
     v.remove('_');
@@ -236,7 +236,7 @@ static bool parseUInt(const QString& s, uint64_t& out)
     return ok;
 }
 
-static bool parseDouble(const QString& s, double& out)
+bool parseDouble(const QString& s, double& out)
 {
     QString v = s.trimmed();
     v.remove('_');
@@ -245,7 +245,7 @@ static bool parseDouble(const QString& s, double& out)
     return ok;
 }
 
-static QString normalizeToken(const QString& value)
+QString normalizeToken(const QString& value)
 {
     QString v = value.trimmed().toUpper();
     v.replace('-', '_');
@@ -253,7 +253,7 @@ static QString normalizeToken(const QString& value)
     return v;
 }
 
-static QByteArray normalizeHex(const QString& s)
+QByteArray normalizeHex(const QString& s)
 {
     QByteArray out;
     const QByteArray in = s.toLatin1();
@@ -269,7 +269,7 @@ static QByteArray normalizeHex(const QString& s)
     return out;
 }
 
-static bool parseHexBytes(const QString& s, QByteArray& out)
+bool parseHexBytes(const QString& s, QByteArray& out)
 {
     QByteArray hex = normalizeHex(s);
 
@@ -281,7 +281,7 @@ static bool parseHexBytes(const QString& s, QByteArray& out)
     return !out.isEmpty();
 }
 
-static QByteArray expandSimpleKey(unsigned int simple)
+QByteArray expandSimpleKey(unsigned int simple)
 {
     if (simple == 0) {
         return QByteArray();
@@ -291,17 +291,17 @@ static QByteArray expandSimpleKey(unsigned int simple)
         return QByteArray();
     }
 
-    QByteArray key(reinterpret_cast<const char*>(kDefaultChannelKey), sizeof(kDefaultChannelKey));
+    QByteArray key(reinterpret_cast<const char*>(kDefaultChannelKey.data()), static_cast<int>(kDefaultChannelKey.size()));
 
     if (simple > 1) {
-        const int offset = static_cast<int>(simple - 1);
+        const auto offset = static_cast<int>(simple - 1);
         key[15] = static_cast<char>(static_cast<uint8_t>(kDefaultChannelKey[15] + offset));
     }
 
     return key;
 }
 
-static bool parseKeySpec(const QString& rawSpec, QByteArray& key, QString& label)
+bool parseKeySpec(const QString& rawSpec, QByteArray& key, QString& label)
 {
     QString spec = rawSpec.trimmed();
     const QString lower = spec.toLower();
@@ -385,7 +385,7 @@ static bool parseKeySpec(const QString& rawSpec, QByteArray& key, QString& label
     return false;
 }
 
-static uint32_t readU32LE(const char* p)
+uint32_t readU32LE(const char* p)
 {
     return static_cast<uint32_t>(static_cast<uint8_t>(p[0]))
         | (static_cast<uint32_t>(static_cast<uint8_t>(p[1])) << 8)
@@ -393,7 +393,7 @@ static uint32_t readU32LE(const char* p)
         | (static_cast<uint32_t>(static_cast<uint8_t>(p[3])) << 24);
 }
 
-static void writeU32LE(char* p, uint32_t v)
+void writeU32LE(char* p, uint32_t v)
 {
     p[0] = static_cast<char>(v & 0xFF);
     p[1] = static_cast<char>((v >> 8) & 0xFF);
@@ -401,7 +401,7 @@ static void writeU32LE(char* p, uint32_t v)
     p[3] = static_cast<char>((v >> 24) & 0xFF);
 }
 
-static bool parseHeader(const QByteArray& frame, Header& h)
+bool parseHeader(const QByteArray& frame, Header& h)
 {
     if (frame.size() < kHeaderLength) {
         return false;
@@ -418,7 +418,7 @@ static bool parseHeader(const QByteArray& frame, Header& h)
     return true;
 }
 
-static QByteArray encodeHeader(const Header& h)
+QByteArray encodeHeader(const Header& h)
 {
     QByteArray out(kHeaderLength, 0);
     char* p = out.data();
@@ -432,14 +432,14 @@ static QByteArray encodeHeader(const Header& h)
     return out;
 }
 
-static bool readVarint(const QByteArray& bytes, int& pos, uint64_t& value)
+bool readVarint(const QByteArray& bytes, int& pos, uint64_t& value)
 {
     value = 0;
     int shift = 0;
 
     while (pos < bytes.size() && shift <= 63)
     {
-        const uint8_t b = static_cast<uint8_t>(bytes[pos++]);
+        const auto b = static_cast<uint8_t>(bytes[pos++]);
         value |= static_cast<uint64_t>(b & 0x7F) << shift;
 
         if ((b & 0x80) == 0) {
@@ -452,7 +452,7 @@ static bool readVarint(const QByteArray& bytes, int& pos, uint64_t& value)
     return false;
 }
 
-static bool readFixed32(const QByteArray& bytes, int& pos, uint32_t& value)
+bool readFixed32(const QByteArray& bytes, int& pos, uint32_t& value)
 {
     if ((pos + 4) > bytes.size()) {
         return false;
@@ -463,7 +463,7 @@ static bool readFixed32(const QByteArray& bytes, int& pos, uint32_t& value)
     return true;
 }
 
-static bool readFixed64(const QByteArray& bytes, int& pos, uint64_t& value)
+bool readFixed64(const QByteArray& bytes, int& pos, uint64_t& value)
 {
     if ((pos + 8) > bytes.size()) {
         return false;
@@ -482,7 +482,7 @@ static bool readFixed64(const QByteArray& bytes, int& pos, uint64_t& value)
     return true;
 }
 
-static bool skipField(const QByteArray& bytes, int& pos, uint32_t wireType)
+bool skipField(const QByteArray& bytes, int& pos, uint32_t wireType)
 {
     switch (wireType)
     {
@@ -518,7 +518,7 @@ static bool skipField(const QByteArray& bytes, int& pos, uint32_t wireType)
     }
 }
 
-static bool parseData(const QByteArray& bytes, DataFields& d)
+bool parseData(const QByteArray& bytes, DataFields& d)
 {
     int pos = 0;
 
@@ -530,8 +530,8 @@ static bool parseData(const QByteArray& bytes, DataFields& d)
             return false;
         }
 
-        const uint32_t field = static_cast<uint32_t>(rawTag >> 3);
-        const uint32_t wire = static_cast<uint32_t>(rawTag & 0x7);
+        const auto field = static_cast<uint32_t>(rawTag >> 3);
+        const auto wire = static_cast<uint32_t>(rawTag & 0x7);
 
         switch (field)
         {
@@ -683,11 +683,11 @@ static bool parseData(const QByteArray& bytes, DataFields& d)
     return d.hasPortnum;
 }
 
-static void writeVarint(QByteArray& out, uint64_t value)
+void writeVarint(QByteArray& out, uint64_t value)
 {
     while (true)
     {
-        uint8_t b = static_cast<uint8_t>(value & 0x7F);
+        auto b = static_cast<uint8_t>(value & 0x7F);
         value >>= 7;
 
         if (value != 0) {
@@ -700,20 +700,20 @@ static void writeVarint(QByteArray& out, uint64_t value)
     }
 }
 
-static void writeTag(QByteArray& out, uint32_t field, uint32_t wire)
+void writeTag(QByteArray& out, uint32_t field, uint32_t wire)
 {
     const uint64_t tag = (static_cast<uint64_t>(field) << 3) | static_cast<uint64_t>(wire);
     writeVarint(out, tag);
 }
 
-static void writeFixed32(QByteArray& out, uint32_t v)
+void writeFixed32(QByteArray& out, uint32_t v)
 {
     char b[4];
     writeU32LE(b, v);
     out.append(b, 4);
 }
 
-static QByteArray encodeData(const DataFields& d)
+QByteArray encodeData(const DataFields& d)
 {
     QByteArray out;
 
@@ -764,7 +764,7 @@ static QByteArray encodeData(const DataFields& d)
     return out;
 }
 
-static uint8_t xorHash(const QByteArray& bytes)
+uint8_t xorHash(const QByteArray& bytes)
 {
     uint8_t h = 0;
 
@@ -775,7 +775,7 @@ static uint8_t xorHash(const QByteArray& bytes)
     return h;
 }
 
-static uint8_t generateChannelHash(const QString& channelName, const QByteArray& key)
+uint8_t generateChannelHash(const QString& channelName, const QByteArray& key)
 {
     QByteArray name = channelName.toUtf8();
 
@@ -806,24 +806,24 @@ public:
 
     void encryptBlock(const uint8_t in[16], uint8_t out[16]) const
     {
-        uint8_t state[16];
-        memcpy(state, in, 16);
+        std::array<uint8_t, 16> state;
+        memcpy(state.data(), in, 16);
 
-        addRoundKey(state, 0);
+        addRoundKey(state.data(), 0);
 
         for (int round = 1; round < m_nr; ++round)
         {
-            subBytes(state);
-            shiftRows(state);
-            mixColumns(state);
-            addRoundKey(state, round);
+            subBytes(state.data());
+            shiftRows(state.data());
+            mixColumns(state.data());
+            addRoundKey(state.data(), round);
         }
 
-        subBytes(state);
-        shiftRows(state);
-        addRoundKey(state, m_nr);
+        subBytes(state.data());
+        shiftRows(state.data());
+        addRoundKey(state.data(), m_nr);
 
-        memcpy(out, state, 16);
+        memcpy(out, state.data(), 16);
     }
 
 private:
@@ -857,7 +857,7 @@ private:
 
     static uint8_t sub(uint8_t x)
     {
-        static const uint8_t sbox[256] = {
+        static const std::array<uint8_t, 256> sbox = {
             0x63,0x7c,0x77,0x7b,0xf2,0x6b,0x6f,0xc5,0x30,0x01,0x67,0x2b,0xfe,0xd7,0xab,0x76,
             0xca,0x82,0xc9,0x7d,0xfa,0x59,0x47,0xf0,0xad,0xd4,0xa2,0xaf,0x9c,0xa4,0x72,0xc0,
             0xb7,0xfd,0x93,0x26,0x36,0x3f,0xf7,0xcc,0x34,0xa5,0xe5,0xf1,0x71,0xd8,0x31,0x15,
@@ -950,7 +950,7 @@ private:
 
     void keyExpansion(const uint8_t* key)
     {
-        static const uint8_t rcon[11] = {0x00,0x01,0x02,0x04,0x08,0x10,0x20,0x40,0x80,0x1B,0x36};
+        static const std::array<uint8_t, 11> rcon = {0x00,0x01,0x02,0x04,0x08,0x10,0x20,0x40,0x80,0x1B,0x36};
 
         const int words = 4 * (m_nr + 1);
         std::vector<uint32_t> w(words, 0);
@@ -992,7 +992,7 @@ enum class CounterMode
     LittleEndian
 };
 
-static void incrementCounter4(uint8_t counter[16], CounterMode mode)
+void incrementCounter4(uint8_t counter[16], CounterMode mode)
 {
     if (mode == CounterMode::BigEndian)
     {
@@ -1016,7 +1016,7 @@ static void incrementCounter4(uint8_t counter[16], CounterMode mode)
     }
 }
 
-static void initNonce(uint8_t nonce[16], uint32_t fromNode, uint32_t packetId)
+void initNonce(uint8_t nonce[16], uint32_t fromNode, uint32_t packetId)
 {
     memset(nonce, 0, 16);
 
@@ -1025,7 +1025,7 @@ static void initNonce(uint8_t nonce[16], uint32_t fromNode, uint32_t packetId)
     memcpy(nonce + sizeof(packetId64), &fromNode, sizeof(fromNode));
 }
 
-static QByteArray aesCtrCrypt(const QByteArray& in, const QByteArray& key, uint32_t fromNode, uint32_t packetId, CounterMode mode)
+QByteArray aesCtrCrypt(const QByteArray& in, const QByteArray& key, uint32_t fromNode, uint32_t packetId, CounterMode mode)
 {
     QByteArray out(in);
 
@@ -1039,14 +1039,14 @@ static QByteArray aesCtrCrypt(const QByteArray& in, const QByteArray& key, uint3
         return QByteArray();
     }
 
-    uint8_t counter[16];
-    initNonce(counter, fromNode, packetId);
+    std::array<uint8_t, 16> counter;
+    initNonce(counter.data(), fromNode, packetId);
 
     int pos = 0;
     while (pos < out.size())
     {
-        uint8_t keystream[16];
-        aes.encryptBlock(counter, keystream);
+        std::array<uint8_t, 16> keystream;
+        aes.encryptBlock(counter.data(), keystream.data());
 
         const int remain = std::min<int>(16, static_cast<int>(out.size() - pos));
         for (int i = 0; i < remain; ++i) {
@@ -1054,18 +1054,18 @@ static QByteArray aesCtrCrypt(const QByteArray& in, const QByteArray& key, uint3
         }
 
         pos += remain;
-        incrementCounter4(counter, mode);
+        incrementCounter4(counter.data(), mode);
     }
 
     return out;
 }
 
-static QString formatNode(uint32_t node)
+QString formatNode(uint32_t node)
 {
     return QString("0x%1").arg(node, 8, 16, QChar('0'));
 }
 
-static QString payloadToText(const QByteArray& payload)
+QString payloadToText(const QByteArray& payload)
 {
     QString s = QString::fromUtf8(payload);
 
@@ -1076,7 +1076,7 @@ static QString payloadToText(const QByteArray& payload)
     return s;
 }
 
-static QString portToName(uint32_t p)
+QString portToName(uint32_t p)
 {
     for (auto it = kPortMap.constBegin(); it != kPortMap.constEnd(); ++it)
     {
@@ -1088,7 +1088,7 @@ static QString portToName(uint32_t p)
     return QString("PORT_%1").arg(p);
 }
 
-static bool addKeyEntry(
+bool addKeyEntry(
     std::vector<KeyEntry>& keys,
     const QString& channelName,
     const QString& keySpec,
@@ -1120,7 +1120,7 @@ static bool addKeyEntry(
     return true;
 }
 
-static bool parseKeyListEntry(
+bool parseKeyListEntry(
     const QString& rawEntry,
     QString& channelName,
     QString& keySpec,
@@ -1174,7 +1174,7 @@ static bool parseKeyListEntry(
     return true;
 }
 
-static bool parseKeySpecList(
+bool parseKeySpecList(
     const QString& rawList,
     std::vector<KeyEntry>& keys,
     QString* error = nullptr,
@@ -1232,7 +1232,7 @@ static bool parseKeySpecList(
     return true;
 }
 
-static std::vector<KeyEntry> defaultKeysFromEnv()
+std::vector<KeyEntry> defaultKeysFromEnv()
 {
     std::vector<KeyEntry> keys;
     QProcessEnvironment env = QProcessEnvironment::systemEnvironment();
@@ -1260,7 +1260,7 @@ static std::vector<KeyEntry> defaultKeysFromEnv()
     return keys;
 }
 
-static bool parsePortValue(const QString& raw, uint32_t& port)
+bool parsePortValue(const QString& raw, uint32_t& port)
 {
     uint64_t numeric = 0;
     if (parseUInt(raw, numeric)) {
@@ -1283,7 +1283,7 @@ static bool parsePortValue(const QString& raw, uint32_t& port)
     return false;
 }
 
-static bool parsePresetName(const QString& presetValue, QString& presetName)
+bool parsePresetName(const QString& presetValue, QString& presetName)
 {
     QString p = normalizeToken(presetValue);
     p.remove('_');
@@ -1300,7 +1300,7 @@ static bool parsePresetName(const QString& presetValue, QString& presetName)
     return false;
 }
 
-static bool presetToChannelName(const QString& presetName, QString& channelName)
+bool presetToChannelName(const QString& presetName, QString& channelName)
 {
     if (presetName == "LONG_FAST") { channelName = "LongFast"; return true; }
     if (presetName == "LONG_SLOW") { channelName = "LongSlow"; return true; }
@@ -1314,7 +1314,7 @@ static bool presetToChannelName(const QString& presetName, QString& channelName)
     return false;
 }
 
-static bool presetToParams(const QString& presetName, bool wideLora, int& bandwidthHz, int& spreadFactor, int& parityBits)
+bool presetToParams(const QString& presetName, bool wideLora, int& bandwidthHz, int& spreadFactor, int& parityBits)
 {
     int bwKHz = 0;
     int sf = 0;
@@ -1339,7 +1339,7 @@ static bool presetToParams(const QString& presetName, bool wideLora, int& bandwi
     return true;
 }
 
-static QString presetToDisplayName(const QString& presetName)
+QString presetToDisplayName(const QString& presetName)
 {
     QString channelName;
     if (presetToChannelName(presetName, channelName)) {
@@ -1348,7 +1348,7 @@ static QString presetToDisplayName(const QString& presetName)
     return QString("LongFast");
 }
 
-static uint32_t meshHashDjb2(const QString& s)
+uint32_t meshHashDjb2(const QString& s)
 {
     const QByteArray bytes = s.toUtf8();
     uint32_t h = 5381u;
@@ -1358,7 +1358,7 @@ static uint32_t meshHashDjb2(const QString& s)
     return h;
 }
 
-static const RegionBand* findRegionBand(const QString& regionValue)
+const RegionBand* findRegionBand(const QString& regionValue)
 {
     QString r = normalizeToken(regionValue);
     r.remove('_');
@@ -1391,7 +1391,7 @@ static const RegionBand* findRegionBand(const QString& regionValue)
     return nullptr;
 }
 
-static bool parseCommand(const QString& command, CommandConfig& cfg, QString& error)
+bool parseCommand(const QString& command, CommandConfig& cfg, QString& error)
 {
     if (!Packet::isCommand(command)) {
         error = "command must start with MESH:";
@@ -1669,7 +1669,7 @@ static bool parseCommand(const QString& command, CommandConfig& cfg, QString& er
         }
         else if (key == "freq_hz" || key == "frequency_hz")
         {
-            if (!parseUInt(value, u) || u < 1000000ull) {
+            if (!parseUInt(value, u) || u < 1000000ULL) {
                 error = "invalid frequency_hz";
                 return false;
             }
@@ -1772,9 +1772,9 @@ static bool parseCommand(const QString& command, CommandConfig& cfg, QString& er
 }
 
 // Forward declaration: summarizePortPayload is defined after the per-port parsers below.
-static QString summarizePortPayload(const DataFields& d);
+QString summarizePortPayload(const DataFields& d);
 
-static QString summarizeHeader(const Header& h)
+QString summarizeHeader(const Header& h)
 {
     const int hopLimit = h.flags & kFlagHopLimitMask;
     const int hopStart = (h.flags & kFlagHopStartMask) >> 5;
@@ -1794,7 +1794,7 @@ static QString summarizeHeader(const Header& h)
         .arg(h.relayNode);
 }
 
-static QString summarizeData(const DataFields& d)
+QString summarizeData(const DataFields& d)
 {
     const QString portName = portToName(d.portnum);
     QString s = QString("port=%1(%2)").arg(portName).arg(d.portnum);
@@ -1832,7 +1832,7 @@ static QString summarizeData(const DataFields& d)
     return s;
 }
 
-static void addDecodeField(DecodeResult& result, const QString& path, const QString& value)
+void addDecodeField(DecodeResult& result, const QString& path, const QString& value)
 {
     DecodeResult::Field f;
     f.path = path;
@@ -1840,17 +1840,17 @@ static void addDecodeField(DecodeResult& result, const QString& path, const QStr
     result.fields.append(f);
 }
 
-static void addDecodeField(DecodeResult& result, const QString& path, uint32_t value)
+void addDecodeField(DecodeResult& result, const QString& path, uint32_t value)
 {
     addDecodeField(result, path, QString::number(value));
 }
 
-static void addDecodeField(DecodeResult& result, const QString& path, bool value)
+void addDecodeField(DecodeResult& result, const QString& path, bool value)
 {
     addDecodeField(result, path, QString(value ? "true" : "false"));
 }
 
-static void appendHeaderDecodeFields(const Header& h, DecodeResult& result)
+void appendHeaderDecodeFields(const Header& h, DecodeResult& result)
 {
     const int hopLimit = h.flags & kFlagHopLimitMask;
     const int hopStart = (h.flags & kFlagHopStartMask) >> 5;
@@ -1881,29 +1881,29 @@ static void appendHeaderDecodeFields(const Header& h, DecodeResult& result)
 // --- Shared decode helpers ---
 
 /** Zigzag-decode a protobuf sint32 value. */
-static int32_t zigzagDecode32(uint64_t n)
+int32_t zigzagDecode32(uint64_t n)
 {
     return static_cast<int32_t>((n >> 1) ^ static_cast<uint64_t>(-(static_cast<int64_t>(n & 1))));
 }
 
 /** Reinterpret the 4 bytes of a protobuf fixed32 field as an IEEE 754 float. */
-static float fixed32ToFloat(uint32_t v)
+float fixed32ToFloat(uint32_t v)
 {
     float f;
     memcpy(&f, &v, 4);
     return f;
 }
 
-static double fixed64ToDouble(uint64_t v)
+double fixed64ToDouble(uint64_t v)
 {
     double d;
     memcpy(&d, &v, 8);
     return d;
 }
 
-static bool decodeCoordinateFromFixed32(uint32_t raw, double& coordinate)
+bool decodeCoordinateFromFixed32(uint32_t raw, double& coordinate)
 {
-    const int32_t fixedValue = static_cast<int32_t>(raw);
+    const auto fixedValue = static_cast<int32_t>(raw);
     const double scaled = static_cast<double>(fixedValue) / 1e7;
 
     if (std::isfinite(scaled) && std::fabs(scaled) <= 180.0)
@@ -1912,7 +1912,7 @@ static bool decodeCoordinateFromFixed32(uint32_t raw, double& coordinate)
         return true;
     }
 
-    const double floatValue = static_cast<double>(fixed32ToFloat(raw));
+    const auto floatValue = static_cast<double>(fixed32ToFloat(raw));
     if (std::isfinite(floatValue) && std::fabs(floatValue) <= 180.0)
     {
         coordinate = floatValue;
@@ -1963,7 +1963,7 @@ struct PositionFields
     uint32_t timestamp = 0;       // Unix timestamp, preferred (uint32 field 32)
 };
 
-static bool parsePositionPayload(const QByteArray& bytes, PositionFields& p)
+bool parsePositionPayload(const QByteArray& bytes, PositionFields& p)
 {
     int pos = 0;
 
@@ -1974,8 +1974,8 @@ static bool parsePositionPayload(const QByteArray& bytes, PositionFields& p)
             return false;
         }
 
-        const uint32_t field = static_cast<uint32_t>(rawTag >> 3);
-        const uint32_t wire  = static_cast<uint32_t>(rawTag & 0x7);
+        const auto field = static_cast<uint32_t>(rawTag >> 3);
+        const auto wire  = static_cast<uint32_t>(rawTag & 0x7);
 
         switch (field)
         {
@@ -2186,7 +2186,7 @@ static bool parsePositionPayload(const QByteArray& bytes, PositionFields& p)
     return p.hasLatitude || p.hasLongitude || p.hasAltitude || p.hasTime || p.hasTimestamp;
 }
 
-static void appendPositionDecodeFields(const PositionFields& p, DecodeResult& result)
+void appendPositionDecodeFields(const PositionFields& p, DecodeResult& result)
 {
     if (p.hasLatitude) {
         addDecodeField(result, "position.latitude",
@@ -2249,7 +2249,7 @@ struct UserFields
     bool isLicensed      = false; // licensed amateur radio operator  (bool field 7)
 };
 
-static bool parseUserPayload(const QByteArray& bytes, UserFields& u)
+bool parseUserPayload(const QByteArray& bytes, UserFields& u)
 {
     int pos = 0;
 
@@ -2258,8 +2258,8 @@ static bool parseUserPayload(const QByteArray& bytes, UserFields& u)
         uint64_t rawTag = 0;
         if (!readVarint(bytes, pos, rawTag)) { return false; }
 
-        const uint32_t field = static_cast<uint32_t>(rawTag >> 3);
-        const uint32_t wire  = static_cast<uint32_t>(rawTag & 0x7);
+        const auto field = static_cast<uint32_t>(rawTag >> 3);
+        const auto wire  = static_cast<uint32_t>(rawTag & 0x7);
 
         switch (field)
         {
@@ -2365,7 +2365,7 @@ static bool parseUserPayload(const QByteArray& bytes, UserFields& u)
     return u.hasId || u.hasLongName || u.hasShortName || u.hasMacaddr || u.hasHwModel || u.hasIsLicensed;
 }
 
-static void appendUserDecodeFields(const UserFields& u, DecodeResult& result)
+void appendUserDecodeFields(const UserFields& u, DecodeResult& result)
 {
     if (u.hasId)        { addDecodeField(result, "nodeinfo.id",       u.id); }
     if (u.hasLongName)  { addDecodeField(result, "nodeinfo.long_name",  u.longName); }
@@ -2429,7 +2429,7 @@ struct TelemetryFields
     EnvironmentMetrics  environmentMetrics;
 };
 
-static bool parseDeviceMetrics(const QByteArray& bytes, DeviceMetrics& dm)
+bool parseDeviceMetrics(const QByteArray& bytes, DeviceMetrics& dm)
 {
     int pos = 0;
 
@@ -2438,8 +2438,8 @@ static bool parseDeviceMetrics(const QByteArray& bytes, DeviceMetrics& dm)
         uint64_t rawTag = 0;
         if (!readVarint(bytes, pos, rawTag)) { return false; }
 
-        const uint32_t field = static_cast<uint32_t>(rawTag >> 3);
-        const uint32_t wire  = static_cast<uint32_t>(rawTag & 0x7);
+        const auto field = static_cast<uint32_t>(rawTag >> 3);
+        const auto wire  = static_cast<uint32_t>(rawTag & 0x7);
 
         switch (field)
         {
@@ -2476,7 +2476,7 @@ static bool parseDeviceMetrics(const QByteArray& bytes, DeviceMetrics& dm)
             {
                 uint64_t v = 0;
                 if (!readVarint(bytes, pos, v)) { return false; }
-                const double raw = static_cast<double>(v);
+                const auto raw = static_cast<double>(v);
                 dm.voltage = static_cast<float>((raw > 1000.0) ? (raw / 1000.0) : raw);
                 dm.hasVoltage = true;
             }
@@ -2558,7 +2558,7 @@ static bool parseDeviceMetrics(const QByteArray& bytes, DeviceMetrics& dm)
     return true;
 }
 
-static bool parseEnvironmentMetrics(const QByteArray& bytes, EnvironmentMetrics& em)
+bool parseEnvironmentMetrics(const QByteArray& bytes, EnvironmentMetrics& em)
 {
     int pos = 0;
 
@@ -2567,8 +2567,8 @@ static bool parseEnvironmentMetrics(const QByteArray& bytes, EnvironmentMetrics&
         uint64_t rawTag = 0;
         if (!readVarint(bytes, pos, rawTag)) { return false; }
 
-        const uint32_t field = static_cast<uint32_t>(rawTag >> 3);
-        const uint32_t wire  = static_cast<uint32_t>(rawTag & 0x7);
+        const auto field = static_cast<uint32_t>(rawTag >> 3);
+        const auto wire  = static_cast<uint32_t>(rawTag & 0x7);
 
         switch (field)
         {
@@ -2660,7 +2660,7 @@ static bool parseEnvironmentMetrics(const QByteArray& bytes, EnvironmentMetrics&
     return true;
 }
 
-static bool parseTelemetryPayload(const QByteArray& bytes, TelemetryFields& t)
+bool parseTelemetryPayload(const QByteArray& bytes, TelemetryFields& t)
 {
     int pos = 0;
 
@@ -2669,8 +2669,8 @@ static bool parseTelemetryPayload(const QByteArray& bytes, TelemetryFields& t)
         uint64_t rawTag = 0;
         if (!readVarint(bytes, pos, rawTag)) { return false; }
 
-        const uint32_t field = static_cast<uint32_t>(rawTag >> 3);
-        const uint32_t wire  = static_cast<uint32_t>(rawTag & 0x7);
+        const auto field = static_cast<uint32_t>(rawTag >> 3);
+        const auto wire  = static_cast<uint32_t>(rawTag & 0x7);
 
         switch (field)
         {
@@ -2724,7 +2724,7 @@ static bool parseTelemetryPayload(const QByteArray& bytes, TelemetryFields& t)
     return t.hasTime || t.hasDeviceMetrics || t.hasEnvironmentMetrics;
 }
 
-static void appendTelemetryDecodeFields(const TelemetryFields& t, DecodeResult& result)
+void appendTelemetryDecodeFields(const TelemetryFields& t, DecodeResult& result)
 {
     if (t.hasTime)
     {
@@ -2798,7 +2798,7 @@ struct RouteDiscoveryFields
 };
 
 /** Parse a packed repeated fixed32 block (content only, length already consumed). */
-static void parsePackedFixed32(const QByteArray& bytes, QVector<uint32_t>& out)
+void parsePackedFixed32(const QByteArray& bytes, QVector<uint32_t>& out)
 {
     int pos = 0;
     while ((pos + 4) <= bytes.size())
@@ -2809,7 +2809,7 @@ static void parsePackedFixed32(const QByteArray& bytes, QVector<uint32_t>& out)
 }
 
 /** Parse a packed repeated sint32 block (content only, length already consumed). */
-static void parsePackedVarintSint32(const QByteArray& bytes, QVector<int32_t>& out)
+void parsePackedVarintSint32(const QByteArray& bytes, QVector<int32_t>& out)
 {
     int pos = 0;
     while (pos < bytes.size())
@@ -2820,7 +2820,7 @@ static void parsePackedVarintSint32(const QByteArray& bytes, QVector<int32_t>& o
     }
 }
 
-static bool parseRouteDiscoveryPayload(const QByteArray& bytes, RouteDiscoveryFields& r)
+bool parseRouteDiscoveryPayload(const QByteArray& bytes, RouteDiscoveryFields& r)
 {
     int pos = 0;
 
@@ -2829,8 +2829,8 @@ static bool parseRouteDiscoveryPayload(const QByteArray& bytes, RouteDiscoveryFi
         uint64_t rawTag = 0;
         if (!readVarint(bytes, pos, rawTag)) { return false; }
 
-        const uint32_t field = static_cast<uint32_t>(rawTag >> 3);
-        const uint32_t wire  = static_cast<uint32_t>(rawTag & 0x7);
+        const auto field = static_cast<uint32_t>(rawTag >> 3);
+        const auto wire  = static_cast<uint32_t>(rawTag & 0x7);
 
         switch (field)
         {
@@ -2907,7 +2907,7 @@ static bool parseRouteDiscoveryPayload(const QByteArray& bytes, RouteDiscoveryFi
     return !r.route.isEmpty() || !r.routeBack.isEmpty();
 }
 
-static void appendRouteDiscoveryDecodeFields(const RouteDiscoveryFields& r, DecodeResult& result)
+void appendRouteDiscoveryDecodeFields(const RouteDiscoveryFields& r, DecodeResult& result)
 {
     addDecodeField(result, "traceroute.forward_hops", QString::number(r.route.size()));
 
@@ -2938,13 +2938,13 @@ static void appendRouteDiscoveryDecodeFields(const RouteDiscoveryFields& r, Deco
     }
 }
 
-static QString summarizePortPayload(const DataFields& d)
+QString summarizePortPayload(const DataFields& d)
 {
     if (d.payload.isEmpty()) {
         return " payload=<empty>";
     }
 
-    const auto appendPayloadHex = [&d]() -> QString {
+    const auto appendPayloadHex = [&d]() {
         const int n = std::min<int>(32, static_cast<int>(d.payload.size()));
         QString text = QString(" payload_hex=%1").arg(QString(d.payload.left(n).toHex()));
         if (d.payload.size() > n) {
@@ -3095,7 +3095,7 @@ static QString summarizePortPayload(const DataFields& d)
 // falls back to generic text / hex for everything else.
 // =============================================================================
 
-static void appendDataDecodeFields(const DataFields& d, DecodeResult& result)
+void appendDataDecodeFields(const DataFields& d, DecodeResult& result)
 {
     addDecodeField(result, "data.port_name", portToName(d.portnum));
     addDecodeField(result, "data.portnum", d.portnum);
@@ -3203,7 +3203,7 @@ static void appendDataDecodeFields(const DataFields& d, DecodeResult& result)
     }
 }
 
-static bool deriveTxRadioSettingsFromConfig(const CommandConfig& cfg, TxRadioSettings& settings, QString& error)
+bool deriveTxRadioSettingsFromConfig(const CommandConfig& cfg, TxRadioSettings& settings, QString& error)
 {
     settings = TxRadioSettings();
     settings.hasCommand = true;
@@ -3251,14 +3251,14 @@ static bool deriveTxRadioSettingsFromConfig(const CommandConfig& cfg, TxRadioSet
     {
         const double freqMHz = cfg.overrideFrequencyMHz + (cfg.hasFrequencyOffsetMHz ? cfg.frequencyOffsetMHz : 0.0);
         settings.hasCenterFrequency = true;
-        settings.centerFrequencyHz = static_cast<qint64>(std::llround(freqMHz * 1000000.0));
+        settings.centerFrequencyHz = std::llround(freqMHz * 1000000.0);
     }
     else if (region)
     {
         const double bwMHz = static_cast<double>(bandwidthHz) / 1000000.0;
         const double slotWidthMHz = region->spacingMHz + bwMHz;
         const double spanMHz = region->freqEndMHz - region->freqStartMHz;
-        const uint32_t numChannels = static_cast<uint32_t>(std::floor(spanMHz / slotWidthMHz));
+        const auto numChannels = static_cast<uint32_t>(std::floor(spanMHz / slotWidthMHz));
 
         if (numChannels == 0) {
             error = "region span too narrow for selected preset bandwidth";
@@ -3284,7 +3284,7 @@ static bool deriveTxRadioSettingsFromConfig(const CommandConfig& cfg, TxRadioSet
             + (cfg.hasFrequencyOffsetMHz ? cfg.frequencyOffsetMHz : 0.0);
 
         settings.hasCenterFrequency = true;
-        settings.centerFrequencyHz = static_cast<qint64>(std::llround(centerMHz * 1000000.0));
+        settings.centerFrequencyHz = std::llround(centerMHz * 1000000.0);
     }
 
     settings.summary = QString("preset=%1 sf=%2 cr=4/%3 bw=%4kHz de=%5")

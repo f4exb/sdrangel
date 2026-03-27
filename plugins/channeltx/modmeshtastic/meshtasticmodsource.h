@@ -108,7 +108,7 @@ private:
     void reset();
     void calculateLevel(Real& sample);
     void modulateSample();
-    unsigned short encodeSymbol(unsigned short symbol, bool headerSymbol); //!< Encodes symbol with payload/header DE spacing
+    unsigned short encodeSymbol(unsigned short symbol, bool headerSymbol) const; //!< Encodes symbol with payload/header DE spacing
 };
 
 #endif // INCLUDE_MESHTASTICMODSOURCE_H

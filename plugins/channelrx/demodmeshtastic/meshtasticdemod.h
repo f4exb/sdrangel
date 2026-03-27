@@ -59,7 +59,7 @@ public:
         }
     private:
         QVector<MeshtasticDemodSettings> m_settingsList;
-        MsgSetExtraPipelineSettings(const QVector<MeshtasticDemodSettings>& settingsList) :
+        explicit MsgSetExtraPipelineSettings(const QVector<MeshtasticDemodSettings>& settingsList) :
             Message(), m_settingsList(settingsList)
         { }
     };

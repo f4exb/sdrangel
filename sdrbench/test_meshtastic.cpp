@@ -28,7 +28,7 @@ namespace
 using modemmeshtastic::DecodeResult;
 using modemmeshtastic::Packet;
 
-static QMap<QString, QString> toFieldMap(const DecodeResult& result)
+QMap<QString, QString> toFieldMap(const DecodeResult& result)
 {
     QMap<QString, QString> map;
 
@@ -42,7 +42,7 @@ static QMap<QString, QString> toFieldMap(const DecodeResult& result)
     return map;
 }
 
-static bool compareField(
+bool compareField(
     const QMap<QString, QString>& fields,
     const QString& path,
     const QString& expected,

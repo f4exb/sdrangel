@@ -201,20 +201,13 @@ bool MeshtasticDemodGUI::handleMessage(const Message& message)
         // Populates the upper unstructured view including raw bytes in hex
         const MeshtasticDemodMsg::MsgReportDecodeBytes& msg = (MeshtasticDemodMsg::MsgReportDecodeBytes&) message;
         handleMeshAutoLockObservation(msg);
-
-        if (m_settings.m_codingScheme == MeshtasticDemodSettings::CodingLoRa) {
-            showLoRaMessage(message);
-        }
-
+        showLoRaMessage(message);
         return true;
     }
     else if (MeshtasticDemodMsg::MsgReportDecodeString::match(message))
     {
         // Populates the lower structured tree view with decoded fields
-        if ((m_settings.m_codingScheme == MeshtasticDemodSettings::CodingLoRa)) {
-            showTextMessage(message);
-        }
-
+        showTextMessage(message);
         return true;
     }
     else if (MeshtasticDemod::MsgConfigureMeshtasticDemod::match(message))
@@ -465,18 +458,7 @@ void MeshtasticDemodGUI::startMeshAutoLock()
         return;
     }
 
-    if (m_settings.m_codingScheme != MeshtasticDemodSettings::CodingLoRa)
-    {
-        displayStatus(tr("MESH LOCK|switch decoder scheme to LoRa before auto-lock"));
-
-        ui->meshAutoLock->blockSignals(true);
-        ui->meshAutoLock->setChecked(false);
-        ui->meshAutoLock->blockSignals(false);
-
-        return;
-    }
-
-    const int bandwidthHz = MeshtasticDemodSettings::bandwidths[m_settings.m_bandwidthIndex];
+        const int bandwidthHz = MeshtasticDemodSettings::bandwidths[m_settings.m_bandwidthIndex];
     const int sf = std::max(1, m_settings.m_spreadFactor);
     const int symbolBins = 1 << std::min(15, sf);
     const int stepHz = std::max(100, bandwidthHz / symbolBins);
@@ -1064,7 +1046,7 @@ void MeshtasticDemodGUI::pushExtraPipelineSettingsToDemod()
 
 void MeshtasticDemodGUI::on_conf_valueChanged(int value)
 {
-    const int maxFocus = static_cast<int>(m_extraPipelineSettings.size());
+    const auto maxFocus = static_cast<int>(m_extraPipelineSettings.size());
     const int newFocus = std::clamp(value, 0, maxFocus);
 
     if (newFocus == m_focusedPipelineIndex) {
@@ -1928,7 +1910,7 @@ void MeshtasticDemodGUI::applySettings(bool force)
 void MeshtasticDemodGUI::updateControlAvailabilityHints()
 {
     const bool loRaMode = m_settings.m_codingScheme == MeshtasticDemodSettings::CodingLoRa;
-    const bool explicitHeaderMode = loRaMode && m_settings.m_hasHeader;
+    const bool explicitHeaderMode = loRaMode && MeshtasticDemodSettings::m_hasHeader;
 
     const QString fftWindowEnabledTip = tr("FFT window used by the de-chirping stage.");
     const QString fftWindowDisabledTip = tr("Ignored in LoRa mode. The LoRa demodulator uses a fixed internal FFT window.");
@@ -1969,7 +1951,7 @@ void MeshtasticDemodGUI::updateControlAvailabilityHints()
     setSliderDimmed(ui->deBits, !isUserPreset);
     setSliderDimmed(ui->preambleChirps, !isUserPreset);
 
-    const bool headerControlsEnabled = !m_settings.m_hasHeader;
+    const bool headerControlsEnabled = !MeshtasticDemodSettings::m_hasHeader;
     ui->fecParity->setEnabled(headerControlsEnabled);
     ui->packetLength->setEnabled(headerControlsEnabled);
 
@@ -2029,15 +2011,6 @@ void MeshtasticDemodGUI::displaySettings()
     ui->udpSend->setChecked(m_settings.m_sendViaUDP);
     ui->udpAddress->setText(m_settings.m_udpAddress);
     ui->udpPort->setText(tr("%1").arg(m_settings.m_udpPort));
-
-    if (!m_settings.m_hasHeader)
-    {
-        ui->fecParity->setValue(m_settings.m_nbParityBits);
-        ui->fecParityText->setText(tr("%1").arg(m_settings.m_nbParityBits));
-        ui->packetLength->setValue(m_settings.m_packetLength);
-        ui->spectrumGUI->setFFTSize(m_settings.m_spreadFactor);
-    }
-
     ui->invertRamps->setChecked(s.m_invertRamps);
 
     displaySquelch();
@@ -2116,19 +2089,19 @@ void MeshtasticDemodGUI::displaySquelch()
 
 void MeshtasticDemodGUI::displayLoRaStatus(int headerParityStatus, bool headerCRCStatus, int payloadParityStatus, bool payloadCRCStatus)
 {
-    if (m_settings.m_hasHeader && (headerParityStatus == (int) MeshtasticDemodSettings::ParityOK)) {
+    if (MeshtasticDemodSettings::m_hasHeader && (headerParityStatus == (int) MeshtasticDemodSettings::ParityOK)) {
         ui->headerHammingStatus->setStyleSheet("QLabel { background-color : green; }");
-    } else if (m_settings.m_hasHeader && (headerParityStatus == (int) MeshtasticDemodSettings::ParityError)) {
+    } else if (MeshtasticDemodSettings::m_hasHeader && (headerParityStatus == (int) MeshtasticDemodSettings::ParityError)) {
         ui->headerHammingStatus->setStyleSheet("QLabel { background-color : red; }");
-    } else if (m_settings.m_hasHeader && (headerParityStatus == (int) MeshtasticDemodSettings::ParityCorrected)) {
+    } else if (MeshtasticDemodSettings::m_hasHeader && (headerParityStatus == (int) MeshtasticDemodSettings::ParityCorrected)) {
         ui->headerHammingStatus->setStyleSheet("QLabel { background-color : blue; }");
     } else {
         ui->headerHammingStatus->setStyleSheet("QLabel { background:rgb(79,79,79); }");
     }
 
-    if (m_settings.m_hasHeader && headerCRCStatus) {
+    if (MeshtasticDemodSettings::m_hasHeader && headerCRCStatus) {
         ui->headerCRCStatus->setStyleSheet("QLabel { background-color : green; }");
-    } else if (m_settings.m_hasHeader && !headerCRCStatus) {
+    } else if (MeshtasticDemodSettings::m_hasHeader && !headerCRCStatus) {
         ui->headerCRCStatus->setStyleSheet("QLabel { background-color : red; }");
     } else {
         ui->headerCRCStatus->setStyleSheet("QLabel { background:rgb(79,79,79); }");
@@ -3142,18 +3115,11 @@ void MeshtasticDemodGUI::showLoRaMessage(const Message& message)
     ui->snrText->setText(tr("%1").arg(msg.getSingalDb() - msg.getNoiseDb(), 0, 'f', 1));
     unsigned int packetLength;
 
-    if (m_settings.m_hasHeader)
-    {
-        ui->fecParity->setValue(msg.getNbParityBits());
-        ui->fecParityText->setText(tr("%1").arg(msg.getNbParityBits()));
-        ui->packetLength->setValue(msg.getPacketSize());
-        ui->packetLengthText->setText(tr("%1").arg(msg.getPacketSize()));
-        packetLength =  msg.getPacketSize();
-    }
-    else
-    {
-        packetLength = m_settings.m_packetLength;
-    }
+    ui->fecParity->setValue(msg.getNbParityBits());
+    ui->fecParityText->setText(tr("%1").arg(msg.getNbParityBits()));
+    ui->packetLength->setValue(msg.getPacketSize());
+    ui->packetLengthText->setText(tr("%1").arg(msg.getPacketSize()));
+    packetLength =  msg.getPacketSize();
 
     QDateTime dt = QDateTime::currentDateTime();
     QString dateStr = dt.toString("HH:mm:ss");
@@ -3257,7 +3223,7 @@ void MeshtasticDemodGUI::showTextMessage(const Message& message)
         const QString messageBaseKey = buildPipelineMessageBaseKey(pipelineId, msg.getFrameId(), msg.getMsgTimestamp());
         QString messageKey = resolvePipelineMessageKey(messageBaseKey);
 
-        if (messageKey.isEmpty() && (m_settings.m_codingScheme != MeshtasticDemodSettings::CodingLoRa)) {
+        if (messageKey.isEmpty()) {
             messageKey = allocatePipelineMessageKey(messageBaseKey);
         }
 

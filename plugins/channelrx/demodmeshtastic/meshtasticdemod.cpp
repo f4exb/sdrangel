@@ -262,10 +262,10 @@ void MeshtasticDemod::applyPipelineRuntimeSettings(PipelineRuntime& runtime, con
 
     if (runtime.decoder)
     {
-        runtime.decoder->setCodingScheme(settings.m_codingScheme);
+        runtime.decoder->setCodingScheme(MeshtasticDemodSettings::m_codingScheme);
         runtime.decoder->setNbSymbolBits(settings.m_spreadFactor, settings.m_deBits);
-        runtime.decoder->setLoRaHasHeader(settings.m_hasHeader);
-        runtime.decoder->setLoRaHasCRC(settings.m_hasCRC);
+        runtime.decoder->setLoRaHasHeader(MeshtasticDemodSettings::m_hasHeader);
+        runtime.decoder->setLoRaHasCRC(MeshtasticDemodSettings::m_hasCRC);
         runtime.decoder->setLoRaParityBits(settings.m_nbParityBits);
         runtime.decoder->setLoRaPacketLength(settings.m_packetLength);
         runtime.decoder->setLoRaBandwidth(MeshtasticDemodSettings::bandwidths[settings.m_bandwidthIndex]);
@@ -512,12 +512,10 @@ void MeshtasticDemod::start()
     }
 
     qDebug() << "MeshtasticDemod::start";
-    m_pipelineConfigs.push_back(PipelineConfig());
+    m_pipelineConfigs.emplace_back();
     m_currentPipelineId = 0;
     makePipelineConfigFromSettings(m_currentPipelineId, m_pipelineConfigs.back(), m_settings);
     startPipelines(m_pipelineConfigs);
-    // const std::vector<PipelineConfig> configs = buildPipelineConfigs(m_settings);
-    // startPipelines(configs);
 
     SpectrumSettings spectrumSettings = m_spectrumVis.getSettings();
     spectrumSettings.m_ssb = true;
@@ -553,7 +551,7 @@ bool MeshtasticDemod::handleMessage(const Message& cmd)
     else if (MsgSetExtraPipelineSettings::match(cmd))
     {
         qDebug() << "MeshtasticDemod::handleMessage: MsgSetExtraPipelineSettings";
-        const MsgSetExtraPipelineSettings& msg = static_cast<const MsgSetExtraPipelineSettings&>(cmd);
+        const auto& msg = static_cast<const MsgSetExtraPipelineSettings&>(cmd);
         applyExtraPipelineSettings(msg.getSettingsList(), false);
         return true;
     }
@@ -567,132 +565,112 @@ bool MeshtasticDemod::handleMessage(const Message& cmd)
         m_lastMsgSyncWord = msg.getSyncWord();
         m_lastMsgTimestamp = msg.getMsgTimestamp();
 
-        if (m_settings.m_codingScheme == MeshtasticDemodSettings::CodingLoRa)
+        m_lastMsgBytes = msg.getBytes();
+        m_lastMsgPacketLength = msg.getPacketSize();
+        m_lastMsgNbParityBits = msg.getNbParityBits();
+        m_lastMsgHasCRC = msg.getHasCRC();
+        m_lastMsgNbSymbols = msg.getNbSymbols();
+        m_lastMsgNbCodewords = msg.getNbCodewords();
+        m_lastMsgEarlyEOM = msg.getEarlyEOM();
+        m_lastMsgHeaderCRC = msg.getHeaderCRCStatus();
+        m_lastMsgHeaderParityStatus = msg.getHeaderParityStatus();
+        m_lastMsgPayloadCRC = msg.getPayloadCRCStatus();
+        m_lastMsgPayloadParityStatus = msg.getPayloadParityStatus();
+        m_lastMsgPipelineName = msg.getPipelineName();
+        m_lastFrameType = QStringLiteral("LORA_FRAME");
+
+        QByteArray bytesCopy(m_lastMsgBytes);
+        bytesCopy.truncate(m_lastMsgPacketLength);
+        bytesCopy.replace('\0', " ");
+        m_lastMsgString = QString(bytesCopy.toStdString().c_str());
+
+        if (m_settings.m_sendViaUDP)
         {
-            m_lastMsgBytes = msg.getBytes();
-            m_lastMsgPacketLength = msg.getPacketSize();
-            m_lastMsgNbParityBits = msg.getNbParityBits();
-            m_lastMsgHasCRC = msg.getHasCRC();
-            m_lastMsgNbSymbols = msg.getNbSymbols();
-            m_lastMsgNbCodewords = msg.getNbCodewords();
-            m_lastMsgEarlyEOM = msg.getEarlyEOM();
-            m_lastMsgHeaderCRC = msg.getHeaderCRCStatus();
-            m_lastMsgHeaderParityStatus = msg.getHeaderParityStatus();
-            m_lastMsgPayloadCRC = msg.getPayloadCRCStatus();
-            m_lastMsgPayloadParityStatus = msg.getPayloadParityStatus();
-            m_lastMsgPipelineName = msg.getPipelineName();
-            m_lastFrameType = QStringLiteral("LORA_FRAME");
+            uint8_t *bytes = reinterpret_cast<uint8_t*>(m_lastMsgBytes.data());
+            m_udpSink.writeUnbuffered(bytes, m_lastMsgPacketLength);
+        }
 
-            QByteArray bytesCopy(m_lastMsgBytes);
-            bytesCopy.truncate(m_lastMsgPacketLength);
-            bytesCopy.replace('\0', " ");
-            m_lastMsgString = QString(bytesCopy.toStdString().c_str());
+        if (getMessageQueueToGUI()) {
+            getMessageQueueToGUI()->push(new MeshtasticDemodMsg::MsgReportDecodeBytes(msg)); // make a copy
+        }
 
-            if (m_settings.m_sendViaUDP)
+        modemmeshtastic::DecodeResult meshResult;
+
+        if (modemmeshtastic::Packet::decodeFrame(m_lastMsgBytes, meshResult, m_settings.m_meshtasticKeySpecList))
+        {
+            m_lastMsgString = meshResult.summary;
+
+            for (const modemmeshtastic::DecodeResult::Field& field : meshResult.fields)
             {
-                uint8_t *bytes = reinterpret_cast<uint8_t*>(m_lastMsgBytes.data());
-                m_udpSink.writeUnbuffered(bytes, m_lastMsgPacketLength);
-            }
-
-            if (getMessageQueueToGUI()) {
-                getMessageQueueToGUI()->push(new MeshtasticDemodMsg::MsgReportDecodeBytes(msg)); // make a copy
-            }
-
-            modemmeshtastic::DecodeResult meshResult;
-
-            if (modemmeshtastic::Packet::decodeFrame(m_lastMsgBytes, meshResult, m_settings.m_meshtasticKeySpecList))
-            {
-                m_lastMsgString = meshResult.summary;
-
-                for (const modemmeshtastic::DecodeResult::Field& field : meshResult.fields)
+                if (field.path == QStringLiteral("data.port_name"))
                 {
-                    if (field.path == QStringLiteral("data.port_name"))
-                    {
-                        m_lastFrameType = field.value;
-                        break;
-                    }
-                }
-
-                qInfo() << "MeshtasticDemod::handleMessage:" << meshResult.summary;
-
-                if (meshResult.dataDecoded && getMessageQueueToGUI())
-                {
-                    MeshtasticDemodMsg::MsgReportDecodeString *meshMsg = MeshtasticDemodMsg::MsgReportDecodeString::create(meshResult.summary);
-                    meshMsg->setFrameId(msg.getFrameId());
-                    meshMsg->setSyncWord(msg.getSyncWord());
-                    meshMsg->setSignalDb(msg.getSingalDb());
-                    meshMsg->setNoiseDb(msg.getNoiseDb());
-                    meshMsg->setMsgTimestamp(msg.getMsgTimestamp());
-                    meshMsg->setPipelineMetadata(msg.getPipelineId(), msg.getPipelineName(), msg.getPipelinePreset());
-                    QVector<QPair<QString, QString>> structuredFields;
-                    structuredFields.reserve(meshResult.fields.size());
-
-                    for (const modemmeshtastic::DecodeResult::Field& field : meshResult.fields) {
-                        structuredFields.append(qMakePair(field.path, field.value));
-                    }
-
-                    meshMsg->setStructuredFields(structuredFields);
-                    getMessageQueueToGUI()->push(meshMsg);
+                    m_lastFrameType = field.value;
+                    break;
                 }
             }
 
-            // Is this an APRS packet?
-            // As per: https://github.com/oe3cjb/TTGO-T-Beam-LoRa-APRS/blob/master/lib/BG_RF95/BG_RF95.cpp
-            // There is a 3 byte header for LoRa APRS packets. Addressing follows in ASCII: srccall>dst:
-            int colonIdx = m_lastMsgBytes.indexOf(':');
-            int greaterThanIdx =  m_lastMsgBytes.indexOf('>');
-            if (   (m_lastMsgBytes[0] == '<')
-                && (greaterThanIdx != -1)
-                && (colonIdx != -1)
-                && ((m_lastMsgHasCRC && m_lastMsgPayloadCRC) || !m_lastMsgHasCRC)
-                )
+            qInfo() << "MeshtasticDemod::handleMessage:" << meshResult.summary;
+
+            if (meshResult.dataDecoded && getMessageQueueToGUI())
             {
-                QByteArray packet;
+                MeshtasticDemodMsg::MsgReportDecodeString *meshMsg = MeshtasticDemodMsg::MsgReportDecodeString::create(meshResult.summary);
+                meshMsg->setFrameId(msg.getFrameId());
+                meshMsg->setSyncWord(msg.getSyncWord());
+                meshMsg->setSignalDb(msg.getSingalDb());
+                meshMsg->setNoiseDb(msg.getNoiseDb());
+                meshMsg->setMsgTimestamp(msg.getMsgTimestamp());
+                meshMsg->setPipelineMetadata(msg.getPipelineId(), msg.getPipelineName(), msg.getPipelinePreset());
+                QVector<QPair<QString, QString>> structuredFields;
+                structuredFields.reserve(meshResult.fields.size());
 
-                // Extract addresses
-                const char *d = m_lastMsgBytes.data();
-                QString srcString = QString::fromLatin1(d + 3, greaterThanIdx - 3);
-                QString dstString = QString::fromLatin1(d + greaterThanIdx + 1, colonIdx - greaterThanIdx - 1);
-
-                // Convert to AX.25 format
-                packet.append(AX25Packet::encodeAddress(dstString));
-                packet.append(AX25Packet::encodeAddress(srcString, 1));
-                packet.append(3);
-                packet.append(-16); // 0xf0
-                packet.append(m_lastMsgBytes.mid(colonIdx+1));
-                if (!m_lastMsgHasCRC)
-                {
-                    packet.append((char)0); // dummy crc
-                    packet.append((char)0);
+                for (const modemmeshtastic::DecodeResult::Field& field : meshResult.fields) {
+                    structuredFields.append(qMakePair(field.path, field.value));
                 }
 
-                // Forward to APRS and other packet features
-                QList<ObjectPipe*> packetsPipes;
-                MainCore::instance()->getMessagePipes().getMessagePipes(this, "packets", packetsPipes);
+                meshMsg->setStructuredFields(structuredFields);
+                getMessageQueueToGUI()->push(meshMsg);
+            }
+        }
 
-                for (const auto& pipe : packetsPipes)
-                {
-                    MessageQueue *messageQueue = qobject_cast<MessageQueue*>(pipe->m_element);
-                    MainCore::MsgPacket *msg = MainCore::MsgPacket::create(this, packet, QDateTime::currentDateTime());
-                    messageQueue->push(msg);
-                }
+        // Is this an APRS packet?
+        // As per: https://github.com/oe3cjb/TTGO-T-Beam-LoRa-APRS/blob/master/lib/BG_RF95/BG_RF95.cpp
+        // There is a 3 byte header for LoRa APRS packets. Addressing follows in ASCII: srccall>dst:
+        int colonIdx = m_lastMsgBytes.indexOf(':');
+        int greaterThanIdx =  m_lastMsgBytes.indexOf('>');
+        if (   (m_lastMsgBytes[0] == '<')
+            && (greaterThanIdx != -1)
+            && (colonIdx != -1)
+            && ((m_lastMsgHasCRC && m_lastMsgPayloadCRC) || !m_lastMsgHasCRC)
+            )
+        {
+            QByteArray packet;
+
+            // Extract addresses
+            const char *d = m_lastMsgBytes.data();
+            QString srcString = QString::fromLatin1(d + 3, greaterThanIdx - 3);
+            QString dstString = QString::fromLatin1(d + greaterThanIdx + 1, colonIdx - greaterThanIdx - 1);
+
+            // Convert to AX.25 format
+            packet.append(AX25Packet::encodeAddress(dstString));
+            packet.append(AX25Packet::encodeAddress(srcString, 1));
+            packet.append(3);
+            packet.append(-16); // 0xf0
+            packet.append(m_lastMsgBytes.mid(colonIdx+1));
+            if (!m_lastMsgHasCRC)
+            {
+                packet.append((char)0); // dummy crc
+                packet.append((char)0);
             }
 
-            // In explicit-header LoRa mode, frame length is already derived from header
-            // and may legitimately vary across packets. Auto-clamping nbSymbolsMax to the
-            // first short frame breaks subsequent longer frames.
-            if (m_settings.m_autoNbSymbolsMax
-                && !((m_settings.m_codingScheme == MeshtasticDemodSettings::CodingLoRa) && m_settings.m_hasHeader))
-            {
-                MeshtasticDemodSettings settings = m_settings;
-                settings.m_nbSymbolsMax = m_lastMsgNbSymbols;
-                applySettings(settings);
+            // Forward to APRS and other packet features
+            QList<ObjectPipe*> packetsPipes;
+            MainCore::instance()->getMessagePipes().getMessagePipes(this, "packets", packetsPipes);
 
-                if (getMessageQueueToGUI()) // forward to GUI if any
-                {
-                    MsgConfigureMeshtasticDemod *msgToGUI = MsgConfigureMeshtasticDemod::create(settings, false);
-                    getMessageQueueToGUI()->push(msgToGUI);
-                }
+            for (const auto& pipe : packetsPipes)
+            {
+                MessageQueue *messageQueue = qobject_cast<MessageQueue*>(pipe->m_element);
+                MainCore::MsgPacket *msg = MainCore::MsgPacket::create(this, packet, QDateTime::currentDateTime());
+                messageQueue->push(msg);
             }
         }
 
@@ -799,12 +777,12 @@ void MeshtasticDemod::applySettings(MeshtasticDemodSettings settings, bool force
             << " m_bandwidthIndex: " << settings.m_bandwidthIndex
             << " m_spreadFactor: " << settings.m_spreadFactor
             << " m_deBits: " << settings.m_deBits
-            << " m_codingScheme: " << settings.m_codingScheme
-            << " m_hasHeader: " << settings.m_hasHeader
-            << " m_hasCRC: " << settings.m_hasCRC
+            << " m_codingScheme: " << MeshtasticDemodSettings::m_codingScheme
+            << " m_hasHeader: " << MeshtasticDemodSettings::m_hasHeader
+            << " m_hasCRC: " << MeshtasticDemodSettings::m_hasCRC
             << " m_nbParityBits: " << settings.m_nbParityBits
             << " m_packetLength: " << settings.m_packetLength
-            << " m_autoNbSymbolsMax: " << settings.m_autoNbSymbolsMax
+            << " m_autoNbSymbolsMax: " << MeshtasticDemodSettings::m_autoNbSymbolsMax
             << " m_sendViaUDP: " << settings.m_sendViaUDP
             << " m_udpAddress: " << settings.m_udpAddress
             << " m_udpPort: " << settings.m_udpPort
@@ -917,7 +895,6 @@ void MeshtasticDemod::applySettings(MeshtasticDemodSettings settings, bool force
     // settings so that m_settings and the GUI stay in sync with what was actually applied.
     // Skip for USER preset: those parameters are controlled entirely by the user via the GUI.
     if (m_running && !m_pipelineConfigs.empty() &&
-        settings.m_codingScheme == MeshtasticDemodSettings::CodingLoRa &&
         settings.m_meshtasticPresetName.trimmed().compare("USER", Qt::CaseInsensitive) != 0)
     {
         const MeshtasticDemodSettings& derived = m_pipelineConfigs[0].settings;
@@ -932,7 +909,7 @@ void MeshtasticDemod::applySettings(MeshtasticDemodSettings settings, bool force
 
         if (bwChanged)
         {
-            DSPSignalNotification *bwMsg = new DSPSignalNotification(
+            auto *bwMsg = new DSPSignalNotification(
                 MeshtasticDemodSettings::bandwidths[settings.m_bandwidthIndex], 0);
             m_spectrumVis.getInputMessageQueue()->push(bwMsg);
         }

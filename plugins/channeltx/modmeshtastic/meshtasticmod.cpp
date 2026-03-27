@@ -218,11 +218,11 @@ void MeshtasticMod::applySettings(const MeshtasticModSettings& incomingSettings,
             << " m_bytesMessage: " << settings.m_bytesMessage.toHex()
             << " m_spreadFactor: " << settings.m_spreadFactor
             << " m_deBits: " << settings.m_deBits
-            << " m_codingScheme: " << settings.m_codingScheme
+            << " m_codingScheme: " << MeshtasticModSettings::m_codingScheme
             << " m_nbParityBits: " << settings.m_nbParityBits
-            << " m_hasCRC: " << settings.m_hasCRC
-            << " m_hasHeader: " << settings.m_hasHeader
-            << " m_messageType: " << settings.m_messageType
+            << " m_hasCRC: " << MeshtasticModSettings::m_hasCRC
+            << " m_hasHeader: " << MeshtasticModSettings::m_hasHeader
+            << " m_messageType: " << MeshtasticModSettings::m_messageType
             << " m_preambleChirps: " << settings.m_preambleChirps
             << " m_quietMillis: " << settings.m_quietMillis
             << " m_messageRepeat: " << settings.m_messageRepeat

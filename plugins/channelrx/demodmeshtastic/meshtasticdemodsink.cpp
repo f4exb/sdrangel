@@ -34,22 +34,6 @@
 #include "meshtasticdemoddecoderlora.h"
 #include "meshtasticdemodsink.h"
 
-// namespace { // For [LOOPBACK] debug only
-
-// QString symbolPreview(const std::vector<unsigned short>& symbols, unsigned int maxCount)
-// {
-//     QStringList parts;
-//     const unsigned int count = std::min<unsigned int>(maxCount, static_cast<unsigned int>(symbols.size()));
-
-//     for (unsigned int i = 0; i < count; i++) {
-//         parts.append(QString::number(symbols[i]));
-//     }
-
-//     return parts.join(",");
-// }
-
-// } // namespace
-
 MeshtasticDemodSink::MeshtasticDemodSink() :
     m_decodeMsg(nullptr),
     m_decoderMsgQueue(nullptr),
@@ -209,7 +193,7 @@ void MeshtasticDemodSink::feed(const SampleVector::const_iterator& begin, const 
 
 		if (m_interpolator.decimate(&m_sampleDistanceRemain, c, &ci))
 		{
-            if (m_settings.m_codingScheme == MeshtasticDemodSettings::CodingLoRa)
+            if (MeshtasticDemodSettings::m_codingScheme == MeshtasticDemodSettings::CodingLoRa)
             {
                 processSampleLoRa(ci);
             }
@@ -443,7 +427,7 @@ bool MeshtasticDemodSink::sendLoRaHeaderProbe()
 
     const std::vector<unsigned short>& symbols = m_decodeMsg->getSymbols();
 
-    if (symbols.size() < 8U || !m_settings.m_hasHeader) {
+    if (symbols.size() < 8U) {
         return false;
     }
 
@@ -462,20 +446,10 @@ bool MeshtasticDemodSink::sendLoRaHeaderProbe()
         headerNbSymbolBits,
         m_settings.m_spreadFactor,
         static_cast<unsigned int>(std::max(1, m_bandwidth)),
-        m_settings.m_hasHeader,
-        m_settings.m_hasCRC
+        MeshtasticDemodSettings::m_hasHeader,
+        MeshtasticDemodSettings::m_hasCRC
     );
     m_decoderMsgQueue->push(probe);
-
-    // qDebug().noquote() << QString(
-    //     "[LOOPBACK][RX] header_probe token=%1 frameId=%2 sf=%3 de=%4 bw=%5 headerSymbols=[%6]"
-    // )
-    //     .arg(m_loRaFrameId)
-    //     .arg(m_loRaFrameId)
-    //     .arg(m_settings.m_spreadFactor)
-    //     .arg(m_settings.m_deBits)
-    //     .arg(m_bandwidth)
-    //     .arg(symbolPreview(headerSymbols, 8U));
 
     return true;
 }
@@ -495,8 +469,7 @@ void MeshtasticDemodSink::applyLoRaHeaderFeedback(
     (void) ldro;
     (void) headerParityStatus;
 
-    if ((m_settings.m_codingScheme != MeshtasticDemodSettings::CodingLoRa)
-        || (m_loRaState != LoRaStateSFOCompensation))
+    if (m_loRaState != LoRaStateSFOCompensation)
     {
         return;
     }
@@ -525,14 +498,6 @@ void MeshtasticDemodSink::applyLoRaHeaderFeedback(
     m_expectedSymbols = expectedSymbols;
     m_headerLocked = true;
     m_loRaReceivedHeader = true;
-
-    // qDebug("[LOOPBACK][RX] header_lock token=%u frameId=%u len=%u cr=%u expected=%u frameSymbols=%u",
-    //     frameId,
-    //     frameId,
-    //     packetLength,
-    //     nbParityBits,
-    //     expectedSymbols,
-    //     m_loRaFrameSymbolCount);
 }
 
 int MeshtasticDemodSink::loRaMod(int a, int b) const
@@ -551,9 +516,7 @@ int MeshtasticDemodSink::loRaRound(float number) const
 
 void MeshtasticDemodSink::resetLoRaFrameSync()
 {
-    if ((m_settings.m_codingScheme == MeshtasticDemodSettings::CodingLoRa)
-        && m_decodeMsg
-        && (m_loRaState != LoRaStateDetect))
+    if (m_decodeMsg && (m_loRaState != LoRaStateDetect))
     {
         delete m_decodeMsg;
         m_decodeMsg = nullptr;
@@ -799,12 +762,6 @@ void MeshtasticDemodSink::finalizeLoRaFrame()
         return;
     }
 
-    // const bool hitExpected = m_headerLocked && (m_loRaFrameSymbolCount >= m_expectedSymbols);
-    // const bool hitMax = (!m_headerLocked) && (m_loRaFrameSymbolCount >= m_settings.m_nbSymbolsMax);
-    // const char *endReason = hitExpected
-    //     ? "expected"
-    //     : (hitMax ? "max" : "other");
-
     qDebug(
         "MeshtasticDemodSink::finalizeLoRaFrame: frameId=%u symbols=%u headerLocked=%d expected=%u",
         m_loRaFrameId,
@@ -812,15 +769,6 @@ void MeshtasticDemodSink::finalizeLoRaFrame()
         m_headerLocked ? 1 : 0,
         m_expectedSymbols
     );
-
-    // qDebug("[LOOPBACK][RX] frame_finalize token=%u frameId=%u reason=%s locked=%d expected=%u actual=%u waitHeader=%d",
-    //     m_loRaFrameId,
-    //     m_loRaFrameId,
-    //     endReason,
-    //     m_headerLocked ? 1 : 0,
-    //     m_expectedSymbols,
-    //     m_loRaFrameSymbolCount,
-    //     m_waitHeaderFeedback ? 1 : 0);
 
     m_decodeMsg->setSignalDb(CalcDb::dbPower(m_magsqOnAvg.asDouble() / (1 << m_settings.m_spreadFactor)));
     m_decodeMsg->setNoiseDb(CalcDb::dbPower(m_magsqOffAvg.asDouble() / (1 << m_settings.m_spreadFactor)));
@@ -1205,7 +1153,7 @@ int MeshtasticDemodSink::processLoRaFrameSyncStep()
 
     std::vector<float> symbolMags;
     const unsigned int rawSymbol = getLoRaSymbolVal(m_loRaInDown.data(), m_loRaPayloadDownchirp.data(), &symbolMags, true);
-    const bool headerSymbol = m_settings.m_hasHeader && (m_loRaFrameSymbolCount < 8U);
+    const bool headerSymbol = m_loRaFrameSymbolCount < 8U;
     const unsigned short symbol = evalSymbol(rawSymbol, headerSymbol) % m_nbSymbolsEff;
     m_decodeMsg->pushBackSymbol(symbol);
     m_decodeMsg->pushBackMagnitudes(symbolMags);
@@ -1237,7 +1185,6 @@ int MeshtasticDemodSink::processLoRaFrameSyncStep()
     m_loRaFrameSymbolCount++;
 
     if (!m_headerLocked
-        && m_settings.m_hasHeader
         && (m_loRaFrameSymbolCount >= 8U))
     {
         tryHeaderLock();

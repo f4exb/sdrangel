@@ -153,7 +153,7 @@ void MeshtasticModGUI::handleSourceMessages()
 
 QString MeshtasticModGUI::getActivePayloadText() const
 {
-    switch (m_settings.m_messageType)
+    switch (MeshtasticModSettings::m_messageType)
     {
     case MeshtasticModSettings::MessageText:
         return m_settings.m_textMessage;
@@ -528,7 +528,7 @@ void MeshtasticModGUI::on_repeatMessage_valueChanged(int value)
 
 void MeshtasticModGUI::on_messageText_editingFinished()
 {
-    if (m_settings.m_messageType == MeshtasticModSettings::MessageText) {
+    if (MeshtasticModSettings::m_messageType == MeshtasticModSettings::MessageText) {
         m_settings.m_textMessage = ui->messageText->toPlainText();
     }
 
@@ -809,7 +809,7 @@ void MeshtasticModGUI::displaySettings()
     displayCurrentPayloadMessage();
     displayBinaryMessage();
 
-    ui->fecParity->setEnabled(m_settings.m_codingScheme == MeshtasticModSettings::CodingLoRa);
+    ui->fecParity->setEnabled(MeshtasticModSettings::m_codingScheme == MeshtasticModSettings::CodingLoRa);
 
     blockApplySettings(true);
     ui->deltaFrequency->setValue(m_channelMarker.getCenterFrequency());
@@ -874,7 +874,7 @@ void MeshtasticModGUI::displayCurrentPayloadMessage()
 {
     ui->messageText->blockSignals(true);
 
-    if (m_settings.m_messageType == MeshtasticModSettings::MessageText) {
+    if (MeshtasticModSettings::m_messageType == MeshtasticModSettings::MessageText) {
         ui->messageText->setText(m_settings.m_textMessage);
     }
 
