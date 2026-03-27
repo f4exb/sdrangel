@@ -1064,7 +1064,9 @@ void MeshtasticDemodGUI::pushExtraPipelineSettingsToDemod()
 
 void MeshtasticDemodGUI::on_conf_valueChanged(int value)
 {
-    const int newFocus = std::max(0, std::min(value, m_extraPipelineSettings.size()));
+    const int maxFocus = static_cast<int>(m_extraPipelineSettings.size());
+    const int newFocus = std::clamp(value, 0, maxFocus);
+
     if (newFocus == m_focusedPipelineIndex) {
         return;
     }
