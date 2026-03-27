@@ -79,7 +79,6 @@ private slots:
 	void on_Spread_valueChanged(int value);
     void on_deBits_valueChanged(int value);
     void on_preambleChirps_valueChanged(int value);
-	void on_scheme_currentIndexChanged(int index);
 	void on_mute_toggled(bool checked);
 	void on_clear_clicked(bool checked);
     void on_eomSquelch_valueChanged(int value);
