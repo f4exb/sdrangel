@@ -155,6 +155,18 @@
 #  define MODEMM17_API
 #endif
 
+/* the 'MODEMMESHTASTIC_API' controls the import/export of 'modemmeshtastic' symbols
+ */
+#if !defined(sdrangel_STATIC)
+#  ifdef modemmeshtastic_EXPORTS
+#    define MODEMMESHTASTIC_API __SDR_EXPORT
+#  else
+#    define MODEMMESHTASTIC_API __SDR_IMPORT
+#  endif
+#else
+#  define MODEMMESHTASTIC_API
+#endif
+
 /* the 'FT8_API' controls the import/export of 'ft8' symbols
  */
 #if !defined(sdrangel_STATIC)

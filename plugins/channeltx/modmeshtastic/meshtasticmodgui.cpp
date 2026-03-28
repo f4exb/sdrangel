@@ -1,5 +1,6 @@
 ///////////////////////////////////////////////////////////////////////////////////
-// Copyright (C) 2020-2022 Edouard Griffiths, F4EXB <f4exb06@gmail.com>          //
+// Copyright (C) 2026 Alejandro Aleman                                           //
+// Copyright (C) 2020-2026 Edouard Griffiths, F4EXB <f4exb06@gmail.com>          //
 // Copyright (C) 2021-2023 Jon Beniston, M7RCE <jon@beniston.com>                //
 //                                                                               //
 // This program is free software; you can redistribute it and/or modify          //
@@ -24,6 +25,9 @@
 #include <cmath>
 
 #include "device/deviceuiset.h"
+#include "device/deviceapi.h"
+#include "dsp/devicesamplesink.h"
+#include "dsp/devicesamplemimo.h"
 #include "plugin/pluginapi.h"
 #include "util/db.h"
 #include "dsp/dspengine.h"
@@ -149,28 +153,10 @@ void MeshtasticModGUI::handleSourceMessages()
 
 QString MeshtasticModGUI::getActivePayloadText() const
 {
-    switch (m_settings.m_messageType)
+    switch (MeshtasticModSettings::m_messageType)
     {
-    case MeshtasticModSettings::MessageBeacon:
-        return m_settings.m_beaconMessage;
-    case MeshtasticModSettings::MessageCQ:
-        return m_settings.m_cqMessage;
-    case MeshtasticModSettings::MessageReply:
-        return m_settings.m_replyMessage;
-    case MeshtasticModSettings::MessageReport:
-        return m_settings.m_reportMessage;
-    case MeshtasticModSettings::MessageReplyReport:
-        return m_settings.m_replyReportMessage;
-    case MeshtasticModSettings::MessageRRR:
-        return m_settings.m_rrrMessage;
-    case MeshtasticModSettings::Message73:
-        return m_settings.m_73Message;
-    case MeshtasticModSettings::MessageQSOText:
-        return m_settings.m_qsoTextMessage;
     case MeshtasticModSettings::MessageText:
         return m_settings.m_textMessage;
-    case MeshtasticModSettings::MessageBytes:
-        return QString::fromUtf8(m_settings.m_bytesMessage);
     default:
         return QString();
     }
@@ -194,73 +180,154 @@ int MeshtasticModGUI::findBandwidthIndex(int bandwidthHz) const
     return bestIndex;
 }
 
-void MeshtasticModGUI::applyMeshtasticRadioSettingsIfPresent(const QString& payloadText)
+bool MeshtasticModGUI::retuneDeviceToFrequency(qint64 centerFrequencyHz)
 {
-    if (m_settings.m_codingScheme != MeshtasticModSettings::CodingLoRa) {
-        return;
+    if (!m_deviceUISet || !m_deviceUISet->m_deviceAPI) {
+        return false;
     }
 
-    if (!Meshtastic::Packet::isCommand(payloadText)) {
-        return;
-    }
+    DeviceAPI* deviceAPI = m_deviceUISet->m_deviceAPI;
 
-    Meshtastic::TxRadioSettings meshRadio;
-    QString error;
-    if (!Meshtastic::Packet::deriveTxRadioSettings(payloadText, meshRadio, error))
+    if (deviceAPI->getDeviceSinkEngine() && deviceAPI->getSampleSink())
     {
-        qWarning() << "MeshtasticModGUI::applyMeshtasticRadioSettingsIfPresent:" << error;
+        deviceAPI->getSampleSink()->setCenterFrequency(centerFrequencyHz);
+        return true;
+    }
+
+    if (deviceAPI->getDeviceMIMOEngine() && deviceAPI->getSampleMIMO())
+    {
+        deviceAPI->getSampleMIMO()->setSinkCenterFrequency(centerFrequencyHz, m_settings.m_streamIndex);
+        return true;
+    }
+
+    return false;
+}
+
+void MeshtasticModGUI::applyMeshtasticProfileFromSelection()
+{
+    const QString region = ui->meshRegion->currentData().toString();
+    const QString preset = ui->meshPreset->currentData().toString();
+    const int meshChannel = ui->meshChannel->currentData().toInt();
+    const int channelNum = meshChannel + 1; // planner expects 1-based channel_num
+
+    if (region.isEmpty() || preset.isEmpty()) {
+        return;
+    }
+
+    const QString command = QString("MESH:preset=%1;region=%2;channel_num=%3").arg(preset, region).arg(channelNum);
+    modemmeshtastic::TxRadioSettings meshRadio;
+    QString error;
+
+    if (!modemmeshtastic::Packet::deriveTxRadioSettings(command, meshRadio, error))
+    {
+        qWarning() << "MeshtasticModGUI::applyMeshtasticProfileFromSelection:" << error;
         return;
     }
 
     bool changed = false;
+    bool selectionStateChanged = false;
+
+    if (m_settings.m_meshtasticRegionCode != region)
+    {
+        m_settings.m_meshtasticRegionCode = region;
+        selectionStateChanged = true;
+    }
+    if (m_settings.m_meshtasticPresetName != preset)
+    {
+        m_settings.m_meshtasticPresetName = preset;
+        selectionStateChanged = true;
+    }
+    if (m_settings.m_meshtasticChannelIndex != meshChannel)
+    {
+        m_settings.m_meshtasticChannelIndex = meshChannel;
+        selectionStateChanged = true;
+    }
+
     const int bwIndex = findBandwidthIndex(meshRadio.bandwidthHz);
-    if (bwIndex >= 0 && bwIndex != m_settings.m_bandwidthIndex) {
+    if (bwIndex >= 0 && bwIndex != m_settings.m_bandwidthIndex)
+    {
         m_settings.m_bandwidthIndex = bwIndex;
         changed = true;
     }
 
-    if (meshRadio.spreadFactor > 0 && meshRadio.spreadFactor != m_settings.m_spreadFactor) {
+    if (meshRadio.spreadFactor > 0 && meshRadio.spreadFactor != m_settings.m_spreadFactor)
+    {
         m_settings.m_spreadFactor = meshRadio.spreadFactor;
         changed = true;
     }
 
-    if (meshRadio.parityBits > 0 && meshRadio.parityBits != m_settings.m_nbParityBits) {
-        m_settings.m_nbParityBits = meshRadio.parityBits;
-        changed = true;
-    }
-
-    if (meshRadio.deBits != m_settings.m_deBits) {
+    if (meshRadio.deBits != m_settings.m_deBits)
+    {
         m_settings.m_deBits = meshRadio.deBits;
         changed = true;
     }
 
-    if (meshRadio.syncWord != m_settings.m_syncWord) {
+    if (meshRadio.parityBits > 0 && meshRadio.parityBits != m_settings.m_nbParityBits)
+    {
+        m_settings.m_nbParityBits = meshRadio.parityBits;
+        changed = true;
+    }
+
+    const int meshPreambleChirps = meshRadio.preambleChirps;
+    if (m_settings.m_preambleChirps != static_cast<unsigned int>(meshPreambleChirps))
+    {
+        m_settings.m_preambleChirps = static_cast<unsigned int>(meshPreambleChirps);
+        changed = true;
+    }
+
+    if (meshRadio.syncWord != m_settings.m_syncWord)
+    {
         m_settings.m_syncWord = meshRadio.syncWord;
         changed = true;
     }
 
     if (meshRadio.hasCenterFrequency)
     {
-        if (m_deviceCenterFrequency != 0)
+        if (retuneDeviceToFrequency(meshRadio.centerFrequencyHz))
+        {
+            if (m_settings.m_inputFrequencyOffset != 0)
+            {
+                m_settings.m_inputFrequencyOffset = 0;
+                changed = true;
+            }
+        }
+        else if (m_deviceCenterFrequency != 0)
         {
             const qint64 wantedOffset = meshRadio.centerFrequencyHz - m_deviceCenterFrequency;
-            if (wantedOffset != m_settings.m_inputFrequencyOffset)
+            const qint64 maxOffset = m_basebandSampleRate / 2;
+
+            if (std::abs(wantedOffset) <= maxOffset)
             {
-                m_settings.m_inputFrequencyOffset = static_cast<int>(wantedOffset);
-                changed = true;
+                if (wantedOffset != m_settings.m_inputFrequencyOffset)
+                {
+                    m_settings.m_inputFrequencyOffset = static_cast<int>(wantedOffset);
+                    changed = true;
+                }
+            }
+            else
+            {
+                qWarning() << "MeshtasticModGUI::applyMeshtasticProfileFromSelection: requested frequency"
+                    << meshRadio.centerFrequencyHz
+                    << "is out of channel offset range with current baseband sample rate";
             }
         }
         else
         {
-            qWarning() << "MeshtasticModGUI::applyMeshtasticRadioSettingsIfPresent: device center frequency unknown, cannot auto-center";
+            qWarning() << "MeshtasticModGUI::applyMeshtasticProfileFromSelection: device center frequency unknown, cannot auto-center";
         }
     }
 
-    if (!changed) {
+    if (!changed && !selectionStateChanged) {
         return;
     }
 
-    qInfo() << "MeshtasticModGUI::applyMeshtasticRadioSettingsIfPresent:" << meshRadio.summary;
+    qInfo() << "MeshtasticModGUI::applyMeshtasticProfileFromSelection:" << meshRadio.summary;
+
+    if (!changed)
+    {
+        applySettings();
+        return;
+    }
 
     const int thisBW = MeshtasticModSettings::bandwidths[m_settings.m_bandwidthIndex];
     m_channelMarker.blockSignals(true);
@@ -276,12 +343,94 @@ void MeshtasticModGUI::applyMeshtasticRadioSettingsIfPresent(const QString& payl
     ui->spreadText->setText(tr("%1").arg(m_settings.m_spreadFactor));
     ui->deBits->setValue(m_settings.m_deBits);
     ui->deBitsText->setText(tr("%1").arg(m_settings.m_deBits));
+    ui->preambleChirps->setValue(m_settings.m_preambleChirps);
+    ui->preambleChirpsText->setText(tr("%1").arg(m_settings.m_preambleChirps));
     ui->fecParity->setValue(m_settings.m_nbParityBits);
     ui->fecParityText->setText(tr("%1").arg(m_settings.m_nbParityBits));
     ui->syncWord->setText(tr("%1").arg(m_settings.m_syncWord, 2, 16));
     blockApplySettings(false);
 
     updateAbsoluteCenterFrequency();
+    applySettings();
+}
+
+void MeshtasticModGUI::rebuildMeshtasticChannelOptions()
+{
+    const QString region = ui->meshRegion->currentData().toString();
+    const QString preset = ui->meshPreset->currentData().toString();
+    const int previousChannel = ui->meshChannel->currentData().toInt();
+
+    m_meshControlsUpdating = true;
+    ui->meshChannel->clear();
+
+    int added = 0;
+    for (int meshChannel = 0; meshChannel <= 200; ++meshChannel)
+    {
+        modemmeshtastic::TxRadioSettings meshRadio;
+        QString error;
+        const int channelNum = meshChannel + 1; // planner expects 1-based channel_num
+        const QString command = QString("MESH:preset=%1;region=%2;channel_num=%3").arg(preset, region).arg(channelNum);
+
+        if (!modemmeshtastic::Packet::deriveTxRadioSettings(command, meshRadio, error))
+        {
+            if (added > 0) {
+                break;
+            } else {
+                continue;
+            }
+        }
+
+        const QString label = meshRadio.hasCenterFrequency
+            ? QString("%1 (%2 MHz)").arg(meshChannel).arg(meshRadio.centerFrequencyHz / 1000000.0, 0, 'f', 3)
+            : QString::number(meshChannel);
+
+        ui->meshChannel->addItem(label, meshChannel);
+        added++;
+    }
+
+    if (added == 0) {
+        ui->meshChannel->addItem("0", 0);
+    }
+
+    ui->meshChannel->setToolTip(tr("Meshtastic channel number (%1 available for %2/%3)")
+        .arg(added)
+        .arg(region)
+        .arg(preset));
+    int restoreIndex = ui->meshChannel->findData(previousChannel);
+    if (restoreIndex < 0) {
+        restoreIndex = 0;
+    }
+    ui->meshChannel->setCurrentIndex(restoreIndex);
+    m_meshControlsUpdating = false;
+
+    qInfo() << "MeshtasticModGUI::rebuildMeshtasticChannelOptions:"
+            << "region=" << region
+            << "preset=" << preset
+            << "channels=" << added;
+
+    QMetaObject::invokeMethod(this, [this]() {
+        if (!m_meshControlsUpdating) {
+            applyMeshtasticProfileFromSelection();
+        }
+    }, Qt::QueuedConnection);
+}
+
+void MeshtasticModGUI::setupMeshtasticAutoProfileControls()
+{
+    for (int i = 0; i < ui->meshRegion->count(); ++i) {
+        ui->meshRegion->setItemData(i, ui->meshRegion->itemText(i), Qt::UserRole);
+    }
+
+    for (int i = 0; i < ui->meshPreset->count(); ++i) {
+        ui->meshPreset->setItemData(i, ui->meshPreset->itemText(i), Qt::UserRole);
+    }
+
+    QObject::connect(ui->meshRegion, QOverload<int>::of(&QComboBox::currentIndexChanged), this, &MeshtasticModGUI::on_meshRegion_currentIndexChanged);
+    QObject::connect(ui->meshPreset, QOverload<int>::of(&QComboBox::currentIndexChanged), this, &MeshtasticModGUI::on_meshPreset_currentIndexChanged);
+    QObject::connect(ui->meshChannel, QOverload<int>::of(&QComboBox::currentIndexChanged), this, &MeshtasticModGUI::on_meshChannel_currentIndexChanged);
+    QObject::connect(ui->meshApply, &QPushButton::clicked, this, &MeshtasticModGUI::on_meshApply_clicked);
+
+    rebuildMeshtasticChannelOptions();
 }
 
 void MeshtasticModGUI::on_deltaFrequency_changed(qint64 value)
@@ -356,15 +505,6 @@ void MeshtasticModGUI::on_syncWord_editingFinished()
     }
 }
 
-void MeshtasticModGUI::on_scheme_currentIndexChanged(int index)
-{
-    m_settings.m_codingScheme = (MeshtasticModSettings::CodingScheme) index;
-    ui->fecParity->setEnabled(m_settings.m_codingScheme == MeshtasticModSettings::CodingLoRa);
-    ui->crc->setEnabled(m_settings.m_codingScheme == MeshtasticModSettings::CodingLoRa);
-    ui->header->setEnabled(m_settings.m_codingScheme == MeshtasticModSettings::CodingLoRa);
-    applySettings();
-}
-
 void MeshtasticModGUI::on_fecParity_valueChanged(int value)
 {
     m_settings.m_nbParityBits = value;
@@ -372,68 +512,11 @@ void MeshtasticModGUI::on_fecParity_valueChanged(int value)
     applySettings();
 }
 
-void MeshtasticModGUI::on_crc_stateChanged(int state)
-{
-	m_settings.m_hasCRC = (state == Qt::Checked);
-	applySettings();
-}
-
-void MeshtasticModGUI::on_header_stateChanged(int state)
-{
-	m_settings.m_hasHeader = (state == Qt::Checked);
-	applySettings();
-}
-
-void MeshtasticModGUI::on_myCall_editingFinished()
-{
-    m_settings.m_myCall = ui->myCall->text();
-    applySettings();
-}
-
-void MeshtasticModGUI::on_urCall_editingFinished()
-{
-    m_settings.m_urCall = ui->urCall->text();
-    applySettings();
-}
-
-void MeshtasticModGUI::on_myLocator_editingFinished()
-{
-    m_settings.m_myLoc = ui->myLocator->text();
-    applySettings();
-}
-
-void MeshtasticModGUI::on_report_editingFinished()
-{
-    m_settings.m_myRpt = ui->report->text();
-    applySettings();
-}
-
-void MeshtasticModGUI::on_msgType_currentIndexChanged(int index)
-{
-    m_settings.m_messageType = (MeshtasticModSettings::MessageType) index;
-    displayCurrentPayloadMessage();
-    applyMeshtasticRadioSettingsIfPresent(getActivePayloadText());
-    applySettings();
-}
-
-void MeshtasticModGUI::on_resetMessages_clicked(bool checked)
-{
-    (void) checked;
-    m_settings.setDefaultTemplates();
-    displayCurrentPayloadMessage();
-    applySettings();
-}
-
 void MeshtasticModGUI::on_playMessage_clicked(bool checked)
 {
     (void) checked;
-    applyMeshtasticRadioSettingsIfPresent(getActivePayloadText());
-    // Switch to message None then back to current message type to trigger sending process
-    MeshtasticModSettings::MessageType msgType = m_settings.m_messageType;
-    m_settings.m_messageType = MeshtasticModSettings::MessageNone;
     applySettings();
-    m_settings.m_messageType = msgType;
-    applySettings();
+    m_meshtasticMod->sendMessage();
 }
 
 void MeshtasticModGUI::on_repeatMessage_valueChanged(int value)
@@ -443,44 +526,18 @@ void MeshtasticModGUI::on_repeatMessage_valueChanged(int value)
     applySettings();
 }
 
-void MeshtasticModGUI::on_generateMessages_clicked(bool checked)
-{
-    (void) checked;
-    m_settings.generateMessages();
-    displayCurrentPayloadMessage();
-    applySettings();
-}
-
 void MeshtasticModGUI::on_messageText_editingFinished()
 {
-    if (m_settings.m_messageType == MeshtasticModSettings::MessageBeacon) {
-        m_settings.m_beaconMessage = ui->messageText->toPlainText();
-    } else if (m_settings.m_messageType == MeshtasticModSettings::MessageCQ) {
-        m_settings.m_cqMessage = ui->messageText->toPlainText();
-    } else if (m_settings.m_messageType == MeshtasticModSettings::MessageReply) {
-        m_settings.m_replyMessage = ui->messageText->toPlainText();
-    } else if (m_settings.m_messageType == MeshtasticModSettings::MessageReport) {
-        m_settings.m_reportMessage = ui->messageText->toPlainText();
-    } else if (m_settings.m_messageType == MeshtasticModSettings::MessageReplyReport) {
-        m_settings.m_replyReportMessage = ui->messageText->toPlainText();
-    } else if (m_settings.m_messageType == MeshtasticModSettings::MessageRRR) {
-        m_settings.m_rrrMessage = ui->messageText->toPlainText();
-    } else if (m_settings.m_messageType == MeshtasticModSettings::Message73) {
-        m_settings.m_73Message = ui->messageText->toPlainText();
-    } else if (m_settings.m_messageType == MeshtasticModSettings::MessageQSOText) {
-        m_settings.m_qsoTextMessage = ui->messageText->toPlainText();
-    } else if (m_settings.m_messageType == MeshtasticModSettings::MessageText) {
+    if (MeshtasticModSettings::m_messageType == MeshtasticModSettings::MessageText) {
         m_settings.m_textMessage = ui->messageText->toPlainText();
     }
 
-    applyMeshtasticRadioSettingsIfPresent(getActivePayloadText());
     applySettings();
 }
 
 void MeshtasticModGUI::on_hexText_editingFinished()
 {
     m_settings.m_bytesMessage = QByteArray::fromHex(ui->hexText->text().toLatin1());
-    applyMeshtasticRadioSettingsIfPresent(getActivePayloadText());
     applySettings();
 }
 
@@ -508,6 +565,49 @@ void MeshtasticModGUI::on_invertRamps_stateChanged(int state)
     applySettings();
 }
 
+void MeshtasticModGUI::on_meshRegion_currentIndexChanged(int index)
+{
+    (void) index;
+    if (m_meshControlsUpdating) {
+        return;
+    }
+
+    rebuildMeshtasticChannelOptions();
+    applyMeshtasticProfileFromSelection();
+}
+
+void MeshtasticModGUI::on_meshPreset_currentIndexChanged(int index)
+{
+    (void) index;
+    if (m_meshControlsUpdating) {
+        return;
+    }
+
+    rebuildMeshtasticChannelOptions();
+    applyMeshtasticProfileFromSelection();
+}
+
+void MeshtasticModGUI::on_meshChannel_currentIndexChanged(int index)
+{
+    (void) index;
+    if (m_meshControlsUpdating) {
+        return;
+    }
+
+    applyMeshtasticProfileFromSelection();
+}
+
+void MeshtasticModGUI::on_meshApply_clicked(bool checked)
+{
+    (void) checked;
+    if (m_meshControlsUpdating) {
+        return;
+    }
+
+    rebuildMeshtasticChannelOptions();
+    applyMeshtasticProfileFromSelection();
+}
+
 void MeshtasticModGUI::onWidgetRolled(QWidget* widget, bool rollDown)
 {
     (void) widget;
@@ -531,7 +631,7 @@ void MeshtasticModGUI::onMenuDialogCalled(const QPoint &p)
 
         if (m_deviceUISet->m_deviceMIMOEngine)
         {
-            dialog.setNumberOfStreams(m_chirpChatMod->getNumberOfDeviceStreams());
+            dialog.setNumberOfStreams(m_meshtasticMod->getNumberOfDeviceStreams());
             dialog.setStreamIndex(m_settings.m_streamIndex);
         }
 
@@ -574,6 +674,7 @@ MeshtasticModGUI::MeshtasticModGUI(PluginAPI* pluginAPI, DeviceUISet *deviceUISe
     m_deviceCenterFrequency(0),
     m_basebandSampleRate(125000),
 	m_doApplySettings(true),
+    m_meshControlsUpdating(false),
     m_tickCount(0)
 {
 	setAttribute(Qt::WA_DeleteOnClose, true);
@@ -585,10 +686,12 @@ MeshtasticModGUI::MeshtasticModGUI(PluginAPI* pluginAPI, DeviceUISet *deviceUISe
 	connect(rollupContents, SIGNAL(widgetRolled(QWidget*,bool)), this, SLOT(onWidgetRolled(QWidget*,bool)));
 	connect(this, SIGNAL(customContextMenuRequested(const QPoint &)), this, SLOT(onMenuDialogCalled(const QPoint &)));
 
-	m_chirpChatMod = (MeshtasticMod*) channelTx;
-	m_chirpChatMod->setMessageQueueToGUI(getInputMessageQueue());
+	m_meshtasticMod = (MeshtasticMod*) channelTx;
+	m_meshtasticMod->setMessageQueueToGUI(getInputMessageQueue());
 
 	connect(&MainCore::instance()->getMasterTimer(), SIGNAL(timeout()), this, SLOT(tick()));
+
+    ui->fecParity->setEnabled(true);
 
     ui->deltaFrequencyLabel->setText(QString("%1f").arg(QChar(0x94, 0x03)));
     ui->deltaFrequency->setColorMapper(ColorMapper(ColorMapper::GrayGold));
@@ -613,29 +716,13 @@ MeshtasticModGUI::MeshtasticModGUI(PluginAPI* pluginAPI, DeviceUISet *deviceUISe
     ui->idleTimeText->setToolTip(tr("Current idle interval in seconds."));
     ui->syncWord->setToolTip(tr("LoRa sync word in hexadecimal (00-ff)."));
     ui->syncLabel->setToolTip(tr("LoRa sync word."));
-    ui->scheme->setToolTip(tr("Encoder mode. Use LoRa for Meshtastic-compatible payloads."));
-    ui->schemeLabel->setToolTip(tr("Select encoding scheme."));
     ui->fecParity->setToolTip(tr("LoRa coding rate parity denominator (CR)."));
     ui->fecParityLabel->setToolTip(tr("LoRa coding rate parity setting."));
     ui->fecParityText->setToolTip(tr("Current coding rate parity value."));
-    ui->crc->setToolTip(tr("Append payload CRC."));
-    ui->header->setToolTip(tr("Use explicit LoRa header mode."));
     ui->channelMute->setToolTip(tr("Mute this channel output."));
-    ui->myCall->setToolTip(tr("Source callsign used by template messages."));
-    ui->myCallLabel->setToolTip(tr("Source callsign field."));
-    ui->urCall->setToolTip(tr("Destination callsign used by template messages."));
-    ui->urCallLabel->setToolTip(tr("Destination callsign field."));
-    ui->myLocator->setToolTip(tr("Source locator used by template messages."));
-    ui->myLocatorLabel->setToolTip(tr("Source locator field."));
-    ui->report->setToolTip(tr("Signal report used by template messages."));
-    ui->reportLabel->setToolTip(tr("Signal report field."));
-    ui->msgType->setToolTip(tr("Select which payload template is edited/transmitted."));
-    ui->msgTypeLabel->setToolTip(tr("Payload template type."));
-    ui->resetMessages->setToolTip(tr("Reset payload templates to defaults."));
     ui->playMessage->setToolTip(tr("Queue one transmission of current message type."));
     ui->repeatMessage->setToolTip(tr("Number of repetitions for each triggered transmission."));
     ui->repeatLabel->setToolTip(tr("Transmission repetition count."));
-    ui->generateMessages->setToolTip(tr("Generate standardized payload templates from current fields."));
     ui->messageText->setToolTip(tr("Text payload editor. Meshtastic MESH: commands can auto-apply radio settings."));
     ui->msgLabel->setToolTip(tr("Message payload editor."));
     ui->hexText->setToolTip(tr("Raw hexadecimal payload bytes."));
@@ -644,7 +731,8 @@ MeshtasticModGUI::MeshtasticModGUI(PluginAPI* pluginAPI, DeviceUISet *deviceUISe
     ui->udpAddress->setToolTip(tr("UDP listen address for incoming payloads."));
     ui->udpPort->setToolTip(tr("UDP listen port for incoming payloads."));
     ui->udpSeparator->setToolTip(tr("UDP input controls."));
-    ui->invertRamps->setToolTip(tr("Invert chirp ramp direction."));
+    ui->invertRamps->setToolTip(tr("Invert chirp ramp direction. Disabled"));
+    ui->invertRamps->setEnabled(false);
     ui->channelPower->setToolTip(tr("Estimated channel output power."));
     ui->timesLabel->setToolTip(tr("Estimated timing values for current LoRa frame."));
     ui->timeSymbolText->setToolTip(tr("Estimated LoRa symbol time."));
@@ -676,6 +764,7 @@ MeshtasticModGUI::MeshtasticModGUI(PluginAPI* pluginAPI, DeviceUISet *deviceUISe
     m_settings.setRollupState(&m_rollupState);
 
     setBandwidths();
+    setupMeshtasticAutoProfileControls();
     displaySettings();
     makeUIConnections();
     applySettings();
@@ -698,7 +787,7 @@ void MeshtasticModGUI::applySettings(bool force)
 	if (m_doApplySettings)
 	{
 		MeshtasticMod::MsgConfigureMeshtasticMod *msg = MeshtasticMod::MsgConfigureMeshtasticMod::create(m_settings, force);
-		m_chirpChatMod->getInputMessageQueue()->push(msg);
+		m_meshtasticMod->getInputMessageQueue()->push(msg);
 	}
 }
 
@@ -720,9 +809,7 @@ void MeshtasticModGUI::displaySettings()
     displayCurrentPayloadMessage();
     displayBinaryMessage();
 
-    ui->fecParity->setEnabled(m_settings.m_codingScheme == MeshtasticModSettings::CodingLoRa);
-    ui->crc->setEnabled(m_settings.m_codingScheme == MeshtasticModSettings::CodingLoRa);
-    ui->header->setEnabled(m_settings.m_codingScheme == MeshtasticModSettings::CodingLoRa);
+    ui->fecParity->setEnabled(MeshtasticModSettings::m_codingScheme == MeshtasticModSettings::CodingLoRa);
 
     blockApplySettings(true);
     ui->deltaFrequency->setValue(m_channelMarker.getCenterFrequency());
@@ -738,22 +825,46 @@ void MeshtasticModGUI::displaySettings()
     ui->idleTimeText->setText(tr("%1").arg(m_settings.m_quietMillis / 1000.0, 0, 'f', 1));
     ui->syncWord->setText((tr("%1").arg(m_settings.m_syncWord, 2, 16)));
     ui->channelMute->setChecked(m_settings.m_channelMute);
-    ui->scheme->setCurrentIndex((int) m_settings.m_codingScheme);
     ui->fecParity->setValue(m_settings.m_nbParityBits);
     ui->fecParityText->setText(tr("%1").arg(m_settings.m_nbParityBits));
-    ui->crc->setChecked(m_settings.m_hasCRC);
-    ui->header->setChecked(m_settings.m_hasHeader);
-    ui->myCall->setText(m_settings.m_myCall);
-    ui->urCall->setText(m_settings.m_urCall);
-    ui->myLocator->setText(m_settings.m_myLoc);
-    ui->report->setText(m_settings.m_myRpt);
     ui->repeatMessage->setValue(m_settings.m_messageRepeat);
     ui->repeatText->setText(tr("%1").arg(m_settings.m_messageRepeat));
-    ui->msgType->setCurrentIndex((int) m_settings.m_messageType);
     ui->udpEnabled->setChecked(m_settings.m_udpEnabled);
     ui->udpAddress->setText(m_settings.m_udpAddress);
     ui->udpPort->setText(QString::number(m_settings.m_udpPort));
     ui->invertRamps->setChecked(m_settings.m_invertRamps);
+
+    m_meshControlsUpdating = true;
+
+    int regionIndex = ui->meshRegion->findData(m_settings.m_meshtasticRegionCode);
+    if (regionIndex < 0) {
+        regionIndex = ui->meshRegion->findData("US");
+    }
+    if (regionIndex < 0) {
+        regionIndex = 0;
+    }
+    ui->meshRegion->setCurrentIndex(regionIndex);
+
+    int presetIndex = ui->meshPreset->findData(m_settings.m_meshtasticPresetName);
+    if (presetIndex < 0) {
+        presetIndex = ui->meshPreset->findData("LONG_FAST");
+    }
+    if (presetIndex < 0) {
+        presetIndex = 0;
+    }
+    ui->meshPreset->setCurrentIndex(presetIndex);
+    m_meshControlsUpdating = false;
+
+    rebuildMeshtasticChannelOptions();
+
+    m_meshControlsUpdating = true;
+    int channelIndex = ui->meshChannel->findData(m_settings.m_meshtasticChannelIndex);
+    if (channelIndex < 0) {
+        channelIndex = 0;
+    }
+    ui->meshChannel->setCurrentIndex(channelIndex);
+    m_meshControlsUpdating = false;
+
     getRollupContents()->restoreState(m_rollupState);
     updateAbsoluteCenterFrequency();
     blockApplySettings(false);
@@ -763,25 +874,7 @@ void MeshtasticModGUI::displayCurrentPayloadMessage()
 {
     ui->messageText->blockSignals(true);
 
-    if (m_settings.m_messageType == MeshtasticModSettings::MessageNone) {
-        ui->messageText->clear();
-    } else if (m_settings.m_messageType == MeshtasticModSettings::MessageBeacon) {
-        ui->messageText->setText(m_settings.m_beaconMessage);
-    } else if (m_settings.m_messageType == MeshtasticModSettings::MessageCQ) {
-        ui->messageText->setText(m_settings.m_cqMessage);
-    } else if (m_settings.m_messageType == MeshtasticModSettings::MessageReply) {
-        ui->messageText->setText(m_settings.m_replyMessage);
-    } else if (m_settings.m_messageType == MeshtasticModSettings::MessageReport) {
-        ui->messageText->setText(m_settings.m_reportMessage);
-    } else if (m_settings.m_messageType == MeshtasticModSettings::MessageReplyReport) {
-        ui->messageText->setText(m_settings.m_replyReportMessage);
-    } else if (m_settings.m_messageType == MeshtasticModSettings::MessageRRR) {
-        ui->messageText->setText(m_settings.m_rrrMessage);
-    } else if (m_settings.m_messageType == MeshtasticModSettings::Message73) {
-        ui->messageText->setText(m_settings.m_73Message);
-    } else if (m_settings.m_messageType == MeshtasticModSettings::MessageQSOText) {
-        ui->messageText->setText(m_settings.m_qsoTextMessage);
-    } else if (m_settings.m_messageType == MeshtasticModSettings::MessageText) {
+    if (MeshtasticModSettings::m_messageType == MeshtasticModSettings::MessageText) {
         ui->messageText->setText(m_settings.m_textMessage);
     }
 
@@ -831,11 +924,11 @@ void MeshtasticModGUI::tick()
     else
     {
         m_tickCount = 0;
-        double powDb = CalcDb::dbPower(m_chirpChatMod->getMagSq());
+        double powDb = CalcDb::dbPower(m_meshtasticMod->getMagSq());
         m_channelPowerDbAvg(powDb);
         ui->channelPower->setText(tr("%1 dB").arg(m_channelPowerDbAvg.asDouble(), 0, 'f', 1));
 
-        if (m_chirpChatMod->getModulatorActive()) {
+        if (m_meshtasticMod->getModulatorActive()) {
             ui->playMessage->setStyleSheet("QPushButton { background-color : green; }");
         } else {
             ui->playMessage->setStyleSheet("QPushButton { background:rgb(79,79,79); }");
@@ -853,25 +946,18 @@ void MeshtasticModGUI::makeUIConnections()
     QObject::connect(ui->idleTime, &QSlider::valueChanged, this, &MeshtasticModGUI::on_idleTime_valueChanged);
     QObject::connect(ui->syncWord, &QLineEdit::editingFinished, this, &MeshtasticModGUI::on_syncWord_editingFinished);
     QObject::connect(ui->channelMute, &QToolButton::toggled, this, &MeshtasticModGUI::on_channelMute_toggled);
-    QObject::connect(ui->scheme, QOverload<int>::of(&QComboBox::currentIndexChanged), this, &MeshtasticModGUI::on_scheme_currentIndexChanged);
     QObject::connect(ui->fecParity, &QDial::valueChanged, this, &MeshtasticModGUI::on_fecParity_valueChanged);
-    QObject::connect(ui->crc, &QCheckBox::stateChanged, this, &MeshtasticModGUI::on_crc_stateChanged);
-    QObject::connect(ui->header, &QCheckBox::stateChanged, this, &MeshtasticModGUI::on_header_stateChanged);
-    QObject::connect(ui->myCall, &QLineEdit::editingFinished, this, &MeshtasticModGUI::on_myCall_editingFinished);
-    QObject::connect(ui->urCall, &QLineEdit::editingFinished, this, &MeshtasticModGUI::on_urCall_editingFinished);
-    QObject::connect(ui->myLocator, &QLineEdit::editingFinished, this, &MeshtasticModGUI::on_myLocator_editingFinished);
-    QObject::connect(ui->report, &QLineEdit::editingFinished, this, &MeshtasticModGUI::on_report_editingFinished);
-    QObject::connect(ui->msgType, QOverload<int>::of(&QComboBox::currentIndexChanged), this, &MeshtasticModGUI::on_msgType_currentIndexChanged);
-    QObject::connect(ui->resetMessages, &QPushButton::clicked, this, &MeshtasticModGUI::on_resetMessages_clicked);
     QObject::connect(ui->playMessage, &QPushButton::clicked, this, &MeshtasticModGUI::on_playMessage_clicked);
     QObject::connect(ui->repeatMessage, &QDial::valueChanged, this, &MeshtasticModGUI::on_repeatMessage_valueChanged);
-    QObject::connect(ui->generateMessages, &QPushButton::clicked, this, &MeshtasticModGUI::on_generateMessages_clicked);
     QObject::connect(ui->messageText, &CustomTextEdit::editingFinished, this, &MeshtasticModGUI::on_messageText_editingFinished);
     QObject::connect(ui->hexText, &QLineEdit::editingFinished, this, &MeshtasticModGUI::on_hexText_editingFinished);
     QObject::connect(ui->udpEnabled, &QCheckBox::clicked, this, &MeshtasticModGUI::on_udpEnabled_clicked);
     QObject::connect(ui->udpAddress, &QLineEdit::editingFinished, this, &MeshtasticModGUI::on_udpAddress_editingFinished);
     QObject::connect(ui->udpPort, &QLineEdit::editingFinished, this, &MeshtasticModGUI::on_udpPort_editingFinished);
-    QObject::connect(ui->invertRamps, &QCheckBox::stateChanged, this, &MeshtasticModGUI::on_invertRamps_stateChanged);
+    QObject::connect(ui->meshRegion, QOverload<int>::of(&QComboBox::currentIndexChanged), this, &MeshtasticModGUI::on_meshRegion_currentIndexChanged);
+    QObject::connect(ui->meshPreset, QOverload<int>::of(&QComboBox::currentIndexChanged), this, &MeshtasticModGUI::on_meshPreset_currentIndexChanged);
+    QObject::connect(ui->meshChannel, QOverload<int>::of(&QComboBox::currentIndexChanged), this, &MeshtasticModGUI::on_meshChannel_currentIndexChanged);
+    QObject::connect(ui->meshApply, &QPushButton::clicked, this, &MeshtasticModGUI::on_meshApply_clicked);
 }
 
 void MeshtasticModGUI::updateAbsoluteCenterFrequency()

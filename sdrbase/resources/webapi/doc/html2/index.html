@@ -4033,6 +4033,12 @@ margin-bottom: 20px;
     "M17ModReport" : {
       "$ref" : "#/definitions/M17ModReport"
     },
+    "MeshtasticDemodReport" : {
+      "$ref" : "#/definitions/MeshtasticDemodReport"
+    },
+    "MeshtasticModReport" : {
+      "$ref" : "#/definitions/MeshtasticModReport"
+    },
     "NavtexDemodReport" : {
       "$ref" : "#/definitions/NavtexDemodReport"
     },
@@ -4229,6 +4235,12 @@ margin-bottom: 20px;
     },
     "M17ModSettings" : {
       "$ref" : "#/definitions/M17ModSettings"
+    },
+    "MeshtasticDemodSettings" : {
+      "$ref" : "#/definitions/MeshtasticDemodSettings"
+    },
+    "MeshtasticModSettings" : {
+      "$ref" : "#/definitions/MeshtasticModSettings"
     },
     "NavtexDemodSettings" : {
       "$ref" : "#/definitions/NavtexDemodSettings"
@@ -10849,6 +10861,324 @@ margin-bottom: 20px;
     }
   },
   "description" : "Map"
+};
+            defs.MeshtasticDemodReport = {
+  "properties" : {
+    "channelPowerDB" : {
+      "type" : "number",
+      "format" : "float",
+      "description" : "current de-chirped total channel power (dB)"
+    },
+    "noisePowerDB" : {
+      "type" : "number",
+      "format" : "float",
+      "description" : "current de-chirped noise argmax power (dB)"
+    },
+    "signalPowerDB" : {
+      "type" : "number",
+      "format" : "float",
+      "description" : "last message de-chirped signal argmax power (dB)"
+    },
+    "snrPowerDB" : {
+      "type" : "number",
+      "format" : "float",
+      "description" : "last message de-chirped signal to noise ratio power (dB)"
+    },
+    "channelSampleRate" : {
+      "type" : "integer"
+    },
+    "syncWord" : {
+      "type" : "integer",
+      "description" : "2 bytes sync word (0..65535)"
+    },
+    "nbParityBits" : {
+      "type" : "integer",
+      "description" : "Hamming FEC parity bits (LoRa)"
+    },
+    "packetLength" : {
+      "type" : "integer",
+      "description" : "Packet length in number of bytes (LoRa)"
+    },
+    "nbSymbols" : {
+      "type" : "integer",
+      "description" : "Number of symbols in the payload with header and CRC (LoRa)"
+    },
+    "nbCodewords" : {
+      "type" : "integer",
+      "description" : "Number of codewords in the payload with header and CRC (LoRa)"
+    },
+    "headerParityStatus" : {
+      "type" : "integer",
+      "description" : "Header FEC parity status:\n  * 0 - Undefined\n  * 1 - Uncorrectable error\n  * 2 - Corrected error\n  * 3 - OK\n"
+    },
+    "headerCRCStatus" : {
+      "type" : "integer",
+      "description" : "header CRC check status. Boolean 1 if OK else 0"
+    },
+    "payloadParityStatus" : {
+      "type" : "integer",
+      "description" : "Payload FEC parity status:\n  * 0 - Undefined\n  * 1 - Uncorrectable error\n  * 2 - Corrected error\n  * 3 - OK\n"
+    },
+    "payloadCRCStatus" : {
+      "type" : "integer",
+      "description" : "payload CRC check status. Boolean 1 if OK else 0"
+    },
+    "messageTimestamp" : {
+      "type" : "string",
+      "description" : "timestamp of the last decoded message"
+    },
+    "messageString" : {
+      "type" : "string",
+      "description" : "string representation of the last decoded message"
+    },
+    "frameType" : {
+      "type" : "string",
+      "description" : "frame type shown in the GUI tree view (for example LORA_FRAME or POSITION_APP)"
+    },
+    "channelType" : {
+      "type" : "string",
+      "description" : "Channel type code e.g. LONG_FAST"
+    },
+    "messageBytes" : {
+      "type" : "array",
+      "description" : "bytes of the last decoded message as an array of hex string represented bytes (00..FF)",
+      "items" : {
+        "type" : "string"
+      }
+    },
+    "decoding" : {
+      "type" : "integer",
+      "description" : "Boolean - decoding status\n  * 0 - no decoding\n  * 1 - decoding\n"
+    }
+  },
+  "description" : "MeshtasticDemod"
+};
+            defs.MeshtasticDemodSettings = {
+  "properties" : {
+    "inputFrequencyOffset" : {
+      "type" : "integer",
+      "format" : "int64"
+    },
+    "bandwidthIndex" : {
+      "type" : "integer",
+      "description" : "standard bandwidths index:\n  *  0 -    375 Hz (384000 / 1024)\n  *  1 -    750 Hz (384000 / 512)\n  *  2 -   1500 Hz (384000 / 256)\n  *  3 -   2604 Hz (333333 / 128)\n  *  4 -   3125 Hz (400000 / 128)\n  *  5 -   3906 Hz (500000 / 128)\n  *  6 -   5208 Hz (333333 / 64)\n  *  7 -   6250 Hz (400000 / 64)\n  *  8 -   7813 Hz (500000 / 64)\n  *  9 -  10417 Hz (333333 / 32)\n  * 10 -  12500 Hz (400000 / 32)\n  * 11 -  15625 Hz (500000 / 32)\n  * 12 -  20833 Hz (333333 / 16)\n  * 13 -  25000 Hz (400000 / 16)\n  * 14 -  31250 Hz (500000 / 16)\n  * 15 -  41667 Hz (333333 / 8)\n  * 16 -  50000 Hz (400000 / 8)\n  * 17 -  62500 Hz (500000 / 8)\n  * 18 -  83333 Hz (333333 / 4)\n  * 19 - 100000 Hz (400000 / 4)\n  * 20 - 125000 Hz (500000 / 4)\n  * 21 - 166667 Hz (333333 / 2)\n  * 22 - 200000 Hz (400000 / 2)\n  * 23 - 250000 Hz (500000 / 2)\n  * 24 - 333333 Hz (333333 / 1)\n  * 25 - 400000 Hz (400000 / 1)\n  * 26 - 500000 Hz (500000 / 1)\n"
+    },
+    "spreadFactor" : {
+      "type" : "integer"
+    },
+    "deBits" : {
+      "type" : "integer",
+      "description" : "Low data rate optimize (DE) bits i.e. nb of FFT bins per effective symbol"
+    },
+    "decodeActive" : {
+      "type" : "integer",
+      "description" : "boolean 1 to activate 0 to de-activate decoder"
+    },
+    "eomSquelchTenths" : {
+      "type" : "integer",
+      "description" : "argmax squared magnitude is compared between current multiplied by this factor and maximum during decoding. This value is divided by 10"
+    },
+    "nbSymbolsMax" : {
+      "type" : "integer",
+      "description" : "expected maximum number of symbols in a payload"
+    },
+    "preambleChirps" : {
+      "type" : "integer",
+      "description" : "Number of expected preamble chirps"
+    },
+    "nbParityBits" : {
+      "type" : "integer",
+      "description" : "Hamming FEC parity bits (LoRa)"
+    },
+    "packetLength" : {
+      "type" : "integer",
+      "description" : "expected packet length in number of bytes (LoRa)"
+    },
+    "sendViaUDP" : {
+      "type" : "integer",
+      "description" : "boolean 1 to send decoded message via UDP else 0"
+    },
+    "udpEnabled" : {
+      "type" : "integer",
+      "description" : "Boolean - Send via UDP\n  * 0 - Do not send decoded messages via UDP\n  * 1 - Send decoded messages via UDP\n"
+    },
+    "udpAddress" : {
+      "type" : "string",
+      "description" : "UDP destination udpAddress"
+    },
+    "udpPort" : {
+      "type" : "integer",
+      "description" : "UDP destination port"
+    },
+    "invertRamps" : {
+      "type" : "integer",
+      "description" : "Invert chirp ramps\n  * 0 - Normal chirp ramps (upchirps for preamble and payload)\n  * 1 - Inverted chirp ramps (downchirps for preamble and payload)\n"
+    },
+    "rgbColor" : {
+      "type" : "integer"
+    },
+    "title" : {
+      "type" : "string"
+    },
+    "streamIndex" : {
+      "type" : "integer",
+      "description" : "MIMO channel. Not relevant when connected to SI (single Rx)."
+    },
+    "useReverseAPI" : {
+      "type" : "integer",
+      "description" : "Synchronize with reverse API (1 for yes, 0 for no)"
+    },
+    "reverseAPIAddress" : {
+      "type" : "string"
+    },
+    "reverseAPIPort" : {
+      "type" : "integer"
+    },
+    "reverseAPIDeviceIndex" : {
+      "type" : "integer"
+    },
+    "reverseAPIChannelIndex" : {
+      "type" : "integer"
+    },
+    "spectrumConfig" : {
+      "$ref" : "#/definitions/GLSpectrum"
+    },
+    "channelMarker" : {
+      "$ref" : "#/definitions/ChannelMarker"
+    },
+    "rollupState" : {
+      "$ref" : "#/definitions/RollupState"
+    }
+  },
+  "description" : "MeshtasticDemod"
+};
+            defs.MeshtasticModReport = {
+  "properties" : {
+    "channelPowerDB" : {
+      "type" : "number",
+      "format" : "float",
+      "description" : "power transmitted in channel (dB)"
+    },
+    "channelSampleRate" : {
+      "type" : "integer"
+    },
+    "symbolTimeMs" : {
+      "type" : "number",
+      "format" : "float",
+      "description" : "symbol duration (ms)"
+    },
+    "payloadTimeMs" : {
+      "type" : "number",
+      "format" : "float",
+      "description" : "payload duration (ms)"
+    },
+    "totalTimeMs" : {
+      "type" : "number",
+      "format" : "float",
+      "description" : "total message duration inc. preamble and SFD (ms)"
+    },
+    "playing" : {
+      "type" : "integer",
+      "description" : "Boolean - modulator is active (playing) including idle time\n  * 0 - Modulator not active\n  * 1 - Modulator active\n"
+    }
+  },
+  "description" : "MeshtasticMod"
+};
+            defs.MeshtasticModSettings = {
+  "properties" : {
+    "inputFrequencyOffset" : {
+      "type" : "integer",
+      "format" : "int64"
+    },
+    "bandwidthIndex" : {
+      "type" : "integer",
+      "description" : "standard bandwidths index:\n  *  0 -    375 Hz (384000 / 1024)\n  *  1 -    750 Hz (384000 / 512)\n  *  2 -   1500 Hz (384000 / 256)\n  *  3 -   2604 Hz (333333 / 128)\n  *  4 -   3125 Hz (400000 / 128)\n  *  5 -   3906 Hz (500000 / 128)\n  *  6 -   5208 Hz (333333 / 64)\n  *  7 -   6250 Hz (400000 / 64)\n  *  8 -   7813 Hz (500000 / 64)\n  *  9 -  10417 Hz (333333 / 32)\n  * 10 -  12500 Hz (400000 / 32)\n  * 11 -  15625 Hz (500000 / 32)\n  * 12 -  20833 Hz (333333 / 16)\n  * 13 -  25000 Hz (400000 / 16)\n  * 14 -  31250 Hz (500000 / 16)\n  * 15 -  41667 Hz (333333 / 8)\n  * 16 -  50000 Hz (400000 / 8)\n  * 17 -  62500 Hz (500000 / 8)\n  * 18 -  83333 Hz (333333 / 4)\n  * 19 - 100000 Hz (400000 / 4)\n  * 20 - 125000 Hz (500000 / 4)\n  * 21 - 166667 Hz (333333 / 2)\n  * 22 - 200000 Hz (400000 / 2)\n  * 23 - 250000 Hz (500000 / 2)\n  * 24 - 333333 Hz (333333 / 1)\n  * 25 - 400000 Hz (400000 / 1)\n  * 26 - 500000 Hz (500000 / 1)\n"
+    },
+    "spreadFactor" : {
+      "type" : "integer"
+    },
+    "deBits" : {
+      "type" : "integer",
+      "description" : "Low data rate optimize (DE) bits i.e. nb of FFT bins per effective symbol"
+    },
+    "preambleChirps" : {
+      "type" : "integer",
+      "description" : "Number of preamble chirps"
+    },
+    "quietMillis" : {
+      "type" : "integer",
+      "description" : "Number of milliseconds to pause between transmissions"
+    },
+    "syncWord" : {
+      "type" : "integer",
+      "description" : "2 byte (0..65535) synchronization syncWord"
+    },
+    "channelMute" : {
+      "type" : "integer",
+      "description" : "boolean"
+    },
+    "nbParityBits" : {
+      "type" : "integer",
+      "description" : "Hamming FEC parity bits (LoRa)"
+    },
+    "textMessage" : {
+      "type" : "string",
+      "description" : "freeform text message"
+    },
+    "messageRepeat" : {
+      "type" : "integer",
+      "description" : "number of repetitions of the same message (0 for infinite)"
+    },
+    "udpEnabled" : {
+      "type" : "integer",
+      "description" : "boolean 1 to enable forwarding messages via UDP else 0"
+    },
+    "udpAddress" : {
+      "type" : "string",
+      "description" : "UDP address to listen for messages to transmit on"
+    },
+    "udpPort" : {
+      "type" : "integer",
+      "description" : "UDP port to listen for messages to transmit on"
+    },
+    "invertRamps" : {
+      "type" : "integer",
+      "description" : "Invert chirp ramps\n  * 0 - Normal chirp ramps (upchirps for preamble and payload)\n  * 1 - Inverted chirp ramps (downchirps for preamble and payload)\n"
+    },
+    "rgbColor" : {
+      "type" : "integer"
+    },
+    "title" : {
+      "type" : "string"
+    },
+    "streamIndex" : {
+      "type" : "integer",
+      "description" : "MIMO channel. Not relevant when connected to SI (single Rx)."
+    },
+    "useReverseAPI" : {
+      "type" : "integer",
+      "description" : "Synchronize with reverse API (1 for yes, 0 for no)"
+    },
+    "reverseAPIAddress" : {
+      "type" : "string"
+    },
+    "reverseAPIPort" : {
+      "type" : "integer"
+    },
+    "reverseAPIDeviceIndex" : {
+      "type" : "integer"
+    },
+    "reverseAPIChannelIndex" : {
+      "type" : "integer"
+    },
+    "channelMarker" : {
+      "$ref" : "#/definitions/ChannelMarker"
+    },
+    "rollupState" : {
+      "$ref" : "#/definitions/RollupState"
+    }
+  },
+  "description" : "MeshtasticMod"
 };
             defs.MetisMISOSettings = {
   "properties" : {
@@ -59982,7 +60312,7 @@ except ApiException as e:
           </div>
           <div id="generator">
             <div class="content">
-              Generated 2026-02-07T23:22:00.482+01:00
+              Generated 2026-03-22T19:58:59.376+01:00
             </div>
           </div>
       </div>

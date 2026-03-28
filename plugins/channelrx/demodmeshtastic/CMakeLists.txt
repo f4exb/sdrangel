@@ -1,10 +1,5 @@
 project(meshtastic)
 
-if (FT8_SUPPORT)
-    set(meshtastic_FT8_LIB ft8)
-    set(meshtastic_FT8_INCLUDE ${CMAKE_SOURCE_DIR}/ft8)
-endif()
-
 set(meshtastic_SOURCES
 	meshtasticdemod.cpp
 	meshtasticdemodsettings.cpp
@@ -12,12 +7,9 @@ set(meshtastic_SOURCES
 	meshtasticdemodbaseband.cpp
 	meshtasticplugin.cpp
 	meshtasticdemoddecoder.cpp
-	meshtasticdemoddecodertty.cpp
-    meshtasticdemoddecoderascii.cpp
     meshtasticdemoddecoderlora.cpp
-    meshtasticdemoddecoderft.cpp
 	meshtasticdemodmsg.cpp
-    ${CMAKE_SOURCE_DIR}/plugins/meshtasticcommon/meshtasticpacket.cpp
+    meshtasticdemodwebapiadapter.cpp
 )
 
 set(meshtastic_HEADERS
@@ -26,18 +18,15 @@ set(meshtastic_HEADERS
 	meshtasticdemodsink.h
 	meshtasticdemodbaseband.h
 	meshtasticdemoddecoder.h
-	meshtasticdemoddecodertty.h
-    meshtasticdemoddecoderascii.h
     meshtasticdemoddecoderlora.h
-    meshtasticdemoddecoderft.h
 	meshtasticdemodmsg.h
 	meshtasticplugin.h
+    meshtasticdemodwebapiadapter.h
 )
 
 include_directories(
     ${CMAKE_SOURCE_DIR}/swagger/sdrangel/code/qt5/client
-    ${meshtastic_FT8_INCLUDE}
-    ${CMAKE_SOURCE_DIR}/plugins/meshtasticcommon
+    ${CMAKE_SOURCE_DIR}/modemmeshtastic
 )
 
 if(NOT SERVER_MODE)
@@ -45,10 +34,13 @@ if(NOT SERVER_MODE)
         ${meshtastic_SOURCES}
         meshtasticdemodgui.cpp
         meshtasticdemodgui.ui
+        meshtastickeysdialog.cpp
+        meshtastickeysdialog.ui
     )
     set(meshtastic_HEADERS
         ${meshtastic_HEADERS}
         meshtasticdemodgui.h
+        meshtastickeysdialog.h
     )
     set(TARGET_NAME ${PLUGINS_PREFIX}demodmeshtastic)
     set(TARGET_LIB "Qt::Widgets")
@@ -78,7 +70,7 @@ target_link_libraries(${TARGET_NAME} PRIVATE
 	sdrbase
 	${TARGET_LIB_GUI}
     swagger
-    ${meshtastic_FT8_LIB}
+    modemmeshtastic
 )
 
 install(TARGETS ${TARGET_NAME} DESTINATION ${INSTALL_FOLDER})

@@ -29,17 +29,35 @@ void MeshtasticModEncoderLoRa::addChecksum(QByteArray& bytes)
 void MeshtasticModEncoderLoRa::encodeBytes(
         const QByteArray& bytes,
         std::vector<unsigned short>& symbols,
-        unsigned int nbSymbolBits,
+        unsigned int payloadNbSymbolBits,
+        unsigned int headerNbSymbolBits,
         bool hasHeader,
         bool hasCRC,
         unsigned int nbParityBits
 )
 {
-    if (nbSymbolBits < 5) {
+    if (payloadNbSymbolBits < 5) {
         return;
     }
 
-    const unsigned int numCodewords = roundUp(bytes.size()*2 + (hasHeader ? headerCodewords : 0), nbSymbolBits); // uses payload + CRC for encoding size
+    if (hasHeader && (headerNbSymbolBits < headerCodewords)) {
+        return;
+    }
+
+    const unsigned int payloadNibbleCount = bytes.size() * 2U;
+    const unsigned int firstBlockCodewords = hasHeader ? headerNbSymbolBits : payloadNbSymbolBits;
+    const unsigned int headerSize = hasHeader ? headerCodewords : 0U;
+    const unsigned int payloadInFirstBlock = firstBlockCodewords > headerSize
+        ? std::min(payloadNibbleCount, firstBlockCodewords - headerSize)
+        : 0U;
+    const unsigned int remainingPayloadNibbles = payloadNibbleCount > payloadInFirstBlock
+        ? (payloadNibbleCount - payloadInFirstBlock)
+        : 0U;
+    const unsigned int remainingCodewords = remainingPayloadNibbles > 0U
+        ? roundUp(remainingPayloadNibbles, payloadNbSymbolBits)
+        : 0U;
+    const unsigned int numCodewords = firstBlockCodewords + remainingCodewords;
+
     unsigned int cOfs = 0;
 	unsigned int dOfs = 0;
 
@@ -61,30 +79,67 @@ void MeshtasticModEncoderLoRa::encodeBytes(
         codewords[cOfs++] = encodeHamming84sx(hdr[2] & 0xf);
     }
 
-    unsigned int headerSize = cOfs;
-
-    // fill nbSymbolBits codewords with 8 bit codewords using payload data (ecode and whiten)
-    encodeFec(codewords, 4, cOfs, dOfs, reinterpret_cast<const uint8_t*>(bytes.data()), nbSymbolBits - headerSize);
-    Sx1272ComputeWhitening(codewords.data() + headerSize, nbSymbolBits - headerSize, 0, headerParityBits);
-
-    // encode and whiten the rest of the payload with 4 + nbParityBits bits codewords
-    if (numCodewords > nbSymbolBits)
+    // Fill first interleaver block (explicit header + first payload codewords) with 4/8 FEC.
+    if (firstBlockCodewords > headerSize)
     {
-        unsigned int cOfs2 = cOfs;
-        encodeFec(codewords, nbParityBits, cOfs, dOfs, reinterpret_cast<const uint8_t*>(bytes.data()), numCodewords - nbSymbolBits);
-        Sx1272ComputeWhitening(codewords.data() + cOfs2, numCodewords - nbSymbolBits, nbSymbolBits - headerSize, nbParityBits);
+        encodeFec(
+            codewords,
+            4,
+            cOfs,
+            dOfs,
+            reinterpret_cast<const uint8_t*>(bytes.data()),
+            bytes.size(),
+            firstBlockCodewords - headerSize
+        );
+        Sx1272ComputeWhitening(codewords.data() + headerSize, firstBlockCodewords - headerSize, 0, headerParityBits);
     }
 
-    // header is always coded with 8 bits and yields exactly 8 symbols (headerSymbols)
-    const unsigned int numSymbols = headerSymbols + (numCodewords / nbSymbolBits - 1) * (4 + nbParityBits);
+    // Encode and whiten remaining payload blocks with payload coding rate.
+    if (remainingCodewords > 0U)
+    {
+        unsigned int cOfs2 = cOfs;
+        encodeFec(
+            codewords,
+            nbParityBits,
+            cOfs,
+            dOfs,
+            reinterpret_cast<const uint8_t*>(bytes.data()),
+            bytes.size(),
+            remainingCodewords
+        );
+        Sx1272ComputeWhitening(
+            codewords.data() + cOfs2,
+            remainingCodewords,
+            static_cast<int>(firstBlockCodewords - headerSize),
+            nbParityBits
+        );
+    }
+
+    const unsigned int numSymbols = hasHeader
+        ? (headerSymbols + (remainingCodewords / payloadNbSymbolBits) * (4U + nbParityBits))
+        : ((numCodewords / payloadNbSymbolBits) * (4U + nbParityBits));
 
     // interleave the codewords into symbols
     symbols.clear();
     symbols.resize(numSymbols);
-    diagonalInterleaveSx(codewords.data(), nbSymbolBits, symbols.data(), nbSymbolBits, headerParityBits);
 
-    if (numCodewords > nbSymbolBits) {
-        diagonalInterleaveSx(codewords.data() + nbSymbolBits, numCodewords - nbSymbolBits, symbols.data() + headerSymbols, nbSymbolBits, nbParityBits);
+    if (hasHeader)
+    {
+        diagonalInterleaveSx(codewords.data(), firstBlockCodewords, symbols.data(), headerNbSymbolBits, headerParityBits);
+
+        if (remainingCodewords > 0U) {
+            diagonalInterleaveSx(
+                codewords.data() + firstBlockCodewords,
+                remainingCodewords,
+                symbols.data() + headerSymbols,
+                payloadNbSymbolBits,
+                nbParityBits
+            );
+        }
+    }
+    else
+    {
+        diagonalInterleaveSx(codewords.data(), numCodewords, symbols.data(), payloadNbSymbolBits, nbParityBits);
     }
 
     // gray decode
@@ -99,49 +154,53 @@ void MeshtasticModEncoderLoRa::encodeFec(
         unsigned int& cOfs,
         unsigned int& dOfs,
         const uint8_t *bytes,
+        const unsigned int bytesLength,
         const unsigned int codewordCount
 )
 {
     for (unsigned int i = 0; i < codewordCount; i++, dOfs++)
     {
+        const unsigned int byteIdx = dOfs / 2;
+        const uint8_t byteVal = byteIdx < bytesLength ? bytes[byteIdx] : 0U;
+
         if (nbParityBits == 1)
         {
             if (dOfs % 2 == 1) {
-                codewords[cOfs++] = encodeParity54(bytes[dOfs/2] >> 4);
+                codewords[cOfs++] = encodeParity54(byteVal >> 4);
             } else {
-                codewords[cOfs++] = encodeParity54(bytes[dOfs/2] & 0xf);
+                codewords[cOfs++] = encodeParity54(byteVal & 0xf);
             }
         }
         else if (nbParityBits == 2)
         {
             if (dOfs % 2 == 1) {
-                codewords[cOfs++] = encodeParity64(bytes[dOfs/2] >> 4);
+                codewords[cOfs++] = encodeParity64(byteVal >> 4);
             } else {
-                codewords[cOfs++] = encodeParity64(bytes[dOfs/2] & 0xf);
+                codewords[cOfs++] = encodeParity64(byteVal & 0xf);
             }
         }
         else if (nbParityBits == 3)
         {
             if (dOfs % 2 == 1) {
-                codewords[cOfs++] = encodeHamming74sx(bytes[dOfs/2] >> 4);
+                codewords[cOfs++] = encodeHamming74sx(byteVal >> 4);
             } else {
-                codewords[cOfs++] = encodeHamming74sx(bytes[dOfs/2] & 0xf);
+                codewords[cOfs++] = encodeHamming74sx(byteVal & 0xf);
             }
         }
         else if (nbParityBits == 4)
         {
             if (dOfs % 2 == 1) {
-                codewords[cOfs++] = encodeHamming84sx(bytes[dOfs/2] >> 4);
+                codewords[cOfs++] = encodeHamming84sx(byteVal >> 4);
             } else {
-                codewords[cOfs++] = encodeHamming84sx(bytes[dOfs/2] & 0xf);
+                codewords[cOfs++] = encodeHamming84sx(byteVal & 0xf);
             }
         }
         else
         {
             if (dOfs % 2 == 1) {
-                codewords[cOfs++] = bytes[dOfs/2] >> 4;
+                codewords[cOfs++] = byteVal >> 4;
             } else {
-                codewords[cOfs++] = bytes[dOfs/2] & 0xf;
+                codewords[cOfs++] = byteVal & 0xf;
             }
         }
     }

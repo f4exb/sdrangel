@@ -17,6 +17,7 @@
 
 #include <QTime>
 #include <QDebug>
+#include <QStringList>
 #include <stdio.h>
 #include <algorithm>
 #include <cmath>
@@ -37,7 +38,6 @@ MeshtasticDemodSink::MeshtasticDemodSink() :
     m_decodeMsg(nullptr),
     m_decoderMsgQueue(nullptr),
     m_fftSequence(-1),
-    m_fftSFDSequence(-1),
     m_downChirps(nullptr),
     m_upChirps(nullptr),
     m_spectrumLine(nullptr),
@@ -91,15 +91,9 @@ MeshtasticDemodSink::MeshtasticDemodSink() :
         m_minRequiredPreambleChirps,
         std::min(ctorTargetRequired, m_maxRequiredPreambleChirps)
     );
-    m_fftInterpolation = (m_settings.m_codingScheme == MeshtasticDemodSettings::CodingLoRa)
-        ? m_loRaFFTInterpolation
-        : m_legacyFFTInterpolation;
+    m_fftInterpolation = m_loRaFFTInterpolation;
 
-    m_state = ChirpChatStateReset;
-	m_chirp = 0;
-	m_chirp0 = 0;
-
-    initSF(m_settings.m_spreadFactor, m_settings.m_deBits, m_settings.m_fftWindow);
+    initSF(m_settings.m_spreadFactor, m_settings.m_deBits);
 }
 
 MeshtasticDemodSink::~MeshtasticDemodSink()
@@ -109,7 +103,6 @@ MeshtasticDemodSink::~MeshtasticDemodSink()
     if (m_fftSequence >= 0)
     {
         fftFactory->releaseEngine(m_interpolatedFFTLength, false, m_fftSequence);
-        fftFactory->releaseEngine(m_interpolatedFFTLength, false, m_fftSFDSequence);
     }
 
     delete[] m_downChirps;
@@ -118,7 +111,7 @@ MeshtasticDemodSink::~MeshtasticDemodSink()
     delete[] m_spectrumLine;
 }
 
-void MeshtasticDemodSink::initSF(unsigned int sf, unsigned int deBits, FFTWindow::Function fftWindow)
+void MeshtasticDemodSink::initSF(unsigned int sf, unsigned int deBits)
 {
     if (m_downChirps) {
         delete[] m_downChirps;
@@ -135,24 +128,15 @@ void MeshtasticDemodSink::initSF(unsigned int sf, unsigned int deBits, FFTWindow
 
     FFTFactory *fftFactory = DSPEngine::instance()->getFFTFactory();
 
-    if (m_fftSequence >= 0)
-    {
+    if (m_fftSequence >= 0) {
         fftFactory->releaseEngine(m_interpolatedFFTLength, false, m_fftSequence);
-        fftFactory->releaseEngine(m_interpolatedFFTLength, false, m_fftSFDSequence);
     }
 
     m_nbSymbols = 1 << sf;
     m_nbSymbolsEff = 1 << (sf - deBits);
-    m_deLength = 1 << deBits;
     m_fftLength = m_nbSymbols;
-    m_fftWindow.create(fftWindow, m_fftLength);
-    m_fftWindow.setKaiserAlpha(M_PI);
     m_interpolatedFFTLength = m_fftInterpolation*m_fftLength;
-    m_preambleTolerance = std::max(1, (m_deLength*static_cast<int>(m_fftInterpolation))/2);
     m_fftSequence = fftFactory->getEngine(m_interpolatedFFTLength, false, &m_fft);
-    m_fftSFDSequence = fftFactory->getEngine(m_interpolatedFFTLength, false, &m_fftSFD);
-    m_state = ChirpChatStateReset;
-    m_sfdSkip = m_fftLength / 4;
     m_downChirps = new Complex[2*m_nbSymbols]; // Each table is 2 chirps long to allow processing from arbitrary offsets.
     m_upChirps = new Complex[2*m_nbSymbols];
     m_spectrumBuffer = new Complex[m_nbSymbols];
@@ -209,18 +193,18 @@ void MeshtasticDemodSink::feed(const SampleVector::const_iterator& begin, const 
 
 		if (m_interpolator.decimate(&m_sampleDistanceRemain, c, &ci))
 		{
-            if (m_settings.m_codingScheme == MeshtasticDemodSettings::CodingLoRa)
+            if (MeshtasticDemodSettings::m_codingScheme == MeshtasticDemodSettings::CodingLoRa)
             {
-                processSample(ci);
+                processSampleLoRa(ci);
             }
             else if (m_osFactor <= 1U)
             {
-                processSample(ci);
+                processSampleLoRa(ci);
             }
             else
             {
                 if ((m_osCounter % m_osFactor) == m_osCenterPhase) {
-                    processSample(ci);
+                    processSampleLoRa(ci);
                 }
                 m_osCounter++;
             }
@@ -229,464 +213,9 @@ void MeshtasticDemodSink::feed(const SampleVector::const_iterator& begin, const 
 	}
 }
 
-void MeshtasticDemodSink::processSample(const Complex& ci)
-{
-    if (m_settings.m_codingScheme == MeshtasticDemodSettings::CodingLoRa)
-    {
-        processSampleLoRa(ci);
-        return;
-    }
-
-    if (m_state == ChirpChatStateReset) // start over
-    {
-        m_demodActive = false;
-        reset();
-        std::queue<double>().swap(m_magsqQueue); // this clears the queue
-        m_state = ChirpChatStateDetectPreamble;
-    }
-    else if (m_state == ChirpChatStateDetectPreamble) // look for preamble
-    {
-        m_fft->in()[m_fftCounter++] = ci * (m_settings.m_invertRamps ? m_upChirps[m_chirp] : m_downChirps[m_chirp]); // de-chirp the preamble ramp
-
-        if (m_fftCounter == m_fftLength)
-        {
-            m_fftWindow.apply(m_fft->in());
-            std::fill(m_fft->in()+m_fftLength, m_fft->in()+m_interpolatedFFTLength, Complex{0.0, 0.0});
-            m_fft->transform();
-            m_fftCounter = 0;
-            double magsq, magsqTotal;
-
-            unsigned int imax = argmax(
-                m_fft->out(),
-                m_fftInterpolation,
-                m_fftLength,
-                magsq,
-                magsqTotal,
-                m_spectrumBuffer,
-                m_fftInterpolation
-            ) / m_fftInterpolation;
-
-            // When ramps are inverted, FFT output interpretation is reversed
-            if (m_settings.m_invertRamps) {
-                imax = (m_nbSymbols - imax) % m_nbSymbols;
-            }
-
-            if (m_magsqQueue.size() > m_settings.m_preambleChirps) {
-                m_magsqQueue.pop();
-            }
-
-            m_magsqTotalAvg(magsqTotal);
-            m_magsqQueue.push(magsq);
-
-            if (m_havePrevPreambleBin)
-            {
-                const int delta = circularBinDelta(imax, m_prevPreambleBin);
-
-                if (std::abs(delta) <= m_preambleTolerance)
-                {
-                    m_preambleConsecutive++;
-                    m_preambleBinHistory.push_back(imax);
-                }
-                else
-                {
-                    m_preambleConsecutive = 1;
-                    m_preambleBinHistory.clear();
-                    m_preambleBinHistory.push_back(imax);
-                }
-            }
-            else
-            {
-                m_havePrevPreambleBin = true;
-                m_preambleConsecutive = 1;
-                m_preambleBinHistory.clear();
-                m_preambleBinHistory.push_back(imax);
-            }
-
-            if (m_preambleBinHistory.size() > m_requiredPreambleChirps) {
-                m_preambleBinHistory.pop_front();
-            }
-
-            m_prevPreambleBin = imax;
-
-            // gr-lora_sdr-style rolling detect: lock after enough consecutive near-equal upchirps.
-            if ((m_preambleConsecutive >= m_requiredPreambleChirps) && (magsq > 1e-9))
-            {
-                const unsigned int preambleBin = getPreambleModeBin();
-
-                if (m_spectrumSink) {
-                    m_spectrumSink->feed(m_spectrumBuffer, m_nbSymbols);
-                }
-
-                qInfo("MeshtasticDemodSink::processSample: preamble found: %u|%f (consecutive=%u)",
-                    preambleBin, magsq, m_preambleConsecutive);
-                m_chirp = preambleBin;
-                m_fftCounter = m_chirp;
-                m_chirp0 = 0;
-                m_chirpCount = 0;
-                m_state = ChirpChatStatePreambleResyc;
-            }
-            else if (!m_magsqQueue.empty())
-            {
-                m_magsqOffAvg(m_magsqQueue.front());
-            }
-        }
-    }
-    else if (m_state == ChirpChatStatePreambleResyc)
-    {
-        m_fftCounter++;
-
-        if (m_fftCounter == m_fftLength)
-        {
-            if (m_spectrumSink) {
-                m_spectrumSink->feed(m_spectrumLine, m_nbSymbols);
-            }
-
-            m_fftCounter = 0;
-            m_demodActive = true;
-            m_state = ChirpChatStatePreamble;
-        }
-    }
-    else if (m_state == ChirpChatStatePreamble) // preamble found look for SFD start
-    {
-        m_fft->in()[m_fftCounter] = ci * (m_settings.m_invertRamps ? m_upChirps[m_chirp] : m_downChirps[m_chirp]);  // de-chirp the preamble ramp
-        m_fftSFD->in()[m_fftCounter] = ci * (m_settings.m_invertRamps ? m_downChirps[m_chirp] : m_upChirps[m_chirp]); // de-chirp the SFD ramp
-        m_fftCounter++;
-
-        if (m_fftCounter == m_fftLength)
-        {
-            m_fftWindow.apply(m_fft->in());
-            std::fill(m_fft->in()+m_fftLength, m_fft->in()+m_interpolatedFFTLength, Complex{0.0, 0.0});
-            m_fft->transform();
-
-            m_fftWindow.apply(m_fftSFD->in());
-            std::fill(m_fftSFD->in()+m_fftLength, m_fftSFD->in()+m_interpolatedFFTLength, Complex{0.0, 0.0});
-            m_fftSFD->transform();
-
-            m_fftCounter = 0;
-            double magsqPre, magsqSFD;
-            double magsqTotal, magsqSFDTotal;
-
-            unsigned int imaxSFD = argmax(
-                m_fftSFD->out(),
-                m_fftInterpolation,
-                m_fftLength,
-                magsqSFD,
-                magsqTotal,
-                nullptr,
-                m_fftInterpolation
-            ) / m_fftInterpolation;
-
-            unsigned int imax = argmax(
-                m_fft->out(),
-                m_fftInterpolation,
-                m_fftLength,
-                magsqPre,
-                magsqSFDTotal,
-                m_spectrumBuffer,
-                m_fftInterpolation
-            ) / m_fftInterpolation;
-
-            // When ramps are inverted, FFT output interpretation is reversed
-            if (m_settings.m_invertRamps) {
-                imax = (m_nbSymbols - imax) % m_nbSymbols;
-            }
-
-            if (m_chirpCount < m_maxSFDSearchChirps)
-            {
-                m_preambleHistory[m_chirpCount] = imax;
-                m_chirpCount++;
-            }
-            else
-            {
-                // Protect against history overflow when long preambles are configured.
-                qWarning("MeshtasticDemodSink::processSample: SFD search history overflow (%u >= %u)",
-                    m_chirpCount, m_maxSFDSearchChirps);
-                m_state = ChirpChatStateReset;
-                return;
-            }
-            const double preDrop = magsqPre - magsqSFD;
-            const double dropRatio = (magsqSFD > 1e-18) ? (-preDrop / magsqSFD) : 0.0;
-            const bool sfdDominant = magsqSFD > (magsqPre * 1.05); // less strict than legacy 50% jump
-            const bool sfdBinAligned = (imaxSFD <= 2U) || (imaxSFD >= (m_nbSymbols - 2U));
-
-            if (sfdDominant && sfdBinAligned) // preamble -> SFD transition candidate
-            {
-                m_magsqTotalAvg(magsqSFDTotal);
-
-                if (m_chirpCount < 1 + (m_settings.hasSyncWord() ? 2 : 0)) // too early
-                {
-                    m_state = ChirpChatStateReset;
-                    qDebug("MeshtasticDemodSink::processSample: SFD search: signal drop is too early");
-                }
-                else
-                {
-                    if (m_settings.hasSyncWord())
-                    {
-                        m_syncWord = round(m_preambleHistory[m_chirpCount-2] / 8.0);
-                        m_syncWord += 16 * round(m_preambleHistory[m_chirpCount-3] / 8.0);
-                        qInfo("MeshtasticDemodSink::processSample: SFD found: pre=%4u|%11.6f sfd=%4u|%11.6f ratio=%8.4f sync=%x",
-                              imax, magsqPre, imaxSFD, magsqSFD, dropRatio, m_syncWord);
-                    }
-                    else
-                    {
-                        m_syncWord = 0;
-                        qInfo("MeshtasticDemodSink::processSample: SFD found: pre=%4u|%11.6f sfd=%4u|%11.6f ratio=%8.4f",
-                              imax, magsqPre, imaxSFD, magsqSFD, dropRatio);
-                    }
-
-                    int sadj = 0;
-                    int nadj = 0;
-                    int zadj;
-                    int sfdSkip = m_sfdSkip;
-
-                    for (unsigned int i = 0; i < m_chirpCount - 1 - (m_settings.hasSyncWord() ? 2 : 0); i++)
-                    {
-                        sadj += m_preambleHistory[i] > m_nbSymbols/2 ? m_preambleHistory[i] - m_nbSymbols : m_preambleHistory[i];
-                        nadj++;
-                    }
-
-                    zadj = nadj == 0 ? 0 : sadj / nadj;
-                    zadj = zadj < -(sfdSkip/2) ? -(sfdSkip/2) : zadj > sfdSkip/2 ? sfdSkip/2 : zadj;
-                    qDebug("MeshtasticDemodSink::processSample: zero adjust: %d (%d)", zadj, nadj);
-
-                    m_sfdSkipCounter = 0;
-                    m_fftCounter = m_fftLength - m_sfdSkip + zadj;
-                    m_chirp += zadj;
-                    m_state = ChirpChatStateSkipSFD; //ChirpChatStateSlideSFD;
-                }
-            }
-            else // SFD missed start over
-            {
-                const unsigned int preambleForWindow = std::max(m_settings.m_preambleChirps, m_requiredPreambleChirps);
-                unsigned int sfdSearchWindow = preambleForWindow - m_requiredPreambleChirps + 2U;
-                sfdSearchWindow = std::max(
-                    m_requiredPreambleChirps,
-                    std::min(sfdSearchWindow, m_maxSFDSearchChirps)
-                );
-
-                if (m_chirpCount <= sfdSearchWindow) {
-                    if (m_spectrumSink) {
-                        m_spectrumSink->feed(m_spectrumBuffer, m_nbSymbols);
-                    }
-
-                    qDebug("MeshtasticDemodSink::processSample: SFD search: pre=%4u|%11.6f sfd=%4u|%11.6f ratio=%8.4f",
-                           imax, magsqPre, imaxSFD, magsqSFD, dropRatio);
-                    m_magsqTotalAvg(magsqTotal);
-                    m_magsqOnAvg(magsqPre);
-                    return;
-                }
-
-                qDebug("MeshtasticDemodSink::processSample: SFD search: number of possible chirps exceeded");
-                m_magsqTotalAvg(magsqTotal);
-                m_state = ChirpChatStateReset;
-            }
-        }
-    }
-    else if (m_state == ChirpChatStateSkipSFD) // Just skip the rest of SFD
-    {
-        m_fftCounter++;
-
-        if (m_fftCounter == m_fftLength)
-        {
-            m_fftCounter = m_fftLength - m_sfdSkip;
-            m_sfdSkipCounter++;
-
-            if (m_sfdSkipCounter == m_settings.getNbSFDFourths() - 4U) // SFD chips fourths less one full period
-            {
-                qInfo("MeshtasticDemodSink::processSample: SFD skipped");
-                m_chirp = m_chirp0;
-                m_fftCounter = 0;
-                m_chirpCount = 0;
-                m_magsqMax = 0.0;
-                m_decodeMsg = MeshtasticDemodMsg::MsgDecodeSymbols::create();
-                m_decodeMsg->setFrameId(0U);
-                m_decodeMsg->setSyncWord(m_syncWord);
-                clearSpectrumHistoryForNewFrame();
-                m_state = ChirpChatStateReadPayload;
-            }
-        }
-    }
-    else if (m_state == ChirpChatStateReadPayload)
-    {
-        m_fft->in()[m_fftCounter] = ci * (m_settings.m_invertRamps ? m_upChirps[m_chirp] : m_downChirps[m_chirp]);
-        m_fftCounter++;
-
-        if (m_fftCounter == m_fftLength)
-        {
-            m_fftWindow.apply(m_fft->in());
-            std::fill(m_fft->in()+m_fftLength, m_fft->in()+m_interpolatedFFTLength, Complex{0.0, 0.0});
-            m_fft->transform();
-            m_fftCounter = 0;
-            double magsq, magsqTotal;
-            unsigned short symbol;
-
-            if (m_settings.m_codingScheme == MeshtasticDemodSettings::CodingFT)
-            {
-                std::vector<float> magnitudes;
-                symbol = evalSymbol(
-                    extractMagnitudes(
-                        magnitudes,
-                        m_fft->out(),
-                        m_fftInterpolation,
-                        m_fftLength,
-                        magsq,
-                        magsqTotal,
-                        m_spectrumBuffer,
-                        m_fftInterpolation
-                    )
-                ) % m_nbSymbolsEff;
-                m_decodeMsg->pushBackSymbol(symbol);
-                m_decodeMsg->pushBackMagnitudes(magnitudes);
-            }
-            else
-            {
-                int imax;
-
-                if (m_settings.m_deBits > 0)
-                {
-                    double magSqNoise;
-                    imax = argmaxSpreaded(
-                        m_fft->out(),
-                        m_fftInterpolation,
-                        m_fftLength,
-                        magsq,
-                        magSqNoise,
-                        magsqTotal,
-                        m_spectrumBuffer,
-                        m_fftInterpolation
-                    );
-                }
-                else
-                {
-                    imax = argmax(
-                        m_fft->out(),
-                        m_fftInterpolation,
-                        m_fftLength,
-                        magsq,
-                        magsqTotal,
-                        m_spectrumBuffer,
-                        m_fftInterpolation
-                    );
-                }
-
-                if (m_settings.m_invertRamps) {
-                    imax = (m_nbSymbols * m_fftInterpolation - imax) % (m_nbSymbols * m_fftInterpolation);
-                }
-
-                const bool headerSymbol = (m_settings.m_codingScheme == MeshtasticDemodSettings::CodingLoRa)
-                    && m_settings.m_hasHeader
-                    && (m_chirpCount < 8U);
-                symbol = evalSymbol(imax, headerSymbol) % m_nbSymbolsEff;
-                m_decodeMsg->pushBackSymbol(symbol);
-            }
-
-            if (m_spectrumSink) {
-                m_spectrumSink->feed(m_spectrumBuffer, m_nbSymbols);
-            }
-
-            if (magsq > m_magsqMax) {
-                m_magsqMax = magsq;
-            }
-
-            m_magsqTotalAvg(magsq);
-
-            const bool inHeaderBlock = (m_settings.m_codingScheme == MeshtasticDemodSettings::CodingLoRa)
-                && m_settings.m_hasHeader
-                && (m_chirpCount < 8U);
-
-            if (m_headerLocked)
-            {
-                // Header-locked: accept every symbol, terminate at exact expected count
-                qDebug("MeshtasticDemodSink::processSample: symbol %02u: %4u|%11.6f (%u/%u locked)",
-                       m_chirpCount, symbol, magsq, m_chirpCount + 1, m_expectedSymbols);
-                m_magsqOnAvg(magsq);
-                m_chirpCount++;
-
-                if (m_chirpCount >= m_expectedSymbols)
-                {
-                    qInfo("MeshtasticDemodSink::processSample: header-locked frame complete (%u symbols)", m_chirpCount);
-                    m_state = ChirpChatStateReset;
-                    m_decodeMsg->setSignalDb(CalcDb::dbPower(m_magsqOnAvg.asDouble() / (1<<m_settings.m_spreadFactor)));
-                    m_decodeMsg->setNoiseDb(CalcDb::dbPower(m_magsqOffAvg.asDouble() / (1<<m_settings.m_spreadFactor)));
-
-                    if (m_decoderMsgQueue && m_settings.m_decodeActive) {
-                        m_decoderMsgQueue->push(m_decodeMsg);
-                    } else {
-                        delete m_decodeMsg;
-                    }
-                }
-            }
-            else if (inHeaderBlock
-                || (m_chirpCount == 0)
-                || (m_settings.m_eomSquelchTenths == 121)
-                || ((m_settings.m_eomSquelchTenths*magsq)/10.0 > m_magsqMax))
-            {
-                qDebug("MeshtasticDemodSink::processSample: symbol %02u: %4u|%11.6f", m_chirpCount, symbol, magsq);
-                m_magsqOnAvg(magsq);
-                m_chirpCount++;
-
-                // Attempt header lock after the 8-symbol header block
-                if (m_chirpCount == 8
-                    && m_settings.m_codingScheme == MeshtasticDemodSettings::CodingLoRa
-                    && m_settings.m_hasHeader)
-                {
-                    tryHeaderLock();
-                }
-
-                if (m_chirpCount > m_settings.m_nbSymbolsMax)
-                {
-                    qInfo("MeshtasticDemodSink::processSample: message length reached");
-                    m_state = ChirpChatStateReset;
-                    m_decodeMsg->setSignalDb(CalcDb::dbPower(m_magsqOnAvg.asDouble() / (1<<m_settings.m_spreadFactor)));
-                    m_decodeMsg->setNoiseDb(CalcDb::dbPower(m_magsqOffAvg.asDouble() / (1<<m_settings.m_spreadFactor)));
-
-                    if (m_decoderMsgQueue && m_settings.m_decodeActive) {
-                        m_decoderMsgQueue->push(m_decodeMsg);
-                    } else {
-                        delete m_decodeMsg;
-                    }
-                }
-            }
-            else
-            {
-                qInfo("MeshtasticDemodSink::processSample: end of message (EOM squelch)");
-                m_state = ChirpChatStateReset;
-                m_decodeMsg->popSymbol();
-                m_decodeMsg->setSignalDb(CalcDb::dbPower(m_magsqOnAvg.asDouble() / (1<<m_settings.m_spreadFactor)));
-                m_decodeMsg->setNoiseDb(CalcDb::dbPower(m_magsqOffAvg.asDouble() / (1<<m_settings.m_spreadFactor)));
-
-                if (m_decoderMsgQueue && m_settings.m_decodeActive) {
-                    m_decoderMsgQueue->push(m_decodeMsg);
-                } else {
-                    delete m_decodeMsg;
-                }
-            }
-        }
-    }
-    else
-    {
-        m_state = ChirpChatStateReset;
-    }
-
-    m_chirp++;
-
-    if (m_chirp >= m_chirp0 + m_nbSymbols) {
-        m_chirp = m_chirp0;
-    }
-}
-
 void MeshtasticDemodSink::reset()
 {
     resetLoRaFrameSync();
-    m_chirp = 0;
-    m_chirp0 = 0;
-    m_fftCounter = 0;
-    m_preambleConsecutive = 0;
-    m_havePrevPreambleBin = false;
-    m_prevPreambleBin = 0;
-    m_preambleBinHistory.clear();
-    m_sfdSkipCounter = 0;
-    m_syncWord = 0;
     m_headerLocked = false;
     m_expectedSymbols = 0;
     m_waitHeaderFeedback = false;
@@ -756,226 +285,6 @@ unsigned int MeshtasticDemodSink::argmax(
     return imax;
 }
 
-unsigned int MeshtasticDemodSink::extractMagnitudes(
-    std::vector<float>& magnitudes,
-    const Complex *fftBins,
-    unsigned int fftMult,
-    unsigned int fftLength,
-    double& magsqMax,
-    double& magsqTotal,
-    Complex *specBuffer,
-    unsigned int specDecim)
-{
-    magsqMax = 0.0;
-    magsqTotal = 0.0;
-    unsigned int imax = 0;
-    double magSum = 0.0;
-    std::vector<double> spectrumBucketPowers;
-
-    if (specBuffer) {
-        spectrumBucketPowers.reserve((fftMult * fftLength) / std::max(1U, specDecim));
-    }
-
-    unsigned int spread = fftMult * (1<<m_settings.m_deBits);
-    unsigned int istart = fftMult*fftLength - spread/2 + 1;
-    float magnitude = 0.0;
-
-    for (unsigned int i2 = istart; i2 < istart + fftMult*fftLength; i2++)
-    {
-        int i = i2 % (fftMult*fftLength);
-        double magsq = std::norm(fftBins[i]);
-        magsqTotal += magsq;
-        magnitude += magsq;
-
-        if (i % spread == (spread/2)-1) // boundary (inclusive)
-        {
-            if (magnitude > magsqMax)
-            {
-                imax = (i/spread)*spread;
-                magsqMax = magnitude;
-            }
-
-            magnitudes.push_back(magnitude);
-            magnitude = 0.0;
-        }
-
-        if (specBuffer)
-        {
-            magSum += magsq;
-
-            if (i % specDecim == specDecim - 1)
-            {
-                spectrumBucketPowers.push_back(magSum);
-                magSum = 0.0;
-            }
-        }
-    }
-
-    const double magsqAvgRaw = magsqTotal / static_cast<double>(fftMult * fftLength);
-    magsqTotal = magsqAvgRaw;
-
-    if (specBuffer && !spectrumBucketPowers.empty())
-    {
-        const double noisePerBucket = magsqAvgRaw * static_cast<double>(std::max(1U, specDecim));
-        const double floorCut = noisePerBucket * 1.05;
-        const double boost = 12.0;
-
-        for (size_t i = 0; i < spectrumBucketPowers.size(); ++i)
-        {
-            const double enhancedPower = std::max(0.0, spectrumBucketPowers[i] - floorCut) * boost;
-            const double specAmp = std::sqrt(enhancedPower) * static_cast<double>(m_nbSymbols);
-            specBuffer[i] = Complex(std::polar(specAmp, 0.0));
-        }
-    }
-
-    return imax;
-}
-
-unsigned int MeshtasticDemodSink::argmaxSpreaded(
-    const Complex *fftBins,
-    unsigned int fftMult,
-    unsigned int fftLength,
-    double& magsqMax,
-    double& magsqNoise,
-    double& magsqTotal,
-    Complex *specBuffer,
-    unsigned int specDecim)
-{
-    magsqMax = 0.0;
-    magsqNoise = 0.0;
-    magsqTotal = 0.0;
-    unsigned int imax = 0;
-    double magSum = 0.0;
-    std::vector<double> spectrumBucketPowers;
-
-    if (specBuffer) {
-        spectrumBucketPowers.reserve((fftMult * fftLength) / std::max(1U, specDecim));
-    }
-
-    unsigned int nbsymbols = 1<<(m_settings.m_spreadFactor - m_settings.m_deBits);
-    unsigned int spread = fftMult * (1<<m_settings.m_deBits);
-    unsigned int istart = fftMult*fftLength - spread/2 + 1;
-    double magSymbol = 0.0;
-
-    for (unsigned int i2 = istart; i2 < istart + fftMult*fftLength; i2++)
-    {
-        int i = i2 % (fftMult*fftLength);
-        double magsq = std::norm(fftBins[i]);
-        magsqTotal += magsq;
-        magSymbol += magsq;
-
-        if (i % spread == (spread/2)-1) // boundary (inclusive)
-        {
-            if (magSymbol > magsqMax)
-            {
-                imax = (i/spread)*spread;
-                magsqMax = magSymbol;
-            }
-
-            magsqNoise += magSymbol;
-            magSymbol = 0.0;
-        }
-
-        if (specBuffer)
-        {
-            magSum += magsq;
-
-            if (i % specDecim == specDecim - 1)
-            {
-                spectrumBucketPowers.push_back(magSum);
-                magSum = 0.0;
-            }
-        }
-    }
-
-    const double magsqAvgRaw = magsqTotal / static_cast<double>(fftMult * fftLength);
-
-    if (specBuffer && !spectrumBucketPowers.empty())
-    {
-        const double noisePerBucket = magsqAvgRaw * static_cast<double>(std::max(1U, specDecim));
-        const double floorCut = noisePerBucket * 1.05;
-        const double boost = 12.0;
-
-        for (size_t i = 0; i < spectrumBucketPowers.size(); ++i)
-        {
-            const double enhancedPower = std::max(0.0, spectrumBucketPowers[i] - floorCut) * boost;
-            const double specAmp = std::sqrt(enhancedPower) * static_cast<double>(m_nbSymbols);
-            specBuffer[i] = Complex(std::polar(specAmp, 0.0));
-        }
-    }
-
-    magsqNoise -= magsqMax;
-    magsqNoise /= (nbsymbols - 1);
-    magsqTotal /= nbsymbols;
-        // magsqNoise /= fftLength;
-        // magsqTotal /= fftMult*fftLength;
-
-    return imax;
-}
-
-void MeshtasticDemodSink::decimateSpectrum(Complex *in, Complex *out, unsigned int size, unsigned int decimation)
-{
-    for (unsigned int i = 0; i < size; i++)
-    {
-        if (i % decimation == 0) {
-            out[i/decimation] = in[i];
-        }
-    }
-}
-
-int MeshtasticDemodSink::toSigned(int u, int intSize)
-{
-    if (u > intSize/2) {
-        return u - intSize;
-    } else {
-        return u;
-    }
-}
-
-int MeshtasticDemodSink::circularBinDelta(unsigned int current, unsigned int previous) const
-{
-    const int bins = static_cast<int>(m_nbSymbols);
-    if (bins <= 0) {
-        return 0;
-    }
-
-    int delta = static_cast<int>(current) - static_cast<int>(previous);
-    const int half = bins / 2;
-
-    if (delta > half) {
-        delta -= bins;
-    } else if (delta < -half) {
-        delta += bins;
-    }
-
-    return delta;
-}
-
-unsigned int MeshtasticDemodSink::getPreambleModeBin() const
-{
-    if (m_preambleBinHistory.empty()) {
-        return 0U;
-    }
-
-    std::vector<unsigned int> counts(m_nbSymbols, 0U);
-    unsigned int bestBin = m_preambleBinHistory.back() % m_nbSymbols;
-    unsigned int bestCount = 0U;
-
-    for (unsigned int bin : m_preambleBinHistory)
-    {
-        const unsigned int b = bin % m_nbSymbols;
-        const unsigned int c = ++counts[b];
-
-        if (c > bestCount)
-        {
-            bestCount = c;
-            bestBin = b;
-        }
-    }
-
-    return bestBin;
-}
-
 unsigned int MeshtasticDemodSink::evalSymbol(unsigned int rawSymbol, bool headerSymbol)
 {
     unsigned int spread = m_fftInterpolation * (1U << m_settings.m_deBits);
@@ -1008,6 +317,10 @@ unsigned int MeshtasticDemodSink::evalSymbol(unsigned int rawSymbol, bool header
 
 void MeshtasticDemodSink::tryHeaderLock()
 {
+    if (!m_decodeMsg) {
+        return;
+    }
+
     const std::vector<unsigned short>& symbols = m_decodeMsg->getSymbols();
 
     if (symbols.size() < 8) {
@@ -1026,57 +339,84 @@ void MeshtasticDemodSink::tryHeaderLock()
         return;
     }
 
-    bool hasCRC = true;
-    unsigned int nbParityBits = 1U;
-    unsigned int packetLength = 0U;
-    int headerParityStatus = (int) MeshtasticDemodSettings::ParityUndefined;
-    bool headerCRCStatus = false;
+    const unsigned int maxOffset = std::min<unsigned int>(2U, static_cast<unsigned int>(symbols.size()) - 8U);
+    const unsigned int headerSymbolMod = 1U << headerNbSymbolBits;
 
-    MeshtasticDemodDecoderLoRa::decodeHeader(
-        symbols,
-        headerNbSymbolBits,
-        hasCRC,
-        nbParityBits,
-        packetLength,
-        headerParityStatus,
-        headerCRCStatus
-    );
-
-    if (!headerCRCStatus || packetLength == 0U || nbParityBits < 1U || nbParityBits > 4U)
+    for (unsigned int offset = 0U; offset <= maxOffset; offset++)
     {
-        qDebug("MeshtasticDemodSink::tryHeaderLock: header invalid (CRC=%d len=%u CR=%u parity=%d)",
-               headerCRCStatus ? 1 : 0,
-               packetLength,
-               nbParityBits,
-               headerParityStatus);
-        return;
+        const std::vector<unsigned short> baseHeaderSlice(symbols.begin() + offset, symbols.begin() + offset + 8U);
+
+        for (int delta = -2; delta <= 2; delta++)
+        {
+            std::vector<unsigned short> headerSlice(baseHeaderSlice);
+
+            if (delta != 0)
+            {
+                for (auto& sym : headerSlice) {
+                    const int shifted = loRaMod(static_cast<int>(sym) + delta, static_cast<int>(headerSymbolMod));
+                    sym = static_cast<unsigned short>(shifted);
+                }
+            }
+
+            bool hasCRC = true;
+            unsigned int nbParityBits = 1U;
+            unsigned int packetLength = 0U;
+            int headerParityStatus = (int) MeshtasticDemodSettings::ParityUndefined;
+            bool headerCRCStatus = false;
+
+            MeshtasticDemodDecoderLoRa::decodeHeader(
+                headerSlice,
+                headerNbSymbolBits,
+                hasCRC,
+                nbParityBits,
+                packetLength,
+                headerParityStatus,
+                headerCRCStatus
+            );
+
+            if (!headerCRCStatus || packetLength == 0U || nbParityBits < 1U || nbParityBits > 4U) {
+                continue;
+            }
+
+            const double symbolDurationMs = (double)(1U << sf) * 1000.0 / (double)m_bandwidth;
+            const bool ldro = symbolDurationMs > 16.0;
+            const unsigned int sfDenom = sf - (ldro ? 2U : 0U);
+
+            // gr-lora_sdr formula: symb_numb = 8 + ceil(max(0, 2*pay_len - sf + 2 + 5 + has_crc*4) / (sf - 2*ldro)) * (4 + cr)
+            const int numerator = 2 * (int)packetLength - (int)sf + 2 + 5 + (hasCRC ? 4 : 0);
+            unsigned int payloadBlocks = 0;
+
+            if (numerator > 0 && sfDenom > 0) {
+                payloadBlocks = ((unsigned int)numerator + sfDenom - 1U) / sfDenom;
+            }
+
+            const unsigned int expectedSymbols = 8U + payloadBlocks * (4U + nbParityBits);
+
+            if (expectedSymbols > m_settings.m_nbSymbolsMax) {
+                continue;
+            }
+
+            if (offset > 0U)
+            {
+                m_decodeMsg->dropFront(offset);
+                m_loRaFrameSymbolCount = m_loRaFrameSymbolCount > offset
+                    ? (m_loRaFrameSymbolCount - offset)
+                    : 0U;
+            }
+
+            m_expectedSymbols = expectedSymbols;
+            m_headerLocked = true;
+
+            // qDebug("[LOOPBACK][RX] header_realign frameId=%u offset=%u delta=%d", m_loRaFrameId, offset, delta);
+            qDebug("MeshtasticDemodSink::tryHeaderLock: LOCKED len=%u CR=%u CRC=%s LDRO=%s expected=%u symbols offset=%u delta=%d",
+                   packetLength, nbParityBits, hasCRC ? "on" : "off", ldro ? "on" : "off", m_expectedSymbols, offset, delta);
+            return;
+        }
     }
 
-    const double symbolDurationMs = (double)(1U << sf) * 1000.0 / (double)m_bandwidth;
-    const bool ldro = symbolDurationMs > 16.0;
-    const unsigned int sfDenom = sf - (ldro ? 2U : 0U);
-
-    // gr-lora_sdr formula: symb_numb = 8 + ceil(max(0, 2*pay_len - sf + 2 + 5 + has_crc*4) / (sf - 2*ldro)) * (4 + cr)
-    const int numerator = 2 * (int)packetLength - (int)sf + 2 + 5 + (hasCRC ? 4 : 0);
-    unsigned int payloadBlocks = 0;
-
-    if (numerator > 0 && sfDenom > 0) {
-        payloadBlocks = ((unsigned int)numerator + sfDenom - 1U) / sfDenom;
+    if (symbols.size() >= 10U) {
+        qDebug("MeshtasticDemodSink::tryHeaderLock: header invalid after offsets 0..%u deltas -2..2", maxOffset);
     }
-
-    m_expectedSymbols = 8U + payloadBlocks * (4U + nbParityBits);
-
-    if (m_expectedSymbols > m_settings.m_nbSymbolsMax)
-    {
-        qDebug("MeshtasticDemodSink::tryHeaderLock: expected %u > max %u, falling back to EOM",
-               m_expectedSymbols, m_settings.m_nbSymbolsMax);
-        return;
-    }
-
-    m_headerLocked = true;
-
-    qDebug("MeshtasticDemodSink::tryHeaderLock: LOCKED len=%u CR=%u CRC=%s LDRO=%s expected=%u symbols",
-           packetLength, nbParityBits, hasCRC ? "on" : "off", ldro ? "on" : "off", m_expectedSymbols);
 }
 
 bool MeshtasticDemodSink::sendLoRaHeaderProbe()
@@ -1087,7 +427,7 @@ bool MeshtasticDemodSink::sendLoRaHeaderProbe()
 
     const std::vector<unsigned short>& symbols = m_decodeMsg->getSymbols();
 
-    if (symbols.size() < 8U || !m_settings.m_hasHeader) {
+    if (symbols.size() < 8U) {
         return false;
     }
 
@@ -1106,10 +446,11 @@ bool MeshtasticDemodSink::sendLoRaHeaderProbe()
         headerNbSymbolBits,
         m_settings.m_spreadFactor,
         static_cast<unsigned int>(std::max(1, m_bandwidth)),
-        m_settings.m_hasHeader,
-        m_settings.m_hasCRC
+        MeshtasticDemodSettings::m_hasHeader,
+        MeshtasticDemodSettings::m_hasCRC
     );
     m_decoderMsgQueue->push(probe);
+
     return true;
 }
 
@@ -1128,8 +469,7 @@ void MeshtasticDemodSink::applyLoRaHeaderFeedback(
     (void) ldro;
     (void) headerParityStatus;
 
-    if ((m_settings.m_codingScheme != MeshtasticDemodSettings::CodingLoRa)
-        || (m_loRaState != LoRaStateSFOCompensation))
+    if (m_loRaState != LoRaStateSFOCompensation)
     {
         return;
     }
@@ -1176,9 +516,7 @@ int MeshtasticDemodSink::loRaRound(float number) const
 
 void MeshtasticDemodSink::resetLoRaFrameSync()
 {
-    if ((m_settings.m_codingScheme == MeshtasticDemodSettings::CodingLoRa)
-        && m_decodeMsg
-        && (m_loRaState != LoRaStateDetect))
+    if (m_decodeMsg && (m_loRaState != LoRaStateDetect))
     {
         delete m_decodeMsg;
         m_decodeMsg = nullptr;
@@ -1207,7 +545,6 @@ void MeshtasticDemodSink::resetLoRaFrameSync()
     m_expectedSymbols = 0;
     m_waitHeaderFeedback = false;
     m_headerFeedbackWaitSteps = 0;
-    m_syncWord = 0;
 
     if (!m_loRaPreambleVals.empty()) {
         std::fill(m_loRaPreambleVals.begin(), m_loRaPreambleVals.end(), 0);
@@ -1654,6 +991,12 @@ int MeshtasticDemodSink::processLoRaFrameSyncStep()
                 m_loRaCFOInt = static_cast<int>(std::floor((m_loRaDownVal - static_cast<int>(m_nbSymbols)) / 2.0));
             }
 
+            // Preserve state-machine net ID bin indices for sync word extraction.
+            // The corrLen-based refinement overwrites m_loRaNetIds but may produce
+            // incorrect results when m_loRaNetIdSamp is not fully populated.
+            const int netIdBin0 = m_loRaNetIds[0];
+            const int netIdBin1 = m_loRaNetIds[1];
+
             const unsigned int upSymCount = std::min<unsigned int>(
                 static_cast<unsigned int>(std::max(0, m_loRaUpSymbToUse)),
                 static_cast<unsigned int>(m_loRaPreambleUpchirps.size() / std::max(1U, m_nbSymbols))
@@ -1769,7 +1112,17 @@ int MeshtasticDemodSink::processLoRaFrameSyncStep()
             m_loRaFrameId++;
             m_decodeMsg = MeshtasticDemodMsg::MsgDecodeSymbols::create();
             m_decodeMsg->setFrameId(m_loRaFrameId);
-            m_decodeMsg->setSyncWord(0U);
+            {
+                // LoRa sync word is encoded across two net-ID chirps.
+                // First chirp (index 0) carries the high nibble, second (index 1) the low nibble.
+                // Each nibble N is mapped to bin N*8. Formula: syncWord = low + 16*high.
+                // Use the coarse state-machine bin values (netIdBin0/1) which are reliably
+                // set from the FFT in LoRaSyncNetId1/2 states, not the refined values which
+                // require m_loRaNetIdSamp to be fully populated.
+                const unsigned int hiNibble = static_cast<unsigned int>(std::round(static_cast<double>(netIdBin0) / 8.0)) & 0xFU;
+                const unsigned int loNibble = static_cast<unsigned int>(std::round(static_cast<double>(netIdBin1) / 8.0)) & 0xFU;
+                m_decodeMsg->setSyncWord(loNibble + 16U * hiNibble);
+            }
             clearSpectrumHistoryForNewFrame();
             m_loRaFrameSymbolCount = 0U;
             m_magsqMax = 0.0;
@@ -1798,24 +1151,9 @@ int MeshtasticDemodSink::processLoRaFrameSyncStep()
         return static_cast<int>(m_loRaSymbolSpan);
     }
 
-    if (m_settings.m_hasHeader
-        && !m_headerLocked
-        && (m_loRaFrameSymbolCount >= 8U)
-        && m_waitHeaderFeedback)
-    {
-        const unsigned int maxWaitSteps = std::max(1U, m_headerFeedbackMaxWaitSteps);
-
-        if (++m_headerFeedbackWaitSteps > maxWaitSteps) {
-            // Safety fallback when async feedback is delayed.
-            m_waitHeaderFeedback = false;
-            qDebug("MeshtasticDemodSink::processLoRaFrameSyncStep: header feedback timeout -> local fallback");
-            tryHeaderLock();
-        }
-    }
-
     std::vector<float> symbolMags;
     const unsigned int rawSymbol = getLoRaSymbolVal(m_loRaInDown.data(), m_loRaPayloadDownchirp.data(), &symbolMags, true);
-    const bool headerSymbol = m_settings.m_hasHeader && (m_loRaFrameSymbolCount < 8U);
+    const bool headerSymbol = m_loRaFrameSymbolCount < 8U;
     const unsigned short symbol = evalSymbol(rawSymbol, headerSymbol) % m_nbSymbolsEff;
     m_decodeMsg->pushBackSymbol(symbol);
     m_decodeMsg->pushBackMagnitudes(symbolMags);
@@ -1847,15 +1185,9 @@ int MeshtasticDemodSink::processLoRaFrameSyncStep()
     m_loRaFrameSymbolCount++;
 
     if (!m_headerLocked
-        && m_settings.m_hasHeader
-        && (m_loRaFrameSymbolCount == 8U))
+        && (m_loRaFrameSymbolCount >= 8U))
     {
-        if (sendLoRaHeaderProbe()) {
-            m_waitHeaderFeedback = true;
-            m_headerFeedbackWaitSteps = 0U;
-        } else {
-            tryHeaderLock();
-        }
+        tryHeaderLock();
     }
 
     if (m_headerLocked)
@@ -1926,19 +1258,16 @@ void MeshtasticDemodSink::applySettings(const MeshtasticDemodSettings& settings,
             << " m_title: " << settings.m_title
             << " force: " << force;
 
-    const unsigned int desiredFFTInterpolation = (settings.m_codingScheme == MeshtasticDemodSettings::CodingLoRa)
-        ? m_loRaFFTInterpolation
-        : m_legacyFFTInterpolation;
+    const unsigned int desiredFFTInterpolation = m_loRaFFTInterpolation;
     const bool fftInterpChanged = desiredFFTInterpolation != m_fftInterpolation;
 
     if ((settings.m_spreadFactor != m_settings.m_spreadFactor)
      || (settings.m_deBits != m_settings.m_deBits)
-     || (settings.m_fftWindow != m_settings.m_fftWindow)
      || fftInterpChanged
      || force)
     {
         m_fftInterpolation = desiredFFTInterpolation;
-        initSF(settings.m_spreadFactor, settings.m_deBits, settings.m_fftWindow);
+        initSF(settings.m_spreadFactor, settings.m_deBits);
     }
 
     const unsigned int configuredPreamble = settings.m_preambleChirps > 0U

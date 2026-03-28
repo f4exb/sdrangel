@@ -29,29 +29,24 @@ public:
     MeshtasticModEncoder();
     ~MeshtasticModEncoder();
 
-    void setCodingScheme(MeshtasticModSettings::CodingScheme codingScheme) { m_codingScheme = codingScheme; }
     void setNbSymbolBits(unsigned int spreadFactor, unsigned int deBits);
     void setLoRaParityBits(unsigned int parityBits) { m_nbParityBits = parityBits; }
-    void setLoRaHasHeader(bool hasHeader) { m_hasHeader = hasHeader; }
-    void setLoRaHasCRC(bool hasCRC) { m_hasCRC = hasCRC; }
     void encodeBytes(const QByteArray& bytes, std::vector<unsigned short>& symbols);
     void encode(MeshtasticModSettings settings, std::vector<unsigned short>& symbols);
 
 private:
-    void encodeString(const QString& str, std::vector<unsigned short>& symbols);
     // LoRa functions
     void encodeBytesLoRa(const QByteArray& bytes, std::vector<unsigned short>& symbols);
 
     // General attributes
-    MeshtasticModSettings::CodingScheme m_codingScheme;
+    static const MeshtasticModSettings::CodingScheme m_codingScheme;
     unsigned int m_spreadFactor;
     unsigned int m_deBits;
     unsigned int m_nbSymbolBits;
     // LoRa attributes
     unsigned int m_nbParityBits; //!< 1 to 4 Hamming FEC bits for 4 payload bits
-    bool m_hasCRC;
-    bool m_hasHeader;
+    static const bool m_hasCRC;
+    static const bool m_hasHeader;
 };
 
 #endif // PLUGINS_CHANNELTX_MODMESHTASTIC_MESHTASTICMODENCODER_H_
-

@@ -78,18 +78,11 @@ private slots:
 	void on_BW_valueChanged(int value);
 	void on_Spread_valueChanged(int value);
     void on_deBits_valueChanged(int value);
-    void on_fftWindow_currentIndexChanged(int index);
     void on_preambleChirps_valueChanged(int value);
-	void on_scheme_currentIndexChanged(int index);
 	void on_mute_toggled(bool checked);
 	void on_clear_clicked(bool checked);
     void on_eomSquelch_valueChanged(int value);
     void on_messageLength_valueChanged(int value);
-	void on_messageLengthAuto_stateChanged(int state);
-	void on_header_stateChanged(int state);
-	void on_fecParity_valueChanged(int value);
-	void on_crc_stateChanged(int state);
-	void on_packetLength_valueChanged(int value);
 	void on_udpSend_stateChanged(int state);
 	void on_udpAddress_editingFinished();
 	void on_udpPort_editingFinished();
@@ -101,6 +94,9 @@ private slots:
     void on_meshKeys_clicked(bool checked);
     void on_meshAutoSampleRate_toggled(bool checked);
     void on_meshAutoLock_clicked(bool checked);
+    void on_conf_valueChanged(int value);
+    void on_confAdd_clicked(bool checked);
+    void on_confDel_clicked(bool checked);
 	void onWidgetRolled(QWidget* widget, bool rollDown);
 	void onMenuDialogCalled(const QPoint& p);
     void channelMarkerHighlightedByCursor();
@@ -119,16 +115,8 @@ private:
     int m_basebandSampleRate;
 	bool m_doApplySettings;
 
-	MeshtasticDemod* m_chirpChatDemod;
+	MeshtasticDemod* m_meshtasticDemod;
 	SpectrumVis* m_spectrumVis;
-    QComboBox* m_meshRegionCombo;
-    QComboBox* m_meshPresetCombo;
-    QComboBox* m_meshChannelCombo;
-    QPushButton* m_meshApplyButton;
-    QPushButton* m_meshKeysButton;
-    QPushButton* m_meshAutoLockButton;
-    QPushButton* m_dechirpLiveFollowButton;
-    QCheckBox* m_meshAutoSampleRateCheck;
     struct PipelineView
     {
         QWidget *tabWidget = nullptr;
@@ -183,6 +171,12 @@ private:
     QMap<QString, QString> m_pipelineMessageKeyByBase;
     QMap<QString, QVector<QString>> m_pipelinePendingMessageKeysByBase;
     quint64 m_pipelineMessageSequence;
+
+    // Multi-pipeline management
+    static constexpr int kMaxPipelines = 4;
+    int m_focusedPipelineIndex;          //!< 0 = primary; 1-3 = extra (volatile) pipelines
+    QVector<MeshtasticDemodSettings> m_extraPipelineSettings; //!< Settings for extra pipelines; not persisted
+
 	MessageQueue m_inputMessageQueue;
 	unsigned int m_tickCount;
 
@@ -197,7 +191,6 @@ private:
     void setBandwidths();
     void showLoRaMessage(const Message& message); //!< For LoRa coding scheme
     void showTextMessage(const Message& message); //!< For TTY and ASCII
-    void showFTMessage(const Message& message);   //!< For FT coding scheme
     void setupPipelineViews();
     PipelineView& ensurePipelineView(int pipelineId, const QString& pipelineName);
     void clearPipelineViews();
@@ -215,7 +208,6 @@ private:
 	void displayBytes(const QByteArray& bytes);
 	void displayStatus(const QString& status);
     void displayLoRaStatus(int headerParityStatus, bool headerCRCStatus, int payloadParityStatus, bool payloadCRCStatus);
-    void displayFTStatus(int payloadParityStatus, bool payloadCRCStatus);
 	QString getParityStr(int parityStatus);
     void resetLoRaStatus();
 	bool handleMessage(const Message& message);
@@ -224,10 +216,18 @@ private:
     void setupMeshtasticAutoProfileControls();
     void rebuildMeshtasticChannelOptions();
     bool retuneDeviceToFrequency(qint64 centerFrequencyHz);
-    bool autoTuneDeviceSampleRateForBandwidth(int bandwidthHz, QString& summary);
+    bool autoTuneDeviceSampleRateForBandwidth(int bandwidthHz, QString& summary, int* newBasebandSampleRateOut = nullptr);
     int findBandwidthIndex(int bandwidthHz) const;
     void applyMeshtasticProfileFromSelection();
     void editMeshtasticKeys();
+    // Multi-pipeline helpers
+    MeshtasticDemodSettings& focusedSettings();
+    const MeshtasticDemodSettings& focusedSettings() const;
+    int pipelineCount() const;
+    void updateConfControls();
+    void loadFocusedSettingsToControls();
+    void applyFocusedPipelineSettings(bool force = false);
+    void pushExtraPipelineSettingsToDemod();
     void startMeshAutoLock();
     void stopMeshAutoLock(bool keepBestCandidate);
     void applyMeshAutoLockCandidate(const MeshAutoLockCandidate& candidate, bool applySettingsNow);

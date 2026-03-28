@@ -83,19 +83,7 @@ private:
         LoRaSyncQuarterDown
     };
 
-    enum ChirpChatState
-    {
-        ChirpChatStateReset,          //!< Reset everything to start all over
-        ChirpChatStateDetectPreamble, //!< Look for preamble
-        ChirpChatStatePreambleResyc,  //!< Synchronize with what is left of preamble chirp
-        ChirpChatStatePreamble,       //!< Preamble is found and look for SFD start
-        ChirpChatStateSkipSFD,        //!< Skip SFD
-        ChirpChatStateReadPayload,
-        ChirpChatStateTest
-    };
-
     MeshtasticDemodSettings m_settings;
-    ChirpChatState m_state;
     bool m_demodActive;
     MeshtasticDemodMsg::MsgDecodeSymbols *m_decodeMsg;
     MessageQueue *m_decoderMsgQueue;
@@ -103,39 +91,22 @@ private:
     int m_channelSampleRate;
     int m_channelFrequencyOffset;
     qint64 m_deviceCenterFrequency;
-	unsigned int m_chirp;
-	unsigned int m_chirp0;
 
     static constexpr unsigned int m_minRequiredPreambleChirps = 4;  //!< Lower bound for preamble validation chirps
     static constexpr unsigned int m_maxRequiredPreambleChirps = 64; //!< Upper bound for preamble validation chirps
-    static constexpr unsigned int m_maxSFDSearchChirps = 64;        //!< Maximum number of chirps when looking for SFD after preamble detection
-    static constexpr unsigned int m_legacyFFTInterpolation = 4;     //!< Legacy interpolation for non-LoRa modes
     static constexpr unsigned int m_loRaFFTInterpolation = 1;       //!< Canonical gr-lora_sdr-like FFT binning for LoRa
 
     FFTEngine *m_fft;
-    FFTEngine *m_fftSFD;
     int m_fftSequence;
-    int m_fftSFDSequence;
-    FFTWindow m_fftWindow;
     Complex *m_downChirps;
     Complex *m_upChirps;
     Complex *m_spectrumLine;
-    unsigned int m_fftCounter;
-    std::deque<unsigned int> m_preambleBinHistory; //!< Rolling preamble bins for mode (k_hat) estimation
-    unsigned int m_preambleConsecutive;            //!< Consecutive upchirp count in DETECT state
-    bool m_havePrevPreambleBin;
-    unsigned int m_prevPreambleBin;
     unsigned int m_requiredPreambleChirps;
-    unsigned int m_preambleHistory[m_maxSFDSearchChirps];
-    unsigned int m_syncWord;
     double m_magsqMax;
     MovingAverageUtil<double, double, 10> m_magsqOnAvg;
     MovingAverageUtil<double, double, 10> m_magsqOffAvg;
     MovingAverageUtil<double, double, 10> m_magsqTotalAvg;
     std::queue<double> m_magsqQueue;
-    unsigned int m_chirpCount; //!< Generic chirp counter
-    unsigned int m_sfdSkip;    //!< Number of samples in a SFD skip or slide (1/4) period
-    unsigned int m_sfdSkipCounter; //!< Counter of skip or slide periods
 
     bool m_headerLocked;               //!< True when header decode succeeded and we have a deterministic symbol budget
     unsigned int m_expectedSymbols;    //!< Total expected symbols (header + payload) from header decode
@@ -195,11 +166,8 @@ private:
     unsigned int m_fftLength;              //!< Length of base FFT
     unsigned int m_fftInterpolation;       //!< FFT interpolation factor (LoRa=1, legacy modes=4)
     unsigned int m_interpolatedFFTLength;  //!< Length of interpolated FFT
-    int m_deLength;                        //!< Number of FFT bins collated to represent one symbol
-    int m_preambleTolerance;               //!< Number of FFT bins to collate when looking for preamble
 
-    void processSample(const Complex& ci);
-    void initSF(unsigned int sf, unsigned int deBits, FFTWindow::Function fftWindow); //!< Init tables, FFTs, depending on spread factor
+    void initSF(unsigned int sf, unsigned int deBits); //!< Init tables, FFTs, depending on spread factor
     void reset();
     unsigned int argmax(
         const Complex *fftBins,
@@ -210,30 +178,6 @@ private:
         Complex *specBuffer,
         unsigned int specDecim
         );
-    unsigned int argmaxSpreaded( //!< count energy in adjacent bins for same symbol (needs DE bits > 0)
-        const Complex *fftBins,
-        unsigned int fftMult,
-        unsigned int fftLength,
-        double& magsqMax,
-        double& magsqNoise,
-        double& magSqTotal,
-        Complex *specBuffer,
-        unsigned int specDecim
-        );
-    unsigned int extractMagnitudes(
-        std::vector<float>& magnitudes,
-        const Complex *fftBins,
-        unsigned int fftMult,
-        unsigned int fftLength,
-        double& magsqMax,
-        double& magSqTotal,
-        Complex *specBuffer,
-        unsigned int specDecim
-    );
-    void decimateSpectrum(Complex *in, Complex *out, unsigned int size, unsigned int decimation);
-    int toSigned(int u, int intSize);
-    int circularBinDelta(unsigned int current, unsigned int previous) const;
-    unsigned int getPreambleModeBin() const;
     unsigned int evalSymbol(unsigned int rawSymbol, bool headerSymbol = false);
     void tryHeaderLock();  //!< Attempt inline header decode after 8 symbols to determine expected frame length
     bool sendLoRaHeaderProbe();

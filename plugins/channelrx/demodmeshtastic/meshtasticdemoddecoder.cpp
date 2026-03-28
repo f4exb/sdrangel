@@ -20,14 +20,11 @@
 #include <cmath>
 
 #include "meshtasticdemoddecoder.h"
-#include "meshtasticdemoddecodertty.h"
-#include "meshtasticdemoddecoderascii.h"
 #include "meshtasticdemoddecoderlora.h"
-#include "meshtasticdemoddecoderft.h"
 #include "meshtasticdemodmsg.h"
 
 MeshtasticDemodDecoder::MeshtasticDemodDecoder() :
-    m_codingScheme(MeshtasticDemodSettings::CodingTTY),
+    m_codingScheme(MeshtasticDemodSettings::CodingLoRa),
     m_spreadFactor(0U),
     m_deBits(0U),
     m_nbSymbolBits(5),
@@ -66,98 +63,45 @@ void MeshtasticDemodDecoder::setNbSymbolBits(unsigned int spreadFactor, unsigned
     m_nbSymbolBits = m_spreadFactor - m_deBits;
 }
 
-void MeshtasticDemodDecoder::decodeSymbols(const std::vector<unsigned short>& symbols, QString& str)
-{
-    switch(m_codingScheme)
-    {
-    case MeshtasticDemodSettings::CodingTTY:
-        if (m_nbSymbolBits == 5) {
-            MeshtasticDemodDecoderTTY::decodeSymbols(symbols, str);
-        }
-        break;
-    case MeshtasticDemodSettings::CodingASCII:
-        if (m_nbSymbolBits == 7) {
-            MeshtasticDemodDecoderASCII::decodeSymbols(symbols, str);
-        }
-        break;
-    default:
-        break;
-    }
-}
-
 void MeshtasticDemodDecoder::decodeSymbols(const std::vector<unsigned short>& symbols, QByteArray& bytes)
 {
-    switch(m_codingScheme)
+    if (m_nbSymbolBits >= 5)
     {
-    case MeshtasticDemodSettings::CodingLoRa:
-        if (m_nbSymbolBits >= 5)
-        {
-            unsigned int headerNbSymbolBits;
+        unsigned int headerNbSymbolBits;
 
-            if (m_hasHeader && (m_spreadFactor > 2U)) {
-                headerNbSymbolBits = m_spreadFactor - 2U;
-            } else {
-                headerNbSymbolBits = m_nbSymbolBits;
-            }
-
-            MeshtasticDemodDecoderLoRa::decodeBytes(
-                bytes,
-                symbols,
-                m_nbSymbolBits,
-                headerNbSymbolBits,
-                m_hasHeader,
-                m_hasCRC,
-                m_nbParityBits,
-                m_packetLength,
-                m_earlyEOM,
-                m_headerParityStatus,
-                m_headerCRCStatus,
-                m_payloadParityStatus,
-                m_payloadCRCStatus
-            );
-
-            MeshtasticDemodDecoderLoRa::getCodingMetrics(
-                m_nbSymbolBits,
-                headerNbSymbolBits,
-                m_nbParityBits,
-                m_packetLength,
-                m_hasHeader,
-                m_hasCRC,
-                m_nbSymbols,
-                m_nbCodewords
-            );
+        if (m_hasHeader && (m_spreadFactor > 2U)) {
+            headerNbSymbolBits = m_spreadFactor - 2U;
+        } else {
+            headerNbSymbolBits = m_nbSymbolBits;
         }
-        break;
-    default:
-        break;
-    }
-}
 
-void MeshtasticDemodDecoder::decodeSymbols( //!< For FT coding scheme
-    const std::vector<std::vector<float>>& mags, // vector of symbols magnitudes
-    int nbSymbolBits, //!< number of bits per symbol
-    std::string& msg,     //!< formatted message
-    std::string& call1,   //!< 1st callsign or shorthand
-    std::string& call2,   //!< 2nd callsign
-    std::string& loc,     //!< locator, report or shorthand
-    bool& reply       //!< true if message is a reply report
-)
-{
-    if (m_codingScheme != MeshtasticDemodSettings::CodingFT) {
-        return;
-    }
+        MeshtasticDemodDecoderLoRa::decodeBytes(
+            bytes,
+            symbols,
+            m_nbSymbolBits,
+            headerNbSymbolBits,
+            m_hasHeader,
+            m_hasCRC,
+            m_nbParityBits,
+            m_packetLength,
+            m_earlyEOM,
+            m_headerParityStatus,
+            m_headerCRCStatus,
+            m_payloadParityStatus,
+            m_payloadCRCStatus
+        );
 
-    MeshtasticDemodDecoderFT::decodeSymbols(
-        mags,
-        nbSymbolBits,
-        msg,
-        call1,
-        call2,
-        loc,
-        reply,
-        m_payloadParityStatus,
-        m_payloadCRCStatus
-    );
+        MeshtasticDemodDecoderLoRa::getCodingMetrics(
+            m_nbSymbolBits,
+            headerNbSymbolBits,
+            m_nbParityBits,
+            m_packetLength,
+            m_hasHeader,
+            m_hasCRC,
+            m_nbSymbols,
+            m_nbCodewords
+        );
+    }
 }
 
 bool MeshtasticDemodDecoder::handleMessage(const Message& cmd)
@@ -240,249 +184,198 @@ bool MeshtasticDemodDecoder::handleMessage(const Message& cmd)
         QDateTime dt = QDateTime::currentDateTime();
         QString msgTimestamp = dt.toString(Qt::ISODateWithMs);
 
-        if (m_codingScheme == MeshtasticDemodSettings::CodingLoRa)
+        QByteArray msgBytes;
+        const std::vector<std::vector<float>>& msgMags = msg.getMagnitudes();
+        const bool canSoftDecode = !msgMags.empty()
+            && (msgMags.size() >= msg.getSymbols().size())
+            && (m_spreadFactor >= 5U)
+            && (m_loRaBandwidth > 0U);
+
+        struct LoRaDecodeState
         {
-            QByteArray msgBytes;
-            const std::vector<std::vector<float>>& msgMags = msg.getMagnitudes();
-            const bool canSoftDecode = !msgMags.empty()
-                && (msgMags.size() >= msg.getSymbols().size())
-                && (m_spreadFactor >= 5U)
-                && (m_loRaBandwidth > 0U);
+            QByteArray bytes;
+            bool hasCRC;
+            unsigned int nbParityBits;
+            unsigned int packetLength;
+            unsigned int nbSymbols;
+            unsigned int nbCodewords;
+            bool earlyEOM;
+            int headerParityStatus;
+            bool headerCRCStatus;
+            int payloadParityStatus;
+            bool payloadCRCStatus;
+        };
 
-            struct LoRaDecodeState
-            {
-                QByteArray bytes;
-                bool hasCRC;
-                unsigned int nbParityBits;
-                unsigned int packetLength;
-                unsigned int nbSymbols;
-                unsigned int nbCodewords;
-                bool earlyEOM;
-                int headerParityStatus;
-                bool headerCRCStatus;
-                int payloadParityStatus;
-                bool payloadCRCStatus;
-            };
+        auto captureLoRaState = [this](const QByteArray& bytes) -> LoRaDecodeState {
+            LoRaDecodeState s;
+            s.bytes = bytes;
+            s.hasCRC = m_hasCRC;
+            s.nbParityBits = m_nbParityBits;
+            s.packetLength = m_packetLength;
+            s.nbSymbols = m_nbSymbols;
+            s.nbCodewords = m_nbCodewords;
+            s.earlyEOM = m_earlyEOM;
+            s.headerParityStatus = m_headerParityStatus;
+            s.headerCRCStatus = m_headerCRCStatus;
+            s.payloadParityStatus = m_payloadParityStatus;
+            s.payloadCRCStatus = m_payloadCRCStatus;
+            return s;
+        };
 
-            auto captureLoRaState = [this](const QByteArray& bytes) -> LoRaDecodeState {
-                LoRaDecodeState s;
-                s.bytes = bytes;
-                s.hasCRC = m_hasCRC;
-                s.nbParityBits = m_nbParityBits;
-                s.packetLength = m_packetLength;
-                s.nbSymbols = m_nbSymbols;
-                s.nbCodewords = m_nbCodewords;
-                s.earlyEOM = m_earlyEOM;
-                s.headerParityStatus = m_headerParityStatus;
-                s.headerCRCStatus = m_headerCRCStatus;
-                s.payloadParityStatus = m_payloadParityStatus;
-                s.payloadCRCStatus = m_payloadCRCStatus;
-                return s;
-            };
+        auto restoreLoRaState = [this, &msgBytes](const LoRaDecodeState& s) {
+            msgBytes = s.bytes;
+            m_hasCRC = s.hasCRC;
+            m_nbParityBits = s.nbParityBits;
+            m_packetLength = s.packetLength;
+            m_nbSymbols = s.nbSymbols;
+            m_nbCodewords = s.nbCodewords;
+            m_earlyEOM = s.earlyEOM;
+            m_headerParityStatus = s.headerParityStatus;
+            m_headerCRCStatus = s.headerCRCStatus;
+            m_payloadParityStatus = s.payloadParityStatus;
+            m_payloadCRCStatus = s.payloadCRCStatus;
+        };
 
-            auto restoreLoRaState = [this, &msgBytes](const LoRaDecodeState& s) {
-                msgBytes = s.bytes;
-                m_hasCRC = s.hasCRC;
-                m_nbParityBits = s.nbParityBits;
-                m_packetLength = s.packetLength;
-                m_nbSymbols = s.nbSymbols;
-                m_nbCodewords = s.nbCodewords;
-                m_earlyEOM = s.earlyEOM;
-                m_headerParityStatus = s.headerParityStatus;
-                m_headerCRCStatus = s.headerCRCStatus;
-                m_payloadParityStatus = s.payloadParityStatus;
-                m_payloadCRCStatus = s.payloadCRCStatus;
-            };
-
-            if (canSoftDecode)
-            {
-                unsigned int headerNbSymbolBits;
-
-                if (m_hasHeader && (m_spreadFactor > 2U)) {
-                    headerNbSymbolBits = m_spreadFactor - 2U;
-                } else {
-                    headerNbSymbolBits = m_nbSymbolBits;
-                }
-
-                MeshtasticDemodDecoderLoRa::decodeBytesSoft(
-                    msgBytes,
-                    msgMags,
-                    msg.getSymbols(),
-                    m_spreadFactor,
-                    m_loRaBandwidth,
-                    m_nbSymbolBits,
-                    headerNbSymbolBits,
-                    m_hasHeader,
-                    m_hasCRC,
-                    m_nbParityBits,
-                    m_packetLength,
-                    m_earlyEOM,
-                    m_headerParityStatus,
-                    m_headerCRCStatus,
-                    m_payloadParityStatus,
-                    m_payloadCRCStatus
-                );
-
-                MeshtasticDemodDecoderLoRa::getCodingMetrics(
-                    m_nbSymbolBits,
-                    headerNbSymbolBits,
-                    m_nbParityBits,
-                    m_packetLength,
-                    m_hasHeader,
-                    m_hasCRC,
-                    m_nbSymbols,
-                    m_nbCodewords
-                );
-
-                const LoRaDecodeState softState = captureLoRaState(msgBytes);
-
-                // Soft path is canonical for gr-lora_sdr, but if this approximation misses CRC
-                // on noisy captures, retry hard decode once and keep whichever path validates.
-                if (m_hasCRC && !m_payloadCRCStatus)
-                {
-                    QByteArray hardBytes;
-                    decodeSymbols(msg.getSymbols(), hardBytes); // hard path updates decoder state
-                    const LoRaDecodeState hardState = captureLoRaState(hardBytes);
-
-                    if (hardState.payloadCRCStatus) {
-                        restoreLoRaState(hardState);
-                    } else {
-                        restoreLoRaState(softState);
-                    }
-                }
-            }
-            else
-            {
-                decodeSymbols(msg.getSymbols(), msgBytes);
-            }
-
-            if (m_hasCRC && !m_payloadCRCStatus && (m_spreadFactor >= 5U))
-            {
-                const LoRaDecodeState baseState = captureLoRaState(msgBytes);
-                const unsigned int headerNbSymbolBits = (m_hasHeader && (m_spreadFactor > 2U))
-                    ? (m_spreadFactor - 2U)
-                    : m_nbSymbolBits;
-                bool recovered = false;
-
-                for (int delta : {-1, 1})
-                {
-                    std::vector<unsigned short> shifted = msg.getSymbols();
-
-                    for (size_t i = 0; i < shifted.size(); i++)
-                    {
-                        const bool isHeader = m_hasHeader && (i < 8U);
-                        const unsigned int bits = isHeader ? headerNbSymbolBits : m_nbSymbolBits;
-                        const unsigned int mod = 1U << std::max(1U, bits);
-                        const int s = static_cast<int>(shifted[i]);
-                        const int v = (s + delta) % static_cast<int>(mod);
-                        shifted[i] = static_cast<unsigned short>(v < 0 ? (v + static_cast<int>(mod)) : v);
-                    }
-
-                    QByteArray shiftedBytes;
-                    decodeSymbols(shifted, shiftedBytes); // hard-path decode with adjusted symbol indices
-                    const LoRaDecodeState shiftedState = captureLoRaState(shiftedBytes);
-
-                    if (shiftedState.payloadCRCStatus)
-                    {
-                        restoreLoRaState(shiftedState);
-                        recovered = true;
-                        break;
-                    }
-                }
-
-                if (!recovered) {
-                    restoreLoRaState(baseState);
-                }
-            }
-
-            qDebug(
-                "MeshtasticDemodDecoder::handleMessage: decode symbols=%zu bytes=%lld earlyEOM=%d hCRC=%d pCRC=%d hParity=%d pParity=%d",
-                msg.getSymbols().size(),
-                static_cast<long long>(msgBytes.size()),
-                m_earlyEOM ? 1 : 0,
-                m_headerCRCStatus ? 1 : 0,
-                m_payloadCRCStatus ? 1 : 0,
-                m_headerParityStatus,
-                m_payloadParityStatus
-            );
-
-            if (m_outputMessageQueue)
-            {
-                qDebug(
-                    "MeshtasticDemodDecoder::handleMessage: push report ts=%s bytes=%lld pCRC=%d",
-                    qPrintable(msgTimestamp),
-                    static_cast<long long>(msgBytes.size()),
-                    m_payloadCRCStatus ? 1 : 0
-                );
-                MeshtasticDemodMsg::MsgReportDecodeBytes *outputMsg = MeshtasticDemodMsg::MsgReportDecodeBytes::create(msgBytes);
-                outputMsg->setFrameId(msg.getFrameId());
-                outputMsg->setSyncWord(msgSyncWord);
-                outputMsg->setSignalDb(msgSignalDb);
-                outputMsg->setNoiseDb(msgNoiseDb);
-                outputMsg->setMsgTimestamp(msgTimestamp);
-                outputMsg->setPacketSize(getPacketLength());
-                outputMsg->setNbParityBits(getNbParityBits());
-                outputMsg->setHasCRC(getHasCRC());
-                outputMsg->setNbSymbols(getNbSymbols());
-                outputMsg->setNbCodewords(getNbCodewords());
-                outputMsg->setEarlyEOM(getEarlyEOM());
-                outputMsg->setHeaderParityStatus(getHeaderParityStatus());
-                outputMsg->setHeaderCRCStatus(getHeaderCRCStatus());
-                outputMsg->setPayloadParityStatus(getPayloadParityStatus());
-                outputMsg->setPayloadCRCStatus(getPayloadCRCStatus());
-                outputMsg->setPipelineMetadata(m_pipelineId, m_pipelineName, m_pipelinePreset);
-                outputMsg->setDechirpedSpectrum(msg.getDechirpedSpectrum());
-                m_outputMessageQueue->push(outputMsg);
-            }
-        }
-        else if (m_codingScheme == MeshtasticDemodSettings::CodingFT)
+        if (canSoftDecode)
         {
-            std::string fmsg, call1, call2, loc;
-            bool reply;
-            decodeSymbols(
-                msg.getMagnitudes(),
+            unsigned int headerNbSymbolBits;
+
+            if (m_hasHeader && (m_spreadFactor > 2U)) {
+                headerNbSymbolBits = m_spreadFactor - 2U;
+            } else {
+                headerNbSymbolBits = m_nbSymbolBits;
+            }
+
+            MeshtasticDemodDecoderLoRa::decodeBytesSoft(
+                msgBytes,
+                msgMags,
+                msg.getSymbols(),
+                m_spreadFactor,
+                m_loRaBandwidth,
                 m_nbSymbolBits,
-                fmsg,
-                call1,
-                call2,
-                loc,
-                reply
+                headerNbSymbolBits,
+                m_hasHeader,
+                m_hasCRC,
+                m_nbParityBits,
+                m_packetLength,
+                m_earlyEOM,
+                m_headerParityStatus,
+                m_headerCRCStatus,
+                m_payloadParityStatus,
+                m_payloadCRCStatus
             );
 
-            if (m_outputMessageQueue)
+            MeshtasticDemodDecoderLoRa::getCodingMetrics(
+                m_nbSymbolBits,
+                headerNbSymbolBits,
+                m_nbParityBits,
+                m_packetLength,
+                m_hasHeader,
+                m_hasCRC,
+                m_nbSymbols,
+                m_nbCodewords
+            );
+
+            const LoRaDecodeState softState = captureLoRaState(msgBytes);
+
+            // Soft path is canonical for gr-lora_sdr, but if this approximation misses CRC
+            // on noisy captures, retry hard decode once and keep whichever path validates.
+            if (m_hasCRC && !m_payloadCRCStatus)
             {
-                MeshtasticDemodMsg::MsgReportDecodeFT *outputMsg = MeshtasticDemodMsg::MsgReportDecodeFT::create();
-                outputMsg->setSyncWord(msgSyncWord);
-                outputMsg->setSignalDb(msgSignalDb);
-                outputMsg->setNoiseDb(msgNoiseDb);
-                outputMsg->setMsgTimestamp(msgTimestamp);
-                outputMsg->setMessage(QString(fmsg.c_str()));
-                outputMsg->setCall1(QString(call1.c_str()));
-                outputMsg->setCall2(QString(call2.c_str()));
-                outputMsg->setLoc(QString(loc.c_str()));
-                outputMsg->setReply(reply);
-                outputMsg->setPayloadParityStatus(getPayloadParityStatus());
-                outputMsg->setPayloadCRCStatus(getPayloadCRCStatus());
-                outputMsg->setPipelineMetadata(m_pipelineId, m_pipelineName, m_pipelinePreset);
-                m_outputMessageQueue->push(outputMsg);
+                QByteArray hardBytes;
+                decodeSymbols(msg.getSymbols(), hardBytes); // hard path updates decoder state
+                const LoRaDecodeState hardState = captureLoRaState(hardBytes);
+
+                if (hardState.payloadCRCStatus) {
+                    restoreLoRaState(hardState);
+                } else {
+                    restoreLoRaState(softState);
+                }
             }
         }
         else
         {
-            QString msgString;
-            decodeSymbols(msg.getSymbols(), msgString);
+            decodeSymbols(msg.getSymbols(), msgBytes);
+        }
 
-            if (m_outputMessageQueue)
+        if (m_hasCRC && !m_payloadCRCStatus && (m_spreadFactor >= 5U))
+        {
+            const LoRaDecodeState baseState = captureLoRaState(msgBytes);
+            const unsigned int headerNbSymbolBits = (m_hasHeader && (m_spreadFactor > 2U))
+                ? (m_spreadFactor - 2U)
+                : m_nbSymbolBits;
+            bool recovered = false;
+
+            for (int delta : {-1, 1})
             {
-                MeshtasticDemodMsg::MsgReportDecodeString *outputMsg = MeshtasticDemodMsg::MsgReportDecodeString::create(msgString);
-                outputMsg->setFrameId(msg.getFrameId());
-                outputMsg->setSyncWord(msgSyncWord);
-                outputMsg->setSignalDb(msgSignalDb);
-                outputMsg->setNoiseDb(msgNoiseDb);
-                outputMsg->setMsgTimestamp(msgTimestamp);
-                outputMsg->setPipelineMetadata(m_pipelineId, m_pipelineName, m_pipelinePreset);
-                m_outputMessageQueue->push(outputMsg);
+                std::vector<unsigned short> shifted = msg.getSymbols();
+
+                for (size_t i = 0; i < shifted.size(); i++)
+                {
+                    const bool isHeader = m_hasHeader && (i < 8U);
+                    const unsigned int bits = isHeader ? headerNbSymbolBits : m_nbSymbolBits;
+                    const unsigned int mod = 1U << std::max(1U, bits);
+                    const int s = static_cast<int>(shifted[i]);
+                    const int v = (s + delta) % static_cast<int>(mod);
+                    shifted[i] = static_cast<unsigned short>(v < 0 ? (v + static_cast<int>(mod)) : v);
+                }
+
+                QByteArray shiftedBytes;
+                decodeSymbols(shifted, shiftedBytes); // hard-path decode with adjusted symbol indices
+                const LoRaDecodeState shiftedState = captureLoRaState(shiftedBytes);
+
+                if (shiftedState.payloadCRCStatus)
+                {
+                    restoreLoRaState(shiftedState);
+                    recovered = true;
+                    break;
+                }
             }
+
+            if (!recovered) {
+                restoreLoRaState(baseState);
+            }
+        }
+
+        qDebug(
+            "MeshtasticDemodDecoder::handleMessage: decode symbols=%zu bytes=%lld earlyEOM=%d hCRC=%d pCRC=%d hParity=%d pParity=%d",
+            msg.getSymbols().size(),
+            static_cast<long long>(msgBytes.size()),
+            m_earlyEOM ? 1 : 0,
+            m_headerCRCStatus ? 1 : 0,
+            m_payloadCRCStatus ? 1 : 0,
+            m_headerParityStatus,
+            m_payloadParityStatus
+        );
+
+        if (m_outputMessageQueue)
+        {
+            qDebug(
+                "MeshtasticDemodDecoder::handleMessage: push report name=%s ts=%s bytes=%lld pCRC=%d",
+                qPrintable(m_pipelineName),
+                qPrintable(msgTimestamp),
+                static_cast<long long>(msgBytes.size()),
+                m_payloadCRCStatus ? 1 : 0
+            );
+            MeshtasticDemodMsg::MsgReportDecodeBytes *outputMsg = MeshtasticDemodMsg::MsgReportDecodeBytes::create(msgBytes);
+            outputMsg->setFrameId(msg.getFrameId());
+            outputMsg->setSyncWord(msgSyncWord);
+            outputMsg->setSignalDb(msgSignalDb);
+            outputMsg->setNoiseDb(msgNoiseDb);
+            outputMsg->setMsgTimestamp(msgTimestamp);
+            outputMsg->setPacketSize(getPacketLength());
+            outputMsg->setNbParityBits(getNbParityBits());
+            outputMsg->setHasCRC(getHasCRC());
+            outputMsg->setNbSymbols(getNbSymbols());
+            outputMsg->setNbCodewords(getNbCodewords());
+            outputMsg->setEarlyEOM(getEarlyEOM());
+            outputMsg->setHeaderParityStatus(getHeaderParityStatus());
+            outputMsg->setHeaderCRCStatus(getHeaderCRCStatus());
+            outputMsg->setPayloadParityStatus(getPayloadParityStatus());
+            outputMsg->setPayloadCRCStatus(getPayloadCRCStatus());
+            outputMsg->setPipelineMetadata(m_pipelineId, m_pipelineName, m_pipelinePreset);
+            outputMsg->setDechirpedSpectrum(msg.getDechirpedSpectrum());
+            m_outputMessageQueue->push(outputMsg);
         }
 
         return true;

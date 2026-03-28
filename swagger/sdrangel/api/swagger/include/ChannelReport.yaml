@@ -69,6 +69,10 @@ ChannelReport:
       $ref: "http://swgserver:8081/api/swagger/include/M17Demod.yaml#/M17DemodReport"
     M17ModReport:
       $ref: "http://swgserver:8081/api/swagger/include/M17Mod.yaml#/M17ModReport"
+    MeshtasticDemodReport:
+      $ref: "http://swgserver:8081/api/swagger/include/MeshtasticDemod.yaml#/MeshtasticDemodReport"
+    MeshtasticModReport:
+      $ref: "http://swgserver:8081/api/swagger/include/MeshtasticMod.yaml#/MeshtasticModReport"
     NavtexDemodReport:
       $ref: "http://swgserver:8081/api/swagger/include/NavtexDemod.yaml#/NavtexDemodReport"
     NFMDemodReport:

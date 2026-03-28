@@ -1,0 +1,128 @@
+MeshtasticModSettings:
+  description: MeshtasticMod
+  properties:
+    inputFrequencyOffset:
+      type: integer
+      format: int64
+    bandwidthIndex:
+      type: integer
+      description: >
+        standard bandwidths index:
+          *  0 -    375 Hz (384000 / 1024)
+          *  1 -    750 Hz (384000 / 512)
+          *  2 -   1500 Hz (384000 / 256)
+          *  3 -   2604 Hz (333333 / 128)
+          *  4 -   3125 Hz (400000 / 128)
+          *  5 -   3906 Hz (500000 / 128)
+          *  6 -   5208 Hz (333333 / 64)
+          *  7 -   6250 Hz (400000 / 64)
+          *  8 -   7813 Hz (500000 / 64)
+          *  9 -  10417 Hz (333333 / 32)
+          * 10 -  12500 Hz (400000 / 32)
+          * 11 -  15625 Hz (500000 / 32)
+          * 12 -  20833 Hz (333333 / 16)
+          * 13 -  25000 Hz (400000 / 16)
+          * 14 -  31250 Hz (500000 / 16)
+          * 15 -  41667 Hz (333333 / 8)
+          * 16 -  50000 Hz (400000 / 8)
+          * 17 -  62500 Hz (500000 / 8)
+          * 18 -  83333 Hz (333333 / 4)
+          * 19 - 100000 Hz (400000 / 4)
+          * 20 - 125000 Hz (500000 / 4)
+          * 21 - 166667 Hz (333333 / 2)
+          * 22 - 200000 Hz (400000 / 2)
+          * 23 - 250000 Hz (500000 / 2)
+          * 24 - 333333 Hz (333333 / 1)
+          * 25 - 400000 Hz (400000 / 1)
+          * 26 - 500000 Hz (500000 / 1)
+    spreadFactor:
+      type: integer
+    deBits:
+      description: Low data rate optimize (DE) bits i.e. nb of FFT bins per effective symbol
+      type: integer
+    preambleChirps:
+      description: Number of preamble chirps
+      type: integer
+    quietMillis:
+      description: Number of milliseconds to pause between transmissions
+      type: integer
+    syncWord:
+      description: 2 byte (0..65535) synchronization syncWord
+      type: integer
+    channelMute:
+      description: boolean
+      type: integer
+    nbParityBits:
+      description: Hamming FEC parity bits (LoRa)
+      type: integer
+    textMessage:
+      description: freeform text message
+      type: string
+    messageRepeat:
+      description: number of repetitions of the same message (0 for infinite)
+      type: integer
+    udpEnabled:
+      description: boolean 1 to enable forwarding messages via UDP else 0
+      type: integer
+    udpAddress:
+      description: UDP address to listen for messages to transmit on
+      type: string
+    udpPort:
+      description: UDP port to listen for messages to transmit on
+      type: integer
+    invertRamps:
+      type: integer
+      description: >
+        Invert chirp ramps
+          * 0 - Normal chirp ramps (upchirps for preamble and payload)
+          * 1 - Inverted chirp ramps (downchirps for preamble and payload)
+    rgbColor:
+      type: integer
+    title:
+      type: string
+    streamIndex:
+      description: MIMO channel. Not relevant when connected to SI (single Rx).
+      type: integer
+    useReverseAPI:
+      description: Synchronize with reverse API (1 for yes, 0 for no)
+      type: integer
+    reverseAPIAddress:
+      type: string
+    reverseAPIPort:
+      type: integer
+    reverseAPIDeviceIndex:
+      type: integer
+    reverseAPIChannelIndex:
+      type: integer
+    channelMarker:
+      $ref: "http://swgserver:8081/api/swagger/include/ChannelMarker.yaml#/ChannelMarker"
+    rollupState:
+      $ref: "http://swgserver:8081/api/swagger/include/RollupState.yaml#/RollupState"
+
+MeshtasticModReport:
+  description: MeshtasticMod
+  properties:
+    channelPowerDB:
+      description: power transmitted in channel (dB)
+      type: number
+      format: float
+    channelSampleRate:
+      type: integer
+    symbolTimeMs:
+      description: symbol duration (ms)
+      type: number
+      format: float
+    payloadTimeMs:
+      description: payload duration (ms)
+      type: number
+      format: float
+    totalTimeMs:
+      description: total message duration inc. preamble and SFD (ms)
+      type: number
+      format: float
+    playing:
+      type: integer
+      description: >
+        Boolean - modulator is active (playing) including idle time
+          * 0 - Modulator not active
+          * 1 - Modulator active

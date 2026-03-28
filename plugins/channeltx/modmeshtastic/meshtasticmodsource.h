@@ -1,5 +1,6 @@
 ///////////////////////////////////////////////////////////////////////////////////
-// Copyright (C) 2019-2020 Edouard Griffiths, F4EXB <f4exb06@gmail.com>          //
+// Copyright (C) 2026 Alejandro Aleman                                           //
+// Copyright (C) 2019-2026 Edouard Griffiths, F4EXB <f4exb06@gmail.com>          //
 //                                                                               //
 // This program is free software; you can redistribute it and/or modify          //
 // it under the terms of the GNU General Public License as published by          //
@@ -57,7 +58,7 @@ private:
         ChirpChatStatePreamble,   //!< Transmit preamble
         ChirpChatStateSyncWord,   //!< Transmit sync word
         ChirpChatStateSFD,        //!< Transmit SFD
-        ChirpChatStatePayload     //!< Tramsmoit payload
+        ChirpChatStatePayload     //!< Transmit payload
     };
 
     int m_channelSampleRate;
@@ -77,6 +78,7 @@ private:
     unsigned int m_quietSamples;   //!< number of samples during quiet period
     unsigned int m_quarterSamples; //!< number of samples in a quarter chirp
     unsigned int m_repeatCount;    //!< message repetition counter
+    unsigned int m_txFrameToken;   //!< monotonically increasing loopback trace token
     bool m_active;                 //!< modulator is in a sending sequence (including periodic quiet times)
 
     NCO m_carrierNco;
@@ -106,7 +108,7 @@ private:
     void reset();
     void calculateLevel(Real& sample);
     void modulateSample();
-    unsigned short encodeSymbol(unsigned short symbol); //!< Encodes symbol with possible DE bits spacing
+    unsigned short encodeSymbol(unsigned short symbol, bool headerSymbol) const; //!< Encodes symbol with payload/header DE spacing
 };
 
 #endif // INCLUDE_MESHTASTICMODSOURCE_H

@@ -53,17 +53,7 @@ public:
 
 private:
     bool handleMessage(const Message& cmd);
-    void decodeSymbols(const std::vector<unsigned short>& symbols, QString& str);      //!< For ASCII and TTY
     void decodeSymbols(const std::vector<unsigned short>& symbols, QByteArray& bytes); //!< For raw bytes (original LoRa)
-    void decodeSymbols( //!< For FT coding scheme
-        const std::vector<std::vector<float>>& mags, // vector of symbols magnitudes
-        int nbSymbolBits, //!< number of bits per symbol
-        std::string& msg,     //!< formatted message
-        std::string& call1,   //!< 1st callsign or shorthand
-        std::string& call2,   //!< 2nd callsign
-        std::string& loc,     //!< locator, report or shorthand
-        bool& reply       //!< true if message is a reply report
-    );
     unsigned int getNbParityBits() const { return m_nbParityBits; }
     unsigned int getPacketLength() const { return m_packetLength; }
     bool getHasCRC() const { return m_hasCRC; }

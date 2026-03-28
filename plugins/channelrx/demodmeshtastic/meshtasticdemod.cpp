@@ -39,7 +39,7 @@
 #include "SWGChannelSettings.h"
 #include "SWGWorkspaceInfo.h"
 #include "SWGChannelReport.h"
-#include "SWGChirpChatDemodReport.h"
+#include "SWGMeshtasticDemodReport.h"
 
 #include "dsp/dspcommands.h"
 #include "device/deviceapi.h"
@@ -54,6 +54,7 @@
 #include "meshtasticpacket.h"
 
 MESSAGE_CLASS_DEFINITION(MeshtasticDemod::MsgConfigureMeshtasticDemod, Message)
+MESSAGE_CLASS_DEFINITION(MeshtasticDemod::MsgSetExtraPipelineSettings, Message)
 
 const char* const MeshtasticDemod::m_channelIdURI = "sdrangel.channel.meshtasticdemod";
 const char* const MeshtasticDemod::m_channelId = "MeshtasticDemod";
@@ -173,15 +174,12 @@ int MeshtasticDemod::findBandwidthIndexForHz(int bandwidthHz) const
 MeshtasticDemodSettings MeshtasticDemod::makePipelineSettingsFromMeshRadio(
     const MeshtasticDemodSettings& baseSettings,
     const QString& presetName,
-    const Meshtastic::TxRadioSettings& meshRadio,
+    const modemmeshtastic::TxRadioSettings& meshRadio,
     qint64 selectedPresetFrequencyHz,
     bool haveSelectedPresetFrequency
 ) const
 {
     MeshtasticDemodSettings out = baseSettings;
-    out.m_codingScheme = MeshtasticDemodSettings::CodingLoRa;
-    out.m_hasHeader = true;
-    out.m_hasCRC = true;
     out.m_spreadFactor = meshRadio.spreadFactor;
     out.m_deBits = meshRadio.deBits;
     out.m_nbParityBits = meshRadio.parityBits;
@@ -214,47 +212,16 @@ MeshtasticDemodSettings MeshtasticDemod::makePipelineSettingsFromMeshRadio(
     return out;
 }
 
-std::vector<MeshtasticDemod::PipelineConfig> MeshtasticDemod::buildPipelineConfigs(const MeshtasticDemodSettings& settings) const
+void MeshtasticDemod::makePipelineConfigFromSettings(int configId, PipelineConfig& config, const MeshtasticDemodSettings& settings) const
 {
-    std::vector<PipelineConfig> configs;
-
-    if (settings.m_codingScheme != MeshtasticDemodSettings::CodingLoRa)
+    // USER preset: all LoRa parameters are user-controlled; skip derivation from the mesh radio table.
+    if (settings.m_meshtasticPresetName.trimmed().compare("USER", Qt::CaseInsensitive) == 0)
     {
-        PipelineConfig config;
-        config.id = 0;
-        config.name = "Main";
-        config.presetName = "MAIN";
+        config.id = configId;
+        config.name = QString("Cnf_%1").arg(configId);
+        config.presetName = settings.m_meshtasticPresetName;
         config.settings = settings;
-        configs.push_back(config);
-        return configs;
-    }
-
-    static const std::array<const char*, 9> kPresetOrder = {
-        "LONG_FAST",
-        "LONG_SLOW",
-        "LONG_MODERATE",
-        "LONG_TURBO",
-        "MEDIUM_FAST",
-        "MEDIUM_SLOW",
-        "SHORT_FAST",
-        "SHORT_SLOW",
-        "SHORT_TURBO"
-    };
-
-    const QString selectedPreset = settings.m_meshtasticPresetName.trimmed().isEmpty()
-        ? QString("LONG_FAST")
-        : settings.m_meshtasticPresetName.trimmed().toUpper();
-
-    QStringList orderedPresets;
-    orderedPresets.append(selectedPreset);
-
-    for (const char *preset : kPresetOrder)
-    {
-        const QString p(preset);
-
-        if (!orderedPresets.contains(p)) {
-            orderedPresets.append(p);
-        }
+        return;
     }
 
     const QString region = settings.m_meshtasticRegionCode.trimmed().isEmpty()
@@ -262,69 +229,31 @@ std::vector<MeshtasticDemod::PipelineConfig> MeshtasticDemod::buildPipelineConfi
         : settings.m_meshtasticRegionCode.trimmed();
     const int channelNum = std::max(1, settings.m_meshtasticChannelIndex + 1);
 
+    modemmeshtastic::TxRadioSettings meshRadio;
+    QString error;
+    const QString command = QString("MESH:preset=%1;region=%2;channel_num=%3")
+        .arg(settings.m_meshtasticPresetName.trimmed().isEmpty() ? QString("LONG_FAST") : settings.m_meshtasticPresetName.trimmed().toUpper())
+        .arg(region)
+        .arg(channelNum);
     qint64 selectedPresetFrequencyHz = 0;
     bool haveSelectedPresetFrequency = false;
-    {
-        Meshtastic::TxRadioSettings selectedMeshRadio;
-        QString error;
-        const QString command = QString("MESH:preset=%1;region=%2;channel_num=%3")
-            .arg(selectedPreset)
-            .arg(region)
-            .arg(channelNum);
 
-        if (Meshtastic::Packet::deriveTxRadioSettings(command, selectedMeshRadio, error) && selectedMeshRadio.hasCenterFrequency)
-        {
-            selectedPresetFrequencyHz = selectedMeshRadio.centerFrequencyHz;
-            haveSelectedPresetFrequency = true;
-        }
+    if (modemmeshtastic::Packet::deriveTxRadioSettings(command, meshRadio, error) && meshRadio.hasCenterFrequency)
+    {
+        selectedPresetFrequencyHz = meshRadio.centerFrequencyHz;
+        haveSelectedPresetFrequency = true;
     }
 
-    int id = 0;
-
-    for (const QString& presetName : orderedPresets)
-    {
-        Meshtastic::TxRadioSettings meshRadio;
-        QString error;
-        const QString command = QString("MESH:preset=%1;region=%2;channel_num=%3")
-            .arg(presetName)
-            .arg(region)
-            .arg(channelNum);
-
-        if (!Meshtastic::Packet::deriveTxRadioSettings(command, meshRadio, error))
-        {
-            qDebug() << "MeshtasticDemod::buildPipelineConfigs: skip preset" << presetName << ":" << error;
-            continue;
-        }
-
-        if (!meshRadio.hasLoRaParams) {
-            continue;
-        }
-
-        PipelineConfig config;
-        config.id = id++;
-        config.name = presetName;
-        config.presetName = presetName;
-        config.settings = makePipelineSettingsFromMeshRadio(
-            settings,
-            presetName,
-            meshRadio,
-            selectedPresetFrequencyHz,
-            haveSelectedPresetFrequency
-        );
-        configs.push_back(config);
-    }
-
-    if (configs.empty())
-    {
-        PipelineConfig config;
-        config.id = 0;
-        config.name = "Main";
-        config.presetName = "MAIN";
-        config.settings = settings;
-        configs.push_back(config);
-    }
-
-    return configs;
+    config.id = configId;
+    config.name = QString("Cnf_%1").arg(configId);
+    config.presetName = settings.m_meshtasticPresetName;
+    config.settings = makePipelineSettingsFromMeshRadio(
+        settings,
+        config.presetName,
+        meshRadio,
+        selectedPresetFrequencyHz,
+        haveSelectedPresetFrequency
+    );
 }
 
 void MeshtasticDemod::applyPipelineRuntimeSettings(PipelineRuntime& runtime, const MeshtasticDemodSettings& settings, bool force)
@@ -333,10 +262,10 @@ void MeshtasticDemod::applyPipelineRuntimeSettings(PipelineRuntime& runtime, con
 
     if (runtime.decoder)
     {
-        runtime.decoder->setCodingScheme(settings.m_codingScheme);
+        runtime.decoder->setCodingScheme(MeshtasticDemodSettings::m_codingScheme);
         runtime.decoder->setNbSymbolBits(settings.m_spreadFactor, settings.m_deBits);
-        runtime.decoder->setLoRaHasHeader(settings.m_hasHeader);
-        runtime.decoder->setLoRaHasCRC(settings.m_hasCRC);
+        runtime.decoder->setLoRaHasHeader(MeshtasticDemodSettings::m_hasHeader);
+        runtime.decoder->setLoRaHasCRC(MeshtasticDemodSettings::m_hasCRC);
         runtime.decoder->setLoRaParityBits(settings.m_nbParityBits);
         runtime.decoder->setLoRaPacketLength(settings.m_packetLength);
         runtime.decoder->setLoRaBandwidth(MeshtasticDemodSettings::bandwidths[settings.m_bandwidthIndex]);
@@ -447,27 +376,133 @@ void MeshtasticDemod::syncPipelinesWithSettings(const MeshtasticDemodSettings& s
         return;
     }
 
-    const std::vector<PipelineConfig> configs = buildPipelineConfigs(settings);
+    // Rebuild pipeline configs from the new settings so that region/preset/channel
+    // changes are reflected in the single pipeline entry.
+    for (size_t i = 0; i < m_pipelineConfigs.size(); ++i) {
+        makePipelineConfigFromSettings(m_pipelineConfigs[i].id, m_pipelineConfigs[i], settings);
+    }
 
-    if (!pipelineLayoutMatches(configs))
+    for (size_t i = 0; i < m_pipelineConfigs.size(); ++i)
     {
-        stopPipelines();
-        startPipelines(configs);
+        m_pipelines[i].id = m_pipelineConfigs[i].id;
+        m_pipelines[i].name = m_pipelineConfigs[i].name;
+        m_pipelines[i].presetName = m_pipelineConfigs[i].presetName;
+
+        if (m_pipelines[i].decoder) {
+            m_pipelines[i].decoder->setPipelineMetadata(m_pipelineConfigs[i].id, m_pipelineConfigs[i].name, m_pipelineConfigs[i].presetName);
+        }
+
+        applyPipelineRuntimeSettings(m_pipelines[i], m_pipelineConfigs[i].settings, force);
+    }
+}
+
+void MeshtasticDemod::applyExtraPipelineSettings(const QVector<MeshtasticDemodSettings>& settingsList, bool force)
+{
+    if (!m_running) {
         return;
     }
 
-    for (size_t i = 0; i < configs.size(); ++i)
-    {
-        m_pipelines[i].id = configs[i].id;
-        m_pipelines[i].name = configs[i].name;
-        m_pipelines[i].presetName = configs[i].presetName;
+    // Remove all secondary configs (indices 1+), keeping only the primary (index 0).
+    while (m_pipelineConfigs.size() > 1) {
+        m_pipelineConfigs.pop_back();
+    }
 
-        if (m_pipelines[i].decoder) {
-            m_pipelines[i].decoder->setPipelineMetadata(configs[i].id, configs[i].name, configs[i].presetName);
+    // Build new secondary configs from the provided settings list.
+    // Settings are used as-is (the GUI has already applied preset derivation and frequency offsets).
+    for (int i = 0; i < settingsList.size(); ++i)
+    {
+        PipelineConfig config;
+        const int configId = i + 1;
+        config.id = configId;
+        config.name = QString("Cnf_%1").arg(configId);
+        config.presetName = settingsList[i].m_meshtasticPresetName;
+        config.settings = settingsList[i];
+        m_pipelineConfigs.push_back(config);
+    }
+
+    // Determine if the layout (pipeline count / IDs) has changed.
+    const bool layoutChanged = !pipelineLayoutMatches(m_pipelineConfigs);
+
+    if (layoutChanged)
+    {
+        // Stop and destroy all secondary runtimes (primary at index 0 stays).
+        for (int i = static_cast<int>(m_pipelines.size()) - 1; i >= 1; --i)
+        {
+            PipelineRuntime& rt = m_pipelines[i];
+            if (rt.basebandThread)
+            {
+                rt.basebandThread->exit();
+                rt.basebandThread->wait();
+                delete rt.basebandThread;
+                rt.basebandThread = nullptr;
+            }
+            if (rt.decoderThread)
+            {
+                rt.decoderThread->exit();
+                rt.decoderThread->wait();
+                delete rt.decoderThread;
+                rt.decoderThread = nullptr;
+            }
+            rt.basebandSink = nullptr;
+            rt.decoder = nullptr;
+        }
+        while (m_pipelines.size() > 1) {
+            m_pipelines.pop_back();
         }
 
-        applyPipelineRuntimeSettings(m_pipelines[i], configs[i].settings, force);
+        // Start fresh secondary runtimes.
+        for (int i = 1; i < static_cast<int>(m_pipelineConfigs.size()); ++i)
+        {
+            const PipelineConfig& config = m_pipelineConfigs[i];
+            PipelineRuntime runtime;
+            runtime.id = config.id;
+            runtime.name = config.name;
+            runtime.presetName = config.presetName;
+            runtime.settings = config.settings;
+
+            runtime.decoderThread = new QThread();
+            runtime.decoder = new MeshtasticDemodDecoder();
+            runtime.decoder->setOutputMessageQueue(getInputMessageQueue());
+            runtime.decoder->setPipelineMetadata(runtime.id, runtime.name, runtime.presetName);
+            runtime.decoder->moveToThread(runtime.decoderThread);
+            QObject::connect(runtime.decoderThread, &QThread::finished, runtime.decoder, &QObject::deleteLater);
+            runtime.decoderThread->start();
+
+            runtime.basebandThread = new QThread();
+            runtime.basebandSink = new MeshtasticDemodBaseband();
+            // Secondary pipelines (id != 0) do not own the spectrum visualiser.
+            runtime.basebandSink->setDecoderMessageQueue(runtime.decoder->getInputMessageQueue());
+            runtime.decoder->setHeaderFeedbackMessageQueue(runtime.basebandSink->getInputMessageQueue());
+            runtime.basebandSink->moveToThread(runtime.basebandThread);
+            QObject::connect(runtime.basebandThread, &QThread::finished, runtime.basebandSink, &QObject::deleteLater);
+
+            if (m_basebandSampleRate != 0) {
+                runtime.basebandSink->setBasebandSampleRate(m_basebandSampleRate);
+            }
+            runtime.basebandSink->reset();
+            runtime.basebandSink->setFifoLabel(QString("%1[%2]").arg(m_channelId).arg(config.name));
+            runtime.basebandThread->start();
+
+            applyPipelineRuntimeSettings(runtime, runtime.settings, true);
+            m_pipelines.push_back(runtime);
+        }
     }
+    else
+    {
+        // Layout unchanged — just update settings for each secondary pipeline.
+        for (int i = 1; i < static_cast<int>(m_pipelineConfigs.size()); ++i)
+        {
+            m_pipelines[i].id = m_pipelineConfigs[i].id;
+            m_pipelines[i].name = m_pipelineConfigs[i].name;
+            m_pipelines[i].presetName = m_pipelineConfigs[i].presetName;
+            if (m_pipelines[i].decoder) {
+                m_pipelines[i].decoder->setPipelineMetadata(m_pipelineConfigs[i].id, m_pipelineConfigs[i].name, m_pipelineConfigs[i].presetName);
+            }
+            applyPipelineRuntimeSettings(m_pipelines[i], m_pipelineConfigs[i].settings, force);
+        }
+    }
+
+    qDebug() << "MeshtasticDemod::applyExtraPipelineSettings: total pipelines=" << m_pipelines.size();
 }
 
 void MeshtasticDemod::start()
@@ -477,8 +512,10 @@ void MeshtasticDemod::start()
     }
 
     qDebug() << "MeshtasticDemod::start";
-    const std::vector<PipelineConfig> configs = buildPipelineConfigs(m_settings);
-    startPipelines(configs);
+    m_pipelineConfigs.emplace_back();
+    m_currentPipelineId = 0;
+    makePipelineConfigFromSettings(m_currentPipelineId, m_pipelineConfigs.back(), m_settings);
+    startPipelines(m_pipelineConfigs);
 
     SpectrumSettings spectrumSettings = m_spectrumVis.getSettings();
     spectrumSettings.m_ssb = true;
@@ -497,6 +534,7 @@ void MeshtasticDemod::stop()
     qDebug() << "MeshtasticDemod::stop";
     m_running = false;
     stopPipelines();
+    m_pipelineConfigs.clear();
 }
 
 bool MeshtasticDemod::handleMessage(const Message& cmd)
@@ -510,6 +548,13 @@ bool MeshtasticDemod::handleMessage(const Message& cmd)
 
 		return true;
 	}
+    else if (MsgSetExtraPipelineSettings::match(cmd))
+    {
+        qDebug() << "MeshtasticDemod::handleMessage: MsgSetExtraPipelineSettings";
+        const auto& msg = static_cast<const MsgSetExtraPipelineSettings&>(cmd);
+        applyExtraPipelineSettings(msg.getSettingsList(), false);
+        return true;
+    }
     else if (MeshtasticDemodMsg::MsgReportDecodeBytes::match(cmd))
     {
         qDebug() << "MeshtasticDemod::handleMessage: MsgReportDecodeBytes";
@@ -520,119 +565,112 @@ bool MeshtasticDemod::handleMessage(const Message& cmd)
         m_lastMsgSyncWord = msg.getSyncWord();
         m_lastMsgTimestamp = msg.getMsgTimestamp();
 
-        if (m_settings.m_codingScheme == MeshtasticDemodSettings::CodingLoRa)
+        m_lastMsgBytes = msg.getBytes();
+        m_lastMsgPacketLength = msg.getPacketSize();
+        m_lastMsgNbParityBits = msg.getNbParityBits();
+        m_lastMsgHasCRC = msg.getHasCRC();
+        m_lastMsgNbSymbols = msg.getNbSymbols();
+        m_lastMsgNbCodewords = msg.getNbCodewords();
+        m_lastMsgEarlyEOM = msg.getEarlyEOM();
+        m_lastMsgHeaderCRC = msg.getHeaderCRCStatus();
+        m_lastMsgHeaderParityStatus = msg.getHeaderParityStatus();
+        m_lastMsgPayloadCRC = msg.getPayloadCRCStatus();
+        m_lastMsgPayloadParityStatus = msg.getPayloadParityStatus();
+        m_lastMsgPipelineName = msg.getPipelineName();
+        m_lastFrameType = QStringLiteral("LORA_FRAME");
+
+        QByteArray bytesCopy(m_lastMsgBytes);
+        bytesCopy.truncate(m_lastMsgPacketLength);
+        bytesCopy.replace('\0', " ");
+        m_lastMsgString = QString(bytesCopy.toStdString().c_str());
+
+        if (m_settings.m_sendViaUDP)
         {
-            m_lastMsgBytes = msg.getBytes();
-            m_lastMsgPacketLength = msg.getPacketSize();
-            m_lastMsgNbParityBits = msg.getNbParityBits();
-            m_lastMsgHasCRC = msg.getHasCRC();
-            m_lastMsgNbSymbols = msg.getNbSymbols();
-            m_lastMsgNbCodewords = msg.getNbCodewords();
-            m_lastMsgEarlyEOM = msg.getEarlyEOM();
-            m_lastMsgHeaderCRC = msg.getHeaderCRCStatus();
-            m_lastMsgHeaderParityStatus = msg.getHeaderParityStatus();
-            m_lastMsgPayloadCRC = msg.getPayloadCRCStatus();
-            m_lastMsgPayloadParityStatus = msg.getPayloadParityStatus();
+            uint8_t *bytes = reinterpret_cast<uint8_t*>(m_lastMsgBytes.data());
+            m_udpSink.writeUnbuffered(bytes, m_lastMsgPacketLength);
+        }
 
-            QByteArray bytesCopy(m_lastMsgBytes);
-            bytesCopy.truncate(m_lastMsgPacketLength);
-            bytesCopy.replace('\0', " ");
-            m_lastMsgString = QString(bytesCopy.toStdString().c_str());
+        if (getMessageQueueToGUI()) {
+            getMessageQueueToGUI()->push(new MeshtasticDemodMsg::MsgReportDecodeBytes(msg)); // make a copy
+        }
 
-            if (m_settings.m_sendViaUDP)
+        modemmeshtastic::DecodeResult meshResult;
+
+        if (modemmeshtastic::Packet::decodeFrame(m_lastMsgBytes, meshResult, m_settings.m_meshtasticKeySpecList))
+        {
+            m_lastMsgString = meshResult.summary;
+
+            for (const modemmeshtastic::DecodeResult::Field& field : meshResult.fields)
             {
-                uint8_t *bytes = reinterpret_cast<uint8_t*>(m_lastMsgBytes.data());
-                m_udpSink.writeUnbuffered(bytes, m_lastMsgPacketLength);
-            }
-
-            if (getMessageQueueToGUI()) {
-                getMessageQueueToGUI()->push(new MeshtasticDemodMsg::MsgReportDecodeBytes(msg)); // make a copy
-            }
-
-            Meshtastic::DecodeResult meshResult;
-
-            if (Meshtastic::Packet::decodeFrame(m_lastMsgBytes, meshResult, m_settings.m_meshtasticKeySpecList))
-            {
-                qInfo() << "MeshtasticDemod::handleMessage:" << meshResult.summary;
-
-                if (meshResult.dataDecoded && getMessageQueueToGUI())
+                if (field.path == QStringLiteral("data.port_name"))
                 {
-                    MeshtasticDemodMsg::MsgReportDecodeString *meshMsg = MeshtasticDemodMsg::MsgReportDecodeString::create(meshResult.summary);
-                    meshMsg->setFrameId(msg.getFrameId());
-                    meshMsg->setSyncWord(msg.getSyncWord());
-                    meshMsg->setSignalDb(msg.getSingalDb());
-                    meshMsg->setNoiseDb(msg.getNoiseDb());
-                    meshMsg->setMsgTimestamp(msg.getMsgTimestamp());
-                    meshMsg->setPipelineMetadata(msg.getPipelineId(), msg.getPipelineName(), msg.getPipelinePreset());
-                    QVector<QPair<QString, QString>> structuredFields;
-                    structuredFields.reserve(meshResult.fields.size());
-
-                    for (const Meshtastic::DecodeResult::Field& field : meshResult.fields) {
-                        structuredFields.append(qMakePair(field.path, field.value));
-                    }
-
-                    meshMsg->setStructuredFields(structuredFields);
-                    getMessageQueueToGUI()->push(meshMsg);
+                    m_lastFrameType = field.value;
+                    break;
                 }
             }
 
-            // Is this an APRS packet?
-            // As per: https://github.com/oe3cjb/TTGO-T-Beam-LoRa-APRS/blob/master/lib/BG_RF95/BG_RF95.cpp
-            // There is a 3 byte header for LoRa APRS packets. Addressing follows in ASCII: srccall>dst:
-            int colonIdx = m_lastMsgBytes.indexOf(':');
-            int greaterThanIdx =  m_lastMsgBytes.indexOf('>');
-            if (   (m_lastMsgBytes[0] == '<')
-                && (greaterThanIdx != -1)
-                && (colonIdx != -1)
-                && ((m_lastMsgHasCRC && m_lastMsgPayloadCRC) || !m_lastMsgHasCRC)
-                )
+            qInfo() << "MeshtasticDemod::handleMessage:" << meshResult.summary;
+
+            if (meshResult.dataDecoded && getMessageQueueToGUI())
             {
-                QByteArray packet;
+                MeshtasticDemodMsg::MsgReportDecodeString *meshMsg = MeshtasticDemodMsg::MsgReportDecodeString::create(meshResult.summary);
+                meshMsg->setFrameId(msg.getFrameId());
+                meshMsg->setSyncWord(msg.getSyncWord());
+                meshMsg->setSignalDb(msg.getSingalDb());
+                meshMsg->setNoiseDb(msg.getNoiseDb());
+                meshMsg->setMsgTimestamp(msg.getMsgTimestamp());
+                meshMsg->setPipelineMetadata(msg.getPipelineId(), msg.getPipelineName(), msg.getPipelinePreset());
+                QVector<QPair<QString, QString>> structuredFields;
+                structuredFields.reserve(meshResult.fields.size());
 
-                // Extract addresses
-                const char *d = m_lastMsgBytes.data();
-                QString srcString = QString::fromLatin1(d + 3, greaterThanIdx - 3);
-                QString dstString = QString::fromLatin1(d + greaterThanIdx + 1, colonIdx - greaterThanIdx - 1);
-
-                // Convert to AX.25 format
-                packet.append(AX25Packet::encodeAddress(dstString));
-                packet.append(AX25Packet::encodeAddress(srcString, 1));
-                packet.append(3);
-                packet.append(-16); // 0xf0
-                packet.append(m_lastMsgBytes.mid(colonIdx+1));
-                if (!m_lastMsgHasCRC)
-                {
-                    packet.append((char)0); // dummy crc
-                    packet.append((char)0);
+                for (const modemmeshtastic::DecodeResult::Field& field : meshResult.fields) {
+                    structuredFields.append(qMakePair(field.path, field.value));
                 }
 
-                // Forward to APRS and other packet features
-                QList<ObjectPipe*> packetsPipes;
-                MainCore::instance()->getMessagePipes().getMessagePipes(this, "packets", packetsPipes);
+                meshMsg->setStructuredFields(structuredFields);
+                getMessageQueueToGUI()->push(meshMsg);
+            }
+        }
 
-                for (const auto& pipe : packetsPipes)
-                {
-                    MessageQueue *messageQueue = qobject_cast<MessageQueue*>(pipe->m_element);
-                    MainCore::MsgPacket *msg = MainCore::MsgPacket::create(this, packet, QDateTime::currentDateTime());
-                    messageQueue->push(msg);
-                }
+        // Is this an APRS packet?
+        // As per: https://github.com/oe3cjb/TTGO-T-Beam-LoRa-APRS/blob/master/lib/BG_RF95/BG_RF95.cpp
+        // There is a 3 byte header for LoRa APRS packets. Addressing follows in ASCII: srccall>dst:
+        int colonIdx = m_lastMsgBytes.indexOf(':');
+        int greaterThanIdx =  m_lastMsgBytes.indexOf('>');
+        if (   (m_lastMsgBytes[0] == '<')
+            && (greaterThanIdx != -1)
+            && (colonIdx != -1)
+            && ((m_lastMsgHasCRC && m_lastMsgPayloadCRC) || !m_lastMsgHasCRC)
+            )
+        {
+            QByteArray packet;
+
+            // Extract addresses
+            const char *d = m_lastMsgBytes.data();
+            QString srcString = QString::fromLatin1(d + 3, greaterThanIdx - 3);
+            QString dstString = QString::fromLatin1(d + greaterThanIdx + 1, colonIdx - greaterThanIdx - 1);
+
+            // Convert to AX.25 format
+            packet.append(AX25Packet::encodeAddress(dstString));
+            packet.append(AX25Packet::encodeAddress(srcString, 1));
+            packet.append(3);
+            packet.append(-16); // 0xf0
+            packet.append(m_lastMsgBytes.mid(colonIdx+1));
+            if (!m_lastMsgHasCRC)
+            {
+                packet.append((char)0); // dummy crc
+                packet.append((char)0);
             }
 
-            // In explicit-header LoRa mode, frame length is already derived from header
-            // and may legitimately vary across packets. Auto-clamping nbSymbolsMax to the
-            // first short frame breaks subsequent longer frames.
-            if (m_settings.m_autoNbSymbolsMax
-                && !((m_settings.m_codingScheme == MeshtasticDemodSettings::CodingLoRa) && m_settings.m_hasHeader))
-            {
-                MeshtasticDemodSettings settings = m_settings;
-                settings.m_nbSymbolsMax = m_lastMsgNbSymbols;
-                applySettings(settings);
+            // Forward to APRS and other packet features
+            QList<ObjectPipe*> packetsPipes;
+            MainCore::instance()->getMessagePipes().getMessagePipes(this, "packets", packetsPipes);
 
-                if (getMessageQueueToGUI()) // forward to GUI if any
-                {
-                    MsgConfigureMeshtasticDemod *msgToGUI = MsgConfigureMeshtasticDemod::create(settings, false);
-                    getMessageQueueToGUI()->push(msgToGUI);
-                }
+            for (const auto& pipe : packetsPipes)
+            {
+                MessageQueue *messageQueue = qobject_cast<MessageQueue*>(pipe->m_element);
+                MainCore::MsgPacket *msg = MainCore::MsgPacket::create(this, packet, QDateTime::currentDateTime());
+                messageQueue->push(msg);
             }
         }
 
@@ -657,44 +695,6 @@ bool MeshtasticDemod::handleMessage(const Message& cmd)
 
         if (getMessageQueueToGUI()) {
             getMessageQueueToGUI()->push(new MeshtasticDemodMsg::MsgReportDecodeString(msg)); // make a copy
-        }
-
-        return true;
-    }
-    else if (MeshtasticDemodMsg::MsgReportDecodeFT::match(cmd))
-    {
-        qDebug() << "MeshtasticDemod::handleMessage: MsgReportDecodeFT";
-        MeshtasticDemodMsg::MsgReportDecodeFT& msg = (MeshtasticDemodMsg::MsgReportDecodeFT&) cmd;
-        m_lastMsgSignalDb = msg.getSingalDb();
-        m_lastMsgNoiseDb = msg.getNoiseDb();
-        m_lastMsgSyncWord = msg.getSyncWord();
-        m_lastMsgTimestamp = msg.getMsgTimestamp();
-        m_lastMsgString = msg.getMessage(); // for now we do not handle message components (call1, ...)
-        int nbSymbolBits = m_settings.m_spreadFactor - m_settings.m_deBits;
-        m_lastMsgNbSymbols = (174 / nbSymbolBits) + ((174 % nbSymbolBits) == 0 ? 0 : 1);
-
-        if (m_settings.m_autoNbSymbolsMax)
-        {
-            MeshtasticDemodSettings settings = m_settings;
-            settings.m_nbSymbolsMax = m_lastMsgNbSymbols;
-            applySettings(settings);
-
-            if (getMessageQueueToGUI()) // forward to GUI if any
-            {
-                MsgConfigureMeshtasticDemod *msgToGUI = MsgConfigureMeshtasticDemod::create(settings, false);
-                getMessageQueueToGUI()->push(msgToGUI);
-            }
-        }
-
-        if (m_settings.m_sendViaUDP)
-        {
-            const QByteArray& byteArray = m_lastMsgString.toUtf8();
-            const uint8_t *bytes = reinterpret_cast<const uint8_t*>(byteArray.data());
-            m_udpSink.writeUnbuffered(bytes, byteArray.size());
-        }
-
-        if (getMessageQueueToGUI()) {
-            getMessageQueueToGUI()->push(new MeshtasticDemodMsg::MsgReportDecodeFT(msg)); // make a copy
         }
 
         return true;
@@ -770,19 +770,19 @@ bool MeshtasticDemod::deserialize(const QByteArray& data)
     }
 }
 
-void MeshtasticDemod::applySettings(const MeshtasticDemodSettings& settings, bool force)
+void MeshtasticDemod::applySettings(MeshtasticDemodSettings settings, bool force)
 {
     qDebug() << "MeshtasticDemod::applySettings:"
             << " m_inputFrequencyOffset: " << settings.m_inputFrequencyOffset
             << " m_bandwidthIndex: " << settings.m_bandwidthIndex
             << " m_spreadFactor: " << settings.m_spreadFactor
             << " m_deBits: " << settings.m_deBits
-            << " m_codingScheme: " << settings.m_codingScheme
-            << " m_hasHeader: " << settings.m_hasHeader
-            << " m_hasCRC: " << settings.m_hasCRC
+            << " m_codingScheme: " << MeshtasticDemodSettings::m_codingScheme
+            << " m_hasHeader: " << MeshtasticDemodSettings::m_hasHeader
+            << " m_hasCRC: " << MeshtasticDemodSettings::m_hasCRC
             << " m_nbParityBits: " << settings.m_nbParityBits
             << " m_packetLength: " << settings.m_packetLength
-            << " m_autoNbSymbolsMax: " << settings.m_autoNbSymbolsMax
+            << " m_autoNbSymbolsMax: " << MeshtasticDemodSettings::m_autoNbSymbolsMax
             << " m_sendViaUDP: " << settings.m_sendViaUDP
             << " m_udpAddress: " << settings.m_udpAddress
             << " m_udpPort: " << settings.m_udpPort
@@ -793,10 +793,10 @@ void MeshtasticDemod::applySettings(const MeshtasticDemodSettings& settings, boo
             << " m_preambleChirps: " << settings.m_preambleChirps
             << " m_streamIndex: " << settings.m_streamIndex
             << " m_useReverseAPI: " << settings.m_useReverseAPI
-            << " m_fftWindow: " << settings.m_fftWindow
             << " m_invertRamps: " << settings.m_invertRamps
             << " m_rgbColor: " << settings.m_rgbColor
             << " m_title: " << settings.m_title
+            << " m_meshtasticPresetName: " << settings.m_meshtasticPresetName
             << " force: " << force;
 
     QList<QString> reverseAPIKeys;
@@ -819,24 +819,6 @@ void MeshtasticDemod::applySettings(const MeshtasticDemodSettings& settings, boo
     }
     if ((settings.m_deBits != m_settings.m_deBits) || force) {
         reverseAPIKeys.append("deBits");
-    }
-    if ((settings.m_fftWindow != m_settings.m_fftWindow) || force) {
-        reverseAPIKeys.append("fftWindow");
-    }
-
-    if ((settings.m_codingScheme != m_settings.m_codingScheme) || force)
-    {
-        reverseAPIKeys.append("codingScheme");
-    }
-
-    if ((settings.m_hasHeader != m_settings.m_hasHeader) || force)
-    {
-        reverseAPIKeys.append("hasHeader");
-    }
-
-    if ((settings.m_hasCRC != m_settings.m_hasCRC) || force)
-    {
-        reverseAPIKeys.append("hasCRC");
     }
 
     if ((settings.m_nbParityBits != m_settings.m_nbParityBits) || force)
@@ -869,9 +851,6 @@ void MeshtasticDemod::applySettings(const MeshtasticDemodSettings& settings, boo
     }
     if ((settings.m_sendViaUDP != m_settings.m_sendViaUDP) || force) {
         reverseAPIKeys.append("sendViaUDP");
-    }
-    if ((settings.m_autoNbSymbolsMax != m_settings.m_autoNbSymbolsMax) || force) {
-        reverseAPIKeys.append("autoNbSymbolsMax");
     }
     if ((settings.m_invertRamps != m_settings.m_invertRamps) || force) {
         reverseAPIKeys.append("invertRamps");
@@ -912,6 +891,30 @@ void MeshtasticDemod::applySettings(const MeshtasticDemodSettings& settings, boo
         syncPipelinesWithSettings(settings, force);
     }
 
+    // Copy LoRa params derived from the preset (bandwidth, spread factor, etc.) back into
+    // settings so that m_settings and the GUI stay in sync with what was actually applied.
+    // Skip for USER preset: those parameters are controlled entirely by the user via the GUI.
+    if (m_running && !m_pipelineConfigs.empty() &&
+        settings.m_meshtasticPresetName.trimmed().compare("USER", Qt::CaseInsensitive) != 0)
+    {
+        const MeshtasticDemodSettings& derived = m_pipelineConfigs[0].settings;
+        const bool bwChanged = (settings.m_bandwidthIndex != derived.m_bandwidthIndex);
+
+        settings.m_spreadFactor           = derived.m_spreadFactor;
+        settings.m_deBits                 = derived.m_deBits;
+        settings.m_nbParityBits           = derived.m_nbParityBits;
+        settings.m_preambleChirps         = derived.m_preambleChirps;
+        settings.m_bandwidthIndex         = derived.m_bandwidthIndex;
+        settings.m_inputFrequencyOffset   = derived.m_inputFrequencyOffset;
+
+        if (bwChanged)
+        {
+            auto *bwMsg = new DSPSignalNotification(
+                MeshtasticDemodSettings::bandwidths[settings.m_bandwidthIndex], 0);
+            m_spectrumVis.getInputMessageQueue()->push(bwMsg);
+        }
+    }
+
     if (settings.m_useReverseAPI)
     {
         bool fullUpdate = ((m_settings.m_useReverseAPI != settings.m_useReverseAPI) && settings.m_useReverseAPI) ||
@@ -930,6 +933,18 @@ void MeshtasticDemod::applySettings(const MeshtasticDemodSettings& settings, boo
     }
 
     m_settings = settings;
+
+    // Forward preset-derived settings back to GUI so controls (e.g. BW slider) reflect
+    // the values actually applied. Skip for USER preset: no parameters were derived, so
+    // there is nothing to sync back — and echoing would trigger an infinite apply loop
+    // (GUI apply → demod echo → GUI displaySettings → rebuildMeshtasticChannelOptions
+    // → queued apply → …).
+    const bool isUserPreset = m_settings.m_meshtasticPresetName.trimmed().compare("USER", Qt::CaseInsensitive) == 0;
+    if (!isUserPreset && getMessageQueueToGUI())
+    {
+        MsgConfigureMeshtasticDemod *msgToGUI = MsgConfigureMeshtasticDemod::create(m_settings, false);
+        getMessageQueueToGUI()->push(msgToGUI);
+    }
 }
 
 int MeshtasticDemod::webapiSettingsGet(
@@ -937,8 +952,8 @@ int MeshtasticDemod::webapiSettingsGet(
     QString& errorMessage)
 {
     (void) errorMessage;
-    response.setChirpChatDemodSettings(new SWGSDRangel::SWGChirpChatDemodSettings());
-    response.getChirpChatDemodSettings()->init();
+    response.setMeshtasticDemodSettings(new SWGSDRangel::SWGMeshtasticDemodSettings());
+    response.getMeshtasticDemodSettings()->init();
     webapiFormatChannelSettings(response, m_settings);
 
     return 200;
@@ -983,96 +998,81 @@ void MeshtasticDemod::webapiUpdateChannelSettings(
         SWGSDRangel::SWGChannelSettings& response)
 {
     if (channelSettingsKeys.contains("inputFrequencyOffset")) {
-        settings.m_inputFrequencyOffset = response.getChirpChatDemodSettings()->getInputFrequencyOffset();
+        settings.m_inputFrequencyOffset = response.getMeshtasticDemodSettings()->getInputFrequencyOffset();
     }
     if (channelSettingsKeys.contains("bandwidthIndex")) {
-        settings.m_bandwidthIndex = response.getChirpChatDemodSettings()->getBandwidthIndex();
+        settings.m_bandwidthIndex = response.getMeshtasticDemodSettings()->getBandwidthIndex();
     }
     if (channelSettingsKeys.contains("spreadFactor")) {
-        settings.m_spreadFactor = response.getChirpChatDemodSettings()->getSpreadFactor();
+        settings.m_spreadFactor = response.getMeshtasticDemodSettings()->getSpreadFactor();
     }
     if (channelSettingsKeys.contains("deBits")) {
-        settings.m_deBits = response.getChirpChatDemodSettings()->getDeBits();
-    }
-    if (channelSettingsKeys.contains("fftWindow")) {
-        settings.m_fftWindow = (FFTWindow::Function) response.getChirpChatDemodSettings()->getFftWindow();
-    }
-    if (channelSettingsKeys.contains("codingScheme")) {
-        settings.m_codingScheme = (MeshtasticDemodSettings::CodingScheme) response.getChirpChatDemodSettings()->getCodingScheme();
+        settings.m_deBits = response.getMeshtasticDemodSettings()->getDeBits();
     }
     if (channelSettingsKeys.contains("decodeActive")) {
-        settings.m_decodeActive = response.getChirpChatDemodSettings()->getDecodeActive() != 0;
+        settings.m_decodeActive = response.getMeshtasticDemodSettings()->getDecodeActive() != 0;
     }
     if (channelSettingsKeys.contains("eomSquelchTenths")) {
-        settings.m_eomSquelchTenths = response.getChirpChatDemodSettings()->getEomSquelchTenths();
+        settings.m_eomSquelchTenths = response.getMeshtasticDemodSettings()->getEomSquelchTenths();
     }
     if (channelSettingsKeys.contains("nbSymbolsMax")) {
-        settings.m_nbSymbolsMax = response.getChirpChatDemodSettings()->getNbSymbolsMax();
-    }
-    if (channelSettingsKeys.contains("autoNbSymbolsMax")) {
-        settings.m_autoNbSymbolsMax = response.getChirpChatDemodSettings()->getAutoNbSymbolsMax() != 0;
+        settings.m_nbSymbolsMax = response.getMeshtasticDemodSettings()->getNbSymbolsMax();
     }
     if (channelSettingsKeys.contains("preambleChirps")) {
-        settings.m_preambleChirps = response.getChirpChatDemodSettings()->getPreambleChirps();
+        settings.m_preambleChirps = response.getMeshtasticDemodSettings()->getPreambleChirps();
     }
     if (channelSettingsKeys.contains("nbParityBits")) {
-        settings.m_nbParityBits = response.getChirpChatDemodSettings()->getNbParityBits();
+        settings.m_nbParityBits = response.getMeshtasticDemodSettings()->getNbParityBits();
     }
     if (channelSettingsKeys.contains("packetLength")) {
-        settings.m_packetLength = response.getChirpChatDemodSettings()->getPacketLength();
-    }
-    if (channelSettingsKeys.contains("hasCRC")) {
-        settings.m_hasCRC = response.getChirpChatDemodSettings()->getHasCrc() != 0;
-    }
-    if (channelSettingsKeys.contains("hasHeader")) {
-        settings.m_hasHeader = response.getChirpChatDemodSettings()->getHasHeader() != 0;
+        settings.m_packetLength = response.getMeshtasticDemodSettings()->getPacketLength();
     }
     if (channelSettingsKeys.contains("sendViaUDP")) {
-        settings.m_sendViaUDP = response.getChirpChatDemodSettings()->getSendViaUdp() != 0;
+        settings.m_sendViaUDP = response.getMeshtasticDemodSettings()->getSendViaUdp() != 0;
     }
     if (channelSettingsKeys.contains("udpAddress")) {
-        settings.m_udpAddress = *response.getChirpChatDemodSettings()->getUdpAddress();
+        settings.m_udpAddress = *response.getMeshtasticDemodSettings()->getUdpAddress();
     }
     if (channelSettingsKeys.contains("udpPort"))
     {
-        uint16_t port = response.getChirpChatDemodSettings()->getUdpPort();
+        uint16_t port = response.getMeshtasticDemodSettings()->getUdpPort();
         settings.m_udpPort = port < 1024 ? 1024 : port;
     }
     if (channelSettingsKeys.contains("invertRamps")) {
-        settings.m_invertRamps = response.getChirpChatDemodSettings()->getInvertRamps() != 0;
+        settings.m_invertRamps = response.getMeshtasticDemodSettings()->getInvertRamps() != 0;
     }
     if (channelSettingsKeys.contains("rgbColor")) {
-        settings.m_rgbColor = response.getChirpChatDemodSettings()->getRgbColor();
+        settings.m_rgbColor = response.getMeshtasticDemodSettings()->getRgbColor();
     }
     if (channelSettingsKeys.contains("title")) {
-        settings.m_title = *response.getChirpChatDemodSettings()->getTitle();
+        settings.m_title = *response.getMeshtasticDemodSettings()->getTitle();
     }
     if (channelSettingsKeys.contains("streamIndex")) {
-        settings.m_streamIndex = response.getChirpChatDemodSettings()->getStreamIndex();
+        settings.m_streamIndex = response.getMeshtasticDemodSettings()->getStreamIndex();
     }
     if (channelSettingsKeys.contains("useReverseAPI")) {
-        settings.m_useReverseAPI = response.getChirpChatDemodSettings()->getUseReverseApi() != 0;
+        settings.m_useReverseAPI = response.getMeshtasticDemodSettings()->getUseReverseApi() != 0;
     }
     if (channelSettingsKeys.contains("reverseAPIAddress")) {
-        settings.m_reverseAPIAddress = *response.getChirpChatDemodSettings()->getReverseApiAddress();
+        settings.m_reverseAPIAddress = *response.getMeshtasticDemodSettings()->getReverseApiAddress();
     }
     if (channelSettingsKeys.contains("reverseAPIPort")) {
-        settings.m_reverseAPIPort = response.getChirpChatDemodSettings()->getReverseApiPort();
+        settings.m_reverseAPIPort = response.getMeshtasticDemodSettings()->getReverseApiPort();
     }
     if (channelSettingsKeys.contains("reverseAPIDeviceIndex")) {
-        settings.m_reverseAPIDeviceIndex = response.getChirpChatDemodSettings()->getReverseApiDeviceIndex();
+        settings.m_reverseAPIDeviceIndex = response.getMeshtasticDemodSettings()->getReverseApiDeviceIndex();
     }
     if (channelSettingsKeys.contains("reverseAPIChannelIndex")) {
-        settings.m_reverseAPIChannelIndex = response.getChirpChatDemodSettings()->getReverseApiChannelIndex();
+        settings.m_reverseAPIChannelIndex = response.getMeshtasticDemodSettings()->getReverseApiChannelIndex();
     }
     if (settings.m_spectrumGUI && channelSettingsKeys.contains("spectrumConfig")) {
-        settings.m_spectrumGUI->updateFrom(channelSettingsKeys, response.getChirpChatDemodSettings()->getSpectrumConfig());
+        settings.m_spectrumGUI->updateFrom(channelSettingsKeys, response.getMeshtasticDemodSettings()->getSpectrumConfig());
     }
     if (settings.m_channelMarker && channelSettingsKeys.contains("channelMarker")) {
-        settings.m_channelMarker->updateFrom(channelSettingsKeys, response.getChirpChatDemodSettings()->getChannelMarker());
+        settings.m_channelMarker->updateFrom(channelSettingsKeys, response.getMeshtasticDemodSettings()->getChannelMarker());
     }
     if (settings.m_rollupState && channelSettingsKeys.contains("rollupState")) {
-        settings.m_rollupState->updateFrom(channelSettingsKeys, response.getChirpChatDemodSettings()->getRollupState());
+        settings.m_rollupState->updateFrom(channelSettingsKeys, response.getMeshtasticDemodSettings()->getRollupState());
     }
 }
 
@@ -1081,98 +1081,93 @@ int MeshtasticDemod::webapiReportGet(
     QString& errorMessage)
 {
     (void) errorMessage;
-    response.setChirpChatDemodReport(new SWGSDRangel::SWGChirpChatDemodReport());
-    response.getChirpChatDemodReport()->init();
+    response.setMeshtasticDemodReport(new SWGSDRangel::SWGMeshtasticDemodReport());
+    response.getMeshtasticDemodReport()->init();
     webapiFormatChannelReport(response);
     return 200;
 }
 
 void MeshtasticDemod::webapiFormatChannelSettings(SWGSDRangel::SWGChannelSettings& response, const MeshtasticDemodSettings& settings)
 {
-    response.getChirpChatDemodSettings()->setInputFrequencyOffset(settings.m_inputFrequencyOffset);
-    response.getChirpChatDemodSettings()->setBandwidthIndex(settings.m_bandwidthIndex);
-    response.getChirpChatDemodSettings()->setSpreadFactor(settings.m_spreadFactor);
-    response.getChirpChatDemodSettings()->setDeBits(settings.m_deBits);
-    response.getChirpChatDemodSettings()->setFftWindow((int) settings.m_fftWindow);
-    response.getChirpChatDemodSettings()->setCodingScheme((int) settings.m_codingScheme);
-    response.getChirpChatDemodSettings()->setDecodeActive(settings.m_decodeActive ? 1 : 0);
-    response.getChirpChatDemodSettings()->setEomSquelchTenths(settings.m_eomSquelchTenths);
-    response.getChirpChatDemodSettings()->setNbSymbolsMax(settings.m_nbSymbolsMax);
-    response.getChirpChatDemodSettings()->setAutoNbSymbolsMax(settings.m_autoNbSymbolsMax ? 1 : 0);
-    response.getChirpChatDemodSettings()->setPreambleChirps(settings.m_preambleChirps);
-    response.getChirpChatDemodSettings()->setNbParityBits(settings.m_nbParityBits);
-    response.getChirpChatDemodSettings()->setPacketLength(settings.m_packetLength);
-    response.getChirpChatDemodSettings()->setHasCrc(settings.m_hasCRC ? 1 : 0);
-    response.getChirpChatDemodSettings()->setHasHeader(settings.m_hasHeader ? 1 : 0);
-    response.getChirpChatDemodSettings()->setSendViaUdp(settings.m_sendViaUDP ? 1 : 0);
-    response.getChirpChatDemodSettings()->setInvertRamps(settings.m_invertRamps ? 1 : 0);
+    response.getMeshtasticDemodSettings()->setInputFrequencyOffset(settings.m_inputFrequencyOffset);
+    response.getMeshtasticDemodSettings()->setBandwidthIndex(settings.m_bandwidthIndex);
+    response.getMeshtasticDemodSettings()->setSpreadFactor(settings.m_spreadFactor);
+    response.getMeshtasticDemodSettings()->setDeBits(settings.m_deBits);
+    response.getMeshtasticDemodSettings()->setDecodeActive(settings.m_decodeActive ? 1 : 0);
+    response.getMeshtasticDemodSettings()->setEomSquelchTenths(settings.m_eomSquelchTenths);
+    response.getMeshtasticDemodSettings()->setNbSymbolsMax(settings.m_nbSymbolsMax);
+    response.getMeshtasticDemodSettings()->setPreambleChirps(settings.m_preambleChirps);
+    response.getMeshtasticDemodSettings()->setNbParityBits(settings.m_nbParityBits);
+    response.getMeshtasticDemodSettings()->setPacketLength(settings.m_packetLength);
+    response.getMeshtasticDemodSettings()->setSendViaUdp(settings.m_sendViaUDP ? 1 : 0);
+    response.getMeshtasticDemodSettings()->setInvertRamps(settings.m_invertRamps ? 1 : 0);
 
-    if (response.getChirpChatDemodSettings()->getUdpAddress()) {
-        *response.getChirpChatDemodSettings()->getUdpAddress() = settings.m_udpAddress;
+    if (response.getMeshtasticDemodSettings()->getUdpAddress()) {
+        *response.getMeshtasticDemodSettings()->getUdpAddress() = settings.m_udpAddress;
     } else {
-        response.getChirpChatDemodSettings()->setUdpAddress(new QString(settings.m_udpAddress));
+        response.getMeshtasticDemodSettings()->setUdpAddress(new QString(settings.m_udpAddress));
     }
 
-    response.getChirpChatDemodSettings()->setUdpPort(settings.m_udpPort);
-    response.getChirpChatDemodSettings()->setRgbColor(settings.m_rgbColor);
+    response.getMeshtasticDemodSettings()->setUdpPort(settings.m_udpPort);
+    response.getMeshtasticDemodSettings()->setRgbColor(settings.m_rgbColor);
 
-    if (response.getChirpChatDemodSettings()->getTitle()) {
-        *response.getChirpChatDemodSettings()->getTitle() = settings.m_title;
+    if (response.getMeshtasticDemodSettings()->getTitle()) {
+        *response.getMeshtasticDemodSettings()->getTitle() = settings.m_title;
     } else {
-        response.getChirpChatDemodSettings()->setTitle(new QString(settings.m_title));
+        response.getMeshtasticDemodSettings()->setTitle(new QString(settings.m_title));
     }
 
-    response.getChirpChatDemodSettings()->setUseReverseApi(settings.m_useReverseAPI ? 1 : 0);
+    response.getMeshtasticDemodSettings()->setUseReverseApi(settings.m_useReverseAPI ? 1 : 0);
 
-    if (response.getChirpChatDemodSettings()->getReverseApiAddress()) {
-        *response.getChirpChatDemodSettings()->getReverseApiAddress() = settings.m_reverseAPIAddress;
+    if (response.getMeshtasticDemodSettings()->getReverseApiAddress()) {
+        *response.getMeshtasticDemodSettings()->getReverseApiAddress() = settings.m_reverseAPIAddress;
     } else {
-        response.getChirpChatDemodSettings()->setReverseApiAddress(new QString(settings.m_reverseAPIAddress));
+        response.getMeshtasticDemodSettings()->setReverseApiAddress(new QString(settings.m_reverseAPIAddress));
     }
 
-    response.getChirpChatDemodSettings()->setReverseApiPort(settings.m_reverseAPIPort);
-    response.getChirpChatDemodSettings()->setReverseApiDeviceIndex(settings.m_reverseAPIDeviceIndex);
-    response.getChirpChatDemodSettings()->setReverseApiChannelIndex(settings.m_reverseAPIChannelIndex);
+    response.getMeshtasticDemodSettings()->setReverseApiPort(settings.m_reverseAPIPort);
+    response.getMeshtasticDemodSettings()->setReverseApiDeviceIndex(settings.m_reverseAPIDeviceIndex);
+    response.getMeshtasticDemodSettings()->setReverseApiChannelIndex(settings.m_reverseAPIChannelIndex);
 
     if (settings.m_spectrumGUI)
     {
-        if (response.getChirpChatDemodSettings()->getSpectrumConfig())
+        if (response.getMeshtasticDemodSettings()->getSpectrumConfig())
         {
-            settings.m_spectrumGUI->formatTo(response.getChirpChatDemodSettings()->getSpectrumConfig());
+            settings.m_spectrumGUI->formatTo(response.getMeshtasticDemodSettings()->getSpectrumConfig());
         }
         else
         {
             SWGSDRangel::SWGGLSpectrum *swgGLSpectrum = new SWGSDRangel::SWGGLSpectrum();
             settings.m_spectrumGUI->formatTo(swgGLSpectrum);
-            response.getChirpChatDemodSettings()->setSpectrumConfig(swgGLSpectrum);
+            response.getMeshtasticDemodSettings()->setSpectrumConfig(swgGLSpectrum);
         }
     }
 
     if (settings.m_channelMarker)
     {
-        if (response.getChirpChatDemodSettings()->getChannelMarker())
+        if (response.getMeshtasticDemodSettings()->getChannelMarker())
         {
-            settings.m_channelMarker->formatTo(response.getChirpChatDemodSettings()->getChannelMarker());
+            settings.m_channelMarker->formatTo(response.getMeshtasticDemodSettings()->getChannelMarker());
         }
         else
         {
             SWGSDRangel::SWGChannelMarker *swgChannelMarker = new SWGSDRangel::SWGChannelMarker();
             settings.m_channelMarker->formatTo(swgChannelMarker);
-            response.getChirpChatDemodSettings()->setChannelMarker(swgChannelMarker);
+            response.getMeshtasticDemodSettings()->setChannelMarker(swgChannelMarker);
         }
     }
 
     if (settings.m_rollupState)
     {
-        if (response.getChirpChatDemodSettings()->getRollupState())
+        if (response.getMeshtasticDemodSettings()->getRollupState())
         {
-            settings.m_rollupState->formatTo(response.getChirpChatDemodSettings()->getRollupState());
+            settings.m_rollupState->formatTo(response.getMeshtasticDemodSettings()->getRollupState());
         }
         else
         {
             SWGSDRangel::SWGRollupState *swgRollupState = new SWGSDRangel::SWGRollupState();
             settings.m_rollupState->formatTo(swgRollupState);
-            response.getChirpChatDemodSettings()->setRollupState(swgRollupState);
+            response.getMeshtasticDemodSettings()->setRollupState(swgRollupState);
         }
     }
 }
@@ -1180,28 +1175,29 @@ void MeshtasticDemod::webapiFormatChannelSettings(SWGSDRangel::SWGChannelSetting
 void MeshtasticDemod::webapiFormatChannelReport(SWGSDRangel::SWGChannelReport& response)
 {
     if (m_running && !m_pipelines.empty() && m_pipelines[0].basebandSink) {
-        response.getChirpChatDemodReport()->setChannelSampleRate(m_pipelines[0].basebandSink->getChannelSampleRate());
+        response.getMeshtasticDemodReport()->setChannelSampleRate(m_pipelines[0].basebandSink->getChannelSampleRate());
     }
 
-    response.getChirpChatDemodReport()->setChannelPowerDb(CalcDb::dbPower(getTotalPower()));
-    response.getChirpChatDemodReport()->setSignalPowerDb(m_lastMsgSignalDb);
-    response.getChirpChatDemodReport()->setNoisePowerDb(CalcDb::dbPower(getCurrentNoiseLevel()));
-    response.getChirpChatDemodReport()->setSnrPowerDb(m_lastMsgSignalDb - m_lastMsgNoiseDb);
-    response.getChirpChatDemodReport()->setHasCrc(m_lastMsgHasCRC);
-    response.getChirpChatDemodReport()->setNbParityBits(m_lastMsgNbParityBits);
-    response.getChirpChatDemodReport()->setPacketLength(m_lastMsgPacketLength);
-    response.getChirpChatDemodReport()->setNbSymbols(m_lastMsgNbSymbols);
-    response.getChirpChatDemodReport()->setNbCodewords(m_lastMsgNbCodewords);
-    response.getChirpChatDemodReport()->setHeaderParityStatus(m_lastMsgHeaderParityStatus);
-    response.getChirpChatDemodReport()->setHeaderCrcStatus(m_lastMsgHeaderCRC);
-    response.getChirpChatDemodReport()->setPayloadParityStatus(m_lastMsgPayloadParityStatus);
-    response.getChirpChatDemodReport()->setPayloadCrcStatus(m_lastMsgPayloadCRC);
-    response.getChirpChatDemodReport()->setMessageTimestamp(new QString(m_lastMsgTimestamp));
-    response.getChirpChatDemodReport()->setMessageString(new QString(m_lastMsgString));
-    response.getChirpChatDemodReport()->setDecoding(getDemodActive() ? 1 : 0);
+    response.getMeshtasticDemodReport()->setChannelPowerDb(CalcDb::dbPower(getTotalPower()));
+    response.getMeshtasticDemodReport()->setSignalPowerDb(m_lastMsgSignalDb);
+    response.getMeshtasticDemodReport()->setNoisePowerDb(CalcDb::dbPower(getCurrentNoiseLevel()));
+    response.getMeshtasticDemodReport()->setSnrPowerDb(m_lastMsgSignalDb - m_lastMsgNoiseDb);
+    response.getMeshtasticDemodReport()->setNbParityBits(m_lastMsgNbParityBits);
+    response.getMeshtasticDemodReport()->setPacketLength(m_lastMsgPacketLength);
+    response.getMeshtasticDemodReport()->setNbSymbols(m_lastMsgNbSymbols);
+    response.getMeshtasticDemodReport()->setNbCodewords(m_lastMsgNbCodewords);
+    response.getMeshtasticDemodReport()->setHeaderParityStatus(m_lastMsgHeaderParityStatus);
+    response.getMeshtasticDemodReport()->setHeaderCrcStatus(m_lastMsgHeaderCRC);
+    response.getMeshtasticDemodReport()->setPayloadParityStatus(m_lastMsgPayloadParityStatus);
+    response.getMeshtasticDemodReport()->setPayloadCrcStatus(m_lastMsgPayloadCRC);
+    response.getMeshtasticDemodReport()->setMessageTimestamp(new QString(m_lastMsgTimestamp));
+    response.getMeshtasticDemodReport()->setMessageString(new QString(m_lastMsgString));
+    response.getMeshtasticDemodReport()->setFrameType(new QString(m_lastFrameType));
+    response.getMeshtasticDemodReport()->setChannelType(new QString(m_lastMsgPipelineName));
+    response.getMeshtasticDemodReport()->setDecoding(getDemodActive() ? 1 : 0);
 
-    response.getChirpChatDemodReport()->setMessageBytes(new QList<QString *>);
-    QList<QString *> *bytesStr = response.getChirpChatDemodReport()->getMessageBytes();
+    response.getMeshtasticDemodReport()->setMessageBytes(new QList<QString *>);
+    QList<QString *> *bytesStr = response.getMeshtasticDemodReport()->getMessageBytes();
 
     for (QByteArray::const_iterator it = m_lastMsgBytes.begin(); it != m_lastMsgBytes.end(); ++it)
     {
@@ -1271,8 +1267,8 @@ void MeshtasticDemod::webapiFormatChannelSettings(
     swgChannelSettings->setOriginatorChannelIndex(getIndexInDeviceSet());
     swgChannelSettings->setOriginatorDeviceSetIndex(getDeviceSetIndex());
     swgChannelSettings->setChannelType(new QString(m_channelId));
-    swgChannelSettings->setChirpChatDemodSettings(new SWGSDRangel::SWGChirpChatDemodSettings());
-    SWGSDRangel::SWGChirpChatDemodSettings *swgMeshtasticDemodSettings = swgChannelSettings->getChirpChatDemodSettings();
+    swgChannelSettings->setMeshtasticDemodSettings(new SWGSDRangel::SWGMeshtasticDemodSettings());
+    SWGSDRangel::SWGMeshtasticDemodSettings *swgMeshtasticDemodSettings = swgChannelSettings->getMeshtasticDemodSettings();
 
     // transfer data that has been modified. When force is on transfer all data except reverse API data
 
@@ -1288,12 +1284,6 @@ void MeshtasticDemod::webapiFormatChannelSettings(
     if (channelSettingsKeys.contains("deBits") || force) {
         swgMeshtasticDemodSettings->setDeBits(settings.m_deBits);
     }
-    if (channelSettingsKeys.contains("fftWindow") || force) {
-        swgMeshtasticDemodSettings->setFftWindow((int) settings.m_fftWindow);
-    }
-    if (channelSettingsKeys.contains("codingScheme") || force) {
-        swgMeshtasticDemodSettings->setCodingScheme((int) settings.m_codingScheme);
-    }
     if (channelSettingsKeys.contains("decodeActive") || force) {
         swgMeshtasticDemodSettings->setDecodeActive(settings.m_decodeActive ? 1 : 0);
     }
@@ -1303,9 +1293,6 @@ void MeshtasticDemod::webapiFormatChannelSettings(
     if (channelSettingsKeys.contains("nbSymbolsMax") || force) {
         swgMeshtasticDemodSettings->setNbSymbolsMax(settings.m_nbSymbolsMax);
     }
-    if (channelSettingsKeys.contains("autoNbSymbolsMax") || force) {
-        swgMeshtasticDemodSettings->setAutoNbSymbolsMax(settings.m_autoNbSymbolsMax ? 1 : 0);
-    }
     if (channelSettingsKeys.contains("preambleChirps") || force) {
         swgMeshtasticDemodSettings->setPreambleChirps(settings.m_preambleChirps);
     }
@@ -1314,12 +1301,6 @@ void MeshtasticDemod::webapiFormatChannelSettings(
     }
     if (channelSettingsKeys.contains("packetLength") || force) {
         swgMeshtasticDemodSettings->setPacketLength(settings.m_packetLength);
-    }
-    if (channelSettingsKeys.contains("hasCRC") || force) {
-        swgMeshtasticDemodSettings->setHasCrc(settings.m_hasCRC ? 1 : 0);
-    }
-    if (channelSettingsKeys.contains("hasHeader") || force) {
-        swgMeshtasticDemodSettings->setHasHeader(settings.m_hasHeader ? 1 : 0);
     }
     if (channelSettingsKeys.contains("sendViaUDP") || force) {
         swgMeshtasticDemodSettings->setSendViaUdp(settings.m_sendViaUDP ? 1 : 0);

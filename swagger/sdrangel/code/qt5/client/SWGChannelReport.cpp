@@ -90,6 +90,10 @@ SWGChannelReport::SWGChannelReport() {
     m_m17_demod_report_isSet = false;
     m17_mod_report = nullptr;
     m_m17_mod_report_isSet = false;
+    meshtastic_demod_report = nullptr;
+    m_meshtastic_demod_report_isSet = false;
+    meshtastic_mod_report = nullptr;
+    m_meshtastic_mod_report_isSet = false;
     navtex_demod_report = nullptr;
     m_navtex_demod_report_isSet = false;
     nfm_demod_report = nullptr;
@@ -206,6 +210,10 @@ SWGChannelReport::init() {
     m_m17_demod_report_isSet = false;
     m17_mod_report = new SWGM17ModReport();
     m_m17_mod_report_isSet = false;
+    meshtastic_demod_report = new SWGMeshtasticDemodReport();
+    m_meshtastic_demod_report_isSet = false;
+    meshtastic_mod_report = new SWGMeshtasticModReport();
+    m_meshtastic_mod_report_isSet = false;
     navtex_demod_report = new SWGNavtexDemodReport();
     m_navtex_demod_report_isSet = false;
     nfm_demod_report = new SWGNFMDemodReport();
@@ -346,6 +354,12 @@ SWGChannelReport::cleanup() {
     }
     if(m17_mod_report != nullptr) { 
         delete m17_mod_report;
+    }
+    if(meshtastic_demod_report != nullptr) { 
+        delete meshtastic_demod_report;
+    }
+    if(meshtastic_mod_report != nullptr) { 
+        delete meshtastic_mod_report;
     }
     if(navtex_demod_report != nullptr) { 
         delete navtex_demod_report;
@@ -490,6 +504,10 @@ SWGChannelReport::fromJsonObject(QJsonObject &pJson) {
     ::SWGSDRangel::setValue(&m17_demod_report, pJson["M17DemodReport"], "SWGM17DemodReport", "SWGM17DemodReport");
     
     ::SWGSDRangel::setValue(&m17_mod_report, pJson["M17ModReport"], "SWGM17ModReport", "SWGM17ModReport");
+    
+    ::SWGSDRangel::setValue(&meshtastic_demod_report, pJson["MeshtasticDemodReport"], "SWGMeshtasticDemodReport", "SWGMeshtasticDemodReport");
+    
+    ::SWGSDRangel::setValue(&meshtastic_mod_report, pJson["MeshtasticModReport"], "SWGMeshtasticModReport", "SWGMeshtasticModReport");
     
     ::SWGSDRangel::setValue(&navtex_demod_report, pJson["NavtexDemodReport"], "SWGNavtexDemodReport", "SWGNavtexDemodReport");
     
@@ -645,6 +663,12 @@ SWGChannelReport::asJsonObject() {
     }
     if((m17_mod_report != nullptr) && (m17_mod_report->isSet())){
         toJsonValue(QString("M17ModReport"), m17_mod_report, obj, QString("SWGM17ModReport"));
+    }
+    if((meshtastic_demod_report != nullptr) && (meshtastic_demod_report->isSet())){
+        toJsonValue(QString("MeshtasticDemodReport"), meshtastic_demod_report, obj, QString("SWGMeshtasticDemodReport"));
+    }
+    if((meshtastic_mod_report != nullptr) && (meshtastic_mod_report->isSet())){
+        toJsonValue(QString("MeshtasticModReport"), meshtastic_mod_report, obj, QString("SWGMeshtasticModReport"));
     }
     if((navtex_demod_report != nullptr) && (navtex_demod_report->isSet())){
         toJsonValue(QString("NavtexDemodReport"), navtex_demod_report, obj, QString("SWGNavtexDemodReport"));
@@ -1029,6 +1053,26 @@ SWGChannelReport::setM17ModReport(SWGM17ModReport* m17_mod_report) {
     this->m_m17_mod_report_isSet = true;
 }
 
+SWGMeshtasticDemodReport*
+SWGChannelReport::getMeshtasticDemodReport() {
+    return meshtastic_demod_report;
+}
+void
+SWGChannelReport::setMeshtasticDemodReport(SWGMeshtasticDemodReport* meshtastic_demod_report) {
+    this->meshtastic_demod_report = meshtastic_demod_report;
+    this->m_meshtastic_demod_report_isSet = true;
+}
+
+SWGMeshtasticModReport*
+SWGChannelReport::getMeshtasticModReport() {
+    return meshtastic_mod_report;
+}
+void
+SWGChannelReport::setMeshtasticModReport(SWGMeshtasticModReport* meshtastic_mod_report) {
+    this->meshtastic_mod_report = meshtastic_mod_report;
+    this->m_meshtastic_mod_report_isSet = true;
+}
+
 SWGNavtexDemodReport*
 SWGChannelReport::getNavtexDemodReport() {
     return navtex_demod_report;
@@ -1355,6 +1399,12 @@ SWGChannelReport::isSet(){
             isObjectUpdated = true; break;
         }
         if(m17_mod_report && m17_mod_report->isSet()){
+            isObjectUpdated = true; break;
+        }
+        if(meshtastic_demod_report && meshtastic_demod_report->isSet()){
+            isObjectUpdated = true; break;
+        }
+        if(meshtastic_mod_report && meshtastic_mod_report->isSet()){
             isObjectUpdated = true; break;
         }
         if(navtex_demod_report && navtex_demod_report->isSet()){

@@ -1,7 +1,5 @@
 ///////////////////////////////////////////////////////////////////////////////////
-// Copyright (C) 2012 maintech GmbH, Otto-Hahn-Str. 15, 97204 Hoechberg, Germany //
-// written by Christian Daniel                                                   //
-// Copyright (C) 2015-2020 Edouard Griffiths, F4EXB <f4exb06@gmail.com>          //
+// Copyright (C) 2019-2026 Edouard Griffiths, F4EXB <f4exb06@gmail.com>          //
 //                                                                               //
 // This program is free software; you can redistribute it and/or modify          //
 // it under the terms of the GNU General Public License as published by          //
@@ -16,29 +14,34 @@
 // You should have received a copy of the GNU General Public License             //
 // along with this program. If not, see <http://www.gnu.org/licenses/>.          //
 ///////////////////////////////////////////////////////////////////////////////////
+#ifndef INCLUDE_MESHTASTICKEYSDIALOG_H
+#define INCLUDE_MESHTASTICKEYSDIALOG_H
 
-#ifndef INCLUDE_MESHTASTICDEMODDECODERTTY_H
-#define INCLUDE_MESHTASTICDEMODDECODERTTY_H
+#include <QDialog>
 
-#include <vector>
-#include <QString>
+namespace Ui {
+class MeshtasticKeysDialog;
+}
 
-class MeshtasticDemodDecoderTTY
+class MeshtasticKeysDialog : public QDialog
 {
+    Q_OBJECT
+
 public:
-    static void decodeSymbols(const std::vector<unsigned short>& symbols, QString& str);
+    explicit MeshtasticKeysDialog(QWidget* parent = nullptr);
+    ~MeshtasticKeysDialog() override;
+
+    void setKeySpecList(const QString& keySpecList);
+    QString getKeySpecList() const;
+
+private slots:
+    void on_validate_clicked();
+    void accept() override;
 
 private:
-    enum TTYState
-    {
-        TTYLetters,
-        TTYFigures
-    };
+    bool validateCurrentInput();
 
-    static const char ttyLetters[32];
-    static const char ttyFigures[32];
-    static const char lettersTag = 0x1f;
-    static const char figuresTag = 0x1b;
+    Ui::MeshtasticKeysDialog* ui;
 };
 
-#endif // INCLUDE_MESHTASTICDEMODDECODERTTY_H
+#endif // INCLUDE_MESHTASTICKEYSDIALOG_H

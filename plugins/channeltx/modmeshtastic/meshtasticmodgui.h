@@ -1,5 +1,6 @@
 ///////////////////////////////////////////////////////////////////////////////////
-// Copyright (C) 2016-2020, 2022 Edouard Griffiths, F4EXB <f4exb06@gmail.com>    //
+// Copyright (C) 2026 Alejandro Aleman                                           //
+// Copyright (C) 2016-2026 Edouard Griffiths, F4EXB <f4exb06@gmail.com>          //
 // Copyright (C) 2021-2022 Jon Beniston, M7RCE <jon@beniston.com>                //
 //                                                                               //
 // This program is free software; you can redistribute it and/or modify          //
@@ -16,8 +17,8 @@
 // along with this program. If not, see <http://www.gnu.org/licenses/>.          //
 ///////////////////////////////////////////////////////////////////////////////////
 
-#ifndef PLUGINS_CHANNELTX_MODLORA_LORAMODGUI_H_
-#define PLUGINS_CHANNELTX_MODLORA_LORAMODGUI_H_
+#ifndef PLUGINS_CHANNELTX_MODMESHTASTIC_MESHTASTICMODGUI_H_
+#define PLUGINS_CHANNELTX_MODMESHTASTIC_MESHTASTICMODGUI_H_
 
 #include "channel/channelgui.h"
 #include "dsp/channelmarker.h"
@@ -72,8 +73,9 @@ private:
     qint64 m_deviceCenterFrequency;
     int m_basebandSampleRate;
     bool m_doApplySettings;
+    bool m_meshControlsUpdating;
 
-    MeshtasticMod* m_chirpChatMod;
+    MeshtasticMod* m_meshtasticMod;
     MovingAverageUtil<double, double, 20> m_channelPowerDbAvg;
 
     std::size_t m_tickCount;
@@ -90,7 +92,10 @@ private:
     void setBandwidths();
     QString getActivePayloadText() const;
     int findBandwidthIndex(int bandwidthHz) const;
-    void applyMeshtasticRadioSettingsIfPresent(const QString& payloadText);
+    bool retuneDeviceToFrequency(qint64 centerFrequencyHz);
+    void setupMeshtasticAutoProfileControls();
+    void rebuildMeshtasticChannelOptions();
+    void applyMeshtasticProfileFromSelection();
     bool handleMessage(const Message& message);
     void makeUIConnections();
     void updateAbsoluteCenterFrequency();
@@ -108,28 +113,22 @@ private slots:
     void on_idleTime_valueChanged(int value);
     void on_syncWord_editingFinished();
     void on_channelMute_toggled(bool checked);
-    void on_scheme_currentIndexChanged(int index);
     void on_fecParity_valueChanged(int value);
-    void on_crc_stateChanged(int state);
-    void on_header_stateChanged(int state);
-    void on_myCall_editingFinished();
-    void on_urCall_editingFinished();
-    void on_myLocator_editingFinished();
-    void on_report_editingFinished();
-    void on_msgType_currentIndexChanged(int index);
-    void on_resetMessages_clicked(bool checked);
     void on_playMessage_clicked(bool checked);
     void on_repeatMessage_valueChanged(int value);
-    void on_generateMessages_clicked(bool checked);
     void on_messageText_editingFinished();
     void on_hexText_editingFinished();
     void on_udpEnabled_clicked(bool checked);
     void on_udpAddress_editingFinished();
     void on_udpPort_editingFinished();
     void on_invertRamps_stateChanged(int state);
+    void on_meshRegion_currentIndexChanged(int index);
+    void on_meshPreset_currentIndexChanged(int index);
+    void on_meshChannel_currentIndexChanged(int index);
+    void on_meshApply_clicked(bool checked);
     void onWidgetRolled(QWidget* widget, bool rollDown);
     void onMenuDialogCalled(const QPoint& p);
     void tick();
 };
 
-#endif /* PLUGINS_CHANNELTX_MODLORA_LORAMODGUI_H_ */
+#endif /* PLUGINS_CHANNELTX_MODMESHTASTIC_MESHTASTICMODGUI_H_ */

@@ -33,24 +33,11 @@ struct MeshtasticModSettings
     enum CodingScheme
     {
         CodingLoRa,  //!< Standard LoRa
-        CodingASCII, //!< plain ASCII (7 bits)
-        CodingTTY,   //!< plain TTY (5 bits)
-        CodingFT     //!< FT8/4 scheme (payload 174 bits LDPC)
     };
 
     enum MessageType
     {
-        MessageNone,
-        MessageBeacon,
-        MessageCQ,
-        MessageReply,
-        MessageReport,
-        MessageReplyReport,
-        MessageRRR,
-        Message73,
-        MessageQSOText,
-        MessageText,
-        MessageBytes
+        MessageText
     };
 
     int m_inputFrequencyOffset;
@@ -60,24 +47,12 @@ struct MeshtasticModSettings
     unsigned int m_preambleChirps; //!< Number of preamble chirps
     int m_quietMillis;             //!< Number of milliseconds to pause between transmissions
     int m_nbParityBits;            //!< Hamming parity bits (LoRa)
-    bool m_hasCRC;                 //!< Payload has CRC (LoRa)
-    bool m_hasHeader;              //!< Header present before actual payload (LoRa)
+    static const bool m_hasCRC;    //!< Payload has CRC (LoRa)
+    static const bool m_hasHeader; //!< Header present before actual payload (LoRa)
     unsigned char m_syncWord;
     bool m_channelMute;
-    CodingScheme m_codingScheme;
-    QString m_myCall;     //!< QSO mode: my callsign
-    QString m_urCall;     //!< QSO mode: your callsign
-    QString m_myLoc;      //!< QSO mode: my locator
-    QString m_myRpt;      //!< QSO mode: my report
-    MessageType m_messageType;
-    QString m_beaconMessage;
-    QString m_cqMessage;
-    QString m_replyMessage;
-    QString m_reportMessage;
-    QString m_replyReportMessage;
-    QString m_rrrMessage;
-    QString m_73Message;
-    QString m_qsoTextMessage;
+    static const CodingScheme m_codingScheme;
+    static const MessageType m_messageType;
     QString m_textMessage;
     QByteArray m_bytesMessage;
     int m_messageRepeat;
@@ -85,6 +60,9 @@ struct MeshtasticModSettings
     QString m_udpAddress;
     uint16_t m_udpPort;
     bool m_invertRamps;            //!< Invert chirp ramps vs standard LoRa (up/down/up is standard)
+    QString m_meshtasticRegionCode;  //!< Meshtastic region code (e.g. "US", "EU_868")
+    QString m_meshtasticPresetName;  //!< Meshtastic modem preset name (e.g. "LONG_FAST")
+    int m_meshtasticChannelIndex;    //!< Meshtastic channel index (0-based)
     uint32_t m_rgbColor;
     QString m_title;
     int m_streamIndex;
@@ -106,8 +84,6 @@ struct MeshtasticModSettings
 
     MeshtasticModSettings();
     void resetToDefaults();
-    void setDefaultTemplates();
-    void generateMessages();
     unsigned int getNbSFDFourths() const; //!< Get the number of SFD period fourths (depends on coding scheme)
     bool hasSyncWord() const;             //!< Only LoRa has a syncword (for the moment)
     void setChannelMarker(Serializable *channelMarker) { m_channelMarker = channelMarker; }

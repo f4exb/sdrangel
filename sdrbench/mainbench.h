@@ -59,6 +59,7 @@ private:
     void testGolay2312();
     void testFFTRRCFilter();
     void testFIRRRCFilter();
+    void testMeshtastic(const QString& argsStr);
     void testFT4(const QString& wavFile, const QString& argsStr); //!< use with sdrbench/samples/ft4/20260304_180052.wav in -f option
     void testFT8(const QString& wavFile, const QString& argsStr); //!< use with sdrbench/samples/ft8/230105_091630.wav in -f option
     void testFT8Protocols(const QString& argsStr);

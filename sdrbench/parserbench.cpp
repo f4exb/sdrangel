@@ -24,7 +24,7 @@
 
 ParserBench::ParserBench() :
     m_testOption(QStringList() << "t" << "test",
-        "Test type: decimateii, decimatefi, decimateff, decimateif, decimateinfii, decimatesupii, ambe, golay2312, ft8, ft4, ft8protocols, callsign, fftrrcfilter, firrrcfilter.",
+        "Test type: decimateii, decimatefi, decimateff, decimateif, decimateinfii, decimatesupii, ambe, golay2312, ft8, ft4, ft8protocols, callsign, fftrrcfilter, firrrcfilter, meshtastic.",
         "test",
         "decimateii"),
     m_nbSamplesOption(QStringList() << "n" << "nb-samples",
@@ -157,6 +157,8 @@ ParserBench::TestType ParserBench::getTestType() const
         return TestFFTRRCFilter;
     } else if (m_testStr == "firrrcfilter") {
         return TestFIRRRCFilter;
+    } else if (m_testStr == "meshtastic") {
+        return TestMeshtastic;
     } else {
         return TestDecimatorsII;
     }

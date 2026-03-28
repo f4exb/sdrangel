@@ -18,18 +18,16 @@
 #include <QDebug>
 
 #include "meshtasticmodencoder.h"
-#include "meshtasticmodencodertty.h"
-#include "meshtasticmodencoderascii.h"
 #include "meshtasticmodencoderlora.h"
-#include "meshtasticmodencoderft.h"
 #include "meshtasticpacket.h"
 
+const MeshtasticModSettings::CodingScheme MeshtasticModEncoder::m_codingScheme = MeshtasticModSettings::CodingLoRa;
+const bool MeshtasticModEncoder::m_hasCRC = true;
+const bool MeshtasticModEncoder::m_hasHeader = true;
+
 MeshtasticModEncoder::MeshtasticModEncoder() :
-    m_codingScheme(MeshtasticModSettings::CodingTTY),
     m_nbSymbolBits(5),
-    m_nbParityBits(1),
-    m_hasCRC(true),
-    m_hasHeader(true)
+    m_nbParityBits(1)
 {}
 
 MeshtasticModEncoder::~MeshtasticModEncoder()
@@ -50,86 +48,28 @@ void MeshtasticModEncoder::setNbSymbolBits(unsigned int spreadFactor, unsigned i
 
 void MeshtasticModEncoder::encode(MeshtasticModSettings settings, std::vector<unsigned short>& symbols)
 {
-    if (settings.m_codingScheme == MeshtasticModSettings::CodingFT)
+    if (m_nbSymbolBits >= 5)
     {
-        MeshtasticModEncoderFT::encodeMsg(
-            settings.m_myCall,
-            settings.m_urCall,
-            settings.m_myLoc,
-            settings.m_myRpt,
-            settings.m_textMessage,
-            settings.m_messageType,
-            m_nbSymbolBits,
-            symbols
-        );
-    }
-    else
-    {
-        if (settings.m_messageType == MeshtasticModSettings::MessageBytes) {
-            encodeBytes(settings.m_bytesMessage, symbols);
-        } else if (settings.m_messageType == MeshtasticModSettings::MessageBeacon) {
-            encodeString(settings.m_beaconMessage, symbols);
-        } else if (settings.m_messageType == MeshtasticModSettings::MessageCQ) {
-            encodeString(settings.m_cqMessage, symbols);
-        } else if (settings.m_messageType == MeshtasticModSettings::MessageReply) {
-            encodeString(settings.m_replyMessage, symbols);
-        } else if (settings.m_messageType == MeshtasticModSettings::MessageReport) {
-            encodeString(settings.m_reportMessage, symbols);
-        } else if (settings.m_messageType == MeshtasticModSettings::MessageReplyReport) {
-            encodeString(settings.m_replyReportMessage, symbols);
-        } else if (settings.m_messageType == MeshtasticModSettings::MessageRRR) {
-            encodeString(settings.m_rrrMessage, symbols);
-        } else if (settings.m_messageType == MeshtasticModSettings::Message73) {
-            encodeString(settings.m_73Message, symbols);
-        } else if (settings.m_messageType == MeshtasticModSettings::MessageQSOText) {
-            encodeString(settings.m_qsoTextMessage, symbols);
-        } else if (settings.m_messageType == MeshtasticModSettings::MessageText) {
-            encodeString(settings.m_textMessage, symbols);
-        }
-    }
-}
+        QByteArray bytes;
+        QString summary;
+        QString error;
 
-void MeshtasticModEncoder::encodeString(const QString& str, std::vector<unsigned short>& symbols)
-{
-    switch (m_codingScheme)
-    {
-    case MeshtasticModSettings::CodingTTY:
-        if (m_nbSymbolBits == 5) {
-            MeshtasticModEncoderTTY::encodeString(str, symbols);
-        }
-        break;
-    case MeshtasticModSettings::CodingASCII:
-        if (m_nbSymbolBits == 7) {
-            MeshtasticModEncoderASCII::encodeString(str, symbols);
-        }
-        break;
-    case MeshtasticModSettings::CodingLoRa:
-        if (m_nbSymbolBits >= 5)
+        if (modemmeshtastic::Packet::isCommand(settings.m_textMessage))
         {
-            QByteArray bytes;
-            QString summary;
-            QString error;
-
-            if (Meshtastic::Packet::isCommand(str))
+            if (!modemmeshtastic::Packet::buildFrameFromCommand(settings.m_textMessage, bytes, summary, error))
             {
-                if (!Meshtastic::Packet::buildFrameFromCommand(str, bytes, summary, error))
-                {
-                    qWarning() << "MeshtasticModEncoder::encodeString: Meshtastic command error:" << error;
-                    return;
-                }
-
-                qInfo() << "MeshtasticModEncoder::encodeString:" << summary;
-            }
-            else
-            {
-                bytes = str.toUtf8();
+                qWarning() << "MeshtasticModEncoder::encode: Meshtastic command error:" << error;
+                return;
             }
 
-            encodeBytesLoRa(bytes, symbols);
+            qInfo() << "MeshtasticModEncoder::encode:" << summary;
         }
-        break;
-    default:
-        break;
+        else
+        {
+            bytes = settings.m_textMessage.toUtf8();
+        }
+
+        encodeBytesLoRa(bytes, symbols);
     }
 }
 
@@ -141,12 +81,12 @@ void MeshtasticModEncoder::encodeBytes(const QByteArray& bytes, std::vector<unsi
     {
         QByteArray payload(bytes);
 
-        if (Meshtastic::Packet::isCommand(QString::fromUtf8(bytes)))
+        if (modemmeshtastic::Packet::isCommand(QString::fromUtf8(bytes)))
         {
             QString summary;
             QString error;
 
-            if (!Meshtastic::Packet::buildFrameFromCommand(QString::fromUtf8(bytes), payload, summary, error))
+            if (!modemmeshtastic::Packet::buildFrameFromCommand(QString::fromUtf8(bytes), payload, summary, error))
             {
                 qWarning() << "MeshtasticModEncoder::encodeBytes: Meshtastic command error:" << error;
                 return;
@@ -177,5 +117,17 @@ void MeshtasticModEncoder::encodeBytesLoRa(const QByteArray& bytes, std::vector<
         MeshtasticModEncoderLoRa::addChecksum(payload);
     }
 
-    MeshtasticModEncoderLoRa::encodeBytes(payload, symbols, m_nbSymbolBits, m_hasHeader, m_hasCRC, m_nbParityBits);
+    const unsigned int headerNbSymbolBits = (m_hasHeader && (m_spreadFactor > 2U))
+        ? (m_spreadFactor - 2U)
+        : m_nbSymbolBits;
+
+    MeshtasticModEncoderLoRa::encodeBytes(
+        payload,
+        symbols,
+        m_nbSymbolBits,
+        headerNbSymbolBits,
+        m_hasHeader,
+        m_hasCRC,
+        m_nbParityBits
+    );
 }

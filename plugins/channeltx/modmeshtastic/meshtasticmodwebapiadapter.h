@@ -46,4 +46,4 @@ private:
     MeshtasticModSettings m_settings;
 };
 
-#endif // INCLUDE_LORAMOD_WEBAPIADAPTER_H
+#endif // INCLUDE_MESHTASTICMOD_WEBAPIADAPTER_H
