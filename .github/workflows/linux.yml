@@ -37,6 +37,7 @@ jobs:
             libxml2-dev bison flex ffmpeg  libpostproc-dev libavcodec-dev libavformat-dev \
             libopus-dev libcodec2-dev libairspy-dev libhackrf-dev \
             libbladerf-dev libsoapysdr-dev libiio-dev libuhd-dev libhamlib-dev libunwind-dev \
+            libavahi-client-dev libavahi-common-dev libaio-dev \
             python3-mako python3-cheetah python3-numpy \
             autoconf automake libtool ninja-build
           bash cmake/ci/build_sdrplay.sh
