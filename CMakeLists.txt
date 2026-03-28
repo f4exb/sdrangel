@@ -19,8 +19,8 @@ set(CMAKE_EXPORT_COMPILE_COMMANDS ON)
 
 # configure version
 set(sdrangel_VERSION_MAJOR "7")
-set(sdrangel_VERSION_MINOR "23")
-set(sdrangel_VERSION_PATCH "2")
+set(sdrangel_VERSION_MINOR "24")
+set(sdrangel_VERSION_PATCH "0")
 set(sdrangel_VERSION_SUFFIX "")
 
 # SDRAngel cmake options

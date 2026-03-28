@@ -33,7 +33,7 @@
 const PluginDescriptor NavtexDemodPlugin::m_pluginDescriptor = {
     NavtexDemod::m_channelId,
     QStringLiteral("Navtex Demodulator"),
-    QStringLiteral("7.23.1"),
+    QStringLiteral("7.24.0"),
     QStringLiteral("(c) Jon Beniston, M7RCE"),
     QStringLiteral("https://github.com/f4exb/sdrangel"),
     true,
