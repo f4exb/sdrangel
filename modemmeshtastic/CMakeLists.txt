@@ -1,4 +1,4 @@
-project (modemmeshtatstic)
+project (modemmeshtastic)
 
 set(modemmeshtastic_SOURCES
     meshtasticpacket.cpp

@@ -79,7 +79,7 @@ void MeshtasticModSettings::resetToDefaults()
     m_preambleChirps = 17;
     m_quietMillis = 1000;
     m_nbParityBits = 1;
-    m_textMessage = "Hello LoRa";
+    m_textMessage = "Hello Meshtastic";
     m_syncWord = 0x34;
     m_channelMute = false;
     m_messageRepeat = 1;
@@ -193,16 +193,15 @@ bool MeshtasticModSettings::deserialize(const QByteArray& data)
             m_channelMarker->deserialize(bytetmp);
         }
 
-        d.readString(6, &m_title, "LoRa Demodulator");
+        d.readString(6, &m_title, "Meshtastic Modulator");
         d.readS32(7, &m_deBits, 0);
         d.readBool(8, &m_channelMute, false);
         d.readU32(9, &utmp, 0x34);
         m_syncWord = utmp > 255 ? 0 : utmp;
         d.readU32(10, &m_preambleChirps, 17);
         d.readS32(11, &m_quietMillis, 1000);
-        d.readBool(11, &m_useReverseAPI, false);
         d.readBool(12, &m_invertRamps, false);
-        d.readString(28, &m_textMessage, "Hello LoRa");
+        d.readString(28, &m_textMessage, "Hello Meshtastic");
         d.readBlob(29, &m_bytesMessage);
         d.readS32(31, &m_nbParityBits, 1);
         d.readS32(44, &m_messageRepeat, 1);

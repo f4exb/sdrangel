@@ -286,15 +286,6 @@ void MeshtasticModSource::modulateSample()
             m_chirpCount = 0;
             m_chirp0 = encodeSymbol(m_symbols[m_chirpCount], MeshtasticModSettings::m_hasHeader && (m_chirpCount < 8U));
             m_txFrameToken++;
-
-            std::vector<unsigned short> mappedPreview;
-            const unsigned int previewCount = std::min<unsigned int>(8U, static_cast<unsigned int>(m_symbols.size()));
-            mappedPreview.reserve(previewCount);
-
-            for (unsigned int i = 0; i < previewCount; i++) {
-                mappedPreview.push_back(encodeSymbol(m_symbols[i], MeshtasticModSettings::m_hasHeader && (i < 8U)));
-            }
-
             m_chirp = (m_chirp0 + m_fftLength)*MeshtasticModSettings::oversampling - 1;
             m_state = ChirpChatStatePayload;
         }
