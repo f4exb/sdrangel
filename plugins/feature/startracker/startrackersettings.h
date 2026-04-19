@@ -2,7 +2,7 @@
 // Copyright (C) 2012 maintech GmbH, Otto-Hahn-Str. 15, 97204 Hoechberg, Germany //
 // written by Christian Daniel                                                   //
 // Copyright (C) 2015-2022 Edouard Griffiths, F4EXB <f4exb06@gmail.com>          //
-// Copyright (C) 2020-2024 Jon Beniston, M7RCE <jon@beniston.com>                //
+// Copyright (C) 2021-2026 Jon Beniston, M7RCE <jon@beniston.com>                //
 //                                                                               //
 // This program is free software; you can redistribute it and/or modify          //
 // it under the terms of the GNU General Public License as published by          //
@@ -33,7 +33,7 @@ struct StarTrackerSettings
     double m_latitude;
     double m_longitude;
     QString m_target;           // Sun, Moon, Custom
-    QString m_dateTime;         // Local date/time for observation, or "" for now
+    QString m_dateTime;         // Date/time for observation, or "" for now (m_utc is used to determine whether this is in UTC or local time)
     QString m_refraction;       // Refraction correction. "None", "Saemundsson" or "Positional Astronomy Library"
     double m_pressure;          // Air pressure in millibars
     double m_temperature;       // Air temperature in C
@@ -75,6 +75,21 @@ struct StarTrackerSettings
     int m_workspaceIndex;
     QByteArray m_geometryBytes;
     enum Rotators {ALL_ROTATORS, NO_ROTATORS, MATCHING_TARGET} m_drawRotators; //!< Which rotators to draw on polar chart
+    QString m_targetSource;     // "SDRangel", "SPICE", "Horizons"
+    QStringList m_spiceEphemerides;
+    QStringList m_solarSystemBodies;
+    bool m_logScale;            // Log scale rather than linear for planetary orbits
+    bool m_utc;                 // Custom date time is in UTC rather than local time
+    enum ChartSelect {
+        CHART_ELEVATION_VS_TIME,
+        CHART_SOLAR_FLUX_VS_FREQUENCY,
+        CHART_SKY_TEMPERATURE,
+        CHART_GALACTIC_LINE_OF_SIGHT,
+        CHART_SOLAR_SYSTEM,
+        CHART_JUPITER
+    } m_chartSelect;
+    int m_chartSubSelect;
+    bool m_night;               // false=Day, time axis is midnight to midnight. true=Night, time axis is noon to noon.
 
     StarTrackerSettings();
     void resetToDefaults();
@@ -83,6 +98,11 @@ struct StarTrackerSettings
     void setRollupState(Serializable *rollupState) { m_rollupState = rollupState; }
     void applySettings(const QStringList& settingsKeys, const StarTrackerSettings& settings);
     QString getDebugString(const QStringList& settingsKeys, bool force=false) const;
+    QDateTime getDateTime() const;
+
+    static const QStringList m_defaultSpiceEphemerides;
+    static const QStringList m_defaultSolarSystemBodies;
+
 };
 
 #endif // INCLUDE_FEATURE_STARTRACKERSETTINGS_H_

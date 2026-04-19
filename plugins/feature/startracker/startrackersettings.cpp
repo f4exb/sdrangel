@@ -1,5 +1,5 @@
 ///////////////////////////////////////////////////////////////////////////////////
-// Copyright (C) 2021, 2023 Jon Beniston, M7RCE <jon@beniston.com>               //
+// Copyright (C) 2021-2026 Jon Beniston, M7RCE <jon@beniston.com>                //
 // Copyright (C) 2021-2022 Edouard Griffiths, F4EXB <f4exb06@gmail.com>          //
 //                                                                               //
 // This program is free software; you can redistribute it and/or modify          //
@@ -18,10 +18,32 @@
 
 #include <QColor>
 
+#include "util/httpdownloadmanager.h"
 #include "util/simpleserializer.h"
 #include "settings/serializable.h"
 
 #include "startrackersettings.h"
+
+const QStringList StarTrackerSettings::m_defaultSpiceEphemerides = {
+    "https://naif.jpl.nasa.gov/pub/naif/generic_kernels/lsk/naif0012.tls",
+    "https://naif.jpl.nasa.gov/pub/naif/generic_kernels/pck/pck00011.tpc",
+    "https://naif.jpl.nasa.gov/pub/naif/generic_kernels/pck/gm_de440.tpc",
+    "https://naif.jpl.nasa.gov/pub/naif/generic_kernels/spk/planets/de440.bsp",
+    "https://naif.jpl.nasa.gov/pub/naif/generic_kernels/spk/satellites/jup365.bsp",
+};
+
+const QStringList StarTrackerSettings::m_defaultSolarSystemBodies = {
+    "SUN",
+    "MERCURY",
+    "VENUS",
+    "EARTH",
+    "MOON",
+    "MARS BARYCENTER",
+    "JUPITER BARYCENTER",
+    "SATURN BARYCENTER",
+    "URANUS BARYCENTER",
+    "NEPTUNE BARYCENTER"
+};
 
 StarTrackerSettings::StarTrackerSettings() :
     m_rollupState(nullptr)
@@ -76,6 +98,14 @@ void StarTrackerSettings::resetToDefaults()
     m_drawMoonOnSkyTempChart = true;
     m_workspaceIndex = 0;
     m_drawRotators = MATCHING_TARGET;
+    m_targetSource = "SDRangel";
+    m_spiceEphemerides = m_defaultSpiceEphemerides;
+    m_solarSystemBodies = m_defaultSolarSystemBodies;
+    m_logScale = true;
+    m_utc = false;
+    m_chartSelect = CHART_ELEVATION_VS_TIME;
+    m_chartSubSelect = 0;
+    m_night = false;
 }
 
 QByteArray StarTrackerSettings::serialize() const
@@ -133,6 +163,13 @@ QByteArray StarTrackerSettings::serialize() const
     s.writeS32(45, m_workspaceIndex);
     s.writeBlob(46, m_geometryBytes);
     s.writeS32(47, (int)m_drawRotators);
+    s.writeString(48, m_targetSource);
+    s.writeList(49, m_spiceEphemerides);
+    s.writeList(50, m_solarSystemBodies);
+    s.writeBool(51, m_logScale);
+    s.writeS32(52, (int) m_chartSelect);
+    s.writeS32(53, m_chartSubSelect);
+    s.writeBool(54, m_night);
 
     return s.final();
 }
@@ -222,6 +259,13 @@ bool StarTrackerSettings::deserialize(const QByteArray& data)
         d.readS32(45, &m_workspaceIndex, 0);
         d.readBlob(46, &m_geometryBytes);
         d.readS32(47, (int *)&m_drawRotators, MATCHING_TARGET);
+        d.readString(48, &m_targetSource, "SDRangel");
+        d.readList(49, &m_spiceEphemerides, m_defaultSpiceEphemerides);
+        d.readList(50, &m_solarSystemBodies, m_defaultSolarSystemBodies);
+        d.readBool(51, &m_logScale, true);
+        d.readS32(52, (int *)&m_chartSelect);
+        d.readS32(53, &m_chartSubSelect);
+        d.readBool(54, &m_night, false);
 
         return true;
     }
@@ -372,6 +416,30 @@ void StarTrackerSettings::applySettings(const QStringList& settingsKeys, const S
     if (settingsKeys.contains("drawRotators")) {
         m_drawRotators = settings.m_drawRotators;
     }
+    if (settingsKeys.contains("targetSource")) {
+        m_targetSource = settings.m_targetSource;
+    }
+    if (settingsKeys.contains("spiceEphemerides")) {
+        m_spiceEphemerides = settings.m_spiceEphemerides;
+    }
+    if (settingsKeys.contains("solarSystemBodies")) {
+        m_solarSystemBodies = settings.m_solarSystemBodies;
+    }
+    if (settingsKeys.contains("logScale")) {
+        m_logScale = settings.m_logScale;
+    }
+    if (settingsKeys.contains("utc")) {
+        m_utc = settings.m_utc;
+    }
+    if (settingsKeys.contains("chartSelect")) {
+        m_chartSelect = settings.m_chartSelect;
+    }
+    if (settingsKeys.contains("chartSubSelect")) {
+        m_chartSubSelect = settings.m_chartSubSelect;
+    }
+    if (settingsKeys.contains("night")) {
+        m_night = settings.m_night;
+    }
 }
 
 QString StarTrackerSettings::getDebugString(const QStringList& settingsKeys, bool force) const
@@ -513,7 +581,49 @@ QString StarTrackerSettings::getDebugString(const QStringList& settingsKeys, boo
     if (settingsKeys.contains("drawRotators") || force) {
         ostr << " m_drawRotators: " << m_drawRotators;
     }
+    if (settingsKeys.contains("targetSource") || force) {
+        ostr << " m_targetSource: " << m_targetSource.toStdString();
+    }
+    if (settingsKeys.contains("spiceEphemerides") || force) {
+        ostr << " m_spiceEphemerides: " << m_spiceEphemerides.join(" ").toStdString();
+    }
+    if (settingsKeys.contains("solarSystemBodies") || force) {
+        ostr << " m_solarSystemBodies: " << m_solarSystemBodies.join(" ").toStdString();
+    }
+    if (settingsKeys.contains("logScale") || force) {
+        ostr << " m_logScale: " << m_logScale;
+    }
+    if (settingsKeys.contains("utc") || force) {
+        ostr << " m_utc: " << m_utc;
+    }
+    if (settingsKeys.contains("chartSelect") || force) {
+        ostr << " m_chartSelect: " << m_chartSelect;
+    }
+    if (settingsKeys.contains("chartSubSelect") || force) {
+        ostr << " m_chartSubSelect: " << m_chartSubSelect;
+    }
+    if (settingsKeys.contains("night") || force) {
+        ostr << " m_night: " << m_night;
+    }
 
     return QString(ostr.str().c_str());
 }
 
+QDateTime StarTrackerSettings::getDateTime() const
+{
+    QDateTime dt;
+
+    if (m_dateTime == "")
+    {
+        dt = QDateTime::currentDateTime();
+    }
+    else
+    {
+        dt = QDateTime::fromString(m_dateTime, Qt::ISODateWithMs);
+        if (m_utc) {
+            dt.setTimeZone(QTimeZone::utc());
+        }
+    }
+
+    return dt;
+}

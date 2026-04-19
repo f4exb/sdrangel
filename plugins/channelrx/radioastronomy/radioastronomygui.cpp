@@ -1587,7 +1587,7 @@ bool RadioAstronomyGUI::hasNeededFFTData(QHash<QString,int> hash)
 // Write FFTMeasurement to a stream
 void RadioAstronomyGUI::saveFFT(QTextStream& out, const FFTMeasurement* fft)
 {
-    out << fft->m_dateTime.toString();
+    out << fft->m_dateTime.toString(Qt::ISODateWithMs);
     out << ",";
     out << fft->m_centerFrequency;
     out << ",";

@@ -30,11 +30,14 @@
 
 #include "feature/featuregui.h"
 #include "util/messagequeue.h"
+#include "util/jplhorizons.h"
 #include "gui/httpdownloadmanagergui.h"
 #include "settings/rollupstate.h"
 #include "availablechannelorfeature.h"
 
 #include "startrackersettings.h"
+#include "startrackerreport.h"
+#include "spiceephemerides.h"
 
 class PluginAPI;
 class FeatureUISet;
@@ -109,6 +112,13 @@ private:
     QNetworkAccessManager *m_networkManager;
     QNetworkRequest m_networkRequest;
     HttpDownloadManagerGUI m_dlm;
+    bool m_startAfterDownload;
+
+    JPLHorizons *m_jplHorizons;
+    QStringList m_jplBodies;
+    QStringList m_spiceTargets;
+    QStringList m_availableFeatures;    // Names of SatelliteTrackers and SkyMaps for target selection
+    SpiceEphemerides m_spiceEphemerides;
 
     // Solar flux plot
     double m_solarFlux; // 10.7cm/2800MHz
@@ -119,12 +129,39 @@ private:
     // Sky temperature
     QList<QImage> m_images;
 
+    GraphicsViewZoom* m_zoom;
+
     // Galactic line of sight
     QList<QPixmap> m_milkyWayImages;
-    GraphicsViewZoom* m_zoom;
     QList<QGraphicsPixmapItem *> m_milkyWayItems;
     QGraphicsLineItem* m_lineOfSight;
     QList<LoSMarker *> m_lineOfSightMarkers;
+    QGraphicsScene *m_galacticLineOfSightScene;
+
+    // Solar system
+    QGraphicsScene *m_solarSystemScene;
+    struct SolarSystemItem {
+        QGraphicsPixmapItem *m_pixmapItem;
+        QGraphicsTextItem *m_textItem;
+        float m_scale;
+        QGraphicsPolygonItem *m_orbitItem;
+    };
+    QFont m_solarSystemLabelFont;
+    QFontMetrics m_solarSystemLabelFontMetrics;
+    QHash<QString, SolarSystemItem *> m_solarSystemItems;
+    QHash<QString, QPixmap> m_planetImages;
+
+    // Jupiter Phase/CML
+    QList<QPixmap> m_jupiterImages;
+    QGraphicsScene *m_jupiterScene;
+    QList<QGraphicsPixmapItem *> m_jupiterItems;
+    QGraphicsPixmapItem *m_ioItem;
+    QGraphicsPixmapItem *m_ganymedeItem;
+    QList<QGraphicsTextItem *> m_ioLegendLabels;
+    QList<QGraphicsTextItem *> m_ganymedeLegendLabels;
+    QList<QGraphicsLineItem *> m_jupiterLines;
+    QList<QGraphicsTextItem *> m_jupiterTexts;
+    QRect m_jupiterRect;
 
     // Images that are part of the animation
     QList<QImage> m_animationImages;
@@ -134,6 +171,12 @@ private:
     double m_sunDec;
     double m_moonRA;
     double m_moonDec;
+
+    // Data for chart from worker
+    QString m_azElVsTimeTarget;
+    QList<double> m_azimuths;
+    QList<double> m_elevations;
+    QList<QDateTime> m_dateTimes;
 
     explicit StarTrackerGUI(PluginAPI* pluginAPI, FeatureUISet *featureUISet, Feature *feature, QWidget* parent = nullptr);
     virtual ~StarTrackerGUI();
@@ -155,6 +198,18 @@ private:
     void plotSolarFluxChart();
     void plotGalacticLineOfSight();
     void createGalacticLineOfSightScene();
+    void plotSolarSystem();
+    void centerOnSolarSystemBody();
+    void plotJupiter();
+    void updateJupiterMoonPosition(double cml, double ioPhase, double ganymedePhase);
+    void updateJupiterMoonPositions(const StarTrackerReport::MsgReportJupiterData& report);
+    void updateSolarSystemPositions(const QStringList &names, const QList<QVector3D> &positions,
+        const QList<QList<QPointF>> &orbit);
+    void scaleSolarSystemItems();
+    void createSolarSystemScene();
+    QPixmap *getPlanetPixmap(const QString& name);
+    QList<QGraphicsTextItem *> createJupiterLegendLabels(int legendXRight, int legendYBottom, int legendStep, int legendMax);
+    void createJupiterScene();
     void plotGalacticMarker(LoSMarker* marker);
     void plotChart();
     void removeAllAxes();
@@ -170,6 +225,9 @@ private:
     void makeUIConnections();
     void limitAzElRange(double& azimuth, double& elevation) const;
     void updateFeatureList(const AvailableChannelOrFeatureList& features);
+    void updateTargetList();
+    bool checkSPICEEphemerides();
+    void downloadSPICEEphemerides();
 
 private slots:
     void onMenuDialogCalled(const QPoint &p);
@@ -190,10 +248,14 @@ private slots:
     void on_galacticLongitude_valueChanged(double value);
     void on_frequency_valueChanged(int value);
     void on_beamwidth_valueChanged(double value);
-    void on_target_currentTextChanged(const QString &text);
+    void on_target_editingFinished();
+    void on_target_currentIndexChanged(int index);
+    void on_targetSource_currentIndexChanged(int index);
     void on_displaySettings_clicked();
     void on_dateTimeSelect_currentTextChanged(const QString &text);
     void on_dateTime_dateTimeChanged(const QDateTime &datetime);
+    void on_utc_clicked(bool checked=false);
+    void on_setTimeToNow_clicked(bool checked=false);
     void updateStatus();
     void on_viewOnMap_clicked();
     void on_chartSelect_currentIndexChanged(int index);
@@ -202,16 +264,23 @@ private slots:
     void autoUpdateSolarFlux();
     void on_downloadSolarFlux_clicked();
     void on_darkTheme_clicked(bool checked);
+    void on_night_clicked(bool checked=false);
     void on_zoomIn_clicked();
     void on_zoomOut_clicked();
+    void zoomed();
     void on_addAnimationFrame_clicked();
     void on_clearAnimation_clicked();
     void on_saveAnimation_clicked();
+    void on_logScale_clicked(bool checked);
     void on_drawSun_clicked(bool checked);
     void on_drawMoon_clicked(bool checked);
     void networkManagerFinished(QNetworkReply *reply);
     void downloadFinished(const QString& filename, bool success);
-};
+    void spiceDownloadsComplete();
+    void majorBodiesUpdated(const QHash<QString, JPLHorizons::BodyID>& bodies);
 
+protected:
+    void resizeEvent(QResizeEvent *event) override;
+};
 
 #endif // INCLUDE_FEATURE_STARTRACKERGUI_H_

@@ -6,11 +6,15 @@ The Star Tracker feature plugin is for use in radio astronomy and EME (Earth-Moo
 
 * It calculates the azimuth and elevation of celestial objects and can send them to the Rotator Controller or other plugins to point an antenna at that object.
 * It can plot drift scan paths in both equatorial and galactic charts.
-* The overhead position of the Sun, Moon and selected star can be displayed on the Map Feature.
+* The overhead position of the Sun, Moon and target object can be displayed on the Map Feature.
 * It can display local Sidereal time, solar flux density and sky temperature.
 * It can plot the line of sight through the Milky Way.
 * It can send the target to the Sky Map plugin, to display associated imagery in a variety of wavelengths. It can also use the Sky Map to set the target.
 * The plugin can communicate with Stellarium, allowing Stellarium to control SDRangel as though it was a telescope and for the direction the antenna is pointing to be displayed in Stellarium.
+* It has built-in models for calculating the position of the Sun and Moon, as well built-in coordiates for a few of the most significant radio objects,
+but can also use NASA JPL's SPICE toolkit or Horizons API for targetting other solar system objects, such as asteroids, comets, planets, planetary satellites and some spacecraft.
+* For Jupiter decameter radiation (DAM) observations, it can calculate and plot the phase of Io and Ganymede, relative to Jupiter's Central Meridian Longitude (CML) on a chart showing emission probability.
+* It can plot the positions of major solar system bodies in the Solar System Map.
 
 <h2>Settings</h2>
 
@@ -36,26 +40,33 @@ When clicked, it sets the latitude, longitude and height fields to the values fr
 
 Pressing this button displays a settings dialog, that allows you to set:
 
-* The epoch used when entering RA and Dec. This can be either J2000 (which is used for most catalogues) or JNOW which is the current date and time.
-* The units used for the display of the calculated azimuth and elevation. This can be either degrees, minutes and seconds or decimal degrees.
-* Whether to correct for atmospheric refraction. You can choose either no correction, the Saemundsson algorithm, typically used for optical astronomy or the more accurate Positional Astronomy Library calculation, which can be used for >250MHz radio frequencies or light. Note that there is only a very minor difference between the two.
-* API key for openweathermap.org which is used to download real-time weather (Air temperature, pressure and humidity) for the specified latitude (6) and longitude (7).
-* How often to download weather (in minutes).
-* Air pressure in millibars. This value can be automatically updated from OpenWeatherMap.
-* Air temperature in degrees Celsius. This value can be automatically updated from OpenWeatherMap.
-* Relative humidity in %. This value can be automatically updated from OpenWeatherMap.
-* Height above sea level in metres of the observation point (antenna location).
-* Temperature lapse rate in Kelvin per kilometre.
-* What data to display for the Solar flux measurement. Data can be selected from 2800 from DRAO or a number of different frequencies from Learmonth. Also, the Learmonth data can be linearly interpolated to the observation frequency set in the main window.
-* The units to display the solar flux in, either Solar Flux Units, Jansky or Wm^-2Hz-1. 1 sfu equals 10,000 Jansky or 10^-22 Wm^-2Hz-1.
-* The update period in seconds, which controls how frequently azimuth and elevation are re-calculated.
-* The IP port number the Stellarium server listens on.
-* Which rotators are displayed on the polar chart. This can be All, None or Matching target. When Matching target is selected, the rotator will
+* Settings Tab:
+
+  * The epoch used when entering RA and Dec. This can be either J2000 (which is used for most catalogues) or JNOW which is the current date and time.
+  * The units used for the display of the calculated azimuth and elevation. This can be either degrees, minutes and seconds or decimal degrees.
+  * Whether to correct for atmospheric refraction. You can choose either no correction, the Saemundsson algorithm, typically used for optical astronomy or the more accurate Positional Astronomy Library calculation, which can be used for >250MHz radio frequencies or light. Note that there is only a very minor difference between the two.
+  * API key for openweathermap.org which is used to download real-time weather (Air temperature, pressure and humidity) for the specified latitude (6) and longitude (7).
+  * How often to download weather (in minutes).
+  * Air pressure in millibars. This value can be automatically updated from OpenWeatherMap.
+  * Air temperature in degrees Celsius. This value can be automatically updated from OpenWeatherMap.
+  * Relative humidity in %. This value can be automatically updated from OpenWeatherMap.
+  * Height above sea level in metres of the observation point (antenna location).
+  * Temperature lapse rate in Kelvin per kilometre.
+  * What data to display for the Solar flux measurement. Data can be selected from 2800 from DRAO or a number of different frequencies from Learmonth. Also, the Learmonth data can be linearly interpolated to the observation frequency set in the main window.
+  * The units to display the solar flux in, either Solar Flux Units, Jansky or Wm^-2Hz-1. 1 sfu equals 10,000 Jansky or 10^-22 Wm^-2Hz-1.
+  * The update period in seconds, which controls how frequently azimuth and elevation are re-calculated.
+  * The IP port number the Stellarium server listens on.
+  * Which rotators are displayed on the polar chart. This can be All, None or Matching target. When Matching target is selected, the rotator will
 only be displayed if the source in the Rotator Controller is set to this Star Tracker and Track is enabled.
-* Whether to start a Stellarium telescope server.
-* Whether to draw the Sun in the map.
-* Whether to draw the Moon on the map.
-* Whether to draw the target star (or galaxy) on the map.
+  * Whether to start a Stellarium telescope server.
+  * Whether to draw the Sun in the map.
+  * Whether to draw the Moon on the map.
+* * Whether to draw the target object on the map.
+
+* Ephemerides Tab:
+
+  * [SPICE](https://naif.jpl.nasa.gov/pub/naif/generic_kernels/spk/) ephermerides files, containing target data.
+  * Solar System bodies, from the above ephermerides files, to draw on the Solar System map.
 
 <h3>6: Latitude</h3>
 
@@ -67,7 +78,9 @@ Specifies the longitude in decimal degrees (East positive) of the observation po
 
 <h3>8: Time</h3>
 
-Select the local date and time at which the position of the target should be calculated. Select either Now, for the current time, or Custom to manually enter a date and time.
+Select the date and time at which the position of the target should be calculated. Select either Now, for the current time, or Custom to manually enter a date and time.
+
+By default the date and time is the local. Check the UTC button is use UTC instead.
 
 <h3>9: LST - Local Sidereal Time</h3>
 
@@ -79,9 +92,14 @@ Displays the Solar flux density. The observatory where the data is sourced from,
 
 <h3>11: Target</h3>
 
-Select a target object to track from the list.
-To manually enter RA (right ascension) and Dec (declination) of an unlisted target, select Custom RA/Dec.
-To allow Stellarium to set the RA and Dec, select Custom RA/Dec, and ensure the Stellarium Server option is checked in the Star Tracker Settings dialog.
+Select a target object to track from the list. 
+- To manually enter RA (right ascension) and Dec (declination) of an unlisted target, select Custom RA/Dec.
+- To allow Stellarium to set the RA and Dec, select Custom RA/Dec, and ensure the Stellarium Server option is checked in the Star Tracker Settings dialog.
+- To select a target from NASA JPL Horizons database of solar system objects (asteroids, comets, planets, planetary satellites and some spacecraft), select Horizons in the target source (12).
+Major bodies will be added to the target list. Other bodies can be targetting by typing in their numeric ID.
+- To select a target from a SPICE SPK file, select SPICE in the target source (12).
+
+SDRangel built-in targets:
 
 | Target           | Type              | Details                                        | Flux density (Jy) or Temperature (K)       |
 |------------------|-------------------|------------------------------------------------|---------------------------------------------
@@ -110,53 +128,68 @@ References:
 * Repeating Jansky - https://www.gb.nrao.edu/~fghigo/JanskyAntenna/RepeatingJansky_memo10.pdf
 * Studies of four regions for use as standards in 21CM observations - http://articles.adsabs.harvard.edu/pdf/1973A%26AS....8..505W
 
-<h3>12: Frequency</h3>
+<h3>12: Target Source</h3>
+
+Selects the source of targets listed in the Target list (11). 
+
+- SDRangel: built-in targets as listed in (11).
+- SPICE: Solar System bodies from a SPICE SPK file. 
+- Horizons: Solar System bodies from NASA JPL's Horizons database.
+
+SPICE SPK files are available from [NASA JPL's NAIF website](https://naif.jpl.nasa.gov/pub/naif/generic_kernels/spk/).
+SPK files can be specified in the Star Tracker Settings dialog (5).
+
+When Horizons is selected, the Target list (11) will be populated with major bodies from the Horizons database. Other bodies can be specified by entering their ID manually.
+The Horizons database includes asteroids, comets, natural satellites, planets, the Sun, some spacecraft and dynamical points (L1 etc) and barycenters.
+[Horizons Manual](https://ssd.jpl.nasa.gov/horizons/manual.html). Using the Horizons API requires an internet connection.
+
+<h3>13: Frequency</h3>
 
 Enter the frequency of observation in MHz. This value is used for sky temperature and refraction calculations.
 
-<h3>13: Beamwidth</h3>
+<h3>14: Beamwidth</h3>
 
 Enter the half power (-3dB) beamwidth of your antenna. This value is used for sky temperature calculation.
 
-<h3>14: Right Ascension</h3>
+<h3>15: Right Ascension</h3>
 
 When target is set to Custom RA/Dec, you can specify the right ascension in hours of the target object. This can be specified as a decimal (E.g. 12.23, from 0 to 24) or in hours, minutes and seconds (E.g. 12h05m10.2s or 12 05 10.2). Whether the epoch is J2000 or JNOW can be set in the Star Tracker Settings dialog.
 
 When target is set to Custom Az/El or Custom l/b, this will display the corresponding right ascension.
 
-<h3>15: Declination</h3>
+<h3>16: Declination</h3>
 
 When target is set to Custom RA/Dec, you can specify the declination in degrees of the target object. This can be specified as a decimal (E.g. 34.6, from -90.0 to 90.0) or in degrees, minutes and seconds (E.g. 34d12m5.6s, 34d12'5.6"  34 12 5.6). Whether the epoch is J2000 or JNOW can be set in the Star Tracker Settings dialog.
 
 When target is set to Custom Az/El or Custom l/b, this will display the corresponding declination.
 
-<h3>16: Azimuth</h3>
+<h3>17: Azimuth</h3>
 
 When target is set to Custom Az/El, you specify the azimuth in degrees of the target object. The corresponding RA/Dec and l/b will be calculated and displayed.
 
 For all other target settings, this displays the calculated azimuth (angle in degrees, clockwise from North) to the object.
 
-<h3>17: Elevation</h3>
+<h3>18: Elevation</h3>
 
 When target is set to Custom Az/El, you specify the elevation in degrees of the target object. The corresponding RA/Dec and l/b will be calculated and displayed.
 
 For all other target settings, this displays the calculated elevation (angle in degrees - 0 to horizon and 90 to zenith) to the object.
 
-<h3>18: Az Offset</h3>
+<h3>19: Az Offset</h3>
 
 An offset in degrees that is added to the computed target azimuth.
 
-<h3>19: El Offset</h3>
+<h3>20: El Offset</h3>
 
 An offset in degrees that is added to the computed target elevation.
 
-<h3>20: l - Galactic Longitude</h3>
+<h3>21: l - Galactic Longitude</h3>
 
 When the target is set to Custom l/b, you specify the galactic longitude (angle in degrees, Eastward from the galactic centre) of the target object.
 
 For all other target settings, this displays the calculated galactic longitude to the object.
 
-<h3>21: b - Galactic Latitude</h3>
+<h3>22: b - Galactic Latitude</h3>
 
 When the target is set to Custom l/b, you specify the galactic latitude (angle in degrees) of the target object.
 
@@ -164,15 +197,12 @@ For all other target settings, displays the calculated galactic latitude to the 
 
 <h2>Plots</h2>
 
-<h3>Light or dark theme</h3>
-
-Click on this icon ![Star Tracker Chart theme](../../../doc/img/StarTracker_chart_theme.png) to switch between light and dark themes for the charts.
-
 <h3>Elevation vs time</h3>
 
 ![Star Tracker Elevation vs Time](../../../doc/img/StarTracker_elevationvstime.png) ![Star Tracker Elevation vs Time Polar](../../../doc/img/StarTracker_elevationvstime_polar.png)
 
 In order to assist in determining whether and when observations of the target object may be possible, an elevation vs time plot is drawn for the 24 hours encompassing the selected date and time.
+The day/night button can be used to select midnight to midnight (unchecked/day) or noon to noon (checked/night).
 This can be plotted on Cartesian or polar axis.
 Some objects may not be visible from a particular latitude for the specified time, in which case, the graph title will indicate the object is not visible on that particular date.
 
@@ -234,6 +264,33 @@ To start a new animation, press ![clear animation](../../../doc/img/StarTracker_
 
 ![StarTracker spiral arm](../../../doc/img/StarTracker_spiral_arm.png)
 
+<h3>Solar System Map</h3>
+
+The Solar System Map shows the positions of the bodies selected in the Settings Dialog (5). Positions can be plotted on either a linear or logarithmic scale. The positions are displayed top down on the ecliptic plane. 
+The map will be centered at the body selected in the combo box. Select '-' to be able to pan the map with the mouse.
+
+![Solar System Map](../../../doc/img/StarTracker_solarsystem.png)
+
+<h3>Jupiter CML and Moon Phase</h3>
+
+The Jupiter CML and Moon Phase plot is for assisting with Jupiter decameter radiation (DAM) observations. It displays the phase of either Io or Ganymede against Jupiter's Central Meridian Longitude (CML) overlaid
+on a chart showing emission probabilty.
+
+![Io Phase Plot](../../../doc/img/StarTracker_iophase.png)
+
+![Ganymede Phase Plot](../../../doc/img/StarTracker_ganymedephase.png)
+
+The moon is plotted at the selected date and time (8). The white line shows the path and time of the current or next visible pass of the moon.
+
+Underneath the chart, the elevation of Jupiter in degrees, the Central Meridan Longitude in degrees and moon phase in degrees, are shown for the selected date and time (8).
+
+The Central Meridan Longitude is the System III longitude of Jupiter that is currently facing Earth, taking in to account light travel time.
+A moon phase of 0 degrees is at the far side of Jupiter, while 180 degrees has the moon directly between Jupiter and the Earth.
+
+<h3>Light or dark theme</h3>
+
+Click on this icon ![Star Tracker Chart theme](../../../doc/img/StarTracker_chart_theme.png) to switch between light and dark themes for the charts.
+
 <h2>Map</h2>
 
 The Star Tracker feature can send the overhead position of the Sun, Moon and target Star to the Map. These can be enabled individually in the settings dialog. The Moon should be displayed with an approximate phase. Stars (or galaxies) are displayed as an image of a pulsar.
@@ -278,19 +335,30 @@ Then select the SDRangel telescope reticle and press Ocular view.
 
 <h2>Attribution</h2>
 
-Solar radio flux measurement at 10.7cm/2800MHz is from National Research Council Canada and Natural Resources Canada: https://www.spaceweather.gc.ca/forecast-prevision/solar-solaire/solarflux/sx-4-en.php
-
-Solar radio flux measurements at 245, 410, 610, 1415, 2695, 4995, 8800 and 15400MHz from the Learmonth Observatory: http://www.sws.bom.gov.au/World_Data_Centre/1/10
-
-150MHz (Landecker and Wielebinski) and 1420MHz (Stockert and Villa-Elisa) All Sky images from MPIfR's (Max-Planck-Institut Fur Radioastronomie) Survey Sampler: https://www3.mpifr-bonn.mpg.de/survey.html
-
-408MHz (Haslam) destriped (Platania) All Sky image and spectral index (Platania) from Strasbourg astronomical Data Center: http://cdsarc.u-strasbg.fr/viz-bin/cat/J/A+A/410/847
-
-Milky Way image from NASA/JPL-Caltech: https://photojournal.jpl.nasa.gov/catalog/PIA10748
-
-Icons are by Adnen Kadri, iconsphere and Erik Madsen, from the Noun Project Noun Project: https://thenounproject.com/
-
-Icons are by Freepik from Flaticon https://www.flaticon.com/
+* Solar radio flux measurement at 10.7cm/2800MHz is from National Research Council Canada and Natural Resources Canada: https://www.spaceweather.gc.ca/forecast-prevision/solar-solaire/solarflux/sx-4-en.php
+* Solar radio flux measurements at 245, 410, 610, 1415, 2695, 4995, 8800 and 15400MHz from the Learmonth Observatory: http://www.sws.bom.gov.au/World_Data_Centre/1/10
+* 150MHz (Landecker and Wielebinski) and 1420MHz (Stockert and Villa-Elisa) All Sky images from MPIfR's (Max-Planck-Institut Fur Radioastronomie) Survey Sampler: https://www3.mpifr-bonn.mpg.de/survey.html
+* 408MHz (Haslam) destriped (Platania) All Sky image and spectral index (Platania) from Strasbourg astronomical Data Center: http://cdsarc.u-strasbg.fr/viz-bin/cat/J/A+A/410/847
+* Milky Way image from NASA/JPL-Caltech: https://photojournal.jpl.nasa.gov/catalog/PIA10748
+* Icons are by Adnen Kadri, iconsphere and Erik Madsen, from the Noun Project Noun Project: https://thenounproject.com/
+* Icons are by Freepik from Flaticon https://www.flaticon.com/
+* Io & Ganymede Phase vs CML plots from Jupiter radio emission induced by Ganymede and consequences for the radio detection of exoplanets, Zarka et all, 2018: https://www.aanda.org/articles/aa/full_html/2018/10/aa33586-18/aa33586-18.html
+* Sun image from Solar Dynamics Observatory, NASA
+* Mercury image from Messenger, NASA/Johns Hopkins University Applied Physics Laboratory/Carnegie Institution of Washington.
+* Venus image by NASA/JPL-Caltech
+* Blue Marble by crew of Apollo 17.
+* Moon image by NASA.
+* Mars image Viking Orbiter, NASA/JPL-Caltech
+* Phobos image by NASA/JPL-Caltech/University of Arizona
+* Deimos image by NASA/JPL-Caltech/University of Arizona
+* Jupiter enhanced image by Kevin M. Gill (CC-BY) based on images provided courtesy of NASA/JPL-Caltech/SwRI/MSSS
+* Io from Galileo by NASA/JPL/USGS
+* Ganymede from Juno by NASA/JPL-Caltech/SwRI/MSSS/Kevin M. Gill
+* Calisto NASA/JPL/DLR
+* Saturn from Cassini, NASA/ESA 
+* Uranus from Voyager 2, NASA/JPL-Caltech
+* Neptune from Voyager 2, NASA/JPL-Caltech
+* Pluto image from New Horizons, NASA/JHUAPL/SwRI
 
 <h2>API</h2>
 

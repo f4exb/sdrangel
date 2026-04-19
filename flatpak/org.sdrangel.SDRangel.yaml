@@ -297,6 +297,14 @@ modules:
         # branch: new-namespaces
         commit: 299dc8f9725f1733e5cc1ce8a69fbcf7f18a2f58
 
+  - name: cspice
+    buildsystem: cmake-ninja
+    sources:
+      - type: git
+        url: https://github.com/srcejon/cspice-cmake
+        # branch: msvc
+        commit: 817571e78709fd8c25d70a2fd1bacaee0829101e
+
   - name: sgp4
     buildsystem: cmake-ninja
     sources:

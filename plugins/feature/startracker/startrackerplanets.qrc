@@ -1,0 +1,20 @@
+<RCC>
+  <qresource prefix="/startracker/">
+    <file>startracker/callisto-250.png</file>
+    <file>startracker/deimos-250.png</file>
+    <file>startracker/earth-250.png</file>
+    <file>startracker/ganymede-250.png</file>
+    <file>startracker/io-250.png</file>
+    <file>startracker/jupiter-250.png</file>
+    <file>startracker/mars-250.png</file>
+    <file>startracker/mercury-250.png</file>
+    <file>startracker/moon-250.png</file>
+    <file>startracker/neptune-250.png</file>
+    <file>startracker/phobos-250.png</file>
+    <file>startracker/pluto-250.png</file>
+    <file>startracker/saturn-250.png</file>
+    <file>startracker/sun-250.png</file>
+    <file>startracker/uranus-250.png</file>
+    <file>startracker/venus-250.png</file>
+  </qresource>
+</RCC>

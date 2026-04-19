@@ -13,6 +13,7 @@
         "BLADERF_DIR": "/opt/install/libbladeRF",
         "CM256CC_DIR": "/opt/install/cm256cc",
         "CODEC2_DIR": "/opt/install/codec2",
+        "CSPICE_DIR": "/opt/install/cspice",
         "DAB_DIR": "/opt/install/libdab",
         "DSDCC_DIR": "/opt/install/dsdcc",
         "HACKRF_DIR": "/opt/install/libhackrf",

@@ -190,7 +190,7 @@ double Astronomy::localSiderealTime(QDateTime dateTime, double longitude)
     return fmod(100.46 + 0.985647 * d + longitude + (360/24) * ut, 360.0);
 }
 
-// Convert from J2000 right ascension (decimal hours) and declination (decimal degrees) to altitude and azimuth, for location (decimal degrees) and time
+// Convert from right ascension (decimal hours) and declination (decimal degrees) to altitude and azimuth, for location (decimal degrees) and time
 AzAlt Astronomy::raDecToAzAlt(RADec rd, double latitude, double longitude, QDateTime dt, bool j2000)
 {
     AzAlt aa;
@@ -475,6 +475,7 @@ double Astronomy::modulo(double a, double b)
 }
 
 // Calculate azimuth and altitude angles to the sun from the given latitude and longitude at the given time
+// Jnow RADec
 // Refer to:
 // https://en.wikipedia.org/wiki/Position_of_the_Sun
 // https://www.aa.quae.nl/en/reken/zonpositie.html
@@ -530,6 +531,7 @@ double Astronomy::moonDays(QDateTime dt)
 }
 
 // Calculate azimuth and altitude angles to the moon from the given latitude and longitude at the given time
+// Jnow RADec
 // Refer to: https://stjarnhimlen.se/comp/ppcomp.html
 // Accurate to 4 arcminute
 void Astronomy::moonPosition(AzAlt& aa, RADec& rd, double latitude, double longitude, QDateTime dt)

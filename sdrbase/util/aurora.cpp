@@ -295,7 +295,7 @@ Aurora::Aurora()
     }
 
     m_cache = new QNetworkDiskCache();
-    m_cache->setCacheDirectory(locations[0] + QDir::separator() + QStringLiteral("cache") + QDir::separator() + QStringLiteral("giro"));
+    m_cache->setCacheDirectory(locations[0] + QDir::separator() + QStringLiteral("cache") + QDir::separator() + QStringLiteral("aurora"));
     m_cache->setMaximumCacheSize(100000000);
     m_networkManager->setCache(m_cache);
 }

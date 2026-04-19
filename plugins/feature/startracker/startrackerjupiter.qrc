@@ -1,0 +1,7 @@
+<RCC>
+  <qresource prefix="/startracker/">
+    <file>startracker/io-phase-vs-cml.png</file>
+    <file>startracker/ganymede-phase-vs-cml.png</file>
+    <file>startracker/phase-cml-legend.png</file>
+  </qresource>
+</RCC>

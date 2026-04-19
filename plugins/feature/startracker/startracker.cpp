@@ -34,6 +34,7 @@
 
 #include "startrackerworker.h"
 #include "startracker.h"
+#include "spice.h"
 
 MESSAGE_CLASS_DEFINITION(StarTracker::MsgConfigureStarTracker, Message)
 MESSAGE_CLASS_DEFINITION(StarTracker::MsgStartStop, Message)
@@ -74,6 +75,8 @@ StarTracker::StarTracker(WebAPIAdapterInterface *webAPIAdapterInterface) :
     m_availableChannelHandler.scanAvailableChannelsAndFeatures();
     QObject::connect(&m_availableFeatureHandler, &AvailableChannelOrFeatureHandler::channelsOrFeaturesChanged, this, &StarTracker::featuresChanged);
     m_availableFeatureHandler.scanAvailableChannelsAndFeatures();
+
+    spiceInit();
 }
 
 StarTracker::~StarTracker()
@@ -246,7 +249,8 @@ void StarTracker::applySettings(const StarTrackerSettings& settings, const QList
         }
     }
 
-    if (m_worker) {
+    if (m_worker)
+    {
         StarTrackerWorker::MsgConfigureStarTrackerWorker *msg = StarTrackerWorker::MsgConfigureStarTrackerWorker::create(
             settings, settingsKeys, force
             );

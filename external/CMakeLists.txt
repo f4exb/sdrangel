@@ -858,6 +858,32 @@ if(ENABLE_FEATURE_SATELLITETRACKER OR ENABLE_CHANNELRX_DEMODAPT)
     endif ()
 endif ()
 
+if(ENABLE_FEATURE_STARTRACKER)
+    if (WIN32)
+        set(CSPICE_LIBRARIES "${SDRANGEL_BINARY_LIB_DIR}/cspice.lib" CACHE INTERNAL "")
+    elseif (LINUX)
+        # We need a shared library on Linux, as the static library has non PIC code, and we need to link it into a shared library
+        set(CSPICE_LIBRARIES "${EXTERNAL_BUILD_LIBRARIES}/lib${LIB_SUFFIX}/libcspice.so" CACHE INTERNAL "")
+        set(CSPICE_ARGS "-DCSPICE_BUILD_STATIC_LIBRARY=OFF")
+    elseif (APPLE)
+        set(CSPICE_LIBRARIES "${EXTERNAL_BUILD_LIBRARIES}/cspice/src/cspice-build/lib/libcspice.a" CACHE INTERNAL "")
+    endif()
+    ExternalProject_Add(cspice
+            GIT_REPOSITORY https://github.com/srcejon/cspice-cmake
+            GIT_TAG "msvc"
+            PREFIX "${EXTERNAL_BUILD_LIBRARIES}/cspice"
+            CMAKE_ARGS ${COMMON_CMAKE_ARGS} ${CSPICE_ARGS}
+            BUILD_BYPRODUCTS "${CSPICE_LIBRARIES}"
+            INSTALL_COMMAND ""
+            TEST_COMMAND ""
+            )
+    ExternalProject_Get_Property(cspice source_dir binary_dir)
+    set(CSPICE_DEPENDS cspice CACHE INTERNAL "")
+    set_global_cache(CSPICE_FOUND ON)
+    set(CSPICE_EXTERNAL ON CACHE INTERNAL "")
+    set(CSPICE_INCLUDE_DIR "${EXTERNAL_BUILD_LIBRARIES}/cspice/src/cspice/include" CACHE INTERNAL "")
+endif ()
+
 if(ENABLE_CHANNELRX_REMOTETCPSINK)
     if (WIN32)
         set(FLAC_LIBRARIES "${SDRANGEL_BINARY_LIB_DIR}/FLAC.lib" CACHE INTERNAL "")

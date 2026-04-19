@@ -9,6 +9,7 @@ set(startracker_SOURCES
     startracker150mhzfits.qrc
     startracker408mhzfits.qrc
     startracker1420mhzfits.qrc
+    spice.cpp
 )
 
 set(startracker_HEADERS
@@ -18,10 +19,12 @@ set(startracker_HEADERS
     startrackerreport.h
     startrackerworker.h
     startrackerwebapiadapter.h
+    spice.h
 )
 
 include_directories(
     ${CMAKE_SOURCE_DIR}/swagger/sdrangel/code/qt5/client
+    ${CSPICE_INCLUDE_DIR}
 )
 
 if(NOT SERVER_MODE)
@@ -36,11 +39,15 @@ if(NOT SERVER_MODE)
         startracker408mhz.qrc
         startracker1420mhz.qrc
         startrackermilkyway.qrc
+        startrackerplanets.qrc
+        startrackerjupiter.qrc
+        spiceephemerides.cpp
     )
     set(startracker_HEADERS
         ${startracker_HEADERS}
         startrackergui.h
         startrackersettingsdialog.h
+        spiceephemerides.h
     )
 
     set(TARGET_NAME ${PLUGINS_PREFIX}featurestartracker)
@@ -64,11 +71,16 @@ if(NOT BUILD_SHARED_LIBS)
     set_property(GLOBAL APPEND PROPERTY STATIC_PLUGINS_PROPERTY ${TARGET_NAME})
 endif()
 
+if(CSPICE_EXTERNAL)
+    add_dependencies(${TARGET_NAME} cspice)
+endif()
+
 target_link_libraries(${TARGET_NAME} PRIVATE
     Qt::Core
     ${TARGET_LIB}
     sdrbase
     ${TARGET_LIB_GUI}
+    ${CSPICE_LIBRARIES}
 )
 
 install(TARGETS ${TARGET_NAME} DESTINATION ${INSTALL_FOLDER})

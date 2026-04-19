@@ -1,5 +1,5 @@
 ///////////////////////////////////////////////////////////////////////////////////
-// Copyright (C) 2021-2024 Jon Beniston, M7RCE <jon@beniston.com>                //
+// Copyright (C) 2021-2026 Jon Beniston, M7RCE <jon@beniston.com>                //
 // Copyright (C) 2021-2022 Edouard Griffiths, F4EXB <f4exb06@gmail.com>          //
 //                                                                               //
 // This program is free software; you can redistribute it and/or modify          //
@@ -46,12 +46,12 @@
 #include "util/astronomy.h"
 #include "util/interpolation.h"
 #include "util/png.h"
+#include "util/profiler.h"
 #include "maincore.h"
 
 #include "ui_startrackergui.h"
 #include "startracker.h"
 #include "startrackergui.h"
-#include "startrackerreport.h"
 #include "startrackersettingsdialog.h"
 
 StarTrackerGUI* StarTrackerGUI::create(PluginAPI* pluginAPI, FeatureUISet *featureUISet, Feature *feature)
@@ -148,6 +148,16 @@ bool StarTrackerGUI::handleMessage(const Message& message)
         raDecChanged();
         return true;
     }
+    else if (StarTrackerReport::MsgReportAzElVsTime::match(message))
+    {
+        StarTrackerReport::MsgReportAzElVsTime& azElVsTime = (StarTrackerReport::MsgReportAzElVsTime&) message;
+        m_azElVsTimeTarget = azElVsTime.getTarget();
+        m_azimuths = azElVsTime.getAzimuths();
+        m_elevations = azElVsTime.getElevations();
+        m_dateTimes = azElVsTime.getDateTimes();
+        plotChart();
+        return true;
+    }
     else if (StarTrackerReport::MsgReportGalactic::match(message))
     {
         StarTrackerReport::MsgReportGalactic& galactic = (StarTrackerReport::MsgReportGalactic&) message;
@@ -157,6 +167,28 @@ bool StarTrackerGUI::handleMessage(const Message& message)
         ui->galacticLatitude->setValue(galactic.getB());
         unblockPlotChartAndPlot();
         blockApplySettings(false);
+        return true;
+    }
+    else if (StarTrackerReport::MsgReportSolarSystemPositions::match(message))
+    {
+        StarTrackerReport::MsgReportSolarSystemPositions& report = (StarTrackerReport::MsgReportSolarSystemPositions&) message;
+        updateSolarSystemPositions(report.getNames(), report.getPositions(), report.getOrbit());
+        return true;
+    }
+    else if (StarTrackerReport::MsgReportJupiter::match(message))
+    {
+        StarTrackerReport::MsgReportJupiter& report = (StarTrackerReport::MsgReportJupiter&) message;
+        ui->jupiterElevation->setText(QString("%1%2").arg((int) std::round(report.getElevation())).arg(QChar(0xb0)));
+        ui->cml->setText(QString("%1%2").arg((int) std::round(report.getCML())).arg(QChar(0xb0)));
+        ui->ioPhase->setText(QString("%1%2").arg((int) std::round(report.getIoPhase())).arg(QChar(0xb0)));
+        ui->ganymedePhase->setText(QString("%1%2").arg((int) std::round(report.getGanymedePhase())).arg(QChar(0xb0)));
+        updateJupiterMoonPosition(report.getCML(), report.getIoPhase(), report.getGanymedePhase());
+        return true;
+    }
+    else if (StarTrackerReport::MsgReportJupiterData::match(message))
+    {
+        StarTrackerReport::MsgReportJupiterData& report = (StarTrackerReport::MsgReportJupiterData&) message;
+        updateJupiterMoonPositions(report);
         return true;
     }
     else if (MainCore::MsgStarTrackerDisplaySettings::match(message))
@@ -234,47 +266,58 @@ void StarTrackerGUI::updateFeatureList(const AvailableChannelOrFeatureList& feat
     // Update list of plugins we can get target from
     ui->target->blockSignals(true);
 
-    // Remove targets no longer available
-    for (int i = 0; i < ui->target->count(); )
+    if (m_settings.m_targetSource == "SDRangel")
     {
-        QString text = ui->target->itemText(i);
-        bool found = false;
-        if (text.contains("SatelliteTracker") || text.contains("SkyMap"))
+        // Remove targets no longer available
+        for (int i = 0; i < ui->target->count(); )
         {
-            for (const auto& feature : features)
+            QString text = ui->target->itemText(i);
+            bool found = false;
+            if (text.contains("SatelliteTracker") || text.contains("SkyMap"))
             {
-                if (feature.getLongId() == text)
+                for (const auto& feature : features)
                 {
-                    found = true;
-                    break;
+                    if (feature.getLongId() == text)
+                    {
+                        found = true;
+                        break;
+                    }
+                }
+                if (!found) {
+                    ui->target->removeItem(i);
+                } else {
+                    i++;
                 }
             }
-            if (!found) {
-                ui->target->removeItem(i);
-            } else {
+            else
+            {
                 i++;
             }
         }
-        else
+
+        // Add new targets
+        for (const auto& feature : features)
         {
-            i++;
+            QString name = feature.getLongId();
+            if (ui->target->findText(name) == -1) {
+                ui->target->addItem(name);
+            }
+        }
+
+        // Features can be created after this plugin, so select it
+        // if the chosen tracker appears
+        int index = ui->target->findText(m_settings.m_target);
+        if (index >= 0) {
+            ui->target->setCurrentIndex(index);
         }
     }
-
-    // Add new targets
-    for (const auto& feature : features)
+    else
     {
-        QString name = feature.getLongId();
-        if (ui->target->findText(name) == -1) {
-            ui->target->addItem(name);
+        // Save feature list for use in updateTargetList
+        m_availableFeatures.clear();
+        for (const auto& feature : features) {
+            m_availableFeatures.append(feature.getLongId());
         }
-    }
-
-    // Features can be created after this plugin, so select it
-    // if the chosen tracker appears
-    int index = ui->target->findText(m_settings.m_target);
-    if (index >= 0) {
-        ui->target->setCurrentIndex(index);
     }
 
     ui->target->blockSignals(false);
@@ -315,6 +358,9 @@ StarTrackerGUI::StarTrackerGUI(PluginAPI* pluginAPI, FeatureUISet *featureUISet,
     m_azElPolarChart(nullptr),
     m_solarFluxChart(nullptr),
     m_networkManager(nullptr),
+    m_startAfterDownload(false),
+    m_jplHorizons(nullptr),
+    m_spiceEphemerides(this),
     m_solarFlux(0.0),
     m_solarFluxesValid(false),
     m_images{QImage(":/startracker/startracker/150mhz_ra_dec.png"),
@@ -323,8 +369,32 @@ StarTrackerGUI::StarTrackerGUI(PluginAPI* pluginAPI, FeatureUISet *featureUISet,
         QImage(":/startracker/startracker/408mhz_galactic.png"),
         QImage(":/startracker/startracker/1420mhz_ra_dec.png"),
         QImage(":/startracker/startracker/1420mhz_galactic.png")},
+    m_zoom(nullptr),
     m_milkyWayImages{QPixmap(":/startracker/startracker/milkyway.png"),
         QPixmap(":/startracker/startracker/milkywayannotated.png")},
+    m_solarSystemLabelFontMetrics(font()),
+    m_planetImages{
+        {"callisto", QPixmap(":/startracker/startracker/callisto-250.png")},
+        {"deimos", QPixmap(":/startracker/startracker/deimos-250.png")},
+        {"earth", QPixmap(":/startracker/startracker/earth-250.png")},
+        {"ganymede", QPixmap(":/startracker/startracker/ganymede-250.png")},
+        {"io", QPixmap(":/startracker/startracker/io-250.png")},
+        {"jupiter", QPixmap(":/startracker/startracker/jupiter-250.png")},
+        {"mars", QPixmap(":/startracker/startracker/mars-250.png")},
+        {"mercury", QPixmap(":/startracker/startracker/mercury-250.png")},
+        {"moon", QPixmap(":/startracker/startracker/moon-250.png")},
+        {"neptune", QPixmap(":/startracker/startracker/neptune-250.png")},
+        {"phobos", QPixmap(":/startracker/startracker/phobos-250.png")},
+        {"pluto", QPixmap(":/startracker/startracker/pluto-250.png")},
+        {"saturn", QPixmap(":/startracker/startracker/saturn-250.png")},
+        {"sun", QPixmap(":/startracker/startracker/sun-250.png")},
+        {"uranus", QPixmap(":/startracker/startracker/uranus-250.png")},
+        {"venus", QPixmap(":/startracker/startracker/venus-250.png")}
+    },
+    m_jupiterImages{QPixmap(":/startracker/startracker/io-phase-vs-cml.png"),
+        QPixmap(":/startracker/startracker/ganymede-phase-vs-cml.png"),
+        QPixmap(":/startracker/startracker/phase-cml-legend.png")
+    },
     m_sunRA(0.0),
     m_sunDec(0.0),
     m_moonRA(0.0),
@@ -452,14 +522,30 @@ StarTrackerGUI::StarTrackerGUI(PluginAPI* pluginAPI, FeatureUISet *featureUISet,
     autoUpdateSolarFlux();
 
     createGalacticLineOfSightScene();
+    createSolarSystemScene();
+    createJupiterScene();
     plotChart();
 
     StarTracker::MsgRequestAvailableFeatures *message = StarTracker::MsgRequestAvailableFeatures::create();
     m_starTracker->getInputMessageQueue()->push(message);
+
+    connect(&m_spiceEphemerides, &SpiceEphemerides::allDownloadsComplete, this, &StarTrackerGUI::spiceDownloadsComplete);
+
+    m_jplHorizons = JPLHorizons::create();
+    if (m_jplHorizons)
+    {
+        connect(m_jplHorizons, &JPLHorizons::majorBodiesUpdated, this, &StarTrackerGUI::majorBodiesUpdated);
+        m_jplHorizons->getMajorBodiesList();
+    }
 }
 
 StarTrackerGUI::~StarTrackerGUI()
 {
+    if (m_jplHorizons)
+    {
+        disconnect(m_jplHorizons, &JPLHorizons::majorBodiesUpdated, this, &StarTrackerGUI::majorBodiesUpdated);
+        delete m_jplHorizons;
+    }
     QObject::disconnect(
         m_networkManager,
         &QNetworkAccessManager::finished,
@@ -507,11 +593,18 @@ void StarTrackerGUI::displaySettings()
     }
 
     m_chart.setTheme(m_settings.m_chartsDarkTheme ? QChart::ChartThemeDark : QChart::ChartThemeLight);
+    ui->night->setChecked(m_settings.m_night);
+    ui->logScale->setChecked(m_settings.m_logScale);
     ui->drawSun->setChecked(m_settings.m_drawSunOnSkyTempChart);
     ui->drawMoon->setChecked(m_settings.m_drawMoonOnSkyTempChart);
     ui->link->setChecked(m_settings.m_link);
     ui->latitude->setValue(m_settings.m_latitude);
     ui->longitude->setValue(m_settings.m_longitude);
+    ui->targetSource->setCurrentIndex(ui->targetSource->findText(m_settings.m_targetSource));
+    ui->target->setEditable(m_settings.m_targetSource == "Horizons");
+    if (ui->target->lineEdit()) {
+        QObject::connect(ui->target->lineEdit(), &QLineEdit::editingFinished, this, &StarTrackerGUI::on_target_editingFinished, Qt::UniqueConnection);
+    }
     ui->target->setCurrentIndex(ui->target->findText(m_settings.m_target));
     ui->azimuth->setUnits((DMSSpinBox::DisplayUnits)m_settings.m_azElUnits);
     ui->elevation->setUnits((DMSSpinBox::DisplayUnits)m_settings.m_azElUnits);
@@ -543,17 +636,25 @@ void StarTrackerGUI::displaySettings()
     {
         ui->dateTimeSelect->setCurrentIndex(0);
         ui->dateTime->setVisible(false);
+        ui->utc->setVisible(false);
+        ui->setTimeToNow->setVisible(false);
     }
     else
     {
         ui->dateTime->setDateTime(QDateTime::fromString(m_settings.m_dateTime, Qt::ISODateWithMs));
         ui->dateTime->setVisible(true);
         ui->dateTimeSelect->setCurrentIndex(1);
+        ui->utc->setVisible(true);
+        ui->setTimeToNow->setVisible(true);
     }
+    ui->utc->setChecked(m_settings.m_utc);
 
     if ((m_settings.m_solarFluxData != StarTrackerSettings::DRAO_2800) && !m_solarFluxesValid) {
         autoUpdateSolarFlux();
     }
+
+    ui->chartSelect->setCurrentIndex((int) m_settings.m_chartSelect);
+    ui->chartSubSelect->setCurrentIndex(m_settings.m_chartSubSelect);
 
     ui->frequency->setValue(m_settings.m_frequency/1000000.0);
     ui->beamwidth->setValue(m_settings.m_beamwidth);
@@ -604,12 +705,54 @@ void StarTrackerGUI::onMenuDialogCalled(const QPoint &p)
     resetContextMenuType();
 }
 
+void StarTrackerGUI::downloadSPICEEphemerides()
+{
+    m_spiceEphemerides.download(m_settings.m_spiceEphemerides);
+}
+
+bool StarTrackerGUI::checkSPICEEphemerides()
+{
+    return m_spiceEphemerides.checkDownloaded(m_settings.m_spiceEphemerides);
+}
+
+void StarTrackerGUI::spiceDownloadsComplete()
+{
+    updateTargetList();
+    on_chartSelect_currentIndexChanged(ui->chartSelect->currentIndex());
+
+    if (m_startAfterDownload)
+    {
+        if (checkSPICEEphemerides())
+        {
+            m_startAfterDownload = false;
+            StarTracker::MsgStartStop *message = StarTracker::MsgStartStop::create(true);
+            m_starTracker->getInputMessageQueue()->push(message);
+        }
+    }
+}
+
 void StarTrackerGUI::on_startStop_toggled(bool checked)
 {
     if (m_doApplySettings)
     {
-        StarTracker::MsgStartStop *message = StarTracker::MsgStartStop::create(checked);
-        m_starTracker->getInputMessageQueue()->push(message);
+        if (checked)
+        {
+            if (checkSPICEEphemerides())
+            {
+                StarTracker::MsgStartStop *message = StarTracker::MsgStartStop::create(checked);
+                m_starTracker->getInputMessageQueue()->push(message);
+            }
+            else
+            {
+                m_startAfterDownload = true;
+                downloadSPICEEphemerides();
+            }
+        }
+        else
+        {
+            StarTracker::MsgStartStop *message = StarTracker::MsgStartStop::create(checked);
+            m_starTracker->getInputMessageQueue()->push(message);
+        }
     }
 }
 
@@ -695,44 +838,32 @@ void StarTrackerGUI::on_galacticLongitude_valueChanged(double value)
 
 void StarTrackerGUI::updateForTarget()
 {
-    if (m_settings.m_target == "Sun")
+    const QStringList raDecTargets = {
+        "PSR B0329+54", "PSR B0833-45", "Sagittarius A", "Cassiopeia A", "Cygnus A", "Taurus A (M1)", "Virgo A (M87)"
+    };
+    const QStringList lbTargets = {
+        "S7", "S8", "S9"
+    };
+
+    if ((m_settings.m_target == "Sun") || (m_settings.m_target == "Moon"))
     {
         ui->rightAscension->setReadOnly(true);
         ui->declination->setReadOnly(true);
+        ui->azimuth->setReadOnly(true);
+        ui->elevation->setReadOnly(true);
+        ui->galacticLatitude->setReadOnly(true);
+        ui->galacticLongitude->setReadOnly(true);
         ui->rightAscension->setText("");
         ui->declination->setText("");
     }
-    else if (m_settings.m_target == "Moon")
+    else if (raDecTargets.contains(m_settings.m_target))
     {
         ui->rightAscension->setReadOnly(true);
         ui->declination->setReadOnly(true);
-        ui->rightAscension->setText("");
-        ui->declination->setText("");
-    }
-    else if (m_settings.m_target == "Custom RA/Dec")
-    {
-        ui->rightAscension->setReadOnly(false);
-        ui->declination->setReadOnly(false);
-    }
-    else if (m_settings.m_target == "S7")
-    {
-        ui->galacticLatitude->setValue(-1.0);
-        ui->galacticLongitude->setValue(132.0);
-    }
-    else if (m_settings.m_target == "S8")
-    {
-        ui->galacticLatitude->setValue(-15.0);
-        ui->galacticLongitude->setValue(207.0);
-    }
-    else if (m_settings.m_target == "S9")
-    {
-        ui->galacticLatitude->setValue(-4.0);
-        ui->galacticLongitude->setValue(356.0);
-    }
-    else
-    {
-        ui->rightAscension->setReadOnly(true);
-        ui->declination->setReadOnly(true);
+        ui->azimuth->setReadOnly(true);
+        ui->elevation->setReadOnly(true);
+        ui->galacticLatitude->setReadOnly(true);
+        ui->galacticLongitude->setReadOnly(true);
         if (m_settings.m_target == "PSR B0329+54")
         {
             ui->rightAscension->setText("03h32m59.35s");
@@ -771,32 +902,90 @@ void StarTrackerGUI::updateForTarget()
         on_rightAscension_editingFinished();
         on_declination_editingFinished();
     }
-    if (m_settings.m_target.contains("SatelliteTracker"))
+    else if (lbTargets.contains(m_settings.m_target))
     {
-        ui->azimuth->setReadOnly(true);
-        ui->elevation->setReadOnly(true);
         ui->rightAscension->setReadOnly(true);
         ui->declination->setReadOnly(true);
-    }
-    else if (m_settings.m_target != "Custom Az/El")
-    {
         ui->azimuth->setReadOnly(true);
         ui->elevation->setReadOnly(true);
-        // Clear as no longer valid when target has changed
-        ui->azimuth->setText("");
-        ui->elevation->setText("");
+        ui->galacticLatitude->setReadOnly(true);
+        ui->galacticLongitude->setReadOnly(true);
+        ui->rightAscension->setText("");
+        ui->declination->setText("");
+        if (m_settings.m_target == "S7")
+        {
+            ui->galacticLatitude->setValue(-1.0);
+            ui->galacticLongitude->setValue(132.0);
+        }
+        else if (m_settings.m_target == "S8")
+        {
+            ui->galacticLatitude->setValue(-15.0);
+            ui->galacticLongitude->setValue(207.0);
+        }
+        else if (m_settings.m_target == "S9")
+        {
+            ui->galacticLatitude->setValue(-4.0);
+            ui->galacticLongitude->setValue(356.0);
+        }
     }
-    else
+    else if (m_settings.m_target == "Custom RA/Dec")
+    {
+        ui->rightAscension->setReadOnly(false);
+        ui->declination->setReadOnly(false);
+        ui->azimuth->setReadOnly(true);
+        ui->elevation->setReadOnly(true);
+        ui->galacticLatitude->setReadOnly(true);
+        ui->galacticLongitude->setReadOnly(true);
+        m_settingsKeys.append("ra");
+        m_settingsKeys.append("dec");
+        applySettings();
+    }
+    else if (m_settings.m_target == "Custom Az/El")
     {
         ui->rightAscension->setReadOnly(true);
         ui->declination->setReadOnly(true);
         ui->azimuth->setReadOnly(false);
         ui->elevation->setReadOnly(false);
+        ui->galacticLatitude->setReadOnly(true);
+        ui->galacticLongitude->setReadOnly(true);
+        ui->rightAscension->setText("");
+        ui->declination->setText("");
+        m_settingsKeys.append("azimuth");
+        m_settingsKeys.append("elevation");
+        applySettings();
+    }
+    else if (m_settings.m_target == "Custom l/b")
+    {
+        ui->rightAscension->setReadOnly(true);
+        ui->declination->setReadOnly(true);
+        ui->azimuth->setReadOnly(true);
+        ui->elevation->setReadOnly(true);
+        ui->galacticLatitude->setReadOnly(false);
+        ui->galacticLongitude->setReadOnly(false);
+        ui->rightAscension->setText("");
+        ui->declination->setText("");
+        m_settingsKeys.append("l");
+        m_settingsKeys.append("b");
+        applySettings();
+    }
+    else if (m_settings.m_target.contains("SatelliteTracker"))
+    {
+        ui->azimuth->setReadOnly(true);
+        ui->elevation->setReadOnly(true);
+        ui->rightAscension->setReadOnly(true);
+        ui->declination->setReadOnly(true);
+        ui->galacticLatitude->setReadOnly(true);
+        ui->galacticLongitude->setReadOnly(true);
+        ui->rightAscension->setText("");
+        ui->declination->setText("");
     }
 }
 
-void StarTrackerGUI::on_target_currentTextChanged(const QString &text)
+void StarTrackerGUI::on_target_currentIndexChanged(int index)
 {
+    (void) index;
+
+    QString text = ui->target->currentText();
     if (!text.isEmpty())
     {
         m_settings.m_target = text;
@@ -807,14 +996,55 @@ void StarTrackerGUI::on_target_currentTextChanged(const QString &text)
     }
 }
 
+void StarTrackerGUI::on_target_editingFinished()
+{
+    QString text = ui->target->currentText();
+    if (!text.isEmpty())
+    {
+        m_settings.m_target = text;
+        m_settingsKeys.append("target");
+        applySettings();
+        updateForTarget();
+        plotChart();
+    }
+}
+
+void StarTrackerGUI::on_targetSource_currentIndexChanged(int index)
+{
+    (void) index;
+
+    m_settings.m_targetSource = ui->targetSource->currentText();
+    m_settingsKeys.append("targetSource");
+    applySettings();
+
+    if (m_settings.m_targetSource == "SPICE")
+    {
+        if (!checkSPICEEphemerides()) {
+            downloadSPICEEphemerides();
+        }
+    }
+
+    ui->target->setEditable(m_settings.m_targetSource == "Horizons");
+    if (ui->target->lineEdit()) {
+        QObject::connect(ui->target->lineEdit(), &QLineEdit::editingFinished, this, &StarTrackerGUI::on_target_editingFinished, Qt::UniqueConnection);
+    }
+    updateTargetList();
+    on_target_currentIndexChanged(ui->target->currentIndex()); // updateTargetList blocks signals, so update target manually
+}
+
 void StarTrackerGUI::updateLST()
 {
     QDateTime dt;
 
     if (m_settings.m_dateTime.isEmpty()) {
         dt = QDateTime::currentDateTime();
-    } else {
+    }
+    else
+    {
         dt = QDateTime::fromString(m_settings.m_dateTime, Qt::ISODateWithMs);
+        if (m_settings.m_utc) {
+            dt.setTimeZone(QTimeZone::utc());
+        }
     }
 
     double lst = Astronomy::localSiderealTime(dt, m_settings.m_longitude);
@@ -907,9 +1137,14 @@ void StarTrackerGUI::on_displaySettings_clicked()
         ui->galacticLongitude->setUnits((DMSSpinBox::DisplayUnits)m_settings.m_azElUnits);
         displaySolarFlux();
 
-        if (ui->chartSelect->currentIndex() <= 1) {
+        if (ui->chartSelect->currentIndex() <= StarTrackerSettings::CHART_SOLAR_FLUX_VS_FREQUENCY) {
             plotChart();
         }
+        if (ui->chartSelect->currentIndex() == StarTrackerSettings::CHART_SOLAR_SYSTEM) {
+            on_chartSelect_currentIndexChanged(ui->chartSelect->currentIndex()); // Update list of bodies
+        }
+
+        checkSPICEEphemerides();
     }
 }
 
@@ -919,11 +1154,15 @@ void StarTrackerGUI::on_dateTimeSelect_currentTextChanged(const QString &text)
     {
         m_settings.m_dateTime = "";
         ui->dateTime->setVisible(false);
+        ui->utc->setVisible(false);
+        ui->setTimeToNow->setVisible(false);
     }
     else
     {
         m_settings.m_dateTime = ui->dateTime->dateTime().toString(Qt::ISODateWithMs);
         ui->dateTime->setVisible(true);
+        ui->utc->setVisible(true);
+        ui->setTimeToNow->setVisible(true);
     }
 
     m_settingsKeys.append("dateTime");
@@ -944,12 +1183,26 @@ void StarTrackerGUI::on_dateTime_dateTimeChanged(const QDateTime &datetime)
     }
 }
 
+void StarTrackerGUI::on_utc_clicked(bool checked)
+{
+    m_settings.m_utc = checked;
+    m_settingsKeys.append("utc");
+    applySettings();
+}
+
+void StarTrackerGUI::on_setTimeToNow_clicked(bool checked)
+{
+    (void) checked;
+
+    ui->dateTime->setDateTime(QDateTime::currentDateTime());
+}
+
 void StarTrackerGUI::plotChart()
 {
     if (!m_doPlotChart) {
         return;
     }
-    if (ui->chartSelect->currentIndex() == 0)
+    if (ui->chartSelect->currentIndex() == StarTrackerSettings::CHART_ELEVATION_VS_TIME)
     {
         if (ui->chartSubSelect->currentIndex() == 0) {
             plotElevationLineChart();
@@ -957,25 +1210,33 @@ void StarTrackerGUI::plotChart()
             plotElevationPolarChart();
         }
     }
-    else if (ui->chartSelect->currentIndex() == 1)
+    else if (ui->chartSelect->currentIndex() == StarTrackerSettings::CHART_SOLAR_FLUX_VS_FREQUENCY)
     {
         plotSolarFluxChart();
     }
-    else if (ui->chartSelect->currentIndex() == 2)
+    else if (ui->chartSelect->currentIndex() == StarTrackerSettings::CHART_SKY_TEMPERATURE)
     {
         plotSkyTemperatureChart();
     }
-    else if (ui->chartSelect->currentIndex() == 3)
+    else if (ui->chartSelect->currentIndex() == StarTrackerSettings::CHART_GALACTIC_LINE_OF_SIGHT)
     {
         plotGalacticLineOfSight();
+    }
+    else if (ui->chartSelect->currentIndex() == StarTrackerSettings::CHART_SOLAR_SYSTEM)
+    {
+        plotSolarSystem();
+    }
+    else if (ui->chartSelect->currentIndex() == StarTrackerSettings::CHART_JUPITER)
+    {
+        plotJupiter();
     }
 }
 
 void StarTrackerGUI::raDecChanged()
 {
-    if (ui->chartSelect->currentIndex() == 2) {
+    if (ui->chartSelect->currentIndex() == StarTrackerSettings::CHART_SKY_TEMPERATURE) {
         plotSkyTemperatureChart();
-    } else if (ui->chartSelect->currentIndex() == 3) {
+    } else if (ui->chartSelect->currentIndex() == StarTrackerSettings::CHART_GALACTIC_LINE_OF_SIGHT) {
         plotGalacticLineOfSight();
     }
 }
@@ -1002,7 +1263,7 @@ void StarTrackerGUI::on_beamwidth_valueChanged(double value)
     applySettings();
     updateChartSubSelect();
 
-    if (ui->chartSelect->currentIndex() == 2) {
+    if (ui->chartSelect->currentIndex() == StarTrackerSettings::CHART_SKY_TEMPERATURE) {
         plotChart();
     }
 }
@@ -1011,6 +1272,8 @@ void StarTrackerGUI::plotSolarFluxChart()
 {
     ui->chart->setVisible(true);
     ui->image->setVisible(false);
+    ui->night->setVisible(false);
+    ui->logScale->setVisible(false);
     ui->drawSun->setVisible(false);
     ui->drawMoon->setVisible(false);
     ui->darkTheme->setVisible(true);
@@ -1019,6 +1282,14 @@ void StarTrackerGUI::plotSolarFluxChart()
     ui->addAnimationFrame->setVisible(false);
     ui->clearAnimation->setVisible(false);
     ui->saveAnimation->setVisible(false);
+    ui->jupiterElevationLabel->setVisible(false);
+    ui->jupiterElevation->setVisible(false);
+    ui->cmlLabel->setVisible(false);
+    ui->cml->setVisible(false);
+    ui->ioPhaseLabel->setVisible(false);
+    ui->ioPhase->setVisible(false);
+    ui->ganymedePhaseLabel->setVisible(false);
+    ui->ganymedePhase->setVisible(false);
 
     QChart *oldChart = m_solarFluxChart;
 
@@ -1101,11 +1372,7 @@ QList<QLineSeries*> StarTrackerGUI::createDriftScan(bool galactic)
     QDateTime dt;
 
     // Get date and time to calculate position at
-    if (m_settings.m_dateTime == "") {
-        dt = QDateTime::currentDateTime();
-    } else {
-        dt = QDateTime::fromString(m_settings.m_dateTime, Qt::ISODateWithMs);
-    }
+    dt = m_settings.getDateTime();
 
     // Create a list of RA/Dec points of drift scan path
     AzAlt aa;
@@ -1203,40 +1470,29 @@ QColor StarTrackerGUI::getSeriesColor(int series)
 
 void StarTrackerGUI::createGalacticLineOfSightScene()
 {
-    m_zoom = new GraphicsViewZoom(ui->image); // Deleted automatically when view is deleted
-
-    QGraphicsScene *scene = new QGraphicsScene(ui->image);
-    scene->setBackgroundBrush(QBrush(Qt::black));
+    m_galacticLineOfSightScene = new QGraphicsScene(ui->image);
+    m_galacticLineOfSightScene->setBackgroundBrush(QBrush(Qt::black));
 
     // Milkyway images
     for (int i = 0; i < m_milkyWayImages.size(); i++)
     {
-        m_milkyWayItems.append(scene->addPixmap(m_milkyWayImages[i]));
+        m_milkyWayItems.append(m_galacticLineOfSightScene->addPixmap(m_milkyWayImages[i]));
         m_milkyWayItems[i]->setPos(0, 0);
         m_milkyWayItems[i]->setVisible(i == 0);
     }
 
     // Line of sight
     QPen pen(QColor(255, 0, 0), 4, Qt::SolidLine);
-    m_lineOfSight = scene->addLine(511, 708, 511, 708, pen);
-
-    ui->image->setScene(scene);
-    ui->image->show();
-
-    ui->image->setDragMode(QGraphicsView::ScrollHandDrag);
+    m_lineOfSight = m_galacticLineOfSightScene->addLine(511, 708, 511, 708, pen);
 }
 
+// Draw top-down image of Milky Way
 void StarTrackerGUI::plotGalacticLineOfSight()
 {
-    if (!ui->image->isVisible())
-    {
-        // Start zoomed out
-        ui->image->fitInView(m_milkyWayItems[0], Qt::KeepAspectRatio);
-    }
-
-    // Draw top-down image of Milky Way
     ui->chart->setVisible(false);
     ui->image->setVisible(true);
+    ui->night->setVisible(false);
+    ui->logScale->setVisible(false);
     ui->drawSun->setVisible(false);
     ui->drawMoon->setVisible(false);
     ui->darkTheme->setVisible(false);
@@ -1245,6 +1501,29 @@ void StarTrackerGUI::plotGalacticLineOfSight()
     ui->addAnimationFrame->setVisible(true);
     ui->clearAnimation->setVisible(true);
     ui->saveAnimation->setVisible(true);
+    ui->jupiterElevationLabel->setVisible(false);
+    ui->jupiterElevation->setVisible(false);
+    ui->cmlLabel->setVisible(false);
+    ui->cml->setVisible(false);
+    ui->ioPhaseLabel->setVisible(false);
+    ui->ioPhase->setVisible(false);
+    ui->ganymedePhaseLabel->setVisible(false);
+    ui->ganymedePhase->setVisible(false);
+
+    if (ui->image->scene() != m_galacticLineOfSightScene)
+    {
+        ui->image->setScene(m_galacticLineOfSightScene);
+        ui->image->resetTransform();
+        // Start zoomed out
+        ui->image->fitInView(m_milkyWayItems[0], Qt::KeepAspectRatio);
+        ui->image->setDragMode(QGraphicsView::ScrollHandDrag);
+    }
+
+    if (!m_zoom)
+    {
+        m_zoom = new GraphicsViewZoom(ui->image); // Deleted automatically when view is deleted
+        connect(m_zoom, &GraphicsViewZoom::zoomed, this, &StarTrackerGUI::zoomed);
+    }
 
     // Select which Milky Way image to show
     int imageIdx = ui->chartSubSelect->currentIndex();
@@ -1294,6 +1573,13 @@ void StarTrackerGUI::on_zoomOut_clicked()
     m_zoom->gentleZoom(0.75);
 }
 
+void StarTrackerGUI::zoomed()
+{
+    if (ui->chartSelect->currentIndex() == StarTrackerSettings::CHART_SOLAR_SYSTEM) {
+        scaleSolarSystemItems();
+    }
+}
+
 void StarTrackerGUI::on_addAnimationFrame_clicked()
 {
     QImage image(ui->image->size(), QImage::Format_ARGB32);
@@ -1334,10 +1620,574 @@ void StarTrackerGUI::on_saveAnimation_clicked()
     }
 }
 
+void StarTrackerGUI::createSolarSystemScene()
+{
+    m_solarSystemScene = new QGraphicsScene(ui->image);
+    m_solarSystemScene->setBackgroundBrush(QBrush(Qt::black));
+
+    m_solarSystemLabelFont = m_solarSystemScene->font();
+    m_solarSystemLabelFont.setPointSize(6);
+    m_solarSystemLabelFontMetrics = QFontMetrics(m_solarSystemLabelFont);
+
+    // Pluto is ~56 from Sun on log scale
+    const double r = 57;
+    m_solarSystemScene->setSceneRect(-r, -r, r * 2, r * 2);
+}
+
+QPixmap *StarTrackerGUI::getPlanetPixmap(const QString& name)
+{
+    QString nameLower = name.toLower();
+    if (m_planetImages.contains(nameLower)) {
+        return &m_planetImages[nameLower];
+    } else {
+        return &m_planetImages["mercury"]; // Use mercury as generic grey moon
+    }
+}
+
+static float getScale(const QString& name)
+{
+    if (name == "mercury") {
+        return 0.5f;
+    } else if (name == "venus") {
+        return 0.7f;
+    } else if (name == "earth") {
+        return 0.7f;
+    } else if (name == "moon") {
+        return 0.5f;
+    } else if (name == "mars") {
+        return 0.6f;
+    } else if (name == "jupiter") {
+        return 1.0f;
+    } else if (name == "saturn") {
+        return 0.9f;
+    } else if (name == "uranus") {
+        return 0.8f;
+    } else if (name == "neptune") {
+        return 0.8f;
+    } else if (name == "pluto") {
+        return 0.4f;
+    } else {
+        return 1.0f;
+    }
+}
+
+static void logScale(QVector3D &p)
+{
+    // Rectangular to spherical
+    float r = p.length();
+    float az = std::atan2(p.y(), p.x());
+    float el = r > 0.0f ? std::acos(p.z() / r) : 0.0f;
+
+    // Log scale radius (log10(mercuryRadiusKM) = 7.7, log10(neptuneRadiusKM) = 9.6)
+    if (r >= 1e7) {
+        r = (std::log10(r) - 7.0f) * 20.0f;
+    } else {
+        r = 0.0f;
+    }
+
+    // Spherical to rectangular
+    p.setX(r * std::sin(el) * std::cos(az));
+    p.setY(r * std::sin(el) * std::sin(az));
+    p.setZ(r * std::cos(el));
+}
+
+void StarTrackerGUI::updateSolarSystemPositions(const QStringList &names, const QList<QVector3D> &positions, const QList<QList<QPointF>> &orbits)
+{
+    const double kmToAU = 6.68459e-9;   // Convert position from kM to AU
+    const double pixelScale = 20.0;     // Mercury is 0.4AU. Neptune is 30 AU
+    bool scale = false;
+    QPen orbitPen(Qt::gray);
+    orbitPen.setWidth(0);
+
+    for (int i = 0; i < names.size(); i++)
+    {
+        SolarSystemItem *item;
+
+        if (m_solarSystemItems.contains(names[i]))
+        {
+            item = m_solarSystemItems.value(names[i]);
+        }
+        else
+        {
+            QString name = names[i];
+            name = name.replace(" BARYCENTER", "");
+
+            QPixmap* pixmap = getPlanetPixmap(name);
+
+            QBrush brush(QColor(200, 200, 200));
+            item = new SolarSystemItem();
+            item->m_textItem = m_solarSystemScene->addText(name, m_solarSystemLabelFont);
+            item->m_textItem->setZValue(2);
+            item->m_scale = getScale(name.toLower());
+            item->m_pixmapItem = m_solarSystemScene->addPixmap(*pixmap);
+            item->m_pixmapItem->setOffset(-pixmap->width() / 2, -pixmap->height() / 2);
+            item->m_pixmapItem->setZValue(1);
+
+            if (orbits[i].size() > 0) {
+                item->m_orbitItem = m_solarSystemScene->addPolygon(QPolygonF(), orbitPen);
+            } else {
+                item->m_orbitItem  = nullptr;
+            }
+
+            m_solarSystemItems.insert(names[i], item);
+            scale = true;
+        }
+
+        // Optional log scaling of orbital radius, so outer planets have similar separation to inner planets
+        QVector3D scaledPos = positions[i];
+        if (m_settings.m_logScale) {
+            logScale(scaledPos);
+        } else {
+            scaledPos = pixelScale * kmToAU * scaledPos;
+        }
+
+        // Draw an ellipse for planet's orbit
+        if (item->m_orbitItem)
+        {
+            QPolygonF polygon;
+
+            for (int j = 0; j < orbits[i].size(); j++)
+            {
+                QPointF point = orbits[i][j];
+
+                if (m_settings.m_logScale)
+                {
+                    QVector3D v = {(float) point.x(), (float) point.y(), 0.0f};
+                    logScale(v);
+                    point.setX(v.x());
+                    point.setY(v.y());
+                }
+                else
+                {
+                    point = pixelScale * kmToAU * point;
+                }
+
+                polygon << point;
+            }
+
+            item->m_orbitItem->setPolygon(polygon);
+        }
+
+        // Position label to right
+        const int textYOffset = m_solarSystemLabelFontMetrics.height();
+        item->m_pixmapItem->setPos(scaledPos.x(), scaledPos.y());
+        item->m_textItem->setPos(scaledPos.x() - 1.1 * item->m_pixmapItem->offset().x() * item->m_pixmapItem->scale(), scaledPos.y() - textYOffset * item->m_textItem->scale());
+    }
+
+    if (scale) {
+        scaleSolarSystemItems();
+    }
+
+    // Remove no longer needed items
+    QMutableHashIterator itr(m_solarSystemItems);
+
+    while (itr.hasNext())
+    {
+        itr.next();
+        if (!names.contains(itr.key()))
+        {
+            SolarSystemItem* item = itr.value();
+            m_solarSystemScene->removeItem(item->m_pixmapItem);
+            m_solarSystemScene->removeItem(item->m_textItem);
+            m_solarSystemScene->removeItem(item->m_orbitItem);
+            delete item;
+            itr.remove();
+        }
+    }
+}
+
+void StarTrackerGUI::scaleSolarSystemItems()
+{
+    float pixmapScale;
+    float textScale;
+    QTransform tf = ui->image->transform();
+
+    if (tf.m11() <= 1)
+    {
+        pixmapScale = 0.01 / tf.m11(); // Keep fixed size as we zoom out
+        textScale = 1.0 / tf.m11();
+    }
+    else if (tf.m11() >= 15)
+    {
+        pixmapScale = 0.01 * 15 / tf.m11(); // Keep fixed size as we zoom in to planetary scale
+        textScale = 1.0 / tf.m11();
+    }
+    else
+    {
+        pixmapScale = 0.01; // Get larger as we zoom in
+        textScale = 1.0 / tf.m11(); // Keep fixed size
+    }
+
+    for (auto& item : m_solarSystemItems)
+    {
+        item->m_textItem->setScale(textScale);
+
+        if (item->m_pixmapItem)
+        {
+            item->m_pixmapItem->setScale(pixmapScale * item->m_scale);
+            QPointF pos = item->m_pixmapItem->pos();
+            int textYOffset = m_solarSystemLabelFontMetrics.height();
+            item->m_textItem->setPos(pos.x() - 1.1 * item->m_pixmapItem->offset().x() * item->m_pixmapItem->scale(), pos.y() - textYOffset * item->m_textItem->scale());
+        }
+    }
+
+    centerOnSolarSystemBody();
+}
+
+// Draw top-down image of Solar System
+void StarTrackerGUI::plotSolarSystem()
+{
+    ui->chart->setVisible(false);
+    ui->image->setVisible(true);
+    ui->night->setVisible(false);
+    ui->logScale->setVisible(true);
+    ui->drawSun->setVisible(false);
+    ui->drawMoon->setVisible(false);
+    ui->darkTheme->setVisible(false);
+    ui->zoomIn->setVisible(true);
+    ui->zoomOut->setVisible(true);
+    ui->addAnimationFrame->setVisible(false);
+    ui->clearAnimation->setVisible(false);
+    ui->saveAnimation->setVisible(false);
+    ui->jupiterElevationLabel->setVisible(false);
+    ui->jupiterElevation->setVisible(false);
+    ui->jupiterElevationLabel->setVisible(false);
+    ui->jupiterElevation->setVisible(false);
+    ui->cmlLabel->setVisible(false);
+    ui->cml->setVisible(false);
+    ui->ioPhaseLabel->setVisible(false);
+    ui->ioPhase->setVisible(false);
+    ui->ganymedePhaseLabel->setVisible(false);
+    ui->ganymedePhase->setVisible(false);
+
+    if (ui->image->scene() != m_solarSystemScene)
+    {
+        ui->image->setScene(m_solarSystemScene);
+        ui->image->resetTransform();
+        ui->image->fitInView(m_solarSystemScene->sceneRect(), Qt::KeepAspectRatio);
+        scaleSolarSystemItems();
+    }
+
+    if (!m_zoom)
+    {
+        m_zoom = new GraphicsViewZoom(ui->image); // Deleted automatically when view is deleted
+        connect(m_zoom, &GraphicsViewZoom::zoomed, this, &StarTrackerGUI::zoomed);
+    }
+
+    centerOnSolarSystemBody();
+}
+
+void StarTrackerGUI::centerOnSolarSystemBody()
+{
+    // Centre on selected body
+    QString selectedBody = ui->chartSubSelect->currentText();
+    if (m_solarSystemItems.contains(selectedBody))
+    {
+        SolarSystemItem *item = m_solarSystemItems.value(selectedBody);
+        ui->image->centerOn(item->m_pixmapItem);
+        ui->image->setDragMode(QGraphicsView::NoDrag);
+    }
+    else
+    {
+        ui->image->setDragMode(QGraphicsView::ScrollHandDrag);
+    }
+}
+
+QList<QGraphicsTextItem *> StarTrackerGUI::createJupiterLegendLabels(int legendXRight, int legendYBottom, int legendStep, int legendMax)
+{
+    QList<QGraphicsTextItem *> list;
+
+    int legendSteps = legendMax / legendStep;
+    int legendYStep = m_jupiterImages[2].height() / legendSteps;
+    int maxLegendYLabelWidth = 0;
+    for (int i = 0; i <= legendSteps; i++)
+    {
+        QString legendStr = QString::number(i * legendStep);
+        QGraphicsTextItem *legendLabel = m_jupiterScene->addText(legendStr);
+        int yw = legendLabel->boundingRect().width();
+        maxLegendYLabelWidth = std::max(maxLegendYLabelWidth, yw);
+        legendLabel->setPos(legendXRight, legendYBottom - i * legendYStep - legendLabel->boundingRect().height() / 2);
+        list.append(legendLabel);
+    }
+
+    return list;
+}
+
+void StarTrackerGUI::createJupiterScene()
+{
+    m_jupiterScene = new QGraphicsScene(ui->image);
+    m_jupiterScene->setBackgroundBrush(QBrush(Qt::black));
+
+    // Phase vs CML images
+    for (int i = 0; i < m_jupiterImages.size(); i++) {
+        m_jupiterItems.append(m_jupiterScene->addPixmap(m_jupiterImages[i]));
+    }
+    m_jupiterItems[0]->setPos(0, 0);
+    m_jupiterItems[1]->setPos(0, 0);
+    m_jupiterItems[1]->setVisible(false);
+
+    // Legend
+
+    int legendSpacing = 10;
+    int legendYTop = (m_jupiterImages[0].height() - m_jupiterImages[2].height()) / 2;
+    int legendYBottom = legendYTop + m_jupiterImages[2].height();
+    int legendXLeft = m_jupiterImages[0].width() + legendSpacing;
+    int legendXRight = legendXLeft + m_jupiterImages[2].width();
+    m_jupiterItems[2]->setPos(legendXLeft, legendYTop);
+    m_ioLegendLabels = createJupiterLegendLabels(legendXRight, legendYBottom, 10, 60);
+    m_ganymedeLegendLabels = createJupiterLegendLabels(legendXRight, legendYBottom, 5, 15);
+
+    QGraphicsTextItem *legendLabel = m_jupiterScene->addText("Probability (%)");
+    legendLabel->setTransformOriginPoint(legendLabel->boundingRect().center());
+    legendLabel->setRotation(-90);
+    legendLabel->setPos(legendXRight, m_jupiterImages[0].height() / 2);
+
+    // Y axis labels
+
+    int phaseMax = 360;
+    int phaseStep = 45;
+    int phaseSteps = phaseMax / phaseStep;
+    int yStep = m_jupiterImages[0].height() / phaseSteps;
+    int maxYLabelWidth = 0;
+
+    for (int i = 0; i <= phaseSteps; i++)
+    {
+        QString phaseStr = QString::number(i * phaseStep);
+        QGraphicsTextItem *yLabel = m_jupiterScene->addText(phaseStr);
+        int yw = yLabel->boundingRect().width();
+        maxYLabelWidth = std::max(maxYLabelWidth, yw);
+        yLabel->setPos(-yw, m_jupiterImages[0].height() - i * yStep - yLabel->boundingRect().height() / 2);
+    }
+
+    QGraphicsTextItem *phaseLabel = m_jupiterScene->addText(QString("Phase (%1)").arg(QChar(0xb0)));
+    phaseLabel->setTransformOriginPoint(phaseLabel->boundingRect().center());
+    phaseLabel->setRotation(-90);
+    phaseLabel->setPos(-2 * phaseLabel->boundingRect().height() - maxYLabelWidth, m_jupiterImages[0].height() / 2);
+
+    // X axis labels
+
+    QGraphicsTextItem *cmlLabel = m_jupiterScene->addText(QString("CML (%1)").arg(QChar(0xb0)));
+    int cmlLabelWidth = cmlLabel->boundingRect().width();
+    cmlLabel->setPos(m_jupiterImages[0].width() / 2 - cmlLabelWidth / 2, m_jupiterImages[0].height() + cmlLabel->boundingRect().height());
+
+    int cmlMax = 360;
+    int cmlStep = 45;
+    int cmlSteps = cmlMax / cmlStep;
+    int xStep = m_jupiterImages[0].width() / cmlSteps;
+
+    for (int i = 0; i <= cmlSteps; i++)
+    {
+        QString cmlStr = QString::number(i * cmlStep);
+        QGraphicsTextItem *xLabel = m_jupiterScene->addText(cmlStr);
+        int xw = xLabel->boundingRect().width();
+        xLabel->setPos(i * xStep - xw / 2, m_jupiterImages[0].height());
+    }
+
+    // Moon images
+
+    const qreal moonScale = 0.1;
+
+    QPixmap *ioPixmap = getPlanetPixmap("io");
+    m_ioItem = m_jupiterScene->addPixmap(*ioPixmap);
+    m_ioItem->setOffset(-ioPixmap->width() / 2, -ioPixmap->height() / 2);
+    m_ioItem->setScale(moonScale);
+    m_ioItem->setZValue(2);
+
+    QPixmap *ganymedePixmap = getPlanetPixmap("ganymede");
+    m_ganymedeItem = m_jupiterScene->addPixmap(*ganymedePixmap);
+    m_ganymedeItem->setOffset(-ganymedePixmap->width() / 2, -ganymedePixmap->height() / 2);
+    m_ganymedeItem->setScale(moonScale);
+    m_ganymedeItem->setZValue(2);
+
+    int yLabelAreaWidth = maxYLabelWidth + phaseLabel->boundingRect().height();
+    int topMargin = (ioPixmap->height() * moonScale) / 2;
+
+    m_jupiterRect.setRect(
+        -yLabelAreaWidth,
+        -topMargin,
+        yLabelAreaWidth + m_jupiterImages[0].width() + legendSpacing + m_jupiterImages[2].width(),
+        m_jupiterImages[0].height() + 2 * cmlLabel->boundingRect().height() + topMargin
+    );
+}
+
+void StarTrackerGUI::updateJupiterMoonPosition(double cml, double ioPhase, double ganymedePhase)
+{
+    int x = (cml / 360.0) * m_jupiterImages[0].width();
+    int y = m_jupiterImages[0].height() - ((ioPhase / 360.0) * m_jupiterImages[0].height());
+    m_ioItem->setPos(x, y);
+
+    y = m_jupiterImages[0].height() - ((ganymedePhase / 360.0) * m_jupiterImages[0].height());
+    m_ganymedeItem->setPos(x, y);
+}
+
+void StarTrackerGUI::updateJupiterMoonPositions(const StarTrackerReport::MsgReportJupiterData& report)
+{
+    QList<StarTrackerReport::JupiterData> jupiterData = report.getJupiterData();
+    QList<StarTrackerReport::JupiterMoonData> moonData = report.getMoonData();
+
+    qDeleteAll(m_jupiterLines);
+    m_jupiterLines.clear();
+    qDeleteAll(m_jupiterTexts);
+    m_jupiterTexts.clear();
+
+    for (int i = 0; i < jupiterData.size() - 1; i++)
+    {
+        QString hour = QString::number(jupiterData[i].m_dateTime.time().hour());
+        double cml1 = moonData[i].m_cml;
+        double cml2 = moonData[i+1].m_cml;
+        double phase1 = moonData[i].m_phase;
+        double phase2 = moonData[i+1].m_phase;
+
+        const int w = m_jupiterImages[0].width();
+        const int h = m_jupiterImages[0].height();
+        int x1 = (cml1 / 360.0) * w;
+        int y1 = h - ((phase1 / 360.0) * h);
+        int x2 = (cml2 / 360.0) * w;
+        int y2 = h - ((phase2 / 360.0) * h);
+        int x2n, y2n;
+
+        bool interpolated = false;
+        if ((x2 < x1) && (y2 > y1))
+        {
+            x2n = 0;
+            y2n = h - Interpolation::interpolate(x1 - w, y1, x2, h - y2, 0);
+            x2 = Interpolation::interpolate(y1, x1, y2 - h, x2 + w, 0);
+            y2 = 0;
+            interpolated = true;
+        }
+        else if (x2 < x1)
+        {
+            y2 = Interpolation::interpolate(x1, y1, x2 + w, y2, w);
+            x2 = w;
+            interpolated = true;
+            x2n = 0;
+            y2n = y2;
+        }
+        else if (y2 > y1)
+        {
+            x2 = Interpolation::interpolate(y1, x1, y2 - h, x2, 0);
+            y2 = 0;
+            interpolated = true;
+            x2n = x2;
+            y2n = h;
+        }
+
+        QGraphicsLineItem *line = m_jupiterScene->addLine(x1, y1, x2, y2, QPen(Qt::white));
+        m_jupiterLines.append(line);
+
+        if (interpolated && (i < jupiterData.size() - 1))
+        {
+            int x3 = (cml2 / 360.0) * w;
+            int y3 = h - ((phase2 / 360.0) * h);
+
+            x2 = x2n;
+            y2 = y2n;
+
+            line = m_jupiterScene->addLine(x2, y2, x3, y3, QPen(Qt::white));
+            m_jupiterLines.append(line);
+        }
+
+        QGraphicsLineItem *dash = m_jupiterScene->addLine(x1, y1, x1, y1 + 3, QPen(Qt::white));
+        m_jupiterLines.append(dash);
+
+        QGraphicsTextItem *text = m_jupiterScene->addText(hour);
+        const int tw = text->boundingRect().width();
+        text->setPos(x1 - tw / 2, y1);
+        m_jupiterTexts.append(text);
+    }
+
+    if (jupiterData.size() > 0)
+    {
+        int i = jupiterData.size() - 1;
+
+        QString hour = QString::number(jupiterData[i].m_dateTime.time().hour());
+        double cml1 = moonData[i].m_cml;
+        double phase1 = moonData[i].m_phase;
+
+        int x1 = (cml1 / 360.0) * m_jupiterImages[0].width();
+        int y1 = m_jupiterImages[0].height() - ((phase1 / 360.0) * m_jupiterImages[0].height());
+
+        QGraphicsLineItem *dash = m_jupiterScene->addLine(x1, y1, x1, y1 + 3, QPen(Qt::white));
+        m_jupiterLines.append(dash);
+
+        QGraphicsTextItem *text = m_jupiterScene->addText(hour);
+        int w = text->boundingRect().width();
+        text->setPos(x1 - w / 2, y1);
+        m_jupiterTexts.append(text);
+    }
+
+}
+
+void StarTrackerGUI::plotJupiter()
+{
+    // Select which Moon to show
+    int imageIdx = ui->chartSubSelect->currentIndex();
+    bool plotIO = imageIdx == 0;
+    bool ployGanymede = imageIdx == 1;
+
+    ui->chart->setVisible(false);
+    ui->image->setVisible(true);
+    ui->night->setVisible(false);
+    ui->logScale->setVisible(false);
+    ui->drawSun->setVisible(false);
+    ui->drawMoon->setVisible(false);
+    ui->darkTheme->setVisible(false);
+    ui->zoomIn->setVisible(false);
+    ui->zoomOut->setVisible(false);
+    ui->addAnimationFrame->setVisible(false);
+    ui->clearAnimation->setVisible(false);
+    ui->saveAnimation->setVisible(false);
+    ui->jupiterElevationLabel->setVisible(true);
+    ui->jupiterElevation->setVisible(true);
+    ui->cmlLabel->setVisible(true);
+    ui->cml->setVisible(true);
+    ui->ioPhaseLabel->setVisible(plotIO);
+    ui->ioPhase->setVisible(plotIO);
+    ui->ganymedePhaseLabel->setVisible(ployGanymede);
+    ui->ganymedePhase->setVisible(ployGanymede);
+
+    if (ui->image->scene() != m_jupiterScene)
+    {
+        ui->image->setScene(m_jupiterScene);
+        ui->image->setDragMode(QGraphicsView::NoDrag);
+    }
+
+    if (m_zoom)
+    {
+        delete m_zoom;
+        m_zoom = nullptr;
+    }
+
+    m_jupiterItems[0]->setVisible(plotIO);
+    m_jupiterItems[1]->setVisible(ployGanymede);
+
+    m_ioItem->setVisible(plotIO);
+    m_ganymedeItem->setVisible(ployGanymede);
+    for (auto& item : m_ioLegendLabels) {
+        item->setVisible(plotIO);
+    }
+    for (auto& item : m_ganymedeLegendLabels) {
+        item->setVisible(ployGanymede);
+    }
+
+    // Expand to available view
+    ui->image->fitInView(m_jupiterRect, Qt::KeepAspectRatio);
+}
+
+void StarTrackerGUI::resizeEvent(QResizeEvent *event)
+{
+    if (ui->chartSelect->currentIndex() == StarTrackerSettings::CHART_JUPITER) {
+        ui->image->fitInView(m_jupiterRect, Qt::KeepAspectRatio);
+    }
+    FeatureGUI::resizeEvent(event);
+}
+
 void StarTrackerGUI::plotSkyTemperatureChart()
 {
     ui->chart->setVisible(true);
     ui->image->setVisible(false);
+    ui->night->setVisible(false);
+    ui->logScale->setVisible(false);
     ui->drawSun->setVisible(true);
     ui->drawMoon->setVisible(true);
     ui->darkTheme->setVisible(false);
@@ -1346,6 +2196,14 @@ void StarTrackerGUI::plotSkyTemperatureChart()
     ui->addAnimationFrame->setVisible(false);
     ui->clearAnimation->setVisible(false);
     ui->saveAnimation->setVisible(false);
+    ui->jupiterElevationLabel->setVisible(false);
+    ui->jupiterElevation->setVisible(false);
+    ui->cmlLabel->setVisible(false);
+    ui->cml->setVisible(false);
+    ui->ioPhaseLabel->setVisible(false);
+    ui->ioPhase->setVisible(false);
+    ui->ganymedePhaseLabel->setVisible(false);
+    ui->ganymedePhase->setVisible(false);
 
     bool galactic = (ui->chartSubSelect->currentIndex() & 1) == 1;
 
@@ -1601,6 +2459,8 @@ void StarTrackerGUI::plotElevationLineChart()
 {
     ui->chart->setVisible(true);
     ui->image->setVisible(false);
+    ui->night->setVisible(true);
+    ui->logScale->setVisible(false);
     ui->drawSun->setVisible(false);
     ui->drawMoon->setVisible(false);
     ui->darkTheme->setVisible(true);
@@ -1609,6 +2469,14 @@ void StarTrackerGUI::plotElevationLineChart()
     ui->addAnimationFrame->setVisible(false);
     ui->clearAnimation->setVisible(false);
     ui->saveAnimation->setVisible(false);
+    ui->jupiterElevationLabel->setVisible(false);
+    ui->jupiterElevation->setVisible(false);
+    ui->cmlLabel->setVisible(false);
+    ui->cml->setVisible(false);
+    ui->ioPhaseLabel->setVisible(false);
+    ui->ioPhase->setVisible(false);
+    ui->ganymedePhaseLabel->setVisible(false);
+    ui->ganymedePhase->setVisible(false);
 
     QChart *oldChart = m_azElLineChart;
 
@@ -1623,8 +2491,6 @@ void StarTrackerGUI::plotElevationLineChart()
     m_azElLineChart->layout()->setContentsMargins(0, 0, 0, 0);
     m_azElLineChart->setMargins(QMargins(1, 1, 1, 1));
 
-    double maxElevation = -90.0;
-
     QLineSeries *elSeries = new QLineSeries();
     QList<QLineSeries *> azSeriesList;
     QLineSeries *azSeries = new QLineSeries();
@@ -1632,66 +2498,55 @@ void StarTrackerGUI::plotElevationLineChart()
     QPen pen(getSeriesColor(1), 2, Qt::SolidLine);
     azSeries->setPen(pen);
 
-    QDateTime dt;
+    double maxElevation = -90.0;
+    double prevAz;
+    QDateTime startTime;
+    QDateTime endTime;
+
+    if (m_settings.m_target == m_azElVsTimeTarget)
+    {
+        if (!m_dateTimes.isEmpty()) {
+            startTime = m_dateTimes[0];
+        }
+
+        for (int i = 0; i < m_dateTimes.size(); i++)
+        {
+            QDateTime dt = m_dateTimes[i];
+
+            if (m_elevations[i] > maxElevation) {
+                maxElevation = m_elevations[i];
+            }
+
+            if (i == 0) {
+                prevAz = m_azimuths[i];
+            }
+            if (((prevAz >= 270) && (m_azimuths[i] < 90)) || ((prevAz < 90) && (m_azimuths[i] >= 270)))
+            {
+                azSeries = new QLineSeries();
+                azSeriesList.append(azSeries);
+                azSeries->setPen(pen);
+            }
+
+            azSeries->append(dt.toMSecsSinceEpoch(), m_azimuths[i]);
+            elSeries->append(dt.toMSecsSinceEpoch(), m_elevations[i]);
+
+            endTime = dt;
+            prevAz = m_azimuths[i];
+        }
+    }
+
     QDateTime currentTime;
 
-    if (m_settings.m_dateTime.isEmpty()) {
-        currentTime = QDateTime::currentDateTime();
-    } else {
-        currentTime = QDateTime::fromString(m_settings.m_dateTime, Qt::ISODateWithMs);
-    }
-    dt = currentTime;
-
-    dt.setTime(QTime(0,0));
-    QDateTime startTime = dt;
-    QDateTime endTime = dt;
-    double prevAz;
-    int timestep = 10*60;
-
-    for (int step = 0; step <= 24*60*60/timestep; step++)
+    if (m_settings.m_dateTime.isEmpty())
     {
-        AzAlt aa;
-        RADec rd;
-
-        // Calculate elevation of desired object
-        if (m_settings.m_target == "Sun")
-        {
-            Astronomy::sunPosition(aa, rd, m_settings.m_latitude, m_settings.m_longitude, dt);
+        currentTime = QDateTime::currentDateTime();
+    }
+    else
+    {
+        currentTime = QDateTime::fromString(m_settings.m_dateTime, Qt::ISODateWithMs);
+        if (m_settings.m_utc) {
+            currentTime.setTimeZone(QTimeZone::utc());
         }
-        else if (m_settings.m_target == "Moon")
-        {
-            Astronomy::moonPosition(aa, rd, m_settings.m_latitude, m_settings.m_longitude, dt);
-        }
-        else
-        {
-            rd.ra = Units::raToDecimal(m_settings.m_ra);
-            rd.dec = Units::decToDecimal(m_settings.m_dec);
-            aa = Astronomy::raDecToAzAlt(rd, m_settings.m_latitude, m_settings.m_longitude, dt, !m_settings.m_jnow);
-        }
-
-        if (aa.alt > maxElevation) {
-            maxElevation = aa.alt;
-        }
-
-        // Skip adjusting for refraction, as it's too slow to calculate using Astronomy::refractionPAL
-        // in this loop, and doesn't typically make a visible difference in the chart
-
-        if (step == 0) {
-            prevAz = aa.az;
-        }
-
-        if (((prevAz >= 270) && (aa.az < 90)) || ((prevAz < 90) && (aa.az >= 270)))
-        {
-            azSeries = new QLineSeries();
-            azSeriesList.append(azSeries);
-            azSeries->setPen(pen);
-        }
-
-        elSeries->append(dt.toMSecsSinceEpoch(), aa.alt);
-        azSeries->append(dt.toMSecsSinceEpoch(), aa.az);
-        endTime = dt;
-        prevAz = aa.az;
-        dt = dt.addSecs(timestep); // addSecs accounts for daylight savings jumps
     }
 
     m_azElLineChart->addAxis(xAxis, Qt::AlignBottom);
@@ -1730,7 +2585,11 @@ void StarTrackerGUI::plotElevationLineChart()
 
     elSeries->attachAxis(xAxis);
     elSeries->attachAxis(yLeftAxis);
-    xAxis->setTitleText(QString("%1 %2").arg(startTime.date().toString()).arg(startTime.timeZoneAbbreviation()));
+    if (m_settings.m_night) {
+        xAxis->setTitleText(QString("%1 - %2 %3").arg(startTime.date().toString()).arg(startTime.date().addDays(1).toString()).arg(startTime.timeZoneAbbreviation()));
+    } else {
+        xAxis->setTitleText(QString("%1 %2").arg(startTime.date().toString()).arg(startTime.timeZoneAbbreviation()));
+    }
     xAxis->setFormat("hh");
     xAxis->setTickCount(7);
     xAxis->setRange(startTime, endTime);
@@ -1739,7 +2598,9 @@ void StarTrackerGUI::plotElevationLineChart()
     yRightAxis->setRange(0.0, 360.0);
     yRightAxis->setTitleText(QString("Azimuth (%1)").arg(QChar(0xb0)));
 
-    if (maxElevation < 0) {
+    if ((m_settings.m_target != m_azElVsTimeTarget) || m_dateTimes.isEmpty()) {
+        m_azElLineChart->setTitle("Waiting for data");
+    } else if (maxElevation < 0) {
         m_azElLineChart->setTitle("Not visible from this latitude");
     } else if (m_settings.m_target.contains("SatelliteTracker")) {
         m_azElLineChart->setTitle("See Satellite Tracker for chart that accounts for satellite's movement");
@@ -1776,6 +2637,8 @@ void StarTrackerGUI::plotElevationPolarChart()
 {
     ui->chart->setVisible(true);
     ui->image->setVisible(false);
+    ui->night->setVisible(true);
+    ui->logScale->setVisible(false);
     ui->drawSun->setVisible(false);
     ui->drawMoon->setVisible(false);
     ui->darkTheme->setVisible(true);
@@ -1784,6 +2647,14 @@ void StarTrackerGUI::plotElevationPolarChart()
     ui->addAnimationFrame->setVisible(false);
     ui->clearAnimation->setVisible(false);
     ui->saveAnimation->setVisible(false);
+    ui->jupiterElevationLabel->setVisible(false);
+    ui->jupiterElevation->setVisible(false);
+    ui->cmlLabel->setVisible(false);
+    ui->cml->setVisible(false);
+    ui->ioPhaseLabel->setVisible(false);
+    ui->ioPhase->setVisible(false);
+    ui->ganymedePhaseLabel->setVisible(false);
+    ui->ganymedePhase->setVisible(false);
 
     QChart *oldChart = m_azElPolarChart;
 
@@ -1824,118 +2695,98 @@ void StarTrackerGUI::plotElevationPolarChart()
     }
     dt = currentTime;
     dt.setTime(QTime(0,0));
-    QDateTime startTime = dt;
     QDateTime endTime = dt;
     QDateTime riseTime;
     QDateTime setTime;
     int riseIdx = -1;
     int setIdx = -1;
     int idx = 0;
-    int timestep = 10*60; // Rise/set times accurate to nearest 10 minutes
     double prevAlt;
 
-    for (int step = 0; step <= 24*60*60/timestep; step++)
+    if (m_settings.m_target == m_azElVsTimeTarget)
     {
-        AzAlt aa;
-        RADec rd;
-
-        // Calculate elevation of desired object
-        if (m_settings.m_target == "Sun")
+        for (int i = 0; i < m_dateTimes.size(); i++)
         {
-            Astronomy::sunPosition(aa, rd, m_settings.m_latitude, m_settings.m_longitude, dt);
+            QDateTime dt = m_dateTimes[i];
+
+            if (m_elevations[i] > maxElevation) {
+                maxElevation = m_elevations[i];
+            }
+
+            if (i == 0) {
+                prevAlt = m_elevations[i];
+            }
+
+            // We can have set before rise in a day, if the object starts > 0
+            if ((m_elevations[i] >= 0.0) && (prevAlt < 0.0))
+            {
+                riseTime = dt;
+                riseIdx = idx;
+            }
+
+            if (( m_elevations[i] < 0.0) && (prevAlt >= 0.0))
+            {
+                setTime = endTime;
+                setIdx = idx;
+            }
+
+            polarSeries->append(m_azimuths[i], 90 -  m_elevations[i]);
+            idx++;
+            endTime = dt;
+            prevAlt = m_elevations[i];
         }
-        else if (m_settings.m_target == "Moon")
+
+        // Polar charts can't handle points that are more than 180 degrees apart, so
+        // we need to split passes that cross from 359 -> 0 degrees (or the reverse)
+        QList<QLineSeries *> series;
+        series.append(new QLineSeries());
+        QLineSeries *s = series.first();
+        QPen pen(getSeriesColor(0), 2, Qt::SolidLine);
+        s->setPen(pen);
+
+        qreal prevAz = polarSeries->at(0).x();
+        qreal prevEl = polarSeries->at(0).y();
+
+        for (int i = 1; i < polarSeries->count(); i++)
         {
-            Astronomy::moonPosition(aa, rd, m_settings.m_latitude, m_settings.m_longitude, dt);
+            qreal az = polarSeries->at(i).x();
+            qreal el = polarSeries->at(i).y();
+
+            if ((prevAz > 270.0) && (az <= 90.0))
+            {
+                double elMid = Interpolation::interpolate(prevAz, prevEl, az+360.0, el, 360.0);
+                s->append(360.0, elMid);
+                series.append(new QLineSeries());
+                s = series.last();
+                s->setPen(pen);
+                s->append(0.0, elMid);
+                s->append(az, el);
+            }
+            else if ((prevAz <= 90.0) && (az > 270.0))
+            {
+                double elMid = Interpolation::interpolate(prevAz, prevEl, az-360.0, el, 0.0);
+                s->append(0.0, elMid);
+                series.append(new QLineSeries());
+                s = series.last();
+                s->setPen(pen);
+                s->append(360.0, elMid);
+                s->append(az, el);
+            }
+            else
+            {
+                s->append(polarSeries->at(i));
+            }
+
+            prevAz = az;
+            prevEl = el;
         }
-        else
+
+        for (int i = 0; i < series.length(); i++)
         {
-            rd.ra = Units::raToDecimal(m_settings.m_ra);
-            rd.dec = Units::decToDecimal(m_settings.m_dec);
-            aa = Astronomy::raDecToAzAlt(rd, m_settings.m_latitude, m_settings.m_longitude, dt, !m_settings.m_jnow);
+            m_azElPolarChart->addSeries(series[i]);
+            series[i]->attachAxis(angularAxis);
+            series[i]->attachAxis(radialAxis);
         }
-
-        if (aa.alt > maxElevation) {
-            maxElevation = aa.alt;
-        }
-
-        // Skip adjusting for refraction, as it's too slow to calculate using Astronomy::refractionPAL
-        // in this loop, and doesn't typically make a visible difference in the chart
-
-        if (idx == 0) {
-            prevAlt = aa.alt;
-        }
-
-        // We can have set before rise in a day, if the object starts > 0
-        if ((aa.alt >= 0.0) && (prevAlt < 0.0))
-        {
-            riseTime = dt;
-            riseIdx = idx;
-        }
-
-        if ((aa.alt < 0.0) && (prevAlt >= 0.0))
-        {
-            setTime = endTime;
-            setIdx = idx;
-        }
-
-        polarSeries->append(aa.az, 90 - aa.alt);
-        idx++;
-        endTime = dt;
-        prevAlt = aa.alt;
-        dt = dt.addSecs(timestep); // addSecs accounts for daylight savings jumps
-    }
-
-    // Polar charts can't handle points that are more than 180 degrees apart, so
-    // we need to split passes that cross from 359 -> 0 degrees (or the reverse)
-    QList<QLineSeries *> series;
-    series.append(new QLineSeries());
-    QLineSeries *s = series.first();
-    QPen pen(getSeriesColor(0), 2, Qt::SolidLine);
-    s->setPen(pen);
-
-    qreal prevAz = polarSeries->at(0).x();
-    qreal prevEl = polarSeries->at(0).y();
-
-    for (int i = 1; i < polarSeries->count(); i++)
-    {
-        qreal az = polarSeries->at(i).x();
-        qreal el = polarSeries->at(i).y();
-
-        if ((prevAz > 270.0) && (az <= 90.0))
-        {
-            double elMid = Interpolation::interpolate(prevAz, prevEl, az+360.0, el, 360.0);
-            s->append(360.0, elMid);
-            series.append(new QLineSeries());
-            s = series.last();
-            s->setPen(pen);
-            s->append(0.0, elMid);
-            s->append(az, el);
-        }
-        else if ((prevAz <= 90.0) && (az > 270.0))
-        {
-            double elMid = Interpolation::interpolate(prevAz, prevEl, az-360.0, el, 0.0);
-            s->append(0.0, elMid);
-            series.append(new QLineSeries());
-            s = series.last();
-            s->setPen(pen);
-            s->append(360.0, elMid);
-            s->append(az, el);
-        }
-        else
-        {
-            s->append(polarSeries->at(i));
-        }
-
-        prevAz = az;
-        prevEl = el;
-    }
-
-    for (int i = 0; i < series.length(); i++)
-    {
-        m_azElPolarChart->addSeries(series[i]);
-        series[i]->attachAxis(angularAxis);
-        series[i]->attachAxis(radialAxis);
     }
 
     if (m_settings.m_drawRotators != StarTrackerSettings::NO_ROTATORS)
@@ -2072,7 +2923,9 @@ void StarTrackerGUI::plotElevationPolarChart()
         posSeries->attachAxis(radialAxis);
     }
 
-    if (maxElevation < 0) {
+    if ((m_settings.m_target != m_azElVsTimeTarget) || m_dateTimes.isEmpty()) {
+        m_azElPolarChart->setTitle("Waiting for data");
+    } else if (maxElevation < 0) {
         m_azElPolarChart->setTitle("Not visible from this latitude");
     } else if (m_settings.m_target.contains("SatelliteTracker")) {
         m_azElPolarChart->setTitle("See Satellite Tracker for chart that accounts for satellite's movement");
@@ -2095,7 +2948,7 @@ void StarTrackerGUI::on_viewOnMap_clicked()
 
 void StarTrackerGUI::updateChartSubSelect()
 {
-    if (ui->chartSelect->currentIndex() == 2)
+    if (ui->chartSelect->currentIndex() == StarTrackerSettings::CHART_SKY_TEMPERATURE)
     {
         ui->chartSubSelect->setItemText(6, QString("%1 MHz %2%3 Equatorial")
                                         .arg((int)std::round(m_settings.m_frequency/1e6))
@@ -2112,6 +2965,8 @@ void StarTrackerGUI::on_chartSelect_currentIndexChanged(int index)
 {
     bool oldState = ui->chartSubSelect->blockSignals(true);
     ui->chartSubSelect->clear();
+
+    QString currentText = ui->chartSubSelect->currentText();
 
     if (index == 0)
     {
@@ -2136,14 +2991,42 @@ void StarTrackerGUI::on_chartSelect_currentIndexChanged(int index)
         ui->chartSubSelect->addItem("Milky Way");
         ui->chartSubSelect->addItem("Milky Way annotated");
     }
+    else if (index == 4)
+    {
+        for (const auto& body : m_settings.m_solarSystemBodies) {
+            ui->chartSubSelect->addItem(body);
+        }
+        ui->chartSubSelect->addItem("-");
+    }
+    else if (index == 5)
+    {
+        ui->chartSubSelect->addItem("Io phase vs CML");
+        ui->chartSubSelect->addItem("Ganymede phase vs CML");
+    }
+
+    int idx = ui->chartSubSelect->findText(currentText);
+    if (idx >= 0) {
+        ui->chartSubSelect->setCurrentIndex(idx);
+    }
 
     ui->chartSubSelect->blockSignals(oldState);
     plotChart();
+
+    m_settings.m_chartSelect = (StarTrackerSettings::ChartSelect) index;
+    m_settingsKeys.append("chartSelect");
+    m_settings.m_chartSubSelect = ui->chartSubSelect->currentIndex();
+    m_settingsKeys.append("chartSubSelect");
+    applySettings();
 }
 
 void StarTrackerGUI::on_chartSubSelect_currentIndexChanged(int index)
 {
     (void) index;
+
+    m_settings.m_chartSubSelect = index;
+    m_settingsKeys.append("chartSubSelect");
+    applySettings();
+
     plotChart();
 }
 
@@ -2356,7 +3239,7 @@ void StarTrackerGUI::updateSolarFlux(bool all)
 
         if (m_dlm.confirmDownload(solarFluxFile, nullptr, 0))
         {
-            QString urlString = QString("https://www.sws.bom.gov.au/Category/World Data Centre/Data Display and Download/Solar Radio/station/learmonth/SRD/%1/L%2.SRD")
+            QString urlString = QString("https://downloads.sws.bom.gov.au/wdc/wdc_solradio/data/learmonth/SRD/%1/L%2.SRD")
                                     .arg(today.year()).arg(today.toString("yyMMdd"));
             m_dlm.download(QUrl(urlString), solarFluxFile, this);
         }
@@ -2393,6 +3276,37 @@ void StarTrackerGUI::on_darkTheme_clicked(bool checked)
     applySettings();
 }
 
+void StarTrackerGUI::on_night_clicked(bool checked)
+{
+    m_settings.m_night = checked;
+    plotChart();
+    m_settingsKeys.append("night");
+    applySettings();
+}
+
+void StarTrackerGUI::on_logScale_clicked(bool checked)
+{
+    m_settings.m_logScale = checked;
+
+    if (m_settings.m_logScale)
+    {
+        // Pluto is ~56 from Sun on log scale
+        const double r = 57;
+        m_solarSystemScene->setSceneRect(-r, -r, r * 2, r * 2);
+    }
+    else
+    {
+        // Mercury is 0.4AU. Neptune is 30 AU
+        const double max = 32.0;
+        const double pixelScale = 20.0;
+        m_solarSystemScene->setSceneRect(-max * pixelScale, -max * pixelScale, 2.0 * max * pixelScale, 2.0 * max * pixelScale);
+    }
+
+    plotChart();
+    m_settingsKeys.append("logScale");
+    applySettings();
+}
+
 void StarTrackerGUI::on_drawSun_clicked(bool checked)
 {
     m_settings.m_drawSunOnSkyTempChart = checked;
@@ -2413,8 +3327,80 @@ void StarTrackerGUI::downloadFinished(const QString& filename, bool success)
 {
     (void) filename;
 
-    if (success) {
+    if (success && filename.endsWith("solar_flux.srd")) {
         readSolarFlux();
+    } else if (!success) {
+        QMessageBox::warning(this, "Failed to download file", QString("Failed to download %1").arg(filename));
+    }
+}
+
+void StarTrackerGUI::majorBodiesUpdated(const QHash<QString, JPLHorizons::BodyID>& bodies)
+{
+    m_jplBodies = QStringList();
+
+    QHashIterator<QString, JPLHorizons::BodyID> itr(bodies);
+    while (itr.hasNext())
+    {
+        itr.next();
+        const JPLHorizons::BodyID& body = itr.value();
+        m_jplBodies.append(body.m_name);
+    }
+
+    m_jplBodies.sort();
+    updateTargetList();
+}
+
+void StarTrackerGUI::updateTargetList()
+{
+    bool block = ui->target->blockSignals(true);
+
+    ui->target->clear();
+
+    if (m_settings.m_targetSource == "SDRangel")
+    {
+        QStringList builtinTargets = {
+            "Sun",
+            "Moon",
+            "PSR B0329+54",
+            "PSR B0833-45",
+            "Sagittarius A",
+            "Cassiopeia A",
+            "Cygnus A",
+            "Taurus A (M1)",
+            "Virgo A (M87)",
+            "Custom RA/Dec",
+            "Custom Az/El",
+            "Custom l/b",
+            "S7",
+            "S8",
+            "S9"
+        };
+
+        for (const auto& target : builtinTargets) {
+            ui->target->addItem(target);
+        }
+        for (const auto& target : m_availableFeatures) {
+            ui->target->addItem(target);
+        }
+    }
+    else if (m_settings.m_targetSource == "SPICE")
+    {
+        for (const auto& target : m_spiceEphemerides.getTargets(m_settings.m_spiceEphemerides)) {
+            ui->target->addItem(target);
+        }
+    }
+    else if (m_settings.m_targetSource == "Horizons")
+    {
+        for (const auto& body : m_jplBodies) {
+            ui->target->addItem(body);
+        }
+    }
+
+    ui->target->blockSignals(block);
+
+    int index = ui->target->findText(m_settings.m_target, Qt::MatchFixedString); // Case insensitive
+    if (index >= 0) {
+        ui->target->setCurrentIndex(index);
     }
 }
 
@@ -2435,10 +3421,13 @@ void StarTrackerGUI::makeUIConnections()
     QObject::connect(ui->galacticLongitude, &DMSSpinBox::valueChanged, this, &StarTrackerGUI::on_galacticLongitude_valueChanged);
     QObject::connect(ui->frequency, qOverload<int>(&QSpinBox::valueChanged), this, &StarTrackerGUI::on_frequency_valueChanged);
     QObject::connect(ui->beamwidth, qOverload<double>(&QDoubleSpinBox::valueChanged), this, &StarTrackerGUI::on_beamwidth_valueChanged);
-    QObject::connect(ui->target, &QComboBox::currentTextChanged, this, &StarTrackerGUI::on_target_currentTextChanged);
+    QObject::connect(ui->target, qOverload<int>(&QComboBox::currentIndexChanged), this, &StarTrackerGUI::on_target_currentIndexChanged);
+    QObject::connect(ui->targetSource, qOverload<int>(&QComboBox::currentIndexChanged), this, &StarTrackerGUI::on_targetSource_currentIndexChanged);
     QObject::connect(ui->displaySettings, &QToolButton::clicked, this, &StarTrackerGUI::on_displaySettings_clicked);
     QObject::connect(ui->dateTimeSelect, &QComboBox::currentTextChanged, this, &StarTrackerGUI::on_dateTimeSelect_currentTextChanged);
     QObject::connect(ui->dateTime, &WrappingDateTimeEdit::dateTimeChanged, this, &StarTrackerGUI::on_dateTime_dateTimeChanged);
+    QObject::connect(ui->utc, &QToolButton::clicked, this, &StarTrackerGUI::on_utc_clicked);
+    QObject::connect(ui->setTimeToNow, &QToolButton::clicked, this, &StarTrackerGUI::on_setTimeToNow_clicked);
     QObject::connect(ui->viewOnMap, &QToolButton::clicked, this, &StarTrackerGUI::on_viewOnMap_clicked);
     QObject::connect(ui->chartSelect, qOverload<int>(&QComboBox::currentIndexChanged), this, &StarTrackerGUI::on_chartSelect_currentIndexChanged);
     QObject::connect(ui->chartSubSelect, qOverload<int>(&QComboBox::currentIndexChanged), this, &StarTrackerGUI::on_chartSubSelect_currentIndexChanged);
@@ -2449,7 +3438,8 @@ void StarTrackerGUI::makeUIConnections()
     QObject::connect(ui->addAnimationFrame, &QToolButton::clicked, this, &StarTrackerGUI::on_addAnimationFrame_clicked);
     QObject::connect(ui->clearAnimation, &QToolButton::clicked, this, &StarTrackerGUI::on_clearAnimation_clicked);
     QObject::connect(ui->saveAnimation, &QToolButton::clicked, this, &StarTrackerGUI::on_saveAnimation_clicked);
+    QObject::connect(ui->logScale, &QToolButton::clicked, this, &StarTrackerGUI::on_logScale_clicked);
+    QObject::connect(ui->night, &QToolButton::clicked, this, &StarTrackerGUI::on_night_clicked);
     QObject::connect(ui->drawSun, &QToolButton::clicked, this, &StarTrackerGUI::on_drawSun_clicked);
     QObject::connect(ui->drawMoon, &QToolButton::clicked, this, &StarTrackerGUI::on_drawMoon_clicked);
 }
-

@@ -1,6 +1,6 @@
 ///////////////////////////////////////////////////////////////////////////////////
 // Copyright (C) 2019-2020, 2022 Edouard Griffiths, F4EXB <f4exb06@gmail.com>    //
-// Copyright (C) 2020-2022 Jon Beniston, M7RCE <jon@beniston.com>                //
+// Copyright (C) 2021-2026 Jon Beniston, M7RCE <jon@beniston.com>                //
 // Copyright (C) 2020 Vort <vvort@yandex.ru>                                     //
 // Copyright (C) 2022 Jiří Pinkava <jiri.pinkava@rossum.ai>                      //
 //                                                                               //
@@ -28,6 +28,7 @@
 #include "util/message.h"
 #include "util/messagequeue.h"
 #include "util/astronomy.h"
+#include "util/jplhorizons.h"
 
 #include "startrackersettings.h"
 
@@ -90,11 +91,28 @@ private:
     QTcpSocket *m_clientConnection;
     float m_solarFlux;
 
+    JPLHorizons *m_jplHorizons;
+    QString m_ephemeridesTarget;
+    QList<JPLHorizons::Ephemeris> m_horizonsEphemerides;
+    QString m_requestedEphemeridesTarget;
+    QDateTime m_requestedEphemeridesStartTime;
+    QDateTime m_requestedEphemeridesStopTime;
+    double m_requestedEphemeridesLatitude;
+    double m_requestedEphemeridesLongitude;
+
+    QString m_chartTarget;
+    double m_chartLatitude;
+    double m_chartLongitude;
+    QDateTime m_chartStartTime;
+    QString m_chartRA;
+    QString m_chartDec;
+    float m_chartL;
+    float m_chartB;
+
     bool handleMessage(const Message& cmd);
     void applySettings(const StarTrackerSettings& settings, const QList<QString>& settingsKeys, bool force = false);
     void restartServer(bool enabled, uint32_t port);
     MessageQueue *getMessageQueueToGUI() { return m_msgQueueToGUI; }
-    void updateRaDec(RADec rd, QDateTime dt, bool lbTarget);
     void writeStellariumTarget(double ra, double dec);
     void removeFromMap(QString id);
     void sendToMap(
@@ -106,6 +124,11 @@ private:
         double lon,
         double rotation = 0.0
     );
+    bool getAzElFromSatelliteTracker(double &azimuth, double &elevation);
+    bool getRAFromSkyMap(RADec &rdJ2000);
+    bool getRAFromHorizons(const QDateTime &dateTime, RADec &rdJ2000);
+    void calculateSolarSystemPositions(const QDateTime& dateTime);
+    void calculateJupiterParameters(const QDateTime& dateTime);
 
 private slots:
     void handleInputMessages();
@@ -114,6 +137,7 @@ private slots:
     void disconnected();
     void errorOccurred(QAbstractSocket::SocketError socketError);
     void readStellariumCommand();
+    void horizonsEphemeridesUpdated(const QString &target, const QList<JPLHorizons::Ephemeris>& ephemerides);
 };
 
 #endif // INCLUDE_FEATURE_STARTRACKERWORKER_H_

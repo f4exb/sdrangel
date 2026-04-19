@@ -246,6 +246,7 @@ set(sdrbase_SOURCES
     util/grb.cpp
     util/httpdownloadmanager.cpp
     util/interpolation.cpp
+    util/jplhorizons.cpp
     util/kiwisdrlist.cpp
     util/lfsr.cpp
     util/maidenhead.cpp
@@ -511,6 +512,7 @@ set(sdrbase_HEADERS
     util/incrementalarray.h
     util/incrementalvector.h
     util/interpolation.h
+    util/jplhorizons.h
     util/kiwisdrlist.h
     util/lfsr.h
     util/maidenhead.h

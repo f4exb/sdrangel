@@ -22,6 +22,7 @@
 #include <cstring>
 #include <regex>
 #include <memory>
+#include <string_view>
 #include <iio.h>
 
 #include <QtGlobal>
@@ -53,6 +54,7 @@ void DevicePlutoSDRScan::scan()
 
     m_scans.clear();
     m_scans.reserve(num_contexts);
+    qDebug("PlutoSDRScan::scan: found %d contexts", num_contexts);
 
     for (i = 0; i < num_contexts; i++)
     {
@@ -64,9 +66,12 @@ void DevicePlutoSDRScan::scan()
         }
 
         qDebug("PlutoSDRScan::scan: %d: %s [%s]", i, description, uri);
-        char *pch = strstr(const_cast<char*>(description), "PlutoSDR");
+        const std::string_view descriptionView = description ? std::string_view{description} : std::string_view{};
+        const bool isPlutoDescription =
+            (descriptionView.find("PlutoSDR") != std::string_view::npos) ||
+            (descriptionView.find("AD93") != std::string_view::npos);
 
-        if (pch)
+        if (isPlutoDescription)
         {
             // As device scan is used across multiple vectors it's best to use a
             // managed pointer, as to keep track of when it's safe to delete.

@@ -67,48 +67,21 @@
     </property>
     <item>
      <layout class="QGridLayout" name="gridLayout">
-      <item row="10" column="0">
-       <widget class="QLabel" name="galacticLatitudeLabel">
-        <property name="font">
-         <font>
-          <family>Liberation Sans</family>
-          <pointsize>9</pointsize>
-          <italic>true</italic>
-         </font>
-        </property>
-        <property name="text">
-         <string>l</string>
-        </property>
-       </widget>
-      </item>
-      <item row="8" column="1">
-       <widget class="DMSSpinBox" name="azimuth" native="true">
+      <item row="3" column="1">
+       <widget class="QComboBox" name="dateTimeSelect">
         <property name="toolTip">
-         <string>Azimuth in degrees to the target from the observation point</string>
+         <string>Select time to calculate target's position at</string>
         </property>
-       </widget>
-      </item>
-      <item row="3" column="0">
-       <widget class="QLabel" name="timeLabel">
-        <property name="text">
-         <string>Time</string>
-        </property>
-       </widget>
-      </item>
-      <item row="9" column="3">
-       <widget class="QDoubleSpinBox" name="elevationOffset">
-        <property name="toolTip">
-         <string>Offset in degrees to add to calculated target elevation</string>
-        </property>
-        <property name="decimals">
-         <number>3</number>
-        </property>
-        <property name="minimum">
-         <double>-180.000000000000000</double>
-        </property>
-        <property name="maximum">
-         <double>180.000000000000000</double>
-        </property>
+        <item>
+         <property name="text">
+          <string>Now</string>
+         </property>
+        </item>
+        <item>
+         <property name="text">
+          <string>Custom</string>
+         </property>
+        </item>
        </widget>
       </item>
       <item row="4" column="1">
@@ -121,17 +94,63 @@
         </property>
        </widget>
       </item>
-      <item row="8" column="2">
-       <widget class="QLabel" name="elevationLabel">
+      <item row="4" column="2">
+       <widget class="QLabel" name="solarFluxLabel">
         <property name="text">
-         <string>Elevation</string>
+         <string>Solar Flux</string>
         </property>
        </widget>
       </item>
-      <item row="7" column="2">
-       <widget class="QLabel" name="declinationLabel">
+      <item row="7" column="3">
+       <widget class="QLineEdit" name="declination">
+        <property name="toolTip">
+         <string>Declination of the target object
+
+This can be specified as a decimal (E.g. 34.23) or in degrees, minutes and seconds (E.g. 34d12m10.2s, 34d12'10.2&quot;  34 12 10.2)</string>
+        </property>
         <property name="text">
-         <string>Dec</string>
+         <string>-90d59'59.59&quot;</string>
+        </property>
+       </widget>
+      </item>
+      <item row="10" column="1">
+       <widget class="DMSSpinBox" name="galacticLongitude" native="true">
+        <property name="toolTip">
+         <string>Galactic longitude in degrees  (positive Eastward from galactic center)</string>
+        </property>
+       </widget>
+      </item>
+      <item row="7" column="0">
+       <widget class="QLabel" name="rightAscensionLabel">
+        <property name="text">
+         <string>RA</string>
+        </property>
+       </widget>
+      </item>
+      <item row="6" column="1">
+       <widget class="QSpinBox" name="frequency">
+        <property name="toolTip">
+         <string>Observation frequency (MHz)</string>
+        </property>
+        <property name="minimum">
+         <number>50</number>
+        </property>
+        <property name="maximum">
+         <number>100000</number>
+        </property>
+       </widget>
+      </item>
+      <item row="3" column="0">
+       <widget class="QLabel" name="timeLabel">
+        <property name="text">
+         <string>Time</string>
+        </property>
+       </widget>
+      </item>
+      <item row="2" column="2">
+       <widget class="QLabel" name="longitudeLabel">
+        <property name="text">
+         <string>Longitude</string>
         </property>
        </widget>
       </item>
@@ -154,10 +173,82 @@
         </property>
        </widget>
       </item>
-      <item row="2" column="2">
-       <widget class="QLabel" name="longitudeLabel">
+      <item row="7" column="2">
+       <widget class="QLabel" name="declinationLabel">
         <property name="text">
-         <string>Longitude</string>
+         <string>Dec</string>
+        </property>
+       </widget>
+      </item>
+      <item row="2" column="3">
+       <widget class="QDoubleSpinBox" name="longitude">
+        <property name="toolTip">
+         <string>Longitude in decimal degrees (East positive) of observation point / antenna location</string>
+        </property>
+        <property name="decimals">
+         <number>6</number>
+        </property>
+        <property name="minimum">
+         <double>-180.000000000000000</double>
+        </property>
+        <property name="maximum">
+         <double>180.000000000000000</double>
+        </property>
+        <property name="value">
+         <double>-180.000000000000000</double>
+        </property>
+       </widget>
+      </item>
+      <item row="5" column="0">
+       <widget class="QLabel" name="targetLabel">
+        <property name="text">
+         <string>Target</string>
+        </property>
+       </widget>
+      </item>
+      <item row="10" column="3">
+       <widget class="DMSSpinBox" name="galacticLatitude" native="true">
+        <property name="toolTip">
+         <string>Galactic latitude in degrees</string>
+        </property>
+       </widget>
+      </item>
+      <item row="8" column="0">
+       <widget class="QLabel" name="azimuthtLabel">
+        <property name="text">
+         <string>Azimuth</string>
+        </property>
+       </widget>
+      </item>
+      <item row="9" column="3">
+       <widget class="QDoubleSpinBox" name="elevationOffset">
+        <property name="toolTip">
+         <string>Offset in degrees to add to calculated target elevation</string>
+        </property>
+        <property name="decimals">
+         <number>3</number>
+        </property>
+        <property name="minimum">
+         <double>-180.000000000000000</double>
+        </property>
+        <property name="maximum">
+         <double>180.000000000000000</double>
+        </property>
+       </widget>
+      </item>
+      <item row="9" column="1">
+       <widget class="QDoubleSpinBox" name="azimuthOffset">
+        <property name="toolTip">
+         <string>Offset in degrees to added to calculated target azimuth</string>
+        </property>
+        <property name="decimals">
+         <number>3</number>
+        </property>
+        <property name="minimum">
+         <double>-360.000000000000000</double>
+        </property>
+        <property name="maximum">
+         <double>360.000000000000000</double>
         </property>
        </widget>
       </item>
@@ -167,7 +258,7 @@
          <widget class="QComboBox" name="target">
           <property name="minimumSize">
            <size>
-            <width>150</width>
+            <width>180</width>
             <height>0</height>
            </size>
           </property>
@@ -257,7 +348,7 @@
         <item>
          <spacer name="horizontalSpacer">
           <property name="orientation">
-           <enum>Qt::Horizontal</enum>
+           <enum>Qt::Orientation::Horizontal</enum>
           </property>
           <property name="sizeHint" stdset="0">
            <size>
@@ -267,14 +358,29 @@
           </property>
          </spacer>
         </item>
+        <item>
+         <widget class="QComboBox" name="targetSource">
+          <property name="toolTip">
+           <string>Source of targets</string>
+          </property>
+          <item>
+           <property name="text">
+            <string>SDRangel</string>
+           </property>
+          </item>
+          <item>
+           <property name="text">
+            <string>SPICE</string>
+           </property>
+          </item>
+          <item>
+           <property name="text">
+            <string>Horizons</string>
+           </property>
+          </item>
+         </widget>
+        </item>
        </layout>
-      </item>
-      <item row="4" column="2">
-       <widget class="QLabel" name="solarFluxLabel">
-        <property name="text">
-         <string>Solar Flux</string>
-        </property>
-       </widget>
       </item>
       <item row="6" column="0">
        <widget class="QLabel" name="frequencyLabel">
@@ -290,34 +396,45 @@
         </property>
        </widget>
       </item>
-      <item row="8" column="0">
-       <widget class="QLabel" name="azimuthtLabel">
-        <property name="text">
-         <string>Azimuth</string>
-        </property>
-       </widget>
-      </item>
-      <item row="8" column="3">
-       <widget class="DMSSpinBox" name="elevation" native="true">
+      <item row="8" column="1">
+       <widget class="DMSSpinBox" name="azimuth" native="true">
         <property name="toolTip">
-         <string>Elevation in degrees to the target from the observation point</string>
+         <string>Azimuth in degrees to the target from the observation point</string>
         </property>
        </widget>
       </item>
-      <item row="4" column="3">
-       <widget class="QLineEdit" name="solarFlux">
-        <property name="toolTip">
-         <string>Solar flux density</string>
-        </property>
-        <property name="readOnly">
-         <bool>true</bool>
-        </property>
-       </widget>
-      </item>
-      <item row="5" column="0">
-       <widget class="QLabel" name="targetLabel">
+      <item row="6" column="2">
+       <widget class="QLabel" name="beamwidthLabel">
         <property name="text">
-         <string>Target</string>
+         <string>Beamwidth</string>
+        </property>
+       </widget>
+      </item>
+      <item row="9" column="2">
+       <widget class="QLabel" name="elevationOffsetLabel">
+        <property name="text">
+         <string>El Offset</string>
+        </property>
+       </widget>
+      </item>
+      <item row="9" column="0">
+       <widget class="QLabel" name="azimuithOffsetLabel">
+        <property name="text">
+         <string>Az Offset</string>
+        </property>
+       </widget>
+      </item>
+      <item row="10" column="0">
+       <widget class="QLabel" name="galacticLatitudeLabel">
+        <property name="font">
+         <font>
+          <family>Liberation Sans</family>
+          <pointsize>9</pointsize>
+          <italic>true</italic>
+         </font>
+        </property>
+        <property name="text">
+         <string>l</string>
         </property>
        </widget>
       </item>
@@ -330,6 +447,49 @@ This can be specified as a decimal (E.g. 12.23) or in hours, minutes and seconds
         </property>
         <property name="text">
          <string>23h59m59.59s</string>
+        </property>
+       </widget>
+      </item>
+      <item row="2" column="1">
+       <widget class="QDoubleSpinBox" name="latitude">
+        <property name="toolTip">
+         <string>Latitude in decimal degrees (North positive) of observation point / antenna location</string>
+        </property>
+        <property name="decimals">
+         <number>6</number>
+        </property>
+        <property name="minimum">
+         <double>-90.000000000000000</double>
+        </property>
+        <property name="maximum">
+         <double>90.000000000000000</double>
+        </property>
+        <property name="value">
+         <double>-90.000000000000000</double>
+        </property>
+       </widget>
+      </item>
+      <item row="2" column="0">
+       <widget class="QLabel" name="latitudeLabel">
+        <property name="text">
+         <string>Latitude</string>
+        </property>
+       </widget>
+      </item>
+      <item row="8" column="2">
+       <widget class="QLabel" name="elevationLabel">
+        <property name="text">
+         <string>Elevation</string>
+        </property>
+       </widget>
+      </item>
+      <item row="4" column="3">
+       <widget class="QLineEdit" name="solarFlux">
+        <property name="toolTip">
+         <string>Solar flux density</string>
+        </property>
+        <property name="readOnly">
+         <bool>true</bool>
         </property>
        </widget>
       </item>
@@ -353,7 +513,7 @@ This can be specified as a decimal (E.g. 12.23) or in hours, minutes and seconds
         <item>
          <spacer name="horizontalSpacer_5">
           <property name="orientation">
-           <enum>Qt::Horizontal</enum>
+           <enum>Qt::Orientation::Horizontal</enum>
           </property>
           <property name="sizeHint" stdset="0">
            <size>
@@ -435,164 +595,6 @@ This can be specified as a decimal (E.g. 12.23) or in hours, minutes and seconds
         </item>
        </layout>
       </item>
-      <item row="7" column="0">
-       <widget class="QLabel" name="rightAscensionLabel">
-        <property name="text">
-         <string>RA</string>
-        </property>
-       </widget>
-      </item>
-      <item row="7" column="3">
-       <widget class="QLineEdit" name="declination">
-        <property name="toolTip">
-         <string>Declination of the target object
-
-This can be specified as a decimal (E.g. 34.23) or in degrees, minutes and seconds (E.g. 34d12m10.2s, 34d12'10.2&quot;  34 12 10.2)</string>
-        </property>
-        <property name="text">
-         <string>-90d59'59.59&quot;</string>
-        </property>
-       </widget>
-      </item>
-      <item row="9" column="1">
-       <widget class="QDoubleSpinBox" name="azimuthOffset">
-        <property name="toolTip">
-         <string>Offset in degrees to added to calculated target azimuth</string>
-        </property>
-        <property name="decimals">
-         <number>3</number>
-        </property>
-        <property name="minimum">
-         <double>-360.000000000000000</double>
-        </property>
-        <property name="maximum">
-         <double>360.000000000000000</double>
-        </property>
-       </widget>
-      </item>
-      <item row="6" column="2">
-       <widget class="QLabel" name="beamwidthLabel">
-        <property name="text">
-         <string>Beamwidth</string>
-        </property>
-       </widget>
-      </item>
-      <item row="2" column="1">
-       <widget class="QDoubleSpinBox" name="latitude">
-        <property name="toolTip">
-         <string>Latitude in decimal degrees (North positive) of observation point / antenna location</string>
-        </property>
-        <property name="decimals">
-         <number>6</number>
-        </property>
-        <property name="minimum">
-         <double>-90.000000000000000</double>
-        </property>
-        <property name="maximum">
-         <double>90.000000000000000</double>
-        </property>
-        <property name="value">
-         <double>-90.000000000000000</double>
-        </property>
-       </widget>
-      </item>
-      <item row="10" column="3">
-       <widget class="DMSSpinBox" name="galacticLatitude" native="true">
-        <property name="toolTip">
-         <string>Galactic latitude in degrees</string>
-        </property>
-       </widget>
-      </item>
-      <item row="6" column="1">
-       <widget class="QSpinBox" name="frequency">
-        <property name="toolTip">
-         <string>Observation frequency (MHz)</string>
-        </property>
-        <property name="minimum">
-         <number>50</number>
-        </property>
-        <property name="maximum">
-         <number>100000</number>
-        </property>
-       </widget>
-      </item>
-      <item row="9" column="0">
-       <widget class="QLabel" name="azimuithOffsetLabel">
-        <property name="text">
-         <string>Az Offset</string>
-        </property>
-       </widget>
-      </item>
-      <item row="3" column="2" colspan="2">
-       <widget class="WrappingDateTimeEdit" name="dateTime">
-        <property name="toolTip">
-         <string>Date and time to use when calculating target's position</string>
-        </property>
-        <property name="displayFormat">
-         <string>dd/MM/yyyy HH:mm:ss</string>
-        </property>
-        <property name="calendarPopup">
-         <bool>true</bool>
-        </property>
-       </widget>
-      </item>
-      <item row="2" column="3">
-       <widget class="QDoubleSpinBox" name="longitude">
-        <property name="toolTip">
-         <string>Longitude in decimal degrees (East positive) of observation point / antenna location</string>
-        </property>
-        <property name="decimals">
-         <number>6</number>
-        </property>
-        <property name="minimum">
-         <double>-180.000000000000000</double>
-        </property>
-        <property name="maximum">
-         <double>180.000000000000000</double>
-        </property>
-        <property name="value">
-         <double>-180.000000000000000</double>
-        </property>
-       </widget>
-      </item>
-      <item row="2" column="0">
-       <widget class="QLabel" name="latitudeLabel">
-        <property name="text">
-         <string>Latitude</string>
-        </property>
-       </widget>
-      </item>
-      <item row="3" column="1">
-       <widget class="QComboBox" name="dateTimeSelect">
-        <property name="toolTip">
-         <string>Select time to calculate target's position at</string>
-        </property>
-        <item>
-         <property name="text">
-          <string>Now</string>
-         </property>
-        </item>
-        <item>
-         <property name="text">
-          <string>Custom</string>
-         </property>
-        </item>
-       </widget>
-      </item>
-      <item row="9" column="2">
-       <widget class="QLabel" name="elevationOffsetLabel">
-        <property name="text">
-         <string>El Offset</string>
-        </property>
-       </widget>
-      </item>
-      <item row="10" column="1">
-       <widget class="DMSSpinBox" name="galacticLongitude" native="true">
-        <property name="toolTip">
-         <string>Galactic longitude in degrees  (positive Eastward from galactic center)</string>
-        </property>
-       </widget>
-      </item>
       <item row="10" column="2">
        <widget class="QLabel" name="galacticLongitudeLabel">
         <property name="font">
@@ -606,6 +608,57 @@ This can be specified as a decimal (E.g. 34.23) or in degrees, minutes and secon
          <string>b</string>
         </property>
        </widget>
+      </item>
+      <item row="8" column="3">
+       <widget class="DMSSpinBox" name="elevation" native="true">
+        <property name="toolTip">
+         <string>Elevation in degrees to the target from the observation point</string>
+        </property>
+       </widget>
+      </item>
+      <item row="3" column="2" colspan="2">
+       <layout class="QHBoxLayout" name="horizontalLayout_3">
+        <item>
+         <widget class="WrappingDateTimeEdit" name="dateTime">
+          <property name="toolTip">
+           <string>Date and time to use when calculating target's position</string>
+          </property>
+          <property name="displayFormat">
+           <string>dd/MM/yyyy HH:mm:ss</string>
+          </property>
+          <property name="calendarPopup">
+           <bool>true</bool>
+          </property>
+         </widget>
+        </item>
+        <item>
+         <widget class="ButtonSwitch" name="utc">
+          <property name="toolTip">
+           <string>Check for UTC time. Uncheck for local time.</string>
+          </property>
+          <property name="text">
+           <string>UTC</string>
+          </property>
+          <property name="checkable">
+           <bool>true</bool>
+          </property>
+         </widget>
+        </item>
+        <item>
+         <widget class="QToolButton" name="setTimeToNow">
+          <property name="toolTip">
+           <string>Set time to now</string>
+          </property>
+          <property name="text">
+           <string/>
+          </property>
+          <property name="icon">
+           <iconset resource="../../../sdrgui/resources/res.qrc">
+            <normaloff>:/recycle.png</normaloff>:/recycle.png</iconset>
+          </property>
+         </widget>
+        </item>
+       </layout>
       </item>
      </layout>
     </item>
@@ -635,21 +688,21 @@ This can be specified as a decimal (E.g. 34.23) or in degrees, minutes and secon
    <property name="windowTitle">
     <string>Plots</string>
    </property>
-   <layout class="QVBoxLayout" name="verticalLayout_2" stretch="0,0,0">
+   <layout class="QVBoxLayout" name="verticalLayout_2" stretch="0,0,0,0">
     <property name="spacing">
      <number>2</number>
     </property>
     <property name="leftMargin">
-     <number>3</number>
+     <number>2</number>
     </property>
     <property name="topMargin">
-     <number>3</number>
+     <number>2</number>
     </property>
     <property name="rightMargin">
-     <number>3</number>
+     <number>2</number>
     </property>
     <property name="bottomMargin">
-     <number>3</number>
+     <number>2</number>
     </property>
     <item>
      <layout class="QHBoxLayout" name="horizontalLayout">
@@ -678,10 +731,38 @@ This can be specified as a decimal (E.g. 34.23) or in degrees, minutes and secon
           <string>Galactic line of sight</string>
          </property>
         </item>
+        <item>
+         <property name="text">
+          <string>Solar system</string>
+         </property>
+        </item>
+        <item>
+         <property name="text">
+          <string>Jupiter CML and Moon Phase</string>
+         </property>
+        </item>
        </widget>
       </item>
       <item>
        <widget class="QComboBox" name="chartSubSelect"/>
+      </item>
+      <item>
+       <widget class="QToolButton" name="logScale">
+        <property name="toolTip">
+         <string>When checked, draws planetary orbits on log scale, rather than linear</string>
+        </property>
+        <property name="text">
+         <string/>
+        </property>
+        <property name="icon">
+         <iconset resource="../../../sdrgui/resources/res.qrc">
+          <normaloff>:/linear.png</normaloff>
+          <normalon>:/logarithmic.png</normalon>:/linear.png</iconset>
+        </property>
+        <property name="checkable">
+         <bool>true</bool>
+        </property>
+       </widget>
       </item>
       <item>
        <widget class="QToolButton" name="drawMoon">
@@ -769,6 +850,24 @@ This can be specified as a decimal (E.g. 34.23) or in degrees, minutes and secon
        </widget>
       </item>
       <item>
+       <widget class="QToolButton" name="night">
+        <property name="toolTip">
+         <string>Day / night. When unchecked, time runs from midnight to midnight. When checked, time runs from noon to noon.</string>
+        </property>
+        <property name="text">
+         <string/>
+        </property>
+        <property name="icon">
+         <iconset resource="startracker.qrc">
+          <normaloff>:/startracker/startracker/sun-button-24.png</normaloff>
+          <normalon>:/startracker/startracker/moon-button-24.png</normalon>:/startracker/startracker/sun-button-24.png</iconset>
+        </property>
+        <property name="checkable">
+         <bool>true</bool>
+        </property>
+       </widget>
+      </item>
+      <item>
        <widget class="QToolButton" name="darkTheme">
         <property name="toolTip">
          <string>Choose between light and dark themes</string>
@@ -799,7 +898,7 @@ This can be specified as a decimal (E.g. 34.23) or in degrees, minutes and secon
           <normaloff>:/zoomin.png</normaloff>:/zoomin.png</iconset>
         </property>
         <property name="checkable">
-         <bool>true</bool>
+         <bool>false</bool>
         </property>
        </widget>
       </item>
@@ -816,7 +915,7 @@ This can be specified as a decimal (E.g. 34.23) or in degrees, minutes and secon
           <normaloff>:/zoomout.png</normaloff>:/zoomout.png</iconset>
         </property>
         <property name="checkable">
-         <bool>true</bool>
+         <bool>false</bool>
         </property>
        </widget>
       </item>
@@ -841,6 +940,72 @@ This can be specified as a decimal (E.g. 34.23) or in degrees, minutes and secon
        </size>
       </property>
      </widget>
+    </item>
+    <item>
+     <layout class="QHBoxLayout" name="jupiterLayout">
+      <item>
+       <widget class="QLabel" name="jupiterElevationLabel">
+        <property name="text">
+         <string>El</string>
+        </property>
+       </widget>
+      </item>
+      <item>
+       <widget class="QLineEdit" name="jupiterElevation">
+        <property name="toolTip">
+         <string>Elevation of Jupiter from specified latitude and longitude in degrees</string>
+        </property>
+       </widget>
+      </item>
+      <item>
+       <widget class="QLabel" name="cmlLabel">
+        <property name="text">
+         <string>CML</string>
+        </property>
+       </widget>
+      </item>
+      <item>
+       <widget class="QLineEdit" name="cml">
+        <property name="toolTip">
+         <string>Jupiter Central Meridian Longitude in degrees</string>
+        </property>
+        <property name="readOnly">
+         <bool>true</bool>
+        </property>
+       </widget>
+      </item>
+      <item>
+       <widget class="QLabel" name="ioPhaseLabel">
+        <property name="text">
+         <string>Io Phase</string>
+        </property>
+       </widget>
+      </item>
+      <item>
+       <widget class="QLineEdit" name="ioPhase">
+        <property name="toolTip">
+         <string>Io phase angle in degrees</string>
+        </property>
+        <property name="readOnly">
+         <bool>true</bool>
+        </property>
+       </widget>
+      </item>
+      <item>
+       <widget class="QLabel" name="ganymedePhaseLabel">
+        <property name="text">
+         <string>Ganymede Phase</string>
+        </property>
+       </widget>
+      </item>
+      <item>
+       <widget class="QLineEdit" name="ganymedePhase">
+        <property name="toolTip">
+         <string>Ganymede phase angle in degrees</string>
+        </property>
+       </widget>
+      </item>
+     </layout>
     </item>
    </layout>
   </widget>
@@ -883,7 +1048,6 @@ This can be specified as a decimal (E.g. 34.23) or in degrees, minutes and secon
   <tabstop>latitude</tabstop>
   <tabstop>longitude</tabstop>
   <tabstop>dateTimeSelect</tabstop>
-  <tabstop>dateTime</tabstop>
   <tabstop>lst</tabstop>
   <tabstop>solarFlux</tabstop>
   <tabstop>target</tabstop>
