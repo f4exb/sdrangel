@@ -16,6 +16,10 @@ if (ENABLE_CHANNELTX_MODAM)
     add_subdirectory(modam)
 endif()
 
+if (ENABLE_CHANNELTX_MODCW)
+    add_subdirectory(modcw)
+endif()
+
 if (ENABLE_CHANNELTX_MODCHIRPCHAT)
     add_subdirectory(modchirpchat)
 endif()
