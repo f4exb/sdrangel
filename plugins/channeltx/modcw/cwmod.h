@@ -50,23 +50,23 @@ public:
 
     public:
         const CWModSettings& getSettings() const { return m_settings; }
-        const QStringList& getSettingKeys() const { return m_settingKeys; }
+        const QStringList& getSettingsKeys() const { return m_settingsKeys; }
         bool getForce() const { return m_force; }
 
-        static MsgConfigureCWMod* create(const QStringList& settingKeys, const CWModSettings& settings, bool force)
+        static MsgConfigureCWMod* create(const QStringList& settingsKeys, const CWModSettings& settings, bool force)
         {
-            return new MsgConfigureCWMod(settingKeys, settings, force);
+            return new MsgConfigureCWMod(settingsKeys, settings, force);
         }
 
     private:
         CWModSettings m_settings;
-        QStringList m_settingKeys;
+        QStringList m_settingsKeys;
         bool m_force;
 
-        MsgConfigureCWMod(const QStringList& settingKeys, const CWModSettings& settings, bool force) :
+        MsgConfigureCWMod(const QStringList& settingsKeys, const CWModSettings& settings, bool force) :
             Message(),
             m_settings(settings),
-            m_settingKeys(settingKeys),
+            m_settingsKeys(settingsKeys),
             m_force(force)
         { }
     };

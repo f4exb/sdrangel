@@ -70,8 +70,8 @@ private:
         DOT,
         DASH,
         SYMBOL_SPACE,   ///< Space between symbols within a character (1 dot duration)
-        CHAR_SPACE,     ///< Space between characters (3 dot durations, 1 already counted)
-        WORD_SPACE      ///< Space between words (7 dot durations, 1 already counted)
+        CHAR_SPACE,     ///< Extra silence between characters (2 dot durations; 1 already given by SYMBOL_SPACE = 3 total)
+        WORD_SPACE      ///< Extra silence between words (6 dot durations; 1 already given by SYMBOL_SPACE = 7 total)
     };
 
     int m_channelSampleRate;

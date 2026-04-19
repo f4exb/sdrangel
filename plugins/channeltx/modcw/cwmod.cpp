@@ -117,7 +117,7 @@ bool CWMod::handleMessage(const Message& cmd)
     {
         MsgConfigureCWMod& cfg = (MsgConfigureCWMod&) cmd;
         qDebug() << "CWMod::handleMessage: MsgConfigureCWMod";
-        applySettings(cfg.getSettingKeys(), cfg.getSettings(), cfg.getForce());
+        applySettings(cfg.getSettingsKeys(), cfg.getSettings(), cfg.getForce());
         return true;
     }
     else if (MsgTx::match(cmd))

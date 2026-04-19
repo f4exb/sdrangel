@@ -170,11 +170,15 @@ void CWModSource::nextElement()
         break;
     case CHAR_SPACE:
         m_keyOn = false;
-        m_samplesRemaining = 3 * m_dotSamples; // 3 dots minus the 1 already counted
+        // Inter-character space is 3 dot durations total; 1 dot is already provided
+        // by the preceding SYMBOL_SPACE, so we add only 2 more dot durations here.
+        m_samplesRemaining = 2 * m_dotSamples;
         break;
     case WORD_SPACE:
         m_keyOn = false;
-        m_samplesRemaining = 7 * m_dotSamples; // 7 dots minus the 1 already counted
+        // Inter-word space is 7 dot durations total; 1 dot is already provided
+        // by the preceding SYMBOL_SPACE, so we add only 6 more dot durations here.
+        m_samplesRemaining = 6 * m_dotSamples;
         break;
     default:
         m_keyOn = false;
