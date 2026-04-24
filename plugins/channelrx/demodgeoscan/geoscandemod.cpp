@@ -7,7 +7,9 @@ const char* const GeoscanDemod::m_channelId    = "GeoscanDemod";
 
 GeoscanDemod::GeoscanDemod(DeviceAPI *deviceAPI) :
     ChannelAPI(m_channelIdURI, ChannelAPI::StreamSingleSink),
-    m_deviceAPI(deviceAPI)
+    m_deviceAPI(deviceAPI),
+    m_sampleRate(DEFAULT_SAMPLE_RATE),
+    m_gfsk(DEFAULT_SAMPLE_RATE, SYMBOL_RATE)
 {
     setObjectName(m_channelId);
     qDebug() << "GeoscanDemod: создан";
@@ -35,12 +37,12 @@ void GeoscanDemod::feed(
     int count = std::distance(begin, end);
     qDebug() << "GeoscanDemod: получено сэмплов:" << count;
 
-    // Здесь будет GFSK демодулятор
-    // Пример чтения одного сэмпла:
-    // for (auto it = begin; it != end; ++it) {
-    //     float i = it->real();
-    //     float q = it->imag();
-    // }
+    for (auto it = begin; it != end; ++it) {
+        float i = it->real();
+        float q = it->imag();
+
+        uint8_t soft = m_gfsk.processSample(i, q);
+    }
 }
 
 void GeoscanDemod::start()
@@ -55,6 +57,12 @@ void GeoscanDemod::stop()
 
 bool GeoscanDemod::handleMessage(const Message& cmd)
 {
-    (void)cmd;
+    if (DSPSignalNotification::match(cmd)) {
+        const DSPSignalNotification& notif = (const DSPSignalNotification&) cmd;
+        m_sampleRate = notif.getSampleRate();                                                                                     
+        m_gfsk = GFSK(m_sampleRate, SYMBOL_RATE);
+        return true;
+    }
+    
     return false;
 }
