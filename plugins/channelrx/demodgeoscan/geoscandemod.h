@@ -8,6 +8,10 @@
 #include "channel/channelapi.h"
 #include "util/message.h"
 #include "geoscanGFSK.h"
+#include "dsp/dspcommands.h"
+
+#define SYMBOL_RATE 9600.0f
+#define DEFAULT_SAMPLE_RATE 96000.0f
 
 class DeviceAPI;
 
@@ -55,6 +59,7 @@ private:
     DeviceAPI *m_deviceAPI;
     virtual bool handleMessage(const Message& cmd);
 
+    float m_sampleRate;
     GFSK m_gfsk;
 };
 

@@ -11,8 +11,7 @@ public:
     uint8_t processSample(float i, float q);
 
 private:
-    float m_prevI;
-    float m_prevQ;
+    float m_prevAngle;
     float m_sensitivity;
 };
 
