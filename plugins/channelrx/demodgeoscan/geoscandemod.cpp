@@ -9,7 +9,10 @@ GeoscanDemod::GeoscanDemod(DeviceAPI *deviceAPI) :
     ChannelAPI(m_channelIdURI, ChannelAPI::StreamSingleSink),
     m_deviceAPI(deviceAPI),
     m_sampleRate(DEFAULT_SAMPLE_RATE),
-    m_gfsk(DEFAULT_SAMPLE_RATE, SYMBOL_RATE)
+    m_gfsk(DEFAULT_SAMPLE_RATE, SYMBOL_RATE),
+    m_crltr((int)(DEFAULT_SAMPLE_RATE / SYMBOL_RATE), DEFAULT_THRESHOLD, [this](std::vector<uint8_t>& packet) {
+        onPacketReady(packet);
+    })
 {
     setObjectName(m_channelId);
     qDebug() << "GeoscanDemod: создан";
@@ -35,13 +38,13 @@ void GeoscanDemod::feed(
 {
     (void)po;
     int count = std::distance(begin, end);
-    qDebug() << "GeoscanDemod: получено сэмплов:" << count;
 
     for (auto it = begin; it != end; ++it) {
         float i = it->real();
         float q = it->imag();
 
         uint8_t soft = m_gfsk.processSample(i, q);
+        m_crltr.process(soft);
     }
 }
 
@@ -65,4 +68,9 @@ bool GeoscanDemod::handleMessage(const Message& cmd)
     }
     
     return false;
+}
+
+void GeoscanDemod::onPacketReady(std::vector<uint8_t>& packet)
+{
+    qDebug() << "GeoscanDemod: получен пакет, байт:" << packet.size();
 }
