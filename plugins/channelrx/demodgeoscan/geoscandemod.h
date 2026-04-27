@@ -60,7 +60,7 @@ public:
 private:
     DeviceAPI *m_deviceAPI;
     virtual bool handleMessage(const Message& cmd);
-    void onPacketReady(std::vector<uint8_t>& packet);
+    void onPacketReady(const std::vector<uint8_t>& packet);
 
     float m_sampleRate;
     GFSK m_gfsk;

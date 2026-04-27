@@ -10,7 +10,7 @@ GeoscanDemod::GeoscanDemod(DeviceAPI *deviceAPI) :
     m_deviceAPI(deviceAPI),
     m_sampleRate(DEFAULT_SAMPLE_RATE),
     m_gfsk(DEFAULT_SAMPLE_RATE, SYMBOL_RATE),
-    m_crltr((int)(DEFAULT_SAMPLE_RATE / SYMBOL_RATE), DEFAULT_THRESHOLD, [this](std::vector<uint8_t>& packet) {
+    m_crltr((int)(DEFAULT_SAMPLE_RATE / SYMBOL_RATE), DEFAULT_THRESHOLD, [this](const std::vector<uint8_t>& packet) {
         onPacketReady(packet);
     })
 {
@@ -70,7 +70,7 @@ bool GeoscanDemod::handleMessage(const Message& cmd)
     return false;
 }
 
-void GeoscanDemod::onPacketReady(std::vector<uint8_t>& packet)
+void GeoscanDemod::onPacketReady(const std::vector<uint8_t>& packet)
 {
     qDebug() << "GeoscanDemod: получен пакет, байт:" << packet.size();
 }
