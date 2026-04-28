@@ -8,10 +8,12 @@
 #include "channel/channelapi.h"
 #include "util/message.h"
 #include "geoscanGFSK.h"
+#include "geoscanCorrelator.h"
 #include "dsp/dspcommands.h"
 
-#define SYMBOL_RATE 9600.0f
-#define DEFAULT_SAMPLE_RATE 96000.0f
+constexpr float SYMBOL_RATE        = 9600.0f;
+constexpr float DEFAULT_SAMPLE_RATE = 96000.0f;
+constexpr int DEFAULT_THRESHOLD = 6900;
 
 class DeviceAPI;
 
@@ -58,9 +60,11 @@ public:
 private:
     DeviceAPI *m_deviceAPI;
     virtual bool handleMessage(const Message& cmd);
+    void onPacketReady(const std::vector<uint8_t>& packet);
 
     float m_sampleRate;
     GFSK m_gfsk;
+    Correlator m_crltr;
 };
 
 #endif // INCLUDE_GEOSCANDEMOD_H
