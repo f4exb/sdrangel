@@ -30,6 +30,7 @@ int Correlator::contribution(const uint8_t* buffer, int from, int to) const
         for (int i = 0;    i <= to;         i++) { sum += buffer[i]; count++; }
     }
 
+    // Computes the soft decision by summing the contribution of each m_sampPerBit IQ sample to minimize deviations.
     return (int)(sum / count);
 }
 
@@ -51,9 +52,11 @@ void Correlator::process(uint8_t soft)
             sumCont += (SYNC_WORD[i] == 1) ? avg : (255 - avg);
         }
 
-        if (sumCont > m_threshold)
+        if (sumCont > m_threshold) {
             m_state = State::COLLECTING;
+        }
     }
+
     else if (m_state == State::COLLECTING) {
         // accumulate samples for current bit
         m_softSum += soft;
