@@ -14,6 +14,7 @@ set(geoscandemod_HEADERS
     geoscanCorrelator.h
     geoscanDCBlocker.h
     geoscanLowPassFilter.h
+
 )
 
 include_directories(
