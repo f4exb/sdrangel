@@ -2,20 +2,31 @@
 #define INCLUDE_GEOSCANDEMOD_H
 
 #include <QObject>
-#include <QThread>
+#include <QString>
 
 #include "dsp/basebandsamplesink.h"
 #include "channel/channelapi.h"
 #include "util/message.h"
+#include "geoscanDCBlocker.h"
 #include "geoscanGFSK.h"
+#include "geoscanLowPassFilter.h"
 #include "geoscanCorrelator.h"
 #include "dsp/dspcommands.h"
 
-constexpr float SYMBOL_RATE        = 9600.0f;
+constexpr float SYMBOL_RATE         = 9600.0f;
 constexpr float DEFAULT_SAMPLE_RATE = 96000.0f;
-constexpr int DEFAULT_THRESHOLD = 6900;
 
 class DeviceAPI;
+
+struct GeoscanSettings {
+    float   dev        = 150.0f;
+    float   bw         = 4800.0f;
+    int     threshold  = 6900;
+    float   deltaF     = 0.0f;
+    QString udpAddress = "127.0.0.1";
+    int     udpPort    = 9999;
+    int     decoder    = 0; // 0=RAW, 1=ADS-B, 2=AIS, 3=IMAGE
+};
 
 class GeoscanDemod : public BasebandSampleSink, public ChannelAPI
 {
@@ -57,14 +68,39 @@ public:
     static const char* const m_channelIdURI;
     static const char* const m_channelId;
 
+    class MsgConfigureGeoscan : public Message
+    {
+        MESSAGE_CLASS_DECLARATION
+    public:
+        const GeoscanSettings& getSettings() const { return m_settings; }
+
+        static MsgConfigureGeoscan* create(const GeoscanSettings& settings) {
+            return new MsgConfigureGeoscan(settings);
+        }
+
+    private:
+        GeoscanSettings m_settings;
+
+        MsgConfigureGeoscan(const GeoscanSettings& settings) :
+            Message(), m_settings(settings) {}
+    };
+
+    float getSnr() const { return m_snr; }
+
 private:
     DeviceAPI *m_deviceAPI;
     virtual bool handleMessage(const Message& cmd);
+    void applySettings(const GeoscanSettings& settings);
     void onPacketReady(const std::vector<uint8_t>& packet);
 
-    float m_sampleRate;
-    GFSK m_gfsk;
-    Correlator m_crltr;
+    float m_snr = 0.0f;
+
+    float           m_sampleRate;
+    GeoscanSettings m_settings;
+    DCBlocker       m_dcBlocker;
+    GFSK            m_gfsk;
+    LowPassFilter   m_lpf;
+    Correlator      m_crltr;
 };
 
 #endif // INCLUDE_GEOSCANDEMOD_H

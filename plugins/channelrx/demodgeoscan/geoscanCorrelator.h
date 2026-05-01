@@ -3,13 +3,17 @@
 #include <cstdint>
 #include <vector>
 #include <functional>
+#include <memory>
 
 constexpr int SYNC_WORD_LEN = 32;
 constexpr uint8_t SYNC_WORD[SYNC_WORD_LEN] = {
     1,0,0,1, 0,0,1,1, 0,0,0,0, 1,0,1,1,
     0,1,0,1, 0,0,0,1, 1,1,0,1, 1,1,1,0
 };
-constexpr int PACKET_SIZE = 72;
+
+constexpr int PACKET_DATA_SIZE = 72;
+constexpr int CRC_SIZE = 2;
+constexpr int PACKET_SIZE = PACKET_DATA_SIZE + CRC_SIZE;
 
 enum class State { SEARCHING, COLLECTING };
 
@@ -19,6 +23,11 @@ class Correlator {
 public:
     Correlator(int sampPerBit, int threshold, CallbackFunc callback);
     ~Correlator();
+
+    Correlator(const Correlator&) = delete;
+    Correlator& operator=(const Correlator&) = delete;
+    Correlator(Correlator&&) = default;
+    Correlator& operator=(Correlator&&) = default;
 
     void process(uint8_t soft);
 
@@ -34,8 +43,9 @@ private:
     // --- search state (circular buffer) ---
     State m_state;
     int m_bufferLen;
-    uint8_t* m_buffer;
+    std::unique_ptr<uint8_t[]> m_buffer; 
     int m_head = 0;
+    bool m_isInverted = false;
 
     // --- collect state ---
     uint8_t m_packet[PACKET_SIZE];

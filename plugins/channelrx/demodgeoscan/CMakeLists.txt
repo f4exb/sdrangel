@@ -3,11 +3,17 @@ project(geoscandemod)
 set(geoscandemod_SOURCES
     geoscandemod.cpp
     geoscanplugin.cpp
+    geoscanGFSK.cpp
+    geoscanCorrelator.cpp
 )
 
 set(geoscandemod_HEADERS
     geoscandemod.h
     geoscanplugin.h
+    geoscanGFSK.h
+    geoscanCorrelator.h
+    geoscanDCBlocker.h
+    geoscanLowPassFilter.h
 )
 
 include_directories(
