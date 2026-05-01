@@ -59,6 +59,8 @@ void GeoscanDemod::feed(
 
     float rms = std::sqrt(sumSq / count);
     m_snr = 20.0f * std::log10(rms + 1e-10f);
+
+
 }
 
 void GeoscanDemod::start()
@@ -69,11 +71,6 @@ void GeoscanDemod::start()
 void GeoscanDemod::stop()
 {
     qDebug() << "GeoscanDemod: остановлен";
-}
-
-float GeoscanDemod::getSnr() const
-{
-    return m_snr;
 }
 
 void GeoscanDemod::applySettings(const GeoscanSettings& settings)
@@ -107,7 +104,34 @@ bool GeoscanDemod::handleMessage(const Message& cmd)
     return false;
 }
 
-void GeoscanDemod::onPacketReady(const std::vector<uint8_t>& packet)
-{
-    qDebug() << "GeoscanDemod: получен пакет, байт:" << packet.size();
+void GeoscanDemod::onPacketReady(const std::vector<uint8_t>& packet) {
+    int packet_size = packet.size();
+    qDebug() << "GeoscanDemod: получен пакет, байт:" << packet_size;
+
+    std::vector<uint8_t> descrambled_packet = packet;
+
+    Scrambler::descramblePN9(descrambled_packet);
+
+    //Проверка CRC
+    uint16_t receivedCrc = 0;
+    receivedCrc |= (descrambled_packet[packet_size-2] << 8);
+    receivedCrc |= descrambled_packet[packet_size-1];
+    uint16_t crc = 0xFFFF;
+    for (uint16_t i = 0; i < packet_size - 2; i++) {
+        crc ^= (descrambled_packet[i] << 8);
+        for (uint16_t j = 0; j < 8; j++) {
+            if (crc & 0x8000) {
+                crc = (crc << 1) ^ 0x8005;
+            }
+            else {
+                crc <<= 1;
+            }
+        }
+    }
+
+    if(crc != receivedCrc) {
+        qDebug() << "CRC Failed";
+        return;
+    }
+    qDebug() << "CRC Completed";
 }
