@@ -6,12 +6,10 @@ Correlator::Correlator(int sampPerBit, int threshold, CallbackFunc callback)
     , m_callback(callback)
     , m_state(State::SEARCHING)
     , m_bufferLen(SYNC_WORD_LEN * sampPerBit)
-    , m_buffer(new uint8_t[SYNC_WORD_LEN * sampPerBit]{})
+    , m_buffer(std::make_unique<uint8_t[]>(SYNC_WORD_LEN * sampPerBit))
 {}
 
-Correlator::~Correlator() {
-    delete[] m_buffer;
-}
+Correlator::~Correlator() {}
 
 // Returns average soft value over circular buffer range [from, to]
 int Correlator::contribution(const uint8_t* buffer, int from, int to) const
@@ -38,22 +36,29 @@ void Correlator::process(uint8_t soft)
 {
     if (m_state == State::SEARCHING) {
         // push new sample into circular buffer
-        m_buffer[m_head] = soft;
+        m_buffer.get()[m_head] = soft;
         m_head = (m_head + 1) % m_bufferLen;
 
         // correlate buffer against each bit of SYNC_WORD
         int sumCont = 0;
+        int sumCountInvert = 0;
         for (int i = 0; i < SYNC_WORD_LEN; i++) {
             int symbolStart = (m_head + m_sampPerBit * i) % m_bufferLen;
             int symbolEnd   = (m_head + m_sampPerBit * (i + 1) - 1) % m_bufferLen;
-            int avg = contribution(m_buffer, symbolStart, symbolEnd);
+            int avg = contribution(m_buffer.get(), symbolStart, symbolEnd);
 
             // high avg → '1', invert for '0'
             sumCont += (SYNC_WORD[i] == 1) ? avg : (255 - avg);
+            sumCountInvert += (SYNC_WORD[i] == 0) ? avg : (255 - avg);
         }
 
         if (sumCont > m_threshold) {
             m_state = State::COLLECTING;
+        }
+
+        else if (sumCountInvert > m_threshold) {
+            m_state = State::COLLECTING;
+            m_isInverted = true;
         }
     }
 
@@ -65,6 +70,11 @@ void Correlator::process(uint8_t soft)
         if (m_samplesCount == m_sampPerBit) {
             // decide bit: avg above midpoint = 1, below = 0
             uint8_t bit = ((float)m_softSum / m_sampPerBit > 127.5f) ? 1 : 0;
+            
+            if (m_isInverted) {
+                bit = !bit;
+            }
+
             m_samplesCount = 0;
             m_softSum = 0;
 
@@ -82,6 +92,7 @@ void Correlator::process(uint8_t soft)
                 m_callback(std::vector<uint8_t>(m_packet, m_packet + PACKET_SIZE));
                 m_packetIndex = 0;
                 m_state = State::SEARCHING;
+                m_isInverted = false;
             }
         }
     }
