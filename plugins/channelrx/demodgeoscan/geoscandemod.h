@@ -11,6 +11,7 @@
 #include "geoscanGFSK.h"
 #include "geoscanLowPassFilter.h"
 #include "geoscanCorrelator.h"
+#include "geoscanPN9.h"
 #include "dsp/dspcommands.h"
 
 constexpr float SYMBOL_RATE         = 9600.0f;

@@ -5,6 +5,7 @@ set(geoscandemod_SOURCES
     geoscanplugin.cpp
     geoscanGFSK.cpp
     geoscanCorrelator.cpp
+    geoscanPN9.cpp
 )
 
 set(geoscandemod_HEADERS
@@ -14,7 +15,7 @@ set(geoscandemod_HEADERS
     geoscanCorrelator.h
     geoscanDCBlocker.h
     geoscanLowPassFilter.h
-
+    geoscanPN9.h
 )
 
 include_directories(
