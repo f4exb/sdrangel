@@ -11,7 +11,6 @@
 #include "geoscanGFSK.h"
 #include "geoscanLowPassFilter.h"
 #include "geoscanCorrelator.h"
-#include "geoscanPN9.h"
 #include "dsp/dspcommands.h"
 
 constexpr float SYMBOL_RATE         = 9600.0f;
@@ -65,7 +64,7 @@ public:
     {
         (void)streamIndex; (void)sinkElseSource; return 0;
     }
-
+	float getSnr() const { return m_snr; } 
     static const char* const m_channelIdURI;
     static const char* const m_channelId;
 
@@ -86,7 +85,6 @@ public:
             Message(), m_settings(settings) {}
     };
 
-    float getSnr() const { return m_snr; }
 
 private:
     DeviceAPI *m_deviceAPI;

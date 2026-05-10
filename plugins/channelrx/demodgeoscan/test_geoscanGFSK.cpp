@@ -5,6 +5,7 @@
 #include <cmath>
 #include <cstdio>
 #include <cassert>
+#include <cstdlib>
 
 static const float SAMPLE_RATE  = 96000.0f;
 static const float SYMBOL_RATE  =  9600.0f;

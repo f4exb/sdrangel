@@ -1,0 +1,139 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<ui version="4.0">
+ <class>GeoscanDemodGUI</class>
+ <widget class="QWidget" name="GeoscanDemodGUI">
+  <property name="geometry">
+   <rect><x>0</x><y>0</y><width>450</width><height>680</height></rect>
+  </property>
+  <property name="windowTitle">
+   <string>Geoscan Satellites Decoder</string>
+  </property>
+  <layout class="QVBoxLayout" name="mainLayout">
+   <item>
+    <widget class="QGroupBox" name="settingsGroup">
+     <property name="title"><string>Настройки</string></property>
+     <layout class="QFormLayout" name="formLayout">
+      <item row="0" column="0">
+       <widget class="QLabel" name="deltaFLabel"><property name="text"><string>Δf (Hz):</string></property></widget>
+      </item>
+      <item row="0" column="1">
+       <layout class="QHBoxLayout" name="deltaFLayout">
+        <item><widget class="QSlider" name="deltaFSlider"><property name="orientation"><enum>Qt::Horizontal</enum></property><property name="minimum"><number>-10000</number></property><property name="maximum"><number>10000</number></property><property name="value"><number>0</number></property></widget></item>
+        <item><widget class="QLabel" name="deltaFValue"><property name="text"><string>0.0</string></property></widget></item>
+       </layout>
+      </item>
+      <item row="1" column="0" colspan="2">
+       <layout class="QHBoxLayout" name="tleLayout">
+        <item><widget class="QPushButton" name="tleFileButton"><property name="text"><string>TLE файл...</string></property></widget></item>
+        <item><widget class="QLabel" name="tleFileName"><property name="text"><string>не выбран</string></property></widget></item>
+        <item><widget class="QComboBox" name="satelliteCombo"><property name="enabled"><bool>false</bool></property></widget></item>
+        <item><widget class="QCheckBox" name="dopplerCheck"><property name="text"><string>Авто-доплер</string></property></widget></item>
+       </layout>
+      </item>
+      <item row="2" column="0" colspan="2">
+       <widget class="QLabel" name="snrLabel"><property name="frameShape"><enum>QFrame::StyledPanel</enum></property><property name="text"><string>SNR: -- dB</string></property><property name="alignment"><set>Qt::AlignCenter</set></property></widget>
+      </item>
+      <item row="3" column="0">
+       <widget class="QLabel" name="bwLabel"><property name="text"><string>BW (Hz):</string></property></widget>
+      </item>
+      <item row="3" column="1">
+       <layout class="QHBoxLayout" name="bwLayout">
+        <item><widget class="QSlider" name="bwSlider"><property name="orientation"><enum>Qt::Horizontal</enum></property><property name="minimum"><number>1000</number></property><property name="maximum"><number>20000</number></property><property name="value"><number>4800</number></property></widget></item>
+        <item><widget class="QLabel" name="bwValue"><property name="text"><string>4800</string></property></widget></item>
+       </layout>
+      </item>
+      <item row="4" column="0">
+       <widget class="QLabel" name="devLabel"><property name="text"><string>dev (Hz):</string></property></widget>
+      </item>
+      <item row="4" column="1">
+       <layout class="QHBoxLayout" name="devLayout">
+        <item><widget class="QSlider" name="devSlider"><property name="orientation"><enum>Qt::Horizontal</enum></property><property name="minimum"><number>50</number></property><property name="maximum"><number>5000</number></property><property name="value"><number>150</number></property></widget></item>
+        <item><widget class="QLabel" name="devValue"><property name="text"><string>150</string></property></widget></item>
+       </layout>
+      </item>
+      <item row="5" column="0">
+       <widget class="QLabel" name="thLabel"><property name="text"><string>Threshold:</string></property></widget>
+      </item>
+      <item row="5" column="1">
+       <layout class="QHBoxLayout" name="thLayout">
+        <item><widget class="QSlider" name="thresholdSlider"><property name="orientation"><enum>Qt::Horizontal</enum></property><property name="minimum"><number>0</number></property><property name="maximum"><number>10000</number></property><property name="value"><number>6900</number></property></widget></item>
+        <item><widget class="QLabel" name="thValue"><property name="text"><string>6900</string></property></widget></item>
+       </layout>
+      </item>
+      <item row="6" column="0">
+       <widget class="QLabel" name="udpLabel"><property name="text"><string>UDP Output:</string></property></widget>
+      </item>
+      <item row="6" column="1">
+       <layout class="QHBoxLayout" name="udpLayout">
+        <item><widget class="QLineEdit" name="udpAddressEdit"><property name="text"><string>127.0.0.1</string></property></widget></item>
+        <item><widget class="QSpinBox" name="udpPortSpin"><property name="minimum"><number>1</number></property><property name="maximum"><number>65535</number></property><property name="value"><number>9999</number></property></widget></item>
+       </layout>
+      </item>
+      <item row="7" column="0">
+       <widget class="QLabel" name="formatLabel"><property name="text"><string>Format:</string></property></widget>
+      </item>
+      <item row="7" column="1">
+       <widget class="QComboBox" name="udpFormatCombo">
+        <item><property name="text"><string>Bits (1 bit/byte LSB)</string></property></item>
+        <item><property name="text"><string>Bytes</string></property></item>
+       </widget>
+      </item>
+      <item row="8" column="0">
+       <widget class="QLabel" name="decoderLabel"><property name="text"><string>Decoder:</string></property></widget>
+      </item>
+      <item row="8" column="1">
+       <widget class="QComboBox" name="decoderCombo">
+        <item><property name="text"><string>RAW</string></property></item>
+        <item><property name="text"><string>ADS-B</string></property></item>
+        <item><property name="text"><string>AIS</string></property></item>
+        <item><property name="text"><string>IMAGE</string></property></item>
+       </widget>
+      </item>
+     </layout>
+    </widget>
+   </item>
+   <item>
+    <widget class="QGroupBox" name="decoderGroup">
+     <property name="title"><string>Декодер</string></property>
+     <layout class="QVBoxLayout" name="decoderLayout">
+      <item>
+       <widget class="QStackedWidget" name="decoderStack">
+        <widget class="QWidget" name="rawPage">
+         <layout class="QVBoxLayout" name="rawLayout">
+          <item><widget class="QLabel" name="rawInfo"><property name="text"><string>RAW: передача пакетов в сокет</string></property></widget></item>
+          <item><spacer name="rawSpacer"><property name="orientation"><enum>Qt::Vertical</enum></property></spacer></item>
+         </layout>
+        </widget>
+        <widget class="QWidget" name="adsbPage">
+         <layout class="QVBoxLayout" name="adsbLayout">
+          <item><widget class="QTextEdit" name="adsbOutput"><property name="readOnly"><bool>true</bool></property><property name="placeholderText"><string>Ожидание ADS-B сообщений...</string></property></widget></item>
+         </layout>
+        </widget>
+        <widget class="QWidget" name="aisPage">
+         <layout class="QVBoxLayout" name="aisLayout">
+          <item><widget class="QTextEdit" name="aisOutput"><property name="readOnly"><bool>true</bool></property><property name="placeholderText"><string>Ожидание AIS сообщений...</string></property></widget></item>
+         </layout>
+        </widget>
+        <widget class="QWidget" name="imagePage">
+         <layout class="QVBoxLayout" name="imageLayout">
+          <item><widget class="QLabel" name="imageView"><property name="minimumSize"><size><width>320</width><height>240</height></size></property><property name="frameShape"><enum>QFrame::Box</enum></property><property name="text"><string>Ожидание данных...</string></property><property name="alignment"><set>Qt::AlignCenter</set></property></widget></item>
+          <item><widget class="QProgressBar" name="imageProgress"><property name="value"><number>0</number></property></widget></item>
+         </layout>
+        </widget>
+       </widget>
+      </item>
+     </layout>
+    </widget>
+   </item>
+   <item>
+    <layout class="QHBoxLayout" name="buttonLayout">
+     <item><widget class="QPushButton" name="startButton"><property name="text"><string>Старт</string></property></widget></item>
+     <item><widget class="QPushButton" name="stopButton"><property name="text"><string>Стоп</string></property></widget></item>
+     <item><spacer name="buttonSpacer"><property name="orientation"><enum>Qt::Horizontal</enum></property></spacer></item>
+    </layout>
+   </item>
+  </layout>
+ </widget>
+ <resources/>
+ <connections/>
+</ui>
