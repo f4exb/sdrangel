@@ -7,6 +7,7 @@ on:
       - snap
     tags:
       - 'v*'
+  workflow_dispatch:
 
 jobs:
   build_snap:

@@ -6,6 +6,7 @@ on:
       - mac_ci
     tags:
       - 'v*'
+  workflow_dispatch:
 
 jobs:
   build_mac_x64:
