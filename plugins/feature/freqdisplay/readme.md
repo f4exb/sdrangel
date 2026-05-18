@@ -24,7 +24,13 @@ Choose the text to display:
 * Power - displays the selected channel's (1) power in dB.
 * Frequency & Power - displays the selected channel's (1) centre frequency in Hz and power in dB.
 
-<h3>3: T - Transparent</h3>
+<h3>3: A - Active Only</h3>
+
+When active only is checked, the frequency / power will only be displayed for a channel if the channel is "active", which means its audio is unmuted and squelch is open.
+If not active, the frequency / power text will be cleared.
+When active only is unchecked, frequency / power will be displayed and spoken, regardless of the channel's audio mute or squelch.
+
+<h3>4: T - Transparent</h3>
 
 When Transparent mode is checked, only the centre frequency and/or power will be displayed with a transparent background,
 so it can be overlaid on other windows.
@@ -34,11 +40,11 @@ so it can be overlaid on other windows.
 When in transparent mode, the text can be repositioning by clicking and dragging it.
 To exit transparent mode, right click on any of the text, and select "Exit transparent mode" from the pop-up menu.
 
-<h3>4: Speech</h3>
+<h3>5: Speech</h3>
 
 When Speech mode is checked, whenever the displayed frequency and/or power value changes, the new value will be spoken.
 
-<h3>5: Units</h3>
+<h3>6: Units</h3>
 
 Specify the units for the frequency value:
 
@@ -47,31 +53,31 @@ Specify the units for the frequency value:
 * MHz
 * GHz
 
-<h3>6: U - Display Units</h3>
+<h3>7: U - Display Units</h3>
 
 When the U button is checked, units will be displayed and spoken.
 
-<h3>7: Freq DP - Frequency Decimal Places</h3>
+<h3>8: Freq DP - Frequency Decimal Places</h3>
 
-Freq DP specifies the number of decimal places used to display frequency values, when the units (5) are not Hz.
+Freq DP specifies the number of decimal places used to display frequency values, when the units (6) are not Hz.
 
-<h3>8: Power DP - Power Decimal Places</h3>
+<h3>9: Power DP - Power Decimal Places</h3>
 
 Power DP specifies the number of decimal places used to display power values.
 
-<h3>9: Font</h3>
+<h3>10: Font</h3>
 
 Select the font used to display frequency and power values.
 
-<h3>10: Font Colour</h3>
+<h3>11: Font Colour</h3>
 
 Select the colour for the font used to display frequency and power values.
 
-<h3>11: DS - Drop Shadow</h3>
+<h3>12: DS - Drop Shadow</h3>
 
 Check to enable a drop shadow behind the frequency and power text, which can improve readability against complex backgrounds when in transparent mode.
 
-<h3>12: Drop Shadow Colour</h3>
+<h3>13: Drop Shadow Colour</h3>
 
 Select the colour for the drop shadow used behind the frequency and power text.
 

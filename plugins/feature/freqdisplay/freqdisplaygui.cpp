@@ -269,6 +269,7 @@ void FreqDisplayGUI::displaySettings()
     }
     ui->displayMode->setCurrentIndex(static_cast<int>(m_settings.m_displayMode));
     ui->speech->setChecked(m_settings.m_speechEnabled);
+    ui->activeOnly->setChecked(m_settings.m_activeOnly);
     ui->transparentBackground->setChecked(m_settings.m_transparentBackground);
     ui->frequencyUnits->setCurrentIndex(static_cast<int>(m_settings.m_frequencyUnits));
     ui->showUnits->setChecked(m_settings.m_showUnits);
@@ -471,6 +472,22 @@ void FreqDisplayGUI::updateFrequencyText()
     const auto& selectedChannel = m_availableChannels.at(channelListIndex);
     const FreqDisplaySettings::DisplayMode mode = m_settings.m_displayMode;
 
+    if (m_settings.m_activeOnly)
+    {
+        // Only display frequency if channel is unmuted and squelch open
+        // If not, we clear the frequency display
+        int squelchValue;
+        int audioMuteValue;
+        bool hasSquelch = ChannelWebAPIUtils::getChannelReportValue(selectedChannel.m_superIndex, selectedChannel.m_index, "squelch", squelchValue);
+        bool hasAudioMute = ChannelWebAPIUtils::getChannelSetting(selectedChannel.m_superIndex, selectedChannel.m_index, "audioMute", audioMuteValue);
+        if ((hasSquelch && !squelchValue) || (hasAudioMute && audioMuteValue)) 
+        {
+            setLabelText(tr(""));
+            updateFrequencyFont();
+            return;
+        }
+    }
+
     // --- Frequency ---
     QString freqText;
     if (mode == FreqDisplaySettings::Frequency || mode == FreqDisplaySettings::Both)
@@ -484,11 +501,9 @@ void FreqDisplayGUI::updateFrequencyText()
             updateFrequencyFont();
             return;
         }
-        if (!ChannelWebAPIUtils::getFrequencyOffset(selectedChannel.m_superIndex, selectedChannel.m_index, offsetHz))
-        {
-            setLabelText(tr("Offset unavailable"));
-            updateFrequencyFont();
-            return;
+        // Not all channels have an offset
+        if (!ChannelWebAPIUtils::getFrequencyOffset(selectedChannel.m_superIndex, selectedChannel.m_index, offsetHz)) {
+            offsetHz = 0;
         }
 
         const qint64 absoluteFrequency = qRound64(centerFrequencyHz) + static_cast<qint64>(offsetHz);
@@ -864,6 +879,12 @@ QString FreqDisplayGUI::formatFrequency(qint64 frequencyHz) const
     }
 }
 
+void FreqDisplayGUI::on_activeOnly_toggled(bool checked)
+{
+    m_settings.m_activeOnly = checked;
+    applySetting("activeOnly");
+}
+
 void FreqDisplayGUI::on_transparentBackground_toggled(bool checked)
 {
     m_settings.m_transparentBackground = checked;
@@ -920,6 +941,7 @@ void FreqDisplayGUI::makeUIConnections()
     connect(ui->displayMode, qOverload<int>(&QComboBox::currentIndexChanged), this, &FreqDisplayGUI::on_displayMode_currentIndexChanged);
     connect(ui->speech, &ButtonSwitch::toggled, this, &FreqDisplayGUI::on_speech_toggled);
     connect(ui->fontFamily, &QFontComboBox::currentFontChanged, this, &FreqDisplayGUI::on_fontFamily_currentFontChanged);
+    connect(ui->activeOnly, &ButtonSwitch::toggled, this, &FreqDisplayGUI::on_activeOnly_toggled);
     connect(ui->transparentBackground, &ButtonSwitch::toggled, this, &FreqDisplayGUI::on_transparentBackground_toggled);
     connect(ui->frequencyUnits, qOverload<int>(&QComboBox::currentIndexChanged), this, &FreqDisplayGUI::on_frequencyUnits_currentIndexChanged);
     connect(ui->showUnits, &ButtonSwitch::toggled, this, &FreqDisplayGUI::on_showUnits_toggled);

@@ -108,6 +108,16 @@
        </widget>
       </item>
       <item>
+       <widget class="ButtonSwitch" name="activeOnly">
+        <property name="toolTip">
+         <string>When checked, display frequency / power only when channel is active (unmuted and squelch open)</string>
+        </property>
+        <property name="text">
+         <string>A</string>
+        </property>
+       </widget>
+      </item>
+      <item>
        <widget class="ButtonSwitch" name="transparentBackground">
         <property name="toolTip">
          <string>Click to display frequency / power on transparent background.

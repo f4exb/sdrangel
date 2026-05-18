@@ -1,62 +1,68 @@
+sdrangel (7.25.1-1) unstable; urgency=medium
+
+    * See Github release
+
+ -- Edouard Griffiths, F4EXB <f4exb06@gmail.com>  Mon, 05 May 2026 06:06:14 +0200
+
 sdrangel (7.25.0-1) unstable; urgency=medium
 
     * See Github release
 
-   -- Edouard Griffiths, F4EXB  <f4exb06@gmail.com>  Mon, 04 May 2026 03:57:14 +0200
+ -- Edouard Griffiths, F4EXB <f4exb06@gmail.com>  Mon, 04 May 2026 03:57:14 +0200
 
 sdrangel (7.24.0-1) unstable; urgency=medium
 
     * See Github release
 
-   -- Edouard Griffiths, F4EXB  <f4exb06@gmail.com>  Sat, 28 Mar 2026 18:18:14 +0100
+ -- Edouard Griffiths, F4EXB <f4exb06@gmail.com>  Sat, 28 Mar 2026 18:18:14 +0100
 
 sdrangel (7.23.2-1) unstable; urgency=medium
 
     * See Github release
 
-   -- Edouard Griffiths, F4EXB  <f4exb06@gmail.com>  Sat, 14 Feb 2026 09:57:19 +0100
+ -- Edouard Griffiths, F4EXB <f4exb06@gmail.com>  Sat, 14 Feb 2026 09:57:19 +0100
 
 sdrangel (7.23.1-1) unstable; urgency=medium
 
     * See Github release
 
-   -- Edouard Griffiths, F4EXB  <f4exb06@gmail.com>  Mon, 02 Feb 2026 21:37:03 +0100
+ -- Edouard Griffiths, F4EXB <f4exb06@gmail.com>  Mon, 02 Feb 2026 21:37:03 +0100
 
 sdrangel (7.23.0-1) unstable; urgency=medium
 
     * See Github release
 
-   -- Edouard Griffiths, F4EXB  <f4exb06@gmail.com>  Tue, 13 Dec 2025 18:06:47 +0100
+ -- Edouard Griffiths, F4EXB <f4exb06@gmail.com>  Tue, 13 Dec 2025 18:06:47 +0100
 
 sdrangel (7.22.10-1) unstable; urgency=medium
 
     * See Github release
 
-   -- Edouard Griffiths, F4EXB  <f4exb06@gmail.com>  Mon, 22 Dec 2025 08:26:27 +0100
+ -- Edouard Griffiths, F4EXB <f4exb06@gmail.com>  Mon, 22 Dec 2025 08:26:27 +0100
 
 sdrangel (7.22.9-1) unstable; urgency=medium
 
     * See Github release
 
-   -- Edouard Griffiths, F4EXB  <f4exb06@gmail.com>  Sun, 28 Sep 2025 15:58:05 +0200
+ -- Edouard Griffiths, F4EXB <f4exb06@gmail.com>  Sun, 28 Sep 2025 15:58:05 +0200
 
 sdrangel (7.22.8-1) unstable; urgency=medium
 
     * See Github release
 
-   -- Edouard Griffiths, F4EXB  <f4exb06@gmail.com>  Wed, 02 Jul 2025 17:00:39 +0200
+ -- Edouard Griffiths, F4EXB <f4exb06@gmail.com>  Wed, 02 Jul 2025 17:00:39 +0200
 
 sdrangel (7.22.7-1) unstable; urgency=medium
 
     * See Github release
 
-   -- Edouard Griffiths, F4EXB  <f4exb06@gmail.com>  Sun, 04 May 2025 17:58:14 +0200
+ -- Edouard Griffiths, F4EXB <f4exb06@gmail.com>  Sun, 04 May 2025 17:58:14 +0200
 
 sdrangel (7.22.6-1) unstable; urgency=medium
 
     * See Github release
 
-   -- Edouard Griffiths, F4EXB  <f4exb06@gmail.com>  Sun, 02 Feb 2025 18:08:11 +0100
+ -- Edouard Griffiths, F4EXB <f4exb06@gmail.com>  Sun, 02 Feb 2025 18:08:11 +0100
 
 sdrangel (7.22.5-1) unstable; urgency=medium
 
@@ -80,7 +86,7 @@ sdrangel (7.22.5-1) unstable; urgency=medium
     * Fixed Appveyor Docker image build
     * Fix output-artifact-directory and unzip file. PR #2323
 
-   -- Edouard Griffiths, F4EXB  <f4exb06@gmail.com>  Thu, 05 Dec 2024 01:07:27 +0100
+ -- Edouard Griffiths, F4EXB <f4exb06@gmail.com>  Thu, 05 Dec 2024 01:07:27 +0100
 
 sdrangel (7.22.4-1) unstable; urgency=medium
 
@@ -90,7 +96,7 @@ sdrangel (7.22.4-1) unstable; urgency=medium
     * Added qtwebchannel dependecy to fix missing 3d Map and Sky Map from Windows release. PR #2316
     * Removed .deb package build from Appveyor
 
-   -- Edouard Griffiths, F4EXB  <f4exb06@gmail.com>  Mom, 11 Nov 2024 08:42:03 +0100
+ -- Edouard Griffiths, F4EXB <f4exb06@gmail.com>  Mom, 11 Nov 2024 08:42:03 +0100
 
 sdrangel (7.22.3-1) unstable; urgency=medium
 
@@ -112,7 +118,7 @@ sdrangel (7.22.3-1) unstable; urgency=medium
     * Update Qt optional packages for 6.8 , PR #2287
     * Use Qt 6.8 for Windows build. PR #2287
 
-   -- Edouard Griffiths, F4EXB  <f4exb06@gmail.com>  Sat, 09 Nov 2024 17:30:44 +0100
+ -- Edouard Griffiths, F4EXB <f4exb06@gmail.com>  Sat, 09 Nov 2024 17:30:44 +0100
 
 sdrangel (7.22.2-1) unstable; urgency=medium
 
@@ -135,7 +141,7 @@ sdrangel (7.22.2-1) unstable; urgency=medium
     * RemoteTCPInput: Add wss protocol support. PR #2270
     * Fix DeviceAPI::deserialize. Fixes #2266. PR #2267
 
-   -- Edouard Griffiths, F4EXB  <f4exb06@gmail.com>  Sun, 20 Oct 2024 08:26:38 +0200
+ -- Edouard Griffiths, F4EXB <f4exb06@gmail.com>  Sun, 20 Oct 2024 08:26:38 +0200
 
 sdrangel (7.22.1-1) unstable; urgency=medium
 
@@ -165,7 +171,7 @@ sdrangel (7.22.1-1) unstable; urgency=medium
     * Frequency Scanner: initialize pointer to FrequencyScanner. Fixes #2262
     * Update channel list upon Morse Decoder and Demod Analyzer GUI creation. Fixes #2263
 
-   -- Edouard Griffiths, F4EXB  <f4exb06@gmail.com>  Sun, 06 Oct 2024 08:39:11 +0200
+ -- Edouard Griffiths, F4EXB <f4exb06@gmail.com>  Sun, 06 Oct 2024 08:39:11 +0200
 
 sdrangel (7.22.0-1) unstable; urgency=medium
 
@@ -182,7 +188,7 @@ sdrangel (7.22.0-1) unstable; urgency=medium
     * Frequency Scanner: Fix rounding error. PR #2186
     * Update sdrangel-windows-libraries link to include latest VC redistributable. PR #2185
 
-   -- Edouard Griffiths, F4EXB  <f4exb06@gmail.com>  Tue, 13 Aug 2024 17:01:01 +0200
+ -- Edouard Griffiths, F4EXB <f4exb06@gmail.com>  Tue, 13 Aug 2024 17:01:01 +0200
 
 sdrangel (7.21.4-1) unstable; urgency=medium
 
@@ -199,7 +205,7 @@ sdrangel (7.21.4-1) unstable; urgency=medium
     * Heat Map: Allow selecting which data to be saved to reduce memory requirements. PR #2175
     * ILS Demod: Add DDM/SDM/Deviation to channel report. PR #2174
 
-   -- Edouard Griffiths, F4EXB  <f4exb06@gmail.com>  Tue, 25 Jun 2024 20:17:52 +0200
+ -- Edouard Griffiths, F4EXB <f4exb06@gmail.com>  Tue, 25 Jun 2024 20:17:52 +0200
 
 sdrangel (7.21.3-1) unstable; urgency=medium
 
@@ -212,7 +218,7 @@ sdrangel (7.21.3-1) unstable; urgency=medium
    * Remove use of deprecated QRegExp. PR #2160
    * Fix memleaks. PR #2157
 
-  -- Edouard Griffiths, F4EXB  <f4exb06@gmail.com>  Mon, 17 Jun 2024 22:30:17 +0200
+  -- Edouard Griffiths, F4EXB <f4exb06@gmail.com>  Mon, 17 Jun 2024 22:30:17 +0200
 
 sdrangel (7.21.2-1) unstable; urgency=medium
 
@@ -242,13 +248,13 @@ sdrangel (7.21.2-1) unstable; urgency=medium
    * Install subversion for Mac build. PR #2123
    * Fix ggmorse paths on ma. PR #2123
 
-  -- Edouard Griffiths, F4EXB  <f4exb06@gmail.com>  Fri, 06 Jun 2024 20:09:11 +0200
+  -- Edouard Griffiths, F4EXB <f4exb06@gmail.com>  Fri, 06 Jun 2024 20:09:11 +0200
 
 sdrangel (7.21.1-1) unstable; urgency=medium
 
    * Morse Decoder feature: Fix for Qt6 and Windows. PR #2122
 
-  -- Edouard Griffiths, F4EXB  <f4exb06@gmail.com>  Fri, 24 May 2024 10:29:04 +0200
+  -- Edouard Griffiths, F4EXB <f4exb06@gmail.com>  Fri, 24 May 2024 10:29:04 +0200
 
 sdrangel (7.21.0-1) unstable; urgency=medium
 
@@ -261,7 +267,7 @@ sdrangel (7.21.0-1) unstable; urgency=medium
    * Do not create a Message if there is no worker to send to. PT #2058
    * Add cmake option to optionally compile with LeakSanitizer. PR #2058
 
-  -- Edouard Griffiths, F4EXB  <f4exb06@gmail.com>  Thu, 23 May 2024 22:18:08 +0200
+  -- Edouard Griffiths, F4EXB <f4exb06@gmail.com>  Thu, 23 May 2024 22:18:08 +0200
 
 sdrangel (7.20.1-1) unstable; urgency=medium
 
@@ -297,7 +303,7 @@ sdrangel (7.20.1-1) unstable; urgency=medium
    * LocalSink: refactored getLocalDevice method
    * Metis MISO: added lock all Rx frequencies option
 
-  -- Edouard Griffiths, F4EXB  <f4exb06@gmail.com>  Sun, 15 May 2024 10:01:05 +0200
+  -- Edouard Griffiths, F4EXB <f4exb06@gmail.com>  Sun, 15 May 2024 10:01:05 +0200
 
 sdrangel (7.20.0-1) unstable; urgency=medium
 
@@ -325,7 +331,7 @@ sdrangel (7.20.0-1) unstable; urgency=medium
    * AIS Demod: Remove unused filter. PR #2052
    * SkyMap: Fix erronous entry in source list. PR #2052
 
-  -- Edouard Griffiths, F4EXB  <f4exb06@gmail.com>  Sun, 14 Apr 2024 09:15:24 +0200
+  -- Edouard Griffiths, F4EXB <f4exb06@gmail.com>  Sun, 14 Apr 2024 09:15:24 +0200
 
 sdrangel (7.19.1-1) unstable; urgency=medium
 
@@ -337,7 +343,7 @@ sdrangel (7.19.1-1) unstable; urgency=medium
    * Scan all plugins for qml (for Mac). PR #2014
    * fix memset() arguments order in vkfftengine. PR #2013
 
-  -- Edouard Griffiths, F4EXB  <f4exb06@gmail.com>  Sun, 17 Mar 2024 19:17:00 +0100
+  -- Edouard Griffiths, F4EXB <f4exb06@gmail.com>  Sun, 17 Mar 2024 19:17:00 +0100
 
 sdrangel (7.19.0-1) unstable; urgency=medium
 
@@ -371,13 +377,13 @@ sdrangel (7.19.0-1) unstable; urgency=medium
    * Class to handle amateur radio callsigns and corresponding country data. Part of #2008
    * FT8 demod: implemented DXCC country decoding. Implements #2008
 
-  -- Edouard Griffiths, F4EXB  <f4exb06@gmail.com>  Fri, 08 Mar 2024 18:12:42 +0100
+  -- Edouard Griffiths, F4EXB <f4exb06@gmail.com>  Fri, 08 Mar 2024 18:12:42 +0100
 
 sdrangel (7.18.0-1) unstable; urgency=medium
 
    * Upgrade to SDRPlay API to 3.14 and support for RSP 1B
 
-  -- Edouard Griffiths, F4EXB  <f4exb06@gmail.com>  Wed, 21 Feb 2024 12:53:33 +0100
+  -- Edouard Griffiths, F4EXB <f4exb06@gmail.com>  Wed, 21 Feb 2024 12:53:33 +0100
 
 sdrangel (7.18.0-1) unstable; urgency=medium
 
@@ -395,7 +401,7 @@ sdrangel (7.18.0-1) unstable; urgency=medium
    * Fix frequency calculation for SSB spectrum. PR #1946
    * File Input: Fix seeking over .wav header. PR #1946
 
-  -- Edouard Griffiths, F4EXB  <f4exb06@gmail.com>  Sun, 18 Feb 2024 10:46:39 +0100
+  -- Edouard Griffiths, F4EXB <f4exb06@gmail.com>  Sun, 18 Feb 2024 10:46:39 +0100
 
 sdrangel (7.17.3-1) unstable; urgency=medium
 
@@ -425,7 +431,7 @@ sdrangel (7.17.3-1) unstable; urgency=medium
    * Use separate date/time fields and prefix address with leading 0. Fixes #1936. PR #1937.
    * Radioastronomy: Handle negative flux values in .srd file. PR #1940.
 
-  -- Edouard Griffiths, F4EXB  <f4exb06@gmail.com>  Sun, 31 Dec 2023 17:58:51 +0100
+  -- Edouard Griffiths, F4EXB <f4exb06@gmail.com>  Sun, 31 Dec 2023 17:58:51 +0100
 
 sdrangel (7.17.2-1) unstable; urgency=medium
 
@@ -441,7 +447,7 @@ sdrangel (7.17.2-1) unstable; urgency=medium
    * Display FIFO size on overflow. PR #1905
    * Freq scanner: Stop scanning when Tune menu selected. PR #1905
 
-  -- Edouard Griffiths, F4EXB  <f4exb06@gmail.com>  Mon, 04 Dec 2023 20:35:40 +0100
+  -- Edouard Griffiths, F4EXB <f4exb06@gmail.com>  Mon, 04 Dec 2023 20:35:40 +0100
 
 sdrangel (7.17.1-1) unstable; urgency=medium
 
@@ -464,7 +470,7 @@ sdrangel (7.17.1-1) unstable; urgency=medium
    * Add instant replay for RTL SDR, SDR Play V3, USRP and Airspy HF RXes. PR #1900.
    * Scope trigger fix. PR #1902. Part of #1901
 
-  -- Edouard Griffiths, F4EXB  <f4exb06@gmail.com>  Wed, 29 Nov 2023 03:00:21 +0100
+  -- Edouard Griffiths, F4EXB <f4exb06@gmail.com>  Wed, 29 Nov 2023 03:00:21 +0100
 
 sdrangel (7.17.0-1) unstable; urgency=medium
 
@@ -477,7 +483,7 @@ sdrangel (7.17.0-1) unstable; urgency=medium
    * Various ADS-B enhancements. PR #1861
    * Use channel sample rate of 48k in RTTY and PSK31 mods. Fixes #1862. PR #1865
 
-  -- Edouard Griffiths, F4EXB  <f4exb06@gmail.com>  Sun, 29 Oct 2023 04:21:18 +0100
+  -- Edouard Griffiths, F4EXB <f4exb06@gmail.com>  Sun, 29 Oct 2023 04:21:18 +0100
 
 sdrangel (7.16.0-1) unstable; urgency=medium
 
@@ -494,7 +500,7 @@ sdrangel (7.16.0-1) unstable; urgency=medium
    * Distingush between China and Taiwan. PR #1810. Fixes #1805
    * Add command line options to start Remote TCP Sink on a specified device/ PR #1809.
 
-  -- Edouard Griffiths, F4EXB  <f4exb06@gmail.com>  Thu, 21 Sep 2023 22:44:31 +0200
+  -- Edouard Griffiths, F4EXB <f4exb06@gmail.com>  Thu, 21 Sep 2023 22:44:31 +0200
 
 sdrangel (7.15.4-1) unstable; urgency=medium
 
@@ -508,7 +514,7 @@ sdrangel (7.15.4-1) unstable; urgency=medium
    * Optmize redrawing of charts in Star Tracker. PR #1791
    * Initialise PhaseDiscriminators state, to avoid outputting huge values. Fix #1794. PR #1794
 
-  -- Edouard Griffiths, F4EXB  <f4exb06@gmail.com>  Sat, 02 Sep 2023 19:12:12 +0200
+  -- Edouard Griffiths, F4EXB <f4exb06@gmail.com>  Sat, 02 Sep 2023 19:12:12 +0200
 
 sdrangel (7.15.3-1) unstable; urgency=medium
 
@@ -521,7 +527,7 @@ sdrangel (7.15.3-1) unstable; urgency=medium
    * Rotator controller: use precision to determine step size. PR #1775
    * Add VkFFT support and profiler. Implements #1166. PR #1779.
 
-  -- Edouard Griffiths, F4EXB  <f4exb06@gmail.com>  Sun, 20 Aug 2023 21:10:13 +0200
+  -- Edouard Griffiths, F4EXB <f4exb06@gmail.com>  Sun, 20 Aug 2023 21:10:13 +0200
 
 sdrangel (7.15.2-1) unstable; urgency=medium
 
@@ -535,7 +541,7 @@ sdrangel (7.15.2-1) unstable; urgency=medium
    * DSD demod UI: Connect slot 1/2 on/off buttons. PR #1758. Fixes #1752
    * Use texture() instead of texture2d() in v330 shaders, so they work on Mac. PR #1759. Fixes #1757
 
-  -- Edouard Griffiths, F4EXB  <f4exb06@gmail.com>  Fri, 04 Aug 2023 01:17:54 +0200
+  -- Edouard Griffiths, F4EXB <f4exb06@gmail.com>  Fri, 04 Aug 2023 01:17:54 +0200
 
 sdrangel (7.15.1-1) unstable; urgency=medium
 
@@ -552,7 +558,7 @@ sdrangel (7.15.1-1) unstable; urgency=medium
    * Audio Input: handle real signals with new main spectrum feature
    * PlutoSDR input/output: do not apply settings to self when coming from a buddy change. Fixes #1690
 
-  -- Edouard Griffiths, F4EXB  <f4exb06@gmail.com>  Tue, 11 Jul 2023 15:45:58 +0200
+  -- Edouard Griffiths, F4EXB <f4exb06@gmail.com>  Tue, 11 Jul 2023 15:45:58 +0200
 
 sdrangel (7.15.0-1) unstable; urgency=medium
 
@@ -562,7 +568,7 @@ sdrangel (7.15.0-1) unstable; urgency=medium
    * SigMFFileInput: fixed acceleration. Part of issue #1699
    * SimplePTT: fixed typo in code. Fixes #1705
 
-  -- Edouard Griffiths, F4EXB  <f4exb06@gmail.com>  Sun, 18 Jun 2023 22:38:55 +0200
+  -- Edouard Griffiths, F4EXB <f4exb06@gmail.com>  Sun, 18 Jun 2023 22:38:55 +0200
 
 sdrangel (7.14.2-1) unstable; urgency=medium
 
@@ -570,14 +576,14 @@ sdrangel (7.14.2-1) unstable; urgency=medium
   * Allow SigMF plugins to work in Windows. PR #1700
   * Only update widgets from UI thread. Fixes #1692. PR #1692
 
-  -- Edouard Griffiths, F4EXB  <f4exb06@gmail.com>  Mon, 28 May 2023 22:04:01 +0200
+  -- Edouard Griffiths, F4EXB <f4exb06@gmail.com>  Mon, 28 May 2023 22:04:01 +0200
 
 sdrangel (7.14.1-1) unstable; urgency=medium
 
   * Fix Sat Tracker crash in previous release. Fixes #1682. PR #1696.
   * Add support for tracking Satellites in the Star Tracker. PR #1696.
 
-  -- Edouard Griffiths, F4EXB  <f4exb06@gmail.com>  Wed, 24 May 2023 06:40:43 +0200
+  -- Edouard Griffiths, F4EXB <f4exb06@gmail.com>  Wed, 24 May 2023 06:40:43 +0200
 
 sdrangel (7.14.0-1) unstable; urgency=medium
 
@@ -608,7 +614,7 @@ sdrangel (7.14.0-1) unstable; urgency=medium
   * Update spectrum settings to match what's used in sink. Fix deserialisation of UI related settings. PR #1695
   * Aaronia RTSA: Fixed API device settings PUT and PATCH
 
-  -- Edouard Griffiths, F4EXB  <f4exb06@gmail.com>  Tue, 23 May 2023 20:09:23 +0200
+  -- Edouard Griffiths, F4EXB <f4exb06@gmail.com>  Tue, 23 May 2023 20:09:23 +0200
 
 sdrangel (7.13.0-1) unstable; urgency=medium
 
@@ -620,7 +626,7 @@ sdrangel (7.13.0-1) unstable; urgency=medium
   - DATV demod: GUI: set RF bandwidth with standard SR
   - Airspy: corrected transverter frequency and mode setting from GUI
 
-  -- Edouard Griffiths, F4EXB  <f4exb06@gmail.com>  Thu, 06 Apr 2023 20:38:25 +0200
+  -- Edouard Griffiths, F4EXB <f4exb06@gmail.com>  Thu, 06 Apr 2023 20:38:25 +0200
 
 sdrangel (7.12.0-1) unstable; urgency=medium
 
@@ -633,7 +639,7 @@ sdrangel (7.12.0-1) unstable; urgency=medium
   - Fix missing GUI connections in Radio Astronomy plugin. Scan for features on startup. PR #1646
   - Fix settings keys in Star Tracker (Rename to settings to match). PR #1646
 
-  -- Edouard Griffiths, F4EXB  <f4exb06@gmail.com>  Sat, 01 Apr 2023 11:39:53 +0200
+  -- Edouard Griffiths, F4EXB <f4exb06@gmail.com>  Sat, 01 Apr 2023 11:39:53 +0200
 
 sdrangel (7.11.0-1) unstable; urgency=medium
 
@@ -651,7 +657,7 @@ sdrangel (7.11.0-1) unstable; urgency=medium
   - MainWindow: disconnect prior to connect in device re-numeration. Fixes #1620
   - Fixing errors when compiling using qt6. Fixes #1625. PR #1629
 
-  -- Edouard Griffiths, F4EXB  <f4exb06@gmail.com>  Sat, 18 Mar 2023 12:41:20 +0100
+  -- Edouard Griffiths, F4EXB <f4exb06@gmail.com>  Sat, 18 Mar 2023 12:41:20 +0100
 
 sdrangel (7.10.0-1) unstable; urgency=medium
 
@@ -666,7 +672,7 @@ sdrangel (7.10.0-1) unstable; urgency=medium
   - Android: Prevent app from being put to sleep when running. Add menu to keep screen on. PR #1602
   - SSB demod GUI: display channel marker in correct stream if connected to a MIMO device
 
-  -- Edouard Griffiths, F4EXB  <f4exb06@gmail.com>  Wed, 23 Feb 2023 23:59:54 +0100
+  -- Edouard Griffiths, F4EXB <f4exb06@gmail.com>  Wed, 23 Feb 2023 23:59:54 +0100
 
 sdrangel (7.9.0-1) unstable; urgency=medium
 
@@ -681,7 +687,7 @@ sdrangel (7.9.0-1) unstable; urgency=medium
   - Add reset measurements button to Spectrum GUI, PR #1565
   - Speed up enumeration / opening USRP B210 by using hardcoded values. PR #1566
 
-  -- Edouard Griffiths, F4EXB  <f4exb06@gmail.com>  Wed, 01 Feb 2023 08:14:50 +0100
+  -- Edouard Griffiths, F4EXB <f4exb06@gmail.com>  Wed, 01 Feb 2023 08:14:50 +0100
 
 sdrangel (7.8.6-1) unstable; urgency=medium
 
@@ -731,7 +737,7 @@ sdrangel (7.8.6-1) unstable; urgency=medium
   - Re-enable LimeSuite in Windows with latest commit
   - FT8 demod library support
 
-  -- Edouard Griffiths, F4EXB  <f4exb06@gmail.com>  Fri, 13 Jan 2023 22:17:50 +0100
+  -- Edouard Griffiths, F4EXB <f4exb06@gmail.com>  Fri, 13 Jan 2023 22:17:50 +0100
 
 sdrangel (7.8.5-1) unstable; urgency=medium
 
@@ -740,7 +746,7 @@ sdrangel (7.8.5-1) unstable; urgency=medium
   * RadioSonde: Fix plotting of heading. Fixes #1527. PR #1528
   * Metis MISO GUI: fixed frequency limits
 
-  -- Edouard Griffiths, F4EXB  <f4exb06@gmail.com>  Sat, 17 Dec 2022 09:27:34 +0100
+  -- Edouard Griffiths, F4EXB <f4exb06@gmail.com>  Sat, 17 Dec 2022 09:27:34 +0100
 
 sdrangel (7.8.4-1) unstable; urgency=medium
 
@@ -750,7 +756,7 @@ sdrangel (7.8.4-1) unstable; urgency=medium
   * Feature plugins: Make settings assignments atomic. Part of #1329
   * KiwiSDR: implement variable sample rate. Fixes #1523
 
-  -- Edouard Griffiths, F4EXB  <f4exb06@gmail.com>  Thu, 01 Dec 2022 20:50:29 +0100
+  -- Edouard Griffiths, F4EXB <f4exb06@gmail.com>  Thu, 01 Dec 2022 20:50:29 +0100
 
 sdrangel (7.8.3-1) unstable; urgency=medium
 
@@ -768,7 +774,7 @@ sdrangel (7.8.3-1) unstable; urgency=medium
   * Arrange rollups after restore geometry to mitigate issue #1474
   * Remote TCP: 8-bit IQ data is unsigned. Fixes implementing #1467. PR #1495
 
-  -- Edouard Griffiths, F4EXB  <f4exb06@gmail.com>  Tue, 15 Nov 2022 20:45:41 +0100
+  -- Edouard Griffiths, F4EXB <f4exb06@gmail.com>  Tue, 15 Nov 2022 20:45:41 +0100
 
 sdrangel (7.8.2-1) unstable; urgency=medium
 
@@ -780,7 +786,7 @@ sdrangel (7.8.2-1) unstable; urgency=medium
   * Save column sort as a setting. Fix deserialize of target satellite. PR #1492. Attempt to fix #1474
   * Fix sorting of next column. PR #1493
 
-  -- Edouard Griffiths, F4EXB  <f4exb06@gmail.com>  Tue, 01 Nov 2022 22:20:21 +0100
+  -- Edouard Griffiths, F4EXB <f4exb06@gmail.com>  Tue, 01 Nov 2022 22:20:21 +0100
 
 sdrangel (7.8.1-1) unstable; urgency=medium
 
@@ -793,7 +799,7 @@ sdrangel (7.8.1-1) unstable; urgency=medium
   * Spectrum frequency ticks MSB truncation. Fixes #1477
   * Have M17 and FreeDV plugins built in the Ubuntu package. Fixes #1480
 
-  -- Edouard Griffiths, F4EXB  <f4exb06@gmail.com>  Wed, 19 Oct 2022 15:25:08 +0200
+  -- Edouard Griffiths, F4EXB <f4exb06@gmail.com>  Wed, 19 Oct 2022 15:25:08 +0200
 
 sdrangel (7.8.0-1) unstable; urgency=medium
 
@@ -857,7 +863,7 @@ sdrangel (7.8.0-1) unstable; urgency=medium
   * Call stopWork from destructor. PR #1431
   * Remote Control: Fix Mac build. PR #1420
 
-  -- Edouard Griffiths, F4EXB  <f4exb06@gmail.com>  Thu, 06 Oct 2022 22:08:43 +0200
+  -- Edouard Griffiths, F4EXB <f4exb06@gmail.com>  Thu, 06 Oct 2022 22:08:43 +0200
 
 sdrangel (7.7.0-1) unstable; urgency=medium
 
@@ -868,7 +874,7 @@ sdrangel (7.7.0-1) unstable; urgency=medium
   * Replace deprecated QMutex(Recursive) in Qt 5.14 with QRecursiveMutex. PR #1413
   * Upgrade Ubuntu package to 22.04 and therefore Qt 5.15. Issue #1416
 
-  -- Edouard Griffiths, F4EXB  <f4exb06@gmail.com>  Sun, 18 Sep 2022 08:48:24 +0200
+  -- Edouard Griffiths, F4EXB <f4exb06@gmail.com>  Sun, 18 Sep 2022 08:48:24 +0200
 
 sdrangel (7.6.4-1) unstable; urgency=medium
 
@@ -877,7 +883,7 @@ sdrangel (7.6.4-1) unstable; urgency=medium
   * Stack workspace: Use full width for spectrum when no channels. PR #1403
   * Fix c++17 compilation with MSVC. PR #1405
 
-  -- Edouard Griffiths, F4EXB  <f4exb06@gmail.com>  Sat, 10 Sep 2022 19:12:31 +0200
+  -- Edouard Griffiths, F4EXB <f4exb06@gmail.com>  Sat, 10 Sep 2022 19:12:31 +0200
 
 sdrangel (7.6.3-1) unstable; urgency=medium
 
@@ -899,7 +905,7 @@ sdrangel (7.6.3-1) unstable; urgency=medium
   * Add device stateChanged signal. Use in RTL SDR GUI. PR #1394
   * Remove ? in Window's title bar. Fixes #1312. PR #1399
 
-  -- Edouard Griffiths, F4EXB  <f4exb06@gmail.com>  Thu, 01 Sep 2022 19:46:21 +0200
+  -- Edouard Griffiths, F4EXB <f4exb06@gmail.com>  Thu, 01 Sep 2022 19:46:21 +0200
 
 sdrangel (7.6.2-1) unstable; urgency=medium
 
@@ -912,7 +918,7 @@ sdrangel (7.6.2-1) unstable; urgency=medium
   * SimplePTT: fixed list of audio devices for VOX displaying output instead of input devices
   * Removed stray comma in CmakeLists.txt. Complements #1310. Fixes #1388
 
-  -- Edouard Griffiths, F4EXB  <f4exb06@gmail.com>  Sun, 14 Aug 2022 09:49:13 +0200
+  -- Edouard Griffiths, F4EXB <f4exb06@gmail.com>  Sun, 14 Aug 2022 09:49:13 +0200
 
 sdrangel (7.6.1-1) unstable; urgency=medium
 
@@ -924,7 +930,7 @@ sdrangel (7.6.1-1) unstable; urgency=medium
   * Corrected order of deletion of feature vs feature GUI. Fixes #1332
   * Some OpenGL fixes. Issues #1351 #1359. PR #1361
 
-  -- Edouard Griffiths, F4EXB  <f4exb06@gmail.com>  Wed, 03 Aug 2022 16:46:27 +0200
+  -- Edouard Griffiths, F4EXB <f4exb06@gmail.com>  Wed, 03 Aug 2022 16:46:27 +0200
 
 sdrangel (7.6.0-1) unstable; urgency=medium
 
@@ -934,13 +940,13 @@ sdrangel (7.6.0-1) unstable; urgency=medium
   * Externals: Update rtlsdr to latest version. Issue #1351. PR #1352
   * Map: Add support for Ionosonde stations. PR #1354
 
-  -- Edouard Griffiths, F4EXB  <f4exb06@gmail.com>  Wed, 20 Jul 2022 19:53:15 +0200
+  -- Edouard Griffiths, F4EXB <f4exb06@gmail.com>  Wed, 20 Jul 2022 19:53:15 +0200
 
 sdrangel (7.5.1-1) unstable; urgency=medium
 
   * M17 is for Linux only
 
-  -- Edouard Griffiths, F4EXB  <f4exb06@gmail.com>  Mon, 18 Jul 2022 13:22:31 +0200
+  -- Edouard Griffiths, F4EXB <f4exb06@gmail.com>  Mon, 18 Jul 2022 13:22:31 +0200
 
 sdrangel (7.5.0-1) unstable; urgency=medium
 
@@ -952,7 +958,7 @@ sdrangel (7.5.0-1) unstable; urgency=medium
   * GLScope and GLSpectrum removed extraneous call to cleanup method. Fixes #1295
   * Update to sdrangel-windows-libraries with UHD 4.2.0. PR #1314
 
-  -- Edouard Griffiths, F4EXB  <f4exb06@gmail.com>  Mon, 18 Jul 2022 09:36:28 +0200
+  -- Edouard Griffiths, F4EXB <f4exb06@gmail.com>  Mon, 18 Jul 2022 09:36:28 +0200
 
 sdrangel (7.4.0-1) unstable; urgency=medium
 
@@ -975,7 +981,7 @@ sdrangel (7.4.0-1) unstable; urgency=medium
   * Added minimal default cmake preset
   * Added cmake enablers for all non sampling device plugins. Fixes #1308
 
-  -- Edouard Griffiths, F4EXB  <f4exb06@gmail.com>  Sun, 26 Jun 2022 04:25:21 +0200
+  -- Edouard Griffiths, F4EXB <f4exb06@gmail.com>  Sun, 26 Jun 2022 04:25:21 +0200
 
 sdrangel (7.3.2-1) unstable; urgency=medium
 
@@ -992,7 +998,7 @@ sdrangel (7.3.2-1) unstable; urgency=medium
   * Radio Clock: fixed common channel settings menu trigger. Fixes #1286
   * Features: fixed common settings menu placement. Issue #1286
 
-  -- Edouard Griffiths, F4EXB  <f4exb06@gmail.com>  Sun, 12 Jun 2022 21:42:51 +0200
+  -- Edouard Griffiths, F4EXB <f4exb06@gmail.com>  Sun, 12 Jun 2022 21:42:51 +0200
 
 sdrangel (7.3.1-1) unstable; urgency=medium
 
@@ -1003,7 +1009,7 @@ sdrangel (7.3.1-1) unstable; urgency=medium
   * NoiseFigure plugin: Fix #1269 and #1268. PR #1269
   * USRP: Add support for non-discoverable devices and user arguments. PR #1271
 
-  -- Edouard Griffiths, F4EXB  <f4exb06@gmail.com>  Wed, 01 Jun 2022 19:30:17 +0200
+  -- Edouard Griffiths, F4EXB <f4exb06@gmail.com>  Wed, 01 Jun 2022 19:30:17 +0200
 
 sdrangel (7.3.0-1) unstable; urgency=medium
 
@@ -1015,7 +1021,7 @@ sdrangel (7.3.0-1) unstable; urgency=medium
   * Fixed Interferometer and BeamSteeringCW MIMO channel plugins
   * Fixed Mac build. PR #1257
 
-  -- Edouard Griffiths, F4EXB  <f4exb06@gmail.com>  Thu, 26 May 2022 03:12:00 +0200
+  -- Edouard Griffiths, F4EXB <f4exb06@gmail.com>  Thu, 26 May 2022 03:12:00 +0200
 
 sdrangel (7.2.1-1) unstable; urgency=medium
 

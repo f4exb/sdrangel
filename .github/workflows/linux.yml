@@ -43,7 +43,15 @@ jobs:
           bash cmake/ci/build_sdrplay.sh
       - name: Build SDRangel
         run: |
-          debuild -i -us -uc -b
+          if [ "${RUNNING_IN_ACT:-}" = "true" ]; then
+            mkdir -p /tmp/build
+            rsync -a --delete . /tmp/build/sdrangel/
+            cd /tmp/build/sdrangel
+            debuild -i -us -uc -b
+            cp ../sdrangel_*_amd64.deb "$GITHUB_WORKSPACE"/
+          else
+            debuild -i -us -uc -b
+          fi
       - name: Get version
         id: get_version
         run: |

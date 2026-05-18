@@ -52,6 +52,7 @@ void FreqDisplaySettings::resetToDefaults()
     m_reverseAPIPort = 8888;
     m_reverseAPIFeatureSetIndex = 0;
     m_reverseAPIFeatureIndex = 0;
+    m_activeOnly = false;
 }
 
 QByteArray FreqDisplaySettings::serialize() const
@@ -82,6 +83,7 @@ QByteArray FreqDisplaySettings::serialize() const
     s.writeU32(20, m_reverseAPIPort);
     s.writeU32(21, m_reverseAPIFeatureSetIndex);
     s.writeU32(22, m_reverseAPIFeatureIndex);
+    s.writeBool(23, m_activeOnly);
 
     return s.final();
 }
@@ -143,6 +145,8 @@ bool FreqDisplaySettings::deserialize(const QByteArray& data)
         m_reverseAPIFeatureSetIndex = utmp > 99 ? 99 : utmp;
         d.readU32(22, &utmp, 0);
         m_reverseAPIFeatureIndex = utmp > 99 ? 99 : utmp;
+
+        d.readBool(23, &m_activeOnly);
 
         return true;
     }
@@ -217,5 +221,8 @@ void FreqDisplaySettings::applySettings(const QStringList& settingsKeys, const F
     }
     if (settingsKeys.contains("reverseAPIFeatureIndex")) {
         m_reverseAPIFeatureIndex = settings.m_reverseAPIFeatureIndex;
+    }
+    if (settingsKeys.contains("activeOnly")) {
+        m_activeOnly = settings.m_activeOnly;
     }
 }

@@ -1,0 +1,51 @@
+name: SDRangel Flatpak Build
+
+on:
+  push:
+    branches:
+      - flatpak
+    tags:
+      - 'v*'
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  build_flatpak:
+    runs-on: ubuntu-latest
+    env:
+      ARCH: x86_64
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          submodules: true
+          fetch-depth: 0
+      - name: Get version
+        id: get_version
+        run: |
+          if [[ "$GITHUB_REF_TYPE" == "tag" ]]; then
+            version="${GITHUB_REF_NAME#v}"
+          elif [[ "$GITHUB_REF_NAME" == "flatpak" ]]; then
+            version="${GITHUB_SHA::8}"
+          else
+            version="${GITHUB_REF_NAME//\//-}-${GITHUB_SHA::8}"
+          fi
+          echo "version=$version" >> "$GITHUB_OUTPUT"
+          echo "bundle=sdrangel-$version-${{ env.ARCH }}.flatpak" >> "$GITHUB_OUTPUT"
+      - name: Build Flatpak
+        uses: flatpak/flatpak-github-actions/flatpak-builder@v6
+        with:
+          bundle: ${{ steps.get_version.outputs.bundle }}
+          manifest-path: flatpak/org.sdrangel.SDRangel.yaml
+          cache-key: flatpak-builder-${{ hashFiles('flatpak/**') }}
+      - name: Upload artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: ${{ steps.get_version.outputs.bundle }}
+          path: ${{ steps.get_version.outputs.bundle }}
+      - name: Upload release
+        if: startsWith(github.ref, 'refs/tags/')
+        uses: softprops/action-gh-release@v2
+        with:
+          files: ${{ steps.get_version.outputs.bundle }}

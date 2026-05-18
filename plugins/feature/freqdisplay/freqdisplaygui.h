@@ -127,8 +127,8 @@ private:
     static QString textForSpeech(const QString& displayText);
 #endif
 
-    static constexpr const char* m_rxTxChannelKinds = "RT";
-    static constexpr int m_pollIntervalMs = 1000;
+    static constexpr const char* m_rxTxChannelKinds = "RTM";
+    static constexpr int m_pollIntervalMs = 250;
     static constexpr int m_minimumFrequencyFontPointSize = 10;
     /// Reference point size used when probing text metrics in updateFrequencyFont().
     /// Large enough that integer rounding in QFontMetrics is negligible.
@@ -170,6 +170,7 @@ private slots:
     void on_displayMode_currentIndexChanged(int index);
     void on_speech_toggled(bool checked);
     void on_fontFamily_currentFontChanged(const QFont& font);
+    void on_activeOnly_toggled(bool checked);
     void on_transparentBackground_toggled(bool checked);
     void on_frequencyUnits_currentIndexChanged(int index);
     void on_showUnits_toggled(bool checked);

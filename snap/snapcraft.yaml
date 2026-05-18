@@ -484,6 +484,7 @@ parts:
         source-tag: msvc
         cmake-parameters:
             - -DCMAKE_INSTALL_PREFIX=/opt/install/sdrangel
+            - -DCSPICE_BUILD_STATIC_LIBRARY=OFF
 
     inmarsatc:
         plugin: cmake

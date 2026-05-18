@@ -63,6 +63,7 @@ struct FreqDisplaySettings
     uint16_t m_reverseAPIPort;
     uint16_t m_reverseAPIFeatureSetIndex;
     uint16_t m_reverseAPIFeatureIndex;
+    bool m_activeOnly;              //!< Only display frequency/power for channels that are active (unmuted and squelch open)
 
     FreqDisplaySettings();
     ~FreqDisplaySettings() = default;
