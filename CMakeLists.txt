@@ -903,6 +903,7 @@ if (NOT ENABLE_EXTERNAL_LIBRARIES OR (ENABLE_EXTERNAL_LIBRARIES STREQUAL "AUTO")
     find_package(GGMorse)
     find_package(LibInmarsatC)
     find_package(RNnoise)
+    find_package(FLAC)
 
     # Devices
     if(ENABLE_AIRSPY)
