@@ -39,8 +39,6 @@ modules:
         x86_64:
           config-opts:
             - --enable-sse2
-            - --enable-avx
-            - --enable-avx-128-fma
         aarch64:
           config-opts:
             - --enable-neon
@@ -207,6 +205,7 @@ modules:
     buildsystem: cmake-ninja
     config-opts:
       - -Wno-dev
+      - -DENABLE_DISTRIBUTION=ON
     sources:
       - type: git
         url: https://github.com/f4exb/cm256cc.git
@@ -299,6 +298,9 @@ modules:
 
   - name: cspice
     buildsystem: cmake-ninja
+    config-opts:
+      - -Wno-dev
+      - -DCSPICE_BUILD_STATIC_LIBRARY=OFF
     sources:
       - type: git
         url: https://github.com/srcejon/cspice-cmake
