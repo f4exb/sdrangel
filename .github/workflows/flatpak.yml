@@ -27,7 +27,7 @@ jobs:
           sudo apt-get install -y flatpak flatpak-builder xvfb
       - name: Add Flathub remote
         run: |
-          sudo flatpak remote-add --if-not-exists --user flathub https://flathub.org/repo/flathub.flatpakrepo
+          flatpak remote-add --if-not-exists --user flathub https://flathub.org/repo/flathub.flatpakrepo
       - name: Get version
         id: get_version
         run: |
