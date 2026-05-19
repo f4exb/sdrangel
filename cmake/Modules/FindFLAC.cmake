@@ -11,7 +11,7 @@ IF(NOT FLAC_FOUND)
     )
 
     FIND_LIBRARY(
-        FLAC_LIBRARY
+        FLAC_LIBRARIES
         NAMES FLAC
               libFLAC
         HINTS ${FLAC_DIR}/lib
