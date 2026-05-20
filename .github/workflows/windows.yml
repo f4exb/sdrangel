@@ -6,6 +6,7 @@ on:
       - windows_release
     tags:
       - 'v*'
+  workflow_dispatch:
 
 jobs:
   build:
