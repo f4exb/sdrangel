@@ -332,8 +332,8 @@ modules:
   - name: hamlib
     sources:
       - type: archive
-        url: https://github.com/Hamlib/Hamlib/releases/download/4.6.5/hamlib-4.6.5.tar.gz
-        sha256: 90d6f1dba59417c00f8f4545131c7efd31930cd0e178598980a8210425e3852e
+        url: https://github.com/Hamlib/Hamlib/releases/download/4.7.1/hamlib-4.7.1.tar.gz
+        sha256: d197a08a3d5d936d7571ae573f745bbba619e88998742c8267e3fcb0fb3d5974
 
   - name: airspy
     buildsystem: cmake-ninja
