@@ -377,6 +377,8 @@ void MainServer::addMIMODevice()
         deviceAPI->setHardwareUserArguments(userArgs);
     }
 
+    m_mainCore->m_deviceSets.back()->m_deviceAPI = deviceAPI;
+
     DeviceSampleMIMO *mimo = deviceAPI->getPluginInterface()->createSampleMIMOPluginInstance(
             deviceAPI->getSamplingDeviceId(), deviceAPI);
     m_mainCore->m_deviceSets.back()->m_deviceAPI->setSampleMIMO(mimo);
