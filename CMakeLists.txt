@@ -121,6 +121,7 @@ option(ENABLE_SOAPYSDR "Enable SoapySDR support" ON)
 option(ENABLE_XTRX "Enable XTRX support" ON)
 option(ENABLE_PACK_MIRSDRAPI "Enable inclusion of the mirsdr-api library - for personal use only" OFF)
 option(ENABLE_USRP "Enable USRP support" ON)
+option(ENABLE_FOBOS "Enable Fobos SDR support" ON)
 
 # Channel Rx enablers
 option(ENABLE_CHANNELRX "Enable channelrx plugins" ON)
@@ -416,6 +417,16 @@ elseif (WIN32)
   set(LIBUSB_LIBRARIES "${EXTERNAL_LIBRARY_FOLDER}/libusb/MS64/dll/libusb-1.0.lib" CACHE INTERNAL "")
   set(LIBUSB_DLL_DIR "${EXTERNAL_LIBRARY_FOLDER}/libusb/MS64/dll" CACHE INTERNAL "")
 
+  set(FOBOS_SDR_FOUND ON CACHE INTERNAL "")
+  set(FOBOS_SDR_INCLUDE_DIR "${EXTERNAL_LIBRARY_FOLDER}/fobos-sdr/include" CACHE INTERNAL "")
+  set(FOBOS_SDR_LIBRARY "${EXTERNAL_LIBRARY_FOLDER}/fobos-sdr/lib/fobos_sdr.lib" CACHE INTERNAL "")
+  set(FOBOS_SDR_DLL_DIR "${EXTERNAL_LIBRARY_FOLDER}/fobos-sdr/bin" CACHE INTERNAL "")
+
+  set(FOBOS_REGULAR_FOUND ON CACHE INTERNAL "")
+  set(FOBOS_REGULAR_INCLUDE_DIR "${EXTERNAL_LIBRARY_FOLDER}/fobos-regular/include" CACHE INTERNAL "")
+  set(FOBOS_REGULAR_LIBRARY "${EXTERNAL_LIBRARY_FOLDER}/fobos-regular/lib/fobos.lib" CACHE INTERNAL "")
+  set(FOBOS_REGULAR_DLL_DIR "${EXTERNAL_LIBRARY_FOLDER}/fobos-regular/bin" CACHE INTERNAL "")
+
   if(VS2022 OR VS2019)
     set(OpenCV_DIR "${EXTERNAL_LIBRARY_FOLDER}/opencv4" CACHE INTERNAL "")
   else()
@@ -493,6 +504,7 @@ elseif (WIN32)
     "${EXTERNAL_LIBRARY_FOLDER}/libusb/MS64/dll"
     "${EXTERNAL_LIBRARY_FOLDER}/ffmpeg/bin"
     "${EXTERNAL_LIBRARY_FOLDER}/libsigmf/lib"
+    "${EXTERNAL_LIBRARY_FOLDER}/fobos-sdr/bin"
   )
 elseif(ANDROID)
   set(EXTERNAL_LIBRARY_FOLDER "${CMAKE_SOURCE_DIR}/external/android")
