@@ -4,6 +4,12 @@ add_subdirectory(fileinput)
 add_subdirectory(testsource)
 add_subdirectory(localinput)
 
+if(ENABLE_FOBOS AND WIN32)
+    add_subdirectory(fobos)
+else()
+    message(STATUS "Not building fobos input (ENABLE_FOBOS=${ENABLE_FOBOS} WIN32=${WIN32})")
+endif()
+
 if (CM256CC_FOUND AND (HAS_SSE3 OR HAS_NEON))
     add_subdirectory(remoteinput)
 else()
