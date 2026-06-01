@@ -30,9 +30,9 @@
 #include "SWGDeviceSettings.h"
 #include "SWGDeviceState.h"
 
-#include "FOBOSinput.h"
+#include "fobosinput.h"
 #include "device/deviceapi.h"
-#include "FOBOSworker.h"
+#include "fobosworker.h"
 #include "dsp/dspcommands.h"
 
 MESSAGE_CLASS_DEFINITION(FOBOSInput::MsgConfigureFOBOS, Message)

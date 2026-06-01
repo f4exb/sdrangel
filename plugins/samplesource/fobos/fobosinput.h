@@ -27,7 +27,7 @@
 #include <QNetworkRequest>
 
 #include <dsp/devicesamplesource.h>
-#include "FOBOSsettings.h"
+#include "fobossettings.h"
 
 class DeviceAPI;
 class FOBOSWorker;

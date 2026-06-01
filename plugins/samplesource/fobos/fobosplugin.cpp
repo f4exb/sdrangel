@@ -22,12 +22,12 @@
 #include "plugin/pluginapi.h"
 
 #ifdef SERVER_MODE
-#include "FOBOSinput.h"
+#include "fobosinput.h"
 #else
-#include "FOBOSgui.h"
+#include "fobosgui.h"
 #endif
-#include "FOBOSplugin.h"
-#include "FOBOSwebapiadapter.h"
+#include "fobosplugin.h"
+#include "foboswebapiadapter.h"
 
 const PluginDescriptor FOBOSPlugin::m_pluginDescriptor = {
     QStringLiteral("FOBOS"),

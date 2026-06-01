@@ -21,8 +21,8 @@
 ///////////////////////////////////////////////////////////////////////////////////
 
 #include "SWGDeviceSettings.h"
-#include "FOBOSinput.h"
-#include "FOBOSwebapiadapter.h"
+#include "fobosinput.h"
+#include "foboswebapiadapter.h"
 
 FOBOSWebAPIAdapter::FOBOSWebAPIAdapter()
 {}

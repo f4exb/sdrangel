@@ -21,7 +21,7 @@
 ///////////////////////////////////////////////////////////////////////////////////
 
 #include "device/devicewebapiadapter.h"
-#include "FOBOSsettings.h"
+#include "fobossettings.h"
 
 class FOBOSWebAPIAdapter : public DeviceWebAPIAdapter
 {

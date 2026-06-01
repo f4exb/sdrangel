@@ -40,7 +40,7 @@
 #include <QPair>
 #include <QList>
 
-#include "ui_FOBOSgui.h"
+#include "ui_fobosgui.h"
 #include "gui/colormapper.h"
 #include "gui/glspectrum.h"
 #include "gui/basicdevicesettingsdialog.h"
@@ -50,7 +50,7 @@
 #include "dsp/dspcommands.h"
 #include "util/db.h"
 
-#include "FOBOSgui.h"
+#include "fobosgui.h"
 #include "device/deviceapi.h"
 #include "device/deviceuiset.h"
 
