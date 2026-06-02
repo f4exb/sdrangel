@@ -31,7 +31,7 @@
 const PluginDescriptor FreqDisplayPlugin::m_pluginDescriptor = {
     FreqDisplay::m_featureId,
     QStringLiteral("Frequency Display"),
-    QStringLiteral("7.25.0"),
+    QStringLiteral("7.26  .0"),
     QStringLiteral("(c) Jon Beniston, M7RCE"),
     QStringLiteral("https://github.com/f4exb/sdrangel"),
     true,

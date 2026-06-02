@@ -32,7 +32,7 @@
 const PluginDescriptor FOBOSPlugin::m_pluginDescriptor = {
     QStringLiteral("FOBOS"),
 	QStringLiteral("Fobos SDR input"),
-    QStringLiteral("7.25.0"),
+    QStringLiteral("7.26.0"),
 	QStringLiteral("(c) Edouard Griffiths, F4EXB"),
 	QStringLiteral("https://github.com/f4exb/sdrangel"),
 	true,
