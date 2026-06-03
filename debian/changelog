@@ -1,8 +1,14 @@
-sdrangel (7.25.1-1) unstable; urgency=medium
+sdrangel (7.26.1-1) unstable; urgency=medium
 
     * See Github release
 
- -- Edouard Griffiths, F4EXB <f4exb06@gmail.com>  Mon, 05 May 2026 06:06:14 +0200
+ -- Edouard Griffiths, F4EXB <f4exb06@gmail.com>  Wed, 03 Jun 2026 01:02:51 +0200
+
+sdrangel (7.26.0-1) unstable; urgency=medium
+
+    * See Github release
+
+ -- Edouard Griffiths, F4EXB <f4exb06@gmail.com>  Tue, 02 Jun 2026 19:30:36 +0200
 
 sdrangel (7.25.1-1) unstable; urgency=medium
 
