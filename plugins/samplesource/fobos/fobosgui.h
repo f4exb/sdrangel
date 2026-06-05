@@ -26,8 +26,8 @@
 
 #include "util/messagequeue.h"
 
-#include "FOBOSsettings.h"
-#include "FOBOSinput.h"
+#include "fobossettings.h"
+#include "fobosinput.h"
 
 class DeviceUISet;
 

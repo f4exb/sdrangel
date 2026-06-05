@@ -14,6 +14,12 @@
 #include <cstdint>
 #include <thread>
 
+#ifdef _WIN32
+#define FOBOS_WORKER_CALL __cdecl
+#else
+#define FOBOS_WORKER_CALL
+#endif
+
 #include "dsp/samplesinkfifo.h"
 #include "fobossettings.h"
 
@@ -61,46 +67,44 @@ signals:
     void backendStatusChanged(const QString& backend, const QString& details);
 
 private:
-#ifdef _WIN32
-    using fobos_sdr_get_api_info_t = int (__cdecl *)(char* lib_version, char* drv_version);
-    using fobos_sdr_get_device_count_t = int (__cdecl *)();
-    using fobos_sdr_list_devices_t = int (__cdecl *)(char* serials);
-    using fobos_sdr_open_t = int (__cdecl *)(fobos_dev_t** out_dev, uint32_t index);
-    using fobos_sdr_close_t = int (__cdecl *)(fobos_dev_t* dev);
-    using fobos_sdr_get_board_info_t = int (__cdecl *)(fobos_dev_t* dev, char* hw_revision, char* fw_version, char* manufacturer, char* product, char* serial);
-    using fobos_sdr_error_name_t = const char* (__cdecl *)(int error_code);
-    using fobos_sdr_set_frequency_t = int (__cdecl *)(fobos_dev_t* dev, double value_hz);
-    using fobos_sdr_set_samplerate_t = int (__cdecl *)(fobos_dev_t* dev, double value_hz);
-    using fobos_sdr_get_samplerates_t = int (__cdecl *)(fobos_dev_t* dev, double* values, uint32_t* count);
-    using fobos_sdr_set_direct_sampling_t = int (__cdecl *)(fobos_dev_t* dev, int value);
-    using fobos_sdr_set_auto_bandwidth_t = int (__cdecl *)(fobos_dev_t* dev, double value);
-    using fobos_sdr_set_user_gpo_t = int (__cdecl *)(fobos_dev_t* dev, uint32_t value);
-    using fobos_sdr_set_clk_source_t = int (__cdecl *)(fobos_dev_t* dev, int value);
-    using fobos_sdr_set_lna_gain_t = int (__cdecl *)(fobos_dev_t* dev, unsigned int value);
-    using fobos_sdr_set_vga_gain_t = int (__cdecl *)(fobos_dev_t* dev, unsigned int value);
-    using fobos_sdr_start_sync_t = int (__cdecl *)(fobos_dev_t* dev, uint32_t buf_length);
-    using fobos_sdr_read_sync_t = int (__cdecl *)(fobos_dev_t* dev, float* buf, uint32_t* actual_buf_length);
-    using fobos_sdr_stop_sync_t = int (__cdecl *)(fobos_dev_t* dev);
+    using fobos_sdr_get_api_info_t = int (FOBOS_WORKER_CALL *)(char* lib_version, char* drv_version);
+    using fobos_sdr_get_device_count_t = int (FOBOS_WORKER_CALL *)();
+    using fobos_sdr_list_devices_t = int (FOBOS_WORKER_CALL *)(char* serials);
+    using fobos_sdr_open_t = int (FOBOS_WORKER_CALL *)(fobos_dev_t** out_dev, uint32_t index);
+    using fobos_sdr_close_t = int (FOBOS_WORKER_CALL *)(fobos_dev_t* dev);
+    using fobos_sdr_get_board_info_t = int (FOBOS_WORKER_CALL *)(fobos_dev_t* dev, char* hw_revision, char* fw_version, char* manufacturer, char* product, char* serial);
+    using fobos_sdr_error_name_t = const char* (FOBOS_WORKER_CALL *)(int error_code);
+    using fobos_sdr_set_frequency_t = int (FOBOS_WORKER_CALL *)(fobos_dev_t* dev, double value_hz);
+    using fobos_sdr_set_samplerate_t = int (FOBOS_WORKER_CALL *)(fobos_dev_t* dev, double value_hz);
+    using fobos_sdr_get_samplerates_t = int (FOBOS_WORKER_CALL *)(fobos_dev_t* dev, double* values, uint32_t* count);
+    using fobos_sdr_set_direct_sampling_t = int (FOBOS_WORKER_CALL *)(fobos_dev_t* dev, int value);
+    using fobos_sdr_set_auto_bandwidth_t = int (FOBOS_WORKER_CALL *)(fobos_dev_t* dev, double value);
+    using fobos_sdr_set_user_gpo_t = int (FOBOS_WORKER_CALL *)(fobos_dev_t* dev, uint32_t value);
+    using fobos_sdr_set_clk_source_t = int (FOBOS_WORKER_CALL *)(fobos_dev_t* dev, int value);
+    using fobos_sdr_set_lna_gain_t = int (FOBOS_WORKER_CALL *)(fobos_dev_t* dev, unsigned int value);
+    using fobos_sdr_set_vga_gain_t = int (FOBOS_WORKER_CALL *)(fobos_dev_t* dev, unsigned int value);
+    using fobos_sdr_start_sync_t = int (FOBOS_WORKER_CALL *)(fobos_dev_t* dev, uint32_t buf_length);
+    using fobos_sdr_read_sync_t = int (FOBOS_WORKER_CALL *)(fobos_dev_t* dev, float* buf, uint32_t* actual_buf_length);
+    using fobos_sdr_stop_sync_t = int (FOBOS_WORKER_CALL *)(fobos_dev_t* dev);
 
-    using fobos_rx_get_api_info_t = int (__cdecl *)(char* lib_version, char* drv_version);
-    using fobos_rx_get_device_count_t = int (__cdecl *)();
-    using fobos_rx_list_devices_t = int (__cdecl *)(char* serials);
-    using fobos_rx_open_t = int (__cdecl *)(fobos_dev_t** out_dev, uint32_t index);
-    using fobos_rx_close_t = int (__cdecl *)(fobos_dev_t* dev);
-    using fobos_rx_get_board_info_t = int (__cdecl *)(fobos_dev_t* dev, char* hw_revision, char* fw_version, char* manufacturer, char* product, char* serial);
-    using fobos_rx_error_name_t = const char* (__cdecl *)(int error_code);
-    using fobos_rx_set_frequency_t = int (__cdecl *)(fobos_dev_t* dev, double value_hz, double* actual_hz);
-    using fobos_rx_set_samplerate_t = int (__cdecl *)(fobos_dev_t* dev, double value_hz, double* actual_hz);
-    using fobos_rx_get_samplerates_t = int (__cdecl *)(fobos_dev_t* dev, double* values, unsigned int* count);
-    using fobos_rx_set_direct_sampling_t = int (__cdecl *)(fobos_dev_t* dev, unsigned int enabled);
-    using fobos_rx_set_user_gpo_t = int (__cdecl *)(fobos_dev_t* dev, uint8_t value);
-    using fobos_rx_set_clk_source_t = int (__cdecl *)(fobos_dev_t* dev, int value);
-    using fobos_rx_set_lna_gain_t = int (__cdecl *)(fobos_dev_t* dev, unsigned int value);
-    using fobos_rx_set_vga_gain_t = int (__cdecl *)(fobos_dev_t* dev, unsigned int value);
-    using fobos_rx_start_sync_t = int (__cdecl *)(fobos_dev_t* dev, uint32_t buf_length);
-    using fobos_rx_read_sync_t = int (__cdecl *)(fobos_dev_t* dev, float* buf, uint32_t* actual_buf_length);
-    using fobos_rx_stop_sync_t = int (__cdecl *)(fobos_dev_t* dev);
-#endif
+    using fobos_rx_get_api_info_t = int (FOBOS_WORKER_CALL *)(char* lib_version, char* drv_version);
+    using fobos_rx_get_device_count_t = int (FOBOS_WORKER_CALL *)();
+    using fobos_rx_list_devices_t = int (FOBOS_WORKER_CALL *)(char* serials);
+    using fobos_rx_open_t = int (FOBOS_WORKER_CALL *)(fobos_dev_t** out_dev, uint32_t index);
+    using fobos_rx_close_t = int (FOBOS_WORKER_CALL *)(fobos_dev_t* dev);
+    using fobos_rx_get_board_info_t = int (FOBOS_WORKER_CALL *)(fobos_dev_t* dev, char* hw_revision, char* fw_version, char* manufacturer, char* product, char* serial);
+    using fobos_rx_error_name_t = const char* (FOBOS_WORKER_CALL *)(int error_code);
+    using fobos_rx_set_frequency_t = int (FOBOS_WORKER_CALL *)(fobos_dev_t* dev, double value_hz, double* actual_hz);
+    using fobos_rx_set_samplerate_t = int (FOBOS_WORKER_CALL *)(fobos_dev_t* dev, double value_hz, double* actual_hz);
+    using fobos_rx_get_samplerates_t = int (FOBOS_WORKER_CALL *)(fobos_dev_t* dev, double* values, unsigned int* count);
+    using fobos_rx_set_direct_sampling_t = int (FOBOS_WORKER_CALL *)(fobos_dev_t* dev, unsigned int enabled);
+    using fobos_rx_set_user_gpo_t = int (FOBOS_WORKER_CALL *)(fobos_dev_t* dev, uint8_t value);
+    using fobos_rx_set_clk_source_t = int (FOBOS_WORKER_CALL *)(fobos_dev_t* dev, int value);
+    using fobos_rx_set_lna_gain_t = int (FOBOS_WORKER_CALL *)(fobos_dev_t* dev, unsigned int value);
+    using fobos_rx_set_vga_gain_t = int (FOBOS_WORKER_CALL *)(fobos_dev_t* dev, unsigned int value);
+    using fobos_rx_start_sync_t = int (FOBOS_WORKER_CALL *)(fobos_dev_t* dev, uint32_t buf_length);
+    using fobos_rx_read_sync_t = int (FOBOS_WORKER_CALL *)(fobos_dev_t* dev, float* buf, uint32_t* actual_buf_length);
+    using fobos_rx_stop_sync_t = int (FOBOS_WORKER_CALL *)(fobos_dev_t* dev);
 
     bool runAgileStart();
     bool runRegularStart();
@@ -158,7 +162,6 @@ private:
     std::thread m_readerThread;
     FobosRuntimeBackend m_runtimeBackend;
 
-#ifdef _WIN32
     void* m_libraryHandle;
     fobos_sdr_error_name_t m_errorName;
     fobos_sdr_close_t m_closeDev;
@@ -182,7 +185,6 @@ private:
     fobos_rx_set_clk_source_t m_regularSetClkSource;
     fobos_rx_set_lna_gain_t m_regularSetLnaGain;
     fobos_rx_set_vga_gain_t m_regularSetVgaGain;
-#endif
 
     uint64_t m_totalReads;
     uint64_t m_totalSamples;

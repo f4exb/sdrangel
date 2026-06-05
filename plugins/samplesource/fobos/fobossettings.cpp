@@ -19,7 +19,7 @@
 
 #include <QtGlobal>
 #include "util/simpleserializer.h"
-#include "FOBOSsettings.h"
+#include "fobossettings.h"
 
 FOBOSSettings::FOBOSSettings()
 {

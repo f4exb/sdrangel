@@ -5,6 +5,68 @@ option(FOBOS_DEBUG_FILE_LOG "Write Fobos SDR diagnostic log file" OFF)
 # Fobos SDR runtime packages. On Windows official builds these are expected
 # to come from external/windows/fobos-sdr and external/windows/fobos-regular
 # in the SDRangel Windows dependency repo.
+#
+# On Linux the plugin is intended to runtime-load libfobos_sdr.so / libfobos.so.
+# CMake still verifies headers and libraries early so developer builds fail with
+# a clear diagnostic instead of a hidden runtime loader error.
+if(UNIX AND NOT APPLE)
+    find_package(PkgConfig QUIET)
+    if(PkgConfig_FOUND)
+        pkg_check_modules(FOBOS_SDR_PC QUIET libfobos_sdr)
+        pkg_check_modules(FOBOS_REGULAR_PC QUIET libfobos)
+    endif()
+
+    set(FOBOS_SDR_INCLUDE_DIR "${FOBOS_SDR_INCLUDE_DIR}" CACHE PATH "Fobos SDR Agile include directory")
+    set(FOBOS_SDR_LIBRARY "${FOBOS_SDR_LIBRARY}" CACHE FILEPATH "Fobos SDR Agile runtime library")
+    set(FOBOS_REGULAR_INCLUDE_DIR "${FOBOS_REGULAR_INCLUDE_DIR}" CACHE PATH "Fobos SDR regular include directory")
+    set(FOBOS_REGULAR_LIBRARY "${FOBOS_REGULAR_LIBRARY}" CACHE FILEPATH "Fobos SDR regular runtime library")
+
+    if(NOT FOBOS_SDR_INCLUDE_DIR AND DEFINED ENV{FOBOS_SDR_DIR})
+        set(FOBOS_SDR_INCLUDE_DIR "$ENV{FOBOS_SDR_DIR}/include" CACHE PATH "Fobos SDR Agile include directory" FORCE)
+    endif()
+    if(NOT FOBOS_SDR_LIBRARY AND DEFINED ENV{FOBOS_SDR_DIR})
+        set(FOBOS_SDR_LIBRARY "$ENV{FOBOS_SDR_DIR}/lib/libfobos_sdr.so" CACHE FILEPATH "Fobos SDR Agile runtime library" FORCE)
+    endif()
+
+    if(NOT FOBOS_REGULAR_INCLUDE_DIR AND DEFINED ENV{FOBOS_DIR})
+        set(FOBOS_REGULAR_INCLUDE_DIR "$ENV{FOBOS_DIR}/include" CACHE PATH "Fobos SDR regular include directory" FORCE)
+    endif()
+    if(NOT FOBOS_REGULAR_LIBRARY AND DEFINED ENV{FOBOS_DIR})
+        set(FOBOS_REGULAR_LIBRARY "$ENV{FOBOS_DIR}/lib/libfobos.so" CACHE FILEPATH "Fobos SDR regular runtime library" FORCE)
+    endif()
+
+    if(NOT FOBOS_SDR_INCLUDE_DIR AND FOBOS_SDR_PC_INCLUDE_DIRS)
+        list(GET FOBOS_SDR_PC_INCLUDE_DIRS 0 FOBOS_SDR_INCLUDE_DIR)
+        set(FOBOS_SDR_INCLUDE_DIR "${FOBOS_SDR_INCLUDE_DIR}" CACHE PATH "Fobos SDR Agile include directory" FORCE)
+    endif()
+    if(NOT FOBOS_REGULAR_INCLUDE_DIR AND FOBOS_REGULAR_PC_INCLUDE_DIRS)
+        list(GET FOBOS_REGULAR_PC_INCLUDE_DIRS 0 FOBOS_REGULAR_INCLUDE_DIR)
+        set(FOBOS_REGULAR_INCLUDE_DIR "${FOBOS_REGULAR_INCLUDE_DIR}" CACHE PATH "Fobos SDR regular include directory" FORCE)
+    endif()
+
+    if(NOT FOBOS_SDR_LIBRARY AND FOBOS_SDR_PC_LIBRARY_DIRS)
+        list(GET FOBOS_SDR_PC_LIBRARY_DIRS 0 FOBOS_SDR_LIBRARY_DIR)
+        set(FOBOS_SDR_LIBRARY "${FOBOS_SDR_LIBRARY_DIR}/libfobos_sdr.so" CACHE FILEPATH "Fobos SDR Agile runtime library" FORCE)
+    endif()
+    if(NOT FOBOS_REGULAR_LIBRARY AND FOBOS_REGULAR_PC_LIBRARY_DIRS)
+        list(GET FOBOS_REGULAR_PC_LIBRARY_DIRS 0 FOBOS_REGULAR_LIBRARY_DIR)
+        set(FOBOS_REGULAR_LIBRARY "${FOBOS_REGULAR_LIBRARY_DIR}/libfobos.so" CACHE FILEPATH "Fobos SDR regular runtime library" FORCE)
+    endif()
+
+    if(NOT EXISTS "${FOBOS_SDR_INCLUDE_DIR}/fobos_sdr.h")
+        message(FATAL_ERROR "Fobos SDR Agile header not found: ${FOBOS_SDR_INCLUDE_DIR}/fobos_sdr.h")
+    endif()
+    if(NOT EXISTS "${FOBOS_SDR_LIBRARY}")
+        message(FATAL_ERROR "Fobos SDR Agile runtime library not found: ${FOBOS_SDR_LIBRARY}")
+    endif()
+    if(NOT EXISTS "${FOBOS_REGULAR_INCLUDE_DIR}/fobos.h")
+        message(FATAL_ERROR "Fobos SDR regular header not found: ${FOBOS_REGULAR_INCLUDE_DIR}/fobos.h")
+    endif()
+    if(NOT EXISTS "${FOBOS_REGULAR_LIBRARY}")
+        message(FATAL_ERROR "Fobos SDR regular runtime library not found: ${FOBOS_REGULAR_LIBRARY}")
+    endif()
+endif()
+
 if(WIN32)
     set(FOBOS_SDR_INCLUDE_DIR "${FOBOS_SDR_INCLUDE_DIR}" CACHE PATH "Fobos SDR Agile include directory")
     set(FOBOS_SDR_LIBRARY "${FOBOS_SDR_LIBRARY}" CACHE FILEPATH "Fobos SDR Agile import library")
@@ -80,7 +142,7 @@ if(NOT BUILD_SHARED_LIBS)
     set_property(GLOBAL APPEND PROPERTY STATIC_PLUGINS_PROPERTY ${TARGET_NAME})
 endif()
 
-if(WIN32)
+if(WIN32 OR UNIX)
     target_include_directories(${TARGET_NAME} PRIVATE ${FOBOS_SDR_INCLUDE_DIR} ${FOBOS_REGULAR_INCLUDE_DIR})
 endif()
 

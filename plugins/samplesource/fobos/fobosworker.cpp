@@ -8,12 +8,17 @@
 
 #include <QDebug>
 #include <QDateTime>
+#include <QStringList>
+#include <QLibrary>
+#include <QByteArray>
 #include <algorithm>
 #include <cmath>
 #include <chrono>
 #include <cstdarg>
 #include <cstdio>
+#include <cstdlib>
 #include <cstring>
+#include <thread>
 #include <vector>
 
 #ifdef _WIN32
@@ -28,8 +33,13 @@ namespace
 #if defined(FOBOS_DEBUG_FILE_LOG)
     static const char* kLogPath = "sdrangel_fobos_source.log";
 #endif
+#ifdef _WIN32
     static const char* kAgileDll = "fobos_sdr.dll";
     static const char* kRegularDll = "fobos.dll";
+#else
+    static const char* kAgileDll = "libfobos_sdr.so";
+    static const char* kRegularDll = "libfobos.so";
+#endif
     static const uint32_t kSyncComplexBufferLength = 65536; // Sync read block size, about 8.2 ms at 8 MS/s
     static const uint32_t kSyncFloatStorage = kSyncComplexBufferLength * 2u; // interleaved float I/Q
     static const uint32_t kFifoChunkComplexLength = kSyncComplexBufferLength; // One FIFO write per read block
@@ -46,10 +56,71 @@ namespace
     static const bool kDefaultExternalClock = false;
 
 #ifdef _WIN32
+    using FobosLibraryHandle = HMODULE;
+#else
+    using DWORD = unsigned long;
+    using HMODULE = void*;
+    using FobosLibraryHandle = HMODULE;
+    static QString g_lastLibraryError;
+
+    static void SetLastError(DWORD) {}
+    static DWORD GetLastError() { return 0; }
+
+    static QString linuxRuntimeCandidate(const char* envName, const char* libName)
+    {
+        const char* root = std::getenv(envName);
+        if (!root || !*root) {
+            return QString();
+        }
+        return QString::fromLocal8Bit(root) + QStringLiteral("/lib/") + QString::fromLatin1(libName);
+    }
+
+    static HMODULE LoadLibraryA(const char* name)
+    {
+        QStringList candidates;
+        const QString libName = QString::fromLatin1(name ? name : "");
+
+        if (libName.contains(QStringLiteral("fobos_sdr"))) {
+            const QString envPath = linuxRuntimeCandidate("FOBOS_SDR_DIR", "libfobos_sdr.so");
+            if (!envPath.isEmpty()) { candidates << envPath; }
+        }
+
+        if (libName.contains(QStringLiteral("fobos")) && !libName.contains(QStringLiteral("fobos_sdr"))) {
+            const QString envPath = linuxRuntimeCandidate("FOBOS_DIR", "libfobos.so");
+            if (!envPath.isEmpty()) { candidates << envPath; }
+        }
+
+        candidates << libName;
+
+        for (const QString& candidate : candidates) {
+            QLibrary* lib = new QLibrary(candidate);
+            if (lib->load()) {
+                g_lastLibraryError.clear();
+                return static_cast<void*>(lib);
+            }
+            g_lastLibraryError = QStringLiteral("%1: %2").arg(candidate, lib->errorString());
+            delete lib;
+        }
+
+        return nullptr;
+    }
+
+    static QFunctionPointer GetProcAddress(HMODULE handle, const char* symbol)
+    {
+        QLibrary* lib = static_cast<QLibrary*>(handle);
+        return lib ? lib->resolve(symbol) : nullptr;
+    }
+
+    static void Sleep(unsigned int msec)
+    {
+        std::this_thread::sleep_for(std::chrono::milliseconds(msec));
+    }
+#endif
+
     static QMutex g_sessionMutex;
-    static HMODULE g_agileLibrary = nullptr;   // DLL is process-scoped; device is not.
-    static HMODULE g_regularLibrary = nullptr; // regular/classic DLL, process-scoped as well.
-    static bool g_deviceBusy = false;          // prevent two SDRangel device sets from using one Fobos.
+    static FobosLibraryHandle g_agileLibrary = nullptr;   // runtime library is process-scoped; device is not.
+    static FobosLibraryHandle g_regularLibrary = nullptr; // regular/classic runtime library, process-scoped as well.
+    static bool g_deviceBusy = false;                     // prevent two SDRangel device sets from using one Fobos.
 
     static void formatLastError(DWORD err, char* out, size_t outSize)
     {
@@ -57,6 +128,7 @@ namespace
             return;
         }
         out[0] = '\0';
+#ifdef _WIN32
         DWORD n = FormatMessageA(
             FORMAT_MESSAGE_FROM_SYSTEM | FORMAT_MESSAGE_IGNORE_INSERTS,
             nullptr,
@@ -73,8 +145,12 @@ namespace
                 --n;
             }
         }
-    }
+#else
+        (void) err;
+        const QByteArray bytes = g_lastLibraryError.toLocal8Bit();
+        std::snprintf(out, outSize, "%s", bytes.constData());
 #endif
+    }
 }
 
 FOBOSWorker::FOBOSWorker(SampleSinkFifo* sampleFifo, QObject* parent) :
@@ -110,9 +186,8 @@ FOBOSWorker::FOBOSWorker(SampleSinkFifo* sampleFifo, QObject* parent) :
     m_readerActive(false),
     m_readerFinished(false),
     m_dev(nullptr),
-    m_runtimeBackend(FobosRuntimeBackend::None)
-#ifdef _WIN32
-    , m_libraryHandle(nullptr),
+    m_runtimeBackend(FobosRuntimeBackend::None),
+    m_libraryHandle(nullptr),
     m_errorName(nullptr),
     m_closeDev(nullptr),
     m_readSync(nullptr),
@@ -133,9 +208,8 @@ FOBOSWorker::FOBOSWorker(SampleSinkFifo* sampleFifo, QObject* parent) :
     m_regularSetUserGpo(nullptr),
     m_regularSetClkSource(nullptr),
     m_regularSetLnaGain(nullptr),
-    m_regularSetVgaGain(nullptr)
-#endif
-    , m_totalReads(0),
+    m_regularSetVgaGain(nullptr),
+    m_totalReads(0),
     m_totalSamples(0),
     m_totalWritten(0),
     m_failedReads(0)
@@ -180,7 +254,6 @@ void FOBOSWorker::stopWork()
     m_stopRequested.store(true);
     m_running.store(false);
 
-#ifdef _WIN32
     bool readerJoined = true;
 
     // Do not call stop_sync while read_sync is active.
@@ -204,7 +277,6 @@ void FOBOSWorker::stopWork()
     }
 
     cleanupAfterReaderJoined(readerJoined);
-#endif
 }
 
 void FOBOSWorker::setSamplerate(int samplerate)
@@ -346,7 +418,6 @@ void FOBOSWorker::setPattern2() {}
 
 bool FOBOSWorker::runAgileStart()
 {
-#ifdef _WIN32
     logLine("============================================================");
     logLine("SDRangel Fobos SDR Agile native source");
     logTimestamp();
@@ -639,17 +710,11 @@ bool FOBOSWorker::runAgileStart()
     logLine("reader_thread=STARTED");
     emit backendStatusChanged(QStringLiteral("Agile"), agileBackendDetails);
     return true;
-#else
-    logLine("Fobos SDR Agile dynamic runtime backend is currently implemented for Windows only");
-    m_running.store(false);
-    return false;
-#endif
 }
 
 
 bool FOBOSWorker::runRegularStart()
 {
-#ifdef _WIN32
     logLine("============================================================");
     logLine("SDRangel Fobos SDR regular native source");
     logTimestamp();
@@ -872,15 +937,10 @@ bool FOBOSWorker::runRegularStart()
     logLine("regular_reader_thread=STARTED");
     emit backendStatusChanged(QStringLiteral("Regular"), regularBackendDetails);
     return true;
-#else
-    m_running.store(false);
-    return false;
-#endif
 }
 
 int FOBOSWorker::callSetFrequency(fobos_dev_t* dev, double valueHz)
 {
-#ifdef _WIN32
     if (m_runtimeBackend == FobosRuntimeBackend::Regular && m_regularSetFrequency) {
         double actual = 0.0;
         int r = m_regularSetFrequency(dev, valueHz, &actual);
@@ -890,13 +950,11 @@ int FOBOSWorker::callSetFrequency(fobos_dev_t* dev, double valueHz)
     if (m_setFrequency) {
         return m_setFrequency(dev, valueHz);
     }
-#endif
     return -9999;
 }
 
 int FOBOSWorker::callSetSamplerate(fobos_dev_t* dev, double valueHz)
 {
-#ifdef _WIN32
     if (m_runtimeBackend == FobosRuntimeBackend::Regular && m_regularSetSamplerate)
     {
         double actual = 0.0;
@@ -907,13 +965,11 @@ int FOBOSWorker::callSetSamplerate(fobos_dev_t* dev, double valueHz)
     {
         return m_setSamplerate(dev, valueHz);
     }
-#endif
     return -9999;
 }
 
 int FOBOSWorker::callSetDirectSampling(fobos_dev_t* dev, int inputMode)
 {
-#ifdef _WIN32
     const int direct = (inputMode == 0) ? 0 : 1;
     if (m_runtimeBackend == FobosRuntimeBackend::Regular && m_regularSetDirectSampling) {
         return m_regularSetDirectSampling(dev, static_cast<unsigned int>(direct));
@@ -921,13 +977,11 @@ int FOBOSWorker::callSetDirectSampling(fobos_dev_t* dev, int inputMode)
     if (m_setDirectSampling) {
         return m_setDirectSampling(dev, direct);
     }
-#endif
     return 0;
 }
 
 int FOBOSWorker::callSetAutoBandwidth(fobos_dev_t* dev, unsigned int bandwidthPercent)
 {
-#ifdef _WIN32
     if (m_runtimeBackend == FobosRuntimeBackend::Regular) {
         (void) dev;
         (void) bandwidthPercent;
@@ -937,59 +991,50 @@ int FOBOSWorker::callSetAutoBandwidth(fobos_dev_t* dev, unsigned int bandwidthPe
         const double ratio = static_cast<double>(bandwidthPercent) * 0.01;
         return m_setAutoBandwidth(dev, ratio);
     }
-#endif
     return 0;
 }
 
 int FOBOSWorker::callSetGpo(fobos_dev_t* dev, unsigned int gpoMask)
 {
-#ifdef _WIN32
     if (m_runtimeBackend == FobosRuntimeBackend::Regular && m_regularSetUserGpo) {
         return m_regularSetUserGpo(dev, static_cast<uint8_t>(gpoMask & 0xffu));
     }
     if (m_setUserGpo) {
         return m_setUserGpo(dev, gpoMask & 0xffu);
     }
-#endif
     return 0;
 }
 
 int FOBOSWorker::callSetClockSource(fobos_dev_t* dev, bool externalClock)
 {
-#ifdef _WIN32
     if (m_runtimeBackend == FobosRuntimeBackend::Regular && m_regularSetClkSource) {
         return m_regularSetClkSource(dev, externalClock ? 1 : 0);
     }
     if (m_setClkSource) {
         return m_setClkSource(dev, externalClock ? 1 : 0);
     }
-#endif
     return 0;
 }
 
 int FOBOSWorker::callSetLnaGain(fobos_dev_t* dev, unsigned int lnaGain)
 {
-#ifdef _WIN32
     if (m_runtimeBackend == FobosRuntimeBackend::Regular && m_regularSetLnaGain) {
         return m_regularSetLnaGain(dev, lnaGain);
     }
     if (m_setLnaGain) {
         return m_setLnaGain(dev, lnaGain);
     }
-#endif
     return -9999;
 }
 
 int FOBOSWorker::callSetVgaGain(fobos_dev_t* dev, unsigned int vgaGain)
 {
-#ifdef _WIN32
     if (m_runtimeBackend == FobosRuntimeBackend::Regular && m_regularSetVgaGain) {
         return m_regularSetVgaGain(dev, vgaGain);
     }
     if (m_setVgaGain) {
         return m_setVgaGain(dev, vgaGain);
     }
-#endif
     return -9999;
 }
 
@@ -998,6 +1043,9 @@ void FOBOSWorker::readerLoop()
 #ifdef _WIN32
     SetThreadPriority(GetCurrentThread(), THREAD_PRIORITY_HIGHEST);
     logLine("reader_thread_priority=THREAD_PRIORITY_HIGHEST");
+#else
+    logLine("reader_thread_priority=DEFAULT_PORTABLE");
+#endif
     fobos_dev_t* dev = m_dev.load();
     if (!dev || !m_readSync) {
         logLine("reader_loop=ABORT no_device_or_readSync");
@@ -1187,12 +1235,10 @@ void FOBOSWorker::readerLoop()
 
     m_readerActive.store(false);
     m_readerFinished.store(true);
-#endif
 }
 
 void FOBOSWorker::cleanupAfterReaderJoined(bool readerJoined)
 {
-#ifdef _WIN32
     fobos_dev_t* dev = m_dev.load();
 
     if (!dev) {
@@ -1222,14 +1268,17 @@ void FOBOSWorker::cleanupAfterReaderJoined(bool readerJoined)
 
     logLine("freelibrary_call=SKIPPED_PROCESS_SCOPED_DLL");
     logLine("source_result=STOPPED_CLEANLY_READER_JOINED_CLOSE_DONE");
-#endif
 }
 
 void FOBOSWorker::logLine(const char* fmt, ...) const
 {
 #if defined(FOBOS_DEBUG_FILE_LOG)
     FILE* f = nullptr;
+#ifdef _WIN32
     fopen_s(&f, kLogPath, "a");
+#else
+    f = std::fopen(kLogPath, "a");
+#endif
     if (!f) {
         return;
     }
@@ -1254,12 +1303,10 @@ void FOBOSWorker::logTimestamp() const
 
 const char* FOBOSWorker::errorName(int code) const
 {
-#ifdef _WIN32
     if (m_errorName) {
         const char* s = m_errorName(code);
         return s ? s : "null_error_name";
     }
-#endif
     return "error_name_unavailable";
 }
 
