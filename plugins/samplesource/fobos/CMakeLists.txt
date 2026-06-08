@@ -2,13 +2,20 @@ project(fobos)
 
 option(FOBOS_DEBUG_FILE_LOG "Write Fobos SDR diagnostic log file" OFF)
 
-# Fobos SDR runtime packages. On Windows official builds these are expected
-# to come from external/windows/fobos-sdr and external/windows/fobos-regular
-# in the SDRangel Windows dependency repo.
+# Fobos SDR runtime packages.
 #
-# On Linux the plugin is intended to runtime-load libfobos_sdr.so / libfobos.so.
-# CMake still verifies headers and libraries early so developer builds fail with
-# a clear diagnostic instead of a hidden runtime loader error.
+# Windows: official builds expect the import libraries / DLLs to come from
+# external/windows/fobos-sdr and external/windows/fobos-regular in the SDRangel
+# Windows dependency repo (handled in the WIN32 block below).
+#
+# Linux: the plugin does NOT link against or #include the Fobos SDK. fobosworker.{h,cpp}
+# forward-declare fobos_dev_t and define their own function-pointer typedefs, then load
+# libfobos_sdr.so / libfobos.so at runtime through QLibrary. Consequently neither the
+# development headers nor the runtime libraries are required at build time, and any
+# combination of backends (Agile, Regular, both or none) is resolved at runtime.
+# The detection below is therefore best-effort and ADVISORY ONLY: it never fails the
+# build, and it is multilib-aware (lib/lib64) so it does not depend on a possibly
+# incorrect libfobos_sdr.pc libdir.
 if(UNIX AND NOT APPLE)
     find_package(PkgConfig QUIET)
     if(PkgConfig_FOUND)
@@ -16,54 +23,50 @@ if(UNIX AND NOT APPLE)
         pkg_check_modules(FOBOS_REGULAR_PC QUIET libfobos)
     endif()
 
-    set(FOBOS_SDR_INCLUDE_DIR "${FOBOS_SDR_INCLUDE_DIR}" CACHE PATH "Fobos SDR Agile include directory")
-    set(FOBOS_SDR_LIBRARY "${FOBOS_SDR_LIBRARY}" CACHE FILEPATH "Fobos SDR Agile runtime library")
-    set(FOBOS_REGULAR_INCLUDE_DIR "${FOBOS_REGULAR_INCLUDE_DIR}" CACHE PATH "Fobos SDR regular include directory")
-    set(FOBOS_REGULAR_LIBRARY "${FOBOS_REGULAR_LIBRARY}" CACHE FILEPATH "Fobos SDR regular runtime library")
+    # Optional include dirs. Not required to build (no vendor header is #included),
+    # but honoured if the user points at a custom SDK location.
+    set(FOBOS_SDR_INCLUDE_DIR "${FOBOS_SDR_INCLUDE_DIR}" CACHE PATH "Optional Fobos SDR Agile include directory (not required on Linux)")
+    set(FOBOS_REGULAR_INCLUDE_DIR "${FOBOS_REGULAR_INCLUDE_DIR}" CACHE PATH "Optional Fobos SDR regular include directory (not required on Linux)")
 
     if(NOT FOBOS_SDR_INCLUDE_DIR AND DEFINED ENV{FOBOS_SDR_DIR})
-        set(FOBOS_SDR_INCLUDE_DIR "$ENV{FOBOS_SDR_DIR}/include" CACHE PATH "Fobos SDR Agile include directory" FORCE)
+        set(FOBOS_SDR_INCLUDE_DIR "$ENV{FOBOS_SDR_DIR}/include" CACHE PATH "Optional Fobos SDR Agile include directory (not required on Linux)" FORCE)
     endif()
-    if(NOT FOBOS_SDR_LIBRARY AND DEFINED ENV{FOBOS_SDR_DIR})
-        set(FOBOS_SDR_LIBRARY "$ENV{FOBOS_SDR_DIR}/lib/libfobos_sdr.so" CACHE FILEPATH "Fobos SDR Agile runtime library" FORCE)
-    endif()
-
     if(NOT FOBOS_REGULAR_INCLUDE_DIR AND DEFINED ENV{FOBOS_DIR})
-        set(FOBOS_REGULAR_INCLUDE_DIR "$ENV{FOBOS_DIR}/include" CACHE PATH "Fobos SDR regular include directory" FORCE)
+        set(FOBOS_REGULAR_INCLUDE_DIR "$ENV{FOBOS_DIR}/include" CACHE PATH "Optional Fobos SDR regular include directory (not required on Linux)" FORCE)
     endif()
-    if(NOT FOBOS_REGULAR_LIBRARY AND DEFINED ENV{FOBOS_DIR})
-        set(FOBOS_REGULAR_LIBRARY "$ENV{FOBOS_DIR}/lib/libfobos.so" CACHE FILEPATH "Fobos SDR regular runtime library" FORCE)
-    endif()
-
     if(NOT FOBOS_SDR_INCLUDE_DIR AND FOBOS_SDR_PC_INCLUDE_DIRS)
         list(GET FOBOS_SDR_PC_INCLUDE_DIRS 0 FOBOS_SDR_INCLUDE_DIR)
-        set(FOBOS_SDR_INCLUDE_DIR "${FOBOS_SDR_INCLUDE_DIR}" CACHE PATH "Fobos SDR Agile include directory" FORCE)
     endif()
     if(NOT FOBOS_REGULAR_INCLUDE_DIR AND FOBOS_REGULAR_PC_INCLUDE_DIRS)
         list(GET FOBOS_REGULAR_PC_INCLUDE_DIRS 0 FOBOS_REGULAR_INCLUDE_DIR)
-        set(FOBOS_REGULAR_INCLUDE_DIR "${FOBOS_REGULAR_INCLUDE_DIR}" CACHE PATH "Fobos SDR regular include directory" FORCE)
     endif()
 
-    if(NOT FOBOS_SDR_LIBRARY AND FOBOS_SDR_PC_LIBRARY_DIRS)
-        list(GET FOBOS_SDR_PC_LIBRARY_DIRS 0 FOBOS_SDR_LIBRARY_DIR)
-        set(FOBOS_SDR_LIBRARY "${FOBOS_SDR_LIBRARY_DIR}/libfobos_sdr.so" CACHE FILEPATH "Fobos SDR Agile runtime library" FORCE)
-    endif()
-    if(NOT FOBOS_REGULAR_LIBRARY AND FOBOS_REGULAR_PC_LIBRARY_DIRS)
-        list(GET FOBOS_REGULAR_PC_LIBRARY_DIRS 0 FOBOS_REGULAR_LIBRARY_DIR)
-        set(FOBOS_REGULAR_LIBRARY "${FOBOS_REGULAR_LIBRARY_DIR}/libfobos.so" CACHE FILEPATH "Fobos SDR regular runtime library" FORCE)
-    endif()
+    # Advisory runtime-library probe. find_library is multilib-aware and can search
+    # common lib/lib64 suffixes, so it is not dependent on a possibly wrong .pc libdir.
+    # The result is informational only and never gates the build.
+    find_library(FOBOS_SDR_LIBRARY
+        NAMES fobos_sdr
+        HINTS "$ENV{FOBOS_SDR_DIR}" ${FOBOS_SDR_PC_PREFIX} ${FOBOS_SDR_PC_LIBRARY_DIRS}
+        PATH_SUFFIXES lib lib64 lib/${CMAKE_LIBRARY_ARCHITECTURE}
+    )
+    find_library(FOBOS_REGULAR_LIBRARY
+        NAMES fobos
+        HINTS "$ENV{FOBOS_DIR}" ${FOBOS_REGULAR_PC_PREFIX} ${FOBOS_REGULAR_PC_LIBRARY_DIRS}
+        PATH_SUFFIXES lib lib64 lib/${CMAKE_LIBRARY_ARCHITECTURE}
+    )
 
-    if(NOT EXISTS "${FOBOS_SDR_INCLUDE_DIR}/fobos_sdr.h")
-        message(FATAL_ERROR "Fobos SDR Agile header not found: ${FOBOS_SDR_INCLUDE_DIR}/fobos_sdr.h")
+    if(FOBOS_SDR_LIBRARY)
+        message(STATUS "Fobos SDR: Agile runtime detected (advisory): ${FOBOS_SDR_LIBRARY}")
+    else()
+        message(STATUS "Fobos SDR: Agile runtime not found at configure time; it will be loaded at runtime via QLibrary if libfobos_sdr.so is installed.")
     endif()
-    if(NOT EXISTS "${FOBOS_SDR_LIBRARY}")
-        message(FATAL_ERROR "Fobos SDR Agile runtime library not found: ${FOBOS_SDR_LIBRARY}")
+    if(FOBOS_REGULAR_LIBRARY)
+        message(STATUS "Fobos SDR: Regular runtime detected (advisory): ${FOBOS_REGULAR_LIBRARY}")
+    else()
+        message(STATUS "Fobos SDR: Regular runtime not found at configure time; it will be loaded at runtime via QLibrary if libfobos.so is installed.")
     endif()
-    if(NOT EXISTS "${FOBOS_REGULAR_INCLUDE_DIR}/fobos.h")
-        message(FATAL_ERROR "Fobos SDR regular header not found: ${FOBOS_REGULAR_INCLUDE_DIR}/fobos.h")
-    endif()
-    if(NOT EXISTS "${FOBOS_REGULAR_LIBRARY}")
-        message(FATAL_ERROR "Fobos SDR regular runtime library not found: ${FOBOS_REGULAR_LIBRARY}")
+    if(NOT FOBOS_SDR_LIBRARY AND NOT FOBOS_REGULAR_LIBRARY)
+        message(STATUS "Fobos SDR: no runtime library detected at configure time. The plugin still builds; install libfobos_sdr.so and/or libfobos.so to use the device.")
     endif()
 endif()
 
@@ -172,7 +175,6 @@ if(WIN32)
             "${SDRANGEL_BINARY_BIN_DIR}/fobos.dll"
         COMMENT "Copying Fobos SDR regular runtime DLL"
     )
-
 
     install(FILES "${FOBOS_SDR_DLL_DIR}/fobos_sdr.dll" DESTINATION ${INSTALL_BIN_DIR})
     install(FILES "${FOBOS_REGULAR_DLL_DIR}/fobos.dll" DESTINATION ${INSTALL_BIN_DIR})
