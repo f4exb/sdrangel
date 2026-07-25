@@ -2086,9 +2086,10 @@ struct spectrum : runnable
 
     void run()
     {
-        while (in.readable() >= fft.n * decim && out.writable() >= 1)
+        const int fft_size = fft.size();
+        while (in.readable() >= fft_size * decim && out.writable() >= 1)
         {
-            phase += fft.n * decim;
+            phase += fft_size * decim;
 
             if (phase >= decimation)
             {
@@ -2096,24 +2097,25 @@ struct spectrum : runnable
                 do_spectrum();
             }
 
-            in.read(fft.n * decim);
+            in.read(fft_size * decim);
         }
     }
 
   private:
     void do_spectrum()
     {
-        std::complex<T> data[fft.n];
+        const int fft_size = fft.size();
+        std::complex<T> data[fft_size];
 
         if (decim == 1)
         {
-            memcpy(data, in.rd(), fft.n * sizeof(data[0]));
+            memcpy(data, in.rd(), fft_size * sizeof(data[0]));
         }
         else
         {
             std::complex<T> *pin = in.rd();
 
-            for (int i = 0; i < fft.n; ++i, pin += decim) {
+            for (int i = 0; i < fft_size; ++i, pin += decim) {
                 data[i] = *pin;
             }
         }
@@ -2121,23 +2123,23 @@ struct spectrum : runnable
         fft.inplace(data, true);
         float power[NFFT];
 
-        for (int i = 0; i < fft.n; ++i) {
+        for (int i = 0; i < fft_size; ++i) {
             power[i] = (float)data[i].real() * data[i].real() + (float)data[i].imag() * data[i].imag();
         }
 
         if (!avgpower)
         {
             // Initialize with first spectrum
-            avgpower = new float[fft.n];
-            memcpy(avgpower, power, fft.n * sizeof(avgpower[0]));
+            avgpower = new float[fft_size];
+            memcpy(avgpower, power, fft_size * sizeof(avgpower[0]));
         }
 
         // Accumulate and low-pass filter
-        for (int i = 0; i < fft.n; ++i)
+        for (int i = 0; i < fft_size; ++i)
             avgpower[i] = avgpower[i] * (1 - kavg) + power[i] * kavg;
 
         // Reuse power[]
-        for (int i = 0; i < fft.n / 2; ++i)
+        for (int i = 0; i < fft_size / 2; ++i)
         {
             power[i] = 10 * log10f(avgpower[NFFT / 2 + i]);
             power[NFFT / 2 + i] = 10 * log10f(avgpower[i]);
