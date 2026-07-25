@@ -72,9 +72,9 @@ SPHP::SPHP(
 void SPHP::flush()
 {
     std::fill(x0.begin(), x0.end(), 0);
-    std::fill(x1.begin(), x0.end(), 0);
-    std::fill(y0.begin(), x0.end(), 0);
-    std::fill(y1.begin(), x0.end(), 0);
+    std::fill(x1.begin(), x1.end(), 0);
+    std::fill(y0.begin(), y0.end(), 0);
+    std::fill(y1.begin(), y1.end(), 0);
 }
 
 void SPHP::execute()
