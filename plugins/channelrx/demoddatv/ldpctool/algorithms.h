@@ -191,12 +191,13 @@ struct OffsetMinSumAlgorithm<SIMD<VALUE, WIDTH>, UPDATE, FACTOR>
 	static void finalp(TYPE *links, int cnt)
 	{
 		TYPE beta = vdup<TYPE>(0.5 * FACTOR);
-		TYPE mags[cnt], mins[cnt];
+		std::vector<TYPE> mags(cnt);
+		std::vector<TYPE> mins(cnt);
 		for (int i = 0; i < cnt; ++i)
 			mags[i] = vmax(vsub(vabs(links[i]), beta), vzero<TYPE>());
 		CODE::exclusive_reduce(mags, mins, cnt, min);
 
-		TYPE signs[cnt];
+		std::vector<TYPE> signs(cnt);
 		CODE::exclusive_reduce(links, signs, cnt, sign);
 
 		for (int i = 0; i < cnt; ++i)
