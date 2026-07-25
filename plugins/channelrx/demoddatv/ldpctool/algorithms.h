@@ -127,7 +127,7 @@ struct MinSumAlgorithm<SIMD<int8_t, WIDTH>, UPDATE>
 	}
 	static void finalp(TYPE *links, int cnt)
 	{
-		TYPE mags[cnt];
+		std::vector<TYPE> mags(cnt);
 		for (int i = 0; i < cnt; ++i)
 			mags[i] = vqabs(links[i]);
 
