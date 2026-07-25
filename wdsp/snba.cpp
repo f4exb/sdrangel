@@ -620,7 +620,7 @@ int SNBA::scanFrame(
 
     if (nimp > 0)
     {
-        while (merit[i] == merit[0] && i < nimp)
+        while (i < nimp && merit[i] == merit[0])
             i++;
     }
 
