@@ -337,7 +337,7 @@ struct MinSumCAlgorithm<SIMD<VALUE, WIDTH>, UPDATE, FACTOR>
 	}
 	static void finalp(TYPE *links, int cnt)
 	{
-		TYPE tmp[cnt];
+		std::vector<TYPE> tmp(cnt);
 		CODE::exclusive_reduce(links, tmp, cnt, minc);
 		for (int i = 0; i < cnt; ++i)
 			links[i] = tmp[i];
