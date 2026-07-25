@@ -14,17 +14,23 @@
 // You should have received a copy of the GNU General Public License                 //
 // along with this program. If not, see <http://www.gnu.org/licenses/>.              //
 ///////////////////////////////////////////////////////////////////////////////////////
+
+#include <stdexcept>
+#include <string>
+
 #include "framework.h"
 
 namespace leansdr
 {
 
-void fatal(const char *s) {
+[[noreturn]] void fatal(const char *s) {
     perror(s);
+    throw std::runtime_error(std::string("leansdr fatal: ") + s);
 }
 
-void fail(const char *s) {
-    fprintf(stderr, "** %s\n", s);
+[[noreturn]] void fail(const char *s) {
+    fprintf(stderr, "** leansdr fail: %s\n", s);
+    throw std::runtime_error(std::string("leansdr fail: ") + s);
 }
 
 } // leansdr
