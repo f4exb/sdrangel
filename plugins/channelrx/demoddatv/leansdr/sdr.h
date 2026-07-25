@@ -19,8 +19,10 @@
 #ifndef LEANSDR_SDR_H
 #define LEANSDR_SDR_H
 
-#include <numeric>
+#include <algorithm>
 #include <complex>
+#include <numeric>
+#include <vector>
 
 #include "leansdr/dsp.h"
 #include "leansdr/math.h"
@@ -2105,11 +2107,11 @@ struct spectrum : runnable
     void do_spectrum()
     {
         const int fft_size = fft.size();
-        std::complex<T> data[fft_size];
+        std::vector<std::complex<T>> data(fft_size);
 
         if (decim == 1)
         {
-            memcpy(data, in.rd(), fft_size * sizeof(data[0]));
+            std::copy(in.rd(), in.rd() + fft_size, data.begin());
         }
         else
         {
@@ -2120,7 +2122,7 @@ struct spectrum : runnable
             }
         }
 
-        fft.inplace(data, true);
+        fft.inplace(data.data(), true);
         float power[NFFT];
 
         for (int i = 0; i < fft_size; ++i) {
