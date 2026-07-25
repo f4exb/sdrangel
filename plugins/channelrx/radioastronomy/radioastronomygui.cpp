@@ -2061,31 +2061,32 @@ void RadioAstronomyGUI::onMenuDialogCalled(const QPoint &p)
 
         dialog.move(p);
         new DialogPositioner(&dialog, false);
-        dialog.exec();
-
-        m_settings.m_rgbColor = m_channelMarker.getColor().rgb();
-        m_settings.m_title = m_channelMarker.getTitle();
-        m_settings.m_useReverseAPI = dialog.useReverseAPI();
-        m_settings.m_reverseAPIAddress = dialog.getReverseAPIAddress();
-        m_settings.m_reverseAPIPort = dialog.getReverseAPIPort();
-        m_settings.m_reverseAPIDeviceIndex = dialog.getReverseAPIDeviceIndex();
-        m_settings.m_reverseAPIChannelIndex = dialog.getReverseAPIChannelIndex();
-
-        setWindowTitle(m_settings.m_title);
-        setTitle(m_channelMarker.getTitle());
-        setTitleColor(m_settings.m_rgbColor);
-
-        if (m_deviceUISet->m_deviceMIMOEngine)
+        if (dialog.exec() == QDialog::Accepted)
         {
-            m_settings.m_streamIndex = dialog.getSelectedStreamIndex();
-            m_channelMarker.clearStreamIndexes();
-            m_channelMarker.addStreamIndex(m_settings.m_streamIndex);
-            updateIndexLabel();
-        }
+            m_settings.m_rgbColor = m_channelMarker.getColor().rgb();
+            m_settings.m_title = m_channelMarker.getTitle();
+            m_settings.m_useReverseAPI = dialog.useReverseAPI();
+            m_settings.m_reverseAPIAddress = dialog.getReverseAPIAddress();
+            m_settings.m_reverseAPIPort = dialog.getReverseAPIPort();
+            m_settings.m_reverseAPIDeviceIndex = dialog.getReverseAPIDeviceIndex();
+            m_settings.m_reverseAPIChannelIndex = dialog.getReverseAPIChannelIndex();
 
-        applySettings(QStringList({"title", "rgbColor", "useReverseAPI", "reverseAPIAddress",
-                                    "reverseAPIPort", "reverseAPIDeviceIndex", "reverseAPIChannelIndex",
-                                    "streamIndex"}));
+            setWindowTitle(m_settings.m_title);
+            setTitle(m_channelMarker.getTitle());
+            setTitleColor(m_settings.m_rgbColor);
+
+            if (m_deviceUISet->m_deviceMIMOEngine)
+            {
+                m_settings.m_streamIndex = dialog.getSelectedStreamIndex();
+                m_channelMarker.clearStreamIndexes();
+                m_channelMarker.addStreamIndex(m_settings.m_streamIndex);
+                updateIndexLabel();
+            }
+
+            applySettings(QStringList({"title", "rgbColor", "useReverseAPI", "reverseAPIAddress",
+                                        "reverseAPIPort", "reverseAPIDeviceIndex", "reverseAPIChannelIndex",
+                                        "streamIndex"}));
+        }
     }
 
     resetContextMenuType();
@@ -5799,7 +5800,9 @@ void RadioAstronomyGUI::spectrumSeries_clicked(const QPointF &point)
             m_spectrumM1Valid = true;
             ui->spectrumMarkerTable->item(SPECTRUM_MARKER_ROW_M1, SPECTRUM_MARKER_COL_FREQ)->setData(Qt::DisplayRole, m_spectrumM1X);
             ui->spectrumMarkerTable->item(SPECTRUM_MARKER_ROW_M1, SPECTRUM_MARKER_COL_VALUE)->setData(Qt::DisplayRole, m_spectrumM1Y);
-            calcVrAndDistanceToPeak(m_spectrumM1X*1e6, fft, SPECTRUM_MARKER_ROW_M1);
+            if (fft) {
+                calcVrAndDistanceToPeak(m_spectrumM1X*1e6, fft, SPECTRUM_MARKER_ROW_M1);
+            }
         }
         else if (selection == "M2")
         {
@@ -5808,7 +5811,9 @@ void RadioAstronomyGUI::spectrumSeries_clicked(const QPointF &point)
             m_spectrumM2Valid = true;
             ui->spectrumMarkerTable->item(SPECTRUM_MARKER_ROW_M2, SPECTRUM_MARKER_COL_FREQ)->setData(Qt::DisplayRole, m_spectrumM2X);
             ui->spectrumMarkerTable->item(SPECTRUM_MARKER_ROW_M2, SPECTRUM_MARKER_COL_VALUE)->setData(Qt::DisplayRole, m_spectrumM2Y);
-            calcVrAndDistanceToPeak(m_spectrumM2X*1e6, fft, SPECTRUM_MARKER_ROW_M2);
+            if (fft) {
+                calcVrAndDistanceToPeak(m_spectrumM2X*1e6, fft, SPECTRUM_MARKER_ROW_M2);
+            }
         }
         calcSpectrumMarkerDelta();
 

@@ -96,7 +96,7 @@ class RadioAstronomyGUI : public ChannelGUI {
         float m_solarFlux;
         float m_airTemp;
         float m_skyTemp;
-        float m_sensor[RADIOASTRONOMY_SENSORS];
+        float m_sensor[RADIOASTRONOMY_SENSORS] {0.0f};
 
         bool m_rotValid;
         float m_rotAz;
@@ -107,6 +107,10 @@ class RadioAstronomyGUI : public ChannelGUI {
         int m_sweepIndex;
 
         FFTMeasurement() :
+            m_centerFrequency(0),
+            m_sampleRate(0),
+            m_integration(0),
+            m_rfBandwidth(0),
             m_fftSize(0),
             m_fftData(nullptr),
             m_db(nullptr),
@@ -124,7 +128,18 @@ class RadioAstronomyGUI : public ChannelGUI {
             m_sigmaS(0.0f),
             m_tempMin(0.0f),
             m_baseline(RadioAstronomySettings::SBL_TSYS0),
+            m_omegaA(0.0f),
+            m_omegaS(0.0f),
             m_coordsValid(false),
+            m_ra(0.0f),
+            m_dec(0.0f),
+            m_azimuth(0.0f),
+            m_elevation(0.0f),
+            m_l(0.0f),
+            m_b(0.0f),
+            m_vBCRS(0.0f),
+            m_vLSR(0.0f),
+            m_solarFlux(0.0f),
             m_airTemp(0.0),
             m_skyTemp(0.0),
             m_rotValid(false),
@@ -186,7 +201,9 @@ class RadioAstronomyGUI : public ChannelGUI {
 
         SensorMeasurements() :
             m_series(nullptr),
-            m_yAxis(nullptr)
+            m_yAxis(nullptr),
+            m_max(-std::numeric_limits<double>::max()),
+            m_min(std::numeric_limits<double>::max())
         {
         }
 
