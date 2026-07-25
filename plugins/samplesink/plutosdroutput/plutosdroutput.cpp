@@ -363,6 +363,8 @@ void PlutoSDROutput::closeDevice()
         delete m_deviceShared.m_deviceParams;
         m_deviceShared.m_deviceParams = 0;
     }
+
+    m_open = false;
 }
 
 void PlutoSDROutput::suspendBuddies()
