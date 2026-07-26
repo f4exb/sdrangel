@@ -51,6 +51,7 @@
 #include <stdlib.h>
 #include <deque>
 #include <bitset>
+#include <vector>
 
 #include "bch.h"
 #include "crc.h"
@@ -907,7 +908,7 @@ struct s2_frame_receiver : runnable
         // Interpolate PLHEADER.
 
         const int PLH_LENGTH = sof.LENGTH + plscodes.LENGTH;
-        std::complex<float> plh_symbols[PLH_LENGTH];
+        std::vector<std::complex<float>> plh_symbols(PLH_LENGTH);
 
         for (int s=0; s<PLH_LENGTH; ++s)
         {
@@ -1005,16 +1006,17 @@ struct s2_frame_receiver : runnable
         // ss now points to first data slot.
         ss.scr = scrambling.Rn;
 
-        std::complex<float> plh_expected[PLH_LENGTH];
+        std::vector<std::complex<float>> plh_expected(PLH_LENGTH);
 
-        std::copy(sof.symbols, sof.symbols + sof.LENGTH, plh_expected);
-        std::copy(plscodes.symbols[plscode_index], plscodes.symbols[plscode_index] + plscodes.LENGTH, &plh_expected[sof.LENGTH]);
+        std::copy(sof.symbols, sof.symbols + sof.LENGTH, plh_expected.begin());
+        std::copy(plscodes.symbols[plscode_index], plscodes.symbols[plscode_index] + plscodes.LENGTH,
+            plh_expected.begin() + sof.LENGTH);
 
         if ( state == FRAME_PROBE )
         {
             // Carrier frequency from differential detector is still not reliable.
             // Use known PLH symbols to improve.
-            match_freq(plh_expected, plh_symbols, PLH_LENGTH, &ss);
+            match_freq(plh_expected.data(), plh_symbols.data(), PLH_LENGTH, &ss);
 #if DEBUG_CARRIER
             fprintf(stderr, "CARRIER freq: %s\n", ss.format());
 #endif
@@ -1022,7 +1024,7 @@ struct s2_frame_receiver : runnable
 
         // Use known PLH symbols to estimate carrier phase and amplitude.
 
-        float mer2 = match_ph_amp(plh_expected, plh_symbols, PLH_LENGTH, &ss);
+        float mer2 = match_ph_amp(plh_expected.data(), plh_symbols.data(), PLH_LENGTH, &ss);
         float mer = 10*log10f(mer2);
 #if DEBUG_CARRIER
         fprintf(stderr, "CARRIER plheader: %s MER %.1f dB\n", ss.format(), mer);
