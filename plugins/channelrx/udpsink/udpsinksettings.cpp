@@ -16,6 +16,7 @@
 // along with this program. If not, see <http://www.gnu.org/licenses/>.          //
 ///////////////////////////////////////////////////////////////////////////////////
 
+#include <cstdint>
 #include <QColor>
 
 #include "util/simpleserializer.h"
@@ -167,7 +168,7 @@ bool UDPSinkSettings::deserialize(const QByteArray& data)
 
         d.readU32(21, &u32tmp, 9998);
 
-        if ((u32tmp > 1024) & (u32tmp < 65538)) {
+        if ((u32tmp > 1024) && (u32tmp <= UINT16_MAX)) {
             m_udpPort = u32tmp;
         } else {
             m_udpPort = 9998;
@@ -175,7 +176,7 @@ bool UDPSinkSettings::deserialize(const QByteArray& data)
 
         d.readU32(22, &u32tmp, 9997);
 
-        if ((u32tmp > 1024) & (u32tmp < 65538)) {
+        if ((u32tmp > 1024) && (u32tmp <= UINT16_MAX)) {
             m_audioPort = u32tmp;
         } else {
             m_audioPort = 9997;
@@ -185,7 +186,7 @@ bool UDPSinkSettings::deserialize(const QByteArray& data)
         d.readString(24, &m_reverseAPIAddress, "127.0.0.1");
         d.readU32(25, &u32tmp, 0);
 
-        if ((u32tmp > 1023) && (u32tmp < 65535)) {
+        if ((u32tmp > 1023) && (u32tmp <= UINT16_MAX)) {
             m_reverseAPIPort = u32tmp;
         } else {
             m_reverseAPIPort = 8888;
