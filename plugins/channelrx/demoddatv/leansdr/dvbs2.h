@@ -1591,8 +1591,8 @@ struct s2_frame_receiver : runnable
 
     float interp_match_pilot(sampler_state *pss)
     {
-        std::complex<T> symbols[pilot.LENGTH];
-        std::complex<T> expected[pilot.LENGTH];
+        std::vector<std::complex<T>> symbols(pilot.LENGTH);
+        std::vector<std::complex<T>> expected(pilot.LENGTH);
 
         for (int i=0; i<pilot.LENGTH; ++i)
         {
@@ -1602,7 +1602,7 @@ struct s2_frame_receiver : runnable
             //fprintf(stderr, "%f %f\n", symbols[i].real(), symbols[i].imag());
         }
 
-        return match_ph_amp(expected, symbols, pilot.LENGTH, pss);
+        return match_ph_amp(expected.data(), symbols.data(), pilot.LENGTH, pss);
     }
 
     // Interpolate a SOF.
