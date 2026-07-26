@@ -363,7 +363,7 @@ void LDPC::ldpc_decode_log(float codeword[], int iters, int plain[], int *ok)
 // check the FT8 CRC-14
 //
 
-void LDPC::ft8_crc(int msg1[], int msglen, int out[14])
+void LDPC::ft8_crc(int msg1[], uint32_t msglen, int out[14])
 {
     // the old FT8 polynomial for 12-bit CRC, 0xc06.
     // int div[] = { 1, 1, 1, 0, 0, 0, 0, 0, 0, 0, 1, 1, 0 };
@@ -375,7 +375,7 @@ void LDPC::ft8_crc(int msg1[], int msglen, int out[14])
     std::vector<int> msg(msglen + 14);
     std::memcpy(msg.data(), msg1, msglen * sizeof(int));
 
-    for (int i = 0; i < msglen; i++)
+    for (uint32_t i = 0; i < msglen; i++)
     {
         if (msg[i])
         {
