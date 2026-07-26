@@ -18,6 +18,7 @@
 
 #include "udpsourcesettings.h"
 
+#include <cstdint>
 #include <QColor>
 
 #include "util/simpleserializer.h"
@@ -171,7 +172,7 @@ bool UDPSourceSettings::deserialize(const QByteArray& data)
         d.readString(18, &m_udpAddress, "127.0.0.1");
         d.readU32(19, &u32tmp, 9998);
 
-        if ((u32tmp > 1024) & (u32tmp < 65538)) {
+        if ((u32tmp > 1024) && (u32tmp <= UINT16_MAX)) {
             m_udpPort = u32tmp;
         } else {
             m_udpPort = 9998;
