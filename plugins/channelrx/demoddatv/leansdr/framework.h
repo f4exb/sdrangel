@@ -35,8 +35,8 @@
 namespace leansdr
 {
 
-void fatal(const char *s);
-void fail(const char *s);
+[[noreturn]] void fatal(const char *s);
+[[noreturn]] void fail(const char *s);
 
 //////////////////////////////////////////////////////////////////////
 // DSP framework

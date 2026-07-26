@@ -1281,16 +1281,28 @@ void DATVDemodSink::feed(const SampleVector::const_iterator& begin, const Sample
 
         qDebug("DATVDemodSink::feed: Settings applied. Standard : %d...", m_settings.m_standard);
         m_blnNeedConfigUpdate = false;
-
-        if(m_settings.m_standard==DATVDemodSettings::DVB_S2)
+        try
         {
-            qDebug("DATVDemodSink::feed: init DVBS-2");
-            InitDATVS2Framework();
+            if(m_settings.m_standard==DATVDemodSettings::DVB_S2)
+            {
+                qDebug("DATVDemodSink::feed: init DVBS-2");
+                InitDATVS2Framework();
+            }
+            else
+            {
+                qDebug("DATVDemodSink::feed: init DVBS");
+                InitDATVFramework();
+            }
         }
-        else
+        catch (const std::exception& e)
         {
-            qDebug("DATVDemodSink::feed: init DVBS");
-            InitDATVFramework();
+            // leansdr uses fail() for unrecoverable internal errors.
+            // Convert these into a DATV initialization failure instead of
+            // allowing them to terminate the application.
+            qCritical("DATVDemodSink::feed: DATV framework initialization failed: %s", e.what());
+
+            CleanUpDATVFramework();
+            return;
         }
     }
 
