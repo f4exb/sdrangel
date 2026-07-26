@@ -1450,7 +1450,7 @@ struct s2_frame_receiver : runnable
         {
             sampler_state ss = *pss;
             float power = 0;
-            std::complex<T> symbs[sof.LENGTH];
+            std::vector<std::complex<T>> symbs(sof.LENGTH);
 
             for (int i=0; i<sof.LENGTH; ++i)
             {
@@ -1458,7 +1458,7 @@ struct s2_frame_receiver : runnable
                 power += cnorm2(symbs[i]);
             }
 
-            std::complex<float> c = conjprod(sof.symbols, symbs, sof.LENGTH);
+            std::complex<float> c = conjprod(sof.symbols, symbs.data(), sof.LENGTH);
             c *= 1.0f / sof.LENGTH;
             align_phase(pss, c);
             float signal_amp = sqrtf(power/sof.LENGTH);
