@@ -58,6 +58,7 @@ TestMISettings::TestMISettings()
 }
 
 TestMISettings::TestMISettings(const TestMISettings& other) :
+    m_title(other.m_title),
     m_streams(other.m_streams)
 {
     m_useReverseAPI = other.m_useReverseAPI;
