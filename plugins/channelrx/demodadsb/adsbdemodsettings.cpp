@@ -531,7 +531,7 @@ void ADSBDemodSettings::applySettings(const QStringList& settingsKeys, const ADS
         std::copy(std::begin(settings.m_columnIndexes), std::end(settings.m_columnIndexes), std::begin(m_columnIndexes));
     }
     if (settingsKeys.contains("columnSizes")) {
-        std::copy(std::begin(settings.m_columnSizes), std::end(settings.m_columnIndexes), std::begin(m_columnSizes));
+        std::copy(std::begin(settings.m_columnSizes), std::end(settings.m_columnSizes), std::begin(m_columnSizes));
     }
     if (settingsKeys.contains("airportRange")) {
         m_airportRange = settings.m_airportRange;
