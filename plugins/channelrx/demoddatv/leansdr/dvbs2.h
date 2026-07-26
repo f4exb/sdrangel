@@ -1610,13 +1610,13 @@ struct s2_frame_receiver : runnable
 
     float interp_match_sof(sampler_state *pss)
     {
-        std::complex<T> symbols[pilot.LENGTH];
+        std::vector<std::complex<T>> symbols(pilot.LENGTH);
 
         for (int i=0; i<sof.LENGTH; ++i) {
             symbols[i] = interp_next(pss) * pss->gain;
         }
 
-        return match_ph_amp(sof.symbols, symbols, sof.LENGTH, pss);
+        return match_ph_amp(sof.symbols, symbols.data(), sof.LENGTH, pss);
     }
 
     // Estimate phase and amplitude from known symbols.
