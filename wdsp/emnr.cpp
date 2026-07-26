@@ -233,7 +233,7 @@ void EMNR::NP::interpM (
         double xlhigh;
         double frac;
 
-        while ((x >= xvals[idx]) && (idx < nvals - 1))
+        while ((idx < nvals - 1) && (x >= xvals[idx]))
             idx++;
 
         xllow = log10 (xvals[idx - 1]);
