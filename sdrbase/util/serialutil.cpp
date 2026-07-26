@@ -38,7 +38,6 @@ void SerialUtil::getComPorts(std::vector<std::string>& comPorts, const std::stri
     (void) regexStr;
 	TCHAR lpTargetPath[5000]; // buffer to store the path of the COMPORTS
 	DWORD test;
-	bool gotPort = 0; // in case the port is not found
 
 	char portName[100];
 
@@ -52,12 +51,6 @@ void SerialUtil::getComPorts(std::vector<std::string>& comPorts, const std::stri
 		if (test != 0) //QueryDosDevice returns zero if it didn't find an object
 		{
 			comPorts.push_back(std::string(portName));
-		}
-
-		if (::GetLastError() == ERROR_INSUFFICIENT_BUFFER)
-		{
-			lpTargetPath[10000]; // in case the buffer got filled, increase size of the buffer.
-			continue;
 		}
 	}
 }
