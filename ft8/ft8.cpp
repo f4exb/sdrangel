@@ -33,6 +33,7 @@
 #include <fftw3.h>
 #include <algorithm>
 #include <complex>
+#include <limits>
 #include <random>
 #include <functional>
 #include <map>
@@ -138,8 +139,7 @@ float FT8::one_coarse_strength(const FFTEngine::ffts_t &bins, int bi0, int si0) 
     {
         for (int si = 0; si < 79; si++)
         {
-            float mx;
-            int mxi = -1;
+            float mx = -std::numeric_limits<float>::infinity();
             float sum = 0;
 
             for (int i = 0; i < 8; i++)
@@ -147,9 +147,8 @@ float FT8::one_coarse_strength(const FFTEngine::ffts_t &bins, int bi0, int si0) 
                 float x = std::abs(bins[si0 + si][bi0 + i]);
                 sum += x;
 
-                if (mxi < 0 || x > mx)
+                if (x > mx)
                 {
-                    mxi = i;
                     mx = x;
                 }
             }
@@ -1562,8 +1561,7 @@ std::vector<std::vector<float>> FT8::soft_c2m(const FFTEngine::ffts_t &c79) cons
     for (int si = 0; si < 79; si++)
     {
         m79[si].resize(8);
-        int mxi = -1;
-        float mx;
+        float mx = -std::numeric_limits<float>::infinity();
         float mx_phase;
 
         for (int bi = 0; bi < 8; bi++)
@@ -1571,9 +1569,8 @@ std::vector<std::vector<float>> FT8::soft_c2m(const FFTEngine::ffts_t &c79) cons
             float x = std::abs(c79[si][bi]);
             m79[si][bi] = x;
 
-            if (mxi < 0 || x > mx)
+            if (x > mx)
             {
-                mxi = bi;
                 mx = x;
                 mx_phase = std::arg(c79[si][bi]); // -pi .. pi
             }

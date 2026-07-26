@@ -21,6 +21,7 @@
 #include <array>
 #include <cmath>
 #include <algorithm>
+#include <limits>
 #include <random>
 #include <functional>
 #include <cstdio>
@@ -140,8 +141,7 @@ float FT4::one_coarse_strength(const FFTEngine::ffts_t &bins, int bi0, int si0) 
     {
         for (int si = 0; si < 103; si++)
         {
-            float mx;
-            int mxi = -1;
+            float mx = -std::numeric_limits<float>::infinity();
             float sum = 0;
 
             for (int i = 0; i < 4; i++)
@@ -149,9 +149,8 @@ float FT4::one_coarse_strength(const FFTEngine::ffts_t &bins, int bi0, int si0) 
                 float x = std::abs(bins[si0 + si][bi0 + i]);
                 sum += x;
 
-                if (mxi < 0 || x > mx)
+                if (x > mx)
                 {
-                    mxi = i;
                     mx = x;
                 }
             }
@@ -1452,8 +1451,7 @@ std::vector<std::vector<float>> FT4::soft_c2m(const FFTEngine::ffts_t &c103) con
     for (int si = 0; si < 103; si++)
     {
         m103[si].resize(4);
-        int mxi = -1;
-        float mx;
+        float mx = -std::numeric_limits<float>::infinity();
         float mx_phase;
 
         for (int bi = 0; bi < 4; bi++)
@@ -1461,9 +1459,8 @@ std::vector<std::vector<float>> FT4::soft_c2m(const FFTEngine::ffts_t &c103) con
             float x = std::abs(c103[si][bi]);
             m103[si][bi] = x;
 
-            if (mxi < 0 || x > mx)
+            if (x > mx)
             {
-                mxi = bi;
                 mx = x;
                 mx_phase = std::arg(c103[si][bi]); // -pi .. pi
             }
