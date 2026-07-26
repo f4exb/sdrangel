@@ -115,7 +115,7 @@ void ChirpChatDemodDecoderFT::decodeSymbols(
     msg = packing.unpack(r174, call1, call2, loc, msgType);
     reply = false;
 
-    if ((msgType == "0.3") || (msgType == "0.3")) {
+    if ((msgType == "0.3") || (msgType == "0.4")) {
         reply = r174[56] != 0;
     }
     if ((msgType == "1") || (msgType == "2")) {
