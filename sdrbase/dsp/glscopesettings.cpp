@@ -489,6 +489,7 @@ GLScopeSettings& GLScopeSettings::operator=(const GLScopeSettings& t)
         m_timeOfs = t.m_timeOfs;
         m_traceLenMult = t.m_traceLenMult;
         m_trigPre = t.m_trigPre;
+        m_freerun = t.m_freerun;
     }
 
     return *this;
