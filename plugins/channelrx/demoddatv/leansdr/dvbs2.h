@@ -51,6 +51,7 @@
 #include <stdlib.h>
 #include <deque>
 #include <bitset>
+#include <vector>
 
 #include "bch.h"
 #include "crc.h"
@@ -907,7 +908,7 @@ struct s2_frame_receiver : runnable
         // Interpolate PLHEADER.
 
         const int PLH_LENGTH = sof.LENGTH + plscodes.LENGTH;
-        std::complex<float> plh_symbols[PLH_LENGTH];
+        std::vector<std::complex<float>> plh_symbols(PLH_LENGTH);
 
         for (int s=0; s<PLH_LENGTH; ++s)
         {
@@ -1005,24 +1006,25 @@ struct s2_frame_receiver : runnable
         // ss now points to first data slot.
         ss.scr = scrambling.Rn;
 
-        std::complex<float> plh_expected[PLH_LENGTH];
+        std::vector<std::complex<float>> plh_expected(PLH_LENGTH);
 
-        std::copy(sof.symbols, sof.symbols + sof.LENGTH, plh_expected);
-        std::copy(plscodes.symbols[plscode_index], plscodes.symbols[plscode_index] + plscodes.LENGTH, &plh_expected[sof.LENGTH]);
+        std::copy(sof.symbols, sof.symbols + sof.LENGTH, plh_expected.begin());
+        std::copy(plscodes.symbols[plscode_index], plscodes.symbols[plscode_index] + plscodes.LENGTH,
+            plh_expected.begin() + sof.LENGTH);
 
         if ( state == FRAME_PROBE )
         {
-	        // Carrier frequency from differential detector is still not reliable.
-	        // Use known PLH symbols to improve.
-	        match_freq(plh_expected, plh_symbols, PLH_LENGTH, &ss);
+            // Carrier frequency from differential detector is still not reliable.
+            // Use known PLH symbols to improve.
+            match_freq(plh_expected.data(), plh_symbols.data(), PLH_LENGTH, &ss);
 #if DEBUG_CARRIER
-	        fprintf(stderr, "CARRIER freq: %s\n", ss.format());
+            fprintf(stderr, "CARRIER freq: %s\n", ss.format());
 #endif
         }
 
         // Use known PLH symbols to estimate carrier phase and amplitude.
 
-        float mer2 = match_ph_amp(plh_expected, plh_symbols, PLH_LENGTH, &ss);
+        float mer2 = match_ph_amp(plh_expected.data(), plh_symbols.data(), PLH_LENGTH, &ss);
         float mer = 10*log10f(mer2);
 #if DEBUG_CARRIER
         fprintf(stderr, "CARRIER plheader: %s MER %.1f dB\n", ss.format(), mer);
@@ -1038,10 +1040,10 @@ struct s2_frame_receiver : runnable
 
         if  (sch->debug2)
         {
-	        fprintf(
+            fprintf(
                 stderr,
                 "PLS: mc=%2d, sf=%d, pilots=%d (%2u/90) %4.1f dB ",
-		        pls.modcod,
+                pls.modcod,
                 pls.sf,
                 pls.pilots,
                 sof_errors + plscode_errors,
@@ -1119,8 +1121,8 @@ struct s2_frame_receiver : runnable
 #if DEBUG_LOOKAHEAD
         static int plh_counter = 0;  // For debugging only
         fprintf(stderr, "\nLOOKAHEAD %d PLH sr %+3.0f  %s  %.1f dB\n",
-	        plh_counter, (1-ss.omega/omega0)*1e6,
-	        ss.format(), 10*log10f(mer2));
+            plh_counter, (1-ss.omega/omega0)*1e6,
+            ss.format(), 10*log10f(mer2));
 #endif
         // Next SOF
         sampler_state ssnext;
@@ -1172,7 +1174,7 @@ struct s2_frame_receiver : runnable
                     plh_counter, i, (1-ssp.omega/omega0)*1e6,
                     ssp.format(), 10*log10f(mer2));
 #endif
-        	}
+            }
         }
 
         if (pls.pilots)
@@ -1225,7 +1227,7 @@ struct s2_frame_receiver : runnable
 
             ssnext.ph16 += fw_adj * sof.LENGTH / 2;
 #if DEBUG_CARRIER
-        	fprintf(stderr, "CARRIER disambiguated:  %s\n", ss.format());
+            fprintf(stderr, "CARRIER disambiguated:  %s\n", ss.format());
 #endif
         }
 
@@ -1254,7 +1256,7 @@ struct s2_frame_receiver : runnable
                 ss.ph16 = sspilots[slot/16-1].ph16;
             }
 
-	        // Time for pilot-aided carrier recovery ?
+            // Time for pilot-aided carrier recovery ?
             if ( pls.pilots && !(slot&15) && slot+16<S )
             {
                 // Sequence of data slots followed by pilots
@@ -1277,9 +1279,9 @@ struct s2_frame_receiver : runnable
             pout->is_pls = false;
             std::complex<float> p;  // Export last symbols for cstln_out
 
-        	for (int s=0; s<pout->LENGTH; ++s)
+            for (int s=0; s<pout->LENGTH; ++s)
             {
-	            p = interp_next(&ss) * ss.gain;
+                p = interp_next(&ss) * ss.gain;
 #if TEST_DIVERSITY
                 if ( psymbols )
                     *psymbols++ = p * scale_symbols;
@@ -1288,16 +1290,16 @@ struct s2_frame_receiver : runnable
                     (void) track_symbol(&ss, p, dcstln);  // SLOW
                 }
 
-	            std::complex<float> d = descramble(&ss, p);
+                std::complex<float> d = descramble(&ss, p);
 #if 1  // Slow
-	            SOFTSYMB *symb = &dcstln->lookup(d.real(), d.imag())->ss;
+                SOFTSYMB *symb = &dcstln->lookup(d.real(), d.imag())->ss;
 #else  // Avoid scaling floats. May wrap at very low SNR.
-	            SOFTSYMB *symb = &dcstln->lookup((int)d.real(), (int)d.imag())->ss;
+                SOFTSYMB *symb = &dcstln->lookup((int)d.real(), (int)d.imag())->ss;
 #endif
-	            pout->symbols[s] = *symb;
-	        }
+                pout->symbols[s] = *symb;
+            }
 
-	        ss.normalize();
+            ss.normalize();
 
             if (psampled) {
                 *psampled++ = p;
@@ -1355,8 +1357,8 @@ struct s2_frame_receiver : runnable
 
         if (state == FRAME_PROBE)
         {
-	        // First frame completed successfully.  Validate the lock.
-	        enter_frame_locked();
+            // First frame completed successfully.  Validate the lock.
+            enter_frame_locked();
         }
 
         if (ss_cache.fw16<min_freqw16 || ss_cache.fw16>max_freqw16)
@@ -1448,7 +1450,7 @@ struct s2_frame_receiver : runnable
         {
             sampler_state ss = *pss;
             float power = 0;
-            std::complex<T> symbs[sof.LENGTH];
+            std::vector<std::complex<T>> symbs(sof.LENGTH);
 
             for (int i=0; i<sof.LENGTH; ++i)
             {
@@ -1456,7 +1458,7 @@ struct s2_frame_receiver : runnable
                 power += cnorm2(symbs[i]);
             }
 
-            std::complex<float> c = conjprod(sof.symbols, symbs, sof.LENGTH);
+            std::complex<float> c = conjprod(sof.symbols, symbs.data(), sof.LENGTH);
             c *= 1.0f / sof.LENGTH;
             align_phase(pss, c);
             float signal_amp = sqrtf(power/sof.LENGTH);
@@ -1558,7 +1560,7 @@ struct s2_frame_receiver : runnable
         std::complex<float> *expect,
         std::complex<float> *recv,
         int ns,
-		sampler_state *ss)
+        sampler_state *ss)
     {
         if (sch->debug) {
             fprintf(stderr, "match_freq\n");
@@ -1589,8 +1591,8 @@ struct s2_frame_receiver : runnable
 
     float interp_match_pilot(sampler_state *pss)
     {
-        std::complex<T> symbols[pilot.LENGTH];
-        std::complex<T> expected[pilot.LENGTH];
+        std::vector<std::complex<T>> symbols(pilot.LENGTH);
+        std::vector<std::complex<T>> expected(pilot.LENGTH);
 
         for (int i=0; i<pilot.LENGTH; ++i)
         {
@@ -1600,7 +1602,7 @@ struct s2_frame_receiver : runnable
             //fprintf(stderr, "%f %f\n", symbols[i].real(), symbols[i].imag());
         }
 
-        return match_ph_amp(expected, symbols, pilot.LENGTH, pss);
+        return match_ph_amp(expected.data(), symbols.data(), pilot.LENGTH, pss);
     }
 
     // Interpolate a SOF.
@@ -1608,13 +1610,13 @@ struct s2_frame_receiver : runnable
 
     float interp_match_sof(sampler_state *pss)
     {
-        std::complex<T> symbols[pilot.LENGTH];
+        std::vector<std::complex<T>> symbols(pilot.LENGTH);
 
         for (int i=0; i<sof.LENGTH; ++i) {
             symbols[i] = interp_next(pss) * pss->gain;
         }
 
-        return match_ph_amp(sof.symbols, symbols, sof.LENGTH, pss);
+        return match_ph_amp(sof.symbols, symbols.data(), sof.LENGTH, pss);
     }
 
     // Estimate phase and amplitude from known symbols.
@@ -1630,7 +1632,7 @@ struct s2_frame_receiver : runnable
         std::complex<float> *expect,
         std::complex<float> *recv,
         int ns,
-		sampler_state *ss
+        sampler_state *ss
     )
     {
         std::complex<float> rr = 0;
@@ -1670,7 +1672,7 @@ struct s2_frame_receiver : runnable
         sampler_state *pss,
         const s2_pls *pls,
         int S,
-		cstln_lut<SOFTSYMB,256> *dcstln
+        cstln_lut<SOFTSYMB,256> *dcstln
     )
     {
         if (sch->debug) {
@@ -1809,7 +1811,7 @@ struct s2_frame_receiver : runnable
     inline uint8_t track_symbol(
         sampler_state *ss,
         const std::complex<float> &p,
-		cstln_lut<SOFTSYMB,256> *c
+        cstln_lut<SOFTSYMB,256> *c
     )
     {
         static const float kph = 4e-2;
@@ -1969,14 +1971,14 @@ struct s2_interleaver : runnable
       hard_sb acc;
       int nacc = 0;
       for ( ; nslots; --nslots,++pout ) {
-	pout->is_pls = false;
-	hard_ss *ps = pout->symbols;
-	for ( int ns=pout->LENGTH; ns--; ++ps ) {
-	  if ( nacc < 2 ) { acc=*pin++; nacc=8; }
-	  *ps = acc>>6;
-	  acc <<= 2;
-	  nacc -= 2;
-	}
+          pout->is_pls = false;
+          hard_ss *ps = pout->symbols;
+          for ( int ns=pout->LENGTH; ns--; ++ps ) {
+              if ( nacc < 2 ) { acc=*pin++; nacc=8; }
+              *ps = acc>>6;
+              acc <<= 2;
+              nacc -= 2;
+          }
       }
       if ( nacc ) fail("Bug: s2_interleaver");
 #else
@@ -2029,38 +2031,38 @@ struct s2_interleaver : runnable
     // EN 302 307-1 figures 7 and 8
 #if 0  // For reference
     static void interleave(int bps, int rows,
-			   const hard_sb *pin, int nslots,
-			   bool msb_first, plslot<hard_ss> *pout) {
+            const hard_sb *pin, int nslots,
+            bool msb_first, plslot<hard_ss> *pout) {
       if ( bps==4 && rows==4050 && msb_first )
-	return interleave4050(pin, nslots, pout);
+          return interleave4050(pin, nslots, pout);
       if ( rows % 8 ) fatal("modcod/framesize combination not supported\n");
       int stride = rows/8;  // Offset to next column, in bytes
       hard_sb accs[bps];    // One accumulator per column
       int nacc = 0;         // Bits in each column accumulator
       for ( ; nslots; --nslots,++pout ) {
-	pout->is_pls = false;
-	hard_ss *ps = pout->symbols;
-	for ( int ns=pout->LENGTH; ns--; ++ps ) {
-	  if ( ! nacc ) {
-	    const hard_sb *pi = pin;
-	    for ( int b=0; b<bps; ++b,pi+=stride ) accs[b] = *pi;
-	    ++pin;
-	    nacc = 8;
-	  }
-	  hard_ss symb = 0;
-	  if ( msb_first )
-	    for ( int b=0; b<bps; ++b ) {
-	      symb = (symb<<1) | (accs[b]>>7);
-	      accs[b] <<= 1;
-	    }
-	  else
-	    for ( int b=bps; b--; ) {
-	      symb = (symb<<1) | (accs[b]>>7);
-	      accs[b] <<= 1;
-	    }
-	  --nacc;
-	  *ps = symb;
-	}
+          pout->is_pls = false;
+          hard_ss *ps = pout->symbols;
+          for ( int ns=pout->LENGTH; ns--; ++ps ) {
+              if ( ! nacc ) {
+                  const hard_sb *pi = pin;
+                  for ( int b=0; b<bps; ++b,pi+=stride ) accs[b] = *pi;
+                  ++pin;
+                  nacc = 8;
+              }
+              hard_ss symb = 0;
+              if ( msb_first )
+                 for ( int b=0; b<bps; ++b ) {
+                     symb = (symb<<1) | (accs[b]>>7);
+                     accs[b] <<= 1;
+                 }
+              else
+                  for ( int b=bps; b--; ) {
+                      symb = (symb<<1) | (accs[b]>>7);
+                      accs[b] <<= 1;
+                  }
+              --nacc;
+              *ps = symb;
+          }
       }
       if ( nacc ) fail("Bug: s2_interleaver");
     }
@@ -2377,27 +2379,27 @@ struct s2_deinterleaver : runnable
     // EN 302 307-1 figures 7 and 8
 #if 0  // For reference
     static void deinterleave(int bps, int rows,
-			     const plslot<SOFTSYMB> *pin, int nslots,
-			     bool msb_first, SOFTBYTE *pout) {
+             const plslot<SOFTSYMB> *pin, int nslots,
+             bool msb_first, SOFTBYTE *pout) {
       if ( bps==4 && rows==4050 && msb_first )
-	return deinterleave4050(pin, nslots, pout);
+          return deinterleave4050(pin, nslots, pout);
       if ( rows % 8 ) fatal("modcod/framesize combination not supported\n");
       int stride = rows/8;  // Offset to next column, in bytes
       SOFTBYTE accs[bps];
       for ( int b=0; b<bps; ++b ) softword_clear(&accs[b]);  // gcc warning
       int nacc = 0;
       for ( ; nslots; --nslots,++pin ) {
-	const SOFTSYMB *ps = pin->symbols;
-	for ( int ns=pin->LENGTH; ns--; ++ps ) {
-	  split_symbol(*ps, bps, accs, nacc, msb_first);
-	  ++nacc;
-	  if ( nacc == 8 ) {
-	    SOFTBYTE *po = pout;
-	    for ( int b=0; b<bps; ++b,po+=stride ) *po = accs[b];
-	    ++pout;
-	    nacc = 0;
-	  }
-	}
+          const SOFTSYMB *ps = pin->symbols;
+          for ( int ns=pin->LENGTH; ns--; ++ps ) {
+              split_symbol(*ps, bps, accs, nacc, msb_first);
+              ++nacc;
+              if ( nacc == 8 ) {
+                  SOFTBYTE *po = pout;
+                  for ( int b=0; b<bps; ++b,po+=stride ) *po = accs[b];
+                  ++pout;
+                  nacc = 0;
+              }
+          }
       }
       if ( nacc ) fail("Bug: s2_deinterleaver");
     }
@@ -3026,10 +3028,10 @@ struct s2_fecdec : runnable
             int bbsize = fi->Kbch / 8;
             // TBD Some decoders want the bad packets.
 #if 0
-	if ( corrupted ) {
-	  fprintf(stderr, "Passing bad frame\n");
-	  corrupted = false;
-	}
+    if ( corrupted ) {
+        fprintf(stderr, "Passing bad frame\n");
+        corrupted = false;
+    }
 #endif
             if (!corrupted)
             {
@@ -3188,17 +3190,17 @@ private:
     int max_trials;
     pipewriter<int> *bitcount, *errcount;
 
-	typedef ldpctool::NormalUpdate<ldpctool::simd_type> update_type;
-	//typedef SelfCorrectedUpdate<simd_type> update_type;
+    typedef ldpctool::NormalUpdate<ldpctool::simd_type> update_type;
+    //typedef SelfCorrectedUpdate<simd_type> update_type;
 
-	//typedef MinSumAlgorithm<simd_type, update_type> algorithm_type;
-	//typedef OffsetMinSumAlgorithm<simd_type, update_type, FACTOR> algorithm_type;
-	typedef ldpctool::MinSumCAlgorithm<ldpctool::simd_type, update_type, ldpctool::FACTOR> algorithm_type;
-	//typedef LogDomainSPA<simd_type, update_type> algorithm_type;
-	//typedef LambdaMinAlgorithm<simd_type, update_type, 3> algorithm_type;
-	//typedef SumProductAlgorithm<simd_type, update_type> algorithm_type;
+    //typedef MinSumAlgorithm<simd_type, update_type> algorithm_type;
+    //typedef OffsetMinSumAlgorithm<simd_type, update_type, FACTOR> algorithm_type;
+    typedef ldpctool::MinSumCAlgorithm<ldpctool::simd_type, update_type, ldpctool::FACTOR> algorithm_type;
+    //typedef LogDomainSPA<simd_type, update_type> algorithm_type;
+    //typedef LambdaMinAlgorithm<simd_type, update_type, 3> algorithm_type;
+    //typedef SumProductAlgorithm<simd_type, update_type> algorithm_type;
 
-	ldpctool::LDPCDecoder<ldpctool::simd_type, algorithm_type> decode;
+    ldpctool::LDPCDecoder<ldpctool::simd_type, algorithm_type> decode;
 
     ldpctool::LDPCInterface *ldpc;
     ldpctool::code_type *code;
@@ -3599,10 +3601,10 @@ struct s2_fecdec_helper : runnable
         //opt_write(errcount, (ncorr >= 0) ? ncorr : fi->Kbch);
 #if 0
       // TBD Some decoders want the bad packets.
-	if ( corrupted ) {
-	  fprintf(stderr, "Passing bad frame\n");
-	  corrupted = false;
-	}
+      if ( corrupted ) {
+          fprintf(stderr, "Passing bad frame\n");
+          corrupted = false;
+      }
 #endif
         if (!corrupted)
         {
@@ -3871,10 +3873,10 @@ struct s2_fecdec_helper : runnable
         //opt_write(errcount, (ncorr >= 0) ? ncorr : fi->Kbch);
 #if 0
       // TBD Some decoders want the bad packets.
-	if ( corrupted ) {
-	  fprintf(stderr, "Passing bad frame\n");
-	  corrupted = false;
-	}
+      if ( corrupted ) {
+          fprintf(stderr, "Passing bad frame\n");
+          corrupted = false;
+      }
 #endif
         if (!corrupted)
         {
@@ -3925,8 +3927,8 @@ struct s2_framer : runnable
         pipebuf<bbframe> &_out
     ) :
         runnable(sch, "S2 framer"),
-    	n_pls_seq(0),
-	    pls_index(0),
+        n_pls_seq(0),
+        pls_index(0),
         in(_in),
         out(_out)
     {
@@ -4017,9 +4019,9 @@ struct s2_framer : runnable
             }
 
             out.written(1);
-	        ++pls_index;
+            ++pls_index;
 
-	        if (pls_index == n_pls_seq) {
+            if (pls_index == n_pls_seq) {
                 pls_index = 0;
             }
         }
@@ -4146,7 +4148,7 @@ private:
 
         if (streamtype==3 && upl==188*8 && sync==0x47 && syncd<=dfl)
         {
-	        handle_ts(data, dfl, syncd, sync);
+            handle_ts(data, dfl, syncd, sync);
         }
         else if (streamtype == 1)
         {
