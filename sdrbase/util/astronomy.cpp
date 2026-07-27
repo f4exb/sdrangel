@@ -323,7 +323,7 @@ void Astronomy::azAltToXY85(AzAlt aa, double& x, double& y)
     double azr = Units::degreesToRadians(az);
     double elr = Units::degreesToRadians(el);
     y = Units::radiansToDegrees(asin(cos(elr) * sin(azr)));
-    if (az == 0.0)
+    if (el == 0.0)
     {
         // cot(0) == Inf
         if ((az == 90.0) || (az == 270.0)) {
