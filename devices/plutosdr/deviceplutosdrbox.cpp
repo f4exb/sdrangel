@@ -708,9 +708,9 @@ void DevicePlutoSDRBox::setSampleRate(uint32_t sampleRate)
 {
     char buff[100];
     std::vector<std::string> params;
-    snprintf(buff, sizeof(buff), "in_voltage_sampling_frequency=%d", sampleRate);
+    snprintf(buff, sizeof(buff), "in_voltage_sampling_frequency=%u", sampleRate);
     params.push_back(std::string(buff));
-    snprintf(buff, sizeof(buff), "out_voltage_sampling_frequency=%d", sampleRate);
+    snprintf(buff, sizeof(buff), "out_voltage_sampling_frequency=%u", sampleRate);
     params.push_back(std::string(buff));
     set_params(DEVICE_PHY, params);
     m_devSampleRate = sampleRate;
@@ -844,7 +844,7 @@ bool DevicePlutoSDRBox::getRxGain(int& gaindB, unsigned int chan)
 {
     chan = chan % 2;
     char buff[30];
-    snprintf(buff, sizeof(buff), "in_voltage%d_hardwaregain", chan);
+    snprintf(buff, sizeof(buff), "in_voltage%u_hardwaregain", chan);
     std::string gainStr;
     get_param(DEVICE_PHY, buff, gainStr);
 
@@ -875,7 +875,7 @@ bool DevicePlutoSDRBox::getRxRSSI(std::string& rssiStr, unsigned int chan)
 {
     chan = chan % 2;
     char buff[20];
-    snprintf(buff, sizeof(buff), "in_voltage%d_rssi", chan);
+    snprintf(buff, sizeof(buff), "in_voltage%u_rssi", chan);
     return get_param(DEVICE_PHY, buff, rssiStr);
 }
 
@@ -883,7 +883,7 @@ bool DevicePlutoSDRBox::getTxRSSI(std::string& rssiStr, unsigned int chan)
 {
     chan = chan % 2;
     char buff[20];
-    snprintf(buff, sizeof(buff), "out_voltage%d_rssi", chan);
+    snprintf(buff, sizeof(buff), "out_voltage%u_rssi", chan);
     return get_param(DEVICE_PHY, buff, rssiStr);
 }
 

@@ -193,7 +193,7 @@ struct scheduler
             pipes[i]->dump(&total_bufs);
         }
 
-        fprintf(stderr, "Total buffer memory: %ld KiB\n",
+        fprintf(stderr, "Total buffer memory: %lu KiB\n",
                 (unsigned long)total_bufs / 1024);
     }
 };
@@ -287,23 +287,23 @@ struct pipebuf : pipebuf_common
     {
         if (total_written < 10000)
         {
-            fprintf(stderr, ".%-16s : %4ld/%4ld", name, total_read,
+            fprintf(stderr, ".%-16s : %4lu/%4lu", name, total_read,
                     total_written);
         }
         else if (total_written < 1000000)
         {
-            fprintf(stderr, ".%-16s : %3ldk/%3ldk", name, total_read / 1000,
+            fprintf(stderr, ".%-16s : %3luk/%3luk", name, total_read / 1000,
                     total_written / 1000);
         }
         else
         {
-            fprintf(stderr, ".%-16s : %3ldM/%3ldM", name, total_read / 1000000,
+            fprintf(stderr, ".%-16s : %3luM/%3luM", name, total_read / 1000000,
                     total_written / 1000000);
         }
 
         *total_bufs += (end - buf) * sizeof(T);
         unsigned long nw = end - wr;
-        fprintf(stderr, " %6ld writable %c,", nw, (nw < min_write) ? '!' : ' ');
+        fprintf(stderr, " %6lu writable %c,", nw, (nw < min_write) ? '!' : ' ');
         T *rd = wr;
 
         for (int j = 0; j < nrd; ++j)
