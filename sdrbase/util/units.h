@@ -89,6 +89,11 @@ public:
         return knots * 0.514444f;
     }
 
+    static float metresPerSecondToKnots(float mps) 
+    {
+        return mps * 1.94384f;
+    }
+
     static float kmpsToKPH(float kps)
     {
         return kps * (60.0 * 60.0);
@@ -107,6 +112,11 @@ public:
     static int feetPerMinToIntegerMetresPerSecond(float fpm)
     {
         return (int)std::round(feetPerMinToMetresPerSecond(fpm));
+    }
+
+    static float metresPerSecondToFeetPerMin(float mps)
+    {
+        return mps * 196.850394f;
     }
 
     template <class T>

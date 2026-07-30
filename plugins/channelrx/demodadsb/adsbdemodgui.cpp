@@ -8427,13 +8427,13 @@ void ADSBDemodGUI::handleImportReply(QNetworkReply* reply)
                         aircraft->m_onSurface = state[8].toBool(false);
                         aircraft->m_onSurfaceValid = true;
                         if (!state[9].isNull()) {
-                            aircraft->setGroundspeed((int)state[9].toDouble(), m_settings);
+                            aircraft->setGroundspeed((int)std::round(Units::metresPerSecondToKnots(state[9].toDouble())), m_settings);
                         }
                         if (!state[10].isNull()) {
                             aircraft->setTrack((float)state[10].toDouble(), aircraft->m_rxTime);
                         }
                         if (!state[11].isNull()) {
-                            aircraft->setVerticalRate((int)state[10].toDouble(), m_settings);
+                            aircraft->setVerticalRate((int)std::round(Units::metresPerSecondToFeetPerMin(state[11].toDouble())), m_settings);
                         }
                         if (!state[14].isNull())
                         {
