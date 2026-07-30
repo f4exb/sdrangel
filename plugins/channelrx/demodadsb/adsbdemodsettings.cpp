@@ -179,7 +179,7 @@ QByteArray ADSBDemodSettings::serialize() const
 
     s.writeBool(46, m_exportClientEnabled);
     s.writeBool(47, m_exportServerEnabled);
-    s.writeBool(48, m_exportServerPort);
+    s.writeU32(48, m_exportServerPort);
     s.writeBool(49, m_importEnabled);
     s.writeString(50, m_importHost);
     s.writeString(51, m_importUsername);
