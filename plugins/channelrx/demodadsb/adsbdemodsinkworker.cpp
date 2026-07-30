@@ -160,7 +160,7 @@ void ADSBDemodSinkWorker::handleModeS(unsigned char *data, int bytes, unsigned i
                 }
                 else if ((df2 == 5) || (df2 == 21))
                 {
-                    int curId = ((data[2] & 0x1f) << 8) | (data[3] & 0xff); // No decode - we just want to know if it changes
+                    int curId = ((l[i].m_data[2] & 0x1f) << 8) | (l[i].m_data[3] & 0xff); // No decode - we just want to know if it changes
 
                     if (id == -1)
                     {
