@@ -329,7 +329,7 @@ void ADSBDemodWorker::handleADSB(QByteArray data, const QDateTime dateTime, floa
                 *p++ = '3'; // Mode-S long
             }
 
-            p = escape(p, timestamp >> 48);  // Big-endian timestamp
+            p = escape(p, timestamp >> 40);  // Big-endian timestamp
             p = escape(p, timestamp >> 32);
             p = escape(p, timestamp >> 24);
             p = escape(p, timestamp >> 16);
