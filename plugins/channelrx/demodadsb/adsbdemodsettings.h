@@ -146,8 +146,8 @@ struct ADSBDemodSettings
     uint16_t m_exportServerPort;
     bool m_importEnabled;
     QString m_importHost;
-    QString m_importUsername;
-    QString m_importPassword;
+    QString m_importClientId;
+    QString m_importClientSecret;
     QString m_importParameters;
     float m_importPeriod;
     QString m_importMinLatitude;

@@ -64,8 +64,10 @@ ADSBDemodSettings:
       type: string
     importUsername:
       type: string
+      description: OpenSky OAuth2 client ID.
     importPassword:
       type: string
+      description: OpenSky OAuth2 client secret.
     importParameters:
       type: string
     importPeriod:

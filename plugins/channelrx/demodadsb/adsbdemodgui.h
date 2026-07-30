@@ -28,6 +28,7 @@
 #include <QTextToSpeech>
 #include <QRandomGenerator>
 #include <QNetworkAccessManager>
+#include <QPointer>
 #include <QtCharts>
 
 #include "channel/channelgui.h"
@@ -1338,6 +1339,12 @@ private:
     QTimer m_importTimer;
     QTimer m_redrawMapTimer;
     QNetworkAccessManager *m_networkManager;
+    QPointer<QNetworkReply> m_importTokenReply;
+    QPointer<QNetworkReply> m_importStatesReply;
+    QString m_importAccessToken;
+    QDateTime m_importAccessTokenExpiry;
+    int m_importRequestGeneration;
+    bool m_importAuthenticationRetry;
     bool m_loadingData;
 
     static const char m_idMap[];
@@ -1429,6 +1436,12 @@ private:
     int grayToBinary(int gray, int bits) const;
     void redrawMap();
     void applyImportSettings();
+    bool importCredentialsConfigured() const;
+    bool importAccessTokenValid() const;
+    void invalidateImportAuthentication();
+    void requestImportAccessToken();
+    void sendImportRequest();
+    void handleImportTokenReply(QNetworkReply *reply);
     void sendAircraftReport();
     void updatePosition(float latitude, float longitude, float altitude);
     void clearOldHeading(Aircraft *aircraft, const QDateTime& dateTime, float newTrack);
@@ -1505,6 +1518,7 @@ private slots:
     virtual void showEvent(QShowEvent *event) override;
     virtual bool eventFilter(QObject *obj, QEvent *event) override;
     void import();
+    void handleImportNetworkReply(QNetworkReply *reply);
     void handleImportReply(QNetworkReply* reply);
     void preferenceChanged(int elementType);
     void devicePositionChanged(float latitude, float longitude, float altitude);
@@ -1522,4 +1536,3 @@ signals:
 };
 
 #endif // INCLUDE_ADSBDEMODGUI_H
-

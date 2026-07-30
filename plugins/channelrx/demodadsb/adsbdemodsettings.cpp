@@ -49,8 +49,8 @@ void ADSBDemodSettings::resetToDefaults()
     m_exportServerPort = 30005;
     m_importEnabled = false;
     m_importHost = "opensky-network.org";
-    m_importUsername = "";
-    m_importPassword = "";
+    m_importClientId = "";
+    m_importClientSecret = "";
     m_importParameters = "";
     m_importPeriod = 10.0;
     m_importMinLatitude = "";
@@ -182,8 +182,8 @@ QByteArray ADSBDemodSettings::serialize() const
     s.writeU32(48, m_exportServerPort);
     s.writeBool(49, m_importEnabled);
     s.writeString(50, m_importHost);
-    s.writeString(51, m_importUsername);
-    s.writeString(52, m_importPassword);
+    s.writeString(51, m_importClientId);
+    s.writeString(52, m_importClientSecret);
     s.writeString(53, m_importParameters);
     s.writeFloat(54, m_importPeriod);
     s.writeString(55, m_importMinLatitude);
@@ -329,8 +329,8 @@ bool ADSBDemodSettings::deserialize(const QByteArray& data)
         }
         d.readBool(49, &m_importEnabled, false);
         d.readString(50, &m_importHost, "opensky-network.org");
-        d.readString(51, &m_importUsername, "");
-        d.readString(52, &m_importPassword, "");
+        d.readString(51, &m_importClientId, "");
+        d.readString(52, &m_importClientSecret, "");
         d.readString(53, &m_importParameters, "");
         d.readFloat(54, &m_importPeriod, 10.0f);
         d.readString(55, &m_importMinLatitude, "");
@@ -485,11 +485,11 @@ void ADSBDemodSettings::applySettings(const QStringList& settingsKeys, const ADS
     if (settingsKeys.contains("importHost")) {
         m_importHost = settings.m_importHost;
     }
-    if (settingsKeys.contains("importUsername")) {
-        m_importUsername = settings.m_importUsername;
+    if (settingsKeys.contains("importUsername") || settingsKeys.contains("importClientId")) {
+        m_importClientId = settings.m_importClientId;
     }
-    if (settingsKeys.contains("importPassword")) {
-        m_importPassword = settings.m_importPassword;
+    if (settingsKeys.contains("importPassword") || settingsKeys.contains("importClientSecret")) {
+        m_importClientSecret = settings.m_importClientSecret;
     }
     if (settingsKeys.contains("importParameters")) {
         m_importParameters = settings.m_importParameters;
@@ -703,11 +703,11 @@ QString ADSBDemodSettings::getDebugString(const QStringList& settingsKeys, bool 
     if (settingsKeys.contains("importHost") || force) {
         ostr << " m_importHost: " << m_importHost.toStdString();
     }
-    if (settingsKeys.contains("importUsername") || force) {
-        ostr << " m_importUsername: " << m_importUsername.toStdString();
+    if (settingsKeys.contains("importUsername") || settingsKeys.contains("importClientId") || force) {
+        ostr << " m_importClientId: " << m_importClientId.toStdString();
     }
-    if (settingsKeys.contains("importPassword") || force) {
-        ostr << " m_importPassword: " << m_importPassword.toStdString();
+    if (settingsKeys.contains("importPassword") || settingsKeys.contains("importClientSecret") || force) {
+        ostr << " m_importClientSecret: " << (m_importClientSecret.isEmpty() ? "<empty>" : "<redacted>");
     }
     if (settingsKeys.contains("importParameters") || force) {
         ostr << " m_importParameters: " << m_importParameters.toStdString();

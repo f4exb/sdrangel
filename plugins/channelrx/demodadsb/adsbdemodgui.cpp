@@ -33,6 +33,7 @@
 #include <QQmlProperty>
 #include <QJsonDocument>
 #include <QJsonObject>
+#include <QUrlQuery>
 #ifdef QT_LOCATION_FOUND
 #include <QGeoServiceProvider>
 #endif
@@ -6955,6 +6956,9 @@ ADSBDemodGUI::ADSBDemodGUI(PluginAPI* pluginAPI, DeviceUISet *deviceUISet, Baseb
     m_aircraftYAxis(nullptr),
     m_speech(nullptr),
     m_progressDialog(nullptr),
+    m_networkManager(nullptr),
+    m_importRequestGeneration(0),
+    m_importAuthenticationRetry(false),
     m_loadingData(false)
 {
     setAttribute(Qt::WA_DeleteOnClose, true);
@@ -7164,7 +7168,7 @@ ADSBDemodGUI::ADSBDemodGUI(PluginAPI* pluginAPI, DeviceUISet *deviceUISet, Baseb
         m_networkManager,
         &QNetworkAccessManager::finished,
         this,
-        &ADSBDemodGUI::handleImportReply
+        &ADSBDemodGUI::handleImportNetworkReply
     );
     applyImportSettings();
 
@@ -7393,6 +7397,11 @@ void ADSBDemodGUI::displaySettings(const QStringList& settingsKeys, bool force)
     if (settingsKeys.contains("importPeriod")
         || settingsKeys.contains("feedEnabled")
         || settingsKeys.contains("importEnabled")
+        || settingsKeys.contains("importHost")
+        || settingsKeys.contains("importUsername")
+        || settingsKeys.contains("importPassword")
+        || settingsKeys.contains("importClientId")
+        || settingsKeys.contains("importClientSecret")
         || force) {
         applyImportSettings();
     }
@@ -8312,6 +8321,7 @@ bool ADSBDemodGUI::eventFilter(QObject *obj, QEvent *event)
 
 void ADSBDemodGUI::applyImportSettings()
 {
+    invalidateImportAuthentication();
     m_importTimer.setInterval(m_settings.m_importPeriod * 1000);
     if (m_settings.m_feedEnabled && m_settings.m_importEnabled) {
         m_importTimer.start();
@@ -8320,9 +8330,55 @@ void ADSBDemodGUI::applyImportSettings()
     }
 }
 
-// Import ADS-B data from opensky-network via an API call
-void ADSBDemodGUI::import()
+bool ADSBDemodGUI::importCredentialsConfigured() const
 {
+    return !m_settings.m_importClientId.isEmpty() && !m_settings.m_importClientSecret.isEmpty();
+}
+
+bool ADSBDemodGUI::importAccessTokenValid() const
+{
+    return !m_importAccessToken.isEmpty()
+        && QDateTime::currentDateTimeUtc() < m_importAccessTokenExpiry;
+}
+
+void ADSBDemodGUI::invalidateImportAuthentication()
+{
+    ++m_importRequestGeneration;
+    m_importTokenReply.clear();
+    m_importStatesReply.clear();
+    m_importAccessToken.clear();
+    m_importAccessTokenExpiry = QDateTime();
+    m_importAuthenticationRetry = false;
+}
+
+void ADSBDemodGUI::requestImportAccessToken()
+{
+    static const QUrl tokenUrl(
+        QStringLiteral("https://auth.opensky-network.org/auth/realms/opensky-network/protocol/openid-connect/token"));
+
+    if (!m_networkManager || m_importTokenReply || m_importStatesReply) {
+        return;
+    }
+
+    QUrlQuery form;
+    form.addQueryItem(QStringLiteral("grant_type"), QStringLiteral("client_credentials"));
+    form.addQueryItem(QStringLiteral("client_id"), m_settings.m_importClientId);
+    form.addQueryItem(QStringLiteral("client_secret"), m_settings.m_importClientSecret);
+
+    QNetworkRequest request(tokenUrl);
+    request.setHeader(QNetworkRequest::ContentTypeHeader, QStringLiteral("application/x-www-form-urlencoded"));
+    QNetworkReply *reply = m_networkManager->post(request, form.query(QUrl::FullyEncoded).toUtf8());
+    reply->setProperty("adsbImportReplyType", QStringLiteral("token"));
+    reply->setProperty("adsbImportGeneration", m_importRequestGeneration);
+    m_importTokenReply = reply;
+}
+
+void ADSBDemodGUI::sendImportRequest()
+{
+    if (!m_networkManager || m_importTokenReply || m_importStatesReply) {
+        return;
+    }
+
     QString urlString = "https://";
     urlString = urlString + m_settings.m_importHost + "/api/states/all";
     QChar join = '?';
@@ -8352,12 +8408,109 @@ void ADSBDemodGUI::import()
         join = '&';
     }
     QNetworkRequest request = QNetworkRequest(QUrl(urlString));
-    if (!m_settings.m_importUsername.isEmpty() && !m_settings.m_importPassword.isEmpty())
-    {
-        QByteArray encoded = (m_settings.m_importUsername + ":" + m_settings.m_importPassword).toLocal8Bit().toBase64();
-        request.setRawHeader("Authorization", "Basic " + encoded);
+    if (importCredentialsConfigured() && importAccessTokenValid()) {
+        request.setRawHeader("Authorization", "Bearer " + m_importAccessToken.toUtf8());
     }
-    m_networkManager->get(request);
+
+    QNetworkReply *reply = m_networkManager->get(request);
+    reply->setProperty("adsbImportReplyType", QStringLiteral("states"));
+    reply->setProperty("adsbImportGeneration", m_importRequestGeneration);
+    m_importStatesReply = reply;
+}
+
+// Import ADS-B data from opensky-network via an API call
+void ADSBDemodGUI::import()
+{
+    if (!m_networkManager || m_importTokenReply || m_importStatesReply) {
+        return;
+    }
+
+    m_importAuthenticationRetry = false;
+
+    const bool clientIdSet = !m_settings.m_importClientId.isEmpty();
+    const bool clientSecretSet = !m_settings.m_importClientSecret.isEmpty();
+    if (clientIdSet != clientSecretSet)
+    {
+        qWarning() << "ADSBDemodGUI::import: OpenSky authentication requires both a client ID and client secret";
+        return;
+    }
+
+    if (!clientIdSet || importAccessTokenValid()) {
+        sendImportRequest();
+    } else {
+        requestImportAccessToken();
+    }
+}
+
+void ADSBDemodGUI::handleImportNetworkReply(QNetworkReply *reply)
+{
+    if (!reply) {
+        return;
+    }
+
+    if (m_importTokenReply == reply) {
+        m_importTokenReply.clear();
+    }
+    if (m_importStatesReply == reply) {
+        m_importStatesReply.clear();
+    }
+
+    const int generation = reply->property("adsbImportGeneration").toInt();
+    if (generation != m_importRequestGeneration)
+    {
+        reply->deleteLater();
+        return;
+    }
+
+    const QString replyType = reply->property("adsbImportReplyType").toString();
+    if (replyType == QStringLiteral("token")) {
+        handleImportTokenReply(reply);
+    } else if (replyType == QStringLiteral("states")) {
+        handleImportReply(reply);
+    } else {
+        qWarning() << "ADSBDemodGUI::handleImportNetworkReply: Unknown reply type";
+    }
+
+    reply->deleteLater();
+}
+
+void ADSBDemodGUI::handleImportTokenReply(QNetworkReply *reply)
+{
+    if (reply->error() != QNetworkReply::NoError)
+    {
+        qWarning() << "ADSBDemodGUI::handleImportTokenReply: OpenSky token request failed:"
+                   << reply->errorString();
+        m_importAuthenticationRetry = false;
+        return;
+    }
+
+    QJsonParseError parseError;
+    const QJsonDocument document = QJsonDocument::fromJson(reply->readAll(), &parseError);
+    if ((parseError.error != QJsonParseError::NoError) || !document.isObject())
+    {
+        qWarning() << "ADSBDemodGUI::handleImportTokenReply: Invalid OpenSky token response:"
+                   << parseError.errorString();
+        m_importAuthenticationRetry = false;
+        return;
+    }
+
+    const QJsonObject object = document.object();
+    const QString accessToken = object.value(QStringLiteral("access_token")).toString();
+    if (accessToken.isEmpty())
+    {
+        qWarning() << "ADSBDemodGUI::handleImportTokenReply: OpenSky token response has no access token";
+        m_importAuthenticationRetry = false;
+        return;
+    }
+
+    const int expiresIn = object.value(QStringLiteral("expires_in")).toInt(1800);
+    const int refreshMargin = qMin(30, qMax(0, expiresIn / 10));
+    m_importAccessToken = accessToken;
+    m_importAccessTokenExpiry = QDateTime::currentDateTimeUtc().addSecs(qMax(1, expiresIn - refreshMargin));
+
+    if (m_settings.m_feedEnabled && m_settings.m_importEnabled) {
+        sendImportRequest();
+    }
 }
 
 // Handle opensky-network API call reply
@@ -8365,6 +8518,16 @@ void ADSBDemodGUI::handleImportReply(QNetworkReply* reply)
 {
     if (reply)
     {
+        const int statusCode = reply->attribute(QNetworkRequest::HttpStatusCodeAttribute).toInt();
+        if ((statusCode == 401) && importCredentialsConfigured() && !m_importAuthenticationRetry)
+        {
+            m_importAccessToken.clear();
+            m_importAccessTokenExpiry = QDateTime();
+            m_importAuthenticationRetry = true;
+            requestImportAccessToken();
+            return;
+        }
+
         if (!reply->error())
         {
             QJsonDocument document = QJsonDocument::fromJson(reply->readAll());
@@ -8470,9 +8633,10 @@ void ADSBDemodGUI::handleImportReply(QNetworkReply* reply)
         }
         else
         {
-            qDebug() << "ADSBDemodGUI::handleImportReply: error " << reply->error();
+            qWarning() << "ADSBDemodGUI::handleImportReply: OpenSky states request failed:"
+                       << reply->errorString();
         }
-        reply->deleteLater();
+        m_importAuthenticationRetry = false;
     }
 }
 
