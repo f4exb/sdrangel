@@ -258,7 +258,7 @@ bool ADSBDemodSettings::deserialize(const QByteArray& data)
         d.readBool(6, &m_feedEnabled, false);
         d.readString(7, &m_exportClientHost, "feed.adsbexchange.com");
         d.readU32(8, &utmp, 0);
-        if ((utmp > 1023) && (utmp < 65535)) {
+        if ((utmp > 0) && (utmp <= 65535)) { // Remote server, so can be a privileged port
             m_exportClientPort = utmp;
         } else {
             m_exportClientPort = 30005;
@@ -270,7 +270,7 @@ bool ADSBDemodSettings::deserialize(const QByteArray& data)
         d.readString(13, &m_reverseAPIAddress, "127.0.0.1");
         d.readU32(14, &utmp, 0);
 
-        if ((utmp > 1023) && (utmp < 65535)) {
+        if ((utmp > 1023) && (utmp <= 65535)) {
             m_reverseAPIPort = utmp;
         } else {
             m_reverseAPIPort = 8888;
@@ -320,9 +320,9 @@ bool ADSBDemodSettings::deserialize(const QByteArray& data)
         d.readBool(44, &m_verboseModelMatching, false);
 
         d.readBool(46, &m_exportClientEnabled, true);
-        d.readBool(47, &m_exportServerEnabled, true);
+        d.readBool(47, &m_exportServerEnabled, false);
         d.readU32(48, &utmp, 0);
-        if ((utmp > 1023) && (utmp < 65535)) {
+        if ((utmp > 1023) && (utmp <= 65535)) {
             m_exportServerPort = utmp;
         } else {
             m_exportServerPort = 30005;
@@ -386,7 +386,7 @@ bool ADSBDemodSettings::deserialize(const QByteArray& data)
     }
 }
 
-QDataStream& operator<<(QDataStream& out, const ADSBDemodSettings::NotificationSettings* settings)
+QDataStream& operator<<(QDataStream& out, const QSharedPointer<ADSBDemodSettings::NotificationSettings>& settings)
 {
     out << settings->m_matchColumn;
     out << settings->m_regExp;
@@ -396,9 +396,9 @@ QDataStream& operator<<(QDataStream& out, const ADSBDemodSettings::NotificationS
     return out;
 }
 
-QDataStream& operator>>(QDataStream& in, ADSBDemodSettings::NotificationSettings*& settings)
+QDataStream& operator>>(QDataStream& in, QSharedPointer<ADSBDemodSettings::NotificationSettings>& settings)
 {
-    settings = new ADSBDemodSettings::NotificationSettings();
+    settings = QSharedPointer<ADSBDemodSettings::NotificationSettings>::create();
     in >> settings->m_matchColumn;
     in >> settings->m_regExp;
     in >> settings->m_speech;
@@ -408,7 +408,7 @@ QDataStream& operator>>(QDataStream& in, ADSBDemodSettings::NotificationSettings
     return in;
 }
 
-QByteArray ADSBDemodSettings::serializeNotificationSettings(QList<NotificationSettings *> notificationSettings) const
+QByteArray ADSBDemodSettings::serializeNotificationSettings(const QList<QSharedPointer<NotificationSettings>>& notificationSettings) const
 {
     QByteArray data;
     QDataStream *stream = new QDataStream(&data, QIODevice::WriteOnly);
@@ -417,7 +417,7 @@ QByteArray ADSBDemodSettings::serializeNotificationSettings(QList<NotificationSe
     return data;
 }
 
-void ADSBDemodSettings::deserializeNotificationSettings(const QByteArray& data, QList<NotificationSettings *>& notificationSettings)
+void ADSBDemodSettings::deserializeNotificationSettings(const QByteArray& data, QList<QSharedPointer<NotificationSettings>>& notificationSettings)
 {
     QDataStream *stream = new QDataStream(data);
     (*stream) >> notificationSettings;
@@ -526,6 +526,9 @@ void ADSBDemodSettings::applySettings(const QStringList& settingsKeys, const ADS
     }
     if (settingsKeys.contains("reverseAPIDeviceIndex")) {
         m_reverseAPIDeviceIndex = settings.m_reverseAPIDeviceIndex;
+    }
+    if (settingsKeys.contains("reverseAPIChannelIndex")) {
+        m_reverseAPIChannelIndex = settings.m_reverseAPIChannelIndex;
     }
     if (settingsKeys.contains("columnIndexes")) {
         std::copy(std::begin(settings.m_columnIndexes), std::end(settings.m_columnIndexes), std::begin(m_columnIndexes));

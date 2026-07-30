@@ -1827,7 +1827,7 @@ int ADSBDemodGUI::roundTo50Feet(int alt)
 // Estimate outside air temperature (static temperature) from Mach number and true airspeed, assuming dry air
 bool ADSBDemodGUI::calcAirTemp(Aircraft *aircraft)
 {
-    if (aircraft->m_machValid && aircraft->m_trueAirspeedValid)
+    if (aircraft->m_machValid && aircraft->m_trueAirspeedValid && (aircraft->m_mach > 0.0f))
     {
         // Calculate speed of sound
         float c = Units::knotsToMetresPerSecond(aircraft->m_trueAirspeed) / aircraft->m_mach;
@@ -2328,7 +2328,7 @@ void ADSBDemodGUI::handleADSB(
 
             if (df == 17)
             {
-                int nacv = ((data[5] >> 3) & 0x3); // Navigation accuracy for velocity
+                int nacv = ((data[5] >> 3) & 0x7); // Navigation accuracy for velocity
 
                 aircraft->m_nacvItem->setData(Qt::DisplayRole, m_nacvStrings[nacv]);
             }
@@ -2338,13 +2338,14 @@ void ADSBDemodGUI::handleADSB(
                 // Ground speed
                 float v, h;
 
-                decodeGroundspeed(data, v, h);
-
-                clearOldHeading(aircraft, dateTime, h);
-                aircraft->setTrack(h, dateTime);
-                aircraft->setGroundspeed(v, m_settings);
+                if (decodeGroundspeed(data, v, h))
+                {
+                    clearOldHeading(aircraft, dateTime, h);
+                    aircraft->setTrack(h, dateTime);
+                    aircraft->setGroundspeed(v, m_settings);
+                }
             }
-            else
+            else if ((st == 3) || (st == 4))
             {
                 // Airspeed (only likely to get this if an aircraft is unable to determine it's position)
                 bool tas;
@@ -2352,22 +2353,30 @@ void ADSBDemodGUI::handleADSB(
                 bool hdgValid;
                 float hdg;
 
-                decodeAirspeed(data, tas, as, hdgValid, hdg);
+                bool asValid = decodeAirspeed(data, tas, as, hdgValid, hdg);
 
                 if (hdgValid) {
                     aircraft->setHeading(hdg, dateTime);
                 }
 
-                if (tas) {
-                    aircraft->setTrueAirspeed(as, m_settings);
-                } else {
-                    aircraft->setIndicatedAirspeed(as, dateTime, m_settings);
+                if (asValid)
+                {
+                    if (tas) {
+                        aircraft->setTrueAirspeed(as, m_settings);
+                    } else {
+                        aircraft->setIndicatedAirspeed(as, dateTime, m_settings);
+                    }
                 }
             }
 
-            int verticalRate;
-            decodeVerticalRate(data, verticalRate);
-            aircraft->setVerticalRate(verticalRate, m_settings);
+            if ((st >= 1) && (st <= 4))
+            {
+                int verticalRate;
+
+                if (decodeVerticalRate(data, verticalRate)) {
+                    aircraft->setVerticalRate(verticalRate, m_settings);
+                }
+            }
         }
         else if (tc == 28)
         {
@@ -2380,10 +2389,12 @@ void ADSBDemodGUI::handleADSB(
                 aircraft->m_status = m_emergencyStatus[es];
                 aircraft->m_statusItem->setText(aircraft->m_status);
                 aircraft->m_squawk = squawkDecode(modeA);
-                if (modeA & 0x40)
+                // This message doesn't signal SPI, so use the state last seen in DF5/21, to keep the text consistent
+                if (aircraft->m_spi) {
                     aircraft->m_squawkItem->setText(QString("%1 IDENT").arg(aircraft->m_squawk, 4, 10, QLatin1Char('0')));
-                else
+                } else {
                     aircraft->m_squawkItem->setText(QString("%1").arg(aircraft->m_squawk, 4, 10, QLatin1Char('0')));
+                }
             }
             else if (st == 2)
             {
@@ -3241,12 +3252,19 @@ void ADSBDemodGUI::decodeID(const QByteArray& data, QString& emitterCategory, QS
     callsign = QString(callsignASCII).trimmed();
 }
 
-void ADSBDemodGUI::decodeGroundspeed(const QByteArray& data, float& v, float& h)
+bool ADSBDemodGUI::decodeGroundspeed(const QByteArray& data, float& v, float& h)
 {
+    int st = data[4] & 0x7;   // Subtype - 2 is supersonic, with 4kt LSB
+    int lsb = (st == 2) ? 4 : 1;
     int s_ew = (data[5] >> 2) & 1; // East-west velocity sign
     int v_ew = ((data[5] & 0x3) << 8) | (data[6] & 0xff); // East-west velocity
     int s_ns = (data[7] >> 7) & 1; // North-south velocity sign
     int v_ns = ((data[7] & 0x7f) << 3) | ((data[8] >> 5) & 0x7); // North-south velocity
+
+    // All-zeros means no velocity information available
+    if ((v_ew == 0) || (v_ns == 0)) {
+        return false;
+    }
 
     int v_we;
     int v_sn;
@@ -3261,28 +3279,46 @@ void ADSBDemodGUI::decodeGroundspeed(const QByteArray& data, float& v, float& h)
     } else {
         v_sn = v_ns - 1;
     }
+    v_we *= lsb;
+    v_sn *= lsb;
     v = std::round(std::sqrt(v_we*v_we + v_sn*v_sn));
     h = std::atan2(v_we, v_sn) * 360.0/(2.0*M_PI);
     if (h < 0.0) {
         h += 360.0;
     }
+    return true;
 }
 
-void ADSBDemodGUI::decodeAirspeed(const QByteArray& data, bool& tas, int& as, bool& hdgValid, float& hdg)
+bool ADSBDemodGUI::decodeAirspeed(const QByteArray& data, bool& tas, int& as, bool& hdgValid, float& hdg)
 {
+    int st = data[4] & 0x7;   // Subtype - 4 is supersonic, with 4kt LSB
+    int lsb = (st == 4) ? 4 : 1;
     hdgValid = (data[5] >> 2) & 1; // Heading status
     int hdgFix =  ((data[5] & 0x3) << 8) | (data[6] & 0xff); // Heading
     hdg = hdgFix / 1024.0f * 360.0f;
 
     tas = (data[7] >> 7) & 1; // Airspeed type (true or indicated)
-    as = ((data[7] & 0x7f) << 3) | ((data[8] >> 5) & 0x7); // Airspeed
+    int asFix = ((data[7] & 0x7f) << 3) | ((data[8] >> 5) & 0x7); // Airspeed
+
+    // All-zeros means no airspeed information available
+    if (asFix == 0) {
+        return false;
+    }
+    as = (asFix - 1) * lsb;
+    return true;
 }
 
-void ADSBDemodGUI::decodeVerticalRate(const QByteArray& data, int& verticalRate)
+bool ADSBDemodGUI::decodeVerticalRate(const QByteArray& data, int& verticalRate)
 {
     int s_vr = (data[8] >> 3) & 1; // Vertical rate sign
     int vr = ((data[8] & 0x7) << 6) | ((data[9] >> 2) & 0x3f); // Vertical rate
+
+    // All-zeros means no vertical rate information available
+    if (vr == 0) {
+        return false;
+    }
     verticalRate = (vr-1)*64*(s_vr?-1:1);
+    return true;
 }
 
 // Called when we have both lat & long
@@ -3617,11 +3653,14 @@ void ADSBDemodGUI::decodeModeS(const QByteArray data, const QDateTime dateTime, 
         // Squawk ident code
         int identCode = ((data[2] & 0x1f) << 8) | (data[3] & 0xff);
         int squawk = squawkDecode(identCode);
+        // SPI (IDENT) is indicated in the flight status field, not the identity field
+        bool spi = (flightStatus == 4) || (flightStatus == 5);
 
-        if (squawk != aircraft->m_squawk)
+        if ((squawk != aircraft->m_squawk) || (spi != aircraft->m_spi))
         {
             aircraft->m_squawk = squawk;
-            if (identCode & 0x40) {
+            aircraft->m_spi = spi;
+            if (spi) {
                 aircraft->m_squawkItem->setText(QString("%1 IDENT").arg(aircraft->m_squawk, 4, 10, QLatin1Char('0')));
             } else {
                 aircraft->m_squawkItem->setText(QString("%1").arg(aircraft->m_squawk, 4, 10, QLatin1Char('0')));
@@ -3630,9 +3669,15 @@ void ADSBDemodGUI::decodeModeS(const QByteArray data, const QDateTime dateTime, 
     }
 }
 
-static bool isSpeedAndHeadingInconsitent(float speed1, float heading1, float speed2, float heading2)
+static bool isSpeedInconsistent(float speed1, float speed2)
 {
-    return (abs(speed1 - speed2) > 50) || (abs(heading1 - heading2) > 45);
+    return std::abs(speed1 - speed2) > 50.0f;
+}
+
+static bool isHeadingInconsistent(float heading1, float heading2)
+{
+    float difference = std::fmod(std::abs(heading1 - heading2), 360.0f);
+    return std::min(difference, 360.0f - difference) > 45.0f;
 }
 
 static bool isVerticalRateInconsistent(int verticalRate1, int verticalRate2)
@@ -3681,7 +3726,7 @@ void ADSBDemodGUI::decodeCommB(const QByteArray data, const QDateTime dateTime, 
         bool altitudeInconsistent_0_5 = !altitudeValid_0_5 || (aircraft->m_altitudeValid && isAltitudeInconsistent(altitude_0_5, aircraft->m_altitude));
 
         const unsigned tc = ((data[4] >> 3) & 0x1f);
-        bool tcInconsistent = !((tc == 0) || ((tc >= 5) && (tc <= 8)) || ((tc >= 9) && (tc << 18)) || ((tc >= 20) && (tc <= 22))); // Only position type codes
+        bool tcInconsistent = !((tc == 0) || ((tc >= 5) && (tc <= 8)) || ((tc >= 9) && (tc <= 18)) || ((tc >= 20) && (tc <= 22))); // Only position type codes
 
         int f;
         double latCpr, lonCpr;
@@ -3726,33 +3771,44 @@ void ADSBDemodGUI::decodeCommB(const QByteArray data, const QDateTime dateTime, 
 
         int st = data[4] & 0x7;   // Subtype
         bool groundspeedSubType = (st == 1) || (st == 2);
-        float groundspeed_0_9, track;
-        bool airspeedType_0_9;
-        int airspeed;
-        bool headingValid;
-        float heading;
+        bool airspeedSubType = (st == 3) || (st == 4);
+        float groundspeed_0_9 = 0.0f, track = 0.0f;
+        bool airspeedType_0_9 = false;
+        int airspeed = 0;
+        bool headingValid = false;
+        float heading = 0.0f;
+        bool groundspeedValid_0_9 = false;
+        bool airspeedValid_0_9 = false;
         if (groundspeedSubType)
         {
             // Ground speed
-            decodeGroundspeed(data, groundspeed_0_9, track);
+            groundspeedValid_0_9 = decodeGroundspeed(data, groundspeed_0_9, track);
         }
-        else
+        else if (airspeedSubType)
         {
             // Airspeed
-            decodeAirspeed(data, airspeedType_0_9, airspeed, headingValid, heading);
+            airspeedValid_0_9 = decodeAirspeed(data, airspeedType_0_9, airspeed, headingValid, heading);
         }
-        int verticalRate;
-        decodeVerticalRate(data, verticalRate);
+        int verticalRate = 0;
+        bool verticalRateValid_0_9 = decodeVerticalRate(data, verticalRate);
 
         bool groundspeedInconsistent = groundspeedSubType
-            && aircraft->m_groundspeedValid
-            && isSpeedAndHeadingInconsitent(groundspeed_0_9, track, aircraft->m_groundspeed, aircraft->m_track);
-        bool airspeedInconsistent = !groundspeedSubType
-            && (airspeedType_0_9 ? aircraft->m_trueAirspeedValid : aircraft->m_indicatedAirspeedValid)
-            && isSpeedAndHeadingInconsitent(airspeed, heading, airspeedType_0_9 ? aircraft->m_trueAirspeed : aircraft->m_indicatedAirspeed, aircraft->m_heading);
-        bool verticalRateInconsistent =  aircraft->m_verticalRateValid && isVerticalRateInconsistent(verticalRate, aircraft->m_verticalRate);
+            && groundspeedValid_0_9
+            && ((aircraft->m_groundspeedValid && isSpeedInconsistent(groundspeed_0_9, aircraft->m_groundspeed))
+                || (aircraft->m_trackValid && isHeadingInconsistent(track, aircraft->m_track)));
+        bool airspeedInconsistent = airspeedSubType
+            && ((airspeedValid_0_9
+                    && (airspeedType_0_9 ? aircraft->m_trueAirspeedValid : aircraft->m_indicatedAirspeedValid)
+                    && isSpeedInconsistent(airspeed, airspeedType_0_9 ? aircraft->m_trueAirspeed : aircraft->m_indicatedAirspeed))
+                || (headingValid && aircraft->m_headingValid && isHeadingInconsistent(heading, aircraft->m_heading)));
+        bool verticalRateInconsistent = verticalRateValid_0_9 && aircraft->m_verticalRateValid && isVerticalRateInconsistent(verticalRate, aircraft->m_verticalRate);
 
-        bool bds_0_9 = (tc == 19) && !groundspeedInconsistent && !airspeedInconsistent && !verticalRateInconsistent;
+        // Require at least one valid subfield, so a frame that happens to have subtype bits 1-4 but
+        // no usable content can't consume the single-match slot for other registers
+        bool bds_0_9 = (tc == 19)
+            && (groundspeedSubType || airspeedSubType)
+            && (groundspeedValid_0_9 || airspeedValid_0_9 || (airspeedSubType && headingValid) || verticalRateValid_0_9)
+            && !groundspeedInconsistent && !airspeedInconsistent && !verticalRateInconsistent;
 
         // BDS 1,0 - ELS
 
@@ -3857,7 +3913,7 @@ void ADSBDemodGUI::decodeCommB(const QByteArray data, const QDateTime dateTime, 
         if (cap_5_f) {
             caps.append("5,F");
         }
-        if (cap_5_5) {
+        if (cap_6_0) {
             caps.append("6,0");
         }
 
@@ -3920,7 +3976,7 @@ void ADSBDemodGUI::decodeCommB(const QByteArray data, const QDateTime dateTime, 
         }
         airlineRegistration[2] = '\0';
         QString airlineRegistrationString = QString(airlineRegistration).trimmed();
-        bool airlineRegistrationInvalid = QString(airlineRegistrationString).contains('#') || !QChar::isLetter(c[0]) || !QChar::isLetter(c[1]);
+        bool airlineRegistrationInvalid = QString(airlineRegistrationString).contains('#') || !QChar(QLatin1Char(airlineRegistration[0])).isLetter() || !QChar(QLatin1Char(airlineRegistration[1])).isLetter();
         bool airlineRegistrationInconsistent = !airlineRegistrationStatus && (c[0] || c[1]);
 
         bool bds_2_1 = !aircraftRegistrationInvalid && !aircraftRegistrationInconsistent && !airlineRegistrationInvalid && !airlineRegistrationInconsistent;
@@ -3994,7 +4050,7 @@ void ADSBDemodGUI::decodeCommB(const QByteArray data, const QDateTime dateTime, 
         bool windSpeedStatus = (data[4] >> 3) & 0x1;
         int windSpeedFix = ((data[4] & 0x7) << 6) | ((data[5] >> 2) & 0x3f);
         int windSpeed = windSpeedFix; // knots
-        int windDirectionFix = ((data[5] & 0x3) << 6) | ((data[6] >> 2) & 0x3f);
+        int windDirectionFix = ((data[5] & 0x3) << 7) | ((data[6] >> 1) & 0x7f);
         int windDirection = windDirectionFix * 180.0f / 256.0f; // Degrees
         bool windSpeedInconsistent = (windSpeed > 250.0f) || (!windSpeedStatus && ((windSpeedFix != 0) || (windDirectionFix != 0)));
 
@@ -4117,7 +4173,7 @@ void ADSBDemodGUI::decodeCommB(const QByteArray data, const QDateTime dateTime, 
 
         bool positionValid = (data[4] >> 7) & 0x1;
 
-        int latitudeFix = ((data[4] & 0x3f) << 13) | ((data[5] & 0xff) << 5) | ((data[6] >> 3) & 0x1f);
+        int latitudeFix = ((data[4] & 0x7f) << 13) | ((data[5] & 0xff) << 5) | ((data[6] >> 3) & 0x1f);
         latitudeFix = (latitudeFix << 12) >> 12;
         float latitude_5_1 = latitudeFix * (360.0f / 1048576.0f);
 
@@ -4171,6 +4227,7 @@ void ADSBDemodGUI::decodeCommB(const QByteArray data, const QDateTime dateTime, 
 
         bool arAltitudeRateStatus = (data[9] >> 1) & 0x1;
         int arAltitudeRateFix = ((data[9] & 0x1) << 8) | (data[10] & 0xff);
+        arAltitudeRateFix = (arAltitudeRateFix << 23) >> 23; // Sign extend 9-bit two's complement value
         int arAltitudeRate = arAltitudeRateFix * 64; // Ft/min
         bool arAltitudeRateInconsistent = (abs(arAltitudeRate) > 6000) || (!arAltitudeRateStatus && (arAltitudeRateFix != 0));
 
@@ -4179,7 +4236,7 @@ void ADSBDemodGUI::decodeCommB(const QByteArray data, const QDateTime dateTime, 
         // BDS 6,0 - Heading and speed report - EHS
 
         bool magHeadingStatus = (data[4] >> 7) & 1;
-        int magHeadingFix = ((data[4] & 0x7f) << 4) | ((data[6] >> 4) & 0xf);
+        int magHeadingFix = ((data[4] & 0x7f) << 4) | ((data[5] >> 4) & 0xf);
         magHeadingFix = (magHeadingFix << 21) >> 21;
         float magHeading = magHeadingFix * (90.0f / 512.0f);
         if (magHeading < 0.0f) {
@@ -4250,19 +4307,30 @@ void ADSBDemodGUI::decodeCommB(const QByteArray data, const QDateTime dateTime, 
             {
                 if (groundspeedSubType)
                 {
-                    aircraft->setGroundspeed(groundspeed_0_9, m_settings);
-                    aircraft->setTrack(track, dateTime);
+                    if (groundspeedValid_0_9)
+                    {
+                        aircraft->setGroundspeed(groundspeed_0_9, m_settings);
+                        aircraft->setTrack(track, dateTime);
+                    }
                 }
                 else
                 {
-                    if (airspeedType_0_9) {
-                        aircraft->setTrueAirspeed(airspeed, m_settings);
-                    } else {
-                        aircraft->setIndicatedAirspeed(airspeed, dateTime, m_settings);
+                    if (airspeedValid_0_9)
+                    {
+                        if (airspeedType_0_9) {
+                            aircraft->setTrueAirspeed(airspeed, m_settings);
+                        }
+                        else {
+                            aircraft->setIndicatedAirspeed(airspeed, dateTime, m_settings);
+                        }
                     }
-                    aircraft->setHeading(heading, dateTime);
+                    if (headingValid) {
+                        aircraft->setHeading(heading, dateTime);
+                    }
                 }
-                aircraft->setVerticalRate(verticalRate, m_settings);
+                if (verticalRateValid_0_9) {
+                    aircraft->setVerticalRate(verticalRate, m_settings);
+                }
             }
             if (bds_1_7)
             {
@@ -4282,13 +4350,14 @@ void ADSBDemodGUI::decodeCommB(const QByteArray data, const QDateTime dateTime, 
                 aircraft->m_bdsCapabilities[4][2] |= cap_4_2;
                 aircraft->m_bdsCapabilities[4][3] |= cap_4_3;
                 aircraft->m_bdsCapabilities[4][4] |= cap_4_4;
+                aircraft->m_bdsCapabilities[4][5] |= cap_4_5;
                 aircraft->m_bdsCapabilities[4][8] |= cap_4_8;
                 aircraft->m_bdsCapabilities[5][0] |= cap_5_0;
                 aircraft->m_bdsCapabilities[5][1] |= cap_5_1;
                 aircraft->m_bdsCapabilities[5][2] |= cap_5_2;
-                aircraft->m_bdsCapabilities[5][3] |= cap_5_4;
-                aircraft->m_bdsCapabilities[5][4] |= cap_5_5;
-                aircraft->m_bdsCapabilities[5][5] |= cap_5_6;
+                aircraft->m_bdsCapabilities[5][3] |= cap_5_3;
+                aircraft->m_bdsCapabilities[5][4] |= cap_5_4;
+                aircraft->m_bdsCapabilities[5][5] |= cap_5_5;
                 aircraft->m_bdsCapabilities[5][6] |= cap_5_6;
                 aircraft->m_bdsCapabilities[5][15] |= cap_5_f;
                 aircraft->m_bdsCapabilities[6][0] |= cap_6_0;
@@ -4389,7 +4458,7 @@ void ADSBDemodGUI::decodeCommB(const QByteArray data, const QDateTime dateTime, 
                     if (windSpeedStatus)
                     {
                         if (m_settings.m_siUnits) {
-                            aircraft->m_groundspeedItem->setData(Qt::DisplayRole, Units::knotsToIntegerKPH(aircraft->m_groundspeed));
+                            aircraft->m_windSpeedItem->setData(Qt::DisplayRole, Units::knotsToIntegerKPH(windSpeed));
                         } else {
                             aircraft->m_windSpeedItem->setData(Qt::DisplayRole, windSpeed);
                         }
@@ -8148,7 +8217,7 @@ int ADSBDemodGUI::gillhamToFeet(int n) const
     int b4 = (n >> 1) & 1;
     int d4 = n & 1;
 
-    int n500 = grayToBinary((d2 << 7) | (d4 << 6) | (a1 << 5) | (a2 << 4) | (a4 << 3) | (b1 << 2) | (b2 << 1) | b4, 4);
+    int n500 = grayToBinary((d2 << 7) | (d4 << 6) | (a1 << 5) | (a2 << 4) | (a4 << 3) | (b1 << 2) | (b2 << 1) | b4, 8);
     int n100 = grayToBinary((c1 << 2) | (c2 << 1) | c4, 3) - 1;
 
     if (n100 == 6) {

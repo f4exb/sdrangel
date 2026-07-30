@@ -37,7 +37,8 @@ ADSBDemodSink::ADSBDemodSink() :
     m_magsqSum(0.0f),
     m_magsqPeak(0.0f),
     m_magsqCount(0),
-    m_messageQueueToGUI(nullptr)
+    m_messageQueueToGUI(nullptr),
+    m_messageQueueToWorker(nullptr)
 {
     applySettings(m_settings, QStringList(), true);
     applyChannelSettings(m_channelSampleRate, m_channelFrequencyOffset, true);
