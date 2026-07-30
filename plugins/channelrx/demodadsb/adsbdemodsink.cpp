@@ -267,9 +267,14 @@ void ADSBDemodSink::applySettings(const ADSBDemodSettings& settings, const QStri
         || (settingsKeys.contains("interpolatorTapsPerPhase") && (settings.m_interpolatorTapsPerPhase != m_settings.m_interpolatorTapsPerPhase))
         || force)
     {
-        m_interpolator.create(m_settings.m_interpolatorPhaseSteps, m_channelSampleRate, settings.m_rfBandwidth / 2.2,  m_settings.m_interpolatorTapsPerPhase);
+        int interpolatorPhaseSteps = settingsKeys.contains("interpolatorPhaseSteps") ? settings.m_interpolatorPhaseSteps : m_settings.m_interpolatorPhaseSteps;
+        float interpolatorTapsPerPhase = settingsKeys.contains("interpolatorTapsPerPhase") ? settings.m_interpolatorTapsPerPhase : m_settings.m_interpolatorTapsPerPhase;
+        int samplesPerBit = settingsKeys.contains("samplesPerBit") ? settings.m_samplesPerBit : m_settings.m_samplesPerBit;
+        Real rfBandwidth = settingsKeys.contains("rfBandwidth") ? settings.m_rfBandwidth : m_settings.m_rfBandwidth;
+
+        m_interpolator.create(interpolatorPhaseSteps, m_channelSampleRate, rfBandwidth / 2.2,  interpolatorTapsPerPhase);
         m_interpolatorDistanceRemain = 0;
-        m_interpolatorDistance = (Real) m_channelSampleRate / (Real) (ADS_B_BITS_PER_SECOND * settings.m_samplesPerBit);
+        m_interpolatorDistance = (Real) m_channelSampleRate / (Real) (ADS_B_BITS_PER_SECOND * samplesPerBit);
     }
 
     if ((settingsKeys.contains("samplesPerBit") && (settings.m_samplesPerBit != m_settings.m_samplesPerBit)) || force)
