@@ -267,10 +267,10 @@ void ADSBDemodSink::applySettings(const ADSBDemodSettings& settings, const QStri
         || (settingsKeys.contains("interpolatorTapsPerPhase") && (settings.m_interpolatorTapsPerPhase != m_settings.m_interpolatorTapsPerPhase))
         || force)
     {
-        int interpolatorPhaseSteps = settingsKeys.contains("interpolatorPhaseSteps") ? settings.m_interpolatorPhaseSteps : m_settings.m_interpolatorPhaseSteps;
-        float interpolatorTapsPerPhase = settingsKeys.contains("interpolatorTapsPerPhase") ? settings.m_interpolatorTapsPerPhase : m_settings.m_interpolatorTapsPerPhase;
-        int samplesPerBit = settingsKeys.contains("samplesPerBit") ? settings.m_samplesPerBit : m_settings.m_samplesPerBit;
-        Real rfBandwidth = settingsKeys.contains("rfBandwidth") ? settings.m_rfBandwidth : m_settings.m_rfBandwidth;
+        int interpolatorPhaseSteps = settingsKeys.contains("interpolatorPhaseSteps") || force ? settings.m_interpolatorPhaseSteps : m_settings.m_interpolatorPhaseSteps;
+        float interpolatorTapsPerPhase = settingsKeys.contains("interpolatorTapsPerPhase") || force ? settings.m_interpolatorTapsPerPhase : m_settings.m_interpolatorTapsPerPhase;
+        int samplesPerBit = settingsKeys.contains("samplesPerBit") || force ? settings.m_samplesPerBit : m_settings.m_samplesPerBit;
+        Real rfBandwidth = settingsKeys.contains("rfBandwidth") || force ? settings.m_rfBandwidth : m_settings.m_rfBandwidth;
 
         m_interpolator.create(interpolatorPhaseSteps, m_channelSampleRate, rfBandwidth / 2.2,  interpolatorTapsPerPhase);
         m_interpolatorDistanceRemain = 0;
