@@ -33,7 +33,6 @@
 #include <QQmlProperty>
 #include <QJsonDocument>
 #include <QJsonObject>
-#include <QUrlQuery>
 #ifdef QT_LOCATION_FOUND
 #include <QGeoServiceProvider>
 #endif
@@ -8360,14 +8359,19 @@ void ADSBDemodGUI::requestImportAccessToken()
         return;
     }
 
-    QUrlQuery form;
-    form.addQueryItem(QStringLiteral("grant_type"), QStringLiteral("client_credentials"));
-    form.addQueryItem(QStringLiteral("client_id"), m_settings.m_importClientId);
-    form.addQueryItem(QStringLiteral("client_secret"), m_settings.m_importClientSecret);
+    const auto encodeFormComponent = [](const QString& value) {
+        QByteArray encoded = QUrl::toPercentEncoding(value);
+        encoded.replace("%20", "+");
+        return encoded;
+    };
+    QByteArray form("grant_type=client_credentials&client_id=");
+    form.append(encodeFormComponent(m_settings.m_importClientId));
+    form.append("&client_secret=");
+    form.append(encodeFormComponent(m_settings.m_importClientSecret));
 
     QNetworkRequest request(tokenUrl);
     request.setHeader(QNetworkRequest::ContentTypeHeader, QStringLiteral("application/x-www-form-urlencoded"));
-    QNetworkReply *reply = m_networkManager->post(request, form.query(QUrl::FullyEncoded).toUtf8());
+    QNetworkReply *reply = m_networkManager->post(request, form);
     reply->setProperty("adsbImportReplyType", QStringLiteral("token"));
     reply->setProperty("adsbImportGeneration", m_importRequestGeneration);
     m_importTokenReply = reply;
