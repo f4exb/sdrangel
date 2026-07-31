@@ -458,7 +458,7 @@ void PagerDemodSink::processOneSample(Complex &ci)
                     m_gotSOP = true;
                     m_inverted = true;
                 }
-                else if (popcount(m_bits ^ PAGERDEMOD_POCSAG_SYNCCODE) <= 2)
+                else if (popcount((m_bits ^ PAGERDEMOD_POCSAG_SYNCCODE) & 0xfffffffeU) <= 2)
                 {
                     quint32 correctedCW;
                     if (bchDecode(m_bits, correctedCW)
@@ -468,7 +468,7 @@ void PagerDemodSink::processOneSample(Complex &ci)
                         m_inverted = false;
                     }
                 }
-                else if (popcount(m_bits ^ PAGERDEMOD_POCSAG_SYNCCODE_INV) <= 2)
+                else if (popcount((m_bits ^ PAGERDEMOD_POCSAG_SYNCCODE_INV) & 0xfffffffeU) <= 2)
                 {
                     quint32 correctedCW;
                     if (bchDecode(~m_bits, correctedCW)
@@ -659,7 +659,6 @@ void PagerDemodSink::applySettings(const QStringList& settingsKeys, const PagerD
         m_interpolator.create(16, m_channelSampleRate, settings.m_rfBandwidth / 2.2);
         m_interpolatorDistance = (Real) m_channelSampleRate / (Real) PagerDemodSettings::m_channelSampleRate;
         m_interpolatorDistanceRemain = m_interpolatorDistance;
-        m_lowpass.create(301, PagerDemodSettings::m_channelSampleRate, settings.m_rfBandwidth / 2.0f);
     }
 
     if ((settingsKeys.contains("fmDeviation") && (settings.m_fmDeviation != m_settings.m_fmDeviation)) || force)

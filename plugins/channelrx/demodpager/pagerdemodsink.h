@@ -111,7 +111,6 @@ private:
 
     MovingAverageUtil<Real, double, 16> m_movingAverage;
 
-    Lowpass<Complex> m_lowpass;         // RF input filter
     PhaseDiscriminators m_phaseDiscri;  // FM demodulator
     Lowpass<Real> m_lowpassBaud;        // Low pass filter for FM demod output
     Real m_dcOffset;                    // Calculated DC offset of preamble
