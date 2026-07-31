@@ -4319,8 +4319,7 @@ void ADSBDemodGUI::decodeCommB(const QByteArray data, const QDateTime dateTime, 
                     {
                         if (airspeedType_0_9) {
                             aircraft->setTrueAirspeed(airspeed, m_settings);
-                        }
-                        else {
+                        } else {
                             aircraft->setIndicatedAirspeed(airspeed, dateTime, m_settings);
                         }
                     }
