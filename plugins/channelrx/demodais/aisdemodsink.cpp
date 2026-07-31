@@ -242,7 +242,7 @@ void AISDemodSink::processOneSample(Complex &ci)
                     else if (onesCount == 6)
                     {
                         // Start/end of packet
-                        if (gotSOP && (bitCount == 8) && (bits == 0x7e) && (byteCount > 0))
+                        if (gotSOP && (bitCount == 8) && (bits == 0x7e) && (byteCount >= 3))
                         {
                             // End of packet
                             // Check CRC is valid
