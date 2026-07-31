@@ -30,8 +30,10 @@
 
 PagerDemodSink::PagerDemodSink() :
         m_scopeSink(nullptr),
+        m_channel(nullptr),
         m_channelSampleRate(PagerDemodSettings::m_channelSampleRate),
         m_channelFrequencyOffset(0),
+        m_samplesPerSymbol(PagerDemodSettings::m_channelSampleRate / 1200),
         m_magsqSum(0.0f),
         m_magsqPeak(0.0f),
         m_magsqCount(0),
@@ -46,7 +48,13 @@ PagerDemodSink::PagerDemodSink() :
         m_syncCount(75),
         m_batchNumber(0),
         m_wordCount(0),
-        m_addressValid(0),
+        m_addressValid(false),
+        m_address(0),
+        m_functionBits(0),
+        m_parityErrors(0),
+        m_bchErrors(0),
+        m_alphaBitBuffer(0),
+        m_alphaBitBufferBits(0),
         m_sampleBufferIndex(0)
 {
     m_magsq = 0.0;
@@ -314,9 +322,11 @@ void PagerDemodSink::decodeBatch()
                 m_bchErrors = m_codeWordsBCHError[i] ? 1 : 0;
                 m_addressValid = true;
             }
-            else
+            else if (m_addressValid)
             {
                 // Message - decode as both numeric and ASCII - not all operators use functionBits to indidcate encoding
+                // Only decoded after an address codeword, otherwise we'd be decoding a message we've
+                // tuned in to the middle of, without knowing who it's for
                 int messageBits = (m_codeWords[i] >> 11) & 0xfffff;
                 if (parityError) {
                     m_parityErrors++;
