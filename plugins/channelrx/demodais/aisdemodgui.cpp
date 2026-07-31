@@ -488,8 +488,9 @@ void AISDemodGUI::messageReceived(const QByteArray& message, const QDateTime& da
     m_painter.setPen(color);
     for (int i = 0; i < totalSlots; i++)
     {
-        int y = (slot + i) / m_slotMapWidth;
-        int x = (slot + i) % m_slotMapWidth;
+        int s = (slot + i) % (m_slotMapWidth * m_slotMapHeight); // Slots wrap at the end of the frame
+        int y = s / m_slotMapWidth;
+        int x = s % m_slotMapWidth;
         m_painter.fillRect(x * 5 + 1, y * 5 + 1, 4, 4, color);
     }
     m_slotsUsed += totalSlots;
@@ -1079,6 +1080,7 @@ void AISDemodGUI::on_logOpen_clicked()
                 }
                 m_loadingData = false;
                 ui->messages->setSortingEnabled(true);
+                filter(); // Apply MMSI filter to loaded rows, as filterRow is skipped during loading
                 QDateTime finishTime = QDateTime::currentDateTime();
                 qDebug() << "Read CSV in " << startTime.secsTo(finishTime);
             }
