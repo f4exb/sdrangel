@@ -71,7 +71,10 @@ QHash<QString, float> AISGUI::m_labelOffset = {
     {"tanker_50m.glbe", 12.0f},
     {"tanker_180m.glbe", 35.0f},
     {"tanker_245m_1.glbe", 30.0f},
+    {"tanker_245m_2.glbe", 30.0f},
+    {"tanker_245m_3.glbe", 30.0f},
     {"tanker_380m_1.glbe", 42.0f},
+    {"tanker_380m_2.glbe", 42.0f},
     {"passenger_100m.glbe", 34.0f},
     {"dredger_53m.glbe", 19.0f},
     {"trawler_22m.glbe", 15.0f},
@@ -152,7 +155,7 @@ bool AISGUI::handleMessage(const Message& message)
         // Decode the message
         AISMessage *ais = AISMessage::decode(report.getPacket());
         // Update table
-        if (ais) 
+        if (ais)
         {
             updateVessels(ais, report.getDateTime());
             delete ais;
@@ -326,7 +329,6 @@ void AISGUI::onMenuDialogCalled(const QPoint &p)
         setTitleColor(m_settings.m_rgbColor);
 
         m_settingsKeys.append("title");
-        m_settingsKeys.append("rgbColor");
         m_settingsKeys.append("useReverseAPI");
         m_settingsKeys.append("reverseAPIAddress");
         m_settingsKeys.append("reverseAPIPort");
@@ -836,7 +838,7 @@ void AISGUI::getImageAndModel(const QString &type, const QString &shipType, int 
                 }
                 else
                 {
-                    int rand = m_random.bounded(1, 3);
+                    int rand = m_random.bounded(1, 4); // bounded() excludes the upper bound
                     vessel->m_model = QString("tug_30m_%1.glbe").arg(rand);
                 }
             }
