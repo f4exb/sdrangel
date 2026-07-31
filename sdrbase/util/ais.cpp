@@ -628,7 +628,7 @@ AISExtendedClassBPositionReport::AISExtendedClassBPositionReport(QByteArray ba) 
 
     m_name = AISMessage::getString(ba, 17, 1, 20);
 
-    m_type = ((ba[32] & 1) << 7) | ((ba[33] >> 1) & 0x3f);
+    m_type = ((ba[32] & 1) << 7) | ((ba[33] >> 1) & 0x7f);
 }
 
 QString AISExtendedClassBPositionReport::toString()
