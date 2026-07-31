@@ -689,7 +689,7 @@ QString AISAidsToNavigationReport::toString()
         "Beacon, Preferred channel starboard hand",
         "Beacon, Isolated danger",
         "Beacon, Safe water",
-        "Beacon, Special mark"
+        "Beacon, Special mark",
         "Cardinal mark N",
         "Cardinal mark E",
         "Cardinal mark S",
