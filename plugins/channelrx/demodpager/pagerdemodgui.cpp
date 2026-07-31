@@ -942,6 +942,12 @@ void PagerDemodGUI::checkNotification(int row)
         case PagerDemodSettings::MESSAGE_COL_MESSAGE:
             match = message;
             break;
+        case PagerDemodSettings::MESSAGE_COL_ALPHA:
+            match = ui->messages->item(row, PagerDemodSettings::MESSAGE_COL_ALPHA)->text();
+            break;
+        case PagerDemodSettings::MESSAGE_COL_NUMERIC:
+            match = ui->messages->item(row, PagerDemodSettings::MESSAGE_COL_NUMERIC)->text();
+            break;
         }
         if (!match.isEmpty())
         {
