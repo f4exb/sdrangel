@@ -280,6 +280,7 @@ AISPositionReport::AISPositionReport(QByteArray ba) :
     m_status = ((ba[4] & 0x3) << 2) | ((ba[5] >> 6) & 0x3);
 
     int rateOfTurn = ((ba[5] << 2) & 0xfc) | ((ba[6] >> 6) & 0x3);
+    rateOfTurn = (rateOfTurn << 24) >> 24;
     if (rateOfTurn == 127) {
         m_rateOfTurn = 720.0f;
     } else if (rateOfTurn == -127) {
