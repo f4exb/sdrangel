@@ -179,11 +179,74 @@ QString AISMessage::typeToString(quint8 type)
 
 AISMessage* AISMessage::decode(const QByteArray ba)
 {
-    if (ba.size() < 1) {
+    // All messages contain the common message ID, repeat indicator and MMSI fields.
+    if (ba.size() < 5) {
         return nullptr;
     }
 
-    int id = (ba[0] >> 2) & 0x3f;
+    int id = (static_cast<quint8>(ba[0]) >> 2) & 0x3f;
+    int minimumSize = 5;
+
+    switch (id)
+    {
+    case 1:
+    case 2:
+    case 3:
+        minimumSize = 19;
+        break;
+    case 4:
+    case 11:
+        minimumSize = 17;
+        break;
+    case 5:
+        minimumSize = 53;
+        break;
+    case 6:
+    case 12:
+        minimumSize = 9;
+        break;
+    case 9:
+        minimumSize = 17;
+        break;
+    case 16:
+        minimumSize = 12;
+        break;
+    case 18:
+        minimumSize = 18;
+        break;
+    case 19:
+        minimumSize = 34;
+        break;
+    case 21:
+        minimumSize = 28;
+        break;
+    case 24:
+    {
+        int partNumber = static_cast<quint8>(ba[4]) & 0x3;
+
+        if (partNumber == 0) {
+            minimumSize = 20;
+        } else if (partNumber == 1) {
+            minimumSize = 17;
+        } else {
+            return nullptr;
+        }
+
+        break;
+    }
+    case 25:
+        minimumSize = ((static_cast<quint8>(ba[4]) >> 1) & 1) ? 9 : 5;
+        break;
+    case 27:
+        minimumSize = 12;
+        break;
+    default:
+        break;
+    }
+
+    if (ba.size() < minimumSize) {
+        return nullptr;
+    }
 
     if ((id == 1) || (id == 2) || (id == 3)) {
         return new AISPositionReport(ba);
@@ -279,16 +342,25 @@ AISPositionReport::AISPositionReport(QByteArray ba) :
 {
     m_status = ((ba[4] & 0x3) << 2) | ((ba[5] >> 6) & 0x3);
 
-    int rateOfTurn = ((ba[5] << 2) & 0xfc) | ((ba[6] >> 6) & 0x3);
-    rateOfTurn = (rateOfTurn << 24) >> 24;
+    qint8 rateOfTurn = static_cast<qint8>(
+        ((static_cast<quint8>(ba[5]) << 2) & 0xfc)
+        | ((static_cast<quint8>(ba[6]) >> 6) & 0x3)
+    );
     if (rateOfTurn == 127) {
         m_rateOfTurn = 720.0f;
     } else if (rateOfTurn == -127) {
         m_rateOfTurn = -720.0f;
+    } else if (rateOfTurn == -128) {
+        m_rateOfTurn = 0.0f;
     } else {
-        m_rateOfTurn = (rateOfTurn / 4.733f) * (rateOfTurn / 4.733f);
+        float scaledRateOfTurn = rateOfTurn / 4.733f;
+        m_rateOfTurn = scaledRateOfTurn * scaledRateOfTurn;
+
+        if (rateOfTurn < 0) {
+            m_rateOfTurn = -m_rateOfTurn;
+        }
     }
-    m_rateOfTurnAvailable = rateOfTurn != 0x80;
+    m_rateOfTurnAvailable = rateOfTurn != -128;
 
     int sog = ((ba[6] & 0x3f) << 4) | ((ba[7] >> 4) & 0xf);
     m_speedOverGroundAvailable = sog != 1023;
@@ -817,4 +889,3 @@ AISUnknownMessageID::AISUnknownMessageID(QByteArray ba) :
     AISMessage(ba)
 {
 }
-
