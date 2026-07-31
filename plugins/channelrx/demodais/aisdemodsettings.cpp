@@ -139,7 +139,7 @@ bool AISDemodSettings::deserialize(const QByteArray& data)
         d.readFloat(4, &m_correlationThreshold, 30);
         d.readString(5, &m_filterMMSI, "");
         d.readBool(6, &m_udpEnabled);
-        d.readString(7, &m_udpAddress);
+        d.readString(7, &m_udpAddress, "127.0.0.1");
         d.readU32(8, &utmp);
 
         if ((utmp > 1023) && (utmp < 65535)) {
@@ -163,7 +163,7 @@ bool AISDemodSettings::deserialize(const QByteArray& data)
         d.readString(17, &m_reverseAPIAddress, "127.0.0.1");
         d.readU32(18, &utmp, 0);
 
-        if ((utmp > 1023) && (utmp < 65535)) {
+        if ((utmp > 1023) && (utmp <= 65535)) {
             m_reverseAPIPort = utmp;
         } else {
             m_reverseAPIPort = 8888;
