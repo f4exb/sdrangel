@@ -228,21 +228,39 @@ void PagerDemodGUI::messageReceived(const QDateTime dateTime, int address, int f
     QString addressString = QString("%1").arg(address, 7, 10, QChar('0'));
 
     // Should we ignore the message if it is a duplicate?
-    if (m_settings.m_filterDuplicates  && (ui->messages->rowCount() > 0))
+    if (m_settings.m_filterDuplicates)
     {
-        int startRow = m_settings.m_duplicateMatchLastOnly ? ui->messages->rowCount() - 1 : 0;
-        for (int row = startRow; row < ui->messages->rowCount(); row++)
+        if (m_settings.m_duplicateMatchLastOnly)
         {
-            QString prevAddress = ui->messages->item(row, PagerDemodSettings::MESSAGE_COL_ADDRESS)->text();
-            QString prevMessage = ui->messages->item(row, PagerDemodSettings::MESSAGE_COL_MESSAGE)->text();
-
-            if ((message == prevMessage) && (m_settings.m_duplicateMatchMessageOnly || (addressString == prevAddress)))
+            // Compare against the most recently displayed message. We can't use the last row in
+            // the table, as the user may have sorted it, so that isn't the most recent message
+            if (m_lastMessageValid
+                && (message == m_lastMessage)
+                && (m_settings.m_duplicateMatchMessageOnly || (addressString == m_lastAddress)))
             {
                 // Ignore this message
                 return;
             }
         }
+        else
+        {
+            for (int row = 0; row < ui->messages->rowCount(); row++)
+            {
+                QString prevAddress = ui->messages->item(row, PagerDemodSettings::MESSAGE_COL_ADDRESS)->text();
+                QString prevMessage = ui->messages->item(row, PagerDemodSettings::MESSAGE_COL_MESSAGE)->text();
+
+                if ((message == prevMessage) && (m_settings.m_duplicateMatchMessageOnly || (addressString == prevAddress)))
+                {
+                    // Ignore this message
+                    return;
+                }
+            }
+        }
     }
+
+    m_lastAddress = addressString;
+    m_lastMessage = message;
+    m_lastMessageValid = true;
 
     // Is scroll bar at bottom
     QScrollBar *sb = ui->messages->verticalScrollBar();
@@ -280,11 +298,14 @@ void PagerDemodGUI::messageReceived(const QDateTime dateTime, int address, int f
     numericItem->setText(numericMessage);
     evenPEItem->setText(QString("%1").arg(evenParityErrors));
     bchPEItem->setText(QString("%1").arg(bchParityErrors));
-    filterRow(row);
-    checkNotification(row);
-    ui->messages->setSortingEnabled(true);
-    if (scrollToBottom) {
-        ui->messages->scrollToBottom();
+    if (!m_loadingData)
+    {
+        filterRow(row);
+        checkNotification(row);
+        ui->messages->setSortingEnabled(true);
+        if (scrollToBottom) {
+            ui->messages->scrollToBottom();
+        }
     }
 }
 
@@ -396,6 +417,7 @@ void PagerDemodGUI::on_filterAddress_editingFinished()
 void PagerDemodGUI::on_clearTable_clicked()
 {
     ui->messages->setRowCount(0);
+    m_lastMessageValid = false; // So duplicate filtering doesn't match a cleared message
 }
 
 void PagerDemodGUI::on_udpEnabled_clicked(bool checked)
@@ -516,7 +538,9 @@ PagerDemodGUI::PagerDemodGUI(PluginAPI* pluginAPI, DeviceUISet *deviceUISet, Bas
     m_deviceCenterFrequency(0),
     m_basebandSampleRate(1),
     m_doApplySettings(true),
-    m_tickCount(0)
+    m_tickCount(0),
+    m_loadingData(false),
+    m_lastMessageValid(false)
 #ifdef QT_TEXTTOSPEECH_FOUND
     , m_speech(nullptr)
 #endif
@@ -836,6 +860,12 @@ void PagerDemodGUI::on_logOpen_clicked()
                     int count = 0;
                     bool cancelled = false;
 
+                    // Don't run notifications for logged messages - they've already been
+                    // actioned when originally received, and re-running them could execute
+                    // a large number of commands. Also avoids re-sorting for every row
+                    m_loadingData = true;
+                    ui->messages->setSortingEnabled(false);
+
                     QStringList cols;
                     while (!cancelled && CSV::readRow(in, &cols))
                     {
@@ -863,6 +893,11 @@ void PagerDemodGUI::on_logOpen_clicked()
                             count++;
                         }
                     }
+
+                    m_loadingData = false;
+                    filter(); // Apply address filter to loaded rows, as filterRow is skipped while loading
+                    ui->messages->setSortingEnabled(true);
+
                     dialog.close();
                 }
                 else

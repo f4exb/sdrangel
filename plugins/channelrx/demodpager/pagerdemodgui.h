@@ -88,6 +88,13 @@ private:
 
     QMenu *messagesMenu;                        // Column select context menu
 
+    bool m_loadingData;                         // Set while reading messages from a .csv log
+    // Most recently displayed message, for duplicate filtering. Can't use the last row in the
+    // table, as the user may have sorted it, so that isn't the most recent message
+    bool m_lastMessageValid;
+    QString m_lastAddress;
+    QString m_lastMessage;
+
 #ifdef QT_TEXTTOSPEECH_FOUND
     QTextToSpeech *m_speech;
 #endif
