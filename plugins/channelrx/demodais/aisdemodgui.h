@@ -93,7 +93,6 @@ private:
     bool m_loadingData;
 
     QMenu *messagesMenu;                        // Column select context menu
-    QMenu *copyMenu;
 
     QPixmap m_image;
     QPainter m_painter;
