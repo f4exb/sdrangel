@@ -304,7 +304,9 @@ void PagerDemodSink::decodeBatch()
             // Check parity bit
             bool parityError = !evenParity(m_codeWords[i], 1, 31, m_codeWords[i] & 0x1);
 
-            if (m_codeWords[i] == PAGERDEMOD_POCSAG_IDLECODE)
+            // The overall parity bit is preserved by bchDecode() so it can be
+            // reported separately. Ignore it when identifying the idle word.
+            if ((m_codeWords[i] & 0xfffffffeU) == (PAGERDEMOD_POCSAG_IDLECODE & 0xfffffffeU))
             {
                 // Idle
             }
@@ -496,7 +498,8 @@ void PagerDemodSink::processOneSample(Complex &ci)
                 m_wordCount++;
 
                 // Check for sync code at start of batch
-                if ((m_wordCount == 1) && (correctedCW != PAGERDEMOD_POCSAG_SYNCCODE))
+                if ((m_wordCount == 1)
+                    && ((correctedCW & 0xfffffffeU) != (PAGERDEMOD_POCSAG_SYNCCODE & 0xfffffffeU)))
                 {
                     m_gotSOP = false;
                     //m_thresholdMet = false;
