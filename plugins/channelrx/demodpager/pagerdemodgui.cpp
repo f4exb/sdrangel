@@ -281,11 +281,11 @@ void PagerDemodGUI::messageReceived(const QDateTime dateTime, int address, int f
     evenPEItem->setText(QString("%1").arg(evenParityErrors));
     bchPEItem->setText(QString("%1").arg(bchParityErrors));
     filterRow(row);
+    checkNotification(row);
     ui->messages->setSortingEnabled(true);
     if (scrollToBottom) {
         ui->messages->scrollToBottom();
     }
-    checkNotification(row);
 }
 
 bool PagerDemodGUI::handleMessage(const Message& message)
