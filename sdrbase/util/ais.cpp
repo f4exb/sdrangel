@@ -17,6 +17,8 @@
 
 #include <QDebug>
 
+#include <cmath>
+
 #include "ais.h"
 
 AISMessage::AISMessage(const QByteArray ba)
@@ -90,7 +92,7 @@ QString AISMessage::toNMEA(const QByteArray bytes)
         // Construct complete sentence with leading ! and trailing checksum
         nmeaSentence.append("!");
         nmeaSentence.append(nmeaProtected);
-        nmeaSentence.append(QString("*%1").arg(checksum, 2, 16, QChar('0')));
+        nmeaSentence.append(QString("*%1").arg(checksum, 2, 16, QChar('0')).toUpper());
 
         nmeaSentences.append(nmeaSentence.join(""));
         sentence++;
@@ -373,7 +375,7 @@ AISPositionReport::AISPositionReport(QByteArray ba) :
     m_longitudeAvailable = longitude != 0x6791ac0;
     m_longitude = longitude / 60.0f / 10000.0f;
 
-    int32_t latitude = ((ba[11] & 0x7f) << 20) | ((ba[12] & 0xff) << 12) | ((ba[13] & 0xff) << 4) | ((ba[14] >> 4) & 0x4);
+    int32_t latitude = ((ba[11] & 0x7f) << 20) | ((ba[12] & 0xff) << 12) | ((ba[13] & 0xff) << 4) | ((ba[14] >> 4) & 0xf);
     latitude = (latitude << 5) >> 5;
     m_latitudeAvailable = latitude != 0x3412140;
     m_latitude = latitude / 60.0f / 10000.0f;
@@ -426,7 +428,7 @@ QString AISPositionReport::getType()
 
 QString AISPositionReport::toString()
 {
-    QString speed = m_speedOverGround == 1022 ? ">102.2" : QString::number(m_speedOverGround);
+    QString speed = ((int)std::round(m_speedOverGround * 10.0f) == 1022) ? ">102.2" : QString::number(m_speedOverGround);
     return QString("Lat: %1%6 Lon: %2%6 Speed: %3 knts Course: %4%6 Status: %5")
                 .arg(m_latitude)
                 .arg(m_longitude)
@@ -542,7 +544,7 @@ AISSARAircraftPositionReport::AISSARAircraftPositionReport(QByteArray ba) :
     m_longitudeAvailable = longitude != 0x6791ac0;
     m_longitude = longitude / 60.0f / 10000.0f;
 
-    int32_t latitude = ((ba[11] & 0x7f) << 20) | ((ba[12] & 0xff) << 12) | ((ba[13] & 0xff) << 4) | ((ba[14] >> 4) & 0x4);
+    int32_t latitude = ((ba[11] & 0x7f) << 20) | ((ba[12] & 0xff) << 12) | ((ba[13] & 0xff) << 4) | ((ba[14] >> 4) & 0xf);
     latitude = (latitude << 5) >> 5;
     m_latitudeAvailable = latitude != 0x3412140;
     m_latitude = latitude / 60.0f / 10000.0f;
@@ -609,7 +611,10 @@ AISInterrogation::AISInterrogation(QByteArray ba) :
 }
 
 AISAssignedModeCommand::AISAssignedModeCommand(QByteArray ba) :
-    AISMessage(ba)
+    AISMessage(ba),
+    m_destinationIdB(0),
+    m_offsetB(0),
+    m_incrementB(0)
 {
     m_destinationIdA = ((ba[5] & 0xff) << 22) | ((ba[6] & 0xff) << 14) | ((ba[7] & 0xff) << 6) | ((ba[8] >> 2) & 0x3f);
     m_offsetA = ((ba[8] & 0x3) << 10) | ((ba[9] & 0xff) << 2) | ((ba[10] >> 6) & 0x3);
@@ -795,7 +800,8 @@ AISGroupAssignment::AISGroupAssignment(QByteArray ba) :
 }
 
 AISStaticDataReport::AISStaticDataReport(QByteArray ba) :
-    AISMessage(ba)
+    AISMessage(ba),
+    m_type(0)
 {
     m_partNumber = ba[4] & 0x3;
     if (m_partNumber == 0)
@@ -871,7 +877,7 @@ AISLongRangePositionReport::AISLongRangePositionReport(QByteArray ba) :
     m_speedOverGroundAvailable = m_speedOverGround != 63;
 
     m_course = ((ba[10] & 0x7) << 6) | ((ba[11] >> 2) & 0x3f);
-    m_courseAvailable = m_course != 512;
+    m_courseAvailable = m_course != 511;
 }
 
 QString AISLongRangePositionReport::toString()
