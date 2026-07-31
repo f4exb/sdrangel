@@ -457,7 +457,7 @@ void PagerDemodSettings::deserializeIntList(const QByteArray& data, QList<qint32
 PagerDemodSettings::NotificationSettings::NotificationSettings() :
     m_matchColumn(PagerDemodSettings::MESSAGE_COL_ADDRESS),
     m_highlight(false),
-    m_highlightColor(Qt::red),
+    m_highlightColor(QColor(Qt::red).rgba()),
     m_plotOnMap(false)
 {
 }
