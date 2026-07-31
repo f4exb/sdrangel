@@ -103,7 +103,6 @@ public:
 private:
     AISSettings m_settings;
     AvailableChannelOrFeatureHandler m_availableChannelHandler;
-    AvailableChannelOrFeatureList m_availableChannels;
 
     QNetworkAccessManager *m_networkManager;
     QNetworkRequest m_networkRequest;
