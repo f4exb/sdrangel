@@ -45,7 +45,8 @@ const char * const AISDemod::m_channelId = "AISDemod";
 AISDemod::AISDemod(DeviceAPI *deviceAPI) :
         ChannelAPI(m_channelIdURI, ChannelAPI::StreamSingleSink),
         m_deviceAPI(deviceAPI),
-        m_basebandSampleRate(0)
+        m_basebandSampleRate(0),
+        m_centerFrequency(0)
 {
     setObjectName(m_channelId);
 
@@ -264,45 +265,6 @@ void AISDemod::applySettings(const AISDemodSettings& settings, const QStringList
 {
     qDebug() << "AISDemod::applySettings:"  << settings.getDebugString(settingsKeys, force);
 
-    QList<QString> reverseAPIKeys;
-
-    if ((settings.m_baud != m_settings.m_baud) || force) {
-        reverseAPIKeys.append("baud");
-    }
-    if ((settings.m_inputFrequencyOffset != m_settings.m_inputFrequencyOffset) || force) {
-        reverseAPIKeys.append("inputFrequencyOffset");
-    }
-    if ((settings.m_rfBandwidth != m_settings.m_rfBandwidth) || force) {
-        reverseAPIKeys.append("rfBandwidth");
-    }
-    if ((settings.m_fmDeviation != m_settings.m_fmDeviation) || force) {
-        reverseAPIKeys.append("fmDeviation");
-    }
-    if ((settings.m_correlationThreshold != m_settings.m_correlationThreshold) || force) {
-        reverseAPIKeys.append("correlationThreshold");
-    }
-    if ((settings.m_udpEnabled != m_settings.m_udpEnabled) || force) {
-        reverseAPIKeys.append("udpEnabled");
-    }
-    if ((settings.m_udpAddress != m_settings.m_udpAddress) || force) {
-        reverseAPIKeys.append("udpAddress");
-    }
-    if ((settings.m_udpPort != m_settings.m_udpPort) || force) {
-        reverseAPIKeys.append("udpPort");
-    }
-    if ((settings.m_udpFormat != m_settings.m_udpFormat) || force) {
-        reverseAPIKeys.append("udpFormat");
-    }
-    if ((settings.m_logFilename != m_settings.m_logFilename) || force) {
-        reverseAPIKeys.append("logFilename");
-    }
-    if ((settings.m_logEnabled != m_settings.m_logEnabled) || force) {
-        reverseAPIKeys.append("logEnabled");
-    }
-    if ((settings.m_useFileTime != m_settings.m_useFileTime) || force) {
-        reverseAPIKeys.append("useFileTime");
-    }
-
     if (settingsKeys.contains("streamIndex"))
     {
         if (m_deviceAPI->getSampleMIMO()) // change of stream is possible for MIMO devices only
@@ -314,8 +276,6 @@ void AISDemod::applySettings(const AISDemodSettings& settings, const QStringList
             m_settings.m_streamIndex = settings.m_streamIndex; // make sure ChannelAPI::getStreamIndex() is consistent
             emit streamIndexChanged(settings.m_streamIndex);
         }
-
-        reverseAPIKeys.append("streamIndex");
     }
 
     AISDemodBaseband::MsgConfigureAISDemodBaseband *msg = AISDemodBaseband::MsgConfigureAISDemodBaseband::create(settings, settingsKeys, force);
