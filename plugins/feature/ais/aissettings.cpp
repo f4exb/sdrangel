@@ -102,8 +102,6 @@ bool AISSettings::deserialize(const QByteArray& data)
     {
         QByteArray bytetmp;
         uint32_t utmp;
-        QString strtmp;
-        QByteArray blob;
 
         d.readString(20, &m_title, "AIS");
         d.readU32(21, &m_rgbColor, QColor(102, 0, 0).rgb());
@@ -111,7 +109,7 @@ bool AISSettings::deserialize(const QByteArray& data)
         d.readString(23, &m_reverseAPIAddress, "127.0.0.1");
         d.readU32(24, &utmp, 0);
 
-        if ((utmp > 1023) && (utmp < 65535)) {
+        if ((utmp > 1023) && (utmp <= 65535)) {
             m_reverseAPIPort = utmp;
         } else {
             m_reverseAPIPort = 8888;
