@@ -152,9 +152,13 @@ bool AISGUI::handleMessage(const Message& message)
         // Decode the message
         AISMessage *ais = AISMessage::decode(report.getPacket());
         // Update table
-        if (ais) {
+        if (ais) 
+        {
             updateVessels(ais, report.getDateTime());
+            delete ais;
         }
+
+        return true;
     }
 
     return false;
