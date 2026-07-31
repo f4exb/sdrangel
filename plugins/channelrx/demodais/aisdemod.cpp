@@ -671,7 +671,7 @@ void AISDemod::webapiFormatChannelSettings(
         swgAISDemodSettings->setUdpPort(settings.m_udpPort);
     }
     if (channelSettingsKeys.contains("udpFormat") || force) {
-        swgAISDemodSettings->setUdpPort((int)settings.m_udpFormat);
+        swgAISDemodSettings->setUdpFormat((int)settings.m_udpFormat);
     }
     if (channelSettingsKeys.contains("logFilename") || force) {
         swgAISDemodSettings->setLogFilename(new QString(settings.m_logFilename));
