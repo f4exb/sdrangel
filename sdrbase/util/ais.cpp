@@ -40,8 +40,11 @@ QString AISMessage::toNMEA(const QByteArray bytes)
 {
     QStringList nmeaSentences;
 
-    // Max payload is ~61 chars  -> 366 bits
-    int sentences = bytes.size() / 45 + 1;
+    // Number of 6-bit characters needed for the message
+    int totalChars = (bytes.size() * 8 + 5) / 6;
+    // A single sentence "!AIVDM,1,1,,," header allows 62 payload chars in 80 chars total,
+    // a multi-sentence "!AIVDM,n,m,i,," header allows 61
+    int sentences = (totalChars <= 62) ? 1 : (totalChars + 60) / 61;
     int sentence = 1;
 
     int bits = 8;
