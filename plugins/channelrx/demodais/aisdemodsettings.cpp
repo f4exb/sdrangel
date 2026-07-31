@@ -34,7 +34,7 @@ AISDemodSettings::AISDemodSettings() :
 
 void AISDemodSettings::resetToDefaults()
 {
-    m_baud = 9600; // Fixed
+    m_baud = AISDEMOD_BAUD_RATE; // Fixed
     m_inputFrequencyOffset = 0;
     m_rfBandwidth = 16000.0f;
     m_fmDeviation = 4800.0f;
@@ -182,7 +182,7 @@ bool AISDemodSettings::deserialize(const QByteArray& data)
 
         d.readString(22, &m_logFilename, "ais_log.csv");
         d.readBool(23, &m_logEnabled, false);
-        d.readS32(24, &m_baud, 9600);
+        d.readS32(24, &m_baud, AISDEMOD_BAUD_RATE);
 
         if (m_rollupState)
         {

@@ -70,6 +70,7 @@ struct AISDemodSettings
     int m_messageColumnIndexes[AISDEMOD_MESSAGE_COLUMNS];//!< How the columns are ordered in the table
     int m_messageColumnSizes[AISDEMOD_MESSAGE_COLUMNS];  //!< Size of the columns in the table
 
+    static const int AISDEMOD_BAUD_RATE = 9600;
     static const int AISDEMOD_CHANNEL_SAMPLE_RATE = 57600; //!< 6x 9600 baud rate (use even multiple so Gaussian filter has odd number of taps)
     static const int m_scopeStreams = 9;
 
