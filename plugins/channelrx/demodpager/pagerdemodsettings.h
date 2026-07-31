@@ -26,6 +26,8 @@
 #include <QRegularExpression>
 #include <QSharedPointer>
 
+class QDataStream;
+
 #include "dsp/dsptypes.h"
 
 class Serializable;
@@ -127,5 +129,8 @@ struct PagerDemodSettings
     QByteArray serializeIntList(const QList<qint32>& ints) const;
     void deserializeIntList(const QByteArray& data, QList<qint32>& ints);
 };
+
+QDataStream& operator<<(QDataStream& out, const QSharedPointer<PagerDemodSettings::NotificationSettings>& settings);
+QDataStream& operator>>(QDataStream& in, QSharedPointer<PagerDemodSettings::NotificationSettings>& settings);
 
 #endif /* INCLUDE_PAGERDEMODSETTINGS_H */
