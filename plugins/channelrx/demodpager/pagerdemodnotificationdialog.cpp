@@ -19,7 +19,6 @@
 #include <QComboBox>
 #include <QPushButton>
 #include <QCheckBox>
-#include <QHBoxLayout>
 
 #include "gui/tablecolorchooser.h"
 
@@ -122,12 +121,6 @@ void PagerDemodNotificationDialog::addRow(PagerDemodSettings::NotificationSettin
     m_colorGUIs.append(highlight);
     QCheckBox *plotOnMap = new QCheckBox();
     plotOnMap->setChecked(false);
-    QWidget *matchWidget = new QWidget();
-    QHBoxLayout *pLayout = new QHBoxLayout(matchWidget);
-    pLayout->addWidget(match);
-    pLayout->setAlignment(Qt::AlignCenter);
-    pLayout->setContentsMargins(0, 0, 0, 0);
-    matchWidget->setLayout(pLayout);
 
     match->addItem("Address");
     match->addItem("Message");
