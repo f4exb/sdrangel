@@ -99,7 +99,9 @@ QByteArray PagerDemodSettings::serialize() const
     s.writeU32(18, m_reverseAPIPort);
     s.writeU32(19, m_reverseAPIDeviceIndex);
     s.writeU32(20, m_reverseAPIChannelIndex);
-    s.writeBlob(21, m_scopeGUI->serialize());
+    if (m_scopeGUI) {
+        s.writeBlob(21, m_scopeGUI->serialize());
+    }
     s.writeBool(22, m_reverse);
     s.writeBlob(23, serializeIntList(m_sevenbit));
     s.writeBlob(24, serializeIntList(m_unicode));
