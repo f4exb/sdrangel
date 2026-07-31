@@ -63,6 +63,9 @@ void PagerDemodSettings::resetToDefaults()
     m_filterDuplicates = false;
     m_duplicateMatchMessageOnly = false;
     m_duplicateMatchLastOnly = false;
+    m_sevenbit.clear();
+    m_unicode.clear();
+    m_notificationSettings.clear();
 
     for (int i = 0; i < PAGERDEMOD_MESSAGE_COLUMNS; i++)
     {
@@ -155,10 +158,10 @@ bool PagerDemodSettings::deserialize(const QByteArray& data)
         d.readString(5, &m_filterAddress, "");
         d.readS32(6, (int*)&m_decode, (int)Standard);
         d.readBool(7, &m_udpEnabled);
-        d.readString(8, &m_udpAddress);
+        d.readString(8, &m_udpAddress, "127.0.0.1");
         d.readU32(9, &utmp);
 
-        if ((utmp > 1023) && (utmp < 65535)) {
+        if ((utmp > 1023) && (utmp <= 65535)) {
             m_udpPort = utmp;
         } else {
             m_udpPort = 9999;
@@ -180,7 +183,7 @@ bool PagerDemodSettings::deserialize(const QByteArray& data)
         d.readString(17, &m_reverseAPIAddress, "127.0.0.1");
         d.readU32(18, &utmp, 0);
 
-        if ((utmp > 1023) && (utmp < 65535)) {
+        if ((utmp > 1023) && (utmp <= 65535)) {
             m_reverseAPIPort = utmp;
         } else {
             m_reverseAPIPort = 8888;
@@ -513,15 +516,15 @@ bool PagerDemodSettings::NotificationSettings::deserialize(const QByteArray& dat
     }
 }
 
-QDataStream& operator<<(QDataStream& out, const PagerDemodSettings::NotificationSettings *settings)
+QDataStream& operator<<(QDataStream& out, const QSharedPointer<PagerDemodSettings::NotificationSettings>& settings)
 {
     out << settings->serialize();
     return out;
 }
 
-QDataStream& operator>>(QDataStream& in, PagerDemodSettings::NotificationSettings*& settings)
+QDataStream& operator>>(QDataStream& in, QSharedPointer<PagerDemodSettings::NotificationSettings>& settings)
 {
-    settings = new PagerDemodSettings::NotificationSettings();
+    settings = QSharedPointer<PagerDemodSettings::NotificationSettings>::create();
     QByteArray data;
     in >> data;
     settings->deserialize(data);

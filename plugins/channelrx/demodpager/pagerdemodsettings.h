@@ -24,6 +24,7 @@
 #include <QByteArray>
 #include <QString>
 #include <QRegularExpression>
+#include <QSharedPointer>
 
 #include "dsp/dsptypes.h"
 
@@ -103,7 +104,7 @@ struct PagerDemodSettings
     QByteArray m_geometryBytes;
     bool m_hidden;
 
-    QList<NotificationSettings *> m_notificationSettings;
+    QList<QSharedPointer<NotificationSettings>> m_notificationSettings;
 
     bool m_filterDuplicates;
     bool m_duplicateMatchMessageOnly;
