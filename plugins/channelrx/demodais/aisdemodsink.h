@@ -37,7 +37,7 @@
 #include <iostream>
 #include <fstream>
 
-#define AISDEMOD_MAX_BYTES  (3+1+126+2+1+1)
+#define AISDEMOD_MAX_BYTES  160
 
 class ChannelAPI;
 class AISDemod;
