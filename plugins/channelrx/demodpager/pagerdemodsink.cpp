@@ -247,7 +247,9 @@ bool PagerDemodSink::bchDecode(const quint32 cw, quint32& correctedCW)
 		return false;
 	}
 
-	correctedCW = result;
+	// The BCH decoder operates on bits 31 through 1. Preserve the separate
+	// overall parity bit in bit 0 so it can be checked after correction.
+	correctedCW = result | (cw & 0x1);
 	return true;
 }
 
@@ -433,7 +435,7 @@ void PagerDemodSink::processOneSample(Complex &ci)
 
             if ((m_bitCount == 32) && !m_gotSOP)
             {
-                // Look for synccode that starts a batch - allow three errors that can be corrected
+                // Look for synccode that starts a batch - allow two errors that can be corrected
                 if (m_bits == PAGERDEMOD_POCSAG_SYNCCODE)
                 {
                     m_gotSOP = true;
@@ -444,19 +446,21 @@ void PagerDemodSink::processOneSample(Complex &ci)
                     m_gotSOP = true;
                     m_inverted = true;
                 }
-                else if (popcount(m_bits ^ PAGERDEMOD_POCSAG_SYNCCODE) >= 29)
+                else if (popcount(m_bits ^ PAGERDEMOD_POCSAG_SYNCCODE) <= 2)
                 {
                     quint32 correctedCW;
-                    if (bchDecode(m_bits, correctedCW) && (correctedCW == PAGERDEMOD_POCSAG_SYNCCODE))
+                    if (bchDecode(m_bits, correctedCW)
+                        && ((correctedCW & 0xfffffffeU) == (PAGERDEMOD_POCSAG_SYNCCODE & 0xfffffffeU)))
                     {
                         m_gotSOP = true;
                         m_inverted = false;
                     }
                 }
-                else if (popcount(m_bits ^ PAGERDEMOD_POCSAG_SYNCCODE_INV) >= 29)
+                else if (popcount(m_bits ^ PAGERDEMOD_POCSAG_SYNCCODE_INV) <= 2)
                 {
                     quint32 correctedCW;
-                    if (bchDecode(~m_bits, correctedCW) && (correctedCW == PAGERDEMOD_POCSAG_SYNCCODE))
+                    if (bchDecode(~m_bits, correctedCW)
+                        && ((correctedCW & 0xfffffffeU) == (PAGERDEMOD_POCSAG_SYNCCODE & 0xfffffffeU)))
                     {
                         m_gotSOP = true;
                         m_inverted = true;
