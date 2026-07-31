@@ -92,7 +92,9 @@ QByteArray AISDemodSettings::serialize() const
     s.writeU32(18, m_reverseAPIPort);
     s.writeU32(19, m_reverseAPIDeviceIndex);
     s.writeU32(20, m_reverseAPIChannelIndex);
-    s.writeBlob(21, m_scopeGUI->serialize());
+    if (m_scopeGUI) {
+        s.writeBlob(21, m_scopeGUI->serialize());
+    }
     s.writeString(22, m_logFilename);
     s.writeBool(23, m_logEnabled);
     s.writeS32(24, m_baud);
