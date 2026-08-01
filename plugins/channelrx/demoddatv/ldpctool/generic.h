@@ -23,6 +23,8 @@ Copyright 2018 Ahmet Inan <xdsopl@gmail.com>
 #ifndef GENERIC_HH
 #define GENERIC_HH
 
+#include <vector>
+
 #include "exclusive_reduce.h"
 
 namespace ldpctool {
@@ -66,13 +68,15 @@ struct MinSumAlgorithm
 	}
 	static void finalp(TYPE *links, int cnt)
 	{
-		TYPE mags[cnt], mins[cnt];
+		std::vector<TYPE> mags(cnt);
+		std::vector<TYPE> mins(cnt);
+		std::vector<TYPE> signs(cnt);
+
 		for (int i = 0; i < cnt; ++i)
 			mags[i] = std::abs(links[i]);
-		CODE::exclusive_reduce(mags, mins, cnt, min);
 
-		TYPE signs[cnt];
-		CODE::exclusive_reduce(links, signs, cnt, sign);
+		CODE::exclusive_reduce(mags.data(), mins.data(), cnt, min);
+		CODE::exclusive_reduce(links, signs.data(), cnt, sign);
 
 		for (int i = 0; i < cnt; ++i)
 			links[i] = sign(mins[i], signs[i]);
