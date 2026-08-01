@@ -447,8 +447,8 @@ struct MinSumCAlgorithm<float, UPDATE, FACTOR>
 	}
 	static void finalp(float *links, int cnt)
 	{
-		float tmp[cnt];
-		CODE::exclusive_reduce(links, tmp, cnt, min);
+		std::vector<float> tmp(cnt);
+		CODE::exclusive_reduce(links, tmp.data(), cnt, min);
 		for (int i = 0; i < cnt; ++i)
 			links[i] = tmp[i];
 	}
