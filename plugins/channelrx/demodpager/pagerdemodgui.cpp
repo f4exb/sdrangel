@@ -64,6 +64,7 @@ void PagerDemodGUI::resizeTable()
     ui->messages->setItem(row, PagerDemodSettings::MESSAGE_COL_NUMERIC, new QTableWidgetItem("123456789123456789123456789123456789123456789123456789"));
     ui->messages->setItem(row, PagerDemodSettings::MESSAGE_COL_EVEN_PE, new QTableWidgetItem("0"));
     ui->messages->setItem(row, PagerDemodSettings::MESSAGE_COL_BCH_PE, new QTableWidgetItem("0"));
+    ui->messages->setItem(row, PagerDemodSettings::MESSAGE_COL_BAUD, new QTableWidgetItem("2400-"));
     ui->messages->resizeColumnsToContents();
     ui->messages->removeRow(row);
 }
@@ -220,7 +221,7 @@ QString PagerDemodGUI::selectMessage(int functionBits, const QString &numericMes
 }
 
 // Add row to table
-void PagerDemodGUI::messageReceived(const QDateTime dateTime, int address, int functionBits,
+void PagerDemodGUI::messageReceived(const QDateTime dateTime, int address, int functionBits, int baud,
         const QString &numericMessage, const QString &alphaMessage,
         int evenParityErrors, int bchParityErrors)
 {
@@ -280,6 +281,7 @@ void PagerDemodGUI::messageReceived(const QDateTime dateTime, int address, int f
     QTableWidgetItem *numericItem = new QTableWidgetItem();
     QTableWidgetItem *evenPEItem = new QTableWidgetItem();
     QTableWidgetItem *bchPEItem = new QTableWidgetItem();
+    QTableWidgetItem *baudItem = new QTableWidgetItem();
     ui->messages->setItem(row, PagerDemodSettings::MESSAGE_COL_DATE, dateItem);
     ui->messages->setItem(row, PagerDemodSettings::MESSAGE_COL_TIME, timeItem);
     ui->messages->setItem(row, PagerDemodSettings::MESSAGE_COL_ADDRESS, addressItem);
@@ -289,6 +291,7 @@ void PagerDemodGUI::messageReceived(const QDateTime dateTime, int address, int f
     ui->messages->setItem(row, PagerDemodSettings::MESSAGE_COL_NUMERIC, numericItem);
     ui->messages->setItem(row, PagerDemodSettings::MESSAGE_COL_EVEN_PE, evenPEItem);
     ui->messages->setItem(row, PagerDemodSettings::MESSAGE_COL_BCH_PE, bchPEItem);
+    ui->messages->setItem(row, PagerDemodSettings::MESSAGE_COL_BAUD, baudItem);
     dateItem->setText(dateTime.date().toString());
     timeItem->setText(dateTime.time().toString());
     addressItem->setText(addressString);
@@ -298,6 +301,7 @@ void PagerDemodGUI::messageReceived(const QDateTime dateTime, int address, int f
     numericItem->setText(numericMessage);
     evenPEItem->setText(QString("%1").arg(evenParityErrors));
     bchPEItem->setText(QString("%1").arg(bchParityErrors));
+    baudItem->setData(Qt::DisplayRole, baud);
     if (!m_loadingData)
     {
         filterRow(row);
@@ -326,7 +330,7 @@ bool PagerDemodGUI::handleMessage(const Message& message)
     else if (PagerDemod::MsgPagerMessage::match(message))
     {
         const PagerDemod::MsgPagerMessage& report = (const PagerDemod::MsgPagerMessage&) message;
-        messageReceived(report.getDateTime(), report.getAddress(), report.getFunctionBits(),
+        messageReceived(report.getDateTime(), report.getAddress(), report.getFunctionBits(), report.getBaud(),
             report.getNumericMessage(), report.getAlphaMessage(),
             report.getEvenParityErrors(), report.getBCHParityErrors());
         return true;
@@ -392,13 +396,6 @@ void PagerDemodGUI::on_fmDev_valueChanged(int value)
     ui->fmDevText->setText(QString("%1%2k").arg(QChar(0xB1, 0x00)).arg(value / 10.0, 0, 'f', 1));
     m_settings.m_fmDeviation = value * 100.0;
     applySettings(QStringList("fmDeviation"));
-}
-
-void PagerDemodGUI::on_baud_currentIndexChanged(int index)
-{
-    (void)index;
-    m_settings.m_baud = ui->baud->currentText().toInt();
-    applySettings(QStringList("baud"));
 }
 
 void PagerDemodGUI::on_decode_currentIndexChanged(int index)
@@ -677,13 +674,6 @@ void PagerDemodGUI::displaySettings()
 
     ui->deltaFrequency->setValue(m_channelMarker.getCenterFrequency());
 
-    if (m_settings.m_baud == 512) {
-        ui->baud->setCurrentIndex(0);
-    } else if (m_settings.m_baud == 1200) {
-        ui->baud->setCurrentIndex(1);
-    } else {
-        ui->baud->setCurrentIndex(2);
-    }
     ui->decode->setCurrentIndex((int)m_settings.m_decode);
 
     ui->rfBWText->setText(QString("%1k").arg(m_settings.m_rfBandwidth / 1000.0, 0, 'f', 1));
@@ -850,6 +840,7 @@ void PagerDemodGUI::on_logOpen_clicked()
                     int numericCol = colIndexes.value("Numeric");
                     int evenCol = colIndexes.value("Even Parity Errors");
                     int bchCol = colIndexes.value("BCH Parity Errors");
+                    int baudCol = colIndexes.value("Baud", -1);
                     int maxCol = std::max({dateCol, timeCol, addressCol, functionCol, alphaCol, numericCol, evenCol, bchCol});
 
                     QMessageBox dialog(this);
@@ -879,7 +870,11 @@ void PagerDemodGUI::on_logOpen_clicked()
                             int evenErrors = cols[evenCol].toInt();
                             int bchErrors = cols[bchCol].toInt();
 
-                            messageReceived(dateTime, address, functionBits,
+                            // Baud is absent from logs written before it was recorded
+                            int baud = ((baudCol >= 0) && (baudCol < cols.size()))
+                                ? cols[baudCol].toInt() : 0;
+
+                            messageReceived(dateTime, address, functionBits, baud,
                                 cols[numericCol], cols[alphaCol],
                                 evenErrors, bchErrors);
 
@@ -918,7 +913,6 @@ void PagerDemodGUI::makeUIConnections()
     QObject::connect(ui->deltaFrequency, &ValueDialZ::changed, this, &PagerDemodGUI::on_deltaFrequency_changed);
     QObject::connect(ui->rfBW, &QSlider::valueChanged, this, &PagerDemodGUI::on_rfBW_valueChanged);
     QObject::connect(ui->fmDev, &QSlider::valueChanged, this, &PagerDemodGUI::on_fmDev_valueChanged);
-    QObject::connect(ui->baud, QOverload<int>::of(&QComboBox::currentIndexChanged), this, &PagerDemodGUI::on_baud_currentIndexChanged);
     QObject::connect(ui->decode, QOverload<int>::of(&QComboBox::currentIndexChanged), this, &PagerDemodGUI::on_decode_currentIndexChanged);
     QObject::connect(ui->charset, &QToolButton::clicked, this, &PagerDemodGUI::on_charset_clicked);
     QObject::connect(ui->filterAddress, &QLineEdit::editingFinished, this, &PagerDemodGUI::on_filterAddress_editingFinished);

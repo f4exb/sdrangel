@@ -36,7 +36,6 @@ PagerDemodSettings::PagerDemodSettings() :
 
 void PagerDemodSettings::resetToDefaults()
 {
-    m_baud = 1200;
     m_inputFrequencyOffset = 0;
     m_rfBandwidth = 20000.0f;
     m_fmDeviation = 4500.0f;
@@ -81,7 +80,6 @@ QByteArray PagerDemodSettings::serialize() const
     s.writeS32(1, m_inputFrequencyOffset);
     s.writeFloat(2, m_rfBandwidth);
     s.writeFloat(3, m_fmDeviation);
-    s.writeS32(4, m_baud);
     s.writeString(5, m_filterAddress);
     s.writeS32(6, (int)m_decode);
     s.writeBool(7, m_udpEnabled);
@@ -154,7 +152,6 @@ bool PagerDemodSettings::deserialize(const QByteArray& data)
         d.readS32(1, &m_inputFrequencyOffset, 0);
         d.readFloat(2, &m_rfBandwidth, 20000.0f);
         d.readFloat(3, &m_fmDeviation, 4500.0f);
-        d.readS32(4, &m_baud, 1200);
         d.readString(5, &m_filterAddress, "");
         d.readS32(6, (int*)&m_decode, (int)Standard);
         d.readBool(7, &m_udpEnabled);
@@ -244,9 +241,6 @@ bool PagerDemodSettings::deserialize(const QByteArray& data)
 
 void PagerDemodSettings::applySettings(const QStringList& settingsKeys, const PagerDemodSettings& settings)
 {
-    if (settingsKeys.contains("baud")) {
-        m_baud = settings.m_baud;
-    }
     if (settingsKeys.contains("inputFrequencyOffset")) {
         m_inputFrequencyOffset = settings.m_inputFrequencyOffset;
     }
@@ -353,9 +347,6 @@ QString PagerDemodSettings::getDebugString(const QStringList& settingsKeys, bool
 {
     std::ostringstream ostr;
 
-    if (settingsKeys.contains("baud") || force) {
-        ostr << " m_baud: " << m_baud;
-    }
     if (settingsKeys.contains("inputFrequencyOffset") || force) {
         ostr << " m_inputFrequencyOffset: " << m_inputFrequencyOffset;
     }

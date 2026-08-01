@@ -33,7 +33,7 @@ class QDataStream;
 class Serializable;
 
 // Number of columns in the tables
-#define PAGERDEMOD_MESSAGE_COLUMNS 9
+#define PAGERDEMOD_MESSAGE_COLUMNS 10
 
 struct PagerDemodSettings
 {
@@ -46,7 +46,8 @@ struct PagerDemodSettings
         MESSAGE_COL_ALPHA,
         MESSAGE_COL_NUMERIC,
         MESSAGE_COL_EVEN_PE,
-        MESSAGE_COL_BCH_PE
+        MESSAGE_COL_BCH_PE,
+        MESSAGE_COL_BAUD
     };
 
     struct NotificationSettings {
@@ -66,7 +67,6 @@ struct PagerDemodSettings
         bool deserialize(const QByteArray& data);
     };
 
-    qint32 m_baud;                      //!< 512, 1200 or 2400
     qint32 m_inputFrequencyOffset;
     Real m_rfBandwidth;
     Real m_fmDeviation;                 //<! 4.5k for POCSAG
