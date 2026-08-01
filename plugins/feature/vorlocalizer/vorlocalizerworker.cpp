@@ -652,7 +652,7 @@ void VorLocalizerWorker::getChannelsByDevice(
         bool operator()(const RRTurnPlan& a, const RRTurnPlan& b)
         {
             unsigned int nbChannelsA = a.m_channels.size();
-            unsigned int nbChannelsB = a.m_channels.size();
+            unsigned int nbChannelsB = b.m_channels.size();
 
             if (nbChannelsA == nbChannelsB) {
                 return a.m_bandwidth > b.m_bandwidth;
