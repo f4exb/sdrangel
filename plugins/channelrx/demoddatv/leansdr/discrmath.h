@@ -24,6 +24,7 @@
 #pragma GCC diagnostic ignored "-Wshift-negative-value"
 
 #include  <cstddef>
+#include <type_traits>
 
 namespace leansdr
 {
@@ -223,6 +224,11 @@ bitvect<T, N> operator*(bitvect<T, N> a, const bitvect<T, NB> &b)
 template <typename Te, int N, Te ALPHA, Te TRUNCP>
 struct gf2n
 {
+    // Field elements are represented as packed polynomial coefficients:
+    // bit i corresponds to the coefficient of X^i. Unsigned storage is
+    // required so bit operations have well-defined behavior.
+    static_assert(std::is_unsigned_v<Te>, "Te must be unsigned");
+
     typedef Te element;
     static const Te alpha = ALPHA;
     gf2n()
@@ -236,9 +242,14 @@ struct gf2n
             lut_exp[i] = alpha_i;                  // ALPHA^i
             lut_exp[((1 << N) - 1) + i] = alpha_i; // Wrap to avoid modulo 2^N-1
             lut_log[alpha_i] = i;
-            bool overflow = alpha_i & (1 << (N - 1));
+            // Multiplication by ALPHA=[X] shifts the polynomial left by one.
+            // If the X^(N-1) coefficient was set, the shift will overflow and
+            // the generator polynomial must be applied modulo P(X).
+            bool overflow = alpha_i & (static_cast<Te>(1) << (N - 1));
             alpha_i *= 2;                // Multiply by alpha=[X] i.e. increase degrees
-            alpha_i &= ~((~(Te)0) << N); // In case Te is wider than N bits
+            // Keep only the lowest N bits. This removes the X^N term and
+            // higher bits before applying the generator polynomial reduction.
+            alpha_i &= static_cast<Te>((static_cast<Te>(1) << N) - 1);
             if (overflow)
                 alpha_i ^= TRUNCP; // Modulo P iteratively
         }

@@ -340,7 +340,7 @@ setInvalid:
 bool SimpleDeserializer::readS32(quint32 id, qint32* result, qint32 def) const
 {
 	uint readOfs;
-	qint32 tmp;
+	quint32 tmp;
 	Elements::const_iterator it = m_elements.constFind(id);
 	if(it == m_elements.constEnd())
 		goto returnDefault;
@@ -354,10 +354,10 @@ bool SimpleDeserializer::readS32(quint32 id, qint32* result, qint32 def) const
 	for(uint i = 0; i < it->length; i++) {
 		quint8 byte = readByte(&readOfs);
 		if((i == 0) && (byte & 0x80))
-			tmp = -1;
+			tmp = 0xFFFFFFFF;
 		tmp = (tmp << 8) | byte;
 	}
-	*result = tmp;
+	*result = static_cast<qint32>(tmp);
 	return true;
 
 returnDefault:
@@ -392,7 +392,7 @@ returnDefault:
 bool SimpleDeserializer::readS64(quint32 id, qint64* result, qint64 def) const
 {
 	uint readOfs;
-	qint64 tmp;
+	quint64 tmp;
 	Elements::const_iterator it = m_elements.constFind(id);
 	if(it == m_elements.constEnd())
 		goto returnDefault;
@@ -406,10 +406,10 @@ bool SimpleDeserializer::readS64(quint32 id, qint64* result, qint64 def) const
 	for(uint i = 0; i < it->length; i++) {
 		quint8 byte = readByte(&readOfs);
 		if((i == 0) && (byte & 0x80))
-			tmp = -1;
+			tmp = 0xFFFFFFFFFFFFFFFFULL;
 		tmp = (tmp << 8) | byte;
 	}
-	*result = tmp;
+	*result = static_cast<qint64>(tmp);
 	return true;
 
 returnDefault:
