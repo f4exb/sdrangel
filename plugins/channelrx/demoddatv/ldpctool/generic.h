@@ -121,18 +121,20 @@ struct MinSumAlgorithm<float, UPDATE>
 	static void finalp(float *links, int cnt)
 	{
 		int mask = 0x80000000;
-		float mags[cnt], mins[cnt];
+		std::vector<float> mags(cnt), mins(cnt);
+		std::vector<int> signs(cnt);
+
 		for (int i = 0; i < cnt; ++i)
 			mags[i] = std::abs(links[i]);
-		CODE::exclusive_reduce(mags, mins, cnt, min);
 
-		int signs[cnt];
-		CODE::exclusive_reduce(reinterpret_cast<int *>(links), signs, cnt, xor_);
+		CODE::exclusive_reduce(mags.data(), mins.data(), cnt, min);
+		CODE::exclusive_reduce(reinterpret_cast<int *>(links), signs.data(), cnt, xor_);
+
 		for (int i = 0; i < cnt; ++i)
 			signs[i] &= mask;
 
 		for (int i = 0; i < cnt; ++i)
-			reinterpret_cast<int *>(links)[i] = signs[i] | reinterpret_cast<int *>(mins)[i];
+			reinterpret_cast<int *>(links)[i] = signs[i] | reinterpret_cast<int *>(mins.data())[i];
 	}
 	static float sign(float a, float b)
 	{
