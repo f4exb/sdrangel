@@ -199,13 +199,17 @@ struct MinSumAlgorithm<int8_t, UPDATE>
 	}
 	static void finalp(int8_t *links, int cnt)
 	{
-		int8_t mags[cnt], mins[cnt];
+		std::vector<int8_t> scratch(3 * cnt);
+		int8_t *mags = scratch.data();
+		int8_t *mins = mags + cnt;
+		int8_t *signs = mins + cnt;
+
 		for (int i = 0; i < cnt; ++i)
 			mags[i] = sqabs(links[i]);
-		CODE::exclusive_reduce(mags, mins, cnt, min);
 
-		int8_t signs[cnt];
+		CODE::exclusive_reduce(mags, mins, cnt, min);
 		CODE::exclusive_reduce(links, signs, cnt, xor_);
+
 		for (int i = 0; i < cnt; ++i)
 			signs[i] |= 127;
 
