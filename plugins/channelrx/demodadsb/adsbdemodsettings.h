@@ -22,6 +22,7 @@
 #include <QtGlobal>
 #include <QString>
 #include <QRegularExpression>
+#include <QSharedPointer>
 
 #include <stdint.h>
 #include "dsp/dsptypes.h"
@@ -146,8 +147,8 @@ struct ADSBDemodSettings
     uint16_t m_exportServerPort;
     bool m_importEnabled;
     QString m_importHost;
-    QString m_importUsername;
-    QString m_importPassword;
+    QString m_importClientId;
+    QString m_importClientSecret;
     QString m_importParameters;
     float m_importPeriod;
     QString m_importMinLatitude;
@@ -192,7 +193,7 @@ struct ADSBDemodSettings
     int m_interpolatorPhaseSteps;
     float m_interpolatorTapsPerPhase;
 
-    QList<NotificationSettings *> m_notificationSettings;
+    QList<QSharedPointer<NotificationSettings>> m_notificationSettings;
     QString m_aviationstackAPIKey;      //!< aviationstack.com API key
     QString m_checkWXAPIKey;            //!< checkwxapi.com API key
     QString m_maptilerAPIKey;           //!< maptiler.com API key (for osm/satellite map)
@@ -237,8 +238,8 @@ struct ADSBDemodSettings
     void setRollupState(Serializable *rollupState) { m_rollupState = rollupState; }
     QByteArray serialize() const;
     bool deserialize(const QByteArray& data);
-    QByteArray serializeNotificationSettings(QList<NotificationSettings *> notificationSettings) const;
-    void deserializeNotificationSettings(const QByteArray& data, QList<NotificationSettings *>& notificationSettings);
+    QByteArray serializeNotificationSettings(const QList<QSharedPointer<NotificationSettings>>& notificationSettings) const;
+    void deserializeNotificationSettings(const QByteArray& data, QList<QSharedPointer<NotificationSettings>>& notificationSettings);
     void applySettings(const QStringList& settingsKeys, const ADSBDemodSettings& settings);
     QString getDebugString(const QStringList& settingsKeys, bool force = false) const;
     void applyPalette();

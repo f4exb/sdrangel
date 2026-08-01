@@ -36,9 +36,9 @@
           </widget>
          </item>
          <item row="2" column="1">
-          <widget class="QLineEdit" name="importUsername">
+          <widget class="QLineEdit" name="importClientId">
            <property name="toolTip">
-            <string>Username to access server with</string>
+            <string>OpenSky API client ID used for OAuth2 authentication</string>
            </property>
           </widget>
          </item>
@@ -109,9 +109,9 @@
           </widget>
          </item>
          <item row="2" column="0">
-          <widget class="QLabel" name="importUsernameLabel">
+          <widget class="QLabel" name="importClientIdLabel">
            <property name="text">
-            <string>Username</string>
+            <string>Client ID</string>
            </property>
           </widget>
          </item>
@@ -143,9 +143,12 @@
           </widget>
          </item>
          <item row="3" column="1">
-          <widget class="QLineEdit" name="importPassword">
+          <widget class="QLineEdit" name="importClientSecret">
            <property name="toolTip">
-            <string>Password to access the server with</string>
+            <string>OpenSky API client secret used for OAuth2 authentication</string>
+           </property>
+           <property name="echoMode">
+            <enum>QLineEdit::Password</enum>
            </property>
           </widget>
          </item>
@@ -188,9 +191,9 @@
           </widget>
          </item>
          <item row="3" column="0">
-          <widget class="QLabel" name="importPasswordLabel">
+          <widget class="QLabel" name="importClientSecretLabel">
            <property name="text">
-            <string>Password</string>
+            <string>Client Secret</string>
            </property>
           </widget>
          </item>
@@ -376,8 +379,8 @@
   <tabstop>exportServerPort</tabstop>
   <tabstop>importEnabled</tabstop>
   <tabstop>importHost</tabstop>
-  <tabstop>importUsername</tabstop>
-  <tabstop>importPassword</tabstop>
+  <tabstop>importClientId</tabstop>
+  <tabstop>importClientSecret</tabstop>
   <tabstop>importParameters</tabstop>
   <tabstop>importPeriod</tabstop>
   <tabstop>latitudeMin</tabstop>

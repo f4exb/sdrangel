@@ -28,6 +28,7 @@
 #include <QTextToSpeech>
 #include <QRandomGenerator>
 #include <QNetworkAccessManager>
+#include <QPointer>
 #include <QtCharts>
 
 #include "channel/channelgui.h"
@@ -110,6 +111,7 @@ struct Aircraft {
     QString m_emitterCategory;  // Aircraft type
     QString m_status;           // Aircraft status
     int m_squawk;               // Mode-A code
+    bool m_spi;                 // Special position identification (IDENT) active
     Real m_range;               // Distance from station to aircraft
     Real m_azimuth;             // Azimuth from station to aircraft
     Real m_elevation;           // Elevation from station to aircraft
@@ -319,6 +321,7 @@ struct Aircraft {
         m_track(0),
         m_verticalRate(0),
         m_squawk(0),
+        m_spi(false),
         m_range(0.0f),
         m_azimuth(0),
         m_elevation(0),
@@ -1338,6 +1341,12 @@ private:
     QTimer m_importTimer;
     QTimer m_redrawMapTimer;
     QNetworkAccessManager *m_networkManager;
+    QPointer<QNetworkReply> m_importTokenReply;
+    QPointer<QNetworkReply> m_importStatesReply;
+    QString m_importAccessToken;
+    QDateTime m_importAccessTokenExpiry;
+    int m_importRequestGeneration;
+    bool m_importAuthenticationRetry;
     bool m_loadingData;
 
     static const char m_idMap[];
@@ -1380,9 +1389,9 @@ private:
         bool updateModel);
 
     void decodeID(const QByteArray& data, QString& emitterCategory, QString& callsign);
-    void decodeGroundspeed(const QByteArray& data, float& v, float& h);
-    void decodeAirspeed(const QByteArray& data, bool& tas, int& as, bool& hdgValid, float& hdg);
-    void decodeVerticalRate(const QByteArray& data, int& verticalRate);
+    bool decodeGroundspeed(const QByteArray& data, float& v, float& h);
+    bool decodeAirspeed(const QByteArray& data, bool& tas, int& as, bool& hdgValid, float& hdg);
+    bool decodeVerticalRate(const QByteArray& data, int& verticalRate);
     void updateAircraftPosition(Aircraft *aircraft, double latitude, double longitude, const QDateTime& dateTime);
     bool validateGlobalPosition(double latitude, double longitude, bool countFailure);
     bool validateLocalPosition(double latitude, double longitude, bool surfacePosition, bool countFailure);
@@ -1429,6 +1438,12 @@ private:
     int grayToBinary(int gray, int bits) const;
     void redrawMap();
     void applyImportSettings();
+    bool importCredentialsConfigured() const;
+    bool importAccessTokenValid() const;
+    void invalidateImportAuthentication();
+    void requestImportAccessToken();
+    void sendImportRequest();
+    void handleImportTokenReply(QNetworkReply *reply);
     void sendAircraftReport();
     void updatePosition(float latitude, float longitude, float altitude);
     void clearOldHeading(Aircraft *aircraft, const QDateTime& dateTime, float newTrack);
@@ -1505,6 +1520,7 @@ private slots:
     virtual void showEvent(QShowEvent *event) override;
     virtual bool eventFilter(QObject *obj, QEvent *event) override;
     void import();
+    void handleImportNetworkReply(QNetworkReply *reply);
     void handleImportReply(QNetworkReply* reply);
     void preferenceChanged(int elementType);
     void devicePositionChanged(float latitude, float longitude, float altitude);
@@ -1522,4 +1538,3 @@ signals:
 };
 
 #endif // INCLUDE_ADSBDEMODGUI_H
-

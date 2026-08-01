@@ -198,7 +198,11 @@ As a server:
 The Beast binary and Hex formats are as detailed here: https://wiki.jetvision.de/wiki/Mode S_Beast:Data_Output_Formats
 
 When Enable import is checked, aircraft data for aircraft anywhere in the world can be imported from OpenSky Network.
-A username and password are not required, but when specified, this allows the update period to be reduced to 5 seconds instead of 10 seconds, and 4000 API calls per day instead of 400.
+The import can be used anonymously, or authenticated with an OpenSky API client. OpenSky no longer accepts account username/password Basic authentication for this API.
+
+To use authenticated import, create an API client from your OpenSky account and enter its **Client ID** and **Client Secret** in the Feed Settings dialog. The plugin exchanges these credentials for a short-lived OAuth2 access token, sends the token as a Bearer token with state-vector requests, refreshes it before expiry, and obtains a new token and retries once if OpenSky rejects a request with HTTP 401.
+See the [OpenSky REST API documentation](https://openskynetwork.github.io/opensky-api/rest.html) for API-client setup and the current anonymous and authenticated request limits.
+
 To limit network traffic and processing power requirements, a geographical region can be set via the minimum and maximum latitude and longitude fields.
 
 <h3>22: Open Notifications Dialog</h3>

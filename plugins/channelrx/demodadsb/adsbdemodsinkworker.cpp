@@ -56,7 +56,7 @@ static int gillhamToFeet(int n)
     int b4 = (n >> 1) & 1;
     int d4 = n & 1;
 
-    int n500 = grayToBinary((d2 << 7) | (d4 << 6) | (a1 << 5) | (a2 << 4) | (a4 << 3) | (b1 << 2) | (b2 << 1) | b4, 4);
+    int n500 = grayToBinary((d2 << 7) | (d4 << 6) | (a1 << 5) | (a2 << 4) | (a4 << 3) | (b1 << 2) | (b2 << 1) | b4, 8);
     int n100 = grayToBinary((c1 << 2) | (c2 << 1) | c4, 3) - 1;
 
     if (n100 == 6) {
@@ -104,7 +104,8 @@ void ADSBDemodSinkWorker::handleModeS(unsigned char *data, int bytes, unsigned i
         if (m_modeSOnlyIcaos.contains(icao))
         {
             l = m_modeSOnlyIcaos.value(icao);
-            if (abs(l.last().m_firstIndex - firstIndex) < 4) {
+            // Sample indexes are only comparable within the same buffer, so also check the frames are close in time
+            if ((abs(l.last().m_firstIndex - firstIndex) < 4) && (qAbs(l.last().m_dateTime.msecsTo(dateTime)) <= 1)) {
                 return; // Duplicate
             }
         }
@@ -160,7 +161,7 @@ void ADSBDemodSinkWorker::handleModeS(unsigned char *data, int bytes, unsigned i
                 }
                 else if ((df2 == 5) || (df2 == 21))
                 {
-                    int curId = ((data[2] & 0x1f) << 8) | (data[3] & 0xff); // No decode - we just want to know if it changes
+                    int curId = ((l[i].m_data[2] & 0x1f) << 8) | (l[i].m_data[3] & 0xff); // No decode - we just want to know if it changes
 
                     if (id == -1)
                     {
@@ -185,6 +186,7 @@ void ADSBDemodSinkWorker::handleModeS(unsigned char *data, int bytes, unsigned i
                 }
 
                 m_icaos.insert(icao, l.back().m_dateTime.toMSecsSinceEpoch());
+                m_modeSOnlyIcaos.remove(icao); // Don't re-forward these frames if the aircraft is heard again much later
             }
             else
             {
@@ -206,14 +208,14 @@ bool ADSBDemodSinkWorker::modeSValid(unsigned char *data, unsigned df)
     }
     else if ((df == 4) || (df == 20))
     {
-        unsigned fs = data[0] & 0x3;
+        unsigned fs = data[0] & 0x7;
         unsigned dr = (data[1] >> 3) & 0x1f;
 
         invalid = (fs == 6) || (fs == 7) || ((dr >= 8) && (dr <= 15));
     }
     else if ((df == 5) || (df == 21))
     {
-        unsigned fs = data[0] & 0x3;
+        unsigned fs = data[0] & 0x7;
         unsigned dr = (data[1] >> 3) & 0x1f;
 
         invalid = (fs == 6) || (fs == 7) || ((dr >= 8) && (dr <= 15)) || ((data[3] & 0x40) != 0);
@@ -675,12 +677,12 @@ void ADSBDemodSinkWorker::handleInputMessages()
             } else {
                 m_settings.applySettings(settingsKeys, settings);
             }
-            delete message;
         }
         else if (ADSBDemod::MsgResetStats::match(*message))
         {
             m_demodStats.reset();
         }
+        delete message;
     }
 }
 

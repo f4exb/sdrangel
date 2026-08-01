@@ -382,10 +382,10 @@ void ADSBDemod::webapiUpdateChannelSettings(
         settings.m_importHost = *response.getAdsbDemodSettings()->getImportHost();
     }
     if (channelSettingsKeys.contains("importUsername")) {
-        settings.m_importUsername = *response.getAdsbDemodSettings()->getImportUsername();
+        settings.m_importClientId = *response.getAdsbDemodSettings()->getImportUsername();
     }
     if (channelSettingsKeys.contains("importPassword")) {
-        settings.m_importPassword = *response.getAdsbDemodSettings()->getImportPassword();
+        settings.m_importClientSecret = *response.getAdsbDemodSettings()->getImportPassword();
     }
     if (channelSettingsKeys.contains("importParameters")) {
         settings.m_importParameters = *response.getAdsbDemodSettings()->getImportParameters();
@@ -473,8 +473,8 @@ void ADSBDemod::webapiFormatChannelSettings(SWGSDRangel::SWGChannelSettings& res
     response.getAdsbDemodSettings()->setExportServerPort(settings.m_exportServerPort);
     response.getAdsbDemodSettings()->setImportEnabled(settings.m_importEnabled ? 1 : 0);
     response.getAdsbDemodSettings()->setImportHost(new QString(settings.m_importHost));
-    response.getAdsbDemodSettings()->setImportUsername(new QString(settings.m_importUsername));
-    response.getAdsbDemodSettings()->setImportPassword(new QString(settings.m_importPassword));
+    response.getAdsbDemodSettings()->setImportUsername(new QString(settings.m_importClientId));
+    response.getAdsbDemodSettings()->setImportPassword(new QString(settings.m_importClientSecret));
     response.getAdsbDemodSettings()->setImportParameters(new QString(settings.m_importParameters));
     response.getAdsbDemodSettings()->setImportPeriod(settings.m_importPeriod);
     response.getAdsbDemodSettings()->setImportMinLatitude(new QString(settings.m_importMinLatitude));
@@ -628,10 +628,10 @@ void ADSBDemod::webapiReverseSendSettings(const QList<QString>& channelSettingsK
         swgADSBDemodSettings->setImportHost(new QString(settings.m_importHost));
     }
     if (channelSettingsKeys.contains("importUsername") || force) {
-        swgADSBDemodSettings->setImportUsername(new QString(settings.m_importUsername));
+        swgADSBDemodSettings->setImportUsername(new QString(settings.m_importClientId));
     }
     if (channelSettingsKeys.contains("importPassword") || force) {
-        swgADSBDemodSettings->setImportPassword(new QString(settings.m_importPassword));
+        swgADSBDemodSettings->setImportPassword(new QString(settings.m_importClientSecret));
     }
     if (channelSettingsKeys.contains("importParameters") || force) {
         swgADSBDemodSettings->setImportParameters(new QString(settings.m_importParameters));

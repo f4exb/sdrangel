@@ -34,8 +34,8 @@ ADSBDemodFeedDialog::ADSBDemodFeedDialog(ADSBDemodSettings *settings, QWidget* p
     ui->exportServerPort->setValue(m_settings->m_exportServerPort);
     ui->importEnabled->setChecked(m_settings->m_importEnabled);
     ui->importHost->setCurrentIndex(ui->importHost->findText(m_settings->m_importHost));
-    ui->importUsername->setText(m_settings->m_importUsername);
-    ui->importPassword->setText(m_settings->m_importPassword);
+    ui->importClientId->setText(m_settings->m_importClientId);
+    ui->importClientSecret->setText(m_settings->m_importClientSecret);
     ui->importParameters->setText(m_settings->m_importParameters);
     ui->importPeriod->setValue(m_settings->m_importPeriod);
     ui->latitudeMin->setText(m_settings->m_importMinLatitude);
@@ -59,8 +59,8 @@ void ADSBDemodFeedDialog::accept()
     m_settings->m_exportServerPort = ui->exportServerPort->value();
     m_settings->m_importEnabled = ui->importEnabled->isChecked();
     m_settings->m_importHost = ui->importHost->currentText();
-    m_settings->m_importUsername = ui->importUsername->text();
-    m_settings->m_importPassword = ui->importPassword->text();
+    m_settings->m_importClientId = ui->importClientId->text();
+    m_settings->m_importClientSecret = ui->importClientSecret->text();
     m_settings->m_importParameters = ui->importParameters->text();
     m_settings->m_importPeriod = ui->importPeriod->value();
     m_settings->m_importMinLatitude = ui->latitudeMin->text();
