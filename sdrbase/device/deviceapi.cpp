@@ -774,13 +774,25 @@ void DeviceAPI::removeBuddy(DeviceAPI* buddy)
 {
     switch(buddy->m_streamType) {
     case StreamSingleRx:
-        m_sourceBuddies.erase(std::find(m_sourceBuddies.begin(), m_sourceBuddies.end(), buddy));
+    {
+        auto it = std::find(m_sourceBuddies.begin(), m_sourceBuddies.end(), buddy);
+        if (it != m_sourceBuddies.end())
+        {
+            m_sourceBuddies.erase(it);
+        }
         break;
+    }
     case StreamSingleTx:
-        m_sinkBuddies.erase(std::find(m_sinkBuddies.begin(), m_sinkBuddies.end(), buddy));
+    {
+        auto it = std::find(m_sinkBuddies.begin(), m_sinkBuddies.end(), buddy);
+        if (it != m_sinkBuddies.end())
+        {
+            m_sinkBuddies.erase(it);
+        }
         break;
+    }
     default:
-        qDebug("DeviceAPI::removeSourceBuddy: buddy %s(%s) is not of single Rx or Tx type",
+        qDebug("DeviceAPI::removeBuddy: buddy %s(%s) is not of single Rx or Tx type",
                 qPrintable(buddy->getHardwareId()),
                 qPrintable(buddy->getSamplingDeviceSerial()));
         return;
