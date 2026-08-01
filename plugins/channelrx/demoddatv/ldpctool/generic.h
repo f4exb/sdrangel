@@ -643,12 +643,12 @@ struct LambdaMinAlgorithm
 	static void finalp(TYPE *links, int cnt)
 	{
 		typedef std::pair<TYPE, int> Pair;
-		Pair mags[cnt];
+		std::vector<Pair> mags(cnt);
 		for (int i = 0; i < cnt; ++i)
 			mags[i] = Pair(std::abs(links[i]), i);
-		std::nth_element(mags, mags+LAMBDA, mags+cnt, [](Pair a, Pair b){ return a.first < b.first; });
+		std::nth_element(mags.begin(), mags.begin()+LAMBDA, mags.end(), [](Pair a, Pair b){ return a.first < b.first; });
 
-		TYPE sums[cnt];
+		std::vector<TYPE> sums(cnt);
 		for (int i = 0; i < cnt; ++i) {
 			int j = 0;
 			if (i == mags[0].second)
@@ -662,8 +662,8 @@ struct LambdaMinAlgorithm
 			}
 		}
 
-		TYPE signs[cnt];
-		CODE::exclusive_reduce(links, signs, cnt, sign);
+		std::vector<TYPE> signs(cnt);
+		CODE::exclusive_reduce(links, signs.data(), cnt, sign);
 
 		for (int i = 0; i < cnt; ++i)
 			links[i] = sign(phi(sums[i]), signs[i]);
