@@ -50,6 +50,7 @@ void AISSettings::resetToDefaults()
     m_reverseAPIFeatureSetIndex = 0;
     m_reverseAPIFeatureIndex = 0;
     m_workspaceIndex = 0;
+    m_displayChart = false;
 
     for (int i = 0; i < AIS_VESSEL_COLUMNS; i++)
     {
@@ -76,6 +77,7 @@ QByteArray AISSettings::serialize() const
 
     s.writeS32(28, m_workspaceIndex);
     s.writeBlob(29, m_geometryBytes);
+    s.writeBool(30, m_displayChart);
 
     for (int i = 0; i < AIS_VESSEL_COLUMNS; i++) {
         s.writeS32(300 + i, m_vesselColumnIndexes[i]);
@@ -128,6 +130,7 @@ bool AISSettings::deserialize(const QByteArray& data)
 
         d.readS32(28, &m_workspaceIndex, 0);
         d.readBlob(29, &m_geometryBytes);
+        d.readBool(30, &m_displayChart, false);
 
         for (int i = 0; i < AIS_VESSEL_COLUMNS; i++) {
             d.readS32(300 + i, &m_vesselColumnIndexes[i], i);
@@ -172,6 +175,9 @@ void AISSettings::applySettings(const QStringList& settingsKeys, const AISSettin
     if (settingsKeys.contains("workspaceIndex")) {
         m_workspaceIndex = settings.m_workspaceIndex;
     }
+    if (settingsKeys.contains("displayChart")) {
+        m_displayChart = settings.m_displayChart;
+    }
 
     if (settingsKeys.contains("vesselColumnIndexes"))
     {
@@ -215,6 +221,9 @@ QString AISSettings::getDebugString(const QStringList& settingsKeys, bool force)
     }
     if (settingsKeys.contains("workspaceIndex") || force) {
         ostr << " m_workspaceIndex: " << m_workspaceIndex;
+    }
+    if (settingsKeys.contains("displayChart") || force) {
+        ostr << " m_displayChart: " << m_displayChart;
     }
 
     if (settingsKeys.contains("vesselColumnIndexes"))

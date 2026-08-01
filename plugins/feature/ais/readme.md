@@ -34,6 +34,10 @@ The vessels table displays the current status for each vessel, base station or a
 * Updated - Gives the date and time the last message was received.
 * Messages - Displays the number of messages received.
 
+* Selecting a vessel displays its first available VesselFinder gallery image to the right of the table. The photographer credit below the image links to the vessel's gallery.
+
+The chart button displays the received AIS message rate and number of ships over time. Right click the chart button to reset the collected chart data. The delete button removes every table item and its corresponding object from the Map feature.
+
 Right clicking on the table header allows you to select which columns to show. The columns can be reordered by left clicking and dragging the column header.
 
 Right clicking on a table cell allows you to copy the cell contents, view the vessel on a variety of websites or find the vessel on the map.
@@ -54,3 +58,5 @@ Selecting an AIS item on the map will display a text bubble containing informati
 Map icons are by Maarten van der Werf, DE Alvida Biersack, ID and jokokerto, MY, from the Noun Project https://thenounproject.com/
 
 Map icons are from http://all-free-download.com.
+
+Vessel photographs and photographer credits are provided by https://www.vesselfinder.com/

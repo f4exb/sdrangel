@@ -23,12 +23,14 @@
 #include <QDesktopServices>
 #include <QAction>
 #include <QClipboard>
+#include <QPainter>
 
 #include "feature/featureuiset.h"
 #include "feature/featurewebapiutils.h"
 #include "gui/basicfeaturesettingsdialog.h"
 #include "gui/tabletapandhold.h"
 #include "gui/dialogpositioner.h"
+#include "gui/crightclickenabler.h"
 #include "util/mmsi.h"
 #include "maincore.h"
 
@@ -158,6 +160,7 @@ bool AISGUI::handleMessage(const Message& message)
         if (ais)
         {
             updateVessels(ais, report.getDateTime());
+            m_messageCount++;
             delete ais;
         }
 
@@ -196,7 +199,16 @@ AISGUI::AISGUI(PluginAPI* pluginAPI, FeatureUISet *featureUISet, Feature *featur
     m_pluginAPI(pluginAPI),
     m_featureUISet(featureUISet),
     m_doApplySettings(true),
-    m_lastFeatureState(0)
+    m_lastFeatureState(0),
+    m_messageRateTime(QDateTime::currentDateTime()),
+    m_messageCount(0),
+    m_chartTickCount(0),
+    m_chart(nullptr),
+    m_messageSeries(nullptr),
+    m_shipSeries(nullptr),
+    m_chartXAxis(nullptr),
+    m_messageYAxis(nullptr),
+    m_shipYAxis(nullptr)
 {
     m_feature = feature;
     setAttribute(Qt::WA_DeleteOnClose, true);
@@ -215,6 +227,8 @@ AISGUI::AISGUI(PluginAPI* pluginAPI, FeatureUISet *featureUISet, Feature *featur
     // Timer to remove vessels we haven't heard from in a while
     connect(&m_timer, SIGNAL(timeout()), this, SLOT(removeOldVessels()));
     m_timer.start(60*1000);
+
+    connect(&m_chartTimer, &QTimer::timeout, this, &AISGUI::updateChart);
 
     // Resize the table using dummy data
     resizeTable();
@@ -239,27 +253,326 @@ AISGUI::AISGUI(PluginAPI* pluginAPI, FeatureUISet *featureUISet, Feature *featur
     connect(ui->vessels, SIGNAL(customContextMenuRequested(QPoint)), SLOT(vessels_customContextMenuRequested(QPoint)));
     TableTapAndHold *tableTapAndHold = new TableTapAndHold(ui->vessels);
     connect(tableTapAndHold, &TableTapAndHold::tapAndHold, this, &AISGUI::vessels_customContextMenuRequested);
+    connect(ui->vessels, &QTableWidget::currentCellChanged, this, &AISGUI::vesselSelectionChanged);
+    connect(&m_vesselFinder, &VesselFinder::shipPhoto, this, &AISGUI::shipPhoto);
+    connect(ui->hidePhoto, &QToolButton::clicked, this, &AISGUI::hideShipPhotoClicked);
+
+    CRightClickEnabler *displayChartClickEnabler = new CRightClickEnabler(ui->displayChart);
+    connect(displayChartClickEnabler, &CRightClickEnabler::rightClick, this, &AISGUI::clearChart);
+
+    ui->photoCredit->setOpenExternalLinks(true);
+    hideShipPhoto();
+    ui->chart->setRenderHint(QPainter::Antialiasing);
+    plotChart();
+    m_chartTimer.start(1000);
 
     m_settings.setRollupState(&m_rollupState);
 
     displaySettings();
     applySettings(true);
+    makeUIConnections();
     m_resizer.enableChildMouseTracking();
 }
 
-AISGUI::~AISGUI()
+void AISGUI::makeUIConnections()
 {
-    // Remove all ships from map
+    QObject::connect(
+        ui->vessels,
+        &QTableWidget::cellDoubleClicked,
+        this,
+        &AISGUI::on_vessels_cellDoubleClicked
+    );
+    QObject::connect(
+        ui->displayChart,
+        &ButtonSwitch::clicked,
+        this,
+        &AISGUI::on_displayChart_clicked
+    );
+    QObject::connect(
+        ui->deleteVessels,
+        &QToolButton::clicked,
+        this,
+        &AISGUI::on_deleteVessels_clicked
+    );
+}
+
+void AISGUI::hideShipPhoto()
+{
+    ui->shipPhoto->clear();
+    ui->photoCredit->clear();
+    ui->photoPanel->setVisible(false);
+}
+
+void AISGUI::hideShipPhotoClicked()
+{
+    // Prevent an outstanding download from showing the photo again.
+    m_selectedPhotoId.clear();
+    hideShipPhoto();
+}
+
+void AISGUI::on_displayChart_clicked(bool checked)
+{
+    m_settings.m_displayChart = checked;
+    m_settingsKeys.append("displayChart");
+    applySettings();
+    ui->chart->setVisible(checked);
+}
+
+void AISGUI::on_deleteVessels_clicked()
+{
+    deleteAllVessels();
+}
+
+void AISGUI::deleteAllVessels()
+{
+    m_selectedPhotoId.clear();
+    hideShipPhoto();
+
     for (int row = ui->vessels->rowCount() - 1; row >= 0; row--)
     {
-        QString mmsi = ui->vessels->item(row, VESSEL_COL_MMSI)->text();
+        const QString mmsi = ui->vessels->item(row, VESSEL_COL_MMSI)->text();
         sendToMap(mmsi, "",
             "", "",
             "", 0.0f, 0.0f,
             0.0f, 0.0f, QDateTime(),
             0.0f);
     }
+
+    ui->vessels->setRowCount(0);
     qDeleteAll(m_vessels);
+    m_vessels.clear();
+}
+
+int AISGUI::countShips() const
+{
+    int ships = 0;
+
+    for (int row = 0; row < ui->vessels->rowCount(); row++)
+    {
+        const QTableWidgetItem *typeItem = ui->vessels->item(row, VESSEL_COL_TYPE);
+
+        if (typeItem && (typeItem->text() == "Vessel")) {
+            ships++;
+        }
+    }
+
+    return ships;
+}
+
+void AISGUI::clearChart(const QPoint& p)
+{
+    (void) p;
+
+    m_messageSeries->clear();
+    m_shipSeries->clear();
+    m_messageCount = 0;
+    m_chartTickCount = 0;
+    m_averageTime = QDateTime();
+    m_messageRateTime = QDateTime::currentDateTime();
+    resetChartAxes();
+}
+
+void AISGUI::resetChartAxes()
+{
+    const QDateTime now = QDateTime::currentDateTime();
+    m_chartXAxis->setMin(now.addSecs(-60));
+    m_chartXAxis->setMax(now);
+    m_messageYAxis->setRange(0.0, 10.0);
+    m_shipYAxis->setRange(0.0, 10.0);
+}
+
+void AISGUI::plotChart()
+{
+    QChart *oldChart = m_chart;
+    m_chart = new QChart();
+    m_chart->layout()->setContentsMargins(0, 0, 0, 0);
+    m_chart->setMargins(QMargins(1, 1, 1, 1));
+    m_chart->setTheme(QChart::ChartThemeDark);
+    m_chart->legend()->setAlignment(Qt::AlignRight);
+
+    m_messageSeries = new QLineSeries();
+    m_messageSeries->setName("Messages");
+    m_shipSeries = new QLineSeries();
+    m_shipSeries->setName("Ships");
+
+    m_chartXAxis = new QDateTimeAxis();
+    m_chartXAxis->setFormat("hh:mm:ss");
+    m_messageYAxis = new QValueAxis();
+    m_messageYAxis->setTitleText("Messages/s");
+    m_shipYAxis = new QValueAxis();
+    m_shipYAxis->setTitleText("Ships");
+
+    m_chart->addAxis(m_chartXAxis, Qt::AlignBottom);
+    m_chart->addAxis(m_messageYAxis, Qt::AlignLeft);
+    m_chart->addAxis(m_shipYAxis, Qt::AlignRight);
+    m_chart->addSeries(m_messageSeries);
+    m_chart->addSeries(m_shipSeries);
+    m_messageSeries->attachAxis(m_chartXAxis);
+    m_messageSeries->attachAxis(m_messageYAxis);
+    m_shipSeries->attachAxis(m_chartXAxis);
+    m_shipSeries->attachAxis(m_shipYAxis);
+    resetChartAxes();
+
+    ui->chart->setChart(m_chart);
+    delete oldChart;
+}
+
+void AISGUI::updateChart()
+{
+    const QDateTime now = QDateTime::currentDateTime();
+    const qint64 elapsedMS = m_messageRateTime.msecsTo(now);
+
+    if (elapsedMS <= 0) {
+        return;
+    }
+
+    const double messageRate = m_messageCount / (elapsedMS / 1000.0);
+    const int ships = countShips();
+    const bool xAtMax = (m_messageSeries->count() == 0)
+        || (m_messageSeries->at(m_messageSeries->count() - 1).x() == m_chartXAxis->max().toMSecsSinceEpoch());
+
+    m_messageSeries->append(now.toMSecsSinceEpoch(), messageRate);
+    m_shipSeries->append(now.toMSecsSinceEpoch(), ships);
+
+    if (xAtMax) {
+        m_chartXAxis->setMax(now);
+    }
+    if (m_messageYAxis->max() < messageRate) {
+        m_messageYAxis->setMax(std::ceil(messageRate) + 1.0);
+    }
+    if (m_shipYAxis->max() < ships + 1) {
+        m_shipYAxis->setMax(ships + 1);
+    }
+
+    m_messageCount = 0;
+    m_messageRateTime = now;
+    m_chartTickCount++;
+
+    // Average one-second samples after ten minutes to limit long-running chart growth.
+    if ((m_chartTickCount % 60) == 0)
+    {
+        QDateTime startTime;
+        QDateTime endTime;
+
+        if (m_averageTime.isValid())
+        {
+            startTime = m_averageTime;
+            endTime = startTime.addSecs(60);
+        }
+        else
+        {
+            endTime = now.addSecs(-10 * 60);
+            startTime = endTime.addSecs(-60);
+        }
+
+        averageSeries(m_messageSeries, startTime, endTime);
+        averageSeries(m_shipSeries, startTime, endTime);
+        m_averageTime = endTime;
+    }
+}
+
+void AISGUI::averageSeries(QLineSeries *series, const QDateTime& startTime, const QDateTime& endTime)
+{
+    int startIndex = 0;
+    int endIndex = -1;
+
+    for (int i = series->count() - 1; i >= 0; i--)
+    {
+        const QDateTime dateTime = QDateTime::fromMSecsSinceEpoch(series->at(i).x());
+
+        if ((endIndex == -1) && (dateTime <= endTime)) {
+            endIndex = i;
+        } else if (dateTime < startTime) {
+            startIndex = i + 1;
+            break;
+        }
+    }
+
+    const int count = endIndex - startIndex + 1;
+
+    if ((endIndex != -1) && (count > 1))
+    {
+        double sum = 0.0;
+
+        for (int i = startIndex; i <= endIndex; i++) {
+            sum += series->at(i).y();
+        }
+
+        const double average = sum / count;
+        const qint64 midpoint = startTime.toMSecsSinceEpoch()
+            + (endTime.toMSecsSinceEpoch() - startTime.toMSecsSinceEpoch()) / 2;
+        series->removePoints(startIndex, count);
+        series->insert(startIndex, QPointF(midpoint, average));
+    }
+}
+
+void AISGUI::vesselSelectionChanged(int currentRow, int currentColumn, int previousRow, int previousColumn)
+{
+    (void) currentColumn;
+    (void) previousRow;
+    (void) previousColumn;
+
+    m_selectedPhotoId.clear();
+    hideShipPhoto();
+
+    if ((currentRow < 0) || (currentRow >= ui->vessels->rowCount())) {
+        return;
+    }
+
+    const QTableWidgetItem *mmsiItem = ui->vessels->item(currentRow, VESSEL_COL_MMSI);
+    const QTableWidgetItem *imoItem = ui->vessels->item(currentRow, VESSEL_COL_IMO);
+    const QString mmsi = mmsiItem ? mmsiItem->text().trimmed() : QString();
+    const QString imo = imoItem ? imoItem->text().trimmed() : QString();
+    bool imoOk = false;
+    bool mmsiOk = false;
+    const qulonglong imoNumber = imo.toULongLong(&imoOk);
+    const qulonglong mmsiNumber = mmsi.toULongLong(&mmsiOk);
+
+    if (imoOk && (imoNumber != 0)) {
+        m_selectedPhotoId = QString("imo:%1").arg(imoNumber);
+    } else if (mmsiOk && (mmsiNumber != 0)) {
+        m_selectedPhotoId = QString("mmsi:%1").arg(mmsiNumber);
+    } else {
+        return;
+    }
+
+    m_vesselFinder.getShipPhoto(imo, mmsi);
+}
+
+void AISGUI::shipPhoto(const VesselFinderPhoto *photo)
+{
+    // A request can complete after another row has been selected.
+    if (!photo || (photo->m_id != m_selectedPhotoId)) {
+        return;
+    }
+
+    if (photo->m_pixmap.isNull())
+    {
+        hideShipPhoto();
+        return;
+    }
+
+    ui->shipPhoto->setPixmap(photo->m_pixmap.scaled(
+        320,
+        320,
+        Qt::KeepAspectRatio,
+        Qt::SmoothTransformation
+    ));
+
+    const QString link = photo->m_link.toHtmlEscaped();
+    const QString credit = photo->m_photographer.isEmpty()
+        ? QString("View on VesselFinder")
+        : QString("Photo by %1").arg(photo->m_photographer.toHtmlEscaped());
+    ui->photoCredit->setText(QString("<a href=\"%1\">%2</a>").arg(link, credit));
+    ui->photoPanel->setVisible(true);
+}
+
+AISGUI::~AISGUI()
+{
+    m_chartTimer.stop();
+    m_timer.stop();
+    disconnect(&m_vesselFinder, &VesselFinder::shipPhoto, this, &AISGUI::shipPhoto);
+    deleteAllVessels();
     delete ui;
 }
 
@@ -280,6 +593,9 @@ void AISGUI::displaySettings()
     setWindowTitle(m_settings.m_title);
     setTitle(m_settings.m_title);
     blockApplySettings(true);
+
+    ui->displayChart->setChecked(m_settings.m_displayChart);
+    ui->chart->setVisible(m_settings.m_displayChart);
 
     // Order and size columns
     QHeaderView *header = ui->vessels->horizontalHeader();
