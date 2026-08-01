@@ -469,8 +469,10 @@ QString RTLSDRInput::getTunerName() const
 {
     const static QStringList names = {"Unknown", "E4000", "FC0012", "FC0013", "FC2580", "R820T", "R828D"};
 
-    if ((int) m_tunerType <= names.size()) {
-        return names[(int) m_tunerType];
+    const int tunerType = (int) m_tunerType;
+
+    if (tunerType >= 0 && tunerType < names.size()) {
+        return names[tunerType];
     } else {
         return names[0];
     }
