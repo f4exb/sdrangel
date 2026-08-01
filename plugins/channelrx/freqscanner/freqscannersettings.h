@@ -32,8 +32,8 @@ class ChannelAPI;
 struct FreqScannerSettings
 {
     struct FrequencySettings {
-        qint64 m_frequency;
-        bool m_enabled;
+        qint64 m_frequency = 0;
+        bool m_enabled = true;
         QString m_notes;
         QString m_threshold;        // QStrings used, as we allow "" for no setting
         QString m_channel;
