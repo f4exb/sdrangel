@@ -589,13 +589,15 @@ struct LogDomainSPA
 	}
 	static void finalp(TYPE *links, int cnt)
 	{
-		TYPE mags[cnt], sums[cnt];
+		std::vector<TYPE> mags(cnt);
+		std::vector<TYPE> sums(cnt);
+		std::vector<TYPE> signs(cnt);
+
 		for (int i = 0; i < cnt; ++i)
 			mags[i] = phi(std::abs(links[i]));
-		CODE::exclusive_reduce(mags, sums, cnt, add);
 
-		TYPE signs[cnt];
-		CODE::exclusive_reduce(links, signs, cnt, sign);
+		CODE::exclusive_reduce(mags.data(), sums.data(), cnt, add);
+		CODE::exclusive_reduce(links, signs.data(), cnt, sign);
 
 		for (int i = 0; i < cnt; ++i)
 			links[i] = sign(phi(sums[i]), signs[i]);
