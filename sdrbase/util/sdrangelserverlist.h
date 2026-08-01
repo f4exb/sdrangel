@@ -18,6 +18,7 @@
 #ifndef INCLUDE_SDRANGELSERVERLIST_H
 #define INCLUDE_SDRANGELSERVERLIST_H
 
+#include <limits>
 #include <QtCore>
 #include <QTimer>
 
@@ -36,25 +37,25 @@ public:
 
     struct SDRangelServer {
         QString m_address;
-        quint16 m_port;
+        quint16 m_port = 0;
         QString m_protocol;
-        qint64 m_minFrequency;
-        qint64 m_maxFrequency;
-        int m_maxSampleRate;
+        qint64 m_minFrequency = 0;
+        qint64 m_maxFrequency = std::numeric_limits<qint64>::max();
+        int m_maxSampleRate = std::numeric_limits<int>::max();
         QString m_device;
         QString m_antenna;
-        bool m_remoteControl;
+        bool m_remoteControl = false;
         QString m_stationName;
         QString m_location;
-        float m_latitude;
-        float m_longitude;
-        float m_altitude;
-        bool m_isotropic;
-        float m_azimuth;
-        float m_elevation;
-        int m_clients;
-        int m_maxClients;
-        int m_timeLimit;        // In minutes
+        float m_latitude = 0.0f;
+        float m_longitude = 0.0f;
+        float m_altitude = 0.0f;
+        bool m_isotropic = false;
+        float m_azimuth = 0.0f;
+        float m_elevation = 0.0f;
+        int m_clients = 0;
+        int m_maxClients = 4;
+        int m_timeLimit = 0;        // In minutes
     };
 
     SDRangelServerList();
