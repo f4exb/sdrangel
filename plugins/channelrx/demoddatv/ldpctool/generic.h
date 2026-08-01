@@ -391,8 +391,8 @@ struct MinSumCAlgorithm
 	}
 	static void finalp(TYPE *links, int cnt)
 	{
-		TYPE tmp[cnt];
-		CODE::exclusive_reduce(links, tmp, cnt, min);
+		std::vector<TYPE> tmp(cnt);
+		CODE::exclusive_reduce(links, tmp.data(), cnt, min);
 		for (int i = 0; i < cnt; ++i)
 			links[i] = tmp[i];
 	}
