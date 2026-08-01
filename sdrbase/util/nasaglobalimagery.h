@@ -58,7 +58,7 @@ public:
         QString m_descriptionURL;
         QDateTime m_startDate;
         QDateTime m_endDate;
-        bool m_ongoing;
+        bool m_ongoing = false;
         QString m_layerPeriod;
         QString m_layerGroup;
     };
