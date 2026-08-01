@@ -248,13 +248,15 @@ struct OffsetMinSumAlgorithm
 	static void finalp(TYPE *links, int cnt)
 	{
 		TYPE beta = 0.5 * FACTOR;
-		TYPE mags[cnt], mins[cnt];
+		std::vector<TYPE> mags(cnt);
+		std::vector<TYPE> mins(cnt);
+		std::vector<TYPE> signs(cnt);
+
 		for (int i = 0; i < cnt; ++i)
 			mags[i] = std::max(std::abs(links[i]) - beta, TYPE(0));
-		CODE::exclusive_reduce(mags, mins, cnt, min);
 
-		TYPE signs[cnt];
-		CODE::exclusive_reduce(links, signs, cnt, sign);
+		CODE::exclusive_reduce(mags.data(), mins.data(), cnt, min);
+		CODE::exclusive_reduce(links, signs.data(), cnt, sign);
 
 		for (int i = 0; i < cnt; ++i)
 			links[i] = sign(mins[i], signs[i]);
