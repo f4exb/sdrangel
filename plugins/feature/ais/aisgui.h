@@ -164,6 +164,7 @@ private slots:
     void on_deleteVessels_clicked();
     void clearChart(const QPoint& p);
     void updateChart();
+    void legendMarkerClicked();
     void vesselSelectionChanged(int currentRow, int currentColumn, int previousRow, int previousColumn);
     void shipPhoto(const VesselFinderPhoto *photo);
     void on_vessels_cellDoubleClicked(int row, int column);
@@ -173,6 +174,9 @@ private slots:
     void vesselsColumnSelectMenu(QPoint pos);
     void vesselsColumnSelectMenuChecked(bool checked = false);
     void removeOldVessels();
+
+protected:
+    bool eventFilter(QObject *obj, QEvent *event) override;
 };
 
 #endif // INCLUDE_FEATURE_AISGUI_H_

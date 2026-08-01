@@ -24,6 +24,7 @@
 #include <QAction>
 #include <QClipboard>
 #include <QPainter>
+#include <QWheelEvent>
 
 #include "feature/featureuiset.h"
 #include "feature/featurewebapiutils.h"
@@ -381,6 +382,95 @@ void AISGUI::resetChartAxes()
     m_shipYAxis->setRange(0.0, 10.0);
 }
 
+static void scaleChartAxis(qint64& start, qint64& end, qint64 minimumRange, int delta, qreal centre)
+{
+    qint64 range = end - start;
+    const double factor = std::pow(0.5, std::abs(delta) / 120.0);
+    qint64 newRange;
+
+    if (delta < 0) {
+        newRange = range / factor;
+    } else {
+        newRange = range * factor;
+    }
+
+    range = std::max(minimumRange / 2, range);
+    newRange = std::max(minimumRange, newRange);
+
+    if (delta < 0) {
+        start -= centre * range;
+    } else {
+        start += centre * newRange;
+    }
+
+    end = start + newRange;
+}
+
+bool AISGUI::eventFilter(QObject *obj, QEvent *event)
+{
+    if ((obj == ui->chart) && (event->type() == QEvent::Wheel))
+    {
+        QWheelEvent *wheelEvent = static_cast<QWheelEvent *>(event);
+        const int delta = wheelEvent->angleDelta().y();
+
+        if (m_messageSeries)
+        {
+            const QPointF point = wheelEvent->position();
+            const QRectF plotArea = m_chart->plotArea();
+
+            if ((plotArea.width() > 0.0) && (plotArea.height() > 0.0))
+            {
+                if (wheelEvent->modifiers() & Qt::ShiftModifier)
+                {
+                    qreal y = (point.y() - plotArea.y()) / plotArea.height();
+                    y = 1.0 - std::min(1.0, std::max(0.0, y));
+
+                    if (m_messageSeries->isVisible())
+                    {
+                        qint64 min = (qint64) m_messageYAxis->min();
+                        qint64 max = (qint64) m_messageYAxis->max();
+                        scaleChartAxis(min, max, 2LL, delta / 2, y);
+                        min = std::max(0LL, min);
+                        max = std::min(5000LL, max);
+                        m_messageYAxis->setMin((qreal) min);
+                        m_messageYAxis->setMax((qreal) max);
+                    }
+
+                    if (m_shipSeries->isVisible())
+                    {
+                        qint64 min = (qint64) m_shipYAxis->min();
+                        qint64 max = (qint64) m_shipYAxis->max();
+                        scaleChartAxis(min, max, 2LL, delta / 2, y);
+                        min = std::max(0LL, min);
+                        max = std::min(5000LL, max);
+                        m_shipYAxis->setMin((qreal) min);
+                        m_shipYAxis->setMax((qreal) max);
+                    }
+                }
+                else if (m_messageSeries->count() > 1)
+                {
+                    qreal x = (point.x() - plotArea.x()) / plotArea.width();
+                    x = std::min(1.0, std::max(0.0, x));
+
+                    qint64 startMS = m_chartXAxis->min().toMSecsSinceEpoch();
+                    qint64 endMS = m_chartXAxis->max().toMSecsSinceEpoch();
+                    scaleChartAxis(startMS, endMS, 10000LL, delta, x);
+
+                    startMS = std::max((qint64) m_messageSeries->at(0).x(), startMS);
+                    endMS = std::min((qint64) m_messageSeries->at(m_messageSeries->count() - 1).x(), endMS);
+                    m_chartXAxis->setMin(QDateTime::fromMSecsSinceEpoch(startMS));
+                    m_chartXAxis->setMax(QDateTime::fromMSecsSinceEpoch(endMS));
+                }
+            }
+        }
+
+        wheelEvent->accept();
+        return true;
+    }
+
+    return FeatureGUI::eventFilter(obj, event);
+}
+
 void AISGUI::plotChart()
 {
     QChart *oldChart = m_chart;
@@ -414,7 +504,45 @@ void AISGUI::plotChart()
     resetChartAxes();
 
     ui->chart->setChart(m_chart);
+    ui->chart->installEventFilter(this);
+
+    const auto markers = m_chart->legend()->markers();
+    for (QLegendMarker *marker : markers) {
+        connect(marker, &QLegendMarker::clicked, this, &AISGUI::legendMarkerClicked);
+    }
+
     delete oldChart;
+}
+
+void AISGUI::legendMarkerClicked()
+{
+    QLegendMarker *marker = qobject_cast<QLegendMarker *>(sender());
+
+    if (!marker) {
+        return;
+    }
+
+    marker->series()->setVisible(!marker->series()->isVisible());
+    marker->setVisible(true);
+
+    const qreal alpha = marker->series()->isVisible() ? 1.0 : 0.5;
+    QBrush brush = marker->labelBrush();
+    QColor color = brush.color();
+    color.setAlphaF(alpha);
+    brush.setColor(color);
+    marker->setLabelBrush(brush);
+
+    brush = marker->brush();
+    color = brush.color();
+    color.setAlphaF(alpha);
+    brush.setColor(color);
+    marker->setBrush(brush);
+
+    QPen pen = marker->pen();
+    color = pen.color();
+    color.setAlphaF(alpha);
+    pen.setColor(color);
+    marker->setPen(pen);
 }
 
 void AISGUI::updateChart()

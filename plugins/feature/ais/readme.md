@@ -12,6 +12,19 @@ The AIS feature can draw corresponding objects on the [Map](../../feature/map/re
 
 ![AIS feature plugin GUI](../../../doc/img/AIS_plugin.png)
 
+<h3>1: Display Chart</h3>
+
+When checked, a chart will be displayed that shows AIS message rates in messages per second.
+The chart is updated every second. Data older than 10 minutes is averaged over a minute, in order to keep the number of data points managable.
+
+Click a series name in the chart legend to hide or show that series. Use the mouse wheel to zoom the time axis around the cursor, or hold Shift while using the wheel to zoom the visible vertical axes.
+
+Right click the chart button to reset the collected chart data.
+
+<h3>2: Delete All Vessels</h3>
+
+Click to delete all vessels from the table and map.
+
 <h3>Vessels Table</h3>
 
 The vessels table displays the current status for each vessel, base station or aid-to-navigation, based on the latest received messages, aggregated from all AIS Demodulators.
@@ -34,9 +47,7 @@ The vessels table displays the current status for each vessel, base station or a
 * Updated - Gives the date and time the last message was received.
 * Messages - Displays the number of messages received.
 
-* Selecting a vessel displays its first available VesselFinder gallery image to the right of the table. The photographer credit below the image links to the vessel's gallery.
-
-The chart button displays the received AIS message rate and number of ships over time. Right click the chart button to reset the collected chart data. The delete button removes every table item and its corresponding object from the Map feature.
+Selecting a vessel displays its first available VesselFinder gallery image to the right of the table. The photographer credit below the image links to the vessel's gallery.
 
 Right clicking on the table header allows you to select which columns to show. The columns can be reordered by left clicking and dragging the column header.
 
