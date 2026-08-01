@@ -36,8 +36,11 @@ struct AISDemodSettings
     qint32 m_baud;
     qint32 m_inputFrequencyOffset;
     Real m_rfBandwidth;
-    Real m_fmDeviation; //!< Peak deviation to give modulation index of 0.5 for 9600 baud
-    Real m_correlationThreshold;
+    Real m_fmDeviation; //!< Peak deviation. M.1371-5 2.3.2 specifies a modulation index of
+                        //!< 0.5, and h = 2.dev/baud, so the peak deviation is 2400 Hz at
+                        //!< 9600 baud. 4800 Hz is the mark to space separation, not the
+                        //!< deviation
+    Real m_correlationThreshold;    //!< Normalised correlation with the preamble, 0 to 1
     QString m_filterMMSI;
     bool m_udpEnabled;
     QString m_udpAddress;
@@ -73,6 +76,13 @@ struct AISDemodSettings
     static const int AISDEMOD_BAUD_RATE = 9600;
     static const int AISDEMOD_CHANNEL_SAMPLE_RATE = 57600; //!< 6x 9600 baud rate (use even multiple so Gaussian filter has odd number of taps)
     static const int m_scopeStreams = 9;
+
+    //! The trellis models the transmitted waveform, so this is the transmit BT-product of
+    //! 0.4 from M.1371-5 2.3.1.2 - not the 0.5 receive BT-product of 2.3.1.3, which is what
+    //! m_pulseShape uses for the preamble correlator. They are different numbers on purpose.
+    //! A 3 symbol phase pulse gives a 16 state trellis; 4 measures no better and costs twice
+    static constexpr float AISDEMOD_MLSE_BT = 0.4f;
+    static const int AISDEMOD_MLSE_SPAN = 3;
 
     AISDemodSettings();
     void resetToDefaults();

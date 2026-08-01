@@ -40,11 +40,13 @@ This specifies the bandwidth of a LPF that is applied to the input signal to lim
 
 <h3>5: Dev - Frequency deviation</h3>
 
-Adjusts the expected peak frequency deviation in 0.1 kHz steps from 1 to 6 kHz. Typical values are 4.8 kHz, corresponding to a modulation index of 0.5 at 9,600 baud.
+Adjusts the expected peak frequency deviation in 0.1 kHz steps from 1 to 6 kHz. The default is 2.4 kHz: ITU-R M.1371-5 section 2.3.2 specifies a modulation index of 0.5, and for continuous phase modulation the modulation index is twice the peak deviation divided by the bit rate, so 0.5 at 9,600 bit/s gives a peak deviation of 2,400 Hz. (4,800 Hz is the separation between the mark and space frequencies, which is twice the deviation.)
+
+This setting scales the output of the FM discriminator, which is used to detect the preamble and drive the scope traces. It has no direct effect on the demodulator's symbol decisions.
 
 <h3>6: TH - Correlation Threshold</h3>
 
-The correlation threshold between the received signal and the preamble (training sequence). A lower value should be able to demodulate weaker signals, but increases processor usage and may result in invalid messages if too low.
+The threshold for the normalised correlation between the received signal and the preamble (training sequence), from 0 to 1. Being normalised, it does not depend on signal level, so the same setting works for strong and weak signals. Real preambles correlate above 0.9 and the default of 0.6 sits well clear of the noise floor. A lower value may demodulate slightly weaker signals, but increases processor usage sharply, because every threshold crossing starts a sequence detection.
 
 <h3>7: Find</h3>
 

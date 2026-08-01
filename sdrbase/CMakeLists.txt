@@ -413,6 +413,7 @@ set(sdrbase_HEADERS
     dsp/kissengine.h
     dsp/firfilter.h
     dsp/gaussian.h
+    dsp/gmskmlse.h
     dsp/mimochannel.h
     dsp/misc.h
     dsp/movingaverage.h

@@ -583,8 +583,8 @@ void AISDemodGUI::on_fmDev_valueChanged(int value)
 
 void AISDemodGUI::on_threshold_valueChanged(int value)
 {
-    ui->thresholdText->setText(QString("%1").arg(value));
-    m_settings.m_correlationThreshold = value;
+    m_settings.m_correlationThreshold = value / 100.0f;
+    ui->thresholdText->setText(QString("%1").arg(m_settings.m_correlationThreshold, 0, 'f', 2));
     applySettings(QStringList({"correlationThreshold"}));
 }
 
@@ -898,8 +898,8 @@ void AISDemodGUI::displaySettings()
     ui->fmDevText->setText(QString("%1%2k").arg(QChar(0xB1, 0x00)).arg(m_settings.m_fmDeviation / 1000.0, 0, 'f', 1));
     ui->fmDev->setValue(m_settings.m_fmDeviation / 100.0);
 
-    ui->thresholdText->setText(QString("%1").arg(m_settings.m_correlationThreshold));
-    ui->threshold->setValue(m_settings.m_correlationThreshold);
+    ui->thresholdText->setText(QString("%1").arg(m_settings.m_correlationThreshold, 0, 'f', 2));
+    ui->threshold->setValue((int) std::round(m_settings.m_correlationThreshold * 100.0f));
 
     updateIndexLabel();
 

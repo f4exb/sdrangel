@@ -1,6 +1,7 @@
 ///////////////////////////////////////////////////////////////////////////////////
 // Copyright (C) 2021, 2023 Jon Beniston, M7RCE <jon@beniston.com>               //
 // Copyright (C) 2021-2022 Edouard Griffiths, F4EXB <f4exb06@gmail.com>          //
+// Some code by AI                                                               //
 //                                                                               //
 // This program is free software; you can redistribute it and/or modify          //
 // it under the terms of the GNU General Public License as published by          //
@@ -40,6 +41,7 @@ AISDemodSink::AISDemodSink(AISDemod *aisDemod) :
         m_messageQueueToChannel(nullptr),
         m_rxBuf(nullptr),
         m_train(nullptr),
+        m_trainEnergy(0.0f),
         m_sampleBufferIndex(0)
 {
     m_magsq = 0.0;
@@ -116,6 +118,58 @@ void AISDemodSink::feed(const SampleVector::const_iterator& begin, const SampleV
     }
 }
 
+// Per burst carrier frequency offset, radians per sample.
+//
+// The training sequence has equal numbers of ones and zeros, so its mean phase increment
+// is the carrier offset and nothing else. Summing the products before taking the argument
+// keeps the estimate out of the noisy per sample phase.
+//
+// This only has to get the MLSE's phase tracking loop into its pull in range - the loop
+// removes what is left, including any drift the estimate cannot see.
+double AISDemodSink::estimateFrequency() const
+{
+    std::complex<double> sum(0.0, 0.0);
+
+    for (int i = 1; i < m_correlationLength; i++)
+    {
+        int j = (m_rxBufIdx + i) % m_rxBufLength;
+        int k = (j + m_rxBufLength - 1) % m_rxBufLength;
+        sum += m_iqBuf[j] * std::conj(m_iqBuf[k]);
+    }
+
+    return std::arg(sum);
+}
+
+// Run the sequence detector over n symbols starting at buffer position x, leaving the
+// symbol decisions in m_symSoft
+void AISDemodSink::computeSymbols(int x, int n)
+{
+    const double dphi = estimateFrequency();
+    const int sps = m_samplesPerSymbol;
+    const int half = sps / 2;
+    const int len = m_rxBufLength;
+    const std::complex<double> *iq = m_iqBuf.data();
+
+    // The phase loop starts with no idea of the carrier phase, so run it over some of the
+    // preamble first and throw those symbols away. x sits 18 symbols into the 24 bit
+    // training sequence, so there is room for this - but only that much, so clamp rather
+    // than reading backwards off the start of the buffer.
+    const int xOffset = ((x - m_rxBufIdx) % len + len) % len;
+    const int warmup = std::min(AISDEMOD_MLSE_WARMUP, (xOffset - half) / sps);
+
+    m_mlse.decode(n + warmup,
+        [x, sps, half, len, iq, dphi, warmup](int k, int m) -> std::complex<double>
+        {
+            int off = (k - warmup)*sps - half + m;
+            int idx = ((x + off) % len + len) % len;
+            double a = -dphi * off;
+            return iq[idx] * std::complex<double>(cos(a), sin(a));
+        },
+        m_mlseSoft);
+
+    m_symSoft.assign(m_mlseSoft.begin() + warmup, m_mlseSoft.end());
+}
+
 void AISDemodSink::processOneSample(Complex &ci)
 {
     // FM demodulation
@@ -150,10 +204,12 @@ void AISDemodSink::processOneSample(Complex &ci)
     // Buffer filtered samples. We buffer enough samples for a max length message
     // before trying to demod, so false triggering can't make us miss anything
     m_rxBuf[m_rxBufIdx] = filtClipped;
+    m_iqBuf[m_rxBufIdx] = std::complex<double>(ci.real() / SDR_RX_SCALEF, ci.imag() / SDR_RX_SCALEF);
     m_rxBufIdx = (m_rxBufIdx + 1) % m_rxBufLength;
     m_rxBufCnt = std::min(m_rxBufCnt + 1, m_rxBufLength);
 
     Real corr = 0.0f;
+    Real metric = 0.0f;
     bool scopeCRCValid = false;
     bool scopeCRCInvalid = false;
     Real dcOffset = 0.0f;
@@ -161,6 +217,7 @@ void AISDemodSink::processOneSample(Complex &ci)
     if (m_rxBufCnt >= m_rxBufLength)
     {
         Real trainingSum = 0.0f;
+        Real energy = 0.0f;
 
         // Correlate with training sequence
         // Note that DC offset doesn't matter for this
@@ -170,182 +227,78 @@ void AISDemodSink::processOneSample(Complex &ci)
             int j = (m_rxBufIdx + i) % m_rxBufLength;
             corr += m_train[i] * m_rxBuf[j];
             trainingSum += m_rxBuf[j];
+            energy += m_rxBuf[j] * m_rxBuf[j];
         }
 
         // If we meet threshold, try to demod
-        // Take abs value, to account for both initial phases
-        thresholdMet = fabs(corr) >= m_settings.m_correlationThreshold;
+        // Take abs value, to account for both initial phases.
+        // Dividing by the geometric mean of the two energies gives a correlation
+        // coefficient in 0..1, which unlike the raw correlation does not depend on the
+        // signal level. That matters because the sequence detector is too expensive to run
+        // on the false triggers an absolute threshold lets through - one fires on noise for
+        // several percent of all samples.
+        metric = (Real) (fabs(corr) / sqrt((double) energy * m_trainEnergy + 1e-12));
+        thresholdMet = metric >= m_settings.m_correlationThreshold;
+
         if (thresholdMet)
         {
-            // Use mean of preamble as DC offset
+            // Mean of the preamble, which is the carrier offset. Only reported to the
+            // scope now - the sequence detector estimates and tracks it for itself.
             dcOffset = trainingSum/m_correlationLength;
 
             // Start demod after (most of) preamble
             int x = (m_rxBufIdx + m_correlationLength*3/4 + 4) % m_rxBufLength;
 
-            // Attempt to demodulate
-            bool gotSOP = false;
-            int bits = 0;
-            int bitCount = 0;
-            int onesCount = 0;
-            int byteCount = 0;
-            int symbolPrev = 0;
-            int totalBitCount = 0; // Count of bits after start flag, before bit stuffing removal, including stop flag
-            for (int sampleIdx = 0; sampleIdx < m_rxBufLength; sampleIdx += m_samplesPerSymbol)
+            int endSampleIdx = 0;
+
+            // Decode only far enough to tell whether there is a start flag. Nearly all
+            // triggers are noise and abort here, which is what makes the sequence
+            // detector affordable.
+            computeSymbols(x, AISDEMOD_SOP_SYMBOLS + 8);
+
+            DemodResult result = deframe(endSampleIdx, scopeCRCValid, scopeCRCInvalid);
+
+            // Extend on demand. Most messages fit one slot, but type 5 and the binary
+            // messages take two or more, and decoding every candidate to the full
+            // buffer length would cost far more than decoding the few long ones twice.
+            //
+            // The look ahead must not run off the end of the circular buffer: symbol n-1
+            // reads up to n*samplesPerSymbol - samplesPerSymbol/2 - 1 samples beyond x,
+            // and anything past the end wraps onto pre-trigger samples, which the
+            // Viterbi traceback would then start from. So cap the span at what is
+            // genuinely buffered, and make sure that capped span is actually attempted
+            // rather than being skipped by the doubling.
+            int xOffset = ((x - m_rxBufIdx) % m_rxBufLength + m_rxBufLength) % m_rxBufLength;
+            int maxSymbols = (m_rxBufLength - xOffset + m_samplesPerSymbol/2) / m_samplesPerSymbol;
+
+            // Never extend to fewer symbols than the first stage already decoded, or the
+            // deframer would run out before it reaches the start flag it just found
+            const int firstSpan = std::max(AISDEMOD_MLSE_SYMBOLS, AISDEMOD_SOP_SYMBOLS + 8);
+
+            for (int span = firstSpan; result == FrameTruncated; span *= 2)
             {
-                // Sum and slice
-                // Summing 3 samples seems to give a very small improvement vs just using 1
-                int sampleCnt = 3;
-                int sampleOffset = -1;
-                Real sampleSum = 0.0f;
-                for (int i = 0; i < sampleCnt; i++) {
-                    sampleSum += m_rxBuf[(x + sampleOffset + i + m_rxBufLength) % m_rxBufLength] - dcOffset;
-                }
-                int symbol = sampleSum >= 0.0f ? 1 : 0;
+                int symbols = std::min(span, maxSymbols);
 
-                // Move to next symbol
-                x = (x + m_samplesPerSymbol) % m_rxBufLength;
+                computeSymbols(x, symbols);
+                result = deframe(endSampleIdx, scopeCRCValid, scopeCRCInvalid);
 
-                // HDLC deframing
-
-                // NRZI decoding
-                int bit;
-                if (symbol != symbolPrev) {
-                    bit = 0;
-                } else {
-                    bit = 1;
-                }
-                symbolPrev = symbol;
-
-                // Store in shift reg
-                bits |= bit << bitCount;
-                bitCount++;
-
-                if (bit == 1)
-                {
-                    onesCount++;
-                    // Shouldn't ever get 7 1s in a row
-                    if ((onesCount == 7) && gotSOP)
-                    {
-                        gotSOP = false;
-                        byteCount = 0;
-                        break;
-                    }
-                }
-                else if (bit == 0)
-                {
-                    if (onesCount == 5)
-                    {
-                        // Remove bit-stuffing (5 1s followed by a 0)
-                        bitCount--;
-                    }
-                    else if (onesCount == 6)
-                    {
-                        // Start/end of packet
-                        if (gotSOP && (bitCount == 8) && (bits == 0x7e) && (byteCount >= 3))
-                        {
-                            // End of packet
-                            // Check CRC is valid
-                            m_crc.init();
-                            m_crc.calculate(m_bytes, byteCount - 2);
-                            uint16_t calcCrc = m_crc.get();
-                            uint16_t rxCrc = m_bytes[byteCount-2] | (m_bytes[byteCount-1] << 8);
-                            if (calcCrc == rxCrc)
-                            {
-                                scopeCRCValid = true;
-                                QByteArray rxPacket((char *)m_bytes, byteCount - 2); // Don't include CRC
-                                //qDebug() << "RX: " << rxPacket.toHex();
-                                if (getMessageQueueToChannel())
-                                {
-                                    // Calculate slot number based on time of start of transmission
-                                    // This is unlikely to be accurate in absolute terms, given we don't know latency from SDR or buffering within SDRangel
-                                    // But can be used to get an idea of congestion
-                                    QDateTime currentTime = QDateTime::currentDateTime();
-                                    if (m_settings.m_useFileTime)
-                                    {
-                                        QString hardwareId = m_aisDemod->getDeviceAPI()->getHardwareId();
-
-                                        if ((hardwareId == "FileInput") || (hardwareId == "SigMFFileInput"))
-                                        {
-                                            QString dateTimeStr;
-                                            int deviceIdx = m_aisDemod->getDeviceSetIndex();
-
-                                            if (ChannelWebAPIUtils::getDeviceReportValue(deviceIdx, "absoluteTime", dateTimeStr)) {
-                                                currentTime = QDateTime::fromString(dateTimeStr, Qt::ISODateWithMs);
-                                            }
-                                        }
-                                    }
-
-                                    int txTimeMs = (totalBitCount + 8 + 24 + 8) * (1000.0 / m_settings.m_baud); // Add ramp up, preamble and start-flag
-                                    QDateTime startDateTime = currentTime.addMSecs(-txTimeMs);
-                                    int ms = startDateTime.time().second() * 1000 + startDateTime.time().msec();
-                                    float slotTime = 60.0f * 1000.0f / 2250.0f; // 2250 slots per minute, 26.6ms per slot
-                                    int slot = ms / slotTime;
-                                    int totalSlots = std::ceil(txTimeMs / slotTime);
-                                    AISDemod::MsgMessage *msg = AISDemod::MsgMessage::create(rxPacket, currentTime, slot, totalSlots);
-                                    getMessageQueueToChannel()->push(msg);
-                                }
-
-                                // Skip over received packet, so we don't try to re-demodulate it
-                                m_rxBufCnt -= sampleIdx;
-                            }
-                            else
-                            {
-                                //qDebug() << QString("CRC mismatch: %1 %2").arg(calcCrc, 4, 16, QLatin1Char('0')).arg(rxCrc, 4, 16, QLatin1Char('0'));
-                                scopeCRCInvalid = true;
-                            }
-                            break;
-                        }
-                        else if (gotSOP)
-                        {
-                            // Repeated start flag without data or misalignment, something not right
-                            break;
-                        }
-                        else
-                        {
-                            // Start of packet
-                            gotSOP = true;
-                            bits = 0;
-                            bitCount = 0;
-                            byteCount = 0;
-                            totalBitCount = 0;
-                        }
-                    }
-                    onesCount = 0;
-                }
-
-                if (gotSOP)
-                {
-                    totalBitCount++;
-                    if (bitCount == 8)
-                    {
-                        // Could also check count according to message ID as that varies
-                        if (byteCount >= AISDEMOD_MAX_BYTES)
-                        {
-                            // Too many bytes
-                            break;
-                        }
-                        else
-                        {
-                            // Got a complete byte
-                            m_bytes[byteCount] = bits;
-                            byteCount++;
-                        }
-                        bits = 0;
-                        bitCount = 0;
-                    }
-                }
-
-                // Abort demod if we haven't found start flag within a couple of bytes of presumed preamble
-                if (!gotSOP && (sampleIdx >= 16 * m_samplesPerSymbol)) {
+                if (symbols >= maxSymbols) {
                     break;
                 }
+            }
+
+            if (result == FrameGood)
+            {
+                // Skip over received packet, so we don't try to re-demodulate it
+                m_rxBufCnt -= endSampleIdx;
             }
         }
     }
 
     // Select signals to feed to scope
-    sampleToScope(ci / SDR_RX_SCALEF, magsq, fmDemod, filt, m_rxBuf[m_rxBufIdx], corr / 100.0, thresholdMet, dcOffset, scopeCRCValid ? 1.0 : (scopeCRCInvalid ? -1.0 : 0));
+    sampleToScope(ci / SDR_RX_SCALEF, magsq, fmDemod, filt, m_rxBuf[m_rxBufIdx],
+        metric,
+        thresholdMet, dcOffset, scopeCRCValid ? 1.0 : (scopeCRCInvalid ? -1.0 : 0));
 
     // Send demod signal to Demod Analyzer feature
     m_demodBuffer[m_demodBufferFill++] = fmDemod * std::numeric_limits<int16_t>::max();
@@ -371,6 +324,172 @@ void AISDemodSink::processOneSample(Complex &ci)
 
         m_demodBufferFill = 0;
     }
+}
+
+// HDLC deframing of the symbol decisions computeSymbols() has left in m_symSoft
+AISDemodSink::DemodResult AISDemodSink::deframe(int& endSampleIdx,
+                                                bool& crcValid, bool& crcInvalid)
+{
+    bool gotSOP = false;
+    int bits = 0;
+    int bitCount = 0;
+    int onesCount = 0;
+    int byteCount = 0;
+    int symbolPrev = 0;
+    int symbolIdx = 0;
+    int totalBitCount = 0; // Count of bits after start flag, before bit stuffing removal, including stop flag
+
+    for (int sampleIdx = 0; sampleIdx < m_rxBufLength; sampleIdx += m_samplesPerSymbol)
+    {
+        if (symbolIdx >= (int) m_symSoft.size()) {
+            return gotSOP ? FrameTruncated : FrameNone;
+        }
+
+        // Sign of the Viterbi's decision for this symbol
+        int symbol = m_symSoft[symbolIdx] >= 0.0f ? 1 : 0;
+
+        symbolIdx++;
+
+        // HDLC deframing
+
+        // NRZI decoding
+        int bit;
+        if (symbol != symbolPrev) {
+            bit = 0;
+        } else {
+            bit = 1;
+        }
+        symbolPrev = symbol;
+
+        // Store in shift reg
+        bits |= bit << bitCount;
+        bitCount++;
+
+        if (bit == 1)
+        {
+            onesCount++;
+            // Shouldn't ever get 7 1s in a row
+            if ((onesCount == 7) && gotSOP) {
+                return FrameNone;
+            }
+        }
+        else if (bit == 0)
+        {
+            if (onesCount == 5)
+            {
+                // Remove bit-stuffing (5 1s followed by a 0)
+                bitCount--;
+            }
+            else if (onesCount == 6)
+            {
+                // Start/end of packet
+                if (gotSOP && (bitCount == 8) && (bits == 0x7e) && (byteCount >= 3))
+                {
+                    // End of packet
+                    // Check CRC is valid
+                    m_crc.init();
+                    m_crc.calculate(m_bytes, byteCount - 2);
+                    uint16_t calcCrc = m_crc.get();
+                    uint16_t rxCrc = m_bytes[byteCount-2] | (m_bytes[byteCount-1] << 8);
+                    if (calcCrc == rxCrc)
+                    {
+                        crcValid = true;
+                        // Don't include CRC
+                        sendMessage(QByteArray((char *) m_bytes, byteCount - 2), totalBitCount);
+                        endSampleIdx = sampleIdx;
+                        return FrameGood;
+                    }
+                    else
+                    {
+                        //qDebug() << QString("CRC mismatch: %1 %2").arg(calcCrc, 4, 16, QLatin1Char('0')).arg(rxCrc, 4, 16, QLatin1Char('0'));
+                        crcInvalid = true;
+                        return FrameBadCrc;
+                    }
+                }
+                else if (gotSOP)
+                {
+                    // Repeated start flag without data or misalignment, something not right
+                    return FrameNone;
+                }
+                else
+                {
+                    // Start of packet
+                    gotSOP = true;
+                    bits = 0;
+                    bitCount = 0;
+                    byteCount = 0;
+                    totalBitCount = 0;
+                }
+            }
+            onesCount = 0;
+        }
+
+        if (gotSOP)
+        {
+            totalBitCount++;
+            if (bitCount == 8)
+            {
+                // Could also check count according to message ID as that varies
+                if (byteCount >= AISDEMOD_MAX_BYTES)
+                {
+                    // Too many bytes
+                    return FrameNone;
+                }
+                else
+                {
+                    // Got a complete byte
+                    m_bytes[byteCount] = bits;
+                    byteCount++;
+                }
+                bits = 0;
+                bitCount = 0;
+            }
+        }
+
+        // Abort demod if we haven't found start flag within a couple of bytes of presumed preamble
+        if (!gotSOP && (sampleIdx >= AISDEMOD_SOP_SYMBOLS * m_samplesPerSymbol)) {
+            return FrameNone;
+        }
+    }
+
+    return gotSOP ? FrameTruncated : FrameNone;
+}
+
+void AISDemodSink::sendMessage(const QByteArray& rxPacket, int totalBitCount)
+{
+    if (!getMessageQueueToChannel()) {
+        return;
+    }
+
+    //qDebug() << "RX: " << rxPacket.toHex();
+
+    // Calculate slot number based on time of start of transmission
+    // This is unlikely to be accurate in absolute terms, given we don't know latency from SDR or buffering within SDRangel
+    // But can be used to get an idea of congestion
+    QDateTime currentTime = QDateTime::currentDateTime();
+    if (m_settings.m_useFileTime)
+    {
+        QString hardwareId = m_aisDemod->getDeviceAPI()->getHardwareId();
+
+        if ((hardwareId == "FileInput") || (hardwareId == "SigMFFileInput"))
+        {
+            QString dateTimeStr;
+            int deviceIdx = m_aisDemod->getDeviceSetIndex();
+
+            if (ChannelWebAPIUtils::getDeviceReportValue(deviceIdx, "absoluteTime", dateTimeStr)) {
+                currentTime = QDateTime::fromString(dateTimeStr, Qt::ISODateWithMs);
+            }
+        }
+    }
+
+    int txTimeMs = (totalBitCount + 8 + 24 + 8) * (1000.0 / m_settings.m_baud); // Add ramp up, preamble and start-flag
+    QDateTime startDateTime = currentTime.addMSecs(-txTimeMs);
+    int ms = startDateTime.time().second() * 1000 + startDateTime.time().msec();
+    float slotTime = 60.0f * 1000.0f / 2250.0f; // 2250 slots per minute, 26.6ms per slot
+    int slot = ms / slotTime;
+    int totalSlots = std::ceil(txTimeMs / slotTime);
+    AISDemod::MsgMessage *msg = AISDemod::MsgMessage::create(rxPacket, currentTime, slot, totalSlots);
+    getMessageQueueToChannel()->push(msg);
 }
 
 void AISDemodSink::applyChannelSettings(int channelSampleRate, int channelFrequencyOffset, bool force)
@@ -426,6 +545,13 @@ void AISDemodSink::applySettings(const AISDemodSettings& settings, const QString
         m_rxBufIdx = 0;
         m_rxBufCnt = 0;
 
+        // The complex baseband the sequence detector works on, kept in step with m_rxBuf
+        m_iqBuf.assign(m_rxBufLength, std::complex<double>(0.0, 0.0));
+
+        m_mlse.create(m_samplesPerSymbol, AISDemodSettings::AISDEMOD_MLSE_SPAN,
+                      AISDemodSettings::AISDEMOD_MLSE_BT);
+        m_mlse.setLoopGains(AISDEMOD_MLSE_PHASE_GAIN, AISDEMOD_MLSE_FREQ_GAIN);
+
         // Create 24-bit training sequence for correlation
         delete[] m_train;
         m_correlationLength = 24*m_samplesPerSymbol;
@@ -443,6 +569,11 @@ void AISDemodSink::applySettings(const AISDemodSettings& settings, const QString
             {
                 m_train[i*m_samplesPerSymbol+j] = m_pulseShape.filter(trainNRZ[i] * 2.0f - 1.0f);
             }
+        }
+
+        m_trainEnergy = 0.0f;
+        for (int i = 0; i < m_correlationLength; i++) {
+            m_trainEnergy += m_train[i] * m_train[i];
         }
     }
 
