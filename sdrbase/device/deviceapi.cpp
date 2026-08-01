@@ -801,32 +801,35 @@ void DeviceAPI::removeBuddy(DeviceAPI* buddy)
 
 void DeviceAPI::clearBuddiesLists()
 {
-    auto itSource = m_sourceBuddies.begin();
-    auto itSink = m_sinkBuddies.begin();
+    // Make copies before iterating because removeBuddy() modifies the buddy
+    // relationship lists. Iterating directly over m_sourceBuddies/m_sinkBuddies
+    // could invalidate iterators while the relationships are being removed.
+    auto sourceCopy = m_sourceBuddies;
+    auto sinkCopy = m_sinkBuddies;
     bool leaderElected = false;
 
-    for (;itSource != m_sourceBuddies.end(); ++itSource)
+    for (auto* buddy : sourceCopy)
     {
         if (isBuddyLeader() && !leaderElected)
         {
-            (*itSource)->setBuddyLeader(true);
+            buddy->setBuddyLeader(true);
             leaderElected = true;
         }
 
-        (*itSource)->removeBuddy(this);
+        buddy->removeBuddy(this);
     }
 
     m_sourceBuddies.clear();
 
-    for (;itSink != m_sinkBuddies.end(); ++itSink)
+    for (auto* buddy : sinkCopy)
     {
         if (isBuddyLeader() && !leaderElected)
         {
-            (*itSink)->setBuddyLeader(true);
+            buddy->setBuddyLeader(true);
             leaderElected = true;
         }
 
-        (*itSink)->removeBuddy(this);
+        buddy->removeBuddy(this);
     }
 
     m_sinkBuddies.clear();
