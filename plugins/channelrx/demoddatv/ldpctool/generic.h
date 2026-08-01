@@ -707,10 +707,12 @@ struct SumProductAlgorithm
 	}
 	static void finalp(TYPE *links, int cnt)
 	{
-		TYPE in[cnt], out[cnt];
+		std::vector<TYPE> in(cnt);
+		std::vector<TYPE> out(cnt);
+
 		for (int i = 0; i < cnt; ++i)
 			in[i] = prep(links[i]);
-		CODE::exclusive_reduce(in, out, cnt, mul);
+		CODE::exclusive_reduce(in.data(), out.data(), cnt, mul);
 		for (int i = 0; i < cnt; ++i)
 			links[i] = postp(out[i]);
 	}
