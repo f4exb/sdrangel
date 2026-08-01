@@ -30,7 +30,7 @@
 LogSlider::LogSlider(QWidget *parent) :
     QSlider(Qt::Horizontal, parent)
 {
-    setRange(0, 1000);
+    QSlider::setRange(0, 1000);
     connect(this, &QSlider::valueChanged, this, &LogSlider::handleValueChanged);
     setPageStep(1);
     setTickPosition(QSlider::TicksAbove);
