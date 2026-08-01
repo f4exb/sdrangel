@@ -18,6 +18,7 @@
 #ifndef INCLUDE_SPYSERVERLIST_H
 #define INCLUDE_SPYSERVERLIST_H
 
+#include <limits>
 #include <QtCore>
 #include <QTimer>
 
@@ -37,17 +38,17 @@ public:
     struct SpyServer {
         QString m_generalDescription;
         QString m_deviceType;
-        QString m_streamingHost; // IP address
-        int m_streamingPort;    // IP port
-        int m_currentClientCount;
-        int m_maxClients;
+        QString m_streamingHost;    // IP address
+        int m_streamingPort = 0;    // IP port
+        int m_currentClientCount = 0;
+        int m_maxClients = 0;
         QString m_antennaType;
-        float m_latitude;
-        float m_longitude;
-        qint64 m_minimumFrequency;
-        qint64 m_maximumFrequency;
-        bool m_fullControlAllowed;
-        bool m_online;
+        float m_latitude = 0.0f;
+        float m_longitude = 0.0f;
+        qint64 m_minimumFrequency = 0;
+        qint64 m_maximumFrequency = std::numeric_limits<qint64>::max();
+        bool m_fullControlAllowed = false;
+        bool m_online = false;
     };
 
     SpyServerList();
