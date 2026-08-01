@@ -161,9 +161,14 @@ void FFTNRDialog::setAlpha(float alpha, int fftLength, int sampleRate)
     ui->alpha->blockSignals(false);
     ui->alphaValue->setText(tr("%1").arg(alphaDisplay));
     ui->alphaValue->setToolTip(tr("dB(1 - alpha) alpha=%1").arg(m_alpha, 0, 'f', 5));
-    float t = m_flen;
-    t /= m_sampleRate;
-    float tau = -(t / log(m_alpha));
+
+    float t = static_cast<float>(m_flen) / m_sampleRate;
+    float tau = 0.0f;
+    if (m_alpha > 0.0f)
+    {
+        tau = -(t / std::log(m_alpha));
+    }
+
     ui->tauText->setText(tr("%1").arg(tau, 0, 'f', 3));
 }
 

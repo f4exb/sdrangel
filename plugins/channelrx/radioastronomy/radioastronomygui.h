@@ -687,7 +687,7 @@ private slots:
     void on_powerGaussianHPBW_valueChanged(double value);
 
     void plotPowerFiltered();
-    void addToPowerFilter(qreal y, qreal x);
+    void addToPowerFilter(qreal x, qreal y);
     void on_powerShowFiltered_clicked(bool checked=false);
     void on_powerFilter_currentIndexChanged(int index);
     void on_powerFilterN_valueChanged(int value);

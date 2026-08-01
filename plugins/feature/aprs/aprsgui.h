@@ -166,7 +166,7 @@ private:
     void removeFromMap(const QString& name);
     void blockApplySettings(bool block);
     void applySettings(bool force = false);
-    void displayTableSettings(QTableWidget *table, QMenu *menu, int *columnIndexes, int *columnSizes, int columns);
+    void displayTableSettings(QTableWidget *table, QMenu *menu, int *columnSizes, int *columnIndexes, int columns);
     bool filterStation(APRSStation *station);
     void filterStations();
     void displaySettings();
