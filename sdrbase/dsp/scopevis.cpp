@@ -725,6 +725,12 @@ void ScopeVis::processTrace(const std::vector<ComplexVector::const_iterator>& vc
 
 bool ScopeVis::nextTrigger()
 {
+    if (m_triggerConditions.empty())
+    {
+        m_currentTriggerIndex = 0;
+        return false; // final
+    }
+
     TriggerCondition *triggerCondition = m_triggerConditions[m_currentTriggerIndex]; // current trigger condition
 
     if (triggerCondition->m_triggerData.m_triggerRepeat > 0)
@@ -740,12 +746,7 @@ bool ScopeVis::nextTrigger()
         }
     }
 
-    if (m_triggerConditions.size() == 0)
-    {
-        m_currentTriggerIndex = 0;
-        return false; // final
-    }
-    else if (m_currentTriggerIndex < m_triggerConditions.size() - 1) // check if next trigger is available
+    if (m_currentTriggerIndex < m_triggerConditions.size() - 1) // check if next trigger is available
     {
         m_currentTriggerIndex++;
         return true; // not final keep going
