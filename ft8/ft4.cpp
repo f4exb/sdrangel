@@ -122,6 +122,9 @@ FT4::FT4(
     hack_len_ = -1;
     fftEngine_ = fftEngine;
     npasses_ = 1;
+    pass_ = 0;
+    hack_0_ = 0.0f;
+    hack_1_ = 0.0f;
 }
 
 void FT4::start_work()
