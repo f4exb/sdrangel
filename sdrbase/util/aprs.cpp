@@ -953,7 +953,7 @@ bool APRSPacket::parseMessage(QString& info, int& idx)
         int i = 5;
         for (int j = 0; j < 8; j++)
         {
-            if (i >= m_message.length())
+            if (i < m_message.length())
                 m_telemetryBitSense[j] = m_message[i] == '1';
             else
                 m_telemetryBitSense[j] = true;
