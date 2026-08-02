@@ -1452,7 +1452,7 @@ std::vector<std::vector<float>> FT4::soft_c2m(const FFTEngine::ffts_t &c103) con
     {
         m103[si].resize(4);
         float mx = -std::numeric_limits<float>::infinity();
-        float mx_phase;
+        float mx_phase = 0.0f;
 
         for (int bi = 0; bi < 4; bi++)
         {
