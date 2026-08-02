@@ -46,6 +46,7 @@ void SimplePTTSettings::resetToDefaults()
     m_vox = false;
     m_voxEnable = false;
     m_gpioControl = GPIONone;
+    m_rx2txGPIOEnable = false;
     m_rx2txCommandEnable = false;
     m_rx2txGPIOMask = 0;
     m_rx2txGPIOValues = 0;
