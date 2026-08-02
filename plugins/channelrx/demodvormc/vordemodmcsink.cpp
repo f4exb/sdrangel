@@ -44,6 +44,8 @@ VORDemodMCSink::VORDemodMCSink(const VORDemodMCSettings& settings, int subChanne
         m_volumeAGC(0.003),
         m_audioFifo(48000),
         m_refPrev(0.0f),
+        m_varPhase(0.0),
+        m_varMag(0.0),
         m_movingAverageIdent(5000),
         m_prevBit(0),
         m_bitTime(0),
@@ -204,13 +206,11 @@ void VORDemodMCSink::processOneSample(Complex &ci)
     Real mag = std::sqrt(magsq);
 
     // Calculate phase of 30Hz variable AM signal
-    double varPhase;
-    double varMag;
     if (m_varGoertzel.size() == VORDEMOD_CHANNEL_SAMPLE_RATE - 1)
     {
         m_varGoertzel.goertzel(mag);
-        varPhase = Units::radiansToDegrees(m_varGoertzel.phase());
-        varMag = m_varGoertzel.mag();
+        m_varPhase = Units::radiansToDegrees(m_varGoertzel.phase());
+        m_varMag = m_varGoertzel.mag();
         m_varGoertzel.reset();
     }
     else
@@ -239,17 +239,17 @@ void VORDemodMCSink::processOneSample(Complex &ci)
         float shiftedPhase = phaseDeg + filterPhaseShift;
 
         // Calculate difference in phase, which is the radial
-        float phaseDifference = shiftedPhase - varPhase;
+        float phaseDifference = shiftedPhase - m_varPhase;
         if (phaseDifference < 0.0)
             phaseDifference += 360.0;
         else if (phaseDifference >= 360.0)
             phaseDifference -= 360.0;
 
-        // qDebug() << "Ref phase: " << phaseDeg << " var phase " << varPhase;
+        // qDebug() << "Ref phase: " << phaseDeg << " var phase " << m_varPhase;
 
         if (getMessageQueueToGUI())
         {
-            VORDemodMCReport::MsgReportRadial *msg = VORDemodMCReport::MsgReportRadial::create(m_subChannelId, phaseDifference, refMag, varMag);
+            VORDemodMCReport::MsgReportRadial *msg = VORDemodMCReport::MsgReportRadial::create(m_subChannelId, phaseDifference, refMag, m_varMag);
             getMessageQueueToGUI()->push(msg);
         }
 

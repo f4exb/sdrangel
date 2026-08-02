@@ -132,6 +132,8 @@ private:
     Lowpass<Complex> m_lowpassRef;
     Lowpass<Complex> m_lowpassIdent;
     Complex m_refPrev;
+    double m_varPhase;
+    double m_varMag;
     MovingAverageUtilVar<Real, double> m_movingAverageIdent;
     static const int m_identBins = 10;
     Real m_identMins[m_identBins];
