@@ -412,6 +412,9 @@ int AISModSource::getBit()
 
 void AISModSource::addBit(int bit)
 {
+    if (m_bitIdx == 0)
+        m_bits[m_byteIdx] = 0;
+
     // Transmit LSB first
     m_bits[m_byteIdx] |= bit << m_bitIdx;
     m_bitIdx++;
