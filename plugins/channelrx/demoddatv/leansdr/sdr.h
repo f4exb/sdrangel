@@ -1472,6 +1472,7 @@ struct fast_qpsk_receiver : runnable
         meas_decimation(1048576),
         pll_adjustment(1.0),
         allow_drift(false),
+        hist{},
         in(_in),
         out(_out, chunk_size),
         mu(0),
@@ -1482,7 +1483,6 @@ struct fast_qpsk_receiver : runnable
         set_freq(0);
         freq_out = _freq_out ? new pipewriter<float>(*_freq_out) : nullptr;
         cstln_out = _cstln_out ? new pipewriter<std::complex<T>>(*_cstln_out) : nullptr;
-        memset(hist, 0, sizeof(hist));
         init_lookup_tables();
     }
 

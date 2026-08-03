@@ -774,13 +774,25 @@ void DeviceAPI::removeBuddy(DeviceAPI* buddy)
 {
     switch(buddy->m_streamType) {
     case StreamSingleRx:
-        m_sourceBuddies.erase(std::find(m_sourceBuddies.begin(), m_sourceBuddies.end(), buddy));
+    {
+        auto it = std::find(m_sourceBuddies.begin(), m_sourceBuddies.end(), buddy);
+        if (it != m_sourceBuddies.end())
+        {
+            m_sourceBuddies.erase(it);
+        }
         break;
+    }
     case StreamSingleTx:
-        m_sinkBuddies.erase(std::find(m_sinkBuddies.begin(), m_sinkBuddies.end(), buddy));
+    {
+        auto it = std::find(m_sinkBuddies.begin(), m_sinkBuddies.end(), buddy);
+        if (it != m_sinkBuddies.end())
+        {
+            m_sinkBuddies.erase(it);
+        }
         break;
+    }
     default:
-        qDebug("DeviceAPI::removeSourceBuddy: buddy %s(%s) is not of single Rx or Tx type",
+        qDebug("DeviceAPI::removeBuddy: buddy %s(%s) is not of single Rx or Tx type",
                 qPrintable(buddy->getHardwareId()),
                 qPrintable(buddy->getSamplingDeviceSerial()));
         return;
@@ -789,32 +801,35 @@ void DeviceAPI::removeBuddy(DeviceAPI* buddy)
 
 void DeviceAPI::clearBuddiesLists()
 {
-    auto itSource = m_sourceBuddies.begin();
-    auto itSink = m_sinkBuddies.begin();
+    // Make copies before iterating because removeBuddy() modifies the buddy
+    // relationship lists. Iterating directly over m_sourceBuddies/m_sinkBuddies
+    // could invalidate iterators while the relationships are being removed.
+    auto sourceCopy = m_sourceBuddies;
+    auto sinkCopy = m_sinkBuddies;
     bool leaderElected = false;
 
-    for (;itSource != m_sourceBuddies.end(); ++itSource)
+    for (auto* buddy : sourceCopy)
     {
         if (isBuddyLeader() && !leaderElected)
         {
-            (*itSource)->setBuddyLeader(true);
+            buddy->setBuddyLeader(true);
             leaderElected = true;
         }
 
-        (*itSource)->removeBuddy(this);
+        buddy->removeBuddy(this);
     }
 
     m_sourceBuddies.clear();
 
-    for (;itSink != m_sinkBuddies.end(); ++itSink)
+    for (auto* buddy : sinkCopy)
     {
         if (isBuddyLeader() && !leaderElected)
         {
-            (*itSink)->setBuddyLeader(true);
+            buddy->setBuddyLeader(true);
             leaderElected = true;
         }
 
-        (*itSink)->removeBuddy(this);
+        buddy->removeBuddy(this);
     }
 
     m_sinkBuddies.clear();

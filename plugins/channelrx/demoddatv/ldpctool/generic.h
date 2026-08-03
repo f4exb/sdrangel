@@ -23,6 +23,8 @@ Copyright 2018 Ahmet Inan <xdsopl@gmail.com>
 #ifndef GENERIC_HH
 #define GENERIC_HH
 
+#include <vector>
+
 #include "exclusive_reduce.h"
 
 namespace ldpctool {
@@ -66,13 +68,15 @@ struct MinSumAlgorithm
 	}
 	static void finalp(TYPE *links, int cnt)
 	{
-		TYPE mags[cnt], mins[cnt];
+		std::vector<TYPE> mags(cnt);
+		std::vector<TYPE> mins(cnt);
+		std::vector<TYPE> signs(cnt);
+
 		for (int i = 0; i < cnt; ++i)
 			mags[i] = std::abs(links[i]);
-		CODE::exclusive_reduce(mags, mins, cnt, min);
 
-		TYPE signs[cnt];
-		CODE::exclusive_reduce(links, signs, cnt, sign);
+		CODE::exclusive_reduce(mags.data(), mins.data(), cnt, min);
+		CODE::exclusive_reduce(links, signs.data(), cnt, sign);
 
 		for (int i = 0; i < cnt; ++i)
 			links[i] = sign(mins[i], signs[i]);
@@ -117,18 +121,20 @@ struct MinSumAlgorithm<float, UPDATE>
 	static void finalp(float *links, int cnt)
 	{
 		int mask = 0x80000000;
-		float mags[cnt], mins[cnt];
+		std::vector<float> mags(cnt), mins(cnt);
+		std::vector<int> signs(cnt);
+
 		for (int i = 0; i < cnt; ++i)
 			mags[i] = std::abs(links[i]);
-		CODE::exclusive_reduce(mags, mins, cnt, min);
 
-		int signs[cnt];
-		CODE::exclusive_reduce(reinterpret_cast<int *>(links), signs, cnt, xor_);
+		CODE::exclusive_reduce(mags.data(), mins.data(), cnt, min);
+		CODE::exclusive_reduce(reinterpret_cast<int *>(links), signs.data(), cnt, xor_);
+
 		for (int i = 0; i < cnt; ++i)
 			signs[i] &= mask;
 
 		for (int i = 0; i < cnt; ++i)
-			reinterpret_cast<int *>(links)[i] = signs[i] | reinterpret_cast<int *>(mins)[i];
+			reinterpret_cast<int *>(links)[i] = signs[i] | reinterpret_cast<int *>(mins.data())[i];
 	}
 	static float sign(float a, float b)
 	{
@@ -193,13 +199,17 @@ struct MinSumAlgorithm<int8_t, UPDATE>
 	}
 	static void finalp(int8_t *links, int cnt)
 	{
-		int8_t mags[cnt], mins[cnt];
+		std::vector<int8_t> scratch(3 * cnt);
+		int8_t *mags = scratch.data();
+		int8_t *mins = mags + cnt;
+		int8_t *signs = mins + cnt;
+
 		for (int i = 0; i < cnt; ++i)
 			mags[i] = sqabs(links[i]);
-		CODE::exclusive_reduce(mags, mins, cnt, min);
 
-		int8_t signs[cnt];
+		CODE::exclusive_reduce(mags, mins, cnt, min);
 		CODE::exclusive_reduce(links, signs, cnt, xor_);
+
 		for (int i = 0; i < cnt; ++i)
 			signs[i] |= 127;
 
@@ -238,13 +248,15 @@ struct OffsetMinSumAlgorithm
 	static void finalp(TYPE *links, int cnt)
 	{
 		TYPE beta = 0.5 * FACTOR;
-		TYPE mags[cnt], mins[cnt];
+		std::vector<TYPE> mags(cnt);
+		std::vector<TYPE> mins(cnt);
+		std::vector<TYPE> signs(cnt);
+
 		for (int i = 0; i < cnt; ++i)
 			mags[i] = std::max(std::abs(links[i]) - beta, TYPE(0));
-		CODE::exclusive_reduce(mags, mins, cnt, min);
 
-		TYPE signs[cnt];
-		CODE::exclusive_reduce(links, signs, cnt, sign);
+		CODE::exclusive_reduce(mags.data(), mins.data(), cnt, min);
+		CODE::exclusive_reduce(links, signs.data(), cnt, sign);
 
 		for (int i = 0; i < cnt; ++i)
 			links[i] = sign(mins[i], signs[i]);
@@ -315,12 +327,15 @@ struct OffsetMinSumAlgorithm<int8_t, UPDATE, FACTOR>
 	static void finalp(int8_t *links, int cnt)
 	{
 		int8_t beta = std::nearbyint(0.5 * FACTOR);
-		int8_t mags[cnt], mins[cnt];
+		std::vector<int8_t> scratch(3 * cnt);
+		int8_t *mags = scratch.data();
+		int8_t *mins = mags + cnt;
+		int8_t *signs = mins + cnt;
+
 		for (int i = 0; i < cnt; ++i)
 			mags[i] = subu(sqabs(links[i]), beta);
 		CODE::exclusive_reduce(mags, mins, cnt, min);
 
-		int8_t signs[cnt];
 		CODE::exclusive_reduce(links, signs, cnt, xor_);
 		for (int i = 0; i < cnt; ++i)
 			signs[i] |= 127;
@@ -376,8 +391,8 @@ struct MinSumCAlgorithm
 	}
 	static void finalp(TYPE *links, int cnt)
 	{
-		TYPE tmp[cnt];
-		CODE::exclusive_reduce(links, tmp, cnt, min);
+		std::vector<TYPE> tmp(cnt);
+		CODE::exclusive_reduce(links, tmp.data(), cnt, min);
 		for (int i = 0; i < cnt; ++i)
 			links[i] = tmp[i];
 	}
@@ -432,8 +447,8 @@ struct MinSumCAlgorithm<float, UPDATE, FACTOR>
 	}
 	static void finalp(float *links, int cnt)
 	{
-		float tmp[cnt];
-		CODE::exclusive_reduce(links, tmp, cnt, min);
+		std::vector<float> tmp(cnt);
+		CODE::exclusive_reduce(links, tmp.data(), cnt, min);
 		for (int i = 0; i < cnt; ++i)
 			links[i] = tmp[i];
 	}
@@ -529,8 +544,8 @@ struct MinSumCAlgorithm<int8_t, UPDATE, FACTOR>
 	}
 	static void finalp(int8_t *links, int cnt)
 	{
-		int8_t tmp[cnt];
-		CODE::exclusive_reduce(links, tmp, cnt, min);
+		std::vector<int8_t> tmp(cnt);
+		CODE::exclusive_reduce(links, tmp.data(), cnt, min);
 		for (int i = 0; i < cnt; ++i)
 			links[i] = tmp[i];
 	}
@@ -574,13 +589,15 @@ struct LogDomainSPA
 	}
 	static void finalp(TYPE *links, int cnt)
 	{
-		TYPE mags[cnt], sums[cnt];
+		std::vector<TYPE> mags(cnt);
+		std::vector<TYPE> sums(cnt);
+		std::vector<TYPE> signs(cnt);
+
 		for (int i = 0; i < cnt; ++i)
 			mags[i] = phi(std::abs(links[i]));
-		CODE::exclusive_reduce(mags, sums, cnt, add);
 
-		TYPE signs[cnt];
-		CODE::exclusive_reduce(links, signs, cnt, sign);
+		CODE::exclusive_reduce(mags.data(), sums.data(), cnt, add);
+		CODE::exclusive_reduce(links, signs.data(), cnt, sign);
 
 		for (int i = 0; i < cnt; ++i)
 			links[i] = sign(phi(sums[i]), signs[i]);
@@ -626,12 +643,12 @@ struct LambdaMinAlgorithm
 	static void finalp(TYPE *links, int cnt)
 	{
 		typedef std::pair<TYPE, int> Pair;
-		Pair mags[cnt];
+		std::vector<Pair> mags(cnt);
 		for (int i = 0; i < cnt; ++i)
 			mags[i] = Pair(std::abs(links[i]), i);
-		std::nth_element(mags, mags+LAMBDA, mags+cnt, [](Pair a, Pair b){ return a.first < b.first; });
+		std::nth_element(mags.begin(), mags.begin()+LAMBDA, mags.end(), [](Pair a, Pair b){ return a.first < b.first; });
 
-		TYPE sums[cnt];
+		std::vector<TYPE> sums(cnt);
 		for (int i = 0; i < cnt; ++i) {
 			int j = 0;
 			if (i == mags[0].second)
@@ -645,8 +662,8 @@ struct LambdaMinAlgorithm
 			}
 		}
 
-		TYPE signs[cnt];
-		CODE::exclusive_reduce(links, signs, cnt, sign);
+		std::vector<TYPE> signs(cnt);
+		CODE::exclusive_reduce(links, signs.data(), cnt, sign);
 
 		for (int i = 0; i < cnt; ++i)
 			links[i] = sign(phi(sums[i]), signs[i]);
@@ -690,10 +707,12 @@ struct SumProductAlgorithm
 	}
 	static void finalp(TYPE *links, int cnt)
 	{
-		TYPE in[cnt], out[cnt];
+		std::vector<TYPE> in(cnt);
+		std::vector<TYPE> out(cnt);
+
 		for (int i = 0; i < cnt; ++i)
 			in[i] = prep(links[i]);
-		CODE::exclusive_reduce(in, out, cnt, mul);
+		CODE::exclusive_reduce(in.data(), out.data(), cnt, mul);
 		for (int i = 0; i < cnt; ++i)
 			links[i] = postp(out[i]);
 	}
