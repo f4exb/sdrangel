@@ -154,7 +154,7 @@ void AISModSource::sampleToScope(Complex sample)
 
 void AISModSource::modulateSample()
 {
-    Real mod;
+    Real mod = 0.0f;
     Real linearRampGain;
 
     if ((m_state == idle) || (m_state == wait))
