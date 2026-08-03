@@ -427,8 +427,11 @@ void PacketDemod::webapiUpdateChannelSettings(
     if (channelSettingsKeys.contains("mode")) {
         settings.m_mode = (PacketDemodSettings::Mode) response.getPacketDemodSettings()->getMode();
     }
-    if (channelSettingsKeys.contains("fmDeviation")) {
-        settings.m_fmDeviation = response.getPacketDemodSettings()->getFmDeviation();
+    if (channelSettingsKeys.contains("chase")) {
+        settings.m_chase = response.getPacketDemodSettings()->getChase();
+    }
+    if (channelSettingsKeys.contains("mlse")) {
+        settings.m_mlse = response.getPacketDemodSettings()->getMlse() != 0;
     }
     if (channelSettingsKeys.contains("rfBandwidth")) {
         settings.m_rfBandwidth = response.getPacketDemodSettings()->getRfBandwidth();
@@ -485,7 +488,8 @@ void PacketDemod::webapiUpdateChannelSettings(
 
 void PacketDemod::webapiFormatChannelSettings(SWGSDRangel::SWGChannelSettings& response, const PacketDemodSettings& settings)
 {
-    response.getPacketDemodSettings()->setFmDeviation(settings.m_fmDeviation);
+    response.getPacketDemodSettings()->setChase(settings.m_chase);
+    response.getPacketDemodSettings()->setMlse(settings.m_mlse ? 1 : 0);
     response.getPacketDemodSettings()->setInputFrequencyOffset(settings.m_inputFrequencyOffset);
     response.getPacketDemodSettings()->setMode((int) settings.m_mode);
     response.getPacketDemodSettings()->setRfBandwidth(settings.m_rfBandwidth);
@@ -596,8 +600,11 @@ void PacketDemod::webapiFormatChannelSettings(
 
     // transfer data that has been modified. When force is on transfer all data except reverse API data
 
-    if (channelSettingsKeys.contains("fmDeviation") || force) {
-        swgPacketDemodSettings->setFmDeviation(settings.m_fmDeviation);
+    if (channelSettingsKeys.contains("chase") || force) {
+        swgPacketDemodSettings->setChase(settings.m_chase);
+    }
+    if (channelSettingsKeys.contains("mlse") || force) {
+        swgPacketDemodSettings->setMlse(settings.m_mlse ? 1 : 0);
     }
     if (channelSettingsKeys.contains("inputFrequencyOffset") || force) {
         swgPacketDemodSettings->setInputFrequencyOffset(settings.m_inputFrequencyOffset);

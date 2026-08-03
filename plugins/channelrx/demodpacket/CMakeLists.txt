@@ -14,6 +14,9 @@ set(demodpacket_HEADERS
     packetdemodsettings.h
     packetdemodbaseband.h
     packetdemodsink.h
+    packetdemodcore.h
+    packetdemodframer.h
+    packetdemodtonecorrelator.h
     packetdemodplugin.h
     packetdemodwebapiadapter.h
 )

@@ -36,7 +36,8 @@ void PacketDemodSettings::resetToDefaults()
     m_inputFrequencyOffset = 0;
     m_mode = ModeAFSK1200;
     m_rfBandwidth = 12500.0f;
-    m_fmDeviation = 2500.0f;
+    m_chase = 6;
+    m_mlse = true;
     m_filterFrom = "";
     m_filterTo = "";
     m_filterPID = "";
@@ -87,7 +88,7 @@ QByteArray PacketDemodSettings::serialize() const
     s.writeU32(18, m_reverseAPIChannelIndex);
 
     s.writeFloat(20, m_rfBandwidth);
-    s.writeFloat(21, m_fmDeviation);
+    // Key 21 was m_fmDeviation - don't reuse
     s.writeBool(22, m_udpEnabled);
     s.writeString(23, m_udpAddress);
     s.writeU32(24, m_udpPort);
@@ -104,6 +105,8 @@ QByteArray PacketDemodSettings::serialize() const
     s.writeBool(30, m_hidden);
 
     s.writeBool(31, m_useFileTime);
+    s.writeS32(32, m_chase);
+    s.writeBool(33, m_mlse);
 
     for (int i = 0; i < PACKETDEMOD_COLUMNS; i++) {
         s.writeS32(100 + i, m_columnIndexes[i]);
@@ -162,7 +165,6 @@ bool PacketDemodSettings::deserialize(const QByteArray& data)
         m_reverseAPIChannelIndex = utmp > 99 ? 99 : utmp;
 
         d.readFloat(20, &m_rfBandwidth, 12500.0f);
-        d.readFloat(21, &m_fmDeviation, 2500.0f);
 
         d.readBool(22, &m_udpEnabled);
         d.readString(23, &m_udpAddress);
@@ -188,6 +190,8 @@ bool PacketDemodSettings::deserialize(const QByteArray& data)
         d.readBool(30, &m_hidden, false);
 
         d.readBool(31, &m_useFileTime, false);
+        d.readS32(32, &m_chase, 6);
+        d.readBool(33, &m_mlse, true);
 
         for (int i = 0; i < PACKETDEMOD_COLUMNS; i++) {
             d.readS32(100 + i, &m_columnIndexes[i], i);
@@ -217,8 +221,11 @@ void PacketDemodSettings::applySettings(const QStringList& settingsKeys, const P
     if (settingsKeys.contains("rfBandwidth")) {
         m_rfBandwidth = settings.m_rfBandwidth;
     }
-    if (settingsKeys.contains("fmDeviation")) {
-        m_fmDeviation = settings.m_fmDeviation;
+    if (settingsKeys.contains("chase")) {
+        m_chase = settings.m_chase;
+    }
+    if (settingsKeys.contains("mlse")) {
+        m_mlse = settings.m_mlse;
     }
     if (settingsKeys.contains("filterFrom")) {
         m_filterFrom = settings.m_filterFrom;
@@ -305,8 +312,11 @@ QString PacketDemodSettings::getDebugString(const QStringList& settingsKeys, boo
     if (settingsKeys.contains("rfBandwidth") || force) {
         ostr << " m_rfBandwidth: " << m_rfBandwidth;
     }
-    if (settingsKeys.contains("fmDeviation") || force) {
-        ostr << " m_fmDeviation: " << m_fmDeviation;
+    if (settingsKeys.contains("chase") || force) {
+        ostr << " m_chase: " << m_chase;
+    }
+    if (settingsKeys.contains("mlse") || force) {
+        ostr << " m_mlse: " << m_mlse;
     }
     if (settingsKeys.contains("filterFrom") || force) {
         ostr << " m_filterFrom: " << m_filterFrom.toStdString();
