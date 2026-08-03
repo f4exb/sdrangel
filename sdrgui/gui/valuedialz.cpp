@@ -647,14 +647,13 @@ void ValueDialZ::keyPressEvent(QKeyEvent* value)
         }
 
         int d = c.toLatin1() - '0';
-        quint64 e = findExponent(m_cursor);
-        quint64 value = abs(m_value);
-        int sign = m_value < 0 ? -1 : 1;
-        quint64 v = (value / e) % 10;
+        qint64 e = static_cast<qint64>(findExponent(m_cursor));
+        qint64 value = qAbs(m_value);
+        qint64 v = (value / e) % 10;
 
         v = value - v * e;
         v += d * e;
-        setValue(sign*v);
+        setValue(m_value < 0 ? -v : v);
         m_cursor++;
 
         if ((m_text[m_cursor] == m_groupSeparator) || (m_text[m_cursor] == m_decSeparator)) {
