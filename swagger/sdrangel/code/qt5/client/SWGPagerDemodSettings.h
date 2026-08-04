@@ -60,9 +60,6 @@ public:
     float getFmDeviation();
     void setFmDeviation(float fm_deviation);
 
-    float getCorrelationThreshold();
-    void setCorrelationThreshold(float correlation_threshold);
-
     qint32 getUdpEnabled();
     void setUdpEnabled(qint32 udp_enabled);
 
@@ -71,9 +68,6 @@ public:
 
     qint32 getUdpPort();
     void setUdpPort(qint32 udp_port);
-
-    qint32 getUdpFormat();
-    void setUdpFormat(qint32 udp_format);
 
     QString* getLogFilename();
     void setLogFilename(QString* log_filename);
@@ -133,9 +127,6 @@ private:
     float fm_deviation;
     bool m_fm_deviation_isSet;
 
-    float correlation_threshold;
-    bool m_correlation_threshold_isSet;
-
     qint32 udp_enabled;
     bool m_udp_enabled_isSet;
 
@@ -144,9 +135,6 @@ private:
 
     qint32 udp_port;
     bool m_udp_port_isSet;
-
-    qint32 udp_format;
-    bool m_udp_format_isSet;
 
     QString* log_filename;
     bool m_log_filename_isSet;

@@ -38,16 +38,12 @@ SWGPagerDemodSettings::SWGPagerDemodSettings() {
     m_rf_bandwidth_isSet = false;
     fm_deviation = 0.0f;
     m_fm_deviation_isSet = false;
-    correlation_threshold = 0.0f;
-    m_correlation_threshold_isSet = false;
     udp_enabled = 0;
     m_udp_enabled_isSet = false;
     udp_address = nullptr;
     m_udp_address_isSet = false;
     udp_port = 0;
     m_udp_port_isSet = false;
-    udp_format = 0;
-    m_udp_format_isSet = false;
     log_filename = nullptr;
     m_log_filename_isSet = false;
     log_enabled = 0;
@@ -92,16 +88,12 @@ SWGPagerDemodSettings::init() {
     m_rf_bandwidth_isSet = false;
     fm_deviation = 0.0f;
     m_fm_deviation_isSet = false;
-    correlation_threshold = 0.0f;
-    m_correlation_threshold_isSet = false;
     udp_enabled = 0;
     m_udp_enabled_isSet = false;
     udp_address = new QString("");
     m_udp_address_isSet = false;
     udp_port = 0;
     m_udp_port_isSet = false;
-    udp_format = 0;
-    m_udp_format_isSet = false;
     log_filename = new QString("");
     m_log_filename_isSet = false;
     log_enabled = 0;
@@ -138,11 +130,9 @@ SWGPagerDemodSettings::cleanup() {
 
 
 
-
     if(udp_address != nullptr) { 
         delete udp_address;
     }
-
 
     if(log_filename != nullptr) { 
         delete log_filename;
@@ -192,15 +182,11 @@ SWGPagerDemodSettings::fromJsonObject(QJsonObject &pJson) {
     
     ::SWGSDRangel::setValue(&fm_deviation, pJson["fmDeviation"], "float", "");
     
-    ::SWGSDRangel::setValue(&correlation_threshold, pJson["correlationThreshold"], "float", "");
-    
     ::SWGSDRangel::setValue(&udp_enabled, pJson["udpEnabled"], "qint32", "");
     
     ::SWGSDRangel::setValue(&udp_address, pJson["udpAddress"], "QString", "QString");
     
     ::SWGSDRangel::setValue(&udp_port, pJson["udpPort"], "qint32", "");
-    
-    ::SWGSDRangel::setValue(&udp_format, pJson["udpFormat"], "qint32", "");
     
     ::SWGSDRangel::setValue(&log_filename, pJson["logFilename"], "QString", "QString");
     
@@ -259,9 +245,6 @@ SWGPagerDemodSettings::asJsonObject() {
     if(m_fm_deviation_isSet){
         obj->insert("fmDeviation", QJsonValue(fm_deviation));
     }
-    if(m_correlation_threshold_isSet){
-        obj->insert("correlationThreshold", QJsonValue(correlation_threshold));
-    }
     if(m_udp_enabled_isSet){
         obj->insert("udpEnabled", QJsonValue(udp_enabled));
     }
@@ -270,9 +253,6 @@ SWGPagerDemodSettings::asJsonObject() {
     }
     if(m_udp_port_isSet){
         obj->insert("udpPort", QJsonValue(udp_port));
-    }
-    if(m_udp_format_isSet){
-        obj->insert("udpFormat", QJsonValue(udp_format));
     }
     if(log_filename != nullptr && *log_filename != QString("")){
         toJsonValue(QString("logFilename"), log_filename, obj, QString("QString"));
@@ -367,16 +347,6 @@ SWGPagerDemodSettings::setFmDeviation(float fm_deviation) {
     this->m_fm_deviation_isSet = true;
 }
 
-float
-SWGPagerDemodSettings::getCorrelationThreshold() {
-    return correlation_threshold;
-}
-void
-SWGPagerDemodSettings::setCorrelationThreshold(float correlation_threshold) {
-    this->correlation_threshold = correlation_threshold;
-    this->m_correlation_threshold_isSet = true;
-}
-
 qint32
 SWGPagerDemodSettings::getUdpEnabled() {
     return udp_enabled;
@@ -405,16 +375,6 @@ void
 SWGPagerDemodSettings::setUdpPort(qint32 udp_port) {
     this->udp_port = udp_port;
     this->m_udp_port_isSet = true;
-}
-
-qint32
-SWGPagerDemodSettings::getUdpFormat() {
-    return udp_format;
-}
-void
-SWGPagerDemodSettings::setUdpFormat(qint32 udp_format) {
-    this->udp_format = udp_format;
-    this->m_udp_format_isSet = true;
 }
 
 QString*
@@ -567,9 +527,6 @@ SWGPagerDemodSettings::isSet(){
         if(m_fm_deviation_isSet){
             isObjectUpdated = true; break;
         }
-        if(m_correlation_threshold_isSet){
-            isObjectUpdated = true; break;
-        }
         if(m_udp_enabled_isSet){
             isObjectUpdated = true; break;
         }
@@ -577,9 +534,6 @@ SWGPagerDemodSettings::isSet(){
             isObjectUpdated = true; break;
         }
         if(m_udp_port_isSet){
-            isObjectUpdated = true; break;
-        }
-        if(m_udp_format_isSet){
             isObjectUpdated = true; break;
         }
         if(log_filename && *log_filename != QString("")){
