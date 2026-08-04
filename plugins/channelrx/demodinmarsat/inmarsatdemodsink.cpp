@@ -325,7 +325,9 @@ InmarsatDemodSink::InmarsatDemodSink(InmarsatDemod *stdCDemod) :
     m_symbolCounter(0),
     m_syncedToUW(false),
     m_equalizer(nullptr),
+    m_evm(0.0f),
     m_costasLoop(10*2*M_PI/100.0, 2),
+    m_locked(false),
     m_rrcBufferIndex(0),
     m_sampleBufferIndexA(0),
     m_sampleBufferIndexB(0)
@@ -528,9 +530,16 @@ void InmarsatDemodSink::processOneSample(Complex &ci)
 
                 // Determine whether Costas loop is locked - BPSK so Q part should average as zero when locked, and will be similar to I when not locked
                 Real derotMag = abs(m_derot);
-                Real iNorm = abs(m_derot.real()) / derotMag;
-                Real qNorm = abs(m_derot.imag()) / derotMag;
-                m_lockAverage(iNorm - qNorm);
+                if (derotMag != 0.0f)
+                {
+                    Real iNorm = abs(m_derot.real()) / derotMag;
+                    Real qNorm = abs(m_derot.imag()) / derotMag;
+                    m_lockAverage(iNorm - qNorm);
+                }
+                else
+                {
+                    m_lockAverage(0.0f);
+                }
                 float lockThresh = 0.45;
                 m_locked = m_lockAverage.instantAverage() > lockThresh;
 
