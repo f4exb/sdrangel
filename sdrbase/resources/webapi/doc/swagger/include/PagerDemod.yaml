@@ -1,9 +1,6 @@
 PagerDemodSettings:
   description: PagerDemod
   properties:
-    baud:
-      description: "Baud rate"
-      type: integer
     decode:
       type: integer
       description: >

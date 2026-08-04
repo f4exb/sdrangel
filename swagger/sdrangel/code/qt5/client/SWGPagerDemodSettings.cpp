@@ -28,8 +28,6 @@ SWGPagerDemodSettings::SWGPagerDemodSettings(QString* json) {
 }
 
 SWGPagerDemodSettings::SWGPagerDemodSettings() {
-    baud = 0;
-    m_baud_isSet = false;
     decode = 0;
     m_decode_isSet = false;
     reverse = 0;
@@ -84,8 +82,6 @@ SWGPagerDemodSettings::~SWGPagerDemodSettings() {
 
 void
 SWGPagerDemodSettings::init() {
-    baud = 0;
-    m_baud_isSet = false;
     decode = 0;
     m_decode_isSet = false;
     reverse = 0;
@@ -143,7 +139,6 @@ SWGPagerDemodSettings::cleanup() {
 
 
 
-
     if(udp_address != nullptr) { 
         delete udp_address;
     }
@@ -187,8 +182,6 @@ SWGPagerDemodSettings::fromJson(QString &json) {
 
 void
 SWGPagerDemodSettings::fromJsonObject(QJsonObject &pJson) {
-    ::SWGSDRangel::setValue(&baud, pJson["baud"], "qint32", "");
-    
     ::SWGSDRangel::setValue(&decode, pJson["decode"], "qint32", "");
     
     ::SWGSDRangel::setValue(&reverse, pJson["reverse"], "qint32", "");
@@ -251,9 +244,6 @@ SWGPagerDemodSettings::asJson ()
 QJsonObject*
 SWGPagerDemodSettings::asJsonObject() {
     QJsonObject* obj = new QJsonObject();
-    if(m_baud_isSet){
-        obj->insert("baud", QJsonValue(baud));
-    }
     if(m_decode_isSet){
         obj->insert("decode", QJsonValue(decode));
     }
@@ -325,16 +315,6 @@ SWGPagerDemodSettings::asJsonObject() {
     }
 
     return obj;
-}
-
-qint32
-SWGPagerDemodSettings::getBaud() {
-    return baud;
-}
-void
-SWGPagerDemodSettings::setBaud(qint32 baud) {
-    this->baud = baud;
-    this->m_baud_isSet = true;
 }
 
 qint32
@@ -572,9 +552,6 @@ bool
 SWGPagerDemodSettings::isSet(){
     bool isObjectUpdated = false;
     do{
-        if(m_baud_isSet){
-            isObjectUpdated = true; break;
-        }
         if(m_decode_isSet){
             isObjectUpdated = true; break;
         }

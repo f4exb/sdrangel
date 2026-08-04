@@ -45,9 +45,6 @@ public:
     virtual void fromJsonObject(QJsonObject &json) override;
     virtual SWGPagerDemodSettings* fromJson(QString &jsonString) override;
 
-    qint32 getBaud();
-    void setBaud(qint32 baud);
-
     qint32 getDecode();
     void setDecode(qint32 decode);
 
@@ -121,9 +118,6 @@ public:
     virtual bool isSet() override;
 
 private:
-    qint32 baud;
-    bool m_baud_isSet;
-
     qint32 decode;
     bool m_decode_isSet;
 
