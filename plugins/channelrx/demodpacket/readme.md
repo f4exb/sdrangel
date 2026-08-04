@@ -34,23 +34,26 @@ This specifies the bandwidth of a LPF that is applied to the input signal to lim
 
 <h3>6: MLSE - Maximum likelihood sequence estimation</h3>
 
-Detects on the complex baseband instead of running the tone correlators on the output of an FM discriminator. Worth about 9 dB of sensitivity. Enabled by default; unchecking it reverts to the standard demodulator.
+Detects on the complex baseband instead of running the tone correlators on the output of an FM discriminator. Worth about 9.5 dB of sensitivity. Enabled by default; unchecking it reverts to the standard demodulator.
 
 A discriminator takes the argument of every sample, and below roughly 8 dB carrier to noise in the channel it starts producing phase slips, at which point its output degrades far faster than its input does - the FM threshold effect. Nothing downstream can recover what has already been destroyed, which is why the standard demodulator falls off a cliff rather than degrading gracefully.
 
 Bell 202 is phase continuous, and the audio phase advances by exactly one cycle per mark bit and 11/6 per space, so at bit boundaries it takes only six values. That makes the signal a six state machine with one exact waveform per state transition, and a sequence detector can correlate against those waveforms directly. Nothing takes the argument of a sample, so there is no threshold to fall off.
 
-Measured against generated packets in AWGN, out of 20 transmitted:
+Measured against generated packets in AWGN, 120 transmitted at each point, with carrier to noise quoted in the 12.5 kHz RF bandwidth:
 
 | Carrier to noise | MLSE | Standard demodulator |
 |-----------------:|-----:|---------------------:|
-| 8 dB             | 19   | 17 |
-| 6 dB             | 19   | 1  |
-| 4 dB             | 19   | 0  |
-| 0 dB             | 16   | 0  |
-| -2 dB            | 8    | 0  |
+| 8 dB             | 100% | 88% |
+| 6 dB             | 100% | 10% |
+| 4 dB             | 100% |  0% |
+| 2 dB             | 100% |  0% |
+| 0 dB             |  98% |  0% |
+| -2 dB            |  78% |  0% |
+| -3 dB            |  40% |  0% |
+| -4 dB            |   8% |  0% |
 
-Real signals behave the same way. Taking a recording whose strong packets both demodulators decode and burying it in measured noise, this still recovers packets at 1.5 to 3 dB carrier to noise, where the standard demodulator recovers none at any point on that scale.
+Half the packets still arrive at -2.7 dB, against +6.9 dB for the standard demodulator.
 
 Symbol timing and carrier offset are searched rather than tracked, because a timing loop driven by a discriminator is exactly what stops working at the sensitivity this is here to reach. 16 timing hypotheses and 5 carrier hypotheses spanning +/-600 Hz run in parallel, and only while a signal is actually present. Because many of those detectors decode the same transmission, frames are deduplicated over a one second window, and because a 16-bit CRC is not enough on its own at that rate, frames are additionally required to have valid callsigns.
 

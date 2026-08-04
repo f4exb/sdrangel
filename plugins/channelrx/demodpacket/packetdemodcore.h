@@ -61,6 +61,26 @@ public:
         int m_chase = 6;
         bool m_mlse = true;
         int m_baudRate = 1200;
+
+        // The waveform model the detector correlates against. The plugin leaves every one of
+        // these at the value it ships and behaves exactly as before; they exist so the test
+        // harness can sweep the model through THIS code.
+        //
+        // That is not a convenience. The harness's own offline path has equivalent options,
+        // but it is markedly less sensitive - on weak_signal_2026-08-01 it returns nothing on
+        // a burst the streaming path decodes, and manages only the 34 dB one - so a sweep run
+        // through it measures the offline path's threshold rather than the model. A model
+        // hypothesis can only be tested where the sensitivity is.
+        double m_toneMark = 1200.0;
+        double m_toneSpace = 2200.0;
+        double m_deviation = PacketDemodSettings::PACKETDEMOD_FM_DEVIATION;
+        int m_ramp = PacketDemodSettings::PACKETDEMOD_MLSE_RAMP;
+
+        // Hold the model where it was put. The estimator and the learn-from-decodes paths
+        // normally move the tones, deviation and symbol rate at runtime, which is right on
+        // air and ruinous for a controlled sweep - the thing being varied does not stay
+        // varied. Only the harness sets this.
+        bool m_adapt = true;
     };
 
     // stamp is when the frame was TRANSMITTED, in channel samples - a replay reports a
@@ -90,6 +110,7 @@ public:
                 m_estBurstLiveDecodes++;
             } else {
                 noteReplayDecodeTones();
+                noteReplayDecodeRate();
             }
 
             return true;
@@ -105,14 +126,12 @@ public:
             return;
         }
 
-        // The estimator reads tone transitions from these. Without them push() returns
-        // false forever, so no transition is ever seen, the activity gate never opens,
-        // the live chains are never started and nothing decodes at all.
+        // The estimator reads tone transitions from these, and buildChains builds them
+        // through calibrateCorrelators. Without them push() returns false forever, so no
+        // transition is ever seen, the activity gate never opens, the live chains are
+        // never started and nothing decodes at all.
         m_correlationLength = PacketDemodSettings::PACKETDEMOD_CHANNEL_SAMPLE_RATE
                             / std::max(1, cfg.m_baudRate);
-        m_correlator.create(m_correlationLength,
-                            PacketDemodSettings::PACKETDEMOD_CHANNEL_SAMPLE_RATE,
-                            2200.0, 1200.0);
 
         buildChains();
     }
@@ -246,19 +265,96 @@ private:
     // enough to matter, since the trellis tolerates only -100/+50 ppm over a long frame.
     // The chains are retuned after each measured burst: the burst that provided the
     // estimate is lost, the retransmissions that follow are not.
-    // Noise floor as the minimum of the recent power. Averaging the gaps instead only
-    // works on a sparse channel - at the duty cycle of a busy one the average IS the
-    // signal, the gate never fires and the estimator silently never runs.
-    // The floor is a LOW PERCENTILE of the recent per slot MEAN power. A minimum sits
-    // several dB below the level noise actually presents and drags every threshold with
-    // it; the median is the signal once the channel is more than half busy. The 20th
-    // percentile of slot means is the noise up to an 80% duty cycle, stable to a couple
+    // Noise floor as a LOW PERCENTILE of the recent per slot MEAN power. Averaging the
+    // gaps instead only works on a sparse channel - at the duty cycle of a busy one the
+    // average IS the signal, the gate never fires and the estimator silently never runs.
+    // A minimum sits several dB below the level noise actually presents and drags every
+    // threshold with it; the median is the signal once the channel is more than half
+    // busy. The 20th percentile is the noise up to an 80% duty cycle, stable to a couple
     // of percent. Thresholds are therefore signal-plus-noise ratios: a burst at 0 dB CNR
     // presents twice the noise power, so 1.8 still catches the weak signals the MLSE
     // exists for while leaving the gate shut on noise.
-    static const int PACKETDEMOD_NOISE_SLOTS = 30;    // 3 s of history
-    static constexpr double PACKETDEMOD_GATE_OPEN = 1.8;
-    static constexpr double PACKETDEMOD_GATE_CLOSE = 1.3;
+    //
+    // The SLOT LENGTH is what decides whether that percentile sees noise at all, and it
+    // has to be shorter than the gaps between transmissions - not shorter than the
+    // transmissions. At 0.1 s every slot on a busy channel straddled a burst edge, so
+    // there were no clean noise slots to take a percentile OF: the floor climbed towards
+    // the signal, the gate stopped opening, and packets were lost while the demodulator
+    // reported nothing wrong. Back-to-back traffic 0.05 to 0.25 s apart cost 5% of
+    // packets that way, at any signal level. 20 ms resolves the shortest gap that can
+    // separate two AX.25 frames, and the history stays at 3 s.
+    // Shortening the slot is not free, and the cost is invisible. A percentile of slot
+    // MEANS depends on how many samples went into a mean: the fewer, the wider their
+    // distribution and the further the 20th percentile sits BELOW the true noise power.
+    // Slot means are Gamma distributed, so the offset is 0.84 standard deviations and the
+    // standard deviation is 1/sqrt(N) of the mean. Uncorrected, going from 0.1 s to 20 ms
+    // lowers the floor by 2.3% and so lowers every threshold that is a ratio to it. That
+    // is 0.1 dB, and it cost two of the five payloads on weak_signal_2026-08-02, where
+    // the gate is what limits sensitivity - the thresholds sit close enough to those
+    // bursts that a tenth of a dB decides them.
+    //
+    // Correcting for it makes the floor read the same whatever the slot length, so the
+    // slot can be chosen for time resolution alone and the thresholds keep the meaning
+    // they were measured with. Referred to the 0.1 s slot they were tuned against.
+    static const int PACKETDEMOD_NOISE_SLOT_DIVIDER = 50;   // 20 ms slots
+    static const int PACKETDEMOD_NOISE_SLOTS = 150;         // 3 s of history
+
+    // Where the gate sits IS the demodulator's sensitivity, and it used to sit above the
+    // detector. At 1.8 the chains were not started until the burst reached -1.0 dB C/N in
+    // the channel noise bandwidth, while the trellis was still recovering a third of the
+    // packets 1.5 dB below that - measurable by running the same signals through the
+    // ungated offline path, which decoded 28 of 80 at -3 dB C/N where the gated path
+    // decoded none.
+    //
+    // Swept against every recording and a generated AWGN channel:
+    //
+    //   open  NO-84  V.23  08-01 | C/N -3  C/N -2  C/N 0 | NO-84 CPU
+    //   1.8     14     5      5  |   0/80   31/80  76/80 |  22x realtime
+    //   1.7     14     4      5  |  13/80   47/80  78/80 |  20x
+    //   1.6     14     4      5  |  25/80   57/80  79/80 |  17x
+    //   1.5     14     6      5  |  33/80   58/80  79/80 |  12x
+    //   1.4     14     4      5  |  28/80   59/80  79/80 |   7x
+    //   1.3     14     6      5  |  32/80   60/80  79/80 |   6x
+    //   1.2     14     4      5  |  32/80   61/80  79/80 |   5x
+    //
+    // Sensitivity saturates at 1.5 - below it the weak signal columns stop improving and
+    // only the CPU moves, and it moves hard, because the live chains then spend a quiet
+    // channel grinding noise. NO-84 is the worst case for that: a satellite pass that is
+    // 95% idle. 12x realtime there still leaves room to run files accelerated, which 7x
+    // does not. The real recordings are otherwise flat across the whole range - the V.23
+    // column swings 4 to 6 without a trend, which is what a channel whose bursts sit
+    // within a tenth of a dB of the threshold does, not a signal to tune on.
+    //
+    // Hysteresis stays proportional to the excess over the floor: close = 1 + 0.375 x
+    // (open - 1), which is what 1.8 / 1.3 was.
+    static constexpr double PACKETDEMOD_NOISE_TUNED_SIGMA = 0.8416; // 20th percentile
+    static constexpr int PACKETDEMOD_NOISE_TUNED_DIVIDER = 10;      // thresholds tuned here
+    static const int PACKETDEMOD_NOISE_PCT_DIVIDER = 5;             // 20th percentile
+    static constexpr double PACKETDEMOD_NOISE_PCT_SIGMA = 0.8416;
+
+    // A percentile only measures noise if enough of the slots ARE noise, and at the start
+    // of a stream that is not true: the ring fills from empty, and if a transmission is in
+    // progress it fills with signal. Measured on generated traffic, the 20th percentile
+    // read SEVENTY TIMES the true floor half a second in - the gate then cannot open at
+    // all, and the strongest packets in the run are the ones lost, which is the opposite
+    // of what a sensitivity limit looks like.
+    //
+    // The smallest slot in the ring is the guard. Noise slot means are tightly clustered -
+    // 3.6% apart at 20 ms, so the 20th percentile of pure noise sits about 1.1x its own
+    // minimum - while a contaminated ring puts them orders of magnitude apart. Capping at
+    // 1.5x leaves ample headroom for the clean case and never binds there, so steady state
+    // is untouched; it only takes over when the percentile has nothing to work with.
+    // Lowering the percentile instead was tried and rejected: the 10th costs a payload on
+    // weak_signal_2026-08-02, where the gate decides sensitivity.
+    static constexpr double PACKETDEMOD_NOISE_MIN_RATIO = 1.5;
+
+    // Where the 20th percentile of the mean of n samples sits, relative to the true mean
+    static double noisePercentileBias(double sigma, double n)
+    {
+        return 1.0 - sigma / std::sqrt(n);
+    }
+    static constexpr double PACKETDEMOD_GATE_OPEN = 1.5;
+    static constexpr double PACKETDEMOD_GATE_CLOSE = 1.1875;
 
     // Fading measurement, to choose the branch metric. A constant envelope FM signal only
     // varies in amplitude if the channel does, so the spread of the received power IS the
@@ -326,6 +422,8 @@ private:
     double m_estToneMark;           // Applied tone frequencies
     double m_estToneSpace;
     double m_toneCalBias[2];        // Correction for the real correlator's image pull
+    double m_calMark = 1200.0;      // Tone pair the correlators above are built for
+    double m_calSpace = 2200.0;
     std::complex<double> m_toneRotAcc[2];
     std::complex<double> m_tonePrev[2];
     bool m_tonePrevValid[2];
@@ -335,6 +433,15 @@ private:
 
     // Learning the channel's tone pair from CRC-valid decodes rather than from the tone
     // correlators - see the comment at the counting site
+    // The period of the chain that just decoded, and the last one before it. A replay
+    // decode is CRC-verified ground truth about the transmitter's symbol clock, and it is
+    // obtained below the FM threshold by construction - the decode itself is the proof.
+    // The rate fit cannot do that: it reads transition times off the discriminator, which
+    // at these levels is producing noise crossings, and it is rejected on 27 of 27 bursts
+    // of weak_signal_2026-08-02 with residuals that are exactly uniform over a symbol.
+    double m_replayChainPeriod = 0.0;
+    double m_learnedRatePpm = 0.0;      // Last replay decode's rate, awaiting a second
+    int m_learnedRateCount = 0;
     double m_replayChainToneMark = 0.0;
     double m_replayChainToneSpace = 0.0;
     int m_altPairDecodes = 0;
@@ -383,6 +490,112 @@ private:
         m_liveTailEnd = 0;
         m_estActive = false;
         m_sampleCount = 0;
+    }
+
+    // Build the estimator's tone correlators for a tone pair, and calibrate what they read
+    // for it.
+    //
+    // These have to FOLLOW the pair the chains are decoding, and used to be nailed to
+    // 1200/2200. On a V.23 channel the chains learn the right pair from CRC-valid decodes
+    // and move there, while every measurement feeding them - per tone deviation, tone
+    // frequency, the transition times the symbol rate is fitted to - carried on being taken
+    // through Bell 202 correlators the signal does not match. The deviation then reads high
+    // (2299/2462 measured on weak_signal_2026-08-02, against 2100 that actually decodes it)
+    // and the replay compensated with a flat 0.88 factor, which is a constant standing in
+    // for a measurement. Forcing the deviation is worth three of that recording's eight
+    // payloads, so the constant was not good enough.
+    //
+    // Cheap enough to redo on a pair change: a few thousand trig calls, against the ~100k
+    // of AfskMlse::create().
+    void calibrateCorrelators(double mark, double space)
+    {
+        m_calMark = mark;
+        m_calSpace = space;
+
+        // f0 is the space correlator and f1 the mark one - see the decision in
+        // updateRateEstimator, where t == 0 means mark won
+        m_correlator.create(m_correlationLength,
+                            PacketDemodSettings::PACKETDEMOD_CHANNEL_SAMPLE_RATE,
+                            space, mark);
+
+        const int sps = m_samplesPerSymbol;
+
+        // What the discriminator gives for a tone at the reference deviation, which every
+        // deviation below is reported as a multiple of.
+        //
+        // PhaseDiscriminators::phaseDiscriminatorDelta returns (dPhi / pi) * scaling, NOT
+        // dPhi * scaling. For peak deviation D the phase step is 2.pi.D/rate, so the
+        // output is 2D/rate * rate/(2.FM_DEVIATION) = D/FM_DEVIATION - and a reference
+        // tone comes out at exactly ONE, not at pi.
+        //
+        // This was pi, and so every deviation the estimator produced was pi times too
+        // small: 810 Hz measured on a synthetic signal generated at exactly 2500. That is
+        // below the 1500 Hz plausibility floor, so the estimate was discarded on every
+        // burst of every recording and the deviation silently stayed at its default. The
+        // estimator has therefore never once measured a deviation in anger.
+        const double amp = 1.0;
+        const double toneF[2] = { mark, space };
+        const double toneW[2] = {
+            2.0*M_PI*mark/PacketDemodSettings::PACKETDEMOD_CHANNEL_SAMPLE_RATE,
+            2.0*M_PI*space/PacketDemodSettings::PACKETDEMOD_CHANNEL_SAMPLE_RATE };
+
+        for (int t = 0; t < 2; t++)
+        {
+            m_devCalPow[t] = 0.0;
+            m_devCalCross[t] = 0.0;
+
+            for (int ph = 0; ph < 16; ph++)
+            {
+                std::complex<double> c(0.0, 0.0), x(0.0, 0.0);
+
+                for (int m = 0; m < sps; m++)
+                {
+                    double a = amp * std::cos(toneW[t]*m + 2.0*M_PI*ph/16.0);
+                    c += a * std::complex<double>(std::cos(toneW[t]*m), std::sin(toneW[t]*m));
+                    x += a * std::complex<double>(std::cos(toneW[1-t]*m), std::sin(toneW[1-t]*m));
+                }
+
+                m_devCalPow[t] += std::norm(c) / 16.0;
+                m_devCalCross[t] += std::norm(x) / 16.0;
+            }
+        }
+
+        // The tone frequency reading, from the rotation of the correlator output. The live
+        // correlator runs newest sample against tap 0 - time reversed - so a real tone's
+        // rotation reads +f, with a small deterministic pull from the frequency image;
+        // measure both on synthetic tones through the same reversed order.
+        for (int t = 0; t < 2; t++)
+        {
+            std::complex<double> rot(0.0, 0.0);
+
+            for (int ph = 0; ph < 16; ph++)
+            {
+                std::complex<double> cPrev(0.0, 0.0);
+
+                for (int k = 0; k < 2; k++)
+                {
+                    std::complex<double> c(0.0, 0.0);
+
+                    for (int m = 0; m < sps; m++)
+                    {
+                        double v = std::cos(2.0*M_PI*toneF[t]*(k - m)
+                            / PacketDemodSettings::PACKETDEMOD_CHANNEL_SAMPLE_RATE
+                            + 2.0*M_PI*ph/16.0);
+                        c += v * std::complex<double>(std::cos(toneW[t]*m), std::sin(toneW[t]*m));
+                    }
+
+                    if (k == 1) {
+                        rot += c * std::conj(cPrev);
+                    }
+
+                    cPrev = c;
+                }
+            }
+
+            double measured = std::arg(rot)
+                * PacketDemodSettings::PACKETDEMOD_CHANNEL_SAMPLE_RATE / (2.0*M_PI);
+            m_toneCalBias[t] = toneF[t] - measured;
+        }
     }
 
     // One detector per symbol timing offset and carrier hypothesis. A chain consumes a whole
@@ -436,15 +649,15 @@ private:
         m_prevSample = Complex(0.0f, 0.0f);
         m_estCarrierAcc = std::complex<double>(0.0, 0.0);
         m_estTrans.clear();
-        m_estDevMark = PacketDemodSettings::PACKETDEMOD_FM_DEVIATION;
-        m_estDevSpace = PacketDemodSettings::PACKETDEMOD_FM_DEVIATION;
+        m_estDevMark = m_cfg.m_deviation;
+        m_estDevSpace = m_cfg.m_deviation;
         m_devAcc[0] = m_devAcc[1] = 0.0;
         m_devAccX[0] = m_devAccX[1] = 0.0;
         m_devCnt[0] = m_devCnt[1] = 0;
         m_lastTransSample = 0;
         m_devDelay.clear();
-        m_estToneMark = 1200.0;
-        m_estToneSpace = 2200.0;
+        m_estToneMark = m_cfg.m_toneMark;
+        m_estToneSpace = m_cfg.m_toneSpace;
         m_toneRotAcc[0] = m_toneRotAcc[1] = std::complex<double>(0.0, 0.0);
         m_tonePrev[0] = m_tonePrev[1] = std::complex<double>(0.0, 0.0);
         m_tonePrevValid[0] = m_tonePrevValid[1] = false;
@@ -455,83 +668,10 @@ private:
 
         m_templateValid = false;
         m_templateAltValid = false;
-        buildTemplates(PacketDemodSettings::PACKETDEMOD_FM_DEVIATION,
-                       PacketDemodSettings::PACKETDEMOD_FM_DEVIATION, 1200.0, 2200.0);
+        buildTemplates(m_cfg.m_deviation, m_cfg.m_deviation,
+                       m_cfg.m_toneMark, m_cfg.m_toneSpace);
 
-        // Calibrate the tone correlators for the deviation estimator: what they read, in
-        // power, for a reference deviation tone in fmDemod units, and the leakage into the
-        // opposite correlator (the correlation windows are not orthogonal)
-        {
-            const int sps = m_samplesPerSymbol;
-            // What the discriminator gives for a tone at the reference deviation. Its
-            // output for peak deviation D is 2.pi.D/rate, scaled by rate/(2.FM_DEVIATION);
-            // the reference IS FM_DEVIATION, so a reference tone comes out at exactly pi.
-            // Deviations are reported below as a multiple of that reference.
-            const double amp = M_PI;
-            const double toneW[2] = {
-                2.0*M_PI*1200.0/PacketDemodSettings::PACKETDEMOD_CHANNEL_SAMPLE_RATE,
-                2.0*M_PI*2200.0/PacketDemodSettings::PACKETDEMOD_CHANNEL_SAMPLE_RATE };
-
-            for (int t = 0; t < 2; t++)
-            {
-                m_devCalPow[t] = 0.0;
-                m_devCalCross[t] = 0.0;
-
-                for (int ph = 0; ph < 16; ph++)
-                {
-                    std::complex<double> c(0.0, 0.0), x(0.0, 0.0);
-
-                    for (int m = 0; m < sps; m++)
-                    {
-                        double a = amp * std::cos(toneW[t]*m + 2.0*M_PI*ph/16.0);
-                        c += a * std::complex<double>(std::cos(toneW[t]*m), std::sin(toneW[t]*m));
-                        x += a * std::complex<double>(std::cos(toneW[1-t]*m), std::sin(toneW[1-t]*m));
-                    }
-
-                    m_devCalPow[t] += std::norm(c) / 16.0;
-                    m_devCalCross[t] += std::norm(x) / 16.0;
-                }
-            }
-
-            // The tone frequency reading, from the rotation of the correlator output. The
-            // live correlator runs newest sample against tap 0 - time reversed - so a real
-            // tone's rotation reads +f, with a small deterministic pull from the frequency
-            // image; measure both on synthetic tones through the same reversed order.
-            const double toneF[2] = { 1200.0, 2200.0 };
-
-            for (int t = 0; t < 2; t++)
-            {
-                std::complex<double> rot(0.0, 0.0);
-
-                for (int ph = 0; ph < 16; ph++)
-                {
-                    std::complex<double> cPrev(0.0, 0.0);
-
-                    for (int k = 0; k < 2; k++)
-                    {
-                        std::complex<double> c(0.0, 0.0);
-
-                        for (int m = 0; m < sps; m++)
-                        {
-                            double v = std::cos(2.0*M_PI*toneF[t]*(k - m)
-                                / PacketDemodSettings::PACKETDEMOD_CHANNEL_SAMPLE_RATE
-                                + 2.0*M_PI*ph/16.0);
-                            c += v * std::complex<double>(std::cos(toneW[t]*m), std::sin(toneW[t]*m));
-                        }
-
-                        if (k == 1) {
-                            rot += c * std::conj(cPrev);
-                        }
-
-                        cPrev = c;
-                    }
-                }
-
-                double measured = std::arg(rot)
-                    * PacketDemodSettings::PACKETDEMOD_CHANNEL_SAMPLE_RATE / (2.0*M_PI);
-                m_toneCalBias[t] = toneF[t] - measured;
-            }
-        }
+        calibrateCorrelators(m_cfg.m_toneMark, m_cfg.m_toneSpace);
 
         double period = (double) m_samplesPerSymbol;
 
@@ -582,10 +722,26 @@ private:
                                                double devMark, double devSpace,
                                                double toneMark, double toneSpace)
     {
+        // A swept model has to stay where the sweep put it - see Config::m_adapt
+        if (!m_cfg.m_adapt) {
+            return;
+        }
+
         bool rebuild = (std::fabs(devMark - m_estDevMark) > 1.0)
                     || (std::fabs(devSpace - m_estDevSpace) > 1.0)
                     || (std::fabs(toneMark - m_estToneMark) > 0.5)
                     || (std::fabs(toneSpace - m_estToneSpace) > 0.5);
+
+        // A different tone PAIR, not a refinement of the current one: the correlators the
+        // estimator measures through have to move with the chains, or every measurement
+        // that feeds them is taken against the wrong tones - see calibrateCorrelators
+        if ((std::fabs(toneMark - m_calMark) > 20.0)
+            || (std::fabs(toneSpace - m_calSpace) > 20.0))
+        {
+            qDebug() << "PacketDemodCore: measuring through tones" << toneMark << "/"
+                     << toneSpace << "- was" << m_calMark << "/" << m_calSpace;
+            calibrateCorrelators(toneMark, toneSpace);
+        }
 
         if (rebuild)
         {
@@ -687,7 +843,7 @@ private:
         {
             m_mlseTemplate[d].create(m_samplesPerSymbol, m_cfg.m_baudRate,
                                      toneMark, toneSpace, devMark, devSpace,
-                                     6, PacketDemodSettings::PACKETDEMOD_MLSE_RAMP);
+                                     6, m_cfg.m_ramp);
             m_mlseTemplate[d].setLoopGains(PacketDemodSettings::PACKETDEMOD_MLSE_PHASE_GAIN,
                                            PacketDemodSettings::PACKETDEMOD_MLSE_FREQ_GAIN);
             m_mlseTemplate[d].setDifferential(d == 1);
@@ -757,6 +913,17 @@ private:
         int phases = std::max(1, std::min(sps, std::min((int) PacketDemodSettings::PACKETDEMOD_MLSE_PHASES, 16)));
         int metrics = 2;
         int pairs = (tone2Mark > 0.0) ? 2 : 1;
+
+        // Held model: replay the burst against exactly what was configured, no hedging on
+        // the alternate pair and no measured deviation
+        if (!m_cfg.m_adapt)
+        {
+            pairs = 1;
+            devMark = m_cfg.m_deviation;
+            devSpace = m_cfg.m_deviation;
+            toneMark = m_cfg.m_toneMark;
+            toneSpace = m_cfg.m_toneSpace;
+        }
 
         rates = std::max(1, rates);
 
@@ -936,6 +1103,7 @@ private:
 
                 m_replayChainToneMark = chain.m_toneMark;
                 m_replayChainToneSpace = chain.m_toneSpace;
+                m_replayChainPeriod = chain.m_period;
 
                 const Complex phase = chain.m_phase;
                 const double readPos = chain.m_readPos;
@@ -1093,13 +1261,20 @@ private:
     void updateRateEstimator(const Complex &ci, Real fmDemod, double magsq)
     {
         // Activity gate on the channel power, fast average against a floor tracked only in
-        // the gaps so a long transmission cannot pull it up. The floor learns quickly for the
-        // first half second and no burst can be declared until it has: from a cold start the
-        // fast average is instantly enormous against a floor still near zero, the gate latches
-        // "in a burst" with the floor frozen, and no measurement ever completes - which leaves
-        // the chains on the nominal rate and decodes nothing from a real transmitter.
-        const quint64 warmup = PacketDemodSettings::PACKETDEMOD_CHANNEL_SAMPLE_RATE / 2;
-        const int slotSamples = PacketDemodSettings::PACKETDEMOD_CHANNEL_SAMPLE_RATE / 10;
+        // the gaps so a long transmission cannot pull it up. No burst can be declared until
+        // the floor has been learned: from a cold start the fast average is instantly
+        // enormous against a floor still near zero, the gate latches "in a burst" with the
+        // floor frozen, and no measurement ever completes - which leaves the chains on the
+        // nominal rate and decodes nothing from a real transmitter.
+        //
+        // The wait is a real deafness at the start of a stream, and it used to be half a
+        // second: long enough to lose a strong packet outright, which is what it did to the
+        // first frame of every generated run. 20 ms slots fill the ring fast enough that
+        // an eighth of a second gives the percentile more slots than the old half second
+        // did, so the deafness is now shorter than one AX.25 frame.
+        const quint64 warmup = PacketDemodSettings::PACKETDEMOD_CHANNEL_SAMPLE_RATE / 8;
+        const int slotSamples = PacketDemodSettings::PACKETDEMOD_CHANNEL_SAMPLE_RATE
+                              / PACKETDEMOD_NOISE_SLOT_DIVIDER;
 
         m_estMagAvg += 0.02 * (magsq - m_estMagAvg);
 
@@ -1140,10 +1315,22 @@ private:
                 }
             }
 
-            if (n >= 4)
+            if (n >= 8)
             {
                 std::nth_element(vals, vals + n/5, vals + n);
-                m_estNoise = vals[n/5];
+
+                // Referred to the slot length the gate thresholds were tuned against
+                const double tuned = noisePercentileBias(PACKETDEMOD_NOISE_TUNED_SIGMA,
+                    PacketDemodSettings::PACKETDEMOD_CHANNEL_SAMPLE_RATE
+                    / (double) PACKETDEMOD_NOISE_TUNED_DIVIDER);
+
+                double floor = vals[n/PACKETDEMOD_NOISE_PCT_DIVIDER] * tuned
+                    / noisePercentileBias(PACKETDEMOD_NOISE_PCT_SIGMA, (double) slotSamples);
+
+                // ... unless the ring holds too little noise to take a percentile of
+                double least = *std::min_element(vals, vals + n);
+
+                m_estNoise = std::min(floor, PACKETDEMOD_NOISE_MIN_RATIO * least);
             }
         }
 
@@ -1719,6 +1906,46 @@ private:
     // Learning from decodes inverts that: after two frames recovered on the other pair, the live
     // chains move there, decode directly, and the replay is skipped entirely for the traffic that
     // used to be most expensive.
+    // A replay decode says what symbol rate actually worked. Learn from it the way the tone
+    // pair is learned - two frames agreeing before the live chains are moved - because that
+    // is the only rate measurement available below the FM threshold.
+    void noteReplayDecodeRate()
+    {
+        if (m_replayChainPeriod <= 0.0) {
+            return;
+        }
+
+        double ppm = (m_replayChainPeriod / (double) m_samplesPerSymbol - 1.0) * 1e6;
+
+        // Already running this rate, within the grid step that would have found it anyway
+        if (std::fabs(ppm - m_estRatePpm) < 0.5 * PACKETDEMOD_REPLAY_RATE_STEP)
+        {
+            m_learnedRateCount = 0;
+            return;
+        }
+
+        // Two decodes have to agree, and agree with each other, not merely disagree with
+        // what is applied - one frame recovered at an edge of the rate grid is as likely to
+        // be that burst's own jitter as the transmitter's clock
+        if ((m_learnedRateCount == 0)
+            || (std::fabs(ppm - m_learnedRatePpm) > 0.5 * PACKETDEMOD_REPLAY_RATE_STEP))
+        {
+            m_learnedRatePpm = ppm;
+            m_learnedRateCount = 1;
+            return;
+        }
+
+        qDebug() << "PacketDemodCore: two frames recovered at" << ppm
+                 << "ppm - moving the live chains there from" << m_estRatePpm;
+
+        m_estRatePpm = 0.5 * (ppm + m_learnedRatePpm);
+        m_learnedRateCount = 0;
+
+        applyEstimatedTuning((double) m_samplesPerSymbol * (1.0 + m_estRatePpm * 1e-6),
+                             m_estCarrier, m_estDevMark, m_estDevSpace,
+                             m_estToneMark, m_estToneSpace);
+    }
+
     void noteReplayDecodeTones()
     {
         if ((m_replayChainToneMark <= 0.0)
