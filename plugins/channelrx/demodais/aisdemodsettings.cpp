@@ -38,7 +38,7 @@ void AISDemodSettings::resetToDefaults()
     m_inputFrequencyOffset = 0;
     m_rfBandwidth = 16000.0f;
     m_fmDeviation = 2400.0f;
-    m_correlationThreshold = 0.6f;
+    m_correlationThreshold = 0.7f;
     m_filterMMSI = "";
     m_udpEnabled = false;
     m_udpAddress = "127.0.0.1";
@@ -107,7 +107,7 @@ QByteArray AISDemodSettings::serialize() const
     s.writeBool(28, m_hidden);
     s.writeBool(29, m_showSlotMap);
     s.writeBool(30, m_useFileTime);
-    s.writeFloat(32, m_correlationThreshold);
+    s.writeFloat(37, m_correlationThreshold);
 
     for (int i = 0; i < AISDEMOD_MESSAGE_COLUMNS; i++)
         s.writeS32(100 + i, m_messageColumnIndexes[i]);
@@ -141,7 +141,7 @@ bool AISDemodSettings::deserialize(const QByteArray& data)
         d.readString(7, &m_udpAddress, "127.0.0.1");
         d.readU32(8, &utmp);
 
-        if ((utmp > 1023) && (utmp < 65535)) {
+        if ((utmp > 1023) && (utmp <= 65535)) {
             m_udpPort = utmp;
         } else {
             m_udpPort = 9999;
@@ -195,7 +195,7 @@ bool AISDemodSettings::deserialize(const QByteArray& data)
         d.readBool(29, &m_showSlotMap, false);
         d.readBool(30, &m_useFileTime, false);
 
-        d.readFloat(32, &m_correlationThreshold, 0.6f);
+        d.readFloat(37, &m_correlationThreshold, 0.7f);
 
         for (int i = 0; i < AISDEMOD_MESSAGE_COLUMNS; i++) {
             d.readS32(100 + i, &m_messageColumnIndexes[i], i);

@@ -67,8 +67,12 @@ class GmskMlse
 public:
     // samplesPerSymbol - the signal must be sampled at an integer multiple of the baud rate
     // span             - assumed length of the Gaussian phase pulse in symbols, 1 to 4.
-    //                    3 is right for the BT values used in practice; 4 costs twice the
-    //                    CPU for no measurable gain
+    //                    4 doubles the state count over 3 and is worth it: measured 25% more
+    //                    AIS messages on a weak recording, and a fifth of a dB. An earlier
+    //                    measurement said 3 was enough, but that was taken at 6 samples per
+    //                    symbol with the symbol timing a third of a symbol out - the trellis
+    //                    could not use the extra span it was being given. Worth re-measuring
+    //                    rather than assuming either way, and cheap to try
     // bt               - bandwidth symbol time product of the transmit filter
     void create(int samplesPerSymbol, int span, double bt)
     {

@@ -8,7 +8,7 @@ AIS is broadcast globally on 25kHz channels at 161.975MHz and 162.025MHz, with o
 
 The AIS demodulators can send received messages to the [AIS feature](../../feature/ais/readme.md), which displays a table combining the latest data for vessels amalgamated from multiple demodulators and sends their positions to the [Map Feature](../../feature/map/readme.md) for display in 2D or 3D.
 
-AIS uses GMSK/FM modulation at a baud rate of 9,600, with a modulation index of 0.5. The demodulator works at a sample rate of 57,600Sa/s.
+AIS uses GMSK/FM modulation at a baud rate of 9,600, with a modulation index of 0.5. The demodulator works at a sample rate of 96,000Sa/s.
 
 Received AIS messages can be NMEA encoded and forwarded via UDP to 3rd party applications.
 

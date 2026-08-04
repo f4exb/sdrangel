@@ -53,6 +53,12 @@
 // the receive buffer
 #define AISDEMOD_MLSE_WARMUP 12
 
+// Symbol timing offsets tried either side of the nominal start, in samples. The correlator
+// locates the burst to about a sample, but the sequence detector wants better than that, and
+// one sample is a tenth of a symbol at 96 kHz. Retries only happen when the nominal timing
+// fails to produce a good frame, so the cost falls on bursts that would otherwise be lost.
+#define AISDEMOD_TIMING_PHASES 2
+
 // Per survivor phase tracking loop gains. The optimum is broad
 #define AISDEMOD_MLSE_PHASE_GAIN 0.3
 #define AISDEMOD_MLSE_FREQ_GAIN  0.05
@@ -112,7 +118,10 @@ private:
     ChannelAPI *m_channel;
     int m_channelSampleRate;
     int m_channelFrequencyOffset;
-    int m_samplesPerSymbol;             // Number of samples per symbol
+    int m_samplesPerSymbol;
+    quint64 m_sampleCounter;    //!< Monotonic, so already tried alignments can be skipped
+    qint64 m_lastAttemptPos;
+    bool m_haveAttempted;             // Number of samples per symbol
 
     NCO m_nco;
     Interpolator m_interpolator;
@@ -135,7 +144,8 @@ private:
     int m_rxBufLength;                  // Size in elements in m_rxBuf
     int m_rxBufIdx;                     // Index in to circular buffer
     int m_rxBufCnt;                     // Number of valid samples in buffer
-    Real *m_train;                      // Training sequence to look for
+    Real *m_train;
+    std::vector<std::complex<double>> m_trainIQ; //!< Preamble as transmitted, for matched filtering                      // Training sequence to look for
     int m_correlationLength;
     Real m_trainEnergy;                 // Sum of squares of m_train, for the normalised correlation
 

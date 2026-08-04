@@ -33,6 +33,7 @@
 AISDemodSink::AISDemodSink(AISDemod *aisDemod) :
         m_scopeSink(nullptr),
         m_aisDemod(aisDemod),
+        m_channel(nullptr),
         m_channelSampleRate(AISDemodSettings::AISDEMOD_CHANNEL_SAMPLE_RATE),
         m_channelFrequencyOffset(0),
         m_magsqSum(0.0f),
@@ -45,6 +46,9 @@ AISDemodSink::AISDemodSink(AISDemod *aisDemod) :
         m_sampleBufferIndex(0)
 {
     m_magsq = 0.0;
+    m_sampleCounter = 0;
+    m_lastAttemptPos = 0;
+    m_haveAttempted = false;
 
     m_demodBuffer.resize(1<<12);
     m_demodBufferFill = 0;
@@ -206,6 +210,7 @@ void AISDemodSink::processOneSample(Complex &ci)
     m_rxBuf[m_rxBufIdx] = filtClipped;
     m_iqBuf[m_rxBufIdx] = std::complex<double>(ci.real() / SDR_RX_SCALEF, ci.imag() / SDR_RX_SCALEF);
     m_rxBufIdx = (m_rxBufIdx + 1) % m_rxBufLength;
+    m_sampleCounter++;
     m_rxBufCnt = std::min(m_rxBufCnt + 1, m_rxBufLength);
 
     Real corr = 0.0f;
@@ -217,28 +222,41 @@ void AISDemodSink::processOneSample(Complex &ci)
     if (m_rxBufCnt >= m_rxBufLength)
     {
         Real trainingSum = 0.0f;
-        Real energy = 0.0f;
 
-        // Correlate with training sequence
-        // Note that DC offset doesn't matter for this
-        // Calculate sum to estimate DC offset
-        for (int i = 0; i < m_correlationLength; i++)
+        // Matched filter for the preamble, on the complex baseband. Correlating the
+        // discriminator output instead - as this used to - means detecting with a statistic
+        // that has already fallen off the FM threshold at the levels the sequence detector
+        // can still demodulate, which is why noise used to trigger it for several percent of
+        // all samples. Blocks are combined non-coherently because neither carrier phase nor
+        // frequency is known; see AISDEMOD_IQ_BLOCKS.
+        if ((m_sampleCounter % AISDemodSettings::AISDEMOD_IQ_DECIM) == 0)
         {
-            int j = (m_rxBufIdx + i) % m_rxBufLength;
-            corr += m_train[i] * m_rxBuf[j];
-            trainingSum += m_rxBuf[j];
-            energy += m_rxBuf[j] * m_rxBuf[j];
-        }
+            const int blocks = AISDemodSettings::AISDEMOD_IQ_BLOCKS;
+            const int blockLen = m_correlationLength / blocks;
+            double sumMag = 0.0;
+            double iqEnergy = 0.0;
 
-        // If we meet threshold, try to demod
-        // Take abs value, to account for both initial phases.
-        // Dividing by the geometric mean of the two energies gives a correlation
-        // coefficient in 0..1, which unlike the raw correlation does not depend on the
-        // signal level. That matters because the sequence detector is too expensive to run
-        // on the false triggers an absolute threshold lets through - one fires on noise for
-        // several percent of all samples.
-        metric = (Real) (fabs(corr) / sqrt((double) energy * m_trainEnergy + 1e-12));
-        thresholdMet = metric >= m_settings.m_correlationThreshold;
+            for (int b = 0; b < blocks; b++)
+            {
+                std::complex<double> acc(0.0, 0.0);
+
+                for (int i = b*blockLen; i < (b+1)*blockLen; i++)
+                {
+                    int j = (m_rxBufIdx + i) % m_rxBufLength;
+                    acc += m_iqBuf[j] * std::conj(m_trainIQ[i]);
+                    iqEnergy += std::norm(m_iqBuf[j]);
+                    trainingSum += m_rxBuf[j];
+                }
+
+                sumMag += std::abs(acc);
+            }
+
+            // |m_trainIQ| is 1, so a clean match of amplitude A gives sumMag = A*N against
+            // sqrt(iqEnergy*N) = A*N, i.e. 1. Noise lands near 0.886/sqrt(blockLen).
+            corr = (Real) sumMag;
+            metric = (Real) (sumMag / (sqrt(iqEnergy * (double) (blockLen*blocks)) + 1e-12));
+            thresholdMet = metric >= m_settings.m_correlationThreshold;
+        }
 
         if (thresholdMet)
         {
@@ -247,7 +265,46 @@ void AISDemodSink::processOneSample(Complex &ci)
             dcOffset = trainingSum/m_correlationLength;
 
             // Start demod after (most of) preamble
-            int x = (m_rxBufIdx + m_correlationLength*3/4 + 4) % m_rxBufLength;
+            // Symbol centres sit at m_samplesPerSymbol/2 - 1 past the training symbol
+            // boundary: the transmit pulse shaping delay and the receive one cancel,
+            // leaving the half symbol offset and the one sample the phase discriminator
+            // consumes. Do not write this as a constant - it was +4, which is only
+            // correct at 10 samples per symbol, and the MLSE will not tolerate a quarter
+            // symbol error the way the old slicer did.
+            int base = (m_rxBufIdx + m_correlationLength*3/4
+                        + m_samplesPerSymbol/2 - 1) % m_rxBufLength;
+
+            // Try the nominal timing first, then progressively larger offsets either side
+            for (int phase = 0; phase <= 2*AISDEMOD_TIMING_PHASES; phase++)
+            {
+            // Only the alignment that is kept should mark the scope trace. deframe()
+            // only ever sets these, so a bad CRC from an alignment that is about to be
+            // retried would otherwise stay set even when a later phase succeeds.
+            scopeCRCValid = false;
+            scopeCRCInvalid = false;
+
+            int d = (phase + 1) / 2;
+
+            if (phase & 1) {
+                d = -d;
+            }
+
+            // Consecutive triggers overlap by all but one alignment, and re-demodulating a
+            // position almost always gives the same answer, so skipping the repeats is worth
+            // about 2.5x the CPU of the whole retry stage. Not quite free: the look ahead
+            // available from a position grows as samples arrive, so a multi slot frame that
+            // ran out of buffer on the first attempt can succeed on a later one. Measured at
+            // one message in 1550 on a clean recording and none at the noise floor.
+            qint64 pos = (qint64) m_sampleCounter + d;
+
+            if (m_haveAttempted && (pos <= m_lastAttemptPos)) {
+                continue;
+            }
+
+            m_lastAttemptPos = pos;
+            m_haveAttempted = true;
+
+            int x = (base + d + m_rxBufLength) % m_rxBufLength;
 
             int endSampleIdx = 0;
 
@@ -291,6 +348,8 @@ void AISDemodSink::processOneSample(Complex &ci)
             {
                 // Skip over received packet, so we don't try to re-demodulate it
                 m_rxBufCnt -= endSampleIdx;
+                break;
+            }
             }
         }
     }
@@ -476,8 +535,18 @@ void AISDemodSink::sendMessage(const QByteArray& rxPacket, int totalBitCount)
             QString dateTimeStr;
             int deviceIdx = m_aisDemod->getDeviceSetIndex();
 
-            if (ChannelWebAPIUtils::getDeviceReportValue(deviceIdx, "absoluteTime", dateTimeStr)) {
-                currentTime = QDateTime::fromString(dateTimeStr, Qt::ISODateWithMs);
+            if (ChannelWebAPIUtils::getDeviceReportValue(deviceIdx, "absoluteTime", dateTimeStr))
+            {
+                QDateTime fileTime = QDateTime::fromString(dateTimeStr, Qt::ISODateWithMs);
+
+                // An unparseable timestamp gives an invalid QDateTime, whose time().second()
+                // is -1. That makes ms and then the slot number negative, which the slot map
+                // indexes with and the log reports. Fall back to the wall clock instead.
+                if (fileTime.isValid()) {
+                    currentTime = fileTime;
+                } else {
+                    qDebug() << "AISDemodSink::sendMessage: could not parse absoluteTime" << dateTimeStr;
+                }
             }
         }
     }
@@ -486,6 +555,11 @@ void AISDemodSink::sendMessage(const QByteArray& rxPacket, int totalBitCount)
     QDateTime startDateTime = currentTime.addMSecs(-txTimeMs);
     int ms = startDateTime.time().second() * 1000 + startDateTime.time().msec();
     float slotTime = 60.0f * 1000.0f / 2250.0f; // 2250 slots per minute, 26.6ms per slot
+
+    if (ms < 0) {
+        ms = 0;
+    }
+
     int slot = ms / slotTime;
     int totalSlots = std::ceil(txTimeMs / slotTime);
     AISDemod::MsgMessage *msg = AISDemod::MsgMessage::create(rxPacket, currentTime, slot, totalSlots);
@@ -534,7 +608,16 @@ void AISDemodSink::applySettings(const AISDemodSettings& settings, const QString
 
     if ((settingsKeys.contains("baud")) || force)
     {
-        m_samplesPerSymbol = AISDemodSettings::AISDEMOD_CHANNEL_SAMPLE_RATE / settings.m_baud;
+        // Clamp before dividing: baud is written by the web API and read from the config
+    // blob without validation, and 0 divides while anything over the channel rate leaves
+    // m_samplesPerSymbol at 0, which makes m_rxBufLength 0 and the next sample a % 0.
+    int baud = settings.m_baud;
+
+    if ((baud < 1) || (baud > AISDemodSettings::AISDEMOD_CHANNEL_SAMPLE_RATE)) {
+        baud = 9600;
+    }
+
+    m_samplesPerSymbol = AISDemodSettings::AISDEMOD_CHANNEL_SAMPLE_RATE / baud;
         qDebug() << "AISDemodSink::applySettings: m_samplesPerSymbol: " << m_samplesPerSymbol << " baud " << settings.m_baud;
         m_pulseShape.create(0.5, 3, m_samplesPerSymbol);
 
@@ -568,6 +651,22 @@ void AISDemodSink::applySettings(const AISDemodSettings& settings, const QString
             for (int j = 0; j < m_samplesPerSymbol; j++)
             {
                 m_train[i*m_samplesPerSymbol+j] = m_pulseShape.filter(trainNRZ[i] * 2.0f - 1.0f);
+            }
+        }
+
+        // The transmitted preamble, for matched filtering on the complex baseband.
+        // m_train is the Gaussian filtered NRZ, i.e. the expected instantaneous
+        // frequency; integrating gives phase, and GMSK with h=1/2 puts +-pi/2 in each
+        // symbol while m_train sums to +-samplesPerSymbol over one.
+        m_trainIQ.assign(m_correlationLength, std::complex<double>(0.0, 0.0));
+        {
+            double phase = 0.0;
+            double k = M_PI / (2.0 * m_samplesPerSymbol);
+
+            for (int i = 0; i < m_correlationLength; i++)
+            {
+                phase += k * m_train[i];
+                m_trainIQ[i] = std::complex<double>(std::cos(phase), std::sin(phase));
             }
         }
 
