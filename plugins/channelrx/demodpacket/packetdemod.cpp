@@ -630,7 +630,7 @@ void PacketDemod::webapiFormatChannelSettings(
     if (channelSettingsKeys.contains("logEnabled") || force) {
         swgPacketDemodSettings->setLogEnabled(settings.m_logEnabled);
     }
-    if (channelSettingsKeys.contains("useFilTime") || force) {
+    if (channelSettingsKeys.contains("useFileTime") || force) {
         swgPacketDemodSettings->setUseFileTime(settings.m_useFileTime);
     }
     if (channelSettingsKeys.contains("rgbColor") || force) {
