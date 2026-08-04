@@ -285,8 +285,21 @@ void AISDemodSettings::applySettings(const QStringList& settingsKeys, const AISD
     if (settingsKeys.contains("workspaceIndex")) {
         m_workspaceIndex = settings.m_workspaceIndex;
     }
+    if (settingsKeys.contains("geometryBytes")) {
+        m_geometryBytes = settings.m_geometryBytes;
+    }
     if (settingsKeys.contains("hidden")) {
         m_hidden = settings.m_hidden;
+    }
+    if (settingsKeys.contains("columnIndexes")) {
+        for (int i = 0; i < AISDEMOD_MESSAGE_COLUMNS; i++) {
+            m_messageColumnIndexes[i] = settings.m_messageColumnIndexes[i];
+        }
+    }
+    if (settingsKeys.contains("columnSizes")) {
+        for (int i = 0; i < AISDEMOD_MESSAGE_COLUMNS; i++) {
+            m_messageColumnSizes[i] = settings.m_messageColumnSizes[i];
+        }
     }
 }
 
