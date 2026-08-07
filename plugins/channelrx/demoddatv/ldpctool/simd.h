@@ -146,7 +146,7 @@ static inline TYPE vzero()
 {
 	TYPE tmp;
 	for (int i = 0; i < TYPE::SIZE; ++i)
-		tmp.u[i] ^= tmp.u[i];
+		tmp.u[i] = 0;
 	return tmp;
 }
 

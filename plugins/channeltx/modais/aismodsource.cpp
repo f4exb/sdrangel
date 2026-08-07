@@ -35,9 +35,16 @@ AISModSource::AISModSource() :
     m_scopeSink(nullptr),
     m_magsq(0.0),
     m_levelCalcCount(0),
+    m_rmsLevel(0.0),
+    m_peakLevelOut(0.0),
     m_peakLevel(0.0f),
     m_levelSum(0.0f),
+    m_sampleIdx(0),
+    m_pow(0.0f),
+    m_powRamp(0.0f),
     m_state(idle),
+    m_waitCounter(0),
+    m_nrziBit(0),
     m_byteIdx(0),
     m_bitIdx(0),
     m_last5Bits(0),
@@ -147,7 +154,7 @@ void AISModSource::sampleToScope(Complex sample)
 
 void AISModSource::modulateSample()
 {
-    Real mod;
+    Real mod = 0.0f;
     Real linearRampGain;
 
     if ((m_state == idle) || (m_state == wait))
@@ -405,6 +412,9 @@ int AISModSource::getBit()
 
 void AISModSource::addBit(int bit)
 {
+    if (m_bitIdx == 0)
+        m_bits[m_byteIdx] = 0;
+
     // Transmit LSB first
     m_bits[m_byteIdx] |= bit << m_bitIdx;
     m_bitIdx++;

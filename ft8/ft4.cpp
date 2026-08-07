@@ -122,6 +122,9 @@ FT4::FT4(
     hack_len_ = -1;
     fftEngine_ = fftEngine;
     npasses_ = 1;
+    pass_ = 0;
+    hack_0_ = 0.0f;
+    hack_1_ = 0.0f;
 }
 
 void FT4::start_work()
@@ -1452,7 +1455,7 @@ std::vector<std::vector<float>> FT4::soft_c2m(const FFTEngine::ffts_t &c103) con
     {
         m103[si].resize(4);
         float mx = -std::numeric_limits<float>::infinity();
-        float mx_phase;
+        float mx_phase = 0.0f;
 
         for (int bi = 0; bi < 4; bi++)
         {

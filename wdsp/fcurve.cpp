@@ -81,6 +81,9 @@ void FCurve::fc_impulse (std::vector<float>& impulse, int nc, float f0, float f1
                 else
                     A[i] = 0.0;
                 break;
+            default:
+                A[i] = 0.0;
+                break;
             }
         }
     }
