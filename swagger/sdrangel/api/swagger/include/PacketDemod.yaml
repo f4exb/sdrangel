@@ -12,9 +12,12 @@ PacketDemodSettings:
     rfBandwidth:
       type: number
       format: float
-    fmDeviation:
-      type: number
-      format: float
+    chase:
+      description: "Chase decoding depth. On CRC failure, retry inverting the n least confident symbols. 0 disables"
+      type: integer
+    mlse:
+      description: "Whether to detect on the complex baseband with maximum likelihood sequence estimation instead of an FM discriminator. Worth about 9 dB. 1 by default"
+      type: integer
     udpEnabled:
       description: "Whether to forward received packets to specified UDP port"
       type: integer

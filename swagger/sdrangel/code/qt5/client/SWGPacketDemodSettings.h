@@ -53,8 +53,11 @@ public:
     float getRfBandwidth();
     void setRfBandwidth(float rf_bandwidth);
 
-    float getFmDeviation();
-    void setFmDeviation(float fm_deviation);
+    qint32 getChase();
+    void setChase(qint32 chase);
+
+    qint32 getMlse();
+    void setMlse(qint32 mlse);
 
     qint32 getUdpEnabled();
     void setUdpEnabled(qint32 udp_enabled);
@@ -117,8 +120,11 @@ private:
     float rf_bandwidth;
     bool m_rf_bandwidth_isSet;
 
-    float fm_deviation;
-    bool m_fm_deviation_isSet;
+    qint32 chase;
+    bool m_chase_isSet;
+
+    qint32 mlse;
+    bool m_mlse_isSet;
 
     qint32 udp_enabled;
     bool m_udp_enabled_isSet;

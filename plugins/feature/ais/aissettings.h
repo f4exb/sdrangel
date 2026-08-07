@@ -41,6 +41,7 @@ struct AISSettings
     Serializable *m_rollupState;
     int m_workspaceIndex;
     QByteArray m_geometryBytes;
+    bool m_displayChart;
 
     int m_vesselColumnIndexes[AIS_VESSEL_COLUMNS];
     int m_vesselColumnSizes[AIS_VESSEL_COLUMNS];

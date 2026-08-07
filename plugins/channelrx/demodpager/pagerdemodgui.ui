@@ -373,44 +373,6 @@
        </widget>
       </item>
       <item>
-       <widget class="QLabel" name="baudLabel">
-        <property name="text">
-         <string>Baud</string>
-        </property>
-       </widget>
-      </item>
-      <item>
-       <widget class="QComboBox" name="baud">
-        <property name="minimumSize">
-         <size>
-          <width>60</width>
-          <height>0</height>
-         </size>
-        </property>
-        <property name="toolTip">
-         <string>Baud rate</string>
-        </property>
-        <property name="currentIndex">
-         <number>1</number>
-        </property>
-        <item>
-         <property name="text">
-          <string>512</string>
-         </property>
-        </item>
-        <item>
-         <property name="text">
-          <string>1200</string>
-         </property>
-        </item>
-        <item>
-         <property name="text">
-          <string>2400</string>
-         </property>
-        </item>
-       </widget>
-      </item>
-      <item>
        <widget class="Line" name="line_11">
         <property name="orientation">
          <enum>Qt::Orientation::Vertical</enum>
@@ -849,6 +811,14 @@
        </property>
        <property name="toolTip">
         <string>Number of BCH parity errors detected in message</string>
+       </property>
+      </column>
+      <column>
+       <property name="text">
+        <string>Baud</string>
+       </property>
+       <property name="toolTip">
+        <string>Baud rate the message was received at, detected from the preamble</string>
        </property>
       </column>
      </widget>

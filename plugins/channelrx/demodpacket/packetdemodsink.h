@@ -2,6 +2,7 @@
 // Copyright (C) 2019-2021 Edouard Griffiths, F4EXB <f4exb06@gmail.com>          //
 // Copyright (C) 2020-2021, 2023 Jon Beniston, M7RCE <jon@beniston.com>          //
 // Copyright (C) 2020 Kacper Michajłow <kasper93@gmail.com>                      //
+// Some code by AI                                                               //
 //                                                                               //
 // This program is free software; you can redistribute it and/or modify          //
 // it under the terms of the GNU General Public License as published by          //
@@ -29,16 +30,28 @@
 #include "dsp/firfilter.h"
 #include "util/movingaverage.h"
 #include "util/messagequeue.h"
-#include "util/crc.h"
 
 #include "packetdemodsettings.h"
+#include "packetdemodframer.h"
+#include "packetdemodtonecorrelator.h"
+#include "packetdemodcore.h"
+
+// Post correlation filter length. The envelope being filtered changes at the baud rate, so
+// this only has to be long enough to smooth it; 301 taps per tone is 602 multiply
+// accumulates per sample and measures no better than 63.
+#define PACKETDEMOD_LOWPASS_TAPS 63
 
 #include <vector>
-#include <iostream>
-#include <fstream>
+#include <deque>
+#include <utility>
+
+// The HDLC state machine, Chase decoding and the frame plausibility check now live in
+// PacketDemodFramer, shared verbatim with the offline test harness.
+typedef PacketDemodFramer::State PacketDemodDeframer;
 
 class ChannelAPI;
 class PacketDemod;
+
 
 class PacketDemodSink : public ChannelSampleSink {
 public:
@@ -71,7 +84,6 @@ public:
         m_magsqPeak = 0.0f;
         m_magsqCount = 0;
     }
-
 
 private:
     struct MagSqLevelsStore
@@ -106,32 +118,33 @@ private:
     MovingAverageUtil<Real, double, 16> m_movingAverage;
 
     PhaseDiscriminators m_phaseDiscri;
-
     int m_correlationLength;
-    Complex *m_f1;
-    Complex *m_f0;
-    Complex *m_corrBuf;
-    int m_corrIdx;
-    int m_corrCnt;
+    PacketDemodToneCorrelator m_correlator;
 
     Lowpass<Real> m_lowpassF1;
     Lowpass<Real> m_lowpassF0;
 
     int m_samplePrev;
     int m_syncCount;
-    int m_symbolPrev;
-    unsigned char m_bits;
-    int m_bitCount;
-    int m_onesCount;
-    bool m_gotSOP;
-    unsigned char m_bytes[512]; // Info field can be 256 bytes
-    int m_byteCount;
-    crc16x25 m_crc;
+    PacketDemodFramer m_framer;
 
+    // Chase decoding: the slicer discards how confident each symbol decision was, so keep
+    // it, and on a CRC failure retry with the weakest decisions inverted
+    PacketDemodDeframer m_deframer;
+
+    // The detector, estimator and replay live in PacketDemodCore, shared verbatim with
+    // the offline test harness rather than mirrored by it.
+    PacketDemodCore m_core;
+    std::deque<std::pair<QByteArray, quint64>> m_recent; // Recently reported, to deduplicate
+
+    // Demod analyzer trace - the sink's business, not the detector's
     QVector<qint16> m_demodBuffer;
     int m_demodBufferFill;
 
     void processOneSample(Complex &ci);
+
+
+    bool sendPacket(const QByteArray& packet, quint64 stamp);  // false if a duplicate
     MessageQueue *getMessageQueueToChannel() { return m_messageQueueToChannel; }
 };
 

@@ -1,6 +1,7 @@
 ///////////////////////////////////////////////////////////////////////////////////
 // Copyright (C) 2021-2022 Jon Beniston, M7RCE <jon@beniston.com>                //
 // Copyright (C) 2021-2022 Edouard Griffiths, F4EXB <f4exb06@gmail.com>          //
+// Some code by AI                                                               //
 //                                                                               //
 // This program is free software; you can redistribute it and/or modify          //
 // it under the terms of the GNU General Public License as published by          //
@@ -30,23 +31,37 @@
 
 PagerDemodSink::PagerDemodSink() :
         m_scopeSink(nullptr),
+        m_channel(nullptr),
         m_channelSampleRate(PagerDemodSettings::m_channelSampleRate),
         m_channelFrequencyOffset(0),
+        m_samplesPerSymbol(PagerDemodSettings::m_channelSampleRate / 1200),
         m_magsqSum(0.0f),
         m_magsqPeak(0.0f),
         m_magsqCount(0),
         m_messageQueueToChannel(nullptr),
         m_dcOffset(0.0f),
-        m_dataPrev(0),
         m_inverted(false),
         m_bit(0),
         m_gotSOP(false),
         m_bits(0),
         m_bitCount(0),
-        m_syncCount(75),
         m_batchNumber(0),
         m_wordCount(0),
-        m_addressValid(0),
+        m_addressValid(false),
+        m_address(0),
+        m_functionBits(0),
+        m_parityErrors(0),
+        m_bchErrors(0),
+        m_alphaBitBuffer(0),
+        m_alphaBitBufferBits(0),
+        m_baud(0),
+        m_mfSum(0.0f),
+        m_mfPtr(0),
+        m_timing(0.0f),
+        m_yPrev(0.0f),
+        m_yMid(0.0f),
+        m_gotMid(false),
+        m_yPower(0.0f),
         m_sampleBufferIndex(0)
 {
     m_magsq = 0.0;
@@ -247,7 +262,9 @@ bool PagerDemodSink::bchDecode(const quint32 cw, quint32& correctedCW)
 		return false;
 	}
 
-	correctedCW = result;
+	// The BCH decoder operates on bits 31 through 1. Preserve the separate
+	// overall parity bit in bit 0 so it can be checked after correction.
+	correctedCW = result | (cw & 0x1);
 	return true;
 }
 
@@ -262,39 +279,36 @@ void PagerDemodSink::decodeBatch()
     {
         for (int word = 0; word < PAGERDEMOD_CODEWORDS_PER_FRAME; word++)
         {
+            // If BCH decoding failed, we can't trust any of the bits in this codeword,
+            // including the address/message flag in the MSB. Treat it as an erasure, so it
+            // can't start a phantom address or prematurely terminate a valid message.
+            // The 20 message bits are still fed into the alpha bit buffer below, to keep
+            // the 7-bit character boundaries aligned - m_bchErrors flags the message as
+            // containing errors
+            if (m_codeWordsBCHError[i])
+            {
+                if (m_addressValid)
+                {
+                    m_bchErrors++;
+                    addMessageBits((m_codeWords[i] >> 11) & 0xfffff);
+                }
+                i++;
+                continue;
+            }
+
             bool addressCodeWord = ((m_codeWords[i] >> 31) & 1) == 0;
 
             // Stop decoding current message if we receive a new address
-            if (addressCodeWord && m_addressValid)
-            {
-                m_numericMessage = m_numericMessage.trimmed(); // Remove trailing spaces
-                if (getMessageQueueToChannel())
-                {
-                    // Convert from 7-bit to UTF-8 using user specified encoding
-                    for (int i = 0; i < m_alphaMessage.size(); i++)
-                    {
-                        QChar c = m_alphaMessage[i];
-                        int idx = m_settings.m_sevenbit.indexOf(c.toLatin1());
-                        if (idx >= 0) {
-                            c = QChar(m_settings.m_unicode[idx]);
-                        }
-                        m_alphaMessage[i] = c;
-                    }
-                    // Reverse reading order, if required
-                    if (m_settings.m_reverse) {
-                        std::reverse(m_alphaMessage.begin(), m_alphaMessage.end());
-                    }
-                    // Send to channel and GUI
-                    PagerDemod::MsgPagerMessage *msg = PagerDemod::MsgPagerMessage::create(m_address, m_functionBits, m_alphaMessage, m_numericMessage, m_parityErrors, m_bchErrors);
-                    getMessageQueueToChannel()->push(msg);
-                }
-                m_addressValid = false;
+            if (addressCodeWord && m_addressValid) {
+                sendMessage();
             }
 
             // Check parity bit
             bool parityError = !evenParity(m_codeWords[i], 1, 31, m_codeWords[i] & 0x1);
 
-            if (m_codeWords[i] == PAGERDEMOD_POCSAG_IDLECODE)
+            // The overall parity bit is preserved by bchDecode() so it can be
+            // reported separately. Ignore it when identifying the idle word.
+            if ((m_codeWords[i] & 0xfffffffeU) == (PAGERDEMOD_POCSAG_IDLECODE & 0xfffffffeU))
             {
                 // Idle
             }
@@ -309,58 +323,279 @@ void PagerDemodSink::decodeBatch()
                 m_alphaBitBufferBits = 0;
                 m_alphaBitBuffer = 0;
                 m_parityErrors = parityError ? 1 : 0;
-                m_bchErrors = m_codeWordsBCHError[i] ? 1 : 0;
+                m_bchErrors = 0; // Erased codewords never get here, so this one decoded cleanly
                 m_addressValid = true;
             }
-            else
+            else if (m_addressValid)
             {
                 // Message - decode as both numeric and ASCII - not all operators use functionBits to indidcate encoding
-                int messageBits = (m_codeWords[i] >> 11) & 0xfffff;
+                // Only decoded after an address codeword, otherwise we'd be decoding a message we've
+                // tuned in to the middle of, without knowing who it's for
                 if (parityError) {
                     m_parityErrors++;
                 }
-                if (m_codeWordsBCHError[i]) {
-                    m_bchErrors++;
-                }
 
-                // Numeric format
-                for (int j = 16; j >= 0; j -= 4)
-                {
-                    quint32 numericBits = (messageBits >> j) & 0xf;
-                    numericBits = reverse(numericBits) >> (32-4);
-                    // Spec has 0xa as 'spare', but other decoders treat is as .
-                    const char numericChars[] = {
-                        '0', '1', '2', '3', '4', '5', '6', '7', '8', '9', '.', 'U', ' ', '-', ')', '('
-                    };
-                    char numericChar = numericChars[numericBits];
-                    m_numericMessage.append(numericChar);
-                }
-
-                // 7-bit ASCII alpnanumeric format
-                m_alphaBitBuffer = (m_alphaBitBuffer << 20) | messageBits;
-                m_alphaBitBufferBits += 20;
-                while (m_alphaBitBufferBits >= 7)
-                {
-                    // Extract next 7-bit character from bit buffer
-                    char c = (m_alphaBitBuffer >> (m_alphaBitBufferBits-7)) & 0x7f;
-                    // Reverse bit ordering
-                    c = reverse(c) >> (32-7);
-                    // Add to received message string (excluding, null, end of text, end ot transmission)
-                    if (c != 0 && c != 0x3 && c != 0x4) {
-                        m_alphaMessage.append(c);
-                    }
-                    // Remove from bit buffer
-                    m_alphaBitBufferBits -= 7;
-                    if (m_alphaBitBufferBits == 0) {
-                        m_alphaBitBuffer = 0;
-                    } else {
-                        m_alphaBitBuffer &= (1 << m_alphaBitBufferBits) - 1;
-                    }
-                }
+                addMessageBits((m_codeWords[i] >> 11) & 0xfffff);
             }
 
             // Move to next codeword
             i++;
+        }
+    }
+}
+
+// Retune the bit level demodulator to a different baud rate. This is only called while
+// unsynced, so there is no partially received message to lose
+void PagerDemodSink::setBaud(int baud)
+{
+    m_baud = baud;
+    m_samplesPerSymbol = PagerDemodSettings::m_channelSampleRate / baud;
+
+    // Signal is a square wave - so include several harmonics
+    m_lowpassBaud.create(301, PagerDemodSettings::m_channelSampleRate, baud * 5.0f);
+
+    m_bits = 0;
+    m_bitCount = 0;
+
+    // Restart the matched filter and timing loop at the new symbol period
+    m_mfBuf.assign(m_samplesPerSymbol, 0.0f);
+    m_mfSum = 0.0f;
+    m_mfPtr = 0;
+    m_timing = m_samplesPerSymbol;
+    m_yPrev = 0.0f;
+    m_yMid = 0.0f;
+    m_gotMid = false;
+    m_yPower = 0.0f;
+
+    qDebug() << "PagerDemodSink::setBaud: " << baud << " m_samplesPerSymbol: " << m_samplesPerSymbol;
+}
+
+// Matched filter (boxcar integrate and dump over one symbol, which is the matched filter
+// for NRZ) and Gardner timing recovery.
+//
+// The symbol clock free runs and is only nudged, rather than being reset by every signal
+// edge. That matters because an isolated noise transition could previously delay or skip a
+// bit, and a single inserted or deleted bit destroys codeword alignment for the rest of
+// the batch, which BCH cannot recover from.
+bool PagerDemodSink::matchedFilterAndDpll(Real v)
+{
+    // Matched filter: running sum over one symbol period
+    m_mfSum -= m_mfBuf[m_mfPtr];
+    m_mfBuf[m_mfPtr] = v;
+    m_mfSum += v;
+    m_mfPtr = (m_mfPtr + 1) % m_samplesPerSymbol;
+
+    m_timing -= 1.0f;
+
+    // Sample midway between the previous and current symbol instants, for the timing error
+    if (!m_gotMid && (m_timing <= m_samplesPerSymbol / 2.0f))
+    {
+        m_yMid = m_mfSum;
+        m_gotMid = true;
+    }
+
+    if (m_timing > 0.0f) {
+        return false;
+    }
+
+    Real y = m_mfSum;
+
+    // Gardner timing error detector - needs no decision and is zero when we're on time
+    Real e = (y - m_yPrev) * m_yMid;
+
+    // Normalise out the amplitude, so loop gain doesn't depend on signal level
+    m_yPower = 0.999f * m_yPower + 0.001f * (y * y);
+    Real eNorm = (m_yPower > 1e-9f) ? (e / m_yPower) : 0.0f;
+    eNorm = std::max(-1.0f, std::min(1.0f, eNorm));
+
+    m_timing += m_samplesPerSymbol - m_dpllGain * eNorm;
+
+    // Keep the correction sane when the loop is being driven by noise
+    if (m_timing < m_samplesPerSymbol * 0.5f) {
+        m_timing = m_samplesPerSymbol * 0.5f;
+    } else if (m_timing > m_samplesPerSymbol * 1.5f) {
+        m_timing = m_samplesPerSymbol * 1.5f;
+    }
+
+    m_yPrev = y;
+    m_gotMid = false;
+
+    // According to a variety of places on the web, high frequency is a 0, low is 1.
+    // While this seems to be correct in the UK, some IQ files I've obtained seem
+    // to be reversed, so we support both. The shift register always holds bits in the
+    // standard mapping and polarity is applied when a codeword is extracted, so the
+    // retained history stays consistent if polarity changes on sync loss
+    int data = y >= 0.0f;
+    handleBit(!data);
+
+    return true;
+}
+
+// Accumulate a demodulated bit, looking for the frame sync code and then codewords
+void PagerDemodSink::handleBit(int bit)
+{
+    m_bit = bit;
+
+    // Store in shift reg. MSB transmitted first
+    m_bits = (m_bits << 1) | m_bit;
+    m_bitCount++;
+
+    if (m_bitCount > 32) {
+        m_bitCount = 32;
+    }
+
+    if ((m_bitCount == 32) && !m_gotSOP)
+    {
+        // Look for synccode that starts a batch - allow two errors that can be corrected
+        if (m_bits == PAGERDEMOD_POCSAG_SYNCCODE)
+        {
+            m_gotSOP = true;
+            m_inverted = false;
+        }
+        else if (m_bits == PAGERDEMOD_POCSAG_SYNCCODE_INV)
+        {
+            m_gotSOP = true;
+            m_inverted = true;
+        }
+        else if (popcount((m_bits ^ PAGERDEMOD_POCSAG_SYNCCODE) & 0xfffffffeU) <= 2)
+        {
+            quint32 correctedCW;
+            if (bchDecode(m_bits, correctedCW)
+                && ((correctedCW & 0xfffffffeU) == (PAGERDEMOD_POCSAG_SYNCCODE & 0xfffffffeU)))
+            {
+                m_gotSOP = true;
+                m_inverted = false;
+            }
+        }
+        else if (popcount((m_bits ^ PAGERDEMOD_POCSAG_SYNCCODE_INV) & 0xfffffffeU) <= 2)
+        {
+            quint32 correctedCW;
+            if (bchDecode(~m_bits, correctedCW)
+                && ((correctedCW & 0xfffffffeU) == (PAGERDEMOD_POCSAG_SYNCCODE & 0xfffffffeU)))
+            {
+                m_gotSOP = true;
+                m_inverted = true;
+            }
+        }
+
+        if (m_gotSOP)
+        {
+            // Reset demod state
+            m_bits = 0;
+            m_bitCount = 0;
+            m_codeWords[0] = PAGERDEMOD_POCSAG_SYNCCODE;
+            m_wordCount = 1;
+            m_addressValid = false;
+        }
+    }
+    else if ((m_bitCount == 32) && m_gotSOP)
+    {
+        // Got a complete codeword - apply the detected polarity, then use BCH decoding
+        // to fix any bit errors
+        quint32 cw = m_inverted ? ~m_bits : m_bits;
+        quint32 correctedCW;
+        m_codeWordsBCHError[m_wordCount] = !bchDecode(cw, correctedCW);
+        m_codeWords[m_wordCount] = correctedCW;
+        m_wordCount++;
+
+        // Check for sync code at start of batch
+        if ((m_wordCount == 1)
+            && ((correctedCW & 0xfffffffeU) != (PAGERDEMOD_POCSAG_SYNCCODE & 0xfffffffeU)))
+        {
+            // A message is only sent when the *next* address arrives, so without
+            // this the last message of a transmission would be silently dropped
+            if (m_addressValid) {
+                sendMessage();
+            }
+            m_gotSOP = false;
+            m_addressValid = false;
+            // m_inverted is deliberately not reset - m_bits holds standard mapped bits,
+            // so the retained history stays valid and the sync search sets polarity again
+        }
+
+        // Have we received a complete batch
+        if (m_wordCount == PAGERDEMOD_BATCH_WORDS)
+        {
+            // Decode it to addresses and messages
+            decodeBatch();
+
+            // Start a new batch
+            m_batchNumber++;
+            m_wordCount = 0;
+        }
+
+        if (m_gotSOP)
+        {
+            m_bits = 0;
+            m_bitCount = 0;
+        }
+        // If we've just lost sync, keep the shift register, so the sliding search
+        // can resume on the next bit rather than waiting for 32 new ones
+    }
+}
+
+// Send the message that has been accumulated for the current address
+void PagerDemodSink::sendMessage()
+{
+    m_numericMessage = m_numericMessage.trimmed(); // Remove trailing spaces
+    if (getMessageQueueToChannel())
+    {
+        // Convert from 7-bit to UTF-8 using user specified encoding
+        for (int i = 0; i < m_alphaMessage.size(); i++)
+        {
+            QChar c = m_alphaMessage[i];
+            int idx = m_settings.m_sevenbit.indexOf(c.toLatin1());
+            if (idx >= 0) {
+                c = QChar(m_settings.m_unicode[idx]);
+            }
+            m_alphaMessage[i] = c;
+        }
+        // Reverse reading order, if required
+        if (m_settings.m_reverse) {
+            std::reverse(m_alphaMessage.begin(), m_alphaMessage.end());
+        }
+        // Send to channel and GUI
+        PagerDemod::MsgPagerMessage *msg = PagerDemod::MsgPagerMessage::create(m_address, m_functionBits, m_alphaMessage, m_numericMessage, m_parityErrors, m_bchErrors, m_baud);
+        getMessageQueueToChannel()->push(msg);
+    }
+    m_addressValid = false;
+}
+
+// Decode the 20 message bits of a codeword as both numeric and 7-bit alphanumeric
+void PagerDemodSink::addMessageBits(int messageBits)
+{
+    // Numeric format
+    for (int j = 16; j >= 0; j -= 4)
+    {
+        quint32 numericBits = (messageBits >> j) & 0xf;
+        numericBits = reverse(numericBits) >> (32-4);
+        // Spec has 0xa as 'spare', but other decoders treat is as .
+        const char numericChars[] = {
+            '0', '1', '2', '3', '4', '5', '6', '7', '8', '9', '.', 'U', ' ', '-', ')', '('
+        };
+        char numericChar = numericChars[numericBits];
+        m_numericMessage.append(numericChar);
+    }
+
+    // 7-bit ASCII alpnanumeric format
+    m_alphaBitBuffer = (m_alphaBitBuffer << 20) | messageBits;
+    m_alphaBitBufferBits += 20;
+    while (m_alphaBitBufferBits >= 7)
+    {
+        // Extract next 7-bit character from bit buffer
+        char c = (m_alphaBitBuffer >> (m_alphaBitBufferBits-7)) & 0x7f;
+        // Reverse bit ordering
+        c = reverse(c) >> (32-7);
+        // Add to received message string (excluding, null, end of text, end ot transmission)
+        if (c != 0 && c != 0x3 && c != 0x4) {
+            m_alphaMessage.append(c);
+        }
+        // Remove from bit buffer
+        m_alphaBitBufferBits -= 7;
+        if (m_alphaBitBufferBits == 0) {
+            m_alphaBitBuffer = 0;
+        } else {
+            m_alphaBitBuffer &= (1 << m_alphaBitBufferBits) - 1;
         }
     }
 }
@@ -384,6 +619,22 @@ void PagerDemodSink::processOneSample(Complex &ci)
 
     m_magsqCount++;
 
+    // Detect the baud rate from the preamble. Only run while unsynced: that is when the
+    // rate can change, and it keeps the per-rate filters out of the decoding path
+    if (!m_gotSOP)
+    {
+        int best = m_baudDetector.process(fmDemod);
+
+        if (m_baudDetector.metric(best) >= m_preambleThreshold)
+        {
+            int baud = PagerDemodBaudDetector::m_rates[best];
+
+            if (baud != m_baud) {
+                setBaud(baud);
+            }
+        }
+    }
+
     // Low pass filter
     Real filt = m_lowpassBaud.filter(fmDemod);
 
@@ -400,117 +651,10 @@ void PagerDemodSink::processOneSample(Complex &ci)
     // Slice data
     int data = (filt - m_dcOffset) >= 0.0;
 
-    // Look for edge - A PLL here would be less susceptible to noise
-    if (data != m_dataPrev)
-    {
-        // Center in middle of bit
-        m_syncCount = m_samplesPerSymbol/2;
-    }
-    else
-    {
-        // Wait until centre of bit to sample it
-        m_syncCount--;
-
-        if (m_syncCount <= 0)
-        {
-            // According to a variety of places on the web, high frequency is a 0, low is 1.
-            // While this seems to be correct in the UK, some IQ files I've obtained seem
-            // to be reversed, so we support both.
-            if (m_inverted) {
-                m_bit = data;
-            } else {
-                m_bit = !data;
-            }
-
-            sample = true;
-            // Store in shift reg. MSB transmitted first
-            m_bits = (m_bits << 1) | m_bit;
-            m_bitCount++;
-
-            if (m_bitCount > 32) {
-                m_bitCount = 32;
-            }
-
-            if ((m_bitCount == 32) && !m_gotSOP)
-            {
-                // Look for synccode that starts a batch - allow three errors that can be corrected
-                if (m_bits == PAGERDEMOD_POCSAG_SYNCCODE)
-                {
-                    m_gotSOP = true;
-                    m_inverted = false;
-                }
-                else if (m_bits == PAGERDEMOD_POCSAG_SYNCCODE_INV)
-                {
-                    m_gotSOP = true;
-                    m_inverted = true;
-                }
-                else if (popcount(m_bits ^ PAGERDEMOD_POCSAG_SYNCCODE) >= 29)
-                {
-                    quint32 correctedCW;
-                    if (bchDecode(m_bits, correctedCW) && (correctedCW == PAGERDEMOD_POCSAG_SYNCCODE))
-                    {
-                        m_gotSOP = true;
-                        m_inverted = false;
-                    }
-                }
-                else if (popcount(m_bits ^ PAGERDEMOD_POCSAG_SYNCCODE_INV) >= 29)
-                {
-                    quint32 correctedCW;
-                    if (bchDecode(~m_bits, correctedCW) && (correctedCW == PAGERDEMOD_POCSAG_SYNCCODE))
-                    {
-                        m_gotSOP = true;
-                        m_inverted = true;
-                    }
-                }
-
-                if (m_gotSOP)
-                {
-                    // Reset demod state
-                    m_bits = 0;
-                    m_bitCount = 0;
-                    m_codeWords[0] = PAGERDEMOD_POCSAG_SYNCCODE;
-                    m_wordCount = 1;
-                    m_addressValid = false;
-                }
-            }
-            else if ((m_bitCount == 32) && m_gotSOP)
-            {
-                // Got a complete codeword - use BCH decoding to fix any bit errors
-                quint32 correctedCW;
-                m_codeWordsBCHError[m_wordCount] = !bchDecode(m_bits, correctedCW);
-                m_codeWords[m_wordCount] = correctedCW;
-                m_wordCount++;
-
-                // Check for sync code at start of batch
-                if ((m_wordCount == 1) && (correctedCW != PAGERDEMOD_POCSAG_SYNCCODE))
-                {
-                    m_gotSOP = false;
-                    //m_thresholdMet = false;
-                    m_addressValid = false;
-                    m_inverted = false;
-                }
-
-                // Have we received a complete batch
-                if (m_wordCount == PAGERDEMOD_BATCH_WORDS)
-                {
-                    // Decode it to addresses and messages
-                    decodeBatch();
-
-                    // Start a new batch
-                    m_batchNumber++;
-                    m_wordCount = 0;
-                }
-
-                m_bits = 0;
-                m_bitCount = 0;
-            }
-
-            m_syncCount = m_samplesPerSymbol;
-        }
-    }
+    // Matched filter and timing recovery produce the bits
+    sample = matchedFilterAndDpll(filt - m_dcOffset);
 
     // Save data for edge detection
-    m_dataPrev = data;
     // Select signals to feed to scope
     Complex scopeSample;
 
@@ -642,7 +786,6 @@ void PagerDemodSink::applySettings(const QStringList& settingsKeys, const PagerD
         m_interpolator.create(16, m_channelSampleRate, settings.m_rfBandwidth / 2.2);
         m_interpolatorDistance = (Real) m_channelSampleRate / (Real) PagerDemodSettings::m_channelSampleRate;
         m_interpolatorDistanceRemain = m_interpolatorDistance;
-        m_lowpass.create(301, PagerDemodSettings::m_channelSampleRate, settings.m_rfBandwidth / 2.0f);
     }
 
     if ((settingsKeys.contains("fmDeviation") && (settings.m_fmDeviation != m_settings.m_fmDeviation)) || force)
@@ -650,13 +793,13 @@ void PagerDemodSink::applySettings(const QStringList& settingsKeys, const PagerD
         m_phaseDiscri.setFMScaling(PagerDemodSettings::m_channelSampleRate / (2.0f * settings.m_fmDeviation));
     }
 
-    if ((settingsKeys.contains("baud") && (settings.m_baud != m_settings.m_baud)) || force)
+    if (force)
     {
-        m_samplesPerSymbol = PagerDemodSettings::m_channelSampleRate / settings.m_baud;
-        qDebug() << "PagerDemodSink::applySettings: m_samplesPerSymbol: " << m_samplesPerSymbol;
-
-        // Signal is a square wave - so include several harmonics
-        m_lowpassBaud.create(301, PagerDemodSettings::m_channelSampleRate, settings.m_baud * 5.0f);
+        // The baud rate is detected from the preamble rather than configured, as POCSAG
+        // networks mix rates and a single channel can carry different rates at different
+        // times. Start at the most common rate until the first preamble is detected.
+        m_baudDetector.create(PagerDemodSettings::m_channelSampleRate);
+        setBaud(1200);
     }
 
     if (force) {

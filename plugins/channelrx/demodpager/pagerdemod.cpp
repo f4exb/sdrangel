@@ -43,7 +43,8 @@ const char * const PagerDemod::m_channelId = "PagerDemod";
 PagerDemod::PagerDemod(DeviceAPI *deviceAPI) :
         ChannelAPI(m_channelIdURI, ChannelAPI::StreamSingleSink),
         m_deviceAPI(deviceAPI),
-        m_basebandSampleRate(0)
+        m_basebandSampleRate(0),
+        m_centerFrequency(0)
 {
     setObjectName(m_channelId);
 
@@ -204,7 +205,8 @@ bool PagerDemod::handleMessage(const Message& cmd)
                 << CSV::escape(report.getAlphaMessage()) << ","
                 << report.getNumericMessage() << ","
                 << QString::number(report.getEvenParityErrors()) << ","
-                << QString::number(report.getBCHParityErrors()) << "\n";
+                << QString::number(report.getBCHParityErrors()) << ","
+                << QString::number(report.getBaud()) << "\n";
             m_logStream.flush();
         }
 
@@ -291,7 +293,7 @@ void PagerDemod::applySettings(const QStringList& settingsKeys, const PagerDemod
                 if (newFile)
                 {
                     // Write header
-                    m_logStream << "Date,Time,Address,Function Bits,Alpha,Numeric,Even Parity Errors,BCH Parity Errors\n";
+                    m_logStream << "Date,Time,Address,Function Bits,Alpha,Numeric,Even Parity Errors,BCH Parity Errors,Baud\n";
                 }
             }
             else
@@ -410,9 +412,6 @@ void PagerDemod::webapiUpdateChannelSettings(
         const QStringList& channelSettingsKeys,
         SWGSDRangel::SWGChannelSettings& response)
 {
-    if (channelSettingsKeys.contains("baud")) {
-        settings.m_baud = response.getPagerDemodSettings()->getBaud();
-    }
     if (channelSettingsKeys.contains("decode")) {
         settings.m_decode = (PagerDemodSettings::Decode) response.getPagerDemodSettings()->getDecode();
     }
@@ -438,10 +437,10 @@ void PagerDemod::webapiUpdateChannelSettings(
         settings.m_udpPort = response.getPagerDemodSettings()->getUdpPort();
     }
     if (channelSettingsKeys.contains("logFilename")) {
-        settings.m_logFilename = *response.getAdsbDemodSettings()->getLogFilename();
+        settings.m_logFilename = *response.getPagerDemodSettings()->getLogFilename();
     }
     if (channelSettingsKeys.contains("logEnabled")) {
-        settings.m_logEnabled = response.getAdsbDemodSettings()->getLogEnabled();
+        settings.m_logEnabled = response.getPagerDemodSettings()->getLogEnabled();
     }
     if (channelSettingsKeys.contains("rgbColor")) {
         settings.m_rgbColor = response.getPagerDemodSettings()->getRgbColor();
@@ -480,7 +479,6 @@ void PagerDemod::webapiUpdateChannelSettings(
 
 void PagerDemod::webapiFormatChannelSettings(SWGSDRangel::SWGChannelSettings& response, const PagerDemodSettings& settings)
 {
-    response.getPagerDemodSettings()->setBaud(settings.m_baud);
     response.getPagerDemodSettings()->setDecode((int) settings.m_decode);
     response.getPagerDemodSettings()->setReverse(settings.m_reverse ? 1 : 0);
     response.getPagerDemodSettings()->setInputFrequencyOffset(settings.m_inputFrequencyOffset);
@@ -606,9 +604,6 @@ void PagerDemod::webapiFormatChannelSettings(
 
     // transfer data that has been modified. When force is on transfer all data except reverse API data
 
-    if (channelSettingsKeys.contains("baud") || force) {
-        swgPagerDemodSettings->setBaud(settings.m_baud);
-    }
     if (channelSettingsKeys.contains("decode") || force) {
         swgPagerDemodSettings->setDecode((int) settings.m_decode);
     }

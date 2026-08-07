@@ -1,6 +1,7 @@
 ///////////////////////////////////////////////////////////////////////////////////
 // Copyright (C) 2021, 2023 Jon Beniston, M7RCE <jon@beniston.com>               //
 // Copyright (C) 2021-2022 Edouard Griffiths, F4EXB <f4exb06@gmail.com>          //
+// Some code by AI                                                               //
 //                                                                               //
 // This program is free software; you can redistribute it and/or modify          //
 // it under the terms of the GNU General Public License as published by          //
@@ -18,12 +19,17 @@
 
 #include <QDebug>
 
+#include <algorithm>
 #include <complex.h>
+#include <vector>
 
 #include "dsp/datafifo.h"
 #include "device/deviceapi.h"
 #include "channel/channelwebapiutils.h"
 #include "maincore.h"
+
+#include "util/ax25.h"
+#include "util/popcount.h"
 
 #include "packetdemod.h"
 #include "packetdemodsink.h"
@@ -35,13 +41,22 @@ PacketDemodSink::PacketDemodSink(PacketDemod *packetDemod) :
         m_magsqSum(0.0f),
         m_magsqPeak(0.0f),
         m_magsqCount(0),
-        m_messageQueueToChannel(nullptr),
-        m_f1(nullptr),
-        m_f0(nullptr),
-        m_corrBuf(nullptr),
-        m_corrIdx(0),
-        m_corrCnt(0)
+        m_messageQueueToChannel(nullptr)
 {
+    // The framer emits frames; what a decode MEANS - deduplication, the burst's live
+    // decode count, and the tone pair learned from replayed frames - stays here.
+    // The discriminator path frames its own bits; the core frames the MLSE chains'.
+    m_framer.setFrameHandler([this](const QByteArray& packet, bool viaChase) -> bool {
+        (void) viaChase;
+        return sendPacket(packet, m_core.sampleCount());
+    });
+
+    // What a decode MEANS - deduplication and the reporting timestamp - stays here; the
+    // core decides what a decode IS.
+    m_core.setPacketHandler([this](const QByteArray& packet, quint64 stamp) -> bool {
+        return sendPacket(packet, stamp);
+    });
+
     m_magsq = 0.0;
 
     m_demodBuffer.resize(1<<12);
@@ -53,9 +68,6 @@ PacketDemodSink::PacketDemodSink(PacketDemod *packetDemod) :
 
 PacketDemodSink::~PacketDemodSink()
 {
-    delete[] m_f1;
-    delete[] m_f0;
-    delete[] m_corrBuf;
 }
 
 void PacketDemodSink::feed(const SampleVector::const_iterator& begin, const SampleVector::const_iterator& end)
@@ -104,158 +116,46 @@ void PacketDemodSink::processOneSample(Complex &ci)
     }
     m_magsqCount++;
 
-    m_corrBuf[m_corrIdx] = fmDemod;
-    if (m_corrCnt >= m_correlationLength)
+    if (m_settings.m_mlse)
     {
-        // Correlate with 1200 + 2200 baud complex exponentials
-        Complex corrF0 = 0.0f;
-        Complex corrF1 = 0.0f;
-        for (int i = 0; i < m_correlationLength; i++)
-        {
-            int j = m_corrIdx - i;
-            if (j < 0)
-                j += m_correlationLength;
-            corrF0 += m_f0[i] * m_corrBuf[j];
-            corrF1 += m_f1[i] * m_corrBuf[j];
-        }
-        m_corrCnt--; // Avoid overflow in increment below
-
-        // Low pass filter, to minimize changes above the baud rate
-        Real f0Filt = m_lowpassF0.filter(std::abs(corrF0));
-        Real f1Filt = m_lowpassF1.filter(std::abs(corrF1));
-
-        // Determine which is the closest match and then quantise to 1 or -1
-        // FIXME: We should try to account for the fact that higher frequencies can have preemphasis
-        float diff = f1Filt - f0Filt;
-        int sample = diff >= 0.0f ? 1 : 0;
-
-        // Look for edge
-        if (sample != m_samplePrev)
-        {
-            m_syncCount = PacketDemodSettings::PACKETDEMOD_CHANNEL_SAMPLE_RATE/m_settings.getBaudRate()/2;
-        }
-        else
-        {
-            m_syncCount--;
-            if (m_syncCount <= 0)
-            {
-                // HDLC deframing
-
-                // Should be in the middle of the symbol
-                // NRZI decoding
-                int bit;
-                if (sample != m_symbolPrev)
-                    bit = 0;
-                else
-                    bit = 1;
-                m_symbolPrev = sample;
-
-                // Store in shift reg
-                m_bits |= bit << m_bitCount;
-                m_bitCount++;
-
-                if (bit == 1)
-                {
-                    m_onesCount++;
-                    // Shouldn't ever get 7 1s in a row
-                    if ((m_onesCount == 7) && m_gotSOP)
-                    {
-                        m_gotSOP = false;
-                        m_byteCount = 0;
-                    }
-                }
-                else if (bit == 0)
-                {
-                    if (m_onesCount == 5)
-                    {
-                        // Remove bit-stuffing (5 1s followed by a 0)
-                        m_bitCount--;
-                    }
-                    else if (m_onesCount == 6)
-                    {
-                        // Start/end of packet
-                        if ((m_bitCount == 8) && (m_bits == 0x7e) && (m_byteCount > 0))
-                        {
-                            // End of packet
-                            // Check CRC is valid
-                            m_crc.init();
-                            m_crc.calculate(m_bytes, m_byteCount - 2);
-                            uint16_t calcCrc = m_crc.get();
-                            uint16_t rxCrc = m_bytes[m_byteCount-2] | (m_bytes[m_byteCount-1] << 8);
-                            if (calcCrc == rxCrc)
-                            {
-                                QByteArray rxPacket((char *)m_bytes, m_byteCount);
-                                qDebug() << "RX: " << rxPacket.toHex();
-                                if (getMessageQueueToChannel())
-                                {
-                                    QDateTime dateTime = QDateTime::currentDateTime();
-                                    if (m_settings.m_useFileTime)
-                                    {
-                                        QString hardwareId = m_packetDemod->getDeviceAPI()->getHardwareId();
-
-                                        if ((hardwareId == "FileInput") || (hardwareId == "SigMFFileInput"))
-                                        {
-                                            QString dateTimeStr;
-                                            int deviceIdx = m_packetDemod->getDeviceSetIndex();
-
-                                            if (ChannelWebAPIUtils::getDeviceReportValue(deviceIdx, "absoluteTime", dateTimeStr)) {
-                                                dateTime = QDateTime::fromString(dateTimeStr, Qt::ISODateWithMs);
-                                            }
-                                        }
-                                    }
-
-                                    MainCore::MsgPacket *msg = MainCore::MsgPacket::create(m_packetDemod, rxPacket, dateTime);
-                                    getMessageQueueToChannel()->push(msg);
-                                }
-                            }
-                            else
-                                qDebug() << QString("PacketDemodSink::processOneSample: CRC mismatch: %1 %2")
-                                    .arg(calcCrc, 4, 16,  QLatin1Char('0'))
-                                    .arg(rxCrc, 4, 16, QLatin1Char('0'));
-                            // Reset state to start receiving next packet
-                            m_gotSOP = false;
-                            m_bits = 0;
-                            m_bitCount = 0;
-                            m_byteCount = 0;
-                        }
-                        else
-                        {
-                            // Start of packet
-                            m_gotSOP = true;
-                            m_bits = 0;
-                            m_bitCount = 0;
-                            m_byteCount = 0;
-                        }
-                    }
-                    m_onesCount = 0;
-                }
-
-                if (m_gotSOP)
-                {
-                    if (m_bitCount == 8)
-                    {
-                        if (m_byteCount >= 512)
-                        {
-                            // Too many bytes
-                            m_gotSOP = false;
-                            m_byteCount = 0;
-                        }
-                        else
-                        {
-                            m_bytes[m_byteCount] = m_bits;
-                            m_byteCount++;
-                        }
-                        m_bits = 0;
-                        m_bitCount = 0;
-                    }
-                }
-                m_syncCount = PacketDemodSettings::PACKETDEMOD_CHANNEL_SAMPLE_RATE/m_settings.getBaudRate();
-            }
-        }
-        m_samplePrev = sample;
+        // Detect on the complex baseband. The discriminator output is still produced
+        // above; the symbol rate estimator decodes its tone transitions to keep the
+        // chains on the transmitter's real clock.
+        m_core.processSample(ci, fmDemod, magsq);
     }
-    m_corrIdx = (m_corrIdx + 1) % m_correlationLength;
-    m_corrCnt++;
+    else
+    {
+        Complex corrF0;
+        Complex corrF1;
+
+        if (m_correlator.push(fmDemod, corrF0, corrF1))
+        {
+            // Low pass filter, to minimize changes above the baud rate
+            Real f0Filt = m_lowpassF0.filter(std::abs(corrF0));
+            Real f1Filt = m_lowpassF1.filter(std::abs(corrF1));
+
+            // Determine which is the closest match and then quantise to 1 or -1
+            // FIXME: We should try to account for the fact that higher frequencies can have preemphasis
+            float diff = f1Filt - f0Filt;
+            int sample = diff >= 0.0f ? 1 : 0;
+
+            // Look for edge
+            if (sample != m_samplePrev)
+            {
+                m_syncCount = PacketDemodSettings::PACKETDEMOD_CHANNEL_SAMPLE_RATE/m_settings.getBaudRate()/2;
+            }
+            else
+            {
+                m_syncCount--;
+                if (m_syncCount <= 0)
+                {
+                    m_framer.process(m_deframer, sample, diff, true);
+                    m_syncCount = PacketDemodSettings::PACKETDEMOD_CHANNEL_SAMPLE_RATE/m_settings.getBaudRate();
+                }
+            }
+            m_samplePrev = sample;
+        }
+    }
 
     m_demodBuffer[m_demodBufferFill++] = fmDemod * std::numeric_limits<int16_t>::max();
 
@@ -282,6 +182,65 @@ void PacketDemodSink::processOneSample(Complex &ci)
     }
 }
 
+bool PacketDemodSink::sendPacket(const QByteArray& packet, quint64 stamp)
+{
+    // The MLSE runs many detectors over the same signal and several of them will decode the
+    // same transmission, a symbol period or so apart. Report it once. Genuine retransmissions
+    // are seconds to minutes apart, and a digipeated repeat has the via path marked, so it
+    // does not compare equal.
+    if (m_settings.m_mlse)
+    {
+        const quint64 rate = PacketDemodSettings::PACKETDEMOD_CHANNEL_SAMPLE_RATE;
+
+        // Timestamp a frame by when it was TRANSMITTED, not when it was decoded: a replay
+        // reports a burst's frames seconds after the live chains would have, and the two
+        // must still compare equal. Entries are kept long enough for a replay to catch up.
+
+        while (!m_recent.empty()
+            && (stamp - m_recent.front().second > (quint64) 10 * rate)) {
+            m_recent.pop_front();
+        }
+
+        for (const auto& r : m_recent)
+        {
+            quint64 dt = (stamp > r.second) ? (stamp - r.second) : (r.second - stamp);
+
+            if ((r.first == packet) && (dt < rate)) {
+                return false;       // a duplicate of one already reported
+            }
+        }
+
+        m_recent.push_back(std::make_pair(packet, stamp));
+    }
+
+    qDebug() << "RX: " << packet.toHex();
+
+    if (!getMessageQueueToChannel()) {
+        return false;
+    }
+
+    QDateTime dateTime = QDateTime::currentDateTime();
+
+    if (m_settings.m_useFileTime)
+    {
+        QString hwType = m_packetDemod->getDeviceAPI()->getHardwareId();
+
+        if ((hwType == "FileInput") || (hwType == "SigMFFileInput"))
+        {
+            QString dateTimeStr;
+            int deviceIdx = m_packetDemod->getDeviceSetIndex();
+
+            if (ChannelWebAPIUtils::getDeviceReportValue(deviceIdx, "absoluteTime", dateTimeStr)) {
+                dateTime = QDateTime::fromString(dateTimeStr, Qt::ISODateWithMs);
+            }
+        }
+    }
+
+    MainCore::MsgPacket *msg = MainCore::MsgPacket::create(m_packetDemod, packet, dateTime);
+    getMessageQueueToChannel()->push(msg);
+    return true;
+}
+
 void PacketDemodSink::applyChannelSettings(int channelSampleRate, int channelFrequencyOffset, bool force)
 {
     qDebug() << "PacketDemodSink::applyChannelSettings:"
@@ -305,6 +264,16 @@ void PacketDemodSink::applyChannelSettings(int channelSampleRate, int channelFre
     m_channelFrequencyOffset = channelFrequencyOffset;
 }
 
+static PacketDemodCore::Config coreConfig(const PacketDemodSettings& settings)
+{
+    PacketDemodCore::Config cfg;
+    cfg.m_chase = settings.m_chase;
+    cfg.m_mlse = settings.m_mlse;
+    cfg.m_baudRate = settings.getBaudRate();
+
+    return cfg;
+}
+
 void PacketDemodSink::applySettings(const QStringList& settingsKeys, const PacketDemodSettings& settings, bool force)
 {
     qDebug() << "PacketDemodSink::applySettings:" << settings.getDebugString(settingsKeys, force);
@@ -315,47 +284,47 @@ void PacketDemodSink::applySettings(const QStringList& settingsKeys, const Packe
         m_interpolatorDistance = (Real) m_channelSampleRate / (Real) PacketDemodSettings::PACKETDEMOD_CHANNEL_SAMPLE_RATE;
         m_interpolatorDistanceRemain = m_interpolatorDistance;
     }
-    if ((settingsKeys.contains("fmDeviation") && (settings.m_fmDeviation != m_settings.m_fmDeviation)) || force)
+    // Both paths frame their own bits, so both need the depth - and the MLSE path is the
+    // default, which is where a Chase setting that only reached the discriminator would
+    // have looked like it did nothing at all
+    if (settingsKeys.contains("chase") || force)
     {
-        m_phaseDiscri.setFMScaling(PacketDemodSettings::PACKETDEMOD_CHANNEL_SAMPLE_RATE / (2.0f * settings.m_fmDeviation));
+        m_framer.setChaseDepth(settings.m_chase);
+        m_core.setChaseDepth(settings.m_chase);
+    }
+
+    if (settingsKeys.contains("mlse") || force) {
+        m_framer.setRequirePlausible(settings.m_mlse);
     }
 
     if (force)
     {
-        delete[] m_f1;
-        delete[] m_f0;
-        delete[] m_corrBuf;
-        m_correlationLength = PacketDemodSettings::PACKETDEMOD_CHANNEL_SAMPLE_RATE/settings.getBaudRate();
-        m_f1 = new Complex[m_correlationLength]();
-        m_f0 = new Complex[m_correlationLength]();
-        m_corrBuf = new Complex[m_correlationLength]();
-        m_corrIdx = 0;
-        m_corrCnt = 0;
-        Real f0 = 0.0f;
-        Real f1 = 0.0f;
-        for (int i = 0; i < m_correlationLength; i++)
-        {
-            m_f0[i] = Complex(cos(f0), sin(f0));
-            m_f1[i] = Complex(cos(f1), sin(f1));
-            f0 += 2.0f*(Real)M_PI*2200.0f/PacketDemodSettings::PACKETDEMOD_CHANNEL_SAMPLE_RATE;
-            f1 += 2.0f*(Real)M_PI*1200.0f/PacketDemodSettings::PACKETDEMOD_CHANNEL_SAMPLE_RATE;
-        }
+        // Deviation is a constant now, so the discriminator scaling is set once
+        m_phaseDiscri.setFMScaling(PacketDemodSettings::PACKETDEMOD_CHANNEL_SAMPLE_RATE
+            / (2.0f * PacketDemodSettings::PACKETDEMOD_FM_DEVIATION));
 
-        m_lowpassF1.create(301, PacketDemodSettings::PACKETDEMOD_CHANNEL_SAMPLE_RATE, settings.getBaudRate() * 1.1f);
-        m_lowpassF0.create(301, PacketDemodSettings::PACKETDEMOD_CHANNEL_SAMPLE_RATE, settings.getBaudRate() * 1.1f);
+        m_correlationLength = PacketDemodSettings::PACKETDEMOD_CHANNEL_SAMPLE_RATE/settings.getBaudRate();
+        m_correlator.create(m_correlationLength,
+                            PacketDemodSettings::PACKETDEMOD_CHANNEL_SAMPLE_RATE,
+                            2200.0, 1200.0);
+
+        m_lowpassF1.create(PACKETDEMOD_LOWPASS_TAPS, PacketDemodSettings::PACKETDEMOD_CHANNEL_SAMPLE_RATE, settings.getBaudRate() * 1.1f);
+        m_lowpassF0.create(PACKETDEMOD_LOWPASS_TAPS, PacketDemodSettings::PACKETDEMOD_CHANNEL_SAMPLE_RATE, settings.getBaudRate() * 1.1f);
+        m_deframer.reset();
         m_samplePrev = 0;
         m_syncCount = 0;
-        m_symbolPrev = 0;
-        m_bits = 0;
-        m_bitCount = 0;
-        m_onesCount = 0;
-        m_gotSOP = false;
-        m_byteCount = 0;
         m_settings = settings;
+        m_core.applyConfig(coreConfig(settings));
     }
     else
     {
-        m_settings.applySettings(settingsKeys, settings);
-    }
+        bool rebuild = settingsKeys.contains("mlse")
+            || settingsKeys.contains("mode");
 
+        m_settings.applySettings(settingsKeys, settings);
+
+        if (rebuild) {
+            m_core.applyConfig(coreConfig(m_settings));
+        }
+    }
 }

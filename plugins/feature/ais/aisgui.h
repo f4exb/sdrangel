@@ -27,10 +27,12 @@
 #include <QDateTime>
 #include <QHash>
 #include <QRandomGenerator>
+#include <QtCharts>
 
 #include "feature/featuregui.h"
 #include "util/messagequeue.h"
 #include "util/ais.h"
+#include "util/vesselfinder.h"
 #include "settings/rollupstate.h"
 
 #include "aissettings.h"
@@ -42,6 +44,10 @@ class AIS;
 namespace Ui {
     class AISGUI;
 }
+
+#if QT_VERSION < QT_VERSION_CHECK(6, 0, 0)
+using namespace QtCharts;
+#endif
 
 class AISGUI : public FeatureGUI {
     Q_OBJECT
@@ -77,10 +83,24 @@ private:
     AIS* m_ais;
     MessageQueue m_inputMessageQueue;
     QTimer m_timer;
+    QTimer m_chartTimer;
     int m_lastFeatureState;
+    QDateTime m_messageRateTime;
+    int m_messageCount;
+    int m_chartTickCount;
+    QDateTime m_averageTime;
+
+    QChart *m_chart;
+    QLineSeries *m_messageSeries;
+    QLineSeries *m_shipSeries;
+    QDateTimeAxis *m_chartXAxis;
+    QValueAxis *m_messageYAxis;
+    QValueAxis *m_shipYAxis;
 
     QRandomGenerator m_random;
     QHash<QString, Vessel *> m_vessels;             // Hash of mmsi to vessels
+    VesselFinder m_vesselFinder;
+    QString m_selectedPhotoId;
     static QStringList m_shipModels;
     static QStringList m_sailboatModels;
     static QHash<QString, float> m_labelOffset;
@@ -95,6 +115,7 @@ private:
     void applySettings(bool force = false);
     void displaySettings();
     bool handleMessage(const Message& message);
+    void makeUIConnections();
 
     void sendToMap(const QString &name, const QString &label,
         const QString &image, const QString &text,
@@ -104,6 +125,13 @@ private:
     );
     void updateVessels(AISMessage *ais, QDateTime dateTime);
     void getImageAndModel(const QString &type, const QString &shipType, int length, const QString &status, Vessel *vessel);
+    void hideShipPhoto();
+    void hideShipPhotoClicked();
+    void deleteAllVessels();
+    int countShips() const;
+    void plotChart();
+    void resetChartAxes();
+    void averageSeries(QLineSeries *series, const QDateTime& startTime, const QDateTime& endTime);
     void resizeTable();
     QAction *createCheckableItem(QString& text, int idx, bool checked, const char *slot);
 
@@ -132,6 +160,13 @@ private slots:
     void onMenuDialogCalled(const QPoint &p);
     void onWidgetRolled(QWidget* widget, bool rollDown);
     void handleInputMessages();
+    void on_displayChart_clicked(bool checked);
+    void on_deleteVessels_clicked();
+    void clearChart(const QPoint& p);
+    void updateChart();
+    void legendMarkerClicked();
+    void vesselSelectionChanged(int currentRow, int currentColumn, int previousRow, int previousColumn);
+    void shipPhoto(const VesselFinderPhoto *photo);
     void on_vessels_cellDoubleClicked(int row, int column);
     void vessels_customContextMenuRequested(QPoint pos);
     void vessels_sectionMoved(int logicalIndex, int oldVisualIndex, int newVisualIndex);
@@ -139,6 +174,9 @@ private slots:
     void vesselsColumnSelectMenu(QPoint pos);
     void vesselsColumnSelectMenuChecked(bool checked = false);
     void removeOldVessels();
+
+protected:
+    bool eventFilter(QObject *obj, QEvent *event) override;
 };
 
 #endif // INCLUDE_FEATURE_AISGUI_H_

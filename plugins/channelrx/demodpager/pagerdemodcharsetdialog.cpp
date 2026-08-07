@@ -33,7 +33,6 @@ PagerDemodCharsetDialog::PagerDemodCharsetDialog(PagerDemodSettings *settings,
     for (int i = 0; i < settings->m_sevenbit.size(); i++) {
         addRow(settings->m_sevenbit[i], settings->m_unicode[i]);
     }
-    connect(ui->table, &QTableWidget::cellChanged, this, &PagerDemodCharsetDialog::on_table_cellChanged);
 }
 
 PagerDemodCharsetDialog::~PagerDemodCharsetDialog()

@@ -1,5 +1,6 @@
 <RCC>
   <qresource prefix="/ais/">
+    <file alias="chart.png">../../channelrx/demodadsb/icons/chart.png</file>
     <file>map/aircraft.png</file>
     <file>map/helicopter.png</file>
     <file>map/ship.png</file>

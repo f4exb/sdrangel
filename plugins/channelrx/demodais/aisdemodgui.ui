@@ -359,13 +359,13 @@
          </size>
         </property>
         <property name="toolTip">
-         <string>Correlation threshold</string>
+         <string>Normalised correlation threshold with the preamble, from 0 to 1</string>
         </property>
         <property name="minimum">
          <number>0</number>
         </property>
         <property name="maximum">
-         <number>60</number>
+         <number>100</number>
         </property>
         <property name="singleStep">
          <number>1</number>
@@ -380,8 +380,14 @@
       </item>
       <item>
        <widget class="QLabel" name="thresholdText">
+        <property name="minimumSize">
+         <size>
+          <width>28</width>
+          <height>0</height>
+         </size>
+        </property>
         <property name="text">
-         <string>60</string>
+         <string>0.60</string>
         </property>
        </widget>
       </item>

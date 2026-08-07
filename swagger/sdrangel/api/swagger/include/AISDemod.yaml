@@ -14,6 +14,7 @@ AISDemodSettings:
       type: number
       format: float
     correlationThreshold:
+      description: "Normalised correlation threshold with the preamble, from 0 to 1"
       type: number
       format: float
     udpEnabled:

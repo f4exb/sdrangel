@@ -36,7 +36,6 @@ PagerDemodSettings::PagerDemodSettings() :
 
 void PagerDemodSettings::resetToDefaults()
 {
-    m_baud = 1200;
     m_inputFrequencyOffset = 0;
     m_rfBandwidth = 20000.0f;
     m_fmDeviation = 4500.0f;
@@ -63,6 +62,9 @@ void PagerDemodSettings::resetToDefaults()
     m_filterDuplicates = false;
     m_duplicateMatchMessageOnly = false;
     m_duplicateMatchLastOnly = false;
+    m_sevenbit.clear();
+    m_unicode.clear();
+    m_notificationSettings.clear();
 
     for (int i = 0; i < PAGERDEMOD_MESSAGE_COLUMNS; i++)
     {
@@ -78,7 +80,6 @@ QByteArray PagerDemodSettings::serialize() const
     s.writeS32(1, m_inputFrequencyOffset);
     s.writeFloat(2, m_rfBandwidth);
     s.writeFloat(3, m_fmDeviation);
-    s.writeS32(4, m_baud);
     s.writeString(5, m_filterAddress);
     s.writeS32(6, (int)m_decode);
     s.writeBool(7, m_udpEnabled);
@@ -99,7 +100,9 @@ QByteArray PagerDemodSettings::serialize() const
     s.writeU32(18, m_reverseAPIPort);
     s.writeU32(19, m_reverseAPIDeviceIndex);
     s.writeU32(20, m_reverseAPIChannelIndex);
-    s.writeBlob(21, m_scopeGUI->serialize());
+    if (m_scopeGUI) {
+        s.writeBlob(21, m_scopeGUI->serialize());
+    }
     s.writeBool(22, m_reverse);
     s.writeBlob(23, serializeIntList(m_sevenbit));
     s.writeBlob(24, serializeIntList(m_unicode));
@@ -149,14 +152,13 @@ bool PagerDemodSettings::deserialize(const QByteArray& data)
         d.readS32(1, &m_inputFrequencyOffset, 0);
         d.readFloat(2, &m_rfBandwidth, 20000.0f);
         d.readFloat(3, &m_fmDeviation, 4500.0f);
-        d.readS32(4, &m_baud, 1200);
         d.readString(5, &m_filterAddress, "");
         d.readS32(6, (int*)&m_decode, (int)Standard);
         d.readBool(7, &m_udpEnabled);
-        d.readString(8, &m_udpAddress);
+        d.readString(8, &m_udpAddress, "127.0.0.1");
         d.readU32(9, &utmp);
 
-        if ((utmp > 1023) && (utmp < 65535)) {
+        if ((utmp > 1023) && (utmp <= 65535)) {
             m_udpPort = utmp;
         } else {
             m_udpPort = 9999;
@@ -178,7 +180,7 @@ bool PagerDemodSettings::deserialize(const QByteArray& data)
         d.readString(17, &m_reverseAPIAddress, "127.0.0.1");
         d.readU32(18, &utmp, 0);
 
-        if ((utmp > 1023) && (utmp < 65535)) {
+        if ((utmp > 1023) && (utmp <= 65535)) {
             m_reverseAPIPort = utmp;
         } else {
             m_reverseAPIPort = 8888;
@@ -239,9 +241,6 @@ bool PagerDemodSettings::deserialize(const QByteArray& data)
 
 void PagerDemodSettings::applySettings(const QStringList& settingsKeys, const PagerDemodSettings& settings)
 {
-    if (settingsKeys.contains("baud")) {
-        m_baud = settings.m_baud;
-    }
     if (settingsKeys.contains("inputFrequencyOffset")) {
         m_inputFrequencyOffset = settings.m_inputFrequencyOffset;
     }
@@ -348,9 +347,6 @@ QString PagerDemodSettings::getDebugString(const QStringList& settingsKeys, bool
 {
     std::ostringstream ostr;
 
-    if (settingsKeys.contains("baud") || force) {
-        ostr << " m_baud: " << m_baud;
-    }
     if (settingsKeys.contains("inputFrequencyOffset") || force) {
         ostr << " m_inputFrequencyOffset: " << m_inputFrequencyOffset;
     }
@@ -452,7 +448,7 @@ void PagerDemodSettings::deserializeIntList(const QByteArray& data, QList<qint32
 PagerDemodSettings::NotificationSettings::NotificationSettings() :
     m_matchColumn(PagerDemodSettings::MESSAGE_COL_ADDRESS),
     m_highlight(false),
-    m_highlightColor(Qt::red),
+    m_highlightColor(QColor(Qt::red).rgba()),
     m_plotOnMap(false)
 {
 }
@@ -511,15 +507,15 @@ bool PagerDemodSettings::NotificationSettings::deserialize(const QByteArray& dat
     }
 }
 
-QDataStream& operator<<(QDataStream& out, const PagerDemodSettings::NotificationSettings *settings)
+QDataStream& operator<<(QDataStream& out, const QSharedPointer<PagerDemodSettings::NotificationSettings>& settings)
 {
     out << settings->serialize();
     return out;
 }
 
-QDataStream& operator>>(QDataStream& in, PagerDemodSettings::NotificationSettings*& settings)
+QDataStream& operator>>(QDataStream& in, QSharedPointer<PagerDemodSettings::NotificationSettings>& settings)
 {
-    settings = new PagerDemodSettings::NotificationSettings();
+    settings = QSharedPointer<PagerDemodSettings::NotificationSettings>::create();
     QByteArray data;
     in >> data;
     settings->deserialize(data);

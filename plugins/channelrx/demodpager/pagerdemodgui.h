@@ -88,6 +88,13 @@ private:
 
     QMenu *messagesMenu;                        // Column select context menu
 
+    bool m_loadingData;                         // Set while reading messages from a .csv log
+    // Most recently displayed message, for duplicate filtering. Can't use the last row in the
+    // table, as the user may have sorted it, so that isn't the most recent message
+    bool m_lastMessageValid;
+    QString m_lastAddress;
+    QString m_lastMessage;
+
 #ifdef QT_TEXTTOSPEECH_FOUND
     QTextToSpeech *m_speech;
 #endif
@@ -100,7 +107,7 @@ private:
     void applySettings(const QStringList& settingsKeys, bool force = false);
     void displaySettings();
     QString selectMessage(int functionBits, const QString &numericMessage, const QString &alphaMessage) const;
-    void messageReceived(const QDateTime dateTime, int address, int functionBits,
+    void messageReceived(const QDateTime dateTime, int address, int functionBits, int baud,
         const QString &numericMessage, const QString &alphaMessage,
         int evenParityErrors, int bchParityErrors);
     bool handleMessage(const Message& message);
@@ -125,7 +132,6 @@ private slots:
     void on_deltaFrequency_changed(qint64 value);
     void on_rfBW_valueChanged(int index);
     void on_fmDev_valueChanged(int value);
-    void on_baud_currentIndexChanged(int index);
     void on_decode_currentIndexChanged(int index);
     void on_charset_clicked();
     void on_filterAddress_editingFinished();

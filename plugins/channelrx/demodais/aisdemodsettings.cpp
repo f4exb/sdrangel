@@ -34,11 +34,11 @@ AISDemodSettings::AISDemodSettings() :
 
 void AISDemodSettings::resetToDefaults()
 {
-    m_baud = 9600; // Fixed
+    m_baud = AISDEMOD_BAUD_RATE; // Fixed
     m_inputFrequencyOffset = 0;
     m_rfBandwidth = 16000.0f;
-    m_fmDeviation = 4800.0f;
-    m_correlationThreshold = 30;
+    m_fmDeviation = 2400.0f;
+    m_correlationThreshold = 0.7f;
     m_filterMMSI = "";
     m_udpEnabled = false;
     m_udpAddress = "127.0.0.1";
@@ -73,7 +73,6 @@ QByteArray AISDemodSettings::serialize() const
     s.writeS32(1, m_inputFrequencyOffset);
     s.writeFloat(2, m_rfBandwidth);
     s.writeFloat(3, m_fmDeviation);
-    s.writeFloat(4, m_correlationThreshold);
     s.writeString(5, m_filterMMSI);
     s.writeBool(6, m_udpEnabled);
     s.writeString(7, m_udpAddress);
@@ -92,7 +91,9 @@ QByteArray AISDemodSettings::serialize() const
     s.writeU32(18, m_reverseAPIPort);
     s.writeU32(19, m_reverseAPIDeviceIndex);
     s.writeU32(20, m_reverseAPIChannelIndex);
-    s.writeBlob(21, m_scopeGUI->serialize());
+    if (m_scopeGUI) {
+        s.writeBlob(21, m_scopeGUI->serialize());
+    }
     s.writeString(22, m_logFilename);
     s.writeBool(23, m_logEnabled);
     s.writeS32(24, m_baud);
@@ -106,6 +107,7 @@ QByteArray AISDemodSettings::serialize() const
     s.writeBool(28, m_hidden);
     s.writeBool(29, m_showSlotMap);
     s.writeBool(30, m_useFileTime);
+    s.writeFloat(37, m_correlationThreshold);
 
     for (int i = 0; i < AISDEMOD_MESSAGE_COLUMNS; i++)
         s.writeS32(100 + i, m_messageColumnIndexes[i]);
@@ -133,14 +135,13 @@ bool AISDemodSettings::deserialize(const QByteArray& data)
 
         d.readS32(1, &m_inputFrequencyOffset, 0);
         d.readFloat(2, &m_rfBandwidth, 16000.0f);
-        d.readFloat(3, &m_fmDeviation, 4800.0f);
-        d.readFloat(4, &m_correlationThreshold, 30);
+        d.readFloat(3, &m_fmDeviation, 2400.0f);
         d.readString(5, &m_filterMMSI, "");
         d.readBool(6, &m_udpEnabled);
-        d.readString(7, &m_udpAddress);
+        d.readString(7, &m_udpAddress, "127.0.0.1");
         d.readU32(8, &utmp);
 
-        if ((utmp > 1023) && (utmp < 65535)) {
+        if ((utmp > 1023) && (utmp <= 65535)) {
             m_udpPort = utmp;
         } else {
             m_udpPort = 9999;
@@ -161,7 +162,7 @@ bool AISDemodSettings::deserialize(const QByteArray& data)
         d.readString(17, &m_reverseAPIAddress, "127.0.0.1");
         d.readU32(18, &utmp, 0);
 
-        if ((utmp > 1023) && (utmp < 65535)) {
+        if ((utmp > 1023) && (utmp <= 65535)) {
             m_reverseAPIPort = utmp;
         } else {
             m_reverseAPIPort = 8888;
@@ -180,7 +181,7 @@ bool AISDemodSettings::deserialize(const QByteArray& data)
 
         d.readString(22, &m_logFilename, "ais_log.csv");
         d.readBool(23, &m_logEnabled, false);
-        d.readS32(24, &m_baud, 9600);
+        d.readS32(24, &m_baud, AISDEMOD_BAUD_RATE);
 
         if (m_rollupState)
         {
@@ -193,6 +194,8 @@ bool AISDemodSettings::deserialize(const QByteArray& data)
         d.readBool(28, &m_hidden, false);
         d.readBool(29, &m_showSlotMap, false);
         d.readBool(30, &m_useFileTime, false);
+
+        d.readFloat(37, &m_correlationThreshold, 0.7f);
 
         for (int i = 0; i < AISDEMOD_MESSAGE_COLUMNS; i++) {
             d.readS32(100 + i, &m_messageColumnIndexes[i], i);
@@ -282,8 +285,21 @@ void AISDemodSettings::applySettings(const QStringList& settingsKeys, const AISD
     if (settingsKeys.contains("workspaceIndex")) {
         m_workspaceIndex = settings.m_workspaceIndex;
     }
+    if (settingsKeys.contains("geometryBytes")) {
+        m_geometryBytes = settings.m_geometryBytes;
+    }
     if (settingsKeys.contains("hidden")) {
         m_hidden = settings.m_hidden;
+    }
+    if (settingsKeys.contains("columnIndexes")) {
+        for (int i = 0; i < AISDEMOD_MESSAGE_COLUMNS; i++) {
+            m_messageColumnIndexes[i] = settings.m_messageColumnIndexes[i];
+        }
+    }
+    if (settingsKeys.contains("columnSizes")) {
+        for (int i = 0; i < AISDEMOD_MESSAGE_COLUMNS; i++) {
+            m_messageColumnSizes[i] = settings.m_messageColumnSizes[i];
+        }
     }
 }
 

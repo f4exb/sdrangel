@@ -34,8 +34,10 @@ SWGPacketDemodSettings::SWGPacketDemodSettings() {
     m_mode_isSet = false;
     rf_bandwidth = 0.0f;
     m_rf_bandwidth_isSet = false;
-    fm_deviation = 0.0f;
-    m_fm_deviation_isSet = false;
+    chase = 0;
+    m_chase_isSet = false;
+    mlse = 0;
+    m_mlse_isSet = false;
     udp_enabled = 0;
     m_udp_enabled_isSet = false;
     udp_address = nullptr;
@@ -82,8 +84,10 @@ SWGPacketDemodSettings::init() {
     m_mode_isSet = false;
     rf_bandwidth = 0.0f;
     m_rf_bandwidth_isSet = false;
-    fm_deviation = 0.0f;
-    m_fm_deviation_isSet = false;
+    chase = 0;
+    m_chase_isSet = false;
+    mlse = 0;
+    m_mlse_isSet = false;
     udp_enabled = 0;
     m_udp_enabled_isSet = false;
     udp_address = new QString("");
@@ -120,6 +124,7 @@ SWGPacketDemodSettings::init() {
 
 void
 SWGPacketDemodSettings::cleanup() {
+
 
 
 
@@ -171,7 +176,9 @@ SWGPacketDemodSettings::fromJsonObject(QJsonObject &pJson) {
     
     ::SWGSDRangel::setValue(&rf_bandwidth, pJson["rfBandwidth"], "float", "");
     
-    ::SWGSDRangel::setValue(&fm_deviation, pJson["fmDeviation"], "float", "");
+    ::SWGSDRangel::setValue(&chase, pJson["chase"], "qint32", "");
+    
+    ::SWGSDRangel::setValue(&mlse, pJson["mlse"], "qint32", "");
     
     ::SWGSDRangel::setValue(&udp_enabled, pJson["udpEnabled"], "qint32", "");
     
@@ -230,8 +237,11 @@ SWGPacketDemodSettings::asJsonObject() {
     if(m_rf_bandwidth_isSet){
         obj->insert("rfBandwidth", QJsonValue(rf_bandwidth));
     }
-    if(m_fm_deviation_isSet){
-        obj->insert("fmDeviation", QJsonValue(fm_deviation));
+    if(m_chase_isSet){
+        obj->insert("chase", QJsonValue(chase));
+    }
+    if(m_mlse_isSet){
+        obj->insert("mlse", QJsonValue(mlse));
     }
     if(m_udp_enabled_isSet){
         obj->insert("udpEnabled", QJsonValue(udp_enabled));
@@ -315,14 +325,24 @@ SWGPacketDemodSettings::setRfBandwidth(float rf_bandwidth) {
     this->m_rf_bandwidth_isSet = true;
 }
 
-float
-SWGPacketDemodSettings::getFmDeviation() {
-    return fm_deviation;
+qint32
+SWGPacketDemodSettings::getChase() {
+    return chase;
 }
 void
-SWGPacketDemodSettings::setFmDeviation(float fm_deviation) {
-    this->fm_deviation = fm_deviation;
-    this->m_fm_deviation_isSet = true;
+SWGPacketDemodSettings::setChase(qint32 chase) {
+    this->chase = chase;
+    this->m_chase_isSet = true;
+}
+
+qint32
+SWGPacketDemodSettings::getMlse() {
+    return mlse;
+}
+void
+SWGPacketDemodSettings::setMlse(qint32 mlse) {
+    this->mlse = mlse;
+    this->m_mlse_isSet = true;
 }
 
 qint32
@@ -499,7 +519,10 @@ SWGPacketDemodSettings::isSet(){
         if(m_rf_bandwidth_isSet){
             isObjectUpdated = true; break;
         }
-        if(m_fm_deviation_isSet){
+        if(m_chase_isSet){
+            isObjectUpdated = true; break;
+        }
+        if(m_mlse_isSet){
             isObjectUpdated = true; break;
         }
         if(m_udp_enabled_isSet){

@@ -82,6 +82,7 @@ public:
         QString getNumericMessage() const { return m_numericMessage; }
         int getEvenParityErrors() const { return m_evenParityErrors; }
         int getBCHParityErrors() const { return m_bchParityErrors; }
+        int getBaud() const { return m_baud; }
         QDateTime getDateTime() const { return m_dateTime; }
 
         static MsgPagerMessage* create(
@@ -90,7 +91,8 @@ public:
             const QString& alphaMessage,
             const QString& numericMessage,
             int evenParityErrors,
-            int bchParityErrors
+            int bchParityErrors,
+            int baud
         )
         {
             return new MsgPagerMessage(
@@ -100,6 +102,7 @@ public:
                 numericMessage,
                 evenParityErrors,
                 bchParityErrors,
+                baud,
                 QDateTime::currentDateTime()
             );
         }
@@ -111,9 +114,10 @@ public:
         QString m_numericMessage;
         int m_evenParityErrors;
         int m_bchParityErrors;
+        int m_baud;
         QDateTime m_dateTime;
 
-        MsgPagerMessage(int address, int functionBits, const QString& alphaMessage, const QString& numericMessage, int evenParityErrors, int bchParityErrors, QDateTime dateTime) :
+        MsgPagerMessage(int address, int functionBits, const QString& alphaMessage, const QString& numericMessage, int evenParityErrors, int bchParityErrors, int baud, QDateTime dateTime) :
             Message(),
             m_address(address),
             m_functionBits(functionBits),
@@ -121,6 +125,7 @@ public:
             m_numericMessage(numericMessage),
             m_evenParityErrors(evenParityErrors),
             m_bchParityErrors(bchParityErrors),
+            m_baud(baud),
             m_dateTime(dateTime)
         {
         }

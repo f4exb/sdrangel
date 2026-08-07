@@ -608,7 +608,7 @@ void InmarsatDemod::webapiFormatChannelSettings(
     if (channelSettingsKeys.contains("logEnabled") || force) {
         swgInmarsatDemodSettings->setLogEnabled(settings.m_logEnabled);
     }
-    if (channelSettingsKeys.contains("useFilTime") || force) {
+    if (channelSettingsKeys.contains("useFileTime") || force) {
         swgInmarsatDemodSettings->setUseFileTime(settings.m_useFileTime);
     }
     if (channelSettingsKeys.contains("rgbColor") || force) {

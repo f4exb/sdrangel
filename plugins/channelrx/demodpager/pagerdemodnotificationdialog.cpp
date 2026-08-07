@@ -19,7 +19,6 @@
 #include <QComboBox>
 #include <QPushButton>
 #include <QCheckBox>
-#include <QHBoxLayout>
 
 #include "gui/tablecolorchooser.h"
 
@@ -42,7 +41,7 @@ PagerDemodNotificationDialog::PagerDemodNotificationDialog(PagerDemodSettings *s
     resizeTable();
 
     for (int i = 0; i < m_settings->m_notificationSettings.size(); i++) {
-        addRow(m_settings->m_notificationSettings[i]);
+        addRow(m_settings->m_notificationSettings[i].data());
     }
 }
 
@@ -54,11 +53,10 @@ PagerDemodNotificationDialog::~PagerDemodNotificationDialog()
 
 void PagerDemodNotificationDialog::accept()
 {
-    qDeleteAll(m_settings->m_notificationSettings);
     m_settings->m_notificationSettings.clear();
     for (int i = 0; i < ui->table->rowCount(); i++)
     {
-        PagerDemodSettings::NotificationSettings *notificationSettings = new PagerDemodSettings::NotificationSettings();
+        QSharedPointer<PagerDemodSettings::NotificationSettings> notificationSettings = QSharedPointer<PagerDemodSettings::NotificationSettings>::create();
         int idx = ((QComboBox *)ui->table->cellWidget(i, NOTIFICATION_COL_MATCH))->currentIndex();
         notificationSettings->m_matchColumn = m_columnMap[idx];
         notificationSettings->m_regExp = ui->table->item(i, NOTIFICATION_COL_REG_EXP)->data(Qt::DisplayRole).toString().trimmed();
@@ -103,7 +101,7 @@ void PagerDemodNotificationDialog::on_remove_clicked()
     {
         int row = indexList.at(0).row();
         ui->table->removeRow(row);
-        m_colorGUIs.removeAt(row);
+        delete m_colorGUIs.takeAt(row);
     }
 }
 
@@ -123,12 +121,6 @@ void PagerDemodNotificationDialog::addRow(PagerDemodSettings::NotificationSettin
     m_colorGUIs.append(highlight);
     QCheckBox *plotOnMap = new QCheckBox();
     plotOnMap->setChecked(false);
-    QWidget *matchWidget = new QWidget();
-    QHBoxLayout *pLayout = new QHBoxLayout(matchWidget);
-    pLayout->addWidget(match);
-    pLayout->setAlignment(Qt::AlignCenter);
-    pLayout->setContentsMargins(0, 0, 0, 0);
-    matchWidget->setLayout(pLayout);
 
     match->addItem("Address");
     match->addItem("Message");
@@ -171,5 +163,6 @@ void PagerDemodNotificationDialog::addRow(PagerDemodSettings::NotificationSettin
     ui->table->setItem(row, NOTIFICATION_COL_SPEECH, speechItem);
     ui->table->setItem(row, NOTIFICATION_COL_COMMAND, commandItem);
     ui->table->setCellWidget(row, NOTIFICATION_COL_PLOT_ON_MAP, plotOnMap);
-    ui->table->setSortingEnabled(true);
+    // Sorting is intentionally left disabled - the table mixes items with cell widgets and a
+    // parallel m_colorGUIs list indexed by row, none of which are reordered when sorting
 }

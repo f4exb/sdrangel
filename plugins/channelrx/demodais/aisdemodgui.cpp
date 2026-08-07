@@ -488,8 +488,9 @@ void AISDemodGUI::messageReceived(const QByteArray& message, const QDateTime& da
     m_painter.setPen(color);
     for (int i = 0; i < totalSlots; i++)
     {
-        int y = (slot + i) / m_slotMapWidth;
-        int x = (slot + i) % m_slotMapWidth;
+        int s = (slot + i) % (m_slotMapWidth * m_slotMapHeight); // Slots wrap at the end of the frame
+        int y = s / m_slotMapWidth;
+        int x = s % m_slotMapWidth;
         m_painter.fillRect(x * 5 + 1, y * 5 + 1, 4, 4, color);
     }
     m_slotsUsed += totalSlots;
@@ -582,8 +583,8 @@ void AISDemodGUI::on_fmDev_valueChanged(int value)
 
 void AISDemodGUI::on_threshold_valueChanged(int value)
 {
-    ui->thresholdText->setText(QString("%1").arg(value));
-    m_settings.m_correlationThreshold = value;
+    m_settings.m_correlationThreshold = value / 100.0f;
+    ui->thresholdText->setText(QString("%1").arg(m_settings.m_correlationThreshold, 0, 'f', 2));
     applySettings(QStringList({"correlationThreshold"}));
 }
 
@@ -768,7 +769,7 @@ AISDemodGUI::AISDemodGUI(PluginAPI* pluginAPI, DeviceUISet *deviceUISet, Baseban
     ui->scopeGUI->changeTrigger(0, triggerData);
     ui->scopeGUI->focusOnTrigger(0); // re-focus to take changes into account in the GUI
 
-    m_scopeVis->setLiveRate(9600*6);
+    m_scopeVis->setLiveRate(AISDemodSettings::AISDEMOD_CHANNEL_SAMPLE_RATE);
     //m_scopeVis->setFreeRun(false); // FIXME: add method rather than call m_scopeVis->configure()
 
     ui->deltaFrequencyLabel->setText(QString("%1f").arg(QChar(0x94, 0x03)));
@@ -897,8 +898,8 @@ void AISDemodGUI::displaySettings()
     ui->fmDevText->setText(QString("%1%2k").arg(QChar(0xB1, 0x00)).arg(m_settings.m_fmDeviation / 1000.0, 0, 'f', 1));
     ui->fmDev->setValue(m_settings.m_fmDeviation / 100.0);
 
-    ui->thresholdText->setText(QString("%1").arg(m_settings.m_correlationThreshold));
-    ui->threshold->setValue(m_settings.m_correlationThreshold);
+    ui->thresholdText->setText(QString("%1").arg(m_settings.m_correlationThreshold, 0, 'f', 2));
+    ui->threshold->setValue((int) std::round(m_settings.m_correlationThreshold * 100.0f));
 
     updateIndexLabel();
 
@@ -1079,6 +1080,7 @@ void AISDemodGUI::on_logOpen_clicked()
                 }
                 m_loadingData = false;
                 ui->messages->setSortingEnabled(true);
+                filter(); // Apply MMSI filter to loaded rows, as filterRow is skipped during loading
                 QDateTime finishTime = QDateTime::currentDateTime();
                 qDebug() << "Read CSV in " << startTime.secsTo(finishTime);
             }

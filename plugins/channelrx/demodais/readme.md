@@ -8,7 +8,7 @@ AIS is broadcast globally on 25kHz channels at 161.975MHz and 162.025MHz, with o
 
 The AIS demodulators can send received messages to the [AIS feature](../../feature/ais/readme.md), which displays a table combining the latest data for vessels amalgamated from multiple demodulators and sends their positions to the [Map Feature](../../feature/map/readme.md) for display in 2D or 3D.
 
-AIS uses GMSK/FM modulation at a baud rate of 9,600, with a modulation index of 0.5. The demodulator works at a sample rate of 57,600Sa/s.
+AIS uses GMSK/FM modulation at a baud rate of 9,600, with a modulation index of 0.5. The demodulator works at a sample rate of 96,000Sa/s.
 
 Received AIS messages can be NMEA encoded and forwarded via UDP to 3rd party applications.
 
@@ -40,40 +40,42 @@ This specifies the bandwidth of a LPF that is applied to the input signal to lim
 
 <h3>5: Dev - Frequency deviation</h3>
 
-Adjusts the expected peak frequency deviation in 0.1 kHz steps from 1 to 6 kHz. Typical values are 4.8 kHz, corresponding to a modulation index of 0.5 at 9,600 baud.
+Adjusts the expected peak frequency deviation in 0.1 kHz steps from 1 to 6 kHz. The default is 2.4 kHz: ITU-R M.1371-5 section 2.3.2 specifies a modulation index of 0.5, and for continuous phase modulation the modulation index is twice the peak deviation divided by the bit rate, so 0.5 at 9,600 bit/s gives a peak deviation of 2,400 Hz. (4,800 Hz is the separation between the mark and space frequencies, which is twice the deviation.)
+
+This setting scales the output of the FM discriminator, which is used to detect the preamble and drive the scope traces. It has no direct effect on the demodulator's symbol decisions.
 
 <h3>6: TH - Correlation Threshold</h3>
 
-The correlation threshold between the received signal and the preamble (training sequence). A lower value should be able to demodulate weaker signals, but increases processor usage and may result in invalid messages if too low.
+The threshold for the normalised correlation between the received signal and the preamble (training sequence), from 0 to 1. Being normalised, it does not depend on signal level, so the same setting works for strong and weak signals. Real preambles correlate above 0.9 and the default of 0.6 sits well clear of the noise floor. A lower value may demodulate slightly weaker signals, but increases processor usage sharply, because every threshold crossing starts a sequence detection.
 
-<h3>7: Find</h3>
+<h3>7: UDP</h3>
 
-Entering a regular expression in the Find field displays only messages where the source MMSI matches the given regular expression.
+When checked, received messages are forwarded to the specified UDP address (8) and port (9).
 
-<h3>8: Clear Messages from table</h3>
-
-Pressing this button clears all messages from the table.
-
-<h3>9: UDP</h3>
-
-When checked, received messages are forwarded to the specified UDP address (10) and port (11).
-
-<h3>10: UDP address</h3>
+<h3>8: UDP address</h3>
 
 IP address of the host to forward received messages to via UDP.
 
-<h3>11: UDP port</h3>
+<h3>9: UDP port</h3>
 
 UDP port number to forward received messages to.
 
-<h3>12: UDP format</h3>
+<h3>10 UDP format</h3>
 
 The format the messages are forwarded via UDP in. This can be either binary (which is useful for SDRangel's PERTester feature) or NMEA (which is useful for 3rd party applications such as OpenCPN).
 
-<h3>13: Use Date and Time from File</h3>
+<h3>11: Find</h3>
+
+Entering a regular expression in the Find field displays only messages where the source MMSI matches the given regular expression.
+
+<h3>12: Use Date and Time from File</h3>
 
 When checked, if the source device is a File Input device, the date and time used for
 packet reception time is taken from the file playback time. Otherwise, the current system clock time is used.
+
+<h3>13: Show / hide Slot Map</h3>
+
+When checked shows the slot map (See below).
 
 <h3>14: Start/stop Logging Messages to .csv File</h3>
 
@@ -86,6 +88,10 @@ Click to specify the name of the .csv file which received AIS messages are logge
 <h3>16: Read Data from .csv File</h3>
 
 Click to specify a previously written .csv log file, which is read and used to update the table.
+
+<h3>17: Clear Messages from table</h3>
+
+Pressing this button clears all messages from the table.
 
 <h3>Slot Map</h3>
 

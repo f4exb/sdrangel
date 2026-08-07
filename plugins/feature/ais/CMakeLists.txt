@@ -31,7 +31,7 @@ if(NOT SERVER_MODE)
     )
 
     set(TARGET_NAME ${PLUGINS_PREFIX}featureais)
-    set(TARGET_LIB Qt::Widgets)
+    set(TARGET_LIB Qt::Widgets Qt::Charts)
     set(TARGET_LIB_GUI "sdrgui")
     set(INSTALL_FOLDER ${INSTALL_PLUGINS_DIR})
 else()

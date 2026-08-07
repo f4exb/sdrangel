@@ -36,15 +36,13 @@ Adjusts the expected peak frequency deviation in 0.1 kHz steps from 1 to 6 kHz. 
 
 Specifies the pager modulation. Currently only POCSAG is supported.
 
-POCSAG uses FSK with 4.5kHz frequency shift, at 512, 1200 or 2400 baud.
+POCSAG uses FSK with 4.5kHz frequency shift, at 512, 1200 or 2400 baud. The baud rate is
+detected automatically from the preamble, as networks mix rates and a single channel can
+carry different rates at different times.
 High frequency is typically 0, with low 1, but occasionally this appears to be reversed, so the demodulator supports either.
 Data is framed as specified in [ITU-R M.584-2](https://www.itu.int/dms_pubrec/itu-r/rec/m/R-REC-M.584-2-199711-I!!PDF-E.pdf)
 
-<h3>7: Baud</h3>
-
-Specifies the baud rate. For POCSAG, this can be 512, 1200 or 2400.
-
-<h3>8: Decode</h3>
+<h3>7: Decode</h3>
 
 Specifies how messages are decoded in the Message column in the table:
 
@@ -56,7 +54,7 @@ Specifies how messages are decoded in the Message column in the table:
 
 The table has Numeric and Alphanumeric columns which always display the corresponding decode.
 
-<h3>9: Character encoding</h3>
+<h3>8: Character encoding</h3>
 
 Click to open the character encoding dialog, which allows a mapping from the received 7-bit alphanumeric characters to Unicode.
 
@@ -64,36 +62,36 @@ Click to open the character encoding dialog, which allows a mapping from the rec
 
 Each row contains a mapping from a 7-bit value to a Unicode code point. Values should be entered in hexadecimal
 
-<h3>10: Find</h3>
+<h3>9: Find</h3>
 
 Entering a regular expression in the Find field displays only messages where the address matches the given regular expression.
 
-<h3>11: Clear Messages from table</h3>
+<h3>10: Clear Messages from table</h3>
 
 Pressing this button clears all messages from the table.
 
-<h3>12: UDP</h3>
+<h3>11: UDP</h3>
 
 When checked, received messages are forwarded to the specified UDP address (12) and port (13).
 
 The messages are forwarded as null terminated ASCII strings, in the format: data time address function alpha numeric
 
-<h3>13: UDP address</h3>
+<h3>12: UDP address</h3>
 
 IP address of the host to forward received messages to via UDP.
 
-<h3>14: UDP port</h3>
+<h3>13: UDP port</h3>
 
 UDP port number to forward received messages to.
 
-<h3>15: Filter Duplicates</h3>
+<h3>14: Filter Duplicates</h3>
 
 Check to filter (discard) duplicate messages. Right click to show the Duplicate Filter options dialog:
 
 - Match message only: When unchecked, compare address and message. When checked, compare only message, ignoring the address.
 - Match last message only: When unchecked the message is compared against all messages in the table. When checked, the message is compared against the last received message only.
 
-<h3>16: Open Notifications Dialog</h3>
+<h3>15: Open Notifications Dialog</h3>
 
 When clicked, opens the Notifications Dialog, which allows speech notifications or programs/scripts to be run when messages matching user-defined rules are received.
 
@@ -116,15 +114,15 @@ In the Speech and Command strings, variables can be used to substitute data from
 
 To experiment with regular expressions, try [https://regexr.com/](https://regexr.com/).
 
-<h3>17: Start/stop Logging Messages to .csv File</h3>
+<h3>16: Start/stop Logging Messages to .csv File</h3>
 
 When checked, writes all received messages to a .csv file.
 
-<h3>18: .csv Log Filename</h3>
+<h3>17: .csv Log Filename</h3>
 
 Click to specify the name of the .csv file which received messages are logged to.
 
-<h3>19: Read Data from .csv File</h3>
+<h3>18: Read Data from .csv File</h3>
 
 Click to specify a previously written .csv log file, which is read and used to update the table.
 
@@ -143,5 +141,6 @@ The received messages table displays each pager message received.
 * Numeric - Message decoded as numeric, regardless of Decode setting (8).
 * Even PE - Number of even parity errors detected in the code words of the message.
 * BCH PE - Number of uncorrectable BCH parity errors detected in the code words of the message.
+* Baud - The baud rate the message was received at, detected automatically from the preamble.
 
 Right clicking on the table header allows you to select which columns to show. The columns can be reordered by left clicking and dragging the column header. Right clicking on an item in the table allows you to copy the value to the clipboard.

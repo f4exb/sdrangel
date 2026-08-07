@@ -64,6 +64,7 @@ void PagerDemodGUI::resizeTable()
     ui->messages->setItem(row, PagerDemodSettings::MESSAGE_COL_NUMERIC, new QTableWidgetItem("123456789123456789123456789123456789123456789123456789"));
     ui->messages->setItem(row, PagerDemodSettings::MESSAGE_COL_EVEN_PE, new QTableWidgetItem("0"));
     ui->messages->setItem(row, PagerDemodSettings::MESSAGE_COL_BCH_PE, new QTableWidgetItem("0"));
+    ui->messages->setItem(row, PagerDemodSettings::MESSAGE_COL_BAUD, new QTableWidgetItem("2400-"));
     ui->messages->resizeColumnsToContents();
     ui->messages->removeRow(row);
 }
@@ -220,7 +221,7 @@ QString PagerDemodGUI::selectMessage(int functionBits, const QString &numericMes
 }
 
 // Add row to table
-void PagerDemodGUI::messageReceived(const QDateTime dateTime, int address, int functionBits,
+void PagerDemodGUI::messageReceived(const QDateTime dateTime, int address, int functionBits, int baud,
         const QString &numericMessage, const QString &alphaMessage,
         int evenParityErrors, int bchParityErrors)
 {
@@ -228,21 +229,39 @@ void PagerDemodGUI::messageReceived(const QDateTime dateTime, int address, int f
     QString addressString = QString("%1").arg(address, 7, 10, QChar('0'));
 
     // Should we ignore the message if it is a duplicate?
-    if (m_settings.m_filterDuplicates  && (ui->messages->rowCount() > 0))
+    if (m_settings.m_filterDuplicates)
     {
-        int startRow = m_settings.m_duplicateMatchLastOnly ? ui->messages->rowCount() - 1 : 0;
-        for (int row = startRow; row < ui->messages->rowCount(); row++)
+        if (m_settings.m_duplicateMatchLastOnly)
         {
-            QString prevAddress = ui->messages->item(row, PagerDemodSettings::MESSAGE_COL_ADDRESS)->text();
-            QString prevMessage = ui->messages->item(row, PagerDemodSettings::MESSAGE_COL_MESSAGE)->text();
-
-            if ((message == prevMessage) && (m_settings.m_duplicateMatchMessageOnly || (addressString == prevAddress)))
+            // Compare against the most recently displayed message. We can't use the last row in
+            // the table, as the user may have sorted it, so that isn't the most recent message
+            if (m_lastMessageValid
+                && (message == m_lastMessage)
+                && (m_settings.m_duplicateMatchMessageOnly || (addressString == m_lastAddress)))
             {
                 // Ignore this message
                 return;
             }
         }
+        else
+        {
+            for (int row = 0; row < ui->messages->rowCount(); row++)
+            {
+                QString prevAddress = ui->messages->item(row, PagerDemodSettings::MESSAGE_COL_ADDRESS)->text();
+                QString prevMessage = ui->messages->item(row, PagerDemodSettings::MESSAGE_COL_MESSAGE)->text();
+
+                if ((message == prevMessage) && (m_settings.m_duplicateMatchMessageOnly || (addressString == prevAddress)))
+                {
+                    // Ignore this message
+                    return;
+                }
+            }
+        }
     }
+
+    m_lastAddress = addressString;
+    m_lastMessage = message;
+    m_lastMessageValid = true;
 
     // Is scroll bar at bottom
     QScrollBar *sb = ui->messages->verticalScrollBar();
@@ -262,6 +281,7 @@ void PagerDemodGUI::messageReceived(const QDateTime dateTime, int address, int f
     QTableWidgetItem *numericItem = new QTableWidgetItem();
     QTableWidgetItem *evenPEItem = new QTableWidgetItem();
     QTableWidgetItem *bchPEItem = new QTableWidgetItem();
+    QTableWidgetItem *baudItem = new QTableWidgetItem();
     ui->messages->setItem(row, PagerDemodSettings::MESSAGE_COL_DATE, dateItem);
     ui->messages->setItem(row, PagerDemodSettings::MESSAGE_COL_TIME, timeItem);
     ui->messages->setItem(row, PagerDemodSettings::MESSAGE_COL_ADDRESS, addressItem);
@@ -271,6 +291,7 @@ void PagerDemodGUI::messageReceived(const QDateTime dateTime, int address, int f
     ui->messages->setItem(row, PagerDemodSettings::MESSAGE_COL_NUMERIC, numericItem);
     ui->messages->setItem(row, PagerDemodSettings::MESSAGE_COL_EVEN_PE, evenPEItem);
     ui->messages->setItem(row, PagerDemodSettings::MESSAGE_COL_BCH_PE, bchPEItem);
+    ui->messages->setItem(row, PagerDemodSettings::MESSAGE_COL_BAUD, baudItem);
     dateItem->setText(dateTime.date().toString());
     timeItem->setText(dateTime.time().toString());
     addressItem->setText(addressString);
@@ -280,12 +301,16 @@ void PagerDemodGUI::messageReceived(const QDateTime dateTime, int address, int f
     numericItem->setText(numericMessage);
     evenPEItem->setText(QString("%1").arg(evenParityErrors));
     bchPEItem->setText(QString("%1").arg(bchParityErrors));
-    filterRow(row);
-    ui->messages->setSortingEnabled(true);
-    if (scrollToBottom) {
-        ui->messages->scrollToBottom();
+    baudItem->setData(Qt::DisplayRole, baud);
+    if (!m_loadingData)
+    {
+        filterRow(row);
+        checkNotification(row);
+        ui->messages->setSortingEnabled(true);
+        if (scrollToBottom) {
+            ui->messages->scrollToBottom();
+        }
     }
-    checkNotification(row);
 }
 
 bool PagerDemodGUI::handleMessage(const Message& message)
@@ -305,7 +330,7 @@ bool PagerDemodGUI::handleMessage(const Message& message)
     else if (PagerDemod::MsgPagerMessage::match(message))
     {
         const PagerDemod::MsgPagerMessage& report = (const PagerDemod::MsgPagerMessage&) message;
-        messageReceived(report.getDateTime(), report.getAddress(), report.getFunctionBits(),
+        messageReceived(report.getDateTime(), report.getAddress(), report.getFunctionBits(), report.getBaud(),
             report.getNumericMessage(), report.getAlphaMessage(),
             report.getEvenParityErrors(), report.getBCHParityErrors());
         return true;
@@ -373,13 +398,6 @@ void PagerDemodGUI::on_fmDev_valueChanged(int value)
     applySettings(QStringList("fmDeviation"));
 }
 
-void PagerDemodGUI::on_baud_currentIndexChanged(int index)
-{
-    (void)index;
-    m_settings.m_baud = ui->baud->currentText().toInt();
-    applySettings(QStringList("baud"));
-}
-
 void PagerDemodGUI::on_decode_currentIndexChanged(int index)
 {
     m_settings.m_decode = (PagerDemodSettings::Decode)index;
@@ -396,6 +414,7 @@ void PagerDemodGUI::on_filterAddress_editingFinished()
 void PagerDemodGUI::on_clearTable_clicked()
 {
     ui->messages->setRowCount(0);
+    m_lastMessageValid = false; // So duplicate filtering doesn't match a cleared message
 }
 
 void PagerDemodGUI::on_udpEnabled_clicked(bool checked)
@@ -516,7 +535,9 @@ PagerDemodGUI::PagerDemodGUI(PluginAPI* pluginAPI, DeviceUISet *deviceUISet, Bas
     m_deviceCenterFrequency(0),
     m_basebandSampleRate(1),
     m_doApplySettings(true),
-    m_tickCount(0)
+    m_tickCount(0),
+    m_loadingData(false),
+    m_lastMessageValid(false)
 #ifdef QT_TEXTTOSPEECH_FOUND
     , m_speech(nullptr)
 #endif
@@ -653,13 +674,6 @@ void PagerDemodGUI::displaySettings()
 
     ui->deltaFrequency->setValue(m_channelMarker.getCenterFrequency());
 
-    if (m_settings.m_baud == 512) {
-        ui->baud->setCurrentIndex(0);
-    } else if (m_settings.m_baud == 1200) {
-        ui->baud->setCurrentIndex(1);
-    } else {
-        ui->baud->setCurrentIndex(2);
-    }
     ui->decode->setCurrentIndex((int)m_settings.m_decode);
 
     ui->rfBWText->setText(QString("%1k").arg(m_settings.m_rfBandwidth / 1000.0, 0, 'f', 1));
@@ -826,6 +840,7 @@ void PagerDemodGUI::on_logOpen_clicked()
                     int numericCol = colIndexes.value("Numeric");
                     int evenCol = colIndexes.value("Even Parity Errors");
                     int bchCol = colIndexes.value("BCH Parity Errors");
+                    int baudCol = colIndexes.value("Baud", -1);
                     int maxCol = std::max({dateCol, timeCol, addressCol, functionCol, alphaCol, numericCol, evenCol, bchCol});
 
                     QMessageBox dialog(this);
@@ -835,6 +850,12 @@ void PagerDemodGUI::on_logOpen_clicked()
                     QApplication::processEvents();
                     int count = 0;
                     bool cancelled = false;
+
+                    // Don't run notifications for logged messages - they've already been
+                    // actioned when originally received, and re-running them could execute
+                    // a large number of commands. Also avoids re-sorting for every row
+                    m_loadingData = true;
+                    ui->messages->setSortingEnabled(false);
 
                     QStringList cols;
                     while (!cancelled && CSV::readRow(in, &cols))
@@ -849,7 +870,11 @@ void PagerDemodGUI::on_logOpen_clicked()
                             int evenErrors = cols[evenCol].toInt();
                             int bchErrors = cols[bchCol].toInt();
 
-                            messageReceived(dateTime, address, functionBits,
+                            // Baud is absent from logs written before it was recorded
+                            int baud = ((baudCol >= 0) && (baudCol < cols.size()))
+                                ? cols[baudCol].toInt() : 0;
+
+                            messageReceived(dateTime, address, functionBits, baud,
                                 cols[numericCol], cols[alphaCol],
                                 evenErrors, bchErrors);
 
@@ -863,6 +888,11 @@ void PagerDemodGUI::on_logOpen_clicked()
                             count++;
                         }
                     }
+
+                    m_loadingData = false;
+                    filter(); // Apply address filter to loaded rows, as filterRow is skipped while loading
+                    ui->messages->setSortingEnabled(true);
+
                     dialog.close();
                 }
                 else
@@ -883,7 +913,6 @@ void PagerDemodGUI::makeUIConnections()
     QObject::connect(ui->deltaFrequency, &ValueDialZ::changed, this, &PagerDemodGUI::on_deltaFrequency_changed);
     QObject::connect(ui->rfBW, &QSlider::valueChanged, this, &PagerDemodGUI::on_rfBW_valueChanged);
     QObject::connect(ui->fmDev, &QSlider::valueChanged, this, &PagerDemodGUI::on_fmDev_valueChanged);
-    QObject::connect(ui->baud, QOverload<int>::of(&QComboBox::currentIndexChanged), this, &PagerDemodGUI::on_baud_currentIndexChanged);
     QObject::connect(ui->decode, QOverload<int>::of(&QComboBox::currentIndexChanged), this, &PagerDemodGUI::on_decode_currentIndexChanged);
     QObject::connect(ui->charset, &QToolButton::clicked, this, &PagerDemodGUI::on_charset_clicked);
     QObject::connect(ui->filterAddress, &QLineEdit::editingFinished, this, &PagerDemodGUI::on_filterAddress_editingFinished);
@@ -941,6 +970,12 @@ void PagerDemodGUI::checkNotification(int row)
             break;
         case PagerDemodSettings::MESSAGE_COL_MESSAGE:
             match = message;
+            break;
+        case PagerDemodSettings::MESSAGE_COL_ALPHA:
+            match = ui->messages->item(row, PagerDemodSettings::MESSAGE_COL_ALPHA)->text();
+            break;
+        case PagerDemodSettings::MESSAGE_COL_NUMERIC:
+            match = ui->messages->item(row, PagerDemodSettings::MESSAGE_COL_NUMERIC)->text();
             break;
         }
         if (!match.isEmpty())

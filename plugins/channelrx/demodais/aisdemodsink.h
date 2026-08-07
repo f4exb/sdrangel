@@ -27,6 +27,7 @@
 #include "dsp/nco.h"
 #include "dsp/interpolator.h"
 #include "dsp/gaussian.h"
+#include "dsp/gmskmlse.h"
 #include "util/movingaverage.h"
 #include "util/messagequeue.h"
 #include "util/crc.h"
@@ -37,7 +38,30 @@
 #include <iostream>
 #include <fstream>
 
-#define AISDEMOD_MAX_BYTES  (3+1+126+2+1+1)
+#define AISDEMOD_MAX_BYTES  160
+
+// Symbols searched for the HDLC start flag before giving up on a correlation trigger
+#define AISDEMOD_SOP_SYMBOLS 16
+
+// Symbols the MLSE decodes once a start flag has been found. One AIS slot is about 256
+// symbols; longer messages occupy several slots and the span doubles until they fit
+#define AISDEMOD_MLSE_SYMBOLS 320
+
+// Preamble symbols decoded to pull the per survivor phase loop in, then discarded. The
+// demodulator starts 18 symbols into the 24 bit training sequence, so there is room for at
+// most that many - beyond it the look back is clamped rather than reading off the start of
+// the receive buffer
+#define AISDEMOD_MLSE_WARMUP 12
+
+// Symbol timing offsets tried either side of the nominal start, in samples. The correlator
+// locates the burst to about a sample, but the sequence detector wants better than that, and
+// one sample is a tenth of a symbol at 96 kHz. Retries only happen when the nominal timing
+// fails to produce a good frame, so the cost falls on bursts that would otherwise be lost.
+#define AISDEMOD_TIMING_PHASES 2
+
+// Per survivor phase tracking loop gains. The optimum is broad
+#define AISDEMOD_MLSE_PHASE_GAIN 0.3
+#define AISDEMOD_MLSE_FREQ_GAIN  0.05
 
 class ChannelAPI;
 class AISDemod;
@@ -94,7 +118,10 @@ private:
     ChannelAPI *m_channel;
     int m_channelSampleRate;
     int m_channelFrequencyOffset;
-    int m_samplesPerSymbol;             // Number of samples per symbol
+    int m_samplesPerSymbol;
+    quint64 m_sampleCounter;    //!< Monotonic, so already tried alignments can be skipped
+    qint64 m_lastAttemptPos;
+    bool m_haveAttempted;             // Number of samples per symbol
 
     NCO m_nco;
     Interpolator m_interpolator;
@@ -117,8 +144,15 @@ private:
     int m_rxBufLength;                  // Size in elements in m_rxBuf
     int m_rxBufIdx;                     // Index in to circular buffer
     int m_rxBufCnt;                     // Number of valid samples in buffer
-    Real *m_train;                      // Training sequence to look for
+    Real *m_train;
+    std::vector<std::complex<double>> m_trainIQ; //!< Preamble as transmitted, for matched filtering                      // Training sequence to look for
     int m_correlationLength;
+    Real m_trainEnergy;                 // Sum of squares of m_train, for the normalised correlation
+
+    GmskMlse m_mlse;                    // Coherent sequence detector, used instead of the slicer
+    std::vector<std::complex<double>> m_iqBuf; // Complex baseband, in step with m_rxBuf
+    std::vector<Real> m_mlseSoft;       // Viterbi output, including the warm up symbols
+    std::vector<Real> m_symSoft;        // Symbol decisions handed to the deframer
 
     unsigned char m_bytes[AISDEMOD_MAX_BYTES];
     crc16x25 m_crc;
@@ -130,7 +164,19 @@ private:
     static const int m_sampleBufferSize = AISDemodSettings::AISDEMOD_CHANNEL_SAMPLE_RATE / 20;
     int m_sampleBufferIndex;
 
+    enum DemodResult
+    {
+        FrameNone,      //!< Nothing that looked like a frame
+        FrameGood,      //!< Complete frame, CRC passed
+        FrameBadCrc,    //!< Complete frame, CRC failed
+        FrameTruncated  //!< Started a frame but ran out of decoded symbols
+    };
+
     void processOneSample(Complex &ci);
+    double estimateFrequency() const;
+    void computeSymbols(int x, int n);
+    DemodResult deframe(int& endSampleIdx, bool& crcValid, bool& crcInvalid);
+    void sendMessage(const QByteArray& packet, int totalBitCount);
     MessageQueue *getMessageQueueToChannel() { return m_messageQueueToChannel; }
     void sampleToScope(Complex sample, Real magsq, Real fmDemod, Real filt, Real rxBuf, Real corr, Real thresholdMet, Real dcOffset, Real crcValid);
 };

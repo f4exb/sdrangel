@@ -22,6 +22,9 @@
 #include <QRegularExpression>
 #include <QFileDialog>
 #include <QScrollBar>
+#include <QClipboard>
+#include <QGuiApplication>
+#include <QMenu>
 
 #include "packetdemodgui.h"
 #include "util/ax25.h"
@@ -36,6 +39,7 @@
 #include "gui/basicchannelsettingsdialog.h"
 #include "dsp/dspengine.h"
 #include "gui/dialogpositioner.h"
+#include "gui/tabletapandhold.h"
 #include "maincore.h"
 
 #include "packetdemod.h"
@@ -274,11 +278,16 @@ void PacketDemodGUI::on_rfBW_valueChanged(int value)
     applySettings(QStringList({"rfBandwidth"}));
 }
 
-void PacketDemodGUI::on_fmDev_valueChanged(int value)
+void PacketDemodGUI::on_mlse_toggled(bool checked)
 {
-    ui->fmDevText->setText(QString("%1%2k").arg(QChar(0xB1, 0x00)).arg(value / 10.0, 0, 'f', 1));
-    m_settings.m_fmDeviation = value * 100.0;
-    applySettings(QStringList({"fmDeviation"}));
+    m_settings.m_mlse = checked;
+    applySettings(QStringList({"mlse"}));
+}
+
+void PacketDemodGUI::on_chase_valueChanged(int value)
+{
+    m_settings.m_chase = value;
+    applySettings(QStringList({"chase"}));
 }
 
 void PacketDemodGUI::on_filterFrom_editingFinished()
@@ -493,10 +502,35 @@ PacketDemodGUI::PacketDemodGUI(PluginAPI* pluginAPI, DeviceUISet *deviceUISet, B
     connect(ui->packets->horizontalHeader(), SIGNAL(sectionMoved(int, int, int)), SLOT(packets_sectionMoved(int, int, int)));
     connect(ui->packets->horizontalHeader(), SIGNAL(sectionResized(int, int, int)), SLOT(packets_sectionResized(int, int, int)));
 
+    // Context menu to copy the value of the cell under the cursor
+    ui->packets->setContextMenuPolicy(Qt::CustomContextMenu);
+    connect(ui->packets, SIGNAL(customContextMenuRequested(QPoint)), SLOT(customContextMenuRequested(QPoint)));
+    TableTapAndHold *tableTapAndHold = new TableTapAndHold(ui->packets);
+    connect(tableTapAndHold, &TableTapAndHold::tapAndHold, this, &PacketDemodGUI::customContextMenuRequested);
+
     displaySettings();
     makeUIConnections();
     applySettings(QStringList(), true);
     m_resizer.enableChildMouseTracking();
+}
+
+void PacketDemodGUI::customContextMenuRequested(QPoint pos)
+{
+    QTableWidgetItem *item = ui->packets->itemAt(pos);
+
+    if (item)
+    {
+        QMenu* tableContextMenu = new QMenu(ui->packets);
+        connect(tableContextMenu, &QMenu::aboutToHide, tableContextMenu, &QMenu::deleteLater);
+        QAction* copyAction = new QAction("Copy", tableContextMenu);
+        const QString text = item->text();
+        connect(copyAction, &QAction::triggered, this, [text]()->void {
+            QClipboard *clipboard = QGuiApplication::clipboard();
+            clipboard->setText(text);
+        });
+        tableContextMenu->addAction(copyAction);
+        tableContextMenu->popup(ui->packets->viewport()->mapToGlobal(pos));
+    }
 }
 
 PacketDemodGUI::~PacketDemodGUI()
@@ -538,8 +572,9 @@ void PacketDemodGUI::displaySettings()
     ui->rfBWText->setText(QString("%1k").arg(m_settings.m_rfBandwidth / 1000.0, 0, 'f', 1));
     ui->rfBW->setValue(m_settings.m_rfBandwidth / 100.0);
 
-    ui->fmDevText->setText(QString("%1%2k").arg(QChar(0xB1, 0x00)).arg(m_settings.m_fmDeviation / 1000.0, 0, 'f', 1));
-    ui->fmDev->setValue(m_settings.m_fmDeviation / 100.0);
+
+    ui->mlse->setChecked(m_settings.m_mlse);
+    ui->chase->setValue(m_settings.m_chase);
 
     updateIndexLabel();
 
@@ -706,7 +741,8 @@ void PacketDemodGUI::makeUIConnections()
     QObject::connect(ui->deltaFrequency, &ValueDialZ::changed, this, &PacketDemodGUI::on_deltaFrequency_changed);
     QObject::connect(ui->mode, QOverload<int>::of(&QComboBox::currentIndexChanged), this, &PacketDemodGUI::on_mode_currentIndexChanged);
     QObject::connect(ui->rfBW, &QSlider::valueChanged, this, &PacketDemodGUI::on_rfBW_valueChanged);
-    QObject::connect(ui->fmDev, &QSlider::valueChanged, this, &PacketDemodGUI::on_fmDev_valueChanged);
+    QObject::connect(ui->mlse, &QCheckBox::toggled, this, &PacketDemodGUI::on_mlse_toggled);
+    QObject::connect(ui->chase, QOverload<int>::of(&QSpinBox::valueChanged), this, &PacketDemodGUI::on_chase_valueChanged);
     QObject::connect(ui->filterFrom, &QLineEdit::editingFinished, this, &PacketDemodGUI::on_filterFrom_editingFinished);
     QObject::connect(ui->filterTo, &QLineEdit::editingFinished, this, &PacketDemodGUI::on_filterTo_editingFinished);
     QObject::connect(ui->filterPID, &QCheckBox::stateChanged, this, &PacketDemodGUI::on_filterPID_stateChanged);

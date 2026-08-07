@@ -62,8 +62,15 @@ bool AX25Packet::decode(QByteArray packet)
     m_via = QString("");
     i = 13;
     int incomingViaStrIdx = -1;
-    while ((packet[i] & 1) == 0)
+    int repeaters = 0;
+
+    // AX.25 permits at most 8 repeater addresses, and each is 7 bytes which must still leave
+    // room for the control byte and the 2 byte FCS.
+    while (((i + 7 + 1 + 2) <= packet.size())
+        && (repeaters < 8)
+        && ((packet[i] & 1) == 0))
     {
+        repeaters++;
         i++;
         for (j = 0; j < 6; j++)
             repeaterAddress[j] = (packet[i+j] >> 1) & 0x7f;
@@ -85,6 +92,13 @@ bool AX25Packet::decode(QByteArray packet)
         m_via.insert(incomingViaStrIdx, "*");
 
     i++;
+
+    // The address field may have been truncated by the bounds above, or simply run to the
+    // end of a malformed frame, so check the control byte is present with room for the FCS
+    if ((i + 3) > packet.size()) {
+        return false;
+    }
+
     // Control can be 1 or 2 bytes - how to know if 2?
     //  I, U and S frames
     control = packet[i++];
@@ -132,12 +146,22 @@ bool AX25Packet::decode(QByteArray packet)
     // APRS packets use UI frames, which are a subype of U frames
     // Only I and UI frames have Layer 3 Protocol ID (PID).
     if ((m_type == "I") || (m_type == "UI"))
+    {
+        if ((i + 3) > packet.size()) {
+            return false;
+        }
         m_pid = QString("%1").arg(((unsigned)packet[i++]) & 0xff, 2, 16, QLatin1Char('0'));
+    }
     else
         m_pid = QString("");
     int infoStart, infoEnd;
     infoStart = i;
     infoEnd = packet.size()-2-i;
+
+    // mid() treats a negative length as "to the end", which would put the FCS in the info
+    if (infoEnd < 0) {
+        infoEnd = 0;
+    }
     QByteArray info(packet.mid(infoStart, infoEnd));
     m_data = info;
     m_dataHex = QString(info.toHex());

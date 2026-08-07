@@ -19,7 +19,6 @@
 #include <QComboBox>
 #include <QPushButton>
 #include <QCheckBox>
-#include <QHBoxLayout>
 
 #include "adsbdemodnotificationdialog.h"
 
@@ -107,12 +106,6 @@ void ADSBDemodNotificationDialog::addRow(ADSBDemodSettings::NotificationSettings
     QComboBox *match = new QComboBox();
     QCheckBox *autoTarget = new QCheckBox();
     autoTarget->setChecked(false);
-    QWidget *matchWidget = new QWidget();
-    QHBoxLayout *pLayout = new QHBoxLayout(matchWidget);
-    pLayout->addWidget(match);
-    pLayout->setAlignment(Qt::AlignCenter);
-    pLayout->setContentsMargins(0, 0, 0, 0);
-    matchWidget->setLayout(pLayout);
 
     match->addItem("ICAO ID");
     match->addItem("Callsign");

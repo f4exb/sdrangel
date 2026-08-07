@@ -123,7 +123,8 @@ private slots:
     void on_deltaFrequency_changed(qint64 value);
     void on_mode_currentIndexChanged(int value);
     void on_rfBW_valueChanged(int index);
-    void on_fmDev_valueChanged(int value);
+    void on_mlse_toggled(bool checked);
+    void on_chase_valueChanged(int value);
     void on_filterFrom_editingFinished();
     void on_filterTo_editingFinished();
     void on_filterPID_stateChanged(int state);
@@ -141,6 +142,7 @@ private slots:
     void packets_sectionResized(int logicalIndex, int oldSize, int newSize);
     void columnSelectMenu(QPoint pos);
     void columnSelectMenuChecked(bool checked = false);
+    void customContextMenuRequested(QPoint point);
     void onWidgetRolled(QWidget* widget, bool rollDown);
     void onMenuDialogCalled(const QPoint& p);
     void handleInputMessages();

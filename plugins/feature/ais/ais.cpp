@@ -21,6 +21,8 @@
 #include <QNetworkReply>
 #include <QBuffer>
 
+#include <algorithm>
+
 #include "SWGFeatureSettings.h"
 
 #include "feature/featureset.h"
@@ -279,8 +281,9 @@ void AIS::webapiUpdateFeatureSettings(
     if (featureSettingsKeys.contains("vesselColumnIndexes"))
     {
         const QList<int> *indexes = response.getAisSettings()->getVesselColumnIndexes();
+        int count = std::min(AIS_VESSEL_COLUMNS, (int)indexes->size());
 
-        for (int i = 0; i < AIS_VESSEL_COLUMNS; i++) {
+        for (int i = 0; i < count; i++) {
             settings.m_vesselColumnIndexes[i] = (*indexes)[i];
         }
     }
@@ -288,8 +291,9 @@ void AIS::webapiUpdateFeatureSettings(
     if (featureSettingsKeys.contains("vesselColumnSizes"))
     {
         const QList<int> *indexes = response.getAisSettings()->getVesselColumnSizes();
+        int count = std::min(AIS_VESSEL_COLUMNS, (int)indexes->size());
 
-        for (int i = 0; i < AIS_VESSEL_COLUMNS; i++) {
+        for (int i = 0; i < count; i++) {
             settings.m_vesselColumnSizes[i] = (*indexes)[i];
         }
     }

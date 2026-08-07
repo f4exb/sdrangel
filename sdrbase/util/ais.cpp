@@ -17,6 +17,8 @@
 
 #include <QDebug>
 
+#include <cmath>
+
 #include "ais.h"
 
 AISMessage::AISMessage(const QByteArray ba)
@@ -38,8 +40,11 @@ QString AISMessage::toNMEA(const QByteArray bytes)
 {
     QStringList nmeaSentences;
 
-    // Max payload is ~61 chars  -> 366 bits
-    int sentences = bytes.size() / 45 + 1;
+    // Number of 6-bit characters needed for the message
+    int totalChars = (bytes.size() * 8 + 5) / 6;
+    // A single sentence "!AIVDM,1,1,,," header allows 62 payload chars in 80 chars total,
+    // a multi-sentence "!AIVDM,n,m,i,," header allows 61
+    int sentences = (totalChars <= 62) ? 1 : (totalChars + 60) / 61;
     int sentence = 1;
 
     int bits = 8;
@@ -90,7 +95,7 @@ QString AISMessage::toNMEA(const QByteArray bytes)
         // Construct complete sentence with leading ! and trailing checksum
         nmeaSentence.append("!");
         nmeaSentence.append(nmeaProtected);
-        nmeaSentence.append(QString("*%1").arg(checksum, 2, 16, QChar('0')));
+        nmeaSentence.append(QString("*%1").arg(checksum, 2, 16, QChar('0')).toUpper());
 
         nmeaSentences.append(nmeaSentence.join(""));
         sentence++;
@@ -179,11 +184,74 @@ QString AISMessage::typeToString(quint8 type)
 
 AISMessage* AISMessage::decode(const QByteArray ba)
 {
-    if (ba.size() < 1) {
+    // All messages contain the common message ID, repeat indicator and MMSI fields.
+    if (ba.size() < 5) {
         return nullptr;
     }
 
-    int id = (ba[0] >> 2) & 0x3f;
+    int id = (static_cast<quint8>(ba[0]) >> 2) & 0x3f;
+    int minimumSize = 5;
+
+    switch (id)
+    {
+    case 1:
+    case 2:
+    case 3:
+        minimumSize = 19;
+        break;
+    case 4:
+    case 11:
+        minimumSize = 17;
+        break;
+    case 5:
+        minimumSize = 53;
+        break;
+    case 6:
+    case 12:
+        minimumSize = 9;
+        break;
+    case 9:
+        minimumSize = 17;
+        break;
+    case 16:
+        minimumSize = 12;
+        break;
+    case 18:
+        minimumSize = 18;
+        break;
+    case 19:
+        minimumSize = 34;
+        break;
+    case 21:
+        minimumSize = 28;
+        break;
+    case 24:
+    {
+        int partNumber = static_cast<quint8>(ba[4]) & 0x3;
+
+        if (partNumber == 0) {
+            minimumSize = 20;
+        } else if (partNumber == 1) {
+            minimumSize = 17;
+        } else {
+            return nullptr;
+        }
+
+        break;
+    }
+    case 25:
+        minimumSize = ((static_cast<quint8>(ba[4]) >> 1) & 1) ? 9 : 5;
+        break;
+    case 27:
+        minimumSize = 12;
+        break;
+    default:
+        break;
+    }
+
+    if (ba.size() < minimumSize) {
+        return nullptr;
+    }
 
     if ((id == 1) || (id == 2) || (id == 3)) {
         return new AISPositionReport(ba);
@@ -279,15 +347,25 @@ AISPositionReport::AISPositionReport(QByteArray ba) :
 {
     m_status = ((ba[4] & 0x3) << 2) | ((ba[5] >> 6) & 0x3);
 
-    int rateOfTurn = ((ba[5] << 2) & 0xfc) | ((ba[6] >> 6) & 0x3);
+    qint8 rateOfTurn = static_cast<qint8>(
+        ((static_cast<quint8>(ba[5]) << 2) & 0xfc)
+        | ((static_cast<quint8>(ba[6]) >> 6) & 0x3)
+    );
     if (rateOfTurn == 127) {
         m_rateOfTurn = 720.0f;
     } else if (rateOfTurn == -127) {
         m_rateOfTurn = -720.0f;
+    } else if (rateOfTurn == -128) {
+        m_rateOfTurn = 0.0f;
     } else {
-        m_rateOfTurn = (rateOfTurn / 4.733f) * (rateOfTurn / 4.733f);
+        float scaledRateOfTurn = rateOfTurn / 4.733f;
+        m_rateOfTurn = scaledRateOfTurn * scaledRateOfTurn;
+
+        if (rateOfTurn < 0) {
+            m_rateOfTurn = -m_rateOfTurn;
+        }
     }
-    m_rateOfTurnAvailable = rateOfTurn != 0x80;
+    m_rateOfTurnAvailable = rateOfTurn != -128;
 
     int sog = ((ba[6] & 0x3f) << 4) | ((ba[7] >> 4) & 0xf);
     m_speedOverGroundAvailable = sog != 1023;
@@ -300,7 +378,7 @@ AISPositionReport::AISPositionReport(QByteArray ba) :
     m_longitudeAvailable = longitude != 0x6791ac0;
     m_longitude = longitude / 60.0f / 10000.0f;
 
-    int32_t latitude = ((ba[11] & 0x7f) << 20) | ((ba[12] & 0xff) << 12) | ((ba[13] & 0xff) << 4) | ((ba[14] >> 4) & 0x4);
+    int32_t latitude = ((ba[11] & 0x7f) << 20) | ((ba[12] & 0xff) << 12) | ((ba[13] & 0xff) << 4) | ((ba[14] >> 4) & 0xf);
     latitude = (latitude << 5) >> 5;
     m_latitudeAvailable = latitude != 0x3412140;
     m_latitude = latitude / 60.0f / 10000.0f;
@@ -353,7 +431,7 @@ QString AISPositionReport::getType()
 
 QString AISPositionReport::toString()
 {
-    QString speed = m_speedOverGround == 1022 ? ">102.2" : QString::number(m_speedOverGround);
+    QString speed = ((int)std::round(m_speedOverGround * 10.0f) == 1022) ? ">102.2" : QString::number(m_speedOverGround);
     return QString("Lat: %1%6 Lon: %2%6 Speed: %3 knts Course: %4%6 Status: %5")
                 .arg(m_latitude)
                 .arg(m_longitude)
@@ -469,7 +547,7 @@ AISSARAircraftPositionReport::AISSARAircraftPositionReport(QByteArray ba) :
     m_longitudeAvailable = longitude != 0x6791ac0;
     m_longitude = longitude / 60.0f / 10000.0f;
 
-    int32_t latitude = ((ba[11] & 0x7f) << 20) | ((ba[12] & 0xff) << 12) | ((ba[13] & 0xff) << 4) | ((ba[14] >> 4) & 0x4);
+    int32_t latitude = ((ba[11] & 0x7f) << 20) | ((ba[12] & 0xff) << 12) | ((ba[13] & 0xff) << 4) | ((ba[14] >> 4) & 0xf);
     latitude = (latitude << 5) >> 5;
     m_latitudeAvailable = latitude != 0x3412140;
     m_latitude = latitude / 60.0f / 10000.0f;
@@ -536,7 +614,10 @@ AISInterrogation::AISInterrogation(QByteArray ba) :
 }
 
 AISAssignedModeCommand::AISAssignedModeCommand(QByteArray ba) :
-    AISMessage(ba)
+    AISMessage(ba),
+    m_destinationIdB(0),
+    m_offsetB(0),
+    m_incrementB(0)
 {
     m_destinationIdA = ((ba[5] & 0xff) << 22) | ((ba[6] & 0xff) << 14) | ((ba[7] & 0xff) << 6) | ((ba[8] >> 2) & 0x3f);
     m_offsetA = ((ba[8] & 0x3) << 10) | ((ba[9] & 0xff) << 2) | ((ba[10] >> 6) & 0x3);
@@ -627,7 +708,7 @@ AISExtendedClassBPositionReport::AISExtendedClassBPositionReport(QByteArray ba) 
 
     m_name = AISMessage::getString(ba, 17, 1, 20);
 
-    m_type = ((ba[32] & 1) << 7) | ((ba[33] >> 1) & 0x3f);
+    m_type = ((ba[32] & 1) << 7) | ((ba[33] >> 1) & 0x7f);
 }
 
 QString AISExtendedClassBPositionReport::toString()
@@ -689,7 +770,7 @@ QString AISAidsToNavigationReport::toString()
         "Beacon, Preferred channel starboard hand",
         "Beacon, Isolated danger",
         "Beacon, Safe water",
-        "Beacon, Special mark"
+        "Beacon, Special mark",
         "Cardinal mark N",
         "Cardinal mark E",
         "Cardinal mark S",
@@ -722,7 +803,8 @@ AISGroupAssignment::AISGroupAssignment(QByteArray ba) :
 }
 
 AISStaticDataReport::AISStaticDataReport(QByteArray ba) :
-    AISMessage(ba)
+    AISMessage(ba),
+    m_type(0)
 {
     m_partNumber = ba[4] & 0x3;
     if (m_partNumber == 0)
@@ -798,7 +880,7 @@ AISLongRangePositionReport::AISLongRangePositionReport(QByteArray ba) :
     m_speedOverGroundAvailable = m_speedOverGround != 63;
 
     m_course = ((ba[10] & 0x7) << 6) | ((ba[11] >> 2) & 0x3f);
-    m_courseAvailable = m_course != 512;
+    m_courseAvailable = m_course != 511;
 }
 
 QString AISLongRangePositionReport::toString()
@@ -816,4 +898,3 @@ AISUnknownMessageID::AISUnknownMessageID(QByteArray ba) :
     AISMessage(ba)
 {
 }
-
