@@ -724,28 +724,29 @@ bool APRSPacket::parseObject(QString& info, int& idx)
 
 bool APRSPacket::parseItem(QString& info, int& idx)
 {
-    if (info.length() < idx+3)
+    // Item names are 3-9 characters long and terminated by '!' or '_'
+    // Require the minimum 3-character name plus the terminator.
+    if (info.length() < (idx + 3 + 1))
         return false;
 
-    // Item names are 3-9 chars long, excluding ! or _
-    m_objectName = "";
-    int i;
-    for (i = 0; i < 10; i++)
+    m_objectName.clear();
+
+    for (int i = 0; (i < 9) && (idx < info.length()); ++i)
     {
-        if (info.length() >= idx)
-        {
-            QChar c = info[idx];
-            if (c == '!' || c == '_')
-                break;
-            else
-            {
-                m_objectName.append(c);
-                idx++;
-            }
-        }
+        const QChar c = info[idx];
+        if (c == '!' || c == '_')
+            break;
+
+        m_objectName.append(c);
+        ++idx;
     }
-    if (i == 11)
+
+    if (idx >= info.length())
         return false;
+
+    if (info[idx] != '!' && info[idx] != '_')
+        return false;
+
     if (info[idx] == '!')
         m_objectLive = true;
     else if (info[idx] == '_')
@@ -952,7 +953,7 @@ bool APRSPacket::parseMessage(QString& info, int& idx)
         int i = 5;
         for (int j = 0; j < 8; j++)
         {
-            if (i >= m_message.length())
+            if (i < m_message.length())
                 m_telemetryBitSense[j] = m_message[i] == '1';
             else
                 m_telemetryBitSense[j] = true;

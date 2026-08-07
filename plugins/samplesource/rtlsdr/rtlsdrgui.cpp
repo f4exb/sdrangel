@@ -394,7 +394,7 @@ void RTLSDRGui::on_ppm_valueChanged(int value)
 
 void RTLSDRGui::on_gain_valueChanged(int value)
 {
-	if (value > (int)m_gains.size()) {
+	if (value < 0 || value >= (int)m_gains.size()) {
 		return;
 	}
 
