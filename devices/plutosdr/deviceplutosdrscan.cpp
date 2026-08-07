@@ -24,6 +24,7 @@
 #include <memory>
 #include <string_view>
 #include <iio.h>
+#include <utility>
 
 #include <QtGlobal>
 
@@ -82,9 +83,9 @@ void DevicePlutoSDRScan::scan()
                 DeviceScan({
                     std::string(description),
                     std::string("TBD"),
-                    fixedUri
+                    std::move(fixedUri)
                 }));
-            m_scans.push_back(dev_scan);
+            m_scans.push_back(std::move(dev_scan));
             m_urilMap[m_scans.back()->m_uri] = m_scans.back();
 
             std::regex desc_regex(".*serial=(.+)");
