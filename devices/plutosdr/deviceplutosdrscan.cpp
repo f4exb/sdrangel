@@ -24,6 +24,7 @@
 #include <memory>
 #include <string_view>
 #include <iio.h>
+#include <utility>
 
 #include <QtGlobal>
 
@@ -61,7 +62,7 @@ void DevicePlutoSDRScan::scan()
         const char *description = iio_context_info_get_description(info[i]);
         const char *uri = iio_context_info_get_uri(info[i]);
 
-        if (!DevicePlutoSDRBox::probeURI(std::string(uri))) { // continue if not accessible
+        if (!DevicePlutoSDRBox::probeURI(std::string(uri)) || !description) {
             continue;
         }
 
@@ -69,7 +70,7 @@ void DevicePlutoSDRScan::scan()
         std::string fixedUri = replaceHostnameWithIP(uri, description);
 
         qDebug("PlutoSDRScan::scan: %d: %s [%s] [%s]", i, description, uri, fixedUri.c_str());
-        const std::string_view descriptionView = description ? std::string_view{description} : std::string_view{};
+        const std::string_view descriptionView = std::string_view{description};
         const bool isPlutoDescription =
             (descriptionView.find("PlutoSDR") != std::string_view::npos) ||
             (descriptionView.find("AD93") != std::string_view::npos);
@@ -82,9 +83,9 @@ void DevicePlutoSDRScan::scan()
                 DeviceScan({
                     std::string(description),
                     std::string("TBD"),
-                    fixedUri
+                    std::move(fixedUri)
                 }));
-            m_scans.push_back(dev_scan);
+            m_scans.push_back(std::move(dev_scan));
             m_urilMap[m_scans.back()->m_uri] = m_scans.back();
 
             std::regex desc_regex(".*serial=(.+)");
