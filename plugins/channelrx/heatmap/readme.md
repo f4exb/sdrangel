@@ -8,12 +8,13 @@ To view the Heat Map visually, the [Map Feature](../../feature/map/readme.md) sh
 
 To record data for a heat map, a GPS is required, and Preferences > My Position should have "Auto-update from GPS" enabled.
 
-On Windows/Linux/Mac, a GPS supporting NMEA via a serial port at 4800 baud is required.
+On Windows/Linux/Mac, a GPS supporting NMEA via a serial port is required.
 The COM port / serial device should be specified via the QT_NMEA_SERIAL_PORT environment variable before SDRangel is started.
 (E.g. on Linux: export QT_NMEA_SERIAL_PORT=/dev/ttyACM0 or /dev/ttyUSB0 on Windows: Set QT_NMEA_SERIAL_PORT=COM5 via Control Panel)
-This requires the Qt serialnmea plugin, which is not available in the libqt5positioning5-plugins package on Debian / Ubuntu.
-It can be downloaded for Ubuntu/x64 from http://sdrangel.org/downloads/libqtposition_serialnmea.so and should be installed in usr/lib/x86_64-linux-gnu/qt5/plugins/position/.
-This custom build of the plugin also allows setting the baud rate via the QT_NMEA_SERIAL_BAUD_RATE option (which is not supported on Windows nor Mac).
+The baud rate defaults to 4800 and can be set via the QT_NMEA_SERIAL_BAUD_RATE environment variable.
+This requires the Qt position plugin for NMEA: nmea on Qt 6, or serialnmea on Qt 5.
+On Qt 5, serialnmea is not available in the libqt5positioning5-plugins package on Debian / Ubuntu.
+A build that also supports QT_NMEA_SERIAL_BAUD_RATE can be downloaded for Ubuntu/x64 from http://sdrangel.org/downloads/libqtposition_serialnmea.so and should be installed in usr/lib/x86_64-linux-gnu/qt5/plugins/position/.
 
 On Android, GPS setup should be automatic. GPS position updates may stop on Android when the screen is off. To keep the screen on, press the View > Keep Screen On menu.
 

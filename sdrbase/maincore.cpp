@@ -21,6 +21,7 @@
 #include <QCoreApplication>
 #include <QString>
 #include <QDebug>
+#include <QVariant>
 #include <QGeoPositionInfoSource>
 #if (QT_VERSION >= QT_VERSION_CHECK(6, 5, 0))
 #include <QPermissions>
@@ -443,10 +444,60 @@ void MainCore::requestPermissions()
     requestLocationPermission(); // This requests microphone and camera permissions as well
 }
 
+#if (QT_VERSION >= QT_VERSION_CHECK(6, 0, 0))
+namespace {
+
+//! Create an NMEA position source for the serial port given by QT_NMEA_SERIAL_PORT
+/*!
+ * Qt 5's serialnmea plugin read QT_NMEA_SERIAL_PORT itself. The Qt 6 nmea plugin that replaces it
+ * takes the serial port as a plugin parameter instead and otherwise only auto-detects a couple of
+ * USB vendor identifiers, so the environment variable has to be passed on to it explicitly.
+ * Returns nullptr when QT_NMEA_SERIAL_PORT is not set, so that the platform position source is
+ * still used by default.
+ */
+QGeoPositionInfoSource *createNmeaPositionSource(QObject *parent)
+{
+    const QString serialPort = qEnvironmentVariable("QT_NMEA_SERIAL_PORT");
+
+    if (serialPort.isEmpty()) {
+        return nullptr;
+    }
+
+    QVariantMap parameters;
+    parameters.insert(QStringLiteral("nmea.source"), QStringLiteral("serial:") + serialPort);
+
+    bool baudRateValid = false;
+    const int baudRate = qEnvironmentVariableIntValue("QT_NMEA_SERIAL_BAUD_RATE", &baudRateValid);
+
+    if (baudRateValid && (baudRate > 0)) {
+        parameters.insert(QStringLiteral("nmea.baudrate"), baudRate);
+    }
+
+    QGeoPositionInfoSource *positionSource = QGeoPositionInfoSource::createSource(
+        QStringLiteral("nmea"), parameters, parent);
+
+    if (!positionSource) {
+        qWarning() << "MainCore::initPosition: No NMEA position source for serial port" << serialPort;
+    }
+
+    return positionSource;
+}
+
+} // namespace
+#endif
+
 // Position can take a while to determine, so we start updates at program startup
 void MainCore::initPosition()
 {
+#if (QT_VERSION >= QT_VERSION_CHECK(6, 0, 0))
+    m_positionSource = createNmeaPositionSource(this);
+
+    if (!m_positionSource) {
+        m_positionSource = QGeoPositionInfoSource::createDefaultSource(this);
+    }
+#else
     m_positionSource = QGeoPositionInfoSource::createDefaultSource(this);
+#endif
     if (m_positionSource)
     {
         qDebug() << "MainCore::initPosition: Using position source" << m_positionSource->sourceName();
