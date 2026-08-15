@@ -274,7 +274,11 @@ private:
         return static_cast<unsigned char>((nibbleBits[0] << 3) | (nibbleBits[1] << 2) | (nibbleBits[2] << 1) | nibbleBits[3]);
     }
 
-    static inline unsigned char decodeCodewordSoft(const std::vector<float>& codewordLLR, unsigned int crApp)
+    static inline unsigned char decodeCodewordSoft(
+        const std::vector<float>& codewordLLR,
+        unsigned int crApp,
+        bool& error, // set if soft FEC changes a hard decision; caller may accumulate across codewords
+        bool& bad)   // set on structural decode failure; caller may accumulate across codewords
     {
         static const unsigned char cwLUT[16] = {
             0, 23, 45, 58, 78, 89, 99, 116,
@@ -286,10 +290,17 @@ private:
         };
 
         if ((crApp < 1U) || (crApp > 4U)) {
+            bad = true; // invalid coding rate: structural decode failure
             return 0;
         }
 
         const unsigned int cwLen = 4U + crApp;
+
+        if (codewordLLR.size() < cwLen) {
+            bad = true; // insufficient LLR data: structural decode failure (later mapped to ParityError)
+            return 0;
+        }
+
         const unsigned char *lut = (crApp == 1U) ? cwLUTCr5 : cwLUT;
         float bestScore = std::numeric_limits<float>::lowest();
         unsigned int bestIdx = 0U;
@@ -309,6 +320,25 @@ private:
             if (score > bestScore) {
                 bestScore = score;
                 bestIdx = n;
+            }
+        }
+
+        const unsigned char selectedCW =
+            static_cast<unsigned char>(lut[bestIdx] >> (8U - cwLen));
+
+        for (unsigned int j = 0; j < cwLen; j++)
+        {
+            if (codewordLLR[j] == 0.0f) {
+                continue; // no hard-decision preference for an exactly zero LLR
+            }
+
+            const bool hardBit = codewordLLR[j] > 0.0f;
+            const bool selectedBit =
+                ((selectedCW >> (cwLen - 1U - j)) & 0x1U) != 0U;
+
+            if (hardBit != selectedBit) {
+                error = true; // soft FEC changed one or more raw hard-decision bits
+                break;
             }
         }
 
