@@ -630,7 +630,7 @@ void MeshtasticDemodDecoderLoRa::decodeBytesSoft(
         symOfs += headerSymbols;
     }
 
-    const unsigned int payloadOnlyRowStart = 0U; // all rows in subsequent blocks are payload
+    const unsigned int payloadOnlyRowStart = 0U; // all rows in these blocks are payload
 
     while (symOfs + payloadBlockSymbols <= numSymbols)
     {
@@ -652,7 +652,8 @@ void MeshtasticDemodDecoderLoRa::decodeBytesSoft(
     const unsigned int nibbleOfs = hasHeader ? 5U : 0U;
     const unsigned int neededNibbles = nibbleOfs + dataByteLen * 2U;
 
-    if (nibbles.size() < neededNibbles) {
+    if (nibbles.size() < neededNibbles)
+    {
         earlyEOM = true;
         return;
     }
