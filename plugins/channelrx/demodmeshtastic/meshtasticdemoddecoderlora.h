@@ -277,8 +277,8 @@ private:
     static inline unsigned char decodeCodewordSoft(
         const std::vector<float>& codewordLLR,
         unsigned int crApp,
-        bool& error, // set if soft FEC changes a hard decision across payload codewords decoded so far
-        bool& bad)   // set on structural decode failure across payload codewords decoded so far
+        bool& error, // set if soft FEC changes a hard decision; caller may accumulate across codewords
+        bool& bad)   // set on structural decode failure; caller may accumulate across codewords
     {
         static const unsigned char cwLUT[16] = {
             0, 23, 45, 58, 78, 89, 99, 116,
@@ -300,7 +300,7 @@ private:
             bad = true; // insufficient LLR data: structural decode failure (later mapped to ParityError)
             return 0;
         }
-        
+
         const unsigned char *lut = (crApp == 1U) ? cwLUTCr5 : cwLUT;
         float bestScore = std::numeric_limits<float>::lowest();
         unsigned int bestIdx = 0U;
@@ -337,7 +337,7 @@ private:
                 ((selectedCW >> (cwLen - 1U - j)) & 0x1U) != 0U;
 
             if (hardBit != selectedBit) {
-                error = true; // soft FEC selected a different bit than the raw hard decision
+                error = true; // soft FEC changed one or more raw hard-decision bits
                 break;
             }
         }
