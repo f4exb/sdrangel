@@ -3,11 +3,13 @@ ChannelMarker:
   properties:
     centerFrequency:
       type: integer
+      description: "Device center frequency in Hz."
     color:
       type: integer
       description: RGB color
     title:
       type: string
+      description: "User-visible title."
     frequencyScaleDisplayType:
       type: integer
       description: ChannelMarker::frequencyScaleDisplay_t

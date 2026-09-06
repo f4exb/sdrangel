@@ -12,16 +12,22 @@ ADSBDemodSettings:
     correlationThreshold:
       type: number
       format: float
+      description: "Minimum correlation score required to accept a frame preamble."
     samplesPerBit:
       type: integer
+      description: "Number of input samples used to represent each bit."
     correlateFullPreamble:
       type: integer
+      minimum: 0
+      maximum: 1
       description: >
         Correlate on part or full preamble
           * 0 - part
           * 1 - full
     demodModeS:
       type: integer
+      minimum: 0
+      maximum: 1
       description: >
         Demodulate all mode S frames or just ADS-B
           * 0 - just ADS-B
@@ -35,10 +41,16 @@ ADSBDemodSettings:
       description: Number of taps per phase in channel interpolator
     removeTimeout:
       type: integer
+      description: "Time after which an inactive tracked item is removed."
     feedEnabled:
       type: integer
+      description: "Enable forwarding of received data to the configured feed (1 enabled, 0 disabled)."
+      minimum: 0
+      maximum: 1
     exportClientEnabled:
       type: integer
+      minimum: 0
+      maximum: 1
       description: >
         Send data to server
           * 0 - Do not send data
@@ -48,20 +60,35 @@ ADSBDemodSettings:
       type: string
     exportClientPort:
       type: integer
+      description: "Export client port."
+      minimum: 1
+      maximum: 65535
     exportClientFormat:
       type: integer
+      minimum: 0
+      maximum: 1
       description: >
         Format of sent data
           * 0 - Beast binary
           * 1 - Beast hex
     exportServerEnabled:
       type: integer
+      description: "Enable the data-export server (1 enabled, 0 disabled)."
+      minimum: 0
+      maximum: 1
     exportServerPort:
       type: integer
+      description: "Export server port."
+      minimum: 1
+      maximum: 65535
     importEnabled:
       type: integer
+      description: "Enable importing data from the configured service (1 enabled, 0 disabled)."
+      minimum: 0
+      maximum: 1
     importHost:
       type: string
+      description: "Import host setting for ADS-B demod."
     importUsername:
       type: string
       description: OpenSky OAuth2 client ID.
@@ -70,43 +97,65 @@ ADSBDemodSettings:
       description: OpenSky OAuth2 client secret.
     importParameters:
       type: string
+      description: "Import parameters setting for ADS-B demod."
     importPeriod:
       type: number
       format: float
+      description: "Import period setting for ADS-B demod."
     importMinLatitude:
       type: string
+      description: "Import min latitude setting for ADS-B demod."
     importMaxLatitude:
       type: string
+      description: "Import max latitude setting for ADS-B demod."
     importMinLongitude:
       type: string
+      description: "Import min longitude setting for ADS-B demod."
     importMaxLongitude:
       type: string
+      description: "Import max longitude setting for ADS-B demod."
     logFilename:
       type: string
+      description: "Log file name or path."
     logEnabled:
       type: integer
+      description: "Enable logging to the configured file (1 enabled, 0 disabled)."
+      minimum: 0
+      maximum: 1
     rgbColor:
       type: integer
+      description: "Display color encoded as an RGB integer."
     title:
       type: string
+      description: "User-visible title."
     streamIndex:
       description: MIMO channel. Not relevant when connected to SI (single Rx).
       type: integer
     useReverseAPI:
       description: Synchronize with reverse API (1 for yes, 0 for no)
       type: integer
+      minimum: 0
+      maximum: 1
     reverseAPIAddress:
       type: string
+      description: "IPv4 address or host name of the reverse API peer."
     reverseAPIPort:
       type: integer
+      description: "TCP port of the reverse API peer."
+      minimum: 1
+      maximum: 65535
     reverseAPIDeviceIndex:
       type: integer
+      description: "Device-set index used by the reverse API peer."
     reverseAPIChannelIndex:
       type: integer
+      description: "Channel index used by the reverse API peer."
     channelMarker:
       $ref: "/doc/swagger/include/ChannelMarker.yaml#/ChannelMarker"
+      description: "Channel-marker display configuration."
     rollupState:
       $ref: "/doc/swagger/include/RollupState.yaml#/RollupState"
+      description: "Saved expanded or collapsed state of the GUI sections."
 
 ADSBDemodReport:
   description: ADSBDemod
@@ -117,19 +166,25 @@ ADSBDemodReport:
       format: float
     channelSampleRate:
       type: integer
+      description: "Effective sample rate delivered to the channel in samples per second."
     targetName:
       type: string
+      description: "Name of the selected or tracked target."
     targetAzimuth:
       type: number
       format: float
+      description: "Target azimuth in degrees clockwise from north."
     targetElevation:
       type: number
       format: float
+      description: "Target elevation in degrees above the horizon."
     targetRange:
       type: number
       format: float
+      description: "Distance to the selected or tracked target."
     aircraftState:
       type: array
+      description: "Current states of aircraft tracked by the ADS-B demodulator."
       items:
         $ref: "/doc/swagger/include/ADSBDemod.yaml#/ADSBDemodAircraftState"
 
@@ -145,10 +200,14 @@ ADSBDemodAircraftState:
       description: "Latitude of aircraft in degrees"
       type: number
       format: float
+      minimum: -90
+      maximum: 90
     longitude:
       description: "Longitude of aircraft in degrees"
       type: number
       format: float
+      minimum: -180
+      maximum: 180
     altitude:
       description: "Altitude of aircraft in feet"
       type: integer

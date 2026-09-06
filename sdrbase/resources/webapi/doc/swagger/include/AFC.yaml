@@ -3,8 +3,10 @@ AFCSettings:
   properties:
     title:
       type: string
+      description: "User-visible title."
     rgbColor:
       type: integer
+      description: "Display color encoded as an RGB integer."
     trackerDeviceSetIndex:
       description: index of the device set of frequency tracker being used
       type: integer
@@ -13,12 +15,16 @@ AFCSettings:
       type: integer
     hasTargetFrequency:
       type: integer
+      minimum: 0
+      maximum: 1
       description: >
         Adjust device frequency to match tracker frequency
           * 0 - disabled
           * 1 - enabled
     transverterTarget:
       type: integer
+      minimum: 0
+      maximum: 1
       description: >
         Use transverter or device frequency for tracker frequency adjustment
           * 0 - device
@@ -36,22 +42,33 @@ AFCSettings:
     useReverseAPI:
       description: Synchronize with reverse API (1 for yes, 0 for no)
       type: integer
+      minimum: 0
+      maximum: 1
     reverseAPIAddress:
       type: string
+      description: "IPv4 address or host name of the reverse API peer."
     reverseAPIPort:
       type: integer
+      description: "TCP port of the reverse API peer."
+      minimum: 1
+      maximum: 65535
     reverseAPIFeatureSetIndex:
       type: integer
+      description: "Feature-set index used by the reverse API peer."
     reverseAPIFeatureIndex:
       type: integer
+      description: "Feature index used by the reverse API peer."
     rollupState:
       $ref: "/doc/swagger/include/RollupState.yaml#/RollupState"
+      description: "Saved expanded or collapsed state of the GUI sections."
 
 AFCReport:
   description: "AFC report"
   properties:
     runningState:
       type: integer
+      minimum: 0
+      maximum: 3
       description: >
         Running state
           * 0 - not started
@@ -74,18 +91,24 @@ AFCActions:
   properties:
     run:
       type: integer
+      minimum: 0
+      maximum: 1
       description: >
         Set the plugin running state
           * 0 - idle
           * 1 - run
     deviceTrack:
       type: integer
+      minimum: 0
+      maximum: 1
       description: >
         (Re)initialize tracker target frequency adjustment
           * 0 - release
           * 1 - engage
     devicesApply:
       type: integer
+      minimum: 0
+      maximum: 1
       description: >
         (Re)initialize device sets tracking
           * 0 - release

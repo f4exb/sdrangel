@@ -74,8 +74,10 @@ TriggerData:
       format: float
     triggerLevelCoarse:
       type: integer
+      description: "Trigger level coarse for Trigger data."
     triggerLevelFine:
       type: integer
+      description: "Trigger level fine for Trigger data."
     triggerPositiveEdge:
       description: Trigger on the positive edge (else negative). Boolean
       type: integer
@@ -94,8 +96,10 @@ TriggerData:
       format: float
     triggerDelayCoarse:
       type: integer
+      description: "Trigger delay coarse for Trigger data."
     triggerDelayFine:
       type: integer
+      description: "Trigger delay fine for Trigger data."
     triggerRepeat:
       description: Number of trigger conditions before the final decisive trigger
       type: integer
@@ -123,22 +127,29 @@ GLScope:
       type: integer
     traceIntensity:
       type: integer
+      description: "Trace intensity for Gl scope."
     gridIntensity:
       type: integer
+      description: "Grid intensity for Gl scope."
     time:
       type: integer
+      description: "Time for Gl scope."
     timeOfs:
       type: integer
+      description: "Time ofs for Gl scope."
     traceLenMult:
       type: integer
       description: Trace length multiplier (multiplies 4800 samples)
     trigPre:
       type: integer
+      description: "Trig pre for Gl scope."
     tracesData:
       type: array
+      description: "List of traces data."
       items:
         $ref: "/doc/swagger/include/GLScope.yaml#/TraceData"
     triggersData:
       type: array
+      description: "List of triggers data."
       items:
         $ref: "/doc/swagger/include/GLScope.yaml#/TriggerData"

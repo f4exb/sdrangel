@@ -13,111 +13,171 @@ ChannelReport:
       type: integer
     ADSBDemodReport:
       $ref: "/doc/swagger/include/ADSBDemod.yaml#/ADSBDemodReport"
+      description: "ADS-B demod report data for Channel."
     AISDemodReport:
       $ref: "/doc/swagger/include/AISDemod.yaml#/AISDemodReport"
+      description: "AIS demod report data for Channel."
     AISModReport:
       $ref: "/doc/swagger/include/AISMod.yaml#/AISModReport"
+      description: "AIS mod report data for Channel."
     AMDemodReport:
       $ref: "/doc/swagger/include/AMDemod.yaml#/AMDemodReport"
+      description: "Am demod report data for Channel."
     AMModReport:
       $ref: "/doc/swagger/include/AMMod.yaml#/AMModReport"
+      description: "Am mod report data for Channel."
     ATVModReport:
       $ref: "/doc/swagger/include/ATVMod.yaml#/ATVModReport"
+      description: "Atv mod report data for Channel."
     BFMDemodReport:
       $ref: "/doc/swagger/include/BFMDemod.yaml#/BFMDemodReport"
+      description: "BFM demod report data for Channel."
     ChannelPowerReport:
       $ref: "/doc/swagger/include/ChannelPower.yaml#/ChannelPowerReport"
+      description: "Channel power report data for Channel."
     ChirpChatDemodReport:
       $ref: "/doc/swagger/include/ChirpChatDemod.yaml#/ChirpChatDemodReport"
+      description: "Chirp chat demod report data for Channel."
     ChirpChatModReport:
       $ref: "/doc/swagger/include/ChirpChatMod.yaml#/ChirpChatModReport"
+      description: "Chirp chat mod report data for Channel."
     DATVDemodReport:
       $ref: "/doc/swagger/include/DATVDemod.yaml#/DATVDemodReport"
+      description: "Datv demod report data for Channel."
     DATVModReport:
       $ref: "/doc/swagger/include/DATVMod.yaml#/DATVModReport"
+      description: "Datv mod report data for Channel."
     DOA2Report:
       $ref: "/doc/swagger/include/DOA2.yaml#/DOA2Report"
+      description: "Doa2 report data for Channel."
     DSCDemodReport:
       $ref: "/doc/swagger/include/DSCDemod.yaml#/DSCDemodReport"
+      description: "Dsc demod report data for Channel."
     DSDDemodReport:
       $ref: "/doc/swagger/include/DSDDemod.yaml#/DSDDemodReport"
+      description: "Dsd demod report data for Channel."
     EndOfTrainDemodReport:
       $ref: "/doc/swagger/include/EndOfTrainDemod.yaml#/EndOfTrainDemodReport"
+      description: "End of train demod report data for Channel."
     IEEE_802_15_4_ModReport:
       $ref: "/doc/swagger/include/IEEE_802_15_4_Mod.yaml#/IEEE_802_15_4_ModReport"
+      description: "Ieee 802 15 4 mod report data for Channel."
     FileSinkReport:
       $ref: "/doc/swagger/include/FileSink.yaml#/FileSinkReport"
+      description: "File sink report data for Channel."
     FileSourceReport:
       $ref: "/doc/swagger/include/FileSource.yaml#/FileSourceReport"
+      description: "File source report data for Channel."
     FreeDVDemodReport:
       $ref: "/doc/swagger/include/FreeDVDemod.yaml#/FreeDVDemodReport"
+      description: "Free dv demod report data for Channel."
     FreeDVModReport:
       $ref: "/doc/swagger/include/FreeDVMod.yaml#/FreeDVModReport"
+      description: "Free dv mod report data for Channel."
     FreqScannerReport:
       $ref: "/doc/swagger/include/FreqScanner.yaml#/FreqScannerReport"
+      description: "Freq scanner report data for Channel."
     FreqTrackerReport:
       $ref: "/doc/swagger/include/FreqTracker.yaml#/FreqTrackerReport"
+      description: "Freq tracker report data for Channel."
     FT8DemodReport:
       $ref: "/doc/swagger/include/FT8Demod.yaml#/FT8DemodReport"
+      description: "Ft8 demod report data for Channel."
     HeatMapReport:
       $ref: "/doc/swagger/include/HeatMap.yaml#/HeatMapReport"
+      description: "Heat map report data for Channel."
     ILSDemodReport:
       $ref: "/doc/swagger/include/ILSDemod.yaml#/ILSDemodReport"
+      description: "Ils demod report data for Channel."
     InmarsatDemodReport:
       $ref: "/doc/swagger/include/InmarsatDemod.yaml#/InmarsatDemodReport"
+      description: "Inmarsat demod report data for Channel."
     M17DemodReport:
       $ref: "/doc/swagger/include/M17Demod.yaml#/M17DemodReport"
+      description: "M17 demod report data for Channel."
     M17ModReport:
       $ref: "/doc/swagger/include/M17Mod.yaml#/M17ModReport"
+      description: "M17 mod report data for Channel."
     MeshtasticDemodReport:
       $ref: "/doc/swagger/include/MeshtasticDemod.yaml#/MeshtasticDemodReport"
+      description: "Meshtastic demod report data for Channel."
     MeshtasticModReport:
       $ref: "/doc/swagger/include/MeshtasticMod.yaml#/MeshtasticModReport"
+      description: "Meshtastic mod report data for Channel."
+    MeshcoreDemodReport:
+      $ref: "/doc/swagger/include/MeshcoreDemod.yaml#/MeshcoreDemodReport"
+      description: "Meshcore demod report data for Channel."
+    MeshcoreModReport:
+      $ref: "/doc/swagger/include/MeshcoreMod.yaml#/MeshcoreModReport"
+      description: "Meshcore mod report data for Channel."
     NavtexDemodReport:
       $ref: "/doc/swagger/include/NavtexDemod.yaml#/NavtexDemodReport"
+      description: "Navtex demod report data for Channel."
     NFMDemodReport:
       $ref: "/doc/swagger/include/NFMDemod.yaml#/NFMDemodReport"
+      description: "Nfm demod report data for Channel."
     NFMModReport:
       $ref: "/doc/swagger/include/NFMMod.yaml#/NFMModReport"
+      description: "Nfm mod report data for Channel."
     NoiseFigureReport:
       $ref: "/doc/swagger/include/NoiseFigure.yaml#/NoiseFigureReport"
+      description: "Noise figure report data for Channel."
     SSBDemodReport:
       $ref: "/doc/swagger/include/SSBDemod.yaml#/SSBDemodReport"
+      description: "Ssb demod report data for Channel."
     RadioAstronomyReport:
       $ref: "/doc/swagger/include/RadioAstronomy.yaml#/RadioAstronomyReport"
+      description: "Radio astronomy report data for Channel."
     RadioClockReport:
       $ref: "/doc/swagger/include/RadioClock.yaml#/RadioClockReport"
+      description: "Radio clock report data for Channel."
     RadiosondeDemodReport:
       $ref: "/doc/swagger/include/RadiosondeDemod.yaml#/RadiosondeDemodReport"
+      description: "Radiosonde demod report data for Channel."
     RemoteSourceReport:
       $ref: "/doc/swagger/include/RemoteSource.yaml#/RemoteSourceReport"
+      description: "Remote source report data for Channel."
     RTTYDemodReport:
       $ref: "/doc/swagger/include/RTTYDemod.yaml#/RTTYDemodReport"
+      description: "Rtty demod report data for Channel."
     RTTYModReport:
       $ref: "/doc/swagger/include/RTTYMod.yaml#/RTTYModReport"
+      description: "Rtty mod report data for Channel."
     PacketDemodReport:
       $ref: "/doc/swagger/include/PacketDemod.yaml#/PacketDemodReport"
+      description: "Packet demod report data for Channel."
     PacketModReport:
       $ref: "/doc/swagger/include/PacketMod.yaml#/PacketModReport"
+      description: "Packet mod report data for Channel."
     PagerDemodReport:
       $ref: "/doc/swagger/include/PagerDemod.yaml#/PagerDemodReport"
+      description: "Pager demod report data for Channel."
     PSK31ModReport:
       $ref: "/doc/swagger/include/PSK31Mod.yaml#/PSK31ModReport"
+      description: "Psk31 mod report data for Channel."
     SigMFFileSinkReport:
       $ref: "/doc/swagger/include/SigMFFileSink.yaml#/SigMFFileSinkReport"
+      description: "Sig mf file sink report data for Channel."
     SSBModReport:
       $ref: "/doc/swagger/include/SSBMod.yaml#/SSBModReport"
+      description: "Ssb mod report data for Channel."
     UDPSourceReport:
       $ref: "/doc/swagger/include/UDPSource.yaml#/UDPSourceReport"
+      description: "UDP source report data for Channel."
     UDPSinkReport:
       $ref: "/doc/swagger/include/UDPSink.yaml#/UDPSinkReport"
+      description: "UDP sink report data for Channel."
     # VORDemodMCReport:
     #   $ref: "/doc/swagger/include/VORDemodMC.yaml#/VORDemodMCReport"
     VORDemodReport:
       $ref: "/doc/swagger/include/VORDemod.yaml#/VORDemodReport"
+      description: "Vor demod report data for Channel."
     WDSPRxReport:
       $ref: "/doc/swagger/include/WDSPRx.yaml#/WDSPRxReport"
+      description: "Wdsp receive report data for Channel."
     WFMDemodReport:
       $ref: "/doc/swagger/include/WFMDemod.yaml#/WFMDemodReport"
+      description: "Wfm demod report data for Channel."
     WFMModReport:
       $ref: "/doc/swagger/include/WFMMod.yaml#/WFMModReport"
+      description: "Wfm mod report data for Channel."

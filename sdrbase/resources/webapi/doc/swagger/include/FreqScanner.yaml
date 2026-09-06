@@ -13,60 +13,83 @@ FreqScannerSettings:
     threshold:
       type: number
       format: float
+      description: "Threshold setting for Freq scanner."
     frequencies:
       type: array
+      description: "List of frequencies."
       items:
         $ref: "/doc/swagger/include/FreqScanner.yaml#/FreqScannerFrequency"
     channel:
       type: string
+      description: "Channel identifier or configuration."
     scanTime:
       type: number
       format: float
+      description: "Scan time setting for Freq scanner."
     retransmitTime:
       type: number
       format: float
+      description: "Retransmit time setting for Freq scanner."
     tuneTime:
       type: number
       format: float
+      description: "Tune time setting for Freq scanner."
     priority:
       type: integer
+      description: "Priority setting for Freq scanner."
     measurement:
       type: integer
+      description: "Measurement setting for Freq scanner."
     mode:
       type: integer
+      description: "Mode setting for Freq scanner."
     rgbColor:
       type: integer
+      description: "Display color encoded as an RGB integer."
     title:
       type: string
+      description: "User-visible title."
     streamIndex:
       description: MIMO channel. Not relevant when connected to SI (single Rx).
       type: integer
     useReverseAPI:
       description: Synchronize with reverse API (1 for yes, 0 for no)
       type: integer
+      minimum: 0
+      maximum: 1
     reverseAPIAddress:
       type: string
+      description: "IPv4 address or host name of the reverse API peer."
     reverseAPIPort:
       type: integer
+      description: "TCP port of the reverse API peer."
+      minimum: 1
+      maximum: 65535
     reverseAPIDeviceIndex:
       type: integer
+      description: "Device-set index used by the reverse API peer."
     reverseAPIChannelIndex:
       type: integer
+      description: "Channel index used by the reverse API peer."
     channelMarker:
       $ref: "/doc/swagger/include/ChannelMarker.yaml#/ChannelMarker"
+      description: "Channel-marker display configuration."
     rollupState:
       $ref: "/doc/swagger/include/RollupState.yaml#/RollupState"
+      description: "Saved expanded or collapsed state of the GUI sections."
 
 FreqScannerReport:
   description: FreqScanner
   properties:
     channelSampleRate:
       type: integer
+      description: "Effective sample rate delivered to the channel in samples per second."
     scanState:
       description: (IDLE=0, START_SCAN=1, SCANNING=2, WAIT_FOR_END_TX=3, WAIT_FOR_RETRANSMISSION=4)
       type: integer
     channelState:
       type: array
+      description: "List of channel state."
       items:
         $ref: "/doc/swagger/include/FreqScanner.yaml#/FreqScannerChannelState"
 
@@ -85,24 +108,33 @@ FreqScannerFrequency:
     frequency:
       type: integer
       format: int64
+      description: "Frequency in Hz."
     enabled:
       type: integer
+      description: "Enabled for Freq scanner frequency."
     notes:
       type: string
+      description: "Notes for Freq scanner frequency."
     channel:
       type: string
+      description: "Channel identifier or configuration."
     channelBandwidth:
       type: string
+      description: "Channel bandwidth in Hz."
     threshold:
       type: string
+      description: "Threshold for Freq scanner frequency."
     squelch:
       type: string
+      description: "Squelch threshold in dB."
 
 FreqScannerActions:
   description: "Frequency Scanner actions"
   properties:
     run:
       type: integer
+      minimum: 0
+      maximum: 1
       description: >
         Set the plugin running state
           * 0 - idle

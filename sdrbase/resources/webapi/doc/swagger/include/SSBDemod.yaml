@@ -4,18 +4,25 @@ SSBDemodSettings:
     inputFrequencyOffset:
       type: integer
       format: int64
+      description: "Channel frequency offset from the device center frequency in Hz."
     filterIndex:
       type: integer
+      description: "Selected filter index."
     spanLog2:
       type: integer
+      description: "Base-2 exponent controlling the displayed or processed frequency span."
     rfBandwidth:
       type: number
       format: float
+      description: "RF bandwidth in Hz."
     lowCutoff:
       type: number
       format: float
+      description: "Lower filter cutoff frequency in Hz."
     fftWindow:
       type: integer
+      minimum: 0
+      maximum: 8
       description: >
         FFT Window index (FFTWindow::Function):
           * 0 - Bartlett
@@ -30,6 +37,7 @@ SSBDemodSettings:
     volume:
       type: number
       format: float
+      description: "Audio volume multiplier."
     audioBinaural:
       description: Audio binaural mode (1 if active else 0)
       type: integer
@@ -42,9 +50,13 @@ SSBDemodSettings:
     audioMute:
       description: Mute audio (1 if muted else 0)
       type: integer
+      minimum: 0
+      maximum: 1
     agc:
       description: AGC (1 if AGC active else 0)
       type: integer
+      minimum: 0
+      maximum: 1
     agcClamping:
       description: AGC clamping (1 if AGC clampingactive else 0)
       type: integer
@@ -59,12 +71,16 @@ SSBDemodSettings:
       type: integer
     dnr:
       type: integer
+      minimum: 0
+      maximum: 1
       description: >
         Toggle noise reduction:
           * 0 - Noise reduction off
           * 1 - Noise reduction on
     dnrScheme:
       type: integer
+      minimum: 0
+      maximum: 2
       description: >
         Noise reduction scheme:
           * 0 - Average of magnitudes
@@ -87,30 +103,44 @@ SSBDemodSettings:
       description: Smoothing constant (alpha) of the exponential smoothing filter. Must be between  0 and 1.
     rgbColor:
       type: integer
+      description: "Display color encoded as an RGB integer."
     title:
       type: string
+      description: "User-visible title."
     audioDeviceName:
       type: string
+      description: "Name of the audio device to use."
     streamIndex:
       description: MIMO channel. Not relevant when connected to SI (single Rx).
       type: integer
     useReverseAPI:
       description: Synchronize with reverse API (1 for yes, 0 for no)
       type: integer
+      minimum: 0
+      maximum: 1
     reverseAPIAddress:
       type: string
+      description: "IPv4 address or host name of the reverse API peer."
     reverseAPIPort:
       type: integer
+      description: "TCP port of the reverse API peer."
+      minimum: 1
+      maximum: 65535
     reverseAPIDeviceIndex:
       type: integer
+      description: "Device-set index used by the reverse API peer."
     reverseAPIChannelIndex:
       type: integer
+      description: "Channel index used by the reverse API peer."
     spectrumConfig:
       $ref: "/doc/swagger/include/GLSpectrum.yaml#/GLSpectrum"
+      description: "Spectrum-display configuration."
     channelMarker:
       $ref: "/doc/swagger/include/ChannelMarker.yaml#/ChannelMarker"
+      description: "Channel-marker display configuration."
     rollupState:
       $ref: "/doc/swagger/include/RollupState.yaml#/RollupState"
+      description: "Saved expanded or collapsed state of the GUI sections."
 
 SSBDemodReport:
   description: SSBDemod
@@ -124,5 +154,7 @@ SSBDemodReport:
       type: integer
     audioSampleRate:
       type: integer
+      description: "Audio sample rate in samples per second."
     channelSampleRate:
       type: integer
+      description: "Effective sample rate delivered to the channel in samples per second."

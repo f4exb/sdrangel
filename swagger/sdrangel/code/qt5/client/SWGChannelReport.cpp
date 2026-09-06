@@ -521,9 +521,9 @@ SWGChannelReport::fromJsonObject(QJsonObject &pJson) {
     
     ::SWGSDRangel::setValue(&meshtastic_demod_report, pJson["MeshtasticDemodReport"], "SWGMeshtasticDemodReport", "SWGMeshtasticDemodReport");
     
-    ::SWGSDRangel::setValue(&meshcore_demod_report, pJson["MeshcoreDemodReport"], "SWGMeshcoreDemodReport", "SWGMeshcoreDemodReport");
-    
     ::SWGSDRangel::setValue(&meshtastic_mod_report, pJson["MeshtasticModReport"], "SWGMeshtasticModReport", "SWGMeshtasticModReport");
+    
+    ::SWGSDRangel::setValue(&meshcore_demod_report, pJson["MeshcoreDemodReport"], "SWGMeshcoreDemodReport", "SWGMeshcoreDemodReport");
     
     ::SWGSDRangel::setValue(&meshcore_mod_report, pJson["MeshcoreModReport"], "SWGMeshcoreModReport", "SWGMeshcoreModReport");
     
@@ -685,11 +685,11 @@ SWGChannelReport::asJsonObject() {
     if((meshtastic_demod_report != nullptr) && (meshtastic_demod_report->isSet())){
         toJsonValue(QString("MeshtasticDemodReport"), meshtastic_demod_report, obj, QString("SWGMeshtasticDemodReport"));
     }
-    if((meshcore_demod_report != nullptr) && (meshcore_demod_report->isSet())){
-        toJsonValue(QString("MeshcoreDemodReport"), meshcore_demod_report, obj, QString("SWGMeshcoreDemodReport"));
-    }
     if((meshtastic_mod_report != nullptr) && (meshtastic_mod_report->isSet())){
         toJsonValue(QString("MeshtasticModReport"), meshtastic_mod_report, obj, QString("SWGMeshtasticModReport"));
+    }
+    if((meshcore_demod_report != nullptr) && (meshcore_demod_report->isSet())){
+        toJsonValue(QString("MeshcoreDemodReport"), meshcore_demod_report, obj, QString("SWGMeshcoreDemodReport"));
     }
     if((meshcore_mod_report != nullptr) && (meshcore_mod_report->isSet())){
         toJsonValue(QString("MeshcoreModReport"), meshcore_mod_report, obj, QString("SWGMeshcoreModReport"));

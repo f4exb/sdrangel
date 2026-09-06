@@ -11,16 +11,20 @@ FreqTrackerSettings:
       format: float
     log2Decim:
       type: integer
+      description: "Base-2 exponent of the software decimation factor; the output sample rate is divided by 2^log2Decim."
     squelch:
       description: power squelch threshold in decibels
       type: number
       format: float
     rgbColor:
       type: integer
+      description: "Display color encoded as an RGB integer."
     title:
       type: string
+      description: "User-visible title."
     spanLog2:
       type: integer
+      description: "Base-2 exponent controlling the displayed or processed frequency span."
     alphaEMA:
       description: Alpha factor for delta frequency EMA
       type: number
@@ -49,20 +53,31 @@ FreqTrackerSettings:
     useReverseAPI:
       description: Synchronize with reverse API (1 for yes, 0 for no)
       type: integer
+      minimum: 0
+      maximum: 1
     reverseAPIAddress:
       type: string
+      description: "IPv4 address or host name of the reverse API peer."
     reverseAPIPort:
       type: integer
+      description: "TCP port of the reverse API peer."
+      minimum: 1
+      maximum: 65535
     reverseAPIDeviceIndex:
       type: integer
+      description: "Device-set index used by the reverse API peer."
     reverseAPIChannelIndex:
       type: integer
+      description: "Channel index used by the reverse API peer."
     spectrumConfig:
       $ref: "/doc/swagger/include/GLSpectrum.yaml#/GLSpectrum"
+      description: "Spectrum-display configuration."
     channelMarker:
       $ref: "/doc/swagger/include/ChannelMarker.yaml#/ChannelMarker"
+      description: "Channel-marker display configuration."
     rollupState:
       $ref: "/doc/swagger/include/RollupState.yaml#/RollupState"
+      description: "Saved expanded or collapsed state of the GUI sections."
 
 FreqTrackerReport:
   description: FreqTracker
@@ -79,5 +94,7 @@ FreqTrackerReport:
       type: integer
     sampleRate:
       type: integer
+      description: "Sample rate in samples per second."
     channelSampleRate:
       type: integer
+      description: "Effective sample rate delivered to the channel in samples per second."

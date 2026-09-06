@@ -3,93 +3,143 @@ USRPInputSettings:
   properties:
     title:
       type: string
+      description: "User-visible title."
     centerFrequency:
       type: integer
       format: int64
+      description: "Device center frequency in Hz."
     devSampleRate:
       type: integer
+      description: "Device I/Q sample rate in samples per second before software decimation or interpolation."
     loOffset:
       type: integer
+      description: "LO offset setting for Usrp input."
     dcBlock:
       type: integer
+      description: "Enable DSP DC-offset correction (1 enabled, 0 disabled)."
+      minimum: 0
+      maximum: 1
     iqCorrection:
       type: integer
+      description: "Enable I/Q imbalance correction (1 enabled, 0 disabled)."
+      minimum: 0
+      maximum: 1
     log2SoftDecim:
       type: integer
+      description: "Base-2 exponent of the software decimation factor."
     lpfBW:
       type: integer
+      description: "Analog low-pass filter bandwidth in Hz."
     antennaPath:
       type: string
+      description: "Selected RF antenna path."
     gain:
       type: integer
+      description: "Gain setting; units and available values depend on the device or plugin."
     gainMode:
       description: 0 for auto, 1 for manual
       type: integer
     clockSource:
       type: string
+      description: "Clock source setting for Usrp input."
     transverterMode:
       type: integer
+      description: "Enable transverter frequency translation (1 enabled, 0 disabled)."
+      minimum: 0
+      maximum: 1
     transverterDeltaFrequency:
       type: integer
       format: int64
+      description: "Frequency translation applied in transverter mode in Hz."
     gpioDir:
       type: integer
       format: int8
+      description: "GPIO direction bit mask, with one bit per pin."
     gpioPins:
       type: integer
       format: int8
+      description: "GPIO pin-state bit mask, with one bit per pin."
     useReverseAPI:
       description: Synchronize with reverse API (1 for yes, 0 for no)
       type: integer
+      minimum: 0
+      maximum: 1
     reverseAPIAddress:
       type: string
+      description: "IPv4 address or host name of the reverse API peer."
     reverseAPIPort:
       type: integer
+      description: "TCP port of the reverse API peer."
+      minimum: 1
+      maximum: 65535
     reverseAPIDeviceIndex:
       type: integer
+      description: "Device-set index used by the reverse API peer."
 
 USRPOutputSettings:
   description: USRP
   properties:
     title:
       type: string
+      description: "User-visible title."
     centerFrequency:
       type: integer
       format: int64
+      description: "Device center frequency in Hz."
     devSampleRate:
       type: integer
+      description: "Device I/Q sample rate in samples per second before software decimation or interpolation."
     loOffset:
       type: integer
+      description: "LO offset setting for Usrp output."
     log2SoftInterp:
       type: integer
+      description: "Base-2 exponent of the software interpolation factor."
     lpfBW:
       type: integer
+      description: "Analog low-pass filter bandwidth in Hz."
     gain:
       type: integer
+      description: "Gain setting; units and available values depend on the device or plugin."
     antennaPath:
       type: string
+      description: "Selected RF antenna path."
     clockSource:
       type: string
+      description: "Clock source setting for Usrp output."
     transverterMode:
       type: integer
+      description: "Enable transverter frequency translation (1 enabled, 0 disabled)."
+      minimum: 0
+      maximum: 1
     transverterDeltaFrequency:
       type: integer
       format: int64
+      description: "Frequency translation applied in transverter mode in Hz."
     gpioDir:
       type: integer
       format: int8
+      description: "GPIO direction bit mask, with one bit per pin."
     gpioPins:
       type: integer
       format: int8
+      description: "GPIO pin-state bit mask, with one bit per pin."
     useReverseAPI:
       description: Synchronize with reverse API (1 for yes, 0 for no)
       type: integer
+      minimum: 0
+      maximum: 1
     reverseAPIAddress:
       type: string
+      description: "IPv4 address or host name of the reverse API peer."
     reverseAPIPort:
       type: integer
+      description: "TCP port of the reverse API peer."
+      minimum: 1
+      maximum: 65535
     reverseAPIDeviceIndex:
       type: integer
+      description: "Device-set index used by the reverse API peer."
 
 USRPInputReport:
   description: USRP
@@ -100,10 +150,14 @@ USRPInputReport:
     streamActive:
       description: 1 if active else 0
       type: integer
+      minimum: 0
+      maximum: 1
     overrunCount:
       type: integer
+      description: "Number of stream overrun events."
     timeoutCount:
       type: integer
+      description: "Number of timeout events or items."
 
 USRPOutputReport:
   description: USRP
@@ -114,7 +168,11 @@ USRPOutputReport:
     streamActive:
       description: 1 if active else 0
       type: integer
+      minimum: 0
+      maximum: 1
     underrunCount:
       type: integer
+      description: "Number of stream underrun events."
     droppedPacketsCount:
       type: integer
+      description: "Number of dropped packets."

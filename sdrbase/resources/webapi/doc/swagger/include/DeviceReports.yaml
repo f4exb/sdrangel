@@ -13,67 +13,100 @@ DeviceReport:
       type: integer
     airspyReport:
       $ref: "/doc/swagger/include/Airspy.yaml#/AirspyReport"
+      description: "Airspy report data for Device."
     airspyHFReport:
       $ref: "/doc/swagger/include/AirspyHF.yaml#/AirspyHFReport"
+      description: "Airspy hf report data for Device."
     androidSDRDriverInputReport:
       $ref: "/doc/swagger/include/AndroidSDRDriverInput.yaml#/AndroidSDRDriverInputReport"
+      description: "Android sdr driver input report data for Device."
     bladeRF2InputReport:
       $ref: "/doc/swagger/include/BladeRF2.yaml#/BladeRF2InputReport"
+      description: "Blade rf2 input report data for Device."
     bladeRF2OutputReport:
       $ref: "/doc/swagger/include/BladeRF2.yaml#/BladeRF2OutputReport"
+      description: "Blade rf2 output report data for Device."
     bladeRF2MIMOReport:
       $ref: "/doc/swagger/include/BladeRF2.yaml#/BladeRF2MIMOReport"
+      description: "Blade rf2 MIMO report data for Device."
     fileInputReport:
       $ref: "/doc/swagger/include/FileInput.yaml#/FileInputReport"
+      description: "File input report data for Device."
     kiwiSDRReport:
       $ref: "/doc/swagger/include/KiwiSDR.yaml#/KiwiSDRReport"
+      description: "Kiwi sdr report data for Device."
     limeSdrInputReport:
       $ref: "/doc/swagger/include/LimeSdr.yaml#/LimeSdrInputReport"
+      description: "Lime sdr input report data for Device."
     limeSdrOutputReport:
       $ref: "/doc/swagger/include/LimeSdr.yaml#/LimeSdrOutputReport"
+      description: "Lime sdr output report data for Device."
     limeSdrMIMOReport:
       $ref: "/doc/swagger/include/LimeSdr.yaml#/LimeSdrMIMOReport"
+      description: "Lime sdr MIMO report data for Device."
     localInputReport:
       $ref: "/doc/swagger/include/LocalInput.yaml#/LocalInputReport"
+      description: "Local input report data for Device."
     localOutputReport:
       $ref: "/doc/swagger/include/LocalOutput.yaml#/LocalOutputReport"
+      description: "Local output report data for Device."
     perseusReport:
       $ref: "/doc/swagger/include/Perseus.yaml#/PerseusReport"
+      description: "Perseus report data for Device."
     plutoSdrInputReport:
       $ref: "/doc/swagger/include/PlutoSdr.yaml#/PlutoSdrInputReport"
+      description: "Pluto sdr input report data for Device."
     plutoSdrOutputReport:
       $ref: "/doc/swagger/include/PlutoSdr.yaml#/PlutoSdrOutputReport"
+      description: "Pluto sdr output report data for Device."
     plutoSdrMIMOReport:
       $ref: "/doc/swagger/include/PlutoSdr.yaml#/PlutoSdrMIMOReport"
+      description: "Pluto sdr MIMO report data for Device."
     rtlSdrReport:
       $ref: "/doc/swagger/include/RtlSdr.yaml#/RtlSdrReport"
+      description: "Rtl sdr report data for Device."
     remoteOutputReport:
       $ref: "/doc/swagger/include/RemoteOutput.yaml#/RemoteOutputReport"
+      description: "Remote output report data for Device."
     remoteInputReport:
       $ref: "/doc/swagger/include/RemoteInput.yaml#/RemoteInputReport"
+      description: "Remote input report data for Device."
     remoteTCPInputReport:
       $ref: "/doc/swagger/include/RemoteTCPInput.yaml#/RemoteTCPInputReport"
+      description: "Remote TCP input report data for Device."
     sdrPlayReport:
       $ref: "/doc/swagger/include/SDRPlay.yaml#/SDRPlayReport"
+      description: "Sdr play report data for Device."
     sdrPlayV3Report:
       $ref: "/doc/swagger/include/SDRPlayV3.yaml#/SDRPlayV3Report"
+      description: "Sdr play v3 report data for Device."
     sigMFFileInputReport:
       $ref: "/doc/swagger/include/SigMFFileInput.yaml#/SigMFFileInputReport"
+      description: "Sig mf file input report data for Device."
     soapySDRInputReport:
       $ref: "/doc/swagger/include/SoapySDR.yaml#/SoapySDRReport"
+      description: "Soapy sdr input report data for Device."
     soapySDROutputReport:
       $ref: "/doc/swagger/include/SoapySDR.yaml#/SoapySDRReport"
+      description: "Soapy sdr output report data for Device."
     usrpInputReport:
       $ref: "/doc/swagger/include/USRP.yaml#/USRPInputReport"
+      description: "Usrp input report data for Device."
     usrpOutputReport:
       $ref: "/doc/swagger/include/USRP.yaml#/USRPOutputReport"
+      description: "Usrp output report data for Device."
     xtrxInputReport:
       $ref: "/doc/swagger/include/Xtrx.yaml#/XtrxInputReport"
+      description: "Xtrx input report data for Device."
     xtrxOutputReport:
       $ref: "/doc/swagger/include/Xtrx.yaml#/XtrxOutputReport"
+      description: "Xtrx output report data for Device."
     xtrxMIMOReport:
       $ref: "/doc/swagger/include/Xtrx.yaml#/XtrxMIMOReport"
+      description: "Xtrx MIMO report data for Device."
     AaroniaRTSAReport:
       $ref: "/doc/swagger/include/AaroniaRTSA.yaml#/AaroniaRTSAReport"
+      description: "Aaronia rtsa report data for Device."
     aaroniaRTSAOutputReport:
       $ref: "/doc/swagger/include/AaroniaRTSA.yaml#/AaroniaRTSAOutputReport"
+      description: "Aaronia rtsa output report data for Device."

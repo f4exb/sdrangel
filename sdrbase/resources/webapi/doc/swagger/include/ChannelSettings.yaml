@@ -19,131 +19,201 @@ ChannelSettings:
       type: integer
     ADSBDemodSettings:
       $ref: "/doc/swagger/include/ADSBDemod.yaml#/ADSBDemodSettings"
+      description: "ADS-B demod settings configuration for Channel."
     AISDemodSettings:
       $ref: "/doc/swagger/include/AISDemod.yaml#/AISDemodSettings"
+      description: "AIS demod settings configuration for Channel."
     AISModSettings:
       $ref: "/doc/swagger/include/AISMod.yaml#/AISModSettings"
+      description: "AIS mod settings configuration for Channel."
     AMDemodSettings:
       $ref: "/doc/swagger/include/AMDemod.yaml#/AMDemodSettings"
+      description: "Am demod settings configuration for Channel."
     AMModSettings:
       $ref: "/doc/swagger/include/AMMod.yaml#/AMModSettings"
+      description: "Am mod settings configuration for Channel."
     APTDemodSettings:
       $ref: "/doc/swagger/include/APTDemod.yaml#/APTDemodSettings"
+      description: "Apt demod settings configuration for Channel."
     ATVDemodSettings:
       $ref: "/doc/swagger/include/ATVDemod.yaml#/ATVDemodSettings"
+      description: "Atv demod settings configuration for Channel."
     ATVModSettings:
       $ref: "/doc/swagger/include/ATVMod.yaml#/ATVModSettings"
+      description: "Atv mod settings configuration for Channel."
     BeamSteeringCWModSettings:
       $ref: "/doc/swagger/include/BeamSteeringCWMod.yaml#/BeamSteeringCWModSettings"
+      description: "Beam steering CW mod settings configuration for Channel."
     BFMDemodSettings:
       $ref: "/doc/swagger/include/BFMDemod.yaml#/BFMDemodSettings"
+      description: "BFM demod settings configuration for Channel."
     ChannelAnalyzerSettings:
       $ref: "/doc/swagger/include/ChannelAnalyzer.yaml#/ChannelAnalyzerSettings"
+      description: "Channel analyzer settings configuration for Channel."
     ChannelPowerSettings:
       $ref: "/doc/swagger/include/ChannelPower.yaml#/ChannelPowerSettings"
+      description: "Channel power settings configuration for Channel."
     ChirpChatDemodSettings:
       $ref: "/doc/swagger/include/ChirpChatDemod.yaml#/ChirpChatDemodSettings"
+      description: "Chirp chat demod settings configuration for Channel."
     ChirpChatModSettings:
       $ref: "/doc/swagger/include/ChirpChatMod.yaml#/ChirpChatModSettings"
+      description: "Chirp chat mod settings configuration for Channel."
     DATVModSettings:
       $ref: "/doc/swagger/include/DATVMod.yaml#/DATVModSettings"
+      description: "Datv mod settings configuration for Channel."
     DATVDemodSettings:
       $ref: "/doc/swagger/include/DATVDemod.yaml#/DATVDemodSettings"
+      description: "Datv demod settings configuration for Channel."
     DABDemodSettings:
       $ref: "/doc/swagger/include/DABDemod.yaml#/DABDemodSettings"
+      description: "Dab demod settings configuration for Channel."
     DOA2Settings:
       $ref: "/doc/swagger/include/DOA2.yaml#/DOA2Settings"
+      description: "Doa2 settings configuration for Channel."
     DSCDemodSettings:
       $ref: "/doc/swagger/include/DSCDemod.yaml#/DSCDemodSettings"
+      description: "Dsc demod settings configuration for Channel."
     DSDDemodSettings:
       $ref: "/doc/swagger/include/DSDDemod.yaml#/DSDDemodSettings"
+      description: "Dsd demod settings configuration for Channel."
     EndOfTrainDemodSettings:
       $ref: "/doc/swagger/include/EndOfTrainDemod.yaml#/EndOfTrainDemodSettings"
+      description: "End of train demod settings configuration for Channel."
     FileSinkSettings:
       $ref: "/doc/swagger/include/FileSink.yaml#/FileSinkSettings"
+      description: "File sink settings configuration for Channel."
     FileSourceSettings:
       $ref: "/doc/swagger/include/FileSource.yaml#/FileSourceSettings"
+      description: "File source settings configuration for Channel."
     FreeDVDemodSettings:
       $ref: "/doc/swagger/include/FreeDVDemod.yaml#/FreeDVDemodSettings"
+      description: "Free dv demod settings configuration for Channel."
     FreeDVModSettings:
       $ref: "/doc/swagger/include/FreeDVMod.yaml#/FreeDVModSettings"
+      description: "Free dv mod settings configuration for Channel."
     FreqScannerSettings:
       $ref: "/doc/swagger/include/FreqScanner.yaml#/FreqScannerSettings"
+      description: "Freq scanner settings configuration for Channel."
     FreqTrackerSettings:
       $ref: "/doc/swagger/include/FreqTracker.yaml#/FreqTrackerSettings"
+      description: "Freq tracker settings configuration for Channel."
     FT8DemodSettings:
       $ref: "/doc/swagger/include/FT8Demod.yaml#/FT8DemodSettings"
+      description: "Ft8 demod settings configuration for Channel."
     HeatMapSettings:
       $ref: "/doc/swagger/include/HeatMap.yaml#/HeatMapSettings"
+      description: "Heat map settings configuration for Channel."
     ILSDemodSettings:
       $ref: "/doc/swagger/include/ILSDemod.yaml#/ILSDemodSettings"
+      description: "Ils demod settings configuration for Channel."
     InmarsatDemodSettings:
       $ref: "/doc/swagger/include/InmarsatDemod.yaml#/InmarsatDemodSettings"
+      description: "Inmarsat demod settings configuration for Channel."
     InterferometerSettings:
       $ref: "/doc/swagger/include/Interferometer.yaml#/InterferometerSettings"
+      description: "Interferometer settings configuration for Channel."
     IEEE_802_15_4_ModSettings:
       $ref: "/doc/swagger/include/IEEE_802_15_4_Mod.yaml#/IEEE_802_15_4_ModSettings"
+      description: "Ieee 802 15 4 mod settings configuration for Channel."
     M17DemodSettings:
       $ref: "/doc/swagger/include/M17Demod.yaml#/M17DemodSettings"
+      description: "M17 demod settings configuration for Channel."
     M17ModSettings:
       $ref: "/doc/swagger/include/M17Mod.yaml#/M17ModSettings"
+      description: "M17 mod settings configuration for Channel."
     MeshtasticDemodSettings:
       $ref: "/doc/swagger/include/MeshtasticDemod.yaml#/MeshtasticDemodSettings"
+      description: "Meshtastic demod settings configuration for Channel."
     MeshtasticModSettings:
       $ref: "/doc/swagger/include/MeshtasticMod.yaml#/MeshtasticModSettings"
+      description: "Meshtastic mod settings configuration for Channel."
+    MeshcoreDemodSettings:
+      $ref: "/doc/swagger/include/MeshcoreDemod.yaml#/MeshcoreDemodSettings"
+      description: "Meshcore demod settings configuration for Channel."
+    MeshcoreModSettings:
+      $ref: "/doc/swagger/include/MeshcoreMod.yaml#/MeshcoreModSettings"
+      description: "Meshcore mod settings configuration for Channel."
     NavtexDemodSettings:
       $ref: "/doc/swagger/include/NavtexDemod.yaml#/NavtexDemodSettings"
+      description: "Navtex demod settings configuration for Channel."
     NFMDemodSettings:
       $ref: "/doc/swagger/include/NFMDemod.yaml#/NFMDemodSettings"
+      description: "Nfm demod settings configuration for Channel."
     NFMModSettings:
       $ref: "/doc/swagger/include/NFMMod.yaml#/NFMModSettings"
+      description: "Nfm mod settings configuration for Channel."
     NoiseFigureSettings:
       $ref: "/doc/swagger/include/NoiseFigure.yaml#/NoiseFigureSettings"
+      description: "Noise figure settings configuration for Channel."
     LocalSinkSettings:
       $ref: "/doc/swagger/include/LocalSink.yaml#/LocalSinkSettings"
+      description: "Local sink settings configuration for Channel."
     LocalSourceSettings:
       $ref: "/doc/swagger/include/LocalSource.yaml#/LocalSourceSettings"
+      description: "Local source settings configuration for Channel."
     PacketDemodSettings:
       $ref: "/doc/swagger/include/PacketDemod.yaml#/PacketDemodSettings"
+      description: "Packet demod settings configuration for Channel."
     PacketModSettings:
       $ref: "/doc/swagger/include/PacketMod.yaml#/PacketModSettings"
+      description: "Packet mod settings configuration for Channel."
     PagerDemodSettings:
       $ref: "/doc/swagger/include/PagerDemod.yaml#/PagerDemodSettings"
+      description: "Pager demod settings configuration for Channel."
     PSK31ModSettings:
       $ref: "/doc/swagger/include/PSK31Mod.yaml#/PSK31ModSettings"
+      description: "Psk31 mod settings configuration for Channel."
     RadioAstronomySettings:
       $ref: "/doc/swagger/include/RadioAstronomy.yaml#/RadioAstronomySettings"
+      description: "Radio astronomy settings configuration for Channel."
     RadioClockSettings:
       $ref: "/doc/swagger/include/RadioClock.yaml#/RadioClockSettings"
+      description: "Radio clock settings configuration for Channel."
     RadiosondeDemodSettings:
       $ref: "/doc/swagger/include/RadiosondeDemod.yaml#/RadiosondeDemodSettings"
+      description: "Radiosonde demod settings configuration for Channel."
     RemoteSinkSettings:
       $ref: "/doc/swagger/include/RemoteSink.yaml#/RemoteSinkSettings"
+      description: "Remote sink settings configuration for Channel."
     RemoteSourceSettings:
       $ref: "/doc/swagger/include/RemoteSource.yaml#/RemoteSourceSettings"
+      description: "Remote source settings configuration for Channel."
     RemoteTCPSinkSettings:
       $ref: "/doc/swagger/include/RemoteTCPSink.yaml#/RemoteTCPSinkSettings"
+      description: "Remote TCP sink settings configuration for Channel."
     RTTYDemodSettings:
       $ref: "/doc/swagger/include/RTTYDemod.yaml#/RTTYDemodSettings"
+      description: "Rtty demod settings configuration for Channel."
     RTTYModSettings:
       $ref: "/doc/swagger/include/RTTYMod.yaml#/RTTYModSettings"
+      description: "Rtty mod settings configuration for Channel."
     SigMFFileSinkSettings:
       $ref: "/doc/swagger/include/SigMFFileSink.yaml#/SigMFFileSinkSettings"
+      description: "Sig mf file sink settings configuration for Channel."
     SSBModSettings:
       $ref: "/doc/swagger/include/SSBMod.yaml#/SSBModSettings"
+      description: "Ssb mod settings configuration for Channel."
     SSBDemodSettings:
       $ref: "/doc/swagger/include/SSBDemod.yaml#/SSBDemodSettings"
+      description: "Ssb demod settings configuration for Channel."
     UDPSourceSettings:
       $ref: "/doc/swagger/include/UDPSource.yaml#/UDPSourceSettings"
+      description: "UDP source settings configuration for Channel."
     UDPSinkSettings:
       $ref: "/doc/swagger/include/UDPSink.yaml#/UDPSinkSettings"
+      description: "UDP sink settings configuration for Channel."
     # VORDemodMCSettings:
     #   $ref: "/doc/swagger/include/VORDemodMC.yaml#/VORDemodMCSettings"
     VORDemodSettings:
       $ref: "/doc/swagger/include/VORDemod.yaml#/VORDemodSettings"
+      description: "Vor demod settings configuration for Channel."
     WDSPRxSettings:
       $ref: "/doc/swagger/include/WDSPRx.yaml#/WDSPRxSettings"
+      description: "Wdsp receive settings configuration for Channel."
     WFMDemodSettings:
       $ref: "/doc/swagger/include/WFMDemod.yaml#/WFMDemodSettings"
+      description: "Wfm demod settings configuration for Channel."
     WFMModSettings:
       $ref: "/doc/swagger/include/WFMMod.yaml#/WFMModSettings"
+      description: "Wfm mod settings configuration for Channel."

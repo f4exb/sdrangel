@@ -3,12 +3,16 @@ DeviceConfig:
   properties:
     deviceId:
       type: string
+      description: "Device id for Device config."
     deviceSerial:
       type: string
+      description: "Device serial for Device config."
     deviceSequence:
       type: integer
+      description: "Device sequence for Device config."
     config:
       $ref: "/doc/swagger/include/DeviceSettings.yaml#/DeviceSettings"
+      description: "Configuration data."
 
 ChannelConfig:
   description: Represents a Preset::ChannelConfig object
@@ -18,6 +22,7 @@ ChannelConfig:
       type: string
     config:
       $ref: "/doc/swagger/include/ChannelSettings.yaml#/ChannelSettings"
+      description: "Configuration data."
 
 Preset:
   description: Represents a Preset object
@@ -27,25 +32,35 @@ Preset:
       type: integer
     group:
       type: string
+      description: "Group for Preset."
     description:
       type: string
+      description: "Human-readable description."
     centerFrequency:
       type: integer
       format: int64
+      description: "Device center frequency in Hz."
     spectrumConfig:
       $ref: "/doc/swagger/include/GLSpectrum.yaml#/GLSpectrum"
+      description: "Spectrum-display configuration."
     dcOffsetCorrection:
       description: boolean
       type: integer
+      minimum: 0
+      maximum: 1
     iqImbalanceCorrection:
       description: boolean
       type: integer
+      minimum: 0
+      maximum: 1
     channelConfigs:
       type: array
+      description: "List of channel configs."
       items:
         $ref: "/doc/swagger/include/Preset.yaml#/ChannelConfig"
     deviceConfigs:
       type: array
+      description: "List of device configs."
       items:
         $ref: "/doc/swagger/include/Preset.yaml#/DeviceConfig"
     layout:

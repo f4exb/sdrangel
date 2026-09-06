@@ -46,6 +46,8 @@ SWGFeatureReport::SWGFeatureReport() {
     m_per_tester_report_isSet = false;
     rig_ctl_server_report = nullptr;
     m_rig_ctl_server_report_isSet = false;
+    mcp_server_report = nullptr;
+    m_mcp_server_report_isSet = false;
     satellite_tracker_report = nullptr;
     m_satellite_tracker_report_isSet = false;
     simple_ptt_report = nullptr;
@@ -82,6 +84,8 @@ SWGFeatureReport::init() {
     m_per_tester_report_isSet = false;
     rig_ctl_server_report = new SWGRigCtlServerReport();
     m_rig_ctl_server_report_isSet = false;
+    mcp_server_report = new SWGMCPServerReport();
+    m_mcp_server_report_isSet = false;
     satellite_tracker_report = new SWGSatelliteTrackerReport();
     m_satellite_tracker_report_isSet = false;
     simple_ptt_report = new SWGSimplePTTReport();
@@ -122,6 +126,9 @@ SWGFeatureReport::cleanup() {
     }
     if(rig_ctl_server_report != nullptr) { 
         delete rig_ctl_server_report;
+    }
+    if(mcp_server_report != nullptr) { 
+        delete mcp_server_report;
     }
     if(satellite_tracker_report != nullptr) { 
         delete satellite_tracker_report;
@@ -168,6 +175,8 @@ SWGFeatureReport::fromJsonObject(QJsonObject &pJson) {
     ::SWGSDRangel::setValue(&per_tester_report, pJson["PERTesterReport"], "SWGPERTesterReport", "SWGPERTesterReport");
     
     ::SWGSDRangel::setValue(&rig_ctl_server_report, pJson["RigCtlServerReport"], "SWGRigCtlServerReport", "SWGRigCtlServerReport");
+    
+    ::SWGSDRangel::setValue(&mcp_server_report, pJson["MCPServerReport"], "SWGMCPServerReport", "SWGMCPServerReport");
     
     ::SWGSDRangel::setValue(&satellite_tracker_report, pJson["SatelliteTrackerReport"], "SWGSatelliteTrackerReport", "SWGSatelliteTrackerReport");
     
@@ -221,6 +230,9 @@ SWGFeatureReport::asJsonObject() {
     }
     if((rig_ctl_server_report != nullptr) && (rig_ctl_server_report->isSet())){
         toJsonValue(QString("RigCtlServerReport"), rig_ctl_server_report, obj, QString("SWGRigCtlServerReport"));
+    }
+    if((mcp_server_report != nullptr) && (mcp_server_report->isSet())){
+        toJsonValue(QString("MCPServerReport"), mcp_server_report, obj, QString("SWGMCPServerReport"));
     }
     if((satellite_tracker_report != nullptr) && (satellite_tracker_report->isSet())){
         toJsonValue(QString("SatelliteTrackerReport"), satellite_tracker_report, obj, QString("SWGSatelliteTrackerReport"));
@@ -331,6 +343,16 @@ SWGFeatureReport::setRigCtlServerReport(SWGRigCtlServerReport* rig_ctl_server_re
     this->m_rig_ctl_server_report_isSet = true;
 }
 
+SWGMCPServerReport*
+SWGFeatureReport::getMcpServerReport() {
+    return mcp_server_report;
+}
+void
+SWGFeatureReport::setMcpServerReport(SWGMCPServerReport* mcp_server_report) {
+    this->mcp_server_report = mcp_server_report;
+    this->m_mcp_server_report_isSet = true;
+}
+
 SWGSatelliteTrackerReport*
 SWGFeatureReport::getSatelliteTrackerReport() {
     return satellite_tracker_report;
@@ -411,6 +433,9 @@ SWGFeatureReport::isSet(){
             isObjectUpdated = true; break;
         }
         if(rig_ctl_server_report && rig_ctl_server_report->isSet()){
+            isObjectUpdated = true; break;
+        }
+        if(mcp_server_report && mcp_server_report->isSet()){
             isObjectUpdated = true; break;
         }
         if(satellite_tracker_report && satellite_tracker_report->isSet()){

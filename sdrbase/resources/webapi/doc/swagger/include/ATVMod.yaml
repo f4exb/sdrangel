@@ -4,73 +4,108 @@ ATVModSettings:
     inputFrequencyOffset:
       type: integer
       format: int64
+      description: "Channel frequency offset from the device center frequency in Hz."
     rfBandwidth:
       type: number
       format: float
+      description: "RF bandwidth in Hz."
     rfOppBandwidth:
       type: number
       format: float
+      description: "RF opp bandwidth in Hz."
     atvStd:
       type: integer
+      description: "Atv std setting for Atv mod."
     nbLines:
       type: integer
+      description: "Nb lines setting for Atv mod."
     fps:
       type: integer
+      description: "Fps setting for Atv mod."
     atvModInput:
       type: integer
+      description: "Atv mod input setting for Atv mod."
     uniformLevel:
       type: number
       format: float
+      description: "Uniform level setting for Atv mod."
     atvModulation:
       type: integer
+      description: "Atv modulation setting for Atv mod."
     videoPlayLoop:
       type: integer
+      description: "Video play loop setting for Atv mod."
     videoPlay:
       type: integer
+      description: "Video play setting for Atv mod."
     cameraPlay:
       type: integer
+      description: "Camera play setting for Atv mod."
     channelMute:
       type: integer
+      description: "Mute the channel output (1 muted, 0 unmuted)."
+      minimum: 0
+      maximum: 1
     invertedVideo:
       type: integer
+      description: "Inverted video setting for Atv mod."
     rfScalingFactor:
       type: number
       format: float
+      description: "RF scaling factor setting for Atv mod."
     fmExcursion:
       type: number
       format: float
+      description: "FM excursion setting for Atv mod."
     forceDecimator:
       type: integer
+      description: "Force decimator setting for Atv mod."
     showOverlayText:
       type: integer
+      description: "Show overlay text setting for Atv mod."
     overlayText:
       type: string
+      description: "Overlay text setting for Atv mod."
     rgbColor:
       type: integer
+      description: "Display color encoded as an RGB integer."
     title:
       type: string
+      description: "User-visible title."
     imageFileName:
       type: string
+      description: "Image file name or path."
     videoFileName:
       type: string
+      description: "Video file name."
     streamIndex:
       description: MIMO channel. Not relevant when connected to SI (single Rx).
       type: integer
     useReverseAPI:
       description: Synchronize with reverse API (1 for yes, 0 for no)
       type: integer
+      minimum: 0
+      maximum: 1
     reverseAPIAddress:
       type: string
+      description: "IPv4 address or host name of the reverse API peer."
     reverseAPIPort:
       type: integer
+      description: "TCP port of the reverse API peer."
+      minimum: 1
+      maximum: 65535
     reverseAPIDeviceIndex:
       type: integer
+      description: "Device-set index used by the reverse API peer."
     reverseAPIChannelIndex:
       type: integer
+      description: "Channel index used by the reverse API peer."
     channelMarker:
       $ref: "/doc/swagger/include/ChannelMarker.yaml#/ChannelMarker"
+      description: "Channel-marker display configuration."
     rollupState:
       $ref: "/doc/swagger/include/RollupState.yaml#/RollupState"
+      description: "Saved expanded or collapsed state of the GUI sections."
 
 ATVModReport:
   description: ATVMod
@@ -81,3 +116,4 @@ ATVModReport:
       format: float
     channelSampleRate:
       type: integer
+      description: "Effective sample rate delivered to the channel in samples per second."

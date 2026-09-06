@@ -16,95 +16,142 @@ DeviceSettings:
       type: integer
     airspySettings:
       $ref: "/doc/swagger/include/Airspy.yaml#/AirspySettings"
+      description: "Airspy settings configuration for Device."
     airspyHFSettings:
       $ref: "/doc/swagger/include/AirspyHF.yaml#/AirspyHFSettings"
+      description: "Airspy hf settings configuration for Device."
     androidSDRDriverInputSettings:
       $ref: "/doc/swagger/include/AndroidSDRDriverInput.yaml#/AndroidSDRDriverInputSettings"
+      description: "Android sdr driver input settings configuration for Device."
     audioCATSISOSettings:
       $ref: "/doc/swagger/include/AudioCATSISO.yaml#/AudioCATSISOSettings"
+      description: "Audio catsiso settings configuration for Device."
     audioInputSettings:
       $ref: "/doc/swagger/include/AudioInput.yaml#/AudioInputSettings"
+      description: "Audio input settings configuration for Device."
     audioOutputSettings:
       $ref: "/doc/swagger/include/AudioOutput.yaml#/AudioOutputSettings"
+      description: "Audio output settings configuration for Device."
     bladeRF1InputSettings:
       $ref: "/doc/swagger/include/BladeRF1.yaml#/BladeRF1InputSettings"
+      description: "Blade rf1 input settings configuration for Device."
     bladeRF2InputSettings:
       $ref: "/doc/swagger/include/BladeRF2.yaml#/BladeRF2InputSettings"
+      description: "Blade rf2 input settings configuration for Device."
     bladeRF1OutputSettings:
       $ref: "/doc/swagger/include/BladeRF1.yaml#/BladeRF1OutputSettings"
+      description: "Blade rf1 output settings configuration for Device."
     bladeRF2OutputSettings:
       $ref: "/doc/swagger/include/BladeRF2.yaml#/BladeRF2OutputSettings"
+      description: "Blade rf2 output settings configuration for Device."
     bladeRF2MIMOSettings:
       $ref: "/doc/swagger/include/BladeRF2.yaml#/BladeRF2MIMOSettings"
+      description: "Blade rf2 MIMO settings configuration for Device."
     fcdProSettings:
       $ref: "/doc/swagger/include/FCDPro.yaml#/FCDProSettings"
+      description: "Fcd pro settings configuration for Device."
     fcdProPlusSettings:
       $ref: "/doc/swagger/include/FCDProPlus.yaml#/FCDProPlusSettings"
+      description: "Fcd pro plus settings configuration for Device."
     fileInputSettings:
       $ref: "/doc/swagger/include/FileInput.yaml#/FileInputSettings"
+      description: "File input settings configuration for Device."
     fileOutputSettings:
       $ref: "/doc/swagger/include/FileOutput.yaml#/FileOutputSettings"
+      description: "File output settings configuration for Device."
     hackRFInputSettings:
       $ref: "/doc/swagger/include/HackRF.yaml#/HackRFInputSettings"
+      description: "Hack RF input settings configuration for Device."
     hackRFOutputSettings:
       $ref: "/doc/swagger/include/HackRF.yaml#/HackRFOutputSettings"
+      description: "Hack RF output settings configuration for Device."
     kiwiSDRSettings:
       $ref: "/doc/swagger/include/KiwiSDR.yaml#/KiwiSDRSettings"
+      description: "Kiwi sdr settings configuration for Device."
     limeSdrInputSettings:
       $ref: "/doc/swagger/include/LimeSdr.yaml#/LimeSdrInputSettings"
+      description: "Lime sdr input settings configuration for Device."
     limeSdrOutputSettings:
       $ref: "/doc/swagger/include/LimeSdr.yaml#/LimeSdrOutputSettings"
+      description: "Lime sdr output settings configuration for Device."
     limeSdrMIMOSettings:
       $ref: "/doc/swagger/include/LimeSdr.yaml#/LimeSdrMIMOSettings"
+      description: "Lime sdr MIMO settings configuration for Device."
     localInputSettings:
       $ref: "/doc/swagger/include/LocalInput.yaml#/LocalInputSettings"
+      description: "Local input settings configuration for Device."
     localOutputSettings:
       $ref: "/doc/swagger/include/LocalOutput.yaml#/LocalOutputSettings"
+      description: "Local output settings configuration for Device."
     metisMISOSettings:
       $ref: "/doc/swagger/include/MetisMISO.yaml#/MetisMISOSettings"
+      description: "Metis miso settings configuration for Device."
     perseusSettings:
       $ref: "/doc/swagger/include/Perseus.yaml#/PerseusSettings"
+      description: "Perseus settings configuration for Device."
     plutoSdrInputSettings:
       $ref: "/doc/swagger/include/PlutoSdr.yaml#/PlutoSdrInputSettings"
+      description: "Pluto sdr input settings configuration for Device."
     plutoSdrOutputSettings:
       $ref: "/doc/swagger/include/PlutoSdr.yaml#/PlutoSdrOutputSettings"
+      description: "Pluto sdr output settings configuration for Device."
     plutoSdrMIMOSettings:
       $ref: "/doc/swagger/include/PlutoSdr.yaml#/PlutoSdrMIMOSettings"
+      description: "Pluto sdr MIMO settings configuration for Device."
     rtlSdrSettings:
       $ref: "/doc/swagger/include/RtlSdr.yaml#/RtlSdrSettings"
+      description: "Rtl sdr settings configuration for Device."
     remoteOutputSettings:
       $ref: "/doc/swagger/include/RemoteOutput.yaml#/RemoteOutputSettings"
+      description: "Remote output settings configuration for Device."
     remoteInputSettings:
       $ref: "/doc/swagger/include/RemoteInput.yaml#/RemoteInputSettings"
+      description: "Remote input settings configuration for Device."
     remoteTCPInputSettings:
       $ref: "/doc/swagger/include/RemoteTCPInput.yaml#/RemoteTCPInputSettings"
+      description: "Remote TCP input settings configuration for Device."
     sdrPlaySettings:
       $ref: "/doc/swagger/include/SDRPlay.yaml#/SDRPlaySettings"
+      description: "Sdr play settings configuration for Device."
     sdrPlayV3Settings:
       $ref: "/doc/swagger/include/SDRPlayV3.yaml#/SDRPlayV3Settings"
+      description: "Sdr play v3 settings configuration for Device."
     sigMFFileInputSettings:
       $ref: "/doc/swagger/include/SigMFFileInput.yaml#/SigMFFileInputSettings"
+      description: "Sig mf file input settings configuration for Device."
     soapySDRInputSettings:
       $ref: "/doc/swagger/include/SoapySDR.yaml#/SoapySDRInputSettings"
+      description: "Soapy sdr input settings configuration for Device."
     soapySDROutputSettings:
       $ref: "/doc/swagger/include/SoapySDR.yaml#/SoapySDROutputSettings"
+      description: "Soapy sdr output settings configuration for Device."
     testMISettings:
       $ref: "/doc/swagger/include/TestMI.yaml#/TestMISettings"
+      description: "Test mi settings configuration for Device."
     testMOSyncSettings:
       $ref: "/doc/swagger/include/TestMOSync.yaml#/TestMOSyncSettings"
+      description: "Test mo sync settings configuration for Device."
     testSourceSettings:
       $ref: "/doc/swagger/include/TestSource.yaml#/TestSourceSettings"
+      description: "Test source settings configuration for Device."
     usrpInputSettings:
       $ref: "/doc/swagger/include/USRP.yaml#/USRPInputSettings"
+      description: "Usrp input settings configuration for Device."
     usrpOutputSettings:
       $ref: "/doc/swagger/include/USRP.yaml#/USRPOutputSettings"
+      description: "Usrp output settings configuration for Device."
     xtrxInputSettings:
       $ref: "/doc/swagger/include/Xtrx.yaml#/XtrxInputSettings"
+      description: "Xtrx input settings configuration for Device."
     xtrxOutputSettings:
       $ref: "/doc/swagger/include/Xtrx.yaml#/XtrxOutputSettings"
+      description: "Xtrx output settings configuration for Device."
     xtrxMIMOSettings:
       $ref: "/doc/swagger/include/Xtrx.yaml#/XtrxMIMOSettings"
+      description: "Xtrx MIMO settings configuration for Device."
     aaroniaRTSASettings:
       $ref: "/doc/swagger/include/AaroniaRTSA.yaml#/AaroniaRTSASettings"
+      description: "Aaronia rtsa settings configuration for Device."
     aaroniaRTSAOutputSettings:
       $ref: "/doc/swagger/include/AaroniaRTSA.yaml#/AaroniaRTSAOutputSettings"
+      description: "Aaronia rtsa output settings configuration for Device."

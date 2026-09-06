@@ -7,6 +7,7 @@ AISModSettings:
       format: int64
     baud:
       type: integer
+      description: "Symbol or serial rate in baud."
     rfBandwidth:
       description: channel RF bandwidth in Hz
       type: number
@@ -17,35 +18,53 @@ AISModSettings:
     gain:
       type: number
       format: float
+      description: "Gain setting; units and available values depend on the device or plugin."
     channelMute:
       type: integer
+      description: "Mute the channel output (1 muted, 0 unmuted)."
+      minimum: 0
+      maximum: 1
     repeat:
       type: integer
+      description: "Repeat transmission or playback (1 enabled, 0 disabled)."
+      minimum: 0
+      maximum: 1
     repeatDelay:
       type: number
       format: float
+      description: "Delay between repetitions."
     repeatCount:
       type: integer
+      description: "Number of repetitions."
     rampUpBits:
       type: integer
+      description: "Ramp up bits setting for AIS mod."
     rampDownBits:
       type: integer
+      description: "Ramp down bits setting for AIS mod."
     rampRange:
       type: integer
+      description: "Ramp range setting for AIS mod."
     rfNoise:
       type: integer
+      minimum: 0
+      maximum: 1
       description: >
         Boolean
           * 0 - off
           * 1 - on
     writeToFile:
       type: integer
+      minimum: 0
+      maximum: 1
       description: >
         Boolean
           * 0 - off
           * 1 - on
     msgType:
       type: integer
+      minimum: 0
+      maximum: 3
       description: >
         Message Type
           * 0 - Scheduled position report
@@ -54,8 +73,11 @@ AISModSettings:
           * 3 - Base station report
     mmsi:
       type: string
+      description: "Maritime Mobile Service Identity number."
     status:
       type: integer
+      minimum: 0
+      maximum: 8
       description: >
         Ship status
           * 0 - Under way using engine
@@ -71,55 +93,83 @@ AISModSettings:
     latitude:
       type: number
       format: float
+      description: "Latitude in degrees, positive north."
+      minimum: -90
+      maximum: 90
     longitude:
       type: number
       format: float
+      description: "Longitude in degrees, positive east."
+      minimum: -180
+      maximum: 180
     course:
       type: number
       format: float
+      description: "Course over ground in degrees."
     speed:
       type: number
       format: float
+      description: "Reported speed."
     heading:
       type: integer
+      description: "Heading in degrees."
     data:
       type: string
+      description: "Payload data."
     bt:
       type: number
       format: float
+      description: "Bt setting for AIS mod."
     symbolSpan:
       type: integer
+      description: "Symbol span setting for AIS mod."
     rgbColor:
       type: integer
+      description: "Display color encoded as an RGB integer."
     title:
       type: string
+      description: "User-visible title."
     streamIndex:
       description: MIMO channel. Not relevant when connected to SI (single Rx).
       type: integer
     useReverseAPI:
       description: Synchronize with reverse API (1 for yes, 0 for no)
       type: integer
+      minimum: 0
+      maximum: 1
     reverseAPIAddress:
       type: string
+      description: "IPv4 address or host name of the reverse API peer."
     reverseAPIPort:
       type: integer
+      description: "TCP port of the reverse API peer."
+      minimum: 1
+      maximum: 65535
     reverseAPIDeviceIndex:
       type: integer
+      description: "Device-set index used by the reverse API peer."
     reverseAPIChannelIndex:
       type: integer
+      description: "Channel index used by the reverse API peer."
     udpEnabled:
       description: "Whether to receive messages to transmit on specified UDP port"
       type: integer
+      minimum: 0
+      maximum: 1
     udpAddress:
       description: "UDP address to receive messages to transmit via"
       type: string
     udpPort:
       description: "UDP port to receive messages to transmit via"
       type: integer
+      minimum: 1
+      maximum: 65535
     channelMarker:
       $ref: "/doc/swagger/include/ChannelMarker.yaml#/ChannelMarker"
+      description: "Channel-marker display configuration."
     rollupState:
       $ref: "/doc/swagger/include/RollupState.yaml#/RollupState"
+      description: "Saved expanded or collapsed state of the GUI sections."
 
 AISModReport:
   description: AISMod
@@ -130,21 +180,27 @@ AISModReport:
       format: float
     channelSampleRate:
       type: integer
+      description: "Effective sample rate delivered to the channel in samples per second."
 
 AISModActions:
   description: AISMod
   properties:
     tx:
       type: integer
+      minimum: 0
+      maximum: 1
       description: >
         Transmit stored message
           * 0 - do nothing
           * 1 - transmit
     encode:
       type: integer
+      minimum: 0
+      maximum: 1
       description: >
         Encode message from discrete data
           * 0 - do nothing
           * 1 - encode
     data:
       type: string
+      description: "Payload data."

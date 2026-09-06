@@ -27,6 +27,7 @@
 #include "SWGFreqDisplayReport.h"
 #include "SWGGS232ControllerReport.h"
 #include "SWGLimeRFEReport.h"
+#include "SWGMCPServerReport.h"
 #include "SWGMapReport.h"
 #include "SWGPERTesterReport.h"
 #include "SWGRigCtlServerReport.h"
@@ -82,6 +83,9 @@ public:
     SWGRigCtlServerReport* getRigCtlServerReport();
     void setRigCtlServerReport(SWGRigCtlServerReport* rig_ctl_server_report);
 
+    SWGMCPServerReport* getMcpServerReport();
+    void setMcpServerReport(SWGMCPServerReport* mcp_server_report);
+
     SWGSatelliteTrackerReport* getSatelliteTrackerReport();
     void setSatelliteTrackerReport(SWGSatelliteTrackerReport* satellite_tracker_report);
 
@@ -127,6 +131,9 @@ private:
 
     SWGRigCtlServerReport* rig_ctl_server_report;
     bool m_rig_ctl_server_report_isSet;
+
+    SWGMCPServerReport* mcp_server_report;
+    bool m_mcp_server_report_isSet;
 
     SWGSatelliteTrackerReport* satellite_tracker_report;
     bool m_satellite_tracker_report_isSet;

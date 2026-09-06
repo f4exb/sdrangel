@@ -19,36 +19,54 @@ RadioClockSettings:
     threshold:
       type: number
       format: float
+      description: "Threshold setting for Radio clock."
     modulation:
       description: 0 - MSF, 1 - DCF77, 2 - TDF, 3 - WWVB, 4 - JJY
       type: integer
+      minimum: 0
+      maximum: 4
     timezone:
       description: 0 - Broadcast, 1 - Local, 2 - UTC
       type: integer
+      minimum: 0
+      maximum: 2
     rgbColor:
       type: integer
+      description: "Display color encoded as an RGB integer."
     title:
       type: string
+      description: "User-visible title."
     streamIndex:
       description: MIMO channel. Not relevant when connected to SI (single Rx).
       type: integer
     useReverseAPI:
       description: Synchronize with reverse API (1 for yes, 0 for no)
       type: integer
+      minimum: 0
+      maximum: 1
     reverseAPIAddress:
       type: string
+      description: "IPv4 address or host name of the reverse API peer."
     reverseAPIPort:
       type: integer
+      description: "TCP port of the reverse API peer."
+      minimum: 1
+      maximum: 65535
     reverseAPIDeviceIndex:
       type: integer
+      description: "Device-set index used by the reverse API peer."
     reverseAPIChannelIndex:
       type: integer
+      description: "Channel index used by the reverse API peer."
     scopeConfig:
       $ref: "/doc/swagger/include/GLScope.yaml#/GLScope"
+      description: "Oscilloscope-display configuration."
     channelMarker:
       $ref: "/doc/swagger/include/ChannelMarker.yaml#/ChannelMarker"
+      description: "Channel-marker display configuration."
     rollupState:
       $ref: "/doc/swagger/include/RollupState.yaml#/RollupState"
+      description: "Saved expanded or collapsed state of the GUI sections."
 
 RadioClockReport:
   description: RadioClock
@@ -59,7 +77,10 @@ RadioClockReport:
       format: float
     channelSampleRate:
       type: integer
+      description: "Effective sample rate delivered to the channel in samples per second."
     date:
       type: string
+      description: "Reported date."
     time:
       type: string
+      description: "Reported time."
