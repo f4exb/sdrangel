@@ -380,9 +380,8 @@ modules:
       - -Wno-dev
     sources:
       - type: git
-        url: https://github.com/steve-m/librtlsdr.git
-        # latest master for 2.0.2 versioning fix
-        commit: ae0dd6d4f09088d13500a854091b45ad281ca4f0
+        url: https://github.com/osmocom/rtl-sdr.git
+        commit: 797f8143266d983c56d8f35d2d442527529dd8a5
 
   - name: plutosdr
     buildsystem: cmake-ninja
