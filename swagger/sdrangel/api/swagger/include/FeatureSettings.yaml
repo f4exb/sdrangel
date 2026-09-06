@@ -15,45 +15,70 @@ FeatureSettings:
       type: integer
     AFCSettings:
       $ref: "http://swgserver:8081/api/swagger/include/AFC.yaml#/AFCSettings"
+      description: "Afc settings configuration for Feature."
     AISSettings:
       $ref: "http://swgserver:8081/api/swagger/include/AIS.yaml#/AISSettings"
+      description: "AIS settings configuration for Feature."
     AMBESettings:
       $ref: "http://swgserver:8081/api/swagger/include/AMBE.yaml#/AMBESettings"
+      description: "Ambe settings configuration for Feature."
     AntennaToolsSettings:
       $ref: "http://swgserver:8081/api/swagger/include/AntennaTools.yaml#/AntennaToolsSettings"
+      description: "Antenna tools settings configuration for Feature."
     APRSSettings:
       $ref: "http://swgserver:8081/api/swagger/include/APRS.yaml#/APRSSettings"
+      description: "Aprs settings configuration for Feature."
     DemodAnalyzerSettings:
       $ref: "http://swgserver:8081/api/swagger/include/DemodAnalyzer.yaml#/DemodAnalyzerSettings"
+      description: "Demod analyzer settings configuration for Feature."
     DenoiserSettings:
       $ref: "http://swgserver:8081/api/swagger/include/Denoiser.yaml#/DenoiserSettings"
+      description: "Denoiser settings configuration for Feature."
     JogdialControllerSettings:
       $ref: "http://swgserver:8081/api/swagger/include/JogdialController.yaml#/JogdialControllerSettings"
+      description: "Jogdial controller settings configuration for Feature."
     FreqDisplaySettings:
       $ref: "http://swgserver:8081/api/swagger/include/FreqDisplay.yaml#/FreqDisplaySettings"
+      description: "Freq display settings configuration for Feature."
     GS232ControllerSettings:
       $ref: "http://swgserver:8081/api/swagger/include/GS232Controller.yaml#/GS232ControllerSettings"
+      description: "Gs232 controller settings configuration for Feature."
     LimeRFESettings:
       $ref: "http://swgserver:8081/api/swagger/include/LimeRFE.yaml#/LimeRFESettings"
+      description: "Lime rfe settings configuration for Feature."
     MapSettings:
       $ref: "http://swgserver:8081/api/swagger/include/Map.yaml#/MapSettings"
+      description: "Map settings configuration for Feature."
     MorseDecoderSettings:
       $ref: "http://swgserver:8081/api/swagger/include/MorseDecoder.yaml#/MorseDecoderSettings"
+      description: "Morse decoder settings configuration for Feature."
     PERTesterSettings:
       $ref: "http://swgserver:8081/api/swagger/include/PERTester.yaml#/PERTesterSettings"
+      description: "Per tester settings configuration for Feature."
     RadiosondeSettings:
       $ref: "http://swgserver:8081/api/swagger/include/Radiosonde.yaml#/RadiosondeSettings"
+      description: "Radiosonde settings configuration for Feature."
     RigCtlServerSettings:
       $ref: "http://swgserver:8081/api/swagger/include/RigCtlServer.yaml#/RigCtlServerSettings"
+      description: "Rig ctl server settings configuration for Feature."
+    MCPServerSettings:
+      $ref: "http://swgserver:8081/api/swagger/include/MCPServer.yaml#/MCPServerSettings"
+      description: "Mcp server settings configuration for Feature."
     SatelliteTrackerSettings:
       $ref: "http://swgserver:8081/api/swagger/include/SatelliteTracker.yaml#/SatelliteTrackerSettings"
+      description: "Satellite tracker settings configuration for Feature."
     SIDSettings:
       $ref: "http://swgserver:8081/api/swagger/include/SID.yaml#/SIDSettings"
+      description: "Sid settings configuration for Feature."
     SimplePTTSettings:
       $ref: "http://swgserver:8081/api/swagger/include/SimplePTT.yaml#/SimplePTTSettings"
+      description: "Simple ptt settings configuration for Feature."
     SkyMapSettings:
       $ref: "http://swgserver:8081/api/swagger/include/SkyMap.yaml#/SkyMapSettings"
+      description: "Sky map settings configuration for Feature."
     StarTrackerSettings:
       $ref: "http://swgserver:8081/api/swagger/include/StarTracker.yaml#/StarTrackerSettings"
+      description: "Star tracker settings configuration for Feature."
     VORLocalizerSettings:
       $ref: "http://swgserver:8081/api/swagger/include/VORLocalizer.yaml#/VORLocalizerSettings"
+      description: "Vor localizer settings configuration for Feature."

@@ -3,35 +3,46 @@ ATVDemodSettings:
   properties:
     fpsIndex:
       type: integer
+      description: "Selected fps index."
     halfImage:
       description: (boolean) 1 for m_fltRatioOfRowsToDisplay = 0.5, 0 for m_fltRatioOfRowsToDisplay = 1.0
       type: integer
     RFBandwidthFactor:
       type: integer
+      description: "RF bandwidth factor setting for Atv demod."
     OppBandwidthFactor:
       type: integer
+      description: "Opp bandwidth factor setting for Atv demod."
     nbLinesIndex:
       type: integer
+      description: "Selected nb lines index."
     intFrequencyOffset:
       type: integer
+      description: "Int frequency offset in Hz."
     enmModulation:
       description: see ATVDemodSettings::ATVModulation
       type: integer
     fltRFBandwidth:
       type: number
       format: float
+      description: "Flt RF bandwidth in Hz."
     fltRFOppBandwidth:
       type: number
       format: float
+      description: "Flt RF opp bandwidth in Hz."
     blnFFTFiltering:
       description: boolean
       type: integer
+      minimum: 0
+      maximum: 1
     fltBFOFrequency:
       type: number
       format: float
+      description: "Flt bfo frequency in Hz."
     fmDeviation:
       type: number
       format: float
+      description: "FM frequency deviation in Hz."
     amScalingFactor:
       type: integer
       description: Factor in % to apply to detected signal scale
@@ -40,49 +51,72 @@ ATVDemodSettings:
       description: Factor in % to apply to adjusted signal scale
     intSampleRate:
       type: integer
+      description: "Int sample rate in samples per second."
     enmATVStandard:
       description: see ATVDemodSettings::ATVStd
       type: integer
     intNumberOfLines:
       type: integer
+      description: "Int number of lines setting for Atv demod."
     fltLineDuration:
       type: number
       format: float
+      description: "Flt line duration setting for Atv demod."
     fltTopDuration:
       type: number
       format: float
+      description: "Flt top duration setting for Atv demod."
     fltFramePerS:
       type: number
       format: float
+      description: "Flt frame per s setting for Atv demod."
     fltRatioOfRowsToDisplay:
       type: number
       format: float
+      description: "Flt ratio of rows to display setting for Atv demod."
     fltVoltLevelSynchroTop:
       type: number
       format: float
+      description: "Flt volt level synchro top setting for Atv demod."
     fltVoltLevelSynchroBlack:
       type: number
       format: float
+      description: "Flt volt level synchro black setting for Atv demod."
     blnHSync:
       description: boolean
       type: integer
+      minimum: 0
+      maximum: 1
     blnVSync:
       description: boolean
       type: integer
+      minimum: 0
+      maximum: 1
     blnInvertVideo:
       description: boolean
       type: integer
+      minimum: 0
+      maximum: 1
     intVideoTabIndex:
       type: integer
+      description: "Selected int video tab index."
     intTVSampleRate:
       type: integer
+      description: "Int tv sample rate in samples per second."
     intNumberSamplePerLine:
       type: integer
+      description: "Int number sample per line setting for Atv demod."
     rgbColor:
       type: integer
+      description: "Display color encoded as an RGB integer."
     title:
       type: string
+      description: "User-visible title."
     udpAddress:
       type: string
+      description: "IPv4 address or host name used for UDP traffic."
     udpPort:
       type: integer
+      description: "UDP port number."
+      minimum: 1
+      maximum: 65535

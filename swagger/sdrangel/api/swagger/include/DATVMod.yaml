@@ -4,9 +4,11 @@ DATVModSettings:
     inputFrequencyOffset:
       type: integer
       format: int64
+      description: "Channel frequency offset from the device center frequency in Hz."
     rfBandwidth:
       type: number
       format: float
+      description: "RF bandwidth in Hz."
     standard:
       description: "Broadcast standard (DVB-S=0)"
       type: integer
@@ -28,6 +30,7 @@ DATVModSettings:
       type: integer
     imageFileName:
       type: string
+      description: "Image file name or path."
     imageOverlayTimestamp:
       description: "Overlay timestamp on still image (1 for yes, 0 for no)"
       type: integer
@@ -42,40 +45,60 @@ DATVModSettings:
       type: integer
     tsFileName:
       type: string
+      description: "Ts file name."
     tsFilePlayLoop:
       type: integer
+      description: "Ts file play loop setting for Datv mod."
     tsFilePlay:
       description: "(Pause=0 Play=1)"
       type: integer
     udpAddress:
       type: string
+      description: "IPv4 address or host name used for UDP traffic."
     udpPort:
       description: "UDP port number to receive MPEG transport stream on"
       type: integer
+      minimum: 1
+      maximum: 65535
     channelMute:
       type: integer
+      description: "Mute the channel output (1 muted, 0 unmuted)."
+      minimum: 0
+      maximum: 1
     rgbColor:
       type: integer
+      description: "Display color encoded as an RGB integer."
     title:
       type: string
+      description: "User-visible title."
     streamIndex:
       description: MIMO channel. Not relevant when connected to SI (single Rx).
       type: integer
     useReverseAPI:
       description: Synchronize with reverse API (1 for yes, 0 for no)
       type: integer
+      minimum: 0
+      maximum: 1
     reverseAPIAddress:
       type: string
+      description: "IPv4 address or host name of the reverse API peer."
     reverseAPIPort:
       type: integer
+      description: "TCP port of the reverse API peer."
+      minimum: 1
+      maximum: 65535
     reverseAPIDeviceIndex:
       type: integer
+      description: "Device-set index used by the reverse API peer."
     reverseAPIChannelIndex:
       type: integer
+      description: "Channel index used by the reverse API peer."
     channelMarker:
       $ref: "http://swgserver:8081/api/swagger/include/ChannelMarker.yaml#/ChannelMarker"
+      description: "Channel-marker display configuration."
     rollupState:
       $ref: "http://swgserver:8081/api/swagger/include/RollupState.yaml#/RollupState"
+      description: "Saved expanded or collapsed state of the GUI sections."
 
 DATVModReport:
   description: DATVMod
@@ -86,12 +109,17 @@ DATVModReport:
       format: float
     channelSampleRate:
       type: integer
+      description: "Effective sample rate delivered to the channel in samples per second."
     dataRate:
       type: integer
+      description: "Reported data rate."
     tsFileBitrate:
       type: integer
+      description: "Reported ts file bitrate."
     tsFileLength:
       type: integer
+      description: "Reported ts file length."
     udpByteCount:
       type: integer
       format: int64
+      description: "Number of udp byte events or items."

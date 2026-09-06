@@ -3,21 +3,30 @@ XtrxInputSettings:
   properties:
     title:
       type: string
+      description: "User-visible title."
     centerFrequency:
       type: integer
       format: int64
+      description: "Device center frequency in Hz."
     devSampleRate:
       type: integer
+      description: "Device I/Q sample rate in samples per second before software decimation or interpolation."
     log2HardDecim:
       type: integer
+      description: "Base-2 exponent of the hardware decimation factor."
     dcBlock:
       description: Software DC blocking (1 for yes, 0 for no)
       type: integer
+      minimum: 0
+      maximum: 1
     iqCorrection:
       description: Software IQ imbalance correction (1 for yes, 0 for no)
       type: integer
+      minimum: 0
+      maximum: 1
     log2SoftDecim:
       type: integer
+      description: "Base-2 exponent of the software decimation factor."
     lpfBW:
       description: LMS analog lowpass filter bandwidth (Hz)
       type: integer
@@ -27,6 +36,8 @@ XtrxInputSettings:
     ncoEnable:
       description: Enable TSP NCO and mixing (1 for yes, 0 for no)
       type: integer
+      minimum: 0
+      maximum: 1
     ncoFrequency:
       description: Frequency shift from LO
       type: integer
@@ -48,6 +59,8 @@ XtrxInputSettings:
     extClock:
       description: Use external clock source (1 for yes, 0 for no)
       type: integer
+      minimum: 0
+      maximum: 1
     extClockFreq:
       description: Frequency (Hz) of external clock source
       type: integer
@@ -56,6 +69,8 @@ XtrxInputSettings:
       type: integer
     iqOrder:
       type: integer
+      minimum: 0
+      maximum: 1
       description: >
         IQ samples order
           * 0 - Q then I (swapped)
@@ -63,12 +78,19 @@ XtrxInputSettings:
     useReverseAPI:
       description: Synchronize with reverse API (1 for yes, 0 for no)
       type: integer
+      minimum: 0
+      maximum: 1
     reverseAPIAddress:
       type: string
+      description: "IPv4 address or host name of the reverse API peer."
     reverseAPIPort:
       type: integer
+      description: "TCP port of the reverse API peer."
+      minimum: 1
+      maximum: 65535
     reverseAPIDeviceIndex:
       type: integer
+      description: "Device-set index used by the reverse API peer."
 
 XtrxInputReport:
   description: XTRX
@@ -78,11 +100,14 @@ XtrxInputReport:
       type: integer
     fifoSize:
       type: integer
+      description: "FIFO capacity in samples."
     fifoFill:
       type: integer
+      description: "Current FIFO fill level."
     temperature:
       type: number
       format: float
+      description: "Reported device temperature."
     gpsLock:
       description: 1 if GPSDO is locked else 0
       type: integer
@@ -92,15 +117,20 @@ XtrxOutputSettings:
   properties:
     title:
       type: string
+      description: "User-visible title."
     centerFrequency:
       type: integer
       format: int64
+      description: "Device center frequency in Hz."
     devSampleRate:
       type: integer
+      description: "Device I/Q sample rate in samples per second before software decimation or interpolation."
     log2HardInterp:
       type: integer
+      description: "Base-2 exponent of the hardware interpolation factor."
     log2SoftInterp:
       type: integer
+      description: "Base-2 exponent of the software interpolation factor."
     lpfBW:
       description: LMS analog lowpass filter bandwidth (Hz)
       type: integer
@@ -110,6 +140,8 @@ XtrxOutputSettings:
     ncoEnable:
       description: Enable TSP NCO and mixing (1 for yes, 0 for no)
       type: integer
+      minimum: 0
+      maximum: 1
     ncoFrequency:
       description: Frequency shift from LO
       type: integer
@@ -119,6 +151,8 @@ XtrxOutputSettings:
     extClock:
       description: Use external clock source (1 for yes, 0 for no)
       type: integer
+      minimum: 0
+      maximum: 1
     extClockFreq:
       description: Frequency (Hz) of external clock source
       type: integer
@@ -128,12 +162,19 @@ XtrxOutputSettings:
     useReverseAPI:
       description: Synchronize with reverse API (1 for yes, 0 for no)
       type: integer
+      minimum: 0
+      maximum: 1
     reverseAPIAddress:
       type: string
+      description: "IPv4 address or host name of the reverse API peer."
     reverseAPIPort:
       type: integer
+      description: "TCP port of the reverse API peer."
+      minimum: 1
+      maximum: 65535
     reverseAPIDeviceIndex:
       type: integer
+      description: "Device-set index used by the reverse API peer."
 
 XtrxOutputReport:
   description: XTRX
@@ -143,11 +184,14 @@ XtrxOutputReport:
       type: integer
     fifoSize:
       type: integer
+      description: "FIFO capacity in samples."
     fifoFill:
       type: integer
+      description: "Current FIFO fill level."
     temperature:
       type: number
       format: float
+      description: "Reported device temperature."
     gpsLock:
       description: 1 if GPSDO is locked else 0
       type: integer
@@ -157,9 +201,12 @@ XtrxMIMOSettings:
   properties:
     title:
       type: string
+      description: "User-visible title."
     extClock:
       description: Boolean 1 if external clock source else 0
       type: integer
+      minimum: 0
+      maximum: 1
     extClockFreq:
       description: Frequency (Hz) of external clock source
       type: integer
@@ -172,16 +219,22 @@ XtrxMIMOSettings:
     useReverseAPI:
       description: Boolean 1 use 0 do not use reverse API
       type: integer
+      minimum: 0
+      maximum: 1
     reverseAPIAddress:
       description: IPv4 address
       type: string
     reverseAPIPort:
       description: Network port from 1024 to 65535
       type: integer
+      minimum: 1
+      maximum: 65535
     reverseAPIDeviceIndex:
       type: integer
+      description: "Device-set index used by the reverse API peer."
     rxDevSampleRate:
       type: integer
+      description: "Receive dev sample rate in samples per second."
     log2HardDecim:
       description: 0 is automatic then 1 to 6 is log2 of hardware decimation
       type: integer
@@ -191,12 +244,17 @@ XtrxMIMOSettings:
     rxCenterFrequency:
       type: integer
       format: int64
+      description: "Receive center frequency in Hz."
     dcBlock:
       description: Software DC blocking (1 for yes, 0 for no)
       type: integer
+      minimum: 0
+      maximum: 1
     iqCorrection:
       description: Software IQ imbalance correction (1 for yes, 0 for no)
       type: integer
+      minimum: 0
+      maximum: 1
     ncoEnableRx:
       description: Enable TSP NCO Rx on both channels and mixing (1 for yes, 0 for no)
       type: integer
@@ -205,6 +263,8 @@ XtrxMIMOSettings:
       type: integer
     antennaPathRx:
       type: integer
+      minimum: 0
+      maximum: 2
       description: >
         Antenna selected (enum value from XTRXMIMOSettings::RxAntenna):
             * 0 - RXANT_LO low range
@@ -212,6 +272,8 @@ XtrxMIMOSettings:
             * 2 - RXANT_HI high range
     iqOrder:
       type: integer
+      minimum: 0
+      maximum: 1
       description: >
         IQ samples order
           * 0 - Q then I (swapped)
@@ -224,6 +286,8 @@ XtrxMIMOSettings:
       type: integer
     gainModeRx0:
       type: integer
+      minimum: 0
+      maximum: 1
       description: >
         Gain mode (XTRXMIMOSettings::GainMode) for Rx channel 0:
             * 0 - GAIN_AUTO automatic
@@ -239,6 +303,7 @@ XtrxMIMOSettings:
       type: integer
     pwrmodeRx0:
       type: integer
+      description: "Pwrmode rx0 setting for Xtrx MIMO."
     lpfBWRx1:
       description: LMS analog lowpass filter bandwidth (Hz) for Rx channel 1
       type: integer
@@ -247,6 +312,8 @@ XtrxMIMOSettings:
       type: integer
     gainModeRx1:
       type: integer
+      minimum: 0
+      maximum: 1
       description: >
         Gain mode (XTRXMIMOSettings::GainMode) for Rx channel 1:
             * 0 - GAIN_AUTO automatic
@@ -262,8 +329,10 @@ XtrxMIMOSettings:
       type: integer
     pwrmodeRx1:
       type: integer
+      description: "Pwrmode rx1 setting for Xtrx MIMO."
     txDevSampleRate:
       type: integer
+      description: "Transmit dev sample rate in samples per second."
     log2HardInterp:
       description: 0 is automatic then 1 to 6 is log2 of hardware interpolation
       type: integer
@@ -273,6 +342,7 @@ XtrxMIMOSettings:
     txCenterFrequency:
       type: integer
       format: int64
+      description: "Transmit center frequency in Hz."
     ncoEnableTx:
       description: Enable TSP NCO Tx on both channels and mixing (1 for yes, 0 for no)
       type: integer
@@ -281,6 +351,8 @@ XtrxMIMOSettings:
       type: integer
     antennaPathTx:
       type: integer
+      minimum: 0
+      maximum: 1
       description: >
         Antenna selected (enum value from XTRXMIMOSettings::TxAntenna):
             * 0 - TXANT_HI high range
@@ -293,6 +365,7 @@ XtrxMIMOSettings:
       type: integer
     pwrmodeTx0:
       type: integer
+      description: "Pwrmode tx0 setting for Xtrx MIMO."
     lpfBWTx1:
       description: LMS analog lowpass filter bandwidth (Hz) for Tx channel 1
       type: integer
@@ -301,6 +374,7 @@ XtrxMIMOSettings:
       type: integer
     pwrmodeTx1:
       type: integer
+      description: "Pwrmode tx1 setting for Xtrx MIMO."
 
 XtrxMIMOReport:
   description: XTRX
@@ -310,19 +384,26 @@ XtrxMIMOReport:
       type: integer
     fifoSize:
       type: integer
+      description: "FIFO capacity in samples."
     fifoFillRx:
       type: integer
+      description: "Current receive FIFO fill level."
     fifoFillTx:
       type: integer
+      description: "Current transmit FIFO fill level."
     temperature:
       type: number
       format: float
+      description: "Reported device temperature."
     gpsLock:
       description: 1 if GPSDO is locked else 0
       type: integer
     actualInputRate:
       type: integer
+      description: "Reported actual input rate."
     actualOutputRate:
       type: integer
+      description: "Reported actual output rate."
     clockGenRate:
       type: integer
+      description: "Reported clock gen rate."

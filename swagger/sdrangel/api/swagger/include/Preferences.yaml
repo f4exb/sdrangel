@@ -9,22 +9,33 @@ Preferences:
       type: integer
     audioType:
       type: string
+      description: "Audio type for Preferences."
     audioDevice:
       type: string
+      description: "Audio device for Preferences."
     latitude:
       type: number
       format: float
+      description: "Latitude in degrees, positive north."
+      minimum: -90
+      maximum: 90
     longitude:
       type: number
       format: float
+      description: "Longitude in degrees, positive east."
+      minimum: -180
+      maximum: 180
     consoleMinLogLevel:
       description: See QtMsgType
       type: integer
     useLogFile:
       description: boolean
       type: integer
+      minimum: 0
+      maximum: 1
     logFileName:
       type: string
+      description: "Log file name."
     fileMinLogLevel:
       description: See QtMsgType
       type: integer

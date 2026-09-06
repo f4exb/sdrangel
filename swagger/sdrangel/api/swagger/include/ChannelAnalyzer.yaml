@@ -3,73 +3,108 @@ ChannelAnalyzerSettings:
   properties:
     frequency:
       type: integer
+      description: "Frequency in Hz."
     downSample:
       description: Boolean
       type: integer
+      minimum: 0
+      maximum: 1
     downSampleRate:
       type: integer
+      description: "Down sample rate in samples per second."
     bandwidth:
       type: integer
+      description: "Bandwidth in Hz."
     lowCutoff:
       type: integer
+      description: "Lower filter cutoff frequency in Hz."
     spanLog2:
       type: integer
+      description: "Base-2 exponent controlling the displayed or processed frequency span."
     ssb:
       description: Boolean
       type: integer
+      minimum: 0
+      maximum: 1
     pll:
       description: Boolean
       type: integer
+      minimum: 0
+      maximum: 1
     fll:
       description: Boolean
       type: integer
+      minimum: 0
+      maximum: 1
     costasLoop:
       description: Boolean
       type: integer
+      minimum: 0
+      maximum: 1
     rrc:
       description: Boolean
       type: integer
+      minimum: 0
+      maximum: 1
     rrcRolloff:
       description: in 100ths
       type: integer
     pllPskOrder:
       type: integer
+      description: "Pll psk order setting for Channel analyzer."
     pllBandwidth:
       type: number
       format: float
+      description: "Pll bandwidth in Hz."
     pllDampingFactor:
       type: number
       format: float
+      description: "Pll damping factor setting for Channel analyzer."
     pllLoopGain:
       type: number
       format: float
+      description: "Pll loop gain setting for Channel analyzer."
     inputType:
       description: see ChannelAnalyzerSettings::InputType
       type: integer
     rgbColor:
       type: integer
+      description: "Display color encoded as an RGB integer."
     title:
       type: string
+      description: "User-visible title."
     streamIndex:
       description: MIMO channel. Not relevant when connected to SI (single Rx).
       type: integer
     useReverseAPI:
       description: Synchronize with reverse API (1 for yes, 0 for no)
       type: integer
+      minimum: 0
+      maximum: 1
     reverseAPIAddress:
       type: string
+      description: "IPv4 address or host name of the reverse API peer."
     reverseAPIPort:
       type: integer
+      description: "TCP port of the reverse API peer."
+      minimum: 1
+      maximum: 65535
     reverseAPIDeviceIndex:
       type: integer
+      description: "Device-set index used by the reverse API peer."
     reverseAPIChannelIndex:
       type: integer
+      description: "Channel index used by the reverse API peer."
     spectrumConfig:
       $ref: "http://swgserver:8081/api/swagger/include/GLSpectrum.yaml#/GLSpectrum"
+      description: "Spectrum-display configuration."
     scopeConfig:
       $ref: "http://swgserver:8081/api/swagger/include/GLScope.yaml#/GLScope"
+      description: "Oscilloscope-display configuration."
     channelMarker:
       $ref: "http://swgserver:8081/api/swagger/include/ChannelMarker.yaml#/ChannelMarker"
+      description: "Channel-marker display configuration."
     rollupState:
       $ref: "http://swgserver:8081/api/swagger/include/RollupState.yaml#/RollupState"
+      description: "Saved expanded or collapsed state of the GUI sections."
 

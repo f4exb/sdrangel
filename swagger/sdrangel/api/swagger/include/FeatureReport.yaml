@@ -9,27 +9,43 @@ FeatureReport:
       type: string
     AFCReport:
       $ref: "http://swgserver:8081/api/swagger/include/AFC.yaml#/AFCReport"
+      description: "Afc report data for Feature."
     AMBEReport:
       $ref: "http://swgserver:8081/api/swagger/include/AMBE.yaml#/AMBEReport"
+      description: "Ambe report data for Feature."
     FreqDisplayReport:
       $ref: "http://swgserver:8081/api/swagger/include/FreqDisplay.yaml#/FreqDisplayReport"
+      description: "Freq display report data for Feature."
     GS232ControllerReport:
       $ref: "http://swgserver:8081/api/swagger/include/GS232Controller.yaml#/GS232ControllerReport"
+      description: "Gs232 controller report data for Feature."
     LimeRFEReport:
       $ref: "http://swgserver:8081/api/swagger/include/LimeRFE.yaml#/LimeRFEReport"
+      description: "Lime rfe report data for Feature."
     MapReport:
       $ref: "http://swgserver:8081/api/swagger/include/Map.yaml#/MapReport"
+      description: "Map report data for Feature."
     PERTesterReport:
       $ref: "http://swgserver:8081/api/swagger/include/PERTester.yaml#/PERTesterReport"
+      description: "Per tester report data for Feature."
     RigCtlServerReport:
       $ref: "http://swgserver:8081/api/swagger/include/RigCtlServer.yaml#/RigCtlServerReport"
+      description: "Rig ctl server report data for Feature."
+    MCPServerReport:
+      $ref: "http://swgserver:8081/api/swagger/include/MCPServer.yaml#/MCPServerReport"
+      description: "Mcp server report data for Feature."
     SatelliteTrackerReport:
       $ref: "http://swgserver:8081/api/swagger/include/SatelliteTracker.yaml#/SatelliteTrackerReport"
+      description: "Satellite tracker report data for Feature."
     SimplePTTReport:
       $ref: "http://swgserver:8081/api/swagger/include/SimplePTT.yaml#/SimplePTTReport"
+      description: "Simple ptt report data for Feature."
     SkyMapReport:
       $ref: "http://swgserver:8081/api/swagger/include/SkyMap.yaml#/SkyMapReport"
+      description: "Sky map report data for Feature."
     StarTrackerReport:
       $ref: "http://swgserver:8081/api/swagger/include/StarTracker.yaml#/StarTrackerReport"
+      description: "Star tracker report data for Feature."
     VORLocalizerReport:
       $ref: "http://swgserver:8081/api/swagger/include/VORLocalizer.yaml#/VORLocalizerReport"
+      description: "Vor localizer report data for Feature."

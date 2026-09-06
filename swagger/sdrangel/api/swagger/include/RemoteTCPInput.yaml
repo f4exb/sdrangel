@@ -3,72 +3,118 @@ RemoteTCPInputSettings:
   properties:
     title:
       type: string
+      description: "User-visible title."
     centerFrequency:
       type: integer
       format: int64
+      description: "Device center frequency in Hz."
     loPpmCorrection:
       type: integer
+      description: "Local-oscillator correction in parts per million."
     dcBlock:
       type: integer
+      description: "Enable DSP DC-offset correction (1 enabled, 0 disabled)."
+      minimum: 0
+      maximum: 1
     iqCorrection:
       type: integer
+      description: "Enable I/Q imbalance correction (1 enabled, 0 disabled)."
+      minimum: 0
+      maximum: 1
     biasTee:
       type: integer
+      description: "Enable the antenna bias tee (1 enabled, 0 disabled)."
+      minimum: 0
+      maximum: 1
     directSampling:
       type: integer
+      description: "Direct sampling setting for Remote TCP input."
     devSampleRate:
       type: integer
+      description: "Device I/Q sample rate in samples per second before software decimation or interpolation."
     log2Decim:
       type: integer
+      description: "Base-2 exponent of the software decimation factor; the output sample rate is divided by 2^log2Decim."
     gain:
       type: integer
+      description: "Gain setting; units and available values depend on the device or plugin."
     agc:
       type: integer
+      description: "Enable automatic gain control (1 enabled, 0 disabled)."
+      minimum: 0
+      maximum: 1
     rfBW:
       type: integer
+      description: "RF bw in Hz."
     inputFrequencyOffset:
       type: integer
       format: int64
+      description: "Channel frequency offset from the device center frequency in Hz."
     channelGain:
       type: integer
+      description: "Channel gain setting for Remote TCP input."
     channelSampleRate:
       type: integer
+      description: "Effective sample rate delivered to the channel in samples per second."
     channelDecimation:
       type: integer
+      description: "Channel decimation setting for Remote TCP input."
     sampleBits:
       type: integer
+      description: "Number of significant bits in each sample."
     dataAddress:
       type: string
+      description: "IPv4 address or host name used for data traffic."
     dataPort:
       type: integer
+      description: "Network port used for data traffic."
+      minimum: 1
+      maximum: 65535
     overrideRemoteSettings:
       type: integer
+      description: "Override remote settings setting for Remote TCP input."
     preFill:
       type: integer
+      description: "Pre fill setting for Remote TCP input."
     protocol:
       description: (SDRangel or Spy Server)
       type: string
     useReverseAPI:
       description: Synchronize with reverse API (1 for yes, 0 for no)
       type: integer
+      minimum: 0
+      maximum: 1
     reverseAPIAddress:
       type: string
+      description: "IPv4 address or host name of the reverse API peer."
     reverseAPIPort:
       type: integer
+      description: "TCP port of the reverse API peer."
+      minimum: 1
+      maximum: 65535
     reverseAPIDeviceIndex:
       type: integer
+      description: "Device-set index used by the reverse API peer."
 
 RemoteTCPInputReport:
   description: RemoteTCPInput
   properties:
     sampleRate:
       type: integer
+      description: "Sample rate in samples per second."
     latitude:
       type: number
       format: float
+      description: "Latitude in degrees, positive north."
+      minimum: -90
+      maximum: 90
     longitude:
       type: number
       format: float
+      description: "Longitude in degrees, positive east."
+      minimum: -180
+      maximum: 180
     altitude:
       type: number
       format: float
+      description: "Altitude above mean sea level."

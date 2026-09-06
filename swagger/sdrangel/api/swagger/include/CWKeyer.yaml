@@ -2,6 +2,7 @@ CWKeyerSettings:
   properties:
     sampleRate:
       type: integer
+      description: "Sample rate in samples per second."
     wpm:
       description: Words Per Minute keying speed
       type: integer
@@ -10,6 +11,7 @@ CWKeyerSettings:
       type: integer
     text:
       type: string
+      description: "Text setting for CW keyer."
     loop:
       description: 1 to loop on text keying
       type: integer

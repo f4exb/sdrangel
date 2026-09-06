@@ -3,59 +3,90 @@ SDRPlayV3Settings:
   properties:
     title:
       type: string
+      description: "User-visible title."
     centerFrequency:
       type: integer
       format: int64
+      description: "Device center frequency in Hz."
     LOppmTenths:
       type: integer
+      description: "Local-oscillator correction in tenths of a part per million."
     ifFrequencyIndex:
       type: integer
+      description: "Selected if frequency index."
     bandwidthIndex:
       type: integer
+      description: "Selected bandwidth index."
     devSampleRate:
       type: integer
+      description: "Device I/Q sample rate in samples per second before software decimation or interpolation."
     log2Decim:
       type: integer
+      description: "Base-2 exponent of the software decimation factor; the output sample rate is divided by 2^log2Decim."
     fcPos:
       type: integer
+      description: "Position of the decimated passband relative to the device center frequency."
     dcBlock:
       type: integer
+      description: "Enable DSP DC-offset correction (1 enabled, 0 disabled)."
+      minimum: 0
+      maximum: 1
     iqCorrection:
       type: integer
+      description: "Enable I/Q imbalance correction (1 enabled, 0 disabled)."
+      minimum: 0
+      maximum: 1
     lnaIndex:
       type: integer
+      description: "Selected lna index."
     lnaGain:
       description: Gain in dB, as an alternative to lnaIndex setting
       type: integer
     ifAGC:
       type: integer
+      description: "IF agc setting for Sdr play v3."
     ifGain:
       type: integer
+      description: "Intermediate-frequency gain setting."
     amNotch:
       type: integer
+      description: "Am notch setting for Sdr play v3."
     fmNotch:
       type: integer
+      description: "FM notch setting for Sdr play v3."
     dabNotch:
       type: integer
+      description: "Dab notch setting for Sdr play v3."
     extRef:
       type: integer
+      description: "Ext ref setting for Sdr play v3."
     tuner:
       type: integer
+      description: "Tuner setting for Sdr play v3."
     antenna:
       type: integer
+      description: "Antenna setting for Sdr play v3."
     transverterMode:
       type: integer
+      description: "Enable transverter frequency translation (1 enabled, 0 disabled)."
+      minimum: 0
+      maximum: 1
     transverterDeltaFrequency:
       type: integer
       format: int64
+      description: "Frequency translation applied in transverter mode in Hz."
     iqOrder:
       type: integer
+      minimum: 0
+      maximum: 1
       description: >
         IQ samples order
           * 0 - Q then I (swapped)
           * 1 - I then Q (straight)
     biasTee:
       type: integer
+      minimum: 0
+      maximum: 1
       description: >
         Bias tee
           * 0 - inactive
@@ -63,12 +94,19 @@ SDRPlayV3Settings:
     useReverseAPI:
       description: Synchronize with reverse API (1 for yes, 0 for no)
       type: integer
+      minimum: 0
+      maximum: 1
     reverseAPIAddress:
       type: string
+      description: "IPv4 address or host name of the reverse API peer."
     reverseAPIPort:
       type: integer
+      description: "TCP port of the reverse API peer."
+      minimum: 1
+      maximum: 65535
     reverseAPIDeviceIndex:
       type: integer
+      description: "Device-set index used by the reverse API peer."
 
 SDRPlayV3Report:
   description: SDRplayV3
@@ -78,9 +116,11 @@ SDRPlayV3Report:
       description: SDRplay device type. Can be RSP1, RSP1A, RSP1B, RSP2, RSPduo, RSPdx, Unknown
     bandwidths:
       type: array
+      description: "Supported bandwidths in Hz."
       items:
         $ref: "http://swgserver:8081/api/swagger/include/Structs.yaml#/Bandwidth"
     intermediateFrequencies:
       type: array
+      description: "List of intermediate frequencies."
       items:
         $ref: "http://swgserver:8081/api/swagger/include/Structs.yaml#/Frequency"

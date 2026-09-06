@@ -3,12 +3,16 @@ Command:
   properties:
     group:
       type: string
+      description: "Group for Command."
     description:
       type: string
+      description: "Human-readable description."
     command:
       type: string
+      description: "Command for Command."
     argString:
       type: string
+      description: "Arg string for Command."
     key:
       description: Qt::Key
       type: integer
@@ -18,6 +22,10 @@ Command:
     associateKey:
       description: boolean
       type: integer
+      minimum: 0
+      maximum: 1
     release:
       description: boolean
       type: integer
+      minimum: 0
+      maximum: 1

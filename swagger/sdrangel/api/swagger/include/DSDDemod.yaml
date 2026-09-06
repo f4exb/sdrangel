@@ -4,47 +4,70 @@ DSDDemodSettings:
     inputFrequencyOffset:
       type: integer
       format: int64
+      description: "Channel frequency offset from the device center frequency in Hz."
     rfBandwidth:
       type: number
       format: float
+      description: "RF bandwidth in Hz."
     fmDeviation:
       type: number
       format: float
+      description: "FM frequency deviation in Hz."
     demodGain:
       type: number
       format: float
+      description: "Demod gain setting for Dsd demod."
     volume:
       type: number
       format: float
+      description: "Audio volume multiplier."
     baudRate:
       type: integer
+      description: "Serial-port baud rate in bits per second."
     squelchGate:
       type: integer
+      description: "Squelch gate duration."
     squelch:
       type: number
       format: float
+      description: "Squelch threshold in dB."
     audioMute:
       type: integer
+      description: "Mute audio output (1 muted, 0 unmuted)."
+      minimum: 0
+      maximum: 1
     enableCosineFiltering:
       type: integer
+      description: "Enable cosine filtering (1 enabled, 0 disabled)."
+      minimum: 0
+      maximum: 1
     syncOrConstellation:
       type: integer
+      description: "Sync or constellation setting for Dsd demod."
     slot1On:
       type: integer
+      description: "Slot1 on setting for Dsd demod."
     slot2On:
       type: integer
+      description: "Slot2 on setting for Dsd demod."
     tdmaStereo:
       type: integer
+      description: "Tdma stereo setting for Dsd demod."
     pllLock:
       type: integer
+      description: "Pll lock setting for Dsd demod."
     rgbColor:
       type: integer
+      description: "Display color encoded as an RGB integer."
     title:
       type: string
+      description: "User-visible title."
     audioDeviceName:
       type: string
+      description: "Name of the audio device to use."
     highPassFilter:
       type: integer
+      description: "High pass filter setting for Dsd demod."
     traceLengthMutliplier:
       description: multiply by 50ms
       type: integer
@@ -60,23 +83,35 @@ DSDDemodSettings:
     useReverseAPI:
       description: Synchronize with reverse API (1 for yes, 0 for no)
       type: integer
+      minimum: 0
+      maximum: 1
     reverseAPIAddress:
       type: string
+      description: "IPv4 address or host name of the reverse API peer."
     reverseAPIPort:
       type: integer
+      description: "TCP port of the reverse API peer."
+      minimum: 1
+      maximum: 65535
     reverseAPIDeviceIndex:
       type: integer
+      description: "Device-set index used by the reverse API peer."
     reverseAPIChannelIndex:
       type: integer
+      description: "Channel index used by the reverse API peer."
     channelMarker:
       $ref: "http://swgserver:8081/api/swagger/include/ChannelMarker.yaml#/ChannelMarker"
+      description: "Channel-marker display configuration."
     rollupState:
       $ref: "http://swgserver:8081/api/swagger/include/RollupState.yaml#/RollupState"
+      description: "Saved expanded or collapsed state of the GUI sections."
     ambeFeatureIndex:
       type: integer
       description: index of AMBE controller feature to be used for AMBE frames decoding
     connectAMBE:
       type: integer
+      minimum: 0
+      maximum: 1
       description: >
         Decode frames with AMBE feature
           * 0 - Do not decode frames with AMBE feature
@@ -90,8 +125,10 @@ DSDDemodReport:
       format: float
     audioSampleRate:
       type: integer
+      description: "Audio sample rate in samples per second."
     channelSampleRate:
       type: integer
+      description: "Effective sample rate delivered to the channel in samples per second."
     squelch:
       description: squelch status (1 if open else 0)
       type: integer

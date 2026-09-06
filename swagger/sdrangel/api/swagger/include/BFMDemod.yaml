@@ -4,14 +4,28 @@ BFMDemodSettings:
     inputFrequencyOffset:
       type: integer
       format: int64
+      description: "Channel frequency offset from the device center frequency in Hz."
     rfBandwidth:
       type: number
       format: float
+      minimum: 80000
+      maximum: 250000
+      description: >
+        RF channel bandwidth in Hz. The channel/baseband sample rate must be
+        greater than this bandwidth. For 180 kHz broadcast FM use at least
+        240 kS/s; 256 kS/s is recommended.
     afBandwidth:
       type: number
       format: float
+      minimum: 1000
+      maximum: 20000
+      default: 15000
+      description: >
+        Demodulated audio bandwidth in Hz. Broadcast FM normally uses 15 kHz.
     deEmphasis:
       type: integer
+      minimum: 0
+      maximum: 1
       description: >
         De-emphasis time constant (us)
           * 0 - 50us (Europe, Australia)
@@ -19,45 +33,76 @@ BFMDemodSettings:
     volume:
       type: number
       format: float
+      description: "Audio volume multiplier."
     squelch:
       type: number
       format: float
+      description: "Squelch threshold in dB."
     audioMute:
       type: integer
+      description: "Mute audio output (1 muted, 0 unmuted)."
+      minimum: 0
+      maximum: 1
     audioStereo:
       type: integer
+      description: "Enable stereo audio decoding (1 stereo, 0 mono)."
+      minimum: 0
+      maximum: 1
     lsbStereo:
       type: integer
+      description: "Use lower-sideband stereo decoding (1 enabled, 0 disabled)."
+      minimum: 0
+      maximum: 1
     showPilot:
       type: integer
+      description: "Show the stereo pilot spectrum (1 enabled, 0 disabled)."
+      minimum: 0
+      maximum: 1
     rdsActive:
       type: integer
+      description: "Enable RDS decoding (1 enabled, 0 disabled)."
+      minimum: 0
+      maximum: 1
     rgbColor:
       type: integer
+      description: "Display color encoded as an RGB integer."
     title:
       type: string
+      description: "User-visible title."
     audioDeviceName:
       type: string
+      description: "Name of the audio device to use."
     streamIndex:
       description: MIMO channel. Not relevant when connected to SI (single Rx).
       type: integer
     useReverseAPI:
       description: Synchronize with reverse API (1 for yes, 0 for no)
       type: integer
+      minimum: 0
+      maximum: 1
     reverseAPIAddress:
       type: string
+      description: "IPv4 address or host name of the reverse API peer."
     reverseAPIPort:
       type: integer
+      description: "TCP port of the reverse API peer."
+      minimum: 1
+      maximum: 65535
     reverseAPIDeviceIndex:
       type: integer
+      description: "Device-set index used by the reverse API peer."
     reverseAPIChannelIndex:
       type: integer
+      description: "Channel index used by the reverse API peer."
     spectrumConfig:
       $ref: "http://swgserver:8081/api/swagger/include/GLSpectrum.yaml#/GLSpectrum"
+      description: "Spectrum-display configuration."
     channelMarker:
       $ref: "http://swgserver:8081/api/swagger/include/ChannelMarker.yaml#/ChannelMarker"
+      description: "Channel-marker display configuration."
     rollupState:
       $ref: "http://swgserver:8081/api/swagger/include/RollupState.yaml#/RollupState"
+      description: "Saved expanded or collapsed state of the GUI sections."
 
 BFMDemodReport:
   description: BFMDemod
@@ -71,8 +116,12 @@ BFMDemodReport:
       type: integer
     audioSampleRate:
       type: integer
+      description: "Audio sample rate in samples per second."
     channelSampleRate:
       type: integer
+      description: >
+        Effective complex baseband sample rate delivered to this channel in
+        samples per second. This must be greater than rfBandwidth.
     pilotLocked:
       description: pilot locked status (1 if open else 0)
       type: integer
@@ -82,6 +131,7 @@ BFMDemodReport:
       format: float
     rdsReport:
       $ref: "#/RDSReport"
+      description: "RDS decoder status and decoded programme information."
 
 RDSReport:
   description: RDS information
@@ -89,9 +139,13 @@ RDSReport:
     demodStatus:
       description: Demodulation success  (%)
       type: integer
+      minimum: 0
+      maximum: 100
     decodStatus:
       description: Decoding success  (%)
       type: integer
+      minimum: 0
+      maximum: 100
     rdsDemodAccumDB:
       description: RDS demodulator accumulator level (dB)
       type: number
@@ -126,8 +180,10 @@ RDSReport:
       type: string
     altFrequencies:
       type: array
+      description: "Alternative broadcast frequencies reported by RDS."
       items:
         properties:
           frequency:
             type: number
             format: float
+            description: "Frequency in Hz."

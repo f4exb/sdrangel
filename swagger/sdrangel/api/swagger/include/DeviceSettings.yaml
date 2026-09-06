@@ -16,95 +16,142 @@ DeviceSettings:
       type: integer
     airspySettings:
       $ref: "http://swgserver:8081/api/swagger/include/Airspy.yaml#/AirspySettings"
+      description: "Airspy settings configuration for Device."
     airspyHFSettings:
       $ref: "http://swgserver:8081/api/swagger/include/AirspyHF.yaml#/AirspyHFSettings"
+      description: "Airspy hf settings configuration for Device."
     androidSDRDriverInputSettings:
       $ref: "http://swgserver:8081/api/swagger/include/AndroidSDRDriverInput.yaml#/AndroidSDRDriverInputSettings"
+      description: "Android sdr driver input settings configuration for Device."
     audioCATSISOSettings:
       $ref: "http://swgserver:8081/api/swagger/include/AudioCATSISO.yaml#/AudioCATSISOSettings"
+      description: "Audio catsiso settings configuration for Device."
     audioInputSettings:
       $ref: "http://swgserver:8081/api/swagger/include/AudioInput.yaml#/AudioInputSettings"
+      description: "Audio input settings configuration for Device."
     audioOutputSettings:
       $ref: "http://swgserver:8081/api/swagger/include/AudioOutput.yaml#/AudioOutputSettings"
+      description: "Audio output settings configuration for Device."
     bladeRF1InputSettings:
       $ref: "http://swgserver:8081/api/swagger/include/BladeRF1.yaml#/BladeRF1InputSettings"
+      description: "Blade rf1 input settings configuration for Device."
     bladeRF2InputSettings:
       $ref: "http://swgserver:8081/api/swagger/include/BladeRF2.yaml#/BladeRF2InputSettings"
+      description: "Blade rf2 input settings configuration for Device."
     bladeRF1OutputSettings:
       $ref: "http://swgserver:8081/api/swagger/include/BladeRF1.yaml#/BladeRF1OutputSettings"
+      description: "Blade rf1 output settings configuration for Device."
     bladeRF2OutputSettings:
       $ref: "http://swgserver:8081/api/swagger/include/BladeRF2.yaml#/BladeRF2OutputSettings"
+      description: "Blade rf2 output settings configuration for Device."
     bladeRF2MIMOSettings:
       $ref: "http://swgserver:8081/api/swagger/include/BladeRF2.yaml#/BladeRF2MIMOSettings"
+      description: "Blade rf2 MIMO settings configuration for Device."
     fcdProSettings:
       $ref: "http://swgserver:8081/api/swagger/include/FCDPro.yaml#/FCDProSettings"
+      description: "Fcd pro settings configuration for Device."
     fcdProPlusSettings:
       $ref: "http://swgserver:8081/api/swagger/include/FCDProPlus.yaml#/FCDProPlusSettings"
+      description: "Fcd pro plus settings configuration for Device."
     fileInputSettings:
       $ref: "http://swgserver:8081/api/swagger/include/FileInput.yaml#/FileInputSettings"
+      description: "File input settings configuration for Device."
     fileOutputSettings:
       $ref: "http://swgserver:8081/api/swagger/include/FileOutput.yaml#/FileOutputSettings"
+      description: "File output settings configuration for Device."
     hackRFInputSettings:
       $ref: "http://swgserver:8081/api/swagger/include/HackRF.yaml#/HackRFInputSettings"
+      description: "Hack RF input settings configuration for Device."
     hackRFOutputSettings:
       $ref: "http://swgserver:8081/api/swagger/include/HackRF.yaml#/HackRFOutputSettings"
+      description: "Hack RF output settings configuration for Device."
     kiwiSDRSettings:
       $ref: "http://swgserver:8081/api/swagger/include/KiwiSDR.yaml#/KiwiSDRSettings"
+      description: "Kiwi sdr settings configuration for Device."
     limeSdrInputSettings:
       $ref: "http://swgserver:8081/api/swagger/include/LimeSdr.yaml#/LimeSdrInputSettings"
+      description: "Lime sdr input settings configuration for Device."
     limeSdrOutputSettings:
       $ref: "http://swgserver:8081/api/swagger/include/LimeSdr.yaml#/LimeSdrOutputSettings"
+      description: "Lime sdr output settings configuration for Device."
     limeSdrMIMOSettings:
       $ref: "http://swgserver:8081/api/swagger/include/LimeSdr.yaml#/LimeSdrMIMOSettings"
+      description: "Lime sdr MIMO settings configuration for Device."
     localInputSettings:
       $ref: "http://swgserver:8081/api/swagger/include/LocalInput.yaml#/LocalInputSettings"
+      description: "Local input settings configuration for Device."
     localOutputSettings:
       $ref: "http://swgserver:8081/api/swagger/include/LocalOutput.yaml#/LocalOutputSettings"
+      description: "Local output settings configuration for Device."
     metisMISOSettings:
       $ref: "http://swgserver:8081/api/swagger/include/MetisMISO.yaml#/MetisMISOSettings"
+      description: "Metis miso settings configuration for Device."
     perseusSettings:
       $ref: "http://swgserver:8081/api/swagger/include/Perseus.yaml#/PerseusSettings"
+      description: "Perseus settings configuration for Device."
     plutoSdrInputSettings:
       $ref: "http://swgserver:8081/api/swagger/include/PlutoSdr.yaml#/PlutoSdrInputSettings"
+      description: "Pluto sdr input settings configuration for Device."
     plutoSdrOutputSettings:
       $ref: "http://swgserver:8081/api/swagger/include/PlutoSdr.yaml#/PlutoSdrOutputSettings"
+      description: "Pluto sdr output settings configuration for Device."
     plutoSdrMIMOSettings:
       $ref: "http://swgserver:8081/api/swagger/include/PlutoSdr.yaml#/PlutoSdrMIMOSettings"
+      description: "Pluto sdr MIMO settings configuration for Device."
     rtlSdrSettings:
       $ref: "http://swgserver:8081/api/swagger/include/RtlSdr.yaml#/RtlSdrSettings"
+      description: "Rtl sdr settings configuration for Device."
     remoteOutputSettings:
       $ref: "http://swgserver:8081/api/swagger/include/RemoteOutput.yaml#/RemoteOutputSettings"
+      description: "Remote output settings configuration for Device."
     remoteInputSettings:
       $ref: "http://swgserver:8081/api/swagger/include/RemoteInput.yaml#/RemoteInputSettings"
+      description: "Remote input settings configuration for Device."
     remoteTCPInputSettings:
       $ref: "http://swgserver:8081/api/swagger/include/RemoteTCPInput.yaml#/RemoteTCPInputSettings"
+      description: "Remote TCP input settings configuration for Device."
     sdrPlaySettings:
       $ref: "http://swgserver:8081/api/swagger/include/SDRPlay.yaml#/SDRPlaySettings"
+      description: "Sdr play settings configuration for Device."
     sdrPlayV3Settings:
       $ref: "http://swgserver:8081/api/swagger/include/SDRPlayV3.yaml#/SDRPlayV3Settings"
+      description: "Sdr play v3 settings configuration for Device."
     sigMFFileInputSettings:
       $ref: "http://swgserver:8081/api/swagger/include/SigMFFileInput.yaml#/SigMFFileInputSettings"
+      description: "Sig mf file input settings configuration for Device."
     soapySDRInputSettings:
       $ref: "http://swgserver:8081/api/swagger/include/SoapySDR.yaml#/SoapySDRInputSettings"
+      description: "Soapy sdr input settings configuration for Device."
     soapySDROutputSettings:
       $ref: "http://swgserver:8081/api/swagger/include/SoapySDR.yaml#/SoapySDROutputSettings"
+      description: "Soapy sdr output settings configuration for Device."
     testMISettings:
       $ref: "http://swgserver:8081/api/swagger/include/TestMI.yaml#/TestMISettings"
+      description: "Test mi settings configuration for Device."
     testMOSyncSettings:
       $ref: "http://swgserver:8081/api/swagger/include/TestMOSync.yaml#/TestMOSyncSettings"
+      description: "Test mo sync settings configuration for Device."
     testSourceSettings:
       $ref: "http://swgserver:8081/api/swagger/include/TestSource.yaml#/TestSourceSettings"
+      description: "Test source settings configuration for Device."
     usrpInputSettings:
       $ref: "http://swgserver:8081/api/swagger/include/USRP.yaml#/USRPInputSettings"
+      description: "Usrp input settings configuration for Device."
     usrpOutputSettings:
       $ref: "http://swgserver:8081/api/swagger/include/USRP.yaml#/USRPOutputSettings"
+      description: "Usrp output settings configuration for Device."
     xtrxInputSettings:
       $ref: "http://swgserver:8081/api/swagger/include/Xtrx.yaml#/XtrxInputSettings"
+      description: "Xtrx input settings configuration for Device."
     xtrxOutputSettings:
       $ref: "http://swgserver:8081/api/swagger/include/Xtrx.yaml#/XtrxOutputSettings"
+      description: "Xtrx output settings configuration for Device."
     xtrxMIMOSettings:
       $ref: "http://swgserver:8081/api/swagger/include/Xtrx.yaml#/XtrxMIMOSettings"
+      description: "Xtrx MIMO settings configuration for Device."
     aaroniaRTSASettings:
       $ref: "http://swgserver:8081/api/swagger/include/AaroniaRTSA.yaml#/AaroniaRTSASettings"
+      description: "Aaronia rtsa settings configuration for Device."
     aaroniaRTSAOutputSettings:
       $ref: "http://swgserver:8081/api/swagger/include/AaroniaRTSA.yaml#/AaroniaRTSAOutputSettings"
+      description: "Aaronia rtsa output settings configuration for Device."

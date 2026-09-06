@@ -1,26 +1,18 @@
-RigCtlServerSettings:
-  description: "RigCtl server settings"
+MCPServerSettings:
+  description: "MCP (Model Context Protocol) server settings"
   properties:
-    enabled:
+    address:
+      type: string
+      description: Address to bind the HTTP listener to. Defaults to 127.0.0.1 (local connections only)
+    port:
       type: integer
-      minimum: 0
-      maximum: 1
-      description: >
-        Enable RigCtl server
-          * 1 - enabled
-          * 0 - disabled
-    rigCtlPort:
-      type: integer
-      description: "Rig ctl port."
-    maxFrequencyOffset:
-      type: integer
-      description: "Max frequency offset in Hz."
-    deviceIndex:
-      type: integer
-      description: "Selected device index."
-    channelIndex:
-      type: integer
-      description: "Selected channel index."
+      description: TCP port the MCP server listens on
+    token:
+      type: string
+      description: Optional bearer token clients must present in the Authorization header. Empty for no authentication
+    captureDir:
+      type: string
+      description: Directory that IQ and audio captures are written to. Capture tools refuse paths outside it
     title:
       type: string
       description: "User-visible title."
@@ -53,8 +45,8 @@ RigCtlServerSettings:
       $ref: "http://swgserver:8081/api/swagger/include/RollupState.yaml#/RollupState"
       description: "Saved expanded or collapsed state of the GUI sections."
 
-RigCtlServerReport:
-  description: RigCtl server report
+MCPServerReport:
+  description: MCP server report
   properties:
     runningState:
       type: integer
@@ -66,9 +58,12 @@ RigCtlServerReport:
           * 1 - idle
           * 2 - running
           * 3 - error
+    requestCount:
+      type: integer
+      description: Number of MCP requests served since the server was started
 
-RigCtlServerActions:
-  description: RigCtl server actions
+MCPServerActions:
+  description: MCP server actions
   properties:
     run:
       type: integer

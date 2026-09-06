@@ -19,25 +19,37 @@ ChannelActions:
       type: integer
     AISModActions:
       $ref: "http://swgserver:8081/api/swagger/include/AISMod.yaml#/AISModActions"
+      description: "AIS mod actions configuration for Channel."
     APTDemodActions:
       $ref: "http://swgserver:8081/api/swagger/include/APTDemod.yaml#/APTDemodActions"
+      description: "Apt demod actions configuration for Channel."
     FileSinkActions:
       $ref: "http://swgserver:8081/api/swagger/include/FileSink.yaml#/FileSinkActions"
+      description: "File sink actions configuration for Channel."
     FileSourceActions:
       $ref: "http://swgserver:8081/api/swagger/include/FileSource.yaml#/FileSourceActions"
+      description: "File source actions configuration for Channel."
     FreqScannerActions:
       $ref: "http://swgserver:8081/api/swagger/include/FreqScanner.yaml#/FreqScannerActions"
+      description: "Freq scanner actions configuration for Channel."
     IEEE_802_15_4_ModActions:
       $ref: "http://swgserver:8081/api/swagger/include/IEEE_802_15_4_Mod.yaml#/IEEE_802_15_4_ModActions"
+      description: "Ieee 802 15 4 mod actions configuration for Channel."
     MeshcoreModActions:
       $ref: "http://swgserver:8081/api/swagger/include/MeshcoreMod.yaml#/MeshcoreModActions"
+      description: "Meshcore mod actions configuration for Channel."
     PacketModActions:
       $ref: "http://swgserver:8081/api/swagger/include/PacketMod.yaml#/PacketModActions"
+      description: "Packet mod actions configuration for Channel."
     PSK31ModActions:
       $ref: "http://swgserver:8081/api/swagger/include/PSK31Mod.yaml#/PSK31ModActions"
+      description: "Psk31 mod actions configuration for Channel."
     RadioAstronomyActions:
       $ref: "http://swgserver:8081/api/swagger/include/RadioAstronomy.yaml#/RadioAstronomyActions"
+      description: "Radio astronomy actions configuration for Channel."
     RTTYModActions:
       $ref: "http://swgserver:8081/api/swagger/include/RTTYMod.yaml#/RTTYModActions"
+      description: "Rtty mod actions configuration for Channel."
     SigMFFileSinkActions:
       $ref: "http://swgserver:8081/api/swagger/include/SigMFFileSink.yaml#/SigMFFileSinkActions"
+      description: "Sig mf file sink actions configuration for Channel."

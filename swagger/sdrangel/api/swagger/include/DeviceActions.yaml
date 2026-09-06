@@ -16,3 +16,4 @@ DeviceActions:
       type: integer
     sigMFFileInputActions:
       $ref: "http://swgserver:8081/api/swagger/include/SigMFFileInput.yaml#/SigMFFileInputActions"
+      description: "Sig mf file input actions configuration for Device."

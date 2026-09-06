@@ -4,12 +4,15 @@ SpectrumHistogramMarker:
     frequency:
       type: number
       format: float
+      description: "Frequency in Hz."
     power:
       type: number
       format: float
       description: Fixed power mark
     markerType:
       type: integer
+      minimum: 0
+      maximum: 2
       description: >
         Marker type
           * 0 - Fixed power
@@ -20,6 +23,8 @@ SpectrumHistogramMarker:
       description: Color in 8 bit BGR series
     show:
       type: integer
+      minimum: 0
+      maximum: 1
       description: >
         Boolean - Marker display state
           * 0 - Hidden
@@ -31,6 +36,7 @@ SpectrumWaterfallMarker:
     frequency:
       type: number
       format: float
+      description: "Frequency in Hz."
     time:
       type: number
       format: float
@@ -40,6 +46,8 @@ SpectrumWaterfallMarker:
       description: Color in 8 bit BGR series
     show:
       type: integer
+      minimum: 0
+      maximum: 1
       description: >
         Boolean - Marker display state
           * 0 - Hidden
@@ -51,13 +59,17 @@ SpectrumAnnotationMarker:
     startFrequency:
       type: integer
       format: int64
+      description: "Start frequency in Hz."
     bandwidth:
       type: integer
+      description: "Bandwidth in Hz."
     markerColor:
       type: integer
       description: Color in 8 bit BGR series
     show:
       type: integer
+      minimum: 0
+      maximum: 2
       description: >
         SpectrumAnnotationMarker::ShowState - Marker display state
           * 0 - Hidden
@@ -70,22 +82,29 @@ SpectrumCalibrationPoint:
     frequency:
       type: integer
       format: int64
+      description: "Frequency in Hz."
     powerRelativeReference:
       type: number
       format: float
+      description: "Power relative reference for Spectrum calibration point."
     powerAbsoluteReference:
       type: number
       format: float
+      description: "Power absolute reference for Spectrum calibration point."
 
 GLSpectrum:
   description: GLSpectrumGUI settings
   properties:
     fftSize:
       type: integer
+      description: "FFT size in samples."
     fftOverlap:
       type: integer
+      description: "FFT overlap for Gl spectrum."
     fftWindow:
       type: integer
+      minimum: 0
+      maximum: 8
       description: >
         FFT Window index (FFTWindow::Function):
           * 0 - Bartlett
@@ -100,59 +119,88 @@ GLSpectrum:
     refLevel:
       type: number
       format: float
+      description: "Ref level for Gl spectrum."
     powerRange:
       type: number
       format: float
+      description: "Power range for Gl spectrum."
     fpsPeriodMs:
       type: integer
       description: FPS capping period in milliseconds. 0 for no limit.
     displayWaterfall:
       description: boolean
       type: integer
+      minimum: 0
+      maximum: 1
     invertedWaterfall:
       description: boolean
       type: integer
+      minimum: 0
+      maximum: 1
     displayMaxHold:
       description: boolean
       type: integer
+      minimum: 0
+      maximum: 1
     displayHistogram:
       description: boolean
       type: integer
+      minimum: 0
+      maximum: 1
     decay:
       type: integer
+      description: "Decay for Gl spectrum."
     displayGrid:
       description: boolean
       type: integer
+      minimum: 0
+      maximum: 1
     displayGridIntensity:
       type: integer
+      description: "Display grid intensity for Gl spectrum."
     decayDivisor:
       type: integer
+      description: "Decay divisor for Gl spectrum."
     histogramStroke:
       type: integer
+      description: "Histogram stroke for Gl spectrum."
     displayCurrent:
       description: boolean
       type: integer
+      minimum: 0
+      maximum: 1
     displayTraceIntensity:
       type: integer
+      description: "Display trace intensity for Gl spectrum."
     waterfallShare:
       type: number
       format: float
+      description: "Waterfall share for Gl spectrum."
     averagingMode:
       description: See GLSpectrumGUI::AveragingMode
       type: integer
     averagingValue:
       type: integer
+      description: "Averaging value for Gl spectrum."
     linear:
       description: boolean
       type: integer
+      minimum: 0
+      maximum: 1
     ssb:
       description: boolean
       type: integer
+      minimum: 0
+      maximum: 1
     usb:
       description: boolean
       type: integer
+      minimum: 0
+      maximum: 1
     wsSpectrum:
       type: integer
+      minimum: 0
+      maximum: 1
       description: >
         Boolean - Start or stop websocket server
           * 0 - Stop server
@@ -165,6 +213,8 @@ GLSpectrum:
       type: integer
     markersDisplay:
       type: integer
+      minimum: 0
+      maximum: 2
       description: >
         Display markers (SpectrumSettings::MarkersDisplay)
           * 0 - Mome
@@ -172,26 +222,34 @@ GLSpectrum:
           * 2 - Spectrum annotation markers
     useCalibration:
       type: integer
+      minimum: 0
+      maximum: 1
       description: boolean
     calibrationInterpMode:
       type: integer
+      minimum: 0
+      maximum: 1
       description: >
         Interpolation scheme between points SpectrumSettings::CalibrationInterpolationMode
           * 0 - Linear
           * 1 - Log (dB linear)
     histogramMarkers:
       type: array
+      description: "List of histogram markers."
       items:
         $ref: "http://swgserver:8081/api/swagger/include/GLSpectrum.yaml#/SpectrumHistogramMarker"
     waterfallMarkers:
       type: array
+      description: "List of waterfall markers."
       items:
         $ref: "http://swgserver:8081/api/swagger/include/GLSpectrum.yaml#/SpectrumWaterfallMarker"
     annotationMarkers:
       type: array
+      description: "List of annotation markers."
       items:
         $ref: "http://swgserver:8081/api/swagger/include/GLSpectrum.yaml#/SpectrumAnnotationMarker"
     calibrationPoints:
       type: array
+      description: "List of calibration points."
       items:
         $ref: "http://swgserver:8081/api/swagger/include/GLSpectrum.yaml#/SpectrumCalibrationPoint"
