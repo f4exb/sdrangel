@@ -20,7 +20,10 @@
 
 WDSPRxCWPeakDialog::WDSPRxCWPeakDialog(QWidget* parent) :
     QDialog(parent),
-    ui(new Ui::WDSPRxCWPeakDialog)
+    ui(new Ui::WDSPRxCWPeakDialog),
+    m_cwPeakFrequency(0.0),
+    m_cwBandwidth(0.0),
+    m_cwGain(0.0)
 {
     ui->setupUi(this);
 }

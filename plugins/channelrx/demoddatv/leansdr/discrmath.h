@@ -43,7 +43,7 @@ struct bitvect
     static const size_t NW = (N + WSIZE - 1) / WSIZE;
     T v[NW];
 
-    bitvect() {}
+    bitvect() : v{} {}
     bitvect(T val)
     {
         v[0] = val;

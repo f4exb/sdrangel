@@ -57,7 +57,11 @@ VORDemod::VORDemod(DeviceAPI *deviceAPI) :
         m_thread(nullptr),
         m_basebandSink(nullptr),
         m_running(false),
-        m_basebandSampleRate(0)
+        m_basebandSampleRate(0),
+        m_centerFrequency(0),
+        m_radial(0),
+        m_refMag(0),
+        m_varMag(0)
 {
     setObjectName(m_channelId);
     applySettings(QStringList(), m_settings, true);

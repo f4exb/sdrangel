@@ -19,7 +19,8 @@
 
 FT8DemodFilterProxy::FT8DemodFilterProxy(QObject *parent) :
     QSortFilterProxyModel(parent),
-    m_filterActive(FILTER_NONE)
+    m_filterActive(FILTER_NONE),
+    m_df(0)
 {
 }
 

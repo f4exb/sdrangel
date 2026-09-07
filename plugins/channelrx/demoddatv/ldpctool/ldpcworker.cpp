@@ -43,6 +43,9 @@ Transformed again in to a Qt worker.
 
 LDPCWorker::LDPCWorker(int modcod, int maxTrials, int batchSize, bool shortFrames) :
     m_maxTrials(maxTrials),
+    BLOCKS(0),
+    m_codeLen(0),
+    m_dataLen(0),
     m_aligned_buffer(nullptr),
     m_ldpc(nullptr),
     m_code(nullptr),

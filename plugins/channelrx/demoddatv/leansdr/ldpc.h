@@ -85,6 +85,8 @@ struct ldpc_engine
     node *cnodes; // [n-k]
 
     ldpc_engine() :
+        k(0),
+        n(0),
         vnodes(nullptr),
         cnodes(nullptr)
     {

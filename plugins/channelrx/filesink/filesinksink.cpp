@@ -32,7 +32,10 @@
 #include "util/stringlist.h"
 
 FileSinkSink::FileSinkSink() :
+    m_channelSampleRate(0),
+    m_channelFrequencyOffset(0),
     m_sinkSampleRate(0),
+    m_centerFrequency(0),
     m_nbCaptures(0),
     m_preRecordBuffer(48000),
     m_preRecordFill(0),
@@ -42,6 +45,7 @@ FileSinkSink::FileSinkSink() :
     m_record(false),
     m_squelchOpen(false),
     m_postSquelchCounter(0),
+    m_deviceUId(0),
     m_msCount(0),
     m_byteCount(0),
     m_bytesPerSample(sizeof(Sample))

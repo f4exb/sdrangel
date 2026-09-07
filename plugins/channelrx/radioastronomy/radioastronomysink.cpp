@@ -25,6 +25,7 @@
 
 RadioAstronomySink::RadioAstronomySink(RadioAstronomy *aisDemod) :
     m_radioAstronomy(aisDemod),
+    m_channel(nullptr),
     m_channelSampleRate(1000000),
     m_channelFrequencyOffset(0),
     m_fftSequence(-1),
@@ -35,6 +36,7 @@ RadioAstronomySink::RadioAstronomySink(RadioAstronomy *aisDemod) :
     m_fftSumCount(0),
     m_enabled(false),
     m_cal(false),
+    m_hot(false),
     m_magsqSum(0.0f),
     m_magsqPeak(0.0f),
     m_magsqCount(0),

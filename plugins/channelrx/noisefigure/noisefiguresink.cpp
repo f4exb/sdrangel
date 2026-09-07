@@ -26,6 +26,7 @@
 #include "noisefiguresink.h"
 
 NoiseFigureSink::NoiseFigureSink() :
+        m_channel(nullptr),
         m_channelSampleRate(48000),
         m_fftSequence(-1),
         m_fft(nullptr),

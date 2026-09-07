@@ -20,7 +20,11 @@
 
 WDSPRxSquelchDialog::WDSPRxSquelchDialog(QWidget* parent) :
     QDialog(parent),
-    ui(new Ui::WDSPRxSquelchDialog)
+    ui(new Ui::WDSPRxSquelchDialog),
+    m_mode(WDSPRxProfile::SquelchModeVoice),
+    m_ssqlTauMute(0.0),
+    m_ssqlTauUnmute(0.0),
+    m_amsqMaxTail(0.0)
 {
     ui->setupUi(this);
 }

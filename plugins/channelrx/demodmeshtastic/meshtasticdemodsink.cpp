@@ -41,6 +41,7 @@ MeshtasticDemodSink::MeshtasticDemodSink() :
     m_downChirps(nullptr),
     m_upChirps(nullptr),
     m_spectrumLine(nullptr),
+    m_magsqMax(0.0),
     m_headerLocked(false),
     m_expectedSymbols(0),
     m_waitHeaderFeedback(false),

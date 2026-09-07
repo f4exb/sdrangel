@@ -37,6 +37,14 @@ ChirpChatDemodSink::ChirpChatDemodSink() :
     m_downChirps(nullptr),
     m_upChirps(nullptr),
     m_spectrumLine(nullptr),
+    m_fftCounter(0),
+    m_argMaxHistory{},
+    m_argMaxHistoryCounter(0),
+    m_preambleHistory{},
+    m_syncWord(0),
+    m_magsqMax(0.0),
+    m_chirpCount(0),
+    m_sfdSkipCounter(0),
     m_spectrumSink(nullptr),
     m_spectrumBuffer(nullptr)
 {

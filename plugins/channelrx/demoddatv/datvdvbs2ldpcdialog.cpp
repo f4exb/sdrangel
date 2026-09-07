@@ -27,7 +27,8 @@
 
 DatvDvbS2LdpcDialog::DatvDvbS2LdpcDialog(QWidget* parent) :
     QDialog(parent),
-    ui(new Ui::DatvDvbS2LdpcDialog)
+    ui(new Ui::DatvDvbS2LdpcDialog),
+    m_maxTrials(0)
 {
     ui->setupUi(this);
 }

@@ -25,7 +25,9 @@
 
 MESSAGE_CLASS_DEFINITION(FreqTrackerBaseband::MsgConfigureFreqTrackerBaseband, Message)
 
-FreqTrackerBaseband::FreqTrackerBaseband()
+FreqTrackerBaseband::FreqTrackerBaseband() :
+    m_basebandSampleRate(0),
+    m_spectrumVis(nullptr)
 {
     m_sampleFifo.setSize(SampleSinkFifo::getSizePolicy(48000));
     m_channelizer = new DownChannelizer(&m_sink);

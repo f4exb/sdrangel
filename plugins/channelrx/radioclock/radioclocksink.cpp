@@ -28,6 +28,7 @@
 
 RadioClockSink::RadioClockSink() :
         m_scopeSink(nullptr),
+        m_channel(nullptr),
         m_channelSampleRate(RadioClockSettings::RADIOCLOCK_CHANNEL_SAMPLE_RATE),
         m_channelFrequencyOffset(0),
         m_magsq(0.0),
@@ -43,8 +44,13 @@ RadioClockSink::RadioClockSink() :
         m_periodCount(0),
         m_gotMinuteMarker(false),
         m_second(0),
+        m_timeCode{},
+        m_secondMarkers(0),
+        m_threshold(0),
         m_dst(RadioClockSettings::UNKNOWN),
+        m_timeCodeB{},
         m_zeroCount(0),
+        m_bits{},
         m_sampleBufferIndex(0),
         m_gotMarker(false)
 {

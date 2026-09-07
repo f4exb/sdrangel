@@ -29,6 +29,7 @@
 EndOfTrainDemodSink::EndOfTrainDemodSink(EndOfTrainDemod *endoftrainDemod) :
         m_scopeSink(nullptr),
         m_endoftrainDemod(endoftrainDemod),
+        m_channel(nullptr),
         m_channelSampleRate(EndOfTrainDemodSettings::CHANNEL_SAMPLE_RATE),
         m_channelFrequencyOffset(0),
         m_magsqSum(0.0f),
@@ -40,6 +41,7 @@ EndOfTrainDemodSink::EndOfTrainDemodSink(EndOfTrainDemod *endoftrainDemod) :
         m_corrBuf(nullptr),
         m_corrIdx(0),
         m_corrCnt(0),
+        m_bytes{},
         m_sampleBufferIndex(0)
 {
     m_magsq = 0.0;

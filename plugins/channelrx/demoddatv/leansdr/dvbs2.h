@@ -609,6 +609,7 @@ struct s2_frame_receiver : runnable
         meas_decimation(1048576),
         Ftune(0),
         allow_drift(false),
+        omega0(0),
         strongpls(false),
         modcods(0xffffffff),
         framesizes(0x03),
@@ -616,6 +617,11 @@ struct s2_frame_receiver : runnable
         fastdrift(false),
         freq_tol(0.25),
         sr_tol(100e-6),
+        state(FRAME_DETECT),
+        min_freqw16(0),
+        max_freqw16(0),
+        ss_cache{},
+        discard(0),
         cstln(NULL),
         in(_in), out(_out,1+modcod_info::MAX_SLOTS_PER_FRAME),
         meas_count(0),
@@ -2969,6 +2975,7 @@ struct s2_fecdec : runnable
     ) :
         runnable(sch, "S2 fecdec"),
         bitflips(0),
+        bch_buf{},
         in(_in),
         out(_out),
         bitcount(opt_writer(_bitcount, 1)),
@@ -3095,7 +3102,8 @@ struct s2_fecdec_soft : runnable
         shortframes(_shortframes ? 1 : 0),
         max_trials(_max_trials),
         bitcount(opt_writer(_bitcount, 1)),
-        errcount(opt_writer(_errcount, 1))
+        errcount(opt_writer(_errcount, 1)),
+        bch_buf{}
     {
         const char *tabname = ldpctool::LDPCInterface::mc_tabnames[shortframes][modcod];
         fprintf(stderr, "s2_fecdec_soft::s2_fecdec_soft: tabname: %s\n", tabname);
@@ -3230,10 +3238,12 @@ struct simplequeue
 {
     static const int SIZE = _SIZE;
 
-    simplequeue()
-    {
-        rd = wr = count = 0;
-    }
+    simplequeue():
+        rd(0),
+        wr(0),
+        count(0),
+        q{}
+    {}
 
     bool full() { return count == SIZE; }
 
@@ -3286,6 +3296,7 @@ struct s2_fecdec_helper : runnable
         max_trials(8),
         in(_in),
         out(_out),
+        command(nullptr),
         bitcount(opt_writer(_bitcount, 1)),
         errcount(opt_writer(_errcount, 1))
     {
@@ -3294,6 +3305,8 @@ struct s2_fecdec_helper : runnable
         for (int mc = 0; mc < 32; ++mc) {
             for (int sf = 0; sf < 2; ++sf) {
                 pools[mc][sf].procs = nullptr;
+                pools[mc][sf].nprocs = 0;
+                pools[mc][sf].shift = 0;
             }
         }
     }
@@ -3674,6 +3687,9 @@ struct s2_fecdec_helper : runnable
         max_trials(8),
         in(_in),
         out(_out),
+        command(nullptr),
+        ldpc_buf{},
+        bch_buf{},
         bitcount(opt_writer(_bitcount, 1)),
         errcount(opt_writer(_errcount, 1))
     {
@@ -3943,10 +3959,13 @@ struct s2_framer : runnable
         pipebuf<bbframe> &_out
     ) :
         runnable(sch, "S2 framer"),
+        rolloff_code(0),
+        pls_seq(nullptr),
         n_pls_seq(0),
         pls_index(0),
         in(_in),
-        out(_out)
+        out(_out),
+        rembuf{}
     {
         nremain = 0;
         remcrc = 0; // CRC for nonexistent previous packet
@@ -4070,6 +4089,7 @@ struct s2_deframer : runnable
         runnable(sch, "S2 deframer"),
         fd_gse(-1),
         nleftover(-1),
+        leftover{},
         in(_in),
         out(_out, MAX_TS_PER_BBFRAME),
         current_state(false),

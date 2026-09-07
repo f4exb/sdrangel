@@ -51,13 +51,13 @@ class LDPC : public LDPCInterface
 	static const int R = N-K;
 	static const int q = R/M;
 
-	int acc_pos_[TABLE::DEG_MAX];
-	const int *row_ptr;
-	int bit_deg_;
-	int grp_num;
-	int grp_len;
-	int grp_cnt;
-	int row_cnt;
+	int acc_pos_[TABLE::DEG_MAX]{};
+	const int *row_ptr = 0;
+	int bit_deg_ = 0;
+	int grp_num = 0;
+	int grp_len = 0;
+	int grp_cnt = 0;
+	int row_cnt = 0;
 
 	void next_group()
 	{

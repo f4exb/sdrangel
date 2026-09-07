@@ -25,7 +25,8 @@
 #include "remotetcpsinkbaseband.h"
 #include "remotetcpsink.h"
 
-RemoteTCPSinkBaseband::RemoteTCPSinkBaseband()
+RemoteTCPSinkBaseband::RemoteTCPSinkBaseband() :
+    m_running(false)
 {
     qDebug("RemoteTCPSinkBaseband::RemoteTCPSinkBaseband");
     m_sampleFifo.setSize(SampleSinkFifo::getSizePolicy(48000));
