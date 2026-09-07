@@ -60,6 +60,7 @@ const int ChirpChatModSettings::oversampling = 4;
 
 ChirpChatModSettings::ChirpChatModSettings() :
     m_inputFrequencyOffset(0),
+    m_messageType(MessageNone),
     m_channelMarker(nullptr),
     m_rollupState(nullptr)
 {
