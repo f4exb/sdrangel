@@ -23,6 +23,8 @@
 
 ChirpChatModEncoder::ChirpChatModEncoder() :
     m_codingScheme(ChirpChatModSettings::CodingTTY),
+    m_spreadFactor(0),
+    m_deBits(0),
     m_nbSymbolBits(5),
     m_nbParityBits(1),
     m_hasCRC(true),
