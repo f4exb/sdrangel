@@ -24,6 +24,7 @@
 #include "rttymodsettings.h"
 
 RttyModSettings::RttyModSettings() :
+    m_writeToFile(false),
     m_channelMarker(nullptr),
     m_rollupState(nullptr)
 {
