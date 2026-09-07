@@ -129,7 +129,11 @@ void OurAirportsDB::readDB()
     if (!m_airportsById || (airportDBModifiedDateTime > m_modifiedDateTime))
     {
         // Using shared pointer, so old object, if it exists, will be deleted, when no longer user
-        m_airportsById = QSharedPointer<QHash<int, AirportInformation *>>(OurAirportsDB::readAirportsDB(getAirportDBFilename()));
+        m_airportsById = QSharedPointer<QHash<int, AirportInformation *>>(OurAirportsDB::readAirportsDB(getAirportDBFilename()),
+            [](QHash<int, AirportInformation *> *airportInfo) {
+                qDeleteAll(*airportInfo);
+                delete airportInfo;
+            });
         if (m_airportsById != nullptr)
         {
             OurAirportsDB::readFrequenciesDB(getAirportFrequenciesDBFilename(), m_airportsById.get());

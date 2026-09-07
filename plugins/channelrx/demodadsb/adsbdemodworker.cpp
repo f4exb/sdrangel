@@ -58,10 +58,15 @@ void ADSBBeastServer::send(const char *data, int length)
 
 void ADSBBeastServer::close()
 {
-    for (auto client : m_clients) {
+    const auto clients = m_clients;
+    m_clients.clear();
+
+    for (auto client : clients) {
+        client->disconnect(this);
+        client->close();
         client->deleteLater();
     }
-    m_clients.clear();
+
     QTcpServer::close();
 }
 
@@ -74,9 +79,12 @@ void ADSBBeastServer::readClient()
 void ADSBBeastServer::discardClient()
 {
     qDebug() << "ADSBBeastServer client disconnected";
+
     QTcpSocket *socket = (QTcpSocket*)sender();
-    socket->deleteLater();
-    m_clients.removeAll(socket);
+    if (socket) {
+        m_clients.removeAll(socket);
+        socket->deleteLater();
+    }
 }
 
 ADSBDemodWorker::ADSBDemodWorker() :
@@ -97,6 +105,14 @@ ADSBDemodWorker::ADSBDemodWorker() :
 
 ADSBDemodWorker::~ADSBDemodWorker()
 {
+    m_heartbeatTimer.stop();
+
+    m_beastServer.close();
+
+    if (m_socket.state() != QAbstractSocket::UnconnectedState) {
+        m_socket.close();
+    }
+
     m_inputMessageQueue.clear();
 }
 

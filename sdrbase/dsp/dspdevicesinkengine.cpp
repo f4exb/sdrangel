@@ -508,6 +508,12 @@ bool DSPDeviceSinkEngine::handleMessage(const Message& message)
 		m_basebandSampleSources.remove(source);
         return true;
 	}
+    else if (DSPGenerationError::match(message))
+    {
+        const DSPGenerationError& deviceError = (const DSPGenerationError&) message;
+        gotoError(deviceError.getErrorMessage());
+        return true;
+    }
 
     return false;
 }

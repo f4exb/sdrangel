@@ -57,7 +57,8 @@ ADSBDemod::ADSBDemod(DeviceAPI *devieAPI) :
         m_centerFrequency(0),
         m_targetAzElValid(false),
         m_targetAzimuth(0.0f),
-        m_targetElevation(0.0f)
+        m_targetElevation(0.0f),
+        m_targetRange(0.0f)
 {
     qDebug("ADSBDemod::ADSBDemod");
     setObjectName(m_channelId);

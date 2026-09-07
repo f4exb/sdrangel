@@ -46,6 +46,7 @@ PlaneSpotters::~PlaneSpotters()
         &PlaneSpotters::handleReply
     );
     delete m_networkManager;
+    qDeleteAll(m_photos);
 }
 
 void PlaneSpotters::getAircraftPhoto(const QString& icao)

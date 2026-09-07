@@ -24,7 +24,8 @@ MESSAGE_CLASS_DEFINITION(LocalSinkWorker::MsgStartStop, Message)
 LocalSinkWorker::LocalSinkWorker(QObject* parent) :
     QObject(parent),
     m_running(false),
-    m_sampleFifo(0)
+    m_sampleFifo(0),
+    m_deviceSampleFifo(nullptr)
 {
     connect(&m_inputMessageQueue, SIGNAL(messageEnqueued()), this, SLOT(handleInputMessages()), Qt::QueuedConnection);
 }

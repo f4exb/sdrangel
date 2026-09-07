@@ -22,6 +22,7 @@
 #include <QDateTime>
 #include <QString>
 #include <QMessageBox>
+#include <QSignalBlocker>
 
 #include "device/deviceapi.h"
 #include "device/deviceuiset.h"
@@ -486,6 +487,10 @@ void PlutoSDRMIMOGUI::updateStatus()
                 ui->startStopRx->setStyleSheet("QToolButton { background-color : green; }");
                 break;
             case DeviceAPI::StError:
+                {
+                    QSignalBlocker blocker(ui->startStopRx);
+                    ui->startStopRx->setChecked(false);
+                }
                 ui->startStopRx->setStyleSheet("QToolButton { background-color : red; }");
                 QMessageBox::information(this, tr("Message"), m_deviceUISet->m_deviceAPI->errorMessage());
                 break;
@@ -510,6 +515,10 @@ void PlutoSDRMIMOGUI::updateStatus()
                 ui->startStopTx->setStyleSheet("QToolButton { background-color : green; }");
                 break;
             case DeviceAPI::StError:
+                {
+                    QSignalBlocker blocker(ui->startStopTx);
+                    ui->startStopTx->setChecked(false);
+                }
                 ui->startStopTx->setStyleSheet("QToolButton { background-color : red; }");
                 QMessageBox::information(this, tr("Message"), m_deviceUISet->m_deviceAPI->errorMessage());
                 break;
@@ -520,6 +529,10 @@ void PlutoSDRMIMOGUI::updateStatus()
         m_lastTxEngineState = stateTx;
     }
 
+    if (stateTx == DeviceAPI::StError || stateRx == DeviceAPI::StError)
+    {
+        return;
+    }
 
     if (m_statusCounter % 2 == 0) // 1s
     {

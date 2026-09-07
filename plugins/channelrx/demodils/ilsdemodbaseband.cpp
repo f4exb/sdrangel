@@ -28,6 +28,7 @@
 MESSAGE_CLASS_DEFINITION(ILSDemodBaseband::MsgConfigureILSDemodBaseband, Message)
 
 ILSDemodBaseband::ILSDemodBaseband() :
+    m_spectrumVis(nullptr),
     m_running(false)
 {
     qDebug("ILSDemodBaseband::ILSDemodBaseband");

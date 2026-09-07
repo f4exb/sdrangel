@@ -137,7 +137,7 @@ void ADSBDemodSink::processOneSample(Real magsq)
         m_bufferDateTimeValid[m_writeBuffer] = true;
 
         // Make sure timestamps from different buffers are in order, even if we receive samples faster than real time
-        const qint64 samplesPerSecondMSec = ADS_B_BITS_PER_SECOND * m_settings.m_samplesPerBit / 1000;
+        const qint64 samplesPerSecondMSec = qint64(ADS_B_BITS_PER_SECOND) * m_settings.m_samplesPerBit / 1000;
         const qint64 offsetMSec = m_bufferSize / samplesPerSecondMSec;
         m_minFirstSampleDateTime = dateTime.addMSecs(offsetMSec);
     }

@@ -24,7 +24,8 @@
 #include "settings/serializable.h"
 
 
-LocalSinkSettings::LocalSinkSettings()
+LocalSinkSettings::LocalSinkSettings():
+    m_spectrumGUI(nullptr)
 {
     resetToDefaults();
 }

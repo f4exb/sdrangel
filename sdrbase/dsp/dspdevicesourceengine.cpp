@@ -640,6 +640,12 @@ bool DSPDeviceSourceEngine::handleMessage(const Message& message)
 		emit sinkRemoved();
 		return true;
 	}
+    else if (DSPAcquisitionError::match(message))
+    {
+        const DSPAcquisitionError& deviceError = (const DSPAcquisitionError&) message;
+        gotoError(deviceError.getErrorMessage());
+        return true;
+    }
 
     return false;
 }

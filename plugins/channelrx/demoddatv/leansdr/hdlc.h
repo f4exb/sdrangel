@@ -39,6 +39,12 @@ struct hdlc_dec
         maxframesize(_maxframesize),
         invertmask(_invert ? 0xff : 0),
         framebuf(new u8[maxframesize]),
+        shiftreg(0),
+        inframe(false),
+        byte_out(0),
+        nbits_out(0),
+        framesize(0),
+        crc16(0),
         debug(false)
     {
         reset();

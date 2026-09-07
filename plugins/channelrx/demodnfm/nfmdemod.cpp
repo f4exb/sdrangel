@@ -55,6 +55,8 @@ const int NFMDemod::m_udpBlockSize = 512;
 NFMDemod::NFMDemod(DeviceAPI *devieAPI) :
         ChannelAPI(m_channelIdURI, ChannelAPI::StreamSingleSink),
         m_deviceAPI(devieAPI),
+        m_thread(nullptr),
+        m_basebandSink(nullptr),
         m_running(false),
         m_basebandSampleRate(0),
         m_centerFrequency(0)

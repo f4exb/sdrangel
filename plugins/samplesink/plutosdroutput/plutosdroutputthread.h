@@ -45,6 +45,9 @@ public:
     virtual bool isRunning() { return m_running; }
     void setLog2Interpolation(unsigned int log2_interp);
 
+signals:
+    void error(int errorCode);
+
 private:
     QMutex m_startWaitMutex;
     QWaitCondition m_startWaiter;

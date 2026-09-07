@@ -29,6 +29,8 @@
 #include "rttydemodsink.h"
 
 RttyDemodSink::RttyDemodSink() :
+        m_scopeSink(nullptr),
+        m_channel(nullptr),
         m_channelSampleRate(RttyDemodSettings::RTTYDEMOD_CHANNEL_SAMPLE_RATE),
         m_channelFrequencyOffset(0),
         m_magsqSum(0.0f),
@@ -40,6 +42,9 @@ RttyDemodSink::RttyDemodSink() :
         m_prods2(nullptr),
         m_exp(nullptr),
         m_sampleIdx(0),
+        m_data(false),
+        m_dataPrev(false),
+        m_cycleCount(0),
         m_clockHistogram(100),
         m_shiftEstMag(m_fftSize),
         m_fftSequence(-1),

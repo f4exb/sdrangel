@@ -504,7 +504,7 @@ void ScopeVis::feed(const std::vector<ComplexVector::const_iterator>& vbegin, in
             m_triggerLocation = m_triggerLocation < 0 ? 0 : m_triggerLocation; // trim negative values
             m_triggerLocation = m_triggerLocation > remainder ? remainder : m_triggerLocation; // trim past begin values
 
-            for (auto begin : nvbegin) {
+            for (auto& begin : nvbegin) {
                 begin += m_traceSize;
             }
 

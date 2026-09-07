@@ -31,9 +31,13 @@ MESSAGE_CLASS_DEFINITION(FileSinkBaseband::MsgConfigureFileSinkWork, Message)
 
 FileSinkBaseband::FileSinkBaseband() :
     m_channelizer(&m_sink),
+    m_spectrumSink(nullptr),
+    m_messageQueueToGUI(nullptr),
     m_specMax(0),
     m_squelchLevel(0),
-    m_squelchOpen(false)
+    m_squelchOpen(false),
+    m_centerFrequency(0),
+    m_timer(nullptr)
 {
     qDebug("FileSinkBaseband::FileSinkBaseband");
     m_sampleFifo.setSize(SampleSinkFifo::getSizePolicy(48000));

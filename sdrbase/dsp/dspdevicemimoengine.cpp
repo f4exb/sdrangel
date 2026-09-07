@@ -1235,6 +1235,18 @@ bool DSPDeviceMIMOEngine::handleMessage(const Message& message)
 
         return true;
     }
+    else if (DSPAcquisitionError::match(message))
+    {
+        const DSPAcquisitionError& deviceError = (const DSPAcquisitionError&) message;
+        gotoError(0, deviceError.getErrorMessage());
+        return true;
+    }
+    else if (DSPGenerationError::match(message))
+    {
+        const DSPGenerationError& deviceError = (const DSPGenerationError&) message;
+        gotoError(1, deviceError.getErrorMessage());
+        return true;
+    }
 
 
     return false;

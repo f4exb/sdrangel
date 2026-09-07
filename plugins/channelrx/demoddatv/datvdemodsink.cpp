@@ -38,21 +38,35 @@
 const unsigned int DATVDemodSink::m_rfFilterFftLength = 512;
 
 DATVDemodSink::DATVDemodSink() :
+    m_lngExpectedReadIQ(0),
+    m_lngReadIQ(0),
+    BUF_BASEBAND(0),
+    BUF_SYMBOLS(0),
+    BUF_BYTES(0),
+    BUF_MPEGBYTES(0),
+    BUF_PACKETS(0),
+    BUF_SLOW(0),
+    BUF_SLOTS(0),
+    BUF_FRAMES(0),
+    BUF_S2PACKETS(0),
+    S2_MAX_SYMBOLS(0),
+    m_blnDVBInitialized(false),
     m_blnNeedConfigUpdate(false),
     m_tvScreen(nullptr),
-#ifndef SERVER_MODE
     m_videoRender(nullptr),
-#endif
     m_videoStream(new DATVideostream()),
     m_udpStream(leansdr::tspacket::SIZE),
     m_videoThread(nullptr),
     m_audioFifo(48000),
+    m_interpolatorDistance(0),
+    m_interpolatorDistanceRemain(0),
     m_blnRenderingVideo(false),
     m_cstlnSetByModcod(false),
     m_modcodModulation(-1),
     m_modcodCodeRate(-1),
     m_enmModulation(DATVDemodSettings::BPSK /*DATV_FM1*/),
     m_channelSampleRate(1024000),
+    m_channelFrequencyOffset(0),
     m_messageQueueToGUI(nullptr)
 {
     //*************** DATV PARAMETERS  ***************

@@ -44,6 +44,7 @@ const uint8_t RadiosondeDemodSink::m_descramble[64] = {
 RadiosondeDemodSink::RadiosondeDemodSink(RadiosondeDemod *radiosondeDemod) :
         m_scopeSink(nullptr),
         m_radiosondeDemod(radiosondeDemod),
+        m_channel(nullptr),
         m_channelSampleRate(RadiosondeDemodSettings::RADIOSONDEDEMOD_CHANNEL_SAMPLE_RATE),
         m_channelFrequencyOffset(0),
         m_magsqSum(0.0f),
@@ -52,6 +53,7 @@ RadiosondeDemodSink::RadiosondeDemodSink(RadiosondeDemod *radiosondeDemod) :
         m_messageQueueToChannel(nullptr),
         m_rxBuf(nullptr),
         m_train(nullptr),
+        m_bytes{},
         m_sampleBufferIndex(0)
 {
     m_magsq = 0.0;

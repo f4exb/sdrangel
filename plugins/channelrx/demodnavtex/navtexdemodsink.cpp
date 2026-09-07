@@ -28,6 +28,8 @@
 #include "navtexdemodsink.h"
 
 NavtexDemodSink::NavtexDemodSink() :
+        m_scopeSink(nullptr),
+        m_channel(nullptr),
         m_channelSampleRate(NavtexDemodSettings::NAVTEXDEMOD_CHANNEL_SAMPLE_RATE),
         m_channelFrequencyOffset(0),
         m_magsqSum(0.0f),
@@ -35,6 +37,8 @@ NavtexDemodSink::NavtexDemodSink() :
         m_magsqCount(0),
         m_messageQueueToChannel(nullptr),
         m_exp(nullptr),
+        m_data(false),
+        m_dataPrev(false),
         m_sampleBufferIndex(0)
 {
     m_magsq = 0.0;

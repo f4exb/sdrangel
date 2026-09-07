@@ -99,6 +99,14 @@ void PlutoSDROutputThread::run()
         // Schedule TX buffer for sending
         nbytes_tx = m_plutoBox->txBufferPush();
 
+        if (nbytes_tx < 0)
+        {
+            qCritical("PlutoSDROutputThread::run: error pushing buffer: %s (%zd)",
+                strerror(-nbytes_tx), nbytes_tx);
+            emit error((int) nbytes_tx);
+            break;
+        }
+
         if (nbytes_tx != 4*m_blockSizeSamples)
         {
             qDebug("PlutoSDROutputThread::run: error pushing buf %d / %d", (int) nbytes_tx, (int) 4*m_blockSizeSamples);

@@ -58,7 +58,14 @@ NoiseFigure::NoiseFigure(DeviceAPI *deviceAPI) :
         ChannelAPI(m_channelIdURI, ChannelAPI::StreamSingleSink),
         m_deviceAPI(deviceAPI),
         m_basebandSampleRate(0),
-        m_state(IDLE)
+        m_centerFrequency(0),
+        m_state(IDLE),
+        m_sweepValue(0.0),
+        m_step(0),
+        m_steps(0),
+        m_onPower(0.0),
+        m_offPower(0.0),
+        m_session(0)
 {
     setObjectName(m_channelId);
 

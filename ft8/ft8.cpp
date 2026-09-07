@@ -1562,7 +1562,7 @@ std::vector<std::vector<float>> FT8::soft_c2m(const FFTEngine::ffts_t &c79) cons
     {
         m79[si].resize(8);
         float mx = -std::numeric_limits<float>::infinity();
-        float mx_phase;
+        float mx_phase = 0;
 
         for (int bi = 0; bi < 8; bi++)
         {
@@ -1602,15 +1602,14 @@ std::vector<std::vector<float>> FT8::soft_c2m(const FFTEngine::ffts_t &c79) cons
 
         // choose the phase that has the lowest total distance to other
         // phases. like median but avoids -pi..pi wrap-around.
-        int n = v.size();
-        int best = -1;
-        float best_score = 0;
-        for (int i = 0; i < n; i++)
-
+        const size_t n = v.size();
+        size_t best = 0;
+        float best_score = std::numeric_limits<float>::infinity();
+        for (size_t i = 0; i < n; i++)
         {
             float score = 0;
 
-            for (int j = 0; j < n; j++)
+            for (size_t j = 0; j < n; j++)
             {
                 if (i == j) {
                     continue;
@@ -1625,7 +1624,7 @@ std::vector<std::vector<float>> FT8::soft_c2m(const FFTEngine::ffts_t &c79) cons
                 score += d;
             }
 
-            if (best == -1 || score < best_score)
+            if (score < best_score)
             {
                 best = i;
                 best_score = score;

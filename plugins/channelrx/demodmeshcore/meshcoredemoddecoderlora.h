@@ -224,8 +224,8 @@ private:
             }
 
             // fall through to crApp=3 syndrome logic
+            Q_FALLTHROUGH();
         }
-        // no break
         case 3:
         {
             const bool s0 = codeword[0] ^ codeword[1] ^ codeword[2] ^ codeword[4];

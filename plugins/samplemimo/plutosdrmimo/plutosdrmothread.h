@@ -46,6 +46,9 @@ public:
     void setFifo(SampleMOFifo *sampleFifo) { m_sampleFifo = sampleFifo; }
     SampleMOFifo *getFifo() { return m_sampleFifo; }
 
+signals:
+    void error(int errorCode);
+
 private:
     QMutex m_startWaitMutex;
     QWaitCondition m_startWaiter;

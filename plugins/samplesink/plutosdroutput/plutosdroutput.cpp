@@ -117,6 +117,7 @@ bool PlutoSDROutput::start()
     // start / stop streaming is done in the thread.
 
     m_plutoSDROutputThread = new PlutoSDROutputThread(PLUTOSDR_BLOCKSIZE_SAMPLES, m_deviceShared.m_deviceParams->getBox(), &m_sampleSourceFifo);
+    connect(m_plutoSDROutputThread, &PlutoSDROutputThread::error, this, &PlutoSDROutput::handleError, Qt::QueuedConnection);
     qDebug("PlutoSDROutput::start: thread created");
 
     m_plutoSDROutputThread->setLog2Interpolation(m_settings.m_log2Interp);
@@ -148,6 +149,31 @@ void PlutoSDROutput::stop()
     }
 
     m_deviceShared.m_thread = 0;
+}
+
+void PlutoSDROutput::handleError(int errorCode)
+{
+    QMutexLocker mutexLocker(&m_mutex);
+
+    m_running = false;
+    if (m_plutoSDROutputThread)
+    {
+        if (m_plutoSDROutputThread->isRunning())
+        {
+            m_plutoSDROutputThread->stopWork();
+        }
+        m_plutoSDROutputThread->wait();
+        delete m_plutoSDROutputThread;
+        m_plutoSDROutputThread = nullptr;
+    }
+    m_deviceShared.m_thread = 0;
+
+    const QString errorMessage =
+        tr("Radio needs a restart: %1 (%2)")
+            .arg(strerror(-errorCode))
+            .arg(errorCode);
+
+    m_deviceAPI->getDeviceEngineInputMessageQueue()->push(new DSPGenerationError(errorMessage));
 }
 
 QByteArray PlutoSDROutput::serialize() const

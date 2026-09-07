@@ -163,6 +163,7 @@ public:
 
     bool openDevice();
     void closeDevice();
+    void handleError(int errorCode);
     void suspendBuddies();
     void resumeBuddies();
     bool applySettings(const PlutoSDRInputSettings& settings, const QList<QString>& settingsKeys, bool force = false);

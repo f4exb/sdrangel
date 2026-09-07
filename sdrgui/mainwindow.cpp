@@ -2855,6 +2855,9 @@ void MainWindow::sampleSourceChange(int deviceSetIndex, int newDeviceIndex, Work
     {
         qDebug("MainWindow::sampleSourceChange: deviceSet %d workspace: %d", deviceSetIndex, workspace->getIndex());
         DeviceUISet *deviceUISet = m_deviceUIs[deviceSetIndex];
+        QString deviceDescription = deviceUISet->m_deviceAPI->getSampleSource()->getDeviceDescription();
+        QByteArray settings = deviceUISet->m_deviceAPI->getSampleSource()->serialize();
+        qint64 centerFrequency = deviceUISet->m_deviceAPI->getSampleSource()->getCenterFrequency();
         QPoint p = deviceUISet->m_deviceGUI->pos();
         workspace->removeFromMdiArea(deviceUISet->m_deviceGUI);
         deviceUISet->m_deviceAPI->stopDeviceEngine();
@@ -2870,6 +2873,13 @@ void MainWindow::sampleSourceChange(int deviceSetIndex, int newDeviceIndex, Work
         sampleSourceCreate(deviceSetIndex, newDeviceIndex, deviceUISet);
         sampleSourceCreateUI(deviceSetIndex, newDeviceIndex, deviceUISet);
         deviceUISet->m_deviceGUI->setWorkspaceIndex(workspace->getIndex());
+        if (deviceUISet->m_deviceAPI->getSampleSource()->getDeviceDescription() == deviceDescription)
+        {
+            if (deviceUISet->m_deviceAPI->getSampleSource()->deserialize(settings))
+            {
+                deviceUISet->m_deviceAPI->getSampleSource()->setCenterFrequency(centerFrequency);
+            }
+        }
         workspace->addToMdiArea(deviceUISet->m_deviceGUI);
         deviceUISet->m_deviceGUI->move(p);
 
@@ -2888,6 +2898,9 @@ void MainWindow::sampleSinkChange(int deviceSetIndex, int newDeviceIndex, Worksp
     {
         qDebug("MainWindow::sampleSinkChange: deviceSet %d workspace: %d", deviceSetIndex, workspace->getIndex());
         DeviceUISet *deviceUISet = m_deviceUIs[deviceSetIndex];
+        QString deviceDescription = deviceUISet->m_deviceAPI->getSampleSink()->getDeviceDescription();
+        QByteArray settings = deviceUISet->m_deviceAPI->getSampleSink()->serialize();
+        qint64 centerFrequency = deviceUISet->m_deviceAPI->getSampleSink()->getCenterFrequency();
         QPoint p = deviceUISet->m_deviceGUI->pos();
         workspace->removeFromMdiArea(deviceUISet->m_deviceGUI);
         deviceUISet->m_deviceAPI->saveSamplingDeviceSettings(m_mainCore->m_settings.getWorkingPreset()); // save old API settings
@@ -2903,6 +2916,13 @@ void MainWindow::sampleSinkChange(int deviceSetIndex, int newDeviceIndex, Worksp
         sampleSinkCreate(deviceSetIndex, newDeviceIndex, deviceUISet);
         sampleSinkCreateUI(deviceSetIndex, newDeviceIndex, deviceUISet);
         deviceUISet->m_deviceGUI->setWorkspaceIndex(workspace->getIndex());
+        if (deviceUISet->m_deviceAPI->getSampleSink()->getDeviceDescription() == deviceDescription)
+        {
+            if (deviceUISet->m_deviceAPI->getSampleSink()->deserialize(settings))
+            {
+                deviceUISet->m_deviceAPI->getSampleSink()->setCenterFrequency(centerFrequency);
+            }
+        }
         workspace->addToMdiArea(deviceUISet->m_deviceGUI);
         deviceUISet->m_deviceGUI->move(p);
 
@@ -2919,8 +2939,12 @@ void MainWindow::sampleMIMOChange(int deviceSetIndex, int newDeviceIndex, Worksp
 {
     if (deviceSetIndex >= 0)
     {
-        qDebug("MainWindow::sampleSinkChange: deviceSet %d workspace: %d", deviceSetIndex, workspace->getIndex());
+        qDebug("MainWindow::sampleMIMOChange: deviceSet %d workspace: %d", deviceSetIndex, workspace->getIndex());
         DeviceUISet *deviceUISet = m_deviceUIs[deviceSetIndex];
+        QString deviceDescription = deviceUISet->m_deviceAPI->getSampleMIMO()->getDeviceDescription();
+        QByteArray settings = deviceUISet->m_deviceAPI->getSampleMIMO()->serialize();
+        quint64 sourceCenterFrequency = deviceUISet->m_deviceAPI->getSampleMIMO()->getSourceCenterFrequency(0);
+        quint64 sinkCenterFrequency = deviceUISet->m_deviceAPI->getSampleMIMO()->getSinkCenterFrequency(0);
         QPoint p = deviceUISet->m_deviceGUI->pos();
         workspace->removeFromMdiArea(deviceUISet->m_deviceGUI);
         deviceUISet->m_deviceAPI->saveSamplingDeviceSettings(m_mainCore->m_settings.getWorkingPreset()); // save old API settings
@@ -2935,6 +2959,14 @@ void MainWindow::sampleMIMOChange(int deviceSetIndex, int newDeviceIndex, Worksp
         sampleMIMOCreate(deviceSetIndex, newDeviceIndex, deviceUISet);
         sampleMIMOCreateUI(deviceSetIndex, newDeviceIndex, deviceUISet);
         deviceUISet->m_deviceGUI->setWorkspaceIndex(workspace->getIndex());
+        if (deviceUISet->m_deviceAPI->getSampleMIMO()->getDeviceDescription() == deviceDescription)
+        {
+            if (deviceUISet->m_deviceAPI->getSampleMIMO()->deserialize(settings))
+            {
+                deviceUISet->m_deviceAPI->getSampleMIMO()->setSourceCenterFrequency(sourceCenterFrequency, 0);
+                deviceUISet->m_deviceAPI->getSampleMIMO()->setSinkCenterFrequency(sinkCenterFrequency, 0);
+            }
+        }
         workspace->addToMdiArea(deviceUISet->m_deviceGUI);
         deviceUISet->m_deviceGUI->move(p);
 

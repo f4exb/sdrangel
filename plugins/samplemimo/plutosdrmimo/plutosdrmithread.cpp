@@ -111,6 +111,14 @@ void PlutoSDRMIThread::run()
         // Refill RX buffer
         nbytes_rx = m_plutoBox->rxBufferRefill();
 
+        if (nbytes_rx < 0)
+        {
+            qCritical("PlutoSDRMIThread::run: error refilling buffer: %s (%zd)",
+                strerror(-nbytes_rx), nbytes_rx);
+            emit error((int) nbytes_rx);
+            break;
+        }
+
         if (nbytes_rx != m_plutoSDRBlockSizeSamples*p_inc)
         {
             qWarning("PlutoSDRMIThread::run: error refilling buf %d / %ld", (int) nbytes_rx, (int)  m_plutoSDRBlockSizeSamples*p_inc);

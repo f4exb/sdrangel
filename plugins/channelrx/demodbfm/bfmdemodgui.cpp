@@ -867,9 +867,8 @@ void BFMDemodGUI::rdsUpdate(bool force)
 
 			RDSParser::psns_map_t::iterator it = m_bfmDemod->getRDSParser()->m_g14_program_service_names.begin();
 			const RDSParser::psns_map_t::iterator itEnd = m_bfmDemod->getRDSParser()->m_g14_program_service_names.end();
-			int i = 0;
 
-			for (; it != itEnd; ++it, i++)
+			for (; it != itEnd; ++it)
 			{
 				m_g14ComboIndex.push_back(it->first);
 				QString pistring(str(boost::format("%04X:%s") % it->first % it->second).c_str());

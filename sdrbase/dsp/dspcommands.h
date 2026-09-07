@@ -43,6 +43,20 @@ class SDRBASE_API DSPAcquisitionStop : public Message {
 	MESSAGE_CLASS_DECLARATION
 };
 
+class SDRBASE_API DSPAcquisitionError : public Message {
+    MESSAGE_CLASS_DECLARATION
+
+public:
+    DSPAcquisitionError(const QString& errorMessage) :
+        m_errorMessage(errorMessage)
+    { }
+
+    const QString& getErrorMessage() const { return m_errorMessage; }
+
+private:
+    QString m_errorMessage;
+};
+
 class SDRBASE_API DSPGenerationInit : public Message {
 	MESSAGE_CLASS_DECLARATION
 };
@@ -53,6 +67,20 @@ class SDRBASE_API DSPGenerationStart : public Message {
 
 class SDRBASE_API DSPGenerationStop : public Message {
 	MESSAGE_CLASS_DECLARATION
+};
+
+class SDRBASE_API DSPGenerationError : public Message {
+    MESSAGE_CLASS_DECLARATION
+
+public:
+    DSPGenerationError(const QString& errorMessage) :
+        m_errorMessage(errorMessage)
+    { }
+
+    const QString& getErrorMessage() const { return m_errorMessage; }
+
+private:
+    QString m_errorMessage;
 };
 
 class SDRBASE_API DSPGetSourceDeviceDescription : public Message {

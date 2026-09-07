@@ -48,7 +48,8 @@ ChannelAnalyzer::ChannelAnalyzer(DeviceAPI *deviceAPI) :
         ChannelAPI(m_channelIdURI, ChannelAPI::StreamSingleSink),
         m_deviceAPI(deviceAPI),
         m_spectrumVis(SDR_RX_SCALEF),
-        m_basebandSampleRate(0)
+        m_basebandSampleRate(0),
+        m_centerFrequency(0)
 {
     qDebug("ChannelAnalyzer::ChannelAnalyzer");
     setObjectName(m_channelId);

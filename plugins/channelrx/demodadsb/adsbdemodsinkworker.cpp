@@ -324,6 +324,7 @@ void ADSBDemodSinkWorker::run()
         // chip+ indexes are 0, 2, 7, 9
         Real preambleCorrelationOnes = 0.0;
         Real preambleCorrelationZeros = 0.0;
+        Real preambleCorrelation = 0.0;
         for (int i = 0; i < samplesPerChip; i++)
         {
             preambleCorrelationOnes  += m_sink->m_sampleBuffer[readBuffer][startIdx +  0*samplesPerChip + i];
@@ -362,7 +363,11 @@ void ADSBDemodSinkWorker::run()
         // The threshold accounts for the different number of zeros and ones in the preamble
         // If the sum of ones is exactly 0, it's probably no signal
 
-        Real preambleCorrelation = preambleCorrelationOnes/preambleCorrelationZeros; // without one/zero ratio correction
+        if (preambleCorrelationZeros != 0.0)
+        {
+            // without one/zero ratio correction
+            preambleCorrelation = preambleCorrelationOnes/preambleCorrelationZeros;
+        }
 
         if ((preambleCorrelation > m_correlationThresholdLinear) && (preambleCorrelationOnes != 0.0f))
         {
@@ -688,7 +693,7 @@ void ADSBDemodSinkWorker::handleInputMessages()
 
 QDateTime ADSBDemodSinkWorker::rxDateTime(int firstIdx, int readBuffer) const
 {
-    const qint64 samplesPerSecondMSec = ADS_B_BITS_PER_SECOND * m_settings.m_samplesPerBit / 1000;
+    const qint64 samplesPerSecondMSec = qint64(ADS_B_BITS_PER_SECOND) * m_settings.m_samplesPerBit / 1000;
     const qint64 offsetMSec = (firstIdx - m_sink->m_samplesPerFrame - 1) / samplesPerSecondMSec;
     return m_sink->m_bufferFirstSampleDateTime[readBuffer].addMSecs(offsetMSec);
 }

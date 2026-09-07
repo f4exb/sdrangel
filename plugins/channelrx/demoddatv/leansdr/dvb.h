@@ -819,7 +819,7 @@ struct dvb_deconvol_sync : runnable
     struct sync_t
     {
         deconvol_poly2<Tin, uint32_t, uint64_t, 0x3ba, 0x38f70> deconv;
-        u8 lut[4]; // TBD Swap and flip bits in the polynomials instead.
+        u8 lut[4] = {}; // TBD Swap and flip bits in the polynomials instead.
     } syncs[NSYNCS];
 
     sync_t *locked;
@@ -893,6 +893,11 @@ struct mpeg_sync : runnable
         bitphase(0),
         synchronized(false),
         next_sync_count(0),
+        phase8(-1),
+        lock_timeleft(0),
+        locktime(0),
+        state_out(nullptr),
+        locktime_out(nullptr),
         report_state(true)
     {
         state_out = _state_out ? new pipewriter<int>(*_state_out) : nullptr;
@@ -1223,7 +1228,7 @@ static const int SIZE_TSPACKET = 188; // TBD remove
 struct tspacket
 {
     static const int SIZE = 188;
-    u8 data[SIZE_TSPACKET];
+    u8 data[SIZE_TSPACKET] = {};
 };
 
 // RS ENCODER

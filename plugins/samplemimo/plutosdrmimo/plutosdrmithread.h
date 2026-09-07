@@ -47,6 +47,9 @@ public:
     SampleMIFifo *getFifo() { return m_sampleFifo; }
     void setIQOrder(bool iqOrder) { m_iqOrder = iqOrder; }
 
+signals:
+    void error(int errorCode);
+
 private:
     QMutex m_startWaitMutex;
     QWaitCondition m_startWaiter;

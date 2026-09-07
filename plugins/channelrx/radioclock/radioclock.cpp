@@ -47,7 +47,8 @@ const char * const RadioClock::m_channelId = "RadioClock";
 RadioClock::RadioClock(DeviceAPI *deviceAPI) :
         ChannelAPI(m_channelIdURI, ChannelAPI::StreamSingleSink),
         m_deviceAPI(deviceAPI),
-        m_basebandSampleRate(0)
+        m_basebandSampleRate(0),
+        m_centerFrequency(0)
 {
     setObjectName(m_channelId);
 

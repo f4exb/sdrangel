@@ -35,6 +35,8 @@ FreqTrackerSink::FreqTrackerSink() :
         m_spectrumSink(nullptr),
         m_sampleBufferCount(0),
       	m_undersampleCount(0),
+        m_squelchLevel(0.0),
+        m_squelchCount(0),
         m_squelchOpen(false),
         m_squelchGate(0),
         m_magsqSum(0.0f),

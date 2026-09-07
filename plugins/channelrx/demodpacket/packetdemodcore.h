@@ -179,7 +179,7 @@ private:
 
     std::vector<MlseChain> m_chains;
     std::vector<Complex> m_bitBuf;  // Recent channel samples, circular
-    quint64 m_sampleCount;
+    quint64 m_sampleCount = 0;
     int m_samplesPerSymbol = PacketDemodSettings::PACKETDEMOD_CHANNEL_SAMPLE_RATE / 1200;
 
     // Burst replay. The estimator can only know a burst's tuning once the burst is over,
@@ -256,7 +256,7 @@ private:
         int m_rates = 1;
     };
     PendingReplay m_pendingReplay;
-    quint64 m_replayReportTime;     // Burst time, so replayed frames dedup against live
+    quint64 m_replayReportTime = 0;     // Burst time, so replayed frames dedup against live
     bool m_liveRunning = false;
     quint64 m_liveTailEnd = 0;
 
@@ -396,14 +396,14 @@ private:
     // Per tone deviation, from the correlation power over run interiors. The opposite
     // tone's correlator is the in-burst noise reference: both see the same noise power, so
     // their difference is the tone's signal power with the noise cancelled at any SNR.
-    double m_estDevMark;
-    double m_estDevSpace;
+    double m_estDevMark = 0.0;
+    double m_estDevSpace = 0.0;
     double m_devCalPow[2];          // Correlator power for a reference deviation tone
     double m_devCalCross[2];        // ... and its leakage into the other correlator
     double m_devAcc[2];             // Same and opposite correlator powers this burst
     double m_devAccX[2];
     int m_devCnt[2];
-    quint64 m_lastTransSample;      // For keeping the accumulation clear of transitions
+    quint64 m_lastTransSample = 0;      // For keeping the accumulation clear of transitions
 
     struct DevSample
     {
@@ -419,8 +419,8 @@ private:
     // need a strong burst - the gate is a power ratio of 16, roughly 10 dB CNR - and
     // several bursts agreeing, because the detector only tolerates about half a percent
     // of tone error and corrupted estimates arrive with a consistent bias.
-    double m_estToneMark;           // Applied tone frequencies
-    double m_estToneSpace;
+    double m_estToneMark = 0.0;           // Applied tone frequencies
+    double m_estToneSpace = 0.0;
     double m_toneCalBias[2];        // Correction for the real correlator's image pull
     double m_calMark = 1200.0;      // Tone pair the correlators above are built for
     double m_calSpace = 2200.0;
@@ -429,7 +429,7 @@ private:
     bool m_tonePrevValid[2];
     std::deque<double> m_toneHist[2]; // Recent accepted per burst estimates
     std::deque<double> m_tonePairHist[2]; // Loose-gate history for tone-pair classification
-    int m_estBurstLiveDecodes;        // Valid frames the LIVE chains got from this burst
+    int m_estBurstLiveDecodes = 0;        // Valid frames the LIVE chains got from this burst
 
     // Learning the channel's tone pair from CRC-valid decodes rather than from the tone
     // correlators - see the comment at the counting site

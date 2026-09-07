@@ -86,7 +86,7 @@ public:
         int m_bitCount;
         int m_onesCount;
         bool m_gotSOP;
-        unsigned char m_bytes[512];     // Info field can be 256 bytes
+        unsigned char m_bytes[512]{};     // Info field can be 256 bytes
         int m_byteCount;
 
         std::vector<Real> m_symHist;

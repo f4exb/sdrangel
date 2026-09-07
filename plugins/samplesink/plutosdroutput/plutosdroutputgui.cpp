@@ -22,6 +22,7 @@
 #include <stdio.h>
 #include <QDebug>
 #include <QMessageBox>
+#include <QSignalBlocker>
 
 #include "dsp/dspcommands.h"
 #include "gui/glspectrum.h"
@@ -408,6 +409,10 @@ void PlutoSDROutputGUI::updateStatus()
                 ui->startStop->setStyleSheet("QToolButton { background-color : green; }");
                 break;
             case DeviceAPI::StError:
+                {
+                    QSignalBlocker blocker(ui->startStop);
+                    ui->startStop->setChecked(false);
+                }
                 ui->startStop->setStyleSheet("QToolButton { background-color : red; }");
                 QMessageBox::information(this, tr("Message"), m_deviceUISet->m_deviceAPI->errorMessage());
                 break;
@@ -416,6 +421,11 @@ void PlutoSDROutputGUI::updateStatus()
         }
 
         m_lastEngineState = state;
+    }
+
+    if (state == DeviceAPI::StError)
+    {
+        return;
     }
 
     if (m_statusCounter % 2 == 0) // 1s

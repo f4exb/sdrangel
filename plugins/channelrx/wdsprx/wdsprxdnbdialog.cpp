@@ -19,7 +19,14 @@
 
 WDSPRxDNBDialog::WDSPRxDNBDialog(QWidget* parent) :
     QDialog(parent),
-    ui(new Ui::WDSPRxDNBDialog)
+    ui(new Ui::WDSPRxDNBDialog),
+    m_nbScheme(WDSPRxProfile::NBSchemeNB),
+    m_nb2Mode(WDSPRxProfile::NB2ModeZero),
+    m_nbSlewTime(0.0),
+    m_nbLeadTime(0.0),
+    m_nbLagTime(0.0),
+    m_nbThreshold(0),
+    m_nbAvgTime(0.0)
 {
     ui->setupUi(this);
 }

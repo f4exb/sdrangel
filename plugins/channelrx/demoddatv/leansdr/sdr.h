@@ -235,10 +235,11 @@ struct auto_notch : runnable
 
     struct slot
     {
-        int i;
+        int i = 0;
         std::complex<float> estim;
-        std::complex<float> *expj, *ej;
-        int estt;
+        std::complex<float> *expj = nullptr;
+        std::complex<float> *ej   = nullptr;
+        int estt = 0;
     };
 
     slot *__slots;
@@ -480,9 +481,9 @@ uint8_t softsymb_to_dump(const hard_ss &ss, int bit);
 struct eucl_ss
 {
     static const int MAX_SYMBOLS = 4;
-    uint16_t dists2[MAX_SYMBOLS];
-    uint16_t discr2; // 2nd_nearest - nearest
-    uint8_t nearest;
+    uint16_t dists2[MAX_SYMBOLS]{};
+    uint16_t discr2 = 0; // 2nd_nearest - nearest
+    uint8_t nearest = 0;
 };
 
 void to_softsymb(const full_ss *fss, eucl_ss *ss);
@@ -523,10 +524,10 @@ struct cstln_base
     };
 
     static const char *names[];
-    float amp_max; // Max amplitude. 1 for PSK, 0 if not applicable.
-    std::complex<int8_t> *symbols;
-    int nsymbols;
-    int nrotations;
+    float amp_max = 0.0f; // Max amplitude. 1 for PSK, 0 if not applicable.
+    std::complex<int8_t> *symbols = nullptr;
+    int nsymbols = 0;
+    int nrotations = 0;
 };
 // cstln_base
 
@@ -539,7 +540,11 @@ struct cstln_lut : cstln_base
         float gamma1 = 0,
         float gamma2 = 0,
         float gamma3 = 0
-    )
+    ) :
+        lut{},
+        m_typeCode(0),
+        m_rateCode(0),
+        m_setByModcod(false)
     {
         symbols = nullptr;
 
@@ -742,8 +747,8 @@ struct cstln_lut : cstln_base
     struct result
     {
         SOFTSYMB ss;
-        s_angle phase_error;
-        uint8_t symbol; // Nearest symbol, useful for C&T recovery
+        s_angle phase_error = 0;
+        uint8_t symbol = 0; // Nearest symbol, useful for C&T recovery
     };
 
     inline result *lookup(float I, float Q)
@@ -1023,7 +1028,7 @@ struct linear_sampler : sampler_interface<T>
 
   private:
     trig16 trig;
-    float freqw;
+    float freqw = 0.0f;
 };
 // linear_sampler
 
@@ -1147,6 +1152,8 @@ struct cstln_receiver : runnable
         sampler(_sampler),
         cstln(nullptr),
         meas_decimation(1048576),
+        omega(0),
+        freqw(0),
         pll_adjustment(1.0),
         allow_drift(false),
         kest(0.01),
@@ -1477,7 +1484,8 @@ struct fast_qpsk_receiver : runnable
         out(_out, chunk_size),
         mu(0),
         phase(0),
-        meas_count(0)
+        meas_count(0),
+        mer_out(nullptr)
     {
         set_omega(1);
         set_freq(0);

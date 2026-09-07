@@ -853,15 +853,35 @@ void ChirpChatDemodGUI::makeUIConnections()
     QObject::connect(ui->clear, &QPushButton::clicked, this, &ChirpChatDemodGUI::on_clear_clicked);
     QObject::connect(ui->eomSquelch, &QDial::valueChanged, this, &ChirpChatDemodGUI::on_eomSquelch_valueChanged);
     QObject::connect(ui->messageLength, &QDial::valueChanged, this, &ChirpChatDemodGUI::on_messageLength_valueChanged);
+
+#if QT_VERSION >= QT_VERSION_CHECK(6, 7, 0)
+    QObject::connect(ui->messageLengthAuto, &QCheckBox::checkStateChanged, this, [this](Qt::CheckState state) {
+        on_messageLengthAuto_stateChanged(static_cast<int>(state));
+    });
+    QObject::connect(ui->header, &QCheckBox::checkStateChanged, this, [this](Qt::CheckState state) {
+        on_header_stateChanged(static_cast<int>(state));
+    });
+    QObject::connect(ui->crc, &QCheckBox::checkStateChanged, this, [this](Qt::CheckState state) {
+        on_crc_stateChanged(static_cast<int>(state));
+    });
+    QObject::connect(ui->udpSend, &QCheckBox::checkStateChanged, this, [this](Qt::CheckState state) {
+        on_udpSend_stateChanged(static_cast<int>(state));
+    });
+    QObject::connect(ui->invertRamps, &QCheckBox::checkStateChanged, this, [this](Qt::CheckState state) {
+        on_invertRamps_stateChanged(static_cast<int>(state));
+    });
+#else
     QObject::connect(ui->messageLengthAuto, &QCheckBox::stateChanged, this, &ChirpChatDemodGUI::on_messageLengthAuto_stateChanged);
     QObject::connect(ui->header, &QCheckBox::stateChanged, this, &ChirpChatDemodGUI::on_header_stateChanged);
-    QObject::connect(ui->fecParity, &QDial::valueChanged, this, &ChirpChatDemodGUI::on_fecParity_valueChanged);
     QObject::connect(ui->crc, &QCheckBox::stateChanged, this, &ChirpChatDemodGUI::on_crc_stateChanged);
-    QObject::connect(ui->packetLength, &QDial::valueChanged, this, &ChirpChatDemodGUI::on_packetLength_valueChanged);
     QObject::connect(ui->udpSend, &QCheckBox::stateChanged, this, &ChirpChatDemodGUI::on_udpSend_stateChanged);
+    QObject::connect(ui->invertRamps, &QCheckBox::stateChanged, this, &ChirpChatDemodGUI::on_invertRamps_stateChanged);
+#endif
+
+    QObject::connect(ui->fecParity, &QDial::valueChanged, this, &ChirpChatDemodGUI::on_fecParity_valueChanged);
+    QObject::connect(ui->packetLength, &QDial::valueChanged, this, &ChirpChatDemodGUI::on_packetLength_valueChanged);
     QObject::connect(ui->udpAddress, &QLineEdit::editingFinished, this, &ChirpChatDemodGUI::on_udpAddress_editingFinished);
     QObject::connect(ui->udpPort, &QLineEdit::editingFinished, this, &ChirpChatDemodGUI::on_udpPort_editingFinished);
-    QObject::connect(ui->invertRamps, &QCheckBox::stateChanged, this, &ChirpChatDemodGUI::on_invertRamps_stateChanged);
 }
 
 void ChirpChatDemodGUI::updateAbsoluteCenterFrequency()

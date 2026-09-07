@@ -38,6 +38,7 @@ const unsigned NFMDemodSink::CTCSS_DETECTOR_RATE = 6000;
 NFMDemodSink::NFMDemodSink() :
         m_channelSampleRate(48000),
         m_channelFrequencyOffset(0),
+        m_channel(nullptr),
         m_audioSampleRate(48000),
         m_audioBufferFill(0),
         m_audioFifo(48000),

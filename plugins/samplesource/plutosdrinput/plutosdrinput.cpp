@@ -108,6 +108,11 @@ bool PlutoSDRInput::start()
         return true;
     }
 
+    if (!m_deviceShared.m_deviceParams)
+    {
+        qCritical("PlutoSDRInput::start: device not open");
+        return false;
+    }
     if (!m_deviceShared.m_deviceParams->getBox())
     {
         qCritical("PlutoSDRInput::start: device not open");
@@ -117,6 +122,7 @@ bool PlutoSDRInput::start()
     // start / stop streaming is done in the thread.
 
     m_plutoSDRInputThread = new PlutoSDRInputThread(PLUTOSDR_BLOCKSIZE_SAMPLES, m_deviceShared.m_deviceParams->getBox(), &m_sampleFifo);
+    connect(m_plutoSDRInputThread, &PlutoSDRInputThread::error, this, &PlutoSDRInput::handleError, Qt::QueuedConnection);
     qDebug("PlutoSDRInput::start: thread created");
 
     m_plutoSDRInputThread->setLog2Decimation(m_settings.m_log2Decim);
@@ -149,6 +155,40 @@ void PlutoSDRInput::stop()
     }
 
     m_deviceShared.m_thread = nullptr;
+}
+
+void PlutoSDRInput::handleError(int errorCode)
+{
+    QMutexLocker mutexLocker(&m_mutex);
+
+    m_running = false;
+    if (m_plutoSDRInputThread)
+    {
+        if (m_plutoSDRInputThread->isRunning())
+        {
+            m_plutoSDRInputThread->stopWork();
+        }
+        m_plutoSDRInputThread->wait();
+        delete m_plutoSDRInputThread;
+        m_plutoSDRInputThread = nullptr;
+    }
+    m_deviceShared.m_thread = nullptr;
+
+    if (m_deviceAPI->getSinkBuddies().size() == 0)
+    {
+        m_deviceShared.m_deviceParams->close();
+        delete m_deviceShared.m_deviceParams;
+        m_deviceShared.m_deviceParams = 0;
+    }
+
+    m_open = false;
+
+    const QString errorMessage =
+        tr("Radio needs a restart: %1 (%2)")
+            .arg(strerror(-errorCode))
+            .arg(errorCode);
+
+    m_deviceAPI->getDeviceEngineInputMessageQueue()->push(new DSPAcquisitionError(errorMessage));
 }
 
 QByteArray PlutoSDRInput::serialize() const

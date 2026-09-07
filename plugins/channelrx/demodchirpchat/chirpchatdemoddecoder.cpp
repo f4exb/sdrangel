@@ -26,10 +26,20 @@
 
 ChirpChatDemodDecoder::ChirpChatDemodDecoder() :
     m_codingScheme(ChirpChatDemodSettings::CodingTTY),
+    m_spreadFactor(0),
+    m_deBits(0),
     m_nbSymbolBits(5),
     m_nbParityBits(1),
     m_hasCRC(true),
     m_hasHeader(true),
+    m_packetLength(0),
+    m_nbSymbols(0),
+    m_nbCodewords(0),
+    m_earlyEOM(false),
+    m_headerParityStatus(0),
+    m_headerCRCStatus(false),
+    m_payloadParityStatus(0),
+    m_payloadCRCStatus(false),
     m_outputMessageQueue(nullptr)
 {
     connect(&m_inputMessageQueue, SIGNAL(messageEnqueued()), this, SLOT(handleInputMessages()));

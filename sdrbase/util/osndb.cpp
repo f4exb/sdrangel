@@ -53,6 +53,8 @@ OsnDB::OsnDB(QObject *parent) :
 OsnDB::~OsnDB()
 {
     disconnect(&m_dlm, &HttpDownloadManager::downloadComplete, this, &OsnDB::downloadFinished);
+    AircraftInformation::cleanupFlagIcons();
+    AircraftInformation::cleanupAirlineIcons();
 }
 
 void OsnDB::downloadAircraftInformation()
@@ -731,3 +733,18 @@ QIcon *AircraftInformation::getFlagIcon(const QString &country)
     }
 }
 
+void AircraftInformation::cleanupFlagIcons()
+{
+    for (auto icon : m_flagIcons) {
+        delete icon;
+    }
+    m_flagIcons.clear();
+}
+
+void AircraftInformation::cleanupAirlineIcons()
+{
+    for (auto icon : m_airlineIcons) {
+        delete icon;
+    }
+    m_airlineIcons.clear();
+}

@@ -20,7 +20,10 @@
 
 WDSPRxAGCDialog::WDSPRxAGCDialog(QWidget* parent) :
     QDialog(parent),
-    ui(new Ui::WDSPRxAGCDialog)
+    ui(new Ui::WDSPRxAGCDialog),
+    m_agcMode(WDSPRxProfile::AGCLong),
+    m_agcSlope(0),
+    m_agcHangThreshold(0)
 {
     ui->setupUi(this);
 }

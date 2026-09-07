@@ -19,7 +19,13 @@
 
 WDSPRxDNRDialog::WDSPRxDNRDialog(QWidget* parent) :
     QDialog(parent),
-    ui(new Ui::WDSPRxDNRDialog)
+    ui(new Ui::WDSPRxDNRDialog),
+    m_snb(false),
+    m_nrScheme(WDSPRxProfile::NRSchemeNR),
+    m_nr2Gain(WDSPRxProfile::NR2GainLinear),
+    m_nr2NPE(WDSPRxProfile::NR2NPEOSMS),
+    m_nrPosition(WDSPRxProfile::NRPositionPreAGC),
+    m_nr2ArtifactReduction(false)
 {
     ui->setupUi(this);
     ui->snb->hide();
