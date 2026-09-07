@@ -523,10 +523,11 @@ void FreqScanner::processScanResults(const QDateTime& fftStartTime, const QList<
                     else // TABLE_ORDER
                     {
                         // Find first frequency in list above threshold
-                        for (int i = 0; i < m_scanResults.size(); i++)
+                        const size_t n = m_scanResults.size();
+                        for (size_t i = 0; i < n; i++)
                         {
-                            int j = m_settings.m_voiceSquelchType == FreqScannerSettings::VoiceSquelchType::VoiceLsb ?
-                                m_scanResults.size()-1 - i : i;
+                            const size_t j = m_settings.m_voiceSquelchType == FreqScannerSettings::VoiceSquelchType::VoiceLsb ?
+                                n - 1 - i : i;
 
                             if (lockDeviceFrequency && !isInCurrentScanRange(m_scanResults[j].m_frequency)) {
                                 continue;
