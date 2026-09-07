@@ -92,7 +92,7 @@ private:
     struct VORRange
     {
         std::vector<int> m_vorIndices;
-        int m_frequencyRange;
+        int m_frequencyRange{0};
 
         VORRange() = default;
         VORRange(const VORRange&) = default;
@@ -101,8 +101,8 @@ private:
 
     struct RRDevice
     {
-        int m_deviceIndex;
-        int m_frequency;
+        int m_deviceIndex{0};
+        int m_frequency{0};
 
         RRDevice() = default;
         RRDevice(const RRDevice&) = default;
@@ -111,10 +111,10 @@ private:
 
     struct RRChannel
     {
-        ChannelAPI *m_channelAPI;
-        int m_channelIndex;
-        int m_frequencyShift;
-        int m_navId;
+        ChannelAPI *m_channelAPI{nullptr};
+        int m_channelIndex{0};
+        int m_frequencyShift{0};
+        int m_navId{0};
 
         RRChannel() = default;
         RRChannel(const RRChannel&) = default;
@@ -124,9 +124,9 @@ private:
     struct RRTurnPlan
     {
         RRDevice m_device;
-        int m_bandwidth;
+        int m_bandwidth{0};
         std::vector<RRChannel> m_channels;
-        bool m_fixedCenterFrequency;    // Devices such as FileInput that can't have center freq changed
+        bool m_fixedCenterFrequency{false};    // Devices such as FileInput that can't have center freq changed
 
         RRTurnPlan() = default;
         RRTurnPlan(const RRTurnPlan&) = default;
@@ -135,9 +135,9 @@ private:
 
     struct ChannelAllocation
     {
-        int m_navId;
-        int m_deviceIndex;
-        int m_channelIndex;
+        int m_navId{0};
+        int m_deviceIndex{0};
+        int m_channelIndex{0};
 
         ChannelAllocation() = default;
         ChannelAllocation(const ChannelAllocation&) = default;
