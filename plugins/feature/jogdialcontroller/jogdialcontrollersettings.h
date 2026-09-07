@@ -32,11 +32,11 @@ struct JogdialControllerSettings
 {
     struct AvailableChannel
     {
-        bool m_tx;
-        int m_deviceSetIndex;
-        int m_channelIndex;
-        DeviceAPI *m_deviceAPI;
-        ChannelAPI *m_channelAPI;
+        bool m_tx{false};
+        int m_deviceSetIndex{0};
+        int m_channelIndex{0};
+        DeviceAPI *m_deviceAPI{nullptr};
+        ChannelAPI *m_channelAPI{nullptr};
         QString m_deviceId;
         QString m_channelId;
 
