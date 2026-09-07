@@ -166,9 +166,13 @@ printf "\033[33;1mCoverity Build Capture version: %s\033[0m\n" "$COVERITY_TOOL_V
 # Configure
 RESULTS_DIR="$REPO_ROOT/cov-int"
 BUILD_DIR="$REPO_ROOT/build-coverity"
-RESULTS_ARCHIVE=analysis-results.tgz
-cd "$REPO_ROOT"
-if [ ! -f "${REPO_ROOT}/${RESULTS_ARCHIVE}" ] ; then
+RESULTS_ARCHIVE="$REPO_ROOT/analysis-results.tgz"
+cd "$REPO_ROOT" || {
+    echo "ERROR: Unable to change to repository root: $REPO_ROOT" >&2
+    exit 1
+}
+
+if [ ! -f "$RESULTS_ARCHIVE" ] ; then
   rm -rf "$RESULTS_DIR"
   rm -rf "$BUILD_DIR"
 
@@ -179,7 +183,7 @@ if [ ! -f "${REPO_ROOT}/${RESULTS_ARCHIVE}" ] ; then
 
   # Build
   printf "\033[33;1mRunning Coverity Scan Analysis Tool...\033[0m\n"
-  cd "$BUILD_DIR"
+
   cov-build --dir "$RESULTS_DIR" ninja -C "$BUILD_DIR" -j "$JOBS"
   if grep -q "No files were emitted." "$RESULTS_DIR/build-log.txt"; then
     echo "ERROR: Coverity did not emit any files." >&2
@@ -193,8 +197,8 @@ if [ ! -f "${REPO_ROOT}/${RESULTS_ARCHIVE}" ] ; then
   tar czf "$RESULTS_ARCHIVE" -C "$REPO_ROOT" cov-int
 fi
 
-if ! tar tf "${REPO_ROOT}/${RESULTS_ARCHIVE}" | grep '^cov-int/build-log.txt$' >/dev/null; then
-  echo "ERROR: Coverity archive ${REPO_ROOT}/${RESULTS_ARCHIVE} does not contain cov-int/build-log.txt" >&2
+if ! tar tf "$RESULTS_ARCHIVE" | grep '^cov-int/build-log.txt$' >/dev/null; then
+  echo "ERROR: Coverity archive $RESULTS_ARCHIVE does not contain cov-int/build-log.txt" >&2
   exit 1
 fi
 
@@ -258,8 +262,8 @@ else
     --silent --write-out "\n%{http_code}\n" \
     --form project="$COVERITY_SCAN_PROJECT_NAME" \
     --form token="$COVERITY_SCAN_TOKEN" \
-    --form email=blackhole@blackhole.io \
-    --form file=@$RESULTS_ARCHIVE \
+    --form "email=$COVERITY_SCAN_NOTIFICATION_EMAIL" \
+    --form "file=@$RESULTS_ARCHIVE" \
     --form version="$VERSION_SHA" \
     --form description="Automated Build: $VERSION_SHA" \
     $UPLOAD_URL)
