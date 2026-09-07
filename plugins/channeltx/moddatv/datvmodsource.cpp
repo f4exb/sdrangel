@@ -223,6 +223,7 @@ DATVModSource::DATVModSource() :
     m_symbolSel(0),
     m_symbolIdx(0),
     m_samplesPerSymbol(1),
+    m_plFrame(nullptr),
     m_udpSocket(nullptr),
     m_udpByteCount(0),
     m_udpAbsByteCount(0),
@@ -232,6 +233,11 @@ DATVModSource::DATVModSource() :
     m_sampleRate(0),
     m_channelSampleRate(1000000),
     m_channelFrequencyOffset(0),
+    m_levelCalcCount(0),
+    m_rmsLevel(0.0),
+    m_peakLevelOut(0.0),
+    m_peakLevel(0.0),
+    m_levelSum(0.0),
     m_tsFileOK(false),
     m_messageQueueToGUI(nullptr)
 {
