@@ -26,6 +26,8 @@ const bool MeshtasticModEncoder::m_hasCRC = true;
 const bool MeshtasticModEncoder::m_hasHeader = true;
 
 MeshtasticModEncoder::MeshtasticModEncoder() :
+    m_spreadFactor(0),
+    m_deBits(0),
     m_nbSymbolBits(5),
     m_nbParityBits(1)
 {}
