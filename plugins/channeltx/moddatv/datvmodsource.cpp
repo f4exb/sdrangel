@@ -213,6 +213,7 @@ void DATVModSource::checkBitrates()
 }
 
 DATVModSource::DATVModSource() :
+    m_mpegTS{},
     m_mpegTSBitrate(0),
     m_mpegTSSize(0),
     m_sampleIdx(0),
@@ -223,10 +224,12 @@ DATVModSource::DATVModSource() :
     m_symbolSel(0),
     m_symbolIdx(0),
     m_samplesPerSymbol(1),
+    m_iqSymbols{},
     m_plFrame(nullptr),
     m_udpSocket(nullptr),
     m_udpByteCount(0),
     m_udpAbsByteCount(0),
+    m_udpBuffer{},
     m_udpBufferIdx(0),
     m_udpBufferCount(0),
     m_udpMaxBufferUtilization(0),
