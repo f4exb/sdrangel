@@ -35,6 +35,7 @@ const QStringList SkyMapSettings::m_pipeURIs = {
 };
 
 SkyMapSettings::SkyMapSettings() :
+    m_rgbColor(QColor(0, 0, 0).rgb()),
     m_rollupState(nullptr)
 {
     resetToDefaults();
