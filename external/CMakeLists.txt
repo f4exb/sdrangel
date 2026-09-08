@@ -27,7 +27,7 @@ set(MIRISDR_TAG "v2.0.0")
 set(LIBSIGMF_TAG "new-namespaces")
 
 set(PTHREADS4W_TAG "Version-2-11-0-release")
-set(RTLSDR_TAG "v2.0.1")
+set(RTLSDR_TAG "v2.0.3")
 set(RTLSDR_UDEV OFF)
 set(SOAPYSDR_TAG "1667b4e6301d7ad47b340dcdcd6e9969bf57d843")
 set(SOAPYSDR_SDRPLAY_TAG "soapy-sdrplay-0.2.0")
