@@ -17,7 +17,8 @@
 
 #include "metismisodecimators.h"
 
-MetisMISODecimators::MetisMISODecimators()
+MetisMISODecimators::MetisMISODecimators() :
+    m_accumulators{}
 {
     resetCounters();
 }
