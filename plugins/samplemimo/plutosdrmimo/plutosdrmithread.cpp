@@ -25,6 +25,8 @@ PlutoSDRMIThread::PlutoSDRMIThread(DevicePlutoSDRBox* plutoBox, QObject* parent)
     m_running(false),
     m_plutoBox(plutoBox),
     m_sampleFifo(nullptr),
+    m_log2Decim(0),
+    m_fcPos(0),
     m_iqOrder(true)
 {
     qDebug("PlutoSDRMIThread::PlutoSDRMIThread");
