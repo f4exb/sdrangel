@@ -148,11 +148,11 @@ bool DATVDemodSettings::deserialize(const QByteArray& data)
         d.readS32(3, &m_centerFrequency, 0);
 
         d.readS32(4, &tmp, (int) DVB_S);
-        tmp = tmp < 0 ? 0 : tmp > (int) DVB_S2 ? (int) DVB_S2 : tmp;
+        tmp = tmp < 0 ? 0 : (tmp > (int) DVB_S2 ? (int) DVB_S2 : tmp);
         m_standard = (dvb_version) tmp;
 
         d.readS32(5, &tmp, (int) BPSK);
-        tmp = tmp < 0 ? 0 : tmp >= (int) MOD_UNSET ? (int) MOD_UNSET - 1 : tmp;
+        tmp = tmp < 0 ? 0 : (tmp >= (int) MOD_UNSET ? (int) MOD_UNSET - 1 : tmp);
         m_modulation = (DATVModulation) tmp;
 
         if (m_channelMarker)
@@ -165,7 +165,7 @@ bool DATVDemodSettings::deserialize(const QByteArray& data)
         d.readString(8, &m_title, "DATV Demodulator");
 
         d.readS32(9, &tmp, (int) FEC12);
-        tmp = tmp < 0 ? 0 : tmp >= (int) RATE_UNSET ? (int) RATE_UNSET - 1 : tmp;
+        tmp = tmp < 0 ? 0 : (tmp >= (int) RATE_UNSET ? (int) RATE_UNSET - 1 : tmp);
         m_fec = (DATVCodeRate) tmp;
 
         d.readBool(10, &m_audioMute, false);
@@ -175,7 +175,7 @@ bool DATVDemodSettings::deserialize(const QByteArray& data)
         d.readBool(14, &m_fastLock, false);
 
         d.readS32(15, &tmp, (int) SAMP_LINEAR);
-        tmp = tmp < 0 ? 0 : tmp > (int) SAMP_RRC ? (int) SAMP_RRC : tmp;
+        tmp = tmp < 0 ? 0 : (tmp > (int) SAMP_RRC ? (int) SAMP_RRC : tmp);
         m_filter = (dvb_sampler) tmp;
 
         d.readBool(16, &m_hardMetric, false);
@@ -208,7 +208,7 @@ bool DATVDemodSettings::deserialize(const QByteArray& data)
         d.readBool(32, &m_softLDPC, false);
         d.readS32(33, &m_maxBitflips, 0);
         d.readS32(35, &tmp, 8);
-        m_softLDPCMaxTrials = tmp < 1 ? 1 : tmp > m_softLDPCMaxMaxTrials ? m_softLDPCMaxMaxTrials : tmp;
+        m_softLDPCMaxTrials = tmp < 1 ? 1 : (tmp > m_softLDPCMaxMaxTrials ? m_softLDPCMaxMaxTrials : tmp);
         d.readBool(36, &m_playerEnable, true);
 
         if (m_rollupState)
