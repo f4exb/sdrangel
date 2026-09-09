@@ -700,7 +700,7 @@ void VorLocalizerWorker::rrNextTurn()
             continue;
         }
 
-        unsigned int turnCount = m_rrTurnCounters[iDevPlan];
+        std::size_t turnCount = m_rrTurnCounters[iDevPlan];
         int deviceIndex = rrPlan[turnCount].m_device.m_deviceIndex;
         int deviceFrequency = rrPlan[turnCount].m_device.m_frequency - m_settings.m_centerShift;
 

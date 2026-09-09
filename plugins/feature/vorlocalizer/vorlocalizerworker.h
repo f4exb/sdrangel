@@ -155,7 +155,7 @@ private:
     QRecursiveMutex m_mutex;
     QTimer m_rrTimer;
     std::vector<std::vector<RRTurnPlan>> m_rrPlans; //!< Round robin plans for each device
-    std::vector<int> m_rrTurnCounters; //!< Round robin turn count for each device
+    std::vector<std::size_t> m_rrTurnCounters; //!< Round robin turn count for each device
 
     bool handleMessage(const Message& cmd);
     void applySettings(const VORLocalizerSettings& settings, const QList<QString>& settingsKeys, bool force = false);
