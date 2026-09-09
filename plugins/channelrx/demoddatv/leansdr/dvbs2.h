@@ -3697,6 +3697,8 @@ struct s2_fecdec_helper : runnable
         for (int mc = 0; mc < 32; ++mc) {
             for (int sf = 0; sf < 2; ++sf) {
                 pools[mc][sf].procs = nullptr;
+                pools[mc][sf].nprocs = 0;
+                pools[mc][sf].shift = 0;
             }
         }
     }
