@@ -84,7 +84,7 @@ void AudioOutputWorker::setSamplerate(int samplerate)
 	    qDebug() << "AudioOutputWorker::setSamplerate:"
 	            << " new:" << samplerate
 	            << " old:" << m_samplerate
-                << " m_sampleFifo size:" << m_sampleFifo->size()
+                << " m_sampleFifo size:" << (m_sampleFifo ? QString::number(m_sampleFifo->size()) : "nullptr")
                 << " m_audioFifo size:" << m_audioFifo->size()
                 << " sample i/q size" << sizeof(FixReal);
 
