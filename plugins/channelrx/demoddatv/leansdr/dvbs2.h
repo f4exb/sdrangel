@@ -1741,7 +1741,7 @@ struct s2_frame_receiver : runnable
         {
             fprintf(
                 stderr,
-                "PL errors: %d/%d (%.0f ppm)\n",
+                "PL errors: %u/%u (%.0f ppm)\n",
                 pls_total_errors,
                 pls_total_count,
                 1e6 * pls_total_errors / pls_total_count
