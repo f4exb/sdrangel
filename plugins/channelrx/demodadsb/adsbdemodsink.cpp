@@ -121,10 +121,14 @@ void ADSBDemodSink::feed(const SampleVector::const_iterator& begin, const Sample
 
 void ADSBDemodSink::processOneSample(Real magsq)
 {
-    m_magsqSum += magsq;
-    if (magsq > m_magsqPeak)
-        m_magsqPeak = magsq;
-    m_magsqCount++;
+    {
+        QMutexLocker locker(&m_magsqMutex);
+
+        m_magsqSum += magsq;
+        if (magsq > m_magsqPeak)
+           m_magsqPeak = magsq;
+        m_magsqCount++;
+    }
     m_sampleBuffer[m_writeBuffer][m_writeIdx] = magsq;
     m_writeIdx++;
     if (!m_bufferDateTimeValid[m_writeBuffer])

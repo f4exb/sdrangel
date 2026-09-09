@@ -22,6 +22,7 @@
 #ifndef SDRBASE_DSP_DSPDEVICESINKENGINE_H_
 #define SDRBASE_DSP_DSPDEVICESINKENGINE_H_
 
+#include <atomic>
 #include <QObject>
 #include <QTimer>
 #include <QMutex>
@@ -83,7 +84,7 @@ private:
 
 	MessageQueue m_inputMessageQueue;  //<! Input message queue. Post here.
 
-	State m_state;
+	std::atomic<State> m_state;
 
 	QString m_errorMessage;
 	QString m_deviceDescription;
