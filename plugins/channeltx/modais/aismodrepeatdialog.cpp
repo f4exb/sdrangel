@@ -24,6 +24,8 @@
 
 AISModRepeatDialog::AISModRepeatDialog(float repeatDelay, int repeatCount, QWidget* parent) :
     QDialog(parent),
+    m_repeatDelay(repeatDelay),
+    m_repeatCount(repeatCount),
     ui(new Ui::AISModRepeatDialog)
 {
     ui->setupUi(this);
