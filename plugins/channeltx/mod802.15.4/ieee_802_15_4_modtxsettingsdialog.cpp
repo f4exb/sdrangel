@@ -24,6 +24,20 @@ IEEE_802_15_4_ModTXSettingsDialog::IEEE_802_15_4_ModTXSettingsDialog(int rampUpB
         int lpfTaps, bool bbNoise, bool writeToFile,
         QWidget* parent) :
     QDialog(parent),
+    m_rampUpBits(rampUpBits),
+    m_rampDownBits(rampDownBits),
+    m_rampRange(rampRange),
+    m_modulateWhileRamping(modulateWhileRamping),
+    m_modulation(modulation),
+    m_bitRate(bitRate),
+    m_pulseShaping(pulseShaping),
+    m_beta(beta),
+    m_symbolSpan(symbolSpan),
+    m_scramble(scramble),
+    m_polynomial(polynomial),
+    m_lpfTaps(lpfTaps),
+    m_bbNoise(bbNoise),
+    m_writeToFile(writeToFile),
     ui(new Ui::IEEE_802_15_4_ModTXSettingsDialog)
 {
     ui->setupUi(this);
