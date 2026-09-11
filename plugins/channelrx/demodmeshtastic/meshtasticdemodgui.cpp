@@ -2853,7 +2853,7 @@ void MeshtasticDemodGUI::appendPipelineTreeFields(
         }
 
         bool isIndex = false;
-        rawName.toInt(&isIndex);
+        (void) rawName.toInt(&isIndex);
 
         if (isIndex) {
             return QString("Item (%1)").arg(rawName);
