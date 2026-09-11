@@ -195,8 +195,8 @@ private:
 
     std::mutex m_outputMutex;
 
-    static const int m_retryMinMs = 1000;   //!< First wait before reopening the event stream
-    static const int m_retryMaxMs = 60000;  //!< And the longest, once it keeps failing
+    static constexpr int m_retryMinMs = 1000;   //!< First wait before reopening the event stream
+    static constexpr int m_retryMaxMs = 60000;  //!< And the longest, once it keeps failing
 
     std::atomic<bool> m_running { true };
     std::atomic<bool> m_streamWanted { false };

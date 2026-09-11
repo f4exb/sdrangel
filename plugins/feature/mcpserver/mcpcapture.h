@@ -124,10 +124,10 @@ public:
     static const void *channelObject(int deviceSetIndex, int channelIndex);
 
     //!< Inline audio is only offered for short clips, as it is base64 encoded into the reply
-    static const int m_maxInlineSeconds = 10;
+    static constexpr int m_maxInlineSeconds = 10;
 
     //!< Blocking captures hold an HTTP connection open, so they are kept short
-    static const int m_maxBlockingSeconds = 30;
+    static constexpr int m_maxBlockingSeconds = 30;
 
 private:
     struct Recording

@@ -62,7 +62,7 @@ private:
     QElapsedTimer m_age;
     bool m_closed;
 
-    static const int m_maxQueued = 256; //!< A client that cannot keep up loses the oldest events
+    static constexpr int m_maxQueued = 256; //!< A client that cannot keep up loses the oldest events
 };
 
 // Sessions and their open event streams. A session is created by initialize and identified by
@@ -98,11 +98,11 @@ public:
     int streamCount() const;
     qint64 getNotificationsSent() const;
 
-    static const int m_maxStreams = 8;
-    static const int m_maxSessions = 32;                        //!< Oldest idle sessions are dropped beyond this
+    static constexpr int m_maxStreams = 8;
+    static constexpr int m_maxSessions = 32;                        //!< Oldest idle sessions are dropped beyond this
     static const qint64 m_sessionIdleMs = 24 * 60 * 60 * 1000;  //!< Sessions unused for this long are dropped
 
-    static const int m_maxStreamLifetimeMs = 10 * 60 * 1000; //!< Backstop against streams whose client vanished
+    static constexpr int m_maxStreamLifetimeMs = 10 * 60 * 1000; //!< Backstop against streams whose client vanished
 
 private:
     mutable QMutex m_mutex;
@@ -123,7 +123,7 @@ class MCPNotifier : public QObject
 public:
     MCPNotifier(MCPStreams *streams, MCPDataFeed *dataFeed, MCPTools *tools, QObject *parent = nullptr);
 
-    static const int m_coalesceMs = 1000;
+    static constexpr int m_coalesceMs = 1000;
 
 private slots:
     void onDeviceSetAdded(int index, DeviceAPI *device);

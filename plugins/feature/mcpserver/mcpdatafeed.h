@@ -75,7 +75,7 @@ public:
     QJsonObject getMapItems(const QString& source, const QString& name, int limit, bool includeTrack);
     QJsonObject getStatus();
 
-    static const int m_maxPackets = 1000;
+    static constexpr int m_maxPackets = 1000;
 
 private:
     AvailableChannelOrFeatureHandler m_packetHandler;
