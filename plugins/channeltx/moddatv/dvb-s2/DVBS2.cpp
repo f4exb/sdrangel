@@ -162,9 +162,12 @@ void DVBS2::physical( void )
 
 }
 
-DVBS2::DVBS2()
+DVBS2::DVBS2() :
+    m_payload_symbols(0),
+    m_efficiency(0.0),
+    m_s2_config_updated(0)
 {
-	m_configured = 0;
+    m_configured = 0;
     modulator_configuration();
     build_symbol_scrambler_table();
     pl_build_dummy();
