@@ -116,6 +116,7 @@ AudioCATSISOSettings::AudioCATSISOSettings(const AudioCATSISOSettings& other)
     m_txSampleRate = other.m_txSampleRate;
     m_transverterMode = other.m_transverterMode;
     m_transverterDeltaFrequency = other.m_transverterDeltaFrequency;
+    m_iqOrder = other.m_iqOrder;
     m_rxDeviceName = other.m_rxDeviceName;
     m_rxVolume = other.m_rxVolume;
     m_log2Decim = other.m_log2Decim;
