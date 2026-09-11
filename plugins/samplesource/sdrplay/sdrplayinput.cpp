@@ -831,7 +831,11 @@ void SDRPlayInput::webapiFormatDeviceReport(SWGSDRangel::SWGDeviceReport& respon
     for (unsigned int i = 0; i < SDRPlayBands::getNbBands(); i++)
     {
         response.getSdrPlayReport()->getFrequencyBands()->append(new SWGSDRangel::SWGFrequencyBand);
-        response.getSdrPlayReport()->getFrequencyBands()->back()->setName(new QString(SDRPlayBands::getBandName(i)));
+        if (response.getSdrPlayReport()->getFrequencyBands()->back()->getName()) {
+            *response.getSdrPlayReport()->getFrequencyBands()->back()->getName() = SDRPlayBands::getBandName(i);
+        } else {
+            response.getSdrPlayReport()->getFrequencyBands()->back()->setName(new QString(SDRPlayBands::getBandName(i)));
+        }
         response.getSdrPlayReport()->getFrequencyBands()->back()->setLowerBound(SDRPlayBands::getBandLow(i) * 1000);
         response.getSdrPlayReport()->getFrequencyBands()->back()->setHigherBound(SDRPlayBands::getBandHigh(i) * 1000);
     }

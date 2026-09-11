@@ -570,7 +570,11 @@ void RemoteTCPSink::webapiFormatChannelSettings(
     swgChannelSettings->setDirection(0); // Single sink (Rx)
     swgChannelSettings->setOriginatorChannelIndex(getIndexInDeviceSet());
     swgChannelSettings->setOriginatorDeviceSetIndex(getDeviceSetIndex());
-    swgChannelSettings->setChannelType(new QString(m_channelId));
+    if (swgChannelSettings->getChannelType()) {
+        *swgChannelSettings->getChannelType() = m_channelId;
+    } else {
+        swgChannelSettings->setChannelType(new QString(m_channelId));
+    }
     swgChannelSettings->setRemoteTcpSinkSettings(new SWGSDRangel::SWGRemoteTCPSinkSettings());
     SWGSDRangel::SWGRemoteTCPSinkSettings *swgRemoteTCPSinkSettings = swgChannelSettings->getRemoteTcpSinkSettings();
 
@@ -589,7 +593,11 @@ void RemoteTCPSink::webapiFormatChannelSettings(
         swgRemoteTCPSinkSettings->setSampleBits(settings.m_sampleBits);
     }
     if (channelSettingsKeys.contains("dataAddress") || force) {
-        swgRemoteTCPSinkSettings->setDataAddress(new QString(settings.m_dataAddress));
+        if (swgRemoteTCPSinkSettings->getDataAddress()) {
+            *swgRemoteTCPSinkSettings->getDataAddress() = settings.m_dataAddress;
+        } else {
+            swgRemoteTCPSinkSettings->setDataAddress(new QString(settings.m_dataAddress));
+        }
     }
     if (channelSettingsKeys.contains("dataPort") || force) {
         swgRemoteTCPSinkSettings->setDataPort(settings.m_dataPort);
@@ -601,7 +609,11 @@ void RemoteTCPSink::webapiFormatChannelSettings(
         swgRemoteTCPSinkSettings->setRgbColor(settings.m_rgbColor);
     }
     if (channelSettingsKeys.contains("title") || force) {
-        swgRemoteTCPSinkSettings->setTitle(new QString(settings.m_title));
+        if (swgRemoteTCPSinkSettings->getTitle()) {
+            *swgRemoteTCPSinkSettings->getTitle() = settings.m_title;
+        } else {
+            swgRemoteTCPSinkSettings->setTitle(new QString(settings.m_title));
+        }
     }
     if (channelSettingsKeys.contains("streamIndex") || force) {
         swgRemoteTCPSinkSettings->setStreamIndex(settings.m_streamIndex);

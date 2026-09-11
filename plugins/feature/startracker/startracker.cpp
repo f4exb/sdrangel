@@ -365,13 +365,33 @@ void StarTracker::webapiFormatFeatureSettings(
     SWGSDRangel::SWGFeatureSettings& response,
     const StarTrackerSettings& settings)
 {
-    response.getStarTrackerSettings()->setTarget(new QString(settings.m_target));
-    response.getStarTrackerSettings()->setRa(new QString(settings.m_ra));
-    response.getStarTrackerSettings()->setDec(new QString(settings.m_dec));
+    if (response.getStarTrackerSettings()->getTarget()) {
+        *response.getStarTrackerSettings()->getTarget() = settings.m_target;
+    } else {
+        response.getStarTrackerSettings()->setTarget(new QString(settings.m_target));
+    }
+    if (response.getStarTrackerSettings()->getRa()) {
+        *response.getStarTrackerSettings()->getRa() = settings.m_ra;
+    } else {
+        response.getStarTrackerSettings()->setRa(new QString(settings.m_ra));
+    }
+    if (response.getStarTrackerSettings()->getDec()) {
+        *response.getStarTrackerSettings()->getDec() = settings.m_dec;
+    } else {
+        response.getStarTrackerSettings()->setDec(new QString(settings.m_dec));
+    }
     response.getStarTrackerSettings()->setLatitude(settings.m_latitude);
     response.getStarTrackerSettings()->setLongitude(settings.m_longitude);
-    response.getStarTrackerSettings()->setDateTime(new QString(settings.m_dateTime));
-    response.getStarTrackerSettings()->setRefraction(new QString(settings.m_refraction));
+    if (response.getStarTrackerSettings()->getDateTime()) {
+        *response.getStarTrackerSettings()->getDateTime() = settings.m_dateTime;
+    } else {
+        response.getStarTrackerSettings()->setDateTime(new QString(settings.m_dateTime));
+    }
+    if (response.getStarTrackerSettings()->getRefraction()) {
+        *response.getStarTrackerSettings()->getRefraction() = settings.m_refraction;
+    } else {
+        response.getStarTrackerSettings()->setRefraction(new QString(settings.m_refraction));
+    }
     response.getStarTrackerSettings()->setPressure(settings.m_pressure);
     response.getStarTrackerSettings()->setTemperature(settings.m_temperature);
     response.getStarTrackerSettings()->setHumidity(settings.m_humidity);

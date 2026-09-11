@@ -1039,7 +1039,11 @@ void SigMFFileInput::webapiFormatDeviceSettings(SWGSDRangel::SWGDeviceSettings& 
         response.getSigMfFileInputSettings()->setTitle(new QString(settings.m_title));
     }
 
-    response.getSigMfFileInputSettings()->setFileName(new QString(settings.m_fileName));
+    if (response.getSigMfFileInputSettings()->getFileName()) {
+        *response.getSigMfFileInputSettings()->getFileName() = settings.m_fileName;
+    } else {
+        response.getSigMfFileInputSettings()->setFileName(new QString(settings.m_fileName));
+    }
     response.getSigMfFileInputSettings()->setAccelerationFactor(settings.m_accelerationFactor);
     response.getSigMfFileInputSettings()->setTrackLoop(settings.m_trackLoop ? 1 : 0);
     response.getSigMfFileInputSettings()->setFullLoop(settings.m_fullLoop ? 1 : 0);

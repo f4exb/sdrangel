@@ -689,7 +689,11 @@ void AISMod::webapiFormatChannelSettings(SWGSDRangel::SWGChannelSettings& respon
     response.getAisModSettings()->setReverseApiChannelIndex(settings.m_reverseAPIChannelIndex);
 
     response.getAisModSettings()->setUdpEnabled(settings.m_udpEnabled);
-    response.getAisModSettings()->setUdpAddress(new QString(settings.m_udpAddress));
+    if (response.getAisModSettings()->getUdpAddress()) {
+        *response.getAisModSettings()->getUdpAddress() = settings.m_udpAddress;
+    } else {
+        response.getAisModSettings()->setUdpAddress(new QString(settings.m_udpAddress));
+    }
     response.getAisModSettings()->setUdpPort(settings.m_udpPort);
 
     if (settings.m_channelMarker)
@@ -787,7 +791,11 @@ void AISMod::webapiFormatChannelSettings(
     swgChannelSettings->setDirection(1); // single source (Tx)
     swgChannelSettings->setOriginatorChannelIndex(getIndexInDeviceSet());
     swgChannelSettings->setOriginatorDeviceSetIndex(getDeviceSetIndex());
-    swgChannelSettings->setChannelType(new QString(m_channelId));
+    if (swgChannelSettings->getChannelType()) {
+        *swgChannelSettings->getChannelType() = m_channelId;
+    } else {
+        swgChannelSettings->setChannelType(new QString(m_channelId));
+    }
     swgChannelSettings->setAisModSettings(new SWGSDRangel::SWGAISModSettings());
     SWGSDRangel::SWGAISModSettings *swgAISModSettings = swgChannelSettings->getAisModSettings();
 
@@ -839,7 +847,11 @@ void AISMod::webapiFormatChannelSettings(
         swgAISModSettings->setMsgType((int) settings.m_msgType);
     }
     if (channelSettingsKeys.contains("mmsi")) {
-        swgAISModSettings->setMmsi(new QString(settings.m_mmsi));
+        if (swgAISModSettings->getMmsi()) {
+            *swgAISModSettings->getMmsi() = settings.m_mmsi;
+        } else {
+            swgAISModSettings->setMmsi(new QString(settings.m_mmsi));
+        }
     }
     if (channelSettingsKeys.contains("status")) {
         swgAISModSettings->setStatus((int) settings.m_status);
@@ -860,7 +872,11 @@ void AISMod::webapiFormatChannelSettings(
         swgAISModSettings->setHeading(settings.m_heading);
     }
     if (channelSettingsKeys.contains("data")) {
-        swgAISModSettings->setData(new QString(settings.m_data));
+        if (swgAISModSettings->getData()) {
+            *swgAISModSettings->getData() = settings.m_data;
+        } else {
+            swgAISModSettings->setData(new QString(settings.m_data));
+        }
     }
     if (channelSettingsKeys.contains("bt")) {
         swgAISModSettings->setBt(settings.m_bt);
@@ -872,7 +888,11 @@ void AISMod::webapiFormatChannelSettings(
         swgAISModSettings->setRgbColor(settings.m_rgbColor);
     }
     if (channelSettingsKeys.contains("title") || force) {
-        swgAISModSettings->setTitle(new QString(settings.m_title));
+        if (swgAISModSettings->getTitle()) {
+            *swgAISModSettings->getTitle() = settings.m_title;
+        } else {
+            swgAISModSettings->setTitle(new QString(settings.m_title));
+        }
     }
     if (channelSettingsKeys.contains("streamIndex") || force) {
         swgAISModSettings->setStreamIndex(settings.m_streamIndex);
@@ -881,7 +901,11 @@ void AISMod::webapiFormatChannelSettings(
         swgAISModSettings->setUdpEnabled(settings.m_udpEnabled);
     }
     if (channelSettingsKeys.contains("udpAddress") || force) {
-        swgAISModSettings->setUdpAddress(new QString(settings.m_udpAddress));
+        if (swgAISModSettings->getUdpAddress()) {
+            *swgAISModSettings->getUdpAddress() = settings.m_udpAddress;
+        } else {
+            swgAISModSettings->setUdpAddress(new QString(settings.m_udpAddress));
+        }
     }
     if (channelSettingsKeys.contains("udpPort") || force) {
         swgAISModSettings->setUdpPort(settings.m_udpPort);

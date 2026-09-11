@@ -552,7 +552,11 @@ void ChannelAnalyzer::webapiFormatChannelSettings(
     swgChannelSettings->setDirection(0); // Single sink (Rx)
     swgChannelSettings->setOriginatorChannelIndex(getIndexInDeviceSet());
     swgChannelSettings->setOriginatorDeviceSetIndex(getDeviceSetIndex());
-    swgChannelSettings->setChannelType(new QString(m_channelId));
+    if (swgChannelSettings->getChannelType()) {
+        *swgChannelSettings->getChannelType() = m_channelId;
+    } else {
+        swgChannelSettings->setChannelType(new QString(m_channelId));
+    }
     swgChannelSettings->setChannelAnalyzerSettings(new SWGSDRangel::SWGChannelAnalyzerSettings());
     SWGSDRangel::SWGChannelAnalyzerSettings *swgChannelAnalyzerSettings = swgChannelSettings->getChannelAnalyzerSettings();
 
@@ -613,7 +617,11 @@ void ChannelAnalyzer::webapiFormatChannelSettings(
         swgChannelAnalyzerSettings->setRgbColor(settings.m_rgbColor);
     }
     if (channelSettingsKeys.contains("title") || force) {
-        swgChannelAnalyzerSettings->setTitle(new QString(settings.m_title));
+        if (swgChannelAnalyzerSettings->getTitle()) {
+            *swgChannelAnalyzerSettings->getTitle() = settings.m_title;
+        } else {
+            swgChannelAnalyzerSettings->setTitle(new QString(settings.m_title));
+        }
     }
     if (channelSettingsKeys.contains("streamIndex")) {
         swgChannelAnalyzerSettings->setStreamIndex(settings.m_streamIndex);
@@ -622,7 +630,11 @@ void ChannelAnalyzer::webapiFormatChannelSettings(
         swgChannelAnalyzerSettings->setUseReverseApi(settings.m_useReverseAPI ? 1 : 0);
     }
     if (channelSettingsKeys.contains("reverseAPIAddress")) {
-        swgChannelAnalyzerSettings->setReverseApiAddress(new QString(settings.m_reverseAPIAddress));
+        if (swgChannelAnalyzerSettings->getReverseApiAddress()) {
+            *swgChannelAnalyzerSettings->getReverseApiAddress() = settings.m_reverseAPIAddress;
+        } else {
+            swgChannelAnalyzerSettings->setReverseApiAddress(new QString(settings.m_reverseAPIAddress));
+        }
     }
     if (channelSettingsKeys.contains("reverseAPIPort")) {
         swgChannelAnalyzerSettings->setReverseApiPort(settings.m_reverseAPIPort);

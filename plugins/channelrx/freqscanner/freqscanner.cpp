@@ -1282,7 +1282,11 @@ void FreqScanner::webapiFormatChannelSettings(
     swgChannelSettings->setDirection(0); // Single sink (Rx)
     swgChannelSettings->setOriginatorChannelIndex(getIndexInDeviceSet());
     swgChannelSettings->setOriginatorDeviceSetIndex(getDeviceSetIndex());
-    swgChannelSettings->setChannelType(new QString("FreqScanner"));
+    if (swgChannelSettings->getChannelType()) {
+        *swgChannelSettings->getChannelType() = "FreqScanner";
+    } else {
+        swgChannelSettings->setChannelType(new QString("FreqScanner"));
+    }
     swgChannelSettings->setFreqScannerSettings(new SWGSDRangel::SWGFreqScannerSettings());
     SWGSDRangel::SWGFreqScannerSettings *swgFreqScannerSettings = swgChannelSettings->getFreqScannerSettings();
 
@@ -1309,7 +1313,11 @@ void FreqScanner::webapiFormatChannelSettings(
         swgFreqScannerSettings->setRgbColor(settings.m_rgbColor);
     }
     if (channelSettingsKeys.contains("title") || force) {
-        swgFreqScannerSettings->setTitle(new QString(settings.m_title));
+        if (swgFreqScannerSettings->getTitle()) {
+            *swgFreqScannerSettings->getTitle() = settings.m_title;
+        } else {
+            swgFreqScannerSettings->setTitle(new QString(settings.m_title));
+        }
     }
     if (channelSettingsKeys.contains("streamIndex") || force) {
         swgFreqScannerSettings->setStreamIndex(settings.m_streamIndex);

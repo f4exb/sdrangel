@@ -1060,7 +1060,11 @@ void LimeRFE::webapiFormatFeatureSettings(
     }
 
     response.getLimeRfeSettings()->setRgbColor(settings.m_rgbColor);
-    response.getLimeRfeSettings()->setDevicePath(new QString(settings.m_devicePath));
+    if (response.getLimeRfeSettings()->getDevicePath()) {
+        *response.getLimeRfeSettings()->getDevicePath() = settings.m_devicePath;
+    } else {
+        response.getLimeRfeSettings()->setDevicePath(new QString(settings.m_devicePath));
+    }
     response.getLimeRfeSettings()->setRxChannels((int) settings.m_rxChannels);
     response.getLimeRfeSettings()->setRxWidebandChannel((int) settings.m_rxWidebandChannel);
     response.getLimeRfeSettings()->setRxHamChannel((int) settings.m_rxHAMChannel);

@@ -357,7 +357,11 @@ void AMBE::webapiFormatFeatureReport(SWGSDRangel::SWGFeatureReport& response)
     for (auto& deviceRef : deviceRefs)
     {
         response.getAmbeReport()->getDevices()->append(new SWGSDRangel::SWGAMBEDeviceReport);
-        response.getAmbeReport()->getDevices()->back()->setDevicePath(new QString(deviceRef.m_devicePath));
+        if (response.getAmbeReport()->getDevices()->back()->getDevicePath()) {
+            *response.getAmbeReport()->getDevices()->back()->getDevicePath() = deviceRef.m_devicePath;
+        } else {
+            response.getAmbeReport()->getDevices()->back()->setDevicePath(new QString(deviceRef.m_devicePath));
+        }
         response.getAmbeReport()->getDevices()->back()->setSuccessCount(deviceRef.m_successCount);
         response.getAmbeReport()->getDevices()->back()->setFailureCount(deviceRef.m_failureCount);
     }

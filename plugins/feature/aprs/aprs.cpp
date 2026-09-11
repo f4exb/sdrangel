@@ -280,11 +280,27 @@ void APRS::webapiFormatFeatureSettings(
     SWGSDRangel::SWGFeatureSettings& response,
     const APRSSettings& settings)
 {
-    response.getAprsSettings()->setIgateServer(new QString(settings.m_igateServer));
+    if (response.getAprsSettings()->getIgateServer()) {
+        *response.getAprsSettings()->getIgateServer() = settings.m_igateServer;
+    } else {
+        response.getAprsSettings()->setIgateServer(new QString(settings.m_igateServer));
+    }
     response.getAprsSettings()->setIgatePort(settings.m_igatePort);
-    response.getAprsSettings()->setIgateCallsign(new QString(settings.m_igateCallsign));
-    response.getAprsSettings()->setIgatePasscode(new QString(settings.m_igatePasscode));
-    response.getAprsSettings()->setIgateFilter(new QString(settings.m_igateFilter));
+    if (response.getAprsSettings()->getIgateCallsign()) {
+        *response.getAprsSettings()->getIgateCallsign() = settings.m_igateCallsign;
+    } else {
+        response.getAprsSettings()->setIgateCallsign(new QString(settings.m_igateCallsign));
+    }
+    if (response.getAprsSettings()->getIgatePasscode()) {
+        *response.getAprsSettings()->getIgatePasscode() = settings.m_igatePasscode;
+    } else {
+        response.getAprsSettings()->setIgatePasscode(new QString(settings.m_igatePasscode));
+    }
+    if (response.getAprsSettings()->getIgateFilter()) {
+        *response.getAprsSettings()->getIgateFilter() = settings.m_igateFilter;
+    } else {
+        response.getAprsSettings()->setIgateFilter(new QString(settings.m_igateFilter));
+    }
     response.getAprsSettings()->setIgateEnabled(settings.m_igateEnabled ? 1 : 0);
 
     if (response.getAprsSettings()->getTitle()) {

@@ -365,7 +365,11 @@ void HeatMap::webapiFormatChannelSettings(SWGSDRangel::SWGChannelSettings& respo
     response.getHeatMapSettings()->setRfBandwidth(settings.m_rfBandwidth);
     response.getHeatMapSettings()->setMinPower(settings.m_minPower);
     response.getHeatMapSettings()->setMaxPower(settings.m_maxPower);
-    response.getHeatMapSettings()->setColorMapName(new QString(settings.m_colorMapName));
+    if (response.getHeatMapSettings()->getColorMapName()) {
+        *response.getHeatMapSettings()->getColorMapName() = settings.m_colorMapName;
+    } else {
+        response.getHeatMapSettings()->setColorMapName(new QString(settings.m_colorMapName));
+    }
     response.getHeatMapSettings()->setMode((int) settings.m_mode);
     response.getHeatMapSettings()->setPulseThreshold(settings.m_pulseThreshold);
     response.getHeatMapSettings()->setAveragePeriodUs(settings.m_averagePeriodUS);
@@ -469,7 +473,11 @@ void HeatMap::webapiFormatChannelSettings(
     swgChannelSettings->setDirection(0); // Single sink (Rx)
     swgChannelSettings->setOriginatorChannelIndex(getIndexInDeviceSet());
     swgChannelSettings->setOriginatorDeviceSetIndex(getDeviceSetIndex());
-    swgChannelSettings->setChannelType(new QString("HeatMap"));
+    if (swgChannelSettings->getChannelType()) {
+        *swgChannelSettings->getChannelType() = "HeatMap";
+    } else {
+        swgChannelSettings->setChannelType(new QString("HeatMap"));
+    }
     swgChannelSettings->setHeatMapSettings(new SWGSDRangel::SWGHeatMapSettings());
     SWGSDRangel::SWGHeatMapSettings *swgHeatMapSettings = swgChannelSettings->getHeatMapSettings();
 
@@ -488,7 +496,11 @@ void HeatMap::webapiFormatChannelSettings(
         swgHeatMapSettings->setMaxPower(settings.m_maxPower);
     }
     if (channelSettingsKeys.contains("colorMapName") || force) {
-        swgHeatMapSettings->setColorMapName(new QString(settings.m_colorMapName));
+        if (swgHeatMapSettings->getColorMapName()) {
+            *swgHeatMapSettings->getColorMapName() = settings.m_colorMapName;
+        } else {
+            swgHeatMapSettings->setColorMapName(new QString(settings.m_colorMapName));
+        }
     }
     if (channelSettingsKeys.contains("mode") || force) {
         swgHeatMapSettings->setMode((int) settings.m_mode);
@@ -506,7 +518,11 @@ void HeatMap::webapiFormatChannelSettings(
         swgHeatMapSettings->setRgbColor(settings.m_rgbColor);
     }
     if (channelSettingsKeys.contains("title") || force) {
-        swgHeatMapSettings->setTitle(new QString(settings.m_title));
+        if (swgHeatMapSettings->getTitle()) {
+            *swgHeatMapSettings->getTitle() = settings.m_title;
+        } else {
+            swgHeatMapSettings->setTitle(new QString(settings.m_title));
+        }
     }
     if (channelSettingsKeys.contains("streamIndex") || force) {
         swgHeatMapSettings->setStreamIndex(settings.m_streamIndex);

@@ -514,19 +514,35 @@ void FileSource::webapiFormatChannelReport(SWGSDRangel::SWGChannelReport& respon
     QTime t(0, 0, 0, 0);
     t = t.addSecs(t_sec);
     t = t.addMSecs(t_msec);
-    response.getFileSourceReport()->setElapsedTime(new QString(t.toString("HH:mm:ss.zzz")));
+    if (response.getFileSourceReport()->getElapsedTime()) {
+        *response.getFileSourceReport()->getElapsedTime() = t.toString("HH:mm:ss.zzz");
+    } else {
+        response.getFileSourceReport()->setElapsedTime(new QString(t.toString("HH:mm:ss.zzz")));
+    }
 
     qint64 startingTimeStampMsec = startingTimeStamp * 1000LL;
     QDateTime dt = QDateTime::fromMSecsSinceEpoch(startingTimeStampMsec);
     dt = dt.addSecs(t_sec);
     dt = dt.addMSecs(t_msec);
-    response.getFileSourceReport()->setAbsoluteTime(new QString(dt.toString("yyyy-MM-dd HH:mm:ss.zzz")));
+    if (response.getFileSourceReport()->getAbsoluteTime()) {
+        *response.getFileSourceReport()->getAbsoluteTime() = dt.toString("yyyy-MM-dd HH:mm:ss.zzz");
+    } else {
+        response.getFileSourceReport()->setAbsoluteTime(new QString(dt.toString("yyyy-MM-dd HH:mm:ss.zzz")));
+    }
 
     QTime recordLength(0, 0, 0, 0);
     recordLength = recordLength.addSecs(fileRecordLength);
-    response.getFileSourceReport()->setDurationTime(new QString(recordLength.toString("HH:mm:ss")));
+    if (response.getFileSourceReport()->getDurationTime()) {
+        *response.getFileSourceReport()->getDurationTime() = recordLength.toString("HH:mm:ss");
+    } else {
+        response.getFileSourceReport()->setDurationTime(new QString(recordLength.toString("HH:mm:ss")));
+    }
 
-    response.getFileSourceReport()->setFileName(new QString(m_settings.m_fileName));
+    if (response.getFileSourceReport()->getFileName()) {
+        *response.getFileSourceReport()->getFileName() = m_settings.m_fileName;
+    } else {
+        response.getFileSourceReport()->setFileName(new QString(m_settings.m_fileName));
+    }
     response.getFileSourceReport()->setFileSampleRate(fileSampleRate);
     response.getFileSourceReport()->setFileSampleSize(fileSampleSize);
     response.getFileSourceReport()->setSampleRate(m_basebandSampleRate);
@@ -593,7 +609,11 @@ void FileSource::webapiFormatChannelSettings(
     swgChannelSettings->setDirection(1); // single source (Tx)
     swgChannelSettings->setOriginatorChannelIndex(getIndexInDeviceSet());
     swgChannelSettings->setOriginatorDeviceSetIndex(getDeviceSetIndex());
-    swgChannelSettings->setChannelType(new QString(m_channelId));
+    if (swgChannelSettings->getChannelType()) {
+        *swgChannelSettings->getChannelType() = m_channelId;
+    } else {
+        swgChannelSettings->setChannelType(new QString(m_channelId));
+    }
     swgChannelSettings->setFileSourceSettings(new SWGSDRangel::SWGFileSourceSettings());
     SWGSDRangel::SWGFileSourceSettings *swgFileSourceSettings = swgChannelSettings->getFileSourceSettings();
 
@@ -612,7 +632,11 @@ void FileSource::webapiFormatChannelSettings(
         swgFileSourceSettings->setRgbColor(settings.m_rgbColor);
     }
     if (channelSettingsKeys.contains("title") || force) {
-        swgFileSourceSettings->setTitle(new QString(settings.m_title));
+        if (swgFileSourceSettings->getTitle()) {
+            *swgFileSourceSettings->getTitle() = settings.m_title;
+        } else {
+            swgFileSourceSettings->setTitle(new QString(settings.m_title));
+        }
     }
     if (channelSettingsKeys.contains("streamIndex") || force) {
         swgFileSourceSettings->setStreamIndex(settings.m_streamIndex);

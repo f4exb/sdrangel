@@ -495,10 +495,18 @@ void AISDemod::webapiFormatChannelSettings(SWGSDRangel::SWGChannelSettings& resp
     response.getAisDemodSettings()->setFmDeviation(settings.m_fmDeviation);
     response.getAisDemodSettings()->setCorrelationThreshold(settings.m_correlationThreshold);
     response.getAisDemodSettings()->setUdpEnabled(settings.m_udpEnabled);
-    response.getAisDemodSettings()->setUdpAddress(new QString(settings.m_udpAddress));
+    if (response.getAisDemodSettings()->getUdpAddress()) {
+        *response.getAisDemodSettings()->getUdpAddress() = settings.m_udpAddress;
+    } else {
+        response.getAisDemodSettings()->setUdpAddress(new QString(settings.m_udpAddress));
+    }
     response.getAisDemodSettings()->setUdpPort(settings.m_udpPort);
     response.getAisDemodSettings()->setUdpFormat((int)settings.m_udpFormat);
-    response.getAisDemodSettings()->setLogFilename(new QString(settings.m_logFilename));
+    if (response.getAisDemodSettings()->getLogFilename()) {
+        *response.getAisDemodSettings()->getLogFilename() = settings.m_logFilename;
+    } else {
+        response.getAisDemodSettings()->setLogFilename(new QString(settings.m_logFilename));
+    }
     response.getAisDemodSettings()->setLogEnabled(settings.m_logEnabled);
     response.getAisDemodSettings()->setUseFileTime(settings.m_useFileTime);
 
@@ -600,7 +608,11 @@ void AISDemod::webapiFormatChannelSettings(
     swgChannelSettings->setDirection(0); // Single sink (Rx)
     swgChannelSettings->setOriginatorChannelIndex(getIndexInDeviceSet());
     swgChannelSettings->setOriginatorDeviceSetIndex(getDeviceSetIndex());
-    swgChannelSettings->setChannelType(new QString("AISDemod"));
+    if (swgChannelSettings->getChannelType()) {
+        *swgChannelSettings->getChannelType() = "AISDemod";
+    } else {
+        swgChannelSettings->setChannelType(new QString("AISDemod"));
+    }
     swgChannelSettings->setAisDemodSettings(new SWGSDRangel::SWGAISDemodSettings());
     SWGSDRangel::SWGAISDemodSettings *swgAISDemodSettings = swgChannelSettings->getAisDemodSettings();
 
@@ -625,7 +637,11 @@ void AISDemod::webapiFormatChannelSettings(
         swgAISDemodSettings->setUdpEnabled(settings.m_udpEnabled);
     }
     if (channelSettingsKeys.contains("udpAddress") || force) {
-        swgAISDemodSettings->setUdpAddress(new QString(settings.m_udpAddress));
+        if (swgAISDemodSettings->getUdpAddress()) {
+            *swgAISDemodSettings->getUdpAddress() = settings.m_udpAddress;
+        } else {
+            swgAISDemodSettings->setUdpAddress(new QString(settings.m_udpAddress));
+        }
     }
     if (channelSettingsKeys.contains("udpPort") || force) {
         swgAISDemodSettings->setUdpPort(settings.m_udpPort);
@@ -634,7 +650,11 @@ void AISDemod::webapiFormatChannelSettings(
         swgAISDemodSettings->setUdpFormat((int)settings.m_udpFormat);
     }
     if (channelSettingsKeys.contains("logFilename") || force) {
-        swgAISDemodSettings->setLogFilename(new QString(settings.m_logFilename));
+        if (swgAISDemodSettings->getLogFilename()) {
+            *swgAISDemodSettings->getLogFilename() = settings.m_logFilename;
+        } else {
+            swgAISDemodSettings->setLogFilename(new QString(settings.m_logFilename));
+        }
     }
     if (channelSettingsKeys.contains("logEnabled") || force) {
         swgAISDemodSettings->setLogEnabled(settings.m_logEnabled);
@@ -646,7 +666,11 @@ void AISDemod::webapiFormatChannelSettings(
         swgAISDemodSettings->setRgbColor(settings.m_rgbColor);
     }
     if (channelSettingsKeys.contains("title") || force) {
-        swgAISDemodSettings->setTitle(new QString(settings.m_title));
+        if (swgAISDemodSettings->getTitle()) {
+            *swgAISDemodSettings->getTitle() = settings.m_title;
+        } else {
+            swgAISDemodSettings->setTitle(new QString(settings.m_title));
+        }
     }
     if (channelSettingsKeys.contains("streamIndex") || force) {
         swgAISDemodSettings->setStreamIndex(settings.m_streamIndex);

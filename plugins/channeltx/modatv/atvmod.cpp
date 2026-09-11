@@ -651,7 +651,11 @@ void ATVMod::webapiFormatChannelSettings(
     swgChannelSettings->setDirection(1); // single source (Tx)
     swgChannelSettings->setOriginatorChannelIndex(getIndexInDeviceSet());
     swgChannelSettings->setOriginatorDeviceSetIndex(getDeviceSetIndex());
-    swgChannelSettings->setChannelType(new QString(m_channelId));
+    if (swgChannelSettings->getChannelType()) {
+        *swgChannelSettings->getChannelType() = m_channelId;
+    } else {
+        swgChannelSettings->setChannelType(new QString(m_channelId));
+    }
     swgChannelSettings->setAtvModSettings(new SWGSDRangel::SWGATVModSettings());
     SWGSDRangel::SWGATVModSettings *swgATVModSettings = swgChannelSettings->getAtvModSettings();
 
@@ -712,13 +716,21 @@ void ATVMod::webapiFormatChannelSettings(
         swgATVModSettings->setShowOverlayText(settings.m_showOverlayText ? 1 : 0);
     }
     if (channelSettingsKeys.contains("overlayText") || force) {
-        swgATVModSettings->setOverlayText(new QString(settings.m_overlayText));
+        if (swgATVModSettings->getOverlayText()) {
+            *swgATVModSettings->getOverlayText() = settings.m_overlayText;
+        } else {
+            swgATVModSettings->setOverlayText(new QString(settings.m_overlayText));
+        }
     }
     if (channelSettingsKeys.contains("rgbColor") || force) {
         swgATVModSettings->setRgbColor(settings.m_rgbColor);
     }
     if (channelSettingsKeys.contains("title") || force) {
-        swgATVModSettings->setTitle(new QString(settings.m_title));
+        if (swgATVModSettings->getTitle()) {
+            *swgATVModSettings->getTitle() = settings.m_title;
+        } else {
+            swgATVModSettings->setTitle(new QString(settings.m_title));
+        }
     }
     if (channelSettingsKeys.contains("streamIndex") || force) {
         swgATVModSettings->setStreamIndex(settings.m_streamIndex);

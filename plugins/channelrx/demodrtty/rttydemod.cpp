@@ -532,7 +532,11 @@ void RttyDemod::webapiFormatChannelSettings(SWGSDRangel::SWGChannelSettings& res
     response.getRttyDemodSettings()->setBaudRate(settings.m_baudRate);
     response.getRttyDemodSettings()->setFrequencyShift(settings.m_frequencyShift);
     response.getRttyDemodSettings()->setUdpEnabled(settings.m_udpEnabled);
-    response.getRttyDemodSettings()->setUdpAddress(new QString(settings.m_udpAddress));
+    if (response.getRttyDemodSettings()->getUdpAddress()) {
+        *response.getRttyDemodSettings()->getUdpAddress() = settings.m_udpAddress;
+    } else {
+        response.getRttyDemodSettings()->setUdpAddress(new QString(settings.m_udpAddress));
+    }
     response.getRttyDemodSettings()->setUdpPort(settings.m_udpPort);
     response.getRttyDemodSettings()->setCharacterSet(settings.m_characterSet);
     response.getRttyDemodSettings()->setSuppressCrlf(settings.m_suppressCRLF);
@@ -540,7 +544,11 @@ void RttyDemod::webapiFormatChannelSettings(SWGSDRangel::SWGChannelSettings& res
     response.getRttyDemodSettings()->setMsbFirst(settings.m_msbFirst);
     response.getRttyDemodSettings()->setSpaceHigh(settings.m_spaceHigh);
     response.getRttyDemodSettings()->setSquelch(settings.m_squelch);
-    response.getRttyDemodSettings()->setLogFilename(new QString(settings.m_logFilename));
+    if (response.getRttyDemodSettings()->getLogFilename()) {
+        *response.getRttyDemodSettings()->getLogFilename() = settings.m_logFilename;
+    } else {
+        response.getRttyDemodSettings()->setLogFilename(new QString(settings.m_logFilename));
+    }
     response.getRttyDemodSettings()->setLogEnabled(settings.m_logEnabled);
 
     response.getRttyDemodSettings()->setRgbColor(settings.m_rgbColor);
@@ -650,7 +658,11 @@ void RttyDemod::webapiFormatChannelSettings(
     swgChannelSettings->setDirection(0); // Single sink (Rx)
     swgChannelSettings->setOriginatorChannelIndex(getIndexInDeviceSet());
     swgChannelSettings->setOriginatorDeviceSetIndex(getDeviceSetIndex());
-    swgChannelSettings->setChannelType(new QString("RttyDemod"));
+    if (swgChannelSettings->getChannelType()) {
+        *swgChannelSettings->getChannelType() = "RttyDemod";
+    } else {
+        swgChannelSettings->setChannelType(new QString("RttyDemod"));
+    }
     swgChannelSettings->setRttyDemodSettings(new SWGSDRangel::SWGRTTYDemodSettings());
     SWGSDRangel::SWGRTTYDemodSettings *swgRttyDemodSettings = swgChannelSettings->getRttyDemodSettings();
 
@@ -672,7 +684,11 @@ void RttyDemod::webapiFormatChannelSettings(
         swgRttyDemodSettings->setUdpEnabled(settings.m_udpEnabled);
     }
     if (channelSettingsKeys.contains("udpAddress") || force) {
-        swgRttyDemodSettings->setUdpAddress(new QString(settings.m_udpAddress));
+        if (swgRttyDemodSettings->getUdpAddress()) {
+            *swgRttyDemodSettings->getUdpAddress() = settings.m_udpAddress;
+        } else {
+            swgRttyDemodSettings->setUdpAddress(new QString(settings.m_udpAddress));
+        }
     }
     if (channelSettingsKeys.contains("udpPort") || force) {
         swgRttyDemodSettings->setUdpPort(settings.m_udpPort);
@@ -696,7 +712,11 @@ void RttyDemod::webapiFormatChannelSettings(
         swgRttyDemodSettings->setSquelch(settings.m_squelch);
     }
     if (channelSettingsKeys.contains("logFilename") || force) {
-        swgRttyDemodSettings->setLogFilename(new QString(settings.m_logFilename));
+        if (swgRttyDemodSettings->getLogFilename()) {
+            *swgRttyDemodSettings->getLogFilename() = settings.m_logFilename;
+        } else {
+            swgRttyDemodSettings->setLogFilename(new QString(settings.m_logFilename));
+        }
     }
     if (channelSettingsKeys.contains("logEnabled") || force) {
         swgRttyDemodSettings->setLogEnabled(settings.m_logEnabled);
@@ -705,7 +725,11 @@ void RttyDemod::webapiFormatChannelSettings(
         swgRttyDemodSettings->setRgbColor(settings.m_rgbColor);
     }
     if (channelSettingsKeys.contains("title") || force) {
-        swgRttyDemodSettings->setTitle(new QString(settings.m_title));
+        if (swgRttyDemodSettings->getTitle()) {
+            *swgRttyDemodSettings->getTitle() = settings.m_title;
+        } else {
+            swgRttyDemodSettings->setTitle(new QString(settings.m_title));
+        }
     }
     if (channelSettingsKeys.contains("streamIndex") || force) {
         swgRttyDemodSettings->setStreamIndex(settings.m_streamIndex);

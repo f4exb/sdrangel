@@ -1194,7 +1194,11 @@ void BladeRF2Input::webapiFormatDeviceReport(SWGSDRangel::SWGDeviceReport& respo
         for (; it != modes.end(); ++it)
         {
             response.getBladeRf2InputReport()->getGainModes()->append(new SWGSDRangel::SWGNamedEnum);
-            response.getBladeRf2InputReport()->getGainModes()->back()->setName(new QString(it->m_name));
+            if (response.getBladeRf2InputReport()->getGainModes()->back()->getName()) {
+                *response.getBladeRf2InputReport()->getGainModes()->back()->getName() = it->m_name;
+            } else {
+                response.getBladeRf2InputReport()->getGainModes()->back()->setName(new QString(it->m_name));
+            }
             response.getBladeRf2InputReport()->getGainModes()->back()->setValue(it->m_value);
         }
     }

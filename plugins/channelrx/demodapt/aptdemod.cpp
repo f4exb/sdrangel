@@ -482,7 +482,11 @@ void APTDemod::webapiFormatChannelSettings(SWGSDRangel::SWGChannelSettings& resp
     response.getAptDemodSettings()->setChannels((int)settings.m_channels);
     response.getAptDemodSettings()->setDecodeEnabled(settings.m_decodeEnabled);
     response.getAptDemodSettings()->setAutoSave(settings.m_autoSave);
-    response.getAptDemodSettings()->setAutoSavePath(new QString(settings.m_autoSavePath));
+    if (response.getAptDemodSettings()->getAutoSavePath()) {
+        *response.getAptDemodSettings()->getAutoSavePath() = settings.m_autoSavePath;
+    } else {
+        response.getAptDemodSettings()->setAutoSavePath(new QString(settings.m_autoSavePath));
+    }
     response.getAptDemodSettings()->setAutoSaveMinScanLines(settings.m_autoSaveMinScanLines);
     response.getAptDemodSettings()->setSaveCombined(settings.m_saveCombined);
     response.getAptDemodSettings()->setSaveSeparate(settings.m_saveSeparate);
@@ -490,7 +494,11 @@ void APTDemod::webapiFormatChannelSettings(SWGSDRangel::SWGChannelSettings& resp
     response.getAptDemodSettings()->setScanlinesPerImageUpdate(settings.m_scanlinesPerImageUpdate);
     response.getAptDemodSettings()->setTransparencyThreshold(settings.m_transparencyThreshold);
     response.getAptDemodSettings()->setOpacityThreshold(settings.m_opacityThreshold);
-    response.getAptDemodSettings()->setPalettes(new QString(settings.m_palettes.join(";")));
+    if (response.getAptDemodSettings()->getPalettes()) {
+        *response.getAptDemodSettings()->getPalettes() = settings.m_palettes.join(";");
+    } else {
+        response.getAptDemodSettings()->setPalettes(new QString(settings.m_palettes.join(";")));
+    }
     response.getAptDemodSettings()->setPalette(settings.m_palette);
     response.getAptDemodSettings()->setHorizontalPixelsPerDegree(settings.m_horizontalPixelsPerDegree);
     response.getAptDemodSettings()->setVerticalPixelsPerDegree(settings.m_verticalPixelsPerDegree);
@@ -582,7 +590,11 @@ void APTDemod::webapiFormatChannelSettings(
     swgChannelSettings->setDirection(0); // Single sink (Rx)
     swgChannelSettings->setOriginatorChannelIndex(getIndexInDeviceSet());
     swgChannelSettings->setOriginatorDeviceSetIndex(getDeviceSetIndex());
-    swgChannelSettings->setChannelType(new QString("APTDemod"));
+    if (swgChannelSettings->getChannelType()) {
+        *swgChannelSettings->getChannelType() = "APTDemod";
+    } else {
+        swgChannelSettings->setChannelType(new QString("APTDemod"));
+    }
     swgChannelSettings->setAptDemodSettings(new SWGSDRangel::SWGAPTDemodSettings());
     SWGSDRangel::SWGAPTDemodSettings *swgAPTDemodSettings = swgChannelSettings->getAptDemodSettings();
 
@@ -625,7 +637,11 @@ void APTDemod::webapiFormatChannelSettings(
         swgAPTDemodSettings->setAutoSave(settings.m_autoSave);
     }
     if (channelSettingsKeys.contains("autoSavePath") || force) {
-        swgAPTDemodSettings->setAutoSavePath(new QString(settings.m_autoSavePath));
+        if (swgAPTDemodSettings->getAutoSavePath()) {
+            *swgAPTDemodSettings->getAutoSavePath() = settings.m_autoSavePath;
+        } else {
+            swgAPTDemodSettings->setAutoSavePath(new QString(settings.m_autoSavePath));
+        }
     }
     if (channelSettingsKeys.contains("autoSaveMinScanLines") || force) {
         swgAPTDemodSettings->setAutoSaveMinScanLines(settings.m_autoSaveMinScanLines);
@@ -649,7 +665,11 @@ void APTDemod::webapiFormatChannelSettings(
         swgAPTDemodSettings->setOpacityThreshold(settings.m_opacityThreshold);
     }
     if (channelSettingsKeys.contains("palettes") || force) {
-        swgAPTDemodSettings->setPalettes(new QString(settings.m_palettes.join(";")));
+        if (swgAPTDemodSettings->getPalettes()) {
+            *swgAPTDemodSettings->getPalettes() = settings.m_palettes.join(";");
+        } else {
+            swgAPTDemodSettings->setPalettes(new QString(settings.m_palettes.join(";")));
+        }
     }
     if (channelSettingsKeys.contains("palette") || force) {
         swgAPTDemodSettings->setPalette(settings.m_palette);
@@ -670,7 +690,11 @@ void APTDemod::webapiFormatChannelSettings(
         swgAPTDemodSettings->setRgbColor(settings.m_rgbColor);
     }
     if (channelSettingsKeys.contains("title") || force) {
-        swgAPTDemodSettings->setTitle(new QString(settings.m_title));
+        if (swgAPTDemodSettings->getTitle()) {
+            *swgAPTDemodSettings->getTitle() = settings.m_title;
+        } else {
+            swgAPTDemodSettings->setTitle(new QString(settings.m_title));
+        }
     }
     if (channelSettingsKeys.contains("streamIndex") || force) {
         swgAPTDemodSettings->setStreamIndex(settings.m_streamIndex);

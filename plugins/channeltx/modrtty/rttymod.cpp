@@ -527,7 +527,11 @@ void RttyMod::webapiFormatChannelSettings(SWGSDRangel::SWGChannelSettings& respo
     response.getRttyModSettings()->setPostfixCrlf(settings.m_postfixCRLF);
 
     response.getRttyModSettings()->setUdpEnabled(settings.m_udpEnabled);
-    response.getRttyModSettings()->setUdpAddress(new QString(settings.m_udpAddress));
+    if (response.getRttyModSettings()->getUdpAddress()) {
+        *response.getRttyModSettings()->getUdpAddress() = settings.m_udpAddress;
+    } else {
+        response.getRttyModSettings()->setUdpAddress(new QString(settings.m_udpAddress));
+    }
     response.getRttyModSettings()->setUdpPort(settings.m_udpPort);
 
     response.getRttyModSettings()->setRgbColor(settings.m_rgbColor);
@@ -645,7 +649,11 @@ void RttyMod::webapiFormatChannelSettings(
     swgChannelSettings->setDirection(1); // single source (Tx)
     swgChannelSettings->setOriginatorChannelIndex(getIndexInDeviceSet());
     swgChannelSettings->setOriginatorDeviceSetIndex(getDeviceSetIndex());
-    swgChannelSettings->setChannelType(new QString(m_channelId));
+    if (swgChannelSettings->getChannelType()) {
+        *swgChannelSettings->getChannelType() = m_channelId;
+    } else {
+        swgChannelSettings->setChannelType(new QString(m_channelId));
+    }
     swgChannelSettings->setRttyModSettings(new SWGSDRangel::SWGRTTYModSettings());
     SWGSDRangel::SWGRTTYModSettings *swgRttyModSettings = swgChannelSettings->getRttyModSettings();
 
@@ -682,7 +690,11 @@ void RttyMod::webapiFormatChannelSettings(
         swgRttyModSettings->setRfNoise(settings.m_rfNoise ? 1 : 0);
     }
     if (channelSettingsKeys.contains("text")) {
-        swgRttyModSettings->setText(new QString(settings.m_text));
+        if (swgRttyModSettings->getText()) {
+            *swgRttyModSettings->getText() = settings.m_text;
+        } else {
+            swgRttyModSettings->setText(new QString(settings.m_text));
+        }
     }
     if (channelSettingsKeys.contains("beta")) {
         swgRttyModSettings->setBeta(settings.m_beta);
@@ -712,7 +724,11 @@ void RttyMod::webapiFormatChannelSettings(
         swgRttyModSettings->setRgbColor(settings.m_rgbColor);
     }
     if (channelSettingsKeys.contains("title") || force) {
-        swgRttyModSettings->setTitle(new QString(settings.m_title));
+        if (swgRttyModSettings->getTitle()) {
+            *swgRttyModSettings->getTitle() = settings.m_title;
+        } else {
+            swgRttyModSettings->setTitle(new QString(settings.m_title));
+        }
     }
     if (channelSettingsKeys.contains("streamIndex") || force) {
         swgRttyModSettings->setStreamIndex(settings.m_streamIndex);
@@ -721,7 +737,11 @@ void RttyMod::webapiFormatChannelSettings(
         swgRttyModSettings->setUdpEnabled(settings.m_udpEnabled);
     }
     if (channelSettingsKeys.contains("udpAddress") || force) {
-        swgRttyModSettings->setUdpAddress(new QString(settings.m_udpAddress));
+        if (swgRttyModSettings->getUdpAddress()) {
+            *swgRttyModSettings->getUdpAddress() = settings.m_udpAddress;
+        } else {
+            swgRttyModSettings->setUdpAddress(new QString(settings.m_udpAddress));
+        }
     }
     if (channelSettingsKeys.contains("udpPort") || force) {
         swgRttyModSettings->setUdpPort(settings.m_udpPort);

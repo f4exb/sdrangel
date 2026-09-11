@@ -485,7 +485,11 @@ void BeamSteeringCWMod::webapiFormatChannelSettings(
     swgChannelSettings->setDirection(2); // MIMO sink
     swgChannelSettings->setOriginatorChannelIndex(getIndexInDeviceSet());
     swgChannelSettings->setOriginatorDeviceSetIndex(getDeviceSetIndex());
-    swgChannelSettings->setChannelType(new QString("BeamSteeringCWSource"));
+    if (swgChannelSettings->getChannelType()) {
+        *swgChannelSettings->getChannelType() = "BeamSteeringCWSource";
+    } else {
+        swgChannelSettings->setChannelType(new QString("BeamSteeringCWSource"));
+    }
     swgChannelSettings->setBeamSteeringCwModSettings(new SWGSDRangel::SWGBeamSteeringCWModSettings());
     SWGSDRangel::SWGBeamSteeringCWModSettings *swgBeamSteeringCWSettings = swgChannelSettings->getBeamSteeringCwModSettings();
 
@@ -498,7 +502,11 @@ void BeamSteeringCWMod::webapiFormatChannelSettings(
         swgBeamSteeringCWSettings->setRgbColor(settings.m_rgbColor);
     }
     if (channelSettingsKeys.contains("title") || force) {
-        swgBeamSteeringCWSettings->setTitle(new QString(settings.m_title));
+        if (swgBeamSteeringCWSettings->getTitle()) {
+            *swgBeamSteeringCWSettings->getTitle() = settings.m_title;
+        } else {
+            swgBeamSteeringCWSettings->setTitle(new QString(settings.m_title));
+        }
     }
     if (channelSettingsKeys.contains("log2Decim") || force) {
         swgBeamSteeringCWSettings->setLog2Interp(settings.m_log2Interp);

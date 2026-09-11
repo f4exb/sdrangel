@@ -452,7 +452,11 @@ void AudioInput::webapiFormatDeviceSettings(SWGSDRangel::SWGDeviceSettings& resp
         response.getAudioInputSettings()->setTitle(new QString(settings.m_title));
     }
 
-    response.getAudioInputSettings()->setDevice(new QString(settings.m_deviceName));
+    if (response.getAudioInputSettings()->getDevice()) {
+        *response.getAudioInputSettings()->getDevice() = settings.m_deviceName;
+    } else {
+        response.getAudioInputSettings()->setDevice(new QString(settings.m_deviceName));
+    }
     response.getAudioInputSettings()->setDevSampleRate(settings.m_sampleRate);
     response.getAudioInputSettings()->setVolume(settings.m_volume);
     response.getAudioInputSettings()->setLog2Decim(settings.m_log2Decim);

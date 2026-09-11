@@ -283,12 +283,24 @@ void PERTester::webapiFormatFeatureSettings(
     response.getPerTesterSettings()->setInterval(settings.m_interval);
     response.getPerTesterSettings()->setStart((int)settings.m_start);
     response.getPerTesterSettings()->setSatellites(convertStringListToPtrs(settings.m_satellites));
-    response.getPerTesterSettings()->setPacket(new QString(settings.m_packet));
+    if (response.getPerTesterSettings()->getPacket()) {
+        *response.getPerTesterSettings()->getPacket() = settings.m_packet;
+    } else {
+        response.getPerTesterSettings()->setPacket(new QString(settings.m_packet));
+    }
     response.getPerTesterSettings()->setIgnoreLeadingBytes(settings.m_ignoreLeadingBytes);
     response.getPerTesterSettings()->setIgnoreTrailingBytes(settings.m_ignoreTrailingBytes);
-    response.getPerTesterSettings()->setTxUdpAddress(new QString(settings.m_txUDPAddress));
+    if (response.getPerTesterSettings()->getTxUdpAddress()) {
+        *response.getPerTesterSettings()->getTxUdpAddress() = settings.m_txUDPAddress;
+    } else {
+        response.getPerTesterSettings()->setTxUdpAddress(new QString(settings.m_txUDPAddress));
+    }
     response.getPerTesterSettings()->setTxUdpPort(settings.m_txUDPPort);
-    response.getPerTesterSettings()->setRxUdpAddress(new QString(settings.m_rxUDPAddress));
+    if (response.getPerTesterSettings()->getRxUdpAddress()) {
+        *response.getPerTesterSettings()->getRxUdpAddress() = settings.m_rxUDPAddress;
+    } else {
+        response.getPerTesterSettings()->setRxUdpAddress(new QString(settings.m_rxUDPAddress));
+    }
     response.getPerTesterSettings()->setRxUdpPort(settings.m_rxUDPPort);
 
     if (response.getPerTesterSettings()->getTitle()) {

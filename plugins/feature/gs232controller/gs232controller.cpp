@@ -404,12 +404,24 @@ void GS232Controller::webapiFormatFeatureSettings(
 {
     response.getGs232ControllerSettings()->setAzimuth(settings.m_azimuth);
     response.getGs232ControllerSettings()->setElevation(settings.m_elevation);
-    response.getGs232ControllerSettings()->setSerialPort(new QString(settings.m_serialPort));
+    if (response.getGs232ControllerSettings()->getSerialPort()) {
+        *response.getGs232ControllerSettings()->getSerialPort() = settings.m_serialPort;
+    } else {
+        response.getGs232ControllerSettings()->setSerialPort(new QString(settings.m_serialPort));
+    }
     response.getGs232ControllerSettings()->setBaudRate(settings.m_baudRate);
-    response.getGs232ControllerSettings()->setHost(new QString(settings.m_host));
+    if (response.getGs232ControllerSettings()->getHost()) {
+        *response.getGs232ControllerSettings()->getHost() = settings.m_host;
+    } else {
+        response.getGs232ControllerSettings()->setHost(new QString(settings.m_host));
+    }
     response.getGs232ControllerSettings()->setPort(settings.m_port);
     response.getGs232ControllerSettings()->setTrack(settings.m_track);
-    response.getGs232ControllerSettings()->setSource(new QString(settings.m_source));
+    if (response.getGs232ControllerSettings()->getSource()) {
+        *response.getGs232ControllerSettings()->getSource() = settings.m_source;
+    } else {
+        response.getGs232ControllerSettings()->setSource(new QString(settings.m_source));
+    }
     response.getGs232ControllerSettings()->setAzimuthOffset(settings.m_azimuthOffset);
     response.getGs232ControllerSettings()->setElevationOffset(settings.m_elevationOffset);
     response.getGs232ControllerSettings()->setAzimuthMin(settings.m_azimuthMin);
@@ -420,7 +432,11 @@ void GS232Controller::webapiFormatFeatureSettings(
     response.getGs232ControllerSettings()->setProtocol(settings.m_protocol);
     response.getGs232ControllerSettings()->setPrecision(settings.m_precision);
     response.getGs232ControllerSettings()->setCoordinates((int)settings.m_coordinates);
-    response.getGs232ControllerSettings()->setInputController(new QString(settings.m_inputController));
+    if (response.getGs232ControllerSettings()->getInputController()) {
+        *response.getGs232ControllerSettings()->getInputController() = settings.m_inputController;
+    } else {
+        response.getGs232ControllerSettings()->setInputController(new QString(settings.m_inputController));
+    }
     response.getGs232ControllerSettings()->setInputSensitivity(settings.m_inputControllerSettings.m_lowSensitivity);
 
     if (response.getGs232ControllerSettings()->getTitle()) {

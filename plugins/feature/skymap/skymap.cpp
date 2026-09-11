@@ -234,10 +234,26 @@ void SkyMap::webapiFormatFeatureSettings(
     response.getSkyMapSettings()->setDisplayReticle(settings.m_displayReticle ? 1 : 0);
     response.getSkyMapSettings()->setDisplayGrid(settings.m_displayGrid ? 1 : 0);
     response.getSkyMapSettings()->setDisplayAntennaFoV(settings.m_displayAntennaFoV ? 1 : 0);
-    response.getSkyMapSettings()->setMap(new QString(settings.m_map));
-    response.getSkyMapSettings()->setBackground(new QString(settings.m_background));
-    response.getSkyMapSettings()->setProjection(new QString(settings.m_projection));
-    response.getSkyMapSettings()->setSource(new QString(settings.m_source));
+    if (response.getSkyMapSettings()->getMap()) {
+        *response.getSkyMapSettings()->getMap() = settings.m_map;
+    } else {
+        response.getSkyMapSettings()->setMap(new QString(settings.m_map));
+    }
+    if (response.getSkyMapSettings()->getBackground()) {
+        *response.getSkyMapSettings()->getBackground() = settings.m_background;
+    } else {
+        response.getSkyMapSettings()->setBackground(new QString(settings.m_background));
+    }
+    if (response.getSkyMapSettings()->getProjection()) {
+        *response.getSkyMapSettings()->getProjection() = settings.m_projection;
+    } else {
+        response.getSkyMapSettings()->setProjection(new QString(settings.m_projection));
+    }
+    if (response.getSkyMapSettings()->getSource()) {
+        *response.getSkyMapSettings()->getSource() = settings.m_source;
+    } else {
+        response.getSkyMapSettings()->setSource(new QString(settings.m_source));
+    }
     response.getSkyMapSettings()->setTrack(settings.m_track ? 1 : 0);
     response.getSkyMapSettings()->setLatitude(settings.m_latitude);
     response.getSkyMapSettings()->setLongitude(settings.m_longitude);
@@ -446,7 +462,11 @@ void SkyMap::webapiFormatFeatureReport(SWGSDRangel::SWGFeatureReport& response)
         *response.getSkyMapReport()->getDateTime() = m_viewDetails.m_dateTime.toString(Qt::ISODateWithMs);
     } else {
         //response.getSkyMapReport()->setDateTime(new QString(skymapDateTime));
-        response.getSkyMapReport()->setDateTime(new QString(m_viewDetails.m_dateTime.toString(Qt::ISODateWithMs)));
+        if (response.getSkyMapReport()->getDateTime()) {
+            *response.getSkyMapReport()->getDateTime() = m_viewDetails.m_dateTime.toString(Qt::ISODateWithMs);
+        } else {
+            response.getSkyMapReport()->setDateTime(new QString(m_viewDetails.m_dateTime.toString(Qt::ISODateWithMs)));
+        }
     }
     response.getSkyMapReport()->setRa(m_viewDetails.m_ra);
     response.getSkyMapReport()->setDec(m_viewDetails.m_dec);

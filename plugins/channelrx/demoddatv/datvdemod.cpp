@@ -538,7 +538,11 @@ void DATVDemod::webapiFormatChannelSettings(
     swgChannelSettings->setDirection(0); // Single sink (Rx)
     swgChannelSettings->setOriginatorChannelIndex(getIndexInDeviceSet());
     swgChannelSettings->setOriginatorDeviceSetIndex(getDeviceSetIndex());
-    swgChannelSettings->setChannelType(new QString("DATVDemod"));
+    if (swgChannelSettings->getChannelType()) {
+        *swgChannelSettings->getChannelType() = "DATVDemod";
+    } else {
+        swgChannelSettings->setChannelType(new QString("DATVDemod"));
+    }
     swgChannelSettings->setDatvDemodSettings(new SWGSDRangel::SWGDATVDemodSettings());
     SWGSDRangel::SWGDATVDemodSettings *swgDATVDemodSettings = swgChannelSettings->getDatvDemodSettings();
 
@@ -548,7 +552,11 @@ void DATVDemod::webapiFormatChannelSettings(
         swgDATVDemodSettings->setRgbColor(settings.m_rgbColor);
     }
     if (channelSettingsKeys.contains("title") || force) {
-        swgDATVDemodSettings->setTitle(new QString(settings.m_title));
+        if (swgDATVDemodSettings->getTitle()) {
+            *swgDATVDemodSettings->getTitle() = settings.m_title;
+        } else {
+            swgDATVDemodSettings->setTitle(new QString(settings.m_title));
+        }
     }
     if (channelSettingsKeys.contains("rfBandwidth") || force) {
         swgDATVDemodSettings->setRfBandwidth(settings.m_rfBandwidth);
@@ -578,7 +586,11 @@ void DATVDemod::webapiFormatChannelSettings(
         swgDATVDemodSettings->setAudioMute(settings.m_audioMute ? 1 : 0);
     }
     if (channelSettingsKeys.contains("audioDeviceName") || force) {
-        swgDATVDemodSettings->setAudioDeviceName(new QString(settings.m_audioDeviceName));
+        if (swgDATVDemodSettings->getAudioDeviceName()) {
+            *swgDATVDemodSettings->getAudioDeviceName() = settings.m_audioDeviceName;
+        } else {
+            swgDATVDemodSettings->setAudioDeviceName(new QString(settings.m_audioDeviceName));
+        }
     }
     if (channelSettingsKeys.contains("symbolRate") || force) {
         swgDATVDemodSettings->setSymbolRate(settings.m_symbolRate);
@@ -614,7 +626,11 @@ void DATVDemod::webapiFormatChannelSettings(
         swgDATVDemodSettings->setVideoMute(settings.m_videoMute ? 1 : 0);
     }
     if (channelSettingsKeys.contains("udpTSAddress") || force) {
-        swgDATVDemodSettings->setUdpTsAddress(new QString(settings.m_udpTSAddress));
+        if (swgDATVDemodSettings->getUdpTsAddress()) {
+            *swgDATVDemodSettings->getUdpTsAddress() = settings.m_udpTSAddress;
+        } else {
+            swgDATVDemodSettings->setUdpTsAddress(new QString(settings.m_udpTSAddress));
+        }
     }
     if (channelSettingsKeys.contains("udpTSPort") || force) {
         swgDATVDemodSettings->setUdpTsPort(settings.m_udpTSPort);

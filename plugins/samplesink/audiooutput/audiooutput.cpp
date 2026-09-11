@@ -366,7 +366,11 @@ void AudioOutput::webapiFormatDeviceSettings(SWGSDRangel::SWGDeviceSettings& res
         response.getAudioOutputSettings()->setTitle(new QString(settings.m_title));
     }
 
-    response.getAudioOutputSettings()->setDeviceName(new QString(settings.m_deviceName));
+    if (response.getAudioOutputSettings()->getDeviceName()) {
+        *response.getAudioOutputSettings()->getDeviceName() = settings.m_deviceName;
+    } else {
+        response.getAudioOutputSettings()->setDeviceName(new QString(settings.m_deviceName));
+    }
     response.getAudioOutputSettings()->setVolume(settings.m_volume);
     response.getAudioOutputSettings()->setIqMapping((int) settings.m_iqMapping);
 

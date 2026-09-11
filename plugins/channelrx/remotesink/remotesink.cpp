@@ -604,7 +604,11 @@ void RemoteSink::webapiFormatChannelSettings(
     swgChannelSettings->setDirection(0); // Single sink (Rx)
     swgChannelSettings->setOriginatorChannelIndex(getIndexInDeviceSet());
     swgChannelSettings->setOriginatorDeviceSetIndex(getDeviceSetIndex());
-    swgChannelSettings->setChannelType(new QString(m_channelId));
+    if (swgChannelSettings->getChannelType()) {
+        *swgChannelSettings->getChannelType() = m_channelId;
+    } else {
+        swgChannelSettings->setChannelType(new QString(m_channelId));
+    }
     swgChannelSettings->setRemoteSinkSettings(new SWGSDRangel::SWGRemoteSinkSettings());
     SWGSDRangel::SWGRemoteSinkSettings *swgRemoteSinkSettings = swgChannelSettings->getRemoteSinkSettings();
 
@@ -620,7 +624,11 @@ void RemoteSink::webapiFormatChannelSettings(
         swgRemoteSinkSettings->setDeviceCenterFrequency(settings.m_deviceCenterFrequency);
     }
     if (channelSettingsKeys.contains("dataAddress") || force) {
-        swgRemoteSinkSettings->setDataAddress(new QString(settings.m_dataAddress));
+        if (swgRemoteSinkSettings->getDataAddress()) {
+            *swgRemoteSinkSettings->getDataAddress() = settings.m_dataAddress;
+        } else {
+            swgRemoteSinkSettings->setDataAddress(new QString(settings.m_dataAddress));
+        }
     }
     if (channelSettingsKeys.contains("dataPort") || force) {
         swgRemoteSinkSettings->setDataPort(settings.m_dataPort);
@@ -629,7 +637,11 @@ void RemoteSink::webapiFormatChannelSettings(
         swgRemoteSinkSettings->setRgbColor(settings.m_rgbColor);
     }
     if (channelSettingsKeys.contains("title") || force) {
-        swgRemoteSinkSettings->setTitle(new QString(settings.m_title));
+        if (swgRemoteSinkSettings->getTitle()) {
+            *swgRemoteSinkSettings->getTitle() = settings.m_title;
+        } else {
+            swgRemoteSinkSettings->setTitle(new QString(settings.m_title));
+        }
     }
     if (channelSettingsKeys.contains("log2Decim") || force) {
         swgRemoteSinkSettings->setLog2Decim(settings.m_log2Decim);

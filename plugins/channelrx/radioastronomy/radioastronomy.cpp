@@ -1017,14 +1017,30 @@ void RadioAstronomy::webapiFormatChannelSettings(SWGSDRangel::SWGChannelSettings
     response.getRadioAstronomySettings()->setIntegration(settings.m_integration);
     response.getRadioAstronomySettings()->setFftSize(settings.m_fftSize);
     response.getRadioAstronomySettings()->setFftWindow((int)settings.m_fftWindow);
-    response.getRadioAstronomySettings()->setFilterFreqs(new QString(settings.m_filterFreqs));
+    if (response.getRadioAstronomySettings()->getFilterFreqs()) {
+        *response.getRadioAstronomySettings()->getFilterFreqs() = settings.m_filterFreqs;
+    } else {
+        response.getRadioAstronomySettings()->setFilterFreqs(new QString(settings.m_filterFreqs));
+    }
 
-    response.getRadioAstronomySettings()->setStarTracker(new QString(settings.m_starTracker));
-    response.getRadioAstronomySettings()->setRotator(new QString(settings.m_rotator));
+    if (response.getRadioAstronomySettings()->getStarTracker()) {
+        *response.getRadioAstronomySettings()->getStarTracker() = settings.m_starTracker;
+    } else {
+        response.getRadioAstronomySettings()->setStarTracker(new QString(settings.m_starTracker));
+    }
+    if (response.getRadioAstronomySettings()->getRotator()) {
+        *response.getRadioAstronomySettings()->getRotator() = settings.m_rotator;
+    } else {
+        response.getRadioAstronomySettings()->setRotator(new QString(settings.m_rotator));
+    }
 
     response.getRadioAstronomySettings()->setRunMode((int)settings.m_runMode);
     response.getRadioAstronomySettings()->setSweepStartAtTime((int)settings.m_sweepStartAtTime);
-    response.getRadioAstronomySettings()->setSweepStartDateTime(new QString(settings.m_sweepStartDateTime.toString(Qt::ISODate)));
+    if (response.getRadioAstronomySettings()->getSweepStartDateTime()) {
+        *response.getRadioAstronomySettings()->getSweepStartDateTime() = settings.m_sweepStartDateTime.toString(Qt::ISODate);
+    } else {
+        response.getRadioAstronomySettings()->setSweepStartDateTime(new QString(settings.m_sweepStartDateTime.toString(Qt::ISODate)));
+    }
     response.getRadioAstronomySettings()->setSweepType((int)settings.m_sweepType);
     response.getRadioAstronomySettings()->setSweep1Start(settings.m_sweep1Start);
     response.getRadioAstronomySettings()->setSweep1Stop(settings.m_sweep1Stop);
@@ -1119,7 +1135,11 @@ void RadioAstronomy::webapiFormatChannelSettings(
     swgChannelSettings->setDirection(0); // Single sink (Rx)
     swgChannelSettings->setOriginatorChannelIndex(getIndexInDeviceSet());
     swgChannelSettings->setOriginatorDeviceSetIndex(getDeviceSetIndex());
-    swgChannelSettings->setChannelType(new QString("RadioAstronomy"));
+    if (swgChannelSettings->getChannelType()) {
+        *swgChannelSettings->getChannelType() = "RadioAstronomy";
+    } else {
+        swgChannelSettings->setChannelType(new QString("RadioAstronomy"));
+    }
     swgChannelSettings->setRadioAstronomySettings(new SWGSDRangel::SWGRadioAstronomySettings());
     SWGSDRangel::SWGRadioAstronomySettings *swgRadioAstronomySettings = swgChannelSettings->getRadioAstronomySettings();
 
@@ -1144,14 +1164,26 @@ void RadioAstronomy::webapiFormatChannelSettings(
         swgRadioAstronomySettings->setRfBandwidth((int)settings.m_fftWindow);
     }
     if (channelSettingsKeys.contains("filterFreqs") || force) {
-        swgRadioAstronomySettings->setFilterFreqs(new QString(settings.m_filterFreqs));
+        if (swgRadioAstronomySettings->getFilterFreqs()) {
+            *swgRadioAstronomySettings->getFilterFreqs() = settings.m_filterFreqs;
+        } else {
+            swgRadioAstronomySettings->setFilterFreqs(new QString(settings.m_filterFreqs));
+        }
     }
 
     if (channelSettingsKeys.contains("starTracker") || force) {
-        swgRadioAstronomySettings->setStarTracker(new QString(settings.m_starTracker));
+        if (swgRadioAstronomySettings->getStarTracker()) {
+            *swgRadioAstronomySettings->getStarTracker() = settings.m_starTracker;
+        } else {
+            swgRadioAstronomySettings->setStarTracker(new QString(settings.m_starTracker));
+        }
     }
     if (channelSettingsKeys.contains("rotator") || force) {
-        swgRadioAstronomySettings->setRotator(new QString(settings.m_rotator));
+        if (swgRadioAstronomySettings->getRotator()) {
+            *swgRadioAstronomySettings->getRotator() = settings.m_rotator;
+        } else {
+            swgRadioAstronomySettings->setRotator(new QString(settings.m_rotator));
+        }
     }
 
     if (channelSettingsKeys.contains("runMode") || force) {
@@ -1161,7 +1193,11 @@ void RadioAstronomy::webapiFormatChannelSettings(
         swgRadioAstronomySettings->setSweepStartAtTime((int)settings.m_sweepStartAtTime);
     }
     if (channelSettingsKeys.contains("sweepStartDateTime") || force) {
-        swgRadioAstronomySettings->setSweepStartDateTime(new QString(settings.m_sweepStartDateTime.toString(Qt::ISODate)));
+        if (swgRadioAstronomySettings->getSweepStartDateTime()) {
+            *swgRadioAstronomySettings->getSweepStartDateTime() = settings.m_sweepStartDateTime.toString(Qt::ISODate);
+        } else {
+            swgRadioAstronomySettings->setSweepStartDateTime(new QString(settings.m_sweepStartDateTime.toString(Qt::ISODate)));
+        }
     }
     if (channelSettingsKeys.contains("sweepType") || force) {
         swgRadioAstronomySettings->setSweepType(settings.m_sweepType);
@@ -1195,7 +1231,11 @@ void RadioAstronomy::webapiFormatChannelSettings(
         swgRadioAstronomySettings->setRgbColor(settings.m_rgbColor);
     }
     if (channelSettingsKeys.contains("title") || force) {
-        swgRadioAstronomySettings->setTitle(new QString(settings.m_title));
+        if (swgRadioAstronomySettings->getTitle()) {
+            *swgRadioAstronomySettings->getTitle() = settings.m_title;
+        } else {
+            swgRadioAstronomySettings->setTitle(new QString(settings.m_title));
+        }
     }
     if (channelSettingsKeys.contains("streamIndex") || force) {
         swgRadioAstronomySettings->setStreamIndex(settings.m_streamIndex);

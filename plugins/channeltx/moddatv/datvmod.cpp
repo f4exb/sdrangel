@@ -473,15 +473,35 @@ void DATVMod::webapiFormatChannelSettings(SWGSDRangel::SWGChannelSettings& respo
     response.getDatvModSettings()->setSymbolRate(settings.m_symbolRate);
     response.getDatvModSettings()->setRollOff(settings.m_rollOff);
     response.getDatvModSettings()->setTsSource(settings.m_source);
-    response.getDatvModSettings()->setImageFileName(new QString(settings.m_imageFileName));
+    if (response.getDatvModSettings()->getImageFileName()) {
+        *response.getDatvModSettings()->getImageFileName() = settings.m_imageFileName;
+    } else {
+        response.getDatvModSettings()->setImageFileName(new QString(settings.m_imageFileName));
+    }
     response.getDatvModSettings()->setImageOverlayTimestamp(settings.m_imageOverlayTimestamp ? 1 : 0);
-    response.getDatvModSettings()->setImageServiceProvider(new QString(settings.m_imageServiceProvider));
-    response.getDatvModSettings()->setImageServiceName(new QString(settings.m_imageServiceName));
+    if (response.getDatvModSettings()->getImageServiceProvider()) {
+        *response.getDatvModSettings()->getImageServiceProvider() = settings.m_imageServiceProvider;
+    } else {
+        response.getDatvModSettings()->setImageServiceProvider(new QString(settings.m_imageServiceProvider));
+    }
+    if (response.getDatvModSettings()->getImageServiceName()) {
+        *response.getDatvModSettings()->getImageServiceName() = settings.m_imageServiceName;
+    } else {
+        response.getDatvModSettings()->setImageServiceName(new QString(settings.m_imageServiceName));
+    }
     response.getDatvModSettings()->setImageCodec((int)settings.m_imageCodec);
-    response.getDatvModSettings()->setTsFileName(new QString(settings.m_tsFileName));
+    if (response.getDatvModSettings()->getTsFileName()) {
+        *response.getDatvModSettings()->getTsFileName() = settings.m_tsFileName;
+    } else {
+        response.getDatvModSettings()->setTsFileName(new QString(settings.m_tsFileName));
+    }
     response.getDatvModSettings()->setTsFilePlayLoop(settings.m_tsFilePlayLoop ? 1 : 0);
     response.getDatvModSettings()->setTsFilePlay(settings.m_tsFilePlay ? 1 : 0);
-    response.getDatvModSettings()->setUdpAddress(new QString(settings.m_udpAddress));
+    if (response.getDatvModSettings()->getUdpAddress()) {
+        *response.getDatvModSettings()->getUdpAddress() = settings.m_udpAddress;
+    } else {
+        response.getDatvModSettings()->setUdpAddress(new QString(settings.m_udpAddress));
+    }
     response.getDatvModSettings()->setUdpPort(settings.m_udpPort);
 
     response.getDatvModSettings()->setChannelMute(settings.m_channelMute ? 1 : 0);
@@ -615,7 +635,11 @@ void DATVMod::webapiFormatChannelSettings(
     swgChannelSettings->setDirection(1); // single source (Tx)
     swgChannelSettings->setOriginatorChannelIndex(getIndexInDeviceSet());
     swgChannelSettings->setOriginatorDeviceSetIndex(getDeviceSetIndex());
-    swgChannelSettings->setChannelType(new QString(m_channelId));
+    if (swgChannelSettings->getChannelType()) {
+        *swgChannelSettings->getChannelType() = m_channelId;
+    } else {
+        swgChannelSettings->setChannelType(new QString(m_channelId));
+    }
     swgChannelSettings->setDatvModSettings(new SWGSDRangel::SWGDATVModSettings());
     SWGSDRangel::SWGDATVModSettings *swgDATVModSettings = swgChannelSettings->getDatvModSettings();
 
@@ -646,22 +670,38 @@ void DATVMod::webapiFormatChannelSettings(
         swgDATVModSettings->setRollOff(settings.m_rollOff);
     }
     if (channelSettingsKeys.contains("imageFileName") || force) {
-        swgDATVModSettings->setImageFileName(new QString(settings.m_imageFileName));
+        if (swgDATVModSettings->getImageFileName()) {
+            *swgDATVModSettings->getImageFileName() = settings.m_imageFileName;
+        } else {
+            swgDATVModSettings->setImageFileName(new QString(settings.m_imageFileName));
+        }
     }
     if (channelSettingsKeys.contains("imageOverlayTimestamp") || force) {
         swgDATVModSettings->setImageOverlayTimestamp(settings.m_imageOverlayTimestamp ? 1 : 0);
     }
     if (channelSettingsKeys.contains("imageServiceProvider") || force) {
-        swgDATVModSettings->setImageServiceProvider(new QString(settings.m_imageServiceProvider));
+        if (swgDATVModSettings->getImageServiceProvider()) {
+            *swgDATVModSettings->getImageServiceProvider() = settings.m_imageServiceProvider;
+        } else {
+            swgDATVModSettings->setImageServiceProvider(new QString(settings.m_imageServiceProvider));
+        }
     }
     if (channelSettingsKeys.contains("imageServiceName") || force) {
-        swgDATVModSettings->setImageServiceName(new QString(settings.m_imageServiceName));
+        if (swgDATVModSettings->getImageServiceName()) {
+            *swgDATVModSettings->getImageServiceName() = settings.m_imageServiceName;
+        } else {
+            swgDATVModSettings->setImageServiceName(new QString(settings.m_imageServiceName));
+        }
     }
     if (channelSettingsKeys.contains("imageCodec") || force) {
         swgDATVModSettings->setImageCodec((int) settings.m_imageCodec);
     }
     if (channelSettingsKeys.contains("tsFileName") || force) {
-        swgDATVModSettings->setTsFileName(new QString(settings.m_tsFileName));
+        if (swgDATVModSettings->getTsFileName()) {
+            *swgDATVModSettings->getTsFileName() = settings.m_tsFileName;
+        } else {
+            swgDATVModSettings->setTsFileName(new QString(settings.m_tsFileName));
+        }
     }
     if (channelSettingsKeys.contains("tsFilePlayLoop") || force) {
         swgDATVModSettings->setTsFilePlayLoop(settings.m_tsFilePlayLoop ? 1 : 0);
@@ -670,7 +710,11 @@ void DATVMod::webapiFormatChannelSettings(
         swgDATVModSettings->setTsFilePlay(settings.m_tsFilePlay ? 1 : 0);
     }
     if (channelSettingsKeys.contains("udpAddress") || force) {
-        swgDATVModSettings->setUdpAddress(new QString(settings.m_udpAddress));
+        if (swgDATVModSettings->getUdpAddress()) {
+            *swgDATVModSettings->getUdpAddress() = settings.m_udpAddress;
+        } else {
+            swgDATVModSettings->setUdpAddress(new QString(settings.m_udpAddress));
+        }
     }
     if (channelSettingsKeys.contains("udpPort") || force) {
         swgDATVModSettings->setUdpPort(settings.m_udpPort);
@@ -682,7 +726,11 @@ void DATVMod::webapiFormatChannelSettings(
         swgDATVModSettings->setRgbColor(settings.m_rgbColor);
     }
     if (channelSettingsKeys.contains("title") || force) {
-        swgDATVModSettings->setTitle(new QString(settings.m_title));
+        if (swgDATVModSettings->getTitle()) {
+            *swgDATVModSettings->getTitle() = settings.m_title;
+        } else {
+            swgDATVModSettings->setTitle(new QString(settings.m_title));
+        }
     }
     if (channelSettingsKeys.contains("streamIndex") || force) {
         swgDATVModSettings->setStreamIndex(settings.m_streamIndex);

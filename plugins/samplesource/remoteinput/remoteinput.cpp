@@ -482,11 +482,23 @@ void RemoteInput::webapiFormatDeviceSettings(SWGSDRangel::SWGDeviceSettings& res
         response.getRemoteInputSettings()->setTitle(new QString(settings.m_title));
     }
 
-    response.getRemoteInputSettings()->setApiAddress(new QString(settings.m_apiAddress));
+    if (response.getRemoteInputSettings()->getApiAddress()) {
+        *response.getRemoteInputSettings()->getApiAddress() = settings.m_apiAddress;
+    } else {
+        response.getRemoteInputSettings()->setApiAddress(new QString(settings.m_apiAddress));
+    }
     response.getRemoteInputSettings()->setApiPort(settings.m_apiPort);
-    response.getRemoteInputSettings()->setDataAddress(new QString(settings.m_dataAddress));
+    if (response.getRemoteInputSettings()->getDataAddress()) {
+        *response.getRemoteInputSettings()->getDataAddress() = settings.m_dataAddress;
+    } else {
+        response.getRemoteInputSettings()->setDataAddress(new QString(settings.m_dataAddress));
+    }
     response.getRemoteInputSettings()->setDataPort(settings.m_dataPort);
-    response.getRemoteInputSettings()->setMulticastAddress(new QString(settings.m_multicastAddress));
+    if (response.getRemoteInputSettings()->getMulticastAddress()) {
+        *response.getRemoteInputSettings()->getMulticastAddress() = settings.m_multicastAddress;
+    } else {
+        response.getRemoteInputSettings()->setMulticastAddress(new QString(settings.m_multicastAddress));
+    }
     response.getRemoteInputSettings()->setMulticastJoin(settings.m_multicastJoin ? 1 : 0);
     response.getRemoteInputSettings()->setDcBlock(settings.m_dcBlock ? 1 : 0);
     response.getRemoteInputSettings()->setIqCorrection(settings.m_iqCorrection);
@@ -521,7 +533,11 @@ void RemoteInput::webapiFormatDeviceReport(SWGSDRangel::SWGDeviceReport& respons
     response.getRemoteInputReport()->setBufferRwBalance(m_remoteInputUDPHandler->getBufferGauge());
 
     QDateTime dt = QDateTime::fromMSecsSinceEpoch(m_remoteInputUDPHandler->getTVmSec());
-    response.getRemoteInputReport()->setRemoteTimestamp(new QString(dt.toString("yyyy-MM-dd  HH:mm:ss.zzz")));
+    if (response.getRemoteInputReport()->getRemoteTimestamp()) {
+        *response.getRemoteInputReport()->getRemoteTimestamp() = dt.toString("yyyy-MM-dd  HH:mm:ss.zzz");
+    } else {
+        response.getRemoteInputReport()->setRemoteTimestamp(new QString(dt.toString("yyyy-MM-dd  HH:mm:ss.zzz")));
+    }
 
     response.getRemoteInputReport()->setMinNbBlocks(m_remoteInputUDPHandler->getMinNbBlocks());
     response.getRemoteInputReport()->setMaxNbRecovery(m_remoteInputUDPHandler->getMaxNbRecovery());

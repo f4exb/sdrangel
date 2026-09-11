@@ -577,7 +577,11 @@ void UDPSource::webapiFormatChannelSettings(
     swgChannelSettings->setDirection(1); // single source (Tx)
     swgChannelSettings->setOriginatorChannelIndex(getIndexInDeviceSet());
     swgChannelSettings->setOriginatorDeviceSetIndex(getDeviceSetIndex());
-    swgChannelSettings->setChannelType(new QString(m_channelId));
+    if (swgChannelSettings->getChannelType()) {
+        *swgChannelSettings->getChannelType() = m_channelId;
+    } else {
+        swgChannelSettings->setChannelType(new QString(m_channelId));
+    }
     swgChannelSettings->setUdpSourceSettings(new SWGSDRangel::SWGUDPSourceSettings());
     SWGSDRangel::SWGUDPSourceSettings *swgUDPSourceSettings = swgChannelSettings->getUdpSourceSettings();
 
@@ -632,19 +636,31 @@ void UDPSource::webapiFormatChannelSettings(
         swgUDPSourceSettings->setRgbColor(settings.m_rgbColor);
     }
     if (channelSettingsKeys.contains("udpAddress") || force) {
-        swgUDPSourceSettings->setUdpAddress(new QString(settings.m_udpAddress));
+        if (swgUDPSourceSettings->getUdpAddress()) {
+            *swgUDPSourceSettings->getUdpAddress() = settings.m_udpAddress;
+        } else {
+            swgUDPSourceSettings->setUdpAddress(new QString(settings.m_udpAddress));
+        }
     }
     if (channelSettingsKeys.contains("udpPort") || force) {
         swgUDPSourceSettings->setUdpPort(settings.m_udpPort);
     }
     if (channelSettingsKeys.contains("multicastAddress") || force) {
-        swgUDPSourceSettings->setMulticastAddress(new QString(settings.m_multicastAddress));
+        if (swgUDPSourceSettings->getMulticastAddress()) {
+            *swgUDPSourceSettings->getMulticastAddress() = settings.m_multicastAddress;
+        } else {
+            swgUDPSourceSettings->setMulticastAddress(new QString(settings.m_multicastAddress));
+        }
     }
     if (channelSettingsKeys.contains("multicastJoin") || force) {
         swgUDPSourceSettings->setMulticastJoin(settings.m_multicastJoin ? 1 : 0);
     }
     if (channelSettingsKeys.contains("title") || force) {
-        swgUDPSourceSettings->setTitle(new QString(settings.m_title));
+        if (swgUDPSourceSettings->getTitle()) {
+            *swgUDPSourceSettings->getTitle() = settings.m_title;
+        } else {
+            swgUDPSourceSettings->setTitle(new QString(settings.m_title));
+        }
     }
     if (channelSettingsKeys.contains("streamIndex") || force) {
         swgUDPSourceSettings->setStreamIndex(settings.m_streamIndex);

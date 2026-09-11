@@ -522,10 +522,18 @@ void DABDemod::webapiFormatChannelSettings(SWGSDRangel::SWGChannelSettings& resp
 {
     response.getDabDemodSettings()->setInputFrequencyOffset(settings.m_inputFrequencyOffset);
     response.getDabDemodSettings()->setRfBandwidth(settings.m_rfBandwidth);
-    response.getDabDemodSettings()->setProgram(new QString(settings.m_program));
+    if (response.getDabDemodSettings()->getProgram()) {
+        *response.getDabDemodSettings()->getProgram() = settings.m_program;
+    } else {
+        response.getDabDemodSettings()->setProgram(new QString(settings.m_program));
+    }
     response.getDabDemodSettings()->setVolume(settings.m_volume);
     response.getDabDemodSettings()->setAudioMute(settings.m_audioMute);
-    response.getDabDemodSettings()->setAudioDeviceName(new QString(settings.m_audioDeviceName));
+    if (response.getDabDemodSettings()->getAudioDeviceName()) {
+        *response.getDabDemodSettings()->getAudioDeviceName() = settings.m_audioDeviceName;
+    } else {
+        response.getDabDemodSettings()->setAudioDeviceName(new QString(settings.m_audioDeviceName));
+    }
 
     response.getDabDemodSettings()->setRgbColor(settings.m_rgbColor);
     if (response.getDabDemodSettings()->getTitle()) {
@@ -611,7 +619,11 @@ void DABDemod::webapiFormatChannelSettings(
     swgChannelSettings->setDirection(0); // Single sink (Rx)
     swgChannelSettings->setOriginatorChannelIndex(getIndexInDeviceSet());
     swgChannelSettings->setOriginatorDeviceSetIndex(getDeviceSetIndex());
-    swgChannelSettings->setChannelType(new QString("DABDemod"));
+    if (swgChannelSettings->getChannelType()) {
+        *swgChannelSettings->getChannelType() = "DABDemod";
+    } else {
+        swgChannelSettings->setChannelType(new QString("DABDemod"));
+    }
     swgChannelSettings->setDabDemodSettings(new SWGSDRangel::SWGDABDemodSettings());
     SWGSDRangel::SWGDABDemodSettings *swgDABDemodSettings = swgChannelSettings->getDabDemodSettings();
 
@@ -624,7 +636,11 @@ void DABDemod::webapiFormatChannelSettings(
         swgDABDemodSettings->setRfBandwidth(settings.m_rfBandwidth);
     }
     if (channelSettingsKeys.contains("program") || force) {
-        swgDABDemodSettings->setProgram(new QString(settings.m_program));
+        if (swgDABDemodSettings->getProgram()) {
+            *swgDABDemodSettings->getProgram() = settings.m_program;
+        } else {
+            swgDABDemodSettings->setProgram(new QString(settings.m_program));
+        }
     }
     if (channelSettingsKeys.contains("volume") || force) {
         swgDABDemodSettings->setVolume(settings.m_volume);
@@ -633,13 +649,21 @@ void DABDemod::webapiFormatChannelSettings(
         swgDABDemodSettings->setAudioMute(settings.m_audioMute);
     }
     if (channelSettingsKeys.contains("audioDeviceName") || force) {
-        swgDABDemodSettings->setAudioDeviceName(new QString(settings.m_audioDeviceName));
+        if (swgDABDemodSettings->getAudioDeviceName()) {
+            *swgDABDemodSettings->getAudioDeviceName() = settings.m_audioDeviceName;
+        } else {
+            swgDABDemodSettings->setAudioDeviceName(new QString(settings.m_audioDeviceName));
+        }
     }
     if (channelSettingsKeys.contains("rgbColor") || force) {
         swgDABDemodSettings->setRgbColor(settings.m_rgbColor);
     }
     if (channelSettingsKeys.contains("title") || force) {
-        swgDABDemodSettings->setTitle(new QString(settings.m_title));
+        if (swgDABDemodSettings->getTitle()) {
+            *swgDABDemodSettings->getTitle() = settings.m_title;
+        } else {
+            swgDABDemodSettings->setTitle(new QString(settings.m_title));
+        }
     }
     if (channelSettingsKeys.contains("streamIndex") || force) {
         swgDABDemodSettings->setStreamIndex(settings.m_streamIndex);

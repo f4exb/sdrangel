@@ -518,14 +518,22 @@ void RemoteSource::webapiFormatChannelSettings(
     swgChannelSettings->setDirection(1); // single source (Tx)
     swgChannelSettings->setOriginatorChannelIndex(getIndexInDeviceSet());
     swgChannelSettings->setOriginatorDeviceSetIndex(getDeviceSetIndex());
-    swgChannelSettings->setChannelType(new QString(m_channelId));
+    if (swgChannelSettings->getChannelType()) {
+        *swgChannelSettings->getChannelType() = m_channelId;
+    } else {
+        swgChannelSettings->setChannelType(new QString(m_channelId));
+    }
     swgChannelSettings->setRemoteSourceSettings(new SWGSDRangel::SWGRemoteSourceSettings());
     SWGSDRangel::SWGRemoteSourceSettings *swgRemoteSourceSettings = swgChannelSettings->getRemoteSourceSettings();
 
     // transfer data that has been modified. When force is on transfer all data except reverse API data
 
     if (channelSettingsKeys.contains("dataAddress") || force) {
-        swgRemoteSourceSettings->setDataAddress(new QString(settings.m_dataAddress));
+        if (swgRemoteSourceSettings->getDataAddress()) {
+            *swgRemoteSourceSettings->getDataAddress() = settings.m_dataAddress;
+        } else {
+            swgRemoteSourceSettings->setDataAddress(new QString(settings.m_dataAddress));
+        }
     }
     if (channelSettingsKeys.contains("dataPort") || force) {
         swgRemoteSourceSettings->setDataPort(settings.m_dataPort);
@@ -540,7 +548,11 @@ void RemoteSource::webapiFormatChannelSettings(
         swgRemoteSourceSettings->setFilterChainHash(settings.m_filterChainHash);
     }
     if (channelSettingsKeys.contains("title") || force) {
-        swgRemoteSourceSettings->setTitle(new QString(settings.m_title));
+        if (swgRemoteSourceSettings->getTitle()) {
+            *swgRemoteSourceSettings->getTitle() = settings.m_title;
+        } else {
+            swgRemoteSourceSettings->setTitle(new QString(settings.m_title));
+        }
     }
     if (channelSettingsKeys.contains("streamIndex") || force) {
         swgRemoteSourceSettings->setStreamIndex(settings.m_streamIndex);

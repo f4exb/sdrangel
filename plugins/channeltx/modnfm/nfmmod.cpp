@@ -762,7 +762,11 @@ void NFMMod::webapiFormatChannelSettings(
     swgChannelSettings->setDirection(1); // single source (Tx)
     swgChannelSettings->setOriginatorChannelIndex(getIndexInDeviceSet());
     swgChannelSettings->setOriginatorDeviceSetIndex(getDeviceSetIndex());
-    swgChannelSettings->setChannelType(new QString(m_channelId));
+    if (swgChannelSettings->getChannelType()) {
+        *swgChannelSettings->getChannelType() = m_channelId;
+    } else {
+        swgChannelSettings->setChannelType(new QString(m_channelId));
+    }
     swgChannelSettings->setNfmModSettings(new SWGSDRangel::SWGNFMModSettings());
     SWGSDRangel::SWGNFMModSettings *swgNFMModSettings = swgChannelSettings->getNfmModSettings();
 
@@ -778,7 +782,11 @@ void NFMMod::webapiFormatChannelSettings(
         swgNFMModSettings->setModAfInput((int) settings.m_modAFInput);
     }
     if (channelSettingsKeys.contains("audioDeviceName") || force) {
-        swgNFMModSettings->setAudioDeviceName(new QString(settings.m_audioDeviceName));
+        if (swgNFMModSettings->getAudioDeviceName()) {
+            *swgNFMModSettings->getAudioDeviceName() = settings.m_audioDeviceName;
+        } else {
+            swgNFMModSettings->setAudioDeviceName(new QString(settings.m_audioDeviceName));
+        }
     }
     if (channelSettingsKeys.contains("playLoop") || force) {
         swgNFMModSettings->setPlayLoop(settings.m_playLoop ? 1 : 0);
@@ -796,7 +804,11 @@ void NFMMod::webapiFormatChannelSettings(
         swgNFMModSettings->setRgbColor(settings.m_rgbColor);
     }
     if (channelSettingsKeys.contains("title") || force) {
-        swgNFMModSettings->setTitle(new QString(settings.m_title));
+        if (swgNFMModSettings->getTitle()) {
+            *swgNFMModSettings->getTitle() = settings.m_title;
+        } else {
+            swgNFMModSettings->setTitle(new QString(settings.m_title));
+        }
     }
     if (channelSettingsKeys.contains("toneFrequency") || force) {
         swgNFMModSettings->setToneFrequency(settings.m_toneFrequency);

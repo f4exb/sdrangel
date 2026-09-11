@@ -519,9 +519,17 @@ void RadiosondeDemod::webapiFormatChannelSettings(SWGSDRangel::SWGChannelSetting
     response.getRadiosondeDemodSettings()->setFmDeviation(settings.m_fmDeviation);
     response.getRadiosondeDemodSettings()->setCorrelationThreshold(settings.m_correlationThreshold);
     response.getRadiosondeDemodSettings()->setUdpEnabled(settings.m_udpEnabled);
-    response.getRadiosondeDemodSettings()->setUdpAddress(new QString(settings.m_udpAddress));
+    if (response.getRadiosondeDemodSettings()->getUdpAddress()) {
+        *response.getRadiosondeDemodSettings()->getUdpAddress() = settings.m_udpAddress;
+    } else {
+        response.getRadiosondeDemodSettings()->setUdpAddress(new QString(settings.m_udpAddress));
+    }
     response.getRadiosondeDemodSettings()->setUdpPort(settings.m_udpPort);
-    response.getRadiosondeDemodSettings()->setLogFilename(new QString(settings.m_logFilename));
+    if (response.getRadiosondeDemodSettings()->getLogFilename()) {
+        *response.getRadiosondeDemodSettings()->getLogFilename() = settings.m_logFilename;
+    } else {
+        response.getRadiosondeDemodSettings()->setLogFilename(new QString(settings.m_logFilename));
+    }
     response.getRadiosondeDemodSettings()->setLogEnabled(settings.m_logEnabled);
     response.getRadiosondeDemodSettings()->setUseFileTime(settings.m_useFileTime);
 
@@ -623,7 +631,11 @@ void RadiosondeDemod::webapiFormatChannelSettings(
     swgChannelSettings->setDirection(0); // Single sink (Rx)
     swgChannelSettings->setOriginatorChannelIndex(getIndexInDeviceSet());
     swgChannelSettings->setOriginatorDeviceSetIndex(getDeviceSetIndex());
-    swgChannelSettings->setChannelType(new QString("RadiosondeDemod"));
+    if (swgChannelSettings->getChannelType()) {
+        *swgChannelSettings->getChannelType() = "RadiosondeDemod";
+    } else {
+        swgChannelSettings->setChannelType(new QString("RadiosondeDemod"));
+    }
     swgChannelSettings->setRadiosondeDemodSettings(new SWGSDRangel::SWGRadiosondeDemodSettings());
     SWGSDRangel::SWGRadiosondeDemodSettings *swgRadiosondeDemodSettings = swgChannelSettings->getRadiosondeDemodSettings();
 
@@ -648,13 +660,21 @@ void RadiosondeDemod::webapiFormatChannelSettings(
         swgRadiosondeDemodSettings->setUdpEnabled(settings.m_udpEnabled);
     }
     if (channelSettingsKeys.contains("udpAddress") || force) {
-        swgRadiosondeDemodSettings->setUdpAddress(new QString(settings.m_udpAddress));
+        if (swgRadiosondeDemodSettings->getUdpAddress()) {
+            *swgRadiosondeDemodSettings->getUdpAddress() = settings.m_udpAddress;
+        } else {
+            swgRadiosondeDemodSettings->setUdpAddress(new QString(settings.m_udpAddress));
+        }
     }
     if (channelSettingsKeys.contains("udpPort") || force) {
         swgRadiosondeDemodSettings->setUdpPort(settings.m_udpPort);
     }
     if (channelSettingsKeys.contains("logFilename") || force) {
-        swgRadiosondeDemodSettings->setLogFilename(new QString(settings.m_logFilename));
+        if (swgRadiosondeDemodSettings->getLogFilename()) {
+            *swgRadiosondeDemodSettings->getLogFilename() = settings.m_logFilename;
+        } else {
+            swgRadiosondeDemodSettings->setLogFilename(new QString(settings.m_logFilename));
+        }
     }
     if (channelSettingsKeys.contains("logEnabled") || force) {
         swgRadiosondeDemodSettings->setLogEnabled(settings.m_logEnabled);
@@ -666,7 +686,11 @@ void RadiosondeDemod::webapiFormatChannelSettings(
         swgRadiosondeDemodSettings->setRgbColor(settings.m_rgbColor);
     }
     if (channelSettingsKeys.contains("title") || force) {
-        swgRadiosondeDemodSettings->setTitle(new QString(settings.m_title));
+        if (swgRadiosondeDemodSettings->getTitle()) {
+            *swgRadiosondeDemodSettings->getTitle() = settings.m_title;
+        } else {
+            swgRadiosondeDemodSettings->setTitle(new QString(settings.m_title));
+        }
     }
     if (channelSettingsKeys.contains("streamIndex") || force) {
         swgRadiosondeDemodSettings->setStreamIndex(settings.m_streamIndex);

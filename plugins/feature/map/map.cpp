@@ -258,7 +258,11 @@ void Map::webapiFormatFeatureSettings(
     const MapSettings& settings)
 {
     response.getMapSettings()->setDisplayNames(settings.m_displayNames ? 1 : 0);
-    response.getMapSettings()->setTerrain(new QString(settings.m_terrain));
+    if (response.getMapSettings()->getTerrain()) {
+        *response.getMapSettings()->getTerrain() = settings.m_terrain;
+    } else {
+        response.getMapSettings()->setTerrain(new QString(settings.m_terrain));
+    }
 
     if (response.getMapSettings()->getTitle()) {
         *response.getMapSettings()->getTitle() = settings.m_title;
