@@ -78,6 +78,7 @@ void AudioCATSISOSettings::resetToDefaults()
     m_txSampleRate = 48000; // Default sample rate
     m_transverterMode = false;
     m_transverterDeltaFrequency = 0;
+    m_iqOrder = false;
     m_rxDeviceName = "";
     m_rxVolume = 1.0f;
     m_log2Decim = 0;
