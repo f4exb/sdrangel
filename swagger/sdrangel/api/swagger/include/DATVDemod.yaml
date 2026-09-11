@@ -100,6 +100,8 @@ DATVDemodSettings:
       description: RRC filter roll-off factor (0..1)
       type: number
       format: float
+      minimum: 0
+      maximum: 1
     viterbi:
       description: (boolean) (DVB-S)
       type: integer
@@ -174,6 +176,8 @@ DATVDemodReport:
     audioDecodeOK:
       description: Audio decode (1 for OK, 0 for KO)
       type: integer
+      minimum: 0
+      maximum: 1
     videoActive:
       description: Audio is active (1 for yes, 0 for now)
       type: integer
@@ -182,6 +186,8 @@ DATVDemodReport:
     videoDecodeOK:
       description: Video decode (1 for OK, 0 for KO)
       type: integer
+      minimum: 0
+      maximum: 1
     udpRunning:
       description: UDP thread (1 running, 0 idle)
       type: integer
@@ -223,6 +229,8 @@ DATVDemodReport:
           * 12: 3/5
     setByModcod:
       type: integer
+      minimum: 0
+      maximum: 1
       description: Modulation and code rate set by DVB-S2 MODCOD (1 for yes, 0 for no)
     mer:
       type: number

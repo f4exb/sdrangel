@@ -25,12 +25,16 @@ PlutoSdrInputSettings:
     lpfFIRlog2Decim:
       description: digital lowpass FIR filter log2 of decimation factor (0..2)
       type: integer
+      minimum: 0
+      maximum: 2
     lpfFIRGain:
       description: digital lowpass FIR filter gain (dB)
       type: integer
     fcPos:
       description: 0=Infra 1=Supra 2=Center
       type: integer
+      minimum: 0
+      maximum: 2
     dcBlock:
       type: integer
       description: "Enable DSP DC-offset correction (1 enabled, 0 disabled)."
@@ -132,6 +136,8 @@ PlutoSdrOutputSettings:
     lpfFIRlog2Interp:
       description: digital lowpass FIR filter log2 of interpolation factor (0..2)
       type: integer
+      minimum: 0
+      maximum: 2
     lpfFIRGain:
       description: digital lowpass FIR filter gain (dB)
       type: integer
@@ -217,6 +223,8 @@ PlutoSdrMIMOSettings:
     fcPosRx:
       description: 0=Infra 1=Supra 2=Center
       type: integer
+      minimum: 0
+      maximum: 2
     rxTransverterMode:
       type: integer
       description: "Receive transverter mode setting for Pluto sdr MIMO."
@@ -244,6 +252,8 @@ PlutoSdrMIMOSettings:
     lpfRxFIRlog2Decim:
       description: digital lowpass FIR filter log2 of decimation factor (0..2)
       type: integer
+      minimum: 0
+      maximum: 2
     lpfRxFIRGain:
       description: digital lowpass FIR filter gain (dB)
       type: integer
@@ -275,6 +285,8 @@ PlutoSdrMIMOSettings:
     fcPosTx:
       description: 0=Infra 1=Supra 2=Center
       type: integer
+      minimum: 0
+      maximum: 2
     txTransverterMode:
       type: integer
       description: "Transmit transverter mode setting for Pluto sdr MIMO."
@@ -294,6 +306,8 @@ PlutoSdrMIMOSettings:
     lpfTxFIRlog2Interp:
       description: digital lowpass FIR filter log2 of interpolation factor (0..2)
       type: integer
+      minimum: 0
+      maximum: 2
     lpfTxFIRGain:
       description: digital lowpass FIR filter gain (dB)
       type: integer

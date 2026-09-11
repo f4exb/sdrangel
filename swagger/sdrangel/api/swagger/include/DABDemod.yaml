@@ -58,3 +58,103 @@ DABDemodSettings:
     rollupState:
       $ref: "http://swgserver:8081/api/swagger/include/RollupState.yaml#/RollupState"
       description: "Saved expanded or collapsed state of the GUI sections."
+
+DABProgram:
+  description: "A programme service discovered in the currently tuned DAB ensemble."
+  properties:
+    name:
+      type: string
+      description: "Exact transmitted service label. Use this value for the program setting."
+    id:
+      type: integer
+      description: "DAB service identifier."
+
+DABDemodReport:
+  description: >
+    Live DAB demodulator, ensemble and selected-programme status. Synchronization,
+    discovered programmes and active audio do not by themselves prove clean reception;
+    check SNR after selecting a programme and after every receiver gain change.
+  properties:
+    channelPowerDB:
+      type: number
+      format: float
+      description: "Average power in the demodulator channel in dB."
+    channelSampleRate:
+      type: integer
+      description: "Effective complex channel sample rate in samples per second. DAB requires 2048000."
+    audioSampleRate:
+      type: integer
+      description: "Audio output sample rate in samples per second."
+    sync:
+      type: integer
+      minimum: 0
+      maximum: 1
+      description: "DAB synchronization state (1 synchronized, 0 not synchronized)."
+    snr:
+      type: integer
+      description: >
+        DAB decoder signal-to-noise ratio in dB. A value of 0 dB or less after
+        synchronization and audio become active is not a healthy result and can indicate
+        receiver overload. With an RTL-SDR, reduce tuner gain through its supported values,
+        wait briefly after each change, and re-read this report. Select the gain that gives
+        the best positive SNR rather than assuming that higher gain is better.
+    frequencyOffset:
+      type: integer
+      description: "Frequency offset estimated by the DAB decoder in Hz."
+    ensembleName:
+      type: string
+      description: "Label of the currently decoded ensemble."
+    ensembleId:
+      type: integer
+      description: "Identifier of the currently decoded ensemble."
+    programs:
+      type: array
+      description: "Programme services discovered in the currently tuned ensemble."
+      items:
+        $ref: "#/DABProgram"
+    selectedProgram:
+      type: string
+      description: "Exact service label currently requested by the program setting."
+    audioActive:
+      type: integer
+      minimum: 0
+      maximum: 1
+      description: "Whether programme audio metadata has been received and audio decoding is active."
+    bitrate:
+      type: integer
+      description: "Selected programme audio bitrate in kbit/s."
+    audio:
+      type: string
+      description: "Selected programme audio codec and channel-mode description."
+    language:
+      type: string
+      description: "Selected programme language."
+    programType:
+      type: string
+      description: "Selected programme type, such as News or Pop Music."
+    frameQuality:
+      type: integer
+      minimum: 0
+      maximum: 100
+      description: "Audio frame decode quality as a percentage."
+    reedSolomonQuality:
+      type: integer
+      minimum: 0
+      maximum: 100
+      description: "Reed-Solomon decode quality as a percentage."
+    aacQuality:
+      type: integer
+      minimum: 0
+      maximum: 100
+      description: "AAC decode quality as a percentage."
+    fibQuality:
+      type: integer
+      minimum: 0
+      maximum: 100
+      description: "Fast Information Block decode quality as a percentage."
+    tii:
+      type: integer
+      description: "Decoded Transmitter Identification Information value."
+    data:
+      type: string
+      description: "Latest dynamic text/data associated with the selected programme."

@@ -8,6 +8,8 @@ RadioClockSettings:
     frequencyMode:
       description: (0 for Offset, 1 for Absolute)
       type: integer
+      minimum: 0
+      maximum: 1
     frequency:
       description: Channel center frequency
       type: integer

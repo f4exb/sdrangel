@@ -26,6 +26,8 @@ HackRFInputSettings:
     fcPos:
       description: 0=Infra 1=Supra 2=Center
       type: integer
+      minimum: 0
+      maximum: 2
     devSampleRate:
       type: integer
       description: "Device I/Q sample rate in samples per second before software decimation or interpolation."
@@ -106,6 +108,8 @@ HackRFOutputSettings:
     fcPos:
       description: 0=Infra 1=Supra 2=Center
       type: integer
+      minimum: 0
+      maximum: 2
     devSampleRate:
       type: integer
       description: "Device I/Q sample rate in samples per second before software decimation or interpolation."

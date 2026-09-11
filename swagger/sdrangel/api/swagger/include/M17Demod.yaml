@@ -54,9 +54,13 @@ M17DemodSettings:
     traceStroke:
       description: 0 to 255
       type: integer
+      minimum: 0
+      maximum: 255
     traceDecay:
       description: 0 to 255
       type: integer
+      minimum: 0
+      maximum: 255
     audioDeviceName:
       type: string
       description: "Name of the audio device to use."

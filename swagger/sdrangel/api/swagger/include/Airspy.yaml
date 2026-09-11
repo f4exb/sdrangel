@@ -16,13 +16,19 @@ AirspySettings:
       description: "Selected dev sample rate index."
     lnaGain:
       type: integer
-      description: "Low-noise-amplifier gain setting."
+      minimum: 0
+      maximum: 14
+      description: "Low noise amplifier gain as a step index, not a dB value. Ignored when lnaAGC is enabled."
     mixerGain:
       type: integer
-      description: "Mixer gain setting for Airspy."
+      minimum: 0
+      maximum: 15
+      description: "Mixer gain as a step index, not a dB value. Ignored when mixerAGC is enabled."
     vgaGain:
       type: integer
-      description: "Variable-gain-amplifier gain setting."
+      minimum: 0
+      maximum: 15
+      description: "Variable gain amplifier (IF) gain as a step index, not a dB value."
     lnaAGC:
       description: LNA AGC (1 if active else 0)
       type: integer
@@ -31,10 +37,14 @@ AirspySettings:
       type: integer
     log2Decim:
       type: integer
+      minimum: 0
+      maximum: 6
       description: "Base-2 exponent of the software decimation factor; the output sample rate is divided by 2^log2Decim."
     fcPos:
       description: 0=Infra 1=Supra 2=Center
       type: integer
+      minimum: 0
+      maximum: 2
     biasT:
       description: Bias tee (1 if active else 0)
       type: integer

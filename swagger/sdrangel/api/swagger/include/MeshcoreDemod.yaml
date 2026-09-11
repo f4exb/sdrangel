@@ -161,6 +161,8 @@ MeshcoreDemodReport:
     syncWord:
       description: 2 bytes sync word (0..65535)
       type: integer
+      minimum: 0
+      maximum: 65535
     nbParityBits:
       description: Hamming FEC parity bits (LoRa)
       type: integer

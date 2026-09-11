@@ -189,6 +189,8 @@ ChirpChatDemodReport:
     syncWord:
       description: 2 bytes sync word (0..65535)
       type: integer
+      minimum: 0
+      maximum: 65535
     hasCRC:
       description: boolean 1 if payload CRC is present else 0 (LoRa)
       type: integer

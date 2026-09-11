@@ -94,12 +94,18 @@ StarTrackerSettings:
     drawSunOnMap:
       description: "Draw the overhead position of the Sun on the Map (1 for yes, 0 for no)"
       type: integer
+      minimum: 0
+      maximum: 1
     drawMoonOnMap:
       description: "Draw the overhead position of the Moon on the Map (1 for yes, 0 for no)"
       type: integer
+      minimum: 0
+      maximum: 1
     drawStarOnMap:
       description: "Draw the overhead position of the target Star on the Map (1 for yes, 0 for no)"
       type: integer
+      minimum: 0
+      maximum: 1
     title:
       type: string
       description: "User-visible title."

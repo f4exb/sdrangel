@@ -39,3 +39,87 @@ AISSettings:
       description: "List of vessel column sizes."
       items:
         type: integer
+
+AISReport:
+  description: >
+    Vessels heard by the AIS feature, which collects the decoded messages of every AIS
+    demodulator in the instance. A field is present only once a message carrying it has been
+    received, so an absent position means unknown rather than zero.
+  properties:
+    reportDateTime:
+      type: string
+      description: "When this snapshot was taken, ISO 8601."
+    vesselCount:
+      type: integer
+      description: "Number of vessels currently held."
+    vessels:
+      type: array
+      description: "The vessels heard."
+      items:
+        $ref: "http://swgserver:8081/api/swagger/include/AIS.yaml#/AISVessel"
+
+AISVessel:
+  description: Vessel heard by the AIS feature
+  properties:
+    mmsi:
+      type: string
+      description: "Maritime Mobile Service Identity, nine digits. The only field always present."
+    name:
+      type: string
+      description: "Vessel name, from a static and voyage related message or an aid-to-navigation report."
+    callsign:
+      type: string
+      description: "Radio callsign."
+    imo:
+      type: string
+      description: "IMO number, where transmitted."
+    country:
+      type: string
+      description: "Flag state, derived from the MMSI maritime identification digits."
+    type:
+      type: string
+      description: "What is transmitting: Vessel, Base station, Aircraft or Aid-to-nav."
+    shipType:
+      type: string
+      description: "Ship and cargo type, such as Cargo or Tug."
+    latitude:
+      type: number
+      format: float
+      minimum: -90
+      maximum: 90
+      description: "Latitude in decimal degrees, north positive."
+    longitude:
+      type: number
+      format: float
+      minimum: -180
+      maximum: 180
+      description: "Longitude in decimal degrees, east positive."
+    course:
+      type: number
+      format: float
+      description: "Course over ground in degrees true."
+    speed:
+      type: number
+      format: float
+      description: "Speed over ground in knots."
+    heading:
+      type: integer
+      description: "True heading in degrees, which differs from course when set and drift apply."
+    status:
+      type: string
+      description: "Navigational status, such as Under way using engine or At anchor."
+    length:
+      type: integer
+      description: "Overall length in metres."
+    destination:
+      type: string
+      description: "Destination as entered by the crew."
+    positionUpdate:
+      type: string
+      description: "When the position was last updated, ISO 8601."
+    lastUpdate:
+      type: string
+      description: "When any field was last updated, ISO 8601."
+    messages:
+      type: integer
+      description: "Messages received from this vessel."

@@ -29,6 +29,8 @@ AMDemodSettings:
     bandpassEnable:
       description: use bandpass filter (1 for yes, 0 for no)
       type: integer
+      minimum: 0
+      maximum: 1
     rgbColor:
       type: integer
       description: "Display color encoded as an RGB integer."
@@ -47,6 +49,8 @@ AMDemodSettings:
     frequencyMode:
       description: (0 for Offset, 1 for MW, 2 for 25k, 3 for 8.33k)
       type: integer
+      minimum: 0
+      maximum: 3
     frequency:
       description: Channel center frequency
       type: integer

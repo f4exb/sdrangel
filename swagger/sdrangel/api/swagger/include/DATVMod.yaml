@@ -34,6 +34,8 @@ DATVModSettings:
     imageOverlayTimestamp:
       description: "Overlay timestamp on still image (1 for yes, 0 for no)"
       type: integer
+      minimum: 0
+      maximum: 1
     imageServiceProvider:
       description: "Service provider name for image overlay"
       type: string

@@ -12,8 +12,10 @@ SIDSettings:
       type: integer
       description: "Autoload setting for Sid."
     filename:
-      type: integer
-      description: "Filename setting for Sid."
+      type: string
+      description: >
+        File that measurements are written to and read back from when autosave or
+        autoload is enabled.
     autosavePeriod:
       type: integer
       description: "Autosave period setting for Sid."

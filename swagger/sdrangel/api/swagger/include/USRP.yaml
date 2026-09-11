@@ -39,6 +39,8 @@ USRPInputSettings:
     gainMode:
       description: 0 for auto, 1 for manual
       type: integer
+      minimum: 0
+      maximum: 1
     clockSource:
       type: string
       description: "Clock source setting for Usrp input."

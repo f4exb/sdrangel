@@ -2,18 +2,24 @@ FreqScannerSettings:
   description: FreqScanner
   properties:
     channelBandwidth:
-      description: channel RF bandwidth in Hz
+      description: >
+        Bandwidth in Hz of each scanned channel.
       type: integer
     channelShift:
-      description: controlled channel frequency shift in Hz
+      description: >
+        Frequency shift in Hz applied to the tuned channel from the scanned frequency,
+        for modes such as SSB or CW where the signal sits on one side of centre.
       type: integer
     channelFrequencyOffset:
-      description: channel center frequency shift from baseband center in Hz
+      description: >
+        Minimum frequency shift in Hz of the tuned channel from the centre of
+        reception, used to keep it clear of a DC spike.
       type: integer
     threshold:
       type: number
       format: float
-      description: "Threshold setting for Freq scanner."
+      description: >
+        Power threshold in dB above which a scanned frequency counts as active.
     frequencies:
       type: array
       description: "List of frequencies."
@@ -21,28 +27,47 @@ FreqScannerSettings:
         $ref: "http://swgserver:8081/api/swagger/include/FreqScanner.yaml#/FreqScannerFrequency"
     channel:
       type: string
-      description: "Channel identifier or configuration."
+      description: >
+        Channel that is tuned to the active frequency, as a device set and channel
+        index, for example "R1:0" for channel 0 of receive device set 1.
     scanTime:
       type: number
       format: float
-      description: "Scan time setting for Freq scanner."
+      description: >
+        Time in seconds that each power measurement is averaged over.
     retransmitTime:
       type: number
       format: float
-      description: "Retransmit time setting for Freq scanner."
+      description: >
+        Time in seconds to wait after the power on the active frequency falls below
+        the threshold before scanning restarts. In multiplex mode this is instead the
+        time spent listening to each frequency.
     tuneTime:
       type: number
       format: float
-      description: "Tune time setting for Freq scanner."
+      description: >
+        Time in milliseconds to wait after retuning the device before measuring, to allow
+        for PLL settling and device to host transfer latency.
     priority:
       type: integer
-      description: "Priority setting for Freq scanner."
+      description: >
+        Which frequency becomes active when several are above the threshold
+          * 0 - the one with the highest power
+          * 1 - the one earliest in the frequency list
     measurement:
       type: integer
-      description: "Measurement setting for Freq scanner."
+      description: >
+        How channel power is measured from the FFT bins
+          * 0 - peak, the highest bin
+          * 1 - total, the sum of every bin
     mode:
       type: integer
-      description: "Mode setting for Freq scanner."
+      description: >
+        Run mode
+          * 0 - single, scan every frequency once and stop
+          * 1 - continuous, rescan when the active frequency goes quiet
+          * 2 - scan only, measure repeatedly without ever tuning the channel
+          * 3 - multiplex, step through the frequencies listening to each in turn
     rgbColor:
       type: integer
       description: "Display color encoded as an RGB integer."
@@ -108,25 +133,36 @@ FreqScannerFrequency:
     frequency:
       type: integer
       format: int64
-      description: "Frequency in Hz."
+      description: >
+        Frequency to scan, in Hz.
     enabled:
       type: integer
-      description: "Enabled for Freq scanner frequency."
+      description: >
+        Whether this frequency takes part in the scan (1 to scan it, 0 to skip it).
     notes:
       type: string
-      description: "Notes for Freq scanner frequency."
+      description: >
+        Free text note about this frequency, such as the station or service name.
     channel:
       type: string
-      description: "Channel identifier or configuration."
+      description: >
+        Overrides the scanner-wide channel for this frequency only, as a device set and
+        channel index such as "R1:0". Empty to use the scanner's own channel setting.
     channelBandwidth:
       type: string
-      description: "Channel bandwidth in Hz."
+      description: >
+        Overrides the scanner-wide channel bandwidth in Hz for this frequency only.
+        Empty to use the scanner's own setting.
     threshold:
       type: string
-      description: "Threshold for Freq scanner frequency."
+      description: >
+        Overrides the scanner-wide power threshold in dB for this frequency only.
+        Empty to use the scanner's own setting.
     squelch:
       type: string
-      description: "Squelch threshold in dB."
+      description: >
+        Squelch threshold in dB to apply to the tuned channel when this frequency becomes
+        active. Empty to leave the channel's own squelch alone.
 
 FreqScannerActions:
   description: "Frequency Scanner actions"
