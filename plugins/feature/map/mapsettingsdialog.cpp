@@ -22,13 +22,12 @@
 #include <QFileDialog>
 
 #include "mapsettingsdialog.h"
+#include "gui/messagedialog.h"
 
 #if (QT_VERSION < QT_VERSION_CHECK(6, 6, 0))
 #include <QtGui/private/qzipreader_p.h>
 #else
 #include <QtCore/private/qzipreader_p.h>
-
-#include "gui/messagedialog.h"
 #endif
 
 MapItemSettingsGUI::MapItemSettingsGUI(QTableWidget *table, int row, MapSettings::MapItemSettings *settings) :
