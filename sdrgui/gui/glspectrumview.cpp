@@ -387,13 +387,11 @@ void GLSpectrumView::setSampleRate(qint32 sampleRate)
 {
     m_mutex.lock();
     m_sampleRate = sampleRate;
-
-    if (m_messageQueueToGUI) {
-        m_messageQueueToGUI->push(new MsgReportSampleRate(m_sampleRate));
-    }
-
     m_changesPending = true;
     m_mutex.unlock();
+    if (m_messageQueueToGUI) {
+        m_messageQueueToGUI->push(new MsgReportSampleRate(sampleRate));
+    }
     update();
 }
 
@@ -417,18 +415,20 @@ void GLSpectrumView::setFFTOverlap(int overlap)
 
 void GLSpectrumView::setDisplayWaterfall(bool display)
 {
+    bool notify = false;
     m_mutex.lock();
     m_displayWaterfall = display;
     if (!display)
     {
         m_waterfallMarkers.clear();
-        if (m_messageQueueToGUI) {
-            m_messageQueueToGUI->push(new MsgReportWaterfallMarkersChange());
-        }
+        notify = true;
     }
     m_changesPending = true;
     stopDrag();
     m_mutex.unlock();
+    if (m_messageQueueToGUI && notify) {
+        m_messageQueueToGUI->push(new MsgReportWaterfallMarkersChange());
+    }
     update();
 }
 
@@ -501,52 +501,58 @@ void GLSpectrumView::setInvertedWaterfall(bool inv)
 
 void GLSpectrumView::setDisplayMaxHold(bool display)
 {
+    bool notify = false;
     m_mutex.lock();
     m_displayMaxHold = display;
     if (!m_displayMaxHold && !m_displayCurrent && !m_displayHistogram)
     {
         m_histogramMarkers.clear();
-        if (m_messageQueueToGUI) {
-            m_messageQueueToGUI->push(new MsgReportHistogramMarkersChange());
-        }
+        notify = true;
     }
     m_changesPending = true;
     stopDrag();
     m_mutex.unlock();
+    if (m_messageQueueToGUI && notify) {
+        m_messageQueueToGUI->push(new MsgReportHistogramMarkersChange());
+    }
     update();
 }
 
 void GLSpectrumView::setDisplayCurrent(bool display)
 {
+    bool notify = false;
     m_mutex.lock();
     m_displayCurrent = display;
     if (!m_displayMaxHold && !m_displayCurrent && !m_displayHistogram)
     {
         m_histogramMarkers.clear();
-        if (m_messageQueueToGUI) {
-            m_messageQueueToGUI->push(new MsgReportHistogramMarkersChange());
-        }
+        notify = true;
     }
     m_changesPending = true;
     stopDrag();
     m_mutex.unlock();
+    if (m_messageQueueToGUI && notify) {
+        m_messageQueueToGUI->push(new MsgReportHistogramMarkersChange());
+    }
     update();
 }
 
 void GLSpectrumView::setDisplayHistogram(bool display)
 {
+    bool notify = false;
     m_mutex.lock();
     m_displayHistogram = display;
     if (!m_displayMaxHold && !m_displayCurrent && !m_displayHistogram)
     {
         m_histogramMarkers.clear();
-        if (m_messageQueueToGUI) {
-            m_messageQueueToGUI->push(new MsgReportHistogramMarkersChange());
-        }
+        notify = true;
     }
     m_changesPending = true;
     stopDrag();
     m_mutex.unlock();
+    if (m_messageQueueToGUI && notify) {
+        m_messageQueueToGUI->push(new MsgReportHistogramMarkersChange());
+    }
     update();
 }
 
@@ -601,13 +607,11 @@ void GLSpectrumView::setUseCalibration(bool useCalibration)
 {
     m_mutex.lock();
     m_useCalibration = useCalibration;
-
+    m_changesPending = true;
+    m_mutex.unlock();
     if (m_messageQueueToGUI) {
         m_messageQueueToGUI->push(new MsgReportCalibrationShift(m_useCalibration ? m_calibrationShiftdB : 0.0));
     }
-
-    m_changesPending = true;
-    m_mutex.unlock();
     update();
 }
 
@@ -1035,12 +1039,12 @@ void GLSpectrumView::redrawWaterfallAnd3DSpectrogram()
 
 void GLSpectrumView::measure(const Real *spectrum, bool updateGUI)
 {
+    m_measurementResults.m_measurement = m_measurement;
+
     switch (m_measurement)
     {
     case SpectrumSettings::MeasurementPeaks:
         if (updateGUI) {
-    m_measurementResults.m_measurement = m_measurement;
-
             measurePeaks(spectrum);
         }
         break;
@@ -1065,6 +1069,14 @@ void GLSpectrumView::measure(const Real *spectrum, bool updateGUI)
         break;
     default:
         break;
+    }
+
+    // Published from the displayed pass only, so that a caller reading the report sees the same
+    // figures as the screen rather than a mixture of the zoomed and full span measurements
+    if (updateGUI && m_spectrumVis)
+    {
+        m_measurementResults.m_updated = QDateTime::currentDateTimeUtc();
+        m_spectrumVis->setMeasurementResults(m_measurementResults);
     }
 }
 
@@ -2721,6 +2733,9 @@ void GLSpectrumView::drawAnnotationMarkers()
 // Find and display peaks
 void GLSpectrumView::measurePeaks(const Real *spectrum)
 {
+    // Rebuilt each pass rather than added to, so the report never carries stale peaks
+    m_measurementResults.m_peaks.clear();
+
     // Copy current spectrum so we can modify it
     Real *spectrumCopy = new Real[m_nbBins];
     std::copy(spectrum, spectrum + m_nbBins, spectrumCopy);
@@ -2744,6 +2759,8 @@ void GLSpectrumView::measurePeaks(const Real *spectrum)
             m_measurements->setPeak(i, frequency, power);
         }
 
+        m_measurementResults.m_peaks.append(SpectrumMeasurementResults::Peak(frequency, power));
+
         if (m_measurementHighlight)
         {
             float x = peakBin / (float)m_nbBins;
@@ -2759,8 +2776,6 @@ void GLSpectrumView::measurePeaks(const Real *spectrum)
                 y * m_histogramRect.height(),
                 m_histogramRect);
         }
-        m_measurementResults.m_peaks.append(SpectrumMeasurementResults::Peak(frequency, power));
-
 
         // Remove peak from spectrum so not found on next pass
         for (int j = left; j <= right; j++) {
@@ -2778,6 +2793,8 @@ void GLSpectrumView::measureChannelPower(const Real *spectrum, bool updateGUI)
     qint64 centerFrequency = getDisplayedCenterFrequency();
 
     power = calcChannelPower(spectrum, centerFrequency + m_measurementCenterFrequencyOffset, m_measurementBandwidth);
+    m_measurementResults.m_channelPower = power;
+
     if (m_measurements) {
         m_measurements->setChannelPower(power, updateGUI);
     }
@@ -2793,13 +2810,17 @@ void GLSpectrumView::measureAdjacentChannelPower(const Real *spectrum, bool upda
     qint64 centerFrequency = getDisplayedCenterFrequency();
 
     power = calcChannelPower(spectrum, centerFrequency + m_measurementCenterFrequencyOffset, m_measurementBandwidth);
-    m_measurementResults.m_channelPower = power;
-
     powerLeft = calcChannelPower(spectrum, centerFrequency + m_measurementCenterFrequencyOffset - m_measurementChSpacing, m_measurementAdjChBandwidth);
     powerRight = calcChannelPower(spectrum, centerFrequency + m_measurementCenterFrequencyOffset + m_measurementChSpacing, m_measurementAdjChBandwidth);
 
     float leftDiff = powerLeft - power;
     float rightDiff = powerRight - power;
+
+    m_measurementResults.m_adjChannelPowerLeft = powerLeft;
+    m_measurementResults.m_adjChannelPowerLeftACPR = leftDiff;
+    m_measurementResults.m_adjChannelPowerCentre = power;
+    m_measurementResults.m_adjChannelPowerRight = powerRight;
+    m_measurementResults.m_adjChannelPowerRightACPR = rightDiff;
 
     if (m_measurements) {
         m_measurements->setAdjacentChannelPower(powerLeft, leftDiff, power, powerRight, rightDiff, updateGUI);
@@ -2816,12 +2837,6 @@ void GLSpectrumView::measureAdjacentChannelPower(const Real *spectrum, bool upda
 void GLSpectrumView::measureOccupiedBandwidth(const Real *spectrum, bool updateGUI)
 {
     float hzPerBin = getDisplayedSampleRate() / (float) m_fftSize;
-    m_measurementResults.m_adjChannelPowerLeft = powerLeft;
-    m_measurementResults.m_adjChannelPowerLeftACPR = leftDiff;
-    m_measurementResults.m_adjChannelPowerCentre = power;
-    m_measurementResults.m_adjChannelPowerRight = powerRight;
-    m_measurementResults.m_adjChannelPowerRightACPR = rightDiff;
-
     qint64 centerFrequency = getDisplayedCenterFrequency();
     int start = frequencyToBin(centerFrequency + m_measurementCenterFrequencyOffset);
     float totalPower, power = 0.0f;
@@ -2854,6 +2869,8 @@ void GLSpectrumView::measureOccupiedBandwidth(const Real *spectrum, bool updateG
     while (((power / totalPower) < 0.99f) && (step < m_nbBins));
 
     float occupiedBandwidth = width * hzPerBin;
+    m_measurementResults.m_occupiedBandwidth = occupiedBandwidth;
+
     if (m_measurements) {
         m_measurements->setOccupiedBandwidth(occupiedBandwidth, updateGUI);
     }
@@ -2869,8 +2886,6 @@ void GLSpectrumView::measureOccupiedBandwidth(const Real *spectrum, bool updateG
 void GLSpectrumView::measure3dBBandwidth(const Real *spectrum, bool updateGUI)
 {
     // Find max peak and it's power in dB
-    m_measurementResults.m_occupiedBandwidth = occupiedBandwidth;
-
     int peakBin = findPeakBin(spectrum);
     float peakPower = m_linear ? CalcDb::dbPower(spectrum[peakBin]) : spectrum[peakBin];
 
@@ -2906,6 +2921,8 @@ void GLSpectrumView::measure3dBBandwidth(const Real *spectrum, bool updateGUI)
     int centerBin = leftBin + (rightBin - leftBin) / 2;
     float centerFrequency = binToFrequency(centerBin);
 
+    m_measurementResults.m_bandwidth3dB = bandwidth;
+
     if (m_measurements) {
         m_measurements->set3dBBandwidth(bandwidth, updateGUI);
     }
@@ -2921,8 +2938,6 @@ const QVector4D GLSpectrumView::m_measurementDarkMarkerColor = QVector4D(0.6f, 0
 // power is no longer falling
 void GLSpectrumView::peakWidth(const Real *spectrum, int center, int &left, int &right, int maxLeft, int maxRight) const
 {
-    m_measurementResults.m_bandwidth3dB = bandwidth;
-
     float prevLeft = spectrum[center];
     float prevRight = spectrum[center];
     left = center - 1;
@@ -3099,6 +3114,12 @@ void GLSpectrumView::measureSNR(const Real *spectrum, bool updateGUI)
         // Calculate SINAD - Signal to noise and distotion ratio (Should be -THD+N)
         float sinad = CalcDb::dbPower((sigPower + harmonicPower + noisePower) / (harmonicPower + noisePower));
 
+        m_measurementResults.m_snr = snr;
+        m_measurementResults.m_snfr = snfr;
+        m_measurementResults.m_thd = thdDB;
+        m_measurementResults.m_thdPlusNoise = thdpn;
+        m_measurementResults.m_sinad = sinad;
+
         m_measurements->setSNR(snr, snfr, thdDB, thdpn, sinad, updateGUI);
     }
 }
@@ -3114,12 +3135,6 @@ void GLSpectrumView::measureSFDR(const Real *spectrum, bool updateGUI)
     int nextPeakBin = -1;
     float nextPeakPower = -std::numeric_limits<float>::max();
     for (int i = 0; i < m_nbBins; i++)
-        m_measurementResults.m_snr = snr;
-        m_measurementResults.m_snfr = snfr;
-        m_measurementResults.m_thd = thdDB;
-        m_measurementResults.m_thdPlusNoise = thdpn;
-        m_measurementResults.m_sinad = sinad;
-
     {
         if ((i < peakLeft) || (i > peakRight))
         {
@@ -3139,6 +3154,8 @@ void GLSpectrumView::measureSFDR(const Real *spectrum, bool updateGUI)
         float nextPeakPowerDB = CalcDb::dbPower(nextPeakPower);
         float sfdr = peakPowerDB - nextPeakPowerDB;
 
+        m_measurementResults.m_sfdr = sfdr;
+
         // Display
         if (m_measurements) {
             m_measurements->setSFDR(sfdr, updateGUI);
@@ -3153,8 +3170,6 @@ void GLSpectrumView::measureSFDR(const Real *spectrum, bool updateGUI)
         }
     }
 }
-
-        m_measurementResults.m_sfdr = sfdr;
 
 // Find power and frequency of max peak in current spectrum
 void GLSpectrumView::findPeak(const Real *spectrum, float &power, float &frequency) const
