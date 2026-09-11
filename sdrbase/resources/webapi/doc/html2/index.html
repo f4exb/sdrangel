@@ -10461,6 +10461,155 @@ margin-bottom: 20px;
   },
   "description" : "GLSpectrumGUI settings"
 };
+            defs.GLSpectrumData = {
+  "properties" : {
+    "centerFrequency" : {
+      "type" : "integer",
+      "format" : "int64",
+      "description" : "Centre frequency of the whole spectrum in Hz."
+    },
+    "bandwidth" : {
+      "type" : "integer",
+      "description" : "Width of the whole spectrum in Hz."
+    },
+    "fftSize" : {
+      "type" : "integer",
+      "description" : "Number of bins the spectrum was computed with, before reduction."
+    },
+    "linear" : {
+      "type" : "integer",
+      "description" : "1 when the powers are linear, 0 when they are in dB.",
+      "minimum" : 0,
+      "maximum" : 1
+    },
+    "updated" : {
+      "type" : "string",
+      "description" : "When the spectrum was last computed, ISO 8601. Absent if it never has been."
+    },
+    "startFrequency" : {
+      "type" : "integer",
+      "format" : "int64",
+      "description" : "Centre frequency of the first returned bin in Hz."
+    },
+    "stopFrequency" : {
+      "type" : "integer",
+      "format" : "int64",
+      "description" : "Centre frequency of the last returned bin in Hz."
+    },
+    "binBandwidth" : {
+      "type" : "number",
+      "format" : "float",
+      "description" : "Width of each returned bin in Hz, after reduction."
+    },
+    "bins" : {
+      "type" : "integer",
+      "description" : "Number of values in power."
+    },
+    "reduce" : {
+      "type" : "string",
+      "description" : "How several FFT bins were combined into each returned one, max or mean. Max keeps a narrow carrier that averaging would bury in its neighbours, which is why it is the default.\n"
+    },
+    "power" : {
+      "type" : "array",
+      "description" : "The reduced powers, first bin first.",
+      "items" : {
+        "type" : "number",
+        "format" : "float"
+      }
+    }
+  },
+  "description" : "A copy of the current power spectrum, reduced to the number of bins asked for so that the answer stays a sensible size whatever the FFT size. The spectrum is only computed while something is consuming it, a spectrum window or a websocket client, so updated says how old these values are and is absent if none has been produced yet.\n"
+};
+            defs.GLSpectrumReport = {
+  "properties" : {
+    "measurement" : {
+      "type" : "integer",
+      "description" : "Which measurement produced these values.\n  * 0 - None, nothing is being measured\n  * 1 - Peaks\n  * 2 - Channel power\n  * 3 - Adjacent channel power\n  * 4 - Occupied bandwidth\n  * 5 - 3 dB bandwidth\n  * 6 - SNR\n"
+    },
+    "updated" : {
+      "type" : "string",
+      "description" : "When these values were last measured, ISO 8601. Absent until the first measurement."
+    },
+    "peaks" : {
+      "type" : "array",
+      "description" : "The strongest peaks, most powerful first. Peaks measurement only.",
+      "items" : {
+        "$ref" : "#/definitions/SpectrumPeak"
+      }
+    },
+    "channelPower" : {
+      "type" : "number",
+      "format" : "float",
+      "description" : "Total power in the measurement bandwidth in dB. Channel power measurement only."
+    },
+    "adjChannelPowerLeft" : {
+      "type" : "number",
+      "format" : "float",
+      "description" : "Power in the lower adjacent channel in dB."
+    },
+    "adjChannelPowerLeftRatio" : {
+      "type" : "number",
+      "format" : "float",
+      "description" : "Lower adjacent channel power ratio in dB, relative to the centre channel."
+    },
+    "adjChannelPowerCentre" : {
+      "type" : "number",
+      "format" : "float",
+      "description" : "Power in the centre channel in dB."
+    },
+    "adjChannelPowerRight" : {
+      "type" : "number",
+      "format" : "float",
+      "description" : "Power in the upper adjacent channel in dB."
+    },
+    "adjChannelPowerRightRatio" : {
+      "type" : "number",
+      "format" : "float",
+      "description" : "Upper adjacent channel power ratio in dB, relative to the centre channel."
+    },
+    "occupiedBandwidth" : {
+      "type" : "number",
+      "format" : "float",
+      "description" : "Occupied bandwidth in Hz. Occupied bandwidth measurement only."
+    },
+    "bandwidth3dB" : {
+      "type" : "number",
+      "format" : "float",
+      "description" : "3 dB bandwidth in Hz. 3 dB bandwidth measurement only."
+    },
+    "snr" : {
+      "type" : "number",
+      "format" : "float",
+      "description" : "Signal to noise ratio in dB. SNR measurement only."
+    },
+    "snfr" : {
+      "type" : "number",
+      "format" : "float",
+      "description" : "Signal to noise and distortion free ratio in dB."
+    },
+    "thd" : {
+      "type" : "number",
+      "format" : "float",
+      "description" : "Total harmonic distortion in dB."
+    },
+    "thdPlusNoise" : {
+      "type" : "number",
+      "format" : "float",
+      "description" : "Total harmonic distortion plus noise in dB."
+    },
+    "sinad" : {
+      "type" : "number",
+      "format" : "float",
+      "description" : "Signal to noise and distortion ratio in dB."
+    },
+    "sfdr" : {
+      "type" : "number",
+      "format" : "float",
+      "description" : "Spurious free dynamic range in dB."
+    }
+  },
+  "description" : "The latest values of whichever spectrum measurement is switched on. Which fields are present depends on the measurement: with none selected nothing is measured at all and only the measurement field is returned. The figures are those of the spectrum as displayed, so they match the window rather than the full span when it is zoomed, and they are only produced by a running GUI.\n"
+};
             defs.GS232ControllerActions = {
   "properties" : {
     "run" : {
@@ -21947,6 +22096,40 @@ margin-bottom: 20px;
   },
   "description" : "SoapySDR"
 };
+            defs.SpectrumActions = {
+  "properties" : {
+    "autoscale" : {
+      "type" : "integer",
+      "description" : "Set the reference level and range from the spectrum currently displayed, as the autoscale button does. Needs a running GUI (1 to do it, 0 to do nothing).\n",
+      "minimum" : 0,
+      "maximum" : 1
+    },
+    "clearSpectrum" : {
+      "type" : "integer",
+      "description" : "Discard the accumulated histogram and max hold traces, as the clear button does. Needs a running GUI (1 to do it, 0 to do nothing).\n",
+      "minimum" : 0,
+      "maximum" : 1
+    },
+    "resetMeasurements" : {
+      "type" : "integer",
+      "description" : "Discard the accumulated measurement statistics, so the minimum, maximum and mean columns start again. Needs a running GUI (1 to do it, 0 to do nothing).\n",
+      "minimum" : 0,
+      "maximum" : 1
+    },
+    "freeze" : {
+      "type" : "integer",
+      "description" : "Stop or resume spectrum processing. Unlike the others this acts on the spectrum itself rather than its display, so it works without a GUI (1 to freeze, 0 to resume).\n",
+      "minimum" : 0,
+      "maximum" : 1
+    },
+    "gotoMarker" : {
+      "type" : "integer",
+      "description" : "Retune the device to the annotation marker at this index, counting from 0, as choosing it in the goto list does. Needs a running GUI.\n",
+      "minimum" : 0
+    }
+  },
+  "description" : "Actions on the main spectrum of a device set"
+};
             defs.SpectrumAnnotationMarker = {
   "properties" : {
     "startFrequency" : {
@@ -22044,6 +22227,21 @@ margin-bottom: 20px;
     }
   },
   "description" : "Display settings for one saved spectrum memory. The captured spectrum samples are not transferred through settings APIs."
+};
+            defs.SpectrumPeak = {
+  "properties" : {
+    "frequency" : {
+      "type" : "integer",
+      "format" : "int64",
+      "description" : "Frequency of the peak in Hz."
+    },
+    "power" : {
+      "type" : "number",
+      "format" : "float",
+      "description" : "Power of the peak in dB."
+    }
+  },
+  "description" : "One peak found in the spectrum"
 };
             defs.SpectrumServer = {
   "properties" : {
@@ -24995,6 +25193,15 @@ margin-bottom: 20px;
                     </li>
                     <li data-group="DeviceSet" data-name="devicesetGet" class="">
                       <a href="#api-DeviceSet-devicesetGet">devicesetGet</a>
+                    </li>
+                    <li data-group="DeviceSet" data-name="devicesetSpectrumActionsPost" class="">
+                      <a href="#api-DeviceSet-devicesetSpectrumActionsPost">devicesetSpectrumActionsPost</a>
+                    </li>
+                    <li data-group="DeviceSet" data-name="devicesetSpectrumDataGet" class="">
+                      <a href="#api-DeviceSet-devicesetSpectrumDataGet">devicesetSpectrumDataGet</a>
+                    </li>
+                    <li data-group="DeviceSet" data-name="devicesetSpectrumReportGet" class="">
+                      <a href="#api-DeviceSet-devicesetSpectrumReportGet">devicesetSpectrumReportGet</a>
                     </li>
                     <li data-group="DeviceSet" data-name="devicesetSpectrumServerDelete" class="">
                       <a href="#api-DeviceSet-devicesetSpectrumServerDelete">devicesetSpectrumServerDelete</a>
@@ -37506,6 +37713,1529 @@ except ApiException as e:
                                     </script>
                                   </div>
                                   <input id='responses-devicesetGet-501-schema-data' type='hidden' value=''></input>
+                                </div>
+                            </div>
+
+                        </article>
+                      </div>
+                      <hr>
+                    <div id="api-DeviceSet-devicesetSpectrumActionsPost">
+                      <article id="api-DeviceSet-devicesetSpectrumActionsPost-0" data-group="User" data-name="devicesetSpectrumActionsPost" data-version="0">
+                        <div class="pull-left">
+                          <h1>devicesetSpectrumActionsPost</h1>
+                          <p></p>
+                        </div>
+                        <div class="pull-right"></div>
+                        <div class="clearfix"></div>
+                        <p></p>
+                        <p class="marked">post an action or actions on the main spectrum</p>
+                        <p></p>
+                        <br />
+                        <pre class="prettyprint language-html prettyprinted" data-type="post"><code><span class="pln">/sdrangel/deviceset/{deviceSetIndex}/spectrum/actions</span></code></pre>
+                        <p>
+                          <h3>Usage and SDK Samples</h3>
+                        </p>
+                        <ul class="nav nav-tabs nav-tabs-examples">
+                          <li class="active"><a href="#examples-DeviceSet-devicesetSpectrumActionsPost-0-curl">Curl</a></li>
+                          <li class=""><a href="#examples-DeviceSet-devicesetSpectrumActionsPost-0-java">Java</a></li>
+                          <li class=""><a href="#examples-DeviceSet-devicesetSpectrumActionsPost-0-android">Android</a></li>
+                          <!--<li class=""><a href="#examples-DeviceSet-devicesetSpectrumActionsPost-0-groovy">Groovy</a></li>-->
+                          <li class=""><a href="#examples-DeviceSet-devicesetSpectrumActionsPost-0-objc">Obj-C</a></li>
+                          <li class=""><a href="#examples-DeviceSet-devicesetSpectrumActionsPost-0-javascript">JavaScript</a></li>
+                          <!--<li class=""><a href="#examples-DeviceSet-devicesetSpectrumActionsPost-0-angular">Angular</a></li>-->
+                          <li class=""><a href="#examples-DeviceSet-devicesetSpectrumActionsPost-0-csharp">C#</a></li>
+                          <li class=""><a href="#examples-DeviceSet-devicesetSpectrumActionsPost-0-php">PHP</a></li>
+                          <li class=""><a href="#examples-DeviceSet-devicesetSpectrumActionsPost-0-perl">Perl</a></li>
+                          <li class=""><a href="#examples-DeviceSet-devicesetSpectrumActionsPost-0-python">Python</a></li>
+                        </ul>
+
+                        <div class="tab-content">
+                          <div class="tab-pane active" id="examples-DeviceSet-devicesetSpectrumActionsPost-0-curl">
+                            <pre class="prettyprint"><code class="language-bsh">curl -X POST "http://localhost/sdrangel/deviceset/{deviceSetIndex}/spectrum/actions"</code></pre>
+                          </div>
+                          <div class="tab-pane" id="examples-DeviceSet-devicesetSpectrumActionsPost-0-java">
+                            <pre class="prettyprint"><code class="language-java">import SWGSDRangel.*;
+import SWGSDRangel.auth.*;
+import SWGSDRangel.model.*;
+import SWGSDRangel.api.DeviceSetApi;
+
+import java.io.File;
+import java.util.*;
+
+public class DeviceSetApiExample {
+
+    public static void main(String[] args) {
+        
+        DeviceSetApi apiInstance = new DeviceSetApi();
+        Integer deviceSetIndex = 56; // Integer | Index of device set in the device set list
+        SpectrumActions body = ; // SpectrumActions | Action(s) to apply to the main spectrum
+        try {
+            SuccessResponse result = apiInstance.devicesetSpectrumActionsPost(deviceSetIndex, body);
+            System.out.println(result);
+        } catch (ApiException e) {
+            System.err.println("Exception when calling DeviceSetApi#devicesetSpectrumActionsPost");
+            e.printStackTrace();
+        }
+    }
+}</code></pre>
+                          </div>
+
+                          <div class="tab-pane" id="examples-DeviceSet-devicesetSpectrumActionsPost-0-android">
+                            <pre class="prettyprint"><code class="language-java">import SWGSDRangel.api.DeviceSetApi;
+
+public class DeviceSetApiExample {
+
+    public static void main(String[] args) {
+        DeviceSetApi apiInstance = new DeviceSetApi();
+        Integer deviceSetIndex = 56; // Integer | Index of device set in the device set list
+        SpectrumActions body = ; // SpectrumActions | Action(s) to apply to the main spectrum
+        try {
+            SuccessResponse result = apiInstance.devicesetSpectrumActionsPost(deviceSetIndex, body);
+            System.out.println(result);
+        } catch (ApiException e) {
+            System.err.println("Exception when calling DeviceSetApi#devicesetSpectrumActionsPost");
+            e.printStackTrace();
+        }
+    }
+}</code></pre>
+                          </div>
+  <!--
+  <div class="tab-pane" id="examples-DeviceSet-devicesetSpectrumActionsPost-0-groovy">
+  <pre class="prettyprint language-json prettyprinted" data-type="json"><code>Coming Soon!</code></pre>
+  </div> -->
+                            <div class="tab-pane" id="examples-DeviceSet-devicesetSpectrumActionsPost-0-objc">
+                              <pre class="prettyprint"><code class="language-cpp">Integer *deviceSetIndex = 56; // Index of device set in the device set list
+SpectrumActions *body = ; // Action(s) to apply to the main spectrum
+
+DeviceSetApi *apiInstance = [[DeviceSetApi alloc] init];
+
+[apiInstance devicesetSpectrumActionsPostWith:deviceSetIndex
+    body:body
+              completionHandler: ^(SuccessResponse output, NSError* error) {
+                            if (output) {
+                                NSLog(@"%@", output);
+                            }
+                            if (error) {
+                                NSLog(@"Error: %@", error);
+                            }
+                        }];
+</code></pre>
+                            </div>
+
+                            <div class="tab-pane" id="examples-DeviceSet-devicesetSpectrumActionsPost-0-javascript">
+                              <pre class="prettyprint"><code class="language-js">var SdRangel = require('sd_rangel');
+
+var api = new SdRangel.DeviceSetApi()
+
+var deviceSetIndex = 56; // {Integer} Index of device set in the device set list
+
+var body = ; // {SpectrumActions} Action(s) to apply to the main spectrum
+
+
+var callback = function(error, data, response) {
+  if (error) {
+    console.error(error);
+  } else {
+    console.log('API called successfully. Returned data: ' + data);
+  }
+};
+api.devicesetSpectrumActionsPost(deviceSetIndex, body, callback);
+</code></pre>
+                            </div>
+
+                            <!--<div class="tab-pane" id="examples-DeviceSet-devicesetSpectrumActionsPost-0-angular">
+              <pre class="prettyprint language-json prettyprinted" data-type="json"><code>Coming Soon!</code></pre>
+            </div>-->
+                            <div class="tab-pane" id="examples-DeviceSet-devicesetSpectrumActionsPost-0-csharp">
+                              <pre class="prettyprint"><code class="language-cs">using System;
+using System.Diagnostics;
+using SWGSDRangel.Api;
+using SWGSDRangel.Client;
+using SWGSDRangel.Model;
+
+namespace Example
+{
+    public class devicesetSpectrumActionsPostExample
+    {
+        public void main()
+        {
+            
+            var apiInstance = new DeviceSetApi();
+            var deviceSetIndex = 56;  // Integer | Index of device set in the device set list
+            var body = new SpectrumActions(); // SpectrumActions | Action(s) to apply to the main spectrum
+
+            try
+            {
+                SuccessResponse result = apiInstance.devicesetSpectrumActionsPost(deviceSetIndex, body);
+                Debug.WriteLine(result);
+            }
+            catch (Exception e)
+            {
+                Debug.Print("Exception when calling DeviceSetApi.devicesetSpectrumActionsPost: " + e.Message );
+            }
+        }
+    }
+}
+</code></pre>
+                            </div>
+
+                            <div class="tab-pane" id="examples-DeviceSet-devicesetSpectrumActionsPost-0-php">
+                              <pre class="prettyprint"><code class="language-php"><&#63;php
+require_once(__DIR__ . '/vendor/autoload.php');
+
+$api_instance = new Swagger\Client\Api\DeviceSetApi();
+$deviceSetIndex = 56; // Integer | Index of device set in the device set list
+$body = ; // SpectrumActions | Action(s) to apply to the main spectrum
+
+try {
+    $result = $api_instance->devicesetSpectrumActionsPost($deviceSetIndex, $body);
+    print_r($result);
+} catch (Exception $e) {
+    echo 'Exception when calling DeviceSetApi->devicesetSpectrumActionsPost: ', $e->getMessage(), PHP_EOL;
+}
+?></code></pre>
+                            </div>
+
+                            <div class="tab-pane" id="examples-DeviceSet-devicesetSpectrumActionsPost-0-perl">
+                              <pre class="prettyprint"><code class="language-perl">use Data::Dumper;
+use SWGSDRangel::Configuration;
+use SWGSDRangel::DeviceSetApi;
+
+my $api_instance = SWGSDRangel::DeviceSetApi->new();
+my $deviceSetIndex = 56; # Integer | Index of device set in the device set list
+my $body = SWGSDRangel::Object::SpectrumActions->new(); # SpectrumActions | Action(s) to apply to the main spectrum
+
+eval { 
+    my $result = $api_instance->devicesetSpectrumActionsPost(deviceSetIndex => $deviceSetIndex, body => $body);
+    print Dumper($result);
+};
+if ($@) {
+    warn "Exception when calling DeviceSetApi->devicesetSpectrumActionsPost: $@\n";
+}</code></pre>
+                            </div>
+
+                            <div class="tab-pane" id="examples-DeviceSet-devicesetSpectrumActionsPost-0-python">
+                              <pre class="prettyprint"><code class="language-python">from __future__ import print_statement
+import time
+import swagger_sdrangel
+from swagger_sdrangel.rest import ApiException
+from pprint import pprint
+
+# create an instance of the API class
+api_instance = swagger_sdrangel.DeviceSetApi()
+deviceSetIndex = 56 # Integer | Index of device set in the device set list
+body =  # SpectrumActions | Action(s) to apply to the main spectrum
+
+try: 
+    api_response = api_instance.deviceset_spectrum_actions_post(deviceSetIndex, body)
+    pprint(api_response)
+except ApiException as e:
+    print("Exception when calling DeviceSetApi->devicesetSpectrumActionsPost: %s\n" % e)</code></pre>
+                            </div>
+                          </div>
+
+                          <h2>Parameters</h2>
+
+                            <div class="methodsubtabletitle">Path parameters</div>
+                            <table id="methodsubtable">
+                                <tr>
+                                  <th width="150px">Name</th>
+                                  <th>Description</th>
+                                </tr>
+                                  <tr><td style="width:150px;">deviceSetIndex*</td>
+<td>
+
+
+    <div id="d2e199_devicesetSpectrumActionsPost_deviceSetIndex">
+        <div class="json-schema-view">
+            <div class="primitive">
+                <span class="type">
+                    Integer
+                </span>
+
+                    <div class="inner description">
+                        Index of device set in the device set list
+                    </div>
+            </div>
+                <div class="inner required">
+                    Required
+                </div>
+        </div>
+    </div>
+</td>
+</tr>
+
+                            </table>
+
+
+                            <div class="methodsubtabletitle">Body parameters</div>
+                            <table id="methodsubtable">
+                              <tr>
+                                <th width="150px">Name</th>
+                                <th>Description</th>
+                              </tr>
+                                <tr><td style="width:150px;">body <span style="color:red;">*</span></td>
+<td>
+
+
+<script>
+$(document).ready(function() {
+  var schemaWrapper = {
+  "in" : "body",
+  "name" : "body",
+  "description" : "Action(s) to apply to the main spectrum",
+  "required" : true,
+  "schema" : {
+    "$ref" : "#/definitions/SpectrumActions"
+  }
+};
+  var schema = schemaWrapper.schema;
+  if (schema.$ref != null) {
+    schema = defsParser.$refs.get(schema.$ref);
+  } else {
+    schemaWrapper.definitions = Object.assign({}, defs);
+    $RefParser.dereference(schemaWrapper).catch(function(err) {
+      console.log(err);
+    });
+  }
+
+  var view = new JSONSchemaView(schema,2,{isBodyParam: true});
+  var result = $('#d2e199_devicesetSpectrumActionsPost_body');
+  result.empty();
+  result.append(view.render());
+});
+</script>
+<div id="d2e199_devicesetSpectrumActionsPost_body"></div>
+</td>
+</tr>
+
+                            </table>
+
+
+
+                          <h2>Responses</h2>
+                            <h3> Status: 202 - Message to perform action was sent successfully </h3>
+
+                            <ul class="nav nav-tabs nav-tabs-examples" >
+                                <li class="active">
+                                  <a data-toggle="tab" href="#responses-devicesetSpectrumActionsPost-202-schema">Schema</a>
+                                </li>
+
+                            </ul>
+
+                            <div class="tab-content" style='margin-bottom: 10px;'>
+                                <div class="tab-pane active" id="responses-devicesetSpectrumActionsPost-202-schema">
+                                  <div id='responses-devicesetSpectrumActionsPost-202-schema-202' style="padding: 30px; border-left: 1px solid #eee; border-right: 1px solid #eee; border-bottom: 1px solid #eee;">
+                                    <script>
+                                      $(document).ready(function() {
+                                        var schemaWrapper = {
+  "description" : "Message to perform action was sent successfully",
+  "schema" : {
+    "$ref" : "#/definitions/SuccessResponse"
+  }
+};
+                                        var schema = schemaWrapper.schema;
+                                        if (schema.$ref != null) {
+                                          schema = defsParser.$refs.get(schema.$ref);
+                                        } else {
+                                          schemaWrapper.definitions = Object.assign({}, defs);
+                                          $RefParser.dereference(schemaWrapper).catch(function(err) {
+                                            console.log(err);
+                                          });
+                                        }
+
+                                        //console.log(JSON.stringify(schema));
+                                        var view = new JSONSchemaView(schema, 3);
+                                        $('#responses-devicesetSpectrumActionsPost-202-schema-data').val(stringify(schema));
+                                        var result = $('#responses-devicesetSpectrumActionsPost-202-schema-202');
+                                        result.empty();
+                                        result.append(view.render());
+                                      });
+                                    </script>
+                                  </div>
+                                  <input id='responses-devicesetSpectrumActionsPost-202-schema-data' type='hidden' value=''></input>
+                                </div>
+                            </div>
+
+                            <h3> Status: 400 - Unknown action, no action given, or an action that needs a spectrum display </h3>
+
+                            <ul class="nav nav-tabs nav-tabs-examples" >
+                                <li class="active">
+                                  <a data-toggle="tab" href="#responses-devicesetSpectrumActionsPost-400-schema">Schema</a>
+                                </li>
+
+                            </ul>
+
+                            <div class="tab-content" style='margin-bottom: 10px;'>
+                                <div class="tab-pane active" id="responses-devicesetSpectrumActionsPost-400-schema">
+                                  <div id='responses-devicesetSpectrumActionsPost-400-schema-400' style="padding: 30px; border-left: 1px solid #eee; border-right: 1px solid #eee; border-bottom: 1px solid #eee;">
+                                    <script>
+                                      $(document).ready(function() {
+                                        var schemaWrapper = {
+  "description" : "Unknown action, no action given, or an action that needs a spectrum display",
+  "schema" : {
+    "$ref" : "#/definitions/ErrorResponse"
+  }
+};
+                                        var schema = schemaWrapper.schema;
+                                        if (schema.$ref != null) {
+                                          schema = defsParser.$refs.get(schema.$ref);
+                                        } else {
+                                          schemaWrapper.definitions = Object.assign({}, defs);
+                                          $RefParser.dereference(schemaWrapper).catch(function(err) {
+                                            console.log(err);
+                                          });
+                                        }
+
+                                        //console.log(JSON.stringify(schema));
+                                        var view = new JSONSchemaView(schema, 3);
+                                        $('#responses-devicesetSpectrumActionsPost-400-schema-data').val(stringify(schema));
+                                        var result = $('#responses-devicesetSpectrumActionsPost-400-schema-400');
+                                        result.empty();
+                                        result.append(view.render());
+                                      });
+                                    </script>
+                                  </div>
+                                  <input id='responses-devicesetSpectrumActionsPost-400-schema-data' type='hidden' value=''></input>
+                                </div>
+                            </div>
+
+                            <h3> Status: 404 - Invalid index </h3>
+
+                            <ul class="nav nav-tabs nav-tabs-examples" >
+                                <li class="active">
+                                  <a data-toggle="tab" href="#responses-devicesetSpectrumActionsPost-404-schema">Schema</a>
+                                </li>
+
+                            </ul>
+
+                            <div class="tab-content" style='margin-bottom: 10px;'>
+                                <div class="tab-pane active" id="responses-devicesetSpectrumActionsPost-404-schema">
+                                  <div id='responses-devicesetSpectrumActionsPost-404-schema-404' style="padding: 30px; border-left: 1px solid #eee; border-right: 1px solid #eee; border-bottom: 1px solid #eee;">
+                                    <script>
+                                      $(document).ready(function() {
+                                        var schemaWrapper = {
+  "description" : "Invalid index",
+  "schema" : {
+    "$ref" : "#/definitions/ErrorResponse"
+  }
+};
+                                        var schema = schemaWrapper.schema;
+                                        if (schema.$ref != null) {
+                                          schema = defsParser.$refs.get(schema.$ref);
+                                        } else {
+                                          schemaWrapper.definitions = Object.assign({}, defs);
+                                          $RefParser.dereference(schemaWrapper).catch(function(err) {
+                                            console.log(err);
+                                          });
+                                        }
+
+                                        //console.log(JSON.stringify(schema));
+                                        var view = new JSONSchemaView(schema, 3);
+                                        $('#responses-devicesetSpectrumActionsPost-404-schema-data').val(stringify(schema));
+                                        var result = $('#responses-devicesetSpectrumActionsPost-404-schema-404');
+                                        result.empty();
+                                        result.append(view.render());
+                                      });
+                                    </script>
+                                  </div>
+                                  <input id='responses-devicesetSpectrumActionsPost-404-schema-data' type='hidden' value=''></input>
+                                </div>
+                            </div>
+
+                            <h3> Status: 500 - Error </h3>
+
+                            <ul class="nav nav-tabs nav-tabs-examples" >
+                                <li class="active">
+                                  <a data-toggle="tab" href="#responses-devicesetSpectrumActionsPost-500-schema">Schema</a>
+                                </li>
+
+                            </ul>
+
+                            <div class="tab-content" style='margin-bottom: 10px;'>
+                                <div class="tab-pane active" id="responses-devicesetSpectrumActionsPost-500-schema">
+                                  <div id='responses-devicesetSpectrumActionsPost-500-schema-500' style="padding: 30px; border-left: 1px solid #eee; border-right: 1px solid #eee; border-bottom: 1px solid #eee;">
+                                    <script>
+                                      $(document).ready(function() {
+                                        var schemaWrapper = {
+  "description" : "Error",
+  "schema" : {
+    "$ref" : "#/definitions/ErrorResponse"
+  }
+};
+                                        var schema = schemaWrapper.schema;
+                                        if (schema.$ref != null) {
+                                          schema = defsParser.$refs.get(schema.$ref);
+                                        } else {
+                                          schemaWrapper.definitions = Object.assign({}, defs);
+                                          $RefParser.dereference(schemaWrapper).catch(function(err) {
+                                            console.log(err);
+                                          });
+                                        }
+
+                                        //console.log(JSON.stringify(schema));
+                                        var view = new JSONSchemaView(schema, 3);
+                                        $('#responses-devicesetSpectrumActionsPost-500-schema-data').val(stringify(schema));
+                                        var result = $('#responses-devicesetSpectrumActionsPost-500-schema-500');
+                                        result.empty();
+                                        result.append(view.render());
+                                      });
+                                    </script>
+                                  </div>
+                                  <input id='responses-devicesetSpectrumActionsPost-500-schema-data' type='hidden' value=''></input>
+                                </div>
+                            </div>
+
+                            <h3> Status: 501 - Function not implemented </h3>
+
+                            <ul class="nav nav-tabs nav-tabs-examples" >
+                                <li class="active">
+                                  <a data-toggle="tab" href="#responses-devicesetSpectrumActionsPost-501-schema">Schema</a>
+                                </li>
+
+                            </ul>
+
+                            <div class="tab-content" style='margin-bottom: 10px;'>
+                                <div class="tab-pane active" id="responses-devicesetSpectrumActionsPost-501-schema">
+                                  <div id='responses-devicesetSpectrumActionsPost-501-schema-501' style="padding: 30px; border-left: 1px solid #eee; border-right: 1px solid #eee; border-bottom: 1px solid #eee;">
+                                    <script>
+                                      $(document).ready(function() {
+                                        var schemaWrapper = {
+  "description" : "Function not implemented",
+  "schema" : {
+    "$ref" : "#/definitions/ErrorResponse"
+  }
+};
+                                        var schema = schemaWrapper.schema;
+                                        if (schema.$ref != null) {
+                                          schema = defsParser.$refs.get(schema.$ref);
+                                        } else {
+                                          schemaWrapper.definitions = Object.assign({}, defs);
+                                          $RefParser.dereference(schemaWrapper).catch(function(err) {
+                                            console.log(err);
+                                          });
+                                        }
+
+                                        //console.log(JSON.stringify(schema));
+                                        var view = new JSONSchemaView(schema, 3);
+                                        $('#responses-devicesetSpectrumActionsPost-501-schema-data').val(stringify(schema));
+                                        var result = $('#responses-devicesetSpectrumActionsPost-501-schema-501');
+                                        result.empty();
+                                        result.append(view.render());
+                                      });
+                                    </script>
+                                  </div>
+                                  <input id='responses-devicesetSpectrumActionsPost-501-schema-data' type='hidden' value=''></input>
+                                </div>
+                            </div>
+
+                        </article>
+                      </div>
+                      <hr>
+                    <div id="api-DeviceSet-devicesetSpectrumDataGet">
+                      <article id="api-DeviceSet-devicesetSpectrumDataGet-0" data-group="User" data-name="devicesetSpectrumDataGet" data-version="0">
+                        <div class="pull-left">
+                          <h1>devicesetSpectrumDataGet</h1>
+                          <p></p>
+                        </div>
+                        <div class="pull-right"></div>
+                        <div class="clearfix"></div>
+                        <p></p>
+                        <p class="marked">Get the main spectrum power values, reduced to a number of bins</p>
+                        <p></p>
+                        <br />
+                        <pre class="prettyprint language-html prettyprinted" data-type="get"><code><span class="pln">/sdrangel/deviceset/{deviceSetIndex}/spectrum/data</span></code></pre>
+                        <p>
+                          <h3>Usage and SDK Samples</h3>
+                        </p>
+                        <ul class="nav nav-tabs nav-tabs-examples">
+                          <li class="active"><a href="#examples-DeviceSet-devicesetSpectrumDataGet-0-curl">Curl</a></li>
+                          <li class=""><a href="#examples-DeviceSet-devicesetSpectrumDataGet-0-java">Java</a></li>
+                          <li class=""><a href="#examples-DeviceSet-devicesetSpectrumDataGet-0-android">Android</a></li>
+                          <!--<li class=""><a href="#examples-DeviceSet-devicesetSpectrumDataGet-0-groovy">Groovy</a></li>-->
+                          <li class=""><a href="#examples-DeviceSet-devicesetSpectrumDataGet-0-objc">Obj-C</a></li>
+                          <li class=""><a href="#examples-DeviceSet-devicesetSpectrumDataGet-0-javascript">JavaScript</a></li>
+                          <!--<li class=""><a href="#examples-DeviceSet-devicesetSpectrumDataGet-0-angular">Angular</a></li>-->
+                          <li class=""><a href="#examples-DeviceSet-devicesetSpectrumDataGet-0-csharp">C#</a></li>
+                          <li class=""><a href="#examples-DeviceSet-devicesetSpectrumDataGet-0-php">PHP</a></li>
+                          <li class=""><a href="#examples-DeviceSet-devicesetSpectrumDataGet-0-perl">Perl</a></li>
+                          <li class=""><a href="#examples-DeviceSet-devicesetSpectrumDataGet-0-python">Python</a></li>
+                        </ul>
+
+                        <div class="tab-content">
+                          <div class="tab-pane active" id="examples-DeviceSet-devicesetSpectrumDataGet-0-curl">
+                            <pre class="prettyprint"><code class="language-bsh">curl -X GET "http://localhost/sdrangel/deviceset/{deviceSetIndex}/spectrum/data?bins=&startFrequency=&stopFrequency=&reduce="</code></pre>
+                          </div>
+                          <div class="tab-pane" id="examples-DeviceSet-devicesetSpectrumDataGet-0-java">
+                            <pre class="prettyprint"><code class="language-java">import SWGSDRangel.*;
+import SWGSDRangel.auth.*;
+import SWGSDRangel.model.*;
+import SWGSDRangel.api.DeviceSetApi;
+
+import java.io.File;
+import java.util.*;
+
+public class DeviceSetApiExample {
+
+    public static void main(String[] args) {
+        
+        DeviceSetApi apiInstance = new DeviceSetApi();
+        Integer deviceSetIndex = 56; // Integer | Index of device set in the device set list
+        Integer bins = 56; // Integer | Number of bins to return, 1 to 4096 (default 128). The spectrum is grouped down to this many
+        Long startFrequency = 789; // Long | Lowest frequency to return in Hz. Default is the start of the spectrum
+        Long stopFrequency = 789; // Long | Highest frequency to return in Hz. Default is the end of the spectrum
+        String reduce = reduce_example; // String | How several bins are combined into one, max or mean (default max)
+        try {
+            GLSpectrumData result = apiInstance.devicesetSpectrumDataGet(deviceSetIndex, bins, startFrequency, stopFrequency, reduce);
+            System.out.println(result);
+        } catch (ApiException e) {
+            System.err.println("Exception when calling DeviceSetApi#devicesetSpectrumDataGet");
+            e.printStackTrace();
+        }
+    }
+}</code></pre>
+                          </div>
+
+                          <div class="tab-pane" id="examples-DeviceSet-devicesetSpectrumDataGet-0-android">
+                            <pre class="prettyprint"><code class="language-java">import SWGSDRangel.api.DeviceSetApi;
+
+public class DeviceSetApiExample {
+
+    public static void main(String[] args) {
+        DeviceSetApi apiInstance = new DeviceSetApi();
+        Integer deviceSetIndex = 56; // Integer | Index of device set in the device set list
+        Integer bins = 56; // Integer | Number of bins to return, 1 to 4096 (default 128). The spectrum is grouped down to this many
+        Long startFrequency = 789; // Long | Lowest frequency to return in Hz. Default is the start of the spectrum
+        Long stopFrequency = 789; // Long | Highest frequency to return in Hz. Default is the end of the spectrum
+        String reduce = reduce_example; // String | How several bins are combined into one, max or mean (default max)
+        try {
+            GLSpectrumData result = apiInstance.devicesetSpectrumDataGet(deviceSetIndex, bins, startFrequency, stopFrequency, reduce);
+            System.out.println(result);
+        } catch (ApiException e) {
+            System.err.println("Exception when calling DeviceSetApi#devicesetSpectrumDataGet");
+            e.printStackTrace();
+        }
+    }
+}</code></pre>
+                          </div>
+  <!--
+  <div class="tab-pane" id="examples-DeviceSet-devicesetSpectrumDataGet-0-groovy">
+  <pre class="prettyprint language-json prettyprinted" data-type="json"><code>Coming Soon!</code></pre>
+  </div> -->
+                            <div class="tab-pane" id="examples-DeviceSet-devicesetSpectrumDataGet-0-objc">
+                              <pre class="prettyprint"><code class="language-cpp">Integer *deviceSetIndex = 56; // Index of device set in the device set list
+Integer *bins = 56; // Number of bins to return, 1 to 4096 (default 128). The spectrum is grouped down to this many (optional)
+Long *startFrequency = 789; // Lowest frequency to return in Hz. Default is the start of the spectrum (optional)
+Long *stopFrequency = 789; // Highest frequency to return in Hz. Default is the end of the spectrum (optional)
+String *reduce = reduce_example; // How several bins are combined into one, max or mean (default max) (optional)
+
+DeviceSetApi *apiInstance = [[DeviceSetApi alloc] init];
+
+[apiInstance devicesetSpectrumDataGetWith:deviceSetIndex
+    bins:bins
+    startFrequency:startFrequency
+    stopFrequency:stopFrequency
+    reduce:reduce
+              completionHandler: ^(GLSpectrumData output, NSError* error) {
+                            if (output) {
+                                NSLog(@"%@", output);
+                            }
+                            if (error) {
+                                NSLog(@"Error: %@", error);
+                            }
+                        }];
+</code></pre>
+                            </div>
+
+                            <div class="tab-pane" id="examples-DeviceSet-devicesetSpectrumDataGet-0-javascript">
+                              <pre class="prettyprint"><code class="language-js">var SdRangel = require('sd_rangel');
+
+var api = new SdRangel.DeviceSetApi()
+
+var deviceSetIndex = 56; // {Integer} Index of device set in the device set list
+
+var opts = { 
+  'bins': 56, // {Integer} Number of bins to return, 1 to 4096 (default 128). The spectrum is grouped down to this many
+  'startFrequency': 789, // {Long} Lowest frequency to return in Hz. Default is the start of the spectrum
+  'stopFrequency': 789, // {Long} Highest frequency to return in Hz. Default is the end of the spectrum
+  'reduce': reduce_example // {String} How several bins are combined into one, max or mean (default max)
+};
+
+var callback = function(error, data, response) {
+  if (error) {
+    console.error(error);
+  } else {
+    console.log('API called successfully. Returned data: ' + data);
+  }
+};
+api.devicesetSpectrumDataGet(deviceSetIndex, opts, callback);
+</code></pre>
+                            </div>
+
+                            <!--<div class="tab-pane" id="examples-DeviceSet-devicesetSpectrumDataGet-0-angular">
+              <pre class="prettyprint language-json prettyprinted" data-type="json"><code>Coming Soon!</code></pre>
+            </div>-->
+                            <div class="tab-pane" id="examples-DeviceSet-devicesetSpectrumDataGet-0-csharp">
+                              <pre class="prettyprint"><code class="language-cs">using System;
+using System.Diagnostics;
+using SWGSDRangel.Api;
+using SWGSDRangel.Client;
+using SWGSDRangel.Model;
+
+namespace Example
+{
+    public class devicesetSpectrumDataGetExample
+    {
+        public void main()
+        {
+            
+            var apiInstance = new DeviceSetApi();
+            var deviceSetIndex = 56;  // Integer | Index of device set in the device set list
+            var bins = 56;  // Integer | Number of bins to return, 1 to 4096 (default 128). The spectrum is grouped down to this many (optional) 
+            var startFrequency = 789;  // Long | Lowest frequency to return in Hz. Default is the start of the spectrum (optional) 
+            var stopFrequency = 789;  // Long | Highest frequency to return in Hz. Default is the end of the spectrum (optional) 
+            var reduce = reduce_example;  // String | How several bins are combined into one, max or mean (default max) (optional) 
+
+            try
+            {
+                GLSpectrumData result = apiInstance.devicesetSpectrumDataGet(deviceSetIndex, bins, startFrequency, stopFrequency, reduce);
+                Debug.WriteLine(result);
+            }
+            catch (Exception e)
+            {
+                Debug.Print("Exception when calling DeviceSetApi.devicesetSpectrumDataGet: " + e.Message );
+            }
+        }
+    }
+}
+</code></pre>
+                            </div>
+
+                            <div class="tab-pane" id="examples-DeviceSet-devicesetSpectrumDataGet-0-php">
+                              <pre class="prettyprint"><code class="language-php"><&#63;php
+require_once(__DIR__ . '/vendor/autoload.php');
+
+$api_instance = new Swagger\Client\Api\DeviceSetApi();
+$deviceSetIndex = 56; // Integer | Index of device set in the device set list
+$bins = 56; // Integer | Number of bins to return, 1 to 4096 (default 128). The spectrum is grouped down to this many
+$startFrequency = 789; // Long | Lowest frequency to return in Hz. Default is the start of the spectrum
+$stopFrequency = 789; // Long | Highest frequency to return in Hz. Default is the end of the spectrum
+$reduce = reduce_example; // String | How several bins are combined into one, max or mean (default max)
+
+try {
+    $result = $api_instance->devicesetSpectrumDataGet($deviceSetIndex, $bins, $startFrequency, $stopFrequency, $reduce);
+    print_r($result);
+} catch (Exception $e) {
+    echo 'Exception when calling DeviceSetApi->devicesetSpectrumDataGet: ', $e->getMessage(), PHP_EOL;
+}
+?></code></pre>
+                            </div>
+
+                            <div class="tab-pane" id="examples-DeviceSet-devicesetSpectrumDataGet-0-perl">
+                              <pre class="prettyprint"><code class="language-perl">use Data::Dumper;
+use SWGSDRangel::Configuration;
+use SWGSDRangel::DeviceSetApi;
+
+my $api_instance = SWGSDRangel::DeviceSetApi->new();
+my $deviceSetIndex = 56; # Integer | Index of device set in the device set list
+my $bins = 56; # Integer | Number of bins to return, 1 to 4096 (default 128). The spectrum is grouped down to this many
+my $startFrequency = 789; # Long | Lowest frequency to return in Hz. Default is the start of the spectrum
+my $stopFrequency = 789; # Long | Highest frequency to return in Hz. Default is the end of the spectrum
+my $reduce = reduce_example; # String | How several bins are combined into one, max or mean (default max)
+
+eval { 
+    my $result = $api_instance->devicesetSpectrumDataGet(deviceSetIndex => $deviceSetIndex, bins => $bins, startFrequency => $startFrequency, stopFrequency => $stopFrequency, reduce => $reduce);
+    print Dumper($result);
+};
+if ($@) {
+    warn "Exception when calling DeviceSetApi->devicesetSpectrumDataGet: $@\n";
+}</code></pre>
+                            </div>
+
+                            <div class="tab-pane" id="examples-DeviceSet-devicesetSpectrumDataGet-0-python">
+                              <pre class="prettyprint"><code class="language-python">from __future__ import print_statement
+import time
+import swagger_sdrangel
+from swagger_sdrangel.rest import ApiException
+from pprint import pprint
+
+# create an instance of the API class
+api_instance = swagger_sdrangel.DeviceSetApi()
+deviceSetIndex = 56 # Integer | Index of device set in the device set list
+bins = 56 # Integer | Number of bins to return, 1 to 4096 (default 128). The spectrum is grouped down to this many (optional)
+startFrequency = 789 # Long | Lowest frequency to return in Hz. Default is the start of the spectrum (optional)
+stopFrequency = 789 # Long | Highest frequency to return in Hz. Default is the end of the spectrum (optional)
+reduce = reduce_example # String | How several bins are combined into one, max or mean (default max) (optional)
+
+try: 
+    api_response = api_instance.deviceset_spectrum_data_get(deviceSetIndex, bins=bins, startFrequency=startFrequency, stopFrequency=stopFrequency, reduce=reduce)
+    pprint(api_response)
+except ApiException as e:
+    print("Exception when calling DeviceSetApi->devicesetSpectrumDataGet: %s\n" % e)</code></pre>
+                            </div>
+                          </div>
+
+                          <h2>Parameters</h2>
+
+                            <div class="methodsubtabletitle">Path parameters</div>
+                            <table id="methodsubtable">
+                                <tr>
+                                  <th width="150px">Name</th>
+                                  <th>Description</th>
+                                </tr>
+                                  <tr><td style="width:150px;">deviceSetIndex*</td>
+<td>
+
+
+    <div id="d2e199_devicesetSpectrumDataGet_deviceSetIndex">
+        <div class="json-schema-view">
+            <div class="primitive">
+                <span class="type">
+                    Integer
+                </span>
+
+                    <div class="inner description">
+                        Index of device set in the device set list
+                    </div>
+            </div>
+                <div class="inner required">
+                    Required
+                </div>
+        </div>
+    </div>
+</td>
+</tr>
+
+                            </table>
+
+
+
+
+                            <div class="methodsubtabletitle">Query parameters</div>
+                            <table id="methodsubtable">
+                              <tr>
+                                <th width="150px">Name</th>
+                                <th>Description</th>
+                              </tr>
+                                <tr><td style="width:150px;">bins</td>
+<td>
+
+
+    <div id="d2e199_devicesetSpectrumDataGet_bins">
+        <div class="json-schema-view">
+            <div class="primitive">
+                <span class="type">
+                    Integer
+                </span>
+
+                    <div class="inner description">
+                        Number of bins to return, 1 to 4096 (default 128). The spectrum is grouped down to this many
+                    </div>
+            </div>
+        </div>
+    </div>
+</td>
+</tr>
+
+                                <tr><td style="width:150px;">startFrequency</td>
+<td>
+
+
+    <div id="d2e199_devicesetSpectrumDataGet_startFrequency">
+        <div class="json-schema-view">
+            <div class="primitive">
+                <span class="type">
+                    Long
+                </span>
+                    <span class="format">
+                        (int64)
+                    </span>
+
+                    <div class="inner description">
+                        Lowest frequency to return in Hz. Default is the start of the spectrum
+                    </div>
+            </div>
+        </div>
+    </div>
+</td>
+</tr>
+
+                                <tr><td style="width:150px;">stopFrequency</td>
+<td>
+
+
+    <div id="d2e199_devicesetSpectrumDataGet_stopFrequency">
+        <div class="json-schema-view">
+            <div class="primitive">
+                <span class="type">
+                    Long
+                </span>
+                    <span class="format">
+                        (int64)
+                    </span>
+
+                    <div class="inner description">
+                        Highest frequency to return in Hz. Default is the end of the spectrum
+                    </div>
+            </div>
+        </div>
+    </div>
+</td>
+</tr>
+
+                                <tr><td style="width:150px;">reduce</td>
+<td>
+
+
+    <div id="d2e199_devicesetSpectrumDataGet_reduce">
+        <div class="json-schema-view">
+            <div class="primitive">
+                <span class="type">
+                    String
+                </span>
+
+                    <div class="inner description">
+                        How several bins are combined into one, max or mean (default max)
+                    </div>
+            </div>
+        </div>
+    </div>
+</td>
+</tr>
+
+                            </table>
+
+                          <h2>Responses</h2>
+                            <h3> Status: 200 - On success return the reduced spectrum </h3>
+
+                            <ul class="nav nav-tabs nav-tabs-examples" >
+                                <li class="active">
+                                  <a data-toggle="tab" href="#responses-devicesetSpectrumDataGet-200-schema">Schema</a>
+                                </li>
+
+                            </ul>
+
+                            <div class="tab-content" style='margin-bottom: 10px;'>
+                                <div class="tab-pane active" id="responses-devicesetSpectrumDataGet-200-schema">
+                                  <div id='responses-devicesetSpectrumDataGet-200-schema-200' style="padding: 30px; border-left: 1px solid #eee; border-right: 1px solid #eee; border-bottom: 1px solid #eee;">
+                                    <script>
+                                      $(document).ready(function() {
+                                        var schemaWrapper = {
+  "description" : "On success return the reduced spectrum",
+  "schema" : {
+    "$ref" : "#/definitions/GLSpectrumData"
+  }
+};
+                                        var schema = schemaWrapper.schema;
+                                        if (schema.$ref != null) {
+                                          schema = defsParser.$refs.get(schema.$ref);
+                                        } else {
+                                          schemaWrapper.definitions = Object.assign({}, defs);
+                                          $RefParser.dereference(schemaWrapper).catch(function(err) {
+                                            console.log(err);
+                                          });
+                                        }
+
+                                        //console.log(JSON.stringify(schema));
+                                        var view = new JSONSchemaView(schema, 3);
+                                        $('#responses-devicesetSpectrumDataGet-200-schema-data').val(stringify(schema));
+                                        var result = $('#responses-devicesetSpectrumDataGet-200-schema-200');
+                                        result.empty();
+                                        result.append(view.render());
+                                      });
+                                    </script>
+                                  </div>
+                                  <input id='responses-devicesetSpectrumDataGet-200-schema-data' type='hidden' value=''></input>
+                                </div>
+                            </div>
+
+                            <h3> Status: 400 - Invalid bins, frequency range or reduction </h3>
+
+                            <ul class="nav nav-tabs nav-tabs-examples" >
+                                <li class="active">
+                                  <a data-toggle="tab" href="#responses-devicesetSpectrumDataGet-400-schema">Schema</a>
+                                </li>
+
+                            </ul>
+
+                            <div class="tab-content" style='margin-bottom: 10px;'>
+                                <div class="tab-pane active" id="responses-devicesetSpectrumDataGet-400-schema">
+                                  <div id='responses-devicesetSpectrumDataGet-400-schema-400' style="padding: 30px; border-left: 1px solid #eee; border-right: 1px solid #eee; border-bottom: 1px solid #eee;">
+                                    <script>
+                                      $(document).ready(function() {
+                                        var schemaWrapper = {
+  "description" : "Invalid bins, frequency range or reduction",
+  "schema" : {
+    "$ref" : "#/definitions/ErrorResponse"
+  }
+};
+                                        var schema = schemaWrapper.schema;
+                                        if (schema.$ref != null) {
+                                          schema = defsParser.$refs.get(schema.$ref);
+                                        } else {
+                                          schemaWrapper.definitions = Object.assign({}, defs);
+                                          $RefParser.dereference(schemaWrapper).catch(function(err) {
+                                            console.log(err);
+                                          });
+                                        }
+
+                                        //console.log(JSON.stringify(schema));
+                                        var view = new JSONSchemaView(schema, 3);
+                                        $('#responses-devicesetSpectrumDataGet-400-schema-data').val(stringify(schema));
+                                        var result = $('#responses-devicesetSpectrumDataGet-400-schema-400');
+                                        result.empty();
+                                        result.append(view.render());
+                                      });
+                                    </script>
+                                  </div>
+                                  <input id='responses-devicesetSpectrumDataGet-400-schema-data' type='hidden' value=''></input>
+                                </div>
+                            </div>
+
+                            <h3> Status: 404 - Invalid index </h3>
+
+                            <ul class="nav nav-tabs nav-tabs-examples" >
+                                <li class="active">
+                                  <a data-toggle="tab" href="#responses-devicesetSpectrumDataGet-404-schema">Schema</a>
+                                </li>
+
+                            </ul>
+
+                            <div class="tab-content" style='margin-bottom: 10px;'>
+                                <div class="tab-pane active" id="responses-devicesetSpectrumDataGet-404-schema">
+                                  <div id='responses-devicesetSpectrumDataGet-404-schema-404' style="padding: 30px; border-left: 1px solid #eee; border-right: 1px solid #eee; border-bottom: 1px solid #eee;">
+                                    <script>
+                                      $(document).ready(function() {
+                                        var schemaWrapper = {
+  "description" : "Invalid index",
+  "schema" : {
+    "$ref" : "#/definitions/ErrorResponse"
+  }
+};
+                                        var schema = schemaWrapper.schema;
+                                        if (schema.$ref != null) {
+                                          schema = defsParser.$refs.get(schema.$ref);
+                                        } else {
+                                          schemaWrapper.definitions = Object.assign({}, defs);
+                                          $RefParser.dereference(schemaWrapper).catch(function(err) {
+                                            console.log(err);
+                                          });
+                                        }
+
+                                        //console.log(JSON.stringify(schema));
+                                        var view = new JSONSchemaView(schema, 3);
+                                        $('#responses-devicesetSpectrumDataGet-404-schema-data').val(stringify(schema));
+                                        var result = $('#responses-devicesetSpectrumDataGet-404-schema-404');
+                                        result.empty();
+                                        result.append(view.render());
+                                      });
+                                    </script>
+                                  </div>
+                                  <input id='responses-devicesetSpectrumDataGet-404-schema-data' type='hidden' value=''></input>
+                                </div>
+                            </div>
+
+                            <h3> Status: 500 - Error </h3>
+
+                            <ul class="nav nav-tabs nav-tabs-examples" >
+                                <li class="active">
+                                  <a data-toggle="tab" href="#responses-devicesetSpectrumDataGet-500-schema">Schema</a>
+                                </li>
+
+                            </ul>
+
+                            <div class="tab-content" style='margin-bottom: 10px;'>
+                                <div class="tab-pane active" id="responses-devicesetSpectrumDataGet-500-schema">
+                                  <div id='responses-devicesetSpectrumDataGet-500-schema-500' style="padding: 30px; border-left: 1px solid #eee; border-right: 1px solid #eee; border-bottom: 1px solid #eee;">
+                                    <script>
+                                      $(document).ready(function() {
+                                        var schemaWrapper = {
+  "description" : "Error",
+  "schema" : {
+    "$ref" : "#/definitions/ErrorResponse"
+  }
+};
+                                        var schema = schemaWrapper.schema;
+                                        if (schema.$ref != null) {
+                                          schema = defsParser.$refs.get(schema.$ref);
+                                        } else {
+                                          schemaWrapper.definitions = Object.assign({}, defs);
+                                          $RefParser.dereference(schemaWrapper).catch(function(err) {
+                                            console.log(err);
+                                          });
+                                        }
+
+                                        //console.log(JSON.stringify(schema));
+                                        var view = new JSONSchemaView(schema, 3);
+                                        $('#responses-devicesetSpectrumDataGet-500-schema-data').val(stringify(schema));
+                                        var result = $('#responses-devicesetSpectrumDataGet-500-schema-500');
+                                        result.empty();
+                                        result.append(view.render());
+                                      });
+                                    </script>
+                                  </div>
+                                  <input id='responses-devicesetSpectrumDataGet-500-schema-data' type='hidden' value=''></input>
+                                </div>
+                            </div>
+
+                            <h3> Status: 501 - Function not implemented </h3>
+
+                            <ul class="nav nav-tabs nav-tabs-examples" >
+                                <li class="active">
+                                  <a data-toggle="tab" href="#responses-devicesetSpectrumDataGet-501-schema">Schema</a>
+                                </li>
+
+                            </ul>
+
+                            <div class="tab-content" style='margin-bottom: 10px;'>
+                                <div class="tab-pane active" id="responses-devicesetSpectrumDataGet-501-schema">
+                                  <div id='responses-devicesetSpectrumDataGet-501-schema-501' style="padding: 30px; border-left: 1px solid #eee; border-right: 1px solid #eee; border-bottom: 1px solid #eee;">
+                                    <script>
+                                      $(document).ready(function() {
+                                        var schemaWrapper = {
+  "description" : "Function not implemented",
+  "schema" : {
+    "$ref" : "#/definitions/ErrorResponse"
+  }
+};
+                                        var schema = schemaWrapper.schema;
+                                        if (schema.$ref != null) {
+                                          schema = defsParser.$refs.get(schema.$ref);
+                                        } else {
+                                          schemaWrapper.definitions = Object.assign({}, defs);
+                                          $RefParser.dereference(schemaWrapper).catch(function(err) {
+                                            console.log(err);
+                                          });
+                                        }
+
+                                        //console.log(JSON.stringify(schema));
+                                        var view = new JSONSchemaView(schema, 3);
+                                        $('#responses-devicesetSpectrumDataGet-501-schema-data').val(stringify(schema));
+                                        var result = $('#responses-devicesetSpectrumDataGet-501-schema-501');
+                                        result.empty();
+                                        result.append(view.render());
+                                      });
+                                    </script>
+                                  </div>
+                                  <input id='responses-devicesetSpectrumDataGet-501-schema-data' type='hidden' value=''></input>
+                                </div>
+                            </div>
+
+                        </article>
+                      </div>
+                      <hr>
+                    <div id="api-DeviceSet-devicesetSpectrumReportGet">
+                      <article id="api-DeviceSet-devicesetSpectrumReportGet-0" data-group="User" data-name="devicesetSpectrumReportGet" data-version="0">
+                        <div class="pull-left">
+                          <h1>devicesetSpectrumReportGet</h1>
+                          <p></p>
+                        </div>
+                        <div class="pull-right"></div>
+                        <div class="clearfix"></div>
+                        <p></p>
+                        <p class="marked">Get the latest main spectrum measurement results</p>
+                        <p></p>
+                        <br />
+                        <pre class="prettyprint language-html prettyprinted" data-type="get"><code><span class="pln">/sdrangel/deviceset/{deviceSetIndex}/spectrum/report</span></code></pre>
+                        <p>
+                          <h3>Usage and SDK Samples</h3>
+                        </p>
+                        <ul class="nav nav-tabs nav-tabs-examples">
+                          <li class="active"><a href="#examples-DeviceSet-devicesetSpectrumReportGet-0-curl">Curl</a></li>
+                          <li class=""><a href="#examples-DeviceSet-devicesetSpectrumReportGet-0-java">Java</a></li>
+                          <li class=""><a href="#examples-DeviceSet-devicesetSpectrumReportGet-0-android">Android</a></li>
+                          <!--<li class=""><a href="#examples-DeviceSet-devicesetSpectrumReportGet-0-groovy">Groovy</a></li>-->
+                          <li class=""><a href="#examples-DeviceSet-devicesetSpectrumReportGet-0-objc">Obj-C</a></li>
+                          <li class=""><a href="#examples-DeviceSet-devicesetSpectrumReportGet-0-javascript">JavaScript</a></li>
+                          <!--<li class=""><a href="#examples-DeviceSet-devicesetSpectrumReportGet-0-angular">Angular</a></li>-->
+                          <li class=""><a href="#examples-DeviceSet-devicesetSpectrumReportGet-0-csharp">C#</a></li>
+                          <li class=""><a href="#examples-DeviceSet-devicesetSpectrumReportGet-0-php">PHP</a></li>
+                          <li class=""><a href="#examples-DeviceSet-devicesetSpectrumReportGet-0-perl">Perl</a></li>
+                          <li class=""><a href="#examples-DeviceSet-devicesetSpectrumReportGet-0-python">Python</a></li>
+                        </ul>
+
+                        <div class="tab-content">
+                          <div class="tab-pane active" id="examples-DeviceSet-devicesetSpectrumReportGet-0-curl">
+                            <pre class="prettyprint"><code class="language-bsh">curl -X GET "http://localhost/sdrangel/deviceset/{deviceSetIndex}/spectrum/report"</code></pre>
+                          </div>
+                          <div class="tab-pane" id="examples-DeviceSet-devicesetSpectrumReportGet-0-java">
+                            <pre class="prettyprint"><code class="language-java">import SWGSDRangel.*;
+import SWGSDRangel.auth.*;
+import SWGSDRangel.model.*;
+import SWGSDRangel.api.DeviceSetApi;
+
+import java.io.File;
+import java.util.*;
+
+public class DeviceSetApiExample {
+
+    public static void main(String[] args) {
+        
+        DeviceSetApi apiInstance = new DeviceSetApi();
+        Integer deviceSetIndex = 56; // Integer | Index of device set in the device set list
+        try {
+            GLSpectrumReport result = apiInstance.devicesetSpectrumReportGet(deviceSetIndex);
+            System.out.println(result);
+        } catch (ApiException e) {
+            System.err.println("Exception when calling DeviceSetApi#devicesetSpectrumReportGet");
+            e.printStackTrace();
+        }
+    }
+}</code></pre>
+                          </div>
+
+                          <div class="tab-pane" id="examples-DeviceSet-devicesetSpectrumReportGet-0-android">
+                            <pre class="prettyprint"><code class="language-java">import SWGSDRangel.api.DeviceSetApi;
+
+public class DeviceSetApiExample {
+
+    public static void main(String[] args) {
+        DeviceSetApi apiInstance = new DeviceSetApi();
+        Integer deviceSetIndex = 56; // Integer | Index of device set in the device set list
+        try {
+            GLSpectrumReport result = apiInstance.devicesetSpectrumReportGet(deviceSetIndex);
+            System.out.println(result);
+        } catch (ApiException e) {
+            System.err.println("Exception when calling DeviceSetApi#devicesetSpectrumReportGet");
+            e.printStackTrace();
+        }
+    }
+}</code></pre>
+                          </div>
+  <!--
+  <div class="tab-pane" id="examples-DeviceSet-devicesetSpectrumReportGet-0-groovy">
+  <pre class="prettyprint language-json prettyprinted" data-type="json"><code>Coming Soon!</code></pre>
+  </div> -->
+                            <div class="tab-pane" id="examples-DeviceSet-devicesetSpectrumReportGet-0-objc">
+                              <pre class="prettyprint"><code class="language-cpp">Integer *deviceSetIndex = 56; // Index of device set in the device set list
+
+DeviceSetApi *apiInstance = [[DeviceSetApi alloc] init];
+
+[apiInstance devicesetSpectrumReportGetWith:deviceSetIndex
+              completionHandler: ^(GLSpectrumReport output, NSError* error) {
+                            if (output) {
+                                NSLog(@"%@", output);
+                            }
+                            if (error) {
+                                NSLog(@"Error: %@", error);
+                            }
+                        }];
+</code></pre>
+                            </div>
+
+                            <div class="tab-pane" id="examples-DeviceSet-devicesetSpectrumReportGet-0-javascript">
+                              <pre class="prettyprint"><code class="language-js">var SdRangel = require('sd_rangel');
+
+var api = new SdRangel.DeviceSetApi()
+
+var deviceSetIndex = 56; // {Integer} Index of device set in the device set list
+
+
+var callback = function(error, data, response) {
+  if (error) {
+    console.error(error);
+  } else {
+    console.log('API called successfully. Returned data: ' + data);
+  }
+};
+api.devicesetSpectrumReportGet(deviceSetIndex, callback);
+</code></pre>
+                            </div>
+
+                            <!--<div class="tab-pane" id="examples-DeviceSet-devicesetSpectrumReportGet-0-angular">
+              <pre class="prettyprint language-json prettyprinted" data-type="json"><code>Coming Soon!</code></pre>
+            </div>-->
+                            <div class="tab-pane" id="examples-DeviceSet-devicesetSpectrumReportGet-0-csharp">
+                              <pre class="prettyprint"><code class="language-cs">using System;
+using System.Diagnostics;
+using SWGSDRangel.Api;
+using SWGSDRangel.Client;
+using SWGSDRangel.Model;
+
+namespace Example
+{
+    public class devicesetSpectrumReportGetExample
+    {
+        public void main()
+        {
+            
+            var apiInstance = new DeviceSetApi();
+            var deviceSetIndex = 56;  // Integer | Index of device set in the device set list
+
+            try
+            {
+                GLSpectrumReport result = apiInstance.devicesetSpectrumReportGet(deviceSetIndex);
+                Debug.WriteLine(result);
+            }
+            catch (Exception e)
+            {
+                Debug.Print("Exception when calling DeviceSetApi.devicesetSpectrumReportGet: " + e.Message );
+            }
+        }
+    }
+}
+</code></pre>
+                            </div>
+
+                            <div class="tab-pane" id="examples-DeviceSet-devicesetSpectrumReportGet-0-php">
+                              <pre class="prettyprint"><code class="language-php"><&#63;php
+require_once(__DIR__ . '/vendor/autoload.php');
+
+$api_instance = new Swagger\Client\Api\DeviceSetApi();
+$deviceSetIndex = 56; // Integer | Index of device set in the device set list
+
+try {
+    $result = $api_instance->devicesetSpectrumReportGet($deviceSetIndex);
+    print_r($result);
+} catch (Exception $e) {
+    echo 'Exception when calling DeviceSetApi->devicesetSpectrumReportGet: ', $e->getMessage(), PHP_EOL;
+}
+?></code></pre>
+                            </div>
+
+                            <div class="tab-pane" id="examples-DeviceSet-devicesetSpectrumReportGet-0-perl">
+                              <pre class="prettyprint"><code class="language-perl">use Data::Dumper;
+use SWGSDRangel::Configuration;
+use SWGSDRangel::DeviceSetApi;
+
+my $api_instance = SWGSDRangel::DeviceSetApi->new();
+my $deviceSetIndex = 56; # Integer | Index of device set in the device set list
+
+eval { 
+    my $result = $api_instance->devicesetSpectrumReportGet(deviceSetIndex => $deviceSetIndex);
+    print Dumper($result);
+};
+if ($@) {
+    warn "Exception when calling DeviceSetApi->devicesetSpectrumReportGet: $@\n";
+}</code></pre>
+                            </div>
+
+                            <div class="tab-pane" id="examples-DeviceSet-devicesetSpectrumReportGet-0-python">
+                              <pre class="prettyprint"><code class="language-python">from __future__ import print_statement
+import time
+import swagger_sdrangel
+from swagger_sdrangel.rest import ApiException
+from pprint import pprint
+
+# create an instance of the API class
+api_instance = swagger_sdrangel.DeviceSetApi()
+deviceSetIndex = 56 # Integer | Index of device set in the device set list
+
+try: 
+    api_response = api_instance.deviceset_spectrum_report_get(deviceSetIndex)
+    pprint(api_response)
+except ApiException as e:
+    print("Exception when calling DeviceSetApi->devicesetSpectrumReportGet: %s\n" % e)</code></pre>
+                            </div>
+                          </div>
+
+                          <h2>Parameters</h2>
+
+                            <div class="methodsubtabletitle">Path parameters</div>
+                            <table id="methodsubtable">
+                                <tr>
+                                  <th width="150px">Name</th>
+                                  <th>Description</th>
+                                </tr>
+                                  <tr><td style="width:150px;">deviceSetIndex*</td>
+<td>
+
+
+    <div id="d2e199_devicesetSpectrumReportGet_deviceSetIndex">
+        <div class="json-schema-view">
+            <div class="primitive">
+                <span class="type">
+                    Integer
+                </span>
+
+                    <div class="inner description">
+                        Index of device set in the device set list
+                    </div>
+            </div>
+                <div class="inner required">
+                    Required
+                </div>
+        </div>
+    </div>
+</td>
+</tr>
+
+                            </table>
+
+
+
+
+
+                          <h2>Responses</h2>
+                            <h3> Status: 200 - On success return the results of the selected measurement </h3>
+
+                            <ul class="nav nav-tabs nav-tabs-examples" >
+                                <li class="active">
+                                  <a data-toggle="tab" href="#responses-devicesetSpectrumReportGet-200-schema">Schema</a>
+                                </li>
+
+                            </ul>
+
+                            <div class="tab-content" style='margin-bottom: 10px;'>
+                                <div class="tab-pane active" id="responses-devicesetSpectrumReportGet-200-schema">
+                                  <div id='responses-devicesetSpectrumReportGet-200-schema-200' style="padding: 30px; border-left: 1px solid #eee; border-right: 1px solid #eee; border-bottom: 1px solid #eee;">
+                                    <script>
+                                      $(document).ready(function() {
+                                        var schemaWrapper = {
+  "description" : "On success return the results of the selected measurement",
+  "schema" : {
+    "$ref" : "#/definitions/GLSpectrumReport"
+  }
+};
+                                        var schema = schemaWrapper.schema;
+                                        if (schema.$ref != null) {
+                                          schema = defsParser.$refs.get(schema.$ref);
+                                        } else {
+                                          schemaWrapper.definitions = Object.assign({}, defs);
+                                          $RefParser.dereference(schemaWrapper).catch(function(err) {
+                                            console.log(err);
+                                          });
+                                        }
+
+                                        //console.log(JSON.stringify(schema));
+                                        var view = new JSONSchemaView(schema, 3);
+                                        $('#responses-devicesetSpectrumReportGet-200-schema-data').val(stringify(schema));
+                                        var result = $('#responses-devicesetSpectrumReportGet-200-schema-200');
+                                        result.empty();
+                                        result.append(view.render());
+                                      });
+                                    </script>
+                                  </div>
+                                  <input id='responses-devicesetSpectrumReportGet-200-schema-data' type='hidden' value=''></input>
+                                </div>
+                            </div>
+
+                            <h3> Status: 404 - Invalid index </h3>
+
+                            <ul class="nav nav-tabs nav-tabs-examples" >
+                                <li class="active">
+                                  <a data-toggle="tab" href="#responses-devicesetSpectrumReportGet-404-schema">Schema</a>
+                                </li>
+
+                            </ul>
+
+                            <div class="tab-content" style='margin-bottom: 10px;'>
+                                <div class="tab-pane active" id="responses-devicesetSpectrumReportGet-404-schema">
+                                  <div id='responses-devicesetSpectrumReportGet-404-schema-404' style="padding: 30px; border-left: 1px solid #eee; border-right: 1px solid #eee; border-bottom: 1px solid #eee;">
+                                    <script>
+                                      $(document).ready(function() {
+                                        var schemaWrapper = {
+  "description" : "Invalid index",
+  "schema" : {
+    "$ref" : "#/definitions/ErrorResponse"
+  }
+};
+                                        var schema = schemaWrapper.schema;
+                                        if (schema.$ref != null) {
+                                          schema = defsParser.$refs.get(schema.$ref);
+                                        } else {
+                                          schemaWrapper.definitions = Object.assign({}, defs);
+                                          $RefParser.dereference(schemaWrapper).catch(function(err) {
+                                            console.log(err);
+                                          });
+                                        }
+
+                                        //console.log(JSON.stringify(schema));
+                                        var view = new JSONSchemaView(schema, 3);
+                                        $('#responses-devicesetSpectrumReportGet-404-schema-data').val(stringify(schema));
+                                        var result = $('#responses-devicesetSpectrumReportGet-404-schema-404');
+                                        result.empty();
+                                        result.append(view.render());
+                                      });
+                                    </script>
+                                  </div>
+                                  <input id='responses-devicesetSpectrumReportGet-404-schema-data' type='hidden' value=''></input>
+                                </div>
+                            </div>
+
+                            <h3> Status: 500 - Error </h3>
+
+                            <ul class="nav nav-tabs nav-tabs-examples" >
+                                <li class="active">
+                                  <a data-toggle="tab" href="#responses-devicesetSpectrumReportGet-500-schema">Schema</a>
+                                </li>
+
+                            </ul>
+
+                            <div class="tab-content" style='margin-bottom: 10px;'>
+                                <div class="tab-pane active" id="responses-devicesetSpectrumReportGet-500-schema">
+                                  <div id='responses-devicesetSpectrumReportGet-500-schema-500' style="padding: 30px; border-left: 1px solid #eee; border-right: 1px solid #eee; border-bottom: 1px solid #eee;">
+                                    <script>
+                                      $(document).ready(function() {
+                                        var schemaWrapper = {
+  "description" : "Error",
+  "schema" : {
+    "$ref" : "#/definitions/ErrorResponse"
+  }
+};
+                                        var schema = schemaWrapper.schema;
+                                        if (schema.$ref != null) {
+                                          schema = defsParser.$refs.get(schema.$ref);
+                                        } else {
+                                          schemaWrapper.definitions = Object.assign({}, defs);
+                                          $RefParser.dereference(schemaWrapper).catch(function(err) {
+                                            console.log(err);
+                                          });
+                                        }
+
+                                        //console.log(JSON.stringify(schema));
+                                        var view = new JSONSchemaView(schema, 3);
+                                        $('#responses-devicesetSpectrumReportGet-500-schema-data').val(stringify(schema));
+                                        var result = $('#responses-devicesetSpectrumReportGet-500-schema-500');
+                                        result.empty();
+                                        result.append(view.render());
+                                      });
+                                    </script>
+                                  </div>
+                                  <input id='responses-devicesetSpectrumReportGet-500-schema-data' type='hidden' value=''></input>
+                                </div>
+                            </div>
+
+                            <h3> Status: 501 - Function not implemented </h3>
+
+                            <ul class="nav nav-tabs nav-tabs-examples" >
+                                <li class="active">
+                                  <a data-toggle="tab" href="#responses-devicesetSpectrumReportGet-501-schema">Schema</a>
+                                </li>
+
+                            </ul>
+
+                            <div class="tab-content" style='margin-bottom: 10px;'>
+                                <div class="tab-pane active" id="responses-devicesetSpectrumReportGet-501-schema">
+                                  <div id='responses-devicesetSpectrumReportGet-501-schema-501' style="padding: 30px; border-left: 1px solid #eee; border-right: 1px solid #eee; border-bottom: 1px solid #eee;">
+                                    <script>
+                                      $(document).ready(function() {
+                                        var schemaWrapper = {
+  "description" : "Function not implemented",
+  "schema" : {
+    "$ref" : "#/definitions/ErrorResponse"
+  }
+};
+                                        var schema = schemaWrapper.schema;
+                                        if (schema.$ref != null) {
+                                          schema = defsParser.$refs.get(schema.$ref);
+                                        } else {
+                                          schemaWrapper.definitions = Object.assign({}, defs);
+                                          $RefParser.dereference(schemaWrapper).catch(function(err) {
+                                            console.log(err);
+                                          });
+                                        }
+
+                                        //console.log(JSON.stringify(schema));
+                                        var view = new JSONSchemaView(schema, 3);
+                                        $('#responses-devicesetSpectrumReportGet-501-schema-data').val(stringify(schema));
+                                        var result = $('#responses-devicesetSpectrumReportGet-501-schema-501');
+                                        result.empty();
+                                        result.append(view.render());
+                                      });
+                                    </script>
+                                  </div>
+                                  <input id='responses-devicesetSpectrumReportGet-501-schema-data' type='hidden' value=''></input>
                                 </div>
                             </div>
 
@@ -66337,7 +68067,7 @@ except ApiException as e:
           </div>
           <div id="generator">
             <div class="content">
-              Generated 2026-09-11T11:04:13.600+02:00
+              Generated 2026-09-11T17:45:32.114+02:00
             </div>
           </div>
       </div>

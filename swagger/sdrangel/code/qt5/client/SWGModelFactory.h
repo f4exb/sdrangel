@@ -179,6 +179,8 @@
 #include "SWGFrequencyRange.h"
 #include "SWGGLScope.h"
 #include "SWGGLSpectrum.h"
+#include "SWGGLSpectrumData.h"
+#include "SWGGLSpectrumReport.h"
 #include "SWGGS232ControllerActions.h"
 #include "SWGGS232ControllerReport.h"
 #include "SWGGS232ControllerSettings.h"
@@ -365,10 +367,12 @@
 #include "SWGSoapySDRInputSettings.h"
 #include "SWGSoapySDROutputSettings.h"
 #include "SWGSoapySDRReport.h"
+#include "SWGSpectrumActions.h"
 #include "SWGSpectrumAnnotationMarker.h"
 #include "SWGSpectrumCalibrationPoint.h"
 #include "SWGSpectrumHistogramMarker.h"
 #include "SWGSpectrumMemorySettings.h"
+#include "SWGSpectrumPeak.h"
 #include "SWGSpectrumServer.h"
 #include "SWGSpectrumServer_clients.h"
 #include "SWGSpectrumWaterfallMarker.h"
@@ -1241,6 +1245,16 @@ namespace SWGSDRangel {
     }
     if(QString("SWGGLSpectrum").compare(type) == 0) {
       SWGGLSpectrum *obj = new SWGGLSpectrum();
+      obj->init();
+      return obj;
+    }
+    if(QString("SWGGLSpectrumData").compare(type) == 0) {
+      SWGGLSpectrumData *obj = new SWGGLSpectrumData();
+      obj->init();
+      return obj;
+    }
+    if(QString("SWGGLSpectrumReport").compare(type) == 0) {
+      SWGGLSpectrumReport *obj = new SWGGLSpectrumReport();
       obj->init();
       return obj;
     }
@@ -2174,6 +2188,11 @@ namespace SWGSDRangel {
       obj->init();
       return obj;
     }
+    if(QString("SWGSpectrumActions").compare(type) == 0) {
+      SWGSpectrumActions *obj = new SWGSpectrumActions();
+      obj->init();
+      return obj;
+    }
     if(QString("SWGSpectrumAnnotationMarker").compare(type) == 0) {
       SWGSpectrumAnnotationMarker *obj = new SWGSpectrumAnnotationMarker();
       obj->init();
@@ -2191,6 +2210,11 @@ namespace SWGSDRangel {
     }
     if(QString("SWGSpectrumMemorySettings").compare(type) == 0) {
       SWGSpectrumMemorySettings *obj = new SWGSpectrumMemorySettings();
+      obj->init();
+      return obj;
+    }
+    if(QString("SWGSpectrumPeak").compare(type) == 0) {
+      SWGSpectrumPeak *obj = new SWGSpectrumPeak();
       obj->init();
       return obj;
     }
