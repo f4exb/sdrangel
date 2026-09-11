@@ -1057,6 +1057,7 @@ void RemoteTCPInputTCPHandler::processDecompressedZlibData(const char *inBuf, in
     else // invalid size
     {
         qWarning("RemoteTCPInputTCPHandler::convert: unexpected sample size in stream: %d bits", (int) m_settings.m_sampleBits);
+        return;
     }
 
     m_uncompressedData.write(reinterpret_cast<quint8*>(m_converterBuffer), nbSamples*sizeof(Sample));
