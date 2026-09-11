@@ -72,7 +72,7 @@ void FileOutput::openFileStream()
 
 	m_ofstream.open(m_settings.m_fileName.toStdString().c_str(), std::ios::binary);
 
-    FileRecord::Header header;
+    FileRecord::Header header{};
 	auto actualSampleRate = (int) (m_settings.m_sampleRate * (1<<m_settings.m_log2Interp));
     header.sampleRate = actualSampleRate;
     header.centerFrequency = m_settings.m_centerFrequency;
