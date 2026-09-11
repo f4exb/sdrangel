@@ -25,6 +25,7 @@
 RemoteControlWorker::RemoteControlWorker() :
     m_msgQueueToFeature(nullptr),
     m_msgQueueToGUI(nullptr),
+    m_running(false),
     m_timer(this)
 {
     connect(&m_inputMessageQueue, SIGNAL(messageEnqueued()), this, SLOT(handleInputMessages()));
