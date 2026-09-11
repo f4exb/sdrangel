@@ -58,6 +58,7 @@ class ChannelMarker;
 class PluginManager;
 class DeviceAPI;
 class DeviceUISet;
+class Feature;
 class FeatureUISet;
 class PluginInterface;
 class QWidget;
@@ -74,6 +75,8 @@ class SerializableInterface;
 class SDRangelSplash;
 
 class QMenuBar;
+class QMenu;
+class QMdiSubWindow;
 class Workspace;
 class MainWindow;
 
@@ -448,6 +451,13 @@ private slots:
     void viewAllWorkspaces() const;
     void removeEmptyWorkspaces();
     void openConfigurationDialog(bool openOnly);
+    //!< Rebuilds the Window > Show submenu from the windows that are currently hidden
+    void populateShowMenu(QMenu *menu) const;
+    //!< Brings one hidden window back, along with its workspace if that is hidden too
+    void showWindow(QMdiSubWindow *window, int workspaceIndex) const;
+    void showAllHiddenWindows() const;
+    //!< Workspace the Window menu's arrangement items act on: the one last worked in
+    Workspace *currentWorkspace() const;
     void loadDefaultConfigurations() const;
 	void loadConfiguration(const Configuration *configuration, bool fromDialog = false);
     void saveConfiguration(Configuration *configuration);

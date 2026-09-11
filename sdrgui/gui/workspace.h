@@ -113,10 +113,6 @@ private slots:
     void addFeatureDialog();
     void featurePresetsDialog();
     void configurationPresetsDialog();
-    void cascadeSubWindows();
-    void tileSubWindows();
-    void stackVerticalSubWindows();
-    void stackSubWindows();
     void autoStackSubWindows(const QPoint&);
     void tabSubWindows();
     void startStopClicked(bool checked = false);
@@ -128,8 +124,14 @@ public slots:
     void layoutSubWindows();
 
 signals:
+    // Same as the corresponding title bar buttons, so the Window menu can invoke them
+    void cascadeSubWindows();
+    void tileSubWindows();
+    void stackVerticalSubWindows();
+    void stackSubWindows();
     void addRxDevice(Workspace *inWorkspace, int deviceIndex);
     void addTxDevice(Workspace *inWorkspace, int deviceIndex);
+    void focused(Workspace *workspace); // The user is working in this workspace
     void addMIMODevice(Workspace *inWorkspace, int deviceIndex);
     void addFeature(Workspace*, int);
     void featurePresetsDialogRequested(QPoint, Workspace*);

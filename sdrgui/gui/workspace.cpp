@@ -144,28 +144,24 @@ Workspace::Workspace(int index, QWidget *parent, Qt::WindowFlags flags) :
     m_cascadeSubWindows->setIcon(cascadeSubWindowsIcon);
     m_cascadeSubWindows->setToolTip("Cascade sub windows");
     m_cascadeSubWindows->setFixedSize(20, 20);
-    m_cascadeSubWindows->setShortcut(QKeySequence(Qt::CTRL | Qt::SHIFT | Qt::Key_C));
 
     m_tileSubWindows = new QPushButton();
     QIcon tileSubWindowsIcon(":/tiles.png");
     m_tileSubWindows->setIcon(tileSubWindowsIcon);
     m_tileSubWindows->setToolTip("Tile sub windows");
     m_tileSubWindows->setFixedSize(20, 20);
-    m_tileSubWindows->setShortcut(QKeySequence(Qt::CTRL | Qt::SHIFT | Qt::Key_T));
 
     m_stackVerticalSubWindows = new QPushButton();
     QIcon stackVerticalSubWindowsIcon(":/stackvertical.png");
     m_stackVerticalSubWindows->setIcon(stackVerticalSubWindowsIcon);
     m_stackVerticalSubWindows->setToolTip("Stack sub windows vertically");
     m_stackVerticalSubWindows->setFixedSize(20, 20);
-    m_stackVerticalSubWindows->setShortcut(QKeySequence(Qt::CTRL | Qt::SHIFT | Qt::Key_V));
 
     m_stackSubWindows = new QPushButton();
     QIcon stackSubWindowsIcon(":/stackcolumns.png");
     m_stackSubWindows->setIcon(stackSubWindowsIcon);
     m_stackSubWindows->setToolTip("Stack sub windows in columns. Right click to stack automatically.");
     m_stackSubWindows->setFixedSize(20, 20);
-    m_stackSubWindows->setShortcut(QKeySequence(Qt::CTRL | Qt::SHIFT | Qt::Key_S));
     CRightClickEnabler *stackSubWindowsRightClickEnabler = new CRightClickEnabler(m_stackSubWindows);
     connect(stackSubWindowsRightClickEnabler, &CRightClickEnabler::rightClick, this, &Workspace::autoStackSubWindows);
 
@@ -175,7 +171,6 @@ Workspace::Workspace(int index, QWidget *parent, Qt::WindowFlags flags) :
     m_tabSubWindows->setCheckable(true);
     m_tabSubWindows->setToolTip("Display sub windows in tabs");
     m_tabSubWindows->setFixedSize(20, 20);
-    m_tabSubWindows->setShortcut(QKeySequence(Qt::CTRL | Qt::SHIFT | Qt::Key_B));
 
     m_normalButton = new QPushButton();
     QIcon normalIcon(":/dock.png");
@@ -916,6 +911,10 @@ void Workspace::subWindowActivated(QMdiSubWindow *activatedWindow)
 
 void Workspace::layoutSubWindows()
 {
+    if (activatedWindow) {
+        emit focused(this);
+    }
+
     if (m_autoStack) {
         stackSubWindows();
     }

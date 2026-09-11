@@ -124,6 +124,7 @@ private:
     QPushButton *m_moveButton;
     QPushButton *m_shrinkButton;
     QPushButton *m_maximizeButton;
+    QPushButton *m_hideButton;
     QPushButton *m_closeButton;
     QPushButton *m_showSpectrumButton;
     QPushButton *m_showAllChannelsButton;

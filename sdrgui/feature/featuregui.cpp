@@ -33,10 +33,10 @@
 #include <QMdiArea>
 
 #include <QMessageBox>
+#include "gui/messagedialog.h"
 
 #include "mainwindow.h"
 #include "feature/feature.h"
-#include "gui/messagedialog.h"
 #include "gui/workspaceselectiondialog.h"
 #include "featuregui.h"
 
@@ -98,6 +98,12 @@ FeatureGUI::FeatureGUI(QWidget *parent) :
     QIcon maximizeIcon(":/maximize.png");
     m_maximizeButton->setIcon(maximizeIcon);
     m_maximizeButton->setToolTip("Adjust window to maximum size in workspace");
+    m_hideButton = new QPushButton();
+    m_hideButton->setFixedSize(20, 20);
+    QIcon hideIcon(":/hide.png");
+    m_hideButton->setIcon(hideIcon);
+    m_hideButton->setToolTip("Hide feature");
+
 
     m_closeButton = new QPushButton();
     m_closeButton->setFixedSize(20, 20);
@@ -125,6 +131,7 @@ FeatureGUI::FeatureGUI(QWidget *parent) :
     m_topLayout->addWidget(m_helpButton);
     m_topLayout->addWidget(m_moveButton);
     m_topLayout->addWidget(m_shrinkButton);
+    m_topLayout->addWidget(m_hideButton);
     m_topLayout->addWidget(m_maximizeButton);
     m_topLayout->addWidget(m_closeButton);
 
@@ -152,6 +159,7 @@ FeatureGUI::FeatureGUI(QWidget *parent) :
     connect(m_moveButton, SIGNAL(clicked()), this, SLOT(openMoveToWorkspaceDialog()));
     connect(m_shrinkButton, SIGNAL(clicked()), this, SLOT(shrinkWindow()));
     connect(m_maximizeButton, SIGNAL(clicked()), this, SLOT(maximizeWindow()));
+    connect(m_hideButton, SIGNAL(clicked()), this, SLOT(hide()));
     connect(this, SIGNAL(forceShrink()), this, SLOT(shrinkWindow()));
     connect(m_closeButton, SIGNAL(clicked()), this, SLOT(close()));
 
@@ -172,6 +180,7 @@ FeatureGUI::~FeatureGUI()
     delete m_topLayout;
     delete m_layouts;
     delete m_statusLabel;
+    delete m_hideButton;
     delete m_closeButton;
     delete m_shrinkButton;
     delete m_maximizeButton;
@@ -183,14 +192,6 @@ FeatureGUI::~FeatureGUI()
     qDebug("FeatureGUI::~FeatureGUI: end");
 }
 
-void FeatureGUI::closeEvent(QCloseEvent *event)
-{
-    qDebug("FeatureGUI::closeEvent");
-    emit closing();
-    event->accept();
-}
-
-void FeatureGUI::mousePressEvent(QMouseEvent* event)
 void FeatureGUI::updateStartStopButton(QAbstractButton *startStopButton)
 {
     if (!startStopButton || !m_feature) {
@@ -221,6 +222,14 @@ void FeatureGUI::updateStartStopButton(QAbstractButton *startStopButton)
             break;
     }
 }
+void FeatureGUI::closeEvent(QCloseEvent *event)
+{
+    qDebug("FeatureGUI::closeEvent");
+    emit closing();
+    event->accept();
+}
+
+void FeatureGUI::mousePressEvent(QMouseEvent* event)
 
 {
     if ((event->button() == Qt::LeftButton) && isOnMovingPad())
@@ -436,6 +445,11 @@ void FeatureGUI::setTitle(const QString& title)
 {
     m_titleLabel->setText(title);
 }
+QString FeatureGUI::getTitle() const
+{
+    return m_titleLabel->text();
+}
+
 
 bool FeatureGUI::isOnMovingPad()
 {

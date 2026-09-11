@@ -66,6 +66,7 @@ public:
     void sizeToContents();
     void setTitleColor(const QColor&) {} // not implemented for a feature
     void setTitle(const QString& title);
+    QString getTitle() const;
     void setIndex(int index);
     int getIndex() const { return m_featureIndex; }
     void setDisplayedame(const QString& name);
@@ -104,6 +105,7 @@ private:
     QPushButton *m_moveButton;
     QPushButton *m_shrinkButton;
     QPushButton *m_maximizeButton;
+    QPushButton *m_hideButton;
     QPushButton *m_closeButton;
     QLabel *m_statusLabel;
     QVBoxLayout *m_layouts;
