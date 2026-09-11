@@ -235,6 +235,26 @@ public:
             SWGSDRangel::SWGDeviceSet& response,
             SWGSDRangel::SWGErrorResponse& error);
 
+    virtual int devicesetSpectrumActionsPost(
+            int deviceSetIndex,
+            const QStringList& spectrumActionsKeys,
+            SWGSDRangel::SWGSpectrumActions& query,
+            SWGSDRangel::SWGErrorResponse& error);
+
+    virtual int devicesetSpectrumDataGet(
+            int deviceSetIndex,
+            int bins,
+            qint64 startFrequency,
+            qint64 stopFrequency,
+            const QString& reduce,
+            SWGSDRangel::SWGGLSpectrumData& response,
+            SWGSDRangel::SWGErrorResponse& error);
+
+    virtual int devicesetSpectrumReportGet(
+            int deviceSetIndex,
+            SWGSDRangel::SWGGLSpectrumReport& response,
+            SWGSDRangel::SWGErrorResponse& error);
+
     virtual int devicesetSpectrumSettingsGet(
             int deviceSetIndex,
             SWGSDRangel::SWGGLSpectrum& response,

@@ -24,6 +24,9 @@
 #include <algorithm>
 
 #include "SWGFeatureSettings.h"
+#include "SWGFeatureReport.h"
+#include "SWGAISReport.h"
+#include "SWGAISVessel.h"
 
 #include "feature/featureset.h"
 #include "settings/serializable.h"
@@ -32,6 +35,7 @@
 #include "ais.h"
 
 MESSAGE_CLASS_DEFINITION(AIS::MsgConfigureAIS, Message)
+MESSAGE_CLASS_DEFINITION(AIS::MsgReportVessels, Message)
 
 const char* const AIS::m_featureIdURI = "sdrangel.feature.ais";
 const char* const AIS::m_featureId = "AIS";
@@ -93,6 +97,14 @@ bool AIS::handleMessage(const Message& cmd)
         MsgConfigureAIS& cfg = (MsgConfigureAIS&) cmd;
         qDebug() << "AIS::handleMessage: MsgConfigureAIS";
         applySettings(cfg.getSettings(), cfg.getSettingsKeys(), cfg.getForce());
+
+        return true;
+    }
+    else if (MsgReportVessels::match(cmd))
+    {
+        MsgReportVessels& report = (MsgReportVessels&) cmd;
+        m_vessels = report.getVessels();
+        m_vesselsUpdated = QDateTime::currentDateTimeUtc();
 
         return true;
     }
@@ -245,6 +257,132 @@ void AIS::webapiFormatFeatureSettings(
 
     for (int i = 0; i < AIS_VESSEL_COLUMNS; i++) {
         response.getAisSettings()->getVesselColumnSizes()->push_back(settings.m_vesselColumnSizes[i]);
+    }
+}
+
+
+int AIS::webapiReportGet(
+    SWGSDRangel::SWGFeatureReport& response,
+    QString& errorMessage)
+{
+    (void) errorMessage;
+    response.setAisReport(new SWGSDRangel::SWGAISReport());
+    response.getAisReport()->init();
+    webapiFormatFeatureReport(response);
+    return 200;
+}
+
+void AIS::webapiFormatFeatureReport(SWGSDRangel::SWGFeatureReport& response)
+{
+    SWGSDRangel::SWGAISReport *report = response.getAisReport();
+    report->setVesselCount(m_vessels.size());
+    if (report->getReportDateTime()) {
+        *report->getReportDateTime() = m_vesselsUpdated.toString(Qt::ISODateWithMs);
+    } else {
+        report->setReportDateTime(new QString(m_vesselsUpdated.toString(Qt::ISODateWithMs)));
+    }
+    report->setVessels(new QList<SWGSDRangel::SWGAISVessel *>);
+
+    for (const auto& vessel : m_vessels)
+    {
+        SWGSDRangel::SWGAISVessel *swgVessel = new SWGSDRangel::SWGAISVessel();
+        report->getVessels()->append(swgVessel);
+        if (swgVessel->getMmsi()) {
+            *swgVessel->getMmsi() = vessel.m_mmsi;
+        } else {
+            swgVessel->setMmsi(new QString(vessel.m_mmsi));
+        }
+        swgVessel->setMessages(vessel.m_messages);
+
+        // Only what has been received is set, so that the rest is left out of the JSON rather
+        // than reported as a zero a caller cannot tell from a real value
+        if (!vessel.m_name.isEmpty()) {
+            if (swgVessel->getName()) {
+                *swgVessel->getName() = vessel.m_name;
+            } else {
+                swgVessel->setName(new QString(vessel.m_name));
+            }
+        }
+        if (!vessel.m_callsign.isEmpty()) {
+            if (swgVessel->getCallsign()) {
+                *swgVessel->getCallsign() = vessel.m_callsign;
+            } else {
+                swgVessel->setCallsign(new QString(vessel.m_callsign));
+            }
+        }
+        if (!vessel.m_imo.isEmpty()) {
+            if (swgVessel->getImo()) {
+                *swgVessel->getImo() = vessel.m_imo;
+            } else {
+                swgVessel->setImo(new QString(vessel.m_imo));
+            }
+        }
+        if (!vessel.m_country.isEmpty()) {
+            if (swgVessel->getCountry()) {
+                *swgVessel->getCountry() = vessel.m_country;
+            } else {
+                swgVessel->setCountry(new QString(vessel.m_country));
+            }
+        }
+        if (!vessel.m_type.isEmpty()) {
+            if (swgVessel->getType()) {
+                *swgVessel->getType() = vessel.m_type;
+            } else {
+                swgVessel->setType(new QString(vessel.m_type));
+            }
+        }
+        if (!vessel.m_shipType.isEmpty()) {
+            if (swgVessel->getShipType()) {
+                *swgVessel->getShipType() = vessel.m_shipType;
+            } else {
+                swgVessel->setShipType(new QString(vessel.m_shipType));
+            }
+        }
+        if (!vessel.m_status.isEmpty()) {
+            if (swgVessel->getStatus()) {
+                *swgVessel->getStatus() = vessel.m_status;
+            } else {
+                swgVessel->setStatus(new QString(vessel.m_status));
+            }
+        }
+        if (!vessel.m_destination.isEmpty()) {
+            if (swgVessel->getDestination()) {
+                *swgVessel->getDestination() = vessel.m_destination;
+            } else {
+                swgVessel->setDestination(new QString(vessel.m_destination));
+            }
+        }
+        if (vessel.m_hasPosition)
+        {
+            swgVessel->setLatitude(vessel.m_latitude);
+            swgVessel->setLongitude(vessel.m_longitude);
+        }
+        if (vessel.m_hasCourse) {
+            swgVessel->setCourse(vessel.m_course);
+        }
+        if (vessel.m_hasSpeed) {
+            swgVessel->setSpeed(vessel.m_speed);
+        }
+        if (vessel.m_hasHeading) {
+            swgVessel->setHeading(vessel.m_heading);
+        }
+        if (vessel.m_hasLength) {
+            swgVessel->setLength(vessel.m_length);
+        }
+        if (vessel.m_positionUpdate.isValid()) {
+            if (swgVessel->getPositionUpdate()) {
+                *swgVessel->getPositionUpdate() = vessel.m_positionUpdate.toString(Qt::ISODateWithMs);
+            } else {
+                swgVessel->setPositionUpdate(new QString(vessel.m_positionUpdate.toString(Qt::ISODateWithMs)));
+            }
+        }
+        if (vessel.m_lastUpdate.isValid()) {
+            if (swgVessel->getLastUpdate()) {
+                *swgVessel->getLastUpdate() = vessel.m_lastUpdate.toString(Qt::ISODateWithMs);
+            } else {
+                swgVessel->setLastUpdate(new QString(vessel.m_lastUpdate.toString(Qt::ISODateWithMs)));
+            }
+        }
     }
 }
 

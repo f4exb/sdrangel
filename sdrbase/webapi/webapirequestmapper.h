@@ -85,6 +85,9 @@ private:
 
     void devicesetService(const std::string& indexStr, qtwebapp::HttpRequest& request, qtwebapp::HttpResponse& response);
     void devicesetSpectrumSettingsService(const std::string& indexStr, qtwebapp::HttpRequest& request, qtwebapp::HttpResponse& response);
+    void devicesetSpectrumReportService(const std::string& indexStr, qtwebapp::HttpRequest& request, qtwebapp::HttpResponse& response);
+    void devicesetSpectrumActionsService(const std::string& indexStr, qtwebapp::HttpRequest& request, qtwebapp::HttpResponse& response);
+    void devicesetSpectrumDataService(const std::string& indexStr, qtwebapp::HttpRequest& request, qtwebapp::HttpResponse& response);
     void devicesetSpectrumServerService(const std::string& indexStr, qtwebapp::HttpRequest& request, qtwebapp::HttpResponse& response);
     void devicesetSpectrumWorkspaceService(const std::string& indexStr, qtwebapp::HttpRequest& request, qtwebapp::HttpResponse& response);
     void devicesetDeviceService(const std::string& indexStr, qtwebapp::HttpRequest& request, qtwebapp::HttpResponse& response);
@@ -210,6 +213,7 @@ private:
     bool parseJsonBody(QString& jsonStr, QJsonObject& jsonObject, qtwebapp::HttpResponse& response);
 
     void resetSpectrumSettings(SWGSDRangel::SWGGLSpectrum& spectrumSettings);
+    void resetSpectrumReport(SWGSDRangel::SWGGLSpectrumReport& spectrumReport);
     void resetDeviceSettings(SWGSDRangel::SWGDeviceSettings& deviceSettings);
     void resetDeviceReport(SWGSDRangel::SWGDeviceReport& deviceReport);
     void resetDeviceActions(SWGSDRangel::SWGDeviceActions& deviceActions);

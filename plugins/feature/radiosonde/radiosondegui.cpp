@@ -198,6 +198,9 @@ RadiosondeGUI::RadiosondeGUI(PluginAPI* pluginAPI, FeatureUISet *featureUISet, F
      // Get updated when position changes
     connect(&MainCore::instance()->getSettings(), &MainSettings::preferenceChanged, this, &RadiosondeGUI::preferenceChanged);
     connect(&m_positionUpdateTimer, &QTimer::timeout, this, &RadiosondeGUI::updatePosition);
+    // The feature has no radiosonde table of its own, so it is given one for the web API report
+    connect(&m_reportTimer, &QTimer::timeout, this, &RadiosondeGUI::sendRadiosondeReport);
+    m_reportTimer.start(1000);
     m_positionUpdateTimer.setSingleShot(true);
 
     ui->radiosondes->setItemDelegateForColumn(RADIOSONDE_COL_LATITUDE, new DecimalDelegate(5, ui->radiosondes));
@@ -221,6 +224,7 @@ RadiosondeGUI::RadiosondeGUI(PluginAPI* pluginAPI, FeatureUISet *featureUISet, F
 
 RadiosondeGUI::~RadiosondeGUI()
 {
+    m_reportTimer.stop();
     disconnect(&MainCore::instance()->getSettings(), &MainSettings::preferenceChanged, this, &RadiosondeGUI::preferenceChanged);
     // Remove from map and free memory
     on_deleteAll_clicked();
@@ -272,6 +276,101 @@ void RadiosondeGUI::displaySettings()
 
     updatePosition();
     applyShowPredictedPaths();
+}
+
+
+// The measurement columns hold the GUI's own strings, which carry a trailing U while the sensor
+// is still uncalibrated. The value is worth reporting either way, so the marker is stripped, and
+// anything that will not parse, the empty string included, is left out of the report as unknown.
+static bool measurementValue(const QString& text, float& value)
+{
+    QString number = text.trimmed();
+
+    if (number.endsWith("U")) {
+        number.chop(1);
+    }
+
+    bool ok = false;
+    value = number.toFloat(&ok);
+    return ok;
+}
+
+void RadiosondeGUI::sendRadiosondeReport()
+{
+    Radiosonde::MsgReportRadiosondes *message = Radiosonde::MsgReportRadiosondes::create();
+    QList<Radiosonde::Sonde>& sondes = message->getRadiosondes();
+    sondes.reserve(ui->radiosondes->rowCount());
+
+    for (int row = 0; row < ui->radiosondes->rowCount(); row++)
+    {
+        QTableWidgetItem *serial = ui->radiosondes->item(row, RADIOSONDE_COL_SERIAL);
+
+        if (!serial) {
+            continue;
+        }
+
+        Radiosonde::Sonde sonde;
+        sonde.m_serial = serial->text();
+        sonde.m_type = cellText(row, RADIOSONDE_COL_TYPE);
+        sonde.m_status = cellText(row, RADIOSONDE_COL_STATUS);
+        sonde.m_burstKillStatus = cellText(row, RADIOSONDE_COL_BURSTKILL_STATUS);
+        sonde.m_burstKillTimer = cellText(row, RADIOSONDE_COL_BURSTKILL_TIMER);
+
+        QVariant latitude = cellValue(row, RADIOSONDE_COL_LATITUDE);
+        QVariant longitude = cellValue(row, RADIOSONDE_COL_LONGITUDE);
+        sonde.m_hasPosition = latitude.isValid() && longitude.isValid();
+
+        if (sonde.m_hasPosition)
+        {
+            sonde.m_latitude = latitude.toFloat();
+            sonde.m_longitude = longitude.toFloat();
+            sonde.m_altitude = cellValue(row, RADIOSONDE_COL_ALTITUDE).toFloat();
+            sonde.m_speed = cellValue(row, RADIOSONDE_COL_SPEED).toFloat();
+            sonde.m_verticalRate = cellValue(row, RADIOSONDE_COL_VERTICAL_RATE).toFloat();
+            sonde.m_heading = cellValue(row, RADIOSONDE_COL_HEADING).toFloat();
+        }
+
+        QVariant altitudeMax = cellValue(row, RADIOSONDE_COL_ALT_MAX);
+        sonde.m_hasAltitudeMax = altitudeMax.isValid();
+
+        if (sonde.m_hasAltitudeMax) {
+            sonde.m_altitudeMax = altitudeMax.toFloat();
+        }
+
+        sonde.m_hasPressure = measurementValue(cellText(row, RADIOSONDE_COL_PRESSURE), sonde.m_pressure);
+        sonde.m_hasTemperature = measurementValue(cellText(row, RADIOSONDE_COL_TEMPERATURE), sonde.m_temperature);
+        sonde.m_hasHumidity = measurementValue(cellText(row, RADIOSONDE_COL_HUMIDITY), sonde.m_humidity);
+
+        // The table carries the frequency in MHz for display; the API reports Hz, as it does
+        // everywhere else
+        bool ok = false;
+        double frequencyMHz = cellText(row, RADIOSONDE_COL_FREQUENCY).toDouble(&ok);
+        sonde.m_hasFrequency = ok;
+
+        if (ok) {
+            sonde.m_frequency = (qint64) std::round(frequencyMHz * 1e6);
+        }
+
+        sonde.m_lastUpdate = cellValue(row, RADIOSONDE_COL_LAST_UPDATE).toDateTime();
+        sonde.m_messages = cellValue(row, RADIOSONDE_COL_MESSAGES).toInt();
+        sondes.append(sonde);
+    }
+
+    m_radiosonde->getInputMessageQueue()->push(message);
+}
+
+QVariant RadiosondeGUI::cellValue(int row, int col) const
+{
+    QTableWidgetItem *item = ui->radiosondes->item(row, col);
+
+    return item ? item->data(Qt::DisplayRole) : QVariant();
+}
+
+QString RadiosondeGUI::cellText(int row, int col) const
+{
+    QTableWidgetItem *item = ui->radiosondes->item(row, col);
+
+    return item ? item->text() : QString();
 }
 
 void RadiosondeGUI::onMenuDialogCalled(const QPoint &p)

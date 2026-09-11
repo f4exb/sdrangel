@@ -33,6 +33,14 @@ public:
         (void) spectrum;
         (void) fftSize;
     }
+
+    // Actions on what is displayed. The default does nothing, so a spectrum with no GUI simply
+    // ignores them rather than needing every caller to know whether one is attached.
+    virtual void spectrumAutoscale() {}
+    virtual void spectrumClear() {}
+    virtual void spectrumResetMeasurements() {}
+    virtual void spectrumGotoMarker(int markerIndex) { (void) markerIndex; }
+
 };
 
 #endif // SDRBASE_DSP_GLSPECTRUMINTERFACE_H_

@@ -22,6 +22,9 @@
 #include <QBuffer>
 
 #include "SWGFeatureSettings.h"
+#include "SWGFeatureReport.h"
+#include "SWGAPRSReport.h"
+#include "SWGAPRSStation.h"
 #include "SWGDeviceState.h"
 
 #include "settings/serializable.h"
@@ -30,6 +33,7 @@
 #include "aprs.h"
 
 MESSAGE_CLASS_DEFINITION(APRS::MsgConfigureAPRS, Message)
+MESSAGE_CLASS_DEFINITION(APRS::MsgReportStations, Message)
 MESSAGE_CLASS_DEFINITION(APRS::MsgReportWorker, Message)
 MESSAGE_CLASS_DEFINITION(APRS::MsgQueryAvailableChannels, Message)
 MESSAGE_CLASS_DEFINITION(APRS::MsgReportAvailableChannels, Message)
@@ -129,6 +133,15 @@ bool APRS::handleMessage(const Message& cmd)
         MsgConfigureAPRS& cfg = (MsgConfigureAPRS&) cmd;
         qDebug() << "APRS::handleMessage: MsgConfigureAPRS";
         applySettings(cfg.getSettings(), cfg.getSettingsKeys(), cfg.getForce());
+
+        return true;
+    }
+    else if (MsgReportStations::match(cmd))
+    {
+        MsgReportStations& report = (MsgReportStations&) cmd;
+        m_stations = report.getStations();
+        m_packetCount = report.getPacketCount();
+        m_stationsUpdated = QDateTime::currentDateTimeUtc();
 
         return true;
     }
@@ -469,6 +482,121 @@ void APRS::webapiFormatFeatureSettings(
     }
 }
 
+
+int APRS::webapiReportGet(
+    SWGSDRangel::SWGFeatureReport& response,
+    QString& errorMessage)
+{
+    (void) errorMessage;
+    response.setAprsReport(new SWGSDRangel::SWGAPRSReport());
+    response.getAprsReport()->init();
+    webapiFormatFeatureReport(response);
+    return 200;
+}
+
+void APRS::webapiFormatFeatureReport(SWGSDRangel::SWGFeatureReport& response)
+{
+    SWGSDRangel::SWGAPRSReport *report = response.getAprsReport();
+    report->setRunningState((int) getState());
+    report->setStationCount(m_stations.size());
+    report->setPacketCount(m_packetCount);
+    if (report->getReportDateTime()) {
+        *report->getReportDateTime() = m_stationsUpdated.toString(Qt::ISODateWithMs);
+    } else {
+        report->setReportDateTime(new QString(m_stationsUpdated.toString(Qt::ISODateWithMs)));
+    }
+    report->setStations(new QList<SWGSDRangel::SWGAPRSStation *>);
+
+    for (const auto& station : m_stations)
+    {
+        SWGSDRangel::SWGAPRSStation *swgStation = new SWGSDRangel::SWGAPRSStation();
+        report->getStations()->append(swgStation);
+        if (swgStation->getCallsign()) {
+            *swgStation->getCallsign() = station.m_callsign;
+        } else {
+            swgStation->setCallsign(new QString(station.m_callsign));
+        }
+        swgStation->setIsObject(station.m_isObject ? 1 : 0);
+        swgStation->setHasWeather(station.m_hasWeather ? 1 : 0);
+        swgStation->setHasTelemetry(station.m_hasTelemetry ? 1 : 0);
+        swgStation->setPackets(station.m_packets);
+
+        // Only what has been received is set, so an absent field reads as unknown rather than zero
+        if (!station.m_reportingStation.isEmpty()) {
+            if (swgStation->getReportingStation()) {
+                *swgStation->getReportingStation() = station.m_reportingStation;
+            } else {
+                swgStation->setReportingStation(new QString(station.m_reportingStation));
+            }
+        }
+        if (!station.m_symbol.isEmpty()) {
+            if (swgStation->getSymbol()) {
+                *swgStation->getSymbol() = station.m_symbol;
+            } else {
+                swgStation->setSymbol(new QString(station.m_symbol));
+            }
+        }
+        if (!station.m_status.isEmpty()) {
+            if (swgStation->getStatus()) {
+                *swgStation->getStatus() = station.m_status;
+            } else {
+                swgStation->setStatus(new QString(station.m_status));
+            }
+        }
+        if (!station.m_comment.isEmpty()) {
+            if (swgStation->getComment()) {
+                *swgStation->getComment() = station.m_comment;
+            } else {
+                swgStation->setComment(new QString(station.m_comment));
+            }
+        }
+        if (!station.m_telemetryProjectName.isEmpty()) {
+            if (swgStation->getTelemetryProjectName()) {
+                *swgStation->getTelemetryProjectName() = station.m_telemetryProjectName;
+            } else {
+                swgStation->setTelemetryProjectName(new QString(station.m_telemetryProjectName));
+            }
+        }
+        if (station.m_hasPosition)
+        {
+            swgStation->setLatitude(station.m_latitude);
+            swgStation->setLongitude(station.m_longitude);
+        }
+        if (station.m_hasAltitude) {
+            swgStation->setAltitude(station.m_altitude);
+        }
+        if (station.m_hasCourseAndSpeed)
+        {
+            swgStation->setCourse(station.m_course);
+            swgStation->setSpeed(station.m_speed);
+        }
+        if (station.m_hasStationDetails)
+        {
+            swgStation->setPowerWatts(station.m_powerWatts);
+            swgStation->setAntennaHeight(station.m_antennaHeight);
+            swgStation->setAntennaGain(station.m_antennaGain);
+
+            if (!station.m_antennaDirectivity.isEmpty()) {
+                if (swgStation->getAntennaDirectivity()) {
+                    *swgStation->getAntennaDirectivity() = station.m_antennaDirectivity;
+                } else {
+                    swgStation->setAntennaDirectivity(new QString(station.m_antennaDirectivity));
+                }
+            }
+        }
+        if (station.m_hasRadioRange) {
+            swgStation->setRadioRange(station.m_radioRange);
+        }
+        if (station.m_lastPacket.isValid()) {
+            if (swgStation->getLastPacketDateTime()) {
+                *swgStation->getLastPacketDateTime() = station.m_lastPacket.toString(Qt::ISODateWithMs);
+            } else {
+                swgStation->setLastPacketDateTime(new QString(station.m_lastPacket.toString(Qt::ISODateWithMs)));
+            }
+        }
+    }
+}
+
 void APRS::webapiUpdateFeatureSettings(
     APRSSettings& settings,
     const QStringList& featureSettingsKeys,
@@ -488,6 +616,9 @@ void APRS::webapiUpdateFeatureSettings(
     }
     if (featureSettingsKeys.contains("igateFilter")) {
         settings.m_igateFilter = *response.getAprsSettings()->getIgateFilter();
+    }
+    if (featureSettingsKeys.contains("igateEnabled")) {
+        settings.m_igateEnabled = response.getAprsSettings()->getIgateEnabled() != 0;
     }
     if (featureSettingsKeys.contains("title")) {
         settings.m_title = *response.getAprsSettings()->getTitle();

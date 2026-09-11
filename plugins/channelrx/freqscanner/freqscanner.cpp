@@ -994,13 +994,21 @@ int FreqScanner::webapiSettingsPutPatch(
     FreqScannerSettings settings = m_settings;
     webapiUpdateChannelSettings(settings, channelSettingsKeys, response);
 
-    MsgConfigureFreqScanner *msg = MsgConfigureFreqScanner::create(settings, channelSettingsKeys, force);
+    // The web API calls the frequency list "frequencies", but everything downstream of here
+    // keys it as "frequencySettings". Without the alias the list is parsed and then dropped
+    // when the settings are merged, leaving the scanner with nothing to scan.
+    QStringList settingsKeys = channelSettingsKeys;
+    if (settingsKeys.contains("frequencies") && !settingsKeys.contains("frequencySettings")) {
+        settingsKeys.append("frequencySettings");
+    }
+
+    MsgConfigureFreqScanner *msg = MsgConfigureFreqScanner::create(settings, settingsKeys, force);
     m_inputMessageQueue.push(msg);
 
     qDebug("FreqScanner::webapiSettingsPutPatch: forward to GUI: %p", m_guiMessageQueue);
     if (m_guiMessageQueue) // forward to GUI if any
     {
-        MsgConfigureFreqScanner *msgToGUI = MsgConfigureFreqScanner::create(settings, channelSettingsKeys, force);
+        MsgConfigureFreqScanner *msgToGUI = MsgConfigureFreqScanner::create(settings, settingsKeys, force);
         m_guiMessageQueue->push(msgToGUI);
     }
 
@@ -1078,6 +1086,27 @@ void FreqScanner::webapiUpdateChannelSettings(
     if (channelSettingsKeys.contains("threshold")) {
         settings.m_threshold = response.getFreqScannerSettings()->getThreshold();
     }
+    if (channelSettingsKeys.contains("channel")) {
+        settings.m_channel = *response.getFreqScannerSettings()->getChannel();
+    }
+    if (channelSettingsKeys.contains("scanTime")) {
+        settings.m_scanTime = response.getFreqScannerSettings()->getScanTime();
+    }
+    if (channelSettingsKeys.contains("retransmitTime")) {
+        settings.m_retransmitTime = response.getFreqScannerSettings()->getRetransmitTime();
+    }
+    if (channelSettingsKeys.contains("tuneTime")) {
+        settings.m_tuneTime = (int) response.getFreqScannerSettings()->getTuneTime();
+    }
+    if (channelSettingsKeys.contains("priority")) {
+        settings.m_priority = (FreqScannerSettings::Priority) response.getFreqScannerSettings()->getPriority();
+    }
+    if (channelSettingsKeys.contains("measurement")) {
+        settings.m_measurement = (FreqScannerSettings::Measurement) response.getFreqScannerSettings()->getMeasurement();
+    }
+    if (channelSettingsKeys.contains("mode")) {
+        settings.m_mode = (FreqScannerSettings::Mode) response.getFreqScannerSettings()->getMode();
+    }
     if (channelSettingsKeys.contains("frequencies"))
     {
         settings.m_frequencySettings.clear();
@@ -1088,6 +1117,7 @@ void FreqScanner::webapiUpdateChannelSettings(
             {
                 FreqScannerSettings::FrequencySettings freqSetting;
                 freqSetting.m_frequency = frequency->getFrequency();
+                freqSetting.m_enabled = frequency->getEnabled() != 0;
                 if (frequency->getNotes()) {
                     freqSetting.m_notes = *frequency->getNotes();
                 }
@@ -1174,6 +1204,19 @@ void FreqScanner::webapiFormatChannelSettings(SWGSDRangel::SWGChannelSettings& r
     response.getFreqScannerSettings()->setChannelBandwidth(settings.m_channelBandwidth);
     response.getFreqScannerSettings()->setChannelShift(settings.m_channelShift);
     response.getFreqScannerSettings()->setThreshold(settings.m_threshold);
+
+    if (response.getFreqScannerSettings()->getChannel()) {
+        *response.getFreqScannerSettings()->getChannel() = settings.m_channel;
+    } else {
+        response.getFreqScannerSettings()->setChannel(new QString(settings.m_channel));
+    }
+
+    response.getFreqScannerSettings()->setScanTime(settings.m_scanTime);
+    response.getFreqScannerSettings()->setRetransmitTime(settings.m_retransmitTime);
+    response.getFreqScannerSettings()->setTuneTime(settings.m_tuneTime);
+    response.getFreqScannerSettings()->setPriority((int) settings.m_priority);
+    response.getFreqScannerSettings()->setMeasurement((int) settings.m_measurement);
+    response.getFreqScannerSettings()->setMode((int) settings.m_mode);
 
     QList<SWGSDRangel::SWGFreqScannerFrequency *> *frequencies = createFrequencyList(settings);
     if (response.getFreqScannerSettings()->getFrequencies()) {
@@ -1303,6 +1346,31 @@ void FreqScanner::webapiFormatChannelSettings(
     }
     if (channelSettingsKeys.contains("threshold") || force) {
         swgFreqScannerSettings->setThreshold(settings.m_threshold);
+    }
+    if (channelSettingsKeys.contains("channel") || force) {
+        if (swgFreqScannerSettings->getChannel()) {
+            *swgFreqScannerSettings->getChannel() = settings.m_channel;
+        } else {
+            swgFreqScannerSettings->setChannel(new QString(settings.m_channel));
+        }
+    }
+    if (channelSettingsKeys.contains("scanTime") || force) {
+        swgFreqScannerSettings->setScanTime(settings.m_scanTime);
+    }
+    if (channelSettingsKeys.contains("retransmitTime") || force) {
+        swgFreqScannerSettings->setRetransmitTime(settings.m_retransmitTime);
+    }
+    if (channelSettingsKeys.contains("tuneTime") || force) {
+        swgFreqScannerSettings->setTuneTime(settings.m_tuneTime);
+    }
+    if (channelSettingsKeys.contains("priority") || force) {
+        swgFreqScannerSettings->setPriority((int) settings.m_priority);
+    }
+    if (channelSettingsKeys.contains("measurement") || force) {
+        swgFreqScannerSettings->setMeasurement((int) settings.m_measurement);
+    }
+    if (channelSettingsKeys.contains("mode") || force) {
+        swgFreqScannerSettings->setMode((int) settings.m_mode);
     }
     if (channelSettingsKeys.contains("frequencies") || force) {
         QList<SWGSDRangel::SWGFreqScannerFrequency *> *frequencies = createFrequencyList(settings);

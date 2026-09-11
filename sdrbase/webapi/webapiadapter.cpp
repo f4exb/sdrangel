@@ -1761,11 +1761,81 @@ int WebAPIAdapter::devicesetGet(
     }
 }
 
+int WebAPIAdapter::devicesetSpectrumActionsPost(
+        int deviceSetIndex,
+        const QStringList& spectrumActionsKeys,
+        SWGSDRangel::SWGSpectrumActions& query,
+        SWGSDRangel::SWGErrorResponse& error)
+{
+    error.init();
+
+    if ((deviceSetIndex >= 0) && (deviceSetIndex < (int) m_mainCore->m_deviceSets.size()))
+    {
+        DeviceSet *deviceSet = m_mainCore->m_deviceSets[deviceSetIndex];
+        return deviceSet->webapiSpectrumActionsPost(spectrumActionsKeys, query, *error.getMessage());
+    }
+    else
+    {
+        error.init();
+        *error.getMessage() = QString("There is no device set with index %1").arg(deviceSetIndex);
+
+        return 404;
+    }
+}
+
+int WebAPIAdapter::devicesetSpectrumDataGet(
+        int deviceSetIndex,
+        int bins,
+        qint64 startFrequency,
+        qint64 stopFrequency,
+        const QString& reduce,
+        SWGSDRangel::SWGGLSpectrumData& response,
+        SWGSDRangel::SWGErrorResponse& error)
+{
+    error.init();
+
+    if ((deviceSetIndex >= 0) && (deviceSetIndex < (int) m_mainCore->m_deviceSets.size()))
+    {
+        const DeviceSet *deviceSet = m_mainCore->m_deviceSets[deviceSetIndex];
+        return deviceSet->webapiSpectrumDataGet(bins, startFrequency, stopFrequency, reduce, response, *error.getMessage());
+    }
+    else
+    {
+        error.init();
+        *error.getMessage() = QString("There is no device set with index %1").arg(deviceSetIndex);
+
+        return 404;
+    }
+}
+
+int WebAPIAdapter::devicesetSpectrumReportGet(
+        int deviceSetIndex,
+        SWGSDRangel::SWGGLSpectrumReport& response,
+        SWGSDRangel::SWGErrorResponse& error)
+{
+    error.init();
+
+    if ((deviceSetIndex >= 0) && (deviceSetIndex < (int) m_mainCore->m_deviceSets.size()))
+    {
+        const DeviceSet *deviceSet = m_mainCore->m_deviceSets[deviceSetIndex];
+        return deviceSet->webapiSpectrumReportGet(response, *error.getMessage());
+    }
+    else
+    {
+        error.init();
+        *error.getMessage() = QString("There is no device set with index %1").arg(deviceSetIndex);
+
+        return 404;
+    }
+}
+
 int WebAPIAdapter::devicesetSpectrumSettingsGet(
         int deviceSetIndex,
         SWGSDRangel::SWGGLSpectrum& response,
         SWGSDRangel::SWGErrorResponse& error)
 {
+    error.init();
+
     if ((deviceSetIndex >= 0) && (deviceSetIndex < (int) m_mainCore->m_deviceSets.size()))
     {
         const DeviceSet *deviceSet = m_mainCore->m_deviceSets[deviceSetIndex];
@@ -3783,7 +3853,7 @@ int WebAPIAdapter::featuresetFeatureWorkspaceGet(
         SWGSDRangel::SWGWorkspaceInfo& response,
         SWGSDRangel::SWGErrorResponse& error)
 {
-    if ((featureIndex >= 0) && (featureIndex < (int) m_mainCore->m_featureSets.size()))
+    if ((featureIndex >= 0) && (m_mainCore->m_featureSets.size() > 0) && (featureIndex < m_mainCore->m_featureSets[0]->getNumberOfFeatures()))
     {
         FeatureSet *featureSet = m_mainCore->m_featureSets[0];
         Feature *feature = featureSet->getFeatureAt(featureIndex);
@@ -3804,7 +3874,7 @@ int WebAPIAdapter::featuresetFeatureWorkspacePut(
         SWGSDRangel::SWGSuccessResponse& response,
         SWGSDRangel::SWGErrorResponse& error)
 {
-    if ((featureIndex >= 0) && (featureIndex < (int) m_mainCore->m_featureSets.size()))
+    if ((featureIndex >= 0) && (m_mainCore->m_featureSets.size() > 0) && (featureIndex < m_mainCore->m_featureSets[0]->getNumberOfFeatures()))
     {
         int workspaceIndex = query.getIndex();
         MainCore::MsgMoveFeatureUIToWorkspace *msg = MainCore::MsgMoveFeatureUIToWorkspace::create(featureIndex, workspaceIndex);

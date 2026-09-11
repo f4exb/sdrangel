@@ -36,6 +36,9 @@ class SpectrumVis;
 
 namespace SWGSDRangel {
     class SWGGLSpectrum;
+    class SWGGLSpectrumReport;
+    class SWGSpectrumActions;
+    class SWGGLSpectrumData;
     class SWGSpectrumServer;
     class SWGSuccessResponse;
 };
@@ -76,6 +79,10 @@ public:
 
     // REST API
     int webapiSpectrumSettingsGet(SWGSDRangel::SWGGLSpectrum& response, QString& errorMessage) const;
+    int webapiSpectrumReportGet(SWGSDRangel::SWGGLSpectrumReport& response, QString& errorMessage) const;
+    int webapiSpectrumDataGet(int bins, qint64 startFrequency, qint64 stopFrequency, const QString& reduce,
+        SWGSDRangel::SWGGLSpectrumData& response, QString& errorMessage) const;
+    int webapiSpectrumActionsPost(const QStringList& spectrumActionsKeys, SWGSDRangel::SWGSpectrumActions& query, QString& errorMessage);
     int webapiSpectrumSettingsPutPatch(
             bool force,
             const QStringList& spectrumSettingsKeys,

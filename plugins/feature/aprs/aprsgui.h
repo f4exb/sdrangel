@@ -111,6 +111,7 @@ public:
     virtual void destroy();
 
     void resetToDefaults();
+    void sendStationReport();
     QByteArray serialize() const;
     bool deserialize(const QByteArray& data);
     virtual MessageQueue *getInputMessageQueue() { return &m_inputMessageQueue; }
@@ -133,6 +134,7 @@ private:
     AvailableChannelOrFeatureList m_availableChannels;
 
     APRS* m_aprs;
+    QTimer m_reportTimer;   //!< Pushes the station list to the feature for the web API report
     MessageQueue m_inputMessageQueue;
     QTimer m_statusTimer;
     int m_lastFeatureState;

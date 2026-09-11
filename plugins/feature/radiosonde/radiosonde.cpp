@@ -22,6 +22,9 @@
 #include <QBuffer>
 
 #include "SWGFeatureSettings.h"
+#include "SWGFeatureReport.h"
+#include "SWGRadiosondeReport.h"
+#include "SWGRadiosonde.h"
 
 #include "feature/featureset.h"
 #include "settings/serializable.h"
@@ -30,6 +33,7 @@
 #include "radiosonde.h"
 
 MESSAGE_CLASS_DEFINITION(Radiosonde::MsgConfigureRadiosonde, Message)
+MESSAGE_CLASS_DEFINITION(Radiosonde::MsgReportRadiosondes, Message)
 
 const char* const Radiosonde::m_featureIdURI = "sdrangel.feature.radiosonde";
 const char* const Radiosonde::m_featureId = "Radiosonde";
@@ -94,6 +98,14 @@ bool Radiosonde::handleMessage(const Message& cmd)
         MsgConfigureRadiosonde& cfg = (MsgConfigureRadiosonde&) cmd;
         qDebug() << "Radiosonde::handleMessage: MsgConfigureRadiosonde";
         applySettings(cfg.getSettings(), cfg.getSettingsKeys(), cfg.getForce());
+
+        return true;
+    }
+    else if (MsgReportRadiosondes::match(cmd))
+    {
+        MsgReportRadiosondes& report = (MsgReportRadiosondes&) cmd;
+        m_radiosondes = report.getRadiosondes();
+        m_radiosondesUpdated = QDateTime::currentDateTimeUtc();
 
         return true;
     }
@@ -246,6 +258,103 @@ void Radiosonde::webapiFormatFeatureSettings(
 
     for (int i = 0; i < RADIOSONDES_COLUMNS; i++) {
         response.getRadiosondeSettings()->getRadiosondesColumnSizes()->push_back(settings.m_radiosondesColumnSizes[i]);
+    }
+}
+
+
+int Radiosonde::webapiReportGet(
+    SWGSDRangel::SWGFeatureReport& response,
+    QString& errorMessage)
+{
+    (void) errorMessage;
+    response.setRadiosondeReport(new SWGSDRangel::SWGRadiosondeReport());
+    response.getRadiosondeReport()->init();
+    webapiFormatFeatureReport(response);
+    return 200;
+}
+
+void Radiosonde::webapiFormatFeatureReport(SWGSDRangel::SWGFeatureReport& response)
+{
+    SWGSDRangel::SWGRadiosondeReport *report = response.getRadiosondeReport();
+    report->setRadiosondeCount(m_radiosondes.size());
+    if (report->getReportDateTime()) {
+        *report->getReportDateTime() = m_radiosondesUpdated.toString(Qt::ISODateWithMs);
+    } else {
+        report->setReportDateTime(new QString(m_radiosondesUpdated.toString(Qt::ISODateWithMs)));
+    }
+    report->setRadiosondes(new QList<SWGSDRangel::SWGRadiosonde *>);
+
+    for (const auto& sonde : m_radiosondes)
+    {
+        SWGSDRangel::SWGRadiosonde *swgSonde = new SWGSDRangel::SWGRadiosonde();
+        report->getRadiosondes()->append(swgSonde);
+        if (swgSonde->getSerial()) {
+            *swgSonde->getSerial() = sonde.m_serial;
+        } else {
+            swgSonde->setSerial(new QString(sonde.m_serial));
+        }
+        swgSonde->setMessages(sonde.m_messages);
+
+        // Only what has been decoded is set, so an absent field reads as unknown rather than zero
+        if (!sonde.m_type.isEmpty()) {
+            if (swgSonde->getType()) {
+                *swgSonde->getType() = sonde.m_type;
+            } else {
+                swgSonde->setType(new QString(sonde.m_type));
+            }
+        }
+        if (!sonde.m_status.isEmpty()) {
+            if (swgSonde->getStatus()) {
+                *swgSonde->getStatus() = sonde.m_status;
+            } else {
+                swgSonde->setStatus(new QString(sonde.m_status));
+            }
+        }
+        if (!sonde.m_burstKillStatus.isEmpty()) {
+            if (swgSonde->getBurstKillStatus()) {
+                *swgSonde->getBurstKillStatus() = sonde.m_burstKillStatus;
+            } else {
+                swgSonde->setBurstKillStatus(new QString(sonde.m_burstKillStatus));
+            }
+        }
+        if (!sonde.m_burstKillTimer.isEmpty()) {
+            if (swgSonde->getBurstKillTimer()) {
+                *swgSonde->getBurstKillTimer() = sonde.m_burstKillTimer;
+            } else {
+                swgSonde->setBurstKillTimer(new QString(sonde.m_burstKillTimer));
+            }
+        }
+        if (sonde.m_hasPosition)
+        {
+            swgSonde->setLatitude(sonde.m_latitude);
+            swgSonde->setLongitude(sonde.m_longitude);
+            swgSonde->setAltitude(sonde.m_altitude);
+            swgSonde->setSpeed(sonde.m_speed);
+            swgSonde->setVerticalRate(sonde.m_verticalRate);
+            swgSonde->setHeading(sonde.m_heading);
+        }
+        if (sonde.m_hasAltitudeMax) {
+            swgSonde->setAltitudeMax(sonde.m_altitudeMax);
+        }
+        if (sonde.m_hasPressure) {
+            swgSonde->setPressure(sonde.m_pressure);
+        }
+        if (sonde.m_hasTemperature) {
+            swgSonde->setTemperature(sonde.m_temperature);
+        }
+        if (sonde.m_hasHumidity) {
+            swgSonde->setHumidity(sonde.m_humidity);
+        }
+        if (sonde.m_hasFrequency) {
+            swgSonde->setFrequency(sonde.m_frequency);
+        }
+        if (sonde.m_lastUpdate.isValid()) {
+            if (swgSonde->getLastUpdate()) {
+                *swgSonde->getLastUpdate() = sonde.m_lastUpdate.toString(Qt::ISODateWithMs);
+            } else {
+                swgSonde->setLastUpdate(new QString(sonde.m_lastUpdate.toString(Qt::ISODateWithMs)));
+            }
+        }
     }
 }
 

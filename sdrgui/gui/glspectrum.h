@@ -38,6 +38,20 @@ class SDRGUI_API GLSpectrum : public QWidget, public GLSpectrumInterface {
 public:
     GLSpectrum(QWidget *parent = nullptr);
     GLSpectrumView *getSpectrumView() const { return m_spectrum; }
+    // Asked for through the web API, which arrives on an HTTP thread, so each is queued onto the
+    // GUI thread rather than run where it was asked for
+    virtual void spectrumAutoscale() override;
+    virtual void spectrumClear() override;
+    virtual void spectrumResetMeasurements() override;
+    virtual void spectrumGotoMarker(int markerIndex) override;
+
+signals:
+    //!< The reference level and range live in GLSpectrumGUI, which does the arithmetic
+    void requestAutoscale();
+    //!< Retuning is GLSpectrumGUI's job too, as it holds the annotation markers
+    void requestGotoMarker(int markerIndex);
+
+public:
     SpectrumMeasurements *getMeasurements() const { return m_measurements; }
     void setMeasurementsVisible(bool visible);
     void setMeasurementsPosition(SpectrumSettings::MeasurementsPosition position);

@@ -81,6 +81,9 @@ namespace SWGSDRangel
     class SWGFeatureReport;
     class SWGFeatureActions;
     class SWGGLSpectrum;
+    class SWGGLSpectrumReport;
+    class SWGSpectrumActions;
+    class SWGGLSpectrumData;
     class SWGSpectrumServer;
 }
 
@@ -935,6 +938,58 @@ public:
      * Handler of /sdrangel/deviceset/{devicesetIndex}/spectrum/server (GET)
      * returns the Http status code (default 501: not implemented)
      */
+    /**
+     * The latest spectrum measurement results
+     */
+    virtual int devicesetSpectrumReportGet(
+            int deviceSetIndex,
+            SWGSDRangel::SWGGLSpectrumReport& response,
+            SWGSDRangel::SWGErrorResponse& error)
+    {
+        (void) deviceSetIndex;
+        (void) response;
+        *error.getMessage() = "Function not implemented";
+        return 501;
+    }
+
+    /**
+     * Act on the main spectrum of a device set
+     */
+    virtual int devicesetSpectrumActionsPost(
+            int deviceSetIndex,
+            const QStringList& spectrumActionsKeys,
+            SWGSDRangel::SWGSpectrumActions& query,
+            SWGSDRangel::SWGErrorResponse& error)
+    {
+        (void) deviceSetIndex;
+        (void) spectrumActionsKeys;
+        (void) query;
+        *error.getMessage() = "Function not implemented";
+        return 501;
+    }
+
+    /**
+     * A reduced copy of the current power spectrum
+     */
+    virtual int devicesetSpectrumDataGet(
+            int deviceSetIndex,
+            int bins,
+            qint64 startFrequency,
+            qint64 stopFrequency,
+            const QString& reduce,
+            SWGSDRangel::SWGGLSpectrumData& response,
+            SWGSDRangel::SWGErrorResponse& error)
+    {
+        (void) deviceSetIndex;
+        (void) bins;
+        (void) startFrequency;
+        (void) stopFrequency;
+        (void) reduce;
+        (void) response;
+        *error.getMessage() = "Function not implemented";
+        return 501;
+    }
+
     virtual int devicesetSpectrumServerGet(
             int deviceSetIndex,
             SWGSDRangel::SWGSpectrumServer& response,
@@ -1714,6 +1769,9 @@ public:
     static QString featuresetPresetURL;
     static std::regex devicesetURLRe;
     static std::regex devicesetSpectrumSettingsURLRe;
+    static std::regex devicesetSpectrumReportURLRe;
+    static std::regex devicesetSpectrumActionsURLRe;
+    static std::regex devicesetSpectrumDataURLRe;
     static std::regex devicesetSpectrumServerURLRe;
     static std::regex devicesetSpectrumWorkspaceURLRe;
     static std::regex devicesetDeviceURLRe;

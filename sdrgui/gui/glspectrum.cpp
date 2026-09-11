@@ -58,6 +58,27 @@ GLSpectrum::GLSpectrum(QWidget *parent) :
     setSizePolicy(QSizePolicy::Expanding, QSizePolicy::Expanding);
 }
 
+
+void GLSpectrum::spectrumAutoscale()
+{
+    QMetaObject::invokeMethod(this, [this]() { emit requestAutoscale(); }, Qt::QueuedConnection);
+}
+
+void GLSpectrum::spectrumClear()
+{
+    QMetaObject::invokeMethod(m_spectrum, [this]() { m_spectrum->clearSpectrumHistogram(); }, Qt::QueuedConnection);
+}
+
+void GLSpectrum::spectrumResetMeasurements()
+{
+    QMetaObject::invokeMethod(m_spectrum, [this]() { m_spectrum->resetMeasurements(); }, Qt::QueuedConnection);
+}
+
+void GLSpectrum::spectrumGotoMarker(int markerIndex)
+{
+    QMetaObject::invokeMethod(this, [this, markerIndex]() { emit requestGotoMarker(markerIndex); }, Qt::QueuedConnection);
+}
+
 void GLSpectrum::setMeasurementsVisible(bool visible)
 {
     m_measurements->setVisible(visible);

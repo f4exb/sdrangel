@@ -7772,7 +7772,10 @@ void ADSBDemodGUI::sendAircraftReport()
             aircraft->m_latitude,
             aircraft->m_longitude,
             aircraft->m_altitude,
-            aircraft->m_groundspeed
+            aircraft->m_groundspeed,
+            aircraft->m_positionValid,
+            aircraft->m_altitudeValid,
+            aircraft->m_groundspeedValid
         };
 
         report.append(aircraftReport);

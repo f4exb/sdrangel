@@ -23,6 +23,10 @@
 ///////////////////////////////////////////////////////////////////////////////////
 
 #include "SWGGLSpectrum.h"
+#include "SWGGLSpectrumReport.h"
+#include "SWGSpectrumActions.h"
+#include "SWGGLSpectrumData.h"
+#include "SWGSpectrumPeak.h"
 #include "SWGSpectrumServer.h"
 #include "SWGSuccessResponse.h"
 
@@ -609,6 +613,8 @@ void SpectrumVis::processFFT(const Complex* fftOut, bool reorder, bool positiveO
             m_mathMovingAverage.nextAverage();
         }
 
+        m_powerSpectrumUpdated = QDateTime::currentDateTimeUtc();
+
         // Stop profiling before newSpectrum, as we profile that separately
         PROFILER_STOP("processFFT");
 
@@ -867,6 +873,282 @@ void SpectrumVis::handleConfigureWSSpectrum(const QString& address, uint16_t por
         m_wsSpectrum.closeSocket();
         m_wsSpectrum.openSocket();
     }
+}
+
+
+
+int SpectrumVis::webapiActionsPost(const QStringList& spectrumActionsKeys, SWGSDRangel::SWGSpectrumActions& query, QString& errorMessage)
+{
+    static const QStringList known = {"autoscale", "clearSpectrum", "resetMeasurements", "freeze", "gotoMarker"};
+    QStringList unknown;
+
+    for (const QString& key : spectrumActionsKeys)
+    {
+        if (!known.contains(key)) {
+            unknown.append(key);
+        }
+    }
+
+    // An action that does not exist is a mistake worth reporting: accepting it would answer
+    // "submitted successfully" to a request that does nothing at all
+    if (!unknown.isEmpty())
+    {
+        errorMessage = QString("Unknown action %1. This spectrum takes: %2")
+            .arg(unknown.join(", ")).arg(known.join(", "));
+        return 400;
+    }
+
+    if (spectrumActionsKeys.isEmpty())
+    {
+        errorMessage = QString("No action given. This spectrum takes: %1").arg(known.join(", "));
+        return 400;
+    }
+
+    // Everything except freeze acts on what is displayed. Checked before anything is applied, so
+    // that a request carrying both freeze and a display action is refused whole rather than
+    // leaving the spectrum stopped behind a 400
+    if (!m_glSpectrum)
+    {
+        for (const QString& key : {QString("autoscale"), QString("clearSpectrum"), QString("resetMeasurements"), QString("gotoMarker")})
+        {
+            if (spectrumActionsKeys.contains(key))
+            {
+                errorMessage = QString("%1 acts on the spectrum display, which this instance does not have").arg(key);
+                return 400;
+            }
+        }
+    }
+
+    // freeze is ours: it stops the spectrum rather than its display, so it needs no GUI
+    if (spectrumActionsKeys.contains("freeze"))
+    {
+        MsgStartStop *msg = MsgStartStop::create(query.getFreeze() == 0);
+        getInputMessageQueue()->push(msg);
+    }
+
+    if (!m_glSpectrum) {
+        return 202;
+    }
+
+    if (spectrumActionsKeys.contains("autoscale") && (query.getAutoscale() != 0)) {
+        m_glSpectrum->spectrumAutoscale();
+    }
+
+    if (spectrumActionsKeys.contains("clearSpectrum") && (query.getClearSpectrum() != 0)) {
+        m_glSpectrum->spectrumClear();
+    }
+
+    if (spectrumActionsKeys.contains("resetMeasurements") && (query.getResetMeasurements() != 0)) {
+        m_glSpectrum->spectrumResetMeasurements();
+    }
+
+    if (spectrumActionsKeys.contains("gotoMarker")) {
+        m_glSpectrum->spectrumGotoMarker(query.getGotoMarker());
+    }
+
+    return 202;
+}
+
+
+int SpectrumVis::webapiSpectrumDataGet(
+    int bins,
+    qint64 startFrequency,
+    qint64 stopFrequency,
+    const QString& reduce,
+    SWGSDRangel::SWGGLSpectrumData& response,
+    QString& errorMessage) const
+{
+    if ((reduce != "max") && (reduce != "mean"))
+    {
+        errorMessage = QString("reduce must be max or mean, not %1").arg(reduce);
+        return 400;
+    }
+
+    if ((bins < 1) || (bins > m_maxDataBins))
+    {
+        errorMessage = QString("bins must be between 1 and %1").arg(m_maxDataBins);
+        return 400;
+    }
+
+    std::vector<Real> spectrum;
+    int fftSize;
+    qint64 centerFrequency;
+    int bandwidth;
+    bool linear;
+    QDateTime updated;
+
+    {
+        // feed() takes this with tryLock and gives up rather than waiting, so the worst this can
+        // do to the sample path is cost it one FFT
+        QMutexLocker locker(&m_mutex);
+        fftSize = m_settings.m_fftSize;
+        centerFrequency = m_centerFrequency;
+        bandwidth = m_sampleRate;
+        linear = m_settings.m_linear;
+        updated = m_powerSpectrumUpdated;
+
+        if ((int) m_powerSpectrum.size() < fftSize)
+        {
+            errorMessage = "The spectrum has not been computed yet";
+            return 500;
+        }
+
+        // Both divide the bin arithmetic below, and a device that has notified a zero sample rate
+        // leaves the spectrum sized but unscaled
+        if ((fftSize <= 0) || (bandwidth <= 0))
+        {
+            errorMessage = "The spectrum has no sample rate yet";
+            return 500;
+        }
+
+        spectrum.assign(m_powerSpectrum.begin(), m_powerSpectrum.begin() + fftSize);
+    }
+
+    double hzPerBin = bandwidth / (double) fftSize;
+    qint64 spectrumStart = centerFrequency - bandwidth / 2;
+
+    // The range asked for, clamped to what there is
+    qint64 wantedStart = (startFrequency == 0) ? spectrumStart : startFrequency;
+    qint64 wantedStop = (stopFrequency == 0) ? spectrumStart + bandwidth : stopFrequency;
+
+    if (wantedStop <= wantedStart)
+    {
+        errorMessage = "stopFrequency must be above startFrequency";
+        return 400;
+    }
+
+    int firstBin = (int) std::floor((wantedStart - spectrumStart) / hzPerBin);
+    int lastBin = (int) std::ceil((wantedStop - spectrumStart) / hzPerBin) - 1;
+    firstBin = std::max(0, std::min(firstBin, fftSize - 1));
+    lastBin = std::max(firstBin, std::min(lastBin, fftSize - 1));
+
+    int available = lastBin - firstBin + 1;
+    int returned = std::min(bins, available);
+    double binsPerGroup = available / (double) returned;
+
+    response.setPower(new QList<float>());
+
+    for (int i = 0; i < returned; i++)
+    {
+        int from = firstBin + (int) std::floor(i * binsPerGroup);
+        int to = firstBin + (int) std::floor((i + 1) * binsPerGroup) - 1;
+        to = std::max(from, std::min(to, lastBin));
+
+        float value = spectrum[from];
+
+        if (reduce == "max")
+        {
+            for (int bin = from + 1; bin <= to; bin++) {
+                value = std::max(value, spectrum[bin]);
+            }
+        }
+        else
+        {
+            double sum = 0.0;
+
+            for (int bin = from; bin <= to; bin++) {
+                sum += spectrum[bin];
+            }
+
+            value = (float) (sum / (to - from + 1));
+        }
+
+        response.getPower()->append(value);
+    }
+
+    response.setCenterFrequency(centerFrequency);
+    response.setBandwidth(bandwidth);
+    response.setFftSize(fftSize);
+    response.setLinear(linear ? 1 : 0);
+    response.setBins(returned);
+    response.setReduce(new QString(reduce));
+    response.setBinBandwidth((float) (available * hzPerBin / returned));
+    // The centre of the first and last groups, so a caller can place every value without
+    // knowing how the grouping fell out
+    response.setStartFrequency((qint64) (spectrumStart + (firstBin + binsPerGroup / 2.0) * hzPerBin));
+    response.setStopFrequency((qint64) (spectrumStart + (firstBin + (returned - 0.5) * binsPerGroup) * hzPerBin));
+
+    if (updated.isValid()) {
+        response.setUpdated(new QString(updated.toString(Qt::ISODateWithMs)));
+    }
+
+    return 200;
+}
+
+int SpectrumVis::webapiSpectrumReportGet(SWGSDRangel::SWGGLSpectrumReport& response, QString& errorMessage) const
+{
+    (void) errorMessage;
+    SpectrumMeasurementResults results;
+    getMeasurementResults(results);
+    response.setMeasurement((int) results.m_measurement);
+
+    if (results.m_updated.isValid()) {
+        response.setUpdated(new QString(results.m_updated.toString(Qt::ISODateWithMs)));
+    }
+
+    // Only the fields the selected measurement actually produces are set, so that a caller cannot
+    // read a zero from a measurement that was never taken
+    switch (results.m_measurement)
+    {
+    case SpectrumSettings::MeasurementPeaks:
+        response.setPeaks(new QList<SWGSDRangel::SWGSpectrumPeak *>);
+
+        for (const auto& peak : results.m_peaks)
+        {
+            SWGSDRangel::SWGSpectrumPeak *swgPeak = new SWGSDRangel::SWGSpectrumPeak();
+            swgPeak->setFrequency(peak.m_frequency);
+            swgPeak->setPower(peak.m_power);
+            response.getPeaks()->append(swgPeak);
+        }
+
+        break;
+
+    case SpectrumSettings::MeasurementChannelPower:
+        response.setChannelPower(results.m_channelPower);
+        break;
+
+    case SpectrumSettings::MeasurementAdjacentChannelPower:
+        response.setAdjChannelPowerLeft(results.m_adjChannelPowerLeft);
+        response.setAdjChannelPowerLeftRatio(results.m_adjChannelPowerLeftACPR);
+        response.setAdjChannelPowerCentre(results.m_adjChannelPowerCentre);
+        response.setAdjChannelPowerRight(results.m_adjChannelPowerRight);
+        response.setAdjChannelPowerRightRatio(results.m_adjChannelPowerRightACPR);
+        break;
+
+    case SpectrumSettings::MeasurementOccupiedBandwidth:
+        response.setOccupiedBandwidth(results.m_occupiedBandwidth);
+        break;
+
+    case SpectrumSettings::Measurement3dBBandwidth:
+        response.setBandwidth3dB(results.m_bandwidth3dB);
+        break;
+
+    case SpectrumSettings::MeasurementSNR:
+        response.setSnr(results.m_snr);
+        response.setSnfr(results.m_snfr);
+        response.setThd(results.m_thd);
+        response.setThdPlusNoise(results.m_thdPlusNoise);
+        response.setSinad(results.m_sinad);
+        response.setSfdr(results.m_sfdr);
+        break;
+
+    default:
+        break;
+    }
+
+    return 200;
+}
+
+void SpectrumVis::setMeasurementResults(const SpectrumMeasurementResults& results)
+{
+    QMutexLocker locker(&m_measurementResultsMutex);
+    m_measurementResults = results;
+}
+
+void SpectrumVis::getMeasurementResults(SpectrumMeasurementResults& results) const
+{
+    QMutexLocker locker(&m_measurementResultsMutex);
+    results = m_measurementResults;
 }
 
 int SpectrumVis::webapiSpectrumSettingsGet(SWGSDRangel::SWGGLSpectrum& response, QString& errorMessage) const

@@ -65,6 +65,9 @@
 #include "SWGFeatureReport.h"
 #include "SWGFeatureActions.h"
 #include "SWGGLSpectrum.h"
+#include "SWGGLSpectrumReport.h"
+#include "SWGSpectrumActions.h"
+#include "SWGGLSpectrumData.h"
 #include "SWGSpectrumServer.h"
 
 WebAPIRequestMapper::WebAPIRequestMapper(QObject* parent) :
@@ -183,6 +186,12 @@ void WebAPIRequestMapper::service(qtwebapp::HttpRequest& request, qtwebapp::Http
                 devicesetDeviceService(std::string(desc_match[1]), request, response);
             } else if (std::regex_match(pathStr, desc_match, WebAPIAdapterInterface::devicesetSpectrumSettingsURLRe)) {
                 devicesetSpectrumSettingsService(std::string(desc_match[1]), request, response);
+            } else if (std::regex_match(pathStr, desc_match, WebAPIAdapterInterface::devicesetSpectrumReportURLRe)) {
+                devicesetSpectrumReportService(std::string(desc_match[1]), request, response);
+            } else if (std::regex_match(pathStr, desc_match, WebAPIAdapterInterface::devicesetSpectrumActionsURLRe)) {
+                devicesetSpectrumActionsService(std::string(desc_match[1]), request, response);
+            } else if (std::regex_match(pathStr, desc_match, WebAPIAdapterInterface::devicesetSpectrumDataURLRe)) {
+                devicesetSpectrumDataService(std::string(desc_match[1]), request, response);
             } else if (std::regex_match(pathStr, desc_match, WebAPIAdapterInterface::devicesetSpectrumServerURLRe)) {
                 devicesetSpectrumServerService(std::string(desc_match[1]), request, response);
             } else if (std::regex_match(pathStr, desc_match, WebAPIAdapterInterface::devicesetSpectrumWorkspaceURLRe)) {
@@ -1752,6 +1761,198 @@ void WebAPIRequestMapper::devicesetService(const std::string& indexStr, qtwebapp
         response.setStatus(405,"Invalid HTTP method");
         errorResponse.init();
         *errorResponse.getMessage() = "Invalid HTTP method";
+        response.write(errorResponse.asJson().toUtf8());
+    }
+}
+
+
+
+
+void WebAPIRequestMapper::devicesetSpectrumDataService(const std::string& indexStr, qtwebapp::HttpRequest& request, qtwebapp::HttpResponse& response)
+{
+    SWGSDRangel::SWGErrorResponse errorResponse;
+    response.setHeader("Content-Type", "application/json");
+    response.setHeader("Access-Control-Allow-Origin", "*");
+
+    try
+    {
+        int deviceSetIndex = boost::lexical_cast<int>(indexStr);
+
+        if (request.getMethod() == "GET")
+        {
+            // Query parameters rather than a body, as this is a read
+            bool ok = false;
+            QByteArray binsParam = request.getParameter("bins");
+            int bins = binsParam.isEmpty() ? 128 : QString(binsParam).toInt(&ok);
+
+            if (!binsParam.isEmpty() && !ok)
+            {
+                response.setStatus(400, "bins must be a number");
+                errorResponse.init();
+                *errorResponse.getMessage() = "bins must be a number";
+                response.write(errorResponse.asJson().toUtf8());
+                return;
+            }
+
+            // Checked rather than defaulted: an unparseable frequency reads as 0, which the
+            // endpoint takes to mean the whole span, so a mistyped one would quietly return
+            // plausible data for the wrong range
+            qint64 startFrequency = 0;
+            qint64 stopFrequency = 0;
+
+            for (const char *name : {"startFrequency", "stopFrequency"})
+            {
+                QByteArray parameter = request.getParameter(name);
+
+                if (parameter.isEmpty()) {
+                    continue;
+                }
+
+                bool parsed = false;
+                qint64 value = QString(parameter).toLongLong(&parsed);
+
+                if (!parsed)
+                {
+                    QString message = QString("%1 must be a number").arg(name);
+                    response.setStatus(400, message.toLatin1().constData());
+                    errorResponse.init();
+                    *errorResponse.getMessage() = message;
+                    response.write(errorResponse.asJson().toUtf8());
+                    return;
+                }
+
+                if (QString(name) == "startFrequency") {
+                    startFrequency = value;
+                } else {
+                    stopFrequency = value;
+                }
+            }
+
+            QByteArray reduceParam = request.getParameter("reduce");
+            QString reduce = reduceParam.isEmpty() ? QString("max") : QString(reduceParam);
+
+            SWGSDRangel::SWGGLSpectrumData normalResponse;
+            normalResponse.init();
+            int status = m_adapter->devicesetSpectrumDataGet(
+                deviceSetIndex, bins, startFrequency, stopFrequency, reduce, normalResponse, errorResponse);
+            response.setStatus(status);
+
+            if (status/100 == 2) {
+                response.write(normalResponse.asJson().toUtf8());
+            } else {
+                response.write(errorResponse.asJson().toUtf8());
+            }
+        }
+        else
+        {
+            response.setStatus(405, "Invalid HTTP method");
+            errorResponse.init();
+            *errorResponse.getMessage() = "Invalid HTTP method";
+            response.write(errorResponse.asJson().toUtf8());
+        }
+    }
+    catch (const boost::bad_lexical_cast &e)
+    {
+        errorResponse.init();
+        *errorResponse.getMessage() = "Wrong integer conversion: " + QString(e.what());
+        response.setStatus(400, errorResponse.getMessage()->toLatin1().constData());
+        response.write(errorResponse.asJson().toUtf8());
+    }
+}
+
+void WebAPIRequestMapper::devicesetSpectrumActionsService(const std::string& indexStr, qtwebapp::HttpRequest& request, qtwebapp::HttpResponse& response)
+{
+    SWGSDRangel::SWGErrorResponse errorResponse;
+    response.setHeader("Content-Type", "application/json");
+    response.setHeader("Access-Control-Allow-Origin", "*");
+
+    try
+    {
+        int deviceSetIndex = boost::lexical_cast<int>(indexStr);
+
+        if (request.getMethod() == "POST")
+        {
+            QString jsonStr = request.getBody();
+            QJsonObject jsonObject;
+
+            if (parseJsonBody(jsonStr, jsonObject, response))
+            {
+                SWGSDRangel::SWGSpectrumActions query;
+                QStringList spectrumActionsKeys;
+                extractKeys(jsonObject, spectrumActionsKeys);
+                query.fromJson(jsonStr);
+                int status = m_adapter->devicesetSpectrumActionsPost(deviceSetIndex, spectrumActionsKeys, query, errorResponse);
+                response.setStatus(status);
+
+                if (status/100 == 2)
+                {
+                    errorResponse.init();
+                    *errorResponse.getMessage() = "Message to change the spectrum was submitted successfully";
+                }
+
+                response.write(errorResponse.asJson().toUtf8());
+            }
+            else
+            {
+                response.setStatus(400, "Invalid JSON format");
+                errorResponse.init();
+                *errorResponse.getMessage() = "Invalid JSON format";
+                response.write(errorResponse.asJson().toUtf8());
+            }
+        }
+        else
+        {
+            response.setStatus(405, "Invalid HTTP method");
+            errorResponse.init();
+            *errorResponse.getMessage() = "Invalid HTTP method";
+            response.write(errorResponse.asJson().toUtf8());
+        }
+    }
+    catch (const boost::bad_lexical_cast &e)
+    {
+        errorResponse.init();
+        *errorResponse.getMessage() = "Wrong integer conversion: " + QString(e.what());
+        response.setStatus(400, errorResponse.getMessage()->toLatin1().constData());
+        response.write(errorResponse.asJson().toUtf8());
+    }
+}
+
+void WebAPIRequestMapper::devicesetSpectrumReportService(const std::string& indexStr, qtwebapp::HttpRequest& request, qtwebapp::HttpResponse& response)
+{
+    SWGSDRangel::SWGErrorResponse errorResponse;
+    response.setHeader("Content-Type", "application/json");
+    response.setHeader("Access-Control-Allow-Origin", "*");
+
+    try
+    {
+        int deviceSetIndex = boost::lexical_cast<int>(indexStr);
+
+        if (request.getMethod() == "GET")
+        {
+            SWGSDRangel::SWGGLSpectrumReport normalResponse;
+            resetSpectrumReport(normalResponse);
+            int status = m_adapter->devicesetSpectrumReportGet(deviceSetIndex, normalResponse, errorResponse);
+            response.setStatus(status);
+
+            if (status/100 == 2) {
+                response.write(normalResponse.asJson().toUtf8());
+            } else {
+                response.write(errorResponse.asJson().toUtf8());
+            }
+        }
+        else
+        {
+            response.setStatus(405, "Invalid HTTP method");
+            errorResponse.init();
+            *errorResponse.getMessage() = "Invalid HTTP method";
+            response.write(errorResponse.asJson().toUtf8());
+        }
+    }
+    catch (const boost::bad_lexical_cast &e)
+    {
+        errorResponse.init();
+        *errorResponse.getMessage() = "Wrong integer conversion: " + QString(e.what());
+        response.setStatus(400, errorResponse.getMessage()->toLatin1().constData());
         response.write(errorResponse.asJson().toUtf8());
     }
 }
@@ -5351,6 +5552,11 @@ bool WebAPIRequestMapper::getFeatureSettings(
             featureSettings->setRigCtlServerSettings(new SWGSDRangel::SWGRigCtlServerSettings());
             featureSettings->getRigCtlServerSettings()->fromJsonObject(settingsJsonObject);
         }
+        else if (featureSettingsKey == "MCPServerSettings")
+        {
+            featureSettings->setMcpServerSettings(new SWGSDRangel::SWGMCPServerSettings());
+            featureSettings->getMcpServerSettings()->fromJsonObject(settingsJsonObject);
+        }
         else if (featureSettingsKey == "VORLocalizerSettings")
         {
             featureSettings->setVorLocalizerSettings(new SWGSDRangel::SWGVORLocalizerSettings());
@@ -5418,6 +5624,11 @@ bool WebAPIRequestMapper::getFeatureActions(
         {
             featureActions->setRigCtlServerActions(new SWGSDRangel::SWGRigCtlServerActions());
             featureActions->getRigCtlServerActions()->fromJsonObject(actionsJsonObject);
+        }
+        else if (featureActionsKey == "MCPServerActions")
+        {
+            featureActions->setMcpServerActions(new SWGSDRangel::SWGMCPServerActions());
+            featureActions->getMcpServerActions()->fromJsonObject(actionsJsonObject);
         }
         else if (featureActionsKey == "SatelliteTrackerActions")
         {
@@ -5508,6 +5719,11 @@ void WebAPIRequestMapper::extractKeys(
 void WebAPIRequestMapper::resetSpectrumSettings(SWGSDRangel::SWGGLSpectrum& spectrumSettings)
 {
     spectrumSettings.cleanup();
+}
+
+void WebAPIRequestMapper::resetSpectrumReport(SWGSDRangel::SWGGLSpectrumReport& spectrumReport)
+{
+    spectrumReport.cleanup();
 }
 
 void WebAPIRequestMapper::resetDeviceSettings(SWGSDRangel::SWGDeviceSettings& deviceSettings)
@@ -5709,6 +5925,7 @@ void WebAPIRequestMapper::resetFeatureSettings(SWGSDRangel::SWGFeatureSettings& 
     featureSettings.setStarTrackerSettings(nullptr);
     featureSettings.setRadiosondeSettings(nullptr);
     featureSettings.setRigCtlServerSettings(nullptr);
+    featureSettings.setMcpServerSettings(nullptr);
 }
 
 void WebAPIRequestMapper::resetFeatureReport(SWGSDRangel::SWGFeatureReport& featureReport)
@@ -5720,6 +5937,7 @@ void WebAPIRequestMapper::resetFeatureReport(SWGSDRangel::SWGFeatureReport& feat
     featureReport.setGs232ControllerReport(nullptr);
     featureReport.setPerTesterReport(nullptr);
     featureReport.setRigCtlServerReport(nullptr);
+    featureReport.setMcpServerReport(nullptr);
     featureReport.setMapReport(nullptr);
     featureReport.setSatelliteTrackerReport(nullptr);
     featureReport.setSimplePttReport(nullptr);
@@ -5737,6 +5955,7 @@ void WebAPIRequestMapper::resetFeatureActions(SWGSDRangel::SWGFeatureActions& fe
     featureActions.setMapActions(nullptr);
     featureActions.setPerTesterActions(nullptr);
     featureActions.setRigCtlServerActions(nullptr);
+    featureActions.setMcpServerActions(nullptr);
     featureActions.setSatelliteTrackerActions(nullptr);
     featureActions.setSimplePttActions(nullptr);
     featureActions.setSkyMapActions(nullptr);

@@ -609,10 +609,21 @@ void ADSBDemod::webapiFormatChannelReport(SWGSDRangel::SWGChannelReport& respons
         } else {
             aircraftState->setCallsign(new QString(report.m_callsign));
         }
-        aircraftState->setLatitude(report.m_latitude);
-        aircraftState->setLongitude(report.m_longitude);
-        aircraftState->setAltitude(report.m_altitude);
-        aircraftState->setGroundSpeed(report.m_groundSpeed);
+        // Only fields that have been received are set, so that unknown ones are left out of the
+        // JSON rather than reported as zero, which is a real position, altitude and speed
+        if (report.m_positionValid)
+        {
+            aircraftState->setLatitude(report.m_latitude);
+            aircraftState->setLongitude(report.m_longitude);
+        }
+
+        if (report.m_altitudeValid) {
+            aircraftState->setAltitude(report.m_altitude);
+        }
+
+        if (report.m_groundSpeedValid) {
+            aircraftState->setGroundSpeed(report.m_groundSpeed);
+        }
         list->append(aircraftState);
     }
 }

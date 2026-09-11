@@ -22,6 +22,7 @@
 
 #include <QThread>
 #include <QHash>
+#include <QDateTime>
 #include <QNetworkRequest>
 
 #include "feature/feature.h"
@@ -119,6 +120,82 @@ public:
         {}
     };
 
+    // A station or object as the GUI knows it. A station is heard long before it reports a
+    // position, and zero is a valid latitude, course and speed, so each value has its own flag
+    struct Station
+    {
+        QString m_callsign;
+        QString m_reportingStation;
+        QString m_symbol;
+        QString m_status;
+        QString m_comment;
+        QString m_antennaDirectivity;
+        QString m_telemetryProjectName;
+        float m_latitude;
+        float m_longitude;
+        float m_altitude;
+        float m_course;
+        float m_speed;
+        float m_powerWatts;
+        float m_antennaHeight;
+        float m_antennaGain;
+        float m_radioRange;
+        int m_packets;
+        QDateTime m_lastPacket;
+        bool m_isObject;
+        bool m_hasWeather;
+        bool m_hasTelemetry;
+        bool m_hasPosition;
+        bool m_hasAltitude;
+        bool m_hasCourseAndSpeed;
+        bool m_hasStationDetails;
+        bool m_hasRadioRange;
+
+        Station() :
+            m_latitude(0.0f),
+            m_longitude(0.0f),
+            m_altitude(0.0f),
+            m_course(0.0f),
+            m_speed(0.0f),
+            m_powerWatts(0.0f),
+            m_antennaHeight(0.0f),
+            m_antennaGain(0.0f),
+            m_radioRange(0.0f),
+            m_packets(0),
+            m_isObject(false),
+            m_hasWeather(false),
+            m_hasTelemetry(false),
+            m_hasPosition(false),
+            m_hasAltitude(false),
+            m_hasCourseAndSpeed(false),
+            m_hasStationDetails(false),
+            m_hasRadioRange(false)
+        { }
+    };
+
+    // Sent from the GUI, which holds the station hash, so the report has something to serve
+    class MsgReportStations : public Message {
+        MESSAGE_CLASS_DECLARATION
+
+    public:
+        QList<Station>& getStations() { return m_stations; }
+        int getPacketCount() const { return m_packetCount; }
+        void setPacketCount(int count) { m_packetCount = count; }
+
+        static MsgReportStations* create() {
+            return new MsgReportStations();
+        }
+
+    private:
+        QList<Station> m_stations;
+        int m_packetCount;
+
+        MsgReportStations() :
+            Message(),
+            m_packetCount(0)
+        { }
+    };
+
     APRS(WebAPIAdapterInterface *webAPIAdapterInterface);
     virtual ~APRS();
     virtual void destroy() { delete this; }
@@ -135,6 +212,10 @@ public:
             SWGSDRangel::SWGDeviceState& response,
             QString& errorMessage);
 
+    virtual int webapiReportGet(
+            SWGSDRangel::SWGFeatureReport& response,
+            QString& errorMessage);
+
     virtual int webapiSettingsGet(
             SWGSDRangel::SWGFeatureSettings& response,
             QString& errorMessage);
@@ -144,6 +225,8 @@ public:
             const QStringList& featureSettingsKeys,
             SWGSDRangel::SWGFeatureSettings& response,
             QString& errorMessage);
+
+    void webapiFormatFeatureReport(SWGSDRangel::SWGFeatureReport& response);
 
     static void webapiFormatFeatureSettings(
         SWGSDRangel::SWGFeatureSettings& response,
@@ -159,6 +242,9 @@ public:
 
 private:
     QThread *m_thread;
+    QList<Station> m_stations;      //!< Latest snapshot pushed by the GUI
+    QDateTime m_stationsUpdated;    //!< When that snapshot was taken
+    int m_packetCount;              //!< Packets across all stations in that snapshot
     APRSWorker *m_worker;
     APRSSettings m_settings;
     AvailableChannelOrFeatureHandler m_availableChannelHandler;

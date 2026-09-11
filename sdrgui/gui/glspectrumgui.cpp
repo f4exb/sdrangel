@@ -135,6 +135,9 @@ void GLSpectrumGUI::setBuddies(SpectrumVis* spectrumVis, GLSpectrum* glSpectrum)
 {
     m_spectrumVis = spectrumVis;
     m_glSpectrum = glSpectrum;
+    // Asked for through the web API: the arithmetic and the annotation markers live here
+    connect(m_glSpectrum, &GLSpectrum::requestAutoscale, this, [this]() { on_autoscale_clicked(false); });
+    connect(m_glSpectrum, &GLSpectrum::requestGotoMarker, this, [this](int index) { on_gotoMarker_currentIndexChanged(index + 1); });
     m_glSpectrum->setSpectrumVis(spectrumVis);
     m_glSpectrum->setMessageQueueToGUI(&m_messageQueue);
     m_spectrumVis->setMessageQueueToGUI(&m_messageQueue);
