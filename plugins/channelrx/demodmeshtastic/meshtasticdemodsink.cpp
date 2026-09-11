@@ -1234,7 +1234,7 @@ void MeshtasticDemodSink::applyChannelSettings(int channelSampleRate, int bandwi
         const int targetFrameSyncRate = std::max(1, bandwidth * static_cast<int>(m_osFactor));
         // Keep the anti-alias/channel filter narrow around the configured LoRa bandwidth.
         // A too-wide cutoff destabilizes preamble bin tracking in DETECT.
-        m_interpolator.create(16, channelSampleRate, m_bandwidth / 1.9f);
+        m_interpolator.create(16, channelSampleRate, bandwidth / 1.9f);
         m_interpolatorDistance = (Real) channelSampleRate / (Real) targetFrameSyncRate;
         m_sampleDistanceRemain = 0;
         m_osCounter = 0;
