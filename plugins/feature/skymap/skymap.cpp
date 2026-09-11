@@ -462,11 +462,7 @@ void SkyMap::webapiFormatFeatureReport(SWGSDRangel::SWGFeatureReport& response)
         *response.getSkyMapReport()->getDateTime() = m_viewDetails.m_dateTime.toString(Qt::ISODateWithMs);
     } else {
         //response.getSkyMapReport()->setDateTime(new QString(skymapDateTime));
-        if (response.getSkyMapReport()->getDateTime()) {
-            *response.getSkyMapReport()->getDateTime() = m_viewDetails.m_dateTime.toString(Qt::ISODateWithMs);
-        } else {
-            response.getSkyMapReport()->setDateTime(new QString(m_viewDetails.m_dateTime.toString(Qt::ISODateWithMs)));
-        }
+        response.getSkyMapReport()->setDateTime(new QString(m_viewDetails.m_dateTime.toString(Qt::ISODateWithMs)));
     }
     response.getSkyMapReport()->setRa(m_viewDetails.m_ra);
     response.getSkyMapReport()->setDec(m_viewDetails.m_dec);

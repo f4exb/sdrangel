@@ -964,10 +964,10 @@ void RadioAstronomy::webapiUpdateChannelSettings(
     if (channelSettingsKeys.contains("sweep1Delay")) {
         settings.m_sweep1Delay = response.getRadioAstronomySettings()->getSweep1Delay();
     }
-    if (channelSettingsKeys.contains("sweep12Start")) {
+    if (channelSettingsKeys.contains("sweep2Start")) {
         settings.m_sweep2Start = response.getRadioAstronomySettings()->getSweep2Start();
     }
-    if (channelSettingsKeys.contains("sweep12Stop")) {
+    if (channelSettingsKeys.contains("sweep2Stop")) {
         settings.m_sweep2Stop = response.getRadioAstronomySettings()->getSweep2Stop();
     }
     if (channelSettingsKeys.contains("sweep2Step")) {

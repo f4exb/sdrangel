@@ -364,6 +364,9 @@ void PSK31::webapiUpdateChannelSettings(
     if (channelSettingsKeys.contains("text")) {
         settings.m_text = *response.getPsk31ModSettings()->getText();
     }
+    if (channelSettingsKeys.contains("pulseShaping")) {
+        settings.m_pulseShaping = response.getPsk31ModSettings()->getPulseShaping() != 0;
+    }
     if (channelSettingsKeys.contains("beta")) {
         settings.m_beta = response.getPsk31ModSettings()->getBeta();
     }

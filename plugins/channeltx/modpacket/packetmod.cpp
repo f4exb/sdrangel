@@ -445,6 +445,9 @@ void PacketMod::webapiUpdateChannelSettings(
     if (channelSettingsKeys.contains("polynomial")) {
         settings.m_polynomial = response.getPacketModSettings()->getPolynomial();
     }
+    if (channelSettingsKeys.contains("pulseShaping")) {
+        settings.m_pulseShaping = response.getPacketModSettings()->getPulseShaping() != 0;
+    }
     if (channelSettingsKeys.contains("beta")) {
         settings.m_beta = response.getPacketModSettings()->getBeta();
     }

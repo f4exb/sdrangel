@@ -240,6 +240,17 @@ void SIDMain::webapiFormatFeatureSettings(
     }
 
     response.getSidSettings()->setRgbColor(settings.m_rgbColor);
+    response.getSidSettings()->setPeriod(settings.m_period);
+    response.getSidSettings()->setAutosave(settings.m_autosave ? 1 : 0);
+    response.getSidSettings()->setAutoload(settings.m_autoload ? 1 : 0);
+    response.getSidSettings()->setAutosavePeriod(settings.m_autosavePeriod);
+
+    if (response.getSidSettings()->getFilename()) {
+        *response.getSidSettings()->getFilename() = settings.m_filename;
+    } else {
+        response.getSidSettings()->setFilename(new QString(settings.m_filename));
+    }
+
     response.getSidSettings()->setUseReverseApi(settings.m_useReverseAPI ? 1 : 0);
 
     if (response.getSidSettings()->getReverseApiAddress()) {
@@ -277,6 +288,21 @@ void SIDMain::webapiUpdateFeatureSettings(
     }
     if (featureSettingsKeys.contains("rgbColor")) {
         settings.m_rgbColor = response.getSidSettings()->getRgbColor();
+    }
+    if (featureSettingsKeys.contains("period")) {
+        settings.m_period = response.getSidSettings()->getPeriod();
+    }
+    if (featureSettingsKeys.contains("autosave")) {
+        settings.m_autosave = response.getSidSettings()->getAutosave() != 0;
+    }
+    if (featureSettingsKeys.contains("autoload")) {
+        settings.m_autoload = response.getSidSettings()->getAutoload() != 0;
+    }
+    if (featureSettingsKeys.contains("autosavePeriod")) {
+        settings.m_autosavePeriod = response.getSidSettings()->getAutosavePeriod();
+    }
+    if (featureSettingsKeys.contains("filename")) {
+        settings.m_filename = *response.getSidSettings()->getFilename();
     }
     if (featureSettingsKeys.contains("useReverseAPI")) {
         settings.m_useReverseAPI = response.getSidSettings()->getUseReverseApi() != 0;

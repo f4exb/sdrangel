@@ -392,6 +392,9 @@ void StarTracker::webapiFormatFeatureSettings(
     } else {
         response.getStarTrackerSettings()->setRefraction(new QString(settings.m_refraction));
     }
+    response.getStarTrackerSettings()->setDrawSunOnMap(settings.m_drawSunOnMap ? 1 : 0);
+    response.getStarTrackerSettings()->setDrawMoonOnMap(settings.m_drawMoonOnMap ? 1 : 0);
+    response.getStarTrackerSettings()->setDrawStarOnMap(settings.m_drawStarOnMap ? 1 : 0);
     response.getStarTrackerSettings()->setPressure(settings.m_pressure);
     response.getStarTrackerSettings()->setTemperature(settings.m_temperature);
     response.getStarTrackerSettings()->setHumidity(settings.m_humidity);
@@ -535,6 +538,18 @@ void StarTracker::webapiUpdateFeatureSettings(
     }
     if (featureSettingsKeys.contains("elevationOffset")) {
         settings.m_elevationOffset = response.getStarTrackerSettings()->getElevationOffset();
+    }
+    if (featureSettingsKeys.contains("drawSunOnMap")) {
+        settings.m_drawSunOnMap = response.getStarTrackerSettings()->getDrawSunOnMap() != 0;
+    }
+    if (featureSettingsKeys.contains("drawMoonOnMap")) {
+        settings.m_drawMoonOnMap = response.getStarTrackerSettings()->getDrawMoonOnMap() != 0;
+    }
+    if (featureSettingsKeys.contains("drawStarOnMap")) {
+        settings.m_drawStarOnMap = response.getStarTrackerSettings()->getDrawStarOnMap() != 0;
+    }
+    if (featureSettingsKeys.contains("refraction")) {
+        settings.m_refraction = *response.getStarTrackerSettings()->getRefraction();
     }
     if (settings.m_rollupState && featureSettingsKeys.contains("rollupState")) {
         settings.m_rollupState->updateFrom(featureSettingsKeys, response.getStarTrackerSettings()->getRollupState());

@@ -532,6 +532,9 @@ void M17Mod::webapiUpdateChannelSettings(
     if (channelSettingsKeys.contains("aprsVia")) {
         settings.m_aprsVia = *response.getM17ModSettings()->getAprsVia();
     }
+    if (channelSettingsKeys.contains("aprsData")) {
+        settings.m_aprsData = *response.getM17ModSettings()->getAprsData();
+    }
     if (channelSettingsKeys.contains("aprsInsertPosition")) {
         settings.m_aprsInsertPosition = response.getM17ModSettings()->getAprsInsertPosition() != 0;
     }
@@ -641,6 +644,12 @@ void M17Mod::webapiFormatChannelSettings(SWGSDRangel::SWGChannelSettings& respon
         *response.getM17ModSettings()->getAprsVia() = settings.m_aprsVia;
     } else {
         response.getM17ModSettings()->setAprsVia(new QString(settings.m_aprsVia));
+    }
+
+    if (response.getM17ModSettings()->getAprsData()) {
+        *response.getM17ModSettings()->getAprsData() = settings.m_aprsData;
+    } else {
+        response.getM17ModSettings()->setAprsData(new QString(settings.m_aprsData));
     }
 
     response.getM17ModSettings()->setAprsInsertPosition(settings.m_aprsInsertPosition ? 1 : 0);

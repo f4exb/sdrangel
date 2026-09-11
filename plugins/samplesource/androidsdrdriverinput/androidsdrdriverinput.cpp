@@ -368,6 +368,10 @@ void AndroidSDRDriverInput::webapiUpdateDeviceSettings(
     if (deviceSettingsKeys.contains("agc")) {
         settings.m_agc = response.getAndroidSdrDriverInputSettings()->getAgc() != 0;
     }
+    // The API exposes a single gain, which is the first stage, as the report does
+    if (deviceSettingsKeys.contains("gain")) {
+        settings.m_gain[0] = response.getAndroidSdrDriverInputSettings()->getGain();
+    }
     if (deviceSettingsKeys.contains("rfBW")) {
         settings.m_rfBW = response.getAndroidSdrDriverInputSettings()->getRfBw();
     }

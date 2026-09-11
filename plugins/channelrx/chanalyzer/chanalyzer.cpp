@@ -299,13 +299,13 @@ void ChannelAnalyzer::webapiUpdateChannelSettings(
         const QStringList& channelSettingsKeys,
         SWGSDRangel::SWGChannelSettings& response)
 {
-    if (channelSettingsKeys.contains("inputFrequencyOffset")) {
+    if (channelSettingsKeys.contains("inputFrequencyOffset") || channelSettingsKeys.contains("frequency")) {
         settings.m_inputFrequencyOffset = response.getChannelAnalyzerSettings()->getFrequency();
     }
-    if (channelSettingsKeys.contains("rationalDownSample ")) {
+    if (channelSettingsKeys.contains("rationalDownSample") || channelSettingsKeys.contains("downSample")) {
         settings.m_rationalDownSample = response.getChannelAnalyzerSettings()->getDownSample() != 0;
     }
-    if (channelSettingsKeys.contains("rationalDownSamplerRate")) {
+    if (channelSettingsKeys.contains("rationalDownSamplerRate") || channelSettingsKeys.contains("downSamplerRate")) {
         settings.m_rationalDownSamplerRate = response.getChannelAnalyzerSettings()->getDownSampleRate();
     }
     if (channelSettingsKeys.contains("bandwidth")) {

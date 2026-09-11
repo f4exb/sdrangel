@@ -1304,6 +1304,9 @@ void XTRXInput::webapiUpdateDeviceSettings(
     if (deviceSettingsKeys.contains("iqOrder")) {
         settings.m_iqOrder = response.getXtrxInputSettings()->getIqOrder() != 0;
     }
+    if (deviceSettingsKeys.contains("title")) {
+        settings.m_title = *response.getXtrxInputSettings()->getTitle();
+    }
     if (deviceSettingsKeys.contains("lpfBW")) {
         settings.m_lpfBW = response.getXtrxInputSettings()->getLpfBw();
     }
@@ -1375,6 +1378,12 @@ void XTRXInput::webapiFormatDeviceSettings(SWGSDRangel::SWGDeviceSettings& respo
     response.getXtrxInputSettings()->setExtClock(settings.m_extClock ? 1 : 0);
     response.getXtrxInputSettings()->setExtClockFreq(settings.m_extClockFreq);
     response.getXtrxInputSettings()->setPwrmode(settings.m_pwrmode);
+
+    if (response.getXtrxInputSettings()->getTitle()) {
+        *response.getXtrxInputSettings()->getTitle() = settings.m_title;
+    } else {
+        response.getXtrxInputSettings()->setTitle(new QString(settings.m_title));
+    }
 
     response.getXtrxInputSettings()->setUseReverseApi(settings.m_useReverseAPI ? 1 : 0);
 

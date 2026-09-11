@@ -503,8 +503,8 @@ void AFC::webapiUpdateFeatureSettings(
     if (featureSettingsKeys.contains("hasTargetFrequency")) {
         settings.m_hasTargetFrequency = response.getAfcSettings()->getHasTargetFrequency() != 0;
     }
-    if (featureSettingsKeys.contains("hasTargetFrequency")) {
-        settings.m_hasTargetFrequency = response.getAfcSettings()->getHasTargetFrequency() != 0;
+    if (featureSettingsKeys.contains("transverterTarget")) {
+        settings.m_transverterTarget = response.getAfcSettings()->getTransverterTarget() != 0;
     }
     if (featureSettingsKeys.contains("targetFrequency")) {
         settings.m_targetFrequency = response.getAfcSettings()->getTargetFrequency();
@@ -571,6 +571,9 @@ void AFC::webapiReverseSendSettings(const QList<QString>& channelSettingsKeys, c
     }
     if (channelSettingsKeys.contains("hasTargetFrequency") || force) {
         swgAFCSettings->setHasTargetFrequency(settings.m_hasTargetFrequency ? 1 : 0);
+    }
+    if (channelSettingsKeys.contains("transverterTarget") || force) {
+        swgAFCSettings->setTransverterTarget(settings.m_transverterTarget ? 1 : 0);
     }
     if (channelSettingsKeys.contains("targetFrequency") || force) {
         swgAFCSettings->setTargetFrequency(settings.m_targetFrequency ? 1 : 0);

@@ -370,6 +370,9 @@ void RttyMod::webapiUpdateChannelSettings(
     if (channelSettingsKeys.contains("text")) {
         settings.m_text = *response.getRttyModSettings()->getText();
     }
+    if (channelSettingsKeys.contains("pulseShaping")) {
+        settings.m_pulseShaping = response.getRttyModSettings()->getPulseShaping() != 0;
+    }
     if (channelSettingsKeys.contains("beta")) {
         settings.m_beta = response.getRttyModSettings()->getBeta();
     }

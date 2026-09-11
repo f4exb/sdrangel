@@ -447,6 +447,9 @@ void SSBDemod::webapiUpdateChannelSettings(
     if (channelSettingsKeys.contains("agcThresholdGate")) {
         settings.m_agcThresholdGate = response.getSsbDemodSettings()->getAgcThresholdGate();
     }
+    if (channelSettingsKeys.contains("dnrScheme")) {
+        settings.m_dnrScheme = response.getSsbDemodSettings()->getDnrScheme();
+    }
     if (channelSettingsKeys.contains("dnr")) {
         settings.m_dnr = response.getSsbDemodSettings()->getDnr() != 0;
     }
