@@ -36,6 +36,7 @@
 #include "util/db.h"
 #include "util/csv.h"
 #include "util/units.h"
+#include "gui/messagedialog.h"
 #include "gui/crightclickenabler.h"
 #include "gui/basicchannelsettingsdialog.h"
 #include "dsp/dspengine.h"
@@ -897,12 +898,12 @@ void PagerDemodGUI::on_logOpen_clicked()
                 }
                 else
                 {
-                    QMessageBox::critical(this, "Pager Demod", error);
+                    MessageDialog::critical(this, "Pager Demod", error);
                 }
             }
             else
             {
-                QMessageBox::critical(this, "Pager Demod", QString("Failed to open file %1").arg(fileNames[0]));
+                MessageDialog::critical(this, "Pager Demod", QString("Failed to open file %1").arg(fileNames[0]));
             }
         }
     }

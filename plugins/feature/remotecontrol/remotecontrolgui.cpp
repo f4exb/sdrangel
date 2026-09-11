@@ -16,6 +16,7 @@
 ///////////////////////////////////////////////////////////////////////////////////
 
 #include "feature/featureuiset.h"
+#include "gui/messagedialog.h"
 #include "gui/basicfeaturesettingsdialog.h"
 #include "gui/flowlayout.h"
 #include "gui/scidoublespinbox.h"
@@ -89,7 +90,7 @@ bool RemoteControlGUI::handleMessage(const Message& message)
     else if (RemoteControl::MsgDeviceError::match(message))
     {
         const RemoteControl::MsgDeviceError& msg = (RemoteControl::MsgDeviceError&) message;
-        QMessageBox::critical(this,  "Remote Control Error", msg.getErrorMessage());
+        MessageDialog::critical(this,  "Remote Control Error", msg.getErrorMessage());
         return true;
     }
     else if (RemoteControl::MsgDeviceUnavailable::match(message))

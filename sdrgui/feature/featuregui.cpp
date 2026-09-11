@@ -31,7 +31,9 @@
 #include <QOpenGLWidget>
 #include <QMdiArea>
 
+#include <QMessageBox>
 #include "mainwindow.h"
+#include "gui/messagedialog.h"
 #include "gui/workspaceselectiondialog.h"
 #include "featuregui.h"
 

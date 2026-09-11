@@ -25,6 +25,7 @@
 #include "feature/featureuiset.h"
 #include "feature/featurewebapiutils.h"
 #include "channel/channelwebapiutils.h"
+#include "gui/messagedialog.h"
 #include "gui/crightclickenabler.h"
 #include "gui/basicfeaturesettingsdialog.h"
 #include "gui/dialogpositioner.h"
@@ -1926,15 +1927,15 @@ void SIDGUI::sdoVideoError(QMediaPlayer::Error error)
     // Qt5/Windows doesn't support mp4 by default, so suggest K-Lite codecs
     // Qt6 doesn't need these
     if (error == QMediaPlayer::FormatError) {
-        QMessageBox::warning(this, "Video Error", "Unable to play video. Please try installing mp4/h264 codec, such as: <a href='https://www.codecguide.com/download_k-lite_codec_pack_basic.htm'>K-Lite codedcs</a>.");
+        MessageDialog::warning(this, "Video Error", "Unable to play video. Please try installing mp4/h264 codec, such as: <a href='https://www.codecguide.com/download_k-lite_codec_pack_basic.htm'>K-Lite codedcs</a>.");
     }
 #elif LINUX
     if (error == QMediaPlayer::FormatError) {
-        QMessageBox::warning(this, "Video Error", "Unable to play video. Please try installing mp4/h264 codec, such as gstreamer libav.");
+        MessageDialog::warning(this, "Video Error", "Unable to play video. Please try installing mp4/h264 codec, such as gstreamer libav.");
     }
 #else
     if (error == QMediaPlayer::FormatError) {
-        QMessageBox::warning(this, "Video Error", "Unable to play video. Please try installing an mp4/h264 codec.");
+        MessageDialog::warning(this, "Video Error", "Unable to play video. Please try installing an mp4/h264 codec.");
     }
 #endif
 }
@@ -1994,7 +1995,7 @@ void SIDGUI::on_showSats_clicked()
     }
     else
     {
-        QMessageBox::warning(this, "Error", "Satellite Tracker feature not available");
+        MessageDialog::warning(this, "Error", "Satellite Tracker feature not available");
     }
 }
 
@@ -2269,7 +2270,7 @@ void SIDGUI::writeCSV(const QString& filename)
     QFile file(filename);
     if (!file.open(QIODevice::WriteOnly | QIODevice::Text))
     {
-        QMessageBox::critical(this, "SID", QString("Failed to open file %1").arg(filename));
+        MessageDialog::critical(this, "SID", QString("Failed to open file %1").arg(filename));
         return;
     }
     QTextStream out(&file);
@@ -2373,7 +2374,7 @@ void SIDGUI::readCSV(const QString& filename, bool autoload)
     if (!file.open(QIODevice::ReadOnly | QIODevice::Text))
     {
         if (!autoload) {
-            QMessageBox::critical(this, "SID", QString("Failed to open file %1").arg(filename));
+            MessageDialog::critical(this, "SID", QString("Failed to open file %1").arg(filename));
         }
         return;
     }
@@ -2536,7 +2537,7 @@ void SIDGUI::on_saveChartImage_clicked()
             QPainter painter(&image);
             ui->chart->render(&painter);
             if (!image.save(fileNames[0])) {
-                QMessageBox::critical(this, "SID", QString("Failed to save image to %1").arg(fileNames[0]));
+                MessageDialog::critical(this, "SID", QString("Failed to save image to %1").arg(fileNames[0]));
             }
         }
     }

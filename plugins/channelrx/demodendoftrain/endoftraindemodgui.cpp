@@ -34,6 +34,7 @@
 #include "plugin/pluginapi.h"
 #include "util/csv.h"
 #include "util/db.h"
+#include "gui/messagedialog.h"
 #include "gui/basicchannelsettingsdialog.h"
 #include "dsp/dspengine.h"
 #include "dsp/glscopesettings.h"
@@ -728,12 +729,12 @@ void EndOfTrainDemodGUI::on_logOpen_clicked()
                 }
                 else
                 {
-                    QMessageBox::critical(this, "End-Of-Train Demod", error);
+                    MessageDialog::critical(this, "End-Of-Train Demod", error);
                 }
             }
             else
             {
-                QMessageBox::critical(this, "End-Of-Train Demod", QString("Failed to open file %1").arg(fileNames[0]));
+                MessageDialog::critical(this, "End-Of-Train Demod", QString("Failed to open file %1").arg(fileNames[0]));
             }
         }
     }

@@ -36,6 +36,7 @@
 #include "plugin/pluginapi.h"
 #include "util/morse.h"
 #include "util/units.h"
+#include "gui/messagedialog.h"
 #include "gui/basicfeaturesettingsdialog.h"
 #include "gui/dialpopup.h"
 #include "gui/dialogpositioner.h"
@@ -920,7 +921,7 @@ void VORLocalizerGUI::downloadingURL(const QString& url)
 
 void VORLocalizerGUI::downloadError(const QString& error)
 {
-    QMessageBox::critical(this, "VOR Localizer", error);
+    MessageDialog::critical(this, "VOR Localizer", error);
 
     if (m_progressDialog)
     {

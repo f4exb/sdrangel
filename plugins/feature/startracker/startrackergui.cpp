@@ -38,6 +38,7 @@
 #include "feature/featureutils.h"
 #include "feature/featurewebapiutils.h"
 #include "channel/channelwebapiutils.h"
+#include "gui/messagedialog.h"
 #include "gui/basicfeaturesettingsdialog.h"
 #include "gui/dmsspinbox.h"
 #include "gui/graphicsviewzoom.h"
@@ -1614,7 +1615,7 @@ void StarTrackerGUI::on_saveAnimation_clicked()
                 apng.addImage(m_animationImages[i]);
             }
             if (!apng.save(fileNames[0])) {
-                QMessageBox::critical(this, "Star Tracker", QString("Failed to write to file %1").arg(fileNames[0]));
+                MessageDialog::critical(this, "Star Tracker", QString("Failed to write to file %1").arg(fileNames[0]));
             }
         }
     }
@@ -3330,7 +3331,7 @@ void StarTrackerGUI::downloadFinished(const QString& filename, bool success)
     if (success && filename.endsWith("solar_flux.srd")) {
         readSolarFlux();
     } else if (!success) {
-        QMessageBox::warning(this, "Failed to download file", QString("Failed to download %1").arg(filename));
+        MessageDialog::warning(this, "Failed to download file", QString("Failed to download %1").arg(filename));
     }
 }
 

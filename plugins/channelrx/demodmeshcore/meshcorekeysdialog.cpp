@@ -20,6 +20,8 @@
 #include "ui_meshcorekeysdialog.h"
 #include "meshcorepacket.h"
 
+#include "gui/messagedialog.h"
+
 MeshcoreKeysDialog::MeshcoreKeysDialog(QWidget *parent) :
     QDialog(parent),
     ui(new Ui::MeshcoreKeysDialog)
@@ -53,7 +55,7 @@ void MeshcoreKeysDialog::accept()
 {
     if (!validateCurrentInput())
     {
-        QMessageBox::warning(this, tr("Invalid Keys"), tr("Fix the Meshcore key list before saving."));
+        MessageDialog::warning(this, tr("Invalid Keys"), tr("Fix the Meshcore key list before saving."));
         return;
     }
 

@@ -31,6 +31,7 @@
 #include "feature/featureuiset.h"
 #include "feature/featureutils.h"
 #include "feature/featurewebapiutils.h"
+#include "gui/messagedialog.h"
 #include "gui/basicfeaturesettingsdialog.h"
 #include "gui/dialogpositioner.h"
 #include "util/units.h"
@@ -200,7 +201,7 @@ bool SatelliteTrackerGUI::handleMessage(const Message& message)
     {
         SatelliteTracker::MsgError& errorMsg = (SatelliteTracker::MsgError&) message;
         QString error = errorMsg.getError();
-        QMessageBox::critical(this, "Satellite Tracker", error);
+        MessageDialog::critical(this, "Satellite Tracker", error);
         return true;
     }
 

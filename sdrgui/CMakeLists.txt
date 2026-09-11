@@ -36,6 +36,7 @@ set(sdrgui_SOURCES
     gui/devicestreamselectiondialog.cpp
     gui/deviceuserargsdialog.cpp
     gui/dialogpositioner.cpp
+    gui/messagedialog.cpp
     gui/dialpopup.cpp
     gui/dmsspinbox.cpp
     gui/editcommanddialog.cpp
@@ -167,6 +168,7 @@ set(sdrgui_HEADERS
     gui/devicestreamselectiondialog.h
     gui/deviceuserargsdialog.h
     gui/dialogpositioner.h
+    gui/messagedialog.h
     gui/dialpopup.h
     gui/dmsspinbox.h
     gui/doublevalidator.h

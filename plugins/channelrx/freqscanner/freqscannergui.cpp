@@ -30,6 +30,7 @@
 #include "dsp/dspengine.h"
 #include "dsp/dspcommands.h"
 #include "ui_freqscannergui.h"
+#include "gui/messagedialog.h"
 #include "gui/basicchannelsettingsdialog.h"
 #include "dsp/dspengine.h"
 #include "gui/tabletapandhold.h"
@@ -958,13 +959,13 @@ void FreqScannerGUI::on_importFreqs_clicked()
             {
                 QString actualColNames = colIndexes.keys().join(" ");
                 QString expectedColNames = colNames.join(" ");
-                QMessageBox::critical(this, "Frequency Scanner", QString("Failed to read expected header in CSV file. %1 != %2").arg(actualColNames).arg(expectedColNames));
+                MessageDialog::critical(this, "Frequency Scanner", QString("Failed to read expected header in CSV file. %1 != %2").arg(actualColNames).arg(expectedColNames));
                 return;
             }
         }
         else
         {
-            QMessageBox::warning(this, "Frequency Scanner", QString("Failed to open file %1").arg(filename));
+            MessageDialog::warning(this, "Frequency Scanner", QString("Failed to open file %1").arg(filename));
         }
     }
 }
@@ -1005,7 +1006,7 @@ void FreqScannerGUI::on_exportFreqs_clicked()
         }
         else
         {
-            QMessageBox::warning(this, "Frequency Scanner", QString("Failed to open file %1").arg(filename));
+            MessageDialog::warning(this, "Frequency Scanner", QString("Failed to open file %1").arg(filename));
         }
     }
 }

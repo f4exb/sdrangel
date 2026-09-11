@@ -32,6 +32,7 @@
 
 #include "feature/featureuiset.h"
 #include "feature/featurewebapiutils.h"
+#include "gui/messagedialog.h"
 #include "gui/basicfeaturesettingsdialog.h"
 #include "gui/dialogpositioner.h"
 #include "maincore.h"
