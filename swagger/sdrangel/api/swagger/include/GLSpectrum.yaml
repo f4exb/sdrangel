@@ -176,12 +176,12 @@ GLSpectrum:
       description: Colour-map name used for waterfall and 3D spectrogram rendering.
       type: string
     spectrumStyle:
-      description: Current spectrum trace style: 0 line, 1 filled, 2 gradient.
+      description: "Current spectrum trace style: 0 line, 1 filled, 2 gradient."
       type: integer
       minimum: 0
       maximum: 2
     measurement:
-      description: Measurement mode: 0 none, 1 peaks, 2 channel power, 3 adjacent-channel power, 4 occupied bandwidth, 5 3 dB bandwidth, 6 SNR, 7 mask.
+      description: "Measurement mode: 0 none, 1 peaks, 2 channel power, 3 adjacent-channel power, 4 occupied bandwidth, 5 3 dB bandwidth, 6 SNR, 7 mask."
       type: integer
       minimum: 0
       maximum: 7
@@ -214,7 +214,7 @@ GLSpectrum:
       minimum: 0
       maximum: 1
     measurementsPosition:
-      description: Measurement panel position: 0 above, 1 below, 2 left, 3 right.
+      description: "Measurement panel position: 0 above, 1 below, 2 left, 3 right."
       type: integer
       minimum: 0
       maximum: 3
@@ -228,7 +228,7 @@ GLSpectrum:
       minimum: 0
       maximum: 1
     showControls:
-      description: Spectrum control visibility: 0 minimum, 1 standard, 2 all.
+      description: "Spectrum control visibility: 0 minimum, 1 standard, 2 all."
       type: integer
       minimum: 0
       maximum: 2
@@ -242,7 +242,7 @@ GLSpectrum:
       minimum: 0
       maximum: 1
     waterfallTimeUnits:
-      description: Waterfall time axis: 0 offset, 1 local time, 2 UTC.
+      description: "Waterfall time axis: 0 offset, 1 local time, 2 UTC."
       type: integer
       minimum: 0
       maximum: 2
@@ -259,7 +259,7 @@ GLSpectrum:
       type: integer
       minimum: 1
     mathMode:
-      description: Spectrum math mode: 0 none, 1-4 moving-average modes, 5-10 saved-memory comparison modes.
+      description: "Spectrum math mode: 0 none, 1-4 moving-average modes, 5-10 saved-memory comparison modes."
       type: integer
       minimum: 0
       maximum: 10
