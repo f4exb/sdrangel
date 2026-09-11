@@ -68,6 +68,7 @@ public:
     void orderByIndex(QList<MainSpectrumGUI *> &list);
     void adjustSubWindowsAfterRestore();
     void updateStartStopButton(bool checked);
+    void updateMCPServerButton(bool available, bool running, int port);
     QToolButton *getMenuButton() const { return m_menuButton; }
 
 private:
@@ -82,6 +83,7 @@ private:
     QFrame *m_vline2;
     QPushButton *m_addFeatureButton;
     QPushButton *m_featurePresetsButton;
+    QPushButton *m_mcpServerButton;
     QFrame *m_vline3;
     QPushButton *m_cascadeSubWindows;
     QPushButton *m_tileSubWindows;
@@ -122,19 +124,20 @@ private slots:
     void subWindowActivated(QMdiSubWindow *window);
 public slots:
     void layoutSubWindows();
-
-signals:
     // Same as the corresponding title bar buttons, so the Window menu can invoke them
     void cascadeSubWindows();
     void tileSubWindows();
     void stackVerticalSubWindows();
     void stackSubWindows();
+
+signals:
+    void focused(Workspace *workspace); // The user is working in this workspace
     void addRxDevice(Workspace *inWorkspace, int deviceIndex);
     void addTxDevice(Workspace *inWorkspace, int deviceIndex);
-    void focused(Workspace *workspace); // The user is working in this workspace
     void addMIMODevice(Workspace *inWorkspace, int deviceIndex);
     void addFeature(Workspace*, int);
     void featurePresetsDialogRequested(QPoint, Workspace*);
+    void showMCPServer();
     void configurationPresetsDialogRequested();
     void startAllDevices(Workspace *inWorkspace);
     void stopAllDevices(Workspace *inWorkspace);

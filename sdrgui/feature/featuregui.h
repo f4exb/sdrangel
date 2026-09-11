@@ -81,8 +81,8 @@ protected:
     void resetContextMenuType() { m_contextMenuType = ContextMenuNone; }
     int getAdditionalHeight() const { return 22 + 22; } // height of top and bottom bars
     int gripSize() { return m_resizer.m_gripSize; } // size in pixels of resize grip around the window
-
     void updateStartStopButton(QAbstractButton *startStopButton);
+
     Feature *m_feature;
     int m_featureIndex;
     QString m_helpURL;

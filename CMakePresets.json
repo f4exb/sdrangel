@@ -66,6 +66,7 @@
         "ENABLE_XTRX": "ON",
         "ENABLE_USRP": "ON",
         "BUILD_SERVER": "OFF",
+        "BUILD_MCP_BUNDLE": "ON",
         "CMAKE_PREFIX_PATH": "C:/Qt/5.15.2/msvc2019_64;C:/Applications/boost_1_81_0"
       },
       "warnings": {

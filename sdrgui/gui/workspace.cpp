@@ -135,6 +135,14 @@ Workspace::Workspace(int index, QWidget *parent, Qt::WindowFlags flags) :
     m_featurePresetsButton->setFixedSize(20, 20);
     m_featurePresetsButton->setShortcut(QKeySequence(Qt::CTRL | Qt::SHIFT | Qt::Key_P));
 
+    m_mcpServerButton = new QPushButton("AI");
+    QFont mcpServerFont = m_mcpServerButton->font();
+    mcpServerFont.setBold(true);
+    m_mcpServerButton->setFont(mcpServerFont);
+    m_mcpServerButton->setToolTip("MCP Server feature is not open");
+    m_mcpServerButton->setFixedSize(20, 20);
+    m_mcpServerButton->setEnabled(false);
+
     m_vline3 = new QFrame();
     m_vline3->setFrameShape(QFrame::VLine);
     m_vline3->setFrameShadow(QFrame::Sunken);
@@ -204,6 +212,7 @@ Workspace::Workspace(int index, QWidget *parent, Qt::WindowFlags flags) :
     m_titleBarLayout->addWidget(m_stackSubWindows);
     m_titleBarLayout->addWidget(m_tabSubWindows);
     m_titleBarLayout->addStretch(1);
+    m_titleBarLayout->addWidget(m_mcpServerButton);
 #ifndef ANDROID
     // Can't undock on Android, as windows don't have title bars to allow them to be moved
     m_titleBarLayout->addWidget(m_normalButton);
@@ -248,6 +257,13 @@ Workspace::Workspace(int index, QWidget *parent, Qt::WindowFlags flags) :
         &QPushButton::clicked,
         this,
         &Workspace::featurePresetsDialog
+    );
+
+    QObject::connect(
+        m_mcpServerButton,
+        &QPushButton::clicked,
+        this,
+        &Workspace::showMCPServer
     );
 
     QObject::connect(
@@ -356,6 +372,7 @@ Workspace::~Workspace()
     delete m_addMIMODeviceButton;
     delete m_addFeatureButton;
     delete m_featurePresetsButton;
+    delete m_mcpServerButton;
     delete m_titleLabel;
     delete m_titleBarLayout;
     delete m_titleBar;
@@ -894,6 +911,10 @@ void Workspace::tabSubWindows()
 
 void Workspace::subWindowActivated(QMdiSubWindow *activatedWindow)
 {
+    if (activatedWindow) {
+        emit focused(this);
+    }
+
     if (activatedWindow && m_tabSubWindows->isChecked())
     {
         // Move other windows out of the way
@@ -911,10 +932,6 @@ void Workspace::subWindowActivated(QMdiSubWindow *activatedWindow)
 
 void Workspace::layoutSubWindows()
 {
-    if (activatedWindow) {
-        emit focused(this);
-    }
-
     if (m_autoStack) {
         stackSubWindows();
     }
@@ -946,6 +963,24 @@ void Workspace::updateStartStopButton(bool checked)
         m_startStopButton->setIcon(stopIcon);
         m_startStopButton->setStyleSheet("QToolButton { background-color : green; }");
         m_startStopButton->setToolTip("Stop all devices in workspace");
+    }
+}
+
+void Workspace::updateMCPServerButton(bool available, bool running, int port)
+{
+    m_mcpServerButton->setEnabled(available);
+    m_mcpServerButton->setStyleSheet(running
+        ? "QPushButton { background-color : green; }"
+        : QString());
+
+    if (!available) {
+        m_mcpServerButton->setToolTip("MCP Server feature is not open");
+    } else if (running && (port > 0)) {
+        m_mcpServerButton->setToolTip(QString("Show MCP Server (running on port %1)").arg(port));
+    } else if (running) {
+        m_mcpServerButton->setToolTip("Show MCP Server (running)");
+    } else {
+        m_mcpServerButton->setToolTip("Show MCP Server");
     }
 }
 
@@ -1137,4 +1172,3 @@ void Workspace::adjustSubWindowsAfterRestore()
         }
     }
 }
-

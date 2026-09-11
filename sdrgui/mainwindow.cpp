@@ -156,6 +156,9 @@ MainWindow::MainWindow(qtwebapp::LoggerWithFile *logger, const MainParser& parse
     m_mainCore->m_mainMessageQueue = &m_inputMessageQueue;
 	m_mainCore->m_settings.setAudioDeviceManager(m_dspEngine->getAudioDeviceManager());
 
+    connect(m_mainCore, &MainCore::featureAdded, this, &MainWindow::mcpServerFeatureAdded);
+    connect(m_mainCore, &MainCore::featureRemoved, this, &MainWindow::mcpServerFeatureRemoved);
+
     QFontDatabase::addApplicationFont(":/LiberationSans-Regular.ttf");
     QFontDatabase::addApplicationFont(":/LiberationMono-Regular.ttf");
 
@@ -280,6 +283,7 @@ MainWindow::MainWindow(qtwebapp::LoggerWithFile *logger, const MainParser& parse
     InitFSM *fsm = new InitFSM(this, splash, !parser.getScratch() && !parser.getRemoteTCPSink(), !parser.getRemoteTCPSink());
     connect(fsm, &InitFSM::finished, fsm, &InitFSM::deleteLater);
     connect(fsm, &InitFSM::finished, splash, &SDRangelSplash::deleteLater);
+    connect(fsm, &InitFSM::finished, this, &MainWindow::startMCPServer);
     if (parser.getRemoteTCPSink()) {
         connect(fsm, &InitFSM::finished, this, &MainWindow::startRemoteTCPSink);
     } else if (parser.getStart()) {
@@ -778,13 +782,13 @@ void RemoveDeviceSetFSM::removeUI()
     } else {
         m_deviceUISet->m_deviceAPI->getSampleMIMO()->setMessageQueueToGUI(nullptr); // have sink stop sending messages to the GUI
     }
+    // As for features: QObject only drops an object's connections in ~QObject, so a signal can
+    // still reach the GUI after the derived destructor has deleted its ui object.
+    QObject::disconnect(m_deviceUISet->m_deviceAPI, nullptr, m_deviceUISet->m_deviceGUI, nullptr);
     delete m_deviceUISet->m_deviceGUI;
     m_deviceUISet->m_deviceAPI->resetSamplingDeviceId();
     if (!m_deviceMIMOEngine) {
         m_deviceUISet->m_deviceAPI->clearBuddiesLists(); // clear old API buddies lists
-    // As for features: QObject only drops an object's connections in ~QObject, so a signal can
-    // still reach the GUI after the derived destructor has deleted its ui object.
-    QObject::disconnect(m_deviceUISet->m_deviceAPI, nullptr, m_deviceUISet->m_deviceGUI, nullptr);
     }
 }
 
@@ -2015,21 +2019,21 @@ void MainWindow::createMenuBar(QToolButton *button) const
     QMenu *fileMenu;
     QMenu *viewMenu;
     QMenu *workspacesMenu;
+    QMenu *windowMenu;
     QMenu *preferencesMenu;
     QMenu *helpMenu;
 
     if (button == nullptr)
-    QMenu *windowMenu;
     {
         QMenuBar *menuBar = this->menuBar();
         fileMenu = menuBar->addMenu("&File");
         viewMenu = menuBar->addMenu("&View");
         workspacesMenu = menuBar->addMenu("&Workspaces");
+        windowMenu = menuBar->addMenu("Wi&ndow");
         preferencesMenu = menuBar->addMenu("&Preferences");
         helpMenu = menuBar->addMenu("&Help");
     }
     else
-        windowMenu = menuBar->addMenu("Wi&ndow");
     {
         auto *menu = new QMenu();
         fileMenu = new QMenu("&File");
@@ -2038,12 +2042,12 @@ void MainWindow::createMenuBar(QToolButton *button) const
         menu->addMenu(viewMenu);
         workspacesMenu = new QMenu("&Workspaces");
         menu->addMenu(workspacesMenu);
+        windowMenu = new QMenu("Wi&ndow");
+        menu->addMenu(windowMenu);
         preferencesMenu = new QMenu("&Preferences");
         menu->addMenu(preferencesMenu);
         helpMenu = new QMenu("&Help");
         menu->addMenu(helpMenu);
-        windowMenu = new QMenu("Wi&ndow");
-        menu->addMenu(windowMenu);
         button->setMenu(menu);
     }
 
@@ -2079,10 +2083,6 @@ void MainWindow::createMenuBar(QToolButton *button) const
     removeEmptyWorkspacesAction->setToolTip("Remove empty workspaces");
     QObject::connect(removeEmptyWorkspacesAction, &QAction::triggered, this, &MainWindow::removeEmptyWorkspaces);
 
-    QAction *configurationsAction = preferencesMenu->addAction("&Configurations...");
-    configurationsAction->setToolTip("Manage configurations");
-    QObject::connect(configurationsAction, &QAction::triggered, this, &MainWindow::on_action_Configurations_triggered);
-    QAction *audioAction = preferencesMenu->addAction("&Audio...");
     // Filled in each time it is opened, so it always matches what is hidden right now and
     // needs no signals from windows being added, hidden or closed
     QMenu *showMenu = windowMenu->addMenu("&Show");
@@ -2165,6 +2165,10 @@ void MainWindow::createMenuBar(QToolButton *button) const
         tabsAction->setChecked(workspace && workspace->getTabSubWindowsOption());
     });
 
+    QAction *configurationsAction = preferencesMenu->addAction("&Configurations...");
+    configurationsAction->setToolTip("Manage configurations");
+    QObject::connect(configurationsAction, &QAction::triggered, this, &MainWindow::on_action_Configurations_triggered);
+    QAction *audioAction = preferencesMenu->addAction("&Audio...");
     audioAction->setToolTip("Audio preferences");
     QObject::connect(audioAction, &QAction::triggered, this, &MainWindow::on_action_Audio_triggered);
     QAction *graphicsAction = preferencesMenu->addAction("&Graphics...");
@@ -2568,15 +2572,15 @@ void MainWindow::addWorkspace()
 
     QObject::connect(
         m_workspaces.back(),
-        &Workspace::addRxDevice,
-        this,
-    QObject::connect(
-        m_workspaces.back(),
         &Workspace::focused,
         this,
         [this](Workspace *inWorkspace) { m_currentWorkspace = inWorkspace; }
     );
 
+    QObject::connect(
+        m_workspaces.back(),
+        &Workspace::addRxDevice,
+        this,
         [this](Workspace *inWorkspace, int deviceIndex) { this->sampleSourceAdd(inWorkspace, inWorkspace, deviceIndex); }
     );
 
@@ -2610,6 +2614,13 @@ void MainWindow::addWorkspace()
 
     QObject::connect(
         m_workspaces.back(),
+        &Workspace::showMCPServer,
+        this,
+        &MainWindow::showMCPServer
+    );
+
+    QObject::connect(
+        m_workspaces.back(),
         &Workspace::configurationPresetsDialogRequested,
         this,
         &MainWindow::on_action_Configurations_triggered
@@ -2638,21 +2649,10 @@ void MainWindow::addWorkspace()
         m_workspaces.back()->show();
         m_workspaces.back()->raise();
     }
+
+    updateMCPServerButton();
  }
 
-void MainWindow::viewAllWorkspaces() const
-{
-    for (const auto& workspace : m_workspaces)
-    {
-        if (workspace->isHidden()) {
-            workspace->show();
-        }
-    }
-}
-
-void MainWindow::removeEmptyWorkspaces()
-{
-    auto it = m_workspaces.begin();
 namespace {
 
 // R0, T1, M2... the prefix the rest of the application uses for a device set. The three GUI
@@ -2833,6 +2833,19 @@ void MainWindow::showAllHiddenWindows() const
     }
 }
 
+void MainWindow::viewAllWorkspaces() const
+{
+    for (const auto& workspace : m_workspaces)
+    {
+        if (workspace->isHidden()) {
+            workspace->show();
+        }
+    }
+}
+
+void MainWindow::removeEmptyWorkspaces()
+{
+    auto it = m_workspaces.begin();
 
     while (it != m_workspaces.end())
     {
@@ -3715,6 +3728,165 @@ void MainWindow::showAllChannels(int deviceSetIndex)
 void MainWindow::startRemoteTCPSink()
 {
     RemoteTCPSinkStarter::start(m_parser);
+}
+
+void MainWindow::startMCPServer()
+{
+    static const QString mcpServerURI = QStringLiteral("sdrangel.feature.mcpserver");
+    int featureSetIndex = -1;
+    int featureIndex = -1;
+    Feature *mcpServer = FeatureWebAPIUtils::getFeature(featureSetIndex, featureIndex, mcpServerURI);
+
+    if (!mcpServer)
+    {
+        PluginAPI::FeatureRegistrations *featureRegistrations = m_pluginManager->getFeatureRegistrations();
+        int registrationIndex = -1;
+
+        for (int i = 0; i < featureRegistrations->size(); i++)
+        {
+            if ((*featureRegistrations)[i].m_featureIdURI == mcpServerURI)
+            {
+                registrationIndex = i;
+                break;
+            }
+        }
+
+        if (registrationIndex < 0)
+        {
+            qWarning("MainWindow::startMCPServer: MCPServer plugin is not available");
+            return;
+        }
+
+        if (m_workspaces.empty())
+        {
+            qWarning("MainWindow::startMCPServer: no workspace is available for the MCPServer feature");
+            return;
+        }
+
+        featureAddClicked(m_workspaces[0], registrationIndex);
+        featureSetIndex = -1;
+        featureIndex = -1;
+        mcpServer = FeatureWebAPIUtils::getFeature(featureSetIndex, featureIndex, mcpServerURI);
+
+        if (!mcpServer)
+        {
+            qWarning("MainWindow::startMCPServer: failed to create the MCPServer feature");
+            return;
+        }
+    }
+
+    if (!FeatureWebAPIUtils::run(featureSetIndex, featureIndex)) {
+        qWarning("MainWindow::startMCPServer: failed to start the MCPServer feature");
+    } else if (mcpServer->getState() == Feature::StRunning) {
+        FeatureGUI *gui = getMCPServerGUI();
+
+        if (gui) {
+            gui->hide();
+        }
+    }
+}
+
+FeatureGUI *MainWindow::getMCPServerGUI(Feature **feature) const
+{
+    for (FeatureUISet *featureUISet : m_featureUIs)
+    {
+        for (int i = 0; i < featureUISet->getNumberOfFeatures(); i++)
+        {
+            Feature *candidate = featureUISet->getFeatureAt(i);
+
+            if (isMCPServerFeature(candidate))
+            {
+                if (feature) {
+                    *feature = candidate;
+                }
+
+                return featureUISet->getFeatureGuiAt(i);
+            }
+        }
+    }
+
+    if (feature) {
+        *feature = nullptr;
+    }
+
+    return nullptr;
+}
+
+void MainWindow::updateMCPServerButton()
+{
+    Feature *feature = nullptr;
+    FeatureGUI *gui = getMCPServerGUI(&feature);
+    bool available = gui != nullptr;
+    bool running = feature && (feature->getState() == Feature::StRunning);
+    int port = -1;
+
+    if (running)
+    {
+        SWGSDRangel::SWGFeatureSettings response;
+        QString errorMessage;
+
+        if ((feature->webapiSettingsGet(response, errorMessage) / 100 == 2)
+            && response.getMcpServerSettings())
+        {
+            port = response.getMcpServerSettings()->getPort();
+        }
+    }
+
+    for (Workspace *workspace : m_workspaces) {
+        workspace->updateMCPServerButton(available, running, port);
+    }
+}
+
+void MainWindow::showMCPServer()
+{
+    FeatureGUI *gui = getMCPServerGUI();
+
+    if (!gui) {
+        return;
+    }
+
+    int workspaceIndex = gui->getWorkspaceIndex();
+
+    if ((workspaceIndex >= 0) && (workspaceIndex < m_workspaces.size()))
+    {
+        m_workspaces[workspaceIndex]->show();
+        m_workspaces[workspaceIndex]->raise();
+    }
+
+    gui->show();
+    gui->raise();
+    gui->setFocus(Qt::OtherFocusReason);
+}
+
+void MainWindow::mcpServerFeatureAdded(int featureSetIndex, Feature *feature)
+{
+    (void) featureSetIndex;
+
+    if (!isMCPServerFeature(feature)) {
+        return;
+    }
+
+    connect(feature, &Feature::stateChanged, this, &MainWindow::updateMCPServerButton, Qt::UniqueConnection);
+    connect(feature, &QObject::destroyed, this, [this]() {
+        QTimer::singleShot(0, this, &MainWindow::updateMCPServerButton);
+    });
+    updateMCPServerButton();
+}
+
+void MainWindow::mcpServerFeatureRemoved(int featureSetIndex, Feature *feature)
+{
+    (void) featureSetIndex;
+
+    if (isMCPServerFeature(feature))
+    {
+        disconnect(feature, &Feature::stateChanged, this, &MainWindow::updateMCPServerButton);
+        QTimer::singleShot(0, this, &MainWindow::updateMCPServerButton);
+    }
+}
+
+bool MainWindow::isMCPServerFeature(const Feature* feature)
+{
+    return feature && (feature->getURI() == QStringLiteral("sdrangel.feature.mcpserver"));
 }
 
 void MainWindow::startAllAfterDelay()

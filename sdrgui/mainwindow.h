@@ -356,6 +356,8 @@ private:
 	void saveDeviceSetPresetSettings(Preset* preset, int deviceSetIndex);
 	void loadFeatureSetPresetSettings(const FeatureSetPreset* preset, int featureSetIndex, Workspace *workspace);
 	void saveFeatureSetPresetSettings(FeatureSetPreset* preset, int featureSetIndex);
+	FeatureGUI *getMCPServerGUI(Feature **feature = nullptr) const;
+	void updateMCPServerButton();
 
 	QString openGLVersion() const;
     void createMenuBar(QToolButton *button) const;
@@ -470,6 +472,11 @@ private slots:
     void featureMove(FeatureGUI *gui, int wsIndexDestnation);
     void deviceStateChanged(DeviceAPI *deviceAPI);
     void openFeaturePresetsDialog(QPoint p, Workspace *workspace);
+    void startMCPServer();
+    void showMCPServer();
+    void mcpServerFeatureAdded(int featureSetIndex, Feature *feature);
+    void mcpServerFeatureRemoved(int featureSetIndex, Feature *feature);
+    static bool isMCPServerFeature(const Feature* feature);
     void startRemoteTCPSink();
     void startAllAfterDelay();
     void startAll();
