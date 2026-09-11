@@ -41,6 +41,8 @@ MESSAGE_CLASS_DEFINITION(AFCWorker::MsgDevicesApply, Message)
 AFCWorker::AFCWorker(WebAPIAdapterInterface *webAPIAdapterInterface) :
     m_webAPIAdapterInterface(webAPIAdapterInterface),
     m_msgQueueToGUI(nullptr),
+    m_trackerDeviceSet(nullptr),
+    m_trackedDeviceSet(nullptr),
     m_freqTracker(nullptr),
     m_trackerDeviceFrequency(0),
     m_trackerChannelOffset(0),
