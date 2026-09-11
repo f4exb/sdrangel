@@ -27,6 +27,8 @@ BladeRF2MIThread::BladeRF2MIThread(struct bladerf* dev, QObject* parent) :
     m_running(false),
     m_dev(dev),
     m_sampleFifo(nullptr),
+    m_log2Decim(0),
+    m_fcPos(0),
     m_iqOrder(true)
 {
     qDebug("BladeRF2MIThread::BladeRF2MIThread");
