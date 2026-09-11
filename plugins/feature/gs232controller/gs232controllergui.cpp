@@ -937,6 +937,7 @@ void GS232ControllerGUI::updateFeatureState()
             ? "QToolButton { background-color : green; }"
             : "QToolButton { background-color : yellow; }");
     }
+    m_lastOnTarget = onTarget;
 }
 
 void GS232ControllerGUI::applySetting(const QString& settingsKey)
