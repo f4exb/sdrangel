@@ -30,6 +30,7 @@ AudioCATInputWorker::AudioCATInputWorker(SampleMIFifo* sampleFifo, AudioFifo *fi
     m_fifo(fifo),
     m_running(false),
     m_log2Decim(0),
+    m_fcPos(0),
     m_iqMapping(AudioCATSISOSettings::IQMapping::L),
     m_convertBuffer(m_convBufSamples),
     m_sampleFifo(sampleFifo)
