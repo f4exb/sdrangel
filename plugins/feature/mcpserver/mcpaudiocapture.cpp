@@ -225,7 +225,7 @@ int MCPAudioCapture::sampleRateFromReport(int deviceSetIndex, int channelIndex)
 
         QJsonObject sub = json[key].toObject();
 
-        for (const QString& rateKey : {"audioSampleRate", "channelSampleRate", "sampleRate"})
+        for (const QString rateKey : {"audioSampleRate", "channelSampleRate", "sampleRate"})
         {
             if (sub.contains(rateKey) && (sub[rateKey].toInt(0) > 0)) {
                 return sub[rateKey].toInt();

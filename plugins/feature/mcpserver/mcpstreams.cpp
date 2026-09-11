@@ -25,6 +25,9 @@
 #include <algorithm>
 
 #include "maincore.h"
+#include "channel/channelapi.h"
+#include "device/deviceapi.h"
+#include "feature/feature.h"
 
 #include "mcpdatafeed.h"
 #include "mcperror.h"

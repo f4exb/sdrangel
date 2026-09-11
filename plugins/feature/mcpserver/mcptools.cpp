@@ -64,6 +64,8 @@
 
 #include "maincore.h"
 #include "device/deviceset.h"
+#include "channel/channelapi.h"
+#include "device/deviceapi.h"
 #include "feature/feature.h"
 #include "feature/featureset.h"
 #include "webapi/webapiadapterinterface.h"
@@ -1187,7 +1189,7 @@ QString MCPTools::describeType(const QString& typeIn, const QString& kindIn)
         out.append(QString("# %1\n# Settings JSON key: %2\n").arg(match.second).arg(settingsKey));
         bool found = false;
 
-        for (const QString& suffix : {"Settings", "Report", "Actions"})
+        for (const QString suffix : {"Settings", "Report", "Actions"})
         {
             QString definition = resolveDefinition(base + suffix);
 

@@ -365,7 +365,7 @@ const MCPDocs::Readme *MCPDocs::match(const QStringList& groups, const QString& 
     idCandidates.append(normId + "input");
     idCandidates.append(normId + "output");
 
-    for (const QString& affix : {"demod", "mod"})
+    for (const QString affix : {"demod", "mod"})
     {
         if (normId.endsWith(affix) && (normId.size() > affix.size())) {
             idCandidates.append(normId.left(normId.size() - affix.size()));
@@ -378,7 +378,7 @@ const MCPDocs::Readme *MCPDocs::match(const QStringList& groups, const QString& 
         QString normDir = normalize(dir);
         result.append(normDir);
 
-        for (const QString& affix : {"demod", "mod"})
+        for (const QString affix : {"demod", "mod"})
         {
             if (normDir.startsWith(affix) && (normDir.size() > affix.size())) {
                 result.append(normDir.mid(affix.size()));
