@@ -898,13 +898,22 @@ bool USRPInput::applySettings(const USRPInputSettings& settings, const QList<QSt
             }
         }
 
+        const std::string gpioBank = "FP0"; // Front Panel GPIO
+
         if (settingsKeys.contains("gpioDir") || force)
         {
             if (m_deviceShared.m_deviceParams->getDevice())
             {
-                m_deviceShared.m_deviceParams->getDevice()->set_gpio_attr("FP0", "CTRL", ~settings.m_gpioDir, 0xff); // 0 for GPIO, 1 for ATR
-                m_deviceShared.m_deviceParams->getDevice()->set_gpio_attr("FP0", "DDR", settings.m_gpioDir, 0xff); // 0 for input, 1 for output
-                qDebug() << "USRPInput::applySettings: set GPIO dir to " << settings.m_gpioDir;
+                std::vector<std::string> banks = m_deviceShared.m_deviceParams->getDevice()->get_gpio_banks(0);
+                for (const auto& bank : banks)                 
+                {
+                    if (!gpioBank.compare(bank))
+                    {
+                        m_deviceShared.m_deviceParams->getDevice()->set_gpio_attr(gpioBank, "CTRL", ~settings.m_gpioDir, 0xff); // 0 for GPIO, 1 for ATR
+                        m_deviceShared.m_deviceParams->getDevice()->set_gpio_attr(gpioBank, "DDR", settings.m_gpioDir, 0xff); // 0 for input, 1 for output
+                        qDebug() << "USRPInput::applySettings: set GPIO dir to" << settings.m_gpioDir;
+                    }
+                }
             }
         }
 
@@ -912,8 +921,15 @@ bool USRPInput::applySettings(const USRPInputSettings& settings, const QList<QSt
         {
             if (m_deviceShared.m_deviceParams->getDevice())
             {
-                m_deviceShared.m_deviceParams->getDevice()->set_gpio_attr("FP0", "OUT", settings.m_gpioPins, 0xff);
-                qDebug() << "USRPInput::applySettings: set GPIO pins to " << settings.m_gpioPins;
+                std::vector<std::string> banks = m_deviceShared.m_deviceParams->getDevice()->get_gpio_banks(0);
+                for (const auto& bank : banks) 
+                {
+                    if (!gpioBank.compare(bank))
+                    {
+                        m_deviceShared.m_deviceParams->getDevice()->set_gpio_attr(gpioBank, "OUT", settings.m_gpioPins, 0xff);
+                        qDebug() << "USRPInput::applySettings: set GPIO pins to" << settings.m_gpioPins;
+                    }
+                }
             }
         }
 

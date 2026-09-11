@@ -26,6 +26,7 @@
 #ifndef INCLUDE_GLSPECTRUMVIEW_H
 #define INCLUDE_GLSPECTRUMVIEW_H
 
+#include <atomic>
 #include <QTimer>
 #include <QMutex>
 #include <QOpenGLBuffer>
@@ -431,7 +432,7 @@ private:
     QMatrix4x4 m_glHistogramSpectrumMatrix;
     QMatrix4x4 m_glHistogramBoxMatrix;
     bool m_displayHistogram;
-    bool m_displayChanged;
+    std::atomic_bool m_displayChanged;
     bool m_displaySourceOrSink;
     int m_displayStreamIndex;
     float m_frequencyZoomFactor;

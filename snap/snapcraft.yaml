@@ -524,7 +524,7 @@ parts:
         plugin: cmake
         source: https://github.com/osmocom/rtl-sdr.git
         source-type: git
-        source-commit: 420086af84d7eaaf98ff948cd11fea2cae71734a
+        source-commit: 797f8143266d983c56d8f35d2d442527529dd8a5
         build-packages:
             - libusb-1.0-0-dev
         cmake-parameters:
