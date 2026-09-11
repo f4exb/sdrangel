@@ -111,7 +111,7 @@ DABDemodReport:
       type: array
       description: "Programme services discovered in the currently tuned ensemble."
       items:
-        $ref: "#/DABProgram"
+        $ref: "/doc/swagger/include/DABDemod.yaml#/DABProgram"
     selectedProgram:
       type: string
       description: "Exact service label currently requested by the program setting."

@@ -52,7 +52,7 @@ SWGMapSettings::SWGMapSettings() {
     m_buildings_isSet = false;
     sun_light_enabled = 0;
     m_sun_light_enabled_isSet = false;
-    light_intensity = nullptr;
+    light_intensity = 0.0f;
     m_light_intensity_isSet = false;
     eci_camera = 0;
     m_eci_camera_isSet = false;
@@ -148,7 +148,7 @@ SWGMapSettings::init() {
     m_buildings_isSet = false;
     sun_light_enabled = 0;
     m_sun_light_enabled_isSet = false;
-    light_intensity = 0.0;
+    light_intensity = 0.0f;
     m_light_intensity_isSet = false;
     eci_camera = 0;
     m_eci_camera_isSet = false;
@@ -240,9 +240,7 @@ SWGMapSettings::cleanup() {
         delete buildings;
     }
 
-    if(light_intensity != nullptr) { 
-        delete light_intensity;
-    }
+
 
 
 
@@ -321,7 +319,7 @@ SWGMapSettings::fromJsonObject(QJsonObject &pJson) {
     
     ::SWGSDRangel::setValue(&sun_light_enabled, pJson["sunLightEnabled"], "qint32", "");
     
-    ::SWGSDRangel::setValue(&light_intensity, pJson["lightIntensity"], "SWGNumber", "SWGNumber");
+    ::SWGSDRangel::setValue(&light_intensity, pJson["lightIntensity"], "float", "");
     
     ::SWGSDRangel::setValue(&eci_camera, pJson["eciCamera"], "qint32", "");
     
@@ -437,8 +435,8 @@ SWGMapSettings::asJsonObject() {
     if(m_sun_light_enabled_isSet){
         obj->insert("sunLightEnabled", QJsonValue(sun_light_enabled));
     }
-    if((light_intensity != nullptr) && (light_intensity->isSet())){
-        toJsonValue(QString("lightIntensity"), light_intensity, obj, QString("SWGNumber"));
+    if(m_light_intensity_isSet){
+        obj->insert("lightIntensity", QJsonValue(light_intensity));
     }
     if(m_eci_camera_isSet){
         obj->insert("eciCamera", QJsonValue(eci_camera));
@@ -657,12 +655,12 @@ SWGMapSettings::setSunLightEnabled(qint32 sun_light_enabled) {
     this->m_sun_light_enabled_isSet = true;
 }
 
-SWGNumber*
+float
 SWGMapSettings::getLightIntensity() {
     return light_intensity;
 }
 void
-SWGMapSettings::setLightIntensity(SWGNumber* light_intensity) {
+SWGMapSettings::setLightIntensity(float light_intensity) {
     this->light_intensity = light_intensity;
     this->m_light_intensity_isSet = true;
 }
@@ -1018,7 +1016,7 @@ SWGMapSettings::isSet(){
         if(m_sun_light_enabled_isSet){
             isObjectUpdated = true; break;
         }
-        if(light_intensity && light_intensity->isSet()){
+        if(m_light_intensity_isSet){
             isObjectUpdated = true; break;
         }
         if(m_eci_camera_isSet){

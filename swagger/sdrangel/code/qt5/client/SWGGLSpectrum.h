@@ -22,7 +22,6 @@
 #include <QJsonObject>
 
 
-#include "SWGNumber.h"
 #include "SWGSpectrumAnnotationMarker.h"
 #include "SWGSpectrumCalibrationPoint.h"
 #include "SWGSpectrumHistogramMarker.h"
@@ -121,11 +120,11 @@ public:
     qint32 getShowControls();
     void setShowControls(qint32 show_controls);
 
-    SWGNumber* getFrequencyZoomFactor();
-    void setFrequencyZoomFactor(SWGNumber* frequency_zoom_factor);
+    float getFrequencyZoomFactor();
+    void setFrequencyZoomFactor(float frequency_zoom_factor);
 
-    SWGNumber* getFrequencyZoomPos();
-    void setFrequencyZoomPos(SWGNumber* frequency_zoom_pos);
+    float getFrequencyZoomPos();
+    void setFrequencyZoomPos(float frequency_zoom_pos);
 
     qint32 getWaterfallTimeUnits();
     void setWaterfallTimeUnits(qint32 waterfall_time_units);
@@ -320,10 +319,10 @@ private:
     qint32 show_controls;
     bool m_show_controls_isSet;
 
-    SWGNumber* frequency_zoom_factor;
+    float frequency_zoom_factor;
     bool m_frequency_zoom_factor_isSet;
 
-    SWGNumber* frequency_zoom_pos;
+    float frequency_zoom_pos;
     bool m_frequency_zoom_pos_isSet;
 
     qint32 waterfall_time_units;

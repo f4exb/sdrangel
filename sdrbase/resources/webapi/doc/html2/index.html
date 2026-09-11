@@ -6269,7 +6269,7 @@ margin-bottom: 20px;
       "type" : "array",
       "description" : "Programme services discovered in the currently tuned ensemble.",
       "items" : {
-        "$ref" : "#/DABProgram"
+        "$ref" : "#/definitions/DABProgram"
       }
     },
     "selectedProgram" : {
@@ -10231,11 +10231,13 @@ margin-bottom: 20px;
     },
     "frequencyZoomFactor" : {
       "type" : "number",
+      "format" : "float",
       "description" : "Horizontal frequency zoom factor.",
       "minimum" : 1
     },
     "frequencyZoomPos" : {
       "type" : "number",
+      "format" : "float",
       "description" : "Horizontal frequency-zoom position as a fraction of the span.",
       "minimum" : 0,
       "maximum" : 1
@@ -14211,6 +14213,7 @@ margin-bottom: 20px;
     },
     "lightIntensity" : {
       "type" : "number",
+      "format" : "float",
       "description" : "Camera light intensity used by the 3D map.",
       "minimum" : 0
     },
@@ -66334,7 +66337,7 @@ except ApiException as e:
           </div>
           <div id="generator">
             <div class="content">
-              Generated 2026-09-11T09:18:28.785+02:00
+              Generated 2026-09-11T11:04:13.600+02:00
             </div>
           </div>
       </div>

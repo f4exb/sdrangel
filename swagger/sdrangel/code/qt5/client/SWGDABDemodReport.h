@@ -22,7 +22,7 @@
 #include <QJsonObject>
 
 
-#include "SWG#/DABProgram.h"
+#include "SWGDABProgram.h"
 #include <QList>
 #include <QString>
 
@@ -68,8 +68,8 @@ public:
     qint32 getEnsembleId();
     void setEnsembleId(qint32 ensemble_id);
 
-    QList<SWG#/DABProgram*>* getPrograms();
-    void setPrograms(QList<SWG#/DABProgram*>* programs);
+    QList<SWGDABProgram*>* getPrograms();
+    void setPrograms(QList<SWGDABProgram*>* programs);
 
     QString* getSelectedProgram();
     void setSelectedProgram(QString* selected_program);
@@ -135,7 +135,7 @@ private:
     qint32 ensemble_id;
     bool m_ensemble_id_isSet;
 
-    QList<SWG#/DABProgram*>* programs;
+    QList<SWGDABProgram*>* programs;
     bool m_programs_isSet;
 
     QString* selected_program;

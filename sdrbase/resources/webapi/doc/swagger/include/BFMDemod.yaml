@@ -130,7 +130,7 @@ BFMDemodReport:
       type: number
       format: float
     rdsReport:
-      $ref: "#/RDSReport"
+      $ref: "/doc/swagger/include/BFMDemod.yaml#/RDSReport"
       description: "RDS decoder status and decoded programme information."
 
 RDSReport:

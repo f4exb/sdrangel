@@ -94,7 +94,7 @@ SWGDABDemodReport::init() {
     m_ensemble_name_isSet = false;
     ensemble_id = 0;
     m_ensemble_id_isSet = false;
-    programs = new QList<SWG#/DABProgram*>();
+    programs = new QList<SWGDABProgram*>();
     m_programs_isSet = false;
     selected_program = new QString("");
     m_selected_program_isSet = false;
@@ -193,7 +193,7 @@ SWGDABDemodReport::fromJsonObject(QJsonObject &pJson) {
     ::SWGSDRangel::setValue(&ensemble_id, pJson["ensembleId"], "qint32", "");
     
     
-    ::SWGSDRangel::setValue(&programs, pJson["programs"], "QList", "SWG#/DABProgram");
+    ::SWGSDRangel::setValue(&programs, pJson["programs"], "QList", "SWGDABProgram");
     ::SWGSDRangel::setValue(&selected_program, pJson["selectedProgram"], "QString", "QString");
     
     ::SWGSDRangel::setValue(&audio_active, pJson["audioActive"], "qint32", "");
@@ -259,7 +259,7 @@ SWGDABDemodReport::asJsonObject() {
         obj->insert("ensembleId", QJsonValue(ensemble_id));
     }
     if(programs && programs->size() > 0){
-        toJsonArray((QList<void*>*)programs, obj, "programs", "SWG#/DABProgram");
+        toJsonArray((QList<void*>*)programs, obj, "programs", "SWGDABProgram");
     }
     if(selected_program != nullptr && *selected_program != QString("")){
         toJsonValue(QString("selectedProgram"), selected_program, obj, QString("QString"));
@@ -381,12 +381,12 @@ SWGDABDemodReport::setEnsembleId(qint32 ensemble_id) {
     this->m_ensemble_id_isSet = true;
 }
 
-QList<SWG#/DABProgram*>*
+QList<SWGDABProgram*>*
 SWGDABDemodReport::getPrograms() {
     return programs;
 }
 void
-SWGDABDemodReport::setPrograms(QList<SWG#/DABProgram*>* programs) {
+SWGDABDemodReport::setPrograms(QList<SWGDABProgram*>* programs) {
     this->programs = programs;
     this->m_programs_isSet = true;
 }

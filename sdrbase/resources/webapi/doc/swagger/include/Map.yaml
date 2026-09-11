@@ -52,6 +52,7 @@ MapSettings:
     lightIntensity:
       description: Camera light intensity used by the 3D map.
       type: number
+      format: float
       minimum: 0
     eciCamera:
       description: Use an ECI rather than ECEF camera frame (1 for yes, 0 for no).

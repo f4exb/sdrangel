@@ -22,7 +22,6 @@
 #include <QJsonObject>
 
 
-#include "SWGNumber.h"
 #include "SWGRollupState.h"
 #include <QString>
 
@@ -80,8 +79,8 @@ public:
     qint32 getSunLightEnabled();
     void setSunLightEnabled(qint32 sun_light_enabled);
 
-    SWGNumber* getLightIntensity();
-    void setLightIntensity(SWGNumber* light_intensity);
+    float getLightIntensity();
+    void setLightIntensity(float light_intensity);
 
     qint32 getEciCamera();
     void setEciCamera(qint32 eci_camera);
@@ -216,7 +215,7 @@ private:
     qint32 sun_light_enabled;
     bool m_sun_light_enabled_isSet;
 
-    SWGNumber* light_intensity;
+    float light_intensity;
     bool m_light_intensity_isSet;
 
     qint32 eci_camera;

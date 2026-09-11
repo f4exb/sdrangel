@@ -76,9 +76,9 @@ SWGGLSpectrum::SWGGLSpectrum() {
     m_find_histogram_peaks_isSet = false;
     show_controls = 0;
     m_show_controls_isSet = false;
-    frequency_zoom_factor = nullptr;
+    frequency_zoom_factor = 0.0f;
     m_frequency_zoom_factor_isSet = false;
-    frequency_zoom_pos = nullptr;
+    frequency_zoom_pos = 0.0f;
     m_frequency_zoom_pos_isSet = false;
     waterfall_time_units = 0;
     m_waterfall_time_units_isSet = false;
@@ -214,9 +214,9 @@ SWGGLSpectrum::init() {
     m_find_histogram_peaks_isSet = false;
     show_controls = 0;
     m_show_controls_isSet = false;
-    frequency_zoom_factor = 0.0;
+    frequency_zoom_factor = 0.0f;
     m_frequency_zoom_factor_isSet = false;
-    frequency_zoom_pos = 0.0;
+    frequency_zoom_pos = 0.0f;
     m_frequency_zoom_pos_isSet = false;
     waterfall_time_units = 0;
     m_waterfall_time_units_isSet = false;
@@ -326,12 +326,8 @@ SWGGLSpectrum::cleanup() {
 
 
 
-    if(frequency_zoom_factor != nullptr) { 
-        delete frequency_zoom_factor;
-    }
-    if(frequency_zoom_pos != nullptr) { 
-        delete frequency_zoom_pos;
-    }
+
+
 
     if(waterfall_time_format != nullptr) { 
         delete waterfall_time_format;
@@ -466,9 +462,9 @@ SWGGLSpectrum::fromJsonObject(QJsonObject &pJson) {
     
     ::SWGSDRangel::setValue(&show_controls, pJson["showControls"], "qint32", "");
     
-    ::SWGSDRangel::setValue(&frequency_zoom_factor, pJson["frequencyZoomFactor"], "SWGNumber", "SWGNumber");
+    ::SWGSDRangel::setValue(&frequency_zoom_factor, pJson["frequencyZoomFactor"], "float", "");
     
-    ::SWGSDRangel::setValue(&frequency_zoom_pos, pJson["frequencyZoomPos"], "SWGNumber", "SWGNumber");
+    ::SWGSDRangel::setValue(&frequency_zoom_pos, pJson["frequencyZoomPos"], "float", "");
     
     ::SWGSDRangel::setValue(&waterfall_time_units, pJson["waterfallTimeUnits"], "qint32", "");
     
@@ -636,11 +632,11 @@ SWGGLSpectrum::asJsonObject() {
     if(m_show_controls_isSet){
         obj->insert("showControls", QJsonValue(show_controls));
     }
-    if((frequency_zoom_factor != nullptr) && (frequency_zoom_factor->isSet())){
-        toJsonValue(QString("frequencyZoomFactor"), frequency_zoom_factor, obj, QString("SWGNumber"));
+    if(m_frequency_zoom_factor_isSet){
+        obj->insert("frequencyZoomFactor", QJsonValue(frequency_zoom_factor));
     }
-    if((frequency_zoom_pos != nullptr) && (frequency_zoom_pos->isSet())){
-        toJsonValue(QString("frequencyZoomPos"), frequency_zoom_pos, obj, QString("SWGNumber"));
+    if(m_frequency_zoom_pos_isSet){
+        obj->insert("frequencyZoomPos", QJsonValue(frequency_zoom_pos));
     }
     if(m_waterfall_time_units_isSet){
         obj->insert("waterfallTimeUnits", QJsonValue(waterfall_time_units));
@@ -1003,22 +999,22 @@ SWGGLSpectrum::setShowControls(qint32 show_controls) {
     this->m_show_controls_isSet = true;
 }
 
-SWGNumber*
+float
 SWGGLSpectrum::getFrequencyZoomFactor() {
     return frequency_zoom_factor;
 }
 void
-SWGGLSpectrum::setFrequencyZoomFactor(SWGNumber* frequency_zoom_factor) {
+SWGGLSpectrum::setFrequencyZoomFactor(float frequency_zoom_factor) {
     this->frequency_zoom_factor = frequency_zoom_factor;
     this->m_frequency_zoom_factor_isSet = true;
 }
 
-SWGNumber*
+float
 SWGGLSpectrum::getFrequencyZoomPos() {
     return frequency_zoom_pos;
 }
 void
-SWGGLSpectrum::setFrequencyZoomPos(SWGNumber* frequency_zoom_pos) {
+SWGGLSpectrum::setFrequencyZoomPos(float frequency_zoom_pos) {
     this->frequency_zoom_pos = frequency_zoom_pos;
     this->m_frequency_zoom_pos_isSet = true;
 }
@@ -1490,10 +1486,10 @@ SWGGLSpectrum::isSet(){
         if(m_show_controls_isSet){
             isObjectUpdated = true; break;
         }
-        if(frequency_zoom_factor && frequency_zoom_factor->isSet()){
+        if(m_frequency_zoom_factor_isSet){
             isObjectUpdated = true; break;
         }
-        if(frequency_zoom_pos && frequency_zoom_pos->isSet()){
+        if(m_frequency_zoom_pos_isSet){
             isObjectUpdated = true; break;
         }
         if(m_waterfall_time_units_isSet){
