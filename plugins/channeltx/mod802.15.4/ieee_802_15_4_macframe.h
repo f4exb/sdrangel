@@ -110,7 +110,7 @@ struct IEEE_802_15_4_MacFrame
         else if ((m_frameControl & IEEE_802_15_4_MAC_SOURCE_ADDRESS_MASK) == IEEE_802_15_4_MAC_SOURCE_ADDRESS_SHORT)
             buf += sprintf(buf, "%02x %02x ", m_sourceShortAddress & 0xff, (m_sourceShortAddress >> 8) & 0xff);
 
-        buf = bytesToHex(buf, m_payload, m_payloadLength);
+        (void) bytesToHex(buf, m_payload, m_payloadLength);
     }
 
 };
