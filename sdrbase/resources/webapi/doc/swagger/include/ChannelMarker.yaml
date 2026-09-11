@@ -12,4 +12,12 @@ ChannelMarker:
       description: "User-visible title."
     frequencyScaleDisplayType:
       type: integer
-      description: ChannelMarker::frequencyScaleDisplay_t
+      minimum: 0
+      maximum: 4
+      description: >
+        What is written against the channel on the frequency scale
+          * 0 - the frequency
+          * 1 - the channel title
+          * 2 - the send address
+          * 3 - the receive address
+          * 4 - nothing

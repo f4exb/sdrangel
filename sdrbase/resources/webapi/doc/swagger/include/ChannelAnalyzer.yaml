@@ -65,8 +65,14 @@ ChannelAnalyzerSettings:
       format: float
       description: "Pll loop gain setting for Channel analyzer."
     inputType:
-      description: see ChannelAnalyzerSettings::InputType
+      description: >
+        Signal fed to the analyser
+          * 0 - the channel signal
+          * 1 - the PLL output
+          * 2 - the autocorrelation of the signal
       type: integer
+      minimum: 0
+      maximum: 2
     rgbColor:
       type: integer
       description: "Display color encoded as an RGB integer."

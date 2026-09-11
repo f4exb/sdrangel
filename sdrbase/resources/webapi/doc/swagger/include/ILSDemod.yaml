@@ -12,6 +12,8 @@ ILSDemodSettings:
     mode:
       description: "(0 for LOC, 1 for G/S)"
       type: integer
+      minimum: 0
+      maximum: 1
     frequencyIndex:
       type: integer
       description: "Selected frequency index."

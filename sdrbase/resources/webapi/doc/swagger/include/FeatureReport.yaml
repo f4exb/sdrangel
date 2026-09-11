@@ -7,6 +7,15 @@ FeatureReport:
     featureType:
       description: Feature type code
       type: string
+    AISReport:
+      $ref: "/doc/swagger/include/AIS.yaml#/AISReport"
+      description: "Ais report data for Feature."
+    APRSReport:
+      $ref: "/doc/swagger/include/APRS.yaml#/APRSReport"
+      description: "Aprs report data for Feature."
+    RadiosondeReport:
+      $ref: "/doc/swagger/include/Radiosonde.yaml#/RadiosondeReport"
+      description: "Radiosonde report data for Feature."
     AFCReport:
       $ref: "/doc/swagger/include/AFC.yaml#/AFCReport"
       description: "Afc report data for Feature."

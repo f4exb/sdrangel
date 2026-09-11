@@ -33,6 +33,8 @@ InmarsatDemodSettings:
     udpFormat:
       description: "0 for binary, 1 for NMEA"
       type: integer
+      minimum: 0
+      maximum: 1
     logFilename:
       type: string
       description: "Log file name or path."

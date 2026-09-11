@@ -53,6 +53,8 @@ MeshcoreModSettings:
     syncWord:
       description: 2 byte (0..65535) synchronization syncWord
       type: integer
+      minimum: 0
+      maximum: 65535
     channelMute:
       description: boolean
       type: integer

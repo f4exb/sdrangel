@@ -57,6 +57,15 @@ TestSourceSettings:
       type: number
       format: float
       description: "Phase imbalance setting for Test source."
+    period:
+      type: integer
+      description: "Period of the P1 and P2 patterns in samples."
+      minimum: 1
+    dutyCycle:
+      type: integer
+      description: "Percentage of the period the P2 pattern is high."
+      minimum: 0
+      maximum: 100
     useReverseAPI:
       description: Synchronize with reverse API (1 for yes, 0 for no)
       type: integer

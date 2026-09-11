@@ -11,6 +11,8 @@ ChannelReport:
     direction:
       description: 0 for Rx only, 1 for Tx only or 2 for any number and direction (default 0)
       type: integer
+      minimum: 0
+      maximum: 2
     ADSBDemodReport:
       $ref: "/doc/swagger/include/ADSBDemod.yaml#/ADSBDemodReport"
       description: "ADS-B demod report data for Channel."
@@ -32,6 +34,9 @@ ChannelReport:
     BFMDemodReport:
       $ref: "/doc/swagger/include/BFMDemod.yaml#/BFMDemodReport"
       description: "BFM demod report data for Channel."
+    DABDemodReport:
+      $ref: "/doc/swagger/include/DABDemod.yaml#/DABDemodReport"
+      description: "DAB demod report data for Channel."
     ChannelPowerReport:
       $ref: "/doc/swagger/include/ChannelPower.yaml#/ChannelPowerReport"
       description: "Channel power report data for Channel."

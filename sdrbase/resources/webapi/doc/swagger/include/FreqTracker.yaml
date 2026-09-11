@@ -11,6 +11,8 @@ FreqTrackerSettings:
       format: float
     log2Decim:
       type: integer
+      minimum: 0
+      maximum: 6
       description: "Base-2 exponent of the software decimation factor; the output sample rate is divided by 2^log2Decim."
     squelch:
       description: power squelch threshold in decibels
@@ -32,6 +34,8 @@ FreqTrackerSettings:
     tracking:
       description: Tracking 1 for enabled 0 for disabled
       type: integer
+      minimum: 0
+      maximum: 1
     trackerType:
       description: Tracker element type (FLL, PLL...)
       type: integer
@@ -41,6 +45,8 @@ FreqTrackerSettings:
     rrc:
       description: RRC filter (1 for on, 0 for off)
       type: integer
+      minimum: 0
+      maximum: 1
     rrcRolloff:
       description: RRC filter rolloff factor in %
       type: integer

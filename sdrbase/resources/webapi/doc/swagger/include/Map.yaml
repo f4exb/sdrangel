@@ -4,8 +4,165 @@ MapSettings:
     displayNames:
       description: Display object names on the map (1 for yes, 0 for no)
       type: integer
+      minimum: 0
+      maximum: 1
+    map2DEnabled:
+      description: Display the 2D map pane (1 for yes, 0 for no). Disable this while keeping map3DEnabled enabled to show only the 3D map.
+      type: integer
+      minimum: 0
+      maximum: 1
+    map3DEnabled:
+      description: Display the 3D map pane (1 for yes, 0 for no).
+      type: integer
+      minimum: 0
+      maximum: 1
+    mapProvider:
+      description: 2D map provider identifier.
+      type: string
+    mapType:
+      description: Selected 2D map type, for example Street Map or Satellite Map.
+      type: string
+    osmURL:
+      description: Custom OpenStreetMap tile-server URL.
+      type: string
+    mapBoxStyles:
+      description: Mapbox style identifier used by the selected 2D provider.
+      type: string
+    displaySelectedGroundTracks:
+      description: Display ground tracks for selected items (1 for yes, 0 for no).
+      type: integer
+      minimum: 0
+      maximum: 1
+    displayAllGroundTracks:
+      description: Display ground tracks for all items (1 for yes, 0 for no).
+      type: integer
+      minimum: 0
+      maximum: 1
     terrain:
       description: "Terrain used for 3D map (E.g: 'Ellipsoid' or 'Cesium World Terrain')"
+      type: string
+    buildings:
+      description: 3D buildings layer, for example None or Cesium OSM Buildings.
+      type: string
+    sunLightEnabled:
+      description: Light the globe from the Sun's direction (1 for yes, 0 for no).
+      type: integer
+      minimum: 0
+      maximum: 1
+    lightIntensity:
+      description: Camera light intensity used by the 3D map.
+      type: number
+      minimum: 0
+    eciCamera:
+      description: Use an ECI rather than ECEF camera frame (1 for yes, 0 for no).
+      type: integer
+      minimum: 0
+      maximum: 1
+    fxaa:
+      description: Enable fast approximate anti-aliasing (1 for yes, 0 for no).
+      type: integer
+      minimum: 0
+      maximum: 1
+    msaa:
+      description: Multisample anti-aliasing level.
+      type: integer
+      minimum: 1
+      maximum: 8
+    terrainLighting:
+      description: Enable terrain lighting (1 for yes, 0 for no).
+      type: integer
+      minimum: 0
+      maximum: 1
+    water:
+      description: Enable water effects (1 for yes, 0 for no).
+      type: integer
+      minimum: 0
+      maximum: 1
+    hdr:
+      description: Enable high dynamic range rendering (1 for yes, 0 for no).
+      type: integer
+      minimum: 0
+      maximum: 1
+    fog:
+      description: Enable atmospheric fog (1 for yes, 0 for no).
+      type: integer
+      minimum: 0
+      maximum: 1
+    fps:
+      description: Display the 3D map frame rate (1 for yes, 0 for no).
+      type: integer
+      minimum: 0
+      maximum: 1
+    displayMUF:
+      description: Display maximum-usable-frequency contours (1 for yes, 0 for no).
+      type: integer
+      minimum: 0
+      maximum: 1
+    displayfoF2:
+      description: Display F2 critical-frequency contours (1 for yes, 0 for no).
+      type: integer
+      minimum: 0
+      maximum: 1
+    displayRain:
+      description: Display weather-radar rain and snow overlay (1 for yes, 0 for no).
+      type: integer
+      minimum: 0
+      maximum: 1
+    displayClouds:
+      description: Display satellite infrared cloud overlay (1 for yes, 0 for no).
+      type: integer
+      minimum: 0
+      maximum: 1
+    displaySeaMarks:
+      description: Display sea marks (1 for yes, 0 for no).
+      type: integer
+      minimum: 0
+      maximum: 1
+    displayRailways:
+      description: Display railways (1 for yes, 0 for no).
+      type: integer
+      minimum: 0
+      maximum: 1
+    displayNASAGlobalImagery:
+      description: Display NASA GIBS imagery (1 for yes, 0 for no).
+      type: integer
+      minimum: 0
+      maximum: 1
+    nasaGlobalImageryIdentifier:
+      description: NASA GIBS imagery-layer identifier.
+      type: string
+    nasaGlobalImageryOpacity:
+      description: NASA GIBS imagery opacity as a percentage.
+      type: integer
+      minimum: 0
+      maximum: 100
+    displayAurora:
+      description: Display aurora-probability overlay (1 for yes, 0 for no).
+      type: integer
+      minimum: 0
+      maximum: 1
+    displayMagDec:
+      description: Display magnetic-declination contours (1 for yes, 0 for no).
+      type: integer
+      minimum: 0
+      maximum: 1
+    displayMaidenheadGrid:
+      description: Display Maidenhead grid (1 for yes, 0 for no).
+      type: integer
+      minimum: 0
+      maximum: 1
+    displayPFD:
+      description: Display the aircraft primary-flight display (1 for yes, 0 for no).
+      type: integer
+      minimum: 0
+      maximum: 1
+    viewFirstPerson:
+      description: Use first-person 3D map view (1 for yes, 0 for no).
+      type: integer
+      minimum: 0
+      maximum: 1
+    defaultImagery:
+      description: Default imagery layer for the 3D map.
       type: string
     title:
       type: string

@@ -30,6 +30,12 @@ SWGFeatureReport::SWGFeatureReport(QString* json) {
 SWGFeatureReport::SWGFeatureReport() {
     feature_type = nullptr;
     m_feature_type_isSet = false;
+    ais_report = nullptr;
+    m_ais_report_isSet = false;
+    aprs_report = nullptr;
+    m_aprs_report_isSet = false;
+    radiosonde_report = nullptr;
+    m_radiosonde_report_isSet = false;
     afc_report = nullptr;
     m_afc_report_isSet = false;
     ambe_report = nullptr;
@@ -68,6 +74,12 @@ void
 SWGFeatureReport::init() {
     feature_type = new QString("");
     m_feature_type_isSet = false;
+    ais_report = new SWGAISReport();
+    m_ais_report_isSet = false;
+    aprs_report = new SWGAPRSReport();
+    m_aprs_report_isSet = false;
+    radiosonde_report = new SWGRadiosondeReport();
+    m_radiosonde_report_isSet = false;
     afc_report = new SWGAFCReport();
     m_afc_report_isSet = false;
     ambe_report = new SWGAMBEReport();
@@ -102,6 +114,15 @@ void
 SWGFeatureReport::cleanup() {
     if(feature_type != nullptr) { 
         delete feature_type;
+    }
+    if(ais_report != nullptr) { 
+        delete ais_report;
+    }
+    if(aprs_report != nullptr) { 
+        delete aprs_report;
+    }
+    if(radiosonde_report != nullptr) { 
+        delete radiosonde_report;
     }
     if(afc_report != nullptr) { 
         delete afc_report;
@@ -160,6 +181,12 @@ void
 SWGFeatureReport::fromJsonObject(QJsonObject &pJson) {
     ::SWGSDRangel::setValue(&feature_type, pJson["featureType"], "QString", "QString");
     
+    ::SWGSDRangel::setValue(&ais_report, pJson["AISReport"], "SWGAISReport", "SWGAISReport");
+    
+    ::SWGSDRangel::setValue(&aprs_report, pJson["APRSReport"], "SWGAPRSReport", "SWGAPRSReport");
+    
+    ::SWGSDRangel::setValue(&radiosonde_report, pJson["RadiosondeReport"], "SWGRadiosondeReport", "SWGRadiosondeReport");
+    
     ::SWGSDRangel::setValue(&afc_report, pJson["AFCReport"], "SWGAFCReport", "SWGAFCReport");
     
     ::SWGSDRangel::setValue(&ambe_report, pJson["AMBEReport"], "SWGAMBEReport", "SWGAMBEReport");
@@ -206,6 +233,15 @@ SWGFeatureReport::asJsonObject() {
     QJsonObject* obj = new QJsonObject();
     if(feature_type != nullptr && *feature_type != QString("")){
         toJsonValue(QString("featureType"), feature_type, obj, QString("QString"));
+    }
+    if((ais_report != nullptr) && (ais_report->isSet())){
+        toJsonValue(QString("AISReport"), ais_report, obj, QString("SWGAISReport"));
+    }
+    if((aprs_report != nullptr) && (aprs_report->isSet())){
+        toJsonValue(QString("APRSReport"), aprs_report, obj, QString("SWGAPRSReport"));
+    }
+    if((radiosonde_report != nullptr) && (radiosonde_report->isSet())){
+        toJsonValue(QString("RadiosondeReport"), radiosonde_report, obj, QString("SWGRadiosondeReport"));
     }
     if((afc_report != nullptr) && (afc_report->isSet())){
         toJsonValue(QString("AFCReport"), afc_report, obj, QString("SWGAFCReport"));
@@ -261,6 +297,36 @@ void
 SWGFeatureReport::setFeatureType(QString* feature_type) {
     this->feature_type = feature_type;
     this->m_feature_type_isSet = true;
+}
+
+SWGAISReport*
+SWGFeatureReport::getAisReport() {
+    return ais_report;
+}
+void
+SWGFeatureReport::setAisReport(SWGAISReport* ais_report) {
+    this->ais_report = ais_report;
+    this->m_ais_report_isSet = true;
+}
+
+SWGAPRSReport*
+SWGFeatureReport::getAprsReport() {
+    return aprs_report;
+}
+void
+SWGFeatureReport::setAprsReport(SWGAPRSReport* aprs_report) {
+    this->aprs_report = aprs_report;
+    this->m_aprs_report_isSet = true;
+}
+
+SWGRadiosondeReport*
+SWGFeatureReport::getRadiosondeReport() {
+    return radiosonde_report;
+}
+void
+SWGFeatureReport::setRadiosondeReport(SWGRadiosondeReport* radiosonde_report) {
+    this->radiosonde_report = radiosonde_report;
+    this->m_radiosonde_report_isSet = true;
 }
 
 SWGAFCReport*
@@ -409,6 +475,15 @@ SWGFeatureReport::isSet(){
     bool isObjectUpdated = false;
     do{
         if(feature_type && *feature_type != QString("")){
+            isObjectUpdated = true; break;
+        }
+        if(ais_report && ais_report->isSet()){
+            isObjectUpdated = true; break;
+        }
+        if(aprs_report && aprs_report->isSet()){
+            isObjectUpdated = true; break;
+        }
+        if(radiosonde_report && radiosonde_report->isSet()){
             isObjectUpdated = true; break;
         }
         if(afc_report && afc_report->isSet()){

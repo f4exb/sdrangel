@@ -22,6 +22,7 @@
 #include <QJsonObject>
 
 
+
 #include "SWGObject.h"
 #include "export.h"
 

@@ -22,6 +22,7 @@
 #include <QJsonObject>
 
 
+#include "SWGNumber.h"
 #include "SWGRollupState.h"
 #include <QString>
 
@@ -46,8 +47,110 @@ public:
     qint32 getDisplayNames();
     void setDisplayNames(qint32 display_names);
 
+    qint32 getMap2DEnabled();
+    void setMap2DEnabled(qint32 map2_d_enabled);
+
+    qint32 getMap3DEnabled();
+    void setMap3DEnabled(qint32 map3_d_enabled);
+
+    QString* getMapProvider();
+    void setMapProvider(QString* map_provider);
+
+    QString* getMapType();
+    void setMapType(QString* map_type);
+
+    QString* getOsmUrl();
+    void setOsmUrl(QString* osm_url);
+
+    QString* getMapBoxStyles();
+    void setMapBoxStyles(QString* map_box_styles);
+
+    qint32 getDisplaySelectedGroundTracks();
+    void setDisplaySelectedGroundTracks(qint32 display_selected_ground_tracks);
+
+    qint32 getDisplayAllGroundTracks();
+    void setDisplayAllGroundTracks(qint32 display_all_ground_tracks);
+
     QString* getTerrain();
     void setTerrain(QString* terrain);
+
+    QString* getBuildings();
+    void setBuildings(QString* buildings);
+
+    qint32 getSunLightEnabled();
+    void setSunLightEnabled(qint32 sun_light_enabled);
+
+    SWGNumber* getLightIntensity();
+    void setLightIntensity(SWGNumber* light_intensity);
+
+    qint32 getEciCamera();
+    void setEciCamera(qint32 eci_camera);
+
+    qint32 getFxaa();
+    void setFxaa(qint32 fxaa);
+
+    qint32 getMsaa();
+    void setMsaa(qint32 msaa);
+
+    qint32 getTerrainLighting();
+    void setTerrainLighting(qint32 terrain_lighting);
+
+    qint32 getWater();
+    void setWater(qint32 water);
+
+    qint32 getHdr();
+    void setHdr(qint32 hdr);
+
+    qint32 getFog();
+    void setFog(qint32 fog);
+
+    qint32 getFps();
+    void setFps(qint32 fps);
+
+    qint32 getDisplayMuf();
+    void setDisplayMuf(qint32 display_muf);
+
+    qint32 getDisplayfoF2();
+    void setDisplayfoF2(qint32 displayfo_f2);
+
+    qint32 getDisplayRain();
+    void setDisplayRain(qint32 display_rain);
+
+    qint32 getDisplayClouds();
+    void setDisplayClouds(qint32 display_clouds);
+
+    qint32 getDisplaySeaMarks();
+    void setDisplaySeaMarks(qint32 display_sea_marks);
+
+    qint32 getDisplayRailways();
+    void setDisplayRailways(qint32 display_railways);
+
+    qint32 getDisplayNasaGlobalImagery();
+    void setDisplayNasaGlobalImagery(qint32 display_nasa_global_imagery);
+
+    QString* getNasaGlobalImageryIdentifier();
+    void setNasaGlobalImageryIdentifier(QString* nasa_global_imagery_identifier);
+
+    qint32 getNasaGlobalImageryOpacity();
+    void setNasaGlobalImageryOpacity(qint32 nasa_global_imagery_opacity);
+
+    qint32 getDisplayAurora();
+    void setDisplayAurora(qint32 display_aurora);
+
+    qint32 getDisplayMagDec();
+    void setDisplayMagDec(qint32 display_mag_dec);
+
+    qint32 getDisplayMaidenheadGrid();
+    void setDisplayMaidenheadGrid(qint32 display_maidenhead_grid);
+
+    qint32 getDisplayPfd();
+    void setDisplayPfd(qint32 display_pfd);
+
+    qint32 getViewFirstPerson();
+    void setViewFirstPerson(qint32 view_first_person);
+
+    QString* getDefaultImagery();
+    void setDefaultImagery(QString* default_imagery);
 
     QString* getTitle();
     void setTitle(QString* title);
@@ -80,8 +183,110 @@ private:
     qint32 display_names;
     bool m_display_names_isSet;
 
+    qint32 map2_d_enabled;
+    bool m_map2_d_enabled_isSet;
+
+    qint32 map3_d_enabled;
+    bool m_map3_d_enabled_isSet;
+
+    QString* map_provider;
+    bool m_map_provider_isSet;
+
+    QString* map_type;
+    bool m_map_type_isSet;
+
+    QString* osm_url;
+    bool m_osm_url_isSet;
+
+    QString* map_box_styles;
+    bool m_map_box_styles_isSet;
+
+    qint32 display_selected_ground_tracks;
+    bool m_display_selected_ground_tracks_isSet;
+
+    qint32 display_all_ground_tracks;
+    bool m_display_all_ground_tracks_isSet;
+
     QString* terrain;
     bool m_terrain_isSet;
+
+    QString* buildings;
+    bool m_buildings_isSet;
+
+    qint32 sun_light_enabled;
+    bool m_sun_light_enabled_isSet;
+
+    SWGNumber* light_intensity;
+    bool m_light_intensity_isSet;
+
+    qint32 eci_camera;
+    bool m_eci_camera_isSet;
+
+    qint32 fxaa;
+    bool m_fxaa_isSet;
+
+    qint32 msaa;
+    bool m_msaa_isSet;
+
+    qint32 terrain_lighting;
+    bool m_terrain_lighting_isSet;
+
+    qint32 water;
+    bool m_water_isSet;
+
+    qint32 hdr;
+    bool m_hdr_isSet;
+
+    qint32 fog;
+    bool m_fog_isSet;
+
+    qint32 fps;
+    bool m_fps_isSet;
+
+    qint32 display_muf;
+    bool m_display_muf_isSet;
+
+    qint32 displayfo_f2;
+    bool m_displayfo_f2_isSet;
+
+    qint32 display_rain;
+    bool m_display_rain_isSet;
+
+    qint32 display_clouds;
+    bool m_display_clouds_isSet;
+
+    qint32 display_sea_marks;
+    bool m_display_sea_marks_isSet;
+
+    qint32 display_railways;
+    bool m_display_railways_isSet;
+
+    qint32 display_nasa_global_imagery;
+    bool m_display_nasa_global_imagery_isSet;
+
+    QString* nasa_global_imagery_identifier;
+    bool m_nasa_global_imagery_identifier_isSet;
+
+    qint32 nasa_global_imagery_opacity;
+    bool m_nasa_global_imagery_opacity_isSet;
+
+    qint32 display_aurora;
+    bool m_display_aurora_isSet;
+
+    qint32 display_mag_dec;
+    bool m_display_mag_dec_isSet;
+
+    qint32 display_maidenhead_grid;
+    bool m_display_maidenhead_grid_isSet;
+
+    qint32 display_pfd;
+    bool m_display_pfd_isSet;
+
+    qint32 view_first_person;
+    bool m_view_first_person_isSet;
+
+    QString* default_imagery;
+    bool m_default_imagery_isSet;
 
     QString* title;
     bool m_title_isSet;

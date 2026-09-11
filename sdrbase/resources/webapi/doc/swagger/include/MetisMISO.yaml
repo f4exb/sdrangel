@@ -112,6 +112,8 @@ MetisMISOSettings:
       description: "Selected sample rate index."
     log2Decim:
       type: integer
+      minimum: 0
+      maximum: 3
       description: "Base-2 exponent of the software decimation factor; the output sample rate is divided by 2^log2Decim."
     LOppmTenths:
       type: integer

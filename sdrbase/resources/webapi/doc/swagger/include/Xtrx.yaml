@@ -241,6 +241,8 @@ XtrxMIMOSettings:
     log2SoftDecim:
       description: log2 of software decimation factor from 0 to 6
       type: integer
+      minimum: 0
+      maximum: 6
     rxCenterFrequency:
       type: integer
       format: int64
@@ -258,6 +260,8 @@ XtrxMIMOSettings:
     ncoEnableRx:
       description: Enable TSP NCO Rx on both channels and mixing (1 for yes, 0 for no)
       type: integer
+      minimum: 0
+      maximum: 1
     ncoFrequencyRx:
       description: Rx frequency shift from LO for both channels
       type: integer
@@ -339,6 +343,8 @@ XtrxMIMOSettings:
     log2SoftInterp:
       description: log2 of software interpolation factor from 0 to 6
       type: integer
+      minimum: 0
+      maximum: 6
     txCenterFrequency:
       type: integer
       format: int64
@@ -346,6 +352,8 @@ XtrxMIMOSettings:
     ncoEnableTx:
       description: Enable TSP NCO Tx on both channels and mixing (1 for yes, 0 for no)
       type: integer
+      minimum: 0
+      maximum: 1
     ncoFrequencyTx:
       description: Tx frequency shift from LO for both channels
       type: integer

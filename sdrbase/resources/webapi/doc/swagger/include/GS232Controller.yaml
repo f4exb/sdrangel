@@ -24,6 +24,8 @@ GS232ControllerSettings:
     track:
       description: Track a target where azimuth and elevation are determined by another plugin (1 for yes, 0 for no)
       type: integer
+      minimum: 0
+      maximum: 1
     source:
       description: "Identifier of the channel or feature plugin providing azimuth and elevation (E.g. R0:0 ADSBDemod)"
       type: string

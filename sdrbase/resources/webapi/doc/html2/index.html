@@ -791,12 +791,6 @@ margin-bottom: 20px;
       "type" : "integer",
       "description" : "Number of input samples used to represent each bit."
     },
-    "correlateFullPreamble" : {
-      "type" : "integer",
-      "description" : "Correlate on part or full preamble\n  * 0 - part\n  * 1 - full\n",
-      "minimum" : 0,
-      "maximum" : 1
-    },
     "demodModeS" : {
       "type" : "integer",
       "description" : "Demodulate all mode S frames or just ADS-B\n  * 0 - just ADS-B\n  * 1 - All mode S\n",
@@ -814,7 +808,7 @@ margin-bottom: 20px;
     },
     "removeTimeout" : {
       "type" : "integer",
-      "description" : "Time after which an inactive tracked item is removed."
+      "description" : "Seconds without a frame after which an aircraft is removed from the display."
     },
     "feedEnabled" : {
       "type" : "integer",
@@ -881,7 +875,7 @@ margin-bottom: 20px;
     "importPeriod" : {
       "type" : "number",
       "format" : "float",
-      "description" : "Import period setting for ADS-B demod."
+      "description" : "How often to import aircraft from the configured web service, in seconds."
     },
     "importMinLatitude" : {
       "type" : "string",
@@ -994,11 +988,11 @@ margin-bottom: 20px;
     "trackerDeviceFrequency" : {
       "type" : "integer",
       "format" : "int64",
-      "description" : "Center frequency of tracker device"
+      "description" : "Centre frequency of the tracking device, in Hz."
     },
     "trackerChannelOffset" : {
       "type" : "integer",
-      "description" : "Tracker channel offset from device center frequency"
+      "description" : "Tracker channel offset from the device centre frequency, in Hz."
     }
   },
   "description" : "AFC report"
@@ -1036,11 +1030,11 @@ margin-bottom: 20px;
     "targetFrequency" : {
       "type" : "integer",
       "format" : "int64",
-      "description" : "Target frequency for the tracker"
+      "description" : "Frequency the tracker should settle on, in Hz."
     },
     "freqTolerance" : {
       "type" : "integer",
-      "description" : "Frequency shift tolerance before tracker frequency is (re)adjusted"
+      "description" : "Frequency error in Hz that is tolerated before the tracker frequency is adjusted again."
     },
     "trackerAdjustPeriod" : {
       "type" : "integer",
@@ -1115,7 +1109,9 @@ margin-bottom: 20px;
     "correlationThreshold" : {
       "type" : "number",
       "format" : "float",
-      "description" : "Normalised correlation threshold with the preamble, from 0 to 1"
+      "description" : "Normalised correlation threshold with the preamble, from 0 to 1",
+      "minimum" : 0,
+      "maximum" : 1
     },
     "udpEnabled" : {
       "type" : "integer",
@@ -1135,7 +1131,9 @@ margin-bottom: 20px;
     },
     "udpFormat" : {
       "type" : "integer",
-      "description" : "0 for binary, 1 for NMEA"
+      "description" : "0 for binary, 1 for NMEA",
+      "minimum" : 0,
+      "maximum" : 1
     },
     "logFilename" : {
       "type" : "string",
@@ -1429,6 +1427,26 @@ margin-bottom: 20px;
   },
   "description" : "AISMod"
 };
+            defs.AISReport = {
+  "properties" : {
+    "reportDateTime" : {
+      "type" : "string",
+      "description" : "When this snapshot was taken, ISO 8601."
+    },
+    "vesselCount" : {
+      "type" : "integer",
+      "description" : "Number of vessels currently held."
+    },
+    "vessels" : {
+      "type" : "array",
+      "description" : "The vessels heard.",
+      "items" : {
+        "$ref" : "#/definitions/AISVessel"
+      }
+    }
+  },
+  "description" : "Vessels heard by the AIS feature, which collects the decoded messages of every AIS demodulator in the instance. A field is present only once a message carrying it has been received, so an absent position means unknown rather than zero.\n"
+};
             defs.AISSettings = {
   "properties" : {
     "title" : {
@@ -1483,6 +1501,91 @@ margin-bottom: 20px;
     }
   },
   "description" : "AIS settings"
+};
+            defs.AISVessel = {
+  "properties" : {
+    "mmsi" : {
+      "type" : "string",
+      "description" : "Maritime Mobile Service Identity, nine digits. The only field always present."
+    },
+    "name" : {
+      "type" : "string",
+      "description" : "Vessel name, from a static and voyage related message or an aid-to-navigation report."
+    },
+    "callsign" : {
+      "type" : "string",
+      "description" : "Radio callsign."
+    },
+    "imo" : {
+      "type" : "string",
+      "description" : "IMO number, where transmitted."
+    },
+    "country" : {
+      "type" : "string",
+      "description" : "Flag state, derived from the MMSI maritime identification digits."
+    },
+    "type" : {
+      "type" : "string",
+      "description" : "What is transmitting: Vessel, Base station, Aircraft or Aid-to-nav."
+    },
+    "shipType" : {
+      "type" : "string",
+      "description" : "Ship and cargo type, such as Cargo or Tug."
+    },
+    "latitude" : {
+      "type" : "number",
+      "format" : "float",
+      "description" : "Latitude in decimal degrees, north positive.",
+      "minimum" : -90,
+      "maximum" : 90
+    },
+    "longitude" : {
+      "type" : "number",
+      "format" : "float",
+      "description" : "Longitude in decimal degrees, east positive.",
+      "minimum" : -180,
+      "maximum" : 180
+    },
+    "course" : {
+      "type" : "number",
+      "format" : "float",
+      "description" : "Course over ground in degrees true."
+    },
+    "speed" : {
+      "type" : "number",
+      "format" : "float",
+      "description" : "Speed over ground in knots."
+    },
+    "heading" : {
+      "type" : "integer",
+      "description" : "True heading in degrees, which differs from course when set and drift apply."
+    },
+    "status" : {
+      "type" : "string",
+      "description" : "Navigational status, such as Under way using engine or At anchor."
+    },
+    "length" : {
+      "type" : "integer",
+      "description" : "Overall length in metres."
+    },
+    "destination" : {
+      "type" : "string",
+      "description" : "Destination as entered by the crew."
+    },
+    "positionUpdate" : {
+      "type" : "string",
+      "description" : "When the position was last updated, ISO 8601."
+    },
+    "lastUpdate" : {
+      "type" : "string",
+      "description" : "When any field was last updated, ISO 8601."
+    },
+    "messages" : {
+      "type" : "integer",
+      "description" : "Messages received from this vessel."
+    }
+  },
+  "description" : "Vessel heard by the AIS feature"
 };
             defs.AMBEActions = {
   "properties" : {
@@ -1658,7 +1761,9 @@ margin-bottom: 20px;
     },
     "bandpassEnable" : {
       "type" : "integer",
-      "description" : "use bandpass filter (1 for yes, 0 for no)"
+      "description" : "use bandpass filter (1 for yes, 0 for no)",
+      "minimum" : 0,
+      "maximum" : 1
     },
     "rgbColor" : {
       "type" : "integer",
@@ -1682,7 +1787,9 @@ margin-bottom: 20px;
     },
     "frequencyMode" : {
       "type" : "integer",
-      "description" : "(0 for Offset, 1 for MW, 2 for 25k, 3 for 8.33k)"
+      "description" : "(0 for Offset, 1 for MW, 2 for 25k, 3 for 8.33k)",
+      "minimum" : 0,
+      "maximum" : 3
     },
     "frequency" : {
       "type" : "integer",
@@ -1765,7 +1872,9 @@ margin-bottom: 20px;
     "modFactor" : {
       "type" : "number",
       "format" : "float",
-      "description" : "modulation factor from 0.0 to 1.0"
+      "description" : "modulation factor from 0.0 to 1.0",
+      "minimum" : 0,
+      "maximum" : 1
     },
     "toneFrequency" : {
       "type" : "number",
@@ -1847,6 +1956,36 @@ margin-bottom: 20px;
     }
   },
   "description" : "AMMod"
+};
+            defs.APRSReport = {
+  "properties" : {
+    "runningState" : {
+      "type" : "integer",
+      "description" : "Running state\n  * 0 - not started\n  * 1 - idle\n  * 2 - running\n  * 3 - error\n",
+      "minimum" : 0,
+      "maximum" : 3
+    },
+    "reportDateTime" : {
+      "type" : "string",
+      "description" : "When this snapshot was taken, ISO 8601."
+    },
+    "stationCount" : {
+      "type" : "integer",
+      "description" : "Number of stations and objects currently held."
+    },
+    "packetCount" : {
+      "type" : "integer",
+      "description" : "Packets received across all stations."
+    },
+    "stations" : {
+      "type" : "array",
+      "description" : "The stations and objects heard.",
+      "items" : {
+        "$ref" : "#/definitions/APRSStation"
+      }
+    }
+  },
+  "description" : "Stations and objects heard by the APRS feature, which collects the AX.25 packets of every packet demodulator in the instance. A field is present only once a packet carrying it has been received.\n"
 };
             defs.APRSSettings = {
   "properties" : {
@@ -2000,6 +2139,114 @@ margin-bottom: 20px;
     }
   },
   "description" : "APRS settings"
+};
+            defs.APRSStation = {
+  "properties" : {
+    "callsign" : {
+      "type" : "string",
+      "description" : "Station callsign with SSID, or the name of the object or item."
+    },
+    "isObject" : {
+      "type" : "integer",
+      "description" : "1 when this is an object or item rather than a station.",
+      "minimum" : 0,
+      "maximum" : 1
+    },
+    "reportingStation" : {
+      "type" : "string",
+      "description" : "Callsign that reported this object. Empty for a station."
+    },
+    "symbol" : {
+      "type" : "string",
+      "description" : "APRS symbol identifier."
+    },
+    "latitude" : {
+      "type" : "number",
+      "format" : "float",
+      "description" : "Latitude in decimal degrees, north positive.",
+      "minimum" : -90,
+      "maximum" : 90
+    },
+    "longitude" : {
+      "type" : "number",
+      "format" : "float",
+      "description" : "Longitude in decimal degrees, east positive.",
+      "minimum" : -180,
+      "maximum" : 180
+    },
+    "altitude" : {
+      "type" : "number",
+      "format" : "float",
+      "description" : "Altitude in metres above mean sea level."
+    },
+    "course" : {
+      "type" : "number",
+      "format" : "float",
+      "description" : "Course in degrees true."
+    },
+    "speed" : {
+      "type" : "number",
+      "format" : "float",
+      "description" : "Speed in km/h."
+    },
+    "status" : {
+      "type" : "string",
+      "description" : "Latest status text."
+    },
+    "comment" : {
+      "type" : "string",
+      "description" : "Latest position comment."
+    },
+    "powerWatts" : {
+      "type" : "number",
+      "format" : "float",
+      "description" : "Transmitter power in watts, from a reported PHG value."
+    },
+    "antennaHeight" : {
+      "type" : "number",
+      "format" : "float",
+      "description" : "Antenna height above average terrain in metres, from a reported PHG value."
+    },
+    "antennaGain" : {
+      "type" : "number",
+      "format" : "float",
+      "description" : "Antenna gain in dB, from a reported PHG value."
+    },
+    "antennaDirectivity" : {
+      "type" : "string",
+      "description" : "Antenna directivity, from a reported PHG value."
+    },
+    "radioRange" : {
+      "type" : "number",
+      "format" : "float",
+      "description" : "Reported range in km."
+    },
+    "hasWeather" : {
+      "type" : "integer",
+      "description" : "1 when weather reports have been received from this station.",
+      "minimum" : 0,
+      "maximum" : 1
+    },
+    "hasTelemetry" : {
+      "type" : "integer",
+      "description" : "1 when telemetry has been received from this station.",
+      "minimum" : 0,
+      "maximum" : 1
+    },
+    "telemetryProjectName" : {
+      "type" : "string",
+      "description" : "Telemetry project name, where reported."
+    },
+    "packets" : {
+      "type" : "integer",
+      "description" : "Packets received from this station."
+    },
+    "lastPacketDateTime" : {
+      "type" : "string",
+      "description" : "When the most recent packet was received, ISO 8601."
+    }
+  },
+  "description" : "Station or object heard by the APRS feature"
 };
             defs.APTDemodActions = {
   "properties" : {
@@ -2209,7 +2456,9 @@ margin-bottom: 20px;
     },
     "halfImage" : {
       "type" : "integer",
-      "description" : "(boolean) 1 for m_fltRatioOfRowsToDisplay = 0.5, 0 for m_fltRatioOfRowsToDisplay = 1.0"
+      "description" : "Display only half of the image rows\n  * 0 - display all rows\n  * 1 - display half the rows\n",
+      "minimum" : 0,
+      "maximum" : 1
     },
     "RFBandwidthFactor" : {
       "type" : "integer",
@@ -2229,7 +2478,9 @@ margin-bottom: 20px;
     },
     "enmModulation" : {
       "type" : "integer",
-      "description" : "see ATVDemodSettings::ATVModulation"
+      "description" : "Modulation of the received ATV signal\n  * 0 - FM with discriminator 1\n  * 1 - FM with discriminator 2\n  * 2 - FM with phase derivative discriminator\n  * 3 - AM\n  * 4 - AM with vestigial lower sideband, signal in the upper sideband\n  * 5 - AM with vestigial upper sideband, signal in the lower sideband\n",
+      "minimum" : 0,
+      "maximum" : 5
     },
     "fltRFBandwidth" : {
       "type" : "number",
@@ -2271,7 +2522,9 @@ margin-bottom: 20px;
     },
     "enmATVStandard" : {
       "type" : "integer",
-      "description" : "see ATVDemodSettings::ATVStd"
+      "description" : "Television standard, which sets the line count and timings\n  * 0 - PAL 625 lines\n  * 1 - PAL 525 lines\n  * 2 - 819 lines\n  * 3 - short, interleaved\n  * 4 - short\n  * 5 - horizontal sync skip\n",
+      "minimum" : 0,
+      "maximum" : 5
     },
     "intNumberOfLines" : {
       "type" : "integer",
@@ -2652,7 +2905,9 @@ margin-bottom: 20px;
     },
     "log2Decim" : {
       "type" : "integer",
-      "description" : "Base-2 exponent of the software decimation factor; the output sample rate is divided by 2^log2Decim."
+      "description" : "Base-2 exponent of the software decimation factor; the output sample rate is divided by 2^log2Decim.",
+      "minimum" : 0,
+      "maximum" : 8
     },
     "transverterMode" : {
       "type" : "integer",
@@ -2703,7 +2958,9 @@ margin-bottom: 20px;
     },
     "agcHigh" : {
       "type" : "integer",
-      "description" : "AGC threshold (1 for high, 0 for low)"
+      "description" : "AGC threshold (1 for high, 0 for low)",
+      "minimum" : 0,
+      "maximum" : 1
     },
     "useDSP" : {
       "type" : "integer",
@@ -2769,15 +3026,21 @@ margin-bottom: 20px;
     },
     "lnaGain" : {
       "type" : "integer",
-      "description" : "Low-noise-amplifier gain setting."
+      "description" : "Low noise amplifier gain as a step index, not a dB value. Ignored when lnaAGC is enabled.",
+      "minimum" : 0,
+      "maximum" : 14
     },
     "mixerGain" : {
       "type" : "integer",
-      "description" : "Mixer gain setting for Airspy."
+      "description" : "Mixer gain as a step index, not a dB value. Ignored when mixerAGC is enabled.",
+      "minimum" : 0,
+      "maximum" : 15
     },
     "vgaGain" : {
       "type" : "integer",
-      "description" : "Variable-gain-amplifier gain setting."
+      "description" : "Variable gain amplifier (IF) gain as a step index, not a dB value.",
+      "minimum" : 0,
+      "maximum" : 15
     },
     "lnaAGC" : {
       "type" : "integer",
@@ -2789,11 +3052,15 @@ margin-bottom: 20px;
     },
     "log2Decim" : {
       "type" : "integer",
-      "description" : "Base-2 exponent of the software decimation factor; the output sample rate is divided by 2^log2Decim."
+      "description" : "Base-2 exponent of the software decimation factor; the output sample rate is divided by 2^log2Decim.",
+      "minimum" : 0,
+      "maximum" : 6
     },
     "fcPos" : {
       "type" : "integer",
-      "description" : "0=Infra 1=Supra 2=Center"
+      "description" : "0=Infra 1=Supra 2=Center",
+      "minimum" : 0,
+      "maximum" : 2
     },
     "biasT" : {
       "type" : "integer",
@@ -4308,7 +4575,9 @@ margin-bottom: 20px;
     },
     "mode" : {
       "type" : "integer",
-      "description" : "see enum CWKeyerSettings::CWMode"
+      "description" : "Source of the keying\n  * 0 - none, key up\n  * 1 - send the text in the text field\n  * 2 - send continuous dots\n  * 3 - send continuous dashes\n  * 4 - key from the keyboard\n",
+      "minimum" : 0,
+      "maximum" : 4
     },
     "text" : {
       "type" : "string",
@@ -4320,23 +4589,25 @@ margin-bottom: 20px;
     },
     "keyboardIambic" : {
       "type" : "integer",
-      "description" : "1 for iambic input 0 for straight input using the keyboard"
+      "description" : "1 for iambic input 0 for straight input using the keyboard",
+      "minimum" : 0,
+      "maximum" : 1
     },
     "dotKey" : {
       "type" : "integer",
-      "description" : "key for dots keyboard input. See enum Qt::Key"
+      "description" : "Keyboard key that sends dots. Key code as a Qt key value, for example 32 (0x20) for space and 65 (0x41) for A. Letter keys use the upper case code. 0 for no key.\n"
     },
     "dotKeyModifiers" : {
       "type" : "integer",
-      "description" : "key modifier for dots keyboard input. See flags Qt::KeyboardModifiers"
+      "description" : "Modifiers for the dot key. Modifier keys held with the key, as a sum of flags: 33554432 (0x02000000) shift, 67108864 (0x04000000) control, 134217728 (0x08000000) alt, 268435456 (0x10000000) meta. 0 for no modifier.\n"
     },
     "dashKey" : {
       "type" : "integer",
-      "description" : "key for dashes keyboard input. See enum Qt::Key"
+      "description" : "Keyboard key that sends dashes. Key code as a Qt key value, for example 32 (0x20) for space and 65 (0x41) for A. Letter keys use the upper case code. 0 for no key.\n"
     },
     "dashKeyModifiers" : {
       "type" : "integer",
-      "description" : "key modifier for dashes keyboard input. See flags Qt::KeyboardModifiers"
+      "description" : "Modifiers for the dash key. Modifier keys held with the key, as a sum of flags: 33554432 (0x02000000) shift, 67108864 (0x04000000) control, 134217728 (0x08000000) alt, 268435456 (0x10000000) meta. 0 for no modifier.\n"
     }
   }
 };
@@ -4418,7 +4689,9 @@ margin-bottom: 20px;
     },
     "direction" : {
       "type" : "integer",
-      "description" : "0 for Rx only, 1 for Tx only or 2 for any number and direction (default 0)"
+      "description" : "0 for Rx only, 1 for Tx only or 2 for any number and direction (default 0)",
+      "minimum" : 0,
+      "maximum" : 2
     },
     "originatorDeviceSetIndex" : {
       "type" : "integer",
@@ -4562,7 +4835,9 @@ margin-bottom: 20px;
     },
     "inputType" : {
       "type" : "integer",
-      "description" : "see ChannelAnalyzerSettings::InputType"
+      "description" : "Signal fed to the analyser\n  * 0 - the channel signal\n  * 1 - the PLL output\n  * 2 - the autocorrelation of the signal\n",
+      "minimum" : 0,
+      "maximum" : 2
     },
     "rgbColor" : {
       "type" : "integer",
@@ -4678,7 +4953,9 @@ margin-bottom: 20px;
     },
     "frequencyScaleDisplayType" : {
       "type" : "integer",
-      "description" : "ChannelMarker::frequencyScaleDisplay_t"
+      "description" : "What is written against the channel on the frequency scale\n  * 0 - the frequency\n  * 1 - the channel title\n  * 2 - the send address\n  * 3 - the receive address\n  * 4 - nothing\n",
+      "minimum" : 0,
+      "maximum" : 4
     }
   },
   "description" : "ChannelMarker settings"
@@ -4721,7 +4998,9 @@ margin-bottom: 20px;
     },
     "frequencyMode" : {
       "type" : "integer",
-      "description" : "(0 for Offset, 1 for Absolute)"
+      "description" : "(0 for Offset, 1 for Absolute)",
+      "minimum" : 0,
+      "maximum" : 1
     },
     "frequency" : {
       "type" : "integer",
@@ -4799,7 +5078,9 @@ margin-bottom: 20px;
     },
     "direction" : {
       "type" : "integer",
-      "description" : "0 for Rx only, 1 for Tx only or 2 for any number and direction (default 0)"
+      "description" : "0 for Rx only, 1 for Tx only or 2 for any number and direction (default 0)",
+      "minimum" : 0,
+      "maximum" : 2
     },
     "ADSBDemodReport" : {
       "description" : "ADS-B demod report data for Channel.",
@@ -4828,6 +5109,10 @@ margin-bottom: 20px;
     "BFMDemodReport" : {
       "description" : "BFM demod report data for Channel.",
       "$ref" : "#/definitions/BFMDemodReport"
+    },
+    "DABDemodReport" : {
+      "description" : "DAB demod report data for Channel.",
+      "$ref" : "#/definitions/DABDemodReport"
     },
     "ChannelPowerReport" : {
       "description" : "Channel power report data for Channel.",
@@ -5038,7 +5323,9 @@ margin-bottom: 20px;
     },
     "direction" : {
       "type" : "integer",
-      "description" : "0 for Rx only, 1 for Tx only or 2 for any number and direction (default 0)"
+      "description" : "0 for Rx only, 1 for Tx only or 2 for any number and direction (default 0)",
+      "minimum" : 0,
+      "maximum" : 2
     },
     "originatorDeviceSetIndex" : {
       "type" : "integer",
@@ -5360,7 +5647,9 @@ margin-bottom: 20px;
     },
     "syncWord" : {
       "type" : "integer",
-      "description" : "2 bytes sync word (0..65535)"
+      "description" : "2 bytes sync word (0..65535)",
+      "minimum" : 0,
+      "maximum" : 65535
     },
     "hasCRC" : {
       "type" : "integer",
@@ -5644,7 +5933,9 @@ margin-bottom: 20px;
     },
     "syncWord" : {
       "type" : "integer",
-      "description" : "2 byte (0..65535) synchronization syncWord"
+      "description" : "2 byte (0..65535) synchronization syncWord",
+      "minimum" : 0,
+      "maximum" : 65535
     },
     "channelMute" : {
       "type" : "integer",
@@ -5828,11 +6119,11 @@ margin-bottom: 20px;
     },
     "key" : {
       "type" : "integer",
-      "description" : "Qt::Key"
+      "description" : "Keyboard key that triggers the command. Key code as a Qt key value, for example 32 (0x20) for space and 65 (0x41) for A. Letter keys use the upper case code. 0 for no key.\n"
     },
     "keyModifiers" : {
       "type" : "integer",
-      "description" : "Qt::KeyboardModifiers"
+      "description" : "Modifiers for the trigger key. Modifier keys held with the key, as a sum of flags: 33554432 (0x02000000) shift, 67108864 (0x04000000) control, 134217728 (0x08000000) alt, 268435456 (0x10000000) meta. 0 for no modifier.\n"
     },
     "associateKey" : {
       "type" : "integer",
@@ -5937,6 +6228,111 @@ margin-bottom: 20px;
   },
   "description" : "Configuration presets"
 };
+            defs.DABDemodReport = {
+  "properties" : {
+    "channelPowerDB" : {
+      "type" : "number",
+      "format" : "float",
+      "description" : "Average power in the demodulator channel in dB."
+    },
+    "channelSampleRate" : {
+      "type" : "integer",
+      "description" : "Effective complex channel sample rate in samples per second. DAB requires 2048000."
+    },
+    "audioSampleRate" : {
+      "type" : "integer",
+      "description" : "Audio output sample rate in samples per second."
+    },
+    "sync" : {
+      "type" : "integer",
+      "description" : "DAB synchronization state (1 synchronized, 0 not synchronized).",
+      "minimum" : 0,
+      "maximum" : 1
+    },
+    "snr" : {
+      "type" : "integer",
+      "description" : "DAB decoder signal-to-noise ratio in dB. A value of 0 dB or less after synchronization and audio become active is not a healthy result and can indicate receiver overload. With an RTL-SDR, reduce tuner gain through its supported values, wait briefly after each change, and re-read this report. Select the gain that gives the best positive SNR rather than assuming that higher gain is better.\n"
+    },
+    "frequencyOffset" : {
+      "type" : "integer",
+      "description" : "Frequency offset estimated by the DAB decoder in Hz."
+    },
+    "ensembleName" : {
+      "type" : "string",
+      "description" : "Label of the currently decoded ensemble."
+    },
+    "ensembleId" : {
+      "type" : "integer",
+      "description" : "Identifier of the currently decoded ensemble."
+    },
+    "programs" : {
+      "type" : "array",
+      "description" : "Programme services discovered in the currently tuned ensemble.",
+      "items" : {
+        "$ref" : "#/DABProgram"
+      }
+    },
+    "selectedProgram" : {
+      "type" : "string",
+      "description" : "Exact service label currently requested by the program setting."
+    },
+    "audioActive" : {
+      "type" : "integer",
+      "description" : "Whether programme audio metadata has been received and audio decoding is active.",
+      "minimum" : 0,
+      "maximum" : 1
+    },
+    "bitrate" : {
+      "type" : "integer",
+      "description" : "Selected programme audio bitrate in kbit/s."
+    },
+    "audio" : {
+      "type" : "string",
+      "description" : "Selected programme audio codec and channel-mode description."
+    },
+    "language" : {
+      "type" : "string",
+      "description" : "Selected programme language."
+    },
+    "programType" : {
+      "type" : "string",
+      "description" : "Selected programme type, such as News or Pop Music."
+    },
+    "frameQuality" : {
+      "type" : "integer",
+      "description" : "Audio frame decode quality as a percentage.",
+      "minimum" : 0,
+      "maximum" : 100
+    },
+    "reedSolomonQuality" : {
+      "type" : "integer",
+      "description" : "Reed-Solomon decode quality as a percentage.",
+      "minimum" : 0,
+      "maximum" : 100
+    },
+    "aacQuality" : {
+      "type" : "integer",
+      "description" : "AAC decode quality as a percentage.",
+      "minimum" : 0,
+      "maximum" : 100
+    },
+    "fibQuality" : {
+      "type" : "integer",
+      "description" : "Fast Information Block decode quality as a percentage.",
+      "minimum" : 0,
+      "maximum" : 100
+    },
+    "tii" : {
+      "type" : "integer",
+      "description" : "Decoded Transmitter Identification Information value."
+    },
+    "data" : {
+      "type" : "string",
+      "description" : "Latest dynamic text/data associated with the selected programme."
+    }
+  },
+  "description" : "Live DAB demodulator, ensemble and selected-programme status. Synchronization, discovered programmes and active audio do not by themselves prove clean reception; check SNR after selecting a programme and after every receiver gain change.\n"
+};
             defs.DABDemodSettings = {
   "properties" : {
     "inputFrequencyOffset" : {
@@ -6015,6 +6411,19 @@ margin-bottom: 20px;
   },
   "description" : "DABDemod"
 };
+            defs.DABProgram = {
+  "properties" : {
+    "name" : {
+      "type" : "string",
+      "description" : "Exact transmitted service label. Use this value for the program setting."
+    },
+    "id" : {
+      "type" : "integer",
+      "description" : "DAB service identifier."
+    }
+  },
+  "description" : "A programme service discovered in the currently tuned DAB ensemble."
+};
             defs.DATVDemodReport = {
   "properties" : {
     "channelPowerDB" : {
@@ -6030,7 +6439,9 @@ margin-bottom: 20px;
     },
     "audioDecodeOK" : {
       "type" : "integer",
-      "description" : "Audio decode (1 for OK, 0 for KO)"
+      "description" : "Audio decode (1 for OK, 0 for KO)",
+      "minimum" : 0,
+      "maximum" : 1
     },
     "videoActive" : {
       "type" : "integer",
@@ -6040,7 +6451,9 @@ margin-bottom: 20px;
     },
     "videoDecodeOK" : {
       "type" : "integer",
-      "description" : "Video decode (1 for OK, 0 for KO)"
+      "description" : "Video decode (1 for OK, 0 for KO)",
+      "minimum" : 0,
+      "maximum" : 1
     },
     "udpRunning" : {
       "type" : "integer",
@@ -6060,7 +6473,9 @@ margin-bottom: 20px;
     },
     "setByModcod" : {
       "type" : "integer",
-      "description" : "Modulation and code rate set by DVB-S2 MODCOD (1 for yes, 0 for no)"
+      "description" : "Modulation and code rate set by DVB-S2 MODCOD (1 for yes, 0 for no)",
+      "minimum" : 0,
+      "maximum" : 1
     },
     "mer" : {
       "type" : "number",
@@ -6162,7 +6577,9 @@ margin-bottom: 20px;
     "rollOff" : {
       "type" : "number",
       "format" : "float",
-      "description" : "RRC filter roll-off factor (0..1)"
+      "description" : "RRC filter roll-off factor (0..1)",
+      "minimum" : 0,
+      "maximum" : 1
     },
     "viterbi" : {
       "type" : "integer",
@@ -6315,7 +6732,9 @@ margin-bottom: 20px;
     },
     "imageOverlayTimestamp" : {
       "type" : "integer",
-      "description" : "Overlay timestamp on still image (1 for yes, 0 for no)"
+      "description" : "Overlay timestamp on still image (1 for yes, 0 for no)",
+      "minimum" : 0,
+      "maximum" : 1
     },
     "imageServiceProvider" : {
       "type" : "string",
@@ -6408,15 +6827,21 @@ margin-bottom: 20px;
   "properties" : {
     "phi" : {
       "type" : "integer",
-      "description" : "Raw phase difference in degrees from 0 to 180"
+      "description" : "Raw phase difference in degrees from 0 to 180",
+      "minimum" : 0,
+      "maximum" : 180
     },
     "posAz" : {
       "type" : "integer",
-      "description" : "Calculated port side (positive) arrival angle in degrees from 0 to 180"
+      "description" : "Calculated port side (positive) arrival angle in degrees from 0 to 180",
+      "minimum" : 0,
+      "maximum" : 180
     },
     "negAz" : {
       "type" : "integer",
-      "description" : "Calculated starboard side (negative) arrival angle in degrees from 0 to 180"
+      "description" : "Calculated starboard side (negative) arrival angle in degrees from 0 to 180",
+      "minimum" : 0,
+      "maximum" : 180
     },
     "blindAngle" : {
       "type" : "integer",
@@ -6461,11 +6886,15 @@ margin-bottom: 20px;
     },
     "antennaAz" : {
       "type" : "integer",
-      "description" : "Antennas azimuth from antenna 1 to antenna 2 in degrees from 0 to 359"
+      "description" : "Antennas azimuth from antenna 1 to antenna 2 in degrees from 0 to 359",
+      "minimum" : 0,
+      "maximum" : 359
     },
     "basebandDistance" : {
       "type" : "integer",
-      "description" : "Antennas baseline distance in millimeters from 1 to 99999"
+      "description" : "Antennas baseline distance in millimeters from 1 to 99999",
+      "minimum" : 1,
+      "maximum" : 99999
     },
     "squelchdB" : {
       "type" : "integer",
@@ -6787,11 +7216,15 @@ margin-bottom: 20px;
     },
     "traceStroke" : {
       "type" : "integer",
-      "description" : "0 to 255"
+      "description" : "0 to 255",
+      "minimum" : 0,
+      "maximum" : 255
     },
     "traceDecay" : {
       "type" : "integer",
-      "description" : "0 to 255"
+      "description" : "0 to 255",
+      "minimum" : 0,
+      "maximum" : 255
     },
     "streamIndex" : {
       "type" : "integer",
@@ -7050,7 +7483,9 @@ margin-bottom: 20px;
     },
     "direction" : {
       "type" : "integer",
-      "description" : "0 for Rx only, 1 for Tx only or 2 for any number and direction (default 0)"
+      "description" : "0 for Rx only, 1 for Tx only or 2 for any number and direction (default 0)",
+      "minimum" : 0,
+      "maximum" : 2
     },
     "originatorIndex" : {
       "type" : "integer",
@@ -7135,7 +7570,9 @@ margin-bottom: 20px;
     },
     "direction" : {
       "type" : "integer",
-      "description" : "0 for Rx only, 1 for Tx only or 2 for any number and direction (default 0)"
+      "description" : "0 for Rx only, 1 for Tx only or 2 for any number and direction (default 0)",
+      "minimum" : 0,
+      "maximum" : 2
     },
     "airspyReport" : {
       "description" : "Airspy report data for Device.",
@@ -7322,7 +7759,9 @@ margin-bottom: 20px;
     },
     "direction" : {
       "type" : "integer",
-      "description" : "0 for Rx only, 1 for Tx only or 2 for any number and direction (default 0)"
+      "description" : "0 for Rx only, 1 for Tx only or 2 for any number and direction (default 0)",
+      "minimum" : 0,
+      "maximum" : 2
     },
     "originatorIndex" : {
       "type" : "integer",
@@ -8288,6 +8727,18 @@ margin-bottom: 20px;
     "featureType" : {
       "type" : "string",
       "description" : "Feature type code"
+    },
+    "AISReport" : {
+      "description" : "Ais report data for Feature.",
+      "$ref" : "#/definitions/AISReport"
+    },
+    "APRSReport" : {
+      "description" : "Aprs report data for Feature.",
+      "$ref" : "#/definitions/APRSReport"
+    },
+    "RadiosondeReport" : {
+      "description" : "Radiosonde report data for Feature.",
+      "$ref" : "#/definitions/RadiosondeReport"
     },
     "AFCReport" : {
       "description" : "Afc report data for Feature.",
@@ -9262,31 +9713,31 @@ margin-bottom: 20px;
     "frequency" : {
       "type" : "integer",
       "format" : "int64",
-      "description" : "Frequency in Hz."
+      "description" : "Frequency to scan, in Hz.\n"
     },
     "enabled" : {
       "type" : "integer",
-      "description" : "Enabled for Freq scanner frequency."
+      "description" : "Whether this frequency takes part in the scan (1 to scan it, 0 to skip it).\n"
     },
     "notes" : {
       "type" : "string",
-      "description" : "Notes for Freq scanner frequency."
+      "description" : "Free text note about this frequency, such as the station or service name.\n"
     },
     "channel" : {
       "type" : "string",
-      "description" : "Channel identifier or configuration."
+      "description" : "Overrides the scanner-wide channel for this frequency only, as a device set and channel index such as \"R1:0\". Empty to use the scanner's own channel setting.\n"
     },
     "channelBandwidth" : {
       "type" : "string",
-      "description" : "Channel bandwidth in Hz."
+      "description" : "Overrides the scanner-wide channel bandwidth in Hz for this frequency only. Empty to use the scanner's own setting.\n"
     },
     "threshold" : {
       "type" : "string",
-      "description" : "Threshold for Freq scanner frequency."
+      "description" : "Overrides the scanner-wide power threshold in dB for this frequency only. Empty to use the scanner's own setting.\n"
     },
     "squelch" : {
       "type" : "string",
-      "description" : "Squelch threshold in dB."
+      "description" : "Squelch threshold in dB to apply to the tuned channel when this frequency becomes active. Empty to leave the channel's own squelch alone.\n"
     }
   }
 };
@@ -9314,20 +9765,20 @@ margin-bottom: 20px;
   "properties" : {
     "channelBandwidth" : {
       "type" : "integer",
-      "description" : "channel RF bandwidth in Hz"
+      "description" : "Bandwidth in Hz of each scanned channel.\n"
     },
     "channelShift" : {
       "type" : "integer",
-      "description" : "controlled channel frequency shift in Hz"
+      "description" : "Frequency shift in Hz applied to the tuned channel from the scanned frequency, for modes such as SSB or CW where the signal sits on one side of centre.\n"
     },
     "channelFrequencyOffset" : {
       "type" : "integer",
-      "description" : "channel center frequency shift from baseband center in Hz"
+      "description" : "Minimum frequency shift in Hz of the tuned channel from the centre of reception, used to keep it clear of a DC spike.\n"
     },
     "threshold" : {
       "type" : "number",
       "format" : "float",
-      "description" : "Threshold setting for Freq scanner."
+      "description" : "Power threshold in dB above which a scanned frequency counts as active.\n"
     },
     "frequencies" : {
       "type" : "array",
@@ -9338,34 +9789,34 @@ margin-bottom: 20px;
     },
     "channel" : {
       "type" : "string",
-      "description" : "Channel identifier or configuration."
+      "description" : "Channel that is tuned to the active frequency, as a device set and channel index, for example \"R1:0\" for channel 0 of receive device set 1.\n"
     },
     "scanTime" : {
       "type" : "number",
       "format" : "float",
-      "description" : "Scan time setting for Freq scanner."
+      "description" : "Time in seconds that each power measurement is averaged over.\n"
     },
     "retransmitTime" : {
       "type" : "number",
       "format" : "float",
-      "description" : "Retransmit time setting for Freq scanner."
+      "description" : "Time in seconds to wait after the power on the active frequency falls below the threshold before scanning restarts. In multiplex mode this is instead the time spent listening to each frequency.\n"
     },
     "tuneTime" : {
       "type" : "number",
       "format" : "float",
-      "description" : "Tune time setting for Freq scanner."
+      "description" : "Time in milliseconds to wait after retuning the device before measuring, to allow for PLL settling and device to host transfer latency.\n"
     },
     "priority" : {
       "type" : "integer",
-      "description" : "Priority setting for Freq scanner."
+      "description" : "Which frequency becomes active when several are above the threshold\n  * 0 - the one with the highest power\n  * 1 - the one earliest in the frequency list\n"
     },
     "measurement" : {
       "type" : "integer",
-      "description" : "Measurement setting for Freq scanner."
+      "description" : "How channel power is measured from the FFT bins\n  * 0 - peak, the highest bin\n  * 1 - total, the sum of every bin\n"
     },
     "mode" : {
       "type" : "integer",
-      "description" : "Mode setting for Freq scanner."
+      "description" : "Run mode\n  * 0 - single, scan every frequency once and stop\n  * 1 - continuous, rescan when the active frequency goes quiet\n  * 2 - scan only, measure repeatedly without ever tuning the channel\n  * 3 - multiplex, step through the frequencies listening to each in turn\n"
     },
     "rgbColor" : {
       "type" : "integer",
@@ -9454,7 +9905,9 @@ margin-bottom: 20px;
     },
     "log2Decim" : {
       "type" : "integer",
-      "description" : "Base-2 exponent of the software decimation factor; the output sample rate is divided by 2^log2Decim."
+      "description" : "Base-2 exponent of the software decimation factor; the output sample rate is divided by 2^log2Decim.",
+      "minimum" : 0,
+      "maximum" : 6
     },
     "squelch" : {
       "type" : "number",
@@ -9480,7 +9933,9 @@ margin-bottom: 20px;
     },
     "tracking" : {
       "type" : "integer",
-      "description" : "Tracking 1 for enabled 0 for disabled"
+      "description" : "Tracking 1 for enabled 0 for disabled",
+      "minimum" : 0,
+      "maximum" : 1
     },
     "trackerType" : {
       "type" : "integer",
@@ -9492,7 +9947,9 @@ margin-bottom: 20px;
     },
     "rrc" : {
       "type" : "integer",
-      "description" : "RRC filter (1 for on, 0 for off)"
+      "description" : "RRC filter (1 for on, 0 for off)",
+      "minimum" : 0,
+      "maximum" : 1
     },
     "rrcRolloff" : {
       "type" : "integer",
@@ -9599,7 +10056,9 @@ margin-bottom: 20px;
   "properties" : {
     "displayMode" : {
       "type" : "integer",
-      "description" : "see GLScopeSettings::DisplayMode"
+      "description" : "Arrangement of the two traces on the scope\n  * 0 - X and Y side by side horizontally\n  * 1 - X and Y stacked vertically\n  * 2 - X only\n  * 3 - Y only\n  * 4 - polar, Y against X\n",
+      "minimum" : 0,
+      "maximum" : 4
     },
     "traceIntensity" : {
       "type" : "integer",
@@ -9678,6 +10137,176 @@ margin-bottom: 20px;
       "minimum" : 0,
       "maximum" : 1
     },
+    "display3DSpectrogram" : {
+      "type" : "integer",
+      "description" : "Display the 3D spectrogram instead of the 2D waterfall (1 for yes, 0 for no).",
+      "minimum" : 0,
+      "maximum" : 1
+    },
+    "spectrogramStyle" : {
+      "type" : "integer",
+      "description" : "Rendering style for the 3D spectrogram.\n  * 0 - Points\n  * 1 - Lines\n  * 2 - Solid\n  * 3 - Outline\n  * 4 - Shaded (requires OpenGL 3.3 or later)\n",
+      "minimum" : 0,
+      "maximum" : 4
+    },
+    "truncateFreqScale" : {
+      "type" : "integer",
+      "description" : "Truncate the frequency scale to the displayed span (1 for yes, 0 for no).",
+      "minimum" : 0,
+      "maximum" : 1
+    },
+    "colorMap" : {
+      "type" : "string",
+      "description" : "Colour-map name used for waterfall and 3D spectrogram rendering."
+    },
+    "spectrumStyle" : {
+      "type" : "integer",
+      "description" : "Current spectrum trace style: 0 line, 1 filled, 2 gradient.",
+      "minimum" : 0,
+      "maximum" : 2
+    },
+    "measurement" : {
+      "type" : "integer",
+      "description" : "Measurement mode: 0 none, 1 peaks, 2 channel power, 3 adjacent-channel power, 4 occupied bandwidth, 5 3 dB bandwidth, 6 SNR, 7 mask.",
+      "minimum" : 0,
+      "maximum" : 7
+    },
+    "measurementCenterFrequencyOffset" : {
+      "type" : "integer",
+      "description" : "Measurement centre-frequency offset in Hz."
+    },
+    "measurementBandwidth" : {
+      "type" : "integer",
+      "description" : "Measurement bandwidth in Hz.",
+      "minimum" : 0
+    },
+    "measurementChSpacing" : {
+      "type" : "integer",
+      "description" : "Adjacent-channel measurement channel spacing in Hz.",
+      "minimum" : 0
+    },
+    "measurementAdjChBandwidth" : {
+      "type" : "integer",
+      "description" : "Adjacent-channel measurement bandwidth in Hz.",
+      "minimum" : 0
+    },
+    "measurementHarmonics" : {
+      "type" : "integer",
+      "description" : "Number of harmonics to measure.",
+      "minimum" : 0
+    },
+    "measurementPeaks" : {
+      "type" : "integer",
+      "description" : "Number of peaks to report.",
+      "minimum" : 0
+    },
+    "measurementHighlight" : {
+      "type" : "integer",
+      "description" : "Highlight the selected measurement (1 for yes, 0 for no).",
+      "minimum" : 0,
+      "maximum" : 1
+    },
+    "measurementsPosition" : {
+      "type" : "integer",
+      "description" : "Measurement panel position: 0 above, 1 below, 2 left, 3 right.",
+      "minimum" : 0,
+      "maximum" : 3
+    },
+    "measurementPrecision" : {
+      "type" : "integer",
+      "description" : "Decimal precision for measurement values.",
+      "minimum" : 0
+    },
+    "findHistogramPeaks" : {
+      "type" : "integer",
+      "description" : "Find peaks in the spectrum histogram (1 for yes, 0 for no).",
+      "minimum" : 0,
+      "maximum" : 1
+    },
+    "showControls" : {
+      "type" : "integer",
+      "description" : "Spectrum control visibility: 0 minimum, 1 standard, 2 all.",
+      "minimum" : 0,
+      "maximum" : 2
+    },
+    "frequencyZoomFactor" : {
+      "type" : "number",
+      "description" : "Horizontal frequency zoom factor.",
+      "minimum" : 1
+    },
+    "frequencyZoomPos" : {
+      "type" : "number",
+      "description" : "Horizontal frequency-zoom position as a fraction of the span.",
+      "minimum" : 0,
+      "maximum" : 1
+    },
+    "waterfallTimeUnits" : {
+      "type" : "integer",
+      "description" : "Waterfall time axis: 0 offset, 1 local time, 2 UTC.",
+      "minimum" : 0,
+      "maximum" : 2
+    },
+    "waterfallTimeFormat" : {
+      "type" : "string",
+      "description" : "Qt date/time format used for the waterfall time axis."
+    },
+    "scrollBar" : {
+      "type" : "integer",
+      "description" : "Enable waterfall/3D spectrogram scrolling (1 for yes, 0 for no).",
+      "minimum" : 0,
+      "maximum" : 1
+    },
+    "scrollLength" : {
+      "type" : "integer",
+      "description" : "Maximum waterfall/3D spectrogram history length.",
+      "minimum" : 1
+    },
+    "mathMode" : {
+      "type" : "integer",
+      "description" : "Spectrum math mode: 0 none, 1-4 moving-average modes, 5-10 saved-memory comparison modes.",
+      "minimum" : 0,
+      "maximum" : 10
+    },
+    "mathAvgCount" : {
+      "type" : "integer",
+      "description" : "Number of FFT frames used by spectrum math averaging.",
+      "minimum" : 1
+    },
+    "measurementMemMasks" : {
+      "type" : "integer",
+      "description" : "Bitmask selecting saved spectrum memories used as measurement masks.",
+      "minimum" : 0,
+      "maximum" : 3
+    },
+    "displayRBW" : {
+      "type" : "integer",
+      "description" : "Display resolution bandwidth (1 for yes, 0 for no).",
+      "minimum" : 0,
+      "maximum" : 1
+    },
+    "displayCursorStats" : {
+      "type" : "integer",
+      "description" : "Display cursor statistics (1 for yes, 0 for no).",
+      "minimum" : 0,
+      "maximum" : 1
+    },
+    "displayPeakStats" : {
+      "type" : "integer",
+      "description" : "Display peak statistics (1 for yes, 0 for no).",
+      "minimum" : 0,
+      "maximum" : 1
+    },
+    "spectrumMemory" : {
+      "type" : "array",
+      "description" : "Display settings for the two saved spectrum memories.",
+      "items" : {
+        "$ref" : "#/definitions/SpectrumMemorySettings"
+      }
+    },
+    "spectrumColor" : {
+      "type" : "integer",
+      "description" : "Current spectrum trace colour encoded as an RGB integer."
+    },
     "invertedWaterfall" : {
       "type" : "integer",
       "description" : "boolean",
@@ -9735,7 +10364,9 @@ margin-bottom: 20px;
     },
     "averagingMode" : {
       "type" : "integer",
-      "description" : "See GLSpectrumGUI::AveragingMode"
+      "description" : "How successive FFTs are averaged\n  * 0 - no averaging\n  * 1 - moving average\n  * 2 - fixed average over each block\n  * 3 - maximum held over each block\n  * 4 - minimum held over each block\n",
+      "minimum" : 0,
+      "maximum" : 4
     },
     "averagingValue" : {
       "type" : "integer",
@@ -9804,6 +10435,12 @@ margin-bottom: 20px;
       "items" : {
         "$ref" : "#/definitions/SpectrumWaterfallMarker"
       }
+    },
+    "annotationMarkersMode" : {
+      "type" : "integer",
+      "description" : "How annotationMarkers in the same request is applied. Replacing is what a PATCH of an array means and is what the other marker lists do, but it discards annotations already there, such as a loaded band plan. Append adds to them instead, so a caller adding one annotation need not read the list, modify it and write it back.\n  * 0 - Replace the annotations with those given (the default)\n  * 1 - Append those given to the annotations already there\n",
+      "minimum" : 0,
+      "maximum" : 1
     },
     "annotationMarkers" : {
       "type" : "array",
@@ -9912,7 +10549,9 @@ margin-bottom: 20px;
     },
     "track" : {
       "type" : "integer",
-      "description" : "Track a target where azimuth and elevation are determined by another plugin (1 for yes, 0 for no)"
+      "description" : "Track a target where azimuth and elevation are determined by another plugin (1 for yes, 0 for no)",
+      "minimum" : 0,
+      "maximum" : 1
     },
     "source" : {
       "type" : "string",
@@ -10051,7 +10690,9 @@ margin-bottom: 20px;
     },
     "fcPos" : {
       "type" : "integer",
-      "description" : "0=Infra 1=Supra 2=Center"
+      "description" : "0=Infra 1=Supra 2=Center",
+      "minimum" : 0,
+      "maximum" : 2
     },
     "devSampleRate" : {
       "type" : "integer",
@@ -10148,7 +10789,9 @@ margin-bottom: 20px;
     },
     "fcPos" : {
       "type" : "integer",
-      "description" : "0=Infra 1=Supra 2=Center"
+      "description" : "0=Infra 1=Supra 2=Center",
+      "minimum" : 0,
+      "maximum" : 2
     },
     "devSampleRate" : {
       "type" : "integer",
@@ -10584,7 +11227,9 @@ margin-bottom: 20px;
     },
     "mode" : {
       "type" : "integer",
-      "description" : "(0 for LOC, 1 for G/S)"
+      "description" : "(0 for LOC, 1 for G/S)",
+      "minimum" : 0,
+      "maximum" : 1
     },
     "frequencyIndex" : {
       "type" : "integer",
@@ -10789,7 +11434,9 @@ margin-bottom: 20px;
     },
     "udpFormat" : {
       "type" : "integer",
-      "description" : "0 for binary, 1 for NMEA"
+      "description" : "0 for binary, 1 for NMEA",
+      "minimum" : 0,
+      "maximum" : 1
     },
     "logFilename" : {
       "type" : "string",
@@ -10989,7 +11636,9 @@ margin-bottom: 20px;
   "properties" : {
     "correlationType" : {
       "type" : "integer",
-      "description" : "see InterferometerSettings::CorrelationType"
+      "description" : "Operation applied to the two input streams\n  * 0 - stream 0 only\n  * 1 - stream 1 only\n  * 2 - add the streams\n  * 3 - multiply the streams\n  * 4 - inverse FFT of the cross spectrum\n  * 5 - inverse FFT of the conjugate cross spectrum\n  * 6 - FFT of the cross spectrum\n  * 7 - second form of the inverse FFT correlation\n",
+      "minimum" : 0,
+      "maximum" : 7
     },
     "rgbColor" : {
       "type" : "integer",
@@ -11113,7 +11762,9 @@ margin-bottom: 20px;
   "properties" : {
     "status" : {
       "type" : "integer",
-      "description" : "0 for Idle, 1 for Connecting, 2 for Connected, 3 for Error, 4 for Disconnected"
+      "description" : "0 for Idle, 1 for Connecting, 2 for Connected, 3 for Error, 4 for Disconnected",
+      "minimum" : 0,
+      "maximum" : 4
     },
     "latitude" : {
       "type" : "number",
@@ -11319,11 +11970,15 @@ margin-bottom: 20px;
     },
     "rxHAMChannel" : {
       "type" : "integer",
-      "description" : "Rx HAM channel selection (LimeRFEController::HAMChannel)\n  * 0 - 30 MHz and lower\n  * 1 - 50 - 70 MHz\n  * 2 - 144 - 146 MHz\n  * 3 - 220 - 225 MHz\n  * 4 - 430 - 440 MHz\n  * 5 - 902 - 928 MHz\n  * 6 - 1240 - 1325 MHz\n  * 7 - 2300 - 2450 MHz\n  * 8 - 3300 - 3500 MHz\n"
+      "description" : "Rx HAM channel selection (LimeRFEController::HAMChannel)\n  * 0 - 30 MHz and lower\n  * 1 - 50 - 70 MHz\n  * 2 - 144 - 146 MHz\n  * 3 - 220 - 225 MHz\n  * 4 - 430 - 440 MHz\n  * 5 - 902 - 928 MHz\n  * 6 - 1240 - 1325 MHz\n  * 7 - 2300 - 2450 MHz\n  * 8 - 3300 - 3500 MHz\n",
+      "minimum" : 0,
+      "maximum" : 8
     },
     "rxCellularChannel" : {
       "type" : "integer",
-      "description" : "Rx cellular channel selection (LimeRFEController::CellularChannel)\n  * 0 - Band 1: 1.92 - 1.98 GHz\n  * 1 - Band 2: 1.84 - 1.92 GHz\n  * 2 - Band 3: 1.71 - 1.79 GHz\n  * 3 - Band 7: 2.48 - 2.58 GHz\n  * 4 - Band 38: 2.56 - 2.63 GHz\n"
+      "description" : "Rx cellular channel selection (LimeRFEController::CellularChannel)\n  * 0 - Band 1: 1.92 - 1.98 GHz\n  * 1 - Band 2: 1.84 - 1.92 GHz\n  * 2 - Band 3: 1.71 - 1.79 GHz\n  * 3 - Band 7: 2.48 - 2.58 GHz\n  * 4 - Band 38: 2.56 - 2.63 GHz\n",
+      "minimum" : 0,
+      "maximum" : 4
     },
     "rxPort" : {
       "type" : "integer",
@@ -11353,11 +12008,15 @@ margin-bottom: 20px;
     },
     "txHAMChannel" : {
       "type" : "integer",
-      "description" : "Tx HAM channel selection (LimeRFEController::HAMChannel)\n  * 0 - 30 MHz and lower\n  * 1 - 50 - 70 MHz\n  * 2 - 144 - 146 MHz\n  * 3 - 220 - 225 MHz\n  * 4 - 430 - 440 MHz\n  * 5 - 902 - 928 MHz\n  * 6 - 1240 - 1325 MHz\n  * 7 - 2300 - 2450 MHz\n  * 8 - 3300 - 3500 MHz\n"
+      "description" : "Tx HAM channel selection (LimeRFEController::HAMChannel)\n  * 0 - 30 MHz and lower\n  * 1 - 50 - 70 MHz\n  * 2 - 144 - 146 MHz\n  * 3 - 220 - 225 MHz\n  * 4 - 430 - 440 MHz\n  * 5 - 902 - 928 MHz\n  * 6 - 1240 - 1325 MHz\n  * 7 - 2300 - 2450 MHz\n  * 8 - 3300 - 3500 MHz\n",
+      "minimum" : 0,
+      "maximum" : 8
     },
     "txCellularChannel" : {
       "type" : "integer",
-      "description" : "Tx cellular channel selection (LimeRFEController::CellularChannel)\n  * 0 - Band 1: 1.92 - 1.98 GHz\n  * 1 - Band 2: 1.84 - 1.92 GHz\n  * 2 - Band 3: 1.71 - 1.79 GHz\n  * 3 - Band 7: 2.48 - 2.58 GHz\n  * 4 - Band 38: 2.56 - 2.63 GHz\n"
+      "description" : "Tx cellular channel selection (LimeRFEController::CellularChannel)\n  * 0 - Band 1: 1.92 - 1.98 GHz\n  * 1 - Band 2: 1.84 - 1.92 GHz\n  * 2 - Band 3: 1.71 - 1.79 GHz\n  * 3 - Band 7: 2.48 - 2.58 GHz\n  * 4 - Band 38: 2.56 - 2.63 GHz\n",
+      "minimum" : 0,
+      "maximum" : 4
     },
     "txPort" : {
       "type" : "integer",
@@ -12558,11 +13217,15 @@ margin-bottom: 20px;
     },
     "traceStroke" : {
       "type" : "integer",
-      "description" : "0 to 255"
+      "description" : "0 to 255",
+      "minimum" : 0,
+      "maximum" : 255
     },
     "traceDecay" : {
       "type" : "integer",
-      "description" : "0 to 255"
+      "description" : "0 to 255",
+      "minimum" : 0,
+      "maximum" : 255
     },
     "audioDeviceName" : {
       "type" : "string",
@@ -12828,7 +13491,9 @@ margin-bottom: 20px;
     },
     "port" : {
       "type" : "integer",
-      "description" : "TCP port the MCP server listens on"
+      "description" : "TCP port the MCP server listens on",
+      "minimum" : 1024,
+      "maximum" : 65535
     },
     "token" : {
       "type" : "string",
@@ -13486,11 +14151,202 @@ margin-bottom: 20px;
   "properties" : {
     "displayNames" : {
       "type" : "integer",
-      "description" : "Display object names on the map (1 for yes, 0 for no)"
+      "description" : "Display object names on the map (1 for yes, 0 for no)",
+      "minimum" : 0,
+      "maximum" : 1
+    },
+    "map2DEnabled" : {
+      "type" : "integer",
+      "description" : "Display the 2D map pane (1 for yes, 0 for no). Disable this while keeping map3DEnabled enabled to show only the 3D map.",
+      "minimum" : 0,
+      "maximum" : 1
+    },
+    "map3DEnabled" : {
+      "type" : "integer",
+      "description" : "Display the 3D map pane (1 for yes, 0 for no).",
+      "minimum" : 0,
+      "maximum" : 1
+    },
+    "mapProvider" : {
+      "type" : "string",
+      "description" : "2D map provider identifier."
+    },
+    "mapType" : {
+      "type" : "string",
+      "description" : "Selected 2D map type, for example Street Map or Satellite Map."
+    },
+    "osmURL" : {
+      "type" : "string",
+      "description" : "Custom OpenStreetMap tile-server URL."
+    },
+    "mapBoxStyles" : {
+      "type" : "string",
+      "description" : "Mapbox style identifier used by the selected 2D provider."
+    },
+    "displaySelectedGroundTracks" : {
+      "type" : "integer",
+      "description" : "Display ground tracks for selected items (1 for yes, 0 for no).",
+      "minimum" : 0,
+      "maximum" : 1
+    },
+    "displayAllGroundTracks" : {
+      "type" : "integer",
+      "description" : "Display ground tracks for all items (1 for yes, 0 for no).",
+      "minimum" : 0,
+      "maximum" : 1
     },
     "terrain" : {
       "type" : "string",
       "description" : "Terrain used for 3D map (E.g: 'Ellipsoid' or 'Cesium World Terrain')"
+    },
+    "buildings" : {
+      "type" : "string",
+      "description" : "3D buildings layer, for example None or Cesium OSM Buildings."
+    },
+    "sunLightEnabled" : {
+      "type" : "integer",
+      "description" : "Light the globe from the Sun's direction (1 for yes, 0 for no).",
+      "minimum" : 0,
+      "maximum" : 1
+    },
+    "lightIntensity" : {
+      "type" : "number",
+      "description" : "Camera light intensity used by the 3D map.",
+      "minimum" : 0
+    },
+    "eciCamera" : {
+      "type" : "integer",
+      "description" : "Use an ECI rather than ECEF camera frame (1 for yes, 0 for no).",
+      "minimum" : 0,
+      "maximum" : 1
+    },
+    "fxaa" : {
+      "type" : "integer",
+      "description" : "Enable fast approximate anti-aliasing (1 for yes, 0 for no).",
+      "minimum" : 0,
+      "maximum" : 1
+    },
+    "msaa" : {
+      "type" : "integer",
+      "description" : "Multisample anti-aliasing level.",
+      "minimum" : 1,
+      "maximum" : 8
+    },
+    "terrainLighting" : {
+      "type" : "integer",
+      "description" : "Enable terrain lighting (1 for yes, 0 for no).",
+      "minimum" : 0,
+      "maximum" : 1
+    },
+    "water" : {
+      "type" : "integer",
+      "description" : "Enable water effects (1 for yes, 0 for no).",
+      "minimum" : 0,
+      "maximum" : 1
+    },
+    "hdr" : {
+      "type" : "integer",
+      "description" : "Enable high dynamic range rendering (1 for yes, 0 for no).",
+      "minimum" : 0,
+      "maximum" : 1
+    },
+    "fog" : {
+      "type" : "integer",
+      "description" : "Enable atmospheric fog (1 for yes, 0 for no).",
+      "minimum" : 0,
+      "maximum" : 1
+    },
+    "fps" : {
+      "type" : "integer",
+      "description" : "Display the 3D map frame rate (1 for yes, 0 for no).",
+      "minimum" : 0,
+      "maximum" : 1
+    },
+    "displayMUF" : {
+      "type" : "integer",
+      "description" : "Display maximum-usable-frequency contours (1 for yes, 0 for no).",
+      "minimum" : 0,
+      "maximum" : 1
+    },
+    "displayfoF2" : {
+      "type" : "integer",
+      "description" : "Display F2 critical-frequency contours (1 for yes, 0 for no).",
+      "minimum" : 0,
+      "maximum" : 1
+    },
+    "displayRain" : {
+      "type" : "integer",
+      "description" : "Display weather-radar rain and snow overlay (1 for yes, 0 for no).",
+      "minimum" : 0,
+      "maximum" : 1
+    },
+    "displayClouds" : {
+      "type" : "integer",
+      "description" : "Display satellite infrared cloud overlay (1 for yes, 0 for no).",
+      "minimum" : 0,
+      "maximum" : 1
+    },
+    "displaySeaMarks" : {
+      "type" : "integer",
+      "description" : "Display sea marks (1 for yes, 0 for no).",
+      "minimum" : 0,
+      "maximum" : 1
+    },
+    "displayRailways" : {
+      "type" : "integer",
+      "description" : "Display railways (1 for yes, 0 for no).",
+      "minimum" : 0,
+      "maximum" : 1
+    },
+    "displayNASAGlobalImagery" : {
+      "type" : "integer",
+      "description" : "Display NASA GIBS imagery (1 for yes, 0 for no).",
+      "minimum" : 0,
+      "maximum" : 1
+    },
+    "nasaGlobalImageryIdentifier" : {
+      "type" : "string",
+      "description" : "NASA GIBS imagery-layer identifier."
+    },
+    "nasaGlobalImageryOpacity" : {
+      "type" : "integer",
+      "description" : "NASA GIBS imagery opacity as a percentage.",
+      "minimum" : 0,
+      "maximum" : 100
+    },
+    "displayAurora" : {
+      "type" : "integer",
+      "description" : "Display aurora-probability overlay (1 for yes, 0 for no).",
+      "minimum" : 0,
+      "maximum" : 1
+    },
+    "displayMagDec" : {
+      "type" : "integer",
+      "description" : "Display magnetic-declination contours (1 for yes, 0 for no).",
+      "minimum" : 0,
+      "maximum" : 1
+    },
+    "displayMaidenheadGrid" : {
+      "type" : "integer",
+      "description" : "Display Maidenhead grid (1 for yes, 0 for no).",
+      "minimum" : 0,
+      "maximum" : 1
+    },
+    "displayPFD" : {
+      "type" : "integer",
+      "description" : "Display the aircraft primary-flight display (1 for yes, 0 for no).",
+      "minimum" : 0,
+      "maximum" : 1
+    },
+    "viewFirstPerson" : {
+      "type" : "integer",
+      "description" : "Use first-person 3D map view (1 for yes, 0 for no).",
+      "minimum" : 0,
+      "maximum" : 1
+    },
+    "defaultImagery" : {
+      "type" : "string",
+      "description" : "Default imagery layer for the 3D map."
     },
     "title" : {
       "type" : "string",
@@ -13559,7 +14415,9 @@ margin-bottom: 20px;
     },
     "syncWord" : {
       "type" : "integer",
-      "description" : "2 bytes sync word (0..65535)"
+      "description" : "2 bytes sync word (0..65535)",
+      "minimum" : 0,
+      "maximum" : 65535
     },
     "nbParityBits" : {
       "type" : "integer",
@@ -13838,7 +14696,9 @@ margin-bottom: 20px;
     },
     "syncWord" : {
       "type" : "integer",
-      "description" : "2 byte (0..65535) synchronization syncWord"
+      "description" : "2 byte (0..65535) synchronization syncWord",
+      "minimum" : 0,
+      "maximum" : 65535
     },
     "channelMute" : {
       "type" : "integer",
@@ -13955,7 +14815,9 @@ margin-bottom: 20px;
     },
     "syncWord" : {
       "type" : "integer",
-      "description" : "2 bytes sync word (0..65535)"
+      "description" : "2 bytes sync word (0..65535)",
+      "minimum" : 0,
+      "maximum" : 65535
     },
     "nbParityBits" : {
       "type" : "integer",
@@ -14223,7 +15085,9 @@ margin-bottom: 20px;
     },
     "syncWord" : {
       "type" : "integer",
-      "description" : "2 byte (0..65535) synchronization syncWord"
+      "description" : "2 byte (0..65535) synchronization syncWord",
+      "minimum" : 0,
+      "maximum" : 65535
     },
     "channelMute" : {
       "type" : "integer",
@@ -14439,7 +15303,9 @@ margin-bottom: 20px;
     },
     "log2Decim" : {
       "type" : "integer",
-      "description" : "Base-2 exponent of the software decimation factor; the output sample rate is divided by 2^log2Decim."
+      "description" : "Base-2 exponent of the software decimation factor; the output sample rate is divided by 2^log2Decim.",
+      "minimum" : 0,
+      "maximum" : 3
     },
     "LOppmTenths" : {
       "type" : "integer",
@@ -16067,7 +16933,9 @@ margin-bottom: 20px;
     },
     "log2Decim" : {
       "type" : "integer",
-      "description" : "Base-2 exponent of the software decimation factor; the output sample rate is divided by 2^log2Decim."
+      "description" : "Base-2 exponent of the software decimation factor; the output sample rate is divided by 2^log2Decim.",
+      "minimum" : 0,
+      "maximum" : 2
     },
     "adcDither" : {
       "type" : "integer",
@@ -16178,7 +17046,9 @@ margin-bottom: 20px;
     },
     "lpfFIRlog2Decim" : {
       "type" : "integer",
-      "description" : "digital lowpass FIR filter log2 of decimation factor (0..2)"
+      "description" : "digital lowpass FIR filter log2 of decimation factor (0..2)",
+      "minimum" : 0,
+      "maximum" : 2
     },
     "lpfFIRGain" : {
       "type" : "integer",
@@ -16186,7 +17056,9 @@ margin-bottom: 20px;
     },
     "fcPos" : {
       "type" : "integer",
-      "description" : "0=Infra 1=Supra 2=Center"
+      "description" : "0=Infra 1=Supra 2=Center",
+      "minimum" : 0,
+      "maximum" : 2
     },
     "dcBlock" : {
       "type" : "integer",
@@ -16366,7 +17238,9 @@ margin-bottom: 20px;
     },
     "fcPosRx" : {
       "type" : "integer",
-      "description" : "0=Infra 1=Supra 2=Center"
+      "description" : "0=Infra 1=Supra 2=Center",
+      "minimum" : 0,
+      "maximum" : 2
     },
     "rxTransverterMode" : {
       "type" : "integer",
@@ -16397,7 +17271,9 @@ margin-bottom: 20px;
     },
     "lpfRxFIRlog2Decim" : {
       "type" : "integer",
-      "description" : "digital lowpass FIR filter log2 of decimation factor (0..2)"
+      "description" : "digital lowpass FIR filter log2 of decimation factor (0..2)",
+      "minimum" : 0,
+      "maximum" : 2
     },
     "lpfRxFIRGain" : {
       "type" : "integer",
@@ -16438,7 +17314,9 @@ margin-bottom: 20px;
     },
     "fcPosTx" : {
       "type" : "integer",
-      "description" : "0=Infra 1=Supra 2=Center"
+      "description" : "0=Infra 1=Supra 2=Center",
+      "minimum" : 0,
+      "maximum" : 2
     },
     "txTransverterMode" : {
       "type" : "integer",
@@ -16463,7 +17341,9 @@ margin-bottom: 20px;
     },
     "lpfTxFIRlog2Interp" : {
       "type" : "integer",
-      "description" : "digital lowpass FIR filter log2 of interpolation factor (0..2)"
+      "description" : "digital lowpass FIR filter log2 of interpolation factor (0..2)",
+      "minimum" : 0,
+      "maximum" : 2
     },
     "lpfTxFIRGain" : {
       "type" : "integer",
@@ -16561,7 +17441,9 @@ margin-bottom: 20px;
     },
     "lpfFIRlog2Interp" : {
       "type" : "integer",
-      "description" : "digital lowpass FIR filter log2 of interpolation factor (0..2)"
+      "description" : "digital lowpass FIR filter log2 of interpolation factor (0..2)",
+      "minimum" : 0,
+      "maximum" : 2
     },
     "lpfFIRGain" : {
       "type" : "integer",
@@ -16674,7 +17556,9 @@ margin-bottom: 20px;
   "properties" : {
     "presetType" : {
       "type" : "integer",
-      "description" : "See Preset::PresetType"
+      "description" : "Which kind of device set the preset applies to\n  * 0 - receiver\n  * 1 - transmitter\n  * 2 - MIMO\n",
+      "minimum" : 0,
+      "maximum" : 2
     },
     "group" : {
       "type" : "string",
@@ -17330,11 +18214,15 @@ margin-bottom: 20px;
     },
     "runMode" : {
       "type" : "integer",
-      "description" : "(0 for single, 1 for continuous, 2 for sweep)"
+      "description" : "(0 for single, 1 for continuous, 2 for sweep)",
+      "minimum" : 0,
+      "maximum" : 2
     },
     "sweepStartAtTime" : {
       "type" : "integer",
-      "description" : "(0 for now, 1 for at sweepStartDateTime)"
+      "description" : "(0 for now, 1 for at sweepStartDateTime)",
+      "minimum" : 0,
+      "maximum" : 1
     },
     "sweepStartDateTime" : {
       "type" : "string",
@@ -17342,7 +18230,9 @@ margin-bottom: 20px;
     },
     "sweepType" : {
       "type" : "integer",
-      "description" : "(0 for Az/El, 1 for l/b, 2 for offset)"
+      "description" : "(0 for Az/El, 1 for l/b, 2 for offset)",
+      "minimum" : 0,
+      "maximum" : 2
     },
     "sweep1Start" : {
       "type" : "number",
@@ -17462,7 +18352,9 @@ margin-bottom: 20px;
     },
     "frequencyMode" : {
       "type" : "integer",
-      "description" : "(0 for Offset, 1 for Absolute)"
+      "description" : "(0 for Offset, 1 for Absolute)",
+      "minimum" : 0,
+      "maximum" : 1
     },
     "frequency" : {
       "type" : "integer",
@@ -17541,6 +18433,98 @@ margin-bottom: 20px;
     }
   },
   "description" : "RadioClock"
+};
+            defs.Radiosonde = {
+  "properties" : {
+    "serial" : {
+      "type" : "string",
+      "description" : "Serial number, which identifies the sonde across a flight."
+    },
+    "type" : {
+      "type" : "string",
+      "description" : "Sonde model, such as RS41."
+    },
+    "latitude" : {
+      "type" : "number",
+      "format" : "float",
+      "description" : "Latitude in decimal degrees, north positive.",
+      "minimum" : -90,
+      "maximum" : 90
+    },
+    "longitude" : {
+      "type" : "number",
+      "format" : "float",
+      "description" : "Longitude in decimal degrees, east positive.",
+      "minimum" : -180,
+      "maximum" : 180
+    },
+    "altitude" : {
+      "type" : "number",
+      "format" : "float",
+      "description" : "Altitude in metres above mean sea level."
+    },
+    "altitudeMax" : {
+      "type" : "number",
+      "format" : "float",
+      "description" : "Greatest altitude seen this flight in metres, which indicates the burst altitude."
+    },
+    "speed" : {
+      "type" : "number",
+      "format" : "float",
+      "description" : "Ground speed in km/h."
+    },
+    "verticalRate" : {
+      "type" : "number",
+      "format" : "float",
+      "description" : "Ascent rate in m/s. Negative after burst."
+    },
+    "heading" : {
+      "type" : "number",
+      "format" : "float",
+      "description" : "Direction of travel in degrees true."
+    },
+    "status" : {
+      "type" : "string",
+      "description" : "Status as reported by the sonde."
+    },
+    "pressure" : {
+      "type" : "number",
+      "format" : "float",
+      "description" : "Atmospheric pressure in hPa."
+    },
+    "temperature" : {
+      "type" : "number",
+      "format" : "float",
+      "description" : "Air temperature in degrees Celsius."
+    },
+    "humidity" : {
+      "type" : "number",
+      "format" : "float",
+      "description" : "Relative humidity as a percentage."
+    },
+    "frequency" : {
+      "type" : "integer",
+      "format" : "int64",
+      "description" : "Transmit frequency in Hz."
+    },
+    "burstKillStatus" : {
+      "type" : "string",
+      "description" : "Whether the burst-kill timer is armed."
+    },
+    "burstKillTimer" : {
+      "type" : "string",
+      "description" : "Time remaining on the burst-kill timer."
+    },
+    "lastUpdate" : {
+      "type" : "string",
+      "description" : "When any field was last updated, ISO 8601."
+    },
+    "messages" : {
+      "type" : "integer",
+      "description" : "Frames received from this radiosonde."
+    }
+  },
+  "description" : "Radiosonde heard by the Radiosonde feature"
 };
             defs.RadiosondeDemodReport = {
   "properties" : {
@@ -17664,6 +18648,26 @@ margin-bottom: 20px;
     }
   },
   "description" : "RadiosondeDemod"
+};
+            defs.RadiosondeReport = {
+  "properties" : {
+    "reportDateTime" : {
+      "type" : "string",
+      "description" : "When this snapshot was taken, ISO 8601."
+    },
+    "radiosondeCount" : {
+      "type" : "integer",
+      "description" : "Number of radiosondes currently held."
+    },
+    "radiosondes" : {
+      "type" : "array",
+      "description" : "The radiosondes heard.",
+      "items" : {
+        "$ref" : "#/definitions/Radiosonde"
+      }
+    }
+  },
+  "description" : "Radiosondes heard by the Radiosonde feature, which collects the decoded frames of every radiosonde demodulator in the instance. A field is present only once a frame carrying it has been received.\n"
 };
             defs.RadiosondeSettings = {
   "properties" : {
@@ -18245,7 +19249,9 @@ margin-bottom: 20px;
     },
     "log2Decim" : {
       "type" : "integer",
-      "description" : "Base-2 exponent of the software decimation factor; the output sample rate is divided by 2^log2Decim."
+      "description" : "Base-2 exponent of the software decimation factor; the output sample rate is divided by 2^log2Decim.",
+      "minimum" : 0,
+      "maximum" : 6
     },
     "gain" : {
       "type" : "integer",
@@ -18551,7 +19557,9 @@ margin-bottom: 20px;
     },
     "lowSampleRate" : {
       "type" : "integer",
-      "description" : "Use the RTL-SDR low sample-rate range (1 enabled, 0 disabled)."
+      "description" : "Use the RTL-SDR low sample-rate range (1 enabled, 0 disabled).",
+      "minimum" : 0,
+      "maximum" : 1
     },
     "centerFrequency" : {
       "type" : "integer",
@@ -18560,7 +19568,7 @@ margin-bottom: 20px;
     },
     "gain" : {
       "type" : "integer",
-      "description" : "Gain setting; units and available values depend on the device or plugin."
+      "description" : "Tuner gain in tenths of a dB, so 496 means 49.6 dB. Only the discrete values the tuner supports can be used; they are listed in the gains field of RtlSdrReport, which must be read from the device report before setting this. Ignored unless agc is disabled.\n"
     },
     "loPpmCorrection" : {
       "type" : "integer",
@@ -18724,7 +19732,9 @@ margin-bottom: 20px;
     },
     "log2Decim" : {
       "type" : "integer",
-      "description" : "Base-2 exponent of the software decimation factor; the output sample rate is divided by 2^log2Decim."
+      "description" : "Base-2 exponent of the software decimation factor; the output sample rate is divided by 2^log2Decim.",
+      "minimum" : 0,
+      "maximum" : 6
     },
     "fcPos" : {
       "type" : "integer",
@@ -18839,7 +19849,9 @@ margin-bottom: 20px;
     },
     "log2Decim" : {
       "type" : "integer",
-      "description" : "Base-2 exponent of the software decimation factor; the output sample rate is divided by 2^log2Decim."
+      "description" : "Base-2 exponent of the software decimation factor; the output sample rate is divided by 2^log2Decim.",
+      "minimum" : 0,
+      "maximum" : 6
     },
     "fcPos" : {
       "type" : "integer",
@@ -18959,8 +19971,8 @@ margin-bottom: 20px;
       "description" : "Autoload setting for Sid."
     },
     "filename" : {
-      "type" : "integer",
-      "description" : "Filename setting for Sid."
+      "type" : "string",
+      "description" : "File that measurements are written to and read back from when autosave or autoload is enabled.\n"
     },
     "autosavePeriod" : {
       "type" : "integer",
@@ -19132,7 +20144,9 @@ margin-bottom: 20px;
     "dnrAlpha" : {
       "type" : "number",
       "format" : "float",
-      "description" : "Smoothing constant (alpha) of the exponential smoothing filter. Must be between  0 and 1."
+      "description" : "Smoothing constant (alpha) of the exponential smoothing filter. Must be between  0 and 1.",
+      "minimum" : 0,
+      "maximum" : 1
     },
     "rgbColor" : {
       "type" : "integer",
@@ -19435,15 +20449,21 @@ margin-bottom: 20px;
     },
     "startOnAOS" : {
       "type" : "integer",
-      "description" : "Start acquisition on AOS (1 for yes, 0 for no)"
+      "description" : "Start acquisition on AOS (1 for yes, 0 for no)",
+      "minimum" : 0,
+      "maximum" : 1
     },
     "stopOnLOS" : {
       "type" : "integer",
-      "description" : "Stop acquisition on LOS (1 for yes, 0 for no)"
+      "description" : "Stop acquisition on LOS (1 for yes, 0 for no)",
+      "minimum" : 0,
+      "maximum" : 1
     },
     "startStopFileSinks" : {
       "type" : "integer",
-      "description" : "Start/stop file sinks on AOS/LOS (1 for yes, 0 for no)"
+      "description" : "Start/stop file sinks on AOS/LOS (1 for yes, 0 for no)",
+      "minimum" : 0,
+      "maximum" : 1
     },
     "frequency" : {
       "type" : "integer",
@@ -19701,11 +20721,15 @@ margin-bottom: 20px;
     },
     "drawOnMap" : {
       "type" : "integer",
-      "description" : "Draw satellites on the Map (1 for yes, 0 for no)"
+      "description" : "Draw satellites on the Map (1 for yes, 0 for no)",
+      "minimum" : 0,
+      "maximum" : 1
     },
     "autoTarget" : {
       "type" : "integer",
-      "description" : "Automatically select target on AOS (1 for yes, 0 for no)"
+      "description" : "Automatically select target on AOS (1 for yes, 0 for no)",
+      "minimum" : 0,
+      "maximum" : 1
     },
     "aosSpeech" : {
       "type" : "string",
@@ -20324,23 +21348,33 @@ margin-bottom: 20px;
   "properties" : {
     "displayNames" : {
       "type" : "integer",
-      "description" : "Display names on the sky map (1 for yes, 0 for no)"
+      "description" : "Display names on the sky map (1 for yes, 0 for no)",
+      "minimum" : 0,
+      "maximum" : 1
     },
     "displayConstellations" : {
       "type" : "integer",
-      "description" : "Display constellations on the sky map (1 for yes, 0 for no)"
+      "description" : "Display constellations on the sky map (1 for yes, 0 for no)",
+      "minimum" : 0,
+      "maximum" : 1
     },
     "displayReticle" : {
       "type" : "integer",
-      "description" : "Display reticle on the sky map (1 for yes, 0 for no)"
+      "description" : "Display reticle on the sky map (1 for yes, 0 for no)",
+      "minimum" : 0,
+      "maximum" : 1
     },
     "displayGrid" : {
       "type" : "integer",
-      "description" : "Display grid on the sky map (1 for yes, 0 for no)"
+      "description" : "Display grid on the sky map (1 for yes, 0 for no)",
+      "minimum" : 0,
+      "maximum" : 1
     },
     "displayAntennaFoV" : {
       "type" : "integer",
-      "description" : "Display antenna field-of-view on the sky map (1 for yes, 0 for no)"
+      "description" : "Display antenna field-of-view on the sky map (1 for yes, 0 for no)",
+      "minimum" : 0,
+      "maximum" : 1
     },
     "map" : {
       "type" : "string",
@@ -20927,9 +21961,13 @@ margin-bottom: 20px;
     },
     "show" : {
       "type" : "integer",
-      "description" : "SpectrumAnnotationMarker::ShowState - Marker display state\n  * 0 - Hidden\n  * 1 - Only top marker visible\n  * 2 - Fully visible with text and full sized limits\n",
+      "description" : "SpectrumAnnotationMarker::ShowState - Marker display state\n  * 0 - Hidden\n  * 1 - Only top marker visible\n  * 2 - Fully visible with text and full sized limits\n  * 3 - Text only\n",
       "minimum" : 0,
-      "maximum" : 2
+      "maximum" : 3
+    },
+    "text" : {
+      "type" : "string",
+      "description" : "Text displayed against the marker."
     }
   },
   "description" : "Spectrum annotation marker settings"
@@ -20984,6 +22022,25 @@ margin-bottom: 20px;
     }
   },
   "description" : "Spectrum histogram marker settings"
+};
+            defs.SpectrumMemorySettings = {
+  "properties" : {
+    "display" : {
+      "type" : "integer",
+      "description" : "Display this saved spectrum memory (1 for yes, 0 for no).",
+      "minimum" : 0,
+      "maximum" : 1
+    },
+    "color" : {
+      "type" : "integer",
+      "description" : "Display colour encoded as an RGB integer."
+    },
+    "label" : {
+      "type" : "string",
+      "description" : "User-visible label for this saved spectrum memory."
+    }
+  },
+  "description" : "Display settings for one saved spectrum memory. The captured spectrum samples are not transferred through settings APIs."
 };
             defs.SpectrumServer = {
   "properties" : {
@@ -21267,15 +22324,21 @@ margin-bottom: 20px;
     },
     "drawSunOnMap" : {
       "type" : "integer",
-      "description" : "Draw the overhead position of the Sun on the Map (1 for yes, 0 for no)"
+      "description" : "Draw the overhead position of the Sun on the Map (1 for yes, 0 for no)",
+      "minimum" : 0,
+      "maximum" : 1
     },
     "drawMoonOnMap" : {
       "type" : "integer",
-      "description" : "Draw the overhead position of the Moon on the Map (1 for yes, 0 for no)"
+      "description" : "Draw the overhead position of the Moon on the Map (1 for yes, 0 for no)",
+      "minimum" : 0,
+      "maximum" : 1
     },
     "drawStarOnMap" : {
       "type" : "integer",
-      "description" : "Draw the overhead position of the target Star on the Map (1 for yes, 0 for no)"
+      "description" : "Draw the overhead position of the target Star on the Map (1 for yes, 0 for no)",
+      "minimum" : 0,
+      "maximum" : 1
     },
     "title" : {
       "type" : "string",
@@ -21545,7 +22608,9 @@ margin-bottom: 20px;
     },
     "log2Interp" : {
       "type" : "integer",
-      "description" : "Base-2 exponent of the software interpolation factor; the output sample rate is multiplied by 2^log2Interp."
+      "description" : "Base-2 exponent of the software interpolation factor; the output sample rate is multiplied by 2^log2Interp.",
+      "minimum" : 0,
+      "maximum" : 6
     },
     "fcPosTx" : {
       "type" : "integer",
@@ -21707,6 +22772,17 @@ margin-bottom: 20px;
       "format" : "float",
       "description" : "Phase imbalance setting for Test source."
     },
+    "period" : {
+      "type" : "integer",
+      "description" : "Period of the P1 and P2 patterns in samples.",
+      "minimum" : 1
+    },
+    "dutyCycle" : {
+      "type" : "integer",
+      "description" : "Percentage of the period the P2 pattern is high.",
+      "minimum" : 0,
+      "maximum" : 100
+    },
     "useReverseAPI" : {
       "type" : "integer",
       "description" : "Synchronize with reverse API (1 for yes, 0 for no)",
@@ -21738,7 +22814,9 @@ margin-bottom: 20px;
     },
     "projectionType" : {
       "type" : "integer",
-      "description" : "Complex to real projection type. See Projector::ProjectionType"
+      "description" : "Projection applied to turn the complex signal into a real trace\n  * 0 - real part\n  * 1 - imaginary part\n  * 2 - magnitude, linear\n  * 3 - squared magnitude (power), linear\n  * 4 - time derivative of the squared magnitude\n  * 5 - squared magnitude in dB\n  * 6 - phase\n  * 7 - direction of arrival from phase, positive branch\n  * 8 - direction of arrival from phase, negative branch\n  * 9 - phase derivative, instantaneous frequency\n  * 10 - BPSK phase comparator\n  * 11 - QPSK phase comparator\n  * 12 - 8-PSK phase comparator\n  * 13 - 16-PSK phase comparator\n",
+      "minimum" : 0,
+      "maximum" : 13
     },
     "inputIndex" : {
       "type" : "integer",
@@ -21813,7 +22891,9 @@ margin-bottom: 20px;
     },
     "projectionType" : {
       "type" : "integer",
-      "description" : "Complex to real projection type. See Projector::ProjectionType"
+      "description" : "Projection applied to turn the complex signal into a real trace\n  * 0 - real part\n  * 1 - imaginary part\n  * 2 - magnitude, linear\n  * 3 - squared magnitude (power), linear\n  * 4 - time derivative of the squared magnitude\n  * 5 - squared magnitude in dB\n  * 6 - phase\n  * 7 - direction of arrival from phase, positive branch\n  * 8 - direction of arrival from phase, negative branch\n  * 9 - phase derivative, instantaneous frequency\n  * 10 - BPSK phase comparator\n  * 11 - QPSK phase comparator\n  * 12 - 8-PSK phase comparator\n  * 13 - 16-PSK phase comparator\n",
+      "minimum" : 0,
+      "maximum" : 13
     },
     "inputIndex" : {
       "type" : "integer",
@@ -22295,7 +23375,9 @@ margin-bottom: 20px;
     },
     "gainMode" : {
       "type" : "integer",
-      "description" : "0 for auto, 1 for manual"
+      "description" : "0 for auto, 1 for manual",
+      "minimum" : 0,
+      "maximum" : 1
     },
     "clockSource" : {
       "type" : "string",
@@ -23546,7 +24628,9 @@ margin-bottom: 20px;
     },
     "log2SoftDecim" : {
       "type" : "integer",
-      "description" : "log2 of software decimation factor from 0 to 6"
+      "description" : "log2 of software decimation factor from 0 to 6",
+      "minimum" : 0,
+      "maximum" : 6
     },
     "rxCenterFrequency" : {
       "type" : "integer",
@@ -23567,7 +24651,9 @@ margin-bottom: 20px;
     },
     "ncoEnableRx" : {
       "type" : "integer",
-      "description" : "Enable TSP NCO Rx on both channels and mixing (1 for yes, 0 for no)"
+      "description" : "Enable TSP NCO Rx on both channels and mixing (1 for yes, 0 for no)",
+      "minimum" : 0,
+      "maximum" : 1
     },
     "ncoFrequencyRx" : {
       "type" : "integer",
@@ -23655,7 +24741,9 @@ margin-bottom: 20px;
     },
     "log2SoftInterp" : {
       "type" : "integer",
-      "description" : "log2 of software interpolation factor from 0 to 6"
+      "description" : "log2 of software interpolation factor from 0 to 6",
+      "minimum" : 0,
+      "maximum" : 6
     },
     "txCenterFrequency" : {
       "type" : "integer",
@@ -23664,7 +24752,9 @@ margin-bottom: 20px;
     },
     "ncoEnableTx" : {
       "type" : "integer",
-      "description" : "Enable TSP NCO Tx on both channels and mixing (1 for yes, 0 for no)"
+      "description" : "Enable TSP NCO Tx on both channels and mixing (1 for yes, 0 for no)",
+      "minimum" : 0,
+      "maximum" : 1
     },
     "ncoFrequencyTx" : {
       "type" : "integer",
@@ -65244,7 +66334,7 @@ except ApiException as e:
           </div>
           <div id="generator">
             <div class="content">
-              Generated 2026-09-06T09:56:57.532+02:00
+              Generated 2026-09-11T09:18:28.785+02:00
             </div>
           </div>
       </div>

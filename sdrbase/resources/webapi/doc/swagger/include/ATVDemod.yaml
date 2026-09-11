@@ -5,8 +5,13 @@ ATVDemodSettings:
       type: integer
       description: "Selected fps index."
     halfImage:
-      description: (boolean) 1 for m_fltRatioOfRowsToDisplay = 0.5, 0 for m_fltRatioOfRowsToDisplay = 1.0
+      description: >
+        Display only half of the image rows
+          * 0 - display all rows
+          * 1 - display half the rows
       type: integer
+      minimum: 0
+      maximum: 1
     RFBandwidthFactor:
       type: integer
       description: "RF bandwidth factor setting for Atv demod."
@@ -20,8 +25,17 @@ ATVDemodSettings:
       type: integer
       description: "Int frequency offset in Hz."
     enmModulation:
-      description: see ATVDemodSettings::ATVModulation
+      description: >
+        Modulation of the received ATV signal
+          * 0 - FM with discriminator 1
+          * 1 - FM with discriminator 2
+          * 2 - FM with phase derivative discriminator
+          * 3 - AM
+          * 4 - AM with vestigial lower sideband, signal in the upper sideband
+          * 5 - AM with vestigial upper sideband, signal in the lower sideband
       type: integer
+      minimum: 0
+      maximum: 5
     fltRFBandwidth:
       type: number
       format: float
@@ -53,8 +67,17 @@ ATVDemodSettings:
       type: integer
       description: "Int sample rate in samples per second."
     enmATVStandard:
-      description: see ATVDemodSettings::ATVStd
+      description: >
+        Television standard, which sets the line count and timings
+          * 0 - PAL 625 lines
+          * 1 - PAL 525 lines
+          * 2 - 819 lines
+          * 3 - short, interleaved
+          * 4 - short
+          * 5 - horizontal sync skip
       type: integer
+      minimum: 0
+      maximum: 5
     intNumberOfLines:
       type: integer
       description: "Int number of lines setting for Atv demod."

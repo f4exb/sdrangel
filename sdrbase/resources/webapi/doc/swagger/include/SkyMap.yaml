@@ -4,18 +4,28 @@ SkyMapSettings:
     displayNames:
       description: "Display names on the sky map (1 for yes, 0 for no)"
       type: integer
+      minimum: 0
+      maximum: 1
     displayConstellations:
       description: "Display constellations on the sky map (1 for yes, 0 for no)"
       type: integer
+      minimum: 0
+      maximum: 1
     displayReticle:
       description: "Display reticle on the sky map (1 for yes, 0 for no)"
       type: integer
+      minimum: 0
+      maximum: 1
     displayGrid:
       description: "Display grid on the sky map (1 for yes, 0 for no)"
       type: integer
+      minimum: 0
+      maximum: 1
     displayAntennaFoV:
       description: "Display antenna field-of-view on the sky map (1 for yes, 0 for no)"
       type: integer      
+      minimum: 0
+      maximum: 1
     map:
       description: "WWT, ESASky or Aladin"
       type: string

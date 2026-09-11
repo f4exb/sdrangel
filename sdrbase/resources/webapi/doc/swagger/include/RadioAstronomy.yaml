@@ -32,15 +32,21 @@ RadioAstronomySettings:
     runMode:
       description: "(0 for single, 1 for continuous, 2 for sweep)"
       type: integer
+      minimum: 0
+      maximum: 2
     sweepStartAtTime:
       description: "(0 for now, 1 for at sweepStartDateTime)"
       type: integer
+      minimum: 0
+      maximum: 1
     sweepStartDateTime:
       type: string
       description: "Sweep start date time setting for Radio astronomy."
     sweepType:
       description: "(0 for Az/El, 1 for l/b, 2 for offset)"
       type: integer
+      minimum: 0
+      maximum: 2
     sweep1Start:
       type: number
       format: float

@@ -12,6 +12,8 @@ RtlSdrSettings:
         devSampleRate / 2^log2Decim.
     lowSampleRate:
       type: integer
+      minimum: 0
+      maximum: 1
       description: "Use the RTL-SDR low sample-rate range (1 enabled, 0 disabled)."
     centerFrequency:
       type: integer
@@ -19,7 +21,10 @@ RtlSdrSettings:
       description: "Device center frequency in Hz."
     gain:
       type: integer
-      description: "Gain setting; units and available values depend on the device or plugin."
+      description: >
+        Tuner gain in tenths of a dB, so 496 means 49.6 dB. Only the discrete values the tuner
+        supports can be used; they are listed in the gains field of RtlSdrReport, which must be
+        read from the device report before setting this. Ignored unless agc is disabled.
     loPpmCorrection:
       type: integer
       description: "Local-oscillator correction in parts per million."

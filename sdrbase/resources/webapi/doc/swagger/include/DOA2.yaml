@@ -21,9 +21,13 @@ DOA2Settings:
       description: Phase difference correction in degrees from -180 to +180
     antennaAz:
       type: integer
+      minimum: 0
+      maximum: 359
       description: Antennas azimuth from antenna 1 to antenna 2 in degrees from 0 to 359
     basebandDistance:
       type: integer
+      minimum: 1
+      maximum: 99999
       description: Antennas baseline distance in millimeters from 1 to 99999
     squelchdB:
       type: integer
@@ -65,12 +69,18 @@ DOA2Report:
   properties:
     phi:
       type: integer
+      minimum: 0
+      maximum: 180
       description: Raw phase difference in degrees from 0 to 180
     posAz:
       type: integer
+      minimum: 0
+      maximum: 180
       description: Calculated port side (positive) arrival angle in degrees from 0 to 180
     negAz:
       type: integer
+      minimum: 0
+      maximum: 180
       description: Calculated starboard side (negative) arrival angle in degrees from 0 to 180
     blindAngle:
       type: integer

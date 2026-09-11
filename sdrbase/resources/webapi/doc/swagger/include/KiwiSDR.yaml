@@ -47,6 +47,8 @@ KiwiSDRReport:
     status:
       description: 0 for Idle, 1 for Connecting, 2 for Connected, 3 for Error, 4 for Disconnected
       type: integer
+      minimum: 0
+      maximum: 4
     latitude:
       type: number
       format: float

@@ -6,6 +6,8 @@ MCPServerSettings:
       description: Address to bind the HTTP listener to. Defaults to 127.0.0.1 (local connections only)
     port:
       type: integer
+      minimum: 1024
+      maximum: 65535
       description: TCP port the MCP server listens on
     token:
       type: string

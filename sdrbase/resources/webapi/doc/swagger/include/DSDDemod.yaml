@@ -74,9 +74,13 @@ DSDDemodSettings:
     traceStroke:
       description: 0 to 255
       type: integer
+      minimum: 0
+      maximum: 255
     traceDecay:
       description: 0 to 255
       type: integer
+      minimum: 0
+      maximum: 255
     streamIndex:
       description: MIMO channel. Not relevant when connected to SI (single Rx).
       type: integer

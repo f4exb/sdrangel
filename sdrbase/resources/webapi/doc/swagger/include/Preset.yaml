@@ -28,8 +28,14 @@ Preset:
   description: Represents a Preset object
   properties:
     presetType:
-      description: See Preset::PresetType
+      description: >
+        Which kind of device set the preset applies to
+          * 0 - receiver
+          * 1 - transmitter
+          * 2 - MIMO
       type: integer
+      minimum: 0
+      maximum: 2
     group:
       type: string
       description: "Group for Preset."

@@ -25,7 +25,9 @@
 #include "SWGAISModActions.h"
 #include "SWGAISModReport.h"
 #include "SWGAISModSettings.h"
+#include "SWGAISReport.h"
 #include "SWGAISSettings.h"
+#include "SWGAISVessel.h"
 #include "SWGAMBEActions.h"
 #include "SWGAMBEDevice.h"
 #include "SWGAMBEDeviceReport.h"
@@ -36,7 +38,9 @@
 #include "SWGAMDemodSettings.h"
 #include "SWGAMModReport.h"
 #include "SWGAMModSettings.h"
+#include "SWGAPRSReport.h"
 #include "SWGAPRSSettings.h"
+#include "SWGAPRSStation.h"
 #include "SWGAPTDemodActions.h"
 #include "SWGAPTDemodActions_aos.h"
 #include "SWGAPTDemodActions_los.h"
@@ -100,7 +104,9 @@
 #include "SWGConfigurationImportExport.h"
 #include "SWGConfigurationItem.h"
 #include "SWGConfigurations.h"
+#include "SWGDABDemodReport.h"
 #include "SWGDABDemodSettings.h"
+#include "SWGDABProgram.h"
 #include "SWGDATVDemodReport.h"
 #include "SWGDATVDemodSettings.h"
 #include "SWGDATVModReport.h"
@@ -298,8 +304,10 @@
 #include "SWGRadioAstronomySettings.h"
 #include "SWGRadioClockReport.h"
 #include "SWGRadioClockSettings.h"
+#include "SWGRadiosonde.h"
 #include "SWGRadiosondeDemodReport.h"
 #include "SWGRadiosondeDemodSettings.h"
+#include "SWGRadiosondeReport.h"
 #include "SWGRadiosondeSettings.h"
 #include "SWGRange.h"
 #include "SWGRangeFloat.h"
@@ -360,6 +368,7 @@
 #include "SWGSpectrumAnnotationMarker.h"
 #include "SWGSpectrumCalibrationPoint.h"
 #include "SWGSpectrumHistogramMarker.h"
+#include "SWGSpectrumMemorySettings.h"
 #include "SWGSpectrumServer.h"
 #include "SWGSpectrumServer_clients.h"
 #include "SWGSpectrumWaterfallMarker.h"
@@ -465,8 +474,18 @@ namespace SWGSDRangel {
       obj->init();
       return obj;
     }
+    if(QString("SWGAISReport").compare(type) == 0) {
+      SWGAISReport *obj = new SWGAISReport();
+      obj->init();
+      return obj;
+    }
     if(QString("SWGAISSettings").compare(type) == 0) {
       SWGAISSettings *obj = new SWGAISSettings();
+      obj->init();
+      return obj;
+    }
+    if(QString("SWGAISVessel").compare(type) == 0) {
+      SWGAISVessel *obj = new SWGAISVessel();
       obj->init();
       return obj;
     }
@@ -520,8 +539,18 @@ namespace SWGSDRangel {
       obj->init();
       return obj;
     }
+    if(QString("SWGAPRSReport").compare(type) == 0) {
+      SWGAPRSReport *obj = new SWGAPRSReport();
+      obj->init();
+      return obj;
+    }
     if(QString("SWGAPRSSettings").compare(type) == 0) {
       SWGAPRSSettings *obj = new SWGAPRSSettings();
+      obj->init();
+      return obj;
+    }
+    if(QString("SWGAPRSStation").compare(type) == 0) {
+      SWGAPRSStation *obj = new SWGAPRSStation();
       obj->init();
       return obj;
     }
@@ -840,8 +869,18 @@ namespace SWGSDRangel {
       obj->init();
       return obj;
     }
+    if(QString("SWGDABDemodReport").compare(type) == 0) {
+      SWGDABDemodReport *obj = new SWGDABDemodReport();
+      obj->init();
+      return obj;
+    }
     if(QString("SWGDABDemodSettings").compare(type) == 0) {
       SWGDABDemodSettings *obj = new SWGDABDemodSettings();
+      obj->init();
+      return obj;
+    }
+    if(QString("SWGDABProgram").compare(type) == 0) {
+      SWGDABProgram *obj = new SWGDABProgram();
       obj->init();
       return obj;
     }
@@ -1830,6 +1869,11 @@ namespace SWGSDRangel {
       obj->init();
       return obj;
     }
+    if(QString("SWGRadiosonde").compare(type) == 0) {
+      SWGRadiosonde *obj = new SWGRadiosonde();
+      obj->init();
+      return obj;
+    }
     if(QString("SWGRadiosondeDemodReport").compare(type) == 0) {
       SWGRadiosondeDemodReport *obj = new SWGRadiosondeDemodReport();
       obj->init();
@@ -1837,6 +1881,11 @@ namespace SWGSDRangel {
     }
     if(QString("SWGRadiosondeDemodSettings").compare(type) == 0) {
       SWGRadiosondeDemodSettings *obj = new SWGRadiosondeDemodSettings();
+      obj->init();
+      return obj;
+    }
+    if(QString("SWGRadiosondeReport").compare(type) == 0) {
+      SWGRadiosondeReport *obj = new SWGRadiosondeReport();
       obj->init();
       return obj;
     }
@@ -2137,6 +2186,11 @@ namespace SWGSDRangel {
     }
     if(QString("SWGSpectrumHistogramMarker").compare(type) == 0) {
       SWGSpectrumHistogramMarker *obj = new SWGSpectrumHistogramMarker();
+      obj->init();
+      return obj;
+    }
+    if(QString("SWGSpectrumMemorySettings").compare(type) == 0) {
+      SWGSpectrumMemorySettings *obj = new SWGSpectrumMemorySettings();
       obj->init();
       return obj;
     }

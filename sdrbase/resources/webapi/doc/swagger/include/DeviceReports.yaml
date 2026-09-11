@@ -11,6 +11,8 @@ DeviceReport:
     direction:
       description: 0 for Rx only, 1 for Tx only or 2 for any number and direction (default 0)
       type: integer
+      minimum: 0
+      maximum: 2
     airspyReport:
       $ref: "/doc/swagger/include/Airspy.yaml#/AirspyReport"
       description: "Airspy report data for Device."

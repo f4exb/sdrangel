@@ -16,6 +16,8 @@ AirspyHFSettings:
       description: "Selected dev sample rate index."
     log2Decim:
       type: integer
+      minimum: 0
+      maximum: 8
       description: "Base-2 exponent of the software decimation factor; the output sample rate is divided by 2^log2Decim."
     transverterMode:
       type: integer
@@ -61,6 +63,8 @@ AirspyHFSettings:
     agcHigh:
       description: AGC threshold (1 for high, 0 for low)
       type: integer
+      minimum: 0
+      maximum: 1
     useDSP:
       description: LibairspyHF DSP (1 for on, 0 for off)
       type: integer

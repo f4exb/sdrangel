@@ -20,6 +20,8 @@ AISDemodSettings:
       description: "Normalised correlation threshold with the preamble, from 0 to 1"
       type: number
       format: float
+      minimum: 0
+      maximum: 1
     udpEnabled:
       description: "Whether to forward received messages to specified UDP port"
       type: integer
@@ -36,6 +38,8 @@ AISDemodSettings:
     udpFormat:
       description: "0 for binary, 1 for NMEA"
       type: integer
+      minimum: 0
+      maximum: 1
     logFilename:
       type: string
       description: "Log file name or path."

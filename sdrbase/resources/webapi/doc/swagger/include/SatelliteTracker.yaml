@@ -81,9 +81,13 @@ SatelliteTrackerSettings:
     drawOnMap:
       description: "Draw satellites on the Map (1 for yes, 0 for no)"
       type: integer
+      minimum: 0
+      maximum: 1
     autoTarget:
       description: "Automatically select target on AOS (1 for yes, 0 for no)"
       type: integer
+      minimum: 0
+      maximum: 1
     aosSpeech:
       description: "Speech warning on AOS"
       type: string
@@ -174,12 +178,18 @@ SatelliteDeviceSettings:
     startOnAOS:
       description: "Start acquisition on AOS (1 for yes, 0 for no)"
       type: integer
+      minimum: 0
+      maximum: 1
     stopOnLOS:
       description: "Stop acquisition on LOS (1 for yes, 0 for no)"
       type: integer
+      minimum: 0
+      maximum: 1
     startStopFileSinks:
       description: "Start/stop file sinks on AOS/LOS (1 for yes, 0 for no)"
       type: integer
+      minimum: 0
+      maximum: 1
     frequency:
       description: "Frequency to override in preset"
       type: integer

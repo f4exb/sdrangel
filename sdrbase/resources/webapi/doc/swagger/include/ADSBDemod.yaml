@@ -16,14 +16,6 @@ ADSBDemodSettings:
     samplesPerBit:
       type: integer
       description: "Number of input samples used to represent each bit."
-    correlateFullPreamble:
-      type: integer
-      minimum: 0
-      maximum: 1
-      description: >
-        Correlate on part or full preamble
-          * 0 - part
-          * 1 - full
     demodModeS:
       type: integer
       minimum: 0
@@ -41,7 +33,7 @@ ADSBDemodSettings:
       description: Number of taps per phase in channel interpolator
     removeTimeout:
       type: integer
-      description: "Time after which an inactive tracked item is removed."
+      description: "Seconds without a frame after which an aircraft is removed from the display."
     feedEnabled:
       type: integer
       description: "Enable forwarding of received data to the configured feed (1 enabled, 0 disabled)."
@@ -101,7 +93,7 @@ ADSBDemodSettings:
     importPeriod:
       type: number
       format: float
-      description: "Import period setting for ADS-B demod."
+      description: "How often to import aircraft from the configured web service, in seconds."
     importMinLatitude:
       type: string
       description: "Import min latitude setting for ADS-B demod."

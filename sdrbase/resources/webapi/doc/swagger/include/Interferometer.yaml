@@ -2,8 +2,19 @@ InterferometerSettings:
   description: Interferometer
   properties:
     correlationType:
-      description: see InterferometerSettings::CorrelationType
+      description: >
+        Operation applied to the two input streams
+          * 0 - stream 0 only
+          * 1 - stream 1 only
+          * 2 - add the streams
+          * 3 - multiply the streams
+          * 4 - inverse FFT of the cross spectrum
+          * 5 - inverse FFT of the conjugate cross spectrum
+          * 6 - FFT of the cross spectrum
+          * 7 - second form of the inverse FFT correlation
       type: integer
+      minimum: 0
+      maximum: 7
     rgbColor:
       type: integer
       description: "Display color encoded as an RGB integer."
