@@ -61,7 +61,7 @@ GS232Controller::GS232Controller(WebAPIAdapterInterface *webAPIAdapterInterface)
 {
     qDebug("GS232Controller::GS232Controller: webAPIAdapterInterface: %p", webAPIAdapterInterface);
     setObjectName(m_featureId);
-    m_state = StIdle;
+    setState(StIdle);
     m_errorMessage = "GS232Controller error";
     m_networkManager = new QNetworkAccessManager();
     QObject::connect(
@@ -127,7 +127,7 @@ void GS232Controller::start()
     QObject::connect(m_thread, &QThread::finished, m_thread, &QThread::deleteLater);
     m_worker->setMessageQueueToFeature(getInputMessageQueue());
     m_thread->start();
-    m_state = StRunning;
+    setState(StRunning);
 
     GS232ControllerWorker::MsgConfigureGS232ControllerWorker *msg =
         GS232ControllerWorker::MsgConfigureGS232ControllerWorker::create(m_settings, QList<QString>(), true);
@@ -137,7 +137,7 @@ void GS232Controller::start()
 void GS232Controller::stop()
 {
     qDebug("GS232Controller::stop");
-    m_state = StIdle;
+    setState(StIdle);
     if (m_thread)
     {
         m_thread->quit();
@@ -174,13 +174,13 @@ bool GS232Controller::handleMessage(const Message& cmd)
     {
         MsgReportWorker& report = (MsgReportWorker&) cmd;
         if (report.getMessage() == "Connected")
-            m_state = StRunning;
+            setState(StRunning);
         else if (report.getMessage() == "Disconnected")
-            m_state = StIdle;
+            setState(StIdle);
         else
         {
-            m_state = StError;
             m_errorMessage = report.getMessage();
+            setState(StError);
         }
         return true;
     }

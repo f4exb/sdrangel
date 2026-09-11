@@ -466,8 +466,8 @@ APRSGUI::APRSGUI(PluginAPI* pluginAPI, FeatureUISet *featureUISet, Feature *feat
     connect(this, SIGNAL(customContextMenuRequested(const QPoint &)), this, SLOT(onMenuDialogCalled(const QPoint &)));
     connect(getInputMessageQueue(), SIGNAL(messageEnqueued()), this, SLOT(handleInputMessages()));
 
-    connect(&m_statusTimer, SIGNAL(timeout()), this, SLOT(updateStatus()));
-    m_statusTimer.start(1000);
+    connect(m_aprs, &Feature::stateChanged, this, &APRSGUI::updateFeatureState);
+    updateFeatureState();
 
     // Resize the table using dummy data
     resizeTable();
@@ -1682,7 +1682,7 @@ void APRSGUI::on_telemetryPlotSelect_currentIndexChanged(int index)
     plotTelemetry();
 }
 
-void APRSGUI::updateStatus()
+void APRSGUI::updateFeatureState()
 {
     switch (m_aprs->getState())
     {

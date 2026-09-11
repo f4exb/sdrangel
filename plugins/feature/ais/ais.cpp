@@ -46,7 +46,7 @@ AIS::AIS(WebAPIAdapterInterface *webAPIAdapterInterface) :
 {
     qDebug("AIS::AIS: webAPIAdapterInterface: %p", webAPIAdapterInterface);
     setObjectName(m_featureId);
-    m_state = StIdle;
+    setState(StIdle);
     m_errorMessage = "AIS error";
     m_networkManager = new QNetworkAccessManager();
     QObject::connect(
@@ -81,13 +81,13 @@ AIS::~AIS()
 void AIS::start()
 {
     qDebug("AIS::start");
-    m_state = StRunning;
+    setState(StRunning);
 }
 
 void AIS::stop()
 {
     qDebug("AIS::stop");
-    m_state = StIdle;
+    setState(StIdle);
 }
 
 bool AIS::handleMessage(const Message& cmd)

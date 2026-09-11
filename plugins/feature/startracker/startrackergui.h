@@ -93,7 +93,6 @@ private:
     MessageQueue m_inputMessageQueue;
     QTimer m_statusTimer;
     QTimer m_solarFluxTimer;
-    int m_lastFeatureState;
 
     QChart *m_azElLineChart;
     QPolarChart *m_azElPolarChart;
@@ -257,6 +256,7 @@ private slots:
     void on_utc_clicked(bool checked=false);
     void on_setTimeToNow_clicked(bool checked=false);
     void updateStatus();
+    void updateFeatureState();
     void on_viewOnMap_clicked();
     void on_chartSelect_currentIndexChanged(int index);
     void on_chartSubSelect_currentIndexChanged(int index);

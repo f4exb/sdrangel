@@ -56,7 +56,7 @@ SatelliteTracker::SatelliteTracker(WebAPIAdapterInterface *webAPIAdapterInterfac
 {
     qDebug("SatelliteTracker::SatelliteTracker: webAPIAdapterInterface: %p", webAPIAdapterInterface);
     setObjectName(m_featureId);
-    m_state = StIdle;
+    setState(StIdle);
     m_errorMessage = "SatelliteTracker error";
     m_networkManager = new QNetworkAccessManager();
     QObject::connect(
@@ -100,7 +100,7 @@ void SatelliteTracker::start()
     m_worker->setMessageQueueToFeature(getInputMessageQueue());
     m_worker->setMessageQueueToGUI(getMessageQueueToGUI());
     m_thread->start();
-    m_state = StRunning;
+    setState(StRunning);
 
     m_worker->getInputMessageQueue()->push(SatelliteTrackerWorker::MsgConfigureSatelliteTrackerWorker::create(m_settings, QList<QString>(), true));
     m_worker->getInputMessageQueue()->push(MsgSatData::create(m_satellites));
@@ -109,7 +109,7 @@ void SatelliteTracker::start()
 void SatelliteTracker::stop()
 {
     qDebug("SatelliteTracker::stop");
-    m_state = StIdle;
+    setState(StIdle);
     if (m_thread)
     {
         m_thread->quit();

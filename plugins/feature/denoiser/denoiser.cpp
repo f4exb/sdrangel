@@ -53,7 +53,7 @@ Denoiser::Denoiser(WebAPIAdapterInterface *webAPIAdapterInterface) :
 {
     qDebug("Denoiser::Denoiser: webAPIAdapterInterface: %p", webAPIAdapterInterface);
     setObjectName(m_featureId);
-    m_state = StIdle;
+    setState(StIdle);
     m_errorMessage = "Denoiser error";
     m_networkManager = new QNetworkAccessManager();
     QObject::connect(
@@ -127,7 +127,7 @@ void Denoiser::start()
 
     m_worker->setMessageQueueToFeature(getInputMessageQueue());
     m_worker->startWork();
-    m_state = StRunning;
+    setState(StRunning);
     m_thread->start();
 
     DenoiserWorker::MsgConfigureDenoiserWorker *msg
@@ -177,7 +177,7 @@ void Denoiser::stop()
     }
 
 	m_worker->stopWork();
-    m_state = StIdle;
+    setState(StIdle);
 	m_thread->quit();
 	m_thread->wait();
 }

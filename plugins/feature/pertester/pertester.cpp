@@ -49,7 +49,7 @@ PERTester::PERTester(WebAPIAdapterInterface *webAPIAdapterInterface) :
 {
     qDebug("PERTester::PERTester: webAPIAdapterInterface: %p", webAPIAdapterInterface);
     setObjectName(m_featureId);
-    m_state = StIdle;
+    setState(StIdle);
     m_errorMessage = "PERTester error";
     m_networkManager = new QNetworkAccessManager();
     QObject::connect(
@@ -90,12 +90,12 @@ void PERTester::start()
     if (m_settings.m_start == PERTesterSettings::START_IMMEDIATELY)
     {
         m_thread->start();
-        m_state = StRunning;
+        setState(StRunning);
     }
     else
     {
         // Wait for AOS
-        m_state = StIdle;
+        setState(StIdle);
     }
     m_thread->start();
 }
@@ -103,7 +103,7 @@ void PERTester::start()
 void PERTester::stop()
 {
     qDebug("PERTester::stop");
-    m_state = StIdle;
+    setState(StIdle);
     if (m_thread)
     {
         m_thread->quit();
@@ -152,8 +152,8 @@ bool PERTester::handleMessage(const Message& cmd)
         }
         else
         {
-            m_state = StError;
             m_errorMessage = report.getMessage();
+            setState(StError);
         }
         return true;
     }
@@ -513,7 +513,7 @@ int PERTester::webapiActionsPost(
                     if (m_settings.m_start == PERTesterSettings::START_ON_AOS)
                     {
                         m_thread->start();
-                        m_state = StRunning;
+                        setState(StRunning);
                     }
                     else if (m_settings.m_start == PERTesterSettings::START_ON_MID_PASS)
                     {
@@ -524,7 +524,7 @@ int PERTester::webapiActionsPost(
                         qint64 msecs = aosTime.msecsTo(losTime) / 2;
                         QTimer::singleShot(msecs, [this] {
                             m_thread->start();
-                            m_state = StRunning;
+                            setState(StRunning);
                         });
                     }
                 }

@@ -54,7 +54,7 @@ DemodAnalyzer::DemodAnalyzer(WebAPIAdapterInterface *webAPIAdapterInterface) :
 {
     qDebug("DemodAnalyzer::DemodAnalyzer: webAPIAdapterInterface: %p", webAPIAdapterInterface);
     setObjectName(m_featureId);
-    m_state = StIdle;
+    setState(StIdle);
     m_errorMessage = "DemodAnalyzer error";
     m_networkManager = new QNetworkAccessManager();
     QObject::connect(
@@ -125,7 +125,7 @@ void DemodAnalyzer::start()
     m_worker->setScopeVis(&m_scopeVis);
     m_worker->setMessageQueueToFeature(getInputMessageQueue());
     m_worker->startWork();
-    m_state = StRunning;
+    setState(StRunning);
     m_thread->start();
 
     DemodAnalyzerWorker::MsgConfigureDemodAnalyzerWorker *msg
@@ -170,7 +170,7 @@ void DemodAnalyzer::stop()
     }
 
 	m_worker->stopWork();
-    m_state = StIdle;
+    setState(StIdle);
 	m_thread->quit();
 	m_thread->wait();
 }

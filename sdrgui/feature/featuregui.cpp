@@ -19,6 +19,7 @@
 ///////////////////////////////////////////////////////////////////////////////////
 
 #include <QCloseEvent>
+#include <QAbstractButton>
 #include <QStyle>
 #include <QLabel>
 #include <QPushButton>
@@ -32,7 +33,9 @@
 #include <QMdiArea>
 
 #include <QMessageBox>
+
 #include "mainwindow.h"
+#include "feature/feature.h"
 #include "gui/messagedialog.h"
 #include "gui/workspaceselectiondialog.h"
 #include "featuregui.h"
@@ -188,6 +191,37 @@ void FeatureGUI::closeEvent(QCloseEvent *event)
 }
 
 void FeatureGUI::mousePressEvent(QMouseEvent* event)
+void FeatureGUI::updateStartStopButton(QAbstractButton *startStopButton)
+{
+    if (!startStopButton || !m_feature) {
+        return;
+    }
+
+    const Feature::FeatureState state = m_feature->getState();
+    const bool oldState = startStopButton->blockSignals(true);
+    startStopButton->setChecked(state == Feature::StRunning);
+    startStopButton->blockSignals(oldState);
+
+    switch (state)
+    {
+        case Feature::StNotStarted:
+            startStopButton->setStyleSheet("QToolButton { background:rgb(79,79,79); }");
+            break;
+        case Feature::StIdle:
+            startStopButton->setStyleSheet("QToolButton { background-color : blue; }");
+            break;
+        case Feature::StRunning:
+            startStopButton->setStyleSheet("QToolButton { background-color : green; }");
+            break;
+        case Feature::StError:
+            startStopButton->setStyleSheet("QToolButton { background-color : red; }");
+            MessageDialog::information(this, tr("Message"), m_feature->getErrorMessage());
+            break;
+        default:
+            break;
+    }
+}
+
 {
     if ((event->button() == Qt::LeftButton) && isOnMovingPad())
     {

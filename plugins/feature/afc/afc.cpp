@@ -60,7 +60,7 @@ AFC::AFC(WebAPIAdapterInterface *webAPIAdapterInterface) :
     m_trackerChannelAPI(nullptr)
 {
     setObjectName(m_featureId);
-    m_state = StIdle;
+    setState(StIdle);
     m_errorMessage = "AFC error";
     m_networkManager = new QNetworkAccessManager();
     QObject::connect(
@@ -123,7 +123,7 @@ void AFC::start()
     AFCWorker::MsgConfigureAFCWorker *msg = AFCWorker::MsgConfigureAFCWorker::create(m_settings, QList<QString>(), true);
     m_worker->getInputMessageQueue()->push(msg);
 
-    m_state = StRunning;
+    setState(StRunning);
     m_running = true;
 }
 
@@ -137,7 +137,7 @@ void AFC::stop()
 
     qDebug("AFC::stop");
     m_running = false;
-    m_state = StIdle;
+    setState(StIdle);
     m_thread->quit();
     m_thread->wait();
 }

@@ -58,7 +58,7 @@ LimeRFE::LimeRFE(WebAPIAdapterInterface *webAPIAdapterInterface) :
     m_rfeDevice(nullptr)
 {
     setObjectName(m_featureId);
-    m_state = StIdle;
+    setState(StIdle);
     m_errorMessage = "LimeRFE error";
     m_networkManager = new QNetworkAccessManager();
     QObject::connect(
@@ -85,13 +85,13 @@ LimeRFE::~LimeRFE()
 void LimeRFE::start()
 {
     qDebug("LimeRFE::start");
-    m_state = StRunning;
+    setState(StRunning);
 }
 
 void LimeRFE::stop()
 {
     qDebug("LimeRFE::stop");
-    m_state = StIdle;
+    setState(StIdle);
 }
 
 void LimeRFE::listComPorts()

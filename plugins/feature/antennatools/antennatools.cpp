@@ -37,7 +37,7 @@ AntennaTools::AntennaTools(WebAPIAdapterInterface *webAPIAdapterInterface) :
 {
     qDebug("AntennaTools::AntennaTools: webAPIAdapterInterface: %p", webAPIAdapterInterface);
     setObjectName(m_featureId);
-    m_state = StIdle;
+    setState(StIdle);
     m_errorMessage = "AntennaTools error";
     m_networkManager = new QNetworkAccessManager();
     QObject::connect(

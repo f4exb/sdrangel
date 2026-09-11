@@ -49,7 +49,7 @@ APRS::APRS(WebAPIAdapterInterface *webAPIAdapterInterface) :
 {
     qDebug("APRS::APRS: webAPIAdapterInterface: %p", webAPIAdapterInterface);
     setObjectName(m_featureId);
-    m_state = StIdle;
+    setState(StIdle);
     m_errorMessage = "APRS error";
     m_networkManager = new QNetworkAccessManager();
     QObject::connect(
@@ -107,7 +107,7 @@ void APRS::start()
     m_worker->setMessageQueueToFeature(getInputMessageQueue());
     m_worker->setMessageQueueToGUI(getMessageQueueToGUI());
     m_thread->start();
-    m_state = StRunning;
+    setState(StRunning);
 
     APRSWorker::MsgConfigureAPRSWorker *msg = APRSWorker::MsgConfigureAPRSWorker::create(m_settings, QList<QString>(), true);
     m_worker->getInputMessageQueue()->push(msg);
@@ -116,7 +116,7 @@ void APRS::start()
 void APRS::stop()
 {
     qDebug("APRS::stop");
-    m_state = StIdle;
+    setState(StIdle);
     if (m_thread)
     {
         m_thread->quit();
@@ -149,13 +149,13 @@ bool APRS::handleMessage(const Message& cmd)
     {
         MsgReportWorker& report = (MsgReportWorker&) cmd;
         if (report.getMessage() == "Connected")
-            m_state = StRunning;
+            setState(StRunning);
         else if (report.getMessage() == "Disconnected")
-            m_state = StIdle;
+            setState(StIdle);
         else
         {
-            m_state = StError;
             m_errorMessage = report.getMessage();
+            setState(StError);
         }
         return true;
     }

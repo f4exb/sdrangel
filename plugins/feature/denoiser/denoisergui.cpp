@@ -143,7 +143,6 @@ DenoiserGUI::DenoiserGUI(PluginAPI* pluginAPI, FeatureUISet *featureUISet, Featu
     m_featureUISet(featureUISet),
     m_sampleRate(48000),
 	m_doApplySettings(true),
-    m_lastFeatureState(0),
     m_selectedChannel(nullptr)
 {
     m_feature = feature;
@@ -163,8 +162,8 @@ DenoiserGUI::DenoiserGUI(PluginAPI* pluginAPI, FeatureUISet *featureUISet, Featu
 	CRightClickEnabler *audioMuteRightClickEnabler = new CRightClickEnabler(ui->audioMute);
 	connect(audioMuteRightClickEnabler, SIGNAL(rightClick(const QPoint &)), this, SLOT(audioSelect(const QPoint &)));
 
-	connect(&m_statusTimer, SIGNAL(timeout()), this, SLOT(updateStatus()));
-	m_statusTimer.start(1000);
+	connect(m_denoiser, &Feature::stateChanged, this, &DenoiserGUI::updateFeatureState);
+	updateFeatureState();
 
     displaySampleRate(m_sampleRate);
 
@@ -412,33 +411,9 @@ void DenoiserGUI::tick()
 	ui->channelPower->setText(tr("%1 dB").arg(powDb, 0, 'f', 1));
 }
 
-void DenoiserGUI::updateStatus()
+void DenoiserGUI::updateFeatureState()
 {
-    int state = m_denoiser->getState();
-
-    if (m_lastFeatureState != state)
-    {
-        switch (state)
-        {
-            case Feature::StNotStarted:
-                ui->startStop->setStyleSheet("QToolButton { background:rgb(79,79,79); }");
-                break;
-            case Feature::StIdle:
-                ui->startStop->setStyleSheet("QToolButton { background-color : blue; }");
-                break;
-            case Feature::StRunning:
-                ui->startStop->setStyleSheet("QToolButton { background-color : green; }");
-                break;
-            case Feature::StError:
-                ui->startStop->setStyleSheet("QToolButton { background-color : red; }");
-                QMessageBox::information(this, tr("Message"), m_denoiser->getErrorMessage());
-                break;
-            default:
-                break;
-        }
-
-        m_lastFeatureState = state;
-    }
+    updateStartStopButton(ui->startStop);
 }
 
 void DenoiserGUI::displayNRenabled()

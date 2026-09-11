@@ -145,7 +145,6 @@ SIDGUI::SIDGUI(PluginAPI* pluginAPI, FeatureUISet *featureUISet, Feature *featur
     m_pluginAPI(pluginAPI),
     m_featureUISet(featureUISet),
     m_doApplySettings(true),
-    m_lastFeatureState(0),
     m_fileDialog(nullptr, "Select CSV file", "", "*.csv"),
     m_chartXAxis(nullptr),
     m_chartY1Axis(nullptr),
@@ -189,8 +188,8 @@ SIDGUI::SIDGUI(PluginAPI* pluginAPI, FeatureUISet *featureUISet, Feature *featur
     ui->chart->setRenderHint(QPainter::Antialiasing);
     ui->xRayChart->setRenderHint(QPainter::Antialiasing);
 
-    connect(&m_statusTimer, &QTimer::timeout, this, &SIDGUI::updateStatus);
-    m_statusTimer.start(250);
+    connect(m_sid, &Feature::stateChanged, this, &SIDGUI::updateFeatureState);
+    updateFeatureState();
 
     connect(&m_autosaveTimer, &QTimer::timeout, this, &SIDGUI::autosave);
 
@@ -287,8 +286,6 @@ SIDGUI::~SIDGUI()
 {
     delete m_grb;
     delete m_stix;
-
-    m_statusTimer.stop();
 
     clearFromMap();
 
@@ -1516,41 +1513,9 @@ void SIDGUI::on_settings_clicked()
     }
 }
 
-void SIDGUI::updateStatus()
+void SIDGUI::updateFeatureState()
 {
-    int state = m_sid->getState();
-
-    if (m_lastFeatureState != state)
-    {
-        // We set checked state of start/stop button, in case it was changed via API
-        bool oldState;
-        switch (state)
-        {
-            case Feature::StNotStarted:
-                ui->startStop->setStyleSheet("QToolButton { background:rgb(79,79,79); }");
-                break;
-            case Feature::StIdle:
-                oldState = ui->startStop->blockSignals(true);
-                ui->startStop->setChecked(false);
-                ui->startStop->blockSignals(oldState);
-                ui->startStop->setStyleSheet("QToolButton { background-color : blue; }");
-                break;
-            case Feature::StRunning:
-                oldState = ui->startStop->blockSignals(true);
-                ui->startStop->setChecked(true);
-                ui->startStop->blockSignals(oldState);
-                ui->startStop->setStyleSheet("QToolButton { background-color : green; }");
-                break;
-            case Feature::StError:
-                ui->startStop->setStyleSheet("QToolButton { background-color : red; }");
-                QMessageBox::critical(this, m_settings.m_title, m_sid->getErrorMessage());
-                break;
-            default:
-                break;
-        }
-
-        m_lastFeatureState = state;
-    }
+    updateStartStopButton(ui->startStop);
 }
 
 void SIDGUI::makeUIConnections()

@@ -148,6 +148,8 @@ RemoteControlGUI::RemoteControlGUI(PluginAPI* pluginAPI, FeatureUISet *featureUI
 
     m_remoteControl = reinterpret_cast<RemoteControl*>(feature);
     m_remoteControl->setMessageQueueToGUI(&m_inputMessageQueue);
+    connect(m_remoteControl, &Feature::stateChanged, this, &RemoteControlGUI::updateFeatureState);
+    updateFeatureState();
 
     m_settings.setRollupState(&m_rollupState);
 
@@ -165,6 +167,11 @@ RemoteControlGUI::~RemoteControlGUI()
     qDeleteAll(m_deviceGUIs);
     m_deviceGUIs.clear();
     delete ui;
+}
+
+void RemoteControlGUI::updateFeatureState()
+{
+    updateStartStopButton(ui->startStop);
 }
 
 void RemoteControlGUI::setWorkspaceIndex(int index)

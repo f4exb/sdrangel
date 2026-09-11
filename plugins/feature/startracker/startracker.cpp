@@ -54,7 +54,7 @@ StarTracker::StarTracker(WebAPIAdapterInterface *webAPIAdapterInterface) :
 {
     qDebug("StarTracker::StarTracker: webAPIAdapterInterface: %p", webAPIAdapterInterface);
     setObjectName(m_featureId);
-    m_state = StIdle;
+    setState(StIdle);
     m_errorMessage = "StarTracker error";
     m_networkManager = new QNetworkAccessManager();
     QObject::connect(
@@ -117,7 +117,7 @@ void StarTracker::start()
     m_worker->setMessageQueueToGUI(getMessageQueueToGUI());
     m_thread->start();
     m_thread->start();
-    m_state = StRunning;
+    setState(StRunning);
 
     m_worker->getInputMessageQueue()->push(StarTrackerWorker::MsgConfigureStarTrackerWorker::create(m_settings, QList<QString>(), true));
     m_worker->getInputMessageQueue()->push(MsgSetSolarFlux::create(m_solarFlux));
@@ -126,7 +126,7 @@ void StarTracker::start()
 void StarTracker::stop()
 {
     qDebug("StarTracker::stop");
-    m_state = StIdle;
+    setState(StIdle);
     if (m_thread)
     {
         m_thread->quit();

@@ -44,7 +44,7 @@ Radiosonde::Radiosonde(WebAPIAdapterInterface *webAPIAdapterInterface) :
 {
     qDebug("Radiosonde::Radiosonde: webAPIAdapterInterface: %p", webAPIAdapterInterface);
     setObjectName(m_featureId);
-    m_state = StIdle;
+    setState(StIdle);
     m_errorMessage = "Radiosonde error";
     m_networkManager = new QNetworkAccessManager();
     QObject::connect(
@@ -82,13 +82,13 @@ Radiosonde::~Radiosonde()
 void Radiosonde::start()
 {
     qDebug("Radiosonde::start");
-    m_state = StRunning;
+    setState(StRunning);
 }
 
 void Radiosonde::stop()
 {
     qDebug("Radiosonde::stop");
-    m_state = StIdle;
+    setState(StIdle);
 }
 
 bool Radiosonde::handleMessage(const Message& cmd)

@@ -238,6 +238,11 @@ void FeatureUISet::handleClosingFeatureGUI(FeatureGUI *featureGUI)
         if (it->m_gui == featureGUI)
         {
             Feature *feature = it->m_feature;
+            // QObject emits destroyed() before it disconnects the object's signal
+            // connections. The destroyed handler below deletes the feature, whose
+            // destructor may emit stateChanged() after the derived GUI has deleted
+            // its ui object. Disconnect feature-to-GUI signals before that can occur.
+            QObject::disconnect(feature, nullptr, featureGUI, nullptr);
             m_featureSet->removeFeatureInstance(feature);
             QObject::connect(
                 featureGUI,

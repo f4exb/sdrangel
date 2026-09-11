@@ -43,7 +43,7 @@ AMBE::AMBE(WebAPIAdapterInterface *webAPIAdapterInterface) :
     Feature(m_featureIdURI, webAPIAdapterInterface)
 {
     setObjectName(m_featureId);
-    m_state = StIdle;
+    setState(StIdle);
     m_errorMessage = "AMBE error";
     m_networkManager = new QNetworkAccessManager();
     QObject::connect(
@@ -68,13 +68,13 @@ AMBE::~AMBE()
 void AMBE::start()
 {
 	qDebug("AMBE::start");
-    m_state = StRunning;
+    setState(StRunning);
 }
 
 void AMBE::stop()
 {
     qDebug("AMBE::stop");
-    m_state = StIdle;
+    setState(StIdle);
 }
 
 void AMBE::applySettings(const AMBESettings& settings, const QList<QString>& settingsKeys,  bool force)

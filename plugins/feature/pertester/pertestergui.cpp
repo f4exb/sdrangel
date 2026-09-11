@@ -129,8 +129,7 @@ PERTesterGUI::PERTesterGUI(PluginAPI* pluginAPI, FeatureUISet *featureUISet, Fea
     ui(new Ui::PERTesterGUI),
     m_pluginAPI(pluginAPI),
     m_featureUISet(featureUISet),
-    m_doApplySettings(true),
-    m_lastFeatureState(0)
+    m_doApplySettings(true)
 {
     m_feature = feature;
     setAttribute(Qt::WA_DeleteOnClose, true);
@@ -148,8 +147,8 @@ PERTesterGUI::PERTesterGUI(PluginAPI* pluginAPI, FeatureUISet *featureUISet, Fea
     connect(this, SIGNAL(customContextMenuRequested(const QPoint &)), this, SLOT(onMenuDialogCalled(const QPoint &)));
     connect(getInputMessageQueue(), SIGNAL(messageEnqueued()), this, SLOT(handleInputMessages()));
 
-    connect(&m_statusTimer, SIGNAL(timeout()), this, SLOT(updateStatus()));
-    m_statusTimer.start(1000);
+    connect(m_perTester, &Feature::stateChanged, this, &PERTesterGUI::updateFeatureState);
+    updateFeatureState();
 
     displaySettings();
     applySettings(true);
@@ -337,41 +336,9 @@ void PERTesterGUI::on_rxUDPPort_editingFinished()
     applySettings();
 }
 
-void PERTesterGUI::updateStatus()
+void PERTesterGUI::updateFeatureState()
 {
-    int state = m_perTester->getState();
-
-    if (m_lastFeatureState != state)
-    {
-        // We set checked state of start/stop button, in case it was changed via API
-        bool oldState;
-        switch (state)
-        {
-            case Feature::StNotStarted:
-                ui->startStop->setStyleSheet("QToolButton { background:rgb(79,79,79); }");
-                break;
-            case Feature::StIdle:
-                oldState = ui->startStop->blockSignals(true);
-                ui->startStop->setChecked(false);
-                ui->startStop->blockSignals(oldState);
-                ui->startStop->setStyleSheet("QToolButton { background-color : blue; }");
-                break;
-            case Feature::StRunning:
-                oldState = ui->startStop->blockSignals(true);
-                ui->startStop->setChecked(true);
-                ui->startStop->blockSignals(oldState);
-                ui->startStop->setStyleSheet("QToolButton { background-color : green; }");
-                break;
-            case Feature::StError:
-                ui->startStop->setStyleSheet("QToolButton { background-color : red; }");
-                QMessageBox::information(this, tr("Message"), m_perTester->getErrorMessage());
-                break;
-            default:
-                break;
-        }
-
-        m_lastFeatureState = state;
-    }
+    updateStartStopButton(ui->startStop);
 }
 
 void PERTesterGUI::applySettings(bool force)

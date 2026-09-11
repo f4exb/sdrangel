@@ -46,7 +46,7 @@ SkyMap::SkyMap(WebAPIAdapterInterface *webAPIAdapterInterface) :
 {
     qDebug("SkyMap::SkyMap: webAPIAdapterInterface: %p", webAPIAdapterInterface);
     setObjectName(m_featureId);
-    m_state = StIdle;
+    setState(StIdle);
     m_errorMessage = "SkyMap error";
     m_networkManager = new QNetworkAccessManager();
     QObject::connect(

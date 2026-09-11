@@ -276,7 +276,6 @@ SatelliteTrackerGUI::SatelliteTrackerGUI(PluginAPI* pluginAPI, FeatureUISet *fea
     m_pluginAPI(pluginAPI),
     m_featureUISet(featureUISet),
     m_doApplySettings(true),
-    m_lastFeatureState(0),
     m_lastUpdatingSatData(false),
     m_targetSatState(nullptr),
     m_plotPass(0),
@@ -302,6 +301,8 @@ SatelliteTrackerGUI::SatelliteTrackerGUI(PluginAPI* pluginAPI, FeatureUISet *fea
 
     connect(&m_statusTimer, SIGNAL(timeout()), this, SLOT(updateStatus()));
     m_statusTimer.start(1000);
+    connect(m_satelliteTracker, &Feature::stateChanged, this, &SatelliteTrackerGUI::updateFeatureState);
+    updateFeatureState();
 
     connect(&m_redrawTimer, &QTimer::timeout, this, &SatelliteTrackerGUI::plotChart);
 
@@ -652,40 +653,6 @@ void SatelliteTrackerGUI::on_autoTarget_clicked(bool checked)
 
 void SatelliteTrackerGUI::updateStatus()
 {
-    int state = m_satelliteTracker->getState();
-
-    if (m_lastFeatureState != state)
-    {
-        // We set checked state of start/stop button, in case it was changed via API
-        bool oldState;
-        switch (state)
-        {
-            case Feature::StNotStarted:
-                ui->startStop->setStyleSheet("QToolButton { background:rgb(79,79,79); }");
-                break;
-            case Feature::StIdle:
-                oldState = ui->startStop->blockSignals(true);
-                ui->startStop->setChecked(false);
-                ui->startStop->blockSignals(oldState);
-                ui->startStop->setStyleSheet("QToolButton { background-color : blue; }");
-                break;
-            case Feature::StRunning:
-                oldState = ui->startStop->blockSignals(true);
-                ui->startStop->setChecked(true);
-                ui->startStop->blockSignals(oldState);
-                ui->startStop->setStyleSheet("QToolButton { background-color : green; }");
-                break;
-            case Feature::StError:
-                ui->startStop->setStyleSheet("QToolButton { background-color : red; }");
-                QMessageBox::information(this, tr("Message"), m_satelliteTracker->getErrorMessage());
-                break;
-            default:
-                break;
-        }
-
-        m_lastFeatureState = state;
-    }
-
     // Indicate if satellite data is being updated
     bool updatingSatData = m_satelliteTracker->isUpdatingSatData();
 
@@ -702,6 +669,11 @@ void SatelliteTrackerGUI::updateStatus()
 
     updateTimeToAOS();
     updateDeviceFeatureCombo();
+}
+
+void SatelliteTrackerGUI::updateFeatureState()
+{
+    updateStartStopButton(ui->startStop);
 }
 
 // Update time to AOS

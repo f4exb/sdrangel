@@ -45,7 +45,7 @@ SIDMain::SIDMain(WebAPIAdapterInterface *webAPIAdapterInterface) :
 {
     qDebug("SIDMain::SID: webAPIAdapterInterface: %p", webAPIAdapterInterface);
     setObjectName(m_featureId);
-    m_state = StIdle;
+    setState(StIdle);
     m_errorMessage = "SID error";
     m_networkManager = new QNetworkAccessManager();
     QObject::connect(
@@ -79,7 +79,7 @@ void SIDMain::start()
     m_worker->setMessageQueueToFeature(getInputMessageQueue());
     m_worker->setMessageQueueToGUI(getMessageQueueToGUI());
     m_thread->start();
-    m_state = StRunning;
+    setState(StRunning);
     MsgConfigureSID *msg = MsgConfigureSID::create(m_settings, QList<QString>(), true);
     m_worker->getInputMessageQueue()->push(msg);
 }
@@ -87,7 +87,7 @@ void SIDMain::start()
 void SIDMain::stop()
 {
     qDebug("SIDMain::stop");
-    m_state = StIdle;
+    setState(StIdle);
     if (m_thread)
     {
         m_thread->quit();
@@ -123,8 +123,8 @@ bool SIDMain::handleMessage(const Message& cmd)
     else if (MsgReportWorker::match(cmd))
     {
         MsgReportWorker& report = (MsgReportWorker&) cmd;
-        m_state = StError;
         m_errorMessage = report.getMessage();
+        setState(StError);
         return true;
     }
     else

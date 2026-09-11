@@ -55,7 +55,7 @@ JogdialController::JogdialController(WebAPIAdapterInterface *webAPIAdapterInterf
 {
     qDebug("JogdialController::JogdialController: webAPIAdapterInterface: %p", webAPIAdapterInterface);
     setObjectName(m_featureId);
-    m_state = StIdle;
+    setState(StIdle);
     m_errorMessage = "JogdialController error";
     m_networkManager = new QNetworkAccessManager();
     QObject::connect(
@@ -81,13 +81,13 @@ JogdialController::~JogdialController()
 void JogdialController::start()
 {
 	qDebug("JogdialController::start");
-    m_state = StRunning;
+    setState(StRunning);
 }
 
 void JogdialController::stop()
 {
     qDebug("JogdialController::stop");
-    m_state = StIdle;
+    setState(StIdle);
 }
 
 bool JogdialController::handleMessage(const Message& cmd)

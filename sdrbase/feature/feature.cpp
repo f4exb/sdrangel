@@ -29,6 +29,7 @@
 
 Feature::Feature(const QString& uri, WebAPIAdapterInterface *webAPIAdapterInterface) :
     m_guiMessageQueue(nullptr),
+	m_state(StNotStarted),
 	m_webAPIAdapterInterface(webAPIAdapterInterface),
     m_name(uri),
 	m_uri(uri),
@@ -90,4 +91,13 @@ void Feature::getFeatureStateStr(QString& stateStr) const
 		stateStr = "notStarted";
 		break;
 	}
+}
+
+void Feature::setState(FeatureState state)
+{
+    if (m_state != state)
+    {
+        m_state = state;
+        emit stateChanged(this);
+    }
 }

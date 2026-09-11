@@ -105,7 +105,7 @@ void SimplePTT::start()
 
     m_worker->setMessageQueueToGUI(getMessageQueueToGUI());
     m_worker->startWork();
-    m_state = StRunning;
+    setState(StRunning);
     m_thread->start();
 
     SimplePTTWorker::MsgConfigureSimplePTTWorker *msg = SimplePTTWorker::MsgConfigureSimplePTTWorker::create(m_settings, QList<QString>(), true);
@@ -125,7 +125,7 @@ void SimplePTT::stop()
     qDebug("SimplePTT::stop");
     m_running = false;
 	m_worker->stopWork();
-    m_state = StIdle;
+    setState(StIdle);
 	m_thread->quit();
 	m_thread->wait();
 }
