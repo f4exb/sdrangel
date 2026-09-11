@@ -24,7 +24,9 @@
 MESSAGE_CLASS_DEFINITION(DFMProtocol::MsgReportDFMStatus, Message)
 
 DFMProtocol::DFMProtocol() :
-    m_packetCnt(0)
+    m_packetCnt(0),
+    m_targetRA(0.0f),
+    m_targetDec(0.0f)
 {
     // Call periodicTask() every 500ms
     connect(&m_timer, &QTimer::timeout, this, &DFMProtocol::periodicTask);
