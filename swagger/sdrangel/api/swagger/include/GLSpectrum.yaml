@@ -235,10 +235,12 @@ GLSpectrum:
     frequencyZoomFactor:
       description: Horizontal frequency zoom factor.
       type: number
+      format: float
       minimum: 1
     frequencyZoomPos:
       description: Horizontal frequency-zoom position as a fraction of the span.
       type: number
+      format: float
       minimum: 0
       maximum: 1
     waterfallTimeUnits:
