@@ -88,8 +88,9 @@ if(BUILD_MCP_BUNDLE)
     target_link_libraries(sdrangel-mcp-tools-dump PRIVATE Qt::Core sdrbase httpserver)
 
     set(MCPBRIDGE_BUNDLE_DIR "${CMAKE_CURRENT_BINARY_DIR}/bundle")
-    # Alongside the built binaries, whatever INSTALL_BIN_DIR happens to be for this platform
-    set(MCPBRIDGE_BUNDLE_FILE "${CMAKE_BINARY_DIR}/bin/sdrangel-${MCPBRIDGE_BUNDLE_VERSION}-${MCPBRIDGE_BUNDLE_PLATFORM}.mcpb")
+    # Alongside the built binaries, which is bin/ on Windows and the build directory itself
+    # elsewhere. That is also where the running application looks for it in a build tree
+    set(MCPBRIDGE_BUNDLE_FILE "${CMAKE_RUNTIME_OUTPUT_DIRECTORY}/sdrangel-${MCPBRIDGE_BUNDLE_VERSION}-${MCPBRIDGE_BUNDLE_PLATFORM}.mcpb")
 
     configure_file(manifest.json.in "${MCPBRIDGE_BUNDLE_DIR}/manifest.json" @ONLY)
 
