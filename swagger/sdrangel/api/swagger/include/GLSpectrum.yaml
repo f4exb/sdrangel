@@ -173,10 +173,10 @@ GLSpectrum:
       minimum: 0
       maximum: 1
     colorMap:
-      description: Colour-map name used for waterfall and 3D spectrogram rendering.
+      description: Colour-map name used for waterfall, 3D spectrogram rendering and spectrum colour gradient.
       type: string
     spectrumStyle:
-      description: "Current spectrum trace style: 0 line, 1 filled, 2 gradient."
+      description: "Current spectrum trace style: 0 line, 1 filled solid colour, 2 filled colour gradient."
       type: integer
       minimum: 0
       maximum: 2
