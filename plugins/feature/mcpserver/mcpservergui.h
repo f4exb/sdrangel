@@ -82,6 +82,8 @@ private slots:
 	void on_token_editingFinished();
 	void on_captureDir_editingFinished();
 	void on_captureDirBrowse_clicked();
+	void on_addToCodex_clicked();
+	void on_addToClaude_clicked();
 	void updateFeatureState();
 	void updateStatistics();
 };

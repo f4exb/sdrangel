@@ -208,6 +208,53 @@ Capture tools refuse file names that would write outside it.</string>
      </layout>
     </item>
     <item>
+     <layout class="QHBoxLayout" name="clientsLayout">
+      <item>
+       <widget class="QLabel" name="clientsLabel">
+        <property name="text">
+         <string>Clients</string>
+        </property>
+       </widget>
+      </item>
+      <item>
+       <widget class="QPushButton" name="addToCodex">
+        <property name="toolTip">
+         <string>Add this server to OpenAI Codex, by writing it into Codex's config.toml.
+Codex needs to be restarted afterwards to pick it up.</string>
+        </property>
+        <property name="text">
+         <string>Add to Codex</string>
+        </property>
+       </widget>
+      </item>
+      <item>
+       <widget class="QPushButton" name="addToClaude">
+        <property name="toolTip">
+         <string>Install the SDRangel extension for Claude Desktop, which carries the bridge
+Claude Desktop needs to reach a server on this machine.
+Claude Desktop asks you to confirm the installation.</string>
+        </property>
+        <property name="text">
+         <string>Add to Claude Desktop</string>
+        </property>
+       </widget>
+      </item>
+      <item>
+       <spacer name="horizontalSpacer_3">
+        <property name="orientation">
+         <enum>Qt::Horizontal</enum>
+        </property>
+        <property name="sizeHint" stdset="0">
+         <size>
+          <width>40</width>
+          <height>20</height>
+         </size>
+        </property>
+       </spacer>
+      </item>
+     </layout>
+    </item>
+    <item>
      <layout class="QHBoxLayout" name="statusLayout">
       <item>
        <widget class="QLabel" name="requests">

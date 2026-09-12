@@ -34,23 +34,38 @@ Directory that the capture tools write IQ and audio files to. It defaults to `SD
 
 Optional bearer token. When set, clients must send an `Authorization: Bearer <token>` HTTP header. Leave empty for no authentication.
 
-<h3>7: Status</h3>
+<h3>7: Add to Codex</h3>
+
+Writes this server into Codex's `config.toml`.
+Codex reads its configuration at startup, so restart it afterwards.
+
+<h3>8: Add to Claude Desktop</h3>
+
+Opens the extension bundle with Claude Desktop, which then shows its own dialog asking whether to install it.
+
+<h3>9: Status</h3>
 
 Number of MCP requests served since the server was started and the last request received.
 
 <h2>Connecting a client</h2>
 
-For clients that support remote (HTTP) MCP servers, add the endpoint URL directly. For example with Claude Code:
+<h3>Claude Code</h3>
+
+For clients that support remote (HTTP) MCP servers, add the endpoint URL directly:
 
     claude mcp add --transport http sdrangel http://127.0.0.1:8092/mcp
 
+
+<h3>Claude Desktop</h3>
+
 Claude Desktop cannot connect to a server on http://127.0.0.1: its custom connectors are
 fetched from Anthropic's cloud, which cannot reach your machine. Install the SDRangel
-extension instead, which carries a small [bridge](bridge/readme.md) that relays the stdio
-transport Claude Desktop does support to this server. On Windows the SDRangel installer
-offers to install it; otherwise take `sdrangel-<version>-<platform>.mcpb` from the release
-and open it with Claude Desktop, or drag it onto Settings > Extensions. Set the port in the
-extension's settings if it is not the default 8092.
+extension, which carries a small [bridge](bridge/readme.md) that relays the stdio
+transport Claude Desktop does support to this server. Press Add to Claude Desktop (8) to hand
+it the bundle; on Windows the installer also offers to do this at the end of a fresh install.
+Failing either, take `sdrangel-<version>-<platform>.mcpb` from the release and open it with
+Claude Desktop, or drag it onto Settings > Extensions. Set the port in the extension's
+settings if it is not the default 8092.
 
 For other clients that only support local stdio servers, run the same bridge directly, in:
 
@@ -68,13 +83,22 @@ For other clients that only support local stdio servers, run the same bridge dir
 `npx -y mcp-remote http://127.0.0.1:8092/mcp` does the same job for a client that has no
 bridge built for its platform, at the cost of needing Node.js installed.
 
-For Codex, add the following to:
+<h3>ChatGPT/Codex</h3>
+
+Codex speaks the HTTP transport, so does not need a bridge. Press Add to Codex (7) to have the
+servers address written to its configuration file, or add the following by hand to:
 
 - Windows: %USERPROFILE%\.codex\config.toml
 - macOS/Linux: ~/.codex/config.toml
 
     [mcp_servers.sdrangel]
     url = "http://127.0.0.1:8092/mcp"
+
+With a token set, the header goes alongside it:
+
+    [mcp_servers.sdrangel]
+    url = "http://127.0.0.1:8092/mcp"
+    http_headers = { "Authorization" = "Bearer <token>" }
 
 <h2>Tools</h2>
 

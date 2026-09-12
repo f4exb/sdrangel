@@ -62,10 +62,14 @@ if(NOT SERVER_MODE)
         ${mcpserver_SOURCES}
         mcpservergui.cpp
         mcpservergui.ui
+        mcpcodexconfig.cpp
+        mcpclaudeextension.cpp
     )
     set(mcpserver_HEADERS
         ${mcpserver_HEADERS}
         mcpservergui.h
+        mcpcodexconfig.h
+        mcpclaudeextension.h
     )
 
     set(TARGET_NAME ${PLUGINS_PREFIX}featuremcpserver)

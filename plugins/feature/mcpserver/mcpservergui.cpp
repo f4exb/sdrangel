@@ -26,6 +26,8 @@
 #include "ui_mcpservergui.h"
 #include "mcpserver.h"
 #include "mcpservergui.h"
+#include "mcpcodexconfig.h"
+#include "mcpclaudeextension.h"
 
 MCPServerGUI* MCPServerGUI::create(PluginAPI* pluginAPI, FeatureUISet *featureUISet, Feature *feature)
 {
@@ -269,6 +271,37 @@ void MCPServerGUI::on_captureDirBrowse_clicked()
     }
 }
 
+void MCPServerGUI::on_addToCodex_clicked()
+{
+    // The settings hold what the server is configured with, which is what a client has to use
+    const QString url = MCPCodexConfig::serverUrl(m_settings.m_address, m_settings.m_port);
+    QString message;
+    MCPCodexConfig::Result result = MCPCodexConfig::addServer("sdrangel", url, m_settings.m_token, message);
+
+    if (result == MCPCodexConfig::Failed)
+    {
+        QMessageBox::critical(this, tr("Add to Codex"), message);
+    }
+    else
+    {
+        // Codex reads its configuration once, at startup
+        QMessageBox::information(this, tr("Add to Codex"),
+            tr("%1\n\nRestart Codex for it to see the server.").arg(message));
+    }
+}
+
+void MCPServerGUI::on_addToClaude_clicked()
+{
+    QString message;
+    MCPClaudeExtension::Result result = MCPClaudeExtension::install(message);
+
+    if (result == MCPClaudeExtension::Launched) {
+        QMessageBox::information(this, tr("Add to Claude Desktop"), message);
+    } else {
+        QMessageBox::warning(this, tr("Add to Claude Desktop"), message);
+    }
+}
+
 void MCPServerGUI::updateFeatureState()
 {
     updateStartStopButton(ui->startStop);
@@ -302,4 +335,6 @@ void MCPServerGUI::makeUIConnections()
 	QObject::connect(ui->token, &QLineEdit::editingFinished, this, &MCPServerGUI::on_token_editingFinished);
 	QObject::connect(ui->captureDir, &QLineEdit::editingFinished, this, &MCPServerGUI::on_captureDir_editingFinished);
 	QObject::connect(ui->captureDirBrowse, &QToolButton::clicked, this, &MCPServerGUI::on_captureDirBrowse_clicked);
+	QObject::connect(ui->addToCodex, &QPushButton::clicked, this, &MCPServerGUI::on_addToCodex_clicked);
+	QObject::connect(ui->addToClaude, &QPushButton::clicked, this, &MCPServerGUI::on_addToClaude_clicked);
 }
