@@ -91,14 +91,14 @@
          <string>http://127.0.0.1:8092/mcp</string>
         </property>
         <property name="textInteractionFlags">
-         <set>Qt::TextSelectableByMouse</set>
+         <set>Qt::TextInteractionFlag::TextSelectableByMouse</set>
         </property>
        </widget>
       </item>
       <item>
        <spacer name="horizontalSpacer">
         <property name="orientation">
-         <enum>Qt::Horizontal</enum>
+         <enum>Qt::Orientation::Horizontal</enum>
         </property>
         <property name="sizeHint" stdset="0">
          <size>
@@ -114,6 +114,12 @@
      <layout class="QHBoxLayout" name="serverLayout">
       <item>
        <widget class="QLabel" name="addressLabel">
+        <property name="minimumSize">
+         <size>
+          <width>60</width>
+          <height>0</height>
+         </size>
+        </property>
         <property name="text">
          <string>Address</string>
         </property>
@@ -160,6 +166,12 @@ Default is 8092.</string>
      <layout class="QHBoxLayout" name="tokenLayout">
       <item>
        <widget class="QLabel" name="tokenLabel">
+        <property name="minimumSize">
+         <size>
+          <width>60</width>
+          <height>0</height>
+         </size>
+        </property>
         <property name="text">
          <string>Token</string>
         </property>
@@ -182,6 +194,12 @@ Leave empty for no authentication (only safe when listening on 127.0.0.1).</stri
      <layout class="QHBoxLayout" name="captureLayout">
       <item>
        <widget class="QLabel" name="captureDirLabel">
+        <property name="minimumSize">
+         <size>
+          <width>60</width>
+          <height>0</height>
+         </size>
+        </property>
         <property name="text">
          <string>Captures</string>
         </property>
@@ -211,6 +229,12 @@ Capture tools refuse file names that would write outside it.</string>
      <layout class="QHBoxLayout" name="clientsLayout">
       <item>
        <widget class="QLabel" name="clientsLabel">
+        <property name="minimumSize">
+         <size>
+          <width>60</width>
+          <height>0</height>
+         </size>
+        </property>
         <property name="text">
          <string>Clients</string>
         </property>
@@ -242,7 +266,7 @@ Claude Desktop asks you to confirm the installation.</string>
       <item>
        <spacer name="horizontalSpacer_3">
         <property name="orientation">
-         <enum>Qt::Horizontal</enum>
+         <enum>Qt::Orientation::Horizontal</enum>
         </property>
         <property name="sizeHint" stdset="0">
          <size>
@@ -279,7 +303,7 @@ Claude Desktop asks you to confirm the installation.</string>
       <item>
        <spacer name="horizontalSpacer_2">
         <property name="orientation">
-         <enum>Qt::Horizontal</enum>
+         <enum>Qt::Orientation::Horizontal</enum>
         </property>
         <property name="sizeHint" stdset="0">
          <size>
