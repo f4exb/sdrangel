@@ -102,11 +102,11 @@ With a token set, the header goes alongside it:
 
 <h2>Tools</h2>
 
-The intent tools do a whole task in one call: `listen` sets up a receiver on a frequency in a given mode, `scan` sets up a Frequency Scanner over a list or range of frequencies and reports what it heard, and `get_status` returns one line per device set and feature. The rest mirror the Web API. Creation tools wait for SDRangel to complete the operation and return the index of the new object; the `set_*` tools reply with only the keys that were changed, since a client carries every reply in its context for the rest of the conversation.
+The intent tools do a whole task in one call: `listen` sets up a receiver on a frequency in a given mode, `scan` sets up a Frequency Scanner over a list or range of frequencies and reports what it heard, and `get_status` returns one line per device set and feature. Both `listen` and `scan` keep track of the channels they add: by default the next of either on the same device set removes them first, so that exploring a band does not leave a trail of demodulators all playing audio, and `cleanup` removes them all. Channels added any other way are never touched; the reply says which of those the retune may have left outside the baseband. The rest mirror the Web API. Creation tools wait for SDRangel to complete the operation and return the index of the new object; the `set_*` tools reply with only the keys that were changed, since a client carries every reply in its context for the rest of the conversation.
 
 | Area | Tools |
 |------|-------|
-| Intent | `listen`, `scan`, `get_status` |
+| Intent | `listen`, `scan`, `cleanup`, `get_status` |
 | Discovery | `get_instance_summary`, `list_available_devices`, `list_channel_types`, `list_feature_types`, `describe_settings`, `get_receiving_guide`, `list_docs`, `get_docs`, `list_audio_devices`, `get_location`, `set_location` |
 | Device sets | `add_deviceset`, `remove_last_deviceset`, `get_deviceset`, `set_device`, `get_device_settings`, `set_device_settings`, `set_center_frequency`, `start_device`, `stop_device`, `get_device_report`, `device_action`, `get_spectrum_settings`, `set_spectrum_settings` |
 | Channels | `add_channel`, `delete_channel`, `get_channel_settings`, `set_channel_settings`, `get_channel_report`, `channel_action` |

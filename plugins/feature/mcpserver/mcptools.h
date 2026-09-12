@@ -133,11 +133,14 @@ private:
     // creation, or two callers snapshot the same state and both claim the same object.
     // The capture tools run without the dispatch lock, so this is reachable.
     QMutex m_creationMutex;
-    // The channel each device set's last listen created, so the next one can take it away
-    // again. listen runs without the dispatch lock, so this has a lock of its own, which is
-    // never held across addChannelAndWait: that takes m_creationMutex
-    QMutex m_listenMutex;
-    QMap<int, const void *> m_listenChannels;
+    // The channels listen and scan have added, so that the next of either on the same device
+    // set can take them away again and cleanup can remove them all. Held by uid rather than
+    // pointer: a channel removed from the GUI frees its address for the next one created,
+    // which must not then be taken for one of these. They run without the dispatch lock, so
+    // this has a lock of its own, which is never held across addChannelAndWait or a delete:
+    // those take m_creationMutex or wait
+    QMutex m_intentMutex;
+    QSet<uint64_t> m_intentChannels;
     const QObject *m_ownerFeature;
     QList<Tool> m_tools;
     QMap<QString, QString> m_yamlDefinitions; //!< Swagger definition name -> YAML text
@@ -203,7 +206,20 @@ private:
     // Shared by the intent level tools
     QJsonObject channelReport(int deviceSetIndex, int channelIndex);
     void postChannelAction(int deviceSetIndex, int channelIndex, const QJsonObject& actions);
-    QJsonObject pickReceiver(const QJsonObject& args, int minBaseband);
+    //!< doomed: uids of channels the caller is about to remove, which the reused set is not counted as carrying
+    QJsonObject pickReceiver(const QJsonObject& args, int minBaseband, const QSet<uint64_t>& doomed = QSet<uint64_t>());
+    static uint64_t channelUid(const void *channel);
+    void trackIntentChannel(const void *channel);
+    void untrackIntentChannel(const void *channel);
+    QSet<uint64_t> intentChannels();
+    //!< A channel's type id and whether listen or scan added it, for the notes the intent tools leave
+    struct ChannelNote { const void *m_channel; int m_index; QString m_id; bool m_intent; };
+    QList<ChannelNote> channelNotes(int deviceSetIndex, const QSet<const void *>& except = QSet<const void *>());
+    //!< Removes the channels listen and scan added to a device set. Returns the ids of those removed
+    QStringList reclaimIntentChannels(int deviceSetIndex);
+    //!< What listen and scan tell the caller about the rest of the device set once their own channels are in
+    QStringList intentNotes(int deviceSetIndex, const QSet<const void *>& added, const QStringList& reclaimed,
+        bool reused, double previousCentre, double centre);
     //!< Channel type ids for a direction, independent of how list_channel_types formats them
     QStringList channelTypeIds(int direction);
     //!< Where a channel is now. The intent tools sleep for many seconds without holding the

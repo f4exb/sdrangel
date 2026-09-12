@@ -3627,6 +3627,119 @@ void MCPTools::relocateChannel(const void *channel, int& deviceSetIndex, int& ch
     }
 }
 
+uint64_t MCPTools::channelUid(const void *channel)
+{
+    return channel ? static_cast<const ChannelAPI *>(channel)->getUID() : 0;
+}
+
+void MCPTools::trackIntentChannel(const void *channel)
+{
+    QMutexLocker locker(&m_intentMutex);
+    m_intentChannels.insert(channelUid(channel));
+}
+
+void MCPTools::untrackIntentChannel(const void *channel)
+{
+    QMutexLocker locker(&m_intentMutex);
+    m_intentChannels.remove(channelUid(channel));
+}
+
+QSet<uint64_t> MCPTools::intentChannels()
+{
+    QMutexLocker locker(&m_intentMutex);
+    return m_intentChannels;
+}
+
+// What a device set carries besides one channel, and which of it listen or scan put there.
+// Read from the live device set rather than any earlier snapshot, as a reclaim in between
+// changes both the indices and the answer
+QList<MCPTools::ChannelNote> MCPTools::channelNotes(int deviceSetIndex, const QSet<const void *>& except)
+{
+    const QSet<uint64_t> intent = intentChannels();
+    QList<ChannelNote> notes;
+
+    for (const QJsonValue& v : getDeviceSet(deviceSetIndex)["channels"].toArray())
+    {
+        QJsonObject channel = v.toObject();
+        int index = channel["index"].toInt();
+        const void *pointer = channelAt(deviceSetIndex, index);
+
+        if (pointer && !except.contains(pointer)) {
+            notes.append({pointer, index, channel["id"].toString(), intent.contains(channelUid(pointer))});
+        }
+    }
+
+    return notes;
+}
+
+QStringList MCPTools::reclaimIntentChannels(int deviceSetIndex)
+{
+    QStringList removed;
+
+    // Each is deleted by identity, wherever it has been renumbered to by then, and highest
+    // index first so that the ids come out in the order the device set listed them
+    QList<ChannelNote> notes = channelNotes(deviceSetIndex);
+
+    for (int i = notes.size() - 1; i >= 0; i--)
+    {
+        if (!notes[i].m_intent) {
+            continue;
+        }
+
+        try
+        {
+            deleteChannelObjectAndWait(notes[i].m_channel);
+            removed.prepend(notes[i].m_id);
+        }
+        catch (const MCPToolError&) {}
+
+        // Tracked no longer either way: if it could not be deleted now it will not be later
+        untrackIntentChannel(notes[i].m_channel);
+    }
+
+    return removed;
+}
+
+QStringList MCPTools::intentNotes(int deviceSetIndex, const QSet<const void *>& added, const QStringList& reclaimed,
+    bool reused, double previousCentre, double centre)
+{
+    QStringList notes;
+
+    if (!reclaimed.isEmpty())
+    {
+        notes.append(QString("Removed %1 channel%2 (%3) that earlier listen or scan calls added to device set %4; pass replace false to keep them.")
+            .arg(reclaimed.size()).arg(reclaimed.size() == 1 ? "" : "s").arg(reclaimed.join(", ")).arg(deviceSetIndex));
+    }
+
+    // Read from the live device set rather than the snapshot pickReceiver made, which still
+    // lists whatever the reclaim has since removed
+    QStringList leftovers;
+    QStringList others;
+
+    for (const ChannelNote& note : channelNotes(deviceSetIndex, added)) {
+        (note.m_intent ? leftovers : others).append(note.m_id);
+    }
+
+    // Only possible with replace false, and then it is the caller's own trail
+    if (!leftovers.isEmpty())
+    {
+        notes.append(QString("Device set %1 still has %2 channel%3 (%4) from earlier listen or scan calls, each playing audio; cleanup removes them.")
+            .arg(deviceSetIndex).arg(leftovers.size()).arg(leftovers.size() == 1 ? "" : "s").arg(leftovers.join(", ")));
+    }
+
+    // Channels that were not put there by these tools are not theirs to remove, so the most
+    // they can do is say what the retune did to them and how to put it right
+    if (reused && !others.isEmpty() && ((qint64) previousCentre != (qint64) centre))
+    {
+        notes.append(QString("Retuned device set %1 from %2 to %3 MHz; its %4 other channel%5 (%6), not added by listen or scan, may now be outside the baseband. "
+            "set_channel_settings inputFrequencyOffset retunes one, delete_channel removes it.")
+            .arg(deviceSetIndex).arg(previousCentre / 1e6, 0, 'f', 3).arg(centre / 1e6, 0, 'f', 3)
+            .arg(others.size()).arg(others.size() == 1 ? "" : "s").arg(others.join(", ")));
+    }
+
+    return notes;
+}
+
 QJsonObject MCPTools::channelReport(int deviceSetIndex, int channelIndex)
 {
     SWGSDRangel::SWGChannelReport response;
@@ -3664,7 +3777,7 @@ void MCPTools::postChannelAction(int deviceSetIndex, int channelIndex, const QJs
 // Finds or creates a receive device set holding a suitable device and sets its sample rate.
 // An existing set holding the same device is reused rather than fought for the hardware; the
 // caller tunes the centre frequency and is told what else that set carries.
-QJsonObject MCPTools::pickReceiver(const QJsonObject& args, int minBaseband)
+QJsonObject MCPTools::pickReceiver(const QJsonObject& args, int minBaseband, const QSet<uint64_t>& doomed)
 {
     SWGSDRangel::SWGInstanceDevicesResponse devicesResponse;
     SWGSDRangel::SWGErrorResponse error;
@@ -3731,8 +3844,15 @@ QJsonObject MCPTools::pickReceiver(const QJsonObject& args, int minBaseband)
         {
             deviceSetIndex = sd["index"].toInt();
 
-            for (const QJsonValue& c : ds["channels"].toArray()) {
-                otherChannels.append(c.toObject()["id"].toString());
+            // Channels the caller is about to remove are not ones the set has to go on
+            // serving, so they neither hold the baseband width up nor count as carried
+            for (const QJsonValue& c : ds["channels"].toArray())
+            {
+                QJsonObject channel = c.toObject();
+
+                if (!doomed.contains(channelUid(channelAt(deviceSetIndex, channel["index"].toInt())))) {
+                    otherChannels.append(channel["id"].toString());
+                }
             }
 
             break;
@@ -3850,7 +3970,7 @@ void MCPTools::registerIntentTools()
             {"mode", strProp("bfm (broadcast FM with stereo and RDS), wfm, nfm, am or airband, ssb/usb, lsb, dab, adsb, ais, dsd/dmr, "
                              "or any channel type id from list_channel_types. Default nfm")},
             {"device", strProp(deviceHint)},
-            {"replace", prop("boolean", "Remove the channel the previous listen added to this device set, so that exploring a band does not leave a trail of channels mis-tuned for the current sample rate. Default true")}
+            {"replace", prop("boolean", "Remove every channel earlier listen and scan calls added to this device set, so that exploring a band does not leave a trail of demodulators all playing audio and mis-tuned for the current centre frequency. Channels added any other way are never touched. Default true")}
         }, {"frequency"}),
         [this](const QJsonObject& args)
         {
@@ -3883,7 +4003,8 @@ void MCPTools::registerIntentTools()
                 }
             }
 
-            QJsonObject receiver = pickReceiver(args, minBaseband);
+            const bool replace = args.value("replace").toBool(true);
+            QJsonObject receiver = pickReceiver(args, minBaseband, replace ? intentChannels() : QSet<uint64_t>());
             int deviceSetIndex = receiver["deviceSetIndex"].toInt();
             int baseband = receiver["baseband"].toInt();
 
@@ -3898,34 +4019,10 @@ void MCPTools::registerIntentTools()
             tune["centerFrequency"] = (double) (frequency - offset);
             patchDeviceSettings(deviceSetIndex, tune);
 
-            bool replaced = false;
-
-            if (args.value("replace").toBool(true))
-            {
-                const void *previous = nullptr;
-                {
-                    QMutexLocker locker(&m_listenMutex);
-                    previous = m_listenChannels.take(deviceSetIndex);
-                }
-
-                // It may be gone already, deleted by hand or with its device set
-                if (previous && channelPointers(deviceSetIndex).contains(previous))
-                {
-                    try
-                    {
-                        deleteChannelObjectAndWait(previous);
-                        replaced = true;
-                    }
-                    catch (const MCPToolError&) {}
-                }
-            }
-
+            const QStringList reclaimed = replace ? reclaimIntentChannels(deviceSetIndex) : QStringList();
             int channelIndex = addChannelAndWait(deviceSetIndex, channelType);
             const void *channel = channelAt(deviceSetIndex, channelIndex);
-            {
-                QMutexLocker locker(&m_listenMutex);
-                m_listenChannels.insert(deviceSetIndex, channel);
-            }
+            trackIntentChannel(channel);
 
             initial["inputFrequencyOffset"] = offset;
 
@@ -3945,10 +4042,7 @@ void MCPTools::registerIntentTools()
             catch (const MCPToolError&)
             {
                 try { deleteChannelObjectAndWait(channel); } catch (const MCPToolError&) {}
-                {
-                    QMutexLocker locker(&m_listenMutex);
-                    m_listenChannels.remove(deviceSetIndex);
-                }
+                untrackIntentChannel(channel);
                 throw;
             }
 
@@ -3961,10 +4055,6 @@ void MCPTools::registerIntentTools()
             result["channelType"] = channelType;
             result["state"] = state;
             QStringList notes;
-
-            if (replaced) {
-                notes.append("Removed the channel the previous listen added to this device set. Pass replace false to keep it.");
-            }
 
             if (state == "running")
             {
@@ -4030,28 +4120,8 @@ void MCPTools::registerIntentTools()
                 notes.append(receiver["rateNote"].toString());
             }
 
-            if (receiver["reused"].toBool()
-                && (qint64) receiver["previousCentre"].toDouble() != frequency - offset)
-            {
-                // Read back rather than taken from the snapshot pickReceiver made, which still
-                // lists the channel the replace above has since removed
-                QStringList others;
-
-                for (const QJsonValue& v : getDeviceSet(deviceSetIndex)["channels"].toArray())
-                {
-                    QJsonObject other = v.toObject();
-
-                    if (other["index"].toInt() != channelIndex) {
-                        others.append(other["id"].toString());
-                    }
-                }
-
-                if (!others.isEmpty())
-                {
-                    notes.append(QString("Retuned device set %1 from %2 MHz; its other channels (%3) may now be outside the baseband.")
-                        .arg(deviceSetIndex).arg(receiver["previousCentre"].toDouble() / 1e6, 0, 'f', 3).arg(others.join(", ")));
-                }
-            }
+            notes.append(intentNotes(deviceSetIndex, {channel}, reclaimed, receiver["reused"].toBool(),
+                receiver["previousCentre"].toDouble(), (double) (frequency - offset)));
 
             if (patched.contains("warning")) {
                 notes.append(patched["warning"].toString());
@@ -4073,7 +4143,9 @@ void MCPTools::registerIntentTools()
         "Scan a set of frequencies for activity and listen to whichever is active, in one call: sets up a receiver, a demodulator "
         "and a Frequency Scanner, starts scanning, watches for a while and reports what was heard and the strongest channels. "
         "The scanner keeps running afterwards; get_channel_report on the scanner channel shows its state (2 scanning, 3 receiving, "
-        "4 holding), channel_action {\"run\": 0} stops it. Blocks for the watch period, so it is capped at 30 seconds.",
+        "4 holding), channel_action {\"run\": 0} stops it. The demodulator and scanner it added stay on the device set until the "
+        "next listen or scan there replaces them, or cleanup removes them; they are not removed when this call returns. "
+        "Blocks for the watch period, so it is capped at 30 seconds.",
         schema({
             {"frequencies", frequencyList},
             {"startFrequency", numProp("Start of a range in Hz, with stopFrequency and stepFrequency")},
@@ -4082,7 +4154,8 @@ void MCPTools::registerIntentTools()
             {"mode", strProp("Demodulator, as for listen. Default am")},
             {"threshold", numProp("Power in dB above which a frequency counts as active. Default -30; the noise floor is reported so it can be adjusted")},
             {"seconds", bounded(numProp("How long to watch before replying, 3 to 30. Default 10"), 3, 30)},
-            {"device", strProp(deviceHint)}
+            {"device", strProp(deviceHint)},
+            {"replace", prop("boolean", "Remove every channel earlier listen and scan calls added to this device set first, as listen does. Channels added any other way are never touched. Default true")}
         }),
         [this](const QJsonObject& args)
         {
@@ -4133,14 +4206,17 @@ void MCPTools::registerIntentTools()
             int channelBandwidth = qAbs(mode->m_rfBandwidth) > 0 ? qAbs(mode->m_rfBandwidth) : 8000;
 
             // A wide baseband means fewer retunes per sweep
-            QJsonObject receiver = pickReceiver(args, 2400000);
+            const bool replace = args.value("replace").toBool(true);
+            QJsonObject receiver = pickReceiver(args, 2400000, replace ? intentChannels() : QSet<uint64_t>());
             int deviceSetIndex = receiver["deviceSetIndex"].toInt();
             QJsonObject tune;
             tune["centerFrequency"] = (double) ((frequencies.first() + frequencies.last()) / 2);
             patchDeviceSettings(deviceSetIndex, tune);
 
+            const QStringList reclaimed = replace ? reclaimIntentChannels(deviceSetIndex) : QStringList();
             int demod = addChannelAndWait(deviceSetIndex, mode->m_channelType);
             const void *demodChannel = channelAt(deviceSetIndex, demod);
+            trackIntentChannel(demodChannel);
             int scanner = -1;
             const void *scannerChannel = nullptr;
 
@@ -4148,8 +4224,14 @@ void MCPTools::registerIntentTools()
             // half built scanner running on the user's radio
             auto discard = [&]()
             {
-                if (scannerChannel) { try { deleteChannelObjectAndWait(scannerChannel); } catch (const MCPToolError&) {} }
+                if (scannerChannel)
+                {
+                    try { deleteChannelObjectAndWait(scannerChannel); } catch (const MCPToolError&) {}
+                    untrackIntentChannel(scannerChannel);
+                }
+
                 try { deleteChannelObjectAndWait(demodChannel); } catch (const MCPToolError&) {}
+                untrackIntentChannel(demodChannel);
             };
 
             try
@@ -4164,6 +4246,7 @@ void MCPTools::registerIntentTools()
                 patchChannelSettings(deviceSetIndex, demod, initial);
                 scanner = addChannelAndWait(deviceSetIndex, "FreqScanner");
                 scannerChannel = channelAt(deviceSetIndex, scanner);
+                trackIntentChannel(scannerChannel);
             }
             catch (const MCPToolError&)
             {
@@ -4338,19 +4421,56 @@ void MCPTools::registerIntentTools()
                 notes.append("Nothing exceeded the threshold while watching. Compare threshold with noiseFloorDb and the strongest channels; set_channel_settings on the scanner channel changes it.");
             }
 
-            qint64 previousCentre = (qint64) receiver["previousCentre"].toDouble();
-
-            if (receiver["reused"].toBool() && !receiver["otherChannels"].toArray().isEmpty()
-                && (previousCentre != (qint64) tune["centerFrequency"].toDouble()))
-            {
-                QStringList others;
-                for (const QJsonValue& v : receiver["otherChannels"].toArray()) { others.append(v.toString()); }
-                notes.append(QString("Retuned device set %1 from %2 MHz; its other channels (%3) may now be outside the baseband.")
-                    .arg(deviceSetIndex).arg(previousCentre / 1e6, 0, 'f', 3).arg(others.join(", ")));
-            }
+            notes.append(intentNotes(deviceSetIndex, {demodChannel, scannerChannel}, reclaimed, receiver["reused"].toBool(),
+                receiver["previousCentre"].toDouble(), tune["centerFrequency"].toDouble()));
 
             if (!notes.isEmpty()) {
                 result["note"] = notes.join(" ");
+            }
+
+            return result;
+        });
+
+    add("cleanup",
+        "Remove the channels that listen and scan added, on one device set or all of them. Each is otherwise left running, "
+        "every demodulator playing audio, until the next listen or scan on the same device set replaces it. Channels added any "
+        "other way are left alone; delete_channel removes those.",
+        schema({
+            {"deviceSetIndex", intProp("Only this device set. Default: every device set")}
+        }),
+        [this](const QJsonObject& args)
+        {
+            QList<int> deviceSetIndices;
+
+            if (hasArg(args, "deviceSetIndex"))
+            {
+                deviceSetIndices.append(argInt(args, "deviceSetIndex"));
+            }
+            else
+            {
+                for (const QJsonValue& v : getInstanceSummary()["devicesetlist"].toObject()["deviceSets"].toArray()) {
+                    deviceSetIndices.append(v.toObject()["samplingDevice"].toObject()["index"].toInt());
+                }
+            }
+
+            QJsonArray removed;
+            int count = 0;
+
+            for (int deviceSetIndex : deviceSetIndices)
+            {
+                for (const QString& id : reclaimIntentChannels(deviceSetIndex))
+                {
+                    removed.append(QString("R%1:%2").arg(deviceSetIndex).arg(id));
+                    count++;
+                }
+            }
+
+            QJsonObject result;
+            result["removed"] = count;
+            result["channels"] = removed;
+
+            if (count == 0) {
+                result["note"] = "Nothing to remove: no channel added by listen or scan is still there.";
             }
 
             return result;
