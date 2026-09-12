@@ -100,7 +100,7 @@ AVFrame* TSGenerator::load_image_to_yuv(const char* filename, int width, int hei
     AVFrame* frame = nullptr;
     AVFrame* yuv_frame = nullptr;
     struct SwsContext* sws_ctx = nullptr;
-    AVPacket pkt;
+    AVPacket* pkt = nullptr;
     int stream_idx = -1;
     AVStream* stream = nullptr;
     const AVCodec* codec = nullptr;
@@ -130,14 +130,16 @@ AVFrame* TSGenerator::load_image_to_yuv(const char* filename, int width, int hei
     if (avcodec_open2(codec_ctx, codec, nullptr) < 0) goto cleanup;
 
     // Decode single frame
-    av_init_packet(&pkt);
-    if (av_read_frame(fmt_ctx, &pkt) < 0) goto cleanup;
+    pkt = av_packet_alloc();
+    if (!pkt) goto cleanup;
+
+    if (av_read_frame(fmt_ctx, pkt) < 0) goto cleanup;
 
     frame = av_frame_alloc();
-    if (frame && avcodec_send_packet(codec_ctx, &pkt) >= 0) {
+    if (frame && avcodec_send_packet(codec_ctx, pkt) >= 0) {
         avcodec_receive_frame(codec_ctx, frame);
     }
-    av_packet_unref(&pkt);
+    av_packet_unref(pkt);
 
     if (!frame) goto cleanup;
 
@@ -160,6 +162,7 @@ AVFrame* TSGenerator::load_image_to_yuv(const char* filename, int width, int hei
     }
 
 cleanup:
+    if (pkt) av_packet_free(&pkt);
     if (frame) av_frame_free(&frame);
     if (codec_ctx) avcodec_free_context(&codec_ctx);
     if (fmt_ctx) avformat_close_input(&fmt_ctx);
