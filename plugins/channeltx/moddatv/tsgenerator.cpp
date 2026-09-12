@@ -345,7 +345,7 @@ int TSGenerator::setup_ts_context(AVFormatContext** oc, AVCodecContext* codec_ct
 
 void TSGenerator::encode_frame_to_ts(AVFormatContext* oc, AVCodecContext* codec_ctx, AVFrame* frame, int stream_idx)
 {
-    AVPacket pkt = {nullptr};
+    AVPacket pkt{};
     int ret;
 
     // 1. Send frame to HEVC encoder
