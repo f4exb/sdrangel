@@ -29,9 +29,11 @@
 #include <complex.h>
 
 #include "SWGChannelSettings.h"
+#include "SWGChannelReport.h"
 #include "SWGWorkspaceInfo.h"
 
 #include "dsp/dspcommands.h"
+#include "util/db.h"
 #include "device/deviceapi.h"
 #include "maincore.h"
 
@@ -411,6 +413,27 @@ int RadiosondeDemod::webapiWorkspaceGet(
     (void) errorMessage;
     response.setIndex(m_settings.m_workspaceIndex);
     return 200;
+}
+
+int RadiosondeDemod::webapiReportGet(
+        SWGSDRangel::SWGChannelReport& response,
+        QString& errorMessage)
+{
+    (void) errorMessage;
+    response.setRadiosondeDemodReport(new SWGSDRangel::SWGRadiosondeDemodReport());
+    response.getRadiosondeDemodReport()->init();
+    webapiFormatChannelReport(response);
+    return 200;
+}
+
+void RadiosondeDemod::webapiFormatChannelReport(SWGSDRangel::SWGChannelReport& response)
+{
+    double magsqAvg, magsqPeak;
+    int nbMagsqSamples;
+    getMagSqLevels(magsqAvg, magsqPeak, nbMagsqSamples);
+
+    response.getRadiosondeDemodReport()->setChannelPowerDb(CalcDb::dbPower(magsqAvg));
+    response.getRadiosondeDemodReport()->setChannelSampleRate(m_basebandSink->getChannelSampleRate());
 }
 
 int RadiosondeDemod::webapiSettingsPutPatch(

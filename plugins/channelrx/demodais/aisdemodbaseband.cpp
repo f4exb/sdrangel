@@ -173,6 +173,11 @@ void AISDemodBaseband::applySettings(const AISDemodSettings& settings, const QSt
     }
 }
 
+int AISDemodBaseband::getChannelSampleRate() const
+{
+    return m_channelizer->getChannelSampleRate();
+}
+
 void AISDemodBaseband::setBasebandSampleRate(int sampleRate)
 {
     m_channelizer->setBasebandSampleRate(sampleRate);

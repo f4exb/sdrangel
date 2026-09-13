@@ -172,6 +172,11 @@ void RadiosondeDemodBaseband::applySettings(const QStringList& settingsKeys, con
     }
 }
 
+int RadiosondeDemodBaseband::getChannelSampleRate() const
+{
+    return m_channelizer->getChannelSampleRate();
+}
+
 void RadiosondeDemodBaseband::setBasebandSampleRate(int sampleRate)
 {
     m_channelizer->setBasebandSampleRate(sampleRate);

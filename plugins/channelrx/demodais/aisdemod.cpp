@@ -29,9 +29,11 @@
 #include <complex.h>
 
 #include "SWGChannelSettings.h"
+#include "SWGChannelReport.h"
 #include "SWGWorkspaceInfo.h"
 
 #include "dsp/dspcommands.h"
+#include "util/db.h"
 #include "device/deviceapi.h"
 #include "util/ais.h"
 #include "maincore.h"
@@ -384,6 +386,27 @@ int AISDemod::webapiWorkspaceGet(
     (void) errorMessage;
     response.setIndex(m_settings.m_workspaceIndex);
     return 200;
+}
+
+int AISDemod::webapiReportGet(
+        SWGSDRangel::SWGChannelReport& response,
+        QString& errorMessage)
+{
+    (void) errorMessage;
+    response.setAisDemodReport(new SWGSDRangel::SWGAISDemodReport());
+    response.getAisDemodReport()->init();
+    webapiFormatChannelReport(response);
+    return 200;
+}
+
+void AISDemod::webapiFormatChannelReport(SWGSDRangel::SWGChannelReport& response)
+{
+    double magsqAvg, magsqPeak;
+    int nbMagsqSamples;
+    getMagSqLevels(magsqAvg, magsqPeak, nbMagsqSamples);
+
+    response.getAisDemodReport()->setChannelPowerDb(CalcDb::dbPower(magsqAvg));
+    response.getAisDemodReport()->setChannelSampleRate(m_basebandSink->getChannelSampleRate());
 }
 
 int AISDemod::webapiSettingsPutPatch(

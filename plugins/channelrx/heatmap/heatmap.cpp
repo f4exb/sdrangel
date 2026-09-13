@@ -29,9 +29,11 @@
 #include <complex.h>
 
 #include "SWGChannelSettings.h"
+#include "SWGChannelReport.h"
 #include "SWGWorkspaceInfo.h"
 
 #include "dsp/dspcommands.h"
+#include "util/db.h"
 #include "device/deviceapi.h"
 
 MESSAGE_CLASS_DEFINITION(HeatMap::MsgConfigureHeatMap, Message)
@@ -265,6 +267,27 @@ int HeatMap::webapiWorkspaceGet(
     (void) errorMessage;
     response.setIndex(m_settings.m_workspaceIndex);
     return 200;
+}
+
+int HeatMap::webapiReportGet(
+        SWGSDRangel::SWGChannelReport& response,
+        QString& errorMessage)
+{
+    (void) errorMessage;
+    response.setHeatMapReport(new SWGSDRangel::SWGHeatMapReport());
+    response.getHeatMapReport()->init();
+    webapiFormatChannelReport(response);
+    return 200;
+}
+
+void HeatMap::webapiFormatChannelReport(SWGSDRangel::SWGChannelReport& response)
+{
+    double magsqAvg, magsqPeak;
+    int nbMagsqSamples;
+    getMagSqLevels(magsqAvg, magsqPeak, nbMagsqSamples);
+
+    response.getHeatMapReport()->setChannelPowerDb(CalcDb::dbPower(magsqAvg));
+    response.getHeatMapReport()->setChannelSampleRate(m_basebandSink->getChannelSampleRate());
 }
 
 int HeatMap::webapiSettingsPutPatch(

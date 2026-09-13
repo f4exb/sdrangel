@@ -30,11 +30,13 @@
 #include <complex.h>
 
 #include "SWGChannelSettings.h"
+#include "SWGChannelReport.h"
 #include "SWGWorkspaceInfo.h"
 #include "SWGChannelActions.h"
 #include "SWGRadioAstronomyActions.h"
 
 #include "dsp/dspcommands.h"
+#include "util/db.h"
 #include "device/deviceapi.h"
 #include "channel/channelwebapiutils.h"
 #include "settings/serializable.h"
@@ -852,6 +854,27 @@ int RadioAstronomy::webapiWorkspaceGet(
     (void) errorMessage;
     response.setIndex(m_settings.m_workspaceIndex);
     return 200;
+}
+
+int RadioAstronomy::webapiReportGet(
+        SWGSDRangel::SWGChannelReport& response,
+        QString& errorMessage)
+{
+    (void) errorMessage;
+    response.setRadioAstronomyReport(new SWGSDRangel::SWGRadioAstronomyReport());
+    response.getRadioAstronomyReport()->init();
+    webapiFormatChannelReport(response);
+    return 200;
+}
+
+void RadioAstronomy::webapiFormatChannelReport(SWGSDRangel::SWGChannelReport& response)
+{
+    double magsqAvg, magsqPeak;
+    int nbMagsqSamples;
+    getMagSqLevels(magsqAvg, magsqPeak, nbMagsqSamples);
+
+    response.getRadioAstronomyReport()->setChannelPowerDb(CalcDb::dbPower(magsqAvg));
+    response.getRadioAstronomyReport()->setChannelSampleRate(m_basebandSink->getChannelSampleRate());
 }
 
 int RadioAstronomy::webapiSettingsPutPatch(

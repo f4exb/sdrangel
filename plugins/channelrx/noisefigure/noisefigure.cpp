@@ -31,9 +31,11 @@
 #include <complex.h>
 
 #include "SWGChannelSettings.h"
+#include "SWGChannelReport.h"
 #include "SWGWorkspaceInfo.h"
 
 #include "dsp/dspcommands.h"
+#include "util/db.h"
 #include "device/deviceapi.h"
 #include "settings/serializable.h"
 #include "util/interpolation.h"
@@ -605,6 +607,27 @@ int NoiseFigure::webapiWorkspaceGet(
     (void) errorMessage;
     response.setIndex(m_settings.m_workspaceIndex);
     return 200;
+}
+
+int NoiseFigure::webapiReportGet(
+        SWGSDRangel::SWGChannelReport& response,
+        QString& errorMessage)
+{
+    (void) errorMessage;
+    response.setNoiseFigureReport(new SWGSDRangel::SWGNoiseFigureReport());
+    response.getNoiseFigureReport()->init();
+    webapiFormatChannelReport(response);
+    return 200;
+}
+
+void NoiseFigure::webapiFormatChannelReport(SWGSDRangel::SWGChannelReport& response)
+{
+    double magsqAvg, magsqPeak;
+    int nbMagsqSamples;
+    getMagSqLevels(magsqAvg, magsqPeak, nbMagsqSamples);
+
+    response.getNoiseFigureReport()->setChannelPowerDb(CalcDb::dbPower(magsqAvg));
+    response.getNoiseFigureReport()->setChannelSampleRate(m_basebandSink->getChannelSampleRate());
 }
 
 int NoiseFigure::webapiSettingsPutPatch(
