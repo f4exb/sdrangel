@@ -379,13 +379,26 @@ int SSBDemod::webapiSettingsPutPatch(
     SSBDemodSettings settings = m_settings;
     webapiUpdateChannelSettings(settings, channelSettingsKeys, response);
 
-    MsgConfigureSSBDemod *msg = MsgConfigureSSBDemod::create(channelSettingsKeys, settings, force);
+    // The filter keys set one entry of the filter bank, and the settings are applied by key
+    // name with the bank copied as a whole under its own, so that is the key to pass on
+    QStringList settingsKeys = channelSettingsKeys;
+
+    for (const char *key : {"rfBandwidth", "lowCutoff", "spanLog2", "fftWindow"})
+    {
+        if (settingsKeys.contains(key) && !settingsKeys.contains("filterBank"))
+        {
+            settingsKeys.append("filterBank");
+            break;
+        }
+    }
+
+    MsgConfigureSSBDemod *msg = MsgConfigureSSBDemod::create(settingsKeys, settings, force);
     m_inputMessageQueue.push(msg);
 
     qDebug("SSBDemod::webapiSettingsPutPatch: forward to GUI: %p", m_guiMessageQueue);
     if (m_guiMessageQueue) // forward to GUI if any
     {
-        MsgConfigureSSBDemod *msgToGUI = MsgConfigureSSBDemod::create(channelSettingsKeys, settings, force);
+        MsgConfigureSSBDemod *msgToGUI = MsgConfigureSSBDemod::create(settingsKeys, settings, force);
         m_guiMessageQueue->push(msgToGUI);
     }
 

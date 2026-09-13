@@ -392,13 +392,26 @@ int FT8Demod::webapiSettingsPutPatch(
     FT8DemodSettings settings = m_settings;
     webapiUpdateChannelSettings(settings, channelSettingsKeys, response);
 
-    MsgConfigureFT8Demod *msg = MsgConfigureFT8Demod::create(channelSettingsKeys, settings, force);
+    // The filter keys set one entry of the filter bank, and the settings are applied by key
+    // name with the bank copied as a whole under its own, so that is the key to pass on
+    QStringList settingsKeys = channelSettingsKeys;
+
+    for (const char *key : {"rfBandwidth", "lowCutoff", "spanLog2", "fftWindow"})
+    {
+        if (settingsKeys.contains(key) && !settingsKeys.contains("filterBank"))
+        {
+            settingsKeys.append("filterBank");
+            break;
+        }
+    }
+
+    MsgConfigureFT8Demod *msg = MsgConfigureFT8Demod::create(settingsKeys, settings, force);
     m_inputMessageQueue.push(msg);
 
     qDebug("FT8Demod::webapiSettingsPutPatch: forward to GUI: %p", m_guiMessageQueue);
     if (m_guiMessageQueue) // forward to GUI if any
     {
-        MsgConfigureFT8Demod *msgToGUI = MsgConfigureFT8Demod::create(channelSettingsKeys, settings, force);
+        MsgConfigureFT8Demod *msgToGUI = MsgConfigureFT8Demod::create(settingsKeys, settings, force);
         m_guiMessageQueue->push(msgToGUI);
     }
 
