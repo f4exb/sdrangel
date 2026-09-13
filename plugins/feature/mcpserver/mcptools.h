@@ -215,8 +215,10 @@ private:
     //!< A channel's type id and whether listen or scan added it, for the notes the intent tools leave
     struct ChannelNote { const void *m_channel; int m_index; QString m_id; bool m_intent; };
     QList<ChannelNote> channelNotes(int deviceSetIndex, const QSet<const void *>& except = QSet<const void *>());
-    //!< Removes the channels listen and scan added to a device set. Returns the ids of those removed
-    QStringList reclaimIntentChannels(int deviceSetIndex);
+    //!< Removes the channels listen and scan added to a device set, except keep. Returns the ids of those removed
+    QStringList reclaimIntentChannels(int deviceSetIndex, const void *keep = nullptr);
+    //!< The channel a previous listen added that a new one of this type can retune instead of replacing, or null
+    const void *reusableIntentChannel(int deviceSetIndex, const QString& channelType, int& channelIndex);
     //!< What listen and scan tell the caller about the rest of the device set once their own channels are in
     QStringList intentNotes(int deviceSetIndex, const QSet<const void *>& added, const QStringList& reclaimed,
         bool reused, double previousCentre, double centre);

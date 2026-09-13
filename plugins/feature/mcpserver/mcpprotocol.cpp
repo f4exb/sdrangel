@@ -349,7 +349,7 @@ static const MCPResourceDef staticResources[] = {
     {"sdrangel://presets", "Presets", "Saved device set presets (device and channel settings) grouped by name"},
     {"sdrangel://configurations", "Configurations", "Saved whole-instance configurations grouped by name"},
     {"sdrangel://guide", "Receiving guide", "Which demodulator and frequency to use for a given signal, the minimum sample rate some modes need, and why nothing is received"},
-    {"sdrangel://docs", "Documentation index", "Plugin documentation available for the devices, channels and features registered in this instance, with section headings"},
+    {"sdrangel://docs", "Documentation index", "Documentation available for the devices, channels and features registered in this instance, and for GUI pages such as the spectrum display, with section headings"},
     {"sdrangel://packets", "Recent packets", "The most recent packets decoded by AIS, packet (AX.25/APRS), LoRa, M17, Meshtastic, MeshCore, Inmarsat and radiosonde demodulators"},
     {"sdrangel://map/items", "Map items", "Objects currently plotted on the map: aircraft, ships, APRS stations, radiosondes, satellites, beacons"},
 };

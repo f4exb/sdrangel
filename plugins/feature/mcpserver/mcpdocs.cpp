@@ -227,9 +227,65 @@ void MCPDocs::load()
     }
 
     applyEnumeratedDeviceIds();
+    addGuiDocs();
 
     qDebug("MCPDocs::load: %d readmes, %d matched to plugins, unmatched: %s",
         (int) m_readmes.size(), (int) m_docs.size(), qPrintable(unmatchedReadmes().join(", ")));
+}
+
+// Pages of the GUI's own, compiled in under :/mcpdocs/gui by the CMake list beside this one.
+// The spectrum display is the one that matters most: its settings are the only ones a client
+// changes that no plugin readme explains
+void MCPDocs::addGuiDocs()
+{
+    struct Page { const char *id; const char *name; const char *file; QStringList aliases; };
+
+    static const QList<Page> pages = {
+        {"spectrum", "Spectrum display", "spectrum.md", {"GLSpectrum", "spectrum display", "spectrum component"}},
+        {"spectrummarkers", "Spectrum markers", "spectrummarkers.md", {"markers"}},
+        {"spectrummeasurements", "Spectrum measurements", "spectrummeasurements.md", {"measurements"}},
+        {"spectrumcalibration", "Spectrum calibration", "spectrumcalibration.md", {"calibration"}},
+        {"mainspectrum", "Main spectrum window", "mainspectrum.md", {}},
+        {"audio", "Audio management", "audio.md", {}},
+        {"configurations", "Configurations", "configurations.md", {}},
+        {"deviceuserargs", "Device user arguments", "deviceuserargs.md", {}},
+        {"transverter", "Transverter dialog", "transverterdialog.md", {}}
+    };
+
+    for (const Page& page : pages)
+    {
+        QString path = QString(":/mcpdocs/gui/%1").arg(page.file);
+
+        if (!QFile::exists(path)) {
+            continue; // not in this build
+        }
+
+        QString markdown = toMarkdown(readFile(path));
+        Doc doc;
+        doc.kind = "gui";
+        doc.id = page.id;
+        doc.aliases = page.aliases;
+        doc.name = page.name;
+        doc.title = page.name;
+        doc.path = path;
+        doc.headings = extractHeadings(markdown);
+        doc.plugin = nullptr;
+
+        // The page's own first heading, when it has one
+        for (const QString& line : markdown.split('\n'))
+        {
+            int level;
+            QString heading = headingText(line, level);
+
+            if (level > 0)
+            {
+                doc.title = heading;
+                break;
+            }
+        }
+
+        m_docs.append(doc);
+    }
 }
 
 void MCPDocs::scanReadmes()

@@ -33,8 +33,8 @@ class MCPDocs
 public:
     struct Doc
     {
-        QString kind;         //!< "channel", "device" or "feature"
-        QString id;           //!< Type id as used by the tools: channelType, device hwType or featureType
+        QString kind;         //!< "channel", "device" or "feature" for a plugin; "gui" for a page of the GUI's own, such as the spectrum display
+        QString id;           //!< Type id as used by the tools: channelType, device hwType or featureType; a short name for a GUI page
         QStringList aliases;  //!< Other ids the plugin is known by (e.g. the registration id of a device when it differs from the enumerated hwType)
         QString direction;    //!< "rx", "tx" or "mimo" for channels and devices, empty for features
         QString name;         //!< Displayed name from the plugin descriptor
@@ -73,6 +73,7 @@ private:
     void scanReadmes();
     const Readme *match(const QStringList& groups, const QString& id, const QString& uri, const QString& displayedName);
     void addDoc(const QString& kind, const QString& id, const QString& direction, const QString& uri, const QString& displayedName, const QStringList& groups, PluginInterface *plugin);
+    void addGuiDocs(); //!< The GUI's own pages, which no plugin owns
     void applyEnumeratedDeviceIds();
     static QString normalize(const QString& s);
     static QString readFile(const QString& path);

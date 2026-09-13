@@ -18,6 +18,27 @@ foreach(readme ${MCPSERVER_READMES})
     string(APPEND MCPSERVER_DOCS_QRC_CONTENT "    <file alias=\"${readme_alias}\">${readme}</file>\n")
 endforeach()
 string(APPEND MCPSERVER_DOCS_QRC_CONTENT "    <file alias=\"bandguide.md\">${CMAKE_CURRENT_SOURCE_DIR}/bandguide.md</file>\n")
+# The GUI's own pages, for what is not a plugin: the spectrum display above all. Listed in
+# MCPDocs::addGuiDocs, which gives each its id
+foreach(guidoc
+    gui/spectrum.md
+    gui/spectrummarkers.md
+    gui/spectrummeasurements.md
+    gui/spectrumcalibration.md
+    mainspectrum/readme.md
+    audio.md
+    configurations.md
+    deviceuserargs.md
+    gui/transverterdialog.md
+)
+    if(guidoc STREQUAL "mainspectrum/readme.md")
+        set(guidoc_alias "gui/mainspectrum.md")
+    else()
+        get_filename_component(guidoc_name ${guidoc} NAME)
+        set(guidoc_alias "gui/${guidoc_name}")
+    endif()
+    string(APPEND MCPSERVER_DOCS_QRC_CONTENT "    <file alias=\"${guidoc_alias}\">${CMAKE_SOURCE_DIR}/sdrgui/${guidoc}</file>\n")
+endforeach()
 string(APPEND MCPSERVER_DOCS_QRC_CONTENT "  </qresource>\n</RCC>\n")
 file(WRITE ${MCPSERVER_DOCS_QRC} "${MCPSERVER_DOCS_QRC_CONTENT}")
 

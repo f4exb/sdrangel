@@ -102,11 +102,11 @@ With a token set, the header goes alongside it:
 
 <h2>Tools</h2>
 
-The intent tools do a whole task in one call: `listen` sets up a receiver on a frequency in a given mode, `scan` sets up a Frequency Scanner over a list or range of frequencies and reports what it heard, and `get_status` returns one line per device set and feature. Both `listen` and `scan` keep track of the channels they add: by default the next of either on the same device set removes them first, so that exploring a band does not leave a trail of demodulators all playing audio, and `cleanup` removes them all. Channels added any other way are never touched; the reply says which of those the retune may have left outside the baseband. The rest mirror the Web API. Creation tools wait for SDRangel to complete the operation and return the index of the new object; the `set_*` tools reply with only the keys that were changed, since a client carries every reply in its context for the rest of the conversation.
+The intent tools do a whole task in one call: `listen` sets up a receiver on a frequency in a given mode, `scan` sets up a Frequency Scanner over a list or range of frequencies and reports every frequency above the threshold with its level (and, for intermittent signals, where the scanner parked), stepping by the channel spacing usual for the mode unless told otherwise and refusing modes that live on fixed frequencies, and `get_status` returns one line per device set and feature. Both `listen` and `scan` keep track of the channels they add: by default the next of either on the same device set removes them first, so that exploring a band does not leave a trail of demodulators all playing audio, and `cleanup` removes them all. A `listen` that finds a demodulator of the type it needs among them retunes it instead, as a person would, so stepping through a band in one mode keeps one channel open throughout. Channels added any other way are never touched; the reply says which of those the retune may have left outside the baseband. The rest mirror the Web API. Creation tools wait for SDRangel to complete the operation and return the index of the new object; the `set_*` tools reply with only the keys that were changed, since a client carries every reply in its context for the rest of the conversation.
 
 | Area | Tools |
 |------|-------|
-| Intent | `listen`, `scan`, `cleanup`, `get_status` |
+| Intent | `listen`, `scan`, `cleanup`, `tune_gain`, `get_status` |
 | Discovery | `get_instance_summary`, `list_available_devices`, `list_channel_types`, `list_feature_types`, `describe_settings`, `get_receiving_guide`, `list_docs`, `get_docs`, `list_audio_devices`, `get_location`, `set_location` |
 | Device sets | `add_deviceset`, `remove_last_deviceset`, `get_deviceset`, `set_device`, `get_device_settings`, `set_device_settings`, `set_center_frequency`, `start_device`, `stop_device`, `get_device_report`, `device_action`, `get_spectrum_settings`, `set_spectrum_settings` |
 | Channels | `add_channel`, `delete_channel`, `get_channel_settings`, `set_channel_settings`, `get_channel_report`, `channel_action` |
@@ -127,7 +127,7 @@ Each tool carries MCP annotations: whether it only reads, whether it overwrites 
 
 `get_receiving_guide` serves a hand written guide in `bandguide.md`: which demodulator and frequency to use for each signal SDRangel can receive, the minimum device sample rate that ADS-B, DAB and broadcast FM need, and the usual reasons nothing is received. Its frequencies come from the plugin readmes, and a test checks that every channel id it names is registered in the build. Edit that file to correct or extend it; it is compiled into the plugin, so re-run cmake after changing it.
 
-`list_docs` and `get_docs` serve the readme of every plugin registered in the running instance. The readmes are compiled into this plugin at build time (re-run cmake after adding a plugin), converted to plain markdown with images removed, and matched to plugin ids by name. `get_docs` accepts a plugin id or its displayed name and an optional section heading, so an agent can read just the part it needs from a long document.
+`list_docs` and `get_docs` serve the readme of every plugin registered in the running instance, and the GUI's own pages for what no plugin owns: the spectrum display (`spectrum`, with `spectrummarkers`, `spectrummeasurements` and `spectrumcalibration`), the main spectrum window, audio management, configurations, device user arguments and the transverter dialog. The readmes are compiled into this plugin at build time (re-run cmake after adding a plugin), converted to plain markdown with images removed, and matched to plugin ids by name; the GUI pages are listed in `CMakeLists.txt` and given their ids in `MCPDocs::addGuiDocs`. `get_docs` accepts a plugin id or its displayed name and an optional section heading, so an agent can read just the part it needs from a long document.
 
 <h2>Event stream</h2>
 
@@ -150,8 +150,8 @@ A client can be told when a resource changes instead of polling for it. An HTTP 
 | `sdrangel://packets` | The 100 most recent decoded packets, from a buffer of the last 1000 |
 | `sdrangel://map/items` | Objects currently plotted on the map |
 | `sdrangel://guide` | The receiving guide |
-| `sdrangel://docs` | Index of plugin documentation with section headings |
-| `sdrangel://docs/{kind}/{id}` | Readme of a plugin as markdown, e.g. `sdrangel://docs/channel/ADSBDemod` |
+| `sdrangel://docs` | Index of plugin and GUI documentation with section headings |
+| `sdrangel://docs/{kind}/{id}` | A document as markdown, e.g. `sdrangel://docs/channel/ADSBDemod` or `sdrangel://docs/gui/spectrum` |
 
 <h2>Prompts</h2>
 

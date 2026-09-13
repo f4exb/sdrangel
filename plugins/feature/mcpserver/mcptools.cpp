@@ -17,6 +17,7 @@
 ///////////////////////////////////////////////////////////////////////////////////
 
 #include <algorithm>
+#include <cmath>
 
 #include <QDebug>
 #include <QDir>
@@ -1132,6 +1133,27 @@ QString MCPTools::describeType(const QString& typeIn, const QString& kindIn)
     // (settings JSON key, description of what matched)
     QList<QPair<QString, QString>> matches;
 
+    // The spectrum display is not a type: its definitions are named after it directly
+    const QString lower = type.toLower();
+
+    if ((kind == "spectrum") || (lower == "spectrum") || (lower == "glspectrum"))
+    {
+        QStringList out;
+        out.append("# main spectrum display of a device set\n# get_spectrum_settings / set_spectrum_settings, get_spectrum_report, spectrum_action\n"
+                   "# get_docs spectrum explains the display and its controls\n");
+
+        for (const QString& definition : {"GLSpectrum", "GLSpectrumReport", "SpectrumActions"})
+        {
+            if (m_yamlDefinitions.contains(definition))
+            {
+                out.append(m_yamlDefinitions[definition]);
+                out.append("");
+            }
+        }
+
+        return out.join('\n');
+    }
+
     if (kind.isEmpty() || (kind == "channel"))
     {
         if (WebAPIUtils::m_channelTypeToSettingsKey.contains(type)) {
@@ -2072,12 +2094,14 @@ void MCPTools::registerInstanceTools()
         [this](const QJsonObject&) { return getAvailableFeatures(); });
 
     add("describe_settings",
-        "Get the documentation (OpenAPI YAML) of the settings, report and actions keys of a device, channel or feature type: "
-        "what each key means, its units and range. Not needed for common keys; call it when a set_* tool reports an unknown key "
-        "or you need a key's meaning. The output can run to a few thousand tokens.",
+        "Get the documentation (OpenAPI YAML) of the settings, report and actions keys of a device, channel or feature type, "
+        "or of the spectrum display: what each key means, its units, range and enumeration values. Not needed for common keys; "
+        "call it when a set_* tool reports an unknown key, or before setting a key whose values are codes, such as a style or "
+        "mode. The output can run to a few thousand tokens.",
         schema({
-            {"type", strProp("Type identifier: a device hwType such as RTLSDR or TestSource, a channelType such as ADSBDemod or NFMDemod, or a featureType such as Map")},
-            {"kind", strProp("Optional: device, channel or feature, to disambiguate when the same id exists for several kinds")}
+            {"type", strProp("Type identifier: a device hwType such as RTLSDR or TestSource, a channelType such as ADSBDemod or NFMDemod, "
+                             "a featureType such as Map, or spectrum for the spectrum display")},
+            {"kind", strProp("Optional: device, channel, feature or spectrum, to disambiguate when the same id exists for several kinds")}
         }, {"type"}),
         [this](const QJsonObject& args) { return QJsonValue(describeType(argString(args, "type"), argString(args, "kind", false))); });
 
@@ -2091,8 +2115,8 @@ void MCPTools::registerInstanceTools()
 
     add("list_docs",
         "List the user documentation (readme) available for the device, channel and feature plugins registered in this instance, "
-        "with the section headings of each. Use get_docs to read one.",
-        schema({{"kind", strProp("Optional: only list device, channel or feature docs")}}),
+        "and for the GUI's own pages such as the spectrum display, with the section headings of each. Use get_docs to read one.",
+        schema({{"kind", strProp("Optional: only list device, channel, feature or gui docs")}}),
         [this](const QJsonObject& args)
         {
             QString kind = argString(args, "kind", false).trimmed().toLower();
@@ -2118,12 +2142,13 @@ void MCPTools::registerInstanceTools()
         });
 
     add("get_docs",
-        "Read the user documentation (readme, as markdown) of a device, channel or feature plugin: what it does, what each setting "
-        "means, frequencies and sample rates it needs, and how to use it. Pass section to get just one section (matched against the "
-        "headings listed by list_docs) as the full documents can be long.",
+        "Read the user documentation (readme, as markdown) of a device, channel or feature plugin, or of a GUI page such as the "
+        "spectrum display: what it does, what each setting means, frequencies and sample rates it needs, and how to use it. Pass "
+        "section to get just one section (matched against the headings listed by list_docs) as the full documents can be long.",
         schema({
-            {"type", strProp("Plugin id (e.g. ADSBDemod, RTLSDR, Map), or its displayed name (e.g. \"ADS-B Demodulator\")")},
-            {"kind", strProp("Optional: device, channel or feature, to disambiguate")},
+            {"type", strProp("Plugin id (e.g. ADSBDemod, RTLSDR, Map), its displayed name (e.g. \"ADS-B Demodulator\"), or a GUI page: "
+                             "spectrum, spectrummarkers, spectrummeasurements, spectrumcalibration, mainspectrum, audio, configurations, deviceuserargs, transverter")},
+            {"kind", strProp("Optional: device, channel, feature or gui, to disambiguate")},
             {"section", strProp("Optional: text of a heading; only that section is returned")}
         }, {"type"}),
         [this](const QJsonObject& args)
@@ -2426,7 +2451,9 @@ void MCPTools::registerDeviceSetTools()
         });
 
     add("set_spectrum_settings",
-        "Change selected settings of the main spectrum display of a device set. Supports FFT and scale, 2D/3D spectrum display, waterfall history, measurements and statistics, math, and saved-memory display settings. Give only the keys to change (see get_spectrum_settings for the keys).",
+        "Change selected settings of the main spectrum display of a device set. Supports FFT and scale, 2D/3D spectrum display, waterfall history, measurements and statistics, math, and saved-memory display settings. Give only the keys to change (see get_spectrum_settings for the keys). "
+        "Keys whose values are codes are documented by describe_settings with type spectrum: for instance spectrumStyle is 0 line, 1 filled solid colour, 2 filled colour gradient, and colorMap names the gradient. "
+        "To smooth the trace set both averagingMode (1 moving) and averagingValue (the number of FFTs, e.g. 10): a mode with the value left at 1 averages nothing.",
         schema({
             {"deviceSetIndex", deviceSetIndexProp},
             {"settings", objProp("Object with the spectrum settings keys to change")}
@@ -2436,14 +2463,63 @@ void MCPTools::registerDeviceSetTools()
             int deviceSetIndex = argInt(args, "deviceSetIndex");
             QJsonObject partial = argObject(args, "settings");
             QStringList unknownKeys;
-            QJsonObject after = patchSpectrumSettings(deviceSetIndex, partial, &unknownKeys);
+
+            auto read = [&]()
+            {
+                SWGSDRangel::SWGGLSpectrum current;
+                SWGSDRangel::SWGErrorResponse error;
+                error.init();
+                check(m_adapter->devicesetSpectrumSettingsGet(deviceSetIndex, current, error), error, "Get spectrum settings");
+                return toJson(current);
+            };
+
+            const QJsonObject before = read();
+            patchSpectrumSettings(deviceSetIndex, partial, &unknownKeys);
+
+            // Read back rather than echo the request: some values are rounded to what the
+            // display offers, and the caller should see what it got. The patch is applied by
+            // message, so give it a moment to land: until every key given has either moved or
+            // was already where it was asked to be
+            QJsonObject after = read();
+
+            for (int attempt = 0; attempt < 10; attempt++)
+            {
+                bool landed = true;
+
+                for (const QString& key : partial.keys())
+                {
+                    if (after.contains(key) && (after[key] == before[key]) && (after[key] != partial[key])) {
+                        landed = false;
+                    }
+                }
+
+                if (landed) {
+                    break;
+                }
+
+                QThread::msleep(50);
+                after = read();
+            }
+
             QJsonObject changed;
+            QStringList notes;
 
             for (const QString& key : partial.keys())
             {
-                if (after.contains(key)) {
+                if (after.contains(key))
+                {
                     changed[key] = after[key];
+
+                    if (after[key].isDouble() && partial[key].isDouble() && (after[key].toDouble() != partial[key].toDouble())) {
+                        notes.append(QString("%1 was rounded to %2, one of the values the display offers.").arg(key).arg(after[key].toDouble()));
+                    }
                 }
+            }
+
+            // A mode with a count of one averages nothing, which is easy to leave that way
+            if ((after["averagingMode"].toInt() != 0) && (after["averagingValue"].toInt() <= 1)) {
+                notes.append("averagingMode is set but averagingValue is 1, so no averaging is happening: set averagingValue as well, "
+                             "10 to smooth a trace or 50 to measure a floor. The values available are 1, 2, 5, 10, 20, 50, 100 and so on.");
             }
 
             QJsonObject result;
@@ -2451,6 +2527,10 @@ void MCPTools::registerDeviceSetTools()
 
             if (!unknownKeys.isEmpty()) {
                 result["warning"] = QString("Ignored unknown keys: %1. describe_settings lists the valid ones.").arg(unknownKeys.join(", "));
+            }
+
+            if (!notes.isEmpty()) {
+                result["note"] = notes.join(" ");
             }
 
             return result;
@@ -2502,7 +2582,20 @@ void MCPTools::registerDeviceSetTools()
                     argString(args, "reduce", false, "max"),
                     response, error),
                 error, "Get spectrum data");
-            return toJson(response);
+            QJsonObject json = toJson(response);
+
+            // The generated serialiser drops a list of plain floats, so the values go in by hand
+            QJsonArray power;
+
+            if (response.getPower())
+            {
+                for (float v : *response.getPower()) {
+                    power.append(std::round((double) v * 10.0) / 10.0);
+                }
+            }
+
+            json["power"] = power;
+            return json;
         });
 
     add("spectrum_action",
@@ -3428,27 +3521,38 @@ struct ListenMode
     int m_rfBandwidth;      //!< Hz. Negative selects the lower sideband, as the SSB demodulator does
     int m_minBaseband;      //!< Hz
     const char *m_settings; //!< JSON of further initial settings
+    int m_scanStep;         //!< Hz. The channel spacing scan steps by unless told otherwise; 0 for a mode on fixed frequencies, which is not scanned for
 };
 
 const char *const bfmSettings = "{\"afBandwidth\":15000,\"audioStereo\":1,\"rdsActive\":1,\"volume\":4,\"squelch\":-60}";
 const char *const amSettings = "{\"afBandwidth\":3000,\"bandpassEnable\":1,\"volume\":4,\"squelch\":-60}";
 
 const ListenMode listenModes[] = {
-    {"bfm",     "BFMDemod",  180000,  240000, bfmSettings},
-    {"fm",      "BFMDemod",  180000,  240000, bfmSettings},
-    {"wfm",     "WFMDemod",  150000,  200000, "{\"volume\":2,\"squelch\":-60}"},
-    {"nfm",     "NFMDemod",   12500,   48000, "{\"afBandwidth\":3000,\"volume\":2}"},
-    {"am",      "AMDemod",     8000,   48000, amSettings},
-    {"airband", "AMDemod",     8000,   48000, amSettings},
-    {"ssb",     "SSBDemod",    3000,   48000, "{\"volume\":2}"},
-    {"usb",     "SSBDemod",    3000,   48000, "{\"volume\":2}"},
-    {"lsb",     "SSBDemod",   -3000,   48000, "{\"volume\":2}"},
-    {"dab",     "DABDemod",       0, 2048000, "{}"},
-    {"adsb",    "ADSBDemod",      0, 2400000, "{}"},
-    {"ais",     "AISDemod",       0,   48000, "{}"},
-    {"dsd",     "DSDDemod",   12500,   48000, "{}"},
-    {"dmr",     "DSDDemod",   12500,   48000, "{}"},
+    // Broadcast FM asks for twice the baseband its channel needs: a 180 kHz channel in a 256 kS/s
+    // baseband sits against the edge of the decimation filters, and RDS suffers first; it also
+    // leaves room to put the channel clear of the device's DC spike
+    {"bfm",        "BFMDemod",        180000,  512000, bfmSettings,                          100000},
+    {"fm",         "BFMDemod",        180000,  512000, bfmSettings,                          100000},
+    {"wfm",        "WFMDemod",        150000,  512000, "{\"volume\":2,\"squelch\":-60}",     100000},
+    {"nfm",        "NFMDemod",         12500,   48000, "{\"afBandwidth\":3000,\"volume\":2}", 12500},
+    {"am",         "AMDemod",           8000,   48000, amSettings,                            25000},
+    {"airband",    "AMDemod",           8000,   48000, amSettings,                            25000},
+    {"ssb",        "SSBDemod",          3000,   48000, "{\"volume\":2}",                       3000},
+    {"usb",        "SSBDemod",          3000,   48000, "{\"volume\":2}",                       3000},
+    {"lsb",        "SSBDemod",         -3000,   48000, "{\"volume\":2}",                       3000},
+    {"dab",        "DABDemod",             0, 2048000, "{}",                                      0},
+    {"adsb",       "ADSBDemod",            0, 2400000, "{}",                                      0},
+    {"ais",        "AISDemod",             0,   48000, "{}",                                      0},
+    {"dsc",        "DSCDemod",           450,   48000, "{}",                                      0},
+    {"dsd",        "DSDDemod",         12500,   48000, "{}",                                  12500},
+    {"dmr",        "DSDDemod",         12500,   48000, "{}",                                  12500},
+    {"pager",      "PagerDemod",       20000,   48000, "{}",                                  12500},
+    {"pocsag",     "PagerDemod",       20000,   48000, "{}",                                  12500},
+    {"sonde",      "RadiosondeDemod",   9600,   48000, "{}",                                  10000},
+    {"radiosonde", "RadiosondeDemod",   9600,   48000, "{}",                                  10000},
 };
+
+const char *const listenModeList = "bfm, wfm, nfm, am, ssb, usb, lsb, dab, adsb, ais, dsc, dsd, pager, sonde";
 
 const ListenMode *findListenMode(const QString& alias)
 {
@@ -3672,7 +3776,7 @@ QList<MCPTools::ChannelNote> MCPTools::channelNotes(int deviceSetIndex, const QS
     return notes;
 }
 
-QStringList MCPTools::reclaimIntentChannels(int deviceSetIndex)
+QStringList MCPTools::reclaimIntentChannels(int deviceSetIndex, const void *keep)
 {
     QStringList removed;
 
@@ -3682,7 +3786,7 @@ QStringList MCPTools::reclaimIntentChannels(int deviceSetIndex)
 
     for (int i = notes.size() - 1; i >= 0; i--)
     {
-        if (!notes[i].m_intent) {
+        if (!notes[i].m_intent || (notes[i].m_channel == keep)) {
             continue;
         }
 
@@ -3698,6 +3802,35 @@ QStringList MCPTools::reclaimIntentChannels(int deviceSetIndex)
     }
 
     return removed;
+}
+
+// Retuning the demodulator a previous listen added is what a person would do, and spares the
+// audio device and the GUI a close and reopen. Only when it is the one intent channel of that
+// type, and no scan's FreqScanner is there to be driving it
+const void *MCPTools::reusableIntentChannel(int deviceSetIndex, const QString& channelType, int& channelIndex)
+{
+    const void *candidate = nullptr;
+    int candidates = 0;
+
+    for (const ChannelNote& note : channelNotes(deviceSetIndex))
+    {
+        if (!note.m_intent) {
+            continue;
+        }
+
+        if (note.m_id == "FreqScanner") {
+            return nullptr;
+        }
+
+        if (note.m_id == channelType)
+        {
+            candidate = note.m_channel;
+            channelIndex = note.m_index;
+            candidates++;
+        }
+    }
+
+    return (candidates == 1) ? candidate : nullptr;
 }
 
 QStringList MCPTools::intentNotes(int deviceSetIndex, const QSet<const void *>& added, const QStringList& reclaimed,
@@ -3930,7 +4063,9 @@ QJsonObject MCPTools::pickReceiver(const QJsonObject& args, int minBaseband, con
         }
     }
 
-    if (hwType == "RTLSDR")
+    // Only a device set this call created gets the receiver profile: one that was found is the
+    // user's, and its gain stays whatever they set
+    if (!reused && (hwType == "RTLSDR"))
     {
         partial["dcBlock"] = 1;
         partial["iqImbalance"] = 1;
@@ -3938,6 +4073,9 @@ QJsonObject MCPTools::pickReceiver(const QJsonObject& args, int minBaseband, con
         // gain left the airband 35 dB down on what a hand-set receiver saw
         partial["agc"] = 0;
         partial["gain"] = 402;
+        rateNote = (rateNote.isEmpty() ? QString() : rateNote + " ")
+            + QString("Device set %1 is new, so its RTL-SDR was set to 40 dB gain with AGC off; set_device_settings changes it.")
+                .arg(deviceSetIndex);
     }
 
     if (!partial.isEmpty()) {
@@ -3967,10 +4105,10 @@ void MCPTools::registerIntentTools()
         "Use the individual tools afterwards to adjust, e.g. set_channel_settings for squelch or volume.",
         schema({
             {"frequency", numProp("Frequency to receive in Hz, e.g. 97300000 for 97.3 MHz")},
-            {"mode", strProp("bfm (broadcast FM with stereo and RDS), wfm, nfm, am or airband, ssb/usb, lsb, dab, adsb, ais, dsd/dmr, "
-                             "or any channel type id from list_channel_types. Default nfm")},
+            {"mode", strProp("bfm (broadcast FM with stereo and RDS), wfm, nfm, am or airband, ssb/usb, lsb, dab, adsb, ais, dsc, dsd/dmr, "
+                             "pager (POCSAG), sonde (RS41 radiosondes), or any channel type id from list_channel_types. Default nfm")},
             {"device", strProp(deviceHint)},
-            {"replace", prop("boolean", "Remove every channel earlier listen and scan calls added to this device set, so that exploring a band does not leave a trail of demodulators all playing audio and mis-tuned for the current centre frequency. Channels added any other way are never touched. Default true")}
+            {"replace", prop("boolean", "Retune the demodulator a previous listen added to this device set when it is of the same type, and remove every other channel earlier listen and scan calls added there, so that exploring a band does not leave a trail of demodulators all playing audio and mis-tuned for the current centre frequency. Channels added any other way are never touched. Default true")}
         }, {"frequency"}),
         [this](const QJsonObject& args)
         {
@@ -3999,7 +4137,7 @@ void MCPTools::registerIntentTools()
                 }
 
                 if (channelType.isEmpty()) {
-                    throw MCPToolError(QString("Unknown mode %1. Use bfm, wfm, nfm, am, ssb, usb, lsb, dab, adsb, ais, dsd, or a channel type from list_channel_types").arg(modeName));
+                    throw MCPToolError(QString("Unknown mode %1. Use one of %2, or a channel type from list_channel_types").arg(modeName).arg(listenModeList));
                 }
             }
 
@@ -4008,21 +4146,43 @@ void MCPTools::registerIntentTools()
             int deviceSetIndex = receiver["deviceSetIndex"].toInt();
             int baseband = receiver["baseband"].toInt();
 
-            // Keep the channel off the DC spike when the baseband has room for it
+            // Keep the channel off the device's DC spike when the baseband has room for it: far
+            // enough that the spike falls outside the channel, or not at all. A spike inside a
+            // wide FM channel is an interferer 25 kHz from the carrier, which is worse than one
+            // on the carrier itself
             int offset = 0;
 
-            if ((rfBandwidth != 0) && (baseband > 0) && (baseband / 2 - 25000 >= qAbs(rfBandwidth) / 2)) {
-                offset = -25000;
+            if ((rfBandwidth != 0) && (baseband > 0))
+            {
+                const int clear = qAbs(rfBandwidth) / 2 + 25000; // spike 25 kHz beyond the channel edge
+
+                if (baseband / 2 >= clear + qAbs(rfBandwidth) / 2) {
+                    offset = -clear;
+                }
             }
 
             QJsonObject tune;
             tune["centerFrequency"] = (double) (frequency - offset);
             patchDeviceSettings(deviceSetIndex, tune);
 
-            const QStringList reclaimed = replace ? reclaimIntentChannels(deviceSetIndex) : QStringList();
-            int channelIndex = addChannelAndWait(deviceSetIndex, channelType);
-            const void *channel = channelAt(deviceSetIndex, channelIndex);
-            trackIntentChannel(channel);
+            // A demodulator of the right type that a previous listen added is retuned rather
+            // than replaced; anything else the intent tools added goes as before
+            int channelIndex = -1;
+            const void *channel = replace ? reusableIntentChannel(deviceSetIndex, channelType, channelIndex) : nullptr;
+            const bool retuned = channel != nullptr;
+            const QStringList reclaimed = replace ? reclaimIntentChannels(deviceSetIndex, channel) : QStringList();
+
+            if (retuned)
+            {
+                // The reclaim may have renumbered it
+                relocateChannel(channel, deviceSetIndex, channelIndex, "demodulator");
+            }
+            else
+            {
+                channelIndex = addChannelAndWait(deviceSetIndex, channelType);
+                channel = channelAt(deviceSetIndex, channelIndex);
+                trackIntentChannel(channel);
+            }
 
             initial["inputFrequencyOffset"] = offset;
 
@@ -4033,7 +4193,8 @@ void MCPTools::registerIntentTools()
             QJsonObject patched;
             QString state;
 
-            // Do not leave a half configured channel behind if setting it up fails
+            // Do not leave a half configured channel behind if setting it up fails. One that was
+            // there already stays, as the previous listen left it
             try
             {
                 patched = patchChannelSettings(deviceSetIndex, channelIndex, initial);
@@ -4041,8 +4202,12 @@ void MCPTools::registerIntentTools()
             }
             catch (const MCPToolError&)
             {
-                try { deleteChannelObjectAndWait(channel); } catch (const MCPToolError&) {}
-                untrackIntentChannel(channel);
+                if (!retuned)
+                {
+                    try { deleteChannelObjectAndWait(channel); } catch (const MCPToolError&) {}
+                    untrackIntentChannel(channel);
+                }
+
                 throw;
             }
 
@@ -4055,6 +4220,13 @@ void MCPTools::registerIntentTools()
             result["channelType"] = channelType;
             result["state"] = state;
             QStringList notes;
+
+            if (retuned)
+            {
+                result["retuned"] = true;
+                notes.append(QString("Retuned the %1 a previous listen added to device set %2 rather than adding another; its other settings are as they were.")
+                    .arg(channelType).arg(deviceSetIndex));
+            }
 
             if (state == "running")
             {
@@ -4141,7 +4313,10 @@ void MCPTools::registerIntentTools()
 
     add("scan",
         "Scan a set of frequencies for activity and listen to whichever is active, in one call: sets up a receiver, a demodulator "
-        "and a Frequency Scanner, starts scanning, watches for a while and reports what was heard and the strongest channels. "
+        "and a Frequency Scanner, starts scanning, watches for a while and reports what it found. active lists every frequency "
+        "above the threshold with its level, strongest first; that is the list to use for stations and other continuous "
+        "signals. heard lists where the scanner parked and for how long, which only tells intermittent signals apart, since "
+        "on a continuous carrier it parks on the first and stays. "
         "The scanner keeps running afterwards; get_channel_report on the scanner channel shows its state (2 scanning, 3 receiving, "
         "4 holding), channel_action {\"run\": 0} stops it. The demodulator and scanner it added stay on the device set until the "
         "next listen or scan there replaces them, or cleanup removes them; they are not removed when this call returns. "
@@ -4150,9 +4325,15 @@ void MCPTools::registerIntentTools()
             {"frequencies", frequencyList},
             {"startFrequency", numProp("Start of a range in Hz, with stopFrequency and stepFrequency")},
             {"stopFrequency", numProp("End of the range in Hz, inclusive")},
-            {"stepFrequency", numProp("Channel spacing in Hz, e.g. 25000 for the civil airband")},
-            {"mode", strProp("Demodulator, as for listen. Default am")},
-            {"threshold", numProp("Power in dB above which a frequency counts as active. Default -30; the noise floor is reported so it can be adjusted")},
+            {"stepFrequency", numProp("Channel spacing in Hz. Optional: without it the spacing usual for the mode is used (bfm 100 kHz, am 25 kHz, "
+                                      "nfm/dsd/pager 12.5 kHz, sonde 10 kHz, ssb 3 kHz), which is the right choice unless the band is known to differ, "
+                                      "e.g. 8333 for airband 8.33 kHz channels in Europe. Broadcast FM stations sit on a 100 kHz raster everywhere; only "
+                                      "the Americas confine them to the odd tenths, so bfm/wfm ranges are scanned at 100 kHz whatever step is given")},
+            {"mode", strProp("Demodulator, as for listen: bfm, wfm, nfm, am, ssb/usb/lsb, dsd, pager, sonde. Modes on fixed frequencies (adsb, ais, "
+                             "dab, dsc) cannot be scanned for; listen to those directly. Default am")},
+            {"threshold", numProp("Power in dB above which a frequency counts as active. Leave it out unless you have a reason: the scale "
+                                  "depends on the device and its gain, so by default the noise floor is measured first and the threshold set "
+                                  "12 dB above it. Both are reported, so a second scan can adjust")},
             {"seconds", bounded(numProp("How long to watch before replying, 3 to 30. Default 10"), 3, 30)},
             {"device", strProp(deviceHint)},
             {"replace", prop("boolean", "Remove every channel earlier listen and scan calls added to this device set first, as listen does. Channels added any other way are never touched. Default true")}
@@ -4160,42 +4341,45 @@ void MCPTools::registerIntentTools()
         [this](const QJsonObject& args)
         {
             QList<qint64> frequencies;
+            const bool fromRange = !hasArg(args, "frequencies");
+            qint64 rangeStart = 0;
+            qint64 rangeStop = 0;
+            qint64 rangeStep = 0; // as given; zero to step by the mode's usual channel spacing
 
-            if (hasArg(args, "frequencies"))
+            if (fromRange)
             {
-                for (const QJsonValue& v : args["frequencies"].toArray()) {
-                    frequencies.append((qint64) v.toDouble());
+                rangeStart = (qint64) argDouble(args, "startFrequency");
+                rangeStop = (qint64) argDouble(args, "stopFrequency");
+                rangeStep = hasArg(args, "stepFrequency") ? (qint64) argDouble(args, "stepFrequency") : 0;
+
+                if ((rangeStep < 0) || (rangeStop < rangeStart)) {
+                    throw MCPToolError("stepFrequency must be positive and stopFrequency at least startFrequency");
                 }
             }
             else
             {
-                qint64 start = (qint64) argDouble(args, "startFrequency");
-                qint64 stop = (qint64) argDouble(args, "stopFrequency");
-                qint64 step = (qint64) argDouble(args, "stepFrequency");
-
-                if ((step <= 0) || (stop < start)) {
-                    throw MCPToolError("stepFrequency must be positive and stopFrequency at least startFrequency");
+                for (const QJsonValue& v : args["frequencies"].toArray()) {
+                    frequencies.append((qint64) v.toDouble());
                 }
 
-                for (qint64 f = start; f <= stop; f += step) {
-                    frequencies.append(f);
+                if (frequencies.isEmpty()) {
+                    throw MCPToolError("Give frequencies, or startFrequency and stopFrequency");
                 }
             }
 
-            if (frequencies.isEmpty()) {
-                throw MCPToolError("Give frequencies, or startFrequency, stopFrequency and stepFrequency");
-            }
-
-            if (frequencies.size() > 2000) {
-                throw MCPToolError(QString("%1 frequencies is too many; use a coarser step or a narrower range (2000 at most)").arg(frequencies.size()));
-            }
-
-            std::sort(frequencies.begin(), frequencies.end());
             QString modeName = argString(args, "mode", false, "am").trimmed();
             const ListenMode *mode = findListenMode(modeName);
 
             if (!mode) {
-                throw MCPToolError(QString("Unknown mode %1. Use bfm, wfm, nfm, am, ssb, usb, lsb, dsd").arg(modeName));
+                throw MCPToolError(QString("Unknown mode %1. Use one of %2").arg(modeName).arg(listenModeList));
+            }
+
+            // A mode on fixed frequencies has nothing to be found by stepping
+            if (mode->m_scanStep == 0)
+            {
+                throw MCPToolError(QString("%1 is received on fixed frequencies, so there is nothing to scan for: listen to them directly. "
+                    "get_receiving_guide lists them (ADS-B 1090 MHz; AIS 161.975 and 162.025 MHz; DSC 2187.5 kHz, 8414.5 kHz, "
+                    "16804.5 kHz and 156.525 MHz; DAB on the Band III blocks, one dab channel per block).").arg(mode->m_channelType));
             }
 
             // Without a threshold, measure the noise floor first and sit 12 dB above it: the
@@ -4204,6 +4388,47 @@ void MCPTools::registerIntentTools()
             double threshold = autoThreshold ? -100.0 : argDouble(args, "threshold");
             int seconds = qBound(3, (int) argDouble(args, "seconds", false, 10.0), 30);
             int channelBandwidth = qAbs(mode->m_rfBandwidth) > 0 ? qAbs(mode->m_rfBandwidth) : 8000;
+
+            // Broadcast FM stations sit on a 100 kHz raster everywhere but the Americas, where
+            // they keep to the odd tenths. A 200 kHz step from 87.5 MHz, the usual assumption,
+            // lands beside every even-tenth station: with a channel this wide the station still
+            // shows up, 100 kHz off and weaker, and then nothing decodes. So a coarser step on
+            // a broadcast range is scanned at 100 kHz, which loses nothing where the odd tenths
+            // are the rule
+            const bool broadcast = (mode->m_channelType == "BFMDemod") || (mode->m_channelType == "WFMDemod");
+            QString rasterNote;
+
+            if (fromRange)
+            {
+                qint64 step = (rangeStep > 0) ? rangeStep : mode->m_scanStep;
+
+                if (broadcast && (step > 100000))
+                {
+                    step = 100000;
+                    rasterNote = QString("Scanned at 100 kHz rather than the %1 kHz step given: broadcast FM stations are on a 100 kHz raster "
+                        "outside the Americas, and a coarser step lands beside them rather than on them.").arg(rangeStep / 1000.0, 0, 'g', 4);
+                }
+                else if (rangeStep > mode->m_scanStep)
+                {
+                    rasterNote = QString("The %1 kHz step given is coarser than the %2 kHz channel spacing usual for %3, so channels between the steps were not seen.")
+                        .arg(rangeStep / 1000.0, 0, 'g', 4).arg(mode->m_scanStep / 1000.0, 0, 'g', 4).arg(modeName);
+                }
+                else if (rangeStep == 0)
+                {
+                    rasterNote = QString("Stepped by %1 kHz, the channel spacing usual for %2; give stepFrequency for another.")
+                        .arg(step / 1000.0, 0, 'g', 4).arg(modeName);
+                }
+
+                for (qint64 f = rangeStart; f <= rangeStop; f += step) {
+                    frequencies.append(f);
+                }
+            }
+
+            if (frequencies.size() > 2000) {
+                throw MCPToolError(QString("%1 frequencies is too many; use a coarser step or a narrower range (2000 at most)").arg(frequencies.size()));
+            }
+
+            std::sort(frequencies.begin(), frequencies.end());
 
             // A wide baseband means fewer retunes per sweep
             const bool replace = args.value("replace").toBool(true);
@@ -4298,25 +4523,40 @@ void MCPTools::registerIntentTools()
 
             if (autoThreshold)
             {
-                QThread::msleep(4000);
-                relocateChannel(scannerChannel, deviceSetIndex, scanner, "scanner");
+                // The power scale depends on the device and its gain, so the only threshold that
+                // is right everywhere is one measured here: the median over the frequencies is
+                // the floor, as most of any band is empty. Wait for the first sweep to have
+                // measured every frequency rather than guess after a fixed time; a long list
+                // at a low sample rate takes a while
                 QList<double> powers;
 
-                for (const QJsonValue& v : channelReport(deviceSetIndex, scanner)["FreqScannerReport"].toObject()["channelState"].toArray()) {
-                    powers.append(v.toObject()["power"].toDouble());
+                for (int attempt = 0; (attempt < 30) && (powers.size() < frequencies.size()); attempt++)
+                {
+                    QThread::msleep(500);
+                    relocateChannel(scannerChannel, deviceSetIndex, scanner, "scanner");
+                    powers.clear();
+
+                    for (const QJsonValue& v : channelReport(deviceSetIndex, scanner)["FreqScannerReport"].toObject()["channelState"].toArray())
+                    {
+                        QJsonObject s = v.toObject();
+
+                        if (s.contains("power")) {
+                            powers.append(s["power"].toDouble());
+                        }
+                    }
                 }
 
-                if (!powers.isEmpty())
+                if (powers.isEmpty())
                 {
-                    std::sort(powers.begin(), powers.end());
-                    measuredFloor = powers[powers.size() / 2];
-                    haveFloor = true;
-                    threshold = measuredFloor + 12.0;
+                    discard();
+                    throw MCPToolError("The scanner measured nothing in 15 seconds, so no threshold could be set. "
+                        "Check the device is running and producing samples, or give threshold explicitly.");
                 }
-                else
-                {
-                    threshold = -30.0;
-                }
+
+                std::sort(powers.begin(), powers.end());
+                measuredFloor = powers[powers.size() / 2];
+                haveFloor = true;
+                threshold = measuredFloor + 12.0;
 
                 // Changing the mode restarts the scan with the new threshold
                 QJsonObject arm;
@@ -4371,8 +4611,25 @@ void MCPTools::registerIntentTools()
             result["threshold"] = threshold;
             result["secondsWatched"] = seconds;
 
+            // A channel this wide takes in a station on the neighbouring raster steps as well,
+            // weaker and off frequency, so of the neighbours within a channel of each other
+            // only the strongest is a station; the rest are its skirts
+            auto isLocalPeak = [&](qint64 f)
+            {
+                const double power = strongest.value(f, -999.0);
+
+                for (auto it = strongest.lowerBound(f - channelBandwidth); (it != strongest.end()) && (it.key() <= f + channelBandwidth); ++it)
+                {
+                    if ((it.key() != f) && ((it.value() > power) || ((it.value() == power) && (it.key() < f)))) {
+                        return false;
+                    }
+                }
+
+                return true;
+            };
+
             QList<QPair<int, qint64>> byTime;
-            for (auto it = heard.begin(); it != heard.end(); ++it) { byTime.append(qMakePair(it.value(), it.key())); }
+            for (auto it = heard.begin(); it != heard.end(); ++it) { if (isLocalPeak(it.key())) { byTime.append(qMakePair(it.value(), it.key())); } }
             std::sort(byTime.begin(), byTime.end(), [](const QPair<int, qint64>& a, const QPair<int, qint64>& b) { return a.first > b.first; });
             QJsonArray heardArray;
 
@@ -4387,24 +4644,41 @@ void MCPTools::registerIntentTools()
             result["heard"] = heardArray;
 
             QList<QPair<double, qint64>> byPower;
-            for (auto it = strongest.begin(); it != strongest.end(); ++it) { byPower.append(qMakePair(it.value(), it.key())); }
+            QList<double> allPowers; // every frequency, for the floor estimate
+            for (auto it = strongest.begin(); it != strongest.end(); ++it) { allPowers.append(it.value()); if (isLocalPeak(it.key())) { byPower.append(qMakePair(it.value(), it.key())); } }
             std::sort(byPower.begin(), byPower.end(), [](const QPair<double, qint64>& a, const QPair<double, qint64>& b) { return a.first > b.first; });
+            std::sort(allPowers.begin(), allPowers.end());
+            // Everything above the threshold, strongest first: for a band of continuous carriers
+            // this is the answer, as the scanner parks on the first one it finds and never gets
+            // to the rest. Capped well above any real band's station count, so that a threshold
+            // set too low on a long list cannot flood the reply
+            QJsonArray activeArray;
             QJsonArray strongestArray;
+            static const int activeCap = 100;
 
-            for (int i = 0; i < qMin(5, byPower.size()); i++)
+            for (int i = 0; i < byPower.size(); i++)
             {
                 QJsonObject s;
                 s["frequency"] = (double) byPower[i].second;
                 s["dB"] = byPower[i].first;
-                strongestArray.append(s);
+
+                if (i < 5) {
+                    strongestArray.append(s);
+                }
+
+                if ((byPower[i].first >= threshold) && (activeArray.size() < activeCap)) {
+                    activeArray.append(s);
+                }
             }
 
+            result["active"] = activeArray;
+            result["activeCount"] = activeArray.size();
             result["strongest"] = strongestArray;
 
             if (haveFloor) {
                 result["noiseFloorDb"] = measuredFloor;
-            } else if (!byPower.isEmpty()) {
-                result["noiseFloorDb"] = byPower[byPower.size() / 2].first;
+            } else if (!allPowers.isEmpty()) {
+                result["noiseFloorDb"] = allPowers[allPowers.size() / 2];
             }
 
             if (autoThreshold) {
@@ -4413,12 +4687,18 @@ void MCPTools::registerIntentTools()
 
             QStringList notes;
 
+            if (!rasterNote.isEmpty()) {
+                notes.append(rasterNote);
+            }
+
             if (!receiver["rateNote"].toString().isEmpty()) {
                 notes.append(receiver["rateNote"].toString());
             }
 
-            if (heardArray.isEmpty()) {
-                notes.append("Nothing exceeded the threshold while watching. Compare threshold with noiseFloorDb and the strongest channels; set_channel_settings on the scanner channel changes it.");
+            if (activeArray.isEmpty()) {
+                notes.append("Nothing exceeded the threshold. Compare threshold with noiseFloorDb and the strongest channels; a second scan with threshold given lowers it.");
+            } else if (heardArray.isEmpty()) {
+                notes.append("The scanner did not park on any of the active frequencies while watching; active is still the list of what was found.");
             }
 
             notes.append(intentNotes(deviceSetIndex, {demodChannel, scannerChannel}, reclaimed, receiver["reused"].toBool(),
@@ -4471,6 +4751,353 @@ void MCPTools::registerIntentTools()
 
             if (count == 0) {
                 result["note"] = "Nothing to remove: no channel added by listen or scan is still there.";
+            }
+
+            return result;
+        });
+
+    add("tune_gain",
+        "Find the receiver gain that gives the best signal to noise ratio and apply it: steps the device through its gain range "
+        "and at each step measures the noise floor and the strongest signal on the main spectrum. Too little gain leaves weak "
+        "signals under the converter's own noise; too much overloads the front end, which raises the floor faster than the "
+        "signal and adds spurious products, so the best gain is where the difference between them peaks, and of gains within a "
+        "decibel of that the lowest is taken, for headroom. On a quiet band, where no signal stands clear of the floor, the "
+        "floor alone decides: the lowest gain at which the antenna's noise rather than the converter's sets it, short of "
+        "overload. Turns the device's AGC off, as it has to for a manual gain to mean "
+        "anything. The device must be running. Blocks for a few seconds per step; the reply carries the whole table so the "
+        "choice can be judged. Give frequency to judge by a particular signal rather than the strongest one.",
+        schema({
+            {"deviceSetIndex", deviceSetIndexProp},
+            {"frequency", numProp("Judge by the signal at this frequency in Hz rather than the strongest in the baseband. It must be inside the baseband")},
+            {"bandwidth", numProp("Width in Hz around frequency to look for the signal in. Default 200000")},
+            {"steps", bounded(intProp("How many gain values to try, spread over the range. Default 8"), 3, 16)},
+            {"apply", prop("boolean", "Apply the chosen gain. false measures and reports but puts the gain back as it was. Default true")},
+            {"gainKey", strProp("For a device type this does not know: the settings key of its gain, from describe_settings. Then give values too")},
+            {"values", prop("array", "For a device type this does not know: the gain values to try, in the key's own units, lowest first")},
+            {"agcKey", strProp("For a device type this does not know: the settings key that turns its AGC off when set to 0")}
+        }, {"deviceSetIndex"}),
+        [this](const QJsonObject& args)
+        {
+            int deviceSetIndex = argInt(args, "deviceSetIndex");
+            QJsonObject reply = getDeviceSettings(deviceSetIndex);
+            const QString hwType = reply["deviceHwType"].toString();
+            QJsonObject settings = settingsOf(reply);
+
+            if (deviceState(deviceSetIndex, 0, -1)["state"].toString() != "running") {
+                throw MCPToolError("The device is not running, so there is nothing to measure. start_device first.");
+            }
+
+            // What this knows about each device's gain: the key, its manual AGC setting, and the
+            // values to try. Where a device has several gain stages the one before the mixer is
+            // tuned, as that is where overload happens; the rest keep their settings
+            struct Knob { QString key; QString agcKey; int agcOff; QList<double> values; QString unit; QString note; };
+            Knob knob;
+            const bool custom = hasArg(args, "gainKey");
+
+            if (custom)
+            {
+                knob.key = argString(args, "gainKey");
+                knob.agcKey = argString(args, "agcKey", false);
+                knob.agcOff = 0;
+                knob.unit = "the key's own units";
+
+                for (const QJsonValue& v : args["values"].toArray()) {
+                    knob.values.append(v.toDouble());
+                }
+
+                if (knob.values.size() < 2) {
+                    throw MCPToolError("Give at least two values to try with gainKey");
+                }
+            }
+            else if (hwType == "RTLSDR")
+            {
+                // The tuner takes only the values it lists, in tenths of a decibel
+                knob = {"gain", "agc", 0, {}, "tenths of a dB", "The tuner's AGC is off, as it must be for the gain to hold"};
+                SWGSDRangel::SWGDeviceReport report;
+                SWGSDRangel::SWGErrorResponse error;
+                error.init();
+                check(m_adapter->devicesetDeviceReportGet(deviceSetIndex, report, error), error, "Get device report");
+                QJsonObject json = toJson(report);
+
+                for (const QString& key : json.keys())
+                {
+                    for (const QJsonValue& g : json[key].toObject()["gains"].toArray()) {
+                        knob.values.append(g.toObject()["gainCB"].toDouble());
+                    }
+                }
+
+                if (knob.values.isEmpty()) {
+                    throw MCPToolError("The RTL-SDR reported no supported gain values; is the device open?");
+                }
+            }
+            else if (hwType == "HackRF") {
+                knob = {"lnaGain", "", 0, {0, 8, 16, 24, 32, 40}, "dB", "Only the LNA is stepped; vgaGain is left as it is"};
+            }
+            else if (hwType == "Airspy") {
+                knob = {"lnaGain", "lnaAGC", 0, {0, 2, 4, 6, 8, 10, 12, 14}, "steps", "Only the LNA is stepped; mixerGain and vgaGain are left as they are, with the LNA AGC off"};
+            }
+            else if (hwType == "LimeSDR") {
+                knob = {"gain", "gainMode", 1, {0, 10, 20, 30, 40, 50, 60, 70}, "dB", "gainMode set to manual"};
+            }
+            else if (hwType == "PlutoSDR") {
+                knob = {"gain", "gainMode", 0, {0, 10, 20, 30, 40, 50, 60, 70}, "dB", "gainMode set to manual"};
+            }
+            else if (hwType == "USRP") {
+                knob = {"gain", "gainMode", 1, {0, 10, 20, 30, 40, 50, 60, 70}, "dB", "gainMode set to manual"};
+            }
+            else
+            {
+                throw MCPToolError(QString("tune_gain does not know the gain settings of a %1. Read them with describe_settings and "
+                    "give gainKey, values and, if it has one, agcKey.").arg(hwType));
+            }
+
+            std::sort(knob.values.begin(), knob.values.end());
+            knob.values.erase(std::unique(knob.values.begin(), knob.values.end()), knob.values.end());
+
+            // Spread the steps over the range rather than trying every value a tuner offers
+            const int steps = qBound(3, argInt(args, "steps", false, 8), 16);
+            QList<double> candidates;
+
+            if (knob.values.size() <= steps) {
+                candidates = knob.values;
+            }
+            else
+            {
+                for (int i = 0; i < steps; i++) {
+                    candidates.append(knob.values[(int) std::round(i * (knob.values.size() - 1) / (double) (steps - 1))]);
+                }
+            }
+
+            const bool apply = args.value("apply").toBool(true);
+            const double previous = settings[knob.key].toDouble();
+            const double previousAgc = knob.agcKey.isEmpty() ? 0 : settings[knob.agcKey].toDouble();
+            const qint64 frequency = (qint64) argDouble(args, "frequency", false, 0);
+            const qint64 bandwidth = (qint64) argDouble(args, "bandwidth", false, 200000);
+
+            // One reading: the floor is the median over the baseband, the signal the strongest bin,
+            // in the window asked for or anywhere. Max reduction keeps a narrow carrier
+            auto measure = [&](double& floorDb, double& peakDb)
+            {
+                SWGSDRangel::SWGGLSpectrumData response;
+                SWGSDRangel::SWGErrorResponse error;
+                response.init();
+                error.init();
+                check(m_adapter->devicesetSpectrumDataGet(deviceSetIndex, 256, 0, 0, "max", response, error), error, "Get spectrum data");
+                // Read from the object: the generated JSON serialiser drops a list of plain floats
+                const bool linear = response.getLinear() != 0;
+                QList<double> powers;
+
+                if (response.getPower())
+                {
+                    for (float v : *response.getPower()) {
+                        powers.append(linear ? 10.0 * std::log10(std::max((double) v, 1e-20)) : (double) v);
+                    }
+                }
+
+                if (powers.isEmpty()) {
+                    throw MCPToolError("The spectrum returned no data");
+                }
+
+                QList<double> sorted = powers;
+                std::sort(sorted.begin(), sorted.end());
+                floorDb = sorted[sorted.size() / 2];
+
+                if (frequency > 0)
+                {
+                    // The data call clamps to the baseband, which would silently measure noise at
+                    // its edge for a frequency outside it
+                    const qint64 low = response.getCenterFrequency() - response.getBandwidth() / 2;
+                    const qint64 high = response.getCenterFrequency() + response.getBandwidth() / 2;
+
+                    if ((frequency < low) || (frequency > high))
+                    {
+                        throw MCPToolError(QString("%1 MHz is outside the baseband, which covers %2 to %3 MHz; tune the device so that it is inside, or leave frequency out")
+                            .arg(frequency / 1e6, 0, 'f', 3).arg(low / 1e6, 0, 'f', 3).arg(high / 1e6, 0, 'f', 3));
+                    }
+
+                    SWGSDRangel::SWGGLSpectrumData window;
+                    SWGSDRangel::SWGErrorResponse windowError;
+                    window.init();
+                    windowError.init();
+                    check(m_adapter->devicesetSpectrumDataGet(deviceSetIndex, 32, frequency - bandwidth / 2, frequency + bandwidth / 2, "max", window, windowError),
+                        windowError, "Get spectrum data");
+                    peakDb = -1e9;
+
+                    if (window.getPower())
+                    {
+                        for (float v : *window.getPower()) {
+                            peakDb = std::max(peakDb, linear ? 10.0 * std::log10(std::max((double) v, 1e-20)) : (double) v);
+                        }
+                    }
+
+                    if (peakDb < -1e8) {
+                        throw MCPToolError("The spectrum has no bins at that frequency; it must be inside the baseband");
+                    }
+                }
+                else
+                {
+                    peakDb = sorted.last();
+                }
+            };
+
+            struct Row { double gain; double floorDb; double peakDb; double snrDb; };
+            QList<Row> rows;
+
+            auto setGain = [&](double gain, bool agcOff)
+            {
+                QJsonObject partial;
+                partial[knob.key] = gain;
+
+                if (!knob.agcKey.isEmpty()) {
+                    partial[knob.agcKey] = agcOff ? knob.agcOff : previousAgc;
+                }
+
+                patchDeviceSettings(deviceSetIndex, partial);
+            };
+
+            try
+            {
+                for (double gain : candidates)
+                {
+                    setGain(gain, true);
+                    QThread::msleep(700); // the tuner, the spectrum averaging and a stale FFT
+                    double floorSum = 0.0;
+                    double peakSum = 0.0;
+                    const int samples = 3;
+
+                    for (int i = 0; i < samples; i++)
+                    {
+                        if (i > 0) {
+                            QThread::msleep(250);
+                        }
+
+                        double floorDb, peakDb;
+                        measure(floorDb, peakDb);
+                        floorSum += floorDb;
+                        peakSum += peakDb;
+                    }
+
+                    rows.append({gain, floorSum / samples, peakSum / samples, (peakSum - floorSum) / samples});
+                }
+            }
+            catch (const MCPToolError&)
+            {
+                setGain(previous, false); // as it was, AGC included
+                throw;
+            }
+
+            auto toDb = [&](double gain) { return (knob.unit == "tenths of a dB") ? gain / 10.0 : gain; };
+
+            // Overload shows as the floor climbing faster than the gain did. The first step
+            // where it does bounds the usable range from above
+            QStringList notes;
+            int compressed = 0;
+            int overloadFrom = rows.size(); // index of the first row that is overloaded
+
+            for (int i = 1; i < rows.size(); i++)
+            {
+                const double gainStep = toDb(rows[i].gain) - toDb(rows[i - 1].gain);
+
+                if ((gainStep > 0) && (rows[i].floorDb - rows[i - 1].floorDb > gainStep + 3.0))
+                {
+                    compressed++;
+                    overloadFrom = std::min(overloadFrom, i);
+                }
+            }
+
+            if (compressed > 0) {
+                notes.append(QString("The noise floor rose faster than the gain over %1 step%2, which is the front end overloading; the higher gains are not usable here.")
+                    .arg(compressed).arg(compressed == 1 ? "" : "s"));
+            }
+
+            // Best SNR, then the lowest gain within a decibel of it
+            double best = -1e9;
+            for (const Row& r : rows) { best = std::max(best, r.snrDb); }
+            const Row *chosen = nullptr;
+            QString judgedBy = frequency > 0 ? QString("the signal at %1 MHz").arg(frequency / 1e6, 0, 'f', 3) : QString("the strongest signal in the baseband");
+
+            if (best >= 6.0)
+            {
+                for (const Row& r : rows) { if ((r.snrDb >= best - 1.0) && !chosen) { chosen = &r; } }
+            }
+            else
+            {
+                // Nothing stood clear of the floor, so the floor itself has to decide: at low gain
+                // it is the converter's own noise and does not move; as gain rises the antenna's
+                // noise comes through and lifts it, which is when weak signals become receivable;
+                // and past overload it lifts faster than the gain. Take the lowest gain that puts
+                // the floor 8 dB above the converter's, which is the antenna's noise dominating
+                // by the usual 10 dB rule with a little allowance for the steps being coarse, or
+                // the last gain before overload if none does
+                double adcFloor = 1e9;
+                for (const Row& r : rows) { adcFloor = std::min(adcFloor, r.floorDb); }
+                const int lastUsable = std::max(0, overloadFrom - 1);
+                static const double antennaDominates = 8.0;
+
+                for (int i = 0; (i <= lastUsable) && !chosen; i++)
+                {
+                    if (rows[i].floorDb >= adcFloor + antennaDominates) {
+                        chosen = &rows[i];
+                    }
+                }
+
+                if (!chosen) {
+                    chosen = &rows[lastUsable];
+                }
+
+                judgedBy = "the noise floor alone, as no signal stood clear of it";
+                notes.append(QString("No signal stood more than 6 dB above the floor, so the gain is set from the floor instead: %1.")
+                    .arg((rows[lastUsable].floorDb < adcFloor + antennaDominates)
+                        ? "the floor never rose 8 dB above the converter's own noise before overload, so the last gain before overload is taken; check the antenna if that seems low"
+                        : "the lowest gain at which the antenna's noise, not the converter's, sets the floor"));
+            }
+
+            if (chosen == &rows.last()) {
+                notes.append("The best was the highest gain tried: the signal is weak or the site quiet, and more gain would not overload yet.");
+            } else if (chosen == &rows.first()) {
+                notes.append("The best was the lowest gain tried: a strong-signal site. Consider an attenuator if the floor still rises with the lowest gain.");
+            }
+
+            if (apply)
+            {
+                setGain(chosen->gain, true);
+            }
+            else
+            {
+                setGain(previous, false);
+                notes.append("Not applied: the gain is back as it was.");
+            }
+
+            if (!knob.note.isEmpty()) {
+                notes.append(knob.note + ".");
+            }
+
+            QJsonObject result;
+            result["deviceSetIndex"] = deviceSetIndex;
+            result["hwType"] = hwType;
+            result["gainKey"] = knob.key;
+            result["unit"] = knob.unit;
+            result["previous"] = previous;
+            result["chosen"] = chosen->gain;
+            result["applied"] = apply;
+            result["bestSnrDb"] = chosen->snrDb;
+            result["judgedBy"] = judgedBy;
+            QJsonArray table;
+
+            for (const Row& r : rows)
+            {
+                QJsonObject o;
+                o["gain"] = r.gain;
+                o["floorDb"] = std::round(r.floorDb * 10) / 10;
+                o["signalDb"] = std::round(r.peakDb * 10) / 10;
+                o["snrDb"] = std::round(r.snrDb * 10) / 10;
+                table.append(o);
+            }
+
+            result["table"] = table;
+
+            if (!notes.isEmpty()) {
+                result["note"] = notes.join(" ");
             }
 
             return result;
