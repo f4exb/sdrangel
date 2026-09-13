@@ -141,6 +141,9 @@ private:
     // those take m_creationMutex or wait
     QMutex m_intentMutex;
     QSet<uint64_t> m_intentChannels;
+    // The features listen added for a mode's output (AIS, Radiosonde, APRS), removed again once no
+    // channel it added still feeds them. A feature that was already there is never among these
+    QSet<uint64_t> m_intentFeatures;
     const QObject *m_ownerFeature;
     QList<Tool> m_tools;
     QMap<QString, QString> m_yamlDefinitions; //!< Swagger definition name -> YAML text
@@ -211,6 +214,14 @@ private:
     QJsonObject pickReceiver(const QJsonObject& args, int minBaseband, const QSet<uint64_t>& doomed = QSet<uint64_t>(), bool profileGain = true);
     //!< The tune_gain tool: sweeps the gain and applies the best, with the table it measured
     QJsonObject tuneGain(const QJsonObject& args);
+    //!< The index of a feature of this type, adding one if there is none. Returns whether it was added
+    int ensureFeature(const QString& featureType, int& featureIndex);
+    void trackIntentFeature(const void *feature);
+    //!< Removes the features listen added that no channel it added still feeds, except one of keepType.
+    //!< Returns the types of those removed
+    QStringList reclaimIntentFeatures(const QString& keepType = QString());
+    //!< Deletes a feature wherever it has been renumbered to
+    void deleteFeatureObjectAndWait(const void *feature);
     //!< Whether listen or scan should measure the gain: a device set they created, or a retune to another band
     static bool gainWorthTuning(bool reused, double previousCentre, double centre);
     static uint64_t channelUid(const void *channel);

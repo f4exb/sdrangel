@@ -45,7 +45,7 @@ Minimum device sample rates:
 
 | What | Channel | Frequency | Notes |
 |------|---------|-----------|-------|
-| AIS | `AISDemod` | 161.975 MHz and 162.025 MHz | The two channels are 50 kHz apart, so one device at 162 MHz covers both with two channels at offsets of -25 kHz and +25 kHz |
+| AIS | `AISDemod` | 161.975 MHz and 162.025 MHz | The two channels are 50 kHz apart, so one device at 162 MHz covers both with two channels at offsets of -25 kHz and +25 kHz. `listen` with mode `ais` at 162000000 does exactly that, and adds the AIS feature, which lists the ships and puts them on the map |
 | DSC distress and calling | `DSCDemod` | 2187.5 kHz, 8414.5 kHz, 16804.5 kHz, 156.525 MHz | The VHF one is marine channel 70 - but isn't yet supported |
 | NAVTEX | `NavtexDemod` | 518 kHz, 490 kHz, 4209.5 kHz | 518 kHz is English international, 490 kHz national languages |
 
@@ -53,7 +53,7 @@ Minimum device sample rates:
 
 | What | Channel | Frequency | Notes |
 |------|---------|-----------|-------|
-| APRS and AX.25 packet | `PacketDemod` | 144.800 MHz in Europe, 144.390 MHz in North America | Add the APRS feature to decode and map the packets |
+| APRS and AX.25 packet | `PacketDemod` | 144.800 MHz in Europe, 144.390 MHz in North America | `listen` with mode `aprs` adds the APRS feature, which decodes and maps the stations; mode `packet` is the demodulator alone |
 | M17 digital voice | `M17Demod` | 144 and 430 MHz bands | Also carries data packets |
 | FT8 and other digital HF | `FT8Demod` | HF band segments | Needs an HF capable receiver |
 | SSB and CW | `SSBDemod`, `WDSPRx` | HF | `WDSPRx` has the more capable receiver chain |
@@ -64,7 +64,7 @@ Minimum device sample rates:
 
 | What | Channel | Frequency | Notes |
 |------|---------|-----------|-------|
-| Radiosondes (RS41) | `RadiosondeDemod` | 400 to 406 MHz | Balloons are up around 00:00 and 12:00 UTC. Add the Radiosonde feature for decoding and mapping |
+| Radiosondes (RS41) | `RadiosondeDemod` | 400 to 406 MHz | Balloons are up around 00:00 and 12:00 UTC. The Radiosonde feature decodes and maps them; `listen` with mode `sonde` adds it |
 | NOAA APT weather images | `APTDemod` | NOAA 15 at 137.620 MHz, NOAA 18 at 137.912 MHz, NOAA 19 at 137.100 MHz | Historical: the NOAA APT satellites were retired in 2025, so there is nothing live to receive. The demodulator still decodes recordings |
 | Time signals | `RadioClock` | MSF 60 kHz, DCF77 77.5 kHz, TDF 162 kHz, WWVB 60 kHz, JJY 40 kHz | Needs a receiver that covers VLF or LF |
 | Inmarsat STD-C | `InmarsatDemod` | 1537.70, 1541.45, 1537.10 MHz | L band, needs a suitable antenna and often an LNA |
@@ -99,7 +99,7 @@ antenna and local interference instead.
 | LoRa | `ChirpChatDemod` | 433, 868, 915 MHz ISM bands | Bandwidth and spreading factor must match the transmitter exactly or nothing decodes |
 | Meshtastic | `MeshtasticDemod` | 433 MHz (EU_433), 868 MHz (EU_868), 902 MHz (US) | Set the region to match the network |
 | MeshCore | `MeshcoreDemod` | Same ISM bands as Meshtastic | |
-| POCSAG pagers | `PagerDemod` | Regional, commonly 138 to 160 MHz | FSK with a 4.5 kHz shift |
+| POCSAG pagers | `PagerDemod` | Regional, commonly 138 to 160 MHz. 153.350 MHz in UK. | FSK with a 4.5 kHz shift |
 | End of train devices | `EndOfTrainDemod` | 457.9375 MHz North America and India, 477.7 MHz Australia, 450.2625 MHz New Zealand | |
 
 ## Scanning for activity

@@ -56,6 +56,7 @@
 #include "SWGConfigurations.h"
 #include "SWGConfigurationIdentifier.h"
 #include "SWGWorkspaceInfo.h"
+#include "SWGWorkspaceActions.h"
 #include "SWGGLSpectrum.h"
 #include "SWGGLSpectrumReport.h"
 #include "SWGSpectrumActions.h"
@@ -333,11 +334,16 @@ QJsonObject numProp(const QString& description) { return prop("number", descript
 QJsonObject strProp(const QString& description) { return prop("string", description); }
 QJsonObject objProp(const QString& description) { return prop("object", description); }
 
-QJsonObject directionProp(const QString& description)
+QJsonObject enumProp(const QString& description, const QStringList& values)
 {
     QJsonObject p = strProp(description);
-    p["enum"] = QJsonArray({"rx", "tx", "mimo"});
+    p["enum"] = QJsonArray::fromStringList(values);
     return p;
+}
+
+QJsonObject directionProp(const QString& description)
+{
+    return enumProp(description, {"rx", "tx", "mimo"});
 }
 
 // Adds the bounds a handler enforces at runtime to the schema, so a client can see them
@@ -3273,6 +3279,27 @@ void MCPTools::registerWorkspaceTools()
             return toJson(response);
         });
 
+    add("arrange_workspace",
+        "GUI only: arrange the windows of a workspace, as its title bar buttons do. cascade, tile, stackVertical and stack "
+        "rearrange them once and turn auto stacking and tabs off; autostack stacks them now and again whenever a window is "
+        "added or resized, until another arrangement is asked for; tab shows one window at a time with a tab for each. "
+        "stack is the usual choice: devices, spectra and channels in columns.",
+        schema({
+            {"workspaceIndex", intProp("Index of the workspace, from 0")},
+            {"arrange", enumProp("cascade, tile, stackVertical, stack, autostack or tab", {"cascade", "tile", "stackVertical", "stack", "autostack", "tab"})}
+        }, {"workspaceIndex", "arrange"}),
+        [this](const QJsonObject& args)
+        {
+            SWGSDRangel::SWGWorkspaceActions query;
+            query.init();
+            query.setArrange(new QString(argString(args, "arrange")));
+            SWGSDRangel::SWGSuccessResponse response;
+            SWGSDRangel::SWGErrorResponse error;
+            error.init();
+            check(m_adapter->workspaceActionsPost(argInt(args, "workspaceIndex"), query, response, error), error, "Arrange workspace");
+            return toJson(response);
+        });
+
     add("set_workspace",
         "GUI only: move a window to a workspace. kind is device, spectrum or channel (with deviceSetIndex, plus channelIndex for a "
         "channel) or feature (with featureIndex).",
@@ -3522,6 +3549,8 @@ struct ListenMode
     int m_minBaseband;      //!< Hz
     const char *m_settings; //!< JSON of further initial settings
     int m_scanStep;         //!< Hz. The channel spacing scan steps by unless told otherwise; 0 for a mode on fixed frequencies, which is not scanned for
+    const char *m_feature;  //!< A feature the mode's output goes to, added if absent; null for none
+    int m_pairOffset;       //!< Hz. Non-zero for a mode on two channels this far either side of the frequency, one demodulator each
 };
 
 const char *const bfmSettings = "{\"afBandwidth\":15000,\"audioStereo\":1,\"rdsActive\":1,\"volume\":4,\"squelch\":-60}";
@@ -3531,28 +3560,57 @@ const ListenMode listenModes[] = {
     // Broadcast FM asks for twice the baseband its channel needs: a 180 kHz channel in a 256 kS/s
     // baseband sits against the edge of the decimation filters, and RDS suffers first; it also
     // leaves room to put the channel clear of the device's DC spike
-    {"bfm",        "BFMDemod",        180000,  512000, bfmSettings,                          100000},
-    {"fm",         "BFMDemod",        180000,  512000, bfmSettings,                          100000},
-    {"wfm",        "WFMDemod",        150000,  512000, "{\"volume\":2,\"squelch\":-60}",     100000},
-    {"nfm",        "NFMDemod",         12500,   48000, "{\"afBandwidth\":3000,\"volume\":2}", 12500},
-    {"am",         "AMDemod",           8000,   48000, amSettings,                            25000},
-    {"airband",    "AMDemod",           8000,   48000, amSettings,                            25000},
-    {"ssb",        "SSBDemod",          3000,   48000, "{\"volume\":2}",                       3000},
-    {"usb",        "SSBDemod",          3000,   48000, "{\"volume\":2}",                       3000},
-    {"lsb",        "SSBDemod",         -3000,   48000, "{\"volume\":2}",                       3000},
-    {"dab",        "DABDemod",             0, 2048000, "{}",                                      0},
-    {"adsb",       "ADSBDemod",            0, 2400000, "{}",                                      0},
-    {"ais",        "AISDemod",             0,   48000, "{}",                                      0},
-    {"dsc",        "DSCDemod",           450,   48000, "{}",                                      0},
-    {"dsd",        "DSDDemod",         12500,   48000, "{}",                                  12500},
-    {"dmr",        "DSDDemod",         12500,   48000, "{}",                                  12500},
-    {"pager",      "PagerDemod",       20000,   48000, "{}",                                  12500},
-    {"pocsag",     "PagerDemod",       20000,   48000, "{}",                                  12500},
-    {"sonde",      "RadiosondeDemod",   9600,   48000, "{}",                                  10000},
-    {"radiosonde", "RadiosondeDemod",   9600,   48000, "{}",                                  10000},
+    {"bfm",        "BFMDemod",        180000,  512000, bfmSettings,                          100000, nullptr,          0},
+    {"fm",         "BFMDemod",        180000,  512000, bfmSettings,                          100000, nullptr,          0},
+    {"wfm",        "WFMDemod",        150000,  512000, "{\"volume\":2,\"squelch\":-60}",     100000, nullptr,          0},
+    {"nfm",        "NFMDemod",         12500,   48000, "{\"afBandwidth\":3000,\"volume\":2}", 12500, nullptr,          0},
+    {"am",         "AMDemod",           8000,   48000, amSettings,                            25000, nullptr,          0},
+    {"airband",    "AMDemod",           8000,   48000, amSettings,                            25000, nullptr,          0},
+    {"ssb",        "SSBDemod",          3000,   48000, "{\"volume\":2}",                       3000, nullptr,          0},
+    {"usb",        "SSBDemod",          3000,   48000, "{\"volume\":2}",                       3000, nullptr,          0},
+    {"lsb",        "SSBDemod",         -3000,   48000, "{\"volume\":2}",                       3000, nullptr,          0},
+    {"dab",        "DABDemod",             0, 2048000, "{}",                                      0, nullptr,          0},
+    {"adsb",       "ADSBDemod",            0, 2400000, "{}",                                      0, nullptr,          0},
+    {"ais",        "AISDemod",             0,  128000, "{}",                                      0, "AIS",        25000},
+    {"dsc",        "DSCDemod",           450,   48000, "{}",                                      0, nullptr,          0},
+    {"dsd",        "DSDDemod",         12500,   48000, "{}",                                  12500, nullptr,          0},
+    {"dmr",        "DSDDemod",         12500,   48000, "{}",                                  12500, nullptr,          0},
+    {"pager",      "PagerDemod",       20000,   48000, "{}",                                  12500, nullptr,          0},
+    {"pocsag",     "PagerDemod",       20000,   48000, "{}",                                  12500, nullptr,          0},
+    {"sonde",      "RadiosondeDemod",   9600,   48000, "{}",                                  10000, "Radiosonde",     0},
+    {"radiosonde", "RadiosondeDemod",   9600,   48000, "{}",                                  10000, "Radiosonde",     0},
+    // AX.25 packet at 1200 baud AFSK. APRS is the same signal on a fixed regional frequency,
+    // with the APRS feature to plot the stations
+    {"packet",     "PacketDemod",      12500,   48000, "{}",                                      0, nullptr,          0},
+    {"aprs",       "PacketDemod",      12500,   48000, "{}",                                      0, "APRS",           0},
 };
 
-const char *const listenModeList = "bfm, wfm, nfm, am, ssb, usb, lsb, dab, adsb, ais, dsc, dsd, pager, sonde";
+const char *const listenModeList = "bfm, wfm, nfm, am, ssb, usb, lsb, dab, adsb, ais, dsc, dsd, pager, sonde, packet, aprs";
+
+// The feature a demodulator of this type feeds, by the modes that add one; null for none
+const char *featureForChannelType(const QString& channelType)
+{
+    for (const ListenMode& mode : listenModes)
+    {
+        if (mode.m_feature && (channelType == QLatin1String(mode.m_channelType))) {
+            return mode.m_feature;
+        }
+    }
+
+    return nullptr;
+}
+
+// What listen and scan say about the features a reclaim took away
+QStringList featureNotes(const QStringList& reclaimedFeatures)
+{
+    if (reclaimedFeatures.isEmpty()) {
+        return QStringList();
+    }
+
+    return QStringList(QString("Removed the %1 feature%2 an earlier listen added, as nothing feeds %3 now.")
+        .arg(reclaimedFeatures.join(" and ")).arg(reclaimedFeatures.size() == 1 ? "" : "s")
+        .arg(reclaimedFeatures.size() == 1 ? "it" : "them"));
+}
 
 const ListenMode *findListenMode(const QString& alias)
 {
@@ -3960,7 +4018,7 @@ QStringList MCPTools::intentNotes(int deviceSetIndex, const QSet<const void *>& 
     // Only possible with replace false, and then it is the caller's own trail
     if (!leftovers.isEmpty())
     {
-        notes.append(QString("Device set %1 still has %2 channel%3 (%4) from earlier listen or scan calls, each playing audio; cleanup removes them.")
+        notes.append(QString("Device set %1 still has %2 channel%3 (%4) from earlier listen or scan calls, any audio ones still playing; cleanup removes them.")
             .arg(deviceSetIndex).arg(leftovers.size()).arg(leftovers.size() == 1 ? "" : "s").arg(leftovers.join(", ")));
     }
 
@@ -4550,6 +4608,160 @@ QJsonObject MCPTools::tuneGain(const QJsonObject& args)
     return result;
 }
 
+// A mode whose output is only useful through a feature, such as AIS to the AIS feature's ship
+// list and the map, gets that feature added with the demodulator. One that is there already is
+// left alone, whatever it is set to
+int MCPTools::ensureFeature(const QString& featureType, int& featureIndex)
+{
+    for (const QJsonValue& v : getInstanceSummary()["featureset"].toObject()["features"].toArray())
+    {
+        QJsonObject f = v.toObject();
+
+        if (f["id"].toString() == featureType)
+        {
+            featureIndex = f["index"].toInt();
+            return 0;
+        }
+    }
+
+    featureIndex = addFeatureAndWait(featureType);
+    trackIntentFeature(featureAt(featureIndex));
+    return 1;
+}
+
+void MCPTools::trackIntentFeature(const void *feature)
+{
+    if (!feature) {
+        return;
+    }
+
+    QMutexLocker locker(&m_intentMutex);
+    m_intentFeatures.insert(static_cast<const Feature *>(feature)->getUID());
+}
+
+// A feature listen added goes with the demodulators that fed it: once the last of those is
+// reclaimed, on whichever device set, it would only show stale data. One the next mode
+// needs, or that a demodulator on another device set still feeds, stays
+QStringList MCPTools::reclaimIntentFeatures(const QString& keepType)
+{
+    QSet<uint64_t> tracked;
+    {
+        QMutexLocker locker(&m_intentMutex);
+        tracked = m_intentFeatures;
+    }
+
+    if (tracked.isEmpty()) {
+        return QStringList();
+    }
+
+    // The feature types the remaining intent channels feed
+    QSet<QString> needed;
+
+    if (!keepType.isEmpty()) {
+        needed.insert(keepType);
+    }
+
+    for (int deviceSetIndex = 0; deviceSetIndex < deviceSetCount(); deviceSetIndex++)
+    {
+        for (const ChannelNote& note : channelNotes(deviceSetIndex))
+        {
+            const char *feature = note.m_intent ? featureForChannelType(note.m_id) : nullptr;
+
+            if (feature) {
+                needed.insert(QString(feature));
+            }
+        }
+    }
+
+    QStringList removed;
+    const std::vector<FeatureSet*>& featureSets = MainCore::instance()->getFeatureeSets();
+
+    if (featureSets.empty()) {
+        return removed;
+    }
+
+    // Collected first: deleting renumbers the rest
+    QList<const Feature *> doomed;
+
+    for (int i = 0; i < featureSets[0]->getNumberOfFeatures(); i++)
+    {
+        const Feature *feature = featureSets[0]->getFeatureAt(i);
+
+        if (feature && tracked.contains(feature->getUID()) && !needed.contains(feature->getIdentifier())) {
+            doomed.append(feature);
+        }
+    }
+
+    for (const Feature *feature : doomed)
+    {
+        const QString id = feature->getIdentifier();
+
+        try
+        {
+            deleteFeatureObjectAndWait(feature);
+            removed.append(id);
+        }
+        catch (const MCPToolError&) {}
+    }
+
+    // Tracked no longer: those removed, and any the user had already deleted
+    QMutexLocker locker(&m_intentMutex);
+
+    for (uint64_t uid : tracked)
+    {
+        bool present = false;
+
+        for (int i = 0; i < featureSets[0]->getNumberOfFeatures(); i++)
+        {
+            const Feature *feature = featureSets[0]->getFeatureAt(i);
+
+            if (feature && (feature->getUID() == uid))
+            {
+                present = true;
+                break;
+            }
+        }
+
+        if (!present) {
+            m_intentFeatures.remove(uid);
+        }
+    }
+
+    return removed;
+}
+
+void MCPTools::deleteFeatureObjectAndWait(const void *feature)
+{
+    int featureIndex = -1;
+    const std::vector<FeatureSet*>& featureSets = MainCore::instance()->getFeatureeSets();
+
+    if (!featureSets.empty())
+    {
+        for (int i = 0; i < featureSets[0]->getNumberOfFeatures(); i++)
+        {
+            if (featureSets[0]->getFeatureAt(i) == feature)
+            {
+                featureIndex = i;
+                break;
+            }
+        }
+    }
+
+    if (featureIndex < 0) {
+        return; // Already gone
+    }
+
+    requireNotSelf(featureIndex, "deleted");
+    SWGSDRangel::SWGSuccessResponse response;
+    SWGSDRangel::SWGErrorResponse error;
+    error.init();
+    check(m_adapter->featuresetFeatureDelete(0, featureIndex, response, error), error, "Delete feature");
+
+    if (!waitFor([&]() { return !featurePointers().contains(feature); })) {
+        throw MCPToolError(QString("Timed out waiting for feature %1 to be removed").arg(featureIndex));
+    }
+}
+
 // The gain suits a band and an antenna, not a mode: a device set that was just created has
 // whatever gain it came with, and one moved to another band has the gain of the last one. A
 // move within a band, or a change of mode on the same frequency, needs no new measurement
@@ -4570,11 +4782,15 @@ void MCPTools::registerIntentTools()
     add("listen",
         "Receive a frequency in one call: picks a device, creates or reuses its device set, sets the sample rate, adds the "
         "demodulator with sensible settings, starts the device and reports the signal level. Audio plays on the default output. "
-        "Use the individual tools afterwards to adjust, e.g. set_channel_settings for squelch or volume.",
+        "Use the individual tools afterwards to adjust, e.g. set_channel_settings for squelch or volume. Modes whose output "
+        "goes to a feature add it too: ais adds the AIS feature, sonde the Radiosonde feature and aprs the APRS feature, whose "
+        "reports and map items carry what was decoded; a later listen or scan removes the feature again once nothing it added "
+        "feeds it. ais is received on two channels, so give 162000000 and it puts a demodulator on each of 161.975 and "
+        "162.025 MHz.",
         schema({
             {"frequency", numProp("Frequency to receive in Hz, e.g. 97300000 for 97.3 MHz")},
             {"mode", strProp("bfm (broadcast FM with stereo and RDS), wfm, nfm, am or airband, ssb/usb, lsb, dab, adsb, ais, dsc, dsd/dmr, "
-                             "pager (POCSAG), sonde (RS41 radiosondes), or any channel type id from list_channel_types. Default nfm")},
+                             "pager (POCSAG), sonde (RS41 radiosondes), packet (AX.25), aprs (APRS with its feature), or any channel type id from list_channel_types. Default nfm")},
             {"device", strProp(deviceHint)},
             {"replace", prop("boolean", "Retune the demodulator a previous listen added to this device set when it is of the same type, and remove every other channel earlier listen and scan calls added there, so that exploring a band does not leave a trail of demodulators all playing audio and mis-tuned for the current centre frequency. Channels added any other way are kept on their frequency where the baseband still holds them; audio demodulators it cannot hold are removed, anything else is left and named. Default true")},
             {"tuneGain", prop("boolean", "Measure and set the receiver gain, as tune_gain does, when the device set is new or the retune is to another band (more than a tenth of the frequency away). Adds several seconds in those cases and none otherwise. false leaves the gain as it is. Default true")}
@@ -4588,6 +4804,8 @@ void MCPTools::registerIntentTools()
             int rfBandwidth = 0;
             int minBaseband = 256000;
             QJsonObject initial;
+            QString companionFeature;
+            int pairOffset = 0;
 
             if (mode)
             {
@@ -4595,6 +4813,8 @@ void MCPTools::registerIntentTools()
                 rfBandwidth = mode->m_rfBandwidth;
                 minBaseband = mode->m_minBaseband;
                 initial = QJsonDocument::fromJson(mode->m_settings).object();
+                companionFeature = mode->m_feature ? QString(mode->m_feature) : QString();
+                pairOffset = mode->m_pairOffset;
             }
             else
             {
@@ -4622,7 +4842,7 @@ void MCPTools::registerIntentTools()
             // on the carrier itself
             int offset = 0;
 
-            if ((rfBandwidth != 0) && (baseband > 0))
+            if ((pairOffset == 0) && (rfBandwidth != 0) && (baseband > 0))
             {
                 const int clear = qAbs(rfBandwidth) / 2 + 25000; // spike 25 kHz beyond the channel edge
 
@@ -4631,11 +4851,19 @@ void MCPTools::registerIntentTools()
                 }
             }
 
+            // A paired mode, such as AIS on 161.975 and 162.025 MHz, centres the device on the
+            // frequency asked for and puts a demodulator either side of it
+            const qint64 centre = (pairOffset != 0) ? frequency : frequency - offset;
+
+            if (pairOffset != 0) {
+                offset = -pairOffset;
+            }
+
             QJsonObject tune;
-            tune["centerFrequency"] = (double) (frequency - offset);
+            tune["centerFrequency"] = (double) centre;
             patchDeviceSettings(deviceSetIndex, tune);
             const RetuneOutcome outcome = receiver["reused"].toBool()
-                ? retuneOtherChannels(deviceSetIndex, receiver["previousCentre"].toDouble(), (double) (frequency - offset), baseband)
+                ? retuneOtherChannels(deviceSetIndex, receiver["previousCentre"].toDouble(), (double) centre, baseband)
                 : RetuneOutcome();
 
             // A demodulator of the right type that a previous listen added is retuned rather
@@ -4644,6 +4872,7 @@ void MCPTools::registerIntentTools()
             const void *channel = replace ? reusableIntentChannel(deviceSetIndex, channelType, channelIndex) : nullptr;
             const bool retuned = channel != nullptr;
             const QStringList reclaimed = replace ? reclaimIntentChannels(deviceSetIndex, channel) : QStringList();
+            const QStringList reclaimedFeatures = replace ? reclaimIntentFeatures(companionFeature) : QStringList();
 
             if (retuned)
             {
@@ -4701,10 +4930,80 @@ void MCPTools::registerIntentTools()
                     .arg(channelType).arg(deviceSetIndex));
             }
 
+            // The second demodulator of a paired mode, on the other channel. A retuned first
+            // one may already have its partner from the previous listen; a fresh one needs it
+            const void *partner = nullptr;
+
+            if (pairOffset != 0)
+            {
+                int partnerIndex = -1;
+
+                for (const ChannelNote& note : channelNotes(deviceSetIndex, {channel}))
+                {
+                    if (note.m_intent && (note.m_id == channelType))
+                    {
+                        partnerIndex = note.m_index;
+                        partner = note.m_channel;
+                        break;
+                    }
+                }
+
+                if (!partner)
+                {
+                    partnerIndex = addChannelAndWait(deviceSetIndex, channelType);
+                    partner = channelAt(deviceSetIndex, partnerIndex);
+                    trackIntentChannel(partner);
+                }
+
+                QJsonObject partnerSettings = initial;
+                partnerSettings["inputFrequencyOffset"] = pairOffset;
+
+                try
+                {
+                    patchChannelSettings(deviceSetIndex, partnerIndex, partnerSettings);
+                }
+                catch (const MCPToolError& e)
+                {
+                    notes.append(QString("The second %1 could not be configured: %2").arg(channelType).arg(e.message));
+                }
+
+                relocateChannel(partner, deviceSetIndex, partnerIndex, "second demodulator");
+                relocateChannel(channel, deviceSetIndex, channelIndex, "demodulator");
+                result["channelIndex"] = channelIndex;
+                result["secondChannelIndex"] = partnerIndex;
+                QJsonArray frequencies;
+                frequencies.append((double) (frequency - pairOffset));
+                frequencies.append((double) (frequency + pairOffset));
+                result["frequencies"] = frequencies;
+                notes.append(QString("%1 is received on two channels, so there are two %2: channel %3 on %4 MHz and channel %5 on %6 MHz, with the device centred between them.")
+                    .arg(modeName.toUpper()).arg(channelType).arg(channelIndex).arg((frequency - pairOffset) / 1e6, 0, 'f', 3)
+                    .arg(partnerIndex).arg((frequency + pairOffset) / 1e6, 0, 'f', 3));
+            }
+
+            // The feature the mode's output goes to, so that the decoded data has somewhere to be
+            // read from and shown
+            if (!companionFeature.isEmpty())
+            {
+                try
+                {
+                    int featureIndex = -1;
+                    const int added = ensureFeature(companionFeature, featureIndex);
+                    result["featureIndex"] = featureIndex;
+                    result["featureType"] = companionFeature;
+                    notes.append(added
+                        ? QString("Added the %1 feature (F%2), which collects what the demodulator decodes; get_feature_report reads it, and it feeds the map.").arg(companionFeature).arg(featureIndex)
+                        : QString("The %1 feature (F%2) is already there and collects what the demodulator decodes.").arg(companionFeature).arg(featureIndex));
+                }
+                catch (const MCPToolError& e)
+                {
+                    notes.append(QString("The %1 feature could not be added: %2").arg(companionFeature).arg(e.message));
+                }
+            }
+
             if (state == "running")
             {
                 // A new device set, or one moved to another band, has no gain to speak of yet
-                if (wantTuneGain && gainWorthTuning(receiver["reused"].toBool(), receiver["previousCentre"].toDouble(), (double) (frequency - offset)))
+                if (wantTuneGain && gainWorthTuning(receiver["reused"].toBool(), receiver["previousCentre"].toDouble(), (double) centre))
                 {
                     QJsonObject gainArgs;
                     gainArgs["deviceSetIndex"] = deviceSetIndex;
@@ -4744,12 +5043,25 @@ void MCPTools::registerIntentTools()
                 // nothing to measure, which is -100 dB or below for every floor in use here
                 double db = 0.0;
                 bool measured = false;
+                bool noReport = false;
                 QElapsedTimer settling;
                 settling.start();
 
                 while (true)
                 {
-                    QJsonObject report = channelReport(deviceSetIndex, channelIndex);
+                    QJsonObject report;
+
+                    // A demodulator with no report at all (APT, ATV) is not a failure of the
+                    // receiver that was just built
+                    try
+                    {
+                        report = channelReport(deviceSetIndex, channelIndex);
+                    }
+                    catch (const MCPToolError&)
+                    {
+                        noReport = true;
+                        break;
+                    }
 
                     if (signalLevel(report, db))
                     {
@@ -4767,7 +5079,14 @@ void MCPTools::registerIntentTools()
                     QThread::msleep(250);
                 }
 
-                if (measured)
+                if (noReport)
+                {
+                    notes.append(QString("%1 has no channel report, so there is no signal level to give; %2.")
+                        .arg(channelType)
+                        .arg(companionFeature.isEmpty() ? QString("get_spectrum_data shows whether there is a signal")
+                            : QString("what it decodes appears in the %1 feature's report and in get_packets").arg(companionFeature)));
+                }
+                else if (measured)
                 {
                     result["signalDb"] = db;
 
@@ -4793,8 +5112,10 @@ void MCPTools::registerIntentTools()
                 notes.append(receiver["rateNote"].toString());
             }
 
-            notes.append(intentNotes(deviceSetIndex, {channel}, reclaimed, receiver["reused"].toBool(),
-                receiver["previousCentre"].toDouble(), (double) (frequency - offset), outcome));
+            notes.append(intentNotes(deviceSetIndex, partner ? QSet<const void *>({channel, partner}) : QSet<const void *>({channel}),
+                reclaimed, receiver["reused"].toBool(),
+                receiver["previousCentre"].toDouble(), (double) centre, outcome));
+            notes.append(featureNotes(reclaimedFeatures));
 
             if (patched.contains("warning")) {
                 notes.append(patched["warning"].toString());
@@ -4945,6 +5266,7 @@ void MCPTools::registerIntentTools()
                 : RetuneOutcome();
 
             const QStringList reclaimed = replace ? reclaimIntentChannels(deviceSetIndex) : QStringList();
+            const QStringList reclaimedFeatures = replace ? reclaimIntentFeatures() : QStringList();
             int demod = addChannelAndWait(deviceSetIndex, mode->m_channelType);
             const void *demodChannel = channelAt(deviceSetIndex, demod);
             trackIntentChannel(demodChannel);
@@ -5235,6 +5557,7 @@ void MCPTools::registerIntentTools()
 
             notes.append(intentNotes(deviceSetIndex, {demodChannel, scannerChannel}, reclaimed, receiver["reused"].toBool(),
                 receiver["previousCentre"].toDouble(), tune["centerFrequency"].toDouble(), outcome));
+            notes.append(featureNotes(reclaimedFeatures));
 
             if (!notes.isEmpty()) {
                 result["note"] = notes.join(" ");
@@ -5244,9 +5567,10 @@ void MCPTools::registerIntentTools()
         });
 
     add("cleanup",
-        "Remove the channels that listen and scan added, on one device set or all of them. Each is otherwise left running, "
-        "every demodulator playing audio, until the next listen or scan on the same device set replaces it. Channels added any "
-        "other way are left alone; delete_channel removes those.",
+        "Remove the channels that listen and scan added, on one device set or all of them, and the features listen added "
+        "for them (AIS, Radiosonde, APRS) once nothing feeds them. Each is otherwise left running, every demodulator playing "
+        "audio, until the next listen or scan on the same device set replaces it. Channels and features added any other way "
+        "are left alone; delete_channel and delete_feature remove those.",
         schema({
             {"deviceSetIndex", intProp("Only this device set. Default: every device set")}
         }),
@@ -5277,12 +5601,21 @@ void MCPTools::registerIntentTools()
                 }
             }
 
+            QJsonArray features;
+
+            for (const QString& id : reclaimIntentFeatures())
+            {
+                features.append(id);
+                count++;
+            }
+
             QJsonObject result;
             result["removed"] = count;
             result["channels"] = removed;
+            result["features"] = features;
 
             if (count == 0) {
-                result["note"] = "Nothing to remove: no channel added by listen or scan is still there.";
+                result["note"] = "Nothing to remove: no channel or feature added by listen or scan is still there.";
             }
 
             return result;
