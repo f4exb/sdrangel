@@ -206,7 +206,11 @@ void PERTester::applySettings(const PERTesterSettings& settings, const QList<QSt
         webapiReverseSendSettings(settingsKeys, settings, fullUpdate || force);
     }
 
-    m_settings = settings;
+    if (force) {
+        m_settings = settings;
+    } else {
+        m_settings.applySettings(settingsKeys, settings);
+    }
 }
 
 int PERTester::webapiRun(bool run,

@@ -111,7 +111,11 @@ void AntennaTools::applySettings(const AntennaToolsSettings& settings, const QLi
         webapiReverseSendSettings(settingsKeys, settings, fullUpdate || force);
     }
 
-    m_settings = settings;
+    if (force) {
+        m_settings = settings;
+    } else {
+        m_settings.applySettings(settingsKeys, settings);
+    }
 }
 
 int AntennaTools::webapiSettingsGet(

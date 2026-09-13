@@ -267,7 +267,11 @@ void StarTracker::applySettings(const StarTrackerSettings& settings, const QList
         webapiReverseSendSettings(settingsKeys, settings, fullUpdate || force);
     }
 
-    m_settings = settings;
+    if (force) {
+        m_settings = settings;
+    } else {
+        m_settings.applySettings(settingsKeys, settings);
+    }
 }
 
 int StarTracker::webapiRun(bool run,

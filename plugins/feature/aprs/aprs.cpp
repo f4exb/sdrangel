@@ -237,7 +237,11 @@ void APRS::applySettings(const APRSSettings& settings, const QList<QString>& set
         webapiReverseSendSettings(settingsKeys, settings, fullUpdate || force);
     }
 
-    m_settings = settings;
+    if (force) {
+        m_settings = settings;
+    } else {
+        m_settings.applySettings(settingsKeys, settings);
+    }
 }
 
 int APRS::webapiRun(bool run,

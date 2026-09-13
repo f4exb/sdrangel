@@ -395,7 +395,11 @@ void LocalSink::applySettings(const LocalSinkSettings& settings, const QList<QSt
         sendChannelSettings(pipes, settingsKeys, settings, force);
     }
 
-    m_settings = settings;
+    if (force) {
+        m_settings = settings;
+    } else {
+        m_settings.applySettings(settingsKeys, settings);
+    }
 }
 
 void LocalSink::validateFilterChainHash(LocalSinkSettings& settings)

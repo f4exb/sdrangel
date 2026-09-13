@@ -161,7 +161,11 @@ void ChannelAnalyzerBaseband::applySettings(const ChannelAnalyzerSettings& setti
     }
 
     m_sink.applySettings(settings, settingsKeys, force);
-    m_settings = settings;
+    if (force) {
+        m_settings = settings;
+    } else {
+        m_settings.applySettings(settingsKeys, settings);
+    }
 }
 
 int ChannelAnalyzerBaseband::getChannelSampleRate() const

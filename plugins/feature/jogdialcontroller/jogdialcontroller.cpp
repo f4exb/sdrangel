@@ -184,7 +184,11 @@ void JogdialController::applySettings(const JogdialControllerSettings& settings,
         webapiReverseSendSettings(settingsKeys, settings, fullUpdate || force);
     }
 
-    m_settings = settings;
+    if (force) {
+        m_settings = settings;
+    } else {
+        m_settings.applySettings(settingsKeys, settings);
+    }
 }
 
 void JogdialController::updateChannels()
