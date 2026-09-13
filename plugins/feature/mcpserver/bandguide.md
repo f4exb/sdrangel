@@ -58,7 +58,7 @@ Minimum device sample rates:
 | FT8 and other digital HF | `FT8Demod` | HF band segments | Needs an HF capable receiver |
 | SSB and CW | `SSBDemod`, `WDSPRx` | HF | `WDSPRx` has the more capable receiver chain |
 | RTTY | `RTTYDemod` | HF | |
-| DMR, dPMR, D-Star, YSF | `DSDDemod` | Varies by band plan | Needs the AMBE feature or hardware for voice |
+| DMR, dPMR, D-Star, YSF, NXDN | `DSDDemod` | Varies by band plan | `listen` with mode `dmr`, `dpmr`, `dstar`, `ysf` or `nxdn` sets the deviation and baud rate the standard needs. Needs the AMBE feature or hardware for voice |
 
 ## Weather, time and utility
 
@@ -120,7 +120,7 @@ usual for the mode.
 | Broadcast FM | `bfm` | 87.5 to 108 MHz | 100 kHz | The Americas use only the odd tenths, 200 kHz apart; everywhere else every tenth. `scan` insists on 100 kHz for this mode |
 | Airband voice | `am` | 118 to 137 MHz | 25 kHz | Europe also uses 8.33 kHz channels (`stepFrequency` 8333 from a 25 kHz frequency lands on all of them). The whole band at 8.33 kHz is over the 2000 frequency limit, so take it in sub bands |
 | Marine VHF, PMR446, amateur FM | `nfm` | 156 to 162 MHz marine, 446.0 to 446.2 MHz PMR, 144 to 146 and 430 to 440 MHz amateur | 12.5 kHz (PMR446 6.25 kHz, marine 25 kHz) | |
-| Digital voice (DMR, dPMR, D-Star, YSF) | `dsd` | Same bands as `nfm` | 12.5 kHz | Detects the carrier; decoding voice needs the AMBE feature or hardware |
+| Digital voice | `dmr`, `dpmr`, `dstar`, `ysf`, `nxdn` | Same bands as `nfm` | 12.5 kHz (dPMR and NXDN 2400 baud 6.25 kHz) | Each sets the DSD demodulator's FM deviation and baud rate for the standard (DMR 5.4 kHz, dPMR 2.7 kHz at 2400 baud, D-Star 3.5 kHz, YSF 7 kHz, NXDN 2.7 kHz; `nxdn24` for the 2400 baud variant), which the decoder needs to recover symbols; `dsd` alone is the plugin's defaults, D-Star's. DMR gets both time slots on. Detects the carrier; decoding voice needs the AMBE feature or hardware |
 | POCSAG pagers | `pager` | Regional, commonly 138 to 160 MHz | 12.5 kHz | Finds the carriers; the messages themselves are shown only in the GUI, the API carries none |
 | Radiosondes (RS41) | `sonde` | 400 to 406 MHz | 10 kHz | Only worth it around launch times, 00:00 and 12:00 UTC. Decoded frames come from `get_packets` |
 | SSB and CW | `ssb`, `usb`, `lsb` | HF band segments | 3 kHz | The scanner measures power in a 3 kHz channel; a busy band segment needs the threshold raised |

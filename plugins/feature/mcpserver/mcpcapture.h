@@ -104,6 +104,10 @@ public:
     QJsonObject startIQRecording(int deviceSetIndex, int channelIndex, const QString& fileName,
         int frequencyOffset, int log2Decim);
 
+    //!< Checks a capture file name the way startIQRecording will, so a caller can refuse it before
+    //!< setting anything up. Throws for one outside the capture directory
+    void checkFileName(const QString& fileName, const QString& defaultPrefix) { resolvePath(fileName, defaultPrefix); }
+
     //!< Stops the recording of the channel currently at this index
     QJsonObject stopIQRecording(int deviceSetIndex, int channelIndex);
 

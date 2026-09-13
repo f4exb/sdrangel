@@ -3487,6 +3487,9 @@ void MCPTools::registerCaptureTools()
                 throw MCPToolError("The device is not running, so there is nothing to record. Call start_device first.");
             }
 
+            // A bad file name is refused before a channel is added for it
+            m_capture.checkFileName(argString(args, "fileName", false), "iq");
+
             int channelIndex = addChannelAndWait(deviceSetIndex, "FileSink");
 
             // This call sleeps for up to half a minute and is not serialised against the other
@@ -3573,8 +3576,18 @@ const ListenMode listenModes[] = {
     {"adsb",       "ADSBDemod",            0, 2400000, "{}",                                      0, nullptr,          0},
     {"ais",        "AISDemod",             0,  128000, "{}",                                      0, "AIS",        25000},
     {"dsc",        "DSCDemod",           450,   48000, "{}",                                      0, nullptr,          0},
-    {"dsd",        "DSDDemod",         12500,   48000, "{}",                                  12500, nullptr,          0},
-    {"dmr",        "DSDDemod",         12500,   48000, "{}",                                  12500, nullptr,          0},
+    // Digital voice: the DSD demodulator decides the standard from the baud rate, and its
+    // discriminator wants the maximum deviation of the standard, the readme's table: DMR 5.4,
+    // dPMR 2.7, D-Star 3.5, YSF 7.0, NXDN 2.7 kHz. dsd alone is the plugin's defaults, which
+    // are D-Star's, set explicitly so that a retuned demodulator gets them too. DMR carries
+    // two time slots, so both are switched on
+    {"dsd",        "DSDDemod",         12500,   48000, "{\"fmDeviation\":3500,\"baudRate\":4800}", 12500, nullptr,  0},
+    {"dmr",        "DSDDemod",         12500,   48000, "{\"fmDeviation\":5400,\"baudRate\":4800,\"slot1On\":1,\"slot2On\":1}", 12500, nullptr, 0},
+    {"dpmr",       "DSDDemod",          6250,   48000, "{\"fmDeviation\":2700,\"baudRate\":2400}", 6250, nullptr,   0},
+    {"dstar",      "DSDDemod",         12500,   48000, "{\"fmDeviation\":3500,\"baudRate\":4800}", 12500, nullptr,  0},
+    {"ysf",        "DSDDemod",         12500,   48000, "{\"fmDeviation\":7000,\"baudRate\":4800}", 12500, nullptr,  0},
+    {"nxdn",       "DSDDemod",         12500,   48000, "{\"fmDeviation\":2700,\"baudRate\":4800}", 12500, nullptr,  0},
+    {"nxdn24",     "DSDDemod",          6250,   48000, "{\"fmDeviation\":2700,\"baudRate\":2400}", 6250, nullptr,   0},
     {"pager",      "PagerDemod",       20000,   48000, "{}",                                  12500, nullptr,          0},
     {"pocsag",     "PagerDemod",       20000,   48000, "{}",                                  12500, nullptr,          0},
     {"sonde",      "RadiosondeDemod",   9600,   48000, "{}",                                  10000, "Radiosonde",     0},
@@ -3585,7 +3598,7 @@ const ListenMode listenModes[] = {
     {"aprs",       "PacketDemod",      12500,   48000, "{}",                                      0, "APRS",           0},
 };
 
-const char *const listenModeList = "bfm, wfm, nfm, am, ssb, usb, lsb, dab, adsb, ais, dsc, dsd, pager, sonde, packet, aprs";
+const char *const listenModeList = "bfm, wfm, nfm, am, ssb, usb, lsb, dab, adsb, ais, dsc, dsd, dmr, dpmr, dstar, ysf, nxdn, pager, sonde, packet, aprs";
 
 // The feature a demodulator of this type feeds, by the modes that add one; null for none
 const char *featureForChannelType(const QString& channelType)
@@ -4797,6 +4810,7 @@ void MCPTools::registerIntentTools()
         schema({
             {"frequency", numProp("Frequency to receive in Hz, e.g. 97300000 for 97.3 MHz")},
             {"mode", strProp("bfm (broadcast FM with stereo and RDS), wfm, nfm, am or airband, ssb/usb, lsb, dab, adsb, ais, dsc, dsd/dmr, "
+                             "dmr, dpmr, dstar, ysf, nxdn or nxdn24 (digital voice through the DSD demodulator with the deviation and baud rate of that standard), "
                              "pager (POCSAG), sonde (RS41 radiosondes), packet (AX.25), aprs (APRS with its feature), or any channel type id from list_channel_types. Default nfm")},
             {"device", strProp(deviceHint)},
             {"replace", prop("boolean", "Retune the demodulator a previous listen added to this device set when it is of the same type, and remove every other channel earlier listen and scan calls added there, so that exploring a band does not leave a trail of demodulators all playing audio and mis-tuned for the current centre frequency. Channels added any other way are kept on their frequency where the baseband still holds them; audio demodulators it cannot hold are removed, anything else is left and named. Default true")},

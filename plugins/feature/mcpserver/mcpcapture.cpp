@@ -391,6 +391,26 @@ QJsonObject MCPCapture::startIQRecording(int deviceSetIndex, int channelIndex, c
 
     patchChannel(deviceSetIndex, channelIndex, type, partial);
 
+    // The record action goes straight to the channel's DSP thread while the settings go through
+    // the channel itself first, so the action can overtake them and start recording to the
+    // file name the sink had before: for a fresh FileSink an empty one, which gives a stray
+    // file in the working directory. Wait until the channel has taken the settings, after
+    // which the DSP thread sees them before the action
+    QElapsedTimer settled;
+    settled.start();
+
+    while (settled.elapsed() < 3000)
+    {
+        QJsonObject now = channelSettings(deviceSetIndex, channelIndex);
+        QString key = settingsKeyOf(now);
+
+        if (!key.isEmpty() && (now[key].toObject()["fileRecordName"].toString() == partial["fileRecordName"].toString())) {
+            break;
+        }
+
+        QThread::msleep(50);
+    }
+
     Recording recording;
     recording.m_fileBase = fileBase;
     recording.m_started = QDateTime::currentDateTime();
