@@ -230,6 +230,12 @@ public:
             SWGSDRangel::SWGSuccessResponse& response,
             SWGSDRangel::SWGErrorResponse& error);
 
+    virtual int workspaceActionsPost(
+            int workspaceIndex,
+            SWGSDRangel::SWGWorkspaceActions& query,
+            SWGSDRangel::SWGSuccessResponse& response,
+            SWGSDRangel::SWGErrorResponse& error);
+
     virtual int devicesetGet(
             int deviceSetIndex,
             SWGSDRangel::SWGDeviceSet& response,

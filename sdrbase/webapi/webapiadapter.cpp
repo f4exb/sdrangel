@@ -72,6 +72,7 @@
 #include "SWGDeviceReport.h"
 #include "SWGDeviceActions.h"
 #include "SWGWorkspaceInfo.h"
+#include "SWGWorkspaceActions.h"
 #include "SWGChannelsDetail.h"
 #include "SWGChannelSettings.h"
 #include "SWGChannelReport.h"
@@ -1736,6 +1737,47 @@ int WebAPIAdapter::instanceWorkspaceDelete(
 
     response.init();
     *response.getMessage() = QString("Message to delete empty workspaces (MsgDeleteEmptyWorkspaces) was submitted successfully");
+
+    return 202;
+}
+
+int WebAPIAdapter::workspaceActionsPost(
+        int workspaceIndex,
+        SWGSDRangel::SWGWorkspaceActions& query,
+        SWGSDRangel::SWGSuccessResponse& response,
+        SWGSDRangel::SWGErrorResponse& error)
+{
+    // The workspaces live in the GUI, which is the only place their number is known, so the
+    // index is checked there and an out of range one is logged rather than reported
+    (void) error;
+    const QString arrange = query.getArrange() ? *query.getArrange() : QString();
+    MainCore::MsgArrangeWorkspace::Arrangement arrangement;
+
+    if (arrange == "cascade") {
+        arrangement = MainCore::MsgArrangeWorkspace::Cascade;
+    } else if (arrange == "tile") {
+        arrangement = MainCore::MsgArrangeWorkspace::Tile;
+    } else if (arrange == "stackVertical") {
+        arrangement = MainCore::MsgArrangeWorkspace::StackVertical;
+    } else if (arrange == "stack") {
+        arrangement = MainCore::MsgArrangeWorkspace::Stack;
+    } else if (arrange == "autostack") {
+        arrangement = MainCore::MsgArrangeWorkspace::AutoStack;
+    } else if (arrange == "tab") {
+        arrangement = MainCore::MsgArrangeWorkspace::Tab;
+    }
+    else
+    {
+        error.init();
+        *error.getMessage() = QString("Unknown arrangement %1").arg(arrange);
+        return 400;
+    }
+
+    MainCore::MsgArrangeWorkspace *msg = MainCore::MsgArrangeWorkspace::create(workspaceIndex, arrangement);
+    m_mainCore->m_mainMessageQueue->push(msg);
+
+    response.init();
+    *response.getMessage() = QString("Message to arrange workspace %1 (MsgArrangeWorkspace) was submitted successfully").arg(workspaceIndex);
 
     return 202;
 }

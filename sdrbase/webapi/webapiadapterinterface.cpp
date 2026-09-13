@@ -78,6 +78,7 @@ std::regex WebAPIAdapterInterface::featuresetFeatureSettingsURLRe("^/sdrangel/fe
 std::regex WebAPIAdapterInterface::featuresetFeatureReportURLRe("^/sdrangel/featureset/feature/([0-9]{1,2})/report$");
 std::regex WebAPIAdapterInterface::featuresetFeatureActionsURLRe("^/sdrangel/featureset/feature/([0-9]{1,2})/actions$");
 std::regex WebAPIAdapterInterface::featuresetFeatureWorkspaceURLRe("^/sdrangel/featureset/feature/([0-9]{1,2})/workspace$");
+std::regex WebAPIAdapterInterface::workspaceActionsURLRe("^/sdrangel/workspace/([0-9]{1,2})/actions$");
 
 void WebAPIAdapterInterface::ConfigKeys::debug() const
 {

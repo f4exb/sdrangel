@@ -67,6 +67,7 @@ namespace SWGSDRangel
     class SWGDeviceReport;
     class SWGDeviceActions;
     class SWGWorkspaceInfo;
+    class SWGWorkspaceActions;
     class SWGChannelsDetail;
     class SWGChannelSettings;
     class SWGChannelReport;
@@ -804,6 +805,24 @@ public:
             SWGSDRangel::SWGSuccessResponse& response,
             SWGSDRangel::SWGErrorResponse& error)
     {
+        (void) response;
+    	error.init();
+    	*error.getMessage() = QString("Function not implemented");
+    	return 501;
+    }
+
+    /**
+     * Handler of /sdrangel/workspace/{workspaceIndex}/actions (POST) swagger/sdrangel/code/html2/index.html#api-Default-workspaceActionsPost
+     * returns the Http status code (default 501: not implemented)
+     */
+    virtual int workspaceActionsPost(
+            int workspaceIndex,
+            SWGSDRangel::SWGWorkspaceActions& query,
+            SWGSDRangel::SWGSuccessResponse& response,
+            SWGSDRangel::SWGErrorResponse& error)
+    {
+        (void) workspaceIndex;
+        (void) query;
         (void) response;
     	error.init();
     	*error.getMessage() = QString("Function not implemented");
@@ -1794,6 +1813,7 @@ public:
     static std::regex featuresetFeatureReportURLRe;
     static std::regex featuresetFeatureActionsURLRe;
     static std::regex featuresetFeatureWorkspaceURLRe;
+    static std::regex workspaceActionsURLRe;
 };
 
 

@@ -2479,6 +2479,52 @@ bool MainWindow::handleMessage(const Message& cmd)
 
         return true;
     }
+    else if (MainCore::MsgArrangeWorkspace::match(cmd))
+    {
+        auto& notif = (const MainCore::MsgArrangeWorkspace&) cmd;
+        int workspaceIndex = notif.getWorkspaceIndex();
+
+        if ((workspaceIndex >= 0) && (workspaceIndex < (int) m_workspaces.size()))
+        {
+            Workspace *workspace = m_workspaces[workspaceIndex];
+
+            // The same as the title bar buttons: each one-shot arrangement turns auto stacking
+            // and tabs off, and either mode turns the other off
+            switch (notif.getArrangement())
+            {
+            case MainCore::MsgArrangeWorkspace::Cascade:
+                workspace->setTabSubWindowsOption(false);
+                workspace->cascadeSubWindows();
+                break;
+            case MainCore::MsgArrangeWorkspace::Tile:
+                workspace->setTabSubWindowsOption(false);
+                workspace->tileSubWindows();
+                break;
+            case MainCore::MsgArrangeWorkspace::StackVertical:
+                workspace->setTabSubWindowsOption(false);
+                workspace->stackVerticalSubWindows();
+                break;
+            case MainCore::MsgArrangeWorkspace::Stack:
+                workspace->setTabSubWindowsOption(false);
+                workspace->stackSubWindows();
+                break;
+            case MainCore::MsgArrangeWorkspace::AutoStack:
+                workspace->setTabSubWindowsOption(false);
+                workspace->setAutoStackOption(true);
+                workspace->layoutSubWindows();
+                break;
+            case MainCore::MsgArrangeWorkspace::Tab:
+                workspace->setTabSubWindowsOption(true);
+                break;
+            }
+        }
+        else
+        {
+            qWarning("MainWindow::handleMessages: MsgArrangeWorkspace: no workspace with index %d", workspaceIndex);
+        }
+
+        return true;
+    }
     else if (MainCore::MsgMoveMainSpectrumUIToWorkspace::match(cmd))
     {
         auto& notif = (const MainCore::MsgMoveMainSpectrumUIToWorkspace&) cmd;

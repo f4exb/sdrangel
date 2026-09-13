@@ -623,6 +623,30 @@ public:
         { }
     };
 
+    class SDRBASE_API MsgArrangeWorkspace : public Message {
+        MESSAGE_CLASS_DECLARATION
+
+    public:
+        enum Arrangement { Cascade, Tile, StackVertical, Stack, AutoStack, Tab };
+
+        int getWorkspaceIndex() const { return m_workspaceIndex; }
+        Arrangement getArrangement() const { return m_arrangement; }
+
+        static MsgArrangeWorkspace* create(int workspaceIndex, Arrangement arrangement) {
+            return new MsgArrangeWorkspace(workspaceIndex, arrangement);
+        }
+
+    private:
+        int m_workspaceIndex;
+        Arrangement m_arrangement;
+
+        MsgArrangeWorkspace(int workspaceIndex, Arrangement arrangement) :
+            Message(),
+            m_workspaceIndex(workspaceIndex),
+            m_arrangement(arrangement)
+        { }
+    };
+
     class SDRBASE_API MsgMoveMainSpectrumUIToWorkspace : public Message {
         MESSAGE_CLASS_DECLARATION
 

@@ -53,6 +53,7 @@
 #include "SWGDeviceReport.h"
 #include "SWGDeviceActions.h"
 #include "SWGWorkspaceInfo.h"
+#include "SWGWorkspaceActions.h"
 #include "SWGChannelsDetail.h"
 #include "SWGChannelSettings.h"
 #include "SWGChannelReport.h"
@@ -194,6 +195,8 @@ void WebAPIRequestMapper::service(qtwebapp::HttpRequest& request, qtwebapp::Http
                 devicesetSpectrumDataService(std::string(desc_match[1]), request, response);
             } else if (std::regex_match(pathStr, desc_match, WebAPIAdapterInterface::devicesetSpectrumServerURLRe)) {
                 devicesetSpectrumServerService(std::string(desc_match[1]), request, response);
+            } else if (std::regex_match(pathStr, desc_match, WebAPIAdapterInterface::workspaceActionsURLRe)) {
+                workspaceActionsService(std::string(desc_match[1]), request, response);
             } else if (std::regex_match(pathStr, desc_match, WebAPIAdapterInterface::devicesetSpectrumWorkspaceURLRe)) {
                 devicesetSpectrumWorkspaceService(std::string(desc_match[1]), request, response);
             } else if (std::regex_match(pathStr, desc_match, WebAPIAdapterInterface::devicesetDeviceSettingsURLRe)) {
@@ -3638,6 +3641,73 @@ void WebAPIRequestMapper::featuresetFeatureActionsService(
     }
 }
 
+void WebAPIRequestMapper::workspaceActionsService(
+        const std::string& workspaceIndexStr,
+        qtwebapp::HttpRequest& request,
+        qtwebapp::HttpResponse& response)
+{
+    SWGSDRangel::SWGErrorResponse errorResponse;
+    response.setHeader("Content-Type", "application/json");
+    response.setHeader("Access-Control-Allow-Origin", "*");
+
+    try
+    {
+        int workspaceIndex = boost::lexical_cast<int>(workspaceIndexStr);
+
+        if (request.getMethod() == "POST")
+        {
+            QString jsonStr = request.getBody();
+            QJsonObject jsonObject;
+
+            if (parseJsonBody(jsonStr, jsonObject, response))
+            {
+                SWGSDRangel::SWGWorkspaceActions query;
+                SWGSDRangel::SWGSuccessResponse normalResponse;
+
+                if (validateWorkspaceActions(query, jsonObject))
+                {
+                    int status = m_adapter->workspaceActionsPost(workspaceIndex, query, normalResponse, errorResponse);
+                    response.setStatus(status);
+
+                    if (status/100 == 2) {
+                        response.write(normalResponse.asJson().toUtf8());
+                    } else {
+                        response.write(errorResponse.asJson().toUtf8());
+                    }
+                }
+                else
+                {
+                    response.setStatus(400,"Invalid JSON request");
+                    errorResponse.init();
+                    *errorResponse.getMessage() = "Invalid JSON request: arrange must be one of cascade, tile, stackVertical, stack, autostack, tab";
+                    response.write(errorResponse.asJson().toUtf8());
+                }
+            }
+            else
+            {
+                response.setStatus(400,"Invalid JSON format");
+                errorResponse.init();
+                *errorResponse.getMessage() = "Invalid JSON format";
+                response.write(errorResponse.asJson().toUtf8());
+            }
+        }
+        else
+        {
+            response.setStatus(405,"Invalid HTTP method");
+            errorResponse.init();
+            *errorResponse.getMessage() = "Invalid HTTP method";
+            response.write(errorResponse.asJson().toUtf8());
+        }
+    }
+    catch (const boost::bad_lexical_cast &e)
+    {
+        errorResponse.init();
+        *errorResponse.getMessage() = "Wrong integer conversion on workspace index";
+        response.setStatus(400,"Invalid data");
+        response.write(errorResponse.asJson().toUtf8());
+    }
+}
+
 void WebAPIRequestMapper::featuresetFeatureWorkspaceService(
         const std::string& featureIndexStr,
         qtwebapp::HttpRequest& request,
@@ -4284,6 +4354,24 @@ bool WebAPIRequestMapper::validateSpectrumSettings(SWGSDRangel::SWGGLSpectrum& s
     //     spectrumSettingsKeys.append("wsSpectrumPort");
     // }
 
+    return true;
+}
+
+// The arrangement is an enumeration, and one outside it is refused here rather than passed on
+bool WebAPIRequestMapper::validateWorkspaceActions(SWGSDRangel::SWGWorkspaceActions& workspaceActions, QJsonObject& jsonObject)
+{
+    if (!jsonObject.contains("arrange") || !jsonObject["arrange"].isString()) {
+        return false;
+    }
+
+    static const QStringList arrangements = {"cascade", "tile", "stackVertical", "stack", "autostack", "tab"};
+    QString arrange = jsonObject["arrange"].toString();
+
+    if (!arrangements.contains(arrange)) {
+        return false;
+    }
+
+    workspaceActions.setArrange(new QString(arrange));
     return true;
 }
 

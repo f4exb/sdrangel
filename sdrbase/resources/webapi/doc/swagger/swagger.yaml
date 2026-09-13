@@ -1097,6 +1097,45 @@ paths:
         "501":
           $ref: "#/responses/Response_501"
 
+  /sdrangel/workspace/{workspaceIndex}/actions:
+    x-swagger-router-controller: instance
+    post:
+      description: Arrange the windows of a workspace (GUI)
+      operationId: workspaceActionsPost
+      tags:
+        - Workspace
+      consumes:
+        - application/json
+      parameters:
+        - in: path
+          name: workspaceIndex
+          type: integer
+          required: true
+          description: Index of workspace in the list of workspaces
+        - name: body
+          in: body
+          description: Action to perform
+          required: true
+          schema:
+            $ref: "#/definitions/WorkspaceActions"
+      responses:
+        "202":
+          description: Successful sending of the message
+          schema:
+            $ref: "#/definitions/SuccessResponse"
+        "400":
+          description: Invalid JSON request
+          schema:
+            $ref: "#/definitions/ErrorResponse"
+        "404":
+          description: Invalid workspace index
+          schema:
+            $ref: "#/definitions/ErrorResponse"
+        "500":
+          $ref: "#/responses/Response_500"
+        "501":
+          $ref: "#/responses/Response_501"
+
   /sdrangel/deviceset:
     x-swagger-router-controller: instance
     post:
@@ -3230,6 +3269,20 @@ definitions:
       index:
         description: index of workspace in the list of workspaces
         type: integer
+
+  WorkspaceActions:
+    description: "Actions on a workspace"
+    required:
+      - arrange
+    properties:
+      arrange:
+        description: >
+          How to arrange the workspace's windows. cascade, tile, stackVertical and stack rearrange
+          them once, and turn auto stacking and tabs off. autostack stacks them now and again
+          whenever a window is added or resized, and stays on until another arrangement is asked
+          for. tab shows one window at a time with a tab for each, and turns auto stacking off.
+        type: string
+        enum: [cascade, tile, stackVertical, stack, autostack, tab]
 
   AudioDevices:
     description: "List of audio devices available in the system"
