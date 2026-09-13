@@ -679,17 +679,28 @@
             </property>
             <layout class="QFormLayout" name="formLayout_3">
              <item row="0" column="0">
-              <widget class="QLabel" name="thunderforestAPIKeyLabel">
-               <property name="minimumSize">
-                <size>
-                 <width>140</width>
-                 <height>0</height>
-                </size>
-               </property>
-               <property name="text">
-                <string>Thunderforest API Key</string>
-               </property>
-              </widget>
+              <layout class="QHBoxLayout" name="thunderforestAPIKeyLayout">
+               <item>
+                <widget class="QLabel" name="thunderforestAPIKeyLabel">
+                 <property name="minimumSize">
+                  <size>
+                   <width>130</width>
+                   <height>0</height>
+                  </size>
+                 </property>
+                 <property name="text">
+                  <string>Thunderforest API Key</string>
+                 </property>
+                </widget>
+               </item>
+               <item>
+                <widget class="QLabel" name="thunderforestAPIKeyStatus">
+                 <property name="text">
+                  <string/>
+                 </property>
+                </widget>
+               </item>
+              </layout>
              </item>
              <item row="0" column="1">
               <widget class="QLineEdit" name="thunderforestAPIKey">
@@ -698,91 +709,389 @@
                </property>
               </widget>
              </item>
-             <item row="1" column="0">
-              <widget class="QLabel" name="maptilerAPIKeyLabel">
-               <property name="minimumSize">
-                <size>
-                 <width>140</width>
-                 <height>0</height>
-                </size>
-               </property>
-               <property name="text">
-                <string>Maptiler API Key</string>
-               </property>
-              </widget>
-             </item>
              <item row="1" column="1">
+              <layout class="QHBoxLayout" name="thunderforestLinksLayout">
+               <item>
+                <widget class="QLabel" name="thunderforestWebsite">
+                 <property name="text">
+                  <string>&lt;a href="https://www.thunderforest.com/"&gt;Thunderforest Website&lt;/a&gt;</string>
+                 </property>
+                 <property name="openExternalLinks">
+                  <bool>true</bool>
+                 </property>
+                </widget>
+               </item>
+               <item>
+                <widget class="QLabel" name="thunderforestRegister">
+                 <property name="text">
+                  <string>&lt;a href="https://www.thunderforest.com/pricing/"&gt;Register at Thunderforest&lt;/a&gt;</string>
+                 </property>
+                 <property name="openExternalLinks">
+                  <bool>true</bool>
+                 </property>
+                </widget>
+               </item>
+               <item>
+                <widget class="QLabel" name="thunderforestFindKey">
+                 <property name="text">
+                  <string>&lt;a href="https://manage.thunderforest.com/dashboard"&gt;Get API Key&lt;/a&gt;</string>
+                 </property>
+                 <property name="openExternalLinks">
+                  <bool>true</bool>
+                 </property>
+                </widget>
+               </item>
+              </layout>
+             </item>
+             <item row="2" column="0">
+              <layout class="QHBoxLayout" name="maptilerAPIKeyLayout">
+               <item>
+                <widget class="QLabel" name="maptilerAPIKeyLabel">
+                 <property name="minimumSize">
+                  <size>
+                   <width>130</width>
+                   <height>0</height>
+                  </size>
+                 </property>
+                 <property name="text">
+                  <string>Maptiler API Key</string>
+                 </property>
+                </widget>
+               </item>
+               <item>
+                <widget class="QLabel" name="maptilerAPIKeyStatus">
+                 <property name="text">
+                  <string/>
+                 </property>
+                </widget>
+               </item>
+              </layout>
+             </item>
+             <item row="2" column="1">
               <widget class="QLineEdit" name="maptilerAPIKey">
                <property name="toolTip">
                 <string>Enter a Maptiler API key in order to use Maptiler maps: https://www.maptiler.com/</string>
                </property>
               </widget>
              </item>
-             <item row="2" column="0">
-              <widget class="QLabel" name="mapBoxAPIKeyLabel">
-               <property name="minimumSize">
-                <size>
-                 <width>140</width>
-                 <height>0</height>
-                </size>
-               </property>
-               <property name="text">
-                <string>Mapbox API Key</string>
-               </property>
-              </widget>
+             <item row="3" column="1">
+              <layout class="QHBoxLayout" name="maptilerLinksLayout">
+               <item>
+                <widget class="QLabel" name="maptilerWebsite">
+                 <property name="text">
+                  <string>&lt;a href="https://www.maptiler.com/"&gt;MapTiler Website&lt;/a&gt;</string>
+                 </property>
+                 <property name="openExternalLinks">
+                  <bool>true</bool>
+                 </property>
+                </widget>
+               </item>
+               <item>
+                <widget class="QLabel" name="maptilerRegister">
+                 <property name="text">
+                  <string>&lt;a href="https://cloud.maptiler.com/auth/widget?next=https://cloud.maptiler.com/maps/"&gt;Register at MapTiler&lt;/a&gt;</string>
+                 </property>
+                 <property name="openExternalLinks">
+                  <bool>true</bool>
+                 </property>
+                </widget>
+               </item>
+               <item>
+                <widget class="QLabel" name="maptilerFindKey">
+                 <property name="text">
+                  <string>&lt;a href="https://cloud.maptiler.com/account/keys/"&gt;Get API key&lt;/a&gt;</string>
+                 </property>
+                 <property name="openExternalLinks">
+                  <bool>true</bool>
+                 </property>
+                </widget>
+               </item>
+              </layout>
              </item>
-             <item row="2" column="1">
+             <item row="4" column="0">
+              <layout class="QHBoxLayout" name="mapBoxAPIKeyLayout">
+               <item>
+                <widget class="QLabel" name="mapBoxAPIKeyLabel">
+                 <property name="minimumSize">
+                  <size>
+                   <width>130</width>
+                   <height>0</height>
+                  </size>
+                 </property>
+                 <property name="text">
+                  <string>Mapbox API Key</string>
+                 </property>
+                </widget>
+               </item>
+               <item>
+                <widget class="QLabel" name="mapBoxAPIKeyStatus">
+                 <property name="text">
+                  <string/>
+                 </property>
+                </widget>
+               </item>
+              </layout>
+             </item>
+             <item row="4" column="1">
               <widget class="QLineEdit" name="mapBoxAPIKey">
                <property name="toolTip">
                 <string>Enter a Mapbox API key in order to use Mapbox maps: https://www.mapbox.com/</string>
                </property>
               </widget>
              </item>
-             <item row="3" column="0">
-              <widget class="QLabel" name="cesiumIonAPIKeyLabel">
-               <property name="minimumSize">
-                <size>
-                 <width>140</width>
-                 <height>0</height>
-                </size>
-               </property>
-               <property name="text">
-                <string>Cesium Ion API Key</string>
-               </property>
-              </widget>
+             <item row="5" column="1">
+              <layout class="QHBoxLayout" name="mapboxLinksLayout">
+               <item>
+                <widget class="QLabel" name="mapboxWebsite">
+                 <property name="text">
+                  <string>&lt;a href="https://www.mapbox.com/"&gt;Mapbox Website&lt;/a&gt;</string>
+                 </property>
+                 <property name="openExternalLinks">
+                  <bool>true</bool>
+                 </property>
+                </widget>
+               </item>
+               <item>
+                <widget class="QLabel" name="mapboxRegister">
+                 <property name="text">
+                  <string>&lt;a href="https://account.mapbox.com/auth/signup/?page=/"&gt;Register at Mapbox&lt;/a&gt;</string>
+                 </property>
+                 <property name="openExternalLinks">
+                  <bool>true</bool>
+                 </property>
+                </widget>
+               </item>
+               <item>
+                <widget class="QLabel" name="mapboxFindKey">
+                 <property name="text">
+                  <string>&lt;a href="https://console.mapbox.com/"&gt;Get Token&lt;/a&gt;</string>
+                 </property>
+                 <property name="openExternalLinks">
+                  <bool>true</bool>
+                 </property>
+                </widget>
+               </item>
+              </layout>
              </item>
-             <item row="3" column="1">
+             <item row="6" column="0">
+              <layout class="QHBoxLayout" name="cesiumIonAPIKeyLayout">
+               <item>
+                <widget class="QLabel" name="cesiumIonAPIKeyLabel">
+                 <property name="minimumSize">
+                  <size>
+                   <width>130</width>
+                   <height>0</height>
+                  </size>
+                 </property>
+                 <property name="text">
+                  <string>Cesium Ion API Key</string>
+                 </property>
+                </widget>
+               </item>
+               <item>
+                <widget class="QLabel" name="cesiumIonAPIKeyStatus">
+                 <property name="text">
+                  <string/>
+                 </property>
+                </widget>
+               </item>
+              </layout>
+             </item>
+             <item row="6" column="1">
               <widget class="QLineEdit" name="cesiumIonAPIKey">
                <property name="toolTip">
                 <string>Enter a Cesium Ion Access Token</string>
                </property>
               </widget>
              </item>
-             <item row="5" column="0">
-              <widget class="QLabel" name="checkWXAPIKeyLabel">
-               <property name="text">
-                <string>CheckWX API key</string>
+             <item row="7" column="1">
+              <layout class="QHBoxLayout" name="cesiumIonLinksLayout">
+               <item>
+                <widget class="QLabel" name="cesiumIonWebsite">
+                 <property name="text">
+                  <string>&lt;a href="https://cesium.com/platform/cesium-ion/"&gt;Cesium ion Website&lt;/a&gt;</string>
+                 </property>
+                 <property name="openExternalLinks">
+                  <bool>true</bool>
+                 </property>
+                </widget>
+               </item>
+               <item>
+                <widget class="QLabel" name="cesiumIonRegister">
+                 <property name="text">
+                  <string>&lt;a href="https://ion.cesium.com/signup/"&gt;Register at Cesium ion&lt;/a&gt;</string>
+                 </property>
+                 <property name="openExternalLinks">
+                  <bool>true</bool>
+                 </property>
+                </widget>
+               </item>
+               <item>
+                <widget class="QLabel" name="cesiumIonFindKey">
+                 <property name="text">
+                  <string>&lt;a href="https://ion.cesium.com/tokens"&gt;Get Access Token&lt;/a&gt;</string>
+                 </property>
+                 <property name="openExternalLinks">
+                  <bool>true</bool>
+                 </property>
+                </widget>
+               </item>
+              </layout>
+             </item>
+             <item row="8" column="0">
+              <layout class="QHBoxLayout" name="arcGISAPIKeyLayout">
+               <item>
+                <widget class="QLabel" name="arcGISAPIKeyLabel">
+                 <property name="minimumSize">
+                  <size>
+                   <width>130</width>
+                   <height>0</height>
+                  </size>
+                 </property>
+                 <property name="text">
+                  <string>ArcGIS API Key</string>
+                 </property>
+                </widget>
+               </item>
+               <item>
+                <widget class="QLabel" name="arcGISAPIKeyStatus">
+                 <property name="text">
+                  <string/>
+                 </property>
+                </widget>
+               </item>
+              </layout>
+             </item>
+             <item row="8" column="1">
+              <widget class="QLineEdit" name="arcGISAPIKey">
+               <property name="toolTip">
+                <string>Enter an ArcGIS API Key</string>
                </property>
               </widget>
              </item>
-             <item row="5" column="1">
+             <item row="9" column="1">
+              <layout class="QHBoxLayout" name="arcGISAPILinksLayout">
+               <item>
+                <widget class="QLabel" name="arcGISAPIWebsite">
+                 <property name="text">
+                  <string>&lt;a href="https://www.esri.com/en-us/arcgis/products/arcgis-location-platform/overview"&gt;ArcGIS Location Platform Website&lt;/a&gt;</string>
+                 </property>
+                 <property name="openExternalLinks">
+                  <bool>true</bool>
+                 </property>
+                </widget>
+               </item>
+               <item>
+                <widget class="QLabel" name="arcGISAPIRegister">
+                 <property name="text">
+                  <string>&lt;a href="https://location.arcgis.com/sign-up/"&gt;Register at ArcGIS Location Platform&lt;/a&gt;</string>
+                 </property>
+                 <property name="openExternalLinks">
+                  <bool>true</bool>
+                 </property>
+                </widget>
+               </item>
+               <item>
+                <widget class="QLabel" name="arcGISAPIFindKey">
+                 <property name="text">
+                  <string>&lt;a href="https://location.arcgis.com/dashboard/"&gt;Get developer credentials/API Key&lt;/a&gt;</string>
+                 </property>
+                 <property name="openExternalLinks">
+                  <bool>true</bool>
+                 </property>
+                </widget>
+               </item>
+              </layout>
+             </item>
+             <item row="10" column="0">
+              <layout class="QHBoxLayout" name="checkWXAPIKeyLayout">
+               <item>
+                <widget class="QLabel" name="checkWXAPIKeyLabel">
+                 <property name="minimumSize">
+                  <size>
+                   <width>130</width>
+                   <height>0</height>
+                  </size>
+                 </property>
+                 <property name="text">
+                  <string>CheckWX API key</string>
+                 </property>
+                </widget>
+               </item>
+               <item>
+                <widget class="QLabel" name="checkWXAPIKeyStatus">
+                 <property name="text">
+                  <string/>
+                 </property>
+                </widget>
+               </item>
+              </layout>
+             </item>
+             <item row="10" column="1">
               <widget class="QLineEdit" name="checkWXAPIKey">
                <property name="toolTip">
                 <string>checkwxapi.com API key for accessing airport weather (METARs)</string>
                </property>
               </widget>
              </item>
-             <item row="4" column="0">
-              <widget class="QLabel" name="arcGISAPIKeyLabel">
-               <property name="text">
-                <string>ArcGIS API Key</string>
-               </property>
-              </widget>
+             <item row="11" column="1">
+              <layout class="QHBoxLayout" name="checkWXAPILinksLayout">
+               <item>
+                <widget class="QLabel" name="checkWXAPIWebsite">
+                 <property name="text">
+                  <string>&lt;a href="https://www.checkwxapi.com/"&gt;CheckWX API Website&lt;/a&gt;</string>
+                 </property>
+                 <property name="openExternalLinks">
+                  <bool>true</bool>
+                 </property>
+                </widget>
+               </item>
+               <item>
+                <widget class="QLabel" name="checkWXAPIRegister">
+                 <property name="text">
+                  <string>&lt;a href="https://www.checkwxapi.com/signup"&gt;Register at CheckWX API&lt;/a&gt;</string>
+                 </property>
+                 <property name="openExternalLinks">
+                  <bool>true</bool>
+                 </property>
+                </widget>
+               </item>
+               <item>
+                <widget class="QLabel" name="checkWXAPIFindKey">
+                 <property name="text">
+                  <string>&lt;a href="https://www.checkwxapi.com/user/apikey"&gt;Get API Key&lt;/a&gt;</string>
+                 </property>
+                 <property name="openExternalLinks">
+                  <bool>true</bool>
+                 </property>
+                </widget>
+               </item>
+              </layout>
              </item>
-             <item row="4" column="1">
-              <widget class="QLineEdit" name="arcGISAPIKey">
+             <item row="12" column="0">
+              <spacer name="apiKeySpacer">
+               <property name="orientation">
+                <enum>Qt::Vertical</enum>
+               </property>
+               <property name="sizeType">
+                <enum>QSizePolicy::Minimum</enum>
+               </property>
+               <property name="sizeHint" stdset="0">
+                <size>
+                 <width>20</width>
+                 <height>10</height>
+                </size>
+               </property>
+              </spacer>
+             </item>
+             <item row="13" column="1">
+              <widget class="QPushButton" name="verifyAPIKeysButton">
                <property name="toolTip">
-                <string>Enter an ArcGIS API Key</string>
+                <string>Validates all entered API keys and tokens by making requests to the corresponding services.
+                  Some requests may consume API usage or incur charges.</string>
+               </property>
+               <property name="text">
+                <string>Validate all Keys/Tokens</string>
                </property>
               </widget>
              </item>
