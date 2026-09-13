@@ -3834,7 +3834,7 @@ QList<MCPTools::ChannelNote> MCPTools::channelNotes(int deviceSetIndex, const QS
     return notes;
 }
 
-QStringList MCPTools::reclaimIntentChannels(int deviceSetIndex, const void *keep)
+QStringList MCPTools::reclaimIntentChannels(int deviceSetIndex, const QSet<const void *>& keep)
 {
     QStringList removed;
 
@@ -3844,7 +3844,7 @@ QStringList MCPTools::reclaimIntentChannels(int deviceSetIndex, const void *keep
 
     for (int i = notes.size() - 1; i >= 0; i--)
     {
-        if (!notes[i].m_intent || (notes[i].m_channel == keep)) {
+        if (!notes[i].m_intent || keep.contains(notes[i].m_channel)) {
             continue;
         }
 
@@ -3863,9 +3863,11 @@ QStringList MCPTools::reclaimIntentChannels(int deviceSetIndex, const void *keep
 }
 
 // Retuning the demodulator a previous listen added is what a person would do, and spares the
-// audio device and the GUI a close and reopen. Only when it is the one intent channel of that
-// type, and no scan's FreqScanner is there to be driving it
-const void *MCPTools::reusableIntentChannel(int deviceSetIndex, const QString& channelType, int& channelIndex)
+// audio device and the GUI a close and reopen. Only when the intent channels of that type are
+// exactly the count the mode uses (one, or two for a paired mode such as AIS), and no scan's
+// FreqScanner is there to be driving them. The first is returned; a paired mode finds the
+// other among the intent channels of the type
+const void *MCPTools::reusableIntentChannel(int deviceSetIndex, const QString& channelType, int& channelIndex, int wanted)
 {
     const void *candidate = nullptr;
     int candidates = 0;
@@ -3882,13 +3884,17 @@ const void *MCPTools::reusableIntentChannel(int deviceSetIndex, const QString& c
 
         if (note.m_id == channelType)
         {
-            candidate = note.m_channel;
-            channelIndex = note.m_index;
+            if (!candidate)
+            {
+                candidate = note.m_channel;
+                channelIndex = note.m_index;
+            }
+
             candidates++;
         }
     }
 
-    return (candidates == 1) ? candidate : nullptr;
+    return (candidates == wanted) ? candidate : nullptr;
 }
 
 // A retune moves every channel on the device set, since each is an offset from the centre. A
@@ -4641,7 +4647,8 @@ void MCPTools::trackIntentFeature(const void *feature)
 
 // A feature listen added goes with the demodulators that fed it: once the last of those is
 // reclaimed, on whichever device set, it would only show stale data. One the next mode
-// needs, or that a demodulator on another device set still feeds, stays
+// needs, or that a demodulator anywhere still feeds, stays: the user may have added their own
+// decoder since and be reading the feature through it
 QStringList MCPTools::reclaimIntentFeatures(const QString& keepType)
 {
     QSet<uint64_t> tracked;
@@ -4654,7 +4661,7 @@ QStringList MCPTools::reclaimIntentFeatures(const QString& keepType)
         return QStringList();
     }
 
-    // The feature types the remaining intent channels feed
+    // The feature types the remaining channels feed, whoever added them
     QSet<QString> needed;
 
     if (!keepType.isEmpty()) {
@@ -4665,7 +4672,7 @@ QStringList MCPTools::reclaimIntentFeatures(const QString& keepType)
     {
         for (const ChannelNote& note : channelNotes(deviceSetIndex))
         {
-            const char *feature = note.m_intent ? featureForChannelType(note.m_id) : nullptr;
+            const char *feature = featureForChannelType(note.m_id);
 
             if (feature) {
                 needed.insert(QString(feature));
@@ -4869,9 +4876,30 @@ void MCPTools::registerIntentTools()
             // A demodulator of the right type that a previous listen added is retuned rather
             // than replaced; anything else the intent tools added goes as before
             int channelIndex = -1;
-            const void *channel = replace ? reusableIntentChannel(deviceSetIndex, channelType, channelIndex) : nullptr;
+            const void *channel = replace ? reusableIntentChannel(deviceSetIndex, channelType, channelIndex, pairOffset != 0 ? 2 : 1) : nullptr;
             const bool retuned = channel != nullptr;
-            const QStringList reclaimed = replace ? reclaimIntentChannels(deviceSetIndex, channel) : QStringList();
+
+            // A paired mode keeps its other demodulator through the reclaim as well
+            QSet<const void *> kept;
+
+            if (retuned)
+            {
+                kept.insert(channel);
+
+                if (pairOffset != 0)
+                {
+                    for (const ChannelNote& note : channelNotes(deviceSetIndex, {channel}))
+                    {
+                        if (note.m_intent && (note.m_id == channelType))
+                        {
+                            kept.insert(note.m_channel);
+                            break;
+                        }
+                    }
+                }
+            }
+
+            const QStringList reclaimed = replace ? reclaimIntentChannels(deviceSetIndex, kept) : QStringList();
             const QStringList reclaimedFeatures = replace ? reclaimIntentFeatures(companionFeature) : QStringList();
 
             if (retuned)

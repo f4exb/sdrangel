@@ -232,9 +232,10 @@ private:
     struct ChannelNote { const void *m_channel; int m_index; QString m_id; bool m_intent; };
     QList<ChannelNote> channelNotes(int deviceSetIndex, const QSet<const void *>& except = QSet<const void *>());
     //!< Removes the channels listen and scan added to a device set, except keep. Returns the ids of those removed
-    QStringList reclaimIntentChannels(int deviceSetIndex, const void *keep = nullptr);
-    //!< The channel a previous listen added that a new one of this type can retune instead of replacing, or null
-    const void *reusableIntentChannel(int deviceSetIndex, const QString& channelType, int& channelIndex);
+    QStringList reclaimIntentChannels(int deviceSetIndex, const QSet<const void *>& keep = QSet<const void *>());
+    //!< The channel a previous listen added that a new one of this type can retune instead of replacing, or null.
+    //!< wanted: how many of the type the mode uses, 2 for a paired mode
+    const void *reusableIntentChannel(int deviceSetIndex, const QString& channelType, int& channelIndex, int wanted = 1);
     //!< What a retune of a reused device set did to the channels listen and scan did not add
     struct RetuneOutcome
     {

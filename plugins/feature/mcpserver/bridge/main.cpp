@@ -35,6 +35,7 @@
 #include <string>
 #include <thread>
 #include <vector>
+#include <set>
 
 #ifdef _WIN32
 #include <fcntl.h>
@@ -164,6 +165,8 @@ private:
     bool reinitialize(const std::string& staleSession);
     bool answerLocally(const std::string& id, const std::string& method, const std::string& message);
     bool openSession();
+    //!< Subscribes again to the resources the client had subscribed to, on a session just built
+    void replaySubscriptions();
     void settleHandshake();
     void waitForHandshake();
     void streamLoop();
@@ -182,6 +185,7 @@ private:
     std::string m_sessionId;
     std::string m_protocolVersion;
     std::string m_initializeMessage;    //!< Kept so the session can be rebuilt without the client
+    std::set<std::string> m_subscriptions;  //!< Resource URIs the client subscribed to, to carry over to a new session
     std::mutex m_reinitMutex;           //!< One rebuild at a time, however many calls failed at once
     std::atomic<bool> m_degraded { false };  //!< Handshake answered without SDRangel: it was not up
     std::string m_shippedTools;         //!< tools/list result packaged with the bridge, may be empty
@@ -383,7 +387,44 @@ bool Bridge::reinitialize(const std::string& staleSession)
     std::string ignoredError;
     exchange("{\"jsonrpc\":\"2.0\",\"method\":\"notifications/initialized\"}", ignoredHead, ignoredBody, ignoredError);
 
-    return !sessionId().empty();
+    if (sessionId().empty()) {
+        return false;
+    }
+
+    replaySubscriptions();
+    return true;
+}
+
+//!< A subscription lives in the session it was made in, so a session the server has forgotten
+//!< took the client's subscriptions with it. The client is not told: the updates it asked for
+//!< carry on arriving as before. The replies are answers to requests the client never made, so
+//!< they are not passed on
+void Bridge::replaySubscriptions()
+{
+    std::set<std::string> uris;
+    {
+        std::lock_guard<std::mutex> lock(m_stateMutex);
+        uris = m_subscriptions;
+    }
+
+    int n = 0;
+
+    for (const std::string& uri : uris)
+    {
+        HttpClient::Head head;
+        std::string body;
+        std::string error;
+        std::string message = "{\"jsonrpc\":\"2.0\",\"id\":\"bridge-subscribe-" + std::to_string(++n)
+            + "\",\"method\":\"resources/subscribe\",\"params\":{\"uri\":\"" + escaped(uri) + "\"}}";
+
+        if (!exchange(message, head, body, error) || (head.m_status < 200) || (head.m_status > 299)) {
+            note(m_options, "could not subscribe again to " + uri);
+        }
+    }
+
+    if (n > 0) {
+        note(m_options, "subscribed again to " + std::to_string(n) + " resource(s)");
+    }
 }
 
 //!< Answers what the bridge can answer on its own. Returns true when it has replied.
@@ -467,6 +508,8 @@ bool Bridge::openSession()
         std::lock_guard<std::mutex> lock(m_stateMutex);
         m_protocolVersion = version;
     }
+
+    replaySubscriptions();
 
     if (m_degraded.exchange(false))
     {
@@ -636,6 +679,24 @@ void Bridge::post(const std::string& message)
         {
             std::lock_guard<std::mutex> lock(m_stateMutex);
             m_protocolVersion = version;
+        }
+    }
+
+    // Remembered only once the server has accepted it, so that a refused subscription is not
+    // replayed on the next session
+    if (((method == "resources/subscribe") || (method == "resources/unsubscribe")) && jsonMember(body, "error").empty())
+    {
+        std::string uri = jsonStringMember(jsonMember(message, "params"), "uri");
+
+        if (!uri.empty())
+        {
+            std::lock_guard<std::mutex> lock(m_stateMutex);
+
+            if (method == "resources/subscribe") {
+                m_subscriptions.insert(uri);
+            } else {
+                m_subscriptions.erase(uri);
+            }
         }
     }
 

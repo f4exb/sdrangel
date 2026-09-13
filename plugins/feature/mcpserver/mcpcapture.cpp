@@ -40,7 +40,46 @@
 #include "mcperror.h"
 #include "mcpcapture.h"
 
+#ifdef Q_OS_WIN
+#include <windows.h>
+#endif
+
 namespace {
+
+// Where the file system really puts an existing path, with every symbolic link and junction on
+// the way resolved. Qt's canonicalFilePath does not see through a junction on Windows, which is
+// the easiest of them to make, so the final path is asked of the system there
+QString realPath(const QString& path)
+{
+#ifdef Q_OS_WIN
+    HANDLE handle = CreateFileW(reinterpret_cast<LPCWSTR>(QDir::toNativeSeparators(path).utf16()), 0,
+        FILE_SHARE_READ | FILE_SHARE_WRITE | FILE_SHARE_DELETE, nullptr, OPEN_EXISTING, FILE_FLAG_BACKUP_SEMANTICS, nullptr);
+
+    if (handle == INVALID_HANDLE_VALUE) {
+        return QString();
+    }
+
+    wchar_t buffer[32768];
+    DWORD length = GetFinalPathNameByHandleW(handle, buffer, sizeof(buffer) / sizeof(buffer[0]), FILE_NAME_NORMALIZED);
+    CloseHandle(handle);
+
+    if ((length == 0) || (length >= sizeof(buffer) / sizeof(buffer[0]))) {
+        return QString();
+    }
+
+    QString result = QString::fromWCharArray(buffer, length);
+
+    if (result.startsWith("\\\\?\\UNC\\")) {
+        result = "\\\\" + result.mid(8);
+    } else if (result.startsWith("\\\\?\\")) {
+        result = result.mid(4);
+    }
+
+    return QDir::cleanPath(QDir::fromNativeSeparators(result));
+#else
+    return QFileInfo(path).canonicalFilePath();
+#endif
+}
 
 QJsonObject toJson(SWGSDRangel::SWGObject& object)
 {
@@ -150,6 +189,32 @@ QString MCPCapture::resolvePath(const QString& nameIn, const QString& defaultPre
 
     if ((full != baseAbs) && !full.startsWith(baseAbs + "/")) {
         throw MCPToolError(QString("File name must stay inside the capture directory %1").arg(baseAbs));
+    }
+
+    // The text can stay inside while the file does not: a symbolic link or junction under the
+    // capture directory leads elsewhere. Judge by where the nearest existing ancestor really
+    // is, since the directories below it are about to be created as ordinary ones
+    QString baseReal = realPath(baseAbs);
+    QString ancestor = QFileInfo(full).path();
+
+    while (!QFileInfo::exists(ancestor))
+    {
+        QString up = QFileInfo(ancestor).path();
+
+        if (up == ancestor) {
+            break;
+        }
+
+        ancestor = up;
+    }
+
+    QString ancestorReal = realPath(ancestor);
+
+    if (baseReal.isEmpty() || ancestorReal.isEmpty()
+        || ((ancestorReal != baseReal) && !ancestorReal.startsWith(baseReal + "/")))
+    {
+        throw MCPToolError(QString("File name must stay inside the capture directory %1; %2 leads outside it")
+            .arg(baseAbs).arg(ancestor));
     }
 
     // SDRangel appends its own timestamp and extension, so strip a supplied one

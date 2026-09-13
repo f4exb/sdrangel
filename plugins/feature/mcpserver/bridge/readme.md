@@ -69,7 +69,9 @@ after it, and the negotiated protocol version with it. Once there is a session, 
 for the server to client event stream, which is where `notifications/resources/updated` arrives for
 anything subscribed to with `resources/subscribe`. The server closes that stream when its lifetime
 backstop expires, so it is reopened for as long as the bridge runs. When stdin closes, the session is
-ended with a DELETE.
+ended with a DELETE. SDRangel forgets every session when it restarts: the bridge then replays the
+client's `initialize` to get a new one, and subscribes again to every resource the client had
+subscribed to, so the client sees neither the restart nor a gap in its updates.
 
 Anything that goes wrong with the transport becomes a JSON-RPC error against the id of the request
 that provoked it, rather than a dropped message. The one users will meet is SDRangel not running,
