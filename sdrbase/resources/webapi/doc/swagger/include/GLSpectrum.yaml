@@ -344,7 +344,8 @@ GLSpectrum:
       description: "Waterfall share for Gl spectrum."
     averagingMode:
       description: >
-        How successive FFTs are averaged
+        How successive FFTs are averaged. Selecting a mode does nothing on its own: the number of
+        FFTs it works over is averagingValue, which must be above 1 for any smoothing to happen.
           * 0 - no averaging
           * 1 - moving average
           * 2 - fixed average over each block
@@ -355,7 +356,11 @@ GLSpectrum:
       maximum: 4
     averagingValue:
       type: integer
-      description: "Averaging value for Gl spectrum."
+      description: >
+        Number of successive FFTs the averaging mode works over. 1 is no averaging whatever the
+        mode. Only 1, 2, 5, 10, 20, 50, 100 and so on are available and anything else is rounded
+        down to one of them. 10 smooths a noisy trace without hiding short signals; 50 or more
+        is for measuring a noise floor.
     linear:
       description: boolean
       type: integer
