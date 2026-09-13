@@ -133,6 +133,8 @@ struct MapSettings
     QHash<QString, MapItemSettings *> m_itemSettings;
 
     MapSettings();
+    MapSettings(const MapSettings& other);
+    MapSettings& operator=(const MapSettings& other);
     ~MapSettings();
     void resetToDefaults();
     QByteArray serialize() const;
