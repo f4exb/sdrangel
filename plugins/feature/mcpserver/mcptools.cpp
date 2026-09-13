@@ -3833,8 +3833,112 @@ const void *MCPTools::reusableIntentChannel(int deviceSetIndex, const QString& c
     return (candidates == 1) ? candidate : nullptr;
 }
 
+// A retune moves every channel on the device set, since each is an offset from the centre. A
+// channel the user added is kept on the frequency it had when the new baseband holds it; an
+// audio demodulator it cannot hold is removed, as all it could do is play noise; anything else
+// is left, with a note, since a file sink or an analyser may be wanted regardless
+MCPTools::RetuneOutcome MCPTools::retuneOtherChannels(int deviceSetIndex, double previousCentre, double centre, int baseband)
+{
+    RetuneOutcome outcome;
+
+    if ((qint64) previousCentre == (qint64) centre) {
+        return outcome;
+    }
+
+    static const QStringList audioDemods = {
+        "AMDemod", "BFMDemod", "DABDemod", "DATVDemod", "DSDDemod", "FreeDVDemod", "ILSDemod", "M17Demod",
+        "NFMDemod", "SSBDemod", "VORDemod", "VORDemodMC", "WFMDemod", "WDSPRx"
+    };
+
+    const QSet<uint64_t> intent = intentChannels();
+    QJsonObject set = getDeviceSet(deviceSetIndex);
+
+    if (baseband <= 0) {
+        baseband = set["samplingDevice"].toObject()["bandwidth"].toInt();
+    }
+
+    struct Item { int m_index; QString m_id; const void *m_channel; qint64 m_offset; };
+    QList<Item> items;
+
+    for (const QJsonValue& v : set["channels"].toArray())
+    {
+        QJsonObject channel = v.toObject();
+        const int index = channel["index"].toInt();
+        const void *pointer = channelAt(deviceSetIndex, index);
+
+        if (pointer && !intent.contains(channelUid(pointer))) {
+            items.append({index, channel["id"].toString(), pointer, (qint64) channel["deltaFrequency"].toDouble()});
+        }
+    }
+
+    // Highest index first, so that a removal does not renumber one still to be visited
+    for (int i = items.size() - 1; i >= 0; i--)
+    {
+        const Item& item = items[i];
+        const qint64 wanted = (qint64) previousCentre + item.m_offset; // where it was listening
+        const qint64 offset = wanted - (qint64) centre;
+        const QString where = QString("%1 at %2 MHz").arg(item.m_id).arg(wanted / 1e6, 0, 'f', 3);
+
+        // The offset key differs by type: most have inputFrequencyOffset, the Channel Analyzer
+        // frequency, ATV intFrequencyOffset, DATV centerFrequency; a sink or a scanner has none
+        // and is left alone. Read the live settings to find which, rather than guess
+        QString offsetKey;
+
+        if ((baseband > 0) && (qAbs(offset) <= baseband * 0.45)) // a tenth kept clear at each edge
+        {
+            try
+            {
+                QJsonObject current = settingsOf(getChannelSettings(deviceSetIndex, item.m_index));
+
+                for (const char *key : {"inputFrequencyOffset", "frequency", "intFrequencyOffset", "centerFrequency"})
+                {
+                    if (current.contains(key))
+                    {
+                        offsetKey = key;
+                        break;
+                    }
+                }
+            }
+            catch (const MCPToolError&) {}
+        }
+
+        if (!offsetKey.isEmpty())
+        {
+            try
+            {
+                QJsonObject partial;
+                partial[offsetKey] = (double) offset;
+                patchChannelSettings(deviceSetIndex, item.m_index, partial);
+                outcome.m_kept.append(where);
+            }
+            catch (const MCPToolError&)
+            {
+                outcome.m_stranded.append(where);
+            }
+        }
+        else if ((baseband > 0) && audioDemods.contains(item.m_id))
+        {
+            try
+            {
+                deleteChannelObjectAndWait(item.m_channel);
+                outcome.m_removed.append(where);
+            }
+            catch (const MCPToolError&)
+            {
+                outcome.m_stranded.append(where);
+            }
+        }
+        else
+        {
+            outcome.m_stranded.append(where);
+        }
+    }
+
+    return outcome;
+}
+
 QStringList MCPTools::intentNotes(int deviceSetIndex, const QSet<const void *>& added, const QStringList& reclaimed,
-    bool reused, double previousCentre, double centre)
+    bool reused, double previousCentre, double centre, const RetuneOutcome& outcome)
 {
     QStringList notes;
 
@@ -3860,16 +3964,34 @@ QStringList MCPTools::intentNotes(int deviceSetIndex, const QSet<const void *>& 
             .arg(deviceSetIndex).arg(leftovers.size()).arg(leftovers.size() == 1 ? "" : "s").arg(leftovers.join(", ")));
     }
 
-    // Channels that were not put there by these tools are not theirs to remove, so the most
-    // they can do is say what the retune did to them and how to put it right
-    if (reused && !others.isEmpty() && ((qint64) previousCentre != (qint64) centre))
+    // What the retune did to the channels the user added, and how to put back what it took
+    if (reused && ((qint64) previousCentre != (qint64) centre)
+        && !(outcome.m_kept.isEmpty() && outcome.m_removed.isEmpty() && outcome.m_stranded.isEmpty()))
     {
-        notes.append(QString("Retuned device set %1 from %2 to %3 MHz; its %4 other channel%5 (%6), not added by listen or scan, may now be outside the baseband. "
-            "set_channel_settings inputFrequencyOffset retunes one, delete_channel removes it.")
-            .arg(deviceSetIndex).arg(previousCentre / 1e6, 0, 'f', 3).arg(centre / 1e6, 0, 'f', 3)
-            .arg(others.size()).arg(others.size() == 1 ? "" : "s").arg(others.join(", ")));
+        QString note = QString("Retuned device set %1 from %2 to %3 MHz.").arg(deviceSetIndex)
+            .arg(previousCentre / 1e6, 0, 'f', 3).arg(centre / 1e6, 0, 'f', 3);
+
+        if (!outcome.m_kept.isEmpty()) {
+            note += QString(" Kept %1 other channel%2 on frequency by moving the offset: %3.")
+                .arg(outcome.m_kept.size()).arg(outcome.m_kept.size() == 1 ? "" : "s").arg(outcome.m_kept.join(", "));
+        }
+
+        if (!outcome.m_removed.isEmpty()) {
+            note += QString(" Removed %1 audio demodulator%2 the new baseband could not hold, which would only have played noise: %3. "
+                "They were not added by listen or scan; add_channel puts one back.")
+                .arg(outcome.m_removed.size()).arg(outcome.m_removed.size() == 1 ? "" : "s").arg(outcome.m_removed.join(", "));
+        }
+
+        if (!outcome.m_stranded.isEmpty()) {
+            note += QString(" Left %1 other channel%2 that the new baseband does not hold, not being audio: %3. "
+                "set_channel_settings inputFrequencyOffset retunes one, delete_channel removes it.")
+                .arg(outcome.m_stranded.size()).arg(outcome.m_stranded.size() == 1 ? "" : "s").arg(outcome.m_stranded.join(", "));
+        }
+
+        notes.append(note);
     }
 
+    (void) others;
     return notes;
 }
 
@@ -3910,7 +4032,7 @@ void MCPTools::postChannelAction(int deviceSetIndex, int channelIndex, const QJs
 // Finds or creates a receive device set holding a suitable device and sets its sample rate.
 // An existing set holding the same device is reused rather than fought for the hardware; the
 // caller tunes the centre frequency and is told what else that set carries.
-QJsonObject MCPTools::pickReceiver(const QJsonObject& args, int minBaseband, const QSet<uint64_t>& doomed)
+QJsonObject MCPTools::pickReceiver(const QJsonObject& args, int minBaseband, const QSet<uint64_t>& doomed, bool profileGain)
 {
     SWGSDRangel::SWGInstanceDevicesResponse devicesResponse;
     SWGSDRangel::SWGErrorResponse error;
@@ -4069,13 +4191,18 @@ QJsonObject MCPTools::pickReceiver(const QJsonObject& args, int minBaseband, con
     {
         partial["dcBlock"] = 1;
         partial["iqImbalance"] = 1;
-        // A fixed 40 dB: the tuner's own AGC is unreliable on weak signals, and the default
-        // gain left the airband 35 dB down on what a hand-set receiver saw
-        partial["agc"] = 0;
-        partial["gain"] = 402;
-        rateNote = (rateNote.isEmpty() ? QString() : rateNote + " ")
-            + QString("Device set %1 is new, so its RTL-SDR was set to 40 dB gain with AGC off; set_device_settings changes it.")
-                .arg(deviceSetIndex);
+
+        // A fixed 40 dB when the caller is not about to measure one: the tuner's own AGC is
+        // unreliable on weak signals, and the default gain left the airband 35 dB down on what
+        // a hand-set receiver saw
+        if (profileGain)
+        {
+            partial["agc"] = 0;
+            partial["gain"] = 402;
+            rateNote = (rateNote.isEmpty() ? QString() : rateNote + " ")
+                + QString("Device set %1 is new, so its RTL-SDR was set to 40 dB gain with AGC off; set_device_settings changes it.")
+                    .arg(deviceSetIndex);
+        }
     }
 
     if (!partial.isEmpty()) {
@@ -4094,6 +4221,347 @@ QJsonObject MCPTools::pickReceiver(const QJsonObject& args, int minBaseband, con
     return result;
 }
 
+// The tune_gain tool, also run by listen and scan when they set up a receiver on a new
+// device set or move one to another band
+QJsonObject MCPTools::tuneGain(const QJsonObject& args)
+{
+    int deviceSetIndex = argInt(args, "deviceSetIndex");
+    QJsonObject reply = getDeviceSettings(deviceSetIndex);
+    const QString hwType = reply["deviceHwType"].toString();
+    QJsonObject settings = settingsOf(reply);
+
+    if (deviceState(deviceSetIndex, 0, -1)["state"].toString() != "running") {
+        throw MCPToolError("The device is not running, so there is nothing to measure. start_device first.");
+    }
+
+    // What this knows about each device's gain: the key, its manual AGC setting, and the
+    // values to try. Where a device has several gain stages the one before the mixer is
+    // tuned, as that is where overload happens; the rest keep their settings
+    struct Knob { QString key; QString agcKey; int agcOff; QList<double> values; QString unit; QString note; };
+    Knob knob;
+    const bool custom = hasArg(args, "gainKey");
+
+    if (custom)
+    {
+        knob.key = argString(args, "gainKey");
+        knob.agcKey = argString(args, "agcKey", false);
+        knob.agcOff = 0;
+        knob.unit = "the key's own units";
+
+        for (const QJsonValue& v : args["values"].toArray()) {
+            knob.values.append(v.toDouble());
+        }
+
+        if (knob.values.size() < 2) {
+            throw MCPToolError("Give at least two values to try with gainKey");
+        }
+    }
+    else if (hwType == "RTLSDR")
+    {
+        // The tuner takes only the values it lists, in tenths of a decibel
+        knob = {"gain", "agc", 0, {}, "tenths of a dB", "The tuner's AGC is off, as it must be for the gain to hold"};
+        SWGSDRangel::SWGDeviceReport report;
+        SWGSDRangel::SWGErrorResponse error;
+        error.init();
+        check(m_adapter->devicesetDeviceReportGet(deviceSetIndex, report, error), error, "Get device report");
+        QJsonObject json = toJson(report);
+
+        for (const QString& key : json.keys())
+        {
+            for (const QJsonValue& g : json[key].toObject()["gains"].toArray()) {
+                knob.values.append(g.toObject()["gainCB"].toDouble());
+            }
+        }
+
+        if (knob.values.isEmpty()) {
+            throw MCPToolError("The RTL-SDR reported no supported gain values; is the device open?");
+        }
+    }
+    else if (hwType == "HackRF") {
+        knob = {"lnaGain", "", 0, {0, 8, 16, 24, 32, 40}, "dB", "Only the LNA is stepped; vgaGain is left as it is"};
+    }
+    else if (hwType == "Airspy") {
+        knob = {"lnaGain", "lnaAGC", 0, {0, 2, 4, 6, 8, 10, 12, 14}, "steps", "Only the LNA is stepped; mixerGain and vgaGain are left as they are, with the LNA AGC off"};
+    }
+    else if (hwType == "LimeSDR") {
+        knob = {"gain", "gainMode", 1, {0, 10, 20, 30, 40, 50, 60, 70}, "dB", "gainMode set to manual"};
+    }
+    else if (hwType == "PlutoSDR") {
+        knob = {"gain", "gainMode", 0, {0, 10, 20, 30, 40, 50, 60, 70}, "dB", "gainMode set to manual"};
+    }
+    else if (hwType == "USRP") {
+        knob = {"gain", "gainMode", 1, {0, 10, 20, 30, 40, 50, 60, 70}, "dB", "gainMode set to manual"};
+    }
+    else
+    {
+        throw MCPToolError(QString("tune_gain does not know the gain settings of a %1. Read them with describe_settings and "
+            "give gainKey, values and, if it has one, agcKey.").arg(hwType));
+    }
+
+    std::sort(knob.values.begin(), knob.values.end());
+    knob.values.erase(std::unique(knob.values.begin(), knob.values.end()), knob.values.end());
+
+    // Spread the steps over the range rather than trying every value a tuner offers
+    const int steps = qBound(3, argInt(args, "steps", false, 8), 16);
+    QList<double> candidates;
+
+    if (knob.values.size() <= steps) {
+        candidates = knob.values;
+    }
+    else
+    {
+        for (int i = 0; i < steps; i++) {
+            candidates.append(knob.values[(int) std::round(i * (knob.values.size() - 1) / (double) (steps - 1))]);
+        }
+    }
+
+    const bool apply = args.value("apply").toBool(true);
+    const double previous = settings[knob.key].toDouble();
+    const double previousAgc = knob.agcKey.isEmpty() ? 0 : settings[knob.agcKey].toDouble();
+    const qint64 frequency = (qint64) argDouble(args, "frequency", false, 0);
+    const qint64 bandwidth = (qint64) argDouble(args, "bandwidth", false, 200000);
+
+    // One reading: the floor is the median over the baseband, the signal the strongest bin,
+    // in the window asked for or anywhere. Max reduction keeps a narrow carrier
+    auto measure = [&](double& floorDb, double& peakDb)
+    {
+        SWGSDRangel::SWGGLSpectrumData response;
+        SWGSDRangel::SWGErrorResponse error;
+        response.init();
+        error.init();
+        check(m_adapter->devicesetSpectrumDataGet(deviceSetIndex, 256, 0, 0, "max", response, error), error, "Get spectrum data");
+        // Read from the object: the generated JSON serialiser drops a list of plain floats
+        const bool linear = response.getLinear() != 0;
+        QList<double> powers;
+
+        if (response.getPower())
+        {
+            for (float v : *response.getPower()) {
+                powers.append(linear ? 10.0 * std::log10(std::max((double) v, 1e-20)) : (double) v);
+            }
+        }
+
+        if (powers.isEmpty()) {
+            throw MCPToolError("The spectrum returned no data");
+        }
+
+        QList<double> sorted = powers;
+        std::sort(sorted.begin(), sorted.end());
+        floorDb = sorted[sorted.size() / 2];
+
+        if (frequency > 0)
+        {
+            // The data call clamps to the baseband, which would silently measure noise at
+            // its edge for a frequency outside it
+            const qint64 low = response.getCenterFrequency() - response.getBandwidth() / 2;
+            const qint64 high = response.getCenterFrequency() + response.getBandwidth() / 2;
+
+            if ((frequency < low) || (frequency > high))
+            {
+                throw MCPToolError(QString("%1 MHz is outside the baseband, which covers %2 to %3 MHz; tune the device so that it is inside, or leave frequency out")
+                    .arg(frequency / 1e6, 0, 'f', 3).arg(low / 1e6, 0, 'f', 3).arg(high / 1e6, 0, 'f', 3));
+            }
+
+            SWGSDRangel::SWGGLSpectrumData window;
+            SWGSDRangel::SWGErrorResponse windowError;
+            window.init();
+            windowError.init();
+            check(m_adapter->devicesetSpectrumDataGet(deviceSetIndex, 32, frequency - bandwidth / 2, frequency + bandwidth / 2, "max", window, windowError),
+                windowError, "Get spectrum data");
+            peakDb = -1e9;
+
+            if (window.getPower())
+            {
+                for (float v : *window.getPower()) {
+                    peakDb = std::max(peakDb, linear ? 10.0 * std::log10(std::max((double) v, 1e-20)) : (double) v);
+                }
+            }
+
+            if (peakDb < -1e8) {
+                throw MCPToolError("The spectrum has no bins at that frequency; it must be inside the baseband");
+            }
+        }
+        else
+        {
+            peakDb = sorted.last();
+        }
+    };
+
+    struct Row { double gain; double floorDb; double peakDb; double snrDb; };
+    QList<Row> rows;
+
+    auto setGain = [&](double gain, bool agcOff)
+    {
+        QJsonObject partial;
+        partial[knob.key] = gain;
+
+        if (!knob.agcKey.isEmpty()) {
+            partial[knob.agcKey] = agcOff ? knob.agcOff : previousAgc;
+        }
+
+        patchDeviceSettings(deviceSetIndex, partial);
+    };
+
+    try
+    {
+        for (double gain : candidates)
+        {
+            setGain(gain, true);
+            QThread::msleep(700); // the tuner, the spectrum averaging and a stale FFT
+            double floorSum = 0.0;
+            double peakSum = 0.0;
+            const int samples = 3;
+
+            for (int i = 0; i < samples; i++)
+            {
+                if (i > 0) {
+                    QThread::msleep(250);
+                }
+
+                double floorDb, peakDb;
+                measure(floorDb, peakDb);
+                floorSum += floorDb;
+                peakSum += peakDb;
+            }
+
+            rows.append({gain, floorSum / samples, peakSum / samples, (peakSum - floorSum) / samples});
+        }
+    }
+    catch (const MCPToolError&)
+    {
+        setGain(previous, false); // as it was, AGC included
+        throw;
+    }
+
+    auto toDb = [&](double gain) { return (knob.unit == "tenths of a dB") ? gain / 10.0 : gain; };
+
+    // Overload shows as the floor climbing faster than the gain did. The first step
+    // where it does bounds the usable range from above
+    QStringList notes;
+    int compressed = 0;
+    int overloadFrom = rows.size(); // index of the first row that is overloaded
+
+    for (int i = 1; i < rows.size(); i++)
+    {
+        const double gainStep = toDb(rows[i].gain) - toDb(rows[i - 1].gain);
+
+        if ((gainStep > 0) && (rows[i].floorDb - rows[i - 1].floorDb > gainStep + 3.0))
+        {
+            compressed++;
+            overloadFrom = std::min(overloadFrom, i);
+        }
+    }
+
+    if (compressed > 0) {
+        notes.append(QString("The noise floor rose faster than the gain over %1 step%2, which is the front end overloading; the higher gains are not usable here.")
+            .arg(compressed).arg(compressed == 1 ? "" : "s"));
+    }
+
+    // Best SNR, then the lowest gain within a decibel of it
+    double best = -1e9;
+    for (const Row& r : rows) { best = std::max(best, r.snrDb); }
+    const Row *chosen = nullptr;
+    QString judgedBy = frequency > 0 ? QString("the signal at %1 MHz").arg(frequency / 1e6, 0, 'f', 3) : QString("the strongest signal in the baseband");
+
+    if (best >= 6.0)
+    {
+        for (const Row& r : rows) { if ((r.snrDb >= best - 1.0) && !chosen) { chosen = &r; } }
+    }
+    else
+    {
+        // Nothing stood clear of the floor, so the floor itself has to decide: at low gain
+        // it is the converter's own noise and does not move; as gain rises the antenna's
+        // noise comes through and lifts it, which is when weak signals become receivable;
+        // and past overload it lifts faster than the gain. Take the lowest gain that puts
+        // the floor 8 dB above the converter's, which is the antenna's noise dominating
+        // by the usual 10 dB rule with a little allowance for the steps being coarse, or
+        // the last gain before overload if none does
+        double adcFloor = 1e9;
+        for (const Row& r : rows) { adcFloor = std::min(adcFloor, r.floorDb); }
+        const int lastUsable = std::max(0, overloadFrom - 1);
+        static const double antennaDominates = 8.0;
+
+        for (int i = 0; (i <= lastUsable) && !chosen; i++)
+        {
+            if (rows[i].floorDb >= adcFloor + antennaDominates) {
+                chosen = &rows[i];
+            }
+        }
+
+        if (!chosen) {
+            chosen = &rows[lastUsable];
+        }
+
+        judgedBy = "the noise floor alone, as no signal stood clear of it";
+        notes.append(QString("No signal stood more than 6 dB above the floor, so the gain is set from the floor instead: %1.")
+            .arg((rows[lastUsable].floorDb < adcFloor + antennaDominates)
+                ? "the floor never rose 8 dB above the converter's own noise before overload, so the last gain before overload is taken; check the antenna if that seems low"
+                : "the lowest gain at which the antenna's noise, not the converter's, sets the floor"));
+    }
+
+    if (chosen == &rows.last()) {
+        notes.append("The best was the highest gain tried: the signal is weak or the site quiet, and more gain would not overload yet.");
+    } else if (chosen == &rows.first()) {
+        notes.append("The best was the lowest gain tried: a strong-signal site. Consider an attenuator if the floor still rises with the lowest gain.");
+    }
+
+    if (apply)
+    {
+        setGain(chosen->gain, true);
+    }
+    else
+    {
+        setGain(previous, false);
+        notes.append("Not applied: the gain is back as it was.");
+    }
+
+    if (!knob.note.isEmpty()) {
+        notes.append(knob.note + ".");
+    }
+
+    QJsonObject result;
+    result["deviceSetIndex"] = deviceSetIndex;
+    result["hwType"] = hwType;
+    result["gainKey"] = knob.key;
+    result["unit"] = knob.unit;
+    result["previous"] = previous;
+    result["chosen"] = chosen->gain;
+    result["applied"] = apply;
+    result["bestSnrDb"] = chosen->snrDb;
+    result["judgedBy"] = judgedBy;
+    QJsonArray table;
+
+    for (const Row& r : rows)
+    {
+        QJsonObject o;
+        o["gain"] = r.gain;
+        o["floorDb"] = std::round(r.floorDb * 10) / 10;
+        o["signalDb"] = std::round(r.peakDb * 10) / 10;
+        o["snrDb"] = std::round(r.snrDb * 10) / 10;
+        table.append(o);
+    }
+
+    result["table"] = table;
+
+    if (!notes.isEmpty()) {
+        result["note"] = notes.join(" ");
+    }
+
+    return result;
+}
+
+// The gain suits a band and an antenna, not a mode: a device set that was just created has
+// whatever gain it came with, and one moved to another band has the gain of the last one. A
+// move within a band, or a change of mode on the same frequency, needs no new measurement
+bool MCPTools::gainWorthTuning(bool reused, double previousCentre, double centre)
+{
+    if (!reused) {
+        return true;
+    }
+
+    return std::abs(centre - previousCentre) > 0.1 * std::max(centre, previousCentre);
+}
+
 void MCPTools::registerIntentTools()
 {
     static const QString deviceHint = "Optional: which device, by serial, displayed name or type (e.g. RTLSDR) as shown by "
@@ -4108,7 +4576,8 @@ void MCPTools::registerIntentTools()
             {"mode", strProp("bfm (broadcast FM with stereo and RDS), wfm, nfm, am or airband, ssb/usb, lsb, dab, adsb, ais, dsc, dsd/dmr, "
                              "pager (POCSAG), sonde (RS41 radiosondes), or any channel type id from list_channel_types. Default nfm")},
             {"device", strProp(deviceHint)},
-            {"replace", prop("boolean", "Retune the demodulator a previous listen added to this device set when it is of the same type, and remove every other channel earlier listen and scan calls added there, so that exploring a band does not leave a trail of demodulators all playing audio and mis-tuned for the current centre frequency. Channels added any other way are never touched. Default true")}
+            {"replace", prop("boolean", "Retune the demodulator a previous listen added to this device set when it is of the same type, and remove every other channel earlier listen and scan calls added there, so that exploring a band does not leave a trail of demodulators all playing audio and mis-tuned for the current centre frequency. Channels added any other way are kept on their frequency where the baseband still holds them; audio demodulators it cannot hold are removed, anything else is left and named. Default true")},
+            {"tuneGain", prop("boolean", "Measure and set the receiver gain, as tune_gain does, when the device set is new or the retune is to another band (more than a tenth of the frequency away). Adds several seconds in those cases and none otherwise. false leaves the gain as it is. Default true")}
         }, {"frequency"}),
         [this](const QJsonObject& args)
         {
@@ -4142,7 +4611,8 @@ void MCPTools::registerIntentTools()
             }
 
             const bool replace = args.value("replace").toBool(true);
-            QJsonObject receiver = pickReceiver(args, minBaseband, replace ? intentChannels() : QSet<uint64_t>());
+            const bool wantTuneGain = args.value("tuneGain").toBool(true);
+            QJsonObject receiver = pickReceiver(args, minBaseband, replace ? intentChannels() : QSet<uint64_t>(), !wantTuneGain);
             int deviceSetIndex = receiver["deviceSetIndex"].toInt();
             int baseband = receiver["baseband"].toInt();
 
@@ -4164,6 +4634,9 @@ void MCPTools::registerIntentTools()
             QJsonObject tune;
             tune["centerFrequency"] = (double) (frequency - offset);
             patchDeviceSettings(deviceSetIndex, tune);
+            const RetuneOutcome outcome = receiver["reused"].toBool()
+                ? retuneOtherChannels(deviceSetIndex, receiver["previousCentre"].toDouble(), (double) (frequency - offset), baseband)
+                : RetuneOutcome();
 
             // A demodulator of the right type that a previous listen added is retuned rather
             // than replaced; anything else the intent tools added goes as before
@@ -4230,6 +4703,34 @@ void MCPTools::registerIntentTools()
 
             if (state == "running")
             {
+                // A new device set, or one moved to another band, has no gain to speak of yet
+                if (wantTuneGain && gainWorthTuning(receiver["reused"].toBool(), receiver["previousCentre"].toDouble(), (double) (frequency - offset)))
+                {
+                    QJsonObject gainArgs;
+                    gainArgs["deviceSetIndex"] = deviceSetIndex;
+                    gainArgs["frequency"] = (double) frequency;
+                    gainArgs["bandwidth"] = (double) (rfBandwidth != 0 ? qAbs(rfBandwidth) : 2000000);
+                    gainArgs["steps"] = 6;
+
+                    try
+                    {
+                        QJsonObject tuned = tuneGain(gainArgs);
+                        QJsonObject gain;
+                        gain["key"] = tuned["gainKey"];
+                        gain["value"] = tuned["chosen"];
+                        gain["unit"] = tuned["unit"];
+                        gain["snrDb"] = tuned["bestSnrDb"];
+                        result["gain"] = gain;
+                        notes.append(QString("Gain measured and set to %1 (%2), judged by %3, as %4; tune_gain shows the table, and tuneGain false leaves the gain alone.")
+                            .arg(tuned["chosen"].toDouble()).arg(tuned["unit"].toString()).arg(tuned["judgedBy"].toString())
+                            .arg(receiver["reused"].toBool() ? "the retune was to another band" : "the device set is new"));
+                    }
+                    catch (const MCPToolError& e)
+                    {
+                        notes.append(QString("The gain was not measured: %1").arg(e.message));
+                    }
+                }
+
                 QThread::msleep(1500);
                 // The channel may have been renumbered while we waited
                 relocateChannel(channel, deviceSetIndex, channelIndex, "demodulator");
@@ -4293,7 +4794,7 @@ void MCPTools::registerIntentTools()
             }
 
             notes.append(intentNotes(deviceSetIndex, {channel}, reclaimed, receiver["reused"].toBool(),
-                receiver["previousCentre"].toDouble(), (double) (frequency - offset)));
+                receiver["previousCentre"].toDouble(), (double) (frequency - offset), outcome));
 
             if (patched.contains("warning")) {
                 notes.append(patched["warning"].toString());
@@ -4336,7 +4837,8 @@ void MCPTools::registerIntentTools()
                                   "12 dB above it. Both are reported, so a second scan can adjust")},
             {"seconds", bounded(numProp("How long to watch before replying, 3 to 30. Default 10"), 3, 30)},
             {"device", strProp(deviceHint)},
-            {"replace", prop("boolean", "Remove every channel earlier listen and scan calls added to this device set first, as listen does. Channels added any other way are never touched. Default true")}
+            {"replace", prop("boolean", "Remove every channel earlier listen and scan calls added to this device set first, as listen does. Channels added any other way are kept on their frequency where the baseband still holds them; audio demodulators it cannot hold are removed, anything else is left and named. Default true")},
+            {"tuneGain", prop("boolean", "Measure and set the receiver gain first, as tune_gain does, when the device set is new or the retune is to another band. Adds several seconds in those cases and none otherwise. false leaves the gain as it is. Default true")}
         }),
         [this](const QJsonObject& args)
         {
@@ -4432,11 +4934,15 @@ void MCPTools::registerIntentTools()
 
             // A wide baseband means fewer retunes per sweep
             const bool replace = args.value("replace").toBool(true);
-            QJsonObject receiver = pickReceiver(args, 2400000, replace ? intentChannels() : QSet<uint64_t>());
+            const bool wantTuneGain = args.value("tuneGain").toBool(true);
+            QJsonObject receiver = pickReceiver(args, 2400000, replace ? intentChannels() : QSet<uint64_t>(), !wantTuneGain);
             int deviceSetIndex = receiver["deviceSetIndex"].toInt();
             QJsonObject tune;
             tune["centerFrequency"] = (double) ((frequencies.first() + frequencies.last()) / 2);
             patchDeviceSettings(deviceSetIndex, tune);
+            const RetuneOutcome outcome = receiver["reused"].toBool()
+                ? retuneOtherChannels(deviceSetIndex, receiver["previousCentre"].toDouble(), tune["centerFrequency"].toDouble(), receiver["baseband"].toInt())
+                : RetuneOutcome();
 
             const QStringList reclaimed = replace ? reclaimIntentChannels(deviceSetIndex) : QStringList();
             int demod = addChannelAndWait(deviceSetIndex, mode->m_channelType);
@@ -4485,6 +4991,28 @@ void MCPTools::registerIntentTools()
             {
                 discard();
                 throw MCPToolError(QString("The device did not start (state %1), so the demodulator and scanner were removed again.").arg(state));
+            }
+
+            // Before the scanner measures anything: the gain sets the floor it measures against
+            QString gainNote;
+
+            if (wantTuneGain && gainWorthTuning(receiver["reused"].toBool(), receiver["previousCentre"].toDouble(), tune["centerFrequency"].toDouble()))
+            {
+                QJsonObject gainArgs;
+                gainArgs["deviceSetIndex"] = deviceSetIndex;
+                gainArgs["steps"] = 6;
+
+                try
+                {
+                    QJsonObject tuned = tuneGain(gainArgs);
+                    gainNote = QString("Gain measured and set to %1 (%2) first, as %3; tuneGain false leaves it alone.")
+                        .arg(tuned["chosen"].toDouble()).arg(tuned["unit"].toString())
+                        .arg(receiver["reused"].toBool() ? "the retune was to another band" : "the device set is new");
+                }
+                catch (const MCPToolError& e)
+                {
+                    gainNote = QString("The gain was not measured: %1").arg(e.message);
+                }
             }
 
             // The scanner's baseband only takes settings while it is running, so configure it
@@ -4691,6 +5219,10 @@ void MCPTools::registerIntentTools()
                 notes.append(rasterNote);
             }
 
+            if (!gainNote.isEmpty()) {
+                notes.append(gainNote);
+            }
+
             if (!receiver["rateNote"].toString().isEmpty()) {
                 notes.append(receiver["rateNote"].toString());
             }
@@ -4702,7 +5234,7 @@ void MCPTools::registerIntentTools()
             }
 
             notes.append(intentNotes(deviceSetIndex, {demodChannel, scannerChannel}, reclaimed, receiver["reused"].toBool(),
-                receiver["previousCentre"].toDouble(), tune["centerFrequency"].toDouble()));
+                receiver["previousCentre"].toDouble(), tune["centerFrequency"].toDouble(), outcome));
 
             if (!notes.isEmpty()) {
                 result["note"] = notes.join(" ");
@@ -4776,332 +5308,7 @@ void MCPTools::registerIntentTools()
             {"values", prop("array", "For a device type this does not know: the gain values to try, in the key's own units, lowest first")},
             {"agcKey", strProp("For a device type this does not know: the settings key that turns its AGC off when set to 0")}
         }, {"deviceSetIndex"}),
-        [this](const QJsonObject& args)
-        {
-            int deviceSetIndex = argInt(args, "deviceSetIndex");
-            QJsonObject reply = getDeviceSettings(deviceSetIndex);
-            const QString hwType = reply["deviceHwType"].toString();
-            QJsonObject settings = settingsOf(reply);
-
-            if (deviceState(deviceSetIndex, 0, -1)["state"].toString() != "running") {
-                throw MCPToolError("The device is not running, so there is nothing to measure. start_device first.");
-            }
-
-            // What this knows about each device's gain: the key, its manual AGC setting, and the
-            // values to try. Where a device has several gain stages the one before the mixer is
-            // tuned, as that is where overload happens; the rest keep their settings
-            struct Knob { QString key; QString agcKey; int agcOff; QList<double> values; QString unit; QString note; };
-            Knob knob;
-            const bool custom = hasArg(args, "gainKey");
-
-            if (custom)
-            {
-                knob.key = argString(args, "gainKey");
-                knob.agcKey = argString(args, "agcKey", false);
-                knob.agcOff = 0;
-                knob.unit = "the key's own units";
-
-                for (const QJsonValue& v : args["values"].toArray()) {
-                    knob.values.append(v.toDouble());
-                }
-
-                if (knob.values.size() < 2) {
-                    throw MCPToolError("Give at least two values to try with gainKey");
-                }
-            }
-            else if (hwType == "RTLSDR")
-            {
-                // The tuner takes only the values it lists, in tenths of a decibel
-                knob = {"gain", "agc", 0, {}, "tenths of a dB", "The tuner's AGC is off, as it must be for the gain to hold"};
-                SWGSDRangel::SWGDeviceReport report;
-                SWGSDRangel::SWGErrorResponse error;
-                error.init();
-                check(m_adapter->devicesetDeviceReportGet(deviceSetIndex, report, error), error, "Get device report");
-                QJsonObject json = toJson(report);
-
-                for (const QString& key : json.keys())
-                {
-                    for (const QJsonValue& g : json[key].toObject()["gains"].toArray()) {
-                        knob.values.append(g.toObject()["gainCB"].toDouble());
-                    }
-                }
-
-                if (knob.values.isEmpty()) {
-                    throw MCPToolError("The RTL-SDR reported no supported gain values; is the device open?");
-                }
-            }
-            else if (hwType == "HackRF") {
-                knob = {"lnaGain", "", 0, {0, 8, 16, 24, 32, 40}, "dB", "Only the LNA is stepped; vgaGain is left as it is"};
-            }
-            else if (hwType == "Airspy") {
-                knob = {"lnaGain", "lnaAGC", 0, {0, 2, 4, 6, 8, 10, 12, 14}, "steps", "Only the LNA is stepped; mixerGain and vgaGain are left as they are, with the LNA AGC off"};
-            }
-            else if (hwType == "LimeSDR") {
-                knob = {"gain", "gainMode", 1, {0, 10, 20, 30, 40, 50, 60, 70}, "dB", "gainMode set to manual"};
-            }
-            else if (hwType == "PlutoSDR") {
-                knob = {"gain", "gainMode", 0, {0, 10, 20, 30, 40, 50, 60, 70}, "dB", "gainMode set to manual"};
-            }
-            else if (hwType == "USRP") {
-                knob = {"gain", "gainMode", 1, {0, 10, 20, 30, 40, 50, 60, 70}, "dB", "gainMode set to manual"};
-            }
-            else
-            {
-                throw MCPToolError(QString("tune_gain does not know the gain settings of a %1. Read them with describe_settings and "
-                    "give gainKey, values and, if it has one, agcKey.").arg(hwType));
-            }
-
-            std::sort(knob.values.begin(), knob.values.end());
-            knob.values.erase(std::unique(knob.values.begin(), knob.values.end()), knob.values.end());
-
-            // Spread the steps over the range rather than trying every value a tuner offers
-            const int steps = qBound(3, argInt(args, "steps", false, 8), 16);
-            QList<double> candidates;
-
-            if (knob.values.size() <= steps) {
-                candidates = knob.values;
-            }
-            else
-            {
-                for (int i = 0; i < steps; i++) {
-                    candidates.append(knob.values[(int) std::round(i * (knob.values.size() - 1) / (double) (steps - 1))]);
-                }
-            }
-
-            const bool apply = args.value("apply").toBool(true);
-            const double previous = settings[knob.key].toDouble();
-            const double previousAgc = knob.agcKey.isEmpty() ? 0 : settings[knob.agcKey].toDouble();
-            const qint64 frequency = (qint64) argDouble(args, "frequency", false, 0);
-            const qint64 bandwidth = (qint64) argDouble(args, "bandwidth", false, 200000);
-
-            // One reading: the floor is the median over the baseband, the signal the strongest bin,
-            // in the window asked for or anywhere. Max reduction keeps a narrow carrier
-            auto measure = [&](double& floorDb, double& peakDb)
-            {
-                SWGSDRangel::SWGGLSpectrumData response;
-                SWGSDRangel::SWGErrorResponse error;
-                response.init();
-                error.init();
-                check(m_adapter->devicesetSpectrumDataGet(deviceSetIndex, 256, 0, 0, "max", response, error), error, "Get spectrum data");
-                // Read from the object: the generated JSON serialiser drops a list of plain floats
-                const bool linear = response.getLinear() != 0;
-                QList<double> powers;
-
-                if (response.getPower())
-                {
-                    for (float v : *response.getPower()) {
-                        powers.append(linear ? 10.0 * std::log10(std::max((double) v, 1e-20)) : (double) v);
-                    }
-                }
-
-                if (powers.isEmpty()) {
-                    throw MCPToolError("The spectrum returned no data");
-                }
-
-                QList<double> sorted = powers;
-                std::sort(sorted.begin(), sorted.end());
-                floorDb = sorted[sorted.size() / 2];
-
-                if (frequency > 0)
-                {
-                    // The data call clamps to the baseband, which would silently measure noise at
-                    // its edge for a frequency outside it
-                    const qint64 low = response.getCenterFrequency() - response.getBandwidth() / 2;
-                    const qint64 high = response.getCenterFrequency() + response.getBandwidth() / 2;
-
-                    if ((frequency < low) || (frequency > high))
-                    {
-                        throw MCPToolError(QString("%1 MHz is outside the baseband, which covers %2 to %3 MHz; tune the device so that it is inside, or leave frequency out")
-                            .arg(frequency / 1e6, 0, 'f', 3).arg(low / 1e6, 0, 'f', 3).arg(high / 1e6, 0, 'f', 3));
-                    }
-
-                    SWGSDRangel::SWGGLSpectrumData window;
-                    SWGSDRangel::SWGErrorResponse windowError;
-                    window.init();
-                    windowError.init();
-                    check(m_adapter->devicesetSpectrumDataGet(deviceSetIndex, 32, frequency - bandwidth / 2, frequency + bandwidth / 2, "max", window, windowError),
-                        windowError, "Get spectrum data");
-                    peakDb = -1e9;
-
-                    if (window.getPower())
-                    {
-                        for (float v : *window.getPower()) {
-                            peakDb = std::max(peakDb, linear ? 10.0 * std::log10(std::max((double) v, 1e-20)) : (double) v);
-                        }
-                    }
-
-                    if (peakDb < -1e8) {
-                        throw MCPToolError("The spectrum has no bins at that frequency; it must be inside the baseband");
-                    }
-                }
-                else
-                {
-                    peakDb = sorted.last();
-                }
-            };
-
-            struct Row { double gain; double floorDb; double peakDb; double snrDb; };
-            QList<Row> rows;
-
-            auto setGain = [&](double gain, bool agcOff)
-            {
-                QJsonObject partial;
-                partial[knob.key] = gain;
-
-                if (!knob.agcKey.isEmpty()) {
-                    partial[knob.agcKey] = agcOff ? knob.agcOff : previousAgc;
-                }
-
-                patchDeviceSettings(deviceSetIndex, partial);
-            };
-
-            try
-            {
-                for (double gain : candidates)
-                {
-                    setGain(gain, true);
-                    QThread::msleep(700); // the tuner, the spectrum averaging and a stale FFT
-                    double floorSum = 0.0;
-                    double peakSum = 0.0;
-                    const int samples = 3;
-
-                    for (int i = 0; i < samples; i++)
-                    {
-                        if (i > 0) {
-                            QThread::msleep(250);
-                        }
-
-                        double floorDb, peakDb;
-                        measure(floorDb, peakDb);
-                        floorSum += floorDb;
-                        peakSum += peakDb;
-                    }
-
-                    rows.append({gain, floorSum / samples, peakSum / samples, (peakSum - floorSum) / samples});
-                }
-            }
-            catch (const MCPToolError&)
-            {
-                setGain(previous, false); // as it was, AGC included
-                throw;
-            }
-
-            auto toDb = [&](double gain) { return (knob.unit == "tenths of a dB") ? gain / 10.0 : gain; };
-
-            // Overload shows as the floor climbing faster than the gain did. The first step
-            // where it does bounds the usable range from above
-            QStringList notes;
-            int compressed = 0;
-            int overloadFrom = rows.size(); // index of the first row that is overloaded
-
-            for (int i = 1; i < rows.size(); i++)
-            {
-                const double gainStep = toDb(rows[i].gain) - toDb(rows[i - 1].gain);
-
-                if ((gainStep > 0) && (rows[i].floorDb - rows[i - 1].floorDb > gainStep + 3.0))
-                {
-                    compressed++;
-                    overloadFrom = std::min(overloadFrom, i);
-                }
-            }
-
-            if (compressed > 0) {
-                notes.append(QString("The noise floor rose faster than the gain over %1 step%2, which is the front end overloading; the higher gains are not usable here.")
-                    .arg(compressed).arg(compressed == 1 ? "" : "s"));
-            }
-
-            // Best SNR, then the lowest gain within a decibel of it
-            double best = -1e9;
-            for (const Row& r : rows) { best = std::max(best, r.snrDb); }
-            const Row *chosen = nullptr;
-            QString judgedBy = frequency > 0 ? QString("the signal at %1 MHz").arg(frequency / 1e6, 0, 'f', 3) : QString("the strongest signal in the baseband");
-
-            if (best >= 6.0)
-            {
-                for (const Row& r : rows) { if ((r.snrDb >= best - 1.0) && !chosen) { chosen = &r; } }
-            }
-            else
-            {
-                // Nothing stood clear of the floor, so the floor itself has to decide: at low gain
-                // it is the converter's own noise and does not move; as gain rises the antenna's
-                // noise comes through and lifts it, which is when weak signals become receivable;
-                // and past overload it lifts faster than the gain. Take the lowest gain that puts
-                // the floor 8 dB above the converter's, which is the antenna's noise dominating
-                // by the usual 10 dB rule with a little allowance for the steps being coarse, or
-                // the last gain before overload if none does
-                double adcFloor = 1e9;
-                for (const Row& r : rows) { adcFloor = std::min(adcFloor, r.floorDb); }
-                const int lastUsable = std::max(0, overloadFrom - 1);
-                static const double antennaDominates = 8.0;
-
-                for (int i = 0; (i <= lastUsable) && !chosen; i++)
-                {
-                    if (rows[i].floorDb >= adcFloor + antennaDominates) {
-                        chosen = &rows[i];
-                    }
-                }
-
-                if (!chosen) {
-                    chosen = &rows[lastUsable];
-                }
-
-                judgedBy = "the noise floor alone, as no signal stood clear of it";
-                notes.append(QString("No signal stood more than 6 dB above the floor, so the gain is set from the floor instead: %1.")
-                    .arg((rows[lastUsable].floorDb < adcFloor + antennaDominates)
-                        ? "the floor never rose 8 dB above the converter's own noise before overload, so the last gain before overload is taken; check the antenna if that seems low"
-                        : "the lowest gain at which the antenna's noise, not the converter's, sets the floor"));
-            }
-
-            if (chosen == &rows.last()) {
-                notes.append("The best was the highest gain tried: the signal is weak or the site quiet, and more gain would not overload yet.");
-            } else if (chosen == &rows.first()) {
-                notes.append("The best was the lowest gain tried: a strong-signal site. Consider an attenuator if the floor still rises with the lowest gain.");
-            }
-
-            if (apply)
-            {
-                setGain(chosen->gain, true);
-            }
-            else
-            {
-                setGain(previous, false);
-                notes.append("Not applied: the gain is back as it was.");
-            }
-
-            if (!knob.note.isEmpty()) {
-                notes.append(knob.note + ".");
-            }
-
-            QJsonObject result;
-            result["deviceSetIndex"] = deviceSetIndex;
-            result["hwType"] = hwType;
-            result["gainKey"] = knob.key;
-            result["unit"] = knob.unit;
-            result["previous"] = previous;
-            result["chosen"] = chosen->gain;
-            result["applied"] = apply;
-            result["bestSnrDb"] = chosen->snrDb;
-            result["judgedBy"] = judgedBy;
-            QJsonArray table;
-
-            for (const Row& r : rows)
-            {
-                QJsonObject o;
-                o["gain"] = r.gain;
-                o["floorDb"] = std::round(r.floorDb * 10) / 10;
-                o["signalDb"] = std::round(r.peakDb * 10) / 10;
-                o["snrDb"] = std::round(r.snrDb * 10) / 10;
-                table.append(o);
-            }
-
-            result["table"] = table;
-
-            if (!notes.isEmpty()) {
-                result["note"] = notes.join(" ");
-            }
-
-            return result;
-        });
+        [this](const QJsonObject& args) { return tuneGain(args); });
 
     add("get_status",
         "One line per device set and feature: device, frequency, run state and channels. The cheapest way to see what is going on.",

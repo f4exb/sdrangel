@@ -206,8 +206,13 @@ private:
     // Shared by the intent level tools
     QJsonObject channelReport(int deviceSetIndex, int channelIndex);
     void postChannelAction(int deviceSetIndex, int channelIndex, const QJsonObject& actions);
-    //!< doomed: uids of channels the caller is about to remove, which the reused set is not counted as carrying
-    QJsonObject pickReceiver(const QJsonObject& args, int minBaseband, const QSet<uint64_t>& doomed = QSet<uint64_t>());
+    //!< doomed: uids of channels the caller is about to remove, which the reused set is not counted as carrying.
+    //!< profileGain: give a device set this creates the fixed receiver gain profile; false when the gain is about to be measured
+    QJsonObject pickReceiver(const QJsonObject& args, int minBaseband, const QSet<uint64_t>& doomed = QSet<uint64_t>(), bool profileGain = true);
+    //!< The tune_gain tool: sweeps the gain and applies the best, with the table it measured
+    QJsonObject tuneGain(const QJsonObject& args);
+    //!< Whether listen or scan should measure the gain: a device set they created, or a retune to another band
+    static bool gainWorthTuning(bool reused, double previousCentre, double centre);
     static uint64_t channelUid(const void *channel);
     void trackIntentChannel(const void *channel);
     void untrackIntentChannel(const void *channel);
@@ -219,9 +224,17 @@ private:
     QStringList reclaimIntentChannels(int deviceSetIndex, const void *keep = nullptr);
     //!< The channel a previous listen added that a new one of this type can retune instead of replacing, or null
     const void *reusableIntentChannel(int deviceSetIndex, const QString& channelType, int& channelIndex);
+    //!< What a retune of a reused device set did to the channels listen and scan did not add
+    struct RetuneOutcome
+    {
+        QStringList m_kept;     //!< Re-offset so that they stay on the frequency they had
+        QStringList m_removed;  //!< Audio demodulators the new baseband could not hold, which would only have made noise
+        QStringList m_stranded; //!< Left where they were: not audio, or the baseband unknown
+    };
+    RetuneOutcome retuneOtherChannels(int deviceSetIndex, double previousCentre, double centre, int baseband);
     //!< What listen and scan tell the caller about the rest of the device set once their own channels are in
     QStringList intentNotes(int deviceSetIndex, const QSet<const void *>& added, const QStringList& reclaimed,
-        bool reused, double previousCentre, double centre);
+        bool reused, double previousCentre, double centre, const RetuneOutcome& outcome);
     //!< Channel type ids for a direction, independent of how list_channel_types formats them
     QStringList channelTypeIds(int direction);
     //!< Where a channel is now. The intent tools sleep for many seconds without holding the

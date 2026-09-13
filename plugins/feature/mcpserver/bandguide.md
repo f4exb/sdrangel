@@ -208,7 +208,10 @@ converter's, sets the floor, short of overload. Use it
 after tuning to the band of interest and before judging weak signals; the reply's table shows
 where the front end starts to overload. It turns the device's AGC off, which a manual gain
 requires. It knows the RTL-SDR, HackRF, Airspy, LimeSDR, PlutoSDR and USRP; for another
-device read `describe_settings` and give it the gain key and values.
+device read `describe_settings` and give it the gain key and values. `listen` and `scan` run
+it themselves when they create a device set or move one to another band, and say what they
+set; pass `tuneGain` false to keep a gain you have chosen. A change of mode or a move within a
+band does not trigger it, as the gain suits the band and the antenna rather than the mode.
 
 RTL-SDR `gain` is in tenths of a decibel (402 is 40.2 dB) and only the values in
 `get_device_report`'s supported list take effect; `agc` hands control to the tuner, which is
