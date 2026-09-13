@@ -757,6 +757,19 @@ void WDSPRxSettings::applySettings(const QStringList& settingsKeys, const WDSPRx
     if (settingsKeys.contains("profileIndex")) {
         m_profileIndex = settings.m_profileIndex;
     }
+
+    if (settingsKeys.contains("spanLog2")) {
+        m_profiles[settings.m_profileIndex].m_spanLog2 = settings.m_profiles[settings.m_profileIndex].m_spanLog2;
+    }
+    if (settingsKeys.contains("highCutoff")) {
+        m_profiles[settings.m_profileIndex].m_highCutoff = settings.m_profiles[settings.m_profileIndex].m_highCutoff;
+    }
+    if (settingsKeys.contains("lowCutoff")) {
+        m_profiles[settings.m_profileIndex].m_lowCutoff = settings.m_profiles[settings.m_profileIndex].m_lowCutoff;
+    }
+    if (settingsKeys.contains("fftWindow")) {
+        m_profiles[settings.m_profileIndex].m_fftWindow = settings.m_profiles[settings.m_profileIndex].m_fftWindow;
+    }
 }
 
 QString WDSPRxSettings::getDebugString(const QStringList& settingsKeys, bool force) const
