@@ -537,7 +537,7 @@ void TestSourceInput::webapiUpdateDeviceSettings(
     if (deviceSettingsKeys.contains("autoCorrOptions")) {
         int autoCorrOptions = response.getTestSourceSettings()->getAutoCorrOptions();
         autoCorrOptions = autoCorrOptions < 0 ? 0 : autoCorrOptions >= TestSourceSettings::AutoCorrLast ? TestSourceSettings::AutoCorrLast-1 : autoCorrOptions;
-        settings.m_sampleSizeIndex = (TestSourceSettings::AutoCorrOptions) autoCorrOptions;
+        settings.m_autoCorrOptions = (TestSourceSettings::AutoCorrOptions) autoCorrOptions;
     }
     if (deviceSettingsKeys.contains("modulation")) {
         int modulation = response.getTestSourceSettings()->getModulation();
@@ -662,7 +662,7 @@ void TestSourceInput::webapiReverseSendSettings(const QList<QString>& deviceSett
         swgTestSourceSettings->setAmplitudeBits(settings.m_amplitudeBits);
     }
     if (deviceSettingsKeys.contains("autoCorrOptions") || force) {
-        swgTestSourceSettings->setAutoCorrOptions((int) settings.m_sampleSizeIndex);
+        swgTestSourceSettings->setAutoCorrOptions((int) settings.m_autoCorrOptions);
     }
     if (deviceSettingsKeys.contains("modulation") || force) {
         swgTestSourceSettings->setModulation((int) settings.m_modulation);

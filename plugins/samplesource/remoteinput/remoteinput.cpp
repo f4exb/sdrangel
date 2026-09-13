@@ -451,7 +451,7 @@ void RemoteInput::webapiUpdateDeviceSettings(
     if (deviceSettingsKeys.contains("multicastAddress")) {
         settings.m_multicastAddress = *response.getRemoteInputSettings()->getMulticastAddress();
     }
-    if (deviceSettingsKeys.contains("multicastAddress")) {
+    if (deviceSettingsKeys.contains("multicastJoin")) {
         settings.m_multicastJoin = response.getRemoteInputSettings()->getMulticastJoin() != 0;
     }
     if (deviceSettingsKeys.contains("dcBlock")) {

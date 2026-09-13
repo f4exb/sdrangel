@@ -897,7 +897,7 @@ void SigMFFileInput::webapiUpdateDeviceSettings(
         settings.m_trackLoop = response.getSigMfFileInputSettings()->getTrackLoop() != 0;
     }
     if (deviceSettingsKeys.contains("fullLoop")) {
-        settings.m_trackLoop = response.getSigMfFileInputSettings()->getFullLoop() != 0;
+        settings.m_fullLoop = response.getSigMfFileInputSettings()->getFullLoop() != 0;
     }
     if (deviceSettingsKeys.contains("useReverseAPI")) {
         settings.m_useReverseAPI = response.getSigMfFileInputSettings()->getUseReverseApi() != 0;

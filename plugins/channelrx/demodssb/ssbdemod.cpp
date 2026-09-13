@@ -414,7 +414,7 @@ void SSBDemod::webapiUpdateChannelSettings(
     if (channelSettingsKeys.contains("lowCutoff")) {
         settings.m_filterBank[settings.m_filterIndex].m_lowCutoff = response.getSsbDemodSettings()->getLowCutoff();
     }
-    if (channelSettingsKeys.contains("fftWimdow")) {
+    if (channelSettingsKeys.contains("fftWindow")) {
         settings.m_filterBank[settings.m_filterIndex].m_fftWindow = (FFTWindow::Function) response.getSsbDemodSettings()->getFftWindow();
     }
     if (channelSettingsKeys.contains("volume")) {

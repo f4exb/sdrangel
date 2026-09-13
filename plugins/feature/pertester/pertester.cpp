@@ -368,7 +368,7 @@ void PERTester::webapiUpdateFeatureSettings(
         settings.m_txUDPPort = response.getPerTesterSettings()->getTxUdpPort();
     }
     if (featureSettingsKeys.contains("rxUDPAddress")) {
-        settings.m_txUDPAddress = *response.getPerTesterSettings()->getRxUdpAddress();
+        settings.m_rxUDPAddress = *response.getPerTesterSettings()->getRxUdpAddress();
     }
     if (featureSettingsKeys.contains("rxUDPPort")) {
         settings.m_rxUDPPort = response.getPerTesterSettings()->getRxUdpPort();

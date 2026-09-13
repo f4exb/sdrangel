@@ -932,10 +932,10 @@ void PlutoSDRInput::webapiUpdateDeviceSettings(
         settings.m_hwBBDCBlock = response.getPlutoSdrInputSettings()->getHwBbdcBlock() != 0;
     }
     if (deviceSettingsKeys.contains("hwRFDCBlock")) {
-        settings.m_hwBBDCBlock = response.getPlutoSdrInputSettings()->getHwRfdcBlock() != 0;
+        settings.m_hwRFDCBlock = response.getPlutoSdrInputSettings()->getHwRfdcBlock() != 0;
     }
     if (deviceSettingsKeys.contains("hwIQCorrection")) {
-        settings.m_hwBBDCBlock = response.getPlutoSdrInputSettings()->getHwIqCorrection() != 0;
+        settings.m_hwIQCorrection = response.getPlutoSdrInputSettings()->getHwIqCorrection() != 0;
     }
     if (deviceSettingsKeys.contains("log2Decim")) {
         settings.m_log2Decim = response.getPlutoSdrInputSettings()->getLog2Decim();

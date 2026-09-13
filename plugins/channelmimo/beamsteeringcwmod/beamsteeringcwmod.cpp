@@ -329,7 +329,7 @@ void BeamSteeringCWMod::webapiUpdateChannelSettings(
         SWGSDRangel::SWGChannelSettings& response)
 {
     if (channelSettingsKeys.contains("steerDegrees")) {
-        settings.m_rgbColor = response.getBeamSteeringCwModSettings()->getSteerDegrees();
+        settings.m_steerDegrees = response.getBeamSteeringCwModSettings()->getSteerDegrees();
     }
 
     if (channelSettingsKeys.contains("rgbColor")) {

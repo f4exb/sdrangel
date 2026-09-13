@@ -279,13 +279,29 @@ int ChannelAnalyzer::webapiSettingsPutPatch(
     ChannelAnalyzerSettings settings = m_settings;
     webapiUpdateChannelSettings(settings, channelSettingsKeys, response);
 
-    MsgConfigureChannelAnalyzer *msg = MsgConfigureChannelAnalyzer::create(settings, channelSettingsKeys, force);
+    // Map API names to setting names
+    QStringList settingsKeys = channelSettingsKeys;
+    static const QList<QPair<QString, QString>> renamed = {
+        {"frequency", "inputFrequencyOffset"},
+        {"spanLog2", "log2Decim"},
+        {"downSample", "rationalDownSample"},
+        {"downSamplerRate", "rationalDownSamplerRate"}
+    };
+
+    for (const auto& pair : renamed)
+    {
+        if (settingsKeys.contains(pair.first) && !settingsKeys.contains(pair.second)) {
+            settingsKeys.append(pair.second);
+        }
+    }
+
+    MsgConfigureChannelAnalyzer *msg = MsgConfigureChannelAnalyzer::create(settings, settingsKeys, force);
     m_inputMessageQueue.push(msg);
 
     qDebug("ChannelAnalyzer::webapiSettingsPutPatch: forward to GUI: %p", m_guiMessageQueue);
     if (m_guiMessageQueue) // forward to GUI if any
     {
-        MsgConfigureChannelAnalyzer *msgToGUI = MsgConfigureChannelAnalyzer::create(settings, channelSettingsKeys, force);
+        MsgConfigureChannelAnalyzer *msgToGUI = MsgConfigureChannelAnalyzer::create(settings, settingsKeys, force);
         m_guiMessageQueue->push(msgToGUI);
     }
 

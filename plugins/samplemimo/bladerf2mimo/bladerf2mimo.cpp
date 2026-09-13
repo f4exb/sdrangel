@@ -967,7 +967,7 @@ void BladeRF2MIMO::webapiUpdateDeviceSettings(
         settings.m_log2Interp = response.getBladeRf2MimoSettings()->getLog2Interp();
     }
     if (deviceSettingsKeys.contains("fcPosTx")) {
-        settings.m_fcPosRx = static_cast<BladeRF2MIMOSettings::fcPos_t>(response.getBladeRf2MimoSettings()->getFcPosTx());
+        settings.m_fcPosTx = static_cast<BladeRF2MIMOSettings::fcPos_t>(response.getBladeRf2MimoSettings()->getFcPosTx());
     }
     if (deviceSettingsKeys.contains("txBandwidth")) {
         settings.m_txBandwidth = response.getBladeRf2MimoSettings()->getTxBandwidth();

@@ -506,7 +506,7 @@ void Denoiser::webapiUpdateFeatureSettings(
     const QStringList& featureSettingsKeys,
     SWGSDRangel::SWGFeatureSettings& response)
 {
-    if (featureSettingsKeys.contains("DenoiserType")) {
+    if (featureSettingsKeys.contains("denoiserType")) {
         settings.m_denoiserType = static_cast<DenoiserSettings::DenoiserType>(response.getDenoiserSettings()->getDenoiserType());
     }
     if (featureSettingsKeys.contains("enableDenoiser")) {
@@ -579,7 +579,7 @@ void Denoiser::webapiReverseSendSettings(const QList<QString>& featureSettingsKe
     if (featureSettingsKeys.contains("reverseAPIFeatureIndex") || force) {
         swgDenoiserSettings->setReverseApiFeatureIndex(settings.m_reverseAPIFeatureIndex);
     }
-    if (featureSettingsKeys.contains("DenoiserType") || force) {
+    if (featureSettingsKeys.contains("denoiserType") || force) {
         swgDenoiserSettings->setDenoiserType(static_cast<int>(settings.m_denoiserType));
     }
     if (featureSettingsKeys.contains("enableDenoiser") || force) {

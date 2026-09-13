@@ -799,13 +799,13 @@ void AudioCATSISO::webapiUpdateDeviceSettings(
     if (deviceSettingsKeys.contains("catPTTMethodIndex")) {
         settings.m_catPTTMethodIndex = response.getAudioCatsisoSettings()->getCatPttMethodIndex();
     }
-    if (deviceSettingsKeys.contains("catPTTMethodIndex")) {
+    if (deviceSettingsKeys.contains("catDTRHigh")) {
         settings.m_catDTRHigh = response.getAudioCatsisoSettings()->getCatDtrHigh() != 0;
     }
     if (deviceSettingsKeys.contains("catRTSHigh")) {
         settings.m_catRTSHigh = response.getAudioCatsisoSettings()->getCatRtsHigh() != 0;
     }
-    if (deviceSettingsKeys.contains("catRTSHigh")) {
+    if (deviceSettingsKeys.contains("catPollingMs")) {
         settings.m_catPollingMs = response.getAudioCatsisoSettings()->getCatPollingMs();
     }
 

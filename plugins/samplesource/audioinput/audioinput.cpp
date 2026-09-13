@@ -385,12 +385,22 @@ int AudioInput::webapiSettingsPutPatch(
     AudioInputSettings settings = m_settings;
     webapiUpdateDeviceSettings(settings, deviceSettingsKeys, response);
 
-    MsgConfigureAudioInput *msg = MsgConfigureAudioInput::create(settings, deviceSettingsKeys, force);
+    // Map API names to setting names
+    QStringList settingsKeys = deviceSettingsKeys;
+
+    if (settingsKeys.contains("device") && !settingsKeys.contains("deviceName")) {
+        settingsKeys.append("deviceName");
+    }
+    if (settingsKeys.contains("devSampleRate") && !settingsKeys.contains("sampleRate")) {
+        settingsKeys.append("sampleRate");
+    }
+
+    MsgConfigureAudioInput *msg = MsgConfigureAudioInput::create(settings, settingsKeys, force);
     m_inputMessageQueue.push(msg);
 
     if (m_guiMessageQueue) // forward to GUI if any
     {
-        MsgConfigureAudioInput *msgToGUI = MsgConfigureAudioInput::create(settings, deviceSettingsKeys, force);
+        MsgConfigureAudioInput *msgToGUI = MsgConfigureAudioInput::create(settings, settingsKeys, force);
         m_guiMessageQueue->push(msgToGUI);
     }
 
