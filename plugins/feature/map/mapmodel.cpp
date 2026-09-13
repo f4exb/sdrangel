@@ -93,6 +93,7 @@ void MapModel::update(const QObject *sourcePipe, SWGSDRangel::SWGMapItem *swgMap
             // Delete from 3D map
             item->update(swgMapItem);
             update3D(item);
+            delete item;
         }
         else
         {
@@ -144,6 +145,7 @@ void MapModel::removeAll()
     if (m_items.count() > 0)
     {
         beginRemoveRows(QModelIndex(), 0, m_items.count() - 1);
+        qDeleteAll(m_items);
         m_items.clear();
         m_itemsHash.clear();
         endRemoveRows();
