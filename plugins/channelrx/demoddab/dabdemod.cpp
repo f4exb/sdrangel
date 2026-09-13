@@ -452,7 +452,11 @@ void DABDemod::applySettings(const QStringList& settingsKeys, const DABDemodSett
         webapiReverseSendSettings(settingsKeys, settings, fullUpdate || force);
     }
 
-    m_settings = settings;
+    if (force) {
+        m_settings = settings;
+    } else {
+        m_settings.applySettings(settingsKeys, settings);
+    }
 }
 
 QByteArray DABDemod::serialize() const

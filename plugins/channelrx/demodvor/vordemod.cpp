@@ -300,7 +300,11 @@ void VORDemod::applySettings(const QStringList& settingsKeys, const VORDemodSett
         sendChannelSettings(pipes, settingsKeys, settings, force);
     }
 
-    m_settings = settings;
+    if (force) {
+        m_settings = settings;
+    } else {
+        m_settings.applySettings(settingsKeys, settings);
+    }
 }
 
 QByteArray VORDemod::serialize() const

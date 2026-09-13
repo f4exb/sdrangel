@@ -244,7 +244,11 @@ void RemoteSource::applySettings(const QStringList& settingsKeys, const RemoteSo
         sendChannelSettings(pipes, settingsKeys, settings, force);
     }
 
-    m_settings = settings;
+    if (force) {
+        m_settings = settings;
+    } else {
+        m_settings.applySettings(settingsKeys, settings);
+    }
 }
 
 void RemoteSource::validateFilterChainHash(RemoteSourceSettings& settings)

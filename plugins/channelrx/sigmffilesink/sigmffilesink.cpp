@@ -364,7 +364,11 @@ void SigMFFileSink::applySettings(const QStringList& settingsKeys, const SigMFFi
         sendChannelSettings(pipes, settingsKeys, settings, force);
     }
 
-    m_settings = settings;
+    if (force) {
+        m_settings = settings;
+    } else {
+        m_settings.applySettings(settingsKeys, settings);
+    }
 }
 
 void SigMFFileSink::record(bool record)

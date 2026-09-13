@@ -333,7 +333,11 @@ void DSDDemod::applySettings(const QStringList& settingsKeys, const DSDDemodSett
         sendChannelSettings(pipes, settingsKeys, settings, force);
     }
 
-    m_settings = settings;
+    if (force) {
+        m_settings = settings;
+    } else {
+        m_settings.applySettings(settingsKeys, settings);
+    }
 }
 
 QByteArray DSDDemod::serialize() const

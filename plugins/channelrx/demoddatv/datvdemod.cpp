@@ -220,7 +220,11 @@ void DATVDemod::applySettings(const QList<QString>& settingsKeys, const DATVDemo
         sendChannelSettings(pipes, settingsKeys, settings, force);
     }
 
-    m_settings = settings;
+    if (force) {
+        m_settings = settings;
+    } else {
+        m_settings.applySettings(settingsKeys, settings);
+    }
 }
 
 uint32_t DATVDemod::getNumberOfDeviceStreams() const

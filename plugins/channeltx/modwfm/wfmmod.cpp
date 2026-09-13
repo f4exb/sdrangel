@@ -293,7 +293,11 @@ void WFMMod::applySettings(const QStringList& settingsKeys, const WFMModSettings
         sendChannelSettings(pipes, settingsKeys, settings, force);
     }
 
-    m_settings = settings;
+    if (force) {
+        m_settings = settings;
+    } else {
+        m_settings.applySettings(settingsKeys, settings);
+    }
 }
 
 QByteArray WFMMod::serialize() const

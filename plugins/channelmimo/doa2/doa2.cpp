@@ -201,7 +201,11 @@ void DOA2::applySettings(const QStringList& settingsKeys, const DOA2Settings& se
         sendChannelSettings(pipes, settingsKeys, settings, force);
     }
 
-    m_settings = settings;
+    if (force) {
+        m_settings = settings;
+    } else {
+        m_settings.applySettings(settingsKeys, settings);
+    }
 }
 
 void DOA2::handleInputMessages()

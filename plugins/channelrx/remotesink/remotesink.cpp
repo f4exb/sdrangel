@@ -318,7 +318,11 @@ void RemoteSink::applySettings(const QStringList& settingsKeys, const RemoteSink
         sendChannelSettings(pipes, reverseAPIKeys, settings, force);
     }
 
-    m_settings = settings;
+    if (force) {
+        m_settings = settings;
+    } else {
+        m_settings.applySettings(settingsKeys, settings);
+    }
 
     if (frequencyOffsetChange) {
         calculateFrequencyOffset();

@@ -314,7 +314,11 @@ void LocalSource::applySettings(const QStringList& settingsKeys, const LocalSour
         sendChannelSettings(pipes, settingsKeys, settings, force);
     }
 
-    m_settings = settings;
+    if (force) {
+        m_settings = settings;
+    } else {
+        m_settings.applySettings(settingsKeys, settings);
+    }
 }
 
 void LocalSource::validateFilterChainHash(LocalSourceSettings& settings)

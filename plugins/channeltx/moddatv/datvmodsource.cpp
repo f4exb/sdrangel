@@ -877,7 +877,11 @@ void DATVModSource::applySettings(const QStringList& settingsKeys, const DATVMod
         m_tsGenerator.set_codec(settings.m_imageCodec);
     }
 
-    m_settings = settings;
+    if (force) {
+        m_settings = settings;
+    } else {
+        m_settings.applySettings(settingsKeys, settings);
+    }
 
     if (m_settings.m_symbolRate > 0)
         m_samplesPerSymbol = m_channelSampleRate/m_settings.m_symbolRate;

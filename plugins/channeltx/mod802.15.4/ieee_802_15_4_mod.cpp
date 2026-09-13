@@ -217,7 +217,11 @@ void IEEE_802_15_4_Mod::applySettings(const QStringList& settingsKeys, const IEE
         sendChannelSettings(pipes, settingsKeys, settings, force);
     }
 
-    m_settings = settings;
+    if (force) {
+        m_settings = settings;
+    } else {
+        m_settings.applySettings(settingsKeys, settings);
+    }
 }
 
 QByteArray IEEE_802_15_4_Mod::serialize() const

@@ -342,7 +342,11 @@ void SSBMod::applySettings(const QStringList& settingKeys, const SSBModSettings&
         sendChannelSettings(pipes, settingKeys, settings, force);
     }
 
-    m_settings = settings;
+    if (force) {
+        m_settings = settings;
+    } else {
+        m_settings.applySettings(settingKeys, settings);
+    }
     m_settings.m_bandwidth = band;
     m_settings.m_lowCutoff = lowCutoff;
     m_settings.m_usb = usb;

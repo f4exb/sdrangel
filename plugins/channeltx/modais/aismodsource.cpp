@@ -339,7 +339,11 @@ void AISModSource::applySettings(const QStringList& settingsKeys, const AISModSe
         addTXPacket(settings.m_data);
     }
 
-    m_settings = settings;
+    if (force) {
+        m_settings = settings;
+    } else {
+        m_settings.applySettings(settingsKeys, settings);
+    }
 
     // Precalculate FM sensensity and linear gain to save doing it in the loop
     m_samplesPerSymbol = AISModSettings::AISMOD_SAMPLE_RATE / m_settings.m_baud;

@@ -340,7 +340,11 @@ void RttyDemod::applySettings(const QStringList& settingsKeys, const RttyDemodSe
         }
     }
 
-    m_settings = settings;
+    if (force) {
+        m_settings = settings;
+    } else {
+        m_settings.applySettings(settingsKeys, settings);
+    }
 }
 
 void RttyDemod::sendSampleRateToDemodAnalyzer()
