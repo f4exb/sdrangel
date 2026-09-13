@@ -83,7 +83,6 @@ void MeshcoreModEncoderLoRa::encodeBytes(
     const unsigned int numCodewords = firstBlockCodewords + remainingCodewords;
 
     unsigned int cOfs = 0;
-	unsigned int dOfs = 0;
 
     std::vector<uint8_t> codewords(numCodewords);
 
@@ -152,7 +151,7 @@ void MeshcoreModEncoderLoRa::encodeBytes(
         {
             const unsigned int payloadNibblesInFirst = firstBlockCodewords - headerSize;
 
-            for (unsigned int i = 0; i < payloadNibblesInFirst; i++, dOfs++) {
+            for (unsigned int i = 0; i < payloadNibblesInFirst; i++) {
                 codewords[cOfs++] = encodeHamming84sx(nibbles[i]);
             }
         }
@@ -162,7 +161,7 @@ void MeshcoreModEncoderLoRa::encodeBytes(
         {
             const unsigned int payloadNibblesInFirst = firstBlockCodewords - headerSize;
 
-            for (unsigned int i = 0; i < remainingCodewords; i++, dOfs++)
+            for (unsigned int i = 0; i < remainingCodewords; i++)
             {
                 uint8_t nib = nibbles[payloadNibblesInFirst + i];
                 if (nbParityBits == 1) {
