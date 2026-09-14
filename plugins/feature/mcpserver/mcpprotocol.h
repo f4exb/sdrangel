@@ -41,7 +41,8 @@ public:
         InvalidRequest = -32600,
         MethodNotFound = -32601,
         InvalidParams = -32602,
-        InternalError = -32603
+        InternalError = -32603,
+        ResourceNotFound = -32002 //!< MCP's own code for a resources/read of a URI that does not exist
     };
 
     // Per request state exchanged with the transport
@@ -63,6 +64,8 @@ public:
     MCPDataFeed& getDataFeed() { return m_tools.dataFeed(); }
     MCPTools& getTools() { return m_tools; }
     void setOwnerFeature(const QObject *feature) { m_tools.setOwnerFeature(feature); }
+    //!< See MCPTools::setStopping
+    void setStopping(bool stopping) { m_tools.setStopping(stopping); }
 
     static QJsonObject makeResult(const QJsonValue& id, const QJsonValue& result);
     static QJsonObject makeError(const QJsonValue& id, int code, const QString& message);

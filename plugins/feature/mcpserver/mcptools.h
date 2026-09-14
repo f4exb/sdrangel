@@ -113,6 +113,7 @@ public:
     QJsonObject getPresets();
     QJsonObject getConfigurations();
     QJsonObject getDeviceSet(int deviceSetIndex);
+    int deviceSetCount() const;
     QString describeType(const QString& type, const QString& kind);
     MCPDocs& docs() { return m_docs; }
     MCPDataFeed& dataFeed() { return m_dataFeed; }
@@ -120,6 +121,10 @@ public:
     void setStreams(MCPStreams *streams) { m_streams = streams; }
     //!< The feature that owns this server, so it can refuse to delete or stop itself
     void setOwnerFeature(const QObject *feature) { m_ownerFeature = feature; }
+    //!< Set by the server, on the main thread, before it waits for the HTTP threads to finish.
+    //!< Every wait and sleep in the tools then ends at once with a tool error, since the main
+    //!< thread they would otherwise be waiting on is the one waiting for them
+    void setStopping(bool stopping);
 
 private:
     WebAPIAdapterInterface *m_adapter;
@@ -133,6 +138,11 @@ private:
     // creation, or two callers snapshot the same state and both claim the same object.
     // The capture tools run without the dispatch lock, so this is reachable.
     QMutex m_creationMutex;
+    // Deletion is by index, and the index is resolved just before the delete is posted for
+    // the main thread to do later. Two calls deleting on one device set unserialised can post
+    // two indices that were right when read and wrong once the first delete has renumbered
+    // the rest, taking a channel neither meant. Held from the lookup to the object being gone
+    QMutex m_deletionMutex;
     // The channels listen and scan have added, so that the next of either on the same device
     // set can take them away again and cleanup can remove them all. Held by uid rather than
     // pointer: a channel removed from the GUI frees its address for the next one created,
@@ -145,7 +155,13 @@ private:
     // channel it added still feeds them. A feature that was already there is never among these
     QSet<uint64_t> m_intentFeatures;
     const QObject *m_ownerFeature;
+    QAtomicInt m_stopping;
     QList<Tool> m_tools;
+    // The definitions are loaded on first use and the parsed schemas cached as they are asked
+    // for, from whichever thread asks. The settings tools run under the dispatch lock but
+    // listen and scan do not, and they patch settings too, so these have a lock of their own,
+    // taken by describeType and settingsSchema; the helpers they call expect it held
+    QMutex m_schemaMutex;
     QMap<QString, QString> m_yamlDefinitions; //!< Swagger definition name -> YAML text
     QMap<QString, QString> m_yamlDefinitionsByLower; //!< Lower cased name -> the name as written
     QMap<QString, SettingsSchema> m_schemaCache; //!< Parsed form of the above, by definition name
@@ -163,8 +179,14 @@ private:
     void registerCaptureTools();
     void registerIntentTools();
 
+    //!< Polls until the condition holds, at most timeoutMs. False on timeout; throws when the
+    //!< server is stopping, as nothing waited for on the main thread will happen then
+    bool waitFor(const std::function<bool()>& condition, int timeoutMs = m_waitTimeoutMs) const;
+    //!< A sleep that a stop cuts short, with the same tool error
+    void pause(int ms) const;
+    static const int m_waitTimeoutMs = 5000;
+
     // Device set helpers
-    int deviceSetCount() const;
     int channelCount(int deviceSetIndex) const;
     int featureCount() const;
     int deviceSetDirection(int deviceSetIndex);
@@ -174,22 +196,32 @@ private:
     int addChannelAndWait(int deviceSetIndex, const QString& channelType);
     int addFeatureAndWait(const QString& featureType);
     int addDeviceSetAndWait(int direction);
-    //!< Identity of the current channels, features or device sets, to spot which one is new
-    QSet<const void *> channelPointers(int deviceSetIndex) const;
-    QSet<const void *> featurePointers() const;
+    //!< Identity of the current channels, features or device sets, to spot which one is new.
+    //!< Channels and features are identified by UID throughout: a pointer to one is only ever
+    //!< good until the next wait, since a deleted object's address is reused by the next one
+    //!< created, and every tool here waits
+    QSet<uint64_t> channelUids(int deviceSetIndex) const;
+    QSet<uint64_t> featureUids() const;
     QSet<const void *> deviceSetPointers() const;
     void deleteChannelAndWait(int deviceSetIndex, int channelIndex);
+    void deleteChannelLocked(int deviceSetIndex, int channelIndex); //!< With m_deletionMutex held
+    //!< Removes a device set that listen or scan created and could not finish setting up, if it
+    //!< is still the last one, which is the only one the API can remove
+    void discardNewDeviceSet(int deviceSetIndex);
+    friend class NewDeviceSetGuard;
     //!< Deletes a channel wherever it has moved to, for callers that held on to it across a wait
-    void deleteChannelObjectAndWait(const void *channel);
+    void deleteChannelObjectAndWait(uint64_t channelUid);
     const void *featureAt(int featureIndex) const;
-    const void *channelAt(int deviceSetIndex, int channelIndex) const;
+    //!< The UID of the feature or channel at an index, 0 when there is none
+    uint64_t featureUidAt(int featureIndex) const;
+    uint64_t channelUidAt(int deviceSetIndex, int channelIndex) const;
     void requireNotSelf(int featureIndex, const QString& action) const;
     QJsonObject getChannelSettings(int deviceSetIndex, int channelIndex);
     QJsonObject patchChannelSettings(int deviceSetIndex, int channelIndex, const QJsonObject& partial);
     //!< The property names and types of one settings definition. Used to tell a misspelled key from
     //!< a valid one, and to reject a value of the wrong type before it reaches the SWG object
     SettingsSchema settingsSchema(const QString& definition);
-    QString resolveDefinition(const QString& name);
+    QString resolveDefinition(const QString& name); //!< Call with m_schemaMutex held
     QJsonObject getSpectrumSettings(int deviceSetIndex);
     //!< unknownKeys, when given, receives the patch keys the schema does not define
     QJsonObject patchSpectrumSettings(int deviceSetIndex, const QJsonObject& partial, QStringList *unknownKeys = nullptr);
@@ -216,26 +248,25 @@ private:
     QJsonObject tuneGain(const QJsonObject& args);
     //!< The index of a feature of this type, adding one if there is none. Returns whether it was added
     int ensureFeature(const QString& featureType, int& featureIndex);
-    void trackIntentFeature(const void *feature);
+    void trackIntentFeature(uint64_t featureUid);
     //!< Removes the features listen added that no channel it added still feeds, except one of keepType.
     //!< Returns the types of those removed
     QStringList reclaimIntentFeatures(const QString& keepType = QString());
     //!< Deletes a feature wherever it has been renumbered to
-    void deleteFeatureObjectAndWait(const void *feature);
+    void deleteFeatureObjectAndWait(uint64_t featureUid);
     //!< Whether listen or scan should measure the gain: a device set they created, or a retune to another band
     static bool gainWorthTuning(bool reused, double previousCentre, double centre);
-    static uint64_t channelUid(const void *channel);
-    void trackIntentChannel(const void *channel);
-    void untrackIntentChannel(const void *channel);
+    void trackIntentChannel(uint64_t channelUid);
+    void untrackIntentChannel(uint64_t channelUid);
     QSet<uint64_t> intentChannels();
     //!< A channel's type id and whether listen or scan added it, for the notes the intent tools leave
-    struct ChannelNote { const void *m_channel; int m_index; QString m_id; bool m_intent; };
-    QList<ChannelNote> channelNotes(int deviceSetIndex, const QSet<const void *>& except = QSet<const void *>());
+    struct ChannelNote { uint64_t m_uid; int m_index; QString m_id; bool m_intent; };
+    QList<ChannelNote> channelNotes(int deviceSetIndex, const QSet<uint64_t>& except = QSet<uint64_t>());
     //!< Removes the channels listen and scan added to a device set, except keep. Returns the ids of those removed
-    QStringList reclaimIntentChannels(int deviceSetIndex, const QSet<const void *>& keep = QSet<const void *>());
-    //!< The channel a previous listen added that a new one of this type can retune instead of replacing, or null.
+    QStringList reclaimIntentChannels(int deviceSetIndex, const QSet<uint64_t>& keep = QSet<uint64_t>());
+    //!< The channel a previous listen added that a new one of this type can retune instead of replacing, or 0.
     //!< wanted: how many of the type the mode uses, 2 for a paired mode
-    const void *reusableIntentChannel(int deviceSetIndex, const QString& channelType, int& channelIndex, int wanted = 1);
+    uint64_t reusableIntentChannel(int deviceSetIndex, const QString& channelType, int& channelIndex, int wanted = 1);
     //!< What a retune of a reused device set did to the channels listen and scan did not add
     struct RetuneOutcome
     {
@@ -245,16 +276,16 @@ private:
     };
     RetuneOutcome retuneOtherChannels(int deviceSetIndex, double previousCentre, double centre, int baseband);
     //!< What listen and scan tell the caller about the rest of the device set once their own channels are in
-    QStringList intentNotes(int deviceSetIndex, const QSet<const void *>& added, const QStringList& reclaimed,
+    QStringList intentNotes(int deviceSetIndex, const QSet<uint64_t>& added, const QStringList& reclaimed,
         bool reused, double previousCentre, double centre, const RetuneOutcome& outcome);
     //!< Channel type ids for a direction, independent of how list_channel_types formats them
     QStringList channelTypeIds(int direction);
     //!< Where a channel is now. The intent tools sleep for many seconds without holding the
     //!< protocol mutex, and a concurrent request that deletes a lower numbered channel
     //!< renumbers everything above it, so their indices have to be resolved again before use.
-    void relocateChannel(const void *channel, int& deviceSetIndex, int& channelIndex, const QString& what);
+    void relocateChannel(uint64_t channelUid, int& deviceSetIndex, int& channelIndex, const QString& what);
 
-    void loadYamlDefinitions();
+    void loadYamlDefinitions(); //!< Call with m_schemaMutex held
 };
 
 #endif // INCLUDE_FEATURE_MCPTOOLS_H_

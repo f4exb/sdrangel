@@ -114,8 +114,12 @@ void MCPServer::start()
 
 void MCPServer::stop()
 {
-    // Event streams must be released first: each is served by an HTTP thread blocked inside
-    // the request handler, and deleting the listener waits for those threads to finish
+    // Deleting the listener waits for every HTTP thread to finish, on this, the main thread,
+    // so anything those threads are waiting for from the main thread must be given up first:
+    // the event streams, each served by a thread blocked inside the request handler, and the
+    // tool calls in progress, which wait for channels and devices that only the main thread
+    // creates and, for an audio capture, for the main thread itself
+    m_protocol->setStopping(true);
     m_streams.closeAll();
 
     if (m_listener)
@@ -125,6 +129,8 @@ void MCPServer::stop()
         m_listener = nullptr;
     }
 
+    // No HTTP thread is left, so the next start() begins with the tools able to wait again
+    m_protocol->setStopping(false);
     setState(StIdle);
 }
 

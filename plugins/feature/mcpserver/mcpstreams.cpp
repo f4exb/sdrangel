@@ -207,10 +207,19 @@ QSet<QString> MCPStreams::subscribedUris() const
     return uris;
 }
 
-void MCPStreams::subscribe(const QString& sessionId, const QString& uri)
+bool MCPStreams::subscribe(const QString& sessionId, const QString& uri)
 {
     QMutexLocker locker(&m_mutex);
-    m_subscriptions[sessionId].insert(uri);
+    QSet<QString>& uris = m_subscriptions[sessionId];
+
+    // Bounded: every subscription is polled for changes each second, and the anonymous
+    // session's set has no DELETE to clear it
+    if (!uris.contains(uri) && (uris.size() >= m_maxSubscriptions)) {
+        return false;
+    }
+
+    uris.insert(uri);
+    return true;
 }
 
 bool MCPStreams::unsubscribe(const QString& sessionId, const QString& uri)
@@ -538,7 +547,9 @@ void MCPNotifier::pollForContentChanges()
             bool ok = false;
             index = uri.mid(QString("sdrangel://deviceset/").size()).toInt(&ok);
 
-            if (!ok) {
+            // A device set that is not there is not read: the read would only throw, once a
+            // second for as long as the subscription lasts
+            if (!ok || (index < 0) || (index >= m_tools->deviceSetCount())) {
                 continue;
             }
         }

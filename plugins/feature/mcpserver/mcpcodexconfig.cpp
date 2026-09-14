@@ -181,7 +181,9 @@ QStringList MCPCodexConfig::rewriteTable(const QStringList& table, const QString
 
     const QString name = QRegularExpression::escape(serverName);
     QRegularExpression child(QString("^\\s*\\[\\s*mcp_servers\\s*\\.\\s*\"?%1\"?\\s*\\.").arg(name));
-    QRegularExpression assignment("^\\s*\"?([A-Za-z0-9_-]+)\"?\\s*=");
+    // A managed key however it is spelt: bare, quoted, or the head of a dotted key such as
+    // http_headers.Authorization, which is the same table written another way
+    QRegularExpression assignment("^\\s*\"?([A-Za-z0-9_-]+)\"?\\s*[=.]");
 
     QStringList out;
 
@@ -292,6 +294,33 @@ MCPCodexConfig::Result MCPCodexConfig::addServer(const QString& serverName, cons
     int start, end;
     findTable(lines, serverName, start, end);
     Result result;
+
+    // The same server written as an inline table under [mcp_servers], or as dotted keys at the
+    // top level, is a table this cannot rewrite in place; adding a [mcp_servers.name] beside it
+    // would define the table twice and Codex would refuse the whole file
+    if (start < 0)
+    {
+        const QString name = QRegularExpression::escape(serverName);
+        QRegularExpression dotted(QString("^\\s*mcp_servers\\s*\\.\\s*\"?%1\"?\\s*[.=]").arg(name));
+        QRegularExpression inlineEntry(QString("^\\s*\"?%1\"?\\s*=").arg(name));
+        QRegularExpression serversHeader("^\\s*\\[\\s*mcp_servers\\s*\\]");
+        QRegularExpression anyTable("^\\s*\\[");
+        bool inServers = false;
+
+        for (const QString& line : lines)
+        {
+            if (anyTable.match(line).hasMatch()) {
+                inServers = serversHeader.match(line).hasMatch();
+            }
+
+            if (dotted.match(line).hasMatch() || (inServers && inlineEntry.match(line).hasMatch()))
+            {
+                message = QString("%1 already defines %2 in a form this cannot update (%3). Remove that entry and try again.")
+                    .arg(path).arg(serverName).arg(line.trimmed());
+                return Failed;
+            }
+        }
+    }
 
     if (start >= 0)
     {

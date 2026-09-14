@@ -122,6 +122,21 @@ bool MCPProtocol::handleMessage(const QJsonObject& message, QJsonObject& respons
         response = makeError(id, e.code, e.message);
         return true;
     }
+    catch (const MCPToolError& e)
+    {
+        // A tool level failure raised outside tools/call: resources/read shares the tool
+        // helpers, and a resource that is not there (a device set index that does not exist,
+        // an unknown schema type) surfaces here. Left uncaught it would leave the HTTP thread
+        // and take the application down, since MCPToolError is not a std::exception
+        qDebug() << "MCPProtocol::handleMessage:" << method << "error:" << e.message;
+
+        if (!hasId) {
+            return false;
+        }
+
+        response = makeError(id, method.startsWith("resources/") ? ResourceNotFound : InvalidParams, e.message);
+        return true;
+    }
     catch (const std::exception& e)
     {
         qWarning() << "MCPProtocol::handleMessage:" << method << "exception:" << e.what();
@@ -131,6 +146,18 @@ bool MCPProtocol::handleMessage(const QJsonObject& message, QJsonObject& respons
         }
 
         response = makeError(id, InternalError, QString("Internal error: %1").arg(e.what()));
+        return true;
+    }
+    catch (...)
+    {
+        // Nothing thrown here may reach the connection thread, which has no handler
+        qWarning() << "MCPProtocol::handleMessage:" << method << "unknown exception";
+
+        if (!hasId) {
+            return false;
+        }
+
+        response = makeError(id, InternalError, "Internal error");
         return true;
     }
 }
@@ -269,9 +296,25 @@ QJsonValue MCPProtocol::resourcesSubscribe(const QJsonObject& params, Context& c
             "Subscribable resources are %2 and sdrangel://deviceset/{index}").arg(uri).arg(subscribable.join(", ")));
     }
 
-    if (subscribe) {
-        m_streams->subscribe(context.m_sessionId, uri);
-    } else {
+    // A device set URI has to name one that could exist: the index the Web API accepts is two
+    // digits, so anything else is a mistake rather than a resource to watch for
+    if (subscribe && uri.startsWith("sdrangel://deviceset/"))
+    {
+        static const QRegularExpression deviceSetUri("^sdrangel://deviceset/([0-9]{1,2})$");
+
+        if (!deviceSetUri.match(uri).hasMatch()) {
+            throw MCPError(InvalidParams, QString("Resource %1 is not a device set: use sdrangel://deviceset/{index} with an index from 0 to 99").arg(uri));
+        }
+    }
+
+    if (subscribe)
+    {
+        if (!m_streams->subscribe(context.m_sessionId, uri)) {
+            throw MCPError(InvalidParams, QString("This session already has %1 subscriptions; unsubscribe from one first").arg(MCPStreams::m_maxSubscriptions));
+        }
+    }
+    else
+    {
         m_streams->unsubscribe(context.m_sessionId, uri);
     }
 
@@ -474,7 +517,7 @@ QJsonValue MCPProtocol::resourcesRead(const QJsonObject& params)
         const MCPDocs::Doc *doc = m_tools.docs().find(id, kind);
 
         if (!doc) {
-            throw MCPError(InvalidParams, QString("Resource not found: %1. Read sdrangel://docs for the available documentation").arg(uri));
+            throw MCPError(ResourceNotFound, QString("Resource not found: %1. Read sdrangel://docs for the available documentation").arg(uri));
         }
 
         content["mimeType"] = "text/markdown";
@@ -494,7 +537,7 @@ QJsonValue MCPProtocol::resourcesRead(const QJsonObject& params)
     }
     else
     {
-        throw MCPError(InvalidParams, QString("Resource not found: %1").arg(uri));
+        throw MCPError(ResourceNotFound, QString("Resource not found: %1").arg(uri));
     }
 
     QJsonArray contents;

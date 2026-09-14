@@ -36,6 +36,7 @@
 #include <thread>
 #include <vector>
 #include <set>
+#include <csignal>
 
 #ifdef _WIN32
 #include <fcntl.h>
@@ -202,6 +203,16 @@ private:
     static constexpr int m_retryMinMs = 1000;   //!< First wait before reopening the event stream
     static constexpr int m_retryMaxMs = 60000;  //!< And the longest, once it keeps failing
 
+    // Socket timeouts, so that a SDRangel that has stopped answering cannot hold a worker
+    // for ever: run() joins every worker once the client closes stdin, and one that never
+    // returns would keep this process alive after the client has given up on it.
+    // A call may legitimately run for over a minute: scan watches for up to 30 s after
+    // measuring its threshold for up to 15 s, and listen may tune the gain first
+    static constexpr int m_callTimeoutMs = 180000;
+    // The server writes a keepalive comment every 15 s while the stream is open
+    static constexpr int m_streamTimeoutMs = 60000;
+    static constexpr int m_shutdownTimeoutMs = 5000;
+
     std::atomic<bool> m_running { true };
     std::atomic<bool> m_streamWanted { false };
     std::thread m_streamThread;
@@ -285,7 +296,7 @@ bool Bridge::exchange(const std::string& message, HttpClient::Head& head, std::s
 {
     HttpClient client;
 
-    if (!client.open(m_options.m_host, m_options.m_port, 0, error))
+    if (!client.open(m_options.m_host, m_options.m_port, m_callTimeoutMs, error))
     {
         error = "Cannot reach SDRangel's MCP server at " + m_options.m_host + ":"
             + std::to_string(m_options.m_port) + ": " + error + ". Start SDRangel, add the MCP Server "
@@ -477,6 +488,16 @@ bool Bridge::openSession()
         return true;
     }
 
+    // One session at a time, however many callers found none: the stream thread and every
+    // worker with a call in hand arrive here together when SDRangel comes back, and each
+    // would otherwise open a session of its own, with the stream on one and the calls on
+    // another. Whoever waited finds the session the first one made
+    std::lock_guard<std::mutex> lock(m_reinitMutex);
+
+    if (!sessionId().empty()) {
+        return true;
+    }
+
     std::string initialize;
     {
         std::lock_guard<std::mutex> lock(m_stateMutex);
@@ -586,6 +607,14 @@ void Bridge::post(const std::string& message)
 
     if (!exchange(message, head, body, error))
     {
+        // A notification has no id and takes no reply, failed or not: an error against a
+        // null id is a response to a call the client never made
+        if (id.empty() && (method != "initialize"))
+        {
+            note(m_options, "dropped " + method + ": " + error);
+            return;
+        }
+
         // The handshake must not fail, whatever SDRangel is doing: a client that is told the
         // server is broken during initialize never comes back to it
         if (method == "initialize")
@@ -721,11 +750,12 @@ void Bridge::stopStream()
     }
 
     {
-        // Closing the socket under the thread is what unblocks its read
+        // Shutting the socket down under the thread is what unblocks its read; the thread
+        // then closes it itself
         std::lock_guard<std::mutex> lock(m_streamMutex);
 
         if (m_streamClient) {
-            m_streamClient->close();
+            m_streamClient->interrupt();
         }
     }
 
@@ -762,7 +792,7 @@ void Bridge::streamLoop()
             continue;
         }
 
-        if (!client.open(m_options.m_host, m_options.m_port, 0, error))
+        if (!client.open(m_options.m_host, m_options.m_port, m_streamTimeoutMs, error))
         {
             note(m_options, "event stream cannot connect: " + error);
         }
@@ -853,7 +883,7 @@ void Bridge::endSession()
     HttpClient client;
     std::string error;
 
-    if (!client.open(m_options.m_host, m_options.m_port, 0, error)) {
+    if (!client.open(m_options.m_host, m_options.m_port, m_shutdownTimeoutMs, error)) {
         return; // going away anyway, and the server expires idle sessions
     }
 
@@ -950,6 +980,11 @@ int Bridge::run()
 
 int main(int argc, char *argv[])
 {
+#ifndef _WIN32
+    // A write to a socket or pipe whose other end has gone must fail, not end the process
+    signal(SIGPIPE, SIG_IGN);
+#endif
+
     Options options;
 
     for (int i = 1; i < argc; i++)

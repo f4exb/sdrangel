@@ -55,6 +55,11 @@ public:
 
     bool open(const std::string& host, int port, int timeoutMs, std::string& error);
     void close();
+    //!< Wakes a read blocked on this socket from another thread. Only the socket is touched:
+    //!< the buffer and the rest belong to the thread reading, which closes when its read
+    //!< returns. Closing from the other thread would not wake a read on Linux, and frees a
+    //!< descriptor number the reader still holds
+    void interrupt();
     bool isOpen() const { return m_socket != invalidSocket(); }
 
     //!< Sends the request and its body. An empty method body is fine.

@@ -27,6 +27,8 @@
 #include <QObject>
 #include <QString>
 
+#include <cstdint>
+
 class WebAPIAdapterInterface;
 class DataFifo;
 class MessageQueue;
@@ -45,6 +47,10 @@ public:
 
     //!< Blocks for the requested duration. Called from an HTTP thread.
     QJsonObject capture(int deviceSetIndex, int channelIndex, double seconds, const QString& path, bool inlineAudio);
+
+    //!< The server is stopping: a capture in progress ends now, and one waiting for the main
+    //!< thread to attach stops waiting, since that thread is waiting for this one
+    void setStopping(bool stopping) { m_stopping.storeRelease(stopping ? 1 : 0); }
 
 private slots:
     void handlePipeToBeDeleted(int reason, QObject *object);
@@ -67,10 +73,11 @@ private:
     // when its garbage collector deletes a pipe, which the next unregister would dereference.
     QMap<QObject *, Attachment> m_attachments;
 
-    QObject *m_pendingChannel;  //!< Arguments and results of attach(), which runs on the main thread
+    QObject *m_pendingChannel;  //!< Results of attach(), which runs on the main thread
     DataFifo *m_pendingFifo;
     MessageQueue *m_pendingReportQueue;
     QString m_attachError;
+    QAtomicInt m_stopping;
 
     // Set when the channel being captured from goes away, so the capture loop stops touching
     // the FIFO before the pipe registry destroys it
@@ -82,7 +89,9 @@ private:
     // return (and the registry cannot free either element) while a read is in progress.
     QMutex m_fifoMutex;
 
-    Q_INVOKABLE bool attach(int deviceSetIndex, int channelIndex);
+    bool attach(int deviceSetIndex, int channelIndex);
+    //!< Runs attach() on the main thread and waits for it, unless the server stops first
+    bool attachFromMainThread(int deviceSetIndex, int channelIndex);
 
     int reportedSampleRate(MessageQueue *queue, int timeoutMs);
     int sampleRateFromReport(int deviceSetIndex, int channelIndex);
@@ -112,20 +121,25 @@ public:
     QJsonObject stopIQRecording(int deviceSetIndex, int channelIndex);
 
     //!< Stops the recording of this channel wherever it has moved to
-    QJsonObject stopIQRecording(const void *channel);
+    QJsonObject stopIQRecording(uint64_t channelUid);
 
     //!< Drops the entry for a channel that is being deleted
-    void forgetRecording(const void *channel);
+    void forgetRecording(uint64_t channelUid);
 
     QJsonObject captureAudio(int deviceSetIndex, int channelIndex, double seconds, const QString& fileName, bool inlineAudio);
     QJsonObject status();
 
+    //!< See MCPTools::setStopping
+    void setStopping(bool stopping);
+
     //!< Current index of a channel, or false if it has gone. Indices shift when a lower
     //!< numbered channel is deleted, so they are resolved again before every action.
-    static bool locateChannel(const void *channel, int& deviceSetIndex, int& channelIndex);
+    //!< Channels are held by UID rather than by pointer across any wait: a deleted channel's
+    //!< address is reused by the next one created, and a UID never is
+    static bool locateChannel(uint64_t channelUid, int& deviceSetIndex, int& channelIndex);
 
-    //!< The channel object at an index, or null
-    static const void *channelObject(int deviceSetIndex, int channelIndex);
+    //!< The UID of the channel at an index, or 0 when there is none
+    static uint64_t channelUidAt(int deviceSetIndex, int channelIndex);
 
     //!< Inline audio is only offered for short clips, as it is base64 encoded into the reply
     static constexpr int m_maxInlineSeconds = 10;
@@ -145,11 +159,12 @@ private:
 
     WebAPIAdapterInterface *m_adapter;
     mutable QMutex m_mutex;
+    QAtomicInt m_stopping;
     QString m_captureDir;
 
-    // Keyed by the channel object rather than its index, because indices are renumbered
+    // Keyed by the channel's UID rather than its index, because indices are renumbered
     // whenever a lower numbered channel is deleted, which can happen while a recording runs
-    QMap<const void *, Recording> m_recordings;
+    QMap<uint64_t, Recording> m_recordings;
     MCPAudioCapture m_audio;
 
     QString resolvePath(const QString& name, const QString& defaultPrefix);

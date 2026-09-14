@@ -78,7 +78,8 @@ public:
     bool sessionExists(const QString& sessionId); //!< Also marks the session as recently used
     void endSession(const QString& sessionId);
 
-    void subscribe(const QString& sessionId, const QString& uri);
+    //!< False when the session already holds as many subscriptions as are allowed
+    bool subscribe(const QString& sessionId, const QString& uri);
     QSet<QString> subscribedUris() const;
     bool unsubscribe(const QString& sessionId, const QString& uri);
     QSet<QString> subscriptions(const QString& sessionId) const;
@@ -100,6 +101,7 @@ public:
 
     static constexpr int m_maxStreams = 8;
     static constexpr int m_maxSessions = 32;                        //!< Oldest idle sessions are dropped beyond this
+    static constexpr int m_maxSubscriptions = 32;                   //!< Per session: the fixed resources and a few device sets
     static const qint64 m_sessionIdleMs = 24 * 60 * 60 * 1000;  //!< Sessions unused for this long are dropped
 
     static constexpr int m_maxStreamLifetimeMs = 10 * 60 * 1000; //!< Backstop against streams whose client vanished

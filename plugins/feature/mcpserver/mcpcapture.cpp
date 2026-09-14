@@ -34,6 +34,7 @@
 #include "SWGErrorResponse.h"
 
 #include "webapi/webapiadapterinterface.h"
+#include "channel/channelapi.h"
 #include "device/deviceset.h"
 #include "maincore.h"
 
@@ -132,8 +133,15 @@ QString settingsKeyOf(const QJsonObject& json)
 
 MCPCapture::MCPCapture(WebAPIAdapterInterface *adapter) :
     m_adapter(adapter),
+    m_stopping(0),
     m_audio(adapter)
 {
+}
+
+void MCPCapture::setStopping(bool stopping)
+{
+    m_stopping.storeRelease(stopping ? 1 : 0);
+    m_audio.setStopping(stopping);
 }
 
 QJsonObject MCPCapture::captureAudio(int deviceSetIndex, int channelIndex, double seconds,
@@ -187,8 +195,13 @@ QString MCPCapture::resolvePath(const QString& nameIn, const QString& defaultPre
     QString baseAbs = QDir::cleanPath(base.absolutePath());
     QString full = QDir::cleanPath(base.absoluteFilePath(name));
 
-    if ((full != baseAbs) && !full.startsWith(baseAbs + "/")) {
-        throw MCPToolError(QString("File name must stay inside the capture directory %1").arg(baseAbs));
+    // A root directory already ends with the separator. A name that resolves to the capture
+    // directory itself, "." or "sub/..", is refused as well: the file would be
+    // "<captureDir>.<timestamp>.sdriq", which lies beside the directory, not in it
+    const QString basePrefix = baseAbs.endsWith('/') ? baseAbs : baseAbs + "/";
+
+    if ((full.size() <= basePrefix.size()) || !full.startsWith(basePrefix)) {
+        throw MCPToolError(QString("File name must be a file inside the capture directory %1").arg(baseAbs));
     }
 
     // The text can stay inside while the file does not: a symbolic link or junction under the
@@ -209,9 +222,10 @@ QString MCPCapture::resolvePath(const QString& nameIn, const QString& defaultPre
     }
 
     QString ancestorReal = realPath(ancestor);
+    const QString realPrefix = baseReal.endsWith('/') ? baseReal : baseReal + "/";
 
     if (baseReal.isEmpty() || ancestorReal.isEmpty()
-        || ((ancestorReal != baseReal) && !ancestorReal.startsWith(baseReal + "/")))
+        || ((ancestorReal != baseReal) && !ancestorReal.startsWith(realPrefix)))
     {
         throw MCPToolError(QString("File name must stay inside the capture directory %1; %2 leads outside it")
             .arg(baseAbs).arg(ancestor));
@@ -303,20 +317,21 @@ QJsonObject MCPCapture::channelReport(int deviceSetIndex, int channelIndex)
     return toJson(response);
 }
 
-const void *MCPCapture::channelObject(int deviceSetIndex, int channelIndex)
+uint64_t MCPCapture::channelUidAt(int deviceSetIndex, int channelIndex)
 {
     const std::vector<DeviceSet*>& deviceSets = MainCore::instance()->getDeviceSets();
 
     if ((deviceSetIndex < 0) || (deviceSetIndex >= (int) deviceSets.size())) {
-        return nullptr;
+        return 0;
     }
 
-    return deviceSets[deviceSetIndex]->getChannelAt(channelIndex);
+    const ChannelAPI *channel = deviceSets[deviceSetIndex]->getChannelAt(channelIndex);
+    return channel ? channel->getUID() : 0;
 }
 
-bool MCPCapture::locateChannel(const void *channel, int& deviceSetIndex, int& channelIndex)
+bool MCPCapture::locateChannel(uint64_t channelUid, int& deviceSetIndex, int& channelIndex)
 {
-    if (!channel) {
+    if (channelUid == 0) {
         return false;
     }
 
@@ -326,7 +341,9 @@ bool MCPCapture::locateChannel(const void *channel, int& deviceSetIndex, int& ch
     {
         for (int c = 0; c < deviceSets[d]->getNumberOfChannels(); c++)
         {
-            if (deviceSets[d]->getChannelAt(c) == channel)
+            const ChannelAPI *channel = deviceSets[d]->getChannelAt(c);
+
+            if (channel && (channel->getUID() == channelUid))
             {
                 deviceSetIndex = d;
                 channelIndex = c;
@@ -339,7 +356,7 @@ bool MCPCapture::locateChannel(const void *channel, int& deviceSetIndex, int& ch
 }
 
 // A channel deleted without stopping its recording would otherwise leave an entry behind for
-// as long as the server runs, and a later channel could be allocated at the same address
+// as long as the server runs
 void MCPCapture::pruneRecordings()
 {
     QMutexLocker locker(&m_mutex);
@@ -357,22 +374,33 @@ void MCPCapture::pruneRecordings()
     }
 }
 
-void MCPCapture::forgetRecording(const void *channel)
+void MCPCapture::forgetRecording(uint64_t channelUid)
 {
     QMutexLocker locker(&m_mutex);
-    m_recordings.remove(channel);
+    m_recordings.remove(channelUid);
 }
 
 QJsonObject MCPCapture::startIQRecording(int deviceSetIndex, int channelIndex, const QString& fileName,
     int frequencyOffset, int log2Decim)
 {
-    const void *channel = channelObject(deviceSetIndex, channelIndex);
+    const uint64_t channel = channelUidAt(deviceSetIndex, channelIndex);
 
-    if (!channel) {
+    if (channel == 0) {
         throw MCPToolError(QString("There is no channel %1:%2").arg(deviceSetIndex).arg(channelIndex));
     }
 
+    // Another request can delete a channel between any two steps here, renumbering the ones
+    // above it, so the index is resolved from the channel's UID before each one rather than
+    // trusted from the call
+    auto locate = [&]()
+    {
+        if (!locateChannel(channel, deviceSetIndex, channelIndex)) {
+            throw MCPToolError("The channel to record with no longer exists: another request removed it, or its device set");
+        }
+    };
+
     pruneRecordings();
+    locate();
     QJsonObject settings = channelSettings(deviceSetIndex, channelIndex);
     QString type = channelType(settings);
 
@@ -389,26 +417,37 @@ QJsonObject MCPCapture::startIQRecording(int deviceSetIndex, int channelIndex, c
         partial["log2Decim"] = log2Decim;
     }
 
+    locate();
     patchChannel(deviceSetIndex, channelIndex, type, partial);
 
     // The record action goes straight to the channel's DSP thread while the settings go through
     // the channel itself first, so the action can overtake them and start recording to the
     // file name the sink had before: for a fresh FileSink an empty one, which gives a stray
     // file in the working directory. Wait until the channel has taken the settings, after
-    // which the DSP thread sees them before the action
+    // which the DSP thread sees them before the action. Recording is only ever started once
+    // they have landed: a sink still on its old file name is not one to start
     QElapsedTimer settled;
     settled.start();
+    bool landed = false;
 
-    while (settled.elapsed() < 3000)
+    while (!landed)
     {
-        QJsonObject now = channelSettings(deviceSetIndex, channelIndex);
-        QString key = settingsKeyOf(now);
-
-        if (!key.isEmpty() && (now[key].toObject()["fileRecordName"].toString() == partial["fileRecordName"].toString())) {
-            break;
+        if (m_stopping.loadAcquire()) {
+            throw MCPToolError("The MCP server is stopping, so the recording was not started");
         }
 
-        QThread::msleep(50);
+        if (settled.elapsed() >= 3000) {
+            throw MCPToolError("The FileSink did not take its file name within 3 seconds, so the recording was not started");
+        }
+
+        locate();
+        QJsonObject now = channelSettings(deviceSetIndex, channelIndex);
+        QString key = settingsKeyOf(now);
+        landed = !key.isEmpty() && (now[key].toObject()["fileRecordName"].toString() == partial["fileRecordName"].toString());
+
+        if (!landed) {
+            QThread::msleep(50);
+        }
     }
 
     Recording recording;
@@ -421,7 +460,17 @@ QJsonObject MCPCapture::startIQRecording(int deviceSetIndex, int channelIndex, c
         m_recordings[channel] = recording;
     }
 
-    recordAction(deviceSetIndex, channelIndex, type, true);
+    locate();
+
+    try
+    {
+        recordAction(deviceSetIndex, channelIndex, type, true);
+    }
+    catch (const MCPToolError&)
+    {
+        forgetRecording(channel); // nothing is recording, so there is nothing to remember
+        throw;
+    }
 
     QJsonObject result;
     result["deviceSetIndex"] = deviceSetIndex;
@@ -435,16 +484,16 @@ QJsonObject MCPCapture::startIQRecording(int deviceSetIndex, int channelIndex, c
 
 QJsonObject MCPCapture::stopIQRecording(int deviceSetIndex, int channelIndex)
 {
-    const void *channel = channelObject(deviceSetIndex, channelIndex);
+    const uint64_t channel = channelUidAt(deviceSetIndex, channelIndex);
 
-    if (!channel) {
+    if (channel == 0) {
         throw MCPToolError(QString("There is no channel %1:%2").arg(deviceSetIndex).arg(channelIndex));
     }
 
     return stopIQRecording(channel);
 }
 
-QJsonObject MCPCapture::stopIQRecording(const void *channel)
+QJsonObject MCPCapture::stopIQRecording(uint64_t channel)
 {
     int deviceSetIndex = -1;
     int channelIndex = -1;
@@ -480,6 +529,10 @@ QJsonObject MCPCapture::stopIQRecording(const void *channel)
     QJsonObject report;
     bool stopped = waitFor([&]()
     {
+        if (m_stopping.loadAcquire()) {
+            return true; // the server is stopping: report what there is rather than wait
+        }
+
         locate();
         report = channelReport(deviceSetIndex, channelIndex);
 
@@ -519,9 +572,8 @@ QJsonObject MCPCapture::stopIQRecording(const void *channel)
         result["warning"] = "The channel still reports that it is recording; the file sizes below may be incomplete";
     }
 
-    // The channel may have been pointed at a different file since the recording started, and a
-    // deleted channel's address can be reused by a new one. Only list files when the channel is
-    // still writing to the file this entry recorded.
+    // The channel may have been pointed at a different file since the recording started. Only
+    // list files when the channel is still writing to the file this entry recorded.
     QString settingsKey = settingsKeyOf(settings);
     QString currentFile = settingsKey.isEmpty() ? QString() : settings[settingsKey].toObject()["fileRecordName"].toString();
     bool matches = recording.m_valid && !currentFile.isEmpty()
@@ -546,11 +598,17 @@ QJsonObject MCPCapture::filesFor(const Recording& recording)
     QFileInfo baseInfo(recording.m_fileBase);
     QDir dir = baseInfo.dir();
     QJsonArray files;
-    QStringList filters;
-    filters << baseInfo.fileName() + ".*";
 
-    for (const QFileInfo& info : dir.entryInfoList(filters, QDir::Files, QDir::Name))
+    // Matched by prefix rather than as a wildcard pattern: a name holding [ ] ? or * would
+    // otherwise match other files, or none
+    const QString prefix = baseInfo.fileName() + ".";
+
+    for (const QFileInfo& info : dir.entryInfoList(QDir::Files, QDir::Name))
     {
+        if (!info.fileName().startsWith(prefix)) {
+            continue;
+        }
+
         // Allow a second of slack: the file is created just after the action is sent
         if (info.lastModified().addSecs(1) < recording.m_started) {
             continue;

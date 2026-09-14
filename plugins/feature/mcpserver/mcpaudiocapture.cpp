@@ -20,7 +20,9 @@
 #include <QElapsedTimer>
 #include <QFile>
 #include <QFileInfo>
+#include <QSharedPointer>
 #include <QThread>
+#include <QWaitCondition>
 
 #include "SWGChannelReport.h"
 #include "SWGErrorResponse.h"
@@ -58,8 +60,64 @@ MCPAudioCapture::MCPAudioCapture(WebAPIAdapterInterface *adapter, QObject *paren
     m_pendingFifo(nullptr),
     m_pendingReportQueue(nullptr),
     m_capturingChannel(nullptr),
-    m_captureAborted(0)
+    m_captureAborted(0),
+    m_stopping(0)
 {
+}
+
+// attach() has to run on the main thread, and the HTTP thread has to wait for it. It is not
+// a blocking queued call, though: when the server stops, the main thread is inside the
+// listener's destructor waiting for this very thread, and a call that could only return once
+// the main thread ran its event loop would never return. The wait here is bounded, gives up
+// as soon as a stop is under way, and leaves the queued call harmless if it runs late
+bool MCPAudioCapture::attachFromMainThread(int deviceSetIndex, int channelIndex)
+{
+    struct Request
+    {
+        QMutex m_mutex;
+        QWaitCondition m_done;
+        bool m_finished = false;
+        bool m_abandoned = false;
+        bool m_result = false;
+    };
+
+    QSharedPointer<Request> request(new Request());
+
+    QMetaObject::invokeMethod(this, [this, request, deviceSetIndex, channelIndex]()
+    {
+        QMutexLocker lock(&request->m_mutex);
+
+        if (request->m_abandoned) {
+            return; // the caller gave up: registering a pipe now would serve nobody
+        }
+
+        request->m_result = attach(deviceSetIndex, channelIndex);
+        request->m_finished = true;
+        request->m_done.wakeAll();
+    }, Qt::QueuedConnection);
+
+    QElapsedTimer waited;
+    waited.start();
+    QMutexLocker lock(&request->m_mutex);
+
+    while (!request->m_finished)
+    {
+        if (m_stopping.loadAcquire())
+        {
+            request->m_abandoned = true;
+            throw MCPToolError("The MCP server is stopping, so this call was abandoned");
+        }
+
+        if (waited.elapsed() > 10000)
+        {
+            request->m_abandoned = true;
+            throw MCPToolError("The main thread did not respond in 10 seconds; the application may be busy or frozen");
+        }
+
+        request->m_done.wait(&request->m_mutex, 100);
+    }
+
+    return request->m_result;
 }
 
 // Registers the demod data pipe and the report message pipe on the channel. Runs on the main
@@ -171,7 +229,7 @@ int MCPAudioCapture::reportedSampleRate(MessageQueue *queue, int timeoutMs)
     QElapsedTimer timer;
     timer.start();
 
-    while (timer.elapsed() < timeoutMs)
+    while ((timer.elapsed() < timeoutMs) && !m_stopping.loadAcquire())
     {
         {
             // The queue belongs to the report pipe and is freed with it when the channel goes,
@@ -239,11 +297,8 @@ int MCPAudioCapture::sampleRateFromReport(int deviceSetIndex, int channelIndex)
 QJsonObject MCPAudioCapture::capture(int deviceSetIndex, int channelIndex, double seconds, const QString& path, bool inlineAudio)
 {
     QMutexLocker captureLock(&m_captureMutex);
-    bool attached = false;
-    QMetaObject::invokeMethod(this, "attach", Qt::BlockingQueuedConnection,
-        Q_RETURN_ARG(bool, attached), Q_ARG(int, deviceSetIndex), Q_ARG(int, channelIndex));
 
-    if (!attached) {
+    if (!attachFromMainThread(deviceSetIndex, channelIndex)) {
         throw MCPToolError(m_attachError);
     }
 
@@ -252,14 +307,18 @@ QJsonObject MCPAudioCapture::capture(int deviceSetIndex, int channelIndex, doubl
     QObject *channel = m_pendingChannel;
     QByteArray samples;
     int nbBytesPerSample = 2;
+    // The FIFO has been filling since attach(), so the requested duration runs from here,
+    // including whatever the wait for the sample rate takes: a channel that never answers the
+    // query (broadcast FM) would otherwise deliver a second more than was asked for
+    QElapsedTimer timer;
+    timer.start();
     int sampleRate = reportedSampleRate(reportQueue, 1000);
 
     if (sampleRate <= 0) {
         sampleRate = sampleRateFromReport(deviceSetIndex, channelIndex);
     }
 
-    QElapsedTimer timer;
-    timer.start();
+    bool stopping = false;
 
     while (timer.elapsed() < (qint64) (seconds * 1000.0))
     {
@@ -270,6 +329,12 @@ QJsonObject MCPAudioCapture::capture(int deviceSetIndex, int channelIndex, doubl
             QMutexLocker fifoLock(&m_fifoMutex);
 
             if (m_captureAborted.loadAcquire()) {
+                break;
+            }
+
+            if (m_stopping.loadAcquire())
+            {
+                stopping = true;
                 break;
             }
 
@@ -315,6 +380,10 @@ QJsonObject MCPAudioCapture::capture(int deviceSetIndex, int channelIndex, doubl
     {
         throw MCPToolError(QString("Channel %1:%2 was removed while its audio was being captured, so the recording was abandoned")
             .arg(deviceSetIndex).arg(channelIndex));
+    }
+
+    if (stopping) {
+        throw MCPToolError("The MCP server is stopping, so the recording was abandoned");
     }
 
     if (samples.isEmpty())

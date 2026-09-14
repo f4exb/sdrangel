@@ -76,6 +76,12 @@ std::string socketError()
     default:              return "socket error " + std::to_string(code);
     }
 #else
+    // A receive timeout set with SO_RCVTIMEO comes back as EAGAIN, whose text says nothing
+    // about time
+    if ((errno == EAGAIN) || (errno == EWOULDBLOCK)) {
+        return "timed out";
+    }
+
     return std::strerror(errno);
 #endif
 }
@@ -192,6 +198,12 @@ bool HttpClient::open(const std::string& host, int port, int timeoutMs, std::str
     int flag = 1;
     setsockopt(m_socket, IPPROTO_TCP, TCP_NODELAY, reinterpret_cast<const char *>(&flag), sizeof(flag));
 
+#ifdef SO_NOSIGPIPE
+    // A send on a connection the server has closed must fail, not raise SIGPIPE and end the
+    // process. Linux has no such option and uses MSG_NOSIGNAL on the send instead
+    setsockopt(m_socket, SOL_SOCKET, SO_NOSIGPIPE, &flag, sizeof(flag));
+#endif
+
     if (timeoutMs > 0)
     {
 #ifdef _WIN32
@@ -210,6 +222,18 @@ bool HttpClient::open(const std::string& host, int port, int timeoutMs, std::str
     m_buffer.clear();
     m_eof = false;
     return true;
+}
+
+void HttpClient::interrupt()
+{
+    if (m_socket != invalidSocket())
+    {
+#ifdef _WIN32
+        shutdown(m_socket, SD_BOTH);
+#else
+        shutdown(m_socket, SHUT_RDWR);
+#endif
+    }
 }
 
 void HttpClient::close()
@@ -234,7 +258,12 @@ bool HttpClient::sendAll(const std::string& data, std::string& error)
 
     while (sent < data.size())
     {
-        int count = ::send(m_socket, data.data() + sent, static_cast<int>(data.size() - sent), 0);
+#ifdef MSG_NOSIGNAL
+        const int flags = MSG_NOSIGNAL;
+#else
+        const int flags = 0;
+#endif
+        int count = ::send(m_socket, data.data() + sent, static_cast<int>(data.size() - sent), flags);
 
         if (count <= 0)
         {
