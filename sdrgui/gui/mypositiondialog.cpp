@@ -24,6 +24,12 @@
 #include "maincore.h"
 
 #include <QGeoCoordinate>
+#include <QJsonArray>
+#include <QJsonDocument>
+#include <QJsonObject>
+#include <QNetworkAccessManager>
+#include <QNetworkReply>
+#include <QNetworkRequest>
 
 MyPositionDialog::MyPositionDialog(MainSettings& mainSettings, QWidget* parent) :
     QDialog(parent),
@@ -62,9 +68,127 @@ void MyPositionDialog::on_gps_clicked()
         ui->latitudeSpinBox->setValue(coord.latitude());
         ui->longitudeSpinBox->setValue(coord.longitude());
         ui->altitudeSpinBox->setValue(coord.altitude());
+        return;
     }
-    else
+
+    // Only guess when both are zero.
+    if (ui->latitudeSpinBox->value() != 0.0 || ui->longitudeSpinBox->value() != 0.0)
     {
-        qDebug() << "MyPositionDialog::on_gps_clicked: Position is not valid.";
+       return;
     }
+
+    qWarning() << "SDRangel uses IP2Location.io <a href=\"https://www.ip2location.io\">IP geolocation</a>"
+               " web service as fall back when GPS is not available";
+
+    // Look up the public IP to get an approximate latitude and longitude.
+    QNetworkAccessManager *networkManager = new QNetworkAccessManager(this);
+    QNetworkRequest request(QUrl(QStringLiteral("https://api.ip2location.io/?format=json")));
+    QNetworkReply *reply = networkManager->get(request);
+
+    auto cleanup = [networkManager](QNetworkReply *reply) {
+        reply->deleteLater();
+        networkManager->deleteLater();
+    };
+
+    connect(reply, &QNetworkReply::finished, this, [this, reply, networkManager, cleanup]() {
+        if (reply->error() != QNetworkReply::NoError)
+        {
+            qWarning() << "MyPositionDialog::on_gps_clicked:"
+                       << "IP geolocation failed:" << reply->errorString();
+            cleanup(reply);
+            return;
+        }
+
+        const QJsonDocument document =
+            QJsonDocument::fromJson(reply->readAll());
+
+        if (!document.isObject())
+        {
+            qWarning() << "MyPositionDialog::on_gps_clicked:"
+                       << "Invalid IP geolocation response.";
+            cleanup(reply);
+            return;
+        }
+
+        const QJsonObject object = document.object();
+        const QJsonValue latitude = object.value(QStringLiteral("latitude"));
+        const QJsonValue longitude = object.value(QStringLiteral("longitude"));
+
+        if (!latitude.isDouble() || !longitude.isDouble())
+        {
+            qWarning() << "MyPositionDialog::on_gps_clicked:"
+                       << "IP geolocation response has no valid coordinates.";
+            cleanup(reply);
+            return;
+        }
+
+        // Look up elevation for the IP-derived coordinates.
+        const QUrl elevationUrl(
+            QStringLiteral("https://api.open-elevation.com/api/v1/lookup?locations=%1,%2")
+                .arg(latitude.toDouble())
+                .arg(longitude.toDouble()));
+
+        QNetworkReply *elevationReply =
+            networkManager->get(QNetworkRequest(elevationUrl));
+
+        reply->deleteLater();
+
+        connect(elevationReply, &QNetworkReply::finished, this,
+                [this, elevationReply, cleanup, latitude, longitude]() {
+            if (elevationReply->error() != QNetworkReply::NoError)
+            {
+                qWarning() << "MyPositionDialog::on_gps_clicked:"
+                           << "Elevation lookup failed:"
+                           << elevationReply->errorString();
+                cleanup(elevationReply);
+                return;
+            }
+
+            const QJsonDocument document =
+                QJsonDocument::fromJson(elevationReply->readAll());
+
+            if (!document.isObject())
+            {
+                qWarning() << "MyPositionDialog::on_gps_clicked:"
+                           << "Invalid elevation response.";
+                cleanup(elevationReply);
+                return;
+            }
+
+            const QJsonArray results =
+                document.object().value(QStringLiteral("results")).toArray();
+
+            if (results.isEmpty() || !results.first().isObject())
+            {
+                qWarning() << "MyPositionDialog::on_gps_clicked:"
+                           << "Elevation response has no results.";
+                cleanup(elevationReply);
+                return;
+            }
+
+            const QJsonValue elevation =
+                results.first().toObject().value(QStringLiteral("elevation"));
+
+            if (!elevation.isDouble())
+            {
+                qWarning() << "MyPositionDialog::on_gps_clicked:"
+                           << "Elevation response has no valid elevation.";
+                cleanup(elevationReply);
+                return;
+            }
+
+            // Use the IP-derived (estimated) coordinates and elevation.
+            ui->latitudeSpinBox->setValue(latitude.toDouble());
+            ui->longitudeSpinBox->setValue(longitude.toDouble());
+            ui->altitudeSpinBox->setValue(elevation.toDouble());
+
+            qDebug() << "MyPositionDialog::on_gps_clicked:"
+                     << "Using approximate position from public IP:"
+                     << latitude.toDouble()
+                     << longitude.toDouble()
+                     << "elevation:" << elevation.toDouble();
+
+            cleanup(elevationReply);
+        });
+    });
 }
