@@ -10366,13 +10366,13 @@ margin-bottom: 20px;
     },
     "averagingMode" : {
       "type" : "integer",
-      "description" : "How successive FFTs are averaged\n  * 0 - no averaging\n  * 1 - moving average\n  * 2 - fixed average over each block\n  * 3 - maximum held over each block\n  * 4 - minimum held over each block\n",
+      "description" : "How successive FFTs are averaged. Selecting a mode does nothing on its own: the number of FFTs it works over is averagingValue, which must be above 1 for any smoothing to happen.\n  * 0 - no averaging\n  * 1 - moving average\n  * 2 - fixed average over each block\n  * 3 - maximum held over each block\n  * 4 - minimum held over each block\n",
       "minimum" : 0,
       "maximum" : 4
     },
     "averagingValue" : {
       "type" : "integer",
-      "description" : "Averaging value for Gl spectrum."
+      "description" : "Number of successive FFTs the averaging mode works over. 1 is no averaging whatever the mode. Only 1, 2, 5, 10, 20, 50, 100 and so on are available and anything else is rounded down to one of them. 10 smooths a noisy trace without hiding short signals; 50 or more is for measuring a noise floor.\n"
     },
     "linear" : {
       "type" : "integer",
@@ -24581,6 +24581,17 @@ margin-bottom: 20px;
   },
   "description" : "WFMMod"
 };
+            defs.WorkspaceActions = {
+  "required" : [ "arrange" ],
+  "properties" : {
+    "arrange" : {
+      "type" : "string",
+      "description" : "How to arrange the workspace's windows. cascade, tile, stackVertical and stack rearrange them once, and turn auto stacking and tabs off. autostack stacks them now and again whenever a window is added or resized, and stays on until another arrangement is asked for. tab shows one window at a time with a tab for each, and turns auto stacking off.\n",
+      "enum" : [ "cascade", "tile", "stackVertical", "stack", "autostack", "tab" ]
+    }
+  },
+  "description" : "Actions on a workspace"
+};
             defs.WorkspaceInfo = {
   "required" : [ "index" ],
   "properties" : {
@@ -25409,6 +25420,9 @@ margin-bottom: 20px;
                     </li>
                     <li data-group="Workspace" data-name="instanceWorkspacesDeleteEmpty" class="">
                       <a href="#api-Workspace-instanceWorkspacesDeleteEmpty">instanceWorkspacesDeleteEmpty</a>
+                    </li>
+                    <li data-group="Workspace" data-name="workspaceActionsPost" class="">
+                      <a href="#api-Workspace-workspaceActionsPost">workspaceActionsPost</a>
                     </li>
           </ul>
         </nav>
@@ -68053,6 +68067,519 @@ except ApiException as e:
                         </article>
                       </div>
                       <hr>
+                    <div id="api-Workspace-workspaceActionsPost">
+                      <article id="api-Workspace-workspaceActionsPost-0" data-group="User" data-name="workspaceActionsPost" data-version="0">
+                        <div class="pull-left">
+                          <h1>workspaceActionsPost</h1>
+                          <p></p>
+                        </div>
+                        <div class="pull-right"></div>
+                        <div class="clearfix"></div>
+                        <p></p>
+                        <p class="marked">Arrange the windows of a workspace (GUI)</p>
+                        <p></p>
+                        <br />
+                        <pre class="prettyprint language-html prettyprinted" data-type="post"><code><span class="pln">/sdrangel/workspace/{workspaceIndex}/actions</span></code></pre>
+                        <p>
+                          <h3>Usage and SDK Samples</h3>
+                        </p>
+                        <ul class="nav nav-tabs nav-tabs-examples">
+                          <li class="active"><a href="#examples-Workspace-workspaceActionsPost-0-curl">Curl</a></li>
+                          <li class=""><a href="#examples-Workspace-workspaceActionsPost-0-java">Java</a></li>
+                          <li class=""><a href="#examples-Workspace-workspaceActionsPost-0-android">Android</a></li>
+                          <!--<li class=""><a href="#examples-Workspace-workspaceActionsPost-0-groovy">Groovy</a></li>-->
+                          <li class=""><a href="#examples-Workspace-workspaceActionsPost-0-objc">Obj-C</a></li>
+                          <li class=""><a href="#examples-Workspace-workspaceActionsPost-0-javascript">JavaScript</a></li>
+                          <!--<li class=""><a href="#examples-Workspace-workspaceActionsPost-0-angular">Angular</a></li>-->
+                          <li class=""><a href="#examples-Workspace-workspaceActionsPost-0-csharp">C#</a></li>
+                          <li class=""><a href="#examples-Workspace-workspaceActionsPost-0-php">PHP</a></li>
+                          <li class=""><a href="#examples-Workspace-workspaceActionsPost-0-perl">Perl</a></li>
+                          <li class=""><a href="#examples-Workspace-workspaceActionsPost-0-python">Python</a></li>
+                        </ul>
+
+                        <div class="tab-content">
+                          <div class="tab-pane active" id="examples-Workspace-workspaceActionsPost-0-curl">
+                            <pre class="prettyprint"><code class="language-bsh">curl -X POST "http://localhost/sdrangel/workspace/{workspaceIndex}/actions"</code></pre>
+                          </div>
+                          <div class="tab-pane" id="examples-Workspace-workspaceActionsPost-0-java">
+                            <pre class="prettyprint"><code class="language-java">import SWGSDRangel.*;
+import SWGSDRangel.auth.*;
+import SWGSDRangel.model.*;
+import SWGSDRangel.api.WorkspaceApi;
+
+import java.io.File;
+import java.util.*;
+
+public class WorkspaceApiExample {
+
+    public static void main(String[] args) {
+        
+        WorkspaceApi apiInstance = new WorkspaceApi();
+        Integer workspaceIndex = 56; // Integer | Index of workspace in the list of workspaces
+        WorkspaceActions body = ; // WorkspaceActions | Action to perform
+        try {
+            SuccessResponse result = apiInstance.workspaceActionsPost(workspaceIndex, body);
+            System.out.println(result);
+        } catch (ApiException e) {
+            System.err.println("Exception when calling WorkspaceApi#workspaceActionsPost");
+            e.printStackTrace();
+        }
+    }
+}</code></pre>
+                          </div>
+
+                          <div class="tab-pane" id="examples-Workspace-workspaceActionsPost-0-android">
+                            <pre class="prettyprint"><code class="language-java">import SWGSDRangel.api.WorkspaceApi;
+
+public class WorkspaceApiExample {
+
+    public static void main(String[] args) {
+        WorkspaceApi apiInstance = new WorkspaceApi();
+        Integer workspaceIndex = 56; // Integer | Index of workspace in the list of workspaces
+        WorkspaceActions body = ; // WorkspaceActions | Action to perform
+        try {
+            SuccessResponse result = apiInstance.workspaceActionsPost(workspaceIndex, body);
+            System.out.println(result);
+        } catch (ApiException e) {
+            System.err.println("Exception when calling WorkspaceApi#workspaceActionsPost");
+            e.printStackTrace();
+        }
+    }
+}</code></pre>
+                          </div>
+  <!--
+  <div class="tab-pane" id="examples-Workspace-workspaceActionsPost-0-groovy">
+  <pre class="prettyprint language-json prettyprinted" data-type="json"><code>Coming Soon!</code></pre>
+  </div> -->
+                            <div class="tab-pane" id="examples-Workspace-workspaceActionsPost-0-objc">
+                              <pre class="prettyprint"><code class="language-cpp">Integer *workspaceIndex = 56; // Index of workspace in the list of workspaces
+WorkspaceActions *body = ; // Action to perform
+
+WorkspaceApi *apiInstance = [[WorkspaceApi alloc] init];
+
+[apiInstance workspaceActionsPostWith:workspaceIndex
+    body:body
+              completionHandler: ^(SuccessResponse output, NSError* error) {
+                            if (output) {
+                                NSLog(@"%@", output);
+                            }
+                            if (error) {
+                                NSLog(@"Error: %@", error);
+                            }
+                        }];
+</code></pre>
+                            </div>
+
+                            <div class="tab-pane" id="examples-Workspace-workspaceActionsPost-0-javascript">
+                              <pre class="prettyprint"><code class="language-js">var SdRangel = require('sd_rangel');
+
+var api = new SdRangel.WorkspaceApi()
+
+var workspaceIndex = 56; // {Integer} Index of workspace in the list of workspaces
+
+var body = ; // {WorkspaceActions} Action to perform
+
+
+var callback = function(error, data, response) {
+  if (error) {
+    console.error(error);
+  } else {
+    console.log('API called successfully. Returned data: ' + data);
+  }
+};
+api.workspaceActionsPost(workspaceIndex, body, callback);
+</code></pre>
+                            </div>
+
+                            <!--<div class="tab-pane" id="examples-Workspace-workspaceActionsPost-0-angular">
+              <pre class="prettyprint language-json prettyprinted" data-type="json"><code>Coming Soon!</code></pre>
+            </div>-->
+                            <div class="tab-pane" id="examples-Workspace-workspaceActionsPost-0-csharp">
+                              <pre class="prettyprint"><code class="language-cs">using System;
+using System.Diagnostics;
+using SWGSDRangel.Api;
+using SWGSDRangel.Client;
+using SWGSDRangel.Model;
+
+namespace Example
+{
+    public class workspaceActionsPostExample
+    {
+        public void main()
+        {
+            
+            var apiInstance = new WorkspaceApi();
+            var workspaceIndex = 56;  // Integer | Index of workspace in the list of workspaces
+            var body = new WorkspaceActions(); // WorkspaceActions | Action to perform
+
+            try
+            {
+                SuccessResponse result = apiInstance.workspaceActionsPost(workspaceIndex, body);
+                Debug.WriteLine(result);
+            }
+            catch (Exception e)
+            {
+                Debug.Print("Exception when calling WorkspaceApi.workspaceActionsPost: " + e.Message );
+            }
+        }
+    }
+}
+</code></pre>
+                            </div>
+
+                            <div class="tab-pane" id="examples-Workspace-workspaceActionsPost-0-php">
+                              <pre class="prettyprint"><code class="language-php"><&#63;php
+require_once(__DIR__ . '/vendor/autoload.php');
+
+$api_instance = new Swagger\Client\Api\WorkspaceApi();
+$workspaceIndex = 56; // Integer | Index of workspace in the list of workspaces
+$body = ; // WorkspaceActions | Action to perform
+
+try {
+    $result = $api_instance->workspaceActionsPost($workspaceIndex, $body);
+    print_r($result);
+} catch (Exception $e) {
+    echo 'Exception when calling WorkspaceApi->workspaceActionsPost: ', $e->getMessage(), PHP_EOL;
+}
+?></code></pre>
+                            </div>
+
+                            <div class="tab-pane" id="examples-Workspace-workspaceActionsPost-0-perl">
+                              <pre class="prettyprint"><code class="language-perl">use Data::Dumper;
+use SWGSDRangel::Configuration;
+use SWGSDRangel::WorkspaceApi;
+
+my $api_instance = SWGSDRangel::WorkspaceApi->new();
+my $workspaceIndex = 56; # Integer | Index of workspace in the list of workspaces
+my $body = SWGSDRangel::Object::WorkspaceActions->new(); # WorkspaceActions | Action to perform
+
+eval { 
+    my $result = $api_instance->workspaceActionsPost(workspaceIndex => $workspaceIndex, body => $body);
+    print Dumper($result);
+};
+if ($@) {
+    warn "Exception when calling WorkspaceApi->workspaceActionsPost: $@\n";
+}</code></pre>
+                            </div>
+
+                            <div class="tab-pane" id="examples-Workspace-workspaceActionsPost-0-python">
+                              <pre class="prettyprint"><code class="language-python">from __future__ import print_statement
+import time
+import swagger_sdrangel
+from swagger_sdrangel.rest import ApiException
+from pprint import pprint
+
+# create an instance of the API class
+api_instance = swagger_sdrangel.WorkspaceApi()
+workspaceIndex = 56 # Integer | Index of workspace in the list of workspaces
+body =  # WorkspaceActions | Action to perform
+
+try: 
+    api_response = api_instance.workspace_actions_post(workspaceIndex, body)
+    pprint(api_response)
+except ApiException as e:
+    print("Exception when calling WorkspaceApi->workspaceActionsPost: %s\n" % e)</code></pre>
+                            </div>
+                          </div>
+
+                          <h2>Parameters</h2>
+
+                            <div class="methodsubtabletitle">Path parameters</div>
+                            <table id="methodsubtable">
+                                <tr>
+                                  <th width="150px">Name</th>
+                                  <th>Description</th>
+                                </tr>
+                                  <tr><td style="width:150px;">workspaceIndex*</td>
+<td>
+
+
+    <div id="d2e199_workspaceActionsPost_workspaceIndex">
+        <div class="json-schema-view">
+            <div class="primitive">
+                <span class="type">
+                    Integer
+                </span>
+
+                    <div class="inner description">
+                        Index of workspace in the list of workspaces
+                    </div>
+            </div>
+                <div class="inner required">
+                    Required
+                </div>
+        </div>
+    </div>
+</td>
+</tr>
+
+                            </table>
+
+
+                            <div class="methodsubtabletitle">Body parameters</div>
+                            <table id="methodsubtable">
+                              <tr>
+                                <th width="150px">Name</th>
+                                <th>Description</th>
+                              </tr>
+                                <tr><td style="width:150px;">body <span style="color:red;">*</span></td>
+<td>
+
+
+<script>
+$(document).ready(function() {
+  var schemaWrapper = {
+  "in" : "body",
+  "name" : "body",
+  "description" : "Action to perform",
+  "required" : true,
+  "schema" : {
+    "$ref" : "#/definitions/WorkspaceActions"
+  }
+};
+  var schema = schemaWrapper.schema;
+  if (schema.$ref != null) {
+    schema = defsParser.$refs.get(schema.$ref);
+  } else {
+    schemaWrapper.definitions = Object.assign({}, defs);
+    $RefParser.dereference(schemaWrapper).catch(function(err) {
+      console.log(err);
+    });
+  }
+
+  var view = new JSONSchemaView(schema,2,{isBodyParam: true});
+  var result = $('#d2e199_workspaceActionsPost_body');
+  result.empty();
+  result.append(view.render());
+});
+</script>
+<div id="d2e199_workspaceActionsPost_body"></div>
+</td>
+</tr>
+
+                            </table>
+
+
+
+                          <h2>Responses</h2>
+                            <h3> Status: 202 - Successful sending of the message </h3>
+
+                            <ul class="nav nav-tabs nav-tabs-examples" >
+                                <li class="active">
+                                  <a data-toggle="tab" href="#responses-workspaceActionsPost-202-schema">Schema</a>
+                                </li>
+
+                            </ul>
+
+                            <div class="tab-content" style='margin-bottom: 10px;'>
+                                <div class="tab-pane active" id="responses-workspaceActionsPost-202-schema">
+                                  <div id='responses-workspaceActionsPost-202-schema-202' style="padding: 30px; border-left: 1px solid #eee; border-right: 1px solid #eee; border-bottom: 1px solid #eee;">
+                                    <script>
+                                      $(document).ready(function() {
+                                        var schemaWrapper = {
+  "description" : "Successful sending of the message",
+  "schema" : {
+    "$ref" : "#/definitions/SuccessResponse"
+  }
+};
+                                        var schema = schemaWrapper.schema;
+                                        if (schema.$ref != null) {
+                                          schema = defsParser.$refs.get(schema.$ref);
+                                        } else {
+                                          schemaWrapper.definitions = Object.assign({}, defs);
+                                          $RefParser.dereference(schemaWrapper).catch(function(err) {
+                                            console.log(err);
+                                          });
+                                        }
+
+                                        //console.log(JSON.stringify(schema));
+                                        var view = new JSONSchemaView(schema, 3);
+                                        $('#responses-workspaceActionsPost-202-schema-data').val(stringify(schema));
+                                        var result = $('#responses-workspaceActionsPost-202-schema-202');
+                                        result.empty();
+                                        result.append(view.render());
+                                      });
+                                    </script>
+                                  </div>
+                                  <input id='responses-workspaceActionsPost-202-schema-data' type='hidden' value=''></input>
+                                </div>
+                            </div>
+
+                            <h3> Status: 400 - Invalid JSON request </h3>
+
+                            <ul class="nav nav-tabs nav-tabs-examples" >
+                                <li class="active">
+                                  <a data-toggle="tab" href="#responses-workspaceActionsPost-400-schema">Schema</a>
+                                </li>
+
+                            </ul>
+
+                            <div class="tab-content" style='margin-bottom: 10px;'>
+                                <div class="tab-pane active" id="responses-workspaceActionsPost-400-schema">
+                                  <div id='responses-workspaceActionsPost-400-schema-400' style="padding: 30px; border-left: 1px solid #eee; border-right: 1px solid #eee; border-bottom: 1px solid #eee;">
+                                    <script>
+                                      $(document).ready(function() {
+                                        var schemaWrapper = {
+  "description" : "Invalid JSON request",
+  "schema" : {
+    "$ref" : "#/definitions/ErrorResponse"
+  }
+};
+                                        var schema = schemaWrapper.schema;
+                                        if (schema.$ref != null) {
+                                          schema = defsParser.$refs.get(schema.$ref);
+                                        } else {
+                                          schemaWrapper.definitions = Object.assign({}, defs);
+                                          $RefParser.dereference(schemaWrapper).catch(function(err) {
+                                            console.log(err);
+                                          });
+                                        }
+
+                                        //console.log(JSON.stringify(schema));
+                                        var view = new JSONSchemaView(schema, 3);
+                                        $('#responses-workspaceActionsPost-400-schema-data').val(stringify(schema));
+                                        var result = $('#responses-workspaceActionsPost-400-schema-400');
+                                        result.empty();
+                                        result.append(view.render());
+                                      });
+                                    </script>
+                                  </div>
+                                  <input id='responses-workspaceActionsPost-400-schema-data' type='hidden' value=''></input>
+                                </div>
+                            </div>
+
+                            <h3> Status: 404 - Invalid workspace index </h3>
+
+                            <ul class="nav nav-tabs nav-tabs-examples" >
+                                <li class="active">
+                                  <a data-toggle="tab" href="#responses-workspaceActionsPost-404-schema">Schema</a>
+                                </li>
+
+                            </ul>
+
+                            <div class="tab-content" style='margin-bottom: 10px;'>
+                                <div class="tab-pane active" id="responses-workspaceActionsPost-404-schema">
+                                  <div id='responses-workspaceActionsPost-404-schema-404' style="padding: 30px; border-left: 1px solid #eee; border-right: 1px solid #eee; border-bottom: 1px solid #eee;">
+                                    <script>
+                                      $(document).ready(function() {
+                                        var schemaWrapper = {
+  "description" : "Invalid workspace index",
+  "schema" : {
+    "$ref" : "#/definitions/ErrorResponse"
+  }
+};
+                                        var schema = schemaWrapper.schema;
+                                        if (schema.$ref != null) {
+                                          schema = defsParser.$refs.get(schema.$ref);
+                                        } else {
+                                          schemaWrapper.definitions = Object.assign({}, defs);
+                                          $RefParser.dereference(schemaWrapper).catch(function(err) {
+                                            console.log(err);
+                                          });
+                                        }
+
+                                        //console.log(JSON.stringify(schema));
+                                        var view = new JSONSchemaView(schema, 3);
+                                        $('#responses-workspaceActionsPost-404-schema-data').val(stringify(schema));
+                                        var result = $('#responses-workspaceActionsPost-404-schema-404');
+                                        result.empty();
+                                        result.append(view.render());
+                                      });
+                                    </script>
+                                  </div>
+                                  <input id='responses-workspaceActionsPost-404-schema-data' type='hidden' value=''></input>
+                                </div>
+                            </div>
+
+                            <h3> Status: 500 - Error </h3>
+
+                            <ul class="nav nav-tabs nav-tabs-examples" >
+                                <li class="active">
+                                  <a data-toggle="tab" href="#responses-workspaceActionsPost-500-schema">Schema</a>
+                                </li>
+
+                            </ul>
+
+                            <div class="tab-content" style='margin-bottom: 10px;'>
+                                <div class="tab-pane active" id="responses-workspaceActionsPost-500-schema">
+                                  <div id='responses-workspaceActionsPost-500-schema-500' style="padding: 30px; border-left: 1px solid #eee; border-right: 1px solid #eee; border-bottom: 1px solid #eee;">
+                                    <script>
+                                      $(document).ready(function() {
+                                        var schemaWrapper = {
+  "description" : "Error",
+  "schema" : {
+    "$ref" : "#/definitions/ErrorResponse"
+  }
+};
+                                        var schema = schemaWrapper.schema;
+                                        if (schema.$ref != null) {
+                                          schema = defsParser.$refs.get(schema.$ref);
+                                        } else {
+                                          schemaWrapper.definitions = Object.assign({}, defs);
+                                          $RefParser.dereference(schemaWrapper).catch(function(err) {
+                                            console.log(err);
+                                          });
+                                        }
+
+                                        //console.log(JSON.stringify(schema));
+                                        var view = new JSONSchemaView(schema, 3);
+                                        $('#responses-workspaceActionsPost-500-schema-data').val(stringify(schema));
+                                        var result = $('#responses-workspaceActionsPost-500-schema-500');
+                                        result.empty();
+                                        result.append(view.render());
+                                      });
+                                    </script>
+                                  </div>
+                                  <input id='responses-workspaceActionsPost-500-schema-data' type='hidden' value=''></input>
+                                </div>
+                            </div>
+
+                            <h3> Status: 501 - Function not implemented </h3>
+
+                            <ul class="nav nav-tabs nav-tabs-examples" >
+                                <li class="active">
+                                  <a data-toggle="tab" href="#responses-workspaceActionsPost-501-schema">Schema</a>
+                                </li>
+
+                            </ul>
+
+                            <div class="tab-content" style='margin-bottom: 10px;'>
+                                <div class="tab-pane active" id="responses-workspaceActionsPost-501-schema">
+                                  <div id='responses-workspaceActionsPost-501-schema-501' style="padding: 30px; border-left: 1px solid #eee; border-right: 1px solid #eee; border-bottom: 1px solid #eee;">
+                                    <script>
+                                      $(document).ready(function() {
+                                        var schemaWrapper = {
+  "description" : "Function not implemented",
+  "schema" : {
+    "$ref" : "#/definitions/ErrorResponse"
+  }
+};
+                                        var schema = schemaWrapper.schema;
+                                        if (schema.$ref != null) {
+                                          schema = defsParser.$refs.get(schema.$ref);
+                                        } else {
+                                          schemaWrapper.definitions = Object.assign({}, defs);
+                                          $RefParser.dereference(schemaWrapper).catch(function(err) {
+                                            console.log(err);
+                                          });
+                                        }
+
+                                        //console.log(JSON.stringify(schema));
+                                        var view = new JSONSchemaView(schema, 3);
+                                        $('#responses-workspaceActionsPost-501-schema-data').val(stringify(schema));
+                                        var result = $('#responses-workspaceActionsPost-501-schema-501');
+                                        result.empty();
+                                        result.append(view.render());
+                                      });
+                                    </script>
+                                  </div>
+                                  <input id='responses-workspaceActionsPost-501-schema-data' type='hidden' value=''></input>
+                                </div>
+                            </div>
+
+                        </article>
+                      </div>
+                      <hr>
                   </section>
           </div>
           <div id="footer">
@@ -68067,7 +68594,7 @@ except ApiException as e:
           </div>
           <div id="generator">
             <div class="content">
-              Generated 2026-09-12T12:20:11.729+02:00
+              Generated 2026-09-14T12:05:38.294+02:00
             </div>
           </div>
       </div>
