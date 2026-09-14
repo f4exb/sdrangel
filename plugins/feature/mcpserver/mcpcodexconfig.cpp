@@ -302,7 +302,8 @@ MCPCodexConfig::Result MCPCodexConfig::addServer(const QString& serverName, cons
     {
         const QString name = QRegularExpression::escape(serverName);
         QRegularExpression dotted(QString("^\\s*mcp_servers\\s*\\.\\s*\"?%1\"?\\s*[.=]").arg(name));
-        QRegularExpression inlineEntry(QString("^\\s*\"?%1\"?\\s*=").arg(name));
+        // Under [mcp_servers]: an inline table, name = { ... }, or dotted keys, name.url = ...
+        QRegularExpression inlineEntry(QString("^\\s*\"?%1\"?\\s*[=.]").arg(name));
         QRegularExpression serversHeader("^\\s*\\[\\s*mcp_servers\\s*\\]");
         QRegularExpression anyTable("^\\s*\\[");
         bool inServers = false;

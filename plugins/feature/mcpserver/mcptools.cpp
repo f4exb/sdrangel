@@ -1781,15 +1781,30 @@ void MCPTools::deleteChannelObjectAndWait(uint64_t channelUid)
     deleteChannelLocked(deviceSetIndex, channelIndex);
 }
 
-void MCPTools::discardNewDeviceSet(int deviceSetIndex)
+uint64_t MCPTools::deviceSetIdentity(int deviceSetIndex) const
+{
+    const std::vector<DeviceSet*>& deviceSets = MainCore::instance()->getDeviceSets();
+
+    if ((deviceSetIndex < 0) || (deviceSetIndex >= (int) deviceSets.size()) || !deviceSets[deviceSetIndex]) {
+        return 0;
+    }
+
+    const DeviceSet *deviceSet = deviceSets[deviceSetIndex];
+    const uint64_t engine = deviceSet->m_deviceAPI ? deviceSet->m_deviceAPI->getDeviceUID() : 0;
+    return (engine << 32) ^ reinterpret_cast<uintptr_t>(deviceSet);
+}
+
+void MCPTools::discardNewDeviceSet(int deviceSetIndex, uint64_t identity)
 {
     try
     {
         QMutexLocker deletionLock(&m_deletionMutex);
 
         // Only the last device set can be removed, and only when it is still the one made
-        // here: another call may have added one since, and then both are left for the user
-        if ((deviceSetIndex < 0) || (deviceSetIndex != deviceSetCount() - 1)) {
+        // here: another call may have added one since, or removed this one and put another
+        // at the same index while this call slept, and then what is there is left for the user
+        if ((deviceSetIndex < 0) || (deviceSetIndex != deviceSetCount() - 1)
+            || (identity == 0) || (deviceSetIdentity(deviceSetIndex) != identity)) {
             return;
         }
 
@@ -4261,11 +4276,15 @@ void MCPTools::postChannelAction(int deviceSetIndex, int channelIndex, const QJs
 class NewDeviceSetGuard
 {
 public:
-    NewDeviceSetGuard(MCPTools *tools, int deviceSetIndex) : m_tools(tools), m_deviceSetIndex(deviceSetIndex) {}
+    NewDeviceSetGuard(MCPTools *tools, int deviceSetIndex) :
+        m_tools(tools),
+        m_deviceSetIndex(deviceSetIndex),
+        m_identity(deviceSetIndex >= 0 ? tools->deviceSetIdentity(deviceSetIndex) : 0)
+    {}
     ~NewDeviceSetGuard()
     {
         if (m_deviceSetIndex >= 0) {
-            m_tools->discardNewDeviceSet(m_deviceSetIndex);
+            m_tools->discardNewDeviceSet(m_deviceSetIndex, m_identity);
         }
     }
     void keep() { m_deviceSetIndex = -1; }
@@ -4273,6 +4292,7 @@ public:
 private:
     MCPTools *m_tools;
     int m_deviceSetIndex;
+    uint64_t m_identity; //!< Of the set as it was when this call made it
 };
 
 QJsonObject MCPTools::pickReceiver(const QJsonObject& args, int minBaseband, const QSet<uint64_t>& doomed, bool profileGain)

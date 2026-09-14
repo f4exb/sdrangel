@@ -207,7 +207,10 @@ private:
     void deleteChannelLocked(int deviceSetIndex, int channelIndex); //!< With m_deletionMutex held
     //!< Removes a device set that listen or scan created and could not finish setting up, if it
     //!< is still the last one, which is the only one the API can remove
-    void discardNewDeviceSet(int deviceSetIndex);
+    void discardNewDeviceSet(int deviceSetIndex, uint64_t identity);
+    //!< What tells one device set from another that has since taken its index: the engine's UID
+    //!< together with the object's address. Zero when there is no such device set
+    uint64_t deviceSetIdentity(int deviceSetIndex) const;
     friend class NewDeviceSetGuard;
     //!< Deletes a channel wherever it has moved to, for callers that held on to it across a wait
     void deleteChannelObjectAndWait(uint64_t channelUid);
