@@ -144,7 +144,7 @@ bool FileSinkGUI::handleMessage(const Message& message)
         const FileSinkMessages::MsgReportSquelch& report = (FileSinkMessages::MsgReportSquelch&) message;
         qDebug("FileSinkGUI::handleMessage: FileSinkMessages::MsgReportRecording: %s", report.getOpen() ? "on" : "off");
 
-        blockSignals(true);
+        ui->record->blockSignals(true);
 
         if (report.getOpen())
         {
@@ -157,7 +157,7 @@ bool FileSinkGUI::handleMessage(const Message& message)
             ui->record->setChecked(false);
         }
 
-        blockSignals(false);
+        ui->record->blockSignals(false);
         return true;
     }
     else if (FileSinkMessages::MsgReportRecordFileName::match(message))
