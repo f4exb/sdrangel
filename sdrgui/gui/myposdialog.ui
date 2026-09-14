@@ -137,6 +137,20 @@
         </property>
        </widget>
       </item>
+      <item row="2" column="2">
+       <widget class="QToolButton" name="mapcoordinates">
+        <property name="toolTip">
+         <string>Open mapcoordinates.net to find your latitude, longitude and elevation</string>
+        </property>
+        <property name="text">
+         <string/>
+        </property>
+        <property name="icon">
+         <iconset resource="../resources/res.qrc">
+          <normaloff>:/world.png</normaloff>:/world.png</iconset>
+        </property>
+       </widget>
+      </item>
       <item row="3" column="1">
        <widget class="QSpinBox" name="altitudeSpinBox">
         <property name="toolTip">
