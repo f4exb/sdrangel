@@ -23,6 +23,7 @@
 #include "ui_myposdialog.h"
 #include "maincore.h"
 
+#include <QDesktopServices>
 #include <QGeoCoordinate>
 #include <QJsonArray>
 #include <QJsonDocument>
@@ -30,6 +31,7 @@
 #include <QNetworkAccessManager>
 #include <QNetworkReply>
 #include <QNetworkRequest>
+#include <QUrl>
 
 MyPositionDialog::MyPositionDialog(MainSettings& mainSettings, QWidget* parent) :
     QDialog(parent),
@@ -42,6 +44,11 @@ MyPositionDialog::MyPositionDialog(MainSettings& mainSettings, QWidget* parent) 
     ui->longitudeSpinBox->setValue(m_mainSettings.getLongitude());
     ui->altitudeSpinBox->setValue(m_mainSettings.getAltitude());
     ui->autoUpdatePosition->setChecked(m_mainSettings.getAutoUpdatePosition());
+
+    connect(ui->mapquest, &QToolButton::clicked, this, [] {
+        QDesktopServices::openUrl(QUrl("https://developer.mapquest.com/documentation/tools/latitude-longitude-finder/"));
+    });
+
 }
 
 MyPositionDialog::~MyPositionDialog()
