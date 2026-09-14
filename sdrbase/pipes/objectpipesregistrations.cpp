@@ -25,7 +25,13 @@ ObjectPipesRegistrations::ObjectPipesRegistrations(ObjectPipeElementsStore *obje
 {}
 
 ObjectPipesRegistrations::~ObjectPipesRegistrations()
-{}
+{
+    for (ObjectPipe *pipe : m_pipes)
+    {
+        m_objectPipeElementsStore->deleteElement(pipe->m_element);
+        delete pipe;
+    }
+}
 
 ObjectPipe *ObjectPipesRegistrations::registerProducerToConsumer(const QObject *producer, const QObject *consumer, const QString& type)
 {
