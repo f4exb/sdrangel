@@ -79,6 +79,7 @@ DeviceUISet::DeviceUISet(int deviceSetIndex, DeviceSet *deviceSet)
 
 DeviceUISet::~DeviceUISet()
 {
+    m_spectrumVis->setGLSpectrum(nullptr);
     delete m_mainSpectrumGUI;
 }
 
