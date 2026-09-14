@@ -249,6 +249,8 @@ private:
     QJsonObject pickReceiver(const QJsonObject& args, int minBaseband, const QSet<uint64_t>& doomed = QSet<uint64_t>(), bool profileGain = true);
     //!< The tune_gain tool: sweeps the gain and applies the best, with the table it measured
     QJsonObject tuneGain(const QJsonObject& args);
+    //!< Sets the main spectrum's reference level and range from what it shows, as the GUI's autoscale button does
+    void autoscaleSpectrum(int deviceSetIndex);
     //!< The index of a feature of this type, adding one if there is none. Returns whether it was added
     int ensureFeature(const QString& featureType, int& featureIndex);
     void trackIntentFeature(uint64_t featureUid);

@@ -4787,9 +4787,28 @@ QJsonObject MCPTools::tuneGain(const QJsonObject& args)
         notes.append("The best was the lowest gain tried: a strong-signal site. Consider an attenuator if the floor still rises with the lowest gain.");
     }
 
+    bool autoscaled = false;
+
     if (apply)
     {
         setGain(chosen->gain, true);
+
+        // The spectrum was scaled for the gain it had, and a change of tens of decibels
+        // leaves the trace off the top or along the bottom of the display. Once the new gain
+        // has reached the trace, the range is set from it, as the GUI's autoscale button does
+        if (argBool(args, "autoscale", true))
+        {
+            try
+            {
+                pause(700);
+                autoscaleSpectrum(deviceSetIndex);
+                autoscaled = true;
+            }
+            catch (const MCPToolError& e)
+            {
+                notes.append(QString("The spectrum could not be autoscaled: %1").arg(e.message));
+            }
+        }
     }
     else
     {
@@ -4804,6 +4823,7 @@ QJsonObject MCPTools::tuneGain(const QJsonObject& args)
     QJsonObject result;
     result["deviceSetIndex"] = deviceSetIndex;
     result["hwType"] = hwType;
+    result["autoscaled"] = autoscaled;
     result["gainKey"] = knob.key;
     result["unit"] = knob.unit;
     result["previous"] = previous;
@@ -4986,6 +5006,20 @@ void MCPTools::deleteFeatureObjectAndWait(uint64_t featureUid)
     if (!waitFor([&]() { return !featureUids().contains(featureUid); })) {
         throw MCPToolError(QString("Timed out waiting for feature %1 to be removed").arg(featureIndex));
     }
+}
+
+void MCPTools::autoscaleSpectrum(int deviceSetIndex)
+{
+    QJsonObject actions;
+    actions["autoscale"] = 1;
+    QStringList keys;
+    extractKeys(actions, keys);
+    SWGSDRangel::SWGSpectrumActions query;
+    query.init();
+    query.fromJsonObject(actions);
+    SWGSDRangel::SWGErrorResponse error;
+    error.init();
+    check(m_adapter->devicesetSpectrumActionsPost(deviceSetIndex, keys, query, error), error, "Autoscale spectrum");
 }
 
 // The gain suits a band and an antenna, not a mode: a device set that was just created has
@@ -5275,9 +5309,10 @@ void MCPTools::registerIntentTools()
                         gain["unit"] = tuned["unit"];
                         gain["snrDb"] = tuned["bestSnrDb"];
                         result["gain"] = gain;
-                        notes.append(QString("Gain measured and set to %1 (%2), judged by %3, as %4; tune_gain shows the table, and tuneGain false leaves the gain alone.")
+                        notes.append(QString("Gain measured and set to %1 (%2), judged by %3, as %4%5; tune_gain shows the table, and tuneGain false leaves the gain alone.")
                             .arg(tuned["chosen"].toDouble()).arg(tuned["unit"].toString()).arg(tuned["judgedBy"].toString())
-                            .arg(receiver["reused"].toBool() ? "the retune was to another band" : "the device set is new"));
+                            .arg(receiver["reused"].toBool() ? "the retune was to another band" : "the device set is new")
+                            .arg(tuned["autoscaled"].toBool() ? ", and the spectrum autoscaled to suit it" : ""));
                     }
                     catch (const MCPToolError& e)
                     {
@@ -5600,9 +5635,10 @@ void MCPTools::registerIntentTools()
                     try
                     {
                         QJsonObject tuned = tuneGain(gainArgs);
-                        gainNote = QString("Gain measured and set to %1 (%2) first, as %3; tuneGain false leaves it alone.")
+                        gainNote = QString("Gain measured and set to %1 (%2) first, as %3%4; tuneGain false leaves it alone.")
                             .arg(tuned["chosen"].toDouble()).arg(tuned["unit"].toString())
-                            .arg(receiver["reused"].toBool() ? "the retune was to another band" : "the device set is new");
+                            .arg(receiver["reused"].toBool() ? "the retune was to another band" : "the device set is new")
+                            .arg(tuned["autoscaled"].toBool() ? ", and the spectrum autoscaled to suit it" : "");
                     }
                     catch (const MCPToolError& e)
                     {
@@ -5906,13 +5942,15 @@ void MCPTools::registerIntentTools()
         "floor alone decides: the lowest gain at which the antenna's noise rather than the converter's sets it, short of "
         "overload. Turns the device's AGC off, as it has to for a manual gain to mean "
         "anything. The device must be running. Blocks for a few seconds per step; the reply carries the whole table so the "
-        "choice can be judged. Give frequency to judge by a particular signal rather than the strongest one.",
+        "choice can be judged. Give frequency to judge by a particular signal rather than the strongest one. Once the gain "
+        "is applied the main spectrum is autoscaled to suit it, unless autoscale is false.",
         schema({
             {"deviceSetIndex", deviceSetIndexProp},
             {"frequency", numProp("Judge by the signal at this frequency in Hz rather than the strongest in the baseband. It must be inside the baseband")},
             {"bandwidth", numProp("Width in Hz around frequency to look for the signal in. Default 200000")},
             {"steps", bounded(intProp("How many gain values to try, spread over the range. Default 8"), 3, 16)},
             {"apply", prop("boolean", "Apply the chosen gain. false measures and reports but puts the gain back as it was. Default true")},
+            {"autoscale", prop("boolean", "Once the chosen gain is applied, set the main spectrum's reference level and range from what it then shows, as spectrum_action autoscale does, so the display suits the new gain. Default true")},
             {"gainKey", strProp("For a device type this does not know: the settings key of its gain, from describe_settings. Then give values too")},
             {"values", prop("array", "For a device type this does not know: the gain values to try, in the key's own units, lowest first")},
             {"agcKey", strProp("For a device type this does not know: the settings key that turns its AGC off when set to 0")}

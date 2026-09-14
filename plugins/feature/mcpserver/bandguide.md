@@ -210,7 +210,9 @@ where the front end starts to overload. It turns the device's AGC off, which a m
 requires. It knows the RTL-SDR, HackRF, Airspy, LimeSDR, PlutoSDR and USRP; for another
 device read `describe_settings` and give it the gain key and values. `listen` and `scan` run
 it themselves when they create a device set or move one to another band, and say what they
-set; pass `tuneGain` false to keep a gain you have chosen. A change of mode or a move within a
+set; pass `tuneGain` false to keep a gain you have chosen. Once the gain is applied the main
+spectrum is autoscaled, so its reference level and range suit the new gain; `autoscale`
+false leaves the display as it was. A change of mode or a move within a
 band does not trigger it, as the gain suits the band and the antenna rather than the mode.
 
 RTL-SDR `gain` is in tenths of a decibel (402 is 40.2 dB) and only the values in
