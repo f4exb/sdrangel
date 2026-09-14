@@ -693,7 +693,14 @@ void VorLocalizerWorker::rrNextTurn()
 
     for (auto rrPlan : m_rrPlans)
     {
-        unsigned int turnCount = m_rrTurnCounters[iDevPlan];
+        if (rrPlan.empty())
+        {
+            qDebug() << "VorLocalizerWorker::rrNextTurn: skipping empty plan";
+            iDevPlan++;
+            continue;
+        }
+
+        std::size_t turnCount = m_rrTurnCounters[iDevPlan];
         int deviceIndex = rrPlan[turnCount].m_device.m_deviceIndex;
         int deviceFrequency = rrPlan[turnCount].m_device.m_frequency - m_settings.m_centerShift;
 

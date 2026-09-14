@@ -1215,7 +1215,7 @@ void RemoteTCPSinkSink::processCommand()
                 {
                     char *buf = new char[msgLen];
                     len = client->read((char *)buf, msgLen);
-                    if (len == (int) msgLen)
+                    if (len == (int) msgLen && msgLen)
                     {
                         bool broadcast = (bool) buf[0];
                         int i;
@@ -1225,11 +1225,20 @@ void RemoteTCPSinkSink::processCommand()
                                 break;
                             }
                         }
-                        QString callsign = QString::fromUtf8(&buf[1]);
-                        QString text = QString::fromUtf8(&buf[i+1]);
 
-                        if (m_messageQueueToGUI) {
-                            m_messageQueueToGUI->push(RemoteTCPSink::MsgSendMessage::create(client->peerAddress(), client->peerPort(), callsign, text, broadcast));
+                        if ((i + 1) < (int) msgLen)
+                        {
+                            QString callsign = QString::fromUtf8(&buf[1]);
+                            QString text = QString::fromUtf8(&buf[i+1]);
+
+                            if (m_messageQueueToGUI) {
+                                m_messageQueueToGUI->push(RemoteTCPSink::MsgSendMessage::create(client->peerAddress(),
+                                                          client->peerPort(), callsign, text, broadcast));
+                            }
+                        }
+                        else
+                        {
+                            qDebug() << "RemoteTCPSinkSink::processCommand: sendMessage: Invalid message format" << msgLen;
                         }
                     }
                     else

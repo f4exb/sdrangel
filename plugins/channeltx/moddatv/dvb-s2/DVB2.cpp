@@ -271,7 +271,9 @@ int DVB2::next_ts_frame_base( u8 *ts )
     // return whether it is time to transmit a new frame
     return res;
 }
-DVB2::DVB2(void)
+DVB2::DVB2(void) :
+    m_format{},
+    m_ldpc_encode{}
 {
     init_bb_randomiser();
     bch_poly_build_tables();

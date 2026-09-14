@@ -40,19 +40,32 @@ RemoteTCPInputTCPHandler::RemoteTCPInputTCPHandler(SampleSinkFifo *sampleFifo, D
     m_webSocket(nullptr),
     m_tcpBuf(nullptr),
     m_sampleFifo(sampleFifo),
-	m_replayBuffer(replayBuffer),
+    m_replayBuffer(replayBuffer),
     m_messageQueueToInput(nullptr),
     m_messageQueueToGUI(nullptr),
+    m_readMetaData(false),
     m_fillBuffer(true),
     m_timer(this),
     m_reconnectTimer(this),
     m_sdra(false),
+    m_spyServer(false),
+    m_device(),
+    m_spyServerHeader(),
+    m_state(HEADER),
+    m_command(),
+    m_commandLength(0),
     m_converterBuffer(nullptr),
     m_converterBufferNbSamples(0),
     m_settings(),
     m_remoteControl(true),
     m_iqOnly(false),
+    m_compressedData(),
+    m_compressedFrames(0),
+    m_uncompressedFrames(0),
+    m_uncompressedData(),
     m_decoder(nullptr),
+    m_remainingSamples(0),
+    m_zStream{},
     m_zOutBuf(m_zBufSize, '\0'),
     m_blacklisted(false),
     m_magsq(0.0f),
@@ -67,11 +80,6 @@ RemoteTCPInputTCPHandler::RemoteTCPInputTCPHandler(SampleSinkFifo *sampleFifo, D
     m_reconnectTimer.setSingleShot(true);
 
     // Initialise zlib decompressor
-    m_zStream.zalloc = nullptr;
-    m_zStream.zfree = nullptr;
-    m_zStream.opaque = nullptr;
-    m_zStream.avail_in = 0;
-    m_zStream.next_in = nullptr;
     if (Z_OK != inflateInit(&m_zStream)) {
         qDebug() << "RemoteTCPInputTCPHandler::RemoteTCPInputTCPHandler: inflateInit failed.";
     }
@@ -1049,6 +1057,7 @@ void RemoteTCPInputTCPHandler::processDecompressedZlibData(const char *inBuf, in
     else // invalid size
     {
         qWarning("RemoteTCPInputTCPHandler::convert: unexpected sample size in stream: %d bits", (int) m_settings.m_sampleBits);
+        return;
     }
 
     m_uncompressedData.write(reinterpret_cast<quint8*>(m_converterBuffer), nbSamples*sizeof(Sample));

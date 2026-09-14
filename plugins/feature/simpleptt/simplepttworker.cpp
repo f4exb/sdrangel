@@ -42,6 +42,7 @@ SimplePTTWorker::SimplePTTWorker(WebAPIAdapterInterface *webAPIAdapterInterface)
     m_tx(false),
     m_audioFifo(12000),
     m_audioSampleRate(48000),
+    m_audioMagsqPeak(0.0f),
     m_voxLevel(1.0),
     m_voxHoldCount(0),
     m_voxState(false),

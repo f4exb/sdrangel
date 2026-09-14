@@ -30,7 +30,9 @@ AudioInputWorker::AudioInputWorker(SampleSinkFifo* sampleFifo, AudioFifo *fifo, 
     m_fifo(fifo),
     m_running(false),
     m_log2Decim(0),
+    m_fcPos(0),
     m_iqMapping(AudioInputSettings::IQMapping::L),
+    m_buf{},
     m_convertBuffer(m_convBufSamples),
     m_sampleFifo(sampleFifo)
 {

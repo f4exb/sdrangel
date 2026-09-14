@@ -56,7 +56,10 @@ const char* const NFMMod::m_channelId = "NFMMod";
 
 NFMMod::NFMMod(DeviceAPI *deviceAPI) :
     ChannelAPI(m_channelIdURI, ChannelAPI::StreamSingleSource),
-	m_deviceAPI(deviceAPI),
+        m_deviceAPI(deviceAPI),
+    m_thread(nullptr),
+    m_running(false),
+    m_basebandSource(nullptr),
     m_basebandSampleRate(0),
     m_centerFrequency(0)
 {

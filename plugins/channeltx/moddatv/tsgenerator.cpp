@@ -30,6 +30,7 @@ extern "C"
 #include "libswscale/swscale.h"
 }
 
+#include <QDebug>
 
 #include <opencv2/imgproc.hpp>  // Add OpenCV for text overlay
 #include <opencv2/imgcodecs.hpp>
@@ -51,6 +52,10 @@ TSGenerator::TSGenerator()
 
 void TSGenerator::generate_still_image_ts(const char* image_path, int bitrate, bool overlay_timestamp, int duration_sec)
 {
+    AVFormatContext* oc = nullptr;
+    int stream_idx = -1;
+    int64_t pts = 0, total_frames;
+
     printf("TSGenerator::generate_still_image_ts: Generating TS from image %s at bitrate %d bps for %d seconds\n",
            image_path, bitrate, duration_sec);
     ts_buffer.clear();
@@ -64,16 +69,28 @@ void TSGenerator::generate_still_image_ts(const char* image_path, int bitrate, b
     if (!codec || !ctx)
         return;
 
-    avcodec_open2(ctx, codec, nullptr);
+    if (avcodec_open2(ctx, codec, nullptr) < 0)
+    {
+        qWarning("TSGenerator::generate_still_image_ts : failed to open avcodec");
+        goto cleanup;
+    }
 
     // 2. In-memory TS context
-    AVFormatContext* oc = nullptr;
-    int stream_idx = setup_ts_context(&oc, ctx);
-    avformat_write_header(oc, nullptr);
+    stream_idx = setup_ts_context(&oc, ctx);
+    if (stream_idx < 0)
+    {
+        qWarning("TSGenerator::generate_still_image_ts : failed to setup_ts_context");
+        goto cleanup;
+    }
+
+    if (avformat_write_header(oc, nullptr) < 0)
+    {
+        qWarning("TSGenerator::generate_still_image_ts : failed to write header");
+        goto cleanup;
+    }
 
     // 3. Generate fixed duration TS packets
-    int64_t pts = 0;
-    int64_t total_frames = 25 * duration_sec;  // 25fps
+    total_frames = 25 * duration_sec;  // 25fps
 
     for (int64_t i = 0; i < total_frames; i++)
     {
@@ -88,9 +105,14 @@ void TSGenerator::generate_still_image_ts(const char* image_path, int bitrate, b
     buffer_size = ts_buffer.size();
 
     // 4. Cleanup
+cleanup:
     if (frame) av_frame_free(&frame);
     if (ctx) avcodec_free_context(&ctx);
-    if (oc) avformat_free_context(oc);
+    if (oc) {
+        if (oc->pb)
+            avio_context_free(&oc->pb);
+        avformat_free_context(oc);
+    }
 }
 
 AVFrame* TSGenerator::load_image_to_yuv(const char* filename, int width, int height)
@@ -100,7 +122,7 @@ AVFrame* TSGenerator::load_image_to_yuv(const char* filename, int width, int hei
     AVFrame* frame = nullptr;
     AVFrame* yuv_frame = nullptr;
     struct SwsContext* sws_ctx = nullptr;
-    AVPacket pkt;
+    AVPacket* pkt = nullptr;
     int stream_idx = -1;
     AVStream* stream = nullptr;
     const AVCodec* codec = nullptr;
@@ -130,14 +152,16 @@ AVFrame* TSGenerator::load_image_to_yuv(const char* filename, int width, int hei
     if (avcodec_open2(codec_ctx, codec, nullptr) < 0) goto cleanup;
 
     // Decode single frame
-    av_init_packet(&pkt);
-    if (av_read_frame(fmt_ctx, &pkt) < 0) goto cleanup;
+    pkt = av_packet_alloc();
+    if (!pkt) goto cleanup;
+
+    if (av_read_frame(fmt_ctx, pkt) < 0) goto cleanup;
 
     frame = av_frame_alloc();
-    if (frame && avcodec_send_packet(codec_ctx, &pkt) >= 0) {
+    if (frame && avcodec_send_packet(codec_ctx, pkt) >= 0) {
         avcodec_receive_frame(codec_ctx, frame);
     }
-    av_packet_unref(&pkt);
+    av_packet_unref(pkt);
 
     if (!frame) goto cleanup;
 
@@ -160,6 +184,7 @@ AVFrame* TSGenerator::load_image_to_yuv(const char* filename, int width, int hei
     }
 
 cleanup:
+    if (pkt) av_packet_free(&pkt);
     if (frame) av_frame_free(&frame);
     if (codec_ctx) avcodec_free_context(&codec_ctx);
     if (fmt_ctx) avformat_close_input(&fmt_ctx);
@@ -342,7 +367,7 @@ int TSGenerator::setup_ts_context(AVFormatContext** oc, AVCodecContext* codec_ct
 
 void TSGenerator::encode_frame_to_ts(AVFormatContext* oc, AVCodecContext* codec_ctx, AVFrame* frame, int stream_idx)
 {
-    AVPacket pkt = {nullptr};
+    AVPacket pkt{};
     int ret;
 
     // 1. Send frame to HEVC encoder

@@ -30,14 +30,15 @@
 #include "fcdprothread.h"
 
 FCDProThread::FCDProThread(SampleSinkFifo* sampleFifo, AudioFifo *fcdFIFO, QObject* parent) :
-	QThread(parent),
-	m_fcdFIFO(fcdFIFO),
-	m_running(false),
-	m_log2Decim(0),
-	m_fcPos(2),
+    QThread(parent),
+    m_fcdFIFO(fcdFIFO),
+    m_running(false),
+    m_log2Decim(0),
+    m_fcPos(2),
     m_iqOrder(true),
-	m_convertBuffer(fcd_traits<Pro>::convBufSize), // nb samples
-	m_sampleFifo(sampleFifo)
+    m_buf{},
+    m_convertBuffer(fcd_traits<Pro>::convBufSize),
+    m_sampleFifo(sampleFifo)
 {
 	start();
 }

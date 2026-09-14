@@ -1485,6 +1485,13 @@ private:
                 }
             }
 
+            // No valid period was found during the coarse search. Do not enter the
+            // refinement loop with a zero period, which would cause division by zero.
+            if (bestP == 0.0)
+            {
+                return;
+            }
+
             // Least squares with outlier rejection. The activity gate deliberately spans the
             // power ramps at each end of a burst, where a handful of transitions are mistimed
             // or spurious - and a plain fit over 500 good transitions is wrecked by five bad

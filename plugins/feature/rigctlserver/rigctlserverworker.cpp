@@ -52,6 +52,9 @@ const struct RigCtlServerWorker::ModeDemod RigCtlServerWorker::m_modeMap[] = {
 
 RigCtlServerWorker::RigCtlServerWorker(WebAPIAdapterInterface *webAPIAdapterInterface) :
     m_state(idle),
+    m_targetFrequency(0.0),
+    m_targetOffset(0.0),
+    m_targetBW(0),
     m_tcpServer(nullptr),
     m_clientConnection(nullptr),
     m_webAPIAdapterInterface(webAPIAdapterInterface),

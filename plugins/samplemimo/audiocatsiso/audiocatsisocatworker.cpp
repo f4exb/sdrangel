@@ -37,9 +37,11 @@ AudioCATSISOCATWorker::AudioCATSISOCATWorker(QObject* parent) :
     m_inputMessageQueueToSISO(nullptr),
     m_running(false),
     m_connected(false),
+    m_rig(nullptr),
     m_pollTimer(nullptr),
     m_ptt(false),
-    m_frequency(0)
+    m_frequency(0),
+    m_rxSampleRate(0)
 {
     rig_set_debug(RIG_DEBUG_ERR);
 }

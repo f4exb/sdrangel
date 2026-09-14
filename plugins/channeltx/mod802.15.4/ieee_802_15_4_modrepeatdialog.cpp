@@ -24,6 +24,8 @@
 
 IEEE_802_15_4_ModRepeatDialog::IEEE_802_15_4_ModRepeatDialog(float repeatDelay, int repeatCount, QWidget* parent) :
     QDialog(parent),
+    m_repeatDelay(repeatDelay),
+    m_repeatCount(repeatCount),
     ui(new Ui::IEEE_802_15_4_ModRepeatDialog)
 {
     ui->setupUi(this);

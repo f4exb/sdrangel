@@ -43,6 +43,7 @@ DOA2Compass::DOA2Compass(QWidget *parent)
     m_azAnt  = 0.0;
     m_blindAngle = 0.0;
     m_blindColor = QColor(32, 32, 32);
+    m_blindAngleBorder = false;
 }
 
 DOA2Compass::~DOA2Compass()

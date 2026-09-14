@@ -369,7 +369,12 @@ void PolylineMapModel::update3D(MapItem *item)
 
 ObjectMapModel::ObjectMapModel(MapGUI *gui) :
     MapModel(gui),
-    m_target(-1)
+    m_target(-1),
+    m_displayNames(false),
+    m_displaySelectedGroundTracks(false),
+    m_displayAllGroundTracks(false),
+    m_bottomLeftLongitude(0.0),
+    m_bottomRightLongitude(0.0)
 {
     //connect(this, &ObjectMapModel::dataChanged, this, &ObjectMapModel::update3DMap);
 }

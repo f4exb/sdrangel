@@ -97,6 +97,9 @@ int DATVModSource::getDVBSDataBitrate(const DATVModSettings& settings) const
     case DATVModSettings::APSK32:
         bitsPerSymbol = 5.0f;
         break;
+    default:
+        qDebug() << "DATVModSource::getDVBSDataBitrate: Unsupported modulation";
+        return 0;
     }
 
     if (settings.m_standard == DATVModSettings::DVB_S)
@@ -143,6 +146,9 @@ int DATVModSource::getDVBSDataBitrate(const DATVModSettings& settings) const
         case DATVModSettings::FEC35:
             convFactor = 3.0f/5.0f;
             break;
+        default:
+            qDebug() << "DATVModSource::getDVBSDataBitrate: Unsupported DVB-S code rate";
+            return 0;
         }
         fecFactor = rsFactor * convFactor;
         plFactor = 1.0f;
@@ -191,7 +197,7 @@ int DATVModSource::getDVBSDataBitrate(const DATVModSettings& settings) const
             break;
         default:
             qDebug() << "DATVModSource::getDVBSDataBitrate: Unsupported DVB-S2 code rate";
-            break;
+            return 0;
         }
         fecFactor = (uncodedBlockSize-bbHeaderBits)/(float)codedBlockSize;
         float symbolsPerFrame = codedBlockSize/bitsPerSymbol;
@@ -207,12 +213,15 @@ void DATVModSource::checkBitrates()
     int dataBitrate = getDVBSDataBitrate(m_settings);
     qDebug() << "MPEG-TS bitrate: " << m_mpegTSBitrate;
     qDebug() << "DVB data bitrate: " << dataBitrate;
+    if (dataBitrate <= 0)
+        qWarning() << "Unable to calculate DVB data bitrate";
     if (dataBitrate < m_mpegTSBitrate)
         qWarning() << "DVB data bitrate is lower than the bitrate of the MPEG transport stream";
     m_tsRatio = m_mpegTSBitrate/(float)dataBitrate;
 }
 
 DATVModSource::DATVModSource() :
+    m_mpegTS{},
     m_mpegTSBitrate(0),
     m_mpegTSSize(0),
     m_sampleIdx(0),
@@ -223,15 +232,23 @@ DATVModSource::DATVModSource() :
     m_symbolSel(0),
     m_symbolIdx(0),
     m_samplesPerSymbol(1),
+    m_iqSymbols{},
+    m_plFrame(nullptr),
     m_udpSocket(nullptr),
     m_udpByteCount(0),
     m_udpAbsByteCount(0),
+    m_udpBuffer{},
     m_udpBufferIdx(0),
     m_udpBufferCount(0),
     m_udpMaxBufferUtilization(0),
     m_sampleRate(0),
     m_channelSampleRate(1000000),
     m_channelFrequencyOffset(0),
+    m_levelCalcCount(0),
+    m_rmsLevel(0.0),
+    m_peakLevelOut(0.0),
+    m_peakLevel(0.0),
+    m_levelSum(0.0),
     m_tsFileOK(false),
     m_messageQueueToGUI(nullptr)
 {
@@ -379,10 +396,18 @@ void DATVModSource::modulateSample()
                 if (m_frameCount == static_cast<int>(m_tsGenerator.get_buffer_size()/sizeof(m_mpegTS)))
                 {
                     int bitrate = static_cast<int>(getDVBSDataBitrate(m_settings) * 1.1f); // Add 10% margin
-                    m_tsGenerator.generate_still_image_ts(m_settings.m_imageFileName.toStdString().c_str(), bitrate, m_settings.m_imageOverlayTimestamp, 1);
-                    m_tsFileOK = true;
-                    m_frameIdx = 0;
-                    m_frameCount = 0;
+                    if (bitrate <= 0)
+                    {
+                        qWarning() << "Unable to generate still image TS: invalid DVB data bitrate";
+                        m_tsFileOK = false;
+                    }
+                    else
+                    {
+                        m_tsGenerator.generate_still_image_ts(m_settings.m_imageFileName.toStdString().c_str(), bitrate, m_settings.m_imageOverlayTimestamp, 1);
+                        m_tsFileOK = true;
+                        m_frameIdx = 0;
+                        m_frameCount = 0;
+                   }
                 }
 
                 // Read transport stream packet from generated image TS

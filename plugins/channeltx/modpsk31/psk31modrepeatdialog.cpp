@@ -24,6 +24,7 @@
 
 PSK31RepeatDialog::PSK31RepeatDialog(int repeatCount, QWidget* parent) :
     QDialog(parent),
+    m_repeatCount(repeatCount),
     ui(new Ui::PSK31RepeatDialog)
 {
     ui->setupUi(this);

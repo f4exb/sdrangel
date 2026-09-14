@@ -39,6 +39,7 @@ MESSAGE_CLASS_DEFINITION(GS232ControllerReport::MsgReportAzAl, Message)
 GS232ControllerWorker::GS232ControllerWorker(GS232Controller *controller) :
     m_controller(controller),
     m_msgQueueToFeature(nullptr),
+    m_running(false),
     m_device(nullptr),
     m_serialPort(this),
     m_socket(this),

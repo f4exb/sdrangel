@@ -59,7 +59,8 @@ SSBMod::SSBMod(DeviceAPI *deviceAPI) :
     m_deviceAPI(deviceAPI),
     m_basebandSampleRate(0),
     m_centerFrequency(0),
-    m_spectrumVis(SDR_TX_SCALEF)
+    m_spectrumVis(SDR_TX_SCALEF),
+    m_levelMeter(nullptr)
 {
 	setObjectName(m_channelId);
 

@@ -27,7 +27,8 @@
 
 MESSAGE_CLASS_DEFINITION(SSBModBaseband::MsgConfigureSSBModBaseband, Message)
 
-SSBModBaseband::SSBModBaseband()
+SSBModBaseband::SSBModBaseband() :
+    m_spectrumVis(nullptr)
 {
     m_sampleFifo.resize(SampleSourceFifo::getSizePolicy(48000));
     m_channelizer = new UpChannelizer(&m_source);

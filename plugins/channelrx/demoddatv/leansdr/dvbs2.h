@@ -1741,7 +1741,7 @@ struct s2_frame_receiver : runnable
         {
             fprintf(
                 stderr,
-                "PL errors: %d/%d (%.0f ppm)\n",
+                "PL errors: %u/%u (%.0f ppm)\n",
                 pls_total_errors,
                 pls_total_count,
                 1e6 * pls_total_errors / pls_total_count
@@ -3106,10 +3106,10 @@ struct s2_fecdec_soft : runnable
         bch_buf{}
     {
         const char *tabname = ldpctool::LDPCInterface::mc_tabnames[shortframes][modcod];
-        fprintf(stderr, "s2_fecdec_soft::s2_fecdec_soft: tabname: %s\n", tabname);
 
         if (tabname)
         {
+            fprintf(stderr, "s2_fecdec_soft::s2_fecdec_soft: tabname: %s\n", tabname);
             ldpc = ldpctool::create_ldpc((char *)"S2", tabname[0], atoi(tabname + 1));
             code = new ldpctool::code_type[ldpc->code_len()];
             aligned_buffer = aligned_alloc(sizeof(ldpctool::simd_type), sizeof(ldpctool::simd_type) * ldpc->code_len());
@@ -3697,6 +3697,8 @@ struct s2_fecdec_helper : runnable
         for (int mc = 0; mc < 32; ++mc) {
             for (int sf = 0; sf < 2; ++sf) {
                 pools[mc][sf].procs = nullptr;
+                pools[mc][sf].nprocs = 0;
+                pools[mc][sf].shift = 0;
             }
         }
     }

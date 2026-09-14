@@ -25,6 +25,9 @@
 
 PacketModBPFDialog::PacketModBPFDialog(float lowFreq, float highFreq, int taps, QWidget* parent) :
     QDialog(parent),
+    m_lowFreq(lowFreq),
+    m_highFreq(highFreq),
+    m_taps(taps),
     ui(new Ui::PacketModBPFDialog)
 {
     ui->setupUi(this);

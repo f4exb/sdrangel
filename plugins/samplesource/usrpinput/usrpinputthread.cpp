@@ -29,6 +29,9 @@ USRPInputThread::USRPInputThread(uhd::rx_streamer::sptr stream, size_t bufSample
   SampleSinkFifo* sampleFifo, ReplayBuffer<qint16> *replayBuffer, QObject* parent) :
     QThread(parent),
     m_running(false),
+    m_packets(0),
+    m_overflows(0),
+    m_timeouts(0),
     m_stream(stream),
     m_bufSamples(bufSamples),
     m_convertBuffer(bufSamples),

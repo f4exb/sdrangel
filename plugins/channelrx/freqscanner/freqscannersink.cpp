@@ -924,12 +924,10 @@ void FreqScannerSink::getFormantEnvelope(int startBin, int endBin, QVector<Real>
     // Step 1: Compute log magnitude spectrum
     QVector<Real> logMag(numBins);
     Real minLog = -10.0; // Floor to avoid log(0)
-    Real sumMagSq = 0.0;
     
     for (int i = 0; i < numBins; i++)
     {
         Real magSq = magSqFromRawFFT(startBin + i);
-        sumMagSq += magSq;
         Real mag = std::sqrt(std::max(magSq, (Real)1e-12));
         logMag[i] = std::log(mag);
         if (logMag[i] < minLog) {

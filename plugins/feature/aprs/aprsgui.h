@@ -54,6 +54,12 @@ public:
     APRSStation(QString& station) :
         m_station(station),
         m_isObject(false),
+        m_telemetryCoefficientsA{},
+        m_telemetryCoefficientsB{},
+        m_telemetryCoefficientsC{},
+        m_hasTelemetryCoefficients(0),
+        m_telemetryBitSense{},
+        m_hasTelemetryBitSense(false),
         m_hasWeather(false),
         m_hasTelemetry(false),
         m_hasCourseAndSpeed(false)

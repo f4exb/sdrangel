@@ -50,7 +50,8 @@ DemodAnalyzer::DemodAnalyzer(WebAPIAdapterInterface *webAPIAdapterInterface) :
     m_spectrumVis(SDR_RX_SCALEF),
     m_availableChannelOrFeatureHandler(DemodAnalyzerSettings::m_channelURIs),
     m_selectedChannel(nullptr),
-    m_dataPipe(nullptr)
+    m_dataPipe(nullptr),
+    m_sampleRate(0)
 {
     qDebug("DemodAnalyzer::DemodAnalyzer: webAPIAdapterInterface: %p", webAPIAdapterInterface);
     setObjectName(m_featureId);

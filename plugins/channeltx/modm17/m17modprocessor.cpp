@@ -37,9 +37,11 @@ MESSAGE_CLASS_DEFINITION(M17ModProcessor::MsgStopGNSS, Message)
 
 M17ModProcessor::M17ModProcessor() :
     m_m17Modulator("MYCALL", ""),
+    m_lich{},
     m_lichSegmentIndex(0),
     m_audioFrameIndex(0),
-    m_audioFrameNumber(0)
+    m_audioFrameNumber(0),
+    m_insertPositionToggle(false)
 {
     m_basebandFifo.setSize(96000);
     m_basebandFifoLow = 4096;
