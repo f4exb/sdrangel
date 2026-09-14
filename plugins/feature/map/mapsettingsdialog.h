@@ -52,6 +52,8 @@ public:
     QDoubleSpinBox *m_smoothingLambda;
 };
 
+class QNetworkAccessManager;
+
 class MapSettingsDialog : public QDialog {
     Q_OBJECT
 
@@ -90,6 +92,8 @@ private:
     int m_fileIdx;
     QMessageBox m_downloadDialog;
     QProgressDialog *m_progressDialog;
+    QNetworkAccessManager *m_networkManager;
+    int m_apiKeyVerificationRequests;
     OpenAIP m_openAIP;
     OurAirportsDB m_ourAirportsDB;
     Waypoints m_waypoints;
@@ -116,6 +120,7 @@ private slots:
     void downloadNavAidsFinished();
     void downloadAirportInformationFinished();
     void downloadWaypointsFinished();
+    void on_verifyAPIKeysButton_clicked();
 
 signals:
     void navAidsUpdated();

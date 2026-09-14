@@ -20,6 +20,11 @@
 #include <QColor>
 #include <QToolButton>
 #include <QFileDialog>
+#include <QJsonDocument>
+#include <QNetworkAccessManager>
+#include <QNetworkReply>
+#include <QNetworkRequest>
+#include <QUrlQuery>
 
 #include "mapsettingsdialog.h"
 
@@ -74,6 +79,8 @@ MapSettingsDialog::MapSettingsDialog(MapSettings *settings, QWidget* parent) :
     m_settings(settings),
     m_downloadDialog(this),
     m_progressDialog(nullptr),
+    m_networkManager(new QNetworkAccessManager(this)),
+    m_apiKeyVerificationRequests(0),
     ui(new Ui::MapSettingsDialog)
 {
     ui->setupUi(this);
@@ -207,7 +214,15 @@ void MapSettingsDialog::accept()
     QString maptilerAPIKey = ui->maptilerAPIKey->text();
     QString cesiumIonAPIKey = ui->cesiumIonAPIKey->text();
     QString arcGISAPIKey = ui->arcGISAPIKey->text();
+    QString checkWXAPIKey = ui->checkWXAPIKey->text();
     m_osmURLChanged = osmURL != m_settings->m_osmURL;
+
+    if (checkWXAPIKey != m_settings->m_checkWXAPIKey)
+    {
+        m_settings->m_checkWXAPIKey = checkWXAPIKey;
+        m_settingsKeysChanged.append("checkWXAPIKey");
+    }
+
     if ((mapProvider != m_settings->m_mapProvider)
         || (thunderforestAPIKey != m_settings->m_thunderforestAPIKey)
         || (maptilerAPIKey != m_settings->m_maptilerAPIKey)
@@ -662,5 +677,164 @@ int MapSettingsDialog::stringToMSAA(const QString& string) const
         return 1;
     } else {
         return string.toInt();
+    }
+}
+
+void MapSettingsDialog::on_verifyAPIKeysButton_clicked()
+{
+    // These requests are intentionally lightweight, but may still count toward
+    // provider API usage or quotas.
+
+    const QString thunderforestAPIKey = ui->thunderforestAPIKey->text();
+    const QString maptilerAPIKey = ui->maptilerAPIKey->text();
+    const QString mapBoxAPIKey = ui->mapBoxAPIKey->text();
+    const QString cesiumIonAPIKey = ui->cesiumIonAPIKey->text();
+    const QString checkWXAPIKey = ui->checkWXAPIKey->text();
+    const QString arcGISAPIKey = ui->arcGISAPIKey->text();
+
+    // Keep the Verify button disabled until all outstanding requests complete.
+    // OK and Cancel remain available while verification is in progress.
+    ui->verifyAPIKeysButton->setEnabled(false);
+    m_apiKeyVerificationRequests = 0;
+
+    auto verifyRequest = [this](QLabel *status,
+                                const QNetworkRequest& request,
+                                auto isValid)
+    {
+        status->setText(QStringLiteral("?"));
+        status->setStyleSheet(QStringLiteral("color: white; font-weight: bold;"));
+        ++m_apiKeyVerificationRequests;
+
+        QNetworkReply *reply = m_networkManager->get(request);
+
+        connect(reply, &QNetworkReply::finished, this, [this, status, reply, isValid]()
+        {
+            if (isValid(reply)) {
+                status->setText(QStringLiteral("✔"));
+                status->setStyleSheet(QStringLiteral("color: green; font-weight: bold;"));
+            } else {
+                status->setText(QStringLiteral("✗"));
+                status->setStyleSheet(QStringLiteral("color: red; font-weight: bold;"));
+            }
+
+            --m_apiKeyVerificationRequests;
+            if (m_apiKeyVerificationRequests == 0)
+            {
+                ui->verifyAPIKeysButton->setEnabled(true);
+            }
+
+            reply->deleteLater();
+        });
+    };
+
+    // Validation requests are provider-specific: some APIs return a useful HTTP
+    // status, while others return a JSON response that must be inspected.
+    auto isHttp200 = [](QNetworkReply *reply)
+    {
+        const int statusCode =
+            reply->attribute(QNetworkRequest::HttpStatusCodeAttribute).toInt();
+        return reply->error() == QNetworkReply::NoError &&
+            statusCode == 200;
+    };
+
+    // Mapbox can return HTTP 200 for an invalid token, so validate the response
+    // code rather than relying on the HTTP status alone.
+    auto isMapBoxTokenValid = [](QNetworkReply *reply)
+    {
+        const int statusCode = reply->attribute(QNetworkRequest::HttpStatusCodeAttribute).toInt();
+        const QJsonDocument response = QJsonDocument::fromJson(reply->readAll());
+        return reply->error() == QNetworkReply::NoError &&
+            statusCode == 200 && response.isObject() &&
+            response.object().value(QStringLiteral("code")).toString() == QStringLiteral("TokenValid");
+    };
+
+    // Use the ArcGIS portal endpoint to validate the credential itself rather
+    // than a map tile request, which may be served from a cache without
+    // validating the token.
+    auto isArcGISAPIKeyValid = [](QNetworkReply *reply)
+    {
+        const QJsonDocument response = QJsonDocument::fromJson(reply->readAll());
+        return reply->error() == QNetworkReply::NoError && response.isObject() &&
+            response.object().contains(QStringLiteral("appInfo"));
+    };
+
+    // Verify API keys
+    if (!thunderforestAPIKey.isEmpty())
+    {
+        QUrl url(QString("https://api.thunderforest.com/outdoors/0/0/0.png?apikey=%1").arg(thunderforestAPIKey));
+        verifyRequest(ui->thunderforestAPIKeyStatus, QNetworkRequest(url), isHttp200);
+    }
+    else
+    {
+        ui->thunderforestAPIKeyStatus->clear();
+    }
+
+    if (!maptilerAPIKey.isEmpty())
+    {
+        QUrl url(QString("https://api.maptiler.com/maps/streets-v4/?key=%1").arg(maptilerAPIKey));
+        verifyRequest(ui->maptilerAPIKeyStatus, QNetworkRequest(url), isHttp200);
+    }
+    else
+    {
+        ui->maptilerAPIKeyStatus->clear();
+    }
+
+    if (!mapBoxAPIKey.isEmpty())
+    {
+        QUrl url(QString(
+            "https://api.mapbox.com/tokens/v2?access_token=%1").arg(mapBoxAPIKey));
+        verifyRequest(ui->mapBoxAPIKeyStatus, QNetworkRequest(url), isMapBoxTokenValid);
+    }
+    else
+    {
+        ui->mapBoxAPIKeyStatus->clear();
+    }
+
+    // Cesium Ion credentials are validated through the authenticated /v1/me
+    // endpoint rather than making a potentially more expensive asset request.
+    if (!cesiumIonAPIKey.isEmpty())
+    {
+        QNetworkRequest request(QUrl(QStringLiteral("https://api.cesium.com/v1/me")));
+        request.setRawHeader("Authorization", QString("Bearer %1").arg(cesiumIonAPIKey).toUtf8());
+        verifyRequest(ui->cesiumIonAPIKeyStatus, request, isHttp200);
+    }
+    else
+    {
+        ui->cesiumIonAPIKeyStatus->clear();
+    }
+
+    if (!arcGISAPIKey.isEmpty())
+    {
+        QUrl url(QStringLiteral("https://www.arcgis.com/sharing/rest/community/self"));
+        QUrlQuery query;
+        query.addQueryItem(QStringLiteral("f"), QStringLiteral("json"));
+        query.addQueryItem(QStringLiteral("token"), arcGISAPIKey);
+        url.setQuery(query);
+
+        verifyRequest(ui->arcGISAPIKeyStatus, QNetworkRequest(url), isArcGISAPIKeyValid);
+    }
+    else
+    {
+        ui->arcGISAPIKeyStatus->clear();
+    }
+
+    // CheckWX does not provide a dedicated key-validation endpoint, so use a
+    // lightweight authenticated METAR request to verify the key.
+    if (!checkWXAPIKey.isEmpty())
+    {
+        QNetworkRequest request(
+            QUrl(QStringLiteral("https://api.checkwx.com/v2/metar/KJFK")));
+        request.setRawHeader("X-API-KEY", checkWXAPIKey.toUtf8());
+        verifyRequest(ui->checkWXAPIKeyStatus, request, isHttp200);
+    }
+    else
+    {
+        ui->checkWXAPIKeyStatus->clear();
+    }
+
+    // in case all strings are empty
+    if (m_apiKeyVerificationRequests == 0)
+    {
+        ui->verifyAPIKeysButton->setEnabled(true);
     }
 }
