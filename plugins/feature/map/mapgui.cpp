@@ -413,6 +413,8 @@ MapGUI::~MapGUI()
         delete m_webServer;
     }
     delete m_giro;
+    delete m_aurora;
+    qDeleteAll(m_ionosondeStations);
     delete ui;
 }
 
