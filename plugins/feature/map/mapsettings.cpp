@@ -175,9 +175,28 @@ MapSettings::MapSettings() :
     resetToDefaults();
 }
 
+MapSettings::MapSettings(const MapSettings& other) :
+    MapSettings()
+{
+    deserialize(other.serialize());
+    m_rollupState = other.m_rollupState;
+}
+
+
+MapSettings& MapSettings::operator=(const MapSettings& other)
+{
+    if (this != &other)
+    {
+        deserialize(other.serialize());
+        m_rollupState = other.m_rollupState;
+    }
+
+    return *this;
+}
+
 MapSettings::~MapSettings()
 {
-    //qDeleteAll(m_itemSettings);
+    qDeleteAll(m_itemSettings);
 }
 
 void MapSettings::resetToDefaults()
@@ -583,9 +602,14 @@ void MapSettings::deserializeItemSettings(const QByteArray& data, QHash<QString,
         }
         else
         {
-            d.readBlob(idx+2, &blob);
-            MapItemSettings *settings = new MapItemSettings(blob);
-            itemSettings.insert(key, settings);
+            if (itemSettings.contains(key))
+            {
+                itemSettings[key]->deserialize(blob);
+            }
+            else
+            {
+                itemSettings.insert(key, new MapItemSettings(blob));
+            }
         }
 
         idx += 2;
