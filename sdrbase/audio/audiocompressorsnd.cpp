@@ -25,7 +25,25 @@
 #include "audiocompressorsnd.h"
 
 
-AudioCompressorSnd::AudioCompressorSnd()
+AudioCompressorSnd::AudioCompressorSnd() :
+    m_rate(0.0f),
+    m_pregain(0.0f),
+    m_threshold(0.0f),
+    m_knee(0.0f),
+    m_ratio(0.0f),
+    m_attack(0.0f),
+    m_release(0.0f),
+    m_predelay(0.0f),
+    m_releasezone1(0.0f),
+    m_releasezone2(0.0f),
+    m_releasezone3(0.0f),
+    m_releasezone4(0.0f),
+    m_postgain(0.0f),
+    m_wet(0.0f),
+    m_compressorState{},
+    m_storageBuffer{},
+    m_processedBuffer{},
+    m_sampleIndex(0)
 {
     m_sampleIndex = 0;
     std::fill(m_processedBuffer, m_processedBuffer+AUDIOCOMPRESSORSND_SF_COMPRESSOR_CHUNKSIZE, 0.0f);
