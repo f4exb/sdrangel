@@ -15,11 +15,13 @@ NFMDemodSettings:
       format: float
     fmDeviation:
       type: integer
+      description: "FM frequency deviation in Hz."
     squelchGate:
       description: squelch gate in tens of ms
       type: integer
     deltaSquelch:
       type: integer
+      description: "Delta squelch setting for Nfm demod."
     squelch:
       description: power squelch threshold in deci-bels
       type: number
@@ -27,38 +29,58 @@ NFMDemodSettings:
     volume:
       type: number
       format: float
+      description: "Audio volume multiplier."
     ctcssOn:
       type: integer
+      description: "Ctcss on setting for Nfm demod."
     highPass:
       type: integer
+      description: "High pass setting for Nfm demod."
     audioMute:
       type: integer
+      description: "Mute audio output (1 muted, 0 unmuted)."
+      minimum: 0
+      maximum: 1
     ctcssIndex:
       type: integer
+      description: "Selected ctcss index."
     rgbColor:
       type: integer
+      description: "Display color encoded as an RGB integer."
     title:
       type: string
+      description: "User-visible title."
     audioDeviceName:
       type: string
+      description: "Name of the audio device to use."
     streamIndex:
       description: MIMO channel. Not relevant when connected to SI (single Rx).
       type: integer
     useReverseAPI:
       description: Synchronize with reverse API (1 for yes, 0 for no)
       type: integer
+      minimum: 0
+      maximum: 1
     reverseAPIAddress:
       type: string
+      description: "IPv4 address or host name of the reverse API peer."
     reverseAPIPort:
       type: integer
+      description: "TCP port of the reverse API peer."
+      minimum: 1
+      maximum: 65535
     reverseAPIDeviceIndex:
       type: integer
+      description: "Device-set index used by the reverse API peer."
     reverseAPIChannelIndex:
       type: integer
+      description: "Channel index used by the reverse API peer."
     channelMarker:
       $ref: "/doc/swagger/include/ChannelMarker.yaml#/ChannelMarker"
+      description: "Channel-marker display configuration."
     rollupState:
       $ref: "/doc/swagger/include/RollupState.yaml#/RollupState"
+      description: "Saved expanded or collapsed state of the GUI sections."
 
 NFMDemodReport:
   description: NFMDemod
@@ -76,6 +98,8 @@ NFMDemodReport:
       type: integer
     audioSampleRate:
       type: integer
+      description: "Audio sample rate in samples per second."
     channelSampleRate:
       type: integer
+      description: "Effective sample rate delivered to the channel in samples per second."
 

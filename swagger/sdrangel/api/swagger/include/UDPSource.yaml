@@ -3,80 +3,119 @@ UDPSourceSettings:
   properties:
     sampleFormat:
       type: integer
+      description: "Sample format setting for UDP source."
     inputSampleRate:
       type: number
       format: float
+      description: "Input sample rate in samples per second."
     inputFrequencyOffset:
       type: integer
       format: int64
+      description: "Channel frequency offset from the device center frequency in Hz."
     rfBandwidth:
       type: number
       format: float
+      description: "RF bandwidth in Hz."
     lowCutoff:
       type: number
       format: float
+      description: "Lower filter cutoff frequency in Hz."
     fmDeviation:
       type: integer
+      description: "FM frequency deviation in Hz."
     amModFactor:
       type: number
       format: float
+      description: "Am mod factor setting for UDP source."
     channelMute:
       type: integer
+      description: "Mute the channel output (1 muted, 0 unmuted)."
+      minimum: 0
+      maximum: 1
     gainIn:
       type: number
       format: float
+      description: "Gain in setting for UDP source."
     gainOut:
       type: number
       format: float
+      description: "Gain out setting for UDP source."
     squelch:
       type: number
       format: float
+      description: "Squelch threshold in dB."
     squelchGate:
       type: number
       format: float
+      description: "Squelch gate duration."
     squelchEnabled:
       type: integer
+      description: "Enable squelch (1 enabled, 0 disabled)."
+      minimum: 0
+      maximum: 1
     autoRWBalance:
       type: integer
+      description: "Auto rw balance setting for UDP source."
     stereoInput:
       type: integer
+      description: "Stereo input setting for UDP source."
     rgbColor:
       type: integer
+      description: "Display color encoded as an RGB integer."
     udpAddress:
       type: string
+      description: "IPv4 address or host name used for UDP traffic."
     udpPort:
       type: integer
       format: uint16
+      description: "UDP port number."
+      minimum: 1
+      maximum: 65535
     multicastAddress:
       type: string
+      description: "IP multicast group address."
     multicastJoin:
       type: integer
+      minimum: 0
+      maximum: 1
       description: >
         Join multicast group
         * 0 - leave group
         * 1 - join group
     title:
       type: string
+      description: "User-visible title."
     streamIndex:
       description: MIMO channel. Not relevant when connected to SI (single Rx).
       type: integer
     useReverseAPI:
       description: Synchronize with reverse API (1 for yes, 0 for no)
       type: integer
+      minimum: 0
+      maximum: 1
     reverseAPIAddress:
       type: string
+      description: "IPv4 address or host name of the reverse API peer."
     reverseAPIPort:
       type: integer
+      description: "TCP port of the reverse API peer."
+      minimum: 1
+      maximum: 65535
     reverseAPIDeviceIndex:
       type: integer
+      description: "Device-set index used by the reverse API peer."
     reverseAPIChannelIndex:
       type: integer
+      description: "Channel index used by the reverse API peer."
     spectrumConfig:
       $ref: "http://swgserver:8081/api/swagger/include/GLSpectrum.yaml#/GLSpectrum"
+      description: "Spectrum-display configuration."
     channelMarker:
       $ref: "http://swgserver:8081/api/swagger/include/ChannelMarker.yaml#/ChannelMarker"
+      description: "Channel-marker display configuration."
     rollupState:
       $ref: "http://swgserver:8081/api/swagger/include/RollupState.yaml#/RollupState"
+      description: "Saved expanded or collapsed state of the GUI sections."
 
 UDPSourceReport:
   description: UDPSource
@@ -97,3 +136,4 @@ UDPSourceReport:
       type: integer
     channelSampleRate:
       type: integer
+      description: "Effective sample rate delivered to the channel in samples per second."

@@ -4,26 +4,39 @@ M17ModSettings:
     inputFrequencyOffset:
       type: integer
       format: int64
+      description: "Channel frequency offset from the device center frequency in Hz."
     rfBandwidth:
       type: number
       format: float
+      description: "RF bandwidth in Hz."
     fmDeviation:
       type: number
       format: float
+      description: "FM frequency deviation in Hz."
     toneFrequency:
       type: number
       format: float
+      description: "Tone frequency in Hz."
     volumeFactor:
       type: number
       format: float
+      description: "Volume factor setting for M17 mod."
     channelMute:
       type: integer
+      description: "Mute the channel output (1 muted, 0 unmuted)."
+      minimum: 0
+      maximum: 1
     playLoop:
       type: integer
+      description: "Loop playback at end of file (1 enabled, 0 disabled)."
+      minimum: 0
+      maximum: 1
     rgbColor:
       type: integer
+      description: "Display color encoded as an RGB integer."
     title:
       type: string
+      description: "User-visible title."
     m17Mode:
       type: integer
       description: M17Mode
@@ -35,55 +48,81 @@ M17ModSettings:
       description: PacketType
     audioDeviceName:
       type: string
+      description: "Name of the audio device to use."
     feedbackAudioDeviceName:
       type: string
+      description: "Feedback audio device name setting for M17 mod."
     feedbackVolumeFactor:
       type: number
       format: float
+      description: "Feedback volume factor setting for M17 mod."
     feedbackAudioEnable:
       type: integer
+      description: "Feedback audio enable setting for M17 mod."
     streamIndex:
       description: MIMO channel. Not relevant when connected to SI (single Rx).
       type: integer
     useReverseAPI:
       description: Synchronize with reverse API (1 for yes, 0 for no)
       type: integer
+      minimum: 0
+      maximum: 1
     reverseAPIAddress:
       type: string
+      description: "IPv4 address or host name of the reverse API peer."
     reverseAPIPort:
       type: integer
+      description: "TCP port of the reverse API peer."
+      minimum: 1
+      maximum: 65535
     reverseAPIDeviceIndex:
       type: integer
+      description: "Device-set index used by the reverse API peer."
     reverseAPIChannelIndex:
       type: integer
+      description: "Channel index used by the reverse API peer."
     sourceCall:
       type: string
+      description: "Source call setting for M17 mod."
     destCall:
       type: string
+      description: "Dest call setting for M17 mod."
     insertPosition:
       type: integer
+      description: "Insert position setting for M17 mod."
     can:
       type: integer
+      description: "Can setting for M17 mod."
     smsText:
       type: string
+      description: "Sms text setting for M17 mod."
     loopPacket:
       type: integer
+      description: "Loop packet setting for M17 mod."
     loopPacketInterval:
       type: integer
+      description: "Loop packet interval setting for M17 mod."
     aprsCallsign:
       type: string
+      description: "Aprs callsign setting for M17 mod."
     aprsTo:
       type: string
+      description: "Aprs to setting for M17 mod."
     aprsVia:
       type: string
+      description: "Aprs via setting for M17 mod."
     aprsData:
       type: string
+      description: "Aprs data setting for M17 mod."
     aprsInsertPosition:
       type: integer
+      description: "Aprs insert position setting for M17 mod."
     channelMarker:
       $ref: "http://swgserver:8081/api/swagger/include/ChannelMarker.yaml#/ChannelMarker"
+      description: "Channel-marker display configuration."
     rollupState:
       $ref: "http://swgserver:8081/api/swagger/include/RollupState.yaml#/RollupState"
+      description: "Saved expanded or collapsed state of the GUI sections."
 
 M17ModReport:
   description: M17Mod
@@ -94,5 +133,7 @@ M17ModReport:
       format: float
     audioSampleRate:
       type: integer
+      description: "Audio sample rate in samples per second."
     channelSampleRate:
       type: integer
+      description: "Effective sample rate delivered to the channel in samples per second."

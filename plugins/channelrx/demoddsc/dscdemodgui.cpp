@@ -40,6 +40,7 @@
 #include "util/csv.h"
 #include "util/db.h"
 #include "util/mmsi.h"
+#include "gui/messagedialog.h"
 #include "gui/basicchannelsettingsdialog.h"
 #include "gui/decimaldelegate.h"
 #include "dsp/dspengine.h"
@@ -1174,12 +1175,12 @@ void DSCDemodGUI::on_logOpen_clicked()
                 }
                 else
                 {
-                    QMessageBox::critical(this, "DSC Demod", error);
+                    MessageDialog::critical(this, "DSC Demod", error);
                 }
             }
             else
             {
-                QMessageBox::critical(this, "DSC Demod", QString("Failed to open file %1").arg(fileNames[0]));
+                MessageDialog::critical(this, "DSC Demod", QString("Failed to open file %1").arg(fileNames[0]));
             }
         }
     }

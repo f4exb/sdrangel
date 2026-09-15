@@ -232,7 +232,7 @@ public:
 	void addChannelSource(BasebandSampleSource* source, int index = 0);            //!< Add a channel source
 	void removeChannelSource(BasebandSampleSource* source, bool deleting, int index = 0); //!< Remove a channel source
 	void addChannelSink(BasebandSampleSink* sink, int index = 0);                  //!< Add a channel sink
-	void removeChannelSink(BasebandSampleSink* sink, int index = 0);               //!< Remove a channel sink
+	void removeChannelSink(BasebandSampleSink* sink, bool deleting, int index = 0); //!< Remove a channel sink
     void addMIMOChannel(MIMOChannel *channel);                                     //!< Add a MIMO channel
     void removeMIMOChannel(MIMOChannel *channel);                                  //!< Remove a MIMO channel
 

@@ -55,6 +55,7 @@ public:
     void connectTimer(const QTimer& timer);
     void disconnectTimer();
 
+    virtual void setScopeVis(ScopeVis *scopeVis) override { m_scopeVis = scopeVis; }
     virtual void setTraces(std::vector<GLScopeSettings::TraceData>* tracesData, std::vector<float *>* traces);
     virtual void newTraces(std::vector<float *>* traces, int traceIndex, std::vector<Projector::ProjectionType>* projectionTypes);
 
@@ -139,6 +140,7 @@ private:
     QList<ScopeMarker> m_markers1;
     QList<ScopeMarker> m_markers2;
 
+    ScopeVis *m_scopeVis; //!< The ScopeVis feeding this, to be detached from before this is destroyed
     std::vector<GLScopeSettings::TraceData> *m_tracesData;
     std::vector<float *> *m_traces;
     std::vector<Projector::ProjectionType> *m_projectionTypes;

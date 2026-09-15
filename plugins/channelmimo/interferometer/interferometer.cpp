@@ -742,7 +742,11 @@ void Interferometer::webapiFormatChannelSettings(
     swgChannelSettings->setDirection(2); // MIMO sink
     swgChannelSettings->setOriginatorChannelIndex(getIndexInDeviceSet());
     swgChannelSettings->setOriginatorDeviceSetIndex(getDeviceSetIndex());
-    swgChannelSettings->setChannelType(new QString("Interferometer"));
+    if (swgChannelSettings->getChannelType()) {
+        *swgChannelSettings->getChannelType() = "Interferometer";
+    } else {
+        swgChannelSettings->setChannelType(new QString("Interferometer"));
+    }
     swgChannelSettings->setInterferometerSettings(new SWGSDRangel::SWGInterferometerSettings());
     SWGSDRangel::SWGInterferometerSettings *swgInterferometerSettings = swgChannelSettings->getInterferometerSettings();
 
@@ -752,7 +756,11 @@ void Interferometer::webapiFormatChannelSettings(
         swgInterferometerSettings->setRgbColor(settings.m_rgbColor);
     }
     if (channelSettingsKeys.contains("title") || force) {
-        swgInterferometerSettings->setTitle(new QString(settings.m_title));
+        if (swgInterferometerSettings->getTitle()) {
+            *swgInterferometerSettings->getTitle() = settings.m_title;
+        } else {
+            swgInterferometerSettings->setTitle(new QString(settings.m_title));
+        }
     }
     if (channelSettingsKeys.contains("log2Decim") || force) {
         swgInterferometerSettings->setLog2Decim(settings.m_log2Decim);

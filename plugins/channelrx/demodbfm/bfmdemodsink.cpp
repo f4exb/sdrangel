@@ -376,5 +376,9 @@ void BFMDemodSink::applySettings(const QStringList& settingsKeys, const BFMDemod
         m_squelchLevel = std::pow(10.0, settings.m_squelch / 10.0);
     }
 
-    m_settings = settings;
+    if (force) {
+        m_settings = settings;
+    } else {
+        m_settings.applySettings(settingsKeys, settings);
+    }
 }

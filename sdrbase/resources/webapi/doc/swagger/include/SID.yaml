@@ -4,28 +4,46 @@ SIDSettings:
     period:
       type: number
       format: float
+      description: "Period setting for Sid."
     autosave:
       type: integer
+      description: "Autosave setting for Sid."
     autoload:
       type: integer
+      description: "Autoload setting for Sid."
     filename:
-      type: integer
+      type: string
+      description: >
+        File that measurements are written to and read back from when autosave or
+        autoload is enabled.
     autosavePeriod:
       type: integer
+      description: "Autosave period setting for Sid."
     title:
       type: string
+      description: "User-visible title."
     rgbColor:
       type: integer
+      description: "Display color encoded as an RGB integer."
     useReverseAPI:
       description: Synchronize with reverse API (1 for yes, 0 for no)
       type: integer
+      minimum: 0
+      maximum: 1
     reverseAPIAddress:
       type: string
+      description: "IPv4 address or host name of the reverse API peer."
     reverseAPIPort:
       type: integer
+      description: "TCP port of the reverse API peer."
+      minimum: 1
+      maximum: 65535
     reverseAPIFeatureSetIndex:
       type: integer
+      description: "Feature-set index used by the reverse API peer."
     reverseAPIFeatureIndex:
       type: integer
+      description: "Feature index used by the reverse API peer."
     rollupState:
       $ref: "/doc/swagger/include/RollupState.yaml#/RollupState"
+      description: "Saved expanded or collapsed state of the GUI sections."

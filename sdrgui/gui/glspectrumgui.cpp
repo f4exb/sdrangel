@@ -135,6 +135,9 @@ void GLSpectrumGUI::setBuddies(SpectrumVis* spectrumVis, GLSpectrum* glSpectrum)
 {
     m_spectrumVis = spectrumVis;
     m_glSpectrum = glSpectrum;
+    // Asked for through the web API: the arithmetic and the annotation markers live here
+    connect(m_glSpectrum, &GLSpectrum::requestAutoscale, this, [this]() { on_autoscale_clicked(false); });
+    connect(m_glSpectrum, &GLSpectrum::requestGotoMarker, this, [this](int index) { on_gotoMarker_currentIndexChanged(index + 1); });
     m_glSpectrum->setSpectrumVis(spectrumVis);
     m_glSpectrum->setMessageQueueToGUI(&m_messageQueue);
     m_spectrumVis->setMessageQueueToGUI(&m_messageQueue);
@@ -163,7 +166,7 @@ bool GLSpectrumGUI::deserialize(const QByteArray& data)
         m_glSpectrum->setWaterfallMarkers(m_settings.getWaterfallMarkers());
         m_glSpectrum->setFrequencyZooming(m_settings.m_frequencyZoomFactor, m_settings.m_frequencyZoomPos);
         setAveragingCombo();
-        displaySettings(); // ends with blockApplySettings(false)
+        displaySettings(); // restores the blocked state it found
         applySettings();
         return true;
     }
@@ -192,7 +195,7 @@ void GLSpectrumGUI::updateSettings()
 
 void GLSpectrumGUI::displaySettings()
 {
-    blockApplySettings(true);
+    bool blocked = blockApplySettings(true);
     ui->showControls->setCurrentIndex((int) m_settings.m_showControls);
     setPowerAndRefRange();
     ui->refLevel->setValue(m_settings.m_refLevel + m_calibrationShiftdB);
@@ -200,8 +203,12 @@ void GLSpectrumGUI::displaySettings()
     ui->decay->setSliderPosition(m_settings.m_decay);
     ui->decayDivisor->setSliderPosition(m_settings.m_decayDivisor);
     ui->stroke->setSliderPosition(m_settings.m_histogramStroke);
+    ui->waterfall->blockSignals(true);
+    ui->spectrogram->blockSignals(true);
     ui->waterfall->setChecked(m_settings.m_displayWaterfall);
     ui->spectrogram->setChecked(m_settings.m_display3DSpectrogram);
+    ui->waterfall->blockSignals(false);
+    ui->spectrogram->blockSignals(false);
     ui->spectrogramStyle->setCurrentIndex((int) m_settings.m_3DSpectrogramStyle);
     ui->spectrogramStyle->setVisible(m_settings.m_display3DSpectrogram && (m_settings.m_showControls == SpectrumSettings::ShowAll));
     ui->colorMap->setCurrentText(m_settings.m_colorMap);
@@ -285,7 +292,7 @@ void GLSpectrumGUI::displaySettings()
     ui->linscale->blockSignals(false);
     ui->mathMode->blockSignals(false);
     ui->mathAvgCount->blockSignals(false);
-    blockApplySettings(false);
+    blockApplySettings(blocked);
 
     updateMeasurements();
 }
@@ -363,9 +370,11 @@ QString GLSpectrumGUI::displayScaled(int64_t value, char type, int precision, bo
     }
 }
 
-void GLSpectrumGUI::blockApplySettings(bool block)
+bool GLSpectrumGUI::blockApplySettings(bool block)
 {
+    bool blocked = !m_doApplySettings;
     m_doApplySettings = !block;
+    return blocked;
 }
 
 void GLSpectrumGUI::applySettings()
@@ -780,9 +789,9 @@ void GLSpectrumGUI::on_waterfall_toggled(bool checked)
     m_settings.m_displayWaterfall = checked;
     if (checked)
     {
-        blockApplySettings(true);
+        bool blocked = blockApplySettings(true);
         ui->spectrogram->setChecked(false);
-        blockApplySettings(false);
+        blockApplySettings(blocked);
     }
     applySettings();
 }
@@ -792,9 +801,9 @@ void GLSpectrumGUI::on_spectrogram_toggled(bool checked)
     m_settings.m_display3DSpectrogram = checked;
     if (checked)
     {
-        blockApplySettings(true);
+        bool blocked = blockApplySettings(true);
         ui->waterfall->setChecked(false);
-        blockApplySettings(false);
+        blockApplySettings(blocked);
     }
     ui->spectrogramStyle->setVisible(m_settings.m_display3DSpectrogram && (m_settings.m_showControls >= SpectrumSettings::ShowAll));
     applySettings();

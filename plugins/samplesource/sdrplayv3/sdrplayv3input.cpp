@@ -1010,28 +1010,60 @@ void SDRPlayV3Input::webapiFormatDeviceReport(SWGSDRangel::SWGDeviceReport& resp
     switch(getDeviceId())
     {
     case SDRPLAY_RSP1_ID:
-        response.getSdrPlayV3Report()->setDeviceType(new QString("RSP1"));
+        if (response.getSdrPlayV3Report()->getDeviceType()) {
+            *response.getSdrPlayV3Report()->getDeviceType() = "RSP1";
+        } else {
+            response.getSdrPlayV3Report()->setDeviceType(new QString("RSP1"));
+        }
         break;
     case SDRPLAY_RSP1A_ID:
-        response.getSdrPlayV3Report()->setDeviceType(new QString("RSP1A"));
+        if (response.getSdrPlayV3Report()->getDeviceType()) {
+            *response.getSdrPlayV3Report()->getDeviceType() = "RSP1A";
+        } else {
+            response.getSdrPlayV3Report()->setDeviceType(new QString("RSP1A"));
+        }
         break;
     case SDRPLAY_RSP1B_ID:
-        response.getSdrPlayV3Report()->setDeviceType(new QString("RSP1B"));
+        if (response.getSdrPlayV3Report()->getDeviceType()) {
+            *response.getSdrPlayV3Report()->getDeviceType() = "RSP1B";
+        } else {
+            response.getSdrPlayV3Report()->setDeviceType(new QString("RSP1B"));
+        }
         break;
     case SDRPLAY_RSP2_ID:
-        response.getSdrPlayV3Report()->setDeviceType(new QString("RSP2"));
+        if (response.getSdrPlayV3Report()->getDeviceType()) {
+            *response.getSdrPlayV3Report()->getDeviceType() = "RSP2";
+        } else {
+            response.getSdrPlayV3Report()->setDeviceType(new QString("RSP2"));
+        }
         break;
     case SDRPLAY_RSPduo_ID:
-        response.getSdrPlayV3Report()->setDeviceType(new QString("RSPduo"));
+        if (response.getSdrPlayV3Report()->getDeviceType()) {
+            *response.getSdrPlayV3Report()->getDeviceType() = "RSPduo";
+        } else {
+            response.getSdrPlayV3Report()->setDeviceType(new QString("RSPduo"));
+        }
         break;
     case SDRPLAY_RSPdx_ID:
-        response.getSdrPlayV3Report()->setDeviceType(new QString("RSPdx"));
+        if (response.getSdrPlayV3Report()->getDeviceType()) {
+            *response.getSdrPlayV3Report()->getDeviceType() = "RSPdx";
+        } else {
+            response.getSdrPlayV3Report()->setDeviceType(new QString("RSPdx"));
+        }
         break;
     case SDRPLAY_RSPdxR2_ID:
-        response.getSdrPlayV3Report()->setDeviceType(new QString("RSPdx-R2"));
+        if (response.getSdrPlayV3Report()->getDeviceType()) {
+            *response.getSdrPlayV3Report()->getDeviceType() = "RSPdx-R2";
+        } else {
+            response.getSdrPlayV3Report()->setDeviceType(new QString("RSPdx-R2"));
+        }
         break;
     default:
-        response.getSdrPlayV3Report()->setDeviceType(new QString("Unknown"));
+        if (response.getSdrPlayV3Report()->getDeviceType()) {
+            *response.getSdrPlayV3Report()->getDeviceType() = "Unknown";
+        } else {
+            response.getSdrPlayV3Report()->setDeviceType(new QString("Unknown"));
+        }
         break;
     }
 }

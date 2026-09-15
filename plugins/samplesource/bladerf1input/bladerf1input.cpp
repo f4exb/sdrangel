@@ -551,7 +551,11 @@ void Bladerf1Input::webapiFormatDeviceSettings(SWGSDRangel::SWGDeviceSettings& r
         response.getBladeRf1InputSettings()->setTitle(new QString(settings.m_title));
     }
 
-    response.getBladeRf1InputSettings()->setTitle(new QString(settings.m_title));
+    if (response.getBladeRf1InputSettings()->getTitle()) {
+        *response.getBladeRf1InputSettings()->getTitle() = settings.m_title;
+    } else {
+        response.getBladeRf1InputSettings()->setTitle(new QString(settings.m_title));
+    }
     response.getBladeRf1InputSettings()->setCenterFrequency(settings.m_centerFrequency);
     response.getBladeRf1InputSettings()->setDevSampleRate(settings.m_devSampleRate);
     response.getBladeRf1InputSettings()->setLnaGain(settings.m_lnaGain);

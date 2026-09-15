@@ -6,15 +6,19 @@ FeatureConfig:
       type: string
     config:
       $ref: "/doc/swagger/include/FeatureSettings.yaml#/FeatureSettings"
+      description: "Configuration data."
 
 FeatureSetPreset:
   description: Represents a Feature Set Preset object
   properties:
     group:
       type: string
+      description: "Group for Feature set preset."
     description:
       type: string
+      description: "Human-readable description."
     featureConfigs:
       type: array
+      description: "List of feature configs."
       items:
         $ref: "/doc/swagger/include/FeatureSetPreset.yaml#/FeatureConfig"

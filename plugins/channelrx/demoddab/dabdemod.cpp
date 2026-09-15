@@ -32,12 +32,16 @@
 #include <complex.h>
 
 #include "SWGChannelSettings.h"
+#include "SWGChannelReport.h"
 #include "SWGWorkspaceInfo.h"
+#include "SWGDABDemodReport.h"
 #include "SWGDABDemodSettings.h"
+#include "SWGDABProgram.h"
 
 #include "dsp/dspcommands.h"
 #include "device/deviceapi.h"
 #include "settings/serializable.h"
+#include "util/db.h"
 #include "maincore.h"
 
 MESSAGE_CLASS_DEFINITION(DABDemod::MsgConfigureDABDemod, Message)
@@ -60,7 +64,19 @@ const char * const DABDemod::m_channelId = "DABDemod";
 DABDemod::DABDemod(DeviceAPI *deviceAPI) :
         ChannelAPI(m_channelIdURI, ChannelAPI::StreamSingleSink),
         m_deviceAPI(deviceAPI),
-        m_basebandSampleRate(0)
+        m_basebandSampleRate(0),
+        m_centerFrequency(0),
+        m_reportSync(false),
+        m_reportSNR(0),
+        m_reportFrequencyOffset(0),
+        m_reportEnsembleId(0),
+        m_reportAudioActive(false),
+        m_reportBitrate(0),
+        m_reportFrameQuality(0),
+        m_reportReedSolomonQuality(0),
+        m_reportAACQuality(0),
+        m_reportFIBQuality(0),
+        m_reportTII(0)
 {
     setObjectName(m_channelId);
 
@@ -136,6 +152,8 @@ void DABDemod::start()
 {
     qDebug("DABDemod::start");
 
+    clearReport();
+
     m_basebandSink->reset();
     m_basebandSink->startWork();
     m_thread.start();
@@ -153,6 +171,7 @@ void DABDemod::stop()
     m_basebandSink->stopWork();
     m_thread.quit();
     m_thread.wait();
+    clearReport();
 }
 
 bool DABDemod::handleMessage(const Message& cmd)
@@ -168,6 +187,9 @@ bool DABDemod::handleMessage(const Message& cmd)
     else if (DSPSignalNotification::match(cmd))
     {
         DSPSignalNotification& notif = (DSPSignalNotification&) cmd;
+        if ((m_basebandSampleRate != notif.getSampleRate()) || (m_centerFrequency != notif.getCenterFrequency())) {
+            clearReport();
+        }
         m_basebandSampleRate = notif.getSampleRate();
         m_centerFrequency = notif.getCenterFrequency();
         // Forward to the sink
@@ -184,6 +206,15 @@ bool DABDemod::handleMessage(const Message& cmd)
     else if (MsgDABSystemData::match(cmd))
     {
         MsgDABSystemData& report = (MsgDABSystemData&)cmd;
+        {
+            QMutexLocker locker(&m_reportMutex);
+            m_reportSync = report.getSync();
+            m_reportSNR = report.getSNR();
+            m_reportFrequencyOffset = report.getFrequencyOffset();
+            if (!m_reportSync) {
+                m_reportAudioActive = false;
+            }
+        }
         if (getMessageQueueToGUI())
         {
             getMessageQueueToGUI()->push(new MsgDABSystemData(report));
@@ -194,6 +225,12 @@ bool DABDemod::handleMessage(const Message& cmd)
     else if (MsgDABProgramQuality::match(cmd))
     {
         MsgDABProgramQuality& report = (MsgDABProgramQuality&)cmd;
+        {
+            QMutexLocker locker(&m_reportMutex);
+            m_reportFrameQuality = report.getFrames();
+            m_reportReedSolomonQuality = report.getRS();
+            m_reportAACQuality = report.getAAC();
+        }
         if (getMessageQueueToGUI())
         {
             getMessageQueueToGUI()->push(new MsgDABProgramQuality(report));
@@ -204,6 +241,10 @@ bool DABDemod::handleMessage(const Message& cmd)
     else if (MsgDABFIBQuality::match(cmd))
     {
         MsgDABFIBQuality& report = (MsgDABFIBQuality&)cmd;
+        {
+            QMutexLocker locker(&m_reportMutex);
+            m_reportFIBQuality = report.getPercent();
+        }
         if (getMessageQueueToGUI())
         {
             getMessageQueueToGUI()->push(new MsgDABFIBQuality(report));
@@ -214,6 +255,10 @@ bool DABDemod::handleMessage(const Message& cmd)
     else if (MsgDABSampleRate::match(cmd))
     {
         MsgDABSampleRate& report = (MsgDABSampleRate&)cmd;
+        {
+            QMutexLocker locker(&m_reportMutex);
+            m_reportAudioActive = report.getSampleRate() > 0;
+        }
         if (getMessageQueueToGUI())
         {
             getMessageQueueToGUI()->push(new MsgDABSampleRate(report));
@@ -224,6 +269,11 @@ bool DABDemod::handleMessage(const Message& cmd)
     else if (MsgDABEnsembleName::match(cmd))
     {
         MsgDABEnsembleName& report = (MsgDABEnsembleName&)cmd;
+        {
+            QMutexLocker locker(&m_reportMutex);
+            m_reportEnsembleName = report.getName();
+            m_reportEnsembleId = report.getId();
+        }
         if (getMessageQueueToGUI())
         {
             getMessageQueueToGUI()->push(new MsgDABEnsembleName(report));
@@ -234,6 +284,10 @@ bool DABDemod::handleMessage(const Message& cmd)
     else if (MsgDABProgramName::match(cmd))
     {
         MsgDABProgramName& report = (MsgDABProgramName&)cmd;
+        {
+            QMutexLocker locker(&m_reportMutex);
+            m_reportPrograms.insert(report.getId(), report.getName());
+        }
         if (getMessageQueueToGUI())
         {
             getMessageQueueToGUI()->push(new MsgDABProgramName(report));
@@ -245,6 +299,14 @@ bool DABDemod::handleMessage(const Message& cmd)
     else if (MsgDABProgramData::match(cmd))
     {
         MsgDABProgramData& report = (MsgDABProgramData&)cmd;
+        {
+            QMutexLocker locker(&m_reportMutex);
+            m_reportAudioActive = true;
+            m_reportBitrate = report.getBitrate();
+            m_reportAudio = report.getAudio();
+            m_reportLanguage = report.getLanguage();
+            m_reportProgramType = report.getProgramType();
+        }
         if (getMessageQueueToGUI())
         {
             getMessageQueueToGUI()->push(new MsgDABProgramData(report));
@@ -255,6 +317,10 @@ bool DABDemod::handleMessage(const Message& cmd)
     else if (MsgDABData::match(cmd))
     {
         MsgDABData& report = (MsgDABData&)cmd;
+        {
+            QMutexLocker locker(&m_reportMutex);
+            m_reportData = report.getData();
+        }
         if (getMessageQueueToGUI())
         {
             getMessageQueueToGUI()->push(new MsgDABData(report));
@@ -275,6 +341,10 @@ bool DABDemod::handleMessage(const Message& cmd)
     else if (MsgDABTII::match(cmd))
     {
         MsgDABTII& report = (MsgDABTII&)cmd;
+        {
+            QMutexLocker locker(&m_reportMutex);
+            m_reportTII = report.getTII();
+        }
         if (getMessageQueueToGUI())
         {
             getMessageQueueToGUI()->push(new MsgDABTII(report));
@@ -285,6 +355,7 @@ bool DABDemod::handleMessage(const Message& cmd)
     else if (MsgDABReset::match(cmd))
     {
         MsgDABReset& report = (MsgDABReset&)cmd;
+        clearReport();
         m_basebandSink->getInputMessageQueue()->push(new MsgDABReset(report));
 
         return true;
@@ -292,6 +363,7 @@ bool DABDemod::handleMessage(const Message& cmd)
     else if (MsgDABResetService::match(cmd))
     {
         MsgDABResetService& report = (MsgDABResetService&)cmd;
+        clearProgramReport();
         m_basebandSink->getInputMessageQueue()->push(new MsgDABResetService(report));
 
         return true;
@@ -325,6 +397,12 @@ void DABDemod::setCenterFrequency(qint64 frequency)
 void DABDemod::applySettings(const QStringList& settingsKeys, const DABDemodSettings& settings, bool force)
 {
     qDebug() << "DABDemod::applySettings:" << settings.getDebugString(settingsKeys, force);
+
+    if ((settings.m_inputFrequencyOffset != m_settings.m_inputFrequencyOffset) || force) {
+        clearReport();
+    } else if (settings.m_program != m_settings.m_program) {
+        clearProgramReport();
+    }
 
     QList<QString> reverseAPIKeys;
 
@@ -374,7 +452,11 @@ void DABDemod::applySettings(const QStringList& settingsKeys, const DABDemodSett
         webapiReverseSendSettings(settingsKeys, settings, fullUpdate || force);
     }
 
-    m_settings = settings;
+    if (force) {
+        m_settings = settings;
+    } else {
+        m_settings.applySettings(settingsKeys, settings);
+    }
 }
 
 QByteArray DABDemod::serialize() const
@@ -427,6 +509,123 @@ int DABDemod::webapiSettingsGet(
     response.getDabDemodSettings()->init();
     webapiFormatChannelSettings(response, m_settings);
     return 200;
+}
+
+int DABDemod::webapiReportGet(
+        SWGSDRangel::SWGChannelReport& response,
+        QString& errorMessage)
+{
+    (void) errorMessage;
+    response.setDabDemodReport(new SWGSDRangel::SWGDABDemodReport());
+    response.getDabDemodReport()->init();
+    webapiFormatChannelReport(response);
+    return 200;
+}
+
+void DABDemod::webapiFormatChannelReport(SWGSDRangel::SWGChannelReport& response)
+{
+    SWGSDRangel::SWGDABDemodReport *report = response.getDabDemodReport();
+    double magsqAvg;
+    double magsqPeak;
+    int nbMagsqSamples;
+    getMagSqLevels(magsqAvg, magsqPeak, nbMagsqSamples);
+    report->setChannelPowerDb(CalcDb::dbPower(magsqAvg));
+    report->setChannelSampleRate(m_basebandSink->getChannelSampleRate());
+    report->setAudioSampleRate(m_basebandSink->getAudioSampleRate());
+    if (report->getSelectedProgram()) {
+        *report->getSelectedProgram() = m_settings.m_program.trimmed();
+    } else {
+        report->setSelectedProgram(new QString(m_settings.m_program.trimmed()));
+    }
+
+    QMutexLocker locker(&m_reportMutex);
+    report->setSync(m_reportSync ? 1 : 0);
+    report->setSnr(m_reportSNR);
+    report->setFrequencyOffset(m_reportFrequencyOffset);
+    // DAB labels are a fixed 16 characters, space padded
+    if (report->getEnsembleName()) {
+        *report->getEnsembleName() = m_reportEnsembleName.trimmed();
+    } else {
+        report->setEnsembleName(new QString(m_reportEnsembleName.trimmed()));
+    }
+    report->setEnsembleId(m_reportEnsembleId);
+
+    for (auto it = m_reportPrograms.cbegin(); it != m_reportPrograms.cend(); ++it)
+    {
+        SWGSDRangel::SWGDABProgram *program = new SWGSDRangel::SWGDABProgram();
+        program->init();
+        if (program->getName()) {
+            *program->getName() = it.value().trimmed();
+        } else {
+            program->setName(new QString(it.value().trimmed()));
+        }
+        program->setId(it.key());
+        report->getPrograms()->append(program);
+    }
+
+    report->setAudioActive(m_reportAudioActive ? 1 : 0);
+    report->setBitrate(m_reportBitrate);
+    if (report->getAudio()) {
+        *report->getAudio() = m_reportAudio.trimmed();
+    } else {
+        report->setAudio(new QString(m_reportAudio.trimmed()));
+    }
+    if (report->getLanguage()) {
+        *report->getLanguage() = m_reportLanguage.trimmed();
+    } else {
+        report->setLanguage(new QString(m_reportLanguage.trimmed()));
+    }
+    if (report->getProgramType()) {
+        *report->getProgramType() = m_reportProgramType.trimmed();
+    } else {
+        report->setProgramType(new QString(m_reportProgramType.trimmed()));
+    }
+    report->setFrameQuality(m_reportFrameQuality);
+    report->setReedSolomonQuality(m_reportReedSolomonQuality);
+    report->setAacQuality(m_reportAACQuality);
+    report->setFibQuality(m_reportFIBQuality);
+    report->setTii(m_reportTII);
+    if (report->getData()) {
+        *report->getData() = m_reportData.trimmed();
+    } else {
+        report->setData(new QString(m_reportData.trimmed()));
+    }
+}
+
+void DABDemod::clearProgramReport()
+{
+    QMutexLocker locker(&m_reportMutex);
+    m_reportAudioActive = false;
+    m_reportBitrate = 0;
+    m_reportAudio.clear();
+    m_reportLanguage.clear();
+    m_reportProgramType.clear();
+    m_reportFrameQuality = 0;
+    m_reportReedSolomonQuality = 0;
+    m_reportAACQuality = 0;
+    m_reportData.clear();
+}
+
+void DABDemod::clearReport()
+{
+    QMutexLocker locker(&m_reportMutex);
+    m_reportSync = false;
+    m_reportSNR = 0;
+    m_reportFrequencyOffset = 0;
+    m_reportEnsembleName.clear();
+    m_reportEnsembleId = 0;
+    m_reportPrograms.clear();
+    m_reportAudioActive = false;
+    m_reportBitrate = 0;
+    m_reportAudio.clear();
+    m_reportLanguage.clear();
+    m_reportProgramType.clear();
+    m_reportFrameQuality = 0;
+    m_reportReedSolomonQuality = 0;
+    m_reportAACQuality = 0;
+    m_reportFIBQuality = 0;
+    m_reportTII = 0;
+    m_reportData.clear();
 }
 
 int DABDemod::webapiWorkspaceGet(
@@ -522,10 +721,18 @@ void DABDemod::webapiFormatChannelSettings(SWGSDRangel::SWGChannelSettings& resp
 {
     response.getDabDemodSettings()->setInputFrequencyOffset(settings.m_inputFrequencyOffset);
     response.getDabDemodSettings()->setRfBandwidth(settings.m_rfBandwidth);
-    response.getDabDemodSettings()->setProgram(new QString(settings.m_program));
+    if (response.getDabDemodSettings()->getProgram()) {
+        *response.getDabDemodSettings()->getProgram() = settings.m_program;
+    } else {
+        response.getDabDemodSettings()->setProgram(new QString(settings.m_program));
+    }
     response.getDabDemodSettings()->setVolume(settings.m_volume);
     response.getDabDemodSettings()->setAudioMute(settings.m_audioMute);
-    response.getDabDemodSettings()->setAudioDeviceName(new QString(settings.m_audioDeviceName));
+    if (response.getDabDemodSettings()->getAudioDeviceName()) {
+        *response.getDabDemodSettings()->getAudioDeviceName() = settings.m_audioDeviceName;
+    } else {
+        response.getDabDemodSettings()->setAudioDeviceName(new QString(settings.m_audioDeviceName));
+    }
 
     response.getDabDemodSettings()->setRgbColor(settings.m_rgbColor);
     if (response.getDabDemodSettings()->getTitle()) {
@@ -611,7 +818,11 @@ void DABDemod::webapiFormatChannelSettings(
     swgChannelSettings->setDirection(0); // Single sink (Rx)
     swgChannelSettings->setOriginatorChannelIndex(getIndexInDeviceSet());
     swgChannelSettings->setOriginatorDeviceSetIndex(getDeviceSetIndex());
-    swgChannelSettings->setChannelType(new QString("DABDemod"));
+    if (swgChannelSettings->getChannelType()) {
+        *swgChannelSettings->getChannelType() = "DABDemod";
+    } else {
+        swgChannelSettings->setChannelType(new QString("DABDemod"));
+    }
     swgChannelSettings->setDabDemodSettings(new SWGSDRangel::SWGDABDemodSettings());
     SWGSDRangel::SWGDABDemodSettings *swgDABDemodSettings = swgChannelSettings->getDabDemodSettings();
 
@@ -624,7 +835,11 @@ void DABDemod::webapiFormatChannelSettings(
         swgDABDemodSettings->setRfBandwidth(settings.m_rfBandwidth);
     }
     if (channelSettingsKeys.contains("program") || force) {
-        swgDABDemodSettings->setProgram(new QString(settings.m_program));
+        if (swgDABDemodSettings->getProgram()) {
+            *swgDABDemodSettings->getProgram() = settings.m_program;
+        } else {
+            swgDABDemodSettings->setProgram(new QString(settings.m_program));
+        }
     }
     if (channelSettingsKeys.contains("volume") || force) {
         swgDABDemodSettings->setVolume(settings.m_volume);
@@ -633,13 +848,21 @@ void DABDemod::webapiFormatChannelSettings(
         swgDABDemodSettings->setAudioMute(settings.m_audioMute);
     }
     if (channelSettingsKeys.contains("audioDeviceName") || force) {
-        swgDABDemodSettings->setAudioDeviceName(new QString(settings.m_audioDeviceName));
+        if (swgDABDemodSettings->getAudioDeviceName()) {
+            *swgDABDemodSettings->getAudioDeviceName() = settings.m_audioDeviceName;
+        } else {
+            swgDABDemodSettings->setAudioDeviceName(new QString(settings.m_audioDeviceName));
+        }
     }
     if (channelSettingsKeys.contains("rgbColor") || force) {
         swgDABDemodSettings->setRgbColor(settings.m_rgbColor);
     }
     if (channelSettingsKeys.contains("title") || force) {
-        swgDABDemodSettings->setTitle(new QString(settings.m_title));
+        if (swgDABDemodSettings->getTitle()) {
+            *swgDABDemodSettings->getTitle() = settings.m_title;
+        } else {
+            swgDABDemodSettings->setTitle(new QString(settings.m_title));
+        }
     }
     if (channelSettingsKeys.contains("streamIndex") || force) {
         swgDABDemodSettings->setStreamIndex(settings.m_streamIndex);

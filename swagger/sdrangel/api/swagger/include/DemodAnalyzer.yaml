@@ -3,15 +3,20 @@ DemodAnalyzerSettings:
   properties:
     log2Decim:
       type: integer
+      description: "Base-2 exponent of the software decimation factor; the output sample rate is divided by 2^log2Decim."
     title:
       type: string
+      description: "User-visible title."
     rgbColor:
       type: integer
+      description: "Display color encoded as an RGB integer."
     fileRecordName:
       type: string
       description: Output wave file name
     recordToFile:
       type: integer
+      minimum: 0
+      maximum: 1
       description: >
         Recording status
           * 1 - recording
@@ -21,24 +26,35 @@ DemodAnalyzerSettings:
       description: Record silence time before stopping recording in 10ths of seconds
     useReverseAPI:
       type: integer
+      minimum: 0
+      maximum: 1
       description: >
         Synchronize with reverse API
           * 1 - yes
           * 0 - no
     reverseAPIAddress:
       type: string
+      description: "IPv4 address or host name of the reverse API peer."
     reverseAPIPort:
       type: integer
+      description: "TCP port of the reverse API peer."
+      minimum: 1
+      maximum: 65535
     reverseAPIFeatureSetIndex:
       type: integer
+      description: "Feature-set index used by the reverse API peer."
     reverseAPIFeatureIndex:
       type: integer
+      description: "Feature index used by the reverse API peer."
     spectrumConfig:
       $ref: "http://swgserver:8081/api/swagger/include/GLSpectrum.yaml#/GLSpectrum"
+      description: "Spectrum-display configuration."
     scopeConfig:
       $ref: "http://swgserver:8081/api/swagger/include/GLScope.yaml#/GLScope"
+      description: "Oscilloscope-display configuration."
     rollupState:
       $ref: "http://swgserver:8081/api/swagger/include/RollupState.yaml#/RollupState"
+      description: "Saved expanded or collapsed state of the GUI sections."
 
 DemodAnalyzerActions:
   description: "Demod Analyzer actions"

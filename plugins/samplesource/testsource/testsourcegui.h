@@ -68,6 +68,7 @@ private:
 	void sendSettings();
     void updateSampleRateAndFrequency();
     void displayAmplitude();
+    void displayPeriod();
     void updateAmpCoarseLimit();
     void updateAmpFineLimit();
     void updateFrequencyShiftLimit();
@@ -94,6 +95,8 @@ private slots:
     void on_iBias_valueChanged(int value);
     void on_qBias_valueChanged(int value);
     void on_phaseImbalance_valueChanged(int value);
+    void on_period_valueChanged(int value);
+    void on_dutyCycle_valueChanged(int value);
     void openDeviceSettingsDialog(const QPoint& p);
     void updateStatus();
     void updateHardware();

@@ -453,6 +453,11 @@ bool RTLSDRThread::applySettings(const RTLSDRSettings& settings, const QStringLi
 
         if (rtlsdr_set_center_freq(m_dev, deviceCenterFrequency) != 0) {
             qWarning("RTLSDRThread::applySettings: rtlsdr_set_center_freq(%lld) failed", deviceCenterFrequency);
+            // Retry after PLL has settled
+            QThread::msleep(5);
+            if (rtlsdr_set_center_freq(m_dev, deviceCenterFrequency) != 0) {
+                qWarning("RTLSDRThread::applySettings: rtlsdr_set_center_freq(%lld) failed", deviceCenterFrequency);
+            }
         } else {
             qDebug("RTLSDRThread::applySettings: rtlsdr_set_center_freq(%lld)", deviceCenterFrequency);
         }

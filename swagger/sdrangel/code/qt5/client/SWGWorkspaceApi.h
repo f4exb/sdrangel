@@ -17,6 +17,7 @@
 
 #include "SWGErrorResponse.h"
 #include "SWGSuccessResponse.h"
+#include "SWGWorkspaceActions.h"
 
 #include <QObject>
 
@@ -36,20 +37,25 @@ public:
 
     void instanceWorkspaceAdd();
     void instanceWorkspacesDeleteEmpty();
+    void workspaceActionsPost(qint32 workspace_index, SWGWorkspaceActions& body);
     
 private:
     void instanceWorkspaceAddCallback (SWGHttpRequestWorker * worker);
     void instanceWorkspacesDeleteEmptyCallback (SWGHttpRequestWorker * worker);
+    void workspaceActionsPostCallback (SWGHttpRequestWorker * worker);
     
 signals:
     void instanceWorkspaceAddSignal(SWGSuccessResponse* summary);
     void instanceWorkspacesDeleteEmptySignal(SWGSuccessResponse* summary);
+    void workspaceActionsPostSignal(SWGSuccessResponse* summary);
     
     void instanceWorkspaceAddSignalE(SWGSuccessResponse* summary, QNetworkReply::NetworkError error_type, QString& error_str);
     void instanceWorkspacesDeleteEmptySignalE(SWGSuccessResponse* summary, QNetworkReply::NetworkError error_type, QString& error_str);
+    void workspaceActionsPostSignalE(SWGSuccessResponse* summary, QNetworkReply::NetworkError error_type, QString& error_str);
     
     void instanceWorkspaceAddSignalEFull(SWGHttpRequestWorker* worker, QNetworkReply::NetworkError error_type, QString& error_str);
     void instanceWorkspacesDeleteEmptySignalEFull(SWGHttpRequestWorker* worker, QNetworkReply::NetworkError error_type, QString& error_str);
+    void workspaceActionsPostSignalEFull(SWGHttpRequestWorker* worker, QNetworkReply::NetworkError error_type, QString& error_str);
     
 };
 

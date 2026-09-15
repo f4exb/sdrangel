@@ -19,7 +19,6 @@
 #ifndef INCLUDE_FEATURE_DEMODANALYZERGUI_H_
 #define INCLUDE_FEATURE_DEMODANALYZERGUI_H_
 
-#include <QTimer>
 #include <QList>
 
 #include "feature/featuregui.h"
@@ -70,8 +69,6 @@ private:
 	SpectrumVis* m_spectrumVis;
 	ScopeVis* m_scopeVis;
 	MessageQueue m_inputMessageQueue;
-	QTimer m_statusTimer;
-	int m_lastFeatureState;
 	AvailableChannelOrFeatureList m_availableChannels;
 	ChannelAPI *m_selectedChannel;
 	MovingAverageUtil<double, double, 40> m_channelPowerAvg;
@@ -98,7 +95,7 @@ private slots:
 	void on_record_toggled(bool checked);
     void on_showFileDialog_clicked(bool checked);
     void on_recordSilenceTime_valueChanged(int value);
-	void updateStatus();
+	void updateFeatureState();
 	void tick();
 };
 

@@ -36,6 +36,7 @@
 #include "plugin/pluginapi.h"
 #include "util/morse.h"
 #include "util/units.h"
+#include "gui/messagedialog.h"
 #include "gui/basicfeaturesettingsdialog.h"
 #include "gui/dialpopup.h"
 #include "gui/dialogpositioner.h"
@@ -920,7 +921,7 @@ void VORLocalizerGUI::downloadingURL(const QString& url)
 
 void VORLocalizerGUI::downloadError(const QString& error)
 {
-    QMessageBox::critical(this, "VOR Localizer", error);
+    MessageDialog::critical(this, "VOR Localizer", error);
 
     if (m_progressDialog)
     {
@@ -1134,7 +1135,6 @@ VORLocalizerGUI::VORLocalizerGUI(PluginAPI* pluginAPI, FeatureUISet *featureUISe
     m_tickCount(0),
     m_progressDialog(nullptr),
     m_vorModel(this),
-    m_lastFeatureState(0),
     m_rrSecondsCount(0)
 {
     m_feature = feature;
@@ -1197,8 +1197,8 @@ VORLocalizerGUI::VORLocalizerGUI(PluginAPI* pluginAPI, FeatureUISet *featureUISe
     connect(ui->vorData->horizontalHeader(), SIGNAL(sectionMoved(int, int, int)), SLOT(vorData_sectionMoved(int, int, int)));
     connect(ui->vorData->horizontalHeader(), SIGNAL(sectionResized(int, int, int)), SLOT(vorData_sectionResized(int, int, int)));
 
-	connect(&m_statusTimer, SIGNAL(timeout()), this, SLOT(updateStatus()));
-	m_statusTimer.start(1000);
+	connect(m_vorLocalizer, &Feature::stateChanged, this, &VORLocalizerGUI::updateFeatureState);
+	updateFeatureState();
 
     ui->rrTurnTimeProgress->setMaximum(m_settings.m_rrTime);
     ui->rrTurnTimeProgress->setValue(0);
@@ -1294,33 +1294,9 @@ void VORLocalizerGUI::displaySettings()
     blockApplySettings(false);
 }
 
-void VORLocalizerGUI::updateStatus()
+void VORLocalizerGUI::updateFeatureState()
 {
-    int state = m_vorLocalizer->getState();
-
-    if (m_lastFeatureState != state)
-    {
-        switch (state)
-        {
-            case Feature::StNotStarted:
-                ui->startStop->setStyleSheet("QToolButton { background:rgb(79,79,79); }");
-                break;
-            case Feature::StIdle:
-                ui->startStop->setStyleSheet("QToolButton { background-color : blue; }");
-                break;
-            case Feature::StRunning:
-                ui->startStop->setStyleSheet("QToolButton { background-color : green; }");
-                break;
-            case Feature::StError:
-                ui->startStop->setStyleSheet("QToolButton { background-color : red; }");
-                QMessageBox::information(this, tr("Message"), m_vorLocalizer->getErrorMessage());
-                break;
-            default:
-                break;
-        }
-
-        m_lastFeatureState = state;
-    }
+    updateStartStopButton(ui->startStop);
 }
 
 void VORLocalizerGUI::tick()
@@ -1411,6 +1387,8 @@ void VORLocalizerGUI::redrawMap()
 
 void VORLocalizerGUI::showEvent(QShowEvent *event)
 {
+    FeatureGUI::showEvent(event);
+
     if (!event->spontaneous())
     {
         // Workaround for https://bugreports.qt.io/browse/QTBUG-100333

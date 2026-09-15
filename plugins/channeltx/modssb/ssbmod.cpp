@@ -342,7 +342,11 @@ void SSBMod::applySettings(const QStringList& settingKeys, const SSBModSettings&
         sendChannelSettings(pipes, settingKeys, settings, force);
     }
 
-    m_settings = settings;
+    if (force) {
+        m_settings = settings;
+    } else {
+        m_settings.applySettings(settingKeys, settings);
+    }
     m_settings.m_bandwidth = band;
     m_settings.m_lowCutoff = lowCutoff;
     m_settings.m_usb = usb;
@@ -751,7 +755,11 @@ void SSBMod::webapiFormatChannelSettings(
     swgChannelSettings->setDirection(1); // single source (Tx)
     swgChannelSettings->setOriginatorChannelIndex(getIndexInDeviceSet());
     swgChannelSettings->setOriginatorDeviceSetIndex(getDeviceSetIndex());
-    swgChannelSettings->setChannelType(new QString(m_channelId));
+    if (swgChannelSettings->getChannelType()) {
+        *swgChannelSettings->getChannelType() = m_channelId;
+    } else {
+        swgChannelSettings->setChannelType(new QString(m_channelId));
+    }
     swgChannelSettings->setSsbModSettings(new SWGSDRangel::SWGSSBModSettings());
     SWGSDRangel::SWGSSBModSettings *swgSSBModSettings = swgChannelSettings->getSsbModSettings();
 
@@ -806,13 +814,21 @@ void SSBMod::webapiFormatChannelSettings(
         swgSSBModSettings->setRgbColor(settings.m_rgbColor);
     }
     if (channelSettingsKeys.contains("title") || force) {
-        swgSSBModSettings->setTitle(new QString(settings.m_title));
+        if (swgSSBModSettings->getTitle()) {
+            *swgSSBModSettings->getTitle() = settings.m_title;
+        } else {
+            swgSSBModSettings->setTitle(new QString(settings.m_title));
+        }
     }
     if (channelSettingsKeys.contains("modAFInput") || force) {
         swgSSBModSettings->setModAfInput((int) settings.m_modAFInput);
     }
     if (channelSettingsKeys.contains("audioDeviceName") || force) {
-        swgSSBModSettings->setAudioDeviceName(new QString(settings.m_audioDeviceName));
+        if (swgSSBModSettings->getAudioDeviceName()) {
+            *swgSSBModSettings->getAudioDeviceName() = settings.m_audioDeviceName;
+        } else {
+            swgSSBModSettings->setAudioDeviceName(new QString(settings.m_audioDeviceName));
+        }
     }
     if (channelSettingsKeys.contains("streamIndex") || force) {
         swgSSBModSettings->setStreamIndex(settings.m_streamIndex);

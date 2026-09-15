@@ -37,6 +37,7 @@
 #include "ui_aptdemodgui.h"
 #include "plugin/pluginapi.h"
 #include "util/db.h"
+#include "gui/messagedialog.h"
 #include "gui/basicchannelsettingsdialog.h"
 #include "gui/dialpopup.h"
 #include "gui/dialogpositioner.h"
@@ -526,12 +527,12 @@ void APTDemodGUI::on_saveImage_clicked()
             {
                 qDebug() << "APT: Saving image to " << fileNames;
                 if (!m_image.save(fileNames[0])) {
-                    QMessageBox::critical(this, "APT Demodulator", QString("Failed to save image to %1").arg(fileNames[0]));
+                    MessageDialog::critical(this, "APT Demodulator", QString("Failed to save image to %1").arg(fileNames[0]));
                 }
             }
             else
             {
-                QMessageBox::critical(this, "APT Demodulator", QString("Please specify a filename with an extension such as .png or .jpg"));
+                MessageDialog::critical(this, "APT Demodulator", QString("Please specify a filename with an extension such as .png or .jpg"));
             }
         }
     }

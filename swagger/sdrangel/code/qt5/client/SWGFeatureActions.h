@@ -28,6 +28,7 @@
 #include "SWGDenoiserActions.h"
 #include "SWGGS232ControllerActions.h"
 #include "SWGLimeRFEActions.h"
+#include "SWGMCPServerActions.h"
 #include "SWGMapActions.h"
 #include "SWGMorseDecoderActions.h"
 #include "SWGPERTesterActions.h"
@@ -90,6 +91,9 @@ public:
     SWGRigCtlServerActions* getRigCtlServerActions();
     void setRigCtlServerActions(SWGRigCtlServerActions* rig_ctl_server_actions);
 
+    SWGMCPServerActions* getMcpServerActions();
+    void setMcpServerActions(SWGMCPServerActions* mcp_server_actions);
+
     SWGSatelliteTrackerActions* getSatelliteTrackerActions();
     void setSatelliteTrackerActions(SWGSatelliteTrackerActions* satellite_tracker_actions);
 
@@ -147,6 +151,9 @@ private:
 
     SWGRigCtlServerActions* rig_ctl_server_actions;
     bool m_rig_ctl_server_actions_isSet;
+
+    SWGMCPServerActions* mcp_server_actions;
+    bool m_mcp_server_actions_isSet;
 
     SWGSatelliteTrackerActions* satellite_tracker_actions;
     bool m_satellite_tracker_actions_isSet;

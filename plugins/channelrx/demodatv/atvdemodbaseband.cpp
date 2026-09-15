@@ -159,7 +159,11 @@ void ATVDemodBaseband::applySettings(const QStringList& settingsKeys, const ATVD
     }
 
     m_sink.applySettings(settingsKeys, settings, force);
-    m_settings = settings;
+    if (force) {
+        m_settings = settings;
+    } else {
+        m_settings.applySettings(settingsKeys, settings);
+    }
 }
 
 int ATVDemodBaseband::getChannelSampleRate() const

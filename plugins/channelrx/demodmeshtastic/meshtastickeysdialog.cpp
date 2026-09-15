@@ -20,6 +20,8 @@
 #include "ui_meshtastickeysdialog.h"
 #include "meshtasticpacket.h"
 
+#include "gui/messagedialog.h"
+
 MeshtasticKeysDialog::MeshtasticKeysDialog(QWidget *parent) :
     QDialog(parent),
     ui(new Ui::MeshtasticKeysDialog)
@@ -53,7 +55,7 @@ void MeshtasticKeysDialog::accept()
 {
     if (!validateCurrentInput())
     {
-        QMessageBox::warning(this, tr("Invalid Keys"), tr("Fix the Meshtastic key list before saving."));
+        MessageDialog::warning(this, tr("Invalid Keys"), tr("Fix the Meshtastic key list before saving."));
         return;
     }
 

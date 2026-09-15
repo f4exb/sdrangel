@@ -2,16 +2,31 @@ InterferometerSettings:
   description: Interferometer
   properties:
     correlationType:
-      description: see InterferometerSettings::CorrelationType
+      description: >
+        Operation applied to the two input streams
+          * 0 - stream 0 only
+          * 1 - stream 1 only
+          * 2 - add the streams
+          * 3 - multiply the streams
+          * 4 - inverse FFT of the cross spectrum
+          * 5 - inverse FFT of the conjugate cross spectrum
+          * 6 - FFT of the cross spectrum
+          * 7 - second form of the inverse FFT correlation
       type: integer
+      minimum: 0
+      maximum: 7
     rgbColor:
       type: integer
+      description: "Display color encoded as an RGB integer."
     title:
       type: string
+      description: "User-visible title."
     log2Decim:
       type: integer
+      description: "Base-2 exponent of the software decimation factor; the output sample rate is divided by 2^log2Decim."
     filterChainHash:
       type: integer
+      description: "Identifier of the selected half-band filter chain."
     phase:
       description: Channel B phase shift in degrees (-180 to 180)
       type: integer
@@ -23,6 +38,8 @@ InterferometerSettings:
       type: integer
     play:
       type: integer
+      minimum: 0
+      maximum: 1
       description: >
         Run correlated IQ samples transfer
           * 0 - stop
@@ -30,19 +47,31 @@ InterferometerSettings:
     useReverseAPI:
       description: Synchronize with reverse API (1 for yes, 0 for no)
       type: integer
+      minimum: 0
+      maximum: 1
     reverseAPIAddress:
       type: string
+      description: "IPv4 address or host name of the reverse API peer."
     reverseAPIPort:
       type: integer
+      description: "TCP port of the reverse API peer."
+      minimum: 1
+      maximum: 65535
     reverseAPIDeviceIndex:
       type: integer
+      description: "Device-set index used by the reverse API peer."
     reverseAPIChannelIndex:
       type: integer
+      description: "Channel index used by the reverse API peer."
     spectrumConfig:
       $ref: "http://swgserver:8081/api/swagger/include/GLSpectrum.yaml#/GLSpectrum"
+      description: "Spectrum-display configuration."
     scopeConfig:
       $ref: "http://swgserver:8081/api/swagger/include/GLScope.yaml#/GLScope"
+      description: "Oscilloscope-display configuration."
     channelMarker:
       $ref: "http://swgserver:8081/api/swagger/include/ChannelMarker.yaml#/ChannelMarker"
+      description: "Channel-marker display configuration."
     rollupState:
       $ref: "http://swgserver:8081/api/swagger/include/RollupState.yaml#/RollupState"
+      description: "Saved expanded or collapsed state of the GUI sections."

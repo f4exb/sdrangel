@@ -25,6 +25,7 @@
 #include <dsp/devicesamplesource.h>
 #include <stdio.h>
 #include <QDebug>
+#include <QThread>
 #include "dsp/dspcommands.h"
 #include "samplesinkfifo.h"
 
@@ -109,9 +110,31 @@ void DSPDeviceSourceEngine::addSink(BasebandSampleSink* sink)
     getInputMessageQueue()->push(cmd);
 }
 
+// Whether a removal can be run on the engine thread and waited for: not from that thread
+// itself, which would deadlock, and not once it has stopped, which would wait forever.
+// Neither should happen in practice: channels are deleted from the main thread, and a device
+// set's channels go before its engine does
+static bool canWaitOn(const QObject *engine)
+{
+    QThread *engineThread = engine->thread();
+    return engineThread && engineThread->isRunning() && (QThread::currentThread() != engineThread);
+}
+
 void DSPDeviceSourceEngine::removeSink(BasebandSampleSink* sink, bool deleting)
 {
 	qDebug() << "DSPDeviceSourceEngine::removeSink: " << sink->getSinkName().toStdString().c_str();
+
+	// When deleting, the sink needs to be removed before returning
+	if (deleting && canWaitOn(this))
+    {
+        QMetaObject::invokeMethod(this, [this, sink]() {
+			// Same code as for DSPRemoveBasebandSampleSink in handleMessage
+            m_basebandSampleSinks.remove(sink);
+            emit sinkRemoved();
+        }, Qt::BlockingQueuedConnection);
+        return;
+    }
+
 	auto *cmd = new DSPRemoveBasebandSampleSink(sink, deleting);
     getInputMessageQueue()->push(cmd);
 }

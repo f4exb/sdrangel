@@ -23,6 +23,8 @@
 #include <QUrl>
 #include <QMessageBox>
 
+#include "gui/messagedialog.h"
+
 RemoteControlDeviceDialog::RemoteControlDeviceDialog(RemoteControlSettings *settings, RemoteControlDevice *rcDevice, QWidget* parent) :
     QDialog(parent),
     ui(new Ui::RemoteControlDeviceDialog),
@@ -218,7 +220,7 @@ void RemoteControlDeviceDialog::on_protocol_currentTextChanged(const QString &pr
         }
         else
         {
-            QMessageBox::critical(this, "Remote Control Error", QString("Failed to discover %1 devices").arg(protocol));
+            MessageDialog::critical(this, "Remote Control Error", QString("Failed to discover %1 devices").arg(protocol));
         }
     }
     enableWidgets();
@@ -388,7 +390,7 @@ void RemoteControlDeviceDialog::deviceList(const QList<DeviceDiscoverer::DeviceI
 
 void RemoteControlDeviceDialog::deviceError(const QString &error)
 {
-    QMessageBox::critical(this, "Remote Control Error", error);
+    MessageDialog::critical(this, "Remote Control Error", error);
 }
 
 void RemoteControlDeviceDialog::on_controlAdd_clicked()

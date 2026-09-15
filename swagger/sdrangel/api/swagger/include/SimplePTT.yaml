@@ -3,8 +3,10 @@ SimplePTTSettings:
   properties:
     title:
       type: string
+      description: "User-visible title."
     rgbColor:
       type: integer
+      description: "Display color encoded as an RGB integer."
     rxDeviceSetIndex:
       description: index of the Rx device set to connect the Rx side to
       type: integer
@@ -19,12 +21,16 @@ SimplePTTSettings:
       type: integer
     vox:
       type: integer
+      minimum: 0
+      maximum: 1
       description: >
         Activate vox system
           * 0 - not active
           * 1 - active
     voxEnable:
       type: integer
+      minimum: 0
+      maximum: 1
       description: >
         Allow vox to control PTT
           * 0 - vox does not control PTT
@@ -37,8 +43,11 @@ SimplePTTSettings:
       description: Vox hold timeout in milliseconds
     audioDeviceName:
       type: string
+      description: "Name of the audio device to use."
     gpioControl:
       type: integer
+      minimum: 0
+      maximum: 2
       description: >
         GPIO control
           * 0 - No GPIO control
@@ -46,6 +55,8 @@ SimplePTTSettings:
           * 2 - Tx side controls GPIO
     rx2txGPIOEnable:
       type: integer
+      minimum: 0
+      maximum: 1
       description: >
         Enable Rx to Tx GPIO control
           * 0 - disable
@@ -60,6 +71,8 @@ SimplePTTSettings:
       description: Rx to Tx change GPIO values
     rx2txCommandEnable:
       type: integer
+      minimum: 0
+      maximum: 1
       description: >
         Enable Rx to Tx command
           * 0 - disable
@@ -69,6 +82,8 @@ SimplePTTSettings:
       description: Command to be executed when Rx switches to Tx
     tx2rxGPIOEnable:
       type: integer
+      minimum: 0
+      maximum: 1
       description: >
         Enable Tx to Rx GPIO control
           * 0 - disable
@@ -83,6 +98,8 @@ SimplePTTSettings:
       description: Tx to Rx change GPIO values
     tx2rxCommandEnable:
       type: integer
+      minimum: 0
+      maximum: 1
       description: >
         Enable Tx to Rx command
           * 0 - disable
@@ -93,22 +110,33 @@ SimplePTTSettings:
     useReverseAPI:
       description: Synchronize with reverse API (1 for yes, 0 for no)
       type: integer
+      minimum: 0
+      maximum: 1
     reverseAPIAddress:
       type: string
+      description: "IPv4 address or host name of the reverse API peer."
     reverseAPIPort:
       type: integer
+      description: "TCP port of the reverse API peer."
+      minimum: 1
+      maximum: 65535
     reverseAPIFeatureSetIndex:
       type: integer
+      description: "Feature-set index used by the reverse API peer."
     reverseAPIFeatureIndex:
       type: integer
+      description: "Feature index used by the reverse API peer."
     rollupState:
       $ref: "http://swgserver:8081/api/swagger/include/RollupState.yaml#/RollupState"
+      description: "Saved expanded or collapsed state of the GUI sections."
 
 SimplePTTReport:
   description: "Simple PTT report"
   properties:
     runningState:
       type: integer
+      minimum: 0
+      maximum: 3
       description: >
         Running state
           * 0 - not started
@@ -117,6 +145,8 @@ SimplePTTReport:
           * 3 - error
     ptt:
       type: integer
+      minimum: 0
+      maximum: 1
       description: >
         PTT status
           * 0 - released
@@ -127,12 +157,16 @@ SimplePTTActions:
   properties:
     run:
       type: integer
+      minimum: 0
+      maximum: 1
       description: >
         Set the plugin running state
           * 0 - idle
           * 1 - run
     ptt:
       type: integer
+      minimum: 0
+      maximum: 1
       description: >
         PTT action
           * 0 - release

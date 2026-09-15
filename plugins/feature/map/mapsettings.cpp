@@ -597,6 +597,9 @@ void MapSettings::applySettings(const QStringList& settingsKeys, const MapSettin
     if (settingsKeys.contains("displayNames")) {
         m_displayNames = settings.m_displayNames;
     }
+    if (settingsKeys.contains("rgbColor")) {
+        m_rgbColor = settings.m_rgbColor;
+    }
     if (settingsKeys.contains("mapProvider")) {
         m_mapProvider = settings.m_mapProvider;
     }
@@ -611,6 +614,9 @@ void MapSettings::applySettings(const QStringList& settingsKeys, const MapSettin
     }
     if (settingsKeys.contains("mapBoxStyles")) {
         m_mapBoxStyles = settings.m_mapBoxStyles;
+    }
+    if (settingsKeys.contains("mapType")) {
+        m_mapType = settings.m_mapType;
     }
     if (settingsKeys.contains("displaySelectedGroundTracks")) {
         m_displaySelectedGroundTracks = settings.m_displaySelectedGroundTracks;

@@ -54,7 +54,7 @@ StarTracker::StarTracker(WebAPIAdapterInterface *webAPIAdapterInterface) :
 {
     qDebug("StarTracker::StarTracker: webAPIAdapterInterface: %p", webAPIAdapterInterface);
     setObjectName(m_featureId);
-    m_state = StIdle;
+    setState(StIdle);
     m_errorMessage = "StarTracker error";
     m_networkManager = new QNetworkAccessManager();
     QObject::connect(
@@ -117,7 +117,7 @@ void StarTracker::start()
     m_worker->setMessageQueueToGUI(getMessageQueueToGUI());
     m_thread->start();
     m_thread->start();
-    m_state = StRunning;
+    setState(StRunning);
 
     m_worker->getInputMessageQueue()->push(StarTrackerWorker::MsgConfigureStarTrackerWorker::create(m_settings, QList<QString>(), true));
     m_worker->getInputMessageQueue()->push(MsgSetSolarFlux::create(m_solarFlux));
@@ -126,7 +126,7 @@ void StarTracker::start()
 void StarTracker::stop()
 {
     qDebug("StarTracker::stop");
-    m_state = StIdle;
+    setState(StIdle);
     if (m_thread)
     {
         m_thread->quit();
@@ -267,7 +267,11 @@ void StarTracker::applySettings(const StarTrackerSettings& settings, const QList
         webapiReverseSendSettings(settingsKeys, settings, fullUpdate || force);
     }
 
-    m_settings = settings;
+    if (force) {
+        m_settings = settings;
+    } else {
+        m_settings.applySettings(settingsKeys, settings);
+    }
 }
 
 int StarTracker::webapiRun(bool run,
@@ -365,13 +369,36 @@ void StarTracker::webapiFormatFeatureSettings(
     SWGSDRangel::SWGFeatureSettings& response,
     const StarTrackerSettings& settings)
 {
-    response.getStarTrackerSettings()->setTarget(new QString(settings.m_target));
-    response.getStarTrackerSettings()->setRa(new QString(settings.m_ra));
-    response.getStarTrackerSettings()->setDec(new QString(settings.m_dec));
+    if (response.getStarTrackerSettings()->getTarget()) {
+        *response.getStarTrackerSettings()->getTarget() = settings.m_target;
+    } else {
+        response.getStarTrackerSettings()->setTarget(new QString(settings.m_target));
+    }
+    if (response.getStarTrackerSettings()->getRa()) {
+        *response.getStarTrackerSettings()->getRa() = settings.m_ra;
+    } else {
+        response.getStarTrackerSettings()->setRa(new QString(settings.m_ra));
+    }
+    if (response.getStarTrackerSettings()->getDec()) {
+        *response.getStarTrackerSettings()->getDec() = settings.m_dec;
+    } else {
+        response.getStarTrackerSettings()->setDec(new QString(settings.m_dec));
+    }
     response.getStarTrackerSettings()->setLatitude(settings.m_latitude);
     response.getStarTrackerSettings()->setLongitude(settings.m_longitude);
-    response.getStarTrackerSettings()->setDateTime(new QString(settings.m_dateTime));
-    response.getStarTrackerSettings()->setRefraction(new QString(settings.m_refraction));
+    if (response.getStarTrackerSettings()->getDateTime()) {
+        *response.getStarTrackerSettings()->getDateTime() = settings.m_dateTime;
+    } else {
+        response.getStarTrackerSettings()->setDateTime(new QString(settings.m_dateTime));
+    }
+    if (response.getStarTrackerSettings()->getRefraction()) {
+        *response.getStarTrackerSettings()->getRefraction() = settings.m_refraction;
+    } else {
+        response.getStarTrackerSettings()->setRefraction(new QString(settings.m_refraction));
+    }
+    response.getStarTrackerSettings()->setDrawSunOnMap(settings.m_drawSunOnMap ? 1 : 0);
+    response.getStarTrackerSettings()->setDrawMoonOnMap(settings.m_drawMoonOnMap ? 1 : 0);
+    response.getStarTrackerSettings()->setDrawStarOnMap(settings.m_drawStarOnMap ? 1 : 0);
     response.getStarTrackerSettings()->setPressure(settings.m_pressure);
     response.getStarTrackerSettings()->setTemperature(settings.m_temperature);
     response.getStarTrackerSettings()->setHumidity(settings.m_humidity);
@@ -515,6 +542,18 @@ void StarTracker::webapiUpdateFeatureSettings(
     }
     if (featureSettingsKeys.contains("elevationOffset")) {
         settings.m_elevationOffset = response.getStarTrackerSettings()->getElevationOffset();
+    }
+    if (featureSettingsKeys.contains("drawSunOnMap")) {
+        settings.m_drawSunOnMap = response.getStarTrackerSettings()->getDrawSunOnMap() != 0;
+    }
+    if (featureSettingsKeys.contains("drawMoonOnMap")) {
+        settings.m_drawMoonOnMap = response.getStarTrackerSettings()->getDrawMoonOnMap() != 0;
+    }
+    if (featureSettingsKeys.contains("drawStarOnMap")) {
+        settings.m_drawStarOnMap = response.getStarTrackerSettings()->getDrawStarOnMap() != 0;
+    }
+    if (featureSettingsKeys.contains("refraction")) {
+        settings.m_refraction = *response.getStarTrackerSettings()->getRefraction();
     }
     if (settings.m_rollupState && featureSettingsKeys.contains("rollupState")) {
         settings.m_rollupState->updateFrom(featureSettingsKeys, response.getStarTrackerSettings()->getRollupState());

@@ -493,12 +493,28 @@ void NavtexDemod::webapiFormatChannelSettings(SWGSDRangel::SWGChannelSettings& r
     response.getNavtexDemodSettings()->setInputFrequencyOffset(settings.m_inputFrequencyOffset);
     response.getNavtexDemodSettings()->setRfBandwidth(settings.m_rfBandwidth);
     response.getNavtexDemodSettings()->setNavArea(settings.m_navArea);
-    response.getNavtexDemodSettings()->setFilterStation(new QString(settings.m_filterStation));
-    response.getNavtexDemodSettings()->setFilterType(new QString(settings.m_filterType));
+    if (response.getNavtexDemodSettings()->getFilterStation()) {
+        *response.getNavtexDemodSettings()->getFilterStation() = settings.m_filterStation;
+    } else {
+        response.getNavtexDemodSettings()->setFilterStation(new QString(settings.m_filterStation));
+    }
+    if (response.getNavtexDemodSettings()->getFilterType()) {
+        *response.getNavtexDemodSettings()->getFilterType() = settings.m_filterType;
+    } else {
+        response.getNavtexDemodSettings()->setFilterType(new QString(settings.m_filterType));
+    }
     response.getNavtexDemodSettings()->setUdpEnabled(settings.m_udpEnabled);
-    response.getNavtexDemodSettings()->setUdpAddress(new QString(settings.m_udpAddress));
+    if (response.getNavtexDemodSettings()->getUdpAddress()) {
+        *response.getNavtexDemodSettings()->getUdpAddress() = settings.m_udpAddress;
+    } else {
+        response.getNavtexDemodSettings()->setUdpAddress(new QString(settings.m_udpAddress));
+    }
     response.getNavtexDemodSettings()->setUdpPort(settings.m_udpPort);
-    response.getNavtexDemodSettings()->setLogFilename(new QString(settings.m_logFilename));
+    if (response.getNavtexDemodSettings()->getLogFilename()) {
+        *response.getNavtexDemodSettings()->getLogFilename() = settings.m_logFilename;
+    } else {
+        response.getNavtexDemodSettings()->setLogFilename(new QString(settings.m_logFilename));
+    }
     response.getNavtexDemodSettings()->setLogEnabled(settings.m_logEnabled);
 
     response.getNavtexDemodSettings()->setRgbColor(settings.m_rgbColor);
@@ -608,7 +624,11 @@ void NavtexDemod::webapiFormatChannelSettings(
     swgChannelSettings->setDirection(0); // Single sink (Rx)
     swgChannelSettings->setOriginatorChannelIndex(getIndexInDeviceSet());
     swgChannelSettings->setOriginatorDeviceSetIndex(getDeviceSetIndex());
-    swgChannelSettings->setChannelType(new QString("NavtexDemod"));
+    if (swgChannelSettings->getChannelType()) {
+        *swgChannelSettings->getChannelType() = "NavtexDemod";
+    } else {
+        swgChannelSettings->setChannelType(new QString("NavtexDemod"));
+    }
     swgChannelSettings->setNavtexDemodSettings(new SWGSDRangel::SWGNavtexDemodSettings());
     SWGSDRangel::SWGNavtexDemodSettings *swgNavtexDemodSettings = swgChannelSettings->getNavtexDemodSettings();
 
@@ -624,22 +644,38 @@ void NavtexDemod::webapiFormatChannelSettings(
         swgNavtexDemodSettings->setNavArea(settings.m_navArea);
     }
     if (channelSettingsKeys.contains("filterStation") || force) {
-        swgNavtexDemodSettings->setFilterStation(new QString(settings.m_filterStation));
+        if (swgNavtexDemodSettings->getFilterStation()) {
+            *swgNavtexDemodSettings->getFilterStation() = settings.m_filterStation;
+        } else {
+            swgNavtexDemodSettings->setFilterStation(new QString(settings.m_filterStation));
+        }
     }
     if (channelSettingsKeys.contains("filterType") || force) {
-        swgNavtexDemodSettings->setFilterType(new QString(settings.m_filterType));
+        if (swgNavtexDemodSettings->getFilterType()) {
+            *swgNavtexDemodSettings->getFilterType() = settings.m_filterType;
+        } else {
+            swgNavtexDemodSettings->setFilterType(new QString(settings.m_filterType));
+        }
     }
     if (channelSettingsKeys.contains("udpEnabled") || force) {
         swgNavtexDemodSettings->setUdpEnabled(settings.m_udpEnabled);
     }
     if (channelSettingsKeys.contains("udpAddress") || force) {
-        swgNavtexDemodSettings->setUdpAddress(new QString(settings.m_udpAddress));
+        if (swgNavtexDemodSettings->getUdpAddress()) {
+            *swgNavtexDemodSettings->getUdpAddress() = settings.m_udpAddress;
+        } else {
+            swgNavtexDemodSettings->setUdpAddress(new QString(settings.m_udpAddress));
+        }
     }
     if (channelSettingsKeys.contains("udpPort") || force) {
         swgNavtexDemodSettings->setUdpPort(settings.m_udpPort);
     }
     if (channelSettingsKeys.contains("logFilename") || force) {
-        swgNavtexDemodSettings->setLogFilename(new QString(settings.m_logFilename));
+        if (swgNavtexDemodSettings->getLogFilename()) {
+            *swgNavtexDemodSettings->getLogFilename() = settings.m_logFilename;
+        } else {
+            swgNavtexDemodSettings->setLogFilename(new QString(settings.m_logFilename));
+        }
     }
     if (channelSettingsKeys.contains("logEnabled") || force) {
         swgNavtexDemodSettings->setLogEnabled(settings.m_logEnabled);
@@ -648,7 +684,11 @@ void NavtexDemod::webapiFormatChannelSettings(
         swgNavtexDemodSettings->setRgbColor(settings.m_rgbColor);
     }
     if (channelSettingsKeys.contains("title") || force) {
-        swgNavtexDemodSettings->setTitle(new QString(settings.m_title));
+        if (swgNavtexDemodSettings->getTitle()) {
+            *swgNavtexDemodSettings->getTitle() = settings.m_title;
+        } else {
+            swgNavtexDemodSettings->setTitle(new QString(settings.m_title));
+        }
     }
     if (channelSettingsKeys.contains("streamIndex") || force) {
         swgNavtexDemodSettings->setStreamIndex(settings.m_streamIndex);

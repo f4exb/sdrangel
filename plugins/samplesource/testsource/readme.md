@@ -83,10 +83,10 @@ This controls the generator sample rate in samples per second.
     - Sync pattern: 010 at full amplitude
     - Binary pattern LSB first on 3 bits from 0 to 7 at 0.3 amplitude
   - **P1**: Pattern 1 is a sawtooth pattern
-    - Pulse width: 1000 samples
+    - Pulse width: Set by period setting
     - Starts at full amplitude then amplitude decreases linearly down to zero
-  - **P2**: Pattern 2 is a 50% duty cycle square pattern
-    - Pulse width: 1000 samples
+  - **P2**: Pattern 2 is a square pattern
+    - Pulse width: Set by period and duty cycle settings
     - Starts with a full amplitude pulse then down to zero for the duration of one pulse
 
 <h3>5: Modulating tone frequency</h3>
@@ -104,6 +104,14 @@ This controls the AM modulation factor from 0 to 99%
 <h3>8: FM deviation</h3>
 
 This controls the frequency modulation deviation in kHz in 100 Hz steps. It cannot exceed the sample rate.
+
+<h3>Period</h3>
+
+Specifies the period of the P1 and P2 patterns in samples. The minimum is one sample.
+
+<h3>Duty Cycle</h3>
+
+Specifies the duty cycle for the P2 pattern. This is the percent of time period the signal is high.
 
 <h3>9: Amplitude coarse control</h3>
 

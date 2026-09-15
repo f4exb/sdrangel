@@ -285,18 +285,17 @@ void FileSinkSink::applySettings(const QStringList& settingsKeys, const FileSink
         << "force: " << force;
 
     QString fileRecordName = settings.m_fileRecordName;
+    QFileInfo fileInfo(settings.m_fileRecordName);
+    QString extension = fileInfo.suffix();
+    if (extension.isEmpty()) {
+        fileRecordName.append(".sdriq");
+    } else if ((extension != "sdriq") && (extension != "wav")) {
+        fileRecordName.chop(extension.size());
+        fileRecordName.append("sdriq");
+    }
 
-    if ((settingsKeys.contains("fileRecordName") && (settings.m_fileRecordName != m_settings.m_fileRecordName)) || force)
+    if ((settingsKeys.contains("fileRecordName") || force) && (fileRecordName != m_settings.m_fileRecordName))
     {
-        QFileInfo fileInfo(settings.m_fileRecordName);
-        QString extension = fileInfo.suffix();
-        if (extension.isEmpty()) {
-            fileRecordName.append(".sdriq");
-        } else if ((extension != "sdriq") && (extension != "wav")) {
-            fileRecordName.chop(extension.size());
-            fileRecordName.append("sdriq");
-        }
-
         QString fileBase;
         FileRecordInterface::RecordType recordType = FileRecordInterface::guessTypeFromFileName(fileRecordName, fileBase);
 
@@ -336,7 +335,9 @@ void FileSinkSink::applySettings(const QStringList& settingsKeys, const FileSink
         m_settings.applySettings(settingsKeys, settings);
     }
 
-    m_settings.m_fileRecordName = fileRecordName;
+    if (settingsKeys.contains("fileRecordName") || force) {
+        m_settings.m_fileRecordName = fileRecordName;
+    }
 }
 
 void FileSinkSink::squelchRecording(bool squelchOpen)

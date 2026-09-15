@@ -509,11 +509,23 @@ void DSCDemod::webapiFormatChannelSettings(SWGSDRangel::SWGChannelSettings& resp
     response.getDscDemodSettings()->setRfBandwidth(settings.m_rfBandwidth);
     response.getDscDemodSettings()->setFilterInvalid(settings.m_filterInvalid);
     response.getDscDemodSettings()->setFilterColumn(settings.m_filterColumn);
-    response.getDscDemodSettings()->setFilter(new QString(settings.m_filter));
+    if (response.getDscDemodSettings()->getFilter()) {
+        *response.getDscDemodSettings()->getFilter() = settings.m_filter;
+    } else {
+        response.getDscDemodSettings()->setFilter(new QString(settings.m_filter));
+    }
     response.getDscDemodSettings()->setUdpEnabled(settings.m_udpEnabled);
-    response.getDscDemodSettings()->setUdpAddress(new QString(settings.m_udpAddress));
+    if (response.getDscDemodSettings()->getUdpAddress()) {
+        *response.getDscDemodSettings()->getUdpAddress() = settings.m_udpAddress;
+    } else {
+        response.getDscDemodSettings()->setUdpAddress(new QString(settings.m_udpAddress));
+    }
     response.getDscDemodSettings()->setUdpPort(settings.m_udpPort);
-    response.getDscDemodSettings()->setLogFilename(new QString(settings.m_logFilename));
+    if (response.getDscDemodSettings()->getLogFilename()) {
+        *response.getDscDemodSettings()->getLogFilename() = settings.m_logFilename;
+    } else {
+        response.getDscDemodSettings()->setLogFilename(new QString(settings.m_logFilename));
+    }
     response.getDscDemodSettings()->setLogEnabled(settings.m_logEnabled);
     response.getDscDemodSettings()->setUseFileTime(settings.m_useFileTime);
 
@@ -624,7 +636,11 @@ void DSCDemod::webapiFormatChannelSettings(
     swgChannelSettings->setDirection(0); // Single sink (Rx)
     swgChannelSettings->setOriginatorChannelIndex(getIndexInDeviceSet());
     swgChannelSettings->setOriginatorDeviceSetIndex(getDeviceSetIndex());
-    swgChannelSettings->setChannelType(new QString("DSCDemod"));
+    if (swgChannelSettings->getChannelType()) {
+        *swgChannelSettings->getChannelType() = "DSCDemod";
+    } else {
+        swgChannelSettings->setChannelType(new QString("DSCDemod"));
+    }
     swgChannelSettings->setDscDemodSettings(new SWGSDRangel::SWGDSCDemodSettings());
     SWGSDRangel::SWGDSCDemodSettings *swgDSCDemodSettings = swgChannelSettings->getDscDemodSettings();
 
@@ -643,19 +659,31 @@ void DSCDemod::webapiFormatChannelSettings(
         swgDSCDemodSettings->setFilterColumn(settings.m_filterColumn);
     }
     if (channelSettingsKeys.contains("filter") || force) {
-        swgDSCDemodSettings->setFilter(new QString(settings.m_filter));
+        if (swgDSCDemodSettings->getFilter()) {
+            *swgDSCDemodSettings->getFilter() = settings.m_filter;
+        } else {
+            swgDSCDemodSettings->setFilter(new QString(settings.m_filter));
+        }
     }
     if (channelSettingsKeys.contains("udpEnabled") || force) {
         swgDSCDemodSettings->setUdpEnabled(settings.m_udpEnabled);
     }
     if (channelSettingsKeys.contains("udpAddress") || force) {
-        swgDSCDemodSettings->setUdpAddress(new QString(settings.m_udpAddress));
+        if (swgDSCDemodSettings->getUdpAddress()) {
+            *swgDSCDemodSettings->getUdpAddress() = settings.m_udpAddress;
+        } else {
+            swgDSCDemodSettings->setUdpAddress(new QString(settings.m_udpAddress));
+        }
     }
     if (channelSettingsKeys.contains("udpPort") || force) {
         swgDSCDemodSettings->setUdpPort(settings.m_udpPort);
     }
     if (channelSettingsKeys.contains("logFilename") || force) {
-        swgDSCDemodSettings->setLogFilename(new QString(settings.m_logFilename));
+        if (swgDSCDemodSettings->getLogFilename()) {
+            *swgDSCDemodSettings->getLogFilename() = settings.m_logFilename;
+        } else {
+            swgDSCDemodSettings->setLogFilename(new QString(settings.m_logFilename));
+        }
     }
     if (channelSettingsKeys.contains("logEnabled") || force) {
         swgDSCDemodSettings->setLogEnabled(settings.m_logEnabled);
@@ -667,7 +695,11 @@ void DSCDemod::webapiFormatChannelSettings(
         swgDSCDemodSettings->setRgbColor(settings.m_rgbColor);
     }
     if (channelSettingsKeys.contains("title") || force) {
-        swgDSCDemodSettings->setTitle(new QString(settings.m_title));
+        if (swgDSCDemodSettings->getTitle()) {
+            *swgDSCDemodSettings->getTitle() = settings.m_title;
+        } else {
+            swgDSCDemodSettings->setTitle(new QString(settings.m_title));
+        }
     }
     if (channelSettingsKeys.contains("streamIndex") || force) {
         swgDSCDemodSettings->setStreamIndex(settings.m_streamIndex);

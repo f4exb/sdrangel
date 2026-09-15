@@ -25,7 +25,9 @@
 #include "SWGAISModActions.h"
 #include "SWGAISModReport.h"
 #include "SWGAISModSettings.h"
+#include "SWGAISReport.h"
 #include "SWGAISSettings.h"
+#include "SWGAISVessel.h"
 #include "SWGAMBEActions.h"
 #include "SWGAMBEDevice.h"
 #include "SWGAMBEDeviceReport.h"
@@ -36,7 +38,9 @@
 #include "SWGAMDemodSettings.h"
 #include "SWGAMModReport.h"
 #include "SWGAMModSettings.h"
+#include "SWGAPRSReport.h"
 #include "SWGAPRSSettings.h"
+#include "SWGAPRSStation.h"
 #include "SWGAPTDemodActions.h"
 #include "SWGAPTDemodActions_aos.h"
 #include "SWGAPTDemodActions_los.h"
@@ -100,7 +104,9 @@
 #include "SWGConfigurationImportExport.h"
 #include "SWGConfigurationItem.h"
 #include "SWGConfigurations.h"
+#include "SWGDABDemodReport.h"
 #include "SWGDABDemodSettings.h"
+#include "SWGDABProgram.h"
 #include "SWGDATVDemodReport.h"
 #include "SWGDATVDemodSettings.h"
 #include "SWGDATVModReport.h"
@@ -173,6 +179,9 @@
 #include "SWGFrequencyRange.h"
 #include "SWGGLScope.h"
 #include "SWGGLSpectrum.h"
+#include "SWGGLSpectrumData.h"
+#include "SWGGLSpectrumHistory.h"
+#include "SWGGLSpectrumReport.h"
 #include "SWGGS232ControllerActions.h"
 #include "SWGGS232ControllerReport.h"
 #include "SWGGS232ControllerSettings.h"
@@ -220,6 +229,9 @@
 #include "SWGM17DemodSettings.h"
 #include "SWGM17ModReport.h"
 #include "SWGM17ModSettings.h"
+#include "SWGMCPServerActions.h"
+#include "SWGMCPServerReport.h"
+#include "SWGMCPServerSettings.h"
 #include "SWGMapActions.h"
 #include "SWGMapAircraftState.h"
 #include "SWGMapAnimation.h"
@@ -228,15 +240,15 @@
 #include "SWGMapItem_2.h"
 #include "SWGMapReport.h"
 #include "SWGMapSettings.h"
-#include "SWGMeshtasticDemodReport.h"
-#include "SWGMeshtasticDemodSettings.h"
-#include "SWGMeshtasticModReport.h"
-#include "SWGMeshtasticModSettings.h"
 #include "SWGMeshcoreDemodReport.h"
 #include "SWGMeshcoreDemodSettings.h"
 #include "SWGMeshcoreModActions.h"
 #include "SWGMeshcoreModReport.h"
 #include "SWGMeshcoreModSettings.h"
+#include "SWGMeshtasticDemodReport.h"
+#include "SWGMeshtasticDemodSettings.h"
+#include "SWGMeshtasticModReport.h"
+#include "SWGMeshtasticModSettings.h"
 #include "SWGMetisMISOSettings.h"
 #include "SWGMorseDecoderActions.h"
 #include "SWGMorseDecoderSettings.h"
@@ -295,8 +307,10 @@
 #include "SWGRadioAstronomySettings.h"
 #include "SWGRadioClockReport.h"
 #include "SWGRadioClockSettings.h"
+#include "SWGRadiosonde.h"
 #include "SWGRadiosondeDemodReport.h"
 #include "SWGRadiosondeDemodSettings.h"
+#include "SWGRadiosondeReport.h"
 #include "SWGRadiosondeSettings.h"
 #include "SWGRange.h"
 #include "SWGRangeFloat.h"
@@ -354,9 +368,13 @@
 #include "SWGSoapySDRInputSettings.h"
 #include "SWGSoapySDROutputSettings.h"
 #include "SWGSoapySDRReport.h"
+#include "SWGSpectrumActions.h"
 #include "SWGSpectrumAnnotationMarker.h"
 #include "SWGSpectrumCalibrationPoint.h"
 #include "SWGSpectrumHistogramMarker.h"
+#include "SWGSpectrumHistorySignal.h"
+#include "SWGSpectrumMemorySettings.h"
+#include "SWGSpectrumPeak.h"
 #include "SWGSpectrumServer.h"
 #include "SWGSpectrumServer_clients.h"
 #include "SWGSpectrumWaterfallMarker.h"
@@ -396,6 +414,9 @@
 #include "SWGWFMDemodSettings.h"
 #include "SWGWFMModReport.h"
 #include "SWGWFMModSettings.h"
+#include "SWGWindowInfo.h"
+#include "SWGWindowList.h"
+#include "SWGWorkspaceActions.h"
 #include "SWGWorkspaceInfo.h"
 #include "SWGXtrxInputReport.h"
 #include "SWGXtrxInputSettings.h"
@@ -462,8 +483,18 @@ namespace SWGSDRangel {
       obj->init();
       return obj;
     }
+    if(QString("SWGAISReport").compare(type) == 0) {
+      SWGAISReport *obj = new SWGAISReport();
+      obj->init();
+      return obj;
+    }
     if(QString("SWGAISSettings").compare(type) == 0) {
       SWGAISSettings *obj = new SWGAISSettings();
+      obj->init();
+      return obj;
+    }
+    if(QString("SWGAISVessel").compare(type) == 0) {
+      SWGAISVessel *obj = new SWGAISVessel();
       obj->init();
       return obj;
     }
@@ -517,8 +548,18 @@ namespace SWGSDRangel {
       obj->init();
       return obj;
     }
+    if(QString("SWGAPRSReport").compare(type) == 0) {
+      SWGAPRSReport *obj = new SWGAPRSReport();
+      obj->init();
+      return obj;
+    }
     if(QString("SWGAPRSSettings").compare(type) == 0) {
       SWGAPRSSettings *obj = new SWGAPRSSettings();
+      obj->init();
+      return obj;
+    }
+    if(QString("SWGAPRSStation").compare(type) == 0) {
+      SWGAPRSStation *obj = new SWGAPRSStation();
       obj->init();
       return obj;
     }
@@ -837,8 +878,18 @@ namespace SWGSDRangel {
       obj->init();
       return obj;
     }
+    if(QString("SWGDABDemodReport").compare(type) == 0) {
+      SWGDABDemodReport *obj = new SWGDABDemodReport();
+      obj->init();
+      return obj;
+    }
     if(QString("SWGDABDemodSettings").compare(type) == 0) {
       SWGDABDemodSettings *obj = new SWGDABDemodSettings();
+      obj->init();
+      return obj;
+    }
+    if(QString("SWGDABProgram").compare(type) == 0) {
+      SWGDABProgram *obj = new SWGDABProgram();
       obj->init();
       return obj;
     }
@@ -1202,6 +1253,21 @@ namespace SWGSDRangel {
       obj->init();
       return obj;
     }
+    if(QString("SWGGLSpectrumData").compare(type) == 0) {
+      SWGGLSpectrumData *obj = new SWGGLSpectrumData();
+      obj->init();
+      return obj;
+    }
+    if(QString("SWGGLSpectrumHistory").compare(type) == 0) {
+      SWGGLSpectrumHistory *obj = new SWGGLSpectrumHistory();
+      obj->init();
+      return obj;
+    }
+    if(QString("SWGGLSpectrumReport").compare(type) == 0) {
+      SWGGLSpectrumReport *obj = new SWGGLSpectrumReport();
+      obj->init();
+      return obj;
+    }
     if(QString("SWGGS232ControllerActions").compare(type) == 0) {
       SWGGS232ControllerActions *obj = new SWGGS232ControllerActions();
       obj->init();
@@ -1437,6 +1503,21 @@ namespace SWGSDRangel {
       obj->init();
       return obj;
     }
+    if(QString("SWGMCPServerActions").compare(type) == 0) {
+      SWGMCPServerActions *obj = new SWGMCPServerActions();
+      obj->init();
+      return obj;
+    }
+    if(QString("SWGMCPServerReport").compare(type) == 0) {
+      SWGMCPServerReport *obj = new SWGMCPServerReport();
+      obj->init();
+      return obj;
+    }
+    if(QString("SWGMCPServerSettings").compare(type) == 0) {
+      SWGMCPServerSettings *obj = new SWGMCPServerSettings();
+      obj->init();
+      return obj;
+    }
     if(QString("SWGMapActions").compare(type) == 0) {
       SWGMapActions *obj = new SWGMapActions();
       obj->init();
@@ -1477,6 +1558,31 @@ namespace SWGSDRangel {
       obj->init();
       return obj;
     }
+    if(QString("SWGMeshcoreDemodReport").compare(type) == 0) {
+      SWGMeshcoreDemodReport *obj = new SWGMeshcoreDemodReport();
+      obj->init();
+      return obj;
+    }
+    if(QString("SWGMeshcoreDemodSettings").compare(type) == 0) {
+      SWGMeshcoreDemodSettings *obj = new SWGMeshcoreDemodSettings();
+      obj->init();
+      return obj;
+    }
+    if(QString("SWGMeshcoreModActions").compare(type) == 0) {
+      SWGMeshcoreModActions *obj = new SWGMeshcoreModActions();
+      obj->init();
+      return obj;
+    }
+    if(QString("SWGMeshcoreModReport").compare(type) == 0) {
+      SWGMeshcoreModReport *obj = new SWGMeshcoreModReport();
+      obj->init();
+      return obj;
+    }
+    if(QString("SWGMeshcoreModSettings").compare(type) == 0) {
+      SWGMeshcoreModSettings *obj = new SWGMeshcoreModSettings();
+      obj->init();
+      return obj;
+    }
     if(QString("SWGMeshtasticDemodReport").compare(type) == 0) {
       SWGMeshtasticDemodReport *obj = new SWGMeshtasticDemodReport();
       obj->init();
@@ -1494,31 +1600,6 @@ namespace SWGSDRangel {
     }
     if(QString("SWGMeshtasticModSettings").compare(type) == 0) {
       SWGMeshtasticModSettings *obj = new SWGMeshtasticModSettings();
-      obj->init();
-      return obj;
-    }
-    if(QString("SWGMeshcoreDemodReport").compare(type) == 0) {
-      SWGMeshcoreDemodReport *obj = new SWGMeshcoreDemodReport();
-      obj->init();
-      return obj;
-    }
-    if(QString("SWGMeshcoreDemodSettings").compare(type) == 0) {
-      SWGMeshcoreDemodSettings *obj = new SWGMeshcoreDemodSettings();
-      obj->init();
-      return obj;
-    }
-    if(QString("SWGMeshcoreModReport").compare(type) == 0) {
-      SWGMeshcoreModReport *obj = new SWGMeshcoreModReport();
-      obj->init();
-      return obj;
-    }
-    if(QString("SWGMeshcoreModSettings").compare(type) == 0) {
-      SWGMeshcoreModSettings *obj = new SWGMeshcoreModSettings();
-      obj->init();
-      return obj;
-    }
-    if(QString("SWGMeshcoreModActions").compare(type) == 0) {
-      SWGMeshcoreModActions *obj = new SWGMeshcoreModActions();
       obj->init();
       return obj;
     }
@@ -1812,6 +1893,11 @@ namespace SWGSDRangel {
       obj->init();
       return obj;
     }
+    if(QString("SWGRadiosonde").compare(type) == 0) {
+      SWGRadiosonde *obj = new SWGRadiosonde();
+      obj->init();
+      return obj;
+    }
     if(QString("SWGRadiosondeDemodReport").compare(type) == 0) {
       SWGRadiosondeDemodReport *obj = new SWGRadiosondeDemodReport();
       obj->init();
@@ -1819,6 +1905,11 @@ namespace SWGSDRangel {
     }
     if(QString("SWGRadiosondeDemodSettings").compare(type) == 0) {
       SWGRadiosondeDemodSettings *obj = new SWGRadiosondeDemodSettings();
+      obj->init();
+      return obj;
+    }
+    if(QString("SWGRadiosondeReport").compare(type) == 0) {
+      SWGRadiosondeReport *obj = new SWGRadiosondeReport();
       obj->init();
       return obj;
     }
@@ -2107,6 +2198,11 @@ namespace SWGSDRangel {
       obj->init();
       return obj;
     }
+    if(QString("SWGSpectrumActions").compare(type) == 0) {
+      SWGSpectrumActions *obj = new SWGSpectrumActions();
+      obj->init();
+      return obj;
+    }
     if(QString("SWGSpectrumAnnotationMarker").compare(type) == 0) {
       SWGSpectrumAnnotationMarker *obj = new SWGSpectrumAnnotationMarker();
       obj->init();
@@ -2119,6 +2215,21 @@ namespace SWGSDRangel {
     }
     if(QString("SWGSpectrumHistogramMarker").compare(type) == 0) {
       SWGSpectrumHistogramMarker *obj = new SWGSpectrumHistogramMarker();
+      obj->init();
+      return obj;
+    }
+    if(QString("SWGSpectrumHistorySignal").compare(type) == 0) {
+      SWGSpectrumHistorySignal *obj = new SWGSpectrumHistorySignal();
+      obj->init();
+      return obj;
+    }
+    if(QString("SWGSpectrumMemorySettings").compare(type) == 0) {
+      SWGSpectrumMemorySettings *obj = new SWGSpectrumMemorySettings();
+      obj->init();
+      return obj;
+    }
+    if(QString("SWGSpectrumPeak").compare(type) == 0) {
+      SWGSpectrumPeak *obj = new SWGSpectrumPeak();
       obj->init();
       return obj;
     }
@@ -2314,6 +2425,21 @@ namespace SWGSDRangel {
     }
     if(QString("SWGWFMModSettings").compare(type) == 0) {
       SWGWFMModSettings *obj = new SWGWFMModSettings();
+      obj->init();
+      return obj;
+    }
+    if(QString("SWGWindowInfo").compare(type) == 0) {
+      SWGWindowInfo *obj = new SWGWindowInfo();
+      obj->init();
+      return obj;
+    }
+    if(QString("SWGWindowList").compare(type) == 0) {
+      SWGWindowList *obj = new SWGWindowList();
+      obj->init();
+      return obj;
+    }
+    if(QString("SWGWorkspaceActions").compare(type) == 0) {
+      SWGWorkspaceActions *obj = new SWGWorkspaceActions();
       obj->init();
       return obj;
     }

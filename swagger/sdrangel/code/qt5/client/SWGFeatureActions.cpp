@@ -50,6 +50,8 @@ SWGFeatureActions::SWGFeatureActions() {
     m_per_tester_actions_isSet = false;
     rig_ctl_server_actions = nullptr;
     m_rig_ctl_server_actions_isSet = false;
+    mcp_server_actions = nullptr;
+    m_mcp_server_actions_isSet = false;
     satellite_tracker_actions = nullptr;
     m_satellite_tracker_actions_isSet = false;
     simple_ptt_actions = nullptr;
@@ -94,6 +96,8 @@ SWGFeatureActions::init() {
     m_per_tester_actions_isSet = false;
     rig_ctl_server_actions = new SWGRigCtlServerActions();
     m_rig_ctl_server_actions_isSet = false;
+    mcp_server_actions = new SWGMCPServerActions();
+    m_mcp_server_actions_isSet = false;
     satellite_tracker_actions = new SWGSatelliteTrackerActions();
     m_satellite_tracker_actions_isSet = false;
     simple_ptt_actions = new SWGSimplePTTActions();
@@ -140,6 +144,9 @@ SWGFeatureActions::cleanup() {
     }
     if(rig_ctl_server_actions != nullptr) { 
         delete rig_ctl_server_actions;
+    }
+    if(mcp_server_actions != nullptr) { 
+        delete mcp_server_actions;
     }
     if(satellite_tracker_actions != nullptr) { 
         delete satellite_tracker_actions;
@@ -196,6 +203,8 @@ SWGFeatureActions::fromJsonObject(QJsonObject &pJson) {
     ::SWGSDRangel::setValue(&per_tester_actions, pJson["PERTesterActions"], "SWGPERTesterActions", "SWGPERTesterActions");
     
     ::SWGSDRangel::setValue(&rig_ctl_server_actions, pJson["RigCtlServerActions"], "SWGRigCtlServerActions", "SWGRigCtlServerActions");
+    
+    ::SWGSDRangel::setValue(&mcp_server_actions, pJson["MCPServerActions"], "SWGMCPServerActions", "SWGMCPServerActions");
     
     ::SWGSDRangel::setValue(&satellite_tracker_actions, pJson["SatelliteTrackerActions"], "SWGSatelliteTrackerActions", "SWGSatelliteTrackerActions");
     
@@ -259,6 +268,9 @@ SWGFeatureActions::asJsonObject() {
     }
     if((rig_ctl_server_actions != nullptr) && (rig_ctl_server_actions->isSet())){
         toJsonValue(QString("RigCtlServerActions"), rig_ctl_server_actions, obj, QString("SWGRigCtlServerActions"));
+    }
+    if((mcp_server_actions != nullptr) && (mcp_server_actions->isSet())){
+        toJsonValue(QString("MCPServerActions"), mcp_server_actions, obj, QString("SWGMCPServerActions"));
     }
     if((satellite_tracker_actions != nullptr) && (satellite_tracker_actions->isSet())){
         toJsonValue(QString("SatelliteTrackerActions"), satellite_tracker_actions, obj, QString("SWGSatelliteTrackerActions"));
@@ -395,6 +407,16 @@ SWGFeatureActions::setRigCtlServerActions(SWGRigCtlServerActions* rig_ctl_server
     this->m_rig_ctl_server_actions_isSet = true;
 }
 
+SWGMCPServerActions*
+SWGFeatureActions::getMcpServerActions() {
+    return mcp_server_actions;
+}
+void
+SWGFeatureActions::setMcpServerActions(SWGMCPServerActions* mcp_server_actions) {
+    this->mcp_server_actions = mcp_server_actions;
+    this->m_mcp_server_actions_isSet = true;
+}
+
 SWGSatelliteTrackerActions*
 SWGFeatureActions::getSatelliteTrackerActions() {
     return satellite_tracker_actions;
@@ -501,6 +523,9 @@ SWGFeatureActions::isSet(){
             isObjectUpdated = true; break;
         }
         if(rig_ctl_server_actions && rig_ctl_server_actions->isSet()){
+            isObjectUpdated = true; break;
+        }
+        if(mcp_server_actions && mcp_server_actions->isSet()){
             isObjectUpdated = true; break;
         }
         if(satellite_tracker_actions && satellite_tracker_actions->isSet()){

@@ -1277,9 +1277,17 @@ void PlutoSDRMIMO::webapiFormatDeviceReport(SWGSDRangel::SWGDeviceReport& respon
     response.getPlutoSdrMimoReport()->setAdcRate(getADCSampleRate());
     std::string rssiStr;
     getRxRSSI(rssiStr, 0);
-    response.getPlutoSdrMimoReport()->setRssiRx0(new QString(rssiStr.c_str()));
+    if (response.getPlutoSdrMimoReport()->getRssiRx0()) {
+        *response.getPlutoSdrMimoReport()->getRssiRx0() = rssiStr.c_str();
+    } else {
+        response.getPlutoSdrMimoReport()->setRssiRx0(new QString(rssiStr.c_str()));
+    }
     getRxRSSI(rssiStr, 1);
-    response.getPlutoSdrMimoReport()->setRssiRx1(new QString(rssiStr.c_str()));
+    if (response.getPlutoSdrMimoReport()->getRssiRx1()) {
+        *response.getPlutoSdrMimoReport()->getRssiRx1() = rssiStr.c_str();
+    } else {
+        response.getPlutoSdrMimoReport()->setRssiRx1(new QString(rssiStr.c_str()));
+    }
     int gainDB;
     getRxGain(gainDB, 0);
     response.getPlutoSdrMimoReport()->setRx0GainDb(gainDB);
@@ -1287,9 +1295,17 @@ void PlutoSDRMIMO::webapiFormatDeviceReport(SWGSDRangel::SWGDeviceReport& respon
     response.getPlutoSdrMimoReport()->setRx1GainDb(gainDB);
     response.getPlutoSdrMimoReport()->setDacRate(getDACSampleRate());
     getTxRSSI(rssiStr, 0);
-    response.getPlutoSdrMimoReport()->setRssiTx0(new QString(rssiStr.c_str()));
+    if (response.getPlutoSdrMimoReport()->getRssiTx0()) {
+        *response.getPlutoSdrMimoReport()->getRssiTx0() = rssiStr.c_str();
+    } else {
+        response.getPlutoSdrMimoReport()->setRssiTx0(new QString(rssiStr.c_str()));
+    }
     getTxRSSI(rssiStr, 1);
-    response.getPlutoSdrMimoReport()->setRssiTx1(new QString(rssiStr.c_str()));
+    if (response.getPlutoSdrMimoReport()->getRssiTx1()) {
+        *response.getPlutoSdrMimoReport()->getRssiTx1() = rssiStr.c_str();
+    } else {
+        response.getPlutoSdrMimoReport()->setRssiTx1(new QString(rssiStr.c_str()));
+    }
 }
 
 void PlutoSDRMIMO::networkManagerFinished(QNetworkReply *reply)

@@ -39,7 +39,7 @@ RemoteControl::RemoteControl(WebAPIAdapterInterface *webAPIAdapterInterface) :
 {
     qDebug("RemoteControl::RemoteControl: webAPIAdapterInterface: %p", webAPIAdapterInterface);
     setObjectName(m_featureId);
-    m_state = StIdle;
+    setState(StIdle);
     m_errorMessage = "RemoteControl error";
     start();
 }
@@ -61,14 +61,14 @@ void RemoteControl::start()
     QObject::connect(m_thread, &QThread::finished, m_thread, &QObject::deleteLater);
 
     m_worker->setMessageQueueToFeature(getInputMessageQueue());
-    m_state = StRunning;
+    setState(StRunning);
     m_thread->start();
 }
 
 void RemoteControl::stop()
 {
     qDebug() << "RemoteControl::stop";
-    m_state = StIdle;
+    setState(StIdle);
     m_thread->quit();
     m_thread->wait();
 }

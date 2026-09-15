@@ -1115,11 +1115,19 @@ void USRPOutput::webapiFormatDeviceSettings(SWGSDRangel::SWGDeviceSettings& resp
         response.getUsrpOutputSettings()->setTitle(new QString(settings.m_title));
     }
 
-    response.getUsrpOutputSettings()->setAntennaPath(new QString(settings.m_antennaPath));
+    if (response.getUsrpOutputSettings()->getAntennaPath()) {
+        *response.getUsrpOutputSettings()->getAntennaPath() = settings.m_antennaPath;
+    } else {
+        response.getUsrpOutputSettings()->setAntennaPath(new QString(settings.m_antennaPath));
+    }
     response.getUsrpOutputSettings()->setCenterFrequency(settings.m_centerFrequency);
     response.getUsrpOutputSettings()->setDevSampleRate(settings.m_devSampleRate);
     response.getUsrpOutputSettings()->setLoOffset(settings.m_loOffset);
-    response.getUsrpOutputSettings()->setClockSource(new QString(settings.m_clockSource));
+    if (response.getUsrpOutputSettings()->getClockSource()) {
+        *response.getUsrpOutputSettings()->getClockSource() = settings.m_clockSource;
+    } else {
+        response.getUsrpOutputSettings()->setClockSource(new QString(settings.m_clockSource));
+    }
     response.getUsrpOutputSettings()->setGain(settings.m_gain);
     response.getUsrpOutputSettings()->setLog2SoftInterp(settings.m_log2SoftInterp);
     response.getUsrpOutputSettings()->setLpfBw(settings.m_lpfBW);

@@ -2199,5 +2199,57 @@ SWGInstanceApi::instanceSummaryCallback(SWGHttpRequestWorker * worker) {
     }
 }
 
+void
+SWGInstanceApi::instanceWindowsGet() {
+    QString fullPath;
+    fullPath.append(this->host).append(this->basePath).append("/sdrangel/windows");
+
+
+
+    SWGHttpRequestWorker *worker = new SWGHttpRequestWorker();
+    SWGHttpRequestInput input(fullPath, "GET");
+
+
+
+
+
+    foreach(QString key, this->defaultHeaders.keys()) {
+        input.headers.insert(key, this->defaultHeaders.value(key));
+    }
+
+    connect(worker,
+            &SWGHttpRequestWorker::on_execution_finished,
+            this,
+            &SWGInstanceApi::instanceWindowsGetCallback);
+
+    worker->execute(&input);
+}
+
+void
+SWGInstanceApi::instanceWindowsGetCallback(SWGHttpRequestWorker * worker) {
+    QString msg;
+    QString error_str = worker->error_str;
+    QNetworkReply::NetworkError error_type = worker->error_type;
+
+    if (worker->error_type == QNetworkReply::NoError) {
+        msg = QString("Success! %1 bytes").arg(worker->response.length());
+    }
+    else {
+        msg = "Error: " + worker->error_str;
+    }
+
+
+    QString json(worker->response);
+    SWGWindowList* output = static_cast<SWGWindowList*>(create(json, QString("SWGWindowList")));
+    worker->deleteLater();
+
+    if (worker->error_type == QNetworkReply::NoError) {
+        emit instanceWindowsGetSignal(output);
+    } else {
+        emit instanceWindowsGetSignalE(output, error_type, error_str);
+        emit instanceWindowsGetSignalEFull(worker, error_type, error_str);
+    }
+}
+
 
 }

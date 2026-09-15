@@ -37,7 +37,7 @@ AntennaTools::AntennaTools(WebAPIAdapterInterface *webAPIAdapterInterface) :
 {
     qDebug("AntennaTools::AntennaTools: webAPIAdapterInterface: %p", webAPIAdapterInterface);
     setObjectName(m_featureId);
-    m_state = StIdle;
+    setState(StIdle);
     m_errorMessage = "AntennaTools error";
     m_networkManager = new QNetworkAccessManager();
     QObject::connect(
@@ -111,7 +111,11 @@ void AntennaTools::applySettings(const AntennaToolsSettings& settings, const QLi
         webapiReverseSendSettings(settingsKeys, settings, fullUpdate || force);
     }
 
-    m_settings = settings;
+    if (force) {
+        m_settings = settings;
+    } else {
+        m_settings.applySettings(settingsKeys, settings);
+    }
 }
 
 int AntennaTools::webapiSettingsGet(

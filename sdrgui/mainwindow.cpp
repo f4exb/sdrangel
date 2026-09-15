@@ -45,6 +45,7 @@
 #include <QProcess>
 #include <QDirIterator>
 #include <QAction>
+#include <QShortcut>
 #include <QMenuBar>
 #include <QStatusBar>
 #include <QScreen>
@@ -99,6 +100,7 @@
 #include "webapi/webapirequestmapper.h"
 #include "webapi/webapiserver.h"
 #include "webapi/webapiadapter.h"
+#include "SWGFeatureSettings.h"
 #include "commands/command.h"
 #include "settings/serializableinterface.h"
 #ifdef ANDROID
@@ -153,6 +155,9 @@ MainWindow::MainWindow(qtwebapp::LoggerWithFile *logger, const MainParser& parse
     m_mainCore->m_masterTabIndex = 0;
     m_mainCore->m_mainMessageQueue = &m_inputMessageQueue;
 	m_mainCore->m_settings.setAudioDeviceManager(m_dspEngine->getAudioDeviceManager());
+
+    connect(m_mainCore, &MainCore::featureAdded, this, &MainWindow::mcpServerFeatureAdded);
+    connect(m_mainCore, &MainCore::featureRemoved, this, &MainWindow::mcpServerFeatureRemoved);
 
     QFontDatabase::addApplicationFont(":/LiberationSans-Regular.ttf");
     QFontDatabase::addApplicationFont(":/LiberationMono-Regular.ttf");
@@ -278,6 +283,7 @@ MainWindow::MainWindow(qtwebapp::LoggerWithFile *logger, const MainParser& parse
     InitFSM *fsm = new InitFSM(this, splash, !parser.getScratch() && !parser.getRemoteTCPSink(), !parser.getRemoteTCPSink());
     connect(fsm, &InitFSM::finished, fsm, &InitFSM::deleteLater);
     connect(fsm, &InitFSM::finished, splash, &SDRangelSplash::deleteLater);
+    connect(fsm, &InitFSM::finished, this, &MainWindow::startMCPServer);
     if (parser.getRemoteTCPSink()) {
         connect(fsm, &InitFSM::finished, this, &MainWindow::startRemoteTCPSink);
     } else if (parser.getStart()) {
@@ -776,6 +782,9 @@ void RemoveDeviceSetFSM::removeUI()
     } else {
         m_deviceUISet->m_deviceAPI->getSampleMIMO()->setMessageQueueToGUI(nullptr); // have sink stop sending messages to the GUI
     }
+    // As for features: QObject only drops an object's connections in ~QObject, so a signal can
+    // still reach the GUI after the derived destructor has deleted its ui object.
+    QObject::disconnect(m_deviceUISet->m_deviceAPI, nullptr, m_deviceUISet->m_deviceGUI, nullptr);
     delete m_deviceUISet->m_deviceGUI;
     m_deviceUISet->m_deviceAPI->resetSamplingDeviceId();
     if (!m_deviceMIMOEngine) {
@@ -1398,6 +1407,7 @@ void MainWindow::sampleSourceCreateUI(
 
     deviceAPI->getSampleSource()->setMessageQueueToGUI(deviceGUI->getInputMessageQueue());
     deviceUISet->m_deviceGUI = deviceGUI;
+    deviceGUI->setWindowOwner(deviceAPI);
     const PluginInterface::SamplingDevice *samplingDevice = DeviceEnumerator::instance()->getRxSamplingDevice(deviceIndex);
     const PluginInterface::SamplingDevice *selectedDevice = DeviceEnumerator::instance()->getRxSamplingDevice(deviceIndex); // FIXME: Why not use samplingDevice?
     deviceUISet->m_selectedDeviceId = selectedDevice->id;
@@ -1555,6 +1565,7 @@ void MainWindow::sampleSinkCreateUI(
 
     deviceAPI->getSampleSink()->setMessageQueueToGUI(deviceGUI->getInputMessageQueue());
     deviceUISet->m_deviceGUI = deviceGUI;
+    deviceGUI->setWindowOwner(deviceAPI);
     const PluginInterface::SamplingDevice *samplingDevice = DeviceEnumerator::instance()->getTxSamplingDevice(deviceIndex);
     const PluginInterface::SamplingDevice *selectedDevice = DeviceEnumerator::instance()->getRxSamplingDevice(deviceIndex); // FIXME: Why getRxSamplingDevice?
     deviceUISet->m_selectedDeviceId = selectedDevice->id;
@@ -1693,6 +1704,7 @@ void MainWindow::sampleMIMOCreateUI(
 
     deviceAPI->getSampleMIMO()->setMessageQueueToGUI(deviceGUI->getInputMessageQueue());
     deviceUISet->m_deviceGUI = deviceGUI;
+    deviceGUI->setWindowOwner(deviceAPI);
     const PluginInterface::SamplingDevice *samplingDevice = DeviceEnumerator::instance()->getMIMOSamplingDevice(deviceIndex);
     const PluginInterface::SamplingDevice *selectedDevice = DeviceEnumerator::instance()->getRxSamplingDevice(deviceIndex); // FIXME: Why getRxSamplingDevice?
     deviceUISet->m_selectedDeviceId = selectedDevice->id;
@@ -2010,6 +2022,7 @@ void MainWindow::createMenuBar(QToolButton *button) const
     QMenu *fileMenu;
     QMenu *viewMenu;
     QMenu *workspacesMenu;
+    QMenu *windowMenu;
     QMenu *preferencesMenu;
     QMenu *helpMenu;
 
@@ -2019,6 +2032,7 @@ void MainWindow::createMenuBar(QToolButton *button) const
         fileMenu = menuBar->addMenu("&File");
         viewMenu = menuBar->addMenu("&View");
         workspacesMenu = menuBar->addMenu("&Workspaces");
+        windowMenu = menuBar->addMenu("Wi&ndow");
         preferencesMenu = menuBar->addMenu("&Preferences");
         helpMenu = menuBar->addMenu("&Help");
     }
@@ -2031,6 +2045,8 @@ void MainWindow::createMenuBar(QToolButton *button) const
         menu->addMenu(viewMenu);
         workspacesMenu = new QMenu("&Workspaces");
         menu->addMenu(workspacesMenu);
+        windowMenu = new QMenu("Wi&ndow");
+        menu->addMenu(windowMenu);
         preferencesMenu = new QMenu("&Preferences");
         menu->addMenu(preferencesMenu);
         helpMenu = new QMenu("&Help");
@@ -2069,6 +2085,88 @@ void MainWindow::createMenuBar(QToolButton *button) const
     QAction *removeEmptyWorkspacesAction = workspacesMenu->addAction("&Remove empty");
     removeEmptyWorkspacesAction->setToolTip("Remove empty workspaces");
     QObject::connect(removeEmptyWorkspacesAction, &QAction::triggered, this, &MainWindow::removeEmptyWorkspaces);
+
+    // Filled in each time it is opened, so it always matches what is hidden right now and
+    // needs no signals from windows being added, hidden or closed
+    QMenu *showMenu = windowMenu->addMenu("&Show");
+    showMenu->setToolTip("Show a device, spectrum, channel or feature window that has been hidden");
+    QObject::connect(showMenu, &QMenu::aboutToShow, this, [this, showMenu]() { populateShowMenu(showMenu); });
+
+    // These do what the workspace title bar buttons do, for the workspace the user last
+    // worked in. They hold the Ctrl+Shift+C/T/V/S/B shortcuts the buttons used to have:
+    // every workspace's buttons claimed the same keys, which made them ambiguous as soon
+    // as there was more than one workspace, so none of them fired. ApplicationShortcut,
+    // as a workspace that has been undocked is a window of its own. A QShortcut rather than
+    // QAction::setShortcut, which would print the key alongside the item. Only the real menu
+    // bar takes them: on Android these menus are built once per workspace, and duplicates of
+    // an application shortcut are ambiguous in just the same way
+    auto arrangeShortcut = [this, button](QAction *action, Qt::Key key)
+    {
+        if (!button)
+        {
+            auto *shortcut = new QShortcut(QKeySequence(Qt::CTRL | Qt::SHIFT | key), menuBar());
+            shortcut->setContext(Qt::ApplicationShortcut);
+            QObject::connect(shortcut, &QShortcut::activated, action, &QAction::trigger);
+        }
+    };
+
+    windowMenu->addSeparator();
+
+    QAction *cascadeAction = windowMenu->addAction("&Cascade");
+    cascadeAction->setToolTip("Cascade sub windows");
+    arrangeShortcut(cascadeAction, Qt::Key_C);
+    QObject::connect(cascadeAction, &QAction::triggered, this, [this]() {
+        if (Workspace *workspace = currentWorkspace()) { workspace->cascadeSubWindows(); }
+    });
+
+    QAction *tileAction = windowMenu->addAction("&Tile");
+    tileAction->setToolTip("Tile sub windows");
+    arrangeShortcut(tileAction, Qt::Key_T);
+    QObject::connect(tileAction, &QAction::triggered, this, [this]() {
+        if (Workspace *workspace = currentWorkspace()) { workspace->tileSubWindows(); }
+    });
+
+    QAction *stackVerticalAction = windowMenu->addAction("Stack &vertically");
+    stackVerticalAction->setToolTip("Stack sub windows vertically");
+    arrangeShortcut(stackVerticalAction, Qt::Key_V);
+    QObject::connect(stackVerticalAction, &QAction::triggered, this, [this]() {
+        if (Workspace *workspace = currentWorkspace()) { workspace->stackVerticalSubWindows(); }
+    });
+
+    QAction *stackColumnsAction = windowMenu->addAction("Stack in c&olumns");
+    stackColumnsAction->setToolTip("Stack sub windows in columns");
+    arrangeShortcut(stackColumnsAction, Qt::Key_S);
+    QObject::connect(stackColumnsAction, &QAction::triggered, this, [this]() {
+        if (Workspace *workspace = currentWorkspace()) { workspace->stackSubWindows(); }
+    });
+
+    QAction *tabsAction = windowMenu->addAction("Ta&bs");
+    tabsAction->setToolTip("Display sub windows in tabs");
+    arrangeShortcut(tabsAction, Qt::Key_B);
+    tabsAction->setCheckable(true);
+    QObject::connect(tabsAction, &QAction::triggered, this, [this, tabsAction]() {
+        // Toggle what the workspace has, not what the tick says: the shortcut can be used
+        // without the menu ever being opened to sync it
+        Workspace *workspace = currentWorkspace();
+
+        if (workspace) {
+            workspace->setTabSubWindowsOption(!workspace->getTabSubWindowsOption());
+        }
+
+        tabsAction->setChecked(workspace && workspace->getTabSubWindowsOption());
+    });
+
+    // Tabs is per workspace, so its tick has to follow whichever workspace the items act on
+    QList<QAction *> arrangeActions = {cascadeAction, tileAction, stackVerticalAction, stackColumnsAction, tabsAction};
+    QObject::connect(windowMenu, &QMenu::aboutToShow, this, [this, arrangeActions, tabsAction]() {
+        Workspace *workspace = currentWorkspace();
+
+        for (QAction *action : arrangeActions) {
+            action->setEnabled(workspace != nullptr);
+        }
+
+        tabsAction->setChecked(workspace && workspace->getTabSubWindowsOption());
+    });
 
     QAction *configurationsAction = preferencesMenu->addAction("&Configurations...");
     configurationsAction->setToolTip("Manage configurations");
@@ -2384,6 +2482,104 @@ bool MainWindow::handleMessage(const Message& cmd)
 
         return true;
     }
+    else if (MainCore::MsgSetWindowHidden::match(cmd))
+    {
+        auto& notif = (const MainCore::MsgSetWindowHidden&) cmd;
+        QMdiSubWindow *window = nullptr;
+        int workspaceIndex = -1;
+        const int deviceSetIndex = notif.getDeviceSetIndex();
+        const bool haveDeviceSet = (deviceSetIndex >= 0) && (deviceSetIndex < (int) m_deviceUIs.size());
+
+        switch (notif.getKind())
+        {
+        case MainCore::MsgSetWindowHidden::Device:
+            if (haveDeviceSet && m_deviceUIs[deviceSetIndex]->m_deviceGUI)
+            {
+                window = m_deviceUIs[deviceSetIndex]->m_deviceGUI;
+                workspaceIndex = m_deviceUIs[deviceSetIndex]->m_deviceGUI->getWorkspaceIndex();
+            }
+            break;
+        case MainCore::MsgSetWindowHidden::Spectrum:
+            if (haveDeviceSet && m_deviceUIs[deviceSetIndex]->m_mainSpectrumGUI)
+            {
+                window = m_deviceUIs[deviceSetIndex]->m_mainSpectrumGUI;
+                workspaceIndex = m_deviceUIs[deviceSetIndex]->m_mainSpectrumGUI->getWorkspaceIndex();
+            }
+            break;
+        case MainCore::MsgSetWindowHidden::Channel:
+            if (haveDeviceSet && (notif.getIndex() >= 0) && (notif.getIndex() < m_deviceUIs[deviceSetIndex]->getNumberOfChannels()))
+            {
+                ChannelGUI *gui = m_deviceUIs[deviceSetIndex]->getChannelGUIAt(notif.getIndex());
+                window = gui;
+                workspaceIndex = gui ? gui->getWorkspaceIndex() : -1;
+            }
+            break;
+        case MainCore::MsgSetWindowHidden::Feature:
+            if (!m_featureUIs.empty() && (notif.getIndex() >= 0) && (notif.getIndex() < m_featureUIs[0]->getNumberOfFeatures()))
+            {
+                FeatureGUI *gui = m_featureUIs[0]->getFeatureGuiAt(notif.getIndex());
+                window = gui;
+                workspaceIndex = gui ? gui->getWorkspaceIndex() : -1;
+            }
+            break;
+        }
+
+        if (!window) {
+            qWarning("MainWindow::handleMessages: MsgSetWindowHidden: no such window");
+        } else if (notif.getHidden()) {
+            window->hide();
+        } else {
+            showWindow(window, workspaceIndex);
+        }
+
+        return true;
+    }
+    else if (MainCore::MsgArrangeWorkspace::match(cmd))
+    {
+        auto& notif = (const MainCore::MsgArrangeWorkspace&) cmd;
+        int workspaceIndex = notif.getWorkspaceIndex();
+
+        if ((workspaceIndex >= 0) && (workspaceIndex < (int) m_workspaces.size()))
+        {
+            Workspace *workspace = m_workspaces[workspaceIndex];
+
+            // The same as the title bar buttons: each one-shot arrangement turns auto stacking
+            // and tabs off, and either mode turns the other off
+            switch (notif.getArrangement())
+            {
+            case MainCore::MsgArrangeWorkspace::Cascade:
+                workspace->setTabSubWindowsOption(false);
+                workspace->cascadeSubWindows();
+                break;
+            case MainCore::MsgArrangeWorkspace::Tile:
+                workspace->setTabSubWindowsOption(false);
+                workspace->tileSubWindows();
+                break;
+            case MainCore::MsgArrangeWorkspace::StackVertical:
+                workspace->setTabSubWindowsOption(false);
+                workspace->stackVerticalSubWindows();
+                break;
+            case MainCore::MsgArrangeWorkspace::Stack:
+                workspace->setTabSubWindowsOption(false);
+                workspace->stackSubWindows();
+                break;
+            case MainCore::MsgArrangeWorkspace::AutoStack:
+                workspace->setTabSubWindowsOption(false);
+                workspace->setAutoStackOption(true);
+                workspace->layoutSubWindows();
+                break;
+            case MainCore::MsgArrangeWorkspace::Tab:
+                workspace->setTabSubWindowsOption(true);
+                break;
+            }
+        }
+        else
+        {
+            qWarning("MainWindow::handleMessages: MsgArrangeWorkspace: no workspace with index %d", workspaceIndex);
+        }
+
+        return true;
+    }
     else if (MainCore::MsgMoveMainSpectrumUIToWorkspace::match(cmd))
     {
         auto& notif = (const MainCore::MsgMoveMainSpectrumUIToWorkspace&) cmd;
@@ -2477,6 +2673,13 @@ void MainWindow::addWorkspace()
 
     QObject::connect(
         m_workspaces.back(),
+        &Workspace::focused,
+        this,
+        [this](Workspace *inWorkspace) { m_currentWorkspace = inWorkspace; }
+    );
+
+    QObject::connect(
+        m_workspaces.back(),
         &Workspace::addRxDevice,
         this,
         [this](Workspace *inWorkspace, int deviceIndex) { this->sampleSourceAdd(inWorkspace, inWorkspace, deviceIndex); }
@@ -2512,6 +2715,13 @@ void MainWindow::addWorkspace()
 
     QObject::connect(
         m_workspaces.back(),
+        &Workspace::showMCPServer,
+        this,
+        &MainWindow::showMCPServer
+    );
+
+    QObject::connect(
+        m_workspaces.back(),
         &Workspace::configurationPresetsDialogRequested,
         this,
         &MainWindow::on_action_Configurations_triggered
@@ -2540,7 +2750,189 @@ void MainWindow::addWorkspace()
         m_workspaces.back()->show();
         m_workspaces.back()->raise();
     }
+
+    updateMCPServerButton();
  }
+
+namespace {
+
+// R0, T1, M2... the prefix the rest of the application uses for a device set. The three GUI
+// classes each declare their own DeviceType enum, but all order them Rx, Tx, MIMO.
+QString deviceSetTag(int deviceType, int deviceSetIndex)
+{
+    static const char *const prefixes[] = {"R", "T", "M"};
+    return QString("%1%2").arg(prefixes[qBound(0, deviceType, 2)]).arg(deviceSetIndex);
+}
+
+} // namespace
+
+void MainWindow::populateShowMenu(QMenu *menu) const
+{
+    menu->clear();
+
+    // isHidden(), not isVisible(): a window sitting on a hidden workspace is not visible but
+    // was never hidden itself, and listing it here would be wrong
+    auto addEntry = [this, menu](const QString& label, QMdiSubWindow *window, int workspaceIndex)
+    {
+        QAction *action = menu->addAction(label);
+        QPointer<QMdiSubWindow> guard(window); // these are WA_DeleteOnClose
+        QObject::connect(action, &QAction::triggered, this, [this, guard, workspaceIndex]()
+        {
+            if (guard) {
+                showWindow(guard, workspaceIndex);
+            }
+        });
+    };
+
+    int hidden = 0;
+
+    for (const auto& section : {QString("Devices"), QString("Spectrums"), QString("Channels"), QString("Features")})
+    {
+        int before = hidden;
+
+        if (section == "Devices")
+        {
+            for (const auto& deviceUISet : m_deviceUIs)
+            {
+                DeviceGUI *gui = deviceUISet->m_deviceGUI;
+
+                if (gui && gui->isHidden())
+                {
+                    if (hidden++ == before) { menu->addSection(section); }
+                    addEntry(QString("%1  %2").arg(deviceSetTag(gui->getDeviceType(), gui->getIndex())).arg(gui->getTitle()),
+                        gui, gui->getWorkspaceIndex());
+                }
+            }
+        }
+        else if (section == "Spectrums")
+        {
+            for (const auto& deviceUISet : m_deviceUIs)
+            {
+                MainSpectrumGUI *gui = deviceUISet->m_mainSpectrumGUI;
+
+                if (gui && gui->isHidden())
+                {
+                    if (hidden++ == before) { menu->addSection(section); }
+                    addEntry(QString("%1  Spectrum").arg(deviceSetTag(gui->getDeviceType(), gui->getIndex())),
+                        gui, gui->getWorkspaceIndex());
+                }
+            }
+        }
+        else if (section == "Channels")
+        {
+            for (const auto& deviceUISet : m_deviceUIs)
+            {
+                for (int i = 0; i < deviceUISet->getNumberOfChannels(); i++)
+                {
+                    ChannelGUI *gui = deviceUISet->getChannelGUIAt(i);
+
+                    if (gui && gui->isHidden())
+                    {
+                        if (hidden++ == before) { menu->addSection(section); }
+                        addEntry(QString("%1:%2  %3")
+                            .arg(deviceSetTag((int) gui->getDeviceType(), gui->getDeviceSetIndex()))
+                            .arg(gui->getIndex()).arg(gui->getTitle()),
+                            gui, gui->getWorkspaceIndex());
+                    }
+                }
+            }
+        }
+        else
+        {
+            for (const auto& featureUISet : m_featureUIs)
+            {
+                for (int i = 0; i < featureUISet->getNumberOfFeatures(); i++)
+                {
+                    FeatureGUI *gui = featureUISet->getFeatureGuiAt(i);
+
+                    if (gui && gui->isHidden())
+                    {
+                        if (hidden++ == before) { menu->addSection(section); }
+                        addEntry(QString("F%1  %2").arg(gui->getIndex()).arg(gui->getTitle()),
+                            gui, gui->getWorkspaceIndex());
+                    }
+                }
+            }
+        }
+    }
+
+    if (hidden == 0)
+    {
+        QAction *none = menu->addAction("(nothing is hidden)");
+        none->setEnabled(false);
+    }
+    else
+    {
+        menu->addSeparator();
+        QAction *all = menu->addAction("Show &all");
+        all->setToolTip("Show every hidden window");
+        QObject::connect(all, &QAction::triggered, this, &MainWindow::showAllHiddenWindows);
+    }
+}
+
+Workspace *MainWindow::currentWorkspace() const
+{
+    // contains(), not a null check: the workspace may have been removed since it was
+    // recorded, which leaves m_currentWorkspace dangling
+    if (m_workspaces.contains(m_currentWorkspace) && !m_currentWorkspace->isHidden()) {
+        return m_currentWorkspace;
+    }
+
+    for (const auto& workspace : m_workspaces)
+    {
+        if (!workspace->isHidden()) {
+            return workspace;
+        }
+    }
+
+    return nullptr;
+}
+
+void MainWindow::showWindow(QMdiSubWindow *window, int workspaceIndex) const
+{
+    // Showing the window is not enough on its own if the workspace holding it is hidden
+    if ((workspaceIndex >= 0) && (workspaceIndex < m_workspaces.size()) && m_workspaces[workspaceIndex]->isHidden()) {
+        m_workspaces[workspaceIndex]->show();
+    }
+
+    window->show();
+    window->raise();
+}
+
+void MainWindow::showAllHiddenWindows() const
+{
+    for (const auto& deviceUISet : m_deviceUIs)
+    {
+        if (deviceUISet->m_deviceGUI && deviceUISet->m_deviceGUI->isHidden()) {
+            showWindow(deviceUISet->m_deviceGUI, deviceUISet->m_deviceGUI->getWorkspaceIndex());
+        }
+
+        if (deviceUISet->m_mainSpectrumGUI && deviceUISet->m_mainSpectrumGUI->isHidden()) {
+            showWindow(deviceUISet->m_mainSpectrumGUI, deviceUISet->m_mainSpectrumGUI->getWorkspaceIndex());
+        }
+
+        for (int i = 0; i < deviceUISet->getNumberOfChannels(); i++)
+        {
+            ChannelGUI *gui = deviceUISet->getChannelGUIAt(i);
+
+            if (gui && gui->isHidden()) {
+                showWindow(gui, gui->getWorkspaceIndex());
+            }
+        }
+    }
+
+    for (const auto& featureUISet : m_featureUIs)
+    {
+        for (int i = 0; i < featureUISet->getNumberOfFeatures(); i++)
+        {
+            FeatureGUI *gui = featureUISet->getFeatureGuiAt(i);
+
+            if (gui && gui->isHidden()) {
+                showWindow(gui, gui->getWorkspaceIndex());
+            }
+        }
+    }
+}
 
 void MainWindow::viewAllWorkspaces() const
 {
@@ -2578,20 +2970,12 @@ void MainWindow::removeEmptyWorkspaces()
 
         for (auto& subWindow : subWindows)
         {
-            if (qobject_cast<DeviceGUI*>(subWindow)) {
-                qobject_cast<DeviceGUI*>(subWindow)->setWorkspaceIndex(i);
-            }
+            WorkspaceWindow *window = qobject_cast<WorkspaceWindow*>(subWindow);
 
-            if (qobject_cast<MainSpectrumGUI*>(subWindow)) {
-                qobject_cast<MainSpectrumGUI*>(subWindow)->setWorkspaceIndex(i);
-            }
-
-            if (qobject_cast<ChannelGUI*>(subWindow)) {
-                qobject_cast<ChannelGUI*>(subWindow)->setWorkspaceIndex(i);
-            }
-
-            if (qobject_cast<FeatureGUI*>(subWindow)) {
-                qobject_cast<FeatureGUI*>(subWindow)->setWorkspaceIndex(i);
+            if (window)
+            {
+                window->setWorkspaceIndex(i);
+                window->publishWindowState();
             }
         }
     }
@@ -3437,6 +3821,165 @@ void MainWindow::showAllChannels(int deviceSetIndex)
 void MainWindow::startRemoteTCPSink()
 {
     RemoteTCPSinkStarter::start(m_parser);
+}
+
+void MainWindow::startMCPServer()
+{
+    static const QString mcpServerURI = QStringLiteral("sdrangel.feature.mcpserver");
+    int featureSetIndex = -1;
+    int featureIndex = -1;
+    Feature *mcpServer = FeatureWebAPIUtils::getFeature(featureSetIndex, featureIndex, mcpServerURI);
+
+    if (!mcpServer)
+    {
+        PluginAPI::FeatureRegistrations *featureRegistrations = m_pluginManager->getFeatureRegistrations();
+        int registrationIndex = -1;
+
+        for (int i = 0; i < featureRegistrations->size(); i++)
+        {
+            if ((*featureRegistrations)[i].m_featureIdURI == mcpServerURI)
+            {
+                registrationIndex = i;
+                break;
+            }
+        }
+
+        if (registrationIndex < 0)
+        {
+            qWarning("MainWindow::startMCPServer: MCPServer plugin is not available");
+            return;
+        }
+
+        if (m_workspaces.empty())
+        {
+            qWarning("MainWindow::startMCPServer: no workspace is available for the MCPServer feature");
+            return;
+        }
+
+        featureAddClicked(m_workspaces[0], registrationIndex);
+        featureSetIndex = -1;
+        featureIndex = -1;
+        mcpServer = FeatureWebAPIUtils::getFeature(featureSetIndex, featureIndex, mcpServerURI);
+
+        if (!mcpServer)
+        {
+            qWarning("MainWindow::startMCPServer: failed to create the MCPServer feature");
+            return;
+        }
+    }
+
+    if (!FeatureWebAPIUtils::run(featureSetIndex, featureIndex)) {
+        qWarning("MainWindow::startMCPServer: failed to start the MCPServer feature");
+    } else if (mcpServer->getState() == Feature::StRunning) {
+        FeatureGUI *gui = getMCPServerGUI();
+
+        if (gui) {
+            gui->hide();
+        }
+    }
+}
+
+FeatureGUI *MainWindow::getMCPServerGUI(Feature **feature) const
+{
+    for (FeatureUISet *featureUISet : m_featureUIs)
+    {
+        for (int i = 0; i < featureUISet->getNumberOfFeatures(); i++)
+        {
+            Feature *candidate = featureUISet->getFeatureAt(i);
+
+            if (isMCPServerFeature(candidate))
+            {
+                if (feature) {
+                    *feature = candidate;
+                }
+
+                return featureUISet->getFeatureGuiAt(i);
+            }
+        }
+    }
+
+    if (feature) {
+        *feature = nullptr;
+    }
+
+    return nullptr;
+}
+
+void MainWindow::updateMCPServerButton()
+{
+    Feature *feature = nullptr;
+    FeatureGUI *gui = getMCPServerGUI(&feature);
+    bool available = gui != nullptr;
+    bool running = feature && (feature->getState() == Feature::StRunning);
+    int port = -1;
+
+    if (running)
+    {
+        SWGSDRangel::SWGFeatureSettings response;
+        QString errorMessage;
+
+        if ((feature->webapiSettingsGet(response, errorMessage) / 100 == 2)
+            && response.getMcpServerSettings())
+        {
+            port = response.getMcpServerSettings()->getPort();
+        }
+    }
+
+    for (Workspace *workspace : m_workspaces) {
+        workspace->updateMCPServerButton(available, running, port);
+    }
+}
+
+void MainWindow::showMCPServer()
+{
+    FeatureGUI *gui = getMCPServerGUI();
+
+    if (!gui) {
+        return;
+    }
+
+    int workspaceIndex = gui->getWorkspaceIndex();
+
+    if ((workspaceIndex >= 0) && (workspaceIndex < m_workspaces.size()))
+    {
+        m_workspaces[workspaceIndex]->show();
+        m_workspaces[workspaceIndex]->raise();
+    }
+
+    gui->show();
+    gui->raise();
+    gui->setFocus(Qt::OtherFocusReason);
+}
+
+void MainWindow::mcpServerFeatureAdded(int featureSetIndex, Feature *feature)
+{
+    (void) featureSetIndex;
+
+    if (!isMCPServerFeature(feature)) {
+        return;
+    }
+
+    connect(feature, &Feature::stateChanged, this, &MainWindow::updateMCPServerButton, Qt::UniqueConnection);
+    connect(feature, &QObject::destroyed, this, [this]() {
+        QTimer::singleShot(0, this, &MainWindow::updateMCPServerButton);
+    });
+    updateMCPServerButton();
+}
+
+void MainWindow::mcpServerFeatureRemoved(int featureSetIndex, Feature *feature)
+{
+    (void) featureSetIndex;
+
+    if (isMCPServerFeature(feature))
+    {
+        disconnect(feature, &Feature::stateChanged, this, &MainWindow::updateMCPServerButton);
+        QTimer::singleShot(0, this, &MainWindow::updateMCPServerButton);
+    }
+}
+
+bool MainWindow::isMCPServerFeature(const Feature* feature)
+{
+    return feature && (feature->getURI() == QStringLiteral("sdrangel.feature.mcpserver"));
 }
 
 void MainWindow::startAllAfterDelay()

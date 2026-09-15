@@ -15,45 +15,70 @@ FeatureSettings:
       type: integer
     AFCSettings:
       $ref: "/doc/swagger/include/AFC.yaml#/AFCSettings"
+      description: "Afc settings configuration for Feature."
     AISSettings:
       $ref: "/doc/swagger/include/AIS.yaml#/AISSettings"
+      description: "AIS settings configuration for Feature."
     AMBESettings:
       $ref: "/doc/swagger/include/AMBE.yaml#/AMBESettings"
+      description: "Ambe settings configuration for Feature."
     AntennaToolsSettings:
       $ref: "/doc/swagger/include/AntennaTools.yaml#/AntennaToolsSettings"
+      description: "Antenna tools settings configuration for Feature."
     APRSSettings:
       $ref: "/doc/swagger/include/APRS.yaml#/APRSSettings"
+      description: "Aprs settings configuration for Feature."
     DemodAnalyzerSettings:
       $ref: "/doc/swagger/include/DemodAnalyzer.yaml#/DemodAnalyzerSettings"
+      description: "Demod analyzer settings configuration for Feature."
     DenoiserSettings:
       $ref: "/doc/swagger/include/Denoiser.yaml#/DenoiserSettings"
+      description: "Denoiser settings configuration for Feature."
     JogdialControllerSettings:
       $ref: "/doc/swagger/include/JogdialController.yaml#/JogdialControllerSettings"
+      description: "Jogdial controller settings configuration for Feature."
     FreqDisplaySettings:
       $ref: "/doc/swagger/include/FreqDisplay.yaml#/FreqDisplaySettings"
+      description: "Freq display settings configuration for Feature."
     GS232ControllerSettings:
       $ref: "/doc/swagger/include/GS232Controller.yaml#/GS232ControllerSettings"
+      description: "Gs232 controller settings configuration for Feature."
     LimeRFESettings:
       $ref: "/doc/swagger/include/LimeRFE.yaml#/LimeRFESettings"
+      description: "Lime rfe settings configuration for Feature."
     MapSettings:
       $ref: "/doc/swagger/include/Map.yaml#/MapSettings"
+      description: "Map settings configuration for Feature."
     MorseDecoderSettings:
       $ref: "/doc/swagger/include/MorseDecoder.yaml#/MorseDecoderSettings"
+      description: "Morse decoder settings configuration for Feature."
     PERTesterSettings:
       $ref: "/doc/swagger/include/PERTester.yaml#/PERTesterSettings"
+      description: "Per tester settings configuration for Feature."
     RadiosondeSettings:
       $ref: "/doc/swagger/include/Radiosonde.yaml#/RadiosondeSettings"
+      description: "Radiosonde settings configuration for Feature."
     RigCtlServerSettings:
       $ref: "/doc/swagger/include/RigCtlServer.yaml#/RigCtlServerSettings"
+      description: "Rig ctl server settings configuration for Feature."
+    MCPServerSettings:
+      $ref: "/doc/swagger/include/MCPServer.yaml#/MCPServerSettings"
+      description: "Mcp server settings configuration for Feature."
     SatelliteTrackerSettings:
       $ref: "/doc/swagger/include/SatelliteTracker.yaml#/SatelliteTrackerSettings"
+      description: "Satellite tracker settings configuration for Feature."
     SIDSettings:
       $ref: "/doc/swagger/include/SID.yaml#/SIDSettings"
+      description: "Sid settings configuration for Feature."
     SimplePTTSettings:
       $ref: "/doc/swagger/include/SimplePTT.yaml#/SimplePTTSettings"
+      description: "Simple ptt settings configuration for Feature."
     SkyMapSettings:
       $ref: "/doc/swagger/include/SkyMap.yaml#/SkyMapSettings"
+      description: "Sky map settings configuration for Feature."
     StarTrackerSettings:
       $ref: "/doc/swagger/include/StarTracker.yaml#/StarTrackerSettings"
+      description: "Star tracker settings configuration for Feature."
     VORLocalizerSettings:
       $ref: "/doc/swagger/include/VORLocalizer.yaml#/VORLocalizerSettings"
+      description: "Vor localizer settings configuration for Feature."

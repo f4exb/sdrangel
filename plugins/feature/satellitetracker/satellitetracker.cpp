@@ -56,7 +56,7 @@ SatelliteTracker::SatelliteTracker(WebAPIAdapterInterface *webAPIAdapterInterfac
 {
     qDebug("SatelliteTracker::SatelliteTracker: webAPIAdapterInterface: %p", webAPIAdapterInterface);
     setObjectName(m_featureId);
-    m_state = StIdle;
+    setState(StIdle);
     m_errorMessage = "SatelliteTracker error";
     m_networkManager = new QNetworkAccessManager();
     QObject::connect(
@@ -100,7 +100,7 @@ void SatelliteTracker::start()
     m_worker->setMessageQueueToFeature(getInputMessageQueue());
     m_worker->setMessageQueueToGUI(getMessageQueueToGUI());
     m_thread->start();
-    m_state = StRunning;
+    setState(StRunning);
 
     m_worker->getInputMessageQueue()->push(SatelliteTrackerWorker::MsgConfigureSatelliteTrackerWorker::create(m_settings, QList<QString>(), true));
     m_worker->getInputMessageQueue()->push(MsgSatData::create(m_satellites));
@@ -109,7 +109,7 @@ void SatelliteTracker::start()
 void SatelliteTracker::stop()
 {
     qDebug("SatelliteTracker::stop");
-    m_state = StIdle;
+    setState(StIdle);
     if (m_thread)
     {
         m_thread->quit();
@@ -484,30 +484,66 @@ void SatelliteTracker::webapiFormatFeatureSettings(
     response.getSatelliteTrackerSettings()->setLatitude(settings.m_latitude);
     response.getSatelliteTrackerSettings()->setLongitude(settings.m_longitude);
     response.getSatelliteTrackerSettings()->setHeightAboveSeaLevel(settings.m_heightAboveSeaLevel);
-    response.getSatelliteTrackerSettings()->setTarget(new QString(settings.m_target));
+    if (response.getSatelliteTrackerSettings()->getTarget()) {
+        *response.getSatelliteTrackerSettings()->getTarget() = settings.m_target;
+    } else {
+        response.getSatelliteTrackerSettings()->setTarget(new QString(settings.m_target));
+    }
     response.getSatelliteTrackerSettings()->setSatellites(convertStringListToPtrs(settings.m_satellites));
     response.getSatelliteTrackerSettings()->setTles(convertStringListToPtrs(settings.m_tles));
-    response.getSatelliteTrackerSettings()->setDateTime(new QString(settings.m_dateTime));
+    if (response.getSatelliteTrackerSettings()->getDateTime()) {
+        *response.getSatelliteTrackerSettings()->getDateTime() = settings.m_dateTime;
+    } else {
+        response.getSatelliteTrackerSettings()->setDateTime(new QString(settings.m_dateTime));
+    }
     response.getSatelliteTrackerSettings()->setMinAosElevation(settings.m_minAOSElevation);
     response.getSatelliteTrackerSettings()->setMinPassElevation(settings.m_minPassElevation);
     response.getSatelliteTrackerSettings()->setRotatorMaxAzimuth(settings.m_rotatorMaxAzimuth);
     response.getSatelliteTrackerSettings()->setRotatorMaxElevation(settings.m_rotatorMaxElevation);
     response.getSatelliteTrackerSettings()->setAzElUnits((int)settings.m_azElUnits);
     response.getSatelliteTrackerSettings()->setGroundTrackPoints(settings.m_groundTrackPoints);
-    response.getSatelliteTrackerSettings()->setDateFormat(new QString(settings.m_dateFormat));
+    if (response.getSatelliteTrackerSettings()->getDateFormat()) {
+        *response.getSatelliteTrackerSettings()->getDateFormat() = settings.m_dateFormat;
+    } else {
+        response.getSatelliteTrackerSettings()->setDateFormat(new QString(settings.m_dateFormat));
+    }
     response.getSatelliteTrackerSettings()->setUtc(settings.m_utc ? 1 : 0);
     response.getSatelliteTrackerSettings()->setUpdatePeriod(settings.m_updatePeriod);
     response.getSatelliteTrackerSettings()->setDopplerPeriod(settings.m_dopplerPeriod);
     response.getSatelliteTrackerSettings()->setDefaultFrequency(settings.m_defaultFrequency);
     response.getSatelliteTrackerSettings()->setDrawOnMap(settings.m_drawOnMap ? 1 : 0);
     response.getSatelliteTrackerSettings()->setAutoTarget(settings.m_autoTarget ? 1 : 0);
-    response.getSatelliteTrackerSettings()->setAosSpeech(new QString(settings.m_aosSpeech));
-    response.getSatelliteTrackerSettings()->setLosSpeech(new QString(settings.m_losSpeech));
-    response.getSatelliteTrackerSettings()->setAosCommand(new QString(settings.m_aosCommand));
-    response.getSatelliteTrackerSettings()->setLosCommand(new QString(settings.m_losCommand));
+    if (response.getSatelliteTrackerSettings()->getAosSpeech()) {
+        *response.getSatelliteTrackerSettings()->getAosSpeech() = settings.m_aosSpeech;
+    } else {
+        response.getSatelliteTrackerSettings()->setAosSpeech(new QString(settings.m_aosSpeech));
+    }
+    if (response.getSatelliteTrackerSettings()->getLosSpeech()) {
+        *response.getSatelliteTrackerSettings()->getLosSpeech() = settings.m_losSpeech;
+    } else {
+        response.getSatelliteTrackerSettings()->setLosSpeech(new QString(settings.m_losSpeech));
+    }
+    if (response.getSatelliteTrackerSettings()->getAosCommand()) {
+        *response.getSatelliteTrackerSettings()->getAosCommand() = settings.m_aosCommand;
+    } else {
+        response.getSatelliteTrackerSettings()->setAosCommand(new QString(settings.m_aosCommand));
+    }
+    if (response.getSatelliteTrackerSettings()->getLosCommand()) {
+        *response.getSatelliteTrackerSettings()->getLosCommand() = settings.m_losCommand;
+    } else {
+        response.getSatelliteTrackerSettings()->setLosCommand(new QString(settings.m_losCommand));
+    }
     response.getSatelliteTrackerSettings()->setPredictionPeriod(settings.m_predictionPeriod);
-    response.getSatelliteTrackerSettings()->setPassStartTime(new QString(settings.m_passStartTime.toString()));
-    response.getSatelliteTrackerSettings()->setPassFinishTime(new QString(settings.m_passFinishTime.toString()));
+    if (response.getSatelliteTrackerSettings()->getPassStartTime()) {
+        *response.getSatelliteTrackerSettings()->getPassStartTime() = settings.m_passStartTime.toString();
+    } else {
+        response.getSatelliteTrackerSettings()->setPassStartTime(new QString(settings.m_passStartTime.toString()));
+    }
+    if (response.getSatelliteTrackerSettings()->getPassFinishTime()) {
+        *response.getSatelliteTrackerSettings()->getPassFinishTime() = settings.m_passFinishTime.toString();
+    } else {
+        response.getSatelliteTrackerSettings()->setPassFinishTime(new QString(settings.m_passFinishTime.toString()));
+    }
     response.getSatelliteTrackerSettings()->setDeviceSettings(getSWGSatelliteDeviceSettingsList(settings));
     response.getSatelliteTrackerSettings()->setAzimuthOffset(settings.m_azimuthOffset);
     response.getSatelliteTrackerSettings()->setElevationOffset(settings.m_elevationOffset);
@@ -796,7 +832,11 @@ void SatelliteTracker::webapiFormatFeatureReport(SWGSDRangel::SWGFeatureReport& 
         itr.next();
         SatelliteState *satState = itr.value();
         SWGSDRangel::SWGSatelliteState *swgSatState = new SWGSDRangel::SWGSatelliteState();
-        swgSatState->setName(new QString(satState->m_name));
+        if (swgSatState->getName()) {
+            *swgSatState->getName() = satState->m_name;
+        } else {
+            swgSatState->setName(new QString(satState->m_name));
+        }
         swgSatState->setLatitude(satState->m_latitude);
         swgSatState->setLongitude(satState->m_longitude);
         swgSatState->setAltitude(satState->m_altitude);
@@ -811,8 +851,16 @@ void SatelliteTracker::webapiFormatFeatureReport(SWGSDRangel::SWGFeatureReport& 
         for (auto const &pass : satState->m_passes)
         {
             SWGSDRangel::SWGSatellitePass *swgPass = new SWGSDRangel::SWGSatellitePass();
-            swgPass->setAos(new QString(pass.m_aos.toString(Qt::ISODateWithMs)));
-            swgPass->setLos(new QString(pass.m_los.toString(Qt::ISODateWithMs)));
+            if (swgPass->getAos()) {
+                *swgPass->getAos() = pass.m_aos.toString(Qt::ISODateWithMs);
+            } else {
+                swgPass->setAos(new QString(pass.m_aos.toString(Qt::ISODateWithMs)));
+            }
+            if (swgPass->getLos()) {
+                *swgPass->getLos() = pass.m_los.toString(Qt::ISODateWithMs);
+            } else {
+                swgPass->setLos(new QString(pass.m_los.toString(Qt::ISODateWithMs)));
+            }
             swgPass->setMaxElevation(pass.m_maxElevation);
             passesList->append(swgPass);
         }

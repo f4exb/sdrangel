@@ -284,6 +284,9 @@ void AudioCATSISOSettings::applySettings(const QStringList& settingsKeys, const 
     if (settingsKeys.contains("log2Decim")) {
         m_log2Decim = settings.m_log2Decim;
     }
+    if (settingsKeys.contains("iqOrder")) {
+        m_iqOrder = settings.m_iqOrder;
+    }
     if (settingsKeys.contains("rxIQMapping")) {
         m_rxIQMapping = settings.m_rxIQMapping;
     }

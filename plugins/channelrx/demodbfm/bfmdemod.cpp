@@ -540,10 +540,12 @@ void BFMDemod::webapiFormatRDSReport(SWGSDRangel::SWGRDSReport *report)
         report->setPid(new QString(str(boost::format("%04X") % getRDSParser()->m_pi_program_identification).c_str()));
         report->setPiType(new QString(getRDSParser()->pty_table[getRDSParser()->m_pi_program_type].c_str()));
         report->setPiCoverage(new QString(getRDSParser()->coverage_area_codes[getRDSParser()->m_pi_area_coverage_index].c_str()));
-        report->setProgServiceName(new QString(getRDSParser()->m_g0_program_service_name));
+        // RDS pads these to a fixed width, which is a transport detail rather than part of the
+        // name, and the radio text ends with a carriage return
+        report->setProgServiceName(new QString(QString(getRDSParser()->m_g0_program_service_name_complete).trimmed()));
         report->setMusicSpeech(new QString((getRDSParser()->m_g0_music_speech ? "Music" : "Speech")));
         report->setMonoStereo(new QString((getRDSParser()->m_g0_mono_stereo ? "Mono" : "Stereo")));
-        report->setRadioText(new QString(getRDSParser()->m_g2_radiotext));
+        report->setRadioText(new QString(QString(getRDSParser()->m_g2_radiotext).trimmed()));
         std::string time = str(boost::format("%4i-%02i-%02i %02i:%02i (%+.1fh)")\
             % (1900 + getRDSParser()->m_g4_year) % getRDSParser()->m_g4_month % getRDSParser()->m_g4_day % getRDSParser()->m_g4_hours % getRDSParser()->m_g4_minutes % getRDSParser()->m_g4_local_time_offset);
         report->setTime(new QString(time.c_str()));
@@ -620,7 +622,11 @@ void BFMDemod::webapiFormatChannelSettings(
     swgChannelSettings->setDirection(0); // Single sink (Rx)
     swgChannelSettings->setOriginatorChannelIndex(getIndexInDeviceSet());
     swgChannelSettings->setOriginatorDeviceSetIndex(getDeviceSetIndex());
-    swgChannelSettings->setChannelType(new QString(m_channelId));
+    if (swgChannelSettings->getChannelType()) {
+        *swgChannelSettings->getChannelType() = m_channelId;
+    } else {
+        swgChannelSettings->setChannelType(new QString(m_channelId));
+    }
     swgChannelSettings->setBfmDemodSettings(new SWGSDRangel::SWGBFMDemodSettings());
     SWGSDRangel::SWGBFMDemodSettings *swgBFMDemodSettings = swgChannelSettings->getBfmDemodSettings();
 
@@ -663,10 +669,18 @@ void BFMDemod::webapiFormatChannelSettings(
         swgBFMDemodSettings->setRgbColor(settings.m_rgbColor);
     }
     if (channelSettingsKeys.contains("title") || force) {
-        swgBFMDemodSettings->setTitle(new QString(settings.m_title));
+        if (swgBFMDemodSettings->getTitle()) {
+            *swgBFMDemodSettings->getTitle() = settings.m_title;
+        } else {
+            swgBFMDemodSettings->setTitle(new QString(settings.m_title));
+        }
     }
     if (channelSettingsKeys.contains("audioDeviceName") || force) {
-        swgBFMDemodSettings->setAudioDeviceName(new QString(settings.m_audioDeviceName));
+        if (swgBFMDemodSettings->getAudioDeviceName()) {
+            *swgBFMDemodSettings->getAudioDeviceName() = settings.m_audioDeviceName;
+        } else {
+            swgBFMDemodSettings->setAudioDeviceName(new QString(settings.m_audioDeviceName));
+        }
     }
     if (channelSettingsKeys.contains("streamIndex") || force) {
         swgBFMDemodSettings->setStreamIndex(settings.m_streamIndex);

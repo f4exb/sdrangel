@@ -36,6 +36,8 @@ SWGSpectrumAnnotationMarker::SWGSpectrumAnnotationMarker() {
     m_marker_color_isSet = false;
     show = 0;
     m_show_isSet = false;
+    text = nullptr;
+    m_text_isSet = false;
 }
 
 SWGSpectrumAnnotationMarker::~SWGSpectrumAnnotationMarker() {
@@ -52,6 +54,8 @@ SWGSpectrumAnnotationMarker::init() {
     m_marker_color_isSet = false;
     show = 0;
     m_show_isSet = false;
+    text = new QString("");
+    m_text_isSet = false;
 }
 
 void
@@ -60,6 +64,9 @@ SWGSpectrumAnnotationMarker::cleanup() {
 
 
 
+    if(text != nullptr) { 
+        delete text;
+    }
 }
 
 SWGSpectrumAnnotationMarker*
@@ -80,6 +87,8 @@ SWGSpectrumAnnotationMarker::fromJsonObject(QJsonObject &pJson) {
     ::SWGSDRangel::setValue(&marker_color, pJson["markerColor"], "qint32", "");
     
     ::SWGSDRangel::setValue(&show, pJson["show"], "qint32", "");
+    
+    ::SWGSDRangel::setValue(&text, pJson["text"], "QString", "QString");
     
 }
 
@@ -108,6 +117,9 @@ SWGSpectrumAnnotationMarker::asJsonObject() {
     }
     if(m_show_isSet){
         obj->insert("show", QJsonValue(show));
+    }
+    if(text != nullptr && *text != QString("")){
+        toJsonValue(QString("text"), text, obj, QString("QString"));
     }
 
     return obj;
@@ -153,6 +165,16 @@ SWGSpectrumAnnotationMarker::setShow(qint32 show) {
     this->m_show_isSet = true;
 }
 
+QString*
+SWGSpectrumAnnotationMarker::getText() {
+    return text;
+}
+void
+SWGSpectrumAnnotationMarker::setText(QString* text) {
+    this->text = text;
+    this->m_text_isSet = true;
+}
+
 
 bool
 SWGSpectrumAnnotationMarker::isSet(){
@@ -168,6 +190,9 @@ SWGSpectrumAnnotationMarker::isSet(){
             isObjectUpdated = true; break;
         }
         if(m_show_isSet){
+            isObjectUpdated = true; break;
+        }
+        if(text && *text != QString("")){
             isObjectUpdated = true; break;
         }
     }while(false);

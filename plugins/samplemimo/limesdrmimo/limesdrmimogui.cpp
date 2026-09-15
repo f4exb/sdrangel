@@ -26,6 +26,7 @@
 
 #include "device/deviceapi.h"
 #include "device/deviceuiset.h"
+#include "gui/messagedialog.h"
 #include "gui/colormapper.h"
 #include "gui/glspectrum.h"
 #include "gui/basicdevicesettingsdialog.h"
@@ -691,7 +692,7 @@ void LimeSDRMIMOGUI::updateStatus()
                 break;
             case DeviceAPI::StError:
                 ui->startStopRx->setStyleSheet("QToolButton { background-color : red; }");
-                QMessageBox::information(this, tr("Message"), m_deviceUISet->m_deviceAPI->errorMessage(0));
+                MessageDialog::information(this, tr("Message"), m_deviceUISet->m_deviceAPI->errorMessage(0));
                 break;
             default:
                 break;
@@ -716,7 +717,7 @@ void LimeSDRMIMOGUI::updateStatus()
                 break;
             case DeviceAPI::StError:
                 ui->startStopTx->setStyleSheet("QToolButton { background-color : red; }");
-                QMessageBox::information(this, tr("Message"), m_deviceUISet->m_deviceAPI->errorMessage(1));
+                MessageDialog::information(this, tr("Message"), m_deviceUISet->m_deviceAPI->errorMessage(1));
                 break;
             default:
                 break;

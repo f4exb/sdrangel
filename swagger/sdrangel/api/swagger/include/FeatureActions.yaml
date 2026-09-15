@@ -15,31 +15,49 @@ FeatureActions:
       type: integer
     AFCActions:
       $ref: "http://swgserver:8081/api/swagger/include/AFC.yaml#/AFCActions"
+      description: "Afc actions configuration for Feature."
     AMBEActions:
       $ref: "http://swgserver:8081/api/swagger/include/AMBE.yaml#/AMBEActions"
+      description: "Ambe actions configuration for Feature."
     GS232ControllerActions:
       $ref: "http://swgserver:8081/api/swagger/include/GS232Controller.yaml#/GS232ControllerActions"
+      description: "Gs232 controller actions configuration for Feature."
     LimeRFEActions:
       $ref: "http://swgserver:8081/api/swagger/include/LimeRFE.yaml#/LimeRFEActions"
+      description: "Lime rfe actions configuration for Feature."
     MapActions:
       $ref: "http://swgserver:8081/api/swagger/include/Map.yaml#/MapActions"
+      description: "Map actions configuration for Feature."
     MorseDecoderActions:
       $ref: "http://swgserver:8081/api/swagger/include/MorseDecoder.yaml#/MorseDecoderActions"
+      description: "Morse decoder actions configuration for Feature."
     PERTesterActions:
       $ref: "http://swgserver:8081/api/swagger/include/PERTester.yaml#/PERTesterActions"
+      description: "Per tester actions configuration for Feature."
     RigCtlServerActions:
       $ref: "http://swgserver:8081/api/swagger/include/RigCtlServer.yaml#/RigCtlServerActions"
+      description: "Rig ctl server actions configuration for Feature."
+    MCPServerActions:
+      $ref: "http://swgserver:8081/api/swagger/include/MCPServer.yaml#/MCPServerActions"
+      description: "Mcp server actions configuration for Feature."
     SatelliteTrackerActions:
       $ref: "http://swgserver:8081/api/swagger/include/SatelliteTracker.yaml#/SatelliteTrackerActions"
+      description: "Satellite tracker actions configuration for Feature."
     SimplePTTActions:
       $ref: "http://swgserver:8081/api/swagger/include/SimplePTT.yaml#/SimplePTTActions"
+      description: "Simple ptt actions configuration for Feature."
     SkyMapActions:
       $ref: "http://swgserver:8081/api/swagger/include/SkyMap.yaml#/SkyMapActions"
+      description: "Sky map actions configuration for Feature."
     StarTrackerActions:
       $ref: "http://swgserver:8081/api/swagger/include/StarTracker.yaml#/StarTrackerActions"
+      description: "Star tracker actions configuration for Feature."
     VORLocalizerActions:
       $ref: "http://swgserver:8081/api/swagger/include/VORLocalizer.yaml#/VORLocalizerActions"
+      description: "Vor localizer actions configuration for Feature."
     DemodAnalyzerActions:
       $ref: "http://swgserver:8081/api/swagger/include/DemodAnalyzer.yaml#/DemodAnalyzerActions"
+      description: "Demod analyzer actions configuration for Feature."
     DenoiserActions:
       $ref: "http://swgserver:8081/api/swagger/include/Denoiser.yaml#/DenoiserActions"
+      description: "Denoiser actions configuration for Feature."

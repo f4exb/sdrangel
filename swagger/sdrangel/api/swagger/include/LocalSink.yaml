@@ -6,20 +6,28 @@ LocalSinkSettings:
       type: integer
     rgbColor:
       type: integer
+      description: "Display color encoded as an RGB integer."
     title:
       type: string
+      description: "User-visible title."
     log2Decim:
       type: integer
+      description: "Base-2 exponent of the software decimation factor; the output sample rate is divided by 2^log2Decim."
     filterChainHash:
       type: integer
+      description: "Identifier of the selected half-band filter chain."
     play:
       type: integer
+      minimum: 0
+      maximum: 1
       description: >
         Run samples transfer
           * 0 - stop
           * 1 - run
     dsp:
       type: integer
+      minimum: 0
+      maximum: 1
       description: >
         Activate DSP
           * 0 - Skip DSP functions
@@ -29,6 +37,8 @@ LocalSinkSettings:
       type: integer
     fftOn:
       type: integer
+      minimum: 0
+      maximum: 1
       description: >
         Activate FFT multiband filter
           * 0 - do not run filter
@@ -38,6 +48,8 @@ LocalSinkSettings:
       type: integer
     fftWindow:
       type: integer
+      minimum: 0
+      maximum: 8
       description: >
         FFT window type
           * 0 - Bartlett
@@ -51,10 +63,13 @@ LocalSinkSettings:
           * 8 - Blackman-Harris (7th order)
     fftBands:
       type: array
+      description: "List of fft bands."
       items:
         $ref: "http://swgserver:8081/api/swagger/include/LocalSink.yaml#/FFTBand"
     reverseFilter:
       type: integer
+      minimum: 0
+      maximum: 1
       description: >
         * 0 - band definitions are bandpass
         * 1 - band definitions are band reject
@@ -64,18 +79,28 @@ LocalSinkSettings:
     useReverseAPI:
       description: Synchronize with reverse API (1 for yes, 0 for no)
       type: integer
+      minimum: 0
+      maximum: 1
     reverseAPIAddress:
       type: string
+      description: "IPv4 address or host name of the reverse API peer."
     reverseAPIPort:
       type: integer
+      description: "TCP port of the reverse API peer."
+      minimum: 1
+      maximum: 65535
     reverseAPIDeviceIndex:
       type: integer
+      description: "Device-set index used by the reverse API peer."
     reverseAPIChannelIndex:
       type: integer
+      description: "Channel index used by the reverse API peer."
     channelMarker:
       $ref: "http://swgserver:8081/api/swagger/include/ChannelMarker.yaml#/ChannelMarker"
+      description: "Channel-marker display configuration."
     rollupState:
       $ref: "http://swgserver:8081/api/swagger/include/RollupState.yaml#/RollupState"
+      description: "Saved expanded or collapsed state of the GUI sections."
 
 
 FFTBand:
