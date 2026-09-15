@@ -24,6 +24,7 @@
 #include <QXmlStreamReader>
 #include <QNetworkDiskCache>
 #include <QRegularExpression>
+#include <QSet>
 
 #include "util/corsproxy.h"
 
@@ -100,6 +101,7 @@ void KiwiSDRList::handleReply(QNetworkReply* reply)
 
 void KiwiSDRList::handleHTML(const QString& url, const QByteArray& bytes)
 {
+    static QSet<QString> unhandledKeys{};
     (void) url;
 
     QList<KiwiSDR> sdrs;
@@ -123,7 +125,7 @@ void KiwiSDRList::handleHTML(const QString& url, const QByteArray& bytes)
 
             if (urlMatch.hasMatch())
             {
-                KiwiSDR sdr;
+                KiwiSDR sdr{};
 
                 sdr.m_url = urlMatch.captured(1);
 
@@ -192,6 +194,11 @@ void KiwiSDRList::handleHTML(const QString& url, const QByteArray& bytes)
                     else if (key == "snr")
                     {
                         sdr.m_snr = value;
+                    }
+                    else if (!unhandledKeys.contains(key))
+                    {
+                        qDebug() << "KiwiSDRList::handleHTML: Unhandled key:" << key << "value:" << value;
+                        unhandledKeys.insert(key);
                     }
                 }
 
