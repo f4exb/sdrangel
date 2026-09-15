@@ -309,7 +309,9 @@ bool MeshtasticDemodDecoder::handleMessage(const Message& cmd)
             }
         }
 
-        if (m_hasCRC && !m_payloadCRCStatus && (m_spreadFactor >= 5U))
+        // Upstream symbol-offset recovery:
+        // Header and payload quantization differ, so positive and negative offsets require different corrections.
+        if (!m_payloadCRCStatus && (m_spreadFactor >= 5U))
         {
             const LoRaDecodeState baseState = captureLoRaState(msgBytes);
             const unsigned int headerNbSymbolBits = (m_hasHeader && (m_spreadFactor > 2U))
@@ -317,8 +319,10 @@ bool MeshtasticDemodDecoder::handleMessage(const Message& cmd)
                 : m_nbSymbolBits;
             bool recovered = false;
 
-            for (int delta : {-1, 1})
+            // Upstream positive-offset recovery:
+            // Apply FFT bin offset of +1 consistently to the 8-symbol header and payload.
             {
+                const int delta = 1;
                 std::vector<unsigned short> shifted = msg.getSymbols();
 
                 for (size_t i = 0; i < shifted.size(); i++)
@@ -335,15 +339,45 @@ bool MeshtasticDemodDecoder::handleMessage(const Message& cmd)
                 decodeSymbols(shifted, shiftedBytes); // hard-path decode with adjusted symbol indices
                 const LoRaDecodeState shiftedState = captureLoRaState(shiftedBytes);
 
-                if (shiftedState.payloadCRCStatus)
+                if (shiftedState.headerCRCStatus
+                    && shiftedState.hasCRC
+                    && shiftedState.payloadCRCStatus)
                 {
                     restoreLoRaState(shiftedState);
-                    decodePath = (delta == -1) ? "minus1_bin" : "plus1_bin";
+                    decodePath = "plus1_bin";
                     recovered = true;
-                    break;
                 }
             }
 
+            // Upstream negative-offset recovery:
+            // Preserve the 8-symbol header and apply FFT bin offset of -1 only to payload symbols.
+            if (!recovered)
+            {
+                std::vector<unsigned short> shifted = msg.getSymbols();
+
+                for (size_t i = m_hasHeader ? 8U : 0U; i < shifted.size(); i++)
+                {
+                    const unsigned int mod = 1U << std::max(1U, m_nbSymbolBits);
+                    const int s = static_cast<int>(shifted[i]);
+                    const int v = (s - 1) % static_cast<int>(mod);
+                    shifted[i] = static_cast<unsigned short>(v < 0 ? (v + static_cast<int>(mod)) : v);
+                }
+
+                QByteArray shiftedBytes;
+                decodeSymbols(shifted, shiftedBytes); // hard-path decode with adjusted symbol indices
+                const LoRaDecodeState shiftedState = captureLoRaState(shiftedBytes);
+
+                if (shiftedState.headerCRCStatus
+                    && shiftedState.hasCRC
+                    && shiftedState.payloadCRCStatus)
+                {
+                    restoreLoRaState(shiftedState);
+                    decodePath = "payload_minus1_bin";
+                    recovered = true;
+                }
+            }
+
+            // If CRC or FEC validation fails, restore the original symbol values.
             if (!recovered) {
                 restoreLoRaState(baseState);
             }
