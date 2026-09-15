@@ -1387,6 +1387,8 @@ void VORLocalizerGUI::redrawMap()
 
 void VORLocalizerGUI::showEvent(QShowEvent *event)
 {
+    FeatureGUI::showEvent(event);
+
     if (!event->spontaneous())
     {
         // Workaround for https://bugreports.qt.io/browse/QTBUG-100333
