@@ -126,10 +126,10 @@ void WSSpectrum::processClientMessage(const QString &message)
 void WSSpectrum::socketDisconnected()
 {
     QWebSocket *pClient = qobject_cast<QWebSocket *>(sender());
-    qDebug() << getWebSocketIdentifier(pClient) << " disconnected";
 
     if (pClient)
     {
+        qDebug() << getWebSocketIdentifier(pClient) << " disconnected";
         m_clients.removeAll(pClient);
         pClient->deleteLater();
     }
