@@ -25,6 +25,7 @@
 #include <QObject>
 #include <QDateTime>
 #include <QMutex>
+#include <QJsonObject>
 #include <QRecursiveMutex>
 
 #include "dsp/basebandsamplesink.h"
@@ -47,6 +48,7 @@ namespace SWGSDRangel {
     class SWGGLSpectrumReport;
     class SWGSpectrumActions;
     class SWGGLSpectrumData;
+    class SWGGLSpectrumHistory;
     class SWGSpectrumServer;
     class SWGSuccessResponse;
 };
@@ -175,7 +177,7 @@ public:
 	SpectrumVis(Real scalef);
 	virtual ~SpectrumVis();
 
-    void setGLSpectrum(GLSpectrumInterface* glSpectrum) { m_glSpectrum = glSpectrum; }
+    void setGLSpectrum(GLSpectrumInterface* glSpectrum);
     void setWorkspaceIndex(int index) { m_workspaceIndex = index; }
     int getWorkspaceIndex() const { return m_workspaceIndex; }
 
@@ -206,6 +208,22 @@ public:
         SWGSDRangel::SWGGLSpectrumData& response, QString& errorMessage) const;
 
     static const int m_maxDataBins = 4096; //!< A reduced spectrum any larger is not a summary
+
+    //!< Statistics over the spectrum history the display keeps for scrolling: per bin max, mean
+    //!< and occupancy, and the signals found. thresholdDb is above the measured floor
+    int webapiSpectrumHistoryGet(double seconds, int bins, qint64 startFrequency, qint64 stopFrequency, double thresholdDb,
+        SWGSDRangel::SWGGLSpectrumHistory& response, QString& errorMessage) const;
+    //!< The same history as a greyscale PNG, newest row at the bottom, bins wide and one row per pixel up to maxRows
+    int webapiSpectrumHistoryImageGet(double seconds, int bins, qint64 startFrequency, qint64 stopFrequency, int maxRows,
+        QByteArray& png, QJsonObject& description, QString& errorMessage) const;
+    static const int m_maxHistoryRows = 4000;
+
+private:
+    struct ReducedHistory;
+    int reduceHistory(double seconds, int bins, qint64 startFrequency, qint64 stopFrequency, int maxRows,
+        ReducedHistory& out, QString& errorMessage) const;
+
+public:
     int webapiActionsPost(const QStringList& spectrumActionsKeys, SWGSDRangel::SWGSpectrumActions& query, QString& errorMessage);
 
     //!< Called by whatever measures the spectrum, once per set of results

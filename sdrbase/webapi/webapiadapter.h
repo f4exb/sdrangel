@@ -260,6 +260,27 @@ public:
             SWGSDRangel::SWGGLSpectrumData& response,
             SWGSDRangel::SWGErrorResponse& error);
 
+    virtual int devicesetSpectrumHistoryGet(
+            int deviceSetIndex,
+            double seconds,
+            int bins,
+            qint64 startFrequency,
+            qint64 stopFrequency,
+            double thresholdDb,
+            SWGSDRangel::SWGGLSpectrumHistory& response,
+            SWGSDRangel::SWGErrorResponse& error);
+
+    virtual int devicesetSpectrumHistoryImageGet(
+            int deviceSetIndex,
+            double seconds,
+            int bins,
+            qint64 startFrequency,
+            qint64 stopFrequency,
+            int maxRows,
+            QByteArray& png,
+            QJsonObject& description,
+            SWGSDRangel::SWGErrorResponse& error);
+
     virtual int devicesetSpectrumReportGet(
             int deviceSetIndex,
             SWGSDRangel::SWGGLSpectrumReport& response,

@@ -470,6 +470,18 @@ int DeviceSet::webapiSpectrumDataGet(int bins, qint64 startFrequency, qint64 sto
     return m_spectrumVis->webapiSpectrumDataGet(bins, startFrequency, stopFrequency, reduce, response, errorMessage);
 }
 
+int DeviceSet::webapiSpectrumHistoryGet(double seconds, int bins, qint64 startFrequency, qint64 stopFrequency, double thresholdDb,
+    SWGSDRangel::SWGGLSpectrumHistory& response, QString& errorMessage) const
+{
+    return m_spectrumVis->webapiSpectrumHistoryGet(seconds, bins, startFrequency, stopFrequency, thresholdDb, response, errorMessage);
+}
+
+int DeviceSet::webapiSpectrumHistoryImageGet(double seconds, int bins, qint64 startFrequency, qint64 stopFrequency, int maxRows,
+    QByteArray& png, QJsonObject& description, QString& errorMessage) const
+{
+    return m_spectrumVis->webapiSpectrumHistoryImageGet(seconds, bins, startFrequency, stopFrequency, maxRows, png, description, errorMessage);
+}
+
 int DeviceSet::webapiSpectrumActionsPost(const QStringList& spectrumActionsKeys, SWGSDRangel::SWGSpectrumActions& query, QString& errorMessage)
 {
     return m_spectrumVis->webapiActionsPost(spectrumActionsKeys, query, errorMessage);

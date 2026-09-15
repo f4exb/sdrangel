@@ -23,6 +23,8 @@
 #define SDRBASE_WEBAPI_WEBAPIADAPTERINTERFACE_H_
 
 #include <QString>
+#include <QJsonObject>
+#include <QByteArray>
 #include <QStringList>
 #include <regex>
 
@@ -86,6 +88,7 @@ namespace SWGSDRangel
     class SWGGLSpectrumReport;
     class SWGSpectrumActions;
     class SWGGLSpectrumData;
+    class SWGGLSpectrumHistory;
     class SWGSpectrumServer;
 }
 
@@ -1003,6 +1006,56 @@ public:
     }
 
     /**
+     * Statistics over the spectrum history kept for scrolling
+     */
+    virtual int devicesetSpectrumHistoryGet(
+            int deviceSetIndex,
+            double seconds,
+            int bins,
+            qint64 startFrequency,
+            qint64 stopFrequency,
+            double thresholdDb,
+            SWGSDRangel::SWGGLSpectrumHistory& response,
+            SWGSDRangel::SWGErrorResponse& error)
+    {
+        (void) deviceSetIndex;
+        (void) seconds;
+        (void) bins;
+        (void) startFrequency;
+        (void) stopFrequency;
+        (void) thresholdDb;
+        (void) response;
+        *error.getMessage() = "Function not implemented";
+        return 501;
+    }
+
+    /**
+     * The spectrum history as a PNG waterfall; description receives its extents
+     */
+    virtual int devicesetSpectrumHistoryImageGet(
+            int deviceSetIndex,
+            double seconds,
+            int bins,
+            qint64 startFrequency,
+            qint64 stopFrequency,
+            int maxRows,
+            QByteArray& png,
+            QJsonObject& description,
+            SWGSDRangel::SWGErrorResponse& error)
+    {
+        (void) deviceSetIndex;
+        (void) seconds;
+        (void) bins;
+        (void) startFrequency;
+        (void) stopFrequency;
+        (void) maxRows;
+        (void) png;
+        (void) description;
+        *error.getMessage() = "Function not implemented";
+        return 501;
+    }
+
+    /**
      * A reduced copy of the current power spectrum
      */
     virtual int devicesetSpectrumDataGet(
@@ -1807,6 +1860,8 @@ public:
     static std::regex devicesetSpectrumReportURLRe;
     static std::regex devicesetSpectrumActionsURLRe;
     static std::regex devicesetSpectrumDataURLRe;
+    static std::regex devicesetSpectrumHistoryURLRe;
+    static std::regex devicesetSpectrumHistoryImageURLRe;
     static std::regex devicesetSpectrumServerURLRe;
     static std::regex devicesetSpectrumWorkspaceURLRe;
     static std::regex devicesetDeviceURLRe;

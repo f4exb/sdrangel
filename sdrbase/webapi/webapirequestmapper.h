@@ -89,6 +89,7 @@ private:
     void devicesetSpectrumReportService(const std::string& indexStr, qtwebapp::HttpRequest& request, qtwebapp::HttpResponse& response);
     void devicesetSpectrumActionsService(const std::string& indexStr, qtwebapp::HttpRequest& request, qtwebapp::HttpResponse& response);
     void devicesetSpectrumDataService(const std::string& indexStr, qtwebapp::HttpRequest& request, qtwebapp::HttpResponse& response);
+    void devicesetSpectrumHistoryService(const std::string& indexStr, qtwebapp::HttpRequest& request, qtwebapp::HttpResponse& response, bool image);
     void devicesetSpectrumServerService(const std::string& indexStr, qtwebapp::HttpRequest& request, qtwebapp::HttpResponse& response);
     void devicesetSpectrumWorkspaceService(const std::string& indexStr, qtwebapp::HttpRequest& request, qtwebapp::HttpResponse& response);
     void devicesetDeviceService(const std::string& indexStr, qtwebapp::HttpRequest& request, qtwebapp::HttpResponse& response);

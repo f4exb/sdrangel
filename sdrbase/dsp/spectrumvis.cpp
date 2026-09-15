@@ -26,6 +26,13 @@
 #include "SWGGLSpectrumReport.h"
 #include "SWGSpectrumActions.h"
 #include "SWGGLSpectrumData.h"
+#include "SWGGLSpectrumHistory.h"
+#include "SWGSpectrumHistorySignal.h"
+#include <QImage>
+#include <QBuffer>
+#include <QJsonObject>
+#include <algorithm>
+#include <cmath>
 #include "SWGSpectrumPeak.h"
 #include "SWGSpectrumServer.h"
 #include "SWGSuccessResponse.h"
@@ -72,8 +79,27 @@ SpectrumVis::SpectrumVis(Real scalef) :
 
 SpectrumVis::~SpectrumVis()
 {
+    if (m_glSpectrum) {
+        m_glSpectrum->setSpectrumVis(nullptr);
+    }
+
     FFTFactory *fftFactory = DSPEngine::instance()->getFFTFactory();
     fftFactory->releaseEngine(m_settings.m_fftSize, false, m_fftEngineSequence);
+}
+
+void SpectrumVis::setGLSpectrum(GLSpectrumInterface* glSpectrum)
+{
+    QMutexLocker mutexLocker(&m_mutex);
+
+    if (m_glSpectrum && (m_glSpectrum != glSpectrum)) {
+        m_glSpectrum->setSpectrumVis(nullptr);
+    }
+
+    m_glSpectrum = glSpectrum;
+
+    if (m_glSpectrum) {
+        m_glSpectrum->setSpectrumVis(this);
+    }
 }
 
 void SpectrumVis::setScalef(Real scalef)
@@ -875,7 +901,348 @@ void SpectrumVis::handleConfigureWSSpectrum(const QString& address, uint16_t por
     }
 }
 
+// The history reduced to a matrix of rows by bins, in dB, over one frequency range and one
+// device setting: rows taken while the device was tuned or sampling differently are left out,
+// since their bins mean other frequencies
+struct SpectrumVis::ReducedHistory
+{
+    int m_bins = 0;
+    int m_rows = 0;
+    qint64 m_startFrequency = 0;    //!< Centre of the first bin
+    double m_binBandwidth = 0.0;
+    qint64 m_centerFrequency = 0;
+    int m_bandwidth = 0;
+    int m_skippedRows = 0;
+    std::vector<float> m_values;    //!< rows * bins, oldest row first
+    QList<QDateTime> m_times;
+};
 
+// Collects the rows of the display's scroll buffer into a reduced matrix. Returns an HTTP status
+int SpectrumVis::reduceHistory(double seconds, int bins, qint64 startFrequency, qint64 stopFrequency, int maxRows,
+    ReducedHistory& out, QString& errorMessage) const
+{
+    QMutexLocker locker(&m_mutex);
+    const int fftSize = m_settings.m_fftSize;
+    const qint64 centerFrequency = m_centerFrequency;
+    const int bandwidth = m_sampleRate;
+    const bool linear = m_settings.m_linear;
+    const bool scrolling = m_settings.m_scrollBar;
+    GLSpectrumInterface *display = m_glSpectrum;
+
+    if (!display)
+    {
+        errorMessage = "There is no spectrum display for this device set, so there is no history";
+        return 404;
+    }
+
+    if (!scrolling)
+    {
+        errorMessage = "The spectrum history is kept only while scrolling is enabled: "
+            "set scrollBar to 1 (and scrollLength to the rows to keep) in the spectrum settings";
+        return 404;
+    }
+
+    if ((fftSize <= 0) || (bandwidth <= 0))
+    {
+        errorMessage = "The spectrum has no sample rate yet";
+        return 500;
+    }
+
+    bins = std::max(1, std::min(bins, m_maxDataBins));
+    const double hzPerBin = bandwidth / (double) fftSize;
+    const qint64 spectrumStart = centerFrequency - bandwidth / 2;
+    const qint64 wantedStart = (startFrequency == 0) ? spectrumStart : startFrequency;
+    const qint64 wantedStop = (stopFrequency == 0) ? spectrumStart + bandwidth : stopFrequency;
+
+    if (wantedStop <= wantedStart)
+    {
+        errorMessage = "stopFrequency must be above startFrequency";
+        return 400;
+    }
+
+    int firstBin = (int) std::floor((wantedStart - spectrumStart) / hzPerBin);
+    int lastBin = (int) std::ceil((wantedStop - spectrumStart) / hzPerBin) - 1;
+    firstBin = std::max(0, std::min(firstBin, fftSize - 1));
+    lastBin = std::max(firstBin, std::min(lastBin, fftSize - 1));
+    const int available = lastBin - firstBin + 1;
+    const int returned = std::min(bins, available);
+    const double binsPerGroup = available / (double) returned;
+
+    out.m_bins = returned;
+    out.m_centerFrequency = centerFrequency;
+    out.m_bandwidth = bandwidth;
+    out.m_binBandwidth = hzPerBin * binsPerGroup;
+    out.m_startFrequency = spectrumStart + (qint64) (firstBin * hzPerBin + out.m_binBandwidth / 2);
+    out.m_rows = 0;
+    out.m_skippedRows = 0;
+    out.m_values.clear();
+    out.m_times.clear();
+
+    const QDateTime since = QDateTime::currentDateTimeUtc().addMSecs(-(qint64) (seconds * 1000.0));
+
+    const bool have = display->getSpectrumHistory(since, maxRows,
+        [&](const Real *spectrum, int rowFftSize, quint32 rowSampleRate, qint64 rowCentre, const QDateTime& dateTime)
+        {
+            if ((rowFftSize != fftSize) || ((int) rowSampleRate != bandwidth) || (rowCentre != centerFrequency))
+            {
+                out.m_skippedRows++;
+                return;
+            }
+
+            const size_t base = out.m_values.size();
+            out.m_values.resize(base + returned);
+
+            for (int i = 0; i < returned; i++)
+            {
+                const int from = firstBin + (int) std::floor(i * binsPerGroup);
+                int to = firstBin + (int) std::floor((i + 1) * binsPerGroup) - 1;
+                to = std::max(from, std::min(to, lastBin));
+                float value = spectrum[from];
+
+                for (int bin = from + 1; bin <= to; bin++) {
+                    value = std::max(value, spectrum[bin]);
+                }
+
+                if (linear) {
+                    value = (float) (10.0 * std::log10(std::max((double) value, 1e-20)));
+                }
+
+                out.m_values[base + i] = value;
+            }
+
+            out.m_times.append(dateTime);
+            out.m_rows++;
+        });
+
+    if (!have)
+    {
+        errorMessage = "The spectrum history is kept only while scrolling is enabled in the spectrum display";
+        return 404;
+    }
+
+    if (out.m_rows == 0)
+    {
+        errorMessage = out.m_skippedRows > 0
+            ? QString("The %1 rows of history in that time were taken with the device tuned or sampling differently, so they do not describe the current band").arg(out.m_skippedRows)
+            : "There is no spectrum history yet for that time: the spectrum is only computed while it is displayed, and rows arrive at the display's refresh rate";
+        return 404;
+    }
+
+    return 200;
+}
+
+int SpectrumVis::webapiSpectrumHistoryGet(double seconds, int bins, qint64 startFrequency, qint64 stopFrequency, double thresholdDb,
+    SWGSDRangel::SWGGLSpectrumHistory& response, QString& errorMessage) const
+{
+    ReducedHistory history;
+    const int status = reduceHistory(seconds, bins, startFrequency, stopFrequency, m_maxHistoryRows, history, errorMessage);
+
+    if (status != 200) {
+        return status;
+    }
+
+    const int rows = history.m_rows;
+    const int n = history.m_bins;
+    std::vector<float> maxDb(n, -1e9f);
+    std::vector<double> meanDb(n, 0.0);
+
+    for (int r = 0; r < rows; r++)
+    {
+        const float *row = &history.m_values[(size_t) r * n];
+
+        for (int i = 0; i < n; i++)
+        {
+            maxDb[i] = std::max(maxDb[i], row[i]);
+            meanDb[i] += row[i];
+        }
+    }
+
+    for (int i = 0; i < n; i++) {
+        meanDb[i] /= rows;
+    }
+
+    // The floor is the median of the per bin means: most bins of most bands hold no signal,
+    // and a mean survives the odd burst that a minimum would not
+    std::vector<double> sorted(meanDb);
+    std::sort(sorted.begin(), sorted.end());
+    const double floorDb = sorted[n / 2];
+    const double threshold = floorDb + thresholdDb;
+    std::vector<int> above(n, 0);
+
+    for (int r = 0; r < rows; r++)
+    {
+        const float *row = &history.m_values[(size_t) r * n];
+
+        for (int i = 0; i < n; i++)
+        {
+            if (row[i] > threshold) {
+                above[i]++;
+            }
+        }
+    }
+
+    response.init();
+    response.setCenterFrequency(history.m_centerFrequency);
+    response.setBandwidth(history.m_bandwidth);
+    response.setStartFrequency(history.m_startFrequency);
+    response.setStopFrequency(history.m_startFrequency + (qint64) ((n - 1) * history.m_binBandwidth));
+    response.setBinBandwidth((int) history.m_binBandwidth);
+    response.setBins(n);
+    response.setRows(rows);
+    response.setSkippedRows(history.m_skippedRows);
+    response.setFirstTime(new QString(history.m_times.first().toString(Qt::ISODateWithMs)));
+    response.setLastTime(new QString(history.m_times.last().toString(Qt::ISODateWithMs)));
+    response.setSeconds((float) (history.m_times.first().msecsTo(history.m_times.last()) / 1000.0));
+    response.setFloorDb((float) floorDb);
+    response.setThresholdDb((float) threshold);
+
+    for (int i = 0; i < n; i++)
+    {
+        response.getMaxDb()->append(maxDb[i]);
+        response.getMeanDb()->append((float) meanDb[i]);
+        response.getOccupancy()->append((float) (above[i] / (double) rows));
+    }
+
+    // Signals: runs of bins whose maximum rose above the threshold. Each is judged over the
+    // rows as a whole, so a signal hopping within its run still counts as one transmission
+    // per row, and its duty cycle is the share of rows in which any of its bins was up
+    struct Found { int m_first; int m_last; };
+    std::vector<Found> runs;
+
+    for (int i = 0; i < n; i++)
+    {
+        if (maxDb[i] <= threshold) {
+            continue;
+        }
+
+        if (!runs.empty() && (runs.back().m_last == i - 1)) {
+            runs.back().m_last = i;
+        } else {
+            runs.push_back({i, i});
+        }
+    }
+
+    // Over thousands of rows, noise alone rises past a threshold a few dB above the floor now
+    // and then, so a run that was up in only a row or two of many is noise, not a signal,
+    // unless it stood well clear when it did
+    const int minActive = std::max(2, rows / 200);
+
+    for (const Found& run : runs)
+    {
+        int peakBin = run.m_first;
+        int active = 0;
+        int firstRow = -1;
+        int lastRow = -1;
+
+        for (int i = run.m_first + 1; i <= run.m_last; i++)
+        {
+            if (maxDb[i] > maxDb[peakBin]) {
+                peakBin = i;
+            }
+        }
+
+        for (int r = 0; r < rows; r++)
+        {
+            const float *row = &history.m_values[(size_t) r * n];
+            bool up = false;
+
+            for (int i = run.m_first; (i <= run.m_last) && !up; i++) {
+                up = row[i] > threshold;
+            }
+
+            if (up)
+            {
+                active++;
+                lastRow = r;
+
+                if (firstRow < 0) {
+                    firstRow = r;
+                }
+            }
+        }
+
+        if ((active < minActive) && (maxDb[peakBin] < threshold + 6.0)) {
+            continue;
+        }
+
+        SWGSDRangel::SWGSpectrumHistorySignal *found = new SWGSDRangel::SWGSpectrumHistorySignal();
+        found->init();
+        found->setFrequency(history.m_startFrequency + (qint64) (peakBin * history.m_binBandwidth));
+        found->setStartFrequency(history.m_startFrequency + (qint64) (run.m_first * history.m_binBandwidth - history.m_binBandwidth / 2));
+        found->setStopFrequency(history.m_startFrequency + (qint64) (run.m_last * history.m_binBandwidth + history.m_binBandwidth / 2));
+        found->setBandwidth((int) ((run.m_last - run.m_first + 1) * history.m_binBandwidth));
+        found->setPeakDb(maxDb[peakBin]);
+        found->setDutyCycle((float) (active / (double) rows));
+        found->setFirstSeen(new QString(history.m_times[firstRow].toString(Qt::ISODateWithMs)));
+        found->setLastSeen(new QString(history.m_times[lastRow].toString(Qt::ISODateWithMs)));
+        response.getSignals()->append(found);
+    }
+
+    response.setSignalCount(response.getSignals()->size());
+    return 200;
+}
+
+int SpectrumVis::webapiSpectrumHistoryImageGet(double seconds, int bins, qint64 startFrequency, qint64 stopFrequency, int maxRows,
+    QByteArray& png, QJsonObject& description, QString& errorMessage) const
+{
+    ReducedHistory history;
+    maxRows = std::max(1, std::min(maxRows, m_maxHistoryRows));
+    const int status = reduceHistory(seconds, bins, startFrequency, stopFrequency, maxRows, history, errorMessage);
+
+    if (status != 200) {
+        return status;
+    }
+
+    const int n = history.m_bins;
+    const int rows = history.m_rows;
+
+    // Greyscale from the floor to the peak: the floor as the median of everything, black a
+    // little below it so noise is not solid black, white at the hottest bin
+    std::vector<float> sorted(history.m_values);
+    std::sort(sorted.begin(), sorted.end());
+    const float floorDb = sorted[sorted.size() / 2];
+    const float peakDb = sorted.back();
+    const float low = floorDb - 5.0f;
+    const float high = std::max(peakDb, low + 10.0f);
+
+    QImage image(n, rows, QImage::Format_Grayscale8);
+
+    for (int r = 0; r < rows; r++)
+    {
+        uchar *line = image.scanLine(r);
+        const float *row = &history.m_values[(size_t) r * n];
+
+        for (int i = 0; i < n; i++)
+        {
+            float v = (row[i] - low) / (high - low);
+            v = std::max(0.0f, std::min(1.0f, v));
+            line[i] = (uchar) (v * 255.0f);
+        }
+    }
+
+    QBuffer buffer(&png);
+    buffer.open(QIODevice::WriteOnly);
+
+    if (!image.save(&buffer, "PNG"))
+    {
+        errorMessage = "The image could not be encoded";
+        return 500;
+    }
+
+    description["width"] = n;
+    description["height"] = rows;
+    description["startFrequency"] = (double) history.m_startFrequency;
+    description["stopFrequency"] = (double) (history.m_startFrequency + (qint64) ((n - 1) * history.m_binBandwidth));
+    description["binBandwidth"] = history.m_binBandwidth;
+    description["centerFrequency"] = (double) history.m_centerFrequency;
+    description["firstTime"] = history.m_times.first().toString(Qt::ISODateWithMs);
+    description["lastTime"] = history.m_times.last().toString(Qt::ISODateWithMs);
+    description["seconds"] = history.m_times.first().msecsTo(history.m_times.last()) / 1000.0;
+    description["blackDb"] = low;
+    description["whiteDb"] = high;
+    description["skippedRows"] = history.m_skippedRows;
+    return 200;
+}
 
 int SpectrumVis::webapiActionsPost(const QStringList& spectrumActionsKeys, SWGSDRangel::SWGSpectrumActions& query, QString& errorMessage)
 {

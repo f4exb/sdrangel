@@ -1182,6 +1182,67 @@ void GLSpectrumView::updateSpectrumBuffer(const Real *spectrum, int fftSize, qui
     m_spectrumBuffer.append(spectrumData);
 }
 
+// We use the scroll buffer for the Web API's spectrum history
+bool GLSpectrumView::getSpectrumHistory(const QDateTime& since, int maxRows, const HistoryRowCallback& row)
+{
+    QMutexLocker mutexLocker(&m_mutex);
+
+    if (!m_scrollBarEnabled) {
+        return false;
+    }
+
+    const int size = (int) m_spectrumBuffer.size();
+    int first = size;
+
+    // Back from the newest to the oldest row still wanted
+    while ((first > 0) && (m_spectrumBuffer[first - 1].m_dateTime >= since)) {
+        first--;
+    }
+
+    // Every FFT is a row, hundreds a second, so a period is usually far more rows than asked
+    // for. Consecutive rows are folded together by maximum rather than skipped, so a burst
+    // shorter than the fold still shows, and a fold never mixes rows of different tunings
+    const int candidates = size - first;
+    const int fold = std::max(1, (candidates + std::max(1, maxRows) - 1) / std::max(1, maxRows));
+    std::vector<Real> combined;
+
+    for (int i = first; i < size; )
+    {
+        const Spectrum& lead = m_spectrumBuffer[i];
+        int end = i + 1;
+
+        while ((end < size) && (end - i < fold)
+            && (m_spectrumBuffer[end].m_sampleRate == lead.m_sampleRate)
+            && (m_spectrumBuffer[end].m_centerFrequency == lead.m_centerFrequency)) {
+            end++;
+        }
+
+        if (end - i == 1)
+        {
+            row(lead.m_spectrum, m_spectrumBufferFFTSize, lead.m_sampleRate, lead.m_centerFrequency, lead.m_dateTime);
+        }
+        else
+        {
+            combined.assign(lead.m_spectrum, lead.m_spectrum + m_spectrumBufferFFTSize);
+
+            for (int j = i + 1; j < end; j++)
+            {
+                const Real *other = m_spectrumBuffer[j].m_spectrum;
+
+                for (int k = 0; k < m_spectrumBufferFFTSize; k++) {
+                    combined[k] = std::max(combined[k], other[k]);
+                }
+            }
+
+            row(combined.data(), m_spectrumBufferFFTSize, lead.m_sampleRate, lead.m_centerFrequency, m_spectrumBuffer[end - 1].m_dateTime);
+        }
+
+        i = end;
+    }
+
+    return true;
+}
+
 void GLSpectrumView::clearWaterfallRow(int nbBins)
 {
     if (m_waterfallBufferPos < m_waterfallBuffer->height())

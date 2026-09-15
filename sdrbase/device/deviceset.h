@@ -22,6 +22,7 @@
 #define SDRSRV_DEVICE_DEVICESET_H_
 
 #include <QTimer>
+#include <QJsonObject>
 
 #include "export.h"
 
@@ -39,6 +40,7 @@ namespace SWGSDRangel {
     class SWGGLSpectrumReport;
     class SWGSpectrumActions;
     class SWGGLSpectrumData;
+    class SWGGLSpectrumHistory;
     class SWGSpectrumServer;
     class SWGSuccessResponse;
 };
@@ -82,6 +84,10 @@ public:
     int webapiSpectrumReportGet(SWGSDRangel::SWGGLSpectrumReport& response, QString& errorMessage) const;
     int webapiSpectrumDataGet(int bins, qint64 startFrequency, qint64 stopFrequency, const QString& reduce,
         SWGSDRangel::SWGGLSpectrumData& response, QString& errorMessage) const;
+    int webapiSpectrumHistoryGet(double seconds, int bins, qint64 startFrequency, qint64 stopFrequency, double thresholdDb,
+        SWGSDRangel::SWGGLSpectrumHistory& response, QString& errorMessage) const;
+    int webapiSpectrumHistoryImageGet(double seconds, int bins, qint64 startFrequency, qint64 stopFrequency, int maxRows,
+        QByteArray& png, QJsonObject& description, QString& errorMessage) const;
     int webapiSpectrumActionsPost(const QStringList& spectrumActionsKeys, SWGSDRangel::SWGSpectrumActions& query, QString& errorMessage);
     int webapiSpectrumSettingsPutPatch(
             bool force,

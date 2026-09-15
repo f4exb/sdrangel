@@ -74,6 +74,7 @@
 #include "SWGWorkspaceInfo.h"
 #include "SWGWorkspaceActions.h"
 #include "SWGWindowList.h"
+#include "SWGGLSpectrumHistory.h"
 #include "SWGWindowInfo.h"
 #include "SWGChannelsDetail.h"
 #include "SWGChannelSettings.h"
@@ -1937,6 +1938,51 @@ int WebAPIAdapter::devicesetSpectrumActionsPost(
 
         return 404;
     }
+}
+
+int WebAPIAdapter::devicesetSpectrumHistoryGet(
+        int deviceSetIndex,
+        double seconds,
+        int bins,
+        qint64 startFrequency,
+        qint64 stopFrequency,
+        double thresholdDb,
+        SWGSDRangel::SWGGLSpectrumHistory& response,
+        SWGSDRangel::SWGErrorResponse& error)
+{
+    error.init();
+
+    if ((deviceSetIndex >= 0) && (deviceSetIndex < (int) m_mainCore->m_deviceSets.size()))
+    {
+        const DeviceSet *deviceSet = m_mainCore->m_deviceSets[deviceSetIndex];
+        return deviceSet->webapiSpectrumHistoryGet(seconds, bins, startFrequency, stopFrequency, thresholdDb, response, *error.getMessage());
+    }
+
+    *error.getMessage() = QString("There is no device set with index %1").arg(deviceSetIndex);
+    return 404;
+}
+
+int WebAPIAdapter::devicesetSpectrumHistoryImageGet(
+        int deviceSetIndex,
+        double seconds,
+        int bins,
+        qint64 startFrequency,
+        qint64 stopFrequency,
+        int maxRows,
+        QByteArray& png,
+        QJsonObject& description,
+        SWGSDRangel::SWGErrorResponse& error)
+{
+    error.init();
+
+    if ((deviceSetIndex >= 0) && (deviceSetIndex < (int) m_mainCore->m_deviceSets.size()))
+    {
+        const DeviceSet *deviceSet = m_mainCore->m_deviceSets[deviceSetIndex];
+        return deviceSet->webapiSpectrumHistoryImageGet(seconds, bins, startFrequency, stopFrequency, maxRows, png, description, *error.getMessage());
+    }
+
+    *error.getMessage() = QString("There is no device set with index %1").arg(deviceSetIndex);
+    return 404;
 }
 
 int WebAPIAdapter::devicesetSpectrumDataGet(

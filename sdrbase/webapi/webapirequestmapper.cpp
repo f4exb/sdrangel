@@ -55,6 +55,7 @@
 #include "SWGWorkspaceInfo.h"
 #include "SWGWorkspaceActions.h"
 #include "SWGWindowList.h"
+#include "SWGGLSpectrumHistory.h"
 #include "SWGChannelsDetail.h"
 #include "SWGChannelSettings.h"
 #include "SWGChannelReport.h"
@@ -196,6 +197,10 @@ void WebAPIRequestMapper::service(qtwebapp::HttpRequest& request, qtwebapp::Http
                 devicesetSpectrumActionsService(std::string(desc_match[1]), request, response);
             } else if (std::regex_match(pathStr, desc_match, WebAPIAdapterInterface::devicesetSpectrumDataURLRe)) {
                 devicesetSpectrumDataService(std::string(desc_match[1]), request, response);
+            } else if (std::regex_match(pathStr, desc_match, WebAPIAdapterInterface::devicesetSpectrumHistoryURLRe)) {
+                devicesetSpectrumHistoryService(std::string(desc_match[1]), request, response, false);
+            } else if (std::regex_match(pathStr, desc_match, WebAPIAdapterInterface::devicesetSpectrumHistoryImageURLRe)) {
+                devicesetSpectrumHistoryService(std::string(desc_match[1]), request, response, true);
             } else if (std::regex_match(pathStr, desc_match, WebAPIAdapterInterface::devicesetSpectrumServerURLRe)) {
                 devicesetSpectrumServerService(std::string(desc_match[1]), request, response);
             } else if (std::regex_match(pathStr, desc_match, WebAPIAdapterInterface::workspaceActionsURLRe)) {
@@ -1800,6 +1805,120 @@ void WebAPIRequestMapper::devicesetService(const std::string& indexStr, qtwebapp
 
 
 
+
+void WebAPIRequestMapper::devicesetSpectrumHistoryService(const std::string& indexStr, qtwebapp::HttpRequest& request, qtwebapp::HttpResponse& response, bool image)
+{
+    SWGSDRangel::SWGErrorResponse errorResponse;
+    response.setHeader("Access-Control-Allow-Origin", "*");
+
+    auto fail = [&](int status, const QString& message)
+    {
+        response.setHeader("Content-Type", "application/json");
+        response.setStatus(status, message.toLatin1().constData());
+        errorResponse.init();
+        *errorResponse.getMessage() = message;
+        response.write(errorResponse.asJson().toUtf8());
+    };
+
+    try
+    {
+        int deviceSetIndex = boost::lexical_cast<int>(indexStr);
+
+        if (request.getMethod() != "GET")
+        {
+            fail(405, "Invalid HTTP method");
+            return;
+        }
+
+        // Numbers from the query string, each checked rather than defaulted on a parse failure
+        double seconds = 60.0;
+        int bins = image ? 512 : 128;
+        int rows = 512;
+        double threshold = 6.0;
+        qint64 startFrequency = 0;
+        qint64 stopFrequency = 0;
+
+        for (const char *name : {"seconds", "bins", "rows", "threshold", "startFrequency", "stopFrequency"})
+        {
+            QByteArray parameter = request.getParameter(name);
+
+            if (parameter.isEmpty()) {
+                continue;
+            }
+
+            bool parsed = false;
+            const double value = QString(parameter).toDouble(&parsed);
+
+            if (!parsed)
+            {
+                fail(400, QString("%1 must be a number").arg(name));
+                return;
+            }
+
+            const QString key(name);
+
+            if (key == "seconds") {
+                seconds = value;
+            } else if (key == "bins") {
+                bins = (int) value;
+            } else if (key == "rows") {
+                rows = (int) value;
+            } else if (key == "threshold") {
+                threshold = value;
+            } else if (key == "startFrequency") {
+                startFrequency = (qint64) value;
+            } else {
+                stopFrequency = (qint64) value;
+            }
+        }
+
+        if ((seconds <= 0.0) || (bins < 1) || (rows < 1))
+        {
+            fail(400, "seconds, bins and rows must be positive");
+            return;
+        }
+
+        if (image)
+        {
+            QByteArray png;
+            QJsonObject description;
+            int status = m_adapter->devicesetSpectrumHistoryImageGet(deviceSetIndex, seconds, bins, startFrequency, stopFrequency, rows, png, description, errorResponse);
+
+            if (status / 100 != 2)
+            {
+                fail(status, errorResponse.getMessage() ? *errorResponse.getMessage() : QString("Error"));
+                return;
+            }
+
+            response.setHeader("Content-Type", "image/png");
+
+            for (const QString& key : description.keys()) {
+                response.setHeader(("X-Spectrum-History-" + key).toLatin1(), description[key].toVariant().toString().toLatin1());
+            }
+
+            response.setStatus(200);
+            response.write(png);
+        }
+        else
+        {
+            SWGSDRangel::SWGGLSpectrumHistory normalResponse;
+            normalResponse.init();
+            int status = m_adapter->devicesetSpectrumHistoryGet(deviceSetIndex, seconds, bins, startFrequency, stopFrequency, threshold, normalResponse, errorResponse);
+            response.setHeader("Content-Type", "application/json");
+            response.setStatus(status);
+
+            if (status/100 == 2) {
+                response.write(normalResponse.asJson().toUtf8());
+            } else {
+                response.write(errorResponse.asJson().toUtf8());
+            }
+        }
+    }
+    catch (const boost::bad_lexical_cast &e)
+    {
+        fail(400, QString("Wrong integer conversion on index %1").arg(e.what()));
+    }
+}
 
 void WebAPIRequestMapper::devicesetSpectrumDataService(const std::string& indexStr, qtwebapp::HttpRequest& request, qtwebapp::HttpResponse& response)
 {

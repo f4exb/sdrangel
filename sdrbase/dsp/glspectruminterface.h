@@ -21,7 +21,11 @@
 #define SDRBASE_DSP_GLSPECTRUMINTERFACE_H_
 
 #include <vector>
+#include <functional>
+#include <QDateTime>
 #include "dsp/dsptypes.h"
+
+class SpectrumVis;
 
 class GLSpectrumInterface
 {
@@ -32,6 +36,23 @@ public:
     {
         (void) spectrum;
         (void) fftSize;
+    }
+
+    // Called by the SpectrumVis this is attached to: set to null before being destroyed
+    virtual void setSpectrumVis(SpectrumVis *spectrumVis) { (void) spectrumVis; }
+
+    //!< One row of the spectrum history
+    typedef std::function<void(const Real *spectrum, int fftSize, quint32 sampleRate, qint64 centerFrequency, const QDateTime& dateTime)> HistoryRowCallback;
+
+    //!< Get spectrum history from scroll buffe, that are no older than since
+    //!< folded together by maximum so that at most maxRows are delivered over
+    //!< the whole period. Returns false when there is no history at all
+    virtual bool getSpectrumHistory(const QDateTime& since, int maxRows, const HistoryRowCallback& row)
+    {
+        (void) since;
+        (void) maxRows;
+        (void) row;
+        return false;
     }
 
     // Actions on what is displayed. The default does nothing, so a spectrum with no GUI simply

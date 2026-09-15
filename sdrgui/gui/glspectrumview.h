@@ -229,6 +229,7 @@ public:
     void setMessageQueueToGUI(MessageQueue* messageQueue) { m_messageQueueToGUI = messageQueue; }
 
     virtual void newSpectrum(const Real* spectrum, int fftSize);
+    virtual bool getSpectrumHistory(const QDateTime& since, int maxRows, const HistoryRowCallback& row) override;
     void clearSpectrumHistogram();
 
     Real getWaterfallShare() const { return m_waterfallShare; }
