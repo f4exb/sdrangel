@@ -22,6 +22,7 @@
 Projector::Projector(ProjectionType projectionType) :
     m_projectionType(projectionType),
     m_prevArg(0.0f),
+    m_prevVal(0.0f),
     m_cache(nullptr),
     m_cacheMaster(true)
 {
