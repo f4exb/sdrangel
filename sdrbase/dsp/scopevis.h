@@ -601,6 +601,7 @@ private:
     struct ConvertBuffers
     {
         ConvertBuffers(uint32_t nbStreams = 1) :
+            m_size(0),
             m_convertBuffers(nbStreams)
         {}
 
