@@ -191,7 +191,7 @@ report again after the interval before concluding a signal has no data.
 
 One spectrum is one instant. `get_spectrum_history` reads the history the GUI keeps for
 scrolling the waterfall, switching scrolling on if it is off, and reports per bin the maximum,
-the mean and the occupancy over the last `seconds`, plus a `signals` list: every run of bins
+the mean and the occupancy over the last `seconds`, plus a `signalList`: every run of bins
 that rose above the floor, with its frequency, width, peak, `dutyCycle` and when it was first
 and last seen. A carrier has a duty cycle near 1, a voice channel a fraction, a pager burst
 almost nothing; a hopper shows as many short signals. It costs no channels and no retuning, so

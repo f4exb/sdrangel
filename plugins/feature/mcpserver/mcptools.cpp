@@ -2786,7 +2786,7 @@ void MCPTools::registerDeviceSetTools()
     add("get_spectrum_history",
         "What has been on a band over the last while, from the spectrum history the GUI keeps for scrolling: per bin "
         "maximum, mean and occupancy (the fraction of the time the bin was above the noise floor by threshold dB), and a "
-        "signals list of every run of bins that rose above it, each with its frequency, width, peak, dutyCycle (1 for a "
+        "signalList of every run of bins that rose above it, each with its frequency, width, peak, dutyCycle (1 for a "
         "continuous carrier, small for bursts) and when it was first and last seen. This is the way to tell a continuous "
         "signal from an intermittent one, find where transmissions are without stepping a scanner over them, and measure "
         "a floor over time rather than from one snapshot. Only rows taken with the device tuned and sampling as it is now "
