@@ -33,7 +33,8 @@
 #include "deviceset.h"
 
 
-DeviceSet::DeviceSet(int tabIndex, int deviceType)
+DeviceSet::DeviceSet(int tabIndex, int deviceType) :
+    m_spectrumVis(nullptr)
 {
     m_deviceAPI = nullptr;
     m_deviceSourceEngine = nullptr;
