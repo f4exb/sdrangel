@@ -35,11 +35,12 @@ MESSAGE_CLASS_DEFINITION(AudioInputDevice::MsgStop, Message)
 MESSAGE_CLASS_DEFINITION(AudioInputDevice::MsgReportSampleRate, Message)
 
 AudioInputDevice::AudioInputDevice() :
-	m_audioInput(0),
-	m_audioUsageCount(0),
-	m_onExit(false),
-	m_volume(0.5f),
-	m_audioFifos()
+    m_audioInput(0),
+    m_audioUsageCount(0),
+    m_onExit(false),
+    m_volume(0.5f),
+    m_audioFifos(),
+    m_managerMessageQueue(nullptr)
 {
     connect(&m_inputMessageQueue, SIGNAL(messageEnqueued()), this, SLOT(handleInputMessages()), Qt::QueuedConnection);
 }
