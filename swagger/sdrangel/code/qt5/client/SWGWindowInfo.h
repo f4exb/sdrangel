@@ -11,38 +11,51 @@
  */
 
 /*
- * SWGWorkspaceInfo.h
+ * SWGWindowInfo.h
  *
- * Where a window is and whether it is shown (GUI). On a PUT either field may be given alone: index moves the window, hidden hides or shows it
+ * One window of the GUI
  */
 
-#ifndef SWGWorkspaceInfo_H_
-#define SWGWorkspaceInfo_H_
+#ifndef SWGWindowInfo_H_
+#define SWGWindowInfo_H_
 
 #include <QJsonObject>
 
 
+#include <QString>
 
 #include "SWGObject.h"
 #include "export.h"
 
 namespace SWGSDRangel {
 
-class SWG_API SWGWorkspaceInfo: public SWGObject {
+class SWG_API SWGWindowInfo: public SWGObject {
 public:
-    SWGWorkspaceInfo();
-    SWGWorkspaceInfo(QString* json);
-    virtual ~SWGWorkspaceInfo();
+    SWGWindowInfo();
+    SWGWindowInfo(QString* json);
+    virtual ~SWGWindowInfo();
     void init();
     void cleanup();
 
     virtual QString asJson () override;
     virtual QJsonObject* asJsonObject() override;
     virtual void fromJsonObject(QJsonObject &json) override;
-    virtual SWGWorkspaceInfo* fromJson(QString &jsonString) override;
+    virtual SWGWindowInfo* fromJson(QString &jsonString) override;
+
+    QString* getKind();
+    void setKind(QString* kind);
+
+    qint32 getDeviceSetIndex();
+    void setDeviceSetIndex(qint32 device_set_index);
 
     qint32 getIndex();
     void setIndex(qint32 index);
+
+    QString* getTitle();
+    void setTitle(QString* title);
+
+    qint32 getWorkspaceIndex();
+    void setWorkspaceIndex(qint32 workspace_index);
 
     qint32 getHidden();
     void setHidden(qint32 hidden);
@@ -51,8 +64,20 @@ public:
     virtual bool isSet() override;
 
 private:
+    QString* kind;
+    bool m_kind_isSet;
+
+    qint32 device_set_index;
+    bool m_device_set_index_isSet;
+
     qint32 index;
     bool m_index_isSet;
+
+    QString* title;
+    bool m_title_isSet;
+
+    qint32 workspace_index;
+    bool m_workspace_index_isSet;
 
     qint32 hidden;
     bool m_hidden_isSet;
@@ -61,4 +86,4 @@ private:
 
 }
 
-#endif /* SWGWorkspaceInfo_H_ */
+#endif /* SWGWindowInfo_H_ */

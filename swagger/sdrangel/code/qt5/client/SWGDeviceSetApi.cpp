@@ -1586,6 +1586,191 @@ SWGDeviceSetApi::devicesetSpectrumDataGetCallback(SWGHttpRequestWorker * worker)
 }
 
 void
+SWGDeviceSetApi::devicesetSpectrumHistoryGet(qint32 device_set_index, float seconds, qint32 bins, qint64 start_frequency, qint64 stop_frequency, float threshold) {
+    QString fullPath;
+    fullPath.append(this->host).append(this->basePath).append("/sdrangel/deviceset/{deviceSetIndex}/spectrum/history");
+
+    QString device_set_indexPathParam("{"); device_set_indexPathParam.append("deviceSetIndex").append("}");
+    fullPath.replace(device_set_indexPathParam, stringValue(device_set_index));
+
+    if (fullPath.indexOf("?") > 0)
+      fullPath.append("&");
+    else
+      fullPath.append("?");
+    fullPath.append(QUrl::toPercentEncoding("seconds"))
+        .append("=")
+        .append(QUrl::toPercentEncoding(stringValue(seconds)));
+
+    if (fullPath.indexOf("?") > 0)
+      fullPath.append("&");
+    else
+      fullPath.append("?");
+    fullPath.append(QUrl::toPercentEncoding("bins"))
+        .append("=")
+        .append(QUrl::toPercentEncoding(stringValue(bins)));
+
+    if (fullPath.indexOf("?") > 0)
+      fullPath.append("&");
+    else
+      fullPath.append("?");
+    fullPath.append(QUrl::toPercentEncoding("startFrequency"))
+        .append("=")
+        .append(QUrl::toPercentEncoding(stringValue(start_frequency)));
+
+    if (fullPath.indexOf("?") > 0)
+      fullPath.append("&");
+    else
+      fullPath.append("?");
+    fullPath.append(QUrl::toPercentEncoding("stopFrequency"))
+        .append("=")
+        .append(QUrl::toPercentEncoding(stringValue(stop_frequency)));
+
+    if (fullPath.indexOf("?") > 0)
+      fullPath.append("&");
+    else
+      fullPath.append("?");
+    fullPath.append(QUrl::toPercentEncoding("threshold"))
+        .append("=")
+        .append(QUrl::toPercentEncoding(stringValue(threshold)));
+
+
+    SWGHttpRequestWorker *worker = new SWGHttpRequestWorker();
+    SWGHttpRequestInput input(fullPath, "GET");
+
+
+
+
+
+    foreach(QString key, this->defaultHeaders.keys()) {
+        input.headers.insert(key, this->defaultHeaders.value(key));
+    }
+
+    connect(worker,
+            &SWGHttpRequestWorker::on_execution_finished,
+            this,
+            &SWGDeviceSetApi::devicesetSpectrumHistoryGetCallback);
+
+    worker->execute(&input);
+}
+
+void
+SWGDeviceSetApi::devicesetSpectrumHistoryGetCallback(SWGHttpRequestWorker * worker) {
+    QString msg;
+    QString error_str = worker->error_str;
+    QNetworkReply::NetworkError error_type = worker->error_type;
+
+    if (worker->error_type == QNetworkReply::NoError) {
+        msg = QString("Success! %1 bytes").arg(worker->response.length());
+    }
+    else {
+        msg = "Error: " + worker->error_str;
+    }
+
+
+    QString json(worker->response);
+    SWGGLSpectrumHistory* output = static_cast<SWGGLSpectrumHistory*>(create(json, QString("SWGGLSpectrumHistory")));
+    worker->deleteLater();
+
+    if (worker->error_type == QNetworkReply::NoError) {
+        emit devicesetSpectrumHistoryGetSignal(output);
+    } else {
+        emit devicesetSpectrumHistoryGetSignalE(output, error_type, error_str);
+        emit devicesetSpectrumHistoryGetSignalEFull(worker, error_type, error_str);
+    }
+}
+
+void
+SWGDeviceSetApi::devicesetSpectrumHistoryImageGet(qint32 device_set_index, float seconds, qint32 bins, qint32 rows, qint64 start_frequency, qint64 stop_frequency) {
+    QString fullPath;
+    fullPath.append(this->host).append(this->basePath).append("/sdrangel/deviceset/{deviceSetIndex}/spectrum/history/image");
+
+    QString device_set_indexPathParam("{"); device_set_indexPathParam.append("deviceSetIndex").append("}");
+    fullPath.replace(device_set_indexPathParam, stringValue(device_set_index));
+
+    if (fullPath.indexOf("?") > 0)
+      fullPath.append("&");
+    else
+      fullPath.append("?");
+    fullPath.append(QUrl::toPercentEncoding("seconds"))
+        .append("=")
+        .append(QUrl::toPercentEncoding(stringValue(seconds)));
+
+    if (fullPath.indexOf("?") > 0)
+      fullPath.append("&");
+    else
+      fullPath.append("?");
+    fullPath.append(QUrl::toPercentEncoding("bins"))
+        .append("=")
+        .append(QUrl::toPercentEncoding(stringValue(bins)));
+
+    if (fullPath.indexOf("?") > 0)
+      fullPath.append("&");
+    else
+      fullPath.append("?");
+    fullPath.append(QUrl::toPercentEncoding("rows"))
+        .append("=")
+        .append(QUrl::toPercentEncoding(stringValue(rows)));
+
+    if (fullPath.indexOf("?") > 0)
+      fullPath.append("&");
+    else
+      fullPath.append("?");
+    fullPath.append(QUrl::toPercentEncoding("startFrequency"))
+        .append("=")
+        .append(QUrl::toPercentEncoding(stringValue(start_frequency)));
+
+    if (fullPath.indexOf("?") > 0)
+      fullPath.append("&");
+    else
+      fullPath.append("?");
+    fullPath.append(QUrl::toPercentEncoding("stopFrequency"))
+        .append("=")
+        .append(QUrl::toPercentEncoding(stringValue(stop_frequency)));
+
+
+    SWGHttpRequestWorker *worker = new SWGHttpRequestWorker();
+    SWGHttpRequestInput input(fullPath, "GET");
+
+
+
+
+
+    foreach(QString key, this->defaultHeaders.keys()) {
+        input.headers.insert(key, this->defaultHeaders.value(key));
+    }
+
+    connect(worker,
+            &SWGHttpRequestWorker::on_execution_finished,
+            this,
+            &SWGDeviceSetApi::devicesetSpectrumHistoryImageGetCallback);
+
+    worker->execute(&input);
+}
+
+void
+SWGDeviceSetApi::devicesetSpectrumHistoryImageGetCallback(SWGHttpRequestWorker * worker) {
+    QString msg;
+    QString error_str = worker->error_str;
+    QNetworkReply::NetworkError error_type = worker->error_type;
+
+    if (worker->error_type == QNetworkReply::NoError) {
+        msg = QString("Success! %1 bytes").arg(worker->response.length());
+    }
+    else {
+        msg = "Error: " + worker->error_str;
+    }
+
+    worker->deleteLater();
+
+    if (worker->error_type == QNetworkReply::NoError) {
+        emit devicesetSpectrumHistoryImageGetSignal();
+    } else {
+        emit devicesetSpectrumHistoryImageGetSignalE(error_type, error_str);
+        emit devicesetSpectrumHistoryImageGetSignalEFull(worker, error_type, error_str);
+    }
+}
+
+void
 SWGDeviceSetApi::devicesetSpectrumReportGet(qint32 device_set_index) {
     QString fullPath;
     fullPath.append(this->host).append(this->basePath).append("/sdrangel/deviceset/{deviceSetIndex}/spectrum/report");

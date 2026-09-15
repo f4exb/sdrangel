@@ -180,6 +180,7 @@
 #include "SWGGLScope.h"
 #include "SWGGLSpectrum.h"
 #include "SWGGLSpectrumData.h"
+#include "SWGGLSpectrumHistory.h"
 #include "SWGGLSpectrumReport.h"
 #include "SWGGS232ControllerActions.h"
 #include "SWGGS232ControllerReport.h"
@@ -371,6 +372,7 @@
 #include "SWGSpectrumAnnotationMarker.h"
 #include "SWGSpectrumCalibrationPoint.h"
 #include "SWGSpectrumHistogramMarker.h"
+#include "SWGSpectrumHistorySignal.h"
 #include "SWGSpectrumMemorySettings.h"
 #include "SWGSpectrumPeak.h"
 #include "SWGSpectrumServer.h"
@@ -412,6 +414,8 @@
 #include "SWGWFMDemodSettings.h"
 #include "SWGWFMModReport.h"
 #include "SWGWFMModSettings.h"
+#include "SWGWindowInfo.h"
+#include "SWGWindowList.h"
 #include "SWGWorkspaceActions.h"
 #include "SWGWorkspaceInfo.h"
 #include "SWGXtrxInputReport.h"
@@ -1251,6 +1255,11 @@ namespace SWGSDRangel {
     }
     if(QString("SWGGLSpectrumData").compare(type) == 0) {
       SWGGLSpectrumData *obj = new SWGGLSpectrumData();
+      obj->init();
+      return obj;
+    }
+    if(QString("SWGGLSpectrumHistory").compare(type) == 0) {
+      SWGGLSpectrumHistory *obj = new SWGGLSpectrumHistory();
       obj->init();
       return obj;
     }
@@ -2209,6 +2218,11 @@ namespace SWGSDRangel {
       obj->init();
       return obj;
     }
+    if(QString("SWGSpectrumHistorySignal").compare(type) == 0) {
+      SWGSpectrumHistorySignal *obj = new SWGSpectrumHistorySignal();
+      obj->init();
+      return obj;
+    }
     if(QString("SWGSpectrumMemorySettings").compare(type) == 0) {
       SWGSpectrumMemorySettings *obj = new SWGSpectrumMemorySettings();
       obj->init();
@@ -2411,6 +2425,16 @@ namespace SWGSDRangel {
     }
     if(QString("SWGWFMModSettings").compare(type) == 0) {
       SWGWFMModSettings *obj = new SWGWFMModSettings();
+      obj->init();
+      return obj;
+    }
+    if(QString("SWGWindowInfo").compare(type) == 0) {
+      SWGWindowInfo *obj = new SWGWindowInfo();
+      obj->init();
+      return obj;
+    }
+    if(QString("SWGWindowList").compare(type) == 0) {
+      SWGWindowList *obj = new SWGWindowList();
       obj->init();
       return obj;
     }

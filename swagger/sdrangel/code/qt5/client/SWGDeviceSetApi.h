@@ -29,6 +29,7 @@
 #include "SWGErrorResponse.h"
 #include "SWGGLSpectrum.h"
 #include "SWGGLSpectrumData.h"
+#include "SWGGLSpectrumHistory.h"
 #include "SWGGLSpectrumReport.h"
 #include "SWGSpectrumActions.h"
 #include "SWGSpectrumServer.h"
@@ -78,6 +79,8 @@ public:
     void devicesetGet(qint32 device_set_index);
     void devicesetSpectrumActionsPost(qint32 device_set_index, SWGSpectrumActions& body);
     void devicesetSpectrumDataGet(qint32 device_set_index, qint32 bins, qint64 start_frequency, qint64 stop_frequency, QString* reduce);
+    void devicesetSpectrumHistoryGet(qint32 device_set_index, float seconds, qint32 bins, qint64 start_frequency, qint64 stop_frequency, float threshold);
+    void devicesetSpectrumHistoryImageGet(qint32 device_set_index, float seconds, qint32 bins, qint32 rows, qint64 start_frequency, qint64 stop_frequency);
     void devicesetSpectrumReportGet(qint32 device_set_index);
     void devicesetSpectrumServerDelete(qint32 device_set_index);
     void devicesetSpectrumServerGet(qint32 device_set_index);
@@ -118,6 +121,8 @@ private:
     void devicesetGetCallback (SWGHttpRequestWorker * worker);
     void devicesetSpectrumActionsPostCallback (SWGHttpRequestWorker * worker);
     void devicesetSpectrumDataGetCallback (SWGHttpRequestWorker * worker);
+    void devicesetSpectrumHistoryGetCallback (SWGHttpRequestWorker * worker);
+    void devicesetSpectrumHistoryImageGetCallback (SWGHttpRequestWorker * worker);
     void devicesetSpectrumReportGetCallback (SWGHttpRequestWorker * worker);
     void devicesetSpectrumServerDeleteCallback (SWGHttpRequestWorker * worker);
     void devicesetSpectrumServerGetCallback (SWGHttpRequestWorker * worker);
@@ -158,6 +163,8 @@ signals:
     void devicesetGetSignal(SWGDeviceSet* summary);
     void devicesetSpectrumActionsPostSignal(SWGSuccessResponse* summary);
     void devicesetSpectrumDataGetSignal(SWGGLSpectrumData* summary);
+    void devicesetSpectrumHistoryGetSignal(SWGGLSpectrumHistory* summary);
+    void devicesetSpectrumHistoryImageGetSignal();
     void devicesetSpectrumReportGetSignal(SWGGLSpectrumReport* summary);
     void devicesetSpectrumServerDeleteSignal(SWGSuccessResponse* summary);
     void devicesetSpectrumServerGetSignal(SWGSpectrumServer* summary);
@@ -197,6 +204,8 @@ signals:
     void devicesetGetSignalE(SWGDeviceSet* summary, QNetworkReply::NetworkError error_type, QString& error_str);
     void devicesetSpectrumActionsPostSignalE(SWGSuccessResponse* summary, QNetworkReply::NetworkError error_type, QString& error_str);
     void devicesetSpectrumDataGetSignalE(SWGGLSpectrumData* summary, QNetworkReply::NetworkError error_type, QString& error_str);
+    void devicesetSpectrumHistoryGetSignalE(SWGGLSpectrumHistory* summary, QNetworkReply::NetworkError error_type, QString& error_str);
+    void devicesetSpectrumHistoryImageGetSignalE(QNetworkReply::NetworkError error_type, QString& error_str);
     void devicesetSpectrumReportGetSignalE(SWGGLSpectrumReport* summary, QNetworkReply::NetworkError error_type, QString& error_str);
     void devicesetSpectrumServerDeleteSignalE(SWGSuccessResponse* summary, QNetworkReply::NetworkError error_type, QString& error_str);
     void devicesetSpectrumServerGetSignalE(SWGSpectrumServer* summary, QNetworkReply::NetworkError error_type, QString& error_str);
@@ -236,6 +245,8 @@ signals:
     void devicesetGetSignalEFull(SWGHttpRequestWorker* worker, QNetworkReply::NetworkError error_type, QString& error_str);
     void devicesetSpectrumActionsPostSignalEFull(SWGHttpRequestWorker* worker, QNetworkReply::NetworkError error_type, QString& error_str);
     void devicesetSpectrumDataGetSignalEFull(SWGHttpRequestWorker* worker, QNetworkReply::NetworkError error_type, QString& error_str);
+    void devicesetSpectrumHistoryGetSignalEFull(SWGHttpRequestWorker* worker, QNetworkReply::NetworkError error_type, QString& error_str);
+    void devicesetSpectrumHistoryImageGetSignalEFull(SWGHttpRequestWorker* worker, QNetworkReply::NetworkError error_type, QString& error_str);
     void devicesetSpectrumReportGetSignalEFull(SWGHttpRequestWorker* worker, QNetworkReply::NetworkError error_type, QString& error_str);
     void devicesetSpectrumServerDeleteSignalEFull(SWGHttpRequestWorker* worker, QNetworkReply::NetworkError error_type, QString& error_str);
     void devicesetSpectrumServerGetSignalEFull(SWGHttpRequestWorker* worker, QNetworkReply::NetworkError error_type, QString& error_str);

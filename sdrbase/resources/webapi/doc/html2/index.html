@@ -10520,6 +10520,101 @@ margin-bottom: 20px;
   },
   "description" : "A copy of the current power spectrum, reduced to the number of bins asked for so that the answer stays a sensible size whatever the FFT size. The spectrum is only computed while something is consuming it, a spectrum window or a websocket client, so updated says how old these values are and is absent if none has been produced yet.\n"
 };
+            defs.GLSpectrumHistory = {
+  "properties" : {
+    "centerFrequency" : {
+      "type" : "integer",
+      "format" : "int64"
+    },
+    "bandwidth" : {
+      "type" : "integer",
+      "description" : "Width of the whole spectrum in Hz."
+    },
+    "startFrequency" : {
+      "type" : "integer",
+      "format" : "int64",
+      "description" : "Centre frequency of the first returned bin in Hz."
+    },
+    "stopFrequency" : {
+      "type" : "integer",
+      "format" : "int64",
+      "description" : "Centre frequency of the last returned bin in Hz."
+    },
+    "binBandwidth" : {
+      "type" : "integer",
+      "description" : "Width of each returned bin in Hz."
+    },
+    "bins" : {
+      "type" : "integer"
+    },
+    "rows" : {
+      "type" : "integer",
+      "description" : "Rows of history used."
+    },
+    "skippedRows" : {
+      "type" : "integer",
+      "description" : "Rows in the period that were taken with the device tuned or sampling differently, and left out."
+    },
+    "firstTime" : {
+      "type" : "string",
+      "description" : "Time of the oldest row used, ISO 8601."
+    },
+    "lastTime" : {
+      "type" : "string",
+      "description" : "Time of the newest row used, ISO 8601."
+    },
+    "seconds" : {
+      "type" : "number",
+      "format" : "float",
+      "description" : "Span between the oldest and newest rows used."
+    },
+    "floorDb" : {
+      "type" : "number",
+      "format" : "float",
+      "description" : "The measured noise floor."
+    },
+    "thresholdDb" : {
+      "type" : "number",
+      "format" : "float",
+      "description" : "The level above which a bin counts as occupied."
+    },
+    "maxDb" : {
+      "type" : "array",
+      "description" : "Per bin maximum over the rows.",
+      "items" : {
+        "type" : "number",
+        "format" : "float"
+      }
+    },
+    "meanDb" : {
+      "type" : "array",
+      "description" : "Per bin mean over the rows.",
+      "items" : {
+        "type" : "number",
+        "format" : "float"
+      }
+    },
+    "occupancy" : {
+      "type" : "array",
+      "description" : "Per bin fraction of rows in which the bin was above the threshold, 0 to 1.",
+      "items" : {
+        "type" : "number",
+        "format" : "float"
+      }
+    },
+    "signalCount" : {
+      "type" : "integer"
+    },
+    "signals" : {
+      "type" : "array",
+      "description" : "Runs of adjacent bins whose maximum rose above the threshold.",
+      "items" : {
+        "$ref" : "#/SpectrumHistorySignal"
+      }
+    }
+  },
+  "description" : "Statistics over the rows of spectrum history the GUI keeps for scrolling, reduced to a number of bins. Powers are in dB whatever the display shows. The floor is the median of the per bin means, and a bin counts as occupied in a row when it is above the floor by the threshold. Rows taken with another centre frequency or sample rate are skipped and counted.\n"
+};
             defs.GLSpectrumReport = {
   "properties" : {
     "measurement" : {
@@ -22209,6 +22304,47 @@ margin-bottom: 20px;
   },
   "description" : "Spectrum histogram marker settings"
 };
+            defs.SpectrumHistorySignal = {
+  "properties" : {
+    "frequency" : {
+      "type" : "integer",
+      "format" : "int64",
+      "description" : "Frequency of the strongest bin in Hz."
+    },
+    "startFrequency" : {
+      "type" : "integer",
+      "format" : "int64",
+      "description" : "Lower edge in Hz."
+    },
+    "stopFrequency" : {
+      "type" : "integer",
+      "format" : "int64",
+      "description" : "Upper edge in Hz."
+    },
+    "bandwidth" : {
+      "type" : "integer",
+      "description" : "Width in Hz, to the bin."
+    },
+    "peakDb" : {
+      "type" : "number",
+      "format" : "float"
+    },
+    "dutyCycle" : {
+      "type" : "number",
+      "format" : "float",
+      "description" : "Fraction of rows in which any bin of the signal was above the threshold, 0 to 1: 1 for a continuous carrier, small for a burst."
+    },
+    "firstSeen" : {
+      "type" : "string",
+      "description" : "Time of the first row it was up in, ISO 8601."
+    },
+    "lastSeen" : {
+      "type" : "string",
+      "description" : "Time of the last row it was up in, ISO 8601."
+    }
+  },
+  "description" : "A signal found in the spectrum history"
+};
             defs.SpectrumMemorySettings = {
   "properties" : {
     "display" : {
@@ -24581,6 +24717,47 @@ margin-bottom: 20px;
   },
   "description" : "WFMMod"
 };
+            defs.WindowInfo = {
+  "properties" : {
+    "kind" : {
+      "type" : "string",
+      "description" : "device, spectrum, channel or feature"
+    },
+    "deviceSetIndex" : {
+      "type" : "integer",
+      "description" : "Index of the device set, for a device, spectrum or channel window"
+    },
+    "index" : {
+      "type" : "integer",
+      "description" : "Channel index within the device set, or feature index; absent for a device or spectrum window"
+    },
+    "title" : {
+      "type" : "string"
+    },
+    "workspaceIndex" : {
+      "type" : "integer"
+    },
+    "hidden" : {
+      "type" : "integer",
+      "description" : "1 when the window is hidden, 0 when it is shown"
+    }
+  },
+  "description" : "One window of the GUI"
+};
+            defs.WindowList = {
+  "properties" : {
+    "windowCount" : {
+      "type" : "integer"
+    },
+    "windows" : {
+      "type" : "array",
+      "items" : {
+        "$ref" : "#/definitions/WindowInfo"
+      }
+    }
+  },
+  "description" : "Every device, spectrum, channel and feature window of the GUI"
+};
             defs.WorkspaceActions = {
   "required" : [ "arrange" ],
   "properties" : {
@@ -24593,14 +24770,17 @@ margin-bottom: 20px;
   "description" : "Actions on a workspace"
 };
             defs.WorkspaceInfo = {
-  "required" : [ "index" ],
   "properties" : {
     "index" : {
       "type" : "integer",
       "description" : "index of workspace in the list of workspaces"
+    },
+    "hidden" : {
+      "type" : "integer",
+      "description" : "1 when the window is hidden, 0 when it is shown. Showing a window also raises it and shows the workspace holding it"
     }
   },
-  "description" : "Workspace information"
+  "description" : "Where a window is and whether it is shown (GUI). On a PUT either field may be given alone: index moves the window, hidden hides or shows it"
 };
             defs.XtrxInputReport = {
   "properties" : {
@@ -25211,6 +25391,12 @@ margin-bottom: 20px;
                     <li data-group="DeviceSet" data-name="devicesetSpectrumDataGet" class="">
                       <a href="#api-DeviceSet-devicesetSpectrumDataGet">devicesetSpectrumDataGet</a>
                     </li>
+                    <li data-group="DeviceSet" data-name="devicesetSpectrumHistoryGet" class="">
+                      <a href="#api-DeviceSet-devicesetSpectrumHistoryGet">devicesetSpectrumHistoryGet</a>
+                    </li>
+                    <li data-group="DeviceSet" data-name="devicesetSpectrumHistoryImageGet" class="">
+                      <a href="#api-DeviceSet-devicesetSpectrumHistoryImageGet">devicesetSpectrumHistoryImageGet</a>
+                    </li>
                     <li data-group="DeviceSet" data-name="devicesetSpectrumReportGet" class="">
                       <a href="#api-DeviceSet-devicesetSpectrumReportGet">devicesetSpectrumReportGet</a>
                     </li>
@@ -25413,6 +25599,9 @@ margin-bottom: 20px;
                     </li>
                     <li data-group="Instance" data-name="instanceSummary" class="">
                       <a href="#api-Instance-instanceSummary">instanceSummary</a>
+                    </li>
+                    <li data-group="Instance" data-name="instanceWindowsGet" class="">
+                      <a href="#api-Instance-instanceWindowsGet">instanceWindowsGet</a>
                     </li>
                   <li class="nav-header" data-group="Workspace"><a href="#api-Workspace">API Methods - Workspace</a></li>
                     <li data-group="Workspace" data-name="instanceWorkspaceAdd" class="">
@@ -38832,6 +39021,1129 @@ except ApiException as e:
                                     </script>
                                   </div>
                                   <input id='responses-devicesetSpectrumDataGet-501-schema-data' type='hidden' value=''></input>
+                                </div>
+                            </div>
+
+                        </article>
+                      </div>
+                      <hr>
+                    <div id="api-DeviceSet-devicesetSpectrumHistoryGet">
+                      <article id="api-DeviceSet-devicesetSpectrumHistoryGet-0" data-group="User" data-name="devicesetSpectrumHistoryGet" data-version="0">
+                        <div class="pull-left">
+                          <h1>devicesetSpectrumHistoryGet</h1>
+                          <p></p>
+                        </div>
+                        <div class="pull-right"></div>
+                        <div class="clearfix"></div>
+                        <p></p>
+                        <p class="marked">Statistics over the spectrum history the GUI keeps for scrolling: per bin maximum, mean and occupancy over a period, and the signals found. Only rows taken with the device tuned and sampling as it is now are used. Needs scrolling enabled in the spectrum settings (scrollBar, scrollLength); the server keeps no history
+</p>
+                        <p></p>
+                        <br />
+                        <pre class="prettyprint language-html prettyprinted" data-type="get"><code><span class="pln">/sdrangel/deviceset/{deviceSetIndex}/spectrum/history</span></code></pre>
+                        <p>
+                          <h3>Usage and SDK Samples</h3>
+                        </p>
+                        <ul class="nav nav-tabs nav-tabs-examples">
+                          <li class="active"><a href="#examples-DeviceSet-devicesetSpectrumHistoryGet-0-curl">Curl</a></li>
+                          <li class=""><a href="#examples-DeviceSet-devicesetSpectrumHistoryGet-0-java">Java</a></li>
+                          <li class=""><a href="#examples-DeviceSet-devicesetSpectrumHistoryGet-0-android">Android</a></li>
+                          <!--<li class=""><a href="#examples-DeviceSet-devicesetSpectrumHistoryGet-0-groovy">Groovy</a></li>-->
+                          <li class=""><a href="#examples-DeviceSet-devicesetSpectrumHistoryGet-0-objc">Obj-C</a></li>
+                          <li class=""><a href="#examples-DeviceSet-devicesetSpectrumHistoryGet-0-javascript">JavaScript</a></li>
+                          <!--<li class=""><a href="#examples-DeviceSet-devicesetSpectrumHistoryGet-0-angular">Angular</a></li>-->
+                          <li class=""><a href="#examples-DeviceSet-devicesetSpectrumHistoryGet-0-csharp">C#</a></li>
+                          <li class=""><a href="#examples-DeviceSet-devicesetSpectrumHistoryGet-0-php">PHP</a></li>
+                          <li class=""><a href="#examples-DeviceSet-devicesetSpectrumHistoryGet-0-perl">Perl</a></li>
+                          <li class=""><a href="#examples-DeviceSet-devicesetSpectrumHistoryGet-0-python">Python</a></li>
+                        </ul>
+
+                        <div class="tab-content">
+                          <div class="tab-pane active" id="examples-DeviceSet-devicesetSpectrumHistoryGet-0-curl">
+                            <pre class="prettyprint"><code class="language-bsh">curl -X GET "http://localhost/sdrangel/deviceset/{deviceSetIndex}/spectrum/history?seconds=&bins=&startFrequency=&stopFrequency=&threshold="</code></pre>
+                          </div>
+                          <div class="tab-pane" id="examples-DeviceSet-devicesetSpectrumHistoryGet-0-java">
+                            <pre class="prettyprint"><code class="language-java">import SWGSDRangel.*;
+import SWGSDRangel.auth.*;
+import SWGSDRangel.model.*;
+import SWGSDRangel.api.DeviceSetApi;
+
+import java.io.File;
+import java.util.*;
+
+public class DeviceSetApiExample {
+
+    public static void main(String[] args) {
+        
+        DeviceSetApi apiInstance = new DeviceSetApi();
+        Integer deviceSetIndex = 56; // Integer | Index of device set in the device set list
+        Float seconds = 3.4; // Float | How far back to look, in seconds (default 60)
+        Integer bins = 56; // Integer | Number of bins to reduce the spectrum to, 1 to 4096 (default 128)
+        Long startFrequency = 789; // Long | Lowest frequency to include in Hz. Default is the start of the spectrum
+        Long stopFrequency = 789; // Long | Highest frequency to include in Hz. Default is the end of the spectrum
+        Float threshold = 3.4; // Float | How far above the measured floor a bin must rise to count as occupied, in dB (default 6)
+        try {
+            GLSpectrumHistory result = apiInstance.devicesetSpectrumHistoryGet(deviceSetIndex, seconds, bins, startFrequency, stopFrequency, threshold);
+            System.out.println(result);
+        } catch (ApiException e) {
+            System.err.println("Exception when calling DeviceSetApi#devicesetSpectrumHistoryGet");
+            e.printStackTrace();
+        }
+    }
+}</code></pre>
+                          </div>
+
+                          <div class="tab-pane" id="examples-DeviceSet-devicesetSpectrumHistoryGet-0-android">
+                            <pre class="prettyprint"><code class="language-java">import SWGSDRangel.api.DeviceSetApi;
+
+public class DeviceSetApiExample {
+
+    public static void main(String[] args) {
+        DeviceSetApi apiInstance = new DeviceSetApi();
+        Integer deviceSetIndex = 56; // Integer | Index of device set in the device set list
+        Float seconds = 3.4; // Float | How far back to look, in seconds (default 60)
+        Integer bins = 56; // Integer | Number of bins to reduce the spectrum to, 1 to 4096 (default 128)
+        Long startFrequency = 789; // Long | Lowest frequency to include in Hz. Default is the start of the spectrum
+        Long stopFrequency = 789; // Long | Highest frequency to include in Hz. Default is the end of the spectrum
+        Float threshold = 3.4; // Float | How far above the measured floor a bin must rise to count as occupied, in dB (default 6)
+        try {
+            GLSpectrumHistory result = apiInstance.devicesetSpectrumHistoryGet(deviceSetIndex, seconds, bins, startFrequency, stopFrequency, threshold);
+            System.out.println(result);
+        } catch (ApiException e) {
+            System.err.println("Exception when calling DeviceSetApi#devicesetSpectrumHistoryGet");
+            e.printStackTrace();
+        }
+    }
+}</code></pre>
+                          </div>
+  <!--
+  <div class="tab-pane" id="examples-DeviceSet-devicesetSpectrumHistoryGet-0-groovy">
+  <pre class="prettyprint language-json prettyprinted" data-type="json"><code>Coming Soon!</code></pre>
+  </div> -->
+                            <div class="tab-pane" id="examples-DeviceSet-devicesetSpectrumHistoryGet-0-objc">
+                              <pre class="prettyprint"><code class="language-cpp">Integer *deviceSetIndex = 56; // Index of device set in the device set list
+Float *seconds = 3.4; // How far back to look, in seconds (default 60) (optional)
+Integer *bins = 56; // Number of bins to reduce the spectrum to, 1 to 4096 (default 128) (optional)
+Long *startFrequency = 789; // Lowest frequency to include in Hz. Default is the start of the spectrum (optional)
+Long *stopFrequency = 789; // Highest frequency to include in Hz. Default is the end of the spectrum (optional)
+Float *threshold = 3.4; // How far above the measured floor a bin must rise to count as occupied, in dB (default 6) (optional)
+
+DeviceSetApi *apiInstance = [[DeviceSetApi alloc] init];
+
+[apiInstance devicesetSpectrumHistoryGetWith:deviceSetIndex
+    seconds:seconds
+    bins:bins
+    startFrequency:startFrequency
+    stopFrequency:stopFrequency
+    threshold:threshold
+              completionHandler: ^(GLSpectrumHistory output, NSError* error) {
+                            if (output) {
+                                NSLog(@"%@", output);
+                            }
+                            if (error) {
+                                NSLog(@"Error: %@", error);
+                            }
+                        }];
+</code></pre>
+                            </div>
+
+                            <div class="tab-pane" id="examples-DeviceSet-devicesetSpectrumHistoryGet-0-javascript">
+                              <pre class="prettyprint"><code class="language-js">var SdRangel = require('sd_rangel');
+
+var api = new SdRangel.DeviceSetApi()
+
+var deviceSetIndex = 56; // {Integer} Index of device set in the device set list
+
+var opts = { 
+  'seconds': 3.4, // {Float} How far back to look, in seconds (default 60)
+  'bins': 56, // {Integer} Number of bins to reduce the spectrum to, 1 to 4096 (default 128)
+  'startFrequency': 789, // {Long} Lowest frequency to include in Hz. Default is the start of the spectrum
+  'stopFrequency': 789, // {Long} Highest frequency to include in Hz. Default is the end of the spectrum
+  'threshold': 3.4 // {Float} How far above the measured floor a bin must rise to count as occupied, in dB (default 6)
+};
+
+var callback = function(error, data, response) {
+  if (error) {
+    console.error(error);
+  } else {
+    console.log('API called successfully. Returned data: ' + data);
+  }
+};
+api.devicesetSpectrumHistoryGet(deviceSetIndex, opts, callback);
+</code></pre>
+                            </div>
+
+                            <!--<div class="tab-pane" id="examples-DeviceSet-devicesetSpectrumHistoryGet-0-angular">
+              <pre class="prettyprint language-json prettyprinted" data-type="json"><code>Coming Soon!</code></pre>
+            </div>-->
+                            <div class="tab-pane" id="examples-DeviceSet-devicesetSpectrumHistoryGet-0-csharp">
+                              <pre class="prettyprint"><code class="language-cs">using System;
+using System.Diagnostics;
+using SWGSDRangel.Api;
+using SWGSDRangel.Client;
+using SWGSDRangel.Model;
+
+namespace Example
+{
+    public class devicesetSpectrumHistoryGetExample
+    {
+        public void main()
+        {
+            
+            var apiInstance = new DeviceSetApi();
+            var deviceSetIndex = 56;  // Integer | Index of device set in the device set list
+            var seconds = 3.4;  // Float | How far back to look, in seconds (default 60) (optional) 
+            var bins = 56;  // Integer | Number of bins to reduce the spectrum to, 1 to 4096 (default 128) (optional) 
+            var startFrequency = 789;  // Long | Lowest frequency to include in Hz. Default is the start of the spectrum (optional) 
+            var stopFrequency = 789;  // Long | Highest frequency to include in Hz. Default is the end of the spectrum (optional) 
+            var threshold = 3.4;  // Float | How far above the measured floor a bin must rise to count as occupied, in dB (default 6) (optional) 
+
+            try
+            {
+                GLSpectrumHistory result = apiInstance.devicesetSpectrumHistoryGet(deviceSetIndex, seconds, bins, startFrequency, stopFrequency, threshold);
+                Debug.WriteLine(result);
+            }
+            catch (Exception e)
+            {
+                Debug.Print("Exception when calling DeviceSetApi.devicesetSpectrumHistoryGet: " + e.Message );
+            }
+        }
+    }
+}
+</code></pre>
+                            </div>
+
+                            <div class="tab-pane" id="examples-DeviceSet-devicesetSpectrumHistoryGet-0-php">
+                              <pre class="prettyprint"><code class="language-php"><&#63;php
+require_once(__DIR__ . '/vendor/autoload.php');
+
+$api_instance = new Swagger\Client\Api\DeviceSetApi();
+$deviceSetIndex = 56; // Integer | Index of device set in the device set list
+$seconds = 3.4; // Float | How far back to look, in seconds (default 60)
+$bins = 56; // Integer | Number of bins to reduce the spectrum to, 1 to 4096 (default 128)
+$startFrequency = 789; // Long | Lowest frequency to include in Hz. Default is the start of the spectrum
+$stopFrequency = 789; // Long | Highest frequency to include in Hz. Default is the end of the spectrum
+$threshold = 3.4; // Float | How far above the measured floor a bin must rise to count as occupied, in dB (default 6)
+
+try {
+    $result = $api_instance->devicesetSpectrumHistoryGet($deviceSetIndex, $seconds, $bins, $startFrequency, $stopFrequency, $threshold);
+    print_r($result);
+} catch (Exception $e) {
+    echo 'Exception when calling DeviceSetApi->devicesetSpectrumHistoryGet: ', $e->getMessage(), PHP_EOL;
+}
+?></code></pre>
+                            </div>
+
+                            <div class="tab-pane" id="examples-DeviceSet-devicesetSpectrumHistoryGet-0-perl">
+                              <pre class="prettyprint"><code class="language-perl">use Data::Dumper;
+use SWGSDRangel::Configuration;
+use SWGSDRangel::DeviceSetApi;
+
+my $api_instance = SWGSDRangel::DeviceSetApi->new();
+my $deviceSetIndex = 56; # Integer | Index of device set in the device set list
+my $seconds = 3.4; # Float | How far back to look, in seconds (default 60)
+my $bins = 56; # Integer | Number of bins to reduce the spectrum to, 1 to 4096 (default 128)
+my $startFrequency = 789; # Long | Lowest frequency to include in Hz. Default is the start of the spectrum
+my $stopFrequency = 789; # Long | Highest frequency to include in Hz. Default is the end of the spectrum
+my $threshold = 3.4; # Float | How far above the measured floor a bin must rise to count as occupied, in dB (default 6)
+
+eval { 
+    my $result = $api_instance->devicesetSpectrumHistoryGet(deviceSetIndex => $deviceSetIndex, seconds => $seconds, bins => $bins, startFrequency => $startFrequency, stopFrequency => $stopFrequency, threshold => $threshold);
+    print Dumper($result);
+};
+if ($@) {
+    warn "Exception when calling DeviceSetApi->devicesetSpectrumHistoryGet: $@\n";
+}</code></pre>
+                            </div>
+
+                            <div class="tab-pane" id="examples-DeviceSet-devicesetSpectrumHistoryGet-0-python">
+                              <pre class="prettyprint"><code class="language-python">from __future__ import print_statement
+import time
+import swagger_sdrangel
+from swagger_sdrangel.rest import ApiException
+from pprint import pprint
+
+# create an instance of the API class
+api_instance = swagger_sdrangel.DeviceSetApi()
+deviceSetIndex = 56 # Integer | Index of device set in the device set list
+seconds = 3.4 # Float | How far back to look, in seconds (default 60) (optional)
+bins = 56 # Integer | Number of bins to reduce the spectrum to, 1 to 4096 (default 128) (optional)
+startFrequency = 789 # Long | Lowest frequency to include in Hz. Default is the start of the spectrum (optional)
+stopFrequency = 789 # Long | Highest frequency to include in Hz. Default is the end of the spectrum (optional)
+threshold = 3.4 # Float | How far above the measured floor a bin must rise to count as occupied, in dB (default 6) (optional)
+
+try: 
+    api_response = api_instance.deviceset_spectrum_history_get(deviceSetIndex, seconds=seconds, bins=bins, startFrequency=startFrequency, stopFrequency=stopFrequency, threshold=threshold)
+    pprint(api_response)
+except ApiException as e:
+    print("Exception when calling DeviceSetApi->devicesetSpectrumHistoryGet: %s\n" % e)</code></pre>
+                            </div>
+                          </div>
+
+                          <h2>Parameters</h2>
+
+                            <div class="methodsubtabletitle">Path parameters</div>
+                            <table id="methodsubtable">
+                                <tr>
+                                  <th width="150px">Name</th>
+                                  <th>Description</th>
+                                </tr>
+                                  <tr><td style="width:150px;">deviceSetIndex*</td>
+<td>
+
+
+    <div id="d2e199_devicesetSpectrumHistoryGet_deviceSetIndex">
+        <div class="json-schema-view">
+            <div class="primitive">
+                <span class="type">
+                    Integer
+                </span>
+
+                    <div class="inner description">
+                        Index of device set in the device set list
+                    </div>
+            </div>
+                <div class="inner required">
+                    Required
+                </div>
+        </div>
+    </div>
+</td>
+</tr>
+
+                            </table>
+
+
+
+
+                            <div class="methodsubtabletitle">Query parameters</div>
+                            <table id="methodsubtable">
+                              <tr>
+                                <th width="150px">Name</th>
+                                <th>Description</th>
+                              </tr>
+                                <tr><td style="width:150px;">seconds</td>
+<td>
+
+
+    <div id="d2e199_devicesetSpectrumHistoryGet_seconds">
+        <div class="json-schema-view">
+            <div class="primitive">
+                <span class="type">
+                    Float
+                </span>
+                    <span class="format">
+                        (float)
+                    </span>
+
+                    <div class="inner description">
+                        How far back to look, in seconds (default 60)
+                    </div>
+            </div>
+        </div>
+    </div>
+</td>
+</tr>
+
+                                <tr><td style="width:150px;">bins</td>
+<td>
+
+
+    <div id="d2e199_devicesetSpectrumHistoryGet_bins">
+        <div class="json-schema-view">
+            <div class="primitive">
+                <span class="type">
+                    Integer
+                </span>
+
+                    <div class="inner description">
+                        Number of bins to reduce the spectrum to, 1 to 4096 (default 128)
+                    </div>
+            </div>
+        </div>
+    </div>
+</td>
+</tr>
+
+                                <tr><td style="width:150px;">startFrequency</td>
+<td>
+
+
+    <div id="d2e199_devicesetSpectrumHistoryGet_startFrequency">
+        <div class="json-schema-view">
+            <div class="primitive">
+                <span class="type">
+                    Long
+                </span>
+                    <span class="format">
+                        (int64)
+                    </span>
+
+                    <div class="inner description">
+                        Lowest frequency to include in Hz. Default is the start of the spectrum
+                    </div>
+            </div>
+        </div>
+    </div>
+</td>
+</tr>
+
+                                <tr><td style="width:150px;">stopFrequency</td>
+<td>
+
+
+    <div id="d2e199_devicesetSpectrumHistoryGet_stopFrequency">
+        <div class="json-schema-view">
+            <div class="primitive">
+                <span class="type">
+                    Long
+                </span>
+                    <span class="format">
+                        (int64)
+                    </span>
+
+                    <div class="inner description">
+                        Highest frequency to include in Hz. Default is the end of the spectrum
+                    </div>
+            </div>
+        </div>
+    </div>
+</td>
+</tr>
+
+                                <tr><td style="width:150px;">threshold</td>
+<td>
+
+
+    <div id="d2e199_devicesetSpectrumHistoryGet_threshold">
+        <div class="json-schema-view">
+            <div class="primitive">
+                <span class="type">
+                    Float
+                </span>
+                    <span class="format">
+                        (float)
+                    </span>
+
+                    <div class="inner description">
+                        How far above the measured floor a bin must rise to count as occupied, in dB (default 6)
+                    </div>
+            </div>
+        </div>
+    </div>
+</td>
+</tr>
+
+                            </table>
+
+                          <h2>Responses</h2>
+                            <h3> Status: 200 - On success return the statistics </h3>
+
+                            <ul class="nav nav-tabs nav-tabs-examples" >
+                                <li class="active">
+                                  <a data-toggle="tab" href="#responses-devicesetSpectrumHistoryGet-200-schema">Schema</a>
+                                </li>
+
+                            </ul>
+
+                            <div class="tab-content" style='margin-bottom: 10px;'>
+                                <div class="tab-pane active" id="responses-devicesetSpectrumHistoryGet-200-schema">
+                                  <div id='responses-devicesetSpectrumHistoryGet-200-schema-200' style="padding: 30px; border-left: 1px solid #eee; border-right: 1px solid #eee; border-bottom: 1px solid #eee;">
+                                    <script>
+                                      $(document).ready(function() {
+                                        var schemaWrapper = {
+  "description" : "On success return the statistics",
+  "schema" : {
+    "$ref" : "#/definitions/GLSpectrumHistory"
+  }
+};
+                                        var schema = schemaWrapper.schema;
+                                        if (schema.$ref != null) {
+                                          schema = defsParser.$refs.get(schema.$ref);
+                                        } else {
+                                          schemaWrapper.definitions = Object.assign({}, defs);
+                                          $RefParser.dereference(schemaWrapper).catch(function(err) {
+                                            console.log(err);
+                                          });
+                                        }
+
+                                        //console.log(JSON.stringify(schema));
+                                        var view = new JSONSchemaView(schema, 3);
+                                        $('#responses-devicesetSpectrumHistoryGet-200-schema-data').val(stringify(schema));
+                                        var result = $('#responses-devicesetSpectrumHistoryGet-200-schema-200');
+                                        result.empty();
+                                        result.append(view.render());
+                                      });
+                                    </script>
+                                  </div>
+                                  <input id='responses-devicesetSpectrumHistoryGet-200-schema-data' type='hidden' value=''></input>
+                                </div>
+                            </div>
+
+                            <h3> Status: 400 - Invalid parameters </h3>
+
+                            <ul class="nav nav-tabs nav-tabs-examples" >
+                                <li class="active">
+                                  <a data-toggle="tab" href="#responses-devicesetSpectrumHistoryGet-400-schema">Schema</a>
+                                </li>
+
+                            </ul>
+
+                            <div class="tab-content" style='margin-bottom: 10px;'>
+                                <div class="tab-pane active" id="responses-devicesetSpectrumHistoryGet-400-schema">
+                                  <div id='responses-devicesetSpectrumHistoryGet-400-schema-400' style="padding: 30px; border-left: 1px solid #eee; border-right: 1px solid #eee; border-bottom: 1px solid #eee;">
+                                    <script>
+                                      $(document).ready(function() {
+                                        var schemaWrapper = {
+  "description" : "Invalid parameters",
+  "schema" : {
+    "$ref" : "#/definitions/ErrorResponse"
+  }
+};
+                                        var schema = schemaWrapper.schema;
+                                        if (schema.$ref != null) {
+                                          schema = defsParser.$refs.get(schema.$ref);
+                                        } else {
+                                          schemaWrapper.definitions = Object.assign({}, defs);
+                                          $RefParser.dereference(schemaWrapper).catch(function(err) {
+                                            console.log(err);
+                                          });
+                                        }
+
+                                        //console.log(JSON.stringify(schema));
+                                        var view = new JSONSchemaView(schema, 3);
+                                        $('#responses-devicesetSpectrumHistoryGet-400-schema-data').val(stringify(schema));
+                                        var result = $('#responses-devicesetSpectrumHistoryGet-400-schema-400');
+                                        result.empty();
+                                        result.append(view.render());
+                                      });
+                                    </script>
+                                  </div>
+                                  <input id='responses-devicesetSpectrumHistoryGet-400-schema-data' type='hidden' value=''></input>
+                                </div>
+                            </div>
+
+                            <h3> Status: 404 - Invalid index, or no history </h3>
+
+                            <ul class="nav nav-tabs nav-tabs-examples" >
+                                <li class="active">
+                                  <a data-toggle="tab" href="#responses-devicesetSpectrumHistoryGet-404-schema">Schema</a>
+                                </li>
+
+                            </ul>
+
+                            <div class="tab-content" style='margin-bottom: 10px;'>
+                                <div class="tab-pane active" id="responses-devicesetSpectrumHistoryGet-404-schema">
+                                  <div id='responses-devicesetSpectrumHistoryGet-404-schema-404' style="padding: 30px; border-left: 1px solid #eee; border-right: 1px solid #eee; border-bottom: 1px solid #eee;">
+                                    <script>
+                                      $(document).ready(function() {
+                                        var schemaWrapper = {
+  "description" : "Invalid index, or no history",
+  "schema" : {
+    "$ref" : "#/definitions/ErrorResponse"
+  }
+};
+                                        var schema = schemaWrapper.schema;
+                                        if (schema.$ref != null) {
+                                          schema = defsParser.$refs.get(schema.$ref);
+                                        } else {
+                                          schemaWrapper.definitions = Object.assign({}, defs);
+                                          $RefParser.dereference(schemaWrapper).catch(function(err) {
+                                            console.log(err);
+                                          });
+                                        }
+
+                                        //console.log(JSON.stringify(schema));
+                                        var view = new JSONSchemaView(schema, 3);
+                                        $('#responses-devicesetSpectrumHistoryGet-404-schema-data').val(stringify(schema));
+                                        var result = $('#responses-devicesetSpectrumHistoryGet-404-schema-404');
+                                        result.empty();
+                                        result.append(view.render());
+                                      });
+                                    </script>
+                                  </div>
+                                  <input id='responses-devicesetSpectrumHistoryGet-404-schema-data' type='hidden' value=''></input>
+                                </div>
+                            </div>
+
+                            <h3> Status: 500 - Error </h3>
+
+                            <ul class="nav nav-tabs nav-tabs-examples" >
+                                <li class="active">
+                                  <a data-toggle="tab" href="#responses-devicesetSpectrumHistoryGet-500-schema">Schema</a>
+                                </li>
+
+                            </ul>
+
+                            <div class="tab-content" style='margin-bottom: 10px;'>
+                                <div class="tab-pane active" id="responses-devicesetSpectrumHistoryGet-500-schema">
+                                  <div id='responses-devicesetSpectrumHistoryGet-500-schema-500' style="padding: 30px; border-left: 1px solid #eee; border-right: 1px solid #eee; border-bottom: 1px solid #eee;">
+                                    <script>
+                                      $(document).ready(function() {
+                                        var schemaWrapper = {
+  "description" : "Error",
+  "schema" : {
+    "$ref" : "#/definitions/ErrorResponse"
+  }
+};
+                                        var schema = schemaWrapper.schema;
+                                        if (schema.$ref != null) {
+                                          schema = defsParser.$refs.get(schema.$ref);
+                                        } else {
+                                          schemaWrapper.definitions = Object.assign({}, defs);
+                                          $RefParser.dereference(schemaWrapper).catch(function(err) {
+                                            console.log(err);
+                                          });
+                                        }
+
+                                        //console.log(JSON.stringify(schema));
+                                        var view = new JSONSchemaView(schema, 3);
+                                        $('#responses-devicesetSpectrumHistoryGet-500-schema-data').val(stringify(schema));
+                                        var result = $('#responses-devicesetSpectrumHistoryGet-500-schema-500');
+                                        result.empty();
+                                        result.append(view.render());
+                                      });
+                                    </script>
+                                  </div>
+                                  <input id='responses-devicesetSpectrumHistoryGet-500-schema-data' type='hidden' value=''></input>
+                                </div>
+                            </div>
+
+                        </article>
+                      </div>
+                      <hr>
+                    <div id="api-DeviceSet-devicesetSpectrumHistoryImageGet">
+                      <article id="api-DeviceSet-devicesetSpectrumHistoryImageGet-0" data-group="User" data-name="devicesetSpectrumHistoryImageGet" data-version="0">
+                        <div class="pull-left">
+                          <h1>devicesetSpectrumHistoryImageGet</h1>
+                          <p></p>
+                        </div>
+                        <div class="pull-right"></div>
+                        <div class="clearfix"></div>
+                        <p></p>
+                        <p class="marked">The spectrum history as a greyscale PNG waterfall, one pixel per bin across and one per row down with the newest row at the bottom, black a little below the noise floor and white at the strongest bin. The frequency and time extents come back in X-Spectrum-History headers and in the JSON form of the same call
+</p>
+                        <p></p>
+                        <br />
+                        <pre class="prettyprint language-html prettyprinted" data-type="get"><code><span class="pln">/sdrangel/deviceset/{deviceSetIndex}/spectrum/history/image</span></code></pre>
+                        <p>
+                          <h3>Usage and SDK Samples</h3>
+                        </p>
+                        <ul class="nav nav-tabs nav-tabs-examples">
+                          <li class="active"><a href="#examples-DeviceSet-devicesetSpectrumHistoryImageGet-0-curl">Curl</a></li>
+                          <li class=""><a href="#examples-DeviceSet-devicesetSpectrumHistoryImageGet-0-java">Java</a></li>
+                          <li class=""><a href="#examples-DeviceSet-devicesetSpectrumHistoryImageGet-0-android">Android</a></li>
+                          <!--<li class=""><a href="#examples-DeviceSet-devicesetSpectrumHistoryImageGet-0-groovy">Groovy</a></li>-->
+                          <li class=""><a href="#examples-DeviceSet-devicesetSpectrumHistoryImageGet-0-objc">Obj-C</a></li>
+                          <li class=""><a href="#examples-DeviceSet-devicesetSpectrumHistoryImageGet-0-javascript">JavaScript</a></li>
+                          <!--<li class=""><a href="#examples-DeviceSet-devicesetSpectrumHistoryImageGet-0-angular">Angular</a></li>-->
+                          <li class=""><a href="#examples-DeviceSet-devicesetSpectrumHistoryImageGet-0-csharp">C#</a></li>
+                          <li class=""><a href="#examples-DeviceSet-devicesetSpectrumHistoryImageGet-0-php">PHP</a></li>
+                          <li class=""><a href="#examples-DeviceSet-devicesetSpectrumHistoryImageGet-0-perl">Perl</a></li>
+                          <li class=""><a href="#examples-DeviceSet-devicesetSpectrumHistoryImageGet-0-python">Python</a></li>
+                        </ul>
+
+                        <div class="tab-content">
+                          <div class="tab-pane active" id="examples-DeviceSet-devicesetSpectrumHistoryImageGet-0-curl">
+                            <pre class="prettyprint"><code class="language-bsh">curl -X GET "http://localhost/sdrangel/deviceset/{deviceSetIndex}/spectrum/history/image?seconds=&bins=&rows=&startFrequency=&stopFrequency="</code></pre>
+                          </div>
+                          <div class="tab-pane" id="examples-DeviceSet-devicesetSpectrumHistoryImageGet-0-java">
+                            <pre class="prettyprint"><code class="language-java">import SWGSDRangel.*;
+import SWGSDRangel.auth.*;
+import SWGSDRangel.model.*;
+import SWGSDRangel.api.DeviceSetApi;
+
+import java.io.File;
+import java.util.*;
+
+public class DeviceSetApiExample {
+
+    public static void main(String[] args) {
+        
+        DeviceSetApi apiInstance = new DeviceSetApi();
+        Integer deviceSetIndex = 56; // Integer | Index of device set in the device set list
+        Float seconds = 3.4; // Float | How far back to look, in seconds (default 60)
+        Integer bins = 56; // Integer | Width in pixels, 1 to 4096 (default 512)
+        Integer rows = 56; // Integer | At most this many rows, the most recent (default 512, up to 4000)
+        Long startFrequency = 789; // Long | Lowest frequency to include in Hz. Default is the start of the spectrum
+        Long stopFrequency = 789; // Long | Highest frequency to include in Hz. Default is the end of the spectrum
+        try {
+            apiInstance.devicesetSpectrumHistoryImageGet(deviceSetIndex, seconds, bins, rows, startFrequency, stopFrequency);
+        } catch (ApiException e) {
+            System.err.println("Exception when calling DeviceSetApi#devicesetSpectrumHistoryImageGet");
+            e.printStackTrace();
+        }
+    }
+}</code></pre>
+                          </div>
+
+                          <div class="tab-pane" id="examples-DeviceSet-devicesetSpectrumHistoryImageGet-0-android">
+                            <pre class="prettyprint"><code class="language-java">import SWGSDRangel.api.DeviceSetApi;
+
+public class DeviceSetApiExample {
+
+    public static void main(String[] args) {
+        DeviceSetApi apiInstance = new DeviceSetApi();
+        Integer deviceSetIndex = 56; // Integer | Index of device set in the device set list
+        Float seconds = 3.4; // Float | How far back to look, in seconds (default 60)
+        Integer bins = 56; // Integer | Width in pixels, 1 to 4096 (default 512)
+        Integer rows = 56; // Integer | At most this many rows, the most recent (default 512, up to 4000)
+        Long startFrequency = 789; // Long | Lowest frequency to include in Hz. Default is the start of the spectrum
+        Long stopFrequency = 789; // Long | Highest frequency to include in Hz. Default is the end of the spectrum
+        try {
+            apiInstance.devicesetSpectrumHistoryImageGet(deviceSetIndex, seconds, bins, rows, startFrequency, stopFrequency);
+        } catch (ApiException e) {
+            System.err.println("Exception when calling DeviceSetApi#devicesetSpectrumHistoryImageGet");
+            e.printStackTrace();
+        }
+    }
+}</code></pre>
+                          </div>
+  <!--
+  <div class="tab-pane" id="examples-DeviceSet-devicesetSpectrumHistoryImageGet-0-groovy">
+  <pre class="prettyprint language-json prettyprinted" data-type="json"><code>Coming Soon!</code></pre>
+  </div> -->
+                            <div class="tab-pane" id="examples-DeviceSet-devicesetSpectrumHistoryImageGet-0-objc">
+                              <pre class="prettyprint"><code class="language-cpp">Integer *deviceSetIndex = 56; // Index of device set in the device set list
+Float *seconds = 3.4; // How far back to look, in seconds (default 60) (optional)
+Integer *bins = 56; // Width in pixels, 1 to 4096 (default 512) (optional)
+Integer *rows = 56; // At most this many rows, the most recent (default 512, up to 4000) (optional)
+Long *startFrequency = 789; // Lowest frequency to include in Hz. Default is the start of the spectrum (optional)
+Long *stopFrequency = 789; // Highest frequency to include in Hz. Default is the end of the spectrum (optional)
+
+DeviceSetApi *apiInstance = [[DeviceSetApi alloc] init];
+
+[apiInstance devicesetSpectrumHistoryImageGetWith:deviceSetIndex
+    seconds:seconds
+    bins:bins
+    rows:rows
+    startFrequency:startFrequency
+    stopFrequency:stopFrequency
+              completionHandler: ^(NSError* error) {
+                            if (error) {
+                                NSLog(@"Error: %@", error);
+                            }
+                        }];
+</code></pre>
+                            </div>
+
+                            <div class="tab-pane" id="examples-DeviceSet-devicesetSpectrumHistoryImageGet-0-javascript">
+                              <pre class="prettyprint"><code class="language-js">var SdRangel = require('sd_rangel');
+
+var api = new SdRangel.DeviceSetApi()
+
+var deviceSetIndex = 56; // {Integer} Index of device set in the device set list
+
+var opts = { 
+  'seconds': 3.4, // {Float} How far back to look, in seconds (default 60)
+  'bins': 56, // {Integer} Width in pixels, 1 to 4096 (default 512)
+  'rows': 56, // {Integer} At most this many rows, the most recent (default 512, up to 4000)
+  'startFrequency': 789, // {Long} Lowest frequency to include in Hz. Default is the start of the spectrum
+  'stopFrequency': 789 // {Long} Highest frequency to include in Hz. Default is the end of the spectrum
+};
+
+var callback = function(error, data, response) {
+  if (error) {
+    console.error(error);
+  } else {
+    console.log('API called successfully.');
+  }
+};
+api.devicesetSpectrumHistoryImageGet(deviceSetIndex, opts, callback);
+</code></pre>
+                            </div>
+
+                            <!--<div class="tab-pane" id="examples-DeviceSet-devicesetSpectrumHistoryImageGet-0-angular">
+              <pre class="prettyprint language-json prettyprinted" data-type="json"><code>Coming Soon!</code></pre>
+            </div>-->
+                            <div class="tab-pane" id="examples-DeviceSet-devicesetSpectrumHistoryImageGet-0-csharp">
+                              <pre class="prettyprint"><code class="language-cs">using System;
+using System.Diagnostics;
+using SWGSDRangel.Api;
+using SWGSDRangel.Client;
+using SWGSDRangel.Model;
+
+namespace Example
+{
+    public class devicesetSpectrumHistoryImageGetExample
+    {
+        public void main()
+        {
+            
+            var apiInstance = new DeviceSetApi();
+            var deviceSetIndex = 56;  // Integer | Index of device set in the device set list
+            var seconds = 3.4;  // Float | How far back to look, in seconds (default 60) (optional) 
+            var bins = 56;  // Integer | Width in pixels, 1 to 4096 (default 512) (optional) 
+            var rows = 56;  // Integer | At most this many rows, the most recent (default 512, up to 4000) (optional) 
+            var startFrequency = 789;  // Long | Lowest frequency to include in Hz. Default is the start of the spectrum (optional) 
+            var stopFrequency = 789;  // Long | Highest frequency to include in Hz. Default is the end of the spectrum (optional) 
+
+            try
+            {
+                apiInstance.devicesetSpectrumHistoryImageGet(deviceSetIndex, seconds, bins, rows, startFrequency, stopFrequency);
+            }
+            catch (Exception e)
+            {
+                Debug.Print("Exception when calling DeviceSetApi.devicesetSpectrumHistoryImageGet: " + e.Message );
+            }
+        }
+    }
+}
+</code></pre>
+                            </div>
+
+                            <div class="tab-pane" id="examples-DeviceSet-devicesetSpectrumHistoryImageGet-0-php">
+                              <pre class="prettyprint"><code class="language-php"><&#63;php
+require_once(__DIR__ . '/vendor/autoload.php');
+
+$api_instance = new Swagger\Client\Api\DeviceSetApi();
+$deviceSetIndex = 56; // Integer | Index of device set in the device set list
+$seconds = 3.4; // Float | How far back to look, in seconds (default 60)
+$bins = 56; // Integer | Width in pixels, 1 to 4096 (default 512)
+$rows = 56; // Integer | At most this many rows, the most recent (default 512, up to 4000)
+$startFrequency = 789; // Long | Lowest frequency to include in Hz. Default is the start of the spectrum
+$stopFrequency = 789; // Long | Highest frequency to include in Hz. Default is the end of the spectrum
+
+try {
+    $api_instance->devicesetSpectrumHistoryImageGet($deviceSetIndex, $seconds, $bins, $rows, $startFrequency, $stopFrequency);
+} catch (Exception $e) {
+    echo 'Exception when calling DeviceSetApi->devicesetSpectrumHistoryImageGet: ', $e->getMessage(), PHP_EOL;
+}
+?></code></pre>
+                            </div>
+
+                            <div class="tab-pane" id="examples-DeviceSet-devicesetSpectrumHistoryImageGet-0-perl">
+                              <pre class="prettyprint"><code class="language-perl">use Data::Dumper;
+use SWGSDRangel::Configuration;
+use SWGSDRangel::DeviceSetApi;
+
+my $api_instance = SWGSDRangel::DeviceSetApi->new();
+my $deviceSetIndex = 56; # Integer | Index of device set in the device set list
+my $seconds = 3.4; # Float | How far back to look, in seconds (default 60)
+my $bins = 56; # Integer | Width in pixels, 1 to 4096 (default 512)
+my $rows = 56; # Integer | At most this many rows, the most recent (default 512, up to 4000)
+my $startFrequency = 789; # Long | Lowest frequency to include in Hz. Default is the start of the spectrum
+my $stopFrequency = 789; # Long | Highest frequency to include in Hz. Default is the end of the spectrum
+
+eval { 
+    $api_instance->devicesetSpectrumHistoryImageGet(deviceSetIndex => $deviceSetIndex, seconds => $seconds, bins => $bins, rows => $rows, startFrequency => $startFrequency, stopFrequency => $stopFrequency);
+};
+if ($@) {
+    warn "Exception when calling DeviceSetApi->devicesetSpectrumHistoryImageGet: $@\n";
+}</code></pre>
+                            </div>
+
+                            <div class="tab-pane" id="examples-DeviceSet-devicesetSpectrumHistoryImageGet-0-python">
+                              <pre class="prettyprint"><code class="language-python">from __future__ import print_statement
+import time
+import swagger_sdrangel
+from swagger_sdrangel.rest import ApiException
+from pprint import pprint
+
+# create an instance of the API class
+api_instance = swagger_sdrangel.DeviceSetApi()
+deviceSetIndex = 56 # Integer | Index of device set in the device set list
+seconds = 3.4 # Float | How far back to look, in seconds (default 60) (optional)
+bins = 56 # Integer | Width in pixels, 1 to 4096 (default 512) (optional)
+rows = 56 # Integer | At most this many rows, the most recent (default 512, up to 4000) (optional)
+startFrequency = 789 # Long | Lowest frequency to include in Hz. Default is the start of the spectrum (optional)
+stopFrequency = 789 # Long | Highest frequency to include in Hz. Default is the end of the spectrum (optional)
+
+try: 
+    api_instance.deviceset_spectrum_history_image_get(deviceSetIndex, seconds=seconds, bins=bins, rows=rows, startFrequency=startFrequency, stopFrequency=stopFrequency)
+except ApiException as e:
+    print("Exception when calling DeviceSetApi->devicesetSpectrumHistoryImageGet: %s\n" % e)</code></pre>
+                            </div>
+                          </div>
+
+                          <h2>Parameters</h2>
+
+                            <div class="methodsubtabletitle">Path parameters</div>
+                            <table id="methodsubtable">
+                                <tr>
+                                  <th width="150px">Name</th>
+                                  <th>Description</th>
+                                </tr>
+                                  <tr><td style="width:150px;">deviceSetIndex*</td>
+<td>
+
+
+    <div id="d2e199_devicesetSpectrumHistoryImageGet_deviceSetIndex">
+        <div class="json-schema-view">
+            <div class="primitive">
+                <span class="type">
+                    Integer
+                </span>
+
+                    <div class="inner description">
+                        Index of device set in the device set list
+                    </div>
+            </div>
+                <div class="inner required">
+                    Required
+                </div>
+        </div>
+    </div>
+</td>
+</tr>
+
+                            </table>
+
+
+
+
+                            <div class="methodsubtabletitle">Query parameters</div>
+                            <table id="methodsubtable">
+                              <tr>
+                                <th width="150px">Name</th>
+                                <th>Description</th>
+                              </tr>
+                                <tr><td style="width:150px;">seconds</td>
+<td>
+
+
+    <div id="d2e199_devicesetSpectrumHistoryImageGet_seconds">
+        <div class="json-schema-view">
+            <div class="primitive">
+                <span class="type">
+                    Float
+                </span>
+                    <span class="format">
+                        (float)
+                    </span>
+
+                    <div class="inner description">
+                        How far back to look, in seconds (default 60)
+                    </div>
+            </div>
+        </div>
+    </div>
+</td>
+</tr>
+
+                                <tr><td style="width:150px;">bins</td>
+<td>
+
+
+    <div id="d2e199_devicesetSpectrumHistoryImageGet_bins">
+        <div class="json-schema-view">
+            <div class="primitive">
+                <span class="type">
+                    Integer
+                </span>
+
+                    <div class="inner description">
+                        Width in pixels, 1 to 4096 (default 512)
+                    </div>
+            </div>
+        </div>
+    </div>
+</td>
+</tr>
+
+                                <tr><td style="width:150px;">rows</td>
+<td>
+
+
+    <div id="d2e199_devicesetSpectrumHistoryImageGet_rows">
+        <div class="json-schema-view">
+            <div class="primitive">
+                <span class="type">
+                    Integer
+                </span>
+
+                    <div class="inner description">
+                        At most this many rows, the most recent (default 512, up to 4000)
+                    </div>
+            </div>
+        </div>
+    </div>
+</td>
+</tr>
+
+                                <tr><td style="width:150px;">startFrequency</td>
+<td>
+
+
+    <div id="d2e199_devicesetSpectrumHistoryImageGet_startFrequency">
+        <div class="json-schema-view">
+            <div class="primitive">
+                <span class="type">
+                    Long
+                </span>
+                    <span class="format">
+                        (int64)
+                    </span>
+
+                    <div class="inner description">
+                        Lowest frequency to include in Hz. Default is the start of the spectrum
+                    </div>
+            </div>
+        </div>
+    </div>
+</td>
+</tr>
+
+                                <tr><td style="width:150px;">stopFrequency</td>
+<td>
+
+
+    <div id="d2e199_devicesetSpectrumHistoryImageGet_stopFrequency">
+        <div class="json-schema-view">
+            <div class="primitive">
+                <span class="type">
+                    Long
+                </span>
+                    <span class="format">
+                        (int64)
+                    </span>
+
+                    <div class="inner description">
+                        Highest frequency to include in Hz. Default is the end of the spectrum
+                    </div>
+            </div>
+        </div>
+    </div>
+</td>
+</tr>
+
+                            </table>
+
+                          <h2>Responses</h2>
+                            <h3> Status: 200 - The PNG image </h3>
+
+                            <ul class="nav nav-tabs nav-tabs-examples" >
+                            </ul>
+
+                            <div class="tab-content" style='margin-bottom: 10px;'>
+                            </div>
+
+                            <h3> Status: 400 - Invalid parameters </h3>
+
+                            <ul class="nav nav-tabs nav-tabs-examples" >
+                                <li class="active">
+                                  <a data-toggle="tab" href="#responses-devicesetSpectrumHistoryImageGet-400-schema">Schema</a>
+                                </li>
+
+                            </ul>
+
+                            <div class="tab-content" style='margin-bottom: 10px;'>
+                                <div class="tab-pane active" id="responses-devicesetSpectrumHistoryImageGet-400-schema">
+                                  <div id='responses-devicesetSpectrumHistoryImageGet-400-schema-400' style="padding: 30px; border-left: 1px solid #eee; border-right: 1px solid #eee; border-bottom: 1px solid #eee;">
+                                    <script>
+                                      $(document).ready(function() {
+                                        var schemaWrapper = {
+  "description" : "Invalid parameters",
+  "schema" : {
+    "$ref" : "#/definitions/ErrorResponse"
+  }
+};
+                                        var schema = schemaWrapper.schema;
+                                        if (schema.$ref != null) {
+                                          schema = defsParser.$refs.get(schema.$ref);
+                                        } else {
+                                          schemaWrapper.definitions = Object.assign({}, defs);
+                                          $RefParser.dereference(schemaWrapper).catch(function(err) {
+                                            console.log(err);
+                                          });
+                                        }
+
+                                        //console.log(JSON.stringify(schema));
+                                        var view = new JSONSchemaView(schema, 3);
+                                        $('#responses-devicesetSpectrumHistoryImageGet-400-schema-data').val(stringify(schema));
+                                        var result = $('#responses-devicesetSpectrumHistoryImageGet-400-schema-400');
+                                        result.empty();
+                                        result.append(view.render());
+                                      });
+                                    </script>
+                                  </div>
+                                  <input id='responses-devicesetSpectrumHistoryImageGet-400-schema-data' type='hidden' value=''></input>
+                                </div>
+                            </div>
+
+                            <h3> Status: 404 - Invalid index, or no history </h3>
+
+                            <ul class="nav nav-tabs nav-tabs-examples" >
+                                <li class="active">
+                                  <a data-toggle="tab" href="#responses-devicesetSpectrumHistoryImageGet-404-schema">Schema</a>
+                                </li>
+
+                            </ul>
+
+                            <div class="tab-content" style='margin-bottom: 10px;'>
+                                <div class="tab-pane active" id="responses-devicesetSpectrumHistoryImageGet-404-schema">
+                                  <div id='responses-devicesetSpectrumHistoryImageGet-404-schema-404' style="padding: 30px; border-left: 1px solid #eee; border-right: 1px solid #eee; border-bottom: 1px solid #eee;">
+                                    <script>
+                                      $(document).ready(function() {
+                                        var schemaWrapper = {
+  "description" : "Invalid index, or no history",
+  "schema" : {
+    "$ref" : "#/definitions/ErrorResponse"
+  }
+};
+                                        var schema = schemaWrapper.schema;
+                                        if (schema.$ref != null) {
+                                          schema = defsParser.$refs.get(schema.$ref);
+                                        } else {
+                                          schemaWrapper.definitions = Object.assign({}, defs);
+                                          $RefParser.dereference(schemaWrapper).catch(function(err) {
+                                            console.log(err);
+                                          });
+                                        }
+
+                                        //console.log(JSON.stringify(schema));
+                                        var view = new JSONSchemaView(schema, 3);
+                                        $('#responses-devicesetSpectrumHistoryImageGet-404-schema-data').val(stringify(schema));
+                                        var result = $('#responses-devicesetSpectrumHistoryImageGet-404-schema-404');
+                                        result.empty();
+                                        result.append(view.render());
+                                      });
+                                    </script>
+                                  </div>
+                                  <input id='responses-devicesetSpectrumHistoryImageGet-404-schema-data' type='hidden' value=''></input>
+                                </div>
+                            </div>
+
+                            <h3> Status: 500 - Error </h3>
+
+                            <ul class="nav nav-tabs nav-tabs-examples" >
+                                <li class="active">
+                                  <a data-toggle="tab" href="#responses-devicesetSpectrumHistoryImageGet-500-schema">Schema</a>
+                                </li>
+
+                            </ul>
+
+                            <div class="tab-content" style='margin-bottom: 10px;'>
+                                <div class="tab-pane active" id="responses-devicesetSpectrumHistoryImageGet-500-schema">
+                                  <div id='responses-devicesetSpectrumHistoryImageGet-500-schema-500' style="padding: 30px; border-left: 1px solid #eee; border-right: 1px solid #eee; border-bottom: 1px solid #eee;">
+                                    <script>
+                                      $(document).ready(function() {
+                                        var schemaWrapper = {
+  "description" : "Error",
+  "schema" : {
+    "$ref" : "#/definitions/ErrorResponse"
+  }
+};
+                                        var schema = schemaWrapper.schema;
+                                        if (schema.$ref != null) {
+                                          schema = defsParser.$refs.get(schema.$ref);
+                                        } else {
+                                          schemaWrapper.definitions = Object.assign({}, defs);
+                                          $RefParser.dereference(schemaWrapper).catch(function(err) {
+                                            console.log(err);
+                                          });
+                                        }
+
+                                        //console.log(JSON.stringify(schema));
+                                        var view = new JSONSchemaView(schema, 3);
+                                        $('#responses-devicesetSpectrumHistoryImageGet-500-schema-data').val(stringify(schema));
+                                        var result = $('#responses-devicesetSpectrumHistoryImageGet-500-schema-500');
+                                        result.empty();
+                                        result.append(view.render());
+                                      });
+                                    </script>
+                                  </div>
+                                  <input id='responses-devicesetSpectrumHistoryImageGet-500-schema-data' type='hidden' value=''></input>
                                 </div>
                             </div>
 
@@ -67394,6 +68706,306 @@ except ApiException as e:
                         </article>
                       </div>
                       <hr>
+                    <div id="api-Instance-instanceWindowsGet">
+                      <article id="api-Instance-instanceWindowsGet-0" data-group="User" data-name="instanceWindowsGet" data-version="0">
+                        <div class="pull-left">
+                          <h1>instanceWindowsGet</h1>
+                          <p></p>
+                        </div>
+                        <div class="pull-right"></div>
+                        <div class="clearfix"></div>
+                        <p></p>
+                        <p class="marked">List the windows of the GUI with their workspace and whether each is hidden (GUI)</p>
+                        <p></p>
+                        <br />
+                        <pre class="prettyprint language-html prettyprinted" data-type="get"><code><span class="pln">/sdrangel/windows</span></code></pre>
+                        <p>
+                          <h3>Usage and SDK Samples</h3>
+                        </p>
+                        <ul class="nav nav-tabs nav-tabs-examples">
+                          <li class="active"><a href="#examples-Instance-instanceWindowsGet-0-curl">Curl</a></li>
+                          <li class=""><a href="#examples-Instance-instanceWindowsGet-0-java">Java</a></li>
+                          <li class=""><a href="#examples-Instance-instanceWindowsGet-0-android">Android</a></li>
+                          <!--<li class=""><a href="#examples-Instance-instanceWindowsGet-0-groovy">Groovy</a></li>-->
+                          <li class=""><a href="#examples-Instance-instanceWindowsGet-0-objc">Obj-C</a></li>
+                          <li class=""><a href="#examples-Instance-instanceWindowsGet-0-javascript">JavaScript</a></li>
+                          <!--<li class=""><a href="#examples-Instance-instanceWindowsGet-0-angular">Angular</a></li>-->
+                          <li class=""><a href="#examples-Instance-instanceWindowsGet-0-csharp">C#</a></li>
+                          <li class=""><a href="#examples-Instance-instanceWindowsGet-0-php">PHP</a></li>
+                          <li class=""><a href="#examples-Instance-instanceWindowsGet-0-perl">Perl</a></li>
+                          <li class=""><a href="#examples-Instance-instanceWindowsGet-0-python">Python</a></li>
+                        </ul>
+
+                        <div class="tab-content">
+                          <div class="tab-pane active" id="examples-Instance-instanceWindowsGet-0-curl">
+                            <pre class="prettyprint"><code class="language-bsh">curl -X GET "http://localhost/sdrangel/windows"</code></pre>
+                          </div>
+                          <div class="tab-pane" id="examples-Instance-instanceWindowsGet-0-java">
+                            <pre class="prettyprint"><code class="language-java">import SWGSDRangel.*;
+import SWGSDRangel.auth.*;
+import SWGSDRangel.model.*;
+import SWGSDRangel.api.InstanceApi;
+
+import java.io.File;
+import java.util.*;
+
+public class InstanceApiExample {
+
+    public static void main(String[] args) {
+        
+        InstanceApi apiInstance = new InstanceApi();
+        try {
+            WindowList result = apiInstance.instanceWindowsGet();
+            System.out.println(result);
+        } catch (ApiException e) {
+            System.err.println("Exception when calling InstanceApi#instanceWindowsGet");
+            e.printStackTrace();
+        }
+    }
+}</code></pre>
+                          </div>
+
+                          <div class="tab-pane" id="examples-Instance-instanceWindowsGet-0-android">
+                            <pre class="prettyprint"><code class="language-java">import SWGSDRangel.api.InstanceApi;
+
+public class InstanceApiExample {
+
+    public static void main(String[] args) {
+        InstanceApi apiInstance = new InstanceApi();
+        try {
+            WindowList result = apiInstance.instanceWindowsGet();
+            System.out.println(result);
+        } catch (ApiException e) {
+            System.err.println("Exception when calling InstanceApi#instanceWindowsGet");
+            e.printStackTrace();
+        }
+    }
+}</code></pre>
+                          </div>
+  <!--
+  <div class="tab-pane" id="examples-Instance-instanceWindowsGet-0-groovy">
+  <pre class="prettyprint language-json prettyprinted" data-type="json"><code>Coming Soon!</code></pre>
+  </div> -->
+                            <div class="tab-pane" id="examples-Instance-instanceWindowsGet-0-objc">
+                              <pre class="prettyprint"><code class="language-cpp">
+InstanceApi *apiInstance = [[InstanceApi alloc] init];
+
+[apiInstance instanceWindowsGetWithCompletionHandler: 
+              ^(WindowList output, NSError* error) {
+                            if (output) {
+                                NSLog(@"%@", output);
+                            }
+                            if (error) {
+                                NSLog(@"Error: %@", error);
+                            }
+                        }];
+</code></pre>
+                            </div>
+
+                            <div class="tab-pane" id="examples-Instance-instanceWindowsGet-0-javascript">
+                              <pre class="prettyprint"><code class="language-js">var SdRangel = require('sd_rangel');
+
+var api = new SdRangel.InstanceApi()
+
+var callback = function(error, data, response) {
+  if (error) {
+    console.error(error);
+  } else {
+    console.log('API called successfully. Returned data: ' + data);
+  }
+};
+api.instanceWindowsGet(callback);
+</code></pre>
+                            </div>
+
+                            <!--<div class="tab-pane" id="examples-Instance-instanceWindowsGet-0-angular">
+              <pre class="prettyprint language-json prettyprinted" data-type="json"><code>Coming Soon!</code></pre>
+            </div>-->
+                            <div class="tab-pane" id="examples-Instance-instanceWindowsGet-0-csharp">
+                              <pre class="prettyprint"><code class="language-cs">using System;
+using System.Diagnostics;
+using SWGSDRangel.Api;
+using SWGSDRangel.Client;
+using SWGSDRangel.Model;
+
+namespace Example
+{
+    public class instanceWindowsGetExample
+    {
+        public void main()
+        {
+            
+            var apiInstance = new InstanceApi();
+
+            try
+            {
+                WindowList result = apiInstance.instanceWindowsGet();
+                Debug.WriteLine(result);
+            }
+            catch (Exception e)
+            {
+                Debug.Print("Exception when calling InstanceApi.instanceWindowsGet: " + e.Message );
+            }
+        }
+    }
+}
+</code></pre>
+                            </div>
+
+                            <div class="tab-pane" id="examples-Instance-instanceWindowsGet-0-php">
+                              <pre class="prettyprint"><code class="language-php"><&#63;php
+require_once(__DIR__ . '/vendor/autoload.php');
+
+$api_instance = new Swagger\Client\Api\InstanceApi();
+
+try {
+    $result = $api_instance->instanceWindowsGet();
+    print_r($result);
+} catch (Exception $e) {
+    echo 'Exception when calling InstanceApi->instanceWindowsGet: ', $e->getMessage(), PHP_EOL;
+}
+?></code></pre>
+                            </div>
+
+                            <div class="tab-pane" id="examples-Instance-instanceWindowsGet-0-perl">
+                              <pre class="prettyprint"><code class="language-perl">use Data::Dumper;
+use SWGSDRangel::Configuration;
+use SWGSDRangel::InstanceApi;
+
+my $api_instance = SWGSDRangel::InstanceApi->new();
+
+eval { 
+    my $result = $api_instance->instanceWindowsGet();
+    print Dumper($result);
+};
+if ($@) {
+    warn "Exception when calling InstanceApi->instanceWindowsGet: $@\n";
+}</code></pre>
+                            </div>
+
+                            <div class="tab-pane" id="examples-Instance-instanceWindowsGet-0-python">
+                              <pre class="prettyprint"><code class="language-python">from __future__ import print_statement
+import time
+import swagger_sdrangel
+from swagger_sdrangel.rest import ApiException
+from pprint import pprint
+
+# create an instance of the API class
+api_instance = swagger_sdrangel.InstanceApi()
+
+try: 
+    api_response = api_instance.instance_windows_get()
+    pprint(api_response)
+except ApiException as e:
+    print("Exception when calling InstanceApi->instanceWindowsGet: %s\n" % e)</code></pre>
+                            </div>
+                          </div>
+
+                          <h2>Parameters</h2>
+
+
+
+
+
+
+                          <h2>Responses</h2>
+                            <h3> Status: 200 - On success return the window list </h3>
+
+                            <ul class="nav nav-tabs nav-tabs-examples" >
+                                <li class="active">
+                                  <a data-toggle="tab" href="#responses-instanceWindowsGet-200-schema">Schema</a>
+                                </li>
+
+                            </ul>
+
+                            <div class="tab-content" style='margin-bottom: 10px;'>
+                                <div class="tab-pane active" id="responses-instanceWindowsGet-200-schema">
+                                  <div id='responses-instanceWindowsGet-200-schema-200' style="padding: 30px; border-left: 1px solid #eee; border-right: 1px solid #eee; border-bottom: 1px solid #eee;">
+                                    <script>
+                                      $(document).ready(function() {
+                                        var schemaWrapper = {
+  "description" : "On success return the window list",
+  "schema" : {
+    "$ref" : "#/definitions/WindowList"
+  }
+};
+                                        var schema = schemaWrapper.schema;
+                                        if (schema.$ref != null) {
+                                          schema = defsParser.$refs.get(schema.$ref);
+                                        } else {
+                                          schemaWrapper.definitions = Object.assign({}, defs);
+                                          $RefParser.dereference(schemaWrapper).catch(function(err) {
+                                            console.log(err);
+                                          });
+                                        }
+
+                                        //console.log(JSON.stringify(schema));
+                                        var view = new JSONSchemaView(schema, 3);
+                                        $('#responses-instanceWindowsGet-200-schema-data').val(stringify(schema));
+                                        var result = $('#responses-instanceWindowsGet-200-schema-200');
+                                        result.empty();
+                                        result.append(view.render());
+                                      });
+                                    </script>
+                                  </div>
+                                  <input id='responses-instanceWindowsGet-200-schema-data' type='hidden' value=''></input>
+                                </div>
+                            </div>
+
+                            <h3> Status: 500 - Error </h3>
+
+                            <ul class="nav nav-tabs nav-tabs-examples" >
+                                <li class="active">
+                                  <a data-toggle="tab" href="#responses-instanceWindowsGet-500-schema">Schema</a>
+                                </li>
+
+                            </ul>
+
+                            <div class="tab-content" style='margin-bottom: 10px;'>
+                                <div class="tab-pane active" id="responses-instanceWindowsGet-500-schema">
+                                  <div id='responses-instanceWindowsGet-500-schema-500' style="padding: 30px; border-left: 1px solid #eee; border-right: 1px solid #eee; border-bottom: 1px solid #eee;">
+                                    <script>
+                                      $(document).ready(function() {
+                                        var schemaWrapper = {
+  "description" : "Error",
+  "schema" : {
+    "$ref" : "#/definitions/ErrorResponse"
+  }
+};
+                                        var schema = schemaWrapper.schema;
+                                        if (schema.$ref != null) {
+                                          schema = defsParser.$refs.get(schema.$ref);
+                                        } else {
+                                          schemaWrapper.definitions = Object.assign({}, defs);
+                                          $RefParser.dereference(schemaWrapper).catch(function(err) {
+                                            console.log(err);
+                                          });
+                                        }
+
+                                        //console.log(JSON.stringify(schema));
+                                        var view = new JSONSchemaView(schema, 3);
+                                        $('#responses-instanceWindowsGet-500-schema-data').val(stringify(schema));
+                                        var result = $('#responses-instanceWindowsGet-500-schema-500');
+                                        result.empty();
+                                        result.append(view.render());
+                                      });
+                                    </script>
+                                  </div>
+                                  <input id='responses-instanceWindowsGet-500-schema-data' type='hidden' value=''></input>
+                                </div>
+                            </div>
+
+                            <h3> Status: 501 - Function not implemented </h3>
+
+                            <ul class="nav nav-tabs nav-tabs-examples" >
+                            </ul>
+
+                            <div class="tab-content" style='margin-bottom: 10px;'>
+                            </div>
+
+                        </article>
+                      </div>
+                      <hr>
                   </section>
                 <section id="api-Workspace">
                   <h1>Workspace</h1>
@@ -68594,7 +70206,7 @@ $(document).ready(function() {
           </div>
           <div id="generator">
             <div class="content">
-              Generated 2026-09-14T12:05:38.294+02:00
+              Generated 2026-09-15T17:49:43.819+02:00
             </div>
           </div>
       </div>

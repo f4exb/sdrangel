@@ -11,54 +11,91 @@
  */
 
 /*
- * SWGWorkspaceInfo.h
+ * SWGSpectrumHistorySignal.h
  *
- * Where a window is and whether it is shown (GUI). On a PUT either field may be given alone: index moves the window, hidden hides or shows it
+ * A signal found in the spectrum history
  */
 
-#ifndef SWGWorkspaceInfo_H_
-#define SWGWorkspaceInfo_H_
+#ifndef SWGSpectrumHistorySignal_H_
+#define SWGSpectrumHistorySignal_H_
 
 #include <QJsonObject>
 
 
+#include <QString>
 
 #include "SWGObject.h"
 #include "export.h"
 
 namespace SWGSDRangel {
 
-class SWG_API SWGWorkspaceInfo: public SWGObject {
+class SWG_API SWGSpectrumHistorySignal: public SWGObject {
 public:
-    SWGWorkspaceInfo();
-    SWGWorkspaceInfo(QString* json);
-    virtual ~SWGWorkspaceInfo();
+    SWGSpectrumHistorySignal();
+    SWGSpectrumHistorySignal(QString* json);
+    virtual ~SWGSpectrumHistorySignal();
     void init();
     void cleanup();
 
     virtual QString asJson () override;
     virtual QJsonObject* asJsonObject() override;
     virtual void fromJsonObject(QJsonObject &json) override;
-    virtual SWGWorkspaceInfo* fromJson(QString &jsonString) override;
+    virtual SWGSpectrumHistorySignal* fromJson(QString &jsonString) override;
 
-    qint32 getIndex();
-    void setIndex(qint32 index);
+    qint64 getFrequency();
+    void setFrequency(qint64 frequency);
 
-    qint32 getHidden();
-    void setHidden(qint32 hidden);
+    qint64 getStartFrequency();
+    void setStartFrequency(qint64 start_frequency);
+
+    qint64 getStopFrequency();
+    void setStopFrequency(qint64 stop_frequency);
+
+    qint32 getBandwidth();
+    void setBandwidth(qint32 bandwidth);
+
+    float getPeakDb();
+    void setPeakDb(float peak_db);
+
+    float getDutyCycle();
+    void setDutyCycle(float duty_cycle);
+
+    QString* getFirstSeen();
+    void setFirstSeen(QString* first_seen);
+
+    QString* getLastSeen();
+    void setLastSeen(QString* last_seen);
 
 
     virtual bool isSet() override;
 
 private:
-    qint32 index;
-    bool m_index_isSet;
+    qint64 frequency;
+    bool m_frequency_isSet;
 
-    qint32 hidden;
-    bool m_hidden_isSet;
+    qint64 start_frequency;
+    bool m_start_frequency_isSet;
+
+    qint64 stop_frequency;
+    bool m_stop_frequency_isSet;
+
+    qint32 bandwidth;
+    bool m_bandwidth_isSet;
+
+    float peak_db;
+    bool m_peak_db_isSet;
+
+    float duty_cycle;
+    bool m_duty_cycle_isSet;
+
+    QString* first_seen;
+    bool m_first_seen_isSet;
+
+    QString* last_seen;
+    bool m_last_seen_isSet;
 
 };
 
 }
 
-#endif /* SWGWorkspaceInfo_H_ */
+#endif /* SWGSpectrumHistorySignal_H_ */

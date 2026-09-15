@@ -11,7 +11,7 @@
  */
 
 
-#include "SWGWorkspaceInfo.h"
+#include "SWGWindowInfo.h"
 
 #include "SWGHelpers.h"
 
@@ -22,38 +22,62 @@
 
 namespace SWGSDRangel {
 
-SWGWorkspaceInfo::SWGWorkspaceInfo(QString* json) {
+SWGWindowInfo::SWGWindowInfo(QString* json) {
     init();
     this->fromJson(*json);
 }
 
-SWGWorkspaceInfo::SWGWorkspaceInfo() {
+SWGWindowInfo::SWGWindowInfo() {
+    kind = nullptr;
+    m_kind_isSet = false;
+    device_set_index = 0;
+    m_device_set_index_isSet = false;
     index = 0;
     m_index_isSet = false;
+    title = nullptr;
+    m_title_isSet = false;
+    workspace_index = 0;
+    m_workspace_index_isSet = false;
     hidden = 0;
     m_hidden_isSet = false;
 }
 
-SWGWorkspaceInfo::~SWGWorkspaceInfo() {
+SWGWindowInfo::~SWGWindowInfo() {
     this->cleanup();
 }
 
 void
-SWGWorkspaceInfo::init() {
+SWGWindowInfo::init() {
+    kind = new QString("");
+    m_kind_isSet = false;
+    device_set_index = 0;
+    m_device_set_index_isSet = false;
     index = 0;
     m_index_isSet = false;
+    title = new QString("");
+    m_title_isSet = false;
+    workspace_index = 0;
+    m_workspace_index_isSet = false;
     hidden = 0;
     m_hidden_isSet = false;
 }
 
 void
-SWGWorkspaceInfo::cleanup() {
+SWGWindowInfo::cleanup() {
+    if(kind != nullptr) { 
+        delete kind;
+    }
+
+
+    if(title != nullptr) { 
+        delete title;
+    }
 
 
 }
 
-SWGWorkspaceInfo*
-SWGWorkspaceInfo::fromJson(QString &json) {
+SWGWindowInfo*
+SWGWindowInfo::fromJson(QString &json) {
     QByteArray array (json.toStdString().c_str());
     QJsonDocument doc = QJsonDocument::fromJson(array);
     QJsonObject jsonObject = doc.object();
@@ -62,15 +86,23 @@ SWGWorkspaceInfo::fromJson(QString &json) {
 }
 
 void
-SWGWorkspaceInfo::fromJsonObject(QJsonObject &pJson) {
+SWGWindowInfo::fromJsonObject(QJsonObject &pJson) {
+    ::SWGSDRangel::setValue(&kind, pJson["kind"], "QString", "QString");
+    
+    ::SWGSDRangel::setValue(&device_set_index, pJson["deviceSetIndex"], "qint32", "");
+    
     ::SWGSDRangel::setValue(&index, pJson["index"], "qint32", "");
+    
+    ::SWGSDRangel::setValue(&title, pJson["title"], "QString", "QString");
+    
+    ::SWGSDRangel::setValue(&workspace_index, pJson["workspaceIndex"], "qint32", "");
     
     ::SWGSDRangel::setValue(&hidden, pJson["hidden"], "qint32", "");
     
 }
 
 QString
-SWGWorkspaceInfo::asJson ()
+SWGWindowInfo::asJson ()
 {
     QJsonObject* obj = this->asJsonObject();
 
@@ -81,10 +113,22 @@ SWGWorkspaceInfo::asJson ()
 }
 
 QJsonObject*
-SWGWorkspaceInfo::asJsonObject() {
+SWGWindowInfo::asJsonObject() {
     QJsonObject* obj = new QJsonObject();
+    if(kind != nullptr && *kind != QString("")){
+        toJsonValue(QString("kind"), kind, obj, QString("QString"));
+    }
+    if(m_device_set_index_isSet){
+        obj->insert("deviceSetIndex", QJsonValue(device_set_index));
+    }
     if(m_index_isSet){
         obj->insert("index", QJsonValue(index));
+    }
+    if(title != nullptr && *title != QString("")){
+        toJsonValue(QString("title"), title, obj, QString("QString"));
+    }
+    if(m_workspace_index_isSet){
+        obj->insert("workspaceIndex", QJsonValue(workspace_index));
     }
     if(m_hidden_isSet){
         obj->insert("hidden", QJsonValue(hidden));
@@ -93,32 +137,84 @@ SWGWorkspaceInfo::asJsonObject() {
     return obj;
 }
 
+QString*
+SWGWindowInfo::getKind() {
+    return kind;
+}
+void
+SWGWindowInfo::setKind(QString* kind) {
+    this->kind = kind;
+    this->m_kind_isSet = true;
+}
+
 qint32
-SWGWorkspaceInfo::getIndex() {
+SWGWindowInfo::getDeviceSetIndex() {
+    return device_set_index;
+}
+void
+SWGWindowInfo::setDeviceSetIndex(qint32 device_set_index) {
+    this->device_set_index = device_set_index;
+    this->m_device_set_index_isSet = true;
+}
+
+qint32
+SWGWindowInfo::getIndex() {
     return index;
 }
 void
-SWGWorkspaceInfo::setIndex(qint32 index) {
+SWGWindowInfo::setIndex(qint32 index) {
     this->index = index;
     this->m_index_isSet = true;
 }
 
+QString*
+SWGWindowInfo::getTitle() {
+    return title;
+}
+void
+SWGWindowInfo::setTitle(QString* title) {
+    this->title = title;
+    this->m_title_isSet = true;
+}
+
 qint32
-SWGWorkspaceInfo::getHidden() {
+SWGWindowInfo::getWorkspaceIndex() {
+    return workspace_index;
+}
+void
+SWGWindowInfo::setWorkspaceIndex(qint32 workspace_index) {
+    this->workspace_index = workspace_index;
+    this->m_workspace_index_isSet = true;
+}
+
+qint32
+SWGWindowInfo::getHidden() {
     return hidden;
 }
 void
-SWGWorkspaceInfo::setHidden(qint32 hidden) {
+SWGWindowInfo::setHidden(qint32 hidden) {
     this->hidden = hidden;
     this->m_hidden_isSet = true;
 }
 
 
 bool
-SWGWorkspaceInfo::isSet(){
+SWGWindowInfo::isSet(){
     bool isObjectUpdated = false;
     do{
+        if(kind && *kind != QString("")){
+            isObjectUpdated = true; break;
+        }
+        if(m_device_set_index_isSet){
+            isObjectUpdated = true; break;
+        }
         if(m_index_isSet){
+            isObjectUpdated = true; break;
+        }
+        if(title && *title != QString("")){
+            isObjectUpdated = true; break;
+        }
+        if(m_workspace_index_isSet){
             isObjectUpdated = true; break;
         }
         if(m_hidden_isSet){

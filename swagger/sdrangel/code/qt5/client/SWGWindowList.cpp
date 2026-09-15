@@ -11,7 +11,7 @@
  */
 
 
-#include "SWGWorkspaceInfo.h"
+#include "SWGWindowList.h"
 
 #include "SWGHelpers.h"
 
@@ -22,38 +22,44 @@
 
 namespace SWGSDRangel {
 
-SWGWorkspaceInfo::SWGWorkspaceInfo(QString* json) {
+SWGWindowList::SWGWindowList(QString* json) {
     init();
     this->fromJson(*json);
 }
 
-SWGWorkspaceInfo::SWGWorkspaceInfo() {
-    index = 0;
-    m_index_isSet = false;
-    hidden = 0;
-    m_hidden_isSet = false;
+SWGWindowList::SWGWindowList() {
+    window_count = 0;
+    m_window_count_isSet = false;
+    windows = nullptr;
+    m_windows_isSet = false;
 }
 
-SWGWorkspaceInfo::~SWGWorkspaceInfo() {
+SWGWindowList::~SWGWindowList() {
     this->cleanup();
 }
 
 void
-SWGWorkspaceInfo::init() {
-    index = 0;
-    m_index_isSet = false;
-    hidden = 0;
-    m_hidden_isSet = false;
+SWGWindowList::init() {
+    window_count = 0;
+    m_window_count_isSet = false;
+    windows = new QList<SWGWindowInfo*>();
+    m_windows_isSet = false;
 }
 
 void
-SWGWorkspaceInfo::cleanup() {
+SWGWindowList::cleanup() {
 
-
+    if(windows != nullptr) { 
+        auto arr = windows;
+        for(auto o: *arr) { 
+            delete o;
+        }
+        delete windows;
+    }
 }
 
-SWGWorkspaceInfo*
-SWGWorkspaceInfo::fromJson(QString &json) {
+SWGWindowList*
+SWGWindowList::fromJson(QString &json) {
     QByteArray array (json.toStdString().c_str());
     QJsonDocument doc = QJsonDocument::fromJson(array);
     QJsonObject jsonObject = doc.object();
@@ -62,15 +68,15 @@ SWGWorkspaceInfo::fromJson(QString &json) {
 }
 
 void
-SWGWorkspaceInfo::fromJsonObject(QJsonObject &pJson) {
-    ::SWGSDRangel::setValue(&index, pJson["index"], "qint32", "");
+SWGWindowList::fromJsonObject(QJsonObject &pJson) {
+    ::SWGSDRangel::setValue(&window_count, pJson["windowCount"], "qint32", "");
     
-    ::SWGSDRangel::setValue(&hidden, pJson["hidden"], "qint32", "");
     
+    ::SWGSDRangel::setValue(&windows, pJson["windows"], "QList", "SWGWindowInfo");
 }
 
 QString
-SWGWorkspaceInfo::asJson ()
+SWGWindowList::asJson ()
 {
     QJsonObject* obj = this->asJsonObject();
 
@@ -81,47 +87,47 @@ SWGWorkspaceInfo::asJson ()
 }
 
 QJsonObject*
-SWGWorkspaceInfo::asJsonObject() {
+SWGWindowList::asJsonObject() {
     QJsonObject* obj = new QJsonObject();
-    if(m_index_isSet){
-        obj->insert("index", QJsonValue(index));
+    if(m_window_count_isSet){
+        obj->insert("windowCount", QJsonValue(window_count));
     }
-    if(m_hidden_isSet){
-        obj->insert("hidden", QJsonValue(hidden));
+    if(windows && windows->size() > 0){
+        toJsonArray((QList<void*>*)windows, obj, "windows", "SWGWindowInfo");
     }
 
     return obj;
 }
 
 qint32
-SWGWorkspaceInfo::getIndex() {
-    return index;
+SWGWindowList::getWindowCount() {
+    return window_count;
 }
 void
-SWGWorkspaceInfo::setIndex(qint32 index) {
-    this->index = index;
-    this->m_index_isSet = true;
+SWGWindowList::setWindowCount(qint32 window_count) {
+    this->window_count = window_count;
+    this->m_window_count_isSet = true;
 }
 
-qint32
-SWGWorkspaceInfo::getHidden() {
-    return hidden;
+QList<SWGWindowInfo*>*
+SWGWindowList::getWindows() {
+    return windows;
 }
 void
-SWGWorkspaceInfo::setHidden(qint32 hidden) {
-    this->hidden = hidden;
-    this->m_hidden_isSet = true;
+SWGWindowList::setWindows(QList<SWGWindowInfo*>* windows) {
+    this->windows = windows;
+    this->m_windows_isSet = true;
 }
 
 
 bool
-SWGWorkspaceInfo::isSet(){
+SWGWindowList::isSet(){
     bool isObjectUpdated = false;
     do{
-        if(m_index_isSet){
+        if(m_window_count_isSet){
             isObjectUpdated = true; break;
         }
-        if(m_hidden_isSet){
+        if(windows && (windows->size() > 0)){
             isObjectUpdated = true; break;
         }
     }while(false);
