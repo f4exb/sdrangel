@@ -92,7 +92,7 @@
       "binaryDir": "${sourceDir}/build-qt6",
       "cacheVariables": {
         "ENABLE_QT6": "ON",
-        "CMAKE_PREFIX_PATH": "C:/Qt/6.7.3/msvc2022_64;C:/Applications/boost_1_81_0"
+        "CMAKE_PREFIX_PATH": "C:/Qt/6.11.2/msvc2022_64;C:/Applications/boost_1_81_0"
       }
     }
   ],
