@@ -40,6 +40,7 @@ FeatureUISet::~FeatureUISet()
 
 void FeatureUISet::registerFeatureInstance(FeatureGUI* featureGUI, Feature *feature)
 {
+    featureGUI->setWindowOwner(feature);
     m_featureInstanceRegistrations.append(FeatureInstanceRegistration(featureGUI, feature));
     m_featureSet->addFeatureInstance(feature);
     QObject::connect(

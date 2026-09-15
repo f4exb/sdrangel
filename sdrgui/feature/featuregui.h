@@ -25,6 +25,7 @@
 #include <QMap>
 
 #include "gui/framelesswindowresizer.h"
+#include "gui/workspacewindow.h"
 #include "gui/rollupcontents.h"
 #include "settings/serializableinterface.h"
 #include "export.h"
@@ -39,7 +40,7 @@ class QHBoxLayout;
 class QSizeGrip;
 class Feature;
 
-class SDRGUI_API FeatureGUI : public QMdiSubWindow, public SerializableInterface
+class SDRGUI_API FeatureGUI : public WorkspaceWindow, public SerializableInterface
 {
     Q_OBJECT
 public:
@@ -55,8 +56,8 @@ public:
 
 	virtual void resetToDefaults() = 0;
     // Data saved in the derived settings
-    virtual void setWorkspaceIndex(int index)= 0;
-    virtual int getWorkspaceIndex() const = 0;
+    virtual void setWorkspaceIndex(int index) override = 0;
+    virtual int getWorkspaceIndex() const override = 0;
     virtual void setGeometryBytes(const QByteArray& blob) = 0;
     virtual QByteArray getGeometryBytes() const = 0;
 
@@ -66,7 +67,7 @@ public:
     void sizeToContents();
     void setTitleColor(const QColor&) {} // not implemented for a feature
     void setTitle(const QString& title);
-    QString getTitle() const;
+    QString getTitle() const override;
     void setIndex(int index);
     int getIndex() const { return m_featureIndex; }
     void setDisplayedame(const QString& name);

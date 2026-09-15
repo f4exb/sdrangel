@@ -82,6 +82,7 @@ private:
     void instanceDeviceSetsService(qtwebapp::HttpRequest& request, qtwebapp::HttpResponse& response);
     void instanceDeviceSetService(qtwebapp::HttpRequest& request, qtwebapp::HttpResponse& response);
     void instanceWorkspaceService(qtwebapp::HttpRequest& request, qtwebapp::HttpResponse& response);
+    void instanceWindowsService(qtwebapp::HttpRequest& request, qtwebapp::HttpResponse& response);
 
     void devicesetService(const std::string& indexStr, qtwebapp::HttpRequest& request, qtwebapp::HttpResponse& response);
     void devicesetSpectrumSettingsService(const std::string& indexStr, qtwebapp::HttpRequest& request, qtwebapp::HttpResponse& response);

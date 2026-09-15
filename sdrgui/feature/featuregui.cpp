@@ -40,7 +40,7 @@
 #include "featuregui.h"
 
 FeatureGUI::FeatureGUI(QWidget *parent) :
-    QMdiSubWindow(parent),
+    WorkspaceWindow(parent),
     m_featureIndex(0),
     m_contextMenuType(ContextMenuNone),
     m_resizer(this),
@@ -443,6 +443,7 @@ void FeatureGUI::shrinkWindow()
 void FeatureGUI::setTitle(const QString& title)
 {
     m_titleLabel->setText(title);
+    publishWindowState();
 }
 
 QString FeatureGUI::getTitle() const

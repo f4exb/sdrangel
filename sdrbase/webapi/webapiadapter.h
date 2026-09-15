@@ -26,9 +26,9 @@
 #include <QtGlobal>
 
 #include "webapi/webapiadapterinterface.h"
+#include "maincore.h"
 #include "export.h"
 
-class MainCore;
 class DeviceSet;
 class FeatureSet;
 
@@ -234,6 +234,10 @@ public:
             int workspaceIndex,
             SWGSDRangel::SWGWorkspaceActions& query,
             SWGSDRangel::SWGSuccessResponse& response,
+            SWGSDRangel::SWGErrorResponse& error);
+
+    virtual int instanceWindowsGet(
+            SWGSDRangel::SWGWindowList& response,
             SWGSDRangel::SWGErrorResponse& error);
 
     virtual int devicesetGet(
@@ -522,6 +526,15 @@ public:
 
 private:
     MainCore *m_mainCore;
+
+    //!< Overlays what the GUI has published for the window on the response: its workspace as
+    //!< the GUI has it, and whether it is hidden. Leaves a response for a window the GUI has
+    //!< not published (the server) as it was
+    void applyWindowState(const void *owner, SWGSDRangel::SWGWorkspaceInfo& response);
+    //!< A channel's workspace information from the plugin, with the GUI's state overlaid
+    int channelWorkspaceGet(ChannelAPI *channelAPI, SWGSDRangel::SWGWorkspaceInfo& response, QString& errorMessage);
+    //!< Posts the show or hide a PUT asks for, if it asks for one. Returns whether it did
+    bool postWindowHidden(MainCore::MsgSetWindowHidden::Kind kind, int deviceSetIndex, int index, const SWGSDRangel::SWGWorkspaceInfo& query);
 
     void getDeviceSetList(SWGSDRangel::SWGDeviceSetList* deviceSetList);
     void getDeviceSet(SWGSDRangel::SWGDeviceSet *swgDeviceSet, const DeviceSet* deviceSet, int deviceSetIndex);

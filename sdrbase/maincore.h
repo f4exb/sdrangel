@@ -25,6 +25,8 @@
 #include <vector>
 
 #include <QMap>
+#include <QHash>
+#include <QMutex>
 #include <QTimer>
 #include <QElapsedTimer>
 #include <QDateTime>
@@ -647,6 +649,36 @@ public:
         { }
     };
 
+    class SDRBASE_API MsgSetWindowHidden : public Message {
+        MESSAGE_CLASS_DECLARATION
+
+    public:
+        enum Kind { Device, Spectrum, Channel, Feature };
+
+        Kind getKind() const { return m_kind; }
+        int getDeviceSetIndex() const { return m_deviceSetIndex; } //!< Unused for a feature
+        int getIndex() const { return m_index; }                   //!< Channel or feature index; unused for a device or spectrum
+        bool getHidden() const { return m_hidden; }
+
+        static MsgSetWindowHidden* create(Kind kind, int deviceSetIndex, int index, bool hidden) {
+            return new MsgSetWindowHidden(kind, deviceSetIndex, index, hidden);
+        }
+
+    private:
+        Kind m_kind;
+        int m_deviceSetIndex;
+        int m_index;
+        bool m_hidden;
+
+        MsgSetWindowHidden(Kind kind, int deviceSetIndex, int index, bool hidden) :
+            Message(),
+            m_kind(kind),
+            m_deviceSetIndex(deviceSetIndex),
+            m_index(index),
+            m_hidden(hidden)
+        { }
+    };
+
     class SDRBASE_API MsgMoveMainSpectrumUIToWorkspace : public Message {
         MESSAGE_CLASS_DECLARATION
 
@@ -977,7 +1009,26 @@ signals:
     void featureAdded(int featureSetIndex, Feature *feature);
     void featureRemoved(int featureSetIndex, Feature *oldFeature);
 
+public:
+    // What the GUI shows of a window, kept here so that the Web API, which has no access to
+    // the GUI and runs on its own threads, can answer for it. Keyed by the object the window
+    // belongs to (DeviceAPI, SpectrumVis, ChannelAPI or Feature) rather than an index, as
+    // indices renumber when a lower one is removed. The GUI publishes on every show, hide,
+    // move and retitle, and removes the entry when the window goes. Empty in the server
+    struct WindowState
+    {
+        int m_workspaceIndex = -1;
+        bool m_hidden = false;
+        QString m_title;
+    };
+
+    void setWindowState(const void *owner, const WindowState& state);
+    void removeWindowState(const void *owner);
+    bool getWindowState(const void *owner, WindowState& state) const; //!< False when the GUI has published nothing for it
+
 private:
+    mutable QMutex m_windowStatesMutex;
+    QHash<const void *, WindowState> m_windowStates;
     MainSettings m_settings;
     qtwebapp::LoggerWithFile *m_logger;
     MessageQueue *m_mainMessageQueue;

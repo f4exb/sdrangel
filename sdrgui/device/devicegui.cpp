@@ -37,7 +37,7 @@
 #include "devicegui.h"
 
 DeviceGUI::DeviceGUI(QWidget *parent) :
-    QMdiSubWindow(parent),
+    WorkspaceWindow(parent),
     m_deviceUISet(nullptr),
     m_deviceType(DeviceRx),
     m_deviceSetIndex(0),
@@ -426,6 +426,7 @@ void DeviceGUI::setTitle(const QString& title)
 {
     setWindowTitle(title + " Device");
     m_titleLabel->setText(title);
+    publishWindowState();
 }
 
 QString DeviceGUI::getTitle() const

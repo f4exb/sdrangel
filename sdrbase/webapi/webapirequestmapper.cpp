@@ -54,6 +54,7 @@
 #include "SWGDeviceActions.h"
 #include "SWGWorkspaceInfo.h"
 #include "SWGWorkspaceActions.h"
+#include "SWGWindowList.h"
 #include "SWGChannelsDetail.h"
 #include "SWGChannelSettings.h"
 #include "SWGChannelReport.h"
@@ -169,6 +170,8 @@ void WebAPIRequestMapper::service(qtwebapp::HttpRequest& request, qtwebapp::Http
             instanceDeviceSetService(request, response);
         } else if (path == WebAPIAdapterInterface::instanceWorkspaceURL) {
             instanceWorkspaceService(request, response);
+        } else if (path == WebAPIAdapterInterface::instanceWindowsURL) {
+            instanceWindowsService(request, response);
         } else if (path == WebAPIAdapterInterface::featuresetURL) {
             featuresetService(request, response);
         } else if (path == WebAPIAdapterInterface::featuresetFeatureURL) {
@@ -1713,6 +1716,33 @@ void WebAPIRequestMapper::instanceWorkspaceService(qtwebapp::HttpRequest& reques
     {
         SWGSDRangel::SWGSuccessResponse normalResponse;
         int status = m_adapter->instanceWorkspaceDelete(normalResponse, errorResponse);
+        response.setStatus(status);
+
+        if (status/100 == 2) {
+            response.write(normalResponse.asJson().toUtf8());
+        } else {
+            response.write(errorResponse.asJson().toUtf8());
+        }
+    }
+    else
+    {
+        response.setStatus(405,"Invalid HTTP method");
+        errorResponse.init();
+        *errorResponse.getMessage() = "Invalid HTTP method";
+        response.write(errorResponse.asJson().toUtf8());
+    }
+}
+
+void WebAPIRequestMapper::instanceWindowsService(qtwebapp::HttpRequest& request, qtwebapp::HttpResponse& response)
+{
+    SWGSDRangel::SWGErrorResponse errorResponse;
+    response.setHeader("Content-Type", "application/json");
+    response.setHeader("Access-Control-Allow-Origin", "*");
+
+    if (request.getMethod() == "GET")
+    {
+        SWGSDRangel::SWGWindowList normalResponse;
+        int status = m_adapter->instanceWindowsGet(normalResponse, errorResponse);
         response.setStatus(status);
 
         if (status/100 == 2) {
@@ -4377,13 +4407,19 @@ bool WebAPIRequestMapper::validateWorkspaceActions(SWGSDRangel::SWGWorkspaceActi
 
 bool WebAPIRequestMapper::validateWorkspaceInfo(SWGSDRangel::SWGWorkspaceInfo& workspaceInfo, QJsonObject& jsonObject)
 {
-    if (jsonObject.contains("index"))
-    {
-        workspaceInfo.setIndex(jsonObject["index"].toInt());
-        return true;
+    // Either field on its own is a request: index moves the window, hidden shows or hides it.
+    // What is absent is passed on as -1, since the object carries no other sign of absence
+    // that the adapter can read
+    const bool hasIndex = jsonObject.contains("index") && jsonObject["index"].isDouble();
+    const bool hasHidden = jsonObject.contains("hidden") && jsonObject["hidden"].isDouble();
+
+    if (!hasIndex && !hasHidden) {
+        return false;
     }
 
-    return false;
+    workspaceInfo.setIndex(hasIndex ? jsonObject["index"].toInt() : -1);
+    workspaceInfo.setHidden(hasHidden ? (jsonObject["hidden"].toInt() != 0 ? 1 : 0) : -1);
+    return true;
 }
 
 bool WebAPIRequestMapper::validateConfig(

@@ -31,6 +31,7 @@
 
 #include "gui/channeladddialog.h"
 #include "gui/framelesswindowresizer.h"
+#include "gui/workspacewindow.h"
 #include "settings/serializableinterface.h"
 #include "export.h"
 
@@ -43,7 +44,7 @@ class QHBoxLayout;
 class QSizeGrip;
 class DeviceUISet;
 
-class SDRGUI_API DeviceGUI : public QMdiSubWindow, public SerializableInterface {
+class SDRGUI_API DeviceGUI : public WorkspaceWindow, public SerializableInterface {
     Q_OBJECT
 public:
     enum DeviceType
@@ -63,8 +64,8 @@ public:
 	~DeviceGUI() override;
 
 	virtual void resetToDefaults() = 0;
-    void setWorkspaceIndex(int index);
-    int getWorkspaceIndex() const { return m_workspaceIndex; }
+    void setWorkspaceIndex(int index) override;
+    int getWorkspaceIndex() const override { return m_workspaceIndex; }
 
 	virtual MessageQueue* getInputMessageQueue() = 0;
 
@@ -73,7 +74,7 @@ public:
     void setDeviceType(DeviceType type);
     DeviceType getDeviceType() const { return m_deviceType; }
     void setTitle(const QString& title);
-    QString getTitle() const;
+    QString getTitle() const override;
     void setDefaultTitle(const QString& title) { m_defaultTitle = title; }
     QString getDefaultTitle() const { return m_defaultTitle; }
     void setToolTip(const QString& tooltip);

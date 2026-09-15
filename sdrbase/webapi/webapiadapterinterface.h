@@ -68,6 +68,7 @@ namespace SWGSDRangel
     class SWGDeviceActions;
     class SWGWorkspaceInfo;
     class SWGWorkspaceActions;
+    class SWGWindowList;
     class SWGChannelsDetail;
     class SWGChannelSettings;
     class SWGChannelReport;
@@ -803,6 +804,20 @@ public:
      */
     virtual int instanceWorkspaceDelete(
             SWGSDRangel::SWGSuccessResponse& response,
+            SWGSDRangel::SWGErrorResponse& error)
+    {
+        (void) response;
+    	error.init();
+    	*error.getMessage() = QString("Function not implemented");
+    	return 501;
+    }
+
+    /**
+     * Handler of /sdrangel/windows (GET) swagger/sdrangel/code/html2/index.html#api-Default-instanceWindowsGet
+     * returns the Http status code (default 501: not implemented)
+     */
+    virtual int instanceWindowsGet(
+            SWGSDRangel::SWGWindowList& response,
             SWGSDRangel::SWGErrorResponse& error)
     {
         (void) response;
@@ -1783,6 +1798,7 @@ public:
     static QString instanceDeviceSetsURL;
     static QString instanceDeviceSetURL;
     static QString instanceWorkspaceURL;
+    static QString instanceWindowsURL;
     static QString featuresetURL;
     static QString featuresetFeatureURL;
     static QString featuresetPresetURL;

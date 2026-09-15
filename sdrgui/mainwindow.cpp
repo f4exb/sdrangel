@@ -1407,6 +1407,7 @@ void MainWindow::sampleSourceCreateUI(
 
     deviceAPI->getSampleSource()->setMessageQueueToGUI(deviceGUI->getInputMessageQueue());
     deviceUISet->m_deviceGUI = deviceGUI;
+    deviceGUI->setWindowOwner(deviceAPI);
     const PluginInterface::SamplingDevice *samplingDevice = DeviceEnumerator::instance()->getRxSamplingDevice(deviceIndex);
     const PluginInterface::SamplingDevice *selectedDevice = DeviceEnumerator::instance()->getRxSamplingDevice(deviceIndex); // FIXME: Why not use samplingDevice?
     deviceUISet->m_selectedDeviceId = selectedDevice->id;
@@ -1564,6 +1565,7 @@ void MainWindow::sampleSinkCreateUI(
 
     deviceAPI->getSampleSink()->setMessageQueueToGUI(deviceGUI->getInputMessageQueue());
     deviceUISet->m_deviceGUI = deviceGUI;
+    deviceGUI->setWindowOwner(deviceAPI);
     const PluginInterface::SamplingDevice *samplingDevice = DeviceEnumerator::instance()->getTxSamplingDevice(deviceIndex);
     const PluginInterface::SamplingDevice *selectedDevice = DeviceEnumerator::instance()->getRxSamplingDevice(deviceIndex); // FIXME: Why getRxSamplingDevice?
     deviceUISet->m_selectedDeviceId = selectedDevice->id;
@@ -1702,6 +1704,7 @@ void MainWindow::sampleMIMOCreateUI(
 
     deviceAPI->getSampleMIMO()->setMessageQueueToGUI(deviceGUI->getInputMessageQueue());
     deviceUISet->m_deviceGUI = deviceGUI;
+    deviceGUI->setWindowOwner(deviceAPI);
     const PluginInterface::SamplingDevice *samplingDevice = DeviceEnumerator::instance()->getMIMOSamplingDevice(deviceIndex);
     const PluginInterface::SamplingDevice *selectedDevice = DeviceEnumerator::instance()->getRxSamplingDevice(deviceIndex); // FIXME: Why getRxSamplingDevice?
     deviceUISet->m_selectedDeviceId = selectedDevice->id;
@@ -2479,6 +2482,58 @@ bool MainWindow::handleMessage(const Message& cmd)
 
         return true;
     }
+    else if (MainCore::MsgSetWindowHidden::match(cmd))
+    {
+        auto& notif = (const MainCore::MsgSetWindowHidden&) cmd;
+        QMdiSubWindow *window = nullptr;
+        int workspaceIndex = -1;
+        const int deviceSetIndex = notif.getDeviceSetIndex();
+        const bool haveDeviceSet = (deviceSetIndex >= 0) && (deviceSetIndex < (int) m_deviceUIs.size());
+
+        switch (notif.getKind())
+        {
+        case MainCore::MsgSetWindowHidden::Device:
+            if (haveDeviceSet && m_deviceUIs[deviceSetIndex]->m_deviceGUI)
+            {
+                window = m_deviceUIs[deviceSetIndex]->m_deviceGUI;
+                workspaceIndex = m_deviceUIs[deviceSetIndex]->m_deviceGUI->getWorkspaceIndex();
+            }
+            break;
+        case MainCore::MsgSetWindowHidden::Spectrum:
+            if (haveDeviceSet && m_deviceUIs[deviceSetIndex]->m_mainSpectrumGUI)
+            {
+                window = m_deviceUIs[deviceSetIndex]->m_mainSpectrumGUI;
+                workspaceIndex = m_deviceUIs[deviceSetIndex]->m_mainSpectrumGUI->getWorkspaceIndex();
+            }
+            break;
+        case MainCore::MsgSetWindowHidden::Channel:
+            if (haveDeviceSet && (notif.getIndex() >= 0) && (notif.getIndex() < m_deviceUIs[deviceSetIndex]->getNumberOfChannels()))
+            {
+                ChannelGUI *gui = m_deviceUIs[deviceSetIndex]->getChannelGUIAt(notif.getIndex());
+                window = gui;
+                workspaceIndex = gui ? gui->getWorkspaceIndex() : -1;
+            }
+            break;
+        case MainCore::MsgSetWindowHidden::Feature:
+            if (!m_featureUIs.empty() && (notif.getIndex() >= 0) && (notif.getIndex() < m_featureUIs[0]->getNumberOfFeatures()))
+            {
+                FeatureGUI *gui = m_featureUIs[0]->getFeatureGuiAt(notif.getIndex());
+                window = gui;
+                workspaceIndex = gui ? gui->getWorkspaceIndex() : -1;
+            }
+            break;
+        }
+
+        if (!window) {
+            qWarning("MainWindow::handleMessages: MsgSetWindowHidden: no such window");
+        } else if (notif.getHidden()) {
+            window->hide();
+        } else {
+            showWindow(window, workspaceIndex);
+        }
+
+        return true;
+    }
     else if (MainCore::MsgArrangeWorkspace::match(cmd))
     {
         auto& notif = (const MainCore::MsgArrangeWorkspace&) cmd;
@@ -2915,20 +2970,12 @@ void MainWindow::removeEmptyWorkspaces()
 
         for (auto& subWindow : subWindows)
         {
-            if (qobject_cast<DeviceGUI*>(subWindow)) {
-                qobject_cast<DeviceGUI*>(subWindow)->setWorkspaceIndex(i);
-            }
+            WorkspaceWindow *window = qobject_cast<WorkspaceWindow*>(subWindow);
 
-            if (qobject_cast<MainSpectrumGUI*>(subWindow)) {
-                qobject_cast<MainSpectrumGUI*>(subWindow)->setWorkspaceIndex(i);
-            }
-
-            if (qobject_cast<ChannelGUI*>(subWindow)) {
-                qobject_cast<ChannelGUI*>(subWindow)->setWorkspaceIndex(i);
-            }
-
-            if (qobject_cast<FeatureGUI*>(subWindow)) {
-                qobject_cast<FeatureGUI*>(subWindow)->setWorkspaceIndex(i);
+            if (window)
+            {
+                window->setWorkspaceIndex(i);
+                window->publishWindowState();
             }
         }
     }
