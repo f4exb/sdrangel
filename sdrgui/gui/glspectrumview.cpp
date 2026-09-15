@@ -1520,7 +1520,11 @@ void GLSpectrumView::paintGL()
             devicePixelRatio = 1.0f;
         }
         glFunctions->glViewport(0, m_3DSpectrogramBottom*devicePixelRatio, width()*devicePixelRatio, m_waterfallHeight*devicePixelRatio);
-        m_glShaderSpectrogram.drawSurface(m_3DSpectrogramStyle, spectrogramGridMatrix, prop_y, m_invertedWaterfall);
+        m_glShaderSpectrogram.drawSurface(
+            m_3DSpectrogramStyle,
+            spectrogramGridMatrix,
+            m_3DSpectrogramTexturePos,
+            m_invertedWaterfall);
         glFunctions->glViewport(0, 0, width()*devicePixelRatio, height()*devicePixelRatio);
     }
     else if (m_displayWaterfall)
