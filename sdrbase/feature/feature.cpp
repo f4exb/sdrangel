@@ -29,10 +29,13 @@
 
 Feature::Feature(const QString& uri, WebAPIAdapterInterface *webAPIAdapterInterface) :
     m_guiMessageQueue(nullptr),
-	m_webAPIAdapterInterface(webAPIAdapterInterface),
+    m_state(StNotStarted),
+    m_webAPIAdapterInterface(webAPIAdapterInterface),
     m_name(uri),
-	m_uri(uri),
-    m_uid(UidCalculator::getNewObjectId())
+    m_uri(uri),
+    m_uid(UidCalculator::getNewObjectId()),
+    m_indexInFeatureSet(0),
+    m_workspaceIndex(0)
 {
     connect(&m_inputMessageQueue, SIGNAL(messageEnqueued()), this, SLOT(handleInputMessages()));
 }
