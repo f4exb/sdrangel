@@ -320,8 +320,8 @@ bool SpectrumSettings::deserialize(const QByteArray& data)
 		int histogramMarkersSize;
 		d.readS32(100, &histogramMarkersSize, 0);
 		histogramMarkersSize = histogramMarkersSize < 0 ? 0 :
-			histogramMarkersSize > SpectrumHistogramMarker::m_maxNbOfMarkers ?
-				SpectrumHistogramMarker::m_maxNbOfMarkers : histogramMarkersSize;
+			(histogramMarkersSize > SpectrumHistogramMarker::m_maxNbOfMarkers ?
+				SpectrumHistogramMarker::m_maxNbOfMarkers : histogramMarkersSize);
 		m_histogramMarkers.clear();
 
 		for (int i = 0; i < histogramMarkersSize; i++)
@@ -335,8 +335,8 @@ bool SpectrumSettings::deserialize(const QByteArray& data)
 
 		d.readS32(110, &waterfallMarkersSize, 0);
 		waterfallMarkersSize = waterfallMarkersSize < 0 ? 0 :
-			waterfallMarkersSize > SpectrumWaterfallMarker::m_maxNbOfMarkers ?
-				SpectrumWaterfallMarker::m_maxNbOfMarkers : waterfallMarkersSize;
+			(waterfallMarkersSize > SpectrumWaterfallMarker::m_maxNbOfMarkers ?
+				SpectrumWaterfallMarker::m_maxNbOfMarkers : waterfallMarkersSize);
 		m_waterfallMarkers.clear();
 
 		for (int i = 0; i < waterfallMarkersSize; i++)
