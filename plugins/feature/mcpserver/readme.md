@@ -4,7 +4,9 @@
 
 This feature exposes SDRangel to AI agents through the [Model Context Protocol](https://modelcontextprotocol.io/) (MCP), so that an assistant such as Claude or ChatGPT/Codex can inspect and control SDRangel: create device sets, select SDR hardware, tune, add demodulators, change settings, read reports, load presets and so on.
 
-The plugin runs an MCP server using the Streamable HTTP transport. MCP clients connect to `http://address:port/mcp`. Everything the server does goes through the same in-process API as SDRangel's REST Web API, so what an agent can do matches what the Web API allows.
+The plugin runs an MCP server using the Streamable HTTP transport. MCP clients connect to `http://address:port/mcp`.
+
+[Tutorial Video](https://youtu.be/G0FmiX7zwb8)
 
 <h2>Interface</h2>
 
@@ -55,12 +57,10 @@ For clients that support remote (HTTP) MCP servers, add the endpoint URL directl
 
     claude mcp add --transport http sdrangel http://127.0.0.1:8092/mcp
 
-
 <h3>Claude Desktop</h3>
 
-Claude Desktop cannot connect to a server on http://127.0.0.1: its custom connectors are
-fetched from Anthropic's cloud, which cannot reach your machine. Install the SDRangel
-extension, which carries a small [bridge](bridge/readme.md) that relays the stdio
+Claude Desktop cannot connect directly to a HTTP server. 
+Install the SDRangel extension, which carries a small [bridge](bridge/readme.md) that relays the stdio
 transport Claude Desktop does support to this server. Press Add to Claude Desktop (8) to hand
 it the bundle; on Windows the installer also offers to do this at the end of a fresh install.
 Failing either, take `sdrangel-<version>-<platform>.mcpb` from the release and open it with
@@ -73,32 +73,38 @@ For other clients that only support local stdio servers, run the same bridge dir
 - Linux: ~/.config/Claude/claude_desktop_config.json
 - macOS: ~/Library/Application Support/Claude/claude_desktop_config.json
 
+```
     "mcpServers": {
       "sdrangel": {
         "command": "C:\\Program Files\\SDRangel\\sdrangel-mcp-bridge.exe",
         "args": ["--port", "8092"]
       }
     }
+```
 
 `npx -y mcp-remote http://127.0.0.1:8092/mcp` does the same job for a client that has no
 bridge built for its platform, at the cost of needing Node.js installed.
 
 <h3>ChatGPT/Codex</h3>
 
-Codex speaks the HTTP transport, so does not need a bridge. Press Add to Codex (7) to have the
-servers address written to its configuration file, or add the following by hand to:
+Codex supports the HTTP transport, so does not need a bridge. Press Add to Codex (7) to have the
+server's address written to its configuration file, or add the following by hand to:
 
 - Windows: %USERPROFILE%\.codex\config.toml
 - macOS/Linux: ~/.codex/config.toml
 
+```
     [mcp_servers.sdrangel]
     url = "http://127.0.0.1:8092/mcp"
+```
 
 With a token set, the header goes alongside it:
 
+```
     [mcp_servers.sdrangel]
     url = "http://127.0.0.1:8092/mcp"
     http_headers = { "Authorization" = "Bearer <token>" }
+```
 
 <h2>Tools</h2>
 
