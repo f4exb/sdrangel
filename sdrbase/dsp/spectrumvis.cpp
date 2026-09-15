@@ -1175,10 +1175,10 @@ int SpectrumVis::webapiSpectrumHistoryGet(double seconds, int bins, qint64 start
         found->setDutyCycle((float) (active / (double) rows));
         found->setFirstSeen(new QString(history.m_times[firstRow].toString(Qt::ISODateWithMs)));
         found->setLastSeen(new QString(history.m_times[lastRow].toString(Qt::ISODateWithMs)));
-        response.getSignals()->append(found);
+        response.getSignalList()->append(found);
     }
 
-    response.setSignalCount(response.getSignals()->size());
+    response.setSignalCount(response.getSignalList()->size());
     return 200;
 }
 
