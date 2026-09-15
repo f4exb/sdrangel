@@ -99,6 +99,10 @@ void fftfilt::init_filter()
 // f2 == 0 ==> high pass filter
 //------------------------------------------------------------------------------
 fftfilt::fftfilt(int len) :
+    m_dnrScheme(FFTNoiseReduction::SchemeAverage),
+    m_dnrAboveAvgFactor(0.0f),
+    m_dnrSigmaFactor(0.0f),
+    m_dnrNbPeaks(0),
     m_noiseReduction(len)
 {
 	flen	= len;
@@ -109,6 +113,10 @@ fftfilt::fftfilt(int len) :
 }
 
 fftfilt::fftfilt(float f1, float f2, int len) :
+    m_dnrScheme(FFTNoiseReduction::SchemeAverage),
+    m_dnrAboveAvgFactor(0.0f),
+    m_dnrSigmaFactor(0.0f),
+    m_dnrNbPeaks(0),
     m_noiseReduction(len)
 {
 	flen	= len;
@@ -120,6 +128,10 @@ fftfilt::fftfilt(float f1, float f2, int len) :
 }
 
 fftfilt::fftfilt(float f2, int len) :
+    m_dnrScheme(FFTNoiseReduction::SchemeAverage),
+    m_dnrAboveAvgFactor(0.0f),
+    m_dnrSigmaFactor(0.0f),
+    m_dnrNbPeaks(0),
     m_noiseReduction(len)
 {
 	flen	= len;
