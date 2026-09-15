@@ -24,7 +24,14 @@ const unsigned int SampleMOFifo::m_guardDivisor = 10;
 
 SampleMOFifo::SampleMOFifo(QObject *parent) :
     QObject(parent),
-    m_nbStreams(0)
+    m_nbStreams(0),
+    m_size(0),
+    m_lowGuard(0),
+    m_highGuard(0),
+    m_midPoint(0),
+    m_readCount(0),
+    m_readHead(0),
+    m_writeHead(0)
 {}
 
 SampleMOFifo::SampleMOFifo(unsigned int nbStreams, unsigned int size, QObject *parent) :
