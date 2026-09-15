@@ -1572,8 +1572,6 @@ void GLSpectrumView::paintGL()
 
         m_3DSpectrogramBufferPos = 0;
 
-        float prop_y = m_3DSpectrogramTexturePos / (m_3DSpectrogramTextureHeight - 1.0);
-
         // Temporarily reduce viewport to waterfall area so anything outside is clipped
         if (window()->windowHandle()) {
             devicePixelRatio = window()->windowHandle()->devicePixelRatio();
