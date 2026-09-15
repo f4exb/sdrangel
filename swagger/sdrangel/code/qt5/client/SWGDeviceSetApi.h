@@ -79,8 +79,8 @@ public:
     void devicesetGet(qint32 device_set_index);
     void devicesetSpectrumActionsPost(qint32 device_set_index, SWGSpectrumActions& body);
     void devicesetSpectrumDataGet(qint32 device_set_index, qint32 bins, qint64 start_frequency, qint64 stop_frequency, QString* reduce);
-    void devicesetSpectrumHistoryGet(qint32 device_set_index, float seconds, qint32 bins, qint64 start_frequency, qint64 stop_frequency, float threshold);
-    void devicesetSpectrumHistoryImageGet(qint32 device_set_index, float seconds, qint32 bins, qint32 rows, qint64 start_frequency, qint64 stop_frequency);
+    void devicesetSpectrumHistoryGet(qint32 device_set_index, qint32 seconds, qint32 bins, qint64 start_frequency, qint64 stop_frequency, qint32 threshold);
+    void devicesetSpectrumHistoryImageGet(qint32 device_set_index, qint32 seconds, qint32 bins, qint32 rows, qint64 start_frequency, qint64 stop_frequency);
     void devicesetSpectrumReportGet(qint32 device_set_index);
     void devicesetSpectrumServerDelete(qint32 device_set_index);
     void devicesetSpectrumServerGet(qint32 device_set_index);

@@ -22,7 +22,7 @@
 #include <QJsonObject>
 
 
-#include "SWG#/SpectrumHistorySignal.h"
+#include "SWGSpectrumHistorySignal.h"
 #include <QList>
 #include <QString>
 
@@ -95,8 +95,8 @@ public:
     qint32 getSignalCount();
     void setSignalCount(qint32 signal_count);
 
-    QList<SWG#/SpectrumHistorySignal*>* getSignals();
-    void setSignals(QList<SWG#/SpectrumHistorySignal*>* signals);
+    QList<SWGSpectrumHistorySignal*>* getSignalList();
+    void setSignalList(QList<SWGSpectrumHistorySignal*>* signal_list);
 
 
     virtual bool isSet() override;
@@ -153,8 +153,8 @@ private:
     qint32 signal_count;
     bool m_signal_count_isSet;
 
-    QList<SWG#/SpectrumHistorySignal*>* signals;
-    bool m_signals_isSet;
+    QList<SWGSpectrumHistorySignal*>* signal_list;
+    bool m_signal_list_isSet;
 
 };
 

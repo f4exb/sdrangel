@@ -62,8 +62,8 @@ SWGGLSpectrumHistory::SWGGLSpectrumHistory() {
     m_occupancy_isSet = false;
     signal_count = 0;
     m_signal_count_isSet = false;
-    signals = nullptr;
-    m_signals_isSet = false;
+    signal_list = nullptr;
+    m_signal_list_isSet = false;
 }
 
 SWGGLSpectrumHistory::~SWGGLSpectrumHistory() {
@@ -106,8 +106,8 @@ SWGGLSpectrumHistory::init() {
     m_occupancy_isSet = false;
     signal_count = 0;
     m_signal_count_isSet = false;
-    signals = new QList<SWG#/SpectrumHistorySignal*>();
-    m_signals_isSet = false;
+    signal_list = new QList<SWGSpectrumHistorySignal*>();
+    m_signal_list_isSet = false;
 }
 
 void
@@ -133,12 +133,12 @@ SWGGLSpectrumHistory::cleanup() {
 
 
 
-    if(signals != nullptr) { 
-        auto arr = signals;
+    if(signal_list != nullptr) { 
+        auto arr = signal_list;
         for(auto o: *arr) { 
             delete o;
         }
-        delete signals;
+        delete signal_list;
     }
 }
 
@@ -188,7 +188,7 @@ SWGGLSpectrumHistory::fromJsonObject(QJsonObject &pJson) {
     ::SWGSDRangel::setValue(&signal_count, pJson["signalCount"], "qint32", "");
     
     
-    ::SWGSDRangel::setValue(&signals, pJson["signals"], "QList", "SWG#/SpectrumHistorySignal");
+    ::SWGSDRangel::setValue(&signal_list, pJson["signalList"], "QList", "SWGSpectrumHistorySignal");
 }
 
 QString
@@ -256,8 +256,8 @@ SWGGLSpectrumHistory::asJsonObject() {
     if(m_signal_count_isSet){
         obj->insert("signalCount", QJsonValue(signal_count));
     }
-    if(signals && signals->size() > 0){
-        toJsonArray((QList<void*>*)signals, obj, "signals", "SWG#/SpectrumHistorySignal");
+    if(signal_list && signal_list->size() > 0){
+        toJsonArray((QList<void*>*)signal_list, obj, "signalList", "SWGSpectrumHistorySignal");
     }
 
     return obj;
@@ -433,14 +433,14 @@ SWGGLSpectrumHistory::setSignalCount(qint32 signal_count) {
     this->m_signal_count_isSet = true;
 }
 
-QList<SWG#/SpectrumHistorySignal*>*
-SWGGLSpectrumHistory::getSignals() {
-    return signals;
+QList<SWGSpectrumHistorySignal*>*
+SWGGLSpectrumHistory::getSignalList() {
+    return signal_list;
 }
 void
-SWGGLSpectrumHistory::setSignals(QList<SWG#/SpectrumHistorySignal*>* signals) {
-    this->signals = signals;
-    this->m_signals_isSet = true;
+SWGGLSpectrumHistory::setSignalList(QList<SWGSpectrumHistorySignal*>* signal_list) {
+    this->signal_list = signal_list;
+    this->m_signal_list_isSet = true;
 }
 
 
@@ -508,7 +508,7 @@ SWGGLSpectrumHistory::isSet(){
         if(m_signal_count_isSet){
             isObjectUpdated = true; break;
         }
-        if(signals && (signals->size() > 0)){
+        if(signal_list && (signal_list->size() > 0)){
             isObjectUpdated = true; break;
         }
     }while(false);

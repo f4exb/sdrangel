@@ -10605,11 +10605,11 @@ margin-bottom: 20px;
     "signalCount" : {
       "type" : "integer"
     },
-    "signals" : {
+    "signalList" : {
       "type" : "array",
       "description" : "Runs of adjacent bins whose maximum rose above the threshold.",
       "items" : {
-        "$ref" : "#/SpectrumHistorySignal"
+        "$ref" : "#/definitions/SpectrumHistorySignal"
       }
     }
   },
@@ -39077,11 +39077,11 @@ public class DeviceSetApiExample {
         
         DeviceSetApi apiInstance = new DeviceSetApi();
         Integer deviceSetIndex = 56; // Integer | Index of device set in the device set list
-        Float seconds = 3.4; // Float | How far back to look, in seconds (default 60)
+        Integer seconds = 56; // Integer | How far back to look, in seconds (default 60)
         Integer bins = 56; // Integer | Number of bins to reduce the spectrum to, 1 to 4096 (default 128)
         Long startFrequency = 789; // Long | Lowest frequency to include in Hz. Default is the start of the spectrum
         Long stopFrequency = 789; // Long | Highest frequency to include in Hz. Default is the end of the spectrum
-        Float threshold = 3.4; // Float | How far above the measured floor a bin must rise to count as occupied, in dB (default 6)
+        Integer threshold = 56; // Integer | How far above the measured floor a bin must rise to count as occupied, in dB (default 6)
         try {
             GLSpectrumHistory result = apiInstance.devicesetSpectrumHistoryGet(deviceSetIndex, seconds, bins, startFrequency, stopFrequency, threshold);
             System.out.println(result);
@@ -39101,11 +39101,11 @@ public class DeviceSetApiExample {
     public static void main(String[] args) {
         DeviceSetApi apiInstance = new DeviceSetApi();
         Integer deviceSetIndex = 56; // Integer | Index of device set in the device set list
-        Float seconds = 3.4; // Float | How far back to look, in seconds (default 60)
+        Integer seconds = 56; // Integer | How far back to look, in seconds (default 60)
         Integer bins = 56; // Integer | Number of bins to reduce the spectrum to, 1 to 4096 (default 128)
         Long startFrequency = 789; // Long | Lowest frequency to include in Hz. Default is the start of the spectrum
         Long stopFrequency = 789; // Long | Highest frequency to include in Hz. Default is the end of the spectrum
-        Float threshold = 3.4; // Float | How far above the measured floor a bin must rise to count as occupied, in dB (default 6)
+        Integer threshold = 56; // Integer | How far above the measured floor a bin must rise to count as occupied, in dB (default 6)
         try {
             GLSpectrumHistory result = apiInstance.devicesetSpectrumHistoryGet(deviceSetIndex, seconds, bins, startFrequency, stopFrequency, threshold);
             System.out.println(result);
@@ -39122,11 +39122,11 @@ public class DeviceSetApiExample {
   </div> -->
                             <div class="tab-pane" id="examples-DeviceSet-devicesetSpectrumHistoryGet-0-objc">
                               <pre class="prettyprint"><code class="language-cpp">Integer *deviceSetIndex = 56; // Index of device set in the device set list
-Float *seconds = 3.4; // How far back to look, in seconds (default 60) (optional)
+Integer *seconds = 56; // How far back to look, in seconds (default 60) (optional)
 Integer *bins = 56; // Number of bins to reduce the spectrum to, 1 to 4096 (default 128) (optional)
 Long *startFrequency = 789; // Lowest frequency to include in Hz. Default is the start of the spectrum (optional)
 Long *stopFrequency = 789; // Highest frequency to include in Hz. Default is the end of the spectrum (optional)
-Float *threshold = 3.4; // How far above the measured floor a bin must rise to count as occupied, in dB (default 6) (optional)
+Integer *threshold = 56; // How far above the measured floor a bin must rise to count as occupied, in dB (default 6) (optional)
 
 DeviceSetApi *apiInstance = [[DeviceSetApi alloc] init];
 
@@ -39155,11 +39155,11 @@ var api = new SdRangel.DeviceSetApi()
 var deviceSetIndex = 56; // {Integer} Index of device set in the device set list
 
 var opts = { 
-  'seconds': 3.4, // {Float} How far back to look, in seconds (default 60)
+  'seconds': 56, // {Integer} How far back to look, in seconds (default 60)
   'bins': 56, // {Integer} Number of bins to reduce the spectrum to, 1 to 4096 (default 128)
   'startFrequency': 789, // {Long} Lowest frequency to include in Hz. Default is the start of the spectrum
   'stopFrequency': 789, // {Long} Highest frequency to include in Hz. Default is the end of the spectrum
-  'threshold': 3.4 // {Float} How far above the measured floor a bin must rise to count as occupied, in dB (default 6)
+  'threshold': 56 // {Integer} How far above the measured floor a bin must rise to count as occupied, in dB (default 6)
 };
 
 var callback = function(error, data, response) {
@@ -39192,11 +39192,11 @@ namespace Example
             
             var apiInstance = new DeviceSetApi();
             var deviceSetIndex = 56;  // Integer | Index of device set in the device set list
-            var seconds = 3.4;  // Float | How far back to look, in seconds (default 60) (optional) 
+            var seconds = 56;  // Integer | How far back to look, in seconds (default 60) (optional) 
             var bins = 56;  // Integer | Number of bins to reduce the spectrum to, 1 to 4096 (default 128) (optional) 
             var startFrequency = 789;  // Long | Lowest frequency to include in Hz. Default is the start of the spectrum (optional) 
             var stopFrequency = 789;  // Long | Highest frequency to include in Hz. Default is the end of the spectrum (optional) 
-            var threshold = 3.4;  // Float | How far above the measured floor a bin must rise to count as occupied, in dB (default 6) (optional) 
+            var threshold = 56;  // Integer | How far above the measured floor a bin must rise to count as occupied, in dB (default 6) (optional) 
 
             try
             {
@@ -39219,11 +39219,11 @@ require_once(__DIR__ . '/vendor/autoload.php');
 
 $api_instance = new Swagger\Client\Api\DeviceSetApi();
 $deviceSetIndex = 56; // Integer | Index of device set in the device set list
-$seconds = 3.4; // Float | How far back to look, in seconds (default 60)
+$seconds = 56; // Integer | How far back to look, in seconds (default 60)
 $bins = 56; // Integer | Number of bins to reduce the spectrum to, 1 to 4096 (default 128)
 $startFrequency = 789; // Long | Lowest frequency to include in Hz. Default is the start of the spectrum
 $stopFrequency = 789; // Long | Highest frequency to include in Hz. Default is the end of the spectrum
-$threshold = 3.4; // Float | How far above the measured floor a bin must rise to count as occupied, in dB (default 6)
+$threshold = 56; // Integer | How far above the measured floor a bin must rise to count as occupied, in dB (default 6)
 
 try {
     $result = $api_instance->devicesetSpectrumHistoryGet($deviceSetIndex, $seconds, $bins, $startFrequency, $stopFrequency, $threshold);
@@ -39241,11 +39241,11 @@ use SWGSDRangel::DeviceSetApi;
 
 my $api_instance = SWGSDRangel::DeviceSetApi->new();
 my $deviceSetIndex = 56; # Integer | Index of device set in the device set list
-my $seconds = 3.4; # Float | How far back to look, in seconds (default 60)
+my $seconds = 56; # Integer | How far back to look, in seconds (default 60)
 my $bins = 56; # Integer | Number of bins to reduce the spectrum to, 1 to 4096 (default 128)
 my $startFrequency = 789; # Long | Lowest frequency to include in Hz. Default is the start of the spectrum
 my $stopFrequency = 789; # Long | Highest frequency to include in Hz. Default is the end of the spectrum
-my $threshold = 3.4; # Float | How far above the measured floor a bin must rise to count as occupied, in dB (default 6)
+my $threshold = 56; # Integer | How far above the measured floor a bin must rise to count as occupied, in dB (default 6)
 
 eval { 
     my $result = $api_instance->devicesetSpectrumHistoryGet(deviceSetIndex => $deviceSetIndex, seconds => $seconds, bins => $bins, startFrequency => $startFrequency, stopFrequency => $stopFrequency, threshold => $threshold);
@@ -39266,11 +39266,11 @@ from pprint import pprint
 # create an instance of the API class
 api_instance = swagger_sdrangel.DeviceSetApi()
 deviceSetIndex = 56 # Integer | Index of device set in the device set list
-seconds = 3.4 # Float | How far back to look, in seconds (default 60) (optional)
+seconds = 56 # Integer | How far back to look, in seconds (default 60) (optional)
 bins = 56 # Integer | Number of bins to reduce the spectrum to, 1 to 4096 (default 128) (optional)
 startFrequency = 789 # Long | Lowest frequency to include in Hz. Default is the start of the spectrum (optional)
 stopFrequency = 789 # Long | Highest frequency to include in Hz. Default is the end of the spectrum (optional)
-threshold = 3.4 # Float | How far above the measured floor a bin must rise to count as occupied, in dB (default 6) (optional)
+threshold = 56 # Integer | How far above the measured floor a bin must rise to count as occupied, in dB (default 6) (optional)
 
 try: 
     api_response = api_instance.deviceset_spectrum_history_get(deviceSetIndex, seconds=seconds, bins=bins, startFrequency=startFrequency, stopFrequency=stopFrequency, threshold=threshold)
@@ -39330,11 +39330,8 @@ except ApiException as e:
         <div class="json-schema-view">
             <div class="primitive">
                 <span class="type">
-                    Float
+                    Integer
                 </span>
-                    <span class="format">
-                        (float)
-                    </span>
 
                     <div class="inner description">
                         How far back to look, in seconds (default 60)
@@ -39419,11 +39416,8 @@ except ApiException as e:
         <div class="json-schema-view">
             <div class="primitive">
                 <span class="type">
-                    Float
+                    Integer
                 </span>
-                    <span class="format">
-                        (float)
-                    </span>
 
                     <div class="inner description">
                         How far above the measured floor a bin must rise to count as occupied, in dB (default 6)
@@ -39662,7 +39656,7 @@ public class DeviceSetApiExample {
         
         DeviceSetApi apiInstance = new DeviceSetApi();
         Integer deviceSetIndex = 56; // Integer | Index of device set in the device set list
-        Float seconds = 3.4; // Float | How far back to look, in seconds (default 60)
+        Integer seconds = 56; // Integer | How far back to look, in seconds (default 60)
         Integer bins = 56; // Integer | Width in pixels, 1 to 4096 (default 512)
         Integer rows = 56; // Integer | At most this many rows, the most recent (default 512, up to 4000)
         Long startFrequency = 789; // Long | Lowest frequency to include in Hz. Default is the start of the spectrum
@@ -39685,7 +39679,7 @@ public class DeviceSetApiExample {
     public static void main(String[] args) {
         DeviceSetApi apiInstance = new DeviceSetApi();
         Integer deviceSetIndex = 56; // Integer | Index of device set in the device set list
-        Float seconds = 3.4; // Float | How far back to look, in seconds (default 60)
+        Integer seconds = 56; // Integer | How far back to look, in seconds (default 60)
         Integer bins = 56; // Integer | Width in pixels, 1 to 4096 (default 512)
         Integer rows = 56; // Integer | At most this many rows, the most recent (default 512, up to 4000)
         Long startFrequency = 789; // Long | Lowest frequency to include in Hz. Default is the start of the spectrum
@@ -39705,7 +39699,7 @@ public class DeviceSetApiExample {
   </div> -->
                             <div class="tab-pane" id="examples-DeviceSet-devicesetSpectrumHistoryImageGet-0-objc">
                               <pre class="prettyprint"><code class="language-cpp">Integer *deviceSetIndex = 56; // Index of device set in the device set list
-Float *seconds = 3.4; // How far back to look, in seconds (default 60) (optional)
+Integer *seconds = 56; // How far back to look, in seconds (default 60) (optional)
 Integer *bins = 56; // Width in pixels, 1 to 4096 (default 512) (optional)
 Integer *rows = 56; // At most this many rows, the most recent (default 512, up to 4000) (optional)
 Long *startFrequency = 789; // Lowest frequency to include in Hz. Default is the start of the spectrum (optional)
@@ -39735,7 +39729,7 @@ var api = new SdRangel.DeviceSetApi()
 var deviceSetIndex = 56; // {Integer} Index of device set in the device set list
 
 var opts = { 
-  'seconds': 3.4, // {Float} How far back to look, in seconds (default 60)
+  'seconds': 56, // {Integer} How far back to look, in seconds (default 60)
   'bins': 56, // {Integer} Width in pixels, 1 to 4096 (default 512)
   'rows': 56, // {Integer} At most this many rows, the most recent (default 512, up to 4000)
   'startFrequency': 789, // {Long} Lowest frequency to include in Hz. Default is the start of the spectrum
@@ -39772,7 +39766,7 @@ namespace Example
             
             var apiInstance = new DeviceSetApi();
             var deviceSetIndex = 56;  // Integer | Index of device set in the device set list
-            var seconds = 3.4;  // Float | How far back to look, in seconds (default 60) (optional) 
+            var seconds = 56;  // Integer | How far back to look, in seconds (default 60) (optional) 
             var bins = 56;  // Integer | Width in pixels, 1 to 4096 (default 512) (optional) 
             var rows = 56;  // Integer | At most this many rows, the most recent (default 512, up to 4000) (optional) 
             var startFrequency = 789;  // Long | Lowest frequency to include in Hz. Default is the start of the spectrum (optional) 
@@ -39798,7 +39792,7 @@ require_once(__DIR__ . '/vendor/autoload.php');
 
 $api_instance = new Swagger\Client\Api\DeviceSetApi();
 $deviceSetIndex = 56; // Integer | Index of device set in the device set list
-$seconds = 3.4; // Float | How far back to look, in seconds (default 60)
+$seconds = 56; // Integer | How far back to look, in seconds (default 60)
 $bins = 56; // Integer | Width in pixels, 1 to 4096 (default 512)
 $rows = 56; // Integer | At most this many rows, the most recent (default 512, up to 4000)
 $startFrequency = 789; // Long | Lowest frequency to include in Hz. Default is the start of the spectrum
@@ -39819,7 +39813,7 @@ use SWGSDRangel::DeviceSetApi;
 
 my $api_instance = SWGSDRangel::DeviceSetApi->new();
 my $deviceSetIndex = 56; # Integer | Index of device set in the device set list
-my $seconds = 3.4; # Float | How far back to look, in seconds (default 60)
+my $seconds = 56; # Integer | How far back to look, in seconds (default 60)
 my $bins = 56; # Integer | Width in pixels, 1 to 4096 (default 512)
 my $rows = 56; # Integer | At most this many rows, the most recent (default 512, up to 4000)
 my $startFrequency = 789; # Long | Lowest frequency to include in Hz. Default is the start of the spectrum
@@ -39843,7 +39837,7 @@ from pprint import pprint
 # create an instance of the API class
 api_instance = swagger_sdrangel.DeviceSetApi()
 deviceSetIndex = 56 # Integer | Index of device set in the device set list
-seconds = 3.4 # Float | How far back to look, in seconds (default 60) (optional)
+seconds = 56 # Integer | How far back to look, in seconds (default 60) (optional)
 bins = 56 # Integer | Width in pixels, 1 to 4096 (default 512) (optional)
 rows = 56 # Integer | At most this many rows, the most recent (default 512, up to 4000) (optional)
 startFrequency = 789 # Long | Lowest frequency to include in Hz. Default is the start of the spectrum (optional)
@@ -39906,11 +39900,8 @@ except ApiException as e:
         <div class="json-schema-view">
             <div class="primitive">
                 <span class="type">
-                    Float
+                    Integer
                 </span>
-                    <span class="format">
-                        (float)
-                    </span>
 
                     <div class="inner description">
                         How far back to look, in seconds (default 60)
@@ -70206,7 +70197,7 @@ $(document).ready(function() {
           </div>
           <div id="generator">
             <div class="content">
-              Generated 2026-09-15T17:49:43.819+02:00
+              Generated 2026-09-15T18:30:50.537+02:00
             </div>
           </div>
       </div>

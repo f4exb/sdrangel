@@ -1586,7 +1586,7 @@ SWGDeviceSetApi::devicesetSpectrumDataGetCallback(SWGHttpRequestWorker * worker)
 }
 
 void
-SWGDeviceSetApi::devicesetSpectrumHistoryGet(qint32 device_set_index, float seconds, qint32 bins, qint64 start_frequency, qint64 stop_frequency, float threshold) {
+SWGDeviceSetApi::devicesetSpectrumHistoryGet(qint32 device_set_index, qint32 seconds, qint32 bins, qint64 start_frequency, qint64 stop_frequency, qint32 threshold) {
     QString fullPath;
     fullPath.append(this->host).append(this->basePath).append("/sdrangel/deviceset/{deviceSetIndex}/spectrum/history");
 
@@ -1680,7 +1680,7 @@ SWGDeviceSetApi::devicesetSpectrumHistoryGetCallback(SWGHttpRequestWorker * work
 }
 
 void
-SWGDeviceSetApi::devicesetSpectrumHistoryImageGet(qint32 device_set_index, float seconds, qint32 bins, qint32 rows, qint64 start_frequency, qint64 stop_frequency) {
+SWGDeviceSetApi::devicesetSpectrumHistoryImageGet(qint32 device_set_index, qint32 seconds, qint32 bins, qint32 rows, qint64 start_frequency, qint64 stop_frequency) {
     QString fullPath;
     fullPath.append(this->host).append(this->basePath).append("/sdrangel/deviceset/{deviceSetIndex}/spectrum/history/image");
 
