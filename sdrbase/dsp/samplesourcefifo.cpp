@@ -24,7 +24,14 @@ const unsigned int SampleSourceFifo::m_rwDivisor = 2;
 const unsigned int SampleSourceFifo::m_guardDivisor = 10;
 
 SampleSourceFifo::SampleSourceFifo(QObject *parent) :
-    QObject(parent)
+    QObject(parent),
+    m_size(0),
+    m_lowGuard(0),
+    m_highGuard(0),
+    m_midPoint(0),
+    m_readHead(0),
+    m_writeHead(0),
+    m_readCount(0)
 {}
 
 SampleSourceFifo::SampleSourceFifo(unsigned int size, QObject *parent) :
