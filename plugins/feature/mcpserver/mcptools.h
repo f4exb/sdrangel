@@ -251,6 +251,9 @@ private:
     QJsonObject tuneGain(const QJsonObject& args);
     //!< Sets the main spectrum's reference level and range from what it shows, as the GUI's autoscale button does
     void autoscaleSpectrum(int deviceSetIndex);
+    //!< Turns spectrum scrolling on if it is off, which is what keeps the history the spectrum
+    //!< history tools read. Returns a note when it did, empty otherwise
+    QString ensureSpectrumHistory(int deviceSetIndex, double seconds);
     //!< The index of a feature of this type, adding one if there is none. Returns whether it was added
     int ensureFeature(const QString& featureType, int& featureIndex);
     void trackIntentFeature(uint64_t featureUid);

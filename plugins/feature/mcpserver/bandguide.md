@@ -187,6 +187,19 @@ as stations transmit rarely; radiosonde frames once a second while a sonde is up
 seconds for a valid radial. A single read immediately after tuning proves nothing; read the
 report again after the interval before concluding a signal has no data.
 
+## What has been on a band over time
+
+One spectrum is one instant. `get_spectrum_history` reads the history the GUI keeps for
+scrolling the waterfall, switching scrolling on if it is off, and reports per bin the maximum,
+the mean and the occupancy over the last `seconds`, plus a `signals` list: every run of bins
+that rose above the floor, with its frequency, width, peak, `dutyCycle` and when it was first
+and last seen. A carrier has a duty cycle near 1, a voice channel a fraction, a pager burst
+almost nothing; a hopper shows as many short signals. It costs no channels and no retuning, so
+it is the first thing to try on an unfamiliar band, before `scan`. Only rows taken with the
+device tuned and sampling as it is now count, so after a retune wait for new history.
+`get_waterfall_image` shows the same history as a picture, frequency across and time down,
+for the cases where the shape matters: drift, hopping, burst timing.
+
 ## Judging a signal level
 
 Power figures (`signalDb`, `channelPowerDB`, the scanner's `power`) are relative to the device

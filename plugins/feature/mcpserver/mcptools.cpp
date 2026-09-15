@@ -57,10 +57,13 @@
 #include "SWGConfigurationIdentifier.h"
 #include "SWGWorkspaceInfo.h"
 #include "SWGWorkspaceActions.h"
+#include "SWGWindowList.h"
 #include "SWGGLSpectrum.h"
 #include "SWGGLSpectrumReport.h"
 #include "SWGSpectrumActions.h"
 #include "SWGGLSpectrumData.h"
+#include "SWGGLSpectrumHistory.h"
+#include "SWGSpectrumHistorySignal.h"
 #include "SWGAudioDevices.h"
 #include "SWGLocationInformation.h"
 
@@ -1011,10 +1014,31 @@ QJsonObject MCPTools::callTool(const QString& name, const QJsonObject& arguments
         }
 
         QJsonValue value = tool->handler(arguments);
+
+        // A handler that has a picture to show puts it under _image, which becomes an image
+        // content item beside the text rather than a base64 blob in it
+        QJsonObject image;
+
+        if (value.isObject() && value.toObject().contains("_image"))
+        {
+            QJsonObject object = value.toObject();
+            image = object.take("_image").toObject();
+            value = object;
+        }
+
         QJsonObject text;
         text["type"] = "text";
         text["text"] = compact(value);
         content.append(text);
+
+        if (!image.isEmpty())
+        {
+            QJsonObject item;
+            item["type"] = "image";
+            item["data"] = image["data"];
+            item["mimeType"] = image["mimeType"];
+            content.append(item);
+        }
 
         if (value.isObject()) {
             result["structuredContent"] = value;
@@ -2759,6 +2783,120 @@ void MCPTools::registerDeviceSetTools()
             return json;
         });
 
+    add("get_spectrum_history",
+        "What has been on a band over the last while, from the spectrum history the GUI keeps for scrolling: per bin "
+        "maximum, mean and occupancy (the fraction of the time the bin was above the noise floor by threshold dB), and a "
+        "signals list of every run of bins that rose above it, each with its frequency, width, peak, dutyCycle (1 for a "
+        "continuous carrier, small for bursts) and when it was first and last seen. This is the way to tell a continuous "
+        "signal from an intermittent one, find where transmissions are without stepping a scanner over them, and measure "
+        "a floor over time rather than from one snapshot. Only rows taken with the device tuned and sampling as it is now "
+        "count; after a retune, wait for new history. Scrolling is switched on if it is off, and then there is nothing to "
+        "report until some has accumulated, so call again after a few seconds. Every bin costs tokens: ask for the coarsest "
+        "that answers the question.",
+        schema({
+            {"deviceSetIndex", deviceSetIndexProp},
+            {"seconds", numProp("How far back to look, in seconds. Default 60")},
+            {"bins", bounded(intProp("Number of bins to reduce the spectrum to. Default 64"), 1, 512)},
+            {"startFrequency", numProp("Only from this frequency in Hz. Default the start of the spectrum")},
+            {"stopFrequency", numProp("Only up to this frequency in Hz. Default the end of the spectrum")},
+            {"threshold", numProp("dB above the measured floor for a bin to count as occupied. Default 6")}
+        }, {"deviceSetIndex"}),
+        [this](const QJsonObject& args)
+        {
+            const int deviceSetIndex = argInt(args, "deviceSetIndex");
+            const double seconds = argDouble(args, "seconds", false, 60.0);
+            const QString enabled = ensureSpectrumHistory(deviceSetIndex, seconds);
+            SWGSDRangel::SWGGLSpectrumHistory response;
+            SWGSDRangel::SWGErrorResponse error;
+            response.init();
+            error.init();
+            const int status = m_adapter->devicesetSpectrumHistoryGet(deviceSetIndex, seconds,
+                argInt(args, "bins", false, 64), argInt64(args, "startFrequency", false, 0), argInt64(args, "stopFrequency", false, 0),
+                argDouble(args, "threshold", false, 6.0), response, error);
+
+            if (!enabled.isEmpty() && (status == 404))
+            {
+                QJsonObject result;
+                result["rows"] = 0;
+                result["note"] = enabled + " Call again in a few seconds, once some has accumulated.";
+                return result;
+            }
+
+            check(status, error, "Get spectrum history");
+            QJsonObject json = toJson(response);
+            QJsonArray maxDb, meanDb, occupancy;
+
+            for (float v : *response.getMaxDb()) {
+                maxDb.append(std::round((double) v * 10.0) / 10.0);
+            }
+
+            for (float v : *response.getMeanDb()) {
+                meanDb.append(std::round((double) v * 10.0) / 10.0);
+            }
+
+            for (float v : *response.getOccupancy()) {
+                occupancy.append(std::round((double) v * 100.0) / 100.0);
+            }
+
+            json["maxDb"] = maxDb;
+            json["meanDb"] = meanDb;
+            json["occupancy"] = occupancy;
+
+            if (!enabled.isEmpty()) {
+                json["note"] = enabled;
+            }
+
+            return json;
+        });
+
+    add("get_waterfall_image",
+        "A picture of the spectrum history, the waterfall, as a greyscale image: frequency across, time down with the newest "
+        "row at the bottom, black a little below the noise floor and white at the strongest signal. Use it when the shape of "
+        "activity matters more than the numbers: a hopping signal, a drifting carrier, a burst pattern, or to see a whole band "
+        "at once. The reply's text gives the frequency and time extents so the picture can be read. get_spectrum_history "
+        "gives the same history as numbers. Scrolling is switched on if it is off, and then there is nothing to show until "
+        "some has accumulated.",
+        schema({
+            {"deviceSetIndex", deviceSetIndexProp},
+            {"seconds", numProp("How far back to look, in seconds. Default 60")},
+            {"width", bounded(intProp("Width in pixels, one per bin. Default 512"), 16, 2048)},
+            {"height", bounded(intProp("At most this many rows, the most recent. Default 512"), 16, 2000)},
+            {"startFrequency", numProp("Only from this frequency in Hz. Default the start of the spectrum")},
+            {"stopFrequency", numProp("Only up to this frequency in Hz. Default the end of the spectrum")}
+        }, {"deviceSetIndex"}),
+        [this](const QJsonObject& args)
+        {
+            const int deviceSetIndex = argInt(args, "deviceSetIndex");
+            const double seconds = argDouble(args, "seconds", false, 60.0);
+            const QString enabled = ensureSpectrumHistory(deviceSetIndex, seconds);
+            QByteArray png;
+            QJsonObject description;
+            SWGSDRangel::SWGErrorResponse error;
+            error.init();
+            const int status = m_adapter->devicesetSpectrumHistoryImageGet(deviceSetIndex, seconds,
+                argInt(args, "width", false, 512), argInt64(args, "startFrequency", false, 0), argInt64(args, "stopFrequency", false, 0),
+                argInt(args, "height", false, 512), png, description, error);
+
+            if (!enabled.isEmpty() && (status == 404))
+            {
+                QJsonObject result;
+                result["note"] = enabled + " Call again in a few seconds, once some has accumulated.";
+                return result;
+            }
+
+            check(status, error, "Get waterfall image");
+            QJsonObject image;
+            image["data"] = QString(png.toBase64());
+            image["mimeType"] = "image/png";
+            description["_image"] = image;
+            description["note"] = QString("Frequency runs left to right from %1 to %2 MHz, time top to bottom from %3 to %4 with the newest row at the bottom; black is %5 dB and white %6 dB.%7")
+                .arg(description["startFrequency"].toDouble() / 1e6, 0, 'f', 4).arg(description["stopFrequency"].toDouble() / 1e6, 0, 'f', 4)
+                .arg(description["firstTime"].toString()).arg(description["lastTime"].toString())
+                .arg(description["blackDb"].toDouble(), 0, 'f', 1).arg(description["whiteDb"].toDouble(), 0, 'f', 1)
+                .arg(enabled.isEmpty() ? QString() : " " + enabled);
+            return description;
+        });
+
     add("spectrum_action",
         "Act on the main spectrum of a device set. autoscale sets the reference level and range from what is on screen, "
         "clearSpectrum discards the histogram and max hold traces, resetMeasurements starts the measurement statistics again, "
@@ -3456,21 +3594,44 @@ void MCPTools::registerWorkspaceTools()
             return toJson(response);
         });
 
+    add("list_windows",
+        "GUI only: every window, with its kind (device, spectrum, channel or feature), indices, title, workspace and whether it "
+        "is hidden. A hidden window is still running; set_workspace with hidden false shows it again.",
+        schema({}),
+        [this](const QJsonObject&)
+        {
+            SWGSDRangel::SWGWindowList response;
+            SWGSDRangel::SWGErrorResponse error;
+            error.init();
+            check(m_adapter->instanceWindowsGet(response, error), error, "List windows");
+            return toJson(response);
+        });
+
     add("set_workspace",
-        "GUI only: move a window to a workspace. kind is device, spectrum or channel (with deviceSetIndex, plus channelIndex for a "
-        "channel) or feature (with featureIndex).",
+        "GUI only: move a window to a workspace, hide it, or show it again. kind is device, spectrum or channel (with "
+        "deviceSetIndex, plus channelIndex for a channel) or feature (with featureIndex). Give workspaceIndex to move, hidden "
+        "to hide (true) or show (false), or both. Showing a window raises it and shows the workspace holding it. Hiding a "
+        "window does not stop it: a hidden demodulator still plays audio. list_windows shows what is hidden.",
         schema({
             {"kind", strProp("device, spectrum, channel or feature")},
-            {"workspaceIndex", intProp("Target workspace index")},
+            {"workspaceIndex", intProp("Workspace to move the window to. Optional")},
+            {"hidden", prop("boolean", "true hides the window, false shows it. Optional")},
             {"deviceSetIndex", intProp("For device, spectrum and channel")},
             {"channelIndex", intProp("For channel")},
             {"featureIndex", intProp("For feature")}
-        }, {"kind", "workspaceIndex"}),
+        }, {"kind"}),
         [this](const QJsonObject& args)
         {
             QString kind = argString(args, "kind").trimmed().toLower();
+
+            if (!hasArg(args, "workspaceIndex") && !hasArg(args, "hidden")) {
+                throw MCPToolError("Give workspaceIndex to move the window, hidden to hide or show it, or both");
+            }
+
+            // -1 for what was not asked for, as the Web API's own validator passes it
             SWGSDRangel::SWGWorkspaceInfo query;
-            query.setIndex(argInt(args, "workspaceIndex"));
+            query.setIndex(hasArg(args, "workspaceIndex") ? argInt(args, "workspaceIndex") : -1);
+            query.setHidden(hasArg(args, "hidden") ? (argBool(args, "hidden", false) ? 1 : 0) : -1);
             SWGSDRangel::SWGSuccessResponse response;
             SWGSDRangel::SWGErrorResponse error;
             error.init();
@@ -3513,14 +3674,15 @@ void MCPTools::registerCaptureTools()
         QString("Record the demodulated audio of a channel to a WAV file and report where it went, how loud it was and whether it "
                 "was silent. Works with demodulators that feed the Demod Analyzer, such as NFMDemod, AMDemod, SSBDemod, WFMDemod, "
                 "BFMDemod, DSDDemod and M17Demod. The device must be running. This call blocks for the duration, so it is limited "
-                "to %1 seconds. Set inline to true (up to %2 seconds) to also get the WAV back as base64 for playing directly.")
+                "to %1 seconds. Set inline to true (up to %2 seconds) to also get the audio back as base64 for playing directly: "
+                "a mono 16 kHz copy, small enough for a tool result, while the file keeps the full rate.")
             .arg(MCPCapture::m_maxBlockingSeconds).arg(MCPCapture::m_maxInlineSeconds),
         schema({
             {"deviceSetIndex", deviceSetIndexProp},
             {"channelIndex", channelIndexProp},
             {"seconds", bounded(numProp(QString("How long to record for, up to %1").arg(MCPCapture::m_maxBlockingSeconds)), 0.1, MCPCapture::m_maxBlockingSeconds)},
             {"fileName", strProp("File name relative to the capture directory. The .wav extension is added. Default: audio_<timestamp>")},
-            {"inline", prop("boolean", QString("Also return the WAV as base64 in audioBase64. Only for clips of %1 seconds or less. Default false").arg(MCPCapture::m_maxInlineSeconds))}
+            {"inline", prop("boolean", QString("Also return the audio as base64 in audioBase64, as a mono 16 kHz WAV. Only for clips of %1 seconds or less. Default false").arg(MCPCapture::m_maxInlineSeconds))}
         }, {"deviceSetIndex", "channelIndex", "seconds"}),
         [this](const QJsonObject& args)
         {
@@ -5020,6 +5182,30 @@ void MCPTools::autoscaleSpectrum(int deviceSetIndex)
     SWGSDRangel::SWGErrorResponse error;
     error.init();
     check(m_adapter->devicesetSpectrumActionsPost(deviceSetIndex, keys, query, error), error, "Autoscale spectrum");
+}
+
+// The history the spectrum tools read is the display's scroll buffer, which fills only while
+// scrolling is on. Switched on here with a length that covers what was asked for at a
+// typical refresh rate, and at least a couple of minutes; a longer length the user has set
+// is left alone
+QString MCPTools::ensureSpectrumHistory(int deviceSetIndex, double seconds)
+{
+    QJsonObject settings = getSpectrumSettings(deviceSetIndex);
+    const bool scrolling = settings["scrollBar"].toInt() != 0;
+    const int length = settings["scrollLength"].toInt();
+    const int wanted = qBound(1200, (int) (seconds * 20.0), 4000);
+
+    if (scrolling && (length >= wanted)) {
+        return QString();
+    }
+
+    QJsonObject partial;
+    partial["scrollBar"] = 1;
+    partial["scrollLength"] = qMax(length, wanted);
+    patchSpectrumSettings(deviceSetIndex, partial);
+    return scrolling
+        ? QString("The spectrum history was lengthened to %1 rows to cover %2 seconds.").arg(qMax(length, wanted)).arg(seconds)
+        : QString("Spectrum scrolling was switched on, as the history the spectrum keeps for it is what this reads; it starts now.");
 }
 
 // The gain suits a band and an antenna, not a mode: a device set that was just created has

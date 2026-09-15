@@ -141,8 +141,13 @@ public:
     //!< The UID of the channel at an index, or 0 when there is none
     static uint64_t channelUidAt(int deviceSetIndex, int channelIndex);
 
-    //!< Inline audio is only offered for short clips, as it is base64 encoded into the reply
-    static constexpr int m_maxInlineSeconds = 10;
+    //!< Inline audio is only offered for short clips, as it is base64 encoded into the reply. The
+    //!< inline copy is mono at m_inlineSampleRate, whatever the file holds: MCP clients refuse a
+    //!< tool result over about a megabyte, which 10 s of 48 kHz audio exceeds once encoded. Even
+    //!< so, a reply that would still be over m_maxInlineBytes goes without the audio
+    static constexpr int m_maxInlineSeconds = 20;
+    static constexpr int m_inlineSampleRate = 16000;
+    static constexpr int m_maxInlineBytes = 900000;
 
     //!< Blocking captures hold an HTTP connection open, so they are kept short
     static constexpr int m_maxBlockingSeconds = 30;

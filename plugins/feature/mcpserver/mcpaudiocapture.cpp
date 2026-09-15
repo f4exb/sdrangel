@@ -460,12 +460,66 @@ QJsonObject MCPAudioCapture::capture(int deviceSetIndex, int channelIndex, doubl
 
     if (inlineAudio)
     {
-        QFile file(fileName);
+        // A smaller copy for the reply: mono, and decimated by an integer factor to at most
+        // the inline rate with a boxcar average, which is plenty for judging speech and
+        // keeps 20 s under what a client accepts. The file keeps the full rate and channels
+        const int factor = qMax(1, sampleRate / MCPCapture::m_inlineSampleRate);
+        const int inlineRate = sampleRate / factor;
+        const int inlineSamples = nbSamples / factor;
+        QByteArray reduced;
+        reduced.resize(inlineSamples * 2);
+        qint16 *out = (qint16 *) reduced.data();
 
-        if (file.open(QIODevice::ReadOnly))
+        for (int i = 0; i < inlineSamples; i++)
         {
-            result["audioBase64"] = QString(file.readAll().toBase64());
+            int sum = 0;
+
+            for (int k = 0; k < factor; k++)
+            {
+                const int n = i * factor + k;
+                sum += mono ? data[n] : (data[2 * n] + data[2 * n + 1]) / 2;
+            }
+
+            out[i] = (qint16) (sum / factor);
+        }
+
+        const QString inlineBase = fileBase + ".inline";
+        WavFileRecord inlineWriter(inlineBase);
+        inlineWriter.setFileBaseIsFileName(true);
+        inlineWriter.setSampleRate(inlineRate);
+        inlineWriter.setMono(true);
+        QByteArray wav;
+
+        if (inlineWriter.startRecording())
+        {
+            inlineWriter.writeMono(out, inlineSamples);
+            inlineWriter.stopRecording();
+            QFile file(inlineBase + ".wav");
+
+            if (file.open(QIODevice::ReadOnly)) {
+                wav = file.readAll();
+            }
+
+            file.remove();
+        }
+
+        const QByteArray encoded = wav.toBase64();
+
+        if (wav.isEmpty())
+        {
+            result["note"] = "The inline copy of the audio could not be made; the file is there";
+        }
+        else if (encoded.size() > MCPCapture::m_maxInlineBytes)
+        {
+            result["note"] = QString("The audio is not inline: even at %1 Hz mono it would be %2 kB encoded, more than a client accepts in one "
+                "reply. Ask for a shorter clip, or read the file").arg(inlineRate).arg(encoded.size() / 1000);
+        }
+        else
+        {
+            result["audioBase64"] = QString(encoded);
             result["audioMimeType"] = "audio/wav";
+            result["inlineSampleRate"] = inlineRate;
+            result["inlineChannels"] = 1;
         }
     }
 
