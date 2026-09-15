@@ -648,10 +648,10 @@ GLSpectrumHistory:
       description: "Per bin fraction of rows in which the bin was above the threshold, 0 to 1."
     signalCount:
       type: integer
-    signals:
+    signalList:
       type: array
       items:
-        $ref: "#/SpectrumHistorySignal"
+        $ref: "http://swgserver:8081/api/swagger/include/GLSpectrum.yaml#/SpectrumHistorySignal"
       description: "Runs of adjacent bins whose maximum rose above the threshold."
 SpectrumHistorySignal:
   description: A signal found in the spectrum history

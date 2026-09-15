@@ -1447,8 +1447,7 @@ paths:
           in: query
           description: How far back to look, in seconds (default 60)
           required: false
-          type: number
-          format: float
+          type: integer
         - name: bins
           in: query
           description: Number of bins to reduce the spectrum to, 1 to 4096 (default 128)
@@ -1470,8 +1469,7 @@ paths:
           in: query
           description: How far above the measured floor a bin must rise to count as occupied, in dB (default 6)
           required: false
-          type: number
-          format: float
+          type: integer
       responses:
         "200":
           description: On success return the statistics
@@ -1510,8 +1508,7 @@ paths:
           in: query
           description: How far back to look, in seconds (default 60)
           required: false
-          type: number
-          format: float
+          type: integer
         - name: bins
           in: query
           description: Width in pixels, 1 to 4096 (default 512)
