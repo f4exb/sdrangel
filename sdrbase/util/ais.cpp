@@ -833,7 +833,8 @@ QString AISStaticDataReport::toString()
 }
 
 AISSingleSlotBinaryMessage::AISSingleSlotBinaryMessage(QByteArray ba) :
-    AISMessage(ba)
+    AISMessage(ba),
+    m_destinationId(0)
 {
     m_destinationIndicator = (ba[4] >> 1) & 1;
     m_binaryDataFlag = ba[4] & 1;
