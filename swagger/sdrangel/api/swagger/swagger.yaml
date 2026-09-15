@@ -1097,6 +1097,24 @@ paths:
         "501":
           $ref: "#/responses/Response_501"
 
+  /sdrangel/windows:
+    x-swagger-router-controller: instance
+    get:
+      description: List the windows of the GUI with their workspace and whether each is hidden (GUI)
+      operationId: instanceWindowsGet
+      tags:
+        - Instance
+      responses:
+        "200":
+          description: On success return the window list
+          schema:
+            $ref: "#/definitions/WindowList"
+        "500":
+          description: Error
+          schema:
+            $ref: "#/definitions/ErrorResponse"
+        "501":
+          description: Function not implemented
   /sdrangel/workspace/{workspaceIndex}/actions:
     x-swagger-router-controller: instance
     post:
@@ -1408,6 +1426,127 @@ paths:
         "501":
           $ref: "#/responses/Response_501"
 
+  /sdrangel/deviceset/{deviceSetIndex}/spectrum/history:
+    x-swagger-router-controller: deviceset
+    get:
+      description: >
+        Statistics over the spectrum history the GUI keeps for scrolling: per bin maximum, mean and
+        occupancy over a period, and the signals found. Only rows taken with the device tuned and
+        sampling as it is now are used. Needs scrolling enabled in the spectrum settings (scrollBar,
+        scrollLength); the server keeps no history
+      operationId: devicesetSpectrumHistoryGet
+      tags:
+        - DeviceSet
+      parameters:
+        - in: path
+          name: deviceSetIndex
+          type: integer
+          required: true
+          description: Index of device set in the device set list
+        - name: seconds
+          in: query
+          description: How far back to look, in seconds (default 60)
+          required: false
+          type: number
+          format: float
+        - name: bins
+          in: query
+          description: Number of bins to reduce the spectrum to, 1 to 4096 (default 128)
+          required: false
+          type: integer
+        - name: startFrequency
+          in: query
+          description: Lowest frequency to include in Hz. Default is the start of the spectrum
+          required: false
+          type: integer
+          format: int64
+        - name: stopFrequency
+          in: query
+          description: Highest frequency to include in Hz. Default is the end of the spectrum
+          required: false
+          type: integer
+          format: int64
+        - name: threshold
+          in: query
+          description: How far above the measured floor a bin must rise to count as occupied, in dB (default 6)
+          required: false
+          type: number
+          format: float
+      responses:
+        "200":
+          description: On success return the statistics
+          schema:
+            $ref: "http://swgserver:8081/api/swagger/include/GLSpectrum.yaml#/GLSpectrumHistory"
+        "400":
+          description: Invalid parameters
+          schema:
+            $ref: "#/definitions/ErrorResponse"
+        "404":
+          description: Invalid index, or no history
+          schema:
+            $ref: "#/definitions/ErrorResponse"
+        "500":
+          $ref: "#/responses/Response_500"
+  /sdrangel/deviceset/{deviceSetIndex}/spectrum/history/image:
+    x-swagger-router-controller: deviceset
+    get:
+      description: >
+        The spectrum history as a greyscale PNG waterfall, one pixel per bin across and one per row
+        down with the newest row at the bottom, black a little below the noise floor and white at
+        the strongest bin. The frequency and time extents come back in X-Spectrum-History headers
+        and in the JSON form of the same call
+      operationId: devicesetSpectrumHistoryImageGet
+      tags:
+        - DeviceSet
+      produces:
+        - image/png
+      parameters:
+        - in: path
+          name: deviceSetIndex
+          type: integer
+          required: true
+          description: Index of device set in the device set list
+        - name: seconds
+          in: query
+          description: How far back to look, in seconds (default 60)
+          required: false
+          type: number
+          format: float
+        - name: bins
+          in: query
+          description: Width in pixels, 1 to 4096 (default 512)
+          required: false
+          type: integer
+        - name: rows
+          in: query
+          description: At most this many rows, the most recent (default 512, up to 4000)
+          required: false
+          type: integer
+        - name: startFrequency
+          in: query
+          description: Lowest frequency to include in Hz. Default is the start of the spectrum
+          required: false
+          type: integer
+          format: int64
+        - name: stopFrequency
+          in: query
+          description: Highest frequency to include in Hz. Default is the end of the spectrum
+          required: false
+          type: integer
+          format: int64
+      responses:
+        "200":
+          description: The PNG image
+        "400":
+          description: Invalid parameters
+          schema:
+            $ref: "#/definitions/ErrorResponse"
+        "404":
+          description: Invalid index, or no history
+          schema:
+            $ref: "#/definitions/ErrorResponse"
+        "500":
+          $ref: "#/responses/Response_500"
   /sdrangel/deviceset/{deviceSetIndex}/spectrum/server:
     x-swagger-router-controller: deviceset
     get:
@@ -3262,12 +3401,41 @@ definitions:
           $ref:  "#/definitions/Channel"
 
   WorkspaceInfo:
-    description: "Workspace information"
-    required:
-      - index
+    description: "Where a window is and whether it is shown (GUI). On a PUT either field may be given alone: index moves the window, hidden hides or shows it"
     properties:
       index:
         description: index of workspace in the list of workspaces
+        type: integer
+      hidden:
+        description: "1 when the window is hidden, 0 when it is shown. Showing a window also raises it and shows the workspace holding it"
+        type: integer
+  WindowList:
+    description: "Every device, spectrum, channel and feature window of the GUI"
+    properties:
+      windowCount:
+        type: integer
+      windows:
+        type: array
+        items:
+          $ref: "#/definitions/WindowInfo"
+  WindowInfo:
+    description: "One window of the GUI"
+    properties:
+      kind:
+        description: "device, spectrum, channel or feature"
+        type: string
+      deviceSetIndex:
+        description: "Index of the device set, for a device, spectrum or channel window"
+        type: integer
+      index:
+        description: "Channel index within the device set, or feature index; absent for a device or spectrum window"
+        type: integer
+      title:
+        type: string
+      workspaceIndex:
+        type: integer
+      hidden:
+        description: "1 when the window is hidden, 0 when it is shown"
         type: integer
 
   WorkspaceActions:

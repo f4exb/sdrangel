@@ -578,6 +578,112 @@ SpectrumActions:
       type: integer
       minimum: 0
 
+GLSpectrumHistory:
+  description: >
+    Statistics over the rows of spectrum history the GUI keeps for scrolling, reduced to a number
+    of bins. Powers are in dB whatever the display shows. The floor is the median of the per bin
+    means, and a bin counts as occupied in a row when it is above the floor by the threshold.
+    Rows taken with another centre frequency or sample rate are skipped and counted.
+  properties:
+    centerFrequency:
+      type: integer
+      format: int64
+    bandwidth:
+      type: integer
+      description: "Width of the whole spectrum in Hz."
+    startFrequency:
+      type: integer
+      format: int64
+      description: "Centre frequency of the first returned bin in Hz."
+    stopFrequency:
+      type: integer
+      format: int64
+      description: "Centre frequency of the last returned bin in Hz."
+    binBandwidth:
+      type: integer
+      description: "Width of each returned bin in Hz."
+    bins:
+      type: integer
+    rows:
+      type: integer
+      description: "Rows of history used."
+    skippedRows:
+      type: integer
+      description: "Rows in the period that were taken with the device tuned or sampling differently, and left out."
+    firstTime:
+      type: string
+      description: "Time of the oldest row used, ISO 8601."
+    lastTime:
+      type: string
+      description: "Time of the newest row used, ISO 8601."
+    seconds:
+      type: number
+      format: float
+      description: "Span between the oldest and newest rows used."
+    floorDb:
+      type: number
+      format: float
+      description: "The measured noise floor."
+    thresholdDb:
+      type: number
+      format: float
+      description: "The level above which a bin counts as occupied."
+    maxDb:
+      type: array
+      items:
+        type: number
+        format: float
+      description: "Per bin maximum over the rows."
+    meanDb:
+      type: array
+      items:
+        type: number
+        format: float
+      description: "Per bin mean over the rows."
+    occupancy:
+      type: array
+      items:
+        type: number
+        format: float
+      description: "Per bin fraction of rows in which the bin was above the threshold, 0 to 1."
+    signalCount:
+      type: integer
+    signals:
+      type: array
+      items:
+        $ref: "#/SpectrumHistorySignal"
+      description: "Runs of adjacent bins whose maximum rose above the threshold."
+SpectrumHistorySignal:
+  description: A signal found in the spectrum history
+  properties:
+    frequency:
+      type: integer
+      format: int64
+      description: "Frequency of the strongest bin in Hz."
+    startFrequency:
+      type: integer
+      format: int64
+      description: "Lower edge in Hz."
+    stopFrequency:
+      type: integer
+      format: int64
+      description: "Upper edge in Hz."
+    bandwidth:
+      type: integer
+      description: "Width in Hz, to the bin."
+    peakDb:
+      type: number
+      format: float
+    dutyCycle:
+      type: number
+      format: float
+      description: "Fraction of rows in which any bin of the signal was above the threshold, 0 to 1: 1 for a continuous carrier, small for a burst."
+    firstSeen:
+      type: string
+      description: "Time of the first row it was up in, ISO 8601."
+    lastSeen:
+      type: string
+      description: "Time of the last row it was up in, ISO 8601."
 GLSpectrumData:
   description: >
     A copy of the current power spectrum, reduced to the number of bins asked for so that the
