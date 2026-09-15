@@ -531,7 +531,9 @@ AISBinaryBroadcast::AISBinaryBroadcast(QByteArray ba) :
 }
 
 AISSARAircraftPositionReport::AISSARAircraftPositionReport(QByteArray ba) :
-    AISMessage(ba)
+    AISMessage(ba),
+    m_headingAvailable(false),
+    m_heading(0)
 {
     m_altitude = ((ba[4] & 0x3) << 10) | ((ba[5] & 0xff) << 2) | ((ba[6] >> 6) & 0x3);
     m_altitudeAvailable = m_altitude != 4095;
