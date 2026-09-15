@@ -38,7 +38,12 @@ void NCO::initTable()
 	m_tableInitialized = true;
 }
 
-NCO::NCO()
+NCO::NCO() :
+    m_phaseIncrement(0),
+    m_phase(0),
+    m_phaseDithered(0),
+    m_lfsr(0),
+    m_ditherMask(0)
 {
 	initTable();
 	m_phase = 0;
