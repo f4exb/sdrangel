@@ -1,1 +1,48 @@
+# Git attributes for SDRangel
+# normalize text files to LF and identify binary files.
+* text=auto eol=lf
+
+# Vendored Cesium content: preserve upstream line endings.
+plugins/feature/map/Cesium/** -text
+
+# Generated Swagger UI files
+sdrbase/resources/webapi/doc/swagger-ui/** -text
+
+# Generated Swagger documentation and client code
+sdrbase/resources/webapi/doc/swagger/** -text
+swagger/sdrangel/code/** -text
+
+# SDRangel configuration and preset files
+*.cfgx binary
+*.prex binary
+
+# Binary image files.
+*.png binary
+*.PNG binary
+*.bmp binary
+*.BMP binary
+*.xcf binary
+*.XCF binary
+*.jpg binary
+*.JPG binary
 *.fits binary
+*.FITS binary
+*.ico binary
+*.ICO binary
+*.icns binary
+*.icns binary
+*.gif binary
+*.GIF binary
+
+# Binary audio/media files.
+*.wav binary
+*.WAV binary
+*.wasm binary
+*.WASM binary
+
+# Binary fonts.
+*.ttf binary
+*.TTF binary
+
+# Binary document files.
+*.odg binary
