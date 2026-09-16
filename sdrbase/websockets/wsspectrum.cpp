@@ -47,6 +47,17 @@ WSSpectrum::~WSSpectrum()
 
 void WSSpectrum::openSocket()
 {
+    if (m_webSocketServer)
+    {
+        if (m_webSocketServer->isListening())
+        {
+            qDebug() << "WSSpectrum::openSocket: invoked while spectrum server already listening at "
+                     << m_listeningAddress.toString() << " on port " << m_port;
+            return;
+        }
+        closeSocket();
+    }
+
     m_webSocketServer = new QWebSocketServer(
         QStringLiteral("Spectrum Server"),
         QWebSocketServer::NonSecureMode,
