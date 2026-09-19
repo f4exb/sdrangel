@@ -624,6 +624,10 @@ QString MeshtasticDemod::buildMeshtasticJsonPacket(
     lora["packet_length"] = static_cast<int>(msg.getPacketSize());
     lora["nb_symbols"]    = static_cast<int>(msg.getNbSymbols());
     lora["nb_codewords"]  = static_cast<int>(msg.getNbCodewords());
+
+    // Report the FFT-bin correction indicated by the 8-symbol header, independent of decode success.
+    lora["binfix"] = msg.getBinfix();
+
     lora["payload_hex"]   = QString(msg.getBytes().left(
         static_cast<int>(msg.getPacketSize())).toHex());
     root["lora"] = lora;
