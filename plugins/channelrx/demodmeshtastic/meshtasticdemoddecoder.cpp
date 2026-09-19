@@ -309,8 +309,11 @@ bool MeshtasticDemodDecoder::handleMessage(const Message& cmd)
                 : m_nbSymbolBits;
             bool recovered = false;
 
-            for (int delta : {-1, 1})
+            // Positive-offset recovery:
+            // Apply a +1 FFT-bin correction across the 8-symbol header and payload.
             {
+                // Restore the original decode state before the positive-offset attempt.
+                restoreLoRaState(baseState);
                 std::vector<unsigned short> shifted = msg.getSymbols();
 
                 for (size_t i = 0; i < shifted.size(); i++)
@@ -319,19 +322,20 @@ bool MeshtasticDemodDecoder::handleMessage(const Message& cmd)
                     const unsigned int bits = isHeader ? headerNbSymbolBits : m_nbSymbolBits;
                     const unsigned int mod = 1U << std::max(1U, bits);
                     const int s = static_cast<int>(shifted[i]);
-                    const int v = (s + delta) % static_cast<int>(mod);
-                    shifted[i] = static_cast<unsigned short>(v < 0 ? (v + static_cast<int>(mod)) : v);
+                    const int v = (s + 1) % static_cast<int>(mod);
+                    shifted[i] = static_cast<unsigned short>(v);
                 }
 
                 QByteArray shiftedBytes;
                 decodeSymbols(shifted, shiftedBytes); // hard-path decode with adjusted symbol indices
                 const LoRaDecodeState shiftedState = captureLoRaState(shiftedBytes);
 
-                if (shiftedState.payloadCRCStatus)
+                if ((!m_hasHeader || shiftedState.headerCRCStatus)
+                    && shiftedState.hasCRC
+                    && shiftedState.payloadCRCStatus)
                 {
                     restoreLoRaState(shiftedState);
                     recovered = true;
-                    break;
                 }
             }
 
