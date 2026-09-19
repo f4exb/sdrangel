@@ -298,6 +298,9 @@ bool MeshtasticDemodDecoder::handleMessage(const Message& cmd)
             decodeSymbols(msg.getSymbols(), msgBytes);
         }
 
+        // Symbol recovery retries packets that fail the normal CRC path.
+        // The 8-symbol header is quantized more coarsely than the payload.
+        // Therefore +1 shifts both regions, while -1 preserves the header and shifts the payload.
         if (m_hasCRC && !m_payloadCRCStatus && (m_spreadFactor >= 5U))
         {
             const LoRaDecodeState baseState = captureLoRaState(msgBytes);
