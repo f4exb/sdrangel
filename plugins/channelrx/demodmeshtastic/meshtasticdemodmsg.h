@@ -34,6 +34,8 @@ namespace MeshtasticDemodMsg
 
     public:
         const std::vector<unsigned short>& getSymbols() const { return m_symbols; }
+        // Return raw FFT peak bins aligned with decoded symbols.
+        const std::vector<unsigned int>& getRawFftBins() const { return m_rawFftBins; }
         const std::vector<std::vector<float>>& getMagnitudes() const { return m_magnitudes; }
         const std::vector<std::vector<float>>& getDechirpedSpectrum() const { return m_dechirpedSpectrum; }
         uint32_t getFrameId() const { return m_frameId; }
@@ -44,8 +46,17 @@ namespace MeshtasticDemodMsg
         void pushBackSymbol(unsigned short symbol) {
             m_symbols.push_back(symbol);
         }
+        // Store the raw FFT peak bin beside its decoded symbol.
+        void pushBackRawFftBin(unsigned int bin) {
+            m_rawFftBins.push_back(bin);
+        }
         void popSymbol() {
             m_symbols.pop_back();
+
+            // Keep raw FFT bins aligned when the last decoded symbol is removed.
+            if (!m_rawFftBins.empty()) {
+                m_rawFftBins.pop_back();
+            }
         }
         void setSyncWord(unsigned char syncWord) {
             m_syncWord = syncWord;
@@ -71,6 +82,10 @@ namespace MeshtasticDemodMsg
             const unsigned int symbolsDrop = std::min<unsigned int>(count, static_cast<unsigned int>(m_symbols.size()));
             m_symbols.erase(m_symbols.begin(), m_symbols.begin() + symbolsDrop);
 
+            // Keep raw FFT bins aligned when header locking drops leading symbols.
+            const unsigned int rawFftBinsDrop = std::min<unsigned int>(count, static_cast<unsigned int>(m_rawFftBins.size()));
+            m_rawFftBins.erase(m_rawFftBins.begin(), m_rawFftBins.begin() + rawFftBinsDrop);
+
             const unsigned int magnitudesDrop = std::min<unsigned int>(count, static_cast<unsigned int>(m_magnitudes.size()));
             m_magnitudes.erase(m_magnitudes.begin(), m_magnitudes.begin() + magnitudesDrop);
 
@@ -87,6 +102,8 @@ namespace MeshtasticDemodMsg
 
     private:
         std::vector<unsigned short> m_symbols;
+        // Preserve raw FFT peak bins until the decoder classifies the packet correction.
+        std::vector<unsigned int> m_rawFftBins;
         std::vector<std::vector<float>> m_magnitudes;
         std::vector<std::vector<float>> m_dechirpedSpectrum;
         uint32_t m_frameId;
@@ -274,6 +291,8 @@ namespace MeshtasticDemodMsg
         const QString& getPipelineName() const { return m_pipelineName; }
         const QString& getPipelinePreset() const { return m_pipelinePreset; }
         const std::vector<std::vector<float>>& getDechirpedSpectrum() const { return m_dechirpedSpectrum; }
+        // Return the FFT-bin correction classification used by JSON reporting.
+        const QString& getBinfix() const { return m_binfix; }
 
         static MsgReportDecodeBytes* create(const QByteArray& bytes) {
             return new MsgReportDecodeBytes(bytes);
@@ -331,6 +350,10 @@ namespace MeshtasticDemodMsg
         void setDechirpedSpectrum(const std::vector<std::vector<float>>& dechirpedSpectrum) {
             m_dechirpedSpectrum = dechirpedSpectrum;
         }
+        // Store the FFT-bin correction classification for JSON reporting.
+        void setBinfix(const QString& binfix) {
+            m_binfix = binfix;
+        }
 
     private:
         QByteArray m_bytes;
@@ -352,6 +375,8 @@ namespace MeshtasticDemodMsg
         int m_pipelineId;
         QString m_pipelineName;
         QString m_pipelinePreset;
+        // Store the packet correction class independently of decode success.
+        QString m_binfix;
         std::vector<std::vector<float>> m_dechirpedSpectrum;
 
         MsgReportDecodeBytes(const QByteArray& bytes) :
@@ -371,7 +396,8 @@ namespace MeshtasticDemodMsg
             m_headerCRCStatus(false),
             m_payloadParityStatus((int) MeshtasticDemodSettings::ParityUndefined),
             m_payloadCRCStatus(false),
-            m_pipelineId(-1)
+            m_pipelineId(-1),
+            m_binfix(QStringLiteral("n/a"))
         { }
     };
 
