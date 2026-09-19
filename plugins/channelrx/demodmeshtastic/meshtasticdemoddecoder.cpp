@@ -312,6 +312,8 @@ bool MeshtasticDemodDecoder::handleMessage(const Message& cmd)
             // Positive-offset recovery:
             // Apply a +1 FFT-bin correction across the 8-symbol header and payload.
             {
+                // Restore the original decode state before the positive-offset attempt.
+                restoreLoRaState(baseState);
                 std::vector<unsigned short> shifted = msg.getSymbols();
 
                 for (size_t i = 0; i < shifted.size(); i++)
@@ -341,6 +343,8 @@ bool MeshtasticDemodDecoder::handleMessage(const Message& cmd)
             // Preserve the 8-symbol header and apply an FFT-bin correction of -1 only to payload symbols.
             if (!recovered)
             {
+                // Restore the original decode state before the negative-offset attempt.
+                restoreLoRaState(baseState);
                 std::vector<unsigned short> shifted = msg.getSymbols();
 
                 for (size_t i = m_hasHeader ? 8U : 0U; i < shifted.size(); i++)
