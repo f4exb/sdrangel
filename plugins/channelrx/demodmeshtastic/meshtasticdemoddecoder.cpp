@@ -191,6 +191,39 @@ bool MeshtasticDemodDecoder::handleMessage(const Message& cmd)
             && (m_spreadFactor >= 5U)
             && (m_loRaBandwidth > 0U);
 
+        // Classify the FFT-bin correction from the 8-symbol header independently of decode success.
+        QString binfix = QStringLiteral("n/a");
+        if (m_hasHeader && (msg.getRawFftBins().size() >= 8U))
+        {
+            const unsigned int headerBinSpread = 1U << std::max(2U, m_deBits);
+
+            if (headerBinSpread == 4U)
+            {
+                const unsigned int residue = msg.getRawFftBins()[0] % headerBinSpread;
+                bool uniform = true;
+
+                for (size_t i = 1U; i < 8U; ++i)
+                {
+                    if ((msg.getRawFftBins()[i] % headerBinSpread) != residue)
+                    {
+                        uniform = false;
+                        break;
+                    }
+                }
+
+                if (uniform)
+                {
+                    if (residue == 0U) {
+                        binfix = QStringLiteral("+1");
+                    } else if (residue == 1U) {
+                        binfix = QStringLiteral("0");
+                    } else if (residue == 2U) {
+                        binfix = QStringLiteral("-1");
+                    }
+                }
+            }
+        }
+
         struct LoRaDecodeState
         {
             QByteArray bytes;
@@ -411,6 +444,8 @@ bool MeshtasticDemodDecoder::handleMessage(const Message& cmd)
             outputMsg->setPayloadParityStatus(getPayloadParityStatus());
             outputMsg->setPayloadCRCStatus(getPayloadCRCStatus());
             outputMsg->setPipelineMetadata(m_pipelineId, m_pipelineName, m_pipelinePreset);
+            // Pass the FFT-bin correction classification to JSON reporting.
+            outputMsg->setBinfix(binfix);
             outputMsg->setDechirpedSpectrum(msg.getDechirpedSpectrum());
             m_outputMessageQueue->push(outputMsg);
         }
