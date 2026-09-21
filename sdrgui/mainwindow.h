@@ -32,6 +32,7 @@
 #include <QFinalState>
 #include <QSignalTransition>
 #include <QProgressDialog>
+#include <QPointer>
 
 #include "settings/mainsettings.h"
 #include "util/message.h"
@@ -231,7 +232,10 @@ public:
 private:
 
     const Configuration *m_configuration;
-    QProgressDialog *m_waitBox;
+    // The dialog is created with WA_DeleteOnClose and this FSM outlives it,
+    // so a bare pointer can dangle between states. QPointer makes the null
+    // checks in the state handlers mean what they are written to mean.
+    QPointer<QProgressDialog> m_waitBox;
 
     RemoveAllWorkspacesFSM *m_removeAllWorkspacesFSM;
 
@@ -346,6 +350,7 @@ private:
 #endif
 
     bool m_settingsSaved;               // Records if settings have already been saved in response to a QCloseEvent
+    QPointer<LoadConfigurationFSM> m_configurationLoadFSM; // In-flight load started by loadConfiguration(), if any
     const MainParser& m_parser;
 
 	void loadSettings();
