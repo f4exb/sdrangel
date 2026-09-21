@@ -55,6 +55,11 @@ public:
         connect(this, &MapModel::dataChanged, this, &MapModel::update3DMap);
     }
 
+    ~MapModel() override
+    {
+        qDeleteAll(m_items);
+    }
+
     virtual void add(MapItem *item);
     virtual void remove(MapItem *item);
     virtual void removeAll();
