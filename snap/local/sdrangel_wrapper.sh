@@ -171,42 +171,16 @@ export XLOCALEDIR="$SNAP_DESKTOP_RUNTIME/usr/share/X11/locale"
 export XCURSOR_PATH="$SNAP_DESKTOP_RUNTIME/usr/share/icons"
 prepend_dir XCURSOR_PATH "$SNAP/data-dir/icons"
 
-# Mesa Libs for OpenGL support
-append_dir LD_LIBRARY_PATH "$SNAP_DESKTOP_RUNTIME/usr/lib/$ARCH/mesa"
-append_dir LD_LIBRARY_PATH "$SNAP_DESKTOP_RUNTIME/usr/lib/$ARCH/mesa-egl"
-
-# Tell libGL and libva where to find the drivers
-export LIBGL_DRIVERS_PATH="$SNAP_DESKTOP_RUNTIME/usr/lib/$ARCH/dri"
-append_dir LD_LIBRARY_PATH "$LIBGL_DRIVERS_PATH"
-append_dir LIBVA_DRIVERS_PATH "$SNAP_DESKTOP_RUNTIME/usr/lib/$ARCH/dri"
-
-# Set where the VDPAU drivers are located
-export VDPAU_DRIVER_PATH="/usr/lib/$ARCH/vdpau/"
-if [ -e "/var/lib/snapd/lib/gl/vdpau/libvdpau_nvidia.so" ]; then
-  export VDPAU_DRIVER_PATH="/var/lib/snapd/lib/gl/vdpau"
-  if [ "$__NV_PRIME_RENDER_OFFLOAD" = 1 ]; then
-    # Prevent picking VA-API (Intel/AMD) over NVIDIA VDPAU
-    # https://download.nvidia.com/XFree86/Linux-x86_64/510.54/README/primerenderoffload.html#configureapplications
-    unset LIBVA_DRIVERS_PATH
-  fi
-fi
-
-# Workaround in snapd for proprietary nVidia drivers mounts the drivers in
-# /var/lib/snapd/lib/gl that needs to be in LD_LIBRARY_PATH
-# Without that OpenGL using apps do not work with the nVidia drivers.
-# Ref.: https://bugs.launchpad.net/snappy/+bug/1588192
-append_dir LD_LIBRARY_PATH "/var/lib/snapd/lib/gl"
-append_dir LD_LIBRARY_PATH "/var/lib/snapd/lib/gl/vdpau"
+# The gpu extension's command-chain wrapper configures Mesa, NVIDIA, VA-API,
+# VDPAU, GBM and EGL paths before this launcher runs. Do not replace those
+# paths with locations inside the application snap: gpu/cleanup deliberately
+# removes duplicate graphics drivers from there.
 
 # Unity7 export (workaround for https://launchpad.net/bugs/1638405)
 append_dir LD_LIBRARY_PATH "$SNAP_DESKTOP_RUNTIME/usr/lib/$ARCH/libunity"
 
 # Pulseaudio export
 append_dir LD_LIBRARY_PATH "$SNAP_DESKTOP_RUNTIME/usr/lib/$ARCH/pulseaudio"
-
-# EGL vendor files on glvnd enabled systems
-prepend_dir __EGL_VENDOR_LIBRARY_DIRS "/var/lib/snapd/lib/glvnd/egl_vendor.d"
-append_dir __EGL_VENDOR_LIBRARY_DIRS "$SNAP_DESKTOP_RUNTIME/usr/share/glvnd/egl_vendor.d"
 
 # Tell GStreamer where to find its plugins
 export GST_PLUGIN_PATH="$SNAP/usr/lib/$ARCH/gstreamer-1.0"
