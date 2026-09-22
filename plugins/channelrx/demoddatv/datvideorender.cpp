@@ -522,7 +522,6 @@ bool DATVideoRender::renderStream()
                     //Rendering device setup
 
                     resizeTVScreen(m_frame->width, m_frame->height);
-                    update();
                     resetImage();
 
                     m_currentRenderWidth = m_frame->width;

@@ -31,6 +31,7 @@
 #include <QRecursiveMutex>
 #include <QFont>
 #include <QMatrix4x4>
+#include <atomic>
 #include "dsp/dsptypes.h"
 #include "glshadertextured.h"
 #include "glshadertvarray.h"
@@ -59,7 +60,7 @@ public:
     bool selectRow(int line);
     bool setDataColor(int col, int red, int green, int blue);
     bool setDataColor(int col, int red, int green, int blue, int alpha);
-    void setAlphaBlend(bool alphaBlend) { m_glShaderArray.setAlphaBlend(alphaBlend); }
+    void setAlphaBlend(bool alphaBlend);
     void setAlphaReset() { m_glShaderArray.setAlphaReset(); }
 
     void connectTimer(const QTimer& timer);
@@ -81,7 +82,9 @@ private:
 	// state
     QTimer m_timer;
     QRecursiveMutex m_mutex;
-    bool m_dataChanged;
+    bool m_alphaBlend;
+    bool m_framebufferNeedsPaint;
+    std::atomic_bool m_dataChanged;
 
     GLShaderTVArray m_glShaderArray;
 

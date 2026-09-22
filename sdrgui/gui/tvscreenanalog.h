@@ -36,6 +36,7 @@
 #include <QOpenGLShaderProgram>
 #include <QOpenGLVertexArrayObject>
 #include <QOpenGLBuffer>
+#include <atomic>
 
 class TVScreenAnalogBuffer
 {
@@ -119,7 +120,7 @@ class SDRGUI_API TVScreenAnalog : public QOpenGLWidget, protected QOpenGLFunctio
 
 	QTimer m_updateTimer;
 
-	bool m_isDataChanged;
+	std::atomic_bool m_isDataChanged;
 
 	int m_textureLoc1;
 	int m_textureLoc2;

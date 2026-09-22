@@ -38,6 +38,7 @@
 // Note: When this object is created, QWidget* is converted to bool
 TVScreen::TVScreen(bool color, QWidget* parent) :
     QOpenGLWidget(parent),
+    m_alphaBlend(false),
     m_glShaderArray(color)
 {
     setAttribute(Qt::WA_OpaquePaintEvent);
@@ -47,6 +48,7 @@ TVScreen::TVScreen(bool color, QWidget* parent) :
     m_lastData = nullptr;
     m_dataChanged = false;
     m_glContextInitialized = false;
+    m_framebufferNeedsPaint = true;
 
     //Par défaut
     m_askedCols = TV_COLS;
@@ -64,6 +66,20 @@ void TVScreen::setColor(bool color)
 	m_glShaderArray.setColor(color);
 }
 
+void TVScreen::setAlphaBlend(bool alphaBlend)
+{
+    // Alpha blending is used to fade scope traces by drawing each frame over
+    // the previous one. QOpenGLWidget discards its framebuffer after paintGL()
+    // by default, which leaves undefined colours to blend with on the next
+    // frame. Preserve it while blending is enabled.
+    QMutexLocker mlock(&m_mutex);
+    setUpdateBehavior(alphaBlend ? QOpenGLWidget::PartialUpdate : QOpenGLWidget::NoPartialUpdate);
+    m_alphaBlend = alphaBlend;
+    // Framebuffer contents may have been invalidated with NoPartialUpdate
+    m_framebufferNeedsPaint = true;
+    m_glShaderArray.setAlphaBlend(alphaBlend);
+}
+
 QRgb* TVScreen::getRowBuffer(int row)
 {
     if (!m_glContextInitialized) {
@@ -75,17 +91,27 @@ QRgb* TVScreen::getRowBuffer(int row)
 
 void TVScreen::renderImage(unsigned char * data)
 {
-    m_lastData = data;
-    m_dataChanged = true;
+    {
+        QMutexLocker mlock(&m_mutex);
+        m_lastData = data;
+        m_dataChanged.store(true, std::memory_order_release);
+    }
+
+    // renderImage() is normally called by a DSP worker. Schedule the repaint
+    // on the widget's thread instead of relying on QWidget::update() being
+    // called from that worker.
+    QMetaObject::invokeMethod(this, "update", Qt::QueuedConnection);
 }
 
 void TVScreen::resetImage()
 {
+    QMutexLocker mlock(&m_mutex);
     m_glShaderArray.ResetPixels();
 }
 
 void TVScreen::resetImage(int alpha)
 {
+    QMutexLocker mlock(&m_mutex);
     m_glShaderArray.ResetPixels(alpha);
 }
 
@@ -97,6 +123,7 @@ void TVScreen::resizeTVScreen(int cols, int intRows)
     m_askedRows = intRows;
     m_cols = cols;
     m_rows = intRows;
+    m_framebufferNeedsPaint = true;
 }
 
 void TVScreen::getSize(int& cols, int& intRows) const
@@ -162,6 +189,7 @@ void TVScreen::initializeGL()
     );
 
     m_glContextInitialized = true;
+    m_framebufferNeedsPaint = true;
 }
 
 void TVScreen::resizeGL(int width, int height)
@@ -169,15 +197,15 @@ void TVScreen::resizeGL(int width, int height)
     QMutexLocker mlock(&m_mutex);
     QOpenGLFunctions *f = QOpenGLContext::currentContext()->functions();
     f->glViewport(0, 0, width, height);
+    m_framebufferNeedsPaint = true;
 }
 
 void TVScreen::paintGL()
 {
-    if (!m_mutex.tryLock(2)) {
-        return;
-    }
-
-    m_dataChanged = false;
+    // Other threads only hold the mutex briefly, so wait for it rather than
+    // skipping the paint, which would leave Qt compositing a stale or
+    // invalidated framebuffer.
+    m_mutex.lock();
 
     if ((m_askedCols != 0) && (m_askedRows != 0))
     {
@@ -192,7 +220,30 @@ void TVScreen::paintGL()
         m_askedRows = 0;
     }
 
+    if (m_framebufferNeedsPaint)
+    {
+        // QOpenGLWidget backing stores have an alpha channel. Initialize a new
+        // or resized one even when no constellation or video frame is ready,
+        // otherwise Qt can composite the uninitialized buffer as transparent.
+        QOpenGLFunctions *f = QOpenGLContext::currentContext()->functions();
+        f->glColorMask(GL_TRUE, GL_TRUE, GL_TRUE, GL_TRUE);
+        f->glClearColor(0.0f, 0.0f, 0.0f, 1.0f);
+        f->glClear(GL_COLOR_BUFFER_BIT);
+    }
+
+    // With PartialUpdate the previous framebuffer is deliberately retained.
+    // Do not blend the same fading image again for incidental repaints, such
+    // as mouse hover or moving another overlay over this widget.
+    const bool dataChanged = m_dataChanged.exchange(false, std::memory_order_acq_rel);
+
+    if (m_alphaBlend && !dataChanged && !m_framebufferNeedsPaint)
+    {
+        m_mutex.unlock();
+        return;
+    }
+
     m_glShaderArray.RenderPixels(m_lastData);
+    m_framebufferNeedsPaint = false;
     m_mutex.unlock();
 }
 
@@ -203,7 +254,7 @@ void TVScreen::mousePressEvent(QMouseEvent* event)
 
 void TVScreen::tick()
 {
-    if (m_dataChanged) {
+    if (m_dataChanged.load(std::memory_order_acquire)) {
         update();
     }
 }
