@@ -107,7 +107,7 @@ jobs:
           path: ${{ github.workspace }}/build/sdrangel-${{ steps.get_version.outputs.version }}-win64.exe
 
   build_mac:
-    runs-on: macos-14
+    runs-on: macos-26
     steps:
       - uses: actions/checkout@v4
         with:
@@ -128,11 +128,11 @@ jobs:
           rm -f /usr/local/bin/2to3
           brew install opencv
       - name: Install brew packages
-        run: brew install nasm boost hidapi libusb fftw ffmpeg@5 faad2 zlib airspy airspyhf hackrf rtl-sdr libbladerf soapysdr qt subversion ncurses
+        run: brew install nasm boost hidapi libusb fftw ffmpeg faad2 zlib airspy airspyhf hackrf rtl-sdr libbladerf soapysdr qt subversion ncurses
       - name: Configure SDRangel
         run: |
           mkdir build && cd build
-          cmake .. -DCMAKE_VERBOSE_MAKEFILE=ON -DENABLE_QT6=ON -DCMAKE_BUILD_TYPE=Release -DDEBUG_OUTPUT=ON -DENABLE_CHANNELRX_DEMODDATV=OFF -DENABLE_CHANNELTX_MODDATV=OFF -DENABLE_MIRISDR=OFF -DBUILD_SERVER=OFF -DENABLE_EXTERNAL_LIBRARIES=AUTO -DBUNDLE=ON -DPKG_CONFIG_USE_CMAKE_PREFIX_PATH=TRUE -DCMAKE_PREFIX_PATH="/usr/local/opt/ffmpeg@5/"
+          cmake .. -DCMAKE_VERBOSE_MAKEFILE=ON -DENABLE_QT6=ON -DCMAKE_BUILD_TYPE=Release -DDEBUG_OUTPUT=ON -DENABLE_CHANNELRX_DEMODDATV=OFF -DENABLE_CHANNELTX_MODDATV=OFF -DENABLE_MIRISDR=OFF -DBUILD_SERVER=OFF -DENABLE_EXTERNAL_LIBRARIES=AUTO -DBUNDLE=ON -DPKG_CONFIG_USE_CMAKE_PREFIX_PATH=TRUE
       - name: Build SDRangel on Mac
         run: |
           cd build
