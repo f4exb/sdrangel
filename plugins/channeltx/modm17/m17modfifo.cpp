@@ -18,7 +18,7 @@
 #include "m17modfifo.h"
 
 M17ModFIFO::M17ModFIFO() :
-	m_fifo(nullptr),
+    m_fifo(nullptr),
     m_fifoEmpty(true)
 {
 	m_size = 0;
@@ -27,7 +27,8 @@ M17ModFIFO::M17ModFIFO() :
 }
 
 M17ModFIFO::M17ModFIFO(uint32_t numSamples) :
-	m_fifo(nullptr)
+    m_fifo(nullptr),
+    m_fifoEmpty(true)
 {
 	QMutexLocker mutexLocker(&m_mutex);
 	create(numSamples);

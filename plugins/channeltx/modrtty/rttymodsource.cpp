@@ -30,15 +30,21 @@ RttyModSource::RttyModSource() :
     m_channelFrequencyOffset(0),
     m_spectrumRate(2000),
     m_fmPhase(0.0),
+    m_bit(0),
     m_spectrumSink(nullptr),
     m_specSampleBufferIndex(0),
     m_magsq(0.0),
     m_levelCalcCount(0),
+    m_rmsLevel(0.0),
+    m_peakLevelOut(0.0),
     m_peakLevel(0.0f),
     m_levelSum(0.0f),
+    m_sampleIdx(0),
     m_byteIdx(0),
     m_bitIdx(0),
-    m_bitCount(0)
+    m_bitCount(0),
+    m_bitCountTotal(0),
+    m_messageQueueToGUI(nullptr)
  {
     m_bits.append(0);
     m_lowpass.create(301, m_channelSampleRate, 400.0 / 2.0);

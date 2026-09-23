@@ -28,6 +28,7 @@
 MESSAGE_CLASS_DEFINITION(RigCtlServerSettings::MsgChannelIndexChange, Message)
 
 RigCtlServerSettings::RigCtlServerSettings() :
+    m_enabled(false),
     m_rollupState(nullptr)
 {
     resetToDefaults();

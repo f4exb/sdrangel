@@ -26,6 +26,13 @@ AISModTXSettingsDialog::AISModTXSettingsDialog(int rampUpBits, int rampDownBits,
         bool rfNoise, bool writeToFile,
         QWidget* parent) :
     QDialog(parent),
+    m_rampUpBits(rampUpBits),
+    m_rampDownBits(rampDownBits),
+    m_rampRange(rampRange),
+    m_baud(baud),
+    m_symbolSpan(symbolSpan),
+    m_rfNoise(rfNoise),
+    m_writeToFile(writeToFile),
     ui(new Ui::AISModTXSettingsDialog)
 {
     ui->setupUi(this);

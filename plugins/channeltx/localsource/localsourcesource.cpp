@@ -21,7 +21,11 @@
 
 LocalSourceSource::LocalSourceSource() :
     m_running(false),
-    m_sinkWorker(nullptr)
+    m_sinkWorker(nullptr),
+    m_localSampleSourceFifo(nullptr),
+    m_chunkSize(0),
+    m_localSamplesIndex(0),
+    m_localSamplesIndexOffset(0)
 {}
 
 LocalSourceSource::~LocalSourceSource()

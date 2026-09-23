@@ -38,7 +38,8 @@ APRSWorker::APRSWorker(APRS *aprs, WebAPIAdapterInterface *webAPIAdapterInterfac
     m_webAPIAdapterInterface(webAPIAdapterInterface),
     m_msgQueueToFeature(nullptr),
     m_msgQueueToGUI(nullptr),
-    m_socket(this)
+    m_socket(this),
+    m_loggedIn(false)
 {
     connect(&m_socket, SIGNAL(readyRead()),this, SLOT(recv()));
     connect(&m_socket, SIGNAL(connected()), this, SLOT(connected()));

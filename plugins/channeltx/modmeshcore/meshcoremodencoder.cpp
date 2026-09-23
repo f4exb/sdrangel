@@ -136,6 +136,8 @@ const bool MeshcoreModEncoder::m_hasCRC = true;
 const bool MeshcoreModEncoder::m_hasHeader = true;
 
 MeshcoreModEncoder::MeshcoreModEncoder() :
+    m_spreadFactor(0),
+    m_deBits(0),
     m_nbSymbolBits(5),
     m_nbParityBits(1)
 {}

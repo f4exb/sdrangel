@@ -18,8 +18,13 @@
 #include "m17moddecimator.h"
 
 M17ModDecimator::M17ModDecimator() :
+    mDecimatedSampleRate(0.0),
+    mOversampleRate(0.0),
+    mRatio(0),
     mKernel(nullptr),
-    mShift(nullptr)
+    mKernelSize(0),
+    mShift(nullptr),
+    mCursor(0)
 {}
 
 M17ModDecimator::~M17ModDecimator()

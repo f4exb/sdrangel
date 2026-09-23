@@ -82,6 +82,7 @@ const QStringList MapSettings::m_mapProviderNames = {
 };
 
 MapSettings::MapSettings() :
+    m_rgbColor(QColor(0, 0, 0).rgb()),
     m_rollupState(nullptr)
 {
     // Source names should match m_pipeTypes

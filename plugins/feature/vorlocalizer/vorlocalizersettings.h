@@ -39,9 +39,9 @@ struct VORLocalizerSettings
 {
     struct VORChannel
     {
-        int m_subChannelId; //!< Unique VOR identifier (from database)
-        int m_frequency;    //!< Frequency the VOR is on
-        bool m_audioMute;   //!< Mute the audio from this VOR
+        int m_subChannelId{0};     //!< Unique VOR identifier (from database)
+        int m_frequency{0};        //!< Frequency the VOR is on
+        bool m_audioMute{false};   //!< Mute the audio from this VOR
 
         VORChannel() = default;
         VORChannel(const VORChannel&) = default;
@@ -52,12 +52,12 @@ struct VORLocalizerSettings
 
     struct AvailableChannel
     {
-        int m_deviceSetIndex;
-        int m_channelIndex;
-        ChannelAPI *m_channelAPI;
-        quint64 m_deviceCenterFrequency;
-        int m_basebandSampleRate;
-        int m_navId;
+        int m_deviceSetIndex{0};
+        int m_channelIndex{0};
+        ChannelAPI *m_channelAPI{nullptr};
+        quint64 m_deviceCenterFrequency{0};
+        int m_basebandSampleRate{0};
+        int m_navId{0};
 
         AvailableChannel() = default;
         AvailableChannel(const AvailableChannel&) = default;

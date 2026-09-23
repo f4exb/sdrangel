@@ -27,6 +27,27 @@ PacketModTXSettingsDialog::PacketModTXSettingsDialog(int rampUpBits, int rampDow
         int lpfTaps, bool bbNoise, bool rfNoise, bool writeToFile,
         QWidget* parent) :
     QDialog(parent),
+    m_rampUpBits(rampUpBits),
+    m_rampDownBits(rampDownBits),
+    m_rampRange(rampRange),
+    m_modulateWhileRamping(modulateWhileRamping),
+    m_modulation(modulation),
+    m_baud(baud),
+    m_markFrequency(markFrequency),
+    m_spaceFrequency(spaceFrequency),
+    m_pulseShaping(pulseShaping),
+    m_beta(beta),
+    m_symbolSpan(symbolSpan),
+    m_scramble(scramble),
+    m_polynomial(polynomial),
+    m_ax25PreFlags(ax25PreFlags),
+    m_ax25PostFlags(ax25PostFlags),
+    m_ax25Control(ax25Control),
+    m_ax25PID(ax25PID),
+    m_lpfTaps(lpfTaps),
+    m_bbNoise(bbNoise),
+    m_rfNoise(rfNoise),
+    m_writeToFile(writeToFile),
     ui(new Ui::PacketModTXSettingsDialog)
 {
     ui->setupUi(this);

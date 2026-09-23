@@ -222,7 +222,7 @@ class DATVideoRenderThread : public QThread
             return;
         }
 
-        while ((m_renderingVideo == true) && (m_renderer))
+        while ((m_renderingVideo == true))
         {
             if (!m_renderer->renderStream()) {
                 break;

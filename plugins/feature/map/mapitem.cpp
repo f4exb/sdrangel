@@ -18,6 +18,8 @@
 #include "mapitem.h"
 
 MapItem::MapItem(const QObject *sourcePipe, const QString &group, MapSettings::MapItemSettings *itemSettings, SWGSDRangel::SWGMapItem *mapItem) :
+    m_latitude(0.0f),
+    m_longitude(0.0f),
     m_altitude(0.0)
 {
     m_sourcePipe = sourcePipe;

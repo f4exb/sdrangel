@@ -157,7 +157,7 @@ void M17ModSource::pullAudio(unsigned int nbSamplesAudio)
 
 void M17ModSource::modulateSample()
 {
-	Real t1, t;
+    Real t1 = 0.0f, t;
     bool carrier;
 
     if ((m_settings.m_m17Mode == M17ModSettings::M17ModeFMTone) || (m_settings.m_m17Mode == M17ModSettings::M17ModeFMAudio))

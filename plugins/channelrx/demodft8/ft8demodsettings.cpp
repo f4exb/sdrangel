@@ -326,7 +326,7 @@ bool FT8DemodSettings::deserialize(const QByteArray& data)
             m_filterBank[i].m_lowCutoff = tmp * 100.0;
             d.readS32(103 + 10*i, &tmp, (int) FFTWindow::Blackman);
             m_filterBank[i].m_fftWindow =
-                (FFTWindow::Function) (tmp < 0 ? 0 : tmp > (int) FFTWindow::BlackmanHarris7 ? (int) FFTWindow::BlackmanHarris7 : tmp);
+                (FFTWindow::Function) (tmp < 0 ? 0 : (tmp > (int) FFTWindow::BlackmanHarris7 ? (int) FFTWindow::BlackmanHarris7 : tmp));
         }
 
         return true;

@@ -79,7 +79,9 @@ class CZML
             m_labelScale(0.0),
             m_labelAltitudeReference(0),
             m_pathColorInt(0),
-            m_pathShow(false)
+            m_pathShow(false),
+            m_aircraftState{},
+            m_aircraftRoll(0.0f)
         { }
     };
 

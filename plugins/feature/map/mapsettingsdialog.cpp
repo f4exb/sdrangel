@@ -71,7 +71,11 @@ MapItemSettingsGUI::MapItemSettingsGUI(QTableWidget *table, int row, MapSettings
 
 MapSettingsDialog::MapSettingsDialog(MapSettings *settings, QWidget* parent) :
     QDialog(parent),
+    m_map2DSettingsChanged(false),
+    m_map3DSettingsChanged(false),
+    m_osmURLChanged(false),
     m_settings(settings),
+    m_fileIdx(0),
     m_downloadDialog(this),
     m_progressDialog(nullptr),
     ui(new Ui::MapSettingsDialog)
