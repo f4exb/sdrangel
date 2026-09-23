@@ -1924,6 +1924,21 @@ void MainWindow::loadConfiguration(const Configuration *configuration, bool from
         (int)configuration->getFeatureSetPreset().getFeatureCount()
     );
 
+    // ConfigurationsDialog calls on_configurationLoad_clicked() from both
+    // on_configurationsTree_itemActivated() (double-click or Enter) and accept()
+    // (the OK button), so a double-click followed by OK - or simply a second click
+    // on Load while the first is still running - starts a second LoadConfigurationFSM.
+    // The two then overlap: the second one's RemoveAllWorkspacesFSM deletes the
+    // workspaces, device sets and GUI widgets the first is still walking, and the
+    // first goes on to dereference freed objects. Serialize them instead.
+    // The QPointer clears itself if the FSM dies without finishing, so a load that
+    // goes wrong cannot wedge this permanently.
+    if (!m_configurationLoadFSM.isNull())
+    {
+        qWarning("MainWindow::loadConfiguration: a configuration is already being loaded - ignoring this request");
+        return;
+    }
+
     QProgressDialog *waitBox = nullptr;
 
     if (fromDialog)
@@ -1938,6 +1953,8 @@ void MainWindow::loadConfiguration(const Configuration *configuration, bool from
     }
 
     LoadConfigurationFSM *fsm = new LoadConfigurationFSM(this, configuration, waitBox);
+    m_configurationLoadFSM = fsm;
+    connect(fsm, &LoadConfigurationFSM::finished, this, [this]() { m_configurationLoadFSM.clear(); });
     connect(fsm, &LoadConfigurationFSM::finished, fsm, &LoadConfigurationFSM::deleteLater);
     fsm->start();
     }
