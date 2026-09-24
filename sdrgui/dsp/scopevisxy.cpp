@@ -85,7 +85,6 @@ void ScopeVisXY::feed(const SampleVector::const_iterator& cbegin, const SampleVe
             }
 
 			m_tvScreen->renderImage(0);
-			m_tvScreen->update();
             std::this_thread::sleep_for(std::chrono::microseconds(5000));
 			m_tvScreen->resetImage(m_alphaReset);
             drawGraticule();

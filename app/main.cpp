@@ -43,6 +43,7 @@
 #include "util/android.h"
 #endif
 #if (QT_VERSION >= QT_VERSION_CHECK(6, 4, 0))
+#include <QOpenGLWidget>
 #include <QQuickWindow>
 #endif
 
@@ -183,6 +184,16 @@ static int runQtApplication(int argc, char* argv[], qtwebapp::LoggerWithFile *lo
 
     SDRangelApplication a(argc, argv);
 
+    // Give the desktop environment an exact desktop-entry ID so startup
+    // notification, window activation, taskbar grouping, and icons do not
+    // have to rely on window-title or executable-name heuristics. Snapd
+    // prefixes exported desktop entries with the snap instance name.
+    const QByteArray snapInstanceName = qgetenv("SNAP_INSTANCE_NAME");
+    const QString desktopFileName = snapInstanceName.isEmpty() ?
+        QStringLiteral("sdrangel") :
+        QString::fromUtf8(snapInstanceName) + QStringLiteral("_sdrangel");
+    QGuiApplication::setDesktopFileName(desktopFileName);
+
 #if 1
     qApp->setStyle(QStyleFactory::create("fusion"));
 
@@ -290,6 +301,20 @@ static int runQtApplication(int argc, char* argv[], qtwebapp::LoggerWithFile *lo
     }
 
     MainWindow w(logger, parser);
+
+#if (QT_VERSION >= QT_VERSION_CHECK(6, 4, 0))
+    // Qt 6.4 and later may recreate a visible top-level native window when
+    // its first QOpenGLWidget child is added. This can result in
+    // the MainWindow being reopened when the first Device is opened
+    // and on Linux the cursor changing to busy for a while,
+    // so make the main window OpenGL-composited from its
+    // first show and keep it that way for the lifetime of the application.
+    QOpenGLWidget openGLSurfaceInitializer(&w);
+    openGLSurfaceInitializer.setObjectName(QStringLiteral("openGLSurfaceInitializer"));
+    openGLSurfaceInitializer.setAttribute(Qt::WA_TransparentForMouseEvents);
+    openGLSurfaceInitializer.setGeometry(-1, -1, 1, 1);
+    openGLSurfaceInitializer.show();
+#endif
 
     w.show();
 

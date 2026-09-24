@@ -128,19 +128,26 @@ void OurAirportsDB::readDB()
 
     if (!m_airportsById || (airportDBModifiedDateTime > m_modifiedDateTime))
     {
-        // Using shared pointer, so old object, if it exists, will be deleted, when no longer user
-        m_airportsById = QSharedPointer<QHash<int, AirportInformation *>>(OurAirportsDB::readAirportsDB(getAirportDBFilename()),
-            [](QHash<int, AirportInformation *> *airportInfo) {
-                qDeleteAll(*airportInfo);
-                delete airportInfo;
-            });
-        if (m_airportsById != nullptr)
-        {
-            OurAirportsDB::readFrequenciesDB(getAirportFrequenciesDBFilename(), m_airportsById.get());
-            m_airportsByIdent = QSharedPointer<QHash<QString, AirportInformation *>>(identHash(m_airportsById.get()));
-        }
+        QHash<int, AirportInformation *> *airportInfo = OurAirportsDB::readAirportsDB(getAirportDBFilename());
 
-        m_modifiedDateTime = airportDBModifiedDateTime;
+        if (airportInfo)
+        {
+            // Using shared pointer, so old object, if it exists, will be deleted when no longer used
+            QSharedPointer<QHash<int, AirportInformation *>> airportsById(
+                airportInfo,
+                [](QHash<int, AirportInformation *> *airportInfo) {
+                    qDeleteAll(*airportInfo);
+                    delete airportInfo;
+                }
+            );
+            OurAirportsDB::readFrequenciesDB(getAirportFrequenciesDBFilename(), airportsById.get());
+            QSharedPointer<QHash<QString, AirportInformation *>> airportsByIdent(identHash(airportsById.get()));
+
+            // Replace both indexes together only after the new database was loaded successfully.
+            m_airportsById = airportsById;
+            m_airportsByIdent = airportsByIdent;
+            m_modifiedDateTime = airportDBModifiedDateTime;
+        }
     }
 }
 
@@ -421,4 +428,3 @@ bool OurAirportsDB::readFrequenciesDB(const QString &filename, QHash<int, Airpor
 
     return true;
 }
-
