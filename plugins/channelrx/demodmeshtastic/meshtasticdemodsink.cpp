@@ -685,7 +685,7 @@ float MeshtasticDemodSink::estimateLoRaCFOFracBernier(const Complex *samples)
     return cfoFrac;
 }
 
-float MeshtasticDemodSink::estimateLoRaSTOFrac()
+float MeshtasticDemodSink::estimateLoRaSTOFrac(int *upBinResidual)
 {
     if (m_loRaUpSymbToUse <= 0) {
         return 0.0f;
@@ -725,9 +725,19 @@ float MeshtasticDemodSink::estimateLoRaSTOFrac()
     const double v = u * 2.4674;
     const double wa = (Y1 - Y_1) / (u * (Y1 + Y_1) + v * Y0 + 1e-12);
     const double ka = wa * m_nbSymbols / M_PI;
-    const double kres = std::fmod((k0 + ka) / 2.0, 1.0);
+    const double peak = (k0 + ka) / 2.0;
+    const double kres = std::fmod(peak, 1.0);
+    const double frac = kres - (kres > 0.5 ? 1.0 : 0.0);
 
-    return static_cast<float>(kres - (kres > 0.5 ? 1.0 : 0.0));
+    if (upBinResidual)
+    {
+        // Express the N-wrapped peak as an integer bin plus exactly the same
+        // fractional offset returned to existing callers, including half-bin ties.
+        const double pos = std::remainder(peak, static_cast<double>(m_nbSymbols));
+        *upBinResidual = static_cast<int>(std::round(pos - frac));
+    }
+
+    return static_cast<float>(frac);
 }
 
 void MeshtasticDemodSink::buildLoRaPayloadDownchirp()
