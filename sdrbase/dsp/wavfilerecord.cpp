@@ -335,9 +335,9 @@ bool WavFileRecord::stopRecording()
         qDebug() << "WavFileRecord::stopRecording";
 
 #ifdef ANDROID
-        long dataSize = (long)m_sampleFile.size();
+        quint64 dataSize = m_sampleFile.size();
 #else
-        long dataSize = m_sampleFile.tellp();
+        quint64 dataSize = m_sampleFile.tellp();
 #endif
 
         // Write meta data
@@ -349,21 +349,52 @@ bool WavFileRecord::stopRecording()
 
         // Fix up chunk sizes
 #ifdef ANDROID
-        long fileSize = (long)m_sampleFile.size();
+        quint64 fileSize = m_sampleFile.size();
         m_sampleFile.seek(offsetof(Header, m_riffHeader.m_size));
 #else
-        long fileSize = m_sampleFile.tellp();
+        quint64 fileSize = m_sampleFile.tellp();
         m_sampleFile.seekp(offsetof(Header, m_riffHeader.m_size));
 #endif
-        qint32 size = (fileSize - 8);
+        const bool rf64 = ((fileSize - 8) >= 0xffffffffULL) ||
+                          ((dataSize - sizeof(Header)) >= 0xffffffffULL);
+
+        quint32 size = rf64 ? 0xffffffffU : (quint32)(fileSize - 8);
         m_sampleFile.write((char *)&size, 4);
 #ifdef ANDROID
         m_sampleFile.seek(offsetof(Header, m_dataHeader.m_size));
 #else
         m_sampleFile.seekp(offsetof(Header, m_dataHeader.m_size));
 #endif
-        size = dataSize - sizeof(Header);
+        size = rf64 ? 0xffffffffU : (quint32)(dataSize - sizeof(Header));
         m_sampleFile.write((char *)&size, 4);
+
+        if (rf64)
+        {
+            DS64 ds64{};
+            ds64.m_riffSize = fileSize - 8;
+            ds64.m_dataSize = dataSize - sizeof(Header);
+            ds64.m_sampleCount = ds64.m_dataSize / (m_nbChannels * sizeof(qint16));
+            ds64.m_tableLength = 0;
+
+#ifdef ANDROID
+            m_sampleFile.seek(offsetof(Header, m_riffHeader.m_id));
+            m_sampleFile.write("RF64", 4);
+            m_sampleFile.seek(offsetof(Header, m_junk.m_id));
+#else
+            m_sampleFile.seekp(offsetof(Header, m_riffHeader.m_id));
+            m_sampleFile.write("RF64", 4);
+            m_sampleFile.seekp(offsetof(Header, m_junk.m_id));
+#endif
+            m_sampleFile.write("ds64", 4);
+
+#ifdef ANDROID
+            m_sampleFile.seek(offsetof(Header, m_ds64));
+#else
+            m_sampleFile.seekp(offsetof(Header, m_ds64));
+#endif
+            m_sampleFile.write((char *)&ds64, sizeof(ds64));
+        }
+
         m_sampleFile.close();
         m_recordOn = false;
         m_recordStart = false;
@@ -411,7 +442,7 @@ bool WavFileRecord::handleMessage(const Message& message)
 
 void WavFileRecord::writeHeader()
 {
-    Header header;
+    Header header{};
     header.m_riffHeader.m_id[0] = 'R';
     header.m_riffHeader.m_id[1] = 'I';
     header.m_riffHeader.m_id[2] = 'F';
@@ -421,6 +452,11 @@ void WavFileRecord::writeHeader()
     header.m_type[1] = 'A';
     header.m_type[2] = 'V';
     header.m_type[3] = 'E';
+    header.m_junk.m_id[0] = 'J';
+    header.m_junk.m_id[1] = 'U';
+    header.m_junk.m_id[2] = 'N';
+    header.m_junk.m_id[3] = 'K';
+    header.m_junk.m_size = sizeof(DS64);
     header.m_fmtHeader.m_id[0] = 'f';
     header.m_fmtHeader.m_id[1] = 'm';
     header.m_fmtHeader.m_id[2] = 't';
@@ -467,7 +503,6 @@ void WavFileRecord::writeHeader()
     header.m_auxi.m_unused5 = 0;
     memset(&header.m_auxi.m_nextFilename[0], 0, 96);
 
-    header.m_dataHeader.m_size = sizeof(Auxi);
     header.m_dataHeader.m_id[0] = 'd';
     header.m_dataHeader.m_id[1] = 'a';
     header.m_dataHeader.m_id[2] = 't';
@@ -477,91 +512,12 @@ void WavFileRecord::writeHeader()
     writeHeader(m_sampleFile, header);
 }
 
-bool WavFileRecord::readHeader(std::ifstream& sampleFile, Header& header, bool check)
+static bool checkHeader(const WavFileRecord::Header& header)
 {
-    memset(&header, 0, sizeof(Header));
-
-    sampleFile.read((char *) &header, 8+4+8+16);
-    if (!sampleFile)
+    if (strncmp(header.m_riffHeader.m_id, "RIFF", 4)  &&
+        strncmp(header.m_riffHeader.m_id, "RF64", 4))
     {
-        qDebug() << "WavFileRecord::readHeader: End of file without reading header";
-        return false;
-    }
-
-    if (check && !checkHeader(header)) {
-        return false;
-    }
-
-    Chunk chunkHeader;
-    bool gotData = false;
-    while (!gotData)
-    {
-        sampleFile.read((char *) &chunkHeader, 8);
-        if (!sampleFile)
-        {
-            qDebug() << "WavFileRecord::readHeader: End of file without reading data header";
-            return false;
-        }
-
-        if (!strncmp(chunkHeader.m_id, "auxi", 4))
-        {
-            memcpy(&header.m_auxiHeader, &chunkHeader, sizeof(Chunk));
-            sampleFile.read((char *) &header.m_auxi, sizeof(Auxi));
-            if (!sampleFile)
-                return false;
-        }
-        else if (!strncmp(chunkHeader.m_id, "data", 4))
-        {
-            memcpy(&header.m_dataHeader, &chunkHeader, sizeof(Chunk));
-            gotData = true;
-        }
-    }
-
-    return true;
-}
-
-bool WavFileRecord::readHeader(QFile& sampleFile, Header& header)
-{
-    memset(&header, 0, sizeof(Header));
-
-    sampleFile.read((char *) &header, 8+4+8+16);
-
-    if (!checkHeader(header)) {
-        return false;
-    }
-
-    Chunk chunkHeader;
-    bool gotData = false;
-    while (!gotData)
-    {
-        if (sampleFile.read((char *) &chunkHeader, 8) != 8)
-        {
-            qDebug() << "WavFileRecord::readHeader: End of file without reading data header";
-            return false;
-        }
-
-        if (!strncmp(chunkHeader.m_id, "auxi", 4))
-        {
-            memcpy(&header.m_auxiHeader, &chunkHeader, sizeof(Chunk));
-            if (sampleFile.read((char *) &header.m_auxi, sizeof(Auxi)) != sizeof(Auxi)) {
-                return false;
-            }
-        }
-        else if (!strncmp(chunkHeader.m_id, "data", 4))
-        {
-            memcpy(&header.m_dataHeader, &chunkHeader, sizeof(Chunk));
-            gotData = true;
-        }
-    }
-
-    return true;
-}
-
-bool WavFileRecord::checkHeader(Header& header)
-{
-    if (strncmp(header.m_riffHeader.m_id, "RIFF", 4))
-    {
-        qDebug() << "WavFileRecord::readHeader: No RIFF header";
+        qDebug() << "WavFileRecord::readHeader: No RIFF/RF64 header";
         return false;
     }
     if (strncmp(header.m_type, "WAVE", 4))
@@ -569,6 +525,17 @@ bool WavFileRecord::checkHeader(Header& header)
         qDebug() << "WavFileRecord::readHeader: No WAVE header";
         return false;
     }
+    if (!strncmp(header.m_riffHeader.m_id, "RF64", 4) &&
+        header.m_riffHeader.m_size != 0xffffffffU)
+    {
+        qDebug() << "WavFileRecord::readHeader: Invalid RF64 RIFF size";
+        return false;
+    }
+    return true;
+}
+
+static bool checkFormat(const WavFileRecord::Header& header)
+{
     if (strncmp(header.m_fmtHeader.m_id, "fmt ", 4))
     {
         qDebug() << "WavFileRecord::readHeader: No fmt header";
@@ -591,6 +558,195 @@ bool WavFileRecord::checkHeader(Header& header)
         return false;
     }
     return true;
+}
+
+
+static bool readBytes(std::ifstream& file, char *data, std::streamsize size)
+{
+    file.read(data, size);
+    return !!file;
+}
+
+static bool readBytes(QFile& file, char *data, qint64 size)
+{
+    return file.read(data, size) == size;
+}
+
+static bool skipBytes(std::ifstream& file, std::streamoff size)
+{
+    file.seekg(size, std::ios::cur);
+    return !!file;
+}
+
+static bool skipBytes(QFile& file, qint64 size)
+{
+    return file.seek(file.pos() + size);
+}
+
+template<typename File>
+bool WavFileRecord::readHeaderInternal(File& sampleFile, Header& header, bool check)
+{
+    memset(&header, 0, sizeof(Header));
+
+    if (!readBytes(sampleFile, (char *) &header, sizeof(Chunk) + sizeof(header.m_type)))
+    {
+        qDebug() << "WavFileRecord::readHeader: End of file without reading header";
+        return false;
+    }
+
+    if (check && !checkHeader(header)) {
+        qDebug() << "WavFileRecord::readHeader: Header failure";
+        return false;
+    }
+
+    Chunk chunkHeader;
+    bool gotData = false;
+    bool gotFmt = false;
+    bool gotDs64 = false;
+
+    while (!gotData)
+    {
+        if (!readBytes(sampleFile, (char *) &chunkHeader, sizeof(Chunk)))
+        {
+            qDebug() << "WavFileRecord::readHeader: End of file without reading data header";
+            return false;
+        }
+        if (!strncmp(chunkHeader.m_id, "fmt ", sizeof(chunkHeader.m_id)))
+        {
+            const quint32 formatSize = sizeof(header.m_audioFormat) + sizeof(header.m_numChannels) +
+                                       sizeof(header.m_sampleRate) + sizeof(header.m_byteRate) +
+                                       sizeof(header.m_blockAlign) + sizeof(header.m_bitsPerSample);
+            if (gotFmt)
+            {
+                qDebug() << "WavFileRecord::readHeader: Duplicate format";
+                return false;
+            }
+            if (chunkHeader.m_size < formatSize)
+            {
+                qDebug() << "WavFileRecord::readHeader: Invalid format size";
+                return false;
+            }
+
+            memcpy(&header.m_fmtHeader, &chunkHeader, sizeof(Chunk));
+            if (!readBytes(sampleFile, (char *) &header.m_audioFormat, sizeof(header.m_audioFormat)) ||
+                !readBytes(sampleFile, (char *) &header.m_numChannels, sizeof(header.m_numChannels)) ||
+                !readBytes(sampleFile, (char *) &header.m_sampleRate, sizeof(header.m_sampleRate)) ||
+                !readBytes(sampleFile, (char *) &header.m_byteRate, sizeof(header.m_byteRate)) ||
+                !readBytes(sampleFile, (char *) &header.m_blockAlign, sizeof(header.m_blockAlign)) ||
+                !readBytes(sampleFile, (char *) &header.m_bitsPerSample, sizeof(header.m_bitsPerSample)))
+            {
+                qDebug() << "WavFileRecord::readHeader: End of file while reading format";
+                return false;
+            }
+            if (check && !checkFormat(header)) {
+                qDebug() << "WavFileRecord::readHeader: Incompatible format failure";
+                return false;
+            }
+
+            gotFmt = true;
+
+            // Skip remaining payload and word-alignment padding
+            if (!skipBytes(sampleFile, chunkHeader.m_size - formatSize + (chunkHeader.m_size & 1)))
+            {
+                qDebug() << "WavFileRecord::readHeader: Error while skipping format";
+                return false;
+            }
+        }
+        else if (!strncmp(chunkHeader.m_id, "JUNK", sizeof(chunkHeader.m_id)))
+        {
+            memcpy(&header.m_junk, &chunkHeader, sizeof(Chunk));
+            if (!skipBytes(sampleFile, static_cast<qint64>(chunkHeader.m_size) + (chunkHeader.m_size & 1)))
+            {
+                qDebug() << "WavFileRecord::readHeader: Error while skipping JUNK";
+                return false;
+            }
+        }
+        else if (!strncmp(chunkHeader.m_id, "ds64", sizeof(chunkHeader.m_id)))
+        {
+            if (chunkHeader.m_size < sizeof(DS64))
+            {
+                qDebug() << "WavFileRecord::readHeader: Invalid ds64 size";
+                return false;
+            }
+            memcpy(&header.m_junk, &chunkHeader, sizeof(Chunk));
+            if (!readBytes(sampleFile, (char *) &header.m_ds64, sizeof(DS64)))
+            {
+                qDebug() << "WavFileRecord::readHeader: End of file while reading ds64";
+                return false;
+            }
+            if (!skipBytes(sampleFile, chunkHeader.m_size - sizeof(DS64) + (chunkHeader.m_size & 1)))
+            {
+                qDebug() << "WavFileRecord::readHeader: Error while skipping ds64";
+                return false;
+            }
+            gotDs64 = true;
+        }
+        else if (!strncmp(chunkHeader.m_id, "auxi", sizeof(chunkHeader.m_id)))
+        {
+            if (chunkHeader.m_size < sizeof(Auxi))
+            {
+                qDebug() << "WavFileRecord::readHeader: Invalid auxi size";
+                return false;
+            }
+
+            memcpy(&header.m_auxiHeader, &chunkHeader, sizeof(Chunk));
+            if (!readBytes(sampleFile, (char *) &header.m_auxi, sizeof(Auxi)))
+            {
+                qDebug() << "WavFileRecord::readHeader: End of file while reading auxi";
+                return false;
+            }
+            if (!skipBytes(sampleFile, chunkHeader.m_size - sizeof(Auxi) + (chunkHeader.m_size & 1)))
+            {
+                qDebug() << "WavFileRecord::readHeader: Error while skipping auxi";
+                return false;
+            }
+
+        }
+        else if (!strncmp(chunkHeader.m_id, "data", 4))
+        {
+            memcpy(&header.m_dataHeader, &chunkHeader, sizeof(Chunk));
+
+            if (gotDs64 && !strncmp(header.m_riffHeader.m_id, "RF64", 4) &&
+                    header.m_dataHeader.m_size != 0xffffffffU) {
+                qDebug() << "WavFileRecord::readHeader: Invalid RF64 data size";
+                return false;
+            }
+            gotData = true;
+        }
+        else
+        {
+            qDebug() << "WavFileRecord::readHeader: skipping unknown section :" << chunkHeader.m_id;
+            if (!skipBytes(sampleFile, static_cast<qint64>(chunkHeader.m_size) + (chunkHeader.m_size & 1)))
+            {
+                qDebug() << "WavFileRecord::readHeader: Error while skipping" << chunkHeader.m_id;
+                return false;
+            }
+
+        }
+    }
+
+    if (check && !gotFmt)
+    {
+        qDebug() << "WavFileRecord::readHeader: No format";
+        return false;
+    }
+    if (check && !strncmp(header.m_riffHeader.m_id, "RF64", 4) && !gotDs64)
+    {
+        qDebug() << "WavFileRecord::readHeader: No ds64 header";
+        return false;
+    }
+
+    return true;
+}
+
+bool WavFileRecord::readHeader(std::ifstream& sampleFile, Header& header, bool check)
+{
+    return readHeaderInternal(sampleFile, header, check);
+}
+
+bool WavFileRecord::readHeader(QFile& sampleFile, Header& header)
+{
+    return readHeaderInternal(sampleFile, header, true);
 }
 
 void WavFileRecord::writeHeader(std::ofstream& sampleFile, Header& header)
