@@ -945,7 +945,18 @@ int MeshtasticDemodSink::processLoRaFrameSyncStep()
                 m_loRaCFOFrac = 0.0f;
             }
 
-            m_loRaSTOFrac = estimateLoRaSTOFrac();
+            int upBinResidual = 0;
+            m_loRaSTOFrac = estimateLoRaSTOFrac(&upBinResidual);
+
+            // Detection aligned on the mode of uncorrected preamble bins. After
+            // fractional CFO correction, an integer upchirp-bin residual can
+            // remain. The current Sync window was already read on the old grid;
+            // adjust consumption so later net-ID windows, downchirps and payload
+            // use the corrected grid. Detection advances osFactor * (N - b) to
+            // move bin b to zero, hence residual r needs -osFactor * r.
+            if (std::abs(upBinResidual) == 1) {
+                m_loRaPendingShift = -upBinResidual * static_cast<int>(m_osFactor);
+            }
 
             for (unsigned int n = 0; n < m_nbSymbols; n++)
             {
