@@ -65,6 +65,7 @@ MeshtasticDemodSink::MeshtasticDemodSink() :
     m_loRaFrameSymbolCount(0),
     m_loRaCFOFrac(0.0f),
     m_loRaSTOFrac(0.0f),
+    m_loRaPendingShift(0),
     m_loRaSFOHat(0.0f),
     m_loRaSFOCum(0.0f),
     m_loRaCFOSTOEstimated(false),
@@ -535,6 +536,7 @@ void MeshtasticDemodSink::resetLoRaFrameSync()
     m_loRaAdditionalUpchirps = 0;
     m_loRaCFOFrac = 0.0f;
     m_loRaSTOFrac = 0.0f;
+    m_loRaPendingShift = 0;
     m_loRaSFOHat = 0.0f;
     m_loRaSFOCum = 0.0f;
     m_loRaCFOSTOEstimated = false;
@@ -807,6 +809,10 @@ void MeshtasticDemodSink::processSampleLoRa(const Complex& ci)
         }
 
         int consumed = processLoRaFrameSyncStep();
+
+        // Apply a one-shot adjustment requested by the step just processed.
+        consumed += m_loRaPendingShift;
+        m_loRaPendingShift = 0;
 
         if (consumed <= 0) {
             consumed = 1;
