@@ -34,7 +34,8 @@ class Serializable;
 struct PacketDemodSettings
 {
     enum Mode {
-        ModeAFSK1200
+        ModeAFSK1200 = 0,
+        ModeG3RUH9600 = 1
     };
 
     qint32 m_inputFrequencyOffset;
@@ -132,6 +133,9 @@ struct PacketDemodSettings
     void applySettings(const QStringList& settingsKeys, const PacketDemodSettings& settings);
     QString getDebugString(const QStringList& settingsKeys, bool force=false) const;
     int getBaudRate() const;
+    bool isAFSK() const { return m_mode == ModeAFSK1200; }
+    bool isMLSEEnabled() const { return isAFSK() && m_mlse; }
+    static bool isValidMode(int mode) { return mode == ModeAFSK1200 || mode == ModeG3RUH9600; }
 };
 
 #endif /* INCLUDE_PACKETDEMODSETTINGS_H */

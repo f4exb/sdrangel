@@ -35,6 +35,7 @@
 #include "packetdemodframer.h"
 #include "packetdemodtonecorrelator.h"
 #include "packetdemodcore.h"
+#include "packetdemodg3ruh.h"
 
 // Post correlation filter length. The envelope being filtered changes at the baud rate, so
 // this only has to be long enough to smooth it; 301 taps per tone is 602 multiply
@@ -134,6 +135,7 @@ private:
 
     // The detector, estimator and replay live in PacketDemodCore, shared verbatim with
     // the offline test harness rather than mirrored by it.
+    PacketDemodG3RUH m_g3ruh;
     PacketDemodCore m_core;
     std::deque<std::pair<QByteArray, quint64>> m_recent; // Recently reported, to deduplicate
 

@@ -387,7 +387,12 @@ int PacketDemod::webapiSettingsPutPatch(
         SWGSDRangel::SWGChannelSettings& response,
         QString& errorMessage)
 {
-    (void) errorMessage;
+    if (channelSettingsKeys.contains("mode")
+        && !PacketDemodSettings::isValidMode(response.getPacketDemodSettings()->getMode()))
+    {
+        errorMessage = "mode must be 0 (1200 AFSK) or 1 (9600 G3RUH)";
+        return 400;
+    }
     PacketDemodSettings settings = m_settings;
     webapiUpdateChannelSettings(settings, channelSettingsKeys, response);
 

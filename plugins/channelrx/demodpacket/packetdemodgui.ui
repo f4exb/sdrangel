@@ -231,6 +231,11 @@
           <string>1200 AFSK</string>
          </property>
         </item>
+        <item>
+         <property name="text">
+          <string>9600 G3RUH</string>
+         </property>
+        </item>
        </widget>
       </item>
       <item>
