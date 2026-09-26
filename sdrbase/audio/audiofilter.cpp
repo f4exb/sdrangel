@@ -33,9 +33,13 @@ const float AudioFilter::m_hpa[3] = {1.000000e+00,  1.667871e+00, -7.156964e-01}
 const float AudioFilter::m_hpb[3] = {8.459039e-01, -1.691760e+00,  8.459039e-01};
 
 AudioFilter::AudioFilter() :
-        m_filterLP(m_lpa, m_lpb),
-        m_filterHP(m_hpa, m_hpb),
-        m_useHP(false)
+    m_filterLP(m_lpa, m_lpb),
+    m_filterHP(m_hpa, m_hpb),
+    m_useHP(false),
+    m_lpva{},
+    m_lpvb{},
+    m_hpva{},
+    m_hpvb{}
 {}
 
 AudioFilter::~AudioFilter()

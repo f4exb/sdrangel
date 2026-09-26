@@ -520,7 +520,8 @@ QDateTime OpenAIP::m_airspacesModifiedDateTime;
 QDateTime OpenAIP::m_navAidsModifiedDateTime;
 
 OpenAIP::OpenAIP(QObject *parent) :
-    QObject(parent)
+    QObject(parent),
+    m_countryIndex(0)
 {
     connect(&m_dlm, &HttpDownloadManager::downloadComplete, this, &OpenAIP::downloadFinished);
 }

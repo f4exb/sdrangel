@@ -25,7 +25,9 @@
 #include <QJsonDocument>
 #include <QJsonObject>
 
-Weather::Weather()
+Weather::Weather() :
+    m_latitude(0.0f),
+    m_longitude(0.0f)
 {
     connect(&m_timer, &QTimer::timeout, this, &Weather::update);
 }

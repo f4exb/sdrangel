@@ -33,12 +33,13 @@ template <typename T>
 class ReplayBuffer {
 
 public:
-	ReplayBuffer() :
+    ReplayBuffer() :
         m_data(1000000*2, 0),
         m_write(0),
         m_read(0),
         m_readOffset(0),
-        m_count(0)
+        m_count(0),
+        m_loop(false)
     {
     }
 

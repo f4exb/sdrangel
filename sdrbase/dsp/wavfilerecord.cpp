@@ -53,6 +53,7 @@ WavFileRecord::WavFileRecord(const QString& fileBase) :
     m_recordOn(false),
     m_recordStart(false),
     m_byteCount(0),
+    m_msShift(0),
     m_nbChannels(2)
 {
     setObjectName("WavFileRecord");

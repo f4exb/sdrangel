@@ -20,6 +20,7 @@
 #include "devicesamplemimo.h"
 
 DeviceSampleMIMO::DeviceSampleMIMO() :
+    m_mimoType(MIMOAsynchronous),
     m_guiMessageQueue(nullptr)
 {
 	connect(&m_inputMessageQueue, SIGNAL(messageEnqueued()), this, SLOT(handleInputMessages()));

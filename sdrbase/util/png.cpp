@@ -22,7 +22,9 @@
 #include <QBuffer>
 #include <QFile>
 
-PNG::PNG()
+PNG::PNG() :
+    m_width(0),
+    m_height(0)
 {
 }
 

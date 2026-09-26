@@ -27,7 +27,8 @@
 #include "dsp/spectrumsettings.h"
 #include "webapiadapterbase.h"
 
-WebAPIAdapterBase::WebAPIAdapterBase()
+WebAPIAdapterBase::WebAPIAdapterBase() :
+    m_pluginManager(nullptr)
 {}
 
 WebAPIAdapterBase::~WebAPIAdapterBase()

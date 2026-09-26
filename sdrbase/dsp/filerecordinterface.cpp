@@ -25,7 +25,8 @@
 
 #include "filerecordinterface.h"
 
-FileRecordInterface::FileRecordInterface()
+FileRecordInterface::FileRecordInterface() :
+    m_guiMessageQueue(nullptr)
 {
     connect(&m_inputMessageQueue, SIGNAL(messageEnqueued()), this, SLOT(handleInputMessages()));
 }

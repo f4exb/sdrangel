@@ -27,7 +27,17 @@
 #include "fits.h"
 
 FITS::FITS(QString resourceName) :
-    m_valid(false)
+    m_valid(false),
+    m_width(0),
+    m_height(0),
+    m_bitsPerPixel(0),
+    m_bytesPerPixel(0),
+    m_bzero(0),
+    m_bscale(0.0),
+    m_uintScale(0.0f),
+    m_cdelta1(0.0),
+    m_cdelta2(0.0),
+    m_dataStart(0)
 {
     QResource m_res(resourceName);
     if (!m_res.isValid()) {
