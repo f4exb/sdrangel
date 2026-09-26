@@ -3,19 +3,33 @@ LocalInputSettings:
   properties:
     title:
       type: string
+      description: "User-visible title."
     dcBlock:
       type: integer
+      description: "Enable DSP DC-offset correction (1 enabled, 0 disabled)."
+      minimum: 0
+      maximum: 1
     iqCorrection:
       type: integer
+      description: "Enable I/Q imbalance correction (1 enabled, 0 disabled)."
+      minimum: 0
+      maximum: 1
     useReverseAPI:
       description: Synchronize with reverse API (1 for yes, 0 for no)
       type: integer
+      minimum: 0
+      maximum: 1
     reverseAPIAddress:
       type: string
+      description: "IPv4 address or host name of the reverse API peer."
     reverseAPIPort:
       type: integer
+      description: "TCP port of the reverse API peer."
+      minimum: 1
+      maximum: 65535
     reverseAPIDeviceIndex:
       type: integer
+      description: "Device-set index used by the reverse API peer."
 
 LocalInputReport:
   description: LocalInput
@@ -23,5 +37,7 @@ LocalInputReport:
     centerFrequency:
       type: integer
       format: int64
+      description: "Device center frequency in Hz."
     sampleRate:
       type: integer
+      description: "Sample rate in samples per second."

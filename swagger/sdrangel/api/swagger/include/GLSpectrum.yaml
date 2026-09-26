@@ -4,12 +4,15 @@ SpectrumHistogramMarker:
     frequency:
       type: number
       format: float
+      description: "Frequency in Hz."
     power:
       type: number
       format: float
       description: Fixed power mark
     markerType:
       type: integer
+      minimum: 0
+      maximum: 2
       description: >
         Marker type
           * 0 - Fixed power
@@ -20,6 +23,8 @@ SpectrumHistogramMarker:
       description: Color in 8 bit BGR series
     show:
       type: integer
+      minimum: 0
+      maximum: 1
       description: >
         Boolean - Marker display state
           * 0 - Hidden
@@ -31,6 +36,7 @@ SpectrumWaterfallMarker:
     frequency:
       type: number
       format: float
+      description: "Frequency in Hz."
     time:
       type: number
       format: float
@@ -40,6 +46,8 @@ SpectrumWaterfallMarker:
       description: Color in 8 bit BGR series
     show:
       type: integer
+      minimum: 0
+      maximum: 1
       description: >
         Boolean - Marker display state
           * 0 - Hidden
@@ -51,18 +59,26 @@ SpectrumAnnotationMarker:
     startFrequency:
       type: integer
       format: int64
+      description: "Start frequency in Hz."
     bandwidth:
       type: integer
+      description: "Bandwidth in Hz."
     markerColor:
       type: integer
       description: Color in 8 bit BGR series
     show:
       type: integer
+      minimum: 0
+      maximum: 3
       description: >
         SpectrumAnnotationMarker::ShowState - Marker display state
           * 0 - Hidden
           * 1 - Only top marker visible
           * 2 - Fully visible with text and full sized limits
+          * 3 - Text only
+    text:
+      type: string
+      description: "Text displayed against the marker."
 
 SpectrumCalibrationPoint:
   description: Spectrum calibration point settings
@@ -70,22 +86,44 @@ SpectrumCalibrationPoint:
     frequency:
       type: integer
       format: int64
+      description: "Frequency in Hz."
     powerRelativeReference:
       type: number
       format: float
+      description: "Power relative reference for Spectrum calibration point."
     powerAbsoluteReference:
       type: number
       format: float
+      description: "Power absolute reference for Spectrum calibration point."
+
+SpectrumMemorySettings:
+  description: Display settings for one saved spectrum memory. The captured spectrum samples are not transferred through settings APIs.
+  properties:
+    display:
+      description: Display this saved spectrum memory (1 for yes, 0 for no).
+      type: integer
+      minimum: 0
+      maximum: 1
+    color:
+      description: Display colour encoded as an RGB integer.
+      type: integer
+    label:
+      description: User-visible label for this saved spectrum memory.
+      type: string
 
 GLSpectrum:
   description: GLSpectrumGUI settings
   properties:
     fftSize:
       type: integer
+      description: "FFT size in samples."
     fftOverlap:
       type: integer
+      description: "FFT overlap for Gl spectrum."
     fftWindow:
       type: integer
+      minimum: 0
+      maximum: 8
       description: >
         FFT Window index (FFTWindow::Function):
           * 0 - Bartlett
@@ -100,59 +138,248 @@ GLSpectrum:
     refLevel:
       type: number
       format: float
+      description: "Ref level for Gl spectrum."
     powerRange:
       type: number
       format: float
+      description: "Power range for Gl spectrum."
     fpsPeriodMs:
       type: integer
       description: FPS capping period in milliseconds. 0 for no limit.
     displayWaterfall:
       description: boolean
       type: integer
+      minimum: 0
+      maximum: 1
+    display3DSpectrogram:
+      description: Display the 3D spectrogram instead of the 2D waterfall (1 for yes, 0 for no).
+      type: integer
+      minimum: 0
+      maximum: 1
+    spectrogramStyle:
+      description: >
+        Rendering style for the 3D spectrogram.
+          * 0 - Points
+          * 1 - Lines
+          * 2 - Solid
+          * 3 - Outline
+          * 4 - Shaded (requires OpenGL 3.3 or later)
+      type: integer
+      minimum: 0
+      maximum: 4
+    truncateFreqScale:
+      description: Truncate the frequency scale to the displayed span (1 for yes, 0 for no).
+      type: integer
+      minimum: 0
+      maximum: 1
+    colorMap:
+      description: Colour-map name used for waterfall, 3D spectrogram rendering and spectrum colour gradient.
+      type: string
+    spectrumStyle:
+      description: "Current spectrum trace style: 0 line, 1 filled solid colour, 2 filled colour gradient."
+      type: integer
+      minimum: 0
+      maximum: 2
+    measurement:
+      description: "Measurement mode: 0 none, 1 peaks, 2 channel power, 3 adjacent-channel power, 4 occupied bandwidth, 5 3 dB bandwidth, 6 SNR, 7 mask."
+      type: integer
+      minimum: 0
+      maximum: 7
+    measurementCenterFrequencyOffset:
+      description: Measurement centre-frequency offset in Hz.
+      type: integer
+    measurementBandwidth:
+      description: Measurement bandwidth in Hz.
+      type: integer
+      minimum: 0
+    measurementChSpacing:
+      description: Adjacent-channel measurement channel spacing in Hz.
+      type: integer
+      minimum: 0
+    measurementAdjChBandwidth:
+      description: Adjacent-channel measurement bandwidth in Hz.
+      type: integer
+      minimum: 0
+    measurementHarmonics:
+      description: Number of harmonics to measure.
+      type: integer
+      minimum: 0
+    measurementPeaks:
+      description: Number of peaks to report.
+      type: integer
+      minimum: 0
+    measurementHighlight:
+      description: Highlight the selected measurement (1 for yes, 0 for no).
+      type: integer
+      minimum: 0
+      maximum: 1
+    measurementsPosition:
+      description: "Measurement panel position: 0 above, 1 below, 2 left, 3 right."
+      type: integer
+      minimum: 0
+      maximum: 3
+    measurementPrecision:
+      description: Decimal precision for measurement values.
+      type: integer
+      minimum: 0
+    findHistogramPeaks:
+      description: Find peaks in the spectrum histogram (1 for yes, 0 for no).
+      type: integer
+      minimum: 0
+      maximum: 1
+    showControls:
+      description: "Spectrum control visibility: 0 minimum, 1 standard, 2 all."
+      type: integer
+      minimum: 0
+      maximum: 2
+    frequencyZoomFactor:
+      description: Horizontal frequency zoom factor.
+      type: number
+      format: float
+      minimum: 1
+    frequencyZoomPos:
+      description: Horizontal frequency-zoom position as a fraction of the span.
+      type: number
+      format: float
+      minimum: 0
+      maximum: 1
+    waterfallTimeUnits:
+      description: "Waterfall time axis: 0 offset, 1 local time, 2 UTC."
+      type: integer
+      minimum: 0
+      maximum: 2
+    waterfallTimeFormat:
+      description: Qt date/time format used for the waterfall time axis.
+      type: string
+    scrollBar:
+      description: Enable waterfall/3D spectrogram scrolling (1 for yes, 0 for no).
+      type: integer
+      minimum: 0
+      maximum: 1
+    scrollLength:
+      description: Maximum waterfall/3D spectrogram history length.
+      type: integer
+      minimum: 1
+    mathMode:
+      description: "Spectrum math mode: 0 none, 1-4 moving-average modes, 5-10 saved-memory comparison modes."
+      type: integer
+      minimum: 0
+      maximum: 10
+    mathAvgCount:
+      description: Number of FFT frames used by spectrum math averaging.
+      type: integer
+      minimum: 1
+    measurementMemMasks:
+      description: Bitmask selecting saved spectrum memories used as measurement masks.
+      type: integer
+      minimum: 0
+      maximum: 3
+    displayRBW:
+      description: Display resolution bandwidth (1 for yes, 0 for no).
+      type: integer
+      minimum: 0
+      maximum: 1
+    displayCursorStats:
+      description: Display cursor statistics (1 for yes, 0 for no).
+      type: integer
+      minimum: 0
+      maximum: 1
+    displayPeakStats:
+      description: Display peak statistics (1 for yes, 0 for no).
+      type: integer
+      minimum: 0
+      maximum: 1
+    spectrumMemory:
+      description: Display settings for the two saved spectrum memories.
+      type: array
+      maximum: 2
+      items:
+        $ref: "http://swgserver:8081/api/swagger/include/GLSpectrum.yaml#/SpectrumMemorySettings"
+    spectrumColor:
+      description: Current spectrum trace colour encoded as an RGB integer.
+      type: integer
     invertedWaterfall:
       description: boolean
       type: integer
+      minimum: 0
+      maximum: 1
     displayMaxHold:
       description: boolean
       type: integer
+      minimum: 0
+      maximum: 1
     displayHistogram:
       description: boolean
       type: integer
+      minimum: 0
+      maximum: 1
     decay:
       type: integer
+      description: "Decay for Gl spectrum."
     displayGrid:
       description: boolean
       type: integer
+      minimum: 0
+      maximum: 1
     displayGridIntensity:
       type: integer
+      description: "Display grid intensity for Gl spectrum."
     decayDivisor:
       type: integer
+      description: "Decay divisor for Gl spectrum."
     histogramStroke:
       type: integer
+      description: "Histogram stroke for Gl spectrum."
     displayCurrent:
       description: boolean
       type: integer
+      minimum: 0
+      maximum: 1
     displayTraceIntensity:
       type: integer
+      description: "Display trace intensity for Gl spectrum."
     waterfallShare:
       type: number
       format: float
+      description: "Waterfall share for Gl spectrum."
     averagingMode:
-      description: See GLSpectrumGUI::AveragingMode
+      description: >
+        How successive FFTs are averaged. Selecting a mode does nothing on its own: the number of
+        FFTs it works over is averagingValue, which must be above 1 for any smoothing to happen.
+          * 0 - no averaging
+          * 1 - moving average
+          * 2 - fixed average over each block
+          * 3 - maximum held over each block
+          * 4 - minimum held over each block
       type: integer
+      minimum: 0
+      maximum: 4
     averagingValue:
       type: integer
+      description: >
+        Number of successive FFTs the averaging mode works over. 1 is no averaging whatever the
+        mode. Only 1, 2, 5, 10, 20, 50, 100 and so on are available and anything else is rounded
+        down to one of them. 10 smooths a noisy trace without hiding short signals; 50 or more
+        is for measuring a noise floor.
     linear:
       description: boolean
       type: integer
+      minimum: 0
+      maximum: 1
     ssb:
       description: boolean
       type: integer
+      minimum: 0
+      maximum: 1
     usb:
       description: boolean
       type: integer
+      minimum: 0
+      maximum: 1
     wsSpectrum:
       type: integer
+      minimum: 0
+      maximum: 1
       description: >
         Boolean - Start or stop websocket server
           * 0 - Stop server
@@ -165,6 +392,8 @@ GLSpectrum:
       type: integer
     markersDisplay:
       type: integer
+      minimum: 0
+      maximum: 2
       description: >
         Display markers (SpectrumSettings::MarkersDisplay)
           * 0 - Mome
@@ -172,26 +401,337 @@ GLSpectrum:
           * 2 - Spectrum annotation markers
     useCalibration:
       type: integer
+      minimum: 0
+      maximum: 1
       description: boolean
     calibrationInterpMode:
       type: integer
+      minimum: 0
+      maximum: 1
       description: >
         Interpolation scheme between points SpectrumSettings::CalibrationInterpolationMode
           * 0 - Linear
           * 1 - Log (dB linear)
     histogramMarkers:
       type: array
+      description: "List of histogram markers."
       items:
         $ref: "http://swgserver:8081/api/swagger/include/GLSpectrum.yaml#/SpectrumHistogramMarker"
     waterfallMarkers:
       type: array
+      description: "List of waterfall markers."
       items:
         $ref: "http://swgserver:8081/api/swagger/include/GLSpectrum.yaml#/SpectrumWaterfallMarker"
+    annotationMarkersMode:
+      description: >
+        How annotationMarkers in the same request is applied. Replacing is what a PATCH of an
+        array means and is what the other marker lists do, but it discards annotations already
+        there, such as a loaded band plan. Append adds to them instead, so a caller adding one
+        annotation need not read the list, modify it and write it back.
+          * 0 - Replace the annotations with those given (the default)
+          * 1 - Append those given to the annotations already there
+      type: integer
+      minimum: 0
+      maximum: 1
     annotationMarkers:
       type: array
+      description: "List of annotation markers."
       items:
         $ref: "http://swgserver:8081/api/swagger/include/GLSpectrum.yaml#/SpectrumAnnotationMarker"
     calibrationPoints:
       type: array
+      description: "List of calibration points."
       items:
         $ref: "http://swgserver:8081/api/swagger/include/GLSpectrum.yaml#/SpectrumCalibrationPoint"
+
+GLSpectrumReport:
+  description: >
+    The latest values of whichever spectrum measurement is switched on. Which fields are present
+    depends on the measurement: with none selected nothing is measured at all and only the
+    measurement field is returned. The figures are those of the spectrum as displayed, so they
+    match the window rather than the full span when it is zoomed, and they are only produced by a
+    running GUI.
+  properties:
+    measurement:
+      description: >
+        Which measurement produced these values.
+          * 0 - None, nothing is being measured
+          * 1 - Peaks
+          * 2 - Channel power
+          * 3 - Adjacent channel power
+          * 4 - Occupied bandwidth
+          * 5 - 3 dB bandwidth
+          * 6 - SNR
+      type: integer
+    updated:
+      type: string
+      description: "When these values were last measured, ISO 8601. Absent until the first measurement."
+    peaks:
+      type: array
+      description: "The strongest peaks, most powerful first. Peaks measurement only."
+      items:
+        $ref: "http://swgserver:8081/api/swagger/include/GLSpectrum.yaml#/SpectrumPeak"
+    channelPower:
+      type: number
+      format: float
+      description: "Total power in the measurement bandwidth in dB. Channel power measurement only."
+    adjChannelPowerLeft:
+      type: number
+      format: float
+      description: "Power in the lower adjacent channel in dB."
+    adjChannelPowerLeftRatio:
+      type: number
+      format: float
+      description: "Lower adjacent channel power ratio in dB, relative to the centre channel."
+    adjChannelPowerCentre:
+      type: number
+      format: float
+      description: "Power in the centre channel in dB."
+    adjChannelPowerRight:
+      type: number
+      format: float
+      description: "Power in the upper adjacent channel in dB."
+    adjChannelPowerRightRatio:
+      type: number
+      format: float
+      description: "Upper adjacent channel power ratio in dB, relative to the centre channel."
+    occupiedBandwidth:
+      type: number
+      format: float
+      description: "Occupied bandwidth in Hz. Occupied bandwidth measurement only."
+    bandwidth3dB:
+      type: number
+      format: float
+      description: "3 dB bandwidth in Hz. 3 dB bandwidth measurement only."
+    snr:
+      type: number
+      format: float
+      description: "Signal to noise ratio in dB. SNR measurement only."
+    snfr:
+      type: number
+      format: float
+      description: "Signal to noise and distortion free ratio in dB."
+    thd:
+      type: number
+      format: float
+      description: "Total harmonic distortion in dB."
+    thdPlusNoise:
+      type: number
+      format: float
+      description: "Total harmonic distortion plus noise in dB."
+    sinad:
+      type: number
+      format: float
+      description: "Signal to noise and distortion ratio in dB."
+    sfdr:
+      type: number
+      format: float
+      description: "Spurious free dynamic range in dB."
+
+SpectrumPeak:
+  description: One peak found in the spectrum
+  properties:
+    frequency:
+      type: integer
+      format: int64
+      description: "Frequency of the peak in Hz."
+    power:
+      type: number
+      format: float
+      description: "Power of the peak in dB."
+
+SpectrumActions:
+  description: Actions on the main spectrum of a device set
+  properties:
+    autoscale:
+      description: >
+        Set the reference level and range from the spectrum currently displayed, as the autoscale
+        button does. Needs a running GUI (1 to do it, 0 to do nothing).
+      type: integer
+      minimum: 0
+      maximum: 1
+    clearSpectrum:
+      description: >
+        Discard the accumulated histogram and max hold traces, as the clear button does. Needs a
+        running GUI (1 to do it, 0 to do nothing).
+      type: integer
+      minimum: 0
+      maximum: 1
+    resetMeasurements:
+      description: >
+        Discard the accumulated measurement statistics, so the minimum, maximum and mean columns
+        start again. Needs a running GUI (1 to do it, 0 to do nothing).
+      type: integer
+      minimum: 0
+      maximum: 1
+    freeze:
+      description: >
+        Stop or resume spectrum processing. Unlike the others this acts on the spectrum itself
+        rather than its display, so it works without a GUI (1 to freeze, 0 to resume).
+      type: integer
+      minimum: 0
+      maximum: 1
+    gotoMarker:
+      description: >
+        Retune the device to the annotation marker at this index, counting from 0, as choosing it
+        in the goto list does. Needs a running GUI.
+      type: integer
+      minimum: 0
+
+GLSpectrumHistory:
+  description: >
+    Statistics over the rows of spectrum history the GUI keeps for scrolling, reduced to a number
+    of bins. Powers are in dB whatever the display shows. The floor is the median of the per bin
+    means, and a bin counts as occupied in a row when it is above the floor by the threshold.
+    Rows taken with another centre frequency or sample rate are skipped and counted.
+  properties:
+    centerFrequency:
+      type: integer
+      format: int64
+    bandwidth:
+      type: integer
+      description: "Width of the whole spectrum in Hz."
+    startFrequency:
+      type: integer
+      format: int64
+      description: "Centre frequency of the first returned bin in Hz."
+    stopFrequency:
+      type: integer
+      format: int64
+      description: "Centre frequency of the last returned bin in Hz."
+    binBandwidth:
+      type: integer
+      description: "Width of each returned bin in Hz."
+    bins:
+      type: integer
+    rows:
+      type: integer
+      description: "Rows of history used."
+    skippedRows:
+      type: integer
+      description: "Rows in the period that were taken with the device tuned or sampling differently, and left out."
+    firstTime:
+      type: string
+      description: "Time of the oldest row used, ISO 8601."
+    lastTime:
+      type: string
+      description: "Time of the newest row used, ISO 8601."
+    seconds:
+      type: number
+      format: float
+      description: "Span between the oldest and newest rows used."
+    floorDb:
+      type: number
+      format: float
+      description: "The measured noise floor."
+    thresholdDb:
+      type: number
+      format: float
+      description: "The level above which a bin counts as occupied."
+    maxDb:
+      type: array
+      items:
+        type: number
+        format: float
+      description: "Per bin maximum over the rows."
+    meanDb:
+      type: array
+      items:
+        type: number
+        format: float
+      description: "Per bin mean over the rows."
+    occupancy:
+      type: array
+      items:
+        type: number
+        format: float
+      description: "Per bin fraction of rows in which the bin was above the threshold, 0 to 1."
+    signalCount:
+      type: integer
+    signalList:
+      type: array
+      items:
+        $ref: "http://swgserver:8081/api/swagger/include/GLSpectrum.yaml#/SpectrumHistorySignal"
+      description: "Runs of adjacent bins whose maximum rose above the threshold."
+SpectrumHistorySignal:
+  description: A signal found in the spectrum history
+  properties:
+    frequency:
+      type: integer
+      format: int64
+      description: "Frequency of the strongest bin in Hz."
+    startFrequency:
+      type: integer
+      format: int64
+      description: "Lower edge in Hz."
+    stopFrequency:
+      type: integer
+      format: int64
+      description: "Upper edge in Hz."
+    bandwidth:
+      type: integer
+      description: "Width in Hz, to the bin."
+    peakDb:
+      type: number
+      format: float
+    dutyCycle:
+      type: number
+      format: float
+      description: "Fraction of rows in which any bin of the signal was above the threshold, 0 to 1: 1 for a continuous carrier, small for a burst."
+    firstSeen:
+      type: string
+      description: "Time of the first row it was up in, ISO 8601."
+    lastSeen:
+      type: string
+      description: "Time of the last row it was up in, ISO 8601."
+GLSpectrumData:
+  description: >
+    A copy of the current power spectrum, reduced to the number of bins asked for so that the
+    answer stays a sensible size whatever the FFT size. The spectrum is only computed while
+    something is consuming it, a spectrum window or a websocket client, so updated says how old
+    these values are and is absent if none has been produced yet.
+  properties:
+    centerFrequency:
+      type: integer
+      format: int64
+      description: "Centre frequency of the whole spectrum in Hz."
+    bandwidth:
+      type: integer
+      description: "Width of the whole spectrum in Hz."
+    fftSize:
+      type: integer
+      description: "Number of bins the spectrum was computed with, before reduction."
+    linear:
+      type: integer
+      minimum: 0
+      maximum: 1
+      description: "1 when the powers are linear, 0 when they are in dB."
+    updated:
+      type: string
+      description: "When the spectrum was last computed, ISO 8601. Absent if it never has been."
+    startFrequency:
+      type: integer
+      format: int64
+      description: "Centre frequency of the first returned bin in Hz."
+    stopFrequency:
+      type: integer
+      format: int64
+      description: "Centre frequency of the last returned bin in Hz."
+    binBandwidth:
+      type: number
+      format: float
+      description: "Width of each returned bin in Hz, after reduction."
+    bins:
+      type: integer
+      description: "Number of values in power."
+    reduce:
+      type: string
+      description: >
+        How several FFT bins were combined into each returned one, max or mean. Max keeps a narrow
+        carrier that averaging would bury in its neighbours, which is why it is the default.
+    power:
+      type: array
+      description: "The reduced powers, first bin first."
+      items:
+        type: number
+        format: float

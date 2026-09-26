@@ -3,47 +3,58 @@ SampleRate:
   properties:
     rate:
       type: integer
+      description: "Sample rate in samples per second."
 
 Bandwidth:
   description: A bandwidth expressed in Hertz (Hz)
   properties:
     bandwidth:
       type: integer
+      description: "Bandwidth in Hz."
 
 Frequency:
   description: A frequency expressed in Hertz (Hz)
   properties:
     frequency:
       type: integer
+      description: "Frequency in Hz."
 
 FrequencyBand:
   description: A band of frequencies given its boundaries in Hertz (Hz)
   properties:
     name:
       type: string
+      description: "Name."
     lowerBound:
       type: integer
+      description: "Inclusive lower bound of the range."
     higherBound:
       type: integer
+      description: "Inclusive upper bound of the range."
 
 Gain:
   description: A gain expressed in centi-Bels (tenths of dB)
   properties:
     gainCB:
       type: integer
+      description: "Gain in centibels (tenths of a decibel)."
 
 Range:
   description: An arbitrary range of integer values
   properties:
     min:
       type: integer
+      description: "Minimum value of the range."
     max:
       type: integer
+      description: "Maximum value of the range."
     step:
       type: integer
+      description: "Increment between adjacent supported values."
     scale:
       type: number
       format: float
+      description: "Scale factor applied to the value."
 
 RangeFloat:
   description: An arbitrary range of floating point values
@@ -51,12 +62,15 @@ RangeFloat:
     min:
       type: number
       format: float
+      description: "Minimum value of the range."
     max:
       type: number
       format: float
+      description: "Maximum value of the range."
     step:
       type: number
       format: float
+      description: "Increment between adjacent supported values."
 
 FrequencyRange:
   description: A frequency range with 64 bit support for min and max
@@ -64,22 +78,28 @@ FrequencyRange:
     min:
       type: integer
       format: int64
+      description: "Minimum value of the range."
     max:
       type: integer
       format: int64
+      description: "Maximum value of the range."
     step:
       type: integer
+      description: "Increment between adjacent supported values."
     scale:
       type: number
       format: float
+      description: "Scale factor applied to the value."
 
 NamedEnum:
   description: Enumeration with name for values
   properties:
     name:
       type: string
+      description: "Name."
     value:
       type: integer
+      description: "Numeric enumeration value."
 
 Complex:
   description: A complex number
@@ -87,6 +107,8 @@ Complex:
     real:
       type: number
       format: float
+      description: "Real component of the complex number."
     imag:
       type: number
       format: float
+      description: "Imaginary component of the complex number."

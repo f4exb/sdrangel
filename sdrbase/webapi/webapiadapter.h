@@ -26,9 +26,9 @@
 #include <QtGlobal>
 
 #include "webapi/webapiadapterinterface.h"
+#include "maincore.h"
 #include "export.h"
 
-class MainCore;
 class DeviceSet;
 class FeatureSet;
 
@@ -230,9 +230,60 @@ public:
             SWGSDRangel::SWGSuccessResponse& response,
             SWGSDRangel::SWGErrorResponse& error);
 
+    virtual int workspaceActionsPost(
+            int workspaceIndex,
+            SWGSDRangel::SWGWorkspaceActions& query,
+            SWGSDRangel::SWGSuccessResponse& response,
+            SWGSDRangel::SWGErrorResponse& error);
+
+    virtual int instanceWindowsGet(
+            SWGSDRangel::SWGWindowList& response,
+            SWGSDRangel::SWGErrorResponse& error);
+
     virtual int devicesetGet(
             int deviceSetIndex,
             SWGSDRangel::SWGDeviceSet& response,
+            SWGSDRangel::SWGErrorResponse& error);
+
+    virtual int devicesetSpectrumActionsPost(
+            int deviceSetIndex,
+            const QStringList& spectrumActionsKeys,
+            SWGSDRangel::SWGSpectrumActions& query,
+            SWGSDRangel::SWGErrorResponse& error);
+
+    virtual int devicesetSpectrumDataGet(
+            int deviceSetIndex,
+            int bins,
+            qint64 startFrequency,
+            qint64 stopFrequency,
+            const QString& reduce,
+            SWGSDRangel::SWGGLSpectrumData& response,
+            SWGSDRangel::SWGErrorResponse& error);
+
+    virtual int devicesetSpectrumHistoryGet(
+            int deviceSetIndex,
+            double seconds,
+            int bins,
+            qint64 startFrequency,
+            qint64 stopFrequency,
+            double thresholdDb,
+            SWGSDRangel::SWGGLSpectrumHistory& response,
+            SWGSDRangel::SWGErrorResponse& error);
+
+    virtual int devicesetSpectrumHistoryImageGet(
+            int deviceSetIndex,
+            double seconds,
+            int bins,
+            qint64 startFrequency,
+            qint64 stopFrequency,
+            int maxRows,
+            QByteArray& png,
+            QJsonObject& description,
+            SWGSDRangel::SWGErrorResponse& error);
+
+    virtual int devicesetSpectrumReportGet(
+            int deviceSetIndex,
+            SWGSDRangel::SWGGLSpectrumReport& response,
             SWGSDRangel::SWGErrorResponse& error);
 
     virtual int devicesetSpectrumSettingsGet(
@@ -496,6 +547,15 @@ public:
 
 private:
     MainCore *m_mainCore;
+
+    //!< Overlays what the GUI has published for the window on the response: its workspace as
+    //!< the GUI has it, and whether it is hidden. Leaves a response for a window the GUI has
+    //!< not published (the server) as it was
+    void applyWindowState(const void *owner, SWGSDRangel::SWGWorkspaceInfo& response);
+    //!< A channel's workspace information from the plugin, with the GUI's state overlaid
+    int channelWorkspaceGet(ChannelAPI *channelAPI, SWGSDRangel::SWGWorkspaceInfo& response, QString& errorMessage);
+    //!< Posts the show or hide a PUT asks for, if it asks for one. Returns whether it did
+    bool postWindowHidden(MainCore::MsgSetWindowHidden::Kind kind, int deviceSetIndex, int index, const SWGSDRangel::SWGWorkspaceInfo& query);
 
     void getDeviceSetList(SWGSDRangel::SWGDeviceSetList* deviceSetList);
     void getDeviceSet(SWGSDRangel::SWGDeviceSet *swgDeviceSet, const DeviceSet* deviceSet, int deviceSetIndex);

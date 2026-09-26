@@ -45,7 +45,7 @@ SIDMain::SIDMain(WebAPIAdapterInterface *webAPIAdapterInterface) :
 {
     qDebug("SIDMain::SID: webAPIAdapterInterface: %p", webAPIAdapterInterface);
     setObjectName(m_featureId);
-    m_state = StIdle;
+    setState(StIdle);
     m_errorMessage = "SID error";
     m_networkManager = new QNetworkAccessManager();
     QObject::connect(
@@ -79,7 +79,7 @@ void SIDMain::start()
     m_worker->setMessageQueueToFeature(getInputMessageQueue());
     m_worker->setMessageQueueToGUI(getMessageQueueToGUI());
     m_thread->start();
-    m_state = StRunning;
+    setState(StRunning);
     MsgConfigureSID *msg = MsgConfigureSID::create(m_settings, QList<QString>(), true);
     m_worker->getInputMessageQueue()->push(msg);
 }
@@ -87,7 +87,7 @@ void SIDMain::start()
 void SIDMain::stop()
 {
     qDebug("SIDMain::stop");
-    m_state = StIdle;
+    setState(StIdle);
     if (m_thread)
     {
         m_thread->quit();
@@ -123,8 +123,8 @@ bool SIDMain::handleMessage(const Message& cmd)
     else if (MsgReportWorker::match(cmd))
     {
         MsgReportWorker& report = (MsgReportWorker&) cmd;
-        m_state = StError;
         m_errorMessage = report.getMessage();
+        setState(StError);
         return true;
     }
     else
@@ -240,6 +240,17 @@ void SIDMain::webapiFormatFeatureSettings(
     }
 
     response.getSidSettings()->setRgbColor(settings.m_rgbColor);
+    response.getSidSettings()->setPeriod(settings.m_period);
+    response.getSidSettings()->setAutosave(settings.m_autosave ? 1 : 0);
+    response.getSidSettings()->setAutoload(settings.m_autoload ? 1 : 0);
+    response.getSidSettings()->setAutosavePeriod(settings.m_autosavePeriod);
+
+    if (response.getSidSettings()->getFilename()) {
+        *response.getSidSettings()->getFilename() = settings.m_filename;
+    } else {
+        response.getSidSettings()->setFilename(new QString(settings.m_filename));
+    }
+
     response.getSidSettings()->setUseReverseApi(settings.m_useReverseAPI ? 1 : 0);
 
     if (response.getSidSettings()->getReverseApiAddress()) {
@@ -277,6 +288,21 @@ void SIDMain::webapiUpdateFeatureSettings(
     }
     if (featureSettingsKeys.contains("rgbColor")) {
         settings.m_rgbColor = response.getSidSettings()->getRgbColor();
+    }
+    if (featureSettingsKeys.contains("period")) {
+        settings.m_period = response.getSidSettings()->getPeriod();
+    }
+    if (featureSettingsKeys.contains("autosave")) {
+        settings.m_autosave = response.getSidSettings()->getAutosave() != 0;
+    }
+    if (featureSettingsKeys.contains("autoload")) {
+        settings.m_autoload = response.getSidSettings()->getAutoload() != 0;
+    }
+    if (featureSettingsKeys.contains("autosavePeriod")) {
+        settings.m_autosavePeriod = response.getSidSettings()->getAutosavePeriod();
+    }
+    if (featureSettingsKeys.contains("filename")) {
+        settings.m_filename = *response.getSidSettings()->getFilename();
     }
     if (featureSettingsKeys.contains("useReverseAPI")) {
         settings.m_useReverseAPI = response.getSidSettings()->getUseReverseApi() != 0;

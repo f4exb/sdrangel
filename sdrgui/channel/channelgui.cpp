@@ -40,7 +40,7 @@
 #include "channelgui.h"
 
 ChannelGUI::ChannelGUI(QWidget *parent) :
-    QMdiSubWindow(parent),
+    WorkspaceWindow(parent),
     m_resizer(this),
     m_contextMenuType(ContextMenuType::ContextMenuNone),
     m_deviceType(DeviceType::DeviceRx),
@@ -459,6 +459,7 @@ void ChannelGUI::shrinkWindow()
 void ChannelGUI::setTitle(const QString& title)
 {
     m_titleLabel->setText(title);
+    publishWindowState();
 }
 
 void ChannelGUI::setTitleColor(const QColor& c)

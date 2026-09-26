@@ -33,6 +33,7 @@
 #include "SWGGS232ControllerSettings.h"
 #include "SWGJogdialControllerSettings.h"
 #include "SWGLimeRFESettings.h"
+#include "SWGMCPServerSettings.h"
 #include "SWGMapSettings.h"
 #include "SWGMorseDecoderSettings.h"
 #include "SWGPERTesterSettings.h"
@@ -121,6 +122,9 @@ public:
     SWGRigCtlServerSettings* getRigCtlServerSettings();
     void setRigCtlServerSettings(SWGRigCtlServerSettings* rig_ctl_server_settings);
 
+    SWGMCPServerSettings* getMcpServerSettings();
+    void setMcpServerSettings(SWGMCPServerSettings* mcp_server_settings);
+
     SWGSatelliteTrackerSettings* getSatelliteTrackerSettings();
     void setSatelliteTrackerSettings(SWGSatelliteTrackerSettings* satellite_tracker_settings);
 
@@ -199,6 +203,9 @@ private:
 
     SWGRigCtlServerSettings* rig_ctl_server_settings;
     bool m_rig_ctl_server_settings_isSet;
+
+    SWGMCPServerSettings* mcp_server_settings;
+    bool m_mcp_server_settings_isSet;
 
     SWGSatelliteTrackerSettings* satellite_tracker_settings;
     bool m_satellite_tracker_settings_isSet;

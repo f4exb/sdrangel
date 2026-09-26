@@ -409,6 +409,8 @@ void SpectrumSettings::formatTo(SWGSDRangel::SWGObject *swgObject) const
     swgSpectrum->setDisplayTraceIntensity(m_displayTraceIntensity);
 	swgSpectrum->setInvertedWaterfall(m_invertedWaterfall ? 1 : 0);
     swgSpectrum->setDisplayWaterfall(m_displayWaterfall ? 1 : 0);
+    swgSpectrum->setDisplay3DSpectrogram(m_display3DSpectrogram ? 1 : 0);
+    swgSpectrum->setSpectrogramStyle((int) m_3DSpectrogramStyle);
     swgSpectrum->setDisplayGrid(m_displayGrid ? 1 : 0);
     swgSpectrum->setDisplayGridIntensity(m_displayGridIntensity);
 	swgSpectrum->setSsb(m_ssb ? 1 : 0);
@@ -417,6 +419,57 @@ void SpectrumSettings::formatTo(SWGSDRangel::SWGObject *swgObject) const
 	swgSpectrum->setMarkersDisplay((int) m_markersDisplay);
 	swgSpectrum->setUseCalibration(m_useCalibration ? 1 : 0);
 	swgSpectrum->setCalibrationInterpMode((int) m_calibrationInterpMode);
+    swgSpectrum->setTruncateFreqScale(m_truncateFreqScale ? 1 : 0);
+    swgSpectrum->setSpectrumStyle((int) m_spectrumStyle);
+    swgSpectrum->setSpectrumColor((int) m_spectrumColor);
+    swgSpectrum->setMeasurement((int) m_measurement);
+    swgSpectrum->setMeasurementCenterFrequencyOffset(m_measurementCenterFrequencyOffset);
+    swgSpectrum->setMeasurementBandwidth(m_measurementBandwidth);
+    swgSpectrum->setMeasurementChSpacing(m_measurementChSpacing);
+    swgSpectrum->setMeasurementAdjChBandwidth(m_measurementAdjChBandwidth);
+    swgSpectrum->setMeasurementHarmonics(m_measurementHarmonics);
+    swgSpectrum->setMeasurementPeaks(m_measurementPeaks);
+    swgSpectrum->setMeasurementHighlight(m_measurementHighlight ? 1 : 0);
+    swgSpectrum->setMeasurementsPosition((int) m_measurementsPosition);
+    swgSpectrum->setMeasurementPrecision(m_measurementPrecision);
+    swgSpectrum->setMeasurementMemMasks((int) m_measurementMemMasks);
+    swgSpectrum->setFindHistogramPeaks(m_findHistogramPeaks ? 1 : 0);
+    swgSpectrum->setShowControls((int) m_showControls);
+    swgSpectrum->setFrequencyZoomFactor(m_frequencyZoomFactor);
+    swgSpectrum->setFrequencyZoomPos(m_frequencyZoomPos);
+    swgSpectrum->setWaterfallTimeUnits((int) m_waterfallTimeUnits);
+    swgSpectrum->setScrollBar(m_scrollBar ? 1 : 0);
+    swgSpectrum->setScrollLength(m_scrollLength);
+    swgSpectrum->setMathMode((int) m_mathMode);
+    swgSpectrum->setMathAvgCount((int) m_mathAvgCount);
+    swgSpectrum->setDisplayRbw(m_displayRBW ? 1 : 0);
+    swgSpectrum->setDisplayCursorStats(m_displayCursorStats ? 1 : 0);
+    swgSpectrum->setDisplayPeakStats(m_displayPeakStats ? 1 : 0);
+
+    if (swgSpectrum->getColorMap()) {
+        *swgSpectrum->getColorMap() = m_colorMap;
+    } else {
+        swgSpectrum->setColorMap(new QString(m_colorMap));
+    }
+
+    if (swgSpectrum->getWaterfallTimeFormat()) {
+        *swgSpectrum->getWaterfallTimeFormat() = m_waterfallTimeFormat;
+    } else {
+        swgSpectrum->setWaterfallTimeFormat(new QString(m_waterfallTimeFormat));
+    }
+
+    if (m_spectrumMemory.size() > 0)
+    {
+        swgSpectrum->setSpectrumMemory(new QList<SWGSDRangel::SWGSpectrumMemorySettings *>);
+
+        for (const auto &memory : m_spectrumMemory)
+        {
+            swgSpectrum->getSpectrumMemory()->append(new SWGSDRangel::SWGSpectrumMemorySettings);
+            swgSpectrum->getSpectrumMemory()->back()->setDisplay(memory.m_display ? 1 : 0);
+            swgSpectrum->getSpectrumMemory()->back()->setColor((int) memory.m_color);
+            swgSpectrum->getSpectrumMemory()->back()->setLabel(new QString(memory.m_label));
+        }
+    }
 
 	if (m_histogramMarkers.size() > 0)
 	{
@@ -458,6 +511,7 @@ void SpectrumSettings::formatTo(SWGSDRangel::SWGObject *swgObject) const
 			swgSpectrum->getAnnotationMarkers()->back()->setBandwidth(marker.m_bandwidth);
 			swgSpectrum->getAnnotationMarkers()->back()->setMarkerColor(qColorToInt(marker.m_markerColor));
 			swgSpectrum->getAnnotationMarkers()->back()->setShow((int) marker.m_show);
+			swgSpectrum->getAnnotationMarkers()->back()->setText(new QString(marker.m_text));
 		}
 	}
 
@@ -545,8 +599,24 @@ void SpectrumSettings::updateFrom(const QStringList& keys, const SWGSDRangel::SW
 	if (keys.contains("spectrumConfig.invertedWaterfall")) {
 		m_invertedWaterfall = swgSpectrum->getInvertedWaterfall() != 0;
 	}
-	if (keys.contains("spectrumConfig.displayWaterfall")) {
+	if (keys.contains("spectrumConfig.displayWaterfall"))
+	{
 		m_displayWaterfall = swgSpectrum->getDisplayWaterfall() != 0;
+
+		if (m_displayWaterfall) {
+			m_display3DSpectrogram = false;
+		}
+	}
+	if (keys.contains("spectrumConfig.display3DSpectrogram"))
+	{
+		m_display3DSpectrogram = swgSpectrum->getDisplay3DSpectrogram() != 0;
+
+		if (m_display3DSpectrogram) {
+			m_displayWaterfall = false;
+		}
+	}
+	if (keys.contains("spectrumConfig.spectrogramStyle")) {
+		m_3DSpectrogramStyle = (SpectrumSettings::SpectrogramStyle) swgSpectrum->getSpectrogramStyle();
 	}
 	if (keys.contains("spectrumConfig.displayGrid")) {
 		m_displayGrid = swgSpectrum->getDisplayGrid() != 0;
@@ -571,6 +641,103 @@ void SpectrumSettings::updateFrom(const QStringList& keys, const SWGSDRangel::SW
 	}
 	if (keys.contains("spectrumConfig.calibrationInterpMode")) {
 		m_calibrationInterpMode = (CalibrationInterpolationMode) swgSpectrum->getCalibrationInterpMode();
+	}
+	if (keys.contains("spectrumConfig.truncateFreqScale")) {
+		m_truncateFreqScale = swgSpectrum->getTruncateFreqScale() != 0;
+	}
+	if (keys.contains("spectrumConfig.colorMap")) {
+		m_colorMap = *swgSpectrum->getColorMap();
+	}
+	if (keys.contains("spectrumConfig.spectrumStyle")) {
+		m_spectrumStyle = (SpectrumSettings::SpectrumStyle) swgSpectrum->getSpectrumStyle();
+	}
+	if (keys.contains("spectrumConfig.spectrumColor")) {
+		m_spectrumColor = (QRgb) swgSpectrum->getSpectrumColor();
+	}
+	if (keys.contains("spectrumConfig.measurement")) {
+		m_measurement = (SpectrumSettings::Measurement) swgSpectrum->getMeasurement();
+	}
+	if (keys.contains("spectrumConfig.measurementCenterFrequencyOffset")) {
+		m_measurementCenterFrequencyOffset = swgSpectrum->getMeasurementCenterFrequencyOffset();
+	}
+	if (keys.contains("spectrumConfig.measurementBandwidth")) {
+		m_measurementBandwidth = swgSpectrum->getMeasurementBandwidth();
+	}
+	if (keys.contains("spectrumConfig.measurementChSpacing")) {
+		m_measurementChSpacing = swgSpectrum->getMeasurementChSpacing();
+	}
+	if (keys.contains("spectrumConfig.measurementAdjChBandwidth")) {
+		m_measurementAdjChBandwidth = swgSpectrum->getMeasurementAdjChBandwidth();
+	}
+	if (keys.contains("spectrumConfig.measurementHarmonics")) {
+		m_measurementHarmonics = swgSpectrum->getMeasurementHarmonics();
+	}
+	if (keys.contains("spectrumConfig.measurementPeaks")) {
+		m_measurementPeaks = swgSpectrum->getMeasurementPeaks();
+	}
+	if (keys.contains("spectrumConfig.measurementHighlight")) {
+		m_measurementHighlight = swgSpectrum->getMeasurementHighlight() != 0;
+	}
+	if (keys.contains("spectrumConfig.measurementsPosition")) {
+		m_measurementsPosition = (SpectrumSettings::MeasurementsPosition) swgSpectrum->getMeasurementsPosition();
+	}
+	if (keys.contains("spectrumConfig.measurementPrecision")) {
+		m_measurementPrecision = swgSpectrum->getMeasurementPrecision();
+	}
+	if (keys.contains("spectrumConfig.measurementMemMasks")) {
+		m_measurementMemMasks = swgSpectrum->getMeasurementMemMasks();
+	}
+	if (keys.contains("spectrumConfig.findHistogramPeaks")) {
+		m_findHistogramPeaks = swgSpectrum->getFindHistogramPeaks() != 0;
+	}
+	if (keys.contains("spectrumConfig.showControls")) {
+		m_showControls = (SpectrumSettings::ShowControls) swgSpectrum->getShowControls();
+	}
+	if (keys.contains("spectrumConfig.frequencyZoomFactor")) {
+		m_frequencyZoomFactor = swgSpectrum->getFrequencyZoomFactor();
+	}
+	if (keys.contains("spectrumConfig.frequencyZoomPos")) {
+		m_frequencyZoomPos = swgSpectrum->getFrequencyZoomPos();
+	}
+	if (keys.contains("spectrumConfig.waterfallTimeUnits")) {
+		m_waterfallTimeUnits = (SpectrumSettings::WaterfallTimeUnits) swgSpectrum->getWaterfallTimeUnits();
+	}
+	if (keys.contains("spectrumConfig.waterfallTimeFormat")) {
+		m_waterfallTimeFormat = *swgSpectrum->getWaterfallTimeFormat();
+	}
+	if (keys.contains("spectrumConfig.scrollBar")) {
+		m_scrollBar = swgSpectrum->getScrollBar() != 0;
+	}
+	if (keys.contains("spectrumConfig.scrollLength")) {
+		m_scrollLength = swgSpectrum->getScrollLength();
+	}
+	if (keys.contains("spectrumConfig.mathMode")) {
+		m_mathMode = (SpectrumSettings::MathMode) swgSpectrum->getMathMode();
+	}
+	if (keys.contains("spectrumConfig.mathAvgCount")) {
+		m_mathAvgCount = swgSpectrum->getMathAvgCount();
+	}
+	if (keys.contains("spectrumConfig.displayRBW")) {
+		m_displayRBW = swgSpectrum->getDisplayRbw() != 0;
+	}
+	if (keys.contains("spectrumConfig.displayCursorStats")) {
+		m_displayCursorStats = swgSpectrum->getDisplayCursorStats() != 0;
+	}
+	if (keys.contains("spectrumConfig.displayPeakStats")) {
+		m_displayPeakStats = swgSpectrum->getDisplayPeakStats() != 0;
+	}
+
+	if (keys.contains("spectrumConfig.spectrumMemory"))
+	{
+		QList<SWGSDRangel::SWGSpectrumMemorySettings *> *swgSpectrumMemory = swgSpectrum->getSpectrumMemory();
+		validateSpectrumMemories();
+
+		for (int i = 0; (i < swgSpectrumMemory->size()) && (i < m_maxSpectrumMemories); i++)
+		{
+			m_spectrumMemory[i].m_display = swgSpectrumMemory->at(i)->getDisplay() != 0;
+			m_spectrumMemory[i].m_color = (QRgb) swgSpectrumMemory->at(i)->getColor();
+			m_spectrumMemory[i].m_label = *swgSpectrumMemory->at(i)->getLabel();
+		}
 	}
 
 	if (keys.contains("spectrumConfig.histogramMarkers"))
@@ -617,15 +784,27 @@ void SpectrumSettings::updateFrom(const QStringList& keys, const SWGSDRangel::SW
 	if (keys.contains("spectrumConfig.annotationMarkers"))
 	{
         QList<SWGSDRangel::SWGSpectrumAnnotationMarker *> *swgAnnotationMarkers = swgSpectrum->getAnnotationMarkers();
-        m_waterfallMarkers.clear();
 
-		for (const auto &swgAnnotationMarker : *swgAnnotationMarkers)
+		// Replacing the list is what a PATCH of an array means, but it also means the obvious call
+		// silently discards whatever was there, a loaded band plan included. Mode 1 appends instead
+		bool append = keys.contains("spectrumConfig.annotationMarkersMode")
+			&& (swgSpectrum->getAnnotationMarkersMode() == 1);
+
+		if (!append) {
+			m_annoationMarkers.clear();
+		}
+
+		for (const auto &swgAnnotationMarker : swgAnnotationMarkers ? *swgAnnotationMarkers : QList<SWGSDRangel::SWGSpectrumAnnotationMarker *>())
 		{
 			m_annoationMarkers.push_back(SpectrumAnnotationMarker());
 			m_annoationMarkers.back().m_startFrequency = swgAnnotationMarker->getStartFrequency();
 			m_annoationMarkers.back().m_bandwidth = swgAnnotationMarker->getBandwidth() < 0 ? 0 : swgAnnotationMarker->getBandwidth();
 			m_annoationMarkers.back().m_markerColor = intToQColor(swgAnnotationMarker->getMarkerColor());
 			m_annoationMarkers.back().m_show = (SpectrumAnnotationMarker::ShowState) swgAnnotationMarker->getShow();
+
+			if (swgAnnotationMarker->getText()) {
+				m_annoationMarkers.back().m_text = *swgAnnotationMarker->getText();
+			}
 		}
 	}
 

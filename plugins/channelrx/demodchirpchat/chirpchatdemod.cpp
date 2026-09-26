@@ -863,8 +863,16 @@ void ChirpChatDemod::webapiFormatChannelReport(SWGSDRangel::SWGChannelReport& re
     response.getChirpChatDemodReport()->setHeaderCrcStatus(m_lastMsgHeaderCRC);
     response.getChirpChatDemodReport()->setPayloadParityStatus(m_lastMsgPayloadParityStatus);
     response.getChirpChatDemodReport()->setPayloadCrcStatus(m_lastMsgPayloadCRC);
-    response.getChirpChatDemodReport()->setMessageTimestamp(new QString(m_lastMsgTimestamp));
-    response.getChirpChatDemodReport()->setMessageString(new QString(m_lastMsgString));
+    if (response.getChirpChatDemodReport()->getMessageTimestamp()) {
+        *response.getChirpChatDemodReport()->getMessageTimestamp() = m_lastMsgTimestamp;
+    } else {
+        response.getChirpChatDemodReport()->setMessageTimestamp(new QString(m_lastMsgTimestamp));
+    }
+    if (response.getChirpChatDemodReport()->getMessageString()) {
+        *response.getChirpChatDemodReport()->getMessageString() = m_lastMsgString;
+    } else {
+        response.getChirpChatDemodReport()->setMessageString(new QString(m_lastMsgString));
+    }
     response.getChirpChatDemodReport()->setDecoding(getDemodActive() ? 1 : 0);
 
     response.getChirpChatDemodReport()->setMessageBytes(new QList<QString *>);
@@ -937,7 +945,11 @@ void ChirpChatDemod::webapiFormatChannelSettings(
     swgChannelSettings->setDirection(0); // Single sink (Rx)
     swgChannelSettings->setOriginatorChannelIndex(getIndexInDeviceSet());
     swgChannelSettings->setOriginatorDeviceSetIndex(getDeviceSetIndex());
-    swgChannelSettings->setChannelType(new QString(m_channelId));
+    if (swgChannelSettings->getChannelType()) {
+        *swgChannelSettings->getChannelType() = m_channelId;
+    } else {
+        swgChannelSettings->setChannelType(new QString(m_channelId));
+    }
     swgChannelSettings->setChirpChatDemodSettings(new SWGSDRangel::SWGChirpChatDemodSettings());
     SWGSDRangel::SWGChirpChatDemodSettings *swgChirpChatDemodSettings = swgChannelSettings->getChirpChatDemodSettings();
 
@@ -989,7 +1001,11 @@ void ChirpChatDemod::webapiFormatChannelSettings(
         swgChirpChatDemodSettings->setSendViaUdp(settings.m_sendViaUDP ? 1 : 0);
     }
     if (channelSettingsKeys.contains("udpAddress") || force) {
-        swgChirpChatDemodSettings->setUdpAddress(new QString(settings.m_udpAddress));
+        if (swgChirpChatDemodSettings->getUdpAddress()) {
+            *swgChirpChatDemodSettings->getUdpAddress() = settings.m_udpAddress;
+        } else {
+            swgChirpChatDemodSettings->setUdpAddress(new QString(settings.m_udpAddress));
+        }
     }
     if (channelSettingsKeys.contains("updPort") || force) {
         swgChirpChatDemodSettings->setUdpPort(settings.m_udpPort);
@@ -1001,7 +1017,11 @@ void ChirpChatDemod::webapiFormatChannelSettings(
         swgChirpChatDemodSettings->setRgbColor(settings.m_rgbColor);
     }
     if (channelSettingsKeys.contains("title") || force) {
-        swgChirpChatDemodSettings->setTitle(new QString(settings.m_title));
+        if (swgChirpChatDemodSettings->getTitle()) {
+            *swgChirpChatDemodSettings->getTitle() = settings.m_title;
+        } else {
+            swgChirpChatDemodSettings->setTitle(new QString(settings.m_title));
+        }
     }
 
     if (settings.m_spectrumGUI && (channelSettingsKeys.contains("spectrunConfig") || force))

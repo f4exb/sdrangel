@@ -4,9 +4,12 @@ ChannelPowerSettings:
     inputFrequencyOffset:
       type: integer
       format: int64
+      description: "Channel frequency offset from the device center frequency in Hz."
     frequencyMode:
       description: (0 for Offset, 1 for Absolute)
       type: integer
+      minimum: 0
+      maximum: 1
     frequency:
       description: Channel center frequency
       type: integer
@@ -14,6 +17,7 @@ ChannelPowerSettings:
     rfBandwidth:
       type: number
       format: float
+      description: "RF bandwidth in Hz."
     pulseThreshold:
       description: "In dB"
       type: number
@@ -23,26 +27,38 @@ ChannelPowerSettings:
       type: integer
     rgbColor:
       type: integer
+      description: "Display color encoded as an RGB integer."
     title:
       type: string
+      description: "User-visible title."
     streamIndex:
       description: MIMO channel. Not relevant when connected to SI (single Rx).
       type: integer
     useReverseAPI:
       description: Synchronize with reverse API (1 for yes, 0 for no)
       type: integer
+      minimum: 0
+      maximum: 1
     reverseAPIAddress:
       type: string
+      description: "IPv4 address or host name of the reverse API peer."
     reverseAPIPort:
       type: integer
+      description: "TCP port of the reverse API peer."
+      minimum: 1
+      maximum: 65535
     reverseAPIDeviceIndex:
       type: integer
+      description: "Device-set index used by the reverse API peer."
     reverseAPIChannelIndex:
       type: integer
+      description: "Channel index used by the reverse API peer."
     channelMarker:
       $ref: "/doc/swagger/include/ChannelMarker.yaml#/ChannelMarker"
+      description: "Channel-marker display configuration."
     rollupState:
       $ref: "/doc/swagger/include/RollupState.yaml#/RollupState"
+      description: "Saved expanded or collapsed state of the GUI sections."
 
 ChannelPowerReport:
   description: ChannelPower
@@ -65,3 +81,4 @@ ChannelPowerReport:
       format: float
     channelSampleRate:
       type: integer
+      description: "Effective sample rate delivered to the channel in samples per second."

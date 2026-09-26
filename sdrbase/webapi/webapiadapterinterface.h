@@ -23,6 +23,8 @@
 #define SDRBASE_WEBAPI_WEBAPIADAPTERINTERFACE_H_
 
 #include <QString>
+#include <QJsonObject>
+#include <QByteArray>
 #include <QStringList>
 #include <regex>
 
@@ -67,6 +69,8 @@ namespace SWGSDRangel
     class SWGDeviceReport;
     class SWGDeviceActions;
     class SWGWorkspaceInfo;
+    class SWGWorkspaceActions;
+    class SWGWindowList;
     class SWGChannelsDetail;
     class SWGChannelSettings;
     class SWGChannelReport;
@@ -81,6 +85,10 @@ namespace SWGSDRangel
     class SWGFeatureReport;
     class SWGFeatureActions;
     class SWGGLSpectrum;
+    class SWGGLSpectrumReport;
+    class SWGSpectrumActions;
+    class SWGGLSpectrumData;
+    class SWGGLSpectrumHistory;
     class SWGSpectrumServer;
 }
 
@@ -808,6 +816,38 @@ public:
     }
 
     /**
+     * Handler of /sdrangel/windows (GET) swagger/sdrangel/code/html2/index.html#api-Default-instanceWindowsGet
+     * returns the Http status code (default 501: not implemented)
+     */
+    virtual int instanceWindowsGet(
+            SWGSDRangel::SWGWindowList& response,
+            SWGSDRangel::SWGErrorResponse& error)
+    {
+        (void) response;
+    	error.init();
+    	*error.getMessage() = QString("Function not implemented");
+    	return 501;
+    }
+
+    /**
+     * Handler of /sdrangel/workspace/{workspaceIndex}/actions (POST) swagger/sdrangel/code/html2/index.html#api-Default-workspaceActionsPost
+     * returns the Http status code (default 501: not implemented)
+     */
+    virtual int workspaceActionsPost(
+            int workspaceIndex,
+            SWGSDRangel::SWGWorkspaceActions& query,
+            SWGSDRangel::SWGSuccessResponse& response,
+            SWGSDRangel::SWGErrorResponse& error)
+    {
+        (void) workspaceIndex;
+        (void) query;
+        (void) response;
+    	error.init();
+    	*error.getMessage() = QString("Function not implemented");
+    	return 501;
+    }
+
+    /**
      * Handler of /sdrangel/deviceset (POST) swagger/sdrangel/code/html2/index.html#api-Default-instanceChannels
      * returns the Http status code (default 501: not implemented)
      */
@@ -935,6 +975,108 @@ public:
      * Handler of /sdrangel/deviceset/{devicesetIndex}/spectrum/server (GET)
      * returns the Http status code (default 501: not implemented)
      */
+    /**
+     * The latest spectrum measurement results
+     */
+    virtual int devicesetSpectrumReportGet(
+            int deviceSetIndex,
+            SWGSDRangel::SWGGLSpectrumReport& response,
+            SWGSDRangel::SWGErrorResponse& error)
+    {
+        (void) deviceSetIndex;
+        (void) response;
+        *error.getMessage() = "Function not implemented";
+        return 501;
+    }
+
+    /**
+     * Act on the main spectrum of a device set
+     */
+    virtual int devicesetSpectrumActionsPost(
+            int deviceSetIndex,
+            const QStringList& spectrumActionsKeys,
+            SWGSDRangel::SWGSpectrumActions& query,
+            SWGSDRangel::SWGErrorResponse& error)
+    {
+        (void) deviceSetIndex;
+        (void) spectrumActionsKeys;
+        (void) query;
+        *error.getMessage() = "Function not implemented";
+        return 501;
+    }
+
+    /**
+     * Statistics over the spectrum history kept for scrolling
+     */
+    virtual int devicesetSpectrumHistoryGet(
+            int deviceSetIndex,
+            double seconds,
+            int bins,
+            qint64 startFrequency,
+            qint64 stopFrequency,
+            double thresholdDb,
+            SWGSDRangel::SWGGLSpectrumHistory& response,
+            SWGSDRangel::SWGErrorResponse& error)
+    {
+        (void) deviceSetIndex;
+        (void) seconds;
+        (void) bins;
+        (void) startFrequency;
+        (void) stopFrequency;
+        (void) thresholdDb;
+        (void) response;
+        *error.getMessage() = "Function not implemented";
+        return 501;
+    }
+
+    /**
+     * The spectrum history as a PNG waterfall; description receives its extents
+     */
+    virtual int devicesetSpectrumHistoryImageGet(
+            int deviceSetIndex,
+            double seconds,
+            int bins,
+            qint64 startFrequency,
+            qint64 stopFrequency,
+            int maxRows,
+            QByteArray& png,
+            QJsonObject& description,
+            SWGSDRangel::SWGErrorResponse& error)
+    {
+        (void) deviceSetIndex;
+        (void) seconds;
+        (void) bins;
+        (void) startFrequency;
+        (void) stopFrequency;
+        (void) maxRows;
+        (void) png;
+        (void) description;
+        *error.getMessage() = "Function not implemented";
+        return 501;
+    }
+
+    /**
+     * A reduced copy of the current power spectrum
+     */
+    virtual int devicesetSpectrumDataGet(
+            int deviceSetIndex,
+            int bins,
+            qint64 startFrequency,
+            qint64 stopFrequency,
+            const QString& reduce,
+            SWGSDRangel::SWGGLSpectrumData& response,
+            SWGSDRangel::SWGErrorResponse& error)
+    {
+        (void) deviceSetIndex;
+        (void) bins;
+        (void) startFrequency;
+        (void) stopFrequency;
+        (void) reduce;
+        (void) response;
+        *error.getMessage() = "Function not implemented";
+        return 501;
+    }
+
     virtual int devicesetSpectrumServerGet(
             int deviceSetIndex,
             SWGSDRangel::SWGSpectrumServer& response,
@@ -1709,11 +1851,17 @@ public:
     static QString instanceDeviceSetsURL;
     static QString instanceDeviceSetURL;
     static QString instanceWorkspaceURL;
+    static QString instanceWindowsURL;
     static QString featuresetURL;
     static QString featuresetFeatureURL;
     static QString featuresetPresetURL;
     static std::regex devicesetURLRe;
     static std::regex devicesetSpectrumSettingsURLRe;
+    static std::regex devicesetSpectrumReportURLRe;
+    static std::regex devicesetSpectrumActionsURLRe;
+    static std::regex devicesetSpectrumDataURLRe;
+    static std::regex devicesetSpectrumHistoryURLRe;
+    static std::regex devicesetSpectrumHistoryImageURLRe;
     static std::regex devicesetSpectrumServerURLRe;
     static std::regex devicesetSpectrumWorkspaceURLRe;
     static std::regex devicesetDeviceURLRe;
@@ -1736,6 +1884,7 @@ public:
     static std::regex featuresetFeatureReportURLRe;
     static std::regex featuresetFeatureActionsURLRe;
     static std::regex featuresetFeatureWorkspaceURLRe;
+    static std::regex workspaceActionsURLRe;
 };
 
 

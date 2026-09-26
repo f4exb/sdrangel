@@ -47,6 +47,7 @@
 #include "dsp/spectrummarkers.h"
 #include "dsp/channelmarker.h"
 #include "dsp/spectrumsettings.h"
+#include "dsp/spectrumvis.h"
 #include "export.h"
 #include "util/incrementalarray.h"
 #include "util/message.h"
@@ -228,6 +229,7 @@ public:
     void setMessageQueueToGUI(MessageQueue* messageQueue) { m_messageQueueToGUI = messageQueue; }
 
     virtual void newSpectrum(const Real* spectrum, int fftSize);
+    virtual bool getSpectrumHistory(const QDateTime& since, int maxRows, const HistoryRowCallback& row) override;
     void clearSpectrumHistogram();
 
     Real getWaterfallShare() const { return m_waterfallShare; }
@@ -468,6 +470,8 @@ private:
     bool m_isDeviceSpectrum;
 
     SpectrumMeasurements *m_measurements;
+    //!< The same numbers the measurements table shows, kept for the web API report
+    SpectrumMeasurementResults m_measurementResults;
     SpectrumSettings::Measurement m_measurement;
     int m_measurementCenterFrequencyOffset;
     int m_measurementBandwidth;

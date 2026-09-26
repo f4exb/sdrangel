@@ -600,7 +600,11 @@ void MeshcoreMod::webapiFormatChannelSettings(SWGSDRangel::SWGChannelSettings& r
 
     response.getMeshcoreModSettings()->setMessageRepeat(settings.m_messageRepeat);
     response.getMeshcoreModSettings()->setUdpEnabled(settings.m_udpEnabled);
-    response.getMeshcoreModSettings()->setUdpAddress(new QString(settings.m_udpAddress));
+    if (response.getMeshcoreModSettings()->getUdpAddress()) {
+        *response.getMeshcoreModSettings()->getUdpAddress() = settings.m_udpAddress;
+    } else {
+        response.getMeshcoreModSettings()->setUdpAddress(new QString(settings.m_udpAddress));
+    }
     response.getMeshcoreModSettings()->setUdpPort(settings.m_udpPort);
     response.getMeshcoreModSettings()->setInvertRamps(settings.m_invertRamps ? 1 : 0);
 
@@ -725,7 +729,11 @@ void MeshcoreMod::webapiFormatChannelSettings(
     swgChannelSettings->setDirection(1); // single source (Tx)
     swgChannelSettings->setOriginatorChannelIndex(getIndexInDeviceSet());
     swgChannelSettings->setOriginatorDeviceSetIndex(getDeviceSetIndex());
-    swgChannelSettings->setChannelType(new QString(m_channelId));
+    if (swgChannelSettings->getChannelType()) {
+        *swgChannelSettings->getChannelType() = m_channelId;
+    } else {
+        swgChannelSettings->setChannelType(new QString(m_channelId));
+    }
     swgChannelSettings->setMeshcoreModSettings(new SWGSDRangel::SWGMeshcoreModSettings());
     SWGSDRangel::SWGMeshcoreModSettings *swgMeshcoreModSettings = swgChannelSettings->getMeshcoreModSettings();
 
@@ -759,7 +767,11 @@ void MeshcoreMod::webapiFormatChannelSettings(
         swgMeshcoreModSettings->setNbParityBits(settings.m_nbParityBits);
     }
     if (channelSettingsKeys.contains("textMessage") || force) {
-        swgMeshcoreModSettings->setTextMessage(new QString(settings.m_textMessage));
+        if (swgMeshcoreModSettings->getTextMessage()) {
+            *swgMeshcoreModSettings->getTextMessage() = settings.m_textMessage;
+        } else {
+            swgMeshcoreModSettings->setTextMessage(new QString(settings.m_textMessage));
+        }
     }
 
     if (channelSettingsKeys.contains("messageRepeat") || force) {
@@ -770,7 +782,11 @@ void MeshcoreMod::webapiFormatChannelSettings(
         swgMeshcoreModSettings->setUdpEnabled(settings.m_udpEnabled);
     }
     if (channelSettingsKeys.contains("udpAddress") || force) {
-        swgMeshcoreModSettings->setUdpAddress(new QString(settings.m_udpAddress));
+        if (swgMeshcoreModSettings->getUdpAddress()) {
+            *swgMeshcoreModSettings->getUdpAddress() = settings.m_udpAddress;
+        } else {
+            swgMeshcoreModSettings->setUdpAddress(new QString(settings.m_udpAddress));
+        }
     }
     if (channelSettingsKeys.contains("udpPort") || force) {
         swgMeshcoreModSettings->setUdpPort(settings.m_udpPort);
@@ -783,7 +799,11 @@ void MeshcoreMod::webapiFormatChannelSettings(
         swgMeshcoreModSettings->setRgbColor(settings.m_rgbColor);
     }
     if (channelSettingsKeys.contains("title") || force) {
-        swgMeshcoreModSettings->setTitle(new QString(settings.m_title));
+        if (swgMeshcoreModSettings->getTitle()) {
+            *swgMeshcoreModSettings->getTitle() = settings.m_title;
+        } else {
+            swgMeshcoreModSettings->setTitle(new QString(settings.m_title));
+        }
     }
 
     if (settings.m_channelMarker && (channelSettingsKeys.contains("channelMarker") || force))

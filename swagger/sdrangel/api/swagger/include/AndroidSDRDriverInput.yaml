@@ -4,42 +4,73 @@ AndroidSDRDriverInputSettings:
     centerFrequency:
       type: integer
       format: int64
+      description: "Device center frequency in Hz."
     loPpmCorrection:
       type: integer
+      description: "Local-oscillator correction in parts per million."
     dcBlock:
       type: integer
+      description: "Enable DSP DC-offset correction (1 enabled, 0 disabled)."
+      minimum: 0
+      maximum: 1
     iqCorrection:
       type: integer
+      description: "Enable I/Q imbalance correction (1 enabled, 0 disabled)."
+      minimum: 0
+      maximum: 1
     biasTee:
       type: integer
+      description: "Enable the antenna bias tee (1 enabled, 0 disabled)."
+      minimum: 0
+      maximum: 1
     directSampling:
       type: integer
+      description: "Direct sampling setting for Android sdr driver input."
     devSampleRate:
       type: integer
+      description: "Device I/Q sample rate in samples per second before software decimation or interpolation."
     log2Decim:
       type: integer
+      description: "Base-2 exponent of the software decimation factor; the output sample rate is divided by 2^log2Decim."
     gain:
       type: integer
+      description: "Gain setting; units and available values depend on the device or plugin."
     agc:
       type: integer
+      description: "Enable automatic gain control (1 enabled, 0 disabled)."
+      minimum: 0
+      maximum: 1
     rfBW:
       type: integer
+      description: "RF bw in Hz."
     sampleBits:
       type: integer
+      description: "Number of significant bits in each sample."
     dataPort:
       type: integer
+      description: "Network port used for data traffic."
+      minimum: 1
+      maximum: 65535
     useReverseAPI:
       description: Synchronize with reverse API (1 for yes, 0 for no)
       type: integer
+      minimum: 0
+      maximum: 1
     reverseAPIAddress:
       type: string
+      description: "IPv4 address or host name of the reverse API peer."
     reverseAPIPort:
       type: integer
+      description: "TCP port of the reverse API peer."
+      minimum: 1
+      maximum: 65535
     reverseAPIDeviceIndex:
       type: integer
+      description: "Device-set index used by the reverse API peer."
 
 AndroidSDRDriverInputReport:
   description: AndroidSDRDriverInput
   properties:
     sampleRate:
       type: integer
+      description: "Sample rate in samples per second."

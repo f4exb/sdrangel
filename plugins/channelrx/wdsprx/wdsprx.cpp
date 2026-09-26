@@ -381,13 +381,20 @@ int WDSPRx::webapiSettingsPutPatch(
     WDSPRxSettings settings = m_settings;
     webapiUpdateChannelSettings(settings, channelSettingsKeys, response);
 
-    MsgConfigureWDSPRx *msg = MsgConfigureWDSPRx::create(channelSettingsKeys, settings, force);
+    // Map API names to setting names
+    QStringList settingsKeys = channelSettingsKeys;
+
+    if (settingsKeys.contains("rfBandwidth") && !settingsKeys.contains("highCutoff")) {
+        settingsKeys.append("highCutoff");
+    }
+
+    MsgConfigureWDSPRx *msg = MsgConfigureWDSPRx::create(settingsKeys, settings, force);
     m_inputMessageQueue.push(msg);
 
     qDebug("WDSPRx::webapiSettingsPutPatch: forward to GUI: %p", m_guiMessageQueue);
     if (m_guiMessageQueue) // forward to GUI if any
     {
-        MsgConfigureWDSPRx *msgToGUI = MsgConfigureWDSPRx::create(channelSettingsKeys, settings, force);
+        MsgConfigureWDSPRx *msgToGUI = MsgConfigureWDSPRx::create(settingsKeys, settings, force);
         m_guiMessageQueue->push(msgToGUI);
     }
 
@@ -586,7 +593,7 @@ void WDSPRx::webapiUpdateChannelSettings(
     if (channelSettingsKeys.contains("lowCutoff")) {
         settings.m_profiles[settings.m_profileIndex].m_lowCutoff = response.getWdspRxSettings()->getLowCutoff();
     }
-    if (channelSettingsKeys.contains("fftWimdow")) {
+    if (channelSettingsKeys.contains("fftWindow")) {
         settings.m_profiles[settings.m_profileIndex].m_fftWindow = response.getWdspRxSettings()->getFftWindow();
     }
     if (channelSettingsKeys.contains("rgbColor")) {
@@ -863,7 +870,11 @@ void WDSPRx::webapiFormatChannelSettings(
     swgChannelSettings->setDirection(0); // Single sink (Rx)
     swgChannelSettings->setOriginatorChannelIndex(getIndexInDeviceSet());
     swgChannelSettings->setOriginatorDeviceSetIndex(getDeviceSetIndex());
-    swgChannelSettings->setChannelType(new QString(m_channelId));
+    if (swgChannelSettings->getChannelType()) {
+        *swgChannelSettings->getChannelType() = m_channelId;
+    } else {
+        swgChannelSettings->setChannelType(new QString(m_channelId));
+    }
     swgChannelSettings->setWdspRxSettings(new SWGSDRangel::SWGWDSPRxSettings());
     SWGSDRangel::SWGWDSPRxSettings *swgWDSPRxSettings = swgChannelSettings->getWdspRxSettings();
 
@@ -1059,10 +1070,18 @@ void WDSPRx::webapiFormatChannelSettings(
         swgWDSPRxSettings->setRgbColor(settings.m_rgbColor);
     }
     if (channelSettingsKeys.contains("title") || force) {
-        swgWDSPRxSettings->setTitle(new QString(settings.m_title));
+        if (swgWDSPRxSettings->getTitle()) {
+            *swgWDSPRxSettings->getTitle() = settings.m_title;
+        } else {
+            swgWDSPRxSettings->setTitle(new QString(settings.m_title));
+        }
     }
     if (channelSettingsKeys.contains("audioDeviceName") || force) {
-        swgWDSPRxSettings->setAudioDeviceName(new QString(settings.m_audioDeviceName));
+        if (swgWDSPRxSettings->getAudioDeviceName()) {
+            *swgWDSPRxSettings->getAudioDeviceName() = settings.m_audioDeviceName;
+        } else {
+            swgWDSPRxSettings->setAudioDeviceName(new QString(settings.m_audioDeviceName));
+        }
     }
     if (channelSettingsKeys.contains("streamIndex") || force) {
         swgWDSPRxSettings->setStreamIndex(settings.m_streamIndex);

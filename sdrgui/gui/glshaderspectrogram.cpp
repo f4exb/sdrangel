@@ -44,12 +44,13 @@ GLShaderSpectrogram::GLShaderSpectrogram() :
     m_textureId(0),
     m_colorMapTexture(nullptr),
     m_colorMapTextureId(0),
+    m_textureWidth(0),
+    m_textureHeight(0),
     m_programForLocs(nullptr),
     m_coord2dLoc(0),
     m_textureTransformLoc(0),
     m_vertexTransformLoc(0),
     m_dataTextureLoc(0),
-    m_limitLoc(0),
     m_brightnessLoc(0),
     m_colorMapLoc(0),
     m_lightDirLoc(0),
@@ -77,7 +78,10 @@ GLShaderSpectrogram::GLShaderSpectrogram() :
     m_lightRotX(0.0),
     m_lightRotY(0.0),
     m_lightRotZ(0.0),
-    m_gridElements(0)
+    m_gridWidthElements(0),
+    m_gridHeightElements(0),
+    m_gridLineIndexCount(0),
+    m_gridTriangleIndexCount(0)
 {
 }
 
@@ -152,25 +156,34 @@ void GLShaderSpectrogram::initializeGL(int majorVersion, int minorVersion)
     }
 }
 
-void GLShaderSpectrogram::initGrid(int elements)
+void GLShaderSpectrogram::initGrid(int width, int height)
 {
-    int gridElements = std::min(elements, 4096); // Limit to keep memory requirements realistic
-    if (gridElements == m_gridElements) {
+    // There is one vertex per texture sample where possible. The final frequency
+    // sample is the extra endpoint written by GLSpectrumView, so W samples form
+    // W-1 cells. Keeping the time vertices aligned with the H texture rows stops
+    // a stored spectrum being resampled as it advances through the circular texture.
+    int gridWidthElements = std::max(1, std::min(width - 1, 4096));
+    int gridHeightElements = std::max(1, std::min(height - 1, 4096));
+
+    if ((gridWidthElements == m_gridWidthElements) && (gridHeightElements == m_gridHeightElements)) {
         return;
     }
-    m_gridElements = gridElements;
-    qDebug() << "GLShaderSpectrogram::initGrid: requested: " << elements << " actual: " << m_gridElements;
-    int e1 = m_gridElements+1;
+
+    m_gridWidthElements = gridWidthElements;
+    m_gridHeightElements = gridHeightElements;
+    qDebug() << "GLShaderSpectrogram::initGrid: requested: " << width - 1 << "x" << height - 1
+             << " actual: " << m_gridWidthElements << "x" << m_gridHeightElements;
+    int verticesPerRow = m_gridWidthElements + 1;
 
     // Grid vertices
-    std::vector<QVector2D> vertices(e1 * e1);
+    std::vector<QVector2D> vertices((m_gridWidthElements + 1) * (m_gridHeightElements + 1));
 
-    for (int i = 0; i < e1; i++)
+    for (int y = 0; y <= m_gridHeightElements; y++)
     {
-        for (int j = 0; j < e1; j++)
+        for (int x = 0; x <= m_gridWidthElements; x++)
         {
-            vertices[i*e1+j].setX(j / (float)m_gridElements);
-            vertices[i*e1+j].setY(i / (float)m_gridElements);
+            vertices[y * verticesPerRow + x].setX(x / (float)m_gridWidthElements);
+            vertices[y * verticesPerRow + x].setY(y / (float)m_gridHeightElements);
         }
     }
 
@@ -190,46 +203,49 @@ void GLShaderSpectrogram::initGrid(int elements)
         m_vao->release();
     }
 
-    std::vector<GLuint> indices(m_gridElements * m_gridElements * 6);
-    int i;
-
     // Create an array of indices into the vertex array that traces both horizontal and vertical lines
-    i = 0;
+    std::vector<GLuint> lineIndices;
+    lineIndices.reserve(
+        2 * (m_gridWidthElements * (m_gridHeightElements + 1)
+            + m_gridHeightElements * (m_gridWidthElements + 1)));
 
-    for (int y = 0; y < e1; y++) {
-        for (int x = 0; x < m_gridElements; x++) {
-            indices[i++] = y * (e1) + x;
-            indices[i++] = y * (e1) + x + 1;
+    for (int y = 0; y <= m_gridHeightElements; y++) {
+        for (int x = 0; x < m_gridWidthElements; x++) {
+            lineIndices.push_back(y * verticesPerRow + x);
+            lineIndices.push_back(y * verticesPerRow + x + 1);
         }
     }
 
-    for (int x = 0; x < e1; x++) {
-        for (int y = 0; y < m_gridElements; y++) {
-            indices[i++] = y * (e1) + x;
-            indices[i++] = (y + 1) * (e1) + x;
+    for (int x = 0; x <= m_gridWidthElements; x++) {
+        for (int y = 0; y < m_gridHeightElements; y++) {
+            lineIndices.push_back(y * verticesPerRow + x);
+            lineIndices.push_back((y + 1) * verticesPerRow + x);
         }
     }
 
+    m_gridLineIndexCount = (int) lineIndices.size();
     m_index0Buf->bind();
-    m_index0Buf->allocate(&indices[0], m_gridElements * (e1) * 4 * sizeof(GLuint));
+    m_index0Buf->allocate(lineIndices.data(), m_gridLineIndexCount * sizeof(GLuint));
 
     // Create an array of indices that describes all the triangles needed to create a completely filled surface
-    i = 0;
+    std::vector<GLuint> triangleIndices;
+    triangleIndices.reserve(m_gridWidthElements * m_gridHeightElements * 6);
 
-    for (int y = 0; y < m_gridElements; y++) {
-        for (int x = 0; x < m_gridElements; x++) {
-            indices[i++] = y * (e1) + x;
-            indices[i++] = y * (e1) + x + 1;
-            indices[i++] = (y + 1) * (e1) + x + 1;
+    for (int y = 0; y < m_gridHeightElements; y++) {
+        for (int x = 0; x < m_gridWidthElements; x++) {
+            triangleIndices.push_back(y * verticesPerRow + x);
+            triangleIndices.push_back(y * verticesPerRow + x + 1);
+            triangleIndices.push_back((y + 1) * verticesPerRow + x + 1);
 
-            indices[i++] = y * (e1) + x;
-            indices[i++] = (y + 1) * (e1) + x + 1;
-            indices[i++] = (y + 1) * (e1) + x;
+            triangleIndices.push_back(y * verticesPerRow + x);
+            triangleIndices.push_back((y + 1) * verticesPerRow + x + 1);
+            triangleIndices.push_back((y + 1) * verticesPerRow + x);
         }
     }
 
+    m_gridTriangleIndexCount = (int) triangleIndices.size();
     m_index1Buf->bind();
-    m_index1Buf->allocate(&indices[0], indices.size() * sizeof(GLuint));
+    m_index1Buf->allocate(triangleIndices.data(), m_gridTriangleIndexCount * sizeof(GLuint));
 
     if (!m_vao)
     {
@@ -299,8 +315,9 @@ void GLShaderSpectrogram::initTexture(const QImage& image)
     } else {
         initTextureMutable(image);
     }
-    initGrid(image.width());
-    m_limit = 1.4f*1.0f/(float)image.height();
+    m_textureWidth = image.width();
+    m_textureHeight = image.height();
+    initGrid(m_textureWidth, m_textureHeight);
 }
 
 void GLShaderSpectrogram::initTextureImmutable(const QImage& image)
@@ -313,7 +330,8 @@ void GLShaderSpectrogram::initTextureImmutable(const QImage& image)
 
     m_texture->setMinificationFilter(QOpenGLTexture::Linear);
     m_texture->setMagnificationFilter(QOpenGLTexture::Linear);
-    m_texture->setWrapMode(QOpenGLTexture::Repeat);
+    m_texture->setWrapMode(QOpenGLTexture::DirectionS, QOpenGLTexture::ClampToEdge);
+    m_texture->setWrapMode(QOpenGLTexture::DirectionT, QOpenGLTexture::Repeat);
 }
 
 void GLShaderSpectrogram::initTextureMutable(const QImage& image)
@@ -331,7 +349,7 @@ void GLShaderSpectrogram::initTextureMutable(const QImage& image)
 
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, QOpenGLTexture::Repeat);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, QOpenGLTexture::ClampToEdge);
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, QOpenGLTexture::Repeat);
 }
 
@@ -369,7 +387,7 @@ void GLShaderSpectrogram::subTextureMutable(int xOffset, int yOffset, int width,
     glTexSubImage2D(GL_TEXTURE_2D, 0, xOffset, yOffset, width, height, GL_RED, GL_UNSIGNED_BYTE, pixels);
 }
 
-void GLShaderSpectrogram::drawSurface(SpectrumSettings::SpectrogramStyle style, const QMatrix4x4& vertexTransform, float textureOffset, bool invert)
+void GLShaderSpectrogram::drawSurface(SpectrumSettings::SpectrogramStyle style, const QMatrix4x4& vertexTransform, int texturePosition, bool invert)
 {
     if ((m_useImmutableStorage && !m_texture) || (!m_useImmutableStorage && !m_textureId))
     {
@@ -387,11 +405,15 @@ void GLShaderSpectrogram::drawSurface(SpectrumSettings::SpectrogramStyle style, 
         return;
     }
 
-    float rot = invert ? 1.0 : -1.0;
+    float direction = invert ? 1.0f : -1.0f;
+    float textureScaleX = (m_textureWidth - 1.0f) / m_textureWidth;
+    float textureScaleY = (m_textureHeight - 1.0f) / m_textureHeight;
+    float textureOffsetX = 0.5f / m_textureWidth;
+    float textureOffsetY = (texturePosition + direction * 0.5f) / m_textureHeight;
     QMatrix4x4 textureTransform(
-        1.0, 0.0, 0.0, 0.0,
-        0.0, rot, 0.0, textureOffset,
-        0.0, 0.0, rot, 0.0,
+        textureScaleX, 0.0, 0.0, textureOffsetX,
+        0.0, direction * textureScaleY, 0.0, textureOffsetY,
+        0.0, 0.0, 1.0, 0.0,
         0.0, 0.0, 0.0, 1.0);        // Use this to move texture for each row of data
 
     QOpenGLFunctions *f = QOpenGLContext::currentContext()->functions();
@@ -403,7 +425,6 @@ void GLShaderSpectrogram::drawSurface(SpectrumSettings::SpectrogramStyle style, 
         m_textureTransformLoc = program->uniformLocation("textureTransform");
         m_vertexTransformLoc = program->uniformLocation("vertexTransform");
         m_dataTextureLoc = program->uniformLocation("dataTexture");
-        m_limitLoc = program->uniformLocation("limit");
         m_brightnessLoc = program->uniformLocation("brightness");
         m_colorMapLoc = program->uniformLocation("colorMap");
         m_lightDirLoc = program->uniformLocation("lightDir");
@@ -431,8 +452,6 @@ void GLShaderSpectrogram::drawSurface(SpectrumSettings::SpectrogramStyle style, 
 
     program->setUniformValue(m_dataTextureLoc, 0);         // set uniform to texture unit?
     program->setUniformValue(m_colorMapLoc, 1);
-
-    program->setUniformValue(m_limitLoc, m_limit);
 
     if (style == SpectrumSettings::Outline)
     {
@@ -478,15 +497,15 @@ void GLShaderSpectrogram::drawSurface(SpectrumSettings::SpectrogramStyle style, 
     switch (style)
     {
     case SpectrumSettings::Points:
-        f->glDrawElements(GL_POINTS, m_gridElements * m_gridElements * 6, GL_UNSIGNED_INT, 0);
+        f->glDrawElements(GL_POINTS, m_gridTriangleIndexCount, GL_UNSIGNED_INT, 0);
         break;
     case SpectrumSettings::Lines:
-        f->glDrawElements(GL_LINES, m_gridElements * m_gridElements * 6, GL_UNSIGNED_INT, 0);
+        f->glDrawElements(GL_LINES, m_gridTriangleIndexCount, GL_UNSIGNED_INT, 0);
         break;
     case SpectrumSettings::Solid:
     case SpectrumSettings::Outline:
     case SpectrumSettings::Shaded:
-        f->glDrawElements(GL_TRIANGLES, m_gridElements * m_gridElements * 6, GL_UNSIGNED_INT, 0);
+        f->glDrawElements(GL_TRIANGLES, m_gridTriangleIndexCount, GL_UNSIGNED_INT, 0);
         break;
     }
 
@@ -498,7 +517,7 @@ void GLShaderSpectrogram::drawSurface(SpectrumSettings::SpectrogramStyle style, 
         // Draw the outline
         program->setUniformValue(m_brightnessLoc, 1.5f);
         m_index0Buf->bind();
-        f->glDrawElements(GL_LINES, m_gridElements * (m_gridElements+1) * 4, GL_UNSIGNED_INT, 0);
+        f->glDrawElements(GL_LINES, m_gridLineIndexCount, GL_UNSIGNED_INT, 0);
     }
 
     if (m_vao)
@@ -731,8 +750,6 @@ void GLShaderSpectrogram::applyPerspective(QMatrix4x4 &matrix)
     matrix = m_perspective * matrix;
 }
 
-// The clamp is to prevent old data affecting new data (And vice versa),
-// which can happen where the texture repeats - might be a better way to do it
 const QString GLShaderSpectrogram::m_vertexShader2 = QString(
     "attribute vec2 coord2d;\n"
     "varying vec4 coord;\n"
@@ -740,10 +757,9 @@ const QString GLShaderSpectrogram::m_vertexShader2 = QString(
     "uniform mat4 textureTransform;\n"
     "uniform mat4 vertexTransform;\n"
     "uniform sampler2D dataTexture;\n"
-    "uniform highp float limit;\n"
     "uniform vec3 lightPos;\n"
     "void main(void) {\n"
-    "   coord = textureTransform * vec4(clamp(coord2d, limit, 1.0-limit), 0, 1);\n"
+    "   coord = textureTransform * vec4(coord2d, 0, 1);\n"
     "   coord.z = (texture2D(dataTexture, coord.xy).r);\n"
     "   gl_Position = vertexTransform * vec4(coord2d, coord.z, 1);\n"
     "   lightDistance = length(lightPos - gl_Position.xyz);\n"
@@ -758,10 +774,9 @@ const QString GLShaderSpectrogram::m_vertexShader = QString(
     "uniform mat4 textureTransform;\n"
     "uniform mat4 vertexTransform;\n"
     "uniform sampler2D dataTexture;\n"
-    "uniform float limit;\n"
     "uniform vec3 lightPos;\n"
     "void main(void) {\n"
-    "   coord = textureTransform * vec4(clamp(coord2d, limit, 1.0-limit), 0, 1);\n"
+    "   coord = textureTransform * vec4(coord2d, 0, 1);\n"
     "   coord.z = (texture(dataTexture, coord.xy).r);\n"
     "   gl_Position = vertexTransform * vec4(coord2d, coord.z, 1);\n"
     "   lightDistance = length(lightPos - gl_Position.xyz);\n"

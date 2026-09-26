@@ -19,7 +19,6 @@
 #ifndef INCLUDE_FEATURE_JOGDIALCONTROLLERGUI_H_
 #define INCLUDE_FEATURE_JOGDIALCONTROLLERGUI_H_
 
-#include <QTimer>
 #include <QList>
 
 #include "feature/featuregui.h"
@@ -68,8 +67,6 @@ private:
 
 	JogdialController* m_jogdialController;
 	MessageQueue m_inputMessageQueue;
-	QTimer m_statusTimer;
-	int m_lastFeatureState;
 	QList<JogdialControllerSettings::AvailableChannel> m_availableChannels;
 	ChannelAPI *m_selectedChannel;
 	CommandKeyReceiver m_commandKeyReceiver;
@@ -91,7 +88,7 @@ private slots:
 	void on_startStop_toggled(bool checked);
 	void on_devicesRefresh_clicked();
 	void on_channels_currentIndexChanged(int index);
-	void updateStatus();
+	void updateFeatureState();
 	void tick();
 };
 

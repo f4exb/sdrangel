@@ -63,7 +63,6 @@ private:
 	SimplePTT* m_simplePTT;
 	MessageQueue m_inputMessageQueue;
 	QTimer m_statusTimer;
-	int m_lastFeatureState;
 	std::vector<QString> m_statusColors;
 	std::vector<QString> m_statusTooltips;
 
@@ -115,6 +114,7 @@ private slots:
     void on_lastCommandLog_clicked();
 
 	void updateStatus();
+	void updateFeatureState();
 	void audioSelect(const QPoint& p);
 };
 

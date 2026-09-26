@@ -54,7 +54,7 @@ VORLocalizer::VORLocalizer(WebAPIAdapterInterface *webAPIAdapterInterface) :
     m_running(false)
 {
     setObjectName(m_featureId);
-    m_state = StIdle;
+    setState(StIdle);
     m_errorMessage = "VORLocalizer error";
     m_networkManager = new QNetworkAccessManager();
     QObject::connect(
@@ -124,7 +124,7 @@ void VORLocalizer::start()
     m_worker->setMessageQueueToFeature(getInputMessageQueue());
     m_worker->setAvailableChannels(&m_availableChannels);
     m_worker->startWork();
-    m_state = StRunning;
+    setState(StRunning);
     m_thread->start();
 
     VorLocalizerWorker::MsgConfigureVORLocalizerWorker *msg = VorLocalizerWorker::MsgConfigureVORLocalizerWorker::create(m_settings, QList<QString>(), true);
@@ -144,7 +144,7 @@ void VORLocalizer::stop()
     qDebug("VORLocalizer::stop");
     m_running = false;
 	m_worker->stopWork();
-    m_state = StIdle;
+    setState(StIdle);
 	m_thread->quit();
 	m_thread->wait();
 }
@@ -357,7 +357,11 @@ void VORLocalizer::applySettings(const VORLocalizerSettings& settings, const QLi
         webapiReverseSendSettings(settingsKeys, settings, fullUpdate || force);
     }
 
-    m_settings = settings;
+    if (force) {
+        m_settings = settings;
+    } else {
+        m_settings.applySettings(settingsKeys, settings);
+    }
 }
 
 void VORLocalizer::updateChannels()

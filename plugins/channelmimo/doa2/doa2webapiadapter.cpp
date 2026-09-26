@@ -46,7 +46,11 @@ void DOA2WebAPIAdapter::webapiFormatChannelSettings(
 {
     response.getDoa2Settings()->setCorrelationType((int) settings.m_correlationType);
     response.getDoa2Settings()->setRgbColor(settings.m_rgbColor);
-    response.getDoa2Settings()->setTitle(new QString(settings.m_title));
+    if (response.getDoa2Settings()->getTitle()) {
+        *response.getDoa2Settings()->getTitle() = settings.m_title;
+    } else {
+        response.getDoa2Settings()->setTitle(new QString(settings.m_title));
+    }
 
     // scope
     SWGSDRangel::SWGGLScope *swgScope = new SWGSDRangel::SWGGLScope();
@@ -72,7 +76,11 @@ void DOA2WebAPIAdapter::webapiFormatChannelSettings(
         swgScope->getTracesData()->back()->setStreamIndex(traceIt->m_streamIndex);
         swgScope->getTracesData()->back()->setOfs(traceIt->m_ofs);
         swgScope->getTracesData()->back()->setProjectionType((int) traceIt->m_projectionType);
-        swgScope->getTracesData()->back()->setTextOverlay(new QString(traceIt->m_textOverlay));
+        if (swgScope->getTracesData()->back()->getTextOverlay()) {
+            *swgScope->getTracesData()->back()->getTextOverlay() = traceIt->m_textOverlay;
+        } else {
+            swgScope->getTracesData()->back()->setTextOverlay(new QString(traceIt->m_textOverlay));
+        }
         swgScope->getTracesData()->back()->setTraceColor(qColorToInt(traceIt->m_traceColor));
         swgScope->getTracesData()->back()->setTraceColorB(traceIt->m_traceColorB);
         swgScope->getTracesData()->back()->setTraceColorG(traceIt->m_traceColorG);

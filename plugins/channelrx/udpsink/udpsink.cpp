@@ -221,7 +221,11 @@ void UDPSink::applySettings(const QStringList& settingsKeys, const UDPSinkSettin
         sendChannelSettings(pipes, settingsKeys, settings, force);
     }
 
-    m_settings = settings;
+    if (force) {
+        m_settings = settings;
+    } else {
+        m_settings.applySettings(settingsKeys, settings);
+    }
 }
 
 QByteArray UDPSink::serialize() const
@@ -550,7 +554,11 @@ void UDPSink::webapiFormatChannelSettings(
     swgChannelSettings->setDirection(0); // Single sink (Rx)
     swgChannelSettings->setOriginatorChannelIndex(getIndexInDeviceSet());
     swgChannelSettings->setOriginatorDeviceSetIndex(getDeviceSetIndex());
-    swgChannelSettings->setChannelType(new QString(m_channelId));
+    if (swgChannelSettings->getChannelType()) {
+        *swgChannelSettings->getChannelType() = m_channelId;
+    } else {
+        swgChannelSettings->setChannelType(new QString(m_channelId));
+    }
     swgChannelSettings->setUdpSinkSettings(new SWGSDRangel::SWGUDPSinkSettings());
     SWGSDRangel::SWGUDPSinkSettings *swgUDPSinkSettings = swgChannelSettings->getUdpSinkSettings();
 
@@ -599,7 +607,11 @@ void UDPSink::webapiFormatChannelSettings(
         swgUDPSinkSettings->setVolume(settings.m_volume);
     }
     if (channelSettingsKeys.contains("udpAddress") || force) {
-        swgUDPSinkSettings->setUdpAddress(new QString(settings.m_udpAddress));
+        if (swgUDPSinkSettings->getUdpAddress()) {
+            *swgUDPSinkSettings->getUdpAddress() = settings.m_udpAddress;
+        } else {
+            swgUDPSinkSettings->setUdpAddress(new QString(settings.m_udpAddress));
+        }
     }
     if (channelSettingsKeys.contains("udpPort") || force) {
         swgUDPSinkSettings->setUdpPort(settings.m_udpPort);
@@ -611,7 +623,11 @@ void UDPSink::webapiFormatChannelSettings(
         swgUDPSinkSettings->setRgbColor(settings.m_rgbColor);
     }
     if (channelSettingsKeys.contains("title") || force) {
-        swgUDPSinkSettings->setTitle(new QString(settings.m_title));
+        if (swgUDPSinkSettings->getTitle()) {
+            *swgUDPSinkSettings->getTitle() = settings.m_title;
+        } else {
+            swgUDPSinkSettings->setTitle(new QString(settings.m_title));
+        }
     }
     if (channelSettingsKeys.contains("streamIndex") || force) {
         swgUDPSinkSettings->setStreamIndex(settings.m_streamIndex);

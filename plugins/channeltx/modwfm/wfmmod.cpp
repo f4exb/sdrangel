@@ -293,7 +293,11 @@ void WFMMod::applySettings(const QStringList& settingsKeys, const WFMModSettings
         sendChannelSettings(pipes, settingsKeys, settings, force);
     }
 
-    m_settings = settings;
+    if (force) {
+        m_settings = settings;
+    } else {
+        m_settings.applySettings(settingsKeys, settings);
+    }
 }
 
 QByteArray WFMMod::serialize() const
@@ -647,7 +651,11 @@ void WFMMod::webapiFormatChannelSettings(
     swgChannelSettings->setDirection(1); // single source (Tx)
     swgChannelSettings->setOriginatorChannelIndex(getIndexInDeviceSet());
     swgChannelSettings->setOriginatorDeviceSetIndex(getDeviceSetIndex());
-    swgChannelSettings->setChannelType(new QString(m_channelId));
+    if (swgChannelSettings->getChannelType()) {
+        *swgChannelSettings->getChannelType() = m_channelId;
+    } else {
+        swgChannelSettings->setChannelType(new QString(m_channelId));
+    }
     swgChannelSettings->setWfmModSettings(new SWGSDRangel::SWGWFMModSettings());
     SWGSDRangel::SWGWFMModSettings *swgWFMModSettings = swgChannelSettings->getWfmModSettings();
 
@@ -675,7 +683,11 @@ void WFMMod::webapiFormatChannelSettings(
         swgWFMModSettings->setRgbColor(settings.m_rgbColor);
     }
     if (channelSettingsKeys.contains("title") || force) {
-        swgWFMModSettings->setTitle(new QString(settings.m_title));
+        if (swgWFMModSettings->getTitle()) {
+            *swgWFMModSettings->getTitle() = settings.m_title;
+        } else {
+            swgWFMModSettings->setTitle(new QString(settings.m_title));
+        }
     }
     if (channelSettingsKeys.contains("toneFrequency") || force) {
         swgWFMModSettings->setToneFrequency(settings.m_toneFrequency);
@@ -690,7 +702,11 @@ void WFMMod::webapiFormatChannelSettings(
         swgWFMModSettings->setStreamIndex(settings.m_streamIndex);
     }
     if (channelSettingsKeys.contains("audioDeviceName") || force) {
-        swgWFMModSettings->setAudioDeviceName(new QString(settings.m_audioDeviceName));
+        if (swgWFMModSettings->getAudioDeviceName()) {
+            *swgWFMModSettings->getAudioDeviceName() = settings.m_audioDeviceName;
+        } else {
+            swgWFMModSettings->setAudioDeviceName(new QString(settings.m_audioDeviceName));
+        }
     }
 
     if (settings.m_channelMarker && (channelSettingsKeys.contains("channelMarker") || force))

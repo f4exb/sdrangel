@@ -88,7 +88,7 @@ private:
     explicit FreqScannerGUI(PluginAPI* pluginAPI, DeviceUISet *deviceUISet, BasebandSampleSink *rxChannel, QWidget* parent = 0);
     virtual ~FreqScannerGUI();
 
-    void blockApplySettings(bool block);
+    bool blockApplySettings(bool block);
     void applySetting(const QString& settingsKey);
     void applySettings(const QStringList& settingsKeys, bool force = false);
     void applyAllSettings();

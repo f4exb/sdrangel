@@ -56,6 +56,7 @@ public:
 	bool           m_g0_af_updated;
 	unsigned int   m_g0_count;
 	char           m_g0_program_service_name[8+1];
+	char           m_g0_program_service_name_complete[8+1]; //!< Last name for which all four segments were received
 	unsigned char  m_g0_psn_bitmap;
 	bool           m_g0_traffic_announcement;
 	bool           m_g0_music_speech;

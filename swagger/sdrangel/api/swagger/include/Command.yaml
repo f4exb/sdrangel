@@ -3,21 +3,31 @@ Command:
   properties:
     group:
       type: string
+      description: "Group for Command."
     description:
       type: string
+      description: "Human-readable description."
     command:
       type: string
+      description: "Command for Command."
     argString:
       type: string
+      description: "Arg string for Command."
     key:
-      description: Qt::Key
+      description: >
+        Keyboard key that triggers the command. Key code as a Qt key value, for example 32 (0x20) for space and 65 (0x41) for A. Letter keys use the upper case code. 0 for no key.
       type: integer
     keyModifiers:
-      description: Qt::KeyboardModifiers
+      description: >
+        Modifiers for the trigger key. Modifier keys held with the key, as a sum of flags: 33554432 (0x02000000) shift, 67108864 (0x04000000) control, 134217728 (0x08000000) alt, 268435456 (0x10000000) meta. 0 for no modifier.
       type: integer
     associateKey:
       description: boolean
       type: integer
+      minimum: 0
+      maximum: 1
     release:
       description: boolean
       type: integer
+      minimum: 0
+      maximum: 1

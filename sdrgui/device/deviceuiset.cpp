@@ -56,6 +56,7 @@ DeviceUISet::DeviceUISet(int deviceSetIndex, DeviceSet *deviceSet)
     m_spectrumGUI = new GLSpectrumGUI;
     m_spectrumGUI->setBuddies(m_spectrumVis, m_spectrum);
     m_mainSpectrumGUI = new MainSpectrumGUI(m_spectrum, m_spectrumGUI);
+    m_mainSpectrumGUI->setWindowOwner(m_spectrumVis);
     // m_channelWindow = new ChannelWindow;
     m_deviceAPI = nullptr;
     m_deviceGUI = nullptr;
@@ -112,6 +113,7 @@ void DeviceUISet::removeChannelMarker(ChannelMarker* channelMarker)
 
 void DeviceUISet::registerRxChannelInstance(ChannelAPI *channelAPI, ChannelGUI* channelGUI)
 {
+    channelGUI->setWindowOwner(channelAPI);
     m_channelInstanceRegistrations.append(ChannelInstanceRegistration(channelAPI, channelGUI, 0));
     m_deviceSet->addChannelInstance(channelAPI);
     QObject::connect(
@@ -125,6 +127,7 @@ void DeviceUISet::registerRxChannelInstance(ChannelAPI *channelAPI, ChannelGUI* 
 
 void DeviceUISet::registerTxChannelInstance(ChannelAPI *channelAPI, ChannelGUI* channelGUI)
 {
+    channelGUI->setWindowOwner(channelAPI);
     m_channelInstanceRegistrations.append(ChannelInstanceRegistration(channelAPI, channelGUI, 1));
     m_deviceSet->addChannelInstance(channelAPI);
     QObject::connect(
@@ -138,6 +141,7 @@ void DeviceUISet::registerTxChannelInstance(ChannelAPI *channelAPI, ChannelGUI* 
 
 void DeviceUISet::registerChannelInstance(ChannelAPI *channelAPI, ChannelGUI* channelGUI)
 {
+    channelGUI->setWindowOwner(channelAPI);
     m_channelInstanceRegistrations.append(ChannelInstanceRegistration( channelAPI, channelGUI, 2));
     m_deviceSet->addChannelInstance(channelAPI);
     QObject::connect(

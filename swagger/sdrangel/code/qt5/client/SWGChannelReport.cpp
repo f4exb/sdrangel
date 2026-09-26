@@ -46,6 +46,8 @@ SWGChannelReport::SWGChannelReport() {
     m_atv_mod_report_isSet = false;
     bfm_demod_report = nullptr;
     m_bfm_demod_report_isSet = false;
+    dab_demod_report = nullptr;
+    m_dab_demod_report_isSet = false;
     channel_power_report = nullptr;
     m_channel_power_report_isSet = false;
     chirp_chat_demod_report = nullptr;
@@ -170,6 +172,8 @@ SWGChannelReport::init() {
     m_atv_mod_report_isSet = false;
     bfm_demod_report = new SWGBFMDemodReport();
     m_bfm_demod_report_isSet = false;
+    dab_demod_report = new SWGDABDemodReport();
+    m_dab_demod_report_isSet = false;
     channel_power_report = new SWGChannelPowerReport();
     m_channel_power_report_isSet = false;
     chirp_chat_demod_report = new SWGChirpChatDemodReport();
@@ -296,6 +300,9 @@ SWGChannelReport::cleanup() {
     }
     if(bfm_demod_report != nullptr) { 
         delete bfm_demod_report;
+    }
+    if(dab_demod_report != nullptr) { 
+        delete dab_demod_report;
     }
     if(channel_power_report != nullptr) { 
         delete channel_power_report;
@@ -475,6 +482,8 @@ SWGChannelReport::fromJsonObject(QJsonObject &pJson) {
     
     ::SWGSDRangel::setValue(&bfm_demod_report, pJson["BFMDemodReport"], "SWGBFMDemodReport", "SWGBFMDemodReport");
     
+    ::SWGSDRangel::setValue(&dab_demod_report, pJson["DABDemodReport"], "SWGDABDemodReport", "SWGDABDemodReport");
+    
     ::SWGSDRangel::setValue(&channel_power_report, pJson["ChannelPowerReport"], "SWGChannelPowerReport", "SWGChannelPowerReport");
     
     ::SWGSDRangel::setValue(&chirp_chat_demod_report, pJson["ChirpChatDemodReport"], "SWGChirpChatDemodReport", "SWGChirpChatDemodReport");
@@ -521,9 +530,9 @@ SWGChannelReport::fromJsonObject(QJsonObject &pJson) {
     
     ::SWGSDRangel::setValue(&meshtastic_demod_report, pJson["MeshtasticDemodReport"], "SWGMeshtasticDemodReport", "SWGMeshtasticDemodReport");
     
-    ::SWGSDRangel::setValue(&meshcore_demod_report, pJson["MeshcoreDemodReport"], "SWGMeshcoreDemodReport", "SWGMeshcoreDemodReport");
-    
     ::SWGSDRangel::setValue(&meshtastic_mod_report, pJson["MeshtasticModReport"], "SWGMeshtasticModReport", "SWGMeshtasticModReport");
+    
+    ::SWGSDRangel::setValue(&meshcore_demod_report, pJson["MeshcoreDemodReport"], "SWGMeshcoreDemodReport", "SWGMeshcoreDemodReport");
     
     ::SWGSDRangel::setValue(&meshcore_mod_report, pJson["MeshcoreModReport"], "SWGMeshcoreModReport", "SWGMeshcoreModReport");
     
@@ -616,6 +625,9 @@ SWGChannelReport::asJsonObject() {
     if((bfm_demod_report != nullptr) && (bfm_demod_report->isSet())){
         toJsonValue(QString("BFMDemodReport"), bfm_demod_report, obj, QString("SWGBFMDemodReport"));
     }
+    if((dab_demod_report != nullptr) && (dab_demod_report->isSet())){
+        toJsonValue(QString("DABDemodReport"), dab_demod_report, obj, QString("SWGDABDemodReport"));
+    }
     if((channel_power_report != nullptr) && (channel_power_report->isSet())){
         toJsonValue(QString("ChannelPowerReport"), channel_power_report, obj, QString("SWGChannelPowerReport"));
     }
@@ -685,11 +697,11 @@ SWGChannelReport::asJsonObject() {
     if((meshtastic_demod_report != nullptr) && (meshtastic_demod_report->isSet())){
         toJsonValue(QString("MeshtasticDemodReport"), meshtastic_demod_report, obj, QString("SWGMeshtasticDemodReport"));
     }
-    if((meshcore_demod_report != nullptr) && (meshcore_demod_report->isSet())){
-        toJsonValue(QString("MeshcoreDemodReport"), meshcore_demod_report, obj, QString("SWGMeshcoreDemodReport"));
-    }
     if((meshtastic_mod_report != nullptr) && (meshtastic_mod_report->isSet())){
         toJsonValue(QString("MeshtasticModReport"), meshtastic_mod_report, obj, QString("SWGMeshtasticModReport"));
+    }
+    if((meshcore_demod_report != nullptr) && (meshcore_demod_report->isSet())){
+        toJsonValue(QString("MeshcoreDemodReport"), meshcore_demod_report, obj, QString("SWGMeshcoreDemodReport"));
     }
     if((meshcore_mod_report != nullptr) && (meshcore_mod_report->isSet())){
         toJsonValue(QString("MeshcoreModReport"), meshcore_mod_report, obj, QString("SWGMeshcoreModReport"));
@@ -855,6 +867,16 @@ void
 SWGChannelReport::setBfmDemodReport(SWGBFMDemodReport* bfm_demod_report) {
     this->bfm_demod_report = bfm_demod_report;
     this->m_bfm_demod_report_isSet = true;
+}
+
+SWGDABDemodReport*
+SWGChannelReport::getDabDemodReport() {
+    return dab_demod_report;
+}
+void
+SWGChannelReport::setDabDemodReport(SWGDABDemodReport* dab_demod_report) {
+    this->dab_demod_report = dab_demod_report;
+    this->m_dab_demod_report_isSet = true;
 }
 
 SWGChannelPowerReport*
@@ -1377,6 +1399,9 @@ SWGChannelReport::isSet(){
             isObjectUpdated = true; break;
         }
         if(bfm_demod_report && bfm_demod_report->isSet()){
+            isObjectUpdated = true; break;
+        }
+        if(dab_demod_report && dab_demod_report->isSet()){
             isObjectUpdated = true; break;
         }
         if(channel_power_report && channel_power_report->isSet()){

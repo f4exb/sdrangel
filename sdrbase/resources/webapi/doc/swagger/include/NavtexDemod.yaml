@@ -4,52 +4,78 @@ NavtexDemodSettings:
     inputFrequencyOffset:
       type: integer
       format: int64
+      description: "Channel frequency offset from the device center frequency in Hz."
     rfBandwidth:
       type: number
       format: float
+      description: "RF bandwidth in Hz."
     navArea:
       type: integer
+      description: "Nav area setting for Navtex demod."
     filterStation:
       type: string
+      description: "Filter station setting for Navtex demod."
     filterType:
       type: string
+      description: "Filter type setting for Navtex demod."
     udpEnabled:
       description: "Whether to forward received messages to specified UDP port"
       type: integer
+      minimum: 0
+      maximum: 1
     udpAddress:
       description: "UDP address to forward received messages to"
       type: string
     udpPort:
       description: "UDP port to forward received messages to"
       type: integer
+      minimum: 1
+      maximum: 65535
     logFilename:
       type: string
+      description: "Log file name or path."
     logEnabled:
       type: integer
+      description: "Enable logging to the configured file (1 enabled, 0 disabled)."
+      minimum: 0
+      maximum: 1
     rgbColor:
       type: integer
+      description: "Display color encoded as an RGB integer."
     title:
       type: string
+      description: "User-visible title."
     streamIndex:
       description: MIMO channel. Not relevant when connected to SI (single Rx).
       type: integer
     useReverseAPI:
       description: Synchronize with reverse API (1 for yes, 0 for no)
       type: integer
+      minimum: 0
+      maximum: 1
     reverseAPIAddress:
       type: string
+      description: "IPv4 address or host name of the reverse API peer."
     reverseAPIPort:
       type: integer
+      description: "TCP port of the reverse API peer."
+      minimum: 1
+      maximum: 65535
     reverseAPIDeviceIndex:
       type: integer
+      description: "Device-set index used by the reverse API peer."
     reverseAPIChannelIndex:
       type: integer
+      description: "Channel index used by the reverse API peer."
     scopeConfig:
       $ref: "/doc/swagger/include/GLScope.yaml#/GLScope"
+      description: "Oscilloscope-display configuration."
     channelMarker:
       $ref: "/doc/swagger/include/ChannelMarker.yaml#/ChannelMarker"
+      description: "Channel-marker display configuration."
     rollupState:
       $ref: "/doc/swagger/include/RollupState.yaml#/RollupState"
+      description: "Saved expanded or collapsed state of the GUI sections."
 
 NavtexDemodReport:
   description: ACARSDemod
@@ -60,3 +86,4 @@ NavtexDemodReport:
       format: float
     channelSampleRate:
       type: integer
+      description: "Effective sample rate delivered to the channel in samples per second."

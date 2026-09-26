@@ -62,6 +62,8 @@ Use this button to mute or unmute audio
 
 This is the bandwidth in kHz of the channel signal before demodulation. It can be set in steps: 80, 100, 120, 140, 160, 180, 200, 220 and 250 kHz. Inspect the baseband spectrum (B) to adjust for best quality.
 
+The BFM demodulator requires a complex baseband sample rate greater than its RF bandwidth. For a 180 kHz broadcast-FM channel, use at least 240 kS/s; 256 kS/s is recommended.
+
 <h3>A.11: AF bandwidth</h3>
 
 This is the AF bandwidth in kHz. It can be varied continuously between 1 and 20 kHz in steps of 1 kHz.

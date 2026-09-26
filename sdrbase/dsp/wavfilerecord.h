@@ -68,10 +68,19 @@ public:
         quint32 m_unused5;
         char m_nextFilename[96];
     };
+    struct DS64
+    {
+        quint64 m_riffSize;
+        quint64 m_dataSize;
+        quint64 m_sampleCount;
+        quint32 m_tableLength;
+    };
     struct SDRBASE_API Header
     {
         Chunk m_riffHeader;
         char m_type[4];        // "WAVE"
+        Chunk m_junk;          // "JUNK" placeholder for RF64 ds64
+        DS64 m_ds64;           // Not used if RIFF
         Chunk m_fmtHeader;
         quint16 m_audioFormat;
         quint16 m_numChannels;
@@ -151,7 +160,8 @@ private:
     void writeInfoList();
     void writeID3();
 
-    static bool checkHeader(Header& header);
+    template<typename File>
+        static bool readHeaderInternal(File& sampleFile, Header& header, bool check);
 };
 
 #endif // INCLUDE_WAV_FILERECORD_H

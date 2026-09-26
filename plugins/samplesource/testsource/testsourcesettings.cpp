@@ -45,6 +45,8 @@ void TestSourceSettings::resetToDefaults()
     m_iFactor = 0.0f;
     m_qFactor = 0.0f;
     m_phaseImbalance = 0.0f;
+    m_period = 1000;
+    m_dutyCycle = 50;
     m_useReverseAPI = false;
     m_reverseAPIAddress = "127.0.0.1";
     m_reverseAPIPort = 8888;
@@ -75,6 +77,8 @@ QByteArray TestSourceSettings::serialize() const
     s.writeString(19, m_reverseAPIAddress);
     s.writeU32(20, m_reverseAPIPort);
     s.writeU32(21, m_reverseAPIDeviceIndex);
+    s.writeS32(22, m_period);
+    s.writeS32(23, m_dutyCycle);
 
     return s.final();
 }
@@ -139,6 +143,11 @@ bool TestSourceSettings::deserialize(const QByteArray& data)
         d.readU32(21, &utmp, 0);
         m_reverseAPIDeviceIndex = utmp > 99 ? 99 : utmp;
 
+        d.readS32(22, &m_period, 1000);
+        m_period = m_period < 1 ? 1 : m_period;
+        d.readS32(23, &m_dutyCycle, 50);
+        m_dutyCycle = m_dutyCycle < 0 ? 0 : m_dutyCycle > 100 ? 100 : m_dutyCycle;
+
         return true;
     }
     else
@@ -200,6 +209,12 @@ void TestSourceSettings::applySettings(const QStringList& settingsKeys, const Te
     }
     if (settingsKeys.contains("phaseImbalance")) {
         m_phaseImbalance = settings.m_phaseImbalance;
+    }
+    if (settingsKeys.contains("period")) {
+        m_period = settings.m_period;
+    }
+    if (settingsKeys.contains("dutyCycle")) {
+        m_dutyCycle = settings.m_dutyCycle;
     }
     if (settingsKeys.contains("useReverseAPI")) {
         m_useReverseAPI = settings.m_useReverseAPI;
@@ -269,6 +284,12 @@ QString TestSourceSettings::getDebugString(const QStringList& settingsKeys, bool
     }
     if (settingsKeys.contains("phaseImbalance") || force) {
         ostr << " m_phaseImbalance: " << m_phaseImbalance;
+    }
+    if (settingsKeys.contains("period") || force) {
+        ostr << " m_period: " << m_period;
+    }
+    if (settingsKeys.contains("dutyCycle") || force) {
+        ostr << " m_dutyCycle: " << m_dutyCycle;
     }
     if (settingsKeys.contains("useReverseAPI") || force) {
         ostr << " m_useReverseAPI: " << m_useReverseAPI;

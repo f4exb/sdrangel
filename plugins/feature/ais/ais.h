@@ -20,6 +20,7 @@
 #ifndef INCLUDE_FEATURE_AIS_H_
 #define INCLUDE_FEATURE_AIS_H_
 
+#include <QDateTime>
 #include <QNetworkRequest>
 #include <QSet>
 
@@ -66,6 +67,69 @@ public:
         { }
     };
 
+    // A vessel as the GUI knows it. Every field except the MMSI is optional, and m_has* says
+    // which have actually been received: zero is a valid position, course, speed and heading
+    struct Vessel
+    {
+        QString m_mmsi;
+        QString m_name;
+        QString m_callsign;
+        QString m_imo;
+        QString m_country;
+        QString m_type;
+        QString m_shipType;
+        QString m_status;
+        QString m_destination;
+        float m_latitude;
+        float m_longitude;
+        float m_course;
+        float m_speed;
+        int m_heading;
+        int m_length;
+        int m_messages;
+        QDateTime m_positionUpdate;
+        QDateTime m_lastUpdate;
+        bool m_hasPosition;
+        bool m_hasCourse;
+        bool m_hasSpeed;
+        bool m_hasHeading;
+        bool m_hasLength;
+
+        Vessel() :
+            m_latitude(0.0f),
+            m_longitude(0.0f),
+            m_course(0.0f),
+            m_speed(0.0f),
+            m_heading(0),
+            m_length(0),
+            m_messages(0),
+            m_hasPosition(false),
+            m_hasCourse(false),
+            m_hasSpeed(false),
+            m_hasHeading(false),
+            m_hasLength(false)
+        { }
+    };
+
+    // Sent from the GUI, which holds the vessel table, so that the report has something to serve
+    class MsgReportVessels : public Message {
+        MESSAGE_CLASS_DECLARATION
+
+    public:
+        QList<Vessel>& getVessels() { return m_vessels; }
+
+        static MsgReportVessels* create() {
+            return new MsgReportVessels();
+        }
+
+    private:
+        QList<Vessel> m_vessels;
+
+        MsgReportVessels() :
+            Message()
+        { }
+    };
+
     AIS(WebAPIAdapterInterface *webAPIAdapterInterface);
     virtual ~AIS();
     virtual void destroy() { delete this; }
@@ -78,6 +142,10 @@ public:
     virtual QByteArray serialize() const;
     virtual bool deserialize(const QByteArray& data);
 
+    virtual int webapiReportGet(
+            SWGSDRangel::SWGFeatureReport& response,
+            QString& errorMessage);
+
     virtual int webapiSettingsGet(
             SWGSDRangel::SWGFeatureSettings& response,
             QString& errorMessage);
@@ -87,6 +155,8 @@ public:
             const QStringList& featureSettingsKeys,
             SWGSDRangel::SWGFeatureSettings& response,
             QString& errorMessage);
+
+    void webapiFormatFeatureReport(SWGSDRangel::SWGFeatureReport& response);
 
     static void webapiFormatFeatureSettings(
         SWGSDRangel::SWGFeatureSettings& response,
@@ -102,6 +172,8 @@ public:
 
 private:
     AISSettings m_settings;
+    QList<Vessel> m_vessels;      //!< Latest snapshot pushed by the GUI
+    QDateTime m_vesselsUpdated;   //!< When that snapshot was taken
     AvailableChannelOrFeatureHandler m_availableChannelHandler;
 
     QNetworkAccessManager *m_networkManager;

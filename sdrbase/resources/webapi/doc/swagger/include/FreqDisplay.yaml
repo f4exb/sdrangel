@@ -6,45 +6,69 @@ FreqDisplaySettings:
       type: string
     fontName:
       type: string
+      description: "Font name setting for Freq display."
     transparentBackground:
       type: integer
+      description: "Transparent background setting for Freq display."
     displayMode:
       description: (0 Frequency, 1 Power, 2 Frequency and Power)
       type: integer
     speechEnabled:
       type: integer
+      description: "Enable speech (1 enabled, 0 disabled)."
+      minimum: 0
+      maximum: 1
     frequencyUnits:
       description: (0 Hz, 1 kHz, 2 MHz, 3 GHz)
       type: integer
     showUnits:
       type: integer
+      description: "Show units setting for Freq display."
     freqDecimalPlaces:
       type: integer
+      description: "Freq decimal places setting for Freq display."
     powerDecimalPlaces:
       type: integer
+      description: "Power decimal places setting for Freq display."
     textcolor:
       type: integer
+      description: "Textcolor setting for Freq display."
     dropShadowEnabled:
       type: integer    
+      description: "Enable drop shadow (1 enabled, 0 disabled)."
+      minimum: 0
+      maximum: 1
     dropShadowColor:
       type: integer    
+      description: "Drop shadow color encoded as an integer."
     title:
       type: string
+      description: "User-visible title."
     rgbColor:
       type: integer
+      description: "Display color encoded as an RGB integer."
     useReverseAPI:
       description: Synchronize with reverse API (1 for yes, 0 for no)
       type: integer
+      minimum: 0
+      maximum: 1
     reverseAPIAddress:
       type: string
+      description: "IPv4 address or host name of the reverse API peer."
     reverseAPIPort:
       type: integer
+      description: "TCP port of the reverse API peer."
+      minimum: 1
+      maximum: 65535
     reverseAPIFeatureSetIndex:
       type: integer
+      description: "Feature-set index used by the reverse API peer."
     reverseAPIFeatureIndex:
       type: integer
+      description: "Feature index used by the reverse API peer."
     rollupState:
       $ref: "/doc/swagger/include/RollupState.yaml#/RollupState"
+      description: "Saved expanded or collapsed state of the GUI sections."
 
 FreqDisplayReport:
   description: "Frequency Display report"

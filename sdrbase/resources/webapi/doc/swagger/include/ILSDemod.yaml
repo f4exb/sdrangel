@@ -4,87 +4,130 @@ ILSDemodSettings:
     inputFrequencyOffset:
       type: integer
       format: int64
+      description: "Channel frequency offset from the device center frequency in Hz."
     rfBandwidth:
       type: number
       format: float
+      description: "RF bandwidth in Hz."
     mode:
       description: "(0 for LOC, 1 for G/S)"
       type: integer
+      minimum: 0
+      maximum: 1
     frequencyIndex:
       type: integer
+      description: "Selected frequency index."
     squelch:
       type: integer
+      description: "Squelch threshold in dB."
     volume:
       type: number
       format: float
+      description: "Audio volume multiplier."
     audioMute:
       type: integer
+      description: "Mute audio output (1 muted, 0 unmuted)."
+      minimum: 0
+      maximum: 1
     average:
       type: integer
+      description: "Average setting for Ils demod."
     ddmUnits:
       type: integer
+      description: "Ddm units setting for Ils demod."
     identThreshold:
       type: number
       format: float
+      description: "Ident threshold setting for Ils demod."
     ident:
       type: string
+      description: "Ident setting for Ils demod."
     runway:
       type: string
+      description: "Runway setting for Ils demod."
     trueBearing:
       type: number
       format: float
+      description: "True bearing setting for Ils demod."
     latitude:
       type: string
+      description: "Latitude in degrees, positive north."
     longitude:
       type: string
+      description: "Longitude in degrees, positive east."
     elevation:
       type: integer
+      description: "Elevation setting for Ils demod."
     glidePath:
       type: number
       format: float
+      description: "Glide path setting for Ils demod."
     refHeight:
       type: number
       format: float
+      description: "Ref height setting for Ils demod."
     courseWidth:
       type: number
       format: float
+      description: "Course width setting for Ils demod."
     udpEnabled:
       description: "Whether to forward DDM to specified UDP port"
       type: integer
+      minimum: 0
+      maximum: 1
     udpAddress:
       description: "UDP address to forward DDM to"
       type: string
     udpPort:
       description: "UDP port to forward DDM to"
       type: integer
+      minimum: 1
+      maximum: 65535
     logFilename:
       type: string
+      description: "Log file name or path."
     logEnabled:
       type: integer
+      description: "Enable logging to the configured file (1 enabled, 0 disabled)."
+      minimum: 0
+      maximum: 1
     rgbColor:
       type: integer
+      description: "Display color encoded as an RGB integer."
     title:
       type: string
+      description: "User-visible title."
     streamIndex:
       description: MIMO channel. Not relevant when connected to SI (single Rx).
       type: integer
     useReverseAPI:
       description: Synchronize with reverse API (1 for yes, 0 for no)
       type: integer
+      minimum: 0
+      maximum: 1
     reverseAPIAddress:
       type: string
+      description: "IPv4 address or host name of the reverse API peer."
     reverseAPIPort:
       type: integer
+      description: "TCP port of the reverse API peer."
+      minimum: 1
+      maximum: 65535
     reverseAPIDeviceIndex:
       type: integer
+      description: "Device-set index used by the reverse API peer."
     reverseAPIChannelIndex:
       type: integer
+      description: "Channel index used by the reverse API peer."
     scopeConfig:
       $ref: "/doc/swagger/include/GLScope.yaml#/GLScope"
+      description: "Oscilloscope-display configuration."
     channelMarker:
       $ref: "/doc/swagger/include/ChannelMarker.yaml#/ChannelMarker"
+      description: "Channel-marker display configuration."
     rollupState:
       $ref: "/doc/swagger/include/RollupState.yaml#/RollupState"
+      description: "Saved expanded or collapsed state of the GUI sections."
 
 ILSDemodReport:
   description: ILSDemod
@@ -95,8 +138,10 @@ ILSDemodReport:
       format: float
     channelSampleRate:
       type: integer
+      description: "Effective sample rate delivered to the channel in samples per second."
     ident:
       type: string
+      description: "Reported ident."
     deviation:
       description: deviation in degrees
       type: number

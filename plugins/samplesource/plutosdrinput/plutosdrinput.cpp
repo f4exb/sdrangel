@@ -932,10 +932,10 @@ void PlutoSDRInput::webapiUpdateDeviceSettings(
         settings.m_hwBBDCBlock = response.getPlutoSdrInputSettings()->getHwBbdcBlock() != 0;
     }
     if (deviceSettingsKeys.contains("hwRFDCBlock")) {
-        settings.m_hwBBDCBlock = response.getPlutoSdrInputSettings()->getHwRfdcBlock() != 0;
+        settings.m_hwRFDCBlock = response.getPlutoSdrInputSettings()->getHwRfdcBlock() != 0;
     }
     if (deviceSettingsKeys.contains("hwIQCorrection")) {
-        settings.m_hwBBDCBlock = response.getPlutoSdrInputSettings()->getHwIqCorrection() != 0;
+        settings.m_hwIQCorrection = response.getPlutoSdrInputSettings()->getHwIqCorrection() != 0;
     }
     if (deviceSettingsKeys.contains("log2Decim")) {
         settings.m_log2Decim = response.getPlutoSdrInputSettings()->getLog2Decim();
@@ -1037,7 +1037,11 @@ void PlutoSDRInput::webapiFormatDeviceReport(SWGSDRangel::SWGDeviceReport& respo
     response.getPlutoSdrInputReport()->setAdcRate(getADCSampleRate());
     std::string rssiStr;
     getRSSI(rssiStr);
-    response.getPlutoSdrInputReport()->setRssi(new QString(rssiStr.c_str()));
+    if (response.getPlutoSdrInputReport()->getRssi()) {
+        *response.getPlutoSdrInputReport()->getRssi() = rssiStr.c_str();
+    } else {
+        response.getPlutoSdrInputReport()->setRssi(new QString(rssiStr.c_str()));
+    }
     int gainDB;
     getGain(gainDB);
     response.getPlutoSdrInputReport()->setGainDb(gainDB);

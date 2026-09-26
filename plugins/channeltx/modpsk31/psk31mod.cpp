@@ -364,6 +364,9 @@ void PSK31::webapiUpdateChannelSettings(
     if (channelSettingsKeys.contains("text")) {
         settings.m_text = *response.getPsk31ModSettings()->getText();
     }
+    if (channelSettingsKeys.contains("pulseShaping")) {
+        settings.m_pulseShaping = response.getPsk31ModSettings()->getPulseShaping() != 0;
+    }
     if (channelSettingsKeys.contains("beta")) {
         settings.m_beta = response.getPsk31ModSettings()->getBeta();
     }
@@ -502,7 +505,11 @@ void PSK31::webapiFormatChannelSettings(SWGSDRangel::SWGChannelSettings& respons
     response.getPsk31ModSettings()->setPostfixCrlf(settings.m_postfixCRLF);
 
     response.getPsk31ModSettings()->setUdpEnabled(settings.m_udpEnabled);
-    response.getPsk31ModSettings()->setUdpAddress(new QString(settings.m_udpAddress));
+    if (response.getPsk31ModSettings()->getUdpAddress()) {
+        *response.getPsk31ModSettings()->getUdpAddress() = settings.m_udpAddress;
+    } else {
+        response.getPsk31ModSettings()->setUdpAddress(new QString(settings.m_udpAddress));
+    }
     response.getPsk31ModSettings()->setUdpPort(settings.m_udpPort);
 
     response.getPsk31ModSettings()->setRgbColor(settings.m_rgbColor);
@@ -620,7 +627,11 @@ void PSK31::webapiFormatChannelSettings(
     swgChannelSettings->setDirection(1); // single source (Tx)
     swgChannelSettings->setOriginatorChannelIndex(getIndexInDeviceSet());
     swgChannelSettings->setOriginatorDeviceSetIndex(getDeviceSetIndex());
-    swgChannelSettings->setChannelType(new QString(m_channelId));
+    if (swgChannelSettings->getChannelType()) {
+        *swgChannelSettings->getChannelType() = m_channelId;
+    } else {
+        swgChannelSettings->setChannelType(new QString(m_channelId));
+    }
     swgChannelSettings->setPsk31ModSettings(new SWGSDRangel::SWGPSK31ModSettings());
     SWGSDRangel::SWGPSK31ModSettings *swgPSK31ModSettings = swgChannelSettings->getPsk31ModSettings();
 
@@ -651,7 +662,11 @@ void PSK31::webapiFormatChannelSettings(
         swgPSK31ModSettings->setRfNoise(settings.m_rfNoise ? 1 : 0);
     }
     if (channelSettingsKeys.contains("text")) {
-        swgPSK31ModSettings->setText(new QString(settings.m_text));
+        if (swgPSK31ModSettings->getText()) {
+            *swgPSK31ModSettings->getText() = settings.m_text;
+        } else {
+            swgPSK31ModSettings->setText(new QString(settings.m_text));
+        }
     }
     if (channelSettingsKeys.contains("beta")) {
         swgPSK31ModSettings->setBeta(settings.m_beta);
@@ -669,7 +684,11 @@ void PSK31::webapiFormatChannelSettings(
         swgPSK31ModSettings->setRgbColor(settings.m_rgbColor);
     }
     if (channelSettingsKeys.contains("title") || force) {
-        swgPSK31ModSettings->setTitle(new QString(settings.m_title));
+        if (swgPSK31ModSettings->getTitle()) {
+            *swgPSK31ModSettings->getTitle() = settings.m_title;
+        } else {
+            swgPSK31ModSettings->setTitle(new QString(settings.m_title));
+        }
     }
     if (channelSettingsKeys.contains("streamIndex") || force) {
         swgPSK31ModSettings->setStreamIndex(settings.m_streamIndex);
@@ -678,7 +697,11 @@ void PSK31::webapiFormatChannelSettings(
         swgPSK31ModSettings->setUdpEnabled(settings.m_udpEnabled);
     }
     if (channelSettingsKeys.contains("udpAddress") || force) {
-        swgPSK31ModSettings->setUdpAddress(new QString(settings.m_udpAddress));
+        if (swgPSK31ModSettings->getUdpAddress()) {
+            *swgPSK31ModSettings->getUdpAddress() = settings.m_udpAddress;
+        } else {
+            swgPSK31ModSettings->setUdpAddress(new QString(settings.m_udpAddress));
+        }
     }
     if (channelSettingsKeys.contains("udpPort") || force) {
         swgPSK31ModSettings->setUdpPort(settings.m_udpPort);

@@ -30,8 +30,76 @@ SWGMapSettings::SWGMapSettings(QString* json) {
 SWGMapSettings::SWGMapSettings() {
     display_names = 0;
     m_display_names_isSet = false;
+    map2_d_enabled = 0;
+    m_map2_d_enabled_isSet = false;
+    map3_d_enabled = 0;
+    m_map3_d_enabled_isSet = false;
+    map_provider = nullptr;
+    m_map_provider_isSet = false;
+    map_type = nullptr;
+    m_map_type_isSet = false;
+    osm_url = nullptr;
+    m_osm_url_isSet = false;
+    map_box_styles = nullptr;
+    m_map_box_styles_isSet = false;
+    display_selected_ground_tracks = 0;
+    m_display_selected_ground_tracks_isSet = false;
+    display_all_ground_tracks = 0;
+    m_display_all_ground_tracks_isSet = false;
     terrain = nullptr;
     m_terrain_isSet = false;
+    buildings = nullptr;
+    m_buildings_isSet = false;
+    sun_light_enabled = 0;
+    m_sun_light_enabled_isSet = false;
+    light_intensity = 0.0f;
+    m_light_intensity_isSet = false;
+    eci_camera = 0;
+    m_eci_camera_isSet = false;
+    fxaa = 0;
+    m_fxaa_isSet = false;
+    msaa = 0;
+    m_msaa_isSet = false;
+    terrain_lighting = 0;
+    m_terrain_lighting_isSet = false;
+    water = 0;
+    m_water_isSet = false;
+    hdr = 0;
+    m_hdr_isSet = false;
+    fog = 0;
+    m_fog_isSet = false;
+    fps = 0;
+    m_fps_isSet = false;
+    display_muf = 0;
+    m_display_muf_isSet = false;
+    displayfo_f2 = 0;
+    m_displayfo_f2_isSet = false;
+    display_rain = 0;
+    m_display_rain_isSet = false;
+    display_clouds = 0;
+    m_display_clouds_isSet = false;
+    display_sea_marks = 0;
+    m_display_sea_marks_isSet = false;
+    display_railways = 0;
+    m_display_railways_isSet = false;
+    display_nasa_global_imagery = 0;
+    m_display_nasa_global_imagery_isSet = false;
+    nasa_global_imagery_identifier = nullptr;
+    m_nasa_global_imagery_identifier_isSet = false;
+    nasa_global_imagery_opacity = 0;
+    m_nasa_global_imagery_opacity_isSet = false;
+    display_aurora = 0;
+    m_display_aurora_isSet = false;
+    display_mag_dec = 0;
+    m_display_mag_dec_isSet = false;
+    display_maidenhead_grid = 0;
+    m_display_maidenhead_grid_isSet = false;
+    display_pfd = 0;
+    m_display_pfd_isSet = false;
+    view_first_person = 0;
+    m_view_first_person_isSet = false;
+    default_imagery = nullptr;
+    m_default_imagery_isSet = false;
     title = nullptr;
     m_title_isSet = false;
     rgb_color = 0;
@@ -58,8 +126,76 @@ void
 SWGMapSettings::init() {
     display_names = 0;
     m_display_names_isSet = false;
+    map2_d_enabled = 0;
+    m_map2_d_enabled_isSet = false;
+    map3_d_enabled = 0;
+    m_map3_d_enabled_isSet = false;
+    map_provider = new QString("");
+    m_map_provider_isSet = false;
+    map_type = new QString("");
+    m_map_type_isSet = false;
+    osm_url = new QString("");
+    m_osm_url_isSet = false;
+    map_box_styles = new QString("");
+    m_map_box_styles_isSet = false;
+    display_selected_ground_tracks = 0;
+    m_display_selected_ground_tracks_isSet = false;
+    display_all_ground_tracks = 0;
+    m_display_all_ground_tracks_isSet = false;
     terrain = new QString("");
     m_terrain_isSet = false;
+    buildings = new QString("");
+    m_buildings_isSet = false;
+    sun_light_enabled = 0;
+    m_sun_light_enabled_isSet = false;
+    light_intensity = 0.0f;
+    m_light_intensity_isSet = false;
+    eci_camera = 0;
+    m_eci_camera_isSet = false;
+    fxaa = 0;
+    m_fxaa_isSet = false;
+    msaa = 0;
+    m_msaa_isSet = false;
+    terrain_lighting = 0;
+    m_terrain_lighting_isSet = false;
+    water = 0;
+    m_water_isSet = false;
+    hdr = 0;
+    m_hdr_isSet = false;
+    fog = 0;
+    m_fog_isSet = false;
+    fps = 0;
+    m_fps_isSet = false;
+    display_muf = 0;
+    m_display_muf_isSet = false;
+    displayfo_f2 = 0;
+    m_displayfo_f2_isSet = false;
+    display_rain = 0;
+    m_display_rain_isSet = false;
+    display_clouds = 0;
+    m_display_clouds_isSet = false;
+    display_sea_marks = 0;
+    m_display_sea_marks_isSet = false;
+    display_railways = 0;
+    m_display_railways_isSet = false;
+    display_nasa_global_imagery = 0;
+    m_display_nasa_global_imagery_isSet = false;
+    nasa_global_imagery_identifier = new QString("");
+    m_nasa_global_imagery_identifier_isSet = false;
+    nasa_global_imagery_opacity = 0;
+    m_nasa_global_imagery_opacity_isSet = false;
+    display_aurora = 0;
+    m_display_aurora_isSet = false;
+    display_mag_dec = 0;
+    m_display_mag_dec_isSet = false;
+    display_maidenhead_grid = 0;
+    m_display_maidenhead_grid_isSet = false;
+    display_pfd = 0;
+    m_display_pfd_isSet = false;
+    view_first_person = 0;
+    m_view_first_person_isSet = false;
+    default_imagery = new QString("");
+    m_default_imagery_isSet = false;
     title = new QString("");
     m_title_isSet = false;
     rgb_color = 0;
@@ -81,8 +217,56 @@ SWGMapSettings::init() {
 void
 SWGMapSettings::cleanup() {
 
+
+
+    if(map_provider != nullptr) { 
+        delete map_provider;
+    }
+    if(map_type != nullptr) { 
+        delete map_type;
+    }
+    if(osm_url != nullptr) { 
+        delete osm_url;
+    }
+    if(map_box_styles != nullptr) { 
+        delete map_box_styles;
+    }
+
+
     if(terrain != nullptr) { 
         delete terrain;
+    }
+    if(buildings != nullptr) { 
+        delete buildings;
+    }
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+    if(nasa_global_imagery_identifier != nullptr) { 
+        delete nasa_global_imagery_identifier;
+    }
+
+
+
+
+
+
+    if(default_imagery != nullptr) { 
+        delete default_imagery;
     }
     if(title != nullptr) { 
         delete title;
@@ -113,7 +297,75 @@ void
 SWGMapSettings::fromJsonObject(QJsonObject &pJson) {
     ::SWGSDRangel::setValue(&display_names, pJson["displayNames"], "qint32", "");
     
+    ::SWGSDRangel::setValue(&map2_d_enabled, pJson["map2DEnabled"], "qint32", "");
+    
+    ::SWGSDRangel::setValue(&map3_d_enabled, pJson["map3DEnabled"], "qint32", "");
+    
+    ::SWGSDRangel::setValue(&map_provider, pJson["mapProvider"], "QString", "QString");
+    
+    ::SWGSDRangel::setValue(&map_type, pJson["mapType"], "QString", "QString");
+    
+    ::SWGSDRangel::setValue(&osm_url, pJson["osmURL"], "QString", "QString");
+    
+    ::SWGSDRangel::setValue(&map_box_styles, pJson["mapBoxStyles"], "QString", "QString");
+    
+    ::SWGSDRangel::setValue(&display_selected_ground_tracks, pJson["displaySelectedGroundTracks"], "qint32", "");
+    
+    ::SWGSDRangel::setValue(&display_all_ground_tracks, pJson["displayAllGroundTracks"], "qint32", "");
+    
     ::SWGSDRangel::setValue(&terrain, pJson["terrain"], "QString", "QString");
+    
+    ::SWGSDRangel::setValue(&buildings, pJson["buildings"], "QString", "QString");
+    
+    ::SWGSDRangel::setValue(&sun_light_enabled, pJson["sunLightEnabled"], "qint32", "");
+    
+    ::SWGSDRangel::setValue(&light_intensity, pJson["lightIntensity"], "float", "");
+    
+    ::SWGSDRangel::setValue(&eci_camera, pJson["eciCamera"], "qint32", "");
+    
+    ::SWGSDRangel::setValue(&fxaa, pJson["fxaa"], "qint32", "");
+    
+    ::SWGSDRangel::setValue(&msaa, pJson["msaa"], "qint32", "");
+    
+    ::SWGSDRangel::setValue(&terrain_lighting, pJson["terrainLighting"], "qint32", "");
+    
+    ::SWGSDRangel::setValue(&water, pJson["water"], "qint32", "");
+    
+    ::SWGSDRangel::setValue(&hdr, pJson["hdr"], "qint32", "");
+    
+    ::SWGSDRangel::setValue(&fog, pJson["fog"], "qint32", "");
+    
+    ::SWGSDRangel::setValue(&fps, pJson["fps"], "qint32", "");
+    
+    ::SWGSDRangel::setValue(&display_muf, pJson["displayMUF"], "qint32", "");
+    
+    ::SWGSDRangel::setValue(&displayfo_f2, pJson["displayfoF2"], "qint32", "");
+    
+    ::SWGSDRangel::setValue(&display_rain, pJson["displayRain"], "qint32", "");
+    
+    ::SWGSDRangel::setValue(&display_clouds, pJson["displayClouds"], "qint32", "");
+    
+    ::SWGSDRangel::setValue(&display_sea_marks, pJson["displaySeaMarks"], "qint32", "");
+    
+    ::SWGSDRangel::setValue(&display_railways, pJson["displayRailways"], "qint32", "");
+    
+    ::SWGSDRangel::setValue(&display_nasa_global_imagery, pJson["displayNASAGlobalImagery"], "qint32", "");
+    
+    ::SWGSDRangel::setValue(&nasa_global_imagery_identifier, pJson["nasaGlobalImageryIdentifier"], "QString", "QString");
+    
+    ::SWGSDRangel::setValue(&nasa_global_imagery_opacity, pJson["nasaGlobalImageryOpacity"], "qint32", "");
+    
+    ::SWGSDRangel::setValue(&display_aurora, pJson["displayAurora"], "qint32", "");
+    
+    ::SWGSDRangel::setValue(&display_mag_dec, pJson["displayMagDec"], "qint32", "");
+    
+    ::SWGSDRangel::setValue(&display_maidenhead_grid, pJson["displayMaidenheadGrid"], "qint32", "");
+    
+    ::SWGSDRangel::setValue(&display_pfd, pJson["displayPFD"], "qint32", "");
+    
+    ::SWGSDRangel::setValue(&view_first_person, pJson["viewFirstPerson"], "qint32", "");
+    
+    ::SWGSDRangel::setValue(&default_imagery, pJson["defaultImagery"], "QString", "QString");
     
     ::SWGSDRangel::setValue(&title, pJson["title"], "QString", "QString");
     
@@ -150,8 +402,110 @@ SWGMapSettings::asJsonObject() {
     if(m_display_names_isSet){
         obj->insert("displayNames", QJsonValue(display_names));
     }
+    if(m_map2_d_enabled_isSet){
+        obj->insert("map2DEnabled", QJsonValue(map2_d_enabled));
+    }
+    if(m_map3_d_enabled_isSet){
+        obj->insert("map3DEnabled", QJsonValue(map3_d_enabled));
+    }
+    if(map_provider != nullptr && *map_provider != QString("")){
+        toJsonValue(QString("mapProvider"), map_provider, obj, QString("QString"));
+    }
+    if(map_type != nullptr && *map_type != QString("")){
+        toJsonValue(QString("mapType"), map_type, obj, QString("QString"));
+    }
+    if(osm_url != nullptr && *osm_url != QString("")){
+        toJsonValue(QString("osmURL"), osm_url, obj, QString("QString"));
+    }
+    if(map_box_styles != nullptr && *map_box_styles != QString("")){
+        toJsonValue(QString("mapBoxStyles"), map_box_styles, obj, QString("QString"));
+    }
+    if(m_display_selected_ground_tracks_isSet){
+        obj->insert("displaySelectedGroundTracks", QJsonValue(display_selected_ground_tracks));
+    }
+    if(m_display_all_ground_tracks_isSet){
+        obj->insert("displayAllGroundTracks", QJsonValue(display_all_ground_tracks));
+    }
     if(terrain != nullptr && *terrain != QString("")){
         toJsonValue(QString("terrain"), terrain, obj, QString("QString"));
+    }
+    if(buildings != nullptr && *buildings != QString("")){
+        toJsonValue(QString("buildings"), buildings, obj, QString("QString"));
+    }
+    if(m_sun_light_enabled_isSet){
+        obj->insert("sunLightEnabled", QJsonValue(sun_light_enabled));
+    }
+    if(m_light_intensity_isSet){
+        obj->insert("lightIntensity", QJsonValue(light_intensity));
+    }
+    if(m_eci_camera_isSet){
+        obj->insert("eciCamera", QJsonValue(eci_camera));
+    }
+    if(m_fxaa_isSet){
+        obj->insert("fxaa", QJsonValue(fxaa));
+    }
+    if(m_msaa_isSet){
+        obj->insert("msaa", QJsonValue(msaa));
+    }
+    if(m_terrain_lighting_isSet){
+        obj->insert("terrainLighting", QJsonValue(terrain_lighting));
+    }
+    if(m_water_isSet){
+        obj->insert("water", QJsonValue(water));
+    }
+    if(m_hdr_isSet){
+        obj->insert("hdr", QJsonValue(hdr));
+    }
+    if(m_fog_isSet){
+        obj->insert("fog", QJsonValue(fog));
+    }
+    if(m_fps_isSet){
+        obj->insert("fps", QJsonValue(fps));
+    }
+    if(m_display_muf_isSet){
+        obj->insert("displayMUF", QJsonValue(display_muf));
+    }
+    if(m_displayfo_f2_isSet){
+        obj->insert("displayfoF2", QJsonValue(displayfo_f2));
+    }
+    if(m_display_rain_isSet){
+        obj->insert("displayRain", QJsonValue(display_rain));
+    }
+    if(m_display_clouds_isSet){
+        obj->insert("displayClouds", QJsonValue(display_clouds));
+    }
+    if(m_display_sea_marks_isSet){
+        obj->insert("displaySeaMarks", QJsonValue(display_sea_marks));
+    }
+    if(m_display_railways_isSet){
+        obj->insert("displayRailways", QJsonValue(display_railways));
+    }
+    if(m_display_nasa_global_imagery_isSet){
+        obj->insert("displayNASAGlobalImagery", QJsonValue(display_nasa_global_imagery));
+    }
+    if(nasa_global_imagery_identifier != nullptr && *nasa_global_imagery_identifier != QString("")){
+        toJsonValue(QString("nasaGlobalImageryIdentifier"), nasa_global_imagery_identifier, obj, QString("QString"));
+    }
+    if(m_nasa_global_imagery_opacity_isSet){
+        obj->insert("nasaGlobalImageryOpacity", QJsonValue(nasa_global_imagery_opacity));
+    }
+    if(m_display_aurora_isSet){
+        obj->insert("displayAurora", QJsonValue(display_aurora));
+    }
+    if(m_display_mag_dec_isSet){
+        obj->insert("displayMagDec", QJsonValue(display_mag_dec));
+    }
+    if(m_display_maidenhead_grid_isSet){
+        obj->insert("displayMaidenheadGrid", QJsonValue(display_maidenhead_grid));
+    }
+    if(m_display_pfd_isSet){
+        obj->insert("displayPFD", QJsonValue(display_pfd));
+    }
+    if(m_view_first_person_isSet){
+        obj->insert("viewFirstPerson", QJsonValue(view_first_person));
+    }
+    if(default_imagery != nullptr && *default_imagery != QString("")){
+        toJsonValue(QString("defaultImagery"), default_imagery, obj, QString("QString"));
     }
     if(title != nullptr && *title != QString("")){
         toJsonValue(QString("title"), title, obj, QString("QString"));
@@ -191,6 +545,86 @@ SWGMapSettings::setDisplayNames(qint32 display_names) {
     this->m_display_names_isSet = true;
 }
 
+qint32
+SWGMapSettings::getMap2DEnabled() {
+    return map2_d_enabled;
+}
+void
+SWGMapSettings::setMap2DEnabled(qint32 map2_d_enabled) {
+    this->map2_d_enabled = map2_d_enabled;
+    this->m_map2_d_enabled_isSet = true;
+}
+
+qint32
+SWGMapSettings::getMap3DEnabled() {
+    return map3_d_enabled;
+}
+void
+SWGMapSettings::setMap3DEnabled(qint32 map3_d_enabled) {
+    this->map3_d_enabled = map3_d_enabled;
+    this->m_map3_d_enabled_isSet = true;
+}
+
+QString*
+SWGMapSettings::getMapProvider() {
+    return map_provider;
+}
+void
+SWGMapSettings::setMapProvider(QString* map_provider) {
+    this->map_provider = map_provider;
+    this->m_map_provider_isSet = true;
+}
+
+QString*
+SWGMapSettings::getMapType() {
+    return map_type;
+}
+void
+SWGMapSettings::setMapType(QString* map_type) {
+    this->map_type = map_type;
+    this->m_map_type_isSet = true;
+}
+
+QString*
+SWGMapSettings::getOsmUrl() {
+    return osm_url;
+}
+void
+SWGMapSettings::setOsmUrl(QString* osm_url) {
+    this->osm_url = osm_url;
+    this->m_osm_url_isSet = true;
+}
+
+QString*
+SWGMapSettings::getMapBoxStyles() {
+    return map_box_styles;
+}
+void
+SWGMapSettings::setMapBoxStyles(QString* map_box_styles) {
+    this->map_box_styles = map_box_styles;
+    this->m_map_box_styles_isSet = true;
+}
+
+qint32
+SWGMapSettings::getDisplaySelectedGroundTracks() {
+    return display_selected_ground_tracks;
+}
+void
+SWGMapSettings::setDisplaySelectedGroundTracks(qint32 display_selected_ground_tracks) {
+    this->display_selected_ground_tracks = display_selected_ground_tracks;
+    this->m_display_selected_ground_tracks_isSet = true;
+}
+
+qint32
+SWGMapSettings::getDisplayAllGroundTracks() {
+    return display_all_ground_tracks;
+}
+void
+SWGMapSettings::setDisplayAllGroundTracks(qint32 display_all_ground_tracks) {
+    this->display_all_ground_tracks = display_all_ground_tracks;
+    this->m_display_all_ground_tracks_isSet = true;
+}
+
 QString*
 SWGMapSettings::getTerrain() {
     return terrain;
@@ -199,6 +633,266 @@ void
 SWGMapSettings::setTerrain(QString* terrain) {
     this->terrain = terrain;
     this->m_terrain_isSet = true;
+}
+
+QString*
+SWGMapSettings::getBuildings() {
+    return buildings;
+}
+void
+SWGMapSettings::setBuildings(QString* buildings) {
+    this->buildings = buildings;
+    this->m_buildings_isSet = true;
+}
+
+qint32
+SWGMapSettings::getSunLightEnabled() {
+    return sun_light_enabled;
+}
+void
+SWGMapSettings::setSunLightEnabled(qint32 sun_light_enabled) {
+    this->sun_light_enabled = sun_light_enabled;
+    this->m_sun_light_enabled_isSet = true;
+}
+
+float
+SWGMapSettings::getLightIntensity() {
+    return light_intensity;
+}
+void
+SWGMapSettings::setLightIntensity(float light_intensity) {
+    this->light_intensity = light_intensity;
+    this->m_light_intensity_isSet = true;
+}
+
+qint32
+SWGMapSettings::getEciCamera() {
+    return eci_camera;
+}
+void
+SWGMapSettings::setEciCamera(qint32 eci_camera) {
+    this->eci_camera = eci_camera;
+    this->m_eci_camera_isSet = true;
+}
+
+qint32
+SWGMapSettings::getFxaa() {
+    return fxaa;
+}
+void
+SWGMapSettings::setFxaa(qint32 fxaa) {
+    this->fxaa = fxaa;
+    this->m_fxaa_isSet = true;
+}
+
+qint32
+SWGMapSettings::getMsaa() {
+    return msaa;
+}
+void
+SWGMapSettings::setMsaa(qint32 msaa) {
+    this->msaa = msaa;
+    this->m_msaa_isSet = true;
+}
+
+qint32
+SWGMapSettings::getTerrainLighting() {
+    return terrain_lighting;
+}
+void
+SWGMapSettings::setTerrainLighting(qint32 terrain_lighting) {
+    this->terrain_lighting = terrain_lighting;
+    this->m_terrain_lighting_isSet = true;
+}
+
+qint32
+SWGMapSettings::getWater() {
+    return water;
+}
+void
+SWGMapSettings::setWater(qint32 water) {
+    this->water = water;
+    this->m_water_isSet = true;
+}
+
+qint32
+SWGMapSettings::getHdr() {
+    return hdr;
+}
+void
+SWGMapSettings::setHdr(qint32 hdr) {
+    this->hdr = hdr;
+    this->m_hdr_isSet = true;
+}
+
+qint32
+SWGMapSettings::getFog() {
+    return fog;
+}
+void
+SWGMapSettings::setFog(qint32 fog) {
+    this->fog = fog;
+    this->m_fog_isSet = true;
+}
+
+qint32
+SWGMapSettings::getFps() {
+    return fps;
+}
+void
+SWGMapSettings::setFps(qint32 fps) {
+    this->fps = fps;
+    this->m_fps_isSet = true;
+}
+
+qint32
+SWGMapSettings::getDisplayMuf() {
+    return display_muf;
+}
+void
+SWGMapSettings::setDisplayMuf(qint32 display_muf) {
+    this->display_muf = display_muf;
+    this->m_display_muf_isSet = true;
+}
+
+qint32
+SWGMapSettings::getDisplayfoF2() {
+    return displayfo_f2;
+}
+void
+SWGMapSettings::setDisplayfoF2(qint32 displayfo_f2) {
+    this->displayfo_f2 = displayfo_f2;
+    this->m_displayfo_f2_isSet = true;
+}
+
+qint32
+SWGMapSettings::getDisplayRain() {
+    return display_rain;
+}
+void
+SWGMapSettings::setDisplayRain(qint32 display_rain) {
+    this->display_rain = display_rain;
+    this->m_display_rain_isSet = true;
+}
+
+qint32
+SWGMapSettings::getDisplayClouds() {
+    return display_clouds;
+}
+void
+SWGMapSettings::setDisplayClouds(qint32 display_clouds) {
+    this->display_clouds = display_clouds;
+    this->m_display_clouds_isSet = true;
+}
+
+qint32
+SWGMapSettings::getDisplaySeaMarks() {
+    return display_sea_marks;
+}
+void
+SWGMapSettings::setDisplaySeaMarks(qint32 display_sea_marks) {
+    this->display_sea_marks = display_sea_marks;
+    this->m_display_sea_marks_isSet = true;
+}
+
+qint32
+SWGMapSettings::getDisplayRailways() {
+    return display_railways;
+}
+void
+SWGMapSettings::setDisplayRailways(qint32 display_railways) {
+    this->display_railways = display_railways;
+    this->m_display_railways_isSet = true;
+}
+
+qint32
+SWGMapSettings::getDisplayNasaGlobalImagery() {
+    return display_nasa_global_imagery;
+}
+void
+SWGMapSettings::setDisplayNasaGlobalImagery(qint32 display_nasa_global_imagery) {
+    this->display_nasa_global_imagery = display_nasa_global_imagery;
+    this->m_display_nasa_global_imagery_isSet = true;
+}
+
+QString*
+SWGMapSettings::getNasaGlobalImageryIdentifier() {
+    return nasa_global_imagery_identifier;
+}
+void
+SWGMapSettings::setNasaGlobalImageryIdentifier(QString* nasa_global_imagery_identifier) {
+    this->nasa_global_imagery_identifier = nasa_global_imagery_identifier;
+    this->m_nasa_global_imagery_identifier_isSet = true;
+}
+
+qint32
+SWGMapSettings::getNasaGlobalImageryOpacity() {
+    return nasa_global_imagery_opacity;
+}
+void
+SWGMapSettings::setNasaGlobalImageryOpacity(qint32 nasa_global_imagery_opacity) {
+    this->nasa_global_imagery_opacity = nasa_global_imagery_opacity;
+    this->m_nasa_global_imagery_opacity_isSet = true;
+}
+
+qint32
+SWGMapSettings::getDisplayAurora() {
+    return display_aurora;
+}
+void
+SWGMapSettings::setDisplayAurora(qint32 display_aurora) {
+    this->display_aurora = display_aurora;
+    this->m_display_aurora_isSet = true;
+}
+
+qint32
+SWGMapSettings::getDisplayMagDec() {
+    return display_mag_dec;
+}
+void
+SWGMapSettings::setDisplayMagDec(qint32 display_mag_dec) {
+    this->display_mag_dec = display_mag_dec;
+    this->m_display_mag_dec_isSet = true;
+}
+
+qint32
+SWGMapSettings::getDisplayMaidenheadGrid() {
+    return display_maidenhead_grid;
+}
+void
+SWGMapSettings::setDisplayMaidenheadGrid(qint32 display_maidenhead_grid) {
+    this->display_maidenhead_grid = display_maidenhead_grid;
+    this->m_display_maidenhead_grid_isSet = true;
+}
+
+qint32
+SWGMapSettings::getDisplayPfd() {
+    return display_pfd;
+}
+void
+SWGMapSettings::setDisplayPfd(qint32 display_pfd) {
+    this->display_pfd = display_pfd;
+    this->m_display_pfd_isSet = true;
+}
+
+qint32
+SWGMapSettings::getViewFirstPerson() {
+    return view_first_person;
+}
+void
+SWGMapSettings::setViewFirstPerson(qint32 view_first_person) {
+    this->view_first_person = view_first_person;
+    this->m_view_first_person_isSet = true;
+}
+
+QString*
+SWGMapSettings::getDefaultImagery() {
+    return default_imagery;
+}
+void
+SWGMapSettings::setDefaultImagery(QString* default_imagery) {
+    this->default_imagery = default_imagery;
+    this->m_default_imagery_isSet = true;
 }
 
 QString*
@@ -289,7 +983,109 @@ SWGMapSettings::isSet(){
         if(m_display_names_isSet){
             isObjectUpdated = true; break;
         }
+        if(m_map2_d_enabled_isSet){
+            isObjectUpdated = true; break;
+        }
+        if(m_map3_d_enabled_isSet){
+            isObjectUpdated = true; break;
+        }
+        if(map_provider && *map_provider != QString("")){
+            isObjectUpdated = true; break;
+        }
+        if(map_type && *map_type != QString("")){
+            isObjectUpdated = true; break;
+        }
+        if(osm_url && *osm_url != QString("")){
+            isObjectUpdated = true; break;
+        }
+        if(map_box_styles && *map_box_styles != QString("")){
+            isObjectUpdated = true; break;
+        }
+        if(m_display_selected_ground_tracks_isSet){
+            isObjectUpdated = true; break;
+        }
+        if(m_display_all_ground_tracks_isSet){
+            isObjectUpdated = true; break;
+        }
         if(terrain && *terrain != QString("")){
+            isObjectUpdated = true; break;
+        }
+        if(buildings && *buildings != QString("")){
+            isObjectUpdated = true; break;
+        }
+        if(m_sun_light_enabled_isSet){
+            isObjectUpdated = true; break;
+        }
+        if(m_light_intensity_isSet){
+            isObjectUpdated = true; break;
+        }
+        if(m_eci_camera_isSet){
+            isObjectUpdated = true; break;
+        }
+        if(m_fxaa_isSet){
+            isObjectUpdated = true; break;
+        }
+        if(m_msaa_isSet){
+            isObjectUpdated = true; break;
+        }
+        if(m_terrain_lighting_isSet){
+            isObjectUpdated = true; break;
+        }
+        if(m_water_isSet){
+            isObjectUpdated = true; break;
+        }
+        if(m_hdr_isSet){
+            isObjectUpdated = true; break;
+        }
+        if(m_fog_isSet){
+            isObjectUpdated = true; break;
+        }
+        if(m_fps_isSet){
+            isObjectUpdated = true; break;
+        }
+        if(m_display_muf_isSet){
+            isObjectUpdated = true; break;
+        }
+        if(m_displayfo_f2_isSet){
+            isObjectUpdated = true; break;
+        }
+        if(m_display_rain_isSet){
+            isObjectUpdated = true; break;
+        }
+        if(m_display_clouds_isSet){
+            isObjectUpdated = true; break;
+        }
+        if(m_display_sea_marks_isSet){
+            isObjectUpdated = true; break;
+        }
+        if(m_display_railways_isSet){
+            isObjectUpdated = true; break;
+        }
+        if(m_display_nasa_global_imagery_isSet){
+            isObjectUpdated = true; break;
+        }
+        if(nasa_global_imagery_identifier && *nasa_global_imagery_identifier != QString("")){
+            isObjectUpdated = true; break;
+        }
+        if(m_nasa_global_imagery_opacity_isSet){
+            isObjectUpdated = true; break;
+        }
+        if(m_display_aurora_isSet){
+            isObjectUpdated = true; break;
+        }
+        if(m_display_mag_dec_isSet){
+            isObjectUpdated = true; break;
+        }
+        if(m_display_maidenhead_grid_isSet){
+            isObjectUpdated = true; break;
+        }
+        if(m_display_pfd_isSet){
+            isObjectUpdated = true; break;
+        }
+        if(m_view_first_person_isSet){
+            isObjectUpdated = true; break;
+        }
+        if(default_imagery && *default_imagery != QString("")){
             isObjectUpdated = true; break;
         }
         if(title && *title != QString("")){

@@ -564,7 +564,11 @@ void WFMDemod::webapiFormatChannelSettings(
     swgChannelSettings->setDirection(0); // Single sink (Rx)
     swgChannelSettings->setOriginatorChannelIndex(getIndexInDeviceSet());
     swgChannelSettings->setOriginatorDeviceSetIndex(getDeviceSetIndex());
-    swgChannelSettings->setChannelType(new QString(m_channelId));
+    if (swgChannelSettings->getChannelType()) {
+        *swgChannelSettings->getChannelType() = m_channelId;
+    } else {
+        swgChannelSettings->setChannelType(new QString(m_channelId));
+    }
     swgChannelSettings->setWfmDemodSettings(new SWGSDRangel::SWGWFMDemodSettings());
     SWGSDRangel::SWGWFMDemodSettings *swgWFMDemodSettings = swgChannelSettings->getWfmDemodSettings();
 
@@ -592,10 +596,18 @@ void WFMDemod::webapiFormatChannelSettings(
         swgWFMDemodSettings->setRgbColor(settings.m_rgbColor);
     }
     if (channelSettingsKeys.contains("title") || force) {
-        swgWFMDemodSettings->setTitle(new QString(settings.m_title));
+        if (swgWFMDemodSettings->getTitle()) {
+            *swgWFMDemodSettings->getTitle() = settings.m_title;
+        } else {
+            swgWFMDemodSettings->setTitle(new QString(settings.m_title));
+        }
     }
     if (channelSettingsKeys.contains("audioDeviceName") || force) {
-        swgWFMDemodSettings->setAudioDeviceName(new QString(settings.m_audioDeviceName));
+        if (swgWFMDemodSettings->getAudioDeviceName()) {
+            *swgWFMDemodSettings->getAudioDeviceName() = settings.m_audioDeviceName;
+        } else {
+            swgWFMDemodSettings->setAudioDeviceName(new QString(settings.m_audioDeviceName));
+        }
     }
     if (channelSettingsKeys.contains("streamIndex") || force) {
         swgWFMDemodSettings->setStreamIndex(settings.m_streamIndex);

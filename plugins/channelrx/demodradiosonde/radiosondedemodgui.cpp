@@ -35,6 +35,7 @@
 #include "util/csv.h"
 #include "util/db.h"
 #include "util/units.h"
+#include "gui/messagedialog.h"
 #include "gui/basicchannelsettingsdialog.h"
 #include "gui/datetimedelegate.h"
 #include "gui/decimaldelegate.h"
@@ -913,12 +914,12 @@ void RadiosondeDemodGUI::on_logOpen_clicked()
                 }
                 else
                 {
-                    QMessageBox::critical(this, "Radiosonde Demod", error);
+                    MessageDialog::critical(this, "Radiosonde Demod", error);
                 }
             }
             else
             {
-                QMessageBox::critical(this, "Radiosonde Demod", QString("Failed to open file %1").arg(fileNames[0]));
+                MessageDialog::critical(this, "Radiosonde Demod", QString("Failed to open file %1").arg(fileNames[0]));
             }
         }
     }

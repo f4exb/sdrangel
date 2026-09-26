@@ -395,7 +395,11 @@ void LocalSink::applySettings(const LocalSinkSettings& settings, const QList<QSt
         sendChannelSettings(pipes, settingsKeys, settings, force);
     }
 
-    m_settings = settings;
+    if (force) {
+        m_settings = settings;
+    } else {
+        m_settings.applySettings(settingsKeys, settings);
+    }
 }
 
 void LocalSink::validateFilterChainHash(LocalSinkSettings& settings)
@@ -678,7 +682,11 @@ void LocalSink::webapiFormatChannelSettings(
     swgChannelSettings->setDirection(0); // Single sink (Rx)
     swgChannelSettings->setOriginatorChannelIndex(getIndexInDeviceSet());
     swgChannelSettings->setOriginatorDeviceSetIndex(getDeviceSetIndex());
-    swgChannelSettings->setChannelType(new QString(m_channelId));
+    if (swgChannelSettings->getChannelType()) {
+        *swgChannelSettings->getChannelType() = m_channelId;
+    } else {
+        swgChannelSettings->setChannelType(new QString(m_channelId));
+    }
     swgChannelSettings->setLocalSinkSettings(new SWGSDRangel::SWGLocalSinkSettings());
     SWGSDRangel::SWGLocalSinkSettings *swgLocalSinkSettings = swgChannelSettings->getLocalSinkSettings();
 
@@ -691,7 +699,11 @@ void LocalSink::webapiFormatChannelSettings(
         swgLocalSinkSettings->setRgbColor(settings.m_rgbColor);
     }
     if (channelSettingsKeys.contains("title") || force) {
-        swgLocalSinkSettings->setTitle(new QString(settings.m_title));
+        if (swgLocalSinkSettings->getTitle()) {
+            *swgLocalSinkSettings->getTitle() = settings.m_title;
+        } else {
+            swgLocalSinkSettings->setTitle(new QString(settings.m_title));
+        }
     }
     if (channelSettingsKeys.contains("log2Decim") || force) {
         swgLocalSinkSettings->setLog2Decim(settings.m_log2Decim);

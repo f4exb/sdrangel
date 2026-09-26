@@ -48,7 +48,7 @@ Map::Map(WebAPIAdapterInterface *webAPIAdapterInterface) :
 {
     qDebug("Map::Map: webAPIAdapterInterface: %p", webAPIAdapterInterface);
     setObjectName(m_featureId);
-    m_state = StIdle;
+    setState(StIdle);
     m_errorMessage = "Map error";
     m_networkManager = new QNetworkAccessManager();
     QObject::connect(
@@ -258,7 +258,73 @@ void Map::webapiFormatFeatureSettings(
     const MapSettings& settings)
 {
     response.getMapSettings()->setDisplayNames(settings.m_displayNames ? 1 : 0);
-    response.getMapSettings()->setTerrain(new QString(settings.m_terrain));
+    response.getMapSettings()->setMap2DEnabled(settings.m_map2DEnabled ? 1 : 0);
+    response.getMapSettings()->setMap3DEnabled(settings.m_map3DEnabled ? 1 : 0);
+    if (response.getMapSettings()->getMapProvider()) {
+        *response.getMapSettings()->getMapProvider() = settings.m_mapProvider;
+    } else {
+        response.getMapSettings()->setMapProvider(new QString(settings.m_mapProvider));
+    }
+    if (response.getMapSettings()->getMapType()) {
+        *response.getMapSettings()->getMapType() = settings.m_mapType;
+    } else {
+        response.getMapSettings()->setMapType(new QString(settings.m_mapType));
+    }
+    if (response.getMapSettings()->getOsmUrl()) {
+        *response.getMapSettings()->getOsmUrl() = settings.m_osmURL;
+    } else {
+        response.getMapSettings()->setOsmUrl(new QString(settings.m_osmURL));
+    }
+    if (response.getMapSettings()->getMapBoxStyles()) {
+        *response.getMapSettings()->getMapBoxStyles() = settings.m_mapBoxStyles;
+    } else {
+        response.getMapSettings()->setMapBoxStyles(new QString(settings.m_mapBoxStyles));
+    }
+    response.getMapSettings()->setDisplaySelectedGroundTracks(settings.m_displaySelectedGroundTracks ? 1 : 0);
+    response.getMapSettings()->setDisplayAllGroundTracks(settings.m_displayAllGroundTracks ? 1 : 0);
+    if (response.getMapSettings()->getBuildings()) {
+        *response.getMapSettings()->getBuildings() = settings.m_buildings;
+    } else {
+        response.getMapSettings()->setBuildings(new QString(settings.m_buildings));
+    }
+    response.getMapSettings()->setSunLightEnabled(settings.m_sunLightEnabled ? 1 : 0);
+    response.getMapSettings()->setLightIntensity(settings.m_lightIntensity);
+    response.getMapSettings()->setEciCamera(settings.m_eciCamera ? 1 : 0);
+    response.getMapSettings()->setFxaa(settings.m_fxaa ? 1 : 0);
+    response.getMapSettings()->setMsaa(settings.m_msaa);
+    response.getMapSettings()->setTerrainLighting(settings.m_terrainLighting ? 1 : 0);
+    response.getMapSettings()->setWater(settings.m_water ? 1 : 0);
+    response.getMapSettings()->setHdr(settings.m_hdr ? 1 : 0);
+    response.getMapSettings()->setFog(settings.m_fog ? 1 : 0);
+    response.getMapSettings()->setFps(settings.m_fps ? 1 : 0);
+    response.getMapSettings()->setDisplayMuf(settings.m_displayMUF ? 1 : 0);
+    response.getMapSettings()->setDisplayfoF2(settings.m_displayfoF2 ? 1 : 0);
+    response.getMapSettings()->setDisplayRain(settings.m_displayRain ? 1 : 0);
+    response.getMapSettings()->setDisplayClouds(settings.m_displayClouds ? 1 : 0);
+    response.getMapSettings()->setDisplaySeaMarks(settings.m_displaySeaMarks ? 1 : 0);
+    response.getMapSettings()->setDisplayRailways(settings.m_displayRailways ? 1 : 0);
+    response.getMapSettings()->setDisplayNasaGlobalImagery(settings.m_displayNASAGlobalImagery ? 1 : 0);
+    if (response.getMapSettings()->getNasaGlobalImageryIdentifier()) {
+        *response.getMapSettings()->getNasaGlobalImageryIdentifier() = settings.m_nasaGlobalImageryIdentifier;
+    } else {
+        response.getMapSettings()->setNasaGlobalImageryIdentifier(new QString(settings.m_nasaGlobalImageryIdentifier));
+    }
+    response.getMapSettings()->setNasaGlobalImageryOpacity(settings.m_nasaGlobalImageryOpacity);
+    response.getMapSettings()->setDisplayAurora(settings.m_displayAurora ? 1 : 0);
+    response.getMapSettings()->setDisplayMagDec(settings.m_displayMagDec ? 1 : 0);
+    response.getMapSettings()->setDisplayMaidenheadGrid(settings.m_displayMaidenheadGrid ? 1 : 0);
+    response.getMapSettings()->setDisplayPfd(settings.m_displayPFD ? 1 : 0);
+    response.getMapSettings()->setViewFirstPerson(settings.m_viewFirstPerson ? 1 : 0);
+    if (response.getMapSettings()->getDefaultImagery()) {
+        *response.getMapSettings()->getDefaultImagery() = settings.m_defaultImagery;
+    } else {
+        response.getMapSettings()->setDefaultImagery(new QString(settings.m_defaultImagery));
+    }
+    if (response.getMapSettings()->getTerrain()) {
+        *response.getMapSettings()->getTerrain() = settings.m_terrain;
+    } else {
+        response.getMapSettings()->setTerrain(new QString(settings.m_terrain));
+    }
 
     if (response.getMapSettings()->getTitle()) {
         *response.getMapSettings()->getTitle() = settings.m_title;
@@ -302,6 +368,108 @@ void Map::webapiUpdateFeatureSettings(
     if (featureSettingsKeys.contains("displayNames")) {
         settings.m_displayNames = response.getMapSettings()->getDisplayNames();
     }
+    if (featureSettingsKeys.contains("map2DEnabled")) {
+        settings.m_map2DEnabled = response.getMapSettings()->getMap2DEnabled() != 0;
+    }
+    if (featureSettingsKeys.contains("map3DEnabled")) {
+        settings.m_map3DEnabled = response.getMapSettings()->getMap3DEnabled() != 0;
+    }
+    if (featureSettingsKeys.contains("mapProvider")) {
+        settings.m_mapProvider = *response.getMapSettings()->getMapProvider();
+    }
+    if (featureSettingsKeys.contains("mapType")) {
+        settings.m_mapType = *response.getMapSettings()->getMapType();
+    }
+    if (featureSettingsKeys.contains("osmURL")) {
+        settings.m_osmURL = *response.getMapSettings()->getOsmUrl();
+    }
+    if (featureSettingsKeys.contains("mapBoxStyles")) {
+        settings.m_mapBoxStyles = *response.getMapSettings()->getMapBoxStyles();
+    }
+    if (featureSettingsKeys.contains("displaySelectedGroundTracks")) {
+        settings.m_displaySelectedGroundTracks = response.getMapSettings()->getDisplaySelectedGroundTracks() != 0;
+    }
+    if (featureSettingsKeys.contains("displayAllGroundTracks")) {
+        settings.m_displayAllGroundTracks = response.getMapSettings()->getDisplayAllGroundTracks() != 0;
+    }
+    if (featureSettingsKeys.contains("buildings")) {
+        settings.m_buildings = *response.getMapSettings()->getBuildings();
+    }
+    if (featureSettingsKeys.contains("sunLightEnabled")) {
+        settings.m_sunLightEnabled = response.getMapSettings()->getSunLightEnabled() != 0;
+    }
+    if (featureSettingsKeys.contains("lightIntensity")) {
+        settings.m_lightIntensity = response.getMapSettings()->getLightIntensity();
+    }
+    if (featureSettingsKeys.contains("eciCamera")) {
+        settings.m_eciCamera = response.getMapSettings()->getEciCamera() != 0;
+    }
+    if (featureSettingsKeys.contains("fxaa")) {
+        settings.m_fxaa = response.getMapSettings()->getFxaa() != 0;
+    }
+    if (featureSettingsKeys.contains("msaa")) {
+        settings.m_msaa = response.getMapSettings()->getMsaa();
+    }
+    if (featureSettingsKeys.contains("terrainLighting")) {
+        settings.m_terrainLighting = response.getMapSettings()->getTerrainLighting() != 0;
+    }
+    if (featureSettingsKeys.contains("water")) {
+        settings.m_water = response.getMapSettings()->getWater() != 0;
+    }
+    if (featureSettingsKeys.contains("hdr")) {
+        settings.m_hdr = response.getMapSettings()->getHdr() != 0;
+    }
+    if (featureSettingsKeys.contains("fog")) {
+        settings.m_fog = response.getMapSettings()->getFog() != 0;
+    }
+    if (featureSettingsKeys.contains("fps")) {
+        settings.m_fps = response.getMapSettings()->getFps() != 0;
+    }
+    if (featureSettingsKeys.contains("displayMUF")) {
+        settings.m_displayMUF = response.getMapSettings()->getDisplayMuf() != 0;
+    }
+    if (featureSettingsKeys.contains("displayfoF2")) {
+        settings.m_displayfoF2 = response.getMapSettings()->getDisplayfoF2() != 0;
+    }
+    if (featureSettingsKeys.contains("displayRain")) {
+        settings.m_displayRain = response.getMapSettings()->getDisplayRain() != 0;
+    }
+    if (featureSettingsKeys.contains("displayClouds")) {
+        settings.m_displayClouds = response.getMapSettings()->getDisplayClouds() != 0;
+    }
+    if (featureSettingsKeys.contains("displaySeaMarks")) {
+        settings.m_displaySeaMarks = response.getMapSettings()->getDisplaySeaMarks() != 0;
+    }
+    if (featureSettingsKeys.contains("displayRailways")) {
+        settings.m_displayRailways = response.getMapSettings()->getDisplayRailways() != 0;
+    }
+    if (featureSettingsKeys.contains("displayNASAGlobalImagery")) {
+        settings.m_displayNASAGlobalImagery = response.getMapSettings()->getDisplayNasaGlobalImagery() != 0;
+    }
+    if (featureSettingsKeys.contains("nasaGlobalImageryIdentifier")) {
+        settings.m_nasaGlobalImageryIdentifier = *response.getMapSettings()->getNasaGlobalImageryIdentifier();
+    }
+    if (featureSettingsKeys.contains("nasaGlobalImageryOpacity")) {
+        settings.m_nasaGlobalImageryOpacity = response.getMapSettings()->getNasaGlobalImageryOpacity();
+    }
+    if (featureSettingsKeys.contains("displayAurora")) {
+        settings.m_displayAurora = response.getMapSettings()->getDisplayAurora() != 0;
+    }
+    if (featureSettingsKeys.contains("displayMagDec")) {
+        settings.m_displayMagDec = response.getMapSettings()->getDisplayMagDec() != 0;
+    }
+    if (featureSettingsKeys.contains("displayMaidenheadGrid")) {
+        settings.m_displayMaidenheadGrid = response.getMapSettings()->getDisplayMaidenheadGrid() != 0;
+    }
+    if (featureSettingsKeys.contains("displayPFD")) {
+        settings.m_displayPFD = response.getMapSettings()->getDisplayPfd() != 0;
+    }
+    if (featureSettingsKeys.contains("viewFirstPerson")) {
+        settings.m_viewFirstPerson = response.getMapSettings()->getViewFirstPerson() != 0;
+    }
+    if (featureSettingsKeys.contains("defaultImagery")) {
+        settings.m_defaultImagery = *response.getMapSettings()->getDefaultImagery();
+    }
     if (featureSettingsKeys.contains("terrain")) {
         settings.m_terrain = *response.getMapSettings()->getTerrain();
     }
@@ -344,6 +512,108 @@ void Map::webapiReverseSendSettings(const QList<QString>& featureSettingsKeys, c
 
     if (featureSettingsKeys.contains("displayNames") || force) {
         swgMapSettings->setDisplayNames(settings.m_displayNames);
+    }
+    if (featureSettingsKeys.contains("map2DEnabled") || force) {
+        swgMapSettings->setMap2DEnabled(settings.m_map2DEnabled);
+    }
+    if (featureSettingsKeys.contains("map3DEnabled") || force) {
+        swgMapSettings->setMap3DEnabled(settings.m_map3DEnabled);
+    }
+    if (featureSettingsKeys.contains("mapProvider") || force) {
+        swgMapSettings->setMapProvider(new QString(settings.m_mapProvider));
+    }
+    if (featureSettingsKeys.contains("mapType") || force) {
+        swgMapSettings->setMapType(new QString(settings.m_mapType));
+    }
+    if (featureSettingsKeys.contains("osmURL") || force) {
+        swgMapSettings->setOsmUrl(new QString(settings.m_osmURL));
+    }
+    if (featureSettingsKeys.contains("mapBoxStyles") || force) {
+        swgMapSettings->setMapBoxStyles(new QString(settings.m_mapBoxStyles));
+    }
+    if (featureSettingsKeys.contains("displaySelectedGroundTracks") || force) {
+        swgMapSettings->setDisplaySelectedGroundTracks(settings.m_displaySelectedGroundTracks);
+    }
+    if (featureSettingsKeys.contains("displayAllGroundTracks") || force) {
+        swgMapSettings->setDisplayAllGroundTracks(settings.m_displayAllGroundTracks);
+    }
+    if (featureSettingsKeys.contains("buildings") || force) {
+        swgMapSettings->setBuildings(new QString(settings.m_buildings));
+    }
+    if (featureSettingsKeys.contains("sunLightEnabled") || force) {
+        swgMapSettings->setSunLightEnabled(settings.m_sunLightEnabled);
+    }
+    if (featureSettingsKeys.contains("lightIntensity") || force) {
+        swgMapSettings->setLightIntensity(settings.m_lightIntensity);
+    }
+    if (featureSettingsKeys.contains("eciCamera") || force) {
+        swgMapSettings->setEciCamera(settings.m_eciCamera);
+    }
+    if (featureSettingsKeys.contains("fxaa") || force) {
+        swgMapSettings->setFxaa(settings.m_fxaa);
+    }
+    if (featureSettingsKeys.contains("msaa") || force) {
+        swgMapSettings->setMsaa(settings.m_msaa);
+    }
+    if (featureSettingsKeys.contains("terrainLighting") || force) {
+        swgMapSettings->setTerrainLighting(settings.m_terrainLighting);
+    }
+    if (featureSettingsKeys.contains("water") || force) {
+        swgMapSettings->setWater(settings.m_water);
+    }
+    if (featureSettingsKeys.contains("hdr") || force) {
+        swgMapSettings->setHdr(settings.m_hdr);
+    }
+    if (featureSettingsKeys.contains("fog") || force) {
+        swgMapSettings->setFog(settings.m_fog);
+    }
+    if (featureSettingsKeys.contains("fps") || force) {
+        swgMapSettings->setFps(settings.m_fps);
+    }
+    if (featureSettingsKeys.contains("displayMUF") || force) {
+        swgMapSettings->setDisplayMuf(settings.m_displayMUF);
+    }
+    if (featureSettingsKeys.contains("displayfoF2") || force) {
+        swgMapSettings->setDisplayfoF2(settings.m_displayfoF2);
+    }
+    if (featureSettingsKeys.contains("displayRain") || force) {
+        swgMapSettings->setDisplayRain(settings.m_displayRain);
+    }
+    if (featureSettingsKeys.contains("displayClouds") || force) {
+        swgMapSettings->setDisplayClouds(settings.m_displayClouds);
+    }
+    if (featureSettingsKeys.contains("displaySeaMarks") || force) {
+        swgMapSettings->setDisplaySeaMarks(settings.m_displaySeaMarks);
+    }
+    if (featureSettingsKeys.contains("displayRailways") || force) {
+        swgMapSettings->setDisplayRailways(settings.m_displayRailways);
+    }
+    if (featureSettingsKeys.contains("displayNASAGlobalImagery") || force) {
+        swgMapSettings->setDisplayNasaGlobalImagery(settings.m_displayNASAGlobalImagery);
+    }
+    if (featureSettingsKeys.contains("nasaGlobalImageryIdentifier") || force) {
+        swgMapSettings->setNasaGlobalImageryIdentifier(new QString(settings.m_nasaGlobalImageryIdentifier));
+    }
+    if (featureSettingsKeys.contains("nasaGlobalImageryOpacity") || force) {
+        swgMapSettings->setNasaGlobalImageryOpacity(settings.m_nasaGlobalImageryOpacity);
+    }
+    if (featureSettingsKeys.contains("displayAurora") || force) {
+        swgMapSettings->setDisplayAurora(settings.m_displayAurora);
+    }
+    if (featureSettingsKeys.contains("displayMagDec") || force) {
+        swgMapSettings->setDisplayMagDec(settings.m_displayMagDec);
+    }
+    if (featureSettingsKeys.contains("displayMaidenheadGrid") || force) {
+        swgMapSettings->setDisplayMaidenheadGrid(settings.m_displayMaidenheadGrid);
+    }
+    if (featureSettingsKeys.contains("displayPFD") || force) {
+        swgMapSettings->setDisplayPfd(settings.m_displayPFD);
+    }
+    if (featureSettingsKeys.contains("viewFirstPerson") || force) {
+        swgMapSettings->setViewFirstPerson(settings.m_viewFirstPerson);
+    }
+    if (featureSettingsKeys.contains("defaultImagery") || force) {
+        swgMapSettings->setDefaultImagery(new QString(settings.m_defaultImagery));
     }
     if (featureSettingsKeys.contains("terrain") || force) {
         swgMapSettings->setTerrain(new QString(settings.m_terrain));

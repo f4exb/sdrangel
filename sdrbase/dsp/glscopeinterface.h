@@ -22,11 +22,15 @@
 
 #include "glscopesettings.h"
 
+class ScopeVis;
+
 class GLScopeInterface
 {
 public:
     GLScopeInterface() {}
     virtual ~GLScopeInterface() {}
+    // Called by the ScopeVis this is attached to: set to null before being destroyed
+    virtual void setScopeVis(ScopeVis *scopeVis) { (void) scopeVis; }
     virtual void setTraces(std::vector<GLScopeSettings::TraceData>* tracesData, std::vector<float *>* traces) = 0;
     virtual void newTraces(std::vector<float *>* traces, int traceIndex, std::vector<Projector::ProjectionType>* projectionTypes) = 0;
     virtual void setSampleRate(int sampleRate) = 0;

@@ -3,19 +3,29 @@ VORLocalizerSettings:
   properties:
     rgbColor:
       type: integer
+      description: "Display color encoded as an RGB integer."
     title:
       type: string
+      description: "User-visible title."
     useReverseAPI:
       description: Synchronize with reverse API (1 for yes, 0 for no)
       type: integer
+      minimum: 0
+      maximum: 1
     reverseAPIAddress:
       type: string
+      description: "IPv4 address or host name of the reverse API peer."
     reverseAPIPort:
       type: integer
+      description: "TCP port of the reverse API peer."
+      minimum: 1
+      maximum: 65535
     reverseAPIFeatureSetIndex:
       type: integer
+      description: "Feature-set index used by the reverse API peer."
     reverseAPIFeatureIndex:
       type: integer
+      description: "Feature index used by the reverse API peer."
     magDecAdjust:
       description: Adjust radial lines on map for magnetic declination of VOR
       type: integer
@@ -24,6 +34,8 @@ VORLocalizerSettings:
       type: integer
     forceRRAveraging:
       type: integer
+      minimum: 0
+      maximum: 1
       description: >
         Force radial and signal magnitudes averaging over the round robin turn
           * 0 - Do not force averaging
@@ -33,12 +45,15 @@ VORLocalizerSettings:
       type: integer
     rollupState:
       $ref: "http://swgserver:8081/api/swagger/include/RollupState.yaml#/RollupState"
+      description: "Saved expanded or collapsed state of the GUI sections."
     columnIndexes:
       type: array
+      description: "List of column indexes."
       items:
         type: integer
     columnSizes:
       type: array
+      description: "List of column sizes."
       items:
         type: integer
 
@@ -47,6 +62,8 @@ VORLocalizerReport:
   properties:
     runningState:
       type: integer
+      minimum: 0
+      maximum: 3
       description: >
         Running state
           * 0 - not started
@@ -59,6 +76,8 @@ VORLocalizerActions:
   properties:
     run:
       type: integer
+      minimum: 0
+      maximum: 1
       description: >
         Set the plugin running state
           * 0 - idle

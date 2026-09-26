@@ -36,6 +36,7 @@ set(sdrgui_SOURCES
     gui/devicestreamselectiondialog.cpp
     gui/deviceuserargsdialog.cpp
     gui/dialogpositioner.cpp
+    gui/messagedialog.cpp
     gui/dialpopup.cpp
     gui/dmsspinbox.cpp
     gui/editcommanddialog.cpp
@@ -104,6 +105,7 @@ set(sdrgui_SOURCES
     gui/welcomedialog.cpp
     gui/workspace.cpp
     gui/workspaceselectiondialog.cpp
+    gui/workspacewindow.cpp
     gui/wsspectrumsettingsdialog.cpp
     gui/wrappingdatetimeedit.cpp
     gui/wrappingdial.cpp
@@ -167,6 +169,7 @@ set(sdrgui_HEADERS
     gui/devicestreamselectiondialog.h
     gui/deviceuserargsdialog.h
     gui/dialogpositioner.h
+    gui/messagedialog.h
     gui/dialpopup.h
     gui/dmsspinbox.h
     gui/doublevalidator.h
@@ -239,6 +242,7 @@ set(sdrgui_HEADERS
     gui/welcomedialog.h
     gui/workspace.h
     gui/workspaceselectiondialog.h
+    gui/workspacewindow.h
     gui/wsspectrumsettingsdialog.h
     gui/wrappingdatetimeedit.h
     gui/wrappingdial.h

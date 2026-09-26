@@ -153,6 +153,19 @@ else ()
     endmacro()
 endif (LINUX)
 
+set(COPY_HEADERS_SCRIPT "${CMAKE_CURRENT_LIST_DIR}/copy_headers.cmake")
+
+# macro that mirrors the headers of a directory into another one, for the libraries whose sources
+# include them by a subdirectory name that is not in the library's own tree. Unlike makeCopyDir this
+# is safe when the destination is inside the source, and it runs on every build rather than only
+# when the destination is missing at configure time: an external project that re-clones wipes the
+# copy, and a configure time check would leave it gone until the next configure
+macro(makeCopyHeaders src dest target)
+    add_custom_command(TARGET ${target} POST_BUILD
+            COMMAND ${CMAKE_COMMAND} -DSRC=${src} -DDEST=${dest} -P ${COPY_HEADERS_SCRIPT}
+            COMMENT "copy headers ${src} -> ${dest}")
+endmacro()
+
 if (WIN32)
     if (VS2015)
         if (CMAKE_SIZEOF_VOID_P EQUAL 8)
@@ -731,7 +744,7 @@ if (NOT LIBSERIALDV_FOUND OR LIBSERIALDV_EXTERNAL)
     set(LIBSERIALDV_EXTERNAL ON CACHE INTERNAL "")
     set(LIBSERIALDV_INCLUDE_DIR "${source_dir}" CACHE INTERNAL "")
     if (WIN32)
-        makeCopyDir("${source_dir}" "${source_dir}/dsp" serialdv)
+        makeCopyHeaders("${source_dir}" "${source_dir}/dsp" serialdv)
         install(FILES "${SDRANGEL_BINARY_BIN_DIR}/serialdv${CMAKE_SHARED_LIBRARY_SUFFIX}" DESTINATION "${INSTALL_LIB_DIR}")
     elseif (LINUX)
         # because sdrbase/dsp/dvserialworker.h use dsp/dvcontroller.h
@@ -1478,7 +1491,7 @@ if (WIN32 OR APPLE)
         set(LIBAIRSPY_EXTERNAL ON CACHE INTERNAL "")
         set(LIBAIRSPY_INCLUDE_DIR "${source_dir}/libairspy/src" CACHE INTERNAL "")
         if (WIN32)
-            makeCopyDir("${source_dir}/libairspy/src" "${source_dir}/libairspy/src/libairspy" airspy)
+            makeCopyHeaders("${source_dir}/libairspy/src" "${source_dir}/libairspy/src/libairspy" airspy)
             makeCopy("${binary_dir}/../airspy-tools/src/airspy${CMAKE_SHARED_LIBRARY_SUFFIX}" "${SDRANGEL_BINARY_BIN_DIR}/airspy${CMAKE_SHARED_LIBRARY_SUFFIX}" airspy)
             install(FILES "${SDRANGEL_BINARY_BIN_DIR}/airspy${CMAKE_SHARED_LIBRARY_SUFFIX}" DESTINATION "${INSTALL_LIB_DIR}")
         elseif (APPLE)
@@ -1520,7 +1533,7 @@ if (WIN32 OR APPLE)
         set(LIBAIRSPYHF_EXTERNAL ON CACHE INTERNAL "")
         set(LIBAIRSPYHF_INCLUDE_DIR "${source_dir}/libairspyhf/src" CACHE INTERNAL "")
         if (WIN32)
-            makeCopyDir("${source_dir}/libairspyhf/src" "${source_dir}/libairspyhf/src/libairspyhf" airspyhf)
+            makeCopyHeaders("${source_dir}/libairspyhf/src" "${source_dir}/libairspyhf/src/libairspyhf" airspyhf)
             install(FILES "${SDRANGEL_BINARY_BIN_DIR}/airspyhf${CMAKE_SHARED_LIBRARY_SUFFIX}" DESTINATION "${INSTALL_LIB_DIR}")
         elseif (APPLE)
             set(LIBAIRSPYHF_LIBRARIES "${binary_dir}/libairspyhf/src/libairspyhf${CMAKE_SHARED_LIBRARY_SUFFIX}" CACHE INTERNAL "")
@@ -1566,7 +1579,7 @@ if (WIN32 OR APPLE)
         set(LIBHACKRF_INCLUDE_DIR "${source_dir}/host/libhackrf" CACHE INTERNAL "")
         if (WIN32)
             # include "libhackrf/hackrf.h"
-            makeCopyDir("${source_dir}/host/libhackrf/src" "${source_dir}/host/libhackrf/libhackrf" hackrf)
+            makeCopyHeaders("${source_dir}/host/libhackrf/src" "${source_dir}/host/libhackrf/libhackrf" hackrf)
             install(FILES "${SDRANGEL_BINARY_BIN_DIR}/hackrf${CMAKE_SHARED_LIBRARY_SUFFIX}" DESTINATION "${INSTALL_LIB_DIR}")
         elseif (APPLE)
             set(LIBHACKRF_LIBRARIES "${binary_dir}/src/libhackrf${CMAKE_SHARED_LIBRARY_SUFFIX}" CACHE INTERNAL "")

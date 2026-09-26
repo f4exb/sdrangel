@@ -593,7 +593,11 @@ void FreqTracker::webapiFormatChannelSettings(
     swgChannelSettings->setDirection(0); // single sink (Rx)
     swgChannelSettings->setOriginatorChannelIndex(getIndexInDeviceSet());
     swgChannelSettings->setOriginatorDeviceSetIndex(getDeviceSetIndex());
-    swgChannelSettings->setChannelType(new QString("FreqTracker"));
+    if (swgChannelSettings->getChannelType()) {
+        *swgChannelSettings->getChannelType() = "FreqTracker";
+    } else {
+        swgChannelSettings->setChannelType(new QString("FreqTracker"));
+    }
     swgChannelSettings->setFreqTrackerSettings(new SWGSDRangel::SWGFreqTrackerSettings());
     SWGSDRangel::SWGFreqTrackerSettings *swgFreqTrackerSettings = swgChannelSettings->getFreqTrackerSettings();
 
@@ -615,7 +619,11 @@ void FreqTracker::webapiFormatChannelSettings(
         swgFreqTrackerSettings->setRgbColor(settings.m_rgbColor);
     }
     if (channelSettingsKeys.contains("title") || force) {
-        swgFreqTrackerSettings->setTitle(new QString(settings.m_title));
+        if (swgFreqTrackerSettings->getTitle()) {
+            *swgFreqTrackerSettings->getTitle() = settings.m_title;
+        } else {
+            swgFreqTrackerSettings->setTitle(new QString(settings.m_title));
+        }
     }
     if (channelSettingsKeys.contains("spanLog2") || force) {
         swgFreqTrackerSettings->setSpanLog2(settings.m_spanLog2);

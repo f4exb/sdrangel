@@ -50,6 +50,7 @@
 #include "util/units.h"
 #include "util/morse.h"
 #include "util/profiler.h"
+#include "gui/messagedialog.h"
 #include "gui/basicchannelsettingsdialog.h"
 #include "gui/crightclickenabler.h"
 #include "gui/clickablelabel.h"
@@ -7771,7 +7772,10 @@ void ADSBDemodGUI::sendAircraftReport()
             aircraft->m_latitude,
             aircraft->m_longitude,
             aircraft->m_altitude,
-            aircraft->m_groundspeed
+            aircraft->m_groundspeed,
+            aircraft->m_positionValid,
+            aircraft->m_altitudeValid,
+            aircraft->m_groundspeedValid
         };
 
         report.append(aircraftReport);
@@ -8086,7 +8090,7 @@ void ADSBDemodGUI::on_logOpen_clicked()
                 }
                 else
                 {
-                    QMessageBox::critical(this, "ADS-B", error);
+                    MessageDialog::critical(this, "ADS-B", error);
                 }
                 ui->adsbData->blockSignals(false);
                 m_loadingData = false;
@@ -8098,7 +8102,7 @@ void ADSBDemodGUI::on_logOpen_clicked()
             }
             else
             {
-                QMessageBox::critical(this, "ADS-B", QString("Failed to open file %1").arg(fileNames[0]));
+                MessageDialog::critical(this, "ADS-B", QString("Failed to open file %1").arg(fileNames[0]));
             }
         }
     }
@@ -8124,7 +8128,7 @@ void ADSBDemodGUI::downloadProgress(qint64 bytesRead, qint64 totalBytes)
 
 void ADSBDemodGUI::downloadError(const QString& error)
 {
-    QMessageBox::critical(this, "ADS-B", error);
+    MessageDialog::critical(this, "ADS-B", error);
     if (m_progressDialog)
     {
         m_progressDialog->close();

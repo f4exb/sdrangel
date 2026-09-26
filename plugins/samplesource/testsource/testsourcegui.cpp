@@ -25,6 +25,7 @@
 #include <QFileDialog>
 
 #include "ui_testsourcegui.h"
+#include "gui/messagedialog.h"
 #include "gui/colormapper.h"
 #include "gui/glspectrum.h"
 #include "gui/basicdevicesettingsdialog.h"
@@ -289,6 +290,42 @@ void TestSourceGui::on_phaseImbalance_valueChanged(int value)
     sendSettings();
 }
 
+void TestSourceGui::on_period_valueChanged(int value)
+{
+    m_settings.m_period = value;
+    displayPeriod();
+    m_settingsKeys.append("period");
+    sendSettings();
+}
+
+void TestSourceGui::on_dutyCycle_valueChanged(int value)
+{
+    m_settings.m_dutyCycle = value;
+    ui->dutyCycleText->setText(QString("%1").arg(m_settings.m_dutyCycle));
+    m_settingsKeys.append("dutyCycle");
+    sendSettings();
+}
+
+void TestSourceGui::displayPeriod()
+{
+    float periodSecs = m_settings.m_period / (float) m_settings.m_sampleRate;
+    QString periodText;
+
+    if (periodSecs >= 1.0) {
+        periodText = QString("%1s").arg(periodSecs, 0, 'f', 1);
+    } else if (periodSecs >= 1e-3) {
+        periodText = QString("%1ms").arg(periodSecs * 1e3, 0, 'f', 1);
+    } else if (periodSecs >= 1e-6) {
+        periodText = QString("%1us").arg(periodSecs * 1e6, 0, 'f', 1);
+    } else if (periodSecs >= 1e-9) {
+        periodText = QString("%1ns").arg(periodSecs * 1e9, 0, 'f', 1);
+    } else {
+        periodText = QString("%1ps").arg(periodSecs * 1e12, 0, 'f', 1);
+    }
+
+    ui->periodText->setText(QString("(%1)").arg(periodText));
+}
+
 void TestSourceGui::displayAmplitude()
 {
     int amplitudeInt = ui->amplitudeCoarse->value() * 100 + ui->amplitudeFine->value();
@@ -406,6 +443,10 @@ void TestSourceGui::displaySettings()
     ui->amModulationText->setText(QString("%1").arg(m_settings.m_amModulation));
     ui->fmDeviation->setValue(m_settings.m_fmDeviation);
     ui->fmDeviationText->setText(QString("%1").arg(m_settings.m_fmDeviation / 10.0, 0, 'f', 1));
+    ui->period->setValue(m_settings.m_period);
+    displayPeriod();
+    ui->dutyCycle->setValue(m_settings.m_dutyCycle);
+    ui->dutyCycleText->setText(QString("%1").arg(m_settings.m_dutyCycle));
     blockApplySettings(false);
 }
 
@@ -447,7 +488,7 @@ void TestSourceGui::updateStatus()
                 break;
             case DeviceAPI::StError:
                 ui->startStop->setStyleSheet("QToolButton { background-color : red; }");
-                QMessageBox::information(this, tr("Message"), m_deviceUISet->m_deviceAPI->errorMessage());
+                MessageDialog::information(this, tr("Message"), m_deviceUISet->m_deviceAPI->errorMessage());
                 break;
             default:
                 break;
@@ -582,4 +623,6 @@ void TestSourceGui::makeUIConnections()
     QObject::connect(ui->iBias, &QSlider::valueChanged, this, &TestSourceGui::on_iBias_valueChanged);
     QObject::connect(ui->qBias, &QSlider::valueChanged, this, &TestSourceGui::on_qBias_valueChanged);
     QObject::connect(ui->phaseImbalance, &QSlider::valueChanged, this, &TestSourceGui::on_phaseImbalance_valueChanged);
+    QObject::connect(ui->period, QOverload<int>::of(&QSpinBox::valueChanged), this, &TestSourceGui::on_period_valueChanged);
+    QObject::connect(ui->dutyCycle, &QDial::valueChanged, this, &TestSourceGui::on_dutyCycle_valueChanged);
 }

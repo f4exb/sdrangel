@@ -3,12 +3,16 @@ DenoiserSettings:
   properties:
     denoiserType:
       type: integer
+      minimum: 0
+      maximum: 1
       description: >
         Denoiser type
           * 0 - none
           * 1 - RNnoise
     enableDenoiser:
       type: integer
+      minimum: 0
+      maximum: 1
       description: >
         Enable denoiser
           * 1 - enable
@@ -22,39 +26,54 @@ DenoiserSettings:
       description: Audio output device name
     audioMute:
       type: integer
+      minimum: 0
+      maximum: 1
       description: >
         Audio mute
           * 1 - mute
           * 0 - unmute
     title:
       type: string
+      description: "User-visible title."
     rgbColor:
       type: integer
+      description: "Display color encoded as an RGB integer."
     fileRecordName:
       type: string
       description: Output wave file name
     recordToFile:
       type: integer
+      minimum: 0
+      maximum: 1
       description: >
         Recording status
           * 1 - recording
           * 0 - not recording
     useReverseAPI:
       type: integer
+      minimum: 0
+      maximum: 1
       description: >
         Synchronize with reverse API
           * 1 - yes
           * 0 - no
     reverseAPIAddress:
       type: string
+      description: "IPv4 address or host name of the reverse API peer."
     reverseAPIPort:
       type: integer
+      description: "TCP port of the reverse API peer."
+      minimum: 1
+      maximum: 65535
     reverseAPIFeatureSetIndex:
       type: integer
+      description: "Feature-set index used by the reverse API peer."
     reverseAPIFeatureIndex:
       type: integer
+      description: "Feature index used by the reverse API peer."
     rollupState:
       $ref: "/doc/swagger/include/RollupState.yaml#/RollupState"
+      description: "Saved expanded or collapsed state of the GUI sections."
 
 DenoiserActions:
   description: "Denoiser actions"

@@ -41,6 +41,7 @@
 #include "util/csv.h"
 #include "util/db.h"
 #include "util/mmsi.h"
+#include "gui/messagedialog.h"
 #include "gui/basicchannelsettingsdialog.h"
 #include "gui/dialpopup.h"
 #include "gui/dialogpositioner.h"
@@ -1076,7 +1077,7 @@ void AISDemodGUI::on_logOpen_clicked()
                 }
                 else
                 {
-                    QMessageBox::critical(this, "AIS Demod", error);
+                    MessageDialog::critical(this, "AIS Demod", error);
                 }
                 m_loadingData = false;
                 ui->messages->setSortingEnabled(true);
@@ -1086,7 +1087,7 @@ void AISDemodGUI::on_logOpen_clicked()
             }
             else
             {
-                QMessageBox::critical(this, "AIS Demod", QString("Failed to open file %1").arg(fileNames[0]));
+                MessageDialog::critical(this, "AIS Demod", QString("Failed to open file %1").arg(fileNames[0]));
             }
         }
     }

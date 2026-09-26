@@ -22,6 +22,7 @@
 #include <QJsonObject>
 
 
+#include <QString>
 
 #include "SWGObject.h"
 #include "export.h"
@@ -53,6 +54,9 @@ public:
     qint32 getShow();
     void setShow(qint32 show);
 
+    QString* getText();
+    void setText(QString* text);
+
 
     virtual bool isSet() override;
 
@@ -68,6 +72,9 @@ private:
 
     qint32 show;
     bool m_show_isSet;
+
+    QString* text;
+    bool m_text_isSet;
 
 };
 

@@ -62,6 +62,10 @@ SWGTestSourceSettings::SWGTestSourceSettings() {
     m_q_factor_isSet = false;
     phase_imbalance = 0.0f;
     m_phase_imbalance_isSet = false;
+    period = 0;
+    m_period_isSet = false;
+    duty_cycle = 0;
+    m_duty_cycle_isSet = false;
     use_reverse_api = 0;
     m_use_reverse_api_isSet = false;
     reverse_api_address = nullptr;
@@ -112,6 +116,10 @@ SWGTestSourceSettings::init() {
     m_q_factor_isSet = false;
     phase_imbalance = 0.0f;
     m_phase_imbalance_isSet = false;
+    period = 0;
+    m_period_isSet = false;
+    duty_cycle = 0;
+    m_duty_cycle_isSet = false;
     use_reverse_api = 0;
     m_use_reverse_api_isSet = false;
     reverse_api_address = new QString("");
@@ -127,6 +135,8 @@ SWGTestSourceSettings::cleanup() {
     if(title != nullptr) { 
         delete title;
     }
+
+
 
 
 
@@ -195,6 +205,10 @@ SWGTestSourceSettings::fromJsonObject(QJsonObject &pJson) {
     ::SWGSDRangel::setValue(&q_factor, pJson["qFactor"], "float", "");
     
     ::SWGSDRangel::setValue(&phase_imbalance, pJson["phaseImbalance"], "float", "");
+    
+    ::SWGSDRangel::setValue(&period, pJson["period"], "qint32", "");
+    
+    ::SWGSDRangel::setValue(&duty_cycle, pJson["dutyCycle"], "qint32", "");
     
     ::SWGSDRangel::setValue(&use_reverse_api, pJson["useReverseAPI"], "qint32", "");
     
@@ -270,6 +284,12 @@ SWGTestSourceSettings::asJsonObject() {
     }
     if(m_phase_imbalance_isSet){
         obj->insert("phaseImbalance", QJsonValue(phase_imbalance));
+    }
+    if(m_period_isSet){
+        obj->insert("period", QJsonValue(period));
+    }
+    if(m_duty_cycle_isSet){
+        obj->insert("dutyCycle", QJsonValue(duty_cycle));
     }
     if(m_use_reverse_api_isSet){
         obj->insert("useReverseAPI", QJsonValue(use_reverse_api));
@@ -458,6 +478,26 @@ SWGTestSourceSettings::setPhaseImbalance(float phase_imbalance) {
 }
 
 qint32
+SWGTestSourceSettings::getPeriod() {
+    return period;
+}
+void
+SWGTestSourceSettings::setPeriod(qint32 period) {
+    this->period = period;
+    this->m_period_isSet = true;
+}
+
+qint32
+SWGTestSourceSettings::getDutyCycle() {
+    return duty_cycle;
+}
+void
+SWGTestSourceSettings::setDutyCycle(qint32 duty_cycle) {
+    this->duty_cycle = duty_cycle;
+    this->m_duty_cycle_isSet = true;
+}
+
+qint32
 SWGTestSourceSettings::getUseReverseApi() {
     return use_reverse_api;
 }
@@ -551,6 +591,12 @@ SWGTestSourceSettings::isSet(){
             isObjectUpdated = true; break;
         }
         if(m_phase_imbalance_isSet){
+            isObjectUpdated = true; break;
+        }
+        if(m_period_isSet){
+            isObjectUpdated = true; break;
+        }
+        if(m_duty_cycle_isSet){
             isObjectUpdated = true; break;
         }
         if(m_use_reverse_api_isSet){

@@ -165,6 +165,11 @@ void NoiseFigureBaseband::applySettings(const QStringList& settingsKeys, const N
     }
 }
 
+int NoiseFigureBaseband::getChannelSampleRate() const
+{
+    return m_channelizer->getChannelSampleRate();
+}
+
 void NoiseFigureBaseband::setBasebandSampleRate(int sampleRate)
 {
     m_channelizer->setBasebandSampleRate(sampleRate);

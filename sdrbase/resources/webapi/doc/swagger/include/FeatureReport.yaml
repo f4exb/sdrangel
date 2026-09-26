@@ -7,29 +7,54 @@ FeatureReport:
     featureType:
       description: Feature type code
       type: string
+    AISReport:
+      $ref: "/doc/swagger/include/AIS.yaml#/AISReport"
+      description: "Ais report data for Feature."
+    APRSReport:
+      $ref: "/doc/swagger/include/APRS.yaml#/APRSReport"
+      description: "Aprs report data for Feature."
+    RadiosondeReport:
+      $ref: "/doc/swagger/include/Radiosonde.yaml#/RadiosondeReport"
+      description: "Radiosonde report data for Feature."
     AFCReport:
       $ref: "/doc/swagger/include/AFC.yaml#/AFCReport"
+      description: "Afc report data for Feature."
     AMBEReport:
       $ref: "/doc/swagger/include/AMBE.yaml#/AMBEReport"
+      description: "Ambe report data for Feature."
     FreqDisplayReport:
       $ref: "/doc/swagger/include/FreqDisplay.yaml#/FreqDisplayReport"
+      description: "Freq display report data for Feature."
     GS232ControllerReport:
       $ref: "/doc/swagger/include/GS232Controller.yaml#/GS232ControllerReport"
+      description: "Gs232 controller report data for Feature."
     LimeRFEReport:
       $ref: "/doc/swagger/include/LimeRFE.yaml#/LimeRFEReport"
+      description: "Lime rfe report data for Feature."
     MapReport:
       $ref: "/doc/swagger/include/Map.yaml#/MapReport"
+      description: "Map report data for Feature."
     PERTesterReport:
       $ref: "/doc/swagger/include/PERTester.yaml#/PERTesterReport"
+      description: "Per tester report data for Feature."
     RigCtlServerReport:
       $ref: "/doc/swagger/include/RigCtlServer.yaml#/RigCtlServerReport"
+      description: "Rig ctl server report data for Feature."
+    MCPServerReport:
+      $ref: "/doc/swagger/include/MCPServer.yaml#/MCPServerReport"
+      description: "Mcp server report data for Feature."
     SatelliteTrackerReport:
       $ref: "/doc/swagger/include/SatelliteTracker.yaml#/SatelliteTrackerReport"
+      description: "Satellite tracker report data for Feature."
     SimplePTTReport:
       $ref: "/doc/swagger/include/SimplePTT.yaml#/SimplePTTReport"
+      description: "Simple ptt report data for Feature."
     SkyMapReport:
       $ref: "/doc/swagger/include/SkyMap.yaml#/SkyMapReport"
+      description: "Sky map report data for Feature."
     StarTrackerReport:
       $ref: "/doc/swagger/include/StarTracker.yaml#/StarTrackerReport"
+      description: "Star tracker report data for Feature."
     VORLocalizerReport:
       $ref: "/doc/swagger/include/VORLocalizer.yaml#/VORLocalizerReport"
+      description: "Vor localizer report data for Feature."

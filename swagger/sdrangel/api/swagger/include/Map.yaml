@@ -4,26 +4,195 @@ MapSettings:
     displayNames:
       description: Display object names on the map (1 for yes, 0 for no)
       type: integer
+      minimum: 0
+      maximum: 1
+    map2DEnabled:
+      description: Display the 2D map pane (1 for yes, 0 for no). Disable this while keeping map3DEnabled enabled to show only the 3D map.
+      type: integer
+      minimum: 0
+      maximum: 1
+    map3DEnabled:
+      description: Display the 3D map pane (1 for yes, 0 for no).
+      type: integer
+      minimum: 0
+      maximum: 1
+    mapProvider:
+      description: 2D map provider identifier.
+      type: string
+    mapType:
+      description: Selected 2D map type, for example Street Map or Satellite Map.
+      type: string
+    osmURL:
+      description: Custom OpenStreetMap tile-server URL.
+      type: string
+    mapBoxStyles:
+      description: Mapbox style identifier used by the selected 2D provider.
+      type: string
+    displaySelectedGroundTracks:
+      description: Display ground tracks for selected items (1 for yes, 0 for no).
+      type: integer
+      minimum: 0
+      maximum: 1
+    displayAllGroundTracks:
+      description: Display ground tracks for all items (1 for yes, 0 for no).
+      type: integer
+      minimum: 0
+      maximum: 1
     terrain:
       description: "Terrain used for 3D map (E.g: 'Ellipsoid' or 'Cesium World Terrain')"
       type: string
+    buildings:
+      description: 3D buildings layer, for example None or Cesium OSM Buildings.
+      type: string
+    sunLightEnabled:
+      description: Light the globe from the Sun's direction (1 for yes, 0 for no).
+      type: integer
+      minimum: 0
+      maximum: 1
+    lightIntensity:
+      description: Camera light intensity used by the 3D map.
+      type: number
+      format: float
+      minimum: 0
+    eciCamera:
+      description: Use an ECI rather than ECEF camera frame (1 for yes, 0 for no).
+      type: integer
+      minimum: 0
+      maximum: 1
+    fxaa:
+      description: Enable fast approximate anti-aliasing (1 for yes, 0 for no).
+      type: integer
+      minimum: 0
+      maximum: 1
+    msaa:
+      description: Multisample anti-aliasing level.
+      type: integer
+      minimum: 1
+      maximum: 8
+    terrainLighting:
+      description: Enable terrain lighting (1 for yes, 0 for no).
+      type: integer
+      minimum: 0
+      maximum: 1
+    water:
+      description: Enable water effects (1 for yes, 0 for no).
+      type: integer
+      minimum: 0
+      maximum: 1
+    hdr:
+      description: Enable high dynamic range rendering (1 for yes, 0 for no).
+      type: integer
+      minimum: 0
+      maximum: 1
+    fog:
+      description: Enable atmospheric fog (1 for yes, 0 for no).
+      type: integer
+      minimum: 0
+      maximum: 1
+    fps:
+      description: Display the 3D map frame rate (1 for yes, 0 for no).
+      type: integer
+      minimum: 0
+      maximum: 1
+    displayMUF:
+      description: Display maximum-usable-frequency contours (1 for yes, 0 for no).
+      type: integer
+      minimum: 0
+      maximum: 1
+    displayfoF2:
+      description: Display F2 critical-frequency contours (1 for yes, 0 for no).
+      type: integer
+      minimum: 0
+      maximum: 1
+    displayRain:
+      description: Display weather-radar rain and snow overlay (1 for yes, 0 for no).
+      type: integer
+      minimum: 0
+      maximum: 1
+    displayClouds:
+      description: Display satellite infrared cloud overlay (1 for yes, 0 for no).
+      type: integer
+      minimum: 0
+      maximum: 1
+    displaySeaMarks:
+      description: Display sea marks (1 for yes, 0 for no).
+      type: integer
+      minimum: 0
+      maximum: 1
+    displayRailways:
+      description: Display railways (1 for yes, 0 for no).
+      type: integer
+      minimum: 0
+      maximum: 1
+    displayNASAGlobalImagery:
+      description: Display NASA GIBS imagery (1 for yes, 0 for no).
+      type: integer
+      minimum: 0
+      maximum: 1
+    nasaGlobalImageryIdentifier:
+      description: NASA GIBS imagery-layer identifier.
+      type: string
+    nasaGlobalImageryOpacity:
+      description: NASA GIBS imagery opacity as a percentage.
+      type: integer
+      minimum: 0
+      maximum: 100
+    displayAurora:
+      description: Display aurora-probability overlay (1 for yes, 0 for no).
+      type: integer
+      minimum: 0
+      maximum: 1
+    displayMagDec:
+      description: Display magnetic-declination contours (1 for yes, 0 for no).
+      type: integer
+      minimum: 0
+      maximum: 1
+    displayMaidenheadGrid:
+      description: Display Maidenhead grid (1 for yes, 0 for no).
+      type: integer
+      minimum: 0
+      maximum: 1
+    displayPFD:
+      description: Display the aircraft primary-flight display (1 for yes, 0 for no).
+      type: integer
+      minimum: 0
+      maximum: 1
+    viewFirstPerson:
+      description: Use first-person 3D map view (1 for yes, 0 for no).
+      type: integer
+      minimum: 0
+      maximum: 1
+    defaultImagery:
+      description: Default imagery layer for the 3D map.
+      type: string
     title:
       type: string
+      description: "User-visible title."
     rgbColor:
       type: integer
+      description: "Display color encoded as an RGB integer."
     useReverseAPI:
       description: Synchronize with reverse API (1 for yes, 0 for no)
       type: integer
+      minimum: 0
+      maximum: 1
     reverseAPIAddress:
       type: string
+      description: "IPv4 address or host name of the reverse API peer."
     reverseAPIPort:
       type: integer
+      description: "TCP port of the reverse API peer."
+      minimum: 1
+      maximum: 65535
     reverseAPIFeatureSetIndex:
       type: integer
+      description: "Feature-set index used by the reverse API peer."
     reverseAPIFeatureIndex:
       type: integer
+      description: "Feature index used by the reverse API peer."
     rollupState:
       $ref: "http://swgserver:8081/api/swagger/include/RollupState.yaml#/RollupState"
+      description: "Saved expanded or collapsed state of the GUI sections."
 
 MapReport:
   description: Map
@@ -64,10 +233,14 @@ MapItem:
       description: "Latitude in decimal degrees, positive to the North"
       type: number
       format: float
+      minimum: -90
+      maximum: 90
     longitude:
       description: "Longitude in decimal degrees, positive to the East"
       type: number
       format: float
+      minimum: -180
+      maximum: 180
     altitude:
       description: "Altitude / height above sea level in metres"
       type: number
@@ -75,6 +248,8 @@ MapItem:
     fixedPosition:
       description: "Indicates whether position of item is constant with time (0 - variable, 1 - fixed)"
       type: integer
+      minimum: 0
+      maximum: 1
     positionDateTime:
       description: "Date and time at this position (ISO 8601 extended format)"
       type: string
@@ -97,6 +272,8 @@ MapItem:
     orientation:
       description: "How to orientate the model (0 - Along direction of motion, 1 - Use heading, pitch and roll)"
       type: integer
+      minimum: 0
+      maximum: 1
     heading:
       description: "Heading angle, in decimal degrees clockwise from North"
       type: number
@@ -129,6 +306,8 @@ MapItem:
     altitudeReference:
       description: "0 - NONE (Absolute), 1 - CLAMP_TO_GROUND, 2 - RELATIVE_TO_GROUND, 3 - CLIP_TO_GROUND."
       type: integer
+      minimum: 0
+      maximum: 3
     animations:
       description: "Animations to play"
       type: array
@@ -137,18 +316,24 @@ MapItem:
     type:
       description: "(0 - Map Item, 1 - Image Tile, 2 - Polygon, 3 - Polyline)"
       type: integer
+      minimum: 0
+      maximum: 3
     imageTileWest:
       type: number
       format: float
+      description: "Image tile west for Map item."
     imageTileSouth:
       type: number
       format: float
+      description: "Image tile south for Map item."
     imageTileEast:
       type: number
       format: float
+      description: "Image tile east for Map item."
     imageTileNorth:
       type: number
       format: float
+      description: "Image tile north for Map item."
     imageZoomLevel:
       description: "For 2D map"
       type: number
@@ -171,11 +356,14 @@ MapItem:
     colorValid:
       description: "0 - Use default color, 1 - Use specified color"
       type: integer
+      minimum: 0
+      maximum: 1
     color:
       description: "RGBA for polygon and polyline"
       type: integer
     aircraftState:
       $ref: "http://swgserver:8081/api/swagger/include/Map.yaml#/MapAircraftState"
+      description: "Current states of aircraft tracked by the ADS-B demodulator."
 
 MapAnimation:
   description: "Animation to play in the model on the 3D map"
@@ -186,9 +374,13 @@ MapAnimation:
     reverse:
       description: "(0 - Forward, 1 - Reverse)"
       type: integer
+      minimum: 0
+      maximum: 1
     loop:
       description: "(0 - Play once, 1 - Play in loop)"
       type: integer
+      minimum: 0
+      maximum: 1
     startDateTime:
       description: "Date and time to start playing this animation (ISO 8601 extended format)"
       type: string
@@ -218,10 +410,14 @@ MapCoordinate:
       description: "Latitude in decimal degrees, positive to the North"
       type: number
       format: float
+      minimum: -90
+      maximum: 90
     longitude:
       description: "Longitude in decimal degrees, positive to the East"
       type: number
       format: float
+      minimum: -180
+      maximum: 180
     altitude:
       description: "Altitude / height above sea level in metres"
       type: number
@@ -235,10 +431,13 @@ MapAircraftState:
   properties:
     callsign:
       type: string
+      description: "Radio callsign."
     aircraftType:
       type: string
+      description: "Aircraft type for Map aircraft state."
     onSurface:
       type: integer
+      description: "On surface for Map aircraft state."
     airspeed:
       description: "Indicated airspeed in knots"
       type: number
@@ -257,6 +456,7 @@ MapAircraftState:
     mach:
       type: number
       format: float
+      description: "Mach for Map aircraft state."
     altitude:
       description: "Barometric altitude in feet"
       type: number
@@ -286,12 +486,15 @@ MapAircraftState:
     selectedAirspeed:
       type: number
       format: float
+      description: "Selected airspeed for Map aircraft state."
     selectedAltitude:
       type: number
       format: float
+      description: "Selected altitude for Map aircraft state."
     selectedHeading:
       type: number
       format: float
+      description: "Selected heading for Map aircraft state."
     autopilot:
       description: "-1 unknown, 0 off, 1 on"
       type: integer
@@ -307,10 +510,13 @@ MapAircraftState:
     windSpeed:
       type: number
       format: float
+      description: "Wind speed for Map aircraft state."
     windDirection:
       type: number
       format: float
+      description: "Wind direction for Map aircraft state."
     staticAirTemperature:
       type: number
       format: float
+      description: "Static air temperature for Map aircraft state."
       
