@@ -135,6 +135,10 @@ void AMBEWorker::handleInputMessages()
                 m_failureCount++;
             }
         }
+        else
+        {
+            qDebug("%s: unhandled message: %s", Q_FUNC_INFO, message->getIdentifier());
+        }
 
         delete message;
 

@@ -117,6 +117,11 @@ void RemoteSourceWorker::handleInputMessages()
             m_socket.bind(notif->getAddress(), notif->getPort());
             connect(&m_socket, SIGNAL(readyRead()), this, SLOT(dataReadyRead()));
         }
+        else
+        {
+            qDebug("%s: unhandled message: %s", Q_FUNC_INFO, message->getIdentifier());
+        }
+        delete message;
     }
 }
 

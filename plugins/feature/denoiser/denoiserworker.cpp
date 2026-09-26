@@ -152,12 +152,15 @@ void DenoiserWorker::writeSampleToFile(const Sample& sample)
 
 void DenoiserWorker::handleInputMessages()
 {
-    Message* message = nullptr;
+    Message* message;
 
-    while ((message = m_inputMessageQueue.pop()) != nullptr)
+    while ((message = m_inputMessageQueue.pop()))
     {
         const Message& cmd = *message;
-        handleMessage(cmd);
+        if (!handleMessage(cmd)) {
+            qDebug("%s: unhandled message: %s", Q_FUNC_INFO, message->getIdentifier());
+        }
+        delete message;
     }
 }
 

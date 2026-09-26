@@ -381,13 +381,12 @@ void BladeRF2MIMOGui::handleInputMessages()
 {
     Message* message;
 
-    while ((message = m_inputMessageQueue.pop()) != 0)
+    while ((message = m_inputMessageQueue.pop()))
     {
-        if (handleMessage(*message)) {
-            delete message;
-        } else {
-            qDebug("BladeRF2MIMOGui::handleInputMessages: unhandled message: %s", message->getIdentifier());
+        if (!handleMessage(*message)) {
+            qDebug("%s: unhandled message: %s", Q_FUNC_INFO, message->getIdentifier());
         }
+        delete message;
     }
 }
 

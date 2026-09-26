@@ -237,10 +237,11 @@ void BladeRF2OutputGui::handleInputMessages()
         }
         else
         {
-            if (handleMessage(*message))
+            if (!handleMessage(*message))
             {
-                delete message;
+                qDebug("%s: unhandled message: %s", Q_FUNC_INFO, message->getIdentifier());
             }
+            delete message;
         }
     }
 }
