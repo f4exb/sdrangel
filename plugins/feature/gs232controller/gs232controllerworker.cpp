@@ -98,11 +98,12 @@ void GS232ControllerWorker::handleInputMessages()
 {
     Message* message;
 
-    while ((message = m_inputMessageQueue.pop()) != nullptr)
+    while ((message = m_inputMessageQueue.pop()))
     {
-        if (handleMessage(*message)) {
-            delete message;
+        if (!handleMessage(*message)) {
+            qDebug("%s: unhandled message: %s", Q_FUNC_INFO, message->getIdentifier());
         }
+        delete message;
     }
 }
 
