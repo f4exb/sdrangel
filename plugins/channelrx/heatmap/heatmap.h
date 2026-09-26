@@ -121,6 +121,10 @@ public:
             SWGSDRangel::SWGChannelSettings& response,
             QString& errorMessage);
 
+    virtual int webapiReportGet(
+            SWGSDRangel::SWGChannelReport& response,
+            QString& errorMessage);
+
     static void webapiFormatChannelSettings(
             SWGSDRangel::SWGChannelSettings& response,
             const HeatMapSettings& settings);
@@ -164,6 +168,7 @@ private:
 
     virtual bool handleMessage(const Message& cmd);
     void applySettings(const QStringList& settingsKeys, const HeatMapSettings& settings, bool force = false);
+    void webapiFormatChannelReport(SWGSDRangel::SWGChannelReport& response);
     void webapiReverseSendSettings(const QList<QString>& channelSettingsKeys, const HeatMapSettings& settings, bool force);
     void webapiFormatChannelSettings(
         const QList<QString>& channelSettingsKeys,

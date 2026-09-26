@@ -217,7 +217,11 @@ void IEEE_802_15_4_Mod::applySettings(const QStringList& settingsKeys, const IEE
         sendChannelSettings(pipes, settingsKeys, settings, force);
     }
 
-    m_settings = settings;
+    if (force) {
+        m_settings = settings;
+    } else {
+        m_settings.applySettings(settingsKeys, settings);
+    }
 }
 
 QByteArray IEEE_802_15_4_Mod::serialize() const
@@ -483,7 +487,11 @@ void IEEE_802_15_4_Mod::webapiFormatChannelSettings(SWGSDRangel::SWGChannelSetti
     response.getIeee802154ModSettings()->setBbNoise(settings.m_bbNoise ? 1 : 0);
     response.getIeee802154ModSettings()->setWriteToFile(settings.m_writeToFile ? 1 : 0);
     response.getIeee802154ModSettings()->setSpectrumRate(settings.m_spectrumRate);
-    response.getIeee802154ModSettings()->setData(new QString(settings.m_data));
+    if (response.getIeee802154ModSettings()->getData()) {
+        *response.getIeee802154ModSettings()->getData() = settings.m_data;
+    } else {
+        response.getIeee802154ModSettings()->setData(new QString(settings.m_data));
+    }
     response.getIeee802154ModSettings()->setRgbColor(settings.m_rgbColor);
 
     if (response.getIeee802154ModSettings()->getTitle()) {
@@ -615,7 +623,11 @@ void IEEE_802_15_4_Mod::webapiFormatChannelSettings(
     swgChannelSettings->setDirection(1); // single source (Tx)
     swgChannelSettings->setOriginatorChannelIndex(getIndexInDeviceSet());
     swgChannelSettings->setOriginatorDeviceSetIndex(getDeviceSetIndex());
-    swgChannelSettings->setChannelType(new QString(m_channelId));
+    if (swgChannelSettings->getChannelType()) {
+        *swgChannelSettings->getChannelType() = m_channelId;
+    } else {
+        swgChannelSettings->setChannelType(new QString(m_channelId));
+    }
     swgChannelSettings->setIeee802154ModSettings(new SWGSDRangel::SWGIEEE_802_15_4_ModSettings());
     SWGSDRangel::SWGIEEE_802_15_4_ModSettings *swgIEEE_802_15_4_ModSettings = swgChannelSettings->getIeee802154ModSettings();
 
@@ -676,13 +688,21 @@ void IEEE_802_15_4_Mod::webapiFormatChannelSettings(
         swgIEEE_802_15_4_ModSettings->setSpectrumRate(settings.m_spectrumRate);
     }
     if (channelSettingsKeys.contains("data") || force) {
-        swgIEEE_802_15_4_ModSettings->setData(new QString(settings.m_data));
+        if (swgIEEE_802_15_4_ModSettings->getData()) {
+            *swgIEEE_802_15_4_ModSettings->getData() = settings.m_data;
+        } else {
+            swgIEEE_802_15_4_ModSettings->setData(new QString(settings.m_data));
+        }
     }
     if (channelSettingsKeys.contains("rgbColor") || force) {
         swgIEEE_802_15_4_ModSettings->setRgbColor(settings.m_rgbColor);
     }
     if (channelSettingsKeys.contains("title") || force) {
-        swgIEEE_802_15_4_ModSettings->setTitle(new QString(settings.m_title));
+        if (swgIEEE_802_15_4_ModSettings->getTitle()) {
+            *swgIEEE_802_15_4_ModSettings->getTitle() = settings.m_title;
+        } else {
+            swgIEEE_802_15_4_ModSettings->setTitle(new QString(settings.m_title));
+        }
     }
     if (channelSettingsKeys.contains("streamIndex") || force) {
         swgIEEE_802_15_4_ModSettings->setStreamIndex(settings.m_streamIndex);
@@ -691,7 +711,11 @@ void IEEE_802_15_4_Mod::webapiFormatChannelSettings(
         swgIEEE_802_15_4_ModSettings->setUseReverseApi(settings.m_useReverseAPI ? 1 : 0);
     }
     if (channelSettingsKeys.contains("reverseAPIAddress") || force) {
-        swgIEEE_802_15_4_ModSettings->setReverseApiAddress(new QString(settings.m_reverseAPIAddress));
+        if (swgIEEE_802_15_4_ModSettings->getReverseApiAddress()) {
+            *swgIEEE_802_15_4_ModSettings->getReverseApiAddress() = settings.m_reverseAPIAddress;
+        } else {
+            swgIEEE_802_15_4_ModSettings->setReverseApiAddress(new QString(settings.m_reverseAPIAddress));
+        }
     }
     if (channelSettingsKeys.contains("reverseAPIPort") || force) {
         swgIEEE_802_15_4_ModSettings->setReverseApiPort(settings.m_reverseAPIPort);
@@ -724,7 +748,11 @@ void IEEE_802_15_4_Mod::webapiFormatChannelSettings(
         swgIEEE_802_15_4_ModSettings->setUdpBytesFormat(settings.m_udpBytesFormat ? 1 : 0);
     }
     if (channelSettingsKeys.contains("udpAddress") || force) {
-        swgIEEE_802_15_4_ModSettings->setUdpAddress(new QString(settings.m_udpAddress));
+        if (swgIEEE_802_15_4_ModSettings->getUdpAddress()) {
+            *swgIEEE_802_15_4_ModSettings->getUdpAddress() = settings.m_udpAddress;
+        } else {
+            swgIEEE_802_15_4_ModSettings->setUdpAddress(new QString(settings.m_udpAddress));
+        }
     }
     if (channelSettingsKeys.contains("udpPort") || force) {
         swgIEEE_802_15_4_ModSettings->setUdpPort(settings.m_udpPort);

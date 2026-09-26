@@ -26,6 +26,7 @@
 #include <QVBoxLayout>
 #include <QLabel>
 
+#include "dsp/spectrumvis.h"
 #include "gui/glspectrum.h"
 #include "gui/glspectrumview.h"
 #include "gui/spectrummeasurements.h"
@@ -33,6 +34,7 @@
 GLSpectrum::GLSpectrum(QWidget *parent) :
     QWidget(parent)
 {
+    m_spectrumVis = nullptr;
     m_spectrumContainer = new QWidget();
     QHBoxLayout *hLayout = new QHBoxLayout(m_spectrumContainer);
     m_spectrum = new GLSpectrumView();
@@ -56,6 +58,40 @@ GLSpectrum::GLSpectrum(QWidget *parent) :
     setLayout(layout);
     m_measurements->setSizePolicy(QSizePolicy::Expanding, QSizePolicy::Preferred);
     setSizePolicy(QSizePolicy::Expanding, QSizePolicy::Expanding);
+}
+
+GLSpectrum::~GLSpectrum()
+{
+    if (m_spectrumVis) {
+        m_spectrumVis->setGLSpectrum(nullptr);
+    }
+}
+
+void GLSpectrum::setSpectrumVis(SpectrumVis* spectrumVis)
+{ 
+    m_spectrumVis = spectrumVis;
+    m_spectrum->setSpectrumVis(spectrumVis); 
+}
+
+
+void GLSpectrum::spectrumAutoscale()
+{
+    QMetaObject::invokeMethod(this, [this]() { emit requestAutoscale(); }, Qt::QueuedConnection);
+}
+
+void GLSpectrum::spectrumClear()
+{
+    QMetaObject::invokeMethod(m_spectrum, [this]() { m_spectrum->clearSpectrumHistogram(); }, Qt::QueuedConnection);
+}
+
+void GLSpectrum::spectrumResetMeasurements()
+{
+    QMetaObject::invokeMethod(m_spectrum, [this]() { m_spectrum->resetMeasurements(); }, Qt::QueuedConnection);
+}
+
+void GLSpectrum::spectrumGotoMarker(int markerIndex)
+{
+    QMetaObject::invokeMethod(this, [this, markerIndex]() { emit requestGotoMarker(markerIndex); }, Qt::QueuedConnection);
 }
 
 void GLSpectrum::setMeasurementsVisible(bool visible)

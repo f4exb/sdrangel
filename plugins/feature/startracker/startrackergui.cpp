@@ -38,6 +38,7 @@
 #include "feature/featureutils.h"
 #include "feature/featurewebapiutils.h"
 #include "channel/channelwebapiutils.h"
+#include "gui/messagedialog.h"
 #include "gui/basicfeaturesettingsdialog.h"
 #include "gui/dmsspinbox.h"
 #include "gui/graphicsviewzoom.h"
@@ -353,7 +354,6 @@ StarTrackerGUI::StarTrackerGUI(PluginAPI* pluginAPI, FeatureUISet *featureUISet,
     m_featureUISet(featureUISet),
     m_doApplySettings(true),
     m_doPlotChart(true),
-    m_lastFeatureState(0),
     m_azElLineChart(nullptr),
     m_azElPolarChart(nullptr),
     m_solarFluxChart(nullptr),
@@ -420,6 +420,8 @@ StarTrackerGUI::StarTrackerGUI(PluginAPI* pluginAPI, FeatureUISet *featureUISet,
 
     connect(&m_statusTimer, SIGNAL(timeout()), this, SLOT(updateStatus()));
     m_statusTimer.start(1000);
+    connect(m_starTracker, &Feature::stateChanged, this, &StarTrackerGUI::updateFeatureState);
+    updateFeatureState();
 
     connect(&m_redrawTimer, &QTimer::timeout, this, &StarTrackerGUI::plotChart);
 
@@ -1053,41 +1055,12 @@ void StarTrackerGUI::updateLST()
 
 void StarTrackerGUI::updateStatus()
 {
-    int state = m_starTracker->getState();
-
-    if (m_lastFeatureState != state)
-    {
-        // We set checked state of start/stop button, in case it was changed via API
-        bool oldState;
-        switch (state)
-        {
-            case Feature::StNotStarted:
-                ui->startStop->setStyleSheet("QToolButton { background:rgb(79,79,79); }");
-                break;
-            case Feature::StIdle:
-                oldState = ui->startStop->blockSignals(true);
-                ui->startStop->setChecked(false);
-                ui->startStop->blockSignals(oldState);
-                ui->startStop->setStyleSheet("QToolButton { background-color : blue; }");
-                break;
-            case Feature::StRunning:
-                oldState = ui->startStop->blockSignals(true);
-                ui->startStop->setChecked(true);
-                ui->startStop->blockSignals(oldState);
-                ui->startStop->setStyleSheet("QToolButton { background-color : green; }");
-                break;
-            case Feature::StError:
-                ui->startStop->setStyleSheet("QToolButton { background-color : red; }");
-                QMessageBox::information(this, tr("Message"), m_starTracker->getErrorMessage());
-                break;
-            default:
-                break;
-        }
-
-        m_lastFeatureState = state;
-    }
-
     updateLST();
+}
+
+void StarTrackerGUI::updateFeatureState()
+{
+    updateStartStopButton(ui->startStop);
 }
 
 void StarTrackerGUI::applySettings(bool force)
@@ -1614,7 +1587,7 @@ void StarTrackerGUI::on_saveAnimation_clicked()
                 apng.addImage(m_animationImages[i]);
             }
             if (!apng.save(fileNames[0])) {
-                QMessageBox::critical(this, "Star Tracker", QString("Failed to write to file %1").arg(fileNames[0]));
+                MessageDialog::critical(this, "Star Tracker", QString("Failed to write to file %1").arg(fileNames[0]));
             }
         }
     }
@@ -3330,7 +3303,7 @@ void StarTrackerGUI::downloadFinished(const QString& filename, bool success)
     if (success && filename.endsWith("solar_flux.srd")) {
         readSolarFlux();
     } else if (!success) {
-        QMessageBox::warning(this, "Failed to download file", QString("Failed to download %1").arg(filename));
+        MessageDialog::warning(this, "Failed to download file", QString("Failed to download %1").arg(filename));
     }
 }
 

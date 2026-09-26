@@ -345,7 +345,11 @@ void AMMod::applySettings(const QStringList& settingsKeys, const AMModSettings& 
         sendChannelSettings(pipes, settingsKeys, settings, force);
     }
 
-    m_settings = settings;
+    if (force) {
+        m_settings = settings;
+    } else {
+        m_settings.applySettings(settingsKeys, settings);
+    }
 }
 
 QByteArray AMMod::serialize() const
@@ -702,7 +706,11 @@ void AMMod::webapiFormatChannelSettings(
     swgChannelSettings->setDirection(1); // single source (Tx)
     swgChannelSettings->setOriginatorChannelIndex(getIndexInDeviceSet());
     swgChannelSettings->setOriginatorDeviceSetIndex(getDeviceSetIndex());
-    swgChannelSettings->setChannelType(new QString(m_channelId));
+    if (swgChannelSettings->getChannelType()) {
+        *swgChannelSettings->getChannelType() = m_channelId;
+    } else {
+        swgChannelSettings->setChannelType(new QString(m_channelId));
+    }
     swgChannelSettings->setAmModSettings(new SWGSDRangel::SWGAMModSettings());
     SWGSDRangel::SWGAMModSettings *swgAMModSettings = swgChannelSettings->getAmModSettings();
 
@@ -718,7 +726,11 @@ void AMMod::webapiFormatChannelSettings(
         swgAMModSettings->setModAfInput((int) settings.m_modAFInput);
     }
     if (channelSettingsKeys.contains("audioDeviceName") || force) {
-        swgAMModSettings->setAudioDeviceName(new QString(settings.m_audioDeviceName));
+        if (swgAMModSettings->getAudioDeviceName()) {
+            *swgAMModSettings->getAudioDeviceName() = settings.m_audioDeviceName;
+        } else {
+            swgAMModSettings->setAudioDeviceName(new QString(settings.m_audioDeviceName));
+        }
     }
     if (channelSettingsKeys.contains("playLoop") || force) {
         swgAMModSettings->setPlayLoop(settings.m_playLoop ? 1 : 0);
@@ -730,7 +742,11 @@ void AMMod::webapiFormatChannelSettings(
         swgAMModSettings->setRgbColor(settings.m_rgbColor);
     }
     if (channelSettingsKeys.contains("title") || force) {
-        swgAMModSettings->setTitle(new QString(settings.m_title));
+        if (swgAMModSettings->getTitle()) {
+            *swgAMModSettings->getTitle() = settings.m_title;
+        } else {
+            swgAMModSettings->setTitle(new QString(settings.m_title));
+        }
     }
     if (channelSettingsKeys.contains("toneFrequency") || force) {
         swgAMModSettings->setToneFrequency(settings.m_toneFrequency);

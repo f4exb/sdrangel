@@ -300,7 +300,11 @@ void VORDemod::applySettings(const QStringList& settingsKeys, const VORDemodSett
         sendChannelSettings(pipes, settingsKeys, settings, force);
     }
 
-    m_settings = settings;
+    if (force) {
+        m_settings = settings;
+    } else {
+        m_settings.applySettings(settingsKeys, settings);
+    }
 }
 
 QByteArray VORDemod::serialize() const
@@ -617,7 +621,11 @@ void VORDemod::webapiFormatChannelSettings(
     swgChannelSettings->setDirection(0); // Single sink (Rx)
     swgChannelSettings->setOriginatorChannelIndex(getIndexInDeviceSet());
     swgChannelSettings->setOriginatorDeviceSetIndex(getDeviceSetIndex());
-    swgChannelSettings->setChannelType(new QString("VORDemod"));
+    if (swgChannelSettings->getChannelType()) {
+        *swgChannelSettings->getChannelType() = "VORDemod";
+    } else {
+        swgChannelSettings->setChannelType(new QString("VORDemod"));
+    }
     swgChannelSettings->setVorDemodSettings(new SWGSDRangel::SWGVORDemodSettings());
     SWGSDRangel::SWGVORDemodSettings *swgVORDemodSettings = swgChannelSettings->getVorDemodSettings();
 
@@ -642,13 +650,21 @@ void VORDemod::webapiFormatChannelSettings(
         swgVORDemodSettings->setIdentBandpassEnable(settings.m_identBandpassEnable);
     }
     if (channelSettingsKeys.contains("title") || force) {
-        swgVORDemodSettings->setTitle(new QString(settings.m_title));
+        if (swgVORDemodSettings->getTitle()) {
+            *swgVORDemodSettings->getTitle() = settings.m_title;
+        } else {
+            swgVORDemodSettings->setTitle(new QString(settings.m_title));
+        }
     }
     if (channelSettingsKeys.contains("volume") || force) {
         swgVORDemodSettings->setVolume(settings.m_volume);
     }
     if (channelSettingsKeys.contains("audioDeviceName") || force) {
-        swgVORDemodSettings->setAudioDeviceName(new QString(settings.m_audioDeviceName));
+        if (swgVORDemodSettings->getAudioDeviceName()) {
+            *swgVORDemodSettings->getAudioDeviceName() = settings.m_audioDeviceName;
+        } else {
+            swgVORDemodSettings->setAudioDeviceName(new QString(settings.m_audioDeviceName));
+        }
     }
     if (channelSettingsKeys.contains("streamIndex") || force) {
         swgVORDemodSettings->setStreamIndex(settings.m_streamIndex);

@@ -101,9 +101,30 @@ void DSPDeviceSinkEngine::addChannelSource(BasebandSampleSource* source)
     getInputMessageQueue()->push(cmd);
 }
 
+// Whether a removal can be run on the engine thread and waited for: not from that thread
+// itself, which would deadlock, and not once it has stopped, which would wait forever
+// Neither should happen in practice: channels are deleted from the main thread, and a device
+// set's channels go before its engine does
+static bool canWaitOn(const QObject *engine)
+{
+    QThread *engineThread = engine->thread();
+    return engineThread && engineThread->isRunning() && (QThread::currentThread() != engineThread);
+}
+
 void DSPDeviceSinkEngine::removeChannelSource(BasebandSampleSource* source, bool deleting)
 {
 	qDebug() << "DSPDeviceSinkEngine::removeChannelSource: " << source->getSourceName().toStdString().c_str();
+
+    // When deleting, the source needs to be removed before returning
+    if (deleting && canWaitOn(this))
+    {
+		// Same code as for DSPRemoveBasebandSampleSource in handleMessage
+        QMetaObject::invokeMethod(this, [this, source]() {
+            m_basebandSampleSources.remove(source);
+        }, Qt::BlockingQueuedConnection);
+        return;
+    }
+
 	auto *cmd = new DSPRemoveBasebandSampleSource(source, deleting);
     getInputMessageQueue()->push(cmd);
 }

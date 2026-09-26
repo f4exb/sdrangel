@@ -314,7 +314,11 @@ void LocalSource::applySettings(const QStringList& settingsKeys, const LocalSour
         sendChannelSettings(pipes, settingsKeys, settings, force);
     }
 
-    m_settings = settings;
+    if (force) {
+        m_settings = settings;
+    } else {
+        m_settings.applySettings(settingsKeys, settings);
+    }
 }
 
 void LocalSource::validateFilterChainHash(LocalSourceSettings& settings)
@@ -547,7 +551,11 @@ void LocalSource::webapiFormatChannelSettings(
     swgChannelSettings->setDirection(1); // single source (Tx)
     swgChannelSettings->setOriginatorChannelIndex(getIndexInDeviceSet());
     swgChannelSettings->setOriginatorDeviceSetIndex(getDeviceSetIndex());
-    swgChannelSettings->setChannelType(new QString(m_channelId));
+    if (swgChannelSettings->getChannelType()) {
+        *swgChannelSettings->getChannelType() = m_channelId;
+    } else {
+        swgChannelSettings->setChannelType(new QString(m_channelId));
+    }
     swgChannelSettings->setLocalSourceSettings(new SWGSDRangel::SWGLocalSourceSettings());
     SWGSDRangel::SWGLocalSourceSettings *swgLocalSourceSettings = swgChannelSettings->getLocalSourceSettings();
 
@@ -560,7 +568,11 @@ void LocalSource::webapiFormatChannelSettings(
         swgLocalSourceSettings->setRgbColor(settings.m_rgbColor);
     }
     if (channelSettingsKeys.contains("title") || force) {
-        swgLocalSourceSettings->setTitle(new QString(settings.m_title));
+        if (swgLocalSourceSettings->getTitle()) {
+            *swgLocalSourceSettings->getTitle() = settings.m_title;
+        } else {
+            swgLocalSourceSettings->setTitle(new QString(settings.m_title));
+        }
     }
     if (channelSettingsKeys.contains("log2Interp") || force) {
         swgLocalSourceSettings->setLog2Interp(settings.m_log2Interp);

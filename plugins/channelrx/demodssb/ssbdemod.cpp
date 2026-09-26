@@ -379,13 +379,26 @@ int SSBDemod::webapiSettingsPutPatch(
     SSBDemodSettings settings = m_settings;
     webapiUpdateChannelSettings(settings, channelSettingsKeys, response);
 
-    MsgConfigureSSBDemod *msg = MsgConfigureSSBDemod::create(channelSettingsKeys, settings, force);
+    // The filter keys set one entry of the filter bank, and the settings are applied by key
+    // name with the bank copied as a whole under its own, so that is the key to pass on
+    QStringList settingsKeys = channelSettingsKeys;
+
+    for (const char *key : {"rfBandwidth", "lowCutoff", "spanLog2", "fftWindow"})
+    {
+        if (settingsKeys.contains(key) && !settingsKeys.contains("filterBank"))
+        {
+            settingsKeys.append("filterBank");
+            break;
+        }
+    }
+
+    MsgConfigureSSBDemod *msg = MsgConfigureSSBDemod::create(settingsKeys, settings, force);
     m_inputMessageQueue.push(msg);
 
     qDebug("SSBDemod::webapiSettingsPutPatch: forward to GUI: %p", m_guiMessageQueue);
     if (m_guiMessageQueue) // forward to GUI if any
     {
-        MsgConfigureSSBDemod *msgToGUI = MsgConfigureSSBDemod::create(channelSettingsKeys, settings, force);
+        MsgConfigureSSBDemod *msgToGUI = MsgConfigureSSBDemod::create(settingsKeys, settings, force);
         m_guiMessageQueue->push(msgToGUI);
     }
 
@@ -414,7 +427,7 @@ void SSBDemod::webapiUpdateChannelSettings(
     if (channelSettingsKeys.contains("lowCutoff")) {
         settings.m_filterBank[settings.m_filterIndex].m_lowCutoff = response.getSsbDemodSettings()->getLowCutoff();
     }
-    if (channelSettingsKeys.contains("fftWimdow")) {
+    if (channelSettingsKeys.contains("fftWindow")) {
         settings.m_filterBank[settings.m_filterIndex].m_fftWindow = (FFTWindow::Function) response.getSsbDemodSettings()->getFftWindow();
     }
     if (channelSettingsKeys.contains("volume")) {
@@ -446,6 +459,9 @@ void SSBDemod::webapiUpdateChannelSettings(
     }
     if (channelSettingsKeys.contains("agcThresholdGate")) {
         settings.m_agcThresholdGate = response.getSsbDemodSettings()->getAgcThresholdGate();
+    }
+    if (channelSettingsKeys.contains("dnrScheme")) {
+        settings.m_dnrScheme = response.getSsbDemodSettings()->getDnrScheme();
     }
     if (channelSettingsKeys.contains("dnr")) {
         settings.m_dnr = response.getSsbDemodSettings()->getDnr() != 0;
@@ -684,7 +700,11 @@ void SSBDemod::webapiFormatChannelSettings(
     swgChannelSettings->setDirection(0); // Single sink (Rx)
     swgChannelSettings->setOriginatorChannelIndex(getIndexInDeviceSet());
     swgChannelSettings->setOriginatorDeviceSetIndex(getDeviceSetIndex());
-    swgChannelSettings->setChannelType(new QString(m_channelId));
+    if (swgChannelSettings->getChannelType()) {
+        *swgChannelSettings->getChannelType() = m_channelId;
+    } else {
+        swgChannelSettings->setChannelType(new QString(m_channelId));
+    }
     swgChannelSettings->setSsbDemodSettings(new SWGSDRangel::SWGSSBDemodSettings());
     SWGSDRangel::SWGSSBDemodSettings *swgSSBDemodSettings = swgChannelSettings->getSsbDemodSettings();
 
@@ -757,10 +777,18 @@ void SSBDemod::webapiFormatChannelSettings(
         swgSSBDemodSettings->setRgbColor(settings.m_rgbColor);
     }
     if (channelSettingsKeys.contains("title") || force) {
-        swgSSBDemodSettings->setTitle(new QString(settings.m_title));
+        if (swgSSBDemodSettings->getTitle()) {
+            *swgSSBDemodSettings->getTitle() = settings.m_title;
+        } else {
+            swgSSBDemodSettings->setTitle(new QString(settings.m_title));
+        }
     }
     if (channelSettingsKeys.contains("audioDeviceName") || force) {
-        swgSSBDemodSettings->setAudioDeviceName(new QString(settings.m_audioDeviceName));
+        if (swgSSBDemodSettings->getAudioDeviceName()) {
+            *swgSSBDemodSettings->getAudioDeviceName() = settings.m_audioDeviceName;
+        } else {
+            swgSSBDemodSettings->setAudioDeviceName(new QString(settings.m_audioDeviceName));
+        }
     }
     if (channelSettingsKeys.contains("streamIndex") || force) {
         swgSSBDemodSettings->setStreamIndex(settings.m_streamIndex);

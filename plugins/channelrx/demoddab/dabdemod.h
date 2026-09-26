@@ -22,6 +22,8 @@
 #include <vector>
 
 #include <QNetworkRequest>
+#include <QMap>
+#include <QMutex>
 #include <QThread>
 
 #include "dsp/basebandsamplesink.h"
@@ -381,6 +383,10 @@ public:
             SWGSDRangel::SWGChannelSettings& response,
             QString& errorMessage);
 
+    virtual int webapiReportGet(
+            SWGSDRangel::SWGChannelReport& response,
+            QString& errorMessage);
+
     static void webapiFormatChannelSettings(
             SWGSDRangel::SWGChannelSettings& response,
             const DABDemodSettings& settings);
@@ -410,12 +416,34 @@ private:
     int m_basebandSampleRate; //!< stored from device message used when starting baseband sink
     qint64 m_centerFrequency;
 
+    mutable QMutex m_reportMutex;
+    bool m_reportSync;
+    int m_reportSNR;
+    int m_reportFrequencyOffset;
+    QString m_reportEnsembleName;
+    int m_reportEnsembleId;
+    QMap<int, QString> m_reportPrograms;
+    bool m_reportAudioActive;
+    int m_reportBitrate;
+    QString m_reportAudio;
+    QString m_reportLanguage;
+    QString m_reportProgramType;
+    int m_reportFrameQuality;
+    int m_reportReedSolomonQuality;
+    int m_reportAACQuality;
+    int m_reportFIBQuality;
+    int m_reportTII;
+    QString m_reportData;
+
     QNetworkAccessManager *m_networkManager;
     QNetworkRequest m_networkRequest;
 
     virtual bool handleMessage(const Message& cmd);
     void applySettings(const QStringList& settingsKeys, const DABDemodSettings& settings, bool force = false);
     void sendSampleRateToDemodAnalyzer();
+    void clearReport();
+    void clearProgramReport();
+    void webapiFormatChannelReport(SWGSDRangel::SWGChannelReport& response);
     void webapiReverseSendSettings(const QList<QString>& channelSettingsKeys, const DABDemodSettings& settings, bool force);
     void webapiFormatChannelSettings(
         const QList<QString>& channelSettingsKeys,

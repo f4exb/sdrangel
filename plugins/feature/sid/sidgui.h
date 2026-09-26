@@ -152,9 +152,7 @@ private:
 
     SIDMain* m_sid;
     MessageQueue m_inputMessageQueue;
-    QTimer m_statusTimer;
     QTimer m_autosaveTimer;
-    int m_lastFeatureState;
 
     QFileDialog m_fileDialog;
 
@@ -281,7 +279,7 @@ private slots:
     void autoscaleXRightClicked();
     void autoscaleYRightClicked();
     void todayRightClicked();
-    void updateStatus();
+    void updateFeatureState();
     void autosave();
     void on_settings_clicked();
     void on_addChannels_clicked();

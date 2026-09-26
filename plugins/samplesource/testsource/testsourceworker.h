@@ -59,12 +59,10 @@ public:
     void setAMModulation(float amModulation);
     void setFMDeviation(float deviation);
     void setPattern0();
-    void setPattern1();
-    void setPattern2();
+    void setPattern1(int period);
+    void setPattern2(int period, int dutyCycle);
 
 private:
-	volatile bool m_running;
-
 	qint16  *m_buf;
     quint32 m_bufsize;
     quint32 m_chunksize;
@@ -79,6 +77,7 @@ private:
 	float m_fmDeviationUnit;
 	float m_fmPhasor;
     uint32_t m_pulseWidth; //!< pulse width in number of samples
+    uint32_t m_period;     //!< period of the P2 pattern in number of samples
     uint32_t m_pulseSampleCount;
     uint32_t m_pulsePatternCount;
     uint32_t m_pulsePatternCycle;

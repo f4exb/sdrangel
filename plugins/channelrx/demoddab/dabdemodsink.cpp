@@ -633,7 +633,11 @@ void DABDemodSink::applySettings(const QStringList& settingsKeys, const DABDemod
         }
     }
 
-    m_settings = settings;
+    if (force) {
+        m_settings = settings;
+    } else {
+        m_settings.applySettings(settingsKeys, settings);
+    }
 }
 
 // Can't call setProgram directly from callback, so we get here via a message

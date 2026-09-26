@@ -37,6 +37,7 @@
 #include "util/db.h"
 #include "util/morse.h"
 #include "util/units.h"
+#include "gui/messagedialog.h"
 #include "gui/basicchannelsettingsdialog.h"
 #include "dsp/dspengine.h"
 #include "gui/crightclickenabler.h"
@@ -1026,7 +1027,7 @@ void VORDemodMCGUI::downloadFinished(const QString& filename, bool success)
     else
     {
         qDebug() << "VORDemodMCGUI::downloadFinished: Failed: " << filename;
-        QMessageBox::warning(this, "Download failed", QString("Failed to download %1").arg(filename));
+        MessageDialog::warning(this, "Download failed", QString("Failed to download %1").arg(filename));
     }
     if (closeDialog && m_progressDialog)
     {

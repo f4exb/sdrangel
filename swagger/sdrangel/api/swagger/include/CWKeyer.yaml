@@ -2,29 +2,45 @@ CWKeyerSettings:
   properties:
     sampleRate:
       type: integer
+      description: "Sample rate in samples per second."
     wpm:
       description: Words Per Minute keying speed
       type: integer
     mode:
-      description: see enum CWKeyerSettings::CWMode
+      description: >
+        Source of the keying
+          * 0 - none, key up
+          * 1 - send the text in the text field
+          * 2 - send continuous dots
+          * 3 - send continuous dashes
+          * 4 - key from the keyboard
       type: integer
+      minimum: 0
+      maximum: 4
     text:
       type: string
+      description: "Text setting for CW keyer."
     loop:
       description: 1 to loop on text keying
       type: integer
     keyboardIambic:
       description: 1 for iambic input 0 for straight input using the keyboard
       type: integer
+      minimum: 0
+      maximum: 1
     dotKey:
-      description: key for dots keyboard input. See enum Qt::Key
+      description: >
+        Keyboard key that sends dots. Key code as a Qt key value, for example 32 (0x20) for space and 65 (0x41) for A. Letter keys use the upper case code. 0 for no key.
       type: integer
     dotKeyModifiers:
-      description: key modifier for dots keyboard input. See flags Qt::KeyboardModifiers
+      description: >
+        Modifiers for the dot key. Modifier keys held with the key, as a sum of flags: 33554432 (0x02000000) shift, 67108864 (0x04000000) control, 134217728 (0x08000000) alt, 268435456 (0x10000000) meta. 0 for no modifier.
       type: integer
     dashKey:
-      description: key for dashes keyboard input. See enum Qt::Key
+      description: >
+        Keyboard key that sends dashes. Key code as a Qt key value, for example 32 (0x20) for space and 65 (0x41) for A. Letter keys use the upper case code. 0 for no key.
       type: integer
     dashKeyModifiers:
-      description: key modifier for dashes keyboard input. See flags Qt::KeyboardModifiers
+      description: >
+        Modifiers for the dash key. Modifier keys held with the key, as a sum of flags: 33554432 (0x02000000) shift, 67108864 (0x04000000) control, 134217728 (0x08000000) alt, 268435456 (0x10000000) meta. 0 for no modifier.
       type: integer

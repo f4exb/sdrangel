@@ -303,7 +303,11 @@ void FreeDVMod::applySettings(const QStringList& settingsKeys, const FreeDVModSe
         sendChannelSettings(pipes, settingsKeys, settings, force);
     }
 
-    m_settings = settings;
+    if (force) {
+        m_settings = settings;
+    } else {
+        m_settings.applySettings(settingsKeys, settings);
+    }
 }
 
 QByteArray FreeDVMod::serialize() const
@@ -658,7 +662,11 @@ void FreeDVMod::webapiFormatChannelSettings(
     swgChannelSettings->setDirection(1); // single source (Tx)
     swgChannelSettings->setOriginatorChannelIndex(getIndexInDeviceSet());
     swgChannelSettings->setOriginatorDeviceSetIndex(getDeviceSetIndex());
-    swgChannelSettings->setChannelType(new QString(m_channelId));
+    if (swgChannelSettings->getChannelType()) {
+        *swgChannelSettings->getChannelType() = m_channelId;
+    } else {
+        swgChannelSettings->setChannelType(new QString(m_channelId));
+    }
     swgChannelSettings->setFreeDvModSettings(new SWGSDRangel::SWGFreeDVModSettings());
     SWGSDRangel::SWGFreeDVModSettings *swgFreeDVModSettings = swgChannelSettings->getFreeDvModSettings();
 
@@ -689,7 +697,11 @@ void FreeDVMod::webapiFormatChannelSettings(
         swgFreeDVModSettings->setRgbColor(settings.m_rgbColor);
     }
     if (channelSettingsKeys.contains("title") || force) {
-        swgFreeDVModSettings->setTitle(new QString(settings.m_title));
+        if (swgFreeDVModSettings->getTitle()) {
+            *swgFreeDVModSettings->getTitle() = settings.m_title;
+        } else {
+            swgFreeDVModSettings->setTitle(new QString(settings.m_title));
+        }
     }
     if (channelSettingsKeys.contains("freeDVMode") || force) {
         swgFreeDVModSettings->setFreeDvMode((int) settings.m_freeDVMode);
@@ -698,7 +710,11 @@ void FreeDVMod::webapiFormatChannelSettings(
         swgFreeDVModSettings->setModAfInput((int) settings.m_modAFInput);
     }
     if (channelSettingsKeys.contains("audioDeviceName") || force) {
-        swgFreeDVModSettings->setAudioDeviceName(new QString(settings.m_audioDeviceName));
+        if (swgFreeDVModSettings->getAudioDeviceName()) {
+            *swgFreeDVModSettings->getAudioDeviceName() = settings.m_audioDeviceName;
+        } else {
+            swgFreeDVModSettings->setAudioDeviceName(new QString(settings.m_audioDeviceName));
+        }
     }
     if (channelSettingsKeys.contains("streamIndex") || force) {
         swgFreeDVModSettings->setStreamIndex(settings.m_streamIndex);

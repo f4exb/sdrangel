@@ -40,7 +40,7 @@ public:
     void initColorMapTexture(const QString &colorMapName);
     void initTexture(const QImage& image);
     void subTexture(int xOffset, int yOffset, int width, int height, const void *pixels);
-    void drawSurface(SpectrumSettings::SpectrogramStyle style, const QMatrix4x4& vertexTransform, float textureOffset, bool invert);
+    void drawSurface(SpectrumSettings::SpectrogramStyle style, const QMatrix4x4& vertexTransform, int texturePosition, bool invert);
     void cleanup();
     void translateX(float distance);
     void translateY(float distance);
@@ -72,7 +72,7 @@ private:
     void initTextureMutable(const QImage& image);
     void subTextureMutable(int xOffset, int yOffset, int width, int height, const void *pixels);
     bool useImmutableStorage();
-    void initGrid(int elements);
+    void initGrid(int width, int height);
     void setPerspective();
 
     QOpenGLShaderProgram *m_programShaded;
@@ -81,14 +81,14 @@ private:
     unsigned int m_textureId;
     QOpenGLTexture *m_colorMapTexture;
     unsigned int m_colorMapTextureId;
-    float m_limit;
+    int m_textureWidth;
+    int m_textureHeight;
 
     QOpenGLShaderProgram *m_programForLocs;     // Which program the locations are for
     int m_coord2dLoc;
     int m_textureTransformLoc;
     int m_vertexTransformLoc;
     int m_dataTextureLoc;
-    int m_limitLoc;
     int m_brightnessLoc;
     int m_colorMapLoc;
     int m_lightDirLoc;
@@ -126,7 +126,10 @@ private:
     float m_lightRotY;
     float m_lightRotZ;
     QMatrix4x4 m_perspective;
-    int m_gridElements;
+    int m_gridWidthElements;
+    int m_gridHeightElements;
+    int m_gridLineIndexCount;
+    int m_gridTriangleIndexCount;
 
 };
 

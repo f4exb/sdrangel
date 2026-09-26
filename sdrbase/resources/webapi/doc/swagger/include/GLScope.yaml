@@ -5,8 +5,25 @@ TraceData:
       description: Source I/Q stream index
       type: integer
     projectionType:
-      description: Complex to real projection type. See Projector::ProjectionType
+      description: >
+        Projection applied to turn the complex signal into a real trace
+          * 0 - real part
+          * 1 - imaginary part
+          * 2 - magnitude, linear
+          * 3 - squared magnitude (power), linear
+          * 4 - time derivative of the squared magnitude
+          * 5 - squared magnitude in dB
+          * 6 - phase
+          * 7 - direction of arrival from phase, positive branch
+          * 8 - direction of arrival from phase, negative branch
+          * 9 - phase derivative, instantaneous frequency
+          * 10 - BPSK phase comparator
+          * 11 - QPSK phase comparator
+          * 12 - 8-PSK phase comparator
+          * 13 - 16-PSK phase comparator
       type: integer
+      minimum: 0
+      maximum: 13
     inputIndex:
       description: Input or feed index this trace is associated with
       type: integer
@@ -63,8 +80,25 @@ TriggerData:
       description: Source I/Q stream index
       type: integer
     projectionType:
-      description: Complex to real projection type. See Projector::ProjectionType
+      description: >
+        Projection applied to turn the complex signal into a real trace
+          * 0 - real part
+          * 1 - imaginary part
+          * 2 - magnitude, linear
+          * 3 - squared magnitude (power), linear
+          * 4 - time derivative of the squared magnitude
+          * 5 - squared magnitude in dB
+          * 6 - phase
+          * 7 - direction of arrival from phase, positive branch
+          * 8 - direction of arrival from phase, negative branch
+          * 9 - phase derivative, instantaneous frequency
+          * 10 - BPSK phase comparator
+          * 11 - QPSK phase comparator
+          * 12 - 8-PSK phase comparator
+          * 13 - 16-PSK phase comparator
       type: integer
+      minimum: 0
+      maximum: 13
     inputIndex:
       description: Input or feed index this trigger is associated with
       type: integer
@@ -74,8 +108,10 @@ TriggerData:
       format: float
     triggerLevelCoarse:
       type: integer
+      description: "Trigger level coarse for Trigger data."
     triggerLevelFine:
       type: integer
+      description: "Trigger level fine for Trigger data."
     triggerPositiveEdge:
       description: Trigger on the positive edge (else negative). Boolean
       type: integer
@@ -94,8 +130,10 @@ TriggerData:
       format: float
     triggerDelayCoarse:
       type: integer
+      description: "Trigger delay coarse for Trigger data."
     triggerDelayFine:
       type: integer
+      description: "Trigger delay fine for Trigger data."
     triggerRepeat:
       description: Number of trigger conditions before the final decisive trigger
       type: integer
@@ -119,26 +157,41 @@ GLScope:
   description: GLScopeGUI settings
   properties:
     displayMode:
-      description: see GLScopeSettings::DisplayMode
+      description: >
+        Arrangement of the two traces on the scope
+          * 0 - X and Y side by side horizontally
+          * 1 - X and Y stacked vertically
+          * 2 - X only
+          * 3 - Y only
+          * 4 - polar, Y against X
       type: integer
+      minimum: 0
+      maximum: 4
     traceIntensity:
       type: integer
+      description: "Trace intensity for Gl scope."
     gridIntensity:
       type: integer
+      description: "Grid intensity for Gl scope."
     time:
       type: integer
+      description: "Time for Gl scope."
     timeOfs:
       type: integer
+      description: "Time ofs for Gl scope."
     traceLenMult:
       type: integer
       description: Trace length multiplier (multiplies 4800 samples)
     trigPre:
       type: integer
+      description: "Trig pre for Gl scope."
     tracesData:
       type: array
+      description: "List of traces data."
       items:
         $ref: "/doc/swagger/include/GLScope.yaml#/TraceData"
     triggersData:
       type: array
+      description: "List of triggers data."
       items:
         $ref: "/doc/swagger/include/GLScope.yaml#/TriggerData"

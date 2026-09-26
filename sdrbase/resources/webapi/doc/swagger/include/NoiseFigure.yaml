@@ -4,64 +4,92 @@ NoiseFigureSettings:
     inputFrequencyOffset:
       type: integer
       format: int64
+      description: "Channel frequency offset from the device center frequency in Hz."
     fftSize:
       type: integer
+      description: "FFT size in samples."
     fftCount:
       type: integer
+      description: "Number of fft events or items."
     sweepSpec:
       description: "(0 - Range, 1 - Step, 2 - List)"
       type: integer
+      minimum: 0
+      maximum: 2
     startValue:
       type: number
       format: float
+      description: "Start value setting for Noise figure."
     stopValue:
       type: number
       format: float
+      description: "Stop value setting for Noise figure."
     steps:
       type: integer
+      description: "Steps setting for Noise figure."
     step:
       type: number
       format: float
+      description: "Increment between adjacent supported values."
     list:
       type: string
+      description: "List setting for Noise figure."
     setting:
       description: "The device setting to sweep (E.g. centerFrequency or gain)"
       type: string
     visaDevice:
       type: string
+      description: "Visa device setting for Noise figure."
     powerOnSCPI:
       type: string
+      description: "Power on scpi setting for Noise figure."
     powerOffSCPI:
       type: string
+      description: "Power off scpi setting for Noise figure."
     powerOnCommand:
       type: string
+      description: "Power on command setting for Noise figure."
     powerOffCommand:
       type: string
+      description: "Power off command setting for Noise figure."
     powerDelay:
       type: number
       format: float
+      description: "Power delay setting for Noise figure."
     rgbColor:
       type: integer
+      description: "Display color encoded as an RGB integer."
     title:
       type: string
+      description: "User-visible title."
     streamIndex:
       description: MIMO channel. Not relevant when connected to SI (single Rx).
       type: integer
     useReverseAPI:
       description: Synchronize with reverse API (1 for yes, 0 for no)
       type: integer
+      minimum: 0
+      maximum: 1
     reverseAPIAddress:
       type: string
+      description: "IPv4 address or host name of the reverse API peer."
     reverseAPIPort:
       type: integer
+      description: "TCP port of the reverse API peer."
+      minimum: 1
+      maximum: 65535
     reverseAPIDeviceIndex:
       type: integer
+      description: "Device-set index used by the reverse API peer."
     reverseAPIChannelIndex:
       type: integer
+      description: "Channel index used by the reverse API peer."
     channelMarker:
       $ref: "/doc/swagger/include/ChannelMarker.yaml#/ChannelMarker"
+      description: "Channel-marker display configuration."
     rollupState:
       $ref: "/doc/swagger/include/RollupState.yaml#/RollupState"
+      description: "Saved expanded or collapsed state of the GUI sections."
 
 NoiseFigureReport:
   description: NoiseFigure
@@ -72,3 +100,4 @@ NoiseFigureReport:
       format: float
     channelSampleRate:
       type: integer
+      description: "Effective sample rate delivered to the channel in samples per second."

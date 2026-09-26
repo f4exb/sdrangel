@@ -88,7 +88,7 @@ void DeviceAPI::removeChannelSink(BasebandSampleSink* sink, bool deleting, int s
     if (m_deviceSourceEngine) {
         m_deviceSourceEngine->removeSink(sink, deleting);
     } else if (m_deviceMIMOEngine) {
-        m_deviceMIMOEngine->removeChannelSink(sink, streamIndex);
+        m_deviceMIMOEngine->removeChannelSink(sink, deleting, streamIndex);
     }
 }
 

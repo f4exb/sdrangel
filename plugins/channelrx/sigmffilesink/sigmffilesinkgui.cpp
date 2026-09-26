@@ -129,7 +129,7 @@ bool SigMFFileSinkGUI::handleMessage(const Message& message)
         const SigMFFileSinkMessages::MsgReportSquelch& report = (SigMFFileSinkMessages::MsgReportSquelch&) message;
         qDebug("SigMFFileSinkGUI::handleMessage: FileSinkMessages::MsgReportRecording: %s", report.getOpen() ? "on" : "off");
 
-        blockSignals(true);
+        ui->record->blockSignals(true);
 
         if (report.getOpen())
         {
@@ -142,7 +142,7 @@ bool SigMFFileSinkGUI::handleMessage(const Message& message)
             ui->record->setChecked(false);
         }
 
-        blockSignals(false);
+        ui->record->blockSignals(false);
         return true;
     }
     else if (SigMFFileSink::MsgReportStartStop::match(message))

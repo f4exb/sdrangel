@@ -587,19 +587,43 @@ void ILSDemod::webapiFormatChannelSettings(SWGSDRangel::SWGChannelSettings& resp
     response.getIlsDemodSettings()->setAverage(settings.m_average);
     response.getIlsDemodSettings()->setDdmUnits((int) settings.m_ddmUnits);
     response.getIlsDemodSettings()->setIdentThreshold(settings.m_identThreshold);
-    response.getIlsDemodSettings()->setIdent(new QString(settings.m_ident));
-    response.getIlsDemodSettings()->setRunway(new QString(settings.m_runway));
+    if (response.getIlsDemodSettings()->getIdent()) {
+        *response.getIlsDemodSettings()->getIdent() = settings.m_ident;
+    } else {
+        response.getIlsDemodSettings()->setIdent(new QString(settings.m_ident));
+    }
+    if (response.getIlsDemodSettings()->getRunway()) {
+        *response.getIlsDemodSettings()->getRunway() = settings.m_runway;
+    } else {
+        response.getIlsDemodSettings()->setRunway(new QString(settings.m_runway));
+    }
     response.getIlsDemodSettings()->setTrueBearing(settings.m_trueBearing);
-    response.getIlsDemodSettings()->setLatitude(new QString(settings.m_latitude));
-    response.getIlsDemodSettings()->setLatitude(new QString(settings.m_latitude));
+    if (response.getIlsDemodSettings()->getLatitude()) {
+        *response.getIlsDemodSettings()->getLatitude() = settings.m_latitude;
+    } else {
+        response.getIlsDemodSettings()->setLatitude(new QString(settings.m_latitude));
+    }
+    if (response.getIlsDemodSettings()->getLatitude()) {
+        *response.getIlsDemodSettings()->getLatitude() = settings.m_latitude;
+    } else {
+        response.getIlsDemodSettings()->setLatitude(new QString(settings.m_latitude));
+    }
     response.getIlsDemodSettings()->setElevation(settings.m_elevation);
     response.getIlsDemodSettings()->setGlidePath(settings.m_glidePath);
     response.getIlsDemodSettings()->setRefHeight(settings.m_refHeight);
     response.getIlsDemodSettings()->setCourseWidth(settings.m_courseWidth);
     response.getIlsDemodSettings()->setUdpEnabled(settings.m_udpEnabled);
-    response.getIlsDemodSettings()->setUdpAddress(new QString(settings.m_udpAddress));
+    if (response.getIlsDemodSettings()->getUdpAddress()) {
+        *response.getIlsDemodSettings()->getUdpAddress() = settings.m_udpAddress;
+    } else {
+        response.getIlsDemodSettings()->setUdpAddress(new QString(settings.m_udpAddress));
+    }
     response.getIlsDemodSettings()->setUdpPort(settings.m_udpPort);
-    response.getIlsDemodSettings()->setLogFilename(new QString(settings.m_logFilename));
+    if (response.getIlsDemodSettings()->getLogFilename()) {
+        *response.getIlsDemodSettings()->getLogFilename() = settings.m_logFilename;
+    } else {
+        response.getIlsDemodSettings()->setLogFilename(new QString(settings.m_logFilename));
+    }
     response.getIlsDemodSettings()->setLogEnabled(settings.m_logEnabled);
 
     response.getIlsDemodSettings()->setRgbColor(settings.m_rgbColor);
@@ -672,7 +696,11 @@ void ILSDemod::webapiFormatChannelReport(SWGSDRangel::SWGChannelReport& response
 
     response.getIlsDemodReport()->setChannelPowerDb(CalcDb::dbPower(magsqAvg));
     response.getIlsDemodReport()->setChannelSampleRate(m_basebandSink->getChannelSampleRate());
-    response.getIlsDemodReport()->setIdent(new QString(m_ident));
+    if (response.getIlsDemodReport()->getIdent()) {
+        *response.getIlsDemodReport()->getIdent() = m_ident;
+    } else {
+        response.getIlsDemodReport()->setIdent(new QString(m_ident));
+    }
     response.getIlsDemodReport()->setDeviation(m_angle);
     response.getIlsDemodReport()->setSdm(m_sdm);
     response.getIlsDemodReport()->setDdm(m_ddm);
@@ -715,7 +743,11 @@ void ILSDemod::webapiFormatChannelSettings(
     swgChannelSettings->setDirection(0); // Single sink (Rx)
     swgChannelSettings->setOriginatorChannelIndex(getIndexInDeviceSet());
     swgChannelSettings->setOriginatorDeviceSetIndex(getDeviceSetIndex());
-    swgChannelSettings->setChannelType(new QString("ILSDemod"));
+    if (swgChannelSettings->getChannelType()) {
+        *swgChannelSettings->getChannelType() = "ILSDemod";
+    } else {
+        swgChannelSettings->setChannelType(new QString("ILSDemod"));
+    }
     swgChannelSettings->setIlsDemodSettings(new SWGSDRangel::SWGILSDemodSettings());
     SWGSDRangel::SWGILSDemodSettings *swgILSDemodSettings = swgChannelSettings->getIlsDemodSettings();
 
@@ -752,19 +784,35 @@ void ILSDemod::webapiFormatChannelSettings(
         swgILSDemodSettings->setIdentThreshold(settings.m_identThreshold);
     }
     if (channelSettingsKeys.contains("ident") || force) {
-        swgILSDemodSettings->setIdent(new QString(settings.m_ident));
+        if (swgILSDemodSettings->getIdent()) {
+            *swgILSDemodSettings->getIdent() = settings.m_ident;
+        } else {
+            swgILSDemodSettings->setIdent(new QString(settings.m_ident));
+        }
     }
     if (channelSettingsKeys.contains("runway") || force) {
-        swgILSDemodSettings->setRunway(new QString(settings.m_runway));
+        if (swgILSDemodSettings->getRunway()) {
+            *swgILSDemodSettings->getRunway() = settings.m_runway;
+        } else {
+            swgILSDemodSettings->setRunway(new QString(settings.m_runway));
+        }
     }
     if (channelSettingsKeys.contains("trueBearing") || force) {
         swgILSDemodSettings->setTrueBearing(settings.m_trueBearing);
     }
     if (channelSettingsKeys.contains("latitude") || force) {
-        swgILSDemodSettings->setLatitude(new QString(settings.m_latitude));
+        if (swgILSDemodSettings->getLatitude()) {
+            *swgILSDemodSettings->getLatitude() = settings.m_latitude;
+        } else {
+            swgILSDemodSettings->setLatitude(new QString(settings.m_latitude));
+        }
     }
     if (channelSettingsKeys.contains("longitude") || force) {
-        swgILSDemodSettings->setLongitude(new QString(settings.m_longitude));
+        if (swgILSDemodSettings->getLongitude()) {
+            *swgILSDemodSettings->getLongitude() = settings.m_longitude;
+        } else {
+            swgILSDemodSettings->setLongitude(new QString(settings.m_longitude));
+        }
     }
     if (channelSettingsKeys.contains("elevation") || force) {
         swgILSDemodSettings->setElevation(settings.m_elevation);
@@ -782,13 +830,21 @@ void ILSDemod::webapiFormatChannelSettings(
         swgILSDemodSettings->setUdpEnabled(settings.m_udpEnabled);
     }
     if (channelSettingsKeys.contains("udpAddress") || force) {
-        swgILSDemodSettings->setUdpAddress(new QString(settings.m_udpAddress));
+        if (swgILSDemodSettings->getUdpAddress()) {
+            *swgILSDemodSettings->getUdpAddress() = settings.m_udpAddress;
+        } else {
+            swgILSDemodSettings->setUdpAddress(new QString(settings.m_udpAddress));
+        }
     }
     if (channelSettingsKeys.contains("udpPort") || force) {
         swgILSDemodSettings->setUdpPort(settings.m_udpPort);
     }
     if (channelSettingsKeys.contains("logFilename") || force) {
-        swgILSDemodSettings->setLogFilename(new QString(settings.m_logFilename));
+        if (swgILSDemodSettings->getLogFilename()) {
+            *swgILSDemodSettings->getLogFilename() = settings.m_logFilename;
+        } else {
+            swgILSDemodSettings->setLogFilename(new QString(settings.m_logFilename));
+        }
     }
     if (channelSettingsKeys.contains("logEnabled") || force) {
         swgILSDemodSettings->setLogEnabled(settings.m_logEnabled);
@@ -797,7 +853,11 @@ void ILSDemod::webapiFormatChannelSettings(
         swgILSDemodSettings->setRgbColor(settings.m_rgbColor);
     }
     if (channelSettingsKeys.contains("title") || force) {
-        swgILSDemodSettings->setTitle(new QString(settings.m_title));
+        if (swgILSDemodSettings->getTitle()) {
+            *swgILSDemodSettings->getTitle() = settings.m_title;
+        } else {
+            swgILSDemodSettings->setTitle(new QString(settings.m_title));
+        }
     }
     if (channelSettingsKeys.contains("streamIndex") || force) {
         swgILSDemodSettings->setStreamIndex(settings.m_streamIndex);

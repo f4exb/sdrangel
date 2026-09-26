@@ -26,6 +26,7 @@
 #include "device/deviceuiset.h"
 
 #include "ui_airspyhfgui.h"
+#include "gui/messagedialog.h"
 #include "gui/colormapper.h"
 #include "gui/glspectrum.h"
 #include "gui/basicdevicesettingsdialog.h"
@@ -466,7 +467,7 @@ void AirspyHFGui::updateStatus()
                 break;
             case DeviceAPI::StError:
                 ui->startStop->setStyleSheet("QToolButton { background-color : red; }");
-                QMessageBox::information(this, tr("Message"), m_deviceUISet->m_deviceAPI->errorMessage());
+                MessageDialog::information(this, tr("Message"), m_deviceUISet->m_deviceAPI->errorMessage());
                 break;
             default:
                 break;

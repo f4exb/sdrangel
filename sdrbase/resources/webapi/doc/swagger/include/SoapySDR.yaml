@@ -3,195 +3,281 @@ SoapySDRInputSettings:
   properties:
     title:
       type: string
+      description: "User-visible title."
     centerFrequency:
       type: integer
       format: int64
+      description: "Device center frequency in Hz."
     LOppmTenths:
       type: integer
+      description: "Local-oscillator correction in tenths of a part per million."
     devSampleRate:
       type: integer
+      description: "Device I/Q sample rate in samples per second before software decimation or interpolation."
     log2Decim:
       type: integer
+      description: "Base-2 exponent of the software decimation factor; the output sample rate is divided by 2^log2Decim."
     fcPos:
       type: integer
+      description: "Position of the decimated passband relative to the device center frequency."
     softDCCorrection:
       description: boolean not zero for true
       type: integer
+      minimum: 0
+      maximum: 1
     softIQCorrection:
       description: boolean not zero for true
       type: integer
+      minimum: 0
+      maximum: 1
     transverterMode:
       description: boolean not zero for true
       type: integer
+      minimum: 0
+      maximum: 1
     transverterDeltaFrequency:
       type: integer
       format: int64
+      description: "Frequency translation applied in transverter mode in Hz."
     iqOrder:
       type: integer
+      minimum: 0
+      maximum: 1
       description: >
         IQ samples order
           * 0 - Q then I (swapped)
           * 1 - I then Q (straight)
     antenna:
       type: string
+      description: "Antenna setting for Soapy sdr input."
     bandwidth:
       type: integer
+      description: "Bandwidth in Hz."
     tunableElements:
       type: array
+      description: "List of tunable elements."
       items:
         $ref: "#/definitions/ArgValue"
     globalGain:
       type: integer
+      description: "Overall device gain setting."
     individualGains:
       type: array
+      description: "List of individual gains."
       items:
         $ref: "#/definitions/ArgValue"
     autoGain:
       description: boolean not zero for true
       type: integer
+      minimum: 0
+      maximum: 1
     autoDCCorrection:
       description: boolean not zero for true
       type: integer
+      minimum: 0
+      maximum: 1
     autoIQCorrection:
       description: boolean not zero for true
       type: integer
+      minimum: 0
+      maximum: 1
     dcCorrection:
       $ref: "/doc/swagger/include/Structs.yaml#/Complex"
+      description: "Enable DC-offset correction (1 enabled, 0 disabled)."
     iqCorrection:
       $ref: "/doc/swagger/include/Structs.yaml#/Complex"
+      description: "Enable I/Q imbalance correction (1 enabled, 0 disabled)."
     streamArgSettings:
       type: array
+      description: "List of stream arg settings."
       items:
         $ref: "#/definitions/ArgValue"
     deviceArgSettings:
       type: array
+      description: "List of device arg settings."
       items:
         $ref: "#/definitions/ArgValue"
     useReverseAPI:
       description: Synchronize with reverse API (1 for yes, 0 for no)
       type: integer
+      minimum: 0
+      maximum: 1
     reverseAPIAddress:
       type: string
+      description: "IPv4 address or host name of the reverse API peer."
     reverseAPIPort:
       type: integer
+      description: "TCP port of the reverse API peer."
+      minimum: 1
+      maximum: 65535
     reverseAPIDeviceIndex:
       type: integer
+      description: "Device-set index used by the reverse API peer."
 
 SoapySDROutputSettings:
   description: SoapySDR
   properties:
     title:
       type: string
+      description: "User-visible title."
     centerFrequency:
       type: integer
       format: int64
+      description: "Device center frequency in Hz."
     LOppmTenths:
       type: integer
+      description: "Local-oscillator correction in tenths of a part per million."
     devSampleRate:
       type: integer
+      description: "Device I/Q sample rate in samples per second before software decimation or interpolation."
     log2Interp:
       type: integer
+      description: "Base-2 exponent of the software interpolation factor; the output sample rate is multiplied by 2^log2Interp."
     transverterMode:
       description: boolean not zero for true
       type: integer
+      minimum: 0
+      maximum: 1
     transverterDeltaFrequency:
       type: integer
       format: int64
+      description: "Frequency translation applied in transverter mode in Hz."
     antenna:
       type: string
+      description: "Antenna setting for Soapy sdr output."
     bandwidth:
       type: integer
+      description: "Bandwidth in Hz."
     tunableElements:
       type: array
+      description: "List of tunable elements."
       items:
         $ref: "#/definitions/ArgValue"
     globalGain:
       type: integer
+      description: "Overall device gain setting."
     individualGains:
       type: array
+      description: "List of individual gains."
       items:
         $ref: "#/definitions/ArgValue"
     autoGain:
       description: boolean not zero for true
       type: integer
+      minimum: 0
+      maximum: 1
     autoDCCorrection:
       description: boolean not zero for true
       type: integer
+      minimum: 0
+      maximum: 1
     autoIQCorrection:
       description: boolean not zero for true
       type: integer
+      minimum: 0
+      maximum: 1
     dcCorrection:
       $ref: "/doc/swagger/include/Structs.yaml#/Complex"
+      description: "Enable DC-offset correction (1 enabled, 0 disabled)."
     iqCorrection:
       $ref: "/doc/swagger/include/Structs.yaml#/Complex"
+      description: "Enable I/Q imbalance correction (1 enabled, 0 disabled)."
     streamArgSettings:
       type: array
+      description: "List of stream arg settings."
       items:
         $ref: "#/definitions/ArgValue"
     deviceArgSettings:
       type: array
+      description: "List of device arg settings."
       items:
         $ref: "#/definitions/ArgValue"
     useReverseAPI:
       description: Synchronize with reverse API (1 for yes, 0 for no)
       type: integer
+      minimum: 0
+      maximum: 1
     reverseAPIAddress:
       type: string
+      description: "IPv4 address or host name of the reverse API peer."
     reverseAPIPort:
       type: integer
+      description: "TCP port of the reverse API peer."
+      minimum: 1
+      maximum: 65535
     reverseAPIDeviceIndex:
       type: integer
+      description: "Device-set index used by the reverse API peer."
 
 SoapySDRReport:
   description: SoapySDR
   properties:
     deviceSettingsArgs:
       type: array
+      description: "List of device settings args."
       items:
         $ref: "#/definitions/ArgInfo"
     streamSettingsArgs:
       type: array
+      description: "List of stream settings args."
       items:
         $ref: "#/definitions/ArgInfo"
     hasDCAutoCorrection:
       description: boolean not zero for true
       type: integer
+      minimum: 0
+      maximum: 1
     hasDCOffsetValue:
       description: boolean not zero for true
       type: integer
+      minimum: 0
+      maximum: 1
     hasIQBalanceValue:
       description: boolean not zero for true
       type: integer
+      minimum: 0
+      maximum: 1
     hasFrequencyCorrectionValue:
       description: boolean not zero for true
       type: integer
+      minimum: 0
+      maximum: 1
     antennas:
       type: array
+      description: "List of antennas."
       items:
         type: string
     hasAGC:
       description: boolean not zero for true
       type: integer
+      minimum: 0
+      maximum: 1
     gainRange:
       $ref: "/doc/swagger/include/Structs.yaml#/RangeFloat"
+      description: "Gain range data for Soapy sdr."
     gainSettings:
       type: array
+      description: "List of gain settings."
       items:
         $ref: "#/definitions/SoapySDRGainSetting"
     frequencySettings:
       type: array
+      description: "List of frequency settings."
       items:
         $ref: "#/definitions/SoapySDRFrequencySetting"
     frequencySettingsArgs:
       type: array
+      description: "List of frequency settings args."
       items:
         $ref: "#/definitions/ArgInfo"
     ratesRanges:
       type: array
+      description: "List of rates ranges."
       items:
         $ref: "/doc/swagger/include/Structs.yaml#/RangeFloat"
     bandwidthsRanges:
       type: array
+      description: "List of bandwidths ranges."
       items:
         $ref: "/doc/swagger/include/Structs.yaml#/RangeFloat"
 
@@ -202,16 +288,20 @@ definitions:
     properties:
       name:
         type: string
+        description: "Name."
       range:
         $ref: "/doc/swagger/include/Structs.yaml#/RangeFloat"
+        description: "Range configuration for Definitions."
 
   SoapySDRFrequencySetting:
     description: A named frequency setting specified by a range list
     properties:
       name:
         type: string
+        description: "Name."
       ranges:
         type: array
+        description: "List of ranges."
         items:
           $ref: "/doc/swagger/include/Structs.yaml#/RangeFloat"
 
@@ -220,35 +310,47 @@ definitions:
     properties:
       key:
         type: string
+        description: "Key for Definitions."
       valueType:
         type: string
+        description: "Value type for Definitions."
         enum: [bool, int, float, string]
       valueString:
         type: string
+        description: "Value string for Definitions."
 
   ArgInfo:
     description: Generic argument information
     properties:
       key:
         type: string
+        description: "Key for Definitions."
       valueType:
         type: string
+        description: "Value type for Definitions."
         enum: [bool, int, float, string]
       valueString:
         type: string
+        description: "Value string for Definitions."
       name:
         type: string
+        description: "Name."
       description:
         type: string
+        description: "Human-readable description."
       units:
         type: string
+        description: "Units for Definitions."
       range:
         $ref: "/doc/swagger/include/Structs.yaml#/RangeFloat"
+        description: "Range configuration for Definitions."
       valueOptions:
         type: array
+        description: "List of value options."
         items:
           type: string
       optionNames:
         type: array
+        description: "List of option names."
         items:
           type: string

@@ -23,6 +23,9 @@
 #define INCLUDE_SPECTRUMVIS_H
 
 #include <QObject>
+#include <QDateTime>
+#include <QMutex>
+#include <QJsonObject>
 #include <QRecursiveMutex>
 
 #include "dsp/basebandsamplesink.h"
@@ -42,8 +45,68 @@ class GLSpectrumInterface;
 
 namespace SWGSDRangel {
     class SWGGLSpectrum;
+    class SWGGLSpectrumReport;
+    class SWGSpectrumActions;
+    class SWGGLSpectrumData;
+    class SWGGLSpectrumHistory;
     class SWGSpectrumServer;
     class SWGSuccessResponse;
+};
+
+
+// The latest value of whichever spectrum measurement is switched on. Which members mean anything
+// depends on m_measurement, and with no measurement selected nothing is computed at all, so the
+// report says so rather than returning zeros.
+//
+// Held as plain values behind a lock rather than pushed as a message: the measuring code runs on
+// every displayed frame regardless of whether anyone is looking, so storing a handful of scalars
+// costs nothing next to the FFT, and a report is only built when one is asked for.
+struct SDRBASE_API SpectrumMeasurementResults
+{
+    struct Peak
+    {
+        qint64 m_frequency; //!< Hz
+        float m_power;      //!< dB
+
+        Peak() : m_frequency(0), m_power(0.0f) {}
+        Peak(qint64 frequency, float power) : m_frequency(frequency), m_power(power) {}
+    };
+
+    SpectrumSettings::Measurement m_measurement;
+    QList<Peak> m_peaks;
+    float m_channelPower;            //!< dB
+    float m_adjChannelPowerLeft;     //!< dB
+    float m_adjChannelPowerLeftACPR; //!< dB
+    float m_adjChannelPowerCentre;   //!< dB
+    float m_adjChannelPowerRight;    //!< dB
+    float m_adjChannelPowerRightACPR;//!< dB
+    float m_occupiedBandwidth;       //!< Hz
+    float m_bandwidth3dB;            //!< Hz
+    float m_snr;                     //!< dB
+    float m_snfr;                    //!< dB
+    float m_thd;                     //!< dB
+    float m_thdPlusNoise;            //!< dB
+    float m_sinad;                   //!< dB
+    float m_sfdr;                    //!< dB
+    QDateTime m_updated;             //!< When these were last measured, invalid until the first one
+
+    SpectrumMeasurementResults() :
+        m_measurement(SpectrumSettings::MeasurementNone),
+        m_channelPower(0.0f),
+        m_adjChannelPowerLeft(0.0f),
+        m_adjChannelPowerLeftACPR(0.0f),
+        m_adjChannelPowerCentre(0.0f),
+        m_adjChannelPowerRight(0.0f),
+        m_adjChannelPowerRightACPR(0.0f),
+        m_occupiedBandwidth(0.0f),
+        m_bandwidth3dB(0.0f),
+        m_snr(0.0f),
+        m_snfr(0.0f),
+        m_thd(0.0f),
+        m_thdPlusNoise(0.0f),
+        m_sinad(0.0f),
+        m_sfdr(0.0f)
+    {}
 };
 
 class SDRBASE_API SpectrumVis : public QObject, public BasebandSampleSink {
@@ -114,7 +177,7 @@ public:
 	SpectrumVis(Real scalef);
 	virtual ~SpectrumVis();
 
-    void setGLSpectrum(GLSpectrumInterface* glSpectrum) { m_glSpectrum = glSpectrum; }
+    void setGLSpectrum(GLSpectrumInterface* glSpectrum);
     void setWorkspaceIndex(int index) { m_workspaceIndex = index; }
     int getWorkspaceIndex() const { return m_workspaceIndex; }
 
@@ -140,6 +203,32 @@ public:
     MessageQueue *getMessageQueueToGUI() { return m_guiMessageQueue; }
 
     int webapiSpectrumSettingsGet(SWGSDRangel::SWGGLSpectrum& response, QString& errorMessage) const;
+    int webapiSpectrumReportGet(SWGSDRangel::SWGGLSpectrumReport& response, QString& errorMessage) const;
+    int webapiSpectrumDataGet(int bins, qint64 startFrequency, qint64 stopFrequency, const QString& reduce,
+        SWGSDRangel::SWGGLSpectrumData& response, QString& errorMessage) const;
+
+    static const int m_maxDataBins = 4096; //!< A reduced spectrum any larger is not a summary
+
+    //!< Statistics over the spectrum history the display keeps for scrolling: per bin max, mean
+    //!< and occupancy, and the signals found. thresholdDb is above the measured floor
+    int webapiSpectrumHistoryGet(double seconds, int bins, qint64 startFrequency, qint64 stopFrequency, double thresholdDb,
+        SWGSDRangel::SWGGLSpectrumHistory& response, QString& errorMessage) const;
+    //!< The same history as a greyscale PNG, newest row at the bottom, bins wide and one row per pixel up to maxRows
+    int webapiSpectrumHistoryImageGet(double seconds, int bins, qint64 startFrequency, qint64 stopFrequency, int maxRows,
+        QByteArray& png, QJsonObject& description, QString& errorMessage) const;
+    static const int m_maxHistoryRows = 4000;
+
+private:
+    struct ReducedHistory;
+    int reduceHistory(double seconds, int bins, qint64 startFrequency, qint64 stopFrequency, int maxRows,
+        ReducedHistory& out, QString& errorMessage) const;
+
+public:
+    int webapiActionsPost(const QStringList& spectrumActionsKeys, SWGSDRangel::SWGSpectrumActions& query, QString& errorMessage);
+
+    //!< Called by whatever measures the spectrum, once per set of results
+    void setMeasurementResults(const SpectrumMeasurementResults& results);
+    void getMeasurementResults(SpectrumMeasurementResults& results) const;
     int webapiSpectrumSettingsPutPatch(
             bool force,
             const QStringList& spectrumSettingsKeys,
@@ -203,6 +292,9 @@ private:
 
 	Real m_scalef;
 	GLSpectrumInterface* m_glSpectrum;
+    SpectrumMeasurementResults m_measurementResults;
+    QDateTime m_powerSpectrumUpdated; //!< When the power spectrum was last computed
+    mutable QMutex m_measurementResultsMutex; //!< Kept away from the DSP mutex: read from HTTP threads
     WSSpectrum m_wsSpectrum;
 	MovingAverage2D<double> m_movingAverage;
 	FixedAverage2D<double> m_fixedAverage;
@@ -220,7 +312,7 @@ private:
     MessageQueue m_inputMessageQueue;
     MessageQueue *m_guiMessageQueue;  //!< Input message queue to the GUI
 
-	QRecursiveMutex m_mutex;
+	mutable QRecursiveMutex m_mutex; //!< mutable so a const read, such as the web API ones, can take it
 
     void performFFT(bool positiveOnly);
     void processFFT(const Complex* fftOut, bool reorder, bool positiveOnly, int fftSize);

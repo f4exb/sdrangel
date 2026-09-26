@@ -4,27 +4,41 @@ RTTYModSettings:
     inputFrequencyOffset:
       type: integer
       format: int64
+      description: "Channel frequency offset from the device center frequency in Hz."
     baud:
       type: number
       format: float
       description: Baud rate
     rfBandwidth:
       type: integer
+      description: "RF bandwidth in Hz."
     frequencyShift:
       type: integer
+      description: "Frequency shift in Hz."
     gain:
       type: number
       format: float
+      description: "Gain setting; units and available values depend on the device or plugin."
     channelMute:
       type: integer
+      description: "Mute the channel output (1 muted, 0 unmuted)."
+      minimum: 0
+      maximum: 1
     repeat:
       type: integer
+      description: "Repeat transmission or playback (1 enabled, 0 disabled)."
+      minimum: 0
+      maximum: 1
     repeatCount:
       type: integer
+      description: "Number of repetitions."
     lpfTaps:
       type: integer
+      description: "Number of low-pass FIR filter taps."
     rfNoise:
       type: integer
+      minimum: 0
+      maximum: 1
       description: >
         Boolean
           * 0 - off
@@ -34,6 +48,8 @@ RTTYModSettings:
       description: Text to transmit
     pulseShaping:
       type: integer
+      minimum: 0
+      maximum: 1
       description: >
         Boolean
           * 0 - off
@@ -41,51 +57,85 @@ RTTYModSettings:
     beta:
       type: number
       format: float
+      description: "Beta setting for Rtty mod."
     symbolSpan:
       type: integer
+      description: "Symbol span setting for Rtty mod."
     characterSet:
       type: integer
+      description: "Character set setting for Rtty mod."
     unshiftOnSpace:
       type: integer
+      description: "Enable unshift on space (1 enabled, 0 disabled)."
+      minimum: 0
+      maximum: 1
     msbFirst:
       type: integer
+      description: "Enable msb first (1 enabled, 0 disabled)."
+      minimum: 0
+      maximum: 1
     spaceHigh:
       type: integer
+      description: "Enable space high (1 enabled, 0 disabled)."
+      minimum: 0
+      maximum: 1
     prefixCRLF:
       type: integer
+      description: "Enable prefix crlf (1 enabled, 0 disabled)."
+      minimum: 0
+      maximum: 1
     postfixCRLF:
       type: integer
+      description: "Enable postfix crlf (1 enabled, 0 disabled)."
+      minimum: 0
+      maximum: 1
     udpEnabled:
       description: "Whether to receive text to transmit on specified UDP port"
       type: integer
+      minimum: 0
+      maximum: 1
     udpAddress:
       description: "UDP address to receive text to transmit via"
       type: string
     udpPort:
       description: "UDP port to receive text to transmit via"
       type: integer
+      minimum: 1
+      maximum: 65535
     rgbColor:
       type: integer
+      description: "Display color encoded as an RGB integer."
     title:
       type: string
+      description: "User-visible title."
     streamIndex:
       description: MIMO channel. Not relevant when connected to SI (single Rx).
       type: integer
     useReverseAPI:
       description: Synchronize with reverse API (1 for yes, 0 for no)
       type: integer
+      minimum: 0
+      maximum: 1
     reverseAPIAddress:
       type: string
+      description: "IPv4 address or host name of the reverse API peer."
     reverseAPIPort:
       type: integer
+      description: "TCP port of the reverse API peer."
+      minimum: 1
+      maximum: 65535
     reverseAPIDeviceIndex:
       type: integer
+      description: "Device-set index used by the reverse API peer."
     reverseAPIChannelIndex:
       type: integer
+      description: "Channel index used by the reverse API peer."
     channelMarker:
       $ref: "http://swgserver:8081/api/swagger/include/ChannelMarker.yaml#/ChannelMarker"
+      description: "Channel-marker display configuration."
     rollupState:
       $ref: "http://swgserver:8081/api/swagger/include/RollupState.yaml#/RollupState"
+      description: "Saved expanded or collapsed state of the GUI sections."
 
 RTTYModReport:
   description: RTTYMod
@@ -96,18 +146,22 @@ RTTYModReport:
       format: float
     channelSampleRate:
       type: integer
+      description: "Effective sample rate delivered to the channel in samples per second."
 
 RTTYModActions:
   description: RTTYMod
   properties:
     tx:
       type: integer
+      minimum: 0
+      maximum: 1
       description: >
         Transmit current text
           * 0 - Do nothing
           * 1 - Transmit
     payload:
       type: object
+      description: "Payload data."
       properties:
         text:
           description: RTTY content to transmit

@@ -174,6 +174,11 @@ void HeatMapBaseband::applySettings(const QStringList& settingsKeys, const HeatM
     }
 }
 
+int HeatMapBaseband::getChannelSampleRate() const
+{
+    return m_channelizer->getChannelSampleRate();
+}
+
 void HeatMapBaseband::setBasebandSampleRate(int sampleRate)
 {
     m_channelizer->setBasebandSampleRate(sampleRate);

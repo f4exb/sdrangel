@@ -484,9 +484,17 @@ void EndOfTrainDemod::webapiFormatChannelSettings(SWGSDRangel::SWGChannelSetting
     response.getEndOfTrainDemodSettings()->setInputFrequencyOffset(settings.m_inputFrequencyOffset);
     response.getEndOfTrainDemodSettings()->setRfBandwidth(settings.m_rfBandwidth);
     response.getEndOfTrainDemodSettings()->setUdpEnabled(settings.m_udpEnabled);
-    response.getEndOfTrainDemodSettings()->setUdpAddress(new QString(settings.m_udpAddress));
+    if (response.getEndOfTrainDemodSettings()->getUdpAddress()) {
+        *response.getEndOfTrainDemodSettings()->getUdpAddress() = settings.m_udpAddress;
+    } else {
+        response.getEndOfTrainDemodSettings()->setUdpAddress(new QString(settings.m_udpAddress));
+    }
     response.getEndOfTrainDemodSettings()->setUdpPort(settings.m_udpPort);
-    response.getEndOfTrainDemodSettings()->setLogFilename(new QString(settings.m_logFilename));
+    if (response.getEndOfTrainDemodSettings()->getLogFilename()) {
+        *response.getEndOfTrainDemodSettings()->getLogFilename() = settings.m_logFilename;
+    } else {
+        response.getEndOfTrainDemodSettings()->setLogFilename(new QString(settings.m_logFilename));
+    }
     response.getEndOfTrainDemodSettings()->setLogEnabled(settings.m_logEnabled);
     response.getEndOfTrainDemodSettings()->setUseFileTime(settings.m_useFileTime);
 
@@ -584,7 +592,11 @@ void EndOfTrainDemod::webapiFormatChannelSettings(
     swgChannelSettings->setDirection(0); // Single sink (Rx)
     swgChannelSettings->setOriginatorChannelIndex(getIndexInDeviceSet());
     swgChannelSettings->setOriginatorDeviceSetIndex(getDeviceSetIndex());
-    swgChannelSettings->setChannelType(new QString("EndOfTrainDemod"));
+    if (swgChannelSettings->getChannelType()) {
+        *swgChannelSettings->getChannelType() = "EndOfTrainDemod";
+    } else {
+        swgChannelSettings->setChannelType(new QString("EndOfTrainDemod"));
+    }
     swgChannelSettings->setEndOfTrainDemodSettings(new SWGSDRangel::SWGEndOfTrainDemodSettings());
     SWGSDRangel::SWGEndOfTrainDemodSettings *swgEndOfTrainDemodSettings = swgChannelSettings->getEndOfTrainDemodSettings();
 
@@ -603,13 +615,21 @@ void EndOfTrainDemod::webapiFormatChannelSettings(
         swgEndOfTrainDemodSettings->setUdpEnabled(settings.m_udpEnabled);
     }
     if (channelSettingsKeys.contains("udpAddress") || force) {
-        swgEndOfTrainDemodSettings->setUdpAddress(new QString(settings.m_udpAddress));
+        if (swgEndOfTrainDemodSettings->getUdpAddress()) {
+            *swgEndOfTrainDemodSettings->getUdpAddress() = settings.m_udpAddress;
+        } else {
+            swgEndOfTrainDemodSettings->setUdpAddress(new QString(settings.m_udpAddress));
+        }
     }
     if (channelSettingsKeys.contains("udpPort") || force) {
         swgEndOfTrainDemodSettings->setUdpPort(settings.m_udpPort);
     }
     if (channelSettingsKeys.contains("logFilename") || force) {
-        swgEndOfTrainDemodSettings->setLogFilename(new QString(settings.m_logFilename));
+        if (swgEndOfTrainDemodSettings->getLogFilename()) {
+            *swgEndOfTrainDemodSettings->getLogFilename() = settings.m_logFilename;
+        } else {
+            swgEndOfTrainDemodSettings->setLogFilename(new QString(settings.m_logFilename));
+        }
     }
     if (channelSettingsKeys.contains("logEnabled") || force) {
         swgEndOfTrainDemodSettings->setLogEnabled(settings.m_logEnabled);
@@ -621,7 +641,11 @@ void EndOfTrainDemod::webapiFormatChannelSettings(
         swgEndOfTrainDemodSettings->setRgbColor(settings.m_rgbColor);
     }
     if (channelSettingsKeys.contains("title") || force) {
-        swgEndOfTrainDemodSettings->setTitle(new QString(settings.m_title));
+        if (swgEndOfTrainDemodSettings->getTitle()) {
+            *swgEndOfTrainDemodSettings->getTitle() = settings.m_title;
+        } else {
+            swgEndOfTrainDemodSettings->setTitle(new QString(settings.m_title));
+        }
     }
     if (channelSettingsKeys.contains("streamIndex") || force) {
         swgEndOfTrainDemodSettings->setStreamIndex(settings.m_streamIndex);

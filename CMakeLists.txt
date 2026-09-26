@@ -32,6 +32,8 @@ option(RX_SAMPLE_24BIT "Internal 24 bit Rx DSP" ON)
 option(BUILD_SERVER "Build Server" ON)
 option(BUILD_GUI "Build GUI" ON)
 option(BUILD_BENCH "Build benchmark" ON)
+option(BUILD_MCP_BRIDGE "Build the Claude Desktop stdio bridge for the MCP server feature" ON)
+option(BUILD_MCP_BUNDLE "Package the MCP bridge as a Claude Desktop extension bundle" ON)
 option(HIDE_CONSOLE "Hide console when running GUI on Windows" ON)
 option(BUNDLE "Enable distribution bundle" OFF)
 set(ARCH_OPT "native" CACHE STRING "Specify instruction set to use. Will be passed directly as `-march` or `/arch:` argument on supported compilers. \
@@ -227,6 +229,7 @@ option(ENABLE_FEATURE_SID "Enable feature sid plugin" ON)
 option(ENABLE_FEATURE_MORSEDECODER "Enable feature morsedecoder plugin" ON)
 option(ENABLE_FEATURE_DENOISER "Enable feature denoiser plugin" ON)
 option(ENABLE_FEATURE_FREQDISPLAY "Enable feature freqdisplay plugin" ON)
+option(ENABLE_FEATURE_MCPSERVER "Enable feature mcpserver plugin" ON)
 
 # on windows always build external libraries
 if(WIN32)
@@ -1100,6 +1103,12 @@ endif()
 
 if (BUILD_BENCH)
 add_subdirectory(sdrbench)
+endif()
+
+# Standalone, and not built by default: only a release that ships a Claude Desktop
+# extension bundle needs it
+if (BUILD_MCP_BRIDGE OR BUILD_MCP_BUNDLE)
+    add_subdirectory(plugins/feature/mcpserver/bridge)
 endif()
 
 if (BUILD_GUI)

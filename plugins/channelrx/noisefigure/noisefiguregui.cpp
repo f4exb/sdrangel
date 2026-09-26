@@ -29,6 +29,7 @@
 #include "ui_noisefiguregui.h"
 #include "plugin/pluginapi.h"
 #include "util/db.h"
+#include "gui/messagedialog.h"
 #include "gui/basicchannelsettingsdialog.h"
 #include "gui/decimaldelegate.h"
 #include "gui/dialogpositioner.h"
@@ -287,7 +288,7 @@ bool NoiseFigureGUI::handleMessage(const Message& message)
         m_runningTest = false;
         QString errorMessage = report.getErrorMessage();
         if (!errorMessage.isEmpty()) {
-            QMessageBox::critical(this, "Noise Figure", errorMessage);
+            MessageDialog::critical(this, "Noise Figure", errorMessage);
         }
         return true;
     }
@@ -406,7 +407,7 @@ void NoiseFigureGUI::on_startStop_clicked()
     // Check we have at least on ENR value
     if (m_settings.m_enr.size() < 1)
     {
-        QMessageBox::critical(this, "Noise Figure", "You must enter the ENR of the noise source for at least one frequency");
+        MessageDialog::critical(this, "Noise Figure", "You must enter the ENR of the noise source for at least one frequency");
         return;
     }
     // Clear current results if starting a test
@@ -435,7 +436,7 @@ void NoiseFigureGUI::on_saveResults_clicked()
             qDebug() << "NoiseFigureGUI: Saving results to " << fileNames;
             QFile file(fileNames[0]);
             if (!file.open(QIODevice::WriteOnly | QIODevice::Text)) {
-                QMessageBox::critical(this, "Noise Figure", QString("Failed to open file %1").arg(fileNames[0]));
+                MessageDialog::critical(this, "Noise Figure", QString("Failed to open file %1").arg(fileNames[0]));
                 return;
             }
             QTextStream out(&file);
@@ -467,7 +468,7 @@ void NoiseFigureGUI::on_openReference_clicked()
             m_refFilename = fileNames[0];
             QFile file(m_refFilename);
             if (!file.open(QIODevice::ReadOnly | QIODevice::Text)) {
-                QMessageBox::critical(this, "Noise Figure", QString("Failed to open file %1").arg(m_refFilename));
+                MessageDialog::critical(this, "Noise Figure", QString("Failed to open file %1").arg(m_refFilename));
                 return;
             }
             QTextStream in(&file);

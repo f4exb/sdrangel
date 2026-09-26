@@ -192,6 +192,11 @@ void RadioAstronomyBaseband::applySettings(const QStringList& settingsKeys, cons
     }
 }
 
+int RadioAstronomyBaseband::getChannelSampleRate() const
+{
+    return m_channelizer->getChannelSampleRate();
+}
+
 void RadioAstronomyBaseband::setBasebandSampleRate(int sampleRate)
 {
     m_channelizer->setBasebandSampleRate(sampleRate);

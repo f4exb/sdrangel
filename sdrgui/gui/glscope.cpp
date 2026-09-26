@@ -26,6 +26,7 @@
 #include <QSurface>
 #include <algorithm>
 
+#include "dsp/scopevis.h"
 #include "glscope.h"
 
 const GLfloat GLScope::m_q3RadiiConst[] = {
@@ -41,6 +42,7 @@ const GLfloat GLScope::m_q3RadiiConst[] = {
 
 GLScope::GLScope(QWidget *parent) :
     QOpenGLWidget(parent),
+    m_scopeVis(nullptr),
     m_tracesData(nullptr),
     m_traces(nullptr),
     m_projectionTypes(nullptr),
@@ -96,6 +98,9 @@ GLScope::GLScope(QWidget *parent) :
 
 GLScope::~GLScope()
 {
+    if (m_scopeVis) {
+        m_scopeVis->setGLScope(nullptr);
+    }
 }
 
 void GLScope::setDisplayGridIntensity(int intensity)

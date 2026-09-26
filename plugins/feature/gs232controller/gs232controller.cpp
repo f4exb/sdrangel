@@ -61,7 +61,7 @@ GS232Controller::GS232Controller(WebAPIAdapterInterface *webAPIAdapterInterface)
 {
     qDebug("GS232Controller::GS232Controller: webAPIAdapterInterface: %p", webAPIAdapterInterface);
     setObjectName(m_featureId);
-    m_state = StIdle;
+    setState(StIdle);
     m_errorMessage = "GS232Controller error";
     m_networkManager = new QNetworkAccessManager();
     QObject::connect(
@@ -127,7 +127,7 @@ void GS232Controller::start()
     QObject::connect(m_thread, &QThread::finished, m_thread, &QThread::deleteLater);
     m_worker->setMessageQueueToFeature(getInputMessageQueue());
     m_thread->start();
-    m_state = StRunning;
+    setState(StRunning);
 
     GS232ControllerWorker::MsgConfigureGS232ControllerWorker *msg =
         GS232ControllerWorker::MsgConfigureGS232ControllerWorker::create(m_settings, QList<QString>(), true);
@@ -137,7 +137,7 @@ void GS232Controller::start()
 void GS232Controller::stop()
 {
     qDebug("GS232Controller::stop");
-    m_state = StIdle;
+    setState(StIdle);
     if (m_thread)
     {
         m_thread->quit();
@@ -174,13 +174,13 @@ bool GS232Controller::handleMessage(const Message& cmd)
     {
         MsgReportWorker& report = (MsgReportWorker&) cmd;
         if (report.getMessage() == "Connected")
-            m_state = StRunning;
+            setState(StRunning);
         else if (report.getMessage() == "Disconnected")
-            m_state = StIdle;
+            setState(StIdle);
         else
         {
-            m_state = StError;
             m_errorMessage = report.getMessage();
+            setState(StError);
         }
         return true;
     }
@@ -404,12 +404,24 @@ void GS232Controller::webapiFormatFeatureSettings(
 {
     response.getGs232ControllerSettings()->setAzimuth(settings.m_azimuth);
     response.getGs232ControllerSettings()->setElevation(settings.m_elevation);
-    response.getGs232ControllerSettings()->setSerialPort(new QString(settings.m_serialPort));
+    if (response.getGs232ControllerSettings()->getSerialPort()) {
+        *response.getGs232ControllerSettings()->getSerialPort() = settings.m_serialPort;
+    } else {
+        response.getGs232ControllerSettings()->setSerialPort(new QString(settings.m_serialPort));
+    }
     response.getGs232ControllerSettings()->setBaudRate(settings.m_baudRate);
-    response.getGs232ControllerSettings()->setHost(new QString(settings.m_host));
+    if (response.getGs232ControllerSettings()->getHost()) {
+        *response.getGs232ControllerSettings()->getHost() = settings.m_host;
+    } else {
+        response.getGs232ControllerSettings()->setHost(new QString(settings.m_host));
+    }
     response.getGs232ControllerSettings()->setPort(settings.m_port);
     response.getGs232ControllerSettings()->setTrack(settings.m_track);
-    response.getGs232ControllerSettings()->setSource(new QString(settings.m_source));
+    if (response.getGs232ControllerSettings()->getSource()) {
+        *response.getGs232ControllerSettings()->getSource() = settings.m_source;
+    } else {
+        response.getGs232ControllerSettings()->setSource(new QString(settings.m_source));
+    }
     response.getGs232ControllerSettings()->setAzimuthOffset(settings.m_azimuthOffset);
     response.getGs232ControllerSettings()->setElevationOffset(settings.m_elevationOffset);
     response.getGs232ControllerSettings()->setAzimuthMin(settings.m_azimuthMin);
@@ -420,7 +432,11 @@ void GS232Controller::webapiFormatFeatureSettings(
     response.getGs232ControllerSettings()->setProtocol(settings.m_protocol);
     response.getGs232ControllerSettings()->setPrecision(settings.m_precision);
     response.getGs232ControllerSettings()->setCoordinates((int)settings.m_coordinates);
-    response.getGs232ControllerSettings()->setInputController(new QString(settings.m_inputController));
+    if (response.getGs232ControllerSettings()->getInputController()) {
+        *response.getGs232ControllerSettings()->getInputController() = settings.m_inputController;
+    } else {
+        response.getGs232ControllerSettings()->setInputController(new QString(settings.m_inputController));
+    }
     response.getGs232ControllerSettings()->setInputSensitivity(settings.m_inputControllerSettings.m_lowSensitivity);
 
     if (response.getGs232ControllerSettings()->getTitle()) {

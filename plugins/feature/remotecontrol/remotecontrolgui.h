@@ -126,6 +126,7 @@ private:
     void deviceUnavailable(const QString &protocol, const QString &deviceId);
 
 private slots:
+    void updateFeatureState();
     void onMenuDialogCalled(const QPoint &p);
     void onWidgetRolled(QWidget* widget, bool rollDown);
     void handleInputMessages();

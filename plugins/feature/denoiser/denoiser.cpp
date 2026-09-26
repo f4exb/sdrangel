@@ -53,7 +53,7 @@ Denoiser::Denoiser(WebAPIAdapterInterface *webAPIAdapterInterface) :
 {
     qDebug("Denoiser::Denoiser: webAPIAdapterInterface: %p", webAPIAdapterInterface);
     setObjectName(m_featureId);
-    m_state = StIdle;
+    setState(StIdle);
     m_errorMessage = "Denoiser error";
     m_networkManager = new QNetworkAccessManager();
     QObject::connect(
@@ -127,7 +127,7 @@ void Denoiser::start()
 
     m_worker->setMessageQueueToFeature(getInputMessageQueue());
     m_worker->startWork();
-    m_state = StRunning;
+    setState(StRunning);
     m_thread->start();
 
     DenoiserWorker::MsgConfigureDenoiserWorker *msg
@@ -177,7 +177,7 @@ void Denoiser::stop()
     }
 
 	m_worker->stopWork();
-    m_state = StIdle;
+    setState(StIdle);
 	m_thread->quit();
 	m_thread->wait();
 }
@@ -506,7 +506,7 @@ void Denoiser::webapiUpdateFeatureSettings(
     const QStringList& featureSettingsKeys,
     SWGSDRangel::SWGFeatureSettings& response)
 {
-    if (featureSettingsKeys.contains("DenoiserType")) {
+    if (featureSettingsKeys.contains("denoiserType")) {
         settings.m_denoiserType = static_cast<DenoiserSettings::DenoiserType>(response.getDenoiserSettings()->getDenoiserType());
     }
     if (featureSettingsKeys.contains("enableDenoiser")) {
@@ -579,7 +579,7 @@ void Denoiser::webapiReverseSendSettings(const QList<QString>& featureSettingsKe
     if (featureSettingsKeys.contains("reverseAPIFeatureIndex") || force) {
         swgDenoiserSettings->setReverseApiFeatureIndex(settings.m_reverseAPIFeatureIndex);
     }
-    if (featureSettingsKeys.contains("DenoiserType") || force) {
+    if (featureSettingsKeys.contains("denoiserType") || force) {
         swgDenoiserSettings->setDenoiserType(static_cast<int>(settings.m_denoiserType));
     }
     if (featureSettingsKeys.contains("enableDenoiser") || force) {

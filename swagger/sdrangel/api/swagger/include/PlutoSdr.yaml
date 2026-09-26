@@ -3,40 +3,66 @@ PlutoSdrInputSettings:
   properties:
     title:
       type: string
+      description: "User-visible title."
     centerFrequency:
       type: integer
       format: int64
+      description: "Device center frequency in Hz."
     devSampleRate:
       type: integer
+      description: "Device I/Q sample rate in samples per second before software decimation or interpolation."
     LOppmTenths:
       type: integer
+      description: "Local-oscillator correction in tenths of a part per million."
     lpfFIREnable:
       description: Low pass FIR filter enable (1 if enabled else 0)
       type: integer
+      minimum: 0
+      maximum: 1
     lpfFIRBW:
       description: digital lowpass FIR filter bandwidth (Hz)
       type: integer
     lpfFIRlog2Decim:
       description: digital lowpass FIR filter log2 of decimation factor (0..2)
       type: integer
+      minimum: 0
+      maximum: 2
     lpfFIRGain:
       description: digital lowpass FIR filter gain (dB)
       type: integer
     fcPos:
       description: 0=Infra 1=Supra 2=Center
       type: integer
+      minimum: 0
+      maximum: 2
     dcBlock:
       type: integer
+      description: "Enable DSP DC-offset correction (1 enabled, 0 disabled)."
+      minimum: 0
+      maximum: 1
     iqCorrection:
       type: integer
+      description: "Enable I/Q imbalance correction (1 enabled, 0 disabled)."
+      minimum: 0
+      maximum: 1
     hwBBDCBlock:
       type: integer
+      description: "Enable hw bbdc block (1 enabled, 0 disabled)."
+      minimum: 0
+      maximum: 1
     hwRFDCBlock:
       type: integer
+      description: "Enable hw rfdc block (1 enabled, 0 disabled)."
+      minimum: 0
+      maximum: 1
     hwIQCorrection:
       type: integer
+      description: "Enable hw i/q correction (1 enabled, 0 disabled)."
+      minimum: 0
+      maximum: 1
     log2Decim:
       type: integer
+      description: "Base-2 exponent of the software decimation factor; the output sample rate is divided by 2^log2Decim."
     lpfBW:
       description: Analog lowpass filter bandwidth (Hz)
       type: integer
@@ -45,15 +71,23 @@ PlutoSdrInputSettings:
       type: integer
     antennaPath:
       type: integer
+      description: "Selected RF antenna path."
     gainMode:
       type: integer
+      description: "Gain-control mode selection."
     transverterMode:
       type: integer
+      description: "Enable transverter frequency translation (1 enabled, 0 disabled)."
+      minimum: 0
+      maximum: 1
     transverterDeltaFrequency:
       type: integer
       format: int64
+      description: "Frequency translation applied in transverter mode in Hz."
     iqOrder:
       type: integer
+      minimum: 0
+      maximum: 1
       description: >
         IQ samples order
           * 0 - Q then I (swapped)
@@ -61,39 +95,55 @@ PlutoSdrInputSettings:
     useReverseAPI:
       description: Synchronize with reverse API (1 for yes, 0 for no)
       type: integer
+      minimum: 0
+      maximum: 1
     reverseAPIAddress:
       type: string
+      description: "IPv4 address or host name of the reverse API peer."
     reverseAPIPort:
       type: integer
+      description: "TCP port of the reverse API peer."
+      minimum: 1
+      maximum: 65535
     reverseAPIDeviceIndex:
       type: integer
+      description: "Device-set index used by the reverse API peer."
 
 PlutoSdrOutputSettings:
   description: PlutoSDR
   properties:
     title:
       type: string
+      description: "User-visible title."
     centerFrequency:
       type: integer
       format: int64
+      description: "Device center frequency in Hz."
     devSampleRate:
       type: integer
+      description: "Device I/Q sample rate in samples per second before software decimation or interpolation."
     LOppmTenths:
       type: integer
+      description: "Local-oscillator correction in tenths of a part per million."
     lpfFIREnable:
       description: Low pass FIR filter enable (1 if enabled else 0)
       type: integer
+      minimum: 0
+      maximum: 1
     lpfFIRBW:
       description: digital lowpass FIR filter bandwidth (Hz)
       type: integer
     lpfFIRlog2Interp:
       description: digital lowpass FIR filter log2 of interpolation factor (0..2)
       type: integer
+      minimum: 0
+      maximum: 2
     lpfFIRGain:
       description: digital lowpass FIR filter gain (dB)
       type: integer
     log2Interp:
       type: integer
+      description: "Base-2 exponent of the software interpolation factor; the output sample rate is multiplied by 2^log2Interp."
     lpfBW:
       description: Analog lowpass filter bandwidth (Hz)
       type: integer
@@ -102,53 +152,90 @@ PlutoSdrOutputSettings:
       type: integer
     antennaPath:
       type: integer
+      description: "Selected RF antenna path."
     transverterMode:
       type: integer
+      description: "Enable transverter frequency translation (1 enabled, 0 disabled)."
+      minimum: 0
+      maximum: 1
     transverterDeltaFrequency:
       type: integer
       format: int64
+      description: "Frequency translation applied in transverter mode in Hz."
     useReverseAPI:
       description: Synchronize with reverse API (1 for yes, 0 for no)
       type: integer
+      minimum: 0
+      maximum: 1
     reverseAPIAddress:
       type: string
+      description: "IPv4 address or host name of the reverse API peer."
     reverseAPIPort:
       type: integer
+      description: "TCP port of the reverse API peer."
+      minimum: 1
+      maximum: 65535
     reverseAPIDeviceIndex:
       type: integer
+      description: "Device-set index used by the reverse API peer."
 
 PlutoSdrMIMOSettings:
   description: PlutoSDR
   properties:
     title:
       type: string
+      description: "User-visible title."
     devSampleRate:
       type: integer
+      description: "Device I/Q sample rate in samples per second before software decimation or interpolation."
     LOppmTenths:
       type: integer
+      description: "Local-oscillator correction in tenths of a part per million."
     rxCenterFrequency:
       type: integer
       format: int64
+      description: "Receive center frequency in Hz."
     dcBlock:
       type: integer
+      description: "Enable DSP DC-offset correction (1 enabled, 0 disabled)."
+      minimum: 0
+      maximum: 1
     iqCorrection:
       type: integer
+      description: "Enable I/Q imbalance correction (1 enabled, 0 disabled)."
+      minimum: 0
+      maximum: 1
     hwBBDCBlock:
       type: integer
+      description: "Enable hw bbdc block (1 enabled, 0 disabled)."
+      minimum: 0
+      maximum: 1
     hwRFDCBlock:
       type: integer
+      description: "Enable hw rfdc block (1 enabled, 0 disabled)."
+      minimum: 0
+      maximum: 1
     hwIQCorrection:
       type: integer
+      description: "Enable hw i/q correction (1 enabled, 0 disabled)."
+      minimum: 0
+      maximum: 1
     fcPosRx:
       description: 0=Infra 1=Supra 2=Center
       type: integer
+      minimum: 0
+      maximum: 2
     rxTransverterMode:
       type: integer
+      description: "Receive transverter mode setting for Pluto sdr MIMO."
     rxTransverterDeltaFrequency:
       type: integer
       format: int64
+      description: "Receive frequency translation applied in transverter mode in Hz."
     iqOrder:
       type: integer
+      minimum: 0
+      maximum: 1
       description: >
         IQ samples order
           * 0 - Q then I (swapped)
@@ -165,36 +252,48 @@ PlutoSdrMIMOSettings:
     lpfRxFIRlog2Decim:
       description: digital lowpass FIR filter log2 of decimation factor (0..2)
       type: integer
+      minimum: 0
+      maximum: 2
     lpfRxFIRGain:
       description: digital lowpass FIR filter gain (dB)
       type: integer
     log2Decim:
       type: integer
+      description: "Base-2 exponent of the software decimation factor; the output sample rate is divided by 2^log2Decim."
     rx0Gain:
       description: Hardware gain
       type: integer
     rx0GainMode:
       type: integer
+      description: "Rx0 gain mode setting for Pluto sdr MIMO."
     rx0AntennaPath:
       type: integer
+      description: "Rx0 antenna path setting for Pluto sdr MIMO."
     rx1Gain:
       description: Hardware gain
       type: integer
     rx1GainMode:
       type: integer
+      description: "Rx1 gain mode setting for Pluto sdr MIMO."
     rx1AntennaPath:
       type: integer
+      description: "Rx1 antenna path setting for Pluto sdr MIMO."
     txCenterFrequency:
       type: integer
       format: int64
+      description: "Transmit center frequency in Hz."
     fcPosTx:
       description: 0=Infra 1=Supra 2=Center
       type: integer
+      minimum: 0
+      maximum: 2
     txTransverterMode:
       type: integer
+      description: "Transmit transverter mode setting for Pluto sdr MIMO."
     txTransverterDeltaFrequency:
       type: integer
       format: int64
+      description: "Transmit frequency translation applied in transverter mode in Hz."
     lpfBWTx:
       description: Analog lowpass filter bandwidth (Hz)
       type: integer
@@ -207,71 +306,98 @@ PlutoSdrMIMOSettings:
     lpfTxFIRlog2Interp:
       description: digital lowpass FIR filter log2 of interpolation factor (0..2)
       type: integer
+      minimum: 0
+      maximum: 2
     lpfTxFIRGain:
       description: digital lowpass FIR filter gain (dB)
       type: integer
     log2Interp:
       type: integer
+      description: "Base-2 exponent of the software interpolation factor; the output sample rate is multiplied by 2^log2Interp."
     tx0Att:
       description: Hardware attenuator gain in decibel fourths (negative)
       type: integer
     tx0AntennaPath:
       type: integer
+      description: "Tx0 antenna path setting for Pluto sdr MIMO."
     tx1Att:
       description: Hardware attenuator gain in decibel fourths (negative)
       type: integer
     tx1AntennaPath:
       type: integer
+      description: "Tx1 antenna path setting for Pluto sdr MIMO."
     useReverseAPI:
       description: Synchronize with reverse API (1 for yes, 0 for no)
       type: integer
+      minimum: 0
+      maximum: 1
     reverseAPIAddress:
       type: string
+      description: "IPv4 address or host name of the reverse API peer."
     reverseAPIPort:
       type: integer
+      description: "TCP port of the reverse API peer."
+      minimum: 1
+      maximum: 65535
     reverseAPIDeviceIndex:
       type: integer
+      description: "Device-set index used by the reverse API peer."
 
 PlutoSdrInputReport:
   description: PlutoSDR
   properties:
     adcRate:
       type: integer
+      description: "ADC sample rate in samples per second."
     rssi:
       type: string
+      description: "Received signal strength indication."
     gainDB:
       type: integer
+      description: "Gain dB in dB."
     temperature:
       type: number
       format: float
+      description: "Reported device temperature."
 
 PlutoSdrOutputReport:
   description: PlutoSDR
   properties:
     dacRate:
       type: integer
+      description: "DAC sample rate in samples per second."
     rssi:
       type: string
+      description: "Received signal strength indication."
     temperature:
       type: number
       format: float
+      description: "Reported device temperature."
 
 PlutoSdrMIMOReport:
   description: PlutoSDR
   properties:
     adcRate:
       type: integer
+      description: "ADC sample rate in samples per second."
     dacRate:
       type: integer
+      description: "DAC sample rate in samples per second."
     rx0GainDB:
       type: integer
+      description: "Rx0 gain dB in dB."
     rx1GainDB:
       type: integer
+      description: "Rx1 gain dB in dB."
     rssiRx0:
       type: string
+      description: "Reported rssi rx0."
     rssiRx1:
       type: string
+      description: "Reported rssi rx1."
     rssiTx0:
       type: string
+      description: "Reported rssi tx0."
     rssiTx1:
       type: string
+      description: "Reported rssi tx1."

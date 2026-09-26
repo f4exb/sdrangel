@@ -563,7 +563,11 @@ void MeshtasticMod::webapiFormatChannelSettings(SWGSDRangel::SWGChannelSettings&
 
     response.getMeshtasticModSettings()->setMessageRepeat(settings.m_messageRepeat);
     response.getMeshtasticModSettings()->setUdpEnabled(settings.m_udpEnabled);
-    response.getMeshtasticModSettings()->setUdpAddress(new QString(settings.m_udpAddress));
+    if (response.getMeshtasticModSettings()->getUdpAddress()) {
+        *response.getMeshtasticModSettings()->getUdpAddress() = settings.m_udpAddress;
+    } else {
+        response.getMeshtasticModSettings()->setUdpAddress(new QString(settings.m_udpAddress));
+    }
     response.getMeshtasticModSettings()->setUdpPort(settings.m_udpPort);
     response.getMeshtasticModSettings()->setInvertRamps(settings.m_invertRamps ? 1 : 0);
 
@@ -688,7 +692,11 @@ void MeshtasticMod::webapiFormatChannelSettings(
     swgChannelSettings->setDirection(1); // single source (Tx)
     swgChannelSettings->setOriginatorChannelIndex(getIndexInDeviceSet());
     swgChannelSettings->setOriginatorDeviceSetIndex(getDeviceSetIndex());
-    swgChannelSettings->setChannelType(new QString(m_channelId));
+    if (swgChannelSettings->getChannelType()) {
+        *swgChannelSettings->getChannelType() = m_channelId;
+    } else {
+        swgChannelSettings->setChannelType(new QString(m_channelId));
+    }
     swgChannelSettings->setMeshtasticModSettings(new SWGSDRangel::SWGMeshtasticModSettings());
     SWGSDRangel::SWGMeshtasticModSettings *swgMeshtasticModSettings = swgChannelSettings->getMeshtasticModSettings();
 
@@ -722,7 +730,11 @@ void MeshtasticMod::webapiFormatChannelSettings(
         swgMeshtasticModSettings->setNbParityBits(settings.m_nbParityBits);
     }
     if (channelSettingsKeys.contains("textMessage") || force) {
-        swgMeshtasticModSettings->setTextMessage(new QString(settings.m_textMessage));
+        if (swgMeshtasticModSettings->getTextMessage()) {
+            *swgMeshtasticModSettings->getTextMessage() = settings.m_textMessage;
+        } else {
+            swgMeshtasticModSettings->setTextMessage(new QString(settings.m_textMessage));
+        }
     }
 
     if (channelSettingsKeys.contains("messageRepeat") || force) {
@@ -733,7 +745,11 @@ void MeshtasticMod::webapiFormatChannelSettings(
         swgMeshtasticModSettings->setUdpEnabled(settings.m_udpEnabled);
     }
     if (channelSettingsKeys.contains("udpAddress") || force) {
-        swgMeshtasticModSettings->setUdpAddress(new QString(settings.m_udpAddress));
+        if (swgMeshtasticModSettings->getUdpAddress()) {
+            *swgMeshtasticModSettings->getUdpAddress() = settings.m_udpAddress;
+        } else {
+            swgMeshtasticModSettings->setUdpAddress(new QString(settings.m_udpAddress));
+        }
     }
     if (channelSettingsKeys.contains("udpPort") || force) {
         swgMeshtasticModSettings->setUdpPort(settings.m_udpPort);
@@ -746,7 +762,11 @@ void MeshtasticMod::webapiFormatChannelSettings(
         swgMeshtasticModSettings->setRgbColor(settings.m_rgbColor);
     }
     if (channelSettingsKeys.contains("title") || force) {
-        swgMeshtasticModSettings->setTitle(new QString(settings.m_title));
+        if (swgMeshtasticModSettings->getTitle()) {
+            *swgMeshtasticModSettings->getTitle() = settings.m_title;
+        } else {
+            swgMeshtasticModSettings->setTitle(new QString(settings.m_title));
+        }
     }
 
     if (settings.m_channelMarker && (channelSettingsKeys.contains("channelMarker") || force))

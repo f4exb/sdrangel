@@ -904,7 +904,11 @@ void PlutoSDROutput::webapiFormatDeviceReport(SWGSDRangel::SWGDeviceReport& resp
     response.getPlutoSdrOutputReport()->setDacRate(getDACSampleRate());
     std::string rssiStr;
     getRSSI(rssiStr);
-    response.getPlutoSdrOutputReport()->setRssi(new QString(rssiStr.c_str()));
+    if (response.getPlutoSdrOutputReport()->getRssi()) {
+        *response.getPlutoSdrOutputReport()->getRssi() = rssiStr.c_str();
+    } else {
+        response.getPlutoSdrOutputReport()->setRssi(new QString(rssiStr.c_str()));
+    }
     fetchTemperature();
     response.getPlutoSdrOutputReport()->setTemperature(getTemperature());
 }
