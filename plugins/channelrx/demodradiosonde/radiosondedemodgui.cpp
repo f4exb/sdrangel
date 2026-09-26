@@ -357,14 +357,14 @@ bool RadiosondeDemodGUI::handleMessage(const Message& frame)
 
 void RadiosondeDemodGUI::handleInputMessages()
 {
-    Message* frame;
+    Message* message;
 
-    while ((frame = getInputMessageQueue()->pop()) != 0)
+    while ((message = getInputMessageQueue()->pop()))
     {
-        if (handleMessage(*frame))
-        {
-            delete frame;
+        if (!handleMessage(*message)) {
+            qDebug("%s: unhandled message: %s", Q_FUNC_INFO, message->getIdentifier());
         }
+        delete message;
     }
 }
 

@@ -277,14 +277,12 @@ void ChannelAnalyzerGUI::handleInputMessages()
 {
     Message* message;
 
-    while ((message = getInputMessageQueue()->pop()) != 0)
+    while ((message = getInputMessageQueue()->pop()))
     {
-        qDebug("ChannelAnalyzerGUI::handleInputMessages: message: %s", message->getIdentifier());
-
-        if (handleMessage(*message))
-        {
-            delete message;
+        if (!handleMessage(*message)) {
+            qDebug("%s: unhandled message: %s", Q_FUNC_INFO, message->getIdentifier());
         }
+        delete message;
     }
 }
 
