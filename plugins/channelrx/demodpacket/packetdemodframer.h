@@ -234,7 +234,7 @@ private:
 
         if (bit == 1)
         {
-            d.m_onesCount++;
+            d.m_onesCount = std::min(d.m_onesCount + 1, 7);
 
             // Shouldn't ever get 7 1s in a row
             if ((d.m_onesCount == 7) && d.m_gotSOP)
@@ -285,6 +285,14 @@ private:
                 d.m_byteCount++;
             }
 
+            d.m_bits = 0;
+            d.m_bitCount = 0;
+        }
+        // Outside a frame only the run-of-ones detector is needed to find a flag.
+        // Do not let m_bitCount grow without bound before acquisition or after an
+        // abort: shifting by >= 32 above is undefined (caught by the IQ tests).
+        if (!d.m_gotSOP)
+        {
             d.m_bits = 0;
             d.m_bitCount = 0;
         }
