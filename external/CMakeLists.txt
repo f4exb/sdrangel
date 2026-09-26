@@ -856,7 +856,8 @@ endif ()
 
 # For Satellite Tracker feature and APT demod
 if(ENABLE_FEATURE_SATELLITETRACKER OR ENABLE_CHANNELRX_DEMODAPT)
-    # No tags for this in github - but doesn't change often
+    # No tags for this in github. Pin the commit to keep builds reproducible.
+    set(SGP4_TAG 1c0d4ee99404538572037fabfdcbc7133917eae8)
     # Fails to build with CMAKE_INTERPROCEDURAL_OPTIMIZATION=ON on Windows
     if (WIN32)
         set(SGP4_LIBRARIES "${SDRANGEL_BINARY_LIB_DIR}/sgp4s.lib" CACHE INTERNAL "")
@@ -867,6 +868,8 @@ if(ENABLE_FEATURE_SATELLITETRACKER OR ENABLE_CHANNELRX_DEMODAPT)
     endif()
     ExternalProject_Add(sgp4
             GIT_REPOSITORY https://github.com/dnwrnr/sgp4.git
+            GIT_TAG ${SGP4_TAG}
+            UPDATE_DISCONNECTED TRUE
             PREFIX "${EXTERNAL_BUILD_LIBRARIES}/sgp4"
             CMAKE_ARGS ${COMMON_CMAKE_ARGS}
             -DCMAKE_INTERPROCEDURAL_OPTIMIZATION=OFF
