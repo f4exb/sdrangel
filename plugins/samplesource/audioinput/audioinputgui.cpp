@@ -20,6 +20,7 @@
 #include <QFileDialog>
 
 #include "ui_audioinputgui.h"
+#include "gui/messagedialog.h"
 #include "gui/glspectrum.h"
 #include "gui/basicdevicesettingsdialog.h"
 #include "gui/dialpopup.h"
@@ -384,7 +385,7 @@ void AudioInputGui::updateStatus()
             break;
         case DeviceAPI::StError:
             ui->startStop->setStyleSheet("QToolButton { background-color : red; }");
-            QMessageBox::information(this, tr("Message"), m_deviceUISet->m_deviceAPI->errorMessage());
+            MessageDialog::information(this, tr("Message"), m_deviceUISet->m_deviceAPI->errorMessage());
             break;
         default:
             break;

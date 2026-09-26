@@ -518,11 +518,19 @@ void RemoteTCPInput::webapiFormatDeviceSettings(SWGSDRangel::SWGDeviceSettings& 
     response.getRemoteTcpInputSettings()->setChannelSampleRate(settings.m_channelSampleRate);
     response.getRemoteTcpInputSettings()->setChannelDecimation(settings.m_channelDecimation);
     response.getRemoteTcpInputSettings()->setSampleBits(settings.m_sampleBits);
-    response.getRemoteTcpInputSettings()->setDataAddress(new QString(settings.m_dataAddress));
+    if (response.getRemoteTcpInputSettings()->getDataAddress()) {
+        *response.getRemoteTcpInputSettings()->getDataAddress() = settings.m_dataAddress;
+    } else {
+        response.getRemoteTcpInputSettings()->setDataAddress(new QString(settings.m_dataAddress));
+    }
     response.getRemoteTcpInputSettings()->setDataPort(settings.m_dataPort);
     response.getRemoteTcpInputSettings()->setOverrideRemoteSettings(settings.m_overrideRemoteSettings ? 1 : 0);
     response.getRemoteTcpInputSettings()->setPreFill(settings.m_preFill ? 1 : 0);
-    response.getRemoteTcpInputSettings()->setProtocol(new QString(settings.m_protocol));
+    if (response.getRemoteTcpInputSettings()->getProtocol()) {
+        *response.getRemoteTcpInputSettings()->getProtocol() = settings.m_protocol;
+    } else {
+        response.getRemoteTcpInputSettings()->setProtocol(new QString(settings.m_protocol));
+    }
 
     response.getRemoteTcpInputSettings()->setUseReverseApi(settings.m_useReverseAPI ? 1 : 0);
 

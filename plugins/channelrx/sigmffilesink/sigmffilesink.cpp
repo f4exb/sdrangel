@@ -364,7 +364,11 @@ void SigMFFileSink::applySettings(const QStringList& settingsKeys, const SigMFFi
         sendChannelSettings(pipes, settingsKeys, settings, force);
     }
 
-    m_settings = settings;
+    if (force) {
+        m_settings = settings;
+    } else {
+        m_settings.applySettings(settingsKeys, settings);
+    }
 }
 
 void SigMFFileSink::record(bool record)
@@ -724,7 +728,11 @@ void SigMFFileSink::webapiFormatChannelSettings(
     swgChannelSettings->setDirection(0); // Single sink (Rx)
     swgChannelSettings->setOriginatorChannelIndex(getIndexInDeviceSet());
     swgChannelSettings->setOriginatorDeviceSetIndex(getDeviceSetIndex());
-    swgChannelSettings->setChannelType(new QString(m_channelId));
+    if (swgChannelSettings->getChannelType()) {
+        *swgChannelSettings->getChannelType() = m_channelId;
+    } else {
+        swgChannelSettings->setChannelType(new QString(m_channelId));
+    }
     swgChannelSettings->setSigMfFileSinkSettings(new SWGSDRangel::SWGSigMFFileSinkSettings());
     SWGSDRangel::SWGSigMFFileSinkSettings *swgSigMFFileSinkSettings = swgChannelSettings->getSigMfFileSinkSettings();
 
@@ -734,13 +742,21 @@ void SigMFFileSink::webapiFormatChannelSettings(
         swgSigMFFileSinkSettings->setInputFrequencyOffset(settings.m_inputFrequencyOffset);
     }
     if (channelSettingsKeys.contains("fileRecordName")) {
-        swgSigMFFileSinkSettings->setTitle(new QString(settings.m_fileRecordName));
+        if (swgSigMFFileSinkSettings->getTitle()) {
+            *swgSigMFFileSinkSettings->getTitle() = settings.m_fileRecordName;
+        } else {
+            swgSigMFFileSinkSettings->setTitle(new QString(settings.m_fileRecordName));
+        }
     }
     if (channelSettingsKeys.contains("rgbColor") || force) {
         swgSigMFFileSinkSettings->setRgbColor(settings.m_rgbColor);
     }
     if (channelSettingsKeys.contains("title") || force) {
-        swgSigMFFileSinkSettings->setTitle(new QString(settings.m_title));
+        if (swgSigMFFileSinkSettings->getTitle()) {
+            *swgSigMFFileSinkSettings->getTitle() = settings.m_title;
+        } else {
+            swgSigMFFileSinkSettings->setTitle(new QString(settings.m_title));
+        }
     }
     if (channelSettingsKeys.contains("log2Decim") || force) {
         swgSigMFFileSinkSettings->setLog2Decim(settings.m_log2Decim);

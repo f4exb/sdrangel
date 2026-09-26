@@ -23,6 +23,7 @@
 
 #include "device/deviceuiset.h"
 #include "device/deviceapi.h"
+#include "gui/messagedialog.h"
 #include "gui/basicchannelsettingsdialog.h"
 #include "gui/dialpopup.h"
 #include "gui/dialogpositioner.h"
@@ -143,7 +144,7 @@ bool FileSinkGUI::handleMessage(const Message& message)
         const FileSinkMessages::MsgReportSquelch& report = (FileSinkMessages::MsgReportSquelch&) message;
         qDebug("FileSinkGUI::handleMessage: FileSinkMessages::MsgReportRecording: %s", report.getOpen() ? "on" : "off");
 
-        blockSignals(true);
+        ui->record->blockSignals(true);
 
         if (report.getOpen())
         {
@@ -156,7 +157,7 @@ bool FileSinkGUI::handleMessage(const Message& message)
             ui->record->setChecked(false);
         }
 
-        blockSignals(false);
+        ui->record->blockSignals(false);
         return true;
     }
     else if (FileSinkMessages::MsgReportRecordFileName::match(message))
@@ -168,7 +169,7 @@ bool FileSinkGUI::handleMessage(const Message& message)
     else if (FileSinkMessages::MsgReportRecordFileError::match(message))
     {
         const FileSinkMessages::MsgReportRecordFileError& report = (FileSinkMessages::MsgReportRecordFileError&) message;
-        QMessageBox::critical(this, tr("File Error"), report.getMessage());
+        MessageDialog::critical(this, tr("File Error"), report.getMessage());
         return true;
     }
     else

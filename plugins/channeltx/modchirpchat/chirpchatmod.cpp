@@ -739,7 +739,11 @@ void ChirpChatMod::webapiFormatChannelSettings(SWGSDRangel::SWGChannelSettings& 
 
     response.getChirpChatModSettings()->setMessageRepeat(settings.m_messageRepeat);
     response.getChirpChatModSettings()->setUdpEnabled(settings.m_udpEnabled);
-    response.getChirpChatModSettings()->setUdpAddress(new QString(settings.m_udpAddress));
+    if (response.getChirpChatModSettings()->getUdpAddress()) {
+        *response.getChirpChatModSettings()->getUdpAddress() = settings.m_udpAddress;
+    } else {
+        response.getChirpChatModSettings()->setUdpAddress(new QString(settings.m_udpAddress));
+    }
     response.getChirpChatModSettings()->setUdpPort(settings.m_udpPort);
     response.getChirpChatModSettings()->setInvertRamps(settings.m_invertRamps ? 1 : 0);
 
@@ -864,7 +868,11 @@ void ChirpChatMod::webapiFormatChannelSettings(
     swgChannelSettings->setDirection(1); // single source (Tx)
     swgChannelSettings->setOriginatorChannelIndex(getIndexInDeviceSet());
     swgChannelSettings->setOriginatorDeviceSetIndex(getDeviceSetIndex());
-    swgChannelSettings->setChannelType(new QString(m_channelId));
+    if (swgChannelSettings->getChannelType()) {
+        *swgChannelSettings->getChannelType() = m_channelId;
+    } else {
+        swgChannelSettings->setChannelType(new QString(m_channelId));
+    }
     swgChannelSettings->setChirpChatModSettings(new SWGSDRangel::SWGChirpChatModSettings());
     SWGSDRangel::SWGChirpChatModSettings *swgChirpChatModSettings = swgChannelSettings->getChirpChatModSettings();
 
@@ -907,46 +915,98 @@ void ChirpChatMod::webapiFormatChannelSettings(
         swgChirpChatModSettings->setHasHeader(settings.m_hasHeader ? 1 : 0);
     }
     if (channelSettingsKeys.contains("myCall") || force) {
-        swgChirpChatModSettings->setMyCall(new QString(settings.m_myCall));
+        if (swgChirpChatModSettings->getMyCall()) {
+            *swgChirpChatModSettings->getMyCall() = settings.m_myCall;
+        } else {
+            swgChirpChatModSettings->setMyCall(new QString(settings.m_myCall));
+        }
     }
     if (channelSettingsKeys.contains("urCall") || force) {
-        swgChirpChatModSettings->setUrCall(new QString(settings.m_urCall));
+        if (swgChirpChatModSettings->getUrCall()) {
+            *swgChirpChatModSettings->getUrCall() = settings.m_urCall;
+        } else {
+            swgChirpChatModSettings->setUrCall(new QString(settings.m_urCall));
+        }
     }
     if (channelSettingsKeys.contains("myLoc") || force) {
-        swgChirpChatModSettings->setMyLoc(new QString(settings.m_myLoc));
+        if (swgChirpChatModSettings->getMyLoc()) {
+            *swgChirpChatModSettings->getMyLoc() = settings.m_myLoc;
+        } else {
+            swgChirpChatModSettings->setMyLoc(new QString(settings.m_myLoc));
+        }
     }
     if (channelSettingsKeys.contains("myRpt") || force) {
-        swgChirpChatModSettings->setMyRpt(new QString(settings.m_myRpt));
+        if (swgChirpChatModSettings->getMyRpt()) {
+            *swgChirpChatModSettings->getMyRpt() = settings.m_myRpt;
+        } else {
+            swgChirpChatModSettings->setMyRpt(new QString(settings.m_myRpt));
+        }
     }
     if (channelSettingsKeys.contains("messageType") || force) {
         swgChirpChatModSettings->setMessageType((int) settings.m_messageType);
     }
     if (channelSettingsKeys.contains("beaconMessage") || force) {
-        swgChirpChatModSettings->setBeaconMessage(new QString(settings.m_beaconMessage));
+        if (swgChirpChatModSettings->getBeaconMessage()) {
+            *swgChirpChatModSettings->getBeaconMessage() = settings.m_beaconMessage;
+        } else {
+            swgChirpChatModSettings->setBeaconMessage(new QString(settings.m_beaconMessage));
+        }
     }
     if (channelSettingsKeys.contains("cqMessage") || force) {
-        swgChirpChatModSettings->setCqMessage(new QString(settings.m_cqMessage));
+        if (swgChirpChatModSettings->getCqMessage()) {
+            *swgChirpChatModSettings->getCqMessage() = settings.m_cqMessage;
+        } else {
+            swgChirpChatModSettings->setCqMessage(new QString(settings.m_cqMessage));
+        }
     }
     if (channelSettingsKeys.contains("replyMessage") || force) {
-        swgChirpChatModSettings->setReplyMessage(new QString(settings.m_replyMessage));
+        if (swgChirpChatModSettings->getReplyMessage()) {
+            *swgChirpChatModSettings->getReplyMessage() = settings.m_replyMessage;
+        } else {
+            swgChirpChatModSettings->setReplyMessage(new QString(settings.m_replyMessage));
+        }
     }
     if (channelSettingsKeys.contains("reportMessage") || force) {
-        swgChirpChatModSettings->setReportMessage(new QString(settings.m_reportMessage));
+        if (swgChirpChatModSettings->getReportMessage()) {
+            *swgChirpChatModSettings->getReportMessage() = settings.m_reportMessage;
+        } else {
+            swgChirpChatModSettings->setReportMessage(new QString(settings.m_reportMessage));
+        }
     }
     if (channelSettingsKeys.contains("replyReportMessage") || force) {
-        swgChirpChatModSettings->setReplyReportMessage(new QString(settings.m_replyReportMessage));
+        if (swgChirpChatModSettings->getReplyReportMessage()) {
+            *swgChirpChatModSettings->getReplyReportMessage() = settings.m_replyReportMessage;
+        } else {
+            swgChirpChatModSettings->setReplyReportMessage(new QString(settings.m_replyReportMessage));
+        }
     }
     if (channelSettingsKeys.contains("rrrMessage") || force) {
-        swgChirpChatModSettings->setRrrMessage(new QString(settings.m_rrrMessage));
+        if (swgChirpChatModSettings->getRrrMessage()) {
+            *swgChirpChatModSettings->getRrrMessage() = settings.m_rrrMessage;
+        } else {
+            swgChirpChatModSettings->setRrrMessage(new QString(settings.m_rrrMessage));
+        }
     }
     if (channelSettingsKeys.contains("message73") || force) {
-        swgChirpChatModSettings->setMessage73(new QString(settings.m_73Message));
+        if (swgChirpChatModSettings->getMessage73()) {
+            *swgChirpChatModSettings->getMessage73() = settings.m_73Message;
+        } else {
+            swgChirpChatModSettings->setMessage73(new QString(settings.m_73Message));
+        }
     }
     if (channelSettingsKeys.contains("qsoTextMessage") || force) {
-        swgChirpChatModSettings->setQsoTextMessage(new QString(settings.m_qsoTextMessage));
+        if (swgChirpChatModSettings->getQsoTextMessage()) {
+            *swgChirpChatModSettings->getQsoTextMessage() = settings.m_qsoTextMessage;
+        } else {
+            swgChirpChatModSettings->setQsoTextMessage(new QString(settings.m_qsoTextMessage));
+        }
     }
     if (channelSettingsKeys.contains("textMessage") || force) {
-        swgChirpChatModSettings->setTextMessage(new QString(settings.m_textMessage));
+        if (swgChirpChatModSettings->getTextMessage()) {
+            *swgChirpChatModSettings->getTextMessage() = settings.m_textMessage;
+        } else {
+            swgChirpChatModSettings->setTextMessage(new QString(settings.m_textMessage));
+        }
     }
 
     if (channelSettingsKeys.contains("bytesMessage") || force)
@@ -969,7 +1029,11 @@ void ChirpChatMod::webapiFormatChannelSettings(
         swgChirpChatModSettings->setUdpEnabled(settings.m_udpEnabled);
     }
     if (channelSettingsKeys.contains("udpAddress") || force) {
-        swgChirpChatModSettings->setUdpAddress(new QString(settings.m_udpAddress));
+        if (swgChirpChatModSettings->getUdpAddress()) {
+            *swgChirpChatModSettings->getUdpAddress() = settings.m_udpAddress;
+        } else {
+            swgChirpChatModSettings->setUdpAddress(new QString(settings.m_udpAddress));
+        }
     }
     if (channelSettingsKeys.contains("udpPort") || force) {
         swgChirpChatModSettings->setUdpPort(settings.m_udpPort);
@@ -982,7 +1046,11 @@ void ChirpChatMod::webapiFormatChannelSettings(
         swgChirpChatModSettings->setRgbColor(settings.m_rgbColor);
     }
     if (channelSettingsKeys.contains("title") || force) {
-        swgChirpChatModSettings->setTitle(new QString(settings.m_title));
+        if (swgChirpChatModSettings->getTitle()) {
+            *swgChirpChatModSettings->getTitle() = settings.m_title;
+        } else {
+            swgChirpChatModSettings->setTitle(new QString(settings.m_title));
+        }
     }
 
     if (settings.m_channelMarker && (channelSettingsKeys.contains("channelMarker") || force))

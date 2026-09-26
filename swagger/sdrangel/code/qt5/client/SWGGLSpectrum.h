@@ -25,6 +25,7 @@
 #include "SWGSpectrumAnnotationMarker.h"
 #include "SWGSpectrumCalibrationPoint.h"
 #include "SWGSpectrumHistogramMarker.h"
+#include "SWGSpectrumMemorySettings.h"
 #include "SWGSpectrumWaterfallMarker.h"
 #include <QList>
 #include <QString>
@@ -67,6 +68,99 @@ public:
 
     qint32 getDisplayWaterfall();
     void setDisplayWaterfall(qint32 display_waterfall);
+
+    qint32 getDisplay3DSpectrogram();
+    void setDisplay3DSpectrogram(qint32 display3_d_spectrogram);
+
+    qint32 getSpectrogramStyle();
+    void setSpectrogramStyle(qint32 spectrogram_style);
+
+    qint32 getTruncateFreqScale();
+    void setTruncateFreqScale(qint32 truncate_freq_scale);
+
+    QString* getColorMap();
+    void setColorMap(QString* color_map);
+
+    qint32 getSpectrumStyle();
+    void setSpectrumStyle(qint32 spectrum_style);
+
+    qint32 getMeasurement();
+    void setMeasurement(qint32 measurement);
+
+    qint32 getMeasurementCenterFrequencyOffset();
+    void setMeasurementCenterFrequencyOffset(qint32 measurement_center_frequency_offset);
+
+    qint32 getMeasurementBandwidth();
+    void setMeasurementBandwidth(qint32 measurement_bandwidth);
+
+    qint32 getMeasurementChSpacing();
+    void setMeasurementChSpacing(qint32 measurement_ch_spacing);
+
+    qint32 getMeasurementAdjChBandwidth();
+    void setMeasurementAdjChBandwidth(qint32 measurement_adj_ch_bandwidth);
+
+    qint32 getMeasurementHarmonics();
+    void setMeasurementHarmonics(qint32 measurement_harmonics);
+
+    qint32 getMeasurementPeaks();
+    void setMeasurementPeaks(qint32 measurement_peaks);
+
+    qint32 getMeasurementHighlight();
+    void setMeasurementHighlight(qint32 measurement_highlight);
+
+    qint32 getMeasurementsPosition();
+    void setMeasurementsPosition(qint32 measurements_position);
+
+    qint32 getMeasurementPrecision();
+    void setMeasurementPrecision(qint32 measurement_precision);
+
+    qint32 getFindHistogramPeaks();
+    void setFindHistogramPeaks(qint32 find_histogram_peaks);
+
+    qint32 getShowControls();
+    void setShowControls(qint32 show_controls);
+
+    float getFrequencyZoomFactor();
+    void setFrequencyZoomFactor(float frequency_zoom_factor);
+
+    float getFrequencyZoomPos();
+    void setFrequencyZoomPos(float frequency_zoom_pos);
+
+    qint32 getWaterfallTimeUnits();
+    void setWaterfallTimeUnits(qint32 waterfall_time_units);
+
+    QString* getWaterfallTimeFormat();
+    void setWaterfallTimeFormat(QString* waterfall_time_format);
+
+    qint32 getScrollBar();
+    void setScrollBar(qint32 scroll_bar);
+
+    qint32 getScrollLength();
+    void setScrollLength(qint32 scroll_length);
+
+    qint32 getMathMode();
+    void setMathMode(qint32 math_mode);
+
+    qint32 getMathAvgCount();
+    void setMathAvgCount(qint32 math_avg_count);
+
+    qint32 getMeasurementMemMasks();
+    void setMeasurementMemMasks(qint32 measurement_mem_masks);
+
+    qint32 getDisplayRbw();
+    void setDisplayRbw(qint32 display_rbw);
+
+    qint32 getDisplayCursorStats();
+    void setDisplayCursorStats(qint32 display_cursor_stats);
+
+    qint32 getDisplayPeakStats();
+    void setDisplayPeakStats(qint32 display_peak_stats);
+
+    QList<SWGSpectrumMemorySettings*>* getSpectrumMemory();
+    void setSpectrumMemory(QList<SWGSpectrumMemorySettings*>* spectrum_memory);
+
+    qint32 getSpectrumColor();
+    void setSpectrumColor(qint32 spectrum_color);
 
     qint32 getInvertedWaterfall();
     void setInvertedWaterfall(qint32 inverted_waterfall);
@@ -140,6 +234,9 @@ public:
     QList<SWGSpectrumWaterfallMarker*>* getWaterfallMarkers();
     void setWaterfallMarkers(QList<SWGSpectrumWaterfallMarker*>* waterfall_markers);
 
+    qint32 getAnnotationMarkersMode();
+    void setAnnotationMarkersMode(qint32 annotation_markers_mode);
+
     QList<SWGSpectrumAnnotationMarker*>* getAnnotationMarkers();
     void setAnnotationMarkers(QList<SWGSpectrumAnnotationMarker*>* annotation_markers);
 
@@ -170,6 +267,99 @@ private:
 
     qint32 display_waterfall;
     bool m_display_waterfall_isSet;
+
+    qint32 display3_d_spectrogram;
+    bool m_display3_d_spectrogram_isSet;
+
+    qint32 spectrogram_style;
+    bool m_spectrogram_style_isSet;
+
+    qint32 truncate_freq_scale;
+    bool m_truncate_freq_scale_isSet;
+
+    QString* color_map;
+    bool m_color_map_isSet;
+
+    qint32 spectrum_style;
+    bool m_spectrum_style_isSet;
+
+    qint32 measurement;
+    bool m_measurement_isSet;
+
+    qint32 measurement_center_frequency_offset;
+    bool m_measurement_center_frequency_offset_isSet;
+
+    qint32 measurement_bandwidth;
+    bool m_measurement_bandwidth_isSet;
+
+    qint32 measurement_ch_spacing;
+    bool m_measurement_ch_spacing_isSet;
+
+    qint32 measurement_adj_ch_bandwidth;
+    bool m_measurement_adj_ch_bandwidth_isSet;
+
+    qint32 measurement_harmonics;
+    bool m_measurement_harmonics_isSet;
+
+    qint32 measurement_peaks;
+    bool m_measurement_peaks_isSet;
+
+    qint32 measurement_highlight;
+    bool m_measurement_highlight_isSet;
+
+    qint32 measurements_position;
+    bool m_measurements_position_isSet;
+
+    qint32 measurement_precision;
+    bool m_measurement_precision_isSet;
+
+    qint32 find_histogram_peaks;
+    bool m_find_histogram_peaks_isSet;
+
+    qint32 show_controls;
+    bool m_show_controls_isSet;
+
+    float frequency_zoom_factor;
+    bool m_frequency_zoom_factor_isSet;
+
+    float frequency_zoom_pos;
+    bool m_frequency_zoom_pos_isSet;
+
+    qint32 waterfall_time_units;
+    bool m_waterfall_time_units_isSet;
+
+    QString* waterfall_time_format;
+    bool m_waterfall_time_format_isSet;
+
+    qint32 scroll_bar;
+    bool m_scroll_bar_isSet;
+
+    qint32 scroll_length;
+    bool m_scroll_length_isSet;
+
+    qint32 math_mode;
+    bool m_math_mode_isSet;
+
+    qint32 math_avg_count;
+    bool m_math_avg_count_isSet;
+
+    qint32 measurement_mem_masks;
+    bool m_measurement_mem_masks_isSet;
+
+    qint32 display_rbw;
+    bool m_display_rbw_isSet;
+
+    qint32 display_cursor_stats;
+    bool m_display_cursor_stats_isSet;
+
+    qint32 display_peak_stats;
+    bool m_display_peak_stats_isSet;
+
+    QList<SWGSpectrumMemorySettings*>* spectrum_memory;
+    bool m_spectrum_memory_isSet;
+
+    qint32 spectrum_color;
+    bool m_spectrum_color_isSet;
 
     qint32 inverted_waterfall;
     bool m_inverted_waterfall_isSet;
@@ -242,6 +432,9 @@ private:
 
     QList<SWGSpectrumWaterfallMarker*>* waterfall_markers;
     bool m_waterfall_markers_isSet;
+
+    qint32 annotation_markers_mode;
+    bool m_annotation_markers_mode_isSet;
 
     QList<SWGSpectrumAnnotationMarker*>* annotation_markers;
     bool m_annotation_markers_isSet;

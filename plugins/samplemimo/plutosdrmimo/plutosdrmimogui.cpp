@@ -26,6 +26,7 @@
 
 #include "device/deviceapi.h"
 #include "device/deviceuiset.h"
+#include "gui/messagedialog.h"
 #include "gui/colormapper.h"
 #include "gui/glspectrum.h"
 #include "gui/basicdevicesettingsdialog.h"
@@ -492,7 +493,7 @@ void PlutoSDRMIMOGUI::updateStatus()
                     ui->startStopRx->setChecked(false);
                 }
                 ui->startStopRx->setStyleSheet("QToolButton { background-color : red; }");
-                QMessageBox::information(this, tr("Message"), m_deviceUISet->m_deviceAPI->errorMessage());
+                MessageDialog::information(this, tr("Message"), m_deviceUISet->m_deviceAPI->errorMessage());
                 break;
             default:
                 break;
@@ -520,7 +521,7 @@ void PlutoSDRMIMOGUI::updateStatus()
                     ui->startStopTx->setChecked(false);
                 }
                 ui->startStopTx->setStyleSheet("QToolButton { background-color : red; }");
-                QMessageBox::information(this, tr("Message"), m_deviceUISet->m_deviceAPI->errorMessage());
+                MessageDialog::information(this, tr("Message"), m_deviceUISet->m_deviceAPI->errorMessage());
                 break;
             default:
                 break;

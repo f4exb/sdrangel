@@ -102,7 +102,7 @@ bool TestSourceInput::start()
     m_testSourceWorker->moveToThread(m_testSourceWorkerThread);
 
     QObject::connect(m_testSourceWorkerThread, &QThread::started, m_testSourceWorker, &TestSourceWorker::startWork);
-    QObject::connect(m_testSourceWorkerThread, &QThread::finished, m_testSourceWorker, &QObject::deleteLater, Qt::QueuedConnection);
+    QObject::connect(m_testSourceWorkerThread, &QThread::finished, m_testSourceWorker, &QObject::deleteLater);
     QObject::connect(m_testSourceWorkerThread, &QThread::finished, m_testSourceWorkerThread, &QThread::deleteLater);
 
 	m_testSourceWorker->setSamplerate(m_settings.m_sampleRate);
@@ -128,9 +128,18 @@ void TestSourceInput::stop()
 
     if (m_testSourceWorkerThread)
     {
-        m_testSourceWorker->stopWork();
+        // The worker's timer lives in the worker thread and Qt will not let this one stop it, so
+        // ask the worker to do it and wait for that before the event loop goes away. Where there is
+        // no waiting for the thread there is no blocking on it either: the worker's destructor,
+        // which does run in the worker thread, stops the timer there instead
+        TestSourceWorker *worker = m_testSourceWorker;
+#ifndef __EMSCRIPTEN__
+        QMetaObject::invokeMethod(worker, [worker]() { worker->stopWork(); }, Qt::BlockingQueuedConnection);
+#endif
         m_testSourceWorkerThread->quit();
+#ifndef __EMSCRIPTEN__
         m_testSourceWorkerThread->wait();
+#endif
         m_testSourceWorker = nullptr;
         m_testSourceWorkerThread = nullptr;
     }
@@ -380,7 +389,9 @@ bool TestSourceInput::applySettings(const TestSourceSettings& settings, const QL
         }
     }
 
-    if (settingsKeys.contains("modulation") || force)
+    if (settingsKeys.contains("modulation")
+        || settingsKeys.contains("period")
+        || settingsKeys.contains("dutyCycle") || force)
     {
         if (m_testSourceWorker != 0)
         {
@@ -389,9 +400,9 @@ bool TestSourceInput::applySettings(const TestSourceSettings& settings, const QL
             if (settings.m_modulation == TestSourceSettings::ModulationPattern0) {
                 m_testSourceWorker->setPattern0();
             } else if (settings.m_modulation == TestSourceSettings::ModulationPattern1) {
-                m_testSourceWorker->setPattern1();
+                m_testSourceWorker->setPattern1(settings.m_period);
             } else if (settings.m_modulation == TestSourceSettings::ModulationPattern2) {
-                m_testSourceWorker->setPattern2();
+                m_testSourceWorker->setPattern2(settings.m_period, settings.m_dutyCycle);
             }
         }
     }
@@ -526,7 +537,7 @@ void TestSourceInput::webapiUpdateDeviceSettings(
     if (deviceSettingsKeys.contains("autoCorrOptions")) {
         int autoCorrOptions = response.getTestSourceSettings()->getAutoCorrOptions();
         autoCorrOptions = autoCorrOptions < 0 ? 0 : autoCorrOptions >= TestSourceSettings::AutoCorrLast ? TestSourceSettings::AutoCorrLast-1 : autoCorrOptions;
-        settings.m_sampleSizeIndex = (TestSourceSettings::AutoCorrOptions) autoCorrOptions;
+        settings.m_autoCorrOptions = (TestSourceSettings::AutoCorrOptions) autoCorrOptions;
     }
     if (deviceSettingsKeys.contains("modulation")) {
         int modulation = response.getTestSourceSettings()->getModulation();
@@ -553,6 +564,14 @@ void TestSourceInput::webapiUpdateDeviceSettings(
     };
     if (deviceSettingsKeys.contains("phaseImbalance")) {
         settings.m_phaseImbalance = response.getTestSourceSettings()->getPhaseImbalance();
+    };
+    if (deviceSettingsKeys.contains("period")) {
+        int period = response.getTestSourceSettings()->getPeriod();
+        settings.m_period = period < 1 ? 1 : period;
+    };
+    if (deviceSettingsKeys.contains("dutyCycle")) {
+        int dutyCycle = response.getTestSourceSettings()->getDutyCycle();
+        settings.m_dutyCycle = dutyCycle < 0 ? 0 : dutyCycle > 100 ? 100 : dutyCycle;
     };
     if (deviceSettingsKeys.contains("useReverseAPI")) {
         settings.m_useReverseAPI = response.getTestSourceSettings()->getUseReverseApi() != 0;
@@ -592,6 +611,8 @@ void TestSourceInput::webapiFormatDeviceSettings(SWGSDRangel::SWGDeviceSettings&
     response.getTestSourceSettings()->setIFactor(settings.m_iFactor);
     response.getTestSourceSettings()->setQFactor(settings.m_qFactor);
     response.getTestSourceSettings()->setPhaseImbalance(settings.m_phaseImbalance);
+    response.getTestSourceSettings()->setPeriod(settings.m_period);
+    response.getTestSourceSettings()->setDutyCycle(settings.m_dutyCycle);
 
     response.getTestSourceSettings()->setUseReverseApi(settings.m_useReverseAPI ? 1 : 0);
 
@@ -641,7 +662,7 @@ void TestSourceInput::webapiReverseSendSettings(const QList<QString>& deviceSett
         swgTestSourceSettings->setAmplitudeBits(settings.m_amplitudeBits);
     }
     if (deviceSettingsKeys.contains("autoCorrOptions") || force) {
-        swgTestSourceSettings->setAutoCorrOptions((int) settings.m_sampleSizeIndex);
+        swgTestSourceSettings->setAutoCorrOptions((int) settings.m_autoCorrOptions);
     }
     if (deviceSettingsKeys.contains("modulation") || force) {
         swgTestSourceSettings->setModulation((int) settings.m_modulation);
@@ -666,6 +687,12 @@ void TestSourceInput::webapiReverseSendSettings(const QList<QString>& deviceSett
     };
     if (deviceSettingsKeys.contains("phaseImbalance") || force) {
         swgTestSourceSettings->setPhaseImbalance(settings.m_phaseImbalance);
+    };
+    if (deviceSettingsKeys.contains("period") || force) {
+        swgTestSourceSettings->setPeriod(settings.m_period);
+    };
+    if (deviceSettingsKeys.contains("dutyCycle") || force) {
+        swgTestSourceSettings->setDutyCycle(settings.m_dutyCycle);
     };
 
     QString channelSettingsURL = QString("http://%1:%2/sdrangel/deviceset/%3/device/settings")

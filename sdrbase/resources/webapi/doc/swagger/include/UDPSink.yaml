@@ -4,22 +4,30 @@ UDPSinkSettings:
     outputSampleRate:
       type: number
       format: float
+      description: "Output sample rate in samples per second."
     sampleFormat:
       type: integer
+      description: "Sample format setting for UDP sink."
     inputFrequencyOffset:
       type: integer
       format: int64
+      description: "Channel frequency offset from the device center frequency in Hz."
     rfBandwidth:
       type: number
       format: float
+      description: "RF bandwidth in Hz."
     fmDeviation:
       type: integer
+      description: "FM frequency deviation in Hz."
     channelMute:
       description: channel mute (1 if muted else 0)
       type: integer
+      minimum: 0
+      maximum: 1
     gain:
       type: number
       format: float
+      description: "Gain setting; units and available values depend on the device or plugin."
     squelchDB:
       description: power dB
       type: integer
@@ -29,17 +37,26 @@ UDPSinkSettings:
     squelchEnabled:
       description: squelch enable (1 if enabled else 0)
       type: integer
+      minimum: 0
+      maximum: 1
     agc:
       description: AGC enable (1 if enabled else 0)
       type: integer
+      minimum: 0
+      maximum: 1
     audioActive:
       description: Audio return enable (1 if enabled else 0)
       type: integer
+      minimum: 0
+      maximum: 1
     audioStereo:
       description: Audio return stereo (1 if stereo else 0)
       type: integer
+      minimum: 0
+      maximum: 1
     volume:
       type: integer
+      description: "Audio volume multiplier."
     udpAddress:
       description: destination UDP address (remote)
       type: string
@@ -47,34 +64,49 @@ UDPSinkSettings:
       description: destination UDP port (remote)
       type: integer
       format: uint16
+      minimum: 1
+      maximum: 65535
     audioPort:
       description: audio return UDP port (local)
       type: integer
       format: uint16
     rgbColor:
       type: integer
+      description: "Display color encoded as an RGB integer."
     title:
       type: string
+      description: "User-visible title."
     streamIndex:
       description: MIMO channel. Not relevant when connected to SI (single Rx).
       type: integer
     useReverseAPI:
       description: Synchronize with reverse API (1 for yes, 0 for no)
       type: integer
+      minimum: 0
+      maximum: 1
     reverseAPIAddress:
       type: string
+      description: "IPv4 address or host name of the reverse API peer."
     reverseAPIPort:
       type: integer
+      description: "TCP port of the reverse API peer."
+      minimum: 1
+      maximum: 65535
     reverseAPIDeviceIndex:
       type: integer
+      description: "Device-set index used by the reverse API peer."
     reverseAPIChannelIndex:
       type: integer
+      description: "Channel index used by the reverse API peer."
     spectrumConfig:
       $ref: "/doc/swagger/include/GLSpectrum.yaml#/GLSpectrum"
+      description: "Spectrum-display configuration."
     channelMarker:
       $ref: "/doc/swagger/include/ChannelMarker.yaml#/ChannelMarker"
+      description: "Channel-marker display configuration."
     rollupState:
       $ref: "/doc/swagger/include/RollupState.yaml#/RollupState"
+      description: "Saved expanded or collapsed state of the GUI sections."
 
 UDPSinkReport:
   description: UDPSink
@@ -92,3 +124,4 @@ UDPSinkReport:
       type: integer
     inputSampleRate:
       type: integer
+      description: "Input sample rate in samples per second."

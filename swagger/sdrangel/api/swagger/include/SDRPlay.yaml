@@ -3,40 +3,63 @@ SDRPlaySettings:
   properties:
     title:
       type: string
+      description: "User-visible title."
     centerFrequency:
       type: integer
       format: int64
+      description: "Device center frequency in Hz."
     tunerGain:
       type: integer
+      description: "Tuner gain setting for Sdr play."
     LOppmTenths:
       type: integer
+      description: "Local-oscillator correction in tenths of a part per million."
     frequencyBandIndex:
       type: integer
+      description: "Selected frequency band index."
     ifFrequencyIndex:
       type: integer
+      description: "Selected if frequency index."
     bandwidthIndex:
       type: integer
+      description: "Selected bandwidth index."
     devSampleRateIndex:
       type: integer
+      description: "Selected dev sample rate index."
     log2Decim:
       type: integer
+      minimum: 0
+      maximum: 6
+      description: "Base-2 exponent of the software decimation factor; the output sample rate is divided by 2^log2Decim."
     fcPos:
       type: integer
+      description: "Position of the decimated passband relative to the device center frequency."
     dcBlock:
       type: integer
+      description: "Enable DSP DC-offset correction (1 enabled, 0 disabled)."
+      minimum: 0
+      maximum: 1
     iqCorrection:
       type: integer
+      description: "Enable I/Q imbalance correction (1 enabled, 0 disabled)."
+      minimum: 0
+      maximum: 1
     tunerGainMode:
       description: 1 tuner (table) gain, 0 manual (LNA, Mixer, BB) gain
       type: integer
     lnaOn:
       type: integer
+      description: "LNA on setting for Sdr play."
     mixerAmpOn:
       type: integer
+      description: "Mixer amp on setting for Sdr play."
     basebandGain:
       type: integer
+      description: "Baseband gain setting for Sdr play."
     iqOrder:
       type: integer
+      minimum: 0
+      maximum: 1
       description: >
         IQ samples order
           * 0 - Q then I (swapped)
@@ -44,29 +67,40 @@ SDRPlaySettings:
     useReverseAPI:
       description: Synchronize with reverse API (1 for yes, 0 for no)
       type: integer
+      minimum: 0
+      maximum: 1
     reverseAPIAddress:
       type: string
+      description: "IPv4 address or host name of the reverse API peer."
     reverseAPIPort:
       type: integer
+      description: "TCP port of the reverse API peer."
+      minimum: 1
+      maximum: 65535
     reverseAPIDeviceIndex:
       type: integer
+      description: "Device-set index used by the reverse API peer."
 
 SDRPlayReport:
   description: SDRplay1
   properties:
     sampleRates:
       type: array
+      description: "Supported sample rates in samples per second."
       items:
         $ref: "http://swgserver:8081/api/swagger/include/Structs.yaml#/SampleRate"
     bandwidths:
       type: array
+      description: "Supported bandwidths in Hz."
       items:
         $ref: "http://swgserver:8081/api/swagger/include/Structs.yaml#/Bandwidth"
     intermediateFrequencies:
       type: array
+      description: "List of intermediate frequencies."
       items:
         $ref: "http://swgserver:8081/api/swagger/include/Structs.yaml#/Frequency"
     frequencyBands:
       type: array
+      description: "List of frequency bands."
       items:
         $ref: "http://swgserver:8081/api/swagger/include/Structs.yaml#/FrequencyBand"

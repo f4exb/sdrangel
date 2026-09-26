@@ -36,8 +36,6 @@ SWGADSBDemodSettings::SWGADSBDemodSettings() {
     m_correlation_threshold_isSet = false;
     samples_per_bit = 0;
     m_samples_per_bit_isSet = false;
-    correlate_full_preamble = 0;
-    m_correlate_full_preamble_isSet = false;
     demod_mode_s = 0;
     m_demod_mode_s_isSet = false;
     interpolator_phase_steps = 0;
@@ -120,8 +118,6 @@ SWGADSBDemodSettings::init() {
     m_correlation_threshold_isSet = false;
     samples_per_bit = 0;
     m_samples_per_bit_isSet = false;
-    correlate_full_preamble = 0;
-    m_correlate_full_preamble_isSet = false;
     demod_mode_s = 0;
     m_demod_mode_s_isSet = false;
     interpolator_phase_steps = 0;
@@ -192,7 +188,6 @@ SWGADSBDemodSettings::init() {
 
 void
 SWGADSBDemodSettings::cleanup() {
-
 
 
 
@@ -278,8 +273,6 @@ SWGADSBDemodSettings::fromJsonObject(QJsonObject &pJson) {
     ::SWGSDRangel::setValue(&correlation_threshold, pJson["correlationThreshold"], "float", "");
     
     ::SWGSDRangel::setValue(&samples_per_bit, pJson["samplesPerBit"], "qint32", "");
-    
-    ::SWGSDRangel::setValue(&correlate_full_preamble, pJson["correlateFullPreamble"], "qint32", "");
     
     ::SWGSDRangel::setValue(&demod_mode_s, pJson["demodModeS"], "qint32", "");
     
@@ -374,9 +367,6 @@ SWGADSBDemodSettings::asJsonObject() {
     }
     if(m_samples_per_bit_isSet){
         obj->insert("samplesPerBit", QJsonValue(samples_per_bit));
-    }
-    if(m_correlate_full_preamble_isSet){
-        obj->insert("correlateFullPreamble", QJsonValue(correlate_full_preamble));
     }
     if(m_demod_mode_s_isSet){
         obj->insert("demodModeS", QJsonValue(demod_mode_s));
@@ -519,16 +509,6 @@ void
 SWGADSBDemodSettings::setSamplesPerBit(qint32 samples_per_bit) {
     this->samples_per_bit = samples_per_bit;
     this->m_samples_per_bit_isSet = true;
-}
-
-qint32
-SWGADSBDemodSettings::getCorrelateFullPreamble() {
-    return correlate_full_preamble;
-}
-void
-SWGADSBDemodSettings::setCorrelateFullPreamble(qint32 correlate_full_preamble) {
-    this->correlate_full_preamble = correlate_full_preamble;
-    this->m_correlate_full_preamble_isSet = true;
 }
 
 qint32
@@ -876,9 +856,6 @@ SWGADSBDemodSettings::isSet(){
             isObjectUpdated = true; break;
         }
         if(m_samples_per_bit_isSet){
-            isObjectUpdated = true; break;
-        }
-        if(m_correlate_full_preamble_isSet){
             isObjectUpdated = true; break;
         }
         if(m_demod_mode_s_isSet){

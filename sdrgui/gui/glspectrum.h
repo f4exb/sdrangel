@@ -37,7 +37,22 @@ class SDRGUI_API GLSpectrum : public QWidget, public GLSpectrumInterface {
 
 public:
     GLSpectrum(QWidget *parent = nullptr);
+    ~GLSpectrum() override;
     GLSpectrumView *getSpectrumView() const { return m_spectrum; }
+    // Asked for through the web API, which arrives on an HTTP thread, so each is queued onto the
+    // GUI thread rather than run where it was asked for
+    virtual void spectrumAutoscale() override;
+    virtual void spectrumClear() override;
+    virtual void spectrumResetMeasurements() override;
+    virtual void spectrumGotoMarker(int markerIndex) override;
+
+signals:
+    //!< The reference level and range live in GLSpectrumGUI, which does the arithmetic
+    void requestAutoscale();
+    //!< Retuning is GLSpectrumGUI's job too, as it holds the annotation markers
+    void requestGotoMarker(int markerIndex);
+
+public:
     SpectrumMeasurements *getMeasurements() const { return m_measurements; }
     void setMeasurementsVisible(bool visible);
     void setMeasurementsPosition(SpectrumSettings::MeasurementsPosition position);
@@ -83,12 +98,13 @@ public:
     void removeChannelMarker(ChannelMarker* channelMarker) { m_spectrum->removeChannelMarker(channelMarker); }
     void setMessageQueueToGUI(MessageQueue* messageQueue) { m_spectrum->setMessageQueueToGUI(messageQueue); }
     void newSpectrum(const Real* spectrum, int fftSize) { m_spectrum->newSpectrum(spectrum, fftSize); }
+    bool getSpectrumHistory(const QDateTime& since, int maxRows, const HistoryRowCallback& row) override { return m_spectrum->getSpectrumHistory(since, maxRows, row); }
     void clearSpectrumHistogram() { m_spectrum->clearSpectrumHistogram(); }
     Real getWaterfallShare() const { return  m_spectrum->getWaterfallShare(); }
     void setWaterfallShare(Real waterfallShare) { m_spectrum->setWaterfallShare(waterfallShare); }
     void setFPSPeriodMs(int fpsPeriodMs) { m_spectrum->setFPSPeriodMs(fpsPeriodMs); }
     void setDisplayedStream(bool sourceOrSink, int streamIndex) { m_spectrum->setDisplayedStream(sourceOrSink, streamIndex); }
-    void setSpectrumVis(SpectrumVis *spectrumVis) { m_spectrum->setSpectrumVis(spectrumVis); }
+    void setSpectrumVis(SpectrumVis* spectrumVis);
     SpectrumVis *getSpectrumVis() { return m_spectrum->getSpectrumVis(); }
     const QList<SpectrumHistogramMarker>& getHistogramMarkers() const { return m_spectrum->getHistogramMarkers(); }
     QList<SpectrumHistogramMarker>& getHistogramMarkers() { return m_spectrum->getHistogramMarkers(); }
@@ -128,6 +144,7 @@ private:
     QSplitter *m_splitter;
     GLSpectrumView *m_spectrum;
     SpectrumMeasurements *m_measurements;
+    SpectrumVis *m_spectrumVis; //!< The SpectrumVis feeding thisd
     SpectrumSettings::MeasurementsPosition m_position;
     QWidget *m_spectrumContainer;
     QScrollBar *m_scrollBar;

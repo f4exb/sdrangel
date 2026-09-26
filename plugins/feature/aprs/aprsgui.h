@@ -117,6 +117,7 @@ public:
     virtual void destroy();
 
     void resetToDefaults();
+    void sendStationReport();
     QByteArray serialize() const;
     bool deserialize(const QByteArray& data);
     virtual MessageQueue *getInputMessageQueue() { return &m_inputMessageQueue; }
@@ -139,9 +140,8 @@ private:
     AvailableChannelOrFeatureList m_availableChannels;
 
     APRS* m_aprs;
+    QTimer m_reportTimer;   //!< Pushes the station list to the feature for the web API report
     MessageQueue m_inputMessageQueue;
-    QTimer m_statusTimer;
-    int m_lastFeatureState;
 
     QHash<QString,APRSStation *> m_stations;    // All stations we've received packets for. Hashed on callsign
 
@@ -223,7 +223,7 @@ private slots:
     void plotMotion();
     void on_motionTimeSelect_currentIndexChanged(int index);
     void on_motionPlotSelect_currentIndexChanged(int index);
-    void updateStatus();
+    void updateFeatureState();
     void packetsTable_sectionMoved(int logicalIndex, int oldVisualIndex, int newVisualIndex);
     void packetsTable_sectionResized(int logicalIndex, int oldSize, int newSize);
     void packetsTable_columnSelectMenu(QPoint pos);

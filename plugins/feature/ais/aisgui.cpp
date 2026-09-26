@@ -228,6 +228,9 @@ AISGUI::AISGUI(PluginAPI* pluginAPI, FeatureUISet *featureUISet, Feature *featur
     // Timer to remove vessels we haven't heard from in a while
     connect(&m_timer, SIGNAL(timeout()), this, SLOT(removeOldVessels()));
     m_timer.start(60*1000);
+    // The feature has no vessel table of its own, so it is given one for the web API report
+    connect(&m_reportTimer, &QTimer::timeout, this, &AISGUI::sendVesselReport);
+    m_reportTimer.start(1000);
 
     connect(&m_chartTimer, &QTimer::timeout, this, &AISGUI::updateChart);
 
@@ -699,6 +702,7 @@ AISGUI::~AISGUI()
 {
     m_chartTimer.stop();
     m_timer.stop();
+    m_reportTimer.stop();
     disconnect(&m_vesselFinder, &VesselFinder::shipPhoto, this, &AISGUI::shipPhoto);
     deleteAllVessels();
     delete ui;
@@ -783,6 +787,93 @@ void AISGUI::onMenuDialogCalled(const QPoint &p)
     }
 
     resetContextMenuType();
+}
+
+
+void AISGUI::sendVesselReport()
+{
+    AIS::MsgReportVessels *message = AIS::MsgReportVessels::create();
+    QList<AIS::Vessel>& vessels = message->getVessels();
+    vessels.reserve(ui->vessels->rowCount());
+
+    for (int row = 0; row < ui->vessels->rowCount(); row++)
+    {
+        QTableWidgetItem *mmsi = ui->vessels->item(row, VESSEL_COL_MMSI);
+
+        if (!mmsi) {
+            continue;
+        }
+
+        AIS::Vessel vessel;
+        vessel.m_mmsi = mmsi->text();
+        vessel.m_country = MMSI::getCountry(vessel.m_mmsi);
+        vessel.m_name = cellText(row, VESSEL_COL_NAME);
+        vessel.m_callsign = cellText(row, VESSEL_COL_CALLSIGN);
+        vessel.m_imo = cellText(row, VESSEL_COL_IMO);
+        vessel.m_type = cellText(row, VESSEL_COL_TYPE);
+        vessel.m_shipType = cellText(row, VESSEL_COL_SHIP_TYPE);
+        vessel.m_status = cellText(row, VESSEL_COL_STATUS);
+        vessel.m_destination = cellText(row, VESSEL_COL_DESTINATION);
+
+        QVariant latitude = cellValue(row, VESSEL_COL_LATITUDE);
+        QVariant longitude = cellValue(row, VESSEL_COL_LONGITUDE);
+        vessel.m_hasPosition = latitude.isValid() && longitude.isValid();
+
+        if (vessel.m_hasPosition)
+        {
+            vessel.m_latitude = latitude.toFloat();
+            vessel.m_longitude = longitude.toFloat();
+        }
+
+        QVariant course = cellValue(row, VESSEL_COL_COURSE);
+        vessel.m_hasCourse = course.isValid();
+
+        if (vessel.m_hasCourse) {
+            vessel.m_course = course.toFloat();
+        }
+
+        QVariant speed = cellValue(row, VESSEL_COL_SPEED);
+        vessel.m_hasSpeed = speed.isValid();
+
+        if (vessel.m_hasSpeed) {
+            vessel.m_speed = speed.toFloat();
+        }
+
+        QVariant heading = cellValue(row, VESSEL_COL_HEADING);
+        vessel.m_hasHeading = heading.isValid();
+
+        if (vessel.m_hasHeading) {
+            vessel.m_heading = heading.toInt();
+        }
+
+        QVariant length = cellValue(row, VESSEL_COL_LENGTH);
+        vessel.m_hasLength = length.isValid();
+
+        if (vessel.m_hasLength) {
+            vessel.m_length = length.toInt();
+        }
+
+        vessel.m_positionUpdate = cellValue(row, VESSEL_COL_POSITION_UPDATE).toDateTime();
+        vessel.m_lastUpdate = cellValue(row, VESSEL_COL_LAST_UPDATE).toDateTime();
+        vessel.m_messages = cellValue(row, VESSEL_COL_MESSAGES).toInt();
+        vessels.append(vessel);
+    }
+
+    m_ais->getInputMessageQueue()->push(message);
+}
+
+QVariant AISGUI::cellValue(int row, int col) const
+{
+    QTableWidgetItem *item = ui->vessels->item(row, col);
+
+    return item ? item->data(Qt::DisplayRole) : QVariant();
+}
+
+QString AISGUI::cellText(int row, int col) const
+{
+    QTableWidgetItem *item = ui->vessels->item(row, col);
+
+    return item ? item->text() : QString();
 }
 
 void AISGUI::removeOldVessels()

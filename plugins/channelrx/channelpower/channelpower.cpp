@@ -479,7 +479,11 @@ void ChannelPower::webapiFormatChannelSettings(
     swgChannelSettings->setDirection(0); // Single sink (Rx)
     swgChannelSettings->setOriginatorChannelIndex(getIndexInDeviceSet());
     swgChannelSettings->setOriginatorDeviceSetIndex(getDeviceSetIndex());
-    swgChannelSettings->setChannelType(new QString("ChannelPower"));
+    if (swgChannelSettings->getChannelType()) {
+        *swgChannelSettings->getChannelType() = "ChannelPower";
+    } else {
+        swgChannelSettings->setChannelType(new QString("ChannelPower"));
+    }
     swgChannelSettings->setChannelPowerSettings(new SWGSDRangel::SWGChannelPowerSettings());
     SWGSDRangel::SWGChannelPowerSettings *swgChannelPowerSettings = swgChannelSettings->getChannelPowerSettings();
 
@@ -507,7 +511,11 @@ void ChannelPower::webapiFormatChannelSettings(
         swgChannelPowerSettings->setRgbColor(settings.m_rgbColor);
     }
     if (channelSettingsKeys.contains("title") || force) {
-        swgChannelPowerSettings->setTitle(new QString(settings.m_title));
+        if (swgChannelPowerSettings->getTitle()) {
+            *swgChannelPowerSettings->getTitle() = settings.m_title;
+        } else {
+            swgChannelPowerSettings->setTitle(new QString(settings.m_title));
+        }
     }
     if (channelSettingsKeys.contains("streamIndex") || force) {
         swgChannelPowerSettings->setStreamIndex(settings.m_streamIndex);

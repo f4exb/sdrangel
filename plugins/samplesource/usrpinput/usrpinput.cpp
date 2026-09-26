@@ -1231,12 +1231,20 @@ void USRPInput::webapiFormatDeviceSettings(SWGSDRangel::SWGDeviceSettings& respo
         response.getUsrpInputSettings()->setTitle(new QString(settings.m_title));
     }
 
-    response.getUsrpInputSettings()->setAntennaPath(new QString(settings.m_antennaPath));
+    if (response.getUsrpInputSettings()->getAntennaPath()) {
+        *response.getUsrpInputSettings()->getAntennaPath() = settings.m_antennaPath;
+    } else {
+        response.getUsrpInputSettings()->setAntennaPath(new QString(settings.m_antennaPath));
+    }
     response.getUsrpInputSettings()->setCenterFrequency(settings.m_centerFrequency);
     response.getUsrpInputSettings()->setDcBlock(settings.m_dcBlock ? 1 : 0);
     response.getUsrpInputSettings()->setDevSampleRate(settings.m_devSampleRate);
     response.getUsrpInputSettings()->setLoOffset(settings.m_loOffset);
-    response.getUsrpInputSettings()->setClockSource(new QString(settings.m_clockSource));
+    if (response.getUsrpInputSettings()->getClockSource()) {
+        *response.getUsrpInputSettings()->getClockSource() = settings.m_clockSource;
+    } else {
+        response.getUsrpInputSettings()->setClockSource(new QString(settings.m_clockSource));
+    }
     response.getUsrpInputSettings()->setGain(settings.m_gain);
     response.getUsrpInputSettings()->setGainMode((int) settings.m_gainMode);
     response.getUsrpInputSettings()->setIqCorrection(settings.m_iqCorrection ? 1 : 0);

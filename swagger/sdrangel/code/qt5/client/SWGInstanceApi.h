@@ -39,6 +39,7 @@
 #include "SWGPresetTransfer.h"
 #include "SWGPresets.h"
 #include "SWGSuccessResponse.h"
+#include "SWGWindowList.h"
 
 #include <QObject>
 
@@ -96,6 +97,7 @@ public:
     void instancePresetPost(SWGPresetTransfer& body);
     void instancePresetPut(SWGPresetTransfer& body);
     void instanceSummary();
+    void instanceWindowsGet();
     
 private:
     void instanceAudioGetCallback (SWGHttpRequestWorker * worker);
@@ -138,6 +140,7 @@ private:
     void instancePresetPostCallback (SWGHttpRequestWorker * worker);
     void instancePresetPutCallback (SWGHttpRequestWorker * worker);
     void instanceSummaryCallback (SWGHttpRequestWorker * worker);
+    void instanceWindowsGetCallback (SWGHttpRequestWorker * worker);
     
 signals:
     void instanceAudioGetSignal(SWGAudioDevices* summary);
@@ -180,6 +183,7 @@ signals:
     void instancePresetPostSignal(SWGPresetIdentifier* summary);
     void instancePresetPutSignal(SWGPresetIdentifier* summary);
     void instanceSummarySignal(SWGInstanceSummaryResponse* summary);
+    void instanceWindowsGetSignal(SWGWindowList* summary);
     
     void instanceAudioGetSignalE(SWGAudioDevices* summary, QNetworkReply::NetworkError error_type, QString& error_str);
     void instanceAudioInputCleanupPatchSignalE(SWGSuccessResponse* summary, QNetworkReply::NetworkError error_type, QString& error_str);
@@ -221,6 +225,7 @@ signals:
     void instancePresetPostSignalE(SWGPresetIdentifier* summary, QNetworkReply::NetworkError error_type, QString& error_str);
     void instancePresetPutSignalE(SWGPresetIdentifier* summary, QNetworkReply::NetworkError error_type, QString& error_str);
     void instanceSummarySignalE(SWGInstanceSummaryResponse* summary, QNetworkReply::NetworkError error_type, QString& error_str);
+    void instanceWindowsGetSignalE(SWGWindowList* summary, QNetworkReply::NetworkError error_type, QString& error_str);
     
     void instanceAudioGetSignalEFull(SWGHttpRequestWorker* worker, QNetworkReply::NetworkError error_type, QString& error_str);
     void instanceAudioInputCleanupPatchSignalEFull(SWGHttpRequestWorker* worker, QNetworkReply::NetworkError error_type, QString& error_str);
@@ -262,6 +267,7 @@ signals:
     void instancePresetPostSignalEFull(SWGHttpRequestWorker* worker, QNetworkReply::NetworkError error_type, QString& error_str);
     void instancePresetPutSignalEFull(SWGHttpRequestWorker* worker, QNetworkReply::NetworkError error_type, QString& error_str);
     void instanceSummarySignalEFull(SWGHttpRequestWorker* worker, QNetworkReply::NetworkError error_type, QString& error_str);
+    void instanceWindowsGetSignalEFull(SWGHttpRequestWorker* worker, QNetworkReply::NetworkError error_type, QString& error_str);
     
 };
 

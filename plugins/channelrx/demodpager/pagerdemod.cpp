@@ -485,9 +485,17 @@ void PagerDemod::webapiFormatChannelSettings(SWGSDRangel::SWGChannelSettings& re
     response.getPagerDemodSettings()->setRfBandwidth(settings.m_rfBandwidth);
     response.getPagerDemodSettings()->setFmDeviation(settings.m_fmDeviation);
     response.getPagerDemodSettings()->setUdpEnabled(settings.m_udpEnabled);
-    response.getPagerDemodSettings()->setUdpAddress(new QString(settings.m_udpAddress));
+    if (response.getPagerDemodSettings()->getUdpAddress()) {
+        *response.getPagerDemodSettings()->getUdpAddress() = settings.m_udpAddress;
+    } else {
+        response.getPagerDemodSettings()->setUdpAddress(new QString(settings.m_udpAddress));
+    }
     response.getPagerDemodSettings()->setUdpPort(settings.m_udpPort);
-    response.getPagerDemodSettings()->setLogFilename(new QString(settings.m_logFilename));
+    if (response.getPagerDemodSettings()->getLogFilename()) {
+        *response.getPagerDemodSettings()->getLogFilename() = settings.m_logFilename;
+    } else {
+        response.getPagerDemodSettings()->setLogFilename(new QString(settings.m_logFilename));
+    }
     response.getPagerDemodSettings()->setLogEnabled(settings.m_logEnabled);
 
     response.getPagerDemodSettings()->setRgbColor(settings.m_rgbColor);
@@ -598,7 +606,11 @@ void PagerDemod::webapiFormatChannelSettings(
     swgChannelSettings->setDirection(0); // Single sink (Rx)
     swgChannelSettings->setOriginatorChannelIndex(getIndexInDeviceSet());
     swgChannelSettings->setOriginatorDeviceSetIndex(getDeviceSetIndex());
-    swgChannelSettings->setChannelType(new QString("PagerDemod"));
+    if (swgChannelSettings->getChannelType()) {
+        *swgChannelSettings->getChannelType() = "PagerDemod";
+    } else {
+        swgChannelSettings->setChannelType(new QString("PagerDemod"));
+    }
     swgChannelSettings->setPagerDemodSettings(new SWGSDRangel::SWGPagerDemodSettings());
     SWGSDRangel::SWGPagerDemodSettings *swgPagerDemodSettings = swgChannelSettings->getPagerDemodSettings();
 
@@ -623,13 +635,21 @@ void PagerDemod::webapiFormatChannelSettings(
         swgPagerDemodSettings->setUdpEnabled(settings.m_udpEnabled);
     }
     if (channelSettingsKeys.contains("udpAddress") || force) {
-        swgPagerDemodSettings->setUdpAddress(new QString(settings.m_udpAddress));
+        if (swgPagerDemodSettings->getUdpAddress()) {
+            *swgPagerDemodSettings->getUdpAddress() = settings.m_udpAddress;
+        } else {
+            swgPagerDemodSettings->setUdpAddress(new QString(settings.m_udpAddress));
+        }
     }
     if (channelSettingsKeys.contains("udpPort") || force) {
         swgPagerDemodSettings->setUdpPort(settings.m_udpPort);
     }
     if (channelSettingsKeys.contains("logFilename") || force) {
-        swgPagerDemodSettings->setLogFilename(new QString(settings.m_logFilename));
+        if (swgPagerDemodSettings->getLogFilename()) {
+            *swgPagerDemodSettings->getLogFilename() = settings.m_logFilename;
+        } else {
+            swgPagerDemodSettings->setLogFilename(new QString(settings.m_logFilename));
+        }
     }
     if (channelSettingsKeys.contains("logEnabled") || force) {
         swgPagerDemodSettings->setLogEnabled(settings.m_logEnabled);
@@ -638,7 +658,11 @@ void PagerDemod::webapiFormatChannelSettings(
         swgPagerDemodSettings->setRgbColor(settings.m_rgbColor);
     }
     if (channelSettingsKeys.contains("title") || force) {
-        swgPagerDemodSettings->setTitle(new QString(settings.m_title));
+        if (swgPagerDemodSettings->getTitle()) {
+            *swgPagerDemodSettings->getTitle() = settings.m_title;
+        } else {
+            swgPagerDemodSettings->setTitle(new QString(settings.m_title));
+        }
     }
     if (channelSettingsKeys.contains("streamIndex") || force) {
         swgPagerDemodSettings->setStreamIndex(settings.m_streamIndex);

@@ -204,7 +204,11 @@ bool DATVModBaseband::handleMessage(const Message& cmd)
 void DATVModBaseband::applySettings(const QStringList& settingsKeys, const DATVModSettings& settings, bool force)
 {
     m_source.applySettings(settingsKeys, settings, force);
-    m_settings = settings;
+    if (force) {
+        m_settings = settings;
+    } else {
+        m_settings.applySettings(settingsKeys, settings);
+    }
 }
 
 int DATVModBaseband::getChannelSampleRate() const

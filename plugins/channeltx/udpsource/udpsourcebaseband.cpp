@@ -190,7 +190,11 @@ bool UDPSourceBaseband::handleMessage(const Message& cmd)
 void UDPSourceBaseband::applySettings(const QStringList& settingsKeys, const UDPSourceSettings& settings, bool force)
 {
     m_source.applySettings(settingsKeys, settings, force);
-    m_settings = settings;
+    if (force) {
+        m_settings = settings;
+    } else {
+        m_settings.applySettings(settingsKeys, settings);
+    }
 }
 
 int UDPSourceBaseband::getChannelSampleRate() const

@@ -354,6 +354,25 @@ elseif(WIN32 OR MINGW)
       ExecWait '$INSTDIR\\\\${VCREDIST_FILE} /passive /norestart'
       Delete '$INSTDIR\\\\${VCREDIST_FILE}'
     ")
+
+    # The Claude Desktop extension, in a file of its own: CPack writes
+    # CPACK_NSIS_EXTRA_INSTALL_COMMANDS into CPackConfig.cmake without escaping it, so the
+    # commands themselves cannot contain a quote
+    if(MCPBRIDGE_BUNDLE_NAME)
+      configure_file(
+        "${CMAKE_CURRENT_SOURCE_DIR}/claude_extension.nsh.in"
+        "${CMAKE_BINARY_DIR}/claude_extension.nsh"
+        @ONLY
+      )
+      # NSIS !include does not take forward slashes, and CPack writes this string into
+      # CPackConfig.cmake raw, so each separator has to survive being read back as CMake
+      file(TO_NATIVE_PATH "${CMAKE_BINARY_DIR}/claude_extension.nsh" MCPBRIDGE_NSH)
+      string(REPLACE "\\" "\\\\" MCPBRIDGE_NSH "${MCPBRIDGE_NSH}")
+      list(APPEND CPACK_NSIS_EXTRA_INSTALL_COMMANDS "
+      !include '${MCPBRIDGE_NSH}'
+      ")
+    endif()
+
     set(CPACK_NSIS_CREATE_ICONS_EXTRA
       "CreateShortCut '$SMPROGRAMS\\\\$STARTMENU_FOLDER\\\\SDRangel.lnk' '$INSTDIR\\\\sdrangel.exe'")
     set(CPACK_NSIS_DELETE_ICONS_EXTRA

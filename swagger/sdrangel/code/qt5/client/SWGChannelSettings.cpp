@@ -617,9 +617,9 @@ SWGChannelSettings::fromJsonObject(QJsonObject &pJson) {
     
     ::SWGSDRangel::setValue(&meshtastic_demod_settings, pJson["MeshtasticDemodSettings"], "SWGMeshtasticDemodSettings", "SWGMeshtasticDemodSettings");
     
-    ::SWGSDRangel::setValue(&meshcore_demod_settings, pJson["MeshcoreDemodSettings"], "SWGMeshcoreDemodSettings", "SWGMeshcoreDemodSettings");
-    
     ::SWGSDRangel::setValue(&meshtastic_mod_settings, pJson["MeshtasticModSettings"], "SWGMeshtasticModSettings", "SWGMeshtasticModSettings");
+    
+    ::SWGSDRangel::setValue(&meshcore_demod_settings, pJson["MeshcoreDemodSettings"], "SWGMeshcoreDemodSettings", "SWGMeshcoreDemodSettings");
     
     ::SWGSDRangel::setValue(&meshcore_mod_settings, pJson["MeshcoreModSettings"], "SWGMeshcoreModSettings", "SWGMeshcoreModSettings");
     
@@ -813,11 +813,11 @@ SWGChannelSettings::asJsonObject() {
     if((meshtastic_demod_settings != nullptr) && (meshtastic_demod_settings->isSet())){
         toJsonValue(QString("MeshtasticDemodSettings"), meshtastic_demod_settings, obj, QString("SWGMeshtasticDemodSettings"));
     }
-    if((meshcore_demod_settings != nullptr) && (meshcore_demod_settings->isSet())){
-        toJsonValue(QString("MeshcoreDemodSettings"), meshcore_demod_settings, obj, QString("SWGMeshcoreDemodSettings"));
-    }
     if((meshtastic_mod_settings != nullptr) && (meshtastic_mod_settings->isSet())){
         toJsonValue(QString("MeshtasticModSettings"), meshtastic_mod_settings, obj, QString("SWGMeshtasticModSettings"));
+    }
+    if((meshcore_demod_settings != nullptr) && (meshcore_demod_settings->isSet())){
+        toJsonValue(QString("MeshcoreDemodSettings"), meshcore_demod_settings, obj, QString("SWGMeshcoreDemodSettings"));
     }
     if((meshcore_mod_settings != nullptr) && (meshcore_mod_settings->isSet())){
         toJsonValue(QString("MeshcoreModSettings"), meshcore_mod_settings, obj, QString("SWGMeshcoreModSettings"));

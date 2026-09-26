@@ -149,7 +149,6 @@ JogdialControllerGUI::JogdialControllerGUI(PluginAPI* pluginAPI, FeatureUISet *f
 	m_pluginAPI(pluginAPI),
     m_featureUISet(featureUISet),
 	m_doApplySettings(true),
-    m_lastFeatureState(0),
     m_selectedChannel(nullptr)
 {
     m_feature = feature;
@@ -166,8 +165,8 @@ JogdialControllerGUI::JogdialControllerGUI(PluginAPI* pluginAPI, FeatureUISet *f
     connect(this, SIGNAL(customContextMenuRequested(const QPoint &)), this, SLOT(onMenuDialogCalled(const QPoint &)));
     connect(getInputMessageQueue(), SIGNAL(messageEnqueued()), this, SLOT(handleInputMessages()));
 
-	connect(&m_statusTimer, SIGNAL(timeout()), this, SLOT(updateStatus()));
-	m_statusTimer.start(1000);
+	connect(m_jogdialController, &Feature::stateChanged, this, &JogdialControllerGUI::updateFeatureState);
+	updateFeatureState();
 
 	connect(&MainCore::instance()->getMasterTimer(), SIGNAL(timeout()), this, SLOT(tick()));
     this->installEventFilter(&m_commandKeyReceiver);
@@ -327,33 +326,9 @@ void JogdialControllerGUI::tick()
 {
 }
 
-void JogdialControllerGUI::updateStatus()
+void JogdialControllerGUI::updateFeatureState()
 {
-    int state = m_jogdialController->getState();
-
-    if (m_lastFeatureState != state)
-    {
-        switch (state)
-        {
-            case Feature::StNotStarted:
-                ui->startStop->setStyleSheet("QToolButton { background:rgb(79,79,79); }");
-                break;
-            case Feature::StIdle:
-                ui->startStop->setStyleSheet("QToolButton { background-color : blue; }");
-                break;
-            case Feature::StRunning:
-                ui->startStop->setStyleSheet("QToolButton { background-color : green; }");
-                break;
-            case Feature::StError:
-                ui->startStop->setStyleSheet("QToolButton { background-color : red; }");
-                QMessageBox::information(this, tr("Message"), m_jogdialController->getErrorMessage());
-                break;
-            default:
-                break;
-        }
-
-        m_lastFeatureState = state;
-    }
+    updateStartStopButton(ui->startStop);
 }
 
 void JogdialControllerGUI::applySettings(bool force)

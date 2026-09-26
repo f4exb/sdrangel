@@ -38,6 +38,7 @@
 #include "util/colormap.h"
 #include "util/db.h"
 #include "util/units.h"
+#include "gui/messagedialog.h"
 #include "gui/basicchannelsettingsdialog.h"
 #include "gui/dialpopup.h"
 #include "gui/dialogpositioner.h"
@@ -314,7 +315,7 @@ void HeatMapGUI::on_writeCSV_clicked()
             QFile file(fileNames[0]);
             if (!file.open(QIODevice::WriteOnly | QIODevice::Text))
             {
-                QMessageBox::critical(this, "Heat Map", QString("Failed to open file %1").arg(fileNames[0]));
+                MessageDialog::critical(this, "Heat Map", QString("Failed to open file %1").arg(fileNames[0]));
                 return;
             }
             QTextStream out(&file);
@@ -351,7 +352,7 @@ void HeatMapGUI::on_readCSV_clicked()
             QFile file(fileNames[0]);
             if (!file.open(QIODevice::ReadOnly | QIODevice::Text))
             {
-                QMessageBox::critical(this, "Heat Map", QString("Failed to open file %1").arg(fileNames[0]));
+                MessageDialog::critical(this, "Heat Map", QString("Failed to open file %1").arg(fileNames[0]));
                 return;
             }
             QTextStream in(&file);
@@ -382,7 +383,7 @@ void HeatMapGUI::on_readCSV_clicked()
             {
                 QString actualColNames = colIndexes.keys().join(" ");
                 QString expectedColNames = colNames.join(" ");
-                QMessageBox::critical(this, "Heat Map", QString("Failed to read expected header in CSV file. %1 != %2").arg(actualColNames).arg(expectedColNames));
+                MessageDialog::critical(this, "Heat Map", QString("Failed to read expected header in CSV file. %1 != %2").arg(actualColNames).arg(expectedColNames));
                 return;
             }
         }
@@ -400,7 +401,7 @@ void HeatMapGUI::on_writeImage_clicked()
         {
             if (!m_image.save(fileNames[0]))
             {
-                QMessageBox::critical(this, "Heat Map", QString("Failed to save image to %1").arg(fileNames[0]));
+                MessageDialog::critical(this, "Heat Map", QString("Failed to save image to %1").arg(fileNames[0]));
                 return;
             }
         }
@@ -977,7 +978,7 @@ void HeatMapGUI::createImage(int width, int height)
     catch (std::bad_alloc&)
     {
         m_image = QImage();
-        QMessageBox::critical(this, "Heat Map", QString("Failed to allocate memory (width=%1 height=%2)").arg(m_width).arg(m_height));
+        MessageDialog::critical(this, "Heat Map", QString("Failed to allocate memory (width=%1 height=%2)").arg(m_width).arg(m_height));
     }
 }
 
@@ -1295,7 +1296,7 @@ void HeatMapGUI::createMap()
     catch (std::bad_alloc&)
     {
         deleteMap();
-        QMessageBox::critical(this, "Heat Map", QString("Failed to allocate memory (width=%1 height=%2)").arg(m_width).arg(m_height));
+        MessageDialog::critical(this, "Heat Map", QString("Failed to allocate memory (width=%1 height=%2)").arg(m_width).arg(m_height));
     }
 
     on_clearHeatMap_clicked();
@@ -1442,7 +1443,7 @@ void HeatMapGUI::resizeMap(int x, int y)
             delete[] powerMaxPeak;
             delete[] powerMinPeak;
             delete[] powerPathLoss;
-            QMessageBox::critical(this, "Heat Map", QString("Failed to allocate memory (width=%1 height=%2)").arg(newWidth).arg(newHeight));
+            MessageDialog::critical(this, "Heat Map", QString("Failed to allocate memory (width=%1 height=%2)").arg(newWidth).arg(newHeight));
         }
     }
 }
@@ -1537,7 +1538,7 @@ void HeatMapGUI::addToPowerSeries(QDateTime dateTime, double average, double pul
         }
         catch (std::bad_alloc&)
         {
-           QMessageBox::critical(this, "Heat Map", QString("Failed to allocate memory for chart series"));
+           MessageDialog::critical(this, "Heat Map", QString("Failed to allocate memory for chart series"));
            ui->displayChart->setChecked(false);
         }
     }

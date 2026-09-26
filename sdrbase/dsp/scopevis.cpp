@@ -81,6 +81,10 @@ ScopeVis::ScopeVis() :
 
 ScopeVis::~ScopeVis()
 {
+    if (m_glScope) {
+        m_glScope->setScopeVis(nullptr);
+    }
+
     disconnect(&m_inputMessageQueue, SIGNAL(messageEnqueued()), this, SLOT(handleInputMessages()));
 
     for (std::vector<TriggerCondition*>::iterator it = m_triggerConditions.begin(); it != m_triggerConditions.end(); ++ it) {
@@ -90,8 +94,19 @@ ScopeVis::~ScopeVis()
 
 void ScopeVis::setGLScope(GLScopeInterface* glScope)
 {
+    QMutexLocker configLocker(&m_mutex);
+
+    if (m_glScope && (m_glScope != glScope)) {
+        m_glScope->setScopeVis(nullptr);
+    }
+
     m_glScope = glScope;
-    m_glScope->setTraces(&m_traces.m_tracesData, &m_traces.m_traces[0]);
+
+    if (m_glScope)
+    {
+        m_glScope->setScopeVis(this);
+        m_glScope->setTraces(&m_traces.m_tracesData, &m_traces.m_traces[0]);
+    }
 }
 
 void ScopeVis::setLiveRate(int sampleRate)

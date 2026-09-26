@@ -392,13 +392,26 @@ int FT8Demod::webapiSettingsPutPatch(
     FT8DemodSettings settings = m_settings;
     webapiUpdateChannelSettings(settings, channelSettingsKeys, response);
 
-    MsgConfigureFT8Demod *msg = MsgConfigureFT8Demod::create(channelSettingsKeys, settings, force);
+    // The filter keys set one entry of the filter bank, and the settings are applied by key
+    // name with the bank copied as a whole under its own, so that is the key to pass on
+    QStringList settingsKeys = channelSettingsKeys;
+
+    for (const char *key : {"rfBandwidth", "lowCutoff", "spanLog2", "fftWindow"})
+    {
+        if (settingsKeys.contains(key) && !settingsKeys.contains("filterBank"))
+        {
+            settingsKeys.append("filterBank");
+            break;
+        }
+    }
+
+    MsgConfigureFT8Demod *msg = MsgConfigureFT8Demod::create(settingsKeys, settings, force);
     m_inputMessageQueue.push(msg);
 
     qDebug("FT8Demod::webapiSettingsPutPatch: forward to GUI: %p", m_guiMessageQueue);
     if (m_guiMessageQueue) // forward to GUI if any
     {
-        MsgConfigureFT8Demod *msgToGUI = MsgConfigureFT8Demod::create(channelSettingsKeys, settings, force);
+        MsgConfigureFT8Demod *msgToGUI = MsgConfigureFT8Demod::create(settingsKeys, settings, force);
         m_guiMessageQueue->push(msgToGUI);
     }
 
@@ -429,7 +442,7 @@ void FT8Demod::webapiUpdateChannelSettings(
     if (channelSettingsKeys.contains("lowCutoff")) {
         settings.m_filterBank[settings.m_filterIndex].m_lowCutoff = response.getFt8DemodSettings()->getLowCutoff();
     }
-    if (channelSettingsKeys.contains("fftWimdow")) {
+    if (channelSettingsKeys.contains("fftWindow")) {
         settings.m_filterBank[settings.m_filterIndex].m_fftWindow = (FFTWindow::Function) response.getFt8DemodSettings()->getFftWindow();
     }
     if (channelSettingsKeys.contains("volume")) {
@@ -539,9 +552,21 @@ void FT8Demod::webapiFormatChannelSettings(SWGSDRangel::SWGChannelSettings& resp
     response.getFt8DemodSettings()->setOsdLdpcThreshold(settings.m_osdLDPCThreshold);
     response.getFt8DemodSettings()->setUseOsd(settings.m_verifyOSD ? 1 : 0);
     response.getFt8DemodSettings()->setEnablePskReporter(settings.m_enablePSKReporter ? 1 : 0);
-    response.getFt8DemodSettings()->setPskReporterCallsign(new QString(settings.m_pskReporterCallsign));
-    response.getFt8DemodSettings()->setPskReporterLocator(new QString(settings.m_pskReporterLocator));
-    response.getFt8DemodSettings()->setPskReporterSoftware(new QString(settings.m_pskReporterSoftware));
+    if (response.getFt8DemodSettings()->getPskReporterCallsign()) {
+        *response.getFt8DemodSettings()->getPskReporterCallsign() = settings.m_pskReporterCallsign;
+    } else {
+        response.getFt8DemodSettings()->setPskReporterCallsign(new QString(settings.m_pskReporterCallsign));
+    }
+    if (response.getFt8DemodSettings()->getPskReporterLocator()) {
+        *response.getFt8DemodSettings()->getPskReporterLocator() = settings.m_pskReporterLocator;
+    } else {
+        response.getFt8DemodSettings()->setPskReporterLocator(new QString(settings.m_pskReporterLocator));
+    }
+    if (response.getFt8DemodSettings()->getPskReporterSoftware()) {
+        *response.getFt8DemodSettings()->getPskReporterSoftware() = settings.m_pskReporterSoftware;
+    } else {
+        response.getFt8DemodSettings()->setPskReporterSoftware(new QString(settings.m_pskReporterSoftware));
+    }
     response.getFt8DemodSettings()->setRgbColor(settings.m_rgbColor);
 
     if (response.getFt8DemodSettings()->getTitle()) {
@@ -683,7 +708,11 @@ void FT8Demod::webapiFormatChannelSettings(
     swgChannelSettings->setDirection(0); // Single sink (Rx)
     swgChannelSettings->setOriginatorChannelIndex(getIndexInDeviceSet());
     swgChannelSettings->setOriginatorDeviceSetIndex(getDeviceSetIndex());
-    swgChannelSettings->setChannelType(new QString(m_channelId));
+    if (swgChannelSettings->getChannelType()) {
+        *swgChannelSettings->getChannelType() = m_channelId;
+    } else {
+        swgChannelSettings->setChannelType(new QString(m_channelId));
+    }
     swgChannelSettings->setFt8DemodSettings(new SWGSDRangel::SWGFT8DemodSettings());
     SWGSDRangel::SWGFT8DemodSettings *swgFT8DemodSettings = swgChannelSettings->getFt8DemodSettings();
 
@@ -741,19 +770,35 @@ void FT8Demod::webapiFormatChannelSettings(
         swgFT8DemodSettings->setEnablePskReporter(settings.m_enablePSKReporter ? 1 : 0);
     }
     if (channelSettingsKeys.contains("pskReporterCallsign") || force) {
-        swgFT8DemodSettings->setPskReporterCallsign(new QString(settings.m_pskReporterCallsign));
+        if (swgFT8DemodSettings->getPskReporterCallsign()) {
+            *swgFT8DemodSettings->getPskReporterCallsign() = settings.m_pskReporterCallsign;
+        } else {
+            swgFT8DemodSettings->setPskReporterCallsign(new QString(settings.m_pskReporterCallsign));
+        }
     }
     if (channelSettingsKeys.contains("pskReporterLocator") || force) {
-        swgFT8DemodSettings->setPskReporterLocator(new QString(settings.m_pskReporterLocator));
+        if (swgFT8DemodSettings->getPskReporterLocator()) {
+            *swgFT8DemodSettings->getPskReporterLocator() = settings.m_pskReporterLocator;
+        } else {
+            swgFT8DemodSettings->setPskReporterLocator(new QString(settings.m_pskReporterLocator));
+        }
     }
     if (channelSettingsKeys.contains("pskReporterSoftware") || force) {
-        swgFT8DemodSettings->setPskReporterSoftware(new QString(settings.m_pskReporterSoftware));
+        if (swgFT8DemodSettings->getPskReporterSoftware()) {
+            *swgFT8DemodSettings->getPskReporterSoftware() = settings.m_pskReporterSoftware;
+        } else {
+            swgFT8DemodSettings->setPskReporterSoftware(new QString(settings.m_pskReporterSoftware));
+        }
     }
     if (channelSettingsKeys.contains("rgbColor") || force) {
         swgFT8DemodSettings->setRgbColor(settings.m_rgbColor);
     }
     if (channelSettingsKeys.contains("title") || force) {
-        swgFT8DemodSettings->setTitle(new QString(settings.m_title));
+        if (swgFT8DemodSettings->getTitle()) {
+            *swgFT8DemodSettings->getTitle() = settings.m_title;
+        } else {
+            swgFT8DemodSettings->setTitle(new QString(settings.m_title));
+        }
     }
     if (channelSettingsKeys.contains("streamIndex") || force) {
         swgFT8DemodSettings->setStreamIndex(settings.m_streamIndex);

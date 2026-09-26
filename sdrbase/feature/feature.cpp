@@ -94,3 +94,12 @@ void Feature::getFeatureStateStr(QString& stateStr) const
 		break;
 	}
 }
+
+void Feature::setState(FeatureState state)
+{
+    if (m_state != state)
+    {
+        m_state = state;
+        emit stateChanged(this);
+    }
+}

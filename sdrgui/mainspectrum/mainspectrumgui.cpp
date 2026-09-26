@@ -36,7 +36,7 @@
 #include "mainspectrumgui.h"
 
 MainSpectrumGUI::MainSpectrumGUI(GLSpectrum *spectrum, GLSpectrumGUI *spectrumGUI, QWidget *parent) :
-    QMdiSubWindow(parent),
+    WorkspaceWindow(parent),
     m_spectrum(spectrum),
     m_spectrumGUI(spectrumGUI),
     m_deviceType(DeviceRx),
@@ -99,7 +99,7 @@ MainSpectrumGUI::MainSpectrumGUI(GLSpectrum *spectrum, GLSpectrumGUI *spectrumGU
     m_hideButton->setFixedSize(20, 20);
     QIcon hideIcon(":/hide.png");
     m_hideButton->setIcon(hideIcon);
-    m_hideButton->setToolTip("Hide device");
+    m_hideButton->setToolTip("Hide spectrum");
 
     m_statusLabel = new QLabel();
     // m_statusLabel->setText("OK"); // for future use
@@ -315,6 +315,7 @@ void MainSpectrumGUI::setTitle(const QString& title)
 {
     setWindowTitle(title + " Spectrum");
     m_titleLabel->setText(title);
+    publishWindowState();
 }
 
 QString MainSpectrumGUI::getTitle() const

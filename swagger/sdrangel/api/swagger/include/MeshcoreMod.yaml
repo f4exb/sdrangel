@@ -4,8 +4,11 @@ MeshcoreModSettings:
     inputFrequencyOffset:
       type: integer
       format: int64
+      description: "Channel frequency offset from the device center frequency in Hz."
     bandwidthIndex:
       type: integer
+      minimum: 0
+      maximum: 26
       description: >
         standard bandwidths index:
           *  0 -    375 Hz (384000 / 1024)
@@ -37,6 +40,7 @@ MeshcoreModSettings:
           * 26 - 500000 Hz (500000 / 1)
     spreadFactor:
       type: integer
+      description: "Spread factor setting for Meshcore mod."
     deBits:
       description: Low data rate optimize (DE) bits i.e. nb of FFT bins per effective symbol
       type: integer
@@ -49,9 +53,13 @@ MeshcoreModSettings:
     syncWord:
       description: 2 byte (0..65535) synchronization syncWord
       type: integer
+      minimum: 0
+      maximum: 65535
     channelMute:
       description: boolean
       type: integer
+      minimum: 0
+      maximum: 1
     nbParityBits:
       description: Hamming FEC parity bits (LoRa)
       type: integer
@@ -64,40 +72,58 @@ MeshcoreModSettings:
     udpEnabled:
       description: boolean 1 to enable forwarding messages via UDP else 0
       type: integer
+      minimum: 0
+      maximum: 1
     udpAddress:
       description: UDP address to listen for messages to transmit on
       type: string
     udpPort:
       description: UDP port to listen for messages to transmit on
       type: integer
+      minimum: 1
+      maximum: 65535
     invertRamps:
       type: integer
+      minimum: 0
+      maximum: 1
       description: >
         Invert chirp ramps
           * 0 - Normal chirp ramps (upchirps for preamble and payload)
           * 1 - Inverted chirp ramps (downchirps for preamble and payload)
     rgbColor:
       type: integer
+      description: "Display color encoded as an RGB integer."
     title:
       type: string
+      description: "User-visible title."
     streamIndex:
       description: MIMO channel. Not relevant when connected to SI (single Rx).
       type: integer
     useReverseAPI:
       description: Synchronize with reverse API (1 for yes, 0 for no)
       type: integer
+      minimum: 0
+      maximum: 1
     reverseAPIAddress:
       type: string
+      description: "IPv4 address or host name of the reverse API peer."
     reverseAPIPort:
       type: integer
+      description: "TCP port of the reverse API peer."
+      minimum: 1
+      maximum: 65535
     reverseAPIDeviceIndex:
       type: integer
+      description: "Device-set index used by the reverse API peer."
     reverseAPIChannelIndex:
       type: integer
+      description: "Channel index used by the reverse API peer."
     channelMarker:
       $ref: "http://swgserver:8081/api/swagger/include/ChannelMarker.yaml#/ChannelMarker"
+      description: "Channel-marker display configuration."
     rollupState:
       $ref: "http://swgserver:8081/api/swagger/include/RollupState.yaml#/RollupState"
+      description: "Saved expanded or collapsed state of the GUI sections."
 
 MeshcoreModReport:
   description: MeshcoreMod
@@ -108,6 +134,7 @@ MeshcoreModReport:
       format: float
     channelSampleRate:
       type: integer
+      description: "Effective sample rate delivered to the channel in samples per second."
     symbolTimeMs:
       description: symbol duration (ms)
       type: number
@@ -122,6 +149,8 @@ MeshcoreModReport:
       format: float
     playing:
       type: integer
+      minimum: 0
+      maximum: 1
       description: >
         Boolean - modulator is active (playing) including idle time
           * 0 - Modulator not active
@@ -132,6 +161,8 @@ MeshcoreModActions:
   properties:
     sendNow:
       type: integer
+      minimum: 0
+      maximum: 1
       description: >
         Send packet immediately
           * 0 - Do nothing

@@ -3,6 +3,7 @@ AaroniaRTSASettings:
   properties:
     title:
       type: string
+      description: "User-visible title."
     centerFrequency:
       description: Sets the center frequency (Hz) of the distant IQ demodulator
       type: integer
@@ -16,18 +17,27 @@ AaroniaRTSASettings:
     useReverseAPI:
       description: Synchronize with reverse API (1 for yes, 0 for no)
       type: integer
+      minimum: 0
+      maximum: 1
     reverseAPIAddress:
       type: string
+      description: "IPv4 address or host name of the reverse API peer."
     reverseAPIPort:
       type: integer
+      description: "TCP port of the reverse API peer."
+      minimum: 1
+      maximum: 65535
     reverseAPIDeviceIndex:
       type: integer
+      description: "Device-set index used by the reverse API peer."
 
 AaroniaRTSAReport:
   description: AaroniaRTSA
   properties:
     status:
       type: integer
+      minimum: 0
+      maximum: 4
       description: >
         Connection to RTSA server status:
           * 0 - Idle
@@ -41,6 +51,7 @@ AaroniaRTSAOutputSettings:
   properties:
     title:
       type: string
+      description: "User-visible title."
     centerFrequency:
       description: Sets the center frequency (Hz) of the distant IQ demodulator
       type: integer
@@ -54,18 +65,27 @@ AaroniaRTSAOutputSettings:
     useReverseAPI:
       description: Synchronize with reverse API (1 for yes, 0 for no)
       type: integer
+      minimum: 0
+      maximum: 1
     reverseAPIAddress:
       type: string
+      description: "IPv4 address or host name of the reverse API peer."
     reverseAPIPort:
       type: integer
+      description: "TCP port of the reverse API peer."
+      minimum: 1
+      maximum: 65535
     reverseAPIDeviceIndex:
       type: integer
+      description: "Device-set index used by the reverse API peer."
 
 AaroniaRTSAOutputReport:
   description: AaroniaRTSAOutput
   properties:
     status:
       type: integer
+      minimum: 0
+      maximum: 4
       description: >
         Connection to RTSA server status:
           * 0 - Idle

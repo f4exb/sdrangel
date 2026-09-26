@@ -44,6 +44,7 @@
 #include "util/interpolation.h"
 #include "util/png.h"
 #include "util/units.h"
+#include "gui/messagedialog.h"
 #include "gui/basicchannelsettingsdialog.h"
 #include "dsp/dspengine.h"
 #include "gui/timedelegate.h"
@@ -1500,7 +1501,7 @@ void RadioAstronomyGUI::savePowerData(const QString& filename)
 {
     QFile file(filename);
     if (!file.open(QIODevice::WriteOnly | QIODevice::Text)) {
-        QMessageBox::critical(this, "Radio Astronomy", QString("Failed to open file %1").arg(filename));
+        MessageDialog::critical(this, "Radio Astronomy", QString("Failed to open file %1").arg(filename));
         return;
     }
     QTextStream out(&file);
@@ -1784,7 +1785,7 @@ void RadioAstronomyGUI::saveSpectrumData(const QString& filename)
 {
     QFile file(filename);
     if (!file.open(QIODevice::WriteOnly | QIODevice::Text)) {
-        QMessageBox::critical(this, "Radio Astronomy", QString("Failed to open file %1").arg(filename));
+        MessageDialog::critical(this, "Radio Astronomy", QString("Failed to open file %1").arg(filename));
         return;
     }
     QTextStream out(&file);
@@ -1882,7 +1883,7 @@ void RadioAstronomyGUI::on_loadSpectrumData_clicked()
         {
             QFile file(fileNames[0]);
             if (!file.open(QIODevice::ReadOnly | QIODevice::Text)) {
-                QMessageBox::critical(this, "Radio Astronomy", QString("Failed to open file %1").arg(fileNames[0]));
+                MessageDialog::critical(this, "Radio Astronomy", QString("Failed to open file %1").arg(fileNames[0]));
                 return;
             }
 
@@ -1997,7 +1998,7 @@ void RadioAstronomyGUI::on_loadSpectrumData_clicked()
                 }
                 else
                 {
-                    QMessageBox::critical(this, "Radio Astronomy", QString("Missing required columns in file %1").arg(fileNames[0]));
+                    MessageDialog::critical(this, "Radio Astronomy", QString("Missing required columns in file %1").arg(fileNames[0]));
                     return;
                 }
             }
@@ -5316,7 +5317,7 @@ void RadioAstronomyGUI::on_savePowerChartImage_clicked()
             QPainter painter(&image);
             ui->powerChart->render(&painter);
             if (!image.save(fileNames[0])) {
-                QMessageBox::critical(this, "Radio Astronomy", QString("Failed to save image to %1").arg(fileNames[0]));
+                MessageDialog::critical(this, "Radio Astronomy", QString("Failed to save image to %1").arg(fileNames[0]));
             }
         }
     }
@@ -5336,7 +5337,7 @@ void RadioAstronomyGUI::on_saveSpectrumChartImage_clicked()
             QPainter painter(&image);
             ui->spectrumChart->render(&painter);
             if (!image.save(fileNames[0])) {
-                QMessageBox::critical(this, "Radio Astronomy", QString("Failed to save image to %1").arg(fileNames[0]));
+                MessageDialog::critical(this, "Radio Astronomy", QString("Failed to save image to %1").arg(fileNames[0]));
             }
         }
     }
@@ -5369,7 +5370,7 @@ void RadioAstronomyGUI::on_saveSpectrumChartImages_clicked()
                     apng.addImage(image);
                 }
                 if (!apng.save(fileNames[0])) {
-                    QMessageBox::critical(this, "Radio Astronomy", QString("Failed to write to file %1").arg(fileNames[0]));
+                    MessageDialog::critical(this, "Radio Astronomy", QString("Failed to write to file %1").arg(fileNames[0]));
                 }
             }
         }
@@ -6378,7 +6379,7 @@ void RadioAstronomyGUI::on_startStop_clicked(bool checked)
         }
         if (!errorMessage.isEmpty())
         {
-            QMessageBox::warning(this,
+            MessageDialog::warning(this,
                 tr("Invalid Sweep Configuration"),
                 errorMessage);
 

@@ -23,12 +23,16 @@
 
 
 #include "SWGAFCReport.h"
+#include "SWGAISReport.h"
 #include "SWGAMBEReport.h"
+#include "SWGAPRSReport.h"
 #include "SWGFreqDisplayReport.h"
 #include "SWGGS232ControllerReport.h"
 #include "SWGLimeRFEReport.h"
+#include "SWGMCPServerReport.h"
 #include "SWGMapReport.h"
 #include "SWGPERTesterReport.h"
+#include "SWGRadiosondeReport.h"
 #include "SWGRigCtlServerReport.h"
 #include "SWGSatelliteTrackerReport.h"
 #include "SWGSimplePTTReport.h"
@@ -58,6 +62,15 @@ public:
     QString* getFeatureType();
     void setFeatureType(QString* feature_type);
 
+    SWGAISReport* getAisReport();
+    void setAisReport(SWGAISReport* ais_report);
+
+    SWGAPRSReport* getAprsReport();
+    void setAprsReport(SWGAPRSReport* aprs_report);
+
+    SWGRadiosondeReport* getRadiosondeReport();
+    void setRadiosondeReport(SWGRadiosondeReport* radiosonde_report);
+
     SWGAFCReport* getAfcReport();
     void setAfcReport(SWGAFCReport* afc_report);
 
@@ -82,6 +95,9 @@ public:
     SWGRigCtlServerReport* getRigCtlServerReport();
     void setRigCtlServerReport(SWGRigCtlServerReport* rig_ctl_server_report);
 
+    SWGMCPServerReport* getMcpServerReport();
+    void setMcpServerReport(SWGMCPServerReport* mcp_server_report);
+
     SWGSatelliteTrackerReport* getSatelliteTrackerReport();
     void setSatelliteTrackerReport(SWGSatelliteTrackerReport* satellite_tracker_report);
 
@@ -103,6 +119,15 @@ public:
 private:
     QString* feature_type;
     bool m_feature_type_isSet;
+
+    SWGAISReport* ais_report;
+    bool m_ais_report_isSet;
+
+    SWGAPRSReport* aprs_report;
+    bool m_aprs_report_isSet;
+
+    SWGRadiosondeReport* radiosonde_report;
+    bool m_radiosonde_report_isSet;
 
     SWGAFCReport* afc_report;
     bool m_afc_report_isSet;
@@ -127,6 +152,9 @@ private:
 
     SWGRigCtlServerReport* rig_ctl_server_report;
     bool m_rig_ctl_server_report_isSet;
+
+    SWGMCPServerReport* mcp_server_report;
+    bool m_mcp_server_report_isSet;
 
     SWGSatelliteTrackerReport* satellite_tracker_report;
     bool m_satellite_tracker_report_isSet;

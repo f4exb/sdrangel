@@ -187,7 +187,6 @@ SimplePTTGUI::SimplePTTGUI(PluginAPI* pluginAPI, FeatureUISet *featureUISet, Fea
 	m_pluginAPI(pluginAPI),
     m_featureUISet(featureUISet),
 	m_doApplySettings(true),
-    m_lastFeatureState(0),
     m_lastCommandResult(false),
     m_lastCommandExitCode(0),
     m_lastCommandExitStatus(QProcess::NormalExit),
@@ -214,6 +213,8 @@ SimplePTTGUI::SimplePTTGUI(PluginAPI* pluginAPI, FeatureUISet *featureUISet, Fea
 
 	connect(&m_statusTimer, SIGNAL(timeout()), this, SLOT(updateStatus()));
 	m_statusTimer.start(500);
+	connect(m_simplePTT, &Feature::stateChanged, this, &SimplePTTGUI::updateFeatureState);
+	updateFeatureState();
 
 	m_statusTooltips.push_back("Idle");  // 0 - all off
 	m_statusTooltips.push_back("Rx on"); // 1 - Rx on
@@ -663,32 +664,6 @@ void SimplePTTGUI::on_lastCommandLog_clicked()
 
 void SimplePTTGUI::updateStatus()
 {
-    int state = m_simplePTT->getState();
-
-    if (m_lastFeatureState != state)
-    {
-        switch (state)
-        {
-            case Feature::StNotStarted:
-                ui->startStop->setStyleSheet("QToolButton { background:rgb(79,79,79); }");
-                break;
-            case Feature::StIdle:
-                ui->startStop->setStyleSheet("QToolButton { background-color : blue; }");
-                break;
-            case Feature::StRunning:
-                ui->startStop->setStyleSheet("QToolButton { background-color : green; }");
-                break;
-            case Feature::StError:
-                ui->startStop->setStyleSheet("QToolButton { background-color : red; }");
-                QMessageBox::information(this, tr("Message"), m_simplePTT->getErrorMessage());
-                break;
-            default:
-                break;
-        }
-
-        m_lastFeatureState = state;
-    }
-
     if (m_settings.m_vox)
     {
         float peak;
@@ -696,6 +671,11 @@ void SimplePTTGUI::updateStatus()
         int peakDB = CalcDb::dbPower(peak);
         ui->audioPeak->setText(tr("%1 dB").arg(peakDB));
     }
+}
+
+void SimplePTTGUI::updateFeatureState()
+{
+    updateStartStopButton(ui->startStop);
 }
 
 void SimplePTTGUI::applySettings(bool force)

@@ -1476,10 +1476,26 @@ void MeshcoreDemod::webapiFormatChannelReport(SWGSDRangel::SWGChannelReport& res
     response.getMeshcoreDemodReport()->setHeaderCrcStatus(m_lastMsgHeaderCRC);
     response.getMeshcoreDemodReport()->setPayloadParityStatus(m_lastMsgPayloadParityStatus);
     response.getMeshcoreDemodReport()->setPayloadCrcStatus(m_lastMsgPayloadCRC);
-    response.getMeshcoreDemodReport()->setMessageTimestamp(new QString(m_lastMsgTimestamp));
-    response.getMeshcoreDemodReport()->setMessageString(new QString(m_lastMsgString));
-    response.getMeshcoreDemodReport()->setFrameType(new QString(m_lastFrameType));
-    response.getMeshcoreDemodReport()->setChannelType(new QString(m_lastMsgPipelineName));
+    if (response.getMeshcoreDemodReport()->getMessageTimestamp()) {
+        *response.getMeshcoreDemodReport()->getMessageTimestamp() = m_lastMsgTimestamp;
+    } else {
+        response.getMeshcoreDemodReport()->setMessageTimestamp(new QString(m_lastMsgTimestamp));
+    }
+    if (response.getMeshcoreDemodReport()->getMessageString()) {
+        *response.getMeshcoreDemodReport()->getMessageString() = m_lastMsgString;
+    } else {
+        response.getMeshcoreDemodReport()->setMessageString(new QString(m_lastMsgString));
+    }
+    if (response.getMeshcoreDemodReport()->getFrameType()) {
+        *response.getMeshcoreDemodReport()->getFrameType() = m_lastFrameType;
+    } else {
+        response.getMeshcoreDemodReport()->setFrameType(new QString(m_lastFrameType));
+    }
+    if (response.getMeshcoreDemodReport()->getChannelType()) {
+        *response.getMeshcoreDemodReport()->getChannelType() = m_lastMsgPipelineName;
+    } else {
+        response.getMeshcoreDemodReport()->setChannelType(new QString(m_lastMsgPipelineName));
+    }
     response.getMeshcoreDemodReport()->setDecoding(getDemodActive() ? 1 : 0);
 
     response.getMeshcoreDemodReport()->setMessageBytes(new QList<QString *>);
@@ -1552,7 +1568,11 @@ void MeshcoreDemod::webapiFormatChannelSettings(
     swgChannelSettings->setDirection(0); // Single sink (Rx)
     swgChannelSettings->setOriginatorChannelIndex(getIndexInDeviceSet());
     swgChannelSettings->setOriginatorDeviceSetIndex(getDeviceSetIndex());
-    swgChannelSettings->setChannelType(new QString(m_channelId));
+    if (swgChannelSettings->getChannelType()) {
+        *swgChannelSettings->getChannelType() = m_channelId;
+    } else {
+        swgChannelSettings->setChannelType(new QString(m_channelId));
+    }
     swgChannelSettings->setMeshcoreDemodSettings(new SWGSDRangel::SWGMeshcoreDemodSettings());
     SWGSDRangel::SWGMeshcoreDemodSettings *swgMeshcoreDemodSettings = swgChannelSettings->getMeshcoreDemodSettings();
 
@@ -1595,7 +1615,11 @@ void MeshcoreDemod::webapiFormatChannelSettings(
         swgMeshcoreDemodSettings->setSendJsonViaUdp(settings.m_sendJsonViaUDP ? 1 : 0);
     }
     if (channelSettingsKeys.contains("udpAddress") || force) {
-        swgMeshcoreDemodSettings->setUdpAddress(new QString(settings.m_udpAddress));
+        if (swgMeshcoreDemodSettings->getUdpAddress()) {
+            *swgMeshcoreDemodSettings->getUdpAddress() = settings.m_udpAddress;
+        } else {
+            swgMeshcoreDemodSettings->setUdpAddress(new QString(settings.m_udpAddress));
+        }
     }
     if (channelSettingsKeys.contains("udpPort") || force) {
         swgMeshcoreDemodSettings->setUdpPort(settings.m_udpPort);
@@ -1607,7 +1631,11 @@ void MeshcoreDemod::webapiFormatChannelSettings(
         swgMeshcoreDemodSettings->setRgbColor(settings.m_rgbColor);
     }
     if (channelSettingsKeys.contains("title") || force) {
-        swgMeshcoreDemodSettings->setTitle(new QString(settings.m_title));
+        if (swgMeshcoreDemodSettings->getTitle()) {
+            *swgMeshcoreDemodSettings->getTitle() = settings.m_title;
+        } else {
+            swgMeshcoreDemodSettings->setTitle(new QString(settings.m_title));
+        }
     }
 
     if (settings.m_spectrumGUI && (channelSettingsKeys.contains("spectrumConfig") || force))

@@ -3,78 +3,228 @@ APRSSettings:
   properties:
     igateServer:
       type: string
+      description: "Igate server setting for Aprs."
     igatePort:
       type: integer
+      description: "Igate port."
+      minimum: 1
+      maximum: 65535
     igateCallsign:
       type: string
+      description: "Igate callsign setting for Aprs."
     igatePasscode:
       type: string
+      description: "Igate passcode setting for Aprs."
     igateFilter:
       type: string
+      description: "Igate filter setting for Aprs."
     igateEnabled:
       type: integer
+      description: "Enable igate (1 enabled, 0 disabled)."
+      minimum: 0
+      maximum: 1
     title:
       type: string
+      description: "User-visible title."
     rgbColor:
       type: integer
+      description: "Display color encoded as an RGB integer."
     useReverseAPI:
       description: Synchronize with reverse API (1 for yes, 0 for no)
       type: integer
+      minimum: 0
+      maximum: 1
     reverseAPIAddress:
       type: string
+      description: "IPv4 address or host name of the reverse API peer."
     reverseAPIPort:
       type: integer
+      description: "TCP port of the reverse API peer."
+      minimum: 1
+      maximum: 65535
     reverseAPIFeatureSetIndex:
       type: integer
+      description: "Feature-set index used by the reverse API peer."
     reverseAPIFeatureIndex:
       type: integer
+      description: "Feature index used by the reverse API peer."
     rollupState:
       $ref: "http://swgserver:8081/api/swagger/include/RollupState.yaml#/RollupState"
+      description: "Saved expanded or collapsed state of the GUI sections."
     packetsTableColumnIndexes:
       type: array
+      description: "List of packets table column indexes."
       items:
         type: integer
     packetsTableColumnSizes:
       type: array
+      description: "List of packets table column sizes."
       items:
         type: integer
     weatherTableColumnIndexes:
       type: array
+      description: "List of weather table column indexes."
       items:
         type: integer
     weatherTableColumnSizes:
       type: array
+      description: "List of weather table column sizes."
       items:
         type: integer
     statusTableColumnIndexes:
       type: array
+      description: "List of status table column indexes."
       items:
         type: integer
     statusTableColumnSizes:
       type: array
+      description: "List of status table column sizes."
       items:
         type: integer
     messagesTableColumnIndexes:
       type: array
+      description: "List of messages table column indexes."
       items:
         type: integer
     messagesTableColumnSizes:
       type: array
+      description: "List of messages table column sizes."
       items:
         type: integer
     telemetryTableColumnIndexes:
       type: array
+      description: "List of telemetry table column indexes."
       items:
         type: integer
     telemetryTableColumnSizes:
       type: array
+      description: "List of telemetry table column sizes."
       items:
         type: integer
     motionTableColumnIndexes:
       type: array
+      description: "List of motion table column indexes."
       items:
         type: integer
     motionTableColumnSizes:
       type: array
+      description: "List of motion table column sizes."
       items:
         type: integer
+
+APRSReport:
+  description: >
+    Stations and objects heard by the APRS feature, which collects the AX.25 packets of every
+    packet demodulator in the instance. A field is present only once a packet carrying it has
+    been received.
+  properties:
+    runningState:
+      type: integer
+      minimum: 0
+      maximum: 3
+      description: >
+        Running state
+          * 0 - not started
+          * 1 - idle
+          * 2 - running
+          * 3 - error
+    reportDateTime:
+      type: string
+      description: "When this snapshot was taken, ISO 8601."
+    stationCount:
+      type: integer
+      description: "Number of stations and objects currently held."
+    packetCount:
+      type: integer
+      description: "Packets received across all stations."
+    stations:
+      type: array
+      description: "The stations and objects heard."
+      items:
+        $ref: "http://swgserver:8081/api/swagger/include/APRS.yaml#/APRSStation"
+
+APRSStation:
+  description: Station or object heard by the APRS feature
+  properties:
+    callsign:
+      type: string
+      description: "Station callsign with SSID, or the name of the object or item."
+    isObject:
+      type: integer
+      minimum: 0
+      maximum: 1
+      description: "1 when this is an object or item rather than a station."
+    reportingStation:
+      type: string
+      description: "Callsign that reported this object. Empty for a station."
+    symbol:
+      type: string
+      description: "APRS symbol identifier."
+    latitude:
+      type: number
+      format: float
+      minimum: -90
+      maximum: 90
+      description: "Latitude in decimal degrees, north positive."
+    longitude:
+      type: number
+      format: float
+      minimum: -180
+      maximum: 180
+      description: "Longitude in decimal degrees, east positive."
+    altitude:
+      type: number
+      format: float
+      description: "Altitude in metres above mean sea level."
+    course:
+      type: number
+      format: float
+      description: "Course in degrees true."
+    speed:
+      type: number
+      format: float
+      description: "Speed in km/h."
+    status:
+      type: string
+      description: "Latest status text."
+    comment:
+      type: string
+      description: "Latest position comment."
+    powerWatts:
+      type: number
+      format: float
+      description: "Transmitter power in watts, from a reported PHG value."
+    antennaHeight:
+      type: number
+      format: float
+      description: "Antenna height above average terrain in metres, from a reported PHG value."
+    antennaGain:
+      type: number
+      format: float
+      description: "Antenna gain in dB, from a reported PHG value."
+    antennaDirectivity:
+      type: string
+      description: "Antenna directivity, from a reported PHG value."
+    radioRange:
+      type: number
+      format: float
+      description: "Reported range in km."
+    hasWeather:
+      type: integer
+      minimum: 0
+      maximum: 1
+      description: "1 when weather reports have been received from this station."
+    hasTelemetry:
+      type: integer
+      minimum: 0
+      maximum: 1
+      description: "1 when telemetry has been received from this station."
+    telemetryProjectName:
+      type: string
+      description: "Telemetry project name, where reported."
+    packets:
+      type: integer
+      description: "Packets received from this station."
+    lastPacketDateTime:
+      type: string
+      description: "When the most recent packet was received, ISO 8601."

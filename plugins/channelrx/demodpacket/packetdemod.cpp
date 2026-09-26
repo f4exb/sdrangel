@@ -494,9 +494,17 @@ void PacketDemod::webapiFormatChannelSettings(SWGSDRangel::SWGChannelSettings& r
     response.getPacketDemodSettings()->setMode((int) settings.m_mode);
     response.getPacketDemodSettings()->setRfBandwidth(settings.m_rfBandwidth);
     response.getPacketDemodSettings()->setUdpEnabled(settings.m_udpEnabled);
-    response.getPacketDemodSettings()->setUdpAddress(new QString(settings.m_udpAddress));
+    if (response.getPacketDemodSettings()->getUdpAddress()) {
+        *response.getPacketDemodSettings()->getUdpAddress() = settings.m_udpAddress;
+    } else {
+        response.getPacketDemodSettings()->setUdpAddress(new QString(settings.m_udpAddress));
+    }
     response.getPacketDemodSettings()->setUdpPort(settings.m_udpPort);
-    response.getPacketDemodSettings()->setLogFilename(new QString(settings.m_logFilename));
+    if (response.getPacketDemodSettings()->getLogFilename()) {
+        *response.getPacketDemodSettings()->getLogFilename() = settings.m_logFilename;
+    } else {
+        response.getPacketDemodSettings()->setLogFilename(new QString(settings.m_logFilename));
+    }
     response.getPacketDemodSettings()->setLogEnabled(settings.m_logEnabled);
     response.getPacketDemodSettings()->setUseFileTime(settings.m_useFileTime);
 
@@ -594,7 +602,11 @@ void PacketDemod::webapiFormatChannelSettings(
     swgChannelSettings->setDirection(0); // Single sink (Rx)
     swgChannelSettings->setOriginatorChannelIndex(getIndexInDeviceSet());
     swgChannelSettings->setOriginatorDeviceSetIndex(getDeviceSetIndex());
-    swgChannelSettings->setChannelType(new QString("PacketDemod"));
+    if (swgChannelSettings->getChannelType()) {
+        *swgChannelSettings->getChannelType() = "PacketDemod";
+    } else {
+        swgChannelSettings->setChannelType(new QString("PacketDemod"));
+    }
     swgChannelSettings->setPacketDemodSettings(new SWGSDRangel::SWGPacketDemodSettings());
     SWGSDRangel::SWGPacketDemodSettings *swgPacketDemodSettings = swgChannelSettings->getPacketDemodSettings();
 
@@ -619,13 +631,21 @@ void PacketDemod::webapiFormatChannelSettings(
         swgPacketDemodSettings->setUdpEnabled(settings.m_udpEnabled);
     }
     if (channelSettingsKeys.contains("udpAddress") || force) {
-        swgPacketDemodSettings->setUdpAddress(new QString(settings.m_udpAddress));
+        if (swgPacketDemodSettings->getUdpAddress()) {
+            *swgPacketDemodSettings->getUdpAddress() = settings.m_udpAddress;
+        } else {
+            swgPacketDemodSettings->setUdpAddress(new QString(settings.m_udpAddress));
+        }
     }
     if (channelSettingsKeys.contains("udpPort") || force) {
         swgPacketDemodSettings->setUdpPort(settings.m_udpPort);
     }
     if (channelSettingsKeys.contains("logFilename") || force) {
-        swgPacketDemodSettings->setLogFilename(new QString(settings.m_logFilename));
+        if (swgPacketDemodSettings->getLogFilename()) {
+            *swgPacketDemodSettings->getLogFilename() = settings.m_logFilename;
+        } else {
+            swgPacketDemodSettings->setLogFilename(new QString(settings.m_logFilename));
+        }
     }
     if (channelSettingsKeys.contains("logEnabled") || force) {
         swgPacketDemodSettings->setLogEnabled(settings.m_logEnabled);
@@ -637,7 +657,11 @@ void PacketDemod::webapiFormatChannelSettings(
         swgPacketDemodSettings->setRgbColor(settings.m_rgbColor);
     }
     if (channelSettingsKeys.contains("title") || force) {
-        swgPacketDemodSettings->setTitle(new QString(settings.m_title));
+        if (swgPacketDemodSettings->getTitle()) {
+            *swgPacketDemodSettings->getTitle() = settings.m_title;
+        } else {
+            swgPacketDemodSettings->setTitle(new QString(settings.m_title));
+        }
     }
     if (channelSettingsKeys.contains("streamIndex") || force) {
         swgPacketDemodSettings->setStreamIndex(settings.m_streamIndex);

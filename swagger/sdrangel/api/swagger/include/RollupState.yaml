@@ -3,8 +3,11 @@ RollupChildState:
   properties:
     objectName:
       type: string
+      description: "Object name for Rollup child state."
     isHidden:
       type: integer
+      minimum: 0
+      maximum: 1
       description: >
         Boolean - child hidden state
           * 0 - visible
@@ -15,7 +18,9 @@ RollupState:
   properties:
     version:
       type: integer
+      description: "Version for Rollup state."
     childrenStates:
       type: array
+      description: "List of children states."
       items:
         $ref: "http://swgserver:8081/api/swagger/include/RollupState.yaml#/RollupChildState"

@@ -18,7 +18,6 @@
 #ifndef INCLUDE_FEATURE_DENOISERGUI_H_
 #define INCLUDE_FEATURE_DENOISERGUI_H_
 
-#include <QTimer>
 #include <QList>
 
 #include "feature/featuregui.h"
@@ -65,8 +64,6 @@ private:
 
 	Denoiser* m_denoiser;
 	MessageQueue m_inputMessageQueue;
-	QTimer m_statusTimer;
-	int m_lastFeatureState;
 	AvailableChannelOrFeatureList m_availableChannels;
 	ChannelAPI *m_selectedChannel;
 	MovingAverageUtil<double, double, 40> m_channelPowerAvg;
@@ -97,7 +94,7 @@ private slots:
 	void on_audioMute_toggled(bool checked);
 	void on_volume_valueChanged(int value);
 	void audioSelect(const QPoint& p);
-	void updateStatus();
+	void updateFeatureState();
 	void tick();
 };
 

@@ -13,7 +13,7 @@
 /*
  * SWGPacketModActions_payload.h
  *
- * 
+ * Payload data.
  */
 
 #ifndef SWGPacketModActions_payload_H_

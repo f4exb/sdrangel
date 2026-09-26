@@ -52,8 +52,8 @@ public:
     qint32 getAutoload();
     void setAutoload(qint32 autoload);
 
-    qint32 getFilename();
-    void setFilename(qint32 filename);
+    QString* getFilename();
+    void setFilename(QString* filename);
 
     qint32 getAutosavePeriod();
     void setAutosavePeriod(qint32 autosave_period);
@@ -95,7 +95,7 @@ private:
     qint32 autoload;
     bool m_autoload_isSet;
 
-    qint32 filename;
+    QString* filename;
     bool m_filename_isSet;
 
     qint32 autosave_period;

@@ -467,23 +467,63 @@ void ADSBDemod::webapiFormatChannelSettings(SWGSDRangel::SWGChannelSettings& res
     response.getAdsbDemodSettings()->setRemoveTimeout(settings.m_removeTimeout);
     response.getAdsbDemodSettings()->setFeedEnabled(settings.m_feedEnabled ? 1 : 0);
     response.getAdsbDemodSettings()->setExportClientEnabled(settings.m_exportClientEnabled ? 1 : 0);
-    response.getAdsbDemodSettings()->setExportClientHost(new QString(settings.m_exportClientHost));
+    if (response.getAdsbDemodSettings()->getExportClientHost()) {
+        *response.getAdsbDemodSettings()->getExportClientHost() = settings.m_exportClientHost;
+    } else {
+        response.getAdsbDemodSettings()->setExportClientHost(new QString(settings.m_exportClientHost));
+    }
     response.getAdsbDemodSettings()->setExportClientPort(settings.m_exportClientPort);
     response.getAdsbDemodSettings()->setExportClientFormat((int) settings.m_exportClientFormat);
     response.getAdsbDemodSettings()->setExportServerEnabled(settings.m_exportServerEnabled ? 1 : 0);
     response.getAdsbDemodSettings()->setExportServerPort(settings.m_exportServerPort);
     response.getAdsbDemodSettings()->setImportEnabled(settings.m_importEnabled ? 1 : 0);
-    response.getAdsbDemodSettings()->setImportHost(new QString(settings.m_importHost));
-    response.getAdsbDemodSettings()->setImportUsername(new QString(settings.m_importClientId));
-    response.getAdsbDemodSettings()->setImportPassword(new QString(settings.m_importClientSecret));
-    response.getAdsbDemodSettings()->setImportParameters(new QString(settings.m_importParameters));
+    if (response.getAdsbDemodSettings()->getImportHost()) {
+        *response.getAdsbDemodSettings()->getImportHost() = settings.m_importHost;
+    } else {
+        response.getAdsbDemodSettings()->setImportHost(new QString(settings.m_importHost));
+    }
+    if (response.getAdsbDemodSettings()->getImportUsername()) {
+        *response.getAdsbDemodSettings()->getImportUsername() = settings.m_importClientId;
+    } else {
+        response.getAdsbDemodSettings()->setImportUsername(new QString(settings.m_importClientId));
+    }
+    if (response.getAdsbDemodSettings()->getImportPassword()) {
+        *response.getAdsbDemodSettings()->getImportPassword() = settings.m_importClientSecret;
+    } else {
+        response.getAdsbDemodSettings()->setImportPassword(new QString(settings.m_importClientSecret));
+    }
+    if (response.getAdsbDemodSettings()->getImportParameters()) {
+        *response.getAdsbDemodSettings()->getImportParameters() = settings.m_importParameters;
+    } else {
+        response.getAdsbDemodSettings()->setImportParameters(new QString(settings.m_importParameters));
+    }
     response.getAdsbDemodSettings()->setImportPeriod(settings.m_importPeriod);
-    response.getAdsbDemodSettings()->setImportMinLatitude(new QString(settings.m_importMinLatitude));
-    response.getAdsbDemodSettings()->setImportMaxLatitude(new QString(settings.m_importMaxLatitude));
-    response.getAdsbDemodSettings()->setImportMinLongitude(new QString(settings.m_importMinLongitude));
-    response.getAdsbDemodSettings()->setImportMaxLongitude(new QString(settings.m_importMaxLongitude));
+    if (response.getAdsbDemodSettings()->getImportMinLatitude()) {
+        *response.getAdsbDemodSettings()->getImportMinLatitude() = settings.m_importMinLatitude;
+    } else {
+        response.getAdsbDemodSettings()->setImportMinLatitude(new QString(settings.m_importMinLatitude));
+    }
+    if (response.getAdsbDemodSettings()->getImportMaxLatitude()) {
+        *response.getAdsbDemodSettings()->getImportMaxLatitude() = settings.m_importMaxLatitude;
+    } else {
+        response.getAdsbDemodSettings()->setImportMaxLatitude(new QString(settings.m_importMaxLatitude));
+    }
+    if (response.getAdsbDemodSettings()->getImportMinLongitude()) {
+        *response.getAdsbDemodSettings()->getImportMinLongitude() = settings.m_importMinLongitude;
+    } else {
+        response.getAdsbDemodSettings()->setImportMinLongitude(new QString(settings.m_importMinLongitude));
+    }
+    if (response.getAdsbDemodSettings()->getImportMaxLongitude()) {
+        *response.getAdsbDemodSettings()->getImportMaxLongitude() = settings.m_importMaxLongitude;
+    } else {
+        response.getAdsbDemodSettings()->setImportMaxLongitude(new QString(settings.m_importMaxLongitude));
+    }
     response.getAdsbDemodSettings()->setRgbColor(settings.m_rgbColor);
-    response.getAdsbDemodSettings()->setLogFilename(new QString(settings.m_logFilename));
+    if (response.getAdsbDemodSettings()->getLogFilename()) {
+        *response.getAdsbDemodSettings()->getLogFilename() = settings.m_logFilename;
+    } else {
+        response.getAdsbDemodSettings()->setLogFilename(new QString(settings.m_logFilename));
+    }
     response.getAdsbDemodSettings()->setLogEnabled(settings.m_logEnabled);
 
     if (response.getAdsbDemodSettings()->getTitle()) {
@@ -545,7 +585,11 @@ void ADSBDemod::webapiFormatChannelReport(SWGSDRangel::SWGChannelReport& respons
 
     if (m_targetAzElValid)
     {
-        response.getAdsbDemodReport()->setTargetName(new QString(m_targetName));
+        if (response.getAdsbDemodReport()->getTargetName()) {
+            *response.getAdsbDemodReport()->getTargetName() = m_targetName;
+        } else {
+            response.getAdsbDemodReport()->setTargetName(new QString(m_targetName));
+        }
         response.getAdsbDemodReport()->setTargetAzimuth(m_targetAzimuth);
         response.getAdsbDemodReport()->setTargetElevation(m_targetElevation);
         response.getAdsbDemodReport()->setTargetRange(m_targetRange);
@@ -555,12 +599,31 @@ void ADSBDemod::webapiFormatChannelReport(SWGSDRangel::SWGChannelReport& respons
     for (const auto& report : m_aircraftReport)
     {
         SWGSDRangel::SWGADSBDemodAircraftState *aircraftState = new SWGSDRangel::SWGADSBDemodAircraftState();
-        aircraftState->setIcao(new QString(report.m_icao));
-        aircraftState->setCallsign(new QString(report.m_callsign));
-        aircraftState->setLatitude(report.m_latitude);
-        aircraftState->setLongitude(report.m_longitude);
-        aircraftState->setAltitude(report.m_altitude);
-        aircraftState->setGroundSpeed(report.m_groundSpeed);
+        if (aircraftState->getIcao()) {
+            *aircraftState->getIcao() = report.m_icao;
+        } else {
+            aircraftState->setIcao(new QString(report.m_icao));
+        }
+        if (aircraftState->getCallsign()) {
+            *aircraftState->getCallsign() = report.m_callsign;
+        } else {
+            aircraftState->setCallsign(new QString(report.m_callsign));
+        }
+        // Only fields that have been received are set, so that unknown ones are left out of the
+        // JSON rather than reported as zero, which is a real position, altitude and speed
+        if (report.m_positionValid)
+        {
+            aircraftState->setLatitude(report.m_latitude);
+            aircraftState->setLongitude(report.m_longitude);
+        }
+
+        if (report.m_altitudeValid) {
+            aircraftState->setAltitude(report.m_altitude);
+        }
+
+        if (report.m_groundSpeedValid) {
+            aircraftState->setGroundSpeed(report.m_groundSpeed);
+        }
         list->append(aircraftState);
     }
 }

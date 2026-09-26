@@ -385,12 +385,22 @@ int AudioInput::webapiSettingsPutPatch(
     AudioInputSettings settings = m_settings;
     webapiUpdateDeviceSettings(settings, deviceSettingsKeys, response);
 
-    MsgConfigureAudioInput *msg = MsgConfigureAudioInput::create(settings, deviceSettingsKeys, force);
+    // Map API names to setting names
+    QStringList settingsKeys = deviceSettingsKeys;
+
+    if (settingsKeys.contains("device") && !settingsKeys.contains("deviceName")) {
+        settingsKeys.append("deviceName");
+    }
+    if (settingsKeys.contains("devSampleRate") && !settingsKeys.contains("sampleRate")) {
+        settingsKeys.append("sampleRate");
+    }
+
+    MsgConfigureAudioInput *msg = MsgConfigureAudioInput::create(settings, settingsKeys, force);
     m_inputMessageQueue.push(msg);
 
     if (m_guiMessageQueue) // forward to GUI if any
     {
-        MsgConfigureAudioInput *msgToGUI = MsgConfigureAudioInput::create(settings, deviceSettingsKeys, force);
+        MsgConfigureAudioInput *msgToGUI = MsgConfigureAudioInput::create(settings, settingsKeys, force);
         m_guiMessageQueue->push(msgToGUI);
     }
 
@@ -452,7 +462,11 @@ void AudioInput::webapiFormatDeviceSettings(SWGSDRangel::SWGDeviceSettings& resp
         response.getAudioInputSettings()->setTitle(new QString(settings.m_title));
     }
 
-    response.getAudioInputSettings()->setDevice(new QString(settings.m_deviceName));
+    if (response.getAudioInputSettings()->getDevice()) {
+        *response.getAudioInputSettings()->getDevice() = settings.m_deviceName;
+    } else {
+        response.getAudioInputSettings()->setDevice(new QString(settings.m_deviceName));
+    }
     response.getAudioInputSettings()->setDevSampleRate(settings.m_sampleRate);
     response.getAudioInputSettings()->setVolume(settings.m_volume);
     response.getAudioInputSettings()->setLog2Decim(settings.m_log2Decim);

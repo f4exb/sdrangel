@@ -199,7 +199,11 @@ void AISModBaseband::applySettings(const QStringList& settingsKeys, const AISMod
 
     m_source.applySettings(settingsKeys, settings, force);
 
-    m_settings = settings;
+    if (force) {
+        m_settings = settings;
+    } else {
+        m_settings.applySettings(settingsKeys, settings);
+    }
 }
 
 int AISModBaseband::getChannelSampleRate() const

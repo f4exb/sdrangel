@@ -508,7 +508,11 @@ void VORDemodMC::webapiFormatChannelSettings(
     swgChannelSettings->setDirection(0); // Single sink (Rx)
     swgChannelSettings->setOriginatorChannelIndex(getIndexInDeviceSet());
     swgChannelSettings->setOriginatorDeviceSetIndex(getDeviceSetIndex());
-    swgChannelSettings->setChannelType(new QString("VORDemodMC"));
+    if (swgChannelSettings->getChannelType()) {
+        *swgChannelSettings->getChannelType() = "VORDemodMC";
+    } else {
+        swgChannelSettings->setChannelType(new QString("VORDemodMC"));
+    }
     swgChannelSettings->setVorDemodMcSettings(new SWGSDRangel::SWGVORDemodMCSettings());
     SWGSDRangel::SWGVORDemodMCSettings *swgVORDemodSettings = swgChannelSettings->getVorDemodMcSettings();
 
@@ -524,13 +528,21 @@ void VORDemodMC::webapiFormatChannelSettings(
         swgVORDemodSettings->setSquelch(settings.m_squelch);
     }
     if (channelSettingsKeys.contains("title") || force) {
-        swgVORDemodSettings->setTitle(new QString(settings.m_title));
+        if (swgVORDemodSettings->getTitle()) {
+            *swgVORDemodSettings->getTitle() = settings.m_title;
+        } else {
+            swgVORDemodSettings->setTitle(new QString(settings.m_title));
+        }
     }
     if (channelSettingsKeys.contains("volume") || force) {
         swgVORDemodSettings->setVolume(settings.m_volume);
     }
     if (channelSettingsKeys.contains("audioDeviceName") || force) {
-        swgVORDemodSettings->setAudioDeviceName(new QString(settings.m_audioDeviceName));
+        if (swgVORDemodSettings->getAudioDeviceName()) {
+            *swgVORDemodSettings->getAudioDeviceName() = settings.m_audioDeviceName;
+        } else {
+            swgVORDemodSettings->setAudioDeviceName(new QString(settings.m_audioDeviceName));
+        }
     }
     if (channelSettingsKeys.contains("streamIndex") || force) {
         swgVORDemodSettings->setStreamIndex(settings.m_streamIndex);

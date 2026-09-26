@@ -1,0 +1,41 @@
+; Offers the Claude Desktop extension, when Claude Desktop is installed.
+;
+; Claude registers no .mcpb file association, and the packaged (MSIX) build has no execution
+; alias, so the only way to hand it a bundle is to run its executable with the bundle as an
+; argument. Both the .exe and the MSIX build write the claude:// protocol handler to HKCU
+; with a real path to that executable, which is where it is found here.
+;
+; Claude shows its own install dialog, with its own warning about what an extension can do,
+; so this only asks whether to open it.
+;
+; Included from CPACK_NSIS_EXTRA_INSTALL_COMMANDS. Kept in a file of its own because CPack
+; writes that variable into CPackConfig.cmake unescaped, so it cannot contain a quote.
+
+IfFileExists "$INSTDIR\@MCPBRIDGE_BUNDLE_NAME@" 0 mcpbDone
+
+  ReadRegStr $R0 HKCU "Software\Classes\claude\shell\open\command" ""
+  StrCmp $R0 "" mcpbDone
+
+  ; The value is "<path to the executable>" "%1". Take what the first pair of quotes holds
+  StrCpy $R5 $R0 1          ; the opening quote, to compare against and to quote with later
+  StrCpy $R1 $R0 "" 1
+  StrCpy $R2 0
+
+  mcpbScan:
+    StrCpy $R3 $R1 1 $R2
+    StrCmp $R3 $R5 mcpbFound
+    StrCmp $R3 "" mcpbDone  ; no closing quote: not a shape we understand, leave it alone
+    IntOp $R2 $R2 + 1
+    Goto mcpbScan
+
+  mcpbFound:
+  StrCpy $R4 $R1 $R2
+
+  ; The path carries the version of the Claude that wrote it, so an update that has not been
+  ; launched since can leave it pointing at a directory that is gone
+  IfFileExists "$R4" 0 mcpbDone
+
+  MessageBox MB_YESNO|MB_ICONQUESTION "Install the SDRangel extension for Claude Desktop?$\r$\n$\r$\nThis lets Claude control SDRangel. Claude will ask you to confirm." IDNO mcpbDone
+  Exec '"$R4" "$INSTDIR\@MCPBRIDGE_BUNDLE_NAME@"'
+
+mcpbDone:

@@ -34,7 +34,7 @@ SWGSIDSettings::SWGSIDSettings() {
     m_autosave_isSet = false;
     autoload = 0;
     m_autoload_isSet = false;
-    filename = 0;
+    filename = nullptr;
     m_filename_isSet = false;
     autosave_period = 0;
     m_autosave_period_isSet = false;
@@ -68,7 +68,7 @@ SWGSIDSettings::init() {
     m_autosave_isSet = false;
     autoload = 0;
     m_autoload_isSet = false;
-    filename = 0;
+    filename = new QString("");
     m_filename_isSet = false;
     autosave_period = 0;
     m_autosave_period_isSet = false;
@@ -95,7 +95,9 @@ SWGSIDSettings::cleanup() {
 
 
 
-
+    if(filename != nullptr) { 
+        delete filename;
+    }
 
     if(title != nullptr) { 
         delete title;
@@ -130,7 +132,7 @@ SWGSIDSettings::fromJsonObject(QJsonObject &pJson) {
     
     ::SWGSDRangel::setValue(&autoload, pJson["autoload"], "qint32", "");
     
-    ::SWGSDRangel::setValue(&filename, pJson["filename"], "qint32", "");
+    ::SWGSDRangel::setValue(&filename, pJson["filename"], "QString", "QString");
     
     ::SWGSDRangel::setValue(&autosave_period, pJson["autosavePeriod"], "qint32", "");
     
@@ -175,8 +177,8 @@ SWGSIDSettings::asJsonObject() {
     if(m_autoload_isSet){
         obj->insert("autoload", QJsonValue(autoload));
     }
-    if(m_filename_isSet){
-        obj->insert("filename", QJsonValue(filename));
+    if(filename != nullptr && *filename != QString("")){
+        toJsonValue(QString("filename"), filename, obj, QString("QString"));
     }
     if(m_autosave_period_isSet){
         obj->insert("autosavePeriod", QJsonValue(autosave_period));
@@ -239,12 +241,12 @@ SWGSIDSettings::setAutoload(qint32 autoload) {
     this->m_autoload_isSet = true;
 }
 
-qint32
+QString*
 SWGSIDSettings::getFilename() {
     return filename;
 }
 void
-SWGSIDSettings::setFilename(qint32 filename) {
+SWGSIDSettings::setFilename(QString* filename) {
     this->filename = filename;
     this->m_filename_isSet = true;
 }
@@ -353,7 +355,7 @@ SWGSIDSettings::isSet(){
         if(m_autoload_isSet){
             isObjectUpdated = true; break;
         }
-        if(m_filename_isSet){
+        if(filename && *filename != QString("")){
             isObjectUpdated = true; break;
         }
         if(m_autosave_period_isSet){

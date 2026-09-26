@@ -45,7 +45,7 @@ RigCtlServer::RigCtlServer(WebAPIAdapterInterface *webAPIAdapterInterface) :
     setObjectName(m_featureId);
     m_worker = new RigCtlServerWorker(webAPIAdapterInterface);
     m_worker->moveToThread(&m_thread);
-    m_state = StIdle;
+    setState(StIdle);
     m_errorMessage = "RigCtlServer error";
     m_networkManager = new QNetworkAccessManager();
     QObject::connect(
@@ -79,7 +79,7 @@ void RigCtlServer::start()
     m_worker->reset();
     m_worker->setMessageQueueToFeature(getInputMessageQueue());
     bool ok = m_worker->startWork();
-    m_state = ok ? StRunning : StError;
+    setState(ok ? StRunning : StError);
     m_thread.start();
 
     RigCtlServerWorker::MsgConfigureRigCtlServerWorker *msg = RigCtlServerWorker::MsgConfigureRigCtlServerWorker::create(
@@ -91,7 +91,7 @@ void RigCtlServer::stop()
 {
     qDebug("RigCtlServer::stop");
 	m_worker->stopWork();
-    m_state = StIdle;
+    setState(StIdle);
 	m_thread.quit();
 	m_thread.wait();
 }

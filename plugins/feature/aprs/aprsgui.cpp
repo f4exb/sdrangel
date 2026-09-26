@@ -32,9 +32,11 @@
 
 #include "feature/featureuiset.h"
 #include "feature/featurewebapiutils.h"
+#include "gui/messagedialog.h"
 #include "gui/basicfeaturesettingsdialog.h"
 #include "gui/dialogpositioner.h"
 #include "maincore.h"
+#include "util/units.h"
 
 #include "ui_aprsgui.h"
 #include "aprs.h"
@@ -448,8 +450,7 @@ APRSGUI::APRSGUI(PluginAPI* pluginAPI, FeatureUISet *featureUISet, Feature *feat
     ui(new Ui::APRSGUI),
     m_pluginAPI(pluginAPI),
     m_featureUISet(featureUISet),
-    m_doApplySettings(true),
-    m_lastFeatureState(0)
+    m_doApplySettings(true)
 {
     m_feature = feature;
     setAttribute(Qt::WA_DeleteOnClose, true);
@@ -465,8 +466,8 @@ APRSGUI::APRSGUI(PluginAPI* pluginAPI, FeatureUISet *featureUISet, Feature *feat
     connect(this, SIGNAL(customContextMenuRequested(const QPoint &)), this, SLOT(onMenuDialogCalled(const QPoint &)));
     connect(getInputMessageQueue(), SIGNAL(messageEnqueued()), this, SLOT(handleInputMessages()));
 
-    connect(&m_statusTimer, SIGNAL(timeout()), this, SLOT(updateStatus()));
-    m_statusTimer.start(1000);
+    connect(m_aprs, &Feature::stateChanged, this, &APRSGUI::updateFeatureState);
+    updateFeatureState();
 
     // Resize the table using dummy data
     resizeTable();
@@ -587,10 +588,15 @@ APRSGUI::APRSGUI(PluginAPI* pluginAPI, FeatureUISet *featureUISet, Feature *feat
     applySettings(true);
     makeUIConnections();
     m_resizer.enableChildMouseTracking();
+
+    // The feature has no station list of its own, so it is given one for the web API report
+    connect(&m_reportTimer, &QTimer::timeout, this, &APRSGUI::sendStationReport);
+    m_reportTimer.start(1000);
 }
 
 APRSGUI::~APRSGUI()
 {
+    m_reportTimer.stop();
     QHashIterator<QString, bool> itr(m_mapItems);
     while (itr.hasNext())
     {
@@ -723,6 +729,97 @@ void APRSGUI::resizeEvent(QResizeEvent* event)
     plotTelemetry();
     plotMotion();
     FeatureGUI::resizeEvent(event);
+}
+
+
+// The station keeps its values as display strings, so the report is built from the packets it
+// holds instead: those carry proper numbers and a flag saying whether each was received. Walking
+// newest first and taking the first packet that has a value gives the same "latest" the GUI shows,
+// without parsing text back into numbers.
+void APRSGUI::sendStationReport()
+{
+    APRS::MsgReportStations *message = APRS::MsgReportStations::create();
+    QList<APRS::Station>& stations = message->getStations();
+    stations.reserve(m_stations.size());
+    int packetCount = 0;
+
+    for (auto it = m_stations.begin(); it != m_stations.end(); ++it)
+    {
+        APRSStation *source = it.value();
+
+        if (!source) {
+            continue;
+        }
+
+        APRS::Station station;
+        station.m_callsign = source->m_station;
+        station.m_reportingStation = source->m_reportingStation;
+        station.m_symbol = source->m_symbolImage;
+        station.m_status = source->m_latestStatus;
+        station.m_isObject = source->m_isObject;
+        station.m_hasWeather = source->m_hasWeather;
+        station.m_hasTelemetry = source->m_hasTelemetry;
+        station.m_telemetryProjectName = source->m_telemetryProjectName;
+        station.m_packets = source->m_packets.size();
+        packetCount += station.m_packets;
+
+        for (int i = source->m_packets.size() - 1; i >= 0; i--)
+        {
+            APRSPacket *packet = source->m_packets[i];
+
+            if (!packet) {
+                continue;
+            }
+
+            if (!station.m_lastPacket.isValid()) {
+                station.m_lastPacket = packet->m_dateTime;
+            }
+
+            if (!station.m_hasPosition && packet->m_hasPosition)
+            {
+                station.m_hasPosition = true;
+                station.m_latitude = packet->m_latitude;
+                station.m_longitude = packet->m_longitude;
+            }
+
+            if (!station.m_hasAltitude && packet->m_hasAltitude)
+            {
+                station.m_hasAltitude = true;
+                station.m_altitude = Units::feetToMetres(packet->m_altitudeFt);
+            }
+
+            if (!station.m_hasCourseAndSpeed && packet->m_hasCourseAndSpeed)
+            {
+                station.m_hasCourseAndSpeed = true;
+                station.m_course = packet->m_course;
+                station.m_speed = Units::knotsToKPH(packet->m_speed);
+            }
+
+            if (!station.m_hasStationDetails && packet->m_hasStationDetails)
+            {
+                station.m_hasStationDetails = true;
+                station.m_powerWatts = packet->m_powerWatts;
+                station.m_antennaHeight = Units::feetToMetres(packet->m_antennaHeightFt);
+                station.m_antennaGain = packet->m_antennaGainDB;
+                station.m_antennaDirectivity = packet->m_antennaDirectivity;
+            }
+
+            if (!station.m_hasRadioRange && packet->m_hasRadioRange)
+            {
+                station.m_hasRadioRange = true;
+                station.m_radioRange = Units::milesToKilometres(packet->m_radioRangeMiles);
+            }
+
+            if (station.m_comment.isEmpty() && !packet->m_comment.isEmpty()) {
+                station.m_comment = packet->m_comment;
+            }
+        }
+
+        stations.append(station);
+    }
+
+    message->setPacketCount(packetCount);
+    m_aprs->getInputMessageQueue()->push(message);
 }
 
 void APRSGUI::onMenuDialogCalled(const QPoint &p)
@@ -1585,32 +1682,23 @@ void APRSGUI::on_telemetryPlotSelect_currentIndexChanged(int index)
     plotTelemetry();
 }
 
-void APRSGUI::updateStatus()
+void APRSGUI::updateFeatureState()
 {
-    int state = m_aprs->getState();
-
-    if (m_lastFeatureState != state)
+    switch (m_aprs->getState())
     {
-        switch (state)
-        {
-            case Feature::StNotStarted:
-                ui->igate->setStyleSheet("QToolButton { background:rgb(79,79,79); }");
-                break;
-            case Feature::StIdle:
-                ui->igate->setStyleSheet("QToolButton { background:rgb(79,79,79); }");
-                break;
-            case Feature::StRunning:
-                ui->igate->setStyleSheet("QToolButton { background-color : green; }");
-                break;
-            case Feature::StError:
-                ui->igate->setStyleSheet("QToolButton { background-color : red; }");
-                QMessageBox::information(this, tr("Message"), m_aprs->getErrorMessage());
-                break;
-            default:
-                break;
-        }
-
-        m_lastFeatureState = state;
+        case Feature::StNotStarted:
+        case Feature::StIdle:
+            ui->igate->setStyleSheet("QToolButton { background:rgb(79,79,79); }");
+            break;
+        case Feature::StRunning:
+            ui->igate->setStyleSheet("QToolButton { background-color : green; }");
+            break;
+        case Feature::StError:
+            ui->igate->setStyleSheet("QToolButton { background-color : red; }");
+            MessageDialog::information(this, tr("Message"), m_aprs->getErrorMessage());
+            break;
+        default:
+            break;
     }
 }
 

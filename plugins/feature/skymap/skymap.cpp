@@ -46,7 +46,7 @@ SkyMap::SkyMap(WebAPIAdapterInterface *webAPIAdapterInterface) :
 {
     qDebug("SkyMap::SkyMap: webAPIAdapterInterface: %p", webAPIAdapterInterface);
     setObjectName(m_featureId);
-    m_state = StIdle;
+    setState(StIdle);
     m_errorMessage = "SkyMap error";
     m_networkManager = new QNetworkAccessManager();
     QObject::connect(
@@ -234,10 +234,26 @@ void SkyMap::webapiFormatFeatureSettings(
     response.getSkyMapSettings()->setDisplayReticle(settings.m_displayReticle ? 1 : 0);
     response.getSkyMapSettings()->setDisplayGrid(settings.m_displayGrid ? 1 : 0);
     response.getSkyMapSettings()->setDisplayAntennaFoV(settings.m_displayAntennaFoV ? 1 : 0);
-    response.getSkyMapSettings()->setMap(new QString(settings.m_map));
-    response.getSkyMapSettings()->setBackground(new QString(settings.m_background));
-    response.getSkyMapSettings()->setProjection(new QString(settings.m_projection));
-    response.getSkyMapSettings()->setSource(new QString(settings.m_source));
+    if (response.getSkyMapSettings()->getMap()) {
+        *response.getSkyMapSettings()->getMap() = settings.m_map;
+    } else {
+        response.getSkyMapSettings()->setMap(new QString(settings.m_map));
+    }
+    if (response.getSkyMapSettings()->getBackground()) {
+        *response.getSkyMapSettings()->getBackground() = settings.m_background;
+    } else {
+        response.getSkyMapSettings()->setBackground(new QString(settings.m_background));
+    }
+    if (response.getSkyMapSettings()->getProjection()) {
+        *response.getSkyMapSettings()->getProjection() = settings.m_projection;
+    } else {
+        response.getSkyMapSettings()->setProjection(new QString(settings.m_projection));
+    }
+    if (response.getSkyMapSettings()->getSource()) {
+        *response.getSkyMapSettings()->getSource() = settings.m_source;
+    } else {
+        response.getSkyMapSettings()->setSource(new QString(settings.m_source));
+    }
     response.getSkyMapSettings()->setTrack(settings.m_track ? 1 : 0);
     response.getSkyMapSettings()->setLatitude(settings.m_latitude);
     response.getSkyMapSettings()->setLongitude(settings.m_longitude);

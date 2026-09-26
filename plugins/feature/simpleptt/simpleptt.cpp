@@ -105,7 +105,7 @@ void SimplePTT::start()
 
     m_worker->setMessageQueueToGUI(getMessageQueueToGUI());
     m_worker->startWork();
-    m_state = StRunning;
+    setState(StRunning);
     m_thread->start();
 
     SimplePTTWorker::MsgConfigureSimplePTTWorker *msg = SimplePTTWorker::MsgConfigureSimplePTTWorker::create(m_settings, QList<QString>(), true);
@@ -125,7 +125,7 @@ void SimplePTT::stop()
     qDebug("SimplePTT::stop");
     m_running = false;
 	m_worker->stopWork();
-    m_state = StIdle;
+    setState(StIdle);
 	m_thread->quit();
 	m_thread->wait();
 }
@@ -359,6 +359,13 @@ void SimplePTT::webapiFormatFeatureSettings(
     response.getSimplePttSettings()->setVoxEnable(settings.m_voxEnable ? 1 : 0);
     response.getSimplePttSettings()->setVoxHold(settings.m_voxHold);
     response.getSimplePttSettings()->setVoxLevel(settings.m_voxLevel);
+
+    if (response.getSimplePttSettings()->getAudioDeviceName()) {
+        *response.getSimplePttSettings()->getAudioDeviceName() = settings.m_audioDeviceName;
+    } else {
+        response.getSimplePttSettings()->setAudioDeviceName(new QString(settings.m_audioDeviceName));
+    }
+
     response.getSimplePttSettings()->setGpioControl((int) settings.m_gpioControl);
     response.getSimplePttSettings()->setRx2txGpioEnable(settings.m_rx2txGPIOEnable ? 1 : 0);
     response.getSimplePttSettings()->setRx2txGpioMask(settings.m_rx2txGPIOMask);
@@ -434,6 +441,9 @@ void SimplePTT::webapiUpdateFeatureSettings(
     }
     if (featureSettingsKeys.contains("vox")) {
         settings.m_vox = response.getSimplePttSettings()->getVox() != 0;
+    }
+    if (featureSettingsKeys.contains("audioDeviceName")) {
+        settings.m_audioDeviceName = *response.getSimplePttSettings()->getAudioDeviceName();
     }
     if (featureSettingsKeys.contains("voxEnable")) {
         settings.m_voxEnable = response.getSimplePttSettings()->getVoxEnable() != 0;

@@ -17,6 +17,7 @@
 ///////////////////////////////////////////////////////////////////////////////////
 
 #include <QDebug>
+#include <QThread>
 
 #include "dspcommands.h"
 #include "basebandsamplesink.h"
@@ -155,12 +156,33 @@ void DSPDeviceMIMOEngine::addChannelSource(BasebandSampleSource* source, int ind
 	getInputMessageQueue()->push(cmd);
 }
 
+// Whether a removal can be run on the engine thread and waited for: not from that thread
+// itself, which would deadlock, and not once it has stopped, which would wait forever
+static bool canWaitOn(const QObject *engine)
+{
+    QThread *engineThread = engine->thread();
+    return engineThread && engineThread->isRunning() && (QThread::currentThread() != engineThread);
+}
+
 void DSPDeviceMIMOEngine::removeChannelSource(BasebandSampleSource* source, bool deleting, int index)
 {
 	qDebug() << "DSPDeviceMIMOEngine::removeChannelSource: "
         << source->getSourceName().toStdString().c_str()
         << " at: "
         << index;
+
+    // A source about to be deleted has to be removed before this returns
+    if (deleting && canWaitOn(this))
+    {
+        // Same code as for RemoveBasebandSampleSource in handleMessage
+        QMetaObject::invokeMethod(this, [this, source, index]() {
+            if ((unsigned int) index < m_basebandSampleSources.size()) {
+                m_basebandSampleSources[index].remove(source);
+            }
+        }, Qt::BlockingQueuedConnection);
+        return;
+    }
+
 	auto *cmd = new RemoveBasebandSampleSource(source, index, deleting);
 	getInputMessageQueue()->push(cmd);
 }
@@ -175,12 +197,25 @@ void DSPDeviceMIMOEngine::addChannelSink(BasebandSampleSink* sink, int index)
 	getInputMessageQueue()->push(cmd);
 }
 
-void DSPDeviceMIMOEngine::removeChannelSink(BasebandSampleSink* sink, int index)
+void DSPDeviceMIMOEngine::removeChannelSink(BasebandSampleSink* sink, bool deleting, int index)
 {
 	qDebug() << "DSPDeviceMIMOEngine::removeChannelSink: "
         << sink->getSinkName().toStdString().c_str()
         << " at: "
         << index;
+
+    // A sink about to be deleted has to be removed before this returns
+    if (deleting && canWaitOn(this))
+    {
+        // Same code as for RemoveBasebandSampleSink in handleMessage
+        QMetaObject::invokeMethod(this, [this, sink, index]() {
+            if ((unsigned int) index < m_basebandSampleSinks.size()) {
+                m_basebandSampleSinks[index].remove(sink);
+            }
+        }, Qt::BlockingQueuedConnection);
+        return;
+    }
+
 	auto *cmd = new RemoveBasebandSampleSink(sink, index);
 	getInputMessageQueue()->push(cmd);
 }
@@ -197,6 +232,18 @@ void DSPDeviceMIMOEngine::removeMIMOChannel(MIMOChannel *channel)
 {
 	qDebug() << "DSPDeviceMIMOEngine::removeMIMOChannel: "
         << channel->getMIMOName().toStdString().c_str();
+    // Called by destructors and when a channel moves to another device, and neither can go
+    // on until the engine has let go of it.
+    if (canWaitOn(this))
+    {
+        QMetaObject::invokeMethod(this, [this, channel]() {
+            channel->stopSinks();
+            channel->stopSources();
+            m_mimoChannels.remove(channel);
+        }, Qt::BlockingQueuedConnection);
+        return;
+    }
+
     auto *cmd = new RemoveMIMOChannel(channel);
     getInputMessageQueue()->push(cmd);
 }
