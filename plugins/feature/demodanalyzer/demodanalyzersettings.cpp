@@ -49,6 +49,7 @@ const QStringList DemodAnalyzerSettings::m_channelURIs = {
     QStringLiteral("sdrangel.channel.wfmdemod"),
     QStringLiteral("sdrangel.channeltx.modwfm"),
     QStringLiteral("sdrangel.channel.wdsprx"),
+    QStringLiteral("sdrangel.feature.denoiser"),
 };
 
 DemodAnalyzerSettings::DemodAnalyzerSettings() :

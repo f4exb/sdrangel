@@ -207,12 +207,21 @@ bool DemodAnalyzer::handleMessage(const Message& cmd)
     else if (MsgSelectChannel::match(cmd))
     {
         MsgSelectChannel& cfg = (MsgSelectChannel&) cmd;
-        ChannelAPI *selectedChannel = cfg.getChannel();
+        QObject *selectedChannel = cfg.getChannel();
+        if (!selectedChannel) {
+            return true;
+        }
         qDebug("DemodAnalyzer::handleMessage: MsgSelectChannel: %p %s",
             selectedChannel, qPrintable(selectedChannel->objectName()));
         setChannel(selectedChannel);
-        MainCore::MsgChannelDemodQuery *msg = MainCore::MsgChannelDemodQuery::create();
-        selectedChannel->getInputMessageQueue()->push(msg);
+        if (m_selectedChannel == selectedChannel)
+        {
+            if (auto *channel = qobject_cast<ChannelAPI*>(selectedChannel)) {
+                channel->getInputMessageQueue()->push(MainCore::MsgChannelDemodQuery::create());
+            } else if (auto *feature = qobject_cast<Feature*>(selectedChannel)) {
+                feature->getInputMessageQueue()->push(MainCore::MsgChannelDemodQuery::create());
+            }
+        }
 
         return true;
     }
@@ -221,32 +230,17 @@ bool DemodAnalyzer::handleMessage(const Message& cmd)
         qDebug() << "DemodAnalyzer::handleMessage: MainCore::MsgChannelDemodReport";
         MainCore::MsgChannelDemodReport& report = (MainCore::MsgChannelDemodReport&) cmd;
 
-        if (report.getChannelAPI() == m_selectedChannel)
-        {
-            m_sampleRate = report.getSampleRate();
-            m_scopeVis.setLiveRate(m_sampleRate);
+        if (report.getChannelAPI() == m_selectedChannel) {
+            applyReportedSampleRate(report.getSampleRate());
+        }
 
-            if (m_running) {
-                m_worker->applySampleRate(m_sampleRate);
-            }
-
-            DSPSignalNotification *msg = new DSPSignalNotification(0, m_sampleRate);
-            m_spectrumVis.getInputMessageQueue()->push(msg);
-
-            if (m_dataPipe)
-            {
-                DataFifo *fifo = qobject_cast<DataFifo*>(m_dataPipe->m_element);
-
-                if (fifo) {
-                    fifo->setSize(2*m_sampleRate);
-                }
-            }
-
-            if (getMessageQueueToGUI())
-            {
-                MsgReportSampleRate *msg = MsgReportSampleRate::create(m_sampleRate);
-                getMessageQueueToGUI()->push(msg);
-            }
+        return true;
+    }
+    else if (MainCore::MsgFeatureDemodReport::match(cmd))
+    {
+        const auto& report = static_cast<const MainCore::MsgFeatureDemodReport&>(cmd);
+        if (report.getFeature() == m_selectedChannel) {
+            applyReportedSampleRate(report.getSampleRate());
         }
 
         return true;
@@ -255,6 +249,35 @@ bool DemodAnalyzer::handleMessage(const Message& cmd)
 	{
 		return false;
 	}
+}
+
+void DemodAnalyzer::applyReportedSampleRate(int sampleRate)
+{
+    if (sampleRate <= 0) {
+        return;
+    }
+
+    m_sampleRate = sampleRate;
+    m_scopeVis.setLiveRate(m_sampleRate);
+
+    if (m_running) {
+        m_worker->applySampleRate(m_sampleRate);
+    }
+
+    m_spectrumVis.getInputMessageQueue()->push(new DSPSignalNotification(0, m_sampleRate));
+
+    if (m_dataPipe)
+    {
+        DataFifo *fifo = qobject_cast<DataFifo*>(m_dataPipe->m_element);
+
+        if (fifo) {
+            fifo->setSize(2*m_sampleRate);
+        }
+    }
+
+    if (getMessageQueueToGUI()) {
+        getMessageQueueToGUI()->push(MsgReportSampleRate::create(m_sampleRate));
+    }
 }
 
 QByteArray DemodAnalyzer::serialize() const
@@ -331,7 +354,7 @@ void DemodAnalyzer::getAvailableChannelsReport()
 }
 
 
-void DemodAnalyzer::setChannel(ChannelAPI *selectedChannel)
+void DemodAnalyzer::setChannel(QObject *selectedChannel)
 {
     if ((selectedChannel == m_selectedChannel) || (m_availableChannels.indexOfObject(selectedChannel) == -1)) {
         return;

@@ -27,11 +27,13 @@
 #include "settings/rollupstate.h"
 
 #include "denoisersettings.h"
+#include "vst3effect.h"
 
 class PluginAPI;
 class FeatureUISet;
 class Denoiser;
 class Feature;
+class QProcess;
 
 namespace Ui {
 	class DenoiserGUI;
@@ -65,8 +67,11 @@ private:
 	Denoiser* m_denoiser;
 	MessageQueue m_inputMessageQueue;
 	AvailableChannelOrFeatureList m_availableChannels;
-	ChannelAPI *m_selectedChannel;
+	QObject *m_selectedChannel;
 	MovingAverageUtil<double, double, 40> m_channelPowerAvg;
+    QVector<Vst3PluginInfo> m_vst3Plugins;
+    QProcess *m_vst3ScanProcess = nullptr;
+    bool m_vst3ScanAttempted = false;
 
 	explicit DenoiserGUI(PluginAPI* pluginAPI, FeatureUISet *featureUISet, Feature *feature, QWidget* parent = nullptr);
 	virtual ~DenoiserGUI();
@@ -76,7 +81,11 @@ private:
 	void displaySettings();
 	void displaySampleRate(int sampleRate);
 	void displayNRenabled();
-	void updateChannelList();
+	void updateControls();
+	void displayVst3Selection();
+	void saveVst3State(Vst3Effect& effect);
+	void scanVst3Plugins(const QStringList& paths = {}, bool automatic = false);
+	void updateChannelList(bool autoSelect);
 	bool handleMessage(const Message& message);
     void makeUIConnections();
 
@@ -90,6 +99,12 @@ private slots:
 	void on_record_toggled(bool checked);
     void on_showFileDialog_clicked(bool checked);
 	void on_denoiserType_currentIndexChanged(int index);
+	void on_nvidiaIntensity_valueChanged(int value);
+	void on_nvidiaVad_toggled(bool checked);
+	void on_vst3Plugin_currentIndexChanged(int index);
+	void on_vst3Refresh_clicked();
+	void on_vst3Browse_clicked();
+	void on_vst3Parameters_clicked();
 	void on_enable_toggled(bool checked);
 	void on_audioMute_toggled(bool checked);
 	void on_volume_valueChanged(int value);
