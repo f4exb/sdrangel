@@ -900,7 +900,7 @@ if(ENABLE_FEATURE_STARTRACKER)
         #   ${EXTERNAL_BUILD_LIBRARIES}/cspice/src/cspice-build/lib/libcspice.so
         # so point CSPICE_LIBRARIES there.
         set(CSPICE_LIBRARIES
-            "${EXTERNAL_BUILD_LIBRARIES}/cspice/src/cspice-build/lib/libcspice.so"
+            "${EXTERNAL_BUILD_LIBRARIES}/lib${LIB_SUFFIX}/libcspice.so"
             CACHE INTERNAL ""
         )
         # Disable -Werror=format-security for cspice only: distro hardening flags (e.g. Ubuntu Noble)
@@ -1227,7 +1227,7 @@ if (LINUX)
         set_global_cache(LIBBLADERF_FOUND ON)
         set(LIBBLADERF_EXTERNAL ON CACHE INTERNAL "")
         set(LIBBLADERF_INCLUDE_DIRS "${EXTERNAL_BUILD_LIBRARIES}/bladerf/src/bladerf/host/libraries/libbladeRF/include" CACHE INTERNAL "")
-        set(LIBBLADERF_LIBRARIES "${EXTERNAL_BUILD_LIBRARIES}/bladerf/src/bladerf-build/output/libbladeRF.so.2" CACHE INTERNAL "")
+        set(LIBBLADERF_LIBRARIES "${EXTERNAL_BUILD_LIBRARIES}/lib${LIB_SUFFIX}/libbladeRF.so.2" CACHE INTERNAL "")
         ExternalProject_Add(bladerf
                 GIT_REPOSITORY https://github.com/Nuand/bladeRF.git
                 GIT_TAG ${BLADERF_TAG}
