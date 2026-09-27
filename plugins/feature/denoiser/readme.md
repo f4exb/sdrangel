@@ -45,6 +45,7 @@ The feature selects `features/denoiser/models/sm_*/denoiser_48k.trtpkg` automati
 NVIDIA officially supports the Linux SDK for its listed server GPUs; consumer GeForce cards are outside that support list.
 
 NVIDIA Noise Removal is not available on macOS.
+The option appears in the Denoiser only when the SDK library and 48 kHz model can be found at startup. Restart SDRangel after installing the SDK or changing its environment variables.
 
 Set the demodulated audio stream to 48 kS/s. The SDK's 48 kHz speech denoiser receives mono audio; stereo input is mixed to mono. 
 If the SDK, model, or supported GPU is unavailable, the feature passes audio through and reports the reason in the feature's error status and SDRangel log. 
@@ -58,7 +59,12 @@ Changes to these controls reload the NVIDIA model briefly. Neither setting can g
 
 Select **VST3 Effect** to scan automatically for effects in the standard VST3 folders on Windows, Linux, or macOS. 
 Denoiser also scans when the feature starts; use **Scan** to refresh the list after installing a plugin. 
-On macOS the folders include the user, system, and network Audio/Plug-ins/VST3 folders, plus the app's Contents/VST3 folder. 
+**Scan** searches these folders recursively:
+
+  - **Windows:** `%ProgramFiles%\Common Files\VST3`, `%LOCALAPPDATA%\Programs\Common\VST3`, and `VST3` beside the SDRangel executable.
+  - **Linux:** `~/.vst3`, `/usr/lib/vst3`, `/usr/lib64/vst3`, `/usr/local/lib/vst3`, `/usr/local/lib64/vst3`, and `vst3` beside the SDRangel executable.
+  - **macOS:** `~/Library/Audio/Plug-ins/VST3`, `/Library/Audio/Plug-ins/VST3`, `/Network/Library/Audio/Plug-ins/VST3`, and the app's `Contents/VST3` folder.
+
 The scanner runs in a separate process so a plugin that fails during discovery cannot crash SDRangel. 
 The **...** button lets you select a module outside those folders. 
 Select an effect from the list and start the feature. 
@@ -69,7 +75,10 @@ The effect runs at the selected channel's sample rate when reported, and otherwi
 
 The host accepts effects with one main mono or stereo audio input and output. 
 Effects that require other layouts or host services may report an error; in that case audio passes through. 
+
 **Params** tries the native editor on Windows, macOS, and Linux when Qt uses X11. If the editor cannot attach, it uses the slider dialog.
+If using Wayland on Linux, you need to set `QT_QPA_PLATFORM=xcb` in the environment to use the native editor. For snaps, also set `DISABLE_WAYLAND=1`.
+
 Editor changes that a plugin does not expose as parameters are only heard once **Params** is closed.
 
 <h3>Notes</h3>

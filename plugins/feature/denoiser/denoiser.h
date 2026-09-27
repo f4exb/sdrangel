@@ -202,6 +202,7 @@ public:
 
     void getAvailableChannelsReport();
     void setLevelMeter(QObject *levelMeter) { m_levelMeter = levelMeter; }
+    bool isRunning() const { return m_running; }
     QVector<Vst3ParameterInfo> vst3Parameters() const;
     bool hasVst3Effect() const;
     QString vst3ParameterText(quint32 id, double value) const;

@@ -29,6 +29,7 @@ public:
     NvidiaAudioEffects();
     ~NvidiaAudioEffects();
 
+    static bool isAvailable(QString& error);
     bool initialize(QString& error, float intensityRatio, bool enableVad);
     void shutdown();
     bool process(const float *input, float *output, QString& error);

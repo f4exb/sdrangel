@@ -47,6 +47,7 @@
 #include "ui_denoisergui.h"
 #include "denoiser.h"
 #include "denoisergui.h"
+#include "nvidiaaudioeffects.h"
 
 DenoiserGUI* DenoiserGUI::create(PluginAPI* pluginAPI, FeatureUISet *featureUISet, Feature *feature)
 {
@@ -190,9 +191,10 @@ DenoiserGUI::DenoiserGUI(PluginAPI* pluginAPI, FeatureUISet *featureUISet, Featu
     ui->denoiserType->setItemData(1, static_cast<int>(DenoiserType::DenoiserType_RNnoise));
     ui->denoiserType->setItemData(2, static_cast<int>(DenoiserType::DenoiserType_Nvidia));
     ui->denoiserType->setItemData(3, static_cast<int>(DenoiserType::DenoiserType_Vst3));
-#if !defined(Q_OS_WIN) && !defined(Q_OS_LINUX)
-    ui->denoiserType->removeItem(static_cast<int>(DenoiserSettings::DenoiserType::DenoiserType_Nvidia));
-#endif
+    QString nvidiaError;
+    if (!NvidiaAudioEffects::isAvailable(nvidiaError)) {
+        ui->denoiserType->removeItem(ui->denoiserType->findData(static_cast<int>(DenoiserType::DenoiserType_Nvidia)));
+    }
     rollupContents->arrangeRollups();
 	connect(rollupContents, SIGNAL(widgetRolled(QWidget*,bool)), this, SLOT(onWidgetRolled(QWidget*,bool)));
 
@@ -870,6 +872,11 @@ void DenoiserGUI::tick()
 void DenoiserGUI::updateFeatureState()
 {
     updateStartStopButton(ui->startStop);
+    if (m_denoiser->getState() == Feature::StError && m_denoiser->isRunning())
+    {
+        const QSignalBlocker blocker(ui->startStop);
+        ui->startStop->setChecked(true);
+    }
     if (m_denoiser->getState() == Feature::StRunning && !m_vst3ScanAttempted) {
         scanVst3Plugins({}, true);
     }

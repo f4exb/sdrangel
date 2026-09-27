@@ -191,6 +191,17 @@ void Denoiser::start()
 
     m_running = true;
     configureVst3();
+    if (m_settings.m_enableDenoiser &&
+        m_settings.m_denoiserType == DenoiserSettings::DenoiserType::DenoiserType_Nvidia)
+    {
+        QString error;
+        if (!NvidiaAudioEffects::isAvailable(error))
+        {
+            m_errorMessage = error + QStringLiteral(" Audio is passing through.");
+            qWarning() << "Denoiser:" << m_errorMessage;
+            setState(StError);
+        }
+    }
 }
 
 void Denoiser::stop()
@@ -245,10 +256,10 @@ bool Denoiser::handleMessage(const Message& cmd)
             m_settings.m_denoiserType == DenoiserSettings::DenoiserType::DenoiserType_Nvidia)
         {
             if (report.getError().isEmpty()) {
-                m_state = StRunning;
+                setState(StRunning);
             } else {
                 m_errorMessage = report.getError();
-                m_state = StError;
+                setState(StError);
             }
         }
         return true;
@@ -260,7 +271,7 @@ bool Denoiser::handleMessage(const Message& cmd)
             m_settings.m_denoiserType == DenoiserSettings::DenoiserType::DenoiserType_Vst3)
         {
             m_errorMessage = report.getError();
-            m_state = StError;
+            setState(StError);
         }
         return true;
     }
@@ -379,11 +390,23 @@ void Denoiser::applySettings(const DenoiserSettings& settings, const QList<QStri
         restoreSelectedSource();
     }
 
-    if (m_running && m_state == StError &&
+    if (m_running &&
         (force || settingsKeys.contains("denoiserType") || settingsKeys.contains("enableDenoiser") ||
          settingsKeys.contains("nvidiaIntensity") || settingsKeys.contains("nvidiaVad")))
     {
-        m_state = StRunning;
+        QString error;
+        if (m_settings.m_enableDenoiser &&
+            m_settings.m_denoiserType == DenoiserSettings::DenoiserType::DenoiserType_Nvidia &&
+            !NvidiaAudioEffects::isAvailable(error))
+        {
+            m_errorMessage = error + QStringLiteral(" Audio is passing through.");
+            qWarning() << "Denoiser:" << m_errorMessage;
+            setState(StError);
+        }
+        else if (m_state == StError)
+        {
+            setState(StRunning);
+        }
     }
     if (m_running && (force || settingsKeys.contains("denoiserType") ||
         settingsKeys.contains("enableDenoiser") ||
@@ -435,7 +458,7 @@ void Denoiser::configureVst3()
     if (m_settings.m_vst3ModulePath.isEmpty() || m_settings.m_vst3ClassId.size() != 16) 
     {
         m_errorMessage = QStringLiteral("Select a VST3 audio effect");
-        m_state = StError;
+        setState(StError);
         return;
     }
     auto effect = std::make_unique<Vst3Effect>();
@@ -443,7 +466,7 @@ void Denoiser::configureVst3()
     if (!effect->open(m_settings.m_vst3ModulePath, m_settings.m_vst3ClassId, m_sampleRate, 2, error, m_settings.m_vst3State))
     {
         m_errorMessage = QStringLiteral("VST3: %1. Audio is passing through.").arg(error);
-        m_state = StError;
+        setState(StError);
         qWarning() << m_errorMessage;
         return;
     }
@@ -453,7 +476,7 @@ void Denoiser::configureVst3()
     m_worker->setVst3Effect(effect.get());
     m_vst3Effect = std::move(effect);
     if (m_state == StError) {
-        m_state = StRunning;
+        setState(StRunning);
     }
 }
 
@@ -491,11 +514,6 @@ void Denoiser::applyReportedSampleRate(int sampleRate)
     {
         m_worker->applySampleRate(m_sampleRate);
         configureVst3();
-        if (sampleRateChanged && m_state == StError &&
-            m_settings.m_denoiserType == DenoiserSettings::DenoiserType::DenoiserType_Nvidia) 
-        {
-            m_state = StRunning;
-        }
     }
 
     if (m_dataPipe)

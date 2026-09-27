@@ -34,42 +34,10 @@
 
 #include "nvidiaaudioeffects.h"
 
-#if defined(Q_OS_WIN) || defined(Q_OS_LINUX)
-struct NvidiaAudioEffects::Impl
+namespace
 {
-    using CreateEffect = int (*)(const char *, void **);
-    using DestroyEffect = int (*)(void *);
-    using SetString = int (*)(void *, const char *, const char *);
-    using SetU32 = int (*)(void *, const char *, unsigned int);
-    using SetFloat = int (*)(void *, const char *, float);
-    using GetU32 = int (*)(void *, const char *, unsigned int *);
-    using Load = int (*)(void *);
-    using Run = int (*)(void *, const float **, float **, unsigned int, unsigned int);
-
-    QLibrary library;
-    void *effect = nullptr;
-    QByteArray modelPath;
-    Qt::HANDLE threadId = nullptr;
-    DestroyEffect destroyEffect = nullptr;
-    Run run = nullptr;
-};
-#else
-struct NvidiaAudioEffects::Impl {};
-#endif
-
-NvidiaAudioEffects::NvidiaAudioEffects() : 
-    m_impl(nullptr) 
+bool findInstallation(QString& libraryPath, QString& modelPath, QString& error)
 {
-}
-
-NvidiaAudioEffects::~NvidiaAudioEffects()
-{
-    shutdown();
-}
-
-bool NvidiaAudioEffects::initialize(QString& error, float intensityRatio, bool enableVad)
-{
-    shutdown();
 #if defined(Q_OS_WIN) || defined(Q_OS_LINUX)
     QString sdkDir = qEnvironmentVariable("NVAFX_SDK_DIR");
 
@@ -78,8 +46,8 @@ bool NvidiaAudioEffects::initialize(QString& error, float intensityRatio, bool e
         sdkDir = QDir(qEnvironmentVariable("ProgramFiles")).filePath("NVIDIA Corporation/NVIDIA Audio Effects SDK");
     }
 
-    const QString libraryPath = QDir(sdkDir).filePath("NVAudioEffects.dll");
-    const QString modelPath = QDir(sdkDir).filePath("models/denoiser_48k.trtpkg");
+    libraryPath = QDir(sdkDir).filePath("NVAudioEffects.dll");
+    modelPath = QDir(sdkDir).filePath("models/denoiser_48k.trtpkg");
 #else
     if (sdkDir.isEmpty()) {
         sdkDir = qEnvironmentVariable("AFX_SDK_ROOT");
@@ -89,8 +57,8 @@ bool NvidiaAudioEffects::initialize(QString& error, float intensityRatio, bool e
         return false;
     }
 
-    const QString libraryPath = QDir(sdkDir).filePath("nvafx/lib/libnv_audiofx.so");
-    QString modelPath = qEnvironmentVariable("NVAFX_MODEL_PATH");
+    libraryPath = QDir(sdkDir).filePath("nvafx/lib/libnv_audiofx.so");
+    modelPath = qEnvironmentVariable("NVAFX_MODEL_PATH");
     if (modelPath.isEmpty())
     {
         // Packages contain GPU-specific models. Pick one only if unambiguous.
@@ -118,6 +86,65 @@ bool NvidiaAudioEffects::initialize(QString& error, float intensityRatio, bool e
     if (!QFileInfo(libraryPath).isFile() || !QFileInfo(modelPath).isFile())
     {
         error = QStringLiteral("NVIDIA Audio Effects library or 48 kHz model was not found: %1, %2").arg(libraryPath, modelPath);
+        return false;
+    }
+    return true;
+#else
+    Q_UNUSED(libraryPath)
+    Q_UNUSED(modelPath)
+    error = QStringLiteral("NVIDIA Audio Effects is available only on Windows and Linux");
+    return false;
+#endif
+}
+}
+
+#if defined(Q_OS_WIN) || defined(Q_OS_LINUX)
+struct NvidiaAudioEffects::Impl
+{
+    using CreateEffect = int (*)(const char *, void **);
+    using DestroyEffect = int (*)(void *);
+    using SetString = int (*)(void *, const char *, const char *);
+    using SetU32 = int (*)(void *, const char *, unsigned int);
+    using SetFloat = int (*)(void *, const char *, float);
+    using GetU32 = int (*)(void *, const char *, unsigned int *);
+    using Load = int (*)(void *);
+    using Run = int (*)(void *, const float **, float **, unsigned int, unsigned int);
+
+    QLibrary library;
+    void *effect = nullptr;
+    QByteArray modelPath;
+    Qt::HANDLE threadId = nullptr;
+    DestroyEffect destroyEffect = nullptr;
+    Run run = nullptr;
+};
+#else
+struct NvidiaAudioEffects::Impl {};
+#endif
+
+NvidiaAudioEffects::NvidiaAudioEffects() :
+    m_impl(nullptr)
+{
+}
+
+NvidiaAudioEffects::~NvidiaAudioEffects()
+{
+    shutdown();
+}
+
+bool NvidiaAudioEffects::isAvailable(QString& error)
+{
+    QString libraryPath;
+    QString modelPath;
+    return findInstallation(libraryPath, modelPath, error);
+}
+
+bool NvidiaAudioEffects::initialize(QString& error, float intensityRatio, bool enableVad)
+{
+    shutdown();
+#if defined(Q_OS_WIN) || defined(Q_OS_LINUX)
+    QString libraryPath;
+    QString modelPath;
+    if (!findInstallation(libraryPath, modelPath, error)) {
         return false;
     }
 
