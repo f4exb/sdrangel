@@ -31,6 +31,15 @@ The noise reduction is based on a mix of DSP functions and a recursive neural ne
 
 You will find all the details about RNnoise here: https://jmvalin.ca/demo/rnnoise/
 
+Please note the following points:
+
+  - Audio sample rate must be 48 kS/s (check 4)
+  - When taking the audio source from the WDSP plugin it should be used without noise reduction
+  - You should have enough input level but not exceed 100% on peaks (check 9 and 10). An average level between 10 and 20% should already provide good results
+  - The model has been trained on human voice therefore anything else like music is considered to be noise. It may however be successful at selecting the voice from songs.
+  - It should have enough original spectral components therefore any noise processing before the input will only deteriorate its performance. It should also have enough bandwidth it is recommended to have at least 100-3000 Hz. It is not an issue to extend beyond 3000 Hz because any high frequency hiss will be cancelled and it may benefit from the extra bandwidth on some transmissions.
+  - With SSB transmisions the pitch should be as close as possible to the natural pitch of the voice. In any case prefer a higher pitch to a lower one. Note that some voices are better processed than others which may also depend on voice processing before transmission.
+
 <h3>NVIDIA Noise Removal</h3>
 
 On Windows, this option uses the NVIDIA Audio Effects SDK redistributable installed separately from NVIDIA Broadcast. 
@@ -45,6 +54,7 @@ The feature selects `features/denoiser/models/sm_*/denoiser_48k.trtpkg` automati
 NVIDIA officially supports the Linux SDK for its listed server GPUs; consumer GeForce cards are outside that support list.
 
 NVIDIA Noise Removal is not available on macOS.
+
 The option appears in the Denoiser only when the SDK library and 48 kHz model can be found at startup. Restart SDRangel after installing the SDK or changing its environment variables.
 
 Set the demodulated audio stream to 48 kS/s. The SDK's 48 kHz speech denoiser receives mono audio; stereo input is mixed to mono. 
@@ -65,32 +75,15 @@ Denoiser also scans when the feature starts; use **Scan** to refresh the list af
   - **Linux:** `~/.vst3`, `/usr/lib/vst3`, `/usr/lib64/vst3`, `/usr/local/lib/vst3`, `/usr/local/lib64/vst3`, and `vst3` beside the SDRangel executable.
   - **macOS:** `~/Library/Audio/Plug-ins/VST3`, `/Library/Audio/Plug-ins/VST3`, `/Network/Library/Audio/Plug-ins/VST3`, and the app's `Contents/VST3` folder.
 
-The scanner runs in a separate process so a plugin that fails during discovery cannot crash SDRangel. 
 The **...** button lets you select a module outside those folders. 
-Select an effect from the list and start the feature. 
+
 **Params** opens the effect's own editor when available, or a slider dialog for its editable parameters. 
 Changes to exposed parameters are saved with the Denoiser settings. 
-When **Params** is closed, the effect's complete state (including editor settings and presets that are not exposed as parameters) is also saved, and the running effect is reloaded with it. 
-The effect runs at the selected channel's sample rate when reported, and otherwise assumes 48 kS/s.
-
-The host accepts effects with one main mono or stereo audio input and output. 
-Effects that require other layouts or host services may report an error; in that case audio passes through. 
 
 **Params** tries the native editor on Windows, macOS, and Linux when Qt uses X11. If the editor cannot attach, it uses the slider dialog.
 If using Wayland on Linux, you need to set `QT_QPA_PLATFORM=xcb` in the environment to use the native editor. For snaps, also set `DISABLE_WAYLAND=1`.
 
 Editor changes that a plugin does not expose as parameters are only heard once **Params** is closed.
-
-<h3>Notes</h3>
-
-Please note the following points:
-
-  - Audio sample rate must be 48 kS/s (check 4)
-  - When taking the audio source from the WDSP plugin it should be used without noise reduction
-  - You should have enough input level but not exceed 100% on peaks (check 9 and 10). An average level between 10 and 20% should already provide good results
-  - The model has been trained on human voice therefore anything else like music is considered to be noise. It may however be successful at selecting the voice from songs.
-  - It should have enough original spectral components therefore any noise processing before the input will only deteriorate its performance. It should also have enough bandwidth it is recommended to have at least 100-3000 Hz. It is not an issue to extend beyond 3000 Hz because any high frequency hiss will be cancelled and it may benefit from the extra bandwidth on some transmissions.
-  - With SSB transmisions the pitch should be as close as possible to the natural pitch of the voice. In any case prefer a higher pitch to a lower one. Note that some voices are better processed than others which may also depend on voice processing before transmission.
 
 <h2>Interface</h2>
 
@@ -118,10 +111,10 @@ Indication of the input audio stream power
 
 <h3>6: Noise reduction scheme</h3>
 
-Selects the noise reduction scheme
+Selects the noise reduction scheme (see introduction for details of each)
 
   - **None**: No noise reduction (passthrough)
-  - **RNnoise**: RNNoise (see introduction)
+  - **RNnoise**: RNNoise
   - **NVIDIA Noise Removal**: NVIDIA Audio Effects SDK speech denoiser
   - **VST3 Effect**: An installed VST3 audio effect
 
