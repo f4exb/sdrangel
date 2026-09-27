@@ -565,6 +565,28 @@ public:
         { }
     };
 
+    class SDRBASE_API MsgFeatureDemodReport : public Message {
+        MESSAGE_CLASS_DECLARATION
+
+    public:
+        const QObject *getFeature() const { return m_feature; }
+        int getSampleRate() const { return m_sampleRate; }
+
+        static MsgFeatureDemodReport* create(const QObject *feature, int sampleRate) {
+            return new MsgFeatureDemodReport(feature, sampleRate);
+        }
+
+    private:
+        const QObject *m_feature;
+        int m_sampleRate;
+
+        MsgFeatureDemodReport(const QObject *feature, int sampleRate) :
+            Message(),
+            m_feature(feature),
+            m_sampleRate(sampleRate)
+        { }
+    };
+
     class SDRBASE_API MsgChannelSettings : public Message {
         MESSAGE_CLASS_DECLARATION
 

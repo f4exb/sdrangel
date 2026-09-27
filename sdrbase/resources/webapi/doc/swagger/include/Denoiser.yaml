@@ -9,6 +9,8 @@ DenoiserSettings:
         Denoiser type
           * 0 - none
           * 1 - RNnoise
+          * 2 - NVIDIA Noise Removal
+          * 3 - VST3 audio effect
     enableDenoiser:
       type: integer
       minimum: 0
@@ -17,6 +19,29 @@ DenoiserSettings:
         Enable denoiser
           * 1 - enable
           * 0 - disable
+    nvidiaIntensity:
+      type: integer
+      minimum: 0
+      maximum: 100
+      description: NVIDIA Noise Removal strength in percent
+    nvidiaVad:
+      type: integer
+      description: >
+        NVIDIA voice activity detection
+          * 1 - enable
+          * 0 - disable
+    vst3ModulePath:
+      type: string
+      description: Absolute path to the selected VST3 module or bundle
+    vst3ClassId:
+      type: string
+      description: 16-byte VST3 processor class ID encoded as hexadecimal
+    vst3Parameters:
+      type: string
+      description: JSON object mapping numeric VST3 parameter IDs to normalized values from 0 to 1
+    vst3State:
+      type: string
+      description: Opaque VST3 component and controller state, base64 encoded
     volumeTenths:
       type: integer
       description: >

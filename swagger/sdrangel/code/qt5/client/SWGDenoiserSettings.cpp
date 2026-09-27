@@ -32,6 +32,18 @@ SWGDenoiserSettings::SWGDenoiserSettings() {
     m_denoiser_type_isSet = false;
     enable_denoiser = 0;
     m_enable_denoiser_isSet = false;
+    nvidia_intensity = 0;
+    m_nvidia_intensity_isSet = false;
+    nvidia_vad = 0;
+    m_nvidia_vad_isSet = false;
+    vst3_module_path = nullptr;
+    m_vst3_module_path_isSet = false;
+    vst3_class_id = nullptr;
+    m_vst3_class_id_isSet = false;
+    vst3_parameters = nullptr;
+    m_vst3_parameters_isSet = false;
+    vst3_state = nullptr;
+    m_vst3_state_isSet = false;
     volume_tenths = 0;
     m_volume_tenths_isSet = false;
     audio_device_name = nullptr;
@@ -70,6 +82,18 @@ SWGDenoiserSettings::init() {
     m_denoiser_type_isSet = false;
     enable_denoiser = 0;
     m_enable_denoiser_isSet = false;
+    nvidia_intensity = 0;
+    m_nvidia_intensity_isSet = false;
+    nvidia_vad = 0;
+    m_nvidia_vad_isSet = false;
+    vst3_module_path = new QString("");
+    m_vst3_module_path_isSet = false;
+    vst3_class_id = new QString("");
+    m_vst3_class_id_isSet = false;
+    vst3_parameters = new QString("");
+    m_vst3_parameters_isSet = false;
+    vst3_state = new QString("");
+    m_vst3_state_isSet = false;
     volume_tenths = 0;
     m_volume_tenths_isSet = false;
     audio_device_name = new QString("");
@@ -100,6 +124,11 @@ SWGDenoiserSettings::init() {
 
 void
 SWGDenoiserSettings::cleanup() {
+
+    if(vst3_module_path != nullptr) delete vst3_module_path;
+    if(vst3_class_id != nullptr) delete vst3_class_id;
+    if(vst3_parameters != nullptr) delete vst3_parameters;
+    if(vst3_state != nullptr) delete vst3_state;
 
 
 
@@ -142,6 +171,14 @@ SWGDenoiserSettings::fromJsonObject(QJsonObject &pJson) {
     
     ::SWGSDRangel::setValue(&enable_denoiser, pJson["enableDenoiser"], "qint32", "");
     
+    ::SWGSDRangel::setValue(&nvidia_intensity, pJson["nvidiaIntensity"], "qint32", "");
+
+    ::SWGSDRangel::setValue(&nvidia_vad, pJson["nvidiaVad"], "qint32", "");
+    ::SWGSDRangel::setValue(&vst3_module_path, pJson["vst3ModulePath"], "QString", "QString");
+    ::SWGSDRangel::setValue(&vst3_class_id, pJson["vst3ClassId"], "QString", "QString");
+    ::SWGSDRangel::setValue(&vst3_parameters, pJson["vst3Parameters"], "QString", "QString");
+    ::SWGSDRangel::setValue(&vst3_state, pJson["vst3State"], "QString", "QString");
+
     ::SWGSDRangel::setValue(&volume_tenths, pJson["volumeTenths"], "qint32", "");
     
     ::SWGSDRangel::setValue(&audio_device_name, pJson["audioDeviceName"], "QString", "QString");
@@ -189,6 +226,24 @@ SWGDenoiserSettings::asJsonObject() {
     }
     if(m_enable_denoiser_isSet){
         obj->insert("enableDenoiser", QJsonValue(enable_denoiser));
+    }
+    if(m_nvidia_intensity_isSet){
+        obj->insert("nvidiaIntensity", QJsonValue(nvidia_intensity));
+    }
+    if(m_nvidia_vad_isSet){
+        obj->insert("nvidiaVad", QJsonValue(nvidia_vad));
+    }
+    if(vst3_module_path != nullptr && *vst3_module_path != QString("")){
+        toJsonValue(QString("vst3ModulePath"), vst3_module_path, obj, QString("QString"));
+    }
+    if(vst3_class_id != nullptr && *vst3_class_id != QString("")){
+        toJsonValue(QString("vst3ClassId"), vst3_class_id, obj, QString("QString"));
+    }
+    if(vst3_parameters != nullptr && *vst3_parameters != QString("")){
+        toJsonValue(QString("vst3Parameters"), vst3_parameters, obj, QString("QString"));
+    }
+    if(vst3_state != nullptr && *vst3_state != QString("")){
+        toJsonValue(QString("vst3State"), vst3_state, obj, QString("QString"));
     }
     if(m_volume_tenths_isSet){
         obj->insert("volumeTenths", QJsonValue(volume_tenths));
@@ -251,6 +306,51 @@ void
 SWGDenoiserSettings::setEnableDenoiser(qint32 enable_denoiser) {
     this->enable_denoiser = enable_denoiser;
     this->m_enable_denoiser_isSet = true;
+}
+
+qint32
+SWGDenoiserSettings::getNvidiaIntensity() {
+    return nvidia_intensity;
+}
+void
+SWGDenoiserSettings::setNvidiaIntensity(qint32 nvidia_intensity) {
+    this->nvidia_intensity = nvidia_intensity;
+    this->m_nvidia_intensity_isSet = true;
+}
+
+qint32
+SWGDenoiserSettings::getNvidiaVad() {
+    return nvidia_vad;
+}
+void
+SWGDenoiserSettings::setNvidiaVad(qint32 nvidia_vad) {
+    this->nvidia_vad = nvidia_vad;
+    this->m_nvidia_vad_isSet = true;
+}
+
+QString* SWGDenoiserSettings::getVst3ModulePath() { return vst3_module_path; }
+void SWGDenoiserSettings::setVst3ModulePath(QString* value) {
+    if (vst3_module_path != value) delete vst3_module_path;
+    vst3_module_path = value;
+    m_vst3_module_path_isSet = true;
+}
+QString* SWGDenoiserSettings::getVst3ClassId() { return vst3_class_id; }
+void SWGDenoiserSettings::setVst3ClassId(QString* value) {
+    if (vst3_class_id != value) delete vst3_class_id;
+    vst3_class_id = value;
+    m_vst3_class_id_isSet = true;
+}
+QString* SWGDenoiserSettings::getVst3Parameters() { return vst3_parameters; }
+void SWGDenoiserSettings::setVst3Parameters(QString* value) {
+    if (vst3_parameters != value) delete vst3_parameters;
+    vst3_parameters = value;
+    m_vst3_parameters_isSet = true;
+}
+QString* SWGDenoiserSettings::getVst3State() { return vst3_state; }
+void SWGDenoiserSettings::setVst3State(QString* value) {
+    if (vst3_state != value) delete vst3_state;
+    vst3_state = value;
+    m_vst3_state_isSet = true;
 }
 
 qint32
@@ -394,6 +494,15 @@ SWGDenoiserSettings::isSet(){
         if(m_enable_denoiser_isSet){
             isObjectUpdated = true; break;
         }
+        if(m_nvidia_intensity_isSet){
+            isObjectUpdated = true; break;
+        }
+        if(m_nvidia_vad_isSet){
+            isObjectUpdated = true; break;
+        }
+        if(m_vst3_module_path_isSet || m_vst3_class_id_isSet || m_vst3_parameters_isSet || m_vst3_state_isSet){
+            isObjectUpdated = true; break;
+        }
         if(m_volume_tenths_isSet){
             isObjectUpdated = true; break;
         }
@@ -437,4 +546,3 @@ SWGDenoiserSettings::isSet(){
     return isObjectUpdated;
 }
 }
-

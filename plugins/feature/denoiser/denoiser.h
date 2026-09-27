@@ -21,15 +21,18 @@
 #include <QHash>
 #include <QNetworkRequest>
 #include <QRecursiveMutex>
+#include <memory>
 
 #include "feature/feature.h"
 #include "util/message.h"
 #include "availablechannelorfeaturehandler.h"
 
 #include "denoisersettings.h"
+#include "vst3effect.h"
 
 class WebAPIAdapterInterface;
 class DenoiserWorker;
+class Vst3Effect;
 class QNetworkAccessManager;
 class QNetworkReply;
 class QThread;
@@ -94,20 +97,28 @@ public:
         AvailableChannelOrFeatureList& getAvailableChannels() { return m_availableChannels; }
         const QStringList& getRenameFrom() const { return m_renameFrom; }
         const QStringList& getRenameTo() const { return m_renameTo; }
+        QObject *getSelectedChannel() const { return m_selectedChannel; }
+        bool getAutoSelect() const { return m_autoSelect; }
 
-        static MsgReportChannels* create(const QStringList& renameFrom, const QStringList& renameTo) {
-            return new MsgReportChannels(renameFrom, renameTo);
+        static MsgReportChannels* create(const QStringList& renameFrom, const QStringList& renameTo,
+            QObject *selectedChannel, bool autoSelect) {
+            return new MsgReportChannels(renameFrom, renameTo, selectedChannel, autoSelect);
         }
 
     private:
         AvailableChannelOrFeatureList m_availableChannels;
         QStringList m_renameFrom;
         QStringList m_renameTo;
+        QObject *m_selectedChannel;
+        bool m_autoSelect;
 
-        MsgReportChannels(const QStringList& renameFrom, const QStringList& renameTo) :
+        MsgReportChannels(const QStringList& renameFrom, const QStringList& renameTo,
+            QObject *selectedChannel, bool autoSelect) :
             Message(),
             m_renameFrom(renameFrom),
-            m_renameTo(renameTo)
+            m_renameTo(renameTo),
+            m_selectedChannel(selectedChannel),
+            m_autoSelect(autoSelect)
         {}
     };
 
@@ -115,15 +126,15 @@ public:
         MESSAGE_CLASS_DECLARATION
 
     public:
-        ChannelAPI *getChannel() { return m_channel; }
-        static MsgSelectChannel* create(ChannelAPI *channel) {
+        QObject *getChannel() { return m_channel; }
+        static MsgSelectChannel* create(QObject *channel) {
             return new MsgSelectChannel(channel);
         }
 
     protected:
-        ChannelAPI *m_channel;
+        QObject *m_channel;
 
-        MsgSelectChannel(ChannelAPI *channel) :
+        MsgSelectChannel(QObject *channel) :
             Message(),
             m_channel(channel)
         { }
@@ -191,6 +202,9 @@ public:
 
     void getAvailableChannelsReport();
     void setLevelMeter(QObject *levelMeter) { m_levelMeter = levelMeter; }
+    QVector<Vst3ParameterInfo> vst3Parameters() const;
+    bool hasVst3Effect() const;
+    QString vst3ParameterText(quint32 id, double value) const;
 
     static const char* const m_featureIdURI;
     static const char* const m_featureId;
@@ -201,9 +215,10 @@ private:
     bool m_running;
     DenoiserWorker *m_worker;
     DenoiserSettings m_settings;
+    std::unique_ptr<Vst3Effect> m_vst3Effect;
     AvailableChannelOrFeatureList m_availableChannels;
     AvailableChannelOrFeatureHandler m_availableChannelOrFeatureHandler;
-    ChannelAPI *m_selectedChannel;
+    QObject *m_selectedChannel;
     ObjectPipe *m_dataPipe;
     int m_sampleRate;
     QObject *m_levelMeter = nullptr;
@@ -214,8 +229,14 @@ private:
     void start();
     void stop();
     void applySettings(const DenoiserSettings& settings, const QList<QString>& settingsKeys, bool force = false);
-    void notifyUpdate(const QStringList& renameFrom, const QStringList& renameTo);
-    void setChannel(ChannelAPI *selectedChannel);
+    void configureVst3();
+    void useDefaultSampleRate();
+    void applyReportedSampleRate(int sampleRate);
+    void reportDemodSampleRate();
+    void notifyUpdate(const QStringList& renameFrom, const QStringList& renameTo, bool autoSelect = true);
+    void querySelectedSource();
+    void restoreSelectedSource();
+    void setChannel(QObject *selectedChannel, bool preserveSavedSource = false);
     void webapiReverseSendSettings(const QList<QString>& featureSettingsKeys, const DenoiserSettings& settings, bool force);
 
 private slots:

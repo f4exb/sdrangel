@@ -1,11 +1,20 @@
 project(denoiser)
 
+if(APPLE)
+    find_library(VST3_COREFOUNDATION_FRAMEWORK CoreFoundation)
+    if(NOT VST3_COREFOUNDATION_FRAMEWORK)
+        message(FATAL_ERROR "CoreFoundation is required for VST3 support on macOS")
+    endif()
+endif()
+
 set(denoiser_SOURCES
 	denoiser.cpp
     denoisersettings.cpp
     denoiserplugin.cpp
     denoiserworker.cpp
     denoiserwebapiadapter.cpp
+    nvidiaaudioeffects.cpp
+    vst3effect.cpp
 )
 
 set(denoiser_HEADERS
@@ -14,6 +23,8 @@ set(denoiser_HEADERS
     denoiserplugin.h
     denoiserworker.h
     denoiserwebapiadapter.h
+    nvidiaaudioeffects.h
+    vst3effect.h
 )
 
 include_directories(
@@ -56,6 +67,8 @@ endif()
 
 target_link_libraries(${TARGET_NAME} PRIVATE
     Qt::Core
+    ${CMAKE_DL_LIBS}
+    ${VST3_COREFOUNDATION_FRAMEWORK}
     ${TARGET_LIB}
 	sdrbase
 	${TARGET_LIB_GUI}
@@ -63,6 +76,22 @@ target_link_libraries(${TARGET_NAME} PRIVATE
 )
 
 install(TARGETS ${TARGET_NAME} DESTINATION ${INSTALL_FOLDER})
+
+if(NOT SERVER_MODE)
+    add_executable(sdrangel-vst3-scan vst3scan.cpp vst3effect.cpp)
+    target_link_libraries(sdrangel-vst3-scan PRIVATE Qt::Core ${CMAKE_DL_LIBS} ${VST3_COREFOUNDATION_FRAMEWORK})
+    if(WIN32)
+        set(VST3_SCAN_RUNTIME_DIR "${SDRANGEL_BINARY_BIN_DIR}")
+    else()
+        set(VST3_SCAN_RUNTIME_DIR "${CMAKE_BINARY_DIR}")
+    endif()
+    set_target_properties(sdrangel-vst3-scan PROPERTIES
+        RUNTIME_OUTPUT_DIRECTORY "${VST3_SCAN_RUNTIME_DIR}"
+        RUNTIME_OUTPUT_DIRECTORY_DEBUG "${VST3_SCAN_RUNTIME_DIR}"
+        RUNTIME_OUTPUT_DIRECTORY_RELEASE "${VST3_SCAN_RUNTIME_DIR}"
+        RUNTIME_OUTPUT_DIRECTORY_RELWITHDEBINFO "${VST3_SCAN_RUNTIME_DIR}")
+    install(TARGETS sdrangel-vst3-scan DESTINATION ${INSTALL_BIN_DIR})
+endif()
 
 # Install debug symbols
 if (WIN32)
