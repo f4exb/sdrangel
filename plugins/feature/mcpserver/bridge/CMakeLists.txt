@@ -87,6 +87,12 @@ if(BUILD_MCP_BUNDLE)
 
     target_link_libraries(sdrangel-mcp-tools-dump PRIVATE Qt::Core sdrbase httpserver)
 
+    if(APPLE)
+        # This helper runs during the build, before macOS packaging rewrites library paths for
+        # the app bundle, so it needs the external-library build directories on its own rpath.
+        set_target_properties(sdrangel-mcp-tools-dump PROPERTIES BUILD_RPATH "${MACOS_EXTERNAL_LIBS_FIXUP}")
+    endif()
+
     set(MCPBRIDGE_BUNDLE_DIR "${CMAKE_CURRENT_BINARY_DIR}/bundle")
     # Alongside the built binaries, which is bin/ on Windows and the build directory itself
     # elsewhere. That is also where the running application looks for it in a build tree
