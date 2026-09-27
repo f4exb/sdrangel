@@ -393,16 +393,8 @@ void DABDemodSink::audio(int16_t *buffer, int size, int samplerate, bool stereo)
     for (int i = 0; i < size; i+=2)
     {
         Complex ci, ca;
-        if (!m_settings.m_audioMute)
-        {
-            ci.real(buffer[i]);
-            ci.imag(buffer[i+1]);
-        }
-        else
-        {
-            ci.real(0.0f);
-            ci.imag(0.0f);
-        }
+        ci.real(buffer[i]);
+        ci.imag(buffer[i+1]);
 
         if (m_audioInterpolatorDistance == 1.0f)
         {
@@ -444,8 +436,9 @@ void DABDemodSink::processOneAudioSample(Complex &ci)
     qint16 l = scale(ci.real(), factor);
     qint16 r = scale(ci.imag(), factor);
 
-    m_audioBuffer[m_audioBufferFill].l = l;
-    m_audioBuffer[m_audioBufferFill].r = r;
+    // Muting DAB's direct output must not silence consumers of the demod pipe.
+    m_audioBuffer[m_audioBufferFill].l = m_settings.m_audioMute ? 0 : l;
+    m_audioBuffer[m_audioBufferFill].r = m_settings.m_audioMute ? 0 : r;
     ++m_audioBufferFill;
 
     if (m_audioBufferFill >= m_audioBuffer.size())
