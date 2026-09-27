@@ -20,6 +20,9 @@
 #include "audio/audiodevicemanager.h"
 
 #include "denoisersettings.h"
+#include <QtGlobal>
+#include <QJsonDocument>
+#include <QJsonObject>
 
 const QStringList DenoiserSettings::m_channelURIs = {
     QStringLiteral("sdrangel.channel.amdemod"),
@@ -31,6 +34,7 @@ const QStringList DenoiserSettings::m_channelURIs = {
     QStringLiteral("sdrangel.channel.ssbdemod"),
     QStringLiteral("sdrangel.channel.wfmdemod"),
     QStringLiteral("sdrangel.channel.wdsprx"),
+    QStringLiteral("sdrangel.feature.denoiser"),
 };
 
 DenoiserSettings::DenoiserSettings() :
@@ -42,10 +46,17 @@ DenoiserSettings::DenoiserSettings() :
 void DenoiserSettings::resetToDefaults()
 {
     m_denoiserType = DenoiserType::DenoiserType_RNnoise;
+    m_selectedSource.clear();
     m_title = "Denoiser";
     m_enableDenoiser = true;
     m_audioMute = false;
     m_volumeTenths = 10;
+    m_nvidiaIntensity = 100;
+    m_nvidiaVad = false;
+    m_vst3ModulePath.clear();
+    m_vst3ClassId.clear();
+    m_vst3Parameters.clear();
+    m_vst3State.clear();
     m_audioDeviceName = AudioDeviceManager::m_defaultDeviceName;
     m_rgbColor = 0xffd700; // gold
     m_useReverseAPI = false;
@@ -84,6 +95,17 @@ QByteArray DenoiserSettings::serialize() const
     s.writeString(15, m_audioDeviceName);
     s.writeBool(16, m_enableDenoiser);
     s.writeS32(17, m_volumeTenths);
+    s.writeS32(18, m_nvidiaIntensity);
+    s.writeBool(19, m_nvidiaVad);
+    s.writeString(20, m_vst3ModulePath);
+    s.writeBlob(21, m_vst3ClassId);
+    QJsonObject parameters;
+    for (auto it = m_vst3Parameters.cbegin(); it != m_vst3Parameters.cend(); ++it) {
+        parameters.insert(QString::number(it.key()), it.value());
+    }
+    s.writeBlob(22, QJsonDocument(parameters).toJson(QJsonDocument::Compact));
+    s.writeString(23, m_selectedSource);
+    s.writeBlob(24, m_vst3State);
 
     return s.final();
 }
@@ -105,7 +127,7 @@ bool DenoiserSettings::deserialize(const QByteArray& data)
         uint32_t utmp;
 
         d.readS32(1, &itmp, 1);
-        m_denoiserType = static_cast<DenoiserType>(itmp);
+        m_denoiserType = static_cast<DenoiserType>(itmp >= 0 && itmp <= 3 ? itmp : 1);
         d.readString(2, &m_title, "Denoiser");
         d.readU32(3, &m_rgbColor, 0xffd700); // gold
         d.readBool(4, &m_useReverseAPI, false);
@@ -137,6 +159,26 @@ bool DenoiserSettings::deserialize(const QByteArray& data)
         d.readString(15, &m_audioDeviceName, AudioDeviceManager::m_defaultDeviceName);
         d.readBool(16, &m_enableDenoiser, true);
         d.readS32(17, &m_volumeTenths, 10);
+        d.readS32(18, &m_nvidiaIntensity, 100);
+        m_nvidiaIntensity = qBound(0, m_nvidiaIntensity, 100);
+        d.readBool(19, &m_nvidiaVad, false);
+        d.readString(20, &m_vst3ModulePath, "");
+        d.readBlob(21, &m_vst3ClassId);
+        bytetmp.clear();
+        d.readBlob(22, &bytetmp);
+        m_vst3Parameters.clear();
+        const QJsonObject parameters = QJsonDocument::fromJson(bytetmp).object();
+        for (auto it = parameters.begin(); it != parameters.end(); ++it) 
+        {
+            bool validId = false;
+            const quint32 id = it.key().toUInt(&validId);
+            const double value = it.value().toDouble(-1.0);
+            if (validId && value >= 0.0 && value <= 1.0) {
+                m_vst3Parameters.insert(id, value);
+            }
+        }
+        d.readString(23, &m_selectedSource, "");
+        d.readBlob(24, &m_vst3State);
 
         return true;
     }
@@ -149,6 +191,9 @@ bool DenoiserSettings::deserialize(const QByteArray& data)
 
 void DenoiserSettings::applySettings(const QStringList& settingsKeys, const DenoiserSettings& settings)
 {
+    if (settingsKeys.contains("selectedSource")) {
+        m_selectedSource = settings.m_selectedSource;
+    }
     if (settingsKeys.contains("denoiserType")) {
         m_denoiserType = settings.m_denoiserType;
     }
@@ -160,6 +205,24 @@ void DenoiserSettings::applySettings(const QStringList& settingsKeys, const Deno
     }
     if (settingsKeys.contains("volumeTenths")) {
         m_volumeTenths = settings.m_volumeTenths;
+    }
+    if (settingsKeys.contains("nvidiaIntensity")) {
+        m_nvidiaIntensity = qBound(0, settings.m_nvidiaIntensity, 100);
+    }
+    if (settingsKeys.contains("nvidiaVad")) {
+        m_nvidiaVad = settings.m_nvidiaVad;
+    }
+    if (settingsKeys.contains("vst3ModulePath")) {
+        m_vst3ModulePath = settings.m_vst3ModulePath;
+    }
+    if (settingsKeys.contains("vst3ClassId")) {
+        m_vst3ClassId = settings.m_vst3ClassId;
+    }
+    if (settingsKeys.contains("vst3Parameters")) {
+        m_vst3Parameters = settings.m_vst3Parameters;
+    }
+    if (settingsKeys.contains("vst3State")) {
+        m_vst3State = settings.m_vst3State;
     }
     if (settingsKeys.contains("audioDeviceName")) {
         m_audioDeviceName = settings.m_audioDeviceName;
@@ -200,6 +263,9 @@ QString DenoiserSettings::getDebugString(const QStringList& settingsKeys, bool f
 {
     QString debugString;
 
+    if (settingsKeys.contains("selectedSource") || force) {
+        debugString += QString("Selected source: %1 ").arg(m_selectedSource);
+    }
     if (settingsKeys.contains("denoiserType") || force) {
         debugString += QString("DenoiserType: %1 ").arg(static_cast<qint32>(m_denoiserType));
     }
@@ -211,6 +277,21 @@ QString DenoiserSettings::getDebugString(const QStringList& settingsKeys, bool f
     }
     if (settingsKeys.contains("volumeTenths") || force) {
         debugString += QString("Volume : %1 ").arg(m_volumeTenths/10.0);
+    }
+    if (settingsKeys.contains("nvidiaIntensity") || force) {
+        debugString += QString("NVIDIA intensity: %1%% ").arg(m_nvidiaIntensity);
+    }
+    if (settingsKeys.contains("nvidiaVad") || force) {
+        debugString += QString("NVIDIA VAD: %1 ").arg(m_nvidiaVad ? "true" : "false");
+    }
+    if (settingsKeys.contains("vst3ModulePath") || force) {
+        debugString += QString("VST3 module: %1 ").arg(m_vst3ModulePath);
+    }
+    if (settingsKeys.contains("vst3ClassId") || force) {
+        debugString += QString("VST3 class: %1 ").arg(QString::fromLatin1(m_vst3ClassId.toHex()));
+    }
+    if (settingsKeys.contains("vst3State") || force) {
+        debugString += QString("VST3 state: %1 bytes ").arg(m_vst3State.size());
     }
     if (settingsKeys.contains("audioDeviceName") || force) {
         debugString += QString("Audio Device Name: %1 ").arg(m_audioDeviceName);

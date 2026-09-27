@@ -316,7 +316,7 @@ void DemodAnalyzerGUI::on_channels_currentIndexChanged(int index)
 {
     if ((index >= 0) && (index < m_availableChannels.size()))
     {
-        m_selectedChannel = qobject_cast<ChannelAPI*>(m_availableChannels[index].m_object);
+        m_selectedChannel = m_availableChannels[index].m_object;
         DemodAnalyzer::MsgSelectChannel *msg = DemodAnalyzer::MsgSelectChannel::create(m_selectedChannel);
         m_demodAnalyzer->getInputMessageQueue()->push(msg);
     }

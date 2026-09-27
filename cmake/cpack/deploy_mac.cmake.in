@@ -11,6 +11,12 @@ execute_process (COMMAND mkdir ${CPACK_TEMPORARY_INSTALL_DIRECTORY}/SDRangel.app
 execute_process (COMMAND pwd)
 execute_process (COMMAND cp sdrangel ${CPACK_TEMPORARY_INSTALL_DIRECTORY}/SDRangel.app/Contents/MacOS/SDRangel)
 
+# The Denoiser launches the VST3 scanner beside the app executable.
+if(EXISTS "@CMAKE_BINARY_DIR@/sdrangel-vst3-scan")
+  file(COPY "@CMAKE_BINARY_DIR@/sdrangel-vst3-scan"
+       DESTINATION "${CPACK_TEMPORARY_INSTALL_DIRECTORY}/SDRangel.app/Contents/MacOS")
+endif()
+
 
 # Add RPATHS to libraries so macdeployqt can find out and copy all dependencies
 message ("Adding RPATHs to executables and libraries")

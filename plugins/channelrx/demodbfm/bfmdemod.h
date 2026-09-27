@@ -176,6 +176,7 @@ private:
     QNetworkRequest m_networkRequest;
 
 	virtual bool handleMessage(const Message& cmd);
+	void sendSampleRateToDemodAnalyzer();
 	void applySettings(const QStringList& settingsKeys, const BFMDemodSettings& settings, bool force = false);
 
     void webapiFormatChannelReport(SWGSDRangel::SWGChannelReport& response);
