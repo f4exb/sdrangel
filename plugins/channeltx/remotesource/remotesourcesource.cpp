@@ -30,6 +30,7 @@ RemoteSourceSource::RemoteSourceSource() :
     m_nbUncorrectableErrors(0),
     m_channelSampleRate(48000)
 {
+    m_sourceWorkerThread.setObjectName("RmtSrcSrcWrk");
     connect(&m_dataQueue, SIGNAL(dataBlockEnqueued()), this, SLOT(handleData()), Qt::QueuedConnection);
     m_cm256p = m_cm256.isInitialized() ? &m_cm256 : 0;
     m_currentMeta.init();

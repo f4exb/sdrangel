@@ -88,6 +88,7 @@ bool PerseusInput::start()
     // start / stop streaming is done in the thread.
 
     m_perseusWorkerThread = new QThread();
+    m_perseusWorkerThread->setObjectName("PerseusInput");
     m_perseusWorker = new PerseusWorker(m_perseusDescriptor, &m_sampleFifo);
     m_perseusWorker->moveToThread(m_perseusWorkerThread);
     qDebug("PerseusInput::start: worker created");

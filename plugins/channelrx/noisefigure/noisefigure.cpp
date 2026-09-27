@@ -70,6 +70,7 @@ NoiseFigure::NoiseFigure(DeviceAPI *deviceAPI) :
         m_session(0)
 {
     setObjectName(m_channelId);
+    m_thread.setObjectName("NoiseFigureBB");
 
     m_basebandSink = new NoiseFigureBaseband();
     m_basebandSink->setMessageQueueToChannel(getInputMessageQueue());

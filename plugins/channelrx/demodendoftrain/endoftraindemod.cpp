@@ -47,6 +47,7 @@ EndOfTrainDemod::EndOfTrainDemod(DeviceAPI *deviceAPI) :
         m_basebandSampleRate(0)
 {
     setObjectName(m_channelId);
+    m_thread.setObjectName("EndOfTrainBB");
 
     m_basebandSink = new EndOfTrainDemodBaseband(this);
     m_basebandSink->setMessageQueueToChannel(getInputMessageQueue());

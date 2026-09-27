@@ -105,6 +105,7 @@ void DOA2::startSinks()
 
     qDebug("DOA2::startSinks");
     m_thread = new QThread(this);
+    m_thread->setObjectName("DOA2");
     m_basebandSink = new DOA2Baseband(m_fftSize);
     m_basebandSink->setScopeSink(&m_scopeSink);
     m_basebandSink->moveToThread(m_thread);

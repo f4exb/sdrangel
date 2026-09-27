@@ -90,6 +90,7 @@ void SatelliteTracker::start()
     }
 
     m_thread = new QThread();
+    m_thread->setObjectName("SatTracker");
     m_worker = new SatelliteTrackerWorker(this, m_webAPIAdapterInterface);
     m_worker->moveToThread(m_thread);
 

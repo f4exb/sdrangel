@@ -57,6 +57,7 @@ RemoteSource::RemoteSource(DeviceAPI *deviceAPI) :
     setObjectName(m_channelId);
 
     m_thread = new QThread(this);
+    m_thread->setObjectName("RemoteSource");
     m_basebandSource = new RemoteSourceBaseband();
     m_basebandSource->moveToThread(m_thread);
 

@@ -27,6 +27,7 @@ PlutoSDROutputThread::PlutoSDROutputThread(uint32_t blocksizeSamples, DevicePlut
     m_sampleFifo(sampleFifo),
     m_log2Interp(0)
 {
+    setObjectName("PlutoSDROutput");
     m_buf = new qint16[blocksizeSamples*2];
 }
 

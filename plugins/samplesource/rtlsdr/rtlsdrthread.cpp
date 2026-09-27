@@ -38,6 +38,7 @@ RTLSDRThread::RTLSDRThread(rtlsdr_dev_t* dev, SampleSinkFifo* sampleFifo, Replay
 	m_sampleFifo(sampleFifo),
 	m_replayBuffer(replayBuffer)
 {
+    setObjectName("RTLSDR");
     applySettings(settings, QStringList(), true);
     connect(&m_inputMessageQueue, &MessageQueue::messageEnqueued, this, &RTLSDRThread::handleInputMessages);
 }

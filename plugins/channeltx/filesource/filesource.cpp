@@ -59,6 +59,7 @@ FileSource::FileSource(DeviceAPI *deviceAPI) :
     setObjectName(m_channelId);
 
     m_thread = new QThread(this);
+    m_thread->setObjectName("FileSource");
     m_basebandSource = new FileSourceBaseband();
     m_basebandSource->moveToThread(m_thread);
 

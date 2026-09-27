@@ -54,6 +54,8 @@ APTDemod::APTDemod(DeviceAPI *deviceAPI) :
         m_basebandSampleRate(0)
 {
     setObjectName(m_channelId);
+    m_imageThread.setObjectName("APTDemodImage");
+    m_thread.setObjectName("APTDemodBB");
 
     m_basebandSink = new APTDemodBaseband();
     m_basebandSink->moveToThread(&m_thread);

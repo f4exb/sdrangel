@@ -39,6 +39,7 @@ USRPInputThread::USRPInputThread(uhd::rx_streamer::sptr stream, size_t bufSample
     m_replayBuffer(replayBuffer),
     m_log2Decim(0)
 {
+    setObjectName("USRPInput");
     // *2 as samples are I+Q
     m_buf = new qint16[2*bufSamples];
     std::fill(m_buf, m_buf + 2*bufSamples, 0);

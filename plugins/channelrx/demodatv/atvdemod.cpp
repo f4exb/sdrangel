@@ -41,6 +41,7 @@ ATVDemod::ATVDemod(DeviceAPI *deviceAPI) :
 {
     qDebug("ATVDemod::ATVDemod");
     setObjectName(m_channelId);
+    m_thread.setObjectName("ATVDemodBB");
 
     m_basebandSink = new ATVDemodBaseband();
     m_basebandSink->setFifoLabel(QString("%1 [%2:%3]")

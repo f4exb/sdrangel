@@ -102,6 +102,7 @@ void BeamSteeringCWMod::startSources()
 
     qDebug("BeamSteeringCWMod::startSources");
     m_thread = new QThread(this);
+    m_thread->setObjectName("BeamSteerCWMod");
     m_basebandSource = new BeamSteeringCWModBaseband();
     m_basebandSource->moveToThread(m_thread);
 

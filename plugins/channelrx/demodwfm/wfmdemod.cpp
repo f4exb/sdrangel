@@ -132,6 +132,7 @@ void WFMDemod::start()
     qDebug() << "WFMDemod::start";
 
     m_thread = new QThread(this);
+    m_thread->setObjectName("WFMDemod");
     m_basebandSink = new WFMDemodBaseband();
     m_basebandSink->setChannel(this);
     m_basebandSink->moveToThread(m_thread);

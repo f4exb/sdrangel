@@ -40,6 +40,7 @@ FCDProPlusThread::FCDProPlusThread(SampleSinkFifo* sampleFifo, AudioFifo *fcdFIF
     m_convertBuffer(fcd_traits<ProPlus>::convBufSize),
     m_sampleFifo(sampleFifo)
 {
+    setObjectName("FCDProPlus");
 	start();
 }
 

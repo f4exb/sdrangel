@@ -50,6 +50,7 @@ VORDemodMC::VORDemodMC(DeviceAPI *deviceAPI) :
         m_basebandSampleRate(0)
 {
     setObjectName(m_channelId);
+    m_thread.setObjectName("VORDemodMCBB");
 
     m_basebandSink = new VORDemodMCBaseband();
     m_basebandSink->moveToThread(&m_thread);

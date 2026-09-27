@@ -31,6 +31,7 @@ XTRXOutputThread::XTRXOutputThread(struct xtrx_dev *dev, unsigned int nbChannels
     m_nbChannels(nbChannels),
     m_uniqueChannelIndex(uniqueChannelIndex)
 {
+    setObjectName("XTRXOutput");
     qDebug("XTRXOutputThread::XTRXOutputThread: nbChannels: %u uniqueChannelIndex: %u", nbChannels, uniqueChannelIndex);
     m_channels = new Channel[2];
 }

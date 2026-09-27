@@ -37,6 +37,7 @@ Bladerf1InputThread::Bladerf1InputThread(struct bladerf* dev, SampleSinkFifo* sa
 	m_fcPos(0),
     m_iqOrder(true)
 {
+    setObjectName("Bladerf1Input");
     std::fill(m_buf, m_buf + 2*BLADERF_BLOCKSIZE, 0);
 }
 

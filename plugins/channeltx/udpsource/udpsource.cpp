@@ -50,6 +50,7 @@ UDPSource::UDPSource(DeviceAPI *deviceAPI) :
     setObjectName(m_channelId);
 
     m_thread = new QThread(this);
+    m_thread->setObjectName("UDPSource");
     m_basebandSource = new UDPSourceBaseband();
     m_basebandSource->setSpectrumSink(&m_spectrumVis);
     m_basebandSource->moveToThread(m_thread);

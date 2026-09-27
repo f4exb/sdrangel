@@ -71,6 +71,7 @@ void SIDMain::start()
 {
     qDebug("SIDMain::start");
     m_thread = new QThread();
+    m_thread->setObjectName("SIDMain");
     m_worker = new SIDWorker(this, m_webAPIAdapterInterface);
     m_worker->moveToThread(m_thread);
     QObject::connect(m_thread, &QThread::started, m_worker, &SIDWorker::startWork);

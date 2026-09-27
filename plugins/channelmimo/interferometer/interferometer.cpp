@@ -124,6 +124,7 @@ void Interferometer::startSinks()
 
     qDebug("Interferometer::startSinks");
     m_thread = new QThread(this);
+    m_thread->setObjectName("Interferometer");
     m_basebandSink = new InterferometerBaseband(m_fftSize);
     m_basebandSink->setSpectrumSink(&m_spectrumVis);
     m_basebandSink->setScopeSink(&m_scopeSink);

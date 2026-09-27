@@ -145,6 +145,7 @@ void WDSPRx::start()
 
     qDebug() << "WDSPRx::start";
     m_thread = new QThread();
+    m_thread->setObjectName("WDSPRx");
     m_basebandSink = new WDSPRxBaseband();
     m_basebandSink->setFifoLabel(QString("%1 [%2:%3]")
         .arg(m_channelId)

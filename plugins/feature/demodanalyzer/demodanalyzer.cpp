@@ -101,6 +101,7 @@ void DemodAnalyzer::start()
 
 	qDebug("DemodAnalyzer::start");
     m_thread = new QThread();
+    m_thread->setObjectName("DemodAnalyzer");
     m_worker = new DemodAnalyzerWorker();
     m_worker->moveToThread(m_thread);
 

@@ -64,6 +64,7 @@ ADSBDemod::ADSBDemod(DeviceAPI *devieAPI) :
     setObjectName(m_channelId);
 
     m_thread = new QThread(this);
+    m_thread->setObjectName("ADSBDemodBB");
     m_basebandSink = new ADSBDemodBaseband();
     m_basebandSink->moveToThread(m_thread);
 

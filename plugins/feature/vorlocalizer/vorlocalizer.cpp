@@ -99,6 +99,7 @@ void VORLocalizer::start()
 
 	qDebug("VORLocalizer::start");
     m_thread = new QThread();
+    m_thread->setObjectName("VORLocalizer");
     m_worker = new VorLocalizerWorker(getWebAPIAdapterInterface());
     m_worker->moveToThread(m_thread);
 

@@ -145,6 +145,7 @@ void FileSink::start()
 
 	qDebug("FileSink::start");
     m_thread = new QThread();
+    m_thread->setObjectName("FileSink");
     m_basebandSink = new FileSinkBaseband();
     m_basebandSink->setFifoLabel(QString("%1 [%2:%3]")
         .arg(m_channelId)

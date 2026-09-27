@@ -52,6 +52,7 @@ NavtexDemod::NavtexDemod(DeviceAPI *deviceAPI) :
         m_basebandSampleRate(0)
 {
     setObjectName(m_channelId);
+    m_thread.setObjectName("NavtexDemodBB");
 
     m_basebandSink = new NavtexDemodBaseband();
     m_basebandSink->setMessageQueueToChannel(getInputMessageQueue());

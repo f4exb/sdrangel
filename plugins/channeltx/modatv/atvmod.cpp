@@ -62,6 +62,7 @@ ATVMod::ATVMod(DeviceAPI *deviceAPI) :
 	setObjectName(m_channelId);
 
     m_thread = new QThread(this);
+    m_thread->setObjectName("ATVMod");
     m_basebandSource = new ATVModBaseband();
     m_basebandSource->moveToThread(m_thread);
 

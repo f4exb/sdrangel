@@ -60,6 +60,7 @@ ILSDemod::ILSDemod(DeviceAPI *deviceAPI) :
     m_angle(NAN)
 {
     setObjectName(m_channelId);
+    m_thread.setObjectName("ILSDemodBB");
 
     m_basebandSink = new ILSDemodBaseband();
     m_basebandSink->setMessageQueueToChannel(getInputMessageQueue());
