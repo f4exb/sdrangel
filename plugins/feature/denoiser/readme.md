@@ -4,7 +4,7 @@
 
 This feature can process demodulated audio with RNNoise, NVIDIA Noise Removal,
 or an installed VST3 audio effect, such as a [denoiser](https://github.com/werman/noise-suppression-for-voice)
-or [EQ](https://www.manda-audio.com/products.php).
+or [EQ](https://duskaudio.com/plugins/multi-q/).
 
 It connects to the "demod" stream of RX channels or features similarly to the Demod Analyzer plugin. 
 It also outputs its processed stereo audio on a "demod" stream, so another Denoiser or Demod Analyzer can use it as an input. 
