@@ -194,10 +194,29 @@ bool BFMDemod::handleMessage(const Message& cmd)
 
         return true;
     }
+    else if (MainCore::MsgChannelDemodQuery::match(cmd))
+    {
+        sendSampleRateToDemodAnalyzer();
+        return true;
+    }
 	else
 	{
     	return false;
 	}
+}
+
+void BFMDemod::sendSampleRateToDemodAnalyzer()
+{
+    QList<ObjectPipe*> pipes;
+    MainCore::instance()->getMessagePipes().getMessagePipes(this, "reportdemod", pipes);
+
+    for (const auto& pipe : pipes)
+    {
+        MessageQueue *messageQueue = qobject_cast<MessageQueue*>(pipe->m_element);
+        if (messageQueue) {
+            messageQueue->push(MainCore::MsgChannelDemodReport::create(this, getAudioSampleRate()));
+        }
+    }
 }
 
 void BFMDemod::setCenterFrequency(qint64 frequency)
