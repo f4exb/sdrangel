@@ -31,6 +31,7 @@
 #include <QProgressDialog>
 #include <QLabel>
 #include <QToolButton>
+#include <QShortcut>
 #include <QFile>
 #include <QFileInfo>
 #include <QFileDialog>
@@ -49,6 +50,7 @@
 #include <QMenuBar>
 #include <QStatusBar>
 #include <QScreen>
+#include <QHash>
 
 #include "device/devicegui.h"
 #include "device/deviceapi.h"
@@ -78,6 +80,7 @@
 #include "gui/fftdialog.h"
 #include "gui/fftwisdomdialog.h"
 #include "gui/workspace.h"
+#include "gui/connectionoverlay.h"
 #include "gui/featurepresetsdialog.h"
 #include "gui/devicesetpresetsdialog.h"
 #include "gui/commandsdialog.h"
@@ -131,6 +134,7 @@ MainWindow::MainWindow(qtwebapp::LoggerWithFile *logger, const MainParser& parse
     m_currentWorkspace(nullptr),
     m_mainCore(MainCore::instance()),
 	m_dspEngine(DSPEngine::instance()),
+    m_connectionOverlayEnabled(false),
 	m_lastEngineState(DeviceAPI::StNotStarted),
     m_dateTimeWidget(nullptr),
     m_showSystemWidget(nullptr),
@@ -207,6 +211,16 @@ MainWindow::MainWindow(qtwebapp::LoggerWithFile *logger, const MainParser& parse
 
 	connect(&m_statusTimer, SIGNAL(timeout()), this, SLOT(updateStatus()));
 	m_statusTimer.start(1000);
+    m_connectionOverlayRefreshTimer.setInterval(500);
+    connect(&m_connectionOverlayRefreshTimer, &QTimer::timeout,
+        this, &MainWindow::updateConnectionOverlays);
+    // One application-wide shortcut: a shortcut on each workspace's button would be
+    // ambiguous with several docked workspaces, and would miss floating ones.
+    QShortcut *connectionOverlayShortcut = new QShortcut(QKeySequence(Qt::CTRL | Qt::SHIFT | Qt::Key_L), this);
+    connectionOverlayShortcut->setContext(Qt::ApplicationShortcut);
+    connect(connectionOverlayShortcut, &QShortcut::activated, this, [this]() {
+        setConnectionOverlayEnabled(!m_connectionOverlayEnabled);
+    });
 
     splash->showStatusMessage("load settings...", Qt::white);
     qDebug() << "MainWindow::MainWindow: load settings...";
@@ -298,6 +312,7 @@ MainWindow::~MainWindow()
 {
 	qDebug() << "MainWindow::~MainWindow";
 
+    setConnectionOverlayEnabled(false);
     m_statusTimer.stop();
     m_apiServer->stop();
     delete m_apiServer;
@@ -765,6 +780,7 @@ void RemoveDeviceSetFSM::removeSink()
 void RemoveDeviceSetFSM::removeUI()
 {
     qDebug() << "RemoveDeviceSetFSM::removeUI";
+    m_mainWindow->m_connectionOverlayRefreshTimer.stop();
 
     // Remove transitions, as we will delete the object (DSPDevice*Engine) that is the source of these signals
     m_states[0]->removeTransition(m_t1);
@@ -784,8 +800,10 @@ void RemoveDeviceSetFSM::removeUI()
     }
     // As for features: QObject only drops an object's connections in ~QObject, so a signal can
     // still reach the GUI after the derived destructor has deleted its ui object.
-    QObject::disconnect(m_deviceUISet->m_deviceAPI, nullptr, m_deviceUISet->m_deviceGUI, nullptr);
-    delete m_deviceUISet->m_deviceGUI;
+    DeviceGUI *deviceGUI = m_deviceUISet->m_deviceGUI;
+    m_deviceUISet->m_deviceGUI = nullptr;
+    QObject::disconnect(m_deviceUISet->m_deviceAPI, nullptr, deviceGUI, nullptr);
+    delete deviceGUI;
     m_deviceUISet->m_deviceAPI->resetSamplingDeviceId();
     if (!m_deviceMIMOEngine) {
         m_deviceUISet->m_deviceAPI->clearBuddiesLists(); // clear old API buddies lists
@@ -870,6 +888,11 @@ void RemoveDeviceSetFSM::removeDeviceSet()
         );
     }
 
+    if (m_mainWindow->m_connectionOverlayEnabled)
+    {
+        m_mainWindow->updateConnectionOverlays();
+        m_mainWindow->m_connectionOverlayRefreshTimer.start();
+    }
     emit m_mainWindow->m_mainCore->deviceSetRemoved(m_deviceSetIndex);
 }
 
@@ -913,6 +936,7 @@ RemoveAllWorkspacesFSM::RemoveAllWorkspacesFSM(MainWindow *mainWindow, QObject *
 void RemoveAllWorkspacesFSM::removeDeviceSets()
 {
     qDebug() << "RemoveAllWorkspacesFSM::removeDeviceSets";
+    m_mainWindow->setConnectionOverlayEnabled(false);
     m_removeAllDeviceSetsFSM->start();
 }
 
@@ -932,6 +956,7 @@ void RemoveAllWorkspacesFSM::removeWorkspaces()
 LoadConfigurationFSM::LoadConfigurationFSM(MainWindow *mainWindow, const Configuration *configuration, QProgressDialog *waitBox, QObject *parent) :
     MainWindowFSM(mainWindow, parent),
     m_configuration(configuration),
+    m_overlayEnabledBeforeLoad(mainWindow->m_connectionOverlayEnabled),
     m_waitBox(waitBox)
 {
     // Create FSM
@@ -1194,6 +1219,8 @@ void LoadConfigurationFSM::restoreGeometry()
     if (m_waitBox) {
         m_waitBox->setValue(100);
     }
+    // Re-enable only now, so the refresh timer doesn't walk device sets while they are being created.
+    m_mainWindow->setConnectionOverlayEnabled(m_overlayEnabledBeforeLoad);
 }
 
 InitFSM::InitFSM(MainWindow *mainWindow, SDRangelSplash *splash, bool loadDefault, bool showConfigs, QObject *parent) :
@@ -2260,6 +2287,7 @@ void MainWindow::createStatusBar()
 void MainWindow::closeEvent(QCloseEvent *closeEvent)
 {
     qDebug("MainWindow::closeEvent");
+    m_connectionOverlayRefreshTimer.stop();
 
     if (!m_settingsSaved)
     {
@@ -2273,6 +2301,8 @@ void MainWindow::closeEvent(QCloseEvent *closeEvent)
 
         m_settingsSaved = true;
     }
+
+    setConnectionOverlayEnabled(false);
 
     if (m_deviceUIs.size() > 0)
     {
@@ -2675,11 +2705,181 @@ void MainWindow::handleWorkspaceVisibility(Workspace *workspace, bool visibility
     m_currentWorkspace = workspace;
 }
 
+void MainWindow::setConnectionOverlayEnabled(bool enabled)
+{
+    m_connectionOverlayEnabled = enabled;
+    for (Workspace *workspace : m_workspaces) {
+        workspace->setConnectionOverlayVisible(enabled);
+    }
+    if (enabled)
+    {
+        updateConnectionOverlays();
+        m_connectionOverlayRefreshTimer.start();
+    }
+    else
+    {
+        m_connectionOverlayRefreshTimer.stop();
+    }
+}
+
+void MainWindow::updateConnectionOverlays()
+{
+    if (!m_connectionOverlayEnabled) {
+        return;
+    }
+
+    struct Endpoint {
+        QMdiSubWindow *window;
+        QString label;
+        int workspace;
+        bool feature;
+        QColor linkColor;
+    };
+    QHash<const QObject*, Endpoint> endpoints;
+    QList<ConnectionOverlay::Connection> connections;
+
+    for (DeviceUISet *deviceUI : m_deviceUIs)
+    {
+        if (!deviceUI || !deviceUI->m_deviceGUI) {
+            continue;
+        }
+        DeviceGUI *device = deviceUI->m_deviceGUI;
+        const QString tag = device->getDeviceType() == DeviceGUI::DeviceTx ? "T" :
+            (device->getDeviceType() == DeviceGUI::DeviceMIMO ? "M" : "R");
+        const QString deviceLabel = QString("%1:%2").arg(tag).arg(deviceUI->getIndex());
+        const QColor deviceColor = device->getDeviceTypeColor();
+        const Endpoint deviceEndpoint{device, deviceLabel, device->getWorkspaceIndex(), false, deviceColor};
+        endpoints.insert(device, deviceEndpoint);
+        endpoints.insert(deviceUI->m_deviceAPI, deviceEndpoint);
+
+        auto appendDeviceConnection = [&](QMdiSubWindow *target, const QString& label,
+                                          int targetWorkspace, ConnectionOverlay::Direction direction) {
+            if (!target) {
+                return;
+            }
+            ConnectionOverlay::Connection connection;
+            connection.source = device;
+            connection.target = target;
+            connection.sourceLabel = deviceLabel;
+            connection.targetLabel = label;
+            connection.flowLabel = "IQ";
+            connection.sourceWorkspace = device->getWorkspaceIndex();
+            connection.targetWorkspace = targetWorkspace;
+            connection.direction = direction;
+            connection.color = deviceColor;
+            connections.append(connection);
+        };
+
+        const ConnectionOverlay::Direction spectrumDirection =
+            device->getDeviceType() == DeviceGUI::DeviceTx ? ConnectionOverlay::Reverse :
+            (device->getDeviceType() == DeviceGUI::DeviceMIMO ? ConnectionOverlay::BothDirections : ConnectionOverlay::Forward);
+        if (deviceUI->m_mainSpectrumGUI)
+        {
+            appendDeviceConnection(deviceUI->m_mainSpectrumGUI, deviceLabel + " spectrum",
+                deviceUI->m_mainSpectrumGUI->getWorkspaceIndex(), spectrumDirection);
+        }
+        for (int channelIndex = 0; channelIndex < deviceUI->getNumberOfChannels(); ++channelIndex)
+        {
+            ChannelGUI *channel = deviceUI->getChannelGUIAt(channelIndex);
+            if (!channel) {
+                continue;
+            }
+            const QString channelLabel = QString("%1%2:%3").arg(tag).arg(deviceUI->getIndex()).arg(channel->getIndex());
+            const int type = deviceUI->getChannelTypeAt(channelIndex);
+            const ConnectionOverlay::Direction direction = type == 1 ? ConnectionOverlay::Reverse :
+                (type == 2 ? ConnectionOverlay::BothDirections : ConnectionOverlay::Forward);
+            appendDeviceConnection(channel, channelLabel, channel->getWorkspaceIndex(), direction);
+            const Endpoint endpoint{channel, channelLabel, channel->getWorkspaceIndex(), false,
+                channel->getIndexLabelColor()};
+            endpoints.insert(channel, endpoint);
+            if (ChannelAPI *channelAPI = deviceUI->getChannelAt(channelIndex)) {
+                endpoints.insert(channelAPI, endpoint);
+            }
+        }
+    }
+
+    for (FeatureUISet *featureUI : m_featureUIs)
+    {
+        if (!featureUI) {
+            continue;
+        }
+        for (int featureIndex = 0; featureIndex < featureUI->getNumberOfFeatures(); ++featureIndex)
+        {
+            FeatureGUI *featureGUI = featureUI->getFeatureGuiAt(featureIndex);
+            if (!featureGUI) {
+                continue;
+            }
+            const Endpoint endpoint{featureGUI, QString("F%1").arg(featureGUI->getIndex()),
+                featureGUI->getWorkspaceIndex(), true, QColor()};
+            endpoints.insert(featureGUI, endpoint);
+            if (Feature *feature = featureUI->getFeatureAt(featureIndex)) {
+                endpoints.insert(feature, endpoint);
+            }
+        }
+    }
+
+    QList<ObjectPipesRegistrations::Connection> pipes = m_mainCore->getDataPipes().getConnections();
+    pipes.append(m_mainCore->getMessagePipes().getConnections());
+    // A message pipe may terminate at a helper QObject owned by a channel or
+    // feature. Walk its parent chain to find the window represented in the graph.
+    auto endpointFor = [&endpoints](const QObject *object) -> const Endpoint* {
+        for (const QObject *current = object; current; current = current->parent()) 
+        {
+            auto found = endpoints.constFind(current);
+            if (found != endpoints.constEnd()) {
+                return &found.value();
+            }
+        }
+        return nullptr;
+    };
+    QHash<QMdiSubWindow*, QHash<QMdiSubWindow*, int>> pipeConnectionIndices;
+    for (const ObjectPipesRegistrations::Connection& pipe : pipes)
+    {
+        const Endpoint *sourceEndpoint = endpointFor(pipe.producer);
+        const Endpoint *targetEndpoint = endpointFor(pipe.consumer);
+        if (!sourceEndpoint || !targetEndpoint) {
+            continue;
+        }
+        const Endpoint& source = *sourceEndpoint;
+        const Endpoint& target = *targetEndpoint;
+        if (source.window == target.window || (!source.feature && !target.feature)) {
+            continue;
+        }
+        const int existingIndex = pipeConnectionIndices.value(source.window).value(target.window, -1);
+        if (existingIndex >= 0)
+        {
+            if (pipe.type == "demod") {
+                connections[existingIndex].flowLabel = "Audio";
+            }
+            continue;
+        }
+        ConnectionOverlay::Connection connection;
+        connection.source = source.window;
+        connection.target = target.window;
+        connection.sourceLabel = source.label;
+        connection.targetLabel = target.label;
+        connection.flowLabel = pipe.type == "demod" ? "Audio" : "Data";
+        connection.sourceWorkspace = source.workspace;
+        connection.targetWorkspace = target.workspace;
+        connection.kind = ConnectionOverlay::PipeLink;
+        connection.direction = ConnectionOverlay::Forward;
+        connection.color = source.linkColor.isValid() ? source.linkColor : target.linkColor;
+        pipeConnectionIndices[source.window].insert(target.window, connections.size());
+        connections.append(connection);
+    }
+
+    for (Workspace *workspace : m_workspaces) {
+        workspace->setConnections(connections);
+    }
+}
+
 void MainWindow::addWorkspace()
 {
     int workspaceIndex = m_workspaces.size();
     auto *workspace = new Workspace(workspaceIndex);
     m_workspaces.push_back(workspace);
+    workspace->setConnectionOverlayVisible(m_connectionOverlayEnabled);
+    connect(workspace, &Workspace::connectionOverlayToggled, this, &MainWindow::setConnectionOverlayEnabled);
     if (workspace->getMenuButton()) {
         createMenuBar(workspace->getMenuButton());
     }
@@ -3266,7 +3466,9 @@ void MainWindow::sampleSourceChange(int deviceSetIndex, int newDeviceIndex, Work
         // deletes old UI and input object
         deviceUISet->m_deviceAPI->getSampleSource()->setMessageQueueToGUI(nullptr); // have source stop sending messages to the GUI
 
-        delete deviceUISet->m_deviceGUI;
+        DeviceGUI *oldDeviceGUI = deviceUISet->m_deviceGUI;
+        deviceUISet->m_deviceGUI = nullptr;
+        delete oldDeviceGUI;
         deviceUISet->m_deviceAPI->resetSamplingDeviceId();
         deviceUISet->m_deviceAPI->getPluginInterface()->deleteSampleSourcePluginInstanceInput(deviceUISet->m_deviceAPI->getSampleSource());
         deviceUISet->m_deviceAPI->clearBuddiesLists(); // clear old API buddies lists
@@ -3309,7 +3511,9 @@ void MainWindow::sampleSinkChange(int deviceSetIndex, int newDeviceIndex, Worksp
 
         // deletes old UI and output object
         deviceUISet->m_deviceAPI->getSampleSink()->setMessageQueueToGUI(nullptr); // have sink stop sending messages to the GUI
-        delete m_deviceUIs[deviceSetIndex]->m_deviceGUI;
+        DeviceGUI *oldDeviceGUI = deviceUISet->m_deviceGUI;
+        deviceUISet->m_deviceGUI = nullptr;
+        delete oldDeviceGUI;
         deviceUISet->m_deviceAPI->resetSamplingDeviceId();
         deviceUISet->m_deviceAPI->getPluginInterface()->deleteSampleSinkPluginInstanceOutput(deviceUISet->m_deviceAPI->getSampleSink());
         deviceUISet->m_deviceAPI->clearBuddiesLists(); // clear old API buddies lists
@@ -3353,7 +3557,9 @@ void MainWindow::sampleMIMOChange(int deviceSetIndex, int newDeviceIndex, Worksp
 
         // deletes old UI and output object
         deviceUISet->m_deviceAPI->getSampleMIMO()->setMessageQueueToGUI(nullptr); // have sink stop sending messages to the GUI
-        delete deviceUISet->m_deviceGUI;
+        DeviceGUI *oldDeviceGUI = deviceUISet->m_deviceGUI;
+        deviceUISet->m_deviceGUI = nullptr;
+        delete oldDeviceGUI;
         deviceUISet->m_deviceAPI->resetSamplingDeviceId();
         deviceUISet->m_deviceAPI->getPluginInterface()->deleteSampleMIMOPluginInstanceMIMO(deviceUISet->m_deviceAPI->getSampleMIMO());
 

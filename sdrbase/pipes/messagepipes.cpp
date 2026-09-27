@@ -52,6 +52,11 @@ void MessagePipes::getMessagePipes(const QObject *producer, const QString& type,
     return m_registrations.getPipes(producer, type, pipes);
 }
 
+QList<ObjectPipesRegistrations::Connection> MessagePipes::getConnections()
+{
+    return m_registrations.getConnections();
+}
+
 void MessagePipes::startGC()
 {
 	qDebug("MessagePipes::startGC");

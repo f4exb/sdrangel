@@ -42,7 +42,7 @@ const char* const AIS::m_featureId = "AIS";
 
 AIS::AIS(WebAPIAdapterInterface *webAPIAdapterInterface) :
     Feature(m_featureIdURI, webAPIAdapterInterface),
-    m_availableChannelHandler({"sdrangel.channel.aisdemod"}, QStringList{"ais"})
+    m_availableChannelHandler({"sdrangel.channel.aisdemod"}, QStringList{"ais"}, "RTMF", this)
 {
     qDebug("AIS::AIS: webAPIAdapterInterface: %p", webAPIAdapterInterface);
     setObjectName(m_featureId);

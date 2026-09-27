@@ -71,6 +71,10 @@ ObjectPipe *ObjectPipesRegistrations::registerProducerToConsumer(const QObject *
             if (!m_pipeMap.contains(std::make_tuple(producer, consumer, typeId))) {
                 m_pipeMap[std::make_tuple(producer, consumer, typeId)] = pipe;
             }
+            // A pipe revived before GC may now belong to a new object at the old
+            // address, so make sure that object's destruction is also tracked.
+            connect(producer, SIGNAL(destroyed(QObject*)), this, SLOT(removeProducer(QObject*)), Qt::UniqueConnection);
+            connect(consumer, SIGNAL(destroyed(QObject*)), this, SLOT(removeConsumer(QObject*)), Qt::UniqueConnection);
             return pipe;
         }
     }
@@ -91,14 +95,15 @@ ObjectPipe *ObjectPipesRegistrations::registerProducerToConsumer(const QObject *
     m_producerAndTypeIdPipes[std::make_tuple(producer, typeId)].push_back(m_pipes.back());
     m_pipeMap[std::make_tuple(producer, consumer, typeId)] = m_pipes.back();
 
-    connect(producer, SIGNAL(destroyed(QObject*)), this, SLOT(removeProducer(QObject*)));
-    connect(consumer, SIGNAL(destroyed(QObject*)), this, SLOT(removeConsumer(QObject*)));
+    connect(producer, SIGNAL(destroyed(QObject*)), this, SLOT(removeProducer(QObject*)), Qt::UniqueConnection);
+    connect(consumer, SIGNAL(destroyed(QObject*)), this, SLOT(removeConsumer(QObject*)), Qt::UniqueConnection);
 
     return m_pipes.back();
 }
 
 ObjectPipe *ObjectPipesRegistrations::unregisterProducerToConsumer(const QObject *producer, const QObject *consumer, const QString& type)
 {
+    QMutexLocker mlock(&m_mutex);
     ObjectPipe *pipe = nullptr;
 
     if (m_typeIds.contains(type))
@@ -159,6 +164,18 @@ void ObjectPipesRegistrations::getPipes(const QObject *producer, const QString& 
     }
 }
 
+QList<ObjectPipesRegistrations::Connection> ObjectPipesRegistrations::getConnections()
+{
+    QMutexLocker lock(&m_mutex);
+    QList<Connection> connections;
+    for (const ObjectPipe *pipe : m_pipes) {
+        if (pipe->getGCCount() == 0) {
+            connections.append({pipe->m_producer, pipe->m_consumer, m_types.value(pipe->m_typeId)});
+        }
+    }
+    return connections;
+}
+
 void ObjectPipesRegistrations::processGC()
 {
     QMutexLocker mlock(&m_mutex);
@@ -171,6 +188,11 @@ void ObjectPipesRegistrations::processGC()
         {
             if ((*itPipe)->decreaseGCCount() == 0) // delete on this pass
             {
+                const auto key = std::make_tuple((*itPipe)->m_producer, (*itPipe)->m_consumer,
+                    (*itPipe)->m_typeId);
+                if (m_pipeMap.value(key, nullptr) == *itPipe) {
+                    m_pipeMap.remove(key);
+                }
                 m_objectPipeElementsStore->deleteElement((*itPipe)->m_element);
                 delete *itPipe;
                 itPipe = m_pipes.erase(itPipe);
@@ -216,7 +238,7 @@ void ObjectPipesRegistrations::removeProducer(QObject *producer)
 
     while (itP != m_pipeMap.end())
     {
-        if (std::get<0>(itP.key())) {
+        if (std::get<0>(itP.key()) == producer) {
             itP = m_pipeMap.erase(itP);
         } else {
             ++itP;

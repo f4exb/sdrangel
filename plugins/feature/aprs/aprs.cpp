@@ -45,7 +45,7 @@ APRS::APRS(WebAPIAdapterInterface *webAPIAdapterInterface) :
     Feature(m_featureIdURI, webAPIAdapterInterface),
     m_thread(nullptr),
     m_worker(nullptr),
-    m_availableChannelHandler(APRSSettings::m_pipeURIs, QStringList{"packets"})
+    m_availableChannelHandler(APRSSettings::m_pipeURIs, QStringList{"packets"}, "RTMF", this)
 {
     qDebug("APRS::APRS: webAPIAdapterInterface: %p", webAPIAdapterInterface);
     setObjectName(m_featureId);

@@ -198,6 +198,7 @@ bool DenoiserWorker::handleMessage(const Message& cmd)
                 this,
                 &DenoiserWorker::handleData
             );
+            m_dataFifo = nullptr; // It is freed by the pipes GC after being unregistered.
         }
 
         return true;
@@ -300,6 +301,10 @@ void DenoiserWorker::applySampleRate(int sampleRate)
 void DenoiserWorker::handleData()
 {
     QMutexLocker mutexLocker(&m_mutex);
+
+    if (!m_dataFifo) {
+        return; // A queued dataReady can arrive after the FIFO was disconnected.
+    }
 
     while ((m_dataFifo->fill() > 0) && (m_inputMessageQueue.size() == 0))
     {

@@ -388,7 +388,7 @@ void MorseDecoder::setChannel(ChannelAPI *selectedChannel)
     if (m_selectedChannel)
     {
         ObjectPipe *pipe = mainCore->getDataPipes().unregisterProducerToConsumer(m_selectedChannel, this, "demod");
-        DataFifo *fifo = qobject_cast<DataFifo*>(pipe->m_element);
+        DataFifo *fifo = pipe ? qobject_cast<DataFifo*>(pipe->m_element) : nullptr;
 
         if ((fifo) && m_running)
         {
@@ -703,6 +703,7 @@ void MorseDecoder::handleDataPipeToBeDeleted(int reason, QObject *object)
         }
 
         m_selectedChannel = nullptr;
+        m_dataPipe = nullptr; // The pipe and its FIFO are freed by the pipes GC.
     }
 }
 

@@ -25,6 +25,7 @@
 
 #include <QtGlobal>
 #include <QString>
+#include <QColor>
 #include <QByteArray>
 #include <QWidget>
 #include <QLabel>
@@ -73,6 +74,7 @@ public:
     void sizeToContents();
     void setDeviceType(DeviceType type);
     DeviceType getDeviceType() const { return m_deviceType; }
+    QColor getDeviceTypeColor() const;
     void setTitle(const QString& title);
     QString getTitle() const override;
     void setDefaultTitle(const QString& title) { m_defaultTitle = title; }
@@ -111,7 +113,6 @@ protected slots:
 
 private:
     bool isOnMovingPad();
-    QString getDeviceTypeColor();
     QString getDeviceTypeTag();
 
     QLabel *m_indexLabel;
