@@ -805,9 +805,7 @@ void RemoveDeviceSetFSM::removeUI()
     QObject::disconnect(m_deviceUISet->m_deviceAPI, nullptr, deviceGUI, nullptr);
     delete deviceGUI;
     m_deviceUISet->m_deviceAPI->resetSamplingDeviceId();
-    if (!m_deviceMIMOEngine) {
-        m_deviceUISet->m_deviceAPI->clearBuddiesLists(); // clear old API buddies lists
-    }
+    // Buddy lists are cleared in removeDeviceSet(), after the sample source/sink is deleted (#2721).
 }
 
 void RemoveDeviceSetFSM::stopEngine()
@@ -848,11 +846,13 @@ void RemoveDeviceSetFSM::removeDeviceSet()
     if (m_deviceSourceEngine)
     {
         delete deviceAPI->getSampleSource();
+        deviceAPI->clearBuddiesLists(); // after the delete, so closeDevice() still saw its buddies (#2721)
         delete m_deviceSourceEngine;
     }
     else if (m_deviceSinkEngine)
     {
         delete deviceAPI->getSampleSink();
+        deviceAPI->clearBuddiesLists(); // after the delete, so closeDevice() still saw its buddies (#2721)
         delete m_deviceSinkEngine;
     }
     else
