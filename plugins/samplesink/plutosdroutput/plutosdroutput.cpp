@@ -108,6 +108,11 @@ bool PlutoSDROutput::start()
         return true;
     }
 
+    if (!m_deviceShared.m_deviceParams)
+    {
+        qCritical("PlutoSDROutput::start: device not open");
+        return false;
+    }
     if (!m_deviceShared.m_deviceParams->getBox())
     {
         qCritical("PlutoSDROutput::start: device not open");
