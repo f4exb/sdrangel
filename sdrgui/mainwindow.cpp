@@ -2734,9 +2734,31 @@ void MainWindow::updateConnectionOverlays()
         int workspace;
         bool feature;
         QColor linkColor;
+        const ChannelAPI *channel;  // For its audio sample rate, if a channel
     };
     QHash<const QObject*, Endpoint> endpoints;
     QList<ConnectionOverlay::Connection> connections;
+
+    // Compact sample rate for labels, e.g. 2.048M or 48k. Empty if unknown.
+    auto formatRate = [](int rate) -> QString {
+        if (rate <= 0) {
+            return QString();
+        }
+        return rate >= 1000000 ? QString::number(rate / 1e6, 'g', 4) + "M" : QString::number(rate / 1e3, 'g', 4) + "k";
+    };
+    // IQ label with the rates at each end in flow order, e.g. "IQ 2.048M → 48k".
+    auto iqLabel = [&formatRate](int fromRate, int toRate) -> QString {
+        const QString from = formatRate(fromRate);
+        const QString to = formatRate(toRate);
+        if (from.isEmpty() || to.isEmpty() || from == to) {
+            return QString("IQ %1").arg(from.isEmpty() ? to : from).trimmed();
+        }
+        return QString("IQ %1 → %2").arg(from, to);
+    };
+    auto audioLabel = [&formatRate](const Endpoint& source) -> QString {
+        const QString rate = source.channel ? formatRate(source.channel->getAudioSampleRate()) : QString();
+        return rate.isEmpty() ? QString("Audio") : QString("Audio %1").arg(rate);
+    };
 
     for (DeviceUISet *deviceUI : m_deviceUIs)
     {
@@ -2748,12 +2770,33 @@ void MainWindow::updateConnectionOverlays()
             (device->getDeviceType() == DeviceGUI::DeviceMIMO ? "M" : "R");
         const QString deviceLabel = QString("%1:%2").arg(tag).arg(deviceUI->getIndex());
         const QColor deviceColor = device->getDeviceTypeColor();
-        const Endpoint deviceEndpoint{device, deviceLabel, device->getWorkspaceIndex(), false, deviceColor};
+        const Endpoint deviceEndpoint{device, deviceLabel, device->getWorkspaceIndex(), false, deviceColor, nullptr};
         endpoints.insert(device, deviceEndpoint);
         endpoints.insert(deviceUI->m_deviceAPI, deviceEndpoint);
 
+        // Device sample rate for a stream. MIMO devices have one per stream.
+        DeviceAPI *deviceAPI = deviceUI->m_deviceAPI;
+        auto deviceRate = [deviceAPI](bool tx, int stream) -> int {
+            if (DeviceSampleMIMO *mimo = deviceAPI->getSampleMIMO())
+            {
+                const unsigned int streams = tx ? mimo->getNbSinkStreams() : mimo->getNbSourceStreams();
+                if (stream < 0 || (unsigned int) stream >= streams) {
+                    return 0;
+                }
+                return tx ? mimo->getSinkSampleRate(stream) : mimo->getSourceSampleRate(stream);
+            }
+            if (DeviceSampleSource *source = deviceAPI->getSampleSource()) {
+                return source->getSampleRate();
+            }
+            if (DeviceSampleSink *sink = deviceAPI->getSampleSink()) {
+                return sink->getSampleRate();
+            }
+            return 0;
+        };
+
         auto appendDeviceConnection = [&](QMdiSubWindow *target, const QString& label,
-                                          int targetWorkspace, ConnectionOverlay::Direction direction) {
+                                          int targetWorkspace, ConnectionOverlay::Direction direction,
+                                          const QString& flowLabel, const QColor& color) {
             if (!target) {
                 return;
             }
@@ -2762,21 +2805,22 @@ void MainWindow::updateConnectionOverlays()
             connection.target = target;
             connection.sourceLabel = deviceLabel;
             connection.targetLabel = label;
-            connection.flowLabel = "IQ";
+            connection.flowLabel = flowLabel;
             connection.sourceWorkspace = device->getWorkspaceIndex();
             connection.targetWorkspace = targetWorkspace;
             connection.direction = direction;
-            connection.color = deviceColor;
+            connection.color = color;
             connections.append(connection);
         };
 
-        const ConnectionOverlay::Direction spectrumDirection =
-            device->getDeviceType() == DeviceGUI::DeviceTx ? ConnectionOverlay::Reverse :
-            (device->getDeviceType() == DeviceGUI::DeviceMIMO ? ConnectionOverlay::BothDirections : ConnectionOverlay::Forward);
+        // The spectrum always displays samples from the device, including for Tx, where
+        // the channels feed the device.
+        const ConnectionOverlay::Direction spectrumDirection = ConnectionOverlay::Forward;
         if (deviceUI->m_mainSpectrumGUI)
         {
+            const int spectrumRate = deviceRate(device->getDeviceType() == DeviceGUI::DeviceTx, 0);
             appendDeviceConnection(deviceUI->m_mainSpectrumGUI, deviceLabel + " spectrum",
-                deviceUI->m_mainSpectrumGUI->getWorkspaceIndex(), spectrumDirection);
+                deviceUI->m_mainSpectrumGUI->getWorkspaceIndex(), spectrumDirection, iqLabel(spectrumRate, spectrumRate), deviceColor);
         }
         for (int channelIndex = 0; channelIndex < deviceUI->getNumberOfChannels(); ++channelIndex)
         {
@@ -2788,11 +2832,22 @@ void MainWindow::updateConnectionOverlays()
             const int type = deviceUI->getChannelTypeAt(channelIndex);
             const ConnectionOverlay::Direction direction = type == 1 ? ConnectionOverlay::Reverse :
                 (type == 2 ? ConnectionOverlay::BothDirections : ConnectionOverlay::Forward);
-            appendDeviceConnection(channel, channelLabel, channel->getWorkspaceIndex(), direction);
+            ChannelAPI *channelAPI = deviceUI->getChannelAt(channelIndex);
+            // Show the device rate and the channel's rate after (de)channelization,
+            // in the direction the IQ flows: device to Rx channel, Tx channel to device.
+            // A channel that reports no rate (e.g. stopped) shows neither, as the device
+            // rate alone would look like the channel's.
+            const bool tx = type == 1;
+            const int chanRate = channelAPI ? channelAPI->getChannelSampleRate() : 0;
+            const int devRate = chanRate > 0 ? deviceRate(tx, channelAPI->getStreamIndex()) : 0;
+            // A Tx channel feeds the device, so its link takes the channel's colour.
+            appendDeviceConnection(channel, channelLabel, channel->getWorkspaceIndex(), direction,
+                chanRate <= 0 ? QString("IQ") : (tx ? iqLabel(chanRate, devRate) : iqLabel(devRate, chanRate)),
+                tx ? channel->getIndexLabelColor() : deviceColor);
             const Endpoint endpoint{channel, channelLabel, channel->getWorkspaceIndex(), false,
-                channel->getIndexLabelColor()};
+                channel->getIndexLabelColor(), channelAPI};
             endpoints.insert(channel, endpoint);
-            if (ChannelAPI *channelAPI = deviceUI->getChannelAt(channelIndex)) {
+            if (channelAPI) {
                 endpoints.insert(channelAPI, endpoint);
             }
         }
@@ -2810,7 +2865,7 @@ void MainWindow::updateConnectionOverlays()
                 continue;
             }
             const Endpoint endpoint{featureGUI, QString("F%1").arg(featureGUI->getIndex()),
-                featureGUI->getWorkspaceIndex(), true, QColor()};
+                featureGUI->getWorkspaceIndex(), true, QColor(), nullptr};
             endpoints.insert(featureGUI, endpoint);
             if (Feature *feature = featureUI->getFeatureAt(featureIndex)) {
                 endpoints.insert(feature, endpoint);
@@ -2835,6 +2890,9 @@ void MainWindow::updateConnectionOverlays()
     QHash<QMdiSubWindow*, QHash<QMdiSubWindow*, int>> pipeConnectionIndices;
     for (const ObjectPipesRegistrations::Connection& pipe : pipes)
     {
+        // A feature taking a channel's demodulated audio, e.g. the Denoiser, may only
+        // subscribe to the "demod" pipe while running, but keeps its "reportdemod" pipe.
+        const bool audio = pipe.type == "demod" || pipe.type == "reportdemod";
         const Endpoint *sourceEndpoint = endpointFor(pipe.producer);
         const Endpoint *targetEndpoint = endpointFor(pipe.consumer);
         if (!sourceEndpoint || !targetEndpoint) {
@@ -2848,8 +2906,8 @@ void MainWindow::updateConnectionOverlays()
         const int existingIndex = pipeConnectionIndices.value(source.window).value(target.window, -1);
         if (existingIndex >= 0)
         {
-            if (pipe.type == "demod") {
-                connections[existingIndex].flowLabel = "Audio";
+            if (audio) {
+                connections[existingIndex].flowLabel = audioLabel(source);
             }
             continue;
         }
@@ -2858,7 +2916,7 @@ void MainWindow::updateConnectionOverlays()
         connection.target = target.window;
         connection.sourceLabel = source.label;
         connection.targetLabel = target.label;
-        connection.flowLabel = pipe.type == "demod" ? "Audio" : "Data";
+        connection.flowLabel = audio ? audioLabel(source) : QString("Data");
         connection.sourceWorkspace = source.workspace;
         connection.targetWorkspace = target.workspace;
         connection.kind = ConnectionOverlay::PipeLink;
