@@ -2801,15 +2801,15 @@ void MainWindow::updateConnectionOverlays()
                 return;
             }
             ConnectionOverlay::Connection connection;
-            connection.source = device;
-            connection.target = target;
-            connection.sourceLabel = deviceLabel;
-            connection.targetLabel = label;
-            connection.flowLabel = flowLabel;
-            connection.sourceWorkspace = device->getWorkspaceIndex();
-            connection.targetWorkspace = targetWorkspace;
-            connection.direction = direction;
-            connection.color = color;
+            connection.m_source = device;
+            connection.m_target = target;
+            connection.m_sourceLabel = deviceLabel;
+            connection.m_targetLabel = label;
+            connection.m_flowLabel = flowLabel;
+            connection.m_sourceWorkspace = device->getWorkspaceIndex();
+            connection.m_targetWorkspace = targetWorkspace;
+            connection.m_direction = direction;
+            connection.m_color = color;
             connections.append(connection);
         };
 
@@ -2907,21 +2907,21 @@ void MainWindow::updateConnectionOverlays()
         if (existingIndex >= 0)
         {
             if (audio) {
-                connections[existingIndex].flowLabel = audioLabel(source);
+                connections[existingIndex].m_flowLabel = audioLabel(source);
             }
             continue;
         }
         ConnectionOverlay::Connection connection;
-        connection.source = source.window;
-        connection.target = target.window;
-        connection.sourceLabel = source.label;
-        connection.targetLabel = target.label;
-        connection.flowLabel = audio ? audioLabel(source) : QString("Data");
-        connection.sourceWorkspace = source.workspace;
-        connection.targetWorkspace = target.workspace;
-        connection.kind = ConnectionOverlay::PipeLink;
-        connection.direction = ConnectionOverlay::Forward;
-        connection.color = source.linkColor.isValid() ? source.linkColor : target.linkColor;
+        connection.m_source = source.window;
+        connection.m_target = target.window;
+        connection.m_sourceLabel = source.label;
+        connection.m_targetLabel = target.label;
+        connection.m_flowLabel = audio ? audioLabel(source) : QString("Data");
+        connection.m_sourceWorkspace = source.workspace;
+        connection.m_targetWorkspace = target.workspace;
+        connection.m_kind = ConnectionOverlay::PipeLink;
+        connection.m_direction = ConnectionOverlay::Forward;
+        connection.m_color = source.linkColor.isValid() ? source.linkColor : target.linkColor;
         pipeConnectionIndices[source.window].insert(target.window, connections.size());
         connections.append(connection);
     }
