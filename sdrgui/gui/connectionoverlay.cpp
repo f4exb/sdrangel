@@ -44,6 +44,7 @@ static constexpr qreal dimmedOpacity = 0.5;
 // Channel, device, spectrum and feature title bars: a 2 px border, then a 20 px row.
 static constexpr int titleBarMiddle = 12;
 static constexpr int titleBarHeight = 24;
+static constexpr int anchorOutset = 6;  // Routes are planned from just outside a window's frame
 
 ConnectionOverlay::ConnectionOverlay(QMdiArea *mdi) :
     QOpenGLWidget(mdi),
@@ -911,7 +912,7 @@ void ConnectionOverlay::computeLayout()
     // uses whichever sides give it the best route. The overlay is a sibling of the
     // scrolling viewport, so MDI window coordinates are translated.
     auto anchorFor = [&viewportOffset](QMdiSubWindow *window, int side) -> QPointF {
-        const QPoint inWindow(side < 0 ? -6 : window->width() + 6, titleBarMiddle);
+        const QPoint inWindow(side < 0 ? -anchorOutset : window->width() + anchorOutset, titleBarMiddle);
         return QPointF(window->geometry().topLeft() + inWindow + viewportOffset);
     };
 
@@ -1374,6 +1375,36 @@ void ConnectionOverlay::computeLayout()
     }
     for (Route& route : m_routes) {
         placeLabel(route.m_flowLabelRect);
+    }
+
+    // End each link on its windows' borders, so it is clear which of two windows
+    // side by side it belongs to. The anchors it was routed from are just outside,
+    // so routes keep clear of the frames; they are extended straight in from there.
+    auto onBorder = [](const QPointF& anchor, int side, const QRectF& box) -> QPointF {
+        const qreal edge = side < 0 ? box.left() : box.right();
+        if (side == 0 || box.isEmpty() || qAbs(anchor.x() - (edge + side * anchorOutset)) > 0.5 ||
+            qAbs(anchor.y() - (box.top() + titleBarMiddle)) > 0.5) {
+            return anchor; // Not at a window, e.g. a stub's tip, or pulled onto the viewport edge
+        }
+        return QPointF(edge, anchor.y());
+    };
+    for (Route& route : m_routes)
+    {
+        const QPointF from = onBorder(route.m_from, route.m_fromSide, route.m_sourceBox);
+        const QPointF to = onBorder(route.m_to, route.m_toSide, route.m_targetBox);
+        if (from != route.m_from)
+        {
+            QPainterPath path(from);
+            path.connectPath(route.m_path);
+            route.m_path = path;
+            route.m_from = from;
+        }
+        if (to != route.m_to)
+        {
+            route.m_path.lineTo(to);
+            route.m_to = to;
+        }
+        route.m_length = route.m_path.length();
     }
     updateHighlight();
 }
