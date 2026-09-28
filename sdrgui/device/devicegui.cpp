@@ -55,7 +55,6 @@ DeviceGUI::DeviceGUI(QWidget *parent) :
         .arg(palette().dark().color().darker(115).name()));
 
     m_indexLabel = new QLabel();
-    m_indexLabel->setObjectName("connectionIndexLabel");
     m_indexLabel->setFixedSize(32, 16);
     m_indexLabel->setStyleSheet("QLabel { background-color: rgb(128, 128, 128); qproperty-alignment: AlignCenter; }");
     m_indexLabel->setText(tr("X:%1").arg(m_deviceSetIndex));
