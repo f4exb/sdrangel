@@ -1357,3 +1357,8 @@ void RadioAstronomy::handleFeatureMessageQueue(MessageQueue* messageQueue)
         }
     }
 }
+
+int RadioAstronomy::getChannelSampleRate() const
+{
+    return m_basebandSink ? m_basebandSink->getChannelSampleRate() : 0;
+}

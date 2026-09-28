@@ -810,3 +810,8 @@ uint32_t FreeDVMod::getNumberOfDeviceStreams() const
 {
     return m_deviceAPI->getNbSinkStreams();
 }
+
+int FreeDVMod::getChannelSampleRate() const
+{
+    return m_basebandSource ? m_basebandSource->getChannelSampleRate() : 0;
+}

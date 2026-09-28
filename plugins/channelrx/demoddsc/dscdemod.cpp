@@ -760,3 +760,13 @@ void DSCDemod::handleIndexInDeviceSetChanged(int index)
         .arg(index);
     m_basebandSink->setFifoLabel(fifoLabel);
 }
+
+int DSCDemod::getChannelSampleRate() const
+{
+    return m_basebandSink ? m_basebandSink->getChannelSampleRate() : 0;
+}
+
+int DSCDemod::getAudioSampleRate() const
+{
+    return DSCDemodSettings::DSCDEMOD_CHANNEL_SAMPLE_RATE;
+}

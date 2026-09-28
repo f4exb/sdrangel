@@ -563,3 +563,7 @@ void ChannelPower::handleIndexInDeviceSetChanged(int index)
     m_basebandSink->setFifoLabel(fifoLabel);
 }
 
+int ChannelPower::getChannelSampleRate() const
+{
+    return m_basebandSink ? m_basebandSink->getChannelSampleRate() : 0;
+}

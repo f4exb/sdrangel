@@ -53,7 +53,7 @@ ChannelAnalyzer::ChannelAnalyzer(DeviceAPI *deviceAPI) :
 {
     qDebug("ChannelAnalyzer::ChannelAnalyzer");
     setObjectName(m_channelId);
-    getChannelSampleRate();
+    getBasebandSampleRate();
     m_basebandSink = new ChannelAnalyzerBaseband();
     m_basebandSink->moveToThread(&m_thread);
 
@@ -116,7 +116,7 @@ uint32_t ChannelAnalyzer::getNumberOfDeviceStreams() const
     return m_deviceAPI->getNbSourceStreams();
 }
 
-int ChannelAnalyzer::getChannelSampleRate()
+int ChannelAnalyzer::getBasebandSampleRate()
 {
     DeviceSampleSource *source = m_deviceAPI->getSampleSource();
 
@@ -723,4 +723,9 @@ void ChannelAnalyzer::handleIndexInDeviceSetChanged(int index)
         .arg(m_deviceAPI->getDeviceSetIndex())
         .arg(index);
     m_basebandSink->setFifoLabel(fifoLabel);
+}
+
+int ChannelAnalyzer::getChannelSampleRate() const
+{
+    return m_basebandSink ? m_basebandSink->getChannelSampleRate() : 0;
 }

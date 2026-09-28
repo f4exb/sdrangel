@@ -56,6 +56,7 @@ const char* const FT8Demod::m_channelId = "FT8Demod";
 FT8Demod::FT8Demod(DeviceAPI *deviceAPI) :
         ChannelAPI(m_channelIdURI, ChannelAPI::StreamSingleSink),
         m_deviceAPI(deviceAPI),
+        m_basebandSink(nullptr),
         m_running(false),
         m_spectrumVis(SDR_RX_SCALEF),
         m_basebandSampleRate(0),
@@ -205,6 +206,7 @@ void FT8Demod::stop()
     m_running = false;
 	m_thread->exit();
 	m_thread->wait();
+    m_basebandSink = nullptr; // Freed by deleteLater when the thread finished
 }
 
 bool FT8Demod::handleMessage(const Message& cmd)
@@ -858,4 +860,9 @@ void FT8Demod::handleIndexInDeviceSetChanged(int index)
         .arg(m_deviceAPI->getDeviceSetIndex())
         .arg(index);
     m_basebandSink->setFifoLabel(fifoLabel);
+}
+
+int FT8Demod::getAudioSampleRate() const
+{
+    return FT8DemodSettings::m_ft8SampleRate;
 }

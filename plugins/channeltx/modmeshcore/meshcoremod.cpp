@@ -907,3 +907,8 @@ void MeshcoreMod::udpRx()
         }
     }
 }
+
+int MeshcoreMod::getChannelSampleRate() const
+{
+    return m_basebandSource ? m_basebandSource->getChannelSampleRate() : 0;
+}

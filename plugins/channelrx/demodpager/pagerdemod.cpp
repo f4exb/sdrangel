@@ -723,3 +723,13 @@ void PagerDemod::handleIndexInDeviceSetChanged(int index)
         .arg(index);
     m_basebandSink->setFifoLabel(fifoLabel);
 }
+
+int PagerDemod::getChannelSampleRate() const
+{
+    return m_basebandSink ? m_basebandSink->getChannelSampleRate() : 0;
+}
+
+int PagerDemod::getAudioSampleRate() const
+{
+    return PagerDemodSettings::m_channelSampleRate;
+}

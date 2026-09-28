@@ -313,7 +313,7 @@ void ChannelAnalyzerGUI::tick()
 
 	if (ui->pll->isChecked())
 	{
-        double sampleRate = (double) m_channelAnalyzer->getChannelSampleRate();
+        double sampleRate = (double) m_channelAnalyzer->getBasebandSampleRate();
 		int freq = (m_channelAnalyzer->getPllFrequency() * sampleRate) / (2.0*M_PI);
 		ui->pll->setToolTip(tr("PLL lock. Freq = %1 Hz").arg(freq));
 		ui->pllLockFrequency->setText(tr("%1 Hz").arg(freq));
@@ -548,13 +548,13 @@ ChannelAnalyzerGUI::ChannelAnalyzerGUI(PluginAPI* pluginAPI, DeviceUISet *device
 	connect(this, SIGNAL(customContextMenuRequested(const QPoint &)), this, SLOT(onMenuDialogCalled(const QPoint &)));
 
 	m_channelAnalyzer = (ChannelAnalyzer*) rxChannel;
-    m_basebandSampleRate = m_channelAnalyzer->getChannelSampleRate();
+    m_basebandSampleRate = m_channelAnalyzer->getBasebandSampleRate();
     qDebug("ChannelAnalyzerGUI::ChannelAnalyzerGUI: m_basebandSampleRate: %d", m_basebandSampleRate);
     m_spectrumVis = m_channelAnalyzer->getSpectrumVis();
 	m_spectrumVis->setGLSpectrum(ui->glSpectrum);
     m_scopeVis = m_channelAnalyzer->getScopeVis();
     m_scopeVis->setGLScope(ui->glScope);
-    m_basebandSampleRate = m_channelAnalyzer->getChannelSampleRate();
+    m_basebandSampleRate = m_channelAnalyzer->getBasebandSampleRate();
     m_scopeVis->setSpectrumVis(m_spectrumVis);
     m_channelAnalyzer->setScopeVis(m_scopeVis);
 	m_channelAnalyzer->setMessageQueueToGUI(getInputMessageQueue());

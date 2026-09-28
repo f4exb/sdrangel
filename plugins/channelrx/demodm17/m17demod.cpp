@@ -165,6 +165,7 @@ void M17Demod::stop()
     m_running = false;
 	m_thread->exit();
 	m_thread->wait();
+    m_basebandSink = nullptr; // Freed by deleteLater when the thread finished
 }
 
 bool M17Demod::handleMessage(const Message& cmd)
@@ -760,4 +761,9 @@ void M17Demod::setScopeXYSink(BasebandSampleSink* sampleSink)
     if (m_running) {
         m_basebandSink->setScopeXYSink(sampleSink);
     }
+}
+
+int M17Demod::getChannelSampleRate() const
+{
+    return m_basebandSink ? m_basebandSink->getChannelSampleRate() : 0;
 }

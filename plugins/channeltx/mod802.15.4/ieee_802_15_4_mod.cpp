@@ -813,3 +813,8 @@ ScopeVis *IEEE_802_15_4_Mod::getScopeSink()
 {
     return m_basebandSource->getScopeSink();
 }
+
+int IEEE_802_15_4_Mod::getChannelSampleRate() const
+{
+    return m_basebandSource ? m_basebandSource->getChannelSampleRate() : 0;
+}

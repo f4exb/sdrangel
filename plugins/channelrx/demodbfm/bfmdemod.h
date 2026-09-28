@@ -91,6 +91,7 @@ public:
     virtual QString getIdentifier() const { return objectName(); }
     virtual void getTitle(QString& title) { title = m_settings.m_title; }
     virtual qint64 getCenterFrequency() const { return m_settings.m_inputFrequencyOffset; }
+    int getChannelSampleRate() const override;
     virtual void setCenterFrequency(qint64 frequency);
 
     virtual QByteArray serialize() const;
@@ -117,7 +118,7 @@ public:
 	Real getDemodAcc() const { return m_running ? m_basebandSink->getDemodAcc() : 0.0f; }
 	Real getDemodQua() const { return m_running ? m_basebandSink->getDemodQua() : 0.0f; }
 	Real getDemodFclk() const { return m_running ? m_basebandSink->getDemodFclk() : 0.0f; }
-    int getAudioSampleRate() const { return m_running ? m_basebandSink->getAudioSampleRate() : 0; }
+    int getAudioSampleRate() const override { return m_running ? m_basebandSink->getAudioSampleRate() : 0; }
 
     void getMagSqLevels(double& avg, double& peak, int& nbSamples) {
         if (m_running) {

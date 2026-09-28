@@ -209,3 +209,8 @@ void ATVDemod::handleIndexInDeviceSetChanged(int index)
         .arg(index);
     m_basebandSink->setFifoLabel(fifoLabel);
 }
+
+int ATVDemod::getChannelSampleRate() const
+{
+    return m_basebandSink ? m_basebandSink->getChannelSampleRate() : 0;
+}

@@ -628,3 +628,8 @@ void RadioClock::handleIndexInDeviceSetChanged(int index)
         .arg(index);
     m_basebandSink->setFifoLabel(fifoLabel);
 }
+
+int RadioClock::getChannelSampleRate() const
+{
+    return RadioClockSettings::RADIOCLOCK_CHANNEL_SAMPLE_RATE;
+}

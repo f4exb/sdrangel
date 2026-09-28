@@ -170,6 +170,7 @@ public:
     virtual QString getIdentifier() const { return objectName(); }
     virtual void getTitle(QString& title) { title = m_settings.m_title; }
     virtual qint64 getCenterFrequency() const { return m_settings.m_inputFrequencyOffset; }
+    int getChannelSampleRate() const override;
     virtual void setCenterFrequency(qint64 frequency);
 
     virtual QByteArray serialize() const;
@@ -228,7 +229,7 @@ public:
         }
     }
 
-    int getAudioSampleRate() const { return m_running ? m_basebandSink->getAudioSampleRate() : 0; }
+    int getAudioSampleRate() const override { return m_running ? m_basebandSink->getAudioSampleRate() : 0; }
     bool isRunning() { return m_running; }
 
     void getDiagnostics(

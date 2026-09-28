@@ -164,6 +164,7 @@ void VORDemod::stop()
     m_basebandSink->stopWork();
     m_thread->quit();
     m_thread->wait();
+    m_basebandSink = nullptr; // Freed by deleteLater when the thread finished
 }
 
 bool VORDemod::handleMessage(const Message& cmd)

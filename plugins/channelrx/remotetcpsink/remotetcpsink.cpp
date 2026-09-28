@@ -764,3 +764,8 @@ void RemoteTCPSink::updatePublicListing()
 
     m_networkManager->post(request, data);
 }
+
+int RemoteTCPSink::getChannelSampleRate() const
+{
+    return m_settings.m_channelSampleRate;
+}

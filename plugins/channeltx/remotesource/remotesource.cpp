@@ -602,3 +602,8 @@ uint32_t RemoteSource::getNumberOfDeviceStreams() const
 {
     return m_deviceAPI->getNbSinkStreams();
 }
+
+int RemoteSource::getChannelSampleRate() const
+{
+    return m_basebandSource ? m_basebandSource->getChannelSampleRate() : 0;
+}

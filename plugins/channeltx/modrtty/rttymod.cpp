@@ -841,3 +841,13 @@ void RttyMod::setMessageQueueToGUI(MessageQueue* queue) {
     ChannelAPI::setMessageQueueToGUI(queue);
     m_basebandSource->setMessageQueueToGUI(queue);
 }
+
+int RttyMod::getChannelSampleRate() const
+{
+    return m_basebandSource ? m_basebandSource->getChannelSampleRate() : 0;
+}
+
+int RttyMod::getAudioSampleRate() const
+{
+    return getSourceChannelSampleRate();
+}

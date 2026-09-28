@@ -177,6 +177,7 @@ public:
     virtual QString getIdentifier() const { return objectName(); }
     virtual void getTitle(QString& title) { title = m_settings.m_title; }
     virtual qint64 getCenterFrequency() const { return m_frequencyOffset; }
+    int getChannelSampleRate() const override;
     virtual void setCenterFrequency(qint64) {}
 
     virtual int getNbSinkStreams() const { return 0; }

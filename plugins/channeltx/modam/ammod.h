@@ -193,6 +193,7 @@ public:
     virtual QString getIdentifier() const { return objectName(); }
     virtual void getTitle(QString& title) { title = m_settings.m_title; }
     virtual qint64 getCenterFrequency() const { return m_settings.m_inputFrequencyOffset; }
+    int getChannelSampleRate() const override;
     virtual void setCenterFrequency(qint64 frequency);
 
     virtual QByteArray serialize() const;
@@ -240,7 +241,7 @@ public:
     double getMagSq() const;
     CWKeyer *getCWKeyer();
     void setLevelMeter(QObject *levelMeter) { m_levelMeter = levelMeter; }
-    int getAudioSampleRate() const;
+    int getAudioSampleRate() const override;
     int getFeedbackAudioSampleRate() const;
 
     static const char* const m_channelIdURI;

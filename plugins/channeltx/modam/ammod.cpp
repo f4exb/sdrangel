@@ -161,6 +161,7 @@ void AMMod::stop()
     m_running = false;
 	m_thread->exit();
 	m_thread->wait();
+    m_basebandSource = nullptr; // Freed by deleteLater when the thread finished
 }
 
 void AMMod::pull(SampleVector::iterator& begin, unsigned int nbSamples)
@@ -835,4 +836,9 @@ int AMMod::getFeedbackAudioSampleRate() const
     }
 
     return 0;
+}
+
+int AMMod::getChannelSampleRate() const
+{
+    return m_basebandSource ? m_basebandSource->getChannelSampleRate() : 0;
 }

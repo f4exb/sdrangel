@@ -1154,3 +1154,8 @@ void ChirpChatMod::udpRx()
         }
     }
 }
+
+int ChirpChatMod::getChannelSampleRate() const
+{
+    return m_basebandSource ? m_basebandSource->getChannelSampleRate() : 0;
+}

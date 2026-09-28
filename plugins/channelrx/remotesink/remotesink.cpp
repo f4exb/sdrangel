@@ -162,6 +162,7 @@ void RemoteSink::stop()
     m_basebandSink->stopWork();
     m_thread->quit();
     m_thread->wait();
+    m_basebandSink = nullptr; // Freed by deleteLater when the thread finished
 }
 
 bool RemoteSink::handleMessage(const Message& cmd)
@@ -704,4 +705,9 @@ void RemoteSink::handleIndexInDeviceSetChanged(int index)
         .arg(m_deviceAPI->getDeviceSetIndex())
         .arg(index);
     m_basebandSink->setFifoLabel(fifoLabel);
+}
+
+int RemoteSink::getChannelSampleRate() const
+{
+    return m_basebandSink ? m_basebandSink->getChannelSampleRate() : 0;
 }

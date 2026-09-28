@@ -694,3 +694,8 @@ double DOA2::normalizeAngle(double angle, double max)
     if (angle > max) { return angle - max; }
     return angle;
 }
+
+int DOA2::getChannelSampleRate() const
+{
+    return static_cast<int>(m_deviceSampleRate / (1 << m_settings.m_log2Decim));
+}
