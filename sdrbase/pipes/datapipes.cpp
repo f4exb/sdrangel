@@ -23,6 +23,7 @@
 DataPipes::DataPipes() :
     m_registrations(&m_dataFifoStore)
 {
+	m_gcThread.setObjectName("DataPipes:gc");
   	m_gcWorker = new DataPipesGCWorker(m_registrations);
 	m_gcWorker->moveToThread(&m_gcThread);
 	startGC();

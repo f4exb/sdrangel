@@ -66,6 +66,7 @@ public:
         m_correlationThresholdLinear(0.02f),
         m_crc()
     {
+        setObjectName("ADSBDemodWork");
     }
     void run() override;
     MessageQueue *getInputMessageQueue() { return &m_inputMessageQueue; }

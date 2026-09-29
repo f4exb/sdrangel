@@ -3,6 +3,7 @@
 <h2>Introduction</h2>
 
 This plugin can be used to analyze the real demodulated signal from some Rx channel plugins. It can also be used to view the modulating signal of some Tx channel plugins.
+It can also display filtered audio from some feature plugins.
 
 Rx plugins are:
 
@@ -32,6 +33,10 @@ Tx plugins are:
   - SSB modulator
   - WFM modulator
 
+Features are:
+
+  - Denoiser feature
+
 <h2>General interface</h2>
 
 ![Demod Analyzer plugin GUI](../../../doc/img/DemodAnalyzer_plugin.png)
@@ -58,7 +63,7 @@ This button starts or stops the plugin
 
 <h3>A.3: Channel selection</h3>
 
-Use this combo to select which channel to use for display. Channel is selected upon change. If channel is not changed or there is only one in the list you have to use the (re)apply button (A.4) to effectively connect the channel to the analyzer.
+Use this combo to select which channel or feature to use for display. The source is selected upon change. If the selection is not changed or there is only one in the list, use the (re)apply button (A.4) to connect it to the analyzer.
 
 <h3>A.4: (Re)apply channel selection</h3>
 

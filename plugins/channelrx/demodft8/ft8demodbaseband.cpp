@@ -42,6 +42,7 @@ FT8DemodBaseband::FT8DemodBaseband() :
     m_ft8WorkerBuffer = new int16_t[FT8DemodSettings::m_ft8SampleRate*15];
 
     m_workerThread = new QThread();
+    m_workerThread->setObjectName("FT8DemodBB:W");
     m_ft8DemodWorker = new FT8DemodWorker();
     m_ft8DemodWorker->moveToThread(m_workerThread);
 
@@ -63,6 +64,7 @@ FT8DemodBaseband::FT8DemodBaseband() :
     m_workerThread->start();
 
     m_pskReporterThread = new QThread();
+    m_pskReporterThread->setObjectName("pskReporter");
     m_pskReporterWorker = new PskReporterWorker();
     m_ft8DemodWorker->setPSKReportingMessageQueue(m_pskReporterWorker->getInputMessageQueue());
     m_pskReporterWorker->moveToThread(m_pskReporterThread);

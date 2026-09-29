@@ -125,6 +125,7 @@ bool FOBOSInput::start()
     }
 
     m_workerThread = new QThread();
+    m_workerThread->setObjectName("FOBOSInput");
     m_worker = new FOBOSWorker(&m_sampleFifo);
     m_worker->moveToThread(m_workerThread);
 

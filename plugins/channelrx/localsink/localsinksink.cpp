@@ -38,6 +38,7 @@ LocalSinkSink::LocalSinkSink() :
     m_sampleRate(48000),
     m_deviceSampleRate(48000)
 {
+    m_sinkWorkerThread.setObjectName("LocalSinkSinkWr");
     m_sampleFifo.setSize(SampleSinkFifo::getSizePolicy(4000000));
     // m_fftFilter = new fftfilt(0.1f, 0.4f, 1<<m_settings.m_log2FFT);
     m_fftFilter = new fftfilt(1<<m_settings.m_log2FFT);

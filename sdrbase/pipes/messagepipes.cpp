@@ -23,6 +23,7 @@
 MessagePipes::MessagePipes() :
     m_registrations(&m_messageQueueStore)
 {
+	m_gcThread.setObjectName("MessagePipes:gc");
   	m_gcWorker = new MessagePipesGCWorker(m_registrations);
 	m_gcWorker->moveToThread(&m_gcThread);
 	startGC();

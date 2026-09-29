@@ -64,6 +64,7 @@ PacketMod::PacketMod(DeviceAPI *deviceAPI) :
     setObjectName(m_channelId);
 
     m_thread = new QThread(this);
+    m_thread->setObjectName("PacketMod");
     m_basebandSource = new PacketModBaseband();
     m_basebandSource->setSpectrumSampleSink(&m_spectrumVis);
     m_basebandSource->setChannel(this);

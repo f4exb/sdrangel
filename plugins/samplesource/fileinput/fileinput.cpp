@@ -64,6 +64,7 @@ FileInput::FileInput(DeviceAPI *deviceAPI) :
 	m_recordLengthMuSec(0),
     m_startingTimeStamp(0)
 {
+    m_fileInputWorkerThread.setObjectName("FileInputWrk");
     m_sampleFifo.setLabel(m_deviceDescription);
     m_deviceAPI->setNbSourceStreams(1);
     qDebug("FileInput::FileInput: device source engine: %p", m_deviceAPI->getDeviceSourceEngine());

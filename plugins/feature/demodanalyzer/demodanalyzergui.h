@@ -70,7 +70,7 @@ private:
 	ScopeVis* m_scopeVis;
 	MessageQueue m_inputMessageQueue;
 	AvailableChannelOrFeatureList m_availableChannels;
-	ChannelAPI *m_selectedChannel;
+	QObject *m_selectedChannel;
 	MovingAverageUtil<double, double, 40> m_channelPowerAvg;
 
 	explicit DemodAnalyzerGUI(PluginAPI* pluginAPI, FeatureUISet *featureUISet, Feature *feature, QWidget* parent = nullptr);

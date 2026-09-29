@@ -130,6 +130,7 @@ void RemoteSink::start()
 
     qDebug("RemoteSink::start: m_basebandSampleRate: %d", m_basebandSampleRate);
     m_thread = new QThread();
+    m_thread->setObjectName("RemoteSink");
     m_basebandSink = new RemoteSinkBaseband();
     m_basebandSink->moveToThread(m_thread);
 

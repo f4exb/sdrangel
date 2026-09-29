@@ -30,6 +30,7 @@ Bladerf1OutputThread::Bladerf1OutputThread(struct bladerf* dev, SampleSourceFifo
 	m_sampleFifo(sampleFifo),
 	m_log2Interp(0)
 {
+    setObjectName("Bladerf1Output");
     std::fill(m_buf, m_buf + 2*BLADERFOUTPUT_BLOCKSIZE, 0);
 }
 

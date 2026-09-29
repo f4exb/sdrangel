@@ -74,6 +74,7 @@ bool TestMOSync::startTx()
 
     qDebug("TestMOSync::startTx");
     m_sinkWorkerThread = new QThread();
+    m_sinkWorkerThread->setObjectName("TestMOSync");
     m_sinkWorker = new TestMOSyncWorker();
     m_sinkWorker->moveToThread(m_sinkWorkerThread);
 

@@ -131,6 +131,7 @@ bool AudioCATSISO::startRx()
     audioDeviceManager->addAudioSource(&m_inputFifo, getInputMessageQueue(), m_rxAudioDeviceIndex);
 
     m_inputWorkerThread = new QThread();
+    m_inputWorkerThread->setObjectName(QString("AudCATrx:%1").arg(m_rxAudioDeviceIndex));
     m_inputWorker = new AudioCATInputWorker(&m_sampleMIFifo, &m_inputFifo);
     m_inputWorker->moveToThread(m_inputWorkerThread);
 
@@ -147,6 +148,7 @@ bool AudioCATSISO::startRx()
     qDebug() << "AudioCATSISO::startRx: start CAT";
 
     m_catWorkerThread = new QThread();
+    m_catWorkerThread->setObjectName(QString("AudCATwk:%1").arg(m_rxAudioDeviceIndex));
     m_catWorker = new AudioCATSISOCATWorker();
     m_catWorker->moveToThread(m_catWorkerThread);
 
@@ -193,6 +195,7 @@ bool AudioCATSISO::startTx()
     audioDeviceManager->addAudioSink(&m_outputFifo, getInputMessageQueue(), m_txAudioDeviceIndex);
 
     m_outputWorkerThread = new QThread();
+    m_outputWorkerThread->setObjectName(QString("AudCATtx:%1").arg(m_txAudioDeviceIndex));
 	m_outputWorker = new AudioCATOutputWorker(&m_sampleMOFifo, &m_outputFifo);
     m_outputWorker->moveToThread(m_outputWorkerThread);
 

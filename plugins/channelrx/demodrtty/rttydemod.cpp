@@ -52,6 +52,7 @@ RttyDemod::RttyDemod(DeviceAPI *deviceAPI) :
         m_basebandSampleRate(0)
 {
     setObjectName(m_channelId);
+    m_thread.setObjectName("RttyDemodBB");
 
     m_basebandSink = new RttyDemodBaseband();
     m_basebandSink->setMessageQueueToChannel(getInputMessageQueue());

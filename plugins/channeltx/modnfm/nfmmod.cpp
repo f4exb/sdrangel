@@ -113,6 +113,7 @@ void NFMMod::start()
 
 	qDebug("NFMMod::start");
     m_thread = new QThread(this);
+    m_thread->setObjectName("NFMMod");
     m_basebandSource = new NFMModBaseband();
     m_basebandSource->setInputFileStream(&m_ifstream);
     m_basebandSource->setChannel(this);

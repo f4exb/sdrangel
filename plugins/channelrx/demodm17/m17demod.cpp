@@ -133,6 +133,7 @@ void M17Demod::start()
 
     qDebug() << "M17Demod::start";
     m_thread = new QThread(this);
+    m_thread->setObjectName("M17Demod");
     m_basebandSink = new M17DemodBaseband();
     m_basebandSink->setChannel(this);
     m_basebandSink->setDemodInputMessageQueue(&m_inputMessageQueue);

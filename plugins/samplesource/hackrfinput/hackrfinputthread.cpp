@@ -34,6 +34,7 @@ HackRFInputThread::HackRFInputThread(hackrf_device* dev, SampleSinkFifo* sampleF
 	m_fcPos(0),
     m_iqOrder(true)
 {
+    setObjectName("HackRFInput");
     std::fill(m_buf, m_buf + 2*HACKRF_BLOCKSIZE, 0);
 }
 

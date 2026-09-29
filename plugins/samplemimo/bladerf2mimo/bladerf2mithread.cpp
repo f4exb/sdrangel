@@ -31,6 +31,7 @@ BladeRF2MIThread::BladeRF2MIThread(struct bladerf* dev, QObject* parent) :
     m_fcPos(0),
     m_iqOrder(true)
 {
+    setObjectName("BladeRF2MI");
     qDebug("BladeRF2MIThread::BladeRF2MIThread");
     m_buf = new qint16[2*DeviceBladeRF2::blockSize*2];
 

@@ -40,6 +40,7 @@ FCDProThread::FCDProThread(SampleSinkFifo* sampleFifo, AudioFifo *fcdFIFO, QObje
     m_convertBuffer(fcd_traits<Pro>::convBufSize),
     m_sampleFifo(sampleFifo)
 {
+    setObjectName("FCDPro");
 	start();
 }
 

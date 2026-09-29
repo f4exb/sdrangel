@@ -36,6 +36,7 @@ SoapySDROutputThread::SoapySDROutputThread(SoapySDR::Device* dev, unsigned int n
     m_errors(0),
     m_consecutiveErrors(0)
 {
+    setObjectName("SoapySDROutput");
     qDebug("SoapySDROutputThread::SoapySDROutputThread");
     m_channels = new Channel[nbTxChannels];
 }

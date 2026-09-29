@@ -44,6 +44,7 @@ RemoteSinkSink::RemoteSinkSink() :
         m_dataPort(9090)
 {
     qDebug("RemoteSinkSink::RemoteSinkSink");
+    m_senderThread.setObjectName("RmtSnkSnkSnd");
     applySettings(QStringList(), m_settings, true);
 }
 

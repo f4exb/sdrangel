@@ -126,6 +126,7 @@ void BFMDemod::start()
 
     qDebug() << "BFMDemod::start";
     m_thread = new QThread();
+    m_thread->setObjectName("BFMDemod");
     m_basebandSink = new BFMDemodBaseband();
     m_basebandSink->setSpectrumSink(&m_spectrumVis);
     m_basebandSink->setChannel(this);
@@ -194,10 +195,29 @@ bool BFMDemod::handleMessage(const Message& cmd)
 
         return true;
     }
+    else if (MainCore::MsgChannelDemodQuery::match(cmd))
+    {
+        sendSampleRateToDemodAnalyzer();
+        return true;
+    }
 	else
 	{
     	return false;
 	}
+}
+
+void BFMDemod::sendSampleRateToDemodAnalyzer()
+{
+    QList<ObjectPipe*> pipes;
+    MainCore::instance()->getMessagePipes().getMessagePipes(this, "reportdemod", pipes);
+
+    for (const auto& pipe : pipes)
+    {
+        MessageQueue *messageQueue = qobject_cast<MessageQueue*>(pipe->m_element);
+        if (messageQueue) {
+            messageQueue->push(MainCore::MsgChannelDemodReport::create(this, getAudioSampleRate()));
+        }
+    }
 }
 
 void BFMDemod::setCenterFrequency(qint64 frequency)

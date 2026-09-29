@@ -25,6 +25,7 @@
 #include "dsp/basebandsamplesink.h"
 #include "dsp/datafifo.h"
 #include "pipes/datapipes.h"
+#include "util/messagequeue.h"
 #include "maincore.h"
 
 #include "rdsparser.h"
@@ -291,6 +292,20 @@ void BFMDemodSink::applyAudioSampleRate(int sampleRate)
     m_deemphasisFilterY.configure(m_settings.getDeEmphasisTimeConstant() * sampleRate);
 
     m_audioSampleRate = sampleRate;
+
+    if (m_channel)
+    {
+        QList<ObjectPipe*> pipes;
+        MainCore::instance()->getMessagePipes().getMessagePipes(m_channel, "reportdemod", pipes);
+
+        for (const auto& pipe : pipes)
+        {
+            MessageQueue *messageQueue = qobject_cast<MessageQueue*>(pipe->m_element);
+            if (messageQueue) {
+                messageQueue->push(MainCore::MsgChannelDemodReport::create(m_channel, sampleRate));
+            }
+        }
+    }
 }
 
 void BFMDemodSink::applyChannelSettings(int channelSampleRate, int channelFrequencyOffset, bool force)

@@ -143,6 +143,7 @@ void SSBDemod::start()
 
     qDebug() << "SSBDemod::start";
     m_thread = new QThread();
+    m_thread->setObjectName("SSBDemod");
     m_basebandSink = new SSBDemodBaseband();
     m_basebandSink->setFifoLabel(QString("%1 [%2:%3]")
         .arg(m_channelId)

@@ -81,6 +81,7 @@ void SimplePTT::start()
 
 	qDebug("SimplePTT::start");
     m_thread = new QThread();
+    m_thread->setObjectName("SimplePTT");
     m_worker = new SimplePTTWorker(getWebAPIAdapterInterface());
     m_worker->moveToThread(m_thread);
 

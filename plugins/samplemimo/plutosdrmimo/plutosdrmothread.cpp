@@ -29,6 +29,7 @@ PlutoSDRMOThread::PlutoSDRMOThread(DevicePlutoSDRBox* plutoBox, QObject* parent)
     m_log2Interp(0),
     m_fcPos(0)
 {
+    setObjectName("PlutoSDRMO");
     qDebug("PlutoSDRMOThread::PlutoSDRMOThread");
     m_buf[0] = new qint16[2*PlutoSDRMIMOSettings::m_plutoSDRBlockSizeSamples];
     m_buf[1] = new qint16[2*PlutoSDRMIMOSettings::m_plutoSDRBlockSizeSamples];
