@@ -59,6 +59,7 @@ RemoteTCPSink::RemoteTCPSink(DeviceAPI *deviceAPI) :
         m_removeRequest(nullptr)
 {
     setObjectName(m_channelId);
+    m_thread.setObjectName("RemoteTCPSinkBB");
 
     m_basebandSink = new RemoteTCPSinkBaseband();
     m_basebandSink->setMessageQueueToChannel(&m_inputMessageQueue);

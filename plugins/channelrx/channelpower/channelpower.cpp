@@ -49,6 +49,7 @@ ChannelPower::ChannelPower(DeviceAPI *deviceAPI) :
         m_centerFrequency(0)
 {
     setObjectName(m_channelId);
+    m_thread.setObjectName("ChannelPower");
 
     m_basebandSink = new ChannelPowerBaseband();
     m_basebandSink->setChannel(this);

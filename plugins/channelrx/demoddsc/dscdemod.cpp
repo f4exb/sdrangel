@@ -52,6 +52,7 @@ DSCDemod::DSCDemod(DeviceAPI *deviceAPI) :
         m_basebandSampleRate(0)
 {
     setObjectName(m_channelId);
+    m_thread.setObjectName("DSCDemodBB");
 
     m_basebandSink = new DSCDemodBaseband(this);
     m_basebandSink->setMessageQueueToChannel(getInputMessageQueue());

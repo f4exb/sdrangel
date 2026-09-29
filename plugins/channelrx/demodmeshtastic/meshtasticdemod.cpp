@@ -295,6 +295,7 @@ void MeshtasticDemod::startPipelines(const std::vector<PipelineConfig>& configs)
         runtime.settings = config.settings;
 
         runtime.decoderThread = new QThread();
+        runtime.decoderThread->setObjectName(QString("Mesh:dc:%1").arg(config.id));
         runtime.decoder = new MeshtasticDemodDecoder();
         runtime.decoder->setOutputMessageQueue(getInputMessageQueue());
         runtime.decoder->setPipelineMetadata(runtime.id, runtime.name, runtime.presetName);
@@ -304,6 +305,7 @@ void MeshtasticDemod::startPipelines(const std::vector<PipelineConfig>& configs)
         runtime.decoderThread->start();
 
         runtime.basebandThread = new QThread();
+        runtime.basebandThread->setObjectName(QString("Mesh:bb:%1").arg(config.id));
         runtime.basebandSink = new MeshtasticDemodBaseband();
 
         if (config.id == 0) {
@@ -463,6 +465,7 @@ void MeshtasticDemod::applyExtraPipelineSettings(const QVector<MeshtasticDemodSe
             runtime.settings = config.settings;
 
             runtime.decoderThread = new QThread();
+            runtime.decoderThread->setObjectName(QString("Mesh:dc:%1").arg(config.id));
             runtime.decoder = new MeshtasticDemodDecoder();
             runtime.decoder->setOutputMessageQueue(getInputMessageQueue());
             runtime.decoder->setPipelineMetadata(runtime.id, runtime.name, runtime.presetName);
@@ -471,6 +474,7 @@ void MeshtasticDemod::applyExtraPipelineSettings(const QVector<MeshtasticDemodSe
             runtime.decoderThread->start();
 
             runtime.basebandThread = new QThread();
+            runtime.basebandThread->setObjectName(QString("Mesh:bb:%1").arg(config.id));
             runtime.basebandSink = new MeshtasticDemodBaseband();
             // Secondary pipelines (id != 0) do not own the spectrum visualiser.
             runtime.basebandSink->setDecoderMessageQueue(runtime.decoder->getInputMessageQueue());

@@ -60,6 +60,7 @@ IEEE_802_15_4_Mod::IEEE_802_15_4_Mod(DeviceAPI *deviceAPI) :
     setObjectName(m_channelId);
 
     m_thread = new QThread(this);
+    m_thread->setObjectName("802_15_4_Mod");
     m_basebandSource = new IEEE_802_15_4_ModBaseband();
     m_basebandSource->setSpectrumSampleSink(&m_spectrumVis);
     m_basebandSource->moveToThread(m_thread);

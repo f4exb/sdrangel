@@ -55,6 +55,7 @@ FreeDVDemod::FreeDVDemod(DeviceAPI *deviceAPI) :
 	setObjectName(m_channelId);
 
     m_thread = new QThread(this);
+    m_thread->setObjectName("FreeDVDemod");
     m_basebandSink = new FreeDVDemodBaseband();
     m_basebandSink->setSpectrumSink(&m_spectrumVis);
     m_basebandSink->moveToThread(m_thread);

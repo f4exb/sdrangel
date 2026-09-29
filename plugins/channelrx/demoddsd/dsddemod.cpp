@@ -156,6 +156,7 @@ void DSDDemod::start()
 
     qDebug() << "DSDDemod::start";
     m_thread = new QThread();
+    m_thread->setObjectName("DSDDemod");
     m_basebandSink = new DSDDemodBaseband();
     m_basebandSink->setFifoLabel(QString("%1 [%2:%3]")
         .arg(m_channelId)

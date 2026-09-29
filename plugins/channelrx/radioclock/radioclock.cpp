@@ -51,6 +51,7 @@ RadioClock::RadioClock(DeviceAPI *deviceAPI) :
         m_centerFrequency(0)
 {
     setObjectName(m_channelId);
+    m_thread.setObjectName("RadioClockBB");
 
     m_basebandSink = new RadioClockBaseband();
     m_basebandSink->setMessageQueueToChannel(getInputMessageQueue());

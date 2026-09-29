@@ -66,6 +66,7 @@ MeshcoreMod::MeshcoreMod(DeviceAPI *deviceAPI) :
 	setObjectName(m_channelId);
 
     m_thread = new QThread(this);
+    m_thread->setObjectName("MeshcoreMod");
     m_basebandSource = new MeshcoreModBaseband();
     m_basebandSource->moveToThread(m_thread);
 

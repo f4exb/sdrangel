@@ -148,6 +148,7 @@ void LocalSink::startProcessing()
 
 	qDebug("LocalSink::startProcessing");
     m_thread = new QThread(this);
+    m_thread->setObjectName("LocalSink");
     m_basebandSink = new LocalSinkBaseband();
     m_basebandSink->setSpectrumSink(&m_spectrumVis);
     m_basebandSink->moveToThread(m_thread);

@@ -53,6 +53,7 @@ LocalSource::LocalSource(DeviceAPI *deviceAPI) :
     setObjectName(m_channelId);
 
     m_thread = new QThread(this);
+    m_thread->setObjectName("LocalSource");
     m_basebandSource = new LocalSourceBaseband();
     m_basebandSource->moveToThread(m_thread);
 

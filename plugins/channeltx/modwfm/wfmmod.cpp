@@ -61,6 +61,7 @@ WFMMod::WFMMod(DeviceAPI *deviceAPI) :
 	setObjectName(m_channelId);
 
     m_thread = new QThread(this);
+    m_thread->setObjectName("WFMMod");
     m_basebandSource = new WFMModBaseband();
     m_basebandSource->setInputFileStream(&m_ifstream);
     m_basebandSource->setChannel(this);

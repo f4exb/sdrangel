@@ -85,6 +85,7 @@ bool AudioOutput::start()
     audioDeviceManager->addAudioSink(&m_audioFifo, getInputMessageQueue(), m_audioDeviceIndex);
 
     m_workerThread = new QThread();
+    m_workerThread->setObjectName("AudioOutput:wrk");
 	m_worker = new AudioOutputWorker(&m_sampleSourceFifo, &m_audioFifo);
     m_worker->moveToThread(m_workerThread);
 

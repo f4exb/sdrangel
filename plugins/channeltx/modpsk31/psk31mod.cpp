@@ -60,6 +60,7 @@ PSK31::PSK31(DeviceAPI *deviceAPI) :
     setObjectName(m_channelId);
 
     m_thread = new QThread(this);
+    m_thread->setObjectName("PSK31");
     m_basebandSource = new PSK31Baseband();
     m_basebandSource->setSpectrumSampleSink(&m_spectrumVis);
     m_basebandSource->setChannel(this);

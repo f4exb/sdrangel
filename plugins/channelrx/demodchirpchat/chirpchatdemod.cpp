@@ -136,6 +136,7 @@ void ChirpChatDemod::start()
 
     qDebug() << "ChirpChatDemod::start";
     m_decoderThread = new QThread(this);
+    m_decoderThread->setObjectName("CCDemod:decode");
     m_decoder = new ChirpChatDemodDecoder();
     m_decoder->setOutputMessageQueue(getInputMessageQueue());
     m_decoder->setNbSymbolBits(m_settings.m_spreadFactor, m_settings.m_deBits);
@@ -151,6 +152,7 @@ void ChirpChatDemod::start()
     m_decoderThread->start();
 
     m_thread = new QThread(this);
+    m_thread->setObjectName("CCDemod:bb");
     m_basebandSink = new ChirpChatDemodBaseband();
     m_basebandSink->setSpectrumSink(&m_spectrumVis);
     m_basebandSink->setDecoderMessageQueue(m_decoder->getInputMessageQueue());

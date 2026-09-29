@@ -51,6 +51,7 @@ PacketDemod::PacketDemod(DeviceAPI *deviceAPI) :
         m_basebandSampleRate(0)
 {
     setObjectName(m_channelId);
+    m_thread.setObjectName("PacketDemodBB");
 
     m_basebandSink = new PacketDemodBaseband(this);
     m_basebandSink->setMessageQueueToChannel(getInputMessageQueue());

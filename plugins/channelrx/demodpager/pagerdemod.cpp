@@ -47,6 +47,7 @@ PagerDemod::PagerDemod(DeviceAPI *deviceAPI) :
         m_centerFrequency(0)
 {
     setObjectName(m_channelId);
+    m_thread.setObjectName("PagerDemodBB");
 
     m_basebandSink = new PagerDemodBaseband();
     m_basebandSink->setMessageQueueToChannel(getInputMessageQueue());

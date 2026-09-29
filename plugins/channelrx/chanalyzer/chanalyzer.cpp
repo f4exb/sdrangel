@@ -53,6 +53,7 @@ ChannelAnalyzer::ChannelAnalyzer(DeviceAPI *deviceAPI) :
 {
     qDebug("ChannelAnalyzer::ChannelAnalyzer");
     setObjectName(m_channelId);
+    m_thread.setObjectName("Channelyzer");
     getBasebandSampleRate();
     m_basebandSink = new ChannelAnalyzerBaseband();
     m_basebandSink->moveToThread(&m_thread);

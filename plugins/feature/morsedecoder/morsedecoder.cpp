@@ -100,6 +100,7 @@ void MorseDecoder::start()
 
 	qDebug("MorseDecoder::start");
     m_thread = new QThread();
+    m_thread->setObjectName("MorseDecoder");
     m_worker = new MorseDecoderWorker();
     m_worker->moveToThread(m_thread);
 

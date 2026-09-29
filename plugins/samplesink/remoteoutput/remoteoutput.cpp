@@ -50,6 +50,7 @@ RemoteOutput::RemoteOutput(DeviceAPI *deviceAPI) :
 	m_settings(),
 	m_masterTimer(deviceAPI->getMasterTimer())
 {
+    m_remoteOutputWorkerThread.setObjectName("RemoteOutputWrk");
     m_deviceAPI->setNbSinkStreams(1);
     m_networkManager = new QNetworkAccessManager();
     QObject::connect(

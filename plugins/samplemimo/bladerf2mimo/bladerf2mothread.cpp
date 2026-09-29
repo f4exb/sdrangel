@@ -28,6 +28,7 @@ BladeRF2MOThread::BladeRF2MOThread(struct bladerf* dev, QObject* parent) :
     m_log2Interp(0),
     m_fcPos(0)
 {
+    setObjectName("BladeRF2MO");
     qDebug("BladeRF2MOThread::BladeRF2MOThread");
     m_buf = new qint16[2*DeviceBladeRF2::blockSize*2];
 }

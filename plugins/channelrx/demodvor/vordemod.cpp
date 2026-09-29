@@ -133,6 +133,7 @@ void VORDemod::start()
 
     qDebug("VORDemod::start");
     m_thread = new QThread();
+    m_thread->setObjectName("VORDemod");
     m_basebandSink = new VORDemodBaseband();
     m_basebandSink->setMessageQueueToChannel(getInputMessageQueue());
     m_basebandSink->moveToThread(m_thread);

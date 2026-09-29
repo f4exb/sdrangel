@@ -43,6 +43,7 @@ M17ModSource::M17ModSource() :
     m_preemphasisFilter(m_preemphasis*48000)
 {
     m_audioFifo.setLabel("M17ModSource.m_audioFifo");
+    m_processorThread.setObjectName("M17ModSourceWrk");
     m_feedbackAudioFifo.setLabel("M17ModSource.m_feedbackAudioFifo");
 	m_audioBuffer.resize(24000);
 	m_audioBufferFill = 0;

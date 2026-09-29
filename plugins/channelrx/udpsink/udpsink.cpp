@@ -57,6 +57,7 @@ UDPSink::UDPSink(DeviceAPI *deviceAPI) :
 	setObjectName(m_channelId);
 
     m_thread = new QThread(this);
+    m_thread->setObjectName("UDPSink");
     m_basebandSink = new UDPSinkBaseband();
     m_basebandSink->setSpectrum(&m_spectrumVis);
     m_basebandSink->moveToThread(m_thread);

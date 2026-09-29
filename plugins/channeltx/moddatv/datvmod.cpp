@@ -63,6 +63,7 @@ DATVMod::DATVMod(DeviceAPI *deviceAPI) :
     setObjectName(m_channelId);
 
     m_thread = new QThread(this);
+    m_thread->setObjectName("DATVMod");
     m_basebandSource = new DATVModBaseband();
     m_basebandSource->moveToThread(m_thread);
 

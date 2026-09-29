@@ -33,6 +33,7 @@ PlutoSDRInputThread::PlutoSDRInputThread(uint32_t blocksizeSamples, DevicePlutoS
     m_phasor(0),
     m_iqOrder(true)
 {
+    setObjectName("PlutoSDRInput");
     m_buf     = new qint16[blocksizeSamples*2]; // (I,Q) -> 2 * int16_t
     m_bufConv = new qint16[blocksizeSamples*2]; // (I,Q) -> 2 * int16_t
 }

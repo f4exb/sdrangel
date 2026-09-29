@@ -51,6 +51,7 @@ AISDemod::AISDemod(DeviceAPI *deviceAPI) :
         m_centerFrequency(0)
 {
     setObjectName(m_channelId);
+    m_thread.setObjectName("AISDemod");
 
     m_basebandSink = new AISDemodBaseband(this);
     m_basebandSink->setMessageQueueToChannel(getInputMessageQueue());

@@ -36,6 +36,7 @@ USRPOutputThread::USRPOutputThread(uhd::tx_streamer::sptr stream, size_t bufSamp
     m_sampleFifo(sampleFifo),
     m_log2Interp(0)
 {
+    setObjectName("USRPOutput");
     // *2 as samples are I+Q
     m_buf = new qint16[2 * bufSamples];
     std::fill(m_buf, m_buf + 2 * bufSamples, 0);

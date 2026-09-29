@@ -79,6 +79,7 @@ DABDemod::DABDemod(DeviceAPI *deviceAPI) :
         m_reportTII(0)
 {
     setObjectName(m_channelId);
+    m_thread.setObjectName("DABDemodBB");
 
     m_basebandSink = new DABDemodBaseband();
     m_basebandSink->setMessageQueueToChannel(getInputMessageQueue());

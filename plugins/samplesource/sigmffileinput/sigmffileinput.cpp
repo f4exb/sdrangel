@@ -64,6 +64,7 @@ SigMFFileInput::SigMFFileInput(DeviceAPI *deviceAPI) :
 	m_settings()
 {
     m_sampleFifo.setLabel(m_deviceDescription);
+    m_fileInputWorkerThread.setObjectName("SigMFInputWrk");
     m_deviceAPI->setNbSourceStreams(1);
     qDebug("SigMFFileInput::SigMFFileInput: device source engine: %p", m_deviceAPI->getDeviceSourceEngine());
     qDebug("SigMFFileInput::SigMFFileInput: device source engine message queue: %p", m_deviceAPI->getDeviceEngineInputMessageQueue());

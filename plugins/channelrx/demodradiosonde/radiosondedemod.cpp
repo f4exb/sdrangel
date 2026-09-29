@@ -49,6 +49,7 @@ RadiosondeDemod::RadiosondeDemod(DeviceAPI *deviceAPI) :
         m_basebandSampleRate(0)
 {
     setObjectName(m_channelId);
+    m_thread.setObjectName("RadiosondeDeBB");
 
     m_basebandSink = new RadiosondeDemodBaseband(this);
     m_basebandSink->setMessageQueueToChannel(getInputMessageQueue());

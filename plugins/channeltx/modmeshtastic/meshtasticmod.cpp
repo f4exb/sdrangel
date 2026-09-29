@@ -64,6 +64,7 @@ MeshtasticMod::MeshtasticMod(DeviceAPI *deviceAPI) :
 	setObjectName(m_channelId);
 
     m_thread = new QThread(this);
+    m_thread->setObjectName("MeshtasticMod");
     m_basebandSource = new MeshtasticModBaseband();
     m_basebandSource->moveToThread(m_thread);
 

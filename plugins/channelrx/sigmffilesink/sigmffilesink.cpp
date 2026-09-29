@@ -145,6 +145,7 @@ void SigMFFileSink::start()
 
 	qDebug("SigMFFileSink::start");
     m_thread = new QThread();
+    m_thread->setObjectName("SigMFFileSink");
     m_basebandSink = new SigMFFileSinkBaseband();
     m_basebandSink->setFifoLabel(QString("%1 [%2:%3]")
         .arg(m_channelId)

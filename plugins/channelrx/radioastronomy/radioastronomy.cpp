@@ -74,6 +74,8 @@ RadioAstronomy::RadioAstronomy(DeviceAPI *deviceAPI) :
 {
     qDebug("RadioAstronomy::RadioAstronomy");
     setObjectName(m_channelId);
+    m_thread.setObjectName("RadioAstroBB");
+    m_workerThread.setObjectName("RadioAstroWk");
 
     m_basebandSink = new RadioAstronomyBaseband(this);
     m_basebandSink->setMessageQueueToChannel(getInputMessageQueue());

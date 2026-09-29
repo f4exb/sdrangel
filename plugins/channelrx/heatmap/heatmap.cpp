@@ -48,6 +48,7 @@ HeatMap::HeatMap(DeviceAPI *deviceAPI) :
         m_centerFrequency(0)
 {
     setObjectName(m_channelId);
+    m_thread.setObjectName("HeatMapBB");
 
     m_basebandSink = new HeatMapBaseband();
     m_basebandSink->setMessageQueueToChannel(getInputMessageQueue());

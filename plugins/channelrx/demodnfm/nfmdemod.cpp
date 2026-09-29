@@ -129,6 +129,7 @@ void NFMDemod::start()
 
     qDebug() << "NFMDemod::start";
     m_thread = new QThread();
+    m_thread->setObjectName("NFMDemod");
     m_basebandSink = new NFMDemodBaseband();
     m_basebandSink->setFifoLabel(QString("%1 [%2:%3]")
         .arg(m_channelId)

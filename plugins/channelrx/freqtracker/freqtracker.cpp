@@ -130,6 +130,7 @@ void FreqTracker::start()
 
 	qDebug("FreqTracker::start");
     m_thread = new QThread(this);
+    m_thread->setObjectName("FreqTracker");
     m_basebandSink = new FreqTrackerBaseband();
     m_basebandSink->setSpectrumSink(&m_spectrumVis);
     m_basebandSink->setMessageQueueToInput(getInputMessageQueue());

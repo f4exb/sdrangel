@@ -61,6 +61,7 @@ ChirpChatMod::ChirpChatMod(DeviceAPI *deviceAPI) :
 	setObjectName(m_channelId);
 
     m_thread = new QThread(this);
+    m_thread->setObjectName("ChirpChatMod");
     m_basebandSource = new ChirpChatModBaseband();
     m_basebandSource->moveToThread(m_thread);
 

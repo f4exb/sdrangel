@@ -98,6 +98,7 @@ bool TestSourceInput::start()
     }
 
     m_testSourceWorkerThread = new QThread();
+    m_testSourceWorkerThread->setObjectName("TestSourceInput");
     m_testSourceWorker = new TestSourceWorker(&m_sampleFifo);
     m_testSourceWorker->moveToThread(m_testSourceWorkerThread);
 

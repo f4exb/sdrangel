@@ -106,6 +106,7 @@ void StarTracker::start()
     qDebug("StarTracker::start");
 
     m_thread = new QThread();
+    m_thread->setObjectName("StarTracker");
     m_worker = new StarTrackerWorker(this, m_webAPIAdapterInterface);
     m_worker->moveToThread(m_thread);
 

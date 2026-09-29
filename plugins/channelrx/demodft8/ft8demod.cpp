@@ -158,6 +158,7 @@ void FT8Demod::start()
 
     qDebug() << "FT8Demod::start";
     m_thread = new QThread();
+    m_thread->setObjectName("FT8Demod");
     m_basebandSink = new FT8DemodBaseband();
     m_basebandSink->setFifoLabel(QString("%1 [%2:%3]")
         .arg(m_channelId)
