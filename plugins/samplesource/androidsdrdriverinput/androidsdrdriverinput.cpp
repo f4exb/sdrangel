@@ -49,6 +49,7 @@ AndroidSDRDriverInput::AndroidSDRDriverInput(DeviceAPI *deviceAPI) :
     m_androidSDRDriverInputTCPPHandler(nullptr),
     m_deviceDescription("AndroidSDRDriverInput")
 {
+    m_thread.setObjectName("AndroidSDRBB");
     m_sampleFifo.setLabel(m_deviceDescription);
     m_sampleFifo.setSize(48000 * 8);
     m_androidSDRDriverInputTCPPHandler = new AndroidSDRDriverInputTCPHandler(&m_sampleFifo, m_deviceAPI);

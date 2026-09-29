@@ -296,6 +296,7 @@ void MeshcoreDemod::startPipelines(const std::vector<PipelineConfig>& configs)
         runtime.settings = config.settings;
 
         runtime.decoderThread = new QThread();
+        runtime.decoderThread->setObjectName(QString("MCDemod:dc:%1").arg(runtime.id));
         runtime.decoder = new MeshcoreDemodDecoder();
         runtime.decoder->setOutputMessageQueue(getInputMessageQueue());
         runtime.decoder->setPipelineMetadata(runtime.id, runtime.name, runtime.presetName);
@@ -305,6 +306,7 @@ void MeshcoreDemod::startPipelines(const std::vector<PipelineConfig>& configs)
         runtime.decoderThread->start();
 
         runtime.basebandThread = new QThread();
+        runtime.basebandThread->setObjectName(QString("MCDemod:bb:%1").arg(runtime.id));
         runtime.basebandSink = new MeshcoreDemodBaseband();
 
         if (config.id == 0) {
@@ -464,6 +466,7 @@ void MeshcoreDemod::applyExtraPipelineSettings(const QVector<MeshcoreDemodSettin
             runtime.settings = config.settings;
 
             runtime.decoderThread = new QThread();
+            runtime.decoderThread->setObjectName(QString("MCDemod:dc:%1").arg(runtime.id));
             runtime.decoder = new MeshcoreDemodDecoder();
             runtime.decoder->setOutputMessageQueue(getInputMessageQueue());
             runtime.decoder->setPipelineMetadata(runtime.id, runtime.name, runtime.presetName);
@@ -472,6 +475,7 @@ void MeshcoreDemod::applyExtraPipelineSettings(const QVector<MeshcoreDemodSettin
             runtime.decoderThread->start();
 
             runtime.basebandThread = new QThread();
+            runtime.basebandThread->setObjectName(QString("MCDemod:bb:%1").arg(runtime.id));
             runtime.basebandSink = new MeshcoreDemodBaseband();
             // Secondary pipelines (id != 0) do not own the spectrum visualiser.
             runtime.basebandSink->setDecoderMessageQueue(runtime.decoder->getInputMessageQueue());

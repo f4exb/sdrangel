@@ -62,6 +62,7 @@ AISMod::AISMod(DeviceAPI *deviceAPI) :
     setObjectName(m_channelId);
 
     m_thread = new QThread(this);
+    m_thread->setObjectName("AISMod");
     m_basebandSource = new AISModBaseband();
     m_basebandSource->setSpectrumSampleSink(&m_spectrumVis);
     m_basebandSource->setChannel(this);

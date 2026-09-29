@@ -54,6 +54,7 @@ void RemoteControl::start()
     qDebug() << "RemoteControl::start";
 
     m_thread = new QThread();
+    m_thread->setObjectName("RemoteControl");
     m_worker = new RemoteControlWorker();
     m_worker->moveToThread(m_thread);
 

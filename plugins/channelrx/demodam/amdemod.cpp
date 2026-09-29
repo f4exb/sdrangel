@@ -127,6 +127,7 @@ void AMDemod::start()
 
 	qDebug("AMDemod::start");
     m_thread = new QThread();
+    m_thread->setObjectName("AMDemod");
     m_basebandSink = new AMDemodBaseband();
     m_basebandSink->setChannel(this);
     m_basebandSink->moveToThread(m_thread);

@@ -43,6 +43,7 @@ RigCtlServer::RigCtlServer(WebAPIAdapterInterface *webAPIAdapterInterface) :
 {
     qDebug("RigCtlServer::RigCtlServer: webAPIAdapterInterface: %p", webAPIAdapterInterface);
     setObjectName(m_featureId);
+    m_thread.setObjectName("RigCtlServerBB");
     m_worker = new RigCtlServerWorker(webAPIAdapterInterface);
     m_worker->moveToThread(&m_thread);
     setState(StIdle);

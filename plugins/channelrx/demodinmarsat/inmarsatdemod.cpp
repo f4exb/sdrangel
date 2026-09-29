@@ -47,6 +47,7 @@ InmarsatDemod::InmarsatDemod(DeviceAPI *deviceAPI) :
         m_basebandSampleRate(0)
 {
     setObjectName(m_channelId);
+    m_thread.setObjectName("InmarsatBB");
 
     m_basebandSink = new InmarsatDemodBaseband(this);
     m_basebandSink->setMessageQueueToChannel(getInputMessageQueue());

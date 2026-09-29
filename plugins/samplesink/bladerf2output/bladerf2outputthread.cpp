@@ -27,6 +27,7 @@ BladeRF2OutputThread::BladeRF2OutputThread(struct bladerf* dev, unsigned int nbT
     m_dev(dev),
     m_nbChannels(nbTxChannels)
 {
+    setObjectName("BladeRF2Output");
     qDebug("BladeRF2OutputThread::BladeRF2OutputThread");
     m_channels = new Channel[nbTxChannels];
     m_buf = new qint16[2*DeviceBladeRF2::blockSize*nbTxChannels];

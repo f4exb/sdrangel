@@ -95,6 +95,7 @@ void AFC::start()
 
 	qDebug("AFC::start");
     m_thread = new QThread();
+    m_thread->setObjectName("AFC");
     m_worker = new AFCWorker(getWebAPIAdapterInterface());
     m_worker->moveToThread(m_thread);
 

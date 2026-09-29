@@ -72,6 +72,7 @@ bool TestSinkOutput::start()
 	qDebug() << "TestSinkOutput::start";
 
     m_testSinkWorkerThread = new QThread();
+    m_testSinkWorkerThread->setObjectName("TestSinkOutput");
 	m_testSinkWorker = new TestSinkWorker(&m_sampleSourceFifo);
     m_testSinkWorker->moveToThread(m_testSinkWorkerThread);
 

@@ -26,7 +26,9 @@ LocalSourceSource::LocalSourceSource() :
     m_chunkSize(0),
     m_localSamplesIndex(0),
     m_localSamplesIndexOffset(0)
-{}
+{
+    m_sinkWorkerThread.setObjectName("LocalSrcSrcWrk");
+}
 
 LocalSourceSource::~LocalSourceSource()
 {}

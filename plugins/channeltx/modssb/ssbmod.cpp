@@ -65,6 +65,7 @@ SSBMod::SSBMod(DeviceAPI *deviceAPI) :
 	setObjectName(m_channelId);
 
     m_thread = new QThread(this);
+    m_thread->setObjectName("SSBMod");
     m_basebandSource = new SSBModBaseband();
     m_basebandSource->setSpectrumSink(&m_spectrumVis);
     m_basebandSource->setInputFileStream(&m_ifstream);

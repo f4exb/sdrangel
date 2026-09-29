@@ -107,6 +107,7 @@ bool AudioInput::start()
     audioDeviceManager->addAudioSource(&m_fifo, getInputMessageQueue(), m_audioDeviceIndex);
 
     m_workerThread = new QThread();
+    m_workerThread->setObjectName("AudioInput");
     m_worker = new AudioInputWorker(&m_sampleFifo, &m_fifo);
     m_worker->moveToThread(m_workerThread);
 

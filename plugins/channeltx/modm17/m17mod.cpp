@@ -62,6 +62,7 @@ M17Mod::M17Mod(DeviceAPI *deviceAPI) :
     m_loopPacketTimer.setInterval(m_settings.m_loopPacketInterval*1000);
 
     m_thread = new QThread(this);
+    m_thread->setObjectName("M17Mod");
     m_basebandSource = new M17ModBaseband();
     m_basebandSource->setInputFileStream(&m_ifstream);
     m_basebandSource->setChannel(this);

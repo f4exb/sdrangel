@@ -58,6 +58,7 @@ RemoteTCPInput::RemoteTCPInput(DeviceAPI *deviceAPI) :
     m_azimuth(std::numeric_limits<float>::quiet_NaN()),
     m_elevation(std::numeric_limits<float>::quiet_NaN())
 {
+    m_thread.setObjectName("RemoteTCPInBB");
     m_sampleFifo.setLabel(m_deviceDescription);
     m_sampleFifo.setSize(48000 * 8);
     m_remoteInputTCPPHandler = new RemoteTCPInputTCPHandler(&m_sampleFifo, m_deviceAPI, &m_replayBuffer);

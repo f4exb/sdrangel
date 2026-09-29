@@ -140,6 +140,7 @@ void Denoiser::start()
 
 	qDebug("Denoiser::start");
     m_thread = new QThread();
+    m_thread->setObjectName("Denoiser");
     m_worker = new DenoiserWorker();
     m_worker->moveToThread(m_thread);
 
