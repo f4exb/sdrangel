@@ -615,7 +615,11 @@ bool PlutoSDROutput::applySettings(const PlutoSDROutputSettings& settings, const
         {
             DevicePlutoSDRShared *buddySharedPtr = (DevicePlutoSDRShared *) (*itSource)->getBuddySharedPtr();
 
-            if (buddySharedPtr && buddySharedPtr->m_threadWasRunning) {
+            // m_threadWasRunning is sticky state on the buddy's shared struct, but the
+            // buddy's thread can be gone by the time we resume (its device was stopped,
+            // or a preset was loaded into it), which nulls m_thread. The matching
+            // suspend block above already tests m_thread; test it here too.
+            if (buddySharedPtr && buddySharedPtr->m_threadWasRunning && buddySharedPtr->m_thread) {
                 buddySharedPtr->m_thread->startWork();
             }
         }
