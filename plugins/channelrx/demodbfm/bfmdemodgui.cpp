@@ -402,6 +402,8 @@ BFMDemodGUI::BFMDemodGUI(PluginAPI* pluginAPI, DeviceUISet *deviceUISet, Baseban
     m_basebandSampleRate(1),
 	m_rdsTimerCount(0),
     m_radiotext_AB_flag(false),
+	m_squelchOpen(false),
+    m_audioSampleRate(-1),
 	m_rate(625000)
 {
 	setAttribute(Qt::WA_DeleteOnClose, true);
@@ -586,7 +588,24 @@ void BFMDemodGUI::tick()
 	Real pilotPowDb =  CalcDb::dbPower(m_bfmDemod->getPilotLevel());
     ui->pilotPower->setText(QString::number(pilotPowDb, 'f', 1));
 
-    if (m_bfmDemod->getAudioSampleRate() < 0)
+    int audioSampleRate = m_bfmDemod->getAudioSampleRate();
+    bool squelchOpen = m_bfmDemod->getSquelchOpen();
+
+    if ((audioSampleRate != m_audioSampleRate) || (squelchOpen != m_squelchOpen))
+    {
+        if (audioSampleRate < 0) {
+            ui->audioMute->setStyleSheet("QToolButton { background-color : red; }");
+        } else if (squelchOpen) {
+            ui->audioMute->setStyleSheet("QToolButton { background-color : green; }");
+        } else {
+            ui->audioMute->setStyleSheet("QToolButton { background:rgb(79,79,79); }");
+        }
+
+        m_audioSampleRate = audioSampleRate;
+        m_squelchOpen = squelchOpen;
+    }
+
+    if (audioSampleRate < 0)
     {
         ui->audioStereo->setStyleSheet("QToolButton { background-color : red; }");
     }
