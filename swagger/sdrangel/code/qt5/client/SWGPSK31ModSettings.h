@@ -80,12 +80,6 @@ public:
     qint32 getSymbolSpan();
     void setSymbolSpan(qint32 symbol_span);
 
-    qint32 getPrefixCrlf();
-    void setPrefixCrlf(qint32 prefix_crlf);
-
-    qint32 getPostfixCrlf();
-    void setPostfixCrlf(qint32 postfix_crlf);
-
     qint32 getUdpEnabled();
     void setUdpEnabled(qint32 udp_enabled);
 
@@ -164,12 +158,6 @@ private:
 
     qint32 symbol_span;
     bool m_symbol_span_isSet;
-
-    qint32 prefix_crlf;
-    bool m_prefix_crlf_isSet;
-
-    qint32 postfix_crlf;
-    bool m_postfix_crlf_isSet;
 
     qint32 udp_enabled;
     bool m_udp_enabled_isSet;

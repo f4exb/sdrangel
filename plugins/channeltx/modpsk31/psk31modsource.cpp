@@ -373,18 +373,15 @@ void PSK31Source::addTXText(QString text)
 {
     int count = m_settings.m_repeat ? m_settings.m_repeatCount : 1;
 
+    // PSK31 defines both CR and LF Varicode characters but no message delimiter.
+    // Terminate messages with a single LF unless the caller supplied a line ending.
+    if (!text.endsWith('\r') && !text.endsWith('\n')) {
+        text.append('\n');
+    }
+
     for (int i = 0; i < count; i++) {
 
-        QString s = text;
-
-        if (m_settings.m_prefixCRLF) {
-            s.prepend("\r\r\n");
-        }
-        if (m_settings.m_postfixCRLF) {
-            s.append("\r\r\n");
-        }
-
-        m_textToTransmit.append(s);
+        m_textToTransmit.append(text);
     }
 }
 

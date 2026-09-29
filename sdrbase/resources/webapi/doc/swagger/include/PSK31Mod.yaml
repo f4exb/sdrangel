@@ -54,16 +54,6 @@ PSK31ModSettings:
     symbolSpan:
       type: integer
       description: "Symbol span setting for Psk31 mod."
-    prefixCRLF:
-      type: integer
-      description: "Enable prefix crlf (1 enabled, 0 disabled)."
-      minimum: 0
-      maximum: 1
-    postfixCRLF:
-      type: integer
-      description: "Enable postfix crlf (1 enabled, 0 disabled)."
-      minimum: 0
-      maximum: 1
     udpEnabled:
       description: "Whether to receive text to transmit on specified UDP port"
       type: integer

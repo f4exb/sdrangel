@@ -374,12 +374,6 @@ void PSK31::webapiUpdateChannelSettings(
     if (channelSettingsKeys.contains("symbolSpan")) {
         settings.m_symbolSpan = response.getPsk31ModSettings()->getSymbolSpan();
     }
-    if (channelSettingsKeys.contains("prefixCRLF")) {
-        settings.m_prefixCRLF = response.getPsk31ModSettings()->getPrefixCrlf();
-    }
-    if (channelSettingsKeys.contains("postfixCRLF")) {
-        settings.m_postfixCRLF = response.getPsk31ModSettings()->getPostfixCrlf();
-    }
     if (channelSettingsKeys.contains("rgbColor")) {
         settings.m_rgbColor = response.getPsk31ModSettings()->getRgbColor();
     }
@@ -502,8 +496,6 @@ void PSK31::webapiFormatChannelSettings(SWGSDRangel::SWGChannelSettings& respons
     response.getPsk31ModSettings()->setBeta(settings.m_beta);
     response.getPsk31ModSettings()->setSymbolSpan(settings.m_symbolSpan);
 
-    response.getPsk31ModSettings()->setPrefixCrlf(settings.m_prefixCRLF);
-    response.getPsk31ModSettings()->setPostfixCrlf(settings.m_postfixCRLF);
 
     response.getPsk31ModSettings()->setUdpEnabled(settings.m_udpEnabled);
     if (response.getPsk31ModSettings()->getUdpAddress()) {
@@ -674,12 +666,6 @@ void PSK31::webapiFormatChannelSettings(
     }
     if (channelSettingsKeys.contains("symbolSpan")) {
         swgPSK31ModSettings->setSymbolSpan(settings.m_symbolSpan);
-    }
-    if (channelSettingsKeys.contains("prefixCRLF")) {
-        swgPSK31ModSettings->setPrefixCrlf(settings.m_prefixCRLF);
-    }
-    if (channelSettingsKeys.contains("postfixCRLF")) {
-        swgPSK31ModSettings->setPostfixCrlf(settings.m_postfixCRLF);
     }
     if (channelSettingsKeys.contains("rgbColor") || force) {
         swgPSK31ModSettings->setRgbColor(settings.m_rgbColor);

@@ -43,8 +43,6 @@ struct PSK31Settings
     bool m_pulseShaping;
     float m_beta;
     int m_symbolSpan;
-    bool m_prefixCRLF;
-    bool m_postfixCRLF;
     QStringList m_predefinedTexts;
 
     quint32 m_rgbColor;
