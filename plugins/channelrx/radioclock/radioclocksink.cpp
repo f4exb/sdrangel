@@ -18,12 +18,15 @@
 
 #include <QDebug>
 
+#include <algorithm>
 #include <complex.h>
+#include <cmath>
 
 #include "dsp/scopevis.h"
 #include "util/db.h"
 
 #include "radioclock.h"
+#include "pcsk225decoder.h"
 #include "radioclocksink.h"
 
 RadioClockSink::RadioClockSink() :
@@ -52,7 +55,46 @@ RadioClockSink::RadioClockSink() :
         m_zeroCount(0),
         m_bits{},
         m_sampleBufferIndex(0),
-        m_gotMarker(false)
+        m_gotMarker(false),
+        m_rbuPrevSample(0.0f, 0.0f),
+        m_rbuHavePrevSample(false),
+        m_rbuHaveSymbolTiming(false),
+        m_rbuSymbolSample(0),
+        m_rbuCarrierLowCount(0),
+        m_rbuTimingErrors(0),
+        m_rbu100Real(0.0),
+        m_rbu100Imag(0.0),
+        m_rbu312Real(0.0),
+        m_rbu312Imag(0.0),
+        m_rbuCorrelationSamples(0),
+        m_rbuRecentBits(0),
+        m_rbuRecentBitCount(0),
+        m_rbuBit(0),
+        m_rbuSecondValid(true),
+        m_rbuInvalidSeconds(0),
+        m_pcskPrevSample(0.0f, 0.0f),
+        m_pcskHavePrevSample(false),
+        m_pcskUnwrappedPhase(0.0),
+        m_pcskPhaseHistory{},
+        m_pcskSampleCount(0),
+        m_pcskSyncCandidate(false),
+        m_pcskSyncQuietSamples(0),
+        m_pcskSyncScore(0.0),
+        m_pcskSyncEndSample(0),
+        m_pcskSyncIntercept(0.0),
+        m_pcskSyncSlope(0.0),
+        m_pcskSyncSeparation(0.0),
+        m_pcskCollectingFrame(false),
+        m_pcskBit(0),
+        m_pcskFrameStartSample(0),
+        m_pcskNextSymbolSample(0),
+        m_pcskPhaseIntercept(0.0),
+        m_pcskPhaseSlope(0.0),
+        m_pcskPhaseSeparation(0.0),
+        m_pcskFrame{},
+        m_pcskReferenceSample(0),
+        m_pcskNextTimeReportSample(0),
+        m_pcskLastValidFrameSample(0)
 {
     m_phaseDiscri.setFMScaling(RadioClockSettings::RADIOCLOCK_CHANNEL_SAMPLE_RATE / (2.0f * 20.0/M_PI));
     applySettings(QStringList(), m_settings, true);
@@ -949,6 +991,635 @@ void RadioClockSink::jjy()
     m_prevData = m_data;
 }
 
+// Russian RBU 66.666...kHz
+// GOST 8.515-2016 and ITU-R TF.2487-0
+// Each 100ms symbol contains 80ms of phase modulation at 100Hz (0) or
+// 312.5Hz (1), followed by a 5ms carrier interruption used for timing.
+void RadioClockSink::rbu(Complex& ci, Real magsq)
+{
+    const int symbolSamples = RadioClockSettings::RADIOCLOCK_CHANNEL_SAMPLE_RATE / 10;
+    const int correlationStart = RadioClockSettings::RADIOCLOCK_CHANNEL_SAMPLE_RATE / 100;
+    const int correlationEnd = 9 * RadioClockSettings::RADIOCLOCK_CHANNEL_SAMPLE_RATE / 100;
+    const double twoPi = 2.0 * M_PI;
+
+    Real averagePower = m_thresholdMovingAverage.instantAverage();
+    m_threshold = averagePower * m_linearThreshold;
+    bool carrierPresent = magsq > m_threshold;
+
+    Real phaseDelta = 0.0f;
+    if (m_rbuHavePrevSample) {
+        phaseDelta = std::arg(ci * std::conj(m_rbuPrevSample));
+    }
+    m_rbuPrevSample = ci;
+    m_rbuHavePrevSample = true;
+    m_fmDemodMovingAverage(phaseDelta);
+
+    // Accept a carrier recovery after an interruption as a symbol edge. Once
+    // timing is acquired the clock free-runs at 10Hz, with valid interruptions
+    // correcting its phase. This avoids losing a whole frame on a single faded
+    // or noise-filled 5ms notch.
+    if (!carrierPresent)
+    {
+        m_rbuCarrierLowCount++;
+    }
+    else if (m_rbuCarrierLowCount > 0)
+    {
+        bool validDrop = (m_rbuCarrierLowCount >= 2) && (m_rbuCarrierLowCount <= 30);
+        bool expectedEdge = !m_rbuHaveSymbolTiming
+            || (m_rbuSymbolSample >= symbolSamples - 15)
+            || (m_rbuSymbolSample <= 15);
+
+        if (validDrop && expectedEdge)
+        {
+            m_rbuHaveSymbolTiming = true;
+            m_rbuTimingErrors = 0;
+            m_rbuSymbolSample = 0;
+            m_rbu100Real = 0.0;
+            m_rbu100Imag = 0.0;
+            m_rbu312Real = 0.0;
+            m_rbu312Imag = 0.0;
+            m_rbuCorrelationSamples = 0;
+        }
+        else if (validDrop)
+        {
+            m_rbuTimingErrors++;
+        }
+
+        m_rbuCarrierLowCount = 0;
+    }
+
+    m_sample = false;
+
+    if (!m_rbuHaveSymbolTiming) {
+        return;
+    }
+
+    if ((m_rbuSymbolSample >= correlationStart) && (m_rbuSymbolSample < correlationEnd))
+    {
+        int n = m_rbuSymbolSample - correlationStart;
+        double phase100 = twoPi * 100.0 * n / RadioClockSettings::RADIOCLOCK_CHANNEL_SAMPLE_RATE;
+        double phase312 = twoPi * 312.5 * n / RadioClockSettings::RADIOCLOCK_CHANNEL_SAMPLE_RATE;
+        m_rbu100Real += phaseDelta * std::cos(phase100);
+        m_rbu100Imag -= phaseDelta * std::sin(phase100);
+        m_rbu312Real += phaseDelta * std::cos(phase312);
+        m_rbu312Imag -= phaseDelta * std::sin(phase312);
+        m_rbuCorrelationSamples++;
+    }
+    else if (m_rbuSymbolSample == correlationEnd)
+    {
+        if (m_rbuCorrelationSamples == correlationEnd - correlationStart)
+        {
+            double power100 = m_rbu100Real * m_rbu100Real + m_rbu100Imag * m_rbu100Imag;
+            double power312 = m_rbu312Real * m_rbu312Real + m_rbu312Imag * m_rbu312Imag;
+            m_data = power312 > power100 ? 1 : 0;
+            m_sample = true;
+            rbuProcessBit(m_data);
+        }
+    }
+
+    m_rbuSymbolSample++;
+
+    if (m_rbuTimingErrors >= 3)
+    {
+        qDebug() << "RadioClockSink::rbu - Repeated symbol timing errors";
+        rbuReset(true);
+    }
+    else if (m_rbuSymbolSample >= symbolSamples)
+    {
+        m_rbuSymbolSample = 0;
+        m_rbu100Real = 0.0;
+        m_rbu100Imag = 0.0;
+        m_rbu312Real = 0.0;
+        m_rbu312Imag = 0.0;
+        m_rbuCorrelationSamples = 0;
+    }
+}
+
+void RadioClockSink::rbuProcessBit(int bit)
+{
+    m_rbuRecentBits = ((m_rbuRecentBits << 1) | (bit & 1)) & 0x3ff;
+    if (m_rbuRecentBitCount < 10) {
+        m_rbuRecentBitCount++;
+    }
+
+    if (!m_gotMinuteMarker)
+    {
+        // Second 59 contains five fixed zero symbols followed by the three
+        // marker ones; the first two symbols of second 00 are also ones.
+        // Matching the full 0000011111 sequence avoids false locks on noise.
+        if ((m_rbuRecentBitCount == 10) && (m_rbuRecentBits == 0x1f))
+        {
+            qDebug() << "RadioClockSink::rbu - Minute marker";
+            m_gotMinuteMarker = true;
+            m_second = 0;
+            m_rbuBit = 2; // Bits 0 and 1 of second 00 formed the marker.
+            m_timeCode[0] = 1;
+            m_timeCodeB[0] = 1;
+            m_rbuSecondValid = true;
+            m_rbuInvalidSeconds = 0;
+            m_dst = RadioClockSettings::UNKNOWN;
+            if (getMessageQueueToChannel()) {
+                getMessageQueueToChannel()->push(RadioClock::MsgStatus::create("Got minute marker"));
+            }
+        }
+        return;
+    }
+
+    if (m_rbuBit == 0)
+    {
+        m_timeCode[m_second] = bit;
+        if ((m_second == 0) && (bit != 1)) {
+            m_rbuSecondValid = false;
+        }
+    }
+    else if (m_rbuBit == 1)
+    {
+        m_timeCodeB[m_second] = bit;
+        if ((m_second == 0) && (bit != 1)) {
+            m_rbuSecondValid = false;
+        }
+    }
+    else if ((m_rbuBit >= 2) && (m_rbuBit <= 6))
+    {
+        if (bit != 0) {
+            m_rbuSecondValid = false;
+        }
+    }
+    else if ((m_rbuBit == 7) || (m_rbuBit == 8))
+    {
+        int expected = m_second == 59 ? 1 : 0;
+        if (bit != expected) {
+            m_rbuSecondValid = false;
+        }
+    }
+    else if ((m_rbuBit == 9) && (bit != 1))
+    {
+        m_rbuSecondValid = false;
+    }
+
+    if (m_rbuBit == 9)
+    {
+        if (m_rbuSecondValid) {
+            m_rbuInvalidSeconds = 0;
+        } else {
+            m_rbuInvalidSeconds++;
+        }
+
+        if (m_rbuInvalidSeconds >= 3)
+        {
+            qDebug() << "RadioClockSink::rbu - Lost lock: invalid second structure";
+            rbuReset(false);
+            return;
+        }
+
+        if (m_second == 59)
+        {
+            QString error;
+            if (rbuDecodeTimeCode(error))
+            {
+                if (getMessageQueueToChannel()) {
+                    getMessageQueueToChannel()->push(RadioClock::MsgStatus::create("OK"));
+                }
+            }
+            else if (getMessageQueueToChannel())
+            {
+                getMessageQueueToChannel()->push(RadioClock::MsgStatus::create(error));
+            }
+            m_second = 0;
+        }
+        else
+        {
+            m_second++;
+            if (m_dateTime.isValid()) {
+                m_dateTime = m_dateTime.addSecs(1);
+            }
+        }
+
+        if (getMessageQueueToChannel() && m_dateTime.isValid()) {
+            getMessageQueueToChannel()->push(RadioClock::MsgDateTime::create(m_dateTime, m_dst));
+        }
+
+        m_rbuBit = 0;
+        m_rbuSecondValid = true;
+    }
+    else
+    {
+        m_rbuBit++;
+    }
+}
+
+bool RadioClockSink::rbuDecodeTimeCode(QString& error)
+{
+    auto weightedValue = [](const int *code, int firstBit, const int *weights, int count) {
+        int value = 0;
+        for (int i = 0; i < count; i++) {
+            value += code[firstBit + i] ? weights[i] : 0;
+        }
+        return value;
+    };
+    auto parity = [](const int *code, int firstBit, int lastBit, int parityBit) {
+        int value = parityBit;
+        for (int i = firstBit; i <= lastBit; i++) {
+            value ^= code[i];
+        }
+        return value == 0;
+    };
+
+    bool parityOK = parity(m_timeCodeB, 18, 25, m_timeCodeB[49])
+        && parity(m_timeCodeB, 26, 33, m_timeCodeB[50])
+        && parity(m_timeCode, 18, 23, m_timeCodeB[53])
+        && parity(m_timeCode, 25, 32, m_timeCodeB[54])
+        && parity(m_timeCode, 33, 40, m_timeCodeB[55])
+        && parity(m_timeCode, 41, 46, m_timeCodeB[56])
+        && parity(m_timeCode, 47, 52, m_timeCodeB[57])
+        && parity(m_timeCode, 53, 59, m_timeCodeB[58]);
+
+    if (!parityOK)
+    {
+        error = "Parity error";
+        return false;
+    }
+
+    static const int yearWeights[] = {80, 40, 20, 10, 8, 4, 2, 1};
+    static const int monthWeights[] = {10, 8, 4, 2, 1};
+    static const int weekdayWeights[] = {4, 2, 1};
+    static const int dayWeights[] = {20, 10, 8, 4, 2, 1};
+    static const int hourWeights[] = {20, 10, 8, 4, 2, 1};
+    static const int minuteWeights[] = {40, 20, 10, 8, 4, 2, 1};
+    static const int offsetWeights[] = {10, 8, 4, 2, 1};
+    static const int tjdWeights[] = {8000, 4000, 2000, 1000, 800, 400, 200, 100, 80, 40, 20, 10, 8, 4, 2, 1};
+
+    int year = 2000 + weightedValue(m_timeCode, 25, yearWeights, 8);
+    int month = weightedValue(m_timeCode, 33, monthWeights, 5);
+    int weekday = weightedValue(m_timeCode, 38, weekdayWeights, 3);
+    int day = weightedValue(m_timeCode, 41, dayWeights, 6);
+    int hour = weightedValue(m_timeCode, 47, hourWeights, 6);
+    int minute = weightedValue(m_timeCode, 53, minuteWeights, 7);
+    int offsetHours = weightedValue(m_timeCode, 19, offsetWeights, 5);
+    int tjd = weightedValue(m_timeCodeB, 18, tjdWeights, 16);
+    if (m_timeCode[18]) {
+        offsetHours = -offsetHours;
+    }
+
+    QDate date(year, month, day);
+    QTime time(hour, minute);
+    int expectedTJD = date.isValid() ? static_cast<int>((date.toJulianDay() - 2400001) % 10000) : -1;
+
+    if (!date.isValid() || !time.isValid() || (weekday != date.dayOfWeek()) || (tjd != expectedTJD)
+        || (offsetHours < -12) || (offsetHours > 14))
+    {
+        qDebug() << "RadioClockSink::rbu - Invalid timecode:"
+                 << year << month << day << weekday << hour << minute
+                 << "offset" << offsetHours << "TJD" << tjd << "expected" << expectedTJD;
+        error = "Invalid timecode";
+        return false;
+    }
+
+    // The frame carries Moscow civil time for the minute beginning immediately
+    // after this frame and explicitly supplies its offset from UTC.
+    m_dateTime = QDateTime(date, time, Qt::OffsetFromUTC, offsetHours * 3600);
+    m_dst = RadioClockSettings::UNKNOWN;
+    error.clear();
+    return true;
+}
+
+void RadioClockSink::rbuReset(bool resetTiming)
+{
+    bool hadMinuteMarker = m_gotMinuteMarker;
+    m_gotMinuteMarker = false;
+    m_rbuRecentBits = 0;
+    m_rbuRecentBitCount = 0;
+    m_rbuBit = 0;
+    m_rbuSecondValid = true;
+    m_rbuInvalidSeconds = 0;
+    m_second = 0;
+    m_dst = RadioClockSettings::UNKNOWN;
+
+    if (resetTiming)
+    {
+        m_rbuHaveSymbolTiming = false;
+        m_rbuSymbolSample = 0;
+        m_rbuCarrierLowCount = 0;
+        m_rbuTimingErrors = 0;
+        m_rbuHavePrevSample = false;
+    }
+
+    if (hadMinuteMarker && getMessageQueueToChannel()) {
+        getMessageQueueToChannel()->push(RadioClock::MsgStatus::create("Looking for minute marker"));
+    }
+}
+
+// Polish PCSK-225 time signal on the 225kHz carrier of Polish Radio.
+// Frames use 50bit/s NRZ phase states separated by approximately 36 degrees.
+// The fixed 0x55 0x55 0x60 header supplies both symbol timing and per-frame
+// carrier phase/frequency estimates, so no wall-clock timing is required.
+void RadioClockSink::pcsk225(Complex& ci, Real magsq)
+{
+    constexpr int samplesPerBit = RadioClockSettings::RADIOCLOCK_CHANNEL_SAMPLE_RATE / 50;
+    const qint64 currentSample = m_pcskSampleCount++;
+
+    Real averagePower = m_thresholdMovingAverage.instantAverage();
+    m_threshold = averagePower * 0.01f; // Reject only very deep carrier fades (-20dB).
+
+    Real phaseDelta = 0.0f;
+    if (m_pcskHavePrevSample) {
+        phaseDelta = std::arg(ci * std::conj(m_pcskPrevSample));
+    }
+    m_pcskPrevSample = ci;
+    m_pcskHavePrevSample = true;
+    m_pcskUnwrappedPhase += phaseDelta;
+    m_pcskPhaseHistory[currentSample % m_pcskPhaseHistorySize] = m_pcskUnwrappedPhase;
+    m_fmDemodMovingAverage(phaseDelta);
+    m_sample = false;
+
+    if (m_pcskCollectingFrame && (currentSample >= m_pcskNextSymbolSample))
+    {
+        double phase0 = m_pcskPhaseIntercept + m_pcskPhaseSlope * m_pcskBit;
+        double phase1 = phase0 + m_pcskPhaseSeparation;
+        double phase = m_pcskUnwrappedPhase;
+        int decodedBit = std::abs(phase - phase1) < std::abs(phase - phase0) ? 1 : 0;
+        int byteIndex = m_pcskBit / 8;
+        int bitIndex = 7 - m_pcskBit % 8;
+
+        if (decodedBit) {
+            m_pcskFrame[byteIndex] |= static_cast<quint8>(1U << bitIndex);
+        } else {
+            m_pcskFrame[byteIndex] &= static_cast<quint8>(~(1U << bitIndex));
+        }
+
+        m_data = decodedBit;
+        m_sample = true;
+        m_pcskBit++;
+        m_pcskNextSymbolSample += samplesPerBit;
+
+        if (m_pcskBit == 96) {
+            pcskCompleteFrame(currentSample);
+        }
+    }
+    else if (!m_pcskCollectingFrame)
+    {
+        if (magsq > m_threshold) {
+            pcskTryFrameSync(currentSample);
+        } else {
+            m_pcskSyncCandidate = false;
+            m_pcskSyncQuietSamples = 0;
+        }
+    }
+
+    if (m_pcskReferenceDateTime.isValid() && (currentSample >= m_pcskNextTimeReportSample))
+    {
+        qint64 elapsedMSecs = (currentSample - m_pcskReferenceSample) * 1000
+            / RadioClockSettings::RADIOCLOCK_CHANNEL_SAMPLE_RATE;
+        m_dateTime = m_pcskReferenceDateTime.addMSecs(elapsedMSecs);
+
+        if (getMessageQueueToChannel()) {
+            getMessageQueueToChannel()->push(RadioClock::MsgDateTime::create(m_dateTime, m_dst));
+        }
+
+        do {
+            m_pcskNextTimeReportSample += RadioClockSettings::RADIOCLOCK_CHANNEL_SAMPLE_RATE;
+        } while (m_pcskNextTimeReportSample <= currentSample);
+    }
+
+    if (m_gotMinuteMarker && (m_pcskLastValidFrameSample > 0)
+        && (currentSample - m_pcskLastValidFrameSample > 125LL * RadioClockSettings::RADIOCLOCK_CHANNEL_SAMPLE_RATE))
+    {
+        m_gotMinuteMarker = false;
+        m_pcskReferenceDateTime = QDateTime();
+        if (getMessageQueueToChannel()) {
+            getMessageQueueToChannel()->push(RadioClock::MsgStatus::create("Looking for PCSK-225 frame"));
+        }
+    }
+}
+
+bool RadioClockSink::pcskTryFrameSync(qint64 currentSample)
+{
+    constexpr int headerBits = 24;
+    constexpr int samplesPerBit = RadioClockSettings::RADIOCLOCK_CHANNEL_SAMPLE_RATE / 50;
+    constexpr quint32 header = 0x555560;
+
+    if (currentSample < (headerBits - 1) * samplesPerBit) {
+        return false;
+    }
+
+    // Least-squares fit: phase(bit) = intercept + slope*bit + separation*knownBit.
+    // This removes residual carrier offset while measuring the two NRZ states.
+    double matrix[3][4]{};
+
+    for (int i = 0; i < headerBits; i++)
+    {
+        qint64 sample = currentSample - (headerBits - 1 - i) * samplesPerBit;
+        double phase = m_pcskPhaseHistory[sample % m_pcskPhaseHistorySize];
+        double knownBit = (header >> (headerBits - 1 - i)) & 1;
+        double x[3] = {1.0, static_cast<double>(i), knownBit};
+
+        for (int row = 0; row < 3; row++)
+        {
+            for (int column = 0; column < 3; column++) {
+                matrix[row][column] += x[row] * x[column];
+            }
+            matrix[row][3] += x[row] * phase;
+        }
+    }
+
+    for (int pivot = 0; pivot < 3; pivot++)
+    {
+        int bestRow = pivot;
+        for (int row = pivot + 1; row < 3; row++) {
+            if (std::abs(matrix[row][pivot]) > std::abs(matrix[bestRow][pivot])) {
+                bestRow = row;
+            }
+        }
+
+        if (std::abs(matrix[bestRow][pivot]) < 1.0e-9) {
+            return false;
+        }
+
+        if (bestRow != pivot) {
+            for (int column = pivot; column < 4; column++) {
+                std::swap(matrix[pivot][column], matrix[bestRow][column]);
+            }
+        }
+
+        double divisor = matrix[pivot][pivot];
+        for (int column = pivot; column < 4; column++) {
+            matrix[pivot][column] /= divisor;
+        }
+
+        for (int row = 0; row < 3; row++)
+        {
+            if (row == pivot) {
+                continue;
+            }
+            double multiplier = matrix[row][pivot];
+            for (int column = pivot; column < 4; column++) {
+                matrix[row][column] -= multiplier * matrix[pivot][column];
+            }
+        }
+    }
+
+    double intercept = matrix[0][3];
+    double slope = matrix[1][3];
+    double separation = matrix[2][3];
+    double squaredError = 0.0;
+
+    for (int i = 0; i < headerBits; i++)
+    {
+        qint64 sample = currentSample - (headerBits - 1 - i) * samplesPerBit;
+        double phase = m_pcskPhaseHistory[sample % m_pcskPhaseHistorySize];
+        double knownBit = (header >> (headerBits - 1 - i)) & 1;
+        double error = phase - (intercept + slope * i + separation * knownBit);
+        squaredError += error * error;
+    }
+
+    double rmsError = std::sqrt(squaredError / headerBits);
+    double phaseDepth = std::abs(separation);
+
+    const bool validCandidate = (phaseDepth >= 0.4) && (phaseDepth <= 0.85)
+        && (rmsError <= 0.08) && (phaseDepth / std::max(rmsError, 1.0e-6) >= 6.0);
+
+    if (validCandidate)
+    {
+        double score = rmsError / phaseDepth;
+
+        if (!m_pcskSyncCandidate || (score < m_pcskSyncScore))
+        {
+            m_pcskSyncCandidate = true;
+            m_pcskSyncQuietSamples = 0;
+            m_pcskSyncScore = score;
+            m_pcskSyncEndSample = currentSample;
+            m_pcskSyncIntercept = intercept;
+            m_pcskSyncSlope = slope;
+            m_pcskSyncSeparation = separation;
+        }
+        else {
+            m_pcskSyncQuietSamples++;
+        }
+    }
+    else if (m_pcskSyncCandidate) {
+        m_pcskSyncQuietSamples++;
+    }
+
+    // A threshold crossing can occur almost one bit before the optimum symbol
+    // centre. Wait for ten samples without a better fit and use the local best
+    // candidate. This still completes before the first payload bit is due.
+    if (!m_pcskSyncCandidate || (m_pcskSyncQuietSamples < samplesPerBit / 2)) {
+        return false;
+    }
+
+    m_pcskCollectingFrame = true;
+    m_pcskSyncCandidate = false;
+    m_pcskBit = headerBits;
+    m_pcskFrameStartSample = m_pcskSyncEndSample - (headerBits - 1) * samplesPerBit;
+    m_pcskNextSymbolSample = m_pcskSyncEndSample + samplesPerBit;
+    m_pcskPhaseIntercept = m_pcskSyncIntercept;
+    m_pcskPhaseSlope = m_pcskSyncSlope;
+    m_pcskPhaseSeparation = m_pcskSyncSeparation;
+    m_pcskFrame.fill(0);
+    m_pcskFrame[0] = 0x55;
+    m_pcskFrame[1] = 0x55;
+    m_pcskFrame[2] = 0x60;
+    m_data = 0;
+    m_sample = true;
+
+    qDebug() << "RadioClockSink::pcsk225 - Frame sync, phase depth"
+             << std::abs(m_pcskPhaseSeparation) * 180.0 / M_PI
+             << "degrees, normalized RMS" << m_pcskSyncScore;
+
+    if (!m_gotMinuteMarker && getMessageQueueToChannel()) {
+        getMessageQueueToChannel()->push(RadioClock::MsgStatus::create("Got PCSK-225 frame sync"));
+    }
+
+    return true;
+}
+
+void RadioClockSink::pcskCompleteFrame(qint64 currentSample)
+{
+    constexpr int samplesPerBit = RadioClockSettings::RADIOCLOCK_CHANNEL_SAMPLE_RATE / 50;
+    PCSK225Decoder::Result result{};
+    QString error;
+    m_pcskCollectingFrame = false;
+
+    if (!PCSK225Decoder::decode(m_pcskFrame, result, error))
+    {
+        qDebug() << "RadioClockSink::pcsk225 -" << error;
+        if (getMessageQueueToChannel()) {
+            getMessageQueueToChannel()->push(RadioClock::MsgStatus::create(error));
+        }
+        return;
+    }
+
+    // The encoded time applies at the documented timing point 25 bits after
+    // the first symbol centre. Keep that sample as the reference so reports
+    // account for the 1.4 seconds spent receiving the rest of the frame.
+    m_pcskReferenceSample = m_pcskFrameStartSample + 25 * samplesPerBit;
+    m_pcskReferenceDateTime = result.m_dateTimeUtc.toOffsetFromUtc(result.m_utcOffsetHours * 3600);
+    m_pcskNextTimeReportSample = currentSample;
+    m_pcskLastValidFrameSample = currentSample;
+    m_gotMinuteMarker = true;
+
+    if (result.m_timeChangePending && (result.m_utcOffsetHours == 1)) {
+        m_dst = RadioClockSettings::STARTING;
+    } else if (result.m_timeChangePending && (result.m_utcOffsetHours == 2)) {
+        m_dst = RadioClockSettings::ENDING;
+    } else if (result.m_utcOffsetHours == 2) {
+        m_dst = RadioClockSettings::IN_EFFECT;
+    } else if (result.m_utcOffsetHours == 1) {
+        m_dst = RadioClockSettings::NOT_IN_EFFECT;
+    } else {
+        m_dst = RadioClockSettings::UNKNOWN;
+    }
+
+    QString status = "OK";
+    if (result.m_correctedSymbols > 0) {
+        status += QString(" (%1 RS symbol%2 corrected")
+            .arg(result.m_correctedSymbols)
+            .arg(result.m_correctedSymbols == 1 ? "" : "s");
+        status += ")";
+    }
+    if (result.m_leapSecondPending) {
+        status += result.m_leapSecondDelete ? "; negative leap second pending" : "; leap second pending";
+    }
+    if (result.m_transmitterStatus != 0) {
+        status += QString("; transmitter status %1").arg(result.m_transmitterStatus);
+    }
+
+    qDebug() << "RadioClockSink::pcsk225 -" << status
+             << result.m_dateTimeUtc << "UTC offset" << result.m_utcOffsetHours;
+
+    if (getMessageQueueToChannel()) {
+        getMessageQueueToChannel()->push(RadioClock::MsgStatus::create(status));
+    }
+}
+
+void RadioClockSink::pcskReset()
+{
+    m_pcskPrevSample = Complex(0.0f, 0.0f);
+    m_pcskHavePrevSample = false;
+    m_pcskUnwrappedPhase = 0.0;
+    m_pcskPhaseHistory.fill(0.0);
+    m_pcskSampleCount = 0;
+    m_pcskSyncCandidate = false;
+    m_pcskSyncQuietSamples = 0;
+    m_pcskSyncScore = 0.0;
+    m_pcskSyncEndSample = 0;
+    m_pcskSyncIntercept = 0.0;
+    m_pcskSyncSlope = 0.0;
+    m_pcskSyncSeparation = 0.0;
+    m_pcskCollectingFrame = false;
+    m_pcskBit = 0;
+    m_pcskFrameStartSample = 0;
+    m_pcskNextSymbolSample = 0;
+    m_pcskPhaseIntercept = 0.0;
+    m_pcskPhaseSlope = 0.0;
+    m_pcskPhaseSeparation = 0.0;
+    m_pcskFrame.fill(0);
+    m_pcskReferenceDateTime = QDateTime();
+    m_pcskReferenceSample = 0;
+    m_pcskNextTimeReportSample = 0;
+    m_pcskLastValidFrameSample = 0;
+}
+
 void RadioClockSink::processOneSample(Complex &ci)
 {
     // Calculate average and peak levels for level meter
@@ -974,6 +1645,10 @@ void RadioClockSink::processOneSample(Complex &ci)
         wwvb();
     } else if (m_settings.m_modulation == RadioClockSettings::JJY) {
         jjy();
+    } else if (m_settings.m_modulation == RadioClockSettings::RBU) {
+        rbu(ci, magsq);
+    } else if (m_settings.m_modulation == RadioClockSettings::PCSK225) {
+        pcsk225(ci, magsq);
     } else {
         msf60();
     }
@@ -1029,6 +1704,8 @@ void RadioClockSink::applySettings(const QStringList& settingsKeys, const RadioC
         m_zeroCount = 0;
         m_second = 0;
         m_dst = RadioClockSettings::UNKNOWN;
+        rbuReset(true);
+        pcskReset();
         if (getMessageQueueToChannel()) {
             getMessageQueueToChannel()->push(RadioClock::MsgStatus::create("Looking for minute marker"));
         }

@@ -7,6 +7,7 @@ set(radioclock_SOURCES
     radioclocksink.cpp
     radioclockplugin.cpp
     radioclockwebapiadapter.cpp
+    pcsk225decoder.cpp
 )
 
 set(radioclock_HEADERS
@@ -16,6 +17,7 @@ set(radioclock_HEADERS
     radioclocksink.h
     radioclockplugin.h
     radioclockwebapiadapter.h
+    pcsk225decoder.h
 )
 
 include_directories(
