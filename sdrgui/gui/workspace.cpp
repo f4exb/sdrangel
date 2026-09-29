@@ -57,6 +57,7 @@ Workspace::Workspace(int index, QWidget *parent, Qt::WindowFlags flags) :
     m_mdi->setHorizontalScrollBarPolicy(Qt::ScrollBarAsNeeded);
     m_mdi->setVerticalScrollBarPolicy(Qt::ScrollBarAsNeeded);
     setWidget(m_mdi);
+    m_connectionOverlay = new ConnectionOverlay(m_mdi);
 
     setWindowTitle(tr("W%1").arg(m_index));
     setObjectName(tr("W%1").arg(m_index));
@@ -180,6 +181,15 @@ Workspace::Workspace(int index, QWidget *parent, Qt::WindowFlags flags) :
     m_tabSubWindows->setToolTip("Display sub windows in tabs");
     m_tabSubWindows->setFixedSize(20, 20);
 
+    m_connectionOverlayButton = new ButtonSwitch();
+    m_connectionOverlayButton->setCheckable(true);
+    m_connectionOverlayButton->setFixedSize(20, 20);
+    // Must match the shortcut created in MainWindow. NativeText shows Cmd on macOS.
+    m_connectionOverlayButton->setToolTip(QString("Show device, channel, spectrum and feature connections (%1)")
+        .arg(QKeySequence(Qt::CTRL | Qt::SHIFT | Qt::Key_L).toString(QKeySequence::NativeText)));
+    QIcon connectionOverlayIcon(":/wiring.png");
+    m_connectionOverlayButton->setIcon(connectionOverlayIcon);
+
     m_normalButton = new QPushButton();
     QIcon normalIcon(":/dock.png");
     m_normalButton->setIcon(normalIcon);
@@ -211,6 +221,7 @@ Workspace::Workspace(int index, QWidget *parent, Qt::WindowFlags flags) :
     m_titleBarLayout->addWidget(m_stackVerticalSubWindows);
     m_titleBarLayout->addWidget(m_stackSubWindows);
     m_titleBarLayout->addWidget(m_tabSubWindows);
+    m_titleBarLayout->addWidget(m_connectionOverlayButton);
     m_titleBarLayout->addStretch(1);
     m_titleBarLayout->addWidget(m_mcpServerButton);
 #ifndef ANDROID
@@ -315,6 +326,9 @@ Workspace::Workspace(int index, QWidget *parent, Qt::WindowFlags flags) :
         &Workspace::tabSubWindows
     );
 
+    QObject::connect(m_connectionOverlayButton, &ButtonSwitch::clicked,
+        this, &Workspace::connectionOverlayToggled);
+
     QObject::connect(
         m_normalButton,
         &QPushButton::clicked,
@@ -357,6 +371,7 @@ Workspace::~Workspace()
     delete m_closeButton;
     delete m_normalButton;
     delete m_tabSubWindows;
+    delete m_connectionOverlayButton;
     delete m_stackSubWindows;
     delete m_stackVerticalSubWindows;
     delete m_tileSubWindows;
@@ -387,6 +402,17 @@ void Workspace::setIndex(int index)
     setWindowTitle(tr("W%1").arg(m_index));
     setObjectName(tr("W%1").arg(m_index));
     m_titleLabel->setText(windowTitle());
+}
+
+void Workspace::setConnectionOverlayVisible(bool visible)
+{
+    m_connectionOverlayButton->doToggle(visible);
+    m_connectionOverlay->setOverlayVisible(visible);
+}
+
+void Workspace::setConnections(const QList<ConnectionOverlay::Connection>& connections)
+{
+    m_connectionOverlay->setConnections(connections);
 }
 
 QList<QMdiSubWindow *> Workspace::getSubWindowList() const
@@ -915,6 +941,9 @@ void Workspace::subWindowActivated(QMdiSubWindow *activatedWindow)
         emit focused(this);
     }
 
+    if (m_connectionOverlay->isVisible()) {
+        m_connectionOverlay->raise();
+    }
     if (activatedWindow && m_tabSubWindows->isChecked())
     {
         // Move other windows out of the way
@@ -1025,6 +1054,9 @@ void Workspace::addToMdiArea(QMdiSubWindow *sub)
     connect(sub, &QObject::destroyed, this, &Workspace::layoutSubWindows);
     m_mdi->addSubWindow(sub);
     sub->show();
+    if (m_connectionOverlay->isVisible()) {
+        m_connectionOverlay->raise();
+    }
     // Auto-stack when sub-window's widgets are rolled up
     ChannelGUI *channel = qobject_cast<ChannelGUI *>(sub);
     if (channel) {

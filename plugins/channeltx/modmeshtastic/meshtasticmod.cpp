@@ -871,3 +871,8 @@ void MeshtasticMod::udpRx()
         }
     }
 }
+
+int MeshtasticMod::getChannelSampleRate() const
+{
+    return m_basebandSource ? m_basebandSource->getChannelSampleRate() : 0;
+}

@@ -956,3 +956,8 @@ void M17Mod::sendPacket()
         m_basebandSource->sendPacket();
     }
 }
+
+int M17Mod::getChannelSampleRate() const
+{
+    return m_basebandSource ? m_basebandSource->getChannelSampleRate() : 0;
+}

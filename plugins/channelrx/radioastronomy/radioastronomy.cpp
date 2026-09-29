@@ -68,7 +68,7 @@ RadioAstronomy::RadioAstronomy(DeviceAPI *deviceAPI) :
     ChannelAPI(m_channelIdURI, ChannelAPI::StreamSingleSink),
     m_deviceAPI(deviceAPI),
     m_basebandSampleRate(0),
-    m_availableFeatureHandler({"sdrangel.feature.startracker"}, QStringList{"startracker.target"}),
+    m_availableFeatureHandler({"sdrangel.feature.startracker"}, QStringList{"startracker.target"}, "RTMF", this),
     m_availableRotatorHandler({"sdrangel.feature.gs232controller"}),
     m_sweeping(false)
 {
@@ -1358,4 +1358,9 @@ void RadioAstronomy::handleFeatureMessageQueue(MessageQueue* messageQueue)
             delete message;
         }
     }
+}
+
+int RadioAstronomy::getChannelSampleRate() const
+{
+    return m_basebandSink ? m_basebandSink->getChannelSampleRate() : 0;
 }

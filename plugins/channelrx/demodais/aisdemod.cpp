@@ -752,3 +752,13 @@ void AISDemod::handleIndexInDeviceSetChanged(int index)
         .arg(index);
     m_basebandSink->setFifoLabel(fifoLabel);
 }
+
+int AISDemod::getChannelSampleRate() const
+{
+    return m_basebandSink ? m_basebandSink->getChannelSampleRate() : 0;
+}
+
+int AISDemod::getAudioSampleRate() const
+{
+    return AISDemodSettings::AISDEMOD_CHANNEL_SAMPLE_RATE;
+}

@@ -235,6 +235,7 @@ public:
 private:
 
     const Configuration *m_configuration;
+    bool m_overlayEnabledBeforeLoad;
     // The dialog is created with WA_DeleteOnClose and this FSM outlives it,
     // so a bare pointer can dangle between states. QPointer makes the null
     // checks in the state handlers mean what they are written to mean.
@@ -332,6 +333,8 @@ private:
 	PluginManager* m_pluginManager;
 
 	QTimer m_statusTimer;
+    QTimer m_connectionOverlayRefreshTimer;
+    bool m_connectionOverlayEnabled;
 	int m_lastEngineState;
 
     QMenuBar *m_menuBar;
@@ -363,6 +366,8 @@ private:
 	void saveFeatureSetPresetSettings(FeatureSetPreset* preset, int featureSetIndex);
 	FeatureGUI *getMCPServerGUI(Feature **feature = nullptr) const;
 	void updateMCPServerButton();
+    void setConnectionOverlayEnabled(bool enabled);
+    void updateConnectionOverlays();
 
 	QString openGLVersion() const;
     void createMenuBar(QToolButton *button) const;

@@ -43,7 +43,7 @@ const char* const Map::m_featureId = "Map";
 
 Map::Map(WebAPIAdapterInterface *webAPIAdapterInterface) :
     Feature(m_featureIdURI, webAPIAdapterInterface),
-    m_availableChannelOrFeatureHandler(MapSettings::m_pipeURIs, QStringList{"mapitems"}),
+    m_availableChannelOrFeatureHandler(MapSettings::m_pipeURIs, QStringList{"mapitems"}, "RTMF", this),
     m_multiplier(0.0)
 {
     qDebug("Map::Map: webAPIAdapterInterface: %p", webAPIAdapterInterface);

@@ -795,3 +795,13 @@ void RttyDemod::handleIndexInDeviceSetChanged(int index)
         .arg(index);
     m_basebandSink->setFifoLabel(fifoLabel);
 }
+
+int RttyDemod::getChannelSampleRate() const
+{
+    return m_basebandSink ? m_basebandSink->getChannelSampleRate() : 0;
+}
+
+int RttyDemod::getAudioSampleRate() const
+{
+    return RttyDemodSettings::RTTYDEMOD_CHANNEL_SAMPLE_RATE;
+}

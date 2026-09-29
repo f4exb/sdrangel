@@ -161,6 +161,7 @@ void FreqTracker::stop()
     m_running = false;
 	m_thread->exit();
 	m_thread->wait();
+    m_basebandSink = nullptr; // Freed by deleteLater when the thread finished
 }
 
 bool FreqTracker::handleMessage(const Message& cmd)
@@ -708,4 +709,9 @@ void FreqTracker::handleIndexInDeviceSetChanged(int index)
         .arg(m_deviceAPI->getDeviceSetIndex())
         .arg(index);
     m_basebandSink->setFifoLabel(fifoLabel);
+}
+
+int FreqTracker::getChannelSampleRate() const
+{
+    return m_basebandSink ? m_basebandSink->getChannelSampleRate() : 0;
 }

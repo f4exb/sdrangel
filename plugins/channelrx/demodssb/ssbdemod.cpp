@@ -191,6 +191,7 @@ void SSBDemod::stop()
     m_running = false;
 	m_thread->exit();
 	m_thread->wait();
+    m_basebandSink = nullptr; // Freed by deleteLater when the thread finished
 }
 
 bool SSBDemod::handleMessage(const Message& cmd)

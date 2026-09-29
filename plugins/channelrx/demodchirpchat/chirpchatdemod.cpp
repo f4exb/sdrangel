@@ -185,6 +185,7 @@ void ChirpChatDemod::stop()
     m_running = false;
 	m_thread->exit();
 	m_thread->wait();
+    m_basebandSink = nullptr; // Freed by deleteLater when the thread finished
     m_decoderThread->exit();
     m_decoderThread->wait();
     m_decoderThread = nullptr;
@@ -1095,4 +1096,9 @@ void ChirpChatDemod::handleIndexInDeviceSetChanged(int index)
         .arg(m_deviceAPI->getDeviceSetIndex())
         .arg(index);
     m_basebandSink->setFifoLabel(fifoLabel);
+}
+
+int ChirpChatDemod::getChannelSampleRate() const
+{
+    return m_basebandSink ? m_basebandSink->getChannelSampleRate() : 0;
 }

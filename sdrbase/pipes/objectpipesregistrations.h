@@ -37,6 +37,11 @@ class SDRBASE_API ObjectPipesRegistrations : public QObject
 {
     Q_OBJECT
 public:
+    struct Connection {
+        const QObject *producer;
+        const QObject *consumer;
+        QString type;
+    };
     enum PipeDeletionReason
     {
         PipeProducerDeleted,
@@ -50,6 +55,7 @@ public:
     ObjectPipe *registerProducerToConsumer(const QObject *producer, const QObject *consumer, const QString& type);
     ObjectPipe *unregisterProducerToConsumer(const QObject *producer, const QObject *consumer, const QString& type);
     void getPipes(const QObject *producer, const QString& type, QList<ObjectPipe*>& pipes);
+    QList<Connection> getConnections();
     void processGC();
 
 private slots:

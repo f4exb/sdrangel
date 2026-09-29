@@ -54,6 +54,7 @@ const char* const FileSink::m_channelId = "FileSink";
 FileSink::FileSink(DeviceAPI *deviceAPI) :
         ChannelAPI(m_channelIdURI, ChannelAPI::StreamSingleSink),
         m_deviceAPI(deviceAPI),
+        m_basebandSink(nullptr),
         m_running(false),
         m_spectrumVis(SDR_RX_SCALEF),
         m_centerFrequency(0),
@@ -207,6 +208,7 @@ void FileSink::stop()
 
 	m_thread->quit();
 	m_thread->wait();
+    m_basebandSink = nullptr; // Freed by deleteLater when the thread finished
 
     if (getMessageQueueToGUI())
     {
@@ -833,4 +835,9 @@ void FileSink::handleIndexInDeviceSetChanged(int index)
         .arg(m_deviceAPI->getDeviceSetIndex())
         .arg(index);
     m_basebandSink->setFifoLabel(fifoLabel);
+}
+
+int FileSink::getChannelSampleRate() const
+{
+    return m_basebandSink ? m_basebandSink->getChannelSampleRate() : 0;
 }

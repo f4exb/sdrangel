@@ -40,7 +40,7 @@ const char* const Radiosonde::m_featureId = "Radiosonde";
 
 Radiosonde::Radiosonde(WebAPIAdapterInterface *webAPIAdapterInterface) :
     Feature(m_featureIdURI, webAPIAdapterInterface),
-    m_availableChannelHandler({"sdrangel.channel.radiosondedemod"}, QStringList{"radiosonde"})
+    m_availableChannelHandler({"sdrangel.channel.radiosondedemod"}, QStringList{"radiosonde"}, "RTMF", this)
 {
     qDebug("Radiosonde::Radiosonde: webAPIAdapterInterface: %p", webAPIAdapterInterface);
     setObjectName(m_featureId);

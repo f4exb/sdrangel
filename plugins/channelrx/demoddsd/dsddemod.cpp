@@ -61,6 +61,7 @@ const int DSDDemod::m_udpBlockSize = 512;
 DSDDemod::DSDDemod(DeviceAPI *deviceAPI) :
         ChannelAPI(m_channelIdURI, ChannelAPI::StreamSingleSink),
         m_deviceAPI(deviceAPI),
+        m_basebandSink(nullptr),
         m_running(false),
         m_basebandSampleRate(0),
         m_centerFrequency(0),
@@ -203,6 +204,7 @@ void DSDDemod::stop()
     m_running = false;
 	m_thread->exit();
 	m_thread->wait();
+    m_basebandSink = nullptr; // Freed by deleteLater when the thread finished
 }
 
 void DSDDemod::setScopeXYSink(BasebandSampleSink* sampleSink)
@@ -920,4 +922,9 @@ void DSDDemod::handleFeatureRemoved(int featureSetIndex, Feature *feature)
         m_availableAMBEFeatures.remove(feature);
         notifyUpdateAMBEFeatures();
     }
+}
+
+int DSDDemod::getChannelSampleRate() const
+{
+    return m_basebandSink ? m_basebandSink->getChannelSampleRate() : 0;
 }
