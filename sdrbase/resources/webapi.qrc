@@ -112,6 +112,7 @@
         <file>webapi/doc/swagger/include/RollupState.yaml</file>
         <file>webapi/doc/swagger/include/RtlSdr.yaml</file>
         <file>webapi/doc/swagger/include/RTTYDemod.yaml</file>
+        <file>webapi/doc/swagger/include/PSK31Demod.yaml</file>
         <file>webapi/doc/swagger/include/RTTYMod.yaml</file>
         <file>webapi/doc/swagger/include/SatelliteTracker.yaml</file>
         <file>webapi/doc/swagger/include/SDRPlay.yaml</file>

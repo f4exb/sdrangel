@@ -49,5 +49,22 @@ private:
 
 };
 
-#endif // INCLUDE_UTIL_PSK31_H
+class SDRBASE_API PSK31Decoder
+{
+public:
+    PSK31Decoder();
 
+    void reset();
+    bool decode(bool bit, QChar& character);
+    bool decodeSymbol(bool symbol, QChar& character);
+
+private:
+    QString m_code;
+    int m_zeroCount;
+    bool m_havePreviousSymbol;
+    bool m_previousSymbol;
+
+    bool decodeCode(QChar& character) const;
+};
+
+#endif // INCLUDE_UTIL_PSK31_H

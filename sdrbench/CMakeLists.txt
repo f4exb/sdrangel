@@ -15,6 +15,9 @@ set(sdrbench_SOURCES
     test_fftrrc.cpp
     test_firrrc.cpp
     test_meshtastic.cpp
+    test_psk31.cpp
+    ../plugins/channelrx/demodpsk31/psk31demodsink.cpp
+    ../plugins/channelrx/demodpsk31/psk31demodsettings.cpp
 )
 
 set(sdrbench_HEADERS
@@ -33,8 +36,11 @@ include_directories(
     ${CMAKE_SOURCE_DIR}/sdrbase
     ${CMAKE_SOURCE_DIR}/logging
     ${CMAKE_SOURCE_DIR}/modemmeshtastic
+    ${CMAKE_SOURCE_DIR}/plugins/channelrx/demodpsk31
     ${CMAKE_SOURCE_DIR}
 )
+
+target_compile_definitions(sdrbench PRIVATE PSK31_DEMOD_SINK_BENCH)
 
 if(DEFINED FFTW3F_DEPENDS)
     add_dependencies(sdrbench "${FFTW3F_DEPENDS}")

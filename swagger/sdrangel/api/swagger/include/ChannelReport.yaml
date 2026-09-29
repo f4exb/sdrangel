@@ -160,6 +160,9 @@ ChannelReport:
     PSK31ModReport:
       $ref: "http://swgserver:8081/api/swagger/include/PSK31Mod.yaml#/PSK31ModReport"
       description: "Psk31 mod report data for Channel."
+    PSK31DemodReport:
+      $ref: "http://swgserver:8081/api/swagger/include/PSK31Demod.yaml#/PSK31DemodReport"
+      description: "PSK31 demodulator report data for Channel."
     SigMFFileSinkReport:
       $ref: "http://swgserver:8081/api/swagger/include/SigMFFileSink.yaml#/SigMFFileSinkReport"
       description: "Sig mf file sink report data for Channel."

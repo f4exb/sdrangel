@@ -65,6 +65,7 @@
 #include "SWGPacketModReport.h"
 #include "SWGPagerDemodReport.h"
 #include "SWGRTTYDemodReport.h"
+#include "SWGPSK31DemodReport.h"
 #include "SWGRTTYModReport.h"
 #include "SWGRadioAstronomyReport.h"
 #include "SWGRadioClockReport.h"
@@ -236,6 +237,9 @@ public:
 
     SWGRTTYDemodReport* getRttyDemodReport();
     void setRttyDemodReport(SWGRTTYDemodReport* rtty_demod_report);
+
+    SWGPSK31DemodReport* getPSK31DemodReport();
+    void setPSK31DemodReport(SWGPSK31DemodReport* psk31_demod_report);
 
     SWGRTTYModReport* getRttyModReport();
     void setRttyModReport(SWGRTTYModReport* rtty_mod_report);
@@ -417,6 +421,9 @@ private:
 
     SWGRTTYDemodReport* rtty_demod_report;
     bool m_rtty_demod_report_isSet;
+
+    SWGPSK31DemodReport* psk31_demod_report;
+    bool m_psk31_demod_report_isSet;
 
     SWGRTTYModReport* rtty_mod_report;
     bool m_rtty_mod_report_isSet;

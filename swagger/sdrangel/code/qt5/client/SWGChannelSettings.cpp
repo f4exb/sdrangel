@@ -134,6 +134,8 @@ SWGChannelSettings::SWGChannelSettings() {
     m_pager_demod_settings_isSet = false;
     psk31_mod_settings = nullptr;
     m_psk31_mod_settings_isSet = false;
+    psk31_demod_settings = nullptr;
+    m_psk31_demod_settings_isSet = false;
     radio_astronomy_settings = nullptr;
     m_radio_astronomy_settings_isSet = false;
     radio_clock_settings = nullptr;
@@ -296,6 +298,8 @@ SWGChannelSettings::init() {
     m_remote_tcp_sink_settings_isSet = false;
     rtty_demod_settings = new SWGRTTYDemodSettings();
     m_rtty_demod_settings_isSet = false;
+    psk31_demod_settings = new SWGPSK31DemodSettings();
+    m_psk31_demod_settings_isSet = false;
     rtty_mod_settings = new SWGRTTYModSettings();
     m_rtty_mod_settings_isSet = false;
     sig_mf_file_sink_settings = new SWGSigMFFileSinkSettings();
@@ -494,6 +498,9 @@ SWGChannelSettings::cleanup() {
     if(rtty_demod_settings != nullptr) { 
         delete rtty_demod_settings;
     }
+    if(psk31_demod_settings != nullptr) {
+        delete psk31_demod_settings;
+    }
     if(rtty_mod_settings != nullptr) { 
         delete rtty_mod_settings;
     }
@@ -656,6 +663,7 @@ SWGChannelSettings::fromJsonObject(QJsonObject &pJson) {
     ::SWGSDRangel::setValue(&remote_tcp_sink_settings, pJson["RemoteTCPSinkSettings"], "SWGRemoteTCPSinkSettings", "SWGRemoteTCPSinkSettings");
     
     ::SWGSDRangel::setValue(&rtty_demod_settings, pJson["RTTYDemodSettings"], "SWGRTTYDemodSettings", "SWGRTTYDemodSettings");
+    ::SWGSDRangel::setValue(&psk31_demod_settings, pJson["PSK31DemodSettings"], "SWGPSK31DemodSettings", "SWGPSK31DemodSettings");
     
     ::SWGSDRangel::setValue(&rtty_mod_settings, pJson["RTTYModSettings"], "SWGRTTYModSettings", "SWGRTTYModSettings");
     
@@ -872,6 +880,9 @@ SWGChannelSettings::asJsonObject() {
     }
     if((rtty_demod_settings != nullptr) && (rtty_demod_settings->isSet())){
         toJsonValue(QString("RTTYDemodSettings"), rtty_demod_settings, obj, QString("SWGRTTYDemodSettings"));
+    }
+    if((psk31_demod_settings != nullptr) && (psk31_demod_settings->isSet())){
+        toJsonValue(QString("PSK31DemodSettings"), psk31_demod_settings, obj, QString("SWGPSK31DemodSettings"));
     }
     if((rtty_mod_settings != nullptr) && (rtty_mod_settings->isSet())){
         toJsonValue(QString("RTTYModSettings"), rtty_mod_settings, obj, QString("SWGRTTYModSettings"));
@@ -1507,6 +1518,16 @@ SWGChannelSettings::setRttyDemodSettings(SWGRTTYDemodSettings* rtty_demod_settin
     this->m_rtty_demod_settings_isSet = true;
 }
 
+SWGPSK31DemodSettings*
+SWGChannelSettings::getPSK31DemodSettings() {
+    return psk31_demod_settings;
+}
+void
+SWGChannelSettings::setPSK31DemodSettings(SWGPSK31DemodSettings* psk31_demod_settings) {
+    this->psk31_demod_settings = psk31_demod_settings;
+    this->m_psk31_demod_settings_isSet = true;
+}
+
 SWGRTTYModSettings*
 SWGChannelSettings::getRttyModSettings() {
     return rtty_mod_settings;
@@ -1771,6 +1792,9 @@ SWGChannelSettings::isSet(){
         if(psk31_mod_settings && psk31_mod_settings->isSet()){
             isObjectUpdated = true; break;
         }
+        if(psk31_demod_settings && psk31_demod_settings->isSet()){
+            isObjectUpdated = true; break;
+        }
         if(radio_astronomy_settings && radio_astronomy_settings->isSet()){
             isObjectUpdated = true; break;
         }
@@ -1826,4 +1850,3 @@ SWGChannelSettings::isSet(){
     return isObjectUpdated;
 }
 }
-

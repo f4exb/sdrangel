@@ -5177,6 +5177,12 @@ bool WebAPIRequestMapper::getChannelSettings(
             channelSettings->getRttyDemodSettings()->init();
             channelSettings->getRttyDemodSettings()->fromJsonObject(settingsJsonObject);
         }
+        else if (channelSettingsKey == "PSK31DemodSettings")
+        {
+            channelSettings->setPSK31DemodSettings(new SWGSDRangel::SWGPSK31DemodSettings());
+            channelSettings->getPSK31DemodSettings()->init();
+            channelSettings->getPSK31DemodSettings()->fromJsonObject(settingsJsonObject);
+        }
         else if (channelSettingsKey == "RTTYModSettings")
         {
             channelSettings->setRttyModSettings(new SWGSDRangel::SWGRTTYModSettings());

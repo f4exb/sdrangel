@@ -1,0 +1,95 @@
+PSK31DemodSettings:
+  description: PSK31 demodulator settings
+  properties:
+    inputFrequencyOffset:
+      type: integer
+      format: int64
+      description: "Channel frequency offset from the device center frequency in Hz."
+    rfBandwidth:
+      type: number
+      format: float
+      description: "RF bandwidth in Hz."
+      minimum: 50
+      maximum: 500
+    udpEnabled:
+      description: "Whether to forward received messages to specified UDP port"
+      type: integer
+      minimum: 0
+      maximum: 1
+    udpAddress:
+      description: "UDP address to forward received messages to"
+      type: string
+    udpPort:
+      description: "UDP port to forward received messages to"
+      type: integer
+      minimum: 1
+      maximum: 65535
+    logFilename:
+      type: string
+      description: "Log file name or path."
+    logEnabled:
+      type: integer
+      description: "Enable logging to the configured file (1 enabled, 0 disabled)."
+      minimum: 0
+      maximum: 1
+    rgbColor:
+      type: integer
+      description: "Display color encoded as an RGB integer."
+    title:
+      type: string
+      description: "User-visible title."
+    streamIndex:
+      description: MIMO channel. Not relevant when connected to SI (single Rx).
+      type: integer
+    useReverseAPI:
+      description: Synchronize with reverse API (1 for yes, 0 for no)
+      type: integer
+      minimum: 0
+      maximum: 1
+    reverseAPIAddress:
+      type: string
+      description: "IPv4 address or host name of the reverse API peer."
+    reverseAPIPort:
+      type: integer
+      description: "TCP port of the reverse API peer."
+      minimum: 1
+      maximum: 65535
+    reverseAPIDeviceIndex:
+      type: integer
+      description: "Device-set index used by the reverse API peer."
+    reverseAPIChannelIndex:
+      type: integer
+      description: "Channel index used by the reverse API peer."
+    scopeConfig:
+      $ref: "http://swgserver:8081/api/swagger/include/GLScope.yaml#/GLScope"
+      description: "Oscilloscope-display configuration."
+    channelMarker:
+      $ref: "http://swgserver:8081/api/swagger/include/ChannelMarker.yaml#/ChannelMarker"
+      description: "Channel-marker display configuration."
+    rollupState:
+      $ref: "http://swgserver:8081/api/swagger/include/RollupState.yaml#/RollupState"
+      description: "Saved expanded or collapsed state of the GUI sections."
+
+PSK31DemodReport:
+  description: PSK31 demodulator runtime report
+  properties:
+    channelPowerDB:
+      description: power received in channel (dB)
+      type: number
+      format: float
+    channelSampleRate:
+      type: integer
+      description: "Effective sample rate delivered to the channel in samples per second."
+    frequencyOffset:
+      type: number
+      format: float
+      description: "Fine carrier-frequency estimate in Hz relative to the selected channel frequency."
+    snr:
+      type: number
+      format: float
+      description: "Signal-to-noise ratio in dB, normalized to a 100 Hz noise bandwidth."
+    locked:
+      type: integer
+      minimum: 0
+      maximum: 1
+      description: "Whether the BPSK carrier-recovery loop is locked."

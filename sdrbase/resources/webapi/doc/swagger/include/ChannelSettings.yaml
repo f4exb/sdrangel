@@ -166,6 +166,9 @@ ChannelSettings:
     PSK31ModSettings:
       $ref: "/doc/swagger/include/PSK31Mod.yaml#/PSK31ModSettings"
       description: "Psk31 mod settings configuration for Channel."
+    PSK31DemodSettings:
+      $ref: "/doc/swagger/include/PSK31Demod.yaml#/PSK31DemodSettings"
+      description: "PSK31 demodulator settings configuration for Channel."
     RadioAstronomySettings:
       $ref: "/doc/swagger/include/RadioAstronomy.yaml#/RadioAstronomySettings"
       description: "Radio astronomy settings configuration for Channel."

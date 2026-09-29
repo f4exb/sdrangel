@@ -72,6 +72,7 @@
 #include "SWGPacketModSettings.h"
 #include "SWGPagerDemodSettings.h"
 #include "SWGRTTYDemodSettings.h"
+#include "SWGPSK31DemodSettings.h"
 #include "SWGRTTYModSettings.h"
 #include "SWGRadioAstronomySettings.h"
 #include "SWGRadioClockSettings.h"
@@ -288,6 +289,9 @@ public:
     SWGRTTYDemodSettings* getRttyDemodSettings();
     void setRttyDemodSettings(SWGRTTYDemodSettings* rtty_demod_settings);
 
+    SWGPSK31DemodSettings* getPSK31DemodSettings();
+    void setPSK31DemodSettings(SWGPSK31DemodSettings* psk31_demod_settings);
+
     SWGRTTYModSettings* getRttyModSettings();
     void setRttyModSettings(SWGRTTYModSettings* rtty_mod_settings);
 
@@ -501,6 +505,9 @@ private:
 
     SWGRTTYDemodSettings* rtty_demod_settings;
     bool m_rtty_demod_settings_isSet;
+
+    SWGPSK31DemodSettings* psk31_demod_settings;
+    bool m_psk31_demod_settings_isSet;
 
     SWGRTTYModSettings* rtty_mod_settings;
     bool m_rtty_mod_settings_isSet;
