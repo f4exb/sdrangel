@@ -207,7 +207,7 @@ public:
     int webapiSpectrumDataGet(int bins, qint64 startFrequency, qint64 stopFrequency, const QString& reduce,
         SWGSDRangel::SWGGLSpectrumData& response, QString& errorMessage) const;
 
-    static const int m_maxDataBins = 4096; //!< A reduced spectrum any larger is not a summary
+    static constexpr int m_maxDataBins = 4096; //!< A reduced spectrum any larger is not a summary
 
     //!< Statistics over the spectrum history the display keeps for scrolling: per bin max, mean
     //!< and occupancy, and the signals found. thresholdDb is above the measured floor
@@ -216,7 +216,7 @@ public:
     //!< The same history as a greyscale PNG, newest row at the bottom, bins wide and one row per pixel up to maxRows
     int webapiSpectrumHistoryImageGet(double seconds, int bins, qint64 startFrequency, qint64 stopFrequency, int maxRows,
         QByteArray& png, QJsonObject& description, QString& errorMessage) const;
-    static const int m_maxHistoryRows = 4000;
+    static constexpr int m_maxHistoryRows = 4000;
 
 private:
     struct ReducedHistory;
