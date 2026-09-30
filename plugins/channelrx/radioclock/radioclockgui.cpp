@@ -261,7 +261,32 @@ void RadioClockGUI::on_threshold_valueChanged(int value)
 void RadioClockGUI::on_modulation_currentIndexChanged(int index)
 {
     m_settings.m_modulation = (RadioClockSettings::Modulation)index;
-    applySettings(QStringList({"modulation"}));
+    QStringList settingsKeys({"modulation"});
+
+    // Select a usable bandwidth when changing from one of the narrow-band
+    // clock formats. The channel filter uses RF bandwidth / 2.2 as its cutoff.
+    if ((m_settings.m_modulation == RadioClockSettings::RBU) && (m_settings.m_rfBandwidth < 700.0f))
+    {
+        m_settings.m_rfBandwidth = 1000.0f;
+        ui->rfBW->blockSignals(true);
+        ui->rfBW->setValue(1000);
+        ui->rfBW->blockSignals(false);
+        ui->rfBWText->setText("1000 Hz");
+        m_channelMarker.setBandwidth(1000.0f);
+        settingsKeys.append("rfBandwidth");
+    }
+    else if ((m_settings.m_modulation == RadioClockSettings::PCSK225) && (m_settings.m_rfBandwidth < 450.0f))
+    {
+        m_settings.m_rfBandwidth = 500.0f;
+        ui->rfBW->blockSignals(true);
+        ui->rfBW->setValue(500);
+        ui->rfBW->blockSignals(false);
+        ui->rfBWText->setText("500 Hz");
+        m_channelMarker.setBandwidth(500.0f);
+        settingsKeys.append("rfBandwidth");
+    }
+
+    applySettings(settingsKeys);
 }
 
 void RadioClockGUI::on_timezone_currentIndexChanged(int index)
