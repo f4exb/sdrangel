@@ -33,6 +33,7 @@
 #include "radioclocksettings.h"
 
 #include <vector>
+#include <array>
 #include <iostream>
 #include <fstream>
 
@@ -141,6 +142,51 @@ private:
     // WWVB state
     bool m_gotMarker;       //!< Marker in previous second
 
+    // RBU state
+    Complex m_rbuPrevSample;
+    bool m_rbuHavePrevSample;
+    bool m_rbuHaveSymbolTiming;
+    int m_rbuSymbolSample;
+    int m_rbuCarrierLowCount;
+    int m_rbuTimingErrors;
+    double m_rbu100Real;
+    double m_rbu100Imag;
+    double m_rbu312Real;
+    double m_rbu312Imag;
+    int m_rbuCorrelationSamples;
+    quint32 m_rbuRecentBits;
+    int m_rbuRecentBitCount;
+    int m_rbuBit;
+    bool m_rbuSecondValid;
+    int m_rbuInvalidSeconds;
+
+    // PCSK-225 state
+    static constexpr int m_pcskPhaseHistorySize = 512;
+    Complex m_pcskPrevSample;
+    bool m_pcskHavePrevSample;
+    double m_pcskUnwrappedPhase;
+    std::array<double, m_pcskPhaseHistorySize> m_pcskPhaseHistory;
+    qint64 m_pcskSampleCount;
+    bool m_pcskSyncCandidate;
+    int m_pcskSyncQuietSamples;
+    double m_pcskSyncScore;
+    qint64 m_pcskSyncEndSample;
+    double m_pcskSyncIntercept;
+    double m_pcskSyncSlope;
+    double m_pcskSyncSeparation;
+    bool m_pcskCollectingFrame;
+    int m_pcskBit;
+    qint64 m_pcskFrameStartSample;
+    qint64 m_pcskNextSymbolSample;
+    double m_pcskPhaseIntercept;
+    double m_pcskPhaseSlope;
+    double m_pcskPhaseSeparation;
+    std::array<quint8, 12> m_pcskFrame;
+    QDateTime m_pcskReferenceDateTime;
+    qint64 m_pcskReferenceSample;
+    qint64 m_pcskNextTimeReportSample;
+    qint64 m_pcskLastValidFrameSample;
+
     void processOneSample(Complex &ci);
     MessageQueue *getMessageQueueToChannel() { return m_messageQueueToChannel; }
     void sampleToScope(Complex sample);
@@ -155,6 +201,14 @@ private:
     void msf60();
     void wwvb();
     void jjy();
+    void rbu(Complex& ci, Real magsq);
+    void rbuProcessBit(int bit);
+    bool rbuDecodeTimeCode(QString& error);
+    void rbuReset(bool resetTiming);
+    void pcsk225(Complex& ci, Real magsq);
+    bool pcskTryFrameSync(qint64 currentSample);
+    void pcskCompleteFrame(qint64 currentSample);
+    void pcskReset();
 };
 
 #endif // INCLUDE_RADIOCLOCKSINK_H

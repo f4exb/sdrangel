@@ -66,7 +66,7 @@ Minimum device sample rates:
 |------|---------|-----------|-------|
 | Radiosondes (RS41) | `RadiosondeDemod` | 400 to 406 MHz | Balloons are up around 00:00 and 12:00 UTC. The Radiosonde feature decodes and maps them; `listen` with mode `sonde` adds it |
 | NOAA APT weather images | `APTDemod` | NOAA 15 at 137.620 MHz, NOAA 18 at 137.912 MHz, NOAA 19 at 137.100 MHz | Historical: the NOAA APT satellites were retired in 2025, so there is nothing live to receive. The demodulator still decodes recordings |
-| Time signals | `RadioClock` | MSF 60 kHz, DCF77 77.5 kHz, TDF 162 kHz, WWVB 60 kHz, JJY 40 kHz | Needs a receiver that covers VLF or LF |
+| Time signals | `RadioClock` | MSF 60 kHz, DCF77 77.5 kHz, TDF 162 kHz, WWVB 60 kHz, JJY 40 kHz, RBU 66.666 kHz, PCSK-225 225 kHz | Needs a receiver that covers VLF or LF |
 | Inmarsat STD-C | `InmarsatDemod` | 1537.70, 1541.45, 1537.10 MHz | L band, needs a suitable antenna and often an LNA |
 
 ## Broadcast

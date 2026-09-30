@@ -15,7 +15,7 @@ RadioClockSettings:
       type: integer
       format: int64
     rfBandwidth:
-      description: channel RF bandwidth in Hz
+      description: "Channel RF bandwidth in Hz. Should be 50 Hz for MSF, DCF77, TDF, WWVB or JJY. Should be 1000 Hz for RBU. Should be 500 Hz for PCSK-225"
       type: number
       format: float
     threshold:
@@ -23,10 +23,10 @@ RadioClockSettings:
       format: float
       description: "Threshold setting for Radio clock."
     modulation:
-      description: 0 - MSF, 1 - DCF77, 2 - TDF, 3 - WWVB, 4 - JJY
+      description: 0 - MSF, 1 - DCF77, 2 - TDF, 3 - WWVB, 4 - JJY, 5 - RBU, 6 - PCSK-225
       type: integer
       minimum: 0
-      maximum: 4
+      maximum: 6
     timezone:
       description: 0 - Broadcast, 1 - Local, 2 - UTC
       type: integer
