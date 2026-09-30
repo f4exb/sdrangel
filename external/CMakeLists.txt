@@ -110,21 +110,21 @@ if (LINUX)
     macro(makeLink src dest target)
         if (NOT EXISTS ${dest})
             add_custom_command(TARGET ${target} PRE_BUILD
-                    COMMAND ${CMAKE_COMMAND} -E create_symlink ${src} ${dest} DEPENDS ${dest} COMMENT "mklink ${src} -> ${dest}")
+                    COMMAND ${CMAKE_COMMAND} -E create_symlink ${src} ${dest} COMMENT "mklink ${src} -> ${dest}")
         endif ()
     endmacro()
     # macro that copy folder
     macro(makeCopy src dest target)
         if (NOT EXISTS ${dest})
             add_custom_command(TARGET ${target} PRE_BUILD
-                    COMMAND ${CMAKE_COMMAND} -E copy_directory ${src} ${dest} DEPENDS ${dest} COMMENT "copy ${src} -> ${dest}")
+                    COMMAND ${CMAKE_COMMAND} -E copy_directory ${src} ${dest} COMMENT "copy ${src} -> ${dest}")
         endif ()
     endmacro()
     # macro that copy file
     macro(makeCopyFile src dest target)
         if (NOT EXISTS ${dest})
             add_custom_command(TARGET ${target} PRE_BUILD
-                    COMMAND ${CMAKE_COMMAND} -E copy_if_different ${src} ${dest} DEPENDS ${dest} COMMENT "copy ${src} -> ${dest}")
+                    COMMAND ${CMAKE_COMMAND} -E copy_if_different ${src} ${dest} COMMENT "copy ${src} -> ${dest}")
         endif ()
     endmacro()
 else ()
@@ -132,7 +132,7 @@ else ()
     macro(makeLink src dest target)
         if (NOT EXISTS ${dest})
             add_custom_command(TARGET ${target} POST_BUILD
-                    COMMAND ${CMAKE_COMMAND} -E create_symlink ${src} ${dest} DEPENDS ${dest} COMMENT "mklink ${src} -> ${dest}")
+                    COMMAND ${CMAKE_COMMAND} -E create_symlink ${src} ${dest} COMMENT "mklink ${src} -> ${dest}")
         endif ()
     endmacro()
 
@@ -140,7 +140,7 @@ else ()
     macro(makeCopyDir src dest target)
         if (NOT EXISTS ${dest})
             add_custom_command(TARGET ${target} POST_BUILD
-                    COMMAND ${CMAKE_COMMAND} -E copy_directory ${src} ${dest} DEPENDS ${dest} COMMENT "copy ${src} -> ${dest}")
+                    COMMAND ${CMAKE_COMMAND} -E copy_directory ${src} ${dest} COMMENT "copy ${src} -> ${dest}")
         endif ()
     endmacro()
 
@@ -148,7 +148,7 @@ else ()
     macro(makeCopy src dest target)
         if (NOT EXISTS ${dest})
             add_custom_command(TARGET ${target} POST_BUILD
-                    COMMAND ${CMAKE_COMMAND} -E copy_if_different ${src} ${dest} DEPENDS ${dest} COMMENT "copy ${src} -> ${dest}")
+                    COMMAND ${CMAKE_COMMAND} -E copy_if_different ${src} ${dest} COMMENT "copy ${src} -> ${dest}")
         endif ()
     endmacro()
 endif (LINUX)
