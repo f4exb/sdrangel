@@ -698,6 +698,11 @@ class Vst3Effect::EditorWidget : public QWidget
 public:
     EditorWidget(Vst3Effect *effect, QWidget *parent) : QWidget(parent), m_effect(effect)
     {
+        // The editor needs a native window to host the plugin's own, but its ancestors
+        // must not be made native: that would reach the dialog, and then the dialog's
+        // parent's children, spreading native windows through the whole main window
+        // (breaking OpenGL composition and mouse input under overlays).
+        setAttribute(Qt::WA_DontCreateNativeAncestors);
         setAttribute(Qt::WA_NativeWindow);
         setFocusPolicy(Qt::StrongFocus);
         m_frame.iface.lpVtbl = &frameVtbl;

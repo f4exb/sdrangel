@@ -923,3 +923,8 @@ uint32_t SSBMod::getNumberOfDeviceStreams() const
 {
     return m_deviceAPI->getNbSinkStreams();
 }
+
+int SSBMod::getChannelSampleRate() const
+{
+    return m_basebandSource ? m_basebandSource->getChannelSampleRate() : 0;
+}

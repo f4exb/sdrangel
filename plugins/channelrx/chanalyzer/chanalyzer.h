@@ -75,7 +75,7 @@ public:
     SpectrumVis *getSpectrumVis() { return &m_spectrumVis; }
     ScopeVis *getScopeVis() { return &m_scopeVis; }
     void setScopeVis(ScopeVis *scopeVis) { m_basebandSink->setScopeVis(scopeVis); }
-    int getChannelSampleRate();
+    int getBasebandSampleRate(); //!< Updates and returns the device (baseband) sample rate
     int getDecimation() const { return 1<<m_settings.m_log2Decim; }
 	double getMagSq() const { return m_basebandSink->getMagSq(); }
 	double getMagSqAvg() const { return m_basebandSink->getMagSqAvg(); }
@@ -95,6 +95,7 @@ public:
     virtual QString getIdentifier() const { return objectName(); }
     virtual void getTitle(QString& title) { title = objectName(); }
     virtual qint64 getCenterFrequency() const { return m_settings.m_inputFrequencyOffset; }
+    int getChannelSampleRate() const override;
     virtual void setCenterFrequency(qint64 frequency);
 
     virtual QByteArray serialize() const { return QByteArray(); }

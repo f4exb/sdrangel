@@ -694,3 +694,13 @@ void InmarsatDemod::handleIndexInDeviceSetChanged(int index)
         .arg(index);
     m_basebandSink->setFifoLabel(fifoLabel);
 }
+
+int InmarsatDemod::getChannelSampleRate() const
+{
+    return m_basebandSink ? m_basebandSink->getChannelSampleRate() : 0;
+}
+
+int InmarsatDemod::getAudioSampleRate() const
+{
+    return InmarsatDemodSettings::CHANNEL_SAMPLE_RATE;
+}

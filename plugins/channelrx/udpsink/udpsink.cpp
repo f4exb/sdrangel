@@ -696,3 +696,8 @@ void UDPSink::handleIndexInDeviceSetChanged(int index)
     m_basebandSink->setFifoLabel(fifoLabel);
     m_basebandSink->setAudioFifoLabel(fifoLabel);
 }
+
+int UDPSink::getChannelSampleRate() const
+{
+    return m_basebandSink ? m_basebandSink->getChannelSampleRate() : 0;
+}

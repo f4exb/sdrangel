@@ -49,8 +49,8 @@ StarTracker::StarTracker(WebAPIAdapterInterface *webAPIAdapterInterface) :
     Feature(m_featureIdURI, webAPIAdapterInterface),
     m_thread(nullptr),
     m_worker(nullptr),
-    m_availableChannelHandler({"sdrangel.channel.radioastronomy"}, QStringList{"startracker.display"}),
-    m_availableFeatureHandler({"sdrangel.feature.satellitetracker", "sdrangel.feature.skymap"})
+    m_availableChannelHandler({"sdrangel.channel.radioastronomy"}, QStringList{"startracker.display"}, "RTMF", this),
+    m_availableFeatureHandler({"sdrangel.feature.satellitetracker", "sdrangel.feature.skymap"}, "RTMF", this)
 {
     qDebug("StarTracker::StarTracker: webAPIAdapterInterface: %p", webAPIAdapterInterface);
     setObjectName(m_featureId);

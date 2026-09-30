@@ -108,6 +108,7 @@ public:
     QString getIdentifier() const final { return objectName(); }
     void getTitle(QString& title) final { title = "DOA 2 sources"; }
     qint64 getCenterFrequency() const final { return m_frequencyOffset; }
+    int getChannelSampleRate() const override;
     void setCenterFrequency(qint64) final { /* Not for MIMO */ }
     uint32_t getDeviceSampleRate() const { return m_deviceSampleRate; }
 

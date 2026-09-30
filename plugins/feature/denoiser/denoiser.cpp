@@ -174,6 +174,16 @@ void Denoiser::start()
     m_worker->getInputMessageQueue()->push(msg);
     m_worker->applySampleRate(m_sampleRate);
 
+    // Subscribe only while the worker can drain the FIFO.
+    if (m_selectedChannel && !m_dataPipe)
+    {
+        m_dataPipe = MainCore::instance()->getDataPipes().registerProducerToConsumer(m_selectedChannel, this, "demod");
+        connect(m_dataPipe, &ObjectPipe::toBeDeleted, this, &Denoiser::handleDataPipeToBeDeleted, Qt::UniqueConnection);
+        if (auto *fifo = qobject_cast<DataFifo*>(m_dataPipe->m_element)) {
+            fifo->setSize(m_sampleRate > 0 ? 2 * m_sampleRate : 96000); // Resized when the rate is reported
+        }
+    }
+
     if (m_dataPipe)
     {
         DataFifo *fifo = qobject_cast<DataFifo*>(m_dataPipe->m_element);
@@ -220,12 +230,8 @@ void Denoiser::stop()
 
     if (m_dataPipe)
     {
-        DataFifo *fifo = qobject_cast<DataFifo*>(m_dataPipe->m_element);
-
-        if (fifo)
-        {
-            DenoiserWorker::MsgConnectFifo *msg = DenoiserWorker::MsgConnectFifo::create(fifo, false);
-            m_worker->getInputMessageQueue()->push(msg);
+        if (auto *fifo = qobject_cast<DataFifo*>(m_dataPipe->m_element)) {
+            disconnect(fifo, SIGNAL(dataReady()), m_worker, SLOT(handleData()));
         }
     }
 
@@ -233,6 +239,12 @@ void Denoiser::stop()
     setState(StIdle);
 	m_thread->quit();
 	m_thread->wait();
+
+    if (m_dataPipe)
+    {
+        MainCore::instance()->getDataPipes().unregisterProducerToConsumer(m_selectedChannel, this, "demod");
+        m_dataPipe = nullptr;
+    }
 }
 
 double Denoiser::getMagSqAvg() const
@@ -659,13 +671,16 @@ void Denoiser::setChannel(QObject *selectedChannel, bool preserveSavedSource)
 
     if (m_selectedChannel)
     {
-        ObjectPipe *pipe = mainCore->getDataPipes().unregisterProducerToConsumer(m_selectedChannel, this, "demod");
-        DataFifo *fifo = pipe ? qobject_cast<DataFifo*>(pipe->m_element) : nullptr;
-
-        if ((fifo) && m_running)
+        if (m_dataPipe)
         {
-            DenoiserWorker::MsgConnectFifo *msg = DenoiserWorker::MsgConnectFifo::create(fifo, false);
-            m_worker->getInputMessageQueue()->push(msg);
+            ObjectPipe *pipe = mainCore->getDataPipes().unregisterProducerToConsumer(m_selectedChannel, this, "demod");
+            DataFifo *fifo = pipe ? qobject_cast<DataFifo*>(pipe->m_element) : nullptr;
+
+            if ((fifo) && m_running)
+            {
+                DenoiserWorker::MsgConnectFifo *msg = DenoiserWorker::MsgConnectFifo::create(fifo, false);
+                m_worker->getInputMessageQueue()->push(msg);
+            }
         }
 
         ObjectPipe *messagePipe = mainCore->getMessagePipes().unregisterProducerToConsumer(m_selectedChannel, this, "reportdemod");
@@ -691,16 +706,15 @@ void Denoiser::setChannel(QObject *selectedChannel, bool preserveSavedSource)
         return;
     }
 
-    m_dataPipe = mainCore->getDataPipes().registerProducerToConsumer(selectedChannel, this, "demod");
-    connect(m_dataPipe, SIGNAL(toBeDeleted(int, QObject*)), this, SLOT(handleDataPipeToBeDeleted(int, QObject*)));
-    DataFifo *fifo = qobject_cast<DataFifo*>(m_dataPipe->m_element);
-
-    if (fifo)
+    if (m_running)
     {
-        fifo->setSize(96000);
+        m_dataPipe = mainCore->getDataPipes().registerProducerToConsumer(selectedChannel, this, "demod");
+        connect(m_dataPipe, &ObjectPipe::toBeDeleted, this, &Denoiser::handleDataPipeToBeDeleted, Qt::UniqueConnection);
+        DataFifo *fifo = qobject_cast<DataFifo*>(m_dataPipe->m_element);
 
-        if (m_running)
+        if (fifo)
         {
+            fifo->setSize(96000);
             DenoiserWorker::MsgConnectFifo *msg = DenoiserWorker::MsgConnectFifo::create(fifo, true);
             m_worker->getInputMessageQueue()->push(msg);
         }
@@ -1061,7 +1075,7 @@ void Denoiser::handleDataPipeToBeDeleted(int reason, QObject *object)
         }
 
         m_selectedChannel = nullptr;
-        m_dataPipe = nullptr;
+        m_dataPipe = nullptr; // The pipe and its FIFO are freed by the pipes GC.
         m_sampleRate = 0;
         if (m_running) 
         {

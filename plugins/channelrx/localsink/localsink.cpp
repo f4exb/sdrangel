@@ -186,6 +186,7 @@ void LocalSink::stopProcessing()
     m_running = false;
 	m_thread->exit();
 	m_thread->wait();
+    m_basebandSink = nullptr; // Freed by deleteLater when the thread finished
 }
 
 bool LocalSink::handleMessage(const Message& cmd)
@@ -861,4 +862,9 @@ void LocalSink::updateDeviceSetList()
         MsgConfigureLocalSink *msg = MsgConfigureLocalSink::create(m_settings, QList<QString>{"localDeviceIndex"}, false);
         m_guiMessageQueue->push(msg);
     }
+}
+
+int LocalSink::getChannelSampleRate() const
+{
+    return m_basebandSink ? m_basebandSink->getChannelSampleRate() : 0;
 }

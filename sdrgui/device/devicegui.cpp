@@ -448,7 +448,7 @@ void DeviceGUI::setIndex(int index)
 void DeviceGUI::setDeviceType(DeviceType type)
 {
     m_deviceType = type;
-    m_indexLabel->setStyleSheet(tr("QLabel { background-color: %1; qproperty-alignment: AlignCenter; }").arg(getDeviceTypeColor()));
+    m_indexLabel->setStyleSheet(tr("QLabel { background-color: %1; qproperty-alignment: AlignCenter; }").arg(getDeviceTypeColor().name()));
 }
 
 void DeviceGUI::setToolTip(const QString& tooltip)
@@ -456,18 +456,18 @@ void DeviceGUI::setToolTip(const QString& tooltip)
     m_titleLabel->setToolTip(tooltip);
 }
 
-QString DeviceGUI::getDeviceTypeColor()
+QColor DeviceGUI::getDeviceTypeColor() const
 {
     switch(m_deviceType)
     {
         case DeviceRx:
-            return "rgb(0, 128, 0)";
+            return QColor(0, 128, 0);
         case DeviceTx:
-            return "rgb(204, 0, 0)";
+            return QColor(204, 0, 0);
         case DeviceMIMO:
-            return "rgb(0, 0, 192)";
+            return QColor(0, 0, 192);
         default:
-            return "rgb(128, 128, 128)";
+            return QColor(128, 128, 128);
     }
 }
 

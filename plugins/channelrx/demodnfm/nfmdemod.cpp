@@ -174,6 +174,7 @@ void NFMDemod::stop()
     m_running = false;
 	m_thread->quit();
 	m_thread->wait();
+    m_basebandSink = nullptr; // Freed by deleteLater when the thread finished
 }
 
 bool NFMDemod::handleMessage(const Message& cmd)
@@ -721,4 +722,9 @@ void NFMDemod::handleIndexInDeviceSetChanged(int index)
         .arg(index);
     m_basebandSink->setFifoLabel(fifoLabel);
     m_basebandSink->setAudioFifoLabel(fifoLabel);
+}
+
+int NFMDemod::getChannelSampleRate() const
+{
+    return m_basebandSink ? m_basebandSink->getChannelSampleRate() : 0;
 }

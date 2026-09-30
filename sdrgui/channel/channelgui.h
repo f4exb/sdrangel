@@ -22,6 +22,7 @@
 #define SDRGUI_CHANNEL_CHANNELGUI_H_
 
 #include <QMdiSubWindow>
+#include <QColor>
 #include <QMap>
 
 #include "gui/qtcompatibility.h"
@@ -80,6 +81,7 @@ public:
     void sizeToContents();
     void setTitle(const QString& title);
     void setTitleColor(const QColor& c);
+    QColor getIndexLabelColor() const { return m_indexLabelColor; }
     void setDeviceType(DeviceType type);
     void setDisplayedame(const QString& name);
     DeviceType getDeviceType() const { return m_deviceType; }
@@ -120,6 +122,7 @@ private:
     DeviceType m_deviceType;
     int m_deviceSetIndex;
     int m_channelIndex;
+    QColor m_indexLabelColor = QColor(128, 128, 128);
     RollupContents* m_rollupContents;
 
     QLabel *m_indexLabel;

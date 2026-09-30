@@ -1687,3 +1687,8 @@ void MeshtasticDemod::handleIndexInDeviceSetChanged(int index)
         runtime.basebandSink->setFifoLabel(fifoLabel);
     }
 }
+
+int MeshtasticDemod::getChannelSampleRate() const
+{
+    return m_pipelines.empty() || !m_pipelines[0].basebandSink ? 0 : m_pipelines[0].basebandSink->getChannelSampleRate();
+}

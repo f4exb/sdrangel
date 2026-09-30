@@ -201,7 +201,7 @@ SkyMapGUI::SkyMapGUI(PluginAPI* pluginAPI, FeatureUISet *featureUISet, Feature *
     m_featureUISet(featureUISet),
     m_doApplySettings(true),
     m_source(nullptr),
-    m_availableChannelOrFeatureHandler(SkyMapSettings::m_pipeURIs, {"target", "skymap.target"}),
+    m_availableChannelOrFeatureHandler(SkyMapSettings::m_pipeURIs, {"target", "skymap.target"}, "RTMF", this),
     m_ready(false)
 {
     m_feature = feature;

@@ -162,6 +162,7 @@ void WFMDemod::stop()
     m_running = false;
 	m_thread->exit();
 	m_thread->wait();
+    m_basebandSink = nullptr; // Freed by deleteLater when the thread finished
 }
 
 bool WFMDemod::handleMessage(const Message& cmd)
@@ -662,4 +663,9 @@ void WFMDemod::handleIndexInDeviceSetChanged(int index)
         .arg(index);
     m_basebandSink->setFifoLabel(fifoLabel);
     m_basebandSink->setAudioFifoLabel(fifoLabel);
+}
+
+int WFMDemod::getChannelSampleRate() const
+{
+    return m_basebandSink ? m_basebandSink->getChannelSampleRate() : 0;
 }

@@ -104,6 +104,7 @@ set(sdrgui_SOURCES
     gui/valuedialz.cpp
     gui/welcomedialog.cpp
     gui/workspace.cpp
+    gui/connectionoverlay.cpp
     gui/workspaceselectiondialog.cpp
     gui/workspacewindow.cpp
     gui/wsspectrumsettingsdialog.cpp
@@ -243,6 +244,7 @@ set(sdrgui_HEADERS
     gui/workspace.h
     gui/workspaceselectiondialog.h
     gui/workspacewindow.h
+    gui/connectionoverlay.h
     gui/wsspectrumsettingsdialog.h
     gui/wrappingdatetimeedit.h
     gui/wrappingdial.h

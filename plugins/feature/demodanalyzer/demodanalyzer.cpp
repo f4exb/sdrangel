@@ -692,6 +692,7 @@ void DemodAnalyzer::handleDataPipeToBeDeleted(int reason, QObject *object)
         }
 
         m_selectedChannel = nullptr;
+        m_dataPipe = nullptr; // The pipe and its FIFO are freed by the pipes GC.
     }
 }
 

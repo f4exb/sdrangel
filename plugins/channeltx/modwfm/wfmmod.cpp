@@ -783,3 +783,8 @@ int WFMMod::getFeedbackAudioSampleRate() const
 {
     return m_basebandSource->getFeedbackAudioSampleRate();
 }
+
+int WFMMod::getChannelSampleRate() const
+{
+    return m_basebandSource ? m_basebandSource->getChannelSampleRate() : 0;
+}
