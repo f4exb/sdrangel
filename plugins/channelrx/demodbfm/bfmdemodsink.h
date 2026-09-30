@@ -62,6 +62,7 @@ public:
 	Real getDemodQua() const { return m_rdsDemod.m_report.qua; }
 	Real getDemodFclk() const { return m_rdsDemod.m_report.fclk; }
     int getSquelchState() const { return m_squelchState; }
+    bool getSquelchOpen() const { return m_squelchState > m_settings.m_rfBandwidth / 20; }
 
     void getMagSqLevels(double& avg, double& peak, int& nbSamples)
     {
