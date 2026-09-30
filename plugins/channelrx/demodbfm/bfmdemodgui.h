@@ -79,6 +79,8 @@ private:
 	bool m_doApplySettings;
 	int m_rdsTimerCount;
     bool m_radiotext_AB_flag;
+    bool m_squelchOpen;
+    int m_audioSampleRate;
 
 	SpectrumVis* m_spectrumVis;
 

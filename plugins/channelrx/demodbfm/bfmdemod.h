@@ -118,6 +118,7 @@ public:
 	Real getDemodAcc() const { return m_running ? m_basebandSink->getDemodAcc() : 0.0f; }
 	Real getDemodQua() const { return m_running ? m_basebandSink->getDemodQua() : 0.0f; }
 	Real getDemodFclk() const { return m_running ? m_basebandSink->getDemodFclk() : 0.0f; }
+    bool getSquelchOpen() const { return m_running && m_basebandSink->getSquelchOpen(); }
     int getAudioSampleRate() const override { return m_running ? m_basebandSink->getAudioSampleRate() : 0; }
 
     void getMagSqLevels(double& avg, double& peak, int& nbSamples) {
