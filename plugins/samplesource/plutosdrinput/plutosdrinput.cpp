@@ -127,8 +127,11 @@ bool PlutoSDRInput::start()
 
     m_plutoSDRInputThread->setLog2Decimation(m_settings.m_log2Decim);
     m_plutoSDRInputThread->setIQOrder(m_settings.m_iqOrder);
-    m_plutoSDRInputThread->startWork();
-    m_deviceShared.m_thread = m_plutoSDRInputThread;
+    {
+        QMutexLocker threadsLocker(&DevicePlutoSDRShared::m_threadsMutex);
+        m_plutoSDRInputThread->startWork();
+        m_deviceShared.m_thread = m_plutoSDRInputThread;
+    }
     m_running = true;
 
     mutexLocker.unlock();
@@ -147,14 +150,20 @@ void PlutoSDRInput::stop()
 
     m_running = false;
 
+    // Unpublish the thread before tearing it down, and keep the shared lock through
+    // stop/wait/delete. applySettings() holds the same lock across its suspend ->
+    // apply -> resume transaction, so teardown must not interleave with that sequence.
+    QMutexLocker threadsLocker(&DevicePlutoSDRShared::m_threadsMutex);
+    m_deviceShared.m_thread = nullptr;
+    m_deviceShared.m_threadWasRunning = false;
+
     if (m_plutoSDRInputThread)
     {
         m_plutoSDRInputThread->stopWork();
+        m_plutoSDRInputThread->wait();
         delete m_plutoSDRInputThread;
         m_plutoSDRInputThread = nullptr;
     }
-
-    m_deviceShared.m_thread = nullptr;
 }
 
 void PlutoSDRInput::handleError(int errorCode)
@@ -162,6 +171,9 @@ void PlutoSDRInput::handleError(int errorCode)
     QMutexLocker mutexLocker(&m_mutex);
 
     m_running = false;
+    QMutexLocker threadsLocker(&DevicePlutoSDRShared::m_threadsMutex);
+    m_deviceShared.m_thread = nullptr;
+    m_deviceShared.m_threadWasRunning = false;
     if (m_plutoSDRInputThread)
     {
         if (m_plutoSDRInputThread->isRunning())
@@ -172,7 +184,6 @@ void PlutoSDRInput::handleError(int errorCode)
         delete m_plutoSDRInputThread;
         m_plutoSDRInputThread = nullptr;
     }
-    m_deviceShared.m_thread = nullptr;
 
     if (m_deviceAPI->getSinkBuddies().size() == 0)
     {
@@ -419,6 +430,7 @@ void PlutoSDRInput::closeDevice()
 
 void PlutoSDRInput::suspendBuddies()
 {
+    QMutexLocker threadsLocker(&DevicePlutoSDRShared::m_threadsMutex);
     // suspend Tx buddy's thread
 
     for (unsigned int i = 0; i < m_deviceAPI->getSinkBuddies().size(); i++)
@@ -434,6 +446,7 @@ void PlutoSDRInput::suspendBuddies()
 
 void PlutoSDRInput::resumeBuddies()
 {
+    QMutexLocker threadsLocker(&DevicePlutoSDRShared::m_threadsMutex);
     // resume Tx buddy's thread
 
     for (unsigned int i = 0; i < m_deviceAPI->getSinkBuddies().size(); i++)
@@ -454,6 +467,10 @@ bool PlutoSDRInput::applySettings(const PlutoSDRInputSettings& settings, const Q
         qCritical("PlutoSDRInput::applySettings: device not open");
         return false;
     }
+
+    // Held for the whole suspend -> apply -> resume sequence below (own thread and buddies'),
+    // so that a concurrent stop()/start() of either device set cannot interleave with it.
+    QMutexLocker threadsLocker(&DevicePlutoSDRShared::m_threadsMutex);
 
     bool forwardChangeOwnDSP    = false;
     bool forwardChangeOtherDSP  = false;
@@ -687,7 +704,7 @@ bool PlutoSDRInput::applySettings(const PlutoSDRInputSettings& settings, const Q
         }
     }
 
-    if (ownThreadWasRunning) {
+    if (ownThreadWasRunning && m_plutoSDRInputThread) {
         m_plutoSDRInputThread->startWork();
     }
 
