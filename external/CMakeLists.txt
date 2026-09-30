@@ -370,6 +370,7 @@ endif (NOT FFTW3F_FOUND AND NOT USE_PRECOMPILED_LIBS)
 include(FetchContent)
 FetchContent_Declare(boost
     URL "https://sourceforge.net/projects/boost/files/boost/${BOOST_TAG}/boost_${BOOST_TAG2}.tar.gz/download"
+    DOWNLOAD_EXTRACT_TIMESTAMP TRUE
 )
 
 find_package(Boost QUIET)
