@@ -83,13 +83,13 @@ PSK31DemodReport:
     frequencyOffset:
       type: number
       format: float
-      description: "Fine carrier-frequency estimate in Hz relative to the selected channel frequency."
+      description: "Carrier-frequency estimate in Hz relative to the selected channel frequency. Only present when locked."
     snr:
       type: number
       format: float
-      description: "Signal-to-noise ratio in dB, normalized to a 100 Hz noise bandwidth."
+      description: "Signal-to-noise ratio in dB, normalized to a 100 Hz noise bandwidth. Only present when locked."
     locked:
       type: integer
       minimum: 0
       maximum: 1
-      description: "Whether the BPSK carrier-recovery loop is locked."
+      description: "Whether a PSK31 signal is locked and being decoded."

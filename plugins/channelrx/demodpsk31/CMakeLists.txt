@@ -5,6 +5,7 @@ set(demodpsk31_SOURCES
     psk31demodsettings.cpp
     psk31demodbaseband.cpp
     psk31demodsink.cpp
+    psk31demodulator.cpp
     psk31demodplugin.cpp
     psk31demodwebapiadapter.cpp
 )
@@ -14,6 +15,7 @@ set(demodpsk31_HEADERS
     psk31demodsettings.h
     psk31demodbaseband.h
     psk31demodsink.h
+    psk31demodulator.h
     psk31demodplugin.h
     psk31demodwebapiadapter.h
 )

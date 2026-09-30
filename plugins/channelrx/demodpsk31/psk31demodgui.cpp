@@ -91,14 +91,21 @@ void PSK31DemodGUI::characterReceived(QString c)
     // Restore scroll position
     ui->text->verticalScrollBar()->setValue(scrollPos);
 
-    if (c == '\b')
+    const QChar character = c.isEmpty() ? QChar() : c[0];
+
+    if (character == '\b')
     {
         ui->text->textCursor().deletePreviousChar();
     }
     else
     {
-        ui->text->insertPlainText(c);
+        const QString text = PSK31Demod::displayText(character, m_previousCharacter);
+        if (!text.isEmpty()) {
+            ui->text->insertPlainText(text);
+        }
     }
+
+    m_previousCharacter = character;
 
     // Scroll to bottom, if we we're previously at the bottom
     if (atBottom) {

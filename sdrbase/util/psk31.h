@@ -61,6 +61,7 @@ public:
 private:
     QString m_code;
     int m_zeroCount;
+    bool m_discard;
     bool m_havePreviousSymbol;
     bool m_previousSymbol;
 

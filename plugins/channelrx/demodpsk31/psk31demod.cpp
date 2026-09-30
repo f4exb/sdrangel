@@ -190,10 +190,12 @@ bool PSK31Demod::handleMessage(const Message& cmd)
         }
 
         // Write to log file
-        if (m_logFile.isOpen())
+        if (m_logFile.isOpen() && !report.getCharacter().isEmpty())
         {
-            m_logStream << report.getCharacter();
+            const QChar character = report.getCharacter()[0];
+            m_logStream << displayText(character, m_previousLogCharacter);
             m_logStream.flush();
+            m_previousLogCharacter = character;
         }
 
         return true;
@@ -219,6 +221,19 @@ bool PSK31Demod::handleMessage(const Message& cmd)
     else
     {
         return false;
+    }
+}
+
+QString PSK31Demod::displayText(QChar character, QChar previousCharacter)
+{
+    if (character == '\r') {
+        return QStringLiteral("\n");
+    } else if (character == '\n') {
+        return previousCharacter == '\r' ? QString() : QStringLiteral("\n");
+    } else if ((character == '\t') || character.isPrint()) {
+        return QString(character);
+    } else {
+        return QString();
     }
 }
 
@@ -552,9 +567,14 @@ void PSK31Demod::webapiFormatChannelReport(SWGSDRangel::SWGChannelReport& respon
 
     response.getPSK31DemodReport()->setChannelPowerDb(CalcDb::dbPower(magsqAvg));
     response.getPSK31DemodReport()->setChannelSampleRate(m_basebandSink->getChannelSampleRate());
-    response.getPSK31DemodReport()->setFrequencyOffset(getFrequencyOffset());
-    response.getPSK31DemodReport()->setSnr(getSNR());
     response.getPSK31DemodReport()->setLocked(isLocked() ? 1 : 0);
+
+    // Only meaningful when a signal is being received
+    if (isLocked())
+    {
+        response.getPSK31DemodReport()->setFrequencyOffset(getFrequencyOffset());
+        response.getPSK31DemodReport()->setSnr(getSNR());
+    }
 }
 
 void PSK31Demod::webapiReverseSendSettings(const QList<QString>& channelSettingsKeys, const PSK31DemodSettings& settings, bool force)

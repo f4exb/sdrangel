@@ -337,6 +337,7 @@ void PSK31Decoder::reset()
 {
     m_code.clear();
     m_zeroCount = 0;
+    m_discard = false;
     m_havePreviousSymbol = false;
     m_previousSymbol = false;
 }
@@ -359,6 +360,12 @@ bool PSK31Decoder::decode(bool bit, QChar& character)
 {
     if (bit)
     {
+        if (m_discard)
+        {
+            m_zeroCount = 0;
+            return false;
+        }
+
         if ((m_zeroCount == 1) && !m_code.isEmpty()) {
             m_code.append('0');
         }
@@ -366,10 +373,13 @@ bool PSK31Decoder::decode(bool bit, QChar& character)
         m_zeroCount = 0;
         m_code.append('1');
 
+        // No Varicode is longer than 12 bits, so this is not a character, but
+        // e.g. an unmodulated carrier. Its tail could look like a valid code,
+        // so ignore everything up to the next character gap.
         if (m_code.size() > 12)
         {
             m_code.clear();
-            m_zeroCount = 0;
+            m_discard = true;
         }
 
         return false;
@@ -381,9 +391,10 @@ bool PSK31Decoder::decode(bool bit, QChar& character)
         return false;
     }
 
-    const bool decoded = decodeCode(character);
+    const bool decoded = !m_discard && decodeCode(character);
     m_code.clear();
     m_zeroCount = 0;
+    m_discard = false;
     return decoded;
 }
 

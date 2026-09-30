@@ -80,6 +80,7 @@ private:
     PSK31Demod* m_psk31Demod;
     int m_basebandSampleRate;
     uint32_t m_tickCount;
+    QChar m_previousCharacter;
     MessageQueue m_inputMessageQueue;
 
     explicit PSK31DemodGUI(PluginAPI* pluginAPI, DeviceUISet *deviceUISet, BasebandSampleSink *rxChannel, QWidget* parent = 0);

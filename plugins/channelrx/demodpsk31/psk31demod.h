@@ -185,6 +185,11 @@ public:
 
     uint32_t getNumberOfDeviceStreams() const;
 
+    // Text to display for a received character. Senders usually end lines
+    // with CR LF, so CR, LF and CR LF each give a single newline. Other
+    // control characters, which are most likely noise, give nothing.
+    static QString displayText(QChar character, QChar previousCharacter);
+
     static const char * const m_channelIdURI;
     static const char * const m_channelId;
 
@@ -198,6 +203,7 @@ private:
     QUdpSocket m_udpSocket;
     QFile m_logFile;
     QTextStream m_logStream;
+    QChar m_previousLogCharacter;
 
     QNetworkAccessManager *m_networkManager;
     QNetworkRequest m_networkRequest;
