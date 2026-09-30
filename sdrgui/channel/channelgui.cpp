@@ -464,6 +464,7 @@ void ChannelGUI::setTitle(const QString& title)
 
 void ChannelGUI::setTitleColor(const QColor& c)
 {
+    m_indexLabelColor = c;
     m_indexLabel->setStyleSheet(tr("QLabel { background-color: %1; color: %2; }")
         .arg(c.name())
         .arg(getTitleColor(c).name())

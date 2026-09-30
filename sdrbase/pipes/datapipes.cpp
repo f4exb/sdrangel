@@ -53,6 +53,11 @@ void DataPipes::getDataPipes(const QObject *producer, const QString& type, QList
     return m_registrations.getPipes(producer, type, pipes);
 }
 
+QList<ObjectPipesRegistrations::Connection> DataPipes::getConnections()
+{
+    return m_registrations.getConnections();
+}
+
 void DataPipes::startGC()
 {
 	qDebug("DataPipes::startGC");

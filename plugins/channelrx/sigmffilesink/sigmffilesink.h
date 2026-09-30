@@ -103,6 +103,7 @@ public:
     virtual QString getIdentifier() const { return objectName(); }
     virtual void getTitle(QString& title) { title = "SigMF File Sink"; }
     virtual qint64 getCenterFrequency() const { return m_frequencyOffset; }
+    int getChannelSampleRate() const override;
     virtual void setCenterFrequency(qint64) {}
 
     virtual QByteArray serialize() const;

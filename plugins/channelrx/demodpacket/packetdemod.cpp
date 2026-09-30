@@ -716,3 +716,13 @@ void PacketDemod::handleIndexInDeviceSetChanged(int index)
         .arg(index);
     m_basebandSink->setFifoLabel(fifoLabel);
 }
+
+int PacketDemod::getChannelSampleRate() const
+{
+    return m_basebandSink ? m_basebandSink->getChannelSampleRate() : 0;
+}
+
+int PacketDemod::getAudioSampleRate() const
+{
+    return PacketDemodSettings::PACKETDEMOD_CHANNEL_SAMPLE_RATE;
+}

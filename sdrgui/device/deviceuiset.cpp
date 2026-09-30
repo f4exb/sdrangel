@@ -205,6 +205,11 @@ ChannelGUI *DeviceUISet::getChannelGUIAt(int channelIndex)
     return m_channelInstanceRegistrations[channelIndex].m_gui;
 }
 
+int DeviceUISet::getChannelTypeAt(int channelIndex) const
+{
+    return m_channelInstanceRegistrations[channelIndex].m_channelType;
+}
+
 // Serialization is only used for Device and Spectrum settings in a Device preset
 // To include channels, use a Device Set preset via loadDeviceSetSettings/saveDeviceSetSettings
 

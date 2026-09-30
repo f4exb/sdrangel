@@ -997,3 +997,13 @@ void AISMod::udpRx()
         m_basebandSource->getInputMessageQueue()->push(msg);
     }
 }
+
+int AISMod::getChannelSampleRate() const
+{
+    return m_basebandSource ? m_basebandSource->getChannelSampleRate() : 0;
+}
+
+int AISMod::getAudioSampleRate() const
+{
+    return AISModSettings::AISMOD_SAMPLE_RATE;
+}

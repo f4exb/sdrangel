@@ -28,6 +28,7 @@
 #include "export.h"
 #include "featureadddialog.h"
 #include "device/deviceapi.h"
+#include "connectionoverlay.h"
 
 class QHBoxLayout;
 class QLabel;
@@ -70,6 +71,8 @@ public:
     void updateStartStopButton(bool checked);
     void updateMCPServerButton(bool available, bool running, int port);
     QToolButton *getMenuButton() const { return m_menuButton; }
+    void setConnectionOverlayVisible(bool visible);
+    void setConnections(const QList<ConnectionOverlay::Connection>& connections);
 
 private:
     int m_index;
@@ -90,6 +93,8 @@ private:
     QPushButton *m_stackVerticalSubWindows;
     QPushButton *m_stackSubWindows;
     ButtonSwitch *m_tabSubWindows;
+    ButtonSwitch *m_connectionOverlayButton;
+    ConnectionOverlay *m_connectionOverlay;
     QWidget *m_titleBar;
     QHBoxLayout *m_titleBarLayout;
     QLabel *m_titleLabel;
@@ -132,6 +137,7 @@ public slots:
 
 signals:
     void focused(Workspace *workspace); // The user is working in this workspace
+    void connectionOverlayToggled(bool visible);
     void addRxDevice(Workspace *inWorkspace, int deviceIndex);
     void addTxDevice(Workspace *inWorkspace, int deviceIndex);
     void addMIMODevice(Workspace *inWorkspace, int deviceIndex);

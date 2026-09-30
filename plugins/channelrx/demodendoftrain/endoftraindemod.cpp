@@ -700,3 +700,13 @@ void EndOfTrainDemod::handleIndexInDeviceSetChanged(int index)
         .arg(index);
     m_basebandSink->setFifoLabel(fifoLabel);
 }
+
+int EndOfTrainDemod::getChannelSampleRate() const
+{
+    return m_basebandSink ? m_basebandSink->getChannelSampleRate() : 0;
+}
+
+int EndOfTrainDemod::getAudioSampleRate() const
+{
+    return EndOfTrainDemodSettings::CHANNEL_SAMPLE_RATE;
+}

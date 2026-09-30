@@ -202,6 +202,7 @@ void FreqScanner::stop()
     m_thread->exit();
 #ifndef __EMSCRIPTEN__
     m_thread->wait();
+    m_basebandSink = nullptr; // Freed by deleteLater when the thread finished
 #endif
 }
 
@@ -1455,4 +1456,9 @@ void FreqScanner::notifyUpdateChannels(const QStringList& renameFrom, const QStr
         msgToGUI->getChannels() = m_availableChannels;
         getMessageQueueToGUI()->push(msgToGUI);
     }
+}
+
+int FreqScanner::getChannelSampleRate() const
+{
+    return m_basebandSink ? m_basebandSink->getChannelSampleRate() : 0;
 }

@@ -353,6 +353,7 @@ public:
     virtual const QString& getURI() const { return getName(); }
     virtual void getTitle(QString& title) { title = m_settings.m_title; }
     virtual qint64 getCenterFrequency() const { return m_settings.m_inputFrequencyOffset; }
+    int getChannelSampleRate() const override;
     virtual void setCenterFrequency(qint64 frequency);
 
     virtual QByteArray serialize() const;
@@ -403,7 +404,7 @@ public:
     }
 
     uint32_t getNumberOfDeviceStreams() const;
-    int getAudioSampleRate() const { return m_basebandSink->getAudioSampleRate(); }
+    int getAudioSampleRate() const override { return m_basebandSink->getAudioSampleRate(); }
 
     static const char * const m_channelIdURI;
     static const char * const m_channelId;

@@ -799,3 +799,13 @@ void PSK31::setMessageQueueToGUI(MessageQueue* queue) {
     ChannelAPI::setMessageQueueToGUI(queue);
     m_basebandSource->setMessageQueueToGUI(queue);
 }
+
+int PSK31::getChannelSampleRate() const
+{
+    return m_basebandSource ? m_basebandSource->getChannelSampleRate() : 0;
+}
+
+int PSK31::getAudioSampleRate() const
+{
+    return getSourceChannelSampleRate();
+}

@@ -1017,3 +1017,13 @@ void PacketMod::udpRx()
         m_basebandSource->getInputMessageQueue()->push(msg);
     }
 }
+
+int PacketMod::getChannelSampleRate() const
+{
+    return m_basebandSource ? m_basebandSource->getChannelSampleRate() : 0;
+}
+
+int PacketMod::getAudioSampleRate() const
+{
+    return getSourceChannelSampleRate();
+}

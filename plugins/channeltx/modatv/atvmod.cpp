@@ -801,3 +801,8 @@ void ATVMod::setMessageQueueToGUI(MessageQueue* queue) {
     ChannelAPI::setMessageQueueToGUI(queue);
     m_basebandSource->setMessageQueueToGUI(queue);
 }
+
+int ATVMod::getChannelSampleRate() const
+{
+    return m_basebandSource ? m_basebandSource->getChannelSampleRate() : 0;
+}
