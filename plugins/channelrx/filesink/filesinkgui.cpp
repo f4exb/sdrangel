@@ -86,8 +86,12 @@ bool FileSinkGUI::handleMessage(const Message& message)
 
         if (m_fixedPosition)
         {
+            const qint32 inputFrequencyOffset = m_settings.m_inputFrequencyOffset;
             setFrequencyFromPos();
-            applySettings(QStringList(), true);
+
+            if (m_settings.m_inputFrequencyOffset != inputFrequencyOffset) {
+                applySettings(QStringList("inputFrequencyOffset"));
+            }
         }
         else
         {
