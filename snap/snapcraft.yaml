@@ -490,6 +490,7 @@ parts:
         plugin: cmake
         source: https://github.com/dnwrnr/sgp4.git
         source-type: git
+        source-tag: v3.0
         cmake-parameters:
             - -DCMAKE_INSTALL_PREFIX=/opt/install/sdrangel
 

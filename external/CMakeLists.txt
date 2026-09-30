@@ -25,7 +25,7 @@ set(AIRSPYHF_TAG "9b7ef82cf37e732b9d2b2adbdd9d9ce8fee446ca")
 set(PERSEUS_TAG afefa23e3140ac79d845acb68cf0beeb86d09028)
 set(MIRISDR_TAG "v2.0.0")
 set(LIBSIGMF_TAG "new-namespaces")
-
+set(SGP4_TAG "v3.0")
 set(PTHREADS4W_TAG "Version-2-11-0-release")
 set(RTLSDR_TAG "v2.0.3")
 set(RTLSDR_UDEV OFF)
@@ -856,8 +856,6 @@ endif ()
 
 # For Satellite Tracker feature and APT demod
 if(ENABLE_FEATURE_SATELLITETRACKER OR ENABLE_CHANNELRX_DEMODAPT)
-    # No tags for this in github. Pin the commit to keep builds reproducible.
-    set(SGP4_TAG 1c0d4ee99404538572037fabfdcbc7133917eae8)
     # Fails to build with CMAKE_INTERPROCEDURAL_OPTIMIZATION=ON on Windows
     if (WIN32)
         set(SGP4_LIBRARIES "${SDRANGEL_BINARY_LIB_DIR}/sgp4s.lib" CACHE INTERNAL "")

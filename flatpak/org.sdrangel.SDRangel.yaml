@@ -312,7 +312,7 @@ modules:
     sources:
       - type: git
         url: https://github.com/dnwrnr/sgp4.git
-        commit: d176906dbfaf8361eee1f83bd1dc1bacc6582798
+        tag: 'v3.0'
 
   - name: aptdec
     buildsystem: cmake-ninja
