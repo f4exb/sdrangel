@@ -41,8 +41,8 @@
 class PSK31Demodulator
 {
 public:
-    static const int m_sampleRate = 1000;
-    static const int m_samplesPerSymbol = 32;
+    static constexpr int m_sampleRate = 1000;
+    static constexpr int m_samplesPerSymbol = 32;
 
     PSK31Demodulator();
 
