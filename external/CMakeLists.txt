@@ -110,21 +110,21 @@ if (LINUX)
     macro(makeLink src dest target)
         if (NOT EXISTS ${dest})
             add_custom_command(TARGET ${target} PRE_BUILD
-                    COMMAND ${CMAKE_COMMAND} -E create_symlink ${src} ${dest} DEPENDS ${dest} COMMENT "mklink ${src} -> ${dest}")
+                    COMMAND ${CMAKE_COMMAND} -E create_symlink ${src} ${dest} COMMENT "mklink ${src} -> ${dest}")
         endif ()
     endmacro()
     # macro that copy folder
     macro(makeCopy src dest target)
         if (NOT EXISTS ${dest})
             add_custom_command(TARGET ${target} PRE_BUILD
-                    COMMAND ${CMAKE_COMMAND} -E copy_directory ${src} ${dest} DEPENDS ${dest} COMMENT "copy ${src} -> ${dest}")
+                    COMMAND ${CMAKE_COMMAND} -E copy_directory ${src} ${dest} COMMENT "copy ${src} -> ${dest}")
         endif ()
     endmacro()
     # macro that copy file
     macro(makeCopyFile src dest target)
         if (NOT EXISTS ${dest})
             add_custom_command(TARGET ${target} PRE_BUILD
-                    COMMAND ${CMAKE_COMMAND} -E copy_if_different ${src} ${dest} DEPENDS ${dest} COMMENT "copy ${src} -> ${dest}")
+                    COMMAND ${CMAKE_COMMAND} -E copy_if_different ${src} ${dest} COMMENT "copy ${src} -> ${dest}")
         endif ()
     endmacro()
 else ()
@@ -132,7 +132,7 @@ else ()
     macro(makeLink src dest target)
         if (NOT EXISTS ${dest})
             add_custom_command(TARGET ${target} POST_BUILD
-                    COMMAND ${CMAKE_COMMAND} -E create_symlink ${src} ${dest} DEPENDS ${dest} COMMENT "mklink ${src} -> ${dest}")
+                    COMMAND ${CMAKE_COMMAND} -E create_symlink ${src} ${dest} COMMENT "mklink ${src} -> ${dest}")
         endif ()
     endmacro()
 
@@ -140,7 +140,7 @@ else ()
     macro(makeCopyDir src dest target)
         if (NOT EXISTS ${dest})
             add_custom_command(TARGET ${target} POST_BUILD
-                    COMMAND ${CMAKE_COMMAND} -E copy_directory ${src} ${dest} DEPENDS ${dest} COMMENT "copy ${src} -> ${dest}")
+                    COMMAND ${CMAKE_COMMAND} -E copy_directory ${src} ${dest} COMMENT "copy ${src} -> ${dest}")
         endif ()
     endmacro()
 
@@ -148,7 +148,7 @@ else ()
     macro(makeCopy src dest target)
         if (NOT EXISTS ${dest})
             add_custom_command(TARGET ${target} POST_BUILD
-                    COMMAND ${CMAKE_COMMAND} -E copy_if_different ${src} ${dest} DEPENDS ${dest} COMMENT "copy ${src} -> ${dest}")
+                    COMMAND ${CMAKE_COMMAND} -E copy_if_different ${src} ${dest} COMMENT "copy ${src} -> ${dest}")
         endif ()
     endmacro()
 endif (LINUX)
@@ -370,6 +370,7 @@ endif (NOT FFTW3F_FOUND AND NOT USE_PRECOMPILED_LIBS)
 include(FetchContent)
 FetchContent_Declare(boost
     URL "https://sourceforge.net/projects/boost/files/boost/${BOOST_TAG}/boost_${BOOST_TAG2}.tar.gz/download"
+    DOWNLOAD_EXTRACT_TIMESTAMP TRUE
 )
 
 find_package(Boost QUIET)
@@ -895,14 +896,24 @@ if(ENABLE_FEATURE_STARTRACKER)
     if (WIN32)
         set(CSPICE_LIBRARIES "${SDRANGEL_BINARY_LIB_DIR}/cspice.lib" CACHE INTERNAL "")
     elseif (LINUX)
-        # We need a shared library on Linux, as the static library has non PIC code, and we need to link it into a shared library
-        # ExternalProject cspice currently outputs libcspice.so under
-        #   ${EXTERNAL_BUILD_LIBRARIES}/cspice/src/cspice-build/lib/libcspice.so
-        # so point CSPICE_LIBRARIES there.
-        set(CSPICE_LIBRARIES
-            "${EXTERNAL_BUILD_LIBRARIES}/lib${LIB_SUFFIX}/libcspice.so"
-            CACHE INTERNAL ""
-        )
+        # We need a shared library on Linux, as the static library has non PIC code,
+        # and we need to link it into a shared library
+        if (CMAKE_BUILD_TYPE STREQUAL "None")
+            # ExternalProject cspice currently outputs libcspice.so under
+            #   ${EXTERNAL_BUILD_LIBRARIES}/cspice/src/cspice-build/lib/libcspice.so
+            # so point CSPICE_LIBRARIES there.
+            set(CSPICE_LIBRARIES
+                "${EXTERNAL_BUILD_LIBRARIES}/cspice/src/cspice-build/lib/libcspice.so"
+                CACHE INTERNAL ""
+            )
+        else()
+            # Release, Debug, and RelWithDebInfo have configuration-specific output
+            # directories supplied by SDRangel.
+            set(CSPICE_LIBRARIES
+                "${EXTERNAL_BUILD_LIBRARIES}/lib${LIB_SUFFIX}/libcspice.so"
+                CACHE INTERNAL ""
+            )
+        endif()
         # Disable -Werror=format-security for cspice only: distro hardening flags (e.g. Ubuntu Noble)
         # inject -Werror=format-security which fails cspice sources that lack -Wformat.
         set(CSPICE_ARGS "-DCSPICE_BUILD_STATIC_LIBRARY=OFF"
@@ -1226,8 +1237,27 @@ if (LINUX)
     if (ENABLE_BLADERF AND (NOT LIBBLADERF_FOUND OR LIBBLADERF_EXTERNAL))
         set_global_cache(LIBBLADERF_FOUND ON)
         set(LIBBLADERF_EXTERNAL ON CACHE INTERNAL "")
-        set(LIBBLADERF_INCLUDE_DIRS "${EXTERNAL_BUILD_LIBRARIES}/bladerf/src/bladerf/host/libraries/libbladeRF/include" CACHE INTERNAL "")
-        set(LIBBLADERF_LIBRARIES "${EXTERNAL_BUILD_LIBRARIES}/lib${LIB_SUFFIX}/libbladeRF.so.2" CACHE INTERNAL "")
+        set(LIBBLADERF_INCLUDE_DIRS
+            "${EXTERNAL_BUILD_LIBRARIES}/bladerf/src/bladerf/host/libraries/libbladeRF/include"
+            CACHE INTERNAL ""
+        )
+        if (CMAKE_BUILD_TYPE STREQUAL "None")
+            # ExternalProject bladerf currently outputs libbladeRF.so.2 under
+            #   ${EXTERNAL_BUILD_LIBRARIES}/bladerf/src/bladerf-build/output/libbladeRF.so.2
+            # so point LIBBLADERF_LIBRARIES there.
+            set(LIBBLADERF_LIBRARIES
+                "${EXTERNAL_BUILD_LIBRARIES}/bladerf/src/bladerf-build/output/libbladeRF.so.2"
+                CACHE INTERNAL ""
+            )
+        else()
+            # Release, Debug, and RelWithDebInfo have configuration-specific output
+            # directories supplied by SDRangel.
+            set(LIBBLADERF_LIBRARIES
+                "${EXTERNAL_BUILD_LIBRARIES}/lib${LIB_SUFFIX}/libbladeRF.so.2"
+                CACHE INTERNAL ""
+            )
+        endif()
+
         ExternalProject_Add(bladerf
                 GIT_REPOSITORY https://github.com/Nuand/bladeRF.git
                 GIT_TAG ${BLADERF_TAG}
