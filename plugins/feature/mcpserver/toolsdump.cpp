@@ -21,8 +21,9 @@
 // the tool list once and does not ask again, so the bridge has to be able to answer with the
 // tools this very build of the server provides, before it has ever spoken to it.
 //
-// The registry is metadata and handler functions: building it touches neither the Web API nor
-// any device, so a null adapter is all it needs.
+// A null adapter prevents Web API calls, but MCPTools members still initialize MainCore,
+// including its pipe workers and platform location/permission services. Log that separately
+// from registry construction, since it can block on a headless CI runner.
 
 #include <cstdio>
 #include <cstdlib>
@@ -33,13 +34,23 @@
 
 #include <QCoreApplication>
 #include <QFile>
+#include <QJsonArray>
 #include <QJsonDocument>
 #include <QJsonObject>
 
+#include "maincore.h"
 #include "mcptools.h"
 
 int main(int argc, char *argv[])
 {
+    // Ninja and CI capture stderr through pipes; publish each checkpoint immediately.
+    std::setvbuf(stderr, nullptr, _IONBF, 0);
+#ifdef _WIN32
+    std::fprintf(stderr, "toolsdump: entered main (pid %lu)\n", GetCurrentProcessId());
+#else
+    std::fprintf(stderr, "toolsdump: entered main\n");
+#endif
+    std::fprintf(stderr, "toolsdump: creating QCoreApplication\n");
     QCoreApplication application(argc, argv);
 
     if (argc < 2)
@@ -49,14 +60,27 @@ int main(int argc, char *argv[])
     }
 
     std::fprintf(stderr, "toolsdump: application up\n");
+
+    // MainCore starts position updates as it is constructed, and the Windows position plugin
+    // asks the system for location access and spins until it has an answer. On a machine where
+    // nobody has ever answered, such as a CI runner, that is for ever. Nothing here needs a
+    // plugin, so leave Qt nowhere to find one and MainCore carries on without a position source
+    QCoreApplication::setLibraryPaths(QStringList());
+
+    std::fprintf(stderr, "toolsdump: initializing MainCore (pipe workers, permissions, positioning)\n");
+    MainCore::instance();
+    std::fprintf(stderr, "toolsdump: MainCore ready; constructing registry\n");
     MCPTools tools(nullptr);
     std::fprintf(stderr, "toolsdump: registry built\n");
 
     QJsonObject result;
+    std::fprintf(stderr, "toolsdump: listing tools\n");
     result["tools"] = tools.listTools();
     std::fprintf(stderr, "toolsdump: listed\n");
 
     QFile file(QString::fromLocal8Bit(argv[1]));
+
+    std::fprintf(stderr, "toolsdump: opening %s\n", argv[1]);
 
     if (!file.open(QIODevice::WriteOnly))
     {
@@ -64,20 +88,27 @@ int main(int argc, char *argv[])
         return 1;
     }
 
+    std::fprintf(stderr, "toolsdump: writing JSON\n");
     file.write(QJsonDocument(result).toJson(QJsonDocument::Compact));
+    std::fprintf(stderr, "toolsdump: closing output\n");
     file.close();
     std::fprintf(stderr, "toolsdump: written\n");
 
-    std::fprintf(stderr, "%s: %d tools\n", argv[1], result["tools"].toArray().size());
+    std::fprintf(stderr, "%s: %lld tools\n", argv[1],
+        static_cast<long long>(result["tools"].toArray().size()));
 
-    // The registry brings background threads up with it and they do not all stop when main
-    // returns, which leaves the process, and so the build, hanging. Even _Exit does not get
-    // out, since the runtime's own teardown waits on them, so end the process from the kernel
-    // side. The file is written and flushed by this point
+    // Preserve the existing teardown workaround: MainCore has background workers, and
+    // this one-shot helper never runs the Qt event loop. This does not protect against
+    // a hang during initialization; the build target applies a separate process timeout.
+    std::fprintf(stderr, "toolsdump: flushing streams before process exit\n");
     std::fflush(nullptr);
 
 #ifdef _WIN32
-    TerminateProcess(GetCurrentProcess(), 0);
+    std::fprintf(stderr, "toolsdump: calling TerminateProcess\n");
+    if (!TerminateProcess(GetCurrentProcess(), 0)) {
+        std::fprintf(stderr, "toolsdump: TerminateProcess failed: %lu\n", GetLastError());
+    }
 #endif
+    std::fprintf(stderr, "toolsdump: calling _Exit\n");
     std::_Exit(0);
 }

@@ -36,7 +36,7 @@ CMake builds one on its own; the `mcpb` CLI only adds validation and signing, an
 npm to build SDRangel would be a poor trade for that. The bundle is not signed, so Claude
 warns that the publisher is unverified when it is installed.
 
-Both options default to off, so a normal build is untouched. With `BUILD_MCP_BUNDLE=ON` the
+With `BUILD_MCP_BUNDLE=ON` the
 bundle is part of `all`, so building the Windows installer picks it up with nothing else to
 remember:
 
