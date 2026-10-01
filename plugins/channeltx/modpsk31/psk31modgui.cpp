@@ -477,7 +477,7 @@ void PSK31GUI::displaySettings()
     ui->udpAddress->setText(m_settings.m_udpAddress);
     ui->udpPort->setText(QString::number(m_settings.m_udpPort));
 
-    ui->gainText->setText(QString("%1dB").arg((double)m_settings.m_gain, 0, 'f', 1));
+    ui->gainText->setText(QString("%1 dB").arg((double)m_settings.m_gain, 0, 'f', 1));
     ui->gain->setValue(m_settings.m_gain);
 
     ui->channelMute->setChecked(m_settings.m_channelMute);

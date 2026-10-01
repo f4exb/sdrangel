@@ -166,6 +166,9 @@ ChannelSettings:
     PSK31ModSettings:
       $ref: "http://swgserver:8081/api/swagger/include/PSK31Mod.yaml#/PSK31ModSettings"
       description: "Psk31 mod settings configuration for Channel."
+    PSK31DemodSettings:
+      $ref: "http://swgserver:8081/api/swagger/include/PSK31Demod.yaml#/PSK31DemodSettings"
+      description: "PSK31 demodulator settings configuration for Channel."
     RadioAstronomySettings:
       $ref: "http://swgserver:8081/api/swagger/include/RadioAstronomy.yaml#/RadioAstronomySettings"
       description: "Radio astronomy settings configuration for Channel."

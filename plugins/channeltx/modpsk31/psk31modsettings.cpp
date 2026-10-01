@@ -41,8 +41,6 @@ void PSK31Settings::resetToDefaults()
     m_lpfTaps = 301;
     m_rfNoise = false;
     m_text = "CQ CQ CQ DE SDRangel CQ";
-    m_prefixCRLF = true;
-    m_postfixCRLF = true;
     m_predefinedTexts = QStringList({
         "CQ CQ CQ DE ${callsign} ${callsign} CQ",
         "DE ${callsign} ${callsign} ${callsign}",
@@ -82,8 +80,6 @@ QByteArray PSK31Settings::serialize() const
     s.writeBool(25, m_rfNoise);
     s.writeString(30, m_text);
 
-    s.writeBool(64, m_prefixCRLF);
-    s.writeBool(65, m_postfixCRLF);
     s.writeList(66, m_predefinedTexts);
 
     s.writeU32(31, m_rgbColor);
@@ -145,8 +141,6 @@ bool PSK31Settings::deserialize(const QByteArray& data)
         d.readBool(25, &m_rfNoise, false);
         d.readString(30, &m_text, "CQ CQ CQ anyone using SDRangel");
 
-        d.readBool(64, &m_prefixCRLF, true);
-        d.readBool(65, &m_postfixCRLF, true);
         d.readList(66, &m_predefinedTexts);
 
         d.readU32(31, &m_rgbColor);
@@ -247,12 +241,6 @@ void PSK31Settings::applySettings(const QStringList& settingsKeys, const PSK31Se
     if (settingsKeys.contains("symbolSpan")) {
         m_symbolSpan = settings.m_symbolSpan;
     }
-    if (settingsKeys.contains("prefixCRLF")) {
-        m_prefixCRLF = settings.m_prefixCRLF;
-    }
-    if (settingsKeys.contains("postfixCRLF")) {
-        m_postfixCRLF = settings.m_postfixCRLF;
-    }
     if (settingsKeys.contains("predefinedTexts")) {
         m_predefinedTexts = settings.m_predefinedTexts;
     }
@@ -342,12 +330,6 @@ QString PSK31Settings::getDebugString(const QStringList& settingsKeys, bool forc
     }
     if (settingsKeys.contains("symbolSpan") || force) {
         ostr << " m_symbolSpan: " << m_symbolSpan;
-    }
-    if (settingsKeys.contains("prefixCRLF") || force) {
-        ostr << " m_prefixCRLF: " << m_prefixCRLF;
-    }
-    if (settingsKeys.contains("postfixCRLF") || force) {
-        ostr << " m_postfixCRLF: " << m_postfixCRLF;
     }
     if (settingsKeys.contains("rgbColor") || force) {
         ostr << " m_rgbColor: " << m_rgbColor;

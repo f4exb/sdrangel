@@ -1,8 +1,7 @@
 ///////////////////////////////////////////////////////////////////////////////////
-// Copyright (C) 2012 maintech GmbH, Otto-Hahn-Str. 15, 97204 Hoechberg, Germany //
-// written by Christian Daniel                                                   //
-// Copyright (C) 2015-2022 Edouard Griffiths, F4EXB <f4exb06@gmail.com>          //
-// Copyright (C) 2020-2021, 2023 Jon Beniston, M7RCE <jon@beniston.com>          //
+// Copyright (C) 2021-2022 Edouard Griffiths, F4EXB <f4exb06@gmail.com>          //
+// Copyright (C) 2026 Jon Beniston, M7RCE <jon@beniston.com>                    //
+// Some code by AI                                                               //
 //                                                                               //
 // This program is free software; you can redistribute it and/or modify          //
 // it under the terms of the GNU General Public License as published by          //
@@ -20,11 +19,14 @@
 
 #include <QColor>
 
+#include <algorithm>
+#include <cmath>
+
 #include "util/simpleserializer.h"
 #include "settings/serializable.h"
-#include "rttydemodsettings.h"
+#include "psk31demodsettings.h"
 
-RttyDemodSettings::RttyDemodSettings() :
+PSK31DemodSettings::PSK31DemodSettings() :
     m_channelMarker(nullptr),
     m_scopeGUI(nullptr),
     m_rollupState(nullptr)
@@ -32,30 +34,29 @@ RttyDemodSettings::RttyDemodSettings() :
     resetToDefaults();
 }
 
-void RttyDemodSettings::resetToDefaults()
+Real PSK31DemodSettings::validateRFBandwidth(Real rfBandwidth)
+{
+    if (!std::isfinite(rfBandwidth)) {
+        return 100.0f;
+    }
+
+    return std::clamp(
+        rfBandwidth,
+        PSK31DEMOD_MIN_RF_BANDWIDTH,
+        PSK31DEMOD_MAX_RF_BANDWIDTH);
+}
+
+void PSK31DemodSettings::resetToDefaults()
 {
     m_inputFrequencyOffset = 0;
-    m_rfBandwidth = 400.0f; // OBW for 2FSK = 2 * deviation + data rate. Then add a bit for carrier frequency offset
-    m_baudRate = 45.45;
-    m_frequencyShift = 170;
+    m_rfBandwidth = 100.0f;
     m_udpEnabled = false;
     m_udpAddress = "127.0.0.1";
     m_udpPort = 9999;
-    m_characterSet = Baudot::ITA2;
-    m_suppressCRLF = false;
-    m_unshiftOnSpace = false;
-    m_filter = LOWPASS;
-    m_atc = true;
-    m_msbFirst = false;
-    m_spaceHigh = false;
-    m_squelch = -70;
-    m_logFilename = "rtty_log.csv";
+    m_logFilename = "psk31_log.txt";
     m_logEnabled = false;
-    m_scopeCh1 = 0;
-    m_scopeCh2 = 1;
-
-    m_rgbColor = QColor(180, 205, 130).rgb();
-    m_title = "RTTY Demodulator";
+    m_rgbColor = QColor(25, 180, 200).rgb();
+    m_title = "PSK31 Demodulator";
     m_streamIndex = 0;
     m_useReverseAPI = false;
     m_reverseAPIAddress = "127.0.0.1";
@@ -66,23 +67,13 @@ void RttyDemodSettings::resetToDefaults()
     m_hidden = false;
 }
 
-QByteArray RttyDemodSettings::serialize() const
+QByteArray PSK31DemodSettings::serialize() const
 {
     SimpleSerializer s(1);
     s.writeS32(1, m_inputFrequencyOffset);
     s.writeS32(2, m_streamIndex);
 
     s.writeFloat(3, m_rfBandwidth);
-    s.writeFloat(4, m_baudRate);
-    s.writeS32(5, m_frequencyShift);
-    s.writeS32(6, (int)m_characterSet);
-    s.writeBool(7, m_suppressCRLF);
-    s.writeBool(8, m_unshiftOnSpace);
-    s.writeS32(9, (int)m_filter);
-    s.writeBool(10, m_atc);
-    s.writeBool(34, m_msbFirst);
-    s.writeBool(35, m_spaceHigh);
-    s.writeS32(36, m_squelch);
 
     if (m_channelMarker) {
         s.writeBlob(11, m_channelMarker->serialize());
@@ -100,8 +91,6 @@ QByteArray RttyDemodSettings::serialize() const
     s.writeString(23, m_udpAddress);
     s.writeU32(24, m_udpPort);
 
-    s.writeS32(31, m_scopeCh1);
-    s.writeS32(32, m_scopeCh2);
     if (m_scopeGUI) {
         s.writeBlob(33, m_scopeGUI->serialize());
     }
@@ -120,7 +109,7 @@ QByteArray RttyDemodSettings::serialize() const
     return s.final();
 }
 
-bool RttyDemodSettings::deserialize(const QByteArray& data)
+bool PSK31DemodSettings::deserialize(const QByteArray& data)
 {
     SimpleDeserializer d(data);
 
@@ -139,17 +128,8 @@ bool RttyDemodSettings::deserialize(const QByteArray& data)
         d.readS32(1, &m_inputFrequencyOffset, 0);
         d.readS32(2, &m_streamIndex, 0);
 
-        d.readFloat(3, &m_rfBandwidth, 450.0f);
-        d.readFloat(4, &m_baudRate, 45.45f);
-        d.readS32(5, &m_frequencyShift, 170);
-        d.readS32(6, (int *)&m_characterSet, (int)Baudot::ITA2);
-        d.readBool(7, &m_suppressCRLF, false);
-        d.readBool(8, &m_unshiftOnSpace, false);
-        d.readS32(9, (int *)&m_filter, (int) LOWPASS);
-        d.readBool(10, &m_atc, true);
-        d.readBool(34, &m_msbFirst, false);
-        d.readBool(35, &m_spaceHigh, false);
-        d.readS32(36, &m_squelch, -70);
+        d.readFloat(3, &m_rfBandwidth, 100.0f);
+        m_rfBandwidth = validateRFBandwidth(m_rfBandwidth);
 
         if (m_channelMarker)
         {
@@ -157,13 +137,13 @@ bool RttyDemodSettings::deserialize(const QByteArray& data)
             m_channelMarker->deserialize(bytetmp);
         }
 
-        d.readU32(12, &m_rgbColor, QColor(180, 205, 130).rgb());
-        d.readString(13, &m_title, "RTTY Demodulator");
+        d.readU32(12, &m_rgbColor, QColor(25, 180, 200).rgb());
+        d.readString(13, &m_title, "PSK31 Demodulator");
         d.readBool(14, &m_useReverseAPI, false);
         d.readString(15, &m_reverseAPIAddress, "127.0.0.1");
         d.readU32(16, &utmp, 0);
 
-        if ((utmp > 1023) && (utmp < 65535)) {
+        if ((utmp >= 1) && (utmp <= 65535)) {
             m_reverseAPIPort = utmp;
         } else {
             m_reverseAPIPort = 8888;
@@ -179,21 +159,19 @@ bool RttyDemodSettings::deserialize(const QByteArray& data)
         d.readString(23, &m_udpAddress);
         d.readU32(24, &utmp);
 
-        if ((utmp > 1023) && (utmp < 65535)) {
+        if ((utmp >= 1) && (utmp <= 65535)) {
             m_udpPort = utmp;
         } else {
             m_udpPort = 9999;
         }
 
-        d.readS32(31, &m_scopeCh1, 0);
-        d.readS32(32, &m_scopeCh2, 0);
         if (m_scopeGUI)
         {
             d.readBlob(33, &bytetmp);
             m_scopeGUI->deserialize(bytetmp);
         }
 
-        d.readString(25, &m_logFilename, "rtty_log.csv");
+        d.readString(25, &m_logFilename, "psk31_log.txt");
         d.readBool(26, &m_logEnabled, false);
 
         if (m_rollupState)
@@ -215,19 +193,13 @@ bool RttyDemodSettings::deserialize(const QByteArray& data)
     }
 }
 
-void RttyDemodSettings::applySettings(const QStringList& settingsKeys, const RttyDemodSettings& settings)
+void PSK31DemodSettings::applySettings(const QStringList& settingsKeys, const PSK31DemodSettings& settings)
 {
     if (settingsKeys.contains("inputFrequencyOffset")) {
         m_inputFrequencyOffset = settings.m_inputFrequencyOffset;
     }
     if (settingsKeys.contains("rfBandwidth")) {
-        m_rfBandwidth = settings.m_rfBandwidth;
-    }
-    if (settingsKeys.contains("baudRate")) {
-        m_baudRate = settings.m_baudRate;
-    }
-    if (settingsKeys.contains("frequencyShift")) {
-        m_frequencyShift = settings.m_frequencyShift;
+        m_rfBandwidth = validateRFBandwidth(settings.m_rfBandwidth);
     }
     if (settingsKeys.contains("udpEnabled")) {
         m_udpEnabled = settings.m_udpEnabled;
@@ -237,30 +209,6 @@ void RttyDemodSettings::applySettings(const QStringList& settingsKeys, const Rtt
     }
     if (settingsKeys.contains("udpPort")) {
         m_udpPort = settings.m_udpPort;
-    }
-    if (settingsKeys.contains("characterSet")) {
-        m_characterSet = settings.m_characterSet;
-    }
-    if (settingsKeys.contains("suppressCRLF")) {
-        m_suppressCRLF = settings.m_suppressCRLF;
-    }
-    if (settingsKeys.contains("unshiftOnSpace")) {
-        m_unshiftOnSpace = settings.m_unshiftOnSpace;
-    }
-    if (settingsKeys.contains("filter")) {
-        m_filter = settings.m_filter;
-    }
-    if (settingsKeys.contains("atc")) {
-        m_atc = settings.m_atc;
-    }
-    if (settingsKeys.contains("msbFirst")) {
-        m_msbFirst = settings.m_msbFirst;
-    }
-    if (settingsKeys.contains("spaceHigh")) {
-        m_spaceHigh = settings.m_spaceHigh;
-    }
-    if (settingsKeys.contains("squelch")) {
-        m_squelch = settings.m_squelch;
     }
     if (settingsKeys.contains("rgbColor")) {
         m_rgbColor = settings.m_rgbColor;
@@ -286,12 +234,6 @@ void RttyDemodSettings::applySettings(const QStringList& settingsKeys, const Rtt
     if (settingsKeys.contains("reverseAPIChannelIndex")) {
         m_reverseAPIChannelIndex = settings.m_reverseAPIChannelIndex;
     }
-    if (settingsKeys.contains("scopeCh1")) {
-        m_scopeCh1 = settings.m_scopeCh1;
-    }
-    if (settingsKeys.contains("scopeCh2")) {
-        m_scopeCh2 = settings.m_scopeCh2;
-    }
     if (settingsKeys.contains("logFilename")) {
         m_logFilename = settings.m_logFilename;
     }
@@ -309,7 +251,7 @@ void RttyDemodSettings::applySettings(const QStringList& settingsKeys, const Rtt
     }
 }
 
-QString RttyDemodSettings::getDebugString(const QStringList& settingsKeys, bool force) const
+QString PSK31DemodSettings::getDebugString(const QStringList& settingsKeys, bool force) const
 {
     std::ostringstream ostr;
 
@@ -319,12 +261,6 @@ QString RttyDemodSettings::getDebugString(const QStringList& settingsKeys, bool 
     if (settingsKeys.contains("rfBandwidth") || force) {
         ostr << " m_rfBandwidth: " << m_rfBandwidth;
     }
-    if (settingsKeys.contains("baudRate") || force) {
-        ostr << " m_baudRate: " << m_baudRate;
-    }
-    if (settingsKeys.contains("frequencyShift") || force) {
-        ostr << " m_frequencyShift: " << m_frequencyShift;
-    }
     if (settingsKeys.contains("udpEnabled") || force) {
         ostr << " m_udpEnabled: " << m_udpEnabled;
     }
@@ -333,30 +269,6 @@ QString RttyDemodSettings::getDebugString(const QStringList& settingsKeys, bool 
     }
     if (settingsKeys.contains("udpPort") || force) {
         ostr << " m_udpPort: " << m_udpPort;
-    }
-    if (settingsKeys.contains("characterSet") || force) {
-        ostr << " m_characterSet: " << m_characterSet;
-    }
-    if (settingsKeys.contains("suppressCRLF") || force) {
-        ostr << " m_suppressCRLF: " << m_suppressCRLF;
-    }
-    if (settingsKeys.contains("unshiftOnSpace") || force) {
-        ostr << " m_unshiftOnSpace: " << m_unshiftOnSpace;
-    }
-    if (settingsKeys.contains("filter") || force) {
-        ostr << " m_filter: " << m_filter;
-    }
-    if (settingsKeys.contains("atc") || force) {
-        ostr << " m_atc: " << m_atc;
-    }
-    if (settingsKeys.contains("msbFirst") || force) {
-        ostr << " m_msbFirst: " << m_msbFirst;
-    }
-    if (settingsKeys.contains("spaceHigh") || force) {
-        ostr << " m_spaceHigh: " << m_spaceHigh;
-    }
-    if (settingsKeys.contains("squelch") || force) {
-        ostr << " m_squelch: " << m_squelch;
     }
     if (settingsKeys.contains("rgbColor") || force) {
         ostr << " m_rgbColor: " << m_rgbColor;
@@ -381,12 +293,6 @@ QString RttyDemodSettings::getDebugString(const QStringList& settingsKeys, bool 
     }
     if (settingsKeys.contains("reverseAPIChannelIndex") || force) {
         ostr << " m_reverseAPIChannelIndex: " << m_reverseAPIChannelIndex;
-    }
-    if (settingsKeys.contains("scopeCh1") || force) {
-        ostr << " m_scopeCh1: " << m_scopeCh1;
-    }
-    if (settingsKeys.contains("scopeCh2") || force) {
-        ostr << " m_scopeCh2: " << m_scopeCh2;
     }
     if (settingsKeys.contains("logFilename") || force) {
         ostr << " m_logFilename: " << m_logFilename.toStdString();

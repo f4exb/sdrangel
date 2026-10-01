@@ -1,8 +1,7 @@
 ///////////////////////////////////////////////////////////////////////////////////
-// Copyright (C) 2012 maintech GmbH, Otto-Hahn-Str. 15, 97204 Hoechberg, Germany //
-// written by Christian Daniel                                                   //
-// Copyright (C) 2015-2019, 2021-2022 Edouard Griffiths, F4EXB <f4exb06@gmail.com> //
-// Copyright (C) 2021-2023 Jon Beniston, M7RCE <jon@beniston.com>                //
+// Copyright (C) 2021-2022 Edouard Griffiths, F4EXB <f4exb06@gmail.com>          //
+// Copyright (C) 2026 Jon Beniston, M7RCE <jon@beniston.com>                    //
+// Some code by AI                                                               //
 //                                                                               //
 // This program is free software; you can redistribute it and/or modify          //
 // it under the terms of the GNU General Public License as published by          //
@@ -18,58 +17,55 @@
 // along with this program. If not, see <http://www.gnu.org/licenses/>.          //
 ///////////////////////////////////////////////////////////////////////////////////
 
-#ifndef PLUGINS_CHANNELTX_MODPSK31_PSK31MODSETTINGS_H
-#define PLUGINS_CHANNELTX_MODPSK31_PSK31MODSETTINGS_H
+#ifndef INCLUDE_PSK31DEMODSETTINGS_H
+#define INCLUDE_PSK31DEMODSETTINGS_H
 
 #include <QByteArray>
-#include <stdint.h>
+
 #include "dsp/dsptypes.h"
-#include "util/baudot.h"
 
 class Serializable;
 
-struct PSK31Settings
+struct PSK31DemodSettings
 {
-    qint64 m_inputFrequencyOffset;
-    float m_baud;
-    int m_rfBandwidth;
-    Real m_gain;
-    bool m_channelMute;
-    bool m_repeat;
-    int m_repeatCount;
-    int m_lpfTaps;
-    bool m_rfNoise;
-    QString m_text;     // Text to send
-    bool m_pulseShaping;
-    float m_beta;
-    int m_symbolSpan;
-    QStringList m_predefinedTexts;
+    qint32 m_inputFrequencyOffset;
+    Real m_rfBandwidth;
+    bool m_udpEnabled;
+    QString m_udpAddress;
+    uint16_t m_udpPort;
 
     quint32 m_rgbColor;
     QString m_title;
     Serializable *m_channelMarker;
-    int m_streamIndex;
+    int m_streamIndex; //!< MIMO channel. Not relevant when connected to SI (single Rx).
     bool m_useReverseAPI;
     QString m_reverseAPIAddress;
     uint16_t m_reverseAPIPort;
     uint16_t m_reverseAPIDeviceIndex;
     uint16_t m_reverseAPIChannelIndex;
-    bool m_udpEnabled;
-    QString m_udpAddress;
-    uint16_t m_udpPort;
+
+    QString m_logFilename;
+    bool m_logEnabled;
+    Serializable *m_scopeGUI;
     Serializable *m_rollupState;
     int m_workspaceIndex;
     QByteArray m_geometryBytes;
     bool m_hidden;
 
-    PSK31Settings();
+    static const int PSK31DEMOD_CHANNEL_SAMPLE_RATE = 1000;
+    static constexpr Real PSK31DEMOD_MIN_RF_BANDWIDTH = 50.0f;
+    static constexpr Real PSK31DEMOD_MAX_RF_BANDWIDTH = 500.0f;
+
+    PSK31DemodSettings();
+    static Real validateRFBandwidth(Real rfBandwidth);
     void resetToDefaults();
     void setChannelMarker(Serializable *channelMarker) { m_channelMarker = channelMarker; }
     void setRollupState(Serializable *rollupState) { m_rollupState = rollupState; }
+    void setScopeGUI(Serializable *scopeGUI) { m_scopeGUI = scopeGUI; }
     QByteArray serialize() const;
     bool deserialize(const QByteArray& data);
-    void applySettings(const QStringList& settingsKeys, const PSK31Settings& settings);
+    void applySettings(const QStringList& settingsKeys, const PSK31DemodSettings& settings);
     QString getDebugString(const QStringList& settingsKeys, bool force=false) const;
 };
 
-#endif /* PLUGINS_CHANNELTX_MODPSK31_PSK31MODSETTINGS_H */
+#endif /* INCLUDE_PSK31DEMODSETTINGS_H */

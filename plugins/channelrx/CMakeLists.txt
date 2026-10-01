@@ -211,6 +211,12 @@ else()
     message(STATUS "Not building demodrtty (ENABLE_CHANNELRX_DEMODRTTY=${ENABLE_CHANNELRX_DEMODRTTY})")
 endif()
 
+if (ENABLE_CHANNELRX_DEMODPSK31)
+    add_subdirectory(demodpsk31)
+else()
+    message(STATUS "Not building demodpsk31 (ENABLE_CHANNELRX_DEMODPSK31=${ENABLE_CHANNELRX_DEMODPSK31})")
+endif()
+
 if (ENABLE_CHANNELRX_DEMODILS)
     add_subdirectory(demodils)
 else()

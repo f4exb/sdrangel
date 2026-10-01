@@ -44,7 +44,8 @@ public:
         TestFT8Protocols,
         TestFFTRRCFilter,
         TestFIRRRCFilter,
-        TestMeshtastic
+        TestMeshtastic,
+        TestPSK31
     } TestType;
 
     ParserBench();

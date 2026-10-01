@@ -130,6 +130,8 @@ SWGChannelReport::SWGChannelReport() {
     m_pager_demod_report_isSet = false;
     psk31_mod_report = nullptr;
     m_psk31_mod_report_isSet = false;
+    psk31_demod_report = nullptr;
+    m_psk31_demod_report_isSet = false;
     sig_mf_file_sink_report = nullptr;
     m_sig_mf_file_sink_report_isSet = false;
     ssb_mod_report = nullptr;
@@ -246,6 +248,8 @@ SWGChannelReport::init() {
     m_remote_source_report_isSet = false;
     rtty_demod_report = new SWGRTTYDemodReport();
     m_rtty_demod_report_isSet = false;
+    psk31_demod_report = new SWGPSK31DemodReport();
+    m_psk31_demod_report_isSet = false;
     rtty_mod_report = new SWGRTTYModReport();
     m_rtty_mod_report_isSet = false;
     packet_demod_report = new SWGPacketDemodReport();
@@ -412,6 +416,9 @@ SWGChannelReport::cleanup() {
     if(rtty_demod_report != nullptr) { 
         delete rtty_demod_report;
     }
+    if(psk31_demod_report != nullptr) {
+        delete psk31_demod_report;
+    }
     if(rtty_mod_report != nullptr) { 
         delete rtty_mod_report;
     }
@@ -555,6 +562,7 @@ SWGChannelReport::fromJsonObject(QJsonObject &pJson) {
     ::SWGSDRangel::setValue(&remote_source_report, pJson["RemoteSourceReport"], "SWGRemoteSourceReport", "SWGRemoteSourceReport");
     
     ::SWGSDRangel::setValue(&rtty_demod_report, pJson["RTTYDemodReport"], "SWGRTTYDemodReport", "SWGRTTYDemodReport");
+    ::SWGSDRangel::setValue(&psk31_demod_report, pJson["PSK31DemodReport"], "SWGPSK31DemodReport", "SWGPSK31DemodReport");
     
     ::SWGSDRangel::setValue(&rtty_mod_report, pJson["RTTYModReport"], "SWGRTTYModReport", "SWGRTTYModReport");
     
@@ -735,6 +743,9 @@ SWGChannelReport::asJsonObject() {
     }
     if((rtty_demod_report != nullptr) && (rtty_demod_report->isSet())){
         toJsonValue(QString("RTTYDemodReport"), rtty_demod_report, obj, QString("SWGRTTYDemodReport"));
+    }
+    if((psk31_demod_report != nullptr) && (psk31_demod_report->isSet())){
+        toJsonValue(QString("PSK31DemodReport"), psk31_demod_report, obj, QString("SWGPSK31DemodReport"));
     }
     if((rtty_mod_report != nullptr) && (rtty_mod_report->isSet())){
         toJsonValue(QString("RTTYModReport"), rtty_mod_report, obj, QString("SWGRTTYModReport"));
@@ -1239,6 +1250,16 @@ SWGChannelReport::setRttyDemodReport(SWGRTTYDemodReport* rtty_demod_report) {
     this->m_rtty_demod_report_isSet = true;
 }
 
+SWGPSK31DemodReport*
+SWGChannelReport::getPSK31DemodReport() {
+    return psk31_demod_report;
+}
+void
+SWGChannelReport::setPSK31DemodReport(SWGPSK31DemodReport* psk31_demod_report) {
+    this->psk31_demod_report = psk31_demod_report;
+    this->m_psk31_demod_report_isSet = true;
+}
+
 SWGRTTYModReport*
 SWGChannelReport::getRttyModReport() {
     return rtty_mod_report;
@@ -1527,6 +1548,9 @@ SWGChannelReport::isSet(){
         if(psk31_mod_report && psk31_mod_report->isSet()){
             isObjectUpdated = true; break;
         }
+        if(psk31_demod_report && psk31_demod_report->isSet()){
+            isObjectUpdated = true; break;
+        }
         if(sig_mf_file_sink_report && sig_mf_file_sink_report->isSet()){
             isObjectUpdated = true; break;
         }
@@ -1555,4 +1579,3 @@ SWGChannelReport::isSet(){
     return isObjectUpdated;
 }
 }
-
