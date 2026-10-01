@@ -7,7 +7,8 @@ Latest Release : [![GitHub release](https://img.shields.io/github/release/f4exb/
 Source : [![Commits since last release](https://img.shields.io/github/commits-since/f4exb/sdrangel/latest)](https://github.com/f4exb/sdrangel/commits/master/) [![Size](https://img.shields.io/github/repo-size/f4exb/sdrangel)](https://github.com/f4exb/sdrangel)
 Downloads : [![Github All Releases](https://img.shields.io/github/downloads/f4exb/sdrangel/total.svg)](https://github.com/f4exb/sdrangel/releases/latest)
 
-Analysis : [![Coverity Scan Build Status](https://img.shields.io/coverity/scan/33161.svg)](https://scan.coverity.com/projects/f4exb-sdrangel)
+Analysis : [![Coverity Scan Build Status](https://img.shields.io/coverity/scan/33161.svg)](https://scan.coverity.com/projects/f4exb-sdrangel) [![Codacy grade](https://img.shields.io/codacy/grade/21c6814b9f4c4ce68419463e8a6ad57d)](https://app.codacy.com/gh/f4exb/sdrangel/dashboard)
+
 Issues : [![open issues](https://img.shields.io/github/issues/f4exb/sdrangel.svg)](https://github.com/f4exb/sdrangel/issues)
 [![closed issues](https://img.shields.io/github/issues-closed/f4exb/sdrangel.svg)](https://github.com/f4exb/sdrangel/issues?q=is%3Aissue+is%3Aclosed)
 
