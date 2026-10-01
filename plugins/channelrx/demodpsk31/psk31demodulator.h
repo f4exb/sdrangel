@@ -83,18 +83,18 @@ private:
         int m_nbSamples;
     };
 
-    static const int m_channelFilterTaps = 255;
-    static const int m_lockConfirmSymbols = 20;
-    static const int m_relockConfirmSymbols = 4;
-    static const int m_unlockConfirmSymbols = 20;
-    static const int m_characterDelaySymbols = 8;
+    static constexpr int m_channelFilterTaps = 255;
+    static constexpr int m_lockConfirmSymbols = 20;
+    static constexpr int m_relockConfirmSymbols = 4;
+    static constexpr int m_unlockConfirmSymbols = 20;
+    static constexpr int m_characterDelaySymbols = 8;
     static constexpr Real m_lockMetricAlpha = 1.0f / 16.0f;
     static constexpr Real m_lockThreshold = 0.5f;
     static constexpr Real m_signalLossRatio = 0.35f;
     static constexpr Real m_signalReturnRatio = 0.5f;
     static constexpr Real m_lockedLevelAlpha = 1.0f / 32.0f;
-    static const int m_afcLength = 512;
-    static const int m_afcInterval = 256;
+    static constexpr int m_afcLength = 512;
+    static constexpr int m_afcInterval = 256;
     static constexpr Real m_snrReferenceBandwidth = 100.0f;
     static constexpr Real m_trackingBandwidth = 70.0f;
     static constexpr Real m_costasRange = 15.0f;
