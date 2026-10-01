@@ -26,6 +26,7 @@ As well as internet and built-in data sources:
 * Airports, NavAids and airspaces,
 * Beacons based on the IARU Region 1 beacon database and International Beacon Project,
 * Radio time transmitters,
+* WEFAX (weather fax) transmitters,
 * GRAVES radar,
 * Ionosonde station data,
 * Navtex transmitters,
