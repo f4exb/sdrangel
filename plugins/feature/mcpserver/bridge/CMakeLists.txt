@@ -93,6 +93,11 @@ if(BUILD_MCP_BUNDLE)
         set_target_properties(sdrangel-mcp-tools-dump PROPERTIES BUILD_RPATH "${MACOS_EXTERNAL_LIBS_FIXUP}")
     endif()
 
+    set(MCPTOOLSDUMP_TIMEOUT 60 CACHE STRING "Timeout in seconds for generating the MCP tool list")
+    if(NOT MCPTOOLSDUMP_TIMEOUT MATCHES "^[1-9][0-9]*$")
+        message(FATAL_ERROR "MCPTOOLSDUMP_TIMEOUT must be a positive integer")
+    endif()
+
     set(MCPBRIDGE_BUNDLE_DIR "${CMAKE_CURRENT_BINARY_DIR}/bundle")
     # Alongside the built binaries, which is bin/ on Windows and the build directory itself
     # elsewhere. That is also where the running application looks for it in a build tree
@@ -109,14 +114,23 @@ if(BUILD_MCP_BUNDLE)
         COMMAND ${CMAKE_COMMAND} -E copy "${CMAKE_SOURCE_DIR}/cmake/cpack/sdrangel_icon.png" "${MCPBRIDGE_BUNDLE_DIR}/icon.png"
         # The tool list, straight from the server's own registry, beside the bridge that serves
         # it when SDRangel is not up
-        COMMAND $<TARGET_FILE:sdrangel-mcp-tools-dump> "${MCPBRIDGE_BUNDLE_DIR}/server/tools.json"
+        COMMAND ${CMAKE_COMMAND}
+            "-DTOOLSDUMP=$<TARGET_FILE:sdrangel-mcp-tools-dump>"
+            "-DTOOLS_JSON=${MCPBRIDGE_BUNDLE_DIR}/server/tools.json"
+            "-DTOOLSDUMP_TIMEOUT=${MCPTOOLSDUMP_TIMEOUT}"
+            -P "${CMAKE_CURRENT_SOURCE_DIR}/run-tools-dump.cmake"
         COMMAND ${CMAKE_COMMAND} -E rm -f "${MCPBRIDGE_BUNDLE_FILE}"
         # Relative paths and a working directory, so that manifest.json lands at the root of
         # the archive, which is where the installer looks for it
+        COMMAND ${CMAKE_COMMAND} -E echo "mcpbundle: archiving ${MCPBRIDGE_BUNDLE_FILE}"
         COMMAND ${CMAKE_COMMAND} -E tar cf "${MCPBRIDGE_BUNDLE_FILE}" --format=zip -- manifest.json icon.png server
+        COMMAND ${CMAKE_COMMAND} -E echo "mcpbundle: archive complete"
         WORKING_DIRECTORY "${MCPBRIDGE_BUNDLE_DIR}"
         DEPENDS sdrangel-mcp-bridge sdrangel-mcp-tools-dump "${MCPBRIDGE_BUNDLE_DIR}/manifest.json"
         COMMENT "Packaging ${MCPBRIDGE_BUNDLE_FILE}"
+        # Stream diagnostics to GitHub Actions even while the helper is still running.
+        # Otherwise Ninja buffers them until the entire bundle command finishes.
+        USES_TERMINAL
         VERBATIM
     )
 
