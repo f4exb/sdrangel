@@ -151,6 +151,12 @@ else()
     message(STATUS "Not building demodapt (ENABLE_CHANNELRX_DEMODAPT=${ENABLE_CHANNELRX_DEMODAPT} APT_FOUND=${APT_FOUND} SGP4_FOUND=${SGP4_FOUND})")
 endif()
 
+if(ENABLE_CHANNELRX_DEMODWEFAX)
+    add_subdirectory(demodwefax)
+else()
+    message(STATUS "Not building demodwefax (ENABLE_CHANNELRX_DEMODWEFAX=${ENABLE_CHANNELRX_DEMODWEFAX})")
+endif()
+
 if(ENABLE_CHANNELRX_DEMODDSD AND LIBDSDCC_FOUND AND LIBMBE_FOUND)
     add_subdirectory(demoddsd)
 else()

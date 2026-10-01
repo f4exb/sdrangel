@@ -25,6 +25,9 @@ ChannelReport:
     AMDemodReport:
       $ref: "/doc/swagger/include/AMDemod.yaml#/AMDemodReport"
       description: "Am demod report data for Channel."
+    WefaxDemodReport:
+      $ref: "/doc/swagger/include/WefaxDemod.yaml#/WefaxDemodReport"
+      description: "WEFAX demodulator report data for Channel."
     AMModReport:
       $ref: "/doc/swagger/include/AMMod.yaml#/AMModReport"
       description: "Am mod report data for Channel."

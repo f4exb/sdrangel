@@ -25,6 +25,9 @@ ChannelActions:
     APTDemodActions:
       $ref: "/doc/swagger/include/APTDemod.yaml#/APTDemodActions"
       description: "Apt demod actions configuration for Channel."
+    WefaxDemodActions:
+      $ref: "/doc/swagger/include/WefaxDemod.yaml#/WefaxDemodActions"
+      description: "WEFAX demodulator actions for Channel."
     FileSinkActions:
       $ref: "/doc/swagger/include/FileSink.yaml#/FileSinkActions"
       description: "File sink actions configuration for Channel."

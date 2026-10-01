@@ -158,6 +158,7 @@
     <file>clockfile.png</file>
     <file>clockcurrent.png</file>
     <file>mouse.png</file>
+    <file>invert.png</file>
     <file>LiberationMono-Regular.ttf</file>
     <file>LiberationSans-Regular.ttf</file>
   </qresource>

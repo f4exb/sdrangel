@@ -37,6 +37,9 @@ ChannelSettings:
     APTDemodSettings:
       $ref: "http://swgserver:8081/api/swagger/include/APTDemod.yaml#/APTDemodSettings"
       description: "Apt demod settings configuration for Channel."
+    WefaxDemodSettings:
+      $ref: "http://swgserver:8081/api/swagger/include/WefaxDemod.yaml#/WefaxDemodSettings"
+      description: "WEFAX demodulator settings configuration for Channel."
     ATVDemodSettings:
       $ref: "http://swgserver:8081/api/swagger/include/ATVDemod.yaml#/ATVDemodSettings"
       description: "Atv demod settings configuration for Channel."

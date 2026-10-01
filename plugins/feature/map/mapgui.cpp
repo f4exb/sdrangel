@@ -361,6 +361,7 @@ MapGUI::MapGUI(PluginAPI* pluginAPI, FeatureUISet *featureUISet, Feature *featur
     addIBPBeacons();
     addNAT();
     addRadioTimeTransmitters();
+    addWEFAXTransmitters();
     addRadar();
     addAurora();
     addIonosonde();
@@ -599,6 +600,73 @@ void MapGUI::addRadioTimeTransmitters()
         timeMapItem.setLabelAltitudeOffset(4.5);
         timeMapItem.setAltitudeReference(1);
         update(m_map, &timeMapItem, "Radio Time Transmitters");
+    }
+}
+
+// Stations and frequencies from https://weatherfax.com/stations/
+// Coordinates from the station map at https://weatherfax.com/ - these are often
+// of the city named, rather than the transmitter site, so aren't precise
+const QList<WEFAXTransmitter> MapGUI::m_wefaxTransmitters = {
+    {"VMC", "Charleville, Australia", -26.402062f, 146.24536f, {2628000, 5100000, 11030000, 13920000, 20469000}},
+    {"VMW", "Wiluna, Australia", -26.633726f, 120.217289f, {5755000, 7535000, 10555000, 15615000, 18060000}},
+    {"VCO", "Sydney, NS, Canada", 46.138927f, -60.193233f, {4416000, 6915100}},
+    {"VFA", "Inuvik, Canada", 68.360741f, -133.723022f, {4292000, 8456000}},
+    {"VFF", "Iqaluit, Canada", 63.748611f, -68.519722f, {3253000, 7710000}},
+    {"VFR", "Resolute, Canada", 74.697299f, -94.829729f, {3253000, 7710000}},
+    {"CBM", "Punta Arenas, Chile", -53.163833f, -70.917068f, {4322000, 8696000}},
+    {"CBV", "Valparaiso, Chile", -33.047237f, -71.612686f, {4228000, 8677000, 17146400}},
+    {"XSG", "Shanghai, China", 31.224361f, 121.46917f, {4170000, 8302000, 12382000, 16559000}},
+    {"XSQ", "Guangzhou, China", 23.128994f, 113.25325f, {4199800, 8412500, 12629300, 16826300}},
+    {"DDH3/DDK6", "Hamburg, Germany", 53.551086f, 9.993682f, {3855000, 7880000, 13882500}},
+    {"SVJ4", "Athens, Greece", 37.98381f, 23.727539f, {4482900, 8106900}},
+    {"JMH", "Tokyo, Japan", 35.652832f, 139.839478f, {3622500, 7795000, 13988500}},
+    {"JFX", "Kagoshima, Japan", 31.5969f, 130.5571f, {4274000, 8658000, 13074000, 16907500, 22559600}},
+    {"JJC", "Tokyo, Japan (Kyodo News)", 35.652832f, 139.839478f, {16971000}}, // Not on weatherfax.com map, so uses JMH's coordinates
+    {"HLL2", "Seoul, Korea", 37.5326f, 127.024612f, {3585000, 5857500, 7433500, 9165000, 13570000}},
+    {"UDK2", "Murmansk, Russia", 68.958524f, 33.08266f, {6328500, 8444000}},
+    {"", "St. Petersburg, Russia", 59.9375f, 30.308611f, {2640000, 4212000}},
+    {"", "Vanino, Russia", 49.084445f, 140.253438f, {6456900}},
+    {"HSW64", "Bangkok, Thailand", 13.736717f, 100.523186f, {7396900}},
+    {"GYA", "Northwood, UK", 51.61944f, -0.40944f, {2618500, 4610000, 8040000, 11086500}},
+    {"NMC", "Point Reyes, USA", 38.00453f, -122.79319f, {4346000, 8682000, 12786000, 17151200, 22527000}},
+    {"NMF", "Boston, USA", 42.360081f, -71.058884f, {4235000, 6340500, 9110000, 12750000}},
+    {"NMG", "New Orleans, USA", 29.951759f, -90.074623f, {4317900, 8503900, 12789900, 17146400}},
+    {"NOJ", "Kodiak, USA", 57.790001f, -152.407227f, {4298000, 8459000, 12412500}},
+    {"KVM70", "Honolulu, USA", 21.315603f, -157.858093f, {9982500, 11090000, 16135000}},
+};
+
+void MapGUI::addWEFAXTransmitters()
+{
+    for (const auto& transmitter : m_wefaxTransmitters)
+    {
+        SWGSDRangel::SWGMapItem wefaxMapItem;
+        // Some stations have no published callsign, so use location as the name for those
+        QString name = transmitter.m_callsign.isEmpty() ? transmitter.m_location.section(',', 0, 0) : transmitter.m_callsign;
+        wefaxMapItem.setName(new QString(name));
+        wefaxMapItem.setLatitude(transmitter.m_latitude);
+        wefaxMapItem.setLongitude(transmitter.m_longitude);
+        wefaxMapItem.setAltitude(0.0);
+        wefaxMapItem.setImage(new QString("antenna.png"));
+        wefaxMapItem.setImageRotation(0);
+        QStringList frequencies;
+        for (const auto frequency : transmitter.m_frequencies) {
+            frequencies.append(QString::number(frequency / 1000.0, 'f', (frequency % 1000) == 0 ? 0 : 1));
+        }
+        QString text = QString("WEFAX Transmitter");
+        if (!transmitter.m_callsign.isEmpty()) {
+            text.append(QString("\nCallsign: %1").arg(transmitter.m_callsign));
+        }
+        text.append(QString("\nLocation: %1\nFrequencies: %2 kHz")
+                        .arg(transmitter.m_location)
+                        .arg(frequencies.join(", ")));
+        wefaxMapItem.setText(new QString(text));
+        wefaxMapItem.setModel(new QString("antenna.glb"));
+        wefaxMapItem.setFixedPosition(true);
+        wefaxMapItem.setOrientation(0);
+        wefaxMapItem.setLabel(new QString(name));
+        wefaxMapItem.setLabelAltitudeOffset(4.5);
+        wefaxMapItem.setAltitudeReference(1);
+        update(m_map, &wefaxMapItem, "WEFAX Transmitters");
     }
 }
 

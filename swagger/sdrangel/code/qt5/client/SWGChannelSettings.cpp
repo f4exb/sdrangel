@@ -48,6 +48,8 @@ SWGChannelSettings::SWGChannelSettings() {
     m_am_mod_settings_isSet = false;
     apt_demod_settings = nullptr;
     m_apt_demod_settings_isSet = false;
+    wefax_demod_settings = nullptr;
+    m_wefax_demod_settings_isSet = false;
     atv_demod_settings = nullptr;
     m_atv_demod_settings_isSet = false;
     atv_mod_settings = nullptr;
@@ -198,6 +200,8 @@ SWGChannelSettings::init() {
     m_am_mod_settings_isSet = false;
     apt_demod_settings = new SWGAPTDemodSettings();
     m_apt_demod_settings_isSet = false;
+    wefax_demod_settings = new SWGWefaxDemodSettings();
+    m_wefax_demod_settings_isSet = false;
     atv_demod_settings = new SWGATVDemodSettings();
     m_atv_demod_settings_isSet = false;
     atv_mod_settings = new SWGATVModSettings();
@@ -347,6 +351,9 @@ SWGChannelSettings::cleanup() {
     }
     if(apt_demod_settings != nullptr) { 
         delete apt_demod_settings;
+    }
+    if(wefax_demod_settings != nullptr) {
+        delete wefax_demod_settings;
     }
     if(atv_demod_settings != nullptr) { 
         delete atv_demod_settings;
@@ -563,6 +570,7 @@ SWGChannelSettings::fromJsonObject(QJsonObject &pJson) {
     ::SWGSDRangel::setValue(&am_mod_settings, pJson["AMModSettings"], "SWGAMModSettings", "SWGAMModSettings");
     
     ::SWGSDRangel::setValue(&apt_demod_settings, pJson["APTDemodSettings"], "SWGAPTDemodSettings", "SWGAPTDemodSettings");
+    ::SWGSDRangel::setValue(&wefax_demod_settings, pJson["WefaxDemodSettings"], "SWGWefaxDemodSettings", "SWGWefaxDemodSettings");
     
     ::SWGSDRangel::setValue(&atv_demod_settings, pJson["ATVDemodSettings"], "SWGATVDemodSettings", "SWGATVDemodSettings");
     
@@ -730,6 +738,9 @@ SWGChannelSettings::asJsonObject() {
     }
     if((apt_demod_settings != nullptr) && (apt_demod_settings->isSet())){
         toJsonValue(QString("APTDemodSettings"), apt_demod_settings, obj, QString("SWGAPTDemodSettings"));
+    }
+    if((wefax_demod_settings != nullptr) && (wefax_demod_settings->isSet())){
+        toJsonValue(QString("WefaxDemodSettings"), wefax_demod_settings, obj, QString("SWGWefaxDemodSettings"));
     }
     if((atv_demod_settings != nullptr) && (atv_demod_settings->isSet())){
         toJsonValue(QString("ATVDemodSettings"), atv_demod_settings, obj, QString("SWGATVDemodSettings"));
@@ -1016,6 +1027,16 @@ void
 SWGChannelSettings::setAptDemodSettings(SWGAPTDemodSettings* apt_demod_settings) {
     this->apt_demod_settings = apt_demod_settings;
     this->m_apt_demod_settings_isSet = true;
+}
+
+SWGWefaxDemodSettings*
+SWGChannelSettings::getWefaxDemodSettings() {
+    return wefax_demod_settings;
+}
+void
+SWGChannelSettings::setWefaxDemodSettings(SWGWefaxDemodSettings* wefax_demod_settings) {
+    this->wefax_demod_settings = wefax_demod_settings;
+    this->m_wefax_demod_settings_isSet = true;
 }
 
 SWGATVDemodSettings*
@@ -1661,6 +1682,9 @@ SWGChannelSettings::isSet(){
             isObjectUpdated = true; break;
         }
         if(apt_demod_settings && apt_demod_settings->isSet()){
+            isObjectUpdated = true; break;
+        }
+        if(wefax_demod_settings && wefax_demod_settings->isSet()){
             isObjectUpdated = true; break;
         }
         if(atv_demod_settings && atv_demod_settings->isSet()){

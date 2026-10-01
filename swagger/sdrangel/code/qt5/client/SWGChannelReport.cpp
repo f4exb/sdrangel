@@ -40,6 +40,8 @@ SWGChannelReport::SWGChannelReport() {
     m_ais_mod_report_isSet = false;
     am_demod_report = nullptr;
     m_am_demod_report_isSet = false;
+    wefax_demod_report = nullptr;
+    m_wefax_demod_report_isSet = false;
     am_mod_report = nullptr;
     m_am_mod_report_isSet = false;
     atv_mod_report = nullptr;
@@ -168,6 +170,8 @@ SWGChannelReport::init() {
     m_ais_mod_report_isSet = false;
     am_demod_report = new SWGAMDemodReport();
     m_am_demod_report_isSet = false;
+    wefax_demod_report = new SWGWefaxDemodReport();
+    m_wefax_demod_report_isSet = false;
     am_mod_report = new SWGAMModReport();
     m_am_mod_report_isSet = false;
     atv_mod_report = new SWGATVModReport();
@@ -295,6 +299,9 @@ SWGChannelReport::cleanup() {
     }
     if(am_demod_report != nullptr) { 
         delete am_demod_report;
+    }
+    if(wefax_demod_report != nullptr) {
+        delete wefax_demod_report;
     }
     if(am_mod_report != nullptr) { 
         delete am_mod_report;
@@ -482,6 +489,7 @@ SWGChannelReport::fromJsonObject(QJsonObject &pJson) {
     ::SWGSDRangel::setValue(&ais_mod_report, pJson["AISModReport"], "SWGAISModReport", "SWGAISModReport");
     
     ::SWGSDRangel::setValue(&am_demod_report, pJson["AMDemodReport"], "SWGAMDemodReport", "SWGAMDemodReport");
+    ::SWGSDRangel::setValue(&wefax_demod_report, pJson["WefaxDemodReport"], "SWGWefaxDemodReport", "SWGWefaxDemodReport");
     
     ::SWGSDRangel::setValue(&am_mod_report, pJson["AMModReport"], "SWGAMModReport", "SWGAMModReport");
     
@@ -623,6 +631,9 @@ SWGChannelReport::asJsonObject() {
     }
     if((am_demod_report != nullptr) && (am_demod_report->isSet())){
         toJsonValue(QString("AMDemodReport"), am_demod_report, obj, QString("SWGAMDemodReport"));
+    }
+    if((wefax_demod_report != nullptr) && (wefax_demod_report->isSet())){
+        toJsonValue(QString("WefaxDemodReport"), wefax_demod_report, obj, QString("SWGWefaxDemodReport"));
     }
     if((am_mod_report != nullptr) && (am_mod_report->isSet())){
         toJsonValue(QString("AMModReport"), am_mod_report, obj, QString("SWGAMModReport"));
@@ -848,6 +859,16 @@ void
 SWGChannelReport::setAmDemodReport(SWGAMDemodReport* am_demod_report) {
     this->am_demod_report = am_demod_report;
     this->m_am_demod_report_isSet = true;
+}
+
+SWGWefaxDemodReport*
+SWGChannelReport::getWefaxDemodReport() {
+    return wefax_demod_report;
+}
+void
+SWGChannelReport::setWefaxDemodReport(SWGWefaxDemodReport* wefax_demod_report) {
+    this->wefax_demod_report = wefax_demod_report;
+    this->m_wefax_demod_report_isSet = true;
 }
 
 SWGAMModReport*
@@ -1411,6 +1432,9 @@ SWGChannelReport::isSet(){
             isObjectUpdated = true; break;
         }
         if(am_demod_report && am_demod_report->isSet()){
+            isObjectUpdated = true; break;
+        }
+        if(wefax_demod_report && wefax_demod_report->isSet()){
             isObjectUpdated = true; break;
         }
         if(am_mod_report && am_mod_report->isSet()){

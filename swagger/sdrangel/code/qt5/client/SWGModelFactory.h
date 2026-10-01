@@ -45,6 +45,9 @@
 #include "SWGAPTDemodActions_aos.h"
 #include "SWGAPTDemodActions_los.h"
 #include "SWGAPTDemodSettings.h"
+#include "SWGWefaxDemodActions.h"
+#include "SWGWefaxDemodReport.h"
+#include "SWGWefaxDemodSettings.h"
 #include "SWGATVDemodSettings.h"
 #include "SWGATVModReport.h"
 #include "SWGATVModSettings.h"
@@ -581,6 +584,18 @@ namespace SWGSDRangel {
     if(QString("SWGAPTDemodSettings").compare(type) == 0) {
       SWGAPTDemodSettings *obj = new SWGAPTDemodSettings();
       obj->init();
+      return obj;
+    }
+    if(QString("SWGWefaxDemodActions").compare(type) == 0) {
+      SWGWefaxDemodActions *obj = new SWGWefaxDemodActions();
+      return obj;
+    }
+    if(QString("SWGWefaxDemodReport").compare(type) == 0) {
+      SWGWefaxDemodReport *obj = new SWGWefaxDemodReport();
+      return obj;
+    }
+    if(QString("SWGWefaxDemodSettings").compare(type) == 0) {
+      SWGWefaxDemodSettings *obj = new SWGWefaxDemodSettings();
       return obj;
     }
     if(QString("SWGATVDemodSettings").compare(type) == 0) {
