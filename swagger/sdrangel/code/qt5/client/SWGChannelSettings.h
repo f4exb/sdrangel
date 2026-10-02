@@ -28,6 +28,7 @@
 #include "SWGAMDemodSettings.h"
 #include "SWGAMModSettings.h"
 #include "SWGAPTDemodSettings.h"
+#include "SWGWefaxDemodSettings.h"
 #include "SWGATVDemodSettings.h"
 #include "SWGATVModSettings.h"
 #include "SWGBFMDemodSettings.h"
@@ -138,6 +139,9 @@ public:
 
     SWGAPTDemodSettings* getAptDemodSettings();
     void setAptDemodSettings(SWGAPTDemodSettings* apt_demod_settings);
+
+    SWGWefaxDemodSettings* getWefaxDemodSettings();
+    void setWefaxDemodSettings(SWGWefaxDemodSettings* wefax_demod_settings);
 
     SWGATVDemodSettings* getAtvDemodSettings();
     void setAtvDemodSettings(SWGATVDemodSettings* atv_demod_settings);
@@ -355,6 +359,9 @@ private:
 
     SWGAPTDemodSettings* apt_demod_settings;
     bool m_apt_demod_settings_isSet;
+
+    SWGWefaxDemodSettings* wefax_demod_settings;
+    bool m_wefax_demod_settings_isSet;
 
     SWGATVDemodSettings* atv_demod_settings;
     bool m_atv_demod_settings_isSet;

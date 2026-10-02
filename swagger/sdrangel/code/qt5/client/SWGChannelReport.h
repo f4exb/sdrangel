@@ -26,6 +26,7 @@
 #include "SWGAISDemodReport.h"
 #include "SWGAISModReport.h"
 #include "SWGAMDemodReport.h"
+#include "SWGWefaxDemodReport.h"
 #include "SWGAMModReport.h"
 #include "SWGATVModReport.h"
 #include "SWGBFMDemodReport.h"
@@ -117,6 +118,9 @@ public:
 
     SWGAMDemodReport* getAmDemodReport();
     void setAmDemodReport(SWGAMDemodReport* am_demod_report);
+
+    SWGWefaxDemodReport* getWefaxDemodReport();
+    void setWefaxDemodReport(SWGWefaxDemodReport* wefax_demod_report);
 
     SWGAMModReport* getAmModReport();
     void setAmModReport(SWGAMModReport* am_mod_report);
@@ -301,6 +305,9 @@ private:
 
     SWGAMDemodReport* am_demod_report;
     bool m_am_demod_report_isSet;
+
+    SWGWefaxDemodReport* wefax_demod_report;
+    bool m_wefax_demod_report_isSet;
 
     SWGAMModReport* am_mod_report;
     bool m_am_mod_report_isSet;

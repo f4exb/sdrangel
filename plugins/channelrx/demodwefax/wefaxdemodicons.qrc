@@ -1,0 +1,6 @@
+<RCC>
+  <qresource prefix="/demodwefax">
+    <file>icons/autoslant.png</file>
+    <file>icons/follow.png</file>
+  </qresource>
+</RCC>

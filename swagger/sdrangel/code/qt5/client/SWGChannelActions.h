@@ -24,6 +24,7 @@
 
 #include "SWGAISModActions.h"
 #include "SWGAPTDemodActions.h"
+#include "SWGWefaxDemodActions.h"
 #include "SWGFileSinkActions.h"
 #include "SWGFileSourceActions.h"
 #include "SWGFreqScannerActions.h"
@@ -71,6 +72,9 @@ public:
 
     SWGAPTDemodActions* getAptDemodActions();
     void setAptDemodActions(SWGAPTDemodActions* apt_demod_actions);
+
+    SWGWefaxDemodActions* getWefaxDemodActions();
+    void setWefaxDemodActions(SWGWefaxDemodActions* wefax_demod_actions);
 
     SWGFileSinkActions* getFileSinkActions();
     void setFileSinkActions(SWGFileSinkActions* file_sink_actions);
@@ -123,6 +127,9 @@ private:
 
     SWGAPTDemodActions* apt_demod_actions;
     bool m_apt_demod_actions_isSet;
+
+    SWGWefaxDemodActions* wefax_demod_actions;
+    bool m_wefax_demod_actions_isSet;
 
     SWGFileSinkActions* file_sink_actions;
     bool m_file_sink_actions_isSet;

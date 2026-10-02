@@ -37,6 +37,9 @@ ChannelSettings:
     APTDemodSettings:
       $ref: "/doc/swagger/include/APTDemod.yaml#/APTDemodSettings"
       description: "Apt demod settings configuration for Channel."
+    WefaxDemodSettings:
+      $ref: "/doc/swagger/include/WefaxDemod.yaml#/WefaxDemodSettings"
+      description: "WEFAX demodulator settings configuration for Channel."
     ATVDemodSettings:
       $ref: "/doc/swagger/include/ATVDemod.yaml#/ATVDemodSettings"
       description: "Atv demod settings configuration for Channel."

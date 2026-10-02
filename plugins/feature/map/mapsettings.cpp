@@ -104,6 +104,7 @@ MapSettings::MapSettings() :
     m_itemSettings.insert("PagerDemod", new MapItemSettings("PagerDemod", true, QColor(200, 191, 231), true, false, 11));
     m_itemSettings.insert("Radiosonde", new MapItemSettings("Radiosonde", true, QColor(102, 0, 102), true, false, 11, modelMinPixelSize));
     m_itemSettings.insert("Radio Time Transmitters", new MapItemSettings("Radio Time Transmitters", true, QColor(255, 0, 0), false, true, 8));
+    m_itemSettings.insert("WEFAX Transmitters", new MapItemSettings("WEFAX Transmitters", true, QColor(255, 0, 0), false, true, 8));
     m_itemSettings.insert("Radar", new MapItemSettings("Radar", true, QColor(255, 0, 0), false, true, 8));
     m_itemSettings.insert("NAT ATC Transmitters", new MapItemSettings("NAT ATC Transmitters", false, QColor(255, 0, 0), false, true, 8));
     m_itemSettings.insert("FT8Demod", new MapItemSettings("FT8Demod", true, QColor(0, 192, 255), true, true, 8));

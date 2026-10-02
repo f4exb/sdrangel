@@ -40,6 +40,8 @@ SWGChannelActions::SWGChannelActions() {
     m_ais_mod_actions_isSet = false;
     apt_demod_actions = nullptr;
     m_apt_demod_actions_isSet = false;
+    wefax_demod_actions = nullptr;
+    m_wefax_demod_actions_isSet = false;
     file_sink_actions = nullptr;
     m_file_sink_actions_isSet = false;
     file_source_actions = nullptr;
@@ -80,6 +82,8 @@ SWGChannelActions::init() {
     m_ais_mod_actions_isSet = false;
     apt_demod_actions = new SWGAPTDemodActions();
     m_apt_demod_actions_isSet = false;
+    wefax_demod_actions = new SWGWefaxDemodActions();
+    m_wefax_demod_actions_isSet = false;
     file_sink_actions = new SWGFileSinkActions();
     m_file_sink_actions_isSet = false;
     file_source_actions = new SWGFileSourceActions();
@@ -115,6 +119,9 @@ SWGChannelActions::cleanup() {
     }
     if(apt_demod_actions != nullptr) { 
         delete apt_demod_actions;
+    }
+    if(wefax_demod_actions != nullptr) {
+        delete wefax_demod_actions;
     }
     if(file_sink_actions != nullptr) { 
         delete file_sink_actions;
@@ -170,6 +177,7 @@ SWGChannelActions::fromJsonObject(QJsonObject &pJson) {
     ::SWGSDRangel::setValue(&ais_mod_actions, pJson["AISModActions"], "SWGAISModActions", "SWGAISModActions");
     
     ::SWGSDRangel::setValue(&apt_demod_actions, pJson["APTDemodActions"], "SWGAPTDemodActions", "SWGAPTDemodActions");
+    ::SWGSDRangel::setValue(&wefax_demod_actions, pJson["WefaxDemodActions"], "SWGWefaxDemodActions", "SWGWefaxDemodActions");
     
     ::SWGSDRangel::setValue(&file_sink_actions, pJson["FileSinkActions"], "SWGFileSinkActions", "SWGFileSinkActions");
     
@@ -224,6 +232,9 @@ SWGChannelActions::asJsonObject() {
     }
     if((apt_demod_actions != nullptr) && (apt_demod_actions->isSet())){
         toJsonValue(QString("APTDemodActions"), apt_demod_actions, obj, QString("SWGAPTDemodActions"));
+    }
+    if((wefax_demod_actions != nullptr) && (wefax_demod_actions->isSet())){
+        toJsonValue(QString("WefaxDemodActions"), wefax_demod_actions, obj, QString("SWGWefaxDemodActions"));
     }
     if((file_sink_actions != nullptr) && (file_sink_actions->isSet())){
         toJsonValue(QString("FileSinkActions"), file_sink_actions, obj, QString("SWGFileSinkActions"));
@@ -317,6 +328,16 @@ void
 SWGChannelActions::setAptDemodActions(SWGAPTDemodActions* apt_demod_actions) {
     this->apt_demod_actions = apt_demod_actions;
     this->m_apt_demod_actions_isSet = true;
+}
+
+SWGWefaxDemodActions*
+SWGChannelActions::getWefaxDemodActions() {
+    return wefax_demod_actions;
+}
+void
+SWGChannelActions::setWefaxDemodActions(SWGWefaxDemodActions* wefax_demod_actions) {
+    this->wefax_demod_actions = wefax_demod_actions;
+    this->m_wefax_demod_actions_isSet = true;
 }
 
 SWGFileSinkActions*
@@ -442,6 +463,9 @@ SWGChannelActions::isSet(){
         if(apt_demod_actions && apt_demod_actions->isSet()){
             isObjectUpdated = true; break;
         }
+        if(wefax_demod_actions && wefax_demod_actions->isSet()){
+            isObjectUpdated = true; break;
+        }
         if(file_sink_actions && file_sink_actions->isSet()){
             isObjectUpdated = true; break;
         }
@@ -476,4 +500,3 @@ SWGChannelActions::isSet(){
     return isObjectUpdated;
 }
 }
-

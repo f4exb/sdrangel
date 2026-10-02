@@ -4889,6 +4889,11 @@ bool WebAPIRequestMapper::getChannelSettings(
             channelSettings->getAptDemodSettings()->init();
             channelSettings->getAptDemodSettings()->fromJsonObject(settingsJsonObject);
         }
+        else if (channelSettingsKey == "WefaxDemodSettings")
+        {
+            channelSettings->setWefaxDemodSettings(new SWGSDRangel::SWGWefaxDemodSettings());
+            channelSettings->getWefaxDemodSettings()->fromJsonObject(settingsJsonObject);
+        }
         else if (channelSettingsKey == "ATVDemodSettings")
         {
             channelSettings->setAtvDemodSettings(new SWGSDRangel::SWGATVDemodSettings());
@@ -5284,6 +5289,11 @@ bool WebAPIRequestMapper::getChannelActions(
         {
             channelActions->setAptDemodActions(new SWGSDRangel::SWGAPTDemodActions());
             channelActions->getAptDemodActions()->fromJsonObject(actionsJsonObject);
+        }
+        else if (channelActionsKey == "WefaxDemodActions")
+        {
+            channelActions->setWefaxDemodActions(new SWGSDRangel::SWGWefaxDemodActions());
+            channelActions->getWefaxDemodActions()->fromJsonObject(actionsJsonObject);
         }
         else if (channelActionsKey == "FileSinkActions")
         {
@@ -6046,6 +6056,7 @@ void WebAPIRequestMapper::resetChannelSettings(SWGSDRangel::SWGChannelSettings& 
     channelSettings.setAmDemodSettings(nullptr);
     channelSettings.setAmModSettings(nullptr);
     channelSettings.setAptDemodSettings(nullptr);
+    channelSettings.setWefaxDemodSettings(nullptr);
     channelSettings.setAtvModSettings(nullptr);
     channelSettings.setBfmDemodSettings(nullptr);
     channelSettings.setChannelPowerSettings(nullptr);
@@ -6093,6 +6104,7 @@ void WebAPIRequestMapper::resetChannelReport(SWGSDRangel::SWGChannelReport& chan
     channelReport.setAisDemodReport(nullptr);
     channelReport.setAisModReport(nullptr);
     channelReport.setAmDemodReport(nullptr);
+    channelReport.setWefaxDemodReport(nullptr);
     channelReport.setAmModReport(nullptr);
     channelReport.setAtvModReport(nullptr);
     channelReport.setBfmDemodReport(nullptr);
@@ -6133,6 +6145,7 @@ void WebAPIRequestMapper::resetChannelActions(SWGSDRangel::SWGChannelActions& ch
     channelActions.cleanup();
     channelActions.setAisModActions(nullptr);
     channelActions.setAptDemodActions(nullptr);
+    channelActions.setWefaxDemodActions(nullptr);
     channelActions.setChannelType(nullptr);
     channelActions.setFileSourceActions(nullptr);
     channelActions.setFreqScannerActions(nullptr);

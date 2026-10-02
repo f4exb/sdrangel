@@ -27,6 +27,7 @@ const QMap<QString, QString> WebAPIUtils::m_channelURIToSettingsKey = {
     {"sdrangel.channel.aisdemod", "AISDemodSettings"},
     {"sdrangel.channel.amdemod", "AMDemodSettings"},
     {"sdrangel.channel.aptdemod", "APTDemodSettings"},
+    {"sdrangel.channel.wefaxdemod", "WefaxDemodSettings"},
     {"de.maintech.sdrangelove.channel.am", "AMDemodSettings"}, // remap
     {"sdrangel.channeltx.modam", "AMModSettings"},
     {"sdrangel.channeltx.modatv", "ATVModSettings"},
@@ -57,7 +58,8 @@ const QMap<QString, QString> WebAPIUtils::m_channelURIToSettingsKey = {
     {"sdrangel.channel.heatmap", "HeatMapSettings"},
     {"sdrangel.channel.ilsdemod", "ILSDemodSettings"},
     {"sdrangel.channel.inmarsatdemod", "InmarsatDemodSettings"},
-    {"sdrangel.channel.navtexemod", "NavtexDemodSettings"},
+    {"sdrangel.channel.navtexdemod", "NavtexDemodSettings"},
+    {"sdrangel.channel.navtexemod", "NavtexDemodSettings"}, // legacy typo
     {"sdrangel.channel.m17demod", "M17DemodSettings"},
     {"sdrangel.channeltx.modm17", "M17ModSettings"},
     {"sdrangel.channel.nfmdemod", "NFMDemodSettings"},
@@ -159,6 +161,7 @@ const QMap<QString, QString> WebAPIUtils::m_channelTypeToSettingsKey = {
     {"AISDemod", "AISDemodSettings"},
     {"AISMod", "AISModSettings"},
     {"APTDemod", "APTDemodSettings"},
+    {"WefaxDemod", "WefaxDemodSettings"},
     {"AMDemod", "AMDemodSettings"},
     {"AMMod", "AMModSettings"},
     {"ATVDemod", "ATVDemodSettings"},
@@ -225,6 +228,7 @@ const QMap<QString, QString> WebAPIUtils::m_channelTypeToSettingsKey = {
 const QMap<QString, QString> WebAPIUtils::m_channelTypeToActionsKey = {
     {"AISMod", "AISModActions"},
     {"APTDemod", "APTDemodActions"},
+    {"WefaxDemod", "WefaxDemodActions"},
     {"FileSink", "FileSinkActions"},
     {"FileSource", "FileSourceActions"},
     {"FreqScanner", "FreqScannerActions"},
