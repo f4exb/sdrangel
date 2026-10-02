@@ -20,9 +20,12 @@
 
 #include "export.h"
 
+#include <array>
+
 #include <QByteArray>
 #include <QString>
 #include <QDateTime>
+#include <QVector>
 
 // Digital Select Calling
 // https://www.itu.int/dms_pubrec/itu-r/rec/m/R-REC-M.493-15-201901-I!!PDF-E.pdf
@@ -31,9 +34,13 @@ class SDRBASE_API DSCDecoder {
 
 public:
 
+    typedef std::array<float, 10> SoftBits; //!< Soft decisions in transmission order, positive for binary 1 (B-state)
+
     void init(int offset);
     bool decodeBits(int bits);
-    QByteArray getMessage() const { return m_bytes; }
+    bool decodeSoftBits(const SoftBits& soft);
+    bool isPhasing() const { return m_state == PHASING; }
+    QByteArray getMessage() const;
     int getErrors() const { return m_errors; }
 
     static int m_maxBytes;
@@ -42,6 +49,10 @@ private:
 
     static const int BUFFER_SIZE = 3;
     signed char m_buf[3];
+    SoftBits m_softBuf[3];
+    SoftBits m_soft;             //!< Soft decisions for the symbol being decoded
+    QVector<float> m_margins;    //!< Soft-decision margin of each symbol in m_bytes
+    static const float m_weakMargin;
     enum State {
         PHASING,
         FILL_DX,
@@ -59,12 +70,16 @@ private:
     bool m_eos;
     static const signed char m_expectedSymbols[];
 
-    QByteArray m_bytes;
+    QByteArray m_bytes;          //!< Soft-decision symbols, with weak symbols erased (-1)
+    QByteArray m_hardBytes;      //!< Symbols from a copy without detectable errors, else -1
 
     bool decodeSymbol(signed char symbol);
+    void eraseWeakSymbols();
     static signed char bitsToSymbol(unsigned int bits);
     static unsigned char reverse(unsigned char b);
-    signed char selectSymbol(signed char dx, signed char rx);
+    signed char selectSymbol(signed char dx, signed char rx, const SoftBits& dxSoft, const SoftBits& rxSoft);
+    static float symbolMetric(int symbol, const SoftBits& soft);
+    static int bestSymbol(const SoftBits& soft, float& bestMetric, float& nextMetric);
 
 };
 

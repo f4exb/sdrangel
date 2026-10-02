@@ -23,6 +23,8 @@
 
 #include <QByteArray>
 
+#include "dsp/dsptypes.h"
+
 class Serializable;
 
 // Number of columns in the table
@@ -30,8 +32,14 @@ class Serializable;
 
 struct DSCDemodSettings
 {
+    enum Mode {
+        ModeMFHF,
+        ModeVHF
+    };
+
     qint32 m_inputFrequencyOffset;
     Real m_rfBandwidth;  // Not currently in GUI as probably doesn't need to be adjusted
+    Mode m_mode;
     bool m_filterInvalid;
     int m_filterColumn;
     QString m_filter;
@@ -63,10 +71,20 @@ struct DSCDemodSettings
     int m_columnIndexes[DSCDEMOD_COLUMNS];//!< How the columns are ordered in the table
     int m_columnSizes[DSCDEMOD_COLUMNS];  //!< Size of the columns in the table
 
-    static const int DSCDEMOD_CHANNEL_SAMPLE_RATE = 1000; // Must be integer multiple of baud rate (x10)
-    static const int DSCDEMOD_BAUD_RATE = 100;
-    static const int DSCDEMOD_FREQUENCY_SHIFT = 170;
+    static const int DSCDEMOD_MFHF_CHANNEL_SAMPLE_RATE = 1000; // Must be integer multiple of baud rate (x10)
+    static const int DSCDEMOD_MFHF_BAUD_RATE = 100;
+    static const int DSCDEMOD_MFHF_FREQUENCY_SHIFT = 170;
+    static const int DSCDEMOD_VHF_CHANNEL_SAMPLE_RATE = 48000;
+    static const int DSCDEMOD_VHF_BAUD_RATE = 1200;
+    static const int DSCDEMOD_VHF_LOW_TONE = 1300;
+    static const int DSCDEMOD_VHF_HIGH_TONE = 2100;
     static const int m_scopeStreams = 10;
+
+    int getChannelSampleRate() const { return m_mode == ModeVHF ? DSCDEMOD_VHF_CHANNEL_SAMPLE_RATE : DSCDEMOD_MFHF_CHANNEL_SAMPLE_RATE; }
+    int getBaudRate() const { return m_mode == ModeVHF ? DSCDEMOD_VHF_BAUD_RATE : DSCDEMOD_MFHF_BAUD_RATE; }
+    // VHF DSC occupies about 13 kHz. 20 kHz leaves room for a few kHz of tuning
+    // error without the extra noise of a full 25 kHz channel reducing sensitivity.
+    static Real getDefaultRFBandwidth(Mode mode) { return mode == ModeVHF ? 20000.0f : 450.0f; }
 
     DSCDemodSettings();
     void resetToDefaults();
