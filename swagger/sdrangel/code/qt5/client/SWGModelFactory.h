@@ -404,6 +404,8 @@
 #include "SWGUDPSourceSettings.h"
 #include "SWGUSRPInputReport.h"
 #include "SWGUSRPInputSettings.h"
+#include "SWGUSRPMIMOReport.h"
+#include "SWGUSRPMIMOSettings.h"
 #include "SWGUSRPOutputReport.h"
 #include "SWGUSRPOutputSettings.h"
 #include "SWGVORDemodReport.h"
@@ -2375,6 +2377,16 @@ namespace SWGSDRangel {
     }
     if(QString("SWGUSRPInputSettings").compare(type) == 0) {
       SWGUSRPInputSettings *obj = new SWGUSRPInputSettings();
+      obj->init();
+      return obj;
+    }
+    if(QString("SWGUSRPMIMOReport").compare(type) == 0) {
+      SWGUSRPMIMOReport *obj = new SWGUSRPMIMOReport();
+      obj->init();
+      return obj;
+    }
+    if(QString("SWGUSRPMIMOSettings").compare(type) == 0) {
+      SWGUSRPMIMOSettings *obj = new SWGUSRPMIMOSettings();
       obj->init();
       return obj;
     }

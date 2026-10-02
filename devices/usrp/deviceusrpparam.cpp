@@ -16,6 +16,8 @@
 // along with this program. If not, see <http://www.gnu.org/licenses/>.          //
 ///////////////////////////////////////////////////////////////////////////////////
 
+#include <functional>
+
 #include <QDebug>
 #include "deviceusrpparam.h"
 
@@ -26,6 +28,13 @@ bool DeviceUSRPParams::open(const QString &deviceStr, bool channelNumOnly)
     try
     {
         std::string device_args(qPrintable(deviceStr));
+
+        // UHD's default receive buffering for USB devices (B2xx) is only a few ms at high sample rates,
+        // which isn't enough to absorb OS scheduling latency (particularly on Windows), resulting in overflows.
+        // So increase it (to ~2MB), unless specified by the user.
+        if (deviceStr.contains("type=b200") && !deviceStr.contains("num_recv_frames")) {
+            device_args += ",num_recv_frames=256";
+        }
 
         // For USB
         // The recv_frame_size must be a multiple of 8 bytes and not a multiple of 1024 bytes.
@@ -39,11 +48,38 @@ bool DeviceUSRPParams::open(const QString &deviceStr, bool channelNumOnly)
         m_nbTxChannels = m_dev->get_tx_num_channels();
         qDebug() << "DeviceUSRPParams::open: m_nbRxChannels: " << m_nbRxChannels << " m_nbTxChannels: " << m_nbTxChannels;
 
-        // Speed up program initialisation, by not getting all properties
-        // If we could find out number of channels without ::make ing the device
-        // that would be even better
-        if (!channelNumOnly)
-        {
+        // On B2xx, Rx streams share a transport, so recv() calls for different streams must be serialised
+        // (See DeviceUSRPRecvLock). Other devices have a transport per stream, so don't need this.
+        QString mboardName = QString::fromStdString(m_dev->get_mboard_name());
+        m_recvLock.setEnabled(mboardName.startsWith("B2"));
+        qDebug() << "DeviceUSRPParams::open: mboard: " << mboardName;
+    }
+    catch (const std::exception& e)
+    {
+        qDebug() << "DeviceUSRPParams::open: exception: " << e.what();
+        close();
+        return false;
+    }
+
+    // Speed up program initialisation, by not getting all properties
+    // If we could find out number of channels without ::make ing the device
+    // that would be even better
+    if (!channelNumOnly)
+    {
+        // Not all properties are supported by all devices / daughterboards, so
+        // query each group separately, so one failure doesn't prevent use of the device
+        auto tryQuery = [](const char *what, const std::function<void()>& query) {
+            try
+            {
+                query();
+            }
+            catch (const std::exception& e)
+            {
+                qWarning() << "DeviceUSRPParams::open: failed to get" << what << ":" << e.what();
+            }
+        };
+
+        tryQuery("frequency and bandwidth ranges", [this]() {
             if (m_nbRxChannels > 0)
             {
                 m_lpfRangeRx = m_dev->get_rx_bandwidth_range();
@@ -54,7 +90,9 @@ bool DeviceUSRPParams::open(const QString &deviceStr, bool channelNumOnly)
                 m_lpfRangeTx = m_dev->get_tx_bandwidth_range();
                 m_loRangeTx = m_dev->get_fe_tx_freq_range();
             }
+        });
 
+        tryQuery("sample rate ranges", [this, &deviceStr]() {
             // For some devices (B210), rx/tx_rates vary with master_clock_rate
             // which can be set automatically by UHD. For other devices,
             // master_clock_rate must be set manually (currently as a device arg)
@@ -111,7 +149,9 @@ bool DeviceUSRPParams::open(const QString &deviceStr, bool channelNumOnly)
                     properties->access<bool>("/mboards/0/auto_tick_rate").set(true);
                 }
             }
+        });
 
+        tryQuery("Rx gains and antennas", [this]() {
             if (m_nbRxChannels > 0)
             {
                 m_gainRangeRx = m_dev->get_rx_gain_range();
@@ -128,6 +168,9 @@ bool DeviceUSRPParams::open(const QString &deviceStr, bool channelNumOnly)
                     m_rxGainNames << QString::fromStdString(rxGainNames[i]);
                 }
             }
+        });
+
+        tryQuery("Tx gains and antennas", [this]() {
             if (m_nbTxChannels > 0)
             {
                 m_gainRangeTx = m_dev->get_tx_gain_range();
@@ -138,21 +181,18 @@ bool DeviceUSRPParams::open(const QString &deviceStr, bool channelNumOnly)
                     m_txAntennas << QString::fromStdString(txAntennas[i]);
                 }
             }
+        });
 
+        tryQuery("clock sources", [this]() {
             std::vector<std::string> clockSources = m_dev->get_clock_sources(0);
             m_clockSources.reserve(clockSources.size());
             for(size_t i = 0, l = clockSources.size(); i < l; ++i) {
                 m_clockSources << QString::fromStdString(clockSources[i]);
             }
-        }
+        });
+    }
 
-        return true;
-    }
-    catch (const std::exception& e)
-    {
-        qDebug() << "DeviceUSRPParams::open: exception: " << e.what();
-        return false;
-    }
+    return true;
 }
 
 void DeviceUSRPParams::close()

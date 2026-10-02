@@ -24,6 +24,7 @@
 #include <QWidget>
 
 #include "util/messagequeue.h"
+#include "usrp/deviceusrpstreamstats.h"
 
 #include "usrpinput.h"
 
@@ -68,6 +69,8 @@ private:
     bool m_forceSettings;
     int m_statusCounter;
     int m_deviceStatusCounter;
+    DeviceUSRPStreamStats m_overrunStats;
+    DeviceUSRPStreamStats m_timeoutStats;
     MessageQueue m_inputMessageQueue;
 
     void displaySettings();

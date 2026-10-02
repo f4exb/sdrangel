@@ -105,6 +105,7 @@ bool USRPInputSettings::deserialize(const QByteArray& data)
         d.readBool(2, &m_dcBlock, false);
         d.readBool(3, &m_iqCorrection, false);
         d.readU32(4, &m_log2SoftDecim, 0);
+        m_log2SoftDecim = m_log2SoftDecim > 6 ? 6 : m_log2SoftDecim;
         d.readFloat(5, &m_lpfBW, 1.5e6);
         d.readU32(6, &m_gain, 50);
         d.readString(7, &m_antennaPath, "TX/RX");

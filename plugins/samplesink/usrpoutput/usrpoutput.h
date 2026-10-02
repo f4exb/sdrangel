@@ -25,6 +25,7 @@
 #include <stdint.h>
 
 #include <QString>
+#include <QRecursiveMutex>
 #include <QNetworkRequest>
 
 #include <uhd/usrp/multi_usrp.hpp>
@@ -226,6 +227,8 @@ private:
     QMutex m_mutex;
     USRPOutputSettings m_settings;
     USRPOutputThread* m_usrpOutputThread;
+    QRecursiveMutex m_settingsMutex; //!< Protects m_settings, which is written in GUI thread and read in device engine thread in start()
+    QMutex m_threadMutex; //!< Protects thread pointer, for access from threads other than the device engine thread
     QString m_deviceDescription;
     bool m_running;
     DeviceUSRPShared m_deviceShared;
@@ -237,13 +240,21 @@ private:
 
     bool openDevice();
     void closeDevice();
-    bool acquireChannel();
+    bool acquireChannel(const USRPOutputSettings& settings);
     void releaseChannel();
+    DeviceUSRPParams *getBuddyDeviceParams() const;
     void suspendRxBuddies();
     void resumeRxBuddies();
     void suspendTxBuddies();
     void resumeTxBuddies();
-    bool applySettings(const USRPOutputSettings& settings, const QList<QString>& settingsKeys, bool preGetStream, bool force = false);
+    bool applySettings(const USRPOutputSettings& settings, const QList<QString>& settingsKeys, bool force = false);
+    void forwardChangeAllDSP();
+    void forwardChangeTxDSP();
+    void forwardChangeOwnDSP();
+    void forwardClockSource();
+    void notifySampleRateChange();
+    void forwardDeviceInfo(bool temperatureValid, float temperature);
+    void resizeSampleSourceFifo(int devSampleRate, unsigned int log2Interp);
     void webapiFormatDeviceReport(SWGSDRangel::SWGDeviceReport& response);
     void webapiReverseSendSettings(const QList<QString>& deviceSettingsKeys, const USRPOutputSettings& settings, bool force);
     void webapiReverseSendStartStop(bool start);

@@ -5612,6 +5612,11 @@ bool WebAPIRequestMapper::getDeviceSettings(
             deviceSettings->setUsrpOutputSettings(new SWGSDRangel::SWGUSRPOutputSettings());
             deviceSettings->getUsrpOutputSettings()->fromJsonObject(settingsJsonObject);
         }
+        else if (deviceSettingsKey == "usrpMIMOSettings")
+        {
+            deviceSettings->setUsrpMimoSettings(new SWGSDRangel::SWGUSRPMIMOSettings());
+            deviceSettings->getUsrpMimoSettings()->fromJsonObject(settingsJsonObject);
+        }
         else if (deviceSettingsKey == "xtrxInputSettings")
         {
             deviceSettings->setXtrxInputSettings(new SWGSDRangel::SWGXtrxInputSettings());
@@ -6015,6 +6020,7 @@ void WebAPIRequestMapper::resetDeviceSettings(SWGSDRangel::SWGDeviceSettings& de
     deviceSettings.setTestSourceSettings(nullptr);
     deviceSettings.setUsrpInputSettings(nullptr);
     deviceSettings.setUsrpOutputSettings(nullptr);
+    deviceSettings.setUsrpMimoSettings(nullptr);
 }
 
 void WebAPIRequestMapper::resetDeviceReport(SWGSDRangel::SWGDeviceReport& deviceReport)
@@ -6037,6 +6043,7 @@ void WebAPIRequestMapper::resetDeviceReport(SWGSDRangel::SWGDeviceReport& device
     deviceReport.setSdrPlayReport(nullptr);
     deviceReport.setSdrPlayV3Report(nullptr);
     deviceReport.setUsrpOutputReport(nullptr);
+    deviceReport.setUsrpMimoReport(nullptr);
 }
 
 void WebAPIRequestMapper::resetDeviceActions(SWGSDRangel::SWGDeviceActions& deviceActions)

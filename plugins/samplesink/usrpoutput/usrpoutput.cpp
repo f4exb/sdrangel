@@ -17,12 +17,14 @@
 ///////////////////////////////////////////////////////////////////////////////////
 
 #include <cstddef>
+#include <cmath>
 #include <string.h>
 
 #include <QMutexLocker>
 #include <QDebug>
 #include <QNetworkReply>
 #include <QBuffer>
+#include <QTimer>
 
 #include <uhd/usrp/multi_usrp.hpp>
 
@@ -58,11 +60,23 @@ USRPOutput::USRPOutput(DeviceAPI *deviceAPI) :
     m_deviceAPI->setNbSinkStreams(1);
     m_sampleSourceFifo.resize(SampleSourceFifo::getSizePolicy(m_settings.m_devSampleRate));
     m_streamId = nullptr;
+    // Hold the shared device mutex (if there are buddies) across suspend...resume, so it can't interleave
+    // with buddies doing the same in their device engine threads
+    DeviceUSRPParams *buddyDeviceParams = getBuddyDeviceParams();
+
+    if (buddyDeviceParams) {
+        buddyDeviceParams->m_mutex.lock();
+    }
+
     suspendRxBuddies();
     suspendTxBuddies();
     openDevice();
     resumeTxBuddies();
     resumeRxBuddies();
+
+    if (buddyDeviceParams) {
+        buddyDeviceParams->m_mutex.unlock();
+    }
     m_networkManager = new QNetworkAccessManager();
     QObject::connect(
         m_networkManager,
@@ -86,11 +100,32 @@ USRPOutput::~USRPOutput()
         stop();
     }
 
+    DeviceUSRPParams *deviceParams = m_deviceShared.m_deviceParams;
+    bool hasBuddies = (m_deviceAPI->getSourceBuddies().size() > 0) || (m_deviceAPI->getSinkBuddies().size() > 0);
+
+    if (deviceParams)
+    {
+        // Prevent buddies using our shared data after we've been deleted, but before buddy lists are cleared.
+        // Buddies read this in their device engine threads with the device mutex held.
+        QMutexLocker deviceLocker(&deviceParams->m_mutex);
+        m_deviceAPI->setBuddySharedPtr(nullptr);
+    }
+
+    // Hold device mutex across suspend...resume, so it can't interleave with buddies doing the same.
+    // If there are no buddies, the device params are deleted in closeDevice, but then there's nothing to protect.
+    if (hasBuddies && deviceParams) {
+        deviceParams->m_mutex.lock();
+    }
+
     suspendRxBuddies();
     suspendTxBuddies();
     closeDevice();
     resumeTxBuddies();
     resumeRxBuddies();
+
+    if (hasBuddies && deviceParams) {
+        deviceParams->m_mutex.unlock();
+    }
 }
 
 void USRPOutput::destroy()
@@ -102,17 +137,27 @@ bool USRPOutput::openDevice()
 {
     bool ret = true;
 
+    // Set shared pointer first, so it is valid for buddies, even if we return early on error
+    m_deviceAPI->setBuddySharedPtr(&m_deviceShared); // propagate common parameters to API
+
     int requestedChannel = m_deviceAPI->getDeviceItemIndex();
 
     // look for Tx buddies and get reference to common parameters
     // if there is a channel left take the first available
     if (m_deviceAPI->getSinkBuddies().size() > 0) // look sink sibling first
     {
-        qDebug("USRPOutput::openDevice: look in Ix buddies");
+        qDebug("USRPOutput::openDevice: look in Tx buddies");
 
         DeviceAPI *sinkBuddy = m_deviceAPI->getSinkBuddies()[0];
         //m_deviceShared = *((DeviceUSRPShared *) sinkBuddy->getBuddySharedPtr()); // copy shared data
         DeviceUSRPShared *deviceUSRPShared = (DeviceUSRPShared*) sinkBuddy->getBuddySharedPtr();
+
+        if (deviceUSRPShared == nullptr)
+        {
+            qCritical("USRPOutput::openDevice: the sink buddy shared pointer is null");
+            return false;
+        }
+
         m_deviceShared.m_deviceParams = deviceUSRPShared->m_deviceParams;
 
         DeviceUSRPParams *deviceParams = m_deviceShared.m_deviceParams; // get device parameters
@@ -144,7 +189,7 @@ bool USRPOutput::openDevice()
             DeviceAPI *buddy = m_deviceAPI->getSinkBuddies()[i];
             DeviceUSRPShared *buddyShared = (DeviceUSRPShared *) buddy->getBuddySharedPtr();
 
-            if (buddyShared->m_channel == requestedChannel)
+            if (buddyShared && (buddyShared->m_channel == requestedChannel))
             {
                 qCritical("USRPOutput::openDevice: cannot open busy channel %u", requestedChannel);
                 return false;
@@ -162,6 +207,13 @@ bool USRPOutput::openDevice()
         DeviceAPI *sourceBuddy = m_deviceAPI->getSourceBuddies()[0];
         //m_deviceShared = *((DeviceUSRPShared *) sourceBuddy->getBuddySharedPtr()); // copy parameters
         DeviceUSRPShared *deviceUSRPShared = (DeviceUSRPShared*) sourceBuddy->getBuddySharedPtr();
+
+        if (deviceUSRPShared == nullptr)
+        {
+            qCritical("USRPOutput::openDevice: the source buddy shared pointer is null");
+            return false;
+        }
+
         m_deviceShared.m_deviceParams = deviceUSRPShared->m_deviceParams;
 
         if (m_deviceShared.m_deviceParams == 0)
@@ -206,9 +258,31 @@ bool USRPOutput::openDevice()
         m_deviceShared.m_channel = requestedChannel; // acknowledge the requested channel
     }
 
-    m_deviceAPI->setBuddySharedPtr(&m_deviceShared); // propagate common parameters to API
-
     return ret;
+}
+
+// Get device parameters shared with buddies, or nullptr if there are no buddies. Called from GUI thread.
+DeviceUSRPParams *USRPOutput::getBuddyDeviceParams() const
+{
+    for (const auto& buddy : m_deviceAPI->getSourceBuddies())
+    {
+        DeviceUSRPShared *buddyShared = (DeviceUSRPShared *) buddy->getBuddySharedPtr();
+
+        if (buddyShared && buddyShared->m_deviceParams) {
+            return buddyShared->m_deviceParams;
+        }
+    }
+
+    for (const auto& buddy : m_deviceAPI->getSinkBuddies())
+    {
+        DeviceUSRPShared *buddyShared = (DeviceUSRPShared *) buddy->getBuddySharedPtr();
+
+        if (buddyShared && buddyShared->m_deviceParams) {
+            return buddyShared->m_deviceParams;
+        }
+    }
+
+    return nullptr;
 }
 
 void USRPOutput::suspendRxBuddies()
@@ -221,6 +295,13 @@ void USRPOutput::suspendRxBuddies()
     for (; itSource != sourceBuddies.end(); ++itSource)
     {
         DeviceUSRPShared *buddySharedPtr = (DeviceUSRPShared *) (*itSource)->getBuddySharedPtr();
+
+        if (!buddySharedPtr || !buddySharedPtr->m_deviceParams) {
+            continue;
+        }
+
+        // Device mutex prevents the buddy deleting its thread while we use it
+        QMutexLocker deviceLocker(&buddySharedPtr->m_deviceParams->m_mutex);
 
         if (buddySharedPtr->m_thread && buddySharedPtr->m_thread->isRunning())
         {
@@ -245,6 +326,13 @@ void USRPOutput::suspendTxBuddies()
     {
         DeviceUSRPShared *buddySharedPtr = (DeviceUSRPShared *) (*itSink)->getBuddySharedPtr();
 
+        if (!buddySharedPtr || !buddySharedPtr->m_deviceParams) {
+            continue;
+        }
+
+        // Device mutex prevents the buddy deleting its thread while we use it
+        QMutexLocker deviceLocker(&buddySharedPtr->m_deviceParams->m_mutex);
+
         if (buddySharedPtr->m_thread && buddySharedPtr->m_thread->isRunning())
         {
             buddySharedPtr->m_thread->stopWork();
@@ -268,7 +356,14 @@ void USRPOutput::resumeRxBuddies()
     {
         DeviceUSRPShared *buddySharedPtr = (DeviceUSRPShared *) (*itSource)->getBuddySharedPtr();
 
-        if (buddySharedPtr->m_threadWasRunning) {
+        if (!buddySharedPtr || !buddySharedPtr->m_deviceParams) {
+            continue;
+        }
+
+        // Device mutex prevents the buddy deleting its thread while we use it
+        QMutexLocker deviceLocker(&buddySharedPtr->m_deviceParams->m_mutex);
+
+        if (buddySharedPtr->m_threadWasRunning && buddySharedPtr->m_thread) {
             buddySharedPtr->m_thread->startWork();
         }
     }
@@ -285,7 +380,14 @@ void USRPOutput::resumeTxBuddies()
     {
         DeviceUSRPShared *buddySharedPtr = (DeviceUSRPShared *) (*itSink)->getBuddySharedPtr();
 
-        if (buddySharedPtr->m_threadWasRunning) {
+        if (!buddySharedPtr || !buddySharedPtr->m_deviceParams) {
+            continue;
+        }
+
+        // Device mutex prevents the buddy deleting its thread while we use it
+        QMutexLocker deviceLocker(&buddySharedPtr->m_deviceParams->m_mutex);
+
+        if (buddySharedPtr->m_threadWasRunning && buddySharedPtr->m_thread) {
             buddySharedPtr->m_thread->startWork();
         }
     }
@@ -293,38 +395,50 @@ void USRPOutput::resumeTxBuddies()
 
 void USRPOutput::closeDevice()
 {
-    if (m_deviceShared.m_deviceParams->getDevice() == nullptr) { // was never open
+    if (m_running) { stop(); }
+
+    m_deviceShared.m_channel = -1; // effectively release the channel for the possible buddies
+
+    if (m_deviceShared.m_deviceParams == nullptr) { // was never created
         return;
     }
 
-    if (m_running) stop();
-
     // No buddies so effectively close the device
+    // (params are deleted even if the device failed to open, to avoid a leak)
 
     if ((m_deviceAPI->getSourceBuddies().size() == 0) && (m_deviceAPI->getSinkBuddies().size() == 0))
     {
         m_deviceShared.m_deviceParams->close();
         delete m_deviceShared.m_deviceParams;
-        m_deviceShared.m_deviceParams = 0;
+        m_deviceShared.m_deviceParams = nullptr;
     }
-
-    m_deviceShared.m_channel = -1; // effectively release the channel for the possible buddies
 }
 
-bool USRPOutput::acquireChannel()
+bool USRPOutput::acquireChannel(const USRPOutputSettings& settings)
 {
+    bool success = true;
+
+    // Hold buddies and device mutexes across suspend...resume, so buddies doing the same at the same time
+    // can't interleave (which could leave a buddy suspended), and buddy lists can't be changed while we use them
+    QMutexLocker buddiesLocker(&DeviceAPI::getBuddiesMutex());
+    QMutexLocker deviceLocker(&m_deviceShared.m_deviceParams->m_mutex);
+
     suspendRxBuddies();
     suspendTxBuddies();
 
     if (m_streamId == nullptr)
     {
+        // Prevent buddies from configuring the device while we set up the stream
+        QMutexLocker deviceLocker(&m_deviceShared.m_deviceParams->m_mutex);
+
         try
         {
             uhd::usrp::multi_usrp::sptr usrp = m_deviceShared.m_deviceParams->getDevice();
 
             // Apply settings before creating stream
             // However, don't set LPF to <10MHz at this stage, otherwise there is massive TX LO leakage
-            applySettings(m_settings, QList<QString>(), true, true);
+            // Actual settings are reported back to handleMessage, which forwards them to buddies and GUI
+            USRPOutputThread::applyDeviceSettings(m_deviceShared.m_deviceParams, m_deviceShared.m_channel, settings, QList<QString>(), true, true, false, getInputMessageQueue());
             usrp->set_tx_bandwidth(56000000, m_deviceShared.m_channel);
 
             // set up the stream
@@ -341,28 +455,37 @@ bool USRPOutput::acquireChannel()
             // Match our transmit buffer size to what UHD uses
             m_bufSamples = m_streamId->get_max_num_samps();
 
-            // Wait for reference and LO to lock
-            DeviceUSRP::waitForLock(usrp, m_settings.m_clockSource, m_deviceShared.m_channel);
+            // Wait for reference and LO to lock. Use actual clock source, in case requested clock wasn't detected
+            DeviceUSRP::waitForLock(usrp, QString::fromStdString(usrp->get_clock_source(0)), m_deviceShared.m_channel, false);
 
             // Now we can set desired bandwidth
-            usrp->set_tx_bandwidth(m_settings.m_lpfBW, m_deviceShared.m_channel);
+            usrp->set_tx_bandwidth(settings.m_lpfBW, m_deviceShared.m_channel);
         }
         catch (std::exception& e)
         {
-            qDebug() << "USRPOutput::acquireChannel: exception: " << e.what();
+            qCritical() << "USRPOutput::acquireChannel: exception: " << e.what();
         }
+
+        // Can't run without a stream
+        success = m_streamId != nullptr;
     }
 
     resumeTxBuddies();
     resumeRxBuddies();
 
-    m_channelAcquired = true;
+    m_channelAcquired = success;
 
-    return true;
+    return success;
 }
 
 void USRPOutput::releaseChannel()
 {
+    // Hold buddies and device mutexes across suspend...resume, so buddies doing the same at the same time
+    // can't interleave (which could leave a buddy suspended), and buddy lists can't be changed while we use them.
+    // This also means the stream is destroyed with the device mutex held.
+    QMutexLocker buddiesLocker(&DeviceAPI::getBuddiesMutex());
+    QMutexLocker deviceLocker(&m_deviceShared.m_deviceParams->m_mutex);
+
     suspendRxBuddies();
     suspendTxBuddies();
 
@@ -377,9 +500,10 @@ void USRPOutput::releaseChannel()
 
 void USRPOutput::init()
 {
-    applySettings(m_settings, QList<QString>(), false, true);
+    applySettings(m_settings, QList<QString>(), true);
 }
 
+// Called from the device engine thread
 bool USRPOutput::start()
 {
     QMutexLocker mutexLocker(&m_mutex);
@@ -388,26 +512,66 @@ bool USRPOutput::start()
         return true;
     }
 
-    if (!m_deviceShared.m_deviceParams->getDevice()) {
+    if (!m_deviceShared.m_deviceParams || !m_deviceShared.m_deviceParams->getDevice()) {
         return false;
     }
 
-    if (!acquireChannel()) {
+    // Create thread before acquiring the channel, so settings changed while the channel is
+    // being acquired are queued to it, to be applied once start() has returned.
+    USRPOutputThread *thread = new USRPOutputThread(m_deviceShared.m_deviceParams, m_deviceShared.m_channel,
+        &m_sampleSourceFifo, getInputMessageQueue());
+    // Publish the thread and take a copy of the settings atomically with respect to applySettings, so
+    // settings changed in the GUI thread while the channel is being acquired are either in the copy or
+    // queued to the thread, to be applied once start() has returned
+    USRPOutputSettings settings;
+    {
+        QMutexLocker settingsLocker(&m_settingsMutex);
+        QMutexLocker threadLocker(&m_threadMutex);
+        m_usrpOutputThread = thread;
+        settings = m_settings;
+    }
+
+    if (!acquireChannel(settings))
+    {
+        {
+            QMutexLocker threadLocker(&m_threadMutex);
+            m_usrpOutputThread = nullptr;
+        }
+        delete thread;
         return false;
     }
 
-    m_usrpOutputThread = new USRPOutputThread(m_streamId, m_bufSamples, &m_sampleSourceFifo);
-    qDebug("USRPOutput::start: thread created");
+    {
+        QMutexLocker threadLocker(&m_threadMutex);
+        thread->setStream(m_streamId, m_bufSamples);
+    }
+    thread->setLog2Interpolation(settings.m_log2SoftInterp);
 
-    m_usrpOutputThread->setLog2Interpolation(m_settings.m_log2SoftInterp);
-    m_usrpOutputThread->startWork();
+    // Size FIFO for the sample rate, in case a resize was lost when stopping.
+    // This is safe here, as we are in the device engine thread (the FIFO writer) and streaming (the reader) hasn't started.
+    // Any resize requested since the thread was published is queued to it, to be performed after this.
+    {
+        unsigned int fifoRate = (unsigned int) settings.m_devSampleRate / (1<<settings.m_log2SoftInterp);
+        fifoRate = fifoRate < 48000U ? 48000U : fifoRate; // DeviceUSRPShared::m_sampleFifoMinRate
+        m_sampleSourceFifo.resize(SampleSourceFifo::getSizePolicy(fifoRate));
+    }
 
-    m_deviceShared.m_thread = m_usrpOutputThread;
+    {
+        // Start streaming and make the thread visible to buddies atomically, so a buddy that is acquiring
+        // its channel (holding the device mutex) can't miss suspending us
+        QMutexLocker deviceLocker(&m_deviceShared.m_deviceParams->m_mutex);
+        thread->startWork();
+        m_deviceShared.m_thread = thread;
+    }
+
+    qDebug("USRPOutput::start: thread started");
+
     m_running = true;
 
     return true;
 }
 
+// Usually called from the device engine thread, but can be called from the GUI thread in the destructor
 void USRPOutput::stop()
 {
     QMutexLocker mutexLocker(&m_mutex);
@@ -419,14 +583,45 @@ void USRPOutput::stop()
     qDebug("USRPOutput::stop");
     m_running = false;
 
-    if (m_usrpOutputThread)
+    USRPOutputThread *thread;
     {
-        m_usrpOutputThread->stopWork();
-        delete m_usrpOutputThread;
-        m_usrpOutputThread = nullptr;
+        QMutexLocker threadLocker(&m_threadMutex);
+        thread = m_usrpOutputThread;
     }
 
-    m_deviceShared.m_thread = 0;
+    if (thread)
+    {
+        // Wait for any settings being applied in the device engine thread to complete and prevent any more
+        thread->detach();
+
+        {
+            // Clear before deleting the thread, so buddies can't access it while it's being destroyed.
+            // Device mutex prevents buddies accessing it while we clear it and stop it
+            QMutexLocker deviceLocker(&m_deviceShared.m_deviceParams->m_mutex);
+            m_deviceShared.m_thread = nullptr;
+            thread->stopWork();
+        }
+
+        // Only clear after streaming has stopped, so resizeSampleSourceFifo doesn't resize the FIFO
+        // directly while it is being read. A resize queued to the detached thread is lost, but the
+        // FIFO is resized when next started.
+        {
+            QMutexLocker threadLocker(&m_threadMutex);
+            m_usrpOutputThread = nullptr;
+        }
+
+        // Release stream, so it's destroyed before the device, even if the thread is deleted later
+        thread->releaseStream();
+
+        QThread *ownerThread = thread->thread();
+        if (!ownerThread || (ownerThread == QThread::currentThread()) || ownerThread->isFinished()) {
+            delete thread;
+        } else {
+            // Called from another thread while the device engine thread is still running, which may have
+            // a pending call to handleInputMessages, so delete it in the device engine thread
+            thread->deleteLater();
+        }
+    }
 
     releaseChannel();
 }
@@ -440,10 +635,14 @@ bool USRPOutput::deserialize(const QByteArray& data)
 {
     bool success = true;
 
-    if (!m_settings.deserialize(data))
     {
-        m_settings.resetToDefaults();
-        success = false;
+        QMutexLocker settingsLocker(&m_settingsMutex);
+
+        if (!m_settings.deserialize(data))
+        {
+            m_settings.resetToDefaults();
+            success = false;
+        }
     }
 
     MsgConfigureUSRP* message = MsgConfigureUSRP::create(m_settings, QList<QString>(), true);
@@ -496,6 +695,13 @@ int USRPOutput::getChannelIndex()
 
 void USRPOutput::getLORange(float& minF, float& maxF) const
 {
+    if (!m_deviceShared.m_deviceParams)
+    {
+        minF = 0.0f;
+        maxF = 0.0f;
+        return;
+    }
+
     try
     {
         minF = m_deviceShared.m_deviceParams->m_loRangeTx.start();
@@ -511,6 +717,13 @@ void USRPOutput::getLORange(float& minF, float& maxF) const
 
 void USRPOutput::getSRRange(float& minF, float& maxF) const
 {
+    if (!m_deviceShared.m_deviceParams)
+    {
+        minF = 0.0f;
+        maxF = 0.0f;
+        return;
+    }
+
     try
     {
         minF = m_deviceShared.m_deviceParams->m_srRangeTx.start();
@@ -518,7 +731,7 @@ void USRPOutput::getSRRange(float& minF, float& maxF) const
     }
     catch (std::exception& e)
     {
-        qDebug() << "USRPOutput::getLORange: exception: " << e.what();
+        qDebug() << "USRPOutput::getSRRange: exception: " << e.what();
         minF = 0.0f;
         maxF = 0.0f;
     }
@@ -526,6 +739,13 @@ void USRPOutput::getSRRange(float& minF, float& maxF) const
 
 void USRPOutput::getLPRange(float& minF, float& maxF) const
 {
+    if (!m_deviceShared.m_deviceParams)
+    {
+        minF = 0.0f;
+        maxF = 0.0f;
+        return;
+    }
+
     try
     {
         minF = m_deviceShared.m_deviceParams->m_lpfRangeTx.start();
@@ -533,7 +753,7 @@ void USRPOutput::getLPRange(float& minF, float& maxF) const
     }
     catch (std::exception& e)
     {
-        qDebug() << "USRPOutput::getLORange: exception: " << e.what();
+        qDebug() << "USRPOutput::getLPRange: exception: " << e.what();
         minF = 0.0f;
         maxF = 0.0f;
     }
@@ -541,6 +761,13 @@ void USRPOutput::getLPRange(float& minF, float& maxF) const
 
 void USRPOutput::getGainRange(float& minF, float& maxF) const
 {
+    if (!m_deviceShared.m_deviceParams)
+    {
+        minF = 0.0f;
+        maxF = 0.0f;
+        return;
+    }
+
     try
     {
         minF = m_deviceShared.m_deviceParams->m_gainRangeTx.start();
@@ -548,7 +775,7 @@ void USRPOutput::getGainRange(float& minF, float& maxF) const
     }
     catch (std::exception& e)
     {
-        qDebug() << "USRPOutput::getLORange: exception: " << e.what();
+        qDebug() << "USRPOutput::getGainRange: exception: " << e.what();
         minF = 0.0f;
         maxF = 0.0f;
     }
@@ -556,12 +783,12 @@ void USRPOutput::getGainRange(float& minF, float& maxF) const
 
 QStringList USRPOutput::getTxAntennas() const
 {
-    return m_deviceShared.m_deviceParams->m_txAntennas;
+    return m_deviceShared.m_deviceParams ? m_deviceShared.m_deviceParams->m_txAntennas : QStringList();
 }
 
 QStringList USRPOutput::getClockSources() const
 {
-    return m_deviceShared.m_deviceParams->m_clockSources;
+    return m_deviceShared.m_deviceParams ? m_deviceShared.m_deviceParams->m_clockSources : QStringList();
 }
 
 bool USRPOutput::handleMessage(const Message& message)
@@ -571,7 +798,7 @@ bool USRPOutput::handleMessage(const Message& message)
         MsgConfigureUSRP& conf = (MsgConfigureUSRP&) message;
         qDebug() << "USRPOutput::handleMessage: MsgConfigureUSRP";
 
-        if (!applySettings(conf.getSettings(), conf.getSettingsKeys(), false, conf.getForce())) {
+        if (!applySettings(conf.getSettings(), conf.getSettingsKeys(), conf.getForce())) {
             qDebug("USRPOutput::handleMessage config error");
         }
 
@@ -599,13 +826,58 @@ bool USRPOutput::handleMessage(const Message& message)
 
         return true;
     }
+    else if (DeviceUSRPShared::MsgReportDeviceSettings::match(message))
+    {
+        // Settings actually set on the device, as read back in the device engine thread
+        DeviceUSRPShared::MsgReportDeviceSettings& report = (DeviceUSRPShared::MsgReportDeviceSettings&) message;
+        QMutexLocker settingsLocker(&m_settingsMutex);
+
+        if (report.getClockSourceValid())
+        {
+            m_settings.m_clockSource = report.getClockSource();
+            forwardClockSource();
+        }
+
+        if (report.getSampleRateValid())
+        {
+            int devSampleRate = (int) std::round(report.getSampleRate());
+            int masterClockRate = (int) std::round(report.getMasterClockRate());
+            qDebug() << "USRPOutput::handleMessage: MsgReportDeviceSettings: devSampleRate:" << devSampleRate << "masterClockRate:" << masterClockRate;
+
+            if ((devSampleRate != m_settings.m_devSampleRate) || (masterClockRate != m_settings.m_masterClockRate))
+            {
+                if (devSampleRate != m_settings.m_devSampleRate) {
+                    resizeSampleSourceFifo(devSampleRate, m_settings.m_log2SoftInterp);
+                }
+
+                m_settings.m_devSampleRate = devSampleRate;
+                m_settings.m_masterClockRate = masterClockRate;
+
+                if (!report.getForwardToBuddies()) {
+                    notifySampleRateChange();
+                }
+            }
+
+            // Result of our own settings change, so the device has changed and buddies need to be informed,
+            // even if the rate is as we requested, as buddies won't have been informed when we weren't running
+            if (report.getForwardToBuddies()) {
+                forwardChangeAllDSP();
+            }
+        }
+
+        return true;
+    }
     else if (DeviceUSRPShared::MsgReportBuddyChange::match(message))
     {
         DeviceUSRPShared::MsgReportBuddyChange& report = (DeviceUSRPShared::MsgReportBuddyChange&) message;
+        QMutexLocker settingsLocker(&m_settingsMutex);
+        uhd::usrp::multi_usrp::sptr device = m_deviceShared.m_deviceParams ? m_deviceShared.m_deviceParams->getDevice() : nullptr;
+        int devSampleRate = m_settings.m_devSampleRate;
 
-        if (!report.getRxElseTx())
+        // Tx buddy changed settings. Only copy them if the buddy's channel shares our LO (E.g. B210),
+        // not if it has an independent front-end (E.g. X310 with two daughterboards)
+        if (!report.getRxElseTx() && DeviceUSRP::channelsShareLO(device, false, report.getChannel(), m_deviceShared.m_channel))
         {
-            // Tx buddy changed settings, we need to copy
             m_settings.m_devSampleRate   = report.getDevSampleRate();
             m_settings.m_centerFrequency = report.getCenterFrequency();
             m_settings.m_loOffset        = report.getLOOffset();
@@ -617,23 +889,28 @@ bool USRPOutput::handleMessage(const Message& message)
         qDebug() << "USRPOutput::handleMessage MsgReportBuddyChange";
         qDebug() << "m_masterClockRate " << m_settings.m_masterClockRate;
 
-        DSPSignalNotification *notif = new DSPSignalNotification(
-                m_settings.m_devSampleRate/(1<<m_settings.m_log2SoftInterp),
-                m_settings.m_centerFrequency);
-        m_deviceAPI->getDeviceEngineInputMessageQueue()->push(notif);
-
-        if (getMessageQueueToGUI())
-        {
-            DeviceUSRPShared::MsgReportBuddyChange *reportToGUI = DeviceUSRPShared::MsgReportBuddyChange::create(
-                    m_settings.m_devSampleRate, m_settings.m_centerFrequency, m_settings.m_loOffset,  m_settings.m_masterClockRate, false);
-            getMessageQueueToGUI()->push(reportToGUI);
+        if (m_settings.m_devSampleRate != devSampleRate) {
+            resizeSampleSourceFifo(m_settings.m_devSampleRate, m_settings.m_log2SoftInterp);
         }
+
+        // A buddy changing the master clock rate may have changed our sample rate, so have the device
+        // engine thread read back the actual rate, which will be reported via MsgReportDeviceSettings
+        {
+            QMutexLocker threadLocker(&m_threadMutex);
+
+            if (m_usrpOutputThread) {
+                m_usrpOutputThread->getInputMessageQueue()->push(DeviceUSRPShared::MsgReadDeviceSampleRate::create());
+            }
+        }
+
+        notifySampleRateChange();
 
         return true;
     }
     else if (DeviceUSRPShared::MsgReportClockSourceChange::match(message))
     {
         DeviceUSRPShared::MsgReportClockSourceChange& report = (DeviceUSRPShared::MsgReportClockSourceChange&) message;
+        QMutexLocker settingsLocker(&m_settingsMutex);
 
         m_settings.m_clockSource = report.getClockSource();
 
@@ -646,11 +923,29 @@ bool USRPOutput::handleMessage(const Message& message)
 
         return true;
     }
+    else if (MsgGetDeviceInfo::match(message))
+    {
+        // Reading a sensor is quick, so do it here, but don't block the GUI thread
+        // if the device is being configured in a device engine thread
+        DeviceUSRPParams *deviceParams = m_deviceShared.m_deviceParams;
+
+        if (deviceParams && deviceParams->getDevice() && deviceParams->m_mutex.tryLock())
+        {
+            double temperature = 0.0;
+            bool temperatureValid = DeviceUSRP::getTemperature(deviceParams->getDevice(), false, m_deviceShared.m_channel, temperature);
+            deviceParams->m_mutex.unlock();
+            forwardDeviceInfo(temperatureValid, temperature);
+        }
+
+        return true;
+    }
     else if (MsgGetStreamInfo::match(message))
     {
         if (m_deviceAPI->getSamplingDeviceGUIMessageQueue())
         {
-            if ((m_streamId != nullptr) && m_channelAcquired)
+            QMutexLocker threadLocker(&m_threadMutex);
+
+            if (m_usrpOutputThread)
             {
                 bool active;
                 quint32 underflows;
@@ -680,328 +975,277 @@ bool USRPOutput::handleMessage(const Message& message)
     }
 }
 
-bool USRPOutput::applySettings(const USRPOutputSettings& settings, const QList<QString>& settingsKeys, bool preGetStream, bool force)
+void USRPOutput::resizeSampleSourceFifo(int devSampleRate, unsigned int log2Interp)
 {
-    qDebug() << "USRPOutput::applySettings: preGetStream:" << preGetStream << " force:" << force << settings.getDebugString(settingsKeys, force);
-    bool forwardChangeOwnDSP = false;
-    bool forwardChangeTxDSP  = false;
-    bool forwardChangeAllDSP = false;
-    bool forwardClockSource  = false;
-    bool checkRates          = false;
+#if defined(_MSC_VER)
+    unsigned int fifoRate = (unsigned int) devSampleRate / (1<<log2Interp);
+    fifoRate = fifoRate < 48000U ? 48000U : fifoRate;
+#else
+    unsigned int fifoRate = std::max(
+        (unsigned int) devSampleRate / (1<<log2Interp),
+        DeviceUSRPShared::m_sampleFifoMinRate);
+#endif
+    unsigned int size = SampleSourceFifo::getSizePolicy(fifoRate);
+    QMutexLocker threadLocker(&m_threadMutex);
 
-    try
+    if (m_usrpOutputThread)
     {
+        // Samples are written to the FIFO in the device engine thread, so resize it there, with streaming paused
+        m_usrpOutputThread->getInputMessageQueue()->push(DeviceUSRPShared::MsgResizeSampleFifo::create(size));
+    }
+    else
+    {
+        m_sampleSourceFifo.resize(size);
+    }
+
+    qDebug("USRPOutput::resizeSampleSourceFifo: rate %u size %u", fifoRate, size);
+}
+
+bool USRPOutput::applySettings(const USRPOutputSettings& settings, const QList<QString>& settingsKeys, bool force)
+{
+    QMutexLocker settingsLocker(&m_settingsMutex);
+    qDebug() << "USRPOutput::applySettings: force:" << force << settings.getDebugString(settingsKeys, force);
+    bool changeOwnDSP = false;
+    bool changeTxDSP  = false;
+    bool changeAllDSP = false;
+
+    if (settingsKeys.contains("devSampleRate") || force) {
+        changeAllDSP = true;
+    }
+
+    if (settingsKeys.contains("centerFrequency")
+        || settingsKeys.contains("loOffset")
+        || settingsKeys.contains("transverterMode")
+        || settingsKeys.contains("transverterDeltaFrequency")
+        || force)
+    {
+        changeTxDSP = true;
+
         qint64 deviceCenterFrequency = settings.m_centerFrequency;
         deviceCenterFrequency -= settings.m_transverterMode ? settings.m_transverterDeltaFrequency : 0;
         deviceCenterFrequency = deviceCenterFrequency < 0 ? 0 : deviceCenterFrequency;
-
-        // apply settings
-
-        if (settingsKeys.contains("clockSource") || force)
-        {
-            if (m_deviceShared.m_deviceParams->getDevice() && (m_channelAcquired || preGetStream))
-            {
-                try
-                {
-                    m_deviceShared.m_deviceParams->getDevice()->set_clock_source(settings.m_clockSource.toStdString(), 0);
-                    forwardClockSource = true;
-                    qDebug() << "USRPOutput::applySettings: clock set to" << settings.m_clockSource;
-                }
-                catch (std::exception &e)
-                {
-                    // An exception will be thrown if the clock is not detected
-                    // however, get_clock_source called below will still say the clock has is set
-                    qCritical() << "USRPOutput::applySettings: could not set clock " << settings.m_clockSource;
-                    // So, default back to internal
-                    m_deviceShared.m_deviceParams->getDevice()->set_clock_source("internal", 0);
-                    // notify GUI that source couldn't be set
-                    forwardClockSource = true;
-                }
-            }
-            else
-            {
-                qCritical() << "USRPOutput::applySettings: could not set clock to " << settings.m_clockSource;
-            }
-        }
-
-        if (settingsKeys.contains("devSampleRate") || force)
-        {
-            forwardChangeAllDSP = true;
-
-            if (m_deviceShared.m_deviceParams->getDevice() && (m_channelAcquired || preGetStream))
-            {
-                m_deviceShared.m_deviceParams->getDevice()->set_tx_rate(settings.m_devSampleRate, m_deviceShared.m_channel);
-                qDebug("USRPOutput::applySettings: set sample rate set to %d", settings.m_devSampleRate);
-                checkRates = true;
-            }
-        }
-
-        if (settingsKeys.contains("centerFrequency")
-            || settingsKeys.contains("loOffset")
-            || settingsKeys.contains("transverterMode")
-            || settingsKeys.contains("transverterDeltaFrequency")
-            || force)
-        {
-            forwardChangeTxDSP = true;
-
-            if (m_deviceShared.m_deviceParams->getDevice() && (m_channelAcquired || preGetStream))
-            {
-                if (settings.m_loOffset != 0)
-                {
-                    uhd::tune_request_t tune_request(deviceCenterFrequency, settings.m_loOffset);
-                    m_deviceShared.m_deviceParams->getDevice()->set_tx_freq(tune_request, m_deviceShared.m_channel);
-                }
-                else
-                {
-                    uhd::tune_request_t tune_request(deviceCenterFrequency);
-                    m_deviceShared.m_deviceParams->getDevice()->set_tx_freq(tune_request, m_deviceShared.m_channel);
-                }
-                m_deviceShared.m_centerFrequency = deviceCenterFrequency; // for buddies
-                qDebug("USRPOutput::applySettings: frequency set to %lld with LO offset %d", deviceCenterFrequency, settings.m_loOffset);
-            }
-        }
-
-        if (settingsKeys.contains("devSampleRate")
-           || settingsKeys.contains("log2SoftInterp") || force)
-        {
-#if defined(_MSC_VER)
-            unsigned int fifoRate = (unsigned int) settings.m_devSampleRate / (1<<settings.m_log2SoftInterp);
-            fifoRate = fifoRate < 48000U ? 48000U : fifoRate;
-#else
-            unsigned int fifoRate = std::max(
-                (unsigned int) settings.m_devSampleRate / (1<<settings.m_log2SoftInterp),
-                DeviceUSRPShared::m_sampleFifoMinRate);
-#endif
-            m_sampleSourceFifo.resize(SampleSourceFifo::getSizePolicy(fifoRate));
-            qDebug("USRPOutput::applySettings: resize FIFO: rate %u", fifoRate);
-        }
-
-        if (settingsKeys.contains("gain") || force)
-        {
-            if (m_deviceShared.m_deviceParams->getDevice() && (m_channelAcquired || preGetStream))
-            {
-                m_deviceShared.m_deviceParams->getDevice()->set_tx_gain(settings.m_gain, m_deviceShared.m_channel);
-                qDebug() << "USRPOutput::applySettings: Gain set to " << settings.m_gain;
-            }
-        }
-
-        if (settingsKeys.contains("lpfBW") || force)
-        {
-            // Don't set bandwidth before get_tx_stream (See above)
-            if (m_deviceShared.m_deviceParams->getDevice() && m_channelAcquired)
-            {
-                m_deviceShared.m_deviceParams->getDevice()->set_tx_bandwidth(settings.m_lpfBW, m_deviceShared.m_channel);
-                qDebug("USRPOutput::applySettings: LPF BW: %f for channel %d", settings.m_lpfBW, m_deviceShared.m_channel);
-            }
-        }
-
-        if (settingsKeys.contains("log2SoftInterp") || force)
-        {
-            forwardChangeOwnDSP = true;
-            m_deviceShared.m_log2Soft = settings.m_log2SoftInterp; // for buddies
-
-            if (m_usrpOutputThread)
-            {
-                m_usrpOutputThread->setLog2Interpolation(settings.m_log2SoftInterp);
-                qDebug() << "USRPOutput::applySettings: set soft interpolation to " << (1<<settings.m_log2SoftInterp);
-            }
-        }
-
-        if (settingsKeys.contains("antennaPath") || force)
-        {
-            if (m_deviceShared.m_deviceParams->getDevice() && (m_channelAcquired || preGetStream))
-            {
-                m_deviceShared.m_deviceParams->getDevice()->set_tx_antenna(settings.m_antennaPath.toStdString(), m_deviceShared.m_channel);
-                qDebug("USRPOutput::applySettings: set antenna path to %s on channel %d", qPrintable(settings.m_antennaPath), m_deviceShared.m_channel);
-            }
-        }
-
-        const std::string gpioBank = "FP0"; // Front Panel GPIO
-
-        if (settingsKeys.contains("gpioDir") || force)
-        {
-            if (m_deviceShared.m_deviceParams->getDevice())
-            {
-                std::vector<std::string> banks = m_deviceShared.m_deviceParams->getDevice()->get_gpio_banks(0);
-                for (const auto& bank : banks)
-                {
-                    if (!gpioBank.compare(bank))
-                    {
-                        m_deviceShared.m_deviceParams->getDevice()->set_gpio_attr(gpioBank, "CTRL", ~settings.m_gpioDir, 0xff); // 0 for GPIO, 1 for ATR
-                        m_deviceShared.m_deviceParams->getDevice()->set_gpio_attr(gpioBank, "DDR", settings.m_gpioDir, 0xff); // 0 for input, 1 for output
-                        qDebug() << "USRPOutput::applySettings: set GPIO dir to" << settings.m_gpioDir;
-                    }
-                }
-            }
-        }
-
-        if (settingsKeys.contains("gpioPins") || force)
-        {
-            if (m_deviceShared.m_deviceParams->getDevice())
-            {
-                std::vector<std::string> banks = m_deviceShared.m_deviceParams->getDevice()->get_gpio_banks(0);
-                for (const auto& bank : banks)
-                {
-                    if (!gpioBank.compare(bank))
-                    {
-                        m_deviceShared.m_deviceParams->getDevice()->set_gpio_attr(gpioBank, "OUT", settings.m_gpioPins, 0xff);
-                        qDebug() << "USRPOutput::applySettings: set GPIO pins to" << settings.m_gpioPins;
-                    }
-                }
-            }
-        }
-
-        if (settingsKeys.contains("useReverseAPI"))
-        {
-            bool fullUpdate = (settingsKeys.contains("useReverseAPI") && settings.m_useReverseAPI) ||
-                settingsKeys.contains("reverseAPIAddress") ||
-                settingsKeys.contains("reverseAPIPort") ||
-                settingsKeys.contains("reverseAPIDeviceIndex");
-            webapiReverseSendSettings(settingsKeys, settings, fullUpdate || force);
-        }
-
-        if (force) {
-            m_settings = settings;
-        } else {
-            m_settings.applySettings(settingsKeys, settings);
-        }
-
-        if (checkRates)
-        {
-            // Check if requested rate could actually be met and what master clock rate we ended up with
-            double actualSampleRate = m_deviceShared.m_deviceParams->getDevice()->get_tx_rate(m_deviceShared.m_channel);
-            qDebug("USRPOutput::applySettings: actual sample rate %f", actualSampleRate);
-            double masterClockRate = m_deviceShared.m_deviceParams->getDevice()->get_master_clock_rate();
-            qDebug("USRPOutput::applySettings: master_clock_rate %f", masterClockRate);
-            m_settings.m_devSampleRate = actualSampleRate;
-            m_settings.m_masterClockRate = masterClockRate;
-        }
-
-        // forward changes to buddies or oneself
-
-        if (forwardChangeAllDSP)
-        {
-            qDebug("USRPOutput::applySettings: forward change to all buddies");
-
-            // send to self first
-            DSPSignalNotification *notif = new DSPSignalNotification(
-                    m_settings.m_devSampleRate/(1<<m_settings.m_log2SoftInterp),
-                    m_settings.m_centerFrequency);
-            m_deviceAPI->getDeviceEngineInputMessageQueue()->push(notif);
-
-            // send to sink buddies
-            const std::vector<DeviceAPI*>& sinkBuddies = m_deviceAPI->getSinkBuddies();
-            std::vector<DeviceAPI*>::const_iterator itSink = sinkBuddies.begin();
-
-            for (; itSink != sinkBuddies.end(); ++itSink)
-            {
-                DeviceUSRPShared::MsgReportBuddyChange *report = DeviceUSRPShared::MsgReportBuddyChange::create(
-                        m_settings.m_devSampleRate, m_settings.m_centerFrequency, m_settings.m_loOffset, m_settings.m_masterClockRate, false);
-                (*itSink)->getSamplingDeviceInputMessageQueue()->push(report);
-            }
-
-            // send to source buddies
-            const std::vector<DeviceAPI*>& sourceBuddies = m_deviceAPI->getSourceBuddies();
-            std::vector<DeviceAPI*>::const_iterator itSource = sourceBuddies.begin();
-
-            for (; itSource != sourceBuddies.end(); ++itSource)
-            {
-                DeviceUSRPShared::MsgReportBuddyChange *report = DeviceUSRPShared::MsgReportBuddyChange::create(
-                        m_settings.m_devSampleRate, m_settings.m_centerFrequency, m_settings.m_loOffset, m_settings.m_masterClockRate, false);
-                (*itSource)->getSamplingDeviceInputMessageQueue()->push(report);
-            }
-
-            // send to GUI so it can see master clock rate and if actual rate differs
-            if (m_deviceAPI->getSamplingDeviceGUIMessageQueue())
-            {
-                DeviceUSRPShared::MsgReportBuddyChange *report = DeviceUSRPShared::MsgReportBuddyChange::create(
-                        m_settings.m_devSampleRate, m_settings.m_centerFrequency, m_settings.m_loOffset, m_settings.m_masterClockRate, false);
-                m_deviceAPI->getSamplingDeviceGUIMessageQueue()->push(report);
-            }
-        }
-        else if (forwardChangeTxDSP)
-        {
-            qDebug("USRPOutput::applySettings: forward change to Tx buddies");
-
-            int sampleRate = m_settings.m_devSampleRate/(1<<m_settings.m_log2SoftInterp);
-
-            // send to self first
-            DSPSignalNotification *notif = new DSPSignalNotification(sampleRate, m_settings.m_centerFrequency);
-            m_deviceAPI->getDeviceEngineInputMessageQueue()->push(notif);
-
-            // send to sink buddies
-            const std::vector<DeviceAPI*>& sinkBuddies = m_deviceAPI->getSinkBuddies();
-            std::vector<DeviceAPI*>::const_iterator itSink = sinkBuddies.begin();
-
-            for (; itSink != sinkBuddies.end(); ++itSink)
-            {
-                DeviceUSRPShared::MsgReportBuddyChange *report = DeviceUSRPShared::MsgReportBuddyChange::create(
-                        m_settings.m_devSampleRate, m_settings.m_centerFrequency, m_settings.m_loOffset, m_settings.m_masterClockRate, false);
-                (*itSink)->getSamplingDeviceInputMessageQueue()->push(report);
-            }
-        }
-        else if (forwardChangeOwnDSP)
-        {
-            qDebug("USRPOutput::applySettings: forward change to self only");
-
-            int sampleRate = m_settings.m_devSampleRate/(1<<m_settings.m_log2SoftInterp);
-            DSPSignalNotification *notif = new DSPSignalNotification(sampleRate, m_settings.m_centerFrequency);
-            m_deviceAPI->getDeviceEngineInputMessageQueue()->push(notif);
-        }
-
-        if (forwardClockSource)
-        {
-            // get what clock is actually set, in case requested clock couldn't be set
-            if (m_deviceShared.m_deviceParams->getDevice())
-            {
-                try
-                {
-                    m_settings.m_clockSource = QString::fromStdString(m_deviceShared.m_deviceParams->getDevice()->get_clock_source(0));
-                    qDebug() << "USRPOutput::applySettings: clock source is " << m_settings.m_clockSource;
-                }
-                catch (std::exception &e)
-                {
-                    qDebug() << "USRPOutput::applySettings: could not get clock source";
-                }
-            }
-
-            // send to GUI in case requested clock isn't detected
-            if (m_deviceAPI->getSamplingDeviceGUIMessageQueue())
-            {
-                DeviceUSRPShared::MsgReportClockSourceChange *report = DeviceUSRPShared::MsgReportClockSourceChange::create(
-                        m_settings.m_clockSource);
-                m_deviceAPI->getSamplingDeviceGUIMessageQueue()->push(report);
-            }
-
-            // send to source buddies
-            const std::vector<DeviceAPI*>& sourceBuddies = m_deviceAPI->getSourceBuddies();
-            std::vector<DeviceAPI*>::const_iterator itSource = sourceBuddies.begin();
-
-            for (; itSource != sourceBuddies.end(); ++itSource)
-            {
-                DeviceUSRPShared::MsgReportClockSourceChange *report = DeviceUSRPShared::MsgReportClockSourceChange::create(
-                        m_settings.m_clockSource);
-                (*itSource)->getSamplingDeviceInputMessageQueue()->push(report);
-            }
-
-            // send to sink buddies
-            const std::vector<DeviceAPI*>& sinkBuddies = m_deviceAPI->getSinkBuddies();
-            std::vector<DeviceAPI*>::const_iterator itSink = sinkBuddies.begin();
-
-            for (; itSink != sinkBuddies.end(); ++itSink)
-            {
-                DeviceUSRPShared::MsgReportClockSourceChange *report = DeviceUSRPShared::MsgReportClockSourceChange::create(
-                        m_settings.m_clockSource);
-                (*itSink)->getSamplingDeviceInputMessageQueue()->push(report);
-            }
-        }
-
-        return true;
+        m_deviceShared.m_centerFrequency = deviceCenterFrequency; // for buddies
     }
-    catch (std::exception &e)
+
+    if (settingsKeys.contains("devSampleRate")
+       || settingsKeys.contains("log2SoftInterp") || force)
     {
-        qDebug() << "USRPOutput::applySettings: exception: " << e.what();
-        return false;
+        resizeSampleSourceFifo(settings.m_devSampleRate, settings.m_log2SoftInterp);
+    }
+
+    if (settingsKeys.contains("log2SoftInterp") || force)
+    {
+        changeOwnDSP = true;
+        m_deviceShared.m_log2Soft = settings.m_log2SoftInterp; // for buddies
+    }
+
+    // Applying settings to the device can take a long time (E.g. sample rate, clock source and bandwidth),
+    // so when running, they are applied in the device engine thread, rather than blocking the GUI thread.
+    // Values actually set are reported back via DeviceUSRPShared::MsgReportDeviceSettings.
+    // When not running, they are applied when the channel is acquired in start(), except for GPIO,
+    // which doesn't require the channel to be acquired.
+    bool threadRunning = false;
+    {
+        QMutexLocker threadLocker(&m_threadMutex);
+
+        if (m_usrpOutputThread)
+        {
+            m_usrpOutputThread->getInputMessageQueue()->push(MsgConfigureUSRP::create(settings, settingsKeys, force));
+            threadRunning = true;
+        }
+    }
+
+    if (!threadRunning && m_deviceShared.m_deviceParams && (settingsKeys.contains("gpioDir") || settingsKeys.contains("gpioPins") || force))
+    {
+        // Don't block the GUI thread if a buddy is configuring the device (E.g. waiting for LO lock). Retry later instead.
+        if (m_deviceShared.m_deviceParams->m_mutex.tryLock())
+        {
+            USRPOutputThread::applyDeviceSettings(m_deviceShared.m_deviceParams, m_deviceShared.m_channel, settings, settingsKeys, force, false, false, nullptr);
+            m_deviceShared.m_deviceParams->m_mutex.unlock();
+        }
+        else
+        {
+            QTimer::singleShot(100, this, [this]() {
+                m_inputMessageQueue.push(MsgConfigureUSRP::create(m_settings, QList<QString>{"gpioDir", "gpioPins"}, false));
+            });
+        }
+    }
+
+    if (settingsKeys.contains("useReverseAPI"))
+    {
+        bool fullUpdate = (settingsKeys.contains("useReverseAPI") && settings.m_useReverseAPI) ||
+            settingsKeys.contains("reverseAPIAddress") ||
+            settingsKeys.contains("reverseAPIPort") ||
+            settingsKeys.contains("reverseAPIDeviceIndex");
+        webapiReverseSendSettings(settingsKeys, settings, fullUpdate || force);
+    }
+
+    if (force) {
+        m_settings = settings;
+    } else {
+        m_settings.applySettings(settingsKeys, settings);
+    }
+
+    // forward changes to buddies or oneself
+    // If the device coerces the sample rate, this will be sent again with the actual rate, once reported
+
+    // When not running, the device hasn't been changed, so buddies don't need to be informed.
+    // They will be informed of the actual settings when we are started.
+    if (!threadRunning)
+    {
+        if (changeAllDSP || changeTxDSP || changeOwnDSP) {
+            forwardChangeOwnDSP();
+        }
+    }
+    else if (changeAllDSP)
+    {
+        forwardChangeAllDSP();
+    }
+    else if (changeTxDSP)
+    {
+        forwardChangeTxDSP();
+    }
+    else if (changeOwnDSP)
+    {
+        forwardChangeOwnDSP();
+    }
+
+    return true;
+}
+
+// Forward sample rate and frequency to self, all buddies and GUI
+void USRPOutput::forwardChangeAllDSP()
+{
+    qDebug("USRPOutput::forwardChangeAllDSP");
+
+    // send to self first
+    forwardChangeOwnDSP();
+
+    // send to sink buddies
+    const std::vector<DeviceAPI*>& sinkBuddies = m_deviceAPI->getSinkBuddies();
+    std::vector<DeviceAPI*>::const_iterator itSink = sinkBuddies.begin();
+
+    for (; itSink != sinkBuddies.end(); ++itSink)
+    {
+        DeviceUSRPShared::MsgReportBuddyChange *report = DeviceUSRPShared::MsgReportBuddyChange::create(
+                m_settings.m_devSampleRate, m_settings.m_centerFrequency, m_settings.m_loOffset, m_settings.m_masterClockRate, false, m_deviceShared.m_channel);
+        (*itSink)->getSamplingDeviceInputMessageQueue()->push(report);
+    }
+
+    // send to source buddies
+    const std::vector<DeviceAPI*>& sourceBuddies = m_deviceAPI->getSourceBuddies();
+    std::vector<DeviceAPI*>::const_iterator itSource = sourceBuddies.begin();
+
+    for (; itSource != sourceBuddies.end(); ++itSource)
+    {
+        DeviceUSRPShared::MsgReportBuddyChange *report = DeviceUSRPShared::MsgReportBuddyChange::create(
+                m_settings.m_devSampleRate, m_settings.m_centerFrequency, m_settings.m_loOffset, m_settings.m_masterClockRate, false, m_deviceShared.m_channel);
+        (*itSource)->getSamplingDeviceInputMessageQueue()->push(report);
+    }
+
+    // send to GUI so it can see master clock rate and if actual rate differs
+    if (m_deviceAPI->getSamplingDeviceGUIMessageQueue())
+    {
+        DeviceUSRPShared::MsgReportBuddyChange *report = DeviceUSRPShared::MsgReportBuddyChange::create(
+                m_settings.m_devSampleRate, m_settings.m_centerFrequency, m_settings.m_loOffset, m_settings.m_masterClockRate, false, m_deviceShared.m_channel);
+        m_deviceAPI->getSamplingDeviceGUIMessageQueue()->push(report);
+    }
+}
+
+// Forward sample rate and frequency to self and Tx buddies
+void USRPOutput::forwardChangeTxDSP()
+{
+    qDebug("USRPOutput::forwardChangeTxDSP");
+
+    // send to self first
+    forwardChangeOwnDSP();
+
+    // send to sink buddies
+    const std::vector<DeviceAPI*>& sinkBuddies = m_deviceAPI->getSinkBuddies();
+    std::vector<DeviceAPI*>::const_iterator itSink = sinkBuddies.begin();
+
+    for (; itSink != sinkBuddies.end(); ++itSink)
+    {
+        DeviceUSRPShared::MsgReportBuddyChange *report = DeviceUSRPShared::MsgReportBuddyChange::create(
+                m_settings.m_devSampleRate, m_settings.m_centerFrequency, m_settings.m_loOffset, m_settings.m_masterClockRate, false, m_deviceShared.m_channel);
+        (*itSink)->getSamplingDeviceInputMessageQueue()->push(report);
+    }
+}
+
+// Forward sample rate and frequency to self only
+void USRPOutput::forwardChangeOwnDSP()
+{
+    int sampleRate = m_settings.m_devSampleRate/(1<<m_settings.m_log2SoftInterp);
+    DSPSignalNotification *notif = new DSPSignalNotification(sampleRate, m_settings.m_centerFrequency);
+    m_deviceAPI->getDeviceEngineInputMessageQueue()->push(notif);
+}
+
+// Forward sample rate and frequency to self and GUI, but not buddies (E.g. when changed by a buddy)
+void USRPOutput::notifySampleRateChange()
+{
+    forwardChangeOwnDSP();
+
+    if (getMessageQueueToGUI())
+    {
+        DeviceUSRPShared::MsgReportBuddyChange *reportToGUI = DeviceUSRPShared::MsgReportBuddyChange::create(
+                m_settings.m_devSampleRate, m_settings.m_centerFrequency, m_settings.m_loOffset,  m_settings.m_masterClockRate, false);
+        getMessageQueueToGUI()->push(reportToGUI);
+    }
+}
+
+// Forward clock source to GUI and all buddies
+void USRPOutput::forwardClockSource()
+{
+    // send to GUI in case requested clock isn't detected
+    if (m_deviceAPI->getSamplingDeviceGUIMessageQueue())
+    {
+        DeviceUSRPShared::MsgReportClockSourceChange *report = DeviceUSRPShared::MsgReportClockSourceChange::create(
+                m_settings.m_clockSource);
+        m_deviceAPI->getSamplingDeviceGUIMessageQueue()->push(report);
+    }
+
+    // send to source buddies
+    const std::vector<DeviceAPI*>& sourceBuddies = m_deviceAPI->getSourceBuddies();
+    std::vector<DeviceAPI*>::const_iterator itSource = sourceBuddies.begin();
+
+    for (; itSource != sourceBuddies.end(); ++itSource)
+    {
+        DeviceUSRPShared::MsgReportClockSourceChange *report = DeviceUSRPShared::MsgReportClockSourceChange::create(
+                m_settings.m_clockSource);
+        (*itSource)->getSamplingDeviceInputMessageQueue()->push(report);
+    }
+
+    // send to sink buddies
+    const std::vector<DeviceAPI*>& sinkBuddies = m_deviceAPI->getSinkBuddies();
+    std::vector<DeviceAPI*>::const_iterator itSink = sinkBuddies.begin();
+
+    for (; itSink != sinkBuddies.end(); ++itSink)
+    {
+        DeviceUSRPShared::MsgReportClockSourceChange *report = DeviceUSRPShared::MsgReportClockSourceChange::create(
+                m_settings.m_clockSource);
+        (*itSink)->getSamplingDeviceInputMessageQueue()->push(report);
+    }
+}
+
+// Forward device info to our GUI and the GUIs of all buddies
+void USRPOutput::forwardDeviceInfo(bool temperatureValid, float temperature)
+{
+    if (m_deviceAPI->getSamplingDeviceGUIMessageQueue()) {
+        m_deviceAPI->getSamplingDeviceGUIMessageQueue()->push(DeviceUSRPShared::MsgReportDeviceInfo::create(temperatureValid, temperature));
+    }
+
+    for (const auto& buddy : m_deviceAPI->getSourceBuddies())
+    {
+        if (buddy->getSamplingDeviceGUIMessageQueue()) {
+            buddy->getSamplingDeviceGUIMessageQueue()->push(DeviceUSRPShared::MsgReportDeviceInfo::create(temperatureValid, temperature));
+        }
+    }
+
+    for (const auto& buddy : m_deviceAPI->getSinkBuddies())
+    {
+        if (buddy->getSamplingDeviceGUIMessageQueue()) {
+            buddy->getSamplingDeviceGUIMessageQueue()->push(DeviceUSRPShared::MsgReportDeviceInfo::create(temperatureValid, temperature));
+        }
     }
 }
 
@@ -1066,7 +1310,7 @@ void USRPOutput::webapiUpdateDeviceSettings(
         settings.m_gain = response.getUsrpOutputSettings()->getGain();
     }
     if (deviceSettingsKeys.contains("log2SoftInterp")) {
-        settings.m_log2SoftInterp = response.getUsrpOutputSettings()->getLog2SoftInterp();
+        settings.m_log2SoftInterp = qBound(0, response.getUsrpOutputSettings()->getLog2SoftInterp(), 6);
     }
     if (deviceSettingsKeys.contains("lpfBW")) {
         settings.m_lpfBW = response.getUsrpOutputSettings()->getLpfBw();
@@ -1182,7 +1426,9 @@ void USRPOutput::webapiFormatDeviceReport(SWGSDRangel::SWGDeviceReport& response
     quint32 underflows = 0;
     quint32 droppedPackets = 0;
 
-    if ((m_streamId != nullptr) && (m_usrpOutputThread != nullptr) && m_channelAcquired)
+    QMutexLocker threadLocker(&m_threadMutex);
+
+    if (m_usrpOutputThread)
     {
         m_usrpOutputThread->getStreamStatus(active, underflows, droppedPackets);
         success = true;

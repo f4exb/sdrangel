@@ -88,6 +88,8 @@ SWGDeviceReport::SWGDeviceReport() {
     m_usrp_input_report_isSet = false;
     usrp_output_report = nullptr;
     m_usrp_output_report_isSet = false;
+    usrp_mimo_report = nullptr;
+    m_usrp_mimo_report_isSet = false;
     xtrx_input_report = nullptr;
     m_xtrx_input_report_isSet = false;
     xtrx_output_report = nullptr;
@@ -166,6 +168,8 @@ SWGDeviceReport::init() {
     m_usrp_input_report_isSet = false;
     usrp_output_report = new SWGUSRPOutputReport();
     m_usrp_output_report_isSet = false;
+    usrp_mimo_report = new SWGUSRPMIMOReport();
+    m_usrp_mimo_report_isSet = false;
     xtrx_input_report = new SWGXtrxInputReport();
     m_xtrx_input_report_isSet = false;
     xtrx_output_report = new SWGXtrxOutputReport();
@@ -268,6 +272,9 @@ SWGDeviceReport::cleanup() {
     if(usrp_output_report != nullptr) { 
         delete usrp_output_report;
     }
+    if(usrp_mimo_report != nullptr) { 
+        delete usrp_mimo_report;
+    }
     if(xtrx_input_report != nullptr) { 
         delete xtrx_input_report;
     }
@@ -355,6 +362,8 @@ SWGDeviceReport::fromJsonObject(QJsonObject &pJson) {
     ::SWGSDRangel::setValue(&usrp_input_report, pJson["usrpInputReport"], "SWGUSRPInputReport", "SWGUSRPInputReport");
     
     ::SWGSDRangel::setValue(&usrp_output_report, pJson["usrpOutputReport"], "SWGUSRPOutputReport", "SWGUSRPOutputReport");
+    
+    ::SWGSDRangel::setValue(&usrp_mimo_report, pJson["usrpMIMOReport"], "SWGUSRPMIMOReport", "SWGUSRPMIMOReport");
     
     ::SWGSDRangel::setValue(&xtrx_input_report, pJson["xtrxInputReport"], "SWGXtrxInputReport", "SWGXtrxInputReport");
     
@@ -471,6 +480,9 @@ SWGDeviceReport::asJsonObject() {
     }
     if((usrp_output_report != nullptr) && (usrp_output_report->isSet())){
         toJsonValue(QString("usrpOutputReport"), usrp_output_report, obj, QString("SWGUSRPOutputReport"));
+    }
+    if((usrp_mimo_report != nullptr) && (usrp_mimo_report->isSet())){
+        toJsonValue(QString("usrpMIMOReport"), usrp_mimo_report, obj, QString("SWGUSRPMIMOReport"));
     }
     if((xtrx_input_report != nullptr) && (xtrx_input_report->isSet())){
         toJsonValue(QString("xtrxInputReport"), xtrx_input_report, obj, QString("SWGXtrxInputReport"));
@@ -791,6 +803,16 @@ SWGDeviceReport::setUsrpOutputReport(SWGUSRPOutputReport* usrp_output_report) {
     this->m_usrp_output_report_isSet = true;
 }
 
+SWGUSRPMIMOReport*
+SWGDeviceReport::getUsrpMimoReport() {
+    return usrp_mimo_report;
+}
+void
+SWGDeviceReport::setUsrpMimoReport(SWGUSRPMIMOReport* usrp_mimo_report) {
+    this->usrp_mimo_report = usrp_mimo_report;
+    this->m_usrp_mimo_report_isSet = true;
+}
+
 SWGXtrxInputReport*
 SWGDeviceReport::getXtrxInputReport() {
     return xtrx_input_report;
@@ -934,6 +956,9 @@ SWGDeviceReport::isSet(){
             isObjectUpdated = true; break;
         }
         if(usrp_output_report && usrp_output_report->isSet()){
+            isObjectUpdated = true; break;
+        }
+        if(usrp_mimo_report && usrp_mimo_report->isSet()){
             isObjectUpdated = true; break;
         }
         if(xtrx_input_report && xtrx_input_report->isSet()){

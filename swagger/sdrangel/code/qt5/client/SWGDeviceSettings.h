@@ -66,6 +66,7 @@
 #include "SWGTestSourceSettings.h"
 #include "SWGUSRPInputSettings.h"
 #include "SWGUSRPOutputSettings.h"
+#include "SWGUSRPMIMOSettings.h"
 #include "SWGXtrxInputSettings.h"
 #include "SWGXtrxMIMOSettings.h"
 #include "SWGXtrxOutputSettings.h"
@@ -224,6 +225,9 @@ public:
     SWGUSRPOutputSettings* getUsrpOutputSettings();
     void setUsrpOutputSettings(SWGUSRPOutputSettings* usrp_output_settings);
 
+    SWGUSRPMIMOSettings* getUsrpMimoSettings();
+    void setUsrpMimoSettings(SWGUSRPMIMOSettings* usrp_mimo_settings);
+
     SWGXtrxInputSettings* getXtrxInputSettings();
     void setXtrxInputSettings(SWGXtrxInputSettings* xtrx_input_settings);
 
@@ -377,6 +381,9 @@ private:
 
     SWGUSRPOutputSettings* usrp_output_settings;
     bool m_usrp_output_settings_isSet;
+
+    SWGUSRPMIMOSettings* usrp_mimo_settings;
+    bool m_usrp_mimo_settings_isSet;
 
     SWGXtrxInputSettings* xtrx_input_settings;
     bool m_xtrx_input_settings_isSet;
