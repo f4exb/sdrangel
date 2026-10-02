@@ -1206,6 +1206,11 @@ else()
 endif()
 
 # Device interface libraries.
+set(LIMESUITE_SIMD_ARGS)
+if (ARCHITECTURE_x86 OR ARCHITECTURE_x86_64)
+    set(LIMESUITE_SIMD_ARGS "-DENABLE_SIMD_FLAGS=SSE3")
+endif()
+
 if (LINUX)
     # apt install liblimesuite-dev (only on ubuntu 18.04). Can be picky on version though so let's build it.
     # needs pkgconfig and libusb
@@ -1227,7 +1232,7 @@ if (LINUX)
                   -DENABLE_QUICKTEST=OFF
                   -DENABLE_EXAMPLES=OFF
                   -DENABLE_LIME_UTIL=OFF
-                  -DENABLE_SIMD_FLAGS=SSE3
+                  ${LIMESUITE_SIMD_ARGS}
                 BUILD_BYPRODUCTS "${LIMESUITE_LIBRARY}"
                 INSTALL_COMMAND ""
                 TEST_COMMAND ""
@@ -1439,7 +1444,7 @@ if (WIN32 OR APPLE)
                 -DENABLE_QUICKTEST=OFF
                 -DENABLE_EXAMPLES=OFF
                 -DENABLE_LIME_UTIL=ON
-                -DENABLE_SIMD_FLAGS=SSE3
+                ${LIMESUITE_SIMD_ARGS}
                 -DENABLE_FX3=ON
                 -DFX3_SDK_PATH=${FX3SDK_DIR}
                 -DLIBUSB_1_LIBRARY=${LIBUSB_LIBRARIES}
