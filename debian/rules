@@ -3,6 +3,13 @@
 # Override with "debuild -eQT_VERSION=6 ..." to build the Qt6 package.
 QT_VERSION ?= 5
 
+DEB_HOST_ARCH := $(shell dpkg-architecture -qDEB_HOST_ARCH)
+ARCH_OPT := nehalem
+ifeq ($(DEB_HOST_ARCH),arm64)
+# ARM64 runners cannot compile with the x86-specific nehalem target.
+ARCH_OPT := armv8-a
+endif
+
 ifeq ($(QT_VERSION),5)
 QT_CMAKE_OPTION := -DENABLE_QT6=OFF
 QT_RUNTIME_DEPENDS := libqt5multimedia5-plugins, qtspeech5-speechd-plugin, qml-module-qtlocation, qml-module-qtpositioning, qml-module-qtquick-window2, qml-module-qtquick-dialogs, qml-module-qtquick-controls, qml-module-qtquick-controls2, qml-module-qtquick-layouts, qml-module-qtgraphicaleffects
@@ -17,7 +24,7 @@ endif
 	dh $@ --parallel --buildsystem=cmake+ninja
 
 override_dh_auto_configure:
-	dh_auto_configure -- -DARCH_OPT=nehalem $(QT_CMAKE_OPTION) -DENABLE_EXTERNAL_LIBRARIES=AUTO -DDEBUG_OUTPUT=ON -DBUILD_SERVER=OFF
+	dh_auto_configure -- -DARCH_OPT=$(ARCH_OPT) $(QT_CMAKE_OPTION) -DENABLE_EXTERNAL_LIBRARIES=AUTO -DDEBUG_OUTPUT=ON -DBUILD_SERVER=OFF
 
 override_dh_gencontrol:
 	dh_gencontrol -- -Vqt:Depends='$(QT_RUNTIME_DEPENDS)'

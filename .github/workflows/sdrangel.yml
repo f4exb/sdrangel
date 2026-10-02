@@ -139,9 +139,18 @@ jobs:
           make -j3
 
   build_linux:
-    runs-on: ubuntu-24.04
+    name: Linux-${{ matrix.arch }}
+    runs-on: ${{ matrix.runner }}
     permissions:
       contents: read
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - arch: x64
+            runner: ubuntu-24.04
+          - arch: arm64
+            runner: ubuntu-24.04-arm
     steps:
       - uses: actions/checkout@v4
         with:
@@ -168,7 +177,8 @@ jobs:
             libavahi-client-dev libavahi-common-dev libaio-dev \
             python3-mako python3-cheetah python3-numpy \
             autoconf automake libtool ninja-build
-          bash cmake/ci/build_sdrplay.sh
+      - name: Install SDRplay API
+        run: bash cmake/ci/build_sdrplay.sh
       - name: Build SDRangel on Linux
         run: |
           debuild -i -us -uc -b
