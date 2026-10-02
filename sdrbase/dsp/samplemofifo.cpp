@@ -17,6 +17,8 @@
 // along with this program. If not, see <http://www.gnu.org/licenses/>.          //
 ///////////////////////////////////////////////////////////////////////////////////
 
+#include <algorithm>
+
 #include "samplemofifo.h"
 
 const unsigned int SampleMOFifo::m_rwDivisor = 2;
@@ -78,6 +80,8 @@ void SampleMOFifo::reset()
         m_vReadCount[stream] = 0;
         m_vReadHead[stream] = 0;
         m_vWriteHead[stream] = m_midPoint;
+        // Clear old data, which would otherwise be read before new data is written
+        std::fill(m_data[stream].begin(), m_data[stream].end(), Sample{0, 0});
     }
 }
 
