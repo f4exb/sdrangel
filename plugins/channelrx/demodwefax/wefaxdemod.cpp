@@ -672,34 +672,78 @@ void WefaxDemod::webapiFormatReverseSettings(
     }
     auto *api = response.getWefaxDemodSettings();
 
-#define FORMAT_REVERSE_VALUE(key, setter, value) if (force || keys.contains(key)) api->setter(value)
-    FORMAT_REVERSE_VALUE("inputFrequencyOffset", setInputFrequencyOffset, settings.m_inputFrequencyOffset);
-    FORMAT_REVERSE_VALUE("rfBandwidth", setRfBandwidth, settings.m_rfBandwidth);
-    FORMAT_REVERSE_VALUE("fmDeviation", setFmDeviation, settings.m_fmDeviation);
-    FORMAT_REVERSE_VALUE("ioc", setIoc, settings.m_ioc);
-    FORMAT_REVERSE_VALUE("linesPerMinute", setLinesPerMinute, settings.m_linesPerMinute);
-    FORMAT_REVERSE_VALUE("autoMode", setAutoMode, settings.m_autoMode ? 1 : 0);
-    FORMAT_REVERSE_VALUE("inverted", setInverted, settings.m_inverted ? 1 : 0);
-    FORMAT_REVERSE_VALUE("minimumPhasingLines", setMinimumPhasingLines, settings.m_minimumPhasingLines);
-    FORMAT_REVERSE_VALUE("startConfirmSeconds", setStartConfirmSeconds, static_cast<float>(settings.m_startConfirmSeconds));
-    FORMAT_REVERSE_VALUE("stopConfirmSeconds", setStopConfirmSeconds, static_cast<float>(settings.m_stopConfirmSeconds));
-    FORMAT_REVERSE_VALUE("manualClockCorrectionPpm", setManualClockCorrectionPpm,
-        static_cast<float>(settings.m_manualClockCorrectionPpm));
-    FORMAT_REVERSE_VALUE("maxRows", setMaxRows, settings.m_maxRows);
-    FORMAT_REVERSE_VALUE("autoSave", setAutoSave, settings.m_autoSave ? 1 : 0);
-    FORMAT_REVERSE_VALUE("displayInverted", setDisplayInverted, settings.m_displayInverted ? 1 : 0);
-    FORMAT_REVERSE_VALUE("displayContrast", setDisplayContrast, settings.m_displayContrast);
-    FORMAT_REVERSE_VALUE("displayThreshold", setDisplayThreshold, settings.m_displayThreshold);
-    FORMAT_REVERSE_VALUE("horizontalAlignment", setHorizontalAlignment, settings.m_horizontalAlignment);
-    FORMAT_REVERSE_VALUE("displaySlantCorrectionPpm", setDisplaySlantCorrectionPpm,
-        static_cast<float>(settings.m_displaySlantCorrectionPpm));
-    FORMAT_REVERSE_VALUE("displayRotation", setDisplayRotation, settings.m_displayRotation);
-    FORMAT_REVERSE_VALUE("displayZoomPercent", setDisplayZoomPercent, settings.m_displayZoomPercent);
-    FORMAT_REVERSE_VALUE("autoScroll", setAutoScroll, settings.m_autoScroll ? 1 : 0);
-    FORMAT_REVERSE_VALUE("autoSlant", setAutoSlant, settings.m_autoSlant ? 1 : 0);
-    FORMAT_REVERSE_VALUE("rgbColor", setRgbColor, settings.m_rgbColor);
-    FORMAT_REVERSE_VALUE("streamIndex", setStreamIndex, settings.m_streamIndex);
-#undef FORMAT_REVERSE_VALUE
+    if (force || keys.contains("inputFrequencyOffset")) {
+        api->setInputFrequencyOffset(settings.m_inputFrequencyOffset);
+    }
+    if (force || keys.contains("rfBandwidth")) {
+        api->setRfBandwidth(settings.m_rfBandwidth);
+    }
+    if (force || keys.contains("fmDeviation")) {
+        api->setFmDeviation(settings.m_fmDeviation);
+    }
+    if (force || keys.contains("ioc")) {
+        api->setIoc(settings.m_ioc);
+    }
+    if (force || keys.contains("linesPerMinute")) {
+        api->setLinesPerMinute(settings.m_linesPerMinute);
+    }
+    if (force || keys.contains("autoMode")) {
+        api->setAutoMode(settings.m_autoMode ? 1 : 0);
+    }
+    if (force || keys.contains("inverted")) {
+        api->setInverted(settings.m_inverted ? 1 : 0);
+    }
+    if (force || keys.contains("minimumPhasingLines")) {
+        api->setMinimumPhasingLines(settings.m_minimumPhasingLines);
+    }
+    if (force || keys.contains("startConfirmSeconds")) {
+        api->setStartConfirmSeconds(static_cast<float>(settings.m_startConfirmSeconds));
+    }
+    if (force || keys.contains("stopConfirmSeconds")) {
+        api->setStopConfirmSeconds(static_cast<float>(settings.m_stopConfirmSeconds));
+    }
+    if (force || keys.contains("manualClockCorrectionPpm")) {
+        api->setManualClockCorrectionPpm(static_cast<float>(settings.m_manualClockCorrectionPpm));
+    }
+    if (force || keys.contains("maxRows")) {
+        api->setMaxRows(settings.m_maxRows);
+    }
+    if (force || keys.contains("autoSave")) {
+        api->setAutoSave(settings.m_autoSave ? 1 : 0);
+    }
+    if (force || keys.contains("displayInverted")) {
+        api->setDisplayInverted(settings.m_displayInverted ? 1 : 0);
+    }
+    if (force || keys.contains("displayContrast")) {
+        api->setDisplayContrast(settings.m_displayContrast);
+    }
+    if (force || keys.contains("displayThreshold")) {
+        api->setDisplayThreshold(settings.m_displayThreshold);
+    }
+    if (force || keys.contains("horizontalAlignment")) {
+        api->setHorizontalAlignment(settings.m_horizontalAlignment);
+    }
+    if (force || keys.contains("displaySlantCorrectionPpm")) {
+        api->setDisplaySlantCorrectionPpm(static_cast<float>(settings.m_displaySlantCorrectionPpm));
+    }
+    if (force || keys.contains("displayRotation")) {
+        api->setDisplayRotation(settings.m_displayRotation);
+    }
+    if (force || keys.contains("displayZoomPercent")) {
+        api->setDisplayZoomPercent(settings.m_displayZoomPercent);
+    }
+    if (force || keys.contains("autoScroll")) {
+        api->setAutoScroll(settings.m_autoScroll ? 1 : 0);
+    }
+    if (force || keys.contains("autoSlant")) {
+        api->setAutoSlant(settings.m_autoSlant ? 1 : 0);
+    }
+    if (force || keys.contains("rgbColor")) {
+        api->setRgbColor(settings.m_rgbColor);
+    }
+    if (force || keys.contains("streamIndex")) {
+        api->setStreamIndex(settings.m_streamIndex);
+    }
     if (force || keys.contains("autoSavePath")) {
         api->setAutoSavePath(new QString(settings.m_autoSavePath));
     }
