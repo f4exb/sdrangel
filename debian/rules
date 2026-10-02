@@ -3,10 +3,12 @@
 # Override with "debuild -eQT_VERSION=6 ..." to build the Qt6 package.
 QT_VERSION ?= 5
 
-DEB_HOST_ARCH := $(shell dpkg-architecture -qDEB_HOST_ARCH)
+include /usr/share/dpkg/architecture.mk
+
+ARCH_OPT :=
+ifeq ($(DEB_HOST_ARCH),amd64)
 ARCH_OPT := nehalem
-ifeq ($(DEB_HOST_ARCH),arm64)
-# ARM64 runners cannot compile with the x86-specific nehalem target.
+else ifeq ($(DEB_HOST_ARCH),arm64)
 ARCH_OPT := armv8-a
 endif
 
