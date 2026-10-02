@@ -9,6 +9,11 @@ DSCDemodSettings:
       type: number
       format: float
       description: "RF bandwidth in Hz."
+    mode:
+      type: integer
+      description: "DSC demodulation mode (0 MF/HF, 1 VHF)."
+      minimum: 0
+      maximum: 1
     filterInvalid:
       type: integer
       description: "Filter invalid setting for Dsc demod."

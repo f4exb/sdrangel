@@ -51,6 +51,9 @@ public:
     float getRfBandwidth();
     void setRfBandwidth(float rf_bandwidth);
 
+    qint32 getMode();
+    void setMode(qint32 mode);
+
     qint32 getFilterInvalid();
     void setFilterInvalid(qint32 filter_invalid);
 
@@ -120,6 +123,9 @@ private:
 
     float rf_bandwidth;
     bool m_rf_bandwidth_isSet;
+
+    qint32 mode;
+    bool m_mode_isSet;
 
     qint32 filter_invalid;
     bool m_filter_invalid_isSet;

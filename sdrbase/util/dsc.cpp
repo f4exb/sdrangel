@@ -15,6 +15,8 @@
 // along with this program. If not, see <http://www.gnu.org/licenses/>.          //
 ///////////////////////////////////////////////////////////////////////////////////
 
+#include <cmath>
+
 #include <QDebug>
 
 #include "util/dsc.h"
@@ -809,6 +811,10 @@ const signed char DSCDecoder::m_expectedSymbols[] = {
 
 int DSCDecoder::m_maxBytes = 40; // Max bytes in any message
 
+// A symbol whose soft-decision metric beats the next best symbol by less than
+// this fraction of its total soft-decision magnitude is considered weak.
+const float DSCDecoder::m_weakMargin = 0.1f;
+
 void DSCDecoder::init(int offset)
 {
     if (offset == 0)
@@ -823,6 +829,8 @@ void DSCDecoder::init(int offset)
     m_idx = 0;
     m_errors = 0;
     m_bytes = QByteArray();
+    m_hardBytes = QByteArray();
+    m_margins.clear();
     m_eos = false;
 }
 
@@ -845,6 +853,7 @@ bool DSCDecoder::decodeSymbol(signed char symbol)
 
     case FILL_DX:
         // Fill up buffer
+        m_softBuf[m_idx] = m_soft;
         m_buf[m_idx++] = symbol;
         if (m_idx == BUFFER_SIZE)
         {
@@ -858,8 +867,10 @@ bool DSCDecoder::decodeSymbol(signed char symbol)
         break;
 
     case FILL_RX:
-        if (   ((m_idx == 1) && (symbol != 106))
-            || ((m_idx == 2) && (symbol != 105))
+        // RX symbols 105 and 104 fill the two time-diversity slots after
+        // the six DX phasing characters and before the first repeats.
+        if (   ((m_idx == 1) && (symbol != 105))
+            || ((m_idx == 2) && (symbol != 104))
            )
         {
             m_errors++;
@@ -869,7 +880,7 @@ bool DSCDecoder::decodeSymbol(signed char symbol)
 
     case RX:
         {
-            signed char a = selectSymbol(m_buf[m_idx], symbol);
+            signed char a = selectSymbol(m_buf[m_idx], symbol, m_softBuf[m_idx], m_soft);
 
             if (DSCMessage::m_endOfSignalStrings.contains((DSCMessage::EndOfSignal) a)) {
                 m_state = DX_EOS;
@@ -881,12 +892,14 @@ bool DSCDecoder::decodeSymbol(signed char symbol)
             {
                 ret = true;
                 m_state = NO_EOS;
+                eraseWeakSymbols();
             }
         }
         break;
 
     case DX:
         // Save received character in buffer
+        m_softBuf[m_idx] = m_soft;
         m_buf[m_idx] = symbol;
         m_idx = (m_idx + 1) % BUFFER_SIZE;
         m_state = RX;
@@ -894,15 +907,17 @@ bool DSCDecoder::decodeSymbol(signed char symbol)
 
     case DX_EOS:
         // Save, EOS symbol
+        m_softBuf[m_idx] = m_soft;
         m_buf[m_idx] = symbol;
         m_idx = (m_idx + 1) % BUFFER_SIZE;
         m_state = RX_EOS;
         break;
 
     case RX_EOS:
-        selectSymbol(m_buf[m_idx], symbol);
+        selectSymbol(m_buf[m_idx], symbol, m_softBuf[m_idx], m_soft);
         m_state = DONE;
         ret = true;
+        eraseWeakSymbols();
         break;
 
     case DONE:
@@ -940,13 +955,99 @@ signed char DSCDecoder::bitsToSymbol(unsigned int bits)
 // Decode 10-bits to symbols then remove errors using repeated symbols
 bool DSCDecoder::decodeBits(int bits)
 {
-    signed char symbol = bitsToSymbol(bits);
-    //qDebug() << "Bits2sym: " << Qt::hex << bits << Qt::hex << symbol;
-    return decodeSymbol(symbol);
+    SoftBits soft;
+    for (int i = 0; i < 10; i++) {
+        soft[i] = ((bits >> (9 - i)) & 1) ? 1.0f : -1.0f;
+    }
+    return decodeSoftBits(soft);
 }
 
-// Select time diversity symbol without errors
-signed char DSCDecoder::selectSymbol(signed char dx, signed char rx)
+// Decode 10 soft decisions to a symbol then remove errors using repeated symbols
+bool DSCDecoder::decodeSoftBits(const SoftBits& soft)
+{
+    unsigned int bits = 0;
+    for (int i = 0; i < 10; i++) {
+        bits = (bits << 1) | (soft[i] > 0.0f ? 1 : 0);
+    }
+    m_soft = soft;
+    return decodeSymbol(bitsToSymbol(bits));
+}
+
+// Prefer the classic selection of a copy without detectable errors, as used before
+// soft decision was added, as when that gives a valid message it is at least as
+// reliable. Otherwise, use the soft decisions.
+QByteArray DSCDecoder::getMessage() const
+{
+    if (DSCMessage(m_hardBytes, QDateTime()).m_valid || !DSCMessage(m_bytes, QDateTime()).m_valid) {
+        return m_hardBytes;
+    } else {
+        return m_bytes;
+    }
+}
+
+// The ECC only reliably detects a single wrong symbol. When several soft decisions
+// are weak, a wrong combination of them could pass the ECC, so mark them as
+// erasures (-1), which makes the message invalid.
+void DSCDecoder::eraseWeakSymbols()
+{
+    int weak = 0;
+    for (float margin : m_margins) {
+        weak += margin < m_weakMargin;
+    }
+    if (weak > 1)
+    {
+        for (int i = 0; i < m_bytes.size(); i++)
+        {
+            if (m_margins[i] < m_weakMargin) {
+                m_bytes[i] = -1;
+            }
+        }
+    }
+}
+
+// Correlation of soft decisions with the 10-bit codeword of a symbol:
+// 7 information bits LSB first, then the number of zeros (B-states) MSB first.
+float DSCDecoder::symbolMetric(int symbol, const SoftBits& soft)
+{
+    const int zeros = 7 - popcount((unsigned char) symbol);
+    float metric = 0.0f;
+    for (int i = 0; i < 7; i++) {
+        metric += ((symbol >> i) & 1) ? soft[i] : -soft[i];
+    }
+    for (int i = 0; i < 3; i++) {
+        metric += ((zeros >> (2 - i)) & 1) ? soft[7 + i] : -soft[7 + i];
+    }
+    return metric;
+}
+
+// Symbol whose codeword best matches the soft decisions, and the metrics of
+// the best and next best symbols
+int DSCDecoder::bestSymbol(const SoftBits& soft, float& bestMetric, float& nextMetric)
+{
+    int best = 0;
+    bestMetric = -1e30f;
+    nextMetric = -1e30f;
+    for (int symbol = 0; symbol < 128; symbol++)
+    {
+        float metric = symbolMetric(symbol, soft);
+        if (metric > bestMetric)
+        {
+            nextMetric = bestMetric;
+            bestMetric = metric;
+            best = symbol;
+        }
+        else if (metric > nextMetric)
+        {
+            nextMetric = metric;
+        }
+    }
+    return best;
+}
+
+// Select time diversity symbol. The classic selection uses a copy without
+// detectable errors. The soft selection combines both copies and chooses the
+// symbol that best matches them, unless both copies agree without errors.
+signed char DSCDecoder::selectSymbol(signed char dx, signed char rx, const SoftBits& dxSoft, const SoftBits& rxSoft)
 {
     signed char s;
     if (dx != -1)
@@ -963,10 +1064,34 @@ signed char DSCDecoder::selectSymbol(signed char dx, signed char rx)
     }
     else
     {
-        s = '*'; // Both received characters have errors
+        s = -1; // Both received characters have errors
         m_errors += 2;
     }
+    m_hardBytes.append(s);
+
+    SoftBits combined;
+    float scale = 0.0f;
+    for (int i = 0; i < 10; i++)
+    {
+        combined[i] = dxSoft[i] + rxSoft[i];
+        scale += std::fabs(combined[i]);
+    }
+    float bestMetric, nextMetric;
+    const int best = bestSymbol(combined, bestMetric, nextMetric);
+    if ((dx == -1) || (dx != rx)) {
+        s = best;
+    }
+    float margin;
+    if (scale <= 0.0f) {
+        margin = 0.0f;
+    } else if (s == best) {
+        margin = (bestMetric - nextMetric) / scale;
+    } else {
+        margin = (symbolMetric(s, combined) - bestMetric) / scale;
+    }
+
     m_bytes.append(s);
+    m_margins.append(margin);
 
     return s;
 }
