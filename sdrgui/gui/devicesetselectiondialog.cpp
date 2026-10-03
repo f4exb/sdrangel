@@ -30,6 +30,7 @@ DeviceSetSelectionDialog::DeviceSetSelectionDialog(std::vector<DeviceUISet*>& de
     ui(new Ui::WorkspaceSelectionDialog),
     m_deviceUIs(deviceUIs),
     m_channelDeviceSetIndex(channelDeviceSetIndex),
+    m_selectedDeviceSetIndex(0),
     m_hasChanged(false)
 {
     ui->setupUi(this);
