@@ -84,7 +84,10 @@ FT8::FT8(
     CallbackInterface *cb,
     const std::vector<cdecode> &prevdecs,
     FFTEngine *fftEngine
-)
+):
+    pass_(0),
+    hack_0_(0.0f),
+    hack_1_(0.0f)
 {
     samples_ = samples;
     min_hz_ = min_hz;
