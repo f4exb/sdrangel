@@ -42,6 +42,7 @@ MetisMISOUDPHandler::MetisMISOUDPHandler(SampleMIFifo *sampleMIFifo, SampleMOFif
     m_commandBase(0),
     m_rxFrame(0),
     m_txFrame(0),
+    metisBufferIndex(0),
     m_receiveSequence(0),
     m_receiveSequenceError(0),
     m_ptt(false),
