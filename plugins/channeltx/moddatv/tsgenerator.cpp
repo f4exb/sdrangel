@@ -486,7 +486,8 @@ double TSGenerator::get_dvbs2_rate(double symbol_rate, DATVModSettings::DATVModu
             fec_den = 5.0;
             break;
         default:
-            return symbol_rate * (fec_num / fec_den); // others
+            qWarning("TSGenerator::get_dvbs2_rate: Unsupported DVB-S2 code rate");
+            return 0;
     }
 
     switch (modulation) {
