@@ -160,13 +160,19 @@ bool DSCDemodBaseband::handleMessage(const Message& cmd)
 
 void DSCDemodBaseband::applySettings(const QStringList& settingsKeys, const DSCDemodSettings& settings, bool force)
 {
-    if ((settingsKeys.contains("inputFrequencyOffset") && (settings.m_inputFrequencyOffset != m_settings.m_inputFrequencyOffset)) || force)
+    bool frequencyChanged = settingsKeys.contains("inputFrequencyOffset")
+        && (settings.m_inputFrequencyOffset != m_settings.m_inputFrequencyOffset);
+    bool modeChanged = settingsKeys.contains("mode") && (settings.m_mode != m_settings.m_mode);
+
+    // Apply the mode first so the sink is configured for the new processing rate
+    // when the channelizer starts forwarding samples at that rate.
+    m_sink.applySettings(settingsKeys, settings, force);
+
+    if (frequencyChanged || modeChanged || force)
     {
-        m_channelizer->setChannelization(DSCDemodSettings::DSCDEMOD_CHANNEL_SAMPLE_RATE, settings.m_inputFrequencyOffset);
+        m_channelizer->setChannelization(settings.getChannelSampleRate(), settings.m_inputFrequencyOffset);
         m_sink.applyChannelSettings(m_channelizer->getChannelSampleRate(), m_channelizer->getChannelFrequencyOffset());
     }
-
-    m_sink.applySettings(settingsKeys, settings, force);
 
     if (force) {
         m_settings = settings;
@@ -183,5 +189,6 @@ int DSCDemodBaseband::getChannelSampleRate() const
 void DSCDemodBaseband::setBasebandSampleRate(int sampleRate)
 {
     m_channelizer->setBasebandSampleRate(sampleRate);
+    m_channelizer->setChannelization(m_settings.getChannelSampleRate(), m_settings.m_inputFrequencyOffset);
     m_sink.applyChannelSettings(m_channelizer->getChannelSampleRate(), m_channelizer->getChannelFrequencyOffset());
 }

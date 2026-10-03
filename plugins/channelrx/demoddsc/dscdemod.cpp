@@ -346,7 +346,7 @@ void DSCDemod::sendSampleRateToDemodAnalyzer()
             MessageQueue *messageQueue = qobject_cast<MessageQueue*>(pipe->m_element);
             MainCore::MsgChannelDemodReport *msg = MainCore::MsgChannelDemodReport::create(
                 this,
-                DSCDemodSettings::DSCDEMOD_CHANNEL_SAMPLE_RATE
+                m_settings.getChannelSampleRate()
             );
             messageQueue->push(msg);
         }
@@ -405,13 +405,20 @@ int DSCDemod::webapiSettingsPutPatch(
     DSCDemodSettings settings = m_settings;
     webapiUpdateChannelSettings(settings, channelSettingsKeys, response);
 
-    MsgConfigureDSCDemod *msg = MsgConfigureDSCDemod::create(channelSettingsKeys, settings, force);
+    // A mode change without an explicit bandwidth selects the mode's default
+    // bandwidth, so that setting must be applied too.
+    QStringList settingsKeys = channelSettingsKeys;
+    if (settingsKeys.contains("mode") && !settingsKeys.contains("rfBandwidth")) {
+        settingsKeys.append("rfBandwidth");
+    }
+
+    MsgConfigureDSCDemod *msg = MsgConfigureDSCDemod::create(settingsKeys, settings, force);
     m_inputMessageQueue.push(msg);
 
     qDebug("DSCDemod::webapiSettingsPutPatch: forward to GUI: %p", m_guiMessageQueue);
     if (m_guiMessageQueue) // forward to GUI if any
     {
-        MsgConfigureDSCDemod *msgToGUI = MsgConfigureDSCDemod::create(channelSettingsKeys, settings, force);
+        MsgConfigureDSCDemod *msgToGUI = MsgConfigureDSCDemod::create(settingsKeys, settings, force);
         m_guiMessageQueue->push(msgToGUI);
     }
 
@@ -441,6 +448,14 @@ void DSCDemod::webapiUpdateChannelSettings(
     }
     if (channelSettingsKeys.contains("rfBandwidth")) {
         settings.m_rfBandwidth = response.getDscDemodSettings()->getRfBandwidth();
+    }
+    if (channelSettingsKeys.contains("mode"))
+    {
+        settings.m_mode = response.getDscDemodSettings()->getMode() == (qint32) DSCDemodSettings::ModeVHF
+            ? DSCDemodSettings::ModeVHF : DSCDemodSettings::ModeMFHF;
+        if (!channelSettingsKeys.contains("rfBandwidth")) {
+            settings.m_rfBandwidth = DSCDemodSettings::getDefaultRFBandwidth(settings.m_mode);
+        }
     }
     if (channelSettingsKeys.contains("filterInvalid")) {
         settings.m_filterInvalid = response.getDscDemodSettings()->getFilterInvalid();
@@ -508,6 +523,7 @@ void DSCDemod::webapiFormatChannelSettings(SWGSDRangel::SWGChannelSettings& resp
 {
     response.getDscDemodSettings()->setInputFrequencyOffset(settings.m_inputFrequencyOffset);
     response.getDscDemodSettings()->setRfBandwidth(settings.m_rfBandwidth);
+    response.getDscDemodSettings()->setMode((qint32) settings.m_mode);
     response.getDscDemodSettings()->setFilterInvalid(settings.m_filterInvalid);
     response.getDscDemodSettings()->setFilterColumn(settings.m_filterColumn);
     if (response.getDscDemodSettings()->getFilter()) {
@@ -653,6 +669,9 @@ void DSCDemod::webapiFormatChannelSettings(
     if (channelSettingsKeys.contains("rfBandwidth") || force) {
         swgDSCDemodSettings->setRfBandwidth(settings.m_rfBandwidth);
     }
+    if (channelSettingsKeys.contains("mode") || force) {
+        swgDSCDemodSettings->setMode((qint32) settings.m_mode);
+    }
     if (channelSettingsKeys.contains("filterInvalid") || force) {
         swgDSCDemodSettings->setFilterInvalid(settings.m_filterInvalid);
     }
@@ -769,5 +788,6 @@ int DSCDemod::getChannelSampleRate() const
 
 int DSCDemod::getAudioSampleRate() const
 {
-    return DSCDemodSettings::DSCDEMOD_CHANNEL_SAMPLE_RATE;
+    // Rate the demodulator runs at, which depends on the MF/HF or VHF mode
+    return m_settings.getChannelSampleRate();
 }

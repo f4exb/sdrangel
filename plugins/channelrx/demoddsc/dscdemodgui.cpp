@@ -615,7 +615,7 @@ DSCDemodGUI::DSCDemodGUI(PluginAPI* pluginAPI, DeviceUISet *deviceUISet, Baseban
     ui->scopeGUI->changeTrigger(0, triggerData);
     ui->scopeGUI->focusOnTrigger(0); // re-focus to take changes into account in the GUI
 
-    m_scopeVis->setLiveRate(DSCDemodSettings::DSCDEMOD_CHANNEL_SAMPLE_RATE);
+    m_scopeVis->setLiveRate(m_settings.getChannelSampleRate());
     m_scopeVis->configure(500, 1, 0, 0, true);   // not working!
     //m_scopeVis->setFreeRun(false); // FIXME: add method rather than call m_scopeVis->configure()
 
@@ -1010,6 +1010,8 @@ void DSCDemodGUI::displaySettings()
     blockApplySettings(true);
 
     ui->deltaFrequency->setValue(m_channelMarker.getCenterFrequency());
+    ui->mode->setCurrentIndex((int) m_settings.m_mode);
+    m_scopeVis->setLiveRate(m_settings.getChannelSampleRate());
 
     updateIndexLabel();
 
@@ -1192,9 +1194,25 @@ void DSCDemodGUI::on_useFileTime_toggled(bool checked)
     applySettings(QStringList({"useFileTime"}));
 }
 
+void DSCDemodGUI::on_mode_currentIndexChanged(int index)
+{
+    DSCDemodSettings::Mode mode = index == (int) DSCDemodSettings::ModeVHF
+        ? DSCDemodSettings::ModeVHF : DSCDemodSettings::ModeMFHF;
+
+    if (mode != m_settings.m_mode)
+    {
+        m_settings.m_mode = mode;
+        m_settings.m_rfBandwidth = DSCDemodSettings::getDefaultRFBandwidth(mode);
+        m_channelMarker.setBandwidth(m_settings.m_rfBandwidth);
+        m_scopeVis->setLiveRate(m_settings.getChannelSampleRate());
+        applySettings(QStringList({"mode", "rfBandwidth"}));
+    }
+}
+
 void DSCDemodGUI::makeUIConnections()
 {
     QObject::connect(ui->deltaFrequency, &ValueDialZ::changed, this, &DSCDemodGUI::on_deltaFrequency_changed);
+    QObject::connect(ui->mode, QOverload<int>::of(&QComboBox::currentIndexChanged), this, &DSCDemodGUI::on_mode_currentIndexChanged);
     QObject::connect(ui->filterInvalid, &ButtonSwitch::clicked, this, &DSCDemodGUI::on_filterInvalid_clicked);
     QObject::connect(ui->filterColumn, QOverload<int>::of(&QComboBox::currentIndexChanged), this, &DSCDemodGUI::on_filterColumn_currentIndexChanged);
     QObject::connect(ui->filter, &QLineEdit::editingFinished, this, &DSCDemodGUI::on_filter_editingFinished);

@@ -23,11 +23,15 @@
 #include <QVector>
 #include <QMap>
 #include <QDateTime>
+#include <algorithm>
+#include <array>
+#include <vector>
 
 #include "dsp/channelsamplesink.h"
 #include "dsp/nco.h"
 #include "dsp/interpolator.h"
 #include "dsp/firfilter.h"
+#include "dsp/phasediscri.h"
 #include "util/movingaverage.h"
 #include "util/movingmaximum.h"
 #include "util/messagequeue.h"
@@ -112,15 +116,28 @@ private:
 
     MovingAverageUtil<Real, double, 16> m_movingAverage;
 
-    Lowpass<Complex> m_lowpassComplex1;
-    Lowpass<Complex> m_lowpassComplex2;
+    static const int m_mfhfSamplesPerBit = DSCDemodSettings::DSCDEMOD_MFHF_CHANNEL_SAMPLE_RATE / DSCDemodSettings::DSCDEMOD_MFHF_BAUD_RATE;
+    std::array<Complex, m_mfhfSamplesPerBit> m_mfhfCorr1{}; //!< Last bit of correlation with each tone
+    std::array<Complex, m_mfhfSamplesPerBit> m_mfhfCorr2{};
+    int m_mfhfCorrIdx;
+    DSCDecoder::SoftBits m_softBits{};
+    static const int m_maxPhasingErrors = 2; //!< Bit errors allowed when acquiring the phasing sequence
+    int m_phasingErrors;                     //!< Bit errors in the phasing pattern that was acquired
+
     MovingMaximum<Real> m_movMax1;
     MovingMaximum<Real> m_movMax2;
 
     static const int m_expLength = 600;
-    static const int m_samplesPerBit = DSCDemodSettings::DSCDEMOD_CHANNEL_SAMPLE_RATE / DSCDemodSettings::DSCDEMOD_BAUD_RATE;
+    int m_samplesPerBit;
     Complex *m_exp;
     int m_expIdx;
+    PhaseDiscriminators m_phaseDiscri;
+    std::vector<Real> m_vhfToneBuffer;
+    std::vector<Complex> m_vhfToneExpLow;
+    std::vector<Complex> m_vhfToneExpHigh;
+    int m_vhfToneIndex;
+    int m_vhfToneCount;
+    Real m_vhfDC;
     int m_bit;
     bool m_data;
     bool m_dataPrev;
@@ -141,14 +158,19 @@ private:
     static const QList<PhasingPattern> m_phasingPatterns;
 
     ComplexVector m_sampleBuffer[DSCDemodSettings::m_scopeStreams];
-    static const int m_sampleBufferSize = DSCDemodSettings::DSCDEMOD_CHANNEL_SAMPLE_RATE / 20;
+    int m_sampleBufferSize;
     int m_sampleBufferIndex;
 
     void processOneSample(Complex &ci);
+    void processMFHFSample(const Complex& ci);
+    void processVHFSample(const Complex& ci);
+    void processData(bool data, Real level1, Real level2, Real unbiasedData, Real biasedData, const Complex& scopeSample);
+    void configureDemod();
+    void resizeScopeBuffer();
     MessageQueue *getMessageQueueToChannel() { return m_messageQueueToChannel; }
     void sampleToScope(Complex sample, Real abs1Filt, Real abs2Filt, Real unbiasedData, Real biasedData);
     void init();
-    void receiveBit(bool bit);
+    void receiveBit(Real soft);
 };
 
 #endif // INCLUDE_DSCDEMODSINK_H
