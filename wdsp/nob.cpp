@@ -96,8 +96,23 @@ NOB::NOB (
     hangslewtime(_hangslewtime),
     hangtime(_hangtime),
     max_imp_seq_time(_max_imp_seq_time),
+    filterlen(0),
     backtau(_backtau),
-    threshold(_threshold)
+    threshold(_threshold),
+    time(0),
+    blank_count(0),
+    I1(0),
+    Q1(0),
+    I2(0),
+    Q2(0),
+    I(0),
+    Q(0),
+    Ilast(0),
+    Qlast(0),
+    deltaI(0),
+    deltaQ(0),
+    Inext(0),
+    Qnext(0)
 {
     dline_size = (int)(MAX_SAMPLERATE * (
         MAX_ADV_SLEW_TIME +
