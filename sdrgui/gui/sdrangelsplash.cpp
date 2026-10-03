@@ -22,7 +22,8 @@
 
 #include "sdrangelsplash.h"
 
-SDRangelSplash::SDRangelSplash(const QPixmap& pixmap)
+SDRangelSplash::SDRangelSplash(const QPixmap& pixmap) :
+    alignement(0)
 {
     int screenWidth = screen()->availableGeometry().width();
     QPixmap pm;
