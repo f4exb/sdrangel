@@ -131,6 +131,7 @@ private:
         ScopeMarker(const ScopeMarker& other) :
             m_point(other.m_point),
             m_time(other.m_time),
+            m_value(other.m_value),
             m_timeStr(other.m_timeStr),
             m_valueStr(other.m_valueStr),
             m_timeDeltaStr(other.m_timeDeltaStr),
