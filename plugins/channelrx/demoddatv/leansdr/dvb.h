@@ -1665,7 +1665,7 @@ struct viterbi_sync : runnable
         // that certain rot/conj combinations are equivalent to
         // polarity inversion.  We could reduce nsyncs.
 
-        syncs = new sync[nsyncs];
+        syncs = new sync[nsyncs]{};
 
         for (int s = 0; s < nsyncs; ++s)
         {
