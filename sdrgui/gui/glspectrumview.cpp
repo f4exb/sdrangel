@@ -1550,7 +1550,7 @@ void GLSpectrumView::paintGL()
     glFunctions->glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
     QMatrix4x4 spectrogramGridMatrix;
-    float devicePixelRatio;
+    float devicePixelRatio = 1.0f;
 
     if (m_display3DSpectrogram)
     {
@@ -1575,8 +1575,6 @@ void GLSpectrumView::paintGL()
         // Temporarily reduce viewport to waterfall area so anything outside is clipped
         if (window()->windowHandle()) {
             devicePixelRatio = window()->windowHandle()->devicePixelRatio();
-        } else {
-            devicePixelRatio = 1.0f;
         }
         glFunctions->glViewport(0, m_3DSpectrogramBottom*devicePixelRatio, width()*devicePixelRatio, m_waterfallHeight*devicePixelRatio);
         m_glShaderSpectrogram.drawSurface(
