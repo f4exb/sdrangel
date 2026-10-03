@@ -613,66 +613,81 @@ void USRPMIMO::setSinkCenterFrequency(qint64 centerFrequency, int index)
     }
 }
 
+// Ranges can be empty if they couldn't be queried when the device was opened, in which case
+// uhd::meta_range_t::start()/stop() throw, so check first. Returns false if empty
+static bool getRange(const uhd::meta_range_t& range, float& minF, float& maxF)
+{
+    if (range.empty())
+    {
+        minF = 0.0f;
+        maxF = 0.0f;
+        return false;
+    }
+
+    minF = range.start();
+    maxF = range.stop();
+    return true;
+}
+
 void USRPMIMO::getRxLORange(float& minF, float& maxF) const
 {
-    minF = m_deviceParams ? m_deviceParams->m_loRangeRx.start() : 0.0f;
-    maxF = m_deviceParams ? m_deviceParams->m_loRangeRx.stop() : 0.0f;
+    getRange(m_deviceParams ? m_deviceParams->m_loRangeRx : uhd::meta_range_t(), minF, maxF);
 }
 
 void USRPMIMO::getTxLORange(float& minF, float& maxF) const
 {
-    minF = m_deviceParams ? m_deviceParams->m_loRangeTx.start() : 0.0f;
-    maxF = m_deviceParams ? m_deviceParams->m_loRangeTx.stop() : 0.0f;
+    getRange(m_deviceParams ? m_deviceParams->m_loRangeTx : uhd::meta_range_t(), minF, maxF);
 }
 
-// Sample rate is common to Rx and Tx, so return intersection of ranges
+// Sample rate is common to Rx and Tx, so return intersection of ranges (ignoring any that couldn't be queried)
 void USRPMIMO::getSRRange(float& minF, float& maxF) const
 {
     minF = 0.0f;
     maxF = 0.0f;
 
-    if (m_deviceParams)
+    if (!m_deviceParams) {
+        return;
+    }
+
+    float rxMin, rxMax, txMin, txMax;
+    bool rxValid = (m_nbRx > 0) && getRange(m_deviceParams->m_srRangeRx, rxMin, rxMax);
+    bool txValid = (m_nbTx > 0) && getRange(m_deviceParams->m_srRangeTx, txMin, txMax);
+
+    if (rxValid && txValid)
     {
-        if ((m_nbRx > 0) && (m_nbTx > 0))
-        {
-            minF = std::max(m_deviceParams->m_srRangeRx.start(), m_deviceParams->m_srRangeTx.start());
-            maxF = std::min(m_deviceParams->m_srRangeRx.stop(), m_deviceParams->m_srRangeTx.stop());
-        }
-        else if (m_nbRx > 0)
-        {
-            minF = m_deviceParams->m_srRangeRx.start();
-            maxF = m_deviceParams->m_srRangeRx.stop();
-        }
-        else if (m_nbTx > 0)
-        {
-            minF = m_deviceParams->m_srRangeTx.start();
-            maxF = m_deviceParams->m_srRangeTx.stop();
-        }
+        minF = std::max(rxMin, txMin);
+        maxF = std::min(rxMax, txMax);
+    }
+    else if (rxValid)
+    {
+        minF = rxMin;
+        maxF = rxMax;
+    }
+    else if (txValid)
+    {
+        minF = txMin;
+        maxF = txMax;
     }
 }
 
 void USRPMIMO::getRxLPRange(float& minF, float& maxF) const
 {
-    minF = m_deviceParams ? m_deviceParams->m_lpfRangeRx.start() : 0.0f;
-    maxF = m_deviceParams ? m_deviceParams->m_lpfRangeRx.stop() : 0.0f;
+    getRange(m_deviceParams ? m_deviceParams->m_lpfRangeRx : uhd::meta_range_t(), minF, maxF);
 }
 
 void USRPMIMO::getTxLPRange(float& minF, float& maxF) const
 {
-    minF = m_deviceParams ? m_deviceParams->m_lpfRangeTx.start() : 0.0f;
-    maxF = m_deviceParams ? m_deviceParams->m_lpfRangeTx.stop() : 0.0f;
+    getRange(m_deviceParams ? m_deviceParams->m_lpfRangeTx : uhd::meta_range_t(), minF, maxF);
 }
 
 void USRPMIMO::getRxGainRange(float& minF, float& maxF) const
 {
-    minF = m_deviceParams ? m_deviceParams->m_gainRangeRx.start() : 0.0f;
-    maxF = m_deviceParams ? m_deviceParams->m_gainRangeRx.stop() : 0.0f;
+    getRange(m_deviceParams ? m_deviceParams->m_gainRangeRx : uhd::meta_range_t(), minF, maxF);
 }
 
 void USRPMIMO::getTxGainRange(float& minF, float& maxF) const
 {
-    minF = m_deviceParams ? m_deviceParams->m_gainRangeTx.start() : 0.0f;
-    maxF = m_deviceParams ? m_deviceParams->m_gainRangeTx.stop() : 0.0f;
+    getRange(m_deviceParams ? m_deviceParams->m_gainRangeTx : uhd::meta_range_t(), minF, maxF);
 }
 
 QStringList USRPMIMO::getRxAntennas() const
