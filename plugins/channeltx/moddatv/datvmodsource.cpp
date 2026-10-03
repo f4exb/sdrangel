@@ -214,7 +214,10 @@ void DATVModSource::checkBitrates()
     qDebug() << "MPEG-TS bitrate: " << m_mpegTSBitrate;
     qDebug() << "DVB data bitrate: " << dataBitrate;
     if (dataBitrate <= 0)
+    {
         qWarning() << "Unable to calculate DVB data bitrate";
+        return;
+    }
     if (dataBitrate < m_mpegTSBitrate)
         qWarning() << "DVB data bitrate is lower than the bitrate of the MPEG transport stream";
     m_tsRatio = m_mpegTSBitrate/(float)dataBitrate;
