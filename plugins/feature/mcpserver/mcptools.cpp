@@ -1244,7 +1244,7 @@ QString MCPTools::describeType(const QString& typeIn, const QString& kindIn)
         out.append("# main spectrum display of a device set\n# get_spectrum_settings / set_spectrum_settings, get_spectrum_report, spectrum_action\n"
                    "# get_docs spectrum explains the display and its controls\n");
 
-        for (const QString& definition : {"GLSpectrum", "GLSpectrumReport", "SpectrumActions"})
+        for (const QString definition : {"GLSpectrum", "GLSpectrumReport", "SpectrumActions"})
         {
             if (m_yamlDefinitions.contains(definition))
             {
@@ -5695,7 +5695,8 @@ void MCPTools::registerIntentTools()
             // shows up, 100 kHz off and weaker, and then nothing decodes. So a coarser step on
             // a broadcast range is scanned at 100 kHz, which loses nothing where the odd tenths
             // are the rule
-            const bool broadcast = (mode->m_channelType == "BFMDemod") || (mode->m_channelType == "WFMDemod");
+            const bool broadcast = (QLatin1String(mode->m_channelType) == "BFMDemod") ||
+                                   (QLatin1String(mode->m_channelType) == "WFMDemod");
             QString rasterNote;
 
             if (fromRange)
