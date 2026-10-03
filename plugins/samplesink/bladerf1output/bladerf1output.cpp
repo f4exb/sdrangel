@@ -392,6 +392,9 @@ bool Bladerf1Output::applySettings(const BladeRF1OutputSettings& settings, const
 	{
         bool changeSettings;
 
+        // Buddy lists can be changed in the GUI thread, but this is also called from start() in the device engine thread
+        QMutexLocker buddiesLocker(&DeviceAPI::getBuddiesMutex());
+
         if (!m_deviceAPI->getSourceBuddies().empty())
         {
             DeviceAPI *buddy = m_deviceAPI->getSourceBuddies()[0];
@@ -406,6 +409,8 @@ bool Bladerf1Output::applySettings(const BladeRF1OutputSettings& settings, const
         {
             changeSettings = true;
         }
+
+        buddiesLocker.unlock();
 
         if (changeSettings)
         {
