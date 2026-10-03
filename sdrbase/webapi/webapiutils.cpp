@@ -151,6 +151,7 @@ const QMap<QString, QString> WebAPIUtils::m_deviceIdToSettingsKey = {
     {"sdrangel.samplemimo.testmosync", "testMOSyncSettings"},
     {"sdrangel.samplesource.usrp", "usrpInputSettings"},
     {"sdrangel.samplesink.usrp", "usrpOutputSettings"},
+    {"sdrangel.samplemimo.usrpmimo", "usrpMIMOSettings"},
     {"sdrangel.samplesource.xtrx", "xtrxInputSettings"},
     {"sdrangel.samplesink.xtrx", "xtrxOutputSettings"},
     {"sdrangel.samplemimo.xtrxmimo", "xtrxMIMOSettings"}
@@ -318,6 +319,7 @@ const QMap<QString, QString> WebAPIUtils::m_mimoDeviceHwIdToSettingsKey = {
     {"MetisMISO", "metisMISOSettings"},
     {"TestMI", "testMISettings"},
     {"TestMOSync", "testMOSyncSettings"},
+    {"USRP", "usrpMIMOSettings"},
     {"XTRX", "xtrxMIMOSettings"}
 };
 

@@ -41,7 +41,7 @@ USRPOutputGUI::USRPOutputGUI(DeviceUISet *deviceUISet, QWidget* parent) :
     m_doApplySettings(true),
     m_forceSettings(true),
     m_statusCounter(0),
-    m_deviceStatusCounter(0)
+    m_deviceStatusCounter(10) // Get device info on first status update
 {
     m_deviceUISet = deviceUISet;
     setAttribute(Qt::WA_DeleteOnClose, true);
@@ -54,9 +54,8 @@ USRPOutputGUI::USRPOutputGUI(DeviceUISet *deviceUISet, QWidget* parent) :
 
     float minF, maxF;
 
-    m_usrpOutput->getLORange(minF, maxF);
     ui->centerFrequency->setColorMapper(ColorMapper(ColorMapper::GrayGold));
-    ui->centerFrequency->setValueRange(7, ((uint32_t) minF)/1000, ((uint32_t) maxF)/1000); // frequency dial is in kHz
+    updateFrequencyLimits(); // frequency dial is in kHz
 
     m_usrpOutput->getSRRange(minF, maxF);
     ui->sampleRate->setColorMapper(ColorMapper(ColorMapper::GrayGreenYellow));
@@ -186,10 +185,16 @@ bool USRPOutputGUI::handleMessage(const Message& message)
     {
         const USRPOutput::MsgConfigureUSRP& cfg = (USRPOutput::MsgConfigureUSRP&) message;
 
-        if (cfg.getForce()) {
+        if (cfg.getForce()) 
+        {
             m_settings = cfg.getSettings();
-        } else {
+        } 
+        else 
+        {
+            // Don't overwrite edits that haven't been sent yet
+            USRPOutputSettings pending = m_settings;
             m_settings.applySettings(cfg.getSettingsKeys(), cfg.getSettings());
+            m_settings.applySettings(m_settingsKeys, pending);
         }
 
         blockApplySettings(true);
@@ -202,15 +207,35 @@ bool USRPOutputGUI::handleMessage(const Message& message)
         DeviceUSRPShared::MsgReportBuddyChange& report = (DeviceUSRPShared::MsgReportBuddyChange&) message;
         m_settings.m_masterClockRate = report.getMasterClockRate();
 
-        if (!report.getRxElseTx()) {
-            m_settings.m_devSampleRate   = report.getDevSampleRate();
-            m_settings.m_centerFrequency = report.getCenterFrequency();
-            m_settings.m_loOffset        = report.getLOOffset();
+        if (!report.getRxElseTx()) 
+        {
+            // Don't overwrite edits that haven't been sent yet
+            if (!m_settingsKeys.contains("devSampleRate")) {
+                m_settings.m_devSampleRate = report.getDevSampleRate();
+            }
+            if (!m_settingsKeys.contains("centerFrequency")) {
+                m_settings.m_centerFrequency = report.getCenterFrequency();
+            }
+            if (!m_settingsKeys.contains("loOffset")) {
+                m_settings.m_loOffset = report.getLOOffset();
+            }
         }
 
         blockApplySettings(true);
         displaySettings();
         blockApplySettings(false);
+
+        return true;
+    }
+    else if (DeviceUSRPShared::MsgReportDeviceInfo::match(message))
+    {
+        DeviceUSRPShared::MsgReportDeviceInfo& report = (DeviceUSRPShared::MsgReportDeviceInfo&) message;
+
+        if (report.getTemperatureValid()) {
+            ui->temperatureText->setText(tr("%1C").arg(QString::number(report.getTemperature(), 'f', 0)));
+        }
+        // Hide if device doesn't have a temperature sensor
+        ui->temperatureText->setVisible(report.getTemperatureValid());
 
         return true;
     }
@@ -229,6 +254,10 @@ bool USRPOutputGUI::handleMessage(const Message& message)
     {
         USRPOutput::MsgReportStreamInfo& report = (USRPOutput::MsgReportStreamInfo&) message;
 
+        // Accumulate statistics, as the counts reported can be reset while running
+        m_underrunStats.update(report.getSuccess(), report.getUnderrun());
+        m_droppedStats.update(report.getSuccess(), report.getDroppedPackets());
+
         if (report.getSuccess())
         {
             if (report.getActive()) {
@@ -237,13 +266,13 @@ bool USRPOutputGUI::handleMessage(const Message& message)
                 ui->streamStatusLabel->setStyleSheet("QLabel { background-color : blue; }");
             }
 
-            if (report.getUnderrun() > 0) {
+            if (m_underrunStats.getCount() > 0) {
                 ui->underrunLabel->setStyleSheet("QLabel { background-color : red; }");
             } else {
                 ui->underrunLabel->setStyleSheet("QLabel { background:rgb(79,79,79); }");
             }
 
-            if (report.getDroppedPackets() > 0) {
+            if (m_droppedStats.getCount() > 0) {
                 ui->droppedLabel->setStyleSheet("QLabel { background-color : red; }");
             } else {
                 ui->droppedLabel->setStyleSheet("QLabel { background:rgb(79,79,79); }");
@@ -253,6 +282,9 @@ bool USRPOutputGUI::handleMessage(const Message& message)
         {
             ui->streamStatusLabel->setStyleSheet("QLabel { background:rgb(79,79,79); }");
         }
+
+        ui->underrunLabel->setToolTip(m_underrunStats.getToolTip("Red if underruns occurred. Cleared when restarting", "Underruns"));
+        ui->droppedLabel->setToolTip(m_droppedStats.getToolTip("Red if packets were dropped. Cleared when restarting", "Dropped packets"));
 
         return true;
     }
@@ -464,6 +496,7 @@ void USRPOutputGUI::updateStatus()
     }
     else
     {
+        // Only one GUI requests device info, which is then sent to all buddies
         if (m_deviceUISet->m_deviceAPI->isBuddyLeader())
         {
             USRPOutput::MsgGetDeviceInfo* message = USRPOutput::MsgGetDeviceInfo::create();

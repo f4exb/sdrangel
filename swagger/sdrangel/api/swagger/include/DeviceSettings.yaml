@@ -142,6 +142,9 @@ DeviceSettings:
     usrpOutputSettings:
       $ref: "http://swgserver:8081/api/swagger/include/USRP.yaml#/USRPOutputSettings"
       description: "Usrp output settings configuration for Device."
+    usrpMIMOSettings:
+      $ref: "http://swgserver:8081/api/swagger/include/USRP.yaml#/USRPMIMOSettings"
+      description: "USRP MIMO settings configuration for Device."
     xtrxInputSettings:
       $ref: "http://swgserver:8081/api/swagger/include/Xtrx.yaml#/XtrxInputSettings"
       description: "Xtrx input settings configuration for Device."

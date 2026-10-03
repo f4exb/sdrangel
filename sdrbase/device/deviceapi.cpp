@@ -30,6 +30,7 @@
 
 #include "deviceapi.h"
 #include <algorithm>
+#include <QMutexLocker>
 
 DeviceAPI::DeviceAPI(
         StreamType streamType,
@@ -737,8 +738,16 @@ void DeviceAPI::saveSamplingDeviceSettings(Preset* preset)
     }
 }
 
+QRecursiveMutex& DeviceAPI::getBuddiesMutex()
+{
+    static QRecursiveMutex buddiesMutex;
+    return buddiesMutex;
+}
+
 void DeviceAPI::addBuddy(DeviceAPI* buddy)
 {
+    QMutexLocker buddiesLocker(&getBuddiesMutex());
+
     if (buddy->m_streamType == StreamSingleRx)
     {
         m_sourceBuddies.push_back(buddy); // this is a source
@@ -772,6 +781,8 @@ void DeviceAPI::addBuddy(DeviceAPI* buddy)
 
 void DeviceAPI::removeBuddy(DeviceAPI* buddy)
 {
+    QMutexLocker buddiesLocker(&getBuddiesMutex());
+
     switch(buddy->m_streamType) {
     case StreamSingleRx:
     {
@@ -801,6 +812,8 @@ void DeviceAPI::removeBuddy(DeviceAPI* buddy)
 
 void DeviceAPI::clearBuddiesLists()
 {
+    QMutexLocker buddiesLocker(&getBuddiesMutex());
+
     // Make copies before iterating because removeBuddy() modifies the buddy
     // relationship lists. Iterating directly over m_sourceBuddies/m_sinkBuddies
     // could invalidate iterators while the relationships are being removed.

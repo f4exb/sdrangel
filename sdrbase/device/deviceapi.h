@@ -22,6 +22,7 @@
 #include <QObject>
 #include <QString>
 #include <QTimer>
+#include <QRecursiveMutex>
 
 #include "settings/serializableinterface.h"
 #include "export.h"
@@ -158,6 +159,8 @@ public:
     void addBuddy(DeviceAPI* buddy);
     void removeBuddy(DeviceAPI* buddy);
     void clearBuddiesLists();
+    //! Mutex held while buddies lists are modified. Hold this when accessing buddies lists from a thread other than the GUI thread.
+    static QRecursiveMutex& getBuddiesMutex();
     void *getBuddySharedPtr() const { return m_buddySharedPtr; }
     void setBuddySharedPtr(void *ptr) { m_buddySharedPtr = ptr; }
     bool isBuddyLeader() const { return m_isBuddyLeader; }

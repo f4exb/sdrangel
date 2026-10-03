@@ -89,6 +89,7 @@ bool USRPOutputSettings::deserialize(const QByteArray& data)
 
         d.readS32(1, &m_devSampleRate, 5000000);
         d.readU32(2, &m_log2SoftInterp, 0);
+        m_log2SoftInterp = m_log2SoftInterp > 6 ? 6 : m_log2SoftInterp;
         d.readFloat(3, &m_lpfBW, 1.5e6);
         d.readU32(4, &m_gain, 4);
         d.readString(5, &m_antennaPath, "TX/RX");

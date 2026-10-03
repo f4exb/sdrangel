@@ -178,3 +178,158 @@ USRPOutputReport:
     droppedPacketsCount:
       type: integer
       description: "Number of dropped packets."
+
+USRPMIMOSettings:
+  description: USRP
+  properties:
+    title:
+      type: string
+      description: "User-visible title."
+    devSampleRate:
+      type: integer
+      description: "Device I/Q sample rate in samples per second before software decimation or interpolation. Common to Rx and Tx."
+    clockSource:
+      type: string
+      description: "Clock source (E.g. internal, external or gpsdo)."
+    gpioDir:
+      type: integer
+      description: "GPIO direction bit mask, with one bit per pin (0 for ATR, 1 for output)."
+    gpioPins:
+      type: integer
+      description: "GPIO pin-state bit mask, with one bit per pin."
+    rxCenterFrequency:
+      type: integer
+      format: int64
+      description: "Rx center frequency in Hz."
+    rxLOOffset:
+      type: integer
+      description: "Rx LO offset in Hz. The LO is offset from the center frequency by this amount and a digital NCO is used to compensate."
+    log2SoftDecim:
+      type: integer
+      description: "Base-2 exponent of the software decimation factor."
+    rxLpfBW:
+      type: integer
+      description: "Rx analog low-pass filter bandwidth in Hz."
+    dcBlock:
+      type: integer
+      description: "Enable Rx DC offset correction (1 enabled, 0 disabled)."
+      minimum: 0
+      maximum: 1
+    iqCorrection:
+      type: integer
+      description: "Enable Rx IQ imbalance correction (1 enabled, 0 disabled)."
+      minimum: 0
+      maximum: 1
+    rxTransverterMode:
+      type: integer
+      description: "Enable Rx transverter frequency translation (1 enabled, 0 disabled)."
+      minimum: 0
+      maximum: 1
+    rxTransverterDeltaFrequency:
+      type: integer
+      format: int64
+      description: "Frequency translation applied in Rx transverter mode in Hz."
+    rx0GainMode:
+      type: integer
+      description: "Rx channel 0 gain mode (0 automatic, 1 manual)."
+      minimum: 0
+      maximum: 1
+    rx0Gain:
+      type: integer
+      description: "Rx channel 0 gain in dB."
+    rx0AntennaPath:
+      type: string
+      description: "Rx channel 0 antenna path."
+    rx1GainMode:
+      type: integer
+      description: "Rx channel 1 gain mode (0 automatic, 1 manual)."
+      minimum: 0
+      maximum: 1
+    rx1Gain:
+      type: integer
+      description: "Rx channel 1 gain in dB."
+    rx1AntennaPath:
+      type: string
+      description: "Rx channel 1 antenna path."
+    txCenterFrequency:
+      type: integer
+      format: int64
+      description: "Tx center frequency in Hz."
+    txLOOffset:
+      type: integer
+      description: "Tx LO offset in Hz. The LO is offset from the center frequency by this amount and a digital NCO is used to compensate."
+    log2SoftInterp:
+      type: integer
+      description: "Base-2 exponent of the software interpolation factor."
+    txLpfBW:
+      type: integer
+      description: "Tx analog low-pass filter bandwidth in Hz."
+    txTransverterMode:
+      type: integer
+      description: "Enable Tx transverter frequency translation (1 enabled, 0 disabled)."
+      minimum: 0
+      maximum: 1
+    txTransverterDeltaFrequency:
+      type: integer
+      format: int64
+      description: "Frequency translation applied in Tx transverter mode in Hz."
+    tx0Gain:
+      type: integer
+      description: "Tx channel 0 gain in dB."
+    tx0AntennaPath:
+      type: string
+      description: "Tx channel 0 antenna path."
+    tx1Gain:
+      type: integer
+      description: "Tx channel 1 gain in dB."
+    tx1AntennaPath:
+      type: string
+      description: "Tx channel 1 antenna path."
+    useReverseAPI:
+      type: integer
+      description: "Synchronize with reverse API (1 for yes, 0 for no)."
+      minimum: 0
+      maximum: 1
+    reverseAPIAddress:
+      type: string
+      description: "IPv4 address or host name of the reverse API peer."
+    reverseAPIPort:
+      type: integer
+      description: "TCP port of the reverse API peer."
+      minimum: 1
+      maximum: 65535
+    reverseAPIDeviceIndex:
+      type: integer
+      description: "Device-set index used by the reverse API peer."
+
+USRPMIMOReport:
+  description: USRP
+  properties:
+    success:
+      type: integer
+      description: "1 if info was successfully retrieved else 0"
+    rxStreamActive:
+      type: integer
+      description: "1 if Rx stream is active else 0"
+    rxOverrunCount:
+      type: integer
+      description: "Number of Rx stream overrun events."
+    rxTimeoutCount:
+      type: integer
+      description: "Number of Rx stream timeout events."
+    txStreamActive:
+      type: integer
+      description: "1 if Tx stream is active else 0"
+    txUnderrunCount:
+      type: integer
+      description: "Number of Tx stream underrun events."
+    txDroppedPacketsCount:
+      type: integer
+      description: "Number of Tx dropped packets."
+    masterClockRate:
+      type: integer
+      description: "Master clock rate (FPGA/RFIC sample rate) in samples per second."
+    temperature:
+      type: number
+      format: float
+      description: "Board temperature in degrees C, if the device has a temperature sensor."

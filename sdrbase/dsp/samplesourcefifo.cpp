@@ -18,6 +18,8 @@
 // along with this program. If not, see <http://www.gnu.org/licenses/>.          //
 ///////////////////////////////////////////////////////////////////////////////////
 
+#include <algorithm>
+
 #include "samplesourcefifo.h"
 
 const unsigned int SampleSourceFifo::m_rwDivisor = 2;
@@ -51,6 +53,8 @@ void SampleSourceFifo::resize(unsigned int size)
     m_readHead = 0;
     m_writeHead = m_midPoint;
     m_data.resize(size);
+    // Clear old data, which would otherwise be read before new data is written
+    std::fill(m_data.begin(), m_data.end(), Sample{0, 0});
 }
 
 void SampleSourceFifo::reset()
@@ -59,6 +63,8 @@ void SampleSourceFifo::reset()
 	m_readCount = 0;
     m_readHead = 0;
     m_writeHead = m_midPoint;
+    // Clear old data, which would otherwise be read before new data is written
+    std::fill(m_data.begin(), m_data.end(), Sample{0, 0});
 }
 
 SampleSourceFifo::~SampleSourceFifo()

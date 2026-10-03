@@ -365,6 +365,9 @@ bool Bladerf1Input::applySettings(const BladeRF1InputSettings& settings, const Q
 	{
         bool changeSettings;
 
+        // Buddy lists can be changed in the GUI thread, but this is also called from start() in the device engine thread
+        QMutexLocker buddiesLocker(&DeviceAPI::getBuddiesMutex());
+
         if (!m_deviceAPI->getSinkBuddies().empty())
         {
             DeviceAPI *buddy = m_deviceAPI->getSinkBuddies()[0];
@@ -379,6 +382,8 @@ bool Bladerf1Input::applySettings(const BladeRF1InputSettings& settings, const Q
         {
             changeSettings = true;
         }
+
+        buddiesLocker.unlock();
 
         if (changeSettings)
         {
