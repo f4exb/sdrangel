@@ -29,7 +29,8 @@
 
 ConfigurationsDialog::ConfigurationsDialog(bool openOnly, QWidget* parent) :
     QDialog(parent),
-    ui(new Ui::ConfigurationsDialog)
+    ui(new Ui::ConfigurationsDialog),
+    m_configurations(nullptr)
 {
     ui->setupUi(this);
     if (openOnly)
