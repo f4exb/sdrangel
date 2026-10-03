@@ -28,8 +28,6 @@
 
 #include <QInputDialog>
 #include <QMessageBox>
-#include <memory>
-#include <functional>
 #include <QProgressDialog>
 #include <QLabel>
 #include <QToolButton>
@@ -3499,70 +3497,15 @@ void MainWindow::sampleDeviceChange(int deviceType, int deviceSetIndex, int newD
 {
     qDebug("MainWindow::sampleDeviceChange: deviceType: %d deviceSetIndex: %d newDeviceIndex: %d",
         deviceType, deviceSetIndex, newDeviceIndex);
-
-    if ((deviceSetIndex < 0) || (deviceSetIndex >= (int) m_deviceUIs.size())) {
-        return;
+    if (deviceType == 0) {
+        sampleSourceChange(deviceSetIndex, newDeviceIndex, workspace);
+    } else if (deviceType == 1) {
+        sampleSinkChange(deviceSetIndex, newDeviceIndex, workspace);
+    } else if (deviceType == 2) {
+        sampleMIMOChange(deviceSetIndex, newDeviceIndex, workspace);
     }
 
-    DeviceUISet *deviceUISet = m_deviceUIs[deviceSetIndex];
-
-    // The sampling device is stopped in the device engine thread. Wait for that to complete before
-    // deleting it, otherwise the device engine thread could use it after it has been deleted.
-    stopDeviceEngineThen(deviceUISet, [this, deviceType, deviceUISet, newDeviceIndex, workspace]() {
-        // Device set may have been removed or renumbered while waiting
-        auto it = std::find(m_deviceUIs.begin(), m_deviceUIs.end(), deviceUISet);
-
-        if (it == m_deviceUIs.end())
-        {
-            qWarning("MainWindow::sampleDeviceChange: device set was removed");
-            return;
-        }
-
-        int index = it - m_deviceUIs.begin();
-
-        if (deviceType == 0) {
-            sampleSourceChange(index, newDeviceIndex, workspace);
-        } else if (deviceType == 1) {
-            sampleSinkChange(index, newDeviceIndex, workspace);
-        } else if (deviceType == 2) {
-            sampleMIMOChange(index, newDeviceIndex, workspace);
-        }
-
-        emit MainCore::instance()->deviceChanged(index);
-    });
-}
-
-// Stop the device engine (all subsystems for MIMO) and call func once it has stopped.
-// The engine stops the sampling device in its own thread, so this waits for that to complete.
-void MainWindow::stopDeviceEngineThen(DeviceUISet *deviceUISet, const std::function<void()>& func)
-{
-    auto connection = std::make_shared<QMetaObject::Connection>();
-    auto handler = [connection, func]() {
-        QObject::disconnect(*connection);
-        func();
-    };
-
-    if (deviceUISet->m_deviceSourceEngine)
-    {
-        *connection = QObject::connect(deviceUISet->m_deviceSourceEngine, &DSPDeviceSourceEngine::acquistionStopped, this, handler, Qt::QueuedConnection);
-        deviceUISet->m_deviceAPI->stopDeviceEngine();
-    }
-    else if (deviceUISet->m_deviceSinkEngine)
-    {
-        *connection = QObject::connect(deviceUISet->m_deviceSinkEngine, &DSPDeviceSinkEngine::generationStopped, this, handler, Qt::QueuedConnection);
-        deviceUISet->m_deviceAPI->stopDeviceEngine();
-    }
-    else if (deviceUISet->m_deviceMIMOEngine)
-    {
-        // Stop Tx then Rx. Messages are processed in order, so Rx stopped indicates both have stopped.
-        *connection = QObject::connect(deviceUISet->m_deviceMIMOEngine, &DSPDeviceMIMOEngine::acquisitionStopped, this, handler, Qt::QueuedConnection);
-        deviceUISet->m_deviceAPI->stopDeviceEngine(1);
-        deviceUISet->m_deviceAPI->stopDeviceEngine(0);
-    }
-    else
-    {
-        func();
-    }
+    emit MainCore::instance()->deviceChanged(deviceSetIndex);
 }
 
 void MainWindow::sampleSourceChange(int deviceSetIndex, int newDeviceIndex, Workspace *workspace)
@@ -3576,7 +3519,7 @@ void MainWindow::sampleSourceChange(int deviceSetIndex, int newDeviceIndex, Work
         qint64 centerFrequency = deviceUISet->m_deviceAPI->getSampleSource()->getCenterFrequency();
         QPoint p = deviceUISet->m_deviceGUI->pos();
         workspace->removeFromMdiArea(deviceUISet->m_deviceGUI);
-        // Device engine has already been stopped by sampleDeviceChange
+        deviceUISet->m_deviceAPI->stopDeviceEngine();
 
         // deletes old UI and input object
         deviceUISet->m_deviceAPI->getSampleSource()->setMessageQueueToGUI(nullptr); // have source stop sending messages to the GUI
@@ -3622,7 +3565,7 @@ void MainWindow::sampleSinkChange(int deviceSetIndex, int newDeviceIndex, Worksp
         QPoint p = deviceUISet->m_deviceGUI->pos();
         workspace->removeFromMdiArea(deviceUISet->m_deviceGUI);
         deviceUISet->m_deviceAPI->saveSamplingDeviceSettings(m_mainCore->m_settings.getWorkingPreset()); // save old API settings
-        // Device engine has already been stopped by sampleDeviceChange
+        deviceUISet->m_deviceAPI->stopDeviceEngine();
 
         // deletes old UI and output object
         deviceUISet->m_deviceAPI->getSampleSink()->setMessageQueueToGUI(nullptr); // have sink stop sending messages to the GUI
@@ -3668,7 +3611,7 @@ void MainWindow::sampleMIMOChange(int deviceSetIndex, int newDeviceIndex, Worksp
         QPoint p = deviceUISet->m_deviceGUI->pos();
         workspace->removeFromMdiArea(deviceUISet->m_deviceGUI);
         deviceUISet->m_deviceAPI->saveSamplingDeviceSettings(m_mainCore->m_settings.getWorkingPreset()); // save old API settings
-        // Device engine has already been stopped by sampleDeviceChange
+        deviceUISet->m_deviceAPI->stopDeviceEngine();
 
         // deletes old UI and output object
         deviceUISet->m_deviceAPI->getSampleMIMO()->setMessageQueueToGUI(nullptr); // have sink stop sending messages to the GUI
