@@ -107,9 +107,10 @@ private:
     void applySettings(const QStringList& settingsKeys, bool force = false);
     void displaySettings();
     QString selectMessage(int functionBits, const QString &numericMessage, const QString &alphaMessage) const;
-    void messageReceived(const QDateTime dateTime, int address, int functionBits, int baud,
+    void messageReceived(const QDateTime dateTime, qint64 address, int functionBits, int baud,
         const QString &numericMessage, const QString &alphaMessage,
-        int evenParityErrors, int bchParityErrors);
+        int evenParityErrors, int bchParityErrors,
+        PagerDemodSettings::Modulation protocol, const QString &type, const QString &frame);
     bool handleMessage(const Message& message);
     void makeUIConnections();
     void updateAbsoluteCenterFrequency();
@@ -132,6 +133,7 @@ private slots:
     void on_deltaFrequency_changed(qint64 value);
     void on_rfBW_valueChanged(int index);
     void on_fmDev_valueChanged(int value);
+    void on_modulation_currentIndexChanged(int index);
     void on_decode_currentIndexChanged(int index);
     void on_charset_clicked();
     void on_filterAddress_editingFinished();

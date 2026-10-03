@@ -58,14 +58,17 @@ void PagerDemodGUI::resizeTable()
     ui->messages->setRowCount(row + 1);
     ui->messages->setItem(row, PagerDemodSettings::MESSAGE_COL_DATE, new QTableWidgetItem("Fri Apr 15 2016--"));
     ui->messages->setItem(row, PagerDemodSettings::MESSAGE_COL_TIME, new QTableWidgetItem("10:17:00"));
-    ui->messages->setItem(row, PagerDemodSettings::MESSAGE_COL_ADDRESS, new QTableWidgetItem("1000000"));
+    ui->messages->setItem(row, PagerDemodSettings::MESSAGE_COL_ADDRESS, new QTableWidgetItem("100000000"));
     ui->messages->setItem(row, PagerDemodSettings::MESSAGE_COL_MESSAGE, new QTableWidgetItem("ABCEDGHIJKLMNOPQRSTUVWXYZABCEDGHIJKLMNOPQRSTUVWXYZ"));
     ui->messages->setItem(row, PagerDemodSettings::MESSAGE_COL_FUNCTION, new QTableWidgetItem("0"));
     ui->messages->setItem(row, PagerDemodSettings::MESSAGE_COL_ALPHA, new QTableWidgetItem("ABCEDGHIJKLMNOPQRSTUVWXYZABCEDGHIJKLMNOPQRSTUVWXYZ"));
     ui->messages->setItem(row, PagerDemodSettings::MESSAGE_COL_NUMERIC, new QTableWidgetItem("123456789123456789123456789123456789123456789123456789"));
     ui->messages->setItem(row, PagerDemodSettings::MESSAGE_COL_EVEN_PE, new QTableWidgetItem("0"));
     ui->messages->setItem(row, PagerDemodSettings::MESSAGE_COL_BCH_PE, new QTableWidgetItem("0"));
-    ui->messages->setItem(row, PagerDemodSettings::MESSAGE_COL_BAUD, new QTableWidgetItem("2400-"));
+    ui->messages->setItem(row, PagerDemodSettings::MESSAGE_COL_BAUD, new QTableWidgetItem("6400-"));
+    ui->messages->setItem(row, PagerDemodSettings::MESSAGE_COL_PROTOCOL, new QTableWidgetItem("POCSAG-"));
+    ui->messages->setItem(row, PagerDemodSettings::MESSAGE_COL_TYPE, new QTableWidgetItem("Alpha (group, partial)"));
+    ui->messages->setItem(row, PagerDemodSettings::MESSAGE_COL_FRAME, new QTableWidgetItem("14/127 D-"));
     ui->messages->resizeColumnsToContents();
     ui->messages->removeRow(row);
 }
@@ -222,12 +225,35 @@ QString PagerDemodGUI::selectMessage(int functionBits, const QString &numericMes
 }
 
 // Add row to table
-void PagerDemodGUI::messageReceived(const QDateTime dateTime, int address, int functionBits, int baud,
+void PagerDemodGUI::messageReceived(const QDateTime dateTime, qint64 address, int functionBits, int baud,
         const QString &numericMessage, const QString &alphaMessage,
-        int evenParityErrors, int bchParityErrors)
+        int evenParityErrors, int bchParityErrors,
+        PagerDemodSettings::Modulation protocol, const QString &type, const QString &frame)
 {
-    QString message = selectMessage(functionBits, numericMessage, alphaMessage);
-    QString addressString = QString("%1").arg(address, 7, 10, QChar('0'));
+    bool flex = protocol == PagerDemodSettings::FLEX;
+    QString message;
+    QString typeString = type;
+
+    if (flex)
+    {
+        // FLEX states the message type, so only one of alpha and numeric is set
+        message = alphaMessage.isEmpty() ? numericMessage : alphaMessage;
+    }
+    else
+    {
+        message = selectMessage(functionBits, numericMessage, alphaMessage);
+
+        if (typeString.isEmpty())
+        {
+            if (numericMessage.isEmpty() && alphaMessage.isEmpty()) {
+                typeString = "Tone";
+            } else {
+                typeString = (message == numericMessage) ? "Numeric" : "Alpha";
+            }
+        }
+    }
+
+    QString addressString = PagerDemodSettings::formatAddress(address, protocol);
 
     // Should we ignore the message if it is a duplicate?
     if (m_settings.m_filterDuplicates)
@@ -283,6 +309,9 @@ void PagerDemodGUI::messageReceived(const QDateTime dateTime, int address, int f
     QTableWidgetItem *evenPEItem = new QTableWidgetItem();
     QTableWidgetItem *bchPEItem = new QTableWidgetItem();
     QTableWidgetItem *baudItem = new QTableWidgetItem();
+    QTableWidgetItem *protocolItem = new QTableWidgetItem();
+    QTableWidgetItem *typeItem = new QTableWidgetItem();
+    QTableWidgetItem *frameItem = new QTableWidgetItem();
     ui->messages->setItem(row, PagerDemodSettings::MESSAGE_COL_DATE, dateItem);
     ui->messages->setItem(row, PagerDemodSettings::MESSAGE_COL_TIME, timeItem);
     ui->messages->setItem(row, PagerDemodSettings::MESSAGE_COL_ADDRESS, addressItem);
@@ -293,16 +322,22 @@ void PagerDemodGUI::messageReceived(const QDateTime dateTime, int address, int f
     ui->messages->setItem(row, PagerDemodSettings::MESSAGE_COL_EVEN_PE, evenPEItem);
     ui->messages->setItem(row, PagerDemodSettings::MESSAGE_COL_BCH_PE, bchPEItem);
     ui->messages->setItem(row, PagerDemodSettings::MESSAGE_COL_BAUD, baudItem);
+    ui->messages->setItem(row, PagerDemodSettings::MESSAGE_COL_PROTOCOL, protocolItem);
+    ui->messages->setItem(row, PagerDemodSettings::MESSAGE_COL_TYPE, typeItem);
+    ui->messages->setItem(row, PagerDemodSettings::MESSAGE_COL_FRAME, frameItem);
     dateItem->setText(dateTime.date().toString());
     timeItem->setText(dateTime.time().toString());
     addressItem->setText(addressString);
     messageItem->setText(message);
-    functionItem->setText(QString("%1").arg(functionBits));
+    functionItem->setText(flex ? QString() : QString("%1").arg(functionBits)); // Function bits are POCSAG only
     alphaItem->setText(alphaMessage);
     numericItem->setText(numericMessage);
     evenPEItem->setText(QString("%1").arg(evenParityErrors));
     bchPEItem->setText(QString("%1").arg(bchParityErrors));
     baudItem->setData(Qt::DisplayRole, baud);
+    protocolItem->setText(PagerDemodSettings::protocolName(protocol));
+    typeItem->setText(typeString);
+    frameItem->setText(frame);
     if (!m_loadingData)
     {
         filterRow(row);
@@ -333,7 +368,8 @@ bool PagerDemodGUI::handleMessage(const Message& message)
         const PagerDemod::MsgPagerMessage& report = (const PagerDemod::MsgPagerMessage&) message;
         messageReceived(report.getDateTime(), report.getAddress(), report.getFunctionBits(), report.getBaud(),
             report.getNumericMessage(), report.getAlphaMessage(),
-            report.getEvenParityErrors(), report.getBCHParityErrors());
+            report.getEvenParityErrors(), report.getBCHParityErrors(),
+            report.getProtocol(), report.getType(), report.getFrame());
         return true;
     }
     else if (DSPSignalNotification::match(message))
@@ -397,6 +433,12 @@ void PagerDemodGUI::on_fmDev_valueChanged(int value)
     ui->fmDevText->setText(QString("%1%2k").arg(QChar(0xB1, 0x00)).arg(value / 10.0, 0, 'f', 1));
     m_settings.m_fmDeviation = value * 100.0;
     applySettings(QStringList("fmDeviation"));
+}
+
+void PagerDemodGUI::on_modulation_currentIndexChanged(int index)
+{
+    m_settings.m_modulation = (PagerDemodSettings::Modulation)index;
+    applySettings(QStringList("modulation"));
 }
 
 void PagerDemodGUI::on_decode_currentIndexChanged(int index)
@@ -675,6 +717,7 @@ void PagerDemodGUI::displaySettings()
 
     ui->deltaFrequency->setValue(m_channelMarker.getCenterFrequency());
 
+    ui->modulation->setCurrentIndex((int)m_settings.m_modulation);
     ui->decode->setCurrentIndex((int)m_settings.m_decode);
 
     ui->rfBWText->setText(QString("%1k").arg(m_settings.m_rfBandwidth / 1000.0, 0, 'f', 1));
@@ -841,7 +884,11 @@ void PagerDemodGUI::on_logOpen_clicked()
                     int numericCol = colIndexes.value("Numeric");
                     int evenCol = colIndexes.value("Even Parity Errors");
                     int bchCol = colIndexes.value("BCH Parity Errors");
+                    // Columns absent from logs written before they were recorded
                     int baudCol = colIndexes.value("Baud", -1);
+                    int protocolCol = colIndexes.value("Protocol", -1);
+                    int typeCol = colIndexes.value("Type", -1);
+                    int frameCol = colIndexes.value("Frame", -1);
                     int maxCol = std::max({dateCol, timeCol, addressCol, functionCol, alphaCol, numericCol, evenCol, bchCol});
 
                     QMessageBox dialog(this);
@@ -866,18 +913,22 @@ void PagerDemodGUI::on_logOpen_clicked()
                             QDate date = QDate::fromString(cols[dateCol]);
                             QTime time = QTime::fromString(cols[timeCol]);
                             QDateTime dateTime(date, time);
-                            int address = cols[addressCol].toInt();
+                            qint64 address = cols[addressCol].toLongLong();
                             int functionBits = cols[functionCol].toInt();
                             int evenErrors = cols[evenCol].toInt();
                             int bchErrors = cols[bchCol].toInt();
 
-                            // Baud is absent from logs written before it was recorded
                             int baud = ((baudCol >= 0) && (baudCol < cols.size()))
                                 ? cols[baudCol].toInt() : 0;
+                            PagerDemodSettings::Modulation protocol = ((protocolCol >= 0) && (protocolCol < cols.size()) && (cols[protocolCol] == "FLEX"))
+                                ? PagerDemodSettings::FLEX : PagerDemodSettings::POCSAG;
+                            QString type = ((typeCol >= 0) && (typeCol < cols.size())) ? cols[typeCol] : QString();
+                            QString frame = ((frameCol >= 0) && (frameCol < cols.size())) ? cols[frameCol] : QString();
 
                             messageReceived(dateTime, address, functionBits, baud,
                                 cols[numericCol], cols[alphaCol],
-                                evenErrors, bchErrors);
+                                evenErrors, bchErrors,
+                                protocol, type, frame);
 
                             if (count % 1000 == 0)
                             {
@@ -914,6 +965,7 @@ void PagerDemodGUI::makeUIConnections()
     QObject::connect(ui->deltaFrequency, &ValueDialZ::changed, this, &PagerDemodGUI::on_deltaFrequency_changed);
     QObject::connect(ui->rfBW, &QSlider::valueChanged, this, &PagerDemodGUI::on_rfBW_valueChanged);
     QObject::connect(ui->fmDev, &QSlider::valueChanged, this, &PagerDemodGUI::on_fmDev_valueChanged);
+    QObject::connect(ui->modulation, QOverload<int>::of(&QComboBox::currentIndexChanged), this, &PagerDemodGUI::on_modulation_currentIndexChanged);
     QObject::connect(ui->decode, QOverload<int>::of(&QComboBox::currentIndexChanged), this, &PagerDemodGUI::on_decode_currentIndexChanged);
     QObject::connect(ui->charset, &QToolButton::clicked, this, &PagerDemodGUI::on_charset_clicked);
     QObject::connect(ui->filterAddress, &QLineEdit::editingFinished, this, &PagerDemodGUI::on_filterAddress_editingFinished);

@@ -33,7 +33,7 @@ class QDataStream;
 class Serializable;
 
 // Number of columns in the tables
-#define PAGERDEMOD_MESSAGE_COLUMNS 10
+#define PAGERDEMOD_MESSAGE_COLUMNS 13
 
 struct PagerDemodSettings
 {
@@ -47,7 +47,10 @@ struct PagerDemodSettings
         MESSAGE_COL_NUMERIC,
         MESSAGE_COL_EVEN_PE,
         MESSAGE_COL_BCH_PE,
-        MESSAGE_COL_BAUD
+        MESSAGE_COL_BAUD,
+        MESSAGE_COL_PROTOCOL,
+        MESSAGE_COL_TYPE,
+        MESSAGE_COL_FRAME
     };
 
     struct NotificationSettings {
@@ -68,6 +71,11 @@ struct PagerDemodSettings
     };
 
     qint32 m_inputFrequencyOffset;
+    enum Modulation {
+        Auto,                           //!< Receive both POCSAG and FLEX
+        POCSAG,
+        FLEX
+    } m_modulation;
     Real m_rfBandwidth;
     Real m_fmDeviation;                 //<! 4.5k for POCSAG
     enum Decode {
@@ -76,7 +84,7 @@ struct PagerDemodSettings
         Numeric,
         Alphanumeric,
         Heuristic
-    } m_decode;                         //!< Whether to decode as numeric or alphanumeric
+    } m_decode;                         //!< Whether to decode POCSAG as numeric or alphanumeric
     bool m_udpEnabled;
     QString m_udpAddress;
     uint16_t m_udpPort;
@@ -115,7 +123,13 @@ struct PagerDemodSettings
     int m_messageColumnIndexes[PAGERDEMOD_MESSAGE_COLUMNS];//!< How the columns are ordered in the table
     int m_messageColumnSizes[PAGERDEMOD_MESSAGE_COLUMNS];  //!< Size of the columns in the table
 
-    static const int m_channelSampleRate = 38400; //!< lcm(512,2400) baud rates
+    static const int m_channelSampleRate = 38400; //!< lcm(512,2400) POCSAG baud rates, and a multiple of FLEX's 1600 and 3200
+
+    static QString protocolName(Modulation protocol) { return protocol == FLEX ? "FLEX" : "POCSAG"; }
+    //!< POCSAG addresses are 21 bits. FLEX capcodes can be up to 10 digits
+    static QString formatAddress(qint64 address, Modulation protocol) {
+        return QString("%1").arg(address, protocol == FLEX ? 9 : 7, 10, QChar('0'));
+    }
 
     PagerDemodSettings();
     void resetToDefaults();
