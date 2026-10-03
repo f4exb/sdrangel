@@ -97,22 +97,12 @@ void USRPOutputThread::startWork()
 
 void USRPOutputThread::stopWork()
 {
-    uhd::async_metadata_t md;
-
     if (!m_running) return; // return if not running
 
     m_running = false;
+    // run() ends the burst before exiting, so no underflow is reported when stopped,
+    // so we don't need to wait for and discard one here (which was done with the device mutex held)
     wait();
-
-    try
-    {
-        // Get message indicating underflow, so it doesn't appear if we restart
-        m_stream->recv_async_msg(md);
-    }
-    catch (std::exception& e)
-    {
-        qDebug() << "USRPOutputThread::stopWork: exception: " << e.what();
-    }
 
     qDebug("USRPOutputThread::stopWork: stream stopped");
 }
@@ -128,11 +118,15 @@ void USRPOutputThread::run()
 
     // Higher priority, so streaming isn't delayed by other threads
     DeviceUSRP::setStreamingThreadPriority();
-    md.start_of_burst = false;
+    // Start a new burst, which is ended when stopped, so the device doesn't report an underflow
+    md.start_of_burst = true;
     md.end_of_burst   = false;
 
+    // Hold mutex, so wake can't occur between startWork() checking m_running and waiting
+    m_startWaitMutex.lock();
     m_running = true;
     m_startWaiter.wakeAll();
+    m_startWaitMutex.unlock();
 
     qDebug("USRPOutputThread::run");
 
@@ -152,6 +146,19 @@ void USRPOutputThread::run()
         {
             qDebug() << "USRPOutputThread::run: exception: " << e.what();
         }
+
+        md.start_of_burst = false;
+    }
+
+    // End the burst, so the stream can be restarted cleanly, without an underflow being reported
+    try
+    {
+        md.end_of_burst = true;
+        m_stream->send(m_buf, 0, md);
+    }
+    catch (std::exception& e)
+    {
+        qDebug() << "USRPOutputThread::run: exception sending end of burst: " << e.what();
     }
 
     m_running = false;
@@ -234,6 +241,8 @@ void USRPOutputThread::getStreamStatus(bool& active, quint32& underflows, quint3
 
     // Don't wait for messages (default timeout is 0.1s), as this is called from the GUI thread
     // Drain all pending messages, so counts are accurate
+    QMutexLocker asyncMsgLocker(&m_asyncMsgMutex);
+
     try
     {
         while (m_stream->recv_async_msg(md, 0.0))

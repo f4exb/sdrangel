@@ -706,13 +706,22 @@ void USRPMIMOGUI::on_decim_currentIndexChanged(int index)
 
     displaySampleRate();
 
+    int devSampleRate;
+
     if (m_sampleRateMode) {
-        m_settings.m_devSampleRate = ui->sampleRate->getValueNew();
+        devSampleRate = ui->sampleRate->getValueNew();
     } else {
-        m_settings.m_devSampleRate = ui->sampleRate->getValueNew() * (1 << index);
+        devSampleRate = ui->sampleRate->getValueNew() * (1 << index);
     }
 
-    m_settingsKeys.append("devSampleRate");
+    // Only send the device sample rate if it has changed, as setting it reconfigures the device
+    // and restarts Tx, which isn't needed if only the software decimation / interpolation has changed
+    if (devSampleRate != m_settings.m_devSampleRate)
+    {
+        m_settings.m_devSampleRate = devSampleRate;
+        m_settingsKeys.append("devSampleRate");
+    }
+
     sendSettings();
 }
 

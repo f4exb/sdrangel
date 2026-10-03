@@ -46,6 +46,7 @@
 
 MESSAGE_CLASS_DEFINITION(USRPMIMO::MsgConfigureUSRPMIMO, Message)
 MESSAGE_CLASS_DEFINITION(USRPMIMO::MsgStartStop, Message)
+MESSAGE_CLASS_DEFINITION(USRPMIMO::MsgDeviceReconfigured, Message)
 MESSAGE_CLASS_DEFINITION(USRPMIMO::MsgGetStreamInfo, Message)
 MESSAGE_CLASS_DEFINITION(USRPMIMO::MsgReportStreamInfo, Message)
 MESSAGE_CLASS_DEFINITION(USRPMIMO::MsgGetDeviceInfo, Message)
@@ -55,6 +56,7 @@ USRPMIMO::USRPMIMO(DeviceAPI *deviceAPI) :
     m_settings(),
     m_sourceThread(nullptr),
     m_sinkThread(nullptr),
+    m_txRestartPending(false),
     m_deviceDescription("USRPMIMO"),
     m_runningRx(false),
     m_runningTx(false),
@@ -158,14 +160,11 @@ bool USRPMIMO::openDevice()
 void USRPMIMO::closeDevice()
 {
     // Stop Tx first, so stopRx doesn't pause and resume the Tx thread, which may be called from the GUI thread,
-    // while the device engine thread might be resizing the Tx FIFO
-    if (m_runningTx) {
-        stopTx();
-    }
-
-    if (m_runningRx) {
-        stopRx();
-    }
+    // while the device engine thread might be resizing the Tx FIFO.
+    // Call unconditionally, as they check m_runningTx/m_runningRx with m_mutex held, so wait for any start
+    // in progress in the device engine thread to complete
+    stopTx();
+    stopRx();
 
     if (m_deviceParams)
     {
@@ -231,7 +230,12 @@ bool USRPMIMO::startRx()
 
             for (int channel = 0; channel < m_nbRx; channel++)
             {
-                device->set_rx_bandwidth(56000000, channel);
+                // Wide bandwidth while setting up the stream is not essential, so don't fail to create the stream if it can't be set
+                try {
+                    device->set_rx_bandwidth(56000000, channel);
+                } catch (std::exception& e) {
+                    qWarning() << "USRPMIMO::startRx: could not set bandwidth: " << e.what();
+                }
                 streamArgs.channels.push_back(channel);
             }
 
@@ -301,6 +305,13 @@ bool USRPMIMO::startTx()
     }
 
     qDebug("USRPMIMO::startTx");
+
+    {
+        // Device reconfigurations reported before we apply the settings below are covered by starting Tx,
+        // so only those reported after that need Tx to be restarted
+        QMutexLocker threadLocker(&m_threadMutex);
+        m_txRestartPending = false;
+    }
     size_t bufSamples = 0;
 
     USRPMIMOSettings settings;
@@ -334,7 +345,12 @@ bool USRPMIMO::startTx()
 
             for (int channel = 0; channel < m_nbTx; channel++)
             {
-                device->set_tx_bandwidth(56000000, channel);
+                // Wide bandwidth while setting up the stream is not essential, so don't fail to create the stream if it can't be set
+                try {
+                    device->set_tx_bandwidth(56000000, channel);
+                } catch (std::exception& e) {
+                    qWarning() << "USRPMIMO::startTx: could not set bandwidth: " << e.what();
+                }
                 streamArgs.channels.push_back(channel);
             }
 
@@ -380,13 +396,21 @@ bool USRPMIMO::startTx()
         QMutexLocker threadLocker(&m_threadMutex);
         thread->setLog2Interpolation(m_settings.m_log2SoftInterp);
         unsigned int fifoSize = getSampleMOFifoSize(m_settings);
+        m_sinkThread = thread;
+        // A device reconfiguration (that needs Tx to be restarted to realign channels) may have been reported
+        // while we were starting, before m_sinkThread was set, in which case it couldn't be acted upon
+        bool restart = m_txRestartPending;
+        m_txRestartPending = false;
+        // Allow settings to be changed while the FIFO is resized, as that can take a while
+        settingsLocker.unlock();
 
-        if (fifoSize != getSampleMOFifoSize(settings)) {
-            // Resize in device engine thread once we return
+        if ((fifoSize != getSampleMOFifoSize(settings)) || restart)
+        {
+            // As we're in the device engine thread, which the thread object belongs to, this is handled immediately,
+            // pausing streaming while the FIFO is resized. Keep the thread mutex locked, so a resize requested
+            // from the GUI thread (in resizeSampleMOFifo) can't be queued before this one, and so handled first
             thread->getInputMessageQueue()->push(DeviceUSRPShared::MsgResizeSampleFifo::create(fifoSize));
         }
-
-        m_sinkThread = thread;
     }
 
     m_runningTx = true;
@@ -425,7 +449,11 @@ void USRPMIMO::stopRx()
         m_sinkThread->stopWork();
     }
 
-    m_rxStream = nullptr;
+    {
+        // Destroying the stream reconfigures the device, so prevent the worker applying settings at the same time
+        QMutexLocker deviceLocker(&m_deviceParams->m_mutex);
+        m_rxStream = nullptr;
+    }
 
     if (txWasRunning) {
         m_sinkThread->startWork();
@@ -475,7 +503,11 @@ void USRPMIMO::stopTx()
         m_sourceThread->stopWork();
     }
 
-    m_txStream = nullptr;
+    {
+        // Destroying the stream reconfigures the device, so prevent the worker applying settings at the same time
+        QMutexLocker deviceLocker(&m_deviceParams->m_mutex);
+        m_txStream = nullptr;
+    }
 
     if (rxWasRunning) {
         m_sourceThread->startWork();
@@ -484,6 +516,7 @@ void USRPMIMO::stopTx()
 
 QByteArray USRPMIMO::serialize() const
 {
+    QMutexLocker settingsLocker(&m_settingsMutex);
     return m_settings.serialize();
 }
 
@@ -520,24 +553,28 @@ const QString& USRPMIMO::getDeviceDescription() const
 
 int USRPMIMO::getSourceSampleRate(int index) const
 {
+    QMutexLocker settingsLocker(&m_settingsMutex);
     (void) index;
     return m_settings.m_devSampleRate / (1<<m_settings.m_log2SoftDecim);
 }
 
 int USRPMIMO::getSinkSampleRate(int index) const
 {
+    QMutexLocker settingsLocker(&m_settingsMutex);
     (void) index;
     return m_settings.m_devSampleRate / (1<<m_settings.m_log2SoftInterp);
 }
 
 quint64 USRPMIMO::getSourceCenterFrequency(int index) const
 {
+    QMutexLocker settingsLocker(&m_settingsMutex);
     (void) index;
     return m_settings.m_rxCenterFrequency;
 }
 
 void USRPMIMO::setSourceCenterFrequency(qint64 centerFrequency, int index)
 {
+    QMutexLocker settingsLocker(&m_settingsMutex);
     (void) index;
     USRPMIMOSettings settings = m_settings;
     settings.m_rxCenterFrequency = centerFrequency;
@@ -554,12 +591,14 @@ void USRPMIMO::setSourceCenterFrequency(qint64 centerFrequency, int index)
 
 quint64 USRPMIMO::getSinkCenterFrequency(int index) const
 {
+    QMutexLocker settingsLocker(&m_settingsMutex);
     (void) index;
     return m_settings.m_txCenterFrequency;
 }
 
 void USRPMIMO::setSinkCenterFrequency(qint64 centerFrequency, int index)
 {
+    QMutexLocker settingsLocker(&m_settingsMutex);
     (void) index;
     USRPMIMOSettings settings = m_settings;
     settings.m_txCenterFrequency = centerFrequency;
@@ -732,6 +771,21 @@ bool USRPMIMO::handleMessage(const Message& message)
 
         return true;
     }
+    else if (MsgDeviceReconfigured::match(message))
+    {
+        // Resize the FIFO for the new sample rate and restart Tx, so channels are realigned with a timed start.
+        // The resize stops and restarts Tx streaming in the device engine thread
+        QMutexLocker threadLocker(&m_threadMutex);
+
+        if (m_sinkThread) {
+            m_sinkThread->getInputMessageQueue()->push(DeviceUSRPShared::MsgResizeSampleFifo::create(getSampleMOFifoSize(m_settings)));
+        } else {
+            // Tx may be in the process of being started, in which case startTx will restart it once it has set m_sinkThread
+            m_txRestartPending = true;
+        }
+
+        return true;
+    }
     else if (MsgGetStreamInfo::match(message))
     {
         if (m_guiMessageQueue)
@@ -852,7 +906,11 @@ bool USRPMIMO::applySettings(const USRPMIMOSettings& settings, const QList<QStri
         m_settings.applySettings(settingsKeys, settings);
     }
 
-    if (settingsKeys.contains("devSampleRate") || settingsKeys.contains("log2SoftInterp") || force) {
+    // When the sample rate or clock is changed, the worker sends MsgDeviceReconfigured once the device has been
+    // reconfigured, which resizes the FIFO (and restarts Tx), so only resize here if that won't happen
+    bool deviceReconfigured = settingsKeys.contains("devSampleRate") || settingsKeys.contains("clockSource") || force;
+
+    if (settingsKeys.contains("log2SoftInterp") && !deviceReconfigured) {
         resizeSampleMOFifo();
     }
 
@@ -913,6 +971,7 @@ int USRPMIMO::webapiSettingsGet(
                 SWGSDRangel::SWGDeviceSettings& response,
                 QString& errorMessage)
 {
+    QMutexLocker settingsLocker(&m_settingsMutex);
     (void) errorMessage;
     response.setUsrpMimoSettings(new SWGSDRangel::SWGUSRPMIMOSettings());
     response.getUsrpMimoSettings()->init();
@@ -926,6 +985,7 @@ int USRPMIMO::webapiSettingsPutPatch(
                 SWGSDRangel::SWGDeviceSettings& response, // query + response
                 QString& errorMessage)
 {
+    QMutexLocker settingsLocker(&m_settingsMutex);
     (void) errorMessage;
     USRPMIMOSettings settings = m_settings;
     webapiUpdateDeviceSettings(settings, deviceSettingsKeys, response);
@@ -1200,7 +1260,10 @@ void USRPMIMO::webapiFormatDeviceReport(SWGSDRangel::SWGDeviceReport& response)
         report->setTxDroppedPacketsCount(timeoutsDropped);
     }
 
-    report->setMasterClockRate(m_settings.m_masterClockRate);
+    {
+        QMutexLocker settingsLocker(&m_settingsMutex);
+        report->setMasterClockRate(m_settings.m_masterClockRate);
+    }
 
     // Don't block if settings are being applied to the device in another thread
     if (m_deviceParams && m_deviceParams->getDevice() && m_deviceParams->m_mutex.tryLock())

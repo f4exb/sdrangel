@@ -100,9 +100,11 @@ USRPInput::~USRPInput()
     );
     delete m_networkManager;
 
-    if (m_running) {
-        stop();
-    }
+    // Call unconditionally, rather than checking m_running, as m_running is only set at the end of start(),
+    // which could still be running in the device engine thread. stop() checks m_running with m_mutex held,
+    // so waits for start() to complete. This must be done before the device mutex is locked below,
+    // as stop() locks the buddies mutex, which must be locked before the device mutex
+    stop();
 
     DeviceUSRPParams *deviceParams = m_deviceShared.m_deviceParams;
     bool hasBuddies = (m_deviceAPI->getSourceBuddies().size() > 0) || (m_deviceAPI->getSinkBuddies().size() > 0);
@@ -411,7 +413,7 @@ void USRPInput::resumeTxBuddies()
 
 void USRPInput::closeDevice()
 {
-    if (m_running) { stop(); }
+    // Already stopped in destructor, before the device mutex was locked
 
     m_deviceShared.m_channel = -1; // effectively release the channel for the possible buddies
 
@@ -455,7 +457,12 @@ bool USRPInput::acquireChannel(const USRPInputSettings& settings)
             // However, don't set LPF to <10MHz at this stage, otherwise there is massive TX LO leakage
             // Actual settings are reported back to handleMessage, which forwards them to buddies and GUI
             USRPInputThread::applyDeviceSettings(m_deviceShared.m_deviceParams, m_deviceShared.m_channel, settings, QList<QString>(), true, true, false, getInputMessageQueue());
-            usrp->set_rx_bandwidth(56000000, m_deviceShared.m_channel);
+            // Wide bandwidth while setting up the stream is not essential, so don't fail to create the stream if it can't be set
+            try {
+                usrp->set_rx_bandwidth(56000000, m_deviceShared.m_channel);
+            } catch (std::exception& e) {
+                qWarning() << "USRPInput::acquireChannel: could not set bandwidth: " << e.what();
+            }
 
             // set up the stream
             std::string cpu_format("sc16");
@@ -534,6 +541,14 @@ bool USRPInput::start()
         return false;
     }
 
+    // openDevice() can fail after the device params have been set, without a channel being allocated.
+    // UHD would treat channel -1 as all channels, which would reconfigure buddies' channels
+    if (m_deviceShared.m_channel < 0)
+    {
+        qCritical("USRPInput::start: no channel allocated");
+        return false;
+    }
+
     // Create thread before acquiring the channel, so settings changed while the channel is
     // being acquired are queued to it, to be applied once start() has returned.
     // start / stop streaming is done in the thread.
@@ -556,6 +571,7 @@ bool USRPInput::start()
             QMutexLocker threadLocker(&m_threadMutex);
             m_usrpInputThread = nullptr;
         }
+        reapplyLostGPIO(thread);
         delete thread;
         return false;
     }
@@ -615,6 +631,7 @@ void USRPInput::stop()
 
         // Release stream, so it's destroyed before the device, even if the thread is deleted later
         thread->releaseStream();
+        reapplyLostGPIO(thread);
 
         QThread *ownerThread = thread->thread();
         if (!ownerThread || (ownerThread == QThread::currentThread()) || ownerThread->isFinished()) {
@@ -629,8 +646,49 @@ void USRPInput::stop()
     releaseChannel();
 }
 
+// When the thread exists, settings (including GPIO) are sent to it to be applied. If the thread is then deleted
+// (failed start, or stopped) before handling them, they are lost. Other settings are applied when next started,
+// but GPIO is also applied when not running, so if a GPIO change was lost, re-apply GPIO in the GUI thread,
+// which will use the direct path, as the thread pointer has been cleared.
+// Only do this if a change was actually lost, as Rx and Tx buddies share the same GPIO bank, so unnecessarily
+// re-applying our settings could overwrite a buddy's.
+// Must be called after the thread pointer has been cleared (so no more messages can be queued to the thread)
+// and after the thread has been detached (or from the device engine thread, which the thread belongs to),
+// so the thread can't be handling its messages. Not needed when called in the GUI thread, as we're being deleted.
+void USRPInput::reapplyLostGPIO(USRPInputThread *thread)
+{
+    if (QThread::currentThread() == this->thread()) {
+        return;
+    }
+
+    bool gpioLost = false;
+    Message *message;
+
+    while ((message = thread->getInputMessageQueue()->pop()) != nullptr)
+    {
+        if (MsgConfigureUSRP::match(*message))
+        {
+            const MsgConfigureUSRP& conf = (const MsgConfigureUSRP&) *message;
+            const QList<QString>& keys = conf.getSettingsKeys();
+            gpioLost = gpioLost || conf.getForce() || keys.contains("gpioDir") || keys.contains("gpioPins");
+        }
+
+        delete message;
+    }
+
+    if (gpioLost)
+    {
+        // Read the settings when this is handled in the GUI thread, rather than now, so settings changes queued
+        // to the GUI thread before this (E.g. from the web API) aren't overwritten with older values
+        QMetaObject::invokeMethod(this, [this]() {
+            m_inputMessageQueue.push(MsgConfigureUSRP::create(m_settings, QList<QString>{"gpioDir", "gpioPins"}, false));
+        }, Qt::QueuedConnection);
+    }
+}
+
 QByteArray USRPInput::serialize() const
 {
+    QMutexLocker settingsLocker(&m_settingsMutex);
     return m_settings.serialize();
 }
 
@@ -667,17 +725,20 @@ const QString& USRPInput::getDeviceDescription() const
 
 int USRPInput::getSampleRate() const
 {
+    QMutexLocker settingsLocker(&m_settingsMutex);
     int rate = m_settings.m_devSampleRate;
     return (rate / (1<<m_settings.m_log2SoftDecim));
 }
 
 quint64 USRPInput::getCenterFrequency() const
 {
+    QMutexLocker settingsLocker(&m_settingsMutex);
     return m_settings.m_centerFrequency;
 }
 
 void USRPInput::setCenterFrequency(qint64 centerFrequency)
 {
+    QMutexLocker settingsLocker(&m_settingsMutex);
     USRPInputSettings settings = m_settings;
     settings.m_centerFrequency = centerFrequency;
 
@@ -1251,6 +1312,7 @@ int USRPInput::webapiSettingsGet(
                 SWGSDRangel::SWGDeviceSettings& response,
                 QString& errorMessage)
 {
+    QMutexLocker settingsLocker(&m_settingsMutex);
     (void) errorMessage;
     response.setUsrpInputSettings(new SWGSDRangel::SWGUSRPInputSettings());
     response.getUsrpInputSettings()->init();
@@ -1264,6 +1326,7 @@ int USRPInput::webapiSettingsPutPatch(
                 SWGSDRangel::SWGDeviceSettings& response, // query + response
                 QString& errorMessage)
 {
+    QMutexLocker settingsLocker(&m_settingsMutex);
     (void) errorMessage;
     USRPInputSettings settings = m_settings;
     webapiUpdateDeviceSettings(settings, deviceSettingsKeys, response);

@@ -248,7 +248,7 @@ private:
     QMutex m_mutex;
     USRPInputSettings m_settings;
     USRPInputThread* m_usrpInputThread;
-    QRecursiveMutex m_settingsMutex; //!< Protects m_settings, which is written in GUI thread and read in device engine thread in start()
+    mutable QRecursiveMutex m_settingsMutex; //!< Protects m_settings, which is written in GUI thread and read in device engine thread (start() and getters) and web API threads
     QMutex m_threadMutex; //!< Protects thread pointer, for access from threads other than the device engine thread
     QString m_deviceDescription;
     bool m_running;
@@ -262,6 +262,7 @@ private:
 
     bool openDevice();
     void closeDevice();
+    void reapplyLostGPIO(USRPInputThread *thread);
     bool acquireChannel(const USRPInputSettings& settings);
     void releaseChannel();
     DeviceUSRPParams *getBuddyDeviceParams() const;

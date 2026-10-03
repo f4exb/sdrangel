@@ -72,7 +72,8 @@ void USRPMIThread::issueStreamCmd(bool start)
     {
         // Channels in a multi-channel stream need to be started at the same time, so they are aligned
         streamCmd.stream_now = false;
-        streamCmd.time_spec = m_device->get_time_now() + uhd::time_spec_t(0.05);
+        // Allow enough time for the command to reach the device, even if the device is being reconfigured
+        streamCmd.time_spec = m_device->get_time_now() + uhd::time_spec_t(0.1);
     }
     else
     {
@@ -170,9 +171,12 @@ void USRPMIThread::run()
     // Higher priority, so streaming isn't delayed by other threads
     DeviceUSRP::setStreamingThreadPriority();
 
+    // Hold mutex, so wake can't occur between startWork() checking m_runStarted and waiting
+    m_startWaitMutex.lock();
     m_running = true;
     m_runStarted = true;
     m_startWaiter.wakeAll();
+    m_startWaitMutex.unlock();
 
     try
     {
@@ -196,12 +200,15 @@ void USRPMIThread::run()
             {
                 m_overflows++;
             }
-            else if (md.error_code == uhd::rx_metadata_t::ERROR_CODE_ALIGNMENT)
+            else if ((md.error_code == uhd::rx_metadata_t::ERROR_CODE_ALIGNMENT)
+                || (md.error_code == uhd::rx_metadata_t::ERROR_CODE_LATE_COMMAND))
             {
                 // Channels lose alignment when the device is reconfigured while streaming
                 // (E.g. sample rate or clock source change, which resets the AD9361 on B2xx).
-                // UHD can't recover from this itself, so restart with a timed start to realign them
-                qDebug("USRPMIThread::run: multi-channel alignment failed - restarting");
+                // UHD can't recover from this itself, so restart with a timed start to realign them.
+                // If the timed start command arrived late, streaming won't have started, so also restart,
+                // rather than waiting for a timeout
+                qDebug() << "USRPMIThread::run:" << QString::fromStdString(md.strerror()) << "- restarting";
                 issueStreamCmd(false);
                 flush();
                 issueStreamCmd(true);

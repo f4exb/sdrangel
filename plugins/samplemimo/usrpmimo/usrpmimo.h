@@ -93,6 +93,25 @@ public:
         { }
     };
 
+    /**
+     * Sent by the worker after applying settings that reconfigure the device's sample rate or clock,
+     * which can leave Tx channels misaligned, so Tx needs to be restarted with a timed start.
+     * (Rx detects misalignment itself, via ERROR_CODE_ALIGNMENT)
+     */
+    class MsgDeviceReconfigured : public Message {
+        MESSAGE_CLASS_DECLARATION
+
+    public:
+        static MsgDeviceReconfigured* create() {
+            return new MsgDeviceReconfigured();
+        }
+
+    private:
+        MsgDeviceReconfigured() :
+            Message()
+        { }
+    };
+
     class MsgGetStreamInfo : public Message {
         MESSAGE_CLASS_DECLARATION
 
@@ -237,10 +256,11 @@ private:
     DeviceAPI *m_deviceAPI;
     QMutex m_mutex;                 //!< Serialises start and stop
     QMutex m_threadMutex;           //!< Protects thread pointers, for access from other threads
-    QRecursiveMutex m_settingsMutex; //!< Protects m_settings, which is written in GUI thread and read in device engine thread in start
+    mutable QRecursiveMutex m_settingsMutex; //!< Protects m_settings, which is written in GUI thread and read in device engine thread (start and getters) and web API threads
     USRPMIMOSettings m_settings;
     USRPMIThread* m_sourceThread;
     USRPMOThread* m_sinkThread;
+    bool m_txRestartPending;        //!< Tx needs restarting once m_sinkThread is set, as device was reconfigured while starting. Protected by m_threadMutex
     QString m_deviceDescription;
     bool m_runningRx;
     bool m_runningTx;

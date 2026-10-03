@@ -100,7 +100,11 @@ bool DeviceUSRPParams::open(const QString &deviceStr, bool channelNumOnly)
             // tx/rx_rate is rate between PC and FPGA
             uhd::meta_range_t clockRange = m_dev->get_master_clock_rate_range();
             uhd::property_tree::sptr properties = m_dev->get_device()->get_tree();
-            if ((clockRange.start() == clockRange.stop()) || !properties->exists("/mboards/0/auto_tick_rate"))
+            const std::string autoTickRatePath = "/mboards/0/auto_tick_rate";
+            // If master_clock_rate was specified in the device args, it is fixed, so don't change it
+            if ((clockRange.start() == clockRange.stop())
+                || !properties->exists(autoTickRatePath)
+                || !properties->access<bool>(autoTickRatePath).get())
             {
                 if (m_nbRxChannels > 0) {
                     m_srRangeRx = m_dev->get_rx_rates();
@@ -117,6 +121,19 @@ bool DeviceUSRPParams::open(const QString &deviceStr, bool channelNumOnly)
             }
             else
             {
+                // Setting the master clock rate disables automatic selection, so restore it afterwards,
+                // even if an exception is thrown, otherwise the clock rate would be stuck
+                struct RestoreAutoTickRate {
+                    uhd::property_tree::sptr m_properties;
+                    std::string m_path;
+                    ~RestoreAutoTickRate() {
+                        try {
+                            m_properties->access<bool>(m_path).set(true);
+                        } catch (...) {
+                        }
+                    }
+                } restoreAutoTickRate{properties, autoTickRatePath};
+
                 // Find max and min sample rate, for max and min master clock rates
                 m_dev->set_master_clock_rate(clockRange.start());
                 uhd::meta_range_t rxLow;
@@ -142,11 +159,6 @@ bool DeviceUSRPParams::open(const QString &deviceStr, bool channelNumOnly)
                 {
                     txHigh = m_dev->get_tx_rates();
                     m_srRangeTx = uhd::meta_range_t(std::min(txLow.start(), txHigh.start()), std::max(txLow.stop(), txHigh.stop()));
-                }
-
-                // Need to restore automatic clock rate
-                if (properties->exists("/mboards/0/auto_tick_rate")) {
-                    properties->access<bool>("/mboards/0/auto_tick_rate").set(true);
                 }
             }
         });

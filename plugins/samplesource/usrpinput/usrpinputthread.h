@@ -86,9 +86,10 @@ private:
     std::atomic<bool> m_started;    //!< Set from startWork() to stopWork()
     std::atomic<bool> m_runStarted; //!< Set when run() has started
 
-    quint64 m_packets;
-    quint32 m_overflows;
-    quint32 m_timeouts;
+    // Counters are written in run(), reset in startWork (device engine threads) and read in getStreamStatus (GUI / web API threads)
+    std::atomic<quint64> m_packets;
+    std::atomic<quint32> m_overflows;
+    std::atomic<quint32> m_timeouts;
 
     uhd::rx_streamer::sptr m_stream;
     qint16 *m_buf;

@@ -65,9 +65,12 @@ private:
     QWaitCondition m_startWaiter;
     std::atomic<bool> m_running;
 
+    // Counters are reset in startWork (device engine thread) and read in getStreamStatus (GUI / web API threads)
     std::atomic<quint64> m_packets;
-    quint32 m_underflows;
-    quint32 m_droppedPackets;
+    std::atomic<quint32> m_underflows;
+    std::atomic<quint32> m_droppedPackets;
+    std::atomic<bool> m_lateStartPending; //!< Late start of burst seen in getStreamStatus, to be handled in run()
+    QMutex m_asyncMsgMutex;             //!< Serialises recv_async_msg, which is called from different threads
 
     uhd::usrp::multi_usrp::sptr m_device;
     uhd::tx_streamer::sptr m_stream;
@@ -86,6 +89,8 @@ private:
     bool m_detached;                    //!< When set, no longer handle requests
 
     void run();
+    void setTimedStart(uhd::tx_metadata_t& md);
+    bool processAsyncMessages();
     unsigned int callback();
     void callbackPart(unsigned int iBegin, unsigned int nSamples, unsigned int offset, unsigned int log2Interp);
     void resizeSampleFifo(unsigned int size);

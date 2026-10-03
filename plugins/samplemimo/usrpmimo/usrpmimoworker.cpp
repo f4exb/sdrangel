@@ -86,6 +86,11 @@ void USRPMIMOWorker::handleInputMessages()
 
     if (pendingConfig) {
         applyDeviceSettings(m_deviceParams, m_nbRx, m_nbTx, settings, settingsKeys, force, true, true, true, true, m_reportQueue);
+
+        // Changing these reconfigures the device (E.g. resets the AD9361 on B2xx), which can misalign Tx channels
+        if (m_reportQueue && (force || settingsKeys.contains("devSampleRate") || settingsKeys.contains("clockSource"))) {
+            m_reportQueue->push(USRPMIMO::MsgDeviceReconfigured::create());
+        }
     }
 }
 

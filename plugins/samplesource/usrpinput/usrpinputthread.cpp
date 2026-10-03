@@ -180,14 +180,42 @@ void USRPInputThread::stopWork()
 // may need to be serialised (See DeviceUSRPRecvLock)
 size_t USRPInputThread::recv(uhd::rx_metadata_t& md, double timeout)
 {
-    if (m_deviceParams)
-    {
-        std::lock_guard<DeviceUSRPRecvLock> recvLock(m_deviceParams->m_recvLock);
+    if (!m_deviceParams) {
         return m_stream->recv(m_buf, m_bufSamples, md, timeout);
     }
-    else
+
+    // Only wait for a short time while holding the lock, so if our stream isn't receiving data
+    // (E.g. it's being restarted after a timeout), streams of buddies aren't blocked for long, which would cause them to overflow.
+    // The buffer is at most a few packets, so should be filled well within this time, at the sample rates where locking is used
+    const double maxLockedTimeout = 0.05;
+    double remaining = timeout;
+
+    while (true)
     {
-        return m_stream->recv(m_buf, m_bufSamples, md, timeout);
+        const double lockedTimeout = std::min(remaining, maxLockedTimeout);
+        size_t samplesReceived;
+
+        {
+            std::lock_guard<DeviceUSRPRecvLock> recvLock(m_deviceParams->m_recvLock);
+            samplesReceived = m_stream->recv(m_buf, m_bufSamples, md, lockedTimeout);
+        }
+
+        if (md.error_code != uhd::rx_metadata_t::ERROR_CODE_TIMEOUT) {
+            return samplesReceived;
+        }
+
+        if (samplesReceived > 0)
+        {
+            // Partially filled buffer: return what we have, rather than reporting a timeout, which would restart the stream
+            md.error_code = uhd::rx_metadata_t::ERROR_CODE_NONE;
+            return samplesReceived;
+        }
+
+        remaining -= lockedTimeout;
+
+        if (remaining <= 0.0) {
+            return samplesReceived; // Timed out
+        }
     }
 }
 
@@ -203,9 +231,12 @@ void USRPInputThread::run()
     // Higher priority, so streaming isn't delayed by other threads
     DeviceUSRP::setStreamingThreadPriority();
 
+    // Hold mutex, so wake can't occur between startWork() checking m_runStarted and waiting
+    m_startWaitMutex.lock();
     m_running = true;
     m_runStarted = true;
     m_startWaiter.wakeAll();
+    m_startWaitMutex.unlock();
 
     try
     {
@@ -217,7 +248,7 @@ void USRPInputThread::run()
             m_packets++;
             if (samples_received != m_bufSamples)
             {
-                qDebug("USRPInputThread::run - received %ld/%ld samples", samples_received, m_bufSamples);
+                qDebug("USRPInputThread::run - received %zu/%zu samples", samples_received, m_bufSamples);
             }
             if (md.error_code ==  uhd::rx_metadata_t::ERROR_CODE_TIMEOUT)
             {

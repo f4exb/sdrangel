@@ -58,7 +58,7 @@ void DeviceUSRP::enumOriginDevices(const QString& hardwareId, PluginInterface::O
 
             // Opening some devices can be a little slow, so use hardcoded number of channels,
             // for known devices
-            static const QMap<QString, int> channelMap{{"B200", 1}, {"B205", 1}, {"B200mini", 1}, {"B205mini", 1}, {"B210", 2}};
+            static const QMap<QString, int> channelMap{{"B200", 1}, {"B205", 1}, {"B200mini", 1}, {"B205mini", 1}, {"B206mini", 1}, {"B210", 2}};
             if (channelMap.contains(product))
             {
                 originDevices.append(PluginInterface::OriginDevice(
@@ -264,10 +264,20 @@ bool DeviceUSRP::setMasterClockRateForSampleRate(uhd::usrp::multi_usrp::sptr usr
     // as otherwise it could be changed when the first channel is set
     properties->access<bool>(autoTickRatePath).set(false);
 
-    if (std::abs(usrp->get_master_clock_rate() - clockRate) >= 1.0)
+    try
     {
-        qDebug("DeviceUSRP::setMasterClockRateForSampleRate: setting master clock rate to %f for sample rate %f", clockRate, sampleRate);
-        usrp->set_master_clock_rate(clockRate);
+        if (std::abs(usrp->get_master_clock_rate() - clockRate) >= 1.0)
+        {
+            qDebug("DeviceUSRP::setMasterClockRateForSampleRate: setting master clock rate to %f for sample rate %f", clockRate, sampleRate);
+            usrp->set_master_clock_rate(clockRate);
+        }
+    }
+    catch (...)
+    {
+        // Otherwise automatic selection would be left disabled, and as this function then sees it as manual,
+        // it would never be re-enabled
+        properties->access<bool>(autoTickRatePath).set(true);
+        throw;
     }
 
     return true;

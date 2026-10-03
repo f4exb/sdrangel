@@ -17,6 +17,7 @@
 ///////////////////////////////////////////////////////////////////////////////////
 
 #include <algorithm>
+#include <chrono>
 
 #include <QDebug>
 
@@ -35,6 +36,7 @@ USRPMOThread::USRPMOThread(uhd::usrp::multi_usrp::sptr device, uhd::tx_streamer:
     m_packets(0),
     m_underflows(0),
     m_droppedPackets(0),
+    m_lateStartPending(false),
     m_device(device),
     m_stream(stream),
     m_bufSamples(bufSamples),
@@ -72,6 +74,7 @@ void USRPMOThread::startWork()
     m_packets = 0;
     m_underflows = 0;
     m_droppedPackets = 0;
+    m_lateStartPending = false;
 
     m_startWaitMutex.lock();
     start();
@@ -90,18 +93,9 @@ void USRPMOThread::stopWork()
     }
 
     m_running = false;
+    // run() ends the burst before exiting, so no underflow is reported when stopped,
+    // so we don't need to wait for and discard one here (which delayed pausing Tx)
     wait();
-
-    try
-    {
-        // Get message indicating underflow, so it doesn't appear if we restart
-        uhd::async_metadata_t md;
-        m_stream->recv_async_msg(md);
-    }
-    catch (std::exception& e)
-    {
-        qDebug() << "USRPMOThread::stopWork: exception: " << e.what();
-    }
 }
 
 // Release references to stream and device, so they're destroyed when the device is closed,
@@ -124,19 +118,31 @@ void USRPMOThread::handleInputMessages()
 {
     QMutexLocker mutexLocker(&m_configMutex);
     Message* message;
+    // Merge consecutive resize requests, so streaming is only stopped and restarted once,
+    // using the most recently requested size
+    bool resize = false;
+    unsigned int size = 0;
 
     while ((message = m_inputMessageQueue.pop()) != nullptr)
     {
         if (!m_detached)
         {
-            if (DeviceUSRPShared::MsgResizeSampleFifo::match(*message)) {
-                resizeSampleFifo(((const DeviceUSRPShared::MsgResizeSampleFifo&) *message).getSize());
-            } else {
+            if (DeviceUSRPShared::MsgResizeSampleFifo::match(*message))
+            {
+                resize = true;
+                size = ((const DeviceUSRPShared::MsgResizeSampleFifo&) *message).getSize();
+            }
+            else
+            {
                 qDebug("%s: unhandled message: %s", Q_FUNC_INFO, message->getIdentifier());
             }
         }
 
         delete message;
+    }
+
+    if (resize) {
+        resizeSampleFifo(size);
     }
 }
 
@@ -158,26 +164,21 @@ void USRPMOThread::resizeSampleFifo(unsigned int size)
     }
 }
 
-void USRPMOThread::run()
+// Start of burst at a time slightly in the future, so channels in a multi-channel stream start at the same time and are aligned
+void USRPMOThread::setTimedStart(uhd::tx_metadata_t& md)
 {
-    uhd::tx_metadata_t md;
-    md.end_of_burst = false;
-
-    // Higher priority, so streaming isn't delayed by other threads
-    DeviceUSRP::setStreamingThreadPriority();
-
     if (m_nbChannels > 1)
     {
-        // Channels in a multi-channel stream need to be started at the same time, so they are aligned
         try
         {
             md.start_of_burst = true;
             md.has_time_spec = true;
-            md.time_spec = m_device->get_time_now() + uhd::time_spec_t(0.05);
+            // Allow enough time for the first packet to reach the device, even if the device is being reconfigured
+            md.time_spec = m_device->get_time_now() + uhd::time_spec_t(0.1);
         }
         catch (std::exception& e)
         {
-            qWarning() << "USRPMOThread::run: could not get time: " << e.what();
+            qWarning() << "USRPMOThread::setTimedStart: could not get time: " << e.what();
             md.start_of_burst = false;
             md.has_time_spec = false;
         }
@@ -187,12 +188,59 @@ void USRPMOThread::run()
         md.start_of_burst = false;
         md.has_time_spec = false;
     }
+}
 
+void USRPMOThread::run()
+{
+    uhd::tx_metadata_t md;
+    md.end_of_burst = false;
+
+    // Higher priority, so streaming isn't delayed by other threads
+    DeviceUSRP::setStreamingThreadPriority();
+
+    setTimedStart(md);
+
+    // Hold mutex, so wake can't occur between startWork() checking m_running and waiting
+    m_startWaitMutex.lock();
     m_running = true;
     m_startWaiter.wakeAll();
+    m_startWaitMutex.unlock();
+
+    auto lastAsyncCheck = std::chrono::steady_clock::now();
 
     while (m_running)
     {
+        // Check for async messages periodically, rather than relying on getStreamStatus being called,
+        // so we can detect a late timed start of burst, after which the device may discard the burst
+        auto now = std::chrono::steady_clock::now();
+
+        if (now - lastAsyncCheck >= std::chrono::milliseconds(50))
+        {
+            lastAsyncCheck = now;
+
+            // getStreamStatus may also have seen a late start
+            bool lateStart = processAsyncMessages();
+            lateStart = m_lateStartPending.exchange(false) || lateStart;
+
+            if (lateStart && (m_nbChannels > 1))
+            {
+                qDebug("USRPMOThread::run: late start of burst - restarting");
+
+                try
+                {
+                    md.end_of_burst = true;
+                    m_stream->send(m_bufPtrs, 0, md);
+                }
+                catch (std::exception& e)
+                {
+                    qDebug() << "USRPMOThread::run: exception sending end of burst: " << e.what();
+                }
+
+                md.end_of_burst = false;
+                setTimedStart(md);
+            }
+        }
+
         unsigned int writtenSamples = callback();
 
         try
@@ -291,11 +339,15 @@ void USRPMOThread::callbackPart(unsigned int iBegin, unsigned int nSamples, unsi
 }
 
 // Called from GUI thread
-void USRPMOThread::getStreamStatus(bool& active, quint32& underflows, quint32& droppedPackets)
+// Drain pending async messages (without waiting) and update counters.
+// Called from the streaming thread and from getStreamStatus in GUI / web API threads.
+// Returns true if a packet arrived late (E.g. timed start of burst)
+bool USRPMOThread::processAsyncMessages()
 {
     uhd::async_metadata_t md;
+    bool timeError = false;
+    QMutexLocker asyncMsgLocker(&m_asyncMsgMutex);
 
-    // Don't wait for messages (default timeout is 0.1s), and drain all pending messages
     try
     {
         while (m_stream && m_stream->recv_async_msg(md, 0.0))
@@ -308,11 +360,27 @@ void USRPMOThread::getStreamStatus(bool& active, quint32& underflows, quint32& d
                 || (md.event_code & uhd::async_metadata_t::EVENT_CODE_SEQ_ERROR_IN_BURST)) {
                 m_droppedPackets++;
             }
+            if (md.event_code & uhd::async_metadata_t::EVENT_CODE_TIME_ERROR)
+            {
+                // Samples weren't transmitted, so count as an underflow
+                m_underflows++;
+                timeError = true;
+            }
         }
     }
     catch (std::exception& e)
     {
-        qDebug() << "USRPMOThread::getStreamStatus: exception: " << e.what();
+        qDebug() << "USRPMOThread::processAsyncMessages: exception: " << e.what();
+    }
+
+    return timeError;
+}
+
+void USRPMOThread::getStreamStatus(bool& active, quint32& underflows, quint32& droppedPackets)
+{
+    // A late start of burst will be handled the next time the streaming thread checks
+    if (processAsyncMessages()) {
+        m_lateStartPending = true;
     }
 
     active = m_packets > 0;
