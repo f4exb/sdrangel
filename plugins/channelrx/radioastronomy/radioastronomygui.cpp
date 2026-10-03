@@ -2385,7 +2385,7 @@ void RadioAstronomyGUI::customContextMenuRequested(QPoint pos)
                 }
                 std::sort(rows.begin(), rows.end(), std::greater<int>());
                 bool deletedCurrent = false;
-                int next;
+                int next = 0;
                 foreach (auto row, rows) {
                     next = row - 1;
                     if (deleteRow(row)) {
@@ -4313,7 +4313,7 @@ void RadioAstronomyGUI::plotFFTMeasurement(int index)
             // Plot power/temp
             for (int i = 0; i < fft->m_fftSize; i++)
             {
-                qreal value;
+                qreal value = -std::numeric_limits<qreal>::infinity();
                 switch (m_settings.m_spectrumYScale)
                 {
                 case RadioAstronomySettings::SY_DBFS:
