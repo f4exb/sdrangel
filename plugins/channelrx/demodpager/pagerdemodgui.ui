@@ -343,7 +343,7 @@
       <item>
        <widget class="QLabel" name="modulationLabel">
         <property name="text">
-         <string>Mod</string>
+         <string>Mode</string>
         </property>
        </widget>
       </item>
@@ -356,20 +356,23 @@
          </size>
         </property>
         <property name="toolTip">
-         <string>Pager modulation</string>
+         <string>Pager protocols to receive. Auto receives both POCSAG and FLEX</string>
         </property>
+        <item>
+         <property name="text">
+          <string>Auto</string>
+         </property>
+        </item>
         <item>
          <property name="text">
           <string>POCSAG</string>
          </property>
         </item>
-       </widget>
-      </item>
-      <item>
-       <widget class="Line" name="line_10">
-        <property name="orientation">
-         <enum>Qt::Orientation::Vertical</enum>
-        </property>
+        <item>
+         <property name="text">
+          <string>FLEX</string>
+         </property>
+        </item>
        </widget>
       </item>
       <item>
@@ -395,7 +398,7 @@
          </size>
         </property>
         <property name="toolTip">
-         <string>How to choose between decoding a message as numeric or alphanumeric</string>
+         <string>How to choose between decoding a POCSAG message as numeric or alphanumeric. FLEX messages state their type</string>
         </property>
         <item>
          <property name="text">
@@ -725,16 +728,16 @@
      <number>2</number>
     </property>
     <property name="leftMargin">
-     <number>3</number>
+     <number>0</number>
     </property>
     <property name="topMargin">
-     <number>3</number>
+     <number>0</number>
     </property>
     <property name="rightMargin">
-     <number>3</number>
+     <number>0</number>
     </property>
     <property name="bottomMargin">
-     <number>3</number>
+     <number>0</number>
     </property>
     <item>
      <widget class="QTableWidget" name="messages">
@@ -765,7 +768,7 @@
         <string>Address</string>
        </property>
        <property name="toolTip">
-        <string>21-bit pager address the message is for</string>
+        <string>21-bit POCSAG address or FLEX capcode the message is for</string>
        </property>
       </column>
       <column>
@@ -778,7 +781,7 @@
         <string>Function</string>
        </property>
        <property name="toolTip">
-        <string>Function bits / source address</string>
+        <string>POCSAG function bits / source address</string>
        </property>
       </column>
       <column>
@@ -818,7 +821,31 @@
         <string>Baud</string>
        </property>
        <property name="toolTip">
-        <string>Baud rate the message was received at, detected from the preamble</string>
+        <string>POCSAG baud rate, detected from the preamble, or FLEX bit rate</string>
+       </property>
+      </column>
+      <column>
+       <property name="text">
+        <string>Protocol</string>
+       </property>
+       <property name="toolTip">
+        <string>Paging protocol: POCSAG or FLEX</string>
+       </property>
+      </column>
+      <column>
+       <property name="text">
+        <string>Type</string>
+       </property>
+       <property name="toolTip">
+        <string>Message type. Partial indicates a fragment of a FLEX message was lost</string>
+       </property>
+      </column>
+      <column>
+       <property name="text">
+        <string>Frame</string>
+       </property>
+       <property name="toolTip">
+        <string>FLEX cycle/frame and phase the message was received in</string>
        </property>
       </column>
      </widget>
@@ -1039,6 +1066,12 @@
    <container>1</container>
   </customwidget>
   <customwidget>
+   <class>ValueDialZ</class>
+   <extends>QWidget</extends>
+   <header>gui/valuedialz.h</header>
+   <container>1</container>
+  </customwidget>
+  <customwidget>
    <class>ButtonSwitch</class>
    <extends>QToolButton</extends>
    <header>gui/buttonswitch.h</header>
@@ -1047,12 +1080,6 @@
    <class>LevelMeterSignalDB</class>
    <extends>QWidget</extends>
    <header>gui/levelmeter.h</header>
-   <container>1</container>
-  </customwidget>
-  <customwidget>
-   <class>ValueDialZ</class>
-   <extends>QWidget</extends>
-   <header>gui/valuedialz.h</header>
    <container>1</container>
   </customwidget>
   <customwidget>

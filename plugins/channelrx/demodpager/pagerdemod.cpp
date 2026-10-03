@@ -176,6 +176,12 @@ bool PagerDemod::handleMessage(const Message& cmd)
             getMessageQueueToGUI()->push(msg);
         }
 
+        bool flex = report.getProtocol() == PagerDemodSettings::FLEX;
+        QString address = PagerDemodSettings::formatAddress(report.getAddress(), report.getProtocol());
+        // Function bits only exist in POCSAG
+        QString functionBits = flex ? QString() : QString::number(report.getFunctionBits());
+        QString protocol = PagerDemodSettings::protocolName(report.getProtocol());
+
         // Forward via UDP
         if (m_settings.m_udpEnabled)
         {
@@ -184,13 +190,17 @@ bool PagerDemod::handleMessage(const Message& cmd)
             message.append('\0');
             message.append(report.getDateTime().time().toString().toLatin1());
             message.append('\0');
-            message.append(QString("%1").arg(report.getAddress(), 7, 10, QChar('0')).toLatin1());
+            message.append(address.toLatin1());
             message.append('\0');
-            message.append(QString::number(report.getFunctionBits()).toLatin1());
+            message.append(functionBits.toLatin1());
             message.append('\0');
             message.append(report.getAlphaMessage().toLatin1());
             message.append('\0');
             message.append(report.getNumericMessage().toLatin1());
+            message.append('\0');
+            message.append(protocol.toLatin1());
+            message.append('\0');
+            message.append(report.getType().toLatin1());
             message.append('\0');
             m_udpSocket.writeDatagram(message.data(), message.size(),
                                 QHostAddress(m_settings.m_udpAddress), m_settings.m_udpPort);
@@ -201,13 +211,16 @@ bool PagerDemod::handleMessage(const Message& cmd)
         {
             m_logStream << report.getDateTime().date().toString() << ","
                 << report.getDateTime().time().toString() << ","
-                << QString("%1").arg(report.getAddress(), 7, 10, QChar('0')) << ","
-                << QString::number(report.getFunctionBits()) << ","
+                << address << ","
+                << functionBits << ","
                 << CSV::escape(report.getAlphaMessage()) << ","
                 << report.getNumericMessage() << ","
                 << QString::number(report.getEvenParityErrors()) << ","
                 << QString::number(report.getBCHParityErrors()) << ","
-                << QString::number(report.getBaud()) << "\n";
+                << QString::number(report.getBaud()) << ","
+                << protocol << ","
+                << CSV::escape(report.getType()) << ","
+                << report.getFrame() << "\n";
             m_logStream.flush();
         }
 
@@ -294,7 +307,7 @@ void PagerDemod::applySettings(const QStringList& settingsKeys, const PagerDemod
                 if (newFile)
                 {
                     // Write header
-                    m_logStream << "Date,Time,Address,Function Bits,Alpha,Numeric,Even Parity Errors,BCH Parity Errors,Baud\n";
+                    m_logStream << "Date,Time,Address,Function Bits,Alpha,Numeric,Even Parity Errors,BCH Parity Errors,Baud,Protocol,Type,Frame\n";
                 }
             }
             else
@@ -413,6 +426,9 @@ void PagerDemod::webapiUpdateChannelSettings(
         const QStringList& channelSettingsKeys,
         SWGSDRangel::SWGChannelSettings& response)
 {
+    if (channelSettingsKeys.contains("modulation")) {
+        settings.m_modulation = (PagerDemodSettings::Modulation) response.getPagerDemodSettings()->getModulation();
+    }
     if (channelSettingsKeys.contains("decode")) {
         settings.m_decode = (PagerDemodSettings::Decode) response.getPagerDemodSettings()->getDecode();
     }
@@ -480,6 +496,7 @@ void PagerDemod::webapiUpdateChannelSettings(
 
 void PagerDemod::webapiFormatChannelSettings(SWGSDRangel::SWGChannelSettings& response, const PagerDemodSettings& settings)
 {
+    response.getPagerDemodSettings()->setModulation((int) settings.m_modulation);
     response.getPagerDemodSettings()->setDecode((int) settings.m_decode);
     response.getPagerDemodSettings()->setReverse(settings.m_reverse ? 1 : 0);
     response.getPagerDemodSettings()->setInputFrequencyOffset(settings.m_inputFrequencyOffset);
@@ -617,6 +634,9 @@ void PagerDemod::webapiFormatChannelSettings(
 
     // transfer data that has been modified. When force is on transfer all data except reverse API data
 
+    if (channelSettingsKeys.contains("modulation") || force) {
+        swgPagerDemodSettings->setModulation((int) settings.m_modulation);
+    }
     if (channelSettingsKeys.contains("decode") || force) {
         swgPagerDemodSettings->setDecode((int) settings.m_decode);
     }

@@ -11,11 +11,18 @@ on:
 
 jobs:
   build_deb:
+    name: Linux Qt6 ${{ matrix.arch }}
     strategy:
       fail-fast: false
       matrix:
-       os: [ubuntu-26.04]
-    runs-on: ${{ matrix.os }}
+        include:
+          - os: ubuntu-26.04
+            runner: ubuntu-26.04
+            arch: amd64
+          - os: ubuntu-26.04
+            runner: ubuntu-26.04-arm
+            arch: arm64
+    runs-on: ${{ matrix.runner }}
     steps:
       - uses: actions/checkout@v4
         with:
@@ -52,7 +59,7 @@ jobs:
             rsync -a --delete . /tmp/build/sdrangel/
             cd /tmp/build/sdrangel
             debuild -eQT_VERSION=6 -i -us -uc -b
-            cp ../sdrangel_*_amd64.deb "$GITHUB_WORKSPACE"/
+            cp ../sdrangel_*_${{ matrix.arch }}.deb "$GITHUB_WORKSPACE"/
           else
             debuild -eQT_VERSION=6 -i -us -uc -b
           fi
@@ -65,14 +72,14 @@ jobs:
                 echo "version=$(echo ${{github.ref_name}} | cut -c2-)" >> $GITHUB_OUTPUT
             fi
       - name: Rename
-        run: mv ../sdrangel_*_amd64.deb sdrangel_${{ steps.get_version.outputs.version }}_${{ matrix.os }}_amd64.deb
+        run: mv ../sdrangel_*_${{ matrix.arch }}.deb sdrangel_${{ steps.get_version.outputs.version }}_${{ matrix.os }}_${{ matrix.arch }}.deb
       - name: Upload artifact
         uses: actions/upload-artifact@v4
         with:
-          name: sdrangel_${{ steps.get_version.outputs.version }}_${{ matrix.os }}_amd64.deb
-          path: sdrangel_${{ steps.get_version.outputs.version }}_${{ matrix.os }}_amd64.deb
+          name: sdrangel_${{ steps.get_version.outputs.version }}_${{ matrix.os }}_${{ matrix.arch }}.deb
+          path: sdrangel_${{ steps.get_version.outputs.version }}_${{ matrix.os }}_${{ matrix.arch }}.deb
       - name: Upload release
         if: startsWith(github.ref, 'refs/tags/')
         uses: softprops/action-gh-release@v2
         with:
-          files: sdrangel_${{ steps.get_version.outputs.version }}_${{ matrix.os }}_amd64.deb
+          files: sdrangel_${{ steps.get_version.outputs.version }}_${{ matrix.os }}_${{ matrix.arch }}.deb

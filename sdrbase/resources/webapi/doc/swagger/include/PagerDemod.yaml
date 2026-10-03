@@ -1,6 +1,15 @@
 PagerDemodSettings:
   description: PagerDemod
   properties:
+    modulation:
+      type: integer
+      minimum: 0
+      maximum: 2
+      description: >
+        Pager protocols to receive
+          * 0 - Auto (POCSAG and FLEX)
+          * 1 - POCSAG
+          * 2 - FLEX
     decode:
       type: integer
       minimum: 0
