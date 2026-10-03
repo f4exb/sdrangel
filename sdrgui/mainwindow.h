@@ -24,6 +24,7 @@
 #define INCLUDE_MAINWINDOW_H
 
 #include <QMainWindow>
+#include <functional>
 #include <QTimer>
 #include <QList>
 #include <QProcess>
@@ -384,6 +385,7 @@ private:
     void deleteChannel(int deviceSetIndex, int channelIndex);
     void channelDuplicateToDeviceSet(const ChannelGUI *sourceChannelGUI, int dsIndexDestination);
     void sampleDeviceChange(int deviceType, int deviceSetIndex, int newDeviceIndex, Workspace *workspace);
+    void stopDeviceEngineThen(DeviceUISet *deviceUISet, const std::function<void()>& func);
     void sampleSourceChange(int deviceSetIndex, int newDeviceIndex, Workspace *workspace);
 	void sampleSinkChange(int deviceSetIndex, int newDeviceIndex, Workspace *workspace);
 	void sampleMIMOChange(int deviceSetIndex, int newDeviceIndex, Workspace *workspace);
