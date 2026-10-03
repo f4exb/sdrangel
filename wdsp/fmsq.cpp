@@ -122,6 +122,7 @@ FMSQ::FMSQ(
     pllpole(_pllpole),
     avtau(_avtau),
     longtau(_longtau),
+    count(0),
     tup(_tup),
     tdown(_tdown),
     tail_thresh(_tail_thresh),
