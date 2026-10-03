@@ -22,6 +22,8 @@
 
 #include <stdint.h>
 
+#include <QRecursiveMutex>
+
 #include "util/message.h"
 #include "export.h"
 
@@ -93,6 +95,15 @@ public:
     bool                 m_threadWasRunning; //!< flag to know if thread needs to be resumed after suspend
 
     static const unsigned int m_sampleFifoMinRate;
+
+    /**
+     * Serializes every access to m_thread across all PlutoSDR device sets.
+     * A buddy suspends and resumes this device's sample thread through m_thread, from another
+     * thread and without holding this device's own mutex. Without a common lock it can restart
+     * a thread that stop() is in the middle of tearing down (QThread: Destroyed while thread is
+     * still running) or call through a pointer that has just been deleted.
+     */
+    static QRecursiveMutex m_threadsMutex;
 
     DevicePlutoSDRShared() :
         m_deviceParams(0),

@@ -22,3 +22,4 @@
 MESSAGE_CLASS_DEFINITION(DevicePlutoSDRShared::MsgCrossReportToBuddy, Message)
 
 const unsigned int DevicePlutoSDRShared::m_sampleFifoMinRate = 48000;
+QRecursiveMutex DevicePlutoSDRShared::m_threadsMutex;

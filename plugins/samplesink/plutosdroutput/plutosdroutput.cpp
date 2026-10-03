@@ -108,6 +108,11 @@ bool PlutoSDROutput::start()
         return true;
     }
 
+    if (!m_deviceShared.m_deviceParams)
+    {
+        qCritical("PlutoSDROutput::start: device not open");
+        return false;
+    }
     if (!m_deviceShared.m_deviceParams->getBox())
     {
         qCritical("PlutoSDROutput::start: device not open");
@@ -121,8 +126,11 @@ bool PlutoSDROutput::start()
     qDebug("PlutoSDROutput::start: thread created");
 
     m_plutoSDROutputThread->setLog2Interpolation(m_settings.m_log2Interp);
-    m_plutoSDROutputThread->startWork();
-    m_deviceShared.m_thread = m_plutoSDROutputThread;
+    {
+        QMutexLocker threadsLocker(&DevicePlutoSDRShared::m_threadsMutex);
+        m_plutoSDROutputThread->startWork();
+        m_deviceShared.m_thread = m_plutoSDROutputThread;
+    }
     m_running = true;
     mutexLocker.unlock();
 
@@ -141,14 +149,20 @@ void PlutoSDROutput::stop()
 
     m_running = false;
 
-    if (m_plutoSDROutputThread != 0)
+    // Unpublish the thread before tearing it down, and keep the shared lock through
+    // stop/wait/delete. applySettings() holds the same lock across its suspend ->
+    // apply -> resume transaction, so teardown must not interleave with that sequence.
+    QMutexLocker threadsLocker(&DevicePlutoSDRShared::m_threadsMutex);
+    m_deviceShared.m_thread = nullptr;
+    m_deviceShared.m_threadWasRunning = false;
+
+    if (m_plutoSDROutputThread)
     {
         m_plutoSDROutputThread->stopWork();
+        m_plutoSDROutputThread->wait();
         delete m_plutoSDROutputThread;
-        m_plutoSDROutputThread = 0;
+        m_plutoSDROutputThread = nullptr;
     }
-
-    m_deviceShared.m_thread = 0;
 }
 
 void PlutoSDROutput::handleError(int errorCode)
@@ -156,6 +170,9 @@ void PlutoSDROutput::handleError(int errorCode)
     QMutexLocker mutexLocker(&m_mutex);
 
     m_running = false;
+    QMutexLocker threadsLocker(&DevicePlutoSDRShared::m_threadsMutex);
+    m_deviceShared.m_thread = nullptr;
+    m_deviceShared.m_threadWasRunning = false;
     if (m_plutoSDROutputThread)
     {
         if (m_plutoSDROutputThread->isRunning())
@@ -166,7 +183,6 @@ void PlutoSDROutput::handleError(int errorCode)
         delete m_plutoSDROutputThread;
         m_plutoSDROutputThread = nullptr;
     }
-    m_deviceShared.m_thread = 0;
 
     const QString errorMessage =
         tr("Radio needs a restart: %1 (%2)")
@@ -395,6 +411,7 @@ void PlutoSDROutput::closeDevice()
 
 void PlutoSDROutput::suspendBuddies()
 {
+    QMutexLocker threadsLocker(&DevicePlutoSDRShared::m_threadsMutex);
     // suspend Rx buddy's thread
 
     for (unsigned int i = 0; i < m_deviceAPI->getSourceBuddies().size(); i++)
@@ -410,6 +427,7 @@ void PlutoSDROutput::suspendBuddies()
 
 void PlutoSDROutput::resumeBuddies()
 {
+    QMutexLocker threadsLocker(&DevicePlutoSDRShared::m_threadsMutex);
     // resume Rx buddy's thread
 
     for (unsigned int i = 0; i < m_deviceAPI->getSourceBuddies().size(); i++)
@@ -432,6 +450,10 @@ bool PlutoSDROutput::applySettings(const PlutoSDROutputSettings& settings, const
     }
 
     qDebug().noquote() << "PlutoSDROutput::applySettings: force:" << force << settings.getDebugString(settingsKeys, force);
+
+    // Held for the whole suspend -> apply -> resume sequence below (own thread and buddies'),
+    // so that a concurrent stop()/start() of either device set cannot interleave with it.
+    QMutexLocker threadsLocker(&DevicePlutoSDRShared::m_threadsMutex);
 
     bool forwardChangeOwnDSP    = false;
     bool forwardChangeOtherDSP  = false;
@@ -610,13 +632,17 @@ bool PlutoSDROutput::applySettings(const PlutoSDROutputSettings& settings, const
         {
             DevicePlutoSDRShared *buddySharedPtr = (DevicePlutoSDRShared *) (*itSource)->getBuddySharedPtr();
 
-            if (buddySharedPtr && buddySharedPtr->m_threadWasRunning) {
+            // m_threadWasRunning is sticky state on the buddy's shared struct, but the
+            // buddy's thread can be gone by the time we resume (its device was stopped,
+            // or a preset was loaded into it), which nulls m_thread. The matching
+            // suspend block above already tests m_thread; test it here too.
+            if (buddySharedPtr && buddySharedPtr->m_threadWasRunning && buddySharedPtr->m_thread) {
                 buddySharedPtr->m_thread->startWork();
             }
         }
     }
 
-    if (ownThreadWasRunning) {
+    if (ownThreadWasRunning && m_plutoSDROutputThread) {
         m_plutoSDROutputThread->startWork();
     }
 
