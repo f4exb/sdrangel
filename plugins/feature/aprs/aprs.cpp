@@ -44,6 +44,7 @@ const char* const APRS::m_featureId = "APRS";
 APRS::APRS(WebAPIAdapterInterface *webAPIAdapterInterface) :
     Feature(m_featureIdURI, webAPIAdapterInterface),
     m_thread(nullptr),
+    m_packetCount(0),
     m_worker(nullptr),
     m_availableChannelHandler(APRSSettings::m_pipeURIs, QStringList{"packets"}, "RTMF", this)
 {
