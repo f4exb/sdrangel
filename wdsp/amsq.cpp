@@ -95,6 +95,7 @@ AMSQ::AMSQ (
     trigger(_trigger),
     rate((double) _rate),
     avtau(_avtau),
+    count(0),
     tup(_tup),
     tdown(_tdown),
     tail_thresh(_tail_thresh),
