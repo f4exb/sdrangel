@@ -28,7 +28,10 @@
 #include "logslider.h"
 
 LogSlider::LogSlider(QWidget *parent) :
-    QSlider(Qt::Horizontal, parent)
+    QSlider(Qt::Horizontal, parent),
+    m_start(0.0),
+    m_stop(0.0),
+    m_steps(0.0)
 {
     QSlider::setRange(0, 1000);
     connect(this, &QSlider::valueChanged, this, &LogSlider::handleValueChanged);
