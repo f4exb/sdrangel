@@ -41,6 +41,7 @@
 
 FeatureGUI::FeatureGUI(QWidget *parent) :
     WorkspaceWindow(parent),
+    m_feature(nullptr),
     m_featureIndex(0),
     m_contextMenuType(ContextMenuNone),
     m_resizer(this),
