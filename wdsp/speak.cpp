@@ -141,6 +141,7 @@ SPEAK::SPEAK(
     rate(_rate),
     f(_f),
     bw(_bw),
+    cbw(0.0),
     gain(_gain),
     nstages(_nstages),
     design(_design)
