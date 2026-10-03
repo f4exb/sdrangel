@@ -960,8 +960,8 @@ void RadiosondeGUI::plotChart()
         {
             // Plot selected data
             QDateTimeAxis *m_chartXAxis;
-            QValueAxis *m_chartY1Axis;
-            QValueAxis *m_chartY2Axis;
+            QValueAxis *m_chartY1Axis = nullptr;
+            QValueAxis *m_chartY2Axis = nullptr;
 
             m_chartXAxis = new QDateTimeAxis();
             if (m_settings.m_y1 != RadiosondeSettings::NONE) {
