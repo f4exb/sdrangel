@@ -20,6 +20,7 @@
 ///////////////////////////////////////////////////////////////////////////////////
 
 #include <QDebug>
+#include <QMutexLocker>
 #include <QNetworkReply>
 #include <QBuffer>
 
@@ -102,6 +103,10 @@ void PlutoSDROutput::init()
 
 bool PlutoSDROutput::start()
 {
+    // Buddy lists can be changed in the GUI thread, but are accessed here (and in functions called from here)
+    // in the device engine thread. Lock before any of our own mutexes, to keep a consistent lock order.
+    QMutexLocker buddiesLocker(&DeviceAPI::getBuddiesMutex());
+
     QMutexLocker mutexLocker(&m_mutex);
 
     if (m_running) {
@@ -141,6 +146,10 @@ bool PlutoSDROutput::start()
 
 void PlutoSDROutput::stop()
 {
+    // Buddy lists can be changed in the GUI thread, but are accessed here (and in functions called from here)
+    // in the device engine thread. Lock before any of our own mutexes, to keep a consistent lock order.
+    QMutexLocker buddiesLocker(&DeviceAPI::getBuddiesMutex());
+
     QMutexLocker mutexLocker(&m_mutex);
 
     if (!m_running) {

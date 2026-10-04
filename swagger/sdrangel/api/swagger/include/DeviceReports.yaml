@@ -97,6 +97,9 @@ DeviceReport:
     usrpOutputReport:
       $ref: "http://swgserver:8081/api/swagger/include/USRP.yaml#/USRPOutputReport"
       description: "Usrp output report data for Device."
+    usrpMIMOReport:
+      $ref: "http://swgserver:8081/api/swagger/include/USRP.yaml#/USRPMIMOReport"
+      description: "USRP MIMO report data for Device."
     xtrxInputReport:
       $ref: "http://swgserver:8081/api/swagger/include/Xtrx.yaml#/XtrxInputReport"
       description: "Xtrx input report data for Device."

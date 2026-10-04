@@ -51,6 +51,7 @@
 #include "SWGSoapySDRReport.h"
 #include "SWGUSRPInputReport.h"
 #include "SWGUSRPOutputReport.h"
+#include "SWGUSRPMIMOReport.h"
 #include "SWGXtrxInputReport.h"
 #include "SWGXtrxMIMOReport.h"
 #include "SWGXtrxOutputReport.h"
@@ -164,6 +165,9 @@ public:
     SWGUSRPOutputReport* getUsrpOutputReport();
     void setUsrpOutputReport(SWGUSRPOutputReport* usrp_output_report);
 
+    SWGUSRPMIMOReport* getUsrpMimoReport();
+    void setUsrpMimoReport(SWGUSRPMIMOReport* usrp_mimo_report);
+
     SWGXtrxInputReport* getXtrxInputReport();
     void setXtrxInputReport(SWGXtrxInputReport* xtrx_input_report);
 
@@ -272,6 +276,9 @@ private:
 
     SWGUSRPOutputReport* usrp_output_report;
     bool m_usrp_output_report_isSet;
+
+    SWGUSRPMIMOReport* usrp_mimo_report;
+    bool m_usrp_mimo_report_isSet;
 
     SWGXtrxInputReport* xtrx_input_report;
     bool m_xtrx_input_report_isSet;

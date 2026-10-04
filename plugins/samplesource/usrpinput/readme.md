@@ -129,12 +129,16 @@ This adjusts the Rx local oscillator (LO) frequency from the centre frequency by
 
 This label turns green when data is being received from the device.
 
+The board temperature in degrees C is displayed to the left of this indicator, for devices that have a temperature sensor (E.g. the AD9361 on the B2xx).
+
 <h3>16: Stream warning indicators</h3>
 
   - **O**: turns red if stream experiences overruns
   - **T**: turns red if stream experiences timeouts
 
 The stream warning indicators are reset when the acquisition is started.
+
+Hovering over an indicator shows statistics for the current (or last) run: the total number of events, the average number per minute, the number in the last minute and the time of the last event.
 
 <h2>Dependencies</h2>
 

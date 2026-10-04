@@ -17,6 +17,7 @@
 ///////////////////////////////////////////////////////////////////////////////////
 
 #include <QDebug>
+#include <QMutexLocker>
 #include <QNetworkReply>
 #include <QBuffer>
 
@@ -261,6 +262,10 @@ void BladeRF2Input::moveThreadToBuddy()
 
 bool BladeRF2Input::start()
 {
+    // Buddy lists can be changed in the GUI thread, but are accessed here (and in functions called from here)
+    // in the device engine thread. Lock before any of our own mutexes, to keep a consistent lock order.
+    QMutexLocker buddiesLocker(&DeviceAPI::getBuddiesMutex());
+
     // There is a single thread per physical device (Rx side). This thread is unique and referenced by a unique
     // buddy in the group of source buddies associated with this physical device.
     //
@@ -399,6 +404,10 @@ bool BladeRF2Input::start()
 
 void BladeRF2Input::stop()
 {
+    // Buddy lists can be changed in the GUI thread, but are accessed here (and in functions called from here)
+    // in the device engine thread. Lock before any of our own mutexes, to keep a consistent lock order.
+    QMutexLocker buddiesLocker(&DeviceAPI::getBuddiesMutex());
+
     // This stop method is responsible for managing the thread and channel disabling when the streaming of
     // a Rx channel is stopped
     //

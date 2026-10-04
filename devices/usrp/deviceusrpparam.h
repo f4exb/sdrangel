@@ -20,12 +20,70 @@
 #define DEVICES_USRP_DEVICEUSRPPARAM_H_
 
 #include <QStringList>
+#include <QRecursiveMutex>
+#include <QMutex>
+#include <QWaitCondition>
 
 #include <uhd/usrp/multi_usrp.hpp>
 #include <uhd/exception.hpp>
 #include <uhd/types/tune_request.hpp>
 
 #include "export.h"
+
+/**
+ * Fair (first come, first served) lock, used to serialise calls to rx_streamer::recv() for
+ * different streams on the same device, on devices where that is required.
+ *
+ * On B2xx, all Rx streams share one transport, with packets being routed to each stream by UHD's
+ * recv_packet_demuxer_3000. This reads from the transport without holding its mutex, so if
+ * recv() is called concurrently for two streams, packets can be delivered out of order
+ * (Seen as 'D' in the console, and reported as an overflow, although no samples are lost).
+ *
+ * The lock needs to be fair, so one thread can't starve the other, as packets for a starved
+ * stream are queued by the demuxer, eventually exhausting the transport's receive frames.
+ */
+class DeviceUSRPRecvLock
+{
+public:
+    DeviceUSRPRecvLock() :
+        m_enabled(false),
+        m_nextTicket(0),
+        m_servingTicket(0)
+    {
+    }
+
+    void setEnabled(bool enabled) { m_enabled = enabled; }
+
+    void lock()
+    {
+        if (m_enabled)
+        {
+            QMutexLocker locker(&m_mutex);
+            quint64 ticket = m_nextTicket++;
+
+            while (ticket != m_servingTicket) {
+                m_waitCondition.wait(&m_mutex);
+            }
+        }
+    }
+
+    void unlock()
+    {
+        if (m_enabled)
+        {
+            QMutexLocker locker(&m_mutex);
+            m_servingTicket++;
+            m_waitCondition.wakeAll();
+        }
+    }
+
+private:
+    bool m_enabled; //!< Only set when device is opened, before any streams are created
+    QMutex m_mutex;
+    QWaitCondition m_waitCondition;
+    quint64 m_nextTicket;
+    quint64 m_servingTicket;
+};
 
 /**
  * This structure refers to one physical device shared among parties (logical devices represented by
@@ -51,6 +109,8 @@ struct DEVICES_API DeviceUSRPParams
     QStringList  m_rxAntennas;                  //!< List of Rx antenna names
     QStringList  m_rxGainNames;                 //!< List of Rx gain stages - Currently this seems limited to "PGA"
     QStringList  m_clockSources;                //!< List of clock sources E.g. "internal", "external", "gpsdo"
+    QRecursiveMutex m_mutex;                    //!< Serialises configuration of the device from the device engine threads of different buddies
+    DeviceUSRPRecvLock m_recvLock;              //!< Serialises rx_streamer::recv() calls for streams of different buddies, where required
 
     DeviceUSRPParams() :
         m_dev(),

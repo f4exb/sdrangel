@@ -1,10 +1,5 @@
 project (sdrbase)
 
-if(WIN32)
-    # This should probably be in ../CMakeLists.txt with the other variables like it
-    set(OPUS_INCLUDE_DIRS "${CMAKE_SOURCE_DIR}/external/windows/libopus/include")
-    set(OPUS_LIBRARIES "${CMAKE_SOURCE_DIR}/external/windows/libopus/lib/x64/libopus.lib")
-endif()
 find_package(Opus REQUIRED)
 
 if(FFTW3F_FOUND)

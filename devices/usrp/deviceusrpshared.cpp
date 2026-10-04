@@ -21,5 +21,9 @@
 
 MESSAGE_CLASS_DEFINITION(DeviceUSRPShared::MsgReportBuddyChange, Message)
 MESSAGE_CLASS_DEFINITION(DeviceUSRPShared::MsgReportClockSourceChange, Message)
+MESSAGE_CLASS_DEFINITION(DeviceUSRPShared::MsgReportDeviceSettings, Message)
+MESSAGE_CLASS_DEFINITION(DeviceUSRPShared::MsgReadDeviceSampleRate, Message)
+MESSAGE_CLASS_DEFINITION(DeviceUSRPShared::MsgReportDeviceInfo, Message)
+MESSAGE_CLASS_DEFINITION(DeviceUSRPShared::MsgResizeSampleFifo, Message)
 
 const unsigned int DeviceUSRPShared::m_sampleFifoMinRate = 48000;
