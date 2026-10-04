@@ -33,7 +33,7 @@ namespace WDSP {
 
 void FCurve::fc_impulse (std::vector<float>& impulse, int nc, float f0, float f1, float g0, float, int curve, float samplerate, float scale, int ctfmode, int wintype)
 {
-    float* A  = new float[nc / 2 + 1]; // (float *) malloc0 ((nc / 2 + 1) * sizeof (float));
+    float* A  = new float[nc / 2 + 1]{}; // (float *) malloc0 ((nc / 2 + 1) * sizeof (float));
     int i;
     float fn, f;
     int mid = nc / 2;

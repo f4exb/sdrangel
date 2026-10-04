@@ -604,7 +604,37 @@ void PagerDemodFlexDecoder::addFragment(PagerDemodFlexMessage& message, int frag
 
 PagerDemodFlex::PagerDemodFlex(int sampleRate) :
     m_sampleRate(sampleRate),
-    m_sps1600(sampleRate / 1600)
+    m_sps1600(sampleRate / 1600),
+    m_candidateFlywheel(false),
+    m_candidateFirst(0),
+    m_candidateEnd(0),
+    m_flywheelSyncEnd(0.0),
+    m_flywheelPeriods(0),
+    m_flywheelCode(0),
+    m_flywheelInverted(false),
+    m_flywheelCycle(0),
+    m_flywheelFrame(0),
+    m_syncEnd(0.0),
+    m_polarity(0.0f),
+    m_dc(0.0f),
+    m_deviation(0.0f),
+    m_syncPower(0.0f),
+    m_bitIndex(0),
+    m_nextBitSample(0.0),
+    m_deviationSum(0.0),
+    m_fiw(0),
+    m_sps(0),
+    m_timing(0.0),
+    m_gotMid(false),
+    m_mid(0.0f),
+    m_prevSymbol(0.0f),
+    m_havePrevSymbol(false),
+    m_prevMf(0.0f),
+    m_symbolIndex(0),
+    m_sync2Symbols(0),
+    m_dataSymbols(0),
+    m_blockPower{},
+    m_blockSamples{}
 {
     int histSize = 1;
     while (histSize <= m_syncBits * m_sps1600) {

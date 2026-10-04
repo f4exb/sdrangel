@@ -28,6 +28,8 @@
 
 FMPreemphasisDialog::FMPreemphasisDialog(float tau, float highFreq, QWidget* parent) :
     QDialog(parent),
+    m_tau(tau),
+    m_highFreq(highFreq),
     ui(new Ui::FMPreemphasisDialog)
 {
     ui->setupUi(this);

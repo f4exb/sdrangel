@@ -63,7 +63,12 @@ TXA::TXA(
     _out_rate,
     _dsp_rate,
     _dsp_size
-)
+),
+    meter{},
+    upslew(0),
+    bps0(nullptr),
+    bps1(nullptr),
+    bps2(nullptr)
 {
     mode   = TXA_LSB;
     f_low  = -5000.0;

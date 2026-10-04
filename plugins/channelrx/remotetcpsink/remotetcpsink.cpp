@@ -55,6 +55,7 @@ RemoteTCPSink::RemoteTCPSink(DeviceAPI *deviceAPI) :
         m_deviceAPI(deviceAPI),
         m_basebandSampleRate(0),
         m_centerFrequency(0),
+        m_networkManager(nullptr),
         m_clients(0),
         m_removeRequest(nullptr)
 {

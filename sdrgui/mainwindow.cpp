@@ -1226,7 +1226,8 @@ void LoadConfigurationFSM::restoreGeometry()
 InitFSM::InitFSM(MainWindow *mainWindow, SDRangelSplash *splash, bool loadDefault, bool showConfigs, QObject *parent) :
     MainWindowFSM(mainWindow, parent),
     m_splash(splash),
-    m_showConfigs(showConfigs)
+    m_showConfigs(showConfigs),
+    m_loadConfigurationFSM(nullptr)
 {
     // Create FSM
     createStates(2);

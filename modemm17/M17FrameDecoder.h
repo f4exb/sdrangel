@@ -107,7 +107,8 @@ struct M17FrameDecoder
 
     M17FrameDecoder(callback_t callback) :
         crc_(0x5935, 0xFFFF),
-        callback_(callback)
+        callback_(callback),
+        output_buffer{}
     {}
 
     void update_state(std::array<uint8_t, 240>& lsf_output)

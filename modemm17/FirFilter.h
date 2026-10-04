@@ -51,7 +51,7 @@ private:
 template <size_t N>
 BaseFirFilter<N> makeFirFilter(const std::array<float, N>& taps)
 {
-	return std::move(BaseFirFilter<N>(taps));
+	return BaseFirFilter<N>(taps);
 }
 
 

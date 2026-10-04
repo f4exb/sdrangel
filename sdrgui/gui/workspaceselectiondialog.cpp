@@ -27,6 +27,7 @@ WorkspaceSelectionDialog::WorkspaceSelectionDialog(int numberOfWorkspaces, int w
     QDialog(parent),
     ui(new Ui::WorkspaceSelectionDialog),
     m_numberOfWorkspaces(numberOfWorkspaces),
+    m_selectedRow(0),
     m_hasChanged(false)
 {
     ui->setupUi(this);

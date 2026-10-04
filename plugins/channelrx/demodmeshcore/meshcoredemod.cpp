@@ -83,7 +83,8 @@ MeshcoreDemod::MeshcoreDemod(DeviceAPI* deviceAPI) :
         m_lastMsgHeaderParityStatus(0),
         m_lastMsgPayloadCRC(false),
         m_lastMsgPayloadParityStatus(0),
-        m_udpSink(this, 256)
+        m_udpSink(this, 256),
+        m_networkManager(nullptr)
 {
 	setObjectName(m_channelId);
 	applySettings(m_settings, true);

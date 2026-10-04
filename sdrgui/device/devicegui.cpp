@@ -41,6 +41,7 @@ DeviceGUI::DeviceGUI(QWidget *parent) :
     m_deviceUISet(nullptr),
     m_deviceType(DeviceRx),
     m_deviceSetIndex(0),
+    m_workspaceIndex(0),
     m_contextMenuType(ContextMenuNone),
     m_resizer(this),
     m_drag(false),

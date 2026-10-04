@@ -32,6 +32,7 @@ BasicChannelSettingsDialog::BasicChannelSettingsDialog(ChannelMarker* marker, QW
     QDialog(parent),
     ui(new Ui::BasicChannelSettingsDialog),
     m_channelMarker(marker),
+    m_streamIndex(0),
     m_hasChanged(false)
 {
     ui->setupUi(this);

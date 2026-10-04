@@ -28,7 +28,8 @@ HttpCookie::HttpCookie(const QByteArray name, const QByteArray value, const int 
     this->version=1;
 }
 
-HttpCookie::HttpCookie(const QByteArray source)
+HttpCookie::HttpCookie(const QByteArray source) :
+    httpOnly(false)
 {
     version=1;
     maxAge=0;

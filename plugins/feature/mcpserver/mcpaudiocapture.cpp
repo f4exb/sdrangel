@@ -59,9 +59,9 @@ MCPAudioCapture::MCPAudioCapture(WebAPIAdapterInterface *adapter, QObject *paren
     m_pendingChannel(nullptr),
     m_pendingFifo(nullptr),
     m_pendingReportQueue(nullptr),
+    m_stopping(0),
     m_capturingChannel(nullptr),
-    m_captureAborted(0),
-    m_stopping(0)
+    m_captureAborted(0)
 {
 }
 

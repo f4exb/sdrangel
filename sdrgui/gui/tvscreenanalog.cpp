@@ -113,13 +113,21 @@ static const char* fragmentShaderSource =
     "}\n";
 
 TVScreenAnalog::TVScreenAnalog(QWidget *parent)	:
-	QOpenGLWidget(parent),
-	m_shader(nullptr),
+    QOpenGLWidget(parent),
+    m_textureLoc1(0),
+    m_textureLoc2(0),
+    m_imageWidthLoc(0),
+    m_imageHeightLoc(0),
+    m_texelWidthLoc(0),
+    m_texelHeightLoc(0),
+    m_vertexAttribIndex(0),
+    m_texCoordAttribIndex(0),
+    m_shader(nullptr),
     m_vao(nullptr),
     m_verticesBuf(nullptr),
     m_textureCoordsBuf(nullptr),
-	m_imageTexture(nullptr),
-	m_lineShiftsTexture(nullptr)
+    m_imageTexture(nullptr),
+    m_lineShiftsTexture(nullptr)
 {
 	setAttribute(Qt::WA_OpaquePaintEvent);
 	m_isDataChanged = false;

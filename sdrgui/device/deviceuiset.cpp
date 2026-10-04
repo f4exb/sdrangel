@@ -47,7 +47,9 @@
 
 #include "deviceuiset.h"
 
-DeviceUISet::DeviceUISet(int deviceSetIndex, DeviceSet *deviceSet)
+DeviceUISet::DeviceUISet(int deviceSetIndex, DeviceSet *deviceSet) :
+    m_selectedDeviceSequence(0),
+    m_selectedDeviceItemImdex(0)
 {
     m_spectrum = new GLSpectrum();
     m_spectrum->setIsDeviceSpectrum(true);

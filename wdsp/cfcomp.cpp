@@ -252,6 +252,7 @@ CFCOMP::CFCOMP(
     out(_out),
     fsize(_fsize),
     ovrlp(_ovrlp),
+    mask_ready(0),
     rate(_rate),
     wintype(_wintype),
     comp_method(_comp_method),
