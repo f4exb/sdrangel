@@ -16,6 +16,7 @@ add_executable(packet_g3ruh_test
     ${SDRANGEL_ROOT}/sdrbase/util/lfsr.cpp
     ${SDRANGEL_ROOT}/sdrbase/util/simpleserializer.cpp)
 target_include_directories(packet_g3ruh_test PRIVATE .. ${SDRANGEL_ROOT}/exports ${SDRANGEL_ROOT}/sdrbase)
+target_compile_definitions(packet_g3ruh_test PRIVATE sdrangel_STATIC)
 target_link_libraries(packet_g3ruh_test PRIVATE Qt${QT_VERSION_MAJOR}::Core Qt${QT_VERSION_MAJOR}::Gui)
 option(PACKET_TEST_SANITIZERS "Enable address and undefined behaviour sanitizers" OFF)
 if(PACKET_TEST_SANITIZERS AND CMAKE_CXX_COMPILER_ID MATCHES "GNU|Clang")

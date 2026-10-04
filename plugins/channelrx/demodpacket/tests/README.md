@@ -51,7 +51,12 @@ noise before/after its burst because the MLSE activity gate needs a noise-floor
 measurement. API adapter checks exercise valid modes, rejection of invalid
 modes without mutation, and preservation of RF bandwidth on mode-only updates.
 
-Sanitizers instrument the test and its compiled sink/settings sources; linked
+The integration test compiles the production channel, baseband, sink, settings
+and API adapter directly, so it works with both Qt 5 and Qt 6 without linking
+against the loadable plugin. Add `-DENABLE_QT6=ON` for a Qt 6 server build. CI
+builds the plugin and runs the integration test with both Qt versions.
+
+Sanitizers instrument the test and these compiled Packet Demod sources; linked
 SDRangel/Qt libraries use the normal build flags. In containers where LeakSanitizer
 cannot enumerate processes, set `ASAN_OPTIONS=detect_leaks=0`. This leaves address,
 undefined-behaviour and float-conversion checks enabled, but does not test leaks.

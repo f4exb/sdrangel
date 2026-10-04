@@ -72,10 +72,13 @@ option(PACKETDEMOD_BUILD_TESTS "Build Packet Demod sink integration tests" OFF)
 if(PACKETDEMOD_BUILD_TESTS AND SERVER_MODE)
     add_executable(packetdemod_sink_test
         tests/test_sink.cpp
+        packetdemod.cpp
+        packetdemodbaseband.cpp
         packetdemodsink.cpp
-        packetdemodsettings.cpp)
+        packetdemodsettings.cpp
+        packetdemodwebapiadapter.cpp)
     target_include_directories(packetdemod_sink_test PRIVATE ${CMAKE_CURRENT_SOURCE_DIR})
-    target_link_libraries(packetdemod_sink_test PRIVATE Qt::Core sdrbase ${TARGET_NAME})
+    target_link_libraries(packetdemod_sink_test PRIVATE Qt::Core sdrbase)
     option(PACKETDEMOD_TEST_SANITIZERS "Sanitize the Packet Demod sink test" OFF)
     if(PACKETDEMOD_TEST_SANITIZERS AND CMAKE_CXX_COMPILER_ID MATCHES "GNU|Clang")
         target_compile_options(packetdemod_sink_test PRIVATE -fsanitize=address,undefined,float-cast-overflow -fno-omit-frame-pointer)
