@@ -1,5 +1,8 @@
 message(STATUS "cmake version: ${CMAKE_VERSION}")
 cmake_minimum_required(VERSION 3.17.0)
+if(CMAKE_VERSION VERSION_GREATER_EQUAL "3.31")
+    cmake_policy(SET CMP0177 NEW)
+endif()
 
 set(CMAKE_MSVC_RUNTIME_LIBRARY "MultiThreaded$<$<CONFIG:Debug>:Debug>DLL")
 
