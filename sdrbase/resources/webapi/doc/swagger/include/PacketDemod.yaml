@@ -10,15 +10,16 @@ PacketDemodSettings:
       description: >
         Transmission mode
           * 0 - 1200 AFSK
+          * 1 - 9600 G3RUH scrambled FSK
     rfBandwidth:
       type: number
       format: float
       description: "RF bandwidth in Hz."
     chase:
-      description: "Chase decoding depth. On CRC failure, retry inverting the n least confident symbols. 0 disables"
+      description: "1200 AFSK only; ignored in 9600 G3RUH mode. Chase decoding depth. On CRC failure, retry inverting the n least confident symbols. 0 disables"
       type: integer
     mlse:
-      description: "Whether to detect on the complex baseband with maximum likelihood sequence estimation instead of an FM discriminator. Worth about 9 dB. 1 by default"
+      description: "1200 AFSK only; ignored in 9600 G3RUH mode. Whether to detect on the complex baseband with maximum likelihood sequence estimation instead of an FM discriminator. Worth about 9 dB. 1 by default"
       type: integer
     udpEnabled:
       description: "Whether to forward received packets to specified UDP port"

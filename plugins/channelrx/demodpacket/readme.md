@@ -26,13 +26,17 @@ Average total power in dB relative to a +/- 1.0 amplitude signal received in the
 
 <h3>4: Modulation</h3>
 
-This specifies the baud rate and modulation that is used for the packet transmission. Currently 1200 baud AFSK is supported.
+This specifies the baud rate and modulation that is used for the packet transmission. Supported modes are 1200 baud AFSK and 9600 baud G3RUH scrambled FSK (AX.25). The latter descrambles with `1 + x^12 + x^17` before NRZI decoding. It does not decode arbitrary 9600-baud satellite telemetry or protocols with different framing/scrambling.
+
+Selecting a mode in the GUI sets the recommended RF bandwidth (12.5 kHz for AFSK, 20 kHz for G3RUH). Adjust this for the transmitter and residual carrier offset. REST clients select `mode: 1` and should also set `rfBandwidth: 20000`; changing the mode through REST preserves the explicitly configured bandwidth. Old presets without a mode load as 1200 AFSK.
 
 <h3>5: RF Bandwidth</h3>
 
 This specifies the bandwidth of a LPF that is applied to the input signal to limit the RF bandwidth.
 
 <h3>6: MLSE - Maximum likelihood sequence estimation</h3>
+
+Available in 1200 AFSK mode only. Its saved preference is retained while using 9600 G3RUH.
 
 Detects on the complex baseband instead of running the tone correlators on the output of an FM discriminator. Worth about 9.5 dB of sensitivity. Enabled by default; unchecking it reverts to the standard demodulator.
 
@@ -68,6 +72,8 @@ Bell 202 tones (mark 1200, space 2200) and V.23 tones (mark 1300, space 2100) ar
 Fading remains hard for it, as it is for any coherent detector. The branch metric is chosen from how much the signal faded during the burst, and the replay tries both regardless, so a fading burst is not lost simply because the choice was made wrongly in advance.
 
 <h3>7: Chase - Chase decoding depth</h3>
+
+Available in 1200 AFSK mode only. G3RUH descrambling spreads each erroneous radio symbol to three descrambled symbols; the existing independent-symbol Chase search does not model this. G3RUH uses normal CRC validation with no Chase retries.
 
 When a frame reaches a closing flag but fails its CRC, it is usually only a few marginal symbol decisions away from being correct. The demodulator keeps how confident each decision was, and on a CRC failure retries the frame with the least confident symbols inverted, accepting the result if the CRC then passes.
 

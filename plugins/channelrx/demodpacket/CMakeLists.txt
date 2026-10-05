@@ -14,6 +14,7 @@ set(demodpacket_HEADERS
     packetdemodsettings.h
     packetdemodbaseband.h
     packetdemodsink.h
+    packetdemodg3ruh.h
     packetdemodcore.h
     packetdemodframer.h
     packetdemodtonecorrelator.h
@@ -66,6 +67,24 @@ target_link_libraries(${TARGET_NAME} PRIVATE
 )
 
 install(TARGETS ${TARGET_NAME} DESTINATION ${INSTALL_FOLDER})
+
+option(PACKETDEMOD_BUILD_TESTS "Build Packet Demod sink integration tests" OFF)
+if(PACKETDEMOD_BUILD_TESTS AND SERVER_MODE)
+    add_executable(packetdemod_sink_test
+        tests/test_sink.cpp
+        packetdemod.cpp
+        packetdemodbaseband.cpp
+        packetdemodsink.cpp
+        packetdemodsettings.cpp
+        packetdemodwebapiadapter.cpp)
+    target_include_directories(packetdemod_sink_test PRIVATE ${CMAKE_CURRENT_SOURCE_DIR})
+    target_link_libraries(packetdemod_sink_test PRIVATE Qt::Core sdrbase)
+    option(PACKETDEMOD_TEST_SANITIZERS "Sanitize the Packet Demod sink test" OFF)
+    if(PACKETDEMOD_TEST_SANITIZERS AND CMAKE_CXX_COMPILER_ID MATCHES "GNU|Clang")
+        target_compile_options(packetdemod_sink_test PRIVATE -fsanitize=address,undefined,float-cast-overflow -fno-omit-frame-pointer)
+        target_link_options(packetdemod_sink_test PRIVATE -fsanitize=address,undefined,float-cast-overflow)
+    endif()
+endif()
 
 # Install debug symbols
 if (WIN32)
