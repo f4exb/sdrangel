@@ -14,7 +14,7 @@ The main three areas are:
 
   - **A**: radio settings
   - **B**: spectrum of FM demodulated signal. Please note that the annotations are custom and not generally available. Controls are similar to other spectrum displays including the main spectrum display.
-  - **C**: RDS data. Note that decoding RDS data requires the locking to the stereo pilot carrier therefore you should switch to stereo (A.3) to be able to decode RDS data
+  - **C**: RDS data. RDS decoding requires a transmitted 19 kHz pilot, but the audio output can remain in mono mode (A.3)
 
 <h2>A: Radio settings</h2>
 

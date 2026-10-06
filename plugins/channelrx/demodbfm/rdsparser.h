@@ -161,7 +161,6 @@ public:
 	static const unsigned int offset_word[5];
 	static const unsigned int syndrome[5];
 	static const char * const offset_name[];
-	static const std::string pty_table[32];
 	static const std::string pi_country_codes[15][5];
 	static const std::string coverage_area_codes[16];
 	static const std::string rds_group_acronyms[16];
