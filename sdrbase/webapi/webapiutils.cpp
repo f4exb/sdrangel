@@ -97,6 +97,7 @@ const QMap<QString, QString> WebAPIUtils::m_channelURIToSettingsKey = {
     {"sdrangel.channel.wfmdemod", "WFMDemodSettings"},
     {"de.maintech.sdrangelove.channel.wfm", "WFMDemodSettings"}, // remap
     {"sdrangel.channeltx.modwfm", "WFMModSettings"},
+    {"sdrangel.channeltx.modbfm", "BFMModSettings"},
     {"sdrangel.channel.beamsteeringcwmod", "BeamSteeringCWModSettings"},
     {"sdrangel.channelmimo.interferometer", "InterferometerSettings"},
     {"sdrangel.channel.sigmffilesink", "SigMFFileSinkSettings"}
@@ -221,6 +222,7 @@ const QMap<QString, QString> WebAPIUtils::m_channelTypeToSettingsKey = {
     {"VORDemod", "VORDemodSettings"},
     {"WFMDemod", "WFMDemodSettings"},
     {"WFMMod", "WFMModSettings"},
+    {"BFMMod", "BFMModSettings"},
     {"BeamSteeringCWMod", "BeamSteeringCWModSettings"},
     {"Interferometer", "InterferometerSettings"},
     {"SigMFFileSink", "SigMFFileSinkSettings"}

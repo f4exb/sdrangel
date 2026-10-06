@@ -48,6 +48,8 @@ SWGChannelReport::SWGChannelReport() {
     m_atv_mod_report_isSet = false;
     bfm_demod_report = nullptr;
     m_bfm_demod_report_isSet = false;
+    bfm_mod_report = nullptr;
+    m_bfm_mod_report_isSet = false;
     dab_demod_report = nullptr;
     m_dab_demod_report_isSet = false;
     channel_power_report = nullptr;
@@ -178,6 +180,8 @@ SWGChannelReport::init() {
     m_atv_mod_report_isSet = false;
     bfm_demod_report = new SWGBFMDemodReport();
     m_bfm_demod_report_isSet = false;
+    bfm_mod_report = new SWGBFMModReport();
+    m_bfm_mod_report_isSet = false;
     dab_demod_report = new SWGDABDemodReport();
     m_dab_demod_report_isSet = false;
     channel_power_report = new SWGChannelPowerReport();
@@ -311,6 +315,9 @@ SWGChannelReport::cleanup() {
     }
     if(bfm_demod_report != nullptr) { 
         delete bfm_demod_report;
+    }
+    if(bfm_mod_report != nullptr) {
+        delete bfm_mod_report;
     }
     if(dab_demod_report != nullptr) { 
         delete dab_demod_report;
@@ -496,6 +503,7 @@ SWGChannelReport::fromJsonObject(QJsonObject &pJson) {
     ::SWGSDRangel::setValue(&atv_mod_report, pJson["ATVModReport"], "SWGATVModReport", "SWGATVModReport");
     
     ::SWGSDRangel::setValue(&bfm_demod_report, pJson["BFMDemodReport"], "SWGBFMDemodReport", "SWGBFMDemodReport");
+    ::SWGSDRangel::setValue(&bfm_mod_report, pJson["BFMModReport"], "SWGBFMModReport", "SWGBFMModReport");
     
     ::SWGSDRangel::setValue(&dab_demod_report, pJson["DABDemodReport"], "SWGDABDemodReport", "SWGDABDemodReport");
     
@@ -643,6 +651,9 @@ SWGChannelReport::asJsonObject() {
     }
     if((bfm_demod_report != nullptr) && (bfm_demod_report->isSet())){
         toJsonValue(QString("BFMDemodReport"), bfm_demod_report, obj, QString("SWGBFMDemodReport"));
+    }
+    if((bfm_mod_report != nullptr) && (bfm_mod_report->isSet())){
+        toJsonValue(QString("BFMModReport"), bfm_mod_report, obj, QString("SWGBFMModReport"));
     }
     if((dab_demod_report != nullptr) && (dab_demod_report->isSet())){
         toJsonValue(QString("DABDemodReport"), dab_demod_report, obj, QString("SWGDABDemodReport"));
@@ -899,6 +910,16 @@ void
 SWGChannelReport::setBfmDemodReport(SWGBFMDemodReport* bfm_demod_report) {
     this->bfm_demod_report = bfm_demod_report;
     this->m_bfm_demod_report_isSet = true;
+}
+
+SWGBFMModReport*
+SWGChannelReport::getBfmModReport() {
+    return bfm_mod_report;
+}
+void
+SWGChannelReport::setBfmModReport(SWGBFMModReport* bfm_mod_report) {
+    this->bfm_mod_report = bfm_mod_report;
+    this->m_bfm_mod_report_isSet = true;
 }
 
 SWGDABDemodReport*
@@ -1444,6 +1465,9 @@ SWGChannelReport::isSet(){
             isObjectUpdated = true; break;
         }
         if(bfm_demod_report && bfm_demod_report->isSet()){
+            isObjectUpdated = true; break;
+        }
+        if(bfm_mod_report && bfm_mod_report->isSet()){
             isObjectUpdated = true; break;
         }
         if(dab_demod_report && dab_demod_report->isSet()){

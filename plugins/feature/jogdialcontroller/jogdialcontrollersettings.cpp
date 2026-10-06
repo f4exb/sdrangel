@@ -40,6 +40,7 @@ const QStringList JogdialControllerSettings::m_channelTypes = {
     QStringLiteral("SSBMod"),
     QStringLiteral("WFMDemod"),
     QStringLiteral("WFMMod"),
+    QStringLiteral("BFMMod"),
 };
 
 const QStringList JogdialControllerSettings::m_channelURIs = {
@@ -57,6 +58,7 @@ const QStringList JogdialControllerSettings::m_channelURIs = {
     QStringLiteral("sdrangel.channeltx.modssb"),
     QStringLiteral("sdrangel.channel.wfmdemod"),
     QStringLiteral("sdrangel.channeltx.modwfm"),
+    QStringLiteral("sdrangel.channeltx.modbfm"),
 };
 
 JogdialControllerSettings::JogdialControllerSettings() :

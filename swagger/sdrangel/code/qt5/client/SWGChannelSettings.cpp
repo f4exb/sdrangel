@@ -58,6 +58,8 @@ SWGChannelSettings::SWGChannelSettings() {
     m_beam_steering_cw_mod_settings_isSet = false;
     bfm_demod_settings = nullptr;
     m_bfm_demod_settings_isSet = false;
+    bfm_mod_settings = nullptr;
+    m_bfm_mod_settings_isSet = false;
     channel_analyzer_settings = nullptr;
     m_channel_analyzer_settings_isSet = false;
     channel_power_settings = nullptr;
@@ -210,6 +212,8 @@ SWGChannelSettings::init() {
     m_beam_steering_cw_mod_settings_isSet = false;
     bfm_demod_settings = new SWGBFMDemodSettings();
     m_bfm_demod_settings_isSet = false;
+    bfm_mod_settings = new SWGBFMModSettings();
+    m_bfm_mod_settings_isSet = false;
     channel_analyzer_settings = new SWGChannelAnalyzerSettings();
     m_channel_analyzer_settings_isSet = false;
     channel_power_settings = new SWGChannelPowerSettings();
@@ -366,6 +370,9 @@ SWGChannelSettings::cleanup() {
     }
     if(bfm_demod_settings != nullptr) { 
         delete bfm_demod_settings;
+    }
+    if(bfm_mod_settings != nullptr) {
+        delete bfm_mod_settings;
     }
     if(channel_analyzer_settings != nullptr) { 
         delete channel_analyzer_settings;
@@ -579,6 +586,7 @@ SWGChannelSettings::fromJsonObject(QJsonObject &pJson) {
     ::SWGSDRangel::setValue(&beam_steering_cw_mod_settings, pJson["BeamSteeringCWModSettings"], "SWGBeamSteeringCWModSettings", "SWGBeamSteeringCWModSettings");
     
     ::SWGSDRangel::setValue(&bfm_demod_settings, pJson["BFMDemodSettings"], "SWGBFMDemodSettings", "SWGBFMDemodSettings");
+    ::SWGSDRangel::setValue(&bfm_mod_settings, pJson["BFMModSettings"], "SWGBFMModSettings", "SWGBFMModSettings");
     
     ::SWGSDRangel::setValue(&channel_analyzer_settings, pJson["ChannelAnalyzerSettings"], "SWGChannelAnalyzerSettings", "SWGChannelAnalyzerSettings");
     
@@ -753,6 +761,9 @@ SWGChannelSettings::asJsonObject() {
     }
     if((bfm_demod_settings != nullptr) && (bfm_demod_settings->isSet())){
         toJsonValue(QString("BFMDemodSettings"), bfm_demod_settings, obj, QString("SWGBFMDemodSettings"));
+    }
+    if((bfm_mod_settings != nullptr) && (bfm_mod_settings->isSet())){
+        toJsonValue(QString("BFMModSettings"), bfm_mod_settings, obj, QString("SWGBFMModSettings"));
     }
     if((channel_analyzer_settings != nullptr) && (channel_analyzer_settings->isSet())){
         toJsonValue(QString("ChannelAnalyzerSettings"), channel_analyzer_settings, obj, QString("SWGChannelAnalyzerSettings"));
@@ -1077,6 +1088,16 @@ void
 SWGChannelSettings::setBfmDemodSettings(SWGBFMDemodSettings* bfm_demod_settings) {
     this->bfm_demod_settings = bfm_demod_settings;
     this->m_bfm_demod_settings_isSet = true;
+}
+
+SWGBFMModSettings*
+SWGChannelSettings::getBfmModSettings() {
+    return bfm_mod_settings;
+}
+void
+SWGChannelSettings::setBfmModSettings(SWGBFMModSettings* bfm_mod_settings) {
+    this->bfm_mod_settings = bfm_mod_settings;
+    this->m_bfm_mod_settings_isSet = true;
 }
 
 SWGChannelAnalyzerSettings*
@@ -1697,6 +1718,9 @@ SWGChannelSettings::isSet(){
             isObjectUpdated = true; break;
         }
         if(bfm_demod_settings && bfm_demod_settings->isSet()){
+            isObjectUpdated = true; break;
+        }
+        if(bfm_mod_settings && bfm_mod_settings->isSet()){
             isObjectUpdated = true; break;
         }
         if(channel_analyzer_settings && channel_analyzer_settings->isSet()){

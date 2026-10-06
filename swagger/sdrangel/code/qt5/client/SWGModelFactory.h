@@ -72,6 +72,8 @@
 #include "SWGAudioOutputSettings.h"
 #include "SWGBFMDemodReport.h"
 #include "SWGBFMDemodSettings.h"
+#include "SWGBFMModReport.h"
+#include "SWGBFMModSettings.h"
 #include "SWGBandwidth.h"
 #include "SWGBase64Blob.h"
 #include "SWGBeamSteeringCWModSettings.h"
@@ -717,6 +719,16 @@ namespace SWGSDRangel {
     }
     if(QString("SWGBFMDemodSettings").compare(type) == 0) {
       SWGBFMDemodSettings *obj = new SWGBFMDemodSettings();
+      obj->init();
+      return obj;
+    }
+    if(QString("SWGBFMModReport").compare(type) == 0) {
+      SWGBFMModReport *obj = new SWGBFMModReport();
+      obj->init();
+      return obj;
+    }
+    if(QString("SWGBFMModSettings").compare(type) == 0) {
+      SWGBFMModSettings *obj = new SWGBFMModSettings();
       obj->init();
       return obj;
     }

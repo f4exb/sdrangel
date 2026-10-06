@@ -1,0 +1,154 @@
+BFMModSettings:
+  description: BFMMod
+  properties:
+    inputFrequencyOffset:
+      type: integer
+      format: int64
+      description: "Channel frequency offset from the device center frequency in Hz."
+    rfBandwidth:
+      type: number
+      format: float
+      description: "RF bandwidth in Hz (150000 to 300000)."
+    afBandwidth:
+      type: number
+      format: float
+      description: "Audio-frequency bandwidth in Hz (1000 to 15000)."
+    fmDeviation:
+      type: number
+      format: float
+      description: "FM frequency deviation in Hz."
+    toneFrequency:
+      type: number
+      format: float
+      description: "Tone frequency in Hz."
+    volumeFactor:
+      type: number
+      format: float
+      description: "Volume factor setting for Broadcast FM mod."
+    audioStereo:
+      type: integer
+      minimum: 0
+      maximum: 1
+      description: "Generate the 19 kHz pilot and 38 kHz stereo difference signal."
+    preEmphasis:
+      type: integer
+      minimum: 0
+      maximum: 2
+      description: "Pre-emphasis: 0 off, 1 50 microseconds, 2 75 microseconds."
+    pilotLevel:
+      type: number
+      format: float
+      minimum: 0
+      maximum: 0.2
+      description: "Stereo pilot amplitude relative to maximum multiplex amplitude."
+    rdsActive:
+      type: integer
+      minimum: 0
+      maximum: 1
+      description: "Enable the 57 kHz RDS subcarrier."
+    rdsLevel:
+      type: number
+      format: float
+      minimum: 0
+      maximum: 0.1
+      description: "RDS subcarrier amplitude relative to maximum multiplex amplitude."
+    rdsPI:
+      type: integer
+      minimum: 0
+      maximum: 65535
+      description: "RDS programme identification code."
+    rdsPTY:
+      type: integer
+      minimum: 0
+      maximum: 31
+      description: "RDS programme type."
+    rdsPS:
+      type: string
+      maxLength: 8
+      description: "RDS programme service name, up to 8 characters."
+    rdsRadioText:
+      type: string
+      maxLength: 64
+      description: "RDS RadioText, up to 64 characters."
+    channelMute:
+      type: integer
+      description: "Mute the channel output (1 muted, 0 unmuted)."
+      minimum: 0
+      maximum: 1
+    playLoop:
+      type: integer
+      description: "Loop playback at end of file (1 enabled, 0 disabled)."
+      minimum: 0
+      maximum: 1
+    rgbColor:
+      type: integer
+      description: "Display color encoded as an RGB integer."
+    title:
+      type: string
+      description: "User-visible title."
+    audioDeviceName:
+      type: string
+      description: "Name of the audio device to use."
+    feedbackAudioDeviceName:
+      type: string
+      description: "Name of the audio output device used for audio feedback."
+    feedbackVolumeFactor:
+      type: number
+      format: float
+      description: "Audio feedback volume factor."
+    fileName:
+      type: string
+      description: "WAV or raw audio file played when modAFInput selects the file input."
+    feedbackAudioEnable:
+      type: integer
+      minimum: 0
+      maximum: 1
+      description: "Enable audio feedback (1 enabled, 0 disabled)."
+    modAFInput:
+      type: integer
+      description: "Audio-frequency modulation input selection."
+    streamIndex:
+      description: MIMO channel. Not relevant when connected to SI (single Rx).
+      type: integer
+    useReverseAPI:
+      description: Synchronize with reverse API (1 for yes, 0 for no)
+      type: integer
+      minimum: 0
+      maximum: 1
+    reverseAPIAddress:
+      type: string
+      description: "IPv4 address or host name of the reverse API peer."
+    reverseAPIPort:
+      type: integer
+      description: "TCP port of the reverse API peer."
+      minimum: 1
+      maximum: 65535
+    reverseAPIDeviceIndex:
+      type: integer
+      description: "Device-set index used by the reverse API peer."
+    reverseAPIChannelIndex:
+      type: integer
+      description: "Channel index used by the reverse API peer."
+    cwKeyer:
+      $ref: "http://swgserver:8081/api/swagger/include/CWKeyer.yaml#/CWKeyerSettings"
+      description: "CW keyer configuration."
+    channelMarker:
+      $ref: "http://swgserver:8081/api/swagger/include/ChannelMarker.yaml#/ChannelMarker"
+      description: "Channel-marker display configuration."
+    rollupState:
+      $ref: "http://swgserver:8081/api/swagger/include/RollupState.yaml#/RollupState"
+      description: "Saved expanded or collapsed state of the GUI sections."
+
+BFMModReport:
+  description: BFMMod
+  properties:
+    channelPowerDB:
+      description: power transmitted in channel (dB)
+      type: number
+      format: float
+    audioSampleRate:
+      type: integer
+      description: "Audio sample rate in samples per second."
+    channelSampleRate:
+      type: integer
+      description: "Effective sample rate delivered to the channel in samples per second."

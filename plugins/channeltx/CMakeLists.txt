@@ -40,6 +40,10 @@ if (ENABLE_CHANNELTX_MODWFM)
     add_subdirectory(modwfm)
 endif()
 
+if (ENABLE_CHANNELTX_MODBFM)
+    add_subdirectory(modbfm)
+endif()
+
 if (ENABLE_CHANNELTX_MODPACKET)
     add_subdirectory(modpacket)
 endif()

@@ -96,6 +96,7 @@ set(sdrbase_SOURCES
     audio/audiocompressorsnd.cpp
     audio/audiodeviceinfo.cpp
     audio/audiodevicemanager.cpp
+    audio/audiofilereader.cpp
     audio/audiofifo.cpp
     audio/audiofilter.cpp
     audio/audiog722.cpp
@@ -276,6 +277,7 @@ set(sdrbase_SOURCES
     util/spyserverlist.cpp
     util/stix.cpp
     util/stringlist.cpp
+    util/rds.cpp
     util/rtty.cpp
     util/uid.cpp
     util/units.cpp
@@ -320,6 +322,7 @@ set(sdrbase_HEADERS
     audio/audiocompressorsnd.h
     audio/audiodeviceinfo.h
     audio/audiodevicemanager.h
+    audio/audiofilereader.h
     audio/audiofifo.h
     audio/audiofilter.h
     audio/audiog722.h
@@ -533,6 +536,7 @@ set(sdrbase_HEADERS
     util/psk31.h
     util/radiosonde.h
     util/rainviewer.h
+    util/rds.h
     util/rtpsink.h
     util/rtty.h
     util/syncmessenger.h
