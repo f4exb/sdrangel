@@ -248,11 +248,6 @@ public:
     static const char* const m_channelId;
 
 private:
-    enum RateState {
-        RSInitialFill,
-        RSRunning
-    };
-
     DeviceAPI* m_deviceAPI;
     QThread *m_thread;
     bool m_running = false;
@@ -261,7 +256,6 @@ private:
     int m_basebandSampleRate;
     qint64 m_centerFrequency;
 
-    SampleVector m_sampleBuffer;
     QRecursiveMutex m_settingsMutex;
 
     std::ifstream m_ifstream;

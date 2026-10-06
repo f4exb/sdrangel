@@ -17,7 +17,6 @@
 // along with this program. If not, see <http://www.gnu.org/licenses/>.          //
 ///////////////////////////////////////////////////////////////////////////////////
 
-#include <QTime>
 #include <QDebug>
 #include <QMutexLocker>
 #include <QNetworkAccessManager>
@@ -31,8 +30,6 @@
 #include "SWGChannelReport.h"
 #include "SWGNFMModReport.h"
 
-#include <stdio.h>
-#include <complex.h>
 #include <algorithm>
 
 #include "dsp/dspcommands.h"

@@ -88,12 +88,10 @@ private:
     Interpolator m_interpolator;
     Real m_interpolatorDistance;
     Real m_interpolatorDistanceRemain;
-    bool m_interpolatorConsumed;
 
     Interpolator m_feedbackInterpolator;
     Real m_feedbackInterpolatorDistance;
     Real m_feedbackInterpolatorDistanceRemain;
-    bool m_feedbackInterpolatorConsumed;
 
     QVector<qint16> m_demodBuffer;
     int m_demodBufferFill;
