@@ -112,7 +112,7 @@ Sets the local monitoring volume from 0.00 to 1.00 in steps of 0.01. The default
 
 <h2>Audio file playback tab</h2>
 
-Select the Audio file input (17) to transmit the output of these controls.
+Select the Audio file input (15) to transmit the output of these controls.
 
 ![Audio file playback tab](../../../doc/img/BFMMmod_audio_tab.png)
 
